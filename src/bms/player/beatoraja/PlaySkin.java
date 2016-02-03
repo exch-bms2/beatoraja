@@ -68,7 +68,7 @@ public class PlaySkin {
 			
 	public PlaySkin() {
 		// 背景
-		background = new Texture("skin/bg.jpg");		
+//		background = new Texture("skin/bg.jpg");		
 		// ノーツ
 		Texture notet = new Texture("skin/note.png");
 		for(int i = 0;i < 8;i++) {

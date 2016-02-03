@@ -56,7 +56,6 @@ public class BMSPlayer extends ApplicationAdapter {
 	private BMSModel model;
 	private TimeLine[] timelines;
 	private int totalnotes;
-	private boolean eof = false;
 	private File file;
 
 	private BMSPlayerInputProcessor input;
@@ -99,7 +98,7 @@ public class BMSPlayer extends ApplicationAdapter {
 	private ShaderProgram layershader;
 
 	private MainController main;
-	
+
 	public BMSPlayer(MainController main, File f, Config config, int auto) {
 		this.main = main;
 		this.file = f;
@@ -215,7 +214,7 @@ public class BMSPlayer extends ApplicationAdapter {
 	@Override
 	public void create() {
 		Logger.getGlobal().info("create");
-		if(config.getLR2PlaySkinPath() != null) {
+		if (config.getLR2PlaySkinPath() != null) {
 			try {
 				skin = new LR2SkinLoader().loadPlaySkin(new File(config.getLR2PlaySkinPath()));
 			} catch (IOException e) {
@@ -365,6 +364,12 @@ public class BMSPlayer extends ApplicationAdapter {
 			break;
 		// 閉店処理
 		case STATE_FAILED:
+			if (autoThread != null) {
+				autoThread.stop = true;
+			}
+			if (keyinput != null) {
+				keyinput.stop = true;
+			}
 			renderMain(time);
 
 			shape.begin(ShapeType.Filled);
@@ -378,14 +383,23 @@ public class BMSPlayer extends ApplicationAdapter {
 				if (keyinput != null) {
 					Logger.getGlobal().info("入力パフォーマンス(max ms) : " + keyinput.frametimes);
 				}
+				// TODO ここでAutoplayをSTOPする
+
 				if (autoplay == 0) {
 					updateScoreDatabase();
 				}
+
 				main.changeState(MainController.STATE_RESULT, null);
 			}
 			break;
 		// 完奏処理
 		case STATE_FINISHED:
+			if (autoThread != null) {
+				autoThread.stop = true;
+			}
+			if (keyinput != null) {
+				keyinput.stop = true;
+			}
 			shape.begin(ShapeType.Filled);
 			long l2 = System.currentTimeMillis() - finishtime;
 			shape.setColor(1, 1, 1, ((float) l2) / 1000f);
@@ -415,6 +429,7 @@ public class BMSPlayer extends ApplicationAdapter {
 		IRScoreData score = scoredb.getScoreData("Player", model.getHash(), false);
 		if (score == null) {
 			score = new IRScoreData();
+			score.setMinbp(Integer.MAX_VALUE);
 		}
 		score.setHash(model.getHash());
 		score.setNotes(model.getTotalNotes() + model.getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
@@ -485,7 +500,7 @@ public class BMSPlayer extends ApplicationAdapter {
 			score.setBd(bad);
 			score.setPr(poor + miss);
 		}
-		final int misscount = bad + poor + miss;
+		final int misscount = bad + poor + miss + totalnotes - notes;
 		if (score.getMinbp() > misscount) {
 			score.setMinbp(misscount);
 		}
@@ -496,18 +511,17 @@ public class BMSPlayer extends ApplicationAdapter {
 	}
 
 	public void stopPlay() {
-		if (eof) {
+		if (finishtime != 0) {
+			return;
+		}
+		if (notes == totalnotes) {
 			state = STATE_FINISHED;
+			Logger.getGlobal().info("STATE_FINISHEDに移行");
 		} else {
 			state = STATE_FAILED;
+			Logger.getGlobal().info("STATE_FAILEDに移行");
 		}
 		finishtime = System.currentTimeMillis();
-		if (autoThread != null) {
-			autoThread.stop = true;
-		}
-		if (keyinput != null) {
-			keyinput.stop = true;
-		}
 	}
 
 	private void renderMain(int time) {
@@ -518,14 +532,14 @@ public class BMSPlayer extends ApplicationAdapter {
 		float h = 720;
 
 		// 背景描画
-//		sprite.begin();
-//		sprite.draw(skin.getBackground(), 0, 0, w, h);
-//		sprite.end();
+		// sprite.begin();
+		// sprite.draw(skin.getBackground(), 0, 0, w, h);
+		// sprite.end();
 
 		sprite.begin();
-		for(SkinPart part : skin.getSkinPart()) {
-			if(part.timing != 3 && part.op[0] == 0 && part.op[1] == 0 && part.op[2] == 0) {
-				sprite.draw(part.image, part.dst.x, part.dst.y, part.dst.width, part.dst.height);				
+		for (SkinPart part : skin.getSkinPart()) {
+			if (part.timing == 0) {
+				sprite.draw(part.image, part.dst.x, part.dst.y, part.dst.width, part.dst.height);
 			}
 		}
 		sprite.end();
@@ -579,7 +593,13 @@ public class BMSPlayer extends ApplicationAdapter {
 		shape.setColor(Color.BLACK);
 		shape.rect(r.x, r.y, r.width, r.height);
 		shape.end();
-		if (misslayer != null && judge.getMisslayer() != 0 && time >= judge.getMisslayer()
+		if (state == STATE_PRELOAD && bga.getBackbmpData() != null) {
+			sprite.begin();
+			Texture bgatex = new Texture(bga.getBackbmpData());
+			sprite.draw(bgatex, r.x, r.y, r.width, r.height);
+			sprite.end();
+			bgatex.dispose();
+		} else if (misslayer != null && judge.getMisslayer() != 0 && time >= judge.getMisslayer()
 				&& time < judge.getMisslayer() + 500) {
 			// ミスレイヤー表示
 			Pixmap miss = bga.getBGAData(misslayer[misslayer.length * (time - judge.getMisslayer()) / 500]);
@@ -629,7 +649,8 @@ public class BMSPlayer extends ApplicationAdapter {
 		gauge.draw(skin, sprite, gr.x, gr.y, gr.width, gr.height);
 		sprite.begin();
 		titlefont.setColor(Color.WHITE);
-		titlefont.draw(sprite, String.valueOf((int) gauge.getValue()) + "%", gr.x + gr.width - 45, gr.y + gr.height + 25);
+		titlefont.draw(sprite, String.valueOf((int) gauge.getValue()) + "%", gr.x + gr.width - 45,
+				gr.y + gr.height + 25);
 		sprite.end();
 		// ジャッジカウント描画
 		Rectangle judge = skin.getJudgecountregion();
@@ -645,8 +666,9 @@ public class BMSPlayer extends ApplicationAdapter {
 		sprite.begin();
 		for (int i = 0; i < judgename.length; i++) {
 			judgefont.setColor(Color.WHITE);
-			judgefont.draw(sprite, judgename[i] + String.format("%4d /%4d", this.judge.getJudgeCount(i, true), this.judge.getJudgeCount(i, false)), judge.x,
-					judge.y + 20 * (5 - i));
+			judgefont.draw(sprite, judgename[i]
+					+ String.format("%4d /%4d", this.judge.getJudgeCount(i, true), this.judge.getJudgeCount(i, false)),
+					judge.x, judge.y + 20 * (5 - i));
 		}
 		sprite.end();
 
@@ -677,8 +699,8 @@ public class BMSPlayer extends ApplicationAdapter {
 		Logger.getGlobal().info("BGAのリソース解放");
 	}
 
-	public AudioProcessor getAudioManager() {
-		return audio;
+	public void play(int id) {
+		audio.play(id);
 	}
 
 	public BMSPlayerInputProcessor getBMSPlayerInputProcessor() {
@@ -693,11 +715,15 @@ public class BMSPlayer extends ApplicationAdapter {
 		return judge;
 	}
 
+	private int notes;
+	
 	public void update(int judge, boolean fast) {
-		gauge.update(judge);
-		if (this.judge.getJudgeCount() - this.judge.getJudgeCount(5) == totalnotes) {
-			eof = true;
+		if(judge < 5) {
+			notes++;
 		}
+		gauge.update(judge);
+		System.out.println(
+				"Now count : " + notes + " - " + totalnotes);
 	}
 
 	private final List<KeyInputLog> createAutoplayLog() {
@@ -761,7 +787,7 @@ public class BMSPlayer extends ApplicationAdapter {
 			return finished;
 		}
 	}
-	
+
 	class KeyInputThread extends Thread {
 		private boolean stop = false;
 		private long frametimes = 1;
@@ -814,15 +840,15 @@ public class BMSPlayer extends ApplicationAdapter {
 					}
 					p++;
 				}
-				if(p < timelines.length) {
+				if (p < timelines.length) {
 					try {
 						final long sleeptime = timelines[p].getTime() - (System.currentTimeMillis() - starttime);
-						if(sleeptime > 0) {
-							sleep(sleeptime);							
+						if (sleeptime > 0) {
+							sleep(sleeptime);
 						}
 					} catch (InterruptedException e) {
 						e.printStackTrace();
-					}					
+					}
 				}
 			}
 
