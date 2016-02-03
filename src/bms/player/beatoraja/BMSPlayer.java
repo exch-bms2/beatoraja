@@ -1,0 +1,831 @@
+package bms.player.beatoraja;
+
+import java.io.*;
+import java.util.*;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
+
+import javax.swing.JFileChooser;
+
+import bms.model.*;
+import bms.player.beatoraja.PlaySkin.SkinPart;
+import bms.player.beatoraja.audio.SoundProcessor;
+import bms.player.beatoraja.audio.AudioProcessor;
+import bms.player.beatoraja.bga.BGAManager;
+import bms.player.beatoraja.gauge.*;
+import bms.player.beatoraja.input.BMSPlayerInputProcessor;
+import bms.player.beatoraja.input.KeyInputLog;
+import bms.player.beatoraja.pattern.*;
+import bms.player.beatoraja.skin.LR2SkinLoader;
+import bms.player.lunaticrave2.IRScoreData;
+import bms.player.lunaticrave2.LunaticRave2ScoreDatabaseManager;
+
+import com.badlogic.gdx.ApplicationAdapter;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
+import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.g2d.*;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.JsonWriter.OutputType;
+
+/**
+ * BMSプレイヤー本体
+ * 
+ * @author exch
+ */
+public class BMSPlayer extends ApplicationAdapter {
+
+	// TODO 必須機能の項目を以下に列挙します
+	// TODO LR2スキンローダー
+
+	// TODO 修正必要なバグ
+	// TODO GLAssistから起動すると楽曲ロード中に止まる
+	// TODO BPM変化が間に挟まるとLN終端描画がおかしくなる
+
+	private ShapeRenderer shape;
+	private SpriteBatch sprite;
+	private BitmapFont titlefont;
+	private BitmapFont judgefont;
+	private BitmapFont systemfont;
+	private BMSModel model;
+	private TimeLine[] timelines;
+	private int totalnotes;
+	private boolean eof = false;
+	private File file;
+
+	private BMSPlayerInputProcessor input;
+	private LaneRenderer lanerender;
+	private ScoreGraphRenderer graphrender;
+	private JudgeManager judge;
+	private AudioProcessor audio;
+
+	private BGAManager bga;
+
+	private PlaySkin skin;
+
+	private GrooveGauge gauge;
+	private PatternModifier option;
+
+	private long starttime;
+	private long finishtime;
+
+	private int autoplay = 0;
+
+	private AutoplayThread autoThread;
+	private KeyInputThread keyinput;
+
+	private final String[] judgename = { "PG ", "GR ", "GD ", "BD ", "PR ", "MS " };
+
+	private int prevrendertime;
+	private int playingbga = -1;
+	private int playinglayer = -1;
+	private int[] misslayer = null;
+
+	private Config config;
+
+	private LunaticRave2ScoreDatabaseManager scoredb;
+
+	private int assist = 0;
+
+	private List<PatternModifyLog> pattern = new ArrayList();
+
+	private ReplayData replay = null;
+	private ShaderProgram layershader;
+
+	private MainController main;
+	
+	public BMSPlayer(MainController main, File f, Config config, int auto) {
+		this.main = main;
+		this.file = f;
+		this.config = config;
+		this.autoplay = auto;
+		if (f.getPath().toLowerCase().endsWith(".bmson")) {
+			BMSONDecoder decoder = new BMSONDecoder();
+			model = decoder.decode(f);
+		} else {
+			BMSDecoder decoder = new BMSDecoder();
+			model = decoder.decode(f);
+		}
+		timelines = model.getAllTimeLines();
+		totalnotes = model.getTotalNotes() + model.getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
+				+ model.getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH);
+		if (config.isBpmguide()) {
+			assist = 1;
+		}
+
+		if (config.isConstant()) {
+			new ConstantBPMModifier().modify(model);
+			assist = 1;
+		}
+
+		if (config.getLnassist() == 1) {
+			new LongNoteModifier().modify(model);
+			assist = 2;
+		}
+
+		if (autoplay == 2) {
+			autoplay = 0;
+			if (new File("replay" + File.separator + model.getHash() + ".json").exists()) {
+				Json json = new Json();
+				try {
+					replay = (ReplayData) json.fromJson(ReplayData.class,
+							new FileReader("replay" + File.separator + model.getHash() + ".json"));
+					autoplay = 2;
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+
+		Logger.getGlobal().info("アシストオプション設定完了");
+		if (replay != null) {
+			PatternModifier.modify(model, Arrays.asList(replay.pattern));
+		} else {
+			switch (config.getRandom()) {
+			case 0:
+				break;
+			case 1:
+				pattern = new LaneShuffleModifier(LaneShuffleModifier.MIRROR).modify(model);
+				break;
+			case 2:
+				pattern = new LaneShuffleModifier(LaneShuffleModifier.R_RANDOM).modify(model);
+				break;
+			case 3:
+				pattern = new LaneShuffleModifier(LaneShuffleModifier.RANDOM).modify(model);
+				break;
+			case 4:
+				pattern = new NoteShuffleModifier(NoteShuffleModifier.S_RANDOM).modify(model);
+				break;
+			case 5:
+				pattern = new NoteShuffleModifier(NoteShuffleModifier.S_RANDOM).modify(model);
+				break;
+			case 6:
+				pattern = new NoteShuffleModifier(NoteShuffleModifier.ALL_SCR).modify(model);
+				break;
+			case 7:
+				pattern = new LaneShuffleModifier(LaneShuffleModifier.RANDOM_EX).modify(model);
+				break;
+			case 8:
+				pattern = new NoteShuffleModifier(NoteShuffleModifier.S_RANDOM_EX).modify(model);
+				break;
+			}
+		}
+		Logger.getGlobal().info("譜面オプション設定完了");
+
+		int g = config.getGauge();
+		if (replay != null) {
+			g = replay.gauge;
+		}
+		switch (g) {
+		case 0:
+			gauge = new AssistEasyGrooveGauge(model);
+			break;
+		case 1:
+			gauge = new EasyGrooveGauge(model);
+			break;
+		case 2:
+			gauge = new NormalGrooveGauge(model);
+			break;
+		case 3:
+			gauge = new HardGrooveGauge(model);
+			break;
+		case 4:
+			gauge = new ExhardGrooveGauge(model);
+			break;
+		}
+		Logger.getGlobal().info("ゲージ設定完了");
+
+		try {
+			Class.forName("org.sqlite.JDBC");
+			scoredb = new LunaticRave2ScoreDatabaseManager(new File(".").getAbsoluteFile().getParent(), "/", "/");
+			scoredb.createTable("Player");
+			Logger.getGlobal().info("スコアデータベース接続");
+		} catch (ClassNotFoundException e) {
+			// TODO 自動生成された catch ブロック
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void create() {
+		Logger.getGlobal().info("create");
+		if(config.getLR2PlaySkinPath() != null) {
+			try {
+				skin = new LR2SkinLoader().loadPlaySkin(new File(config.getLR2PlaySkinPath()));
+			} catch (IOException e) {
+				e.printStackTrace();
+				skin = new PlaySkin();
+			}
+		} else {
+			skin = new PlaySkin();
+		}
+
+		shape = new ShapeRenderer();
+		sprite = new SpriteBatch();
+		input = new BMSPlayerInputProcessor(this, autoplay != 0);
+		lanerender = new LaneRenderer(this, sprite, skin, config, model);
+		Logger.getGlobal().info("描画クラス準備");
+
+		Logger.getGlobal().info("hash");
+		IRScoreData score = scoredb.getScoreData("Player", model.getHash(), false);
+		Logger.getGlobal().info("スコアデータベースからスコア取得");
+		if (score == null) {
+			score = new IRScoreData();
+		}
+		graphrender = new ScoreGraphRenderer(model, score.getExscore(), score.getExscore());
+		Logger.getGlobal().info("スコアグラフ描画クラス準備");
+		judge = new JudgeManager(this, model);
+
+		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/VL-Gothic-Regular.ttf"));
+		titlefont = generator.generateFont(24, model.getFullTitle() + "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890/.%", false);
+		systemfont = generator.generateFont(18, "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890/", false);
+		judgefont = generator.generateFont(18, "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890/", false);
+		generator.dispose();
+
+		String vertex = "attribute vec4 " + ShaderProgram.POSITION_ATTRIBUTE + ";\n" //
+				+ "attribute vec4 " + ShaderProgram.COLOR_ATTRIBUTE + ";\n" //
+				+ "attribute vec2 " + ShaderProgram.TEXCOORD_ATTRIBUTE + "0;\n" //
+				+ "uniform mat4 u_projTrans;\n" //
+				+ "varying vec4 v_color;\n" //
+				+ "varying vec2 v_texCoords;\n" //
+				+ "\n" //
+				+ "void main()\n" //
+				+ "{\n" //
+				+ "   v_color = " + ShaderProgram.COLOR_ATTRIBUTE + ";\n" //
+				+ "   v_color.a = v_color.a * (256.0/255.0);\n" //
+				+ "   v_texCoords = " + ShaderProgram.TEXCOORD_ATTRIBUTE + "0;\n" //
+				+ "   gl_Position =  u_projTrans * " + ShaderProgram.POSITION_ATTRIBUTE + ";\n" //
+				+ "}\n";
+
+		String fragment = "#ifdef GL_ES\n" //
+				+ "#define LOWP lowp\n" //
+				+ "precision mediump float;\n" //
+				+ "#else\n" //
+				+ "#define LOWP \n" //
+				+ "#endif\n" //
+				+ "varying LOWP vec4 v_color;\n" //
+				+ "varying vec2 v_texCoords;\n" //
+				+ "uniform sampler2D u_texture;\n" //
+				+ "void main()\n"//
+				+ "{\n" //
+				+ "    vec4 c4 = texture2D(u_texture, v_texCoords);\n"
+				+ "    if(c4.r == 0 && c4.g == 0 && c4.b == 0) { gl_FragColor = v_color * vec4(c4.r, c4.g, c4.b, 1);} else {gl_FragColor = v_color * vec4(c4.r, c4.g, c4.b, c4.a);}\n"
+				+ "}";
+		layershader = new ShaderProgram(vertex, fragment);
+
+		audio = new SoundProcessor();
+		bga = new BGAManager(config);
+		media = new MediaLoaderThread();
+		media.start();
+	}
+
+	MediaLoaderThread media;
+
+	@Override
+	public void resize(int w, int h) {
+		System.out.println("resize" + w + "," + h);
+	}
+
+	private static final int STATE_PRELOAD = 0;
+	private static final int STATE_READY = 1;
+	private static final int STATE_PLAY = 2;
+	private static final int STATE_FAILED = 3;
+	private static final int STATE_FINISHED = 4;
+
+	private int state = STATE_PRELOAD;
+
+	@Override
+	public void render() {
+		final int time = (int) (System.currentTimeMillis() - starttime);
+		switch (state) {
+		// 楽曲ロード
+		case STATE_PRELOAD:
+			renderMain(0);
+			shape.begin(ShapeType.Filled);
+			shape.setColor(Color.YELLOW);
+			shape.rect(skin.getLaneregion()[7].getX(),
+					skin.getLaneregion()[7].getY() + skin.getLaneregion()[7].getHeight() / 2f,
+					(audio.getProgress() + bga.getProgress()) * (skin.getLaneregion()[6].getX()
+							+ skin.getLaneregion()[6].getWidth() - skin.getLaneregion()[7].getX()) / 2,
+					4);
+			shape.end();
+
+			if (media.isFinished()) {
+				state = STATE_READY;
+				starttime = System.currentTimeMillis();
+				Logger.getGlobal().info("STATE_READYに移行");
+			}
+			break;
+		// GET READY
+		case STATE_READY:
+			renderMain(0);
+			sprite.begin();
+			systemfont.setColor(Color.WHITE);
+			systemfont.draw(sprite, "GET READY", skin.getLaneregion()[7].getX() + 140,
+					skin.getLaneregion()[7].getY() + skin.getLaneregion()[7].getHeight() / 2f);
+			sprite.end();
+			if (time > 1000) {
+				state = STATE_PLAY;
+				starttime = System.currentTimeMillis();
+				input.setStartTime(starttime);
+				prevrendertime = -1;
+				List<KeyInputLog> keylog = null;
+				if (autoplay == 1) {
+					keylog = this.createAutoplayLog();
+				} else if (autoplay == 2) {
+					keylog = Arrays.asList(replay.keylog);
+				}
+				autoThread = new AutoplayThread();
+				autoThread.start();
+				keyinput = new KeyInputThread(keylog);
+				keyinput.start();
+				Logger.getGlobal().info("STATE_PLAYに移行");
+			}
+			break;
+		// プレイ
+		case STATE_PLAY:
+			// System.out.println("playing time : " + time);
+			if (starttime != 0 && timelines[timelines.length - 1].getTime() + 5000 < time) {
+				state = STATE_FINISHED;
+				finishtime = System.currentTimeMillis();
+				Logger.getGlobal().info("STATE_FINISHEDに移行");
+			}
+			if (gauge.getValue() == 0) {
+				state = STATE_FAILED;
+				finishtime = System.currentTimeMillis();
+				Logger.getGlobal().info("STATE_FAILEDに移行");
+			}
+			renderMain(time);
+			break;
+		// 閉店処理
+		case STATE_FAILED:
+			renderMain(time);
+
+			shape.begin(ShapeType.Filled);
+			long l = System.currentTimeMillis() - finishtime;
+			shape.setColor(0, 0, 0, ((float) l) / 1000f);
+			float width = 640f * l / 1000;
+			float height = 360f * l / 1000;
+			shape.rect(640 - width, 360 - height, width * 2, height * 2);
+			shape.end();
+			if (l > 1000) {
+				if (keyinput != null) {
+					Logger.getGlobal().info("入力パフォーマンス(max ms) : " + keyinput.frametimes);
+				}
+				if (autoplay == 0) {
+					updateScoreDatabase();
+				}
+				main.changeState(MainController.STATE_RESULT, null);
+			}
+			break;
+		// 完奏処理
+		case STATE_FINISHED:
+			shape.begin(ShapeType.Filled);
+			long l2 = System.currentTimeMillis() - finishtime;
+			shape.setColor(1, 1, 1, ((float) l2) / 1000f);
+			float width2 = 640f * l2 / 1000;
+			float height2 = 360f * l2 / 1000;
+			shape.rect(640 - width2, 360 - height2, width2 * 2, height2 * 2);
+			shape.end();
+			if (l2 > 1000) {
+				if (keyinput != null) {
+					Logger.getGlobal().info("入力パフォーマンス(max ms) : " + keyinput.frametimes);
+				}
+				if (autoplay == 0) {
+					updateScoreDatabase();
+				}
+				main.changeState(MainController.STATE_RESULT, null);
+			}
+			break;
+		}
+
+		sprite.begin();
+		systemfont.setColor(Color.YELLOW);
+		systemfont.draw(sprite, "FPS " + Gdx.graphics.getFramesPerSecond(), 10, 20);
+		sprite.end();
+	}
+
+	public void updateScoreDatabase() {
+		IRScoreData score = scoredb.getScoreData("Player", model.getHash(), false);
+		if (score == null) {
+			score = new IRScoreData();
+		}
+		score.setHash(model.getHash());
+		score.setNotes(model.getTotalNotes() + model.getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
+				+ model.getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH));
+		int clear = GrooveGauge.CLEARTYPE_FAILED;
+		if (state != STATE_FAILED && gauge.isQualified()) {
+			if (assist > 0) {
+				clear = assist == 1 ? GrooveGauge.CLEARTYPE_LIGHT_ASSTST : GrooveGauge.CLEARTYPE_ASSTST;
+			} else {
+				score.setClearcount(score.getClearcount() + 1);
+				if (judge.getJudgeCount(3) + judge.getJudgeCount(4) == 0) {
+					if (judge.getJudgeCount(2) == 0) {
+						if (judge.getJudgeCount(1) == 0) {
+							clear = GrooveGauge.CLEARTYPE_MAX;
+						} else {
+							clear = GrooveGauge.CLEARTYPE_PERFECT;
+						}
+					} else {
+						clear = GrooveGauge.CLEARTYPE_FULLCOMBO;
+					}
+				} else {
+					clear = gauge.getClearType();
+				}
+			}
+		} else {
+			//
+		}
+
+		if (score.getClear() < clear) {
+			score.setClear(clear);
+		}
+		// リプレイデータ保存
+		if (pattern != null) {
+			ReplayData rd = new ReplayData();
+			rd.keylog = input.getKeyInputLog().toArray(new KeyInputLog[0]);
+			rd.pattern = pattern.toArray(new PatternModifyLog[0]);
+			rd.gauge = config.getGauge();
+			File replaydir = new File("replay");
+			if (!replaydir.exists()) {
+				replaydir.mkdirs();
+			}
+			if (score.getClear() < clear || (clear != GrooveGauge.CLEARTYPE_FAILED
+					&& !new File("replay" + File.separatorChar + model.getHash() + ".json").exists())) {
+				Json json = new Json();
+				json.setOutputType(OutputType.json);
+				try {
+					FileWriter fw = new FileWriter("replay" + File.separatorChar + model.getHash() + ".json");
+					fw.write(json.prettyPrint(rd));
+					fw.flush();
+					fw.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+
+		final int pgreat = judge.getJudgeCount(0);
+		final int great = judge.getJudgeCount(1);
+		final int good = judge.getJudgeCount(2);
+		final int bad = judge.getJudgeCount(3);
+		final int poor = judge.getJudgeCount(4);
+		final int miss = judge.getJudgeCount(5);
+		int exscore = pgreat * 2 + great;
+		if (score.getExscore() < exscore) {
+			score.setPg(pgreat);
+			score.setGr(great);
+			score.setGd(good);
+			score.setBd(bad);
+			score.setPr(poor + miss);
+		}
+		final int misscount = bad + poor + miss;
+		if (score.getMinbp() > misscount) {
+			score.setMinbp(misscount);
+		}
+		score.setPlaycount(score.getPlaycount() + 1);
+		scoredb.setScoreData("Player", score);
+
+		Logger.getGlobal().info("スコアデータベース更新完了 ");
+	}
+
+	public void stopPlay() {
+		if (eof) {
+			state = STATE_FINISHED;
+		} else {
+			state = STATE_FAILED;
+		}
+		finishtime = System.currentTimeMillis();
+		if (autoThread != null) {
+			autoThread.stop = true;
+		}
+		if (keyinput != null) {
+			keyinput.stop = true;
+		}
+	}
+
+	private void renderMain(int time) {
+		Gdx.gl.glClearColor(0, 0, 0, 1);
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+		float w = 1280;
+		float h = 720;
+
+		// 背景描画
+//		sprite.begin();
+//		sprite.draw(skin.getBackground(), 0, 0, w, h);
+//		sprite.end();
+
+		sprite.begin();
+		for(SkinPart part : skin.getSkinPart()) {
+			if(part.timing != 3 && part.op[0] == 0 && part.op[1] == 0 && part.op[2] == 0) {
+				sprite.draw(part.image, part.dst.x, part.dst.y, part.dst.width, part.dst.height);				
+			}
+		}
+		sprite.end();
+
+		// グラフ描画
+		graphrender.drawGraph(skin, shape, this.judge);
+
+		// プログレス描画
+		Rectangle progress = new Rectangle(4, 140, 12, 540);
+		shape.begin(ShapeType.Line);
+		shape.setColor(Color.WHITE);
+		shape.rect(progress.x, progress.y, progress.width, progress.height);
+		shape.end();
+		shape.begin(ShapeType.Filled);
+		shape.setColor(Color.BLACK);
+		shape.rect(progress.x + 1, progress.y + 1, progress.width - 2, progress.height - 2);
+
+		shape.setColor(Color.ORANGE);
+		shape.rect(progress.x + 1,
+				progress.y + 1
+						+ progress.height * (1.0f - (float) time / (timelines[timelines.length - 1].getTime() + 5000)),
+				progress.width - 2, 20);
+		shape.end();
+
+		lanerender.drawLane(shape, systemfont, model, timelines, starttime, time);
+
+		// BGA再生
+		for (TimeLine tl : timelines) {
+			if (tl.getTime() > time) {
+				break;
+			}
+
+			if (tl.getTime() > prevrendertime) {
+				if (tl.getBGA() != -1) {
+					playingbga = tl.getBGA();
+				}
+				if (tl.getLayer() != -1) {
+					playinglayer = tl.getLayer();
+				}
+				if (tl.getPoor() != null && tl.getPoor().length > 0) {
+					misslayer = tl.getPoor();
+				}
+			}
+		}
+		Rectangle r = skin.getBGAregion();
+		shape.begin(ShapeType.Line);
+		shape.setColor(Color.WHITE);
+		shape.rect(r.x - 1, r.y - 1, r.width + 2, r.height + 2);
+		shape.end();
+		shape.begin(ShapeType.Filled);
+		shape.setColor(Color.BLACK);
+		shape.rect(r.x, r.y, r.width, r.height);
+		shape.end();
+		if (misslayer != null && judge.getMisslayer() != 0 && time >= judge.getMisslayer()
+				&& time < judge.getMisslayer() + 500) {
+			// ミスレイヤー表示
+			Pixmap miss = bga.getBGAData(misslayer[misslayer.length * (time - judge.getMisslayer()) / 500]);
+			if (miss != null) {
+				sprite.begin();
+				Texture bgatex = new Texture(miss);
+				sprite.draw(bgatex, r.x, r.y, r.width, r.height);
+				sprite.end();
+				bgatex.dispose();
+			}
+		} else {
+			if (bga.getBGAData(playingbga) != null) {
+				sprite.begin();
+				Texture bgatex = new Texture(bga.getBGAData(playingbga));
+				sprite.draw(bgatex, r.x, r.y, r.width, r.height);
+				sprite.end();
+				bgatex.dispose();
+			}
+			if (bga.getBGAData(playinglayer) != null) {
+				sprite.begin();
+				Texture bgatex = new Texture(bga.getBGAData(playinglayer));
+				// sprite.setShader(layershader);
+				sprite.draw(bgatex, r.x, r.y, r.width, r.height);
+				// sprite.setShader(null);
+				sprite.end();
+				bgatex.dispose();
+			}
+		}
+
+		sprite.begin();
+		titlefont.setColor(Color.WHITE);
+		titlefont.draw(sprite, model.getFullTitle(), r.x, r.y + r.height);
+		sprite.end();
+
+		// ゲージ描画
+		Rectangle gr = skin.getGaugeRegion();
+		shape.begin(ShapeType.Filled);
+		shape.setColor(Color.BLACK);
+		shape.rect(gr.x, gr.y, gr.width, gr.height);
+		shape.rect(gr.x + gr.width - 50, gr.y + gr.height, 50, 30);
+		shape.end();
+		shape.begin(ShapeType.Line);
+		shape.setColor(Color.WHITE);
+		shape.rect(gr.x, gr.y, gr.width, gr.height);
+		shape.rect(gr.x + gr.width - 50, gr.y + gr.height, 50, 30);
+		shape.end();
+		gauge.draw(skin, sprite, gr.x, gr.y, gr.width, gr.height);
+		sprite.begin();
+		titlefont.setColor(Color.WHITE);
+		titlefont.draw(sprite, String.valueOf((int) gauge.getValue()) + "%", gr.x + gr.width - 45, gr.y + gr.height + 25);
+		sprite.end();
+		// ジャッジカウント描画
+		Rectangle judge = skin.getJudgecountregion();
+		shape.begin(ShapeType.Line);
+		shape.setColor(Color.WHITE);
+		shape.rect(judge.x - 1, judge.y - 19, 122, 122);
+		shape.end();
+		shape.begin(ShapeType.Filled);
+		shape.setColor(Color.BLACK);
+		shape.rect(judge.x, judge.y - 18, 120, 120);
+		shape.end();
+
+		sprite.begin();
+		for (int i = 0; i < judgename.length; i++) {
+			judgefont.setColor(Color.WHITE);
+			judgefont.draw(sprite, judgename[i] + String.format("%4d /%4d", this.judge.getJudgeCount(i, true), this.judge.getJudgeCount(i, false)), judge.x,
+					judge.y + 20 * (5 - i));
+		}
+		sprite.end();
+
+		prevrendertime = time;
+	}
+
+	@Override
+	public void pause() {
+		System.out.println("pause");
+	}
+
+	@Override
+	public void resume() {
+		System.out.println("resume");
+	}
+
+	@Override
+	public void dispose() {
+		sprite.dispose();
+		shape.dispose();
+		titlefont.dispose();
+		judgefont.dispose();
+		systemfont.dispose();
+		Logger.getGlobal().info("システム描画のリソース解放");
+		audio.dispose();
+		Logger.getGlobal().info("音源のリソース解放");
+		bga.dispose();
+		Logger.getGlobal().info("BGAのリソース解放");
+	}
+
+	public AudioProcessor getAudioManager() {
+		return audio;
+	}
+
+	public BMSPlayerInputProcessor getBMSPlayerInputProcessor() {
+		return input;
+	}
+
+	public LaneRenderer getLaneRenderer() {
+		return lanerender;
+	}
+
+	public JudgeManager getJudgeManager() {
+		return judge;
+	}
+
+	public void update(int judge, boolean fast) {
+		gauge.update(judge);
+		if (this.judge.getJudgeCount() - this.judge.getJudgeCount(5) == totalnotes) {
+			eof = true;
+		}
+	}
+
+	private final List<KeyInputLog> createAutoplayLog() {
+		List<KeyInputLog> keylog = new ArrayList<KeyInputLog>();
+		Note[] ln = new Note[8];
+		for (int i : model.getAllTimes()) {
+			TimeLine tl = model.getTimeLine(i);
+			for (int lane = 0; lane < 8; lane++) {
+				Note note = tl.getNote(lane);
+				if (note != null) {
+					if (note instanceof LongNote) {
+						if (((LongNote) note).getEnd() == tl) {
+							keylog.add(new KeyInputLog(i, lane, false));
+							if (lane == 7) {
+								// BSS処理
+								keylog.add(new KeyInputLog(i, lane + 1, true));
+							}
+							ln[lane] = null;
+						} else {
+							keylog.add(new KeyInputLog(i, lane, true));
+							ln[lane] = note;
+						}
+					} else if (note instanceof NormalNote) {
+						keylog.add(new KeyInputLog(i, lane, true));
+					}
+				} else {
+					if (ln[lane] == null) {
+						keylog.add(new KeyInputLog(i, lane, false));
+						if (lane == 7) {
+							keylog.add(new KeyInputLog(i, lane + 1, false));
+						}
+					}
+				}
+			}
+		}
+		return keylog;
+	}
+
+	class MediaLoaderThread extends Thread {
+
+		private boolean finished = false;
+
+		@Override
+		public void run() {
+			try {
+				if (config.getBga() == Config.BGA_ON || (config.getBga() == Config.BGA_AUTO && (autoplay != 0))) {
+					bga.setModel(model, file.getPath());
+				}
+				audio.setModel(model, file.getPath());
+			} catch (Exception e) {
+				Logger.getGlobal().severe(e.getClass().getName() + " : " + e.getMessage());
+				e.printStackTrace();
+			} catch (Error e) {
+				Logger.getGlobal().severe(e.getClass().getName() + " : " + e.getMessage());
+			} finally {
+				finished = true;
+			}
+		}
+
+		public boolean isFinished() {
+			return finished;
+		}
+	}
+	
+	class KeyInputThread extends Thread {
+		private boolean stop = false;
+		private long frametimes = 1;
+		private List<KeyInputLog> keylog;
+
+		public KeyInputThread(List<KeyInputLog> keylog) {
+			this.keylog = keylog;
+		}
+
+		@Override
+		public void run() {
+			final TimeLine[] timelines = model.getAllTimeLines();
+			int index = 0;
+
+			int time = 0;
+			while (time < timelines[timelines.length - 1].getTime() + 5000 && !stop) {
+				time = (int) (System.currentTimeMillis() - starttime);
+				// リプレイデータ再生
+				if (keylog != null) {
+					while (index < keylog.size() && keylog.get(index).time <= time) {
+						KeyInputLog key = keylog.get(index);
+						input.getKeystate()[key.keycode] = key.pressed;
+						input.getTime()[key.keycode] = key.time;
+						index++;
+					}
+				}
+				judge.update(timelines, time);
+				long nowtime = System.currentTimeMillis() - starttime - time;
+				frametimes = nowtime < frametimes ? frametimes : nowtime;
+			}
+
+		}
+
+	}
+
+	class AutoplayThread extends Thread {
+
+		private boolean stop = false;
+
+		@Override
+		public void run() {
+			final TimeLine[] timelines = model.getAllTimeLines();
+			int time = 0;
+			for (int p = 0; time < timelines[timelines.length - 1].getTime() + 5000 && !stop;) {
+				time = (int) (System.currentTimeMillis() - starttime);
+				// BGレーン再生
+				while (p < timelines.length && timelines[p].getTime() <= time) {
+					for (Note n : timelines[p].getBackGroundNotes()) {
+						audio.play(n.getWav());
+					}
+					p++;
+				}
+				if(p < timelines.length) {
+					try {
+						final long sleeptime = timelines[p].getTime() - (System.currentTimeMillis() - starttime);
+						if(sleeptime > 0) {
+							sleep(sleeptime);							
+						}
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}					
+				}
+			}
+
+		}
+	}
+}
