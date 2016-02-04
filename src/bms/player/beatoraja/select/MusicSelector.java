@@ -6,7 +6,9 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import bms.model.TimeLine;
+import bms.player.beatoraja.Config;
 import bms.player.beatoraja.MainController;
+import bms.player.beatoraja.MainController.PlayerResource;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.MusicSelectorInputProcessor;
 import bms.player.lunaticrave2.FolderData;
@@ -54,8 +56,11 @@ public class MusicSelector extends ApplicationAdapter {
 	 */
 	private LunaticRave2SongDatabaseManager songdb;
 
-	public MusicSelector(MainController main) {
+	private Config config;
+
+	public MusicSelector(MainController main, Config config) {
 		this.main = main;
+		this.config = config;
 		try {
 			songdb = new LunaticRave2SongDatabaseManager(
 					new File("song.db").getPath(), true);
@@ -141,9 +146,11 @@ public class MusicSelector extends ApplicationAdapter {
 				}
 			} else if (currentsongs[selectedindex] instanceof SongBar) {
 				main.setAuto(0);
-				main.changeState(MainController.STATE_DECIDE, new File(
+				PlayerResource resource = new PlayerResource();
+				resource.setBMSFile(new File(
 						((SongBar) currentsongs[selectedindex]).getSongData()
-								.getPath()));
+								.getPath()), config, 0);
+				main.changeState(MainController.STATE_DECIDE, resource);
 			}
 		}
 
@@ -158,18 +165,20 @@ public class MusicSelector extends ApplicationAdapter {
 
 		if (keystate[4]) {
 			if (currentsongs[selectedindex] instanceof SongBar) {
-				main.setAuto(1);
-				main.changeState(MainController.STATE_DECIDE, new File(
+				PlayerResource resource = new PlayerResource();
+				resource.setBMSFile(new File(
 						((SongBar) currentsongs[selectedindex]).getSongData()
-								.getPath()));
+								.getPath()), config, 1);
+				main.changeState(MainController.STATE_DECIDE, resource);
 			}
 		}
 		if (keystate[6]) {
 			if (currentsongs[selectedindex] instanceof SongBar) {
-				main.setAuto(2);
-				main.changeState(MainController.STATE_DECIDE, new File(
+				PlayerResource resource = new PlayerResource();
+				resource.setBMSFile(new File(
 						((SongBar) currentsongs[selectedindex]).getSongData()
-								.getPath()));
+								.getPath()), config, 2);
+				main.changeState(MainController.STATE_DECIDE, resource);
 			}
 		}
 

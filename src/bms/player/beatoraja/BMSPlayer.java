@@ -8,6 +8,7 @@ import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 
 import bms.model.*;
+import bms.player.beatoraja.MainController.PlayerResource;
 import bms.player.beatoraja.PlaySkin.SkinPart;
 import bms.player.beatoraja.audio.SoundProcessor;
 import bms.player.beatoraja.audio.AudioProcessor;
@@ -57,7 +58,6 @@ public class BMSPlayer extends ApplicationAdapter {
 	private TimeLine[] timelines;
 	private int totalnotes;
 	private boolean eof = false;
-	private File file;
 
 	private BMSPlayerInputProcessor input;
 	private LaneRenderer lanerender;
@@ -66,6 +66,8 @@ public class BMSPlayer extends ApplicationAdapter {
 	private AudioProcessor audio;
 
 	private BGAManager bga;
+	
+	private PlayerResource resource;
 
 	private PlaySkin skin;
 
@@ -87,8 +89,6 @@ public class BMSPlayer extends ApplicationAdapter {
 	private int playinglayer = -1;
 	private int[] misslayer = null;
 
-	private Config config;
-
 	private LunaticRave2ScoreDatabaseManager scoredb;
 
 	private int assist = 0;
@@ -100,18 +100,12 @@ public class BMSPlayer extends ApplicationAdapter {
 
 	private MainController main;
 	
-	public BMSPlayer(MainController main, File f, Config config, int auto) {
+	public BMSPlayer(MainController main, PlayerResource resource) {
 		this.main = main;
-		this.file = f;
-		this.config = config;
-		this.autoplay = auto;
-		if (f.getPath().toLowerCase().endsWith(".bmson")) {
-			BMSONDecoder decoder = new BMSONDecoder();
-			model = decoder.decode(f);
-		} else {
-			BMSDecoder decoder = new BMSDecoder();
-			model = decoder.decode(f);
-		}
+		this.resource = resource;
+		this.model = resource.getBMSModel();
+		Config config = resource.getConfig();
+		this.autoplay = resource.getAutoplay();
 		timelines = model.getAllTimeLines();
 		totalnotes = model.getTotalNotes() + model.getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
 				+ model.getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH);
@@ -214,6 +208,7 @@ public class BMSPlayer extends ApplicationAdapter {
 
 	@Override
 	public void create() {
+		Config config = resource.getConfig();
 		Logger.getGlobal().info("create");
 		if(config.getLR2PlaySkinPath() != null) {
 			try {
@@ -279,13 +274,9 @@ public class BMSPlayer extends ApplicationAdapter {
 				+ "}";
 		layershader = new ShaderProgram(vertex, fragment);
 
-		audio = new SoundProcessor();
-		bga = new BGAManager(config);
-		media = new MediaLoaderThread();
-		media.start();
+		audio = resource.getAudioProcessor();
+		bga = resource.getBGAManager();
 	}
-
-	MediaLoaderThread media;
 
 	@Override
 	public void resize(int w, int h) {
@@ -316,7 +307,7 @@ public class BMSPlayer extends ApplicationAdapter {
 					4);
 			shape.end();
 
-			if (media.isFinished()) {
+			if (resource.mediaLoadFinished()) {
 				state = STATE_READY;
 				starttime = System.currentTimeMillis();
 				Logger.getGlobal().info("STATE_READYに移行");
@@ -451,7 +442,7 @@ public class BMSPlayer extends ApplicationAdapter {
 			ReplayData rd = new ReplayData();
 			rd.keylog = input.getKeyInputLog().toArray(new KeyInputLog[0]);
 			rd.pattern = pattern.toArray(new PatternModifyLog[0]);
-			rd.gauge = config.getGauge();
+			rd.gauge = resource.getConfig().getGauge();
 			File replaydir = new File("replay");
 			if (!replaydir.exists()) {
 				replaydir.mkdirs();
@@ -734,32 +725,6 @@ public class BMSPlayer extends ApplicationAdapter {
 			}
 		}
 		return keylog;
-	}
-
-	class MediaLoaderThread extends Thread {
-
-		private boolean finished = false;
-
-		@Override
-		public void run() {
-			try {
-				if (config.getBga() == Config.BGA_ON || (config.getBga() == Config.BGA_AUTO && (autoplay != 0))) {
-					bga.setModel(model, file.getPath());
-				}
-				audio.setModel(model, file.getPath());
-			} catch (Exception e) {
-				Logger.getGlobal().severe(e.getClass().getName() + " : " + e.getMessage());
-				e.printStackTrace();
-			} catch (Error e) {
-				Logger.getGlobal().severe(e.getClass().getName() + " : " + e.getMessage());
-			} finally {
-				finished = true;
-			}
-		}
-
-		public boolean isFinished() {
-			return finished;
-		}
 	}
 	
 	class KeyInputThread extends Thread {

@@ -3,6 +3,7 @@ package bms.player.beatoraja.decide;
 import java.io.File;
 
 import bms.player.beatoraja.MainController;
+import bms.player.beatoraja.MainController.PlayerResource;
 import bms.player.beatoraja.input.MusicSelectorInputProcessor;
 import bms.player.lunaticrave2.SongData;
 
@@ -27,16 +28,16 @@ public class MusicDecide extends ApplicationAdapter {
 	// TODO 曲決定時からデータ読み込み開始
 
 	private MainController main;
-	private File f;
+	private PlayerResource resource;
 
 	private ShapeRenderer shape;
 	private SpriteBatch sprite;
 	private BitmapFont titlefont;
 	private String title;
 
-	public MusicDecide(MainController main, File f) {
+	public MusicDecide(MainController main, PlayerResource resource) {
 		this.main = main;
-		this.f = f;
+		this.resource = resource;
 	}
 
 	private long time = 0;
@@ -62,12 +63,15 @@ public class MusicDecide extends ApplicationAdapter {
 		final float h = 720;
 
 		sprite.begin();
+		if(resource.getBMSModel().getStagefile() != null) {
+			
+		}
 		titlefont.setColor(Color.WHITE);
 		titlefont.draw(sprite,title,  w /2, h / 2);
 		sprite.end();
 		
 		if(System.currentTimeMillis() > time + 1500) {
-			main.changeState(MainController.STATE_PLAYBMS, f);			
+			main.changeState(MainController.STATE_PLAYBMS, resource);			
 		}
 	}
 }

@@ -10,8 +10,11 @@ import java.util.logging.Logger;
 
 import javax.swing.JFileChooser;
 
+import bms.model.BMSDecoder;
 import bms.model.BMSModel;
+import bms.model.BMSONDecoder;
 import bms.player.beatoraja.audio.AudioProcessor;
+import bms.player.beatoraja.audio.SoundProcessor;
 import bms.player.beatoraja.bga.BGAManager;
 import bms.player.beatoraja.decide.MusicDecide;
 import bms.player.beatoraja.result.MusicResult;
@@ -50,23 +53,23 @@ public class MainController extends ApplicationAdapter {
 	public static final int STATE_PLAYBMS = 2;
 	public static final int STATE_RESULT = 3;
 	
-	public void changeState(int state, File f) {
+	public void changeState(int state, PlayerResource resource) {
 		switch(state) {
 		case STATE_SELECTMUSIC:
 			if(this.f != null) {
 				exit();
 			}
-			selector = new MusicSelector(this);
+			selector = new MusicSelector(this, config);
 			selector.create();
 			current = selector;
 			break;
 		case STATE_DECIDE:
-			decide = new MusicDecide(this, f);
+			decide = new MusicDecide(this, resource);
 			decide.create();
 			current = decide;
 			break;
 		case STATE_PLAYBMS:
-			player = new BMSPlayer(this, f, config, auto);
+			player = new BMSPlayer(this,resource);
 			player.create();
 			current = player;
 			break;
@@ -84,7 +87,13 @@ public class MainController extends ApplicationAdapter {
 
 	@Override
 	public void create() {
-		changeState(f != null ? STATE_PLAYBMS : STATE_SELECTMUSIC, f);
+		if(f != null) {
+			PlayerResource resource = new PlayerResource();
+			resource.setBMSFile(f, config, auto);
+			changeState(STATE_PLAYBMS, resource);			
+		} else {
+			changeState(STATE_SELECTMUSIC, null);			
+		}
 	}
 
 	@Override
@@ -249,14 +258,71 @@ public class MainController extends ApplicationAdapter {
 	 * 
 	 * @author exch
 	 */
-	public class PlayerResource {
+	public static class PlayerResource {
 		private BMSModel model;
 		private Config config;
 		private int auto;
 		private AudioProcessor audio;
 		private BGAManager bga;
+
+		private boolean finished = false;
 		
+		public void setBMSFile(final File f, final Config config, int autoplay) {
+			this.config = config;
+			this.auto = autoplay;
+			if (f.getPath().toLowerCase().endsWith(".bmson")) {
+				BMSONDecoder decoder = new BMSONDecoder();
+				model = decoder.decode(f);
+			} else {
+				BMSDecoder decoder = new BMSDecoder();
+				model = decoder.decode(f);
+			}
+			
+			audio = new SoundProcessor();
+			bga = new BGAManager(config);
+			Thread medialoader = new Thread() {
+				@Override
+				public void run() {
+					try {
+						if (config.getBga() == Config.BGA_ON || (config.getBga() == Config.BGA_AUTO && (auto != 0))) {
+							bga.setModel(model, f.getPath());
+						}
+						audio.setModel(model, f.getPath());
+					} catch (Exception e) {
+						Logger.getGlobal().severe(e.getClass().getName() + " : " + e.getMessage());
+						e.printStackTrace();
+					} catch (Error e) {
+						Logger.getGlobal().severe(e.getClass().getName() + " : " + e.getMessage());
+					} finally {
+						finished = true;
+					}
+				}				
+			};
+			medialoader.start();
+		}
 		
+		public BMSModel getBMSModel() {
+			return model;
+		}
+
+		public int getAutoplay() {
+			return auto;
+		}
+
+		public Config getConfig() {
+			return config;
+		}
 		
+		public AudioProcessor getAudioProcessor() {
+			return audio;
+		}
+		
+		public BGAManager getBGAManager() {
+			return bga;
+		}
+		
+		public boolean mediaLoadFinished() {
+			return finished;
+		}
 	}
 }
