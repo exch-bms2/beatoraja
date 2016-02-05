@@ -19,12 +19,16 @@ import bms.player.beatoraja.bga.BGAManager;
 import bms.player.beatoraja.decide.MusicDecide;
 import bms.player.beatoraja.result.MusicResult;
 import bms.player.beatoraja.select.MusicSelector;
+import bms.player.lunaticrave2.IRScoreData;
+import bms.player.lunaticrave2.LunaticRave2ScoreDatabaseManager;
 import bms.player.lunaticrave2.LunaticRave2SongDatabaseManager;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter.OutputType;
 
@@ -40,12 +44,46 @@ public class MainController extends ApplicationAdapter {
 	private Config config;
 	private int auto;
 	
+	private LunaticRave2ScoreDatabaseManager scoredb;
+	private LunaticRave2SongDatabaseManager songdb;	
+	
+	private SpriteBatch sprite;
+	private ShapeRenderer shape;
+	
 	private File f;
 
 	public MainController(File f, Config config, int auto) {
 		this.auto = auto;
 		this.config = config;
 		this.f = f;
+		
+		try {
+			Class.forName("org.sqlite.JDBC");
+			scoredb = new LunaticRave2ScoreDatabaseManager(new File(".").getAbsoluteFile().getParent(), "/", "/");
+			scoredb.createTable("Player");
+			songdb = new LunaticRave2SongDatabaseManager(
+					new File("song.db").getPath(), true);
+			songdb.createTable();
+		} catch (ClassNotFoundException e) {
+			// TODO 自動生成された catch ブロック
+			e.printStackTrace();
+		}
+	}
+	
+	public LunaticRave2ScoreDatabaseManager getScoreDatabase() {
+		return scoredb;
+	}
+	
+	public LunaticRave2SongDatabaseManager getSongDatabase() {
+		return songdb;
+	}
+	
+	public SpriteBatch getSpriteBatch() {
+		return sprite;
+	}
+	
+	public ShapeRenderer getShapeRenderer() {
+		return shape;
 	}
 	
 	public static final int STATE_SELECTMUSIC = 0;
@@ -74,7 +112,7 @@ public class MainController extends ApplicationAdapter {
 			current = player;
 			break;
 		case STATE_RESULT:
-			result = new MusicResult(this);
+			result = new MusicResult(this, resource);
 			result.create();
 			current = result;
 			break;
@@ -87,6 +125,8 @@ public class MainController extends ApplicationAdapter {
 
 	@Override
 	public void create() {
+		sprite = new SpriteBatch();
+		shape = new ShapeRenderer();
 		if(f != null) {
 			PlayerResource resource = new PlayerResource();
 			resource.setBMSFile(f, config, auto);
@@ -103,6 +143,8 @@ public class MainController extends ApplicationAdapter {
 
 	@Override
 	public void dispose() {
+		shape.dispose();
+		sprite.dispose();
 		if(player != null) {
 			player.dispose();
 		}
@@ -264,6 +306,7 @@ public class MainController extends ApplicationAdapter {
 		private int auto;
 		private AudioProcessor audio;
 		private BGAManager bga;
+		private IRScoreData score;
 
 		private boolean finished = false;
 		
@@ -323,6 +366,14 @@ public class MainController extends ApplicationAdapter {
 		
 		public boolean mediaLoadFinished() {
 			return finished;
+		}
+
+		public IRScoreData getScoreData() {
+			return score;
+		}
+
+		public void setScoreData(IRScoreData score) {
+			this.score = score;
 		}
 	}
 }

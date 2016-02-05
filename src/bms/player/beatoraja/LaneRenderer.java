@@ -185,6 +185,7 @@ public class LaneRenderer {
 				sprite.end();
 			}
 		}
+		// TODO ここでカバー移動判定を行うとオートプレイ時に誤反応するので、MusicSelectのスクラッチ移動判定と共にInputProcessorに集約したい
 		// move lane cover by START + Scratch
 		if (main.getBMSPlayerInputProcessor().startPressed() && (keystate[7] | keystate[8])) {
 			long l = System.currentTimeMillis();

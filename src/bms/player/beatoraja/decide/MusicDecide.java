@@ -30,8 +30,6 @@ public class MusicDecide extends ApplicationAdapter {
 	private MainController main;
 	private PlayerResource resource;
 
-	private ShapeRenderer shape;
-	private SpriteBatch sprite;
 	private BitmapFont titlefont;
 	private String title;
 
@@ -43,8 +41,6 @@ public class MusicDecide extends ApplicationAdapter {
 	private long time = 0;
 	
 	public void create() {
-		shape = new ShapeRenderer();
-		sprite = new SpriteBatch();
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
 				Gdx.files.internal("skin/VL-Gothic-Regular.ttf"));
 		FreeTypeFontParameter parameter = new FreeTypeFontParameter();		
@@ -56,6 +52,7 @@ public class MusicDecide extends ApplicationAdapter {
 	}
 	
 	public void render() {
+		SpriteBatch sprite = main.getSpriteBatch();
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 

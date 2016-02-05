@@ -42,8 +42,6 @@ public class MusicSelector extends ApplicationAdapter {
 
 	private MainController main;
 
-	private ShapeRenderer shape;
-	private SpriteBatch sprite;
 	private BitmapFont titlefont;
 
 	private MusicSelectorInputProcessor input;
@@ -72,14 +70,14 @@ public class MusicSelector extends ApplicationAdapter {
 	}
 
 	public void create() {
-		shape = new ShapeRenderer();
-		sprite = new SpriteBatch();
 		updateBar("e2977170");
 		input = new MusicSelectorInputProcessor(this);
 
 	}
 
 	public void render() {
+		final SpriteBatch sprite = main.getSpriteBatch();
+		final ShapeRenderer shape = main.getShapeRenderer();
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
@@ -225,8 +223,6 @@ public class MusicSelector extends ApplicationAdapter {
 	}
 
 	public void dispose() {
-		shape.dispose();
-		sprite.dispose();
 		titlefont.dispose();
 	}
 }
