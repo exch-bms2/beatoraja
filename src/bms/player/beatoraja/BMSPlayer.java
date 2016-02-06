@@ -2,15 +2,11 @@ package bms.player.beatoraja;
 
 import java.io.*;
 import java.util.*;
-import java.util.logging.FileHandler;
 import java.util.logging.Logger;
-
-import javax.swing.JFileChooser;
 
 import bms.model.*;
 import bms.player.beatoraja.MainController.PlayerResource;
 import bms.player.beatoraja.PlaySkin.SkinPart;
-import bms.player.beatoraja.audio.SoundProcessor;
 import bms.player.beatoraja.audio.AudioProcessor;
 import bms.player.beatoraja.bga.BGAManager;
 import bms.player.beatoraja.gauge.*;
@@ -19,15 +15,12 @@ import bms.player.beatoraja.input.KeyInputLog;
 import bms.player.beatoraja.pattern.*;
 import bms.player.beatoraja.skin.LR2SkinLoader;
 import bms.player.lunaticrave2.IRScoreData;
-import bms.player.lunaticrave2.LunaticRave2ScoreDatabaseManager;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
@@ -42,12 +35,11 @@ import com.badlogic.gdx.utils.JsonWriter.OutputType;
  */
 public class BMSPlayer extends ApplicationAdapter {
 
-	// TODO 必須機能の項目を以下に列挙します
 	// TODO LR2スキンローダー
 
-	// TODO 修正必要なバグ
 	// TODO GLAssistから起動すると楽曲ロード中に止まる
 	// TODO BPM変化が間に挟まるとLN終端描画がおかしくなる
+	// TODO layerの(0,0,0)を透過するShaderの実装
 
 	private BitmapFont titlefont;
 	private BitmapFont judgefont;
@@ -55,7 +47,6 @@ public class BMSPlayer extends ApplicationAdapter {
 	private BMSModel model;
 	private TimeLine[] timelines;
 	private int totalnotes;
-	private File file;
 
 	private BMSPlayerInputProcessor input;
 	private LaneRenderer lanerender;
@@ -70,7 +61,6 @@ public class BMSPlayer extends ApplicationAdapter {
 	private PlaySkin skin;
 
 	private GrooveGauge gauge;
-	private PatternModifier option;
 
 	private long starttime;
 	private long finishtime;
@@ -90,7 +80,7 @@ public class BMSPlayer extends ApplicationAdapter {
 
 	private int assist = 0;
 
-	private List<PatternModifyLog> pattern = new ArrayList();
+	private List<PatternModifyLog> pattern = new ArrayList<PatternModifyLog>();
 
 	private ReplayData replay = null;
 	private ShaderProgram layershader;
@@ -406,8 +396,6 @@ public class BMSPlayer extends ApplicationAdapter {
 					Logger.getGlobal().info(
 							"入力パフォーマンス(max ms) : " + keyinput.frametimes);
 				}
-				// TODO ここでAutoplayをSTOPする
-
 				if (autoplay == 0) {
 					resource.setScoreData(createScoreData());
 				}

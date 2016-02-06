@@ -16,6 +16,8 @@ import bms.player.beatoraja.input.BMSPlayerInputProcessor;
  * @author exch
  */
 public class JudgeManager {
+	
+	// TODO bug:BSSの前後でノーツを重複カウントするケースがある
 
 	private BMSPlayer main;
 	private BMSModel model;

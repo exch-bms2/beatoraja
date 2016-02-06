@@ -33,6 +33,8 @@ import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter.OutputType;
 
 public class MainController extends ApplicationAdapter {
+	
+	// TODO 段位、コースモード
 
 	private BMSPlayer player;
 	private MusicDecide decide;
@@ -309,8 +311,11 @@ public class MainController extends ApplicationAdapter {
 		private AudioProcessor audio;
 		private BGAManager bga;
 		private IRScoreData score;
-
+		
 		private boolean finished = false;
+		
+		private BMSModel[] course;
+		private IRScoreData cscore;
 		
 		public void setBMSFile(final File f, final Config config, int autoplay) {
 			this.config = config;
