@@ -97,13 +97,11 @@ public class MainController extends ApplicationAdapter {
 			if(this.f != null) {
 				exit();
 			}
-			selector = new MusicSelector(this, config);
 			selector.create();
 			current = selector;
 			break;
 		case STATE_DECIDE:
-			decide = new MusicDecide(this, resource);
-			decide.create();
+			decide.create(resource);
 			current = decide;
 			break;
 		case STATE_PLAYBMS:
@@ -112,8 +110,7 @@ public class MainController extends ApplicationAdapter {
 			current = player;
 			break;
 		case STATE_RESULT:
-			result = new MusicResult(this, resource);
-			result.create();
+			result.create(resource);
 			current = result;
 			break;
 		}
@@ -127,6 +124,11 @@ public class MainController extends ApplicationAdapter {
 	public void create() {
 		sprite = new SpriteBatch();
 		shape = new ShapeRenderer();
+		
+		selector = new MusicSelector(this, config);
+		decide = new MusicDecide(this);
+		result = new MusicResult(this);
+
 		if(f != null) {
 			PlayerResource resource = new PlayerResource();
 			resource.setBMSFile(f, config, auto);

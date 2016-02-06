@@ -23,7 +23,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
  * 
  * @author exch
  */
-public class MusicDecide extends ApplicationAdapter {
+public class MusicDecide extends ApplicationAdapter{
 	
 	// TODO 曲決定時からデータ読み込み開始
 
@@ -33,14 +33,14 @@ public class MusicDecide extends ApplicationAdapter {
 	private BitmapFont titlefont;
 	private String title;
 
-	public MusicDecide(MainController main, PlayerResource resource) {
+	public MusicDecide(MainController main) {
 		this.main = main;
-		this.resource = resource;
 	}
 
 	private long time = 0;
 	
-	public void create() {
+	public void create(PlayerResource resource) {
+		this.resource = resource;
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
 				Gdx.files.internal("skin/VL-Gothic-Regular.ttf"));
 		FreeTypeFontParameter parameter = new FreeTypeFontParameter();		

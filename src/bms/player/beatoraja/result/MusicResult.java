@@ -42,14 +42,14 @@ public class MusicResult extends ApplicationAdapter {
 
 	private PlayerResource resource;
 
-	public MusicResult(MainController main, PlayerResource resource) {
+	public MusicResult(MainController main) {
 		this.main = main;
-		this.resource = resource;
 	}
 
 	private long time = 0;
 
-	public void create() {
+	public void create(PlayerResource resource) {
+		this.resource = resource;
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
 				Gdx.files.internal("skin/VL-Gothic-Regular.ttf"));
 		FreeTypeFontParameter parameter = new FreeTypeFontParameter();

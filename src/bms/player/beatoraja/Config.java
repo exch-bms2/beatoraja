@@ -42,6 +42,8 @@ public class Config {
 	
 	private String[] bmsroot = new String[0];
 	
+	private String[] tableURL = new String[0];
+	
 	private int bga = BGA_OFF;
 	public static final int BGA_ON = 0;
 	public static final int BGA_AUTO = 1;
@@ -51,6 +53,7 @@ public class Config {
 	
 	public Config() {
 //		lr2playskin = "skin/spdframe/csv/left_ACwide.csv";
+		tableURL = new String[]{"http://bmsnormal2.syuriken.jp/table.html"};
 	}
 	
 	public boolean isFullscreen() {
@@ -223,5 +226,13 @@ public class Config {
 
 	public void setBmsroot(String[] bmsroot) {
 		this.bmsroot = bmsroot;
+	}
+
+	public String[] getTableURL() {
+		return tableURL;
+	}
+
+	public void setTableURL(String[] tableURL) {
+		this.tableURL = tableURL;
 	}
 }

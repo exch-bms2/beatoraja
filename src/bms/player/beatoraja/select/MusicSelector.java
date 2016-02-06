@@ -1,7 +1,9 @@
 package bms.player.beatoraja.select;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -17,6 +19,9 @@ import bms.player.lunaticrave2.IRScoreData;
 import bms.player.lunaticrave2.LunaticRave2ScoreDatabaseManager;
 import bms.player.lunaticrave2.LunaticRave2SongDatabaseManager;
 import bms.player.lunaticrave2.SongData;
+import bms.table.DifficultyTable;
+import bms.table.DifficultyTableElement;
+import bms.table.DifficultyTableParser;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -52,7 +57,7 @@ public class MusicSelector extends ApplicationAdapter {
 	private Bar[] currentsongs;
 	private IRScoreData[] currentscores;
 	private int selectedindex;
-	private List<String> dir = new ArrayList();
+	private List<Bar> dir = new ArrayList();
 
 	private long duration;
 	/**
@@ -80,6 +85,8 @@ public class MusicSelector extends ApplicationAdapter {
 
 	private Config config;
 
+	private TableBar[] tables = new TableBar[0];
+
 	public MusicSelector(MainController main, Config config) {
 		this.main = main;
 		this.config = config;
@@ -95,10 +102,36 @@ public class MusicSelector extends ApplicationAdapter {
 			e.printStackTrace();
 		}
 		songdb.createTable();
+
+		List<TableBar> tables = new ArrayList<TableBar>();
+		for (String url : config.getTableURL()) {
+			DifficultyTableParser dtp = new DifficultyTableParser();
+			DifficultyTable dt = new DifficultyTable();
+			dt.setSourceURL(url);
+			try {
+				dtp.decode(true, dt);
+				List<TableLevelBar> levels = new ArrayList<TableLevelBar>();
+				for (String lv : dt.getLevelDescription()) {
+					List<String> hashes = new ArrayList<String>();
+					for (DifficultyTableElement dte : dt.getElements()) {
+						if (lv.equals(dte.getDifficultyID())) {
+							hashes.add(dte.getHash());
+						}
+					}
+					levels.add(new TableLevelBar(lv, hashes
+							.toArray(new String[0])));
+				}
+				tables.add(new TableBar(dt.getName(), levels
+						.toArray(new TableLevelBar[0])));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		this.tables = tables.toArray(new TableBar[0]);
 	}
 
 	public void create() {
-		updateBar("e2977170");
+		updateBar(null);
 		input = new MusicSelectorInputProcessor(this);
 
 	}
@@ -129,6 +162,12 @@ public class MusicSelector extends ApplicationAdapter {
 				x = 700;
 			}
 			shape.begin(ShapeType.Filled);
+			if (sd instanceof TableBar) {
+				shape.setColor(Color.valueOf("008080"));
+			}
+			if (sd instanceof TableLevelBar) {
+				shape.setColor(Color.valueOf("4040c0"));
+			}
 			if (sd instanceof FolderBar) {
 				shape.setColor(Color.valueOf("606000"));
 			}
@@ -207,29 +246,6 @@ public class MusicSelector extends ApplicationAdapter {
 		}
 		selectedindex = selectedindex % currentsongs.length;
 
-		if (keystate[0] && keytime[0] != 0) {
-			keytime[0] = 0;
-			if (currentsongs[selectedindex] instanceof FolderBar) {
-				FolderData fd = ((FolderBar) currentsongs[selectedindex])
-						.getFolderData();
-				String path = fd.getPath();
-				if (path.endsWith(String.valueOf(File.separatorChar))) {
-					path = path.substring(0, path.length() - 1);
-				}
-				if (updateBar(songdb.crc32(path, new String[0],
-						new File(".").getAbsolutePath()))) {
-					dir.add(fd.getParent());
-				}
-			} else if (currentsongs[selectedindex] instanceof SongBar) {
-				main.setAuto(0);
-				PlayerResource resource = new PlayerResource();
-				resource.setBMSFile(new File(
-						((SongBar) currentsongs[selectedindex]).getSongData()
-								.getPath()), config, 0);
-				main.changeState(MainController.STATE_DECIDE, resource);
-			}
-		}
-
 		if (input.startPressed()) {
 			if (keystate[1] && keytime[1] != 0) {
 				keytime[1] = 0;
@@ -262,13 +278,38 @@ public class MusicSelector extends ApplicationAdapter {
 			titlefont.draw(sprite, GAUGEOP[config.getGauge()], 200, 520);
 			sprite.end();
 		} else {
+			// 1鍵 (選曲 or フォルダを開く)
+			if (keystate[0] && keytime[0] != 0) {
+				keytime[0] = 0;
+				if (currentsongs[selectedindex] instanceof FolderBar
+						|| currentsongs[selectedindex] instanceof TableBar
+						|| currentsongs[selectedindex] instanceof TableLevelBar) {
+					Bar bar = currentsongs[selectedindex];
+					if (updateBar(bar)) {
+						dir.add(bar);
+					}
+				} else if (currentsongs[selectedindex] instanceof SongBar) {
+					main.setAuto(0);
+					PlayerResource resource = new PlayerResource();
+					resource.setBMSFile(new File(
+							((SongBar) currentsongs[selectedindex])
+									.getSongData().getPath()), config, 0);
+					main.changeState(MainController.STATE_DECIDE, resource);
+				}
+			}
+
+			// 2鍵 (フォルダを閉じる)
 			if (keystate[1] && keytime[1] != 0) {
 				keytime[1] = 0;
-				if (dir.size() > 0) {
-					String crc = dir.get(dir.size() - 1);
-					updateBar(crc);
-					dir.remove(dir.size() - 1);
+				Bar bar = null;
+				if (dir.size() > 1) {
+					bar = dir.get(dir.size() - 2);
 				}
+				if(dir.size() > 0) {
+					dir.remove(dir.size() - 1);					
+				}
+				updateBar(bar);
+
 			}
 
 			if (keystate[4]) {
@@ -292,21 +333,49 @@ public class MusicSelector extends ApplicationAdapter {
 		}
 	}
 
-	public boolean updateBar(String crc) {
-		Logger.getGlobal().info("crc :" + crc);
-		FolderData[] folders = songdb.getFolderDatas("parent", crc, new File(
-				".").getAbsolutePath());
-		SongData[] songs = songdb.getSongDatas("parent", crc,
-				new File(".").getAbsolutePath());
+	public boolean updateBar(Bar bar) {
+		String crc = null;
 		List<Bar> l = new ArrayList();
-		if (songs.length == 0) {
-			for (FolderData folder : folders) {
-				l.add(new FolderBar(folder));
+		if (bar == null) {
+			crc = "e2977170";
+			l.addAll(Arrays.asList(tables));
+		} else if (bar instanceof FolderBar) {
+			crc = ((FolderBar) bar).getCRC();
+		}
+		if (crc != null) {
+			Logger.getGlobal().info("crc :" + crc);
+			FolderData[] folders = songdb.getFolderDatas("parent", crc,
+					new File(".").getAbsolutePath());
+			SongData[] songs = songdb.getSongDatas("parent", crc,
+					new File(".").getAbsolutePath());
+			if (songs.length == 0) {
+				for (FolderData folder : folders) {
+					String path = folder.getPath();
+					if (path.endsWith(String.valueOf(File.separatorChar))) {
+						path = path.substring(0, path.length() - 1);
+					}
+					l.add(new FolderBar(folder, songdb.crc32(path,
+							new String[0], new File(".").getAbsolutePath())));
+				}
+			} else {
+				for (SongData song : songs) {
+					l.add(new SongBar(song));
+				}
 			}
-		} else {
-			for (SongData song : songs) {
-				l.add(new SongBar(song));
+		}
+		if (bar instanceof TableBar) {
+			l.addAll((Arrays.asList(((TableBar)bar).getLevels())));
+		}
+		if (bar instanceof TableLevelBar) {
+			List<SongBar> songbars = new ArrayList();
+			for(String hash : ((TableLevelBar)bar).getHashes()) {
+				SongData[] songs = songdb.getSongDatas("hash", hash,
+						new File(".").getAbsolutePath());
+				if(songs.length > 0) {
+					songbars.add(new SongBar(songs[0]));
+				}
 			}
+			l.addAll(songbars);
 		}
 		if (l.size() > 0) {
 			currentsongs = l.toArray(new Bar[0]);
@@ -390,17 +459,62 @@ class SongBar extends Bar {
 class FolderBar extends Bar {
 
 	private FolderData folder;
+	private String crc;
 
-	public FolderBar(FolderData folder) {
+	public FolderBar(FolderData folder, String crc) {
 		this.folder = folder;
+		this.crc = crc;
 	}
 
 	public FolderData getFolderData() {
 		return folder;
 	}
 
+	public String getCRC() {
+		return crc;
+	}
+
 	@Override
 	public String getTitle() {
 		return folder.getTitle();
+	}
+}
+
+class TableBar extends Bar {
+
+	private String name;
+	private TableLevelBar[] levels;
+
+	public TableBar(String name, TableLevelBar[] levels) {
+		this.name = name;
+		this.levels = levels;
+	}
+
+	@Override
+	public String getTitle() {
+		return name;
+	}
+
+	public TableLevelBar[] getLevels() {
+		return levels;
+	}
+}
+
+class TableLevelBar extends Bar {
+	private String level;
+	private String[] hashes;
+
+	public TableLevelBar(String level, String[] hashes) {
+		this.level = level;
+		this.hashes = hashes;
+	}
+
+	@Override
+	public String getTitle() {
+		return "LEVEL " + level;
+	}
+
+	public String[] getHashes() {
+		return hashes;
 	}
 }
