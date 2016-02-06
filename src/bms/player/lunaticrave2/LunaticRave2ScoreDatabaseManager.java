@@ -23,6 +23,8 @@ public class LunaticRave2ScoreDatabaseManager {
 	private String playerpath = "/LR2files/Database/Score/";
 
 	private String rivalpath = "/LR2files/Rival/";
+	
+	private final QueryRunner qr = new QueryRunner();
 
 	public LunaticRave2ScoreDatabaseManager(String path) throws ClassNotFoundException {
 		rootpath = path;
@@ -53,7 +55,6 @@ public class LunaticRave2ScoreDatabaseManager {
 			pstmt.setString(1, "score");
 			rs = pstmt.executeQuery();
 			if (!rs.next()) {
-				QueryRunner qr = new QueryRunner();
 				if (qr.query(conn, sql, new MapListHandler(), "score").size() == 0) {
 					sql = "CREATE TABLE [score] ([hash] TEXT NOT NULL,"
 							+ "[clear] INTEGER," + "[perfect] INTEGER,"
@@ -175,7 +176,6 @@ public class LunaticRave2ScoreDatabaseManager {
 		try {
 			con = DriverManager.getConnection("jdbc:sqlite:" + rootpath
 					+ playerpath + playername + ".db");
-			QueryRunner qr = new QueryRunner();
 			ResultSetHandler<List<IRScoreData>> rh = new BeanListHandler<IRScoreData>(
 					IRScoreData.class);
 			List<IRScoreData> score;
@@ -230,7 +230,6 @@ public class LunaticRave2ScoreDatabaseManager {
 		try {
 			con = DriverManager.getConnection("jdbc:sqlite:" + rootpath
 					+ playerpath + playername + ".db");
-			QueryRunner qr = new QueryRunner();
 			ResultSetHandler<List<IRScoreData>> rh = new BeanListHandler<IRScoreData>(
 					IRScoreData.class);
 			for (String hash : hashes) {
@@ -281,7 +280,6 @@ public class LunaticRave2ScoreDatabaseManager {
 			con = DriverManager.getConnection("jdbc:sqlite:" + rootpath
 					+ playerpath + playername + ".db");
 			con.setAutoCommit(false);
-			QueryRunner qr = new QueryRunner();
 			String sql = "delete from score where hash = ?";
 			qr.update(con, sql, score.getHash());
 
@@ -321,7 +319,6 @@ public class LunaticRave2ScoreDatabaseManager {
 			con = DriverManager.getConnection("jdbc:sqlite:" + rootpath
 					+ playerpath + playername + ".db");
 			con.setAutoCommit(false);
-			QueryRunner qr = new QueryRunner();
 			for (String hash : map.keySet()) {
 				Map<String, Object> values = map.get(hash);
 				String vs = "";
@@ -363,7 +360,6 @@ public class LunaticRave2ScoreDatabaseManager {
 		try {
 			con = DriverManager.getConnection("jdbc:sqlite:" + rootpath
 					+ rivalpath + rivalname + ".db");
-			QueryRunner qr = new QueryRunner();
 			ResultSetHandler<List<IRScoreData>> rh = new BeanListHandler<IRScoreData>(
 					IRScoreData.class);
 			for (String hash : hashes) {
@@ -400,12 +396,10 @@ public class LunaticRave2ScoreDatabaseManager {
 	 */
 	public PlayerData getPlayerDatas(String playername) {
 		PlayerData result = null;
-		QueryRunner qr;
 		Connection conn = null;
 		try {
 			conn = DriverManager.getConnection("jdbc:sqlite:" + rootpath
 					+ playerpath + playername + ".db");
-			qr = new QueryRunner();
 			ResultSetHandler<List<PlayerData>> rh = new BeanListHandler<PlayerData>(
 					PlayerData.class);
 			List<PlayerData> pd = qr.query(conn, "SELECT * FROM player;", rh);

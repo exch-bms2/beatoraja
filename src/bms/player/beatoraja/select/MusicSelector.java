@@ -3,9 +3,11 @@ package bms.player.beatoraja.select;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import bms.model.TimeLine;
+import bms.player.beatoraja.Config;
 import bms.player.beatoraja.MainController;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.MusicSelectorInputProcessor;
@@ -53,6 +55,7 @@ public class MusicSelector extends ApplicationAdapter {
 	private int selectedindex;
 	private List<String> dir = new ArrayList();
 
+	private Config config = new Config();
 	private long duration;
 	/**
 	 * 楽曲DBアクセサ
@@ -67,6 +70,11 @@ public class MusicSelector extends ApplicationAdapter {
 			"ffff88", "88ffff", "ff8888", "ff0000" };
 	private static final String[] CLEAR = { "NO PLAY", "FAILED", "ASSIST CLEAR", "L-ASSIST CLEAR", "EASY CLEAR",
 			"CLEAR", "HARD CLEAR", "EX-HARD CLEAR", "FULL COMBO", "PERFECT", "MAX" };
+
+	private static final String[] SCOREOP = { "OFF", "MIRROR", "RANDOM", "R-RANDOM", "S-RANDOM", "H-RANDOM", "ALL-SCR",
+			"RANDOM-EX", "S-RANDOM-EX" };
+
+	private static final String[] GAUGEOP = { "ASSIST EASY", "EASY", "NORMAL", "HARD", "EX-HARD", "HAZARD" };
 
 	public MusicSelector(MainController main) {
 		this.main = main;
@@ -144,13 +152,14 @@ public class MusicSelector extends ApplicationAdapter {
 			titlefont.draw(sprite, song.getTitle() + " " + song.getSubtitle(), 100, 600);
 			titlefont.draw(sprite, song.getArtist() + " " + song.getSubartist(), 100, 570);
 			titlefont.draw(sprite, song.getMode() + " KEYS", 100, 530);
+			titlefont.draw(sprite, "LEVEL : " + song.getLevel(), 100, 500);
 
 			if (currentscores[selectedindex] != null) {
 				IRScoreData score = currentscores[selectedindex];
 				titlefont.setColor(Color.valueOf(LAMP[score.getClear()]));
 				titlefont.draw(sprite, CLEAR[score.getClear()], 100, 420);
 				titlefont.setColor(Color.WHITE);
-				titlefont.draw(sprite, "EX-SCORE  : " + score.getExscore(), 100, 390);
+				titlefont.draw(sprite, "EX-SCORE  : " + score.getExscore() + " / " + (score.getNotes() * 2), 100, 390);
 				titlefont.draw(sprite, "MISS COUNT: " + score.getMinbp(), 100, 360);
 			}
 		}
@@ -201,27 +210,58 @@ public class MusicSelector extends ApplicationAdapter {
 			}
 		}
 
-		if (keystate[1] && keytime[1] != 0) {
-			keytime[1] = 0;
-			if (dir.size() > 0) {
-				String crc = dir.get(dir.size() - 1);
-				updateBar(crc);
-				dir.remove(dir.size() - 1);
+		if (input.startPressed()) {
+			if (keystate[1] && keytime[1] != 0) {
+				keytime[1] = 0;
+				config.setRandom(config.getRandom() + 1 < SCOREOP.length ? config.getRandom() + 1 : 0);
 			}
-		}
+			if (keystate[3] && keytime[3] != 0) {
+				keytime[3] = 0;
+				config.setRandom(config.getGauge() + 1 < GAUGEOP.length ? config.getGauge() + 1 : 0);
+			}
+			shape.begin(ShapeType.Filled);
+			shape.setColor(Color.BLACK);
+			shape.rect(100, 200, 400, 400);
+			shape.end();
+			shape.begin(ShapeType.Line);
+			shape.setColor(Color.WHITE);
+			shape.rect(100, 200, 400, 400);
+			shape.rect(150, 250, 55, 95);
+			shape.rect(180, 350, 55, 95);
+			shape.rect(210, 250, 55, 95);
+			shape.rect(240, 350, 55, 95);
+			shape.rect(270, 250, 55, 95);
+			shape.rect(300, 350, 55, 95);
+			shape.rect(330, 250, 55, 95);
+			shape.end();
+			
+			sprite.begin();
+			titlefont.draw(sprite, SCOREOP[config.getRandom()], 110, 490);
+			titlefont.draw(sprite, GAUGEOP[config.getGauge()], 200, 520);
+			sprite.end();
+		} else {
+			if (keystate[1] && keytime[1] != 0) {
+				keytime[1] = 0;
+				if (dir.size() > 0) {
+					String crc = dir.get(dir.size() - 1);
+					updateBar(crc);
+					dir.remove(dir.size() - 1);
+				}
+			}
 
-		if (keystate[4]) {
-			if (currentsongs[selectedindex] instanceof SongBar) {
-				main.setAuto(1);
-				main.changeState(MainController.STATE_DECIDE,
-						new File(((SongBar) currentsongs[selectedindex]).getSongData().getPath()));
+			if (keystate[4]) {
+				if (currentsongs[selectedindex] instanceof SongBar) {
+					main.setAuto(1);
+					main.changeState(MainController.STATE_DECIDE,
+							new File(((SongBar) currentsongs[selectedindex]).getSongData().getPath()));
+				}
 			}
-		}
-		if (keystate[6]) {
-			if (currentsongs[selectedindex] instanceof SongBar) {
-				main.setAuto(2);
-				main.changeState(MainController.STATE_DECIDE,
-						new File(((SongBar) currentsongs[selectedindex]).getSongData().getPath()));
+			if (keystate[6]) {
+				if (currentsongs[selectedindex] instanceof SongBar) {
+					main.setAuto(2);
+					main.changeState(MainController.STATE_DECIDE,
+							new File(((SongBar) currentsongs[selectedindex]).getSongData().getPath()));
+				}
 			}
 		}
 
@@ -249,18 +289,32 @@ public class MusicSelector extends ApplicationAdapter {
 					Gdx.files.internal("skin/VL-Gothic-Regular.ttf"));
 			FreeTypeFontParameter parameter = new FreeTypeFontParameter();
 			parameter.size = 24;
-			String str = parameter.characters;
+
+			StringBuffer str = new StringBuffer(parameter.characters);
+
 			for (Bar song : currentsongs) {
-				str += song.getTitle();
+				str.append(song.getTitle());
+				if (song instanceof SongBar) {
+					SongData s = ((SongBar) song).getSongData();
+					str.append(s.getSubtitle());
+					str.append(s.getArtist());
+					str.append(s.getSubartist());
+				}
 			}
-			parameter.characters = str;
+			parameter.characters = str.toString();
 			titlefont = generator.generateFont(parameter);
 
 			currentscores = new IRScoreData[currentsongs.length];
+			List<String> hashes = new ArrayList();
 			for (int i = 0; i < currentscores.length; i++) {
 				if (currentsongs[i] instanceof SongBar) {
-					currentscores[i] = scoredb.getScoreData("Player",
-							((SongBar) currentsongs[i]).getSongData().getHash(), false);
+					hashes.add(((SongBar) currentsongs[i]).getSongData().getHash());
+				}
+			}
+			Map<String, IRScoreData> m = scoredb.getScoreDatas("Player", hashes.toArray(new String[0]), false);
+			for (int i = 0; i < currentscores.length; i++) {
+				if (currentsongs[i] instanceof SongBar) {
+					currentscores[i] = m.get(((SongBar) currentsongs[i]).getSongData().getHash());
 				} else {
 					currentscores[i] = null;
 				}
