@@ -238,7 +238,7 @@ public class MusicSelector extends ApplicationAdapter {
 			}
 			if (keystate[3] && keytime[3] != 0) {
 				keytime[3] = 0;
-				config.setRandom(config.getGauge() + 1 < GAUGEOP.length ? config
+				config.setGauge(config.getGauge() + 1 < GAUGEOP.length ? config
 						.getGauge() + 1 : 0);
 			}
 			shape.begin(ShapeType.Filled);

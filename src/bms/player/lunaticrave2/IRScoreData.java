@@ -13,15 +13,15 @@ public class IRScoreData {
 	/**
 	 * BMSのハッシュ値
 	 */
-	private String hash;
+	private String hash = "";
 	/**
 	 * BMSのタイトル
 	 */
-	private String title;
+	private String title = "";
 	/**
 	 * クリア状況(0-5)
 	 */
-	private int clear;
+	private int clear = 0;
 	
 	private int exclear;
 	
@@ -29,43 +29,43 @@ public class IRScoreData {
 	
 	private int sync;
 	
-	private int notes;
+	private int notes = 0;
 	/**
 	 * コンボ数
 	 */
-	private int combo;
+	private int combo = 0;
 	/**
 	 * PGREAT数
 	 */
-	private int pg;
+	private int pg = 0;
 	/**
 	 * GREAT数
 	 */
-	private int gr;
+	private int gr = 0;
 	/**
 	 * GOOD数
 	 */
-	private int gd;
+	private int gd = 0;
 	/**
 	 * BAD数
 	 */
-	private int bd;
+	private int bd = 0;
 	/**
 	 * PORR数
 	 */
-	private int pr;
+	private int pr = 0;
 	/**
 	 * 最小ミスカウント数
 	 */
-	private int minbp;
+	private int minbp = Integer.MAX_VALUE;
 	/**
 	 * 譜面、ゲージオプション
 	 */
-	private int option;
+	private int option = 0;
 	/**
 	 * IRランキングの最終更新日時。プレイヤー自身の最終更新日時ではないことに注意。
 	 */
-	private long lastupdate;
+	private long lastupdate = 0;
 	
 	private int playcount;
 	
@@ -89,19 +89,6 @@ public class IRScoreData {
 	private int bestminbp = Integer.MAX_VALUE;
 	
 	public IRScoreData() {
-		setHash("");
-		setTitle("");
-		setClear(0);
-		setNotes(0);
-		setCombo(0);
-		setPg(0);
-		setGr(0);
-		setGd(0);
-		setBd(0);
-		setPr(0);
-		setMinbp(0);
-		setOption(0);
-		setLastupdate(0);
 	}
 
 	public IRScoreData(String hash, String title, int clear, int notes, int combo, int pg,

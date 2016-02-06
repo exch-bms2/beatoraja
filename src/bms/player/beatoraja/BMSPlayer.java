@@ -450,6 +450,16 @@ public class BMSPlayer extends ApplicationAdapter {
 	}
 
 	public IRScoreData createScoreData() {
+		final int pgreat = judge.getJudgeCount(0);
+		final int great = judge.getJudgeCount(1);
+		final int good = judge.getJudgeCount(2);
+		final int bad = judge.getJudgeCount(3);
+		final int poor = judge.getJudgeCount(4);
+		final int miss = judge.getJudgeCount(5);
+		if(pgreat + great + good + bad == 0) {
+			return null;
+		}
+
 		IRScoreData score = new IRScoreData();
 		score.setHash(model.getHash());
 		score.setNotes(model.getTotalNotes()
@@ -505,12 +515,6 @@ public class BMSPlayer extends ApplicationAdapter {
 			}
 		}
 
-		final int pgreat = judge.getJudgeCount(0);
-		final int great = judge.getJudgeCount(1);
-		final int good = judge.getJudgeCount(2);
-		final int bad = judge.getJudgeCount(3);
-		final int poor = judge.getJudgeCount(4);
-		final int miss = judge.getJudgeCount(5);
 		int exscore = pgreat * 2 + great;
 		score.setPg(pgreat);
 		score.setGr(great);
