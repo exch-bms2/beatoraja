@@ -55,7 +55,7 @@ public class BMSPlayer extends ApplicationAdapter {
 	private BMSModel model;
 	private TimeLine[] timelines;
 	private int totalnotes;
-	private boolean eof = false;
+	private File file;
 
 	private BMSPlayerInputProcessor input;
 	private LaneRenderer lanerender;
@@ -386,6 +386,12 @@ public class BMSPlayer extends ApplicationAdapter {
 			break;
 		// 閉店処理
 		case STATE_FAILED:
+			if (autoThread != null) {
+				autoThread.stop = true;
+			}
+			if (keyinput != null) {
+				keyinput.stop = true;
+			}
 			renderMain(time);
 
 			shape.begin(ShapeType.Filled);
@@ -400,6 +406,8 @@ public class BMSPlayer extends ApplicationAdapter {
 					Logger.getGlobal().info(
 							"入力パフォーマンス(max ms) : " + keyinput.frametimes);
 				}
+				// TODO ここでAutoplayをSTOPする
+
 				if (autoplay == 0) {
 					resource.setScoreData(createScoreData());
 				}
@@ -408,6 +416,12 @@ public class BMSPlayer extends ApplicationAdapter {
 			break;
 		// 完奏処理
 		case STATE_FINISHED:
+			if (autoThread != null) {
+				autoThread.stop = true;
+			}
+			if (keyinput != null) {
+				keyinput.stop = true;
+			}
 			shape.begin(ShapeType.Filled);
 			long l2 = System.currentTimeMillis() - finishtime;
 			shape.setColor(1, 1, 1, ((float) l2) / 1000f);
@@ -503,25 +517,23 @@ public class BMSPlayer extends ApplicationAdapter {
 		score.setGd(good);
 		score.setBd(bad);
 		score.setPr(poor + miss);
-		final int misscount = bad + poor + miss;
+		final int misscount = bad + poor + miss + totalnotes - notes;
 		score.setMinbp(misscount);
-
 		return score;
 	}
 
 	public void stopPlay() {
-		if (eof) {
+		if (finishtime != 0) {
+			return;
+		}
+		if (notes == totalnotes) {
 			state = STATE_FINISHED;
+			Logger.getGlobal().info("STATE_FINISHEDに移行");
 		} else {
 			state = STATE_FAILED;
+			Logger.getGlobal().info("STATE_FAILEDに移行");
 		}
 		finishtime = System.currentTimeMillis();
-		if (autoThread != null) {
-			autoThread.stop = true;
-		}
-		if (keyinput != null) {
-			keyinput.stop = true;
-		}
 	}
 
 	private void renderMain(int time) {
@@ -604,8 +616,13 @@ public class BMSPlayer extends ApplicationAdapter {
 		shape.setColor(Color.BLACK);
 		shape.rect(r.x, r.y, r.width, r.height);
 		shape.end();
-		if (misslayer != null && judge.getMisslayer() != 0
-				&& time >= judge.getMisslayer()
+		if (state == STATE_PRELOAD && bga.getBackbmpData() != null) {
+			sprite.begin();
+			Texture bgatex = new Texture(bga.getBackbmpData());
+			sprite.draw(bgatex, r.x, r.y, r.width, r.height);
+			sprite.end();
+			bgatex.dispose();
+		} else if (misslayer != null && judge.getMisslayer() != 0 && time >= judge.getMisslayer()
 				&& time < judge.getMisslayer() + 500) {
 			// ミスレイヤー表示
 			Pixmap miss = bga.getBGAData(misslayer[misslayer.length
@@ -708,8 +725,8 @@ public class BMSPlayer extends ApplicationAdapter {
 		Logger.getGlobal().info("BGAのリソース解放");
 	}
 
-	public AudioProcessor getAudioManager() {
-		return audio;
+	public void play(int id) {
+		audio.play(id);
 	}
 
 	public BMSPlayerInputProcessor getBMSPlayerInputProcessor() {
@@ -724,11 +741,15 @@ public class BMSPlayer extends ApplicationAdapter {
 		return judge;
 	}
 
+	private int notes;
+	
 	public void update(int judge, boolean fast) {
-		gauge.update(judge);
-		if (this.judge.getJudgeCount() - this.judge.getJudgeCount(5) == totalnotes) {
-			eof = true;
+		if(judge < 5) {
+			notes++;
 		}
+		gauge.update(judge);
+		System.out.println(
+				"Now count : " + notes + " - " + totalnotes);
 	}
 
 	private final List<KeyInputLog> createAutoplayLog() {

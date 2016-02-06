@@ -3,6 +3,7 @@ package bms.player.beatoraja.select;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import bms.model.TimeLine;
@@ -12,6 +13,8 @@ import bms.player.beatoraja.MainController.PlayerResource;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.MusicSelectorInputProcessor;
 import bms.player.lunaticrave2.FolderData;
+import bms.player.lunaticrave2.IRScoreData;
+import bms.player.lunaticrave2.LunaticRave2ScoreDatabaseManager;
 import bms.player.lunaticrave2.LunaticRave2SongDatabaseManager;
 import bms.player.lunaticrave2.SongData;
 
@@ -47,12 +50,33 @@ public class MusicSelector extends ApplicationAdapter {
 	private MusicSelectorInputProcessor input;
 
 	private Bar[] currentsongs;
+	private IRScoreData[] currentscores;
 	private int selectedindex;
 	private List<String> dir = new ArrayList();
+
+	private long duration;
 	/**
 	 * 楽曲DBアクセサ
 	 */
 	private LunaticRave2SongDatabaseManager songdb;
+	/**
+	 * スコアDBアクセサ
+	 */
+	private LunaticRave2ScoreDatabaseManager scoredb;
+
+	private static final String[] LAMP = { "000000", "808080", "800080",
+			"ff00ff", "40ff40", "f0c000", "ffffff", "ffff88", "88ffff",
+			"ff8888", "ff0000" };
+	private static final String[] CLEAR = { "NO PLAY", "FAILED",
+			"ASSIST CLEAR", "L-ASSIST CLEAR", "EASY CLEAR", "CLEAR",
+			"HARD CLEAR", "EX-HARD CLEAR", "FULL COMBO", "PERFECT", "MAX" };
+
+	private static final String[] SCOREOP = { "OFF", "MIRROR", "RANDOM",
+			"R-RANDOM", "S-RANDOM", "H-RANDOM", "ALL-SCR", "RANDOM-EX",
+			"S-RANDOM-EX" };
+
+	private static final String[] GAUGEOP = { "ASSIST EASY", "EASY", "NORMAL",
+			"HARD", "EX-HARD", "HAZARD" };
 
 	private Config config;
 
@@ -60,13 +84,17 @@ public class MusicSelector extends ApplicationAdapter {
 		this.main = main;
 		this.config = config;
 		try {
+			Class.forName("org.sqlite.JDBC");
+			scoredb = new LunaticRave2ScoreDatabaseManager(new File(".")
+					.getAbsoluteFile().getParent(), "/", "/");
+			scoredb.createTable("Player");
+			Logger.getGlobal().info("スコアデータベース接続");
 			songdb = new LunaticRave2SongDatabaseManager(
 					new File("song.db").getPath(), true);
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
 		songdb.createTable();
-
 	}
 
 	public void create() {
@@ -92,9 +120,10 @@ public class MusicSelector extends ApplicationAdapter {
 		// draw song bar
 		final float barh = 30;
 		for (int i = 0; i < h / barh; i++) {
-			Bar sd = currentsongs[(int) (selectedindex + currentsongs.length
-					* 100 + i - h / barh / 2)
-					% currentsongs.length];
+			int index = (int) (selectedindex + currentsongs.length * 100 + i - h
+					/ barh / 2)
+					% currentsongs.length;
+			Bar sd = currentsongs[index];
 			int x = 720;
 			if (i == h / barh / 2) {
 				x = 700;
@@ -117,15 +146,64 @@ public class MusicSelector extends ApplicationAdapter {
 			titlefont.draw(sprite, sd.getTitle(), x + 20, (i + 1) * barh);
 			sprite.end();
 
+			if (currentscores[index] != null) {
+				shape.begin(ShapeType.Filled);
+				shape.setColor(Color.valueOf(LAMP[currentscores[index]
+						.getClear()]));
+				shape.rect(x, i * barh, 15, barh - 1);
+				shape.end();
+			}
+
 		}
+
+		sprite.begin();
+		if (currentsongs[selectedindex] instanceof SongBar) {
+			SongData song = ((SongBar) currentsongs[selectedindex])
+					.getSongData();
+			titlefont.draw(sprite, song.getTitle() + " " + song.getSubtitle(),
+					100, 600);
+			titlefont.draw(sprite,
+					song.getArtist() + " " + song.getSubartist(), 100, 570);
+			titlefont.draw(sprite, song.getMode() + " KEYS", 100, 530);
+			titlefont.draw(sprite, "LEVEL : " + song.getLevel(), 100, 500);
+
+			if (currentscores[selectedindex] != null) {
+				IRScoreData score = currentscores[selectedindex];
+				titlefont.setColor(Color.valueOf(LAMP[score.getClear()]));
+				titlefont.draw(sprite, CLEAR[score.getClear()], 100, 420);
+				titlefont.setColor(Color.WHITE);
+				titlefont.draw(sprite, "EX-SCORE  : " + score.getExscore()
+						+ " / " + (score.getNotes() * 2), 100, 390);
+				titlefont.draw(sprite, "MISS COUNT: " + score.getMinbp(), 100,
+						360);
+			}
+		}
+		sprite.end();
 
 		boolean[] keystate = input.getKeystate();
 		long[] keytime = input.getTime();
 		if (keystate[7]) {
-			selectedindex++;
-		}
-		if (keystate[8]) {
-			selectedindex += currentsongs.length - 1;
+			long l = System.currentTimeMillis();
+			if (duration == 0) {
+				selectedindex++;
+				duration = l + 500;
+			}
+			if (l > duration) {
+				duration = l + 50;
+				selectedindex++;
+			}
+		} else if (keystate[8]) {
+			long l = System.currentTimeMillis();
+			if (duration == 0) {
+				selectedindex += currentsongs.length - 1;
+				duration = l + 500;
+			}
+			if (l > duration) {
+				duration = l + 50;
+				selectedindex += currentsongs.length - 1;
+			}
+		} else {
+			duration = 0;
 		}
 		selectedindex = selectedindex % currentsongs.length;
 
@@ -152,34 +230,66 @@ public class MusicSelector extends ApplicationAdapter {
 			}
 		}
 
-		if (keystate[1] && keytime[1] != 0) {
-			keytime[1] = 0;
-			if (dir.size() > 0) {
-				String crc = dir.get(dir.size() - 1);
-				updateBar(crc);
-				dir.remove(dir.size() - 1);
+		if (input.startPressed()) {
+			if (keystate[1] && keytime[1] != 0) {
+				keytime[1] = 0;
+				config.setRandom(config.getRandom() + 1 < SCOREOP.length ? config
+						.getRandom() + 1 : 0);
 			}
-		}
+			if (keystate[3] && keytime[3] != 0) {
+				keytime[3] = 0;
+				config.setRandom(config.getGauge() + 1 < GAUGEOP.length ? config
+						.getGauge() + 1 : 0);
+			}
+			shape.begin(ShapeType.Filled);
+			shape.setColor(Color.BLACK);
+			shape.rect(100, 200, 400, 400);
+			shape.end();
+			shape.begin(ShapeType.Line);
+			shape.setColor(Color.WHITE);
+			shape.rect(100, 200, 400, 400);
+			shape.rect(150, 250, 55, 95);
+			shape.rect(180, 350, 55, 95);
+			shape.rect(210, 250, 55, 95);
+			shape.rect(240, 350, 55, 95);
+			shape.rect(270, 250, 55, 95);
+			shape.rect(300, 350, 55, 95);
+			shape.rect(330, 250, 55, 95);
+			shape.end();
 
-		if (keystate[4]) {
-			if (currentsongs[selectedindex] instanceof SongBar) {
-				PlayerResource resource = new PlayerResource();
-				resource.setBMSFile(new File(
-						((SongBar) currentsongs[selectedindex]).getSongData()
-								.getPath()), config, 1);
-				main.changeState(MainController.STATE_DECIDE, resource);
+			sprite.begin();
+			titlefont.draw(sprite, SCOREOP[config.getRandom()], 110, 490);
+			titlefont.draw(sprite, GAUGEOP[config.getGauge()], 200, 520);
+			sprite.end();
+		} else {
+			if (keystate[1] && keytime[1] != 0) {
+				keytime[1] = 0;
+				if (dir.size() > 0) {
+					String crc = dir.get(dir.size() - 1);
+					updateBar(crc);
+					dir.remove(dir.size() - 1);
+				}
 			}
-		}
-		if (keystate[6]) {
-			if (currentsongs[selectedindex] instanceof SongBar) {
-				PlayerResource resource = new PlayerResource();
-				resource.setBMSFile(new File(
-						((SongBar) currentsongs[selectedindex]).getSongData()
-								.getPath()), config, 2);
-				main.changeState(MainController.STATE_DECIDE, resource);
-			}
-		}
 
+			if (keystate[4]) {
+				if (currentsongs[selectedindex] instanceof SongBar) {
+					PlayerResource resource = new PlayerResource();
+					resource.setBMSFile(new File(
+							((SongBar) currentsongs[selectedindex])
+									.getSongData().getPath()), config, 1);
+					main.changeState(MainController.STATE_DECIDE, resource);
+				}
+			}
+			if (keystate[6]) {
+				if (currentsongs[selectedindex] instanceof SongBar) {
+					PlayerResource resource = new PlayerResource();
+					resource.setBMSFile(new File(
+							((SongBar) currentsongs[selectedindex])
+									.getSongData().getPath()), config, 2);
+					main.changeState(MainController.STATE_DECIDE, resource);
+				}
+			}
+		}
 	}
 
 	public boolean updateBar(String crc) {
@@ -201,17 +311,44 @@ public class MusicSelector extends ApplicationAdapter {
 		if (l.size() > 0) {
 			currentsongs = l.toArray(new Bar[0]);
 			selectedindex = 0;
-			
+
 			FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
 					Gdx.files.internal("skin/VL-Gothic-Regular.ttf"));
 			FreeTypeFontParameter parameter = new FreeTypeFontParameter();
 			parameter.size = 24;
-			String str = "";
+
+			StringBuffer str = new StringBuffer(parameter.characters);
+
 			for (Bar song : currentsongs) {
-				str += song.getTitle();
+				str.append(song.getTitle());
+				if (song instanceof SongBar) {
+					SongData s = ((SongBar) song).getSongData();
+					str.append(s.getSubtitle());
+					str.append(s.getArtist());
+					str.append(s.getSubartist());
+				}
 			}
-			parameter.characters = str;
+			parameter.characters = str.toString();
 			titlefont = generator.generateFont(parameter);
+
+			currentscores = new IRScoreData[currentsongs.length];
+			List<String> hashes = new ArrayList();
+			for (int i = 0; i < currentscores.length; i++) {
+				if (currentsongs[i] instanceof SongBar) {
+					hashes.add(((SongBar) currentsongs[i]).getSongData()
+							.getHash());
+				}
+			}
+			Map<String, IRScoreData> m = scoredb.getScoreDatas("Player",
+					hashes.toArray(new String[0]), false);
+			for (int i = 0; i < currentscores.length; i++) {
+				if (currentsongs[i] instanceof SongBar) {
+					currentscores[i] = m.get(((SongBar) currentsongs[i])
+							.getSongData().getHash());
+				} else {
+					currentscores[i] = null;
+				}
+			}
 			return true;
 		}
 		Logger.getGlobal().warning("楽曲がありません");

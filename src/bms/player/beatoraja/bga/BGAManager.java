@@ -43,6 +43,7 @@ public class BGAManager {
 
 	private Pixmap[] bgamap = new Pixmap[0];
 	private Map<Integer, MovieManager> mpgmap = new HashMap<Integer, MovieManager>();
+	private Pixmap backbmp;
 
 	private final String[] mov_extension = { "mpg", "mpeg", "avi", "wmv" };
 	private final String[] pic_extension = { "jpg", "jpeg", "gif", "bmp", "png" };
@@ -58,6 +59,26 @@ public class BGAManager {
 
 		dispose();
 		progress = 0;
+
+		String back = model.getBackbmp();
+		if(back != null && back.length() > 0) {
+			back = back.substring(0, back.lastIndexOf('.'));
+			for (String mov : pic_extension) {
+				File mpgfile = new File(directorypath + back + "." + mov);
+				if (mpgfile.exists()) {
+					try {
+						backbmp = this.loadPicture(-1, mpgfile);						
+						break;
+					} catch (Exception e) {
+						Logger.getGlobal().warning("BGAファイル読み込み失敗。" + e.getMessage());
+						e.printStackTrace();
+					} catch (Error e) {
+						Logger.getGlobal().severe("BGAファイル読み込み失敗。" + e.getMessage());
+						e.printStackTrace();
+					}
+				}
+			}			
+		}
 
 		bgamap = new Pixmap[model.getBgaList().length];
 		int id = 0;
@@ -116,6 +137,10 @@ public class BGAManager {
 		Pixmap tex = new Pixmap(Gdx.files.internal(f.getPath()));
 		System.out.println("BGA ID:" + id + "  path;" + f.getPath());
 		return tex;
+	}
+	
+	public Pixmap getBackbmpData() {
+		return backbmp;
 	}
 
 	public Pixmap getBGAData(int id) {
