@@ -32,6 +32,8 @@ public class Config {
 	
 	private int judgetiming = 0;
 	
+	private int judgedetail = 0;
+	
 	private boolean constant = false;
 	
 	private boolean bpmguide = false;
@@ -54,6 +56,7 @@ public class Config {
 	public Config() {
 //		lr2playskin = "skin/spdframe/csv/left_ACwide.csv";
 		tableURL = new String[]{"http://bmsnormal2.syuriken.jp/table.html"};
+		judgedetail = 2;
 	}
 	
 	public boolean isFullscreen() {
@@ -234,5 +237,13 @@ public class Config {
 
 	public void setTableURL(String[] tableURL) {
 		this.tableURL = tableURL;
+	}
+
+	public int getJudgedetail() {
+		return judgedetail;
+	}
+
+	public void setJudgedetail(int judgedetail) {
+		this.judgedetail = judgedetail;
 	}
 }

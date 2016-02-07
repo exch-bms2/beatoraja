@@ -21,6 +21,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
@@ -233,12 +234,12 @@ public class BMSPlayer extends ApplicationAdapter {
 
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
 				Gdx.files.internal("skin/VL-Gothic-Regular.ttf"));
-		titlefont = generator.generateFont(24, model.getFullTitle()
-				+ "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890/.%", false);
-		systemfont = generator.generateFont(18,
-				"ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890/", false);
-		judgefont = generator.generateFont(18,
-				"ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890/", false);
+		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
+		parameter.size = 24;
+		titlefont = generator.generateFont(parameter);
+		parameter.size = 18;
+		systemfont = generator.generateFont(parameter);
+		judgefont = generator.generateFont(parameter);
 		generator.dispose();
 
 		String vertex = "attribute vec4 "
@@ -735,7 +736,7 @@ public class BMSPlayer extends ApplicationAdapter {
 
 	private int notes;
 	
-	public void update(int judge, boolean fast) {
+	public void update(int judge) {
 		if(judge < 5) {
 			notes++;
 		}

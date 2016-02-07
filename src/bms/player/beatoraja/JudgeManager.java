@@ -43,7 +43,7 @@ public class JudgeManager {
 	 * 判定の最終更新時間
 	 */
 	private int judgenowt;
-	private boolean judgefast;
+	private int judgefast;
 	/**
 	 * ボムの表示開始時間
 	 */
@@ -136,9 +136,8 @@ public class JudgeManager {
 								if (j < 2) {
 									bomb[lane] = ptime;
 								}
-								judgefast = ptime <= tl.getTime();
-								this.update(j, time, judgefast);
-								main.update(j, judgefast);
+								this.update(j, time,  (int) (tl.getTime() - ptime));
+								main.update(j);
 								if (j < 4) {
 									processing[lane] = ln;
 									if (lane == 7) {
@@ -149,12 +148,11 @@ public class JudgeManager {
 									}
 								}
 							} else if (lane == 7 && key != sckey && processing[lane] != null && ln.getEnd() == tl) {
-								judgefast = ptime < processing[lane].getEnd().getTime();
 								if (j < 2) {
 									bomb[lane] = ptime;
 								}
-								this.update(j < 4 ? j : 4, time, judgefast);
-								main.update(j, judgefast);
+								this.update(j < 4 ? j : 4, time, (int) (processing[lane].getEnd().getTime() - ptime));
+								main.update(j);
 								processing[lane].setState(j + 1);
 								// System.out.println("打鍵:" + time +
 								// " ノーツ位置 > " + tl.getTime() + " -
@@ -171,9 +169,8 @@ public class JudgeManager {
 							if (j < 2) {
 								bomb[lane] = ptime;
 							}
-							judgefast = ptime <= tl.getTime();
-							this.update(j, time, judgefast);
-							main.update(j, judgefast);
+							this.update(j, time, (int) (tl.getTime() - ptime));
+							main.update(j);
 							if (j < 4) {
 								note.setState(j + 1);
 							}
@@ -207,15 +204,14 @@ public class JudgeManager {
 							}
 							if (j == 4 || (ptime > processing[lane].getEnd().getTime() - judge[j]
 									&& ptime < processing[lane].getEnd().getTime() + judge[j])) {
-								judgefast = ptime < processing[lane].getEnd().getTime();
 								if (lane == 7 && j != 4) {
 									break;
 								}
 								if (j < 2) {
 									bomb[lane] = ptime;
 								}
-								this.update(j, time, judgefast);
-								main.update(j, judgefast);
+								this.update(j, time, (int) (processing[lane].getEnd().getTime() - ptime));
+								main.update(j);
 								processing[lane].setState(j + 1);
 								// System.out.println("打鍵:" + time +
 								// " ノーツ位置 > " + tl.getTime() + " - " +
@@ -237,31 +233,29 @@ public class JudgeManager {
 				if (timelines[i].getTime() >= time - judge[3] - 500) {
 					Note note = timelines[i].getNote(lane);
 					if (note != null && note.getState() == 0) {
+						int judge = timelines[i].getTime() - time;
 						if (note instanceof LongNote) {
 							LongNote ln = (LongNote) note;
 							if (ln.getStart() == timelines[i]) {
 								if (processing[lane] != ln) {
 									// System.out.println("ln start poor");
-									this.update(4, time, false);
-									this.update(4, time, false);
-									main.update(4, false);
-									main.update(4, false);
-									judgefast = false;
+									this.update(4, time, judge);
+									this.update(4, time, judge);
+									main.update(4);
+									main.update(4);
 									note.setState(5);
 								}
 							} else {
 								// System.out.println("ln end poor");
-								this.update(4, time, false);
-								main.update(4, false);
-								judgefast = false;
+								this.update(4, time, judge);
+								main.update(4);
 								note.setState(5);
 								processing[lane] = null;
 								sckey = 0;
 							}
 						} else {
-							this.update(4, time, false);
-							main.update(4, false);
-							judgefast = false;
+							this.update(4, time, judge);
+							main.update(4);
 							note.setState(5);
 						}
 					}
@@ -270,10 +264,11 @@ public class JudgeManager {
 		}
 	}
 
-	private void update(int j, int time, boolean fast) {
+	private void update(int j, int time, int fast) {
 		judgenow = j + 1;
 		judgenowt = time;
-		count[j][fast ? 0 : 1]++;
+		count[j][fast >= 0 ? 0 : 1]++;
+		judgefast = fast;
 		if (j < 3) {
 			combo++;
 			maxcombo = maxcombo > combo ? maxcombo : combo;
@@ -291,7 +286,7 @@ public class JudgeManager {
 		return judgenowt;
 	}
 
-	public boolean getJudgeTimingIsFast() {
+	public int getRecentJudgeTiming() {
 		return judgefast;
 	}
 
