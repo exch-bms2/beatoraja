@@ -12,7 +12,6 @@ import bms.model.TimeLine;
 import bms.player.beatoraja.Config;
 import bms.player.beatoraja.MainController;
 import bms.player.beatoraja.MainController.PlayerResource;
-import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.MusicSelectorInputProcessor;
 import bms.player.lunaticrave2.FolderData;
 import bms.player.lunaticrave2.IRScoreData;
@@ -27,15 +26,12 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-import com.badlogic.gdx.math.Rectangle;
 
 /**
  * 選曲部分。 楽曲一覧とカーソルが指す楽曲のステータスを表示し、選択した楽曲を 曲決定部分に渡す。
@@ -45,8 +41,8 @@ import com.badlogic.gdx.math.Rectangle;
 public class MusicSelector extends ApplicationAdapter {
 
 	// TODO オプション選択
-	// TODO スコア取得、閲覧
-	// TODO フォルダの実装(LR2DBアクセサ側も要変更)
+	// TODO 7key, 9key, 14key切り替え(テンキー1)
+	// TODO Barのスムーズスクロール
 
 	private MainController main;
 
@@ -57,7 +53,7 @@ public class MusicSelector extends ApplicationAdapter {
 	private Bar[] currentsongs;
 	private IRScoreData[] currentscores;
 	private int selectedindex;
-	private List<Bar> dir = new ArrayList();
+	private List<Bar> dir = new ArrayList<Bar>();
 
 	private long duration;
 	/**
@@ -131,7 +127,13 @@ public class MusicSelector extends ApplicationAdapter {
 	}
 
 	public void create() {
-		updateBar(null);
+		int index = selectedindex;
+		if(dir.size() > 0) {
+			updateBar(dir.get(dir.size() - 1));
+		} else {
+			updateBar(null);			
+		}
+		selectedindex = index;
 		input = new MusicSelectorInputProcessor(this);
 
 	}
@@ -174,22 +176,22 @@ public class MusicSelector extends ApplicationAdapter {
 			if (sd instanceof SongBar) {
 				shape.setColor(Color.valueOf("006000"));
 			}
-			shape.rect(x, i * barh, 560, barh - 1);
+			shape.rect(x, h - i * barh, 560, barh - 1);
 			shape.end();
 			shape.begin(ShapeType.Line);
 			shape.setColor(Color.valueOf("888888"));
-			shape.rect(x, i * barh, 560, barh - 1);
+			shape.rect(x, h - i * barh, 560, barh - 1);
 			shape.end();
 			sprite.begin();
 			titlefont.setColor(Color.WHITE);
-			titlefont.draw(sprite, sd.getTitle(), x + 20, (i + 1) * barh);
+			titlefont.draw(sprite, sd.getTitle(), x + 20, h - (i - 1) * barh - 2);
 			sprite.end();
 
 			if (currentscores[index] != null) {
 				shape.begin(ShapeType.Filled);
 				shape.setColor(Color.valueOf(LAMP[currentscores[index]
 						.getClear()]));
-				shape.rect(x, i * barh, 15, barh - 1);
+				shape.rect(x, h - i * barh, 15, barh - 1);
 				shape.end();
 			}
 
@@ -301,15 +303,24 @@ public class MusicSelector extends ApplicationAdapter {
 			// 2鍵 (フォルダを閉じる)
 			if (keystate[1] && keytime[1] != 0) {
 				keytime[1] = 0;
-				Bar bar = null;
+				Bar pbar = null;
+				Bar cbar = null;
 				if (dir.size() > 1) {
-					bar = dir.get(dir.size() - 2);
+					pbar = dir.get(dir.size() - 2);
 				}
 				if(dir.size() > 0) {
+					cbar = dir.get(dir.size() - 1);					
 					dir.remove(dir.size() - 1);					
 				}
-				updateBar(bar);
-
+				updateBar(pbar);
+				if(cbar != null) {
+					for(int i = 0;i < currentsongs.length;i++) {
+						if(currentsongs[i].getTitle().equals(cbar.getTitle())) {
+							selectedindex = i;
+							break;
+						}
+					}					
+				}
 			}
 
 			if (keystate[4]) {
