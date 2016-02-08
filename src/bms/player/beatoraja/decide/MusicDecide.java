@@ -11,6 +11,7 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
@@ -25,8 +26,6 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
  */
 public class MusicDecide extends ApplicationAdapter{
 	
-	// TODO 曲決定時からデータ読み込み開始
-
 	private MainController main;
 	private PlayerResource resource;
 
@@ -59,10 +58,14 @@ public class MusicDecide extends ApplicationAdapter{
 		final float w = 1280;
 		final float h = 720;
 
-		sprite.begin();
-		if(resource.getBMSModel().getStagefile() != null) {
-			
+		if(resource.getBGAManager().getStagefileData() != null) {
+			sprite.begin();
+			Texture bgatex = new Texture(resource.getBGAManager().getStagefileData());
+			sprite.draw(bgatex, 0, 0, w, h);
+			sprite.end();
+			bgatex.dispose();
 		}
+		sprite.begin();
 		titlefont.setColor(Color.WHITE);
 		titlefont.draw(sprite,title,  w /2, h / 2);
 		sprite.end();

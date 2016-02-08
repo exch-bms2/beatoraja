@@ -44,6 +44,7 @@ public class BGAManager {
 	private Pixmap[] bgamap = new Pixmap[0];
 	private Map<Integer, MovieManager> mpgmap = new HashMap<Integer, MovieManager>();
 	private Pixmap backbmp;
+	private Pixmap stagefile;
 
 	private final String[] mov_extension = { "mpg", "mpeg", "avi", "wmv" };
 	private final String[] pic_extension = { "jpg", "jpeg", "gif", "bmp", "png" };
@@ -60,24 +61,15 @@ public class BGAManager {
 		dispose();
 		progress = 0;
 
+		String stage = model.getStagefile();
+		if(stage != null && stage.length() > 0) {
+			stage = stage.substring(0, stage.lastIndexOf('.'));
+			stagefile = this.loadPicture(directorypath, stage);
+		}
 		String back = model.getBackbmp();
 		if(back != null && back.length() > 0) {
 			back = back.substring(0, back.lastIndexOf('.'));
-			for (String mov : pic_extension) {
-				File mpgfile = new File(directorypath + back + "." + mov);
-				if (mpgfile.exists()) {
-					try {
-						backbmp = this.loadPicture(-1, mpgfile);						
-						break;
-					} catch (Exception e) {
-						Logger.getGlobal().warning("BGAファイル読み込み失敗。" + e.getMessage());
-						e.printStackTrace();
-					} catch (Error e) {
-						Logger.getGlobal().severe("BGAファイル読み込み失敗。" + e.getMessage());
-						e.printStackTrace();
-					}
-				}
-			}			
+			backbmp = this.loadPicture(directorypath, back);
 		}
 
 		bgamap = new Pixmap[model.getBgaList().length];
@@ -101,22 +93,7 @@ public class BGAManager {
 					}
 				}
 			}
-			for (String mov : pic_extension) {
-				File mpgfile = new File(directorypath + name + "." + mov);
-				if (mpgfile.exists()) {
-					try {
-						Pixmap pix = this.loadPicture(id, mpgfile);
-						bgamap[id] = pix;
-						break;
-					} catch (Exception e) {
-						Logger.getGlobal().warning("BGAファイル読み込み失敗。" + e.getMessage());
-						e.printStackTrace();
-					} catch (Error e) {
-						Logger.getGlobal().severe("BGAファイル読み込み失敗。" + e.getMessage());
-						e.printStackTrace();
-					}
-				}
-			}
+				bgamap[id] = this.loadPicture(directorypath, name);
 			progress += 1f / model.getBgaList().length;
 			id++;
 		}
@@ -133,14 +110,34 @@ public class BGAManager {
 		return null;
 	}
 
-	private Pixmap loadPicture(int id, File f) throws Exception {
-		Pixmap tex = new Pixmap(Gdx.files.internal(f.getPath()));
-		System.out.println("BGA ID:" + id + "  path;" + f.getPath());
+	private Pixmap loadPicture(String dir, String name) {
+		Pixmap tex = null;
+		for (String mov : pic_extension) {
+			File f = new File(dir + name + "." + mov);
+			if (f.exists()) {
+				try {
+					tex = new Pixmap(Gdx.files.internal(f.getPath()));
+					System.out.println("BGA Picture loaded  : " + name);
+					break;
+				} catch (Exception e) {
+					Logger.getGlobal().warning("BGAファイル読み込み失敗。" + e.getMessage());
+					e.printStackTrace();
+				} catch (Error e) {
+					Logger.getGlobal().severe("BGAファイル読み込み失敗。" + e.getMessage());
+					e.printStackTrace();
+				}
+			}
+		}
+		
 		return tex;
 	}
 	
 	public Pixmap getBackbmpData() {
 		return backbmp;
+	}
+
+	public Pixmap getStagefileData() {
+		return stagefile;
 	}
 
 	public Pixmap getBGAData(int id) {
