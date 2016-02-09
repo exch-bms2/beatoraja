@@ -16,8 +16,6 @@ import bms.player.beatoraja.input.BMSPlayerInputProcessor;
  * @author exch
  */
 public class JudgeManager {
-	
-	// TODO bug:BSSの前後でノーツを重複カウントするケースがある
 
 	private BMSPlayer main;
 	private BMSModel model;
@@ -43,6 +41,9 @@ public class JudgeManager {
 	 * 判定の最終更新時間
 	 */
 	private int judgenowt;
+	/**
+	 * 判定差時間(ms , +は早押しで-は遅押し)
+	 */
 	private int judgefast;
 	/**
 	 * ボムの表示開始時間
@@ -58,7 +59,8 @@ public class JudgeManager {
 	 */
 	private int misslayer;
 
-	private final int[][] judgetable = new int[][] { { 8, 24, 70, 130, 0, 1000 }, { 14, 42, 115, 220, 0, 1000 },
+	private final int[][] judgetable = new int[][] {
+			{ 8, 24, 70, 130, 0, 1000 }, { 14, 42, 115, 220, 0, 1000 },
 			{ 18, 54, 150, 285, 0, 1000 }, { 20, 60, 165, 315, 0, 1000 } };
 
 	public JudgeManager(BMSPlayer main, BMSModel model) {
@@ -88,111 +90,158 @@ public class JudgeManager {
 				int lane = key == 8 ? 7 : key;
 				if (keystate[key]) {
 					// キーが押されたときの処理
-					TimeLine tl = null;
-					int j = 0;
-					// 対象ノーツの抽出
-					for (int i = pos; i < timelines.length && timelines[i].getTime() < ptime + judge[5]; i++) {
-						if (timelines[i].getTime() >= ptime - judge[5]) {
-							Note judgenote = timelines[i].getNote(lane);
-							if (judgenote != null
-									&& (judgenote.getState() == 0 || timelines[i].getTime() < ptime - judge[3])) {
-								if (tl == null) {
-									tl = timelines[i];
-									for (j = 0; j < judge.length && !(ptime >= timelines[i].getTime() - judge[j]
-											&& ptime <= timelines[i].getTime() + judge[j]); j++) {
+					if (processing[lane] != null) {
+						if (lane == 7 && key != sckey) {
+							for (int j = 0; j < judge.length; j++) {
+								if (j > 3) {
+									j = 4;
+								}
+								if (j == 4
+										|| (ptime > processing[lane].getEnd()
+												.getTime() - judge[j] && ptime < processing[lane]
+												.getEnd().getTime() + judge[j])) {
+									if (j < 2) {
+										bomb[lane] = ptime;
 									}
-								} else {
-									switch (judgetype) {
-									case 0:
-										if (tl.getTime() < ptime - judge[3]) {
-											tl = timelines[i];
-											for (j = 0; j < judge.length && !(ptime >= timelines[i].getTime() - judge[j]
-													&& ptime <= timelines[i].getTime() + judge[j]); j++) {
-											}
-										}
-										break;
-									case 1:
-										if (Math.abs(tl.getTime() - ptime) > Math.abs(timelines[i].getTime() - ptime)) {
-											tl = timelines[i];
-											for (j = 0; j < judge.length && !(ptime >= timelines[i].getTime() - judge[j]
-													&& ptime <= timelines[i].getTime() + judge[j]); j++) {
-											}
-										}
-										break;
-									}
-								}
-							}
-						} else {
-							pos = i;
-						}
-					}
-					if (tl != null) {
-						Note note = tl.getNote(lane);
-						if (note instanceof LongNote) {
-							// ロングノート処理
-							LongNote ln = (LongNote) note;
-							if (ln.getStart() == tl) {
-								main.play(note.getWav());
-								if (j < 2) {
-									bomb[lane] = ptime;
-								}
-								this.update(j, time,  (int) (tl.getTime() - ptime));
-								main.update(j);
-								if (j < 4) {
-									processing[lane] = ln;
-									if (lane == 7) {
-										// BSS処理開始
-										System.out.println("BSS開始判定 - Time : " + ptime + " Judge : " + j);
-										sckey = key;
-
-									}
-								}
-							} else if (lane == 7 && key != sckey && processing[lane] != null && ln.getEnd() == tl) {
-								if (j < 2) {
-									bomb[lane] = ptime;
-								}
-								this.update(j < 4 ? j : 4, time, (int) (processing[lane].getEnd().getTime() - ptime));
-								main.update(j);
-								processing[lane].setState(j + 1);
-								// System.out.println("打鍵:" + time +
-								// " ノーツ位置 > " + tl.getTime() + " -
-								// " +
-								// (lane + 1) + " : " +
-								// judgename[j]);
-								processing[lane] = null;
-								sckey = 0;
-								System.out.println("BSS終端判定 - Time : " + ptime + " Judge : " + (judgenow - 1));
-							}
-						} else {
-							main.play(note.getWav());
-							// 通常ノート処理
-							if (j < 2) {
-								bomb[lane] = ptime;
-							}
-							this.update(j, time, (int) (tl.getTime() - ptime));
-							main.update(j);
-							if (j < 4) {
-								note.setState(j + 1);
-							}
-							// System.out.println("打鍵:" + time +
-							// " ノーツ位置 > " + tl.getTime() + " - " +
-							// (lane + 1) + " : " + judgename[j]);
-						}
-					} else {						
-						Note n = null;
-						boolean sound = false;
-						for (TimeLine tl2 : timelines) {
-							if (tl2.getNote(lane) != null) {
-								n = tl2.getNote(lane);
-								if (tl2.getTime() >= ptime) {
-									main.play(n.getWav());
-									sound = true;
+									this.update(
+											j < 4 ? j : 4,
+											time,
+											(int) (processing[lane].getEnd().getTime() - ptime));
+									main.update(j);
+									processing[lane].setState(j + 1);
+									// System.out.println("打鍵:" + time +
+									// " ノーツ位置 > " + tl.getTime() + " -
+									// " +
+									// (lane + 1) + " : " +
+									// judgename[j]);
+									System.out.println("BSS終端判定 - Time : " + ptime
+											+ " Judge : " + (judgenow - 1) + " LN : "
+											+ processing[lane].hashCode());
+									processing[lane] = null;
+									sckey = 0;
 									break;
 								}
 							}
+
+						} else {
+							// ここに来るのはマルチキーアサイン以外ありえないはず
 						}
-						if (!sound && n != null) {
-							main.play(n.getWav());
+					} else {
+						TimeLine tl = null;
+						int j = 0;
+						// 対象ノーツの抽出
+						for (int i = pos; i < timelines.length
+								&& timelines[i].getTime() < ptime + judge[5]; i++) {
+							if (timelines[i].getTime() >= ptime - judge[5]) {
+								Note judgenote = timelines[i].getNote(lane);
+								if (judgenote != null
+										&& (judgenote.getState() == 0 || timelines[i]
+												.getTime() < ptime - judge[3])) {
+									if (tl == null) {
+										tl = timelines[i];
+										for (j = 0; j < judge.length
+												&& !(ptime >= timelines[i]
+														.getTime() - judge[j] && ptime <= timelines[i]
+														.getTime() + judge[j]); j++) {
+										}
+									} else {
+										switch (judgetype) {
+										case 0:
+											if (tl.getTime() < ptime - judge[3]) {
+												tl = timelines[i];
+												for (j = 0; j < judge.length
+														&& !(ptime >= timelines[i]
+																.getTime()
+																- judge[j] && ptime <= timelines[i]
+																.getTime()
+																+ judge[j]); j++) {
+												}
+											}
+											break;
+										case 1:
+											if (Math.abs(tl.getTime() - ptime) > Math
+													.abs(timelines[i].getTime()
+															- ptime)) {
+												tl = timelines[i];
+												for (j = 0; j < judge.length
+														&& !(ptime >= timelines[i]
+																.getTime()
+																- judge[j] && ptime <= timelines[i]
+																.getTime()
+																+ judge[j]); j++) {
+												}
+											}
+											break;
+										}
+									}
+								}
+							} else {
+								pos = i;
+							}
+						}
+						if (tl != null) {
+							Note note = tl.getNote(lane);
+							if (note instanceof LongNote) {
+								// ロングノート処理
+								LongNote ln = (LongNote) note;
+								if (ln.getStart() == tl) {
+									main.play(note.getWav());
+									if (j < 2) {
+										bomb[lane] = ptime;
+									}
+									this.update(j, time,
+											(int) (tl.getTime() - ptime));
+									main.update(j);
+									if (j < 4) {
+										processing[lane] = ln;
+										if (lane == 7) {
+											// BSS処理開始
+											System.out
+													.println("BSS開始判定 - Time : "
+															+ ptime
+															+ " Judge : "
+															+ j
+															+ " KEY : "
+															+ key
+															+ " LN : "
+															+ note.hashCode());
+											sckey = key;
+
+										}
+									}
+								}
+							} else {
+								main.play(note.getWav());
+								// 通常ノート処理
+								if (j < 2) {
+									bomb[lane] = ptime;
+								}
+								this.update(j, time,
+										(int) (tl.getTime() - ptime));
+								main.update(j);
+								if (j < 4) {
+									note.setState(j + 1);
+								}
+								// System.out.println("打鍵:" + time +
+								// " ノーツ位置 > " + tl.getTime() + " - " +
+								// (lane + 1) + " : " + judgename[j]);
+							}
+						} else {
+							Note n = null;
+							boolean sound = false;
+							for (TimeLine tl2 : timelines) {
+								if (tl2.getNote(lane) != null) {
+									n = tl2.getNote(lane);
+									if (tl2.getTime() >= ptime) {
+										main.play(n.getWav());
+										sound = true;
+										break;
+									}
+								}
+							}
+							if (!sound && n != null) {
+								main.play(n.getWav());
+							}
 						}
 					}
 				} else {
@@ -202,15 +251,24 @@ public class JudgeManager {
 							if (j > 3) {
 								j = 4;
 							}
-							if (j == 4 || (ptime > processing[lane].getEnd().getTime() - judge[j]
-									&& ptime < processing[lane].getEnd().getTime() + judge[j])) {
-								if (lane == 7 && j != 4) {
-									break;
+							if (j == 4
+									|| (ptime > processing[lane].getEnd()
+											.getTime() - judge[j] && ptime < processing[lane]
+											.getEnd().getTime() + judge[j])) {
+								if (lane == 7) {
+									if (j != 4) {
+										break;
+									}
+									System.out.println("BSS途中離し判定 - Time : "
+											+ ptime + " Judge : " + j
+											+ " LN : " + processing[lane]);
+									sckey = 0;
 								}
 								if (j < 2) {
 									bomb[lane] = ptime;
 								}
-								this.update(j, time, (int) (processing[lane].getEnd().getTime() - ptime));
+								this.update(j, time, (int) (processing[lane]
+										.getEnd().getTime() - ptime));
 								main.update(j);
 								processing[lane].setState(j + 1);
 								// System.out.println("打鍵:" + time +
@@ -218,7 +276,6 @@ public class JudgeManager {
 								// (lane + 1) + " : " + judgename[j]);
 								j = judge.length;
 								processing[lane] = null;
-								sckey = 0;
 								break;
 							}
 						}
@@ -229,7 +286,8 @@ public class JudgeManager {
 		}
 		for (int lane = 0; lane < 8; lane++) {
 			// 見逃しPOOR判定
-			for (int i = 0; i < timelines.length && timelines[i].getTime() < time - judge[3]; i++) {
+			for (int i = 0; i < timelines.length
+					&& timelines[i].getTime() < time - judge[3]; i++) {
 				if (timelines[i].getTime() >= time - judge[3] - 500) {
 					Note note = timelines[i].getNote(lane);
 					if (note != null && note.getState() == 0) {
@@ -311,8 +369,9 @@ public class JudgeManager {
 	}
 
 	public int getJudgeCount() {
-		return count[0][0] + count[0][1] + count[1][0] + count[1][1] + count[2][0] + count[2][1] + count[3][0]
-				+ count[3][1] + count[4][0] + count[4][1] + count[5][0] + count[5][1];
+		return count[0][0] + count[0][1] + count[1][0] + count[1][1]
+				+ count[2][0] + count[2][1] + count[3][0] + count[3][1]
+				+ count[4][0] + count[4][1] + count[5][0] + count[5][1];
 
 	}
 
