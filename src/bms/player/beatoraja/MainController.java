@@ -5,6 +5,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
@@ -314,10 +316,15 @@ public class MainController extends ApplicationAdapter {
 		
 		private boolean finished = false;
 		
+		private float[] gauge;
 		private BMSModel[] course;
+		private File[] coursefile;
+		private int courseindex;
+		
 		private IRScoreData cscore;
 		
 		public void setBMSFile(final File f, final Config config, int autoplay) {
+			this.finished = false;
 			this.config = config;
 			this.auto = autoplay;
 			if (f.getPath().toLowerCase().endsWith(".bmson")) {
@@ -381,6 +388,43 @@ public class MainController extends ApplicationAdapter {
 
 		public void setScoreData(IRScoreData score) {
 			this.score = score;
+		}
+		
+		public void setCourseBMSFiles(File[] files) {
+			coursefile = files;
+			List<BMSModel> models = new ArrayList();
+			for(File f : files) {
+				if (f.getPath().toLowerCase().endsWith(".bmson")) {
+					BMSONDecoder decoder = new BMSONDecoder();
+					models.add(decoder.decode(f));
+				} else {
+					BMSDecoder decoder = new BMSDecoder();
+					models.add(decoder.decode(f));
+				}
+			}
+			course = models.toArray(new BMSModel[0]);
+		}
+		
+		public BMSModel[] getCourseBMSModels() {
+			return course;
+		}
+		
+		public boolean nextCourse() {
+			courseindex++;
+			if(courseindex == coursefile.length) {
+				return false;
+			} else {
+				setBMSFile(coursefile[courseindex], config, auto);
+				return true;
+			}
+		}
+		
+		public float[] getGauge() {
+			return gauge;
+		}
+
+		public void setGauge(float[] gauge) {
+			this.gauge = gauge;
 		}
 	}
 }

@@ -19,6 +19,7 @@ import bms.player.lunaticrave2.LunaticRave2ScoreDatabaseManager;
 import bms.player.lunaticrave2.LunaticRave2SongDatabaseManager;
 import bms.player.lunaticrave2.SongData;
 import bms.table.DifficultyTable;
+import bms.table.DifficultyTable.Grade;
 import bms.table.DifficultyTableElement;
 import bms.table.DifficultyTableParser;
 
@@ -117,8 +118,27 @@ public class MusicSelector extends ApplicationAdapter {
 					levels.add(new TableLevelBar(lv, hashes
 							.toArray(new String[0])));
 				}
+				GradeBar[] grades = new GradeBar[0];
+				if(dt.getGrade() != null) {
+					List<GradeBar> l = new ArrayList();
+					for(Grade g: dt.getGrade()) {
+						List<SongData> songlist = new ArrayList();
+						for (String hash : g.getHashes()) {
+							SongData[] songs = songdb.getSongDatas("hash", hash, new File(
+									".").getAbsolutePath());
+							if (songs.length > 0) {
+								songlist.add(songs[0]);
+							} else {
+								songlist.add(null);
+							}
+						}
+
+						l.add(new GradeBar(g.getName(), songlist.toArray(new SongData[0])));
+					}
+					grades = l.toArray(new GradeBar[0]);
+				}
 				tables.add(new TableBar(dt.getName(), levels
-						.toArray(new TableLevelBar[0])));
+						.toArray(new TableLevelBar[0]),grades));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -128,10 +148,10 @@ public class MusicSelector extends ApplicationAdapter {
 
 	public void create() {
 		int index = selectedindex;
-		if(dir.size() > 0) {
+		if (dir.size() > 0) {
 			updateBar(dir.get(dir.size() - 1));
 		} else {
-			updateBar(null);			
+			updateBar(null);
 		}
 		selectedindex = index;
 		input = new MusicSelectorInputProcessor(this);
@@ -170,6 +190,9 @@ public class MusicSelector extends ApplicationAdapter {
 			if (sd instanceof TableLevelBar) {
 				shape.setColor(Color.valueOf("4040c0"));
 			}
+			if (sd instanceof GradeBar) {
+				shape.setColor(Color.valueOf("804000"));
+			}
 			if (sd instanceof FolderBar) {
 				shape.setColor(Color.valueOf("606000"));
 			}
@@ -184,7 +207,8 @@ public class MusicSelector extends ApplicationAdapter {
 			shape.end();
 			sprite.begin();
 			titlefont.setColor(Color.WHITE);
-			titlefont.draw(sprite, sd.getTitle(), x + 20, h - (i - 1) * barh - 2);
+			titlefont.draw(sprite, sd.getTitle(), x + 20, h - (i - 1) * barh
+					- 2);
 			sprite.end();
 
 			if (currentscores[index] != null) {
@@ -297,6 +321,21 @@ public class MusicSelector extends ApplicationAdapter {
 							((SongBar) currentsongs[selectedindex])
 									.getSongData().getPath()), config, 0);
 					main.changeState(MainController.STATE_DECIDE, resource);
+				} else if (currentsongs[selectedindex] instanceof GradeBar) {
+					if(((GradeBar) currentsongs[selectedindex]).existsAllSongs()) {
+						main.setAuto(0);
+						PlayerResource resource = new PlayerResource();
+						List<File> files = new ArrayList<File>();
+						for (SongData song : ((GradeBar) currentsongs[selectedindex])
+								.getSongDatas()) {
+							files.add(new File(song.getPath()));
+						}
+						resource.setBMSFile(files.get(0), config, 0);
+						resource.setCourseBMSFiles(files.toArray(new File[0]));
+						main.changeState(MainController.STATE_DECIDE, resource);						
+					} else {
+						Logger.getGlobal().info("段位の楽曲が揃っていません");
+					}
 				}
 			}
 
@@ -308,18 +347,18 @@ public class MusicSelector extends ApplicationAdapter {
 				if (dir.size() > 1) {
 					pbar = dir.get(dir.size() - 2);
 				}
-				if(dir.size() > 0) {
-					cbar = dir.get(dir.size() - 1);					
-					dir.remove(dir.size() - 1);					
+				if (dir.size() > 0) {
+					cbar = dir.get(dir.size() - 1);
+					dir.remove(dir.size() - 1);
 				}
 				updateBar(pbar);
-				if(cbar != null) {
-					for(int i = 0;i < currentsongs.length;i++) {
-						if(currentsongs[i].getTitle().equals(cbar.getTitle())) {
+				if (cbar != null) {
+					for (int i = 0; i < currentsongs.length; i++) {
+						if (currentsongs[i].getTitle().equals(cbar.getTitle())) {
 							selectedindex = i;
 							break;
 						}
-					}					
+					}
 				}
 			}
 
@@ -375,14 +414,15 @@ public class MusicSelector extends ApplicationAdapter {
 			}
 		}
 		if (bar instanceof TableBar) {
-			l.addAll((Arrays.asList(((TableBar)bar).getLevels())));
+			l.addAll((Arrays.asList(((TableBar) bar).getLevels())));
+			l.addAll((Arrays.asList(((TableBar) bar).getGrades())));			
 		}
 		if (bar instanceof TableLevelBar) {
 			List<SongBar> songbars = new ArrayList();
-			for(String hash : ((TableLevelBar)bar).getHashes()) {
-				SongData[] songs = songdb.getSongDatas("hash", hash,
-						new File(".").getAbsolutePath());
-				if(songs.length > 0) {
+			for (String hash : ((TableLevelBar) bar).getHashes()) {
+				SongData[] songs = songdb.getSongDatas("hash", hash, new File(
+						".").getAbsolutePath());
+				if (songs.length > 0) {
 					songbars.add(new SongBar(songs[0]));
 				}
 			}
@@ -495,10 +535,12 @@ class TableBar extends Bar {
 
 	private String name;
 	private TableLevelBar[] levels;
+	private GradeBar[] grades;
 
-	public TableBar(String name, TableLevelBar[] levels) {
+	public TableBar(String name, TableLevelBar[] levels, GradeBar[] grades) {
 		this.name = name;
 		this.levels = levels;
+		this.grades = grades;
 	}
 
 	@Override
@@ -509,6 +551,11 @@ class TableBar extends Bar {
 	public TableLevelBar[] getLevels() {
 		return levels;
 	}
+	
+	public GradeBar[] getGrades() {
+		return grades;
+	}
+
 }
 
 class TableLevelBar extends Bar {
@@ -527,5 +574,34 @@ class TableLevelBar extends Bar {
 
 	public String[] getHashes() {
 		return hashes;
+	}
+}
+
+class GradeBar extends Bar {
+
+	private SongData[] songs;
+	private String name;
+
+	public GradeBar(String name, SongData[] songs) {
+		this.songs = songs;
+		this.name = name;
+	}
+
+	public SongData[] getSongDatas() {
+		return songs;
+	}
+
+	@Override
+	public String getTitle() {
+		return name;
+	}
+	
+	public boolean existsAllSongs() {
+		for(SongData song : songs) {
+			if(song == null) {
+				return false;
+			}
+		}
+		return true;
 	}
 }

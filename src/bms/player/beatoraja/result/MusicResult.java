@@ -86,11 +86,21 @@ public class MusicResult extends ApplicationAdapter {
 
 		if (resource.getScoreData() == null
 				|| System.currentTimeMillis() > time + 1500) {
-			main.changeState(MainController.STATE_SELECTMUSIC, null);
+			if(resource.getCourseBMSModels() != null) {
+				if(resource.nextCourse()) {
+					main.changeState(MainController.STATE_PLAYBMS, resource);
+				} else {
+					// TODO 完奏処理
+					main.changeState(MainController.STATE_SELECTMUSIC, null);				
+				}
+			} else {
+				main.changeState(MainController.STATE_SELECTMUSIC, null);				
+			}
 		}
 	}
 
 	public void updateScoreDatabase() {
+		// TODO 段位、コースでは各曲のクリアランプはフルコン以上であれば更新
 		BMSModel model = resource.getBMSModel();
 		IRScoreData newscore = resource.getScoreData();
 		if (newscore == null) {
