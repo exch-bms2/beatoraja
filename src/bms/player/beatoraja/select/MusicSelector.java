@@ -42,6 +42,9 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 public class MusicSelector extends ApplicationAdapter {
 	
 	// TODO フォルダランプ
+	// TODO アシストオプオションの選択
+	// TODO 詳細オプション(BGA ON/OFF、JUDGE TIMING、等
+	// TODO 選曲BGM
 
 	private MainController main;
 

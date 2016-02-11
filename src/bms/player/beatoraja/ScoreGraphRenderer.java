@@ -8,12 +8,23 @@ import com.badlogic.gdx.math.Rectangle;
 
 import bms.model.BMSModel;
 
+/**
+ * スコアグラフ描画用クラス
+ * 
+ * @author exch
+ */
 public class ScoreGraphRenderer {
-
+	/**
+	 * スコアグラフ最大値
+	 */
 	private int max;
-
+	/**
+	 * ベストスコア
+	 */
 	private int best;
-
+	/**
+	 * ライバルスコア
+	 */
 	private int rival;
 
 	public ScoreGraphRenderer(BMSModel model, int best, int rival) {

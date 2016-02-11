@@ -34,7 +34,7 @@ import com.badlogic.gdx.utils.JsonWriter.OutputType;
 
 public class MainController extends ApplicationAdapter {
 	
-	// TODO 段位、コースモード
+	// TODO ゲージ推移の記録
 
 	private BMSPlayer player;
 	private MusicDecide decide;
@@ -67,7 +67,6 @@ public class MainController extends ApplicationAdapter {
 					new File("song.db").getPath(), true);
 			songdb.createTable();
 		} catch (ClassNotFoundException e) {
-			// TODO 自動生成された catch ブロック
 			e.printStackTrace();
 		}
 	}

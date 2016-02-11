@@ -83,7 +83,7 @@ public class MusicResult extends ApplicationAdapter {
 			titlefont.draw(sprite, "POOR : " + score.getPr(), 100, 130);
 		}
 		sprite.end();
-
+		// TODO キー入力で移行、および入力したキーでリプレイ、同じ譜面でリプレイ、等を分けたい
 		if (resource.getScoreData() == null
 				|| System.currentTimeMillis() > time + 1500) {
 			main.changeState(MainController.STATE_SELECTMUSIC, null);
@@ -127,9 +127,8 @@ public class MusicResult extends ApplicationAdapter {
 			score.setBd(bad);
 			score.setPr(poor);
 		}
-		final int misscount = bad + poor;
-		if (score.getMinbp() > misscount) {
-			score.setMinbp(misscount);
+		if (score.getMinbp() > newscore.getMinbp()) {
+			score.setMinbp(newscore.getMinbp());
 		}
 		score.setPlaycount(score.getPlaycount() + 1);
 		score.setLastupdate(Calendar.getInstance(TimeZone.getDefault())

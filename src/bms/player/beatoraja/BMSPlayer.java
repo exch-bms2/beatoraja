@@ -407,6 +407,7 @@ public class BMSPlayer extends ApplicationAdapter {
 				if (autoplay == 0) {
 					resource.setScoreData(createScoreData());
 				}
+				// TODO レーンカバー、緑数字等の保存
 				main.changeState(MainController.STATE_RESULT, resource);
 			}
 			break;
@@ -433,6 +434,7 @@ public class BMSPlayer extends ApplicationAdapter {
 				if (autoplay == 0) {
 					resource.setScoreData(createScoreData());
 				}
+				// TODO レーンカバー、緑数字等の保存
 				main.changeState(MainController.STATE_RESULT, resource);
 			}
 			break;

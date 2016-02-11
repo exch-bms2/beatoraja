@@ -8,6 +8,8 @@ import com.badlogic.gdx.controllers.PovDirection;
 import com.badlogic.gdx.math.Vector3;
 
 public class AbstractInputProcessor {
+	
+	// TODO キーコンフィグの実装
 
 	private boolean[] keystate = new boolean[9];
 	private long[] time = new long[9];
