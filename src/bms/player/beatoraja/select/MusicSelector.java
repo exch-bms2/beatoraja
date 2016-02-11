@@ -20,6 +20,7 @@ import bms.player.lunaticrave2.LunaticRave2ScoreDatabaseManager;
 import bms.player.lunaticrave2.LunaticRave2SongDatabaseManager;
 import bms.player.lunaticrave2.SongData;
 import bms.table.DifficultyTable;
+import bms.table.DifficultyTable.Grade;
 import bms.table.DifficultyTableElement;
 import bms.table.DifficultyTableParser;
 
@@ -120,7 +121,27 @@ public class MusicSelector extends ApplicationAdapter {
 					}
 					levels.add(new TableLevelBar(lv, hashes.toArray(new String[0])));
 				}
-				tables.add(new TableBar(dt.getName(), levels.toArray(new TableLevelBar[0])));
+				GradeBar[] grades = new GradeBar[0];
+				if(dt.getGrade() != null) {
+					List<GradeBar> l = new ArrayList();
+					for(Grade g: dt.getGrade()) {
+						List<SongData> songlist = new ArrayList();
+						for (String hash : g.getHashes()) {
+							SongData[] songs = songdb.getSongDatas("hash", hash, new File(
+									".").getAbsolutePath());
+							if (songs.length > 0) {
+								songlist.add(songs[0]);
+							} else {
+								songlist.add(null);
+							}
+						}
+
+						l.add(new GradeBar(g.getName(), songlist.toArray(new SongData[0])));
+					}
+					grades = l.toArray(new GradeBar[0]);
+				}
+				tables.add(new TableBar(dt.getName(), levels
+						.toArray(new TableLevelBar[0]),grades));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -178,6 +199,9 @@ public class MusicSelector extends ApplicationAdapter {
 			}
 			if (sd instanceof TableLevelBar) {
 				shape.setColor(Color.valueOf("4040c0"));
+			}
+			if (sd instanceof GradeBar) {
+				shape.setColor(Color.valueOf("804000"));
 			}
 			if (sd instanceof FolderBar) {
 				shape.setColor(Color.valueOf("606000"));
@@ -321,6 +345,21 @@ public class MusicSelector extends ApplicationAdapter {
 					resource.setBMSFile(new File(((SongBar) currentsongs[selectedindex]).getSongData().getPath()),
 							config, 0);
 					main.changeState(MainController.STATE_DECIDE, resource);
+				} else if (currentsongs[selectedindex] instanceof GradeBar) {
+					if(((GradeBar) currentsongs[selectedindex]).existsAllSongs()) {
+						main.setAuto(0);
+						PlayerResource resource = new PlayerResource();
+						List<File> files = new ArrayList<File>();
+						for (SongData song : ((GradeBar) currentsongs[selectedindex])
+								.getSongDatas()) {
+							files.add(new File(song.getPath()));
+						}
+						resource.setBMSFile(files.get(0), config, 0);
+						resource.setCourseBMSFiles(files.toArray(new File[0]));
+						main.changeState(MainController.STATE_DECIDE, resource);						
+					} else {
+						Logger.getGlobal().info("段位の楽曲が揃っていません");
+					}
 				}
 			}
 
@@ -395,6 +434,7 @@ public class MusicSelector extends ApplicationAdapter {
 		}
 		if (bar instanceof TableBar) {
 			l.addAll((Arrays.asList(((TableBar) bar).getLevels())));
+			l.addAll((Arrays.asList(((TableBar) bar).getGrades())));			
 		}
 		if (bar instanceof TableLevelBar) {
 			List<SongBar> songbars = new ArrayList<SongBar>();
@@ -469,7 +509,6 @@ public class MusicSelector extends ApplicationAdapter {
 	private Comparator<Bar> getSortComparator() {
 		if (sort == 1) {
 			return new Comparator<Bar>() {
-				@Override
 				public int compare(Bar o1, Bar o2) {
 					if (o1.getScore() == null && o2.getScore() == null) {
 						return 0;
@@ -487,7 +526,6 @@ public class MusicSelector extends ApplicationAdapter {
 		}
 		if (sort == 2) {
 			return new Comparator<Bar>() {
-				@Override
 				public int compare(Bar o1, Bar o2) {
 					if (o1.getScore() == null && o2.getScore() == null) {
 						return 0;
@@ -505,7 +543,6 @@ public class MusicSelector extends ApplicationAdapter {
 		}
 		return new Comparator<Bar>() {
 
-			@Override
 			public int compare(Bar o1, Bar o2) {
 				// TODO Auto-generated method stub
 				return 0;
@@ -576,10 +613,12 @@ class TableBar extends Bar {
 
 	private String name;
 	private TableLevelBar[] levels;
+	private GradeBar[] grades;
 
-	public TableBar(String name, TableLevelBar[] levels) {
+	public TableBar(String name, TableLevelBar[] levels, GradeBar[] grades) {
 		this.name = name;
 		this.levels = levels;
+		this.grades = grades;
 	}
 
 	@Override
@@ -590,6 +629,11 @@ class TableBar extends Bar {
 	public TableLevelBar[] getLevels() {
 		return levels;
 	}
+	
+	public GradeBar[] getGrades() {
+		return grades;
+	}
+
 }
 
 class TableLevelBar extends Bar {
@@ -608,5 +652,34 @@ class TableLevelBar extends Bar {
 
 	public String[] getHashes() {
 		return hashes;
+	}
+}
+
+class GradeBar extends Bar {
+
+	private SongData[] songs;
+	private String name;
+
+	public GradeBar(String name, SongData[] songs) {
+		this.songs = songs;
+		this.name = name;
+	}
+
+	public SongData[] getSongDatas() {
+		return songs;
+	}
+
+	@Override
+	public String getTitle() {
+		return name;
+	}
+	
+	public boolean existsAllSongs() {
+		for(SongData song : songs) {
+			if(song == null) {
+				return false;
+			}
+		}
+		return true;
 	}
 }

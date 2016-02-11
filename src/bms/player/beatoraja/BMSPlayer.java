@@ -39,7 +39,6 @@ public class BMSPlayer extends ApplicationAdapter {
 	// TODO LR2スキンローダー
 
 	// TODO GLAssistから起動すると楽曲ロード中に止まる
-	// TODO BPM変化が間に挟まるとLN終端描画がおかしくなる
 	// TODO layerの(0,0,0)を透過するShaderの実装
 
 	private BitmapFont titlefont;
@@ -180,25 +179,44 @@ public class BMSPlayer extends ApplicationAdapter {
 		if (replay != null) {
 			g = replay.gauge;
 		}
-		switch (g) {
-		case 0:
-			gauge = new AssistEasyGrooveGauge(model);
-			break;
-		case 1:
-			gauge = new EasyGrooveGauge(model);
-			break;
-		case 2:
-			gauge = new NormalGrooveGauge(model);
-			break;
-		case 3:
-			gauge = new HardGrooveGauge(model);
-			break;
-		case 4:
-			gauge = new ExhardGrooveGauge(model);
-			break;
-		case 5:
-			gauge = new HazardGrooveGauge(model);
-			break;
+		if(resource.getCourseBMSModels() != null) {
+			// 段位ゲージ
+			switch (g) {
+			case 0:
+			case 1:
+			case 2:
+				gauge = new GradeGrooveGauge(model);
+				break;
+			case 3:
+			case 4:
+				gauge = new ExgradeGrooveGauge(model);
+				break;
+			}
+		} else {
+			switch (g) {
+			case 0:
+				gauge = new AssistEasyGrooveGauge(model);
+				break;
+			case 1:
+				gauge = new EasyGrooveGauge(model);
+				break;
+			case 2:
+				gauge = new NormalGrooveGauge(model);
+				break;
+			case 3:
+				gauge = new HardGrooveGauge(model);
+				break;
+			case 4:
+				gauge = new ExhardGrooveGauge(model);
+				break;
+			case 5:
+				gauge = new HazardGrooveGauge(model);
+				break;
+			}			
+		}
+		float[] f = resource.getGauge();
+		if(f != null) {
+			gauge.setValue(f[f.length - 1]);
 		}
 		Logger.getGlobal().info("ゲージ設定完了");
 
@@ -408,6 +426,7 @@ public class BMSPlayer extends ApplicationAdapter {
 					resource.setScoreData(createScoreData());
 				}
 				// TODO レーンカバー、緑数字等の保存
+				resource.setGauge(new float[]{gauge.getValue()});
 				main.changeState(MainController.STATE_RESULT, resource);
 			}
 			break;
@@ -435,6 +454,7 @@ public class BMSPlayer extends ApplicationAdapter {
 					resource.setScoreData(createScoreData());
 				}
 				// TODO レーンカバー、緑数字等の保存
+				resource.setGauge(new float[]{gauge.getValue()});
 				main.changeState(MainController.STATE_RESULT, resource);
 			}
 			break;
@@ -513,7 +533,6 @@ public class BMSPlayer extends ApplicationAdapter {
 			}
 		}
 
-		int exscore = pgreat * 2 + great;
 		score.setPg(pgreat);
 		score.setGr(great);
 		score.setGd(good);
@@ -750,8 +769,8 @@ public class BMSPlayer extends ApplicationAdapter {
 			notes++;
 		}
 		gauge.update(judge);
-		System.out.println(
-				"Now count : " + notes + " - " + totalnotes);
+//		System.out.println(
+//				"Now count : " + notes + " - " + totalnotes);
 	}
 
 	private final List<KeyInputLog> createAutoplayLog() {

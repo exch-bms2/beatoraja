@@ -18,6 +18,8 @@ import com.badlogic.gdx.math.Rectangle;
  * @author exch
  */
 public class LaneRenderer {
+	
+	// TODO BPM変化が間に挟まるとLN終端描画がおかしくなる
 
 	/**
 	 * レーンカバーの量
@@ -329,7 +331,7 @@ public class LaneRenderer {
 						}
 					}
 					if (dy > 0) {
-						this.drawNote(x, y + dy, dx, dy, 18.0f, lane, note);
+						this.drawNote(x, y + dy, dx, dy, 1.0f, lane, note);
 					}
 				}
 			}
@@ -450,7 +452,8 @@ public class LaneRenderer {
 	private void drawNote(float x, float y, float width, float height,
 			float scale, int lane, Note note) {
 		if (note instanceof NormalNote) {
-			sprite.draw(skin.getNote()[lane], x, y - scale / 2, width, scale);
+			Sprite s = skin.getNote()[lane];
+			sprite.draw(s, x, y - s.getHeight() * scale / 2, width, s.getHeight() * scale);
 		}
 		if (note instanceof LongNote) {
 			if (y - height < skin.getLaneregion()[lane].y) {
@@ -463,14 +466,16 @@ public class LaneRenderer {
 				sprite.draw(skin.getLongnote()[3][lane], x, y - height - 2,
 						width, height + 4);
 			}
-			sprite.draw(skin.getLongnote()[0][lane], x, y - scale / 2, width,
-					scale);
-			sprite.draw(skin.getLongnote()[1][lane], x, y - height - scale / 2,
-					width, scale);
+			Sprite ls = skin.getLongnote()[0][lane];
+			sprite.draw(ls, x, y - ls.getHeight() * scale / 2, width,
+					ls.getHeight() * scale);
+			Sprite le = skin.getLongnote()[1][lane];
+			sprite.draw(le, x, y - height - le.getHeight() * scale / 2,
+					width, le.getHeight() * scale);
 		}
 		if (note instanceof MineNote) {
-			sprite.draw(skin.getMinenote()[lane], x, y - scale / 2, width,
-					scale);
+			Sprite s = skin.getMinenote()[lane];
+			sprite.draw(s, x, y - s.getHeight() * scale / 2, width, s.getHeight() * scale);
 		}
 	}
 }
