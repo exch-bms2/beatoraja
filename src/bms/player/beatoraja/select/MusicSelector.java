@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -40,10 +41,8 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
  * @author exch
  */
 public class MusicSelector extends ApplicationAdapter {
-
-	// TODO オプション選択
-	// TODO 7key, 9key, 14key切り替え(テンキー1)
-	// TODO Barのスムーズスクロール
+	
+	// TODO フォルダランプ
 
 	private MainController main;
 
@@ -52,11 +51,11 @@ public class MusicSelector extends ApplicationAdapter {
 	private MusicSelectorInputProcessor input;
 
 	private Bar[] currentsongs;
-	private IRScoreData[] currentscores;
 	private int selectedindex;
 	private List<Bar> dir = new ArrayList<Bar>();
 
 	private long duration;
+	private int angle;
 	/**
 	 * 楽曲DBアクセサ
 	 */
@@ -66,19 +65,23 @@ public class MusicSelector extends ApplicationAdapter {
 	 */
 	private LunaticRave2ScoreDatabaseManager scoredb;
 
-	private static final String[] LAMP = { "000000", "808080", "800080",
-			"ff00ff", "40ff40", "f0c000", "ffffff", "ffff88", "88ffff",
-			"ff8888", "ff0000" };
-	private static final String[] CLEAR = { "NO PLAY", "FAILED",
-			"ASSIST CLEAR", "L-ASSIST CLEAR", "EASY CLEAR", "CLEAR",
-			"HARD CLEAR", "EX-HARD CLEAR", "FULL COMBO", "PERFECT", "MAX" };
+	private int mode;
 
-	private static final String[] SCOREOP = { "OFF", "MIRROR", "RANDOM",
-			"R-RANDOM", "S-RANDOM", "H-RANDOM", "ALL-SCR", "RANDOM-EX",
-			"S-RANDOM-EX" };
+	private static final String[] MODE = { "ALL", "7 KEY", "14 KEY", "9 KEY", "5 KEY", "10 KEY" };
 
-	private static final String[] GAUGEOP = { "ASSIST EASY", "EASY", "NORMAL",
-			"HARD", "EX-HARD", "HAZARD" };
+	private int sort;
+
+	private static final String[] SORT = { "Default", "CLEAR LAMP", "MISS COUNT" };
+
+	private static final String[] LAMP = { "000000", "808080", "800080", "ff00ff", "40ff40", "f0c000", "ffffff",
+			"ffff88", "88ffff", "ff8888", "ff0000" };
+	private static final String[] CLEAR = { "NO PLAY", "FAILED", "ASSIST CLEAR", "L-ASSIST CLEAR", "EASY CLEAR",
+			"CLEAR", "HARD CLEAR", "EX-HARD CLEAR", "FULL COMBO", "PERFECT", "MAX" };
+
+	private static final String[] SCOREOP = { "OFF", "MIRROR", "RANDOM", "R-RANDOM", "S-RANDOM", "SPIRAL", "H-RANDOM",
+			"ALL-SCR", "RANDOM-EX", "S-RANDOM-EX" };
+
+	private static final String[] GAUGEOP = { "ASSIST EASY", "EASY", "NORMAL", "HARD", "EX-HARD", "HAZARD" };
 
 	private Config config;
 
@@ -89,12 +92,10 @@ public class MusicSelector extends ApplicationAdapter {
 		this.config = config;
 		try {
 			Class.forName("org.sqlite.JDBC");
-			scoredb = new LunaticRave2ScoreDatabaseManager(new File(".")
-					.getAbsoluteFile().getParent(), "/", "/");
+			scoredb = new LunaticRave2ScoreDatabaseManager(new File(".").getAbsoluteFile().getParent(), "/", "/");
 			scoredb.createTable("Player");
 			Logger.getGlobal().info("スコアデータベース接続");
-			songdb = new LunaticRave2SongDatabaseManager(
-					new File("song.db").getPath(), true);
+			songdb = new LunaticRave2SongDatabaseManager(new File("song.db").getPath(), true);
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -115,8 +116,7 @@ public class MusicSelector extends ApplicationAdapter {
 							hashes.add(dte.getHash());
 						}
 					}
-					levels.add(new TableLevelBar(lv, hashes
-							.toArray(new String[0])));
+					levels.add(new TableLevelBar(lv, hashes.toArray(new String[0])));
 				}
 				GradeBar[] grades = new GradeBar[0];
 				if(dt.getGrade() != null) {
@@ -173,17 +173,24 @@ public class MusicSelector extends ApplicationAdapter {
 		// sprite.end();
 
 		// draw song bar
-		final float barh = 30;
-		for (int i = 0; i < h / barh; i++) {
-			int index = (int) (selectedindex + currentsongs.length * 100 + i - h
-					/ barh / 2)
-					% currentsongs.length;
+		final float barh = 36;
+		for (int i = 0; i < h / barh + 2; i++) {
+			int index = (int) (selectedindex + currentsongs.length * 100 + i - h / barh / 2) % currentsongs.length;
 			Bar sd = currentsongs[index];
 			int x = 720;
 			if (i == h / barh / 2) {
 				x = 700;
 			}
 			shape.begin(ShapeType.Filled);
+			float y = h - i * barh;
+			if (duration != 0) {
+				long time = System.currentTimeMillis();
+				float dy = barh * (Math.abs(angle) - duration + time) / angle + (angle >= 0 ? -1 : 1) * barh;
+				y += dy;
+			}
+			shape.setColor(Color.valueOf("222222"));
+			shape.rect(x + 4, y - 4, 560, barh - 6);
+
 			if (sd instanceof TableBar) {
 				shape.setColor(Color.valueOf("008080"));
 			}
@@ -199,23 +206,17 @@ public class MusicSelector extends ApplicationAdapter {
 			if (sd instanceof SongBar) {
 				shape.setColor(Color.valueOf("006000"));
 			}
-			shape.rect(x, h - i * barh, 560, barh - 1);
-			shape.end();
-			shape.begin(ShapeType.Line);
-			shape.setColor(Color.valueOf("888888"));
-			shape.rect(x, h - i * barh, 560, barh - 1);
+			shape.rect(x, y, 560, barh - 6);
 			shape.end();
 			sprite.begin();
 			titlefont.setColor(Color.WHITE);
-			titlefont.draw(sprite, sd.getTitle(), x + 20, h - (i - 1) * barh
-					- 2);
+			titlefont.draw(sprite, sd.getTitle(), x + 20, y + barh - 12);
 			sprite.end();
 
-			if (currentscores[index] != null) {
+			if (currentsongs[index].getScore() != null) {
 				shape.begin(ShapeType.Filled);
-				shape.setColor(Color.valueOf(LAMP[currentscores[index]
-						.getClear()]));
-				shape.rect(x, h - i * barh, 15, barh - 1);
+				shape.setColor(Color.valueOf(LAMP[currentsongs[index].getScore().getClear()]));
+				shape.rect(x, y, 15, barh - 6);
 				shape.end();
 			}
 
@@ -223,27 +224,44 @@ public class MusicSelector extends ApplicationAdapter {
 
 		sprite.begin();
 		if (currentsongs[selectedindex] instanceof SongBar) {
-			SongData song = ((SongBar) currentsongs[selectedindex])
-					.getSongData();
-			titlefont.draw(sprite, song.getTitle() + " " + song.getSubtitle(),
-					100, 600);
-			titlefont.draw(sprite,
-					song.getArtist() + " " + song.getSubartist(), 100, 570);
+			SongData song = ((SongBar) currentsongs[selectedindex]).getSongData();
+			titlefont.draw(sprite, song.getTitle() + " " + song.getSubtitle(), 100, 600);
+			titlefont.draw(sprite, song.getArtist() + " " + song.getSubartist(), 100, 570);
 			titlefont.draw(sprite, song.getMode() + " KEYS", 100, 530);
 			titlefont.draw(sprite, "LEVEL : " + song.getLevel(), 100, 500);
 
-			if (currentscores[selectedindex] != null) {
-				IRScoreData score = currentscores[selectedindex];
+			if (currentsongs[selectedindex].getScore() != null) {
+				IRScoreData score = currentsongs[selectedindex].getScore();
 				titlefont.setColor(Color.valueOf(LAMP[score.getClear()]));
 				titlefont.draw(sprite, CLEAR[score.getClear()], 100, 420);
 				titlefont.setColor(Color.WHITE);
-				titlefont.draw(sprite, "EX-SCORE  : " + score.getExscore()
-						+ " / " + (score.getNotes() * 2), 100, 390);
-				titlefont.draw(sprite, "MISS COUNT: " + score.getMinbp(), 100,
-						360);
+				titlefont.draw(sprite, "EX-SCORE  : " + score.getExscore() + " / " + (score.getNotes() * 2), 100, 390);
+				titlefont.draw(sprite, "MISS COUNT: " + score.getMinbp(), 100, 360);
+				titlefont.draw(sprite, "CLEAR / PLAY : " + score.getClearcount() + " / " + score.getPlaycount(), 100, 330);
 			}
 		}
+		titlefont.draw(sprite, "MODE : " + MODE[mode], 20, 30);
+		titlefont.draw(sprite, "SORT : " + SORT[sort], 220, 30);
 		sprite.end();
+
+		boolean[] numberstate = input.getNumberState();
+		long[] numtime = input.getNumberTime();
+		if (numberstate[1] && numtime[1] != 0) {
+			// KEYフィルターの切り替え
+			mode = (mode + 1) % MODE.length;
+			numtime[1] = 0;
+			if (dir.size() > 0) {
+				updateBar(dir.get(dir.size() - 1));
+			}
+		}
+		if (numberstate[2] && numtime[2] != 0) {
+			// ソートの切り替え
+			sort = (sort + 1) % SORT.length;
+			numtime[2] = 0;
+			if (dir.size() > 0) {
+				updateBar(dir.get(dir.size() - 1));
+			}
+		}
 
 		boolean[] keystate = input.getKeystate();
 		long[] keytime = input.getTime();
@@ -251,37 +269,42 @@ public class MusicSelector extends ApplicationAdapter {
 			long l = System.currentTimeMillis();
 			if (duration == 0) {
 				selectedindex++;
-				duration = l + 500;
+				duration = l + 300;
+				angle = 300;
 			}
 			if (l > duration) {
 				duration = l + 50;
 				selectedindex++;
+				angle = 50;
 			}
 		} else if (keystate[8]) {
 			long l = System.currentTimeMillis();
 			if (duration == 0) {
 				selectedindex += currentsongs.length - 1;
-				duration = l + 500;
+				duration = l + 300;
+				angle = -300;
 			}
 			if (l > duration) {
 				duration = l + 50;
 				selectedindex += currentsongs.length - 1;
+				angle = -50;
 			}
 		} else {
-			duration = 0;
+			long l = System.currentTimeMillis();
+			if (l > duration) {
+				duration = 0;
+			}
 		}
 		selectedindex = selectedindex % currentsongs.length;
 
 		if (input.startPressed()) {
 			if (keystate[1] && keytime[1] != 0) {
 				keytime[1] = 0;
-				config.setRandom(config.getRandom() + 1 < SCOREOP.length ? config
-						.getRandom() + 1 : 0);
+				config.setRandom(config.getRandom() + 1 < SCOREOP.length ? config.getRandom() + 1 : 0);
 			}
 			if (keystate[3] && keytime[3] != 0) {
 				keytime[3] = 0;
-				config.setGauge(config.getGauge() + 1 < GAUGEOP.length ? config
-						.getGauge() + 1 : 0);
+				config.setGauge(config.getGauge() + 1 < GAUGEOP.length ? config.getGauge() + 1 : 0);
 			}
 			shape.begin(ShapeType.Filled);
 			shape.setColor(Color.BLACK);
@@ -307,8 +330,7 @@ public class MusicSelector extends ApplicationAdapter {
 			// 1鍵 (選曲 or フォルダを開く)
 			if (keystate[0] && keytime[0] != 0) {
 				keytime[0] = 0;
-				if (currentsongs[selectedindex] instanceof FolderBar
-						|| currentsongs[selectedindex] instanceof TableBar
+				if (currentsongs[selectedindex] instanceof FolderBar || currentsongs[selectedindex] instanceof TableBar
 						|| currentsongs[selectedindex] instanceof TableLevelBar) {
 					Bar bar = currentsongs[selectedindex];
 					if (updateBar(bar)) {
@@ -317,9 +339,8 @@ public class MusicSelector extends ApplicationAdapter {
 				} else if (currentsongs[selectedindex] instanceof SongBar) {
 					main.setAuto(0);
 					PlayerResource resource = new PlayerResource();
-					resource.setBMSFile(new File(
-							((SongBar) currentsongs[selectedindex])
-									.getSongData().getPath()), config, 0);
+					resource.setBMSFile(new File(((SongBar) currentsongs[selectedindex]).getSongData().getPath()),
+							config, 0);
 					main.changeState(MainController.STATE_DECIDE, resource);
 				} else if (currentsongs[selectedindex] instanceof GradeBar) {
 					if(((GradeBar) currentsongs[selectedindex]).existsAllSongs()) {
@@ -365,18 +386,16 @@ public class MusicSelector extends ApplicationAdapter {
 			if (keystate[4]) {
 				if (currentsongs[selectedindex] instanceof SongBar) {
 					PlayerResource resource = new PlayerResource();
-					resource.setBMSFile(new File(
-							((SongBar) currentsongs[selectedindex])
-									.getSongData().getPath()), config, 1);
+					resource.setBMSFile(new File(((SongBar) currentsongs[selectedindex]).getSongData().getPath()),
+							config, 1);
 					main.changeState(MainController.STATE_DECIDE, resource);
 				}
 			}
 			if (keystate[6]) {
 				if (currentsongs[selectedindex] instanceof SongBar) {
 					PlayerResource resource = new PlayerResource();
-					resource.setBMSFile(new File(
-							((SongBar) currentsongs[selectedindex])
-									.getSongData().getPath()), config, 2);
+					resource.setBMSFile(new File(((SongBar) currentsongs[selectedindex]).getSongData().getPath()),
+							config, 2);
 					main.changeState(MainController.STATE_DECIDE, resource);
 				}
 			}
@@ -394,18 +413,15 @@ public class MusicSelector extends ApplicationAdapter {
 		}
 		if (crc != null) {
 			Logger.getGlobal().info("crc :" + crc);
-			FolderData[] folders = songdb.getFolderDatas("parent", crc,
-					new File(".").getAbsolutePath());
-			SongData[] songs = songdb.getSongDatas("parent", crc,
-					new File(".").getAbsolutePath());
+			FolderData[] folders = songdb.getFolderDatas("parent", crc, new File(".").getAbsolutePath());
+			SongData[] songs = songdb.getSongDatas("parent", crc, new File(".").getAbsolutePath());
 			if (songs.length == 0) {
 				for (FolderData folder : folders) {
 					String path = folder.getPath();
 					if (path.endsWith(String.valueOf(File.separatorChar))) {
 						path = path.substring(0, path.length() - 1);
 					}
-					l.add(new FolderBar(folder, songdb.crc32(path,
-							new String[0], new File(".").getAbsolutePath())));
+					l.add(new FolderBar(folder, songdb.crc32(path, new String[0], new File(".").getAbsolutePath())));
 				}
 			} else {
 				for (SongData song : songs) {
@@ -418,16 +434,25 @@ public class MusicSelector extends ApplicationAdapter {
 			l.addAll((Arrays.asList(((TableBar) bar).getGrades())));			
 		}
 		if (bar instanceof TableLevelBar) {
-			List<SongBar> songbars = new ArrayList();
+			List<SongBar> songbars = new ArrayList<SongBar>();
 			for (String hash : ((TableLevelBar) bar).getHashes()) {
-				SongData[] songs = songdb.getSongDatas("hash", hash, new File(
-						".").getAbsolutePath());
+				SongData[] songs = songdb.getSongDatas("hash", hash, new File(".").getAbsolutePath());
 				if (songs.length > 0) {
 					songbars.add(new SongBar(songs[0]));
 				}
 			}
 			l.addAll(songbars);
 		}
+
+		List<Bar> remove = new ArrayList<Bar>();
+		for (Bar b : l) {
+			final int[] modes = { 0, 7, 14, 9, 5, 10 };
+			if (modes[mode] != 0 && b instanceof SongBar && ((SongBar) b).getSongData().getMode() != modes[mode]) {
+				remove.add(b);
+			}
+		}
+		l.removeAll(remove);
+
 		if (l.size() > 0) {
 			currentsongs = l.toArray(new Bar[0]);
 			selectedindex = 0;
@@ -451,24 +476,19 @@ public class MusicSelector extends ApplicationAdapter {
 			parameter.characters = str.toString();
 			titlefont = generator.generateFont(parameter);
 
-			currentscores = new IRScoreData[currentsongs.length];
 			List<String> hashes = new ArrayList();
-			for (int i = 0; i < currentscores.length; i++) {
+			for (int i = 0; i < currentsongs.length; i++) {
 				if (currentsongs[i] instanceof SongBar) {
-					hashes.add(((SongBar) currentsongs[i]).getSongData()
-							.getHash());
+					hashes.add(((SongBar) currentsongs[i]).getSongData().getHash());
 				}
 			}
-			Map<String, IRScoreData> m = scoredb.getScoreDatas("Player",
-					hashes.toArray(new String[0]), false);
-			for (int i = 0; i < currentscores.length; i++) {
+			Map<String, IRScoreData> m = scoredb.getScoreDatas("Player", hashes.toArray(new String[0]), false);
+			for (int i = 0; i < currentsongs.length; i++) {
 				if (currentsongs[i] instanceof SongBar) {
-					currentscores[i] = m.get(((SongBar) currentsongs[i])
-							.getSongData().getHash());
-				} else {
-					currentscores[i] = null;
+					currentsongs[i].setScore(m.get(((SongBar) currentsongs[i]).getSongData().getHash()));
 				}
 			}
+			Arrays.sort(currentsongs, this.getSortComparator());
 			return true;
 		}
 		Logger.getGlobal().warning("楽曲がありません");
@@ -482,11 +502,66 @@ public class MusicSelector extends ApplicationAdapter {
 	public void dispose() {
 		titlefont.dispose();
 	}
+
+	private Comparator<Bar> getSortComparator() {
+		if (sort == 1) {
+			return new Comparator<Bar>() {
+				public int compare(Bar o1, Bar o2) {
+					if (o1.getScore() == null && o2.getScore() == null) {
+						return 0;
+					}
+					if (o1.getScore() == null) {
+						return 1;
+					}
+					if (o2.getScore() == null) {
+						return -1;
+					}
+					return o1.getScore().getClear() - o2.getScore().getClear();
+				}
+
+			};
+		}
+		if (sort == 2) {
+			return new Comparator<Bar>() {
+				public int compare(Bar o1, Bar o2) {
+					if (o1.getScore() == null && o2.getScore() == null) {
+						return 0;
+					}
+					if (o1.getScore() == null) {
+						return 1;
+					}
+					if (o2.getScore() == null) {
+						return -1;
+					}
+					return o1.getScore().getMinbp() - o2.getScore().getMinbp();
+				}
+
+			};
+		}
+		return new Comparator<Bar>() {
+
+			public int compare(Bar o1, Bar o2) {
+				// TODO Auto-generated method stub
+				return 0;
+			}
+
+		};
+	}
 }
 
 abstract class Bar {
 
+	private IRScoreData score;
+
 	public abstract String getTitle();
+
+	public IRScoreData getScore() {
+		return score;
+	}
+
+	public void setScore(IRScoreData score) {
+		this.score = score;
+	}
 }
 
 class SongBar extends Bar {

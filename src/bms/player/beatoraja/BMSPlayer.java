@@ -152,18 +152,22 @@ public class BMSPlayer extends ApplicationAdapter {
 						.modify(model);
 				break;
 			case 5:
-				pattern = new NoteShuffleModifier(NoteShuffleModifier.S_RANDOM)
+				pattern = new NoteShuffleModifier(NoteShuffleModifier.SPIRAL)
 						.modify(model);
 				break;
 			case 6:
-				pattern = new NoteShuffleModifier(NoteShuffleModifier.ALL_SCR)
+				pattern = new NoteShuffleModifier(NoteShuffleModifier.H_RANDOM)
 						.modify(model);
 				break;
 			case 7:
-				pattern = new LaneShuffleModifier(LaneShuffleModifier.RANDOM_EX)
+				pattern = new NoteShuffleModifier(NoteShuffleModifier.ALL_SCR)
 						.modify(model);
 				break;
 			case 8:
+				pattern = new LaneShuffleModifier(LaneShuffleModifier.RANDOM_EX)
+						.modify(model);
+				break;
+			case 9:
 				pattern = new NoteShuffleModifier(
 						NoteShuffleModifier.S_RANDOM_EX).modify(model);
 				break;
@@ -204,6 +208,9 @@ public class BMSPlayer extends ApplicationAdapter {
 				break;
 			case 4:
 				gauge = new ExhardGrooveGauge(model);
+				break;
+			case 5:
+				gauge = new HazardGrooveGauge(model);
 				break;
 			}			
 		}

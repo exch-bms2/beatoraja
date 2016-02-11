@@ -8,3 +8,4 @@ Features :
 - assist, light-assist, ex-hard, perfect, and max clear lamp
 - auto play, replay 
 - bmson support (converted from .bms file only)
+- import difficulty table and create table folder
