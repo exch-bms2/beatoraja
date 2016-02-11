@@ -11,6 +11,9 @@ public class AbstractInputProcessor {
 
 	private boolean[] keystate = new boolean[9];
 	private long[] time = new long[9];
+	
+	private boolean[] numberstate = new boolean[10];
+	private long[] numtime = new long[10];
 
 	private long starttime;
 
@@ -38,6 +41,14 @@ public class AbstractInputProcessor {
 
 	public void setKeystate(boolean[] b) {
 		keystate = b;
+	}
+	
+	public boolean[] getNumberState() {
+		return numberstate;
+	}
+	
+	public long[] getNumberTime() {
+		return numtime;
 	}
 
 	public void keyChanged(int presstime, int i, boolean pressed) {
@@ -68,6 +79,7 @@ public class AbstractInputProcessor {
 
 		private int[] keys = new int[] { Keys.Z, Keys.S, Keys.X, Keys.D,
 				Keys.C, Keys.F, Keys.V, Keys.SHIFT_LEFT, Keys.CONTROL_LEFT };
+		private int[] numbers = new int[] { Keys.NUM_0, Keys.NUM_1, Keys.NUM_2, Keys.NUM_3};
 		private int[] cover = new int[] { Keys.DOWN, Keys.UP };
 		private int[] control = new int[] { Keys.Q };
 		private int exit = Keys.ESCAPE;
@@ -95,6 +107,14 @@ public class AbstractInputProcessor {
 			if (exit == keycode) {
 				stopPlay();
 			}
+			
+			for(int i = 0;i < numbers.length;i++) {
+				if(keycode == numbers[i]) {
+					presstime = (int) (System.currentTimeMillis() - starttime);
+					numberstate[i] = true;
+					numtime[i] = presstime;
+				}
+			}
 
 			return true;
 		}
@@ -113,6 +133,13 @@ public class AbstractInputProcessor {
 			}
 			if (control[0] == keycode) {
 				startChanged(false);
+			}
+			for(int i = 0;i < numbers.length;i++) {
+				if(keycode == numbers[i]) {
+					presstime = (int) (System.currentTimeMillis() - starttime);
+					numberstate[i] = false;
+					numtime[i] = presstime;
+				}
 			}
 			return true;
 		}
