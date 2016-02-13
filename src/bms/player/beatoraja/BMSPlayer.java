@@ -97,18 +97,20 @@ public class BMSPlayer extends ApplicationAdapter {
 		totalnotes = model.getTotalNotes()
 				+ model.getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
 				+ model.getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH);
-		if (config.isBpmguide()) {
-			assist = 1;
-		}
+		if(resource.getCourseBMSModels() == null) {
+			if (config.isBpmguide()) {
+				assist = 1;
+			}
 
-		if (config.isConstant()) {
-			new ConstantBPMModifier().modify(model);
-			assist = 1;
-		}
+			if (config.isConstant()) {
+				new ConstantBPMModifier().modify(model);
+				assist = 1;
+			}
 
-		if (config.getLnassist() == 1) {
-			new LongNoteModifier().modify(model);
-			assist = 2;
+			if (config.getLnassist() == 1) {
+				new LongNoteModifier().modify(model);
+				assist = 2;
+			}			
 		}
 
 		if (autoplay == 2) {
@@ -131,7 +133,7 @@ public class BMSPlayer extends ApplicationAdapter {
 		Logger.getGlobal().info("アシストオプション設定完了");
 		if (replay != null) {
 			PatternModifier.modify(model, Arrays.asList(replay.pattern));
-		} else {
+		} else if(resource.getCourseBMSModels() == null || config.getRandom() == 1){
 			switch (config.getRandom()) {
 			case 0:
 				break;
@@ -425,7 +427,7 @@ public class BMSPlayer extends ApplicationAdapter {
 				if (autoplay == 0) {
 					resource.setScoreData(createScoreData());
 				}
-				// TODO レーンカバー、緑数字等の保存
+				saveConfig();
 				resource.setGauge(new float[]{gauge.getValue()});
 				main.changeState(MainController.STATE_RESULT, resource);
 			}
@@ -453,7 +455,7 @@ public class BMSPlayer extends ApplicationAdapter {
 				if (autoplay == 0) {
 					resource.setScoreData(createScoreData());
 				}
-				// TODO レーンカバー、緑数字等の保存
+				saveConfig();
 				resource.setGauge(new float[]{gauge.getValue()});
 				main.changeState(MainController.STATE_RESULT, resource);
 			}
@@ -465,6 +467,17 @@ public class BMSPlayer extends ApplicationAdapter {
 		systemfont.draw(sprite, "FPS " + Gdx.graphics.getFramesPerSecond(), 10,
 				20);
 		sprite.end();
+	}
+	
+	private void saveConfig() {
+		Config config = resource.getConfig();
+		if(lanerender.isFixHispeed()) {
+			config.setGreenvalue(lanerender.getGreenValue());
+		} else {
+			config.setHispeed(lanerender.getHispeed());
+		}
+		config.setLanecover(lanerender.getLaneCoverRegion());
+		config.setLift(lanerender.getLiftRegion());
 	}
 
 	public IRScoreData createScoreData() {
@@ -499,7 +512,7 @@ public class BMSPlayer extends ApplicationAdapter {
 					} else {
 						clear = GrooveGauge.CLEARTYPE_FULLCOMBO;
 					}
-				} else {
+				} else if(resource.getCourseBMSModels() == null){
 					clear = gauge.getClearType();
 				}
 			}
