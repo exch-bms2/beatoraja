@@ -29,6 +29,8 @@ public class Section {
 	public static final int P2_INVISIBLE_KEY_BASE = 41;
 	public static final int P1_LONG_KEY_BASE = 51;
 	public static final int P2_LONG_KEY_BASE = 61;
+	public static final int P1_MINE_KEY_BASE = 131;
+	public static final int P2_MINE_KEY_BASE = 141;
 
 	/**
 	 * 小節の拡大倍率
@@ -99,6 +101,8 @@ public class Section {
 
 	private BMSModel model;
 
+	private int sectionnum;
+
 	public Section(BMSModel model, Section prev, String[] lines) {
 		this.model = model;
 		if (model.getUseKeys() == 9) {
@@ -107,6 +111,9 @@ public class Section {
 			usekeys = model.getPlayer() > 1 ? 10 : 5;
 		}
 		this.prev = prev;
+		if (prev != null) {
+			sectionnum = prev.sectionnum + 1;
+		}
 		for (int i = 0; i < lines.length; i++) {
 			String line = lines[i];
 			int channel = 0;
@@ -181,53 +188,21 @@ public class Section {
 				break;
 			}
 			// 通常ノート(1P側)
-			if (11 <= channel && channel <= 19) {
-				play_1[convertLane(channel - 11)] = this
-						.mergeData(play_1[convertLane(channel - 11)],
-								this.splitData(line));
-			}
+			this.convert(channel, P1_KEY_BASE, play_1, line);
 			// 通常ノート(2P側)
-			if (21 <= channel && channel <= 29) {
-				play_2[convertLane(channel - 21)] = this
-						.mergeData(play_2[convertLane(channel - 21)],
-								this.splitData(line));
-			}
+			this.convert(channel, P2_KEY_BASE, play_2, line);
 			// 不可視ノート(1P側)
-			if (31 <= channel && channel <= 39) {
-				play_1_invisible[convertLane(channel - 31)] = this.mergeData(
-						play_1_invisible[convertLane(channel - 31)],
-						this.splitData(line));
-			}
+			this.convert(channel, P1_INVISIBLE_KEY_BASE, play_1_invisible, line);
 			// 不可視ノート(2P側)
-			if (41 <= channel && channel <= 49) {
-				play_2_invisible[convertLane(channel - 41)] = this.mergeData(
-						play_2_invisible[convertLane(channel - 41)],
-						this.splitData(line));
-			}
+			this.convert(channel, P2_INVISIBLE_KEY_BASE, play_2_invisible, line);
 			// ロングノート(1P側)
-			if (51 <= channel && channel <= 59) {
-				play_1_ln[convertLane(channel - 51)] = this.mergeData(
-						play_1_ln[convertLane(channel - 51)],
-						this.splitData(line));
-			}
+			this.convert(channel, P1_LONG_KEY_BASE, play_1_ln, line);
 			// ロングノート(2P側)
-			if (61 <= channel && channel <= 69) {
-				play_2_ln[convertLane(channel - 61)] = this.mergeData(
-						play_2_ln[convertLane(channel - 61)],
-						this.splitData(line));
-			}
+			this.convert(channel, P2_LONG_KEY_BASE, play_2_ln, line);
 			// 地雷ノート(1P側)
-			if (131 <= channel && channel <= 139) {
-				play_1_mine[convertLane(channel - 131)] = this.mergeData(
-						play_1_mine[convertLane(channel - 131)],
-						this.splitData(line));
-			}
+			this.convert(channel, P1_MINE_KEY_BASE, play_1_mine, line);
 			// 地雷ノート(2P側)
-			if (141 <= channel && channel <= 149) {
-				play_2_mine[convertLane(channel - 141)] = this.mergeData(
-						play_2_mine[convertLane(channel - 141)],
-						this.splitData(line));
-			}
+			this.convert(channel, P2_MINE_KEY_BASE, play_2_mine, line);
 		}
 		if (auto.size() == 0) {
 			auto.add(new String[] { "00" });
@@ -237,17 +212,20 @@ public class Section {
 		}
 	}
 
-	private int convertLane(int ch) {
-		if (ch == 5 || ch == 6) {
-			return ch + 2;
-		}
-		if (ch == 7 || ch == 8) {
-			if (usekeys == 5 || usekeys == 10) {
-				usekeys = usekeys * 7 / 5;
+	private void convert(int channel, int ch, String[][] notes, String line) {
+		if (ch <= channel && channel <= ch + 8) {
+			channel -= ch;
+			if (channel == 5 || channel == 6) {
+				channel += 2;
+			} else if (channel == 7 || channel == 8) {
+				if (usekeys == 5 || usekeys == 10) {
+					usekeys = usekeys * 7 / 5;
+				}
+				channel -= 2;
 			}
-			return ch - 2;
+			notes[channel] = this.mergeData(notes[channel],
+					this.splitData(line));
 		}
-		return ch;
 	}
 
 	/**
@@ -279,10 +257,10 @@ public class Section {
 	}
 
 	/**
-	 * BPM変化のマージ処理を行う
+	 * ノーツのマージ処理を行う
 	 * 
 	 * @param b
-	 *            マージするBPM変化
+	 *            マージするノーツ
 	 */
 	private String[] mergeData(String[] a, String[] b) {
 		if (a == null || a.length == 0) {
@@ -453,7 +431,9 @@ public class Section {
 			Map<String, Integer> bgamap) {
 		int base = this.getStartTime();
 		String[] startln = this.getStartLNStatus().clone();
+		// 小節線追加
 		model.getTimeLine(base).setSectionLine(true);
+		model.getTimeLine(base).setSection(sectionnum);
 		model.getTimeLine(base).setBPM(this.getStartBPM());
 		int[] poors = new int[poor.length];
 		for (int i = 0; i < poors.length; i++) {
@@ -524,6 +504,7 @@ public class Section {
 			for (int i = 0; i < s.length; i++) {
 				if (!s[i].equals("00")) {
 					TimeLine tl = model.getTimeLine(base + (int) (dt * rate));
+					tl.setSection(sectionnum + ((float) i) / s.length);
 					if (key >= 0 && key < 18) {
 						if (tl.existNote(key % 18)) {
 							Logger.getGlobal().warning(
@@ -583,16 +564,16 @@ public class Section {
 						// + (key - 17) + ":"
 						// + (base + (int) (dt * rate)));
 
-							tl.addHiddenNote(key % 18,
-									new NormalNote(getId(s[i], wavmap)));
+						tl.addHiddenNote(key % 18,
+								new NormalNote(getId(s[i], wavmap)));
 
 						tl.setBPM(nowbpm);
 					}
 					if (key >= 36 && key < 54) {
 						// LN処理
 						if (startln[key % 18] == null) {
-							tl.addNote(key % 18, new LongNote(getId(s[i],wavmap),
-									tl));
+							tl.addNote(key % 18,
+									new LongNote(getId(s[i], wavmap), tl));
 							tl.setBPM(nowbpm);
 							startln[key % 18] = s[i];
 						} else {
@@ -660,18 +641,41 @@ public class Section {
 								se = st[k] - (double) i / s.length;
 								model.getTimeLine(base + (int) (dt * rate))
 										.setBPM(0);
+								model.getTimeLine(base + (int) (dt * rate))
+										.setSection(
+												sectionnum + st[k].floatValue());
+								// System.out
+								// .println("STOP (BPM変化中) : "
+								// + (stop.get(st[k]) * (1000 * 60 * 4 /
+								// nowbpm))
+								// + " - bpm " + nowbpm
+								// + " - key - " + key);
 								dt += stop.get(st[k])
-										* (1000 * 60 * 4 / nowbpm);
+										* (1000 * 60 * 4 / nowbpm) / rate;
 								model.getTimeLine(base + (int) (dt * rate))
 										.setBPM(nowbpm);
+								model.getTimeLine(base + (int) (dt * rate))
+										.setSection(
+												sectionnum + st[k].floatValue());
 							}
 						}
 						dt += 1000 * 60 * 4
 								* (bk[j] - (double) i / s.length - se) / nowbpm;
 						se = bk[j] - (double) i / s.length;
 						nowbpm = bpmchange.get(bk[j]);
+						// if (model.getTimeLine(base + (int) (dt * rate))
+						// .getBPM() != nowbpm) {
+						// System.out.println("登録するBPMが異なる可能性があります。Time " + (
+						// base + (int) (dt * rate)) + " section : "
+						// + (sectionnum + bk[j].floatValue()) + " BPM : " +
+						// model.getTimeLine(
+						// base + (int) (dt * rate)).getBPM()
+						// + " → " + nowbpm);
+						// }
 						model.getTimeLine(base + (int) (dt * rate)).setBPM(
 								nowbpm);
+						model.getTimeLine(base + (int) (dt * rate)).setSection(
+								sectionnum + bk[j].floatValue());
 						// Logger.getGlobal().info(
 						// "BPM変化:" + nowbpm + "  time:"
 						// + (base + (int) (dt * rate)));
@@ -685,9 +689,25 @@ public class Section {
 								* (st[k] - (double) i / s.length - se) / nowbpm;
 						se = st[k] - (double) i / s.length;
 						model.getTimeLine(base + (int) (dt * rate)).setBPM(0);
-						dt += stop.get(st[k]) * (1000 * 60 * 4 / nowbpm);
+						model.getTimeLine(base + (int) (dt * rate)).setSection(
+								sectionnum + st[k].floatValue());
+						// System.out.println("STOP : "
+						// + (stop.get(st[k]) * (1000 * 60 * 4 / nowbpm))
+						// + " - bpm " + nowbpm + " - key - " + key);
+						dt += stop.get(st[k]) * (1000 * 60 * 4 / nowbpm) / rate;
+						// if (model.getTimeLine(base + (int) (dt * rate))
+						// .getBPM() != nowbpm) {
+						// System.out.println("登録するBPMが異なる可能性があります。Time " + (
+						// base + (int) (dt * rate)) + " section : "
+						// + (sectionnum + st[k].floatValue()) + " BPM : " +
+						// model.getTimeLine(
+						// base + (int) (dt * rate)).getBPM()
+						// + " → " + nowbpm);
+						// }
 						model.getTimeLine(base + (int) (dt * rate)).setBPM(
 								nowbpm);
+						model.getTimeLine(base + (int) (dt * rate)).setSection(
+								sectionnum + st[k].floatValue());
 					}
 				}
 				double dd = 1000 * 60 * 4 * (1.0 / s.length - se) / nowbpm;

@@ -13,6 +13,10 @@ public class TimeLine {
 	 */
 	private int time;
 	/**
+	 * タイムラインの小節
+	 */
+	private float section;
+	/**
 	 * タイムライン上に配置されている16レーン分(+フリースクラッチ)のノート。配置されていないレーンにはnullを入れる。
 	 */
 	private Note[] notes = new Note[18];
@@ -27,7 +31,7 @@ public class TimeLine {
 	/**
 	 * 小節線の有無
 	 */
-	private boolean section = false;
+	private boolean sectionLine = false;
 	/**
 	 * タイムライン上からのBPM変化。ストップシーケンスの場合は0を入れる
 	 */
@@ -110,11 +114,11 @@ public class TimeLine {
 	}
 	
 	public void setSectionLine(boolean section) {
-		this.section = section;
+		this.sectionLine = section;
 	}
 	
 	public boolean getSectionLine() {
-		return section;
+		return sectionLine;
 	}
 
 	public int getBGA() {
@@ -139,5 +143,13 @@ public class TimeLine {
 
 	public void setPoor(int[] poor) {
 		this.poor = poor;
+	}
+
+	public float getSection() {
+		return section;
+	}
+
+	public void setSection(float section) {
+		this.section = section;
 	}	
 }
