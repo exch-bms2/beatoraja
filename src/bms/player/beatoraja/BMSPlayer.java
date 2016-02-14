@@ -86,6 +86,8 @@ public class BMSPlayer extends ApplicationAdapter {
 	private ShaderProgram layershader;
 
 	private MainController main;
+	
+	private List<Float> gaugelog = new ArrayList<Float>();
 
 	public BMSPlayer(MainController main, PlayerResource resource) {
 		this.main = main;
@@ -216,9 +218,9 @@ public class BMSPlayer extends ApplicationAdapter {
 				break;
 			}			
 		}
-		float[] f = resource.getGauge();
+		List<Float> f = resource.getGauge();
 		if(f != null) {
-			gauge.setValue(f[f.length - 1]);
+			gauge.setValue(f.get(f.size() - 1));
 		}
 		Logger.getGlobal().info("ゲージ設定完了");
 
@@ -388,6 +390,10 @@ public class BMSPlayer extends ApplicationAdapter {
 			break;
 		// プレイ
 		case STATE_PLAY:
+			final float g = gauge.getValue();
+			if(gaugelog.size() <= time / 500) {
+				gaugelog.add(g);
+			}
 			// System.out.println("playing time : " + time);
 			if (starttime != 0
 					&& timelines[timelines.length - 1].getTime() + 5000 < time) {
@@ -395,7 +401,7 @@ public class BMSPlayer extends ApplicationAdapter {
 				finishtime = System.currentTimeMillis();
 				Logger.getGlobal().info("STATE_FINISHEDに移行");
 			}
-			if (gauge.getValue() == 0) {
+			if (g == 0) {
 				state = STATE_FAILED;
 				finishtime = System.currentTimeMillis();
 				Logger.getGlobal().info("STATE_FAILEDに移行");
@@ -428,7 +434,8 @@ public class BMSPlayer extends ApplicationAdapter {
 					resource.setScoreData(createScoreData());
 				}
 				saveConfig();
-				resource.setGauge(new float[]{gauge.getValue()});
+				gaugelog.add(0f);
+				resource.setGauge(gaugelog);
 				main.changeState(MainController.STATE_RESULT, resource);
 			}
 			break;
@@ -456,7 +463,7 @@ public class BMSPlayer extends ApplicationAdapter {
 					resource.setScoreData(createScoreData());
 				}
 				saveConfig();
-				resource.setGauge(new float[]{gauge.getValue()});
+				resource.setGauge(gaugelog);
 				main.changeState(MainController.STATE_RESULT, resource);
 			}
 			break;

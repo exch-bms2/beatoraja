@@ -36,8 +36,6 @@ import com.badlogic.gdx.utils.JsonWriter.OutputType;
 
 public class MainController extends ApplicationAdapter {
 	
-	// TODO ゲージ推移の記録
-
 	private BMSPlayer player;
 	private MusicDecide decide;
 	private MusicSelector selector;
@@ -315,7 +313,7 @@ public class MainController extends ApplicationAdapter {
 		
 		private boolean finished = false;
 		
-		private float[] gauge;
+		private List<Float> gauge;
 		private BMSModel[] course;
 		private File[] coursefile;
 		private int courseindex;
@@ -418,11 +416,11 @@ public class MainController extends ApplicationAdapter {
 			}
 		}
 		
-		public float[] getGauge() {
+		public List<Float> getGauge() {
 			return gauge;
 		}
 
-		public void setGauge(float[] gauge) {
+		public void setGauge(List<Float> gauge) {
 			this.gauge = gauge;
 		}
 	}
