@@ -34,6 +34,8 @@ public class Config {
 	
 	private int judgedetail = 0;
 	
+	private int judgeAlgorithm = JudgeManager.JUDGE_ALGORITHM_LR2;
+	
 	private boolean constant = false;
 	
 	private boolean bpmguide = false;
@@ -245,5 +247,13 @@ public class Config {
 
 	public void setJudgedetail(int judgedetail) {
 		this.judgedetail = judgedetail;
+	}
+
+	public int getJudgeAlgorithm() {
+		return judgeAlgorithm;
+	}
+
+	public void setJudgeAlgorithm(int judgeAlgorithm) {
+		this.judgeAlgorithm = judgeAlgorithm;
 	}
 }

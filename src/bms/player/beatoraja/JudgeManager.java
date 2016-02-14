@@ -20,6 +20,9 @@ public class JudgeManager {
 	private BMSPlayer main;
 	private BMSModel model;
 
+	public static final int JUDGE_ALGORITHM_LR2 = 0;
+	public static final int JUDGE_ALGORITHM_IIDX = 1;
+	public static final int JUDGE_ALGORITHM_LOWEST_NOTE = 2;
 	/**
 	 * 現在の判定カウント内訳
 	 */
@@ -66,6 +69,22 @@ public class JudgeManager {
 	public JudgeManager(BMSPlayer main, BMSModel model) {
 		this.main = main;
 		this.model = model;
+		switch(model.getUseKeys()) {
+		case 5:
+		case 7:
+			bomb = new long[8];
+			processing = new LongNote[8];			
+			break;
+		case 10:
+		case 14:
+			bomb = new long[16];
+			processing = new LongNote[16];			
+			break;
+		case 9:
+			bomb = new long[9];
+			processing = new LongNote[9];			
+			break;
+		}
 		Arrays.fill(bomb, -1000);
 		if (model.getJudgerank() > 3) {
 			judge = judgetable[3];
@@ -83,7 +102,7 @@ public class JudgeManager {
 		BMSPlayerInputProcessor input = main.getBMSPlayerInputProcessor();
 		long[] keytime = input.getTime();
 		boolean[] keystate = input.getKeystate();
-
+		// TODO DP, PMS対応
 		for (int key = 0; key < 9; key++) {
 			if (keytime[key] != 0) {
 				long ptime = keytime[key];
@@ -146,8 +165,22 @@ public class JudgeManager {
 										}
 									} else {
 										switch (judgetype) {
-										case 0:
-											if (tl.getTime() < ptime - judge[3]) {
+										case JUDGE_ALGORITHM_LR2:
+											// 判定ラインより下にある判定ラインに最も近いノーツを選ぶ(LR2式)
+											if (timelines[i].getTime() < ptime) {
+												tl = timelines[i];
+												for (j = 0; j < judge.length	&& !(ptime >= timelines[i].getTime()
+																- judge[j] && ptime <= timelines[i]
+																.getTime()
+																+ judge[j]); j++) {
+												}
+											}
+											break;
+										case JUDGE_ALGORITHM_IIDX:
+											// 最も判定ラインに近いノーツを選ぶ(本家式)
+											if (Math.abs(tl.getTime() - ptime) > Math
+													.abs(timelines[i].getTime()
+															- ptime)) {
 												tl = timelines[i];
 												for (j = 0; j < judge.length
 														&& !(ptime >= timelines[i]
@@ -158,10 +191,9 @@ public class JudgeManager {
 												}
 											}
 											break;
-										case 1:
-											if (Math.abs(tl.getTime() - ptime) > Math
-													.abs(timelines[i].getTime()
-															- ptime)) {
+										case JUDGE_ALGORITHM_LOWEST_NOTE:
+											// 最も下にあるノーツを選ぶ
+											if (tl.getTime() < ptime - judge[3]) {
 												tl = timelines[i];
 												for (j = 0; j < judge.length
 														&& !(ptime >= timelines[i]
