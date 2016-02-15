@@ -19,6 +19,7 @@ import bms.player.beatoraja.audio.AudioProcessor;
 import bms.player.beatoraja.audio.SoundProcessor;
 import bms.player.beatoraja.bga.BGAManager;
 import bms.player.beatoraja.decide.MusicDecide;
+import bms.player.beatoraja.gauge.GrooveGauge;
 import bms.player.beatoraja.result.MusicResult;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.lunaticrave2.IRScoreData;
@@ -312,7 +313,7 @@ public class MainController extends ApplicationAdapter {
 		private IRScoreData score;
 		
 		private boolean finished = false;
-		
+		private GrooveGauge grooveGauge;
 		private List<Float> gauge;
 		private BMSModel[] course;
 		private File[] coursefile;
@@ -422,6 +423,14 @@ public class MainController extends ApplicationAdapter {
 
 		public void setGauge(List<Float> gauge) {
 			this.gauge = gauge;
+		}
+
+		public GrooveGauge getGrooveGauge() {
+			return grooveGauge;
+		}
+
+		public void setGrooveGauge(GrooveGauge grooveGauge) {
+			this.grooveGauge = grooveGauge;
 		}
 	}
 }

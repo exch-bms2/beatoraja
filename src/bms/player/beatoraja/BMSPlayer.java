@@ -436,6 +436,7 @@ public class BMSPlayer extends ApplicationAdapter {
 				saveConfig();
 				gaugelog.add(0f);
 				resource.setGauge(gaugelog);
+				resource.setGrooveGauge(gauge);
 				main.changeState(MainController.STATE_RESULT, resource);
 			}
 			break;
@@ -464,6 +465,7 @@ public class BMSPlayer extends ApplicationAdapter {
 				}
 				saveConfig();
 				resource.setGauge(gaugelog);
+				resource.setGrooveGauge(gauge);
 				main.changeState(MainController.STATE_RESULT, resource);
 			}
 			break;

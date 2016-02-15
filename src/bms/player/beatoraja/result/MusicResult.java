@@ -42,7 +42,9 @@ public class MusicResult extends ApplicationAdapter {
 
 	private PlayerResource resource;
 
-	private IRScoreData oldscore;
+	private int oldclear;
+	private int oldexscore;
+	private int oldmisscount;
 
 	private MusicResultInputProcessor input;
 
@@ -68,6 +70,11 @@ public class MusicResult extends ApplicationAdapter {
 
 	private Rectangle graph = new Rectangle(20, 500, 400, 200);
 
+	private final Color[] graph_back = { Color.valueOf("440044"), Color.valueOf("000044"), Color.valueOf("004400"),
+			Color.valueOf("440000"), Color.valueOf("444400"), Color.valueOf("222222") };
+	private final Color[] graph_line = { Color.valueOf("ff00ff"), Color.valueOf("0000ff"), Color.valueOf("00ff00"),
+			Color.valueOf("ff0000"), Color.valueOf("ffff00"), Color.valueOf("cccccc") };
+
 	public void render() {
 		final SpriteBatch sprite = main.getSpriteBatch();
 		final ShapeRenderer shape = main.getShapeRenderer();
@@ -80,14 +87,28 @@ public class MusicResult extends ApplicationAdapter {
 
 		IRScoreData score = resource.getScoreData();
 		// ゲージグラフ描画
+		int gaugetype = resource.getConfig().getGauge();
+		shape.begin(ShapeType.Filled);
+		shape.setColor(graph_back[gaugetype]);
+		shape.rect(graph.x, graph.y, graph.width, graph.height);
+		if (resource.getGrooveGauge().getBorder() > 0) {
+			shape.setColor(graph_back[3]);
+			shape.rect(graph.x, graph.y + graph.height * resource.getGrooveGauge().getBorder() / 100, graph.width,
+					graph.height * (100 - resource.getGrooveGauge().getBorder()) / 100);
+		}
+		shape.setColor(graph_back[gaugetype]);
+		shape.end();
+
+		Gdx.gl.glLineWidth(4);
 		shape.begin(ShapeType.Line);
 		shape.setColor(Color.WHITE);
 		shape.rect(graph.x, graph.y, graph.width, graph.height);
+
 		Float f1 = null;
 		for (int i = 0; i < resource.getGauge().size(); i++) {
 			Float f2 = resource.getGauge().get(i);
 			if (f1 != null) {
-				shape.setColor(Color.GREEN);
+				shape.setColor(graph_line[gaugetype]);
 				shape.line(graph.x + graph.width * (i - 1) / resource.getGauge().size(),
 						graph.y + (f1 / 100.0f) * graph.height, graph.x + graph.width * i / resource.getGauge().size(),
 						graph.y + (f2 / 100.0f) * graph.height);
@@ -95,23 +116,41 @@ public class MusicResult extends ApplicationAdapter {
 			f1 = f2;
 		}
 		shape.end();
+		Gdx.gl.glLineWidth(1);
 
 		sprite.begin();
 		if (score != null) {
 			titlefont.setColor(Color.WHITE);
 			titlefont.draw(sprite, resource.getScoreData().getClear() > GrooveGauge.CLEARTYPE_FAILED ? "Stage Cleared"
-					: "Stage Failed", w / 2, h / 2);
+					: "Stage Failed", w * 3 / 4, h / 2);
 		}
 
 		if (score != null) {
-			titlefont.draw(sprite, "CLEAR : ", 100, 300);
-			if (oldscore != null) {
-				titlefont.setColor(Color.valueOf(LAMP[oldscore.getClear()]));
-				titlefont.draw(sprite, CLEAR[oldscore.getClear()] + " -> ", 240, 300);
+			titlefont.draw(sprite, "CLEAR : ", 100, 400);
+			if (oldclear != 0) {
+				titlefont.setColor(Color.valueOf(LAMP[oldclear]));
+				titlefont.draw(sprite, CLEAR[oldclear] + " -> ", 240, 400);
 			}
 			titlefont.setColor(Color.valueOf(LAMP[score.getClear()]));
-			titlefont.draw(sprite, CLEAR[score.getClear()], 440, 300);
+			titlefont.draw(sprite, CLEAR[score.getClear()], 440, 400);
 			titlefont.setColor(Color.WHITE);
+
+			titlefont.draw(sprite, "SCORE : ", 100, 370);
+			if (oldexscore != 0) {
+				titlefont.draw(sprite, oldexscore + " -> ", 240, 370);
+			}
+			titlefont.draw(sprite, score.getExscore() + " ( " + (score.getExscore() > oldexscore ? "+" : "")
+					+ (score.getExscore() - oldexscore) + " )", 440, 370);
+			titlefont.setColor(Color.WHITE);
+
+			titlefont.draw(sprite, "MISS COUNT : ", 100, 340);
+			if (oldmisscount < 65535) {
+				titlefont.draw(sprite, oldmisscount + " -> ", 240, 340);
+				titlefont.draw(sprite, score.getMinbp() + " ( " + (score.getMinbp() > oldmisscount ? "+" : "")
+						+ (score.getMinbp() - oldmisscount) + " )", 440, 340);
+			} else {
+				titlefont.draw(sprite, String.valueOf(score.getMinbp()), 440, 340);
+			}
 
 			titlefont.draw(sprite, "PGREAT : " + score.getPg(), 100, 250);
 			titlefont.draw(sprite, "GREAT  : " + score.getGr(), 100, 220);
@@ -147,10 +186,12 @@ public class MusicResult extends ApplicationAdapter {
 			return;
 		}
 		IRScoreData score = main.getScoreDatabase().getScoreData("Player", model.getHash(), false);
-		oldscore = score;
 		if (score == null) {
 			score = new IRScoreData();
 		}
+		oldclear = score.getClear();
+		oldexscore = score.getExscore();
+		oldmisscount = score.getMinbp();
 		score.setHash(model.getHash());
 		score.setNotes(model.getTotalNotes() + model.getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
 				+ model.getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH));
