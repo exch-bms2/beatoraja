@@ -19,6 +19,7 @@ import bms.player.beatoraja.audio.AudioProcessor;
 import bms.player.beatoraja.audio.SoundProcessor;
 import bms.player.beatoraja.bga.BGAManager;
 import bms.player.beatoraja.decide.MusicDecide;
+import bms.player.beatoraja.gauge.GrooveGauge;
 import bms.player.beatoraja.result.MusicResult;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.lunaticrave2.IRScoreData;
@@ -36,8 +37,6 @@ import com.badlogic.gdx.utils.JsonWriter.OutputType;
 
 public class MainController extends ApplicationAdapter {
 	
-	// TODO ゲージ推移の記録
-
 	private BMSPlayer player;
 	private MusicDecide decide;
 	private MusicSelector selector;
@@ -314,8 +313,8 @@ public class MainController extends ApplicationAdapter {
 		private IRScoreData score;
 		
 		private boolean finished = false;
-		
-		private float[] gauge;
+		private GrooveGauge grooveGauge;
+		private List<Float> gauge;
 		private BMSModel[] course;
 		private File[] coursefile;
 		private int courseindex;
@@ -418,12 +417,20 @@ public class MainController extends ApplicationAdapter {
 			}
 		}
 		
-		public float[] getGauge() {
+		public List<Float> getGauge() {
 			return gauge;
 		}
 
-		public void setGauge(float[] gauge) {
+		public void setGauge(List<Float> gauge) {
 			this.gauge = gauge;
+		}
+
+		public GrooveGauge getGrooveGauge() {
+			return grooveGauge;
+		}
+
+		public void setGrooveGauge(GrooveGauge grooveGauge) {
+			this.grooveGauge = grooveGauge;
 		}
 	}
 }

@@ -86,6 +86,8 @@ public class BMSPlayer extends ApplicationAdapter {
 	private ShaderProgram layershader;
 
 	private MainController main;
+	
+	private List<Float> gaugelog = new ArrayList<Float>();
 
 	public BMSPlayer(MainController main, PlayerResource resource) {
 		this.main = main;
@@ -97,18 +99,20 @@ public class BMSPlayer extends ApplicationAdapter {
 		totalnotes = model.getTotalNotes()
 				+ model.getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
 				+ model.getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH);
-		if (config.isBpmguide()) {
-			assist = 1;
-		}
+		if(resource.getCourseBMSModels() == null) {
+			if (config.isBpmguide()) {
+				assist = 1;
+			}
 
-		if (config.isConstant()) {
-			new ConstantBPMModifier().modify(model);
-			assist = 1;
-		}
+			if (config.isConstant()) {
+				new ConstantBPMModifier().modify(model);
+				assist = 1;
+			}
 
-		if (config.getLnassist() == 1) {
-			new LongNoteModifier().modify(model);
-			assist = 2;
+			if (config.getLnassist() == 1) {
+				new LongNoteModifier().modify(model);
+				assist = 2;
+			}			
 		}
 
 		if (autoplay == 2) {
@@ -131,7 +135,7 @@ public class BMSPlayer extends ApplicationAdapter {
 		Logger.getGlobal().info("アシストオプション設定完了");
 		if (replay != null) {
 			PatternModifier.modify(model, Arrays.asList(replay.pattern));
-		} else {
+		} else if(resource.getCourseBMSModels() == null || config.getRandom() == 1){
 			switch (config.getRandom()) {
 			case 0:
 				break;
@@ -214,9 +218,9 @@ public class BMSPlayer extends ApplicationAdapter {
 				break;
 			}			
 		}
-		float[] f = resource.getGauge();
+		List<Float> f = resource.getGauge();
 		if(f != null) {
-			gauge.setValue(f[f.length - 1]);
+			gauge.setValue(f.get(f.size() - 1));
 		}
 		Logger.getGlobal().info("ゲージ設定完了");
 
@@ -386,6 +390,10 @@ public class BMSPlayer extends ApplicationAdapter {
 			break;
 		// プレイ
 		case STATE_PLAY:
+			final float g = gauge.getValue();
+			if(gaugelog.size() <= time / 500) {
+				gaugelog.add(g);
+			}
 			// System.out.println("playing time : " + time);
 			if (starttime != 0
 					&& timelines[timelines.length - 1].getTime() + 5000 < time) {
@@ -393,7 +401,7 @@ public class BMSPlayer extends ApplicationAdapter {
 				finishtime = System.currentTimeMillis();
 				Logger.getGlobal().info("STATE_FINISHEDに移行");
 			}
-			if (gauge.getValue() == 0) {
+			if (g == 0) {
 				state = STATE_FAILED;
 				finishtime = System.currentTimeMillis();
 				Logger.getGlobal().info("STATE_FAILEDに移行");
@@ -425,8 +433,10 @@ public class BMSPlayer extends ApplicationAdapter {
 				if (autoplay == 0) {
 					resource.setScoreData(createScoreData());
 				}
-				// TODO レーンカバー、緑数字等の保存
-				resource.setGauge(new float[]{gauge.getValue()});
+				saveConfig();
+				gaugelog.add(0f);
+				resource.setGauge(gaugelog);
+				resource.setGrooveGauge(gauge);
 				main.changeState(MainController.STATE_RESULT, resource);
 			}
 			break;
@@ -453,8 +463,9 @@ public class BMSPlayer extends ApplicationAdapter {
 				if (autoplay == 0) {
 					resource.setScoreData(createScoreData());
 				}
-				// TODO レーンカバー、緑数字等の保存
-				resource.setGauge(new float[]{gauge.getValue()});
+				saveConfig();
+				resource.setGauge(gaugelog);
+				resource.setGrooveGauge(gauge);
 				main.changeState(MainController.STATE_RESULT, resource);
 			}
 			break;
@@ -465,6 +476,17 @@ public class BMSPlayer extends ApplicationAdapter {
 		systemfont.draw(sprite, "FPS " + Gdx.graphics.getFramesPerSecond(), 10,
 				20);
 		sprite.end();
+	}
+	
+	private void saveConfig() {
+		Config config = resource.getConfig();
+		if(lanerender.isFixHispeed()) {
+			config.setGreenvalue(lanerender.getGreenValue());
+		} else {
+			config.setHispeed(lanerender.getHispeed());
+		}
+		config.setLanecover(lanerender.getLaneCoverRegion());
+		config.setLift(lanerender.getLiftRegion());
 	}
 
 	public IRScoreData createScoreData() {
@@ -499,7 +521,7 @@ public class BMSPlayer extends ApplicationAdapter {
 					} else {
 						clear = GrooveGauge.CLEARTYPE_FULLCOMBO;
 					}
-				} else {
+				} else if(resource.getCourseBMSModels() == null){
 					clear = gauge.getClearType();
 				}
 			}

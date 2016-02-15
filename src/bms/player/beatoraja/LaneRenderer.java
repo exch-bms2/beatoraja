@@ -81,6 +81,30 @@ public class LaneRenderer {
 			basehispeed = hispeed;
 		}
 	}
+	
+	public boolean isFixHispeed() {
+		return fixhispeed;
+	}
+	
+	public float getHispeed() {
+		return hispeed;
+	}
+	
+	public int getGreenValue() {
+		return gvalue;
+	}
+	
+	public float getLaneCoverRegion() {
+		return lanecover;
+	}
+	
+	public boolean isEnableLift() {
+		return enableLift;
+	}
+	
+	public float getLiftRegion() {
+		return lift;
+	}
 
 	public float getLanecover() {
 		return lanecover;

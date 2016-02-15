@@ -79,4 +79,8 @@ public abstract class GrooveGauge {
 	}
 	
 	public abstract void draw(PlaySkin skin, SpriteBatch sprite, float x, float y, float w, float h);
+
+	public float getBorder() {
+		return norm;
+	}
 }
