@@ -20,6 +20,7 @@ import bms.player.beatoraja.audio.SoundProcessor;
 import bms.player.beatoraja.bga.BGAManager;
 import bms.player.beatoraja.decide.MusicDecide;
 import bms.player.beatoraja.gauge.GrooveGauge;
+import bms.player.beatoraja.pattern.PatternModifyLog;
 import bms.player.beatoraja.result.MusicResult;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.lunaticrave2.IRScoreData;
@@ -305,6 +306,7 @@ public class MainController extends ApplicationAdapter {
 	 * @author exch
 	 */
 	public static class PlayerResource {
+		private File f;
 		private BMSModel model;
 		private Config config;
 		private int auto;
@@ -319,9 +321,12 @@ public class MainController extends ApplicationAdapter {
 		private File[] coursefile;
 		private int courseindex;
 		
+		private PatternModifyLog[] pattern;
+		
 		private IRScoreData cscore;
 		
 		public void setBMSFile(final File f, final Config config, int autoplay) {
+			this.f = f;
 			this.finished = false;
 			this.config = config;
 			this.auto = autoplay;
@@ -417,6 +422,17 @@ public class MainController extends ApplicationAdapter {
 			}
 		}
 		
+		public void reloadBMSFile() {
+			if (f.getPath().toLowerCase().endsWith(".bmson")) {
+				BMSONDecoder decoder = new BMSONDecoder();
+				model = decoder.decode(f);
+			} else {
+				BMSDecoder decoder = new BMSDecoder();
+				model = decoder.decode(f);
+			}
+			gauge = null;
+		}
+		
 		public List<Float> getGauge() {
 			return gauge;
 		}
@@ -431,6 +447,14 @@ public class MainController extends ApplicationAdapter {
 
 		public void setGrooveGauge(GrooveGauge grooveGauge) {
 			this.grooveGauge = grooveGauge;
+		}
+
+		public PatternModifyLog[] getPatternModifyLog() {
+			return pattern;
+		}
+
+		public void setPatternModifyLog(PatternModifyLog[] pattern) {
+			this.pattern = pattern;
 		}
 	}
 }

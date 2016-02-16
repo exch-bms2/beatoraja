@@ -159,7 +159,6 @@ public class MusicResult extends ApplicationAdapter {
 			titlefont.draw(sprite, "POOR : " + score.getPr(), 100, 130);
 		}
 		sprite.end();
-		// TODO キー入力で移行、および入力したキーでリプレイ、同じ譜面でリプレイ、等を分けたい
 		boolean[] keystate = input.getKeystate();
 		if (resource.getScoreData() == null || ((System.currentTimeMillis() > time + 500
 				&& (keystate[0] || keystate[2] || keystate[4] || keystate[6])))) {
@@ -174,7 +173,18 @@ public class MusicResult extends ApplicationAdapter {
 					main.changeState(MainController.STATE_SELECTMUSIC, null);
 				}
 			} else {
-				main.changeState(MainController.STATE_SELECTMUSIC, null);
+				if(keystate[4]) {
+					// オプションを変更せず同じ譜面でリプレイ
+					resource.setPatternModifyLog(null);
+					resource.reloadBMSFile();
+					main.changeState(MainController.STATE_PLAYBMS, resource);					
+				} else if(keystate[6]) {
+					// 同じ譜面でリプレイ
+					resource.reloadBMSFile();
+					main.changeState(MainController.STATE_PLAYBMS, resource);
+				} else {
+					main.changeState(MainController.STATE_SELECTMUSIC, null);					
+				}
 			}
 		}
 	}
