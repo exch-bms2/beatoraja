@@ -182,13 +182,13 @@ public class LunaticRave2ScoreDatabaseManager {
 			if (grade) {
 				score = qr
 						.query(con,
-								"SELECT hash, clear, clear_ex as exclear , maxcombo as combo, rank, perfect as pg, great as gr  , minbp, "
+								"SELECT hash, clear, clear_ex as exclear , totalnotes as notes, maxcombo as combo, rank, perfect as pg, great as gr  , minbp, "
 										+ "playcount, clearcount, op_best as option FROM score WHERE hash LIKE '%"
 										+ hash + "'", rh);
 			} else {
 				score = qr
 						.query(con,
-								"SELECT hash, clear, clear_ex as exclear , maxcombo as combo, rank, perfect as pg, great as gr  , minbp, "
+								"SELECT hash, clear, clear_ex as exclear , totalnotes as notes, maxcombo as combo, rank, perfect as pg, great as gr  , minbp, "
 										+ "playcount, clearcount, op_best as option FROM score WHERE hash = '"
 										+ hash + "'", rh);
 			}
@@ -237,13 +237,13 @@ public class LunaticRave2ScoreDatabaseManager {
 				if (grade) {
 					score = qr
 							.query(con,
-									"SELECT hash, clear, clear_ex as exclear , maxcombo as combo, rank, perfect as pg, great as gr  , minbp, "
+									"SELECT hash, clear, clear_ex as exclear ,totalnotes as notes,  maxcombo as combo, rank, perfect as pg, great as gr  , minbp, "
 											+ "playcount, clearcount, op_best as option FROM score WHERE hash LIKE '%"
 											+ hash + "'", rh);
 				} else {
 					score = qr
 							.query(con,
-									"SELECT hash, clear, clear_ex as exclear , maxcombo as combo, rank, perfect as pg, great as gr  , minbp, "
+									"SELECT hash, clear, clear_ex as exclear ,totalnotes as notes,  maxcombo as combo, rank, perfect as pg, great as gr  , minbp, "
 											+ "playcount, clearcount, op_best as option FROM score WHERE hash = '"
 											+ hash + "'", rh);
 				}
