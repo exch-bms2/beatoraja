@@ -46,6 +46,7 @@ public class MusicSelector extends ApplicationAdapter {
 	// TODO アシストオプオションの選択
 	// TODO 詳細オプション(BGA ON/OFF、JUDGE TIMING、等
 	// TODO 選曲BGM
+	// TODO 同じ楽曲を選択する際のリソースの再利用
 
 	private MainController main;
 

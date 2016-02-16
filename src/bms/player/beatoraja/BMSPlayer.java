@@ -133,7 +133,10 @@ public class BMSPlayer extends ApplicationAdapter {
 		Logger.getGlobal().info("アシストオプション設定完了");
 		if (replay != null) {
 			PatternModifier.modify(model, Arrays.asList(replay.pattern));
-		} else if(resource.getCourseBMSModels() == null || config.getRandom() == 1){
+		} else if(resource.getPatternModifyLog() != null) {
+			PatternModifier.modify(model, Arrays.asList(resource.getPatternModifyLog()));
+		}
+		else if(resource.getCourseBMSModels() == null || config.getRandom() == 1){
 			switch (config.getRandom()) {
 			case 0:
 				break;
@@ -263,6 +266,7 @@ public class BMSPlayer extends ApplicationAdapter {
 				Gdx.files.internal("skin/VL-Gothic-Regular.ttf"));
 		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
 		parameter.size = 24;
+		parameter.characters += model.getFullTitle();
 		titlefont = generator.generateFont(parameter);
 		parameter.size = 18;
 		systemfont = generator.generateFont(parameter);
@@ -435,6 +439,9 @@ public class BMSPlayer extends ApplicationAdapter {
 				gaugelog.add(0f);
 				resource.setGauge(gaugelog);
 				resource.setGrooveGauge(gauge);
+				if(pattern != null) {
+					resource.setPatternModifyLog(pattern.toArray(new PatternModifyLog[0]));					
+				}
 				main.changeState(MainController.STATE_RESULT, resource);
 			}
 			break;
@@ -464,6 +471,9 @@ public class BMSPlayer extends ApplicationAdapter {
 				saveConfig();
 				resource.setGauge(gaugelog);
 				resource.setGrooveGauge(gauge);
+				if(pattern != null) {
+					resource.setPatternModifyLog(pattern.toArray(new PatternModifyLog[0]));					
+				}
 				main.changeState(MainController.STATE_RESULT, resource);
 			}
 			break;

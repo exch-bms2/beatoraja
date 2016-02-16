@@ -167,7 +167,7 @@ public class JudgeManager {
 										switch (judgetype) {
 										case JUDGE_ALGORITHM_LR2:
 											// 判定ラインより下にある判定ラインに最も近いノーツを選ぶ(LR2式)
-											if (timelines[i].getTime() < ptime) {
+											if (tl.getTime() < ptime - judge[3] || timelines[i].getTime() <= ptime) {
 												tl = timelines[i];
 												for (j = 0; j < judge.length	&& !(ptime >= timelines[i].getTime()
 																- judge[j] && ptime <= timelines[i]
