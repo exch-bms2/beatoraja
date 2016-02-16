@@ -193,8 +193,7 @@ public class MusicResult extends ApplicationAdapter {
 		oldexscore = score.getExscore();
 		oldmisscount = score.getMinbp();
 		score.setHash(model.getHash());
-		score.setNotes(model.getTotalNotes() + model.getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
-				+ model.getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH));
+		score.setNotes(model.getTotalNotes());
 
 		if (newscore.getClear() != GrooveGauge.CLEARTYPE_FAILED) {
 			score.setClearcount(score.getClearcount() + 1);

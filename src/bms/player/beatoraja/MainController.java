@@ -36,67 +36,68 @@ import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter.OutputType;
 
 public class MainController extends ApplicationAdapter {
-	
+
 	private BMSPlayer player;
 	private MusicDecide decide;
 	private MusicSelector selector;
 	private MusicResult result;
-	
+
 	private ApplicationAdapter current;
-	
+
 	private Config config;
 	private int auto;
-	
+
 	private LunaticRave2ScoreDatabaseManager scoredb;
-	private LunaticRave2SongDatabaseManager songdb;	
-	
+	private LunaticRave2SongDatabaseManager songdb;
+
 	private SpriteBatch sprite;
 	private ShapeRenderer shape;
-	
+
 	private File f;
 
 	public MainController(File f, Config config, int auto) {
 		this.auto = auto;
 		this.config = config;
 		this.f = f;
-		
+
 		try {
 			Class.forName("org.sqlite.JDBC");
-			scoredb = new LunaticRave2ScoreDatabaseManager(new File(".").getAbsoluteFile().getParent(), "/", "/");
+			scoredb = new LunaticRave2ScoreDatabaseManager(new File(".")
+					.getAbsoluteFile().getParent(), "/", "/");
 			scoredb.createTable("Player");
 			songdb = new LunaticRave2SongDatabaseManager(
-					new File("song.db").getPath(), true);
+					new File("song.db").getPath(), true, BMSModel.LNTYPE_CHARGENOTE);
 			songdb.createTable();
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public LunaticRave2ScoreDatabaseManager getScoreDatabase() {
 		return scoredb;
 	}
-	
+
 	public LunaticRave2SongDatabaseManager getSongDatabase() {
 		return songdb;
 	}
-	
+
 	public SpriteBatch getSpriteBatch() {
 		return sprite;
 	}
-	
+
 	public ShapeRenderer getShapeRenderer() {
 		return shape;
 	}
-	
+
 	public static final int STATE_SELECTMUSIC = 0;
 	public static final int STATE_DECIDE = 1;
 	public static final int STATE_PLAYBMS = 2;
 	public static final int STATE_RESULT = 3;
-	
+
 	public void changeState(int state, PlayerResource resource) {
-		switch(state) {
+		switch (state) {
 		case STATE_SELECTMUSIC:
-			if(this.f != null) {
+			if (this.f != null) {
 				exit();
 			}
 			selector.create();
@@ -107,7 +108,7 @@ public class MainController extends ApplicationAdapter {
 			current = decide;
 			break;
 		case STATE_PLAYBMS:
-			player = new BMSPlayer(this,resource);
+			player = new BMSPlayer(this, resource);
 			player.create();
 			current = player;
 			break;
@@ -117,7 +118,7 @@ public class MainController extends ApplicationAdapter {
 			break;
 		}
 	}
-	
+
 	public void setAuto(int auto) {
 		this.auto = auto;
 	}
@@ -126,17 +127,17 @@ public class MainController extends ApplicationAdapter {
 	public void create() {
 		sprite = new SpriteBatch();
 		shape = new ShapeRenderer();
-		
+
 		selector = new MusicSelector(this, config);
 		decide = new MusicDecide(this);
 		result = new MusicResult(this);
 
-		if(f != null) {
+		if (f != null) {
 			PlayerResource resource = new PlayerResource();
 			resource.setBMSFile(f, config, auto);
-			changeState(STATE_PLAYBMS, resource);			
+			changeState(STATE_PLAYBMS, resource);
 		} else {
-			changeState(STATE_SELECTMUSIC, null);			
+			changeState(STATE_SELECTMUSIC, null);
 		}
 	}
 
@@ -149,18 +150,18 @@ public class MainController extends ApplicationAdapter {
 	public void dispose() {
 		shape.dispose();
 		sprite.dispose();
-		if(player != null) {
+		if (player != null) {
 			player.dispose();
 		}
-		if(selector != null) {
+		if (selector != null) {
 			selector.dispose();
 		}
-		if(decide != null) {
+		if (decide != null) {
 			decide.dispose();
 		}
-		if(result != null) {
+		if (result != null) {
 			result.dispose();
-		}	
+		}
 	}
 
 	@Override
@@ -227,14 +228,14 @@ public class MainController extends ApplicationAdapter {
 				e.printStackTrace();
 			}
 		}
-		
-		if(config.getBmsroot().length == 0) {
+
+		if (config.getBmsroot().length == 0) {
 			JFileChooser chooser = new JFileChooser();
 			chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 			chooser.setDialogTitle("Choose BMS root directory");
-			if(chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-				File[] files = new File[]{chooser.getSelectedFile()};
-				String[] rootdir = new String[]{files[0].getAbsolutePath()};
+			if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+				File[] files = new File[] { chooser.getSelectedFile() };
+				String[] rootdir = new String[] { files[0].getAbsolutePath() };
 				config.setBmsroot(rootdir);
 				Json json = new Json();
 				json.setOutputType(OutputType.json);
@@ -249,10 +250,11 @@ public class MainController extends ApplicationAdapter {
 
 				try {
 					LunaticRave2SongDatabaseManager songdb = new LunaticRave2SongDatabaseManager(
-							new File("song.db").getPath(), true);
+							new File("song.db").getPath(), true, BMSModel.LNTYPE_CHARGENOTE);
 					songdb.createTable();
 					Logger.getGlobal().info("song.db更新開始");
-					songdb.updateSongDatas(files, rootdir, new File(".").getAbsolutePath());
+					songdb.updateSongDatas(files, rootdir,
+							new File(".").getAbsolutePath());
 					Logger.getGlobal().info("song.db更新完了");
 				} catch (ClassNotFoundException e) {
 					e.printStackTrace();
@@ -294,11 +296,11 @@ public class MainController extends ApplicationAdapter {
 					e.getClass().getName() + " : " + e.getMessage());
 		}
 	}
-	
+
 	public void exit() {
 		Gdx.app.exit();
 	}
-	
+
 	/**
 	 * プレイヤーのコンポーネント間でデータをやり取りするためのクラス
 	 * 
@@ -311,51 +313,57 @@ public class MainController extends ApplicationAdapter {
 		private AudioProcessor audio;
 		private BGAManager bga;
 		private IRScoreData score;
-		
+
 		private boolean finished = false;
 		private GrooveGauge grooveGauge;
 		private List<Float> gauge;
 		private BMSModel[] course;
 		private File[] coursefile;
 		private int courseindex;
-		
+
 		private IRScoreData cscore;
-		
+
 		public void setBMSFile(final File f, final Config config, int autoplay) {
 			this.finished = false;
 			this.config = config;
 			this.auto = autoplay;
 			if (f.getPath().toLowerCase().endsWith(".bmson")) {
-				BMSONDecoder decoder = new BMSONDecoder();
+				BMSONDecoder decoder = new BMSONDecoder(
+						BMSModel.LNTYPE_CHARGENOTE);
 				model = decoder.decode(f);
 			} else {
-				BMSDecoder decoder = new BMSDecoder();
+				BMSDecoder decoder = new BMSDecoder(BMSModel.LNTYPE_CHARGENOTE);
 				model = decoder.decode(f);
 			}
-			
+
 			audio = new SoundProcessor();
 			bga = new BGAManager(config);
 			Thread medialoader = new Thread() {
 				@Override
 				public void run() {
 					try {
-						if (config.getBga() == Config.BGA_ON || (config.getBga() == Config.BGA_AUTO && (auto != 0))) {
+						if (config.getBga() == Config.BGA_ON
+								|| (config.getBga() == Config.BGA_AUTO && (auto != 0))) {
 							bga.setModel(model, f.getPath());
 						}
 						audio.setModel(model, f.getPath());
 					} catch (Exception e) {
-						Logger.getGlobal().severe(e.getClass().getName() + " : " + e.getMessage());
+						Logger.getGlobal()
+								.severe(e.getClass().getName() + " : "
+										+ e.getMessage());
 						e.printStackTrace();
 					} catch (Error e) {
-						Logger.getGlobal().severe(e.getClass().getName() + " : " + e.getMessage());
+						Logger.getGlobal()
+								.severe(e.getClass().getName() + " : "
+										+ e.getMessage());
 					} finally {
 						finished = true;
 					}
-				}				
+				}
 			};
 			medialoader.start();
 		}
-		
+
 		public BMSModel getBMSModel() {
 			return model;
 		}
@@ -367,15 +375,15 @@ public class MainController extends ApplicationAdapter {
 		public Config getConfig() {
 			return config;
 		}
-		
+
 		public AudioProcessor getAudioProcessor() {
 			return audio;
 		}
-		
+
 		public BGAManager getBGAManager() {
 			return bga;
 		}
-		
+
 		public boolean mediaLoadFinished() {
 			return finished;
 		}
@@ -387,36 +395,38 @@ public class MainController extends ApplicationAdapter {
 		public void setScoreData(IRScoreData score) {
 			this.score = score;
 		}
-		
+
 		public void setCourseBMSFiles(File[] files) {
 			coursefile = files;
 			List<BMSModel> models = new ArrayList();
-			for(File f : files) {
+			for (File f : files) {
 				if (f.getPath().toLowerCase().endsWith(".bmson")) {
-					BMSONDecoder decoder = new BMSONDecoder();
+					BMSONDecoder decoder = new BMSONDecoder(
+							BMSModel.LNTYPE_CHARGENOTE);
 					models.add(decoder.decode(f));
 				} else {
-					BMSDecoder decoder = new BMSDecoder();
+					BMSDecoder decoder = new BMSDecoder(
+							BMSModel.LNTYPE_CHARGENOTE);
 					models.add(decoder.decode(f));
 				}
 			}
 			course = models.toArray(new BMSModel[0]);
 		}
-		
+
 		public BMSModel[] getCourseBMSModels() {
 			return course;
 		}
-		
+
 		public boolean nextCourse() {
 			courseindex++;
-			if(courseindex == coursefile.length) {
+			if (courseindex == coursefile.length) {
 				return false;
 			} else {
 				setBMSFile(coursefile[courseindex], config, auto);
 				return true;
 			}
 		}
-		
+
 		public List<Float> getGauge() {
 			return gauge;
 		}

@@ -17,6 +17,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class BMSONDecoder {
 	
+	private int lntype;
+	
+	public BMSONDecoder(int lntype) {
+		this.lntype = lntype;
+	}
+	
 	public BMSModel decode(File f) {
 		BMSModel model = new BMSModel();
 		try {
@@ -30,6 +36,7 @@ public class BMSONDecoder {
 			model.setBpm(bmson.info.initBPM);
 			model.setPlaylevel(String.valueOf(bmson.info.level));
 			model.setUseKeys(7);
+			model.setLntype(lntype);
 			double nowbpm = model.getBpm();
 			// TODO bpmNotes処理
 			// lines処理(小節線)

@@ -96,9 +96,7 @@ public class BMSPlayer extends ApplicationAdapter {
 		Config config = resource.getConfig();
 		this.autoplay = resource.getAutoplay();
 		timelines = model.getAllTimeLines();
-		totalnotes = model.getTotalNotes()
-				+ model.getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
-				+ model.getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH);
+		totalnotes = model.getTotalNotes();
 		if(resource.getCourseBMSModels() == null) {
 			if (config.isBpmguide()) {
 				assist = 1;
@@ -502,9 +500,7 @@ public class BMSPlayer extends ApplicationAdapter {
 
 		IRScoreData score = new IRScoreData();
 		score.setHash(model.getHash());
-		score.setNotes(model.getTotalNotes()
-				+ model.getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
-				+ model.getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH));
+		score.setNotes(model.getTotalNotes());
 		int clear = GrooveGauge.CLEARTYPE_FAILED;
 		if (state != STATE_FAILED && gauge.isQualified()) {
 			if (assist > 0) {

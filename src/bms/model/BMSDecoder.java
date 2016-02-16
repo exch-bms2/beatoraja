@@ -21,7 +21,14 @@ public class BMSDecoder {
 
 	private List<CommandWord> reserve = new ArrayList<CommandWord>();
 
+	private int lntype;
+	
 	public BMSDecoder() {
+		this(BMSModel.LNTYPE_LONGNOTE);
+	}
+	
+	public BMSDecoder(int lntype) {
+		this.lntype = lntype;
 		// 予約語の登録
 		reserve.add(new CommandWord("PLAYER") {
 			public void execute(BMSModel model, String arg) {
@@ -323,6 +330,7 @@ public class BMSDecoder {
 				}
 			}
 			model.setSelectedIndexOfTimeLines(1);
+			model.setLntype(lntype);
 		} catch (IOException e) {
 			Logger.getGlobal().severe(
 					"BMSファイル解析失敗: " + e.getClass().getName() + " - "

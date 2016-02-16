@@ -86,6 +86,12 @@ public class BMSModel implements Comparable {
 
 	private String lnobj;
 
+	private int lntype;
+
+	public static final int LNTYPE_LONGNOTE = 0;
+	public static final int LNTYPE_CHARGENOTE = 1;
+	public static final int LNTYPE_HELLCHARGENOTE = 2;
+
 	/**
 	 * 時間とTimeLineのマッピング
 	 */
@@ -229,11 +235,11 @@ public class BMSModel implements Comparable {
 	public double getBPM(String id) {
 		return bpmtable.get(id);
 	}
-	
+
 	public double getMinBPM() {
 		double bpm = this.getBpm();
-		for(Map<Integer, TimeLine> tll : timelineList) {
-			for(Integer time : tll.keySet()) {
+		for (Map<Integer, TimeLine> tll : timelineList) {
+			for (Integer time : tll.keySet()) {
 				double d = tll.get(time).getBPM();
 				bpm = (bpm <= d) ? bpm : d;
 			}
@@ -243,8 +249,8 @@ public class BMSModel implements Comparable {
 
 	public double getMaxBPM() {
 		double bpm = this.getBpm();
-		for(Map<Integer, TimeLine> tll : timelineList) {
-			for(Integer time : tll.keySet()) {
+		for (Map<Integer, TimeLine> tll : timelineList) {
+			for (Integer time : tll.keySet()) {
 				double d = tll.get(time).getBPM();
 				bpm = (bpm >= d) ? bpm : d;
 			}
@@ -268,10 +274,10 @@ public class BMSModel implements Comparable {
 	public int getTotalNotes() {
 		return this.getTotalNotes(0, Integer.MAX_VALUE);
 	}
-	
+
 	public int getTotalNotes(int type) {
 		return this.getTotalNotes(0, Integer.MAX_VALUE, type);
-	}	
+	}
 
 	/**
 	 * 指定の時間範囲の総ノート数を返す
@@ -345,7 +351,7 @@ public class BMSModel implements Comparable {
 				TimeLine tl = timelines.get(time);
 				switch (type) {
 				case TOTALNOTES_ALL:
-					count += tl.getTotalNotes();
+					count += tl.getTotalNotes(lntype);
 					break;
 				case TOTALNOTES_KEY:
 					for (int lane : nlane) {
@@ -358,9 +364,12 @@ public class BMSModel implements Comparable {
 				case TOTALNOTES_LONG_KEY:
 					for (int lane : nlane) {
 						if (tl.existNote(lane)
-								&& (tl.getNote(lane) instanceof LongNote)
-								&& ((LongNote) tl.getNote(lane)).getStart() == tl) {
-							count++;
+								&& (tl.getNote(lane) instanceof LongNote)) {
+							LongNote ln = (LongNote) tl.getNote(lane);
+							if (lntype != LNTYPE_LONGNOTE
+									|| ln.getStart() == tl) {
+								count++;
+							}
 						}
 					}
 					break;
@@ -375,9 +384,12 @@ public class BMSModel implements Comparable {
 				case TOTALNOTES_LONG_SCRATCH:
 					for (int lane : slane) {
 						if (tl.existNote(lane)
-								&& (tl.getNote(lane) instanceof LongNote)
-								&& ((LongNote) tl.getNote(lane)).getStart() == tl) {
-							count++;
+								&& (tl.getNote(lane) instanceof LongNote)) {
+							LongNote ln = (LongNote) tl.getNote(lane);
+							if (lntype != LNTYPE_LONGNOTE
+									|| ln.getStart() == tl) {
+								count++;
+							}
 						}
 					}
 					break;
@@ -413,7 +425,7 @@ public class BMSModel implements Comparable {
 		for (int i = 0; i < times.length; i++) {
 			int notes = 0;
 			for (int j = i; times[j] < times[i] + range; j++) {
-				notes += timelines.get(times[j]).getTotalNotes();
+				notes += timelines.get(times[j]).getTotalNotes(lntype);
 			}
 			maxnotes = (maxnotes < notes) ? notes : maxnotes;
 		}
@@ -428,12 +440,12 @@ public class BMSModel implements Comparable {
 		}
 		return tl;
 	}
-	
-	public TimeLine[] getAllTimeLines(){
+
+	public TimeLine[] getAllTimeLines() {
 		Integer[] times = timelines.keySet().toArray(new Integer[0]);
 		Arrays.sort(times);
 		TimeLine[] tls = new TimeLine[times.length];
-		for(int i = 0; i < times.length;i++) {
+		for (int i = 0; i < times.length; i++) {
 			tls[i] = timelines.get(times[i]);
 		}
 		return tls;
@@ -546,6 +558,14 @@ public class BMSModel implements Comparable {
 
 	public void setBackbmp(String backbmp) {
 		this.backbmp = backbmp;
+	}
+
+	public int getLntype() {
+		return lntype;
+	}
+
+	public void setLntype(int lntype) {
+		this.lntype = lntype;
 	}
 
 }

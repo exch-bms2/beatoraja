@@ -33,6 +33,13 @@ public class LunaticRave2SongDatabaseManager {
 	 * bmsonを対象に入れる場合はtrue
 	 */
 	private boolean enableBMSON = false;
+	
+	private int lntype;
+
+	public LunaticRave2SongDatabaseManager(String filepath)
+			throws ClassNotFoundException {
+		this(filepath, BMSModel.LNTYPE_LONGNOTE);
+	}
 
 	/**
 	 * ファイルパスで指定したLR2楽曲データベースへのアクセサを作成する
@@ -41,8 +48,9 @@ public class LunaticRave2SongDatabaseManager {
 	 *            LR2楽曲データベースのファイルパス
 	 * @throws ClassNotFoundException
 	 */
-	public LunaticRave2SongDatabaseManager(String filepath)
+	public LunaticRave2SongDatabaseManager(String filepath, int lntype)
 			throws ClassNotFoundException {
+		this.lntype = lntype;
 		Class.forName("org.sqlite.JDBC");
 		songdb = new SqliteDBManager(filepath);
 	}
@@ -56,7 +64,7 @@ public class LunaticRave2SongDatabaseManager {
 	 *            bmsonを対象に入れる場合はtrue
 	 * @throws ClassNotFoundException
 	 */
-	public LunaticRave2SongDatabaseManager(String path, boolean enableBMSON)
+	public LunaticRave2SongDatabaseManager(String path, boolean enableBMSON, int lntype)
 			throws ClassNotFoundException {
 		Class.forName("org.sqlite.JDBC");
 		songdb = new SqliteDBManager(path);
@@ -638,11 +646,11 @@ public class LunaticRave2SongDatabaseManager {
 			BMSModel model = null;
 			if (name.endsWith(".bms") || name.endsWith(".bme")
 					|| name.endsWith(".bml") || name.endsWith(".pms")) {
-				BMSDecoder decoder = new BMSDecoder();
+				BMSDecoder decoder = new BMSDecoder(lntype);
 				model = decoder.decode(dir);
 			}
 			if (enableBMSON && name.endsWith(".bmson")) {
-				BMSONDecoder decoder = new BMSONDecoder();
+				BMSONDecoder decoder = new BMSONDecoder(lntype);
 				model = decoder.decode(dir);
 			}
 

@@ -48,29 +48,40 @@ public class TimeLine {
 	 * POORレイヤー
 	 */
 	private int[] poor;
-	
+
 	public TimeLine(int time) {
 		this.time = time;
 	}
-	
+
 	public int getTime() {
 		return time;
 	}
+
 	/**
-	 *タイムライン上の総ノート数を返す
+	 * タイムライン上の総ノート数を返す
 	 *
 	 * @return
 	 */
 	public int getTotalNotes() {
+		return getTotalNotes(BMSModel.LNTYPE_LONGNOTE);
+	}
+
+	/**
+	 * タイムライン上の総ノート数を返す
+	 *
+	 * @return
+	 */
+	public int getTotalNotes(int lntype) {
 		int count = 0;
 		for (int i = 0; i < notes.length; i++) {
 			if (notes[i] != null) {
-				if(notes[i] instanceof LongNote) {
-					if((((LongNote)notes[i])).getStart() == this) {
+				if (notes[i] instanceof LongNote) {
+					if (lntype != BMSModel.LNTYPE_LONGNOTE
+							|| (((LongNote) notes[i])).getStart() == this) {
 						count++;
 					}
-				} else if(notes[i] instanceof NormalNote){
-					count++;					
+				} else if (notes[i] instanceof NormalNote) {
+					count++;
 				}
 			}
 		}
@@ -80,43 +91,43 @@ public class TimeLine {
 	public boolean existNote(int lane) {
 		return notes[lane] != null;
 	}
-	
+
 	public Note getNote(int lane) {
 		return notes[lane];
 	}
-	
-	public void addNote(int lane,Note note) {
+
+	public void addNote(int lane, Note note) {
 		notes[lane] = note;
 	}
 
-	public void addHiddenNote(int lane,Note note) {
+	public void addHiddenNote(int lane, Note note) {
 		hiddennotes[lane] = note;
 	}
 
 	public Note getHiddenNote(int lane) {
 		return hiddennotes[lane];
 	}
-	
+
 	public void addBackGroundNote(Note note) {
 		bgnotes.add(note);
 	}
-	
+
 	public Note[] getBackGroundNotes() {
 		return bgnotes.toArray(new Note[0]);
 	}
-	
+
 	public void setBPM(double bpm) {
 		this.bpm = bpm;
 	}
-	
+
 	public double getBPM() {
 		return bpm;
 	}
-	
+
 	public void setSectionLine(boolean section) {
 		this.sectionLine = section;
 	}
-	
+
 	public boolean getSectionLine() {
 		return sectionLine;
 	}
@@ -151,5 +162,5 @@ public class TimeLine {
 
 	public void setSection(float section) {
 		this.section = section;
-	}	
+	}
 }

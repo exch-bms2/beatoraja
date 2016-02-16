@@ -98,7 +98,7 @@ public class MusicSelector extends ApplicationAdapter {
 			scoredb = new LunaticRave2ScoreDatabaseManager(new File(".").getAbsoluteFile().getParent(), "/", "/");
 			scoredb.createTable("Player");
 			Logger.getGlobal().info("スコアデータベース接続");
-			songdb = new LunaticRave2SongDatabaseManager(new File("song.db").getPath(), true);
+			songdb = main.getSongDatabase();
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}

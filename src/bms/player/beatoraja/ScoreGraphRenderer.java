@@ -28,9 +28,7 @@ public class ScoreGraphRenderer {
 	private int rival;
 
 	public ScoreGraphRenderer(BMSModel model, int best, int rival) {
-		max = (model.getTotalNotes()
-				+ model.getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY) + model
-				.getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH)) * 2;
+		max = model.getTotalNotes()* 2;
 		this.best = best;
 		this.rival = rival;
 	}
