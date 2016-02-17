@@ -119,6 +119,18 @@ public class SoundProcessor implements AudioProcessor {
 			wavmap[id].play();
 		}
 	}
+	
+	public void stop(int id) {
+		if(id == -1) {
+			for (Sound s : wavmap) {
+				if (s != null) {
+					s.stop();
+				}
+			}
+		} else {
+			wavmap[id].stop();			
+		}
+	}
 
 	/**
 	 * リソースを開放する

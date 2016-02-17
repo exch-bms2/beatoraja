@@ -24,4 +24,10 @@ public class AudioDeviceProcessor implements AudioProcessor {
 
 	}
 
+	@Override
+	public void stop(int id) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

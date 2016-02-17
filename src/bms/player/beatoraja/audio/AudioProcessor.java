@@ -22,6 +22,8 @@ public interface AudioProcessor {
 	 * @param id
 	 */
 	public void play(int id);
+	
+	public void stop(int id);
 
 	/**
 	 * リソースを開放する

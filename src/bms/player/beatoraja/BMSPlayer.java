@@ -38,6 +38,7 @@ public class BMSPlayer extends ApplicationAdapter {
 
 	// TODO LR2スキンローダー
 
+	// TODO STATE_PRELOAD中の中断時に再度同じ楽曲を選択すると音が出ない
 	// TODO GLAssistから起動すると楽曲ロード中に止まる
 	// TODO layerの(0,0,0)を透過するShaderの実装
 
@@ -418,6 +419,7 @@ public class BMSPlayer extends ApplicationAdapter {
 			if (keyinput != null) {
 				keyinput.stop = true;
 			}
+			resource.getAudioProcessor().stop(-1);
 			renderMain(time);
 
 			shape.begin(ShapeType.Filled);
