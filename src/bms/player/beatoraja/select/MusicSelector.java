@@ -2,27 +2,16 @@ package bms.player.beatoraja.select;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 
-import bms.model.TimeLine;
 import bms.player.beatoraja.Config;
 import bms.player.beatoraja.MainController;
 import bms.player.beatoraja.MainController.PlayerResource;
 import bms.player.beatoraja.input.MusicSelectorInputProcessor;
-import bms.player.lunaticrave2.FolderData;
-import bms.player.lunaticrave2.IRScoreData;
-import bms.player.lunaticrave2.LunaticRave2ScoreDatabaseManager;
-import bms.player.lunaticrave2.LunaticRave2SongDatabaseManager;
-import bms.player.lunaticrave2.SongData;
-import bms.table.DifficultyTable;
+import bms.player.lunaticrave2.*;
+import bms.table.*;
 import bms.table.DifficultyTable.Grade;
-import bms.table.DifficultyTableElement;
-import bms.table.DifficultyTableParser;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -46,7 +35,6 @@ public class MusicSelector extends ApplicationAdapter {
 	// TODO アシストオプオションの選択
 	// TODO 詳細オプション(BGA ON/OFF、JUDGE TIMING、等
 	// TODO 選曲BGM
-	// TODO 同じ楽曲を選択する際のリソースの再利用
 
 	private MainController main;
 
@@ -89,6 +77,8 @@ public class MusicSelector extends ApplicationAdapter {
 
 	private Config config;
 
+	private PlayerResource resource;
+	
 	private TableBar[] tables = new TableBar[0];
 
 	public MusicSelector(MainController main, Config config) {
@@ -150,7 +140,11 @@ public class MusicSelector extends ApplicationAdapter {
 		this.tables = tables.toArray(new TableBar[0]);
 	}
 
-	public void create() {
+	public void create(PlayerResource resource) {
+		this.resource = resource;
+		if(this.resource == null) {
+			this.resource = new PlayerResource();			
+		}
 		int index = selectedindex;
 		if (dir.size() > 0) {
 			updateBar(dir.get(dir.size() - 1));
@@ -342,19 +336,19 @@ public class MusicSelector extends ApplicationAdapter {
 					}
 				} else if (currentsongs[selectedindex] instanceof SongBar) {
 					main.setAuto(0);
-					PlayerResource resource = new PlayerResource();
+					resource.clear();
 					resource.setBMSFile(new File(((SongBar) currentsongs[selectedindex]).getSongData().getPath()),
 							config, 0);
 					main.changeState(MainController.STATE_DECIDE, resource);
 				} else if (currentsongs[selectedindex] instanceof GradeBar) {
 					if(((GradeBar) currentsongs[selectedindex]).existsAllSongs()) {
 						main.setAuto(0);
-						PlayerResource resource = new PlayerResource();
 						List<File> files = new ArrayList<File>();
 						for (SongData song : ((GradeBar) currentsongs[selectedindex])
 								.getSongDatas()) {
 							files.add(new File(song.getPath()));
 						}
+						resource.clear();
 						resource.setBMSFile(files.get(0), config, 0);
 						resource.setCourseBMSFiles(files.toArray(new File[0]));
 						main.changeState(MainController.STATE_DECIDE, resource);						
@@ -389,7 +383,7 @@ public class MusicSelector extends ApplicationAdapter {
 
 			if (keystate[4]) {
 				if (currentsongs[selectedindex] instanceof SongBar) {
-					PlayerResource resource = new PlayerResource();
+					resource.clear();
 					resource.setBMSFile(new File(((SongBar) currentsongs[selectedindex]).getSongData().getPath()),
 							config, 1);
 					main.changeState(MainController.STATE_DECIDE, resource);
@@ -397,7 +391,7 @@ public class MusicSelector extends ApplicationAdapter {
 			}
 			if (keystate[6]) {
 				if (currentsongs[selectedindex] instanceof SongBar) {
-					PlayerResource resource = new PlayerResource();
+					resource.clear();
 					resource.setBMSFile(new File(((SongBar) currentsongs[selectedindex]).getSongData().getPath()),
 							config, 2);
 					main.changeState(MainController.STATE_DECIDE, resource);

@@ -1,20 +1,13 @@
 package bms.player.beatoraja;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.*;
+import java.util.*;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
 import javax.swing.JFileChooser;
 
-import bms.model.BMSDecoder;
-import bms.model.BMSModel;
-import bms.model.BMSONDecoder;
+import bms.model.*;
 import bms.player.beatoraja.audio.AudioProcessor;
 import bms.player.beatoraja.audio.SoundProcessor;
 import bms.player.beatoraja.bga.BGAManager;
@@ -23,9 +16,7 @@ import bms.player.beatoraja.gauge.GrooveGauge;
 import bms.player.beatoraja.pattern.PatternModifyLog;
 import bms.player.beatoraja.result.MusicResult;
 import bms.player.beatoraja.select.MusicSelector;
-import bms.player.lunaticrave2.IRScoreData;
-import bms.player.lunaticrave2.LunaticRave2ScoreDatabaseManager;
-import bms.player.lunaticrave2.LunaticRave2SongDatabaseManager;
+import bms.player.lunaticrave2.*;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -101,7 +92,7 @@ public class MainController extends ApplicationAdapter {
 			if (this.f != null) {
 				exit();
 			}
-			selector.create();
+			selector.create(resource);
 			current = selector;
 			break;
 		case STATE_DECIDE:
@@ -326,9 +317,14 @@ public class MainController extends ApplicationAdapter {
 		private PatternModifyLog[] pattern;
 		
 		private IRScoreData cscore;
+		
+		public void clear() {
+			course = null;
+			gauge = null;
+			coursefile = null;
+		}
 
 		public void setBMSFile(final File f, final Config config, int autoplay) {
-			this.f = f;
 			this.finished = false;
 			this.config = config;
 			this.auto = autoplay;
@@ -340,33 +336,46 @@ public class MainController extends ApplicationAdapter {
 				BMSDecoder decoder = new BMSDecoder(BMSModel.LNTYPE_CHARGENOTE);
 				model = decoder.decode(f);
 			}
+			if(this.f == null || !f.getAbsolutePath().equals(this.f.getAbsolutePath())) {
+				// 前回と違うbmsファイルを読み込んだ場合はリソースのロード
+				// 同フォルダの違うbmsファイルでも、WAV/,BMP定義が違う可能性があるのでロード
+				this.f = f;
 
-			audio = new SoundProcessor();
-			bga = new BGAManager(config);
-			Thread medialoader = new Thread() {
-				@Override
-				public void run() {
-					try {
-						if (config.getBga() == Config.BGA_ON
-								|| (config.getBga() == Config.BGA_AUTO && (auto != 0))) {
-							bga.setModel(model, f.getPath());
-						}
-						audio.setModel(model, f.getPath());
-					} catch (Exception e) {
-						Logger.getGlobal()
-								.severe(e.getClass().getName() + " : "
-										+ e.getMessage());
-						e.printStackTrace();
-					} catch (Error e) {
-						Logger.getGlobal()
-								.severe(e.getClass().getName() + " : "
-										+ e.getMessage());
-					} finally {
-						finished = true;
-					}
+				if(audio != null) {
+					audio.dispose();
 				}
-			};
-			medialoader.start();
+				audio = new SoundProcessor();
+				if(bga != null) {
+					bga.dispose();
+				}
+				bga = new BGAManager(config);
+				Thread medialoader = new Thread() {
+					@Override
+					public void run() {
+						try {
+							if (config.getBga() == Config.BGA_ON
+									|| (config.getBga() == Config.BGA_AUTO && (auto != 0))) {
+								bga.setModel(model, f.getPath());
+							}
+							audio.setModel(model, f.getPath());
+						} catch (Exception e) {
+							Logger.getGlobal()
+									.severe(e.getClass().getName() + " : "
+											+ e.getMessage());
+							e.printStackTrace();
+						} catch (Error e) {
+							Logger.getGlobal()
+									.severe(e.getClass().getName() + " : "
+											+ e.getMessage());
+						} finally {
+							finished = true;
+						}
+					}
+				};
+				medialoader.start();				
+			} else {
+				finished = true;
+			}
 		}
 
 		public BMSModel getBMSModel() {
@@ -440,7 +449,7 @@ public class MainController extends ApplicationAdapter {
 				BMSDecoder decoder = new BMSDecoder(BMSModel.LNTYPE_CHARGENOTE);
 				model = decoder.decode(f);
 			}
-			gauge = null;
+			clear();
 		}
 		
 		public List<Float> getGauge() {

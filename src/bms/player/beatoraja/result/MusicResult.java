@@ -183,7 +183,7 @@ public class MusicResult extends ApplicationAdapter {
 					resource.reloadBMSFile();
 					main.changeState(MainController.STATE_PLAYBMS, resource);
 				} else {
-					main.changeState(MainController.STATE_SELECTMUSIC, null);					
+					main.changeState(MainController.STATE_SELECTMUSIC, resource);					
 				}
 			}
 		}
