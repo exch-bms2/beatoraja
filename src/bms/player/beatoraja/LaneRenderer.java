@@ -4,6 +4,8 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
 
 import bms.model.*;
+import bms.player.beatoraja.MainController.PlayerResource;
+import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
@@ -57,18 +59,25 @@ public class LaneRenderer {
 	private PlaySkin skin;
 	
 	private Config config;
+	private int auto;
 
 	Color[] lanebg = { new Color(0.1f, 0.1f, 0.1f, 1), Color.BLACK,
 			new Color(0.1f, 0.1f, 0.1f, 1), Color.BLACK,
 			new Color(0.1f, 0.1f, 0.1f, 1), Color.BLACK,
 			new Color(0.1f, 0.1f, 0.1f, 1), Color.BLACK };
 
+	private boolean hschanged;
+	private long startpressedtime;
+	private boolean startpressed;
+	private boolean cursorpressed;
+
 	public LaneRenderer(BMSPlayer main, SpriteBatch sprite, PlaySkin skin,
-			Config config, BMSModel model) {
+			PlayerResource resource, BMSModel model) {
 		this.main = main;
 		this.sprite = sprite;
 		this.skin = skin;
-		this.config =config;
+		this.config =resource.getConfig();
+		auto = resource.getAutoplay();
 		this.enableLanecover = config.isEnablelanecover();
 		this.enableLift = config.isEnablelift();
 		this.lift = config.getLift();
@@ -222,24 +231,81 @@ public class LaneRenderer {
 				sprite.end();
 			}
 		}
-		// TODO
-		// ここでカバー移動判定を行うとオートプレイ時に誤反応するので、MusicSelectのスクラッチ移動判定と共にInputProcessorに集約したい
-		// move lane cover by START + Scratch
-		if (main.getBMSPlayerInputProcessor().startPressed()
-				&& (keystate[7] | keystate[8])) {
-			long l = System.currentTimeMillis();
-			if (l - lanecovertiming > 50) {
+		
+		// 各種コントロール入力判定
+		// TODO ここで各種コントロール入力判定をやるべきではないかも
+		BMSPlayerInputProcessor input = main.getBMSPlayerInputProcessor();
+		if(input.getCursorState()[0]) {
+			if(!cursorpressed){
 				float f = lanecover;
-				f = f + (keystate[7] ? 0.001f : -0.001f);
-				if (f > 1) {
-					f = 1;
-				}
+				f = f - 0.01f;
 				if (f < 0) {
 					f = 0;
 				}
 				this.setLanecover(f);
-				lanecovertiming = l;
+				cursorpressed = true;				
 			}
+		} else if(input.getCursorState()[1]){
+			if(!cursorpressed){
+				float f = lanecover;
+				f = f + 0.01f;
+				if (f > 1) {
+					f = 1;
+				}
+				this.setLanecover(f);
+				cursorpressed = true;
+			}
+		} else {
+			cursorpressed = false;			
+		}
+		if(input.startPressed()) {
+			if(auto == 0) {
+				// change hi speed by START + Keys
+				boolean[] key = input.getKeystate();
+				if(key[0] || key[2] || key[4] || key[6]) {
+					if(!hschanged) {
+						changeHispeed(false);						
+						 hschanged = true;							
+					}
+				} else if(key[1] || key[3] || key[5]){
+					if(!hschanged) {
+						changeHispeed(true);
+						 hschanged = true;							
+					}
+				} else {
+					 hschanged = false;
+				}
+				
+				// move lane cover by START + Scratch
+				if (keystate[7] | keystate[8]) {
+					long l = System.currentTimeMillis();
+					if (l - lanecovertiming > 50) {
+						float f = lanecover;
+						f = f + (keystate[7] ? 0.001f : -0.001f);
+						if (f > 1) {
+							f = 1;
+						}
+						if (f < 0) {
+							f = 0;
+						}
+						this.setLanecover(f);
+						lanecovertiming = l;
+					}
+				}				
+			}
+			// show-hide lane cover by double-press START
+			if(!startpressed) {
+				long stime = System.currentTimeMillis();
+				if(stime < startpressedtime + 500) {
+					setEnableLanecover(!isEnableLanecover());
+					startpressedtime = 0;
+				} else {
+					startpressedtime = stime;
+				}						
+			}
+			startpressed = true;
+		} else {
+			startpressed = false;
 		}
 
 		float y = hl;

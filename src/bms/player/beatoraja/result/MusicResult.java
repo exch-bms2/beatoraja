@@ -8,7 +8,6 @@ import bms.model.BMSModel;
 import bms.player.beatoraja.MainController;
 import bms.player.beatoraja.MainController.PlayerResource;
 import bms.player.beatoraja.gauge.GrooveGauge;
-import bms.player.beatoraja.input.MusicResultInputProcessor;
 import bms.player.lunaticrave2.IRScoreData;
 
 import com.badlogic.gdx.ApplicationAdapter;
@@ -46,8 +45,6 @@ public class MusicResult extends ApplicationAdapter {
 	private int oldexscore;
 	private int oldmisscount;
 
-	private MusicResultInputProcessor input;
-
 	public MusicResult(MainController main) {
 		this.main = main;
 	}
@@ -56,7 +53,6 @@ public class MusicResult extends ApplicationAdapter {
 
 	public void create(PlayerResource resource) {
 		this.resource = resource;
-		input = new MusicResultInputProcessor(this);
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/VL-Gothic-Regular.ttf"));
 		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
 		parameter.size = 24;
@@ -159,7 +155,7 @@ public class MusicResult extends ApplicationAdapter {
 			titlefont.draw(sprite, "POOR : " + score.getPr(), 100, 130);
 		}
 		sprite.end();
-		boolean[] keystate = input.getKeystate();
+		boolean[] keystate = main.getInputProcessor().getKeystate();
 		if (resource.getScoreData() == null || ((System.currentTimeMillis() > time + 500
 				&& (keystate[0] || keystate[2] || keystate[4] || keystate[6])))) {
 			if (resource.getCourseBMSModels() != null) {

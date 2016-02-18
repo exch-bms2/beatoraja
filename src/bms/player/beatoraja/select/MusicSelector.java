@@ -13,7 +13,7 @@ import bms.model.TimeLine;
 import bms.player.beatoraja.Config;
 import bms.player.beatoraja.MainController;
 import bms.player.beatoraja.MainController.PlayerResource;
-import bms.player.beatoraja.input.MusicSelectorInputProcessor;
+import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.lunaticrave2.FolderData;
 import bms.player.lunaticrave2.IRScoreData;
 import bms.player.lunaticrave2.LunaticRave2ScoreDatabaseManager;
@@ -26,8 +26,10 @@ import bms.table.DifficultyTableParser;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
@@ -51,8 +53,6 @@ public class MusicSelector extends ApplicationAdapter {
 	private MainController main;
 
 	private BitmapFont titlefont;
-
-	private MusicSelectorInputProcessor input;
 
 	private Bar[] currentsongs;
 	private int selectedindex;
@@ -90,6 +90,9 @@ public class MusicSelector extends ApplicationAdapter {
 	private Config config;
 
 	private TableBar[] tables = new TableBar[0];
+
+	private Sound bgm;
+	private Texture background;
 
 	public MusicSelector(MainController main, Config config) {
 		this.main = main;
@@ -149,7 +152,7 @@ public class MusicSelector extends ApplicationAdapter {
 		}
 		this.tables = tables.toArray(new TableBar[0]);
 	}
-
+	
 	public void create() {
 		int index = selectedindex;
 		if (dir.size() > 0) {
@@ -158,13 +161,27 @@ public class MusicSelector extends ApplicationAdapter {
 			updateBar(null);
 		}
 		selectedindex = index;
-		input = new MusicSelectorInputProcessor(this);
+
+		if(bgm == null) {
+			if(new File("skin/select.wav").exists()) {
+				bgm = Gdx.audio.newSound(Gdx.files.internal("skin/select.wav"));
+			}
+		}
+		if(bgm != null) {
+			bgm.loop();
+		}
+		if(background == null) {
+			if(new File("skin/select.png").exists()) {
+				background = new Texture("skin/select.png");
+			}			
+		}
 
 	}
 
 	public void render() {
 		final SpriteBatch sprite = main.getSpriteBatch();
 		final ShapeRenderer shape = main.getShapeRenderer();
+		BMSPlayerInputProcessor input = main.getInputProcessor();
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
@@ -172,9 +189,11 @@ public class MusicSelector extends ApplicationAdapter {
 		final float h = 720;
 
 		// 背景描画
-		// sprite.begin();
-		// sprite.draw(skin.getBackground(), 0, 0, w, h);
-		// sprite.end();
+		if(background != null) {
+			 sprite.begin();
+			 sprite.draw(background, 0, 0, w, h);
+			 sprite.end();			
+		}
 
 		// draw song bar
 		final float barh = 36;
@@ -345,6 +364,9 @@ public class MusicSelector extends ApplicationAdapter {
 					PlayerResource resource = new PlayerResource();
 					resource.setBMSFile(new File(((SongBar) currentsongs[selectedindex]).getSongData().getPath()),
 							config, 0);
+					if(bgm != null) {
+						bgm.stop();						
+					}
 					main.changeState(MainController.STATE_DECIDE, resource);
 				} else if (currentsongs[selectedindex] instanceof GradeBar) {
 					if(((GradeBar) currentsongs[selectedindex]).existsAllSongs()) {
@@ -357,6 +379,9 @@ public class MusicSelector extends ApplicationAdapter {
 						}
 						resource.setBMSFile(files.get(0), config, 0);
 						resource.setCourseBMSFiles(files.toArray(new File[0]));
+						if(bgm != null) {
+							bgm.stop();						
+						}
 						main.changeState(MainController.STATE_DECIDE, resource);						
 					} else {
 						Logger.getGlobal().info("段位の楽曲が揃っていません");
@@ -392,6 +417,9 @@ public class MusicSelector extends ApplicationAdapter {
 					PlayerResource resource = new PlayerResource();
 					resource.setBMSFile(new File(((SongBar) currentsongs[selectedindex]).getSongData().getPath()),
 							config, 1);
+					if(bgm != null) {
+						bgm.stop();						
+					}
 					main.changeState(MainController.STATE_DECIDE, resource);
 				}
 			}
@@ -400,9 +428,15 @@ public class MusicSelector extends ApplicationAdapter {
 					PlayerResource resource = new PlayerResource();
 					resource.setBMSFile(new File(((SongBar) currentsongs[selectedindex]).getSongData().getPath()),
 							config, 2);
+					if(bgm != null) {
+						bgm.stop();						
+					}
 					main.changeState(MainController.STATE_DECIDE, resource);
 				}
 			}
+		}
+		if(input.isExitPressed()) {
+			exit();
 		}
 	}
 

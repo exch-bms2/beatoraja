@@ -246,8 +246,9 @@ public class BMSPlayer extends ApplicationAdapter {
 			skin = new PlaySkin();
 		}
 
-		input = new BMSPlayerInputProcessor(this, autoplay != 0);
-		lanerender = new LaneRenderer(this, sprite, skin, config, model);
+		input = main.getInputProcessor();
+		input.setEnableKeyInput(autoplay == 0);
+		lanerender = new LaneRenderer(this, sprite, skin, resource, model);
 		Logger.getGlobal().info("描画クラス準備");
 
 		Logger.getGlobal().info("hash");
@@ -442,6 +443,7 @@ public class BMSPlayer extends ApplicationAdapter {
 				if(pattern != null) {
 					resource.setPatternModifyLog(pattern.toArray(new PatternModifyLog[0]));					
 				}
+				input.setEnableKeyInput(true);
 				main.changeState(MainController.STATE_RESULT, resource);
 			}
 			break;
@@ -474,9 +476,13 @@ public class BMSPlayer extends ApplicationAdapter {
 				if(pattern != null) {
 					resource.setPatternModifyLog(pattern.toArray(new PatternModifyLog[0]));					
 				}
+				input.setEnableKeyInput(true);
 				main.changeState(MainController.STATE_RESULT, resource);
 			}
 			break;
+		}
+		if(input.isExitPressed()) {
+			stopPlay();
 		}
 
 		sprite.begin();
@@ -634,7 +640,7 @@ public class BMSPlayer extends ApplicationAdapter {
 								/ (timelines[timelines.length - 1].getTime() + 5000)),
 				progress.width - 2, 20);
 		shape.end();
-
+		// レーン描画
 		lanerender.drawLane(shape, systemfont, model, timelines, starttime,
 				time);
 
@@ -866,6 +872,7 @@ public class BMSPlayer extends ApplicationAdapter {
 					}
 				}
 				judge.update(timelines, time);
+
 				long nowtime = System.currentTimeMillis() - starttime - time;
 				frametimes = nowtime < frametimes ? frametimes : nowtime;
 			}

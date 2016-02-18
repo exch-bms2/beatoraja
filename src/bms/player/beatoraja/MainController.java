@@ -20,6 +20,7 @@ import bms.player.beatoraja.audio.SoundProcessor;
 import bms.player.beatoraja.bga.BGAManager;
 import bms.player.beatoraja.decide.MusicDecide;
 import bms.player.beatoraja.gauge.GrooveGauge;
+import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.pattern.PatternModifyLog;
 import bms.player.beatoraja.result.MusicResult;
 import bms.player.beatoraja.select.MusicSelector;
@@ -27,14 +28,15 @@ import bms.player.lunaticrave2.IRScoreData;
 import bms.player.lunaticrave2.LunaticRave2ScoreDatabaseManager;
 import bms.player.lunaticrave2.LunaticRave2SongDatabaseManager;
 
-import com.badlogic.gdx.ApplicationAdapter;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
+import com.badlogic.gdx.*;
+import com.badlogic.gdx.backends.lwjgl.*;
+import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.utils.BufferUtils;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter.OutputType;
+import com.badlogic.gdx.utils.ScreenUtils;
 
 public class MainController extends ApplicationAdapter {
 
@@ -56,6 +58,8 @@ public class MainController extends ApplicationAdapter {
 
 	private File f;
 
+	private BMSPlayerInputProcessor input;
+	
 	public MainController(File f, Config config, int auto) {
 		this.auto = auto;
 		this.config = config;
@@ -122,6 +126,7 @@ public class MainController extends ApplicationAdapter {
 
 	public void setAuto(int auto) {
 		this.auto = auto;
+		
 	}
 
 	@Override
@@ -129,6 +134,8 @@ public class MainController extends ApplicationAdapter {
 		sprite = new SpriteBatch();
 		shape = new ShapeRenderer();
 
+		input = new BMSPlayerInputProcessor();
+		
 		selector = new MusicSelector(this, config);
 		decide = new MusicDecide(this);
 		result = new MusicResult(this);
@@ -145,6 +152,15 @@ public class MainController extends ApplicationAdapter {
 	@Override
 	public void render() {
 		current.render();
+		
+		if(false) {
+			byte[] pixels = ScreenUtils.getFrameBufferPixels(0, 0, Gdx.graphics.getBackBufferWidth(), Gdx.graphics.getBackBufferHeight(), true);
+
+			Pixmap pixmap = new Pixmap(Gdx.graphics.getBackBufferWidth(), Gdx.graphics.getBackBufferHeight(), Pixmap.Format.RGBA8888);
+			BufferUtils.copy(pixels, 0, pixmap.getPixels(), pixels.length);
+			PixmapIO.writePNG(Gdx.files.external("mypixmap.png"), pixmap);
+			pixmap.dispose();
+		}
 	}
 
 	@Override
@@ -300,6 +316,10 @@ public class MainController extends ApplicationAdapter {
 
 	public void exit() {
 		Gdx.app.exit();
+	}
+
+	public BMSPlayerInputProcessor getInputProcessor () {
+		return input;
 	}
 
 	/**
