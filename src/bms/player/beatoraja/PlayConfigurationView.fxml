@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import utils.javafx.*?>
+
+<TabPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="bms.player.beatoraja.PlayConfigurationView">
+   <tabs>
+      <Tab closable="false" text="表示">
+        <content>
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+               <children>
+                  <VBox prefHeight="200.0" prefWidth="552.0">
+                     <children>
+                        <CheckBox fx:id="fullscreen" mnemonicParsing="false" text="フルスクリーン" />
+                        <CheckBox fx:id="vsync" mnemonicParsing="false" text="垂直同期" />
+                        <HBox alignment="CENTER_LEFT" prefHeight="30.0" prefWidth="552.0">
+                           <children>
+                              <Label text="BGA" />
+                              <ComboBox fx:id="bgaop" prefWidth="150.0" />
+                           </children>
+                        </HBox>
+                        <HBox alignment="CENTER_LEFT" prefHeight="9.0" prefWidth="552.0">
+                           <children>
+                              <Label text="VLCディレクトリパス" />
+                              <TextField fx:id="vlcpath" prefHeight="28.0" prefWidth="278.0" />
+                           </children>
+                        </HBox>
+                        <HBox prefHeight="38.0" prefWidth="552.0">
+                           <children>
+                              <Button mnemonicParsing="false" text="楽曲読み込み" />
+                              <Button mnemonicParsing="false" text="難易度表読み込み">
+                                 <HBox.margin>
+                                    <Insets left="20.0" />
+                                 </HBox.margin>
+                              </Button>
+                           </children>
+                           <VBox.margin>
+                              <Insets left="20.0" top="30.0" />
+                           </VBox.margin>
+                        </HBox>
+                     </children>
+                  </VBox>
+               </children>
+            </AnchorPane>
+        </content>
+      </Tab>
+      <Tab closable="false" text="リソース">
+        <content>
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+               <children>
+                  <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <children>
+                        <HBox prefHeight="100.0" prefWidth="200.0">
+                           <children>
+                              <Label prefHeight="101.0" prefWidth="59.0" text="BMS Path" />
+                              <ListView prefHeight="100.0" prefWidth="508.0" />
+                              <VBox prefHeight="200.0" prefWidth="100.0">
+                                 <children>
+                                    <Button mnemonicParsing="false" prefHeight="28.0" prefWidth="30.0" text="+" />
+                                    <Button mnemonicParsing="false" prefHeight="28.0" prefWidth="30.0" text="-" />
+                                 </children>
+                              </VBox>
+                           </children>
+                        </HBox>
+                        <HBox prefHeight="100.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                           <children>
+                              <Label prefHeight="110.0" prefWidth="62.0" text="Table URL" />
+                              <ListView prefHeight="100.0" prefWidth="508.0" />
+                              <VBox prefHeight="100.0" prefWidth="29.0">
+                                 <children>
+                                    <Button mnemonicParsing="false" prefHeight="28.0" prefWidth="30.0" text="+" />
+                                    <Button mnemonicParsing="false" prefHeight="28.0" prefWidth="30.0" text="-" />
+                                 </children>
+                              </VBox>
+                           </children>
+                        </HBox>
+                     </children>
+                  </VBox>
+               </children>
+            </AnchorPane>
+        </content>
+      </Tab>
+      <Tab closable="false" text="プレイオプション">
+         <content>
+            <VBox prefHeight="241.0" prefWidth="723.0">
+            	<children>
+                  <CheckBox fx:id="fixgvalue" mnemonicParsing="false" text="ノーツ表示時間を固定" />
+            		<GridPane fx:id="lr2configuration" prefHeight="154.0" prefWidth="632.0">
+            			<columnConstraints>
+            				<ColumnConstraints maxWidth="278.0" minWidth="0.0" prefWidth="135.0" />
+            				<ColumnConstraints maxWidth="402.0" minWidth="0.0" prefWidth="188.0" />
+                        <ColumnConstraints maxWidth="438.0" minWidth="0.0" prefWidth="108.0" />
+                        <ColumnConstraints maxWidth="423.0" minWidth="0.0" prefWidth="278.0" />
+            			</columnConstraints>
+            			<rowConstraints>
+            				<RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
+            				<RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
+                        <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
+                        <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
+                        <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
+                        <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
+            			</rowConstraints>
+                     <children>
+            				<Label prefHeight="18.0" prefWidth="78.0" text="HI-SPEED" />
+            				    <Spinner fx:id="hispeed" GridPane.columnIndex="1">
+      <valueFactory>
+        <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.1" max="9.9" min="1.0" value="1.0" />
+      </valueFactory>
+    </Spinner>
+                        <Label text="譜面オプション" GridPane.rowIndex="3" />
+                        <ComboBox fx:id="scoreop" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                        <Label text="ゲージ" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                        <ComboBox fx:id="gaugeop" prefWidth="150.0" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+                        <Label text="ノーツ表示時間" GridPane.columnIndex="2" />
+            				    <Spinner fx:id="gvalue" GridPane.columnIndex="3">
+      <valueFactory>
+        <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" max="2000" min="1" value="300" />
+      </valueFactory>
+    </Spinner>
+                        <CheckBox fx:id="enableLanecover" mnemonicParsing="false" text="レーンカバー" GridPane.rowIndex="1" />
+            				    <Spinner fx:id="lanecover" GridPane.columnIndex="1" GridPane.rowIndex="1">
+      <valueFactory>
+        <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.001" max="1.0" min="0.0" value="0.1" />
+      </valueFactory>
+    </Spinner>
+                        <CheckBox fx:id="enableLift" mnemonicParsing="false" text="リフト" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+            				    <Spinner fx:id="lift" GridPane.columnIndex="3" GridPane.rowIndex="1">
+      <valueFactory>
+        <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.001" max="1.0" min="0.0" value="0.1" />
+      </valueFactory>
+    </Spinner>
+                        <CheckBox fx:id="constant" mnemonicParsing="false" text="CONSTANT" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                        <CheckBox fx:id="bpmguide" mnemonicParsing="false" text="BPMガイド" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+                        <CheckBox fx:id="legacy" mnemonicParsing="false" text="LEGACY NOTE" GridPane.columnIndex="3" GridPane.rowIndex="4" />
+                        <Label text="アシストオプション" GridPane.rowIndex="4" />
+                        <Label text="判定タイミング" GridPane.rowIndex="2" />
+            				    <Spinner fx:id="judgetiming" GridPane.columnIndex="1" GridPane.rowIndex="2">
+      <valueFactory>
+        <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" max="99" min="-99" value="0" />
+      </valueFactory>
+    </Spinner>
+                     </children>
+                  </GridPane>
+            	</children>
+            	<padding>
+            		<Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+            	</padding>
+            </VBox>
+         </content>
+      </Tab>
+   </tabs>
+</TabPane>

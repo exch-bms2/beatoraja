@@ -4,8 +4,6 @@ import java.io.File;
 
 import bms.player.beatoraja.MainController;
 import bms.player.beatoraja.MainController.PlayerResource;
-import bms.player.beatoraja.input.MusicSelectorInputProcessor;
-import bms.player.lunaticrave2.SongData;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -16,8 +14,6 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 
 /**
  * 曲決定部分。
@@ -44,10 +40,14 @@ public class MusicDecide extends ApplicationAdapter{
 				Gdx.files.internal("skin/VL-Gothic-Regular.ttf"));
 		FreeTypeFontParameter parameter = new FreeTypeFontParameter();		
 		parameter.size = 24;	
-		title = "decide";
+		title = resource.getBMSModel().getFullTitle();
 		parameter.characters = title;
 		titlefont = generator.generateFont(parameter);
 		time = System.currentTimeMillis();
+		
+		if(new File("skin/decide.wav").exists()) {
+			Gdx.audio.newSound(Gdx.files.internal("skin/decide.wav")).play();
+		}
 	}
 	
 	public void render() {

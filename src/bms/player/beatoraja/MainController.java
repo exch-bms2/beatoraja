@@ -5,6 +5,12 @@ import java.util.*;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
+import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
+import javafx.scene.control.TabPane;
+import javafx.stage.Stage;
+
 import javax.swing.JFileChooser;
 
 import bms.model.*;
@@ -13,15 +19,14 @@ import bms.player.beatoraja.audio.SoundProcessor;
 import bms.player.beatoraja.bga.BGAManager;
 import bms.player.beatoraja.decide.MusicDecide;
 import bms.player.beatoraja.gauge.GrooveGauge;
+import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.pattern.PatternModifyLog;
 import bms.player.beatoraja.result.MusicResult;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.lunaticrave2.*;
 
-import com.badlogic.gdx.ApplicationAdapter;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
+import com.badlogic.gdx.*;
+import com.badlogic.gdx.backends.lwjgl.*;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.Json;
@@ -47,6 +52,8 @@ public class MainController extends ApplicationAdapter {
 
 	private File f;
 
+	private BMSPlayerInputProcessor input;
+
 	public MainController(File f, Config config, int auto) {
 		this.auto = auto;
 		this.config = config;
@@ -58,7 +65,8 @@ public class MainController extends ApplicationAdapter {
 					.getAbsoluteFile().getParent(), "/", "/");
 			scoredb.createTable("Player");
 			songdb = new LunaticRave2SongDatabaseManager(
-					new File("song.db").getPath(), true, BMSModel.LNTYPE_CHARGENOTE);
+					new File("song.db").getPath(), true,
+					BMSModel.LNTYPE_CHARGENOTE);
 			songdb.createTable();
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
@@ -113,12 +121,15 @@ public class MainController extends ApplicationAdapter {
 
 	public void setAuto(int auto) {
 		this.auto = auto;
+
 	}
 
 	@Override
 	public void create() {
 		sprite = new SpriteBatch();
 		shape = new ShapeRenderer();
+
+		input = new BMSPlayerInputProcessor();
 
 		selector = new MusicSelector(this, config);
 		decide = new MusicDecide(this);
@@ -136,6 +147,18 @@ public class MainController extends ApplicationAdapter {
 	@Override
 	public void render() {
 		current.render();
+
+//		if (false) {
+//			byte[] pixels = ScreenUtils.getFrameBufferPixels(0, 0,
+//					Gdx.graphics.getBackBufferWidth(),
+//					Gdx.graphics.getBackBufferHeight(), true);
+//
+//			Pixmap pixmap = new Pixmap(Gdx.graphics.getBackBufferWidth(),
+//					Gdx.graphics.getBackBufferHeight(), Pixmap.Format.RGBA8888);
+//			BufferUtils.copy(pixels, 0, pixmap.getPixels(), pixels.length);
+//			PixmapIO.writePNG(Gdx.files.external("mypixmap.png"), pixmap);
+//			pixmap.dispose();
+//		}
 	}
 
 	@Override
@@ -183,6 +206,7 @@ public class MainController extends ApplicationAdapter {
 
 		File f = null;
 		int auto = 0;
+		boolean config = false;
 		for (String s : args) {
 			if (s.startsWith("-")) {
 				if (s.equals("-a")) {
@@ -191,11 +215,18 @@ public class MainController extends ApplicationAdapter {
 				if (s.equals("-r")) {
 					auto = 2;
 				}
+				if (s.equals("-c")) {
+					config = true;
+				}
 			} else {
 				f = new File(s);
 			}
 		}
-		MainController.play(f, auto, true);
+		if (config) {
+			BMSInformationLoader.main(args);
+		} else {
+			MainController.play(f, auto, true);
+		}
 	}
 
 	public static void play(File f, int auto, boolean forceExit) {
@@ -242,7 +273,8 @@ public class MainController extends ApplicationAdapter {
 
 				try {
 					LunaticRave2SongDatabaseManager songdb = new LunaticRave2SongDatabaseManager(
-							new File("song.db").getPath(), true, BMSModel.LNTYPE_CHARGENOTE);
+							new File("song.db").getPath(), true,
+							BMSModel.LNTYPE_CHARGENOTE);
 					songdb.createTable();
 					Logger.getGlobal().info("song.db更新開始");
 					songdb.updateSongDatas(files, rootdir,
@@ -293,6 +325,10 @@ public class MainController extends ApplicationAdapter {
 		Gdx.app.exit();
 	}
 
+	public BMSPlayerInputProcessor getInputProcessor() {
+		return input;
+	}
+
 	/**
 	 * プレイヤーのコンポーネント間でデータをやり取りするためのクラス
 	 * 
@@ -313,9 +349,9 @@ public class MainController extends ApplicationAdapter {
 		private BMSModel[] course;
 		private File[] coursefile;
 		private int courseindex;
-		
+
 		private PatternModifyLog[] pattern;
-		
+
 		private IRScoreData cscore;
 		
 		public void clear() {
@@ -440,10 +476,11 @@ public class MainController extends ApplicationAdapter {
 				return true;
 			}
 		}
-		
+
 		public void reloadBMSFile() {
 			if (f.getPath().toLowerCase().endsWith(".bmson")) {
-				BMSONDecoder decoder = new BMSONDecoder(BMSModel.LNTYPE_CHARGENOTE);
+				BMSONDecoder decoder = new BMSONDecoder(
+						BMSModel.LNTYPE_CHARGENOTE);
 				model = decoder.decode(f);
 			} else {
 				BMSDecoder decoder = new BMSDecoder(BMSModel.LNTYPE_CHARGENOTE);
@@ -451,7 +488,7 @@ public class MainController extends ApplicationAdapter {
 			}
 			clear();
 		}
-		
+
 		public List<Float> getGauge() {
 			return gauge;
 		}
@@ -475,5 +512,62 @@ public class MainController extends ApplicationAdapter {
 		public void setPatternModifyLog(PatternModifyLog[] pattern) {
 			this.pattern = pattern;
 		}
+	}
+
+	public static class BMSInformationLoader extends Application {
+
+		private PlayConfigurationView bmsinfo;
+
+		public static void main(String[] args) {
+			launch(args);
+		}
+
+		@Override
+		public void start(Stage primaryStage) throws Exception {
+			Config config = new Config();
+			if (new File("config.json").exists()) {
+				Json json = new Json();
+				try {
+					config = json.fromJson(Config.class, new FileReader(
+							"config.json"));
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();
+				}
+			} else {
+				Json json = new Json();
+				json.setOutputType(OutputType.json);
+				try {
+					FileWriter fw = new FileWriter("config.json");
+					fw.write(json.prettyPrint(config));
+					fw.flush();
+					fw.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+
+			try {
+				FXMLLoader loader = new FXMLLoader(
+						BMSInformationLoader.class
+								.getResource("/bms/player/beatoraja/PlayConfigurationView.fxml"));
+				TabPane stackPane = (TabPane) loader.load();
+				bmsinfo = (PlayConfigurationView) loader.getController();
+				bmsinfo.update(config);
+				// scene.getStylesheets().addAll("/bms/res/win7glass.css",
+				// "/bms/res/style.css");
+				// primaryStage.getIcons().addAll(this.primaryStage.getIcons());
+				Scene scene = new Scene(stackPane, stackPane.getPrefWidth(),
+						stackPane.getPrefHeight());
+
+				primaryStage.setScene(scene);
+				primaryStage.setTitle("beatoraja configuration");
+				primaryStage.show();
+
+			} catch (IOException e) {
+				Logger.getGlobal().severe(e.getMessage());
+				e.printStackTrace();
+			}
+		}
+
 	}
 }
