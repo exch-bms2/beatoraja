@@ -14,16 +14,11 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.TabPane;
-import javafx.scene.layout.HBox;
-import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.stage.FileChooser.ExtensionFilter;
 
 import javax.swing.JFileChooser;
 
-import bms.model.BMSDecoder;
-import bms.model.BMSModel;
-import bms.model.BMSONDecoder;
+import bms.model.*;
 import bms.player.beatoraja.audio.AudioProcessor;
 import bms.player.beatoraja.audio.SoundProcessor;
 import bms.player.beatoraja.bga.BGAManager;
@@ -39,13 +34,10 @@ import bms.player.lunaticrave2.LunaticRave2SongDatabaseManager;
 
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.backends.lwjgl.*;
-import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.utils.BufferUtils;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter.OutputType;
-import com.badlogic.gdx.utils.ScreenUtils;
 
 public class MainController extends ApplicationAdapter {
 
@@ -163,17 +155,17 @@ public class MainController extends ApplicationAdapter {
 	public void render() {
 		current.render();
 
-		if (false) {
-			byte[] pixels = ScreenUtils.getFrameBufferPixels(0, 0,
-					Gdx.graphics.getBackBufferWidth(),
-					Gdx.graphics.getBackBufferHeight(), true);
-
-			Pixmap pixmap = new Pixmap(Gdx.graphics.getBackBufferWidth(),
-					Gdx.graphics.getBackBufferHeight(), Pixmap.Format.RGBA8888);
-			BufferUtils.copy(pixels, 0, pixmap.getPixels(), pixels.length);
-			PixmapIO.writePNG(Gdx.files.external("mypixmap.png"), pixmap);
-			pixmap.dispose();
-		}
+//		if (false) {
+//			byte[] pixels = ScreenUtils.getFrameBufferPixels(0, 0,
+//					Gdx.graphics.getBackBufferWidth(),
+//					Gdx.graphics.getBackBufferHeight(), true);
+//
+//			Pixmap pixmap = new Pixmap(Gdx.graphics.getBackBufferWidth(),
+//					Gdx.graphics.getBackBufferHeight(), Pixmap.Format.RGBA8888);
+//			BufferUtils.copy(pixels, 0, pixmap.getPixels(), pixels.length);
+//			PixmapIO.writePNG(Gdx.files.external("mypixmap.png"), pixmap);
+//			pixmap.dispose();
+//		}
 	}
 
 	@Override
