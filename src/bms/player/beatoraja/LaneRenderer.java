@@ -137,6 +137,8 @@ public class LaneRenderer {
 			hispeed += f;
 		}
 	}
+	
+	private double nowbpm;
 
 	public void drawLane(ShapeRenderer shape, BitmapFont font, BMSModel model,
 			TimeLine[] timelines, long starttime, long time) {
@@ -157,6 +159,7 @@ public class LaneRenderer {
 			}
 			nbpm = t.getBPM();
 		}
+		nowbpm = nbpm;
 		int region = (int) (3000 / (bpm / 100) / hispeed);
 		float hu = laneregion[0].y + laneregion[0].height;
 		float hl = laneregion[0].y;
@@ -471,6 +474,10 @@ public class LaneRenderer {
 		}
 		sprite.end();
 
+	}
+	
+	public double getNowBPM() {
+		return nowbpm;
 	}
 
 	private void drawNote(float x, float y, float width, float height,
