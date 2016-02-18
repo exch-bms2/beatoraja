@@ -5,7 +5,6 @@ import java.util.*;
 import java.util.logging.Logger;
 
 import bms.model.*;
-import bms.player.beatoraja.MainController.PlayerResource;
 import bms.player.beatoraja.PlaySkin.SkinPart;
 import bms.player.beatoraja.audio.AudioProcessor;
 import bms.player.beatoraja.bga.BGAManager;
@@ -136,6 +135,7 @@ public class BMSPlayer extends ApplicationAdapter {
 			PatternModifier.modify(model, Arrays.asList(replay.pattern));
 		} else if (resource.getPatternModifyLog() != null) {
 			PatternModifier.modify(model, Arrays.asList(resource.getPatternModifyLog()));
+			Logger.getGlobal().info("譜面オプション : 保存された譜面変更ログから譜面再現");
 		} else if (resource.getCourseBMSModels() == null || config.getRandom() == 1) {
 			switch (config.getRandom()) {
 			case 0:
@@ -168,8 +168,8 @@ public class BMSPlayer extends ApplicationAdapter {
 				pattern = new NoteShuffleModifier(NoteShuffleModifier.S_RANDOM_EX).modify(model);
 				break;
 			}
+			Logger.getGlobal().info("譜面オプション :  "  + config.getRandom());
 		}
-		Logger.getGlobal().info("譜面オプション設定完了");
 
 		int g = config.getGauge();
 		if (replay != null) {

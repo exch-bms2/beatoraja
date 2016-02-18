@@ -3,7 +3,7 @@ package bms.player.beatoraja.decide;
 import java.io.File;
 
 import bms.player.beatoraja.MainController;
-import bms.player.beatoraja.MainController.PlayerResource;
+import bms.player.beatoraja.PlayerResource;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;

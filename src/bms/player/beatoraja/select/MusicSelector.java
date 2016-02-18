@@ -7,7 +7,7 @@ import java.util.logging.Logger;
 
 import bms.player.beatoraja.Config;
 import bms.player.beatoraja.MainController;
-import bms.player.beatoraja.MainController.PlayerResource;
+import bms.player.beatoraja.PlayerResource;
 import bms.player.lunaticrave2.*;
 import bms.table.*;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;

@@ -6,7 +6,7 @@ import java.util.logging.Logger;
 
 import bms.model.BMSModel;
 import bms.player.beatoraja.MainController;
-import bms.player.beatoraja.MainController.PlayerResource;
+import bms.player.beatoraja.PlayerResource;
 import bms.player.beatoraja.gauge.GrooveGauge;
 import bms.player.lunaticrave2.IRScoreData;
 

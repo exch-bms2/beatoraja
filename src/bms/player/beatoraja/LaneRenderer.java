@@ -4,7 +4,6 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
 
 import bms.model.*;
-import bms.player.beatoraja.MainController.PlayerResource;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 
 import com.badlogic.gdx.graphics.Color;
