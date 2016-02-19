@@ -1,8 +1,14 @@
 package bms.player.beatoraja;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 
+import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.JsonWriter.OutputType;
+
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
@@ -15,6 +21,8 @@ import javafx.util.Callback;
  * @author exch
  */
 public class PlayConfigurationView implements Initializable {
+	
+	// TODO bmsパス、難易度表編集機能
 
 	/**
 	 * ハイスピード
@@ -34,6 +42,12 @@ public class PlayConfigurationView implements Initializable {
 	private CheckBox vsync;
 	@FXML
 	private ComboBox<Integer> bgaop;
+	
+	@FXML
+	private ListView<String> bmsroot;
+	@FXML
+	private ListView<String> tableurl;
+	
 	@FXML
 	private ComboBox<Integer> scoreop;
 	@FXML
@@ -61,6 +75,15 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private CheckBox legacy;
 
+	@FXML
+	private Spinner<Integer> maxfps;
+	@FXML
+	private Spinner<Integer> audiobuffer;
+	@FXML
+	private Spinner<Integer> audiosim;
+	@FXML
+	private ComboBox<Integer> judgealgorithm;
+
 	private Config config;;
 
 	private static final String[] SCOREOP = { "OFF", "MIRROR", "RANDOM", "R-RANDOM",
@@ -70,6 +93,8 @@ public class PlayConfigurationView implements Initializable {
 		"EX-HARD", "HAZARD"};
 
 	private static final String[] BGAOP = { "ON", "AUTOPLAY ", "OFF"};
+
+	private static final String[] JUDGEALGORITHM = { "LR2風", "本家風", "最下ノーツ最優先"};
 
 	public void initialize(URL arg0, ResourceBundle arg1) {
 //		hispeed.setProperty(1.0, 1.0, 9.9, 0.1);
@@ -101,6 +126,8 @@ public class PlayConfigurationView implements Initializable {
 		});
 		bgaop.setButtonCell(new OptionListCell(BGAOP));
 		bgaop.getItems().setAll(0, 1, 2);
+		judgealgorithm.setButtonCell(new OptionListCell(JUDGEALGORITHM));
+		judgealgorithm.getItems().setAll(0, 1, 2);
 	}
 
 	/**
@@ -121,12 +148,22 @@ public class PlayConfigurationView implements Initializable {
 		lanecover.getValueFactory().setValue((double) config.getLanecover());
 		enableLift.setSelected(config.isEnablelift());
 		lift.getValueFactory().setValue((double) config.getLift());
+		judgetiming.getValueFactory().setValue(config.getJudgetiming());
 		
 		vlcpath.setText(config.getVlcpath());
+		
+		bmsroot.getItems().setAll(config.getBmsroot());
+		tableurl.getItems().setAll(config.getTableURL());
 		
 		constant.setSelected(config.isConstant());
 		bpmguide.setSelected(config.isBpmguide());
 		legacy.setSelected(config.getLnassist() == 1);
+		
+		maxfps.getValueFactory().setValue(config.getMaxFramePerSecond());
+		audiobuffer.getValueFactory().setValue(config.getAudioDeviceBufferSize());
+		audiosim.getValueFactory().setValue(config.getAudioDeviceSimultaneousSources());
+		
+		judgealgorithm.setValue(config.getJudgeAlgorithm());
 	}
 
 	/**
@@ -145,12 +182,53 @@ public class PlayConfigurationView implements Initializable {
 		config.setLanecover(lanecover.getValue().floatValue());
 		config.setEnablelift(enableLift.isSelected());
 		config.setLift(lift.getValue().floatValue());
+		config.setJudgetiming(judgetiming.getValue());
 		
 		config.setVlcpath(vlcpath.getText());
+		
+		config.setBmsroot(bmsroot.getItems().toArray(new String[0]));
+		config.setTableURL(tableurl.getItems().toArray(new String[0]));
 		
 		config.setConstant(constant.isSelected());
 		config.setBpmguide(bpmguide.isSelected());
 		config.setLnassist(legacy.isSelected() ? 1 : 0);
+		
+		config.setMaxFramePerSecond(maxfps.getValue());
+		config.setAudioDeviceBufferSize(audiobuffer.getValue());
+		config.setAudioDeviceSimultaneousSources(audiosim.getValue());
+		
+		config.setJudgeAlgorithm(judgealgorithm.getValue());
+		
+		Json json = new Json();
+		json.setOutputType(OutputType.json);
+		try {
+			FileWriter fw = new FileWriter("config.json");
+			fw.write(json.prettyPrint(config));
+			fw.flush();
+			fw.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void start() {
+		commit();
+		Platform.exit();
+		MainController.play(null, 0, true);
+	}
+	
+	public void loadBMS() {
+		// TODO 楽曲読み込み
+	}
+	
+	public void loadTable() {
+		// TODO 難易度表読み込み
+	}
+	
+	public void exit() {
+		commit();
+		Platform.exit();
+		System.exit(0);
 	}
 
 	class OptionListCell extends ListCell<Integer> {

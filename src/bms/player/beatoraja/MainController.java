@@ -1,14 +1,13 @@
 package bms.player.beatoraja;
 
 import java.io.*;
-import java.util.*;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.control.TabPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import javax.swing.JFileChooser;
@@ -295,13 +294,13 @@ public class MainController extends ApplicationAdapter {
 			// vSync
 			cfg.vSyncEnabled = config.isVsync();
 			if (!config.isVsync()) {
-				cfg.backgroundFPS = 0;
-				cfg.foregroundFPS = 0;
+				cfg.backgroundFPS = config.getMaxFramePerSecond();
+				cfg.foregroundFPS = config.getMaxFramePerSecond();
 			}
 			cfg.title = "Beatoraja";
 
-			cfg.audioDeviceBufferSize = 384;
-			cfg.audioDeviceSimultaneousSources = 64;
+			cfg.audioDeviceBufferSize = config.getAudioDeviceBufferSize();
+			cfg.audioDeviceSimultaneousSources = config.getAudioDeviceSimultaneousSources();
 			cfg.forceExit = forceExit;
 
 			new LwjglApplication(player, cfg);
@@ -360,7 +359,7 @@ public class MainController extends ApplicationAdapter {
 				FXMLLoader loader = new FXMLLoader(
 						BMSInformationLoader.class
 								.getResource("/bms/player/beatoraja/PlayConfigurationView.fxml"));
-				TabPane stackPane = (TabPane) loader.load();
+				VBox stackPane = (VBox) loader.load();
 				bmsinfo = (PlayConfigurationView) loader.getController();
 				bmsinfo.update(config);
 				// scene.getStylesheets().addAll("/bms/res/win7glass.css",
