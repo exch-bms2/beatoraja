@@ -412,6 +412,7 @@ public class BMSPlayer extends ApplicationAdapter {
 					resource.setPatternModifyLog(pattern.toArray(new PatternModifyLog[0]));
 				}
 				input.setEnableKeyInput(true);
+				input.setStartTime(0);
 				main.changeState(MainController.STATE_RESULT, resource);
 			}
 			break;
@@ -444,6 +445,7 @@ public class BMSPlayer extends ApplicationAdapter {
 					resource.setPatternModifyLog(pattern.toArray(new PatternModifyLog[0]));
 				}
 				input.setEnableKeyInput(true);
+				input.setStartTime(0);
 				main.changeState(MainController.STATE_RESULT, resource);
 			}
 			break;
@@ -677,12 +679,12 @@ public class BMSPlayer extends ApplicationAdapter {
 		shape.begin(ShapeType.Line);
 		shape.setColor(Color.WHITE);
 		shape.rect(gr.x, gr.y, gr.width, gr.height);
-		shape.rect(gr.x + gr.width - 50, gr.y + gr.height, 50, 30);
+		shape.rect(gr.x + gr.width - 65, gr.y + gr.height, 65, 30);
 		shape.end();
 		gauge.draw(skin, sprite, gr.x, gr.y, gr.width, gr.height);
 		sprite.begin();
 		titlefont.setColor(Color.WHITE);
-		titlefont.draw(sprite, String.valueOf((int) gauge.getValue()) + "%", gr.x + gr.width - 45,
+		titlefont.draw(sprite, String.format("%5.1f", gauge.getValue()) + "%", gr.x + gr.width - 60,
 				gr.y + gr.height + 25);
 		sprite.end();
 		// ジャッジカウント描画
@@ -713,7 +715,7 @@ public class BMSPlayer extends ApplicationAdapter {
 		// ハイスピード、デュレーション描画
 		sprite.begin();
 		titlefont.setColor(Color.WHITE);
-		titlefont.draw(sprite, "HISPEED - " + lanerender.getHispeed() + "  DURATION - " + lanerender.getGreenValue(),
+		titlefont.draw(sprite, "HISPEED - " + String.format("%.2f", lanerender.getHispeed()) + "  DURATION - " + lanerender.getGreenValue(),
 				50, 22);
 		sprite.end();
 

@@ -161,12 +161,13 @@ public class MusicResult extends ApplicationAdapter {
 			if (resource.getCourseBMSModels() != null) {
 				if (resource.getGauge().get(resource.getGauge().size() - 1) <= 0) {
 					// TODO 不合格リザルト
-				}
+					main.changeState(MainController.STATE_GRADE_RESULT, resource);
+				} else 
 				if (resource.nextCourse()) {
 					main.changeState(MainController.STATE_PLAYBMS, resource);
 				} else {
 					// TODO 合格リザルト
-					main.changeState(MainController.STATE_SELECTMUSIC, null);
+					main.changeState(MainController.STATE_GRADE_RESULT, resource);
 				}
 			} else {
 				if(keystate[4]) {

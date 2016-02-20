@@ -131,10 +131,13 @@ public class PlaySkin {
 		judge[2] = new Sprite(jt, 25 * 16, 0, 25 * 5, 52);
 		judge[3] = new Sprite(jt, 25 * 22, 0, 25 * 4, 52);
 		judge[4] = new Sprite(jt, 25 * 26, 0, 25 * 4, 52);
-		judgenum = new Sprite[2][10];
+		judgenum = new Sprite[3][10];
 		for(int j = 0;j < 2;j++) {
 			for(int i = 0;i < 10;i++) {
 				judgenum[j][i] = new Sprite(jt, 28 * i + 115 , j * 52 * 3, 28, 52);
+			}			
+			for(int i = 0;i < 10;i++) {
+				judgenum[2][i] = new Sprite(jt, 28 * i + 115 , 52 * 3, 28, 52);
 			}			
 		}
 		judgeregion = new Rectangle(20, 240, 390, 20);

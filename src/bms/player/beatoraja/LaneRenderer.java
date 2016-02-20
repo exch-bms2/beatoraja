@@ -457,7 +457,7 @@ public class LaneRenderer {
 			final float f = 1.5f;
 			Sprite s = skin.getJudge()[(judgenow == 6 ? 5 : judgenow) - 1];
 			int w = s.getRegionWidth();
-			if (judgenow < 3) {
+			if (judgenow < 4) {
 				w += 20;
 				int count = 0;
 				for (int i = combo;; count++) {

@@ -196,4 +196,12 @@ public class PlayerResource {
 	public void setPatternModifyLog(PatternModifyLog[] pattern) {
 		this.pattern = pattern;
 	}
+
+	public IRScoreData getCourseScoreData() {
+		return cscore;
+	}
+
+	public void setCourseScoreData(IRScoreData cscore) {
+		this.cscore = cscore;
+	}
 }

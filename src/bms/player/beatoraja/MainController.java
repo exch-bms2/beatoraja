@@ -16,6 +16,7 @@ import javax.swing.JFileChooser;
 import bms.model.*;
 import bms.player.beatoraja.decide.MusicDecide;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
+import bms.player.beatoraja.result.GradeResult;
 import bms.player.beatoraja.result.MusicResult;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.lunaticrave2.*;
@@ -33,6 +34,7 @@ public class MainController extends ApplicationAdapter {
 	private MusicDecide decide;
 	private MusicSelector selector;
 	private MusicResult result;
+	private GradeResult gresult;
 
 	private ApplicationAdapter current;
 
@@ -88,6 +90,7 @@ public class MainController extends ApplicationAdapter {
 	public static final int STATE_DECIDE = 1;
 	public static final int STATE_PLAYBMS = 2;
 	public static final int STATE_RESULT = 3;
+	public static final int STATE_GRADE_RESULT = 4;
 
 	public void changeState(int state, PlayerResource resource) {
 		switch (state) {
@@ -111,6 +114,10 @@ public class MainController extends ApplicationAdapter {
 			result.create(resource);
 			current = result;
 			break;
+		case STATE_GRADE_RESULT:
+			gresult.create(resource);
+			current = gresult;
+			break;
 		}
 	}
 
@@ -129,6 +136,7 @@ public class MainController extends ApplicationAdapter {
 		selector = new MusicSelector(this, config);
 		decide = new MusicDecide(this);
 		result = new MusicResult(this);
+		gresult = new GradeResult(this);
 
 		if (f != null) {
 			PlayerResource resource = new PlayerResource();
