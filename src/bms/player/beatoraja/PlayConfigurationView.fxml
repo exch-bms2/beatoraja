@@ -43,20 +43,32 @@
                                     <ListView fx:id="bmsroot" prefHeight="100.0" prefWidth="508.0" />
                                     <VBox prefHeight="200.0" prefWidth="100.0">
                                        <children>
-                                          <Button mnemonicParsing="false" prefHeight="28.0" prefWidth="30.0" text="+" />
-                                          <Button mnemonicParsing="false" prefHeight="28.0" prefWidth="30.0" text="-" />
+                                          <Button mnemonicParsing="false" onAction="#addSongPath" prefHeight="28.0" prefWidth="30.0" text="+" />
+                                          <Button mnemonicParsing="false" onAction="#removeSongPath" prefHeight="28.0" prefWidth="30.0" text="-" />
                                        </children>
                                     </VBox>
                                  </children>
+                                 <VBox.margin>
+                                    <Insets bottom="30.0" />
+                                 </VBox.margin>
                               </HBox>
                               <HBox prefHeight="100.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                  <children>
                                     <Label prefHeight="110.0" prefWidth="62.0" text="Table URL" />
-                                    <ListView fx:id="tableurl" prefHeight="100.0" prefWidth="508.0" />
-                                    <VBox prefHeight="100.0" prefWidth="29.0">
+                                    <VBox prefHeight="100.0" prefWidth="536.0">
                                        <children>
-                                          <Button mnemonicParsing="false" prefHeight="28.0" prefWidth="30.0" text="+" />
-                                          <Button mnemonicParsing="false" prefHeight="28.0" prefWidth="30.0" text="-" />
+                                          <HBox>
+                                             <children>
+                                                <TextField fx:id="url" prefHeight="28.0" prefWidth="510.0" />
+                                                <Button mnemonicParsing="false" onAction="#addTableURL" prefHeight="28.0" prefWidth="30.0" text="+" />
+                                             </children>
+                                          </HBox>
+                                          <HBox>
+                                             <children>
+                                                <ListView fx:id="tableurl" prefHeight="100.0" prefWidth="508.0" />
+                                                <Button mnemonicParsing="false" onAction="#removeTableURL" prefHeight="28.0" prefWidth="30.0" text="-" />
+                                             </children>
+                                          </HBox>
                                        </children>
                                     </VBox>
                                  </children>

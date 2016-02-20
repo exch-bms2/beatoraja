@@ -200,7 +200,7 @@ public class MainController extends ApplicationAdapter {
 
 		File f = null;
 		int auto = 0;
-		boolean config = false;
+		boolean config = (!new File("song.db").exists());
 		for (String s : args) {
 			if (s.startsWith("-")) {
 				if (s.equals("-a")) {
@@ -243,43 +243,6 @@ public class MainController extends ApplicationAdapter {
 				fw.close();
 			} catch (IOException e) {
 				e.printStackTrace();
-			}
-		}
-
-		if (config.getBmsroot().length == 0) {
-			JFileChooser chooser = new JFileChooser();
-			chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-			chooser.setDialogTitle("Choose BMS root directory");
-			if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-				File[] files = new File[] { chooser.getSelectedFile() };
-				String[] rootdir = new String[] { files[0].getAbsolutePath() };
-				config.setBmsroot(rootdir);
-				Json json = new Json();
-				json.setOutputType(OutputType.json);
-				try {
-					FileWriter fw = new FileWriter("config.json");
-					fw.write(json.prettyPrint(config));
-					fw.flush();
-					fw.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-
-				try {
-					LunaticRave2SongDatabaseManager songdb = new LunaticRave2SongDatabaseManager(
-							new File("song.db").getPath(), true,
-							BMSModel.LNTYPE_CHARGENOTE);
-					songdb.createTable();
-					Logger.getGlobal().info("song.db更新開始");
-					songdb.updateSongDatas(files, rootdir,
-							new File(".").getAbsolutePath());
-					Logger.getGlobal().info("song.db更新完了");
-				} catch (ClassNotFoundException e) {
-					e.printStackTrace();
-				}
-
-			} else {
-				System.exit(1);
 			}
 		}
 
