@@ -315,6 +315,16 @@ public class MainController extends ApplicationAdapter {
 	}
 
 	public void exit() {
+		Json json = new Json();
+		json.setOutputType(OutputType.json);
+		try {
+			FileWriter fw = new FileWriter("config.json");
+			fw.write(json.prettyPrint(config));
+			fw.flush();
+			fw.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		Gdx.app.exit();
 	}
 
