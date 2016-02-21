@@ -23,7 +23,11 @@ import bms.player.lunaticrave2.*;
 
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.backends.lwjgl.*;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter.OutputType;
@@ -35,6 +39,8 @@ public class MainController extends ApplicationAdapter {
 	private MusicSelector selector;
 	private MusicResult result;
 	private GradeResult gresult;
+	
+	private BitmapFont systemfont;
 
 	private ApplicationAdapter current;
 
@@ -50,6 +56,8 @@ public class MainController extends ApplicationAdapter {
 	private File f;
 
 	private BMSPlayerInputProcessor input;
+	
+	private boolean showfps;
 
 	public MainController(File f, Config config, int auto) {
 		this.auto = auto;
@@ -145,13 +153,32 @@ public class MainController extends ApplicationAdapter {
 		} else {
 			changeState(STATE_SELECTMUSIC, null);
 		}
+		
+		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/VL-Gothic-Regular.ttf"));
+		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
+		parameter.size = 24;
+		systemfont = generator.generateFont(parameter);
+		generator.dispose();
+
 	}
 
 	@Override
 	public void render() {
 		current.render();
+		
+		if(input.getFunctionstate()[0] && input.getFunctiontime()[0] != 0) {
+			showfps = !showfps;
+			input.getFunctiontime()[0] = 0;
+		}
+		if(showfps) {
+			sprite.begin();
+			systemfont.setColor(Color.YELLOW);
+			systemfont.draw(sprite, "FPS " + Gdx.graphics.getFramesPerSecond(), 10, 718);
+			sprite.end();			
+		}
 
-//		if (false) {
+		if (input.getFunctionstate()[5] && input.getFunctiontime()[5] != 0) {
+			// スクリーンショット
 //			byte[] pixels = ScreenUtils.getFrameBufferPixels(0, 0,
 //					Gdx.graphics.getBackBufferWidth(),
 //					Gdx.graphics.getBackBufferHeight(), true);
@@ -161,7 +188,8 @@ public class MainController extends ApplicationAdapter {
 //			BufferUtils.copy(pixels, 0, pixmap.getPixels(), pixels.length);
 //			PixmapIO.writePNG(Gdx.files.external("mypixmap.png"), pixmap);
 //			pixmap.dispose();
-//		}
+			input.getFunctiontime()[5] = 0;		
+		}
 	}
 
 	@Override

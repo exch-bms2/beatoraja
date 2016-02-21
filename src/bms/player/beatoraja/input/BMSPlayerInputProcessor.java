@@ -33,7 +33,9 @@ public class BMSPlayerInputProcessor {
 	
 	private boolean[] numberstate = new boolean[10];
 	private long[] numtime = new long[10];
-
+	private boolean[] functionstate = new boolean[12];
+	private long[] functiontime = new long[12];
+	
 	private long starttime;
 
 	private boolean enableKeyInput = true;
@@ -124,6 +126,22 @@ public class BMSPlayerInputProcessor {
 		this.exitPressed = exitPressed;
 	}
 
+	public boolean[] getFunctionstate() {
+		return functionstate;
+	}
+
+	public void setFunctionstate(boolean[] functionstate) {
+		this.functionstate = functionstate;
+	}
+
+	public long[] getFunctiontime() {
+		return functiontime;
+	}
+
+	public void setFunctiontime(long[] functiontime) {
+		this.functiontime = functiontime;
+	}
+
 	/**
 	 * キーボード入力処理用クラス
 	 * 
@@ -135,6 +153,8 @@ public class BMSPlayerInputProcessor {
 				Keys.C, Keys.F, Keys.V, Keys.SHIFT_LEFT, Keys.CONTROL_LEFT };
 		private int[] numbers = new int[] { Keys.NUM_0, Keys.NUM_1, Keys.NUM_2, Keys.NUM_3};
 		private int[] cover = new int[] { Keys.UP, Keys.DOWN, Keys.LEFT, Keys.RIGHT };
+		private int[] function = new int[]{Keys.F1, Keys.F2, Keys.F3, Keys.F4, Keys.F5, Keys.F6
+				, Keys.F7, Keys.F8, Keys.F9, Keys.F10, Keys.F11, Keys.F12};
 		private int[] control = new int[] { Keys.Q };
 		private int exit = Keys.ESCAPE;
 
@@ -166,6 +186,14 @@ public class BMSPlayerInputProcessor {
 					presstime = (int) (System.currentTimeMillis() - starttime);
 					numberstate[i] = true;
 					numtime[i] = presstime;
+				}
+			}
+
+			for(int i = 0;i < function.length;i++) {
+				if(keycode == function[i]) {
+					presstime = (int) (System.currentTimeMillis() - starttime);
+					functionstate[i] = true;
+					functiontime[i] = presstime;
 				}
 			}
 
