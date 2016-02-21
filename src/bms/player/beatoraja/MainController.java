@@ -1,14 +1,13 @@
 package bms.player.beatoraja;
 
 import java.io.*;
-import java.util.*;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.control.TabPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import javax.swing.JFileChooser;
@@ -237,7 +236,7 @@ public class MainController extends ApplicationAdapter {
 
 		File f = null;
 		int auto = 0;
-		boolean config = false;
+		boolean config = (!new File("song.db").exists());
 		for (String s : args) {
 			if (s.startsWith("-")) {
 				if (s.equals("-a")) {
@@ -283,43 +282,6 @@ public class MainController extends ApplicationAdapter {
 			}
 		}
 
-		if (config.getBmsroot().length == 0) {
-			JFileChooser chooser = new JFileChooser();
-			chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-			chooser.setDialogTitle("Choose BMS root directory");
-			if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-				File[] files = new File[] { chooser.getSelectedFile() };
-				String[] rootdir = new String[] { files[0].getAbsolutePath() };
-				config.setBmsroot(rootdir);
-				Json json = new Json();
-				json.setOutputType(OutputType.json);
-				try {
-					FileWriter fw = new FileWriter("config.json");
-					fw.write(json.prettyPrint(config));
-					fw.flush();
-					fw.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-
-				try {
-					LunaticRave2SongDatabaseManager songdb = new LunaticRave2SongDatabaseManager(
-							new File("song.db").getPath(), true,
-							BMSModel.LNTYPE_CHARGENOTE);
-					songdb.createTable();
-					Logger.getGlobal().info("song.db更新開始");
-					songdb.updateSongDatas(files, rootdir,
-							new File(".").getAbsolutePath());
-					Logger.getGlobal().info("song.db更新完了");
-				} catch (ClassNotFoundException e) {
-					e.printStackTrace();
-				}
-
-			} else {
-				System.exit(1);
-			}
-		}
-
 		try {
 			MainController player = new MainController(f, config, auto);
 			LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
@@ -331,13 +293,13 @@ public class MainController extends ApplicationAdapter {
 			// vSync
 			cfg.vSyncEnabled = config.isVsync();
 			if (!config.isVsync()) {
-				cfg.backgroundFPS = 0;
-				cfg.foregroundFPS = 0;
+				cfg.backgroundFPS = config.getMaxFramePerSecond();
+				cfg.foregroundFPS = config.getMaxFramePerSecond();
 			}
 			cfg.title = "Beatoraja";
 
-			cfg.audioDeviceBufferSize = 384;
-			cfg.audioDeviceSimultaneousSources = 64;
+			cfg.audioDeviceBufferSize = config.getAudioDeviceBufferSize();
+			cfg.audioDeviceSimultaneousSources = config.getAudioDeviceSimultaneousSources();
 			cfg.forceExit = forceExit;
 
 			new LwjglApplication(player, cfg);
@@ -396,7 +358,7 @@ public class MainController extends ApplicationAdapter {
 				FXMLLoader loader = new FXMLLoader(
 						BMSInformationLoader.class
 								.getResource("/bms/player/beatoraja/PlayConfigurationView.fxml"));
-				TabPane stackPane = (TabPane) loader.load();
+				VBox stackPane = (VBox) loader.load();
 				bmsinfo = (PlayConfigurationView) loader.getController();
 				bmsinfo.update(config);
 				// scene.getStylesheets().addAll("/bms/res/win7glass.css",
