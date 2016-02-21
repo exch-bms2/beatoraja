@@ -251,6 +251,15 @@ public class BMSPlayer extends ApplicationAdapter {
 		Logger.getGlobal().info("スコアグラフ描画クラス準備");
 		judge = new JudgeManager(this, model);
 
+		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/VL-Gothic-Regular.ttf"));
+		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
+		parameter.size = 24;
+		parameter.characters += model.getFullTitle();
+		titlefont = generator.generateFont(parameter);
+		parameter.size = 18;
+		systemfont = generator.generateFont(parameter);
+		judgefont = generator.generateFont(parameter);
+		generator.dispose();
 
 		String vertex = "attribute vec4 " + ShaderProgram.POSITION_ATTRIBUTE + ";\n" //
 				+ "attribute vec4 " + ShaderProgram.COLOR_ATTRIBUTE + ";\n" //
