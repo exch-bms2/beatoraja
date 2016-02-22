@@ -32,8 +32,6 @@ import javafx.util.Callback;
  */
 public class PlayConfigurationView implements Initializable {
 
-	// TODO 難易度表編集機能
-
 	/**
 	 * ハイスピード
 	 */
@@ -99,8 +97,8 @@ public class PlayConfigurationView implements Initializable {
 	private Config config;;
 
 	private static final String[] SCOREOP = { "OFF", "MIRROR", "RANDOM",
-			"R-RANDOM", "S-RANDOM", "H-RANDOM", "ALL-SCR", "RANDOM-EX",
-			"S-RANDOM-EX" };
+			"R-RANDOM", "S-RANDOM", "SPIRAL", "H-RANDOM", "ALL-SCR",
+			"RANDOM-EX", "S-RANDOM-EX" };
 
 	private static final String[] GAUGEOP = { "ASSIST EASY", "EASY", "NORMAL",
 			"HARD", "EX-HARD", "HAZARD" };
@@ -110,11 +108,6 @@ public class PlayConfigurationView implements Initializable {
 	private static final String[] JUDGEALGORITHM = { "LR2風", "本家風", "最下ノーツ最優先" };
 
 	public void initialize(URL arg0, ResourceBundle arg1) {
-		// hispeed.setProperty(1.0, 1.0, 9.9, 0.1);
-		// gvalue.setProperty(1, 1, 2000, 1);
-		// lanecover.setProperty(0.0, 0.0, 1.0, 0.001);
-		// lift.setProperty(0.0, 0.0, 1.0, 0.001);
-		// judgetiming.setProperty(0, -99, 99, 1);
 		lr2configuration.setHgap(25);
 		lr2configuration.setVgap(4);
 
@@ -124,14 +117,14 @@ public class PlayConfigurationView implements Initializable {
 			}
 		});
 		scoreop.setButtonCell(new OptionListCell(SCOREOP));
-		scoreop.getItems().setAll(0, 1, 2, 3, 4, 5, 6, 7);
+		scoreop.getItems().setAll(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
 		gaugeop.setCellFactory(new Callback<ListView<Integer>, ListCell<Integer>>() {
 			public ListCell<Integer> call(ListView<Integer> param) {
 				return new OptionListCell(GAUGEOP);
 			}
 		});
 		gaugeop.setButtonCell(new OptionListCell(GAUGEOP));
-		gaugeop.getItems().setAll(0, 1, 2, 3, 4);
+		gaugeop.getItems().setAll(0, 1, 2, 3, 4, 5);
 		bgaop.setCellFactory(new Callback<ListView<Integer>, ListCell<Integer>>() {
 			public ListCell<Integer> call(ListView<Integer> param) {
 				return new OptionListCell(BGAOP);

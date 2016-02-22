@@ -1,53 +1,102 @@
 package bms.player.beatoraja;
 
+/**
+ * 各種設定項目。config.jsonで保持される
+ * 
+ * @author exch
+ */
 public class Config {
 	
+	/**
+	 * フルスクリーン
+	 */
 	private boolean fullscreen;
-	
+	/**
+	 * 垂直同期
+	 */
 	private boolean vsync;
-	
+	/**
+	 * オーディオバッファサイズ。大きすぎると音声遅延が発生し、少なすぎるとノイズが発生する
+	 */
 	private int audioDeviceBufferSize = 384;
-	
+	/**
+	 * オーディオ同時発音数
+	 */
 	private int audioDeviceSimultaneousSources = 64;
-	
+	/**
+	 * 最大FPS。垂直同期OFFの時のみ有効
+	 */
 	private int maxFramePerSecond = 240;
 	
 	private int gauge = 0;
 	
 	private int random;
 	
-	private float hispeed = 1.0f;
-	
+	/**
+	 * ハイスピード固定。固定する場合はデュレーションが有効となり、固定しない場合はハイスピードが有効になる
+	 */
 	private boolean fixhispeed = true;
-	
+	/**
+	 * ハイスピード。1.0で等速
+	 */
+	private float hispeed = 1.0f;
+	/**
+	 * デュレーション(ノーツ表示時間)
+	 */
 	private int greenvalue = 300;
-	
+	/**
+	 * レーンカバー表示量(0-1)
+	 */
 	private float lanecover = 0.2f;
-	
+	/**
+	 * レーンカバー使用
+	 */
 	private boolean enablelanecover = true;
-
+	/**
+	 * リフト表示量(0-1)
+	 */
 	private float lift = 0.1f;
-	
+	/**
+	 * リフト使用
+	 */
 	private boolean enablelift = true;
-	
+	/**
+	 * 判定タイミング
+	 */
 	private int judgetiming = 0;
-	
+	/**
+	 * 判定表示方法
+	 */
 	private int judgedetail = 0;
-	
+	/**
+	 * 判定アルゴリズム
+	 */
 	private int judgeAlgorithm = JudgeManager.JUDGE_ALGORITHM_LR2;
-	
+	/**
+	 * アシストオプション:コンスタント
+	 */
 	private boolean constant = false;
-	
+	/**
+	 * アシストオプション:BPMガイド
+	 */
 	private boolean bpmguide = false;
-	
+	/**
+	 * アシストオプション:LNアシスト
+	 */
 	private int lnassist = 0;
 	
 	private String lr2playskin;
-	
+	/**
+	 * BMSルートディレクトリパス
+	 */
 	private String[] bmsroot = new String[0];
-	
+	/**
+	 * 難易度表URL
+	 */
 	private String[] tableURL = new String[0];
-	
+	/**
+	 * BGA表示
+	 */
 	private int bga = BGA_OFF;
 	public static final int BGA_ON = 0;
 	public static final int BGA_AUTO = 1;

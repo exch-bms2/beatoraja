@@ -2,6 +2,7 @@ package bms.player.beatoraja;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Rectangle;
@@ -33,7 +34,7 @@ public class ScoreGraphRenderer {
 		this.rival = rival;
 	}
 
-	public void drawGraph(PlaySkin skin, ShapeRenderer shape, JudgeManager judge) {
+	public void drawGraph(PlaySkin skin, SpriteBatch sprite, BitmapFont font, ShapeRenderer shape, JudgeManager judge) {
 		Rectangle graph = skin.getGraphregion();
 		shape.begin(ShapeType.Filled);
 		shape.setColor(Color.BLACK);
@@ -45,7 +46,7 @@ public class ScoreGraphRenderer {
 		for(int i = 1;i < 20;i++) {
 			float y = graph.y + graph.height * i / 20;
 			if(i % 2 == 0){
-				if(i >= 16) {
+				if(i >= 14) {
 					shape.setColor(Color.LIGHT_GRAY);
 					shape.line(graph.x, y, graph.x + graph.width, y);
 				} else {
@@ -92,6 +93,17 @@ public class ScoreGraphRenderer {
 		shape.rect(graph.x + graph.width * 2 / 3 + 3, graph.y,
 				(graph.width - 9) / 3, graph.height * rival * rate / max);
 		shape.end();
+		
+		sprite.begin();
+		font.setColor(Color.valueOf("bbbbff"));
+		font.setColor(Color.WHITE);
+		font.draw(sprite, String.format("%5.1f", notes != 0 ? ((float)now * 100 / (notes * 2)) : 0f) + "%", graph.x + 20, graph.y - 5);
+		font.draw(sprite, "P:" + String.format("%5d", now) , graph.x + 5, graph.y - 23);
+		font.setColor(Color.valueOf("bbffbb"));
+		font.draw(sprite, "B:" + String.format("%5d", best) , graph.x + 5, graph.y - 41);
+		font.setColor(Color.valueOf("ffbbbb"));
+		font.draw(sprite, "R:" + String.format("%5d", rival) , graph.x + 5, graph.y - 59);
+		sprite.end();
 	}
 
 }

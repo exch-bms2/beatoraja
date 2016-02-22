@@ -574,7 +574,7 @@ public class BMSPlayer extends ApplicationAdapter {
 		sprite.end();
 
 		// グラフ描画
-		graphrender.drawGraph(skin, shape, this.judge);
+		graphrender.drawGraph(skin, sprite, systemfont, shape, this.judge);
 
 		// プログレス描画
 		Rectangle progress = new Rectangle(4, 140, 12, 540);
@@ -667,19 +667,14 @@ public class BMSPlayer extends ApplicationAdapter {
 		// ゲージ描画
 		Rectangle gr = skin.getGaugeRegion();
 		shape.begin(ShapeType.Filled);
-		shape.setColor(Color.BLACK);
+		shape.setColor(Color.DARK_GRAY);
 		shape.rect(gr.x, gr.y, gr.width, gr.height);
-		shape.rect(gr.x + gr.width - 50, gr.y + gr.height, 50, 30);
-		shape.end();
-		shape.begin(ShapeType.Line);
-		shape.setColor(Color.WHITE);
-		shape.rect(gr.x, gr.y, gr.width, gr.height);
-		shape.rect(gr.x + gr.width - 65, gr.y + gr.height, 65, 30);
+		shape.rect(gr.x + gr.width - 80, gr.y + gr.height, 80, 30);
 		shape.end();
 		gauge.draw(skin, sprite, gr.x, gr.y, gr.width, gr.height);
 		sprite.begin();
 		titlefont.setColor(Color.WHITE);
-		titlefont.draw(sprite, String.format("%5.1f", gauge.getValue()) + "%", gr.x + gr.width - 60,
+		titlefont.draw(sprite, String.format("%5.1f", gauge.getValue()) + "%", gr.x + gr.width - 75,
 				gr.y + gr.height + 25);
 		sprite.end();
 		// ジャッジカウント描画
@@ -711,7 +706,7 @@ public class BMSPlayer extends ApplicationAdapter {
 		sprite.begin();
 		titlefont.setColor(Color.WHITE);
 		titlefont.draw(sprite, "HISPEED - " + String.format("%.2f", lanerender.getHispeed()) + "  DURATION - " + lanerender.getGreenValue(),
-				50, 22);
+				30, 22);
 		sprite.end();
 
 		prevrendertime = time;

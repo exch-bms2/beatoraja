@@ -146,7 +146,7 @@ public class PlaySkin {
 		
 		graphregion = new Rectangle(410, 220, 90, 480);
 		
-		judgecountregion = new Rectangle(410, 100, 90, 120);
+		judgecountregion = new Rectangle(410, 40, 90, 120);
 		
 		laneregion = new Rectangle[8];
 		laneregion[0] = new Rectangle(90, 140, 50, 580);
