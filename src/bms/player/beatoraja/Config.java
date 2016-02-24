@@ -27,9 +27,13 @@ public class Config {
 	 * 最大FPS。垂直同期OFFの時のみ有効
 	 */
 	private int maxFramePerSecond = 240;
-	
+	/**
+	 * ゲージの種類
+	 */
 	private int gauge = 0;
-	
+	/**
+	 * 譜面オプション
+	 */
 	private int random;
 	
 	/**
@@ -44,6 +48,12 @@ public class Config {
 	 * デュレーション(ノーツ表示時間)
 	 */
 	private int greenvalue = 300;
+	
+	private int fixhispeedtype = FIX_HISPEED_MAINBPM;
+	
+	public static final int FIX_HISPEED_STARTBPM = 0;
+	public static final int FIX_HISPEED_MAXBPM = 1;
+	public static final int FIX_HISPEED_MAINBPM = 2;
 	/**
 	 * レーンカバー表示量(0-1)
 	 */
@@ -304,5 +314,13 @@ public class Config {
 
 	public void setJudgeAlgorithm(int judgeAlgorithm) {
 		this.judgeAlgorithm = judgeAlgorithm;
+	}
+
+	public int getFixhispeedtype() {
+		return fixhispeedtype;
+	}
+
+	public void setFixhispeedtype(int fixhispeedtype) {
+		this.fixhispeedtype = fixhispeedtype;
 	}
 }

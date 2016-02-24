@@ -60,27 +60,23 @@ public class MusicSelector extends ApplicationAdapter {
 
 	private int mode;
 
-	private static final String[] MODE = { "ALL", "7 KEY", "14 KEY", "9 KEY",
-			"5 KEY", "10 KEY" };
+	private static final String[] MODE = { "ALL", "7 KEY", "14 KEY", "9 KEY", "5 KEY", "10 KEY" };
 
 	private int sort;
 
-	private static final String[] SORT = { "Default", "CLEAR LAMP",
-			"MISS COUNT" };
+	private static final String[] SORT = { "Default", "CLEAR LAMP", "MISS COUNT" };
 
-	private static final String[] LAMP = { "000000", "808080", "800080",
-			"ff00ff", "40ff40", "f0c000", "ffffff", "ffff88", "88ffff",
-			"ff8888", "ff0000" };
-	private static final String[] CLEAR = { "NO PLAY", "FAILED",
-			"ASSIST CLEAR", "L-ASSIST CLEAR", "EASY CLEAR", "CLEAR",
-			"HARD CLEAR", "EX-HARD CLEAR", "FULL COMBO", "PERFECT", "MAX" };
+	private static final String[] LAMP = { "000000", "808080", "800080", "ff00ff", "40ff40", "f0c000", "ffffff",
+			"ffff88", "88ffff", "ff8888", "ff0000" };
+	private static final String[] CLEAR = { "NO PLAY", "FAILED", "ASSIST CLEAR", "L-ASSIST CLEAR", "EASY CLEAR",
+			"CLEAR", "HARD CLEAR", "EX-HARD CLEAR", "FULL COMBO", "PERFECT", "MAX" };
 
-	private static final String[] SCOREOP = { "OFF", "MIRROR", "RANDOM",
-			"R-RANDOM", "S-RANDOM", "SPIRAL", "H-RANDOM", "ALL-SCR",
-			"RANDOM-EX", "S-RANDOM-EX" };
+	private static final String[] SCOREOP = { "OFF", "MIRROR", "RANDOM", "R-RANDOM", "S-RANDOM", "SPIRAL", "H-RANDOM",
+			"ALL-SCR", "RANDOM-EX", "S-RANDOM-EX" };
 
-	private static final String[] GAUGEOP = { "ASSIST EASY", "EASY", "NORMAL",
-			"HARD", "EX-HARD", "HAZARD" };
+	private static final String[] GAUGEOP = { "ASSIST EASY", "EASY", "NORMAL", "HARD", "EX-HARD", "HAZARD" };
+
+	private static final String[] FIXHISPEEDOP = { "STARTBPM", "MAXBPM", "MAINBPM" };
 
 	private Config config;
 
@@ -96,8 +92,7 @@ public class MusicSelector extends ApplicationAdapter {
 		this.config = config;
 		try {
 			Class.forName("org.sqlite.JDBC");
-			scoredb = new LunaticRave2ScoreDatabaseManager(new File(".")
-					.getAbsoluteFile().getParent(), "/", "/");
+			scoredb = new LunaticRave2ScoreDatabaseManager(new File(".").getAbsoluteFile().getParent(), "/", "/");
 			scoredb.createTable("Player");
 			Logger.getGlobal().info("スコアデータベース接続");
 			songdb = main.getSongDatabase();
@@ -113,8 +108,7 @@ public class MusicSelector extends ApplicationAdapter {
 			for (File f : dir.listFiles()) {
 				try {
 					Json json = new Json();
-					TableData td = json.fromJson(TableData.class,
-							new FileReader(f));
+					TableData td = json.fromJson(TableData.class, new FileReader(f));
 					List<TableLevelBar> levels = new ArrayList<TableLevelBar>();
 					for (String lv : td.getLevel()) {
 						levels.add(new TableLevelBar(lv, td.getHash().get(lv)));
@@ -123,8 +117,7 @@ public class MusicSelector extends ApplicationAdapter {
 					for (String s : td.getGrade()) {
 						List<SongData> songlist = new ArrayList();
 						for (String hash : td.getGradehash().get(s)) {
-							SongData[] songs = songdb.getSongDatas("hash",
-									hash, new File(".").getAbsolutePath());
+							SongData[] songs = songdb.getSongDatas("hash", hash, new File(".").getAbsolutePath());
 							if (songs.length > 0) {
 								songlist.add(songs[0]);
 							} else {
@@ -132,11 +125,10 @@ public class MusicSelector extends ApplicationAdapter {
 							}
 						}
 
-						l.add(new GradeBar(s, songlist
-								.toArray(new SongData[0])));
+						l.add(new GradeBar(s, songlist.toArray(new SongData[0])));
 					}
-					tables.add(new TableBar(td.getName(), levels
-							.toArray(new TableLevelBar[0]), l.toArray(new GradeBar[0])));
+					tables.add(new TableBar(td.getName(), levels.toArray(new TableLevelBar[0]),
+							l.toArray(new GradeBar[0])));
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -194,9 +186,7 @@ public class MusicSelector extends ApplicationAdapter {
 		// draw song bar
 		final float barh = 36;
 		for (int i = 0; i < h / barh + 2; i++) {
-			int index = (int) (selectedindex + currentsongs.length * 100 + i - h
-					/ barh / 2)
-					% currentsongs.length;
+			int index = (int) (selectedindex + currentsongs.length * 100 + i - h / barh / 2) % currentsongs.length;
 			Bar sd = currentsongs[index];
 			int x = 720;
 			if (i == h / barh / 2) {
@@ -206,8 +196,7 @@ public class MusicSelector extends ApplicationAdapter {
 			float y = h - i * barh;
 			if (duration != 0) {
 				long time = System.currentTimeMillis();
-				float dy = barh * (Math.abs(angle) - duration + time) / angle
-						+ (angle >= 0 ? -1 : 1) * barh;
+				float dy = barh * (Math.abs(angle) - duration + time) / angle + (angle >= 0 ? -1 : 1) * barh;
 				y += dy;
 			}
 			shape.setColor(Color.valueOf("222222"));
@@ -237,8 +226,7 @@ public class MusicSelector extends ApplicationAdapter {
 
 			if (currentsongs[index].getScore() != null) {
 				shape.begin(ShapeType.Filled);
-				shape.setColor(Color.valueOf(LAMP[currentsongs[index]
-						.getScore().getClear()]));
+				shape.setColor(Color.valueOf(LAMP[currentsongs[index].getScore().getClear()]));
 				shape.rect(x, y, 15, barh - 6);
 				shape.end();
 			}
@@ -247,12 +235,9 @@ public class MusicSelector extends ApplicationAdapter {
 
 		sprite.begin();
 		if (currentsongs[selectedindex] instanceof SongBar) {
-			SongData song = ((SongBar) currentsongs[selectedindex])
-					.getSongData();
-			titlefont.draw(sprite, song.getTitle() + " " + song.getSubtitle(),
-					100, 600);
-			titlefont.draw(sprite,
-					song.getArtist() + " " + song.getSubartist(), 100, 570);
+			SongData song = ((SongBar) currentsongs[selectedindex]).getSongData();
+			titlefont.draw(sprite, song.getTitle() + " " + song.getSubtitle(), 100, 600);
+			titlefont.draw(sprite, song.getArtist() + " " + song.getSubartist(), 100, 570);
 			titlefont.draw(sprite, song.getMode() + " KEYS", 100, 530);
 			titlefont.draw(sprite, "LEVEL : " + song.getLevel(), 100, 500);
 
@@ -261,13 +246,10 @@ public class MusicSelector extends ApplicationAdapter {
 				titlefont.setColor(Color.valueOf(LAMP[score.getClear()]));
 				titlefont.draw(sprite, CLEAR[score.getClear()], 100, 420);
 				titlefont.setColor(Color.WHITE);
-				titlefont.draw(sprite, "EX-SCORE  : " + score.getExscore()
-						+ " / " + (score.getNotes() * 2), 100, 390);
-				titlefont.draw(sprite, "MISS COUNT: " + score.getMinbp(), 100,
-						360);
-				titlefont.draw(sprite,
-						"CLEAR / PLAY : " + score.getClearcount() + " / "
-								+ score.getPlaycount(), 100, 330);
+				titlefont.draw(sprite, "EX-SCORE  : " + score.getExscore() + " / " + (score.getNotes() * 2), 100, 390);
+				titlefont.draw(sprite, "MISS COUNT: " + score.getMinbp(), 100, 360);
+				titlefont.draw(sprite, "CLEAR / PLAY : " + score.getClearcount() + " / " + score.getPlaycount(), 100,
+						330);
 			}
 		}
 		titlefont.draw(sprite, "MODE : " + MODE[mode], 20, 30);
@@ -330,13 +312,16 @@ public class MusicSelector extends ApplicationAdapter {
 		if (input.startPressed()) {
 			if (keystate[1] && keytime[1] != 0) {
 				keytime[1] = 0;
-				config.setRandom(config.getRandom() + 1 < SCOREOP.length ? config
-						.getRandom() + 1 : 0);
+				config.setRandom(config.getRandom() + 1 < SCOREOP.length ? config.getRandom() + 1 : 0);
 			}
 			if (keystate[3] && keytime[3] != 0) {
 				keytime[3] = 0;
-				config.setGauge(config.getGauge() + 1 < GAUGEOP.length ? config
-						.getGauge() + 1 : 0);
+				config.setGauge(config.getGauge() + 1 < GAUGEOP.length ? config.getGauge() + 1 : 0);
+			}
+			if (keystate[6] && keytime[6] != 0) {
+				keytime[6] = 0;
+				config.setFixhispeedtype(
+						config.getFixhispeedtype() + 1 < FIXHISPEEDOP.length ? config.getFixhispeedtype() + 1 : 0);
 			}
 			shape.begin(ShapeType.Filled);
 			shape.setColor(Color.BLACK);
@@ -357,13 +342,13 @@ public class MusicSelector extends ApplicationAdapter {
 			sprite.begin();
 			titlefont.draw(sprite, SCOREOP[config.getRandom()], 110, 490);
 			titlefont.draw(sprite, GAUGEOP[config.getGauge()], 200, 520);
+			titlefont.draw(sprite, FIXHISPEEDOP[config.getFixhispeedtype()], 300, 220);
 			sprite.end();
 		} else {
 			// 1鍵 (選曲 or フォルダを開く)
 			if (keystate[0] && keytime[0] != 0) {
 				keytime[0] = 0;
-				if (currentsongs[selectedindex] instanceof FolderBar
-						|| currentsongs[selectedindex] instanceof TableBar
+				if (currentsongs[selectedindex] instanceof FolderBar || currentsongs[selectedindex] instanceof TableBar
 						|| currentsongs[selectedindex] instanceof TableLevelBar) {
 					Bar bar = currentsongs[selectedindex];
 					if (updateBar(bar)) {
@@ -372,20 +357,17 @@ public class MusicSelector extends ApplicationAdapter {
 				} else if (currentsongs[selectedindex] instanceof SongBar) {
 					main.setAuto(0);
 					resource.clear();
-					resource.setBMSFile(new File(
-							((SongBar) currentsongs[selectedindex])
-									.getSongData().getPath()), config, 0);
+					resource.setBMSFile(new File(((SongBar) currentsongs[selectedindex]).getSongData().getPath()),
+							config, 0);
 					if (bgm != null) {
 						bgm.stop();
 					}
 					main.changeState(MainController.STATE_DECIDE, resource);
 				} else if (currentsongs[selectedindex] instanceof GradeBar) {
-					if (((GradeBar) currentsongs[selectedindex])
-							.existsAllSongs()) {
+					if (((GradeBar) currentsongs[selectedindex]).existsAllSongs()) {
 						main.setAuto(0);
 						List<File> files = new ArrayList<File>();
-						for (SongData song : ((GradeBar) currentsongs[selectedindex])
-								.getSongDatas()) {
+						for (SongData song : ((GradeBar) currentsongs[selectedindex]).getSongDatas()) {
 							files.add(new File(song.getPath()));
 						}
 						resource.clear();
@@ -427,9 +409,8 @@ public class MusicSelector extends ApplicationAdapter {
 			if (keystate[4]) {
 				if (currentsongs[selectedindex] instanceof SongBar) {
 					resource.clear();
-					resource.setBMSFile(new File(
-							((SongBar) currentsongs[selectedindex])
-									.getSongData().getPath()), config, 1);
+					resource.setBMSFile(new File(((SongBar) currentsongs[selectedindex]).getSongData().getPath()),
+							config, 1);
 					if (bgm != null) {
 						bgm.stop();
 					}
@@ -439,9 +420,8 @@ public class MusicSelector extends ApplicationAdapter {
 			if (keystate[6]) {
 				if (currentsongs[selectedindex] instanceof SongBar) {
 					resource.clear();
-					resource.setBMSFile(new File(
-							((SongBar) currentsongs[selectedindex])
-									.getSongData().getPath()), config, 2);
+					resource.setBMSFile(new File(((SongBar) currentsongs[selectedindex]).getSongData().getPath()),
+							config, 2);
 					if (bgm != null) {
 						bgm.stop();
 					}
@@ -465,18 +445,15 @@ public class MusicSelector extends ApplicationAdapter {
 		}
 		if (crc != null) {
 			Logger.getGlobal().info("crc :" + crc);
-			FolderData[] folders = songdb.getFolderDatas("parent", crc,
-					new File(".").getAbsolutePath());
-			SongData[] songs = songdb.getSongDatas("parent", crc,
-					new File(".").getAbsolutePath());
+			FolderData[] folders = songdb.getFolderDatas("parent", crc, new File(".").getAbsolutePath());
+			SongData[] songs = songdb.getSongDatas("parent", crc, new File(".").getAbsolutePath());
 			if (songs.length == 0) {
 				for (FolderData folder : folders) {
 					String path = folder.getPath();
 					if (path.endsWith(String.valueOf(File.separatorChar))) {
 						path = path.substring(0, path.length() - 1);
 					}
-					l.add(new FolderBar(folder, songdb.crc32(path,
-							new String[0], new File(".").getAbsolutePath())));
+					l.add(new FolderBar(folder, songdb.crc32(path, new String[0], new File(".").getAbsolutePath())));
 				}
 			} else {
 				for (SongData song : songs) {
@@ -491,8 +468,7 @@ public class MusicSelector extends ApplicationAdapter {
 		if (bar instanceof TableLevelBar) {
 			List<SongBar> songbars = new ArrayList<SongBar>();
 			for (String hash : ((TableLevelBar) bar).getHashes()) {
-				SongData[] songs = songdb.getSongDatas("hash", hash, new File(
-						".").getAbsolutePath());
+				SongData[] songs = songdb.getSongDatas("hash", hash, new File(".").getAbsolutePath());
 				if (songs.length > 0) {
 					songbars.add(new SongBar(songs[0]));
 				}
@@ -503,8 +479,7 @@ public class MusicSelector extends ApplicationAdapter {
 		List<Bar> remove = new ArrayList<Bar>();
 		for (Bar b : l) {
 			final int[] modes = { 0, 7, 14, 9, 5, 10 };
-			if (modes[mode] != 0 && b instanceof SongBar
-					&& ((SongBar) b).getSongData().getMode() != modes[mode]) {
+			if (modes[mode] != 0 && b instanceof SongBar && ((SongBar) b).getSongData().getMode() != modes[mode]) {
 				remove.add(b);
 			}
 		}
@@ -536,16 +511,13 @@ public class MusicSelector extends ApplicationAdapter {
 			List<String> hashes = new ArrayList();
 			for (int i = 0; i < currentsongs.length; i++) {
 				if (currentsongs[i] instanceof SongBar) {
-					hashes.add(((SongBar) currentsongs[i]).getSongData()
-							.getHash());
+					hashes.add(((SongBar) currentsongs[i]).getSongData().getHash());
 				}
 			}
-			Map<String, IRScoreData> m = scoredb.getScoreDatas("Player",
-					hashes.toArray(new String[0]), false);
+			Map<String, IRScoreData> m = scoredb.getScoreDatas("Player", hashes.toArray(new String[0]), false);
 			for (int i = 0; i < currentsongs.length; i++) {
 				if (currentsongs[i] instanceof SongBar) {
-					currentsongs[i].setScore(m.get(((SongBar) currentsongs[i])
-							.getSongData().getHash()));
+					currentsongs[i].setScore(m.get(((SongBar) currentsongs[i]).getSongData().getHash()));
 				}
 			}
 			Arrays.sort(currentsongs, this.getSortComparator());

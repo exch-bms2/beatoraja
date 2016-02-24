@@ -1,5 +1,8 @@
 package bms.player.beatoraja;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
 
@@ -81,6 +84,31 @@ public class LaneRenderer {
 		this.gvalue = config.getGreenvalue();
 		this.model = model;
 		hispeed = config.getHispeed();
+		switch(config.getFixhispeedtype()) {
+		case Config.FIX_HISPEED_STARTBPM:
+			basebpm = model.getBpm();
+			break;
+		case Config.FIX_HISPEED_MAXBPM:
+			basebpm = model.getMaxBPM();
+			break;
+		case Config.FIX_HISPEED_MAINBPM:
+			Map<Double, Integer> m = new HashMap<Double, Integer>();
+			for(TimeLine tl : model.getAllTimeLines()) {
+				Integer count = m.get(tl.getBPM());
+				if(count == null) {
+					count = 0;
+				}
+				m.put(tl.getBPM(), count + tl.getTotalNotes());
+			}
+			int maxcount = 0;
+			for(double bpm : m.keySet()) {
+				if(m.get(bpm) > maxcount) {
+					maxcount = m.get(bpm);
+					basebpm = bpm;
+				}
+			}
+			break;
+		}
 		this.setLanecover(config.getLanecover());
 		if (this.fixhispeed) {
 			basehispeed = hispeed;
@@ -118,7 +146,7 @@ public class LaneRenderer {
 	public void setLanecover(float lanecover) {
 		this.lanecover = lanecover;
 		if (this.fixhispeed) {
-			hispeed = (float) ((3000 / (model.getBpm() / 100) / gvalue) * 0.6
+			hispeed = (float) ((3000 / (basebpm / 100) / gvalue) * 0.6
 					* (1 - (enableLanecover ? lanecover : 0)));
 		}
 	}
@@ -143,6 +171,7 @@ public class LaneRenderer {
 		}
 	}
 
+	private double basebpm;
 	private double nowbpm;
 
 	public void drawLane(ShapeRenderer shape, BitmapFont font, BMSModel model, TimeLine[] timelines, long starttime,
