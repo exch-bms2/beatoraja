@@ -10,7 +10,7 @@ import bms.model.BMSModel;
 import bms.model.BMSONDecoder;
 import bms.player.beatoraja.audio.AudioProcessor;
 import bms.player.beatoraja.audio.SoundProcessor;
-import bms.player.beatoraja.bga.BGAManager;
+import bms.player.beatoraja.bga.BGAProcessor;
 import bms.player.beatoraja.gauge.GrooveGauge;
 import bms.player.beatoraja.pattern.PatternModifyLog;
 import bms.player.lunaticrave2.IRScoreData;
@@ -26,7 +26,7 @@ public class PlayerResource {
 	private Config config;
 	private int auto;
 	private AudioProcessor audio;
-	private BGAManager bga;
+	private BGAProcessor bga;
 	private IRScoreData score;
 
 	private boolean finished = false;
@@ -70,7 +70,7 @@ public class PlayerResource {
 			if(bga != null) {
 				bga.dispose();
 			}
-			bga = new BGAManager(config);
+			bga = new BGAProcessor(config);
 			Thread medialoader = new Thread() {
 				@Override
 				public void run() {
@@ -114,7 +114,7 @@ public class PlayerResource {
 		return audio;
 	}
 
-	public BGAManager getBGAManager() {
+	public BGAProcessor getBGAManager() {
 		return bga;
 	}
 

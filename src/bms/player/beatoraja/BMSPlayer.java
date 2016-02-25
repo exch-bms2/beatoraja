@@ -7,7 +7,7 @@ import java.util.logging.Logger;
 import bms.model.*;
 import bms.player.beatoraja.PlaySkin.SkinPart;
 import bms.player.beatoraja.audio.AudioProcessor;
-import bms.player.beatoraja.bga.BGAManager;
+import bms.player.beatoraja.bga.BGAProcessor;
 import bms.player.beatoraja.gauge.*;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyInputLog;
@@ -56,7 +56,7 @@ public class BMSPlayer extends ApplicationAdapter {
 	private JudgeManager judge;
 	private AudioProcessor audio;
 
-	private BGAManager bga;
+	private BGAProcessor bga;
 
 	private PlayerResource resource;
 
