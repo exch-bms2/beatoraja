@@ -328,7 +328,7 @@ public class BMSPlayer extends ApplicationAdapter {
 					4);
 			shape.end();
 
-			if (resource.mediaLoadFinished()) {
+			if (resource.mediaLoadFinished() && !input.startPressed()) {
 				state = STATE_READY;
 				starttime = System.currentTimeMillis();
 				Logger.getGlobal().info("STATE_READYに移行");
@@ -457,7 +457,7 @@ public class BMSPlayer extends ApplicationAdapter {
 
 	private void saveConfig() {
 		Config config = resource.getConfig();
-		if (lanerender.isFixHispeed()) {
+		if (lanerender.getFixHispeed() != Config.FIX_HISPEED_OFF) {
 			config.setGreenvalue(lanerender.getGreenValue());
 		} else {
 			config.setHispeed(lanerender.getHispeed());

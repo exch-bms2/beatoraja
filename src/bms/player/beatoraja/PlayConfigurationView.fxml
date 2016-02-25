@@ -83,7 +83,7 @@
                <content>
                   <VBox prefHeight="241.0" prefWidth="723.0">
                   	<children>
-                        <CheckBox fx:id="fixgvalue" mnemonicParsing="false" text="ノーツ表示時間を固定" />
+                  	    <ComboBox fx:id="fixhispeed" prefWidth="150.0" />                  	
                   		<GridPane fx:id="lr2configuration" prefHeight="154.0" prefWidth="632.0">
                   			<columnConstraints>
                   				<ColumnConstraints maxWidth="278.0" minWidth="0.0" prefWidth="135.0" />

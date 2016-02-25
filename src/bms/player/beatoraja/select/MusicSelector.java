@@ -76,7 +76,7 @@ public class MusicSelector extends ApplicationAdapter {
 
 	private static final String[] GAUGEOP = { "ASSIST EASY", "EASY", "NORMAL", "HARD", "EX-HARD", "HAZARD" };
 
-	private static final String[] FIXHISPEEDOP = { "STARTBPM", "MAXBPM", "MAINBPM" };
+	private static final String[] FIXHISPEEDOP = { "OFF", "STARTBPM", "MAXBPM", "MAINBPM" };
 
 	private Config config;
 
@@ -320,8 +320,8 @@ public class MusicSelector extends ApplicationAdapter {
 			}
 			if (keystate[6] && keytime[6] != 0) {
 				keytime[6] = 0;
-				config.setFixhispeedtype(
-						config.getFixhispeedtype() + 1 < FIXHISPEEDOP.length ? config.getFixhispeedtype() + 1 : 0);
+				config.setFixhispeed(
+						config.getFixhispeed() + 1 < FIXHISPEEDOP.length ? config.getFixhispeed() + 1 : 0);
 			}
 			shape.begin(ShapeType.Filled);
 			shape.setColor(Color.BLACK);
@@ -342,7 +342,7 @@ public class MusicSelector extends ApplicationAdapter {
 			sprite.begin();
 			titlefont.draw(sprite, SCOREOP[config.getRandom()], 110, 490);
 			titlefont.draw(sprite, GAUGEOP[config.getGauge()], 200, 520);
-			titlefont.draw(sprite, FIXHISPEEDOP[config.getFixhispeedtype()], 300, 220);
+			titlefont.draw(sprite, FIXHISPEEDOP[config.getFixhispeed()], 300, 220);
 			sprite.end();
 		} else {
 			// 1鍵 (選曲 or フォルダを開く)

@@ -48,7 +48,7 @@ public class LaneRenderer {
 
 	private int gvalue;
 
-	private boolean fixhispeed;
+	private int fixhispeed;
 	private float basehispeed;
 
 	private BMSModel model;
@@ -80,11 +80,13 @@ public class LaneRenderer {
 		this.enableLanecover = config.isEnablelanecover();
 		this.enableLift = config.isEnablelift();
 		this.lift = config.getLift();
-		this.fixhispeed = config.isFixhispeed();
+		this.fixhispeed = config.getFixhispeed();
 		this.gvalue = config.getGreenvalue();
 		this.model = model;
 		hispeed = config.getHispeed();
-		switch(config.getFixhispeedtype()) {
+		switch(config.getFixhispeed()) {
+		case Config.FIX_HISPEED_OFF:
+			break;
 		case Config.FIX_HISPEED_STARTBPM:
 			basebpm = model.getBpm();
 			break;
@@ -110,12 +112,12 @@ public class LaneRenderer {
 			break;
 		}
 		this.setLanecover(config.getLanecover());
-		if (this.fixhispeed) {
+		if (this.fixhispeed != Config.FIX_HISPEED_OFF) {
 			basehispeed = hispeed;
 		}
 	}
 
-	public boolean isFixHispeed() {
+	public int getFixHispeed() {
 		return fixhispeed;
 	}
 
@@ -145,7 +147,7 @@ public class LaneRenderer {
 
 	public void setLanecover(float lanecover) {
 		this.lanecover = lanecover;
-		if (this.fixhispeed) {
+		if (this.fixhispeed != Config.FIX_HISPEED_OFF) {
 			hispeed = (float) ((3000 / (basebpm / 100) / gvalue) * 0.6
 					* (1 - (enableLanecover ? lanecover : 0)));
 		}
@@ -161,7 +163,7 @@ public class LaneRenderer {
 
 	public void changeHispeed(boolean b) {
 		float f = 0;
-		if (fixhispeed) {
+		if (this.fixhispeed != Config.FIX_HISPEED_OFF) {
 			f = basehispeed * 0.25f * (b ? 1 : -1);
 		} else {
 			f = 0.125f * (b ? 1 : -1);

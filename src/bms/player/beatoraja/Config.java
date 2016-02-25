@@ -39,7 +39,13 @@ public class Config {
 	/**
 	 * ハイスピード固定。固定する場合はデュレーションが有効となり、固定しない場合はハイスピードが有効になる
 	 */
-	private boolean fixhispeed = true;
+	private int fixhispeed = FIX_HISPEED_MAINBPM;
+	
+	public static final int FIX_HISPEED_OFF = 0;
+	public static final int FIX_HISPEED_STARTBPM = 1;
+	public static final int FIX_HISPEED_MAXBPM = 2;
+	public static final int FIX_HISPEED_MAINBPM = 3;
+	
 	/**
 	 * ハイスピード。1.0で等速
 	 */
@@ -49,11 +55,6 @@ public class Config {
 	 */
 	private int greenvalue = 300;
 	
-	private int fixhispeedtype = FIX_HISPEED_MAINBPM;
-	
-	public static final int FIX_HISPEED_STARTBPM = 0;
-	public static final int FIX_HISPEED_MAXBPM = 1;
-	public static final int FIX_HISPEED_MAINBPM = 2;
 	/**
 	 * レーンカバー表示量(0-1)
 	 */
@@ -160,11 +161,11 @@ public class Config {
 		this.hispeed = hispeed;
 	}
 
-	public boolean isFixhispeed() {
+	public int getFixhispeed() {
 		return fixhispeed;
 	}
 
-	public void setFixhispeed(boolean fixhispeed) {
+	public void setFixhispeed(int fixhispeed) {
 		this.fixhispeed = fixhispeed;
 	}
 
@@ -314,13 +315,5 @@ public class Config {
 
 	public void setJudgeAlgorithm(int judgeAlgorithm) {
 		this.judgeAlgorithm = judgeAlgorithm;
-	}
-
-	public int getFixhispeedtype() {
-		return fixhispeedtype;
-	}
-
-	public void setFixhispeedtype(int fixhispeedtype) {
-		this.fixhispeedtype = fixhispeedtype;
 	}
 }

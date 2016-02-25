@@ -41,7 +41,7 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private GridPane lr2configuration;
 	@FXML
-	private CheckBox fixgvalue;
+	private ComboBox<Integer> fixhispeed;
 	@FXML
 	private Spinner<Integer> gvalue;
 	@FXML
@@ -105,6 +105,8 @@ public class PlayConfigurationView implements Initializable {
 
 	private static final String[] BGAOP = { "ON", "AUTOPLAY ", "OFF" };
 
+	private static final String[] FIXHISPEEDOP = { "OFF", "START BPM", "MAX BPM", "MAIN BPM" };
+
 	private static final String[] JUDGEALGORITHM = { "LR2風", "本家風", "最下ノーツ最優先" };
 
 	public void initialize(URL arg0, ResourceBundle arg1) {
@@ -132,6 +134,13 @@ public class PlayConfigurationView implements Initializable {
 		});
 		bgaop.setButtonCell(new OptionListCell(BGAOP));
 		bgaop.getItems().setAll(0, 1, 2);
+		fixhispeed.setCellFactory(new Callback<ListView<Integer>, ListCell<Integer>>() {
+			public ListCell<Integer> call(ListView<Integer> param) {
+				return new OptionListCell(FIXHISPEEDOP);
+			}
+		});
+		fixhispeed.setButtonCell(new OptionListCell(FIXHISPEEDOP));
+		fixhispeed.getItems().setAll(0, 1, 2, 3);
 		judgealgorithm.setButtonCell(new OptionListCell(JUDGEALGORITHM));
 		judgealgorithm.getItems().setAll(0, 1, 2);
 	}
@@ -147,7 +156,7 @@ public class PlayConfigurationView implements Initializable {
 		scoreop.getSelectionModel().select(config.getRandom());
 		gaugeop.getSelectionModel().select(config.getGauge());
 
-		fixgvalue.setSelected(config.isFixhispeed());
+		fixhispeed.setValue(config.getFixhispeed());
 		hispeed.getValueFactory().setValue((double) config.getHispeed());
 		gvalue.getValueFactory().setValue(config.getGreenvalue());
 		enableLanecover.setSelected(config.isEnablelanecover());
@@ -184,7 +193,7 @@ public class PlayConfigurationView implements Initializable {
 		config.setRandom(scoreop.getValue());
 		config.setGauge(gaugeop.getValue());
 		config.setHispeed(hispeed.getValue().floatValue());
-		config.setFixhispeed(fixgvalue.isSelected());
+		config.setFixhispeed(fixhispeed.getValue());
 		config.setGreenvalue(gvalue.getValue());
 		config.setEnablelanecover(enableLanecover.isSelected());
 		config.setLanecover(lanecover.getValue().floatValue());
