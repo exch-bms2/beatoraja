@@ -13,8 +13,7 @@ public class ConstantBPMModifier extends PatternModifier {
 	
 	@Override
 	public List<PatternModifyLog> modify(BMSModel model) {
-		for (int time : model.getAllTimes()) {
-			TimeLine tl = model.getTimeLine(time);
+		for (TimeLine tl : model.getAllTimeLines()) {
 			tl.setBPM(model.getBpm());
 		}
 		return null;

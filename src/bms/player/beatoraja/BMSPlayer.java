@@ -764,8 +764,8 @@ public class BMSPlayer extends ApplicationAdapter {
 	private final List<KeyInputLog> createAutoplayLog() {
 		List<KeyInputLog> keylog = new ArrayList<KeyInputLog>();
 		Note[] ln = new Note[8];
-		for (int i : model.getAllTimes()) {
-			TimeLine tl = model.getTimeLine(i);
+		for (TimeLine tl : model.getAllTimeLines()) {
+			int i = tl.getTime();
 			for (int lane = 0; lane < 8; lane++) {
 				Note note = tl.getNote(lane);
 				if (note != null) {

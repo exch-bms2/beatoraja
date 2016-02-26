@@ -432,9 +432,8 @@ public class Section {
 		int base = this.getStartTime();
 		String[] startln = this.getStartLNStatus().clone();
 		// 小節線追加
-		model.getTimeLine(base).setSectionLine(true);
-		model.getTimeLine(base).setSection(sectionnum);
-		model.getTimeLine(base).setBPM(this.getStartBPM());
+		model.getTimeLine(sectionnum, base).setSectionLine(true);
+		model.getTimeLine(sectionnum, base).setBPM(this.getStartBPM());
 		int[] poors = new int[poor.length];
 		for (int i = 0; i < poors.length; i++) {
 			if (bgamap.get(poor[i]) != null) {
@@ -443,7 +442,7 @@ public class Section {
 				poors[i] = -1;
 			}
 		}
-		model.getTimeLine(base).setPoor(poors);
+		model.getTimeLine(sectionnum, base).setPoor(poors);
 		// BPM変化。ストップシーケンステーブル準備
 		Map<Double, Double> bpmchange = new HashMap<Double, Double>();
 		Map<Double, Double> stop = new HashMap<Double, Double>();
@@ -503,8 +502,7 @@ public class Section {
 			double dt = 0.0;
 			for (int i = 0; i < s.length; i++) {
 				if (!s[i].equals("00")) {
-					TimeLine tl = model.getTimeLine(base + (int) (dt * rate));
-					tl.setSection(sectionnum + ((float) i) / s.length);
+					TimeLine tl = model.getTimeLine(sectionnum + ((float) i) / s.length, base + (int) (dt * rate));
 					if (key >= 0 && key < 18) {
 						if (tl.existNote(key % 18)) {
 							Logger.getGlobal().warning(
@@ -514,29 +512,28 @@ public class Section {
 						}
 						if (s[i].equals(model.getLNObject())) {
 							// LN終端処理
-							int[] times = model.getAllTimes();
-							for (int t = times.length - 1; t >= 0; t--) {
-								TimeLine tl2 = model.getTimeLine(times[t]);
-								if (base + (int) (dt * rate) > times[t]
-										&& tl2.existNote(key % 18)) {
-									Note note = tl2.getNote(key % 18);
+							TimeLine[] tl2 = model.getAllTimeLines();
+							for (int t = tl2.length - 1; t >= 0; t--) {
+								if (base + (int) (dt * rate) > tl2[t].getTime()
+										&& tl2[t].existNote(key % 18)) {
+									Note note = tl2[t].getNote(key % 18);
 									if (note instanceof NormalNote) {
 										LongNote ln = new LongNote(
-												note.getWav(), tl2);
+												note.getWav(), tl2[t]);
 										ln.setEnd(tl);
-										tl2.addNote(key % 18, ln);
+										tl2[t].addNote(key % 18, ln);
 										tl.addNote(key % 18, ln);
 										tl.setBPM(nowbpm);
 										break;
 									} else if (note instanceof LongNote
-											&& ((LongNote) note).getStart() == tl2) {
+											&& ((LongNote) note).getStart() == tl2[t]) {
 										Logger.getGlobal()
 												.warning(
 														model.getTitle()
 																+ "はLNレーンで開始定義し、LNオブジェクトで終端定義しています。レーン:"
 																+ key
 																+ " - Time(ms):"
-																+ times[t]);
+																+ tl2[t].getTime());
 										((LongNote) note).setEnd(tl);
 										tl.addNote(key % 18, note);
 										tl.setBPM(nowbpm);
@@ -548,7 +545,7 @@ public class Section {
 																+ "はLNオブジェクトの対応が取れません。レーン:"
 																+ key
 																+ " - Time(ms):"
-																+ times[t]);
+																+ tl2[t].getTime());
 									}
 								}
 							}
@@ -578,12 +575,11 @@ public class Section {
 							startln[key % 18] = s[i];
 						} else {
 							// LN終端処理
-							int[] times = model.getAllTimes();
-							for (int t = times.length - 1; t >= 0; t--) {
-								TimeLine tl2 = model.getTimeLine(times[t]);
-								if (base + (int) (dt * rate) > times[t]
-										&& tl2.existNote(key % 18)) {
-									Note note = tl2.getNote(key % 18);
+							TimeLine[] tl2 = model.getAllTimeLines();
+							for (int t = tl2.length - 1; t >= 0; t--) {
+								if (base + (int) (dt * rate) > tl2[t].getTime()
+										&& tl2[t].existNote(key % 18)) {
+									Note note = tl2[t].getNote(key % 18);
 									if (note instanceof LongNote) {
 										((LongNote) note).setEnd(tl);
 										tl.addNote(key % 18, note);
@@ -595,7 +591,7 @@ public class Section {
 												model.getTitle()
 														+ "はLN内に通常ノートが存在します!"
 														+ (key - 35) + ":"
-														+ times[t]);
+														+ tl2[t].getTime());
 									}
 								}
 							}
@@ -639,11 +635,11 @@ public class Section {
 										* (st[k] - (double) i / s.length - se)
 										/ nowbpm;
 								se = st[k] - (double) i / s.length;
-								model.getTimeLine(base + (int) (dt * rate))
-										.setBPM(0);
-								model.getTimeLine(base + (int) (dt * rate))
-										.setSection(
-												sectionnum + st[k].floatValue());
+								model.getTimeLine(sectionnum + st[k].floatValue(), base + (int) (dt * rate))
+								.setBPM(nowbpm);
+								model.getTimeLine(sectionnum + st[k].floatValue(), base + (int) (dt * rate))
+								.setStop((int) (stop.get(st[k])
+										* (1000 * 60 * 4 / nowbpm)));
 								// System.out
 								// .println("STOP (BPM変化中) : "
 								// + (stop.get(st[k]) * (1000 * 60 * 4 /
@@ -652,11 +648,6 @@ public class Section {
 								// + " - key - " + key);
 								dt += stop.get(st[k])
 										* (1000 * 60 * 4 / nowbpm) / rate;
-								model.getTimeLine(base + (int) (dt * rate))
-										.setBPM(nowbpm);
-								model.getTimeLine(base + (int) (dt * rate))
-										.setSection(
-												sectionnum + st[k].floatValue());
 							}
 						}
 						dt += 1000 * 60 * 4
@@ -672,10 +663,8 @@ public class Section {
 						// base + (int) (dt * rate)).getBPM()
 						// + " → " + nowbpm);
 						// }
-						model.getTimeLine(base + (int) (dt * rate)).setBPM(
+						model.getTimeLine(sectionnum + bk[j].floatValue(), base + (int) (dt * rate)).setBPM(
 								nowbpm);
-						model.getTimeLine(base + (int) (dt * rate)).setSection(
-								sectionnum + bk[j].floatValue());
 						// Logger.getGlobal().info(
 						// "BPM変化:" + nowbpm + "  time:"
 						// + (base + (int) (dt * rate)));
@@ -688,9 +677,11 @@ public class Section {
 						dt += 1000 * 60 * 4
 								* (st[k] - (double) i / s.length - se) / nowbpm;
 						se = st[k] - (double) i / s.length;
-						model.getTimeLine(base + (int) (dt * rate)).setBPM(0);
-						model.getTimeLine(base + (int) (dt * rate)).setSection(
-								sectionnum + st[k].floatValue());
+						model.getTimeLine(sectionnum + st[k].floatValue(), base + (int) (dt * rate)).setBPM(
+								nowbpm);
+						model.getTimeLine(sectionnum + st[k].floatValue(), base + (int) (dt * rate))
+						.setStop((int) (stop.get(st[k])
+								* (1000 * 60 * 4 / nowbpm)));
 						// System.out.println("STOP : "
 						// + (stop.get(st[k]) * (1000 * 60 * 4 / nowbpm))
 						// + " - bpm " + nowbpm + " - key - " + key);
@@ -704,10 +695,6 @@ public class Section {
 						// base + (int) (dt * rate)).getBPM()
 						// + " → " + nowbpm);
 						// }
-						model.getTimeLine(base + (int) (dt * rate)).setBPM(
-								nowbpm);
-						model.getTimeLine(base + (int) (dt * rate)).setSection(
-								sectionnum + st[k].floatValue());
 					}
 				}
 				double dd = 1000 * 60 * 4 * (1.0 / s.length - se) / nowbpm;

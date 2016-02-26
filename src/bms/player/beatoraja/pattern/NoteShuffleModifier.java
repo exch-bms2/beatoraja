@@ -54,8 +54,7 @@ public class NoteShuffleModifier extends PatternModifier {
 		int[] random = new int[0];
 		int[] ln = new int[lanes];
 		Arrays.fill(ln, -1);
-		for (int time : model.getAllTimes()) {
-			TimeLine tl = model.getTimeLine(time);
+		for (TimeLine tl : model.getAllTimeLines()) {
 			Note[] notes = new Note[lanes];
 			for (int i = 0; i < lanes; i++) {
 				notes[i] = tl.getNote(i);
@@ -157,7 +156,7 @@ public class NoteShuffleModifier extends PatternModifier {
 					tl.addNote(i, n);
 				}
 			}
-			log.add(new PatternModifyLog(time, random));
+			log.add(new PatternModifyLog(tl.getTime(), random));
 		}
 		return log;
 	}

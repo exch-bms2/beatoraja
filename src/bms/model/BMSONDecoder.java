@@ -41,7 +41,7 @@ public class BMSONDecoder {
 			// TODO bpmNotes処理
 			// lines処理(小節線)
 			for(BarLine bl : bmson.lines) {
-				model.getTimeLine((int) ((1000.0 * 60 * 4 * bl.y) / (nowbpm * 960))).setSectionLine(true);
+				model.getTimeLine(bl.y / 960f, (int) ((1000.0 * 60 * 4 * bl.y) / (nowbpm * 960))).setSectionLine(true);
 			}
 			// TODO stopNotes処理
 			List<String> wavmap = new ArrayList<String>();
@@ -50,18 +50,18 @@ public class BMSONDecoder {
 				wavmap.add(sc.name);
 				for(bms.model.bmson.Note n : sc.notes) {
 					if(n.x == 0) {
-						model.getTimeLine((int) ((1000.0 * 60 * 4 * n.y) / (nowbpm * 960))).addBackGroundNote(new NormalNote(id));						
+						model.getTimeLine(n.y / 960f, (int) ((1000.0 * 60 * 4 * n.y) / (nowbpm * 960))).addBackGroundNote(new NormalNote(id));						
 					} else {
 						if(n.l > 0) {
 							// ロングノート
-							TimeLine start = model.getTimeLine((int) ((1000.0 * 60 * 4 * n.y) / (nowbpm * 960)));
+							TimeLine start = model.getTimeLine(n.y / 960f,(int) ((1000.0 * 60 * 4 * n.y) / (nowbpm * 960)));
 							LongNote ln = new LongNote(id, start);
 							start.addNote(n.x - 1, ln);
-							TimeLine end = model.getTimeLine((int) ((1000.0 * 60 * 4 * (n.y + n.l)) / (nowbpm * 960)));
+							TimeLine end = model.getTimeLine(n.y / 960f,(int) ((1000.0 * 60 * 4 * (n.y + n.l)) / (nowbpm * 960)));
 							ln.setEnd(end);
 							end.addNote(n.x - 1, ln);
 						} else {
-							model.getTimeLine((int) ((1000.0 * 60 * 4 * n.y) / (nowbpm * 960))).addNote(n.x - 1, new NormalNote(id));							
+							model.getTimeLine(n.y / 960f,(int) ((1000.0 * 60 * 4 * n.y) / (nowbpm * 960))).addNote(n.x - 1, new NormalNote(id));							
 						}
 					}
 				}

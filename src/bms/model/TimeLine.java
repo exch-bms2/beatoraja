@@ -33,9 +33,13 @@ public class TimeLine {
 	 */
 	private boolean sectionLine = false;
 	/**
-	 * タイムライン上からのBPM変化。ストップシーケンスの場合は0を入れる
+	 * タイムライン上からのBPM変化
 	 */
 	private double bpm;
+	/**
+	 * ストップ時間(ms)
+	 */
+	private int stop;
 	/**
 	 * 表示するBGAのID
 	 */
@@ -162,5 +166,13 @@ public class TimeLine {
 
 	public void setSection(float section) {
 		this.section = section;
+	}
+
+	public int getStop() {
+		return stop;
+	}
+
+	public void setStop(int stop) {
+		this.stop = stop;
 	}
 }

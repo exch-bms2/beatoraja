@@ -65,8 +65,7 @@ public class LaneShuffleModifier extends PatternModifier {
 	public List<PatternModifyLog> modify(BMSModel model) {
 		List<PatternModifyLog> log = new ArrayList();
 		int lanes = 8;
-		for (int time : model.getAllTimes()) {
-			TimeLine tl = model.getTimeLine(time);
+		for (TimeLine tl : model.getAllTimeLines()) {
 			Note[] notes = new Note[lanes];
 			for (int i = 0; i < lanes; i++) {
 				notes[i] = tl.getNote(i);
@@ -74,7 +73,7 @@ public class LaneShuffleModifier extends PatternModifier {
 			for (int i = 0; i < lanes; i++) {
 				tl.addNote(i, notes[random[i]]);
 			}
-			log.add(new PatternModifyLog(time, random));
+			log.add(new PatternModifyLog(tl.getTime(), random));
 		}
 		return log;
 	}

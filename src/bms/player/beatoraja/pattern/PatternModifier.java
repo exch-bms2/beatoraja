@@ -25,12 +25,11 @@ public abstract class PatternModifier {
 	
 	public static void modify(BMSModel model, List<PatternModifyLog> log) {
 		int lanes = 8;
-		for (int time : model.getAllTimes()) {
-			TimeLine tl = model.getTimeLine(time);
+		for (TimeLine tl : model.getAllTimeLines()) {
 			Note[] notes = new Note[lanes];
 			PatternModifyLog pm = null;
 			for(PatternModifyLog pms : log) {
-				if(pms.time == time) {
+				if(pms.time == tl.getTime()) {
 					pm = pms;
 					break;
 				}

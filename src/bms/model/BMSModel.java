@@ -95,14 +95,14 @@ public class BMSModel implements Comparable {
 	/**
 	 * 時間とTimeLineのマッピング
 	 */
-	private Map<Integer, TimeLine> timelines = new HashMap<Integer, TimeLine>();
+	private Map<Float, TimeLine> timelines = new HashMap<Float, TimeLine>();
 
 	private int random;
 
 	/**
 	 * TimeLineリスト
 	 */
-	private List<Map<Integer, TimeLine>> timelineList = new ArrayList();
+	private List<Map<Float, TimeLine>> timelineList = new ArrayList();
 
 	public static final int TOTALNOTES_ALL = 0;
 	public static final int TOTALNOTES_KEY = 1;
@@ -238,8 +238,8 @@ public class BMSModel implements Comparable {
 
 	public double getMinBPM() {
 		double bpm = this.getBpm();
-		for (Map<Integer, TimeLine> tll : timelineList) {
-			for (Integer time : tll.keySet()) {
+		for (Map<Float, TimeLine> tll : timelineList) {
+			for (Float time : tll.keySet()) {
 				double d = tll.get(time).getBPM();
 				bpm = (bpm <= d) ? bpm : d;
 			}
@@ -249,8 +249,8 @@ public class BMSModel implements Comparable {
 
 	public double getMaxBPM() {
 		double bpm = this.getBpm();
-		for (Map<Integer, TimeLine> tll : timelineList) {
-			for (Integer time : tll.keySet()) {
+		for (Map<Float, TimeLine> tll : timelineList) {
+			for (Float time : tll.keySet()) {
 				double d = tll.get(time).getBPM();
 				bpm = (bpm >= d) ? bpm : d;
 			}
@@ -343,12 +343,10 @@ public class BMSModel implements Comparable {
 			nlane = BMS_NORMALLANE_2P;
 			slane = BMS_SCRATCHLANE_2P;
 		}
-		Iterator<Integer> i = timelines.keySet().iterator();
+		
 		int count = 0;
-		for (; i.hasNext();) {
-			Integer time = (Integer) i.next();
-			if (time >= start && time < end) {
-				TimeLine tl = timelines.get(time);
+		for (TimeLine tl : this.getAllTimeLines()) {
+			if (tl.getTime() >= start && tl.getTime() < end) {
 				switch (type) {
 				case TOTALNOTES_ALL:
 					count += tl.getTotalNotes(lntype);
@@ -432,17 +430,18 @@ public class BMSModel implements Comparable {
 		return maxnotes;
 	}
 
-	public TimeLine getTimeLine(int time) {
-		TimeLine tl = timelines.get(time);
+	public TimeLine getTimeLine(float section, int time) {
+		TimeLine tl = timelines.get(section);
 		if (tl == null) {
 			tl = new TimeLine(time);
-			timelines.put(time, tl);
+			tl.setSection(section);
+			timelines.put(section, tl);
 		}
 		return tl;
 	}
 
 	public TimeLine[] getAllTimeLines() {
-		Integer[] times = timelines.keySet().toArray(new Integer[0]);
+		Float[] times = timelines.keySet().toArray(new Float[0]);
 		Arrays.sort(times);
 		TimeLine[] tls = new TimeLine[times.length];
 		for (int i = 0; i < times.length; i++) {
@@ -452,24 +451,22 @@ public class BMSModel implements Comparable {
 	}
 
 	public int[] getAllTimes() {
-		Integer[] times = timelines.keySet().toArray(new Integer[0]);
-		Arrays.sort(times);
+		TimeLine[] times = getAllTimeLines();
 		int[] result = new int[times.length];
 		for (int i = 0; i < times.length; i++) {
-			result[i] = times[i];
+			result[i] = times[i].getTime();
 		}
 		return result;
 	}
 
 	public int getLastTime() {
-		Integer[] times = timelines.keySet().toArray(new Integer[0]);
+		TimeLine[] times = getAllTimeLines();
 		Arrays.sort(times);
 
 		for (int i = times.length - 1; i > 0; i--) {
-			TimeLine tl = this.getTimeLine(times[i]);
 			for (int lane = 0; lane < 18; lane++) {
-				if (tl.existNote(lane)) {
-					return times[i];
+				if (times[i].existNote(lane)) {
+					return times[i].getTime();
 				}
 			}
 		}
@@ -539,7 +536,7 @@ public class BMSModel implements Comparable {
 	public void setRandom(int random) {
 		this.random = random;
 		for (int i = random - timelineList.size(); i > 0; i--) {
-			timelineList.add(new HashMap<Integer, TimeLine>());
+			timelineList.add(new HashMap<Float, TimeLine>());
 		}
 		timelineList.set(0, timelines);
 	}
