@@ -19,7 +19,7 @@ public class JudgeManager {
 
 	private BMSPlayer main;
 	private BMSModel model;
-
+	
 	public static final int JUDGE_ALGORITHM_LR2 = 0;
 	public static final int JUDGE_ALGORITHM_IIDX = 1;
 	public static final int JUDGE_ALGORITHM_LOWEST_NOTE = 2;
@@ -413,6 +413,12 @@ public class JudgeManager {
 
 	public int getJudgeCount(int judge, boolean fast) {
 		return fast ? count[judge][0] : count[judge][1];
+	}
+
+	public void setExpandJudge() {
+		judge[0] = judge[1];
+		judge[1] = judge[2];
+		judge[2] = judge[3];
 	}
 
 }

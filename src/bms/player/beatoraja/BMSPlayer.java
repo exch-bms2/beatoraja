@@ -100,6 +100,9 @@ public class BMSPlayer extends ApplicationAdapter {
 		this.autoplay = resource.getAutoplay();
 		timelines = model.getAllTimeLines();
 		totalnotes = model.getTotalNotes();
+		
+		judge = new JudgeManager(this, model);
+
 		if (resource.getCourseBMSModels() == null) {
 			if (config.isBpmguide()) {
 				assist = 1;
@@ -113,6 +116,10 @@ public class BMSPlayer extends ApplicationAdapter {
 			if (config.getLnassist() == 1) {
 				new LongNoteModifier().modify(model);
 				assist = 2;
+			}
+			if(config.isExpandjudge()) {
+				judge.setExpandJudge();
+				assist = 2;				
 			}
 		}
 
@@ -157,15 +164,19 @@ public class BMSPlayer extends ApplicationAdapter {
 				break;
 			case 6:
 				pattern = new NoteShuffleModifier(NoteShuffleModifier.H_RANDOM).modify(model);
+				assist = (assist == 0) ? 1 : assist;
 				break;
 			case 7:
 				pattern = new NoteShuffleModifier(NoteShuffleModifier.ALL_SCR).modify(model);
+				assist = (assist == 0) ? 1 : assist;
 				break;
 			case 8:
 				pattern = new LaneShuffleModifier(LaneShuffleModifier.RANDOM_EX).modify(model);
+				assist = (assist == 0) ? 1 : assist;
 				break;
 			case 9:
 				pattern = new NoteShuffleModifier(NoteShuffleModifier.S_RANDOM_EX).modify(model);
+				assist = (assist == 0) ? 1 : assist;
 				break;
 			}
 			Logger.getGlobal().info("譜面オプション :  "  + config.getRandom());
@@ -249,7 +260,6 @@ public class BMSPlayer extends ApplicationAdapter {
 		}
 		graphrender = new ScoreGraphRenderer(model, score.getExscore(), score.getExscore());
 		Logger.getGlobal().info("スコアグラフ描画クラス準備");
-		judge = new JudgeManager(this, model);
 
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/VL-Gothic-Regular.ttf"));
 		FreeTypeFontParameter parameter = new FreeTypeFontParameter();

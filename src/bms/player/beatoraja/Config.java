@@ -96,6 +96,8 @@ public class Config {
 	 */
 	private int lnassist = 0;
 	
+	private boolean expandjudge = false;
+	
 	private String lr2playskin;
 	/**
 	 * BMSルートディレクトリパス
@@ -315,5 +317,13 @@ public class Config {
 
 	public void setJudgeAlgorithm(int judgeAlgorithm) {
 		this.judgeAlgorithm = judgeAlgorithm;
+	}
+
+	public boolean isExpandjudge() {
+		return expandjudge;
+	}
+
+	public void setExpandjudge(boolean expandjudge) {
+		this.expandjudge = expandjudge;
 	}
 }

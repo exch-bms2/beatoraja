@@ -35,9 +35,7 @@ import com.badlogic.gdx.utils.Json;
 public class MusicSelector extends ApplicationAdapter {
 
 	// TODO フォルダランプ
-	// TODO アシストオプオションの選択
 	// TODO 詳細オプション(BGA ON/OFF、JUDGE TIMING、等
-	// TODO 選曲BGM
 
 	private MainController main;
 
@@ -343,6 +341,50 @@ public class MusicSelector extends ApplicationAdapter {
 			titlefont.draw(sprite, SCOREOP[config.getRandom()], 110, 490);
 			titlefont.draw(sprite, GAUGEOP[config.getGauge()], 200, 520);
 			titlefont.draw(sprite, FIXHISPEEDOP[config.getFixhispeed()], 300, 220);
+			sprite.end();
+		} else if (input.isSelectPressed()) {
+			if (keystate[0] && keytime[0] != 0) {
+				keytime[0] = 0;
+				config.setExpandjudge(!config.isExpandjudge());
+			}
+			if (keystate[1] && keytime[1] != 0) {
+				keytime[1] = 0;
+				config.setConstant(!config.isConstant());
+			}
+			if (keystate[3] && keytime[3] != 0) {
+				keytime[3] = 0;
+				config.setLnassist(config.getLnassist() == 0 ? 1 : 0);
+			}
+			if (keystate[5] && keytime[5] != 0) {
+				keytime[5] = 0;
+				config.setBpmguide(!config.isBpmguide());
+			}
+			shape.begin(ShapeType.Filled);
+			shape.setColor(Color.BLACK);
+			shape.rect(100, 200, 400, 400);
+			shape.end();
+			shape.begin(ShapeType.Line);
+			shape.setColor(Color.CYAN);
+			shape.rect(100, 200, 400, 400);
+			shape.rect(150, 250, 55, 95);
+			shape.rect(180, 350, 55, 95);
+			shape.rect(210, 250, 55, 95);
+			shape.rect(240, 350, 55, 95);
+			shape.rect(270, 250, 55, 95);
+			shape.rect(300, 350, 55, 95);
+			shape.rect(330, 250, 55, 95);
+			shape.end();
+
+			sprite.begin();
+			
+			titlefont.setColor(config.isConstant() ? Color.WHITE : Color.valueOf("444444"));
+			titlefont.draw(sprite, "CONSTANT", 110, 490);
+			titlefont.setColor(config.getLnassist() == 1 ? Color.WHITE : Color.valueOf("444444"));
+			titlefont.draw(sprite, "LEGACY NOTE", 200, 520);
+			titlefont.setColor(config.isBpmguide() ? Color.WHITE : Color.valueOf("444444"));			
+			titlefont.draw(sprite, "BPM GUIDE", 300, 490);
+			titlefont.setColor(config.isExpandjudge() ? Color.WHITE : Color.valueOf("444444"));
+			titlefont.draw(sprite, "EXPAND JUDGE", 90, 220);
 			sprite.end();
 		} else {
 			// 1鍵 (選曲 or フォルダを開く)

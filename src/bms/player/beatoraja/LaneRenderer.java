@@ -414,6 +414,7 @@ public class LaneRenderer {
 									nbpm2 = timelines[i + j].getBPM();
 								}
 							}
+							System.out.println(dy);
 						} else {
 							dy = 0;
 						}

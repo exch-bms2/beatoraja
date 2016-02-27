@@ -43,6 +43,7 @@ public class BMSPlayerInputProcessor {
 	private List<KeyInputLog> keylog = new ArrayList<KeyInputLog>();
 
 	private boolean startPressed;
+	private boolean selectPressed;
 	
 	private boolean exitPressed;
 	
@@ -142,6 +143,14 @@ public class BMSPlayerInputProcessor {
 		this.functiontime = functiontime;
 	}
 
+	public boolean isSelectPressed() {
+		return selectPressed;
+	}
+
+	public void setSelectPressed(boolean selectPressed) {
+		this.selectPressed = selectPressed;
+	}
+
 	/**
 	 * キーボード入力処理用クラス
 	 * 
@@ -155,7 +164,7 @@ public class BMSPlayerInputProcessor {
 		private int[] cover = new int[] { Keys.UP, Keys.DOWN, Keys.LEFT, Keys.RIGHT };
 		private int[] function = new int[]{Keys.F1, Keys.F2, Keys.F3, Keys.F4, Keys.F5, Keys.F6
 				, Keys.F7, Keys.F8, Keys.F9, Keys.F10, Keys.F11, Keys.F12};
-		private int[] control = new int[] { Keys.Q };
+		private int[] control = new int[] { Keys.Q, Keys.W };
 		private int exit = Keys.ESCAPE;
 
 		public boolean keyDown(int keycode) {
@@ -176,6 +185,9 @@ public class BMSPlayerInputProcessor {
 
 			if (control[0] == keycode) {
 				startChanged(true);
+			}
+			if (control[1] == keycode) {
+				setSelectPressed(true);
 			}
 			if (exit == keycode) {
 				setExitPressed(true);
@@ -214,6 +226,9 @@ public class BMSPlayerInputProcessor {
 			}
 			if (control[0] == keycode) {
 				startChanged(false);
+			}
+			if (control[1] == keycode) {
+				setSelectPressed(false);
 			}
 			if (exit == keycode) {
 				setExitPressed(false);
@@ -269,6 +284,7 @@ public class BMSPlayerInputProcessor {
 
 		private int[] buttons = new int[] { 3, 6, 2, 7, 1, 4 };
 		private int start = 8;
+		private int select = 9;
 
 		public boolean accelerometerMoved(Controller arg0, int arg1,
 				Vector3 arg2) {
@@ -321,6 +337,9 @@ public class BMSPlayerInputProcessor {
 			if (start == keycode) {
 				startChanged(true);
 			}
+			if (select == keycode) {
+				setSelectPressed(true);
+			}
 
 			System.out.println("button : " + keycode);
 			return false;
@@ -336,6 +355,9 @@ public class BMSPlayerInputProcessor {
 
 			if (start == keycode) {
 				startChanged(false);
+			}
+			if (select == keycode) {
+				setSelectPressed(false);
 			}
 
 			return false;
