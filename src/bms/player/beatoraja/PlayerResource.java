@@ -30,6 +30,7 @@ public class PlayerResource {
 	private IRScoreData score;
 
 	private boolean finished = false;
+	private boolean updateScore = true;
 	private GrooveGauge grooveGauge;
 	private List<Float> gauge;
 	private BMSModel[] course;
@@ -203,5 +204,13 @@ public class PlayerResource {
 
 	public void setCourseScoreData(IRScoreData cscore) {
 		this.cscore = cscore;
+	}
+
+	public boolean isUpdateScore() {
+		return updateScore;
+	}
+	
+	public void setUpdateScore(boolean b) {
+		this.updateScore = b;
 	}
 }

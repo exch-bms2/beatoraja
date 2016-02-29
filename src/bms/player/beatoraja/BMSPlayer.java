@@ -102,24 +102,32 @@ public class BMSPlayer extends ApplicationAdapter {
 		totalnotes = model.getTotalNotes();
 		
 		judge = new JudgeManager(this, model);
+		
+		boolean score = true;
 
 		if (resource.getCourseBMSModels() == null) {
-			if (config.isBpmguide()) {
+			if (config.isBpmguide() && (model.getMinBPM() < model.getMaxBPM())) {
+				// BPM変化がなければBPMガイドなし
 				assist = 1;
+				score = false;
 			}
 
-			if (config.isConstant()) {
+			if (config.isConstant() && (model.getMinBPM() < model.getMaxBPM())) {
+				// BPM変化がなければコンスタントなし
 				new ConstantBPMModifier().modify(model);
 				assist = 1;
+				score = false;
 			}
 
 			if (config.getLnassist() == 1) {
 				new LongNoteModifier().modify(model);
 				assist = 2;
+				score = false;
 			}
 			if(config.isExpandjudge()) {
 				judge.setExpandJudge();
-				assist = 2;				
+				assist = 2;
+				score = false;
 			}
 		}
 
@@ -165,18 +173,22 @@ public class BMSPlayer extends ApplicationAdapter {
 			case 6:
 				pattern = new NoteShuffleModifier(NoteShuffleModifier.H_RANDOM).modify(model);
 				assist = (assist == 0) ? 1 : assist;
+				score = false;
 				break;
 			case 7:
 				pattern = new NoteShuffleModifier(NoteShuffleModifier.ALL_SCR).modify(model);
 				assist = (assist == 0) ? 1 : assist;
+				score = false;
 				break;
 			case 8:
 				pattern = new LaneShuffleModifier(LaneShuffleModifier.RANDOM_EX).modify(model);
 				assist = (assist == 0) ? 1 : assist;
+				score = false;
 				break;
 			case 9:
 				pattern = new NoteShuffleModifier(NoteShuffleModifier.S_RANDOM_EX).modify(model);
 				assist = (assist == 0) ? 1 : assist;
+				score = false;
 				break;
 			}
 			Logger.getGlobal().info("譜面オプション :  "  + config.getRandom());
@@ -221,6 +233,8 @@ public class BMSPlayer extends ApplicationAdapter {
 				break;
 			}
 		}
+		resource.setUpdateScore(score);
+		
 		List<Float> f = resource.getGauge();
 		if (f != null) {
 			gauge.setValue(f.get(f.size() - 1));
@@ -571,9 +585,13 @@ public class BMSPlayer extends ApplicationAdapter {
 		float h = 720;
 
 		// 背景描画
-		// sprite.begin();
-		// sprite.draw(skin.getBackground(), 0, 0, w, h);
-		// sprite.end();
+		if(resource.getBGAManager().getStagefileData() != null) {
+			sprite.begin();
+			Texture bgatex = new Texture(resource.getBGAManager().getStagefileData());
+			sprite.draw(bgatex, 0, 0, w, h);
+			sprite.end();
+			bgatex.dispose();
+		}
 
 		sprite.begin();
 		for (SkinPart part : skin.getSkinPart()) {

@@ -14,6 +14,7 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
@@ -80,6 +81,14 @@ public class MusicResult extends ApplicationAdapter {
 
 		final float w = 1280;
 		final float h = 720;
+		
+		if(resource.getBGAManager().getStagefileData() != null) {
+			sprite.begin();
+			Texture bgatex = new Texture(resource.getBGAManager().getStagefileData());
+			sprite.draw(bgatex, 0, 0, w, h);
+			sprite.end();
+			bgatex.dispose();
+		}
 
 		IRScoreData score = resource.getScoreData();
 		// ゲージグラフ描画
@@ -113,7 +122,12 @@ public class MusicResult extends ApplicationAdapter {
 		}
 		shape.end();
 		Gdx.gl.glLineWidth(1);
-
+		
+		shape.begin(ShapeType.Filled);
+		shape.setColor(0f, 0f, 0f, 0.5f);
+		shape.rect(80, 100, 1120, 350);
+		shape.end();
+		
 		sprite.begin();
 		if (score != null) {
 			titlefont.setColor(Color.WHITE);
@@ -216,14 +230,14 @@ public class MusicResult extends ApplicationAdapter {
 		final int bad = newscore.getBd();
 		final int poor = newscore.getPr();
 		int exscore = pgreat * 2 + great;
-		if (score.getExscore() < exscore) {
+		if (score.getExscore() < exscore && resource.isUpdateScore()) {
 			score.setPg(pgreat);
 			score.setGr(great);
 			score.setGd(good);
 			score.setBd(bad);
 			score.setPr(poor);
 		}
-		if (score.getMinbp() > newscore.getMinbp()) {
+		if (score.getMinbp() > newscore.getMinbp() && resource.isUpdateScore()) {
 			score.setMinbp(newscore.getMinbp());
 		}
 		score.setPlaycount(score.getPlaycount() + 1);
