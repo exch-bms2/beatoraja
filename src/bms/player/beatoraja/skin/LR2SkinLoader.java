@@ -25,7 +25,7 @@ public class LR2SkinLoader {
 		float dstw = 1280;
 		float dsth = 720;
 
-		PlaySkin skin = new PlaySkin();
+		PlaySkin skin = new PlaySkin(7);
 		Rectangle[] laner = new Rectangle[8];
 		Sprite[] note = new Sprite[8];
 		Sprite[] lnstart = new Sprite[8];

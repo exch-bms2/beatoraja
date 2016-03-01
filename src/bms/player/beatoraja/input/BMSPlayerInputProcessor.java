@@ -17,9 +17,9 @@ import com.badlogic.gdx.controllers.PovDirection;
 import com.badlogic.gdx.math.Vector3;
 
 public class BMSPlayerInputProcessor {
-	
+
 	// TODO キーコンフィグの実装
-	
+
 	public BMSPlayerInputProcessor() {
 		Gdx.input.setInputProcessor(new KeyBoardInputProcesseor());
 		for (Controller controller : Controllers.getControllers()) {
@@ -28,14 +28,14 @@ public class BMSPlayerInputProcessor {
 		}
 	}
 
-	private boolean[] keystate = new boolean[9];
-	private long[] time = new long[9];
-	
+	private boolean[] keystate = new boolean[18];
+	private long[] time = new long[18];
+
 	private boolean[] numberstate = new boolean[10];
 	private long[] numtime = new long[10];
 	private boolean[] functionstate = new boolean[12];
 	private long[] functiontime = new long[12];
-	
+
 	private long starttime;
 
 	private boolean enableKeyInput = true;
@@ -43,9 +43,9 @@ public class BMSPlayerInputProcessor {
 	private List<KeyInputLog> keylog = new ArrayList<KeyInputLog>();
 
 	private boolean startPressed;
-	
+
 	private boolean exitPressed;
-	
+
 	private boolean[] cursor = new boolean[4];
 
 	public void setStartTime(long starttime) {
@@ -71,28 +71,28 @@ public class BMSPlayerInputProcessor {
 	public void setKeystate(boolean[] b) {
 		keystate = b;
 	}
-	
+
 	public boolean[] getNumberState() {
 		return numberstate;
 	}
-	
+
 	public long[] getNumberTime() {
 		return numtime;
 	}
 
 	public void keyChanged(int presstime, int i, boolean pressed) {
-		if(enableKeyInput) {
+		if (enableKeyInput) {
 			keystate[i] = pressed;
 			time[i] = presstime;
-			if(this.getStartTime() != 0) {
-				keylog.add(new KeyInputLog(presstime, i, pressed));						
-			}		
+			if (this.getStartTime() != 0) {
+				keylog.add(new KeyInputLog(presstime, i, pressed));
+			}
 		}
 	}
-	
+
 	public void setEnableKeyInput(boolean b) {
 		enableKeyInput = b;
-		if(b) {
+		if (b) {
 			Arrays.fill(keystate, false);
 			Arrays.fill(time, 0);
 		}
@@ -100,7 +100,7 @@ public class BMSPlayerInputProcessor {
 
 	public List<KeyInputLog> getKeyInputLog() {
 		return keylog;
-	}		
+	}
 
 	public void startChanged(boolean pressed) {
 		startPressed = pressed;
@@ -150,11 +150,17 @@ public class BMSPlayerInputProcessor {
 	class KeyBoardInputProcesseor implements InputProcessor {
 
 		private int[] keys = new int[] { Keys.Z, Keys.S, Keys.X, Keys.D,
-				Keys.C, Keys.F, Keys.V, Keys.SHIFT_LEFT, Keys.CONTROL_LEFT };
-		private int[] numbers = new int[] { Keys.NUM_0, Keys.NUM_1, Keys.NUM_2, Keys.NUM_3};
-		private int[] cover = new int[] { Keys.UP, Keys.DOWN, Keys.LEFT, Keys.RIGHT };
-		private int[] function = new int[]{Keys.F1, Keys.F2, Keys.F3, Keys.F4, Keys.F5, Keys.F6
-				, Keys.F7, Keys.F8, Keys.F9, Keys.F10, Keys.F11, Keys.F12};
+				Keys.C, Keys.F, Keys.V, Keys.SHIFT_LEFT, Keys.CONTROL_LEFT,
+				Keys.COMMA, Keys.L, Keys.PERIOD, Keys.SEMICOLON, Keys.SLASH,
+				Keys.COLON, Keys.BACKSLASH, Keys.SHIFT_RIGHT,
+				Keys.CONTROL_RIGHT };
+		private int[] numbers = new int[] { Keys.NUM_0, Keys.NUM_1, Keys.NUM_2,
+				Keys.NUM_3 };
+		private int[] cover = new int[] { Keys.UP, Keys.DOWN, Keys.LEFT,
+				Keys.RIGHT };
+		private int[] function = new int[] { Keys.F1, Keys.F2, Keys.F3,
+				Keys.F4, Keys.F5, Keys.F6, Keys.F7, Keys.F8, Keys.F9, Keys.F10,
+				Keys.F11, Keys.F12 };
 		private int[] control = new int[] { Keys.Q };
 		private int exit = Keys.ESCAPE;
 
@@ -168,7 +174,7 @@ public class BMSPlayerInputProcessor {
 			}
 
 			// レーンカバー
-			for(int i = 0;i < cursor.length;i++) {
+			for (int i = 0; i < cursor.length; i++) {
 				if (cover[i] == keycode) {
 					cursor[i] = true;
 				}
@@ -180,17 +186,17 @@ public class BMSPlayerInputProcessor {
 			if (exit == keycode) {
 				setExitPressed(true);
 			}
-			
-			for(int i = 0;i < numbers.length;i++) {
-				if(keycode == numbers[i]) {
+
+			for (int i = 0; i < numbers.length; i++) {
+				if (keycode == numbers[i]) {
 					presstime = (int) (System.currentTimeMillis() - starttime);
 					numberstate[i] = true;
 					numtime[i] = presstime;
 				}
 			}
 
-			for(int i = 0;i < function.length;i++) {
-				if(keycode == function[i]) {
+			for (int i = 0; i < function.length; i++) {
+				if (keycode == function[i]) {
 					presstime = (int) (System.currentTimeMillis() - starttime);
 					functionstate[i] = true;
 					functiontime[i] = presstime;
@@ -218,14 +224,14 @@ public class BMSPlayerInputProcessor {
 			if (exit == keycode) {
 				setExitPressed(false);
 			}
-			
-			for(int i = 0;i < cursor.length;i++) {
+
+			for (int i = 0; i < cursor.length; i++) {
 				if (cover[i] == keycode) {
 					cursor[i] = false;
 				}
 			}
-			for(int i = 0;i < numbers.length;i++) {
-				if(keycode == numbers[i]) {
+			for (int i = 0; i < numbers.length; i++) {
+				if (keycode == numbers[i]) {
 					presstime = (int) (System.currentTimeMillis() - starttime);
 					numberstate[i] = false;
 					numtime[i] = presstime;
@@ -286,7 +292,6 @@ public class BMSPlayerInputProcessor {
 					keyChanged(presstime, 6, false);
 				}
 			} else {
-				// TODO 正回転、逆回転を分ける
 				if (arg2 == -1.0) {
 					keyChanged(presstime, 7, true);
 					if (keystate[8]) {

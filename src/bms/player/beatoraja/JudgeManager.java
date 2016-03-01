@@ -56,6 +56,10 @@ public class JudgeManager {
 	 * 処理中のLN
 	 */
 	private LongNote[] processing = new LongNote[8];
+	
+	private int[] keyassign;
+	private int[] noteassign;
+	
 	private int sckey;
 	/**
 	 * ミスレイヤー表示開始時間
@@ -73,16 +77,22 @@ public class JudgeManager {
 		case 5:
 		case 7:
 			bomb = new long[8];
-			processing = new LongNote[8];			
+			processing = new LongNote[8];	
+			keyassign = new int[]{0,1,2,3,4,5,6,7,7};
+			noteassign = new int[]{0,1,2,3,4,5,6,7};
 			break;
 		case 10:
 		case 14:
 			bomb = new long[16];
 			processing = new LongNote[16];			
+			keyassign = new int[]{0,1,2,3,4,5,6,7,7,8,9,10,11,12,13,14,15,15};
+			noteassign = new int[]{0,1,2,3,4,5,6,7,9,10,11,12,13,14,15,16};
 			break;
 		case 9:
 			bomb = new long[9];
 			processing = new LongNote[9];			
+			keyassign = new int[]{0,1,2,3,4,5,6,7,8,9};
+			noteassign = new int[]{0,1,2,3,4,5,9,10,11,12};
 			break;
 		}
 		Arrays.fill(bomb, -1000);
@@ -103,10 +113,10 @@ public class JudgeManager {
 		long[] keytime = input.getTime();
 		boolean[] keystate = input.getKeystate();
 		// TODO DP, PMS対応
-		for (int key = 0; key < 9; key++) {
+		for (int key = 0; key < keyassign.length; key++) {
 			if (keytime[key] != 0) {
 				long ptime = keytime[key];
-				int lane = key == 8 ? 7 : key;
+				int lane = keyassign[key];
 				if (keystate[key]) {
 					// キーが押されたときの処理
 					if (processing[lane] != null) {
@@ -152,7 +162,7 @@ public class JudgeManager {
 						for (int i = pos; i < timelines.length
 								&& timelines[i].getTime() < ptime + judge[5]; i++) {
 							if (timelines[i].getTime() >= ptime - judge[5]) {
-								Note judgenote = timelines[i].getNote(lane);
+								Note judgenote = timelines[i].getNote(noteassign[lane]);
 								if (judgenote != null
 										&& (judgenote.getState() == 0 || timelines[i]
 												.getTime() < ptime - judge[3])) {
@@ -212,7 +222,7 @@ public class JudgeManager {
 							}
 						}
 						if (tl != null) {
-							Note note = tl.getNote(lane);
+							Note note = tl.getNote(noteassign[lane]);
 							if (note instanceof LongNote) {
 								// ロングノート処理
 								LongNote ln = (LongNote) note;

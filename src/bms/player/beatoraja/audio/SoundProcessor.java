@@ -114,9 +114,13 @@ public class SoundProcessor implements AudioProcessor {
 	}
 
 	public void play(int id) {
-		if (id != -1 && wavmap[id] != null) {
-			wavmap[id].stop();
-			wavmap[id].play();
+		try {
+			if (id != -1 && wavmap[id] != null) {
+				wavmap[id].stop();
+				wavmap[id].play();
+			}			
+		} catch(Exception e) {
+			e.printStackTrace();
 		}
 	}
 	

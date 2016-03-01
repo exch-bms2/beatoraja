@@ -72,7 +72,8 @@ public class BMSPlayer extends ApplicationAdapter {
 	private AutoplayThread autoThread;
 	private KeyInputThread keyinput;
 
-	private final String[] judgename = { "PG ", "GR ", "GD ", "BD ", "PR ", "MS " };
+	private final String[] judgename = { "PG ", "GR ", "GD ", "BD ", "PR ",
+			"MS " };
 
 	private int prevrendertime;
 	private int playingbga = -1;
@@ -118,11 +119,14 @@ public class BMSPlayer extends ApplicationAdapter {
 
 		if (autoplay == 2) {
 			autoplay = 0;
-			if (new File("replay" + File.separator + model.getHash() + ".json").exists()) {
+			if (new File("replay" + File.separator + model.getHash() + ".json")
+					.exists()) {
 				Json json = new Json();
 				try {
-					replay = (ReplayData) json.fromJson(ReplayData.class,
-							new FileReader("replay" + File.separator + model.getHash() + ".json"));
+					replay = (ReplayData) json.fromJson(
+							ReplayData.class,
+							new FileReader("replay" + File.separator
+									+ model.getHash() + ".json"));
 					autoplay = 2;
 				} catch (FileNotFoundException e) {
 					e.printStackTrace();
@@ -134,41 +138,52 @@ public class BMSPlayer extends ApplicationAdapter {
 		if (replay != null) {
 			PatternModifier.modify(model, Arrays.asList(replay.pattern));
 		} else if (resource.getPatternModifyLog() != null) {
-			PatternModifier.modify(model, Arrays.asList(resource.getPatternModifyLog()));
+			PatternModifier.modify(model,
+					Arrays.asList(resource.getPatternModifyLog()));
 			Logger.getGlobal().info("譜面オプション : 保存された譜面変更ログから譜面再現");
-		} else if (resource.getCourseBMSModels() == null || config.getRandom() == 1) {
+		} else if (resource.getCourseBMSModels() == null
+				|| config.getRandom() == 1) {
 			switch (config.getRandom()) {
 			case 0:
 				break;
 			case 1:
-				pattern = new LaneShuffleModifier(LaneShuffleModifier.MIRROR).modify(model);
+				pattern = new LaneShuffleModifier(LaneShuffleModifier.MIRROR)
+						.modify(model);
 				break;
 			case 2:
-				pattern = new LaneShuffleModifier(LaneShuffleModifier.R_RANDOM).modify(model);
+				pattern = new LaneShuffleModifier(LaneShuffleModifier.R_RANDOM)
+						.modify(model);
 				break;
 			case 3:
-				pattern = new LaneShuffleModifier(LaneShuffleModifier.RANDOM).modify(model);
+				pattern = new LaneShuffleModifier(LaneShuffleModifier.RANDOM)
+						.modify(model);
 				break;
 			case 4:
-				pattern = new NoteShuffleModifier(NoteShuffleModifier.S_RANDOM).modify(model);
+				pattern = new NoteShuffleModifier(NoteShuffleModifier.S_RANDOM)
+						.modify(model);
 				break;
 			case 5:
-				pattern = new NoteShuffleModifier(NoteShuffleModifier.SPIRAL).modify(model);
+				pattern = new NoteShuffleModifier(NoteShuffleModifier.SPIRAL)
+						.modify(model);
 				break;
 			case 6:
-				pattern = new NoteShuffleModifier(NoteShuffleModifier.H_RANDOM).modify(model);
+				pattern = new NoteShuffleModifier(NoteShuffleModifier.H_RANDOM)
+						.modify(model);
 				break;
 			case 7:
-				pattern = new NoteShuffleModifier(NoteShuffleModifier.ALL_SCR).modify(model);
+				pattern = new NoteShuffleModifier(NoteShuffleModifier.ALL_SCR)
+						.modify(model);
 				break;
 			case 8:
-				pattern = new LaneShuffleModifier(LaneShuffleModifier.RANDOM_EX).modify(model);
+				pattern = new LaneShuffleModifier(LaneShuffleModifier.RANDOM_EX)
+						.modify(model);
 				break;
 			case 9:
-				pattern = new NoteShuffleModifier(NoteShuffleModifier.S_RANDOM_EX).modify(model);
+				pattern = new NoteShuffleModifier(
+						NoteShuffleModifier.S_RANDOM_EX).modify(model);
 				break;
 			}
-			Logger.getGlobal().info("譜面オプション :  "  + config.getRandom());
+			Logger.getGlobal().info("譜面オプション :  " + config.getRandom());
 		}
 
 		int g = config.getGauge();
@@ -227,13 +242,14 @@ public class BMSPlayer extends ApplicationAdapter {
 		Logger.getGlobal().info("create");
 		if (config.getLR2PlaySkinPath() != null) {
 			try {
-				skin = new LR2SkinLoader().loadPlaySkin(new File(config.getLR2PlaySkinPath()));
+				skin = new LR2SkinLoader().loadPlaySkin(new File(config
+						.getLR2PlaySkinPath()));
 			} catch (IOException e) {
 				e.printStackTrace();
-				skin = new PlaySkin();
+				skin = new PlaySkin(model.getUseKeys());
 			}
 		} else {
-			skin = new PlaySkin();
+			skin = new PlaySkin(model.getUseKeys());
 		}
 
 		input = main.getInputProcessor();
@@ -242,16 +258,19 @@ public class BMSPlayer extends ApplicationAdapter {
 		Logger.getGlobal().info("描画クラス準備");
 
 		Logger.getGlobal().info("hash");
-		IRScoreData score = main.getScoreDatabase().getScoreData("Player", model.getHash(), false);
+		IRScoreData score = main.getScoreDatabase().getScoreData("Player",
+				model.getHash(), false);
 		Logger.getGlobal().info("スコアデータベースからスコア取得");
 		if (score == null) {
 			score = new IRScoreData();
 		}
-		graphrender = new ScoreGraphRenderer(model, score.getExscore(), score.getExscore());
+		graphrender = new ScoreGraphRenderer(model, score.getExscore(),
+				score.getExscore());
 		Logger.getGlobal().info("スコアグラフ描画クラス準備");
 		judge = new JudgeManager(this, model);
 
-		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/VL-Gothic-Regular.ttf"));
+		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
+				Gdx.files.internal("skin/VL-Gothic-Regular.ttf"));
 		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
 		parameter.size = 24;
 		parameter.characters += model.getFullTitle();
@@ -261,19 +280,30 @@ public class BMSPlayer extends ApplicationAdapter {
 		judgefont = generator.generateFont(parameter);
 		generator.dispose();
 
-		String vertex = "attribute vec4 " + ShaderProgram.POSITION_ATTRIBUTE + ";\n" //
-				+ "attribute vec4 " + ShaderProgram.COLOR_ATTRIBUTE + ";\n" //
-				+ "attribute vec2 " + ShaderProgram.TEXCOORD_ATTRIBUTE + "0;\n" //
+		String vertex = "attribute vec4 "
+				+ ShaderProgram.POSITION_ATTRIBUTE
+				+ ";\n" //
+				+ "attribute vec4 "
+				+ ShaderProgram.COLOR_ATTRIBUTE
+				+ ";\n" //
+				+ "attribute vec2 "
+				+ ShaderProgram.TEXCOORD_ATTRIBUTE
+				+ "0;\n" //
 				+ "uniform mat4 u_projTrans;\n" //
 				+ "varying vec4 v_color;\n" //
 				+ "varying vec2 v_texCoords;\n" //
 				+ "\n" //
 				+ "void main()\n" //
 				+ "{\n" //
-				+ "   v_color = " + ShaderProgram.COLOR_ATTRIBUTE + ";\n" //
+				+ "   v_color = "
+				+ ShaderProgram.COLOR_ATTRIBUTE
+				+ ";\n" //
 				+ "   v_color.a = v_color.a * (256.0/255.0);\n" //
-				+ "   v_texCoords = " + ShaderProgram.TEXCOORD_ATTRIBUTE + "0;\n" //
-				+ "   gl_Position =  u_projTrans * " + ShaderProgram.POSITION_ATTRIBUTE + ";\n" //
+				+ "   v_texCoords = "
+				+ ShaderProgram.TEXCOORD_ATTRIBUTE
+				+ "0;\n" //
+				+ "   gl_Position =  u_projTrans * "
+				+ ShaderProgram.POSITION_ATTRIBUTE + ";\n" //
 				+ "}\n";
 
 		String fragment = "#ifdef GL_ES\n" //
@@ -321,11 +351,14 @@ public class BMSPlayer extends ApplicationAdapter {
 			renderMain(0);
 			shape.begin(ShapeType.Filled);
 			shape.setColor(Color.YELLOW);
-			shape.rect(skin.getLaneregion()[7].getX(),
-					skin.getLaneregion()[7].getY() + skin.getLaneregion()[7].getHeight() / 2f,
-					(audio.getProgress() + bga.getProgress()) * (skin.getLaneregion()[6].getX()
-							+ skin.getLaneregion()[6].getWidth() - skin.getLaneregion()[7].getX()) / 2,
-					4);
+			shape.rect(
+					skin.getLaneregion()[7].getX(),
+					skin.getLaneregion()[7].getY()
+							+ skin.getLaneregion()[7].getHeight() / 2f,
+					(audio.getProgress() + bga.getProgress())
+							* (skin.getLaneregion()[6].getX()
+									+ skin.getLaneregion()[6].getWidth() - skin
+										.getLaneregion()[7].getX()) / 2, 4);
 			shape.end();
 
 			if (resource.mediaLoadFinished() && !input.startPressed()) {
@@ -339,8 +372,12 @@ public class BMSPlayer extends ApplicationAdapter {
 			renderMain(0);
 			sprite.begin();
 			systemfont.setColor(Color.WHITE);
-			systemfont.draw(sprite, "GET READY", skin.getLaneregion()[7].getX() + 140,
-					skin.getLaneregion()[7].getY() + skin.getLaneregion()[7].getHeight() / 2f);
+			systemfont.draw(
+					sprite,
+					"GET READY",
+					skin.getLaneregion()[7].getX() + 140,
+					skin.getLaneregion()[7].getY()
+							+ skin.getLaneregion()[7].getHeight() / 2f);
 			sprite.end();
 			if (time > 1000) {
 				state = STATE_PLAY;
@@ -367,7 +404,8 @@ public class BMSPlayer extends ApplicationAdapter {
 				gaugelog.add(g);
 			}
 			// System.out.println("playing time : " + time);
-			if (starttime != 0 && timelines[timelines.length - 1].getTime() + 5000 < time) {
+			if (starttime != 0
+					&& timelines[timelines.length - 1].getTime() + 5000 < time) {
 				state = STATE_FINISHED;
 				finishtime = System.currentTimeMillis();
 				Logger.getGlobal().info("STATE_FINISHEDに移行");
@@ -399,7 +437,8 @@ public class BMSPlayer extends ApplicationAdapter {
 			shape.end();
 			if (l > 1000) {
 				if (keyinput != null) {
-					Logger.getGlobal().info("入力パフォーマンス(max ms) : " + keyinput.frametimes);
+					Logger.getGlobal().info(
+							"入力パフォーマンス(max ms) : " + keyinput.frametimes);
 				}
 				if (autoplay == 0) {
 					resource.setScoreData(createScoreData());
@@ -409,7 +448,8 @@ public class BMSPlayer extends ApplicationAdapter {
 				resource.setGauge(gaugelog);
 				resource.setGrooveGauge(gauge);
 				if (pattern != null) {
-					resource.setPatternModifyLog(pattern.toArray(new PatternModifyLog[0]));
+					resource.setPatternModifyLog(pattern
+							.toArray(new PatternModifyLog[0]));
 				}
 				input.setEnableKeyInput(true);
 				input.setStartTime(0);
@@ -433,7 +473,8 @@ public class BMSPlayer extends ApplicationAdapter {
 			shape.end();
 			if (l2 > 1000) {
 				if (keyinput != null) {
-					Logger.getGlobal().info("入力パフォーマンス(max ms) : " + keyinput.frametimes);
+					Logger.getGlobal().info(
+							"入力パフォーマンス(max ms) : " + keyinput.frametimes);
 				}
 				if (autoplay == 0) {
 					resource.setScoreData(createScoreData());
@@ -442,7 +483,8 @@ public class BMSPlayer extends ApplicationAdapter {
 				resource.setGauge(gaugelog);
 				resource.setGrooveGauge(gauge);
 				if (pattern != null) {
-					resource.setPatternModifyLog(pattern.toArray(new PatternModifyLog[0]));
+					resource.setPatternModifyLog(pattern
+							.toArray(new PatternModifyLog[0]));
 				}
 				input.setEnableKeyInput(true);
 				input.setStartTime(0);
@@ -450,7 +492,7 @@ public class BMSPlayer extends ApplicationAdapter {
 			}
 			break;
 		}
-		if(input.isExitPressed()) {
+		if (input.isExitPressed()) {
 			stopPlay();
 		}
 	}
@@ -483,7 +525,8 @@ public class BMSPlayer extends ApplicationAdapter {
 		int clear = GrooveGauge.CLEARTYPE_FAILED;
 		if (state != STATE_FAILED && gauge.isQualified()) {
 			if (assist > 0) {
-				clear = assist == 1 ? GrooveGauge.CLEARTYPE_LIGHT_ASSTST : GrooveGauge.CLEARTYPE_ASSTST;
+				clear = assist == 1 ? GrooveGauge.CLEARTYPE_LIGHT_ASSTST
+						: GrooveGauge.CLEARTYPE_ASSTST;
 			} else {
 				if (judge.getJudgeCount(3) + judge.getJudgeCount(4) == 0) {
 					if (judge.getJudgeCount(2) == 0) {
@@ -511,12 +554,15 @@ public class BMSPlayer extends ApplicationAdapter {
 			if (!replaydir.exists()) {
 				replaydir.mkdirs();
 			}
-			if (score.getClear() < clear || (clear != GrooveGauge.CLEARTYPE_FAILED
-					&& !new File("replay" + File.separatorChar + model.getHash() + ".json").exists())) {
+			if (score.getClear() < clear
+					|| (clear != GrooveGauge.CLEARTYPE_FAILED && !new File(
+							"replay" + File.separatorChar + model.getHash()
+									+ ".json").exists())) {
 				Json json = new Json();
 				json.setOutputType(OutputType.json);
 				try {
-					FileWriter fw = new FileWriter("replay" + File.separatorChar + model.getHash() + ".json");
+					FileWriter fw = new FileWriter("replay"
+							+ File.separatorChar + model.getHash() + ".json");
 					fw.write(json.prettyPrint(rd));
 					fw.flush();
 					fw.close();
@@ -567,8 +613,10 @@ public class BMSPlayer extends ApplicationAdapter {
 
 		sprite.begin();
 		for (SkinPart part : skin.getSkinPart()) {
-			if (part.timing != 3 && part.op[0] == 0 && part.op[1] == 0 && part.op[2] == 0) {
-				sprite.draw(part.image, part.dst.x, part.dst.y, part.dst.width, part.dst.height);
+			if (part.timing != 3 && part.op[0] == 0 && part.op[1] == 0
+					&& part.op[2] == 0) {
+				sprite.draw(part.image, part.dst.x, part.dst.y, part.dst.width,
+						part.dst.height);
 			}
 		}
 		sprite.end();
@@ -577,19 +625,24 @@ public class BMSPlayer extends ApplicationAdapter {
 		graphrender.drawGraph(skin, sprite, systemfont, shape, this.judge);
 
 		// プログレス描画
-		Rectangle progress = new Rectangle(4, 140, 12, 540);
+		Rectangle progress = skin.getProgressRegion();
 		shape.begin(ShapeType.Line);
 		shape.setColor(Color.WHITE);
 		shape.rect(progress.x, progress.y, progress.width, progress.height);
 		shape.end();
 		shape.begin(ShapeType.Filled);
 		shape.setColor(Color.BLACK);
-		shape.rect(progress.x + 1, progress.y + 1, progress.width - 2, progress.height - 2);
+		shape.rect(progress.x + 1, progress.y + 1, progress.width - 2,
+				progress.height - 2);
 
 		shape.setColor(Color.ORANGE);
-		shape.rect(progress.x + 1,
-				progress.y + 1
-						+ progress.height * (1.0f - (float) time / (timelines[timelines.length - 1].getTime() + 5000)),
+		shape.rect(
+				progress.x + 1,
+				progress.y
+						+ 1
+						+ progress.height
+						* (1.0f - (float) time
+								/ (timelines[timelines.length - 1].getTime() + 5000)),
 				progress.width - 2, 20);
 		shape.end();
 		// レーン描画
@@ -629,10 +682,12 @@ public class BMSPlayer extends ApplicationAdapter {
 			sprite.draw(bgatex, r.x, r.y, r.width, r.height);
 			sprite.end();
 			bgatex.dispose();
-		} else if (misslayer != null && judge.getMisslayer() != 0 && time >= judge.getMisslayer()
+		} else if (misslayer != null && judge.getMisslayer() != 0
+				&& time >= judge.getMisslayer()
 				&& time < judge.getMisslayer() + 500) {
 			// ミスレイヤー表示
-			Pixmap miss = bga.getBGAData(misslayer[misslayer.length * (time - judge.getMisslayer()) / 500]);
+			Pixmap miss = bga.getBGAData(misslayer[misslayer.length
+					* (time - judge.getMisslayer()) / 500]);
 			if (miss != null) {
 				sprite.begin();
 				Texture bgatex = new Texture(miss);
@@ -674,8 +729,8 @@ public class BMSPlayer extends ApplicationAdapter {
 		gauge.draw(skin, sprite, gr.x, gr.y, gr.width, gr.height);
 		sprite.begin();
 		titlefont.setColor(Color.WHITE);
-		titlefont.draw(sprite, String.format("%5.1f", gauge.getValue()) + "%", gr.x + gr.width - 75,
-				gr.y + gr.height + 25);
+		titlefont.draw(sprite, String.format("%5.1f", gauge.getValue()) + "%",
+				gr.x + gr.width - 75, gr.y + gr.height + 25);
 		sprite.end();
 		// ジャッジカウント描画
 		Rectangle judge = skin.getJudgecountregion();
@@ -691,8 +746,12 @@ public class BMSPlayer extends ApplicationAdapter {
 		sprite.begin();
 		for (int i = 0; i < judgename.length; i++) {
 			judgefont.setColor(Color.WHITE);
-			judgefont.draw(sprite, judgename[i]
-					+ String.format("%4d /%4d", this.judge.getJudgeCount(i, true), this.judge.getJudgeCount(i, false)),
+			judgefont.draw(
+					sprite,
+					judgename[i]
+							+ String.format("%4d /%4d",
+									this.judge.getJudgeCount(i, true),
+									this.judge.getJudgeCount(i, false)),
 					judge.x, judge.y + 20 * (5 - i));
 		}
 		sprite.end();
@@ -700,13 +759,15 @@ public class BMSPlayer extends ApplicationAdapter {
 		sprite.begin();
 		titlefont.setColor(Color.WHITE);
 		titlefont.draw(sprite, "BPM", 650, 44);
-		titlefont.draw(sprite, minbpm + " - " + (int) lanerender.getNowBPM() + " - " + maxbpm, 600, 22);
+		titlefont.draw(sprite, minbpm + " - " + (int) lanerender.getNowBPM()
+				+ " - " + maxbpm, 600, 22);
 		sprite.end();
 		// ハイスピード、デュレーション描画
 		sprite.begin();
 		titlefont.setColor(Color.WHITE);
-		titlefont.draw(sprite, "HISPEED - " + String.format("%.2f", lanerender.getHispeed()) + "  DURATION - " + lanerender.getGreenValue(),
-				30, 22);
+		titlefont.draw(sprite,
+				"HISPEED - " + String.format("%.2f", lanerender.getHispeed())
+						+ "  DURATION - " + lanerender.getGreenValue(), 30, 22);
 		sprite.end();
 
 		prevrendertime = time;
@@ -761,18 +822,24 @@ public class BMSPlayer extends ApplicationAdapter {
 		// "Now count : " + notes + " - " + totalnotes);
 	}
 
+	/**
+	 * AUTOPLAY用のKeyInputLogを生成する
+	 * 
+	 * @return AUTOPLAY用のKeyInputLog
+	 */
 	private final List<KeyInputLog> createAutoplayLog() {
 		List<KeyInputLog> keylog = new ArrayList<KeyInputLog>();
-		Note[] ln = new Note[8];
+		int keys = (model.getUseKeys() == 5 || model.getUseKeys() == 7) ? 8 : ((model.getUseKeys() == 10 || model.getUseKeys() == 14) ? 16 : 9);
+		Note[] ln = new Note[keys];
 		for (TimeLine tl : model.getAllTimeLines()) {
 			int i = tl.getTime();
-			for (int lane = 0; lane < 8; lane++) {
+			for (int lane = 0; lane < keys; lane++) {
 				Note note = tl.getNote(lane);
 				if (note != null) {
 					if (note instanceof LongNote) {
 						if (((LongNote) note).getEnd() == tl) {
 							keylog.add(new KeyInputLog(i, lane, false));
-							if (lane == 7) {
+							if ((keys == 8 || keys == 16) && (lane == 7 || lane == 16)) {
 								// BSS処理
 								keylog.add(new KeyInputLog(i, lane + 1, true));
 							}
@@ -812,11 +879,13 @@ public class BMSPlayer extends ApplicationAdapter {
 			int index = 0;
 
 			int time = 0;
-			while (time < timelines[timelines.length - 1].getTime() + 5000 && !stop) {
+			while (time < timelines[timelines.length - 1].getTime() + 5000
+					&& !stop) {
 				time = (int) (System.currentTimeMillis() - starttime);
 				// リプレイデータ再生
 				if (keylog != null) {
-					while (index < keylog.size() && keylog.get(index).time <= time) {
+					while (index < keylog.size()
+							&& keylog.get(index).time <= time) {
 						KeyInputLog key = keylog.get(index);
 						input.getKeystate()[key.keycode] = key.pressed;
 						input.getTime()[key.keycode] = key.time;
@@ -841,7 +910,8 @@ public class BMSPlayer extends ApplicationAdapter {
 		public void run() {
 			final TimeLine[] timelines = model.getAllTimeLines();
 			int time = 0;
-			for (int p = 0; time < timelines[timelines.length - 1].getTime() + 5000 && !stop;) {
+			for (int p = 0; time < timelines[timelines.length - 1].getTime() + 5000
+					&& !stop;) {
 				time = (int) (System.currentTimeMillis() - starttime);
 				// BGレーン再生
 				while (p < timelines.length && timelines[p].getTime() <= time) {
@@ -852,7 +922,8 @@ public class BMSPlayer extends ApplicationAdapter {
 				}
 				if (p < timelines.length) {
 					try {
-						final long sleeptime = timelines[p].getTime() - (System.currentTimeMillis() - starttime);
+						final long sleeptime = timelines[p].getTime()
+								- (System.currentTimeMillis() - starttime);
 						if (sleeptime > 0) {
 							sleep(sleeptime);
 						}
