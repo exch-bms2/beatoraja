@@ -83,6 +83,10 @@ public class MusicSelector extends ApplicationAdapter {
 	private TableBar[] tables = new TableBar[0];
 
 	private Sound bgm;
+	private Sound move;
+	private Sound folder;
+	private Sound sorts;
+	
 	private Texture background;
 
 	public MusicSelector(MainController main, Config config) {
@@ -156,6 +160,23 @@ public class MusicSelector extends ApplicationAdapter {
 		if (bgm != null) {
 			bgm.loop();
 		}
+		if (move == null) {
+			if (new File("skin/cursor.wav").exists()) {
+				move = Gdx.audio.newSound(Gdx.files.internal("skin/cursor.wav"));
+			}
+		}
+		if(folder == null) {
+			if (new File("skin/folder.wav").exists()) {
+				folder = Gdx.audio.newSound(Gdx.files.internal("skin/folder.wav"));
+			}			
+		}
+		if(sorts == null) {
+			if (new File("skin/sort.wav").exists()) {
+				sorts = Gdx.audio.newSound(Gdx.files.internal("skin/sort.wav"));
+			}			
+		}
+
+		
 		if (background == null) {
 			if (new File("skin/select.png").exists()) {
 				background = new Texture("skin/select.png");
@@ -263,6 +284,9 @@ public class MusicSelector extends ApplicationAdapter {
 			if (dir.size() > 0) {
 				updateBar(dir.get(dir.size() - 1));
 			}
+			if(sorts != null) {
+				sorts.play();
+			}
 		}
 		if (numberstate[2] && numtime[2] != 0) {
 			// ソートの切り替え
@@ -270,6 +294,9 @@ public class MusicSelector extends ApplicationAdapter {
 			numtime[2] = 0;
 			if (dir.size() > 0) {
 				updateBar(dir.get(dir.size() - 1));
+			}
+			if(sorts != null) {
+				sorts.play();
 			}
 		}
 
@@ -279,24 +306,36 @@ public class MusicSelector extends ApplicationAdapter {
 			long l = System.currentTimeMillis();
 			if (duration == 0) {
 				selectedindex++;
+				if(move != null) {
+					move.play();
+				}
 				duration = l + 300;
 				angle = 300;
 			}
 			if (l > duration) {
 				duration = l + 50;
 				selectedindex++;
+				if(move != null) {
+					move.play();
+				}
 				angle = 50;
 			}
 		} else if (keystate[8]) {
 			long l = System.currentTimeMillis();
 			if (duration == 0) {
 				selectedindex += currentsongs.length - 1;
+				if(move != null) {
+					move.play();
+				}
 				duration = l + 300;
 				angle = -300;
 			}
 			if (l > duration) {
 				duration = l + 50;
 				selectedindex += currentsongs.length - 1;
+				if(move != null) {
+					move.play();
+				}
 				angle = -50;
 			}
 		} else {
@@ -394,6 +433,9 @@ public class MusicSelector extends ApplicationAdapter {
 						|| currentsongs[selectedindex] instanceof TableLevelBar) {
 					Bar bar = currentsongs[selectedindex];
 					if (updateBar(bar)) {
+						if(folder != null) {
+							folder.play();							
+						}
 						dir.add(bar);
 					}
 				} else if (currentsongs[selectedindex] instanceof SongBar) {
@@ -436,6 +478,9 @@ public class MusicSelector extends ApplicationAdapter {
 				if (dir.size() > 0) {
 					cbar = dir.get(dir.size() - 1);
 					dir.remove(dir.size() - 1);
+					if(folder != null) {
+						folder.play();							
+					}
 				}
 				updateBar(pbar);
 				if (cbar != null) {
