@@ -20,8 +20,7 @@ public class AutoplayModifier extends PatternModifier {
 	}
 	@Override
 	public List<PatternModifyLog> modify(BMSModel model) {
-		for (int time : model.getAllTimes()) {
-			TimeLine tl = model.getTimeLine(time);
+		for (TimeLine tl : model.getAllTimeLines()) {
 			for(int lane : lanes) {
 				if(tl.getNote(lane) != null) {
 					tl.addBackGroundNote(tl.getNote(lane));
