@@ -152,7 +152,7 @@ public class BMSPlayerInputProcessor {
 		private int[] keys = new int[] { Keys.Z, Keys.S, Keys.X, Keys.D,
 				Keys.C, Keys.F, Keys.V, Keys.SHIFT_LEFT, Keys.CONTROL_LEFT,
 				Keys.COMMA, Keys.L, Keys.PERIOD, Keys.SEMICOLON, Keys.SLASH,
-				Keys.COLON, Keys.BACKSLASH, Keys.SHIFT_RIGHT,
+				Keys.APOSTROPHE, Keys.UNKNOWN, Keys.SHIFT_RIGHT,
 				Keys.CONTROL_RIGHT };
 		private int[] numbers = new int[] { Keys.NUM_0, Keys.NUM_1, Keys.NUM_2,
 				Keys.NUM_3 };
@@ -165,6 +165,7 @@ public class BMSPlayerInputProcessor {
 		private int exit = Keys.ESCAPE;
 
 		public boolean keyDown(int keycode) {
+//			System.out.println(keycode);
 			int presstime = (int) (System.currentTimeMillis() - starttime);
 			for (int i = 0; i < keys.length; i++) {
 				if (keys[i] == keycode) {

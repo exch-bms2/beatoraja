@@ -60,7 +60,8 @@ public class JudgeManager {
 	private int[] keyassign;
 	private int[] noteassign;
 	
-	private int sckey;
+	private int[] sckeyassign;
+	private int[] sckey;
 	/**
 	 * ミスレイヤー表示開始時間
 	 */
@@ -80,6 +81,8 @@ public class JudgeManager {
 			processing = new LongNote[8];	
 			keyassign = new int[]{0,1,2,3,4,5,6,7,7};
 			noteassign = new int[]{0,1,2,3,4,5,6,7};
+			sckeyassign = new int[]{7};
+			sckey = new int[1];
 			break;
 		case 10:
 		case 14:
@@ -87,12 +90,16 @@ public class JudgeManager {
 			processing = new LongNote[16];			
 			keyassign = new int[]{0,1,2,3,4,5,6,7,7,8,9,10,11,12,13,14,15,15};
 			noteassign = new int[]{0,1,2,3,4,5,6,7,9,10,11,12,13,14,15,16};
+			sckeyassign = new int[]{7, 15};
+			sckey = new int[2];
 			break;
 		case 9:
 			bomb = new long[9];
 			processing = new LongNote[9];			
 			keyassign = new int[]{0,1,2,3,4,5,6,7,8,9};
 			noteassign = new int[]{0,1,2,3,4,5,9,10,11,12};
+			sckeyassign = new int[]{};
+			sckey = new int[0];
 			break;
 		}
 		Arrays.fill(bomb, -1000);
@@ -117,10 +124,17 @@ public class JudgeManager {
 			if (keytime[key] != 0) {
 				long ptime = keytime[key];
 				int lane = keyassign[key];
+				int sc = -1;
+				for(int i = 0 ;i < sckeyassign.length;i++) {
+					if(sckeyassign[i] == lane) {
+						sc = i;
+						break;
+					}
+				}
 				if (keystate[key]) {
 					// キーが押されたときの処理
 					if (processing[lane] != null) {
-						if (lane == 7 && key != sckey) {
+						if (sc != -1 && key != sckey[sc]) {
 							for (int j = 0; j < judge.length; j++) {
 								if (j > 3) {
 									j = 4;
@@ -147,7 +161,7 @@ public class JudgeManager {
 											+ " Judge : " + (judgenow - 1) + " LN : "
 											+ processing[lane].hashCode());
 									processing[lane] = null;
-									sckey = 0;
+									sckey[sc] = 0;
 									break;
 								}
 							}
@@ -247,7 +261,7 @@ public class JudgeManager {
 															+ key
 															+ " LN : "
 															+ note.hashCode());
-											sckey = key;
+											sckey[sc] = key;
 
 										}
 									}
@@ -297,14 +311,14 @@ public class JudgeManager {
 									|| (ptime > processing[lane].getEnd()
 											.getTime() - judge[j] && ptime < processing[lane]
 											.getEnd().getTime() + judge[j])) {
-								if (lane == 7) {
+								if (sc != -1) {
 									if (j != 4) {
 										break;
 									}
 									System.out.println("BSS途中離し判定 - Time : "
 											+ ptime + " Judge : " + j
 											+ " LN : " + processing[lane]);
-									sckey = 0;
+									sckey[sc] = 0;
 								}
 								if (j < 2) {
 									bomb[lane] = ptime;
@@ -326,8 +340,15 @@ public class JudgeManager {
 				keytime[key] = 0;
 			}
 		}
-		for (int lane = 0; lane < 8; lane++) {
+		for (int lane = 0; lane < noteassign.length; lane++) {
 			// 見逃しPOOR判定
+			int sc = -1;
+			for(int i = 0 ;i < sckeyassign.length;i++) {
+				if(sckeyassign[i] == lane) {
+					sc = i;
+					break;
+				}
+			}
 			for (int i = 0; i < timelines.length
 					&& timelines[i].getTime() < time - judge[3]; i++) {
 				if (timelines[i].getTime() >= time - judge[3] - 500) {
@@ -351,7 +372,7 @@ public class JudgeManager {
 								main.update(4);
 								note.setState(5);
 								processing[lane] = null;
-								sckey = 0;
+								sckey[sc] = 0;
 							}
 						} else {
 							this.update(4, time, judge);

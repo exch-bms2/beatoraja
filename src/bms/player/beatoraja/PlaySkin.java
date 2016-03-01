@@ -52,6 +52,8 @@ public class PlaySkin {
 	 */
 	private Rectangle[] laneregion;
 
+	private Rectangle[] lanegroupregion;
+
 	private Rectangle bgaregion;
 
 	private Rectangle gaugeregion;
@@ -61,7 +63,7 @@ public class PlaySkin {
 	private Rectangle judgecountregion;
 
 	private Rectangle graphregion;
-	
+
 	private Rectangle progressregion;
 
 	private Sprite slider;
@@ -176,8 +178,10 @@ public class PlaySkin {
 		laneregion[6] = new Rectangle(360, 140, 50, 580);
 		laneregion[7] = new Rectangle(20, 140, 70, 580);
 
+		lanegroupregion = new Rectangle[] { new Rectangle(20, 140, 390, 580) };
+
 		gaugeregion = new Rectangle(20, 30, 390, 30);
-		
+
 		progressregion = new Rectangle(4, 140, 12, 540);
 	}
 
@@ -261,7 +265,7 @@ public class PlaySkin {
 				judgenum[2][i] = new Sprite(jt, 28 * i + 115, 52 * 3, 28, 52);
 			}
 		}
-		judgeregion = new Rectangle(20, 240, 390, 20);
+		judgeregion = new Rectangle(210, 240, 390, 20);
 
 		bgaregion = new Rectangle(10, 500, 180, 180);
 
@@ -287,8 +291,11 @@ public class PlaySkin {
 		laneregion[14] = new Rectangle(950, 140, 50, 580);
 		laneregion[15] = new Rectangle(1000, 140, 70, 580);
 
+		lanegroupregion = new Rectangle[] { new Rectangle(210, 140, 390, 580),
+				new Rectangle(680, 140, 390, 580) };
+
 		gaugeregion = new Rectangle(445, 30, 390, 30);
-		
+
 		progressregion = new Rectangle(1072, 140, 6, 540);
 	}
 
@@ -356,6 +363,10 @@ public class PlaySkin {
 		return laneregion;
 	}
 
+	public Rectangle[] getLaneGroupRegion() {
+		return lanegroupregion;
+	}
+
 	public void setLaneregion(Rectangle[] laneregion) {
 		this.laneregion = laneregion;
 	}
@@ -379,7 +390,7 @@ public class PlaySkin {
 	public Rectangle getGraphregion() {
 		return graphregion;
 	}
-	
+
 	public Rectangle getProgressRegion() {
 		return progressregion;
 	}
