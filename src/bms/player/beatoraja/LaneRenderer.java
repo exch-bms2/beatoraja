@@ -254,20 +254,30 @@ public class LaneRenderer {
 			shape.rect(x, hl, dx, hu - hl);
 			shape.end();
 			// キービーム描画
-			int key = model.getUseKeys() == 9 && lane >= 5 ? lane + 5 : (model
-					.getUseKeys() > 9 && lane >= 8 ? lane + 1 : lane);
-			if (keystate[key] || (key == 7 && keystate[8])
-					|| (key == 16 && keystate[17])) {
-				sprite.begin();
-				if (lane == 7) {
-					sprite.draw(skin.getKeybeam()[2], x, hl, dx, hu - hl);
-				} else if (lane % 2 == 0) {
-					sprite.draw(skin.getKeybeam()[0], x, hl, dx, hu - hl);
-				} else {
-					sprite.draw(skin.getKeybeam()[1], x, hl, dx, hu - hl);
+			sprite.begin();
+			if (model.getUseKeys() == 9) {
+				if(keystate[lane]) {
+					if (lane % 2 == 0) {
+						sprite.draw(skin.getKeybeam()[0], x, hl, dx, hu - hl);
+					} else {
+						sprite.draw(skin.getKeybeam()[1], x, hl, dx, hu - hl);
+					}					
 				}
-				sprite.end();
+			} else {
+				int key = (model.getUseKeys() > 9 && lane >= 8 ? lane + 1
+						: lane);
+				if (keystate[key] || (key == 7 && keystate[8])
+						|| (key == 16 && keystate[17])) {
+					if (lane == 7) {
+						sprite.draw(skin.getKeybeam()[2], x, hl, dx, hu - hl);
+					} else if (lane % 2 == 0) {
+						sprite.draw(skin.getKeybeam()[0], x, hl, dx, hu - hl);
+					} else {
+						sprite.draw(skin.getKeybeam()[1], x, hl, dx, hu - hl);
+					}
+				}
 			}
+			sprite.end();
 
 			shape.begin(ShapeType.Line);
 			shape.setColor(Color.GRAY);

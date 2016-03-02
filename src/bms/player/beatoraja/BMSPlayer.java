@@ -863,7 +863,7 @@ public class BMSPlayer extends ApplicationAdapter {
 			int i = tl.getTime();
 			for (int lane = 0; lane < keys; lane++) {
 				if(!sc || (lane != 8 && lane != 17)) {
-					Note note = tl.getNote(lane);
+					Note note = tl.getNote(model.getUseKeys() == 9 && lane >= 5 ? lane + 5: lane);
 					if (note != null) {
 						if (note instanceof LongNote) {
 							if (((LongNote) note).getEnd() == tl) {

@@ -96,8 +96,8 @@ public class JudgeManager {
 		case 9:
 			bomb = new long[9];
 			processing = new LongNote[9];			
-			keyassign = new int[]{0,1,2,3,4,5,6,7,8,9};
-			noteassign = new int[]{0,1,2,3,4,5,9,10,11,12};
+			keyassign = new int[]{0,1,2,3,4,5,6,7,8};
+			noteassign = new int[]{0,1,2,3,4,10,11,12,13};
 			sckeyassign = new int[]{};
 			sckey = new int[0];
 			break;
