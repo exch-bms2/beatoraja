@@ -130,6 +130,15 @@ public class BMSPlayer extends ApplicationAdapter {
 				assist = 2;
 				score = false;
 			}
+			if (config.isNomine()) {
+				// 地雷ノートがなければアシストなし
+				MineNoteModifier mod = new MineNoteModifier();
+				mod.modify(model);
+				if(mod.mineNoteExists()) {
+					assist = 2;
+					score = false;					
+				}
+			}
 		}
 
 		if (autoplay == 2) {

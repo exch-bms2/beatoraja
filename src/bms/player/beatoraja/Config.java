@@ -1,5 +1,7 @@
 package bms.player.beatoraja;
 
+import com.badlogic.gdx.Input.Keys;
+
 /**
  * 各種設定項目。config.jsonで保持される
  * 
@@ -35,6 +37,14 @@ public class Config {
 	 * 譜面オプション
 	 */
 	private int random;
+	/**
+	 * 譜面オプション(2P)
+	 */
+	private int random2;
+	/**
+	 * DP用オプション
+	 */
+	private int doubleoption;
 	
 	/**
 	 * ハイスピード固定。固定する場合はデュレーションが有効となり、固定しない場合はハイスピードが有効になる
@@ -95,8 +105,14 @@ public class Config {
 	 * アシストオプション:LNアシスト
 	 */
 	private int lnassist = 0;
-	
+	/**
+	 * アシストオプション:判定拡大
+	 */
 	private boolean expandjudge = false;
+	/**
+	 * アシストオプション:地雷除去
+	 */
+	private boolean nomine = false;
 	
 	private String lr2playskin;
 	/**
@@ -116,6 +132,18 @@ public class Config {
 	public static final int BGA_OFF = 2;	
 	
 	private String vlcpath = "";
+	
+	private int[] keyassign7 = { Keys.Z, Keys.S, Keys.X, Keys.D,
+			Keys.C, Keys.F, Keys.V, Keys.SHIFT_LEFT, Keys.CONTROL_LEFT};
+	
+	private int[] keyassign9 = { Keys.Z, Keys.S, Keys.X, Keys.D,
+			Keys.C, Keys.F, Keys.V, Keys.G, Keys.B};
+	
+	private int[] keyassign14 = { Keys.Z, Keys.S, Keys.X, Keys.D,
+			Keys.C, Keys.F, Keys.V, Keys.SHIFT_LEFT, Keys.CONTROL_LEFT,
+			Keys.COMMA, Keys.L, Keys.PERIOD, Keys.SEMICOLON, Keys.SLASH,
+			Keys.APOSTROPHE, Keys.UNKNOWN, Keys.SHIFT_RIGHT,
+			Keys.CONTROL_RIGHT };
 	
 	public Config() {
 //		lr2playskin = "skin/spdframe/csv/left_ACwide.csv";
@@ -325,5 +353,53 @@ public class Config {
 
 	public void setExpandjudge(boolean expandjudge) {
 		this.expandjudge = expandjudge;
+	}
+
+	public int[] getKeyassign7() {
+		return keyassign7;
+	}
+
+	public void setKeyassign7(int[] keyassign7) {
+		this.keyassign7 = keyassign7;
+	}
+
+	public int[] getKeyassign9() {
+		return keyassign9;
+	}
+
+	public void setKeyassign9(int[] keyassign9) {
+		this.keyassign9 = keyassign9;
+	}
+
+	public int[] getKeyassign14() {
+		return keyassign14;
+	}
+
+	public void setKeyassign14(int[] keyassign14) {
+		this.keyassign14 = keyassign14;
+	}
+
+	public int getRandom2() {
+		return random2;
+	}
+
+	public void setRandom2(int random2) {
+		this.random2 = random2;
+	}
+
+	public int getDoubleoption() {
+		return doubleoption;
+	}
+
+	public void setDoubleoption(int doubleoption) {
+		this.doubleoption = doubleoption;
+	}
+
+	public boolean isNomine() {
+		return nomine;
+	}
+
+	public void setNomine(boolean nomine) {
+		this.nomine = nomine;
 	}
 }
