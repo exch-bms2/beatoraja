@@ -39,11 +39,14 @@ public class JudgeManager {
 	/**
 	 * 現在表示中の判定
 	 */
-	private int judgenow;
+	private int[] judgenow;
 	/**
 	 * 判定の最終更新時間
 	 */
-	private int judgenowt;
+	private int[] judgenowt;
+	
+	private int[] judgecombo;
+
 	/**
 	 * 判定差時間(ms , +は早押しで-は遅押し)
 	 */
@@ -83,6 +86,9 @@ public class JudgeManager {
 			noteassign = new int[]{0,1,2,3,4,5,6,7};
 			sckeyassign = new int[]{7};
 			sckey = new int[1];
+			judgenow = new int[1];
+			judgenowt = new int[1];
+			judgecombo= new int[1];
 			break;
 		case 10:
 		case 14:
@@ -92,6 +98,9 @@ public class JudgeManager {
 			noteassign = new int[]{0,1,2,3,4,5,6,7,9,10,11,12,13,14,15,16};
 			sckeyassign = new int[]{7, 15};
 			sckey = new int[2];
+			judgenow = new int[2];
+			judgenowt = new int[2];
+			judgecombo= new int[2];
 			break;
 		case 9:
 			bomb = new long[9];
@@ -100,6 +109,9 @@ public class JudgeManager {
 			noteassign = new int[]{0,1,2,3,4,10,11,12,13};
 			sckeyassign = new int[]{};
 			sckey = new int[0];
+			judgenow = new int[1];
+			judgenowt = new int[1];
+			judgecombo= new int[1];
 			break;
 		}
 		Arrays.fill(bomb, -1000);
@@ -146,7 +158,7 @@ public class JudgeManager {
 									if (j < 2) {
 										bomb[lane] = ptime;
 									}
-									this.update(
+									this.update(lane, 
 											j < 4 ? j : 4,
 											time,
 											(int) (processing[lane].getEnd().getTime() - ptime));
@@ -158,7 +170,7 @@ public class JudgeManager {
 									// (lane + 1) + " : " +
 									// judgename[j]);
 									System.out.println("BSS終端判定 - Time : " + ptime
-											+ " Judge : " + (judgenow - 1) + " LN : "
+											+ " Judge : " + j + " LN : "
 											+ processing[lane].hashCode());
 									processing[lane] = null;
 									sckey[sc] = 0;
@@ -245,7 +257,7 @@ public class JudgeManager {
 									if (j < 2) {
 										bomb[lane] = ptime;
 									}
-									this.update(j, time,
+									this.update(lane, j, time,
 											(int) (tl.getTime() - ptime));
 									main.update(j);
 									if (j < 4) {
@@ -272,7 +284,7 @@ public class JudgeManager {
 								if (j < 2) {
 									bomb[lane] = ptime;
 								}
-								this.update(j, time,
+								this.update(lane, j, time,
 										(int) (tl.getTime() - ptime));
 								main.update(j);
 								if (j < 4) {
@@ -323,7 +335,7 @@ public class JudgeManager {
 								if (j < 2) {
 									bomb[lane] = ptime;
 								}
-								this.update(j, time, (int) (processing[lane]
+								this.update(lane, j, time, (int) (processing[lane]
 										.getEnd().getTime() - ptime));
 								main.update(j);
 								processing[lane].setState(j + 1);
@@ -360,22 +372,22 @@ public class JudgeManager {
 							if (ln.getStart() == timelines[i]) {
 								if (processing[lane] != ln) {
 									// System.out.println("ln start poor");
-									this.update(4, time, judge);
-									this.update(4, time, judge);
+									this.update(lane, 4, time, judge);
+									this.update(lane, 4, time, judge);
 									main.update(4);
 									main.update(4);
 									note.setState(5);
 								}
 							} else {
 								// System.out.println("ln end poor");
-								this.update(4, time, judge);
+								this.update(lane, 4, time, judge);
 								main.update(4);
 								note.setState(5);
 								processing[lane] = null;
 								sckey[sc] = 0;
 							}
 						} else {
-							this.update(4, time, judge);
+							this.update(lane, 4, time, judge);
 							main.update(4);
 							note.setState(5);
 						}
@@ -385,9 +397,9 @@ public class JudgeManager {
 		}
 	}
 
-	private void update(int j, int time, int fast) {
-		judgenow = j + 1;
-		judgenowt = time;
+	private void update(int lane, int j, int time, int fast) {
+		judgenow[lane / (noteassign.length / judgenow.length)] = j + 1;
+		judgenowt[lane / (noteassign.length / judgenow.length)] = time;
 		count[j][fast >= 0 ? 0 : 1]++;
 		judgefast = fast;
 		if (j < 3) {
@@ -397,14 +409,19 @@ public class JudgeManager {
 			combo = 0;
 			misslayer = time;
 		}
+		judgecombo[lane / (noteassign.length / judgenow.length)] = combo;
 	}
 
-	public int getJudgeNow() {
+	public int[] getJudgeNow() {
 		return judgenow;
 	}
 
-	public int getJudgeTime() {
+	public int[] getJudgeTime() {
 		return judgenowt;
+	}
+
+	public int[] getJudgeCombo() {
+		return judgecombo;
 	}
 
 	public int getRecentJudgeTiming() {

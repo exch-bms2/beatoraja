@@ -90,6 +90,20 @@ public class LaneRenderer {
 		this.fixhispeed = config.getFixhispeed();
 		this.gvalue = config.getGreenvalue();
 		this.model = model;
+		if (model.getUseKeys() == 9) {
+			lanebg = new Color[] { new Color(0.1f, 0.1f, 0.1f, 1),
+					new Color(0.1f, 0.1f, 0.0f, 1),
+					new Color(0.0f, 0.1f, 0.0f, 1),
+					new Color(0.0f, 0.0f, 0.1f, 1),
+					new Color(0.1f, 0.0f, 0.0f, 1),
+					new Color(0.0f, 0.0f, 0.1f, 1),
+					new Color(0.0f, 0.1f, 0.0f, 1),
+					new Color(0.1f, 0.1f, 0.0f, 1),
+					new Color(0.1f, 0.1f, 0.1f, 1), Color.BLACK,
+					new Color(0.1f, 0.1f, 0.1f, 1), Color.BLACK,
+					new Color(0.1f, 0.1f, 0.1f, 1), Color.BLACK,
+					new Color(0.1f, 0.1f, 0.1f, 1), Color.BLACK };
+		}
 		hispeed = config.getHispeed();
 		switch (config.getFixhispeed()) {
 		case Config.FIX_HISPEED_OFF:
@@ -256,12 +270,12 @@ public class LaneRenderer {
 			// キービーム描画
 			sprite.begin();
 			if (model.getUseKeys() == 9) {
-				if(keystate[lane]) {
+				if (keystate[lane]) {
 					if (lane % 2 == 0) {
 						sprite.draw(skin.getKeybeam()[0], x, hl, dx, hu - hl);
 					} else {
 						sprite.draw(skin.getKeybeam()[1], x, hl, dx, hu - hl);
-					}					
+					}
 				}
 			} else {
 				int key = (model.getUseKeys() > 9 && lane >= 8 ? lane + 1
@@ -501,65 +515,76 @@ public class LaneRenderer {
 		sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		// sprite.disableBlending();
 
-		final int judgenow = judge.getJudgeNow();
-		final int judgenowt = judge.getJudgeTime();
-		final int combo = judge.getCombo();
+		final int[] judgenow = judge.getJudgeNow();
+		final int[] judgenowt = judge.getJudgeTime();
+		final int[] combo = judge.getJudgeCombo();
 		// 判定文字描画
 
-		if (judgenow > 0 && time < judgenowt + 500) {
-			final float f = 1.5f;
-			Sprite s = skin.getJudge()[(judgenow == 6 ? 5 : judgenow) - 1];
-			int w = s.getRegionWidth();
-			if (judgenow < 4) {
-				w += 20;
-				int count = 0;
-				for (int i = combo;; count++) {
-					w += 25;
-					if (i < 10) {
-						break;
-					} else {
-						i /= 10;
+		for (int jr = 0; jr < skin.getJudgeregion().length; jr++) {
+			if (judgenow[jr] > 0 && time < judgenowt[jr] + 500) {
+				final float f = 1.5f;
+				Sprite s = skin.getJudge()[(judgenow[jr] == 6 ? 5
+						: judgenow[jr]) - 1];
+				int w = s.getRegionWidth();
+				if (judgenow[jr] < 4) {
+					w += 20;
+					int count = 0;
+					for (int i = combo[jr];; count++) {
+						w += 25;
+						if (i < 10) {
+							break;
+						} else {
+							i /= 10;
+						}
+					}
+					for (int i = combo[jr], j = 0;; j++) {
+						sprite.draw(
+								skin.getJudgenum()[judgenow[jr] - 1][i % 10],
+								skin.getJudgeregion()[jr].x
+										+ skin.getJudgeregion()[jr].width
+										/ 2
+										+ (-w / 2 + s.getRegionWidth() + 20 + (count - j) * 25)
+										* f, hl + 100, 25 * f, 52 * f);
+						if (i < 10) {
+							break;
+						} else {
+							i /= 10;
+						}
 					}
 				}
-				for (int i = combo, j = 0;; j++) {
-					sprite.draw(
-							skin.getJudgenum()[judgenow - 1][i % 10],
-							skin.getJudgeregion().x
-									+ skin.getJudgeregion().width
-									/ 2
-									+ (-w / 2 + s.getRegionWidth() + 20 + (count - j) * 25)
-									* f, hl + 100, 25 * f, 52 * f);
-					if (i < 10) {
-						break;
-					} else {
-						i /= 10;
+				sprite.draw(s,
+						skin.getJudgeregion()[jr].x
+								+ skin.getJudgeregion()[jr].width / 2 - w * f
+								/ 2, hl + 100, s.getRegionWidth() * f,
+						s.getRegionHeight() * f);
+				// FAST, SLOW描画
+				if (config.getJudgedetail() == 1) {
+					if (judgenow[jr] > 1) {
+
+						font.setColor(judge.getRecentJudgeTiming() >= 0 ? Color.BLUE
+								: Color.RED);
+						font.draw(sprite,
+								judge.getRecentJudgeTiming() >= 0 ? "FAST"
+										: "SLOW", skin.getJudgeregion()[jr].x
+										+ skin.getJudgeregion()[jr].width / 2,
+								hl + 180);
 					}
+
+				} else if (config.getJudgedetail() == 2) {
+					if (judgenow[jr] > 0) {
+
+						font.setColor(judge.getRecentJudgeTiming() >= 0 ? Color.BLUE
+								: Color.RED);
+						font.draw(
+								sprite,
+								(judge.getRecentJudgeTiming() >= 0 ? "+" : "")
+										+ judge.getRecentJudgeTiming() + " ms",
+								skin.getJudgeregion()[jr].x
+										+ skin.getJudgeregion()[jr].width / 2,
+								hl + 180);
+					}
+
 				}
-			}
-			sprite.draw(s, playerr[0].x + playerr[0].width / 2 - w * f / 2,
-					hl + 100, s.getRegionWidth() * f, s.getRegionHeight() * f);
-			// FAST, SLOW描画
-			if (config.getJudgedetail() == 1) {
-				if (judgenow > 1) {
-
-					font.setColor(judge.getRecentJudgeTiming() >= 0 ? Color.BLUE
-							: Color.RED);
-					font.draw(
-							sprite,
-							judge.getRecentJudgeTiming() >= 0 ? "FAST" : "SLOW",
-							playerr[0].x + playerr[0].width / 2, hl + 180);
-				}
-
-			} else if (config.getJudgedetail() == 2) {
-				if (judgenow > 0) {
-
-					font.setColor(judge.getRecentJudgeTiming() >= 0 ? Color.BLUE
-							: Color.RED);
-					font.draw(sprite, (judge.getRecentJudgeTiming() >= 0 ? "+"
-							: "") + judge.getRecentJudgeTiming() + " ms",
-							playerr[0].x + playerr[0].width / 2, hl + 180);
-				}
-
 			}
 		}
 

@@ -58,7 +58,7 @@ public class PlaySkin {
 
 	private Rectangle gaugeregion;
 
-	private Rectangle judgeregion;
+	private Rectangle[] judgeregion;
 
 	private Rectangle judgecountregion;
 
@@ -160,7 +160,7 @@ public class PlaySkin {
 				judgenum[2][i] = new Sprite(jt, 28 * i + 115, 52 * 3, 28, 52);
 			}
 		}
-		judgeregion = new Rectangle(20, 240, 390, 20);
+		judgeregion = new Rectangle[]{new Rectangle(20, 240, 390, 20)};
 
 		bgaregion = new Rectangle(500, 50, 740, 650);
 
@@ -192,23 +192,48 @@ public class PlaySkin {
 		note = new Sprite[9];
 		longnote = new Sprite[4][9];
 		minenote = new Sprite[9];
-		Texture notet = new Texture("skin/note.png");
+		Texture notet = new Texture("skin/pop.png");
 		for (int i = 0; i < 9; i++) {
-			if (i % 2 == 0) {
-				note[i] = new Sprite(notet, 99, 5, 27, 8);
-				longnote[0][i] = new Sprite(notet, 99, 43, 27, 13);
-				longnote[1][i] = new Sprite(notet, 99, 57, 27, 13);
-				longnote[2][i] = new Sprite(notet, 99, 80, 27, 1);
-				longnote[3][i] = new Sprite(notet, 99, 76, 27, 1);
-				minenote[i] = new Sprite(notet, 99, 23, 27, 8);
-			} else {
-				note[i] = new Sprite(notet, 127, 5, 21, 8);
-				longnote[0][i] = new Sprite(notet, 127, 43, 21, 13);
-				longnote[1][i] = new Sprite(notet, 127, 57, 21, 13);
-				longnote[2][i] = new Sprite(notet, 127, 80, 21, 1);
-				longnote[3][i] = new Sprite(notet, 127, 76, 21, 1);
-				minenote[i] = new Sprite(notet, 127, 23, 21, 8);
+			if (i == 0 || i == 8) {
+				note[i] = new Sprite(notet, 0, 0, 36, 18);
+				longnote[0][i] = new Sprite(notet, 0, 18, 36, 18);
+				longnote[1][i] = new Sprite(notet, 0, 38, 36, 18);
+				longnote[2][i] = new Sprite(notet, 0, 38, 36, 1);
+				longnote[3][i] = new Sprite(notet, 0, 38, 36, 1);
+				minenote[i] = new Sprite(notet, 0, 18, 36, 18);
+			} 
+			if (i == 1 || i == 7)  {
+				note[i] = new Sprite(notet, 38, 0, 28, 18);
+				longnote[0][i] = new Sprite(notet, 38, 18, 28, 18);
+				longnote[1][i] = new Sprite(notet, 38, 38, 28, 18);
+				longnote[2][i] = new Sprite(notet, 38, 38, 28, 1);
+				longnote[3][i] = new Sprite(notet, 38, 38, 28, 1);
+				minenote[i]  = new Sprite(notet, 38, 0, 28, 18);
 			}
+			if (i == 2 || i == 6)  {
+				note[i] = new Sprite(notet, 68, 0, 36, 18);
+				longnote[0][i] = new Sprite(notet, 68, 18, 36, 18);
+				longnote[1][i] = new Sprite(notet, 68, 38, 36, 18);
+				longnote[2][i] = new Sprite(notet, 68, 38, 36, 1);
+				longnote[3][i] = new Sprite(notet, 68, 38, 36, 1);
+				minenote[i] = new Sprite(notet, 68, 18, 36, 18);
+			}
+			if (i == 3 || i == 5)  {
+				note[i] = new Sprite(notet, 106, 0, 28, 18);
+				longnote[0][i] = new Sprite(notet, 106, 18, 28, 18);
+				longnote[1][i] = new Sprite(notet, 106, 38, 28, 18);
+				longnote[2][i] = new Sprite(notet, 106, 38, 28, 1);
+				longnote[3][i] = new Sprite(notet, 106, 38, 28, 1);
+				minenote[i]  = new Sprite(notet, 106, 0, 28, 18);
+			}
+			if (i == 4) {
+				note[i] = new Sprite(notet, 136, 0, 36, 18);
+				longnote[0][i] = new Sprite(notet, 136, 18, 36, 18);
+				longnote[1][i] = new Sprite(notet, 136, 38, 36, 18);
+				longnote[2][i] = new Sprite(notet, 136, 38, 36, 1);
+				longnote[3][i] = new Sprite(notet, 136, 38, 36, 1);
+				minenote[i] = new Sprite(notet, 136, 18, 36, 18);
+			} 
 		}
 
 		// ボムのスプライト作成
@@ -256,9 +281,9 @@ public class PlaySkin {
 				judgenum[2][i] = new Sprite(jt, 28 * i + 115, 52 * 3, 28, 52);
 			}
 		}
-		judgeregion = new Rectangle(300, 240, 680, 20);
+		judgeregion = new Rectangle[]{new Rectangle(300, 240, 680, 20)};
 
-		bgaregion = new Rectangle(10, 500, 330, 330);
+		bgaregion = new Rectangle(10, 390, 330, 330);
 
 		graphregion = new Rectangle(1090, 220, 90, 480);
 
@@ -362,7 +387,7 @@ public class PlaySkin {
 				judgenum[2][i] = new Sprite(jt, 28 * i + 115, 52 * 3, 28, 52);
 			}
 		}
-		judgeregion = new Rectangle(210, 240, 390, 20);
+		judgeregion = new Rectangle[]{new Rectangle(210, 240, 390, 20), new Rectangle(680, 240, 390, 20)};
 
 		bgaregion = new Rectangle(10, 500, 180, 180);
 
@@ -472,11 +497,11 @@ public class PlaySkin {
 		return background;
 	}
 
-	public Rectangle getJudgeregion() {
+	public Rectangle[] getJudgeregion() {
 		return judgeregion;
 	}
 
-	public void setJudgeregion(Rectangle judgeregion) {
+	public void setJudgeregion(Rectangle[] judgeregion) {
 		this.judgeregion = judgeregion;
 	}
 
