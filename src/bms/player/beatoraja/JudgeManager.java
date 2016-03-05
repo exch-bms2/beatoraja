@@ -262,7 +262,7 @@ public class JudgeManager {
 									main.update(j);
 									if (j < 4) {
 										processing[lane] = ln;
-										if (lane == 7) {
+										if (sc != -1) {
 											// BSS処理開始
 											System.out
 													.println("BSS開始判定 - Time : "
@@ -364,7 +364,7 @@ public class JudgeManager {
 			for (int i = 0; i < timelines.length
 					&& timelines[i].getTime() < time - judge[3]; i++) {
 				if (timelines[i].getTime() >= time - judge[3] - 500) {
-					Note note = timelines[i].getNote(lane);
+					Note note = timelines[i].getNote(noteassign[lane]);
 					if (note != null && note.getState() == 0) {
 						int judge = timelines[i].getTime() - time;
 						if (note instanceof LongNote) {

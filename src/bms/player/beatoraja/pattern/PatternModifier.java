@@ -17,6 +17,12 @@ public abstract class PatternModifier {
 
 	private int assist;
 	
+	private int type;
+	
+	public static final int PLAYER1 = 0;
+	public static final int PLAYER2 = 1;
+	public static final int NINEKEYS = 2;
+	
 	public PatternModifier(int assist) {
 		this.assist = assist;
 	}
@@ -24,9 +30,7 @@ public abstract class PatternModifier {
 	public abstract List<PatternModifyLog> modify(BMSModel model);
 	
 	public static void modify(BMSModel model, List<PatternModifyLog> log) {
-		int lanes = 8;
 		for (TimeLine tl : model.getAllTimeLines()) {
-			Note[] notes = new Note[lanes];
 			PatternModifyLog pm = null;
 			for(PatternModifyLog pms : log) {
 				if(pms.time == tl.getTime()) {
@@ -35,6 +39,8 @@ public abstract class PatternModifier {
 				}
 			}
 			if(pm != null) {
+				int lanes = pm.modify.length;				
+				Note[] notes = new Note[lanes];
 				for (int i = 0; i < lanes; i++) {
 					notes[i] = tl.getNote(pm.modify[i]);
 				}
@@ -47,7 +53,59 @@ public abstract class PatternModifier {
 
 	}
 	
+	public static List<PatternModifyLog> merge(List<PatternModifyLog> log, List<PatternModifyLog> log2) {
+		List<PatternModifyLog> result = new ArrayList();
+		for(PatternModifyLog pml : log) {
+			boolean b = true;
+			for(PatternModifyLog pml2 : log2) {
+				if(pml.time == pml2.time) {
+					int[] newmod = new int[pml.modify.length];
+					for(int i = 0;i < pml.modify.length;i++) {
+						newmod[i] = pml.modify[pml2.modify[i]];
+					}
+					result.add(new PatternModifyLog(pml.time, newmod));
+					b = true;
+					break;
+				}
+			}
+			if(b) {
+				result.add(pml);
+			}
+		}
+		
+		for(PatternModifyLog pml2 : log2) {
+			boolean b = true;
+			for(PatternModifyLog pml : log) {
+				if(pml2.time == pml.time) {
+					b = false;
+					break;
+				}
+			}
+			if(b) {
+				for(int index = 0;index < result.size();index++) {
+					if(pml2.time < result.get(index).time) {
+						result.add(index, pml2);
+						b = false;
+						break;
+					}
+				}
+				if(b) {
+					result.add(pml2);
+				}
+			}
+		}
+		return result;
+	}
+	
 	public int getAssistLevel() {
 		return assist;
+	}
+
+	public int getModifyTarget() {
+		return type;
+	}
+
+	public void setModifyTarget(int type) {
+		this.type = type;
 	}
 }

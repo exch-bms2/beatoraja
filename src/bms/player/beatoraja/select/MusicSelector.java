@@ -84,7 +84,8 @@ public class MusicSelector extends ApplicationAdapter {
 
 	private Sound bgm;
 	private Sound move;
-	private Sound folder;
+	private Sound folderopen;
+	private Sound folderclose;
 	private Sound sorts;
 	
 	private Texture background;
@@ -165,9 +166,14 @@ public class MusicSelector extends ApplicationAdapter {
 				move = Gdx.audio.newSound(Gdx.files.internal("skin/cursor.wav"));
 			}
 		}
-		if(folder == null) {
-			if (new File("skin/folder.wav").exists()) {
-				folder = Gdx.audio.newSound(Gdx.files.internal("skin/folder.wav"));
+		if(folderopen == null) {
+			if (new File("skin/folder_open.wav").exists()) {
+				folderopen = Gdx.audio.newSound(Gdx.files.internal("skin/folder_open.wav"));
+			}			
+		}
+		if(folderclose == null) {
+			if (new File("skin/folder_close.wav").exists()) {
+				folderclose = Gdx.audio.newSound(Gdx.files.internal("skin/folder_close.wav"));
 			}			
 		}
 		if(sorts == null) {
@@ -347,13 +353,17 @@ public class MusicSelector extends ApplicationAdapter {
 		selectedindex = selectedindex % currentsongs.length;
 
 		if (input.startPressed()) {
+			if (keystate[0] && keytime[0] != 0) {
+				keytime[0] = 0;
+				config.setGauge(config.getGauge() + 1 < GAUGEOP.length ? config.getGauge() + 1 : 0);
+			}
 			if (keystate[1] && keytime[1] != 0) {
 				keytime[1] = 0;
 				config.setRandom(config.getRandom() + 1 < SCOREOP.length ? config.getRandom() + 1 : 0);
 			}
-			if (keystate[3] && keytime[3] != 0) {
-				keytime[3] = 0;
-				config.setGauge(config.getGauge() + 1 < GAUGEOP.length ? config.getGauge() + 1 : 0);
+			if (keystate[5] && keytime[5] != 0) {
+				keytime[5] = 0;
+				config.setRandom2(config.getRandom2() + 1 < SCOREOP.length ? config.getRandom2() + 1 : 0);
 			}
 			if (keystate[6] && keytime[6] != 0) {
 				keytime[6] = 0;
@@ -377,8 +387,9 @@ public class MusicSelector extends ApplicationAdapter {
 			shape.end();
 
 			sprite.begin();
-			titlefont.draw(sprite, SCOREOP[config.getRandom()], 110, 490);
-			titlefont.draw(sprite, GAUGEOP[config.getGauge()], 200, 520);
+			titlefont.draw(sprite, SCOREOP[config.getRandom()], 110, 520);
+			titlefont.draw(sprite, GAUGEOP[config.getGauge()], 110, 220);
+			titlefont.draw(sprite, SCOREOP[config.getRandom2()], 300, 520);
 			titlefont.draw(sprite, FIXHISPEEDOP[config.getFixhispeed()], 300, 220);
 			sprite.end();
 		} else if (input.isSelectPressed()) {
@@ -397,6 +408,10 @@ public class MusicSelector extends ApplicationAdapter {
 			if (keystate[5] && keytime[5] != 0) {
 				keytime[5] = 0;
 				config.setBpmguide(!config.isBpmguide());
+			}
+			if (keystate[6] && keytime[6] != 0) {
+				keytime[6] = 0;
+				config.setNomine(!config.isNomine());
 			}
 			shape.begin(ShapeType.Filled);
 			shape.setColor(Color.BLACK);
@@ -424,6 +439,8 @@ public class MusicSelector extends ApplicationAdapter {
 			titlefont.draw(sprite, "BPM GUIDE", 300, 490);
 			titlefont.setColor(config.isExpandjudge() ? Color.WHITE : Color.valueOf("444444"));
 			titlefont.draw(sprite, "EXPAND JUDGE", 90, 220);
+			titlefont.setColor(config.isNomine() ? Color.WHITE : Color.valueOf("444444"));
+			titlefont.draw(sprite, "NO MINE", 330, 220);
 			sprite.end();
 		} else {
 			// 1鍵 (選曲 or フォルダを開く)
@@ -433,8 +450,8 @@ public class MusicSelector extends ApplicationAdapter {
 						|| currentsongs[selectedindex] instanceof TableLevelBar) {
 					Bar bar = currentsongs[selectedindex];
 					if (updateBar(bar)) {
-						if(folder != null) {
-							folder.play();							
+						if(folderopen != null) {
+							folderopen.play();							
 						}
 						dir.add(bar);
 					}
@@ -478,8 +495,8 @@ public class MusicSelector extends ApplicationAdapter {
 				if (dir.size() > 0) {
 					cbar = dir.get(dir.size() - 1);
 					dir.remove(dir.size() - 1);
-					if(folder != null) {
-						folder.play();							
+					if(folderclose != null) {
+						folderclose.play();							
 					}
 				}
 				updateBar(pbar);
