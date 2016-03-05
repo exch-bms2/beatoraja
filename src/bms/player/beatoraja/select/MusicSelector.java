@@ -353,13 +353,17 @@ public class MusicSelector extends ApplicationAdapter {
 		selectedindex = selectedindex % currentsongs.length;
 
 		if (input.startPressed()) {
+			if (keystate[0] && keytime[0] != 0) {
+				keytime[0] = 0;
+				config.setGauge(config.getGauge() + 1 < GAUGEOP.length ? config.getGauge() + 1 : 0);
+			}
 			if (keystate[1] && keytime[1] != 0) {
 				keytime[1] = 0;
 				config.setRandom(config.getRandom() + 1 < SCOREOP.length ? config.getRandom() + 1 : 0);
 			}
-			if (keystate[3] && keytime[3] != 0) {
-				keytime[3] = 0;
-				config.setGauge(config.getGauge() + 1 < GAUGEOP.length ? config.getGauge() + 1 : 0);
+			if (keystate[5] && keytime[5] != 0) {
+				keytime[5] = 0;
+				config.setRandom2(config.getRandom2() + 1 < SCOREOP.length ? config.getRandom2() + 1 : 0);
 			}
 			if (keystate[6] && keytime[6] != 0) {
 				keytime[6] = 0;
@@ -383,8 +387,9 @@ public class MusicSelector extends ApplicationAdapter {
 			shape.end();
 
 			sprite.begin();
-			titlefont.draw(sprite, SCOREOP[config.getRandom()], 110, 490);
-			titlefont.draw(sprite, GAUGEOP[config.getGauge()], 200, 520);
+			titlefont.draw(sprite, SCOREOP[config.getRandom()], 110, 520);
+			titlefont.draw(sprite, GAUGEOP[config.getGauge()], 110, 220);
+			titlefont.draw(sprite, SCOREOP[config.getRandom2()], 300, 520);
 			titlefont.draw(sprite, FIXHISPEEDOP[config.getFixhispeed()], 300, 220);
 			sprite.end();
 		} else if (input.isSelectPressed()) {

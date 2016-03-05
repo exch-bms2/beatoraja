@@ -50,7 +50,7 @@ public class NoteShuffleModifier extends PatternModifier {
 	@Override
 	public List<PatternModifyLog> modify(BMSModel model) {
 		List<PatternModifyLog> log = new ArrayList<PatternModifyLog>();
-		int lanes = 8;
+		int lanes = 18;
 		int[] random = new int[0];
 		int[] ln = new int[lanes];
 		Arrays.fill(ln, -1);
@@ -62,32 +62,72 @@ public class NoteShuffleModifier extends PatternModifier {
 			List<Integer> l;
 			switch (type) {
 			case S_RANDOM:
-				l = new ArrayList<Integer>(Arrays.asList(0, 1, 2, 3, 4, 5, 6));
-				random = new int[8];
-				for (int lane = 0; lane < 7; lane++) {
-					if(ln[lane] != -1) {
-						random[lane] = ln[lane];
-						l.remove((Integer)ln[lane]);
+				switch(getModifyTarget()) {
+				case PLAYER1:
+					l = new ArrayList<Integer>(Arrays.asList(0, 1, 2, 3, 4, 5, 6));
+					random = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 };
+					for (int lane = 0; lane < 7; lane++) {
+						if(ln[lane] != -1) {
+							random[lane] = ln[lane];
+							l.remove((Integer)ln[lane]);
+						}
 					}
-				}
-				for (int lane = 0; lane < 7; lane++) {
-					if(ln[lane] == -1) {
-						int r = (int) (Math.random() * l.size());
-						random[lane] = l.get(r);
-						l.remove(r);						
+					for (int lane = 0; lane < 7; lane++) {
+						if(ln[lane] == -1) {
+							int r = (int) (Math.random() * l.size());
+							random[lane] = l.get(r);
+							l.remove(r);						
+						}
 					}
+					break;
+				case PLAYER2:
+					l = new ArrayList<Integer>(Arrays.asList(0, 1, 2, 3, 4, 5, 6));
+					random = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 };
+					for (int lane = 0; lane < 7; lane++) {
+						if(ln[lane + 9] != -1) {
+							random[lane + 9] = ln[lane + 9];
+							l.remove((Integer)ln[lane + 9] - 9);
+						}
+					}
+					for (int lane = 0; lane < 7; lane++) {
+						if(ln[lane + 9] == -1) {
+							int r = (int) (Math.random() * l.size());
+							random[lane + 9] = l.get(r) + 9;
+							l.remove(r);						
+						}
+					}
+					break;
+				case NINEKEYS:
+					l = new ArrayList<Integer>(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8));
+					random = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 };
+					for (int lane = 0; lane < 9; lane++) {
+						int plane = lane >= 5 ? lane + 5 : lane;
+						if(ln[plane] != -1) {
+							random[plane] = ln[plane];
+							l.remove((Integer)(ln[plane] >= 9 ? ln[plane] - 5 : ln[plane]));
+						}
+					}
+					for (int lane = 0; lane < 9; lane++) {
+						int plane = lane >= 5 ? lane + 5 : lane;
+						if(ln[plane] == -1) {
+							int r = (int) (Math.random() * l.size());
+							random[plane] = l.get(r) >= 5 ? l.get(r) + 5 : l.get(r);
+							l.remove(r);						
+						}
+					}
+					break;
 				}
-				random[7] = 7;
 				break;
 			case SPIRAL:
+				// TODO 9,14key対応
 				if(random.length == 0) {
 					// 初期値の作成
-					random = new int[8];
+					random = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 };
 					int index = (int) (Math.random() * 7);
 					int j = (int) (Math.random() * 2) >= 1 ? 1 : 6;
-					for(int i = 0;i < random.length - 1;i++) {
+					for(int i = 0;i < 7;i++) {
 						random[i] = index;
-						index = (index + j) % (random.length - 1);
+						index = (index + j) % 7;
 					}
 					inc = (int) (Math.random() * 6) + 1;
 				} else {
@@ -98,45 +138,161 @@ public class NoteShuffleModifier extends PatternModifier {
 						}
 					}
 					if(!cln) {
-						int[] nrandom = new int[random.length];
+						int[] nrandom = Arrays.copyOf(random, random.length);
 						int index = inc;
-						for(int i = 0;i < random.length - 1;i++) {
+						for(int i = 0;i < 7;i++) {
 							nrandom[i] = random[index];
-							index = (index + 1) % (random.length - 1);
+							index = (index + 1) % 7;
 						}
 						random = nrandom;						
 					}
 				}
-				random[7] = 7;
 				break;
 			case ALL_SCR:
-				random = new int[]{0,1,2,3,4,5,6,7};
-				if(ln[7] == -1 && notes[7] == null) {
-					for (int lane = 0; lane < 7; lane++) {
-						if(notes[lane] != null && notes[lane] instanceof NormalNote) {
-							random[7] = lane;
-							random[lane] = 7;
-							break;
-						}
-					}					
+				random = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 };
+				switch(getModifyTarget()) {
+				case PLAYER1:
+					if(ln[7] == -1 && notes[7] == null) {
+						for (int lane = 0; lane < 7; lane++) {
+							if(notes[lane] != null && notes[lane] instanceof NormalNote) {
+								random[7] = lane;
+								random[lane] = 7;
+								break;
+							}
+						}					
+					}
+					break;
+				case PLAYER2:
+					if(ln[16] == -1 && notes[16] == null) {
+						for (int lane = 0; lane < 7; lane++) {
+							if(notes[lane + 9] != null && notes[lane + 9] instanceof NormalNote) {
+								random[16] = lane + 9;
+								random[lane + 9] = 16;
+								break;
+							}
+						}					
+					}
+					break;
+				case NINEKEYS:
+					break;
 				}
 				break;
 			case H_RANDOM:
-				// TODO 未実装
-			case S_RANDOM_EX:
-				List<Integer> le = new ArrayList<Integer>(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7));
-				random = new int[8];
-				for (int lane = 0; lane < 8; lane++) {
-					if(ln[lane] != -1) {
-						random[lane] = ln[lane];
-						le.remove((Integer)ln[lane]);
+				// TODO 縦連補正は未実装
+				switch(getModifyTarget()) {
+				case PLAYER1:
+					l = new ArrayList<Integer>(Arrays.asList(0, 1, 2, 3, 4, 5, 6));
+					random = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 };
+					for (int lane = 0; lane < 7; lane++) {
+						if(ln[lane] != -1) {
+							random[lane] = ln[lane];
+							l.remove((Integer)ln[lane]);
+						}
 					}
+					for (int lane = 0; lane < 7; lane++) {
+						if(ln[lane] == -1) {
+							int r = (int) (Math.random() * l.size());
+							random[lane] = l.get(r);
+							l.remove(r);						
+						}
+					}
+					break;
+				case PLAYER2:
+					l = new ArrayList<Integer>(Arrays.asList(0, 1, 2, 3, 4, 5, 6));
+					random = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 };
+					for (int lane = 0; lane < 7; lane++) {
+						if(ln[lane + 9] != -1) {
+							random[lane + 9] = ln[lane + 9];
+							l.remove((Integer)ln[lane + 9] - 9);
+						}
+					}
+					for (int lane = 0; lane < 7; lane++) {
+						if(ln[lane + 9] == -1) {
+							int r = (int) (Math.random() * l.size());
+							random[lane + 9] = l.get(r) + 9;
+							l.remove(r);						
+						}
+					}
+					break;
+				case NINEKEYS:
+					l = new ArrayList<Integer>(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8));
+					random = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 };
+					for (int lane = 0; lane < 9; lane++) {
+						int plane = lane >= 5 ? lane + 5 : lane;
+						if(ln[plane] != -1) {
+							random[plane] = ln[plane];
+							l.remove((Integer)(ln[plane] >= 9 ? ln[plane] - 5 : ln[plane]));
+						}
+					}
+					for (int lane = 0; lane < 9; lane++) {
+						int plane = lane >= 5 ? lane + 5 : lane;
+						if(ln[plane] == -1) {
+							int r = (int) (Math.random() * l.size());
+							random[plane] = l.get(r) >= 5 ? l.get(r) + 5 : l.get(r);
+							l.remove(r);						
+						}
+					}
+					break;
 				}
-				for (int lane = 0; lane < 8; lane++) {
-					int re = (int) (Math.random() * le.size());
-					random[lane] = le.get(re);
-					le.remove(re);
+				break;
+			case S_RANDOM_EX:
+				switch(getModifyTarget()) {
+				case PLAYER1:
+					l = new ArrayList<Integer>(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7));
+					random = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 };
+					for (int lane = 0; lane < 8; lane++) {
+						if(ln[lane] != -1) {
+							random[lane] = ln[lane];
+							l.remove((Integer)ln[lane]);
+						}
+					}
+					for (int lane = 0; lane < 8; lane++) {
+						if(ln[lane] == -1) {
+							int r = (int) (Math.random() * l.size());
+							random[lane] = l.get(r);
+							l.remove(r);						
+						}
+					}
+					break;
+				case PLAYER2:
+					l = new ArrayList<Integer>(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7));
+					random = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 };
+					for (int lane = 0; lane < 8; lane++) {
+						if(ln[lane + 9] != -1) {
+							random[lane + 9] = ln[lane + 9];
+							l.remove((Integer)ln[lane + 9] - 9);
+						}
+					}
+					for (int lane = 0; lane < 8; lane++) {
+						if(ln[lane + 9] == -1) {
+							int r = (int) (Math.random() * l.size());
+							random[lane + 9] = l.get(r) + 9;
+							l.remove(r);						
+						}
+					}
+					break;
+				case NINEKEYS:
+					// S-RANDOMと同じ
+					l = new ArrayList<Integer>(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8));
+					random = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 };
+					for (int lane = 0; lane < 9; lane++) {
+						int plane = lane >= 5 ? lane + 5 : lane;
+						if(ln[plane] != -1) {
+							random[plane] = ln[plane];
+							l.remove((Integer)(ln[plane] >= 9 ? ln[plane] - 5 : ln[plane]));
+						}
+					}
+					for (int lane = 0; lane < 9; lane++) {
+						int plane = lane >= 5 ? lane + 5 : lane;
+						if(ln[plane] == -1) {
+							int r = (int) (Math.random() * l.size());
+							random[plane] = l.get(r) >= 5 ? l.get(r) + 5 : l.get(r);
+							l.remove(r);						
+						}
+					}
+					break;
 				}
+
 				break;
 
 			}
