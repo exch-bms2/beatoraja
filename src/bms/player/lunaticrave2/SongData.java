@@ -18,6 +18,7 @@ public class SongData {
 	private List<String> path = new ArrayList<String>();
 	private String tag;	
 	private String hash;
+	private int date;
 	private int adddate;
 	private int level;
 	private int exlevel;
@@ -117,5 +118,11 @@ public class SongData {
 	}
 	public void setMode(int mode) {
 		this.mode = mode;
+	}
+	public int getDate() {
+		return date;
+	}
+	public void setDate(int date) {
+		this.date = date;
 	}
 }

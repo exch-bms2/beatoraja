@@ -260,7 +260,15 @@ public class PlayConfigurationView implements Initializable {
 		MainController.play(null, 0, true);
 	}
 
-	public void loadBMS() {
+	public void loadAllBMS() {
+		loadBMS(true);
+	}
+	
+	public void loadDiffBMS() {
+		loadBMS(false);		
+	}
+	
+	public void loadBMS(boolean updateAll) {
 		commit();
 		try {
 			Class.forName("org.sqlite.JDBC");
@@ -274,7 +282,7 @@ public class PlayConfigurationView implements Initializable {
 				files[i] = new File(config.getBmsroot()[i]);
 			}
 			songdb.updateSongDatas(files, config.getBmsroot(),
-					new File(".").getAbsolutePath());
+					new File(".").getAbsolutePath(), updateAll);
 			Logger.getGlobal().info("song.db更新完了");
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();

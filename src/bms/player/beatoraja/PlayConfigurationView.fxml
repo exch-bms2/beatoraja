@@ -203,7 +203,7 @@
       <HBox prefHeight="38.0" prefWidth="552.0">
          <children>
             <Button mnemonicParsing="false" onAction="#start" text="起動" />
-            <Button mnemonicParsing="false" onAction="#loadBMS" text="楽曲読み込み">
+            <Button mnemonicParsing="false" onAction="#loadDiffBMS" text="楽曲読み込み">
                <HBox.margin>
                   <Insets left="20.0" />
                </HBox.margin>
@@ -216,6 +216,11 @@
             <Button mnemonicParsing="false" onAction="#exit" text="終了">
                <HBox.margin>
                   <Insets left="20.0" />
+               </HBox.margin>
+            </Button>
+            <Button mnemonicParsing="false" onAction="#loadAllBMS" text="楽曲全更新">
+               <HBox.margin>
+                  <Insets left="100.0" />
                </HBox.margin>
             </Button>
          </children>

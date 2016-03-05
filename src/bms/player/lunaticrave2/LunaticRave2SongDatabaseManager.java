@@ -515,7 +515,7 @@ public class LunaticRave2SongDatabaseManager {
 	 * @param path
 	 *            LR2のルートパス
 	 */
-	public void updateSongDatas(File[] files, String[] rootdirs, String path) {
+	public void updateSongDatas(File[] files, String[] rootdirs, String path, boolean updateAll) {
 		DataSource ds = songdb.getDataSource();
 		Map<String, String> tags = new HashMap<String, String>();
 		Connection conn = null;
@@ -538,7 +538,7 @@ public class LunaticRave2SongDatabaseManager {
 				}
 			}
 			for (File f : files) {
-				this.listBMSFiles(conn, f, rootdirs, tags, path);
+				this.listBMSFiles(conn, f, rootdirs, tags, path, updateAll);
 			}
 			conn.commit();
 			conn.close();
@@ -555,20 +555,32 @@ public class LunaticRave2SongDatabaseManager {
 	}
 
 	private void listBMSFiles(Connection conn, File dir, String[] rootdirs,
-			Map<String, String> tags, String path) throws SQLException {
+			Map<String, String> tags, String path, boolean updateAll) throws SQLException {
 		QueryRunner qr = new QueryRunner();
 		ResultSetHandler<List<SongData>> rh = new BeanListHandler<SongData>(
 				SongData.class);
 		ResultSetHandler<List<FolderData>> rh2 = new BeanListHandler<FolderData>(
 				FolderData.class);
 		if (dir.isDirectory()) {
-			for (File f : dir.listFiles()) {
-				this.listBMSFiles(conn, f, rootdirs, tags, path);
-			}
-			// ディレクトリ内のファイルに存在しないレコードを削除
+			// ディレクトリ処理
 			List<SongData> records = qr.query(conn,
 					"select * from song where folder = ?", rh,
 					crc32(dir.getAbsolutePath(), rootdirs, path));
+			for (File f : dir.listFiles()) {
+				boolean b = true;
+				if(!updateAll && f.isFile()) {
+					for(SongData record : records) {
+						if(record.getDate() == f.lastModified() / 1000) {
+							b = false;
+							break;
+						}
+					}
+				}
+				if(b) {
+					this.listBMSFiles(conn, f, rootdirs, tags, path, updateAll);					
+				}
+			}
+			// ディレクトリ内のファイルに存在しないレコードを削除
 			List<SongData> removes = new ArrayList<SongData>(records);
 			for (SongData record : records) {
 				for (File f : dir.listFiles()) {
@@ -615,7 +627,7 @@ public class LunaticRave2SongDatabaseManager {
 					1,
 					"",
 					crc32(dir.getParentFile().getAbsolutePath(), rootdirs, path),
-					Calendar.getInstance().getTimeInMillis() / 1000, null,
+					dir.lastModified() / 1000, null,
 					Calendar.getInstance().getTimeInMillis() / 1000);
 			List<FolderData> folders = qr.query(conn,
 					"select * from folder where parent = ?", rh2,
@@ -637,11 +649,15 @@ public class LunaticRave2SongDatabaseManager {
 				}
 			}
 			for (FolderData record : fremoves) {
+//				System.out.println("Song Database : folder deleted - " + record.getPath());
 				qr.update(conn, "delete from folder where path = ?",
 						record.getPath());
+				qr.update(conn, "delete from song where path like ?",
+						record.getPath() + "%");
 			}
 
 		} else {
+			// ファイル処理
 			String name = dir.getName().toLowerCase();
 			BMSModel model = null;
 			if (name.endsWith(".bms") || name.endsWith(".bme")
