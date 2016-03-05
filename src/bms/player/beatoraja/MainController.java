@@ -1,6 +1,8 @@
 package bms.player.beatoraja;
 
 import java.io.*;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
@@ -9,7 +11,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-
 import bms.model.*;
 import bms.player.beatoraja.decide.MusicDecide;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
@@ -20,14 +21,19 @@ import bms.player.lunaticrave2.*;
 
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.backends.lwjgl.*;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.PixmapIO;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.utils.BufferUtils;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter.OutputType;
+import com.badlogic.gdx.utils.ScreenUtils;
 
 public class MainController extends ApplicationAdapter {
 
@@ -36,7 +42,7 @@ public class MainController extends ApplicationAdapter {
 	private MusicSelector selector;
 	private MusicResult result;
 	private GradeResult gresult;
-	
+
 	private BitmapFont systemfont;
 
 	private ApplicationAdapter current;
@@ -53,7 +59,7 @@ public class MainController extends ApplicationAdapter {
 	private File f;
 
 	private BMSPlayerInputProcessor input;
-	
+
 	private boolean showfps;
 
 	public MainController(File f, Config config, int auto) {
@@ -150,8 +156,9 @@ public class MainController extends ApplicationAdapter {
 		} else {
 			changeState(STATE_SELECTMUSIC, null);
 		}
-		
-		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/VL-Gothic-Regular.ttf"));
+
+		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
+				Gdx.files.internal("skin/VL-Gothic-Regular.ttf"));
 		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
 		parameter.size = 24;
 		systemfont = generator.generateFont(parameter);
@@ -162,30 +169,36 @@ public class MainController extends ApplicationAdapter {
 	@Override
 	public void render() {
 		current.render();
-		
-		if(input.getFunctionstate()[0] && input.getFunctiontime()[0] != 0) {
+		// FPS表示切替
+		if (input.getFunctionstate()[0] && input.getFunctiontime()[0] != 0) {
 			showfps = !showfps;
 			input.getFunctiontime()[0] = 0;
 		}
-		if(showfps) {
+		if (showfps) {
 			sprite.begin();
 			systemfont.setColor(Color.YELLOW);
-			systemfont.draw(sprite, "FPS " + Gdx.graphics.getFramesPerSecond(), 10, 718);
-			sprite.end();			
+			systemfont.draw(sprite, "FPS " + Gdx.graphics.getFramesPerSecond(),
+					10, 718);
+			sprite.end();
 		}
 
+		// スクリーンショット
 		if (input.getFunctionstate()[5] && input.getFunctiontime()[5] != 0) {
-			// スクリーンショット
-//			byte[] pixels = ScreenUtils.getFrameBufferPixels(0, 0,
-//					Gdx.graphics.getBackBufferWidth(),
-//					Gdx.graphics.getBackBufferHeight(), true);
-//
-//			Pixmap pixmap = new Pixmap(Gdx.graphics.getBackBufferWidth(),
-//					Gdx.graphics.getBackBufferHeight(), Pixmap.Format.RGBA8888);
-//			BufferUtils.copy(pixels, 0, pixmap.getPixels(), pixels.length);
-//			PixmapIO.writePNG(Gdx.files.external("mypixmap.png"), pixmap);
-//			pixmap.dispose();
-			input.getFunctiontime()[5] = 0;		
+			byte[] pixels = ScreenUtils.getFrameBufferPixels(0, 0,
+					Gdx.graphics.getBackBufferWidth(),
+					Gdx.graphics.getBackBufferHeight(), true);
+
+			Pixmap pixmap = new Pixmap(Gdx.graphics.getBackBufferWidth(),
+					Gdx.graphics.getBackBufferHeight(), Pixmap.Format.RGBA8888);
+			BufferUtils.copy(pixels, 0, pixmap.getPixels(), pixels.length);
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
+			String path = "screenshot/"
+					+ sdf.format(Calendar.getInstance().getTime())
+					+ ".png";
+			PixmapIO.writePNG(new FileHandle(path), pixmap);
+			pixmap.dispose();
+			input.getFunctiontime()[5] = 0;
+			Logger.getGlobal().info("スクリーンショット保存:" + path);
 		}
 	}
 
@@ -297,7 +310,8 @@ public class MainController extends ApplicationAdapter {
 			cfg.title = "Beatoraja";
 
 			cfg.audioDeviceBufferSize = config.getAudioDeviceBufferSize();
-			cfg.audioDeviceSimultaneousSources = config.getAudioDeviceSimultaneousSources();
+			cfg.audioDeviceSimultaneousSources = config
+					.getAudioDeviceSimultaneousSources();
 			cfg.forceExit = forceExit;
 
 			new LwjglApplication(player, cfg);
