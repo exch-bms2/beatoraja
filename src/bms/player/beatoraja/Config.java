@@ -1,5 +1,7 @@
 package bms.player.beatoraja;
 
+import bms.player.beatoraja.input.BMSPlayerInputProcessor.BMKeys;
+
 import com.badlogic.gdx.Input.Keys;
 
 /**
@@ -133,17 +135,32 @@ public class Config {
 	
 	private String vlcpath = "";
 	
-	private int[] keyassign7 = { Keys.Z, Keys.S, Keys.X, Keys.D,
-			Keys.C, Keys.F, Keys.V, Keys.SHIFT_LEFT, Keys.CONTROL_LEFT};
+	private int[] keyassign7 = {
+			Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.F, Keys.V,
+			Keys.SHIFT_LEFT, Keys.CONTROL_LEFT, Keys.COMMA, Keys.L,
+			Keys.PERIOD, Keys.SEMICOLON, Keys.SLASH, Keys.APOSTROPHE,
+			Keys.UNKNOWN, Keys.SHIFT_RIGHT, Keys.CONTROL_RIGHT, Keys.Q,
+			Keys.W };
 	
-	private int[] keyassign9 = { Keys.Z, Keys.S, Keys.X, Keys.D,
-			Keys.C, Keys.F, Keys.V, Keys.G, Keys.B};
+	private int[] controllerasign = {
+			BMKeys.BUTTON_3, BMKeys.BUTTON_6, BMKeys.BUTTON_2,
+			BMKeys.BUTTON_7, BMKeys.BUTTON_1, BMKeys.BUTTON_4,
+			BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN, BMKeys.BUTTON_8,
+			BMKeys.BUTTON_9 };
 	
-	private int[] keyassign14 = { Keys.Z, Keys.S, Keys.X, Keys.D,
-			Keys.C, Keys.F, Keys.V, Keys.SHIFT_LEFT, Keys.CONTROL_LEFT,
-			Keys.COMMA, Keys.L, Keys.PERIOD, Keys.SEMICOLON, Keys.SLASH,
-			Keys.APOSTROPHE, Keys.UNKNOWN, Keys.SHIFT_RIGHT,
-			Keys.CONTROL_RIGHT };
+	private int[] keyassign9 = {
+			Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.F, Keys.V,
+			Keys.G, Keys.B, Keys.COMMA, Keys.L,
+			Keys.PERIOD, Keys.SEMICOLON, Keys.SLASH, Keys.APOSTROPHE,
+			Keys.UNKNOWN, Keys.SHIFT_RIGHT, Keys.CONTROL_RIGHT, Keys.Q,
+			Keys.W };
+	
+	private int[] keyassign14 = {
+			Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.F, Keys.V,
+			Keys.SHIFT_LEFT, Keys.CONTROL_LEFT, Keys.COMMA, Keys.L,
+			Keys.PERIOD, Keys.SEMICOLON, Keys.SLASH, Keys.APOSTROPHE,
+			Keys.UNKNOWN, Keys.SHIFT_RIGHT, Keys.CONTROL_RIGHT, Keys.Q,
+			Keys.W };
 	
 	public Config() {
 //		lr2playskin = "skin/spdframe/csv/left_ACwide.csv";
@@ -401,5 +418,13 @@ public class Config {
 
 	public void setNomine(boolean nomine) {
 		this.nomine = nomine;
+	}
+
+	public int[] getControllerasign() {
+		return controllerasign;
+	}
+
+	public void setControllerasign(int[] controllerasign) {
+		this.controllerasign = controllerasign;
 	}
 }

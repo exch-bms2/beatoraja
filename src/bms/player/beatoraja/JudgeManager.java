@@ -384,7 +384,9 @@ public class JudgeManager {
 								main.update(4);
 								note.setState(5);
 								processing[lane] = null;
-								sckey[sc] = 0;
+								if(sc != -1) {
+									sckey[sc] = 0;									
+								}
 							}
 						} else {
 							this.update(lane, 4, time, judge);
