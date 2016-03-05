@@ -39,7 +39,6 @@ public class BMSPlayer extends ApplicationAdapter {
 
 	// TODO STATE_PRELOAD中の中断時に再度同じ楽曲を選択すると音が出ない
 	// TODO GLAssistから起動すると楽曲ロード中に止まる
-	// TODO layerの(0,0,0)を透過するShaderの実装
 
 	private BitmapFont titlefont;
 	private BitmapFont judgefont;
@@ -186,7 +185,6 @@ public class BMSPlayer extends ApplicationAdapter {
 				if (config.getRandom() > 0) {
 					random[config.getRandom()]
 							.setModifyTarget(PatternModifier.PLAYER1);
-					// TODO パターン変更ログのマージ
 					pattern = PatternModifier.merge(pattern,
 							random[config.getRandom()].modify(model));
 				}
@@ -348,7 +346,6 @@ public class BMSPlayer extends ApplicationAdapter {
 				+ "   v_color = "
 				+ ShaderProgram.COLOR_ATTRIBUTE
 				+ ";\n" //
-				+ "   v_color.a = v_color.a * (256.0/255.0);\n" //
 				+ "   v_texCoords = "
 				+ ShaderProgram.TEXCOORD_ATTRIBUTE
 				+ "0;\n" //
@@ -368,10 +365,14 @@ public class BMSPlayer extends ApplicationAdapter {
 				+ "void main()\n"//
 				+ "{\n" //
 				+ "    vec4 c4 = texture2D(u_texture, v_texCoords);\n"
-				+ "    if(c4.r == 0 && c4.g == 0 && c4.b == 0) { gl_FragColor = v_color * vec4(c4.r, c4.g, c4.b, 1);} else {gl_FragColor = v_color * vec4(c4.r, c4.g, c4.b, c4.a);}\n"
+				+ "    if(c4.r == 0.0 && c4.g == 0.0 && c4.b == 0.0) "
+				+ "{ gl_FragColor = v_color * vec4(c4.r, c4.g, c4.b, 0.0);}"
+				+ " else {gl_FragColor = v_color * c4;}\n"
 				+ "}";
 		layershader = new ShaderProgram(vertex, fragment);
 
+		System.out.println(layershader.getLog());
+		
 		audio = resource.getAudioProcessor();
 		bga = resource.getBGAManager();
 	}
@@ -761,9 +762,13 @@ public class BMSPlayer extends ApplicationAdapter {
 			if (bga.getBGAData(playinglayer) != null) {
 				sprite.begin();
 				Texture bgatex = new Texture(bga.getBGAData(playinglayer));
-				// sprite.setShader(layershader);
-				sprite.draw(bgatex, r.x, r.y, r.width, r.height);
-				// sprite.setShader(null);
+				if (layershader.isCompiled()) {
+					sprite.setShader(layershader);
+					sprite.draw(bgatex, r.x, r.y, r.width, r.height);
+					sprite.setShader(null);
+				} else {
+					sprite.draw(bgatex, r.x, r.y, r.width, r.height);
+				}
 				sprite.end();
 				bgatex.dispose();
 			}
