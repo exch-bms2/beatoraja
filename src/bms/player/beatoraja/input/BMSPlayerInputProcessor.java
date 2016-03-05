@@ -43,12 +43,30 @@ public class BMSPlayerInputProcessor {
 		}
 	}
 
+	/**
+	 * 各キーのON/OFF状態
+	 */
 	private boolean[] keystate = new boolean[18];
+	/**
+	 * 各キーの最終更新時間
+	 * TODO これを他クラスから編集させない方がいいかも
+	 */
 	private long[] time = new long[18];
-
+	/**
+	 * 0-9キーのON/OFF状態
+	 */
 	private boolean[] numberstate = new boolean[10];
+	/**
+	 * 0-9キーの最終更新時間
+	 */
 	private long[] numtime = new long[10];
+	/**
+	 * F1-F12キーのON/OFF状態
+	 */
 	private boolean[] functionstate = new boolean[12];
+	/**
+	 * F1-F12キーの最終更新時間
+	 */
 	private long[] functiontime = new long[12];
 
 	private long starttime;
@@ -66,6 +84,9 @@ public class BMSPlayerInputProcessor {
 
 	public void setStartTime(long starttime) {
 		this.starttime = starttime;
+		if(starttime != 0) {
+			Arrays.fill(time, 0);
+		}
 	}
 
 	public long getStartTime() {
@@ -333,7 +354,7 @@ public class BMSPlayerInputProcessor {
 
 		private int player = 0;
 
-		private float[] axis = new float[3];
+		private float[] axis = new float[4];
 
 		public BMSControllerListener(int player, int[] buttons) {
 			this.player = player;
