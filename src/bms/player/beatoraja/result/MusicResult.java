@@ -34,10 +34,12 @@ import com.badlogic.gdx.math.Rectangle;
  */
 public class MusicResult extends ApplicationAdapter {
 
-	private static final String[] LAMP = { "000000", "808080", "800080", "ff00ff", "40ff40", "f0c000", "ffffff",
-			"ffff88", "88ffff", "ff8888", "ff0000" };
-	private static final String[] CLEAR = { "NO PLAY", "FAILED", "ASSIST CLEAR", "L-ASSIST CLEAR", "EASY CLEAR",
-			"CLEAR", "HARD CLEAR", "EX-HARD CLEAR", "FULL COMBO", "PERFECT", "MAX" };
+	private static final String[] LAMP = { "000000", "808080", "800080",
+			"ff00ff", "40ff40", "f0c000", "ffffff", "ffff88", "88ffff",
+			"ff8888", "ff0000" };
+	private static final String[] CLEAR = { "NO PLAY", "FAILED",
+			"ASSIST CLEAR", "L-ASSIST CLEAR", "EASY CLEAR", "CLEAR",
+			"HARD CLEAR", "EX-HARD CLEAR", "FULL COMBO", "PERFECT", "MAX" };
 
 	private MainController main;
 
@@ -49,16 +51,17 @@ public class MusicResult extends ApplicationAdapter {
 	private int oldclear;
 	private int oldexscore;
 	private int oldmisscount;
-	
+
 	private Sound clear;
 	private Sound fail;
 
 	public MusicResult(MainController main) {
 		this.main = main;
-		
+
 		if (clear == null) {
 			if (new File("skin/clear.wav").exists()) {
-				clear = Gdx.audio.newSound(Gdx.files.internal("skin/clear.wav"));
+				clear = Gdx.audio
+						.newSound(Gdx.files.internal("skin/clear.wav"));
 			}
 		}
 		if (fail == null) {
@@ -73,7 +76,8 @@ public class MusicResult extends ApplicationAdapter {
 
 	public void create(PlayerResource resource) {
 		this.resource = resource;
-		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/VL-Gothic-Regular.ttf"));
+		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
+				Gdx.files.internal("skin/VL-Gothic-Regular.ttf"));
 		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
 		parameter.size = 24;
 		title = "result";
@@ -86,10 +90,14 @@ public class MusicResult extends ApplicationAdapter {
 
 	private Rectangle graph = new Rectangle(20, 500, 400, 200);
 
-	private final Color[] graph_back = { Color.valueOf("440044"), Color.valueOf("000044"), Color.valueOf("004400"),
-			Color.valueOf("440000"), Color.valueOf("444400"), Color.valueOf("222222") };
-	private final Color[] graph_line = { Color.valueOf("ff00ff"), Color.valueOf("0000ff"), Color.valueOf("00ff00"),
-			Color.valueOf("ff0000"), Color.valueOf("ffff00"), Color.valueOf("cccccc") };
+	private final Color[] graph_back = { Color.valueOf("440044"),
+			Color.valueOf("000044"), Color.valueOf("004400"),
+			Color.valueOf("440000"), Color.valueOf("444400"),
+			Color.valueOf("222222") };
+	private final Color[] graph_line = { Color.valueOf("ff00ff"),
+			Color.valueOf("0000ff"), Color.valueOf("00ff00"),
+			Color.valueOf("ff0000"), Color.valueOf("ffff00"),
+			Color.valueOf("cccccc") };
 
 	public void render() {
 		final SpriteBatch sprite = main.getSpriteBatch();
@@ -100,10 +108,11 @@ public class MusicResult extends ApplicationAdapter {
 
 		final float w = 1280;
 		final float h = 720;
-		
-		if(resource.getBGAManager().getStagefileData() != null) {
+
+		if (resource.getBGAManager().getStagefileData() != null) {
 			sprite.begin();
-			Texture bgatex = new Texture(resource.getBGAManager().getStagefileData());
+			Texture bgatex = new Texture(resource.getBGAManager()
+					.getStagefileData());
 			sprite.draw(bgatex, 0, 0, w, h);
 			sprite.end();
 			bgatex.dispose();
@@ -117,8 +126,11 @@ public class MusicResult extends ApplicationAdapter {
 		shape.rect(graph.x, graph.y, graph.width, graph.height);
 		if (resource.getGrooveGauge().getBorder() > 0) {
 			shape.setColor(graph_back[3]);
-			shape.rect(graph.x, graph.y + graph.height * resource.getGrooveGauge().getBorder() / 100, graph.width,
-					graph.height * (100 - resource.getGrooveGauge().getBorder()) / 100);
+			shape.rect(graph.x, graph.y + graph.height
+					* resource.getGrooveGauge().getBorder() / 100, graph.width,
+					graph.height
+							* (100 - resource.getGrooveGauge().getBorder())
+							/ 100);
 		}
 		shape.setColor(graph_back[gaugetype]);
 		shape.end();
@@ -133,25 +145,38 @@ public class MusicResult extends ApplicationAdapter {
 			Float f2 = resource.getGauge().get(i);
 			if (f1 != null) {
 				shape.setColor(graph_line[gaugetype]);
-				shape.line(graph.x + graph.width * (i - 1) / resource.getGauge().size(),
-						graph.y + (f1 / 100.0f) * graph.height, graph.x + graph.width * i / resource.getGauge().size(),
-						graph.y + (f2 / 100.0f) * graph.height);
+				shape.line(graph.x + graph.width * (i - 1)
+						/ resource.getGauge().size(), graph.y + (f1 / 100.0f)
+						* graph.height, graph.x + graph.width * i
+						/ resource.getGauge().size(), graph.y + (f2 / 100.0f)
+						* graph.height);
 			}
 			f1 = f2;
 		}
 		shape.end();
 		Gdx.gl.glLineWidth(1);
-		
+
 		shape.begin(ShapeType.Filled);
 		shape.setColor(0.1f, 0.1f, 0.1f, 0.5f);
 		shape.rect(80, 100, 1120, 350);
 		shape.end();
-		
+
 		sprite.begin();
-		if (score != null) {
+		if (resource.getCourseBMSModels() != null) {
 			titlefont.setColor(Color.WHITE);
-			titlefont.draw(sprite, resource.getScoreData().getClear() > GrooveGauge.CLEARTYPE_FAILED ? "Stage Cleared"
-					: "Stage Failed", w * 3 / 4, h / 2);
+			titlefont
+					.draw(sprite,
+							resource.getGauge().get(
+									resource.getGauge().size() - 1) > 0 ? "Stage Passed"
+									: "Stage Failed", w * 3 / 4, h / 2);
+		} else {
+			if (score != null) {
+				titlefont.setColor(Color.WHITE);
+				titlefont
+						.draw(sprite,
+								resource.getScoreData().getClear() > GrooveGauge.CLEARTYPE_FAILED ? "Stage Cleared"
+										: "Stage Failed", w * 3 / 4, h / 2);
+			}
 		}
 
 		if (score != null) {
@@ -168,17 +193,24 @@ public class MusicResult extends ApplicationAdapter {
 			if (oldexscore != 0) {
 				titlefont.draw(sprite, oldexscore + " -> ", 240, 370);
 			}
-			titlefont.draw(sprite, score.getExscore() + " ( " + (score.getExscore() > oldexscore ? "+" : "")
-					+ (score.getExscore() - oldexscore) + " )", 440, 370);
+			titlefont.draw(sprite,
+					score.getExscore() + " ( "
+							+ (score.getExscore() > oldexscore ? "+" : "")
+							+ (score.getExscore() - oldexscore) + " )", 440,
+					370);
 			titlefont.setColor(Color.WHITE);
 
 			titlefont.draw(sprite, "MISS COUNT : ", 100, 340);
 			if (oldmisscount < 65535) {
 				titlefont.draw(sprite, oldmisscount + " -> ", 240, 340);
-				titlefont.draw(sprite, score.getMinbp() + " ( " + (score.getMinbp() > oldmisscount ? "+" : "")
-						+ (score.getMinbp() - oldmisscount) + " )", 440, 340);
+				titlefont.draw(sprite,
+						score.getMinbp() + " ( "
+								+ (score.getMinbp() > oldmisscount ? "+" : "")
+								+ (score.getMinbp() - oldmisscount) + " )",
+						440, 340);
 			} else {
-				titlefont.draw(sprite, String.valueOf(score.getMinbp()), 440, 340);
+				titlefont.draw(sprite, String.valueOf(score.getMinbp()), 440,
+						340);
 			}
 
 			titlefont.draw(sprite, "PGREAT : " + score.getPg(), 100, 250);
@@ -190,34 +222,36 @@ public class MusicResult extends ApplicationAdapter {
 		sprite.end();
 		boolean[] keystate = main.getInputProcessor().getKeystate();
 		long[] keytime = main.getInputProcessor().getTime();
-		if (resource.getScoreData() == null || ((System.currentTimeMillis() > time + 500
-				&& (keystate[0] || keystate[2] || keystate[4] || keystate[6])))) {
+		if (resource.getScoreData() == null
+				|| ((System.currentTimeMillis() > time + 500 && (keystate[0]
+						|| keystate[2] || keystate[4] || keystate[6])))) {
 			if (resource.getCourseBMSModels() != null) {
 				if (resource.getGauge().get(resource.getGauge().size() - 1) <= 0) {
-					// TODO 不合格リザルト
-					main.changeState(MainController.STATE_GRADE_RESULT, resource);
-				} else 
-				if (resource.nextCourse()) {
+					// 不合格リザルト
+					main.changeState(MainController.STATE_GRADE_RESULT,
+							resource);
+				} else if (resource.nextCourse()) {
 					main.changeState(MainController.STATE_PLAYBMS, resource);
 				} else {
-					// TODO 合格リザルト
-					main.changeState(MainController.STATE_GRADE_RESULT, resource);
+					// 合格リザルト
+					main.changeState(MainController.STATE_GRADE_RESULT,
+							resource);
 				}
 			} else {
-				if(keystate[4]) {
+				if (keystate[4]) {
 					keytime[4] = 0;
 					// オプションを変更せず同じ譜面でリプレイ
 					resource.setPatternModifyLog(null);
 					resource.reloadBMSFile();
-					main.changeState(MainController.STATE_PLAYBMS, resource);					
-				} else if(keystate[6]) {
+					main.changeState(MainController.STATE_PLAYBMS, resource);
+				} else if (keystate[6]) {
 					keytime[6] = 0;
 					// 同じ譜面でリプレイ
 					resource.reloadBMSFile();
 					main.changeState(MainController.STATE_PLAYBMS, resource);
 				} else {
 					keytime[0] = keytime[2] = 0;
-					main.changeState(MainController.STATE_SELECTMUSIC, resource);					
+					main.changeState(MainController.STATE_SELECTMUSIC, resource);
 				}
 			}
 		}
@@ -229,7 +263,8 @@ public class MusicResult extends ApplicationAdapter {
 		if (newscore == null) {
 			return;
 		}
-		IRScoreData score = main.getScoreDatabase().getScoreData("Player", model.getHash(), false);
+		IRScoreData score = main.getScoreDatabase().getScoreData("Player",
+				model.getHash(), false);
 		if (score == null) {
 			score = new IRScoreData();
 		}
@@ -264,20 +299,16 @@ public class MusicResult extends ApplicationAdapter {
 			score.setMinbp(newscore.getMinbp());
 		}
 		score.setPlaycount(score.getPlaycount() + 1);
-		score.setLastupdate(Calendar.getInstance(TimeZone.getDefault()).getTimeInMillis() / 1000L);
+		score.setLastupdate(Calendar.getInstance(TimeZone.getDefault())
+				.getTimeInMillis() / 1000L);
 		main.getScoreDatabase().setScoreData("Player", score);
 
 		Logger.getGlobal().info("スコアデータベース更新完了 ");
-		
-		if(newscore.getClear() != GrooveGauge.CLEARTYPE_FAILED) {
-			clear.play();
-		} else {
-			fail.play();
-		}
+
 		// コースモードの場合はコーススコアに加算・累積する
-		if(resource.getCourseBMSModels() != null) {
+		if (resource.getCourseBMSModels() != null) {
 			IRScoreData cscore = resource.getCourseScoreData();
-			if(cscore == null) {
+			if (cscore == null) {
 				cscore = new IRScoreData();
 				cscore.setMinbp(0);
 				resource.setCourseScoreData(cscore);
@@ -288,6 +319,33 @@ public class MusicResult extends ApplicationAdapter {
 			cscore.setBd(cscore.getBd() + newscore.getBd());
 			cscore.setPr(cscore.getPr() + newscore.getPr());
 			cscore.setMinbp(cscore.getMinbp() + newscore.getMinbp());
+			if (resource.getGauge().get(resource.getGauge().size() - 1) > 0) {
+				cscore.setClear(resource.getGrooveGauge().getClearType());
+			} else {
+				cscore.setClear(GrooveGauge.CLEARTYPE_FAILED);
+				
+				boolean b = false;
+				// 残りの曲がある場合はtotalnotesをBPに加算する
+				for(BMSModel m : resource.getCourseBMSModels()) {
+					if(b) {
+						cscore.setMinbp(cscore.getMinbp() + m.getTotalNotes());
+					}
+					if(m == resource.getBMSModel()) {
+						b = true;
+					}
+				}
+			}
+			newscore = cscore;
+		}
+
+		if (newscore.getClear() != GrooveGauge.CLEARTYPE_FAILED) {
+			if (clear != null) {
+				clear.play();
+			}
+		} else {
+			if (fail != null) {
+				fail.play();
+			}
 		}
 	}
 }

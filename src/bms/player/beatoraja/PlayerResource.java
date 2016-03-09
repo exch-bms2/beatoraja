@@ -33,6 +33,8 @@ public class PlayerResource {
 	private boolean updateScore = true;
 	private GrooveGauge grooveGauge;
 	private List<Float> gauge;
+	
+	private String coursetitle;
 	private BMSModel[] course;
 	private File[] coursefile;
 	private int courseindex;
@@ -42,6 +44,7 @@ public class PlayerResource {
 	private IRScoreData cscore;
 	
 	public void clear() {
+		coursetitle = null;
 		course = null;
 		gauge = null;
 		coursefile = null;
@@ -212,5 +215,13 @@ public class PlayerResource {
 	
 	public void setUpdateScore(boolean b) {
 		this.updateScore = b;
+	}
+
+	public String getCoursetitle() {
+		return coursetitle;
+	}
+
+	public void setCoursetitle(String coursetitle) {
+		this.coursetitle = coursetitle;
 	}
 }
