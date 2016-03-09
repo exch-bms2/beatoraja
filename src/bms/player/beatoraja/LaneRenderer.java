@@ -23,8 +23,6 @@ import com.badlogic.gdx.math.Rectangle;
  */
 public class LaneRenderer {
 
-	// TODO timeベースの描画からsectionベースの描画に移行
-
 	/**
 	 * レーンカバーの量
 	 */
@@ -215,8 +213,7 @@ public class LaneRenderer {
 			nbpm = t.getBPM();
 		}
 		nowbpm = nbpm;
-		// TODO 緑数字の算出にしか使っていないのと、数値が違う(BPM200ベースで半分)
-		int region = (int) (3000 / (nbpm / 100) / hispeed);
+		int region = (int) (240000 / nbpm / hispeed);
 		// double sect = (bpm / 60) * 4 * 1000;
 		float hu = laneregion[0].y + laneregion[0].height;
 		float hl = laneregion[0].y;
@@ -378,8 +375,8 @@ public class LaneRenderer {
 
 		float y = hl;
 
-		long ltime = 0;
-		float yy = 0;
+		// long ltime = 0;
+		// float yy = 0;
 
 		for (int i = pos; i < timelines.length && y <= hu; i++) {
 			TimeLine tl = timelines[i];
@@ -397,14 +394,16 @@ public class LaneRenderer {
 										.getTime() + timelines[i - 1].getStop()
 										: 0)) * (hu - hl) * hispeed;
 					}
-					if(y < 0) {
-						System.out.println(" y : " + y + " line : " + (i > 0 ? timelines[i]
-								.getTime() : 0) + " time : " + time + " stop : " + (i > 0 ? timelines[i - 1]
-										.getStop() : 0));
-					}
+					// if(y < 0) {
+					// System.out.println(" y : " + y + " line : " + (i > 0 ?
+					// timelines[i]
+					// .getTime() : 0) + " time : " + time + " stop : " + (i > 0
+					// ? timelines[i - 1]
+					// .getStop() : 0));
+					// }
 				}
-				ltime = tl.getTime() - time;
-				yy = y - hl;
+				// ltime = tl.getTime() - time;
+				// yy = y - hl;
 				for (int p = 0; p < playerr.length; p++) {
 					if (config.isBpmguide() && tl.getBPM() != nbpm) {
 						// BPMガイド描画
@@ -471,30 +470,26 @@ public class LaneRenderer {
 							// .getStart()
 							// .getTime());
 							// } else {
-							double nbpm2 = tl.getBPM();
 							dy = 0;
 							for (int j = 0; timelines[i + j] != ((LongNote) note)
 									.getEnd(); j++) {
 								if (timelines[i + j + 1].getTime() >= time) {
-									if (nbpm2 > 0) {
-										if (timelines[i + j].getTime() > time) {
-											dy += (float) (timelines[i + j + 1]
-													.getSection() - timelines[i
-													+ j].getSection())
-													* (hu - hl) * hispeed;
-										} else {
-											dy += (timelines[i + j + 1]
-													.getSection() - timelines[i
-													+ j].getSection())
-													* (timelines[i + j + 1]
-															.getTime() - time)
-													/ (timelines[i + j + 1]
-															.getTime() - timelines[i
-															+ j].getTime())
-													* (hu - hl) * hispeed;
-										}
+									if (timelines[i + j].getTime() + timelines[i + j].getStop() > time) {
+										dy += (float) (timelines[i + j + 1]
+												.getSection() - timelines[i + j]
+												.getSection())
+												* (hu - hl) * hispeed;
+									} else {
+										dy += (timelines[i + j + 1]
+												.getSection() - timelines[i + j]
+												.getSection())
+												* (timelines[i + j + 1]
+														.getTime() - time)
+												/ (timelines[i + j + 1]
+														.getTime() - timelines[i
+														+ j].getTime())
+												* (hu - hl) * hispeed;
 									}
-									nbpm2 = timelines[i + j].getBPM();
 								}
 							}
 							// System.out.println(dy);
@@ -515,8 +510,8 @@ public class LaneRenderer {
 
 		}
 
-//		System.out.println("time :" + ltime + " y :" + yy + " real time : "
-//				+ (ltime * (hu - hl) / yy));
+		// System.out.println("time :" + ltime + " y :" + yy + " real time : "
+		// + (ltime * (hu - hl) / yy));
 
 		sprite.begin();
 
