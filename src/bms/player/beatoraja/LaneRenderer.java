@@ -169,7 +169,7 @@ public class LaneRenderer {
 	public void setLanecover(float lanecover) {
 		this.lanecover = lanecover;
 		if (this.fixhispeed != Config.FIX_HISPEED_OFF) {
-			hispeed = (float) ((3000 / (basebpm / 100) / gvalue) * 0.6 * (1 - (enableLanecover ? lanecover
+			hispeed = (float) ((2400f / (basebpm / 100) / gvalue) * 0.6 * (1 - (enableLanecover ? lanecover
 					: 0)));
 		}
 	}
@@ -215,7 +215,8 @@ public class LaneRenderer {
 			nbpm = t.getBPM();
 		}
 		nowbpm = nbpm;
-		int region = (int) (3000 / (bpm / 100) / hispeed);
+		// TODO 緑数字の算出にしか使っていないのと、数値が違う(BPM200ベースで半分)
+		int region = (int) (3000 / (nbpm / 100) / hispeed);
 		// double sect = (bpm / 60) * 4 * 1000;
 		float hu = laneregion[0].y + laneregion[0].height;
 		float hl = laneregion[0].y;
@@ -377,21 +378,33 @@ public class LaneRenderer {
 
 		float y = hl;
 
+		long ltime = 0;
+		float yy = 0;
+
 		for (int i = pos; i < timelines.length && y <= hu; i++) {
 			TimeLine tl = timelines[i];
 			if (tl.getTime() >= time) {
 				if (nbpm > 0) {
-					if (i > 0 && timelines[i - 1].getTime() > time) {
-						y += (float) (timelines[i].getTime() - timelines[i - 1]
-								.getTime())
-								* (hu - hl)
-								/ ((float) (300000f / hispeed) / nbpm);
+					if ((i > 0 && timelines[i - 1].getTime()
+							+ timelines[i - 1].getStop() > time)) {
+						y += (float) (timelines[i].getSection() - timelines[i - 1]
+								.getSection()) * (hu - hl) * hispeed;
 					} else {
-						y += (float) (timelines[i].getTime() - time)
-								* (hu - hl)
-								/ ((float) (300000f / hispeed) / nbpm);
+						y += (float) (timelines[i].getSection() - (i > 0 ? timelines[i - 1]
+								.getSection() : 0))
+								* (timelines[i].getTime() - time)
+								/ (timelines[i].getTime() - (i > 0 ? timelines[i - 1]
+										.getTime() + timelines[i - 1].getStop()
+										: 0)) * (hu - hl) * hispeed;
+					}
+					if(y < 0) {
+						System.out.println(" y : " + y + " line : " + (i > 0 ? timelines[i]
+								.getTime() : 0) + " time : " + time + " stop : " + (i > 0 ? timelines[i - 1]
+										.getStop() : 0));
 					}
 				}
+				ltime = tl.getTime() - time;
+				yy = y - hl;
 				for (int p = 0; p < playerr.length; p++) {
 					if (config.isBpmguide() && tl.getBPM() != nbpm) {
 						// BPMガイド描画
@@ -466,21 +479,25 @@ public class LaneRenderer {
 									if (nbpm2 > 0) {
 										if (timelines[i + j].getTime() > time) {
 											dy += (float) (timelines[i + j + 1]
-													.getTime() - timelines[i
-													+ j].getTime())
-													* (hu - hl)
-													/ ((float) (300000f / hispeed) / nbpm2);
+													.getSection() - timelines[i
+													+ j].getSection())
+													* (hu - hl) * hispeed;
 										} else {
-											dy += (float) (timelines[i + j + 1]
-													.getTime() - time)
-													* (hu - hl)
-													/ ((float) (300000f / hispeed) / nbpm2);
+											dy += (timelines[i + j + 1]
+													.getSection() - timelines[i
+													+ j].getSection())
+													* (timelines[i + j + 1]
+															.getTime() - time)
+													/ (timelines[i + j + 1]
+															.getTime() - timelines[i
+															+ j].getTime())
+													* (hu - hl) * hispeed;
 										}
 									}
 									nbpm2 = timelines[i + j].getBPM();
 								}
 							}
-							System.out.println(dy);
+							// System.out.println(dy);
 						} else {
 							dy = 0;
 						}
@@ -495,7 +512,11 @@ public class LaneRenderer {
 				}
 			}
 			sprite.end();
+
 		}
+
+//		System.out.println("time :" + ltime + " y :" + yy + " real time : "
+//				+ (ltime * (hu - hl) / yy));
 
 		sprite.begin();
 
