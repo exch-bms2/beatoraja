@@ -119,33 +119,97 @@ public class NoteShuffleModifier extends PatternModifier {
 				}
 				break;
 			case SPIRAL:
-				// TODO 9,14key対応
-				if(random.length == 0) {
-					// 初期値の作成
-					random = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 };
-					int index = (int) (Math.random() * 7);
-					int j = (int) (Math.random() * 2) >= 1 ? 1 : 6;
-					for(int i = 0;i < 7;i++) {
-						random[i] = index;
-						index = (index + j) % 7;
-					}
-					inc = (int) (Math.random() * 6) + 1;
-				} else {
-					boolean cln = false;
-					for (int lane = 0; lane < 7; lane++) {
-						if(ln[lane] != -1) {
-							cln = true;
-						}
-					}
-					if(!cln) {
-						int[] nrandom = Arrays.copyOf(random, random.length);
-						int index = inc;
+				switch(getModifyTarget()) {
+				case PLAYER1:
+					if(random.length == 0) {
+						// 初期値の作成
+						random = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 };
+						int index = (int) (Math.random() * 7);
+						int j = (int) (Math.random() * 2) >= 1 ? 1 : 6;
 						for(int i = 0;i < 7;i++) {
-							nrandom[i] = random[index];
-							index = (index + 1) % 7;
+							random[i] = index;
+							index = (index + j) % 7;
 						}
-						random = nrandom;						
+						inc = (int) (Math.random() * 6) + 1;
+					} else {
+						boolean cln = false;
+						for (int lane = 0; lane < 7; lane++) {
+							if(ln[lane] != -1) {
+								cln = true;
+							}
+						}
+						if(!cln) {
+							int[] nrandom = Arrays.copyOf(random, random.length);
+							int index = inc;
+							for(int i = 0;i < 7;i++) {
+								nrandom[i] = random[index];
+								index = (index + 1) % 7;
+							}
+							random = nrandom;						
+						}
 					}
+					break;
+				case PLAYER2:
+					if(random.length == 0) {
+						// 初期値の作成
+						random = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 };
+						int index = (int) (Math.random() * 7);
+						int j = (int) (Math.random() * 2) >= 1 ? 1 : 6;
+						for(int i = 0;i < 7;i++) {
+							random[i + 9] = index + 9;
+							index = (index + j) % 7;
+						}
+						inc = (int) (Math.random() * 6) + 1;
+					} else {
+						boolean cln = false;
+						for (int lane = 0; lane < 7; lane++) {
+							if(ln[lane + 9] != -1) {
+								cln = true;
+							}
+						}
+						if(!cln) {
+							int[] nrandom = Arrays.copyOf(random, random.length);
+							int index = inc;
+							for(int i = 0;i < 7;i++) {
+								nrandom[i + 9] = random[index + 9];
+								index = (index + 1) % 7;
+							}
+							random = nrandom;						
+						}
+					}
+					break;
+				case NINEKEYS:
+					if(random.length == 0) {
+						// 初期値の作成
+						random = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 };
+						int index = (int) (Math.random() * 9);
+						int j = (int) (Math.random() * 2) >= 1 ? 1 : 6;
+						for(int i = 0;i < 9;i++) {
+							int plane = i >= 5 ? i + 5 : i;
+							random[plane] = index >= 5 ? index + 5 : index;
+							index = (index + j) % 9;
+						}
+						inc = (int) (Math.random() * 8) + 1;
+					} else {
+						boolean cln = false;
+						for (int lane = 0; lane < 9; lane++) {
+							int plane = lane >= 5 ? lane + 5 : lane;
+							if(ln[plane] != -1) {
+								cln = true;
+							}
+						}
+						if(!cln) {
+							int[] nrandom = Arrays.copyOf(random, random.length);
+							int index = inc;
+							for(int i = 0;i < 9;i++) {
+								int plane = i >= 5 ? i + 5 : i;
+								nrandom[plane] = random[index >= 5 ? index + 5 : index];
+								index = (index + 1) % 9;
+							}
+							random = nrandom;						
+						}
+					}
+					break;
 				}
 				break;
 			case ALL_SCR:

@@ -16,11 +16,16 @@ import bms.model.TimeLine;
 public class LaneShuffleModifier extends PatternModifier {
 
 	private int[] random;
+	private int type;
 
 	public static final int MIRROR = 0;
 	public static final int R_RANDOM = 1;
 	public static final int RANDOM = 2;
 	public static final int RANDOM_EX = 3;
+	/**
+	 * 1P-2Pを入れ替える
+	 */
+	public static final int FLIP = 4;
 
 	private static final int[][] MIRROR_LANE = { { 6, 5, 4, 3, 2, 1, 0, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 },
 			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 15, 14, 13, 12, 11, 10, 9, 16, 17 },
@@ -28,14 +33,18 @@ public class LaneShuffleModifier extends PatternModifier {
 
 	public LaneShuffleModifier(int type) {
 		super(type == RANDOM_EX ? 1 : 0);
+		this.type =type;
+	}
+
+	private void makeRandom() {
 		switch (type) {
 		case MIRROR:
 			random = MIRROR_LANE[getModifyTarget()];
 			break;
 		case R_RANDOM:
-			int i,j;
+			int i, j;
 			random = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 };
-			switch(getModifyTarget()) {
+			switch (getModifyTarget()) {
 			case PLAYER1:
 				i = (int) (Math.random() * 6);
 				j = (int) (Math.random() * 2);
@@ -67,7 +76,7 @@ public class LaneShuffleModifier extends PatternModifier {
 			List<Integer> l = new ArrayList<Integer>(Arrays.asList(0, 1, 2, 3, 4, 5, 6));
 			random = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 };
 			random[7] = 7;
-			switch(getModifyTarget()) {
+			switch (getModifyTarget()) {
 			case PLAYER1:
 				for (int lane = 0; lane < 7; lane++) {
 					int r = (int) (Math.random() * l.size());
@@ -95,7 +104,7 @@ public class LaneShuffleModifier extends PatternModifier {
 		case RANDOM_EX:
 			List<Integer> le = new ArrayList<Integer>(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7));
 			random = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 };
-			switch(getModifyTarget()) {
+			switch (getModifyTarget()) {
 			case PLAYER1:
 				for (int lane = 0; lane < 8; lane++) {
 					int r = (int) (Math.random() * le.size());
@@ -115,13 +124,17 @@ public class LaneShuffleModifier extends PatternModifier {
 				break;
 			}
 			break;
+		case FLIP:
+			random = new int[] { 9, 10, 11, 12, 13, 14, 15, 16, 17, 0, 1, 2, 3, 4, 5, 6, 7, 8 };
+			break;
 
-		}
+		}		
 	}
-
+	
 	@Override
 	public List<PatternModifyLog> modify(BMSModel model) {
 		List<PatternModifyLog> log = new ArrayList();
+		makeRandom();
 		int lanes = random.length;
 		for (TimeLine tl : model.getAllTimeLines()) {
 			Note[] notes = new Note[lanes];
