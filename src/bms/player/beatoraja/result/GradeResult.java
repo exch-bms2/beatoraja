@@ -120,27 +120,35 @@ public class GradeResult extends ApplicationAdapter {
 		}
 		sprite.end();
 		boolean[] keystate = main.getInputProcessor().getKeystate();
+		long[] keytime = main.getInputProcessor().getTime();
 		if (resource.getScoreData() == null || ((System.currentTimeMillis() > time + 500
 				&& (keystate[0] || keystate[2] || keystate[4] || keystate[6])))) {
+			keytime[0] = keytime[2] = keytime[4] = keytime[6] = 0;
 					main.changeState(MainController.STATE_SELECTMUSIC, resource);					
 		}
 	}
 
 	public void updateScoreDatabase() {
-		BMSModel model = resource.getBMSModel();
-		IRScoreData newscore = resource.getScoreData();
+		BMSModel[] models = resource.getCourseBMSModels();
+		String hash = "";
+		int totalnotes = 0;
+		for(BMSModel model : models) {
+			hash += model.getHash();
+			totalnotes += model.getTotalNotes();
+		}
+		IRScoreData newscore = resource.getCourseScoreData();
 		if (newscore == null) {
 			return;
 		}
-		IRScoreData score = main.getScoreDatabase().getScoreData("Player", model.getHash(), false);
+		IRScoreData score = main.getScoreDatabase().getScoreData("Player", hash, false);
 		if (score == null) {
 			score = new IRScoreData();
 		}
 		oldclear = score.getClear();
 		oldexscore = score.getExscore();
 		oldmisscount = score.getMinbp();
-		score.setHash(model.getHash());
-		score.setNotes(model.getTotalNotes());
+		score.setHash(hash);
+		score.setNotes(totalnotes);
 
 		if (newscore.getClear() != GrooveGauge.CLEARTYPE_FAILED) {
 			score.setClearcount(score.getClearcount() + 1);

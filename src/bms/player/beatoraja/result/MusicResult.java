@@ -1,8 +1,11 @@
 package bms.player.beatoraja.result;
 
+import java.io.File;
 import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.logging.Logger;
+
+import org.lwjgl.opengl.GL11;
 
 import bms.model.BMSModel;
 import bms.player.beatoraja.MainController;
@@ -12,6 +15,7 @@ import bms.player.lunaticrave2.IRScoreData;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
@@ -45,9 +49,24 @@ public class MusicResult extends ApplicationAdapter {
 	private int oldclear;
 	private int oldexscore;
 	private int oldmisscount;
+	
+	private Sound clear;
+	private Sound fail;
 
 	public MusicResult(MainController main) {
 		this.main = main;
+		
+		if (clear == null) {
+			if (new File("skin/clear.wav").exists()) {
+				clear = Gdx.audio.newSound(Gdx.files.internal("skin/clear.wav"));
+			}
+		}
+		if (fail == null) {
+			if (new File("skin/fail.wav").exists()) {
+				fail = Gdx.audio.newSound(Gdx.files.internal("skin/fail.wav"));
+			}
+		}
+
 	}
 
 	private long time = 0;
@@ -124,7 +143,7 @@ public class MusicResult extends ApplicationAdapter {
 		Gdx.gl.glLineWidth(1);
 		
 		shape.begin(ShapeType.Filled);
-		shape.setColor(0f, 0f, 0f, 0.5f);
+		shape.setColor(0.1f, 0.1f, 0.1f, 0.5f);
 		shape.rect(80, 100, 1120, 350);
 		shape.end();
 		
@@ -170,6 +189,7 @@ public class MusicResult extends ApplicationAdapter {
 		}
 		sprite.end();
 		boolean[] keystate = main.getInputProcessor().getKeystate();
+		long[] keytime = main.getInputProcessor().getTime();
 		if (resource.getScoreData() == null || ((System.currentTimeMillis() > time + 500
 				&& (keystate[0] || keystate[2] || keystate[4] || keystate[6])))) {
 			if (resource.getCourseBMSModels() != null) {
@@ -185,15 +205,18 @@ public class MusicResult extends ApplicationAdapter {
 				}
 			} else {
 				if(keystate[4]) {
+					keytime[4] = 0;
 					// オプションを変更せず同じ譜面でリプレイ
 					resource.setPatternModifyLog(null);
 					resource.reloadBMSFile();
 					main.changeState(MainController.STATE_PLAYBMS, resource);					
 				} else if(keystate[6]) {
+					keytime[6] = 0;
 					// 同じ譜面でリプレイ
 					resource.reloadBMSFile();
 					main.changeState(MainController.STATE_PLAYBMS, resource);
 				} else {
+					keytime[0] = keytime[2] = 0;
 					main.changeState(MainController.STATE_SELECTMUSIC, resource);					
 				}
 			}
@@ -245,5 +268,26 @@ public class MusicResult extends ApplicationAdapter {
 		main.getScoreDatabase().setScoreData("Player", score);
 
 		Logger.getGlobal().info("スコアデータベース更新完了 ");
+		
+		if(newscore.getClear() != GrooveGauge.CLEARTYPE_FAILED) {
+			clear.play();
+		} else {
+			fail.play();
+		}
+		// コースモードの場合はコーススコアに加算・累積する
+		if(resource.getCourseBMSModels() != null) {
+			IRScoreData cscore = resource.getCourseScoreData();
+			if(cscore == null) {
+				cscore = new IRScoreData();
+				cscore.setMinbp(0);
+				resource.setCourseScoreData(cscore);
+			}
+			cscore.setPg(cscore.getPg() + newscore.getPg());
+			cscore.setGr(cscore.getGr() + newscore.getGr());
+			cscore.setGd(cscore.getGd() + newscore.getGd());
+			cscore.setBd(cscore.getBd() + newscore.getBd());
+			cscore.setPr(cscore.getPr() + newscore.getPr());
+			cscore.setMinbp(cscore.getMinbp() + newscore.getMinbp());
+		}
 	}
 }
