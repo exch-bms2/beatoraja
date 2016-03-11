@@ -23,7 +23,7 @@ import uk.co.caprica.vlcj.player.direct.RenderCallbackAdapter;
 import uk.co.caprica.vlcj.runtime.RuntimeUtil;
 import uk.co.caprica.vlcj.runtime.x.LibXUtil;
 
-public class VLCMovieProcessor {
+public class VLCMovieProcessor implements MovieProcessor {
 
 	private OrthographicCamera camera;
 
