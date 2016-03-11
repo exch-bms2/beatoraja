@@ -12,7 +12,7 @@ public class EasyGrooveGauge extends GrooveGauge {
 	public EasyGrooveGauge(BMSModel model) {
 		super(2,100, 20, 80, CLEARTYPE_EASY);
 		float g = (float) (model.getTotal() / model.getTotalNotes());
-		gauge = new float[] { g, g, g / 2, -1.6f, -4.8f, -1.6f };
+		gauge = new float[] { g, g, g / 2, -2.0f, -4.0f, -2.0f };
 	}
 	
 	@Override
