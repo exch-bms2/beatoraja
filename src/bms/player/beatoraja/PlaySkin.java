@@ -22,7 +22,7 @@ public class PlaySkin {
 	/**
 	 * ロングノーツ画像
 	 */
-	private Sprite[][] longnote = new Sprite[4][8];
+	private Sprite[][] longnote = new Sprite[10][8];
 	/**
 	 * 地雷ノーツ画像
 	 */
@@ -36,7 +36,7 @@ public class PlaySkin {
 	 */
 	private Sprite[] keybeam = new Sprite[0];
 	/**
-	 * レーンカバーは像
+	 * レーンカバー画像
 	 */
 	private Sprite lanecover;
 
@@ -86,7 +86,7 @@ public class PlaySkin {
 		// background = new Texture("skin/bg.jpg");
 		// ノーツ
 		note = new Sprite[8];
-		longnote = new Sprite[4][8];
+		longnote = new Sprite[10][8];
 		minenote = new Sprite[8];
 		Texture notet = new Texture("skin/note.png");
 		for (int i = 0; i < 8; i++) {
@@ -96,6 +96,12 @@ public class PlaySkin {
 				longnote[1][i] = new Sprite(notet, 99, 57, 27, 13);
 				longnote[2][i] = new Sprite(notet, 99, 80, 27, 1);
 				longnote[3][i] = new Sprite(notet, 99, 76, 27, 1);
+				longnote[4][i] = new Sprite(notet, 99, 94, 27, 13);
+				longnote[5][i] = new Sprite(notet, 99, 108, 27, 13);
+				longnote[6][i] = new Sprite(notet, 99, 131, 27, 1);
+				longnote[7][i] = new Sprite(notet, 99, 127, 27, 1);
+				longnote[8][i] = new Sprite(notet, 99, 128, 27, 1);
+				longnote[9][i] = new Sprite(notet, 99, 129, 27, 1);
 				minenote[i] = new Sprite(notet, 99, 23, 27, 8);
 			} else if (i == 7) {
 				note[i] = new Sprite(notet, 50, 5, 46, 8);
@@ -103,6 +109,12 @@ public class PlaySkin {
 				longnote[1][i] = new Sprite(notet, 50, 57, 46, 13);
 				longnote[2][i] = new Sprite(notet, 50, 80, 46, 1);
 				longnote[3][i] = new Sprite(notet, 50, 76, 46, 1);
+				longnote[4][i] = new Sprite(notet, 50, 94, 46, 13);
+				longnote[5][i] = new Sprite(notet, 50, 108, 46, 13);
+				longnote[6][i] = new Sprite(notet, 50, 131, 46, 1);
+				longnote[7][i] = new Sprite(notet, 50, 127, 46, 1);
+				longnote[8][i] = new Sprite(notet, 50, 128, 46, 1);
+				longnote[9][i] = new Sprite(notet, 50, 129, 46, 1);
 				minenote[i] = new Sprite(notet, 50, 23, 46, 8);
 			} else {
 				note[i] = new Sprite(notet, 127, 5, 21, 8);
@@ -110,6 +122,12 @@ public class PlaySkin {
 				longnote[1][i] = new Sprite(notet, 127, 57, 21, 13);
 				longnote[2][i] = new Sprite(notet, 127, 80, 21, 1);
 				longnote[3][i] = new Sprite(notet, 127, 76, 21, 1);
+				longnote[4][i] = new Sprite(notet, 127, 94, 21, 13);
+				longnote[5][i] = new Sprite(notet, 127, 108, 21, 13);
+				longnote[6][i] = new Sprite(notet, 127, 131, 21, 1);
+				longnote[7][i] = new Sprite(notet, 127, 127, 21, 1);
+				longnote[8][i] = new Sprite(notet, 127, 128, 21, 1);
+				longnote[9][i] = new Sprite(notet, 127, 129, 21, 1);
 				minenote[i] = new Sprite(notet, 127, 23, 21, 8);
 			}
 		}

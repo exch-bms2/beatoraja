@@ -77,6 +77,8 @@ public class MusicSelector extends ApplicationAdapter {
 	private static final String[] GAUGEOP = { "ASSIST EASY", "EASY", "NORMAL", "HARD", "EX-HARD", "HAZARD" };
 
 	private static final String[] FIXHISPEEDOP = { "OFF", "STARTBPM", "MAXBPM", "MAINBPM" };
+	
+	private static final String[] LNOP = { "OFF", "LEGACY", "HELL CHARGE"};
 
 	private Config config;
 
@@ -409,7 +411,7 @@ public class MusicSelector extends ApplicationAdapter {
 			}
 			if (keystate[3] && keytime[3] != 0) {
 				keytime[3] = 0;
-				config.setLnassist(config.getLnassist() == 0 ? 1 : 0);
+				config.setLnassist(config.getLnassist() + 1 == 3 ? 0 : config.getLnassist() + 1);
 			}
 			if (keystate[5] && keytime[5] != 0) {
 				keytime[5] = 0;
@@ -439,8 +441,8 @@ public class MusicSelector extends ApplicationAdapter {
 
 			titlefont.setColor(config.isConstant() ? Color.WHITE : Color.valueOf("444444"));
 			titlefont.draw(sprite, "CONSTANT", 110, 490);
-			titlefont.setColor(config.getLnassist() == 1 ? Color.WHITE : Color.valueOf("444444"));
-			titlefont.draw(sprite, "LEGACY NOTE", 200, 520);
+			titlefont.setColor(config.getLnassist() >= 1 ? Color.WHITE : Color.valueOf("444444"));
+			titlefont.draw(sprite, LNOP[config.getLnassist()], 200, 520);
 			titlefont.setColor(config.isBpmguide() ? Color.WHITE : Color.valueOf("444444"));
 			titlefont.draw(sprite, "BPM GUIDE", 300, 490);
 			titlefont.setColor(config.isExpandjudge() ? Color.WHITE : Color.valueOf("444444"));

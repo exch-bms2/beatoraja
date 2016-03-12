@@ -126,6 +126,11 @@ public class BMSPlayer extends ApplicationAdapter {
 				assist = 2;
 				score = false;
 			}
+			if (config.getLnassist() == 2) {
+				model.setLntype(BMSModel.LNTYPE_HELLCHARGENOTE);
+			} else {
+				model.setLntype(BMSModel.LNTYPE_CHARGENOTE);				
+			}
 			if (config.isExpandjudge()) {
 				judge.setExpandJudge();
 				assist = 2;
@@ -829,6 +834,10 @@ public class BMSPlayer extends ApplicationAdapter {
 		gauge.update(judge);
 		// System.out.println(
 		// "Now count : " + notes + " - " + totalnotes);
+	}
+	
+	public GrooveGauge getGauge() {
+		return gauge;
 	}
 
 	/**

@@ -642,22 +642,47 @@ public class LaneRenderer {
 					s.getHeight() * scale);
 		}
 		if (note instanceof LongNote) {
-			if (y - height < skin.getLaneregion()[lane].y) {
-				height = y - skin.getLaneregion()[lane].y;
-			}
-			if (main.getJudgeManager().getProcessingLongNotes()[lane] == note) {
-				sprite.draw(skin.getLongnote()[2][lane], x, y - height - 2,
-						width, height + 4);
+			if(model.getLntype() == 2) {
+				if (y - height < skin.getLaneregion()[lane].y) {
+					height = y - skin.getLaneregion()[lane].y;
+				}
+				JudgeManager judge = main.getJudgeManager();
+
+				boolean[] inclease = judge.getHellChargeJudges();
+				if (main.getJudgeManager().getProcessingLongNotes()[lane] == note) {
+					sprite.draw(skin.getLongnote()[6][lane], x, y - height - 2,
+							width, height + 4);
+				} else if(judge.getPassingLongNotes()[lane] == note){
+					sprite.draw(skin.getLongnote()[inclease[lane] ? 8 : 9][lane], x, y - height - 2,
+							width, height + 4);					
+				} else {
+					sprite.draw(skin.getLongnote()[7][lane], x, y - height - 2,
+							width, height + 4);					
+				}
+				Sprite ls = skin.getLongnote()[4][lane];
+				sprite.draw(ls, x, y - ls.getHeight() * scale / 2, width,
+						ls.getHeight() * scale);
+				Sprite le = skin.getLongnote()[5][lane];
+				sprite.draw(le, x, y - height - le.getHeight() * scale / 2, width,
+						le.getHeight() * scale);				
 			} else {
-				sprite.draw(skin.getLongnote()[3][lane], x, y - height - 2,
-						width, height + 4);
+				if (y - height < skin.getLaneregion()[lane].y) {
+					height = y - skin.getLaneregion()[lane].y;
+				}
+				if (main.getJudgeManager().getProcessingLongNotes()[lane] == note) {
+					sprite.draw(skin.getLongnote()[2][lane], x, y - height - 2,
+							width, height + 4);
+				} else {
+					sprite.draw(skin.getLongnote()[3][lane], x, y - height - 2,
+							width, height + 4);
+				}
+				Sprite ls = skin.getLongnote()[0][lane];
+				sprite.draw(ls, x, y - ls.getHeight() * scale / 2, width,
+						ls.getHeight() * scale);
+				Sprite le = skin.getLongnote()[1][lane];
+				sprite.draw(le, x, y - height - le.getHeight() * scale / 2, width,
+						le.getHeight() * scale);
 			}
-			Sprite ls = skin.getLongnote()[0][lane];
-			sprite.draw(ls, x, y - ls.getHeight() * scale / 2, width,
-					ls.getHeight() * scale);
-			Sprite le = skin.getLongnote()[1][lane];
-			sprite.draw(le, x, y - height - le.getHeight() * scale / 2, width,
-					le.getHeight() * scale);
 		}
 		if (note instanceof MineNote) {
 			Sprite s = skin.getMinenote()[lane];

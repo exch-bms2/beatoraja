@@ -35,4 +35,13 @@ public class GradeGrooveGauge extends GrooveGauge {
 		}
 		sprite.end();
 	}
+	
+	@Override
+	public float getGaugeValue(int judge) {
+		if(this.getValue() > 30 || judge < 3) {
+			return gauge[judge];			
+		} else {
+			return gauge[judge] * 0.5f;			
+		}
+	}
 }

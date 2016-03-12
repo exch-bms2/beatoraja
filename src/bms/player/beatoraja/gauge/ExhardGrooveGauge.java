@@ -27,4 +27,9 @@ public class ExhardGrooveGauge extends GrooveGauge {
 		}
 		sprite.end();
 	}
+
+	@Override
+	public float getGaugeValue(int judge) {
+		return gauge[judge];
+	}
 }
