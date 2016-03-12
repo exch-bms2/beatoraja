@@ -24,7 +24,7 @@ public class BGAProcessor {
 	private float progress = 0;
 
 	private Pixmap[] bgamap = new Pixmap[0];
-	private Map<Integer, VLCMovieProcessor> mpgmap = new HashMap<Integer, VLCMovieProcessor>();
+	private Map<Integer, MovieProcessor> mpgmap = new HashMap<Integer, MovieProcessor>();
 	private Pixmap backbmp;
 	private Pixmap stagefile;
 
@@ -63,7 +63,7 @@ public class BGAProcessor {
 				File mpgfile = new File(directorypath + name + "." + mov);
 				if (mpgfile.exists()) {
 					try {
-						VLCMovieProcessor mm = this.loadMovie(id, mpgfile);
+						MovieProcessor mm = this.loadMovie(id, mpgfile);
 						mpgmap.put(id, mm);
 						break;
 					} catch (Exception e) {
@@ -83,9 +83,9 @@ public class BGAProcessor {
 		progress = 1;
 	}
 
-	private VLCMovieProcessor loadMovie(int id, File f) throws Exception {
+	private MovieProcessor loadMovie(int id, File f) throws Exception {
 		if (config.getVlcpath().length() > 0) {
-			VLCMovieProcessor mm = new VLCMovieProcessor(config.getVlcpath());
+			MovieProcessor mm = new VLCMovieProcessor(config.getVlcpath());
 			mm.create(f.getPath());
 			return mm;
 		}

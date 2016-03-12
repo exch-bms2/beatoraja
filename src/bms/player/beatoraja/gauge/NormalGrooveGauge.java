@@ -12,7 +12,7 @@ public class NormalGrooveGauge extends GrooveGauge {
 	public NormalGrooveGauge(BMSModel model) {
 		super(2,100, 20, 80, CLEARTYPE_NORMAL);
 		float g = (float) (model.getTotal() / model.getTotalNotes());
-		gauge = new float[] { g, g, g / 2, -2.0f, -6.0f, -2.0f };
+		gauge = new float[] { g, g, g / 2, -3.0f, -6.0f, -3.0f };
 	}
 	
 	@Override

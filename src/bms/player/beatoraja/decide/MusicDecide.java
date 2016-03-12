@@ -41,7 +41,7 @@ public class MusicDecide extends ApplicationAdapter{
 		FreeTypeFontParameter parameter = new FreeTypeFontParameter();		
 		parameter.size = 24;	
 		title = resource.getBMSModel().getFullTitle();
-		parameter.characters = title;
+		parameter.characters += title + "段位認定 " + resource.getCoursetitle();
 		titlefont = generator.generateFont(parameter);
 		time = System.currentTimeMillis();
 		
@@ -58,17 +58,24 @@ public class MusicDecide extends ApplicationAdapter{
 		final float w = 1280;
 		final float h = 720;
 
-		if(resource.getBGAManager().getStagefileData() != null) {
+		if(resource.getCourseBMSModels() != null) {
 			sprite.begin();
-			Texture bgatex = new Texture(resource.getBGAManager().getStagefileData());
-			sprite.draw(bgatex, 0, 0, w, h);
-			sprite.end();
-			bgatex.dispose();
+			titlefont.setColor(Color.WHITE);
+			titlefont.draw(sprite, "段位認定 " + resource.getCoursetitle(),  w /2, h / 2);
+			sprite.end();						
+		} else {
+			if(resource.getBGAManager().getStagefileData() != null) {
+				sprite.begin();
+				Texture bgatex = new Texture(resource.getBGAManager().getStagefileData());
+				sprite.draw(bgatex, 0, 0, w, h);
+				sprite.end();
+				bgatex.dispose();
+			}
+			sprite.begin();
+			titlefont.setColor(Color.WHITE);
+			titlefont.draw(sprite,title,  w /2, h / 2);
+			sprite.end();			
 		}
-		sprite.begin();
-		titlefont.setColor(Color.WHITE);
-		titlefont.draw(sprite,title,  w /2, h / 2);
-		sprite.end();
 		
 		if(System.currentTimeMillis() > time + 1500) {
 			main.changeState(MainController.STATE_PLAYBMS, resource);			

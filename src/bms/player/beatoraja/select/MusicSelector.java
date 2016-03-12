@@ -478,6 +478,7 @@ public class MusicSelector extends ApplicationAdapter {
 							files.add(new File(song.getPath()));
 						}
 						resource.clear();
+						resource.setCoursetitle(((GradeBar) currentsongs[selectedindex]).getTitle());
 						resource.setBMSFile(files.get(0), config, 0);
 						resource.setCourseBMSFiles(files.toArray(new File[0]));
 						if (bgm != null) {

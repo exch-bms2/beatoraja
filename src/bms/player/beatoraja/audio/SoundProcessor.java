@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +37,8 @@ public class SoundProcessor implements AudioProcessor {
 
 	private Sound[] wavmap = new Sound[0];
 
+	private long[] playmap = new long[0];
+	
 	private float progress = 0;
 
 	/**
@@ -110,14 +113,18 @@ public class SoundProcessor implements AudioProcessor {
 		}
 		Logger.getGlobal().info("音源ファイル読み込み完了。音源数:" + model.getWavList().length);
 		wavmap = sounds.toArray(new Sound[0]);
+		playmap = new long[wavmap.length];
+		Arrays.fill(playmap, -1);
 		progress = 1;
 	}
 
 	public void play(int id) {
 		try {
 			if (id != -1 && wavmap[id] != null) {
-				wavmap[id].stop();
-				wavmap[id].play();
+				if(playmap[id] != -1) {
+					wavmap[id].stop(playmap[id]);					
+				}
+				playmap[id] = wavmap[id].play();
 			}			
 		} catch(Exception e) {
 			e.printStackTrace();

@@ -11,7 +11,7 @@ public class ExhardGrooveGauge extends GrooveGauge {
 
 	public ExhardGrooveGauge(BMSModel model) {
 		super(0, 100, 100, 0, CLEARTYPE_EXHARD);
-		gauge = new float[] { 0.16f, 0.16f, 0, -9.0f, -18.0f, -9.0f };
+		gauge = new float[] { 0.15f, 0.15f, 0, -10.0f, -20.0f, -10.0f };
 	}
 
 	@Override

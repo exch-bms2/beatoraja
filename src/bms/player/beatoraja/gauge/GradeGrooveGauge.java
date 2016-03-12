@@ -11,15 +11,19 @@ public class GradeGrooveGauge extends GrooveGauge {
 
 	public GradeGrooveGauge(BMSModel model) {
 		super(0, 100, 100, 0, CLEARTYPE_NORMAL);
-		gauge = new float[] { 0.16f, 0.16f, 0.04f, -1.25f, -2.5f, -1.25f };
+		gauge = new float[] { 0.15f, 0.15f, 0.03f, -1.5f, -3f, -1.5f };
 	}
 
 	@Override
 	public void update(int judge) {
 		if(this.getValue() > 30 || judge < 3) {
 			this.setValue(this.getValue() + gauge[judge]);			
-		} else {
+		} else if(this.getValue() > 15) {
+			this.setValue(this.getValue() + gauge[judge] * 0.75f);			
+		} else if(this.getValue() > 5) {
 			this.setValue(this.getValue() + gauge[judge] * 0.5f);			
+		} else {
+			this.setValue(this.getValue() + gauge[judge] * 0.25f);			
 		}
 	}
 
