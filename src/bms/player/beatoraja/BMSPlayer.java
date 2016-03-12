@@ -839,7 +839,7 @@ public class BMSPlayer extends ApplicationAdapter {
 	public GrooveGauge getGauge() {
 		return gauge;
 	}
-
+	
 	/**
 	 * AUTOPLAY用のKeyInputLogを生成する
 	 * 
