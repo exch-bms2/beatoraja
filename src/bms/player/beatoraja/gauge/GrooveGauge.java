@@ -56,6 +56,12 @@ public abstract class GrooveGauge {
 	 */
 	public abstract void update(int judge);
 
+	public void addValue(float value) {
+		setValue(getValue() + value);
+	}
+	
+	public abstract float getGaugeValue(int judge);
+	
 	public float getValue() {
 		return value;
 	}

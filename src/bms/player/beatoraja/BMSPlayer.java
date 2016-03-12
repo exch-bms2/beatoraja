@@ -830,6 +830,10 @@ public class BMSPlayer extends ApplicationAdapter {
 		// System.out.println(
 		// "Now count : " + notes + " - " + totalnotes);
 	}
+	
+	public GrooveGauge getGauge() {
+		return gauge;
+	}
 
 	/**
 	 * AUTOPLAY用のKeyInputLogを生成する
