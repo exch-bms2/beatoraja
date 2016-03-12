@@ -804,8 +804,8 @@ public class BMSPlayer extends ApplicationAdapter {
 		Logger.getGlobal().info("BGAのリソース解放");
 	}
 
-	public void play(int id) {
-		audio.play(id);
+	public void play(int id, int starttime) {
+		audio.play(id, starttime);
 	}
 
 	public BMSPlayerInputProcessor getBMSPlayerInputProcessor() {
@@ -927,7 +927,7 @@ public class BMSPlayer extends ApplicationAdapter {
 				// BGレーン再生
 				while (p < timelines.length && timelines[p].getTime() <= time) {
 					for (Note n : timelines[p].getBackGroundNotes()) {
-						audio.play(n.getWav());
+						audio.play(n.getWav(), n.getStarttime());
 					}
 					p++;
 				}

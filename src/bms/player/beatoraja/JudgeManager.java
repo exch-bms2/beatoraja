@@ -253,7 +253,7 @@ public class JudgeManager {
 								// ロングノート処理
 								LongNote ln = (LongNote) note;
 								if (ln.getStart() == tl) {
-									main.play(note.getWav());
+									main.play(note.getWav(), note.getStarttime());
 									if (j < 2) {
 										bomb[lane] = ptime;
 									}
@@ -279,7 +279,7 @@ public class JudgeManager {
 									}
 								}
 							} else {
-								main.play(note.getWav());
+								main.play(note.getWav(), note.getStarttime());
 								// 通常ノート処理
 								if (j < 2) {
 									bomb[lane] = ptime;
@@ -301,14 +301,14 @@ public class JudgeManager {
 								if (tl2.getNote(lane) != null) {
 									n = tl2.getNote(lane);
 									if (tl2.getTime() >= ptime) {
-										main.play(n.getWav());
+										main.play(n.getWav(), n.getStarttime());
 										sound = true;
 										break;
 									}
 								}
 							}
 							if (!sound && n != null) {
-								main.play(n.getWav());
+								main.play(n.getWav(), n.getStarttime());
 							}
 						}
 					}

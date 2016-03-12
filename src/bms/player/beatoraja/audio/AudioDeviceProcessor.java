@@ -14,7 +14,7 @@ public class AudioDeviceProcessor implements AudioProcessor {
 		return 0;
 	}
 
-	public void play(int id) {
+	public void play(int id, int starttime) {
 		// TODO Auto-generated method stub
 
 	}

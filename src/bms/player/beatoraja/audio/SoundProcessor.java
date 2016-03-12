@@ -118,7 +118,11 @@ public class SoundProcessor implements AudioProcessor {
 		progress = 1;
 	}
 
-	public void play(int id) {
+	public void play(int id, int starttime) {
+		if(starttime != 0) {
+			// TODO 音切りのロジック実装までは途中からの再生は行わない
+			return;
+		}
 		try {
 			if (id != -1 && wavmap[id] != null) {
 				if(playmap[id] != -1) {
