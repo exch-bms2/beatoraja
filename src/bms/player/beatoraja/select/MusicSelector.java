@@ -77,8 +77,8 @@ public class MusicSelector extends ApplicationAdapter {
 	private static final String[] GAUGEOP = { "ASSIST EASY", "EASY", "NORMAL", "HARD", "EX-HARD", "HAZARD" };
 
 	private static final String[] FIXHISPEEDOP = { "OFF", "STARTBPM", "MAXBPM", "MAINBPM" };
-	
-	private static final String[] LNOP = { "OFF", "LEGACY", "HELL CHARGE"};
+
+	private static final String[] LNOP = { "OFF", "LEGACY", "HELL CHARGE" };
 
 	private Config config;
 
@@ -134,8 +134,8 @@ public class MusicSelector extends ApplicationAdapter {
 
 						l.add(new GradeBar(s, songlist.toArray(new SongData[0])));
 					}
-					tables.add(new TableBar(td.getName(), levels.toArray(new TableLevelBar[0]),
-							l.toArray(new GradeBar[0])));
+					tables.add(new TableBar(td.getName(), levels.toArray(new TableLevelBar[0]), l
+							.toArray(new GradeBar[0])));
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -237,7 +237,7 @@ public class MusicSelector extends ApplicationAdapter {
 				shape.setColor(Color.valueOf("4040c0"));
 			}
 			if (sd instanceof GradeBar) {
-				shape.setColor(((GradeBar)sd).existsAllSongs() ? Color.valueOf("804000") : Color.valueOf("201000"));
+				shape.setColor(((GradeBar) sd).existsAllSongs() ? Color.valueOf("804000") : Color.valueOf("201000"));
 			}
 			if (sd instanceof FolderBar) {
 				shape.setColor(Color.valueOf("606000"));
@@ -366,8 +366,8 @@ public class MusicSelector extends ApplicationAdapter {
 			}
 			if (keystate[3] && keytime[3] != 0) {
 				keytime[3] = 0;
-				config.setDoubleoption(
-						config.getDoubleoption() + 1 < DOUBLEOP.length ? config.getDoubleoption() + 1 : 0);
+				config.setDoubleoption(config.getDoubleoption() + 1 < DOUBLEOP.length ? config.getDoubleoption() + 1
+						: 0);
 			}
 			if (keystate[5] && keytime[5] != 0) {
 				keytime[5] = 0;
@@ -466,12 +466,13 @@ public class MusicSelector extends ApplicationAdapter {
 				} else if (currentsongs[selectedindex] instanceof SongBar) {
 					main.setAuto(0);
 					resource.clear();
-					resource.setBMSFile(new File(((SongBar) currentsongs[selectedindex]).getSongData().getPath()),
-							config, 0);
-					if (bgm != null) {
-						bgm.stop();
+					if (resource.setBMSFile(new File(((SongBar) currentsongs[selectedindex]).getSongData().getPath()),
+							config, 0)) {
+						if (bgm != null) {
+							bgm.stop();
+						}
+						main.changeState(MainController.STATE_DECIDE, resource);
 					}
-					main.changeState(MainController.STATE_DECIDE, resource);
 				} else if (currentsongs[selectedindex] instanceof GradeBar) {
 					if (((GradeBar) currentsongs[selectedindex]).existsAllSongs()) {
 						main.setAuto(0);
@@ -522,23 +523,26 @@ public class MusicSelector extends ApplicationAdapter {
 			if (keystate[4]) {
 				if (currentsongs[selectedindex] instanceof SongBar) {
 					resource.clear();
-					resource.setBMSFile(new File(((SongBar) currentsongs[selectedindex]).getSongData().getPath()),
-							config, 1);
-					if (bgm != null) {
-						bgm.stop();
+					if (resource.setBMSFile(new File(((SongBar) currentsongs[selectedindex]).getSongData().getPath()),
+							config, 1)) {
+						if (bgm != null) {
+							bgm.stop();
+						}
+						main.changeState(MainController.STATE_DECIDE, resource);
+
 					}
-					main.changeState(MainController.STATE_DECIDE, resource);
 				}
 			}
 			if (keystate[6]) {
 				if (currentsongs[selectedindex] instanceof SongBar) {
 					resource.clear();
-					resource.setBMSFile(new File(((SongBar) currentsongs[selectedindex]).getSongData().getPath()),
-							config, 2);
-					if (bgm != null) {
-						bgm.stop();
+					if (resource.setBMSFile(new File(((SongBar) currentsongs[selectedindex]).getSongData().getPath()),
+							config, 2)) {
+						if (bgm != null) {
+							bgm.stop();
+						}
+						main.changeState(MainController.STATE_DECIDE, resource);
 					}
-					main.changeState(MainController.STATE_DECIDE, resource);
 				}
 			}
 		}
@@ -628,12 +632,12 @@ public class MusicSelector extends ApplicationAdapter {
 				}
 				if (currentsongs[i] instanceof GradeBar) {
 					GradeBar gb = (GradeBar) currentsongs[i];
-					if(gb.existsAllSongs()) {
+					if (gb.existsAllSongs()) {
 						String hash = "";
-						for(SongData sd : gb.getSongDatas()) {
+						for (SongData sd : gb.getSongDatas()) {
 							hash += sd.getHash();
 						}
-						hashes.add(hash);						
+						hashes.add(hash);
 					}
 				}
 			}
@@ -644,12 +648,12 @@ public class MusicSelector extends ApplicationAdapter {
 				}
 				if (currentsongs[i] instanceof GradeBar) {
 					GradeBar gb = (GradeBar) currentsongs[i];
-					if(gb.existsAllSongs()) {
+					if (gb.existsAllSongs()) {
 						String hash = "";
-						for(SongData sd : gb.getSongDatas()) {
+						for (SongData sd : gb.getSongDatas()) {
 							hash += sd.getHash();
 						}
-						currentsongs[i].setScore(m.get(hash));						
+						currentsongs[i].setScore(m.get(hash));
 					}
 				}
 			}

@@ -50,7 +50,7 @@ public class PlayerResource {
 		coursefile = null;
 	}
 
-	public void setBMSFile(final File f, final Config config, int autoplay) {
+	public boolean setBMSFile(final File f, final Config config, int autoplay) {
 		this.config = config;
 		this.auto = autoplay;
 		pattern = null;
@@ -61,6 +61,9 @@ public class PlayerResource {
 		} else {
 			BMSDecoder decoder = new BMSDecoder(BMSModel.LNTYPE_CHARGENOTE);
 			model = decoder.decode(f);
+		}
+		if(model.getAllTimeLines().length == 0) {
+			return false;
 		}
 		if(this.f == null || !f.getAbsolutePath().equals(this.f.getAbsolutePath())) {
 			// 前回と違うbmsファイルを読み込んだ場合はリソースのロード
@@ -100,6 +103,7 @@ public class PlayerResource {
 			};
 			medialoader.start();				
 		}
+		return true;
 	}
 
 	public BMSModel getBMSModel() {
