@@ -106,6 +106,7 @@ public class BMSPlayerInputProcessor {
 		this.starttime = starttime;
 		if(starttime != 0) {
 			Arrays.fill(time, 0);
+			keylog.clear();
 		}
 	}
 

@@ -15,6 +15,10 @@ import bms.player.beatoraja.input.BMSPlayerInputProcessor;
  * @author exch
  */
 public class JudgeManager {
+	
+	// TODO LNモードの実装
+	// TODO bug:HCN皿でゲージが増えない
+	// TODO bug:稀にノーツカウント漏れがある(BSS絡み？)
 
 	private BMSPlayer main;
 	private BMSModel model;
@@ -143,7 +147,7 @@ public class JudgeManager {
 		BMSPlayerInputProcessor input = main.getBMSPlayerInputProcessor();
 		long[] keytime = input.getTime();
 		boolean[] keystate = input.getKeystate();
-		for (int i = pos; timelines[i].getTime() <= time; i++) {
+		for (int i = pos; i < timelines.length && timelines[i].getTime() <= time; i++) {
 			if (timelines[i].getTime() > prevtime) {
 				for (int key = 0; key < keyassign.length; key++) {
 					final Note note = timelines[i].getNote(noteassign[keyassign[key]]);
