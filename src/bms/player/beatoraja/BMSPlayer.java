@@ -39,8 +39,6 @@ public class BMSPlayer extends ApplicationAdapter {
 
 	// TODO LR2スキンローダー
 
-	// TODO 地雷ノート実装
-	// TODO STATE_PRELOAD中の中断時に再度同じ楽曲を選択すると音が出ない
 	// TODO GLAssistから起動すると楽曲ロード中に止まる
 
 	private BitmapFont titlefont;
@@ -658,7 +656,7 @@ public class BMSPlayer extends ApplicationAdapter {
 		shape.setColor(Color.BLACK);
 		shape.rect(progress.x + 1, progress.y + 1, progress.width - 2, progress.height - 2);
 
-		shape.setColor(Color.ORANGE);
+		shape.setColor(notes == totalnotes ? Color.BLUE : Color.ORANGE);
 		shape.rect(progress.x + 1,
 				progress.y + 1
 						+ progress.height * (1.0f - (float) time / (timelines[timelines.length - 1].getTime() + 5000)),
@@ -742,7 +740,7 @@ public class BMSPlayer extends ApplicationAdapter {
 		// ゲージ描画
 		Rectangle gr = skin.getGaugeRegion();
 		shape.begin(ShapeType.Filled);
-		shape.setColor(Color.DARK_GRAY);
+		shape.setColor(Color.valueOf("#001000"));
 		shape.rect(gr.x, gr.y, gr.width, gr.height);
 		shape.rect(gr.x + gr.width - 80, gr.y + gr.height, 80, 30);
 		shape.end();
@@ -752,6 +750,14 @@ public class BMSPlayer extends ApplicationAdapter {
 		titlefont.draw(sprite, String.format("%5.1f", gauge.getValue()) + "%", gr.x + gr.width - 75,
 				gr.y + gr.height + 25);
 		sprite.end();
+		
+		Gdx.gl.glEnable(GL11.GL_BLEND);
+		Gdx.gl.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+		shape.begin(ShapeType.Filled);
+		shape.setColor(0, 0, 0, 0.7f);
+		shape.rect(0, 0, 1280, 25);
+		shape.end();
+		Gdx.gl.glDisable(GL11.GL_BLEND);
 		// ジャッジカウント描画
 		Rectangle judge = skin.getJudgecountregion();
 		shape.begin(ShapeType.Line);
@@ -774,8 +780,7 @@ public class BMSPlayer extends ApplicationAdapter {
 		// BPM描画
 		sprite.begin();
 		titlefont.setColor(Color.WHITE);
-		titlefont.draw(sprite, "BPM", 650, 44);
-		titlefont.draw(sprite, minbpm + " - " + (int) lanerender.getNowBPM() + " - " + maxbpm, 600, 22);
+		titlefont.draw(sprite, "BPM  " + minbpm + " - " + (int) lanerender.getNowBPM() + " - " + maxbpm, 600, 22);
 		sprite.end();
 		// ハイスピード、デュレーション描画
 		sprite.begin();

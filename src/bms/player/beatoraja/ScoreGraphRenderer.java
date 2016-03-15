@@ -1,5 +1,8 @@
 package bms.player.beatoraja;
 
+import org.lwjgl.opengl.GL11;
+
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -94,6 +97,14 @@ public class ScoreGraphRenderer {
 				(graph.width - 9) / 3, graph.height * rival * rate / max);
 		shape.end();
 		
+		Gdx.gl.glEnable(GL11.GL_BLEND);
+		Gdx.gl.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+		shape.begin(ShapeType.Filled);
+		shape.setColor(0, 0, 0, 0.7f);
+		shape.rect(graph.x, graph.y - 77, graph.width, 77);
+		shape.end();
+		Gdx.gl.glDisable(GL11.GL_BLEND);
+
 		sprite.begin();
 		font.setColor(Color.valueOf("bbbbff"));
 		font.setColor(Color.WHITE);
