@@ -152,7 +152,7 @@ public class PlaySkin {
 		keybeam[7] = new Sprite(kbt, 0, 0, 47, 255);
 
 		Texture lct = new Texture("skin/lanecover.png");
-		lanecover = new Sprite(lct, 0, 0, 194, 342);
+		lanecover = new Sprite(lct, 0, 0, 390, 580);
 		// ゲージ
 		Texture gt = new Texture("skin/gauge.png");
 		gauge = new Sprite[4];
@@ -208,7 +208,7 @@ public class PlaySkin {
 		// background = new Texture("skin/bg.jpg");
 		// ノーツ
 		note = new Sprite[9];
-		longnote = new Sprite[4][9];
+		longnote = new Sprite[10][9];
 		minenote = new Sprite[9];
 		Texture notet = new Texture("skin/pop.png");
 		for (int i = 0; i < 9; i++) {
@@ -218,6 +218,12 @@ public class PlaySkin {
 				longnote[1][i] = new Sprite(notet, 0, 38, 36, 18);
 				longnote[2][i] = new Sprite(notet, 0, 38, 36, 1);
 				longnote[3][i] = new Sprite(notet, 0, 38, 36, 1);
+				longnote[4][i] = new Sprite(notet, 0, 18, 36, 18);
+				longnote[5][i] = new Sprite(notet, 0, 38, 36, 18);
+				longnote[6][i] = new Sprite(notet, 0, 38, 36, 1);
+				longnote[7][i] = new Sprite(notet, 0, 38, 36, 1);
+				longnote[8][i] = new Sprite(notet, 0, 38, 36, 1);
+				longnote[9][i] = new Sprite(notet, 0, 38, 36, 1);
 				minenote[i] = new Sprite(notet, 0, 18, 36, 18);
 			} 
 			if (i == 1 || i == 7)  {
@@ -226,6 +232,12 @@ public class PlaySkin {
 				longnote[1][i] = new Sprite(notet, 38, 38, 28, 18);
 				longnote[2][i] = new Sprite(notet, 38, 38, 28, 1);
 				longnote[3][i] = new Sprite(notet, 38, 38, 28, 1);
+				longnote[4][i] = new Sprite(notet, 38, 18, 28, 18);
+				longnote[5][i] = new Sprite(notet, 38, 38, 28, 18);
+				longnote[6][i] = new Sprite(notet, 38, 38, 28, 1);
+				longnote[7][i] = new Sprite(notet, 38, 38, 28, 1);
+				longnote[8][i] = new Sprite(notet, 38, 38, 28, 1);
+				longnote[9][i] = new Sprite(notet, 38, 38, 28, 1);
 				minenote[i]  = new Sprite(notet, 38, 0, 28, 18);
 			}
 			if (i == 2 || i == 6)  {
@@ -234,6 +246,12 @@ public class PlaySkin {
 				longnote[1][i] = new Sprite(notet, 68, 38, 36, 18);
 				longnote[2][i] = new Sprite(notet, 68, 38, 36, 1);
 				longnote[3][i] = new Sprite(notet, 68, 38, 36, 1);
+				longnote[4][i] = new Sprite(notet, 68, 18, 36, 18);
+				longnote[5][i] = new Sprite(notet, 68, 38, 36, 18);
+				longnote[6][i] = new Sprite(notet, 68, 38, 36, 1);
+				longnote[7][i] = new Sprite(notet, 68, 38, 36, 1);
+				longnote[8][i] = new Sprite(notet, 68, 38, 36, 1);
+				longnote[9][i] = new Sprite(notet, 68, 38, 36, 1);
 				minenote[i] = new Sprite(notet, 68, 18, 36, 18);
 			}
 			if (i == 3 || i == 5)  {
@@ -242,6 +260,12 @@ public class PlaySkin {
 				longnote[1][i] = new Sprite(notet, 106, 38, 28, 18);
 				longnote[2][i] = new Sprite(notet, 106, 38, 28, 1);
 				longnote[3][i] = new Sprite(notet, 106, 38, 28, 1);
+				longnote[4][i] = new Sprite(notet, 106, 18, 28, 18);
+				longnote[5][i] = new Sprite(notet, 106, 38, 28, 18);
+				longnote[6][i] = new Sprite(notet, 106, 38, 28, 1);
+				longnote[7][i] = new Sprite(notet, 106, 38, 28, 1);
+				longnote[8][i] = new Sprite(notet, 106, 38, 28, 1);
+				longnote[9][i] = new Sprite(notet, 106, 38, 28, 1);
 				minenote[i]  = new Sprite(notet, 106, 0, 28, 18);
 			}
 			if (i == 4) {
@@ -250,6 +274,12 @@ public class PlaySkin {
 				longnote[1][i] = new Sprite(notet, 136, 38, 36, 18);
 				longnote[2][i] = new Sprite(notet, 136, 38, 36, 1);
 				longnote[3][i] = new Sprite(notet, 136, 38, 36, 1);
+				longnote[4][i] = new Sprite(notet, 136, 18, 36, 18);
+				longnote[5][i] = new Sprite(notet, 136, 38, 36, 18);
+				longnote[6][i] = new Sprite(notet, 136, 38, 36, 1);
+				longnote[7][i] = new Sprite(notet, 136, 38, 36, 1);
+				longnote[8][i] = new Sprite(notet, 136, 38, 36, 1);
+				longnote[9][i] = new Sprite(notet, 136, 38, 36, 1);
 				minenote[i] = new Sprite(notet, 136, 18, 36, 18);
 			} 
 		}
@@ -273,7 +303,7 @@ public class PlaySkin {
 		keybeam[1] = keybeam[3] = keybeam[5] = keybeam[7] = new Sprite(kbt, 47, 0, 28, 255);
 
 		Texture lct = new Texture("skin/lanecover.png");
-		lanecover = new Sprite(lct, 0, 0, 194, 342);
+		lanecover = new Sprite(lct, 0, 0, 390, 580);
 		// ゲージ
 		Texture gt = new Texture("skin/gauge.png");
 		gauge = new Sprite[4];
@@ -330,7 +360,7 @@ public class PlaySkin {
 		// background = new Texture("skin/bg.jpg");
 		// ノーツ
 		note = new Sprite[16];
-		longnote = new Sprite[4][16];
+		longnote = new Sprite[10][16];
 		minenote = new Sprite[16];
 		Texture notet = new Texture("skin/note.png");
 		for (int i = 0; i < 16; i++) {
@@ -340,6 +370,12 @@ public class PlaySkin {
 				longnote[1][i] = new Sprite(notet, 99, 57, 27, 13);
 				longnote[2][i] = new Sprite(notet, 99, 80, 27, 1);
 				longnote[3][i] = new Sprite(notet, 99, 76, 27, 1);
+				longnote[4][i] = new Sprite(notet, 99, 94, 27, 13);
+				longnote[5][i] = new Sprite(notet, 99, 108, 27, 13);
+				longnote[6][i] = new Sprite(notet, 99, 131, 27, 1);
+				longnote[7][i] = new Sprite(notet, 99, 127, 27, 1);
+				longnote[8][i] = new Sprite(notet, 99, 128, 27, 1);
+				longnote[9][i] = new Sprite(notet, 99, 129, 27, 1);
 				minenote[i] = new Sprite(notet, 99, 23, 27, 8);
 			} else if (i == 7 || i == 15) {
 				note[i] = new Sprite(notet, 50, 5, 46, 8);
@@ -347,6 +383,12 @@ public class PlaySkin {
 				longnote[1][i] = new Sprite(notet, 50, 57, 46, 13);
 				longnote[2][i] = new Sprite(notet, 50, 80, 46, 1);
 				longnote[3][i] = new Sprite(notet, 50, 76, 46, 1);
+				longnote[4][i] = new Sprite(notet, 50, 94, 46, 13);
+				longnote[5][i] = new Sprite(notet, 50, 108, 46, 13);
+				longnote[6][i] = new Sprite(notet, 50, 131, 46, 1);
+				longnote[7][i] = new Sprite(notet, 50, 127, 46, 1);
+				longnote[8][i] = new Sprite(notet, 50, 128, 46, 1);
+				longnote[9][i] = new Sprite(notet, 50, 129, 46, 1);
 				minenote[i] = new Sprite(notet, 50, 23, 46, 8);
 			} else {
 				note[i] = new Sprite(notet, 127, 5, 21, 8);
@@ -354,6 +396,12 @@ public class PlaySkin {
 				longnote[1][i] = new Sprite(notet, 127, 57, 21, 13);
 				longnote[2][i] = new Sprite(notet, 127, 80, 21, 1);
 				longnote[3][i] = new Sprite(notet, 127, 76, 21, 1);
+				longnote[4][i] = new Sprite(notet, 127, 94, 21, 13);
+				longnote[5][i] = new Sprite(notet, 127, 108, 21, 13);
+				longnote[6][i] = new Sprite(notet, 127, 131, 21, 1);
+				longnote[7][i] = new Sprite(notet, 127, 127, 21, 1);
+				longnote[8][i] = new Sprite(notet, 127, 128, 21, 1);
+				longnote[9][i] = new Sprite(notet, 127, 129, 21, 1);
 				minenote[i] = new Sprite(notet, 127, 23, 21, 8);
 			}
 		}
@@ -379,7 +427,7 @@ public class PlaySkin {
 		keybeam[7] = keybeam[15] = new Sprite(kbt, 0, 0, 47, 255);
 
 		Texture lct = new Texture("skin/lanecover.png");
-		lanecover = new Sprite(lct, 0, 0, 194, 342);
+		lanecover = new Sprite(lct, 0, 0, 390, 580);
 		// ゲージ
 		Texture gt = new Texture("skin/gauge.png");
 		gauge = new Sprite[4];

@@ -474,7 +474,7 @@ public class LunaticRave2SongDatabaseManager {
 					dsql += " and ";
 				}
 			}
-			qr.update(conn, "delete from folder where " + dsql);
+			qr.update(conn, "delete from folder where path not like 'LR2files%' and path not like '%.lr2folder' and " + dsql);
 			qr.update(conn, "delete from song where " + dsql);
 			// 楽曲のタグの保持
 			for (File f : files) {
