@@ -75,8 +75,14 @@ public class JudgeManager {
 	 */
 	private int misslayer;
 
-	private final int[][] judgetable = new int[][] { { 8, 24, 70, 130, 0, 1000 }, { 14, 42, 115, 220, 0, 1000 },
-			{ 18, 54, 150, 285, 0, 1000 }, { 20, 60, 165, 315, 0, 1000 } };
+	private static final int[] judgetable = { 20, 60, 165, 315, 0, 1000 };
+
+			private int[] judge;
+
+			private int pos = 0;
+			private int judgetype = 0;
+
+			private int prevtime;
 
 	public JudgeManager(BMSPlayer main, BMSModel model) {
 		this.main = main;
@@ -128,19 +134,16 @@ public class JudgeManager {
 			break;
 		}
 		Arrays.fill(bomb, -1000);
-		if (model.getJudgerank() > 3) {
-			judge = judgetable[3];
-		} else {
-			judge = judgetable[model.getJudgerank()];
+		
+		judge = new int[6];
+		for(int i = 0;i < judgetable.length;i++) {
+			if(i < 4) {
+				judge[i] = judgetable[i] * model.getJudgerank() / 100;
+			} else {
+				judge[i] = judgetable[i];
+			}
 		}
 	}
-
-	private int[] judge;
-
-	private int pos = 0;
-	private int judgetype = 0;
-
-	private int prevtime;
 
 	public void update(TimeLine[] timelines, int time) {
 		BMSPlayerInputProcessor input = main.getBMSPlayerInputProcessor();

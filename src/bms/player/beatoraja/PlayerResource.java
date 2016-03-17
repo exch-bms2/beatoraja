@@ -58,9 +58,26 @@ public class PlayerResource {
 			BMSONDecoder decoder = new BMSONDecoder(
 					BMSModel.LNTYPE_CHARGENOTE);
 			model = decoder.decode(f);
+			if(model.getTotal() <= 0.0) {
+				model.setTotal(100.0);
+			}
+			int totalnotes = model.getTotalNotes();
+			model.setTotal(model.getTotal() / 100.0 * 7.605 * totalnotes / (0.01 * totalnotes + 6.5));
 		} else {
 			BMSDecoder decoder = new BMSDecoder(BMSModel.LNTYPE_CHARGENOTE);
 			model = decoder.decode(f);
+			// JUDGERANKをbmson互換に変換
+			if(model.getJudgerank() < 0 || model.getJudgerank() > 2) {
+				model.setJudgerank(100);
+			} else {
+				final int[] judgetable = {40, 70 ,90};
+				model.setJudgerank(judgetable[model.getJudgerank()]);
+			}
+			// TOTAL未定義の場合
+			if(model.getTotal() <= 0.0) {
+				int totalnotes = model.getTotalNotes();
+				model.setTotal(7.605 * totalnotes / (0.01 * totalnotes + 6.5));
+			}
 		}
 		if(model.getAllTimeLines().length == 0) {
 			return false;
