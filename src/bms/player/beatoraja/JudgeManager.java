@@ -221,10 +221,11 @@ public class JudgeManager {
 									if (j < 2) {
 										bomb[lane] = ptime;
 									}
+									final int dtime = (int) (processing[lane].getEnd().getTime() - ptime);
 									this.update(lane, j < 4 ? j : 4, time,
-											(int) (processing[lane].getEnd().getTime() - ptime));
+											dtime);
 									main.update(j);
-									processing[lane].setState(j + 1);
+									processing[lane].setState(dtime >= 0 ? dtime + 1 : dtime);
 									// System.out.println("打鍵:" + time +
 									// " ノーツ位置 > " + tl.getTime() + " -
 									// " +
@@ -324,10 +325,11 @@ public class JudgeManager {
 								if (j < 2) {
 									bomb[lane] = ptime;
 								}
-								this.update(lane, j, time, (int) (tl.getTime() - ptime));
+								final int dtime = (int) (tl.getTime() - ptime);
+								this.update(lane, j, time, dtime);
 								main.update(j);
 								if (j < 4) {
-									note.setState(j + 1);
+									note.setState(dtime >= 0 ? dtime + 1 : dtime);
 								}
 								// System.out.println("打鍵:" + time +
 								// " ノーツ位置 > " + tl.getTime() + " - " +
@@ -371,9 +373,10 @@ public class JudgeManager {
 								if (j < 2) {
 									bomb[lane] = ptime;
 								}
-								this.update(lane, j, time, (int) (processing[lane].getEnd().getTime() - ptime));
+								final int dtime = (int) (processing[lane].getEnd().getTime() - ptime);
+								this.update(lane, j, time, dtime);
 								main.update(j);
-								processing[lane].setState(j + 1);
+								processing[lane].setState(dtime >= 0 ? dtime + 1 : dtime);
 								// System.out.println("打鍵:" + time +
 								// " ノーツ位置 > " + tl.getTime() + " - " +
 								// (lane + 1) + " : " + judgename[j]);
@@ -411,13 +414,13 @@ public class JudgeManager {
 									this.update(lane, 4, time, judge);
 									main.update(4);
 									main.update(4);
-									note.setState(5);
+									note.setState(judge);
 								}
 							} else {
 								// System.out.println("ln end poor");
 								this.update(lane, 4, time, judge);
 								main.update(4);
-								note.setState(5);
+								note.setState(judge);
 								processing[lane] = null;
 								if (sc != -1) {
 									sckey[sc] = 0;
@@ -426,7 +429,7 @@ public class JudgeManager {
 						} else {
 							this.update(lane, 4, time, judge);
 							main.update(4);
-							note.setState(5);
+							note.setState(judge);
 						}
 					}
 				}
