@@ -17,7 +17,6 @@ import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 public class JudgeManager {
 	
 	// TODO LNモードの実装
-	// TODO bug:HCN皿でゲージが増えない
 	// TODO bug:稀にノーツカウント漏れがある(BSS絡み？)
 
 	private BMSPlayer main;
@@ -171,15 +170,22 @@ public class JudgeManager {
 						}
 					}
 				}
-
 			}
 		}
 
+		Arrays.fill(inclease, false);
 		for (int key = 0; key < keyassign.length; key++) {
 			if (passing[keyassign[key]] != null) {
 				if (keystate[key]) {
-					passingcount[keyassign[key]] += (time - prevtime);
 					inclease[keyassign[key]] = true;
+				} else {
+				}
+			}
+		}
+		for (int key = 0; key < keyassign.length; key++) {
+			if(passing[keyassign[key]] != null) {
+				if(inclease[keyassign[key]]) {
+					passingcount[keyassign[key]] += (time - prevtime);
 					if (passingcount[keyassign[key]] > 100) {
 						main.getGauge().addValue(main.getGauge().getGaugeValue(1));
 						System.out.println("HCN : Gauge increase");
@@ -187,7 +193,6 @@ public class JudgeManager {
 					}
 				} else {
 					passingcount[keyassign[key]] -= (time - prevtime);
-					inclease[keyassign[key]] = false;
 					if (passingcount[keyassign[key]] < -100) {
 						main.getGauge().addValue(main.getGauge().getGaugeValue(4) / 5);
 						System.out.println("HCN : Gauge decrease");
@@ -196,6 +201,7 @@ public class JudgeManager {
 				}
 			}
 		}
+
 
 		for (int key = 0; key < keyassign.length; key++) {
 			if (keytime[key] != 0) {
