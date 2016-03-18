@@ -338,14 +338,17 @@ public class JudgeManager {
 						} else {
 							Note n = null;
 							boolean sound = false;
-							for (TimeLine tl2 : timelines) {
+							for (TimeLine tl2 : timelines) {								
 								if (tl2.getNote(lane) != null) {
 									n = tl2.getNote(lane);
-									if (tl2.getTime() >= ptime) {
-										main.play(n.getWav(), n.getStarttime());
-										sound = true;
-										break;
-									}
+								}
+								if (tl2.getHiddenNote(lane) != null) {
+									n = tl2.getHiddenNote(lane);
+								}
+								if (n != null && tl2.getTime() >= ptime) {
+									main.play(n.getWav(), n.getStarttime());
+									sound = true;
+									break;
 								}
 							}
 							if (!sound && n != null) {

@@ -56,8 +56,10 @@ public class NoteShuffleModifier extends PatternModifier {
 		Arrays.fill(ln, -1);
 		for (TimeLine tl : model.getAllTimeLines()) {
 			Note[] notes = new Note[lanes];
+			Note[] hnotes = new Note[lanes];
 			for (int i = 0; i < lanes; i++) {
 				notes[i] = tl.getNote(i);
+				hnotes[i] = tl.getHiddenNote(i);
 			}
 			List<Integer> l;
 			switch (type) {
@@ -363,6 +365,7 @@ public class NoteShuffleModifier extends PatternModifier {
 
 			for (int i = 0; i < lanes; i++) {
 				Note n = notes[random[i]];
+				Note hn = hnotes[random[i]];
 				if (n instanceof LongNote) {
 					LongNote ln2 = (LongNote) n;
 					if (ln2.getStart() == tl) {
@@ -375,6 +378,7 @@ public class NoteShuffleModifier extends PatternModifier {
 				} else {
 					tl.addNote(i, n);
 				}
+				tl.addHiddenNote(i, hn);
 			}
 			log.add(new PatternModifyLog(tl.getTime(), random));
 		}
