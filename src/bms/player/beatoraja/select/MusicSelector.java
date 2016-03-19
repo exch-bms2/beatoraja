@@ -35,7 +35,8 @@ import com.badlogic.gdx.utils.Json;
 public class MusicSelector extends ApplicationAdapter {
 
 	// TODO フォルダランプ
-	// TODO 詳細オプション(BGA ON/OFF、JUDGE TIMING、等
+	// TODO 詳細オプション(BGA ON/OFF、JUDGE TIMING、JUDGE DETAIL等
+	// TODO キーコンフィグ、プレイ以外でのデフォルトキーコンフィグの設定
 
 	private MainController main;
 
@@ -134,8 +135,8 @@ public class MusicSelector extends ApplicationAdapter {
 
 						l.add(new GradeBar(s, songlist.toArray(new SongData[0])));
 					}
-					tables.add(new TableBar(td.getName(), levels.toArray(new TableLevelBar[0]), l
-							.toArray(new GradeBar[0])));
+					tables.add(new TableBar(td.getName(), levels.toArray(new TableLevelBar[0]),
+							l.toArray(new GradeBar[0])));
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -216,9 +217,9 @@ public class MusicSelector extends ApplicationAdapter {
 		for (int i = 0; i < h / barh + 2; i++) {
 			int index = (int) (selectedindex + currentsongs.length * 100 + i - h / barh / 2) % currentsongs.length;
 			Bar sd = currentsongs[index];
-			int x = 720;
+			float x = w * 3 / 5;
 			if (i == h / barh / 2) {
-				x = 700;
+				x -= 20;
 			}
 			shape.begin(ShapeType.Filled);
 			float y = h - i * barh;
@@ -228,7 +229,7 @@ public class MusicSelector extends ApplicationAdapter {
 				y += dy;
 			}
 			shape.setColor(Color.valueOf("222222"));
-			shape.rect(x + 4, y - 4, 560, barh - 6);
+			shape.rect(x + 4, y - 4, w * 2 / 5, barh - 6);
 
 			if (sd instanceof TableBar) {
 				shape.setColor(Color.valueOf("008080"));
@@ -245,7 +246,7 @@ public class MusicSelector extends ApplicationAdapter {
 			if (sd instanceof SongBar) {
 				shape.setColor(Color.valueOf("006000"));
 			}
-			shape.rect(x, y, 560, barh - 6);
+			shape.rect(x, y, w * 2 / 5, barh - 6);
 			shape.end();
 			sprite.begin();
 			titlefont.setColor(Color.WHITE);
@@ -262,13 +263,21 @@ public class MusicSelector extends ApplicationAdapter {
 		}
 
 		sprite.begin();
+		
+		StringBuffer str = new StringBuffer();
+		for(Bar b : dir) {
+			str.append(b.getTitle() + " > ");
+		}
+		titlefont.setColor(Color.VIOLET);
+		titlefont.draw(sprite, str.toString(), 40, 640);
+		
+		titlefont.setColor(Color.WHITE);
 		if (currentsongs[selectedindex] instanceof SongBar) {
 			SongData song = ((SongBar) currentsongs[selectedindex]).getSongData();
 			titlefont.draw(sprite, song.getTitle() + " " + song.getSubtitle(), 100, 600);
 			titlefont.draw(sprite, song.getArtist() + " " + song.getSubartist(), 100, 570);
 			titlefont.draw(sprite, song.getMode() + " KEYS", 100, 530);
 			titlefont.draw(sprite, "LEVEL : " + song.getLevel(), 100, 500);
-
 			if (currentsongs[selectedindex].getScore() != null) {
 				IRScoreData score = currentsongs[selectedindex].getScore();
 				titlefont.setColor(Color.valueOf(LAMP[score.getClear()]));
@@ -280,6 +289,33 @@ public class MusicSelector extends ApplicationAdapter {
 						330);
 			}
 		}
+		// TODO 段位用の表示(ミラー段位、EX段位)
+		if (currentsongs[selectedindex] instanceof GradeBar) {
+			titlefont.draw(sprite, currentsongs[selectedindex].getTitle(), 100, 600);
+			if (currentsongs[selectedindex].getScore() != null) {
+				IRScoreData score = currentsongs[selectedindex].getScore();
+				titlefont.setColor(Color.valueOf(LAMP[score.getClear()]));
+				titlefont.draw(sprite, CLEAR[score.getClear()], 100, 420);
+				titlefont.setColor(Color.WHITE);
+				titlefont.draw(sprite, "EX-SCORE  : " + score.getExscore() + " / " + (score.getNotes() * 2), 100, 390);
+				titlefont.draw(sprite, "MISS COUNT: " + score.getMinbp(), 100, 360);
+				titlefont.draw(sprite, "CLEAR / PLAY : " + score.getClearcount() + " / " + score.getPlaycount(), 100,
+						330);
+			}
+		}
+
+		if (currentsongs[selectedindex] instanceof FolderBar) {
+			titlefont.draw(sprite, currentsongs[selectedindex].getTitle(), 100, 600);
+		}
+
+		if (currentsongs[selectedindex] instanceof TableBar) {
+			titlefont.draw(sprite, currentsongs[selectedindex].getTitle(), 100, 600);
+		}
+
+		if (currentsongs[selectedindex] instanceof TableLevelBar) {
+			titlefont.draw(sprite, currentsongs[selectedindex].getTitle(), 100, 600);
+		}
+
 		titlefont.draw(sprite, "MODE : " + MODE[mode], 20, 30);
 		titlefont.draw(sprite, "SORT : " + SORT[sort], 220, 30);
 		sprite.end();
@@ -366,8 +402,8 @@ public class MusicSelector extends ApplicationAdapter {
 			}
 			if (keystate[3] && keytime[3] != 0) {
 				keytime[3] = 0;
-				config.setDoubleoption(config.getDoubleoption() + 1 < DOUBLEOP.length ? config.getDoubleoption() + 1
-						: 0);
+				config.setDoubleoption(
+						config.getDoubleoption() + 1 < DOUBLEOP.length ? config.getDoubleoption() + 1 : 0);
 			}
 			if (keystate[5] && keytime[5] != 0) {
 				keytime[5] = 0;
@@ -622,6 +658,14 @@ public class MusicSelector extends ApplicationAdapter {
 					str.append(s.getSubartist());
 				}
 			}
+
+			if (bar != null) {
+				str.append(bar.getTitle());
+			}
+			for(Bar b : dir) {
+				str.append(b.getTitle());
+			}
+
 			parameter.characters = str.toString();
 			titlefont = generator.generateFont(parameter);
 
@@ -837,7 +881,7 @@ class GradeBar extends Bar {
 
 	@Override
 	public String getTitle() {
-		return name;
+		return "段位認定 " + name;
 	}
 
 	public boolean existsAllSongs() {
