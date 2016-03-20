@@ -533,6 +533,7 @@ public class BMSPlayer extends ApplicationAdapter {
 	}
 
 	public IRScoreData createScoreData() {
+		// TODO リプレイログの保存はMusicResultへ移行(保存するかどうかを選択したい)
 		final int pgreat = judge.getJudgeCount(0);
 		final int great = judge.getJudgeCount(1);
 		final int good = judge.getJudgeCount(2);
@@ -567,8 +568,8 @@ public class BMSPlayer extends ApplicationAdapter {
 			}
 		}
 		score.setClear(clear);
-		// リプレイデータ保存
-		if (pattern != null) {
+		// リプレイデータ保存。スコア保存されない場合はリプレイ保存しない
+		if (resource.isUpdateScore()) {
 			ReplayData rd = new ReplayData();
 			rd.keylog = input.getKeyInputLog().toArray(new KeyInputLog[0]);
 			rd.pattern = pattern.toArray(new PatternModifyLog[0]);
