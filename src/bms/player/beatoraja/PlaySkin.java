@@ -1,5 +1,8 @@
 package bms.player.beatoraja;
 
+import bms.player.beatoraja.skin.Skin;
+import bms.player.beatoraja.skin.SkinObject;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
@@ -13,7 +16,7 @@ import com.badlogic.gdx.math.Rectangle;
  * 
  * @author exch
  */
-public class PlaySkin {
+public class PlaySkin extends Skin {
 
 	/**
 	 * ノーツ画像
@@ -67,8 +70,6 @@ public class PlaySkin {
 	private Rectangle progressregion;
 
 	private Sprite slider;
-
-	private SkinPart[] skinparts = new SkinPart[0];
 
 	public PlaySkin(int mode) {
 		if (mode == 5 || mode == 7) {
@@ -581,24 +582,5 @@ public class PlaySkin {
 
 	public Rectangle getProgressRegion() {
 		return progressregion;
-	}
-
-	public SkinPart[] getSkinPart() {
-		return skinparts;
-	}
-
-	public void setSkinPart(SkinPart[] parts) {
-		skinparts = parts;
-	}
-
-	public static class SkinPart {
-
-		public TextureRegion image;
-
-		public Rectangle dst;
-
-		public int timing;
-
-		public int[] op = new int[3];
 	}
 }

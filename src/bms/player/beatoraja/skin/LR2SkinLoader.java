@@ -15,48 +15,66 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 
 import bms.player.beatoraja.PlaySkin;
-import bms.player.beatoraja.PlaySkin.SkinPart;
 
-public class LR2SkinLoader {
+public abstract class LR2SkinLoader {
 
-	public PlaySkin loadPlaySkin(File f) throws IOException {
+	private List<CommandWord> commands = new ArrayList();
+
+	List<Texture> imagelist = new ArrayList();
+
+	protected void addCommandWord(CommandWord cm) {
+		commands.add(cm);
+	}
+
+	protected void loadSkin(Skin skin, File f) throws IOException {
 		float srcw = 640;
 		float srch = 480;
 		float dstw = 1280;
 		float dsth = 720;
 
-		PlaySkin skin = new PlaySkin(7);
-		Rectangle[] laner = new Rectangle[8];
-		Sprite[] note = new Sprite[8];
-		Sprite[] lnstart = new Sprite[8];
-		Sprite[] lnend = new Sprite[8];
-		Sprite[] lnbody = new Sprite[8];
-		Sprite[] lnbodya = new Sprite[8];
-		Sprite[] mine = new Sprite[8];
-		List<Texture> imagelist = new ArrayList();
-		List<SkinPart> partlist = new ArrayList();
-		SkinPart part = null;
-		BufferedReader br = new BufferedReader(new InputStreamReader(
-				new FileInputStream(f), "MS932"));
+		List<SkinObject> partlist = new ArrayList();
+		SkinObject part = null;
+		BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(f), "MS932"));
 		String line = null;
+		int[] option = new int[0];
 
 		while ((line = br.readLine()) != null) {
 			if (!line.startsWith("//")) {
-				String[] str = line.split(",");
+				String[] str = line.split(",", -1);
 				if (str.length > 0) {
+					if (str[0].equals("#IF")) {
+						List<Integer> l = new ArrayList();
+						for (int i = 1; i < str.length; i++) {
+							try {
+								l.add(Integer.parseInt(str[1]));
+							} catch (NumberFormatException e) {
+								break;
+							}
+						}
+
+						option = new int[l.size()];
+						for (int i = 0; i < l.size(); i++) {
+							option[i] = l.get(i);
+						}
+					}
+					if (str[0].equals("#ELSEIF")) {
+
+					}
+					if (str[0].equals("#ELSE")) {
+
+					}
+					if (str[0].equals("#ENDIF")) {
+						option = new int[0];
+					}
 					if (str[0].equals("#IMAGE")) {
-						String imagepath = str[1].replace("LR2files\\Theme",
-								"skin").replace("\\", "/");
+						String imagepath = str[1].replace("LR2files\\Theme", "skin").replace("\\", "/");
 						File imagefile = new File(imagepath);
 						if (imagepath.contains("*")) {
-							String ext = imagepath.substring(imagepath
-									.lastIndexOf("*") + 1);
-							File imagedir = new File(imagepath.substring(0,
-									imagepath.lastIndexOf('/')));
+							String ext = imagepath.substring(imagepath.lastIndexOf("*") + 1);
+							File imagedir = new File(imagepath.substring(0, imagepath.lastIndexOf('/')));
 							if (imagedir.exists() && imagedir.isDirectory()) {
 								for (File subfile : imagedir.listFiles()) {
-									if (subfile.getPath().toLowerCase()
-											.endsWith(ext)) {
+									if (subfile.getPath().toLowerCase().endsWith(ext)) {
 										imagefile = subfile;
 										break;
 									}
@@ -65,8 +83,7 @@ public class LR2SkinLoader {
 						}
 						if (imagefile.exists()) {
 							try {
-								imagelist.add(new Texture(Gdx.files
-										.internal(imagefile.getPath())));
+								imagelist.add(new Texture(Gdx.files.internal(imagefile.getPath())));
 							} catch (GdxRuntimeException e) {
 								imagelist.add(null);
 								e.printStackTrace();
@@ -74,148 +91,48 @@ public class LR2SkinLoader {
 						} else {
 							imagelist.add(null);
 						}
-						System.out.println("Image Loaded - "
-								+ (imagelist.size() - 1) + " : "
-								+ imagefile.getPath());
+						System.out.println("Image Loaded - " + (imagelist.size() - 1) + " : " + imagefile.getPath());
 					}
 
 					if (str[0].equals("#SRC_IMAGE")) {
 						int gr = Integer.parseInt(str[2]);
 						if (gr < imagelist.size() && imagelist.get(gr) != null) {
-							part = new SkinPart();
-							part.image = new TextureRegion(imagelist.get(gr),
-									Integer.parseInt(str[3]),
-									Integer.parseInt(str[4]),
-									Integer.parseInt(str[5]),
-									Integer.parseInt(str[6]));
-							if (str.length > 13) {
-								part.timing = Integer.parseInt(str[10]);
-								part.op[0] = Integer.parseInt(str[11]);
-								part.op[1] = Integer.parseInt(str[12]);
-								part.op[2] = Integer.parseInt(str[13]);
+							try {
+								part = new SkinObject();
+								part.setImage(new TextureRegion(imagelist.get(gr), Integer.parseInt(str[3]), Integer
+										.parseInt(str[4]), Integer.parseInt(str[5]), Integer.parseInt(str[6])));
+								part.setTiming(Integer.parseInt(str[10]));
+								part.setOption(option);
+								partlist.add(part);								
+							} catch(NumberFormatException e) {
+								e.printStackTrace();
 							}
 						}
 					}
 					if (str[0].equals("#DST_IMAGE")) {
 						if (part != null) {
-							part.dst = new Rectangle(Integer.parseInt(str[3])
-									* dstw / srcw, dsth
-									- Integer.parseInt(str[4]) * dsth / srch,
-									Integer.parseInt(str[5]) * dstw / srcw,
-									Integer.parseInt(str[6]) * dsth / srch);
-							if(str.length > 20) {
-								part.timing = Integer.parseInt(str[17]);
-								part.op[0] = Integer.parseInt(str[18]);
-								part.op[1] = Integer.parseInt(str[19]);
-								part.op[2] = Integer.parseInt(str[20]);
+							try {
+								part.setDestination(Integer.parseInt(str[2]), Integer.parseInt(str[3]) * dstw / srcw,
+										Integer.parseInt(str[4]) * dstw / srcw, Integer.parseInt(str[5]) * dstw / srcw,
+										Integer.parseInt(str[6]) * dstw / srcw, Integer.parseInt(str[7]),
+										Integer.parseInt(str[8]), Integer.parseInt(str[9]), Integer.parseInt(str[10]),
+										Integer.parseInt(str[11]), Integer.parseInt(str[12]),
+										Integer.parseInt(str[13]), Integer.parseInt(str[14]),
+										Integer.parseInt(str[15]), Integer.parseInt(str[16]),
+										Integer.parseInt(str[17]), Integer.parseInt(str[18]),
+										Integer.parseInt(str[19]), Integer.parseInt(str[20]));
+							} catch (NumberFormatException e) {
+								e.printStackTrace();
 							}
-							partlist.add(part);
 							part = null;
 						}
 					}
 
-					if (str[0].equals("#DST_BGA")) {
-						skin.setBGAregion(new Rectangle(Integer.parseInt(str[3])
-								* dstw / srcw, dsth - Integer.parseInt(str[4])
-								* dsth / srch - Integer.parseInt(str[6]) * dsth / srch, Integer.parseInt(str[5]) * dstw
-								/ srcw, Integer.parseInt(str[6]) * dsth / srch));
-					}
-
-					if (str[0].equals("#DST_LINE")) {
-
-					}
-
-					if (str[0].equals("#SRC_NOTE")) {
-						int lane = Integer.parseInt(str[1]);
-						if (lane <= 7) {
-							lane = (lane == 0 ? 7 : lane - 1);
-							if (note[lane] == null) {
-								note[lane] = new Sprite(imagelist.get(Integer
-										.parseInt(str[2])),
-										Integer.parseInt(str[3]),
-										Integer.parseInt(str[4]),
-										Integer.parseInt(str[5]),
-										Integer.parseInt(str[6]));
-							}
+					for (CommandWord cm : commands) {
+						if (str[0].equals("#" + cm.str)) {
+							cm.execute(str);
 						}
 					}
-					if (str[0].equals("#SRC_LN_END")) {
-						int lane = Integer.parseInt(str[1]);
-						if (lane <= 7) {
-							lane = (lane == 0 ? 7 : lane - 1);
-							if (lnend[lane] == null) {
-								lnend[lane] = new Sprite(imagelist.get(Integer
-										.parseInt(str[2])),
-										Integer.parseInt(str[3]),
-										Integer.parseInt(str[4]),
-										Integer.parseInt(str[5]),
-										Integer.parseInt(str[6]));
-							}
-						}
-					}
-					if (str[0].equals("#SRC_LN_START")) {
-						int lane = Integer.parseInt(str[1]);
-						if (lane <= 7) {
-							lane = (lane == 0 ? 7 : lane - 1);
-							if (lnstart[lane] == null) {
-								lnstart[lane] = new Sprite(
-										imagelist.get(Integer.parseInt(str[2])),
-										Integer.parseInt(str[3]), Integer
-												.parseInt(str[4]), Integer
-												.parseInt(str[5]), Integer
-												.parseInt(str[6]));
-							}
-						}
-					}
-					if (str[0].equals("#SRC_LN_BODY")) {
-						int lane = Integer.parseInt(str[1]);
-						if (lane <= 7) {
-							lane = (lane == 0 ? 7 : lane - 1);
-							if (lnbody[lane] == null) {
-								lnbody[lane] = new Sprite(imagelist.get(Integer
-										.parseInt(str[2])),
-										Integer.parseInt(str[3]),
-										Integer.parseInt(str[4]),
-										Integer.parseInt(str[5]), 1);
-								lnbodya[lane] = new Sprite(imagelist
-										.get(Integer.parseInt(str[2])), Integer
-										.parseInt(str[3]), Integer
-										.parseInt(str[4])
-										+ Integer.parseInt(str[6]) - 1,
-										Integer.parseInt(str[5]), 1);
-							}
-						}
-					}
-					if (str[0].equals("#SRC_MINE")) {
-						int lane = Integer.parseInt(str[1]);
-						if (lane <= 7) {
-							lane = (lane == 0 ? 7 : lane - 1);
-							if (mine[lane] == null) {
-								mine[lane] = new Sprite(imagelist.get(Integer
-										.parseInt(str[2])),
-										Integer.parseInt(str[3]),
-										Integer.parseInt(str[4]),
-										Integer.parseInt(str[5]),
-										Integer.parseInt(str[6]));
-							}
-						}
-					}
-
-					if (str[0].equals("#DST_NOTE")) {
-						int lane = Integer.parseInt(str[1]);
-						if (lane <= 7) {
-							lane = (lane == 0 ? 7 : lane - 1);
-							if (laner[lane] == null) {
-								laner[lane] = new Rectangle(
-										Integer.parseInt(str[3]) * dstw / srcw,
-										dsth - Integer.parseInt(str[4]) * dsth
-												/ srch,
-										Integer.parseInt(str[5]) * dstw / srcw,
-										Integer.parseInt(str[4]) * dsth / srch);
-							}
-						}
-					}
-
 					// if (str[0].equals("#DST_SLIDER")) {
 					// slider = new Sprite(imagelist.get(Integer
 					// .parseInt(str[2])),
@@ -228,12 +145,18 @@ public class LR2SkinLoader {
 			}
 		}
 
-		skin.setNote(note);
-		skin.setMinenote(mine);
-		skin.setLongnote(new Sprite[][] { lnend, lnstart, lnbodya, lnbody });
-		skin.setLaneregion(laner);
-		skin.setSkinPart(partlist.toArray(new SkinPart[0]));
-		return skin;
+		skin.setSkinPart(partlist.toArray(new SkinObject[0]));
 
+	}
+
+	public abstract class CommandWord {
+
+		public final String str;
+
+		public CommandWord(String str) {
+			this.str = str;
+		}
+
+		public abstract void execute(String[] values);
 	}
 }

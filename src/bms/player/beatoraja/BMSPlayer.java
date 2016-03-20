@@ -7,14 +7,15 @@ import java.util.logging.Logger;
 import org.lwjgl.opengl.GL11;
 
 import bms.model.*;
-import bms.player.beatoraja.PlaySkin.SkinPart;
 import bms.player.beatoraja.audio.AudioProcessor;
 import bms.player.beatoraja.bga.BGAProcessor;
 import bms.player.beatoraja.gauge.*;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyInputLog;
 import bms.player.beatoraja.pattern.*;
+import bms.player.beatoraja.skin.LR2PlaySkinLoader;
 import bms.player.beatoraja.skin.LR2SkinLoader;
+import bms.player.beatoraja.skin.SkinObject;
 import bms.player.lunaticrave2.IRScoreData;
 
 import com.badlogic.gdx.ApplicationAdapter;
@@ -281,7 +282,7 @@ public class BMSPlayer extends ApplicationAdapter {
 		Logger.getGlobal().info("create");
 		if (config.getLR2PlaySkinPath() != null) {
 			try {
-				skin = new LR2SkinLoader().loadPlaySkin(new File(config.getLR2PlaySkinPath()));
+				skin = new LR2PlaySkinLoader().loadPlaySkin(new File(config.getLR2PlaySkinPath()));
 			} catch (IOException e) {
 				e.printStackTrace();
 				skin = new PlaySkin(model.getUseKeys());
@@ -637,9 +638,13 @@ public class BMSPlayer extends ApplicationAdapter {
 		}
 
 		sprite.begin();
-		for (SkinPart part : skin.getSkinPart()) {
-			if (part.timing != 3 && part.op[0] == 0 && part.op[1] == 0 && part.op[2] == 0) {
-				sprite.draw(part.image, part.dst.x, part.dst.y, part.dst.width, part.dst.height);
+		for (SkinObject part : skin.getSkinPart()) {
+			int[] op = part.getOption();
+ 			if (part.getTiming() != 3 && op.length == 0) {
+ 				Rectangle r = part.getDestination(time);
+ 				if(r != null) {
+ 					sprite.draw(part.getImage(), r.x, r.y, r.width, r.height); 					
+ 				}
 			}
 		}
 		sprite.end();
