@@ -266,7 +266,7 @@ public class BMSPlayer extends ApplicationAdapter {
 	}
 
 	private final PatternModifier[] random = { null, new LaneShuffleModifier(LaneShuffleModifier.MIRROR),
-			new LaneShuffleModifier(LaneShuffleModifier.R_RANDOM), new LaneShuffleModifier(LaneShuffleModifier.RANDOM),
+			new LaneShuffleModifier(LaneShuffleModifier.RANDOM),new LaneShuffleModifier(LaneShuffleModifier.R_RANDOM), 
 			new NoteShuffleModifier(NoteShuffleModifier.S_RANDOM), new NoteShuffleModifier(NoteShuffleModifier.SPIRAL),
 			new NoteShuffleModifier(NoteShuffleModifier.H_RANDOM), new NoteShuffleModifier(NoteShuffleModifier.ALL_SCR),
 			new LaneShuffleModifier(LaneShuffleModifier.RANDOM_EX),
