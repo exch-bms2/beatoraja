@@ -70,17 +70,6 @@ public class MusicSelector extends ApplicationAdapter {
 	private static final String[] CLEAR = { "NO PLAY", "FAILED", "ASSIST CLEAR", "L-ASSIST CLEAR", "EASY CLEAR",
 			"CLEAR", "HARD CLEAR", "EX-HARD CLEAR", "FULL COMBO", "PERFECT", "MAX" };
 
-	private static final String[] SCOREOP = { "OFF", "MIRROR", "RANDOM", "R-RANDOM", "S-RANDOM", "SPIRAL", "H-RANDOM",
-			"ALL-SCR", "RANDOM-EX", "S-RANDOM-EX" };
-
-	private static final String[] DOUBLEOP = { "OFF", "FLIP" };
-
-	private static final String[] GAUGEOP = { "ASSIST EASY", "EASY", "NORMAL", "HARD", "EX-HARD", "HAZARD" };
-
-	private static final String[] FIXHISPEEDOP = { "OFF", "STARTBPM", "MAXBPM", "MAINBPM" };
-
-	private static final String[] LNOP = { "OFF", "LEGACY", "HELL CHARGE" };
-
 	private Config config;
 
 	private PlayerResource resource;
@@ -94,6 +83,9 @@ public class MusicSelector extends ApplicationAdapter {
 	private Sound sorts;
 
 	private Texture background;
+
+	private GameOptionRenderer option;
+	private AssistOptionRenderer aoption;
 
 	public MusicSelector(MainController main, Config config) {
 		this.main = main;
@@ -193,6 +185,8 @@ public class MusicSelector extends ApplicationAdapter {
 			}
 		}
 
+		option = new GameOptionRenderer(main.getShapeRenderer(), main.getSpriteBatch(), titlefont, config);
+		aoption = new AssistOptionRenderer(main.getShapeRenderer(), main.getSpriteBatch(), titlefont, config);
 	}
 
 	public void render() {
@@ -263,14 +257,14 @@ public class MusicSelector extends ApplicationAdapter {
 		}
 
 		sprite.begin();
-		
+
 		StringBuffer str = new StringBuffer();
-		for(Bar b : dir) {
+		for (Bar b : dir) {
 			str.append(b.getTitle() + " > ");
 		}
 		titlefont.setColor(Color.VIOLET);
 		titlefont.draw(sprite, str.toString(), 40, 640);
-		
+
 		titlefont.setColor(Color.WHITE);
 		if (currentsongs[selectedindex] instanceof SongBar) {
 			SongData song = ((SongBar) currentsongs[selectedindex]).getSongData();
@@ -392,100 +386,9 @@ public class MusicSelector extends ApplicationAdapter {
 		selectedindex = selectedindex % currentsongs.length;
 
 		if (input.startPressed()) {
-			if (keystate[0] && keytime[0] != 0) {
-				keytime[0] = 0;
-				config.setGauge(config.getGauge() + 1 < GAUGEOP.length ? config.getGauge() + 1 : 0);
-			}
-			if (keystate[1] && keytime[1] != 0) {
-				keytime[1] = 0;
-				config.setRandom(config.getRandom() + 1 < SCOREOP.length ? config.getRandom() + 1 : 0);
-			}
-			if (keystate[3] && keytime[3] != 0) {
-				keytime[3] = 0;
-				config.setDoubleoption(
-						config.getDoubleoption() + 1 < DOUBLEOP.length ? config.getDoubleoption() + 1 : 0);
-			}
-			if (keystate[5] && keytime[5] != 0) {
-				keytime[5] = 0;
-				config.setRandom2(config.getRandom2() + 1 < SCOREOP.length ? config.getRandom2() + 1 : 0);
-			}
-			if (keystate[6] && keytime[6] != 0) {
-				keytime[6] = 0;
-				config.setFixhispeed(config.getFixhispeed() + 1 < FIXHISPEEDOP.length ? config.getFixhispeed() + 1 : 0);
-			}
-			shape.begin(ShapeType.Filled);
-			shape.setColor(Color.BLACK);
-			shape.rect(100, 200, 400, 400);
-			shape.end();
-			shape.begin(ShapeType.Line);
-			shape.setColor(Color.WHITE);
-			shape.rect(100, 200, 400, 400);
-			shape.rect(150, 250, 55, 95);
-			shape.rect(180, 350, 55, 95);
-			shape.rect(210, 250, 55, 95);
-			shape.rect(240, 350, 55, 95);
-			shape.rect(270, 250, 55, 95);
-			shape.rect(300, 350, 55, 95);
-			shape.rect(330, 250, 55, 95);
-			shape.end();
-
-			sprite.begin();
-			titlefont.draw(sprite, SCOREOP[config.getRandom()], 110, 520);
-			titlefont.draw(sprite, DOUBLEOP[config.getDoubleoption()], 220, 520);
-			titlefont.draw(sprite, GAUGEOP[config.getGauge()], 110, 220);
-			titlefont.draw(sprite, SCOREOP[config.getRandom2()], 330, 520);
-			titlefont.draw(sprite, FIXHISPEEDOP[config.getFixhispeed()], 300, 220);
-			sprite.end();
+			option.render(keystate, keytime);
 		} else if (input.isSelectPressed()) {
-			if (keystate[0] && keytime[0] != 0) {
-				keytime[0] = 0;
-				config.setExpandjudge(!config.isExpandjudge());
-			}
-			if (keystate[1] && keytime[1] != 0) {
-				keytime[1] = 0;
-				config.setConstant(!config.isConstant());
-			}
-			if (keystate[3] && keytime[3] != 0) {
-				keytime[3] = 0;
-				config.setLnassist(config.getLnassist() + 1 == 3 ? 0 : config.getLnassist() + 1);
-			}
-			if (keystate[5] && keytime[5] != 0) {
-				keytime[5] = 0;
-				config.setBpmguide(!config.isBpmguide());
-			}
-			if (keystate[6] && keytime[6] != 0) {
-				keytime[6] = 0;
-				config.setNomine(!config.isNomine());
-			}
-			shape.begin(ShapeType.Filled);
-			shape.setColor(Color.BLACK);
-			shape.rect(100, 200, 400, 400);
-			shape.end();
-			shape.begin(ShapeType.Line);
-			shape.setColor(Color.CYAN);
-			shape.rect(100, 200, 400, 400);
-			shape.rect(150, 250, 55, 95);
-			shape.rect(180, 350, 55, 95);
-			shape.rect(210, 250, 55, 95);
-			shape.rect(240, 350, 55, 95);
-			shape.rect(270, 250, 55, 95);
-			shape.rect(300, 350, 55, 95);
-			shape.rect(330, 250, 55, 95);
-			shape.end();
-
-			sprite.begin();
-
-			titlefont.setColor(config.isConstant() ? Color.WHITE : Color.valueOf("444444"));
-			titlefont.draw(sprite, "CONSTANT", 110, 490);
-			titlefont.setColor(config.getLnassist() >= 1 ? Color.WHITE : Color.valueOf("444444"));
-			titlefont.draw(sprite, LNOP[config.getLnassist()], 200, 520);
-			titlefont.setColor(config.isBpmguide() ? Color.WHITE : Color.valueOf("444444"));
-			titlefont.draw(sprite, "BPM GUIDE", 300, 490);
-			titlefont.setColor(config.isExpandjudge() ? Color.WHITE : Color.valueOf("444444"));
-			titlefont.draw(sprite, "EXPAND JUDGE", 90, 220);
-			titlefont.setColor(config.isNomine() ? Color.WHITE : Color.valueOf("444444"));
-			titlefont.draw(sprite, "NO MINE", 330, 220);
-			sprite.end();
+			aoption.render(keystate, keytime);
 		} else {
 			// 1鍵 (選曲 or フォルダを開く)
 			if (keystate[0] && keytime[0] != 0) {
@@ -662,7 +565,7 @@ public class MusicSelector extends ApplicationAdapter {
 			if (bar != null) {
 				str.append(bar.getTitle());
 			}
-			for(Bar b : dir) {
+			for (Bar b : dir) {
 				str.append(b.getTitle());
 			}
 
