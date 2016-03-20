@@ -25,27 +25,58 @@ public class PlayerResource {
 	private BMSModel model;
 	private Config config;
 	private int auto;
+	/**
+	 * BMSの音源リソース
+	 */
 	private AudioProcessor audio;
+	/**
+	 * BMSのBGAリソース
+	 */
 	private BGAProcessor bga;
-	private IRScoreData score;
-
+	/**
+	 * BMSのリソースの読み込みが完了したかどうか
+	 */
 	private boolean finished = false;
+	
+	/**
+	 * スコア
+	 */
+	private IRScoreData score;
+	/**
+	 * スコア更新するかどうか
+	 */
 	private boolean updateScore = true;
 	private GrooveGauge grooveGauge;
 	private List<Float> gauge;
-	
+
+	/**
+	 * コースタイトル
+	 */
 	private String coursetitle;
+	/**
+	 * コースのBMSモデル
+	 */
 	private BMSModel[] course;
+	/**
+	 * コースファイル
+	 */
 	private File[] coursefile;
+	/**
+	 * コース何曲目
+	 */
 	private int courseindex;
 
 	private PatternModifyLog[] pattern;
-
+	/**
+	 * コーススコア
+	 */
 	private IRScoreData cscore;
 	
 	public void clear() {
 		coursetitle = null;
 		course = null;
+		courseindex = 0;
+		cscore = null;
 		gauge = null;
 		coursefile = null;
 	}
