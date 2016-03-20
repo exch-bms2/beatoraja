@@ -17,7 +17,6 @@ import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 public class JudgeManager {
 	
 	// TODO LNモードの実装
-	// TODO bug:HCN皿でゲージが増えない
 	// TODO bug:稀にノーツカウント漏れがある(BSS絡み？)
 
 	private BMSPlayer main;
@@ -76,8 +75,14 @@ public class JudgeManager {
 	 */
 	private int misslayer;
 
-	private final int[][] judgetable = new int[][] { { 8, 24, 70, 130, 0, 1000 }, { 14, 42, 115, 220, 0, 1000 },
-			{ 18, 54, 150, 285, 0, 1000 }, { 20, 60, 165, 315, 0, 1000 } };
+	private static final int[] judgetable = { 20, 60, 165, 315, 0, 1000 };
+
+			private int[] judge;
+
+			private int pos = 0;
+			private int judgetype = 0;
+
+			private int prevtime;
 
 	public JudgeManager(BMSPlayer main, BMSModel model) {
 		this.main = main;
@@ -129,19 +134,16 @@ public class JudgeManager {
 			break;
 		}
 		Arrays.fill(bomb, -1000);
-		if (model.getJudgerank() > 3) {
-			judge = judgetable[3];
-		} else {
-			judge = judgetable[model.getJudgerank()];
+		
+		judge = new int[6];
+		for(int i = 0;i < judgetable.length;i++) {
+			if(i < 4) {
+				judge[i] = judgetable[i] * model.getJudgerank() / 100;
+			} else {
+				judge[i] = judgetable[i];
+			}
 		}
 	}
-
-	private int[] judge;
-
-	private int pos = 0;
-	private int judgetype = 0;
-
-	private int prevtime;
 
 	public void update(TimeLine[] timelines, int time) {
 		BMSPlayerInputProcessor input = main.getBMSPlayerInputProcessor();
@@ -171,15 +173,22 @@ public class JudgeManager {
 						}
 					}
 				}
-
 			}
 		}
 
+		Arrays.fill(inclease, false);
 		for (int key = 0; key < keyassign.length; key++) {
 			if (passing[keyassign[key]] != null) {
 				if (keystate[key]) {
-					passingcount[keyassign[key]] += (time - prevtime);
 					inclease[keyassign[key]] = true;
+				} else {
+				}
+			}
+		}
+		for (int key = 0; key < keyassign.length; key++) {
+			if(passing[keyassign[key]] != null) {
+				if(inclease[keyassign[key]]) {
+					passingcount[keyassign[key]] += (time - prevtime);
 					if (passingcount[keyassign[key]] > 100) {
 						main.getGauge().addValue(main.getGauge().getGaugeValue(1));
 						System.out.println("HCN : Gauge increase");
@@ -187,7 +196,6 @@ public class JudgeManager {
 					}
 				} else {
 					passingcount[keyassign[key]] -= (time - prevtime);
-					inclease[keyassign[key]] = false;
 					if (passingcount[keyassign[key]] < -100) {
 						main.getGauge().addValue(main.getGauge().getGaugeValue(4) / 5);
 						System.out.println("HCN : Gauge decrease");
@@ -196,6 +204,7 @@ public class JudgeManager {
 				}
 			}
 		}
+
 
 		for (int key = 0; key < keyassign.length; key++) {
 			if (keytime[key] != 0) {

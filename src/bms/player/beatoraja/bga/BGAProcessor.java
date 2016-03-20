@@ -45,37 +45,57 @@ public class BGAProcessor {
 
 		String stage = model.getStagefile();
 		if(stage != null && stage.length() > 0) {
-			stage = stage.substring(0, stage.lastIndexOf('.'));
-			stagefile = this.loadPicture(directorypath, stage);
+			stagefile = this.loadPicture(new File(directorypath + stage));
 		}
 		String back = model.getBackbmp();
 		if(back != null && back.length() > 0) {
-			back = back.substring(0, back.lastIndexOf('.'));
-			backbmp = this.loadPicture(directorypath, back);
+			backbmp = this.loadPicture(new File(directorypath + back));
 		}
 
 		bgamap = new Pixmap[model.getBgaList().length];
 		int id = 0;
 		for (String name : model.getBgaList()) {
-			name = name.substring(0, name.lastIndexOf('.'));
-
-			for (String mov : mov_extension) {
-				File mpgfile = new File(directorypath + name + "." + mov);
-				if (mpgfile.exists()) {
-					try {
-						MovieProcessor mm = this.loadMovie(id, mpgfile);
-						mpgmap.put(id, mm);
+			File f = null;
+			if(new File(directorypath + name).exists()) {
+				f = new File(directorypath + name);
+			}
+			if(f == null) {
+				name = name.substring(0, name.lastIndexOf('.'));
+				for (String mov : mov_extension) {
+					File mpgfile = new File(directorypath + name + "." + mov);
+					if (mpgfile.exists()) {
+						f = mpgfile;
 						break;
-					} catch (Exception e) {
-						Logger.getGlobal().warning("BGAファイル読み込み失敗。" + e.getMessage());
-						e.printStackTrace();
-					} catch (Error e) {
-						Logger.getGlobal().severe("BGAファイル読み込み失敗。" + e.getMessage());
-						e.printStackTrace();
+					}
+				}
+				for (String mov : pic_extension) {
+					File picfile = new File(directorypath + name + "." + mov);
+					if (picfile.exists()) {
+						f = picfile;
+						break;
 					}
 				}
 			}
-				bgamap[id] = this.loadPicture(directorypath, name);
+			
+			if(f != null) {
+				for (String mov : mov_extension) {
+					if(f.getName().endsWith(mov)) {
+						try {
+							MovieProcessor mm = this.loadMovie(id, f);
+							mpgmap.put(id, mm);
+							break;
+						} catch (Exception e) {
+							Logger.getGlobal().warning("BGAファイル読み込み失敗。" + e.getMessage());
+							e.printStackTrace();
+						} catch (Error e) {
+							Logger.getGlobal().severe("BGAファイル読み込み失敗。" + e.getMessage());
+							e.printStackTrace();
+						}						
+					}
+				}
+				bgamap[id] = this.loadPicture(f);				
+			}
+
 			progress += 1f / model.getBgaList().length;
 			id++;
 		}
@@ -92,14 +112,13 @@ public class BGAProcessor {
 		return null;
 	}
 
-	private Pixmap loadPicture(String dir, String name) {
+	private Pixmap loadPicture(File dir) {
 		Pixmap tex = null;
 		for (String mov : pic_extension) {
-			File f = new File(dir + name + "." + mov);
-			if (f.exists()) {
+			if (dir.getName().endsWith(mov)) {
 				try {
-					tex = new Pixmap(Gdx.files.internal(f.getPath()));
-					System.out.println("BGA Picture loaded  : " + name);
+					tex = new Pixmap(Gdx.files.internal(dir.getPath()));
+					System.out.println("BGA Picture loaded  : " + dir.getName());
 					break;
 				} catch (Exception e) {
 					Logger.getGlobal().warning("BGAファイル読み込み失敗。" + e.getMessage());

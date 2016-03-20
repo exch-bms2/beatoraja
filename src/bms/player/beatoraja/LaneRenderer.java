@@ -652,7 +652,7 @@ public class LaneRenderer {
 				if (main.getJudgeManager().getProcessingLongNotes()[lane] == note) {
 					sprite.draw(skin.getLongnote()[6][lane], x, y - height - 2,
 							width, height + 4);
-				} else if(judge.getPassingLongNotes()[lane] == note){
+				} else if(note.getState() > 2 && judge.getPassingLongNotes()[lane] == note){
 					sprite.draw(skin.getLongnote()[inclease[lane] ? 8 : 9][lane], x, y - height - 2,
 							width, height + 4);					
 				} else {
