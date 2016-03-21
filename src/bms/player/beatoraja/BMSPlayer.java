@@ -78,11 +78,8 @@ public class BMSPlayer extends ApplicationAdapter {
 	private int prevrendertime;
 	
 	private int playingbgaid = -1;
-	private Pixmap playingbga = null;
-	private Texture playingbgatex = null;
 	private int playinglayerid = -1;
-	private Pixmap playinglayer = null;
-	private Texture playinglayertex = null;
+
 	private int[] misslayer = null;
 
 	private int assist = 0;
@@ -634,12 +631,10 @@ public class BMSPlayer extends ApplicationAdapter {
 		float h = 720;
 
 		// 背景描画
-		if (resource.getBGAManager().getStagefileData() != null) {
+		if(resource.getBGAManager().getStagefileData() != null) {
 			sprite.begin();
-			Texture bgatex = new Texture(resource.getBGAManager().getStagefileData());
-			sprite.draw(bgatex, 0, 0, w, h);
+			sprite.draw(resource.getBGAManager().getStagefileData(), 0, 0, w, h);
 			sprite.end();
-			bgatex.dispose();
 		}
 
 		sprite.begin();
@@ -695,8 +690,6 @@ public class BMSPlayer extends ApplicationAdapter {
 				}
 			}
 		}
-		Pixmap showbga = bga.getBGAData(playingbgaid);
-		Pixmap showlayer = bga.getBGAData(playinglayerid);
 		
 		Rectangle r = skin.getBGAregion();
 		shape.begin(ShapeType.Line);
@@ -709,47 +702,27 @@ public class BMSPlayer extends ApplicationAdapter {
 		shape.end();
 		if (state == STATE_PRELOAD && bga.getBackbmpData() != null) {
 			sprite.begin();
-			Texture bgatex = new Texture(bga.getBackbmpData());
-			sprite.draw(bgatex, r.x, r.y, r.width, r.height);
+			sprite.draw(bga.getBackbmpData(), r.x, r.y, r.width, r.height);
 			sprite.end();
-			bgatex.dispose();
 		} else if (misslayer != null && judge.getMisslayer() != 0 && time >= judge.getMisslayer()
 				&& time < judge.getMisslayer() + 500) {
 			// draw miss layer
-			Pixmap miss = bga.getBGAData(misslayer[misslayer.length * (time - judge.getMisslayer()) / 500]);
+			Texture miss = bga.getBGAData(misslayer[misslayer.length * (time - judge.getMisslayer()) / 500]);
 			if (miss != null) {
 				sprite.begin();
-				Texture bgatex = new Texture(miss);
-				sprite.draw(bgatex, r.x, r.y, r.width, r.height);
+				sprite.draw(miss, r.x, r.y, r.width, r.height);
 				sprite.end();
-				bgatex.dispose();
 			}
 		} else {
 			// draw BGA
-			if (showbga != playingbga) {
-				if(playingbgatex != null) {
-					playingbgatex.dispose();
-				}
-				playingbga = showbga;
-				if(playingbga != null) {
-					playingbgatex = new Texture(playingbga);					
-				}
-			}
+			Texture playingbgatex = bga.getBGAData(playingbgaid);
 			if(playingbgatex != null){
 				sprite.begin();
 				sprite.draw(playingbgatex, r.x, r.y, r.width, r.height);
 				sprite.end();				
 			}
 			// draw layer
-			if (showlayer != playinglayer) {
-				if(playinglayertex != null) {
-					playinglayertex.dispose();
-				}
-				playinglayer = showlayer;
-				if(playinglayer != null) {
-					playinglayertex = new Texture(playinglayer);					
-				}
-			}
+			Texture playinglayertex = bga.getBGAData(playinglayerid);
 			if(playinglayertex != null){
 				sprite.begin();
 				if (layershader.isCompiled()) {
@@ -838,12 +811,6 @@ public class BMSPlayer extends ApplicationAdapter {
 		titlefont.dispose();
 		judgefont.dispose();
 		systemfont.dispose();
-		if(playingbgatex != null) {
-			playingbgatex.dispose();
-		}
-		if(playinglayertex != null) {
-			playinglayertex.dispose();
-		}
 		Logger.getGlobal().info("システム描画のリソース解放");
 		audio.dispose();
 		Logger.getGlobal().info("音源のリソース解放");

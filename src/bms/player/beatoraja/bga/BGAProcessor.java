@@ -9,6 +9,7 @@ import bms.player.beatoraja.Config;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
 
 /**
  * 
@@ -25,18 +26,25 @@ public class BGAProcessor {
 
 	private Pixmap[] bgamap = new Pixmap[0];
 	private Map<Integer, MovieProcessor> mpgmap = new HashMap<Integer, MovieProcessor>();
-	private Pixmap backbmp;
-	private Pixmap stagefile;
+	
+	private Pixmap backbmpp;
+	private Texture backbmp;
+	private Pixmap stagefilep;
+	private Texture stagefile;
 
 	private final String[] mov_extension = { "mpg", "mpeg", "avi", "wmv" };
 	private final String[] pic_extension = { "jpg", "jpeg", "gif", "bmp", "png" };
 
+	private Texture[] bgacache = new Texture[128];
+	private int[] bgacacheid = new int[128];
+	
 	public BGAProcessor(Config config) {
 		this.config = config;
 	}
 
 	public void setModel(BMSModel model, String filepath) {
 		this.model = model;
+		Arrays.fill(bgacacheid, -1);
 		// BMS格納ディレクトリ
 		String directorypath = filepath.substring(0, filepath.lastIndexOf(File.separatorChar) + 1);
 
@@ -45,11 +53,11 @@ public class BGAProcessor {
 
 		String stage = model.getStagefile();
 		if(stage != null && stage.length() > 0) {
-			stagefile = this.loadPicture(new File(directorypath + stage));
+			stagefilep = this.loadPicture(new File(directorypath + stage));
 		}
 		String back = model.getBackbmp();
 		if(back != null && back.length() > 0) {
-			backbmp = this.loadPicture(new File(directorypath + back));
+			backbmpp = this.loadPicture(new File(directorypath + back));
 		}
 
 		bgamap = new Pixmap[model.getBgaList().length];
@@ -133,25 +141,44 @@ public class BGAProcessor {
 		return tex;
 	}
 	
-	public Pixmap getBackbmpData() {
+	public Texture getBackbmpData() {
+		if(backbmpp == null) {
+			return null;
+		}
+		if(backbmp == null) {
+			backbmp = new Texture(backbmpp);
+		}
 		return backbmp;
 	}
 
-	public Pixmap getStagefileData() {
+	public Texture getStagefileData() {
+		if(stagefilep == null) {
+			return null;
+		}
+		if(stagefile == null) {
+			stagefile = new Texture(stagefilep);
+		}
 		return stagefile;
 	}
 
-	public Pixmap getBGAData(int id) {
+	public Texture getBGAData(int id) {
 		if (progress != 1 || id == -1) {
 			return null;
 		}
-
-		Pixmap pix = bgamap[id];
-		if(pix != null) {
-			return pix;
-		}
 		if (mpgmap.get(id) != null) {
 			return mpgmap.get(id).getBGAData();
+		}
+		if(bgacacheid[id % bgacache.length] == id) {
+			return bgacache[id % bgacache.length];
+		}
+		if(bgacache[id % bgacache.length] != null) {
+			bgacache[id % bgacache.length].dispose();
+		}
+		Pixmap pix = bgamap[id];
+		if(pix != null) {
+			bgacache[id % bgacache.length] = new Texture(pix);
+			bgacacheid[id % bgacache.length] = id;
+			return bgacache[id % bgacache.length];
 		}
 		return null;
 	}
@@ -160,6 +187,19 @@ public class BGAProcessor {
 	 * リソースを開放する
 	 */
 	public void dispose() {
+		if(stagefile != null) {
+			stagefile.dispose();
+			stagefilep.dispose();
+		}
+		if(backbmp != null) {
+			backbmp.dispose();
+			backbmpp.dispose();
+		}
+		for(Texture bga : bgacache) {
+			if(bga != null) {
+				bga.dispose();
+			}
+		}
 		for (Pixmap id : bgamap) {
 			if (id != null) {
 				id.dispose();
