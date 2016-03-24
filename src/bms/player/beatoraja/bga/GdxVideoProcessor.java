@@ -1,6 +1,7 @@
 package bms.player.beatoraja.bga;
 
 import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
 
 public class GdxVideoProcessor implements MovieProcessor {
 
@@ -14,7 +15,7 @@ public class GdxVideoProcessor implements MovieProcessor {
 	}
 
 	@Override
-	public Pixmap getBGAData() {
+	public Texture getBGAData() {
 		// TODO 自動生成されたメソッド・スタブ
 		return null;
 	}

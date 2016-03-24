@@ -34,6 +34,7 @@ import com.badlogic.gdx.utils.BufferUtils;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter.OutputType;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.SerializationException;
 
 public class MainController extends ApplicationAdapter {
 
@@ -278,6 +279,8 @@ public class MainController extends ApplicationAdapter {
 				config = json.fromJson(Config.class, new FileReader(
 						"config.json"));
 			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (SerializationException e) {
 				e.printStackTrace();
 			}
 		} else {

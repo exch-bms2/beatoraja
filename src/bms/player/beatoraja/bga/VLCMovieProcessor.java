@@ -9,6 +9,7 @@ import java.nio.IntBuffer;
 
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Gdx2DPixmap;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.sun.jna.Native;
@@ -77,13 +78,27 @@ public class VLCMovieProcessor implements MovieProcessor {
 
 		System.out.println(LibVlc.INSTANCE.libvlc_get_version());
 	}
+	
+	private Pixmap showing;
+	private Texture showingtex;
 
-	public Pixmap getBGAData() {
+	public Texture getBGAData() {
 		if (!play) {
 			mediaPlayer.start();
 			play = true;
 		}
-		return pixmap;
+		if(showing != pixmap) {
+			showing = pixmap;
+			if(showingtex != null) {
+				showingtex.dispose();
+			}
+			if(pixmap != null) {
+				showingtex = new Texture(pixmap);				
+			} else {
+				showingtex = null;
+			}
+		}
+		return showingtex;
 	}
 
 	public void dispose() {

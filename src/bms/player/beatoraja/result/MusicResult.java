@@ -141,10 +141,8 @@ public class MusicResult extends ApplicationAdapter {
 
 		if (resource.getBGAManager().getStagefileData() != null) {
 			sprite.begin();
-			Texture bgatex = new Texture(resource.getBGAManager().getStagefileData());
-			sprite.draw(bgatex, 0, 0, w, h);
+			sprite.draw(resource.getBGAManager().getStagefileData(), 0, 0, w, h);
 			sprite.end();
-			bgatex.dispose();
 		}
 
 		IRScoreData score = resource.getScoreData();

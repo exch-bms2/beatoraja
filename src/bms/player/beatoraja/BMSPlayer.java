@@ -14,7 +14,6 @@ import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyInputLog;
 import bms.player.beatoraja.pattern.*;
 import bms.player.beatoraja.skin.LR2PlaySkinLoader;
-import bms.player.beatoraja.skin.LR2SkinLoader;
 import bms.player.beatoraja.skin.SkinObject;
 import bms.player.lunaticrave2.IRScoreData;
 
@@ -64,9 +63,16 @@ public class BMSPlayer extends ApplicationAdapter {
 	private PlaySkin skin;
 
 	private GrooveGauge gauge;
-
+	/**
+	 * プレイ開始時間。0の場合はプレイ開始前
+	 */
 	private long starttime;
+	/**
+	 * プレイ終了時間。0の場合はプレイ終了前
+	 */
 	private long finishtime;
+
+	private int playtime;
 
 	private int autoplay = 0;
 
@@ -76,13 +82,10 @@ public class BMSPlayer extends ApplicationAdapter {
 	private final String[] judgename = { "PG ", "GR ", "GD ", "BD ", "PR ", "MS " };
 
 	private int prevrendertime;
-	
+
 	private int playingbgaid = -1;
-	private Pixmap playingbga = null;
-	private Texture playingbgatex = null;
 	private int playinglayerid = -1;
-	private Pixmap playinglayer = null;
-	private Texture playinglayertex = null;
+
 	private int[] misslayer = null;
 
 	private int assist = 0;
@@ -105,6 +108,8 @@ public class BMSPlayer extends ApplicationAdapter {
 		Config config = resource.getConfig();
 		this.autoplay = resource.getAutoplay();
 		timelines = model.getAllTimeLines();
+		// 通常プレイの場合は最後のノーツ、オートプレイの場合はBG/BGAを含めた最後のノーツ
+		playtime = (autoplay == 1 ? model.getLastTime() : model.getLastNoteTime())+ 5000;			
 		totalnotes = model.getTotalNotes();
 
 		judge = new JudgeManager(this, model);
@@ -134,7 +139,7 @@ public class BMSPlayer extends ApplicationAdapter {
 			if (config.getLnmode() == 2) {
 				model.setLntype(BMSModel.LNTYPE_HELLCHARGENOTE);
 			} else {
-				model.setLntype(BMSModel.LNTYPE_CHARGENOTE);				
+				model.setLntype(BMSModel.LNTYPE_CHARGENOTE);
 			}
 			if (config.isExpandjudge()) {
 				judge.setExpandJudge();
@@ -273,7 +278,7 @@ public class BMSPlayer extends ApplicationAdapter {
 	}
 
 	private final PatternModifier[] random = { null, new LaneShuffleModifier(LaneShuffleModifier.MIRROR),
-			new LaneShuffleModifier(LaneShuffleModifier.RANDOM),new LaneShuffleModifier(LaneShuffleModifier.R_RANDOM), 
+			new LaneShuffleModifier(LaneShuffleModifier.RANDOM), new LaneShuffleModifier(LaneShuffleModifier.R_RANDOM),
 			new NoteShuffleModifier(NoteShuffleModifier.S_RANDOM), new NoteShuffleModifier(NoteShuffleModifier.SPIRAL),
 			new NoteShuffleModifier(NoteShuffleModifier.H_RANDOM), new NoteShuffleModifier(NoteShuffleModifier.ALL_SCR),
 			new LaneShuffleModifier(LaneShuffleModifier.RANDOM_EX),
@@ -395,6 +400,7 @@ public class BMSPlayer extends ApplicationAdapter {
 			shape.end();
 
 			if (resource.mediaLoadFinished() && !input.startPressed()) {
+				bga.prepare();
 				state = STATE_READY;
 				starttime = System.currentTimeMillis();
 				Logger.getGlobal().info("STATE_READYに移行");
@@ -433,7 +439,7 @@ public class BMSPlayer extends ApplicationAdapter {
 				gaugelog.add(g);
 			}
 			// System.out.println("playing time : " + time);
-			if (starttime != 0 && timelines[timelines.length - 1].getTime() + 5000 < time) {
+			if (starttime != 0 && playtime < time) {
 				state = STATE_FINISHED;
 				finishtime = System.currentTimeMillis();
 				Logger.getGlobal().info("STATE_FINISHEDに移行");
@@ -637,20 +643,18 @@ public class BMSPlayer extends ApplicationAdapter {
 		// 背景描画
 		if (resource.getBGAManager().getStagefileData() != null) {
 			sprite.begin();
-			Texture bgatex = new Texture(resource.getBGAManager().getStagefileData());
-			sprite.draw(bgatex, 0, 0, w, h);
+			sprite.draw(resource.getBGAManager().getStagefileData(), 0, 0, w, h);
 			sprite.end();
-			bgatex.dispose();
 		}
 
 		sprite.begin();
 		for (SkinObject part : skin.getSkinPart()) {
 			int[] op = part.getOption();
- 			if (part.getTiming() != 3 && op.length == 0) {
- 				Rectangle r = part.getDestination(time);
- 				if(r != null) {
- 					sprite.draw(part.getImage(), r.x, r.y, r.width, r.height); 					
- 				}
+			if (part.getTiming() != 3 && op.length == 0) {
+				Rectangle r = part.getDestination(time);
+				if (r != null) {
+					sprite.draw(part.getImage(), r.x, r.y, r.width, r.height);
+				}
 			}
 		}
 		sprite.end();
@@ -669,16 +673,13 @@ public class BMSPlayer extends ApplicationAdapter {
 		shape.rect(progress.x + 1, progress.y + 1, progress.width - 2, progress.height - 2);
 
 		shape.setColor(notes == totalnotes ? Color.BLUE : Color.ORANGE);
-		shape.rect(progress.x + 1,
-				progress.y + 1
-						+ progress.height * (1.0f - (float) time / (timelines[timelines.length - 1].getTime() + 5000)),
+		shape.rect(progress.x + 1, progress.y + 1 + progress.height * (1.0f - (float) time / playtime),
 				progress.width - 2, 20);
 		shape.end();
 		// レーン描画
 		lanerender.drawLane(shape, systemfont, model, timelines, starttime, time);
 
 		// BGA再生
-		
 		for (TimeLine tl : timelines) {
 			if (tl.getTime() > time) {
 				break;
@@ -696,9 +697,7 @@ public class BMSPlayer extends ApplicationAdapter {
 				}
 			}
 		}
-		Pixmap showbga = bga.getBGAData(playingbgaid);
-		Pixmap showlayer = bga.getBGAData(playinglayerid);
-		
+
 		Rectangle r = skin.getBGAregion();
 		shape.begin(ShapeType.Line);
 		shape.setColor(Color.WHITE);
@@ -710,48 +709,28 @@ public class BMSPlayer extends ApplicationAdapter {
 		shape.end();
 		if (state == STATE_PRELOAD && bga.getBackbmpData() != null) {
 			sprite.begin();
-			Texture bgatex = new Texture(bga.getBackbmpData());
-			sprite.draw(bgatex, r.x, r.y, r.width, r.height);
+			sprite.draw(bga.getBackbmpData(), r.x, r.y, r.width, r.height);
 			sprite.end();
-			bgatex.dispose();
 		} else if (misslayer != null && judge.getMisslayer() != 0 && time >= judge.getMisslayer()
 				&& time < judge.getMisslayer() + 500) {
 			// draw miss layer
-			Pixmap miss = bga.getBGAData(misslayer[misslayer.length * (time - judge.getMisslayer()) / 500]);
+			Texture miss = bga.getBGAData(misslayer[misslayer.length * (time - judge.getMisslayer()) / 500]);
 			if (miss != null) {
 				sprite.begin();
-				Texture bgatex = new Texture(miss);
-				sprite.draw(bgatex, r.x, r.y, r.width, r.height);
+				sprite.draw(miss, r.x, r.y, r.width, r.height);
 				sprite.end();
-				bgatex.dispose();
 			}
 		} else {
 			// draw BGA
-			if (showbga != playingbga) {
-				if(playingbgatex != null) {
-					playingbgatex.dispose();
-				}
-				playingbga = showbga;
-				if(playingbga != null) {
-					playingbgatex = new Texture(playingbga);					
-				}
-			}
-			if(playingbgatex != null){
+			Texture playingbgatex = bga.getBGAData(playingbgaid);
+			if (playingbgatex != null) {
 				sprite.begin();
 				sprite.draw(playingbgatex, r.x, r.y, r.width, r.height);
-				sprite.end();				
+				sprite.end();
 			}
 			// draw layer
-			if (showlayer != playinglayer) {
-				if(playinglayertex != null) {
-					playinglayertex.dispose();
-				}
-				playinglayer = showlayer;
-				if(playinglayer != null) {
-					playinglayertex = new Texture(playinglayer);					
-				}
-			}
-			if(playinglayertex != null){
+			Texture playinglayertex = bga.getBGAData(playinglayerid);
+			if (playinglayertex != null) {
 				sprite.begin();
 				if (layershader.isCompiled()) {
 					sprite.setShader(layershader);
@@ -782,7 +761,7 @@ public class BMSPlayer extends ApplicationAdapter {
 		titlefont.draw(sprite, String.format("%5.1f", gauge.getValue()) + "%", gr.x + gr.width - 75,
 				gr.y + gr.height + 25);
 		sprite.end();
-		
+
 		Gdx.gl.glEnable(GL11.GL_BLEND);
 		Gdx.gl.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		shape.begin(ShapeType.Filled);
@@ -820,6 +799,13 @@ public class BMSPlayer extends ApplicationAdapter {
 		titlefont.draw(sprite, "HISPEED - " + String.format("%.2f", lanerender.getHispeed()) + "  DURATION - "
 				+ lanerender.getGreenValue(), 30, 22);
 		sprite.end();
+		// 残り時間描画
+		sprite.begin();
+		titlefont.setColor(Color.WHITE);
+		titlefont.draw(sprite,
+				"TIME " + String.format("%02d:%02d", (playtime - time+ 1000) / 60000, ((playtime - time + 1000) / 1000) % 60),
+				w - 150, 22);
+		sprite.end();
 
 		prevrendertime = time;
 	}
@@ -839,12 +825,6 @@ public class BMSPlayer extends ApplicationAdapter {
 		titlefont.dispose();
 		judgefont.dispose();
 		systemfont.dispose();
-		if(playingbgatex != null) {
-			playingbgatex.dispose();
-		}
-		if(playinglayertex != null) {
-			playinglayertex.dispose();
-		}
 		Logger.getGlobal().info("システム描画のリソース解放");
 		audio.dispose();
 		Logger.getGlobal().info("音源のリソース解放");
@@ -878,11 +858,11 @@ public class BMSPlayer extends ApplicationAdapter {
 		// System.out.println(
 		// "Now count : " + notes + " - " + totalnotes);
 	}
-	
+
 	public GrooveGauge getGauge() {
 		return gauge;
 	}
-	
+
 	/**
 	 * AUTOPLAY用のKeyInputLogを生成する
 	 * 

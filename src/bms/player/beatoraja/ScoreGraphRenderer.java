@@ -39,17 +39,20 @@ public class ScoreGraphRenderer {
 
 	public void drawGraph(PlaySkin skin, SpriteBatch sprite, BitmapFont font, ShapeRenderer shape, JudgeManager judge) {
 		Rectangle graph = skin.getGraphregion();
+		Gdx.gl.glEnable(GL11.GL_BLEND);
+		Gdx.gl.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		shape.begin(ShapeType.Filled);
-		shape.setColor(Color.BLACK);
+		shape.setColor(Color.valueOf("00000080"));
 		shape.rect(graph.x, graph.y, graph.width, graph.height);
 		shape.end();
+		Gdx.gl.glDisable(GL11.GL_BLEND);
 		shape.begin(ShapeType.Line);
 		shape.setColor(Color.WHITE);
 		shape.rect(graph.x, graph.y, graph.width, graph.height);
-		for(int i = 1;i < 20;i++) {
-			float y = graph.y + graph.height * i / 20;
-			if(i % 2 == 0){
-				if(i >= 14) {
+		for(int i = 1;i < 27;i++) {
+			float y = graph.y + graph.height * i / 27;
+			if(i % 3 == 0){
+				if(i >= 18) {
 					shape.setColor(Color.LIGHT_GRAY);
 					shape.line(graph.x, y, graph.x + graph.width, y);
 				} else {
