@@ -14,6 +14,7 @@ import org.lwjgl.opengl.GL11;
 import bms.model.BMSModel;
 import bms.model.Note;
 import bms.model.TimeLine;
+import bms.player.beatoraja.Config;
 import bms.player.beatoraja.MainController;
 import bms.player.beatoraja.PlayerResource;
 import bms.player.beatoraja.gauge.GrooveGauge;
@@ -105,9 +106,9 @@ public class MusicResult extends ApplicationAdapter {
 						fdata[tl.getTime() / 1000][0]++;
 					} else {
 						int dtime = n.getState() > 0 ? n.getState() - 1 : n.getState();
-						for(int j = 0;j < judgetable.length;j++) {
-							if(Math.abs(dtime) <= judgetable[j]) {
-								data[tl.getTime() / 1000][j + 1]++;	
+						for (int j = 0; j < judgetable.length; j++) {
+							if (Math.abs(dtime) <= judgetable[j]) {
+								data[tl.getTime() / 1000][j + 1]++;
 								fdata[tl.getTime() / 1000][dtime >= 0 ? 1 : 2]++;
 								break;
 							}
@@ -249,19 +250,17 @@ public class MusicResult extends ApplicationAdapter {
 		titlefont.draw(sprite, resource.getBMSModel().getFullTitle(), w / 2 - layout.width / 2, 23);
 		sprite.end();
 
-		if(((System.currentTimeMillis() - time) / 5000) % 2 == 0) {
-	 		drawGraph(data, JGRAPH);			
+		if (((System.currentTimeMillis() - time) / 5000) % 2 == 0) {
+			drawGraph(data, JGRAPH);
 			sprite.begin();
 			titlefont.setColor(Color.GREEN);
-			titlefont.draw(sprite,
-					"JUDGE DETAIL", 500, 700);
+			titlefont.draw(sprite, "JUDGE DETAIL", 500, 700);
 			sprite.end();
 		} else {
-	 		drawGraph(fdata, FGRAPH);
+			drawGraph(fdata, FGRAPH);
 			sprite.begin();
 			titlefont.setColor(Color.CYAN);
-			titlefont.draw(sprite,
-					"FAST/SLOW", 500, 700);
+			titlefont.draw(sprite, "FAST/SLOW", 500, 700);
 			sprite.end();
 		}
 
@@ -302,24 +301,39 @@ public class MusicResult extends ApplicationAdapter {
 	public void updateScoreDatabase() {
 		BMSModel model = resource.getBMSModel();
 		IRScoreData newscore = resource.getScoreData();
+		String hash = model.getHash();
+		boolean ln = model.getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
+				+ model.getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH) > 0;
+		if (ln && resource.getConfig().getLnmode() > 0) {
+			hash = "C" + hash;
+		}
 		if (newscore == null) {
 			return;
 		}
-		IRScoreData score = main.getScoreDatabase().getScoreData("Player", model.getHash(), false);
+		IRScoreData score = main.getScoreDatabase().getScoreData("Player", hash, false);
 		if (score == null) {
 			score = new IRScoreData();
 		}
-		oldclear = score.getClear();
+		int clear;
+		if (ln && resource.getConfig().getLnmode() == 2) {
+			clear = oldclear = score.getExclear();
+		} else {
+			clear = oldclear = score.getClear();
+		}
 		oldexscore = score.getExscore();
 		oldmisscount = score.getMinbp();
-		score.setHash(model.getHash());
+		score.setHash(hash);
 		score.setNotes(model.getTotalNotes());
 
 		if (newscore.getClear() != GrooveGauge.CLEARTYPE_FAILED) {
 			score.setClearcount(score.getClearcount() + 1);
 		}
-		if (score.getClear() < newscore.getClear()) {
-			score.setClear(newscore.getClear());
+		if (clear < newscore.getClear()) {
+			if (ln && resource.getConfig().getLnmode() == 2) {
+				score.setExclear(newscore.getClear());				
+			} else {
+				score.setClear(newscore.getClear());				
+			}
 			score.setOption(resource.getConfig().getRandom());
 		}
 
@@ -379,8 +393,8 @@ public class MusicResult extends ApplicationAdapter {
 		}
 
 		if (newscore.getClear() != GrooveGauge.CLEARTYPE_FAILED) {
-			if (clear != null) {
-				clear.play();
+			if (this.clear != null) {
+				this.clear.play();
 			}
 		} else {
 			if (fail != null) {
@@ -390,7 +404,7 @@ public class MusicResult extends ApplicationAdapter {
 	}
 
 	private static final String[] JGRAPH = { "555555", "0088ff", "00ff88", "ffff00", "ff8800", "ff0000" };
-	private static final String[] FGRAPH = { "555555", "0088ff", "ff8800"};
+	private static final String[] FGRAPH = { "555555", "0088ff", "ff8800" };
 
 	/**
 	 * 密度分布グラフの描画
@@ -400,7 +414,7 @@ public class MusicResult extends ApplicationAdapter {
 	private void drawGraph(int[][] data, String[] GRAPH) {
 
 		final ShapeRenderer shape = main.getShapeRenderer();
-		
+
 		float x = 500;
 		float y = 500;
 		float w = 700;

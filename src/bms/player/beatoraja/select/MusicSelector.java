@@ -63,12 +63,17 @@ public class MusicSelector extends ApplicationAdapter {
 
 	private int sort;
 
-	private static final String[] SORT = { "Default", "CLEAR LAMP", "MISS COUNT" };
+	private static final String[] SORT = { "Default", "CLEAR LAMP", "MISS COUNT", "SCORE RATE" };
 
 	private static final String[] LAMP = { "000000", "808080", "800080", "ff00ff", "40ff40", "f0c000", "ffffff",
 			"ffff88", "88ffff", "ff8888", "ff0000" };
 	private static final String[] CLEAR = { "NO PLAY", "FAILED", "ASSIST CLEAR", "L-ASSIST CLEAR", "EASY CLEAR",
 			"CLEAR", "HARD CLEAR", "EX-HARD CLEAR", "FULL COMBO", "PERFECT", "MAX" };
+
+	private static final String[] RANK = { "F-", "F-", "F", "F", "F+", "F+", "E-", "E", "E+", "D-", "D", "D+", "C-",
+			"C", "C+", "B-", "B", "B+", "A-", "A", "A+", "AA-", "AA", "AA+", "AAA-", "AAA", "AAA+" };
+
+	private static final String[] LNMODE = { "LONG NOTE", "CHARGE NOTE", "HELL CHARGE NOTE" };
 
 	private Config config;
 
@@ -127,8 +132,8 @@ public class MusicSelector extends ApplicationAdapter {
 
 						l.add(new GradeBar(s, songlist.toArray(new SongData[0])));
 					}
-					tables.add(new TableBar(td.getName(), levels.toArray(new TableLevelBar[0]),
-							l.toArray(new GradeBar[0])));
+					tables.add(new TableBar(td.getName(), levels.toArray(new TableLevelBar[0]), l
+							.toArray(new GradeBar[0])));
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -277,7 +282,11 @@ public class MusicSelector extends ApplicationAdapter {
 				titlefont.setColor(Color.valueOf(LAMP[score.getClear()]));
 				titlefont.draw(sprite, CLEAR[score.getClear()], 100, 420);
 				titlefont.setColor(Color.WHITE);
-				titlefont.draw(sprite, "EX-SCORE  : " + score.getExscore() + " / " + (score.getNotes() * 2), 100, 390);
+				titlefont.draw(
+						sprite,
+						"EX-SCORE  : " + score.getExscore() + " / " + (score.getNotes() * 2) + "    RANK : "
+								+ RANK[(score.getExscore() * 27 / (score.getNotes() * 2))] + " ( "
+								+ ((score.getExscore() * 1000 / (score.getNotes() * 2)) / 10.0f) + "% )", 100, 390);
 				titlefont.draw(sprite, "MISS COUNT: " + score.getMinbp(), 100, 360);
 				titlefont.draw(sprite, "CLEAR / PLAY : " + score.getClearcount() + " / " + score.getPlaycount(), 100,
 						330);
@@ -310,8 +319,9 @@ public class MusicSelector extends ApplicationAdapter {
 			titlefont.draw(sprite, currentsongs[selectedindex].getTitle(), 100, 600);
 		}
 
-		titlefont.draw(sprite, "MODE : " + MODE[mode], 20, 30);
-		titlefont.draw(sprite, "SORT : " + SORT[sort], 220, 30);
+		titlefont.draw(sprite, "MODE : " + MODE[mode], 20, 60);
+		titlefont.draw(sprite, "SORT : " + SORT[sort], 220, 60);
+		titlefont.draw(sprite, "LN MODE : " + LNMODE[config.getLnmode()], 20, 30);
 		sprite.end();
 
 		boolean[] numberstate = input.getNumberState();
@@ -331,6 +341,17 @@ public class MusicSelector extends ApplicationAdapter {
 			// ソートの切り替え
 			sort = (sort + 1) % SORT.length;
 			numtime[2] = 0;
+			if (dir.size() > 0) {
+				updateBar(dir.get(dir.size() - 1));
+			}
+			if (sorts != null) {
+				sorts.play();
+			}
+		}
+		if (numberstate[3] && numtime[3] != 0) {
+			// LNモードの切り替え
+			config.setLnmode((config.getLnmode() + 1) % LNMODE.length);
+			numtime[3] = 0;
 			if (dir.size() > 0) {
 				updateBar(dir.get(dir.size() - 1));
 			}
@@ -575,7 +596,11 @@ public class MusicSelector extends ApplicationAdapter {
 			List<String> hashes = new ArrayList();
 			for (int i = 0; i < currentsongs.length; i++) {
 				if (currentsongs[i] instanceof SongBar) {
-					hashes.add(((SongBar) currentsongs[i]).getSongData().getHash());
+					if (config.getLnmode() > 0 && ((SongBar) currentsongs[i]).getSongData().getLongnote() == 1) {
+						hashes.add("C" + ((SongBar) currentsongs[i]).getSongData().getHash());
+					} else {
+						hashes.add(((SongBar) currentsongs[i]).getSongData().getHash());
+					}
 				}
 				if (currentsongs[i] instanceof GradeBar) {
 					GradeBar gb = (GradeBar) currentsongs[i];
@@ -591,7 +616,18 @@ public class MusicSelector extends ApplicationAdapter {
 			Map<String, IRScoreData> m = scoredb.getScoreDatas("Player", hashes.toArray(new String[0]), false);
 			for (int i = 0; i < currentsongs.length; i++) {
 				if (currentsongs[i] instanceof SongBar) {
-					currentsongs[i].setScore(m.get(((SongBar) currentsongs[i]).getSongData().getHash()));
+					String hash;
+					if (config.getLnmode() > 0 && ((SongBar) currentsongs[i]).getSongData().getLongnote() == 1) {
+						hash = "C" + ((SongBar) currentsongs[i]).getSongData().getHash();
+					} else {
+						hash= ((SongBar) currentsongs[i]).getSongData().getHash();
+					}
+					currentsongs[i].setScore(m.get(hash));
+					if (currentsongs[i].getScore() != null && config.getLnmode() == 2
+							&& ((SongBar) currentsongs[i]).getSongData().getLongnote() == 1) {
+						currentsongs[i].getScore().setClear(currentsongs[i].getScore().getExclear());
+					}
+
 				}
 				if (currentsongs[i] instanceof GradeBar) {
 					GradeBar gb = (GradeBar) currentsongs[i];
@@ -650,6 +686,24 @@ public class MusicSelector extends ApplicationAdapter {
 						return -1;
 					}
 					return o1.getScore().getMinbp() - o2.getScore().getMinbp();
+				}
+
+			};
+		}
+		if (sort == 3) {
+			return new Comparator<Bar>() {
+				public int compare(Bar o1, Bar o2) {
+					if (o1.getScore() == null && o2.getScore() == null) {
+						return 0;
+					}
+					if (o1.getScore() == null) {
+						return 1;
+					}
+					if (o2.getScore() == null) {
+						return -1;
+					}
+					return o1.getScore().getExscore() * 1000 / o1.getScore().getNotes() - o2.getScore().getExscore()
+							* 1000 / o2.getScore().getNotes();
 				}
 
 			};

@@ -21,7 +21,6 @@ import bms.player.lunaticrave2.IRScoreData;
  * @author exch
  */
 public class PlayerResource {
-	private File f;
 	private BMSModel model;
 	private Config config;
 	private int auto;
@@ -47,6 +46,9 @@ public class PlayerResource {
 	 */
 	private boolean updateScore = true;
 	private GrooveGauge grooveGauge;
+	/**
+	 * ゲージの遷移ログ
+	 */
 	private List<Float> gauge;
 
 	/**
@@ -57,10 +59,6 @@ public class PlayerResource {
 	 * コースのBMSモデル
 	 */
 	private BMSModel[] course;
-	/**
-	 * コースファイル
-	 */
-	private File[] coursefile;
 	/**
 	 * コース何曲目
 	 */
@@ -78,13 +76,13 @@ public class PlayerResource {
 		courseindex = 0;
 		cscore = null;
 		gauge = null;
-		coursefile = null;
 	}
 
 	public boolean setBMSFile(final File f, final Config config, int autoplay) {
 		this.config = config;
 		this.auto = autoplay;
 		pattern = null;
+		String bmspath = model != null ? model.getPath() : null;
 		if (f.getPath().toLowerCase().endsWith(".bmson")) {
 			BMSONDecoder decoder = new BMSONDecoder(
 					BMSModel.LNTYPE_CHARGENOTE);
@@ -113,10 +111,9 @@ public class PlayerResource {
 		if(model.getAllTimeLines().length == 0) {
 			return false;
 		}
-		if(this.f == null || !f.getAbsolutePath().equals(this.f.getAbsolutePath())) {
+		if(bmspath == null || !f.getAbsolutePath().equals(bmspath)) {
 			// 前回と違うbmsファイルを読み込んだ場合はリソースのロード
 			// 同フォルダの違うbmsファイルでも、WAV/,BMP定義が違う可能性があるのでロード
-			this.f = f;
 			this.finished = false;
 			if(audio != null) {
 				audio.dispose();
@@ -187,7 +184,6 @@ public class PlayerResource {
 	}
 
 	public void setCourseBMSFiles(File[] files) {
-		coursefile = files;
 		List<BMSModel> models = new ArrayList();
 		for (File f : files) {
 			if (f.getPath().toLowerCase().endsWith(".bmson")) {
@@ -209,15 +205,16 @@ public class PlayerResource {
 
 	public boolean nextCourse() {
 		courseindex++;
-		if (courseindex == coursefile.length) {
+		if (courseindex == course.length) {
 			return false;
 		} else {
-			setBMSFile(coursefile[courseindex], config, auto);
+			setBMSFile(new File(course[courseindex].getPath()), config, auto);
 			return true;
 		}
 	}
 
 	public void reloadBMSFile() {
+		File f = new File(model.getPath());
 		if (f.getPath().toLowerCase().endsWith(".bmson")) {
 			BMSONDecoder decoder = new BMSONDecoder(
 					BMSModel.LNTYPE_CHARGENOTE);

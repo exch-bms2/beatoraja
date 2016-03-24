@@ -106,7 +106,8 @@ public class Config {
 	/**
 	 * アシストオプション:LNアシスト
 	 */
-	private int lnassist = 0;
+	private boolean legacynote = false;
+	private int lnmode = 0;
 	/**
 	 * アシストオプション:判定拡大
 	 */
@@ -288,12 +289,12 @@ public class Config {
 		this.bpmguide = bpmguide;
 	}
 
-	public int getLnassist() {
-		return lnassist;
+	public int getLnmode() {
+		return lnmode;
 	}
 
-	public void setLnassist(int lnassist) {
-		this.lnassist = lnassist;
+	public void setLnmode(int lnmode) {
+		this.lnmode = lnmode;
 	}
 
 	public String getVlcpath() {
@@ -426,5 +427,13 @@ public class Config {
 
 	public void setControllerasign(int[] controllerasign) {
 		this.controllerasign = controllerasign;
+	}
+
+	public boolean isLegacynote() {
+		return legacynote;
+	}
+
+	public void setLegacynote(boolean legacynote) {
+		this.legacynote = legacynote;
 	}
 }

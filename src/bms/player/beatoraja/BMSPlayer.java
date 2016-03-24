@@ -125,12 +125,13 @@ public class BMSPlayer extends ApplicationAdapter {
 				score = false;
 			}
 
-			if (config.getLnassist() == 1) {
+			if (config.isLegacynote()) {
 				new LongNoteModifier().modify(model);
 				assist = 2;
 				score = false;
 			}
-			if (config.getLnassist() == 2) {
+			// TODO LN実装時に追加
+			if (config.getLnmode() == 2) {
 				model.setLntype(BMSModel.LNTYPE_HELLCHARGENOTE);
 			} else {
 				model.setLntype(BMSModel.LNTYPE_CHARGENOTE);				

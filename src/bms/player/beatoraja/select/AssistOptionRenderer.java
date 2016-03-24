@@ -17,8 +17,6 @@ public class AssistOptionRenderer {
 	
 	// TODO HELL CHARGEはアシストオプションに含めない方がいいかも
 
-	private static final String[] LNOP = { "OFF", "LEGACY", "HELL CHARGE" };
-
 	private ShapeRenderer shape;
 	private SpriteBatch sprite;
 	private BitmapFont titlefont;
@@ -43,7 +41,7 @@ public class AssistOptionRenderer {
 		}
 		if (keystate[3] && keytime[3] != 0) {
 			keytime[3] = 0;
-			config.setLnassist(config.getLnassist() + 1 == 3 ? 0 : config.getLnassist() + 1);
+			config.setLegacynote(!config.isLegacynote());
 		}
 		if (keystate[5] && keytime[5] != 0) {
 			keytime[5] = 0;
@@ -73,8 +71,8 @@ public class AssistOptionRenderer {
 
 		titlefont.setColor(config.isConstant() ? Color.WHITE : Color.valueOf("444444"));
 		titlefont.draw(sprite, "CONSTANT", 110, 490);
-		titlefont.setColor(config.getLnassist() >= 1 ? Color.WHITE : Color.valueOf("444444"));
-		titlefont.draw(sprite, LNOP[config.getLnassist()], 200, 520);
+		titlefont.setColor(config.isLegacynote() ? Color.WHITE : Color.valueOf("444444"));
+		titlefont.draw(sprite, "LEGACY NOTE", 200, 520);
 		titlefont.setColor(config.isBpmguide() ? Color.WHITE : Color.valueOf("444444"));
 		titlefont.draw(sprite, "BPM GUIDE", 300, 490);
 		titlefont.setColor(config.isExpandjudge() ? Color.WHITE : Color.valueOf("444444"));

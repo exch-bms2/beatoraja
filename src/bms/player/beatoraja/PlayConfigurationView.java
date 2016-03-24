@@ -172,7 +172,7 @@ public class PlayConfigurationView implements Initializable {
 
 		constant.setSelected(config.isConstant());
 		bpmguide.setSelected(config.isBpmguide());
-		legacy.setSelected(config.getLnassist() == 1);
+		legacy.setSelected(config.isLegacynote());
 
 		maxfps.getValueFactory().setValue(config.getMaxFramePerSecond());
 		audiobuffer.getValueFactory().setValue(
@@ -208,7 +208,7 @@ public class PlayConfigurationView implements Initializable {
 
 		config.setConstant(constant.isSelected());
 		config.setBpmguide(bpmguide.isSelected());
-		config.setLnassist(legacy.isSelected() ? 1 : 0);
+		config.setLegacynote(legacy.isSelected());
 
 		config.setMaxFramePerSecond(maxfps.getValue());
 		config.setAudioDeviceBufferSize(audiobuffer.getValue());

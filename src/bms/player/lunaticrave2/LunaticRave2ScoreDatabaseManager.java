@@ -51,7 +51,7 @@ public class LunaticRave2ScoreDatabaseManager {
 			// conn.setAutoCommit(false);
 			pstmt = conn.prepareStatement(sql);
 
-			// songテーブル作成(存在しない場合)
+			// sxoreテーブル作成(存在しない場合)
 			pstmt.setString(1, "score");
 			rs = pstmt.executeQuery();
 			if (!rs.next()) {
@@ -295,7 +295,7 @@ public class LunaticRave2ScoreDatabaseManager {
 					score.getMinbp(), score.getPlaycount(),
 					score.getClearcount(),
 					score.getPlaycount() - score.getClearcount(),
-					score.getRank(), 0, 0, 0, "", "", 0, 0, score.getOption(),
+					score.getRank(), 0, 0, 0, "", "", 0, score.getExclear(), score.getOption(),
 					0, 0);
 			con.commit();
 			con.close();

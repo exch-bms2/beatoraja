@@ -23,6 +23,7 @@ public class SongData {
 	private int level;
 	private int exlevel;
 	private int mode;
+	private int longnote;
 
 	public int getFavorite() {
 		return favorite;
@@ -124,5 +125,11 @@ public class SongData {
 	}
 	public void setDate(int date) {
 		this.date = date;
+	}
+	public int getLongnote() {
+		return longnote;
+	}
+	public void setLongnote(int longnote) {
+		this.longnote = longnote;
 	}
 }
