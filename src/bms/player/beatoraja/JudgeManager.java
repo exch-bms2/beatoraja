@@ -15,15 +15,24 @@ import bms.player.beatoraja.input.BMSPlayerInputProcessor;
  * @author exch
  */
 public class JudgeManager {
-	
+
 	// TODO LNモードの実装
 	// TODO bug:稀にノーツカウント漏れがある(BSS絡み？)
 
 	private BMSPlayer main;
 	private BMSModel model;
 
+	/**
+	 * 判定アルゴリズム:LR2風
+	 */
 	public static final int JUDGE_ALGORITHM_LR2 = 0;
+	/**
+	 * 判定アルゴリズム:本家風
+	 */
 	public static final int JUDGE_ALGORITHM_IIDX = 1;
+	/**
+	 * 判定アルゴリズム:最下ノーツ優先判定
+	 */
 	public static final int JUDGE_ALGORITHM_LOWEST_NOTE = 2;
 	/**
 	 * 現在の判定カウント内訳
@@ -77,12 +86,12 @@ public class JudgeManager {
 
 	private static final int[] judgetable = { 20, 60, 165, 315, 0, 1000 };
 
-			private int[] judge;
+	private int[] judge;
 
-			private int pos = 0;
-			private int judgetype = 0;
+	private int pos = 0;
+	private int judgetype = 0;
 
-			private int prevtime;
+	private int prevtime;
 
 	public JudgeManager(BMSPlayer main, BMSModel model) {
 		this.main = main;
@@ -134,10 +143,10 @@ public class JudgeManager {
 			break;
 		}
 		Arrays.fill(bomb, -1000);
-		
+
 		judge = new int[6];
-		for(int i = 0;i < judgetable.length;i++) {
-			if(i < 4) {
+		for (int i = 0; i < judgetable.length; i++) {
+			if (i < 4) {
 				judge[i] = judgetable[i] * model.getJudgerank() / 100;
 			} else {
 				judge[i] = judgetable[i];
@@ -186,8 +195,8 @@ public class JudgeManager {
 			}
 		}
 		for (int key = 0; key < keyassign.length; key++) {
-			if(passing[keyassign[key]] != null) {
-				if(inclease[keyassign[key]]) {
+			if (passing[keyassign[key]] != null) {
+				if (inclease[keyassign[key]]) {
 					passingcount[keyassign[key]] += (time - prevtime);
 					if (passingcount[keyassign[key]] > 100) {
 						main.getGauge().addValue(main.getGauge().getGaugeValue(1));
@@ -204,7 +213,6 @@ public class JudgeManager {
 				}
 			}
 		}
-
 
 		for (int key = 0; key < keyassign.length; key++) {
 			if (keytime[key] != 0) {
@@ -231,8 +239,7 @@ public class JudgeManager {
 										bomb[lane] = ptime;
 									}
 									final int dtime = (int) (processing[lane].getEnd().getTime() - ptime);
-									this.update(lane, j < 4 ? j : 4, time,
-											dtime);
+									this.update(lane, j < 4 ? j : 4, time, dtime);
 									main.update(j);
 									processing[lane].setState(dtime >= 0 ? dtime + 1 : dtime);
 									// System.out.println("打鍵:" + time +
@@ -347,7 +354,7 @@ public class JudgeManager {
 						} else {
 							Note n = null;
 							boolean sound = false;
-							for (TimeLine tl2 : timelines) {								
+							for (TimeLine tl2 : timelines) {
 								if (tl2.getNote(lane) != null) {
 									n = tl2.getNote(lane);
 								}
@@ -512,6 +519,10 @@ public class JudgeManager {
 		return count[0][0] + count[0][1] + count[1][0] + count[1][1] + count[2][0] + count[2][1] + count[3][0]
 				+ count[3][1] + count[4][0] + count[4][1] + count[5][0] + count[5][1];
 
+	}
+
+	public int[] getJudgeTimeRegion() {
+		return judge;
 	}
 
 	public int getJudgeCount(int judge) {
