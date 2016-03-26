@@ -52,10 +52,6 @@ public class MusicSelector extends ApplicationAdapter {
 	 * 楽曲DBアクセサ
 	 */
 	private LunaticRave2SongDatabaseManager songdb;
-	/**
-	 * スコアDBアクセサ
-	 */
-	private LunaticRave2ScoreDatabaseManager scoredb;
 
 	private int mode;
 
@@ -97,9 +93,6 @@ public class MusicSelector extends ApplicationAdapter {
 		this.config = config;
 		try {
 			Class.forName("org.sqlite.JDBC");
-			scoredb = new LunaticRave2ScoreDatabaseManager(new File(".").getAbsoluteFile().getParent(), "/", "/");
-			scoredb.createTable("Player");
-			Logger.getGlobal().info("スコアデータベース接続");
 			songdb = main.getSongDatabase();
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
@@ -252,11 +245,28 @@ public class MusicSelector extends ApplicationAdapter {
 			titlefont.draw(sprite, sd.getTitle(), x + 20, y + barh - 12);
 			sprite.end();
 
-			if (currentsongs[index].getScore() != null) {
-				shape.begin(ShapeType.Filled);
-				shape.setColor(Color.valueOf(LAMP[currentsongs[index].getScore().getClear()]));
-				shape.rect(x, y, 15, barh - 6);
-				shape.end();
+			if (sd instanceof GradeBar) {
+				int lamp = -1;
+				if(sd.getScore() != null) {
+					lamp = sd.getScore().getClear();
+				}
+				GradeBar gb = (GradeBar) sd;
+				if(gb.getMirrorScore() != null) {
+					lamp = (lamp > gb.getMirrorScore().getClear()) ? lamp : gb.getMirrorScore().getClear();
+				}
+				if (lamp != -1) {
+					shape.begin(ShapeType.Filled);
+					shape.setColor(Color.valueOf(LAMP[lamp]));
+					shape.rect(x, y, 15, barh - 6);
+					shape.end();
+				}				
+			} else {
+				if (sd.getScore() != null) {
+					shape.begin(ShapeType.Filled);
+					shape.setColor(Color.valueOf(LAMP[currentsongs[index].getScore().getClear()]));
+					shape.rect(x, y, 15, barh - 6);
+					shape.end();
+				}				
 			}
 
 			if (sd instanceof SongBar) {
@@ -307,8 +317,9 @@ public class MusicSelector extends ApplicationAdapter {
 						330);
 			}
 		}
-		// TODO 段位用の表示(ミラー段位、EX段位)
+		// 段位用の表示(ミラー段位、EX段位)
 		if (currentsongs[selectedindex] instanceof GradeBar) {
+			GradeBar gb = (GradeBar) currentsongs[selectedindex];
 			titlefont.draw(sprite, currentsongs[selectedindex].getTitle(), 100, 600);
 			if (currentsongs[selectedindex].getScore() != null) {
 				IRScoreData score = currentsongs[selectedindex].getScore();
@@ -319,6 +330,16 @@ public class MusicSelector extends ApplicationAdapter {
 				titlefont.draw(sprite, "MISS COUNT: " + score.getMinbp(), 100, 360);
 				titlefont.draw(sprite, "CLEAR / PLAY : " + score.getClearcount() + " / " + score.getPlaycount(), 100,
 						330);
+			}
+			if (gb.getMirrorScore() != null) {
+				IRScoreData score = gb.getMirrorScore();
+				titlefont.setColor(Color.valueOf(LAMP[score.getClear()]));
+				titlefont.draw(sprite, CLEAR[score.getClear()], 100, 270);
+				titlefont.setColor(Color.WHITE);
+				titlefont.draw(sprite, "EX-SCORE  : " + score.getExscore() + " / " + (score.getNotes() * 2), 100, 240);
+				titlefont.draw(sprite, "MISS COUNT: " + score.getMinbp(), 100, 210);
+				titlefont.draw(sprite, "CLEAR / PLAY : " + score.getClearcount() + " / " + score.getPlaycount(), 100,
+						180);
 			}
 		}
 
@@ -608,50 +629,26 @@ public class MusicSelector extends ApplicationAdapter {
 			parameter.characters = str.toString();
 			titlefont = generator.generateFont(parameter);
 
-			List<String> hashes = new ArrayList();
 			for (int i = 0; i < currentsongs.length; i++) {
 				if (currentsongs[i] instanceof SongBar) {
-					if (config.getLnmode() > 0 && ((SongBar) currentsongs[i]).getSongData().getLongnote() == 1) {
-						hashes.add("C" + ((SongBar) currentsongs[i]).getSongData().getHash());
-					} else {
-						hashes.add(((SongBar) currentsongs[i]).getSongData().getHash());
-					}
-				}
-				if (currentsongs[i] instanceof GradeBar) {
-					GradeBar gb = (GradeBar) currentsongs[i];
-					if (gb.existsAllSongs()) {
-						String hash = "";
-						for (SongData sd : gb.getSongDatas()) {
-							hash += sd.getHash();
-						}
-						hashes.add(hash);
-					}
-				}
-			}
-			Map<String, IRScoreData> m = scoredb.getScoreDatas("Player", hashes.toArray(new String[0]), false);
-			for (int i = 0; i < currentsongs.length; i++) {
-				if (currentsongs[i] instanceof SongBar) {
-					String hash;
-					if (config.getLnmode() > 0 && ((SongBar) currentsongs[i]).getSongData().getLongnote() == 1) {
-						hash = "C" + ((SongBar) currentsongs[i]).getSongData().getHash();
-					} else {
-						hash = ((SongBar) currentsongs[i]).getSongData().getHash();
-					}
-					currentsongs[i].setScore(m.get(hash));
+					SongData sd = ((SongBar)currentsongs[i]).getSongData();
+					currentsongs[i].setScore(main.getPlayDataAccessor().readScoreData(sd.getHash(), sd.getLongnote() == 1, config.getLnmode()));
 					if (currentsongs[i].getScore() != null && config.getLnmode() == 2
 							&& ((SongBar) currentsongs[i]).getSongData().getLongnote() == 1) {
 						currentsongs[i].getScore().setClear(currentsongs[i].getScore().getExclear());
 					}
-
 				}
 				if (currentsongs[i] instanceof GradeBar) {
 					GradeBar gb = (GradeBar) currentsongs[i];
 					if (gb.existsAllSongs()) {
 						String hash = "";
+						boolean ln = false;
 						for (SongData sd : gb.getSongDatas()) {
 							hash += sd.getHash();
+							ln |= sd.getLongnote() == 1;
 						}
-						currentsongs[i].setScore(m.get(hash));
+						gb.setScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), false));
+						gb.setMirrorScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), true));
 					}
 				}
 			}
@@ -842,6 +839,8 @@ class GradeBar extends Bar {
 	private SongData[] songs;
 	private String name;
 
+	private IRScoreData score;
+
 	public GradeBar(String name, SongData[] songs) {
 		this.songs = songs;
 		this.name = name;
@@ -864,4 +863,13 @@ class GradeBar extends Bar {
 		}
 		return true;
 	}
+	
+	public IRScoreData getMirrorScore() {
+		return score;
+	}
+
+	public void setMirrorScore(IRScoreData score) {
+		this.score = score;
+	}
+
 }

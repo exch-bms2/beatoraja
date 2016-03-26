@@ -1,6 +1,8 @@
 package bms.player.beatoraja.result;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -17,7 +19,10 @@ import bms.model.TimeLine;
 import bms.player.beatoraja.Config;
 import bms.player.beatoraja.MainController;
 import bms.player.beatoraja.PlayerResource;
+import bms.player.beatoraja.ReplayData;
 import bms.player.beatoraja.gauge.GrooveGauge;
+import bms.player.beatoraja.input.KeyInputLog;
+import bms.player.beatoraja.pattern.PatternModifyLog;
 import bms.player.lunaticrave2.IRScoreData;
 
 import com.badlogic.gdx.ApplicationAdapter;
@@ -34,6 +39,8 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFont
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.JsonWriter.OutputType;
 
 /**
  * リザルト
@@ -198,6 +205,9 @@ public class MusicResult extends ApplicationAdapter {
 						resource.getScoreData().getClear() > GrooveGauge.CLEARTYPE_FAILED ? "Stage Cleared"
 								: "Stage Failed", w * 3 / 4, h / 2);
 			}
+			if (saveReplay) {
+				titlefont.draw(sprite, "Replay Saved", w * 3 / 4, h / 4);
+			}
 		}
 
 		if (score != null) {
@@ -280,7 +290,7 @@ public class MusicResult extends ApplicationAdapter {
 				if (keystate[4]) {
 					keytime[4] = 0;
 					// オプションを変更せず同じ譜面でリプレイ
-					resource.setPatternModifyLog(null);
+					resource.getReplayData().pattern = null;
 					resource.reloadBMSFile();
 					main.changeState(MainController.STATE_PLAYBMS, resource);
 				} else if (keystate[6]) {
@@ -294,9 +304,22 @@ public class MusicResult extends ApplicationAdapter {
 				}
 			}
 		}
+
+		if (resource.getCourseBMSModels() == null && resource.getScoreData() != null
+				&& (main.getInputProcessor().getNumberState()[1])) {
+			if (!saveReplay && resource.isUpdateScore()) {
+				ReplayData rd = resource.getReplayData();
+				main.getPlayDataAccessor()
+						.wrireReplayData(rd, resource.getBMSModel(), resource.getConfig().getLnmode());
+				saveReplay = true;
+			}
+		}
 	}
 
+	private boolean saveReplay = false;
+
 	public void updateScoreDatabase() {
+		saveReplay = false;
 		BMSModel model = resource.getBMSModel();
 		IRScoreData newscore = resource.getScoreData();
 		String hash = model.getHash();
@@ -308,54 +331,20 @@ public class MusicResult extends ApplicationAdapter {
 		if (newscore == null) {
 			return;
 		}
-		IRScoreData score = main.getScoreDatabase().getScoreData("Player", hash, false);
+		IRScoreData score = main.getPlayDataAccessor().readScoreData(resource.getBMSModel(),
+				resource.getConfig().getLnmode());
 		if (score == null) {
 			score = new IRScoreData();
 		}
-		int clear;
 		if (ln && resource.getConfig().getLnmode() == 2) {
-			clear = oldclear = score.getExclear();
+			oldclear = score.getExclear();
 		} else {
-			clear = oldclear = score.getClear();
+			oldclear = score.getClear();
 		}
 		oldexscore = score.getExscore();
 		oldmisscount = score.getMinbp();
-		score.setHash(hash);
-		score.setNotes(model.getTotalNotes());
-
-		if (newscore.getClear() != GrooveGauge.CLEARTYPE_FAILED) {
-			score.setClearcount(score.getClearcount() + 1);
-		}
-		if (clear < newscore.getClear()) {
-			if (ln && resource.getConfig().getLnmode() == 2) {
-				score.setExclear(newscore.getClear());				
-			} else {
-				score.setClear(newscore.getClear());				
-			}
-			score.setOption(resource.getConfig().getRandom());
-		}
-
-		final int pgreat = newscore.getPg();
-		final int great = newscore.getGr();
-		final int good = newscore.getGd();
-		final int bad = newscore.getBd();
-		final int poor = newscore.getPr();
-		int exscore = pgreat * 2 + great;
-		if (score.getExscore() < exscore && resource.isUpdateScore()) {
-			score.setPg(pgreat);
-			score.setGr(great);
-			score.setGd(good);
-			score.setBd(bad);
-			score.setPr(poor);
-		}
-		if (score.getMinbp() > newscore.getMinbp() && resource.isUpdateScore()) {
-			score.setMinbp(newscore.getMinbp());
-		}
-		score.setPlaycount(score.getPlaycount() + 1);
-		score.setLastupdate(Calendar.getInstance(TimeZone.getDefault()).getTimeInMillis() / 1000L);
-		main.getScoreDatabase().setScoreData("Player", score);
-
-		Logger.getGlobal().info("スコアデータベース更新完了 ");
+		main.getPlayDataAccessor().writeScoreDara(resource.getScoreData(), resource.getBMSModel(),
+				resource.getConfig().getLnmode(), resource.isUpdateScore());
 
 		// コースモードの場合はコーススコアに加算・累積する
 		if (resource.getCourseBMSModels() != null) {

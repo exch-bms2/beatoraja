@@ -64,7 +64,7 @@ public class PlayerResource {
 	 */
 	private int courseindex;
 
-	private PatternModifyLog[] pattern;
+	private ReplayData replay;
 	/**
 	 * コーススコア
 	 */
@@ -81,7 +81,7 @@ public class PlayerResource {
 	public boolean setBMSFile(final File f, final Config config, int autoplay) {
 		this.config = config;
 		this.auto = autoplay;
-		pattern = null;
+		replay = new ReplayData();
 		String bmspath = model != null ? model.getPath() : null;
 		if (f.getPath().toLowerCase().endsWith(".bmson")) {
 			BMSONDecoder decoder = new BMSONDecoder(
@@ -242,12 +242,12 @@ public class PlayerResource {
 		this.grooveGauge = grooveGauge;
 	}
 
-	public PatternModifyLog[] getPatternModifyLog() {
-		return pattern;
+	public ReplayData getReplayData() {
+		return replay;
 	}
 
-	public void setPatternModifyLog(PatternModifyLog[] pattern) {
-		this.pattern = pattern;
+	public void setReplayData(ReplayData replay) {
+		this.replay = replay;
 	}
 
 	public IRScoreData getCourseScoreData() {
