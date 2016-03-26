@@ -613,7 +613,7 @@ public class LunaticRave2SongDatabaseManager {
 					s = s.substring(path.length() + 1);
 				}
 				qr.update(conn, sql, s);
-
+				// TODO txtファイルの有無の判定とrecordへの反映
 				sql = "insert into song " + "(hash, title, subtitle, genre, artist, subartist, tag, path, type, "
 						+ "folder, stagefile, banner, backbmp, parent, level, difficulty, "
 						+ "maxbpm, minbpm, mode, judge, longnote, bga, random, "
@@ -626,7 +626,7 @@ public class LunaticRave2SongDatabaseManager {
 								.getBanner(), model.getBackbmp(),
 						crc32(dir.getParentFile().getParentFile().getAbsolutePath(), rootdirs, path), model
 								.getPlaylevel(), model.getDifficulty(), model.getMaxBPM(), model.getMinBPM(), model
-								.getUseKeys(), model.getJudgerank(), model.getLNObject() != null ? 1 : 0, model
+								.getUseKeys(), model.getJudgerank(), model.containsLongNote() ? 1 : 0, model
 								.getBgaList().length > 0 ? 1 : 0, model.getRandom() > 1 ? 1 : 0,
 						dir.lastModified() / 1000, 0, 0, model.getTotalNotes(), Calendar.getInstance()
 								.getTimeInMillis() / 1000, 0);

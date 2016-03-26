@@ -259,6 +259,21 @@ public class MusicSelector extends ApplicationAdapter {
 				shape.end();
 			}
 
+			if (sd instanceof SongBar) {
+				SongData song = ((SongBar) sd).getSongData();
+				if (song.getLongnote() != 0) {
+					shape.begin(ShapeType.Filled);
+					shape.setColor(Color.valueOf("222200"));
+					shape.rect(x - 36, y - 4, 30, barh - 6);
+					shape.setColor(Color.YELLOW);
+					shape.rect(x - 40, y, 30, barh - 6);
+					shape.end();
+					sprite.begin();
+					titlefont.setColor(Color.BLACK);
+					titlefont.draw(sprite, "LN", x - 36, y + barh - 12);
+					sprite.end();
+				}
+			}
 		}
 
 		sprite.begin();
@@ -620,7 +635,7 @@ public class MusicSelector extends ApplicationAdapter {
 					if (config.getLnmode() > 0 && ((SongBar) currentsongs[i]).getSongData().getLongnote() == 1) {
 						hash = "C" + ((SongBar) currentsongs[i]).getSongData().getHash();
 					} else {
-						hash= ((SongBar) currentsongs[i]).getSongData().getHash();
+						hash = ((SongBar) currentsongs[i]).getSongData().getHash();
 					}
 					currentsongs[i].setScore(m.get(hash));
 					if (currentsongs[i].getScore() != null && config.getLnmode() == 2
