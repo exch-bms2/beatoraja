@@ -20,7 +20,6 @@ import com.badlogic.gdx.graphics.Texture;
 public class BGAProcessor {
 
 	// TODO VLC依存の切り離し
-	// TODO ミスレイヤーBGAのキャッシュと開幕BGAの先読みキャッシュ(getBGAできる段階でないと出来ないので難しいか)
 
 	private BMSModel model;
 	private Config config;
@@ -151,6 +150,15 @@ public class BGAProcessor {
 		int count = 0;
 		for (TimeLine tl : model.getAllTimeLines()) {
 			int bga = tl.getBGA();
+			if (bga != -1 && bgacache[bga % bgacache.length] == null) {
+				Pixmap pix = bgamap[bga];
+				if (pix != null) {
+					bgacache[bga % bgacache.length] = new Texture(pix);
+					bgacacheid[bga % bgacache.length] = bga;
+					count++;
+				}
+			}
+			bga = tl.getLayer();
 			if (bga != -1 && bgacache[bga % bgacache.length] == null) {
 				Pixmap pix = bgamap[bga];
 				if (pix != null) {
