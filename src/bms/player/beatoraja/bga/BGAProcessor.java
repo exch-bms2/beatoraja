@@ -147,6 +147,9 @@ public class BGAProcessor {
 	 * BGAの初期データをあらかじめキャッシュする
 	 */
 	public void prepare() {
+		if(model == null) {
+			return;
+		}
 		long l = System.currentTimeMillis();
 		int count = 0;
 		for (TimeLine tl : model.getAllTimeLines()) {

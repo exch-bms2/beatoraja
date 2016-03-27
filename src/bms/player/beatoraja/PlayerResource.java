@@ -24,6 +24,8 @@ public class PlayerResource {
 	private BMSModel model;
 	private Config config;
 	private int auto;
+	
+	private int bgashow;
 	/**
 	 * BMSの音源リソース
 	 */
@@ -111,9 +113,10 @@ public class PlayerResource {
 		if(model.getAllTimeLines().length == 0) {
 			return false;
 		}
-		if(bmspath == null || !f.getAbsolutePath().equals(bmspath)) {
-			// 前回と違うbmsファイルを読み込んだ場合はリソースのロード
+		if(bmspath == null || !f.getAbsolutePath().equals(bmspath) || bgashow != config.getBga()) {
+			// 前回と違うbmsファイルを読み込んだ場合、BGAオプション変更時はリソースのロード
 			// 同フォルダの違うbmsファイルでも、WAV/,BMP定義が違う可能性があるのでロード
+			this.bgashow = config.getBga();
 			this.finished = false;
 			if(audio != null) {
 				audio.dispose();
