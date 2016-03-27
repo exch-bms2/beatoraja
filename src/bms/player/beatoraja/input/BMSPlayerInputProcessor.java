@@ -24,25 +24,20 @@ import com.badlogic.gdx.math.Vector3;
 public class BMSPlayerInputProcessor {
 
 	private KeyBoardInputProcesseor kbinput;
-	
+
 	private List<BMSControllerListener> bminput = new ArrayList();
-	
+
 	public BMSPlayerInputProcessor() {
-		kbinput = new KeyBoardInputProcesseor(new int[] {
-				Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.F, Keys.V,
-				Keys.SHIFT_LEFT, Keys.CONTROL_LEFT, Keys.COMMA, Keys.L,
-				Keys.PERIOD, Keys.SEMICOLON, Keys.SLASH, Keys.APOSTROPHE,
-				Keys.UNKNOWN, Keys.SHIFT_RIGHT, Keys.CONTROL_RIGHT, Keys.Q,
-				Keys.W });
+		kbinput = new KeyBoardInputProcesseor(new int[] { Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.F, Keys.V,
+				Keys.SHIFT_LEFT, Keys.CONTROL_LEFT, Keys.COMMA, Keys.L, Keys.PERIOD, Keys.SEMICOLON, Keys.SLASH,
+				Keys.APOSTROPHE, Keys.UNKNOWN, Keys.SHIFT_RIGHT, Keys.CONTROL_RIGHT, Keys.Q, Keys.W });
 		Gdx.input.setInputProcessor(kbinput);
 		int player = 0;
 		for (Controller controller : Controllers.getControllers()) {
 			Logger.getGlobal().info("コントローラーを検出 : " + controller.getName());
-			BMSControllerListener bm = new BMSControllerListener(player, new int[] {
-					BMKeys.BUTTON_3, BMKeys.BUTTON_6, BMKeys.BUTTON_2,
-					BMKeys.BUTTON_7, BMKeys.BUTTON_1, BMKeys.BUTTON_4,
-					BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN, BMKeys.BUTTON_8,
-					BMKeys.BUTTON_9 });
+			BMSControllerListener bm = new BMSControllerListener(player,
+					new int[] { BMKeys.BUTTON_3, BMKeys.BUTTON_6, BMKeys.BUTTON_2, BMKeys.BUTTON_7, BMKeys.BUTTON_1,
+							BMKeys.BUTTON_4, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN, BMKeys.BUTTON_8, BMKeys.BUTTON_9 });
 			controller.addListener(bm);
 			bminput.add(bm);
 			if (player == 1) {
@@ -58,8 +53,7 @@ public class BMSPlayerInputProcessor {
 	 */
 	private boolean[] keystate = new boolean[18];
 	/**
-	 * 各キーの最終更新時間
-	 * TODO これを他クラスから編集させない方がいいかも
+	 * 各キーの最終更新時間 TODO これを他クラスから編集させない方がいいかも
 	 */
 	private long[] time = new long[18];
 	/**
@@ -95,16 +89,16 @@ public class BMSPlayerInputProcessor {
 	public void setKeyassign(int[] keyassign) {
 		kbinput.setKeyAssign(keyassign);
 	}
-	
+
 	public void setControllerassign(int[] buttons) {
-		for(BMSControllerListener controller : bminput) {
+		for (BMSControllerListener controller : bminput) {
 			controller.setControllerKeyAssign(buttons);
 		}
 	}
-	
+
 	public void setStartTime(long starttime) {
 		this.starttime = starttime;
-		if(starttime != 0) {
+		if (starttime != 0) {
 			Arrays.fill(time, 0);
 			keylog.clear();
 		}
@@ -215,31 +209,25 @@ public class BMSPlayerInputProcessor {
 	 */
 	class KeyBoardInputProcesseor implements InputProcessor {
 
-		private int[] keys = new int[] { Keys.Z, Keys.S, Keys.X, Keys.D,
-				Keys.C, Keys.F, Keys.V, Keys.SHIFT_LEFT, Keys.CONTROL_LEFT,
-				Keys.COMMA, Keys.L, Keys.PERIOD, Keys.SEMICOLON, Keys.SLASH,
-				Keys.APOSTROPHE, Keys.UNKNOWN, Keys.SHIFT_RIGHT,
-				Keys.CONTROL_RIGHT };
-		private int[] numbers = new int[] { Keys.NUM_0, Keys.NUM_1, Keys.NUM_2,
-				Keys.NUM_3 };
-		private int[] cover = new int[] { Keys.UP, Keys.DOWN, Keys.LEFT,
-				Keys.RIGHT };
-		private int[] function = new int[] { Keys.F1, Keys.F2, Keys.F3,
-				Keys.F4, Keys.F5, Keys.F6, Keys.F7, Keys.F8, Keys.F9, Keys.F10,
-				Keys.F11, Keys.F12 };
+		private int[] keys = new int[] { Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.F, Keys.V, Keys.SHIFT_LEFT,
+				Keys.CONTROL_LEFT, Keys.COMMA, Keys.L, Keys.PERIOD, Keys.SEMICOLON, Keys.SLASH, Keys.APOSTROPHE,
+				Keys.UNKNOWN, Keys.SHIFT_RIGHT, Keys.CONTROL_RIGHT };
+		private int[] numbers = new int[] { Keys.NUM_0, Keys.NUM_1, Keys.NUM_2, Keys.NUM_3, Keys.NUM_4, Keys.NUM_5,
+				Keys.NUM_6, Keys.NUM_7, Keys.NUM_8, Keys.NUM_9 };
+		private int[] cover = new int[] { Keys.UP, Keys.DOWN, Keys.LEFT, Keys.RIGHT };
+		private int[] function = new int[] { Keys.F1, Keys.F2, Keys.F3, Keys.F4, Keys.F5, Keys.F6, Keys.F7, Keys.F8,
+				Keys.F9, Keys.F10, Keys.F11, Keys.F12 };
 		private int[] control = new int[] { Keys.Q, Keys.W };
 		private int exit = Keys.ESCAPE;
 
 		public KeyBoardInputProcesseor(int[] keys) {
 			this.setKeyAssign(keys);
 		}
-		
+
 		public void setKeyAssign(int[] keys) {
-			this.keys = new int[] { keys[0], keys[1], keys[2], keys[3],
-					keys[4], keys[5], keys[6], keys[7], keys[8], keys[9],
-					keys[10], keys[11], keys[12], keys[13], keys[14], keys[15],
-					keys[16], keys[17] };
-			this.control = new int[] { keys[18], keys[19] };			
+			this.keys = new int[] { keys[0], keys[1], keys[2], keys[3], keys[4], keys[5], keys[6], keys[7], keys[8],
+					keys[9], keys[10], keys[11], keys[12], keys[13], keys[14], keys[15], keys[16], keys[17] };
+			this.control = new int[] { keys[18], keys[19] };
 		}
 
 		public boolean keyDown(int keycode) {
@@ -386,23 +374,21 @@ public class BMSPlayerInputProcessor {
 			this.setControllerKeyAssign(buttons);
 		}
 
-		private int[] buttons = new int[] { BMKeys.BUTTON_3, BMKeys.BUTTON_6,
-				BMKeys.BUTTON_2, BMKeys.BUTTON_7, BMKeys.BUTTON_1,
-				BMKeys.BUTTON_4, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN };
+		private int[] buttons = new int[] { BMKeys.BUTTON_3, BMKeys.BUTTON_6, BMKeys.BUTTON_2, BMKeys.BUTTON_7,
+				BMKeys.BUTTON_1, BMKeys.BUTTON_4, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN };
 		private int start = BMKeys.BUTTON_8;
 		private int select = BMKeys.BUTTON_9;
 
 		public void setControllerKeyAssign(int[] buttons) {
-			this.buttons = new int[] { buttons[0], buttons[1], buttons[2],
-					buttons[3], buttons[4], buttons[5], buttons[6], buttons[7],
-					buttons[8] };
+			this.buttons = new int[] { buttons[0], buttons[1], buttons[2], buttons[3], buttons[4], buttons[5],
+					buttons[6], buttons[7], buttons[8] };
 			this.start = buttons[9];
-			this.select = buttons[10];			
+			this.select = buttons[10];
 		}
-		
-		public boolean accelerometerMoved(Controller arg0, int arg1,
-				Vector3 arg2) {
-			Logger.getGlobal().info("controller : " + player + " accelerometer moved :" + arg1 + " - " + arg2.x + " " + arg2.y + " " + arg2.z);
+
+		public boolean accelerometerMoved(Controller arg0, int arg1, Vector3 arg2) {
+			Logger.getGlobal().info("controller : " + player + " accelerometer moved :" + arg1 + " - " + arg2.x + " "
+					+ arg2.y + " " + arg2.z);
 			return false;
 		}
 
@@ -454,7 +440,8 @@ public class BMSPlayerInputProcessor {
 				}
 			}
 			axis[arg1] = arg2;
-//			Logger.getGlobal().info("controller : " + player +"axis moved :" + arg1 + " - " + arg2);
+			// Logger.getGlobal().info("controller : " + player +"axis moved :"
+			// + arg1 + " - " + arg2);
 			return false;
 		}
 
@@ -473,7 +460,8 @@ public class BMSPlayerInputProcessor {
 				setSelectPressed(true);
 			}
 
-//			Logger.getGlobal().info("controller : " + player +"button pressed : " + keycode);
+			// Logger.getGlobal().info("controller : " + player +"button pressed
+			// : " + keycode);
 			return false;
 		}
 
@@ -506,17 +494,17 @@ public class BMSPlayerInputProcessor {
 		}
 
 		public boolean povMoved(Controller arg0, int arg1, PovDirection arg2) {
-			Logger.getGlobal().info("controller : " + player +"pov moved : " + arg1 + " - " + arg2.ordinal());
+			Logger.getGlobal().info("controller : " + player + "pov moved : " + arg1 + " - " + arg2.ordinal());
 			return false;
 		}
 
 		public boolean xSliderMoved(Controller arg0, int arg1, boolean arg2) {
-			Logger.getGlobal().info("controller : " + player +"xslider moved : " + arg1 + " - " + arg2);
+			Logger.getGlobal().info("controller : " + player + "xslider moved : " + arg1 + " - " + arg2);
 			return false;
 		}
 
 		public boolean ySliderMoved(Controller arg0, int arg1, boolean arg2) {
-			Logger.getGlobal().info("controller : " + player +"yslider moved : " + arg1 + " - " + arg2);
+			Logger.getGlobal().info("controller : " + player + "yslider moved : " + arg1 + " - " + arg2);
 			return false;
 		}
 

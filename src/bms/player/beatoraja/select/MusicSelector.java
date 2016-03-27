@@ -91,6 +91,7 @@ public class MusicSelector extends ApplicationAdapter {
 
 	private GameOptionRenderer option;
 	private AssistOptionRenderer aoption;
+	private DetailOptionRenderer doption;
 
 	public MusicSelector(MainController main, Config config) {
 		this.main = main;
@@ -132,8 +133,8 @@ public class MusicSelector extends ApplicationAdapter {
 
 						l.add(new GradeBar(s, songlist.toArray(new SongData[0])));
 					}
-					tables.add(new TableBar(td.getName(), levels.toArray(new TableLevelBar[0]), l
-							.toArray(new GradeBar[0])));
+					tables.add(new TableBar(td.getName(), levels.toArray(new TableLevelBar[0]),
+							l.toArray(new GradeBar[0])));
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -192,6 +193,7 @@ public class MusicSelector extends ApplicationAdapter {
 
 		option = new GameOptionRenderer(main.getShapeRenderer(), main.getSpriteBatch(), titlefont, config);
 		aoption = new AssistOptionRenderer(main.getShapeRenderer(), main.getSpriteBatch(), titlefont, config);
+		doption = new DetailOptionRenderer(main.getShapeRenderer(), main.getSpriteBatch(), titlefont, config);
 	}
 
 	public void render() {
@@ -282,11 +284,11 @@ public class MusicSelector extends ApplicationAdapter {
 				titlefont.setColor(Color.valueOf(LAMP[score.getClear()]));
 				titlefont.draw(sprite, CLEAR[score.getClear()], 100, 420);
 				titlefont.setColor(Color.WHITE);
-				titlefont.draw(
-						sprite,
+				titlefont.draw(sprite,
 						"EX-SCORE  : " + score.getExscore() + " / " + (score.getNotes() * 2) + "    RANK : "
 								+ RANK[(score.getExscore() * 27 / (score.getNotes() * 2))] + " ( "
-								+ ((score.getExscore() * 1000 / (score.getNotes() * 2)) / 10.0f) + "% )", 100, 390);
+								+ ((score.getExscore() * 1000 / (score.getNotes() * 2)) / 10.0f) + "% )",
+						100, 390);
 				titlefont.draw(sprite, "MISS COUNT: " + score.getMinbp(), 100, 360);
 				titlefont.draw(sprite, "CLEAR / PLAY : " + score.getClearcount() + " / " + score.getPlaycount(), 100,
 						330);
@@ -362,7 +364,8 @@ public class MusicSelector extends ApplicationAdapter {
 
 		boolean[] keystate = input.getKeystate();
 		long[] keytime = input.getTime();
-		if (keystate[7]) {
+		boolean[] cursor = input.getCursorState();
+		if (keystate[7] || cursor[1]) {
 			long l = System.currentTimeMillis();
 			if (duration == 0) {
 				selectedindex++;
@@ -380,7 +383,7 @@ public class MusicSelector extends ApplicationAdapter {
 				}
 				angle = 50;
 			}
-		} else if (keystate[8]) {
+		} else if (keystate[8] || cursor[0]) {
 			long l = System.currentTimeMillis();
 			if (duration == 0) {
 				selectedindex += currentsongs.length - 1;
@@ -410,10 +413,13 @@ public class MusicSelector extends ApplicationAdapter {
 			option.render(keystate, keytime);
 		} else if (input.isSelectPressed()) {
 			aoption.render(keystate, keytime);
+		} else if (input.getNumberState()[5]) {
+			doption.render(keystate, keytime);
 		} else {
 			// 1鍵 (選曲 or フォルダを開く)
-			if (keystate[0] && keytime[0] != 0) {
+			if ((keystate[0] && keytime[0] != 0) || cursor[3]) {
 				keytime[0] = 0;
+				cursor[3] = false;
 				if (currentsongs[selectedindex] instanceof FolderBar || currentsongs[selectedindex] instanceof TableBar
 						|| currentsongs[selectedindex] instanceof TableLevelBar) {
 					Bar bar = currentsongs[selectedindex];
@@ -455,8 +461,9 @@ public class MusicSelector extends ApplicationAdapter {
 			}
 
 			// 2鍵 (フォルダを閉じる)
-			if (keystate[1] && keytime[1] != 0) {
+			if ((keystate[1] && keytime[1] != 0) || cursor[2]) {
 				keytime[1] = 0;
+				cursor[2] = false;
 				Bar pbar = null;
 				Bar cbar = null;
 				if (dir.size() > 1) {
@@ -620,7 +627,7 @@ public class MusicSelector extends ApplicationAdapter {
 					if (config.getLnmode() > 0 && ((SongBar) currentsongs[i]).getSongData().getLongnote() == 1) {
 						hash = "C" + ((SongBar) currentsongs[i]).getSongData().getHash();
 					} else {
-						hash= ((SongBar) currentsongs[i]).getSongData().getHash();
+						hash = ((SongBar) currentsongs[i]).getSongData().getHash();
 					}
 					currentsongs[i].setScore(m.get(hash));
 					if (currentsongs[i].getScore() != null && config.getLnmode() == 2
@@ -702,8 +709,8 @@ public class MusicSelector extends ApplicationAdapter {
 					if (o2.getScore() == null) {
 						return -1;
 					}
-					return o1.getScore().getExscore() * 1000 / o1.getScore().getNotes() - o2.getScore().getExscore()
-							* 1000 / o2.getScore().getNotes();
+					return o1.getScore().getExscore() * 1000 / o1.getScore().getNotes()
+							- o2.getScore().getExscore() * 1000 / o2.getScore().getNotes();
 				}
 
 			};
