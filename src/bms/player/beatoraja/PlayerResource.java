@@ -83,31 +83,7 @@ public class PlayerResource {
 		this.auto = autoplay;
 		replay = new ReplayData();
 		String bmspath = model != null ? model.getPath() : null;
-		if (f.getPath().toLowerCase().endsWith(".bmson")) {
-			BMSONDecoder decoder = new BMSONDecoder(
-					BMSModel.LNTYPE_CHARGENOTE);
-			model = decoder.decode(f);
-			if(model.getTotal() <= 0.0) {
-				model.setTotal(100.0);
-			}
-			int totalnotes = model.getTotalNotes();
-			model.setTotal(model.getTotal() / 100.0 * 7.605 * totalnotes / (0.01 * totalnotes + 6.5));
-		} else {
-			BMSDecoder decoder = new BMSDecoder(BMSModel.LNTYPE_CHARGENOTE);
-			model = decoder.decode(f);
-			// JUDGERANKをbmson互換に変換
-			if(model.getJudgerank() < 0 || model.getJudgerank() > 2) {
-				model.setJudgerank(100);
-			} else {
-				final int[] judgetable = {40, 70 ,90};
-				model.setJudgerank(judgetable[model.getJudgerank()]);
-			}
-			// TOTAL未定義の場合
-			if(model.getTotal() <= 0.0) {
-				int totalnotes = model.getTotalNotes();
-				model.setTotal(7.605 * totalnotes / (0.01 * totalnotes + 6.5));
-			}
-		}
+		model = loadBMSModel(f);
 		if(model.getAllTimeLines().length == 0) {
 			return false;
 		}
@@ -150,6 +126,37 @@ public class PlayerResource {
 		}
 		return true;
 	}
+	
+	private BMSModel loadBMSModel(File f) {
+		BMSModel model;
+		if (f.getPath().toLowerCase().endsWith(".bmson")) {
+			BMSONDecoder decoder = new BMSONDecoder(
+					BMSModel.LNTYPE_CHARGENOTE);
+			model = decoder.decode(f);
+			if(model.getTotal() <= 0.0) {
+				model.setTotal(100.0);
+			}
+			int totalnotes = model.getTotalNotes();
+			model.setTotal(model.getTotal() / 100.0 * 7.605 * totalnotes / (0.01 * totalnotes + 6.5));
+		} else {
+			BMSDecoder decoder = new BMSDecoder(BMSModel.LNTYPE_CHARGENOTE);
+			model = decoder.decode(f);
+			// JUDGERANKをbmson互換に変換
+			if(model.getJudgerank() < 0 || model.getJudgerank() > 2) {
+				model.setJudgerank(100);
+			} else {
+				final int[] judgetable = {40, 70 ,90};
+				model.setJudgerank(judgetable[model.getJudgerank()]);
+			}
+			// TOTAL未定義の場合
+			if(model.getTotal() <= 0.0) {
+				int totalnotes = model.getTotalNotes();
+				model.setTotal(7.605 * totalnotes / (0.01 * totalnotes + 6.5));
+			}
+		}
+
+		return model;
+	}
 
 	public BMSModel getBMSModel() {
 		return model;
@@ -186,15 +193,7 @@ public class PlayerResource {
 	public void setCourseBMSFiles(File[] files) {
 		List<BMSModel> models = new ArrayList();
 		for (File f : files) {
-			if (f.getPath().toLowerCase().endsWith(".bmson")) {
-				BMSONDecoder decoder = new BMSONDecoder(
-						BMSModel.LNTYPE_CHARGENOTE);
-				models.add(decoder.decode(f));
-			} else {
-				BMSDecoder decoder = new BMSDecoder(
-						BMSModel.LNTYPE_CHARGENOTE);
-				models.add(decoder.decode(f));
-			}
+			models.add(loadBMSModel(f));
 		}
 		course = models.toArray(new BMSModel[0]);
 	}
@@ -215,14 +214,7 @@ public class PlayerResource {
 
 	public void reloadBMSFile() {
 		File f = new File(model.getPath());
-		if (f.getPath().toLowerCase().endsWith(".bmson")) {
-			BMSONDecoder decoder = new BMSONDecoder(
-					BMSModel.LNTYPE_CHARGENOTE);
-			model = decoder.decode(f);
-		} else {
-			BMSDecoder decoder = new BMSDecoder(BMSModel.LNTYPE_CHARGENOTE);
-			model = decoder.decode(f);
-		}
+		model = loadBMSModel(f);
 		clear();
 	}
 

@@ -373,8 +373,8 @@ public class JudgeManager {
 						}
 					}
 				} else {
+					// キーが離されたときの処理
 					if (processing[lane] != null) {
-						// キーが離されたときの処理
 						for (int j = 0; j < judge.length; j++) {
 							if (j > 3) {
 								j = 4;
@@ -382,7 +382,7 @@ public class JudgeManager {
 							if (j == 4 || (ptime > processing[lane].getEnd().getTime() - judge[j]
 									&& ptime < processing[lane].getEnd().getTime() + judge[j])) {
 								if (sc != -1) {
-									if (j != 4) {
+									if (j != 4 || key != sckey[sc]) {
 										break;
 									}
 									System.out.println("BSS途中離し判定 - Time : " + ptime + " Judge : " + j + " LN : "
