@@ -398,16 +398,16 @@ public class BMSPlayerInputProcessor {
 				// 7ボタン目の処理、スクラッチ処理
 				if (arg2 == -1.0) {
 					// LEFT
-					buttonDown(arg0, BMKeys.LEFT);
 					if (axis[arg1] == 1.0) {
 						buttonUp(arg0, BMKeys.RIGHT);
 					}
+					buttonDown(arg0, BMKeys.LEFT);
 				} else if (arg2 == 1.0) {
 					// RIGHT
-					buttonDown(arg0, BMKeys.RIGHT);
 					if (axis[arg1] == -1.0) {
 						buttonUp(arg0, BMKeys.LEFT);
 					}
+					buttonDown(arg0, BMKeys.RIGHT);
 				} else {
 					if (axis[arg1] == 1.0) {
 						buttonUp(arg0, BMKeys.RIGHT);
@@ -420,16 +420,16 @@ public class BMSPlayerInputProcessor {
 			} else {
 				if (arg2 == -1.0) {
 					// UP
-					buttonDown(arg0, BMKeys.UP);
 					if (axis[arg1] == 1.0) {
 						buttonUp(arg0, BMKeys.DOWN);
 					}
+					buttonDown(arg0, BMKeys.UP);
 				} else if (arg2 == 1.0) {
 					// DOWN
-					buttonDown(arg0, BMKeys.DOWN);
 					if (axis[arg1] == -1.0) {
 						buttonUp(arg0, BMKeys.UP);
 					}
+					buttonDown(arg0, BMKeys.DOWN);
 				} else {
 					if (axis[arg1] == 1.0) {
 						buttonUp(arg0, BMKeys.DOWN);
@@ -460,8 +460,7 @@ public class BMSPlayerInputProcessor {
 				setSelectPressed(true);
 			}
 
-			// Logger.getGlobal().info("controller : " + player +"button pressed
-			// : " + keycode);
+//			Logger.getGlobal().info("controller : " + player +" button pressed : " + keycode + " time : " + presstime);
 			return false;
 		}
 
@@ -479,7 +478,7 @@ public class BMSPlayerInputProcessor {
 			if (select == keycode) {
 				setSelectPressed(false);
 			}
-
+//			Logger.getGlobal().info("controller : " + player +" button released : " + keycode + " time : " + presstime);
 			return false;
 		}
 

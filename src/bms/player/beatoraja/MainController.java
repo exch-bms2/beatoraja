@@ -51,7 +51,6 @@ public class MainController extends ApplicationAdapter {
 	private Config config;
 	private int auto;
 
-	private LunaticRave2ScoreDatabaseManager scoredb;
 	private LunaticRave2SongDatabaseManager songdb;
 
 	private SpriteBatch sprite;
@@ -63,6 +62,8 @@ public class MainController extends ApplicationAdapter {
 
 	private boolean showfps;
 
+	private PlayDataAccessor playdata;
+	
 	public MainController(File f, Config config, int auto) {
 		this.auto = auto;
 		this.config = config;
@@ -70,9 +71,6 @@ public class MainController extends ApplicationAdapter {
 
 		try {
 			Class.forName("org.sqlite.JDBC");
-			scoredb = new LunaticRave2ScoreDatabaseManager(new File(".")
-					.getAbsoluteFile().getParent(), "/", "/");
-			scoredb.createTable("Player");
 			songdb = new LunaticRave2SongDatabaseManager(
 					new File("song.db").getPath(), true,
 					BMSModel.LNTYPE_CHARGENOTE);
@@ -80,16 +78,18 @@ public class MainController extends ApplicationAdapter {
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
-	}
-
-	public LunaticRave2ScoreDatabaseManager getScoreDatabase() {
-		return scoredb;
+		
+		playdata = new PlayDataAccessor("Player");
 	}
 
 	public LunaticRave2SongDatabaseManager getSongDatabase() {
 		return songdb;
 	}
 
+	public PlayDataAccessor getPlayDataAccessor() {
+		return playdata;
+	}
+	
 	public SpriteBatch getSpriteBatch() {
 		return sprite;
 	}

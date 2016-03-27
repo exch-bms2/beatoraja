@@ -109,7 +109,7 @@ public class BMSPlayer extends ApplicationAdapter {
 		this.autoplay = resource.getAutoplay();
 		timelines = model.getAllTimeLines();
 		// 通常プレイの場合は最後のノーツ、オートプレイの場合はBG/BGAを含めた最後のノーツ
-		playtime = (autoplay == 1 ? model.getLastTime() : model.getLastNoteTime())+ 5000;			
+		playtime = (autoplay == 1 ? model.getLastTime() : model.getLastNoteTime()) + 5000;
 		totalnotes = model.getTotalNotes();
 
 		judge = new JudgeManager(this, model);
@@ -158,24 +158,17 @@ public class BMSPlayer extends ApplicationAdapter {
 		}
 
 		if (autoplay == 2) {
-			autoplay = 0;
-			if (new File("replay" + File.separator + model.getHash() + ".json").exists()) {
-				Json json = new Json();
-				try {
-					replay = (ReplayData) json.fromJson(ReplayData.class,
-							new FileReader("replay" + File.separator + model.getHash() + ".json"));
-					autoplay = 2;
-				} catch (FileNotFoundException e) {
-					e.printStackTrace();
-				}
+			replay = main.getPlayDataAccessor().readReplayData(model, config.getLnmode());
+			if (replay == null) {
+				autoplay = 0;
 			}
 		}
 
 		Logger.getGlobal().info("アシストオプション設定完了");
 		if (replay != null) {
 			PatternModifier.modify(model, Arrays.asList(replay.pattern));
-		} else if (resource.getPatternModifyLog() != null) {
-			PatternModifier.modify(model, Arrays.asList(resource.getPatternModifyLog()));
+		} else if (resource.getReplayData().pattern != null) {
+			PatternModifier.modify(model, Arrays.asList(resource.getReplayData().pattern));
 			Logger.getGlobal().info("譜面オプション : 保存された譜面変更ログから譜面再現");
 		} else if (resource.getCourseBMSModels() == null || config.getRandom() == 1) {
 			switch (model.getUseKeys()) {
@@ -280,7 +273,8 @@ public class BMSPlayer extends ApplicationAdapter {
 	private final PatternModifier[] random = { null, new LaneShuffleModifier(LaneShuffleModifier.MIRROR),
 			new LaneShuffleModifier(LaneShuffleModifier.RANDOM), new LaneShuffleModifier(LaneShuffleModifier.R_RANDOM),
 			new NoteShuffleModifier(NoteShuffleModifier.S_RANDOM), new NoteShuffleModifier(NoteShuffleModifier.SPIRAL),
-			new NoteShuffleModifier(NoteShuffleModifier.H_RANDOM), new NoteShuffleModifier(NoteShuffleModifier.ALL_SCR),
+			new NoteShuffleModifier(NoteShuffleModifier.H_RANDOM),
+			new NoteShuffleModifier(NoteShuffleModifier.ALL_SCR),
 			new LaneShuffleModifier(LaneShuffleModifier.RANDOM_EX),
 			new NoteShuffleModifier(NoteShuffleModifier.S_RANDOM_EX) };
 
@@ -304,15 +298,14 @@ public class BMSPlayer extends ApplicationAdapter {
 
 		input = main.getInputProcessor();
 		input.setEnableKeyInput(autoplay == 0);
-		input.setKeyassign(model.getUseKeys() == 5 || model.getUseKeys() == 7 ? config.getKeyassign7()
-				: (model.getUseKeys() == 10 || model.getUseKeys() == 14 ? config.getKeyassign14()
-						: config.getKeyassign9()));
+		input.setKeyassign(model.getUseKeys() == 5 || model.getUseKeys() == 7 ? config.getKeyassign7() : (model
+				.getUseKeys() == 10 || model.getUseKeys() == 14 ? config.getKeyassign14() : config.getKeyassign9()));
 		input.setControllerassign(config.getControllerasign());
 		lanerender = new LaneRenderer(this, sprite, skin, resource, model);
 		Logger.getGlobal().info("描画クラス準備");
 
 		Logger.getGlobal().info("hash");
-		IRScoreData score = main.getScoreDatabase().getScoreData("Player", model.getHash(), false);
+		IRScoreData score = main.getPlayDataAccessor().readScoreData(model, config.getLnmode());
 		Logger.getGlobal().info("スコアデータベースからスコア取得");
 		if (score == null) {
 			score = new IRScoreData();
@@ -357,7 +350,8 @@ public class BMSPlayer extends ApplicationAdapter {
 				+ "{\n" //
 				+ "    vec4 c4 = texture2D(u_texture, v_texCoords);\n"
 				+ "    if(c4.r == 0.0 && c4.g == 0.0 && c4.b == 0.0) "
-				+ "{ gl_FragColor = v_color * vec4(c4.r, c4.g, c4.b, 0.0);}" + " else {gl_FragColor = v_color * c4;}\n"
+				+ "{ gl_FragColor = v_color * vec4(c4.r, c4.g, c4.b, 0.0);}"
+				+ " else {gl_FragColor = v_color * c4;}\n"
 				+ "}";
 		layershader = new ShaderProgram(vertex, fragment);
 
@@ -392,11 +386,12 @@ public class BMSPlayer extends ApplicationAdapter {
 			renderMain(0);
 			shape.begin(ShapeType.Filled);
 			shape.setColor(Color.YELLOW);
-			shape.rect(skin.getLaneregion()[7].getX(),
+			shape.rect(
+					skin.getLaneregion()[7].getX(),
 					skin.getLaneregion()[7].getY() + skin.getLaneregion()[7].getHeight() / 2f,
-					(audio.getProgress() + bga.getProgress()) * (skin.getLaneregion()[6].getX()
-							+ skin.getLaneregion()[6].getWidth() - skin.getLaneregion()[7].getX()) / 2,
-					4);
+					(audio.getProgress() + bga.getProgress())
+							* (skin.getLaneregion()[6].getX() + skin.getLaneregion()[6].getWidth() - skin
+									.getLaneregion()[7].getX()) / 2, 4);
 			shape.end();
 
 			if (resource.mediaLoadFinished() && !input.startPressed()) {
@@ -411,8 +406,8 @@ public class BMSPlayer extends ApplicationAdapter {
 			renderMain(0);
 			sprite.begin();
 			systemfont.setColor(Color.WHITE);
-			systemfont.draw(sprite, "GET READY", skin.getLaneregion()[7].getX() + 140,
-					skin.getLaneregion()[7].getY() + skin.getLaneregion()[7].getHeight() / 2f);
+			systemfont.draw(sprite, "GET READY", skin.getLaneregion()[7].getX() + 140, skin.getLaneregion()[7].getY()
+					+ skin.getLaneregion()[7].getHeight() / 2f);
 			sprite.end();
 			if (time > 1000) {
 				state = STATE_PLAY;
@@ -487,7 +482,7 @@ public class BMSPlayer extends ApplicationAdapter {
 				resource.setGauge(gaugelog);
 				resource.setGrooveGauge(gauge);
 				if (pattern != null) {
-					resource.setPatternModifyLog(pattern.toArray(new PatternModifyLog[0]));
+					resource.getReplayData().pattern = pattern.toArray(new PatternModifyLog[0]);
 				}
 				input.setEnableKeyInput(true);
 				input.setStartTime(0);
@@ -521,7 +516,7 @@ public class BMSPlayer extends ApplicationAdapter {
 				resource.setGauge(gaugelog);
 				resource.setGrooveGauge(gauge);
 				if (pattern != null) {
-					resource.setPatternModifyLog(pattern.toArray(new PatternModifyLog[0]));
+					resource.getReplayData().pattern = pattern.toArray(new PatternModifyLog[0]);
 				}
 				input.setEnableKeyInput(true);
 				input.setStartTime(0);
@@ -581,30 +576,13 @@ public class BMSPlayer extends ApplicationAdapter {
 			}
 		}
 		score.setClear(clear);
+		score.setOption(resource.getConfig().getRandom()
+				+ (model.getUseKeys() == 10 || model.getUseKeys() == 14 ? (resource.getConfig().getRandom2() * 10 + resource
+						.getConfig().getDoubleoption() * 100) : 0));
 		// リプレイデータ保存。スコア保存されない場合はリプレイ保存しない
-		if (resource.isUpdateScore()) {
-			ReplayData rd = new ReplayData();
-			rd.keylog = input.getKeyInputLog().toArray(new KeyInputLog[0]);
-			rd.pattern = pattern.toArray(new PatternModifyLog[0]);
-			rd.gauge = resource.getConfig().getGauge();
-			File replaydir = new File("replay");
-			if (!replaydir.exists()) {
-				replaydir.mkdirs();
-			}
-			if (score.getClear() < clear || (clear != GrooveGauge.CLEARTYPE_FAILED
-					&& !new File("replay" + File.separatorChar + model.getHash() + ".json").exists())) {
-				Json json = new Json();
-				json.setOutputType(OutputType.json);
-				try {
-					FileWriter fw = new FileWriter("replay" + File.separatorChar + model.getHash() + ".json");
-					fw.write(json.prettyPrint(rd));
-					fw.flush();
-					fw.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}
+		resource.getReplayData().keylog = input.getKeyInputLog().toArray(new KeyInputLog[0]);
+		resource.getReplayData().pattern = pattern.toArray(new PatternModifyLog[0]);
+		resource.getReplayData().gauge = resource.getConfig().getGauge();
 
 		score.setPg(pgreat);
 		score.setGr(great);
@@ -758,8 +736,8 @@ public class BMSPlayer extends ApplicationAdapter {
 		gauge.draw(skin, sprite, gr.x, gr.y, gr.width, gr.height);
 		sprite.begin();
 		titlefont.setColor(Color.WHITE);
-		titlefont.draw(sprite, String.format("%5.1f", gauge.getValue()) + "%", gr.x + gr.width - 75,
-				gr.y + gr.height + 25);
+		titlefont.draw(sprite, String.format("%5.1f", gauge.getValue()) + "%", gr.x + gr.width - 75, gr.y + gr.height
+				+ 25);
 		sprite.end();
 
 		Gdx.gl.glEnable(GL11.GL_BLEND);
@@ -783,9 +761,11 @@ public class BMSPlayer extends ApplicationAdapter {
 		sprite.begin();
 		for (int i = 0; i < judgename.length; i++) {
 			judgefont.setColor(Color.WHITE);
-			judgefont.draw(sprite, judgename[i]
-					+ String.format("%4d /%4d", this.judge.getJudgeCount(i, true), this.judge.getJudgeCount(i, false)),
-					judge.x, judge.y + 20 * (5 - i));
+			judgefont.draw(
+					sprite,
+					judgename[i]
+							+ String.format("%4d /%4d", this.judge.getJudgeCount(i, true),
+									this.judge.getJudgeCount(i, false)), judge.x, judge.y + 20 * (5 - i));
 		}
 		sprite.end();
 		// BPM描画
@@ -802,9 +782,11 @@ public class BMSPlayer extends ApplicationAdapter {
 		// 残り時間描画
 		sprite.begin();
 		titlefont.setColor(Color.WHITE);
-		titlefont.draw(sprite,
-				"TIME " + String.format("%02d:%02d", (playtime - time+ 1000) / 60000, ((playtime - time + 1000) / 1000) % 60),
-				w - 150, 22);
+		titlefont.draw(
+				sprite,
+				"TIME "
+						+ String.format("%02d:%02d", (playtime - time + 1000) / 60000,
+								((playtime - time + 1000) / 1000) % 60), w - 150, 22);
 		sprite.end();
 
 		prevrendertime = time;
@@ -870,10 +852,10 @@ public class BMSPlayer extends ApplicationAdapter {
 	 */
 	private final List<KeyInputLog> createAutoplayLog() {
 		List<KeyInputLog> keylog = new ArrayList<KeyInputLog>();
-		int keys = (model.getUseKeys() == 5 || model.getUseKeys() == 7) ? 9
-				: ((model.getUseKeys() == 10 || model.getUseKeys() == 14) ? 18 : 9);
-		boolean sc = (model.getUseKeys() == 5 || model.getUseKeys() == 7 || model.getUseKeys() == 10
-				|| model.getUseKeys() == 14);
+		int keys = (model.getUseKeys() == 5 || model.getUseKeys() == 7) ? 9 : ((model.getUseKeys() == 10 || model
+				.getUseKeys() == 14) ? 18 : 9);
+		boolean sc = (model.getUseKeys() == 5 || model.getUseKeys() == 7 || model.getUseKeys() == 10 || model
+				.getUseKeys() == 14);
 		Note[] ln = new Note[keys];
 		for (TimeLine tl : model.getAllTimeLines()) {
 			int i = tl.getTime();
