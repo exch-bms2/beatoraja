@@ -15,8 +15,6 @@ import bms.player.beatoraja.Config;
  */
 public class AssistOptionRenderer {
 	
-	// TODO HELL CHARGEはアシストオプションに含めない方がいいかも
-
 	private ShapeRenderer shape;
 	private SpriteBatch sprite;
 	private BitmapFont titlefont;
@@ -39,9 +37,17 @@ public class AssistOptionRenderer {
 			keytime[1] = 0;
 			config.setConstant(!config.isConstant());
 		}
+		if (keystate[2] && keytime[2] != 0) {
+			keytime[2] = 0;
+			config.setShowjudgearea(!config.isShowjudgearea());
+		}
 		if (keystate[3] && keytime[3] != 0) {
 			keytime[3] = 0;
 			config.setLegacynote(!config.isLegacynote());
+		}
+		if (keystate[4] && keytime[4] != 0) {
+			keytime[4] = 0;
+			config.setMarkprocessednote(!config.isMarkprocessednote());
 		}
 		if (keystate[5] && keytime[5] != 0) {
 			keytime[5] = 0;
@@ -73,12 +79,16 @@ public class AssistOptionRenderer {
 		titlefont.draw(sprite, "CONSTANT", 110, 490);
 		titlefont.setColor(config.isLegacynote() ? Color.WHITE : Color.valueOf("444444"));
 		titlefont.draw(sprite, "LEGACY NOTE", 200, 520);
+		titlefont.setColor(config.isShowjudgearea() ? Color.WHITE : Color.valueOf("444444"));
+		titlefont.draw(sprite, "JUDGE AREA", 150, 220);
 		titlefont.setColor(config.isBpmguide() ? Color.WHITE : Color.valueOf("444444"));
 		titlefont.draw(sprite, "BPM GUIDE", 300, 490);
+		titlefont.setColor(config.isMarkprocessednote() ? Color.WHITE : Color.valueOf("444444"));
+		titlefont.draw(sprite, "MARK", 300, 220);
 		titlefont.setColor(config.isExpandjudge() ? Color.WHITE : Color.valueOf("444444"));
-		titlefont.draw(sprite, "EXPAND JUDGE", 90, 220);
+		titlefont.draw(sprite, "EXPAND JUDGE", 90, 250);
 		titlefont.setColor(config.isNomine() ? Color.WHITE : Color.valueOf("444444"));
-		titlefont.draw(sprite, "NO MINE", 330, 220);
+		titlefont.draw(sprite, "NO MINE", 330, 250);
 		sprite.end();
 	}
 

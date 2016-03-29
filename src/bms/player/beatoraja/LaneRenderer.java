@@ -70,9 +70,6 @@ public class LaneRenderer {
 	private boolean startpressed;
 	private boolean cursorpressed;
 
-	private boolean processednote = false;
-	private boolean showjudgeregion = false;
-
 	public LaneRenderer(BMSPlayer main, SpriteBatch sprite, PlaySkin skin, PlayerResource resource, BMSModel model) {
 		this.main = main;
 		this.sprite = sprite;
@@ -356,7 +353,7 @@ public class LaneRenderer {
 		// float yy = 0;
 
 		// 判定エリア表示
-		if (showjudgeregion) {
+		if (config.isShowjudgearea()) {
 			Gdx.gl.glEnable(GL11.GL_BLEND);
 			Gdx.gl.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 			shape.begin(ShapeType.Filled);
@@ -598,7 +595,7 @@ public class LaneRenderer {
 	private void drawNote(float x, float y, float width, float height, float scale, int lane, Note note) {
 		if (note instanceof NormalNote) {
 			Sprite s = skin.getNote()[lane];
-			if (processednote && note.getState() != 0) {
+			if (config.isMarkprocessednote() && note.getState() != 0) {
 				// TODO 処理済みノートの描画
 				s.setAlpha(0.3f);
 				sprite.draw(s, x, y - s.getHeight() * scale / 2, width, s.getHeight() * scale);

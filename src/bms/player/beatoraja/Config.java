@@ -20,6 +20,11 @@ public class Config {
 	 */
 	private boolean vsync;
 	/**
+	 * 解像度
+	 */
+	private int resolution;
+	
+	/**
 	 * オーディオバッファサイズ。大きすぎると音声遅延が発生し、少なすぎるとノイズが発生する
 	 */
 	private int audioDeviceBufferSize = 384;
@@ -100,13 +105,12 @@ public class Config {
 	 */
 	private boolean constant = false;
 	/**
-	 * アシストオプション:BPMガイド
-	 */
-	private boolean bpmguide = false;
-	/**
 	 * アシストオプション:LNアシスト
 	 */
 	private boolean legacynote = false;
+	/**
+	 * LNモード
+	 */
 	private int lnmode = 0;
 	/**
 	 * アシストオプション:判定拡大
@@ -116,6 +120,15 @@ public class Config {
 	 * アシストオプション:地雷除去
 	 */
 	private boolean nomine = false;
+
+	/**
+	 * アシストオプション:BPMガイド
+	 */
+	private boolean bpmguide = false;
+
+	private boolean showjudgearea = false;
+	
+	private boolean markprocessednote = false;
 	
 	private String lr2playskin;
 	/**
@@ -435,5 +448,21 @@ public class Config {
 
 	public void setLegacynote(boolean legacynote) {
 		this.legacynote = legacynote;
+	}
+
+	public boolean isShowjudgearea() {
+		return showjudgearea;
+	}
+
+	public void setShowjudgearea(boolean showjudgearea) {
+		this.showjudgearea = showjudgearea;
+	}
+
+	public boolean isMarkprocessednote() {
+		return markprocessednote;
+	}
+
+	public void setMarkprocessednote(boolean markprocessednote) {
+		this.markprocessednote = markprocessednote;
 	}
 }
