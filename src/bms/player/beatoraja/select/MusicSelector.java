@@ -20,6 +20,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
@@ -76,6 +77,8 @@ public class MusicSelector extends ApplicationAdapter {
 	private PlayerResource resource;
 
 	private TableBar[] tables = new TableBar[0];
+	
+	private MusicSelectSkin skin;
 
 	private Sound bgm;
 	private Sound move;
@@ -183,6 +186,8 @@ public class MusicSelector extends ApplicationAdapter {
 			}
 		}
 
+		skin = new MusicSelectSkin();
+		
 		option = new GameOptionRenderer(main.getShapeRenderer(), main.getSpriteBatch(), titlefont, config);
 		aoption = new AssistOptionRenderer(main.getShapeRenderer(), main.getSpriteBatch(), titlefont, config);
 	}
@@ -210,39 +215,39 @@ public class MusicSelector extends ApplicationAdapter {
 			int index = (int) (selectedindex + currentsongs.length * 100 + i - h / barh / 2) % currentsongs.length;
 			Bar sd = currentsongs[index];
 			float x = w * 3 / 5;
-			if (i == h / barh / 2) {
+			if (i == (int)(h / barh / 2)) {
 				x -= 20;
 			}
-			shape.begin(ShapeType.Filled);
+			sprite.begin();
 			float y = h - i * barh;
+			
+			Sprite barimage = skin.getBar()[0];
 			if (duration != 0) {
 				long time = System.currentTimeMillis();
 				float dy = barh * (Math.abs(angle) - duration + time) / angle + (angle >= 0 ? -1 : 1) * barh;
 				y += dy;
 			}
-			shape.setColor(Color.valueOf("222222"));
-			shape.rect(x + 4, y - 4, w * 2 / 5, barh - 6);
-
 			if (sd instanceof TableBar) {
-				shape.setColor(Color.valueOf("008080"));
+				barimage = skin.getBar()[2];
 			}
 			if (sd instanceof TableLevelBar) {
-				shape.setColor(Color.valueOf("4040c0"));
+				barimage = skin.getBar()[2];
 			}
 			if (sd instanceof GradeBar) {
-				shape.setColor(((GradeBar) sd).existsAllSongs() ? Color.valueOf("804000") : Color.valueOf("201000"));
+				barimage = skin.getBar()[6];
 			}
 			if (sd instanceof FolderBar) {
-				shape.setColor(Color.valueOf("606000"));
+				barimage = skin.getBar()[1];
 			}
 			if (sd instanceof SongBar) {
-				shape.setColor(Color.valueOf("006000"));
+				barimage = skin.getBar()[0];
 			}
-			shape.rect(x, y, w * 2 / 5, barh - 6);
-			shape.end();
-			sprite.begin();
+			
+			sprite.draw(barimage, x, y, w * 2 / 5, barh - 2);
+			titlefont.setColor(Color.BLACK);
+			titlefont.draw(sprite, sd.getTitle(), x + 22, y + barh - 10);
 			titlefont.setColor(Color.WHITE);
-			titlefont.draw(sprite, sd.getTitle(), x + 20, y + barh - 12);
+			titlefont.draw(sprite, sd.getTitle(), x + 20, y + barh - 8);
 			sprite.end();
 
 			if (sd instanceof GradeBar) {
@@ -257,14 +262,14 @@ public class MusicSelector extends ApplicationAdapter {
 				if (lamp != -1) {
 					shape.begin(ShapeType.Filled);
 					shape.setColor(Color.valueOf(LAMP[lamp]));
-					shape.rect(x, y, 15, barh - 6);
+					shape.rect(x, y, 15, barh - 2);
 					shape.end();
 				}				
 			} else {
 				if (sd.getScore() != null) {
 					shape.begin(ShapeType.Filled);
 					shape.setColor(Color.valueOf(LAMP[currentsongs[index].getScore().getClear()]));
-					shape.rect(x, y, 15, barh - 6);
+					shape.rect(x, y, 15, barh - 2);
 					shape.end();
 				}				
 			}
