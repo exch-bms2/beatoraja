@@ -628,10 +628,10 @@ public class BMSPlayer extends ApplicationAdapter {
 		sprite.begin();
 		for (SkinObject part : skin.getSkinPart()) {
 			int[] op = part.getOption();
-			if (part.getTiming() != 3 && op.length == 0) {
+			if (part.getTiming() != 3) {
 				Rectangle r = part.getDestination(time);
 				if (r != null) {
-					sprite.draw(part.getImage(), r.x, r.y, r.width, r.height);
+					sprite.draw(part.getImage(time), r.x, r.y, r.width, r.height);
 				}
 			}
 		}

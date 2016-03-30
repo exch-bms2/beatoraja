@@ -8,6 +8,7 @@ import bms.player.beatoraja.select.MusicSelectSkin;
 import bms.player.beatoraja.skin.LR2SkinLoader.CommandWord;
 
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
@@ -53,12 +54,13 @@ public class LR2SelectSkinLoader extends LR2SkinLoader {
 						TextureRegion[][] lamps = new TextureRegion[dy][dx];
 						for(int dh = 0; dh < dy; dh++) {
 							for(int dw = 0; dw < dx; dw++) {
-								lamps[dh][dw] = new Sprite(imagelist.get(Integer.parseInt(str[2])),  + w / dx * dw,
+								lamps[dh][dw] = new Sprite(imagelist.get(Integer.parseInt(str[2])),  x + w / dx * dw,
 										y + h / dy * dh, w / dx, h / dy);
 							}							
 						}
 						for (int i : lampg[Integer.parseInt(str[1])]) {
 							lamp[i] = new Animation(Integer.parseInt(str[9]) / 1000f, lamps[0]);
+							lamp[i].setPlayMode(PlayMode.LOOP);
 						}
 					} catch (NumberFormatException e) {
 						e.printStackTrace();
@@ -68,14 +70,15 @@ public class LR2SelectSkinLoader extends LR2SkinLoader {
 		});
 	}
 
-	public MusicSelectSkin loadSelectSkin(File f) throws IOException {
+	public MusicSelectSkin loadSelectSkin(File f, int[] option) throws IOException {
 
 		MusicSelectSkin skin = new MusicSelectSkin();
 
-		this.loadSkin(skin, f);
+		this.loadSkin(skin, f, option);
 
 		skin.setBar(bar);
-
+		skin.setLamp(lamp);
+		
 		return skin;
 	}
 }

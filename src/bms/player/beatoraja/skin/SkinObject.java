@@ -16,19 +16,30 @@ public class SkinObject {
 	/**
 	 * イメージ
 	 */
-	private TextureRegion image;
+	private TextureRegion[] image;
+	private int cycle;
 	
 	private List<SkinObjectDestination> dst = new ArrayList<SkinObjectDestination>();
 
 	private int timing;
 	private int[] option = new int[3];
 
-	public TextureRegion getImage() {
+	public TextureRegion[] getImage() {
 		return image;
 	}
 	
-	public void setImage(TextureRegion image) {
+	public TextureRegion getImage(long time) {
+		if(cycle == 0) {
+			return image[0];
+		}
+		final int index = (int) ((time / (cycle / image.length))) % image.length;
+//		System.out.println(index + " / " + image.length);
+		return image[index];
+	}
+	
+	public void setImage(TextureRegion[] image, int cycle) {
 		this.image = image;
+		this.cycle = cycle;
 	}
 	
 	public void setDestination(long time, float x, float y, float w, float h, int acc, int a, int r, int g, int b,
@@ -37,7 +48,7 @@ public class SkinObject {
 		obj.time = time;
 		obj.region = new Rectangle(x,y,w,h);
 		obj.acc = acc;
-		obj.color = new Color(r / 256.0f, g/ 256.0f, b / 256.0f, a / 256.0f);
+		obj.color = new Color(r / 255.0f, g/ 255.0f, b / 255.0f, a / 255.0f);
 		obj.blend = blend;
 		obj.filter = filter;
 		obj.angle = angle;
@@ -51,10 +62,23 @@ public class SkinObject {
 				return;
 			}
 		}
-		dst.add(obj);
+		dst.add(obj);		
 	}
 
 	public Rectangle getDestination(long time) {
+		if(dst.size() == 0) {
+			System.out.println("void image");
+			return new Rectangle(0,0,0,0);
+		}
+		long lasttime = dst.get(dst.size() - 1).time;
+		int loop = dst.get(0).loop;
+		if(lasttime > 0 && time > loop) {
+			if(lasttime - loop == 0) {
+				time = loop;
+			} else {
+				time = (time - loop) % (lasttime - loop) + loop;				
+			}
+		}
 		for(int i = 0; i < dst.size();i++) {
 			final SkinObjectDestination obj1 = dst.get(i);
 			if(obj1.time <= time) {
@@ -69,6 +93,40 @@ public class SkinObject {
 					float w = r1.width + (r2.width - r1.width) * (time - obj1.time) / (time2 - obj1.time);
 					float h = r1.height + (r2.height - r1.height) * (time - obj1.time) / (time2 - obj1.time);
 					return new Rectangle(x,y,w,h);
+				}
+			}
+		}
+		return null;
+	}
+
+	public Color getColor(long time) {
+		if(dst.size() == 0) {
+			System.out.println("void color");
+			return new Color(0,0,0,0);
+		}
+		long lasttime = dst.get(dst.size() - 1).time;
+		int loop = dst.get(0).loop;
+		if(lasttime > 0 && time > loop) {
+			if(lasttime - loop == 0) {
+				time = loop;
+			} else {
+				time = (time - loop) % (lasttime - loop) + loop;				
+			}
+		}
+		for(int i = 0; i < dst.size();i++) {
+			final SkinObjectDestination obj1 = dst.get(i);
+			if(obj1.time <= time) {
+				if(i + 1 == dst.size()) {
+					return obj1.color;
+				} else {
+					final Color r1 = obj1.color;
+					final long time2 = dst.get(i + 1).time;					
+					final Color r2 = dst.get(i + 1).color;
+					float r = r1.r + (r2.r - r1.r) * (time - obj1.time) / (time2 - obj1.time);
+					float g = r1.g + (r2.g - r1.g) * (time - obj1.time) / (time2 - obj1.time);
+					float b = r1.b + (r2.b - r1.b) * (time - obj1.time) / (time2 - obj1.time);
+					float a = r1.a + (r2.a - r1.a) * (time - obj1.time) / (time2 - obj1.time);
+					return new Color(r,g,b,a);
 				}
 			}
 		}
