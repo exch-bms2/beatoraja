@@ -9,6 +9,8 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import bms.player.beatoraja.Config;
 
 public class DetailOptionRenderer {
+	
+	// TODO レーンカバー、リフト
 
 	private ShapeRenderer shape;
 	private SpriteBatch sprite;
@@ -17,6 +19,8 @@ public class DetailOptionRenderer {
 	private Config config;
 
 	private static final String[] BGA = { "BGA ON", "BGA AUTO", "BGA OFF" };
+
+	private static final String[] JUDGE = { "JUDGE OFF", "JUDGE F/S", "JUDGE +-ms" };
 
 	public DetailOptionRenderer(ShapeRenderer shape, SpriteBatch sprite, BitmapFont titlefont, Config config) {
 		this.sprite = sprite;
@@ -29,6 +33,10 @@ public class DetailOptionRenderer {
 		if (keystate[0] && keytime[0] != 0) {
 			keytime[0] = 0;
 			config.setBga((config.getBga() + 1) % BGA.length);
+		}
+		if (keystate[1] && keytime[1] != 0) {
+			keytime[1] = 0;
+			config.setJudgedetail((config.getJudgedetail() + 1) % JUDGE.length);
 		}
 		if (keystate[3] && keytime[3] != 0) {
 			keytime[3] = 0;
@@ -74,6 +82,7 @@ public class DetailOptionRenderer {
 
 		titlefont.setColor(Color.WHITE);
 		titlefont.draw(sprite, BGA[config.getBga()], 130, 250);
+		titlefont.draw(sprite, JUDGE[config.getJudgedetail()], 110, 480);
 		titlefont.draw(sprite, "- DURATION + ", 240, 480);
 		titlefont.draw(sprite, String.valueOf(config.getGreenvalue()), 300, 510);
 		titlefont.draw(sprite, "- JUDGE TIMING + ", 270, 250);
