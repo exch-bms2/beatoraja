@@ -17,6 +17,7 @@ import bms.player.lunaticrave2.*;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.skin.LR2PlaySkinLoader;
 import bms.player.beatoraja.skin.LR2SelectSkinLoader;
+import bms.player.beatoraja.skin.SkinNumber;
 import bms.player.beatoraja.skin.SkinObject;
 
 import com.badlogic.gdx.ApplicationAdapter;
@@ -256,6 +257,82 @@ public class MusicSelector extends ApplicationAdapter {
 				}
 			}
 		}
+
+		for (SkinNumber num : skin.getSkinNumbers()) {
+			int value = -1;
+			if (num.getId() == 71) {
+				if (currentsongs[selectedindex].getScore() != null) {
+					value = currentsongs[selectedindex].getScore().getExscore();
+				}
+			}
+			if (num.getId() == 72) {
+				if (currentsongs[selectedindex].getScore() != null) {
+					value = currentsongs[selectedindex].getScore().getNotes() * 2;
+				}
+			}
+			if (num.getId() == 76) {
+				if (currentsongs[selectedindex].getScore() != null) {
+					value = currentsongs[selectedindex].getScore().getMinbp();
+				}
+			}
+			if (num.getId() == 77) {
+				if (currentsongs[selectedindex].getScore() != null) {
+					value = currentsongs[selectedindex].getScore().getPlaycount();
+				}
+			}
+			if (num.getId() == 78) {
+				if (currentsongs[selectedindex].getScore() != null) {
+					value = currentsongs[selectedindex].getScore().getClearcount();
+				}
+			}
+			if (num.getId() == 79) {
+				if (currentsongs[selectedindex].getScore() != null) {
+					value = currentsongs[selectedindex].getScore().getPlaycount()
+							- currentsongs[selectedindex].getScore().getClearcount();
+				}
+			}
+			if (num.getId() == 80) {
+				if (currentsongs[selectedindex].getScore() != null) {
+					value = currentsongs[selectedindex].getScore().getPg();
+				}
+			}
+			if (num.getId() == 81) {
+				if (currentsongs[selectedindex].getScore() != null) {
+					value = currentsongs[selectedindex].getScore().getGr();
+				}
+			}
+			if (num.getId() == 82) {
+				if (currentsongs[selectedindex].getScore() != null) {
+					value = currentsongs[selectedindex].getScore().getGd();
+				}
+			}
+			if (num.getId() == 83) {
+				if (currentsongs[selectedindex].getScore() != null) {
+					value = currentsongs[selectedindex].getScore().getBd();
+				}
+			}
+			if (num.getId() == 84) {
+				if (currentsongs[selectedindex].getScore() != null) {
+					value = currentsongs[selectedindex].getScore().getPr();
+				}
+			}
+
+			if (value != -1) {
+				Rectangle r = num.getDestination(time);
+				int[] values = new int[num.getKeta()];
+				for (int i = values.length - 1; i >= 0; i--) {
+					values[i] = value % 10;
+					value /= 10;
+				}
+
+//				sprite.setColor(num.getColor(time));
+				for (int i = 0; i < values.length; i++) {
+					sprite.draw(num.getImage()[values[i]], r.x + r.width * i, r.y, r.width, r.height);
+				}
+//				sprite.setColor(Color.WHITE);
+			}
+		}
+
 		sprite.end();
 
 		// draw song bar

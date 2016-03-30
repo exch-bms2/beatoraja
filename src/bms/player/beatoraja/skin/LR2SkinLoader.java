@@ -37,7 +37,9 @@ public abstract class LR2SkinLoader {
 		float dsth = 720;
 
 		List<SkinObject> partlist = new ArrayList();
+		List<SkinNumber> numlist = new ArrayList();
 		SkinObject part = null;
+		SkinNumber num = null;
 		BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(f), "MS932"));
 		String line = null;
 
@@ -128,20 +130,20 @@ public abstract class LR2SkinLoader {
 								try {
 									int[] values = parseInt(str);
 									int x = values[3];
-									int y = Integer.parseInt(str[4]);
-									int w = Integer.parseInt(str[5]);
+									int y = values[4];
+									int w = values[5];
 									if(w == -1) {
 										w = imagelist.get(gr).getWidth();
 									}
-									int h = Integer.parseInt(str[6]);
+									int h = values[6];
 									if(h == -1) {
 										h = imagelist.get(gr).getHeight();
 									}
-									int divx = Integer.parseInt(str[7]);
+									int divx = values[7];
 									if(divx <= 0) {
 										divx = 1;
 									}
-									int divy = Integer.parseInt(str[8]);
+									int divy = values[8];
 									if(divy <= 0) {
 										divy = 1;
 									}
@@ -177,6 +179,64 @@ public abstract class LR2SkinLoader {
 								}
 							}
 						}
+						
+						if (str[0].equals("#SRC_NUMBER")) {
+							int gr = Integer.parseInt(str[2]);
+							if (gr < imagelist.size() && imagelist.get(gr) != null) {
+								try {
+									int[] values = parseInt(str);
+									int x = values[3];
+									int y = values[4];
+									int w = values[5];
+									if(w == -1) {
+										w = imagelist.get(gr).getWidth();
+									}
+									int h = values[6];
+									if(h == -1) {
+										h = imagelist.get(gr).getHeight();
+									}
+									int divx = values[7];
+									if(divx <= 0) {
+										divx = 1;
+									}
+									int divy = values[8];
+									if(divy <= 0) {
+										divy = 1;
+									}
+									TextureRegion[] images = new TextureRegion[divx * divy];
+									for (int i = 0; i < divx; i++) {
+										for (int j = 0; j < divy; j++) {
+											images[divx * j + i] = new TextureRegion(imagelist.get(gr), x + w / divx
+													* i, y + h / divy * j, w / divx, h / divy);
+										}
+									}
+									num = new SkinNumber();
+									num.setImage(images, values[9]);
+									num.setId(values[11]);
+									num.setKeta(values[13]);
+									numlist.add(num);
+								} catch (NumberFormatException e) {
+									e.printStackTrace();
+								}
+							}							
+						}
+						if (str[0].equals("#DST_NUMBER")) {
+							if (num != null) {
+								try {
+									int[] values = parseInt(str);
+									num.setDestination(values[2], values[3] * dstw
+											/ srcw, dsth - (values[4] + values[6]) * dsth / srch, values[5]
+											* dstw / srcw, values[6] * dsth / srch,
+											values[7], values[8],
+											values[9], values[10],
+											values[11], values[12],
+											values[13], values[14],values[15],values[16],values[17],values[18],values[19],values[20]);										
+								} catch (NumberFormatException e) {
+									e.printStackTrace();
+								}
+							}							
+						}
+
 
 						for (CommandWord cm : commands) {
 							if (str[0].equals("#" + cm.str)) {
@@ -198,7 +258,7 @@ public abstract class LR2SkinLoader {
 		}
 
 		skin.setSkinPart(partlist.toArray(new SkinObject[0]));
-
+		skin.setSkinNumbers(numlist.toArray(new SkinNumber[0]));
 	}
 	
 	private int[] parseInt(String[] s) {
