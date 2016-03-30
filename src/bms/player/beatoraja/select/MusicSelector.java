@@ -6,12 +6,19 @@ import java.io.IOException;
 import java.util.*;
 import java.util.logging.Logger;
 
+import org.lwjgl.opengl.GL11;
+
 import bms.player.beatoraja.Config;
 import bms.player.beatoraja.MainController;
+import bms.player.beatoraja.PlaySkin;
 import bms.player.beatoraja.PlayerResource;
 import bms.player.beatoraja.TableData;
 import bms.player.lunaticrave2.*;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
+import bms.player.beatoraja.skin.LR2PlaySkinLoader;
+import bms.player.beatoraja.skin.LR2SelectSkinLoader;
+import bms.player.beatoraja.skin.SkinNumber;
+import bms.player.beatoraja.skin.SkinObject;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -20,11 +27,13 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Json;
 
 /**
@@ -77,6 +86,8 @@ public class MusicSelector extends ApplicationAdapter {
 
 	private TableBar[] tables = new TableBar[0];
 
+	private MusicSelectSkin skin;
+
 	private Sound bgm;
 	private Sound move;
 	private Sound folderopen;
@@ -89,6 +100,8 @@ public class MusicSelector extends ApplicationAdapter {
 	private AssistOptionRenderer aoption;
 	private DetailOptionRenderer doption;
 	private KeyConfigurationRenderer koption;
+
+	private long starttime;
 
 	public MusicSelector(MainController main, Config config) {
 		this.main = main;
@@ -127,8 +140,8 @@ public class MusicSelector extends ApplicationAdapter {
 
 						l.add(new GradeBar(s, songlist.toArray(new SongData[0])));
 					}
-					tables.add(new TableBar(td.getName(), levels.toArray(new TableLevelBar[0]),
-							l.toArray(new GradeBar[0])));
+					tables.add(new TableBar(td.getName(), levels.toArray(new TableLevelBar[0]), l
+							.toArray(new GradeBar[0])));
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -185,10 +198,27 @@ public class MusicSelector extends ApplicationAdapter {
 			}
 		}
 
+		if (config.getLr2selectskin() != null) {
+			try {
+				skin = new LR2SelectSkinLoader().loadSelectSkin(new File(config.getLr2selectskin()),
+						config.getLr2selectskinoption());
+			} catch (IOException e) {
+				e.printStackTrace();
+				skin = new MusicSelectSkin();
+			}
+
+			// lr2playskin = "skin/spdframe/csv/left_ACwide.csv";
+
+		} else {
+			skin = new MusicSelectSkin();
+		}
+
 		option = new GameOptionRenderer(main.getShapeRenderer(), main.getSpriteBatch(), titlefont, config);
 		aoption = new AssistOptionRenderer(main.getShapeRenderer(), main.getSpriteBatch(), titlefont, config);
 		doption = new DetailOptionRenderer(main.getShapeRenderer(), main.getSpriteBatch(), titlefont, config);
 		koption = new KeyConfigurationRenderer(main.getShapeRenderer(), main.getSpriteBatch(), titlefont, config);
+
+		starttime = System.currentTimeMillis();
 	}
 
 	public void render() {
@@ -202,11 +232,110 @@ public class MusicSelector extends ApplicationAdapter {
 		final float h = 720;
 
 		// 背景描画
-		if (background != null) {
-			sprite.begin();
-			sprite.draw(background, 0, 0, w, h);
-			sprite.end();
+		// if (background != null) {
+		// sprite.begin();
+		// sprite.draw(background, 0, 0, w, h);
+		// sprite.end();
+		// }
+
+		final long time = System.currentTimeMillis() - starttime;
+
+		sprite.begin();
+		for (SkinObject part : skin.getSkinPart()) {
+			int[] op = part.getOption();
+			boolean draw = true;
+			for (int option : op) {
+				if (option != 0) {
+					draw = false;
+					break;
+				}
+			}
+			if (part.getTiming() == 0 && draw) {
+				Rectangle r = part.getDestination(time);
+				if (r != null) {
+					sprite.setColor(part.getColor(time));
+					sprite.draw(part.getImage(time), r.x, r.y, r.width, r.height);
+					sprite.setColor(Color.WHITE);
+				}
+			}
 		}
+
+		for (SkinNumber num : skin.getSkinNumbers()) {
+			int value = -1;
+			if (num.getId() == 71) {
+				if (currentsongs[selectedindex].getScore() != null) {
+					value = currentsongs[selectedindex].getScore().getExscore();
+				}
+			}
+			if (num.getId() == 72) {
+				if (currentsongs[selectedindex].getScore() != null) {
+					value = currentsongs[selectedindex].getScore().getNotes() * 2;
+				}
+			}
+			if (num.getId() == 76) {
+				if (currentsongs[selectedindex].getScore() != null) {
+					value = currentsongs[selectedindex].getScore().getMinbp();
+				}
+			}
+			if (num.getId() == 77) {
+				if (currentsongs[selectedindex].getScore() != null) {
+					value = currentsongs[selectedindex].getScore().getPlaycount();
+				}
+			}
+			if (num.getId() == 78) {
+				if (currentsongs[selectedindex].getScore() != null) {
+					value = currentsongs[selectedindex].getScore().getClearcount();
+				}
+			}
+			if (num.getId() == 79) {
+				if (currentsongs[selectedindex].getScore() != null) {
+					value = currentsongs[selectedindex].getScore().getPlaycount()
+							- currentsongs[selectedindex].getScore().getClearcount();
+				}
+			}
+			if (num.getId() == 80) {
+				if (currentsongs[selectedindex].getScore() != null) {
+					value = currentsongs[selectedindex].getScore().getPg();
+				}
+			}
+			if (num.getId() == 81) {
+				if (currentsongs[selectedindex].getScore() != null) {
+					value = currentsongs[selectedindex].getScore().getGr();
+				}
+			}
+			if (num.getId() == 82) {
+				if (currentsongs[selectedindex].getScore() != null) {
+					value = currentsongs[selectedindex].getScore().getGd();
+				}
+			}
+			if (num.getId() == 83) {
+				if (currentsongs[selectedindex].getScore() != null) {
+					value = currentsongs[selectedindex].getScore().getBd();
+				}
+			}
+			if (num.getId() == 84) {
+				if (currentsongs[selectedindex].getScore() != null) {
+					value = currentsongs[selectedindex].getScore().getPr();
+				}
+			}
+
+			if (value != -1) {
+				Rectangle r = num.getDestination(time);
+				int[] values = new int[num.getKeta()];
+				for (int i = values.length - 1; i >= 0; i--) {
+					values[i] = value % 10;
+					value /= 10;
+				}
+
+//				sprite.setColor(num.getColor(time));
+				for (int i = 0; i < values.length; i++) {
+					sprite.draw(num.getImage()[values[i]], r.x + r.width * i, r.y, r.width, r.height);
+				}
+//				sprite.setColor(Color.WHITE);
+			}
+		}
+
+		sprite.end();
 
 		// draw song bar
 		final float barh = 36;
@@ -214,63 +343,65 @@ public class MusicSelector extends ApplicationAdapter {
 			int index = (int) (selectedindex + currentsongs.length * 100 + i - h / barh / 2) % currentsongs.length;
 			Bar sd = currentsongs[index];
 			float x = w * 3 / 5;
-			if (i == h / barh / 2) {
+			if (i == (int) (h / barh / 2)) {
 				x -= 20;
 			}
-			shape.begin(ShapeType.Filled);
+			sprite.begin();
 			float y = h - i * barh;
+
+			Sprite barimage = skin.getBar()[0];
 			if (duration != 0) {
-				long time = System.currentTimeMillis();
-				float dy = barh * (Math.abs(angle) - duration + time) / angle + (angle >= 0 ? -1 : 1) * barh;
+				float dy = barh * (Math.abs(angle) - duration + System.currentTimeMillis()) / angle
+						+ (angle >= 0 ? -1 : 1) * barh;
 				y += dy;
 			}
-			shape.setColor(Color.valueOf("222222"));
-			shape.rect(x + 4, y - 4, w * 2 / 5, barh - 6);
-
 			if (sd instanceof TableBar) {
-				shape.setColor(Color.valueOf("008080"));
+				barimage = skin.getBar()[2];
 			}
 			if (sd instanceof TableLevelBar) {
-				shape.setColor(Color.valueOf("4040c0"));
+				barimage = skin.getBar()[2];
 			}
 			if (sd instanceof GradeBar) {
-				shape.setColor(((GradeBar) sd).existsAllSongs() ? Color.valueOf("804000") : Color.valueOf("201000"));
+				barimage = skin.getBar()[6];
 			}
 			if (sd instanceof FolderBar) {
-				shape.setColor(Color.valueOf("606000"));
+				barimage = skin.getBar()[1];
 			}
 			if (sd instanceof SongBar) {
-				shape.setColor(Color.valueOf("006000"));
+				barimage = skin.getBar()[0];
 			}
-			shape.rect(x, y, w * 2 / 5, barh - 6);
-			shape.end();
-			sprite.begin();
+
+			sprite.draw(barimage, x, y, w * 2 / 5, barh);
+			titlefont.setColor(Color.BLACK);
+			titlefont.draw(sprite, sd.getTitle(), x + 22, y + barh - 8);
 			titlefont.setColor(Color.WHITE);
-			titlefont.draw(sprite, sd.getTitle(), x + 20, y + barh - 12);
+			titlefont.draw(sprite, sd.getTitle(), x + 20, y + barh - 6);
 			sprite.end();
 
 			if (sd instanceof GradeBar) {
 				int lamp = -1;
-				if(sd.getScore() != null) {
+				if (sd.getScore() != null) {
 					lamp = sd.getScore().getClear();
 				}
 				GradeBar gb = (GradeBar) sd;
-				if(gb.getMirrorScore() != null) {
+				if (gb.getMirrorScore() != null) {
 					lamp = (lamp > gb.getMirrorScore().getClear()) ? lamp : gb.getMirrorScore().getClear();
 				}
 				if (lamp != -1) {
-					shape.begin(ShapeType.Filled);
-					shape.setColor(Color.valueOf(LAMP[lamp]));
-					shape.rect(x, y, 15, barh - 6);
-					shape.end();
-				}				
+					sprite.setBlendFunction(GL11.GL_ONE, GL11.GL_ONE);
+					sprite.begin();
+					sprite.draw(skin.getLamp()[lamp].getKeyFrame(time / 1000f), x, y, 15, barh);
+					sprite.end();
+					sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+				}
 			} else {
-				if (sd.getScore() != null) {
-					shape.begin(ShapeType.Filled);
-					shape.setColor(Color.valueOf(LAMP[currentsongs[index].getScore().getClear()]));
-					shape.rect(x, y, 15, barh - 6);
-					shape.end();
-				}				
+				if (sd.getScore() != null && skin.getLamp()[sd.getScore().getClear()] != null) {
+					sprite.setBlendFunction(GL11.GL_ONE, GL11.GL_ONE);
+					sprite.begin();
+					sprite.draw(skin.getLamp()[sd.getScore().getClear()].getKeyFrame(time / 1000f), x, y, 15, barh);
+					sprite.end();
+					sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+				}
 			}
 
 			if (sd instanceof SongBar) {
@@ -311,11 +442,11 @@ public class MusicSelector extends ApplicationAdapter {
 				titlefont.setColor(Color.valueOf(LAMP[score.getClear()]));
 				titlefont.draw(sprite, CLEAR[score.getClear()], 100, 420);
 				titlefont.setColor(Color.WHITE);
-				titlefont.draw(sprite,
+				titlefont.draw(
+						sprite,
 						"EX-SCORE  : " + score.getExscore() + " / " + (score.getNotes() * 2) + "    RANK : "
 								+ RANK[(score.getExscore() * 27 / (score.getNotes() * 2))] + " ( "
-								+ ((score.getExscore() * 1000 / (score.getNotes() * 2)) / 10.0f) + "% )",
-						100, 390);
+								+ ((score.getExscore() * 1000 / (score.getNotes() * 2)) / 10.0f) + "% )", 100, 390);
 				titlefont.draw(sprite, "MISS COUNT: " + score.getMinbp(), 100, 360);
 				titlefont.draw(sprite, "CLEAR / PLAY : " + score.getClearcount() + " / " + score.getPlaycount(), 100,
 						330);
@@ -642,8 +773,9 @@ public class MusicSelector extends ApplicationAdapter {
 
 			for (int i = 0; i < currentsongs.length; i++) {
 				if (currentsongs[i] instanceof SongBar) {
-					SongData sd = ((SongBar)currentsongs[i]).getSongData();
-					currentsongs[i].setScore(main.getPlayDataAccessor().readScoreData(sd.getHash(), sd.getLongnote() == 1, config.getLnmode()));
+					SongData sd = ((SongBar) currentsongs[i]).getSongData();
+					currentsongs[i].setScore(main.getPlayDataAccessor().readScoreData(sd.getHash(),
+							sd.getLongnote() == 1, config.getLnmode()));
 					if (currentsongs[i].getScore() != null && config.getLnmode() == 2
 							&& ((SongBar) currentsongs[i]).getSongData().getLongnote() == 1) {
 						currentsongs[i].getScore().setClear(currentsongs[i].getScore().getExclear());
@@ -725,8 +857,8 @@ public class MusicSelector extends ApplicationAdapter {
 					if (o2.getScore() == null) {
 						return -1;
 					}
-					return o1.getScore().getExscore() * 1000 / o1.getScore().getNotes()
-							- o2.getScore().getExscore() * 1000 / o2.getScore().getNotes();
+					return o1.getScore().getExscore() * 1000 / o1.getScore().getNotes() - o2.getScore().getExscore()
+							* 1000 / o2.getScore().getNotes();
 				}
 
 			};
@@ -874,7 +1006,7 @@ class GradeBar extends Bar {
 		}
 		return true;
 	}
-	
+
 	public IRScoreData getMirrorScore() {
 		return score;
 	}

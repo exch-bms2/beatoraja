@@ -9,11 +9,11 @@ public class LR2DecideSkinLoader extends LR2PlaySkinLoader {
 
 	private MusicDecideSkin skin;
 	
-	public MusicDecideSkin loadMusicDecideSkin(File f) throws IOException {
+	public MusicDecideSkin loadMusicDecideSkin(File f, int[] option) throws IOException {
 
 		skin = new MusicDecideSkin();
 
-		this.loadSkin(skin, f);
+		this.loadSkin(skin, f, option);
 
 		return skin;
 	}

@@ -1,47 +1,45 @@
 package bms.player.beatoraja.skin;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 
-/**
- * スキンパーツ
- * 
- * @author exch
- */
-public class SkinObject {
-	
+public class SkinNumber {
+
 	/**
 	 * イメージ
 	 */
 	private TextureRegion[] image;
-	private int cycle;
 	
 	private List<SkinObjectDestination> dst = new ArrayList<SkinObjectDestination>();
 
-	private int timing;
-	private int[] option = new int[3];
 
-	public TextureRegion[] getImage() {
-		return image;
-	}
+	private int id;
 	
-	public TextureRegion getImage(long time) {
-		if(cycle == 0) {
-			return image[0];
-		}
-		final int index = (int) ((time / (cycle / image.length))) % image.length;
-//		System.out.println(index + " / " + image.length);
-		return image[index];
-	}
+	private int cycle;
+	
+	private int keta;
 	
 	public void setImage(TextureRegion[] image, int cycle) {
 		this.image = image;
 		this.cycle = cycle;
 	}
 	
+	public TextureRegion[] getImage() {
+		return image;
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
 	public void setDestination(long time, float x, float y, float w, float h, int acc, int a, int r, int g, int b,
 			int blend, int filter, int angle, int center, int loop, int timer, int op1, int op2, int op3) {
 		SkinObjectDestination obj = new SkinObjectDestination();
@@ -64,7 +62,7 @@ public class SkinObject {
 		}
 		dst.add(obj);		
 	}
-
+	
 	public Rectangle getDestination(long time) {
 		if(dst.size() == 0) {
 			System.out.println("void image");
@@ -132,21 +130,13 @@ public class SkinObject {
 		}
 		return null;
 	}
-
-	public int getTiming() {
-		return timing;
+	
+	public int getKeta() {
+		return keta;
 	}
 
-	public void setTiming(int timing) {
-		this.timing = timing;
-	}
-
-	public int[] getOption() {
-		return option;
-	}
-
-	public void setOption(int[] option) {
-		this.option = option;
+	public void setKeta(int keta) {
+		this.keta = keta;
 	}
 
 	private class SkinObjectDestination {
