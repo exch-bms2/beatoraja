@@ -481,7 +481,7 @@ public class LaneRenderer {
 						}
 					}
 					if (dy > 0) {
-						this.drawNote(laneregion[lane].x, y + dy, laneregion[lane].width, dy, 1.0f, lane, note);
+						this.drawNote(laneregion[lane].x, y + dy, laneregion[lane].width, dy, 2.0f, lane, note);
 					}
 				}
 			}
@@ -606,6 +606,7 @@ public class LaneRenderer {
 		}
 		if (note instanceof LongNote) {
 			if (model.getLntype() == 2) {
+				// HCN
 				if (y - height < skin.getLaneregion()[lane].y) {
 					height = y - skin.getLaneregion()[lane].y;
 				}
@@ -623,7 +624,9 @@ public class LaneRenderer {
 				sprite.draw(ls, x, y - ls.getHeight() * scale / 2, width, ls.getHeight() * scale);
 				Sprite le = skin.getLongnote()[5][lane];
 				sprite.draw(le, x, y - height - le.getHeight() * scale / 2, width, le.getHeight() * scale);
-			} else {
+			}
+			if (model.getLntype() == 1) {
+				// CN
 				if (y - height < skin.getLaneregion()[lane].y) {
 					height = y - skin.getLaneregion()[lane].y;
 				}
@@ -634,6 +637,19 @@ public class LaneRenderer {
 				}
 				Sprite ls = skin.getLongnote()[0][lane];
 				sprite.draw(ls, x, y - ls.getHeight() * scale / 2, width, ls.getHeight() * scale);
+				Sprite le = skin.getLongnote()[1][lane];
+				sprite.draw(le, x, y - height - le.getHeight() * scale / 2, width, le.getHeight() * scale);
+			}
+			if (model.getLntype() == 0) {
+				// LN
+				if (y - height < skin.getLaneregion()[lane].y) {
+					height = y - skin.getLaneregion()[lane].y;
+				}
+				if (main.getJudgeManager().getProcessingLongNotes()[lane] == note) {
+					sprite.draw(skin.getLongnote()[2][lane], x, y - height - 2, width, height + 4);
+				} else {
+					sprite.draw(skin.getLongnote()[3][lane], x, y - height - 2, width, height + 4);
+				}
 				Sprite le = skin.getLongnote()[1][lane];
 				sprite.draw(le, x, y - height - le.getHeight() * scale / 2, width, le.getHeight() * scale);
 			}

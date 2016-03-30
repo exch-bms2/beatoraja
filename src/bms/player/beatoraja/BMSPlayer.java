@@ -110,7 +110,6 @@ public class BMSPlayer extends ApplicationAdapter {
 		timelines = model.getAllTimeLines();
 		// 通常プレイの場合は最後のノーツ、オートプレイの場合はBG/BGAを含めた最後のノーツ
 		playtime = (autoplay == 1 ? model.getLastTime() : model.getLastNoteTime()) + 5000;
-		totalnotes = model.getTotalNotes();
 
 		judge = new JudgeManager(this, model);
 
@@ -135,11 +134,14 @@ public class BMSPlayer extends ApplicationAdapter {
 				assist = 2;
 				score = false;
 			}
-			// TODO LN実装時に追加
 			if (config.getLnmode() == 2) {
 				model.setLntype(BMSModel.LNTYPE_HELLCHARGENOTE);
-			} else {
+			}
+			if (config.getLnmode() == 1) {
 				model.setLntype(BMSModel.LNTYPE_CHARGENOTE);
+			}
+			if (config.getLnmode() == 0) {
+				model.setLntype(BMSModel.LNTYPE_LONGNOTE);
 			}
 			if (config.isExpandjudge()) {
 				judge.setExpandJudge();
@@ -156,6 +158,7 @@ public class BMSPlayer extends ApplicationAdapter {
 				}
 			}
 		}
+		totalnotes = model.getTotalNotes();
 
 		if (autoplay == 2) {
 			replay = main.getPlayDataAccessor().readReplayData(model, config.getLnmode());

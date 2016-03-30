@@ -233,8 +233,9 @@ public class JudgeManager {
 								if (j > 3) {
 									j = 4;
 								}
-								if (j == 4 || (ptime > processing[lane].getEnd().getTime() - judge[j]
-										&& ptime < processing[lane].getEnd().getTime() + judge[j])) {
+								if (j == 4
+										|| (ptime > processing[lane].getEnd().getTime() - judge[j] && ptime < processing[lane]
+												.getEnd().getTime() + judge[j])) {
 									if (j < 2) {
 										bomb[lane] = ptime;
 									}
@@ -269,8 +270,9 @@ public class JudgeManager {
 										&& (judgenote.getState() == 0 || timelines[i].getTime() < ptime - judge[3])) {
 									if (tl == null) {
 										tl = timelines[i];
-										for (j = 0; j < judge.length && !(ptime >= timelines[i].getTime() - judge[j]
-												&& ptime <= timelines[i].getTime() + judge[j]); j++) {
+										for (j = 0; j < judge.length
+												&& !(ptime >= timelines[i].getTime() - judge[j] && ptime <= timelines[i]
+														.getTime() + judge[j]); j++) {
 										}
 									} else {
 										switch (judgetype) {
@@ -279,19 +281,19 @@ public class JudgeManager {
 											if (tl.getTime() < ptime - judge[3] || timelines[i].getTime() <= ptime) {
 												tl = timelines[i];
 												for (j = 0; j < judge.length
-														&& !(ptime >= timelines[i].getTime() - judge[j]
-																&& ptime <= timelines[i].getTime() + judge[j]); j++) {
+														&& !(ptime >= timelines[i].getTime() - judge[j] && ptime <= timelines[i]
+																.getTime() + judge[j]); j++) {
 												}
 											}
 											break;
 										case JUDGE_ALGORITHM_IIDX:
 											// 最も判定ラインに近いノーツを選ぶ(本家式)
-											if (Math.abs(tl.getTime() - ptime) > Math
-													.abs(timelines[i].getTime() - ptime)) {
+											if (Math.abs(tl.getTime() - ptime) > Math.abs(timelines[i].getTime()
+													- ptime)) {
 												tl = timelines[i];
 												for (j = 0; j < judge.length
-														&& !(ptime >= timelines[i].getTime() - judge[j]
-																&& ptime <= timelines[i].getTime() + judge[j]); j++) {
+														&& !(ptime >= timelines[i].getTime() - judge[j] && ptime <= timelines[i]
+																.getTime() + judge[j]); j++) {
 												}
 											}
 											break;
@@ -300,8 +302,8 @@ public class JudgeManager {
 											if (tl.getTime() < ptime - judge[3]) {
 												tl = timelines[i];
 												for (j = 0; j < judge.length
-														&& !(ptime >= timelines[i].getTime() - judge[j]
-																&& ptime <= timelines[i].getTime() + judge[j]); j++) {
+														&& !(ptime >= timelines[i].getTime() - judge[j] && ptime <= timelines[i]
+																.getTime() + judge[j]); j++) {
 												}
 											}
 											break;
@@ -322,14 +324,18 @@ public class JudgeManager {
 									if (j < 2) {
 										bomb[lane] = ptime;
 									}
-									this.update(lane, j, time, (int) (tl.getTime() - ptime));
-									main.update(j);
+									if (model.getLntype() == BMSModel.LNTYPE_LONGNOTE) {
+										passingcount[lane] = (int) (tl.getTime() - ptime);
+									} else {
+										this.update(lane, j, time, (int) (tl.getTime() - ptime));
+										main.update(j);
+									}
 									if (j < 4) {
 										processing[lane] = ln;
 										if (sc != -1) {
 											// BSS処理開始
-											System.out.println("BSS開始判定 - Time : " + ptime + " Judge : " + j + " KEY : "
-													+ key + " LN : " + note.hashCode());
+											System.out.println("BSS開始判定 - Time : " + ptime + " Judge : " + j
+													+ " KEY : " + key + " LN : " + note.hashCode());
 											sckey[sc] = key;
 
 										}
@@ -379,8 +385,9 @@ public class JudgeManager {
 							if (j > 3) {
 								j = 4;
 							}
-							if (j == 4 || (ptime > processing[lane].getEnd().getTime() - judge[j]
-									&& ptime < processing[lane].getEnd().getTime() + judge[j])) {
+							if (j == 4
+									|| (ptime > processing[lane].getEnd().getTime() - judge[j] && ptime < processing[lane]
+											.getEnd().getTime() + judge[j])) {
 								if (sc != -1) {
 									if (j != 4 || key != sckey[sc]) {
 										break;
@@ -393,15 +400,18 @@ public class JudgeManager {
 									bomb[lane] = ptime;
 								}
 								final int dtime = (int) (processing[lane].getEnd().getTime() - ptime);
-								this.update(lane, j, time, dtime);
-								main.update(j);
-								processing[lane].setState(dtime >= 0 ? dtime + 1 : dtime);
+								if (model.getLntype() != BMSModel.LNTYPE_LONGNOTE
+										|| Math.abs(passingcount[lane]) < Math.abs(dtime)) {
+									this.update(lane, j, time, dtime);
+									main.update(j);
+									processing[lane].setState(dtime >= 0 ? dtime + 1 : dtime);
+									processing[lane] = null;
+								}
+								j = judge.length;
+								break;
 								// System.out.println("打鍵:" + time +
 								// " ノーツ位置 > " + tl.getTime() + " - " +
 								// (lane + 1) + " : " + judgename[j]);
-								j = judge.length;
-								processing[lane] = null;
-								break;
 							}
 						}
 					}
@@ -411,6 +421,20 @@ public class JudgeManager {
 			prevtime = time;
 		}
 		for (int lane = 0; lane < noteassign.length; lane++) {
+			// LN終端判定
+			if (model.getLntype() == BMSModel.LNTYPE_LONGNOTE && processing[lane] != null
+					&& processing[lane].getEnd().getTime() < time) {
+				int j = 0;
+				for (; j < judge.length; j++) {
+					if (Math.abs(passingcount[lane]) <= judge[j]) {
+						break;
+					}
+				}
+				this.update(lane, j, time, passingcount[lane]);
+				main.update(j);
+				processing[lane].setState(passingcount[lane] >= 0 ? passingcount[lane] + 1 : passingcount[lane]);
+				processing[lane] = null;
+			}
 			// 見逃しPOOR判定
 			int sc = -1;
 			for (int i = 0; i < sckeyassign.length; i++) {
@@ -429,9 +453,11 @@ public class JudgeManager {
 							if (ln.getStart() == timelines[i]) {
 								if (processing[lane] != ln) {
 									// System.out.println("ln start poor");
+									if (model.getLntype() != BMSModel.LNTYPE_LONGNOTE) {
+										this.update(lane, 4, time, judge);
+										main.update(4);
+									}
 									this.update(lane, 4, time, judge);
-									this.update(lane, 4, time, judge);
-									main.update(4);
 									main.update(4);
 									note.setState(judge);
 								}
