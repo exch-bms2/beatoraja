@@ -154,13 +154,11 @@ public class MusicSelector extends ApplicationAdapter {
 		if (this.resource == null) {
 			this.resource = new PlayerResource();
 		}
-		int index = selectedindex;
 		if (dir.size() > 0) {
 			updateBar(dir.get(dir.size() - 1));
 		} else {
 			updateBar(null);
 		}
-		selectedindex = index;
 
 		if (bgm == null) {
 			if (new File("skin/select.wav").exists()) {
@@ -686,6 +684,7 @@ public class MusicSelector extends ApplicationAdapter {
 	}
 
 	public boolean updateBar(Bar bar) {
+		final Bar prevbar = currentsongs != null ? currentsongs[selectedindex] : null;
 		String crc = null;
 		List<Bar> l = new ArrayList();
 		if (bar == null) {
@@ -737,9 +736,8 @@ public class MusicSelector extends ApplicationAdapter {
 		l.removeAll(remove);
 
 		if (l.size() > 0) {
+			// 変更前と同じバーがあればカーソル位置を保持する
 			currentsongs = l.toArray(new Bar[0]);
-			selectedindex = 0;
-
 			FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
 					Gdx.files.internal("skin/VL-Gothic-Regular.ttf"));
 			FreeTypeFontParameter parameter = new FreeTypeFontParameter();
@@ -798,6 +796,30 @@ public class MusicSelector extends ApplicationAdapter {
 				}
 			}
 			Arrays.sort(currentsongs, this.getSortComparator());
+			
+			selectedindex = 0;
+			
+			if(prevbar!= null) {
+				if (prevbar instanceof SongBar) {
+					final SongBar prevsong = (SongBar) prevbar;
+					for (int i = 0; i < currentsongs.length; i++) {
+						if (currentsongs[i] instanceof SongBar
+								&& ((SongBar) currentsongs[i]).getSongData().getHash()
+										.equals(prevsong.getSongData().getHash())) {
+							selectedindex = i;
+							break;
+						}
+					}
+				}else {
+					for (int i = 0; i < currentsongs.length; i++) {
+						if (currentsongs[i].getTitle().equals(prevbar.getTitle())) {
+							selectedindex = i;
+							break;
+						}
+					}
+					
+				}				
+			}
 			return true;
 		}
 		Logger.getGlobal().warning("楽曲がありません");
