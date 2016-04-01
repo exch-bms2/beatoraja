@@ -325,11 +325,11 @@ public class MusicSelector extends ApplicationAdapter {
 					value /= 10;
 				}
 
-//				sprite.setColor(num.getColor(time));
+				// sprite.setColor(num.getColor(time));
 				for (int i = 0; i < values.length; i++) {
 					sprite.draw(num.getImage()[values[i]], r.x + r.width * i, r.y, r.width, r.height);
 				}
-//				sprite.setColor(Color.WHITE);
+				// sprite.setColor(Color.WHITE);
 			}
 		}
 
@@ -787,7 +787,13 @@ public class MusicSelector extends ApplicationAdapter {
 							ln |= sd.getLongnote() == 1;
 						}
 						gb.setScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), false));
+						if (gb.getScore() != null && config.getLnmode() == 2 && ln) {
+							gb.getScore().setClear(gb.getScore().getExclear());
+						}
 						gb.setMirrorScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), true));
+						if (gb.getMirrorScore() != null && config.getLnmode() == 2 && ln) {
+							gb.getMirrorScore().setClear(gb.getMirrorScore().getExclear());
+						}
 					}
 				}
 			}

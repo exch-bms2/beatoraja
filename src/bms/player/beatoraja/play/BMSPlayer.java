@@ -119,6 +119,7 @@ public class BMSPlayer extends ApplicationAdapter {
 
 		boolean score = true;
 
+		model.setLntype(config.getLnmode());
 		if (resource.getCourseBMSModels() == null) {
 			if (config.isBpmguide() && (model.getMinBPM() < model.getMaxBPM())) {
 				// BPM変化がなければBPMガイドなし
@@ -137,15 +138,6 @@ public class BMSPlayer extends ApplicationAdapter {
 				new LongNoteModifier().modify(model);
 				assist = 2;
 				score = false;
-			}
-			if (config.getLnmode() == 2) {
-				model.setLntype(BMSModel.LNTYPE_HELLCHARGENOTE);
-			}
-			if (config.getLnmode() == 1) {
-				model.setLntype(BMSModel.LNTYPE_CHARGENOTE);
-			}
-			if (config.getLnmode() == 0) {
-				model.setLntype(BMSModel.LNTYPE_LONGNOTE);
 			}
 			if (config.isExpandjudge()) {
 				judge.setExpandJudge();

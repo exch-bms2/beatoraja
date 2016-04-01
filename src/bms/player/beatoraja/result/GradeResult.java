@@ -74,7 +74,7 @@ public class GradeResult extends ApplicationAdapter {
 			sprite.begin();
 			if (score != null) {
 				titlefont.setColor(Color.WHITE);
-				titlefont.draw(sprite, "段位認定 " + resource.getCoursetitle()
+				titlefont.draw(sprite, resource.getCoursetitle()
 						+ (score.getClear() > GrooveGauge.CLEARTYPE_FAILED ? "  合格" : "  不合格"), w * 3 / 4, h / 2);
 			}
 			titlefont.draw(sprite, "CLEAR : ", 100, 400);
@@ -132,7 +132,16 @@ public class GradeResult extends ApplicationAdapter {
 		if (score == null) {
 			score = new IRScoreData();
 		}
-		oldclear = score.getClear();
+		boolean ln = false;
+		for(BMSModel model : models) {
+			ln |= model.getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
+					+ model.getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH) > 0;			
+		}
+		if (ln && resource.getConfig().getLnmode() == 2) {
+			oldclear = score.getExclear();
+		} else {
+			oldclear = score.getClear();
+		}
 		oldexscore = score.getExscore();
 		oldmisscount = score.getMinbp();
 
