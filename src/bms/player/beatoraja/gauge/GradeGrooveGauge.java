@@ -3,7 +3,7 @@ package bms.player.beatoraja.gauge;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 import bms.model.BMSModel;
-import bms.player.beatoraja.PlaySkin;
+import bms.player.beatoraja.play.PlaySkin;
 
 public class GradeGrooveGauge extends GrooveGauge {
 
@@ -20,7 +20,7 @@ public class GradeGrooveGauge extends GrooveGauge {
 			this.setValue(this.getValue() + gauge[judge]);			
 		} else if(this.getValue() > 15) {
 			this.setValue(this.getValue() + gauge[judge] * 0.75f);			
-		} else if(this.getValue() > 5) {
+		} else if(this.getValue() > 7.5) {
 			this.setValue(this.getValue() + gauge[judge] * 0.5f);			
 		} else {
 			this.setValue(this.getValue() + gauge[judge] * 0.25f);			

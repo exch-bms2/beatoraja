@@ -1,4 +1,4 @@
-package bms.player.beatoraja;
+package bms.player.beatoraja.play;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -6,6 +6,8 @@ import java.util.Map;
 import org.lwjgl.opengl.GL11;
 
 import bms.model.*;
+import bms.player.beatoraja.Config;
+import bms.player.beatoraja.PlayerResource;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 
 import com.badlogic.gdx.Gdx;

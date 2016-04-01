@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
-import bms.player.beatoraja.BMSPlayer;
+import bms.player.beatoraja.play.BMSPlayer;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;

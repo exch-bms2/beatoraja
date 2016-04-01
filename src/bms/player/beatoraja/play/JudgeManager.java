@@ -1,4 +1,4 @@
-package bms.player.beatoraja;
+package bms.player.beatoraja.play;
 
 import java.util.Arrays;
 

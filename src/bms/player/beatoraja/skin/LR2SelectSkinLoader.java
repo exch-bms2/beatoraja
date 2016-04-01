@@ -3,7 +3,7 @@ package bms.player.beatoraja.skin;
 import java.io.File;
 import java.io.IOException;
 
-import bms.player.beatoraja.PlaySkin;
+import bms.player.beatoraja.play.PlaySkin;
 import bms.player.beatoraja.select.MusicSelectSkin;
 import bms.player.beatoraja.skin.LR2SkinLoader.CommandWord;
 

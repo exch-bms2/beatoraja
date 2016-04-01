@@ -10,11 +10,11 @@ import org.lwjgl.opengl.GL11;
 
 import bms.player.beatoraja.Config;
 import bms.player.beatoraja.MainController;
-import bms.player.beatoraja.PlaySkin;
 import bms.player.beatoraja.PlayerResource;
 import bms.player.beatoraja.TableData;
 import bms.player.lunaticrave2.*;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
+import bms.player.beatoraja.play.PlaySkin;
 import bms.player.beatoraja.skin.LR2PlaySkinLoader;
 import bms.player.beatoraja.skin.LR2SelectSkinLoader;
 import bms.player.beatoraja.skin.SkinNumber;
