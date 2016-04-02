@@ -201,13 +201,17 @@ public class BMSPlayerInputProcessor {
 	public void setSelectPressed(boolean selectPressed) {
 		this.selectPressed = selectPressed;
 	}
+	
+	public KeyBoardInputProcesseor getKeyBoardInputProcesseor() {
+		return kbinput;
+	}
 
 	/**
 	 * キーボード入力処理用クラス
 	 * 
 	 * @author exch
 	 */
-	class KeyBoardInputProcesseor implements InputProcessor {
+	public class KeyBoardInputProcesseor implements InputProcessor {
 
 		private int[] keys = new int[] { Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.F, Keys.V, Keys.SHIFT_LEFT,
 				Keys.CONTROL_LEFT, Keys.COMMA, Keys.L, Keys.PERIOD, Keys.SEMICOLON, Keys.SLASH, Keys.APOSTROPHE,
@@ -219,6 +223,8 @@ public class BMSPlayerInputProcessor {
 				Keys.F9, Keys.F10, Keys.F11, Keys.F12 };
 		private int[] control = new int[] { Keys.Q, Keys.W };
 		private int exit = Keys.ESCAPE;
+		
+		private int lastPressedKey = -1;
 
 		public KeyBoardInputProcesseor(int[] keys) {
 			this.setKeyAssign(keys);
@@ -231,7 +237,7 @@ public class BMSPlayerInputProcessor {
 		}
 
 		public boolean keyDown(int keycode) {
-			System.out.println(keycode);
+			setLastPressedKey(keycode);
 			int presstime = (int) (System.currentTimeMillis() - starttime);
 			for (int i = 0; i < keys.length; i++) {
 				if (keys[i] == keycode) {
@@ -337,6 +343,14 @@ public class BMSPlayerInputProcessor {
 			// TODO 自動生成されたメソッド・スタブ
 			return false;
 		}
+
+		public int getLastPressedKey() {
+			return lastPressedKey;
+		}
+
+		public void setLastPressedKey(int lastPressedKey) {
+			this.lastPressedKey = lastPressedKey;
+		}
 	}
 
 	public static class BMKeys {
@@ -368,6 +382,8 @@ public class BMSPlayerInputProcessor {
 		private int player = 0;
 
 		private float[] axis = new float[4];
+		
+		private int lastPressedButton = -1;
 
 		public BMSControllerListener(int player, int[] buttons) {
 			this.player = player;
@@ -452,6 +468,7 @@ public class BMSPlayerInputProcessor {
 					keyChanged(presstime, i + player * 9, true);
 				}
 			}
+			setLastPressedButton(keycode);
 
 			if (start == keycode) {
 				startChanged(true);
@@ -505,6 +522,14 @@ public class BMSPlayerInputProcessor {
 		public boolean ySliderMoved(Controller arg0, int arg1, boolean arg2) {
 			Logger.getGlobal().info("controller : " + player + "yslider moved : " + arg1 + " - " + arg2);
 			return false;
+		}
+
+		public int getLastPressedButton() {
+			return lastPressedButton;
+		}
+
+		public void setLastPressedButton(int lastPressedButton) {
+			this.lastPressedButton = lastPressedButton;
 		}
 
 	}

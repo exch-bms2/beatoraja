@@ -216,7 +216,7 @@ public class MusicSelector extends ApplicationAdapter {
 		option = new GameOptionRenderer(main.getShapeRenderer(), main.getSpriteBatch(), titlefont, config);
 		aoption = new AssistOptionRenderer(main.getShapeRenderer(), main.getSpriteBatch(), titlefont, config);
 		doption = new DetailOptionRenderer(main.getShapeRenderer(), main.getSpriteBatch(), titlefont, config);
-		koption = new KeyConfigurationRenderer(main.getShapeRenderer(), main.getSpriteBatch(), titlefont, config);
+		koption = new KeyConfigurationRenderer(main.getInputProcessor(), main.getShapeRenderer(), main.getSpriteBatch(), titlefont, config);
 
 		starttime = System.currentTimeMillis();
 	}
