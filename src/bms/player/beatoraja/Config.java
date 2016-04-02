@@ -1,6 +1,7 @@
 package bms.player.beatoraja;
 
 import bms.player.beatoraja.input.BMSPlayerInputProcessor.BMKeys;
+import bms.player.beatoraja.play.JudgeManager;
 
 import com.badlogic.gdx.Input.Keys;
 

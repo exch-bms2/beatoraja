@@ -2,7 +2,7 @@ package bms.player.beatoraja.gauge;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
-import bms.player.beatoraja.PlaySkin;
+import bms.player.beatoraja.play.PlaySkin;
 
 /**
  * プレイゲージの抽象クラス

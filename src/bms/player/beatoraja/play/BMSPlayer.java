@@ -1,4 +1,4 @@
-package bms.player.beatoraja;
+package bms.player.beatoraja.play;
 
 import java.io.*;
 import java.util.*;
@@ -7,6 +7,10 @@ import java.util.logging.Logger;
 import org.lwjgl.opengl.GL11;
 
 import bms.model.*;
+import bms.player.beatoraja.Config;
+import bms.player.beatoraja.MainController;
+import bms.player.beatoraja.PlayerResource;
+import bms.player.beatoraja.ReplayData;
 import bms.player.beatoraja.audio.AudioProcessor;
 import bms.player.beatoraja.bga.BGAProcessor;
 import bms.player.beatoraja.gauge.*;
@@ -115,6 +119,7 @@ public class BMSPlayer extends ApplicationAdapter {
 
 		boolean score = true;
 
+		model.setLntype(config.getLnmode());
 		if (resource.getCourseBMSModels() == null) {
 			if (config.isBpmguide() && (model.getMinBPM() < model.getMaxBPM())) {
 				// BPM変化がなければBPMガイドなし
@@ -133,15 +138,6 @@ public class BMSPlayer extends ApplicationAdapter {
 				new LongNoteModifier().modify(model);
 				assist = 2;
 				score = false;
-			}
-			if (config.getLnmode() == 2) {
-				model.setLntype(BMSModel.LNTYPE_HELLCHARGENOTE);
-			}
-			if (config.getLnmode() == 1) {
-				model.setLntype(BMSModel.LNTYPE_CHARGENOTE);
-			}
-			if (config.getLnmode() == 0) {
-				model.setLntype(BMSModel.LNTYPE_LONGNOTE);
 			}
 			if (config.isExpandjudge()) {
 				judge.setExpandJudge();

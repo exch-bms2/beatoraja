@@ -14,7 +14,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 
-import bms.player.beatoraja.PlaySkin;
+import bms.player.beatoraja.play.PlaySkin;
 
 public abstract class LR2SkinLoader {
 

@@ -322,12 +322,8 @@ public class MusicResult extends ApplicationAdapter {
 		saveReplay = false;
 		BMSModel model = resource.getBMSModel();
 		IRScoreData newscore = resource.getScoreData();
-		String hash = model.getHash();
 		boolean ln = model.getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
 				+ model.getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH) > 0;
-		if (ln && resource.getConfig().getLnmode() > 0) {
-			hash = "C" + hash;
-		}
 		if (newscore == null) {
 			return;
 		}

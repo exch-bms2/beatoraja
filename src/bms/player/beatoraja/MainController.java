@@ -14,6 +14,7 @@ import javafx.stage.Stage;
 import bms.model.*;
 import bms.player.beatoraja.decide.MusicDecide;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
+import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.result.GradeResult;
 import bms.player.beatoraja.result.MusicResult;
 import bms.player.beatoraja.select.MusicSelector;

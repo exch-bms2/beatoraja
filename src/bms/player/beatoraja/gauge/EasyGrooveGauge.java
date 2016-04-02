@@ -3,7 +3,7 @@ package bms.player.beatoraja.gauge;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 import bms.model.BMSModel;
-import bms.player.beatoraja.PlaySkin;
+import bms.player.beatoraja.play.PlaySkin;
 
 public class EasyGrooveGauge extends GrooveGauge {
 
@@ -12,7 +12,7 @@ public class EasyGrooveGauge extends GrooveGauge {
 	public EasyGrooveGauge(BMSModel model) {
 		super(2,100, 20, 80, CLEARTYPE_EASY);
 		float g = (float) (model.getTotal() / model.getTotalNotes());
-		gauge = new float[] { g, g, g / 2, -2.0f, -4.0f, -2.0f };
+		gauge = new float[] { g, g, g / 2, -1.5f, -3.0f, -1.0f };
 	}
 	
 	@Override

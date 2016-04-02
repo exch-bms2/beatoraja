@@ -1,4 +1,4 @@
-package bms.player.beatoraja;
+package bms.player.beatoraja.play;
 
 import java.util.Arrays;
 
@@ -16,7 +16,6 @@ import bms.player.beatoraja.input.BMSPlayerInputProcessor;
  */
 public class JudgeManager {
 
-	// TODO LNモードの実装
 	// TODO bug:稀にノーツカウント漏れがある(BSS絡み？)
 
 	private BMSPlayer main;
@@ -57,7 +56,6 @@ public class JudgeManager {
 	private int[] judgenowt;
 
 	private int[] judgecombo;
-
 	/**
 	 * 判定差時間(ms , +は早押しで-は遅押し)
 	 */
@@ -70,7 +68,13 @@ public class JudgeManager {
 	 * 処理中のLN
 	 */
 	private LongNote[] processing = new LongNote[8];
+	/**
+	 * 通過中のHCN
+	 */
 	private LongNote[] passing = new LongNote[8];
+	/**
+	 * HCN増加判定
+	 */
 	private boolean[] inclease = new boolean[8];
 	private int[] passingcount;
 
@@ -83,8 +87,14 @@ public class JudgeManager {
 	 * ミスレイヤー表示開始時間
 	 */
 	private int misslayer;
-
+	/**
+	 * 各判定の範囲(+-ms)。PGREAT, GREAT, GOOD, BAD, POOR, MISS空POORの順
+	 */
 	private static final int[] judgetable = { 20, 60, 165, 315, 0, 1000 };
+	/**
+	 * HCNの増減間隔(ms)
+	 */
+	private static final int hcnduration = 100;
 
 	private int[] judge;
 
@@ -92,6 +102,18 @@ public class JudgeManager {
 	private int judgetype = 0;
 
 	private int prevtime;
+	
+	private void prepareAttr(int judges) {
+		bomb = new long[noteassign.length];
+		processing = new LongNote[noteassign.length];
+		passing = new LongNote[noteassign.length];
+		passingcount = new int[noteassign.length];
+		inclease = new boolean[noteassign.length];
+		sckey = new int[sckeyassign.length];
+		judgenow = new int[judges];
+		judgenowt = new int[judges];
+		judgecombo = new int[judges];		
+	}
 
 	public JudgeManager(BMSPlayer main, BMSModel model) {
 		this.main = main;
@@ -99,47 +121,23 @@ public class JudgeManager {
 		switch (model.getUseKeys()) {
 		case 5:
 		case 7:
-			bomb = new long[8];
-			processing = new LongNote[8];
-			passing = new LongNote[8];
-			passingcount = new int[8];
-			inclease = new boolean[8];
 			keyassign = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 7 };
 			noteassign = new int[] { 0, 1, 2, 3, 4, 5, 6, 7 };
 			sckeyassign = new int[] { 7 };
-			sckey = new int[1];
-			judgenow = new int[1];
-			judgenowt = new int[1];
-			judgecombo = new int[1];
+			prepareAttr(1);
 			break;
 		case 10:
 		case 14:
-			bomb = new long[16];
-			processing = new LongNote[16];
-			passing = new LongNote[16];
-			passingcount = new int[16];
-			inclease = new boolean[16];
 			keyassign = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 7, 8, 9, 10, 11, 12, 13, 14, 15, 15 };
 			noteassign = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13, 14, 15, 16 };
 			sckeyassign = new int[] { 7, 15 };
-			sckey = new int[2];
-			judgenow = new int[2];
-			judgenowt = new int[2];
-			judgecombo = new int[2];
+			prepareAttr(2);
 			break;
 		case 9:
-			bomb = new long[9];
-			processing = new LongNote[9];
-			passing = new LongNote[9];
-			passingcount = new int[9];
-			inclease = new boolean[9];
 			keyassign = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8 };
 			noteassign = new int[] { 0, 1, 2, 3, 4, 10, 11, 12, 13 };
 			sckeyassign = new int[] {};
-			sckey = new int[0];
-			judgenow = new int[1];
-			judgenowt = new int[1];
-			judgecombo = new int[1];
+			prepareAttr(1);
 			break;
 		}
 		Arrays.fill(bomb, -1000);
@@ -158,6 +156,7 @@ public class JudgeManager {
 		BMSPlayerInputProcessor input = main.getBMSPlayerInputProcessor();
 		long[] keytime = input.getTime();
 		boolean[] keystate = input.getKeystate();
+
 		for (int i = pos; i < timelines.length && timelines[i].getTime() <= time; i++) {
 			if (timelines[i].getTime() > prevtime) {
 				for (int key = 0; key < keyassign.length; key++) {
@@ -183,8 +182,12 @@ public class JudgeManager {
 					}
 				}
 			}
+			if (pos < i && timelines[i].getTime() < prevtime - judge[5]) {
+				pos = i;
+//				System.out.println("judge first position : " + timelines[i].getTime() + " time : " + time);
+			}
 		}
-
+		// HCNゲージ増減判定
 		Arrays.fill(inclease, false);
 		for (int key = 0; key < keyassign.length; key++) {
 			if (passing[keyassign[key]] != null) {
@@ -198,17 +201,17 @@ public class JudgeManager {
 			if (passing[keyassign[key]] != null) {
 				if (inclease[keyassign[key]]) {
 					passingcount[keyassign[key]] += (time - prevtime);
-					if (passingcount[keyassign[key]] > 100) {
+					if (passingcount[keyassign[key]] > hcnduration) {
 						main.getGauge().addValue(main.getGauge().getGaugeValue(1));
 						System.out.println("HCN : Gauge increase");
-						passingcount[keyassign[key]] -= 100;
+						passingcount[keyassign[key]] -= hcnduration;
 					}
 				} else {
 					passingcount[keyassign[key]] -= (time - prevtime);
-					if (passingcount[keyassign[key]] < -100) {
+					if (passingcount[keyassign[key]] < -hcnduration) {
 						main.getGauge().addValue(main.getGauge().getGaugeValue(4) / 5);
 						System.out.println("HCN : Gauge decrease");
-						passingcount[keyassign[key]] += 100;
+						passingcount[keyassign[key]] += hcnduration;
 					}
 				}
 			}
@@ -218,17 +221,11 @@ public class JudgeManager {
 			if (keytime[key] != 0) {
 				long ptime = keytime[key];
 				int lane = keyassign[key];
-				int sc = -1;
-				for (int i = 0; i < sckeyassign.length; i++) {
-					if (sckeyassign[i] == lane) {
-						sc = i;
-						break;
-					}
-				}
+				int sc = Arrays.binarySearch(sckeyassign, lane);
 				if (keystate[key]) {
 					// キーが押されたときの処理
 					if (processing[lane] != null) {
-						if (sc != -1 && key != sckey[sc]) {
+						if (sc >= 0 && key != sckey[sc]) {
 							for (int j = 0; j < judge.length; j++) {
 								if (j > 3) {
 									j = 4;
@@ -243,11 +240,6 @@ public class JudgeManager {
 									this.update(lane, j < 4 ? j : 4, time, dtime);
 									main.update(j);
 									processing[lane].setState(dtime >= 0 ? dtime + 1 : dtime);
-									// System.out.println("打鍵:" + time +
-									// " ノーツ位置 > " + tl.getTime() + " -
-									// " +
-									// (lane + 1) + " : " +
-									// judgename[j]);
 									System.out.println("BSS終端判定 - Time : " + ptime + " Judge : " + j + " LN : "
 											+ processing[lane].hashCode());
 									processing[lane] = null;
@@ -266,7 +258,9 @@ public class JudgeManager {
 						for (int i = pos; i < timelines.length && timelines[i].getTime() < ptime + judge[5]; i++) {
 							if (timelines[i].getTime() >= ptime - judge[5]) {
 								Note judgenote = timelines[i].getNote(noteassign[lane]);
-								if (judgenote != null && !(judgenote instanceof MineNote)
+								if (judgenote != null
+										&& !(judgenote instanceof MineNote)
+										&& !(judgenote instanceof LongNote && ((LongNote) judgenote).getEnd() == timelines[i])
 										&& (judgenote.getState() == 0 || timelines[i].getTime() < ptime - judge[3])) {
 									if (tl == null) {
 										tl = timelines[i];
@@ -310,8 +304,6 @@ public class JudgeManager {
 										}
 									}
 								}
-							} else {
-								pos = i;
 							}
 						}
 						if (tl != null) {
@@ -332,7 +324,7 @@ public class JudgeManager {
 									}
 									if (j < 4) {
 										processing[lane] = ln;
-										if (sc != -1) {
+										if (sc >= 0) {
 											// BSS処理開始
 											System.out.println("BSS開始判定 - Time : " + ptime + " Judge : " + j
 													+ " KEY : " + key + " LN : " + note.hashCode());
@@ -353,9 +345,6 @@ public class JudgeManager {
 								if (j < 4) {
 									note.setState(dtime >= 0 ? dtime + 1 : dtime);
 								}
-								// System.out.println("打鍵:" + time +
-								// " ノーツ位置 > " + tl.getTime() + " - " +
-								// (lane + 1) + " : " + judgename[j]);
 							}
 						} else {
 							Note n = null;
@@ -388,7 +377,7 @@ public class JudgeManager {
 							if (j == 4
 									|| (ptime > processing[lane].getEnd().getTime() - judge[j] && ptime < processing[lane]
 											.getEnd().getTime() + judge[j])) {
-								if (sc != -1) {
+								if (sc >= 0) {
 									if (j != 4 || key != sckey[sc]) {
 										break;
 									}
@@ -409,9 +398,6 @@ public class JudgeManager {
 								}
 								j = judge.length;
 								break;
-								// System.out.println("打鍵:" + time +
-								// " ノーツ位置 > " + tl.getTime() + " - " +
-								// (lane + 1) + " : " + judgename[j]);
 							}
 						}
 					}
@@ -420,6 +406,7 @@ public class JudgeManager {
 			}
 			prevtime = time;
 		}
+		
 		for (int lane = 0; lane < noteassign.length; lane++) {
 			// LN終端判定
 			if (model.getLntype() == BMSModel.LNTYPE_LONGNOTE && processing[lane] != null
@@ -436,13 +423,6 @@ public class JudgeManager {
 				processing[lane] = null;
 			}
 			// 見逃しPOOR判定
-			int sc = -1;
-			for (int i = 0; i < sckeyassign.length; i++) {
-				if (sckeyassign[i] == lane) {
-					sc = i;
-					break;
-				}
-			}
 			for (int i = 0; i < timelines.length && timelines[i].getTime() < time - judge[3]; i++) {
 				if (timelines[i].getTime() >= time - judge[3] - 500) {
 					Note note = timelines[i].getNote(noteassign[lane]);
@@ -467,7 +447,8 @@ public class JudgeManager {
 								main.update(4);
 								note.setState(judge);
 								processing[lane] = null;
-								if (sc != -1) {
+								int sc = Arrays.binarySearch(sckeyassign, lane);
+								if (sc >= 0) {
 									sckey[sc] = 0;
 								}
 							}
@@ -511,10 +492,6 @@ public class JudgeManager {
 
 	public int getRecentJudgeTiming() {
 		return judgefast;
-	}
-
-	public int getCombo() {
-		return combo;
 	}
 
 	public long[] getBomb() {

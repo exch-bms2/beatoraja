@@ -46,7 +46,7 @@ public class MusicDecide extends ApplicationAdapter {
 		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
 		parameter.size = 24;
 		title = resource.getBMSModel().getFullTitle();
-		parameter.characters += title + "段位認定 " + resource.getCoursetitle();
+		parameter.characters += title + resource.getCoursetitle();
 		titlefont = generator.generateFont(parameter);
 		time = System.currentTimeMillis();
 
@@ -79,7 +79,7 @@ public class MusicDecide extends ApplicationAdapter {
 		if (resource.getCourseBMSModels() != null) {
 			sprite.begin();
 			titlefont.setColor(Color.WHITE);
-			titlefont.draw(sprite, "段位認定 " + resource.getCoursetitle(), w / 2, h / 2);
+			titlefont.draw(sprite, resource.getCoursetitle(), w / 2, h / 2);
 			sprite.end();
 		} else {
 			if (resource.getBGAManager().getStagefileData() != null) {
