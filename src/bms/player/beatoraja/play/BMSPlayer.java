@@ -41,8 +41,7 @@ import com.badlogic.gdx.utils.JsonWriter.OutputType;
  */
 public class BMSPlayer extends ApplicationAdapter {
 
-	// TODO LR2スキンローダー
-
+	// TODO bug:オートプレイ時に直前のプレイリザルトを送ってしまう(スコアがリセット出来てない？)
 	// TODO GLAssistから起動すると楽曲ロード中に止まる
 
 	private BitmapFont titlefont;
@@ -234,6 +233,7 @@ public class BMSPlayer extends ApplicationAdapter {
 				break;
 			case 3:
 			case 4:
+			case 5:
 				gauge = new ExgradeGrooveGauge(model);
 				break;
 			}
@@ -540,7 +540,6 @@ public class BMSPlayer extends ApplicationAdapter {
 	}
 
 	public IRScoreData createScoreData() {
-		// TODO リプレイログの保存はMusicResultへ移行(保存するかどうかを選択したい)
 		final int pgreat = judge.getJudgeCount(0);
 		final int great = judge.getJudgeCount(1);
 		final int good = judge.getJudgeCount(2);

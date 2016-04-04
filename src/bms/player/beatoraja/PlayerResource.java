@@ -5,14 +5,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import bms.model.BMSDecoder;
-import bms.model.BMSModel;
-import bms.model.BMSONDecoder;
+import bms.model.*;
 import bms.player.beatoraja.audio.AudioProcessor;
 import bms.player.beatoraja.audio.SoundProcessor;
 import bms.player.beatoraja.bga.BGAProcessor;
 import bms.player.beatoraja.gauge.GrooveGauge;
-import bms.player.beatoraja.pattern.PatternModifyLog;
 import bms.player.lunaticrave2.IRScoreData;
 
 /**
@@ -77,6 +74,7 @@ public class PlayerResource {
 		course = null;
 		courseindex = 0;
 		cscore = null;
+		score = null;
 		gauge = null;
 	}
 

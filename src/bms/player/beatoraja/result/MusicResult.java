@@ -1,28 +1,14 @@
 package bms.player.beatoraja.result;
 
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.TimeZone;
-import java.util.logging.Logger;
-
-import javafx.scene.canvas.GraphicsContext;
 
 import org.lwjgl.opengl.GL11;
 
 import bms.model.BMSModel;
 import bms.model.Note;
 import bms.model.TimeLine;
-import bms.player.beatoraja.Config;
-import bms.player.beatoraja.MainController;
-import bms.player.beatoraja.PlayerResource;
-import bms.player.beatoraja.ReplayData;
+import bms.player.beatoraja.*;
 import bms.player.beatoraja.gauge.GrooveGauge;
-import bms.player.beatoraja.input.KeyInputLog;
-import bms.player.beatoraja.pattern.PatternModifyLog;
 import bms.player.lunaticrave2.IRScoreData;
 
 import com.badlogic.gdx.ApplicationAdapter;
@@ -30,7 +16,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -39,8 +24,6 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFont
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.utils.Json;
-import com.badlogic.gdx.utils.JsonWriter.OutputType;
 
 /**
  * リザルト
@@ -339,11 +322,11 @@ public class MusicResult extends ApplicationAdapter {
 		}
 		oldexscore = score.getExscore();
 		oldmisscount = score.getMinbp();
-		main.getPlayDataAccessor().writeScoreDara(resource.getScoreData(), resource.getBMSModel(),
-				resource.getConfig().getLnmode(), resource.isUpdateScore());
-
 		// コースモードの場合はコーススコアに加算・累積する
 		if (resource.getCourseBMSModels() != null) {
+			if(resource.getScoreData().getClear() == GrooveGauge.CLEARTYPE_FAILED) {
+				resource.getScoreData().setClear(GrooveGauge.CLEARTYPE_NOPLAY);
+			}
 			IRScoreData cscore = resource.getCourseScoreData();
 			if (cscore == null) {
 				cscore = new IRScoreData();
@@ -374,6 +357,8 @@ public class MusicResult extends ApplicationAdapter {
 			}
 			newscore = cscore;
 		}
+		main.getPlayDataAccessor().writeScoreDara(resource.getScoreData(), resource.getBMSModel(),
+				resource.getConfig().getLnmode(), resource.isUpdateScore());
 
 		if (newscore.getClear() != GrooveGauge.CLEARTYPE_FAILED) {
 			if (this.clear != null) {
