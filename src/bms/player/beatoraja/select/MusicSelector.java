@@ -99,6 +99,7 @@ public class MusicSelector extends ApplicationAdapter {
 	private GameOptionRenderer option;
 	private AssistOptionRenderer aoption;
 	private DetailOptionRenderer doption;
+	private KeyConfigurationRenderer koption;
 
 	private long starttime;
 
@@ -213,6 +214,7 @@ public class MusicSelector extends ApplicationAdapter {
 		option = new GameOptionRenderer(main.getShapeRenderer(), main.getSpriteBatch(), titlefont, config);
 		aoption = new AssistOptionRenderer(main.getShapeRenderer(), main.getSpriteBatch(), titlefont, config);
 		doption = new DetailOptionRenderer(main.getShapeRenderer(), main.getSpriteBatch(), titlefont, config);
+		koption = new KeyConfigurationRenderer(main.getInputProcessor(), main.getShapeRenderer(), main.getSpriteBatch(), titlefont, config);
 
 		starttime = System.currentTimeMillis();
 	}
@@ -580,6 +582,8 @@ public class MusicSelector extends ApplicationAdapter {
 			aoption.render(keystate, keytime);
 		} else if (input.getNumberState()[5]) {
 			doption.render(keystate, keytime);
+		} else if (input.getNumberState()[6]) {
+			koption.render(cursor);
 		} else {
 			// 1鍵 (選曲 or フォルダを開く)
 			if ((keystate[0] && keytime[0] != 0) || cursor[3]) {

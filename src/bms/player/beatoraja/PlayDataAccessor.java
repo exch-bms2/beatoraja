@@ -72,7 +72,7 @@ public class PlayDataAccessor {
 		score.setHash(hash);
 		score.setNotes(model.getTotalNotes());
 
-		if (newscore.getClear() != GrooveGauge.CLEARTYPE_FAILED) {
+		if (newscore.getClear() > GrooveGauge.CLEARTYPE_FAILED) {
 			score.setClearcount(score.getClearcount() + 1);
 		}
 		if (clear < newscore.getClear()) {
