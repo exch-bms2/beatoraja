@@ -5,16 +5,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
+import bms.player.beatoraja.input.BMControllerInputProcessor.BMKeys;
 import bms.player.beatoraja.play.BMSPlayer;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.controllers.Controller;
-import com.badlogic.gdx.controllers.ControllerListener;
 import com.badlogic.gdx.controllers.Controllers;
-import com.badlogic.gdx.controllers.PovDirection;
-import com.badlogic.gdx.math.Vector3;
 
 /**
  * キーボードやコントローラからの入力を管理するクラス
@@ -25,17 +22,17 @@ public class BMSPlayerInputProcessor {
 
 	private KeyBoardInputProcesseor kbinput;
 
-	private List<BMSControllerListener> bminput = new ArrayList();
+	private List<BMControllerInputProcessor> bminput = new ArrayList();
 
 	public BMSPlayerInputProcessor() {
-		kbinput = new KeyBoardInputProcesseor(new int[] { Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.F, Keys.V,
+		kbinput = new KeyBoardInputProcesseor(this, new int[] { Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.F, Keys.V,
 				Keys.SHIFT_LEFT, Keys.CONTROL_LEFT, Keys.COMMA, Keys.L, Keys.PERIOD, Keys.SEMICOLON, Keys.SLASH,
 				Keys.APOSTROPHE, Keys.UNKNOWN, Keys.SHIFT_RIGHT, Keys.CONTROL_RIGHT, Keys.Q, Keys.W });
 		Gdx.input.setInputProcessor(kbinput);
 		int player = 0;
 		for (Controller controller : Controllers.getControllers()) {
 			Logger.getGlobal().info("コントローラーを検出 : " + controller.getName());
-			BMSControllerListener bm = new BMSControllerListener(player,
+			BMControllerInputProcessor bm = new BMControllerInputProcessor(this, player,
 					new int[] { BMKeys.BUTTON_3, BMKeys.BUTTON_6, BMKeys.BUTTON_2, BMKeys.BUTTON_7, BMKeys.BUTTON_1,
 							BMKeys.BUTTON_4, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN, BMKeys.BUTTON_8, BMKeys.BUTTON_9 });
 			controller.addListener(bm);
@@ -59,21 +56,21 @@ public class BMSPlayerInputProcessor {
 	/**
 	 * 0-9キーのON/OFF状態
 	 */
-	private boolean[] numberstate = new boolean[10];
+	boolean[] numberstate = new boolean[10];
 	/**
 	 * 0-9キーの最終更新時間
 	 */
-	private long[] numtime = new long[10];
+	long[] numtime = new long[10];
 	/**
 	 * F1-F12キーのON/OFF状態
 	 */
-	private boolean[] functionstate = new boolean[12];
+	boolean[] functionstate = new boolean[12];
 	/**
 	 * F1-F12キーの最終更新時間
 	 */
-	private long[] functiontime = new long[12];
+	long[] functiontime = new long[12];
 
-	private long starttime;
+	long starttime;
 
 	private boolean enableKeyInput = true;
 
@@ -84,14 +81,14 @@ public class BMSPlayerInputProcessor {
 
 	private boolean exitPressed;
 
-	private boolean[] cursor = new boolean[4];
+	boolean[] cursor = new boolean[4];
 
 	public void setKeyassign(int[] keyassign) {
 		kbinput.setKeyAssign(keyassign);
 	}
 
 	public void setControllerassign(int[] buttons) {
-		for (BMSControllerListener controller : bminput) {
+		for (BMControllerInputProcessor controller : bminput) {
 			controller.setControllerKeyAssign(buttons);
 		}
 	}
@@ -205,333 +202,9 @@ public class BMSPlayerInputProcessor {
 	public KeyBoardInputProcesseor getKeyBoardInputProcesseor() {
 		return kbinput;
 	}
-
-	/**
-	 * キーボード入力処理用クラス
-	 * 
-	 * @author exch
-	 */
-	public class KeyBoardInputProcesseor implements InputProcessor {
-
-		private int[] keys = new int[] { Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.F, Keys.V, Keys.SHIFT_LEFT,
-				Keys.CONTROL_LEFT, Keys.COMMA, Keys.L, Keys.PERIOD, Keys.SEMICOLON, Keys.SLASH, Keys.APOSTROPHE,
-				Keys.UNKNOWN, Keys.SHIFT_RIGHT, Keys.CONTROL_RIGHT };
-		private int[] numbers = new int[] { Keys.NUM_0, Keys.NUM_1, Keys.NUM_2, Keys.NUM_3, Keys.NUM_4, Keys.NUM_5,
-				Keys.NUM_6, Keys.NUM_7, Keys.NUM_8, Keys.NUM_9 };
-		private int[] cover = new int[] { Keys.UP, Keys.DOWN, Keys.LEFT, Keys.RIGHT };
-		private int[] function = new int[] { Keys.F1, Keys.F2, Keys.F3, Keys.F4, Keys.F5, Keys.F6, Keys.F7, Keys.F8,
-				Keys.F9, Keys.F10, Keys.F11, Keys.F12 };
-		private int[] control = new int[] { Keys.Q, Keys.W };
-		private int exit = Keys.ESCAPE;
-		
-		private int lastPressedKey = -1;
-
-		public KeyBoardInputProcesseor(int[] keys) {
-			this.setKeyAssign(keys);
-		}
-
-		public void setKeyAssign(int[] keys) {
-			this.keys = new int[] { keys[0], keys[1], keys[2], keys[3], keys[4], keys[5], keys[6], keys[7], keys[8],
-					keys[9], keys[10], keys[11], keys[12], keys[13], keys[14], keys[15], keys[16], keys[17] };
-			this.control = new int[] { keys[18], keys[19] };
-		}
-
-		public boolean keyDown(int keycode) {
-			setLastPressedKey(keycode);
-			int presstime = (int) (System.currentTimeMillis() - starttime);
-			for (int i = 0; i < keys.length; i++) {
-				if (keys[i] == keycode) {
-					keyChanged(presstime, i, true);
-					return true;
-				}
-			}
-
-			// レーンカバー
-			for (int i = 0; i < cursor.length; i++) {
-				if (cover[i] == keycode) {
-					cursor[i] = true;
-				}
-			}
-
-			if (control[0] == keycode) {
-				startChanged(true);
-			}
-			if (control[1] == keycode) {
-				setSelectPressed(true);
-			}
-			if (exit == keycode) {
-				setExitPressed(true);
-			}
-
-			for (int i = 0; i < numbers.length; i++) {
-				if (keycode == numbers[i]) {
-					presstime = (int) (System.currentTimeMillis() - starttime);
-					numberstate[i] = true;
-					numtime[i] = presstime;
-				}
-			}
-
-			for (int i = 0; i < function.length; i++) {
-				if (keycode == function[i]) {
-					presstime = (int) (System.currentTimeMillis() - starttime);
-					functionstate[i] = true;
-					functiontime[i] = presstime;
-				}
-			}
-
-			return true;
-		}
-
-		public boolean keyTyped(char keycode) {
-			return false;
-		}
-
-		public boolean keyUp(int keycode) {
-			int presstime = (int) (System.currentTimeMillis() - starttime);
-			for (int i = 0; i < keys.length; i++) {
-				if (keys[i] == keycode) {
-					keyChanged(presstime, i, false);
-					return true;
-				}
-			}
-			if (control[0] == keycode) {
-				startChanged(false);
-			}
-			if (control[1] == keycode) {
-				setSelectPressed(false);
-			}
-			if (exit == keycode) {
-				setExitPressed(false);
-			}
-
-			for (int i = 0; i < cursor.length; i++) {
-				if (cover[i] == keycode) {
-					cursor[i] = false;
-				}
-			}
-			for (int i = 0; i < numbers.length; i++) {
-				if (keycode == numbers[i]) {
-					presstime = (int) (System.currentTimeMillis() - starttime);
-					numberstate[i] = false;
-					numtime[i] = presstime;
-				}
-			}
-			return true;
-		}
-
-		public boolean mouseMoved(int arg0, int arg1) {
-			// TODO 自動生成されたメソッド・スタブ
-			return false;
-		}
-
-		public boolean scrolled(int arg0) {
-			// TODO 自動生成されたメソッド・スタブ
-			return false;
-		}
-
-		public boolean touchDown(int arg0, int arg1, int arg2, int arg3) {
-			// TODO 自動生成されたメソッド・スタブ
-			return false;
-		}
-
-		public boolean touchDragged(int arg0, int arg1, int arg2) {
-			// TODO 自動生成されたメソッド・スタブ
-			return false;
-		}
-
-		public boolean touchUp(int arg0, int arg1, int arg2, int arg3) {
-			// TODO 自動生成されたメソッド・スタブ
-			return false;
-		}
-
-		public int getLastPressedKey() {
-			return lastPressedKey;
-		}
-
-		public void setLastPressedKey(int lastPressedKey) {
-			this.lastPressedKey = lastPressedKey;
-		}
-	}
-
-	public static class BMKeys {
-		public static final int BUTTON_0 = 0;
-		public static final int BUTTON_1 = 1;
-		public static final int BUTTON_2 = 2;
-		public static final int BUTTON_3 = 3;
-		public static final int BUTTON_4 = 4;
-		public static final int BUTTON_5 = 5;
-		public static final int BUTTON_6 = 6;
-		public static final int BUTTON_7 = 7;
-		public static final int BUTTON_8 = 8;
-		public static final int BUTTON_9 = 9;
-		public static final int UP = 10;
-		public static final int DOWN = 11;
-		public static final int LEFT = 12;
-		public static final int RIGHT = 13;
-	}
-
-	/**
-	 * 専用コントローラー入力処理用クラス
-	 * 
-	 * @author exch
-	 */
-	class BMSControllerListener implements ControllerListener {
-
-		// TODO 専コンのキーコンフィグ
-
-		private int player = 0;
-
-		private float[] axis = new float[4];
-		
-		private int lastPressedButton = -1;
-
-		public BMSControllerListener(int player, int[] buttons) {
-			this.player = player;
-			this.setControllerKeyAssign(buttons);
-		}
-
-		private int[] buttons = new int[] { BMKeys.BUTTON_3, BMKeys.BUTTON_6, BMKeys.BUTTON_2, BMKeys.BUTTON_7,
-				BMKeys.BUTTON_1, BMKeys.BUTTON_4, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN };
-		private int start = BMKeys.BUTTON_8;
-		private int select = BMKeys.BUTTON_9;
-
-		public void setControllerKeyAssign(int[] buttons) {
-			this.buttons = new int[] { buttons[0], buttons[1], buttons[2], buttons[3], buttons[4], buttons[5],
-					buttons[6], buttons[7], buttons[8] };
-			this.start = buttons[9];
-			this.select = buttons[10];
-		}
-
-		public boolean accelerometerMoved(Controller arg0, int arg1, Vector3 arg2) {
-			Logger.getGlobal().info("controller : " + player + " accelerometer moved :" + arg1 + " - " + arg2.x + " "
-					+ arg2.y + " " + arg2.z);
-			return false;
-		}
-
-		public boolean axisMoved(Controller arg0, int arg1, float arg2) {
-			int presstime = (int) (System.currentTimeMillis() - starttime);
-			if (arg1 == 0 || arg1 == 3) {
-				// 7ボタン目の処理、スクラッチ処理
-				if (arg2 == -1.0) {
-					// LEFT
-					if (axis[arg1] == 1.0) {
-						buttonUp(arg0, BMKeys.RIGHT);
-					}
-					buttonDown(arg0, BMKeys.LEFT);
-				} else if (arg2 == 1.0) {
-					// RIGHT
-					if (axis[arg1] == -1.0) {
-						buttonUp(arg0, BMKeys.LEFT);
-					}
-					buttonDown(arg0, BMKeys.RIGHT);
-				} else {
-					if (axis[arg1] == 1.0) {
-						buttonUp(arg0, BMKeys.RIGHT);
-					}
-					if (axis[arg1] == -1.0) {
-						buttonUp(arg0, BMKeys.LEFT);
-					}
-				}
-				axis[arg1] = arg2;
-			} else {
-				if (arg2 == -1.0) {
-					// UP
-					if (axis[arg1] == 1.0) {
-						buttonUp(arg0, BMKeys.DOWN);
-					}
-					buttonDown(arg0, BMKeys.UP);
-				} else if (arg2 == 1.0) {
-					// DOWN
-					if (axis[arg1] == -1.0) {
-						buttonUp(arg0, BMKeys.UP);
-					}
-					buttonDown(arg0, BMKeys.DOWN);
-				} else {
-					if (axis[arg1] == 1.0) {
-						buttonUp(arg0, BMKeys.DOWN);
-					}
-					if (axis[arg1] == -1.0) {
-						buttonUp(arg0, BMKeys.UP);
-					}
-				}
-			}
-			axis[arg1] = arg2;
-			// Logger.getGlobal().info("controller : " + player +"axis moved :"
-			// + arg1 + " - " + arg2);
-			return false;
-		}
-
-		public boolean buttonDown(Controller arg0, int keycode) {
-			int presstime = (int) (System.currentTimeMillis() - starttime);
-			for (int i = 0; i < buttons.length; i++) {
-				if (buttons[i] == keycode) {
-					keyChanged(presstime, i + player * 9, true);
-				}
-			}
-			setLastPressedButton(keycode);
-
-			if (start == keycode) {
-				startChanged(true);
-			}
-			if (select == keycode) {
-				setSelectPressed(true);
-			}
-
-//			Logger.getGlobal().info("controller : " + player +" button pressed : " + keycode + " time : " + presstime);
-			return false;
-		}
-
-		public boolean buttonUp(Controller arg0, int keycode) {
-			int presstime = (int) (System.currentTimeMillis() - starttime);
-			for (int i = 0; i < buttons.length; i++) {
-				if (buttons[i] == keycode) {
-					keyChanged(presstime, i + player * 9, false);
-				}
-			}
-
-			if (start == keycode) {
-				startChanged(false);
-			}
-			if (select == keycode) {
-				setSelectPressed(false);
-			}
-//			Logger.getGlobal().info("controller : " + player +" button released : " + keycode + " time : " + presstime);
-			return false;
-		}
-
-		public void connected(Controller arg0) {
-			// TODO 自動生成されたメソッド・スタブ
-
-		}
-
-		public void disconnected(Controller arg0) {
-			// TODO 自動生成されたメソッド・スタブ
-
-		}
-
-		public boolean povMoved(Controller arg0, int arg1, PovDirection arg2) {
-			Logger.getGlobal().info("controller : " + player + "pov moved : " + arg1 + " - " + arg2.ordinal());
-			return false;
-		}
-
-		public boolean xSliderMoved(Controller arg0, int arg1, boolean arg2) {
-			Logger.getGlobal().info("controller : " + player + "xslider moved : " + arg1 + " - " + arg2);
-			return false;
-		}
-
-		public boolean ySliderMoved(Controller arg0, int arg1, boolean arg2) {
-			Logger.getGlobal().info("controller : " + player + "yslider moved : " + arg1 + " - " + arg2);
-			return false;
-		}
-
-		public int getLastPressedButton() {
-			return lastPressedButton;
-		}
-
-		public void setLastPressedButton(int lastPressedButton) {
-			this.lastPressedButton = lastPressedButton;
-		}
-
+	
+	public BMControllerInputProcessor[] getBMInputProcessor() {
+		return bminput.toArray(new BMControllerInputProcessor[0]);
 	}
 
 }
