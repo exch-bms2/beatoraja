@@ -485,7 +485,7 @@ public class BMSPlayer extends ApplicationAdapter {
 				}
 				input.setEnableKeyInput(true);
 				input.setStartTime(0);
-				main.changeState(MainController.STATE_RESULT, resource);
+				main.changeState(MainController.STATE_RESULT);
 			}
 			break;
 		// 完奏処理
@@ -519,7 +519,7 @@ public class BMSPlayer extends ApplicationAdapter {
 				}
 				input.setEnableKeyInput(true);
 				input.setStartTime(0);
-				main.changeState(MainController.STATE_RESULT, resource);
+				main.changeState(MainController.STATE_RESULT);
 			}
 			break;
 		}

@@ -69,6 +69,10 @@ public class PlayerResource {
 	 */
 	private IRScoreData cscore;
 	
+	public PlayerResource(Config config) {
+		this.config = config;
+	}
+	
 	public void clear() {
 		coursetitle = null;
 		course = null;

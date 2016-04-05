@@ -262,12 +262,12 @@ public class MusicResult extends ApplicationAdapter {
 			if (resource.getCourseBMSModels() != null) {
 				if (resource.getGauge().get(resource.getGauge().size() - 1) <= 0) {
 					// 不合格リザルト
-					main.changeState(MainController.STATE_GRADE_RESULT, resource);
+					main.changeState(MainController.STATE_GRADE_RESULT);
 				} else if (resource.nextCourse()) {
-					main.changeState(MainController.STATE_PLAYBMS, resource);
+					main.changeState(MainController.STATE_PLAYBMS);
 				} else {
 					// 合格リザルト
-					main.changeState(MainController.STATE_GRADE_RESULT, resource);
+					main.changeState(MainController.STATE_GRADE_RESULT);
 				}
 			} else {
 				if (keystate[4]) {
@@ -275,15 +275,15 @@ public class MusicResult extends ApplicationAdapter {
 					// オプションを変更せず同じ譜面でリプレイ
 					resource.getReplayData().pattern = null;
 					resource.reloadBMSFile();
-					main.changeState(MainController.STATE_PLAYBMS, resource);
+					main.changeState(MainController.STATE_PLAYBMS);
 				} else if (keystate[6]) {
 					keytime[6] = 0;
 					// 同じ譜面でリプレイ
 					resource.reloadBMSFile();
-					main.changeState(MainController.STATE_PLAYBMS, resource);
+					main.changeState(MainController.STATE_PLAYBMS);
 				} else {
 					keytime[0] = keytime[2] = 0;
-					main.changeState(MainController.STATE_SELECTMUSIC, resource);
+					main.changeState(MainController.STATE_SELECTMUSIC);
 				}
 			}
 		}

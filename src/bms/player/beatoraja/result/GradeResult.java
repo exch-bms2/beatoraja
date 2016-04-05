@@ -117,7 +117,7 @@ public class GradeResult extends ApplicationAdapter {
 		if (score == null
 				|| ((System.currentTimeMillis() > time + 500 && (keystate[0] || keystate[2] || keystate[4] || keystate[6])))) {
 			keytime[0] = keytime[2] = keytime[4] = keytime[6] = 0;
-			main.changeState(MainController.STATE_SELECTMUSIC, resource);
+			main.changeState(MainController.STATE_SELECTMUSIC);
 		}
 	}
 

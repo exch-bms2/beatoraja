@@ -12,6 +12,7 @@ import javafx.scene.Scene;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import bms.model.*;
+import bms.player.beatoraja.config.KeyConfiguration;
 import bms.player.beatoraja.decide.MusicDecide;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.play.BMSPlayer;
@@ -44,6 +45,9 @@ public class MainController extends ApplicationAdapter {
 	private MusicSelector selector;
 	private MusicResult result;
 	private GradeResult gresult;
+	private KeyConfiguration keyconfig;
+
+	private PlayerResource resource;
 
 	private BitmapFont systemfont;
 
@@ -56,30 +60,35 @@ public class MainController extends ApplicationAdapter {
 
 	private SpriteBatch sprite;
 	private ShapeRenderer shape;
-
-	private File f;
+	/**
+	 * 1曲プレイで指定したBMSファイル
+	 */
+	private File bmsfile;
 
 	private BMSPlayerInputProcessor input;
-
+	/**
+	 * FPSを描画するかどうか
+	 */
 	private boolean showfps;
-
+	/**
+	 * プレイデータアクセサ
+	 */
 	private PlayDataAccessor playdata;
-	
+
 	public MainController(File f, Config config, int auto) {
 		this.auto = auto;
 		this.config = config;
-		this.f = f;
+		this.bmsfile = f;
 
 		try {
 			Class.forName("org.sqlite.JDBC");
-			songdb = new LunaticRave2SongDatabaseManager(
-					new File("song.db").getPath(), true,
+			songdb = new LunaticRave2SongDatabaseManager(new File("song.db").getPath(), true,
 					BMSModel.LNTYPE_CHARGENOTE);
 			songdb.createTable();
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
-		
+
 		playdata = new PlayDataAccessor("Player");
 	}
 
@@ -90,7 +99,7 @@ public class MainController extends ApplicationAdapter {
 	public PlayDataAccessor getPlayDataAccessor() {
 		return playdata;
 	}
-	
+
 	public SpriteBatch getSpriteBatch() {
 		return sprite;
 	}
@@ -104,11 +113,12 @@ public class MainController extends ApplicationAdapter {
 	public static final int STATE_PLAYBMS = 2;
 	public static final int STATE_RESULT = 3;
 	public static final int STATE_GRADE_RESULT = 4;
+	public static final int STATE_CONFIG = 5;
 
-	public void changeState(int state, PlayerResource resource) {
+	public void changeState(int state) {
 		switch (state) {
 		case STATE_SELECTMUSIC:
-			if (this.f != null) {
+			if (this.bmsfile != null) {
 				exit();
 			}
 			selector.create(resource);
@@ -131,6 +141,10 @@ public class MainController extends ApplicationAdapter {
 			gresult.create(resource);
 			current = gresult;
 			break;
+		case STATE_CONFIG:
+			keyconfig.create(resource);
+			current = keyconfig;
+			break;
 		}
 	}
 
@@ -150,17 +164,18 @@ public class MainController extends ApplicationAdapter {
 		decide = new MusicDecide(this);
 		result = new MusicResult(this);
 		gresult = new GradeResult(this);
+		keyconfig = new KeyConfiguration(this);
 
-		if (f != null) {
-			PlayerResource resource = new PlayerResource();
-			resource.setBMSFile(f, config, auto);
-			changeState(STATE_PLAYBMS, resource);
+		resource = new PlayerResource(config);
+
+		if (bmsfile != null) {
+			resource.setBMSFile(bmsfile, config, auto);
+			changeState(STATE_PLAYBMS);
 		} else {
-			changeState(STATE_SELECTMUSIC, null);
+			changeState(STATE_SELECTMUSIC);
 		}
 
-		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
-				Gdx.files.internal("skin/VL-Gothic-Regular.ttf"));
+		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/VL-Gothic-Regular.ttf"));
 		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
 		parameter.size = 24;
 		systemfont = generator.generateFont(parameter);
@@ -178,25 +193,21 @@ public class MainController extends ApplicationAdapter {
 		}
 		if (showfps) {
 			sprite.begin();
-			systemfont.setColor(Color.YELLOW);
-			systemfont.draw(sprite, "FPS " + Gdx.graphics.getFramesPerSecond(),
-					10, 718);
+			systemfont.setColor(Color.PURPLE);
+			systemfont.draw(sprite, String.format("FPS %d", Gdx.graphics.getFramesPerSecond()), 10, 718);
 			sprite.end();
 		}
 
 		// スクリーンショット
 		if (input.getFunctionstate()[5] && input.getFunctiontime()[5] != 0) {
-			byte[] pixels = ScreenUtils.getFrameBufferPixels(0, 0,
-					Gdx.graphics.getBackBufferWidth(),
+			byte[] pixels = ScreenUtils.getFrameBufferPixels(0, 0, Gdx.graphics.getBackBufferWidth(),
 					Gdx.graphics.getBackBufferHeight(), true);
 
-			Pixmap pixmap = new Pixmap(Gdx.graphics.getBackBufferWidth(),
-					Gdx.graphics.getBackBufferHeight(), Pixmap.Format.RGBA8888);
+			Pixmap pixmap = new Pixmap(Gdx.graphics.getBackBufferWidth(), Gdx.graphics.getBackBufferHeight(),
+					Pixmap.Format.RGBA8888);
 			BufferUtils.copy(pixels, 0, pixmap.getPixels(), pixels.length);
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
-			String path = "screenshot/"
-					+ sdf.format(Calendar.getInstance().getTime())
-					+ ".png";
+			String path = "screenshot/" + sdf.format(Calendar.getInstance().getTime()) + ".png";
 			PixmapIO.writePNG(new FileHandle(path), pixmap);
 			pixmap.dispose();
 			input.getFunctiontime()[5] = 0;
@@ -277,8 +288,7 @@ public class MainController extends ApplicationAdapter {
 		if (new File("config.json").exists()) {
 			Json json = new Json();
 			try {
-				config = json.fromJson(Config.class, new FileReader(
-						"config.json"));
+				config = json.fromJson(Config.class, new FileReader("config.json"));
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			} catch (SerializationException e) {
@@ -314,19 +324,16 @@ public class MainController extends ApplicationAdapter {
 			cfg.title = "Beatoraja";
 
 			cfg.audioDeviceBufferSize = config.getAudioDeviceBufferSize();
-			cfg.audioDeviceSimultaneousSources = config
-					.getAudioDeviceSimultaneousSources();
+			cfg.audioDeviceSimultaneousSources = config.getAudioDeviceSimultaneousSources();
 			cfg.forceExit = forceExit;
 
 			new LwjglApplication(player, cfg);
 		} catch (Exception e) {
 			e.printStackTrace();
-			Logger.getGlobal().severe(
-					e.getClass().getName() + " : " + e.getMessage());
+			Logger.getGlobal().severe(e.getClass().getName() + " : " + e.getMessage());
 		} catch (Error e) {
 			e.printStackTrace();
-			Logger.getGlobal().severe(
-					e.getClass().getName() + " : " + e.getMessage());
+			Logger.getGlobal().severe(e.getClass().getName() + " : " + e.getMessage());
 		}
 	}
 
@@ -362,8 +369,7 @@ public class MainController extends ApplicationAdapter {
 			if (new File("config.json").exists()) {
 				Json json = new Json();
 				try {
-					config = json.fromJson(Config.class, new FileReader(
-							"config.json"));
+					config = json.fromJson(Config.class, new FileReader("config.json"));
 				} catch (FileNotFoundException e) {
 					e.printStackTrace();
 				}
@@ -382,16 +388,14 @@ public class MainController extends ApplicationAdapter {
 
 			try {
 				FXMLLoader loader = new FXMLLoader(
-						BMSInformationLoader.class
-								.getResource("/bms/player/beatoraja/PlayConfigurationView.fxml"));
+						BMSInformationLoader.class.getResource("/bms/player/beatoraja/PlayConfigurationView.fxml"));
 				VBox stackPane = (VBox) loader.load();
 				bmsinfo = (PlayConfigurationView) loader.getController();
 				bmsinfo.update(config);
 				// scene.getStylesheets().addAll("/bms/res/win7glass.css",
 				// "/bms/res/style.css");
 				// primaryStage.getIcons().addAll(this.primaryStage.getIcons());
-				Scene scene = new Scene(stackPane, stackPane.getPrefWidth(),
-						stackPane.getPrefHeight());
+				Scene scene = new Scene(stackPane, stackPane.getPrefWidth(), stackPane.getPrefHeight());
 
 				primaryStage.setScene(scene);
 				primaryStage.setTitle("beatoraja configuration");

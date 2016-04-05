@@ -106,7 +106,7 @@ public class MusicDecide extends ApplicationAdapter {
 		sprite.end();
 
 		if (System.currentTimeMillis() > time + 1500) {
-			main.changeState(MainController.STATE_PLAYBMS, resource);
+			main.changeState(MainController.STATE_PLAYBMS);
 		}
 	}
 }

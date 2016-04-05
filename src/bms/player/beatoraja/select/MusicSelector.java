@@ -99,7 +99,6 @@ public class MusicSelector extends ApplicationAdapter {
 	private GameOptionRenderer option;
 	private AssistOptionRenderer aoption;
 	private DetailOptionRenderer doption;
-	private KeyConfigurationRenderer koption;
 
 	private long starttime;
 
@@ -152,9 +151,6 @@ public class MusicSelector extends ApplicationAdapter {
 
 	public void create(PlayerResource resource) {
 		this.resource = resource;
-		if (this.resource == null) {
-			this.resource = new PlayerResource();
-		}
 		if (dir.size() > 0) {
 			updateBar(dir.get(dir.size() - 1));
 		} else {
@@ -214,7 +210,6 @@ public class MusicSelector extends ApplicationAdapter {
 		option = new GameOptionRenderer(main.getShapeRenderer(), main.getSpriteBatch(), titlefont, config);
 		aoption = new AssistOptionRenderer(main.getShapeRenderer(), main.getSpriteBatch(), titlefont, config);
 		doption = new DetailOptionRenderer(main.getShapeRenderer(), main.getSpriteBatch(), titlefont, config);
-		koption = new KeyConfigurationRenderer(main.getInputProcessor(), main.getShapeRenderer(), main.getSpriteBatch(), titlefont, config);
 
 		starttime = System.currentTimeMillis();
 	}
@@ -583,7 +578,10 @@ public class MusicSelector extends ApplicationAdapter {
 		} else if (input.getNumberState()[5]) {
 			doption.render(keystate, keytime);
 		} else if (input.getNumberState()[6]) {
-			koption.render(cursor);
+			if (bgm != null) {
+				bgm.stop();
+			}
+			main.changeState(MainController.STATE_CONFIG);
 		} else {
 			// 1鍵 (選曲 or フォルダを開く)
 			if ((keystate[0] && keytime[0] != 0) || cursor[3]) {
@@ -606,7 +604,7 @@ public class MusicSelector extends ApplicationAdapter {
 						if (bgm != null) {
 							bgm.stop();
 						}
-						main.changeState(MainController.STATE_DECIDE, resource);
+						main.changeState(MainController.STATE_DECIDE);
 					}
 				} else if (currentsongs[selectedindex] instanceof GradeBar) {
 					if (((GradeBar) currentsongs[selectedindex]).existsAllSongs()) {
@@ -622,7 +620,7 @@ public class MusicSelector extends ApplicationAdapter {
 						if (bgm != null) {
 							bgm.stop();
 						}
-						main.changeState(MainController.STATE_DECIDE, resource);
+						main.changeState(MainController.STATE_DECIDE);
 					} else {
 						Logger.getGlobal().info("段位の楽曲が揃っていません");
 					}
@@ -664,7 +662,7 @@ public class MusicSelector extends ApplicationAdapter {
 						if (bgm != null) {
 							bgm.stop();
 						}
-						main.changeState(MainController.STATE_DECIDE, resource);
+						main.changeState(MainController.STATE_DECIDE);
 
 					}
 				}
@@ -677,7 +675,7 @@ public class MusicSelector extends ApplicationAdapter {
 						if (bgm != null) {
 							bgm.stop();
 						}
-						main.changeState(MainController.STATE_DECIDE, resource);
+						main.changeState(MainController.STATE_DECIDE);
 					}
 				}
 			}

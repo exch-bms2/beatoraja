@@ -17,10 +17,20 @@ import bms.player.lunaticrave2.LunaticRave2ScoreDatabaseManager;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter.OutputType;
 
+/**
+ * プレイデータアクセス用クラス
+ * 
+ * @author exch
+ */
 public class PlayDataAccessor {
 
+	/**
+	 * プレイヤー名
+	 */
 	private String player;
-
+	/**
+	 * スコアデータベースアクセサ
+	 */
 	private LunaticRave2ScoreDatabaseManager scoredb;
 
 	public PlayDataAccessor(String player) {
@@ -35,6 +45,12 @@ public class PlayDataAccessor {
 		}
 	}
 
+	/**
+	 * スコアデータを読み込む
+	 * @param model　対象のモデル
+	 * @param lnmode LNモード
+     * @return スコアデータ
+     */
 	public IRScoreData readScoreData(BMSModel model, int lnmode) {
 		String hash = model.getHash();
 		boolean ln = model.getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
@@ -42,6 +58,13 @@ public class PlayDataAccessor {
 		return readScoreData(hash, ln, lnmode);
 	}
 
+	/**
+	 * スコアデータを読み込む
+	 * @param model　対象のbmsのハッシュ値
+	 * @param ln 対象のbmsがLNを含む場合はtrueを入れる
+	 * @param lnmode LNモード
+     * @return スコアデータ
+     */
 	public IRScoreData readScoreData(String hash, boolean ln, int lnmode) {
 		if (ln && lnmode > 0) {
 			hash = "C" + hash;
