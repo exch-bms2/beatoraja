@@ -5,18 +5,15 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import bms.model.BMSModel;
 import bms.player.beatoraja.play.PlaySkin;
 
+/**
+ * ハザードゲージ
+ *
+ * @author exch
+ */
 public class HazardGrooveGauge extends GrooveGauge {
 
-	private float[] gauge;
-
 	public HazardGrooveGauge(BMSModel model) {
-		super(0, 100, 100, 0, CLEARTYPE_FULLCOMBO);
-		gauge = new float[] { 0.16f, 0.16f, 0.04f, -100.0f, -100.0f, -2.5f };
-	}
-
-	@Override
-	public void update(int judge) {
-		this.setValue(this.getValue() + gauge[judge]);
+		super(0, 100, 100, 0, CLEARTYPE_FULLCOMBO, new float[] { 0.16f, 0.16f, 0.04f, -100.0f, -100.0f, -2.5f });
 	}
 
 	@Override
@@ -26,10 +23,5 @@ public class HazardGrooveGauge extends GrooveGauge {
 			sprite.draw(skin.getGauge()[3], x + w * (i - 2) / 100, y, w / 50, h);
 		}
 		sprite.end();
-	}
-
-	@Override
-	public float getGaugeValue(int judge) {
-		return gauge[judge];
 	}
 }

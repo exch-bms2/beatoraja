@@ -5,21 +5,19 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import bms.model.BMSModel;
 import bms.player.beatoraja.play.PlaySkin;
 
+/**
+ * イージーゲージ
+ *
+ * @author exch
+ */
 public class EasyGrooveGauge extends GrooveGauge {
 
-	private float[] gauge;
-	
 	public EasyGrooveGauge(BMSModel model) {
-		super(2,100, 20, 80, CLEARTYPE_EASY);
-		float g = (float) (model.getTotal() / model.getTotalNotes());
-		gauge = new float[] { g, g, g / 2, -1.5f, -3.0f, -1.0f };
+		super(2,100, 20, 80, CLEARTYPE_EASY, new float[] { (float) (model.getTotal() / model.getTotalNotes()),
+				(float) (model.getTotal() / model.getTotalNotes()), (float) (model.getTotal() / model.getTotalNotes()) / 2,
+				-1.5f, -3.0f, -1.0f });
 	}
 	
-	@Override
-	public void update(int judge) {
-		this.setValue(this.getValue() + gauge[judge]);
-	}
-
 	@Override
 	public void draw(PlaySkin skin, SpriteBatch sprite, float x, float y, float w, float h) {
 		sprite.begin();
@@ -33,10 +31,5 @@ public class EasyGrooveGauge extends GrooveGauge {
 			}
 		}
 		sprite.end();
-	}
-	
-	@Override
-	public float getGaugeValue(int judge) {
-		return gauge[judge];
 	}
 }
