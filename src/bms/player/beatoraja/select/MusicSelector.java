@@ -444,6 +444,10 @@ public class MusicSelector extends ApplicationAdapter {
 				titlefont.draw(sprite, "CLEAR / PLAY : " + score.getClearcount() + " / " + score.getPlaycount(), 100,
 						330);
 			}
+			if(((SongBar)currentsongs[selectedindex]).existsReplayData()) {
+				titlefont.setColor(Color.GREEN);
+				titlefont.draw(sprite, "7 KEY : Replay", 100, 270);
+			}
 		}
 		// 段位用の表示(ミラー段位、EX段位)
 		if (currentsongs[selectedindex] instanceof GradeBar) {
@@ -471,6 +475,7 @@ public class MusicSelector extends ApplicationAdapter {
 			}
 		}
 
+		titlefont.setColor(Color.WHITE);
 		if (currentsongs[selectedindex] instanceof FolderBar) {
 			titlefont.draw(sprite, currentsongs[selectedindex].getTitle(), 100, 600);
 		}
@@ -776,6 +781,8 @@ public class MusicSelector extends ApplicationAdapter {
 							&& ((SongBar) currentsongs[i]).getSongData().getLongnote() == 1) {
 						currentsongs[i].getScore().setClear(currentsongs[i].getScore().getExclear());
 					}
+					((SongBar) currentsongs[i]).setExistsReplayData(main.getPlayDataAccessor().existsReplayData(sd.getHash(),
+							config.getLnmode()));
 				}
 				if (currentsongs[i] instanceof GradeBar) {
 					GradeBar gb = (GradeBar) currentsongs[i];
@@ -919,6 +926,8 @@ class SongBar extends Bar {
 
 	private SongData song;
 
+	private boolean existsReplay;
+
 	public SongBar(SongData song) {
 		this.song = song;
 	}
@@ -930,6 +939,14 @@ class SongBar extends Bar {
 	@Override
 	public String getTitle() {
 		return song.getTitle();
+	}
+
+	public boolean existsReplayData() {
+		return existsReplay;
+	}
+
+	public void setExistsReplayData(boolean existsReplay) {
+		this.existsReplay = existsReplay;
 	}
 }
 

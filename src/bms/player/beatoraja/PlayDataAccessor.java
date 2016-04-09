@@ -60,7 +60,6 @@ public class PlayDataAccessor {
 
 	/**
 	 * スコアデータを読み込む
-	 * @param model　対象のbmsのハッシュ値
 	 * @param ln 対象のbmsがLNを含む場合はtrueを入れる
 	 * @param lnmode LNモード
      * @return スコアデータ
@@ -221,13 +220,21 @@ public class PlayDataAccessor {
 	}
 
 	private static final String[] replay = {"", "C", "H"};
-	
+
+	public boolean existsReplayData(BMSModel model, int lnmode) {
+		return new File(this.getReplayDataFilePath(model.getHash(), lnmode)).exists();
+	}
+
+	public boolean existsReplayData(String hash, int lnmode) {
+		return new File(this.getReplayDataFilePath(hash, lnmode)).exists();
+	}
+
 	public ReplayData readReplayData(BMSModel model, int lnmode) {
-		if (new File("replay" + File.separator +  replay[lnmode] + model.getHash() + ".json").exists()) {
+		if (existsReplayData(model, lnmode)) {
 			Json json = new Json();
 			try {
 				return (ReplayData) json.fromJson(ReplayData.class,
-						new FileReader("replay" + File.separator +  replay[lnmode] + model.getHash() + ".json"));
+						new FileReader(this.getReplayDataFilePath(model.getHash(), lnmode)));
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
@@ -243,7 +250,7 @@ public class PlayDataAccessor {
 		Json json = new Json();
 		json.setOutputType(OutputType.json);
 		try {
-			FileWriter fw = new FileWriter("replay" + File.separatorChar +  replay[lnmode] + model.getHash() + ".json");
+			FileWriter fw = new FileWriter(this.getReplayDataFilePath(model.getHash(), lnmode));
 			fw.write(json.prettyPrint(rd));
 			fw.flush();
 			fw.close();
@@ -251,5 +258,9 @@ public class PlayDataAccessor {
 			e.printStackTrace();
 		}
 
+	}
+
+	private String getReplayDataFilePath(String hash, int lnmode) {
+		return "replay" + File.separatorChar +  replay[lnmode] + hash + ".json";
 	}
 }
