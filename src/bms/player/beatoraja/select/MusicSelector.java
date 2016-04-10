@@ -414,6 +414,29 @@ public class MusicSelector extends ApplicationAdapter {
 			}
 		}
 
+		// draw song bar position
+		Rectangle progress = skin.getSeekRegion();
+		shape.begin(ShapeType.Line);
+		shape.setColor(Color.WHITE);
+		shape.rect(progress.x, progress.y, progress.width, progress.height);
+		shape.end();
+		shape.begin(ShapeType.Filled);
+		shape.setColor(Color.BLACK);
+		shape.rect(progress.x + 1, progress.y + 1, progress.width - 2, progress.height - 2);
+
+		shape.setColor(Color.ORANGE);
+		float dy = progress.y  + 1 + (progress.height - 20) * (1.0f - (float) selectedindex / currentsongs.length);
+		if (duration != 0) {
+			dy -= (float) progress.height / currentsongs.length * (Math.abs(angle) - duration + System.currentTimeMillis()) / angle
+					+ (angle >= 0 ? -1 : 1) * (float) progress.height / currentsongs.length;
+		}
+		while(dy > progress.y + progress.height) {
+			dy -= progress.height;
+		}
+		shape.rect(progress.x + 1, dy,
+				progress.width - 2, 20);
+		shape.end();
+
 		sprite.begin();
 
 		StringBuffer str = new StringBuffer();
