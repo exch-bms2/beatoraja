@@ -18,6 +18,7 @@ import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyInputLog;
 import bms.player.beatoraja.pattern.*;
 import bms.player.beatoraja.skin.LR2PlaySkinLoader;
+import bms.player.beatoraja.skin.SkinNumber;
 import bms.player.beatoraja.skin.SkinObject;
 import bms.player.lunaticrave2.IRScoreData;
 
@@ -41,7 +42,6 @@ import com.badlogic.gdx.utils.JsonWriter.OutputType;
  */
 public class BMSPlayer extends ApplicationAdapter {
 
-	// TODO bug:オートプレイ時に直前のプレイリザルトを送ってしまう(スコアがリセット出来てない？)
 	// TODO GLAssistから起動すると楽曲ロード中に止まる
 
 	private BitmapFont titlefont;
@@ -78,8 +78,13 @@ public class BMSPlayer extends ApplicationAdapter {
 	private int playtime;
 
 	private int autoplay = 0;
-
+	/**
+	 * BGレーン再生用スレッド
+	 */
 	private AutoplayThread autoThread;
+	/**
+	 * キー入力用スレッド
+	 */
 	private KeyInputThread keyinput;
 
 	private final String[] judgename = { "PG ", "GR ", "GD ", "BD ", "PR ", "MS " };
@@ -729,13 +734,13 @@ public class BMSPlayer extends ApplicationAdapter {
 		shape.begin(ShapeType.Filled);
 		shape.setColor(Color.valueOf("#001000"));
 		shape.rect(gr.x, gr.y, gr.width, gr.height);
-		shape.rect(gr.x + gr.width - 80, gr.y + gr.height, 80, 30);
+		shape.rect(gr.x + gr.width - 96, gr.y + gr.height, 96, 30);
 		shape.end();
 		gauge.draw(skin, sprite, gr.x, gr.y, gr.width, gr.height);
+		SkinNumber[] gaugecount = skin.getGaugeCount();
 		sprite.begin();
-		titlefont.setColor(Color.WHITE);
-		titlefont.draw(sprite, String.format("%5.1f", gauge.getValue()) + "%", gr.x + gr.width - 75, gr.y + gr.height
-				+ 25);
+		gaugecount[0].draw(sprite, 0, (int) gauge.getValue());
+		gaugecount[1].draw(sprite, 0, (int) (gauge.getValue() * 10));
 		sprite.end();
 
 		Gdx.gl.glEnable(GL11.GL_BLEND);
@@ -747,29 +752,29 @@ public class BMSPlayer extends ApplicationAdapter {
 		Gdx.gl.glDisable(GL11.GL_BLEND);
 		// ジャッジカウント描画
 		Rectangle judge = skin.getJudgecountregion();
-		shape.begin(ShapeType.Line);
-		shape.setColor(Color.WHITE);
-		shape.rect(judge.x - 1, judge.y - 19, 122, 122);
-		shape.end();
+		Gdx.gl.glEnable(GL11.GL_BLEND);
+		Gdx.gl.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		shape.begin(ShapeType.Filled);
-		shape.setColor(Color.BLACK);
-		shape.rect(judge.x, judge.y - 18, 120, 120);
+		shape.setColor(0, 0, 0, 0.5f);
+		shape.rect(judge.x, judge.y, judge.width, judge.height);
 		shape.end();
+		Gdx.gl.glDisable(GL11.GL_BLEND);
 
+		SkinNumber[][] judgecount = skin.getJudgeCount();
 		sprite.begin();
-		for (int i = 0; i < judgename.length; i++) {
-			judgefont.setColor(Color.WHITE);
-			judgefont.draw(
-					sprite,
-					judgename[i]
-							+ String.format("%4d /%4d", this.judge.getJudgeCount(i, true),
-									this.judge.getJudgeCount(i, false)), judge.x, judge.y + 20 * (5 - i));
+		for (int i = 0; i < 6; i++) {
+			for (int j = 0; j < 2; j++) {
+				judgecount[i][j].draw(sprite, 0, this.judge.getJudgeCount(i, j == 0));
+			}
 		}
 		sprite.end();
 		// BPM描画
 		sprite.begin();
-		titlefont.setColor(Color.WHITE);
-		titlefont.draw(sprite, "BPM  " + minbpm + " - " + (int) lanerender.getNowBPM() + " - " + maxbpm, 600, 22);
+		if(minbpm != maxbpm) {
+			skin.getBPMNumber()[0].draw(sprite, 0, minbpm);
+			skin.getBPMNumber()[2].draw(sprite, 0, maxbpm);			
+		}
+		skin.getBPMNumber()[1].draw(sprite, 0, (int) lanerender.getNowBPM());
 		sprite.end();
 		// ハイスピード、デュレーション描画
 		sprite.begin();
@@ -779,12 +784,8 @@ public class BMSPlayer extends ApplicationAdapter {
 		sprite.end();
 		// 残り時間描画
 		sprite.begin();
-		titlefont.setColor(Color.WHITE);
-		titlefont.draw(
-				sprite,
-				"TIME "
-						+ String.format("%02d:%02d", (playtime - time + 1000) / 60000,
-								((playtime - time + 1000) / 1000) % 60), w - 150, 22);
+		skin.getTimeCount()[0].draw(sprite, 0, (playtime - time + 1000) / 60000);
+		skin.getTimeCount()[1].draw(sprite, 0, ((playtime - time + 1000) / 1000) % 60);
 		sprite.end();
 
 		prevrendertime = time;

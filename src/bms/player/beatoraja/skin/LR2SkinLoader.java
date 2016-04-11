@@ -210,10 +210,8 @@ public abstract class LR2SkinLoader {
 													* i, y + h / divy * j, w / divx, h / divy);
 										}
 									}
-									num = new SkinNumber();
-									num.setImage(images, values[9]);
+									num = new SkinNumber(images, values[9],values[13], 0);
 									num.setId(values[11]);
-									num.setKeta(values[13]);
 									numlist.add(num);
 								} catch (NumberFormatException e) {
 									e.printStackTrace();

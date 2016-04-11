@@ -549,7 +549,7 @@ public class LaneRenderer {
 				if (config.getJudgedetail() == 1) {
 					if (judgenow[jr] > 1) {
 
-						font.setColor(judge.getRecentJudgeTiming() >= 0 ? Color.BLUE : Color.RED);
+						font.setColor(judge.getRecentJudgeTiming() >= 0 ? Color.CYAN : Color.RED);
 						font.draw(sprite, judge.getRecentJudgeTiming() >= 0 ? "FAST" : "SLOW",
 								skin.getJudgeregion()[jr].x + skin.getJudgeregion()[jr].width / 2, hl + 180);
 					}
@@ -557,7 +557,11 @@ public class LaneRenderer {
 				} else if (config.getJudgedetail() == 2) {
 					if (judgenow[jr] > 0) {
 
-						font.setColor(judge.getRecentJudgeTiming() >= 0 ? Color.BLUE : Color.RED);
+						if(judgenow[jr] == 1) {
+							font.setColor(judge.getRecentJudgeTiming() >= 0 ? Color.SKY : Color.PINK);														
+						} else {
+							font.setColor(judge.getRecentJudgeTiming() >= 0 ? Color.BLUE : Color.RED);							
+						}
 						font.draw(sprite,
 								(judge.getRecentJudgeTiming() >= 0 ? "+" : "") + judge.getRecentJudgeTiming() + " ms",
 								skin.getJudgeregion()[jr].x + skin.getJudgeregion()[jr].width / 2, hl + 180);

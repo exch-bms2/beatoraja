@@ -1,6 +1,7 @@
 package bms.player.beatoraja.play;
 
 import bms.player.beatoraja.skin.Skin;
+import bms.player.beatoraja.skin.SkinNumber;
 import bms.player.beatoraja.skin.SkinObject;
 
 import com.badlogic.gdx.Gdx;
@@ -50,6 +51,12 @@ public class PlaySkin extends Skin {
 	private Sprite[] judge;
 
 	private Sprite[][] judgenum;
+
+	private SkinNumber[][] judgecount = new SkinNumber[6][2];
+	private SkinNumber[] gaugecount = new SkinNumber[2];
+	
+	private SkinNumber[] bpm = new SkinNumber[3];
+	private SkinNumber[] timecount = new SkinNumber[2];
 	/**
 	 * レーン描画エリア
 	 */
@@ -72,6 +79,7 @@ public class PlaySkin extends Skin {
 	private Sprite slider;
 
 	public PlaySkin(int mode) {
+		makeCommonSkin();
 		if (mode == 5 || mode == 7) {
 			make7KeySkin();
 		} else if (mode == 10 || mode == 14) {
@@ -79,7 +87,70 @@ public class PlaySkin extends Skin {
 		} else {
 			make9KeySkin();
 		}
+	}
 
+	private void makeCommonSkin() {
+		// ボムのスプライト作成
+		Texture bombt = new Texture("skin/bomb.png");
+		TextureRegion[][] bombtr = TextureRegion.split(bombt, 181, 191);
+		bomb = new Animation[bombtr.length];
+		for (int i = 0; i < bombtr.length; i++) {
+			bomb[i] = new Animation(1 / 60f, bombtr[i]);
+		}
+		bomb[0].setPlayMode(Animation.PlayMode.NORMAL);
+		bomb[1].setPlayMode(Animation.PlayMode.LOOP);
+		bomb[2].setPlayMode(Animation.PlayMode.LOOP);
+		bomb[3].setPlayMode(Animation.PlayMode.LOOP);
+		// ゲージ
+		Texture gt = new Texture("skin/gauge.png");
+		gauge = new Sprite[4];
+		gauge[0] = new Sprite(gt, 5, 0, 5, 17);
+		gauge[1] = new Sprite(gt, 0, 0, 5, 17);
+		gauge[2] = new Sprite(gt, 5, 17, 5, 17);
+		gauge[3] = new Sprite(gt, 0, 17, 5, 17);
+		// 判定文字
+		Texture jt = new Texture("skin/judge.png");
+		judge = new Sprite[5];
+		judge[0] = new Sprite(jt, 0, 0, 115, 52);
+		judge[1] = new Sprite(jt, 0, 52 * 3, 115, 52);
+		judge[2] = new Sprite(jt, 25 * 16, 0, 25 * 5, 52);
+		judge[3] = new Sprite(jt, 25 * 22, 0, 25 * 4, 52);
+		judge[4] = new Sprite(jt, 25 * 26, 0, 25 * 4, 52);
+		judgenum = new Sprite[3][10];
+		for (int j = 0; j < 2; j++) {
+			for (int i = 0; i < 10; i++) {
+				judgenum[j][i] = new Sprite(jt, 28 * i + 115, j * 52 * 3, 28, 52);
+			}
+			for (int i = 0; i < 10; i++) {
+				judgenum[2][i] = new Sprite(jt, 28 * i + 115, 52 * 3, 28, 52);
+			}
+		}
+		// 数字
+		Texture nt = new Texture("skin/number.png");
+		TextureRegion[][] ntr = TextureRegion.split(nt, 24, 24);
+
+		gaugecount[0] = new SkinNumber(ntr[0], 0, 3, 0);
+		gaugecount[1] = new SkinNumber(ntr[0], 0, 1, 0);
+
+		for (int i = 0; i < judgecount.length; i++) {
+			for (int j = 0; j < judgecount[i].length; j++) {
+				judgecount[i][j] = new SkinNumber(ntr[0], 0, 4, 2);
+			}
+		}
+		Texture lct = new Texture("skin/lanecover.png");
+		lanecover = new Sprite(lct, 0, 0, 390, 580);
+		
+		bpm[0] = new SkinNumber(ntr[0], 0, 4, 0);
+		bpm[0].setDestination(0, 520, 0, 18, 18, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		bpm[1] = new SkinNumber(ntr[0], 0, 4, 0);
+		bpm[1].setDestination(0, 592, 0, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		bpm[2] = new SkinNumber(ntr[0], 0, 4, 0);
+		bpm[2].setDestination(0, 688, 0, 18, 18, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		
+		timecount[0] = new SkinNumber(ntr[0], 0, 2, 1);
+		timecount[0].setDestination(0, 1160, 0, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		timecount[1] = new SkinNumber(ntr[0], 0, 2, 1);
+		timecount[1].setDestination(0, 1232, 0, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 	}
 
 	private void make7KeySkin() {
@@ -133,59 +204,25 @@ public class PlaySkin extends Skin {
 			}
 		}
 
-		// ボムのスプライト作成
-		Texture bombt = new Texture("skin/bomb.png");
-		TextureRegion[][] bombtr = TextureRegion.split(bombt, 181, 191);
-		bomb = new Animation[bombtr.length];
-		for (int i = 0; i < bombtr.length; i++) {
-			bomb[i] = new Animation(1 / 60f, bombtr[i]);
-		}
-		bomb[0].setPlayMode(Animation.PlayMode.NORMAL);
-		bomb[1].setPlayMode(Animation.PlayMode.LOOP);
-		bomb[2].setPlayMode(Animation.PlayMode.LOOP);
-		bomb[3].setPlayMode(Animation.PlayMode.LOOP);
-
 		Texture kbt = new Texture("skin/keybeam.png");
 		keybeam = new Sprite[8];
-		keybeam[0] = keybeam[2] = keybeam[4] = keybeam[6] = new Sprite(kbt, 75,
-				0, 21, 255);
+		keybeam[0] = keybeam[2] = keybeam[4] = keybeam[6] = new Sprite(kbt, 75, 0, 21, 255);
 		keybeam[1] = keybeam[3] = keybeam[5] = new Sprite(kbt, 47, 0, 28, 255);
 		keybeam[7] = new Sprite(kbt, 0, 0, 47, 255);
 
-		Texture lct = new Texture("skin/lanecover.png");
-		lanecover = new Sprite(lct, 0, 0, 390, 580);
-		// ゲージ
-		Texture gt = new Texture("skin/gauge.png");
-		gauge = new Sprite[4];
-		gauge[0] = new Sprite(gt, 5, 0, 5, 17);
-		gauge[1] = new Sprite(gt, 0, 0, 5, 17);
-		gauge[2] = new Sprite(gt, 5, 17, 5, 17);
-		gauge[3] = new Sprite(gt, 0, 17, 5, 17);
-		// 判定文字
-		Texture jt = new Texture("skin/judge.png");
-		judge = new Sprite[5];
-		judge[0] = new Sprite(jt, 0, 0, 115, 52);
-		judge[1] = new Sprite(jt, 0, 52 * 3, 115, 52);
-		judge[2] = new Sprite(jt, 25 * 16, 0, 25 * 5, 52);
-		judge[3] = new Sprite(jt, 25 * 22, 0, 25 * 4, 52);
-		judge[4] = new Sprite(jt, 25 * 26, 0, 25 * 4, 52);
-		judgenum = new Sprite[3][10];
-		for (int j = 0; j < 2; j++) {
-			for (int i = 0; i < 10; i++) {
-				judgenum[j][i] = new Sprite(jt, 28 * i + 115, j * 52 * 3, 28,
-						52);
-			}
-			for (int i = 0; i < 10; i++) {
-				judgenum[2][i] = new Sprite(jt, 28 * i + 115, 52 * 3, 28, 52);
-			}
-		}
-		judgeregion = new Rectangle[]{new Rectangle(20, 240, 390, 20)};
+		judgeregion = new Rectangle[] { new Rectangle(20, 240, 390, 20) };
 
 		bgaregion = new Rectangle(500, 50, 740, 650);
 
 		graphregion = new Rectangle(410, 220, 90, 480);
 
-		judgecountregion = new Rectangle(410, 40, 90, 120);
+		judgecountregion = new Rectangle(500, 50, 144, 108);
+		for (int i = 0; i < judgecount.length; i++) {
+			for (int j = 0; j < judgecount[i].length; j++) {
+				judgecount[i][j].setDestination(0, 536 + j * 60, 50 + (5 - i) * 18, 12, 18, 0, 1, 1, 1, 1, 0, 0, 0, 0,
+						0, 0, 0, 0, 0);
+			}
+		}
 
 		laneregion = new Rectangle[8];
 		laneregion[0] = new Rectangle(90, 140, 50, 580);
@@ -200,6 +237,8 @@ public class PlaySkin extends Skin {
 		lanegroupregion = new Rectangle[] { new Rectangle(20, 140, 390, 580) };
 
 		gaugeregion = new Rectangle(20, 30, 390, 30);
+		gaugecount[0].setDestination(0, 314, 60, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		gaugecount[1].setDestination(0, 386, 60, 18, 18, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 		progressregion = new Rectangle(4, 140, 12, 540);
 	}
@@ -226,8 +265,8 @@ public class PlaySkin extends Skin {
 				longnote[8][i] = new Sprite(notet, 0, 38, 36, 1);
 				longnote[9][i] = new Sprite(notet, 0, 38, 36, 1);
 				minenote[i] = new Sprite(notet, 0, 18, 36, 18);
-			} 
-			if (i == 1 || i == 7)  {
+			}
+			if (i == 1 || i == 7) {
 				note[i] = new Sprite(notet, 38, 0, 28, 18);
 				longnote[0][i] = new Sprite(notet, 38, 18, 28, 18);
 				longnote[1][i] = new Sprite(notet, 38, 38, 28, 18);
@@ -239,9 +278,9 @@ public class PlaySkin extends Skin {
 				longnote[7][i] = new Sprite(notet, 38, 38, 28, 1);
 				longnote[8][i] = new Sprite(notet, 38, 38, 28, 1);
 				longnote[9][i] = new Sprite(notet, 38, 38, 28, 1);
-				minenote[i]  = new Sprite(notet, 38, 0, 28, 18);
+				minenote[i] = new Sprite(notet, 38, 0, 28, 18);
 			}
-			if (i == 2 || i == 6)  {
+			if (i == 2 || i == 6) {
 				note[i] = new Sprite(notet, 68, 0, 36, 18);
 				longnote[0][i] = new Sprite(notet, 68, 18, 36, 18);
 				longnote[1][i] = new Sprite(notet, 68, 38, 36, 18);
@@ -255,7 +294,7 @@ public class PlaySkin extends Skin {
 				longnote[9][i] = new Sprite(notet, 68, 38, 36, 1);
 				minenote[i] = new Sprite(notet, 68, 18, 36, 18);
 			}
-			if (i == 3 || i == 5)  {
+			if (i == 3 || i == 5) {
 				note[i] = new Sprite(notet, 106, 0, 28, 18);
 				longnote[0][i] = new Sprite(notet, 106, 18, 28, 18);
 				longnote[1][i] = new Sprite(notet, 106, 38, 28, 18);
@@ -267,7 +306,7 @@ public class PlaySkin extends Skin {
 				longnote[7][i] = new Sprite(notet, 106, 38, 28, 1);
 				longnote[8][i] = new Sprite(notet, 106, 38, 28, 1);
 				longnote[9][i] = new Sprite(notet, 106, 38, 28, 1);
-				minenote[i]  = new Sprite(notet, 106, 0, 28, 18);
+				minenote[i] = new Sprite(notet, 106, 0, 28, 18);
 			}
 			if (i == 4) {
 				note[i] = new Sprite(notet, 136, 0, 36, 18);
@@ -282,61 +321,26 @@ public class PlaySkin extends Skin {
 				longnote[8][i] = new Sprite(notet, 136, 38, 36, 1);
 				longnote[9][i] = new Sprite(notet, 136, 38, 36, 1);
 				minenote[i] = new Sprite(notet, 136, 18, 36, 18);
-			} 
+			}
 		}
-
-		// ボムのスプライト作成
-		Texture bombt = new Texture("skin/bomb.png");
-		TextureRegion[][] bombtr = TextureRegion.split(bombt, 181, 191);
-		bomb = new Animation[bombtr.length];
-		for (int i = 0; i < bombtr.length; i++) {
-			bomb[i] = new Animation(1 / 60f, bombtr[i]);
-		}
-		bomb[0].setPlayMode(Animation.PlayMode.NORMAL);
-		bomb[1].setPlayMode(Animation.PlayMode.LOOP);
-		bomb[2].setPlayMode(Animation.PlayMode.LOOP);
-		bomb[3].setPlayMode(Animation.PlayMode.LOOP);
 
 		Texture kbt = new Texture("skin/keybeam.png");
 		keybeam = new Sprite[9];
-		keybeam[0] = keybeam[2] = keybeam[4] = keybeam[6] = keybeam[8] = new Sprite(kbt, 75,
-				0, 21, 255);
+		keybeam[0] = keybeam[2] = keybeam[4] = keybeam[6] = keybeam[8] = new Sprite(kbt, 75, 0, 21, 255);
 		keybeam[1] = keybeam[3] = keybeam[5] = keybeam[7] = new Sprite(kbt, 47, 0, 28, 255);
 
-		Texture lct = new Texture("skin/lanecover.png");
-		lanecover = new Sprite(lct, 0, 0, 390, 580);
-		// ゲージ
-		Texture gt = new Texture("skin/gauge.png");
-		gauge = new Sprite[4];
-		gauge[0] = new Sprite(gt, 5, 0, 5, 17);
-		gauge[1] = new Sprite(gt, 0, 0, 5, 17);
-		gauge[2] = new Sprite(gt, 5, 17, 5, 17);
-		gauge[3] = new Sprite(gt, 0, 17, 5, 17);
-		// 判定文字
-		Texture jt = new Texture("skin/judge.png");
-		judge = new Sprite[5];
-		judge[0] = new Sprite(jt, 0, 0, 115, 52);
-		judge[1] = new Sprite(jt, 0, 52 * 3, 115, 52);
-		judge[2] = new Sprite(jt, 25 * 16, 0, 25 * 5, 52);
-		judge[3] = new Sprite(jt, 25 * 22, 0, 25 * 4, 52);
-		judge[4] = new Sprite(jt, 25 * 26, 0, 25 * 4, 52);
-		judgenum = new Sprite[3][10];
-		for (int j = 0; j < 2; j++) {
-			for (int i = 0; i < 10; i++) {
-				judgenum[j][i] = new Sprite(jt, 28 * i + 115, j * 52 * 3, 28,
-						52);
-			}
-			for (int i = 0; i < 10; i++) {
-				judgenum[2][i] = new Sprite(jt, 28 * i + 115, 52 * 3, 28, 52);
-			}
-		}
-		judgeregion = new Rectangle[]{new Rectangle(300, 240, 680, 20)};
-
+		judgeregion = new Rectangle[] { new Rectangle(300, 240, 680, 20) };
 		bgaregion = new Rectangle(10, 390, 330, 330);
 
 		graphregion = new Rectangle(1090, 220, 90, 480);
 
-		judgecountregion = new Rectangle(1090, 40, 90, 120);
+		judgecountregion = new Rectangle(1090, 40, 144, 108);
+		for (int i = 0; i < judgecount.length; i++) {
+			for (int j = 0; j < judgecount[i].length; j++) {
+				judgecount[i][j].setDestination(0, 1126 + j * 60, 40 + (5 - i) * 18, 12, 18, 0, 1, 1, 1, 1, 0, 0, 0, 0,
+						0, 0, 0, 0, 0);
+			}
+		}
 
 		laneregion = new Rectangle[9];
 		laneregion[0] = new Rectangle(345, 140, 70, 580);
@@ -352,6 +356,8 @@ public class PlaySkin extends Skin {
 		lanegroupregion = new Rectangle[] { new Rectangle(345, 140, 590, 580) };
 
 		gaugeregion = new Rectangle(345, 30, 590, 30);
+		gaugecount[0].setDestination(0, 600, 60, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		gaugecount[1].setDestination(0, 672, 60, 18, 18, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 		progressregion = new Rectangle(990, 140, 10, 540);
 	}
@@ -407,60 +413,26 @@ public class PlaySkin extends Skin {
 			}
 		}
 
-		// ボムのスプライト作成
-		Texture bombt = new Texture("skin/bomb.png");
-		TextureRegion[][] bombtr = TextureRegion.split(bombt, 181, 191);
-		bomb = new Animation[bombtr.length];
-		for (int i = 0; i < bombtr.length; i++) {
-			bomb[i] = new Animation(1 / 60f, bombtr[i]);
-		}
-		bomb[0].setPlayMode(Animation.PlayMode.NORMAL);
-		bomb[1].setPlayMode(Animation.PlayMode.LOOP);
-		bomb[2].setPlayMode(Animation.PlayMode.LOOP);
-		bomb[3].setPlayMode(Animation.PlayMode.LOOP);
-
 		Texture kbt = new Texture("skin/keybeam.png");
 		keybeam = new Sprite[16];
 		keybeam[0] = keybeam[2] = keybeam[4] = keybeam[6] = keybeam[8] = keybeam[10] = keybeam[12] = keybeam[14] = new Sprite(
 				kbt, 75, 0, 21, 255);
-		keybeam[1] = keybeam[3] = keybeam[5] = keybeam[9] = keybeam[11] = keybeam[13] = new Sprite(
-				kbt, 47, 0, 28, 255);
+		keybeam[1] = keybeam[3] = keybeam[5] = keybeam[9] = keybeam[11] = keybeam[13] = new Sprite(kbt, 47, 0, 28, 255);
 		keybeam[7] = keybeam[15] = new Sprite(kbt, 0, 0, 47, 255);
 
-		Texture lct = new Texture("skin/lanecover.png");
-		lanecover = new Sprite(lct, 0, 0, 390, 580);
-		// ゲージ
-		Texture gt = new Texture("skin/gauge.png");
-		gauge = new Sprite[4];
-		gauge[0] = new Sprite(gt, 5, 0, 5, 17);
-		gauge[1] = new Sprite(gt, 0, 0, 5, 17);
-		gauge[2] = new Sprite(gt, 5, 17, 5, 17);
-		gauge[3] = new Sprite(gt, 0, 17, 5, 17);
-		// 判定文字
-		Texture jt = new Texture("skin/judge.png");
-		judge = new Sprite[5];
-		judge[0] = new Sprite(jt, 0, 0, 115, 52);
-		judge[1] = new Sprite(jt, 0, 52 * 3, 115, 52);
-		judge[2] = new Sprite(jt, 25 * 16, 0, 25 * 5, 52);
-		judge[3] = new Sprite(jt, 25 * 22, 0, 25 * 4, 52);
-		judge[4] = new Sprite(jt, 25 * 26, 0, 25 * 4, 52);
-		judgenum = new Sprite[3][10];
-		for (int j = 0; j < 2; j++) {
-			for (int i = 0; i < 10; i++) {
-				judgenum[j][i] = new Sprite(jt, 28 * i + 115, j * 52 * 3, 28,
-						52);
-			}
-			for (int i = 0; i < 10; i++) {
-				judgenum[2][i] = new Sprite(jt, 28 * i + 115, 52 * 3, 28, 52);
-			}
-		}
-		judgeregion = new Rectangle[]{new Rectangle(210, 240, 390, 20), new Rectangle(680, 240, 390, 20)};
+		judgeregion = new Rectangle[] { new Rectangle(210, 240, 390, 20), new Rectangle(680, 240, 390, 20) };
 
 		bgaregion = new Rectangle(10, 500, 180, 180);
 
 		graphregion = new Rectangle(1090, 220, 90, 480);
 
-		judgecountregion = new Rectangle(1090, 40, 90, 120);
+		judgecountregion = new Rectangle(1090, 40, 144, 108);
+		for (int i = 0; i < judgecount.length; i++) {
+			for (int j = 0; j < judgecount[i].length; j++) {
+				judgecount[i][j].setDestination(0, 1126 + j * 60, 40 + (5 - i) * 18, 12, 18, 0, 1, 1, 1, 1, 0, 0, 0, 0,
+						0, 0, 0, 0, 0);
+			}
+		}
 
 		laneregion = new Rectangle[16];
 		laneregion[0] = new Rectangle(280, 140, 50, 580);
@@ -480,10 +452,11 @@ public class PlaySkin extends Skin {
 		laneregion[14] = new Rectangle(950, 140, 50, 580);
 		laneregion[15] = new Rectangle(1000, 140, 70, 580);
 
-		lanegroupregion = new Rectangle[] { new Rectangle(210, 140, 390, 580),
-				new Rectangle(680, 140, 390, 580) };
+		lanegroupregion = new Rectangle[] { new Rectangle(210, 140, 390, 580), new Rectangle(680, 140, 390, 580) };
 
 		gaugeregion = new Rectangle(445, 30, 390, 30);
+		gaugecount[0].setDestination(0, 600, 60, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		gaugecount[1].setDestination(0, 672, 60, 18, 18, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 		progressregion = new Rectangle(1072, 140, 6, 540);
 	}
@@ -534,6 +507,22 @@ public class PlaySkin extends Skin {
 
 	public Sprite[][] getJudgenum() {
 		return judgenum;
+	}
+
+	public SkinNumber[] getGaugeCount() {
+		return gaugecount;
+	}
+
+	public SkinNumber[][] getJudgeCount() {
+		return judgecount;
+	}
+
+	public SkinNumber[] getBPMNumber() {
+		return bpm;
+	}
+
+	public SkinNumber[] getTimeCount() {
+		return timecount;
 	}
 
 	public Rectangle getBGAregion() {
