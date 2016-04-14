@@ -14,6 +14,7 @@ import bms.player.beatoraja.gauge.GrooveGauge;
 import bms.player.lunaticrave2.IRScoreData;
 import bms.player.lunaticrave2.LunaticRave2ScoreDatabaseManager;
 
+import bms.player.lunaticrave2.PlayerData;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter.OutputType;
 
@@ -45,6 +46,28 @@ public class PlayDataAccessor {
 		}
 	}
 
+	public PlayerData readPlayerData() {
+		return scoredb.getPlayerDatas(player);
+	}
+
+	public void updatePlayerData(IRScoreData score, long time) {
+		PlayerData pd = readPlayerData();
+		pd.setPerfect(pd.getPerfect() + score.getPg());
+		pd.setGreat(pd.getGreat() + score.getGr());
+		pd.setGood(pd.getGood() + score.getGd());
+		pd.setBad(pd.getBad()+ score.getBd());
+		pd.setPoor(pd.getPoor() + score.getPr());
+
+		pd.setPlaycount(pd.getPlaycount() + 1);
+		if(score.getClear() > GrooveGauge.CLEARTYPE_FAILED) {
+			pd.setClear(pd.getClear() + 1);
+		} else {
+			pd.setFail(pd.getFail() + 1);
+		}
+		pd.setPlaytime(pd.getPlaytime() + time);
+		// TODO プレイデータDB更新
+	}
+
 	/**
 	 * スコアデータを読み込む
 	 * @param model　対象のモデル
@@ -71,6 +94,13 @@ public class PlayDataAccessor {
 		return scoredb.getScoreData(player, hash, false);
 	}
 
+	/**
+	 * スコアデータを書き込む
+	 * @param newscore スコアデータ
+	 * @param model　対象のモデル
+	 * @param lnmode LNモード
+	 * @param updateScore プレイ回数のみ反映する場合はfalse
+     */
 	public void writeScoreDara(IRScoreData newscore, BMSModel model, int lnmode, boolean updateScore) {
 		String hash = model.getHash();
 		boolean ln = model.getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
@@ -222,19 +252,27 @@ public class PlayDataAccessor {
 	private static final String[] replay = {"", "C", "H"};
 
 	public boolean existsReplayData(BMSModel model, int lnmode) {
-		return new File(this.getReplayDataFilePath(model.getHash(), lnmode)).exists();
+		boolean ln = model.getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
+				+ model.getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH) > 0;
+		return new File(this.getReplayDataFilePath(model.getHash(), ln, lnmode)).exists();
 	}
 
-	public boolean existsReplayData(String hash, int lnmode) {
-		return new File(this.getReplayDataFilePath(hash, lnmode)).exists();
+	public boolean existsReplayData(String hash, boolean ln, int lnmode) {
+		return new File(this.getReplayDataFilePath(hash, ln, lnmode)).exists();
 	}
 
+	/**
+	 * リプレイデータを読み込む
+	 * @param model 対象のBMS
+	 * @param lnmode LNモード
+     * @return リプレイデータ
+     */
 	public ReplayData readReplayData(BMSModel model, int lnmode) {
 		if (existsReplayData(model, lnmode)) {
 			Json json = new Json();
 			try {
-				return (ReplayData) json.fromJson(ReplayData.class,
-						new FileReader(this.getReplayDataFilePath(model.getHash(), lnmode)));
+				return json.fromJson(ReplayData.class,
+						new FileReader(this.getReplayDataFilePath(model, lnmode)));
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
@@ -242,6 +280,12 @@ public class PlayDataAccessor {
 		return null;
 	}
 
+	/**
+	 * リプレイデータを書き込む
+	 * @param rd リプレイデータ
+	 * @param model 対象のBMS
+	 * @param lnmode LNモード
+     */
 	public void wrireReplayData(ReplayData rd, BMSModel model, int lnmode) {
 		File replaydir = new File("replay");
 		if (!replaydir.exists()) {
@@ -250,7 +294,7 @@ public class PlayDataAccessor {
 		Json json = new Json();
 		json.setOutputType(OutputType.json);
 		try {
-			FileWriter fw = new FileWriter(this.getReplayDataFilePath(model.getHash(), lnmode));
+			FileWriter fw = new FileWriter(this.getReplayDataFilePath(model, lnmode));
 			fw.write(json.prettyPrint(rd));
 			fw.flush();
 			fw.close();
@@ -260,7 +304,13 @@ public class PlayDataAccessor {
 
 	}
 
-	private String getReplayDataFilePath(String hash, int lnmode) {
-		return "replay" + File.separatorChar +  replay[lnmode] + hash + ".json";
+	private String getReplayDataFilePath(BMSModel model, int lnmode) {
+		boolean ln = model.getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
+				+ model.getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH) > 0;
+		return getReplayDataFilePath(model.getHash(), ln, lnmode);
+	}
+
+	private String getReplayDataFilePath(String hash, boolean ln, int lnmode) {
+		return "replay" + File.separatorChar +  (ln ? replay[lnmode] : "") + hash + ".json";
 	}
 }
