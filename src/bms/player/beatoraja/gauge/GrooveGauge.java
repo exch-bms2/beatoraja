@@ -28,7 +28,10 @@ public abstract class GrooveGauge {
 	private float norm;
 
 	private int cleartype;
-	
+
+	private float[] gauge;
+
+
 	public static final int CLEARTYPE_NOPLAY = 0;
 	public static final int CLEARTYPE_FAILED = 1;
 	public static final int CLEARTYPE_ASSTST = 2;
@@ -41,12 +44,13 @@ public abstract class GrooveGauge {
 	public static final int CLEARTYPE_PERFECT = 9;
 	public static final int CLEARTYPE_MAX = 10;
 	
-	public GrooveGauge(float minValue, float maxValue, float startValue, float norm, int cleartype) {
+	public GrooveGauge(float minValue, float maxValue, float startValue, float norm, int cleartype, float[] gauge) {
 		this.minValue = minValue;
 		this.maxValue = maxValue;
 		this.value = startValue;
 		this.norm = norm;
 		this.cleartype = cleartype;
+		this.gauge = gauge;
 	}
 
 	/**
@@ -54,14 +58,27 @@ public abstract class GrooveGauge {
 	 * 
 	 * @param judge
 	 */
-	public abstract void update(int judge);
+	public void update(int judge) {
+		this.update(judge, 1);
+	}
+
+	/**
+	 * 判定に応じてゲージを更新する
+	 *
+	 * @param judge
+	 */
+	public void update(int judge, float rate) {
+		this.setValue(this.getValue() + this.getGaugeValue(judge) * rate);
+	}
 
 	public void addValue(float value) {
-		setValue(getValue() + value);
+		this.setValue(this.getValue() + value);
 	}
-	
-	public abstract float getGaugeValue(int judge);
-	
+
+	protected float getGaugeValue(int judge) {
+		return gauge[judge];
+	}
+
 	public float getValue() {
 		return value;
 	}
@@ -89,4 +106,5 @@ public abstract class GrooveGauge {
 	public float getBorder() {
 		return norm;
 	}
+
 }

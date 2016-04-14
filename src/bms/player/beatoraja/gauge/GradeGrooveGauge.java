@@ -5,26 +5,15 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import bms.model.BMSModel;
 import bms.player.beatoraja.play.PlaySkin;
 
+/**
+ * 段位ゲージ
+ *
+ * @author exch
+ */
 public class GradeGrooveGauge extends GrooveGauge {
 
-	private float[] gauge;
-
 	public GradeGrooveGauge(BMSModel model) {
-		super(0, 100, 100, 0, CLEARTYPE_NORMAL);
-		gauge = new float[] { 0.15f, 0.15f, 0.03f, -1.5f, -3f, -1.5f };
-	}
-
-	@Override
-	public void update(int judge) {
-		if(this.getValue() > 30 || judge < 3) {
-			this.setValue(this.getValue() + gauge[judge]);			
-		} else if(this.getValue() > 15) {
-			this.setValue(this.getValue() + gauge[judge] * 0.75f);			
-		} else if(this.getValue() > 7.5) {
-			this.setValue(this.getValue() + gauge[judge] * 0.5f);			
-		} else {
-			this.setValue(this.getValue() + gauge[judge] * 0.25f);			
-		}
+		super(0, 100, 100, 0, CLEARTYPE_NORMAL, new float[] { 0.15f, 0.15f, 0.03f, -1.5f, -3f, -1.5f });
 	}
 
 	@Override
@@ -37,11 +26,16 @@ public class GradeGrooveGauge extends GrooveGauge {
 	}
 	
 	@Override
-	public float getGaugeValue(int judge) {
+	protected float getGaugeValue(int judge) {
+		float value = super.getGaugeValue(judge);
 		if(this.getValue() > 30 || judge < 3) {
-			return gauge[judge];			
+			return value;
+		} else if(this.getValue() > 15) {
+			return value * 0.75f;
+		} else if(this.getValue() > 7.5) {
+			return value * 0.5f;
 		} else {
-			return gauge[judge] * 0.5f;			
+			return value * 0.25f;
 		}
 	}
 }

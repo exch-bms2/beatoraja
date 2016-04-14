@@ -24,6 +24,7 @@ public class SongData {
 	private int exlevel;
 	private int mode;
 	private int longnote;
+	private int difficulty;
 
 	public int getFavorite() {
 		return favorite;
@@ -131,5 +132,13 @@ public class SongData {
 	}
 	public void setLongnote(int longnote) {
 		this.longnote = longnote;
+	}
+
+	public int getDifficulty() {
+		return difficulty;
+	}
+
+	public void setDifficulty(int difficulty) {
+		this.difficulty = difficulty;
 	}
 }
