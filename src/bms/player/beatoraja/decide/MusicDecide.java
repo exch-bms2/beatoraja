@@ -29,9 +29,6 @@ public class MusicDecide extends ApplicationAdapter {
 	private MainController main;
 	private PlayerResource resource;
 
-	private BitmapFont titlefont;
-	private String title;
-
 	private MusicDecideSkin skin;
 
 	public MusicDecide(MainController main) {
@@ -42,12 +39,6 @@ public class MusicDecide extends ApplicationAdapter {
 
 	public void create(PlayerResource resource) {
 		this.resource = resource;
-		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/VL-Gothic-Regular.ttf"));
-		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
-		parameter.size = 24;
-		title = resource.getBMSModel().getFullTitle();
-		parameter.characters += title + resource.getCoursetitle();
-		titlefont = generator.generateFont(parameter);
 		time = System.currentTimeMillis();
 
 		if (new File("skin/decide.wav").exists()) {
@@ -66,32 +57,37 @@ public class MusicDecide extends ApplicationAdapter {
 		} else {
 			skin = new MusicDecideSkin();
 		}
+
+		if(resource.getCourseBMSModels() != null) {
+			skin.getTitle().setText(resource.getCoursetitle());
+			skin.getGenre().setText("");
+			skin.getArtist().setText("");
+		} else {
+			skin.getTitle().setText(resource.getBMSModel().getFullTitle());
+			skin.getGenre().setText(resource.getBMSModel().getGenre());
+			skin.getArtist().setText(resource.getBMSModel().getFullArtist());
+		}
 	}
 
 	public void render() {
 		SpriteBatch sprite = main.getSpriteBatch();
+		long nowtime = System.currentTimeMillis() - time;
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 		final float w = 1280;
 		final float h = 720;
 
-		if (resource.getCourseBMSModels() != null) {
+		if (resource.getCourseBMSModels() == null && resource.getBGAManager().getStagefileData() != null) {
 			sprite.begin();
-			titlefont.setColor(Color.WHITE);
-			titlefont.draw(sprite, resource.getCoursetitle(), w / 2, h / 2);
-			sprite.end();
-		} else {
-			if (resource.getBGAManager().getStagefileData() != null) {
-				sprite.begin();
-				sprite.draw(resource.getBGAManager().getStagefileData(), 0, 0, w, h);
-				sprite.end();
-			}
-			sprite.begin();
-			titlefont.setColor(Color.WHITE);
-			titlefont.draw(sprite, title, w / 2, h / 2);
+			sprite.draw(resource.getBGAManager().getStagefileData(), 0, 0, w, h);
 			sprite.end();
 		}
+		sprite.begin();
+		skin.getGenre().draw(sprite, nowtime);
+		skin.getTitle().draw(sprite, nowtime);
+		skin.getArtist().draw(sprite, nowtime);
+		sprite.end();
 
 		sprite.begin();
 		for (SkinObject part : skin.getSkinPart()) {
