@@ -2,10 +2,8 @@ package bms.player.beatoraja.play;
 
 import bms.player.beatoraja.skin.Skin;
 import bms.player.beatoraja.skin.SkinNumber;
-import bms.player.beatoraja.skin.SkinObject;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
+import bms.player.beatoraja.skin.SkinText;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -214,6 +212,12 @@ public class PlaySkin extends Skin {
 
 		bgaregion = new Rectangle(500, 50, 740, 650);
 
+		SkinText title = new SkinText("skin/VL-Gothic-Regular.ttf",0,24);
+		title.setDestination(0, 502, 698, 18, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		title.setDestination(1000, 502, 698, 18, 18, 0, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		title.setDestination(2000, 502, 698, 18, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		this.setTitle(title);
+
 		graphregion = new Rectangle(410, 220, 90, 480);
 
 		judgecountregion = new Rectangle(500, 50, 144, 108);
@@ -331,6 +335,11 @@ public class PlaySkin extends Skin {
 
 		judgeregion = new Rectangle[] { new Rectangle(300, 240, 680, 20) };
 		bgaregion = new Rectangle(10, 390, 330, 330);
+		SkinText title = new SkinText("skin/VL-Gothic-Regular.ttf",0,24);
+		title.setDestination(0, 12, 720, 18, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		title.setDestination(1000, 12, 720, 18, 18, 0, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		title.setDestination(2000, 12, 720, 18, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		this.setTitle(title);
 
 		graphregion = new Rectangle(1090, 220, 90, 480);
 
@@ -423,6 +432,11 @@ public class PlaySkin extends Skin {
 		judgeregion = new Rectangle[] { new Rectangle(210, 240, 390, 20), new Rectangle(680, 240, 390, 20) };
 
 		bgaregion = new Rectangle(10, 500, 180, 180);
+		SkinText title = new SkinText("skin/VL-Gothic-Regular.ttf",0,24);
+		title.setDestination(0, 12, 678, 18, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		title.setDestination(1000, 12, 678, 18, 18, 0, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		title.setDestination(2000, 12, 678, 18, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		this.setTitle(title);
 
 		graphregion = new Rectangle(1090, 220, 90, 480);
 

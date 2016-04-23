@@ -1,25 +1,21 @@
 package bms.player.beatoraja.skin;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.Rectangle;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * テキストオブジェクト
  *
  * @author exch
  */
-public class SkinText extends AbstractSkinObject{
-
+public class SkinText extends SkinObject {
+    /**
+     * ビットマップフォント
+     */
     private BitmapFont font;
-
-    private int id;
 
     private int cycle;
 
@@ -33,21 +29,19 @@ public class SkinText extends AbstractSkinObject{
         parameter.size = size;
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
     public void setText(String text) {
+        if(text == null || text.length() == 0) {
+            text = " ";
+        }
         parameter.characters = text;
         font = generator.generateFont(parameter);
     }
 
     public void draw(SpriteBatch sprite, long time) {
         Rectangle r = this.getDestination(time);
-        font.draw(sprite, parameter.characters, r.x, r.y);
+        if(r != null && font != null) {
+            font.setColor(getColor(time));
+            font.draw(sprite, parameter.characters, r.x, r.y);
+        }
     }
 }

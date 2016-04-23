@@ -6,17 +6,12 @@ import java.io.IOException;
 import bms.player.beatoraja.MainController;
 import bms.player.beatoraja.PlayerResource;
 import bms.player.beatoraja.skin.LR2DecideSkinLoader;
-import bms.player.beatoraja.skin.SkinObject;
+import bms.player.beatoraja.skin.SkinImage;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.math.Rectangle;
 
 /**
@@ -63,9 +58,7 @@ public class MusicDecide extends ApplicationAdapter {
 			skin.getGenre().setText("");
 			skin.getArtist().setText("");
 		} else {
-			skin.getTitle().setText(resource.getBMSModel().getFullTitle());
-			skin.getGenre().setText(resource.getBMSModel().getGenre());
-			skin.getArtist().setText(resource.getBMSModel().getFullArtist());
+			skin.setText(resource.getBMSModel());
 		}
 	}
 
@@ -84,13 +77,11 @@ public class MusicDecide extends ApplicationAdapter {
 			sprite.end();
 		}
 		sprite.begin();
-		skin.getGenre().draw(sprite, nowtime);
-		skin.getTitle().draw(sprite, nowtime);
-		skin.getArtist().draw(sprite, nowtime);
+		skin.drawAllObjects(sprite, nowtime);
 		sprite.end();
 
 		sprite.begin();
-		for (SkinObject part : skin.getSkinPart()) {
+		for (SkinImage part : skin.getSkinPart()) {
 			int[] op = part.getOption();
 			if (true) {
 				Rectangle r = part.getDestination(System.currentTimeMillis() - time);

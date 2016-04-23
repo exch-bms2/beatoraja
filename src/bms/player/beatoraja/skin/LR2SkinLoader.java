@@ -3,18 +3,11 @@ package bms.player.beatoraja.skin;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringTokenizer;
-import java.util.logging.Logger;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.GdxRuntimeException;
-
-import bms.player.beatoraja.play.PlaySkin;
 
 public abstract class LR2SkinLoader {
 
@@ -36,9 +29,9 @@ public abstract class LR2SkinLoader {
 		float dstw = 1280;
 		float dsth = 720;
 
-		List<SkinObject> partlist = new ArrayList();
+		List<SkinImage> partlist = new ArrayList();
 		List<SkinNumber> numlist = new ArrayList();
-		SkinObject part = null;
+		SkinImage part = null;
 		SkinNumber num = null;
 		BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(f), "MS932"));
 		String line = null;
@@ -154,7 +147,7 @@ public abstract class LR2SkinLoader {
 													* i, y + h / divy * j, w / divx, h / divy);
 										}
 									}
-									part = new SkinObject();
+									part = new SkinImage();
 									part.setImage(images, values[9]);
 									part.setTiming(values[10]);
 									partlist.add(part);
@@ -255,7 +248,7 @@ public abstract class LR2SkinLoader {
 			}
 		}
 
-		skin.setSkinPart(partlist.toArray(new SkinObject[0]));
+		skin.setSkinPart(partlist.toArray(new SkinImage[0]));
 		skin.setSkinNumbers(numlist.toArray(new SkinNumber[0]));
 	}
 	

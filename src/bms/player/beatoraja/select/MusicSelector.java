@@ -1,25 +1,13 @@
 package bms.player.beatoraja.select;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 import java.util.logging.Logger;
 
-import bms.player.lunaticrave2.config.Name;
-import org.lwjgl.opengl.GL11;
-
-import bms.player.beatoraja.Config;
-import bms.player.beatoraja.MainController;
-import bms.player.beatoraja.PlayerResource;
-import bms.player.beatoraja.TableData;
+import bms.player.beatoraja.*;
 import bms.player.lunaticrave2.*;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
-import bms.player.beatoraja.play.PlaySkin;
-import bms.player.beatoraja.skin.LR2PlaySkinLoader;
-import bms.player.beatoraja.skin.LR2SelectSkinLoader;
-import bms.player.beatoraja.skin.SkinNumber;
-import bms.player.beatoraja.skin.SkinObject;
+import bms.player.beatoraja.skin.*;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -27,9 +15,7 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -57,22 +43,35 @@ public class MusicSelector extends ApplicationAdapter {
 	 */
 	private Bar[] currentsongs;
 	/**
-	 * 洗濯中のバーのインデックス
+	 * 選択中のバーのインデックス
 	 */
 	private int selectedindex;
+    /**
+     * 現在のフォルダ階層
+     */
 	private List<Bar> dir = new ArrayList<Bar>();
 
+    /**
+     * バー移動中のカウンタ
+     */
 	private long duration;
+    /**
+     * バーの移動方向
+     */
 	private int angle;
 	/**
 	 * 楽曲DBアクセサ
 	 */
 	private LunaticRave2SongDatabaseManager songdb;
-
+    /**
+     * 選択中のモードフィルタ
+     */
 	private int mode;
 
 	private static final String[] MODE = { "ALL", "7 KEY", "14 KEY", "9 KEY", "5 KEY", "10 KEY" };
-
+    /**
+     * 選択中のソート
+     */
 	private int sort;
 
 	private final BarSorter[] SORT = { BarSorter.NAME_SORTER, BarSorter.LEVEL_SORTER, BarSorter.LAMP_SORTER,
@@ -242,7 +241,7 @@ public class MusicSelector extends ApplicationAdapter {
 		final long time = System.currentTimeMillis() - starttime;
 
 		sprite.begin();
-		for (SkinObject part : skin.getSkinPart()) {
+		for (SkinImage part : skin.getSkinPart()) {
 			int[] op = part.getOption();
 			boolean draw = true;
 			for (int option : op) {
@@ -463,11 +462,12 @@ public class MusicSelector extends ApplicationAdapter {
 			str.append(b.getTitle() + " > ");
 		}
 		titlefont.setColor(Color.VIOLET);
-		titlefont.draw(sprite, str.toString(), 40, 640);
+		titlefont.draw(sprite, str.toString(), 40, 670);
 
 		titlefont.setColor(Color.WHITE);
 		if (currentsongs[selectedindex] instanceof SongBar) {
 			SongData song = ((SongBar) currentsongs[selectedindex]).getSongData();
+            titlefont.draw(sprite, song.getGenre(), 100, 630);
 			titlefont.draw(sprite, song.getTitle() + " " + song.getSubtitle(), 100, 600);
 			titlefont.draw(sprite, song.getArtist() + " " + song.getSubartist(), 100, 570);
 			titlefont.draw(sprite, song.getMode() + " KEYS", 100, 530);
@@ -801,6 +801,7 @@ public class MusicSelector extends ApplicationAdapter {
 					str.append(s.getSubtitle());
 					str.append(s.getArtist());
 					str.append(s.getSubartist());
+                    str.append(s.getGenre());
 				}
 			}
 

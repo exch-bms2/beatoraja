@@ -19,7 +19,7 @@ import bms.player.beatoraja.input.KeyInputLog;
 import bms.player.beatoraja.pattern.*;
 import bms.player.beatoraja.skin.LR2PlaySkinLoader;
 import bms.player.beatoraja.skin.SkinNumber;
-import bms.player.beatoraja.skin.SkinObject;
+import bms.player.beatoraja.skin.SkinImage;
 import bms.player.lunaticrave2.IRScoreData;
 
 import com.badlogic.gdx.ApplicationAdapter;
@@ -32,8 +32,6 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.utils.Json;
-import com.badlogic.gdx.utils.JsonWriter.OutputType;
 
 /**
  * BMSプレイヤー本体
@@ -299,6 +297,7 @@ public class BMSPlayer extends ApplicationAdapter {
 		} else {
 			skin = new PlaySkin(model.getUseKeys());
 		}
+		skin.setText(resource.getBMSModel());
 
 		input = main.getInputProcessor();
 		input.setEnableKeyInput(autoplay == 0);
@@ -459,7 +458,7 @@ public class BMSPlayer extends ApplicationAdapter {
 				keyinput.stop = true;
 			}
 			resource.getAudioProcessor().stop(-1);
-			renderMain(time);
+			renderMain(starttime != 0 ? time : 0);
 
 			Gdx.gl.glEnable(GL11.GL_BLEND);
 			Gdx.gl.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
@@ -629,7 +628,7 @@ public class BMSPlayer extends ApplicationAdapter {
 		}
 
 		sprite.begin();
-		for (SkinObject part : skin.getSkinPart()) {
+		for (SkinImage part : skin.getSkinPart()) {
 			int[] op = part.getOption();
 			if (part.getTiming() != 3) {
 				Rectangle r = part.getDestination(time);
@@ -725,8 +724,7 @@ public class BMSPlayer extends ApplicationAdapter {
 		}
 
 		sprite.begin();
-		titlefont.setColor(Color.WHITE);
-		titlefont.draw(sprite, model.getFullTitle(), r.x, r.y + r.height);
+		skin.drawAllObjects(sprite, time);
 		sprite.end();
 
 		// ゲージ描画

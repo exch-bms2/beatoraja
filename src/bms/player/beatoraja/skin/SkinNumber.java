@@ -1,9 +1,5 @@
 package bms.player.beatoraja.skin;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
@@ -13,7 +9,7 @@ import com.badlogic.gdx.math.Rectangle;
  * 
  * @author exch
  */
-public class SkinNumber extends AbstractSkinObject{
+public class SkinNumber extends SkinObject {
 
 	/**
 	 * イメージ
@@ -21,7 +17,7 @@ public class SkinNumber extends AbstractSkinObject{
 	private TextureRegion[] image;
 	
 	private int id;
-	
+
 	private int cycle;
 	
 	private int keta;
