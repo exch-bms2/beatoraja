@@ -109,10 +109,27 @@ public class BMSPlayer extends ApplicationAdapter {
 		this.main = main;
 		this.resource = resource;
 		this.model = resource.getBMSModel();
+		this.autoplay = resource.getAutoplay();
+		Config config = resource.getConfig();
+		if (autoplay == 2) {
+			replay = main.getPlayDataAccessor().readReplayData(model, config.getLnmode());
+			if (replay == null) {
+				autoplay = 0;
+			}
+		}
+
+		if(model.getRandom() > 1) {
+			if(autoplay == 2) {
+				model.setSelectedIndexOfTimeLines(replay.random);								
+			} else if(resource.getReplayData().pattern != null) {
+				model.setSelectedIndexOfTimeLines(resource.getReplayData().random);												
+			} else {
+				model.setSelectedIndexOfTimeLines((int) (Math.random() * model.getRandom()) + 1);								
+			}
+			Logger.getGlobal().info("譜面分岐 : " + model.getSelectedIndexOfTimeLines());
+		}
 		minbpm = (int) model.getMinBPM();
 		maxbpm = (int) model.getMaxBPM();
-		Config config = resource.getConfig();
-		this.autoplay = resource.getAutoplay();
 		timelines = model.getAllTimeLines();
 		// 通常プレイの場合は最後のノーツ、オートプレイの場合はBG/BGAを含めた最後のノーツ
 		playtime = (autoplay == 1 ? model.getLastTime() : model.getLastNoteTime()) + 5000;
@@ -122,7 +139,7 @@ public class BMSPlayer extends ApplicationAdapter {
 		boolean score = true;
 
 		model.setLntype(config.getLnmode());
-		if (resource.getCourseBMSModels() == null) {
+		if (resource.getCourseBMSModels() == null && autoplay != 2) {
 			if (config.isBpmguide() && (model.getMinBPM() < model.getMaxBPM())) {
 				// BPM変化がなければBPMガイドなし
 				assist = 1;
@@ -157,13 +174,6 @@ public class BMSPlayer extends ApplicationAdapter {
 			}
 		}
 		totalnotes = model.getTotalNotes();
-
-		if (autoplay == 2) {
-			replay = main.getPlayDataAccessor().readReplayData(model, config.getLnmode());
-			if (replay == null) {
-				autoplay = 0;
-			}
-		}
 
 		Logger.getGlobal().info("アシストオプション設定完了");
 		if (replay != null) {
@@ -484,9 +494,6 @@ public class BMSPlayer extends ApplicationAdapter {
 				gaugelog.add(0f);
 				resource.setGauge(gaugelog);
 				resource.setGrooveGauge(gauge);
-				if (pattern != null) {
-					resource.getReplayData().pattern = pattern.toArray(new PatternModifyLog[0]);
-				}
 				input.setEnableKeyInput(true);
 				input.setStartTime(0);
 				main.changeState(MainController.STATE_RESULT);
@@ -518,9 +525,6 @@ public class BMSPlayer extends ApplicationAdapter {
 				saveConfig();
 				resource.setGauge(gaugelog);
 				resource.setGrooveGauge(gauge);
-				if (pattern != null) {
-					resource.getReplayData().pattern = pattern.toArray(new PatternModifyLog[0]);
-				}
 				input.setEnableKeyInput(true);
 				input.setStartTime(0);
 				main.changeState(MainController.STATE_RESULT);
@@ -584,6 +588,7 @@ public class BMSPlayer extends ApplicationAdapter {
 		// リプレイデータ保存。スコア保存されない場合はリプレイ保存しない
 		resource.getReplayData().keylog = input.getKeyInputLog().toArray(new KeyInputLog[0]);
 		resource.getReplayData().pattern = pattern.toArray(new PatternModifyLog[0]);
+		resource.getReplayData().random = model.getSelectedIndexOfTimeLines();
 		resource.getReplayData().gauge = resource.getConfig().getGauge();
 
 		score.setPg(pgreat);

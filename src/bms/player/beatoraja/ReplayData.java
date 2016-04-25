@@ -10,9 +10,20 @@ import bms.player.beatoraja.pattern.PatternModifyLog;
  */
 public class ReplayData {
 	
+	/**
+	 * キー入力ログ
+	 */
 	public KeyInputLog[] keylog;
-	
+	/**
+	 * ゲージの種類
+	 */
 	public int gauge;
-	
+	/**
+	 * 譜面オプションによる変更ログ
+	 */
 	public PatternModifyLog[] pattern;
+	/**
+	 * ランダムシーケンスを含むbmsの場合、選択されたRANDOM番号
+	 */
+	public int random;
 }
