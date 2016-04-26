@@ -90,13 +90,21 @@ public class JudgeManager {
     /**
      * 各判定の範囲(+-ms)。PGREAT, GREAT, GOOD, BAD, POOR, MISS空POORの順
      */
-    private static final int[] judgetable = {20, 60, 165, 315, 0, 1000};
+//    private static final int[] judgetable = {20, 60, 165, 315, 0, 1000};
+    private static final int[] judgetable = {20, 60, 160, 250, 0, 1000};
+    private static final int[] pjudgetable = {25, 75, 175, 175, 0, 1000};
+    /**
+     * スクラッチレーンの判定拡大幅
+     */
+    private static final int sjudgerate = 110;
     /**
      * HCNの増減間隔(ms)
      */
     private static final int hcnduration = 100;
 
-    private int[] judge;
+    private int[] njudge;
+    private int[] sjudge;
+    
 
     private int pos = 0;
     private int judgetype = 0;
@@ -142,12 +150,15 @@ public class JudgeManager {
         }
         Arrays.fill(bomb, -1000);
 
-        judge = new int[6];
+        njudge = new int[6];
+        sjudge = new int[6];
         for (int i = 0; i < judgetable.length; i++) {
             if (i < 4) {
-                judge[i] = judgetable[i] * model.getJudgerank() / 100;
+                njudge[i] = (model.getUseKeys() == 9 ? pjudgetable[i] : judgetable[i]) * model.getJudgerank() / 100;
+                sjudge[i] = njudge[i] * sjudgerate / 100;
             } else {
-                judge[i] = judgetable[i];
+                sjudge[i] = njudge[i] = (model.getUseKeys() == 9 ? pjudgetable[i] : judgetable[i]);
+                
             }
         }
     }
@@ -182,7 +193,7 @@ public class JudgeManager {
                     }
                 }
             }
-            if (pos < i && timelines[i].getTime() < prevtime - judge[5]) {
+            if (pos < i && timelines[i].getTime() < prevtime - njudge[5]) {
                 pos = i;
 //				System.out.println("judge first position : " + timelines[i].getTime() + " time : " + time);
             }
@@ -222,6 +233,7 @@ public class JudgeManager {
                 long ptime = keytime[key];
                 int lane = keyassign[key];
                 int sc = Arrays.binarySearch(sckeyassign, lane);
+            	int[] judge = sc >= 0 ? sjudge : njudge;
                 if (keystate[key]) {
                     // キーが押されたときの処理
                     if (processing[lane] != null) {
@@ -408,6 +420,9 @@ public class JudgeManager {
         }
 
         for (int lane = 0; lane < noteassign.length; lane++) {
+            int sc = Arrays.binarySearch(sckeyassign, lane);
+        	int[] judge = sc >= 0 ? sjudge : njudge;
+
             // LN終端判定
             if (model.getLntype() == BMSModel.LNTYPE_LONGNOTE && processing[lane] != null
                     && processing[lane].getEnd().getTime() < time) {
@@ -427,35 +442,34 @@ public class JudgeManager {
                 if (timelines[i].getTime() >= time - judge[3] - 500) {
                     Note note = timelines[i].getNote(noteassign[lane]);
                     if (note != null && !(note instanceof MineNote) && note.getState() == 0) {
-                        int judge = timelines[i].getTime() - time;
+                        int jud = timelines[i].getTime() - time;
                         if (note instanceof LongNote) {
                             LongNote ln = (LongNote) note;
                             if (ln.getStart() == timelines[i]) {
                                 if (processing[lane] != ln) {
                                     // System.out.println("ln start poor");
                                     if (model.getLntype() != BMSModel.LNTYPE_LONGNOTE) {
-                                        this.update(lane, 4, time, judge);
+                                        this.update(lane, 4, time, jud);
                                         main.update(4);
                                     }
-                                    this.update(lane, 4, time, judge);
+                                    this.update(lane, 4, time, jud);
                                     main.update(4);
-                                    note.setState(judge);
+                                    note.setState(jud);
                                 }
                             } else {
                                 // System.out.println("ln end poor");
-                                this.update(lane, 4, time, judge);
+                                this.update(lane, 4, time, jud);
                                 main.update(4);
-                                note.setState(judge);
+                                note.setState(jud);
                                 processing[lane] = null;
-                                int sc = Arrays.binarySearch(sckeyassign, lane);
                                 if (sc >= 0) {
                                     sckey[sc] = 0;
                                 }
                             }
                         } else {
-                            this.update(lane, 4, time, judge);
+                            this.update(lane, 4, time, jud);
                             main.update(4);
-                            note.setState(judge);
+                            note.setState(jud);
                         }
                     }
                 }
@@ -525,7 +539,11 @@ public class JudgeManager {
     }
 
     public int[] getJudgeTimeRegion() {
-        return judge;
+        return njudge;
+    }
+
+    public int[] getScratchJudgeTimeRegion() {
+        return sjudge;
     }
 
     public int getJudgeCount(int judge) {
@@ -537,9 +555,13 @@ public class JudgeManager {
     }
 
     public void setExpandJudge() {
-        judge[0] = judge[1];
-        judge[1] = judge[2];
-        judge[2] = judge[3];
+        njudge[0] = njudge[1];
+        njudge[1] = njudge[2];
+        njudge[2] = njudge[3];
+        sjudge[0] = sjudge[1];
+        sjudge[1] = sjudge[2];
+        sjudge[2] = sjudge[3];
+        
     }
 
 }
