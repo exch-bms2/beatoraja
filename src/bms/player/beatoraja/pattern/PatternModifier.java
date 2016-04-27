@@ -47,8 +47,8 @@ public abstract class PatternModifier {
 					hnotes[i] = tl.getHiddenNote(pm.modify[i]);
 				}
 				for (int i = 0; i < lanes; i++) {
-					tl.addNote(i, notes[i]);
-					tl.addHiddenNote(i, hnotes[i]);
+					tl.setNote(i, notes[i]);
+					tl.setHiddenNote(i, hnotes[i]);
 				}
 				
 			}

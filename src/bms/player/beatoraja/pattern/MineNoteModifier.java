@@ -22,7 +22,7 @@ public class MineNoteModifier extends PatternModifier {
 			for(int lane = 0;lane < 18;lane++) {
 				if(tl.getNote(lane) instanceof MineNote) {
 					exists = true;
-					tl.addNote(lane, null);
+					tl.setNote(lane, null);
 				}
 			}
 		}

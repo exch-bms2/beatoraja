@@ -61,7 +61,7 @@ public class NoteShuffleModifier extends PatternModifier {
         int[] ln = new int[lanes];
         Arrays.fill(ln, -1);
         for (TimeLine tl : model.getAllTimeLines()) {
-            if (tl.getTotalNotes(BMSModel.LNTYPE_CHARGENOTE) > 0) {
+            if (tl.existNote() || tl.existHiddenNote()) {
                 Note[] notes = new Note[lanes];
                 Note[] hnotes = new Note[lanes];
                 for (int i = 0; i < lanes; i++) {
@@ -416,16 +416,16 @@ public class NoteShuffleModifier extends PatternModifier {
                     if (n instanceof LongNote) {
                         LongNote ln2 = (LongNote) n;
                         if (ln2.getStart() == tl) {
-                            tl.addNote(i, n);
+                            tl.setNote(i, n);
                             ln[i] = random[i];
                         } else {
-                            tl.addNote(i, n);
+                            tl.setNote(i, n);
                             ln[i] = -1;
                         }
                     } else {
-                        tl.addNote(i, n);
+                        tl.setNote(i, n);
                     }
-                    tl.addHiddenNote(i, hn);
+                    tl.setHiddenNote(i, hn);
                 }
                 log.add(new PatternModifyLog(tl.getTime(), random));
             }

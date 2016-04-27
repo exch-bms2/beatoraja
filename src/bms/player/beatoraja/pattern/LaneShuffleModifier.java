@@ -137,17 +137,19 @@ public class LaneShuffleModifier extends PatternModifier {
 		makeRandom();
 		int lanes = random.length;
 		for (TimeLine tl : model.getAllTimeLines()) {
-			Note[] notes = new Note[lanes];
-			Note[] hnotes = new Note[lanes];
-			for (int i = 0; i < lanes; i++) {
-				notes[i] = tl.getNote(i);
-				hnotes[i] = tl.getHiddenNote(i);
+			if(tl.existNote() || tl.existHiddenNote()) {
+				Note[] notes = new Note[lanes];
+				Note[] hnotes = new Note[lanes];
+				for (int i = 0; i < lanes; i++) {
+					notes[i] = tl.getNote(i);
+					hnotes[i] = tl.getHiddenNote(i);
+				}
+				for (int i = 0; i < lanes; i++) {
+					tl.setNote(i, notes[random[i]]);
+					tl.setHiddenNote(i, hnotes[random[i]]);
+				}
+				log.add(new PatternModifyLog(tl.getTime(), random));				
 			}
-			for (int i = 0; i < lanes; i++) {
-				tl.addNote(i, notes[random[i]]);
-				tl.addHiddenNote(i, hnotes[random[i]]);
-			}
-			log.add(new PatternModifyLog(tl.getTime(), random));
 		}
 		return log;
 	}

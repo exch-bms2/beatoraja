@@ -16,8 +16,8 @@ public class LongNoteModifier extends PatternModifier {
 			for(int lane = 0;lane < 18;lane++) {
 				if(tl.getNote(lane) instanceof LongNote) {
 					LongNote ln = (LongNote) tl.getNote(lane);
-					tl.addNote(lane, new NormalNote(ln.getWav()));
-					ln.getEnd().addNote(lane, null);
+					tl.setNote(lane, new NormalNote(ln.getWav()));
+					ln.getEnd().setNote(lane, null);
 				}
 			}
 		}

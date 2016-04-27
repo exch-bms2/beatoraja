@@ -24,7 +24,7 @@ public class AutoplayModifier extends PatternModifier {
 			for(int lane : lanes) {
 				if(tl.getNote(lane) != null) {
 					tl.addBackGroundNote(tl.getNote(lane));
-					tl.addNote(lane, null);
+					tl.setNote(lane, null);
 				}
 			}
 		}
