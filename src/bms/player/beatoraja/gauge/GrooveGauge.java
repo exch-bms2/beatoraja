@@ -31,7 +31,6 @@ public abstract class GrooveGauge {
 
 	private float[] gauge;
 
-
 	public static final int CLEARTYPE_NOPLAY = 0;
 	public static final int CLEARTYPE_FAILED = 1;
 	public static final int CLEARTYPE_ASSTST = 2;
@@ -43,8 +42,16 @@ public abstract class GrooveGauge {
 	public static final int CLEARTYPE_FULLCOMBO = 8;
 	public static final int CLEARTYPE_PERFECT = 9;
 	public static final int CLEARTYPE_MAX = 10;
+
+	public GrooveGauge() {
+		
+	}
 	
 	public GrooveGauge(float minValue, float maxValue, float startValue, float norm, int cleartype, float[] gauge) {
+		init(minValue, maxValue, startValue, norm, cleartype, gauge);
+	}
+
+	protected void init(float minValue, float maxValue, float startValue, float norm, int cleartype, float[] gauge) {
 		this.minValue = minValue;
 		this.maxValue = maxValue;
 		this.value = startValue;
@@ -64,7 +71,7 @@ public abstract class GrooveGauge {
 
 	/**
 	 * 判定に応じてゲージを更新する
-	 *
+	 * 
 	 * @param judge
 	 */
 	public void update(int judge, float rate) {
@@ -92,15 +99,15 @@ public abstract class GrooveGauge {
 			this.value = value;
 		}
 	}
-	
+
 	public boolean isQualified() {
 		return value >= norm;
 	}
-	
+
 	public int getClearType() {
 		return cleartype;
 	}
-	
+
 	public abstract void draw(PlaySkin skin, SpriteBatch sprite, float x, float y, float w, float h);
 
 	public float getBorder() {

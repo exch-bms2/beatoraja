@@ -12,8 +12,20 @@ import bms.player.beatoraja.play.PlaySkin;
  */
 public class HardGrooveGauge extends GrooveGauge {
 
+	private boolean noadjust = false;
+	
 	public HardGrooveGauge(BMSModel model) {
-		super(0, 100, 100, 0, CLEARTYPE_HARD, new float[] { 0.15f, 0.15f, 0, -5.0f, -10.0f, -5.0f });
+		if(model.getUseKeys() == 9) {
+			noadjust = true;
+			// TODO ポップンのHARDの仕様(閉店なし)に合わせるべきか
+			init(0, 100, 100, 0, CLEARTYPE_HARD, new float[] { 0.15f, 0.15f, 0, -5.0f, -10.0f, -10.0f });
+//			init(2,100, 25, 66.7f, CLEARTYPE_HARD,new float[] { (float) (model.getTotal() / model.getTotalNotes()),
+//					(float) (model.getTotal() / model.getTotalNotes()), (float) (model.getTotal() / model.getTotalNotes()) / 2,
+//					-1.6f, -5.0f, -5.0f })	;			
+		} else {
+			init(0, 100, 100, 0, CLEARTYPE_HARD, new float[] { 0.15f, 0.15f, 0, -5.0f, -10.0f, -5.0f });
+		}
+
 	}
 
 	@Override
@@ -28,6 +40,9 @@ public class HardGrooveGauge extends GrooveGauge {
 	@Override
 	protected float getGaugeValue(int judge) {
 		float value = super.getGaugeValue(judge);
+//		if(noadjust) {
+//			return value;
+//		}
 		if(this.getValue() > 30 || judge < 3) {
 			return value;
 		} else if(this.getValue() > 15) {

@@ -13,9 +13,15 @@ import bms.player.beatoraja.play.PlaySkin;
 public class NormalGrooveGauge extends GrooveGauge {
 
 	public NormalGrooveGauge(BMSModel model) {
-		super(2,100, 20, 80, CLEARTYPE_NORMAL,new float[] { (float) (model.getTotal() / model.getTotalNotes()),
-				(float) (model.getTotal() / model.getTotalNotes()), (float) (model.getTotal() / model.getTotalNotes()) / 2,
-				-3.0f, -6.0f, -2.0f });
+		if(model.getUseKeys() == 9) {
+			init(2,100, 25, 66.7f, CLEARTYPE_NORMAL,new float[] { (float) (model.getTotal() / model.getTotalNotes()),
+					(float) (model.getTotal() / model.getTotalNotes()), (float) (model.getTotal() / model.getTotalNotes()) / 2,
+					-1.6f, -5.0f, -5.0f })	;			
+		} else {
+			init(2,100, 20, 80, CLEARTYPE_NORMAL,new float[] { (float) (model.getTotal() / model.getTotalNotes()),
+					(float) (model.getTotal() / model.getTotalNotes()), (float) (model.getTotal() / model.getTotalNotes()) / 2,
+					-3.0f, -6.0f, -2.0f })	;		
+		}
 	}
 	
 	@Override

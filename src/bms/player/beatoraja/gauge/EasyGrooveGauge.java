@@ -11,11 +11,18 @@ import bms.player.beatoraja.play.PlaySkin;
  * @author exch
  */
 public class EasyGrooveGauge extends GrooveGauge {
-
+	
 	public EasyGrooveGauge(BMSModel model) {
-		super(2,100, 20, 80, CLEARTYPE_EASY, new float[] { (float) (model.getTotal() / model.getTotalNotes()),
-				(float) (model.getTotal() / model.getTotalNotes()), (float) (model.getTotal() / model.getTotalNotes()) / 2,
-				-1.5f, -3.0f, -1.0f });
+		if(model.getUseKeys() == 9) {
+			init(2,100, 25, 66.7f, CLEARTYPE_EASY,new float[] { (float) (model.getTotal() / model.getTotalNotes()),
+					(float) (model.getTotal() / model.getTotalNotes()), (float) (model.getTotal() / model.getTotalNotes()) / 2,
+					-0.8f, -2.5f, -2.5f })	;			
+		} else {
+			init(2,100, 20, 80, CLEARTYPE_EASY, new float[] { (float) (model.getTotal() / model.getTotalNotes()),
+					(float) (model.getTotal() / model.getTotalNotes()), (float) (model.getTotal() / model.getTotalNotes()) / 2,
+					-1.5f, -4.5f, -0.5f });
+		}
+
 	}
 	
 	@Override

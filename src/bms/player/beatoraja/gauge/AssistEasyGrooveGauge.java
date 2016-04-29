@@ -13,9 +13,16 @@ import bms.player.beatoraja.play.PlaySkin;
 public class AssistEasyGrooveGauge extends GrooveGauge {
 
     public AssistEasyGrooveGauge(BMSModel model) {
-        super(2, 100, 20, 60, CLEARTYPE_LIGHT_ASSTST, new float[]{(float) (model.getTotal() / model.getTotalNotes()),
-                (float) (model.getTotal() / model.getTotalNotes()), (float) (model.getTotal() / model.getTotalNotes()) / 2,
-                -1.5f, -3.0f, 0});
+		if(model.getUseKeys() == 9) {
+			init(2,100, 25, 50, CLEARTYPE_LIGHT_ASSTST,new float[] { (float) (model.getTotal() / model.getTotalNotes()),
+					(float) (model.getTotal() / model.getTotalNotes()), (float) (model.getTotal() / model.getTotalNotes()) / 2,
+					-0.8f, -2.5f, -0.8f })	;			
+		} else {
+	        init(2, 100, 20, 60, CLEARTYPE_LIGHT_ASSTST, new float[]{(float) (model.getTotal() / model.getTotalNotes()),
+	                (float) (model.getTotal() / model.getTotalNotes()), (float) (model.getTotal() / model.getTotalNotes()) / 2,
+	                -1.5f, -3.0f, 0});
+		}
+
     }
 
     @Override

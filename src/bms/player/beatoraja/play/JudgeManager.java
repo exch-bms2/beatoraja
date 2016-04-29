@@ -92,6 +92,9 @@ public class JudgeManager {
      */
 //    private static final int[] judgetable = {20, 60, 165, 315, 0, 1000};
     private static final int[] judgetable = {20, 60, 160, 250, 0, 1000};
+    /**
+     * PMSの各判定の範囲(+-ms)。PGREAT, GREAT, GOOD, BAD, POOR, MISS空POORの順
+     */
     private static final int[] pjudgetable = {25, 75, 175, 175, 0, 1000};
     /**
      * スクラッチレーンの判定拡大幅
@@ -101,8 +104,13 @@ public class JudgeManager {
      * HCNの増減間隔(ms)
      */
     private static final int hcnduration = 100;
-
+    /**
+     * ノーツ判定テーブル
+     */
     private int[] njudge;
+    /**
+     * スクラッチ判定テーブル
+     */
     private int[] sjudge;
     
 
