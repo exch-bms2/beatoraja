@@ -20,6 +20,7 @@ import bms.player.lunaticrave2.IRScoreData;
 public class GradeResult extends ApplicationAdapter {
 	
 	// TODO 段位リプレイの保存
+	// TODO 段位ゲージ繊維の表示
 
 	private static final String[] LAMP = { "000000", "808080", "800080", "ff00ff", "40ff40", "f0c000", "ffffff",
 			"ffff88", "88ffff", "ff8888", "ff0000" };
