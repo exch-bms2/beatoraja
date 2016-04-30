@@ -52,6 +52,12 @@ public class MusicResult extends ApplicationAdapter {
     private Sound clear;
     private Sound fail;
 
+    private MusicResultSkin skin;
+
+    private DetailGraphRenderer detail;
+
+    private long time = 0;
+
     public MusicResult(MainController main) {
         this.main = main;
 
@@ -65,10 +71,8 @@ public class MusicResult extends ApplicationAdapter {
                 fail = Gdx.audio.newSound(Gdx.files.internal("skin/fail.wav"));
             }
         }
-
+        skin = new MusicResultSkin();
     }
-
-    private long time = 0;
 
     public void create(PlayerResource resource) {
         this.resource = resource;
@@ -82,7 +86,7 @@ public class MusicResult extends ApplicationAdapter {
         layout = new GlyphLayout(titlefont, resource.getBMSModel().getFullTitle());
         updateScoreDatabase();
         // 保存されているリプレイデータがない場合は、EASY以上で自動保存
-        if (resource.getScoreData() != null
+        if (resource.getAutoplay() == 0 && resource.getScoreData() != null
                 && resource.getScoreData().getClear() >= GrooveGauge.CLEARTYPE_EASY
                 && !main.getPlayDataAccessor().existsReplayData(resource.getBMSModel(), resource.getConfig().getLnmode())) {
             saveReplayData();
@@ -91,34 +95,8 @@ public class MusicResult extends ApplicationAdapter {
         // TODO 後でJUDGERANK反映
         final int[] judgetable = {20, 60, 165, 315, 1000};
 
-        data = new int[resource.getBMSModel().getLastTime() / 1000 + 1][6];
-        fdata = new int[resource.getBMSModel().getLastTime() / 1000 + 1][3];
-        for (TimeLine tl : resource.getBMSModel().getAllTimeLines()) {
-            for (int i = 0; i < 18; i++) {
-                Note n = tl.getNote(i);
-                if (n != null) {
-                    if (n.getState() == 0) {
-                        data[tl.getTime() / 1000][0]++;
-                        fdata[tl.getTime() / 1000][0]++;
-                    } else {
-                        int dtime = n.getState() > 0 ? n.getState() - 1 : n.getState();
-                        for (int j = 0; j < judgetable.length; j++) {
-                            if (Math.abs(dtime) <= judgetable[j]) {
-                                data[tl.getTime() / 1000][j + 1]++;
-                                fdata[tl.getTime() / 1000][dtime >= 0 ? 1 : 2]++;
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        detail = new DetailGraphRenderer(resource.getBMSModel(), judgetable, judgetable);
     }
-
-    private int[][] data;
-    private int[][] fdata;
-
-    private Rectangle graph = new Rectangle(20, 500, 400, 200);
 
     private final Color[] graph_back = {Color.valueOf("440044"), Color.valueOf("000044"), Color.valueOf("004400"),
             Color.valueOf("440000"), Color.valueOf("444400"), Color.valueOf("222222")};
@@ -134,6 +112,8 @@ public class MusicResult extends ApplicationAdapter {
 
         final float w = 1280;
         final float h = 720;
+
+        Rectangle graph = skin.getGaugeRegion();
 
         if (resource.getBGAManager().getStagefileData() != null) {
             sprite.begin();
@@ -247,19 +227,7 @@ public class MusicResult extends ApplicationAdapter {
         titlefont.draw(sprite, resource.getBMSModel().getFullTitle(), w / 2 - layout.width / 2, 23);
         sprite.end();
 
-        if (((System.currentTimeMillis() - time) / 5000) % 2 == 0) {
-            drawGraph(data, JGRAPH);
-            sprite.begin();
-            titlefont.setColor(Color.GREEN);
-            titlefont.draw(sprite, "JUDGE DETAIL", 500, 700);
-            sprite.end();
-        } else {
-            drawGraph(fdata, FGRAPH);
-            sprite.begin();
-            titlefont.setColor(Color.CYAN);
-            titlefont.draw(sprite, "FAST/SLOW", 500, 700);
-            sprite.end();
-        }
+        detail.render(sprite, titlefont, shape, System.currentTimeMillis() - time, skin.getJudgeRegion());
 
         boolean[] keystate = main.getInputProcessor().getKeystate();
         long[] keytime = main.getInputProcessor().getTime();
@@ -294,7 +262,7 @@ public class MusicResult extends ApplicationAdapter {
             }
         }
 
-        if (main.getInputProcessor().getNumberState()[1]) {
+        if (resource.getAutoplay() == 0 && main.getInputProcessor().getNumberState()[1]) {
             saveReplayData();
         }
     }
@@ -368,8 +336,11 @@ public class MusicResult extends ApplicationAdapter {
             }
             newscore = cscore;
         }
-        main.getPlayDataAccessor().writeScoreDara(resource.getScoreData(), resource.getBMSModel(),
-                resource.getConfig().getLnmode(), resource.isUpdateScore());
+
+        if(resource.getAutoplay() == 0) {
+            main.getPlayDataAccessor().writeScoreDara(resource.getScoreData(), resource.getBMSModel(),
+                    resource.getConfig().getLnmode(), resource.isUpdateScore());
+        }
 
         if (newscore.getClear() != GrooveGauge.CLEARTYPE_FAILED) {
             if (this.clear != null) {
@@ -394,18 +365,15 @@ public class MusicResult extends ApplicationAdapter {
 
         final ShapeRenderer shape = main.getShapeRenderer();
 
-        float x = 500;
-        float y = 500;
-        float w = 700;
-        float h = 200;
-
         int max = 40;
+
+        Rectangle judge = skin.getJudgeRegion();
 
         Gdx.gl.glEnable(GL11.GL_BLEND);
         Gdx.gl.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         shape.begin(ShapeType.Filled);
         shape.setColor(0, 0, 0, 0.8f);
-        shape.rect(x, y, w, h);
+        shape.rect(judge.x, judge.y, judge.width, judge.height);
         shape.end();
         Gdx.gl.glDisable(GL11.GL_BLEND);
 
@@ -416,14 +384,16 @@ public class MusicResult extends ApplicationAdapter {
             // x軸補助線描画
             if (i % 30 == 0) {
                 shape.setColor(Color.valueOf("666666"));
-                shape.line(x + i * w / data.length, y, x + i * w / data.length, y + h);
+                shape.line(judge.x + i * judge.width / data.length, judge.y, judge.x + i * judge.width / data.length,
+                        judge.y + judge.height);
             }
 
             for (int j = 0, k = n[0], index = 0; index < GRAPH.length; ) {
                 if (k > 0) {
                     k--;
                     shape.setColor(Color.valueOf(GRAPH[index]));
-                    shape.rect(x + w * i / data.length, y + j * (h / max), w / data.length - 1, (h / max) - 1);
+                    shape.rect(judge.x + judge.width * i / data.length, judge.y + j * (judge.height / max),
+                            judge.width / data.length - 1, (judge.height / max) - 1);
                     j++;
                 } else {
                     index++;

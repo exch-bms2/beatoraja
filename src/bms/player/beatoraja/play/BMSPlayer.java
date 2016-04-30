@@ -487,7 +487,7 @@ public class BMSPlayer extends ApplicationAdapter {
 				if (keyinput != null) {
 					Logger.getGlobal().info("入力パフォーマンス(max ms) : " + keyinput.frametimes);
 				}
-				if (autoplay == 0) {
+				if (autoplay != 1) {
 					resource.setScoreData(createScoreData());
 				}
 				saveConfig();
@@ -519,7 +519,7 @@ public class BMSPlayer extends ApplicationAdapter {
 				if (keyinput != null) {
 					Logger.getGlobal().info("入力パフォーマンス(max ms) : " + keyinput.frametimes);
 				}
-				if (autoplay == 0) {
+				if (autoplay != 1) {
 					resource.setScoreData(createScoreData());
 				}
 				saveConfig();
@@ -915,6 +915,9 @@ public class BMSPlayer extends ApplicationAdapter {
 				if (keylog != null) {
 					while (index < keylog.size() && keylog.get(index).time <= time) {
 						KeyInputLog key = keylog.get(index);
+//						if(input.getKeystate()[key.keycode] == key.pressed) {
+//							System.out.println("押し離しが行われていません : key - " + key.keycode + " pressed - " + key.pressed + " time - " + key.time);
+//						}
 						input.getKeystate()[key.keycode] = key.pressed;
 						input.getTime()[key.keycode] = key.time;
 						index++;
