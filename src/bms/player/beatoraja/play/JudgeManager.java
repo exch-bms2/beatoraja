@@ -92,7 +92,7 @@ public class JudgeManager {
     /**
      * PMSの各判定の範囲(+-ms)。PGREAT, GREAT, GOOD, BAD, POOR, MISS空POORの順
      */
-    private static final int[] pjudgetable = {25, 75, 175, 175, 0, 1000};
+    private static final int[] pjudgetable = {25, 75, 175, 200, 0, 1000};
     /**
      * スクラッチレーンの判定拡大幅
      */
@@ -256,7 +256,8 @@ public class JudgeManager {
                                     final int dtime = (int) (processing[lane].getEnd().getTime() - ptime);
                                     this.update(lane, j < 4 ? j : 4, time, dtime);
                                     main.update(j);
-                                    processing[lane].setEndstate(dtime >= 0 ? dtime + 1 : dtime);
+                                    processing[lane].setEndstate(j + 1);
+                                    processing[lane].setEndtime(dtime);
                                     System.out.println("BSS終端判定 - Time : " + ptime + " Judge : " + j + " LN : "
                                             + processing[lane].hashCode());
                                     processing[lane] = null;
@@ -343,7 +344,8 @@ public class JudgeManager {
                                         this.update(lane, j, time, dtime);
                                         main.update(j);
                                         if (j < 4) {
-                                            ln.setState(dtime >= 0 ? dtime + 1 : dtime);
+                                        	ln.setState(j + 1);
+                                            ln.setTime(dtime);
                                         }
                                     }
                                     if (j < 4) {
@@ -367,7 +369,8 @@ public class JudgeManager {
                                 this.update(lane, j, time, dtime);
                                 main.update(j);
                                 if (j < 4) {
-                                    note.setState(dtime >= 0 ? dtime + 1 : dtime);
+                                	note.setState(j + 1);
+                                    note.setTime(dtime);
                                 }
                             }
                         } else {
@@ -416,7 +419,8 @@ public class JudgeManager {
                                     }
                                     this.update(lane, j, time, dtime);
                                     main.update(j);
-                                    processing[lane].setEndstate(dtime >= 0 ? dtime + 1 : dtime);
+                                    processing[lane].setEndstate(j + 1);
+                                    processing[lane].setEndtime(dtime);
                                     processing[lane] = null;
                                 } else {
                                 	if(Math.abs(passingcount[lane]) > Math.abs(dtime)) {
@@ -429,7 +433,8 @@ public class JudgeManager {
                                 	}
                                     this.update(lane, j, time, dtime);
                                     main.update(j);
-                                    processing[lane].setState(dtime >= 0 ? dtime + 1 : dtime);
+                                    processing[lane].setState(j + 1);
+                                    processing[lane].setTime(dtime);
                                     processing[lane] = null;                                	
                                 }
                                 j = judge.length;
@@ -458,7 +463,8 @@ public class JudgeManager {
                 }
                 this.update(lane, j, time, passingcount[lane]);
                 main.update(j);
-                processing[lane].setState(passingcount[lane] >= 0 ? passingcount[lane] + 1 : passingcount[lane]);
+                processing[lane].setState(j + 1);
+                processing[lane].setTime(passingcount[lane]);
                 processing[lane] = null;
             }
             // 見逃しPOOR判定
@@ -470,23 +476,27 @@ public class JudgeManager {
                         if(note instanceof NormalNote && note.getState() == 0) {
                             this.update(lane, 4, time, jud);
                             main.update(4);
-                            note.setState(jud);
+                            note.setState(5);
+                            note.setTime(jud);
                         }
                         if(note instanceof LongNote && ((LongNote) note).getStart() == timelines[i] && note.getState() == 0) {
                         	if(model.getLntype() != BMSModel.LNTYPE_LONGNOTE) {
                                 // System.out.println("CN start poor");
                                 this.update(lane, 4, time, jud);
                                 main.update(4);
-                                note.setState(jud);                            	
+                                note.setState(5);
+                                note.setTime(jud);
                                 this.update(lane, 4, time, jud);
                                 main.update(4);
-                                ((LongNote) note).setEndstate(jud);                        		
+                                ((LongNote) note).setEndstate(5);                 		
+                                ((LongNote) note).setEndtime(jud);                        		
                         	}
                             if(model.getLntype() == BMSModel.LNTYPE_LONGNOTE && processing[lane] != note) {
                                 // System.out.println("LN start poor");
                                 this.update(lane, 4, time, jud);
                                 main.update(4);
-                                note.setState(jud);                            	
+                                note.setState(5);
+                                note.setTime(jud);
                             }
                         	
                         }
@@ -494,7 +504,8 @@ public class JudgeManager {
                             // System.out.println("CN end poor");
                             this.update(lane, 4, time, jud);
                             main.update(4);
-                            ((LongNote) note).setEndstate(jud);
+                            ((LongNote) note).setEndstate(5);                 		
+                            ((LongNote) note).setEndtime(jud);                        		
                             processing[lane] = null;
                             if (sc >= 0) {
                                 sckey[sc] = 0;

@@ -28,39 +28,29 @@ public class DetailGraphRenderer {
             Color.valueOf("ff0000"), Color.valueOf("ffff00"), Color.valueOf("cccccc")};
 
     private static final String[] JGRAPH = {"555555", "0088ff", "00ff88", "ffff00", "ff8800", "ff0000"};
-    private static final String[] FGRAPH = {"555555", "0088ff", "ff8800"};
+    private static final String[] FGRAPH = {"555555", "44ff44", "0088ff", "ff8800"};
 
-    public DetailGraphRenderer(BMSModel model, int[] njudge, int[] sjudge) {
+    public DetailGraphRenderer(BMSModel model) {
         data = new int[model.getLastTime() / 1000 + 1][6];
-        fdata = new int[model.getLastTime() / 1000 + 1][3];
+        fdata = new int[model.getLastTime() / 1000 + 1][4];
         for (TimeLine tl : model.getAllTimeLines()) {
             for (int i = 0; i < 18; i++) {
-                int[] judgetable = (model.getUseKeys() != 9 && i % 9 == 7 ? sjudge : njudge);
                 Note n = tl.getNote(i);
                 if (n != null && !(model.getLntype() == BMSModel.LNTYPE_LONGNOTE && n instanceof LongNote && ((LongNote)n).getEnd() == tl)) {
                     int state = n.getState();
+                    int time = n.getTime();
                     if(n instanceof LongNote && ((LongNote)n).getEnd() == tl) {
                         state = ((LongNote)n).getEndstate();
+                        time = ((LongNote)n).getEndtime();
 //                        if(state == 0) {
 //                            System.out.println("終端未処理:"+tl.getTime());
 //                        }
                     }
-                    if (state == 0) {
-                        data[tl.getTime() / 1000][0]++;
-                        fdata[tl.getTime() / 1000][0]++;
+                    data[tl.getTime() / 1000][state]++;
+                    if (state <= 1) {
+                        fdata[tl.getTime() / 1000][state]++;
                     } else {
-                        int dtime = state > 0 ? state - 1 : state;
-                        for (int j = 0; j < judgetable.length; j++) {
-                            if (Math.abs(dtime) <= judgetable[j]) {
-                                data[tl.getTime() / 1000][j + 1]++;
-                                fdata[tl.getTime() / 1000][dtime >= 0 ? 1 : 2]++;
-                                break;
-                            }
-                        }
-                        if(Math.abs(dtime) > judgetable[judgetable.length - 1]) {
-                            data[tl.getTime() / 1000][judgetable.length]++;
-                            fdata[tl.getTime() / 1000][dtime >= 0 ? 1 : 2]++;
-                        }
+                        fdata[tl.getTime() / 1000][time >= 0 ? 2 : 3]++;
                     }
                 }
             }

@@ -92,10 +92,7 @@ public class MusicResult extends ApplicationAdapter {
             saveReplayData();
         }
 
-        // TODO 後でJUDGERANK反映
-        final int[] judgetable = {20, 60, 165, 315, 1000};
-
-        detail = new DetailGraphRenderer(resource.getBMSModel(), judgetable, judgetable);
+        detail = new DetailGraphRenderer(resource.getBMSModel());
     }
 
     private final Color[] graph_back = {Color.valueOf("440044"), Color.valueOf("000044"), Color.valueOf("004400"),
