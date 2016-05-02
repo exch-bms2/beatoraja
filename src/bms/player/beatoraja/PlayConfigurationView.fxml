@@ -83,7 +83,6 @@
                <content>
                   <VBox prefHeight="241.0" prefWidth="723.0">
                   	<children>
-                  	    <ComboBox fx:id="fixhispeed" prefWidth="150.0" />                  	
                   		<GridPane fx:id="lr2configuration" prefHeight="154.0" prefWidth="632.0">
                   			<columnConstraints>
                   				<ColumnConstraints maxWidth="278.0" minWidth="0.0" prefWidth="135.0" />
@@ -106,10 +105,14 @@
               <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.1" max="9.9" min="1.0" value="1.0" />
             </valueFactory>
           </Spinner>
+                              <Label text="ハイスピード固定" GridPane.columnIndex="2" GridPane.rowIndex="2"  />
+                  	    <ComboBox fx:id="fixhispeed" prefWidth="150.0" GridPane.columnIndex="3" GridPane.rowIndex="2" />                  	
                               <Label text="譜面オプション" GridPane.rowIndex="3" />
                               <ComboBox fx:id="scoreop" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                               <Label text="ゲージ" GridPane.columnIndex="2" GridPane.rowIndex="3" />
                               <ComboBox fx:id="gaugeop" prefWidth="150.0" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+                              <Label text="ロングノート種類" GridPane.rowIndex="4" />
+                              <ComboBox fx:id="lntype" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                               <Label text="ノーツ表示時間" GridPane.columnIndex="2" />
                   				    <Spinner fx:id="gvalue" GridPane.columnIndex="3">
             <valueFactory>
@@ -128,10 +131,10 @@
               <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.001" max="1.0" min="0.0" value="0.1" />
             </valueFactory>
           </Spinner>
-                              <CheckBox fx:id="constant" mnemonicParsing="false" text="CONSTANT" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                              <CheckBox fx:id="bpmguide" mnemonicParsing="false" text="BPMガイド" GridPane.columnIndex="2" GridPane.rowIndex="4" />
-                              <CheckBox fx:id="legacy" mnemonicParsing="false" text="LEGACY NOTE" GridPane.columnIndex="3" GridPane.rowIndex="4" />
-                              <Label text="アシストオプション" GridPane.rowIndex="4" />
+                              <CheckBox fx:id="constant" mnemonicParsing="false" text="CONSTANT" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                              <CheckBox fx:id="bpmguide" mnemonicParsing="false" text="BPMガイド" GridPane.columnIndex="2" GridPane.rowIndex="5" />
+                              <CheckBox fx:id="legacy" mnemonicParsing="false" text="LEGACY NOTE" GridPane.columnIndex="3" GridPane.rowIndex="5" />
+                              <Label text="アシストオプション" GridPane.rowIndex="5" />
                               <Label text="判定タイミング" GridPane.rowIndex="2" />
                   				    <Spinner fx:id="judgetiming" GridPane.columnIndex="1" GridPane.rowIndex="2">
             <valueFactory>
