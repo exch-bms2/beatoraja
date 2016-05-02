@@ -63,6 +63,8 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private ComboBox<Integer> gaugeop;
 	@FXML
+	private ComboBox<Integer> lntype;
+	@FXML
 	private ComboBox<String> configBox;
 	@FXML
 	private CheckBox enableLanecover;
@@ -96,12 +98,12 @@ public class PlayConfigurationView implements Initializable {
 
 	private Config config;;
 
-	private static final String[] SCOREOP = { "OFF", "MIRROR", "RANDOM",
-			"R-RANDOM", "S-RANDOM", "SPIRAL", "H-RANDOM", "ALL-SCR",
-			"RANDOM-EX", "S-RANDOM-EX" };
+	private static final String[] SCOREOP = { "OFF", "MIRROR", "RANDOM", "R-RANDOM", "S-RANDOM", "SPIRAL", "H-RANDOM",
+			"ALL-SCR", "RANDOM-EX", "S-RANDOM-EX" };
 
-	private static final String[] GAUGEOP = { "ASSIST EASY", "EASY", "NORMAL",
-			"HARD", "EX-HARD", "HAZARD" };
+	private static final String[] GAUGEOP = { "ASSIST EASY", "EASY", "NORMAL", "HARD", "EX-HARD", "HAZARD" };
+
+	private static final String[] LNTYPE = { "LONG NOTE", "CHARGE NOTE", "HELL CHARGE NOTE" };
 
 	private static final String[] BGAOP = { "ON", "AUTOPLAY ", "OFF" };
 
@@ -141,6 +143,13 @@ public class PlayConfigurationView implements Initializable {
 		});
 		fixhispeed.setButtonCell(new OptionListCell(FIXHISPEEDOP));
 		fixhispeed.getItems().setAll(0, 1, 2, 3);
+		lntype.setCellFactory(new Callback<ListView<Integer>, ListCell<Integer>>() {
+			public ListCell<Integer> call(ListView<Integer> param) {
+				return new OptionListCell(LNTYPE);
+			}
+		});
+		lntype.setButtonCell(new OptionListCell(LNTYPE));
+		lntype.getItems().setAll(0, 1, 2);
 		judgealgorithm.setButtonCell(new OptionListCell(JUDGEALGORITHM));
 		judgealgorithm.getItems().setAll(0, 1, 2);
 	}
@@ -155,6 +164,7 @@ public class PlayConfigurationView implements Initializable {
 		bgaop.setValue(config.getBga());
 		scoreop.getSelectionModel().select(config.getRandom());
 		gaugeop.getSelectionModel().select(config.getGauge());
+		lntype.getSelectionModel().select(config.getLnmode());
 
 		fixhispeed.setValue(config.getFixhispeed());
 		hispeed.getValueFactory().setValue((double) config.getHispeed());
@@ -175,10 +185,8 @@ public class PlayConfigurationView implements Initializable {
 		legacy.setSelected(config.isLegacynote());
 
 		maxfps.getValueFactory().setValue(config.getMaxFramePerSecond());
-		audiobuffer.getValueFactory().setValue(
-				config.getAudioDeviceBufferSize());
-		audiosim.getValueFactory().setValue(
-				config.getAudioDeviceSimultaneousSources());
+		audiobuffer.getValueFactory().setValue(config.getAudioDeviceBufferSize());
+		audiosim.getValueFactory().setValue(config.getAudioDeviceSimultaneousSources());
 
 		judgealgorithm.setValue(config.getJudgeAlgorithm());
 	}
@@ -192,6 +200,7 @@ public class PlayConfigurationView implements Initializable {
 		config.setBga(bgaop.getValue());
 		config.setRandom(scoreop.getValue());
 		config.setGauge(gaugeop.getValue());
+		config.setLnmode(lntype.getValue());
 		config.setHispeed(hispeed.getValue().floatValue());
 		config.setFixhispeed(fixhispeed.getValue());
 		config.setGreenvalue(gvalue.getValue());
@@ -238,20 +247,18 @@ public class PlayConfigurationView implements Initializable {
 	}
 
 	public void removeSongPath() {
-		bmsroot.getItems().removeAll(
-				bmsroot.getSelectionModel().getSelectedItems());
+		bmsroot.getItems().removeAll(bmsroot.getSelectionModel().getSelectedItems());
 	}
 
 	public void addTableURL() {
 		String s = url.getText();
-		if(s.startsWith("http") && !tableurl.getItems().contains(s)) {
+		if (s.startsWith("http") && !tableurl.getItems().contains(s)) {
 			tableurl.getItems().add(url.getText());
 		}
 	}
 
 	public void removeTableURL() {
-		tableurl.getItems().removeAll(
-				tableurl.getSelectionModel().getSelectedItems());
+		tableurl.getItems().removeAll(tableurl.getSelectionModel().getSelectedItems());
 	}
 
 	public void start() {
@@ -263,26 +270,29 @@ public class PlayConfigurationView implements Initializable {
 	public void loadAllBMS() {
 		loadBMS(true);
 	}
-	
+
 	public void loadDiffBMS() {
-		loadBMS(false);		
+		loadBMS(false);
 	}
-	
+
+	/**
+	 * BMSを読み込み、楽曲データベースを更新する
+	 * 
+	 * @param updateAll falseの場合は追加削除分のみを更新する
+	 */
 	public void loadBMS(boolean updateAll) {
 		commit();
 		try {
 			Class.forName("org.sqlite.JDBC");
-			LunaticRave2SongDatabaseManager songdb = new LunaticRave2SongDatabaseManager(
-					new File("song.db").getPath(), true,
-					BMSModel.LNTYPE_CHARGENOTE);
+			LunaticRave2SongDatabaseManager songdb = new LunaticRave2SongDatabaseManager(new File("song.db").getPath(),
+					true, BMSModel.LNTYPE_CHARGENOTE);
 			songdb.createTable();
 			Logger.getGlobal().info("song.db更新開始");
 			File[] files = new File[config.getBmsroot().length];
 			for (int i = 0; i < files.length; i++) {
 				files[i] = new File(config.getBmsroot()[i]);
 			}
-			songdb.updateSongDatas(files, config.getBmsroot(),
-					new File(".").getAbsolutePath(), updateAll);
+			songdb.updateSongDatas(files, config.getBmsroot(), new File(".").getAbsolutePath(), updateAll);
 			Logger.getGlobal().info("song.db更新完了");
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
@@ -292,16 +302,20 @@ public class PlayConfigurationView implements Initializable {
 	public void loadTable() {
 		commit();
 		File dir = new File("table");
-		if(!dir.exists()) {
+		if (!dir.exists()) {
 			dir.mkdir();
 		}
-		for(File f : dir.listFiles()) {
+		for (File f : dir.listFiles()) {
 			f.delete();
 		}
 		for (String url : config.getTableURL()) {
 			DifficultyTableParser dtp = new DifficultyTableParser();
 			DifficultyTable dt = new DifficultyTable();
-			dt.setSourceURL(url);
+			if (url.endsWith(".json")) {
+				dt.setHeadURL(url);
+			} else {
+				dt.setSourceURL(url);
+			}
 			try {
 				dtp.decode(true, dt);
 				TableData td = new TableData();
@@ -320,8 +334,8 @@ public class PlayConfigurationView implements Initializable {
 				td.setHash(levels);
 
 				if (dt.getGrade() != null) {
-					List<String> gname = new ArrayList();
-					HashMap<String, String[]> l = new HashMap();
+					List<String> gname = new ArrayList<String>();
+					HashMap<String, String[]> l = new HashMap<String, String[]>();
 					for (Grade g : dt.getGrade()) {
 						gname.add(g.getName());
 						l.put(g.getName(), g.getHashes());
@@ -333,8 +347,7 @@ public class PlayConfigurationView implements Initializable {
 				json.setElementType(TableData.class, "hash", HashMap.class);
 				json.setElementType(TableData.class, "gradehash", HashMap.class);
 				json.setOutputType(OutputType.json);
-				FileWriter fw = new FileWriter("table/" + td.getName()
-						+ ".json");
+				FileWriter fw = new FileWriter("table/" + td.getName() + ".json");
 				fw.write(json.prettyPrint(td));
 				fw.flush();
 				fw.close();
