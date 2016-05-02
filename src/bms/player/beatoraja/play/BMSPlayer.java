@@ -696,10 +696,10 @@ public class BMSPlayer extends ApplicationAdapter {
 			sprite.begin();
 			sprite.draw(bga.getBackbmpData(), r.x, r.y, r.width, r.height);
 			sprite.end();
-		} else if (misslayer != null && judge.getMisslayer() != 0 && time >= judge.getMisslayer()
-				&& time < judge.getMisslayer() + 500) {
+		} else if (misslayer != null && misslayertime != 0 && time >= misslayertime
+				&& time < misslayertime + 500) {
 			// draw miss layer
-			Texture miss = bga.getBGAData(misslayer[misslayer.length * (time - judge.getMisslayer()) / 500]);
+			Texture miss = bga.getBGAData(misslayer[misslayer.length * (time - misslayertime) / 500]);
 			if (miss != null) {
 				sprite.begin();
 				sprite.draw(miss, r.x, r.y, r.width, r.height);
@@ -834,9 +834,14 @@ public class BMSPlayer extends ApplicationAdapter {
 
 	private int notes;
 
-	public void update(int judge) {
+	private int misslayertime;
+
+	public void update(int lane, int judge, int time, int fase) {
 		if (judge < 5) {
 			notes++;
+		}
+		if(judge == 3 || judge == 4) {
+			misslayertime = time;
 		}
 		gauge.update(judge);
 		// System.out.println(
