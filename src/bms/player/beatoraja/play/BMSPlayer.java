@@ -104,6 +104,8 @@ public class BMSPlayer extends ApplicationAdapter {
 	private MainController main;
 
 	private List<Float> gaugelog = new ArrayList<Float>();
+	
+	private int playspeed = 100;
 
 	public BMSPlayer(MainController main, PlayerResource resource) {
 		this.main = main;
@@ -181,7 +183,17 @@ public class BMSPlayer extends ApplicationAdapter {
 		} else if (resource.getReplayData().pattern != null) {
 			PatternModifier.modify(model, Arrays.asList(resource.getReplayData().pattern));
 			Logger.getGlobal().info("譜面オプション : 保存された譜面変更ログから譜面再現");
-		} else if (resource.getCourseBMSModels() == null || config.getRandom() == 1) {
+		} else {
+			if (resource.getCourseBMSModels() != null) {
+				if(config.getRandom() == 1) {
+					config.setRandom2(1);
+					config.setDoubleoption(1);
+				} else {
+					config.setRandom(0);
+					config.setRandom2(0);
+					config.setDoubleoption(0);
+				}
+			}
 			switch (model.getUseKeys()) {
 			case 10:
 			case 14:
@@ -387,12 +399,15 @@ public class BMSPlayer extends ApplicationAdapter {
 
 	private int state = STATE_PRELOAD;
 
+	private long prevtime;
+	
 	@Override
 	public void render() {
 		final ShapeRenderer shape = main.getShapeRenderer();
 		final SpriteBatch sprite = main.getSpriteBatch();
 
-		final int time = (int) (System.currentTimeMillis() - starttime);
+		final long nowtime = System.currentTimeMillis() ;
+		final int time = (int) (nowtime - starttime);
 		switch (state) {
 		// 楽曲ロード
 		case STATE_PRELOAD:
@@ -442,6 +457,8 @@ public class BMSPlayer extends ApplicationAdapter {
 			break;
 		// プレイ
 		case STATE_PLAY:
+			starttime += (nowtime - prevtime) * (100 - playspeed) / 100;
+			final long pretime = prevrendertime;
 			final float g = gauge.getValue();
 			if (gaugelog.size() <= time / 500) {
 				gaugelog.add(g);
@@ -458,6 +475,7 @@ public class BMSPlayer extends ApplicationAdapter {
 				Logger.getGlobal().info("STATE_FAILEDに移行");
 			}
 			renderMain(time);
+			
 			break;
 		// 閉店処理
 		case STATE_FAILED:
@@ -534,6 +552,19 @@ public class BMSPlayer extends ApplicationAdapter {
 		if (input.isExitPressed()) {
 			stopPlay();
 		}
+		if(autoplay !=0 && input.getNumberState()[1]) {
+			playspeed = 25;
+		} else if(autoplay !=0 && input.getNumberState()[2]) {
+			playspeed = 50;
+		} else if(autoplay !=0 && input.getNumberState()[3]) {
+			playspeed = 200;
+		} else if(autoplay !=0 && input.getNumberState()[4]) {
+			playspeed = 300;
+		} else {
+			playspeed = 100;			
+		}
+		
+		prevtime = nowtime;
 	}
 
 	private void saveConfig() {
