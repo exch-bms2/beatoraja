@@ -11,7 +11,6 @@ import java.util.logging.Logger;
 
 import bms.model.BMSModel;
 import bms.player.beatoraja.gauge.GrooveGauge;
-import bms.player.lunaticrave2.IRScoreData;
 import bms.player.lunaticrave2.LunaticRave2ScoreDatabaseManager;
 
 import bms.player.lunaticrave2.PlayerData;

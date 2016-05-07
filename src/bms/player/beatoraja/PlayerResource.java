@@ -10,7 +10,6 @@ import bms.player.beatoraja.audio.AudioProcessor;
 import bms.player.beatoraja.audio.SoundProcessor;
 import bms.player.beatoraja.bga.BGAProcessor;
 import bms.player.beatoraja.gauge.GrooveGauge;
-import bms.player.lunaticrave2.IRScoreData;
 
 /**
  * プレイヤーのコンポーネント間でデータをやり取りするためのクラス

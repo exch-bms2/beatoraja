@@ -7,10 +7,7 @@ import java.util.logging.Logger;
 import org.lwjgl.opengl.GL11;
 
 import bms.model.*;
-import bms.player.beatoraja.Config;
-import bms.player.beatoraja.MainController;
-import bms.player.beatoraja.PlayerResource;
-import bms.player.beatoraja.ReplayData;
+import bms.player.beatoraja.*;
 import bms.player.beatoraja.audio.AudioProcessor;
 import bms.player.beatoraja.bga.BGAProcessor;
 import bms.player.beatoraja.gauge.*;
@@ -20,7 +17,6 @@ import bms.player.beatoraja.pattern.*;
 import bms.player.beatoraja.skin.LR2PlaySkinLoader;
 import bms.player.beatoraja.skin.SkinNumber;
 import bms.player.beatoraja.skin.SkinImage;
-import bms.player.lunaticrave2.IRScoreData;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -622,11 +618,19 @@ public class BMSPlayer extends ApplicationAdapter {
 		resource.getReplayData().random = model.getSelectedIndexOfTimeLines();
 		resource.getReplayData().gauge = resource.getConfig().getGauge();
 
-		score.setPg(pgreat);
-		score.setGr(great);
-		score.setGd(good);
-		score.setBd(bad);
-		score.setPr(poor + miss);
+		score.setFpg(judge.getJudgeCount(0,true));
+		score.setSpg(judge.getJudgeCount(0,false));
+		score.setFgr(judge.getJudgeCount(1,true));
+		score.setSgr(judge.getJudgeCount(1,false));
+		score.setFgd(judge.getJudgeCount(2,true));
+		score.setSgd(judge.getJudgeCount(2,false));
+		score.setFbd(judge.getJudgeCount(3,true));
+		score.setSbd(judge.getJudgeCount(3,false));
+		score.setFpr(judge.getJudgeCount(4,true));
+		score.setSpr(judge.getJudgeCount(4,false));
+		score.setFms(judge.getJudgeCount(5,true));
+		score.setSms(judge.getJudgeCount(5,false));
+
 		final int misscount = bad + poor + miss + totalnotes - notes;
 		score.setMinbp(misscount);
 		return score;

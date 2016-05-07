@@ -1,8 +1,8 @@
 package bms.player.beatoraja.select;
 
 import bms.player.lunaticrave2.FolderData;
-import bms.player.lunaticrave2.IRScoreData;
 import bms.player.lunaticrave2.SongData;
+import bms.player.beatoraja.*;
 
 public abstract class Bar {
 

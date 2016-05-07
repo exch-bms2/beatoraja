@@ -12,10 +12,8 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 
 import bms.model.BMSModel;
-import bms.player.beatoraja.MainController;
-import bms.player.beatoraja.PlayerResource;
+import bms.player.beatoraja.*;
 import bms.player.beatoraja.gauge.GrooveGauge;
-import bms.player.lunaticrave2.IRScoreData;
 
 public class GradeResult extends ApplicationAdapter {
 	

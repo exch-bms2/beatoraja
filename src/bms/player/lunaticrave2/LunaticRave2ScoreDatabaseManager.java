@@ -8,8 +8,7 @@ import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
-
-import bms.*;
+import bms.player.beatoraja.*;
 
 /**
  * LR2のスコアデータベースへのアクセスクラス
