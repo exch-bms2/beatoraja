@@ -10,6 +10,7 @@ import java.util.TimeZone;
 import java.util.logging.Logger;
 
 import bms.model.BMSModel;
+import bms.model.TimeLine;
 import bms.player.beatoraja.gauge.GrooveGauge;
 import bms.player.lunaticrave2.IRScoreData;
 import bms.player.lunaticrave2.LunaticRave2ScoreDatabaseManager;
@@ -65,7 +66,7 @@ public class PlayDataAccessor {
 			pd.setFail(pd.getFail() + 1);
 		}
 		pd.setPlaytime(pd.getPlaytime() + time);
-		// TODO プレイデータDB更新
+		scoredb.setPlayerData(player, pd);
 	}
 
 	/**
@@ -156,6 +157,15 @@ public class PlayDataAccessor {
 		score.setLastupdate(Calendar.getInstance(TimeZone.getDefault()).getTimeInMillis() / 1000L);
 		scoredb.setScoreData(player, score);
 
+		int time = 0;
+		for(TimeLine tl : model.getAllTimeLines()) {
+			for(int i = 0;i < 18;i++) {
+				if(tl.getNote(i) != null && tl.getNote(i).getState() != 0) {
+					time =tl.getTime() / 1000;
+				}
+			}
+		}
+		updatePlayerData(newscore, time);
 		Logger.getGlobal().info("スコアデータベース更新完了 ");
 
 	}

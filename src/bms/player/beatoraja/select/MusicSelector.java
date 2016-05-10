@@ -46,32 +46,32 @@ public class MusicSelector extends ApplicationAdapter {
 	 * 選択中のバーのインデックス
 	 */
 	private int selectedindex;
-    /**
-     * 現在のフォルダ階層
-     */
+	/**
+	 * 現在のフォルダ階層
+	 */
 	private List<Bar> dir = new ArrayList<Bar>();
 
-    /**
-     * バー移動中のカウンタ
-     */
+	/**
+	 * バー移動中のカウンタ
+	 */
 	private long duration;
-    /**
-     * バーの移動方向
-     */
+	/**
+	 * バーの移動方向
+	 */
 	private int angle;
 	/**
 	 * 楽曲DBアクセサ
 	 */
 	private LunaticRave2SongDatabaseManager songdb;
-    /**
-     * 選択中のモードフィルタ
-     */
+	/**
+	 * 選択中のモードフィルタ
+	 */
 	private int mode;
 
 	private static final String[] MODE = { "ALL", "7 KEY", "14 KEY", "9 KEY", "5 KEY", "10 KEY" };
-    /**
-     * 選択中のソート
-     */
+	/**
+	 * 選択中のソート
+	 */
 	private int sort;
 
 	private final BarSorter[] SORT = { BarSorter.NAME_SORTER, BarSorter.LEVEL_SORTER, BarSorter.LAMP_SORTER,
@@ -90,6 +90,8 @@ public class MusicSelector extends ApplicationAdapter {
 	private Config config;
 
 	private PlayerResource resource;
+
+	private PlayerData playerdata;
 
 	private TableBar[] tables = new TableBar[0];
 
@@ -157,6 +159,7 @@ public class MusicSelector extends ApplicationAdapter {
 	}
 
 	public void create(PlayerResource resource) {
+		playerdata = main.getPlayDataAccessor().readPlayerData();
 		this.resource = resource;
 		if (dir.size() > 0) {
 			updateBar(dir.get(dir.size() - 1));
@@ -467,7 +470,7 @@ public class MusicSelector extends ApplicationAdapter {
 		titlefont.setColor(Color.WHITE);
 		if (currentsongs[selectedindex] instanceof SongBar) {
 			SongData song = ((SongBar) currentsongs[selectedindex]).getSongData();
-            titlefont.draw(sprite, song.getGenre(), 100, 630);
+			titlefont.draw(sprite, song.getGenre(), 100, 630);
 			titlefont.draw(sprite, song.getTitle() + " " + song.getSubtitle(), 100, 600);
 			titlefont.draw(sprite, song.getArtist() + " " + song.getSubartist(), 100, 570);
 			titlefont.draw(sprite, song.getMode() + " KEYS", 100, 530);
@@ -529,6 +532,9 @@ public class MusicSelector extends ApplicationAdapter {
 		if (currentsongs[selectedindex] instanceof TableLevelBar) {
 			titlefont.draw(sprite, currentsongs[selectedindex].getTitle(), 100, 600);
 		}
+
+		titlefont.draw(sprite, "PLAYCOUNT : " + playerdata.getPlaycount() + " NOTESCOUNT : "
+				+ (playerdata.getPerfect() + playerdata.getGreat() + playerdata.getGood() + playerdata.getBad()), 20, 120);
 
 		titlefont.draw(sprite, "MODE : " + MODE[mode], 20, 60);
 		titlefont.draw(sprite, "SORT : " + SORT[sort].getName(), 220, 60);
@@ -801,7 +807,7 @@ public class MusicSelector extends ApplicationAdapter {
 					str.append(s.getSubtitle());
 					str.append(s.getArtist());
 					str.append(s.getSubartist());
-                    str.append(s.getGenre());
+					str.append(s.getGenre());
 				}
 			}
 
