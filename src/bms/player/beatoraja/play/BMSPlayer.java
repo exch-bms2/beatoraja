@@ -411,11 +411,10 @@ public class BMSPlayer extends ApplicationAdapter {
 			shape.begin(ShapeType.Filled);
 			shape.setColor(Color.YELLOW);
 			shape.rect(
-					skin.getLaneregion()[7].getX(),
-					skin.getLaneregion()[7].getY() + skin.getLaneregion()[7].getHeight() / 2f,
+					skin.getJudgeregion()[0].x,
+					skin.getJudgeregion()[0].y + 200,
 					(audio.getProgress() + bga.getProgress())
-							* (skin.getLaneregion()[6].getX() + skin.getLaneregion()[6].getWidth() - skin
-									.getLaneregion()[7].getX()) / 2, 4);
+							* (skin.getJudgeregion()[0].width) / 2, 4);
 			shape.end();
 
 			if (resource.mediaLoadFinished() && !input.startPressed()) {
@@ -430,8 +429,8 @@ public class BMSPlayer extends ApplicationAdapter {
 			renderMain(0);
 			sprite.begin();
 			systemfont.setColor(Color.WHITE);
-			systemfont.draw(sprite, "GET READY", skin.getLaneregion()[7].getX() + 140, skin.getLaneregion()[7].getY()
-					+ skin.getLaneregion()[7].getHeight() / 2f);
+			systemfont.draw(sprite, "GET READY", skin.getJudgeregion()[0].x + skin.getJudgeregion()[0].width / 2 - 35,
+					skin.getJudgeregion()[0].y + 200);
 			sprite.end();
 			if (time > 1000) {
 				state = STATE_PLAY;
@@ -769,13 +768,14 @@ public class BMSPlayer extends ApplicationAdapter {
 
 		// ゲージ描画
 		Rectangle gr = skin.getGaugeRegion();
+		SkinNumber[] gaugecount = skin.getGaugeCount();
 		shape.begin(ShapeType.Filled);
 		shape.setColor(Color.valueOf("#001000"));
 		shape.rect(gr.x, gr.y, gr.width, gr.height);
-		shape.rect(gr.x + gr.width - 96, gr.y + gr.height, 96, 30);
+		Rectangle gcr0 = gaugecount[0].getDestination(time);
+		shape.rect(gcr0.x, gcr0.y - 2, gcr0.width * 4, gcr0.height + 4);
 		shape.end();
 		gauge.draw(skin, sprite, gr.x, gr.y, gr.width, gr.height);
-		SkinNumber[] gaugecount = skin.getGaugeCount();
 		sprite.begin();
 		gaugecount[0].draw(sprite, 0, (int) gauge.getValue());
 		gaugecount[1].draw(sprite, 0, (int) (gauge.getValue() * 10));

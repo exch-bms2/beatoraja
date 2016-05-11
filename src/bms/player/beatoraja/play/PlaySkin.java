@@ -431,7 +431,7 @@ public class PlaySkin extends Skin {
 
 		judgeregion = new Rectangle[] { new Rectangle(210, 240, 390, 20), new Rectangle(680, 240, 390, 20) };
 
-		bgaregion = new Rectangle(10, 500, 180, 180);
+		bgaregion = new Rectangle(10, 500, 180, 220);
 		SkinText title = new SkinText("skin/VL-Gothic-Regular.ttf",0,24);
 		title.setDestination(0, 12, 678, 18, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		title.setDestination(1000, 12, 678, 18, 18, 0, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);

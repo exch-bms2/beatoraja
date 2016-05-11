@@ -362,7 +362,7 @@ public class MusicSelector extends ApplicationAdapter {
 				barimage = skin.getBar()[2];
 			}
 			if (sd instanceof GradeBar) {
-				barimage = skin.getBar()[6];
+				barimage = skin.getBar()[((GradeBar) sd).existsAllSongs() ? 3 : 4];
 			}
 			if (sd instanceof FolderBar) {
 				barimage = skin.getBar()[1];
@@ -377,6 +377,8 @@ public class MusicSelector extends ApplicationAdapter {
 			titlefont.setColor(Color.WHITE);
 			titlefont.draw(sprite, sd.getTitle(), x + 60, y + barh - 6);
 			sprite.end();
+
+			boolean ln = false;
 
 			if (sd instanceof GradeBar) {
 				int lamp = -1;
@@ -394,6 +396,14 @@ public class MusicSelector extends ApplicationAdapter {
 					sprite.end();
 					// sprite.setBlendFunction(GL11.GL_SRC_ALPHA,
 					// GL11.GL_ONE_MINUS_SRC_ALPHA);
+				}
+				if(gb.existsAllSongs()) {
+					for(SongData song : gb.getSongDatas()) {
+						if(song.getLongnote() != 0) {
+							ln = true;
+							break;
+						}
+					}
 				}
 			} else {
 				if (sd.getScore() != null && skin.getLamp()[sd.getScore().getClear()] != null) {
@@ -417,18 +427,23 @@ public class MusicSelector extends ApplicationAdapter {
 						: Color.WHITE);
 				titlefont.draw(sprite, level, x + 20, y + barh - 6);
 				sprite.end();
+
 				if (song.getLongnote() != 0) {
-					shape.begin(ShapeType.Filled);
-					shape.setColor(Color.valueOf("222200"));
-					shape.rect(x - 36, y - 4, 30, barh - 6);
-					shape.setColor(Color.YELLOW);
-					shape.rect(x - 40, y, 30, barh - 6);
-					shape.end();
-					sprite.begin();
-					titlefont.setColor(Color.BLACK);
-					titlefont.draw(sprite, "LN", x - 36, y + barh - 12);
-					sprite.end();
+					ln = true;
 				}
+			}
+
+			if(ln) {
+				shape.begin(ShapeType.Filled);
+				shape.setColor(Color.valueOf("222200"));
+				shape.rect(x - 36, y - 4, 30, barh - 6);
+				shape.setColor(Color.YELLOW);
+				shape.rect(x - 40, y, 30, barh - 6);
+				shape.end();
+				sprite.begin();
+				titlefont.setColor(Color.BLACK);
+				titlefont.draw(sprite, "LN", x - 36, y + barh - 12);
+				sprite.end();
 			}
 		}
 
@@ -494,7 +509,19 @@ public class MusicSelector extends ApplicationAdapter {
 		// 段位用の表示(ミラー段位、EX段位)
 		if (currentsongs[selectedindex] instanceof GradeBar) {
 			GradeBar gb = (GradeBar) currentsongs[selectedindex];
-			titlefont.draw(sprite, currentsongs[selectedindex].getTitle(), 100, 600);
+			titlefont.draw(sprite, gb.getTitle(), 100, 600);
+
+			for(int i = 0;i < gb.getSongDatas().length;i++) {
+				if(gb.getSongDatas()[i] != null) {
+					titlefont.setColor(Color.YELLOW);
+					titlefont.draw(sprite, gb.getSongDatas()[i].getTitle(), 120, 570 - i * 30);
+				} else {
+					titlefont.setColor(Color.GRAY);
+					titlefont.draw(sprite, "no song", 120, 570 - i * 30);
+				}
+			}
+
+
 			if (currentsongs[selectedindex].getScore() != null) {
 				IRScoreData score = currentsongs[selectedindex].getScore();
 				titlefont.setColor(Color.valueOf(LAMP[score.getClear()]));
@@ -802,6 +829,13 @@ public class MusicSelector extends ApplicationAdapter {
 					str.append(s.getArtist());
 					str.append(s.getSubartist());
                     str.append(s.getGenre());
+				}
+				if(song instanceof GradeBar) {
+					for(SongData sd : ((GradeBar) song).getSongDatas()) {
+						if(sd != null) {
+							str.append(sd.getTitle());
+						}
+					}
 				}
 			}
 
