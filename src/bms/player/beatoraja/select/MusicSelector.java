@@ -30,7 +30,7 @@ import com.badlogic.gdx.utils.Json;
  */
 public class MusicSelector extends ApplicationAdapter {
 
-	// TODO フォルダランプ
+	// TODO フォルダのクリアランプ/スコア状況内訳照会
 	// TODO バナー、テキスト表示
 	// TODO 詳細オプション(BGA ON/OFF、JUDGE TIMING、JUDGE DETAIL等
 
@@ -109,6 +109,8 @@ public class MusicSelector extends ApplicationAdapter {
 
 	private long starttime;
 
+	private Map<String, IRScoreData>[] scorecache;
+
 	public MusicSelector(MainController main, Config config) {
 		this.main = main;
 		this.config = config;
@@ -154,10 +156,40 @@ public class MusicSelector extends ApplicationAdapter {
 			}
 			this.tables = tables.toArray(new TableBar[0]);
 		}
+
+		scorecache = new Map[3];
+		for(int i = 0;i < scorecache.length;i++) {
+			scorecache[i] = new HashMap();
+		}
+	}
+
+	private IRScoreData readScoreData(String hash, int lnmode) {
+		if(scorecache[lnmode].containsKey(hash)) {
+			return scorecache[lnmode].get(hash);
+		}
+		SongData[] songs = songdb.getSongDatas("hash", hash, new File(".").getAbsolutePath());
+		if (songs.length > 0) {
+			IRScoreData score = main.getPlayDataAccessor().readScoreData(songs[0].getHash(), songs[0].getLongnote() == 1, lnmode);
+			if (score != null && config.getLnmode() == 2
+					&& (songs[0].getLongnote() == 1)){
+				score.setClear(score.getExclear());
+			}
+			for(int i = 0;i < scorecache.length;i++) {
+				if(songs[0].getLongnote() == 0 || i == lnmode) {
+					scorecache[i].put(hash, score);
+				}
+			}
+			return score;
+		}
+		return null;
 	}
 
 	public void create(PlayerResource resource) {
 		this.resource = resource;
+		for(Map cache : scorecache) {
+			cache.clear();
+		}
+
 		if (dir.size() > 0) {
 			updateBar(dir.get(dir.size() - 1));
 		} else {
@@ -392,7 +424,7 @@ public class MusicSelector extends ApplicationAdapter {
 				if (lamp != -1) {
 					// sprite.setBlendFunction(GL11.GL_ONE, GL11.GL_ONE);
 					sprite.begin();
-					sprite.draw(skin.getLamp()[lamp].getKeyFrame(time / 1000f), x, y, 15, barh);
+					sprite.draw(skin.getLamp()[lamp].getKeyFrame(time / 1000f), x, y + 2, 15, barh - 2);
 					sprite.end();
 					// sprite.setBlendFunction(GL11.GL_SRC_ALPHA,
 					// GL11.GL_ONE_MINUS_SRC_ALPHA);
@@ -409,7 +441,7 @@ public class MusicSelector extends ApplicationAdapter {
 				if (sd.getScore() != null && skin.getLamp()[sd.getScore().getClear()] != null) {
 					// sprite.setBlendFunction(GL11.GL_ONE, GL11.GL_ONE);
 					sprite.begin();
-					sprite.draw(skin.getLamp()[sd.getScore().getClear()].getKeyFrame(time / 1000f), x, y, 15, barh);
+					sprite.draw(skin.getLamp()[sd.getScore().getClear()].getKeyFrame(time / 1000f), x, y + 2, 15, barh - 2);
 					sprite.end();
 					// sprite.setBlendFunction(GL11.GL_SRC_ALPHA,
 					// GL11.GL_ONE_MINUS_SRC_ALPHA);
@@ -779,7 +811,27 @@ public class MusicSelector extends ApplicationAdapter {
 					if (path.endsWith(String.valueOf(File.separatorChar))) {
 						path = path.substring(0, path.length() - 1);
 					}
-					l.add(new FolderBar(folder, songdb.crc32(path, new String[0], new File(".").getAbsolutePath())));
+					String ccrc = songdb.crc32(path, new String[0], new File(".").getAbsolutePath());
+					FolderBar cfolder = new FolderBar(folder, ccrc);
+					l.add(cfolder);
+					int clear = 255;
+					for (SongData sd : songdb.getSongDatas("parent", ccrc, new File(".").getAbsolutePath())) {
+						IRScoreData score = readScoreData(sd.getHash(), config.getLnmode());
+						if(score == null) {
+							clear = 0;
+							break;
+						} else {
+							if(score.getClear() < clear){
+								clear = score.getClear();
+							}
+						}
+					}
+					if(clear != 0 && clear != 255) {
+						IRScoreData dummyscore = new IRScoreData();
+						dummyscore.setClear(clear);
+						cfolder.setScore(dummyscore);
+					}
+
 				}
 			} else {
 				for (SongData song : songs) {
@@ -790,6 +842,25 @@ public class MusicSelector extends ApplicationAdapter {
 		if (bar instanceof TableBar) {
 			l.addAll((Arrays.asList(((TableBar) bar).getLevels())));
 			l.addAll((Arrays.asList(((TableBar) bar).getGrades())));
+			for(TableLevelBar levelbar : ((TableBar) bar).getLevels()) {
+				int clear = 255;
+				for (String hash : ((TableLevelBar) levelbar).getHashes()) {
+						IRScoreData score = readScoreData(hash, config.getLnmode());
+						if(score == null) {
+							clear = 0;
+							break;
+						} else {
+							if(score.getClear() < clear){
+								clear = score.getClear();
+							}
+						}
+				}
+				if(clear != 0 && clear != 255) {
+					IRScoreData dummyscore = new IRScoreData();
+					dummyscore.setClear(clear);
+					levelbar.setScore(dummyscore);
+				}
+			}
 		}
 		if (bar instanceof TableLevelBar) {
 			List<SongBar> songbars = new ArrayList<SongBar>();
@@ -852,8 +923,7 @@ public class MusicSelector extends ApplicationAdapter {
 			for (int i = 0; i < currentsongs.length; i++) {
 				if (currentsongs[i] instanceof SongBar) {
 					SongData sd = ((SongBar) currentsongs[i]).getSongData();
-					currentsongs[i].setScore(main.getPlayDataAccessor().readScoreData(sd.getHash(),
-							sd.getLongnote() == 1, config.getLnmode()));
+					currentsongs[i].setScore(readScoreData(sd.getHash(),config.getLnmode()));
 					if (currentsongs[i].getScore() != null && config.getLnmode() == 2
 							&& ((SongBar) currentsongs[i]).getSongData().getLongnote() == 1) {
 						currentsongs[i].getScore().setClear(currentsongs[i].getScore().getExclear());
