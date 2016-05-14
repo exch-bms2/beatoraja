@@ -9,7 +9,6 @@ import bms.model.Note;
 import bms.model.TimeLine;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.gauge.GrooveGauge;
-import bms.player.lunaticrave2.IRScoreData;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -155,7 +154,7 @@ public class MusicResult extends ApplicationAdapter {
         Gdx.gl.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         shape.begin(ShapeType.Filled);
         shape.setColor(0, 0, 0, 0.8f);
-        shape.rect(80, 100, 1120, 350);
+        shape.rect(80, 70, 1120, 380);
         shape.end();
         Gdx.gl.glDisable(GL11.GL_BLEND);
 
@@ -205,11 +204,14 @@ public class MusicResult extends ApplicationAdapter {
                 titlefont.draw(sprite, String.valueOf(score.getMinbp()), 440, 340);
             }
 
-            titlefont.draw(sprite, "PGREAT : " + score.getPg(), 100, 250);
-            titlefont.draw(sprite, "GREAT  : " + score.getGr(), 100, 220);
-            titlefont.draw(sprite, "GOOD   : " + score.getGd(), 100, 190);
-            titlefont.draw(sprite, "BAD    : " + score.getBd(), 100, 160);
-            titlefont.draw(sprite, "POOR : " + score.getPr(), 100, 130);
+            titlefont.draw(sprite, String.format("PGREAT : %4d ( %4d / %4d )", score.getPg(), score.getFpg(), score.getSpg()), 100, 280);
+            titlefont.draw(sprite, String.format("GREAT  : %4d ( %4d / %4d )", score.getGr(), score.getFgr(), score.getSgr()), 100, 250);
+            titlefont.draw(sprite, String.format("GOOD   : %4d ( %4d / %4d )", score.getGd(), score.getFgd(), score.getSgd()), 100, 220);
+            titlefont.draw(sprite, String.format("GBAD   : %4d ( %4d / %4d )", score.getBd(), score.getFbd(), score.getSbd()), 100, 190);
+            titlefont.draw(sprite, String.format("POOR   : %4d ( %4d / %4d )", score.getPr(), score.getFpr(), score.getSpr()), 100, 160);
+            titlefont.draw(sprite, String.format("MISS   : %4d ( %4d / %4d )", score.getFms() + score.getSms(), score.getFms(), score.getSms()), 100, 130);
+            titlefont.draw(sprite, String.format("FAST / SLOW  :  %4d / %4d", score.getFgr() + score.getFgd() + score.getFbd() + score.getFpr() + score.getFms()
+                    , score.getSgr() + score.getSgd() + score.getSbd() + score.getSpr() + score.getSms()), 100, 100);
         }
         sprite.end();
 

@@ -12,11 +12,14 @@ import bms.player.beatoraja.play.PlaySkin;
  */
 public class NormalGrooveGauge extends GrooveGauge {
 
+	private boolean ispms = false;
+
 	public NormalGrooveGauge(BMSModel model) {
 		if(model.getUseKeys() == 9) {
-			init(2,100, 25, 66.7f, CLEARTYPE_NORMAL,new float[] { (float) (model.getTotal() / model.getTotalNotes()),
+			init(2,100, 25, 66.6f, CLEARTYPE_NORMAL,new float[] { (float) (model.getTotal() / model.getTotalNotes()),
 					(float) (model.getTotal() / model.getTotalNotes()), (float) (model.getTotal() / model.getTotalNotes()) / 2,
-					-1.6f, -5.0f, -5.0f })	;			
+					-1.6f, -5.0f, -5.0f })	;
+			ispms = true;
 		} else {
 			init(2,100, 20, 80, CLEARTYPE_NORMAL,new float[] { (float) (model.getTotal() / model.getTotalNotes()),
 					(float) (model.getTotal() / model.getTotalNotes()), (float) (model.getTotal() / model.getTotalNotes()) / 2,
@@ -27,13 +30,17 @@ public class NormalGrooveGauge extends GrooveGauge {
 	@Override
 	public void draw(PlaySkin skin, SpriteBatch sprite, float x, float y, float w, float h) {
 		sprite.begin();
-		for(int i = 2; i <= 100 && i <= getValue(); i+=2) {
-			if (i < 80) {
-				sprite.draw(skin.getGauge()[0], x + w * (i - 2) / 100,
-						y, w / 50, h);
-			} else {
-				sprite.draw(skin.getGauge()[1], x + w * (i - 2) / 100,
-						y, w / 50, h);
+		final int count = ispms ? 24 : 50;
+		for(int i = 1; i <= count; i++) {
+			final float border = i * 100f / count;
+			if(getValue() >= border) {
+				if (border < getBorder()) {
+					sprite.draw(skin.getGauge()[0], x + w * (i - 1) / count,
+							y, w / count, h);
+				} else {
+					sprite.draw(skin.getGauge()[1], x + w * (i - 1) / count,
+							y, w / count, h);
+				}
 			}
 		}
 		sprite.end();

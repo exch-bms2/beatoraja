@@ -7,10 +7,7 @@ import java.util.logging.Logger;
 import org.lwjgl.opengl.GL11;
 
 import bms.model.*;
-import bms.player.beatoraja.Config;
-import bms.player.beatoraja.MainController;
-import bms.player.beatoraja.PlayerResource;
-import bms.player.beatoraja.ReplayData;
+import bms.player.beatoraja.*;
 import bms.player.beatoraja.audio.AudioProcessor;
 import bms.player.beatoraja.bga.BGAProcessor;
 import bms.player.beatoraja.gauge.*;
@@ -20,7 +17,6 @@ import bms.player.beatoraja.pattern.*;
 import bms.player.beatoraja.skin.LR2PlaySkinLoader;
 import bms.player.beatoraja.skin.SkinNumber;
 import bms.player.beatoraja.skin.SkinImage;
-import bms.player.lunaticrave2.IRScoreData;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -415,11 +411,10 @@ public class BMSPlayer extends ApplicationAdapter {
 			shape.begin(ShapeType.Filled);
 			shape.setColor(Color.YELLOW);
 			shape.rect(
-					skin.getLaneregion()[7].getX(),
-					skin.getLaneregion()[7].getY() + skin.getLaneregion()[7].getHeight() / 2f,
+					skin.getJudgeregion()[0].x,
+					skin.getJudgeregion()[0].y + 200,
 					(audio.getProgress() + bga.getProgress())
-							* (skin.getLaneregion()[6].getX() + skin.getLaneregion()[6].getWidth() - skin
-									.getLaneregion()[7].getX()) / 2, 4);
+							* (skin.getJudgeregion()[0].width) / 2, 4);
 			shape.end();
 
 			if (resource.mediaLoadFinished() && !input.startPressed()) {
@@ -434,8 +429,8 @@ public class BMSPlayer extends ApplicationAdapter {
 			renderMain(0);
 			sprite.begin();
 			systemfont.setColor(Color.WHITE);
-			systemfont.draw(sprite, "GET READY", skin.getLaneregion()[7].getX() + 140, skin.getLaneregion()[7].getY()
-					+ skin.getLaneregion()[7].getHeight() / 2f);
+			systemfont.draw(sprite, "GET READY", skin.getJudgeregion()[0].x + skin.getJudgeregion()[0].width / 2 - 35,
+					skin.getJudgeregion()[0].y + 200);
 			sprite.end();
 			if (time > 1000) {
 				state = STATE_PLAY;
@@ -622,11 +617,19 @@ public class BMSPlayer extends ApplicationAdapter {
 		resource.getReplayData().random = model.getSelectedIndexOfTimeLines();
 		resource.getReplayData().gauge = resource.getConfig().getGauge();
 
-		score.setPg(pgreat);
-		score.setGr(great);
-		score.setGd(good);
-		score.setBd(bad);
-		score.setPr(poor + miss);
+		score.setFpg(judge.getJudgeCount(0,true));
+		score.setSpg(judge.getJudgeCount(0,false));
+		score.setFgr(judge.getJudgeCount(1,true));
+		score.setSgr(judge.getJudgeCount(1,false));
+		score.setFgd(judge.getJudgeCount(2,true));
+		score.setSgd(judge.getJudgeCount(2,false));
+		score.setFbd(judge.getJudgeCount(3,true));
+		score.setSbd(judge.getJudgeCount(3,false));
+		score.setFpr(judge.getJudgeCount(4,true));
+		score.setSpr(judge.getJudgeCount(4,false));
+		score.setFms(judge.getJudgeCount(5,true));
+		score.setSms(judge.getJudgeCount(5,false));
+
 		final int misscount = bad + poor + miss + totalnotes - notes;
 		score.setMinbp(misscount);
 		return score;
@@ -727,10 +730,10 @@ public class BMSPlayer extends ApplicationAdapter {
 			sprite.begin();
 			sprite.draw(bga.getBackbmpData(), r.x, r.y, r.width, r.height);
 			sprite.end();
-		} else if (misslayer != null && judge.getMisslayer() != 0 && time >= judge.getMisslayer()
-				&& time < judge.getMisslayer() + 500) {
+		} else if (misslayer != null && misslayertime != 0 && time >= misslayertime
+				&& time < misslayertime + 500) {
 			// draw miss layer
-			Texture miss = bga.getBGAData(misslayer[misslayer.length * (time - judge.getMisslayer()) / 500]);
+			Texture miss = bga.getBGAData(misslayer[misslayer.length * (time - misslayertime) / 500]);
 			if (miss != null) {
 				sprite.begin();
 				sprite.draw(miss, r.x, r.y, r.width, r.height);
@@ -765,13 +768,14 @@ public class BMSPlayer extends ApplicationAdapter {
 
 		// ゲージ描画
 		Rectangle gr = skin.getGaugeRegion();
+		SkinNumber[] gaugecount = skin.getGaugeCount();
 		shape.begin(ShapeType.Filled);
 		shape.setColor(Color.valueOf("#001000"));
 		shape.rect(gr.x, gr.y, gr.width, gr.height);
-		shape.rect(gr.x + gr.width - 96, gr.y + gr.height, 96, 30);
+		Rectangle gcr0 = gaugecount[0].getDestination(time);
+		shape.rect(gcr0.x, gcr0.y - 2, gcr0.width * 4, gcr0.height + 4);
 		shape.end();
 		gauge.draw(skin, sprite, gr.x, gr.y, gr.width, gr.height);
-		SkinNumber[] gaugecount = skin.getGaugeCount();
 		sprite.begin();
 		gaugecount[0].draw(sprite, 0, (int) gauge.getValue());
 		gaugecount[1].draw(sprite, 0, (int) (gauge.getValue() * 10));
@@ -865,9 +869,14 @@ public class BMSPlayer extends ApplicationAdapter {
 
 	private int notes;
 
-	public void update(int judge) {
+	private int misslayertime;
+
+	public void update(int lane, int judge, int time, int fase) {
 		if (judge < 5) {
 			notes++;
+		}
+		if(judge == 3 || judge == 4) {
+			misslayertime = time;
 		}
 		gauge.update(judge);
 		// System.out.println(
