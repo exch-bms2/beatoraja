@@ -24,6 +24,8 @@ public class Config {
 	 * 解像度
 	 */
 	private int resolution;
+
+	private boolean folderlamp = true;
 	
 	/**
 	 * オーディオバッファサイズ。大きすぎると音声遅延が発生し、少なすぎるとノイズが発生する
@@ -522,5 +524,13 @@ public class Config {
 
 	public void setLr2decideskinoption(int[] lr2decideskinoption) {
 		this.lr2decideskinoption = lr2decideskinoption;
+	}
+
+	public boolean isFolderlamp() {
+		return folderlamp;
+	}
+
+	public void setFolderlamp(boolean folderlamp) {
+		this.folderlamp = folderlamp;
 	}
 }

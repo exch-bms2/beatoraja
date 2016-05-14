@@ -54,6 +54,8 @@ class FolderBar extends Bar {
 
 	private FolderData folder;
 	private String crc;
+	private int[] lamps = new int[11];
+	private int[] ranks = new int[0];
 
 	public FolderBar(FolderData folder, String crc) {
 		this.folder = folder;
@@ -71,6 +73,22 @@ class FolderBar extends Bar {
 	@Override
 	public String getTitle() {
 		return folder.getTitle();
+	}
+
+	public int[] getLamps() {
+		return lamps;
+	}
+
+	public void setLamps(int[] lamps) {
+		this.lamps = lamps;
+	}
+
+	public int[] getRanks() {
+		return ranks;
+	}
+
+	public void setRanks(int[] ranks) {
+		this.ranks = ranks;
 	}
 }
 
@@ -104,6 +122,8 @@ class TableBar extends Bar {
 class TableLevelBar extends Bar {
 	private String level;
 	private String[] hashes;
+	private int[] lamps = new int[11];
+	private int[] ranks = new int[0];
 
 	public TableLevelBar(String level, String[] hashes) {
 		this.level = level;
@@ -117,6 +137,22 @@ class TableLevelBar extends Bar {
 
 	public String[] getHashes() {
 		return hashes;
+	}
+
+	public int[] getLamps() {
+		return lamps;
+	}
+
+	public void setLamps(int[] lamps) {
+		this.lamps = lamps;
+	}
+
+	public int[] getRanks() {
+		return ranks;
+	}
+
+	public void setRanks(int[] ranks) {
+		this.ranks = ranks;
 	}
 }
 
