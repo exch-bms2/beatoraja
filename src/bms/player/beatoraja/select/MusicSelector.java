@@ -83,9 +83,14 @@ public class MusicSelector extends ApplicationAdapter {
 			"CLEAR", "HARD CLEAR", "EX-HARD CLEAR", "FULL COMBO", "PERFECT", "MAX" };
 
 	private static final String[] RANK = { "F-", "F-", "F", "F", "F+", "F+", "E-", "E", "E+", "D-", "D", "D+", "C-",
-			"C", "C+", "B-", "B", "B+", "A-", "A", "A+", "AA-", "AA", "AA+", "AAA-", "AAA", "AAA+" };
+			"C", "C+", "B-", "B", "B+", "A-", "A", "A+", "AA-", "AA", "AA+", "AAA-", "AAA", "AAA+", "MAX" };
 
-	private static final String[] LNMODE = { "LONG NOTE", "CHARGE NOTE", "HELL CHARGE NOTE" };
+    private static final String[] RANKCOLOR = { "404040", "400040", "400040", "400040", "400040", "400040",
+            "000040", "000040", "000040", "004040", "004040", "004040", "00c000",
+            "00c000", "00c000", "80c000", "80c000", "80c000", "f08000", "f08000", "f08000", "e0e0e0", "e0e0e0", "e0e0e0",
+            "ffff44", "ffff44", "ffff44", "ffffcc" };
+
+    private static final String[] LNMODE = { "LONG NOTE", "CHARGE NOTE", "HELL CHARGE NOTE" };
 
 	private Config config;
 
@@ -590,6 +595,7 @@ public class MusicSelector extends ApplicationAdapter {
         	titlefont.draw(sprite, currentsongs[selectedindex].getTitle(), 100, 600);
         }
 
+        titlefont.setColor(Color.WHITE);
         titlefont.draw(sprite, "PLAYCOUNT : " + playerdata.getPlaycount() + " NOTESCOUNT : "
 		+ (playerdata.getPerfect() + playerdata.getGreat() + playerdata.getGood() + playerdata.getBad()), 20, 120);
 
@@ -598,19 +604,27 @@ public class MusicSelector extends ApplicationAdapter {
             titlefont.draw(sprite, currentsongs[selectedindex].getTitle(), 100, 600);
             if(config.isFolderlamp()) {
                 int[] lamps = ((FolderBar) currentsongs[selectedindex]).getLamps();
+                int[] ranks = ((FolderBar) currentsongs[selectedindex]).getRanks();
                 int count = 0;
                 for (int lamp : lamps) {
                     count += lamp;
                 }
                 titlefont.draw(sprite, "TOTAL SONGS : " + count, 100, 500);
+                titlefont.draw(sprite, "LAMP:", 36, 386);
+                titlefont.draw(sprite, "RANK:", 36, 346);
                 sprite.end();
                 shape.begin(ShapeType.Filled);
 
                 if (count != 0) {
                     for (int i = 10, x = 0; i >= 0; i--) {
                         shape.setColor(Color.valueOf(LAMP[i]));
-                        shape.rect(100 + x * 400 / count, 200, lamps[i] * 400 / count, 30);
+                        shape.rect(100 + x * 400 / count, 360, lamps[i] * 400 / count, 30);
                         x += lamps[i];
+                    }
+                    for (int i = 27, x = 0; i >= 0; i--) {
+                        shape.setColor(Color.valueOf(RANKCOLOR[i]));
+                        shape.rect(100 + x * 400 / count, 320, ranks[i] * 400 / count, 30);
+                        x += ranks[i];
                     }
                 }
                 shape.end();
@@ -626,19 +640,27 @@ public class MusicSelector extends ApplicationAdapter {
             titlefont.draw(sprite, currentsongs[selectedindex].getTitle(), 100, 600);
             if(config.isFolderlamp()) {
                 int[] lamps = ((TableLevelBar) currentsongs[selectedindex]).getLamps();
+                int[] ranks = ((TableLevelBar) currentsongs[selectedindex]).getRanks();
                 int count = 0;
                 for (int lamp : lamps) {
                     count += lamp;
                 }
                 titlefont.draw(sprite, "TOTAL SONGS : " + count, 100, 500);
+                titlefont.draw(sprite, "LAMP:", 36, 386);
+                titlefont.draw(sprite, "RANK:", 36, 346);
                 sprite.end();
                 shape.begin(ShapeType.Filled);
 
                 if (count != 0) {
                     for (int i = 10, x = 0; i >= 0; i--) {
                         shape.setColor(Color.valueOf(LAMP[i]));
-                        shape.rect(100 + x * 400 / count, 200, lamps[i] * 400 / count, 30);
+                        shape.rect(100 + x * 400 / count, 360, lamps[i] * 400 / count, 30);
                         x += lamps[i];
+                    }
+                    for (int i = 27, x = 0; i >= 0; i--) {
+                        shape.setColor(Color.valueOf(RANKCOLOR[i]));
+                        shape.rect(100 + x * 400 / count, 320, ranks[i] * 400 / count, 30);
+                        x += ranks[i];
                     }
                 }
                 shape.end();
@@ -875,16 +897,23 @@ public class MusicSelector extends ApplicationAdapter {
                     if (config.isFolderlamp()) {
                         int clear = 255;
                         int[] clears = new int[11];
+                        int[] ranks = new int[28];
                         for (SongData sd : songdb.getSongDatas("parent", ccrc, new File(".").getAbsolutePath())) {
                             IRScoreData score = readScoreData(sd.getHash(), config.getLnmode());
                             if (score != null) {
                                 clears[score.getClear()]++;
+                                if(score.getNotes() != 0) {
+                                    ranks[(score.getExscore() * 27 / (score.getNotes() * 2))]++;
+                                } else {
+                                    ranks[0]++;
+                                }
                                 if (score.getClear() < clear) {
                                     clear = score.getClear();
                                 }
                             }
                         }
                         cfolder.setLamps(clears);
+                        cfolder.setRanks(ranks);
                         if (clear != 0 && clear != 255) {
                             IRScoreData dummyscore = new IRScoreData();
                             dummyscore.setClear(clear);
@@ -905,16 +934,23 @@ public class MusicSelector extends ApplicationAdapter {
                 for (TableLevelBar levelbar : ((TableBar) bar).getLevels()) {
                     int clear = 255;
                     int[] clears = new int[11];
+                    int[] ranks = new int[28];
                     for (String hash : ((TableLevelBar) levelbar).getHashes()) {
                         IRScoreData score = readScoreData(hash, config.getLnmode());
                         if (score != null) {
                             clears[score.getClear()]++;
+                            if(score.getNotes() != 0) {
+                                ranks[(score.getExscore() * 27 / (score.getNotes() * 2))]++;
+                            } else {
+                                ranks[0]++;
+                            }
                             if (score.getClear() < clear) {
                                 clear = score.getClear();
                             }
                         }
                     }
                     levelbar.setLamps(clears);
+                    levelbar.setRanks(ranks);
                     if (clear != 0 && clear != 255) {
                         IRScoreData dummyscore = new IRScoreData();
                         dummyscore.setClear(clear);
