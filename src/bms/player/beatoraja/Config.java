@@ -23,8 +23,11 @@ public class Config {
 	/**
 	 * 解像度
 	 */
-	private int resolution;
-
+	private int resolution = 1;
+	
+	/**
+	 * フォルダランプの有効/無効
+	 */
 	private boolean folderlamp = true;
 	
 	/**
@@ -164,32 +167,38 @@ public class Config {
 	
 	private String vlcpath = "";
 	
-	private int[] keyassign7 = {
-			Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.F, Keys.V,
-			Keys.SHIFT_LEFT, Keys.CONTROL_LEFT, Keys.COMMA, Keys.L,
-			Keys.PERIOD, Keys.SEMICOLON, Keys.SLASH, Keys.APOSTROPHE,
-			Keys.UNKNOWN, Keys.SHIFT_RIGHT, Keys.CONTROL_RIGHT, Keys.Q,
-			Keys.W };
-	
-	private int[] controllerasign = {
+	private PlayConfig mode7 = new PlayConfig(new int[]{
+		Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.F, Keys.V,
+		Keys.SHIFT_LEFT, Keys.CONTROL_LEFT, Keys.COMMA, Keys.L,
+		Keys.PERIOD, Keys.SEMICOLON, Keys.SLASH, Keys.APOSTROPHE,
+		Keys.UNKNOWN, Keys.SHIFT_RIGHT, Keys.CONTROL_RIGHT, Keys.Q,
+		Keys.W },  new int[]{
 			BMKeys.BUTTON_3, BMKeys.BUTTON_6, BMKeys.BUTTON_2,
 			BMKeys.BUTTON_7, BMKeys.BUTTON_1, BMKeys.BUTTON_4,
 			BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN, BMKeys.BUTTON_8,
-			BMKeys.BUTTON_9 };
+			BMKeys.BUTTON_9 });
 	
-	private int[] keyassign9 = {
-			Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.F, Keys.V,
-			Keys.G, Keys.B, Keys.COMMA, Keys.L,
-			Keys.PERIOD, Keys.SEMICOLON, Keys.SLASH, Keys.APOSTROPHE,
-			Keys.UNKNOWN, Keys.SHIFT_RIGHT, Keys.CONTROL_RIGHT, Keys.Q,
-			Keys.W };
+	private PlayConfig mode14 = new PlayConfig(new int[]{
+		Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.F, Keys.V,
+		Keys.SHIFT_LEFT, Keys.CONTROL_LEFT, Keys.COMMA, Keys.L,
+		Keys.PERIOD, Keys.SEMICOLON, Keys.SLASH, Keys.APOSTROPHE,
+		Keys.UNKNOWN, Keys.SHIFT_RIGHT, Keys.CONTROL_RIGHT, Keys.Q,
+		Keys.W },  new int[]{
+			BMKeys.BUTTON_3, BMKeys.BUTTON_6, BMKeys.BUTTON_2,
+			BMKeys.BUTTON_7, BMKeys.BUTTON_1, BMKeys.BUTTON_4,
+			BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN, BMKeys.BUTTON_8,
+			BMKeys.BUTTON_9 });
 	
-	private int[] keyassign14 = {
-			Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.F, Keys.V,
-			Keys.SHIFT_LEFT, Keys.CONTROL_LEFT, Keys.COMMA, Keys.L,
-			Keys.PERIOD, Keys.SEMICOLON, Keys.SLASH, Keys.APOSTROPHE,
-			Keys.UNKNOWN, Keys.SHIFT_RIGHT, Keys.CONTROL_RIGHT, Keys.Q,
-			Keys.W };
+	private PlayConfig mode9 = new PlayConfig(new int[]{
+		Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.F, Keys.V,
+		Keys.G, Keys.B, Keys.COMMA, Keys.L,
+		Keys.PERIOD, Keys.SEMICOLON, Keys.SLASH, Keys.APOSTROPHE,
+		Keys.UNKNOWN, Keys.SHIFT_RIGHT, Keys.CONTROL_RIGHT, Keys.Q,
+		Keys.W },  new int[]{
+			BMKeys.BUTTON_3, BMKeys.BUTTON_6, BMKeys.BUTTON_2,
+			BMKeys.BUTTON_7, BMKeys.BUTTON_1, BMKeys.BUTTON_4,
+			BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN, BMKeys.BUTTON_8,
+			BMKeys.BUTTON_9 });	
 	
 	public Config() {
 //		lr2playskin = "skin/spdframe/csv/left_ACwide.csv";
@@ -406,30 +415,6 @@ public class Config {
 		this.expandjudge = expandjudge;
 	}
 
-	public int[] getKeyassign7() {
-		return keyassign7;
-	}
-
-	public void setKeyassign7(int[] keyassign7) {
-		this.keyassign7 = keyassign7;
-	}
-
-	public int[] getKeyassign9() {
-		return keyassign9;
-	}
-
-	public void setKeyassign9(int[] keyassign9) {
-		this.keyassign9 = keyassign9;
-	}
-
-	public int[] getKeyassign14() {
-		return keyassign14;
-	}
-
-	public void setKeyassign14(int[] keyassign14) {
-		this.keyassign14 = keyassign14;
-	}
-
 	public int getRandom2() {
 		return random2;
 	}
@@ -452,14 +437,6 @@ public class Config {
 
 	public void setNomine(boolean nomine) {
 		this.nomine = nomine;
-	}
-
-	public int[] getControllerasign() {
-		return controllerasign;
-	}
-
-	public void setControllerasign(int[] controllerasign) {
-		this.controllerasign = controllerasign;
 	}
 
 	public boolean isLegacynote() {
@@ -532,5 +509,37 @@ public class Config {
 
 	public void setFolderlamp(boolean folderlamp) {
 		this.folderlamp = folderlamp;
+	}
+
+	public PlayConfig getMode7() {
+		return mode7;
+	}
+
+	public void setMode7(PlayConfig mode7) {
+		this.mode7 = mode7;
+	}
+
+	public PlayConfig getMode14() {
+		return mode14;
+	}
+
+	public void setMode14(PlayConfig mode14) {
+		this.mode14 = mode14;
+	}
+
+	public PlayConfig getMode9() {
+		return mode9;
+	}
+
+	public void setMode9(PlayConfig mode9) {
+		this.mode9 = mode9;
+	}
+
+	public int getResolution() {
+		return resolution;
+	}
+
+	public void setResolution(int resolution) {
+		this.resolution = resolution;
 	}
 }
