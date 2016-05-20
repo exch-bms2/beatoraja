@@ -601,18 +601,23 @@ public class LunaticRave2SongDatabaseManager {
 				model = decoder.decode(dir);
 			}
 
-			if (model != null) {
+			String sql = "delete from song where path = ?";
+			String s = dir.getAbsolutePath();
+			if (s.startsWith(path)) {
+				s = s.substring(path.length() + 1);
+			}
+			qr.update(conn, sql, s);
+			
+			if (model != null && (model.getTotalNotes() != 0 || model.getWavList().length != 0)) {
 				// TODO LR2ではDIFFICULTY未定義の場合に同梱譜面を見て振り分けている
 				if (model.getDifficulty() == 0) {
-					model.setDifficulty(5);
+					try {
+						int level = (Integer.parseInt(model.getPlaylevel()) - 1) / 3 + 1;
+						model.setDifficulty(level <= 5 ? level : 5);
+					} catch(NumberFormatException e) {
+						model.setDifficulty(5);						
+					}
 				}
-
-				String sql = "delete from song where path = ?";
-				String s = dir.getAbsolutePath();
-				if (s.startsWith(path)) {
-					s = s.substring(path.length() + 1);
-				}
-				qr.update(conn, sql, s);
 				// TODO txtファイルの有無の判定とrecordへの反映
 				sql = "insert into song " + "(hash, title, subtitle, genre, artist, subartist, tag, path, type, "
 						+ "folder, stagefile, banner, backbmp, parent, level, difficulty, "

@@ -97,6 +97,10 @@ public class PlayConfigurationView implements Initializable {
 	private ComboBox<Integer> judgealgorithm;
 
 	private Config config;;
+	@FXML
+	private CheckBox folderlamp;
+	@FXML
+	private ComboBox<Integer> judgedetail;
 
 	private static final String[] SCOREOP = { "OFF", "MIRROR", "RANDOM", "R-RANDOM", "S-RANDOM", "SPIRAL", "H-RANDOM",
 			"ALL-SCR", "RANDOM-EX", "S-RANDOM-EX" };
@@ -110,6 +114,8 @@ public class PlayConfigurationView implements Initializable {
 	private static final String[] FIXHISPEEDOP = { "OFF", "START BPM", "MAX BPM", "MAIN BPM" };
 
 	private static final String[] JUDGEALGORITHM = { "LR2風", "本家風", "最下ノーツ最優先" };
+
+	private static final String[] JUDGEDETAIL = { "なし", "FAST/SLOW", "±ms" };
 
 	public void initialize(URL arg0, ResourceBundle arg1) {
 		lr2configuration.setHgap(25);
@@ -151,7 +157,20 @@ public class PlayConfigurationView implements Initializable {
 		lntype.setButtonCell(new OptionListCell(LNTYPE));
 		lntype.getItems().setAll(0, 1, 2);
 		judgealgorithm.setButtonCell(new OptionListCell(JUDGEALGORITHM));
+		judgealgorithm.setCellFactory(new Callback<ListView<Integer>, ListCell<Integer>>() {
+			public ListCell<Integer> call(ListView<Integer> param) {
+				return new OptionListCell(JUDGEALGORITHM);
+			}
+		});
 		judgealgorithm.getItems().setAll(0, 1, 2);
+		judgedetail.setCellFactory(new Callback<ListView<Integer>, ListCell<Integer>>() {
+			public ListCell<Integer> call(ListView<Integer> param) {
+				return new OptionListCell(JUDGEDETAIL);
+			}
+		});
+		judgedetail.setButtonCell(new OptionListCell(JUDGEDETAIL));
+		judgedetail.getItems().setAll(0, 1, 2);
+
 	}
 
 	/**
@@ -189,6 +208,9 @@ public class PlayConfigurationView implements Initializable {
 		audiosim.getValueFactory().setValue(config.getAudioDeviceSimultaneousSources());
 
 		judgealgorithm.setValue(config.getJudgeAlgorithm());
+		
+		folderlamp.setSelected(config.isFolderlamp());
+		judgedetail.setValue(config.getJudgedetail());
 	}
 
 	/**
@@ -224,6 +246,9 @@ public class PlayConfigurationView implements Initializable {
 		config.setAudioDeviceSimultaneousSources(audiosim.getValue());
 
 		config.setJudgeAlgorithm(judgealgorithm.getValue());
+		
+		config.setFolderlamp(folderlamp.isSelected());
+		config.setJudgedetail(judgedetail.getValue());
 
 		Json json = new Json();
 		json.setOutputType(OutputType.json);

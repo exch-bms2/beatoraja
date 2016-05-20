@@ -38,8 +38,12 @@ public class GradeResult extends ApplicationAdapter {
 
 	private long time = 0;
 
+    private MusicResultSkin skin;
+
 	public GradeResult(MainController main) {
 		this.main = main;
+		
+        skin = new MusicResultSkin();
 	}
 
 	public void create(PlayerResource resource) {
@@ -104,11 +108,35 @@ public class GradeResult extends ApplicationAdapter {
 				titlefont.draw(sprite, String.valueOf(score.getMinbp()), 440, 340);
 			}
 
-			titlefont.draw(sprite, "PGREAT : " + score.getPg(), 100, 250);
-			titlefont.draw(sprite, "GREAT  : " + score.getGr(), 100, 220);
-			titlefont.draw(sprite, "GOOD   : " + score.getGd(), 100, 190);
-			titlefont.draw(sprite, "BAD    : " + score.getBd(), 100, 160);
-			titlefont.draw(sprite, "POOR : " + score.getPr(), 100, 130);
+            titlefont.draw(sprite, "PGREAT : ", 100, 280);
+            titlefont.draw(sprite, "GREAT  : ", 100, 250);
+            titlefont.draw(sprite, "GOOD   : ", 100, 220);
+            titlefont.draw(sprite, "BAD    : ",  100, 190);
+            titlefont.draw(sprite, "POOR   : ", 100, 160);
+            titlefont.draw(sprite, "MISS   : ", 100, 130);
+            titlefont.draw(sprite, "FAST / SLOW  :  ", 100, 100);
+            
+    		skin.getJudgeCount(0, 0).draw(sprite, time, score.getPg());
+    		skin.getJudgeCount(0, 1).draw(sprite, time, score.getFpg());
+    		skin.getJudgeCount(0, 2).draw(sprite, time, score.getSpg());
+    		skin.getJudgeCount(1, 0).draw(sprite, time, score.getGr());
+    		skin.getJudgeCount(1, 1).draw(sprite, time, score.getFgr());
+    		skin.getJudgeCount(1, 2).draw(sprite, time, score.getSgr());
+    		skin.getJudgeCount(2, 0).draw(sprite, time, score.getGd());
+    		skin.getJudgeCount(2, 1).draw(sprite, time, score.getFgd());
+    		skin.getJudgeCount(2, 2).draw(sprite, time, score.getSgd());
+    		skin.getJudgeCount(3, 0).draw(sprite, time, score.getBd());
+    		skin.getJudgeCount(3, 1).draw(sprite, time, score.getFbd());
+    		skin.getJudgeCount(3, 2).draw(sprite, time, score.getSbd());
+    		skin.getJudgeCount(4, 0).draw(sprite, time, score.getFpr() + score.getSpr());
+    		skin.getJudgeCount(4, 1).draw(sprite, time, score.getFpr());
+    		skin.getJudgeCount(4, 2).draw(sprite, time, score.getSpr());
+    		skin.getJudgeCount(5, 0).draw(sprite, time, score.getFms() + score.getSms());
+    		skin.getJudgeCount(5, 1).draw(sprite, time, score.getFms());
+    		skin.getJudgeCount(5, 2).draw(sprite, time, score.getSms());
+    		
+    		skin.getJudgeCount(true).draw(sprite, time, score.getFgr() + score.getFgd() + score.getFbd() + score.getFpr() + score.getFms());
+    		skin.getJudgeCount(false).draw(sprite, time, score.getSgr() + score.getSgd() + score.getSbd() + score.getSpr() + score.getSms());
 			sprite.end();
 		}
 		boolean[] keystate = main.getInputProcessor().getKeystate();

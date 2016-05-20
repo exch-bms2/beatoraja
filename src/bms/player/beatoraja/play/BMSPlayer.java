@@ -319,9 +319,10 @@ public class BMSPlayer extends ApplicationAdapter {
 
 		input = main.getInputProcessor();
 		input.setEnableKeyInput(autoplay == 0);
-		input.setKeyassign(model.getUseKeys() == 5 || model.getUseKeys() == 7 ? config.getKeyassign7() : (model
-				.getUseKeys() == 10 || model.getUseKeys() == 14 ? config.getKeyassign14() : config.getKeyassign9()));
-		input.setControllerassign(config.getControllerasign());
+		PlayConfig pc = (model.getUseKeys() == 5 || model.getUseKeys() == 7 ? config.getMode7() : (model
+				.getUseKeys() == 10 || model.getUseKeys() == 14 ? config.getMode14() : config.getMode9()));
+		input.setKeyassign(pc.getKeyassign());
+		input.setControllerassign(pc.getControllerassign());
 		lanerender = new LaneRenderer(this, sprite, skin, resource, model);
 		Logger.getGlobal().info("描画クラス準備");
 
@@ -908,7 +909,7 @@ public class BMSPlayer extends ApplicationAdapter {
 						if (note instanceof LongNote) {
 							if (((LongNote) note).getEnd() == tl) {
 								keylog.add(new KeyInputLog(i, lane, false));
-								if (sc && (lane == 7 || lane == 16)) {
+								if (model.getLntype() != 0 && sc && (lane == 7 || lane == 16)) {
 									// BSS処理
 									keylog.add(new KeyInputLog(i, lane + 1, true));
 								}

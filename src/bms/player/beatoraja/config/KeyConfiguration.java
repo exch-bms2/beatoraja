@@ -74,9 +74,10 @@ public class KeyConfiguration extends ApplicationAdapter {
 		String[] keys = KEYS[mode];
 		int[] keysa = KEYSA[mode];
 		int[] bmkeysa = BMKEYSA[mode];
-		int[] keyassign = (mode == 0 ? config.getKeyassign7() : (mode == 1 ? config.getKeyassign9() : config
-				.getKeyassign14()));
-		int[] bmkeyassign = config.getControllerasign();
+		PlayConfig pc = (mode == 0 ? config.getMode7() : (mode == 1 ? config.getMode9() : config
+				.getMode14()));
+		int[] keyassign = pc.getKeyassign();
+		int[] bmkeyassign = pc.getControllerassign();
 
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);

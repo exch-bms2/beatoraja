@@ -24,7 +24,7 @@
                                     <ComboBox fx:id="bgaop" prefWidth="150.0" />
                                  </children>
                               </HBox>
-                              <HBox alignment="CENTER_LEFT" prefHeight="9.0" prefWidth="552.0" />
+                              <CheckBox fx:id="folderlamp" mnemonicParsing="false" prefHeight="25.0" prefWidth="133.0" text="フォルダランプ" />
                            </children>
                         </VBox>
                      </children>
@@ -97,6 +97,7 @@
                               <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
                               <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
                               <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
+                              <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
                   			</rowConstraints>
                            <children>
                   				<Label prefHeight="18.0" prefWidth="78.0" text="HI-SPEED" />
@@ -141,6 +142,8 @@
               <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" max="99" min="-99" value="0" />
             </valueFactory>
           </Spinner>
+                              <Label text="判定詳細表示" GridPane.rowIndex="6" />
+                              <ComboBox fx:id="judgedetail" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="6" />
                            </children>
                         </GridPane>
                   	</children>

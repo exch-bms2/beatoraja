@@ -1,5 +1,6 @@
 package bms.player.beatoraja;
 
+import java.awt.Rectangle;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -24,19 +25,13 @@ import bms.player.lunaticrave2.*;
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.backends.lwjgl.*;
 import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.PixmapIO;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.utils.BufferUtils;
-import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.*;
 import com.badlogic.gdx.utils.JsonWriter.OutputType;
-import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.utils.SerializationException;
 
 public class MainController extends ApplicationAdapter {
 
@@ -74,6 +69,8 @@ public class MainController extends ApplicationAdapter {
 	 * プレイデータアクセサ
 	 */
 	private PlayDataAccessor playdata;
+
+	public static final Rectangle[] RESOLUTION = {new Rectangle(640, 480),new Rectangle(1280, 720),new Rectangle(1920, 1280),new Rectangle(3840, 2560)};
 
 	public MainController(File f, Config config, int auto) {
 		this.auto = auto;
@@ -310,8 +307,8 @@ public class MainController extends ApplicationAdapter {
 		try {
 			MainController player = new MainController(f, config, auto);
 			LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
-			cfg.width = 1280;
-			cfg.height = 720;
+			cfg.width = RESOLUTION[config.getResolution()].width;
+			cfg.height = RESOLUTION[config.getResolution()].height;
 
 			// fullscreen
 			cfg.fullscreen = config.isFullscreen();
@@ -370,7 +367,7 @@ public class MainController extends ApplicationAdapter {
 				Json json = new Json();
 				try {
 					config = json.fromJson(Config.class, new FileReader("config.json"));
-				} catch (FileNotFoundException e) {
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			} else {
