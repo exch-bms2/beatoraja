@@ -132,7 +132,7 @@ public class PlaySkin extends Skin {
 
 		for (int i = 0; i < judgecount.length; i++) {
 			for (int j = 0; j < judgecount[i].length; j++) {
-				judgecount[i][j] = new SkinNumber(ntr[0], 0, 4, 2);
+				judgecount[i][j] = new SkinNumber(ntr[j + 1], 0, 4, 2);
 			}
 		}
 		Texture lct = new Texture("skin/lanecover.png");

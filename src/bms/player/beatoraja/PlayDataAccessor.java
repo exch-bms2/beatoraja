@@ -152,6 +152,9 @@ public class PlayDataAccessor {
 		if (score.getMinbp() > newscore.getMinbp() && updateScore) {
 			score.setMinbp(newscore.getMinbp());
 		}
+		if (score.getCombo() < newscore.getCombo() && updateScore) {
+			score.setCombo(newscore.getCombo());
+		}
 		score.setPlaycount(score.getPlaycount() + 1);
 		score.setLastupdate(Calendar.getInstance(TimeZone.getDefault()).getTimeInMillis() / 1000L);
 		scoredb.setScoreData(player, score);

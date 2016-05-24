@@ -588,6 +588,7 @@ public class BMSPlayer extends ApplicationAdapter {
 		IRScoreData score = new IRScoreData();
 		score.setHash(model.getHash());
 		score.setNotes(model.getTotalNotes());
+		score.setCombo(judge.getMaxcombo());
 		int clear = GrooveGauge.CLEARTYPE_FAILED;
 		if (state != STATE_FAILED && gauge.isQualified()) {
 			if (assist > 0) {
