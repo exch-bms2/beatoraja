@@ -1,6 +1,7 @@
 package bms.player.beatoraja.result;
 
 import java.io.File;
+import java.io.IOException;
 
 import org.lwjgl.opengl.GL11;
 
@@ -8,7 +9,12 @@ import bms.model.BMSModel;
 import bms.model.Note;
 import bms.model.TimeLine;
 import bms.player.beatoraja.*;
+import bms.player.beatoraja.decide.MusicDecideSkin;
 import bms.player.beatoraja.gauge.GrooveGauge;
+import bms.player.beatoraja.skin.LR2DecideSkinLoader;
+import bms.player.beatoraja.skin.LR2ResultSkinLoader;
+import bms.player.beatoraja.skin.SkinImage;
+import bms.player.beatoraja.skin.SkinObject;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -47,6 +53,7 @@ public class MusicResult extends ApplicationAdapter {
 	private int oldclear;
 	private int oldexscore;
 	private int oldmisscount;
+	private int oldcombo;
 
 	private Sound clear;
 	private Sound fail;
@@ -55,7 +62,7 @@ public class MusicResult extends ApplicationAdapter {
 
 	private DetailGraphRenderer detail;
 
-	private long time = 0;
+	private long starttime = 0;
 
 	public MusicResult(MainController main) {
 		this.main = main;
@@ -70,7 +77,7 @@ public class MusicResult extends ApplicationAdapter {
 				fail = Gdx.audio.newSound(Gdx.files.internal("skin/fail.wav"));
 			}
 		}
-		skin = new MusicResultSkin();
+		
 	}
 
 	public void create(PlayerResource resource) {
@@ -81,7 +88,7 @@ public class MusicResult extends ApplicationAdapter {
 		title = "result";
 		parameter.characters = title + resource.getBMSModel().getFullTitle() + parameter.characters;
 		titlefont = generator.generateFont(parameter);
-		time = System.currentTimeMillis();
+		starttime = System.currentTimeMillis();
 		layout = new GlyphLayout(titlefont, resource.getBMSModel().getFullTitle());
 		updateScoreDatabase();
 		// 保存されているリプレイデータがない場合は、EASY以上で自動保存
@@ -93,6 +100,19 @@ public class MusicResult extends ApplicationAdapter {
 			saveReplayData();
 		}
 
+		if (resource.getConfig().getLr2resultskin() != null) {
+			LR2ResultSkinLoader loader = new LR2ResultSkinLoader();
+			try {
+				skin = loader.loadResultSkin(new File(resource.getConfig().getLr2resultskin()), resource
+						.getConfig().getLr2resultskinoption());
+			} catch (IOException e) {
+				e.printStackTrace();
+				skin = new MusicResultSkin();
+			}
+		} else {
+			skin = new MusicResultSkin();
+		}
+
 		detail = new DetailGraphRenderer(resource.getBMSModel());
 	}
 
@@ -102,6 +122,7 @@ public class MusicResult extends ApplicationAdapter {
 			Color.valueOf("ff0000"), Color.valueOf("ffff00"), Color.valueOf("cccccc") };
 
 	public void render() {
+		int time = (int) (System.currentTimeMillis() - starttime);
 		final SpriteBatch sprite = main.getSpriteBatch();
 		final ShapeRenderer shape = main.getShapeRenderer();
 
@@ -176,44 +197,51 @@ public class MusicResult extends ApplicationAdapter {
 				titlefont.draw(sprite, "Replay Saved", w * 3 / 4, h / 4);
 			}
 		}
+		
+		for(SkinImage img : skin.getSkinPart()) {
+			if(img.getTiming() != 2) {
+				img.draw(sprite, time);				
+			}
+		}
 
 		if (score != null) {
-			titlefont.draw(sprite, "CLEAR : ", 100, 400);
+			// totalnotes
+			skin.getTotalnotes().draw(sprite, time, resource.getScoreData().getNotes());
+			
 			if (oldclear != 0) {
 				titlefont.setColor(Color.valueOf(LAMP[oldclear]));
-				titlefont.draw(sprite, CLEAR[oldclear] + " -> ", 240, 400);
+				titlefont.draw(sprite, CLEAR[oldclear] + " -> ", 240, 425);
 			}
 			titlefont.setColor(Color.valueOf(LAMP[score.getClear()]));
-			titlefont.draw(sprite, CLEAR[score.getClear()], 440, 400);
+			titlefont.draw(sprite, CLEAR[score.getClear()], 440, 425);
 			titlefont.setColor(Color.WHITE);
 
-			titlefont.draw(sprite, "SCORE : ", 100, 370);
 			if (oldexscore != 0) {
-				skin.getScore(false).draw(sprite, time, oldexscore);
-				titlefont.draw(sprite, " -> ", 360, 370);
+				skin.getScore(1).draw(sprite, time, oldexscore);
+				titlefont.draw(sprite, " -> ", 360, 395);
 			}
-			skin.getScore(true).draw(sprite, time, score.getExscore());
+			skin.getScore(0).draw(sprite, time, score.getExscore());
 			titlefont.draw(sprite, " ( " + (score.getExscore() > oldexscore ? "+" : "")
-					+ (score.getExscore() - oldexscore) + " )", 540, 370);
+					+ (score.getExscore() - oldexscore) + " )", 560, 395);
 			titlefont.setColor(Color.WHITE);
 
-			titlefont.draw(sprite, "MISS COUNT : ", 100, 340);
 			if (oldmisscount < 65535) {
-				skin.getMisscount(false).draw(sprite, time, oldmisscount);
-				titlefont.draw(sprite, " -> ", 360, 340);
-				skin.getMisscount(true).draw(sprite, time, score.getMinbp());
+				skin.getMisscount(1).draw(sprite, time, oldmisscount);
+				titlefont.draw(sprite, " -> ", 360, 365);
+				skin.getMisscount(0).draw(sprite, time, score.getMinbp());
 				titlefont.draw(sprite, " ( " + (score.getMinbp() > oldmisscount ? "+" : "")
-						+ (score.getMinbp() - oldmisscount) + " )", 540, 340);
+						+ (score.getMinbp() - oldmisscount) + " )", 560, 365);
 			} else {
-				skin.getMisscount(true).draw(sprite, time, score.getMinbp());
+				skin.getMisscount(0).draw(sprite, time, score.getMinbp());
+			}
+			
+			if(oldcombo > 0) {
+				skin.getMaxcombo(0).draw(sprite, time, score.getCombo());
+				skin.getMaxcombo(1).draw(sprite, time, oldcombo);
+			} else {
+				skin.getMaxcombo(0).draw(sprite, time, score.getCombo());				
 			}
 
-			titlefont.draw(sprite, "PGREAT : ", 100, 280);
-			titlefont.draw(sprite, "GREAT  : ", 100, 250);
-			titlefont.draw(sprite, "GOOD   : ", 100, 220);
-			titlefont.draw(sprite, "BAD    : ", 100, 190);
-			titlefont.draw(sprite, "POOR   : ", 100, 160);
-			titlefont.draw(sprite, "MISS   : ", 100, 130);
 			titlefont.draw(sprite, "FAST / SLOW  :  ", 100, 100);
 
 			skin.getJudgeCount(0, 0).draw(sprite, time, score.getPg());
@@ -258,7 +286,7 @@ public class MusicResult extends ApplicationAdapter {
 		boolean[] keystate = main.getInputProcessor().getKeystate();
 		long[] keytime = main.getInputProcessor().getTime();
 		if (resource.getScoreData() == null
-				|| ((System.currentTimeMillis() > time + 500 && (keystate[0] || keystate[2] || keystate[4] || keystate[6])))) {
+				|| ((time > 500 && (keystate[0] || keystate[2] || keystate[4] || keystate[6])))) {
 			if (resource.getCourseBMSModels() != null) {
 				if (resource.getGauge().get(resource.getGauge().size() - 1) <= 0) {
 					// 不合格リザルト
@@ -327,6 +355,7 @@ public class MusicResult extends ApplicationAdapter {
 		}
 		oldexscore = score.getExscore();
 		oldmisscount = score.getMinbp();
+		oldcombo = score.getCombo();
 		// コースモードの場合はコーススコアに加算・累積する
 		if (resource.getCourseBMSModels() != null) {
 			if (resource.getScoreData().getClear() == GrooveGauge.CLEARTYPE_FAILED) {

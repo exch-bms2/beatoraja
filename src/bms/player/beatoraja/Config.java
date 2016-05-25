@@ -148,6 +148,9 @@ public class Config {
 	
 	private int[] lr2decideskinoption = new int[0];
 	
+	private String lr2resultskin;
+	
+	private int[] lr2resultskinoption = new int[0];
 	
 	/**
 	 * BMSルートディレクトリパス
@@ -207,6 +210,8 @@ public class Config {
 //		lr2decideskinoption = new int[]{900, 920, 910};
 //		lr2selectskin = "skin/green_ary/Select/select.csv";
 //		lr2selectskinoption = new int[] { 915, 918, 928, 920, 936, 950, 925, 930, 932 };		
+//		lr2resultskin = "skin/RESULT SIMPLE FM/result_left.csv";
+//		lr2resultskinoption = new int[] { 900, 905, 907, 909};		
 		tableURL = new String[]{"http://bmsnormal2.syuriken.jp/table.html"};
 		judgedetail = 2;
 	}
@@ -541,5 +546,21 @@ public class Config {
 
 	public void setResolution(int resolution) {
 		this.resolution = resolution;
+	}
+
+	public String getLr2resultskin() {
+		return lr2resultskin;
+	}
+
+	public void setLr2resultskin(String lr2resultskin) {
+		this.lr2resultskin = lr2resultskin;
+	}
+
+	public int[] getLr2resultskinoption() {
+		return lr2resultskinoption;
+	}
+
+	public void setLr2resultskinoption(int[] lr2resultskinoption) {
+		this.lr2resultskinoption = lr2resultskinoption;
 	}
 }

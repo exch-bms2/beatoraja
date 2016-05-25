@@ -1,6 +1,7 @@
 package bms.player.beatoraja.result;
 
 import bms.player.beatoraja.skin.Skin;
+import bms.player.beatoraja.skin.SkinImage;
 import bms.player.beatoraja.skin.SkinNumber;
 
 import com.badlogic.gdx.graphics.Texture;
@@ -16,19 +17,39 @@ public class MusicResultSkin extends Skin{
 
     private Rectangle judgeregion;
 
-    public MusicResultSkin() {
-        this.setSkinNumbers(new SkinNumber[24]);
-        
+    private SkinNumber[][] judgecounts= new SkinNumber[6][3];
+    private SkinNumber[] fastslow = new SkinNumber[2];
+    private SkinNumber[] exscore = new SkinNumber[3];
+    private SkinNumber[] misscount = new SkinNumber[3];
+    private SkinNumber[] maxcombo = new SkinNumber[3];
+    private SkinNumber totalnotes;
+    
+    public SkinNumber getTotalnotes() {
+		return totalnotes;
+	}
+
+	public void setTotalnotes(SkinNumber totalnotes) {
+		this.totalnotes = totalnotes;
+	}
+
+	public MusicResultSkin() {
         gaugeregion = new Rectangle(20, 500, 400, 200);
-        judgeregion = new Rectangle(500,500,700,200);        
+        judgeregion = new Rectangle(500,500,700,200);
+        
+		Texture bg = new Texture("skin/resultbg.png");
+        SkinImage[] images = new SkinImage[1];
+        images[0] = new SkinImage();
+        images[0].setImage(new TextureRegion[]{new TextureRegion(bg)}, 0);
+        images[0].setDestination(0, 0, 0, 1280, 720, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        this.setSkinPart(images);
 		// 数字
 		Texture nt = new Texture("skin/number.png");
 		TextureRegion[][] ntr = TextureRegion.split(nt, 24, 24);
 
 		for(int i =0;i < 6;i++) {
 			for(int j = 0;j < 3;j++) {
-				SkinNumber sn = new SkinNumber(ntr[j],0,4,0);
-				sn.setDestination(0, 230 + j * 90, 260 - i * 30, 18, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0,
+				SkinNumber sn = new SkinNumber(ntr[0],0,4,0);
+				sn.setDestination(0, 230 + j * 90, 255 - i * 30, 18, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0,
 						0, 0, 0, 0, 0);
 				setJudgeCount(i, j, sn);
 			}
@@ -36,28 +57,41 @@ public class MusicResultSkin extends Skin{
 		
 		for(int i = 0;i < 2;i++) {
 			SkinNumber sn = new SkinNumber(ntr[i + 1],0,4,0);
-			sn.setDestination(0, 330 + i * 90, 80, 18, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0,
+			sn.setDestination(0, 320 + i * 90, 75, 18, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0,
 					0, 0, 0, 0, 0);
 			setJudgeCount(i == 0, sn);			
 		}
 		
 		SkinNumber score = new SkinNumber(ntr[0],0,5,0);
-		score.setDestination(0, 240, 350, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0,
+		score.setDestination(0, 240, 375, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0,
 				0, 0, 0, 0, 0);
-		setScore(false, score);
+		setScore(1, score);
 		SkinNumber nscore = new SkinNumber(ntr[0],0,5,0);
-		nscore.setDestination(0, 410, 350, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0,
+		nscore.setDestination(0, 410, 375, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0,
 				0, 0, 0, 0, 0);
-		setScore(true, nscore);
+		setScore(0, nscore);
 		
 		SkinNumber minbp = new SkinNumber(ntr[0],0,5,0);
-		minbp.setDestination(0, 240, 320, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0,
+		minbp.setDestination(0, 240, 345, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0,
 				0, 0, 0, 0, 0);
-		setMisscount(false, minbp);
+		setMisscount(1, minbp);
 		SkinNumber nminbp = new SkinNumber(ntr[0],0,5,0);
-		nminbp.setDestination(0, 410, 320, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0,
+		nminbp.setDestination(0, 410, 345, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0,
 				0, 0, 0, 0, 0);
-		setMisscount(true, nminbp);
+		setMisscount(0, nminbp);
+		
+		SkinNumber combo = new SkinNumber(ntr[0],0,5,0);
+		combo.setDestination(0, 240, 315, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0,
+				0, 0, 0, 0, 0);
+		setMaxcombo(1, combo);
+		SkinNumber ncombo = new SkinNumber(ntr[0],0,5,0);
+		ncombo.setDestination(0, 410, 315, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0,
+				0, 0, 0, 0, 0);
+		setMaxcombo(0, ncombo);
+		
+		totalnotes = new SkinNumber(ntr[0],0,5,0);
+		totalnotes.setDestination(0, 360, 486, 12, 12, 0, 1, 1, 1, 1, 0, 0, 0, 0,
+				0, 0, 0, 0, 0);
     }
 
     public Rectangle getGaugeRegion() {
@@ -69,35 +103,43 @@ public class MusicResultSkin extends Skin{
     }
 
     public SkinNumber getJudgeCount(int judge, int status) {
-    	return this.getSkinNumbers()[judge * 3 + status];
+    	return judgecounts[judge][status];
     }
     
     public void setJudgeCount(int judge, int status, SkinNumber number) {
-    	this.getSkinNumbers()[judge * 3 + status] = number;
+    	judgecounts[judge][status] = number;
     }
     
     public SkinNumber getJudgeCount(boolean fast) {
-    	return this.getSkinNumbers()[18 + (fast ? 0 : 1)];
+    	return fastslow[(fast ? 0 : 1)];
     }
     
     public void setJudgeCount(boolean fast, SkinNumber number) {
-    	this.getSkinNumbers()[18 + (fast ? 0 : 1)] = number;
+    	fastslow[(fast ? 0 : 1)] = number;
     }
     
-    public SkinNumber getScore(boolean newscore) {
-    	return this.getSkinNumbers()[20 + (newscore ? 0 : 1)];
+    public SkinNumber getScore(int status) {
+    	return exscore[status];
     }
     
-    public void setScore(boolean newscore, SkinNumber number) {
-    	this.getSkinNumbers()[20 + (newscore ? 0 : 1)] = number;
+    public void setScore(int status, SkinNumber number) {
+    	exscore[status] = number;
     }
     
-    public SkinNumber getMisscount(boolean newscore) {
-    	return this.getSkinNumbers()[22 + (newscore ? 0 : 1)];
+    public SkinNumber getMisscount(int status) {
+    	return misscount[status];
     }
     
-    public void setMisscount(boolean newscore, SkinNumber number) {
-    	this.getSkinNumbers()[22 + (newscore ? 0 : 1)] = number;
-    }    
+    public void setMisscount(int status, SkinNumber number) {
+    	misscount[status]= number;
+    }  
+    
+    public SkinNumber getMaxcombo(int status) {
+    	return maxcombo[status];
+    }
+    
+    public void setMaxcombo(int status, SkinNumber number) {
+    	maxcombo[status]= number;
+    }  
 
 }
