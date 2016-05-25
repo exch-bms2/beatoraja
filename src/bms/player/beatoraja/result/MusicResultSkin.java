@@ -19,9 +19,9 @@ public class MusicResultSkin extends Skin{
 
     private SkinNumber[][] judgecounts= new SkinNumber[6][3];
     private SkinNumber[] fastslow = new SkinNumber[2];
-    private SkinNumber[] exscore = new SkinNumber[3];
-    private SkinNumber[] misscount = new SkinNumber[3];
-    private SkinNumber[] maxcombo = new SkinNumber[3];
+    private SkinNumber[] exscore = new SkinNumber[4];
+    private SkinNumber[] misscount = new SkinNumber[4];
+    private SkinNumber[] maxcombo = new SkinNumber[4];
     private SkinNumber totalnotes;
     
     public SkinNumber getTotalnotes() {
@@ -71,6 +71,15 @@ public class MusicResultSkin extends Skin{
 				0, 0, 0, 0, 0);
 		setScore(0, nscore);
 		
+		SkinNumber dscore = new SkinNumber(ntr[1],0,5,0);
+		dscore.setDestination(0, 550, 375, 12, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0,
+				0, 0, 0, 0, 0);
+		setScore(2, dscore);
+		dscore = new SkinNumber(ntr[2],0,5,0);
+		dscore.setDestination(0, 550, 375, 12, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0,
+				0, 0, 0, 0, 0);
+		setScore(3, dscore);
+
 		SkinNumber minbp = new SkinNumber(ntr[0],0,5,0);
 		minbp.setDestination(0, 240, 345, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0,
 				0, 0, 0, 0, 0);
@@ -79,6 +88,14 @@ public class MusicResultSkin extends Skin{
 		nminbp.setDestination(0, 410, 345, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0,
 				0, 0, 0, 0, 0);
 		setMisscount(0, nminbp);
+		SkinNumber dminbp = new SkinNumber(ntr[1],0,5,0);
+		dminbp.setDestination(0, 550, 345, 12, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0,
+				0, 0, 0, 0, 0);
+		setMisscount(2, dminbp);
+		dminbp = new SkinNumber(ntr[2],0,5,0);
+		dminbp.setDestination(0, 550, 345, 12, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0,
+				0, 0, 0, 0, 0);
+		setMisscount(3, dminbp);
 		
 		SkinNumber combo = new SkinNumber(ntr[0],0,5,0);
 		combo.setDestination(0, 240, 315, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0,
@@ -141,5 +158,4 @@ public class MusicResultSkin extends Skin{
     public void setMaxcombo(int status, SkinNumber number) {
     	maxcombo[status]= number;
     }  
-
 }

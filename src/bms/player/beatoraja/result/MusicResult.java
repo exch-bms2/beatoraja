@@ -3,18 +3,14 @@ package bms.player.beatoraja.result;
 import java.io.File;
 import java.io.IOException;
 
+import bms.player.beatoraja.gauge.*;
 import org.lwjgl.opengl.GL11;
 
 import bms.model.BMSModel;
-import bms.model.Note;
-import bms.model.TimeLine;
 import bms.player.beatoraja.*;
-import bms.player.beatoraja.decide.MusicDecideSkin;
 import bms.player.beatoraja.gauge.GrooveGauge;
-import bms.player.beatoraja.skin.LR2DecideSkinLoader;
 import bms.player.beatoraja.skin.LR2ResultSkinLoader;
 import bms.player.beatoraja.skin.SkinImage;
-import bms.player.beatoraja.skin.SkinObject;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -116,11 +112,6 @@ public class MusicResult extends ApplicationAdapter {
 		detail = new DetailGraphRenderer(resource.getBMSModel());
 	}
 
-	private final Color[] graph_back = { Color.valueOf("440044"), Color.valueOf("000044"), Color.valueOf("004400"),
-			Color.valueOf("440000"), Color.valueOf("444400"), Color.valueOf("222222") };
-	private final Color[] graph_line = { Color.valueOf("ff00ff"), Color.valueOf("0000ff"), Color.valueOf("00ff00"),
-			Color.valueOf("ff0000"), Color.valueOf("ffff00"), Color.valueOf("cccccc") };
-
 	public void render() {
 		int time = (int) (System.currentTimeMillis() - starttime);
 		final SpriteBatch sprite = main.getSpriteBatch();
@@ -142,16 +133,38 @@ public class MusicResult extends ApplicationAdapter {
 
 		IRScoreData score = resource.getScoreData();
 		// ゲージグラフ描画
-		int gaugetype = resource.getConfig().getGauge();
+		String graphcolor = "444444";
+		String graphline = "cccccc";
+		if(resource.getGrooveGauge() instanceof AssistEasyGrooveGauge) {
+			graphcolor = "440044";
+			graphline = "ff00ff";
+		}
+		if(resource.getGrooveGauge() instanceof EasyGrooveGauge) {
+			graphcolor = "004444";
+			graphline = "00ffff";
+		}
+		if(resource.getGrooveGauge() instanceof NormalGrooveGauge) {
+			graphcolor = "004400";
+			graphline = "00ff00";
+		}
+		if(resource.getGrooveGauge() instanceof HardGrooveGauge || resource.getGrooveGauge() instanceof GradeGrooveGauge) {
+			graphcolor = "440000";
+			graphline = "ff0000";
+		}
+		if(resource.getGrooveGauge() instanceof ExhardGrooveGauge || resource.getGrooveGauge() instanceof ExgradeGrooveGauge) {
+			graphcolor = "444400";
+			graphline = "ffff00";
+		}
+
 		shape.begin(ShapeType.Filled);
-		shape.setColor(graph_back[gaugetype]);
+		shape.setColor(Color.valueOf(graphcolor));
 		shape.rect(graph.x, graph.y, graph.width, graph.height);
 		if (resource.getGrooveGauge().getBorder() > 0) {
-			shape.setColor(graph_back[3]);
+			shape.setColor(Color.valueOf("440000"));
 			shape.rect(graph.x, graph.y + graph.height * resource.getGrooveGauge().getBorder() / 100, graph.width,
 					graph.height * (100 - resource.getGrooveGauge().getBorder()) / 100);
 		}
-		shape.setColor(graph_back[gaugetype]);
+		shape.setColor(Color.valueOf(graphcolor));
 		shape.end();
 
 		Gdx.gl.glLineWidth(4);
@@ -163,7 +176,7 @@ public class MusicResult extends ApplicationAdapter {
 		for (int i = 0; i < resource.getGauge().size(); i++) {
 			Float f2 = resource.getGauge().get(i);
 			if (f1 != null) {
-				shape.setColor(graph_line[gaugetype]);
+				shape.setColor(Color.valueOf(graphline));
 				shape.line(graph.x + graph.width * (i - 1) / resource.getGauge().size(), graph.y + (f1 / 100.0f)
 						* graph.height, graph.x + graph.width * i / resource.getGauge().size(), graph.y + (f2 / 100.0f)
 						* graph.height);
@@ -218,19 +231,17 @@ public class MusicResult extends ApplicationAdapter {
 
 			if (oldexscore != 0) {
 				skin.getScore(1).draw(sprite, time, oldexscore);
+				titlefont.setColor(Color.WHITE);
 				titlefont.draw(sprite, " -> ", 360, 395);
 			}
 			skin.getScore(0).draw(sprite, time, score.getExscore());
-			titlefont.draw(sprite, " ( " + (score.getExscore() > oldexscore ? "+" : "")
-					+ (score.getExscore() - oldexscore) + " )", 560, 395);
-			titlefont.setColor(Color.WHITE);
+			skin.getScore(score.getExscore() > oldexscore ? 2 : 3).draw(sprite, time, Math.abs(score.getExscore() - oldexscore));
 
 			if (oldmisscount < 65535) {
 				skin.getMisscount(1).draw(sprite, time, oldmisscount);
 				titlefont.draw(sprite, " -> ", 360, 365);
 				skin.getMisscount(0).draw(sprite, time, score.getMinbp());
-				titlefont.draw(sprite, " ( " + (score.getMinbp() > oldmisscount ? "+" : "")
-						+ (score.getMinbp() - oldmisscount) + " )", 560, 365);
+				skin.getMisscount(score.getMinbp() > oldmisscount ? 3 : 2).draw(sprite, time, Math.abs(score.getMinbp() - oldmisscount));
 			} else {
 				skin.getMisscount(0).draw(sprite, time, score.getMinbp());
 			}
