@@ -818,8 +818,10 @@ public class BMSPlayer extends ApplicationAdapter {
 		// ハイスピード、デュレーション描画
 		sprite.begin();
 		titlefont.setColor(Color.WHITE);
-		titlefont.draw(sprite, "HISPEED - " + String.format("%.2f", lanerender.getHispeed()) + "  DURATION - "
-				+ lanerender.getGreenValue(), 30, 22);
+		titlefont.draw(sprite, "HISPEED        DURATION", 30, 22);
+		skin.getHispeed()[0].draw(sprite, time, (int) lanerender.getHispeed());
+		skin.getHispeed()[1].draw(sprite, time, (int) (lanerender.getHispeed() * 100));
+		skin.getDuration().draw(sprite, time, lanerender.getGreenValue());
 		sprite.end();
 		// 残り時間描画
 		sprite.begin();

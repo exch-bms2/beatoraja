@@ -17,7 +17,7 @@ public class MusicResultSkin extends Skin{
     private Rectangle judgeregion;
 
     public MusicResultSkin() {
-        this.setSkinNumbers(new SkinNumber[24]);
+        this.setSkinNumbers(new SkinNumber[28]);
         
         gaugeregion = new Rectangle(20, 500, 400, 200);
         judgeregion = new Rectangle(500,500,700,200);        
@@ -44,20 +44,36 @@ public class MusicResultSkin extends Skin{
 		SkinNumber score = new SkinNumber(ntr[0],0,5,0);
 		score.setDestination(0, 240, 350, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0,
 				0, 0, 0, 0, 0);
-		setScore(false, score);
+		setScore(0, score);
 		SkinNumber nscore = new SkinNumber(ntr[0],0,5,0);
 		nscore.setDestination(0, 410, 350, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0,
 				0, 0, 0, 0, 0);
-		setScore(true, nscore);
-		
+		setScore(1, nscore);
+		SkinNumber dscore = new SkinNumber(ntr[1],0,5,0);
+		dscore.setDestination(0, 550, 350, 12, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0,
+				0, 0, 0, 0, 0);
+		setScore(2, dscore);
+		dscore = new SkinNumber(ntr[2],0,5,0);
+		dscore.setDestination(0, 550, 350, 12, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0,
+				0, 0, 0, 0, 0);
+		setScore(3, dscore);
+
 		SkinNumber minbp = new SkinNumber(ntr[0],0,5,0);
 		minbp.setDestination(0, 240, 320, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0,
 				0, 0, 0, 0, 0);
-		setMisscount(false, minbp);
+		setMisscount(0, minbp);
 		SkinNumber nminbp = new SkinNumber(ntr[0],0,5,0);
 		nminbp.setDestination(0, 410, 320, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0,
 				0, 0, 0, 0, 0);
-		setMisscount(true, nminbp);
+		setMisscount(1, nminbp);
+		SkinNumber dminbp = new SkinNumber(ntr[1],0,5,0);
+		dminbp.setDestination(0, 550, 320, 12, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0,
+				0, 0, 0, 0, 0);
+		setMisscount(2, dminbp);
+		dminbp = new SkinNumber(ntr[2],0,5,0);
+		dminbp.setDestination(0, 550, 320, 12, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0,
+				0, 0, 0, 0, 0);
+		setMisscount(3, dminbp);
     }
 
     public Rectangle getGaugeRegion() {
@@ -84,20 +100,20 @@ public class MusicResultSkin extends Skin{
     	this.getSkinNumbers()[18 + (fast ? 0 : 1)] = number;
     }
     
-    public SkinNumber getScore(boolean newscore) {
-    	return this.getSkinNumbers()[20 + (newscore ? 0 : 1)];
+    public SkinNumber getScore(int status) {
+    	return this.getSkinNumbers()[20 + status];
     }
     
-    public void setScore(boolean newscore, SkinNumber number) {
-    	this.getSkinNumbers()[20 + (newscore ? 0 : 1)] = number;
+    public void setScore(int status, SkinNumber number) {
+    	this.getSkinNumbers()[20 + status] = number;
     }
     
-    public SkinNumber getMisscount(boolean newscore) {
-    	return this.getSkinNumbers()[22 + (newscore ? 0 : 1)];
+    public SkinNumber getMisscount(int status) {
+    	return this.getSkinNumbers()[24 + status];
     }
     
-    public void setMisscount(boolean newscore, SkinNumber number) {
-    	this.getSkinNumbers()[22 + (newscore ? 0 : 1)] = number;
+    public void setMisscount(int status, SkinNumber number) {
+    	this.getSkinNumbers()[24 + status] = number;
     }    
 
 }

@@ -55,6 +55,9 @@ public class PlaySkin extends Skin {
 	
 	private SkinNumber[] bpm = new SkinNumber[3];
 	private SkinNumber[] timecount = new SkinNumber[2];
+
+	private SkinNumber[] hispeed = new SkinNumber[2];
+	private SkinNumber duration;
 	/**
 	 * レーン描画エリア
 	 */
@@ -149,6 +152,14 @@ public class PlaySkin extends Skin {
 		timecount[0].setDestination(0, 1160, 0, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		timecount[1] = new SkinNumber(ntr[0], 0, 2, 1);
 		timecount[1].setDestination(0, 1232, 0, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+
+		hispeed[0] = new SkinNumber(ntr[0], 0, 2, 0);
+		hispeed[0].setDestination(0, 130, 0, 12, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		hispeed[1] = new SkinNumber(ntr[0], 0, 2, 1);
+		hispeed[1].setDestination(0, 160, 0, 10, 20, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+
+		duration = new SkinNumber(ntr[0], 0, 4, 0);
+		duration.setDestination(0, 318, 0, 12, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 	}
 
 	private void make7KeySkin() {
@@ -537,6 +548,22 @@ public class PlaySkin extends Skin {
 
 	public SkinNumber[] getTimeCount() {
 		return timecount;
+	}
+
+	public SkinNumber getDuration() {
+		return duration;
+	}
+
+	public void setDuration(SkinNumber duration) {
+		this.duration = duration;
+	}
+
+	public SkinNumber[] getHispeed() {
+		return hispeed;
+	}
+
+	public void setHispeed(SkinNumber[] hispeed) {
+		this.hispeed = hispeed;
 	}
 
 	public Rectangle getBGAregion() {
