@@ -56,7 +56,7 @@ public class MusicResultSkin extends Skin{
 		}
 		
 		for(int i = 0;i < 2;i++) {
-			SkinNumber sn = new SkinNumber(ntr[i + 1],0,4,0);
+			SkinNumber sn = new SkinNumber(ntr[0],0,4,0);
 			sn.setDestination(0, 320 + i * 90, 75, 18, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0,
 					0, 0, 0, 0, 0);
 			setJudgeCount(i == 0, sn);			
@@ -105,6 +105,14 @@ public class MusicResultSkin extends Skin{
 		ncombo.setDestination(0, 410, 315, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0,
 				0, 0, 0, 0, 0);
 		setMaxcombo(0, ncombo);
+		SkinNumber dcombo = new SkinNumber(ntr[1],0,5,0);
+		dcombo.setDestination(0, 550, 315, 12, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0,
+				0, 0, 0, 0, 0);
+		setMaxcombo(2, dcombo);
+		dcombo = new SkinNumber(ntr[2],0,5,0);
+		dcombo.setDestination(0, 550, 315, 12, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0,
+				0, 0, 0, 0, 0);
+		setMaxcombo(3, dcombo);
 		
 		totalnotes = new SkinNumber(ntr[0],0,5,0);
 		totalnotes.setDestination(0, 360, 486, 12, 12, 0, 1, 1, 1, 1, 0, 0, 0, 0,

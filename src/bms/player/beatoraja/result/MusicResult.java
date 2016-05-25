@@ -233,25 +233,23 @@ public class MusicResult extends ApplicationAdapter {
 				skin.getScore(1).draw(sprite, time, oldexscore);
 				titlefont.setColor(Color.WHITE);
 				titlefont.draw(sprite, " -> ", 360, 395);
+				skin.getScore(score.getExscore() > oldexscore ? 2 : 3).draw(sprite, time, Math.abs(score.getExscore() - oldexscore));
 			}
 			skin.getScore(0).draw(sprite, time, score.getExscore());
-			skin.getScore(score.getExscore() > oldexscore ? 2 : 3).draw(sprite, time, Math.abs(score.getExscore() - oldexscore));
 
 			if (oldmisscount < 65535) {
 				skin.getMisscount(1).draw(sprite, time, oldmisscount);
 				titlefont.draw(sprite, " -> ", 360, 365);
-				skin.getMisscount(0).draw(sprite, time, score.getMinbp());
 				skin.getMisscount(score.getMinbp() > oldmisscount ? 3 : 2).draw(sprite, time, Math.abs(score.getMinbp() - oldmisscount));
-			} else {
-				skin.getMisscount(0).draw(sprite, time, score.getMinbp());
 			}
+			skin.getMisscount(0).draw(sprite, time, score.getMinbp());
 			
 			if(oldcombo > 0) {
-				skin.getMaxcombo(0).draw(sprite, time, score.getCombo());
 				skin.getMaxcombo(1).draw(sprite, time, oldcombo);
-			} else {
-				skin.getMaxcombo(0).draw(sprite, time, score.getCombo());				
+				titlefont.draw(sprite, " -> ", 360, 335);
+				skin.getMaxcombo(score.getCombo() > oldcombo ? 2 : 3).draw(sprite, time, Math.abs(score.getCombo() - oldcombo));
 			}
+			skin.getMaxcombo(0).draw(sprite, time, score.getCombo());				
 
 			titlefont.draw(sprite, "FAST / SLOW  :  ", 100, 100);
 
@@ -292,7 +290,7 @@ public class MusicResult extends ApplicationAdapter {
 		titlefont.draw(sprite, resource.getBMSModel().getFullTitle(), w / 2 - layout.width / 2, 23);
 		sprite.end();
 
-		detail.render(sprite, titlefont, shape, System.currentTimeMillis() - time, skin.getJudgeRegion());
+		detail.render(sprite, titlefont, shape, time, skin.getJudgeRegion());
 
 		boolean[] keystate = main.getInputProcessor().getKeystate();
 		long[] keytime = main.getInputProcessor().getTime();
