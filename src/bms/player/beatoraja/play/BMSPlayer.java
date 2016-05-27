@@ -8,12 +8,12 @@ import org.lwjgl.opengl.GL11;
 
 import bms.model.*;
 import bms.player.beatoraja.*;
-import bms.player.beatoraja.audio.AudioProcessor;
-import bms.player.beatoraja.bga.BGAProcessor;
 import bms.player.beatoraja.gauge.*;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyInputLog;
 import bms.player.beatoraja.pattern.*;
+import bms.player.beatoraja.play.audio.AudioProcessor;
+import bms.player.beatoraja.play.bga.BGAProcessor;
 import bms.player.beatoraja.skin.LR2PlaySkinLoader;
 import bms.player.beatoraja.skin.SkinNumber;
 import bms.player.beatoraja.skin.SkinImage;
@@ -85,11 +85,6 @@ public class BMSPlayer extends ApplicationAdapter {
 
 	private int prevrendertime;
 
-	private int playingbgaid = -1;
-	private int playinglayerid = -1;
-
-	private int[] misslayer = null;
-
 	private int assist = 0;
 
 	private List<PatternModifyLog> pattern = new ArrayList<PatternModifyLog>();
@@ -102,6 +97,27 @@ public class BMSPlayer extends ApplicationAdapter {
 	private List<Float> gaugelog = new ArrayList<Float>();
 	
 	private int playspeed = 100;
+	
+	/**
+	 * 処理済ノート数
+	 */
+	private int notes;
+	/**
+	 * 再生中のBGAID
+	 */
+	private int playingbgaid = -1;
+	/**
+	 * 再生中のレイヤーID
+	 */
+	private int playinglayerid = -1;
+	/**
+	 * ミスレイヤー表示開始時間
+	 */
+	private int misslayertime;
+	/**
+	 * 現在のミスレイヤーシーケンス
+	 */
+	private int[] misslayer = null;
 
 	public BMSPlayer(MainController main, PlayerResource resource) {
 		this.main = main;
@@ -662,12 +678,6 @@ public class BMSPlayer extends ApplicationAdapter {
 		float h = 720;
 
 		// 背景描画
-		if (resource.getBGAManager().getStagefileData() != null) {
-			sprite.begin();
-			sprite.draw(resource.getBGAManager().getStagefileData(), 0, 0, w, h);
-			sprite.end();
-		}
-
 		sprite.begin();
 		for (SkinImage part : skin.getSkinPart()) {
 			int[] op = part.getOption();
@@ -783,13 +793,6 @@ public class BMSPlayer extends ApplicationAdapter {
 		gaugecount[1].draw(sprite, 0, (int) (gauge.getValue() * 10));
 		sprite.end();
 
-		Gdx.gl.glEnable(GL11.GL_BLEND);
-		Gdx.gl.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-		shape.begin(ShapeType.Filled);
-		shape.setColor(0, 0, 0, 0.7f);
-		shape.rect(0, 0, 1280, 25);
-		shape.end();
-		Gdx.gl.glDisable(GL11.GL_BLEND);
 		// ジャッジカウント描画
 		Rectangle judge = skin.getJudgecountregion();
 		Gdx.gl.glEnable(GL11.GL_BLEND);
@@ -818,8 +821,6 @@ public class BMSPlayer extends ApplicationAdapter {
 		sprite.end();
 		// ハイスピード、デュレーション描画
 		sprite.begin();
-		titlefont.setColor(Color.WHITE);
-		titlefont.draw(sprite, "HISPEED        DURATION", 30, 22);
 		skin.getHispeed()[0].draw(sprite, time, (int) lanerender.getHispeed());
 		skin.getHispeed()[1].draw(sprite, time, (int) (lanerender.getHispeed() * 100));
 		skin.getDuration().draw(sprite, time, lanerender.getGreenValue());
@@ -870,10 +871,6 @@ public class BMSPlayer extends ApplicationAdapter {
 	public JudgeManager getJudgeManager() {
 		return judge;
 	}
-
-	private int notes;
-
-	private int misslayertime;
 
 	public void update(int lane, int judge, int time, int fase) {
 		if (judge < 5) {
@@ -938,6 +935,11 @@ public class BMSPlayer extends ApplicationAdapter {
 		return keylog;
 	}
 
+	/**
+	 * キー入力処理用スレッド
+	 * 
+	 * @author exch
+	 */
 	class KeyInputThread extends Thread {
 		private boolean stop = false;
 		private long frametimes = 1;
@@ -977,6 +979,11 @@ public class BMSPlayer extends ApplicationAdapter {
 
 	}
 
+	/**
+	 * BGレーン再生用スレッド
+	 * 
+	 * @author exch
+	 */
 	class AutoplayThread extends Thread {
 
 		private boolean stop = false;

@@ -1,6 +1,7 @@
 package bms.player.beatoraja.play;
 
 import bms.player.beatoraja.skin.Skin;
+import bms.player.beatoraja.skin.SkinImage;
 import bms.player.beatoraja.skin.SkinNumber;
 
 import bms.player.beatoraja.skin.SkinText;
@@ -142,24 +143,31 @@ public class PlaySkin extends Skin {
 		lanecover = new Sprite(lct, 0, 0, 390, 580);
 		
 		bpm[0] = new SkinNumber(ntr[0], 0, 4, 0);
-		bpm[0].setDestination(0, 520, 0, 18, 18, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		bpm[0].setDestination(0, 520, 2, 18, 18, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		bpm[1] = new SkinNumber(ntr[0], 0, 4, 0);
-		bpm[1].setDestination(0, 592, 0, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		bpm[1].setDestination(0, 592, 2, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		bpm[2] = new SkinNumber(ntr[0], 0, 4, 0);
-		bpm[2].setDestination(0, 688, 0, 18, 18, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		bpm[2].setDestination(0, 688, 2, 18, 18, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		
 		timecount[0] = new SkinNumber(ntr[0], 0, 2, 1);
-		timecount[0].setDestination(0, 1160, 0, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		timecount[0].setDestination(0, 1148, 2, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		timecount[1] = new SkinNumber(ntr[0], 0, 2, 1);
-		timecount[1].setDestination(0, 1232, 0, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		timecount[1].setDestination(0, 1220, 2, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 		hispeed[0] = new SkinNumber(ntr[0], 0, 2, 0);
-		hispeed[0].setDestination(0, 130, 0, 12, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		hispeed[0].setDestination(0, 116, 2, 12, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		hispeed[1] = new SkinNumber(ntr[0], 0, 2, 1);
-		hispeed[1].setDestination(0, 160, 0, 10, 20, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		hispeed[1].setDestination(0, 154, 2, 10, 20, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 		duration = new SkinNumber(ntr[0], 0, 4, 0);
-		duration.setDestination(0, 318, 0, 12, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		duration.setDestination(0, 318, 2, 12, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		
+		Texture bg = new Texture("skin/playbg.png");
+        SkinImage[] images = new SkinImage[1];
+        images[0] = new SkinImage();
+        images[0].setImage(new TextureRegion[]{new TextureRegion(bg)}, 0);
+        images[0].setDestination(0, 0, 0, 1280, 720, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        this.setSkinPart(images);
 	}
 
 	private void make7KeySkin() {

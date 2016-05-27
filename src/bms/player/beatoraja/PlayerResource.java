@@ -6,10 +6,10 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import bms.model.*;
-import bms.player.beatoraja.audio.AudioProcessor;
-import bms.player.beatoraja.audio.SoundProcessor;
-import bms.player.beatoraja.bga.BGAProcessor;
 import bms.player.beatoraja.gauge.GrooveGauge;
+import bms.player.beatoraja.play.audio.AudioProcessor;
+import bms.player.beatoraja.play.audio.SoundProcessor;
+import bms.player.beatoraja.play.bga.BGAProcessor;
 
 /**
  * プレイヤーのコンポーネント間でデータをやり取りするためのクラス
