@@ -2,7 +2,6 @@ package bms.player.beatoraja.result;
 
 import java.util.logging.Logger;
 
-import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -15,7 +14,7 @@ import bms.model.BMSModel;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.gauge.GrooveGauge;
 
-public class GradeResult extends ApplicationAdapter {
+public class GradeResult extends MainState {
 	
 	// TODO 段位リプレイの保存
 	// TODO 段位ゲージ繊維の表示
@@ -36,8 +35,6 @@ public class GradeResult extends ApplicationAdapter {
 	private int oldexscore;
 	private int oldmisscount;
 
-	private long time = 0;
-
     private MusicResultSkin skin;
 
 	public GradeResult(MainController main) {
@@ -54,12 +51,11 @@ public class GradeResult extends ApplicationAdapter {
 		title = "result";
 		parameter.characters = title + parameter.characters + "段位認定 " + resource.getCoursetitle() + "不合格";
 		titlefont = generator.generateFont(parameter);
-		time = System.currentTimeMillis();
-
 		updateScoreDatabase();
 	}
 
 	public void render() {
+		int time = getNowTime();
 		final SpriteBatch sprite = main.getSpriteBatch();
 		IRScoreData score = resource.getCourseScoreData();
 
@@ -176,5 +172,11 @@ public class GradeResult extends ApplicationAdapter {
 				resource.getConfig().getRandom() == 1, resource.isUpdateScore());
 
 		Logger.getGlobal().info("スコアデータベース更新完了 ");
+	}
+
+	@Override
+	public void dispose() {
+		// TODO Auto-generated method stub
+		
 	}
 }

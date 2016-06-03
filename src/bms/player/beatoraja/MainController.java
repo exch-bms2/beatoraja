@@ -46,7 +46,7 @@ public class MainController extends ApplicationAdapter {
 
 	private BitmapFont systemfont;
 
-	private ApplicationAdapter current;
+	private MainState current;
 
 	private Config config;
 	private int auto;
@@ -143,6 +143,7 @@ public class MainController extends ApplicationAdapter {
 			current = keyconfig;
 			break;
 		}
+		current.setStartTime(System.currentTimeMillis());
 	}
 
 	public void setAuto(int auto) {

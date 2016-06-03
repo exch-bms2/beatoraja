@@ -20,7 +20,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
  * 
  * @author exch
  */
-public class KeyConfiguration extends ApplicationAdapter {
+public class KeyConfiguration extends MainState {
 
 	private MainController main;
 	private PlayerResource resource;
@@ -152,5 +152,11 @@ public class KeyConfiguration extends ApplicationAdapter {
 			input.setExitPressed(false);
 			main.changeState(MainController.STATE_SELECTMUSIC);
 		}
+	}
+
+	@Override
+	public void dispose() {
+		// TODO Auto-generated method stub
+		
 	}
 }

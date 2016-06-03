@@ -34,7 +34,7 @@ import com.badlogic.gdx.math.Rectangle;
  * 
  * @author exch
  */
-public class BMSPlayer extends ApplicationAdapter {
+public class BMSPlayer extends MainState {
 
 	// TODO GLAssistから起動すると楽曲ロード中に止まる
 
@@ -314,7 +314,6 @@ public class BMSPlayer extends ApplicationAdapter {
 			new LaneShuffleModifier(LaneShuffleModifier.RANDOM_EX),
 			new NoteShuffleModifier(NoteShuffleModifier.S_RANDOM_EX) };
 
-	@Override
 	public void create() {
 		final ShapeRenderer shape = main.getShapeRenderer();
 		final SpriteBatch sprite = main.getSpriteBatch();
@@ -1014,5 +1013,11 @@ public class BMSPlayer extends ApplicationAdapter {
 			}
 
 		}
+	}
+
+	@Override
+	public void create(PlayerResource resource) {
+		// TODO Auto-generated method stub
+		
 	}
 }

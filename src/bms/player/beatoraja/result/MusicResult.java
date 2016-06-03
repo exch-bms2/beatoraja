@@ -12,7 +12,6 @@ import bms.player.beatoraja.gauge.GrooveGauge;
 import bms.player.beatoraja.skin.LR2ResultSkinLoader;
 import bms.player.beatoraja.skin.SkinImage;
 
-import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
@@ -31,7 +30,7 @@ import com.badlogic.gdx.math.Rectangle;
  * 
  * @author exch
  */
-public class MusicResult extends ApplicationAdapter {
+public class MusicResult extends MainState {
 
 	private static final String[] LAMP = { "000000", "808080", "800080", "ff00ff", "40ff40", "f0c000", "ffffff",
 			"ffff88", "88ffff", "ff8888", "ff0000" };
@@ -58,8 +57,6 @@ public class MusicResult extends ApplicationAdapter {
 
 	private DetailGraphRenderer detail;
 
-	private long starttime = 0;
-
 	public MusicResult(MainController main) {
 		this.main = main;
 
@@ -84,7 +81,6 @@ public class MusicResult extends ApplicationAdapter {
 		title = "result";
 		parameter.characters = title + resource.getBMSModel().getFullTitle() + parameter.characters;
 		titlefont = generator.generateFont(parameter);
-		starttime = System.currentTimeMillis();
 		layout = new GlyphLayout(titlefont, resource.getBMSModel().getFullTitle());
 		updateScoreDatabase();
 		// 保存されているリプレイデータがない場合は、EASY以上で自動保存
@@ -113,7 +109,7 @@ public class MusicResult extends ApplicationAdapter {
 	}
 
 	public void render() {
-		int time = (int) (System.currentTimeMillis() - starttime);
+		int time = getNowTime();
 		final SpriteBatch sprite = main.getSpriteBatch();
 		final ShapeRenderer shape = main.getShapeRenderer();
 
@@ -422,5 +418,11 @@ public class MusicResult extends ApplicationAdapter {
 				fail.play();
 			}
 		}
+	}
+
+	@Override
+	public void dispose() {
+		// TODO Auto-generated method stub
+		
 	}
 }
