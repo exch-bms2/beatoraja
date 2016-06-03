@@ -30,23 +30,6 @@ public class LR2ResultSkinLoader extends LR2SkinLoader {
 				skin.setMaxcombo(1, number);
 			}
 			
-			if(number.getId() == 110) {
-				skin.setJudgeCount(0, 0, number);
-			}
-			if(number.getId() == 111) {
-				skin.setJudgeCount(1, 0, number);
-			}
-			if(number.getId() == 112) {
-				skin.setJudgeCount(2, 0, number);
-			}
-			if(number.getId() == 113) {
-				skin.setJudgeCount(3, 0, number);
-			}
-			if(number.getId() == 114) {
-				skin.setJudgeCount(4, 0, number);
-			}
-
-			
 			if(number.getId() == 101) {
 				skin.setScore(0, number);
 			}

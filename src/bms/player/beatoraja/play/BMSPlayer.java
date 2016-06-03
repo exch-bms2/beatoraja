@@ -330,6 +330,7 @@ public class BMSPlayer extends MainState {
 		} else {
 			skin = new PlaySkin(model.getUseKeys());
 		}
+		this.setSkin(skin);
 		skin.setText(resource.getBMSModel());
 
 		input = main.getInputProcessor();
@@ -779,18 +780,11 @@ public class BMSPlayer extends MainState {
 
 		// ゲージ描画
 		Rectangle gr = skin.getGaugeRegion();
-		SkinNumber[] gaugecount = skin.getGaugeCount();
 		shape.begin(ShapeType.Filled);
 		shape.setColor(Color.valueOf("#001000"));
-		shape.rect(gr.x, gr.y, gr.width, gr.height);
-		Rectangle gcr0 = gaugecount[0].getDestination(time);
-		shape.rect(gcr0.x, gcr0.y - 2, gcr0.width * 4, gcr0.height + 4);
+		shape.rect(gr.x, gr.y, gr.width, gr.height + 24);
 		shape.end();
 		gauge.draw(skin, sprite, gr.x, gr.y, gr.width, gr.height);
-		sprite.begin();
-		gaugecount[0].draw(sprite, 0, (int) gauge.getValue());
-		gaugecount[1].draw(sprite, 0, (int) (gauge.getValue() * 10));
-		sprite.end();
 
 		// ジャッジカウント描画
 		Rectangle judge = skin.getJudgecountregion();
@@ -801,34 +795,6 @@ public class BMSPlayer extends MainState {
 		shape.rect(judge.x, judge.y, judge.width, judge.height);
 		shape.end();
 		Gdx.gl.glDisable(GL11.GL_BLEND);
-
-		SkinNumber[][] judgecount = skin.getJudgeCount();
-		sprite.begin();
-		for (int i = 0; i < 6; i++) {
-			for (int j = 0; j < 2; j++) {
-				judgecount[i][j].draw(sprite, 0, this.judge.getJudgeCount(i, j == 0));
-			}
-		}
-		sprite.end();
-		// BPM描画
-		sprite.begin();
-		if(minbpm != maxbpm) {
-			skin.getBPMNumber()[0].draw(sprite, 0, minbpm);
-			skin.getBPMNumber()[2].draw(sprite, 0, maxbpm);			
-		}
-		skin.getBPMNumber()[1].draw(sprite, 0, (int) lanerender.getNowBPM());
-		sprite.end();
-		// ハイスピード、デュレーション描画
-		sprite.begin();
-		skin.getHispeed()[0].draw(sprite, time, (int) lanerender.getHispeed());
-		skin.getHispeed()[1].draw(sprite, time, (int) (lanerender.getHispeed() * 100));
-		skin.getDuration().draw(sprite, time, lanerender.getGreenValue());
-		sprite.end();
-		// 残り時間描画
-		sprite.begin();
-		skin.getTimeCount()[0].draw(sprite, 0, (playtime - time + 1000) / 60000);
-		skin.getTimeCount()[1].draw(sprite, 0, ((playtime - time + 1000) / 1000) % 60);
-		sprite.end();
 
 		prevrendertime = time;
 	}
@@ -865,6 +831,10 @@ public class BMSPlayer extends MainState {
 
 	public LaneRenderer getLaneRenderer() {
 		return lanerender;
+	}
+	
+	public int getJudgeCount(int judge, boolean fast) {
+		return this.judge.getJudgeCount(judge, fast);
 	}
 
 	public JudgeManager getJudgeManager() {
@@ -1019,5 +989,48 @@ public class BMSPlayer extends MainState {
 	public void create(PlayerResource resource) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public int getMaxcombo() {
+		return super.getMaxcombo();
+	}
+
+	@Override
+	public int getMinBPM() {
+		return minbpm;
+	}
+
+	@Override
+	public int getBPM() {
+		return (int) lanerender.getNowBPM();
+	}
+
+	@Override
+	public int getMaxBPM() {
+		return maxbpm;
+	}
+	
+	@Override
+	public float getHispeed() {
+		return lanerender.getHispeed();
+	}
+
+	@Override
+	public int getDuration() {
+		return lanerender.getGreenValue();
+	}
+
+	@Override
+	public float getGrooveGauge() {
+		return gauge.getValue();
+	}
+
+	public int getTimeleftMinute() {
+		return (int) ((playtime - (int) (starttime != 0 ? System.currentTimeMillis() - starttime : 0) + 1000) / 60000);
+	}
+
+	public int getTimeleftSecond() {
+		return ((playtime - (int) (starttime != 0 ? System.currentTimeMillis() - starttime : 0) + 1000) / 1000) % 60;
 	}
 }

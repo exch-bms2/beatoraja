@@ -1,8 +1,12 @@
 package bms.player.beatoraja;
 
+import bms.player.beatoraja.skin.Skin;
+
 public abstract class MainState {
 
 	private long starttime;
+	
+	private Skin skin;
 	
 	public abstract void create(PlayerResource resource);
 	
@@ -33,4 +37,57 @@ public abstract class MainState {
 	public int getNowTime() {
 		return (int) (System.currentTimeMillis() - starttime);
 	}
+
+	public Skin getSkin() {
+		return skin;
+	}
+
+	public void setSkin(Skin skin) {
+		this.skin = skin;
+	}
+	
+	public int getScore() {
+		return 0;
+	}
+	
+	public int getMaxcombo() {
+		return 0;
+	}
+	
+	public int getJudgeCount(int judge, boolean fast) {
+		return 0;
+	}
+
+	public int getMinBPM() {
+		return 0;
+	}
+	
+	public int getBPM() {
+		return 0;
+	}
+	
+	public int getMaxBPM() {
+		return 0;
+	}
+	
+	public float getHispeed() {
+		return 0;
+	}
+
+	public int getDuration() {
+		return 0;
+	}
+
+	public float getGrooveGauge() {
+		return 0;
+	}
+
+	public int getTimeleftMinute() {
+		return 0;
+	}
+
+	public int getTimeleftSecond() {
+		return 0;
+	}
+
 }

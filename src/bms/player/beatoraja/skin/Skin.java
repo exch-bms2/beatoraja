@@ -70,9 +70,6 @@ public class Skin {
 		for(SkinImage obj : skinparts) {
 			obj.draw(sprite, time);
 		}
-		for(SkinNumber num : numbers) {
-			num.draw(sprite, time, 0);
-		}
 		if(genre != null) {
 			genre.draw(sprite, time);
 		}

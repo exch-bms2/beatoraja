@@ -24,8 +24,6 @@ public class MusicDecide extends MainState {
 	private MainController main;
 	private PlayerResource resource;
 
-	private MusicDecideSkin skin;
-
 	public MusicDecide(MainController main) {
 		this.main = main;
 	}
@@ -40,22 +38,22 @@ public class MusicDecide extends MainState {
 		if (resource.getConfig().getLr2decideskin() != null) {
 			LR2DecideSkinLoader loader = new LR2DecideSkinLoader();
 			try {
-				skin = loader.loadMusicDecideSkin(new File(resource.getConfig().getLr2decideskin()), resource
-						.getConfig().getLr2decideskinoption());
+				setSkin(loader.loadMusicDecideSkin(new File(resource.getConfig().getLr2decideskin()), resource
+						.getConfig().getLr2decideskinoption()));
 			} catch (IOException e) {
 				e.printStackTrace();
-				skin = new MusicDecideSkin();
+				setSkin(new MusicDecideSkin());
 			}
 		} else {
-			skin = new MusicDecideSkin();
+			setSkin(new MusicDecideSkin());
 		}
 
 		if(resource.getCourseBMSModels() != null) {
-			skin.getTitle().setText(resource.getCoursetitle());
-			skin.getGenre().setText("");
-			skin.getArtist().setText("");
+			getSkin().getTitle().setText(resource.getCoursetitle());
+			getSkin().getGenre().setText("");
+			getSkin().getArtist().setText("");
 		} else {
-			skin.setText(resource.getBMSModel());
+			getSkin().setText(resource.getBMSModel());
 		}
 	}
 
@@ -74,11 +72,11 @@ public class MusicDecide extends MainState {
 			sprite.end();
 		}
 		sprite.begin();
-		skin.drawAllObjects(sprite, nowtime);
+		getSkin().drawAllObjects(sprite, nowtime);
 		sprite.end();
 
 		sprite.begin();
-		for (SkinImage part : skin.getSkinPart()) {
+		for (SkinImage part : getSkin().getSkinPart()) {
 			int[] op = part.getOption();
 			if (true) {
 				Rectangle r = part.getDestination(nowtime);

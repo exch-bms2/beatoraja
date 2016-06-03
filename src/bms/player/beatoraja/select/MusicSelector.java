@@ -260,7 +260,8 @@ public class MusicSelector extends MainState {
 		} else {
 			skin = new MusicSelectSkin();
 		}
-
+		this.setSkin(skin);
+		
 		option = new GameOptionRenderer(main.getShapeRenderer(), main.getSpriteBatch(), titlefont, config);
 		aoption = new AssistOptionRenderer(main.getShapeRenderer(), main.getSpriteBatch(), titlefont, config);
 		doption = new DetailOptionRenderer(main.getShapeRenderer(), main.getSpriteBatch(), titlefont, config);

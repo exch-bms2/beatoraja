@@ -1,5 +1,7 @@
 package bms.player.beatoraja.skin;
 
+import bms.player.beatoraja.MainState;
+
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
@@ -25,12 +27,23 @@ public class SkinNumber extends SkinObject {
 	private int zeropadding;
 	
 	private TextureRegion[] values;
-
+	
+	private NumberResourceAccessor resource;
+	
 	public SkinNumber(TextureRegion[] image, int cycle, int keta, int zeropadding) {
+		this(image, cycle, keta, zeropadding, null);
+	}
+	
+	public SkinNumber(TextureRegion[] image, int cycle, int keta, int zeropadding, NumberResourceAccessor resource) {
 		this.image = image;
 		this.cycle = cycle;
 		this.setKeta(keta);
-		this.zeropadding = zeropadding;		
+		this.zeropadding = zeropadding;
+		this.resource = resource;
+	}
+	
+	public void setNumberResourceAccessor(NumberResourceAccessor resource) {
+		this.resource = resource;
 	}
 	
 	public TextureRegion[] getImage() {
@@ -64,6 +77,12 @@ public class SkinNumber extends SkinObject {
 			value /= 10;
 		}
 		return values;
+	}
+	
+	public  void draw(SpriteBatch sprite, long time, MainState state) {
+		if(resource != null) {
+			draw(sprite, time, resource.getValue(state));			
+		}
 	}
 	
 	public void draw(SpriteBatch sprite, long time, int value) {

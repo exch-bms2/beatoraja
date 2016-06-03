@@ -104,6 +104,7 @@ public class MusicResult extends MainState {
 		} else {
 			skin = new MusicResultSkin();
 		}
+		this.setSkin(skin);
 
 		detail = new DetailGraphRenderer(resource.getBMSModel());
 	}
@@ -248,25 +249,6 @@ public class MusicResult extends MainState {
 			skin.getMaxcombo(0).draw(sprite, time, score.getCombo());				
 
 			titlefont.draw(sprite, "FAST / SLOW  :  ", 100, 100);
-
-			skin.getJudgeCount(0, 0).draw(sprite, time, score.getPg());
-			skin.getJudgeCount(0, 1).draw(sprite, time, score.getFpg());
-			skin.getJudgeCount(0, 2).draw(sprite, time, score.getSpg());
-			skin.getJudgeCount(1, 0).draw(sprite, time, score.getGr());
-			skin.getJudgeCount(1, 1).draw(sprite, time, score.getFgr());
-			skin.getJudgeCount(1, 2).draw(sprite, time, score.getSgr());
-			skin.getJudgeCount(2, 0).draw(sprite, time, score.getGd());
-			skin.getJudgeCount(2, 1).draw(sprite, time, score.getFgd());
-			skin.getJudgeCount(2, 2).draw(sprite, time, score.getSgd());
-			skin.getJudgeCount(3, 0).draw(sprite, time, score.getBd());
-			skin.getJudgeCount(3, 1).draw(sprite, time, score.getFbd());
-			skin.getJudgeCount(3, 2).draw(sprite, time, score.getSbd());
-			skin.getJudgeCount(4, 0).draw(sprite, time, score.getFpr() + score.getSpr());
-			skin.getJudgeCount(4, 1).draw(sprite, time, score.getFpr());
-			skin.getJudgeCount(4, 2).draw(sprite, time, score.getSpr());
-			skin.getJudgeCount(5, 0).draw(sprite, time, score.getFms() + score.getSms());
-			skin.getJudgeCount(5, 1).draw(sprite, time, score.getFms());
-			skin.getJudgeCount(5, 2).draw(sprite, time, score.getSms());
 
 			skin.getJudgeCount(true).draw(sprite, time,
 					score.getFgr() + score.getFgd() + score.getFbd() + score.getFpr() + score.getFms());
@@ -420,6 +402,27 @@ public class MusicResult extends MainState {
 		}
 	}
 
+	public int getJudgeCount(int judge, boolean fast) {
+		IRScoreData score = resource.getScoreData();
+		if(score != null) {
+			switch(judge) {
+			case 0:
+				return fast ? score.getFpg() : score.getSpg();
+			case 1:
+				return fast ? score.getFgr() : score.getSgr();
+			case 2:
+				return fast ? score.getFgd() : score.getSgd();
+			case 3:
+				return fast ? score.getFbd() : score.getSbd();
+			case 4:
+				return fast ? score.getFpr() : score.getSpr();
+			case 5:
+				return fast ? score.getFms() : score.getSms();
+			}
+		}
+		return 0;
+	}
+	
 	@Override
 	public void dispose() {
 		// TODO Auto-generated method stub
