@@ -782,7 +782,6 @@ public class MusicSelector extends ApplicationAdapter {
                         dir.add(bar);
                     }
                 } else if (currentsongs[selectedindex] instanceof SongBar) {
-                    main.setAuto(0);
                     resource.clear();
                     if (resource.setBMSFile(new File(((SongBar) currentsongs[selectedindex]).getSongData().getPath()),
                             config, 0)) {
@@ -793,7 +792,6 @@ public class MusicSelector extends ApplicationAdapter {
                     }
                 } else if (currentsongs[selectedindex] instanceof GradeBar) {
                     if (((GradeBar) currentsongs[selectedindex]).existsAllSongs()) {
-                        main.setAuto(0);
                         List<File> files = new ArrayList<File>();
                         for (SongData song : ((GradeBar) currentsongs[selectedindex]).getSongDatas()) {
                             files.add(new File(song.getPath()));
@@ -838,7 +836,7 @@ public class MusicSelector extends ApplicationAdapter {
                     }
                 }
             }
-
+            // 5鍵 (オートプレイ)
             if (keystate[4]) {
                 if (currentsongs[selectedindex] instanceof SongBar) {
                     resource.clear();
@@ -849,6 +847,23 @@ public class MusicSelector extends ApplicationAdapter {
                         }
                         main.changeState(MainController.STATE_DECIDE);
 
+                    }
+                } else if (currentsongs[selectedindex] instanceof GradeBar) {
+                    if (((GradeBar) currentsongs[selectedindex]).existsAllSongs()) {
+                        List<File> files = new ArrayList<File>();
+                        for (SongData song : ((GradeBar) currentsongs[selectedindex]).getSongDatas()) {
+                            files.add(new File(song.getPath()));
+                        }
+                        resource.clear();
+                        resource.setCoursetitle(((GradeBar) currentsongs[selectedindex]).getTitle());
+                        resource.setBMSFile(files.get(0), config, 1);
+                        resource.setCourseBMSFiles(files.toArray(new File[0]));
+                        if (bgm != null) {
+                            bgm.stop();
+                        }
+                        main.changeState(MainController.STATE_DECIDE);
+                    } else {
+                        Logger.getGlobal().info("段位の楽曲が揃っていません");
                     }
                 }
             }

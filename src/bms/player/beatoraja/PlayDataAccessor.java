@@ -1,10 +1,6 @@
 package bms.player.beatoraja;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.logging.Logger;
@@ -273,6 +269,14 @@ public class PlayDataAccessor {
 		return new File(this.getReplayDataFilePath(hash, ln, lnmode)).exists();
 	}
 
+	public boolean existsReplayData(String[] hash, boolean ln, int lnmode) {
+		String hashes = "";
+		for(String s : hash) {
+			hashes += s;
+		}
+		return new File(this.getReplayDataFilePath(hashes, ln, lnmode)).exists();
+	}
+
 	/**
 	 * リプレイデータを読み込む
 	 * @param model 対象のBMS
@@ -314,6 +318,79 @@ public class PlayDataAccessor {
 			e.printStackTrace();
 		}
 
+	}
+
+	public ReplayData[] readReplayData(BMSModel[] models, int lnmode) {
+		String[] hashes = new String[models.length];
+		boolean ln = false;
+		for(int i = 0;i < models.length;i++) {
+			hashes[i] = models[i].getHash();
+			ln |= models[i].getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
+					+ models[i].getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH) > 0;
+		}
+		return this.readReplayData(hashes, ln, lnmode);
+	}
+
+	/**
+	 * コースリプレイデータを読み込む
+	 * @param hash 対象のBMSハッシュ群
+	 * @param lnmode LNモード
+	 * @return リプレイデータ
+	 */
+	public ReplayData[] readReplayData(String[] hash, boolean ln , int lnmode) {
+		if (existsReplayData(hash, ln, lnmode)) {
+			Json json = new Json();
+			try {
+				String hashes = "";
+				for(String s : hash) {
+					hashes += s;
+				}
+				return json.fromJson(ReplayData[].class,
+						new FileReader(this.getReplayDataFilePath(hashes, ln, lnmode)));
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			}
+		}
+		return null;
+	}
+
+	public void wrireReplayData(ReplayData[] rd, BMSModel[] models, int lnmode) {
+		String[] hashes = new String[models.length];
+		boolean ln = false;
+		for(int i = 0;i < models.length;i++) {
+			hashes[i] = models[i].getHash();
+			ln |= models[i].getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
+					+ models[i].getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH) > 0;
+		}
+		this.wrireReplayData(rd, hashes, ln, lnmode);
+
+	}
+
+		/**
+         * コースリプレイデータを書き込む
+         * @param rd リプレイデータ
+         * @param hash 対象のBMSハッシュ群
+         * @param lnmode LNモード
+         */
+	public void wrireReplayData(ReplayData[] rd, String[] hash, boolean ln, int lnmode) {
+		File replaydir = new File("replay");
+		if (!replaydir.exists()) {
+			replaydir.mkdirs();
+		}
+		Json json = new Json();
+		json.setOutputType(OutputType.json);
+		try {
+			String hashes = "";
+			for(String s : hash) {
+				hashes += s;
+			}
+			FileWriter fw = new FileWriter(this.getReplayDataFilePath(hashes, ln, lnmode));
+			fw.write(json.prettyPrint(rd));
+			fw.flush();
+			fw.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private String getReplayDataFilePath(BMSModel model, int lnmode) {

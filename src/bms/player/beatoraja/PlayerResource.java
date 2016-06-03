@@ -63,6 +63,8 @@ public class PlayerResource {
 	private int courseindex;
 
 	private ReplayData replay;
+
+	private List<ReplayData> courseReplay = new ArrayList<ReplayData>();
 	/**
 	 * コーススコア
 	 */
@@ -79,6 +81,7 @@ public class PlayerResource {
 		cscore = null;
 		score = null;
 		gauge = null;
+		courseReplay.clear();
 	}
 
 	public boolean setBMSFile(final File f, final Config config, int autoplay) {
@@ -268,5 +271,13 @@ public class PlayerResource {
 
 	public void setCoursetitle(String coursetitle) {
 		this.coursetitle = coursetitle;
+	}
+
+	public ReplayData[] getCourseReplay() {
+		return courseReplay.toArray(new ReplayData[0]);
+	}
+
+	public void addCourseReplay(ReplayData rd) {
+		courseReplay.add(rd);
 	}
 }

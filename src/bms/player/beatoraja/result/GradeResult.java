@@ -36,9 +36,11 @@ public class GradeResult extends ApplicationAdapter {
 	private int oldexscore;
 	private int oldmisscount;
 
-	private long time = 0;
+	private long starttime = 0;
 
     private MusicResultSkin skin;
+
+	private boolean saveReplay = false;
 
 	public GradeResult(MainController main) {
 		this.main = main;
@@ -54,15 +56,33 @@ public class GradeResult extends ApplicationAdapter {
 		title = "result";
 		parameter.characters = title + parameter.characters + "段位認定 " + resource.getCoursetitle() + "不合格";
 		titlefont = generator.generateFont(parameter);
-		time = System.currentTimeMillis();
+		starttime = System.currentTimeMillis();
 
 		updateScoreDatabase();
+
+		// 保存されているリプレイデータがない場合は、EASY以上で自動保存
+		String[] hashes = new String[resource.getCourseBMSModels().length];
+
+		boolean ln = false;
+		for(int i = 0;i < hashes.length;i++) {
+			BMSModel model = resource.getCourseBMSModels()[i];
+			hashes[i] = model.getHash();
+			ln |= model.getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
+					+ model.getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH) > 0;
+		}
+		if (resource.getAutoplay() == 0
+				&& resource.getCourseScoreData() != null
+				&& resource.getCourseScoreData().getClear() >= GrooveGauge.CLEARTYPE_EASY
+				&& !main.getPlayDataAccessor().existsReplayData(hashes,ln,
+				resource.getConfig().getLnmode())) {
+			saveReplayData();
+		}
 	}
 
 	public void render() {
 		final SpriteBatch sprite = main.getSpriteBatch();
 		IRScoreData score = resource.getCourseScoreData();
-
+		int time = (int) (System.currentTimeMillis() - starttime);
 		if (score != null) {
 			if (score.getClear() > GrooveGauge.CLEARTYPE_FAILED) {
 				Gdx.gl.glClearColor(0, 0, 0.4f, 1);
@@ -79,6 +99,9 @@ public class GradeResult extends ApplicationAdapter {
 				titlefont.setColor(Color.WHITE);
 				titlefont.draw(sprite, resource.getCoursetitle()
 						+ (score.getClear() > GrooveGauge.CLEARTYPE_FAILED ? "  合格" : "  不合格"), w * 3 / 4, h / 2);
+				if (saveReplay) {
+					titlefont.draw(sprite, "Replay Saved", w * 3 / 4, h / 4);
+				}
 			}
 			titlefont.draw(sprite, "CLEAR : ", 100, 400);
 			if (oldclear != 0) {
@@ -141,8 +164,8 @@ public class GradeResult extends ApplicationAdapter {
 		}
 		boolean[] keystate = main.getInputProcessor().getKeystate();
 		long[] keytime = main.getInputProcessor().getTime();
-		if (score == null
-				|| ((System.currentTimeMillis() > time + 500 && (keystate[0] || keystate[2] || keystate[4] || keystate[6])))) {
+		if (resource.getAutoplay() == 1
+				|| ((time > 500 && (keystate[0] || keystate[2] || keystate[4] || keystate[6])))) {
 			keytime[0] = keytime[2] = keytime[4] = keytime[6] = 0;
 			main.changeState(MainController.STATE_SELECTMUSIC);
 		}
@@ -176,5 +199,17 @@ public class GradeResult extends ApplicationAdapter {
 				resource.getConfig().getRandom() == 1, resource.isUpdateScore());
 
 		Logger.getGlobal().info("スコアデータベース更新完了 ");
+	}
+
+	private void saveReplayData() {
+		if (resource.getCourseBMSModels() == null && resource.getScoreData() != null) {
+			if (!saveReplay && resource.isUpdateScore()) {
+				// 保存されているリプレイデータがない場合は、EASY以上で自動保存
+				ReplayData[] rd = resource.getCourseReplay();
+				main.getPlayDataAccessor()
+						.wrireReplayData(rd, resource.getCourseBMSModels(), resource.getConfig().getLnmode());
+				saveReplay = true;
+			}
+		}
 	}
 }
