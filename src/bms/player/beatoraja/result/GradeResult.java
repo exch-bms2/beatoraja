@@ -2,7 +2,6 @@ package bms.player.beatoraja.result;
 
 import java.util.logging.Logger;
 
-import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -15,7 +14,7 @@ import bms.model.BMSModel;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.gauge.GrooveGauge;
 
-public class GradeResult extends ApplicationAdapter {
+public class GradeResult extends MainState {
 	
 	// TODO 段位リプレイの保存
 	// TODO 段位ゲージ繊維の表示
