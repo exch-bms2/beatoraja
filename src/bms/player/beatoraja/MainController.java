@@ -20,6 +20,7 @@ import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.result.GradeResult;
 import bms.player.beatoraja.result.MusicResult;
 import bms.player.beatoraja.select.MusicSelector;
+import bms.player.beatoraja.skin.SkinNumber;
 import bms.player.lunaticrave2.*;
 
 import com.badlogic.gdx.*;
@@ -46,7 +47,7 @@ public class MainController extends ApplicationAdapter {
 
 	private BitmapFont systemfont;
 
-	private ApplicationAdapter current;
+	private MainState current;
 
 	private Config config;
 	private int auto;
@@ -143,6 +144,7 @@ public class MainController extends ApplicationAdapter {
 			current = keyconfig;
 			break;
 		}
+		current.setStartTime(System.currentTimeMillis());
 	}
 
 	public void setAuto(int auto) {
@@ -182,7 +184,16 @@ public class MainController extends ApplicationAdapter {
 
 	@Override
 	public void render() {
+		final int time = current.getNowTime();
 		current.render();
+		
+		SkinNumber[] numbers = current.getSkin().getSkinNumbers();
+		sprite.begin();
+		for(SkinNumber number : numbers) {
+			number.draw(sprite, time ,current);
+		}
+		sprite.end();
+
 		// FPS表示切替
 		if (input.getFunctionstate()[0] && input.getFunctiontime()[0] != 0) {
 			showfps = !showfps;

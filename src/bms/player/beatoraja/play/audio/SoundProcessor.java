@@ -1,4 +1,4 @@
-package bms.player.beatoraja.audio;
+package bms.player.beatoraja.play.audio;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -38,7 +38,7 @@ public class SoundProcessor implements AudioProcessor {
 	private Sound[] wavmap = new Sound[0];
 
 	private long[] playmap = new long[0];
-	
+
 	private float progress = 0;
 
 	/**
@@ -53,10 +53,10 @@ public class SoundProcessor implements AudioProcessor {
 
 		this.model = model;
 		// BMS格納ディレクトリ
-		String directorypath = filepath.substring(0,
-				filepath.lastIndexOf(File.separatorChar) + 1);
+		String directorypath = filepath.substring(0, filepath.lastIndexOf(File.separatorChar) + 1);
 
 		List<Sound> sounds = new ArrayList<Sound>();
+		// TODO WAVデータを一旦全部読み込み、スライシングにかけてIDを振り直す
 		for (String name : model.getWavList()) {
 			name = name.substring(0, name.lastIndexOf('.'));
 			Sound sound = null;
@@ -64,13 +64,11 @@ public class SoundProcessor implements AudioProcessor {
 			File oggfile = new File(directorypath + name + ".ogg");
 			try {
 				if (wavfile.exists()) {
-					sound = Gdx.audio.newSound(new FileHandleStream(
-							"tempwav.wav") {
+					sound = Gdx.audio.newSound(new FileHandleStream("tempwav.wav") {
 						@Override
 						public InputStream read() {
 							try {
-								return new ByteArrayInputStream(
-										convertWav(wavfile));
+								return new ByteArrayInputStream(convertWav(wavfile));
 							} catch (UnsupportedAudioFileException e) {
 								e.printStackTrace();
 							} catch (IOException e) {
@@ -92,19 +90,16 @@ public class SoundProcessor implements AudioProcessor {
 					});
 				}
 			} catch (GdxRuntimeException e) {
-				Logger.getGlobal().warning(
-						"音源(wav)ファイル読み込み失敗。" + e.getMessage());
+				Logger.getGlobal().warning("音源(wav)ファイル読み込み失敗。" + e.getMessage());
 				e.printStackTrace();
 			}
 			if (sound == null) {
 				try {
 					if (oggfile.exists()) {
-						sound = Gdx.audio.newSound(Gdx.files.internal(oggfile
-								.getPath()));
+						sound = Gdx.audio.newSound(Gdx.files.internal(oggfile.getPath()));
 					}
 				} catch (GdxRuntimeException e) {
-					Logger.getGlobal().warning(
-							"音源(ogg)ファイル読み込み失敗。" + e.getMessage());
+					Logger.getGlobal().warning("音源(ogg)ファイル読み込み失敗。" + e.getMessage());
 					// e.printStackTrace();
 				}
 			}
@@ -119,31 +114,31 @@ public class SoundProcessor implements AudioProcessor {
 	}
 
 	public void play(int id, int starttime) {
-		if(starttime != 0) {
+		if (starttime != 0) {
 			// TODO 音切りのロジック実装までは途中からの再生は行わない
 			return;
 		}
 		try {
 			if (id != -1 && wavmap[id] != null) {
-				if(playmap[id] != -1) {
-					wavmap[id].stop(playmap[id]);					
+				if (playmap[id] != -1) {
+					wavmap[id].stop(playmap[id]);
 				}
 				playmap[id] = wavmap[id].play();
-			}			
-		} catch(Exception e) {
+			}
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void stop(int id) {
-		if(id == -1) {
+		if (id == -1) {
 			for (Sound s : wavmap) {
 				if (s != null) {
 					s.stop();
 				}
 			}
 		} else {
-			wavmap[id].stop();			
+			wavmap[id].stop();
 		}
 	}
 
@@ -162,26 +157,54 @@ public class SoundProcessor implements AudioProcessor {
 		return progress;
 	}
 
-	private byte[] convertWav(File sourceFile)
-			throws UnsupportedAudioFileException, IOException {
-		
+	/**
+	 * WAVデータをlibGDXの読み込める形に変換する
+	 * @param sourceFile
+	 * @return
+	 * @throws UnsupportedAudioFileException
+	 * @throws IOException
+	 */
+	private byte[] convertWav(File sourceFile) throws UnsupportedAudioFileException, IOException {
+
 		AudioInputStream sourceStream = null;
 		sourceStream = AudioSystem.getAudioInputStream(sourceFile);
 		AudioFormat sourceFormat = sourceStream.getFormat();
 
-		AudioFormat targetFormat = new AudioFormat(Encoding.PCM_SIGNED,
-				sourceFormat.getSampleRate(), 16,
+		AudioFormat targetFormat = new AudioFormat(Encoding.PCM_SIGNED, sourceFormat.getSampleRate(), 16,
 				sourceFormat.getChannels(), sourceFormat.getFrameSize() * 16 / sourceFormat.getSampleSizeInBits(),
 				sourceFormat.getSampleRate(), sourceFormat.isBigEndian());
-//		System.out.println(sourceFormat + " : " +sourceFormat.getFrameSize());
-//		System.out.println(targetFormat + " : " +targetFormat.getFrameSize());
+		// System.out.println(sourceFormat + " : "
+		// +sourceFormat.getFrameSize());
+		// System.out.println(targetFormat + " : "
+		// +targetFormat.getFrameSize());
 
-		AudioInputStream targetStream = AudioSystem.getAudioInputStream(
-				targetFormat, sourceStream);
+		AudioInputStream targetStream = AudioSystem.getAudioInputStream(targetFormat, sourceStream);
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		AudioSystem.write(targetStream, Type.WAVE, bos);
 
 		return bos.toByteArray();
 	}
 
+	/**
+	 * WAVデータを指定の開始時間、間隔で切り出す
+	 * @param is
+	 * @param starttime
+	 * @param duration
+	 * @return
+	 * @throws UnsupportedAudioFileException
+	 * @throws IOException
+	 */
+	private byte[] sliceWav(InputStream is, int starttime, int duration) throws UnsupportedAudioFileException, IOException {
+		AudioInputStream sourceStream = AudioSystem.getAudioInputStream(is);
+		AudioFormat format = sourceStream.getFormat();
+
+		int bytesPerSecond = format.getFrameSize() * (int) format.getFrameRate();
+		sourceStream.skip(starttime * bytesPerSecond / 1000);
+		long framesOfAudioToCopy = duration * (int) format.getFrameRate() / 1000;
+		AudioInputStream shortenedStream = new AudioInputStream(is, format, framesOfAudioToCopy);
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		AudioSystem.write(shortenedStream, Type.WAVE, bos);
+
+		return bos.toByteArray();
+	}
 }

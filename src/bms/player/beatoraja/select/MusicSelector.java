@@ -28,7 +28,7 @@ import com.badlogic.gdx.utils.Json;
  * 
  * @author exch
  */
-public class MusicSelector extends ApplicationAdapter {
+public class MusicSelector extends MainState {
 
 	// TODO フォルダのクリアランプ/スコア状況内訳
 	// TODO バナー、テキスト表示
@@ -114,7 +114,6 @@ public class MusicSelector extends ApplicationAdapter {
 	private AssistOptionRenderer aoption;
 	private DetailOptionRenderer doption;
 
-	private long starttime;
 	/**
 	 * スコアデータのキャッシュ
 	 */
@@ -261,12 +260,12 @@ public class MusicSelector extends ApplicationAdapter {
 		} else {
 			skin = new MusicSelectSkin();
 		}
-
+		this.setSkin(skin);
+		
 		option = new GameOptionRenderer(main.getShapeRenderer(), main.getSpriteBatch(), titlefont, config);
 		aoption = new AssistOptionRenderer(main.getShapeRenderer(), main.getSpriteBatch(), titlefont, config);
 		doption = new DetailOptionRenderer(main.getShapeRenderer(), main.getSpriteBatch(), titlefont, config);
 
-		starttime = System.currentTimeMillis();
 	}
 
 	public void render() {
@@ -286,7 +285,7 @@ public class MusicSelector extends ApplicationAdapter {
         // sprite.end();
         // }
 
-        final long time = System.currentTimeMillis() - starttime;
+        final int time = getNowTime();
 
         sprite.begin();
         for (SkinImage part : skin.getSkinPart()) {

@@ -1,6 +1,7 @@
 package bms.player.beatoraja.config;
 
 import bms.player.beatoraja.*;
+import bms.player.beatoraja.decide.MusicDecideSkin;
 import bms.player.beatoraja.input.*;
 
 import com.badlogic.gdx.ApplicationAdapter;
@@ -20,7 +21,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
  * 
  * @author exch
  */
-public class KeyConfiguration extends ApplicationAdapter {
+public class KeyConfiguration extends MainState {
 
 	private MainController main;
 	private PlayerResource resource;
@@ -54,6 +55,9 @@ public class KeyConfiguration extends ApplicationAdapter {
 
 	public KeyConfiguration(MainController main) {
 		this.main = main;
+		
+		this.setSkin(new MusicDecideSkin());
+
 	}
 
 	public void create(PlayerResource resource) {
@@ -152,5 +156,11 @@ public class KeyConfiguration extends ApplicationAdapter {
 			input.setExitPressed(false);
 			main.changeState(MainController.STATE_SELECTMUSIC);
 		}
+	}
+
+	@Override
+	public void dispose() {
+		// TODO Auto-generated method stub
+		
 	}
 }

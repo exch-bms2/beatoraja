@@ -1,4 +1,4 @@
-package bms.player.beatoraja.audio;
+package bms.player.beatoraja.play.audio;
 
 import bms.model.BMSModel;
 

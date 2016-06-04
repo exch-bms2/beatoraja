@@ -29,8 +29,8 @@ public abstract class LR2SkinLoader {
 		float dstw = 1280;
 		float dsth = 720;
 
-		List<SkinImage> partlist = new ArrayList();
-		List<SkinNumber> numlist = new ArrayList();
+		List<SkinImage> partlist = new ArrayList<SkinImage>();
+		List<SkinNumber> numlist = new ArrayList<SkinNumber>();
 		SkinImage part = null;
 		SkinNumber num = null;
 		BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(f), "MS932"));
@@ -125,19 +125,19 @@ public abstract class LR2SkinLoader {
 									int x = values[3];
 									int y = values[4];
 									int w = values[5];
-									if(w == -1) {
+									if (w == -1) {
 										w = imagelist.get(gr).getWidth();
 									}
 									int h = values[6];
-									if(h == -1) {
+									if (h == -1) {
 										h = imagelist.get(gr).getHeight();
 									}
 									int divx = values[7];
-									if(divx <= 0) {
+									if (divx <= 0) {
 										divx = 1;
 									}
 									int divy = values[8];
-									if(divy <= 0) {
+									if (divy <= 0) {
 										divy = 1;
 									}
 									TextureRegion[] images = new TextureRegion[divx * divy];
@@ -151,6 +151,7 @@ public abstract class LR2SkinLoader {
 									part.setImage(images, values[9]);
 									part.setTiming(values[10]);
 									partlist.add(part);
+//									System.out.println("Object Added - " + (part.getTiming()));
 								} catch (NumberFormatException e) {
 									e.printStackTrace();
 								}
@@ -160,19 +161,17 @@ public abstract class LR2SkinLoader {
 							if (part != null) {
 								try {
 									int[] values = parseInt(str);
-									part.setDestination(values[2], values[3] * dstw
-											/ srcw, dsth - (values[4] + values[6]) * dsth / srch, values[5]
-											* dstw / srcw, values[6] * dsth / srch,
-											values[7], values[8],
-											values[9], values[10],
-											values[11], values[12],
-											values[13], values[14],values[15],values[16],values[17],values[18],values[19],values[20]);										
+									part.setDestination(values[2], values[3] * dstw / srcw, dsth
+											- (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw, values[6]
+											* dsth / srch, values[7], values[8], values[9], values[10], values[11],
+											values[12], values[13], values[14], values[15], values[16], values[17],
+											values[18], values[19], values[20]);
 								} catch (NumberFormatException e) {
 									e.printStackTrace();
 								}
 							}
 						}
-						
+
 						if (str[0].equals("#SRC_NUMBER")) {
 							int gr = Integer.parseInt(str[2]);
 							if (gr < imagelist.size() && imagelist.get(gr) != null) {
@@ -181,19 +180,19 @@ public abstract class LR2SkinLoader {
 									int x = values[3];
 									int y = values[4];
 									int w = values[5];
-									if(w == -1) {
+									if (w == -1) {
 										w = imagelist.get(gr).getWidth();
 									}
 									int h = values[6];
-									if(h == -1) {
+									if (h == -1) {
 										h = imagelist.get(gr).getHeight();
 									}
 									int divx = values[7];
-									if(divx <= 0) {
+									if (divx <= 0) {
 										divx = 1;
 									}
 									int divy = values[8];
-									if(divy <= 0) {
+									if (divy <= 0) {
 										divy = 1;
 									}
 									TextureRegion[] images = new TextureRegion[divx * divy];
@@ -203,37 +202,79 @@ public abstract class LR2SkinLoader {
 													* i, y + h / divy * j, w / divx, h / divy);
 										}
 									}
-									num = new SkinNumber(images, values[9],values[13], 0);
+									num = new SkinNumber(images, values[9], values[13], 0);
 									num.setId(values[11]);
+									if(num.getId() == 90) {
+										num.setNumberResourceAccessor(NumberResourceAccessor.MAX_BPM);
+									}
+									if(num.getId() == 91) {
+										num.setNumberResourceAccessor(NumberResourceAccessor.MIN_BPM);
+									}
+
+									
+									if(num.getId() == 101) {
+										num.setNumberResourceAccessor(NumberResourceAccessor.SCORE);
+									}
+									if(num.getId() == 110) {
+										num.setNumberResourceAccessor(NumberResourceAccessor.PERFECT);
+									}
+									if(num.getId() == 111) {
+										num.setNumberResourceAccessor(NumberResourceAccessor.GREAT);
+									}
+									if(num.getId() == 112) {
+										num.setNumberResourceAccessor(NumberResourceAccessor.GOOD);
+									}
+									if(num.getId() == 113) {
+										num.setNumberResourceAccessor(NumberResourceAccessor.BAD);
+									}
+									if(num.getId() == 114) {
+										num.setNumberResourceAccessor(NumberResourceAccessor.POOR);
+									}
+
+									if(num.getId() == 121) {
+										num.setNumberResourceAccessor(NumberResourceAccessor.TARGET_SCORE);
+									}
+
+									if(num.getId() == 160) {
+										num.setNumberResourceAccessor(NumberResourceAccessor.NOW_BPM);
+									}
+									if(num.getId() == 163) {
+										num.setNumberResourceAccessor(NumberResourceAccessor.TIMELEFT_MINUTE);
+									}
+									if(num.getId() == 164) {
+										num.setNumberResourceAccessor(NumberResourceAccessor.TIMELEFT_SECOND);
+									}
+
+
 									numlist.add(num);
+//									System.out.println("Number Added - " + (num.getId()));
 								} catch (NumberFormatException e) {
 									e.printStackTrace();
 								}
-							}							
+							}
 						}
 						if (str[0].equals("#DST_NUMBER")) {
 							if (num != null) {
 								try {
 									int[] values = parseInt(str);
-									num.setDestination(values[2], values[3] * dstw
-											/ srcw, dsth - (values[4] + values[6]) * dsth / srch, values[5]
-											* dstw / srcw, values[6] * dsth / srch,
-											values[7], values[8],
-											values[9], values[10],
-											values[11], values[12],
-											values[13], values[14],values[15],values[16],values[17],values[18],values[19],values[20]);										
+									num.setDestination(values[2], values[3] * dstw / srcw, dsth
+											- (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw, values[6]
+											* dsth / srch, values[7], values[8], values[9], values[10], values[11],
+											values[12], values[13], values[14], values[15], values[16], values[17],
+											values[18], values[19], values[20]);
 								} catch (NumberFormatException e) {
 									e.printStackTrace();
 								}
-							}							
+							}
 						}
-
 
 						for (CommandWord cm : commands) {
 							if (str[0].equals("#" + cm.str)) {
 								cm.execute(str);
 							}
 						}
+					} else {
+//						System.out.println("line skip : " + line);
 					}
 
 					// if (str[0].equals("#DST_SLIDER")) {
@@ -251,14 +292,14 @@ public abstract class LR2SkinLoader {
 		skin.setSkinPart(partlist.toArray(new SkinImage[0]));
 		skin.setSkinNumbers(numlist.toArray(new SkinNumber[0]));
 	}
-	
+
 	private int[] parseInt(String[] s) {
 		int[] result = new int[21];
-		for(int i = 2;i < s.length;i++) {
+		for (int i = 2; i < s.length; i++) {
 			try {
-				result[i] =  Integer.parseInt(s[i]);
-			} catch(Exception e) {
-				
+				result[i] = Integer.parseInt(s[i]);
+			} catch (Exception e) {
+
 			}
 		}
 		return result;

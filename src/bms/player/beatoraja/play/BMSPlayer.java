@@ -8,12 +8,12 @@ import org.lwjgl.opengl.GL11;
 
 import bms.model.*;
 import bms.player.beatoraja.*;
-import bms.player.beatoraja.audio.AudioProcessor;
-import bms.player.beatoraja.bga.BGAProcessor;
 import bms.player.beatoraja.gauge.*;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyInputLog;
 import bms.player.beatoraja.pattern.*;
+import bms.player.beatoraja.play.audio.AudioProcessor;
+import bms.player.beatoraja.play.bga.BGAProcessor;
 import bms.player.beatoraja.skin.LR2PlaySkinLoader;
 import bms.player.beatoraja.skin.SkinNumber;
 import bms.player.beatoraja.skin.SkinImage;
@@ -34,7 +34,7 @@ import com.badlogic.gdx.math.Rectangle;
  * 
  * @author exch
  */
-public class BMSPlayer extends ApplicationAdapter {
+public class BMSPlayer extends MainState {
 
 	// TODO GLAssistから起動すると楽曲ロード中に止まる
 
@@ -85,11 +85,6 @@ public class BMSPlayer extends ApplicationAdapter {
 
 	private int prevrendertime;
 
-	private int playingbgaid = -1;
-	private int playinglayerid = -1;
-
-	private int[] misslayer = null;
-
 	private int assist = 0;
 
 	private List<PatternModifyLog> pattern = new ArrayList<PatternModifyLog>();
@@ -102,6 +97,27 @@ public class BMSPlayer extends ApplicationAdapter {
 	private List<Float> gaugelog = new ArrayList<Float>();
 	
 	private int playspeed = 100;
+	
+	/**
+	 * 処理済ノート数
+	 */
+	private int notes;
+	/**
+	 * 再生中のBGAID
+	 */
+	private int playingbgaid = -1;
+	/**
+	 * 再生中のレイヤーID
+	 */
+	private int playinglayerid = -1;
+	/**
+	 * ミスレイヤー表示開始時間
+	 */
+	private int misslayertime;
+	/**
+	 * 現在のミスレイヤーシーケンス
+	 */
+	private int[] misslayer = null;
 
 	public BMSPlayer(MainController main, PlayerResource resource) {
 		this.main = main;
@@ -298,7 +314,6 @@ public class BMSPlayer extends ApplicationAdapter {
 			new LaneShuffleModifier(LaneShuffleModifier.RANDOM_EX),
 			new NoteShuffleModifier(NoteShuffleModifier.S_RANDOM_EX) };
 
-	@Override
 	public void create() {
 		final ShapeRenderer shape = main.getShapeRenderer();
 		final SpriteBatch sprite = main.getSpriteBatch();
@@ -315,6 +330,7 @@ public class BMSPlayer extends ApplicationAdapter {
 		} else {
 			skin = new PlaySkin(model.getUseKeys());
 		}
+		this.setSkin(skin);
 		skin.setText(resource.getBMSModel());
 
 		input = main.getInputProcessor();
@@ -662,12 +678,6 @@ public class BMSPlayer extends ApplicationAdapter {
 		float h = 720;
 
 		// 背景描画
-		if (resource.getBGAManager().getStagefileData() != null) {
-			sprite.begin();
-			sprite.draw(resource.getBGAManager().getStagefileData(), 0, 0, w, h);
-			sprite.end();
-		}
-
 		sprite.begin();
 		for (SkinImage part : skin.getSkinPart()) {
 			int[] op = part.getOption();
@@ -770,26 +780,12 @@ public class BMSPlayer extends ApplicationAdapter {
 
 		// ゲージ描画
 		Rectangle gr = skin.getGaugeRegion();
-		SkinNumber[] gaugecount = skin.getGaugeCount();
 		shape.begin(ShapeType.Filled);
 		shape.setColor(Color.valueOf("#001000"));
-		shape.rect(gr.x, gr.y, gr.width, gr.height);
-		Rectangle gcr0 = gaugecount[0].getDestination(time);
-		shape.rect(gcr0.x, gcr0.y - 2, gcr0.width * 4, gcr0.height + 4);
+		shape.rect(gr.x, gr.y, gr.width, gr.height + 24);
 		shape.end();
 		gauge.draw(skin, sprite, gr.x, gr.y, gr.width, gr.height);
-		sprite.begin();
-		gaugecount[0].draw(sprite, 0, (int) gauge.getValue());
-		gaugecount[1].draw(sprite, 0, (int) (gauge.getValue() * 10));
-		sprite.end();
 
-		Gdx.gl.glEnable(GL11.GL_BLEND);
-		Gdx.gl.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-		shape.begin(ShapeType.Filled);
-		shape.setColor(0, 0, 0, 0.7f);
-		shape.rect(0, 0, 1280, 25);
-		shape.end();
-		Gdx.gl.glDisable(GL11.GL_BLEND);
 		// ジャッジカウント描画
 		Rectangle judge = skin.getJudgecountregion();
 		Gdx.gl.glEnable(GL11.GL_BLEND);
@@ -799,36 +795,6 @@ public class BMSPlayer extends ApplicationAdapter {
 		shape.rect(judge.x, judge.y, judge.width, judge.height);
 		shape.end();
 		Gdx.gl.glDisable(GL11.GL_BLEND);
-
-		SkinNumber[][] judgecount = skin.getJudgeCount();
-		sprite.begin();
-		for (int i = 0; i < 6; i++) {
-			for (int j = 0; j < 2; j++) {
-				judgecount[i][j].draw(sprite, 0, this.judge.getJudgeCount(i, j == 0));
-			}
-		}
-		sprite.end();
-		// BPM描画
-		sprite.begin();
-		if(minbpm != maxbpm) {
-			skin.getBPMNumber()[0].draw(sprite, 0, minbpm);
-			skin.getBPMNumber()[2].draw(sprite, 0, maxbpm);			
-		}
-		skin.getBPMNumber()[1].draw(sprite, 0, (int) lanerender.getNowBPM());
-		sprite.end();
-		// ハイスピード、デュレーション描画
-		sprite.begin();
-		titlefont.setColor(Color.WHITE);
-		titlefont.draw(sprite, "HISPEED        DURATION", 30, 22);
-		skin.getHispeed()[0].draw(sprite, time, (int) lanerender.getHispeed());
-		skin.getHispeed()[1].draw(sprite, time, (int) (lanerender.getHispeed() * 100));
-		skin.getDuration().draw(sprite, time, lanerender.getGreenValue());
-		sprite.end();
-		// 残り時間描画
-		sprite.begin();
-		skin.getTimeCount()[0].draw(sprite, 0, (playtime - time + 1000) / 60000);
-		skin.getTimeCount()[1].draw(sprite, 0, ((playtime - time + 1000) / 1000) % 60);
-		sprite.end();
 
 		prevrendertime = time;
 	}
@@ -866,14 +832,14 @@ public class BMSPlayer extends ApplicationAdapter {
 	public LaneRenderer getLaneRenderer() {
 		return lanerender;
 	}
+	
+	public int getJudgeCount(int judge, boolean fast) {
+		return this.judge.getJudgeCount(judge, fast);
+	}
 
 	public JudgeManager getJudgeManager() {
 		return judge;
 	}
-
-	private int notes;
-
-	private int misslayertime;
 
 	public void update(int lane, int judge, int time, int fase) {
 		if (judge < 5) {
@@ -938,6 +904,11 @@ public class BMSPlayer extends ApplicationAdapter {
 		return keylog;
 	}
 
+	/**
+	 * キー入力処理用スレッド
+	 * 
+	 * @author exch
+	 */
 	class KeyInputThread extends Thread {
 		private boolean stop = false;
 		private long frametimes = 1;
@@ -977,6 +948,11 @@ public class BMSPlayer extends ApplicationAdapter {
 
 	}
 
+	/**
+	 * BGレーン再生用スレッド
+	 * 
+	 * @author exch
+	 */
 	class AutoplayThread extends Thread {
 
 		private boolean stop = false;
@@ -1007,5 +983,54 @@ public class BMSPlayer extends ApplicationAdapter {
 			}
 
 		}
+	}
+
+	@Override
+	public void create(PlayerResource resource) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public int getMaxcombo() {
+		return super.getMaxcombo();
+	}
+
+	@Override
+	public int getMinBPM() {
+		return minbpm;
+	}
+
+	@Override
+	public int getBPM() {
+		return (int) lanerender.getNowBPM();
+	}
+
+	@Override
+	public int getMaxBPM() {
+		return maxbpm;
+	}
+	
+	@Override
+	public float getHispeed() {
+		return lanerender.getHispeed();
+	}
+
+	@Override
+	public int getDuration() {
+		return lanerender.getGreenValue();
+	}
+
+	@Override
+	public float getGrooveGauge() {
+		return gauge.getValue();
+	}
+
+	public int getTimeleftMinute() {
+		return (int) ((playtime - (int) (starttime != 0 ? System.currentTimeMillis() - starttime : 0) + 1000) / 60000);
+	}
+
+	public int getTimeleftSecond() {
+		return ((playtime - (int) (starttime != 0 ? System.currentTimeMillis() - starttime : 0) + 1000) / 1000) % 60;
 	}
 }

@@ -1,4 +1,4 @@
-package bms.player.beatoraja.bga;
+package bms.player.beatoraja.play.bga;
 
 import java.io.File;
 import java.util.*;

@@ -1,4 +1,4 @@
-package bms.player.beatoraja.bga;
+package bms.player.beatoraja.play.bga;
 
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
