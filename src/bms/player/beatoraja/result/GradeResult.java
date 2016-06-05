@@ -2,6 +2,7 @@ package bms.player.beatoraja.result;
 
 import java.util.logging.Logger;
 
+import bms.player.beatoraja.skin.SkinImage;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -16,7 +17,7 @@ import bms.player.beatoraja.gauge.GrooveGauge;
 import bms.player.beatoraja.skin.SkinImage;
 
 public class GradeResult extends MainState {
-	
+
 	// TODO 段位リプレイの保存
 	// TODO 段位ゲージ繊維の表示
 
@@ -37,12 +38,14 @@ public class GradeResult extends MainState {
 	private int oldmisscount;
 	private int oldcombo;
 
-    private MusicResultSkin skin;
+	private MusicResultSkin skin;
+
+	private boolean saveReplay = false;
 
 	public GradeResult(MainController main) {
 		this.main = main;
-		
-        skin = new MusicResultSkin();
+
+		skin = new MusicResultSkin();
 		this.setSkin(skin);
 	}
 
@@ -55,6 +58,22 @@ public class GradeResult extends MainState {
 		parameter.characters = title + parameter.characters + "段位認定 " + resource.getCoursetitle() + "不合格";
 		titlefont = generator.generateFont(parameter);
 		updateScoreDatabase();
+
+		// 保存されているリプレイデータがない場合は、EASY以上で自動保存
+		String[] hashes = new String[resource.getCourseBMSModels().length];
+
+		boolean ln = false;
+		for (int i = 0; i < hashes.length; i++) {
+			BMSModel model = resource.getCourseBMSModels()[i];
+			hashes[i] = model.getHash();
+			ln |= model.getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
+					+ model.getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH) > 0;
+		}
+		if (resource.getAutoplay() == 0 && resource.getCourseScoreData() != null
+				&& resource.getCourseScoreData().getClear() >= GrooveGauge.CLEARTYPE_EASY
+				&& !main.getPlayDataAccessor().existsReplayData(hashes, ln, resource.getConfig().getLnmode())) {
+			saveReplayData();
+		}
 	}
 
 	public void render() {
@@ -78,17 +97,19 @@ public class GradeResult extends MainState {
 				titlefont.setColor(Color.WHITE);
 				titlefont.draw(sprite, resource.getCoursetitle()
 						+ (score.getClear() > GrooveGauge.CLEARTYPE_FAILED ? "  合格" : "  不合格"), w * 3 / 4, h / 2);
-			}
-			for(SkinImage img : skin.getSkinPart()) {
-				if(img.getTiming() != 2) {
-					img.draw(sprite, time);				
+				if (saveReplay) {
+					titlefont.draw(sprite, "Replay Saved", w * 3 / 4, h / 4);
 				}
 			}
-
+			for (SkinImage img : skin.getSkinPart()) {
+				if (img.getTiming() != 2) {
+					img.draw(sprite, time);
+				}
+			}
 			if (score != null) {
 				// totalnotes
 				skin.getTotalnotes().draw(sprite, time, resource.getScoreData().getNotes());
-				
+
 				if (oldclear != 0) {
 					titlefont.setColor(Color.valueOf(LAMP[oldclear]));
 					titlefont.draw(sprite, CLEAR[oldclear] + " -> ", 240, 425);
@@ -100,17 +121,20 @@ public class GradeResult extends MainState {
 				if (oldexscore != 0) {
 					titlefont.setColor(Color.WHITE);
 					titlefont.draw(sprite, " -> ", 360, 395);
-					skin.getScore(score.getExscore() > oldexscore ? 2 : 3).draw(sprite, time, Math.abs(score.getExscore() - oldexscore));
+					skin.getScore(score.getExscore() > oldexscore ? 2 : 3).draw(sprite, time,
+							Math.abs(score.getExscore() - oldexscore));
 				}
 
 				if (oldmisscount < 65535) {
 					titlefont.draw(sprite, " -> ", 360, 365);
-					skin.getMisscount(score.getMinbp() > oldmisscount ? 3 : 2).draw(sprite, time, Math.abs(score.getMinbp() - oldmisscount));
+					skin.getMisscount(score.getMinbp() > oldmisscount ? 3 : 2).draw(sprite, time,
+							Math.abs(score.getMinbp() - oldmisscount));
 				}
-				
-				if(oldcombo > 0) {
+
+				if (oldcombo > 0) {
 					titlefont.draw(sprite, " -> ", 360, 335);
-					skin.getMaxcombo(score.getCombo() > oldcombo ? 2 : 3).draw(sprite, time, Math.abs(score.getCombo() - oldcombo));
+					skin.getMaxcombo(score.getCombo() > oldcombo ? 2 : 3).draw(sprite, time,
+							Math.abs(score.getCombo() - oldcombo));
 				}
 
 				titlefont.draw(sprite, "FAST / SLOW  :  ", 100, 100);
@@ -120,9 +144,11 @@ public class GradeResult extends MainState {
 				skin.getJudgeCount(false).draw(sprite, time,
 						score.getSgr() + score.getSgd() + score.getSbd() + score.getSpr() + score.getSms());
 			}
-            
-    		skin.getJudgeCount(true).draw(sprite, time, score.getFgr() + score.getFgd() + score.getFbd() + score.getFpr() + score.getFms());
-    		skin.getJudgeCount(false).draw(sprite, time, score.getSgr() + score.getSgd() + score.getSbd() + score.getSpr() + score.getSms());
+
+			skin.getJudgeCount(true).draw(sprite, time,
+					score.getFgr() + score.getFgd() + score.getFbd() + score.getFpr() + score.getFms());
+			skin.getJudgeCount(false).draw(sprite, time,
+					score.getSgr() + score.getSgd() + score.getSbd() + score.getSpr() + score.getSms());
 			sprite.end();
 		}
 		boolean[] keystate = main.getInputProcessor().getKeystate();
@@ -131,6 +157,10 @@ public class GradeResult extends MainState {
 				|| ((System.currentTimeMillis() > time + 500 && (keystate[0] || keystate[2] || keystate[4] || keystate[6])))) {
 			keytime[0] = keytime[2] = keytime[4] = keytime[6] = 0;
 			main.changeState(MainController.STATE_SELECTMUSIC);
+		}
+
+		if (resource.getAutoplay() == 0 && main.getInputProcessor().getNumberState()[1]) {
+			saveReplayData();
 		}
 	}
 
@@ -146,9 +176,9 @@ public class GradeResult extends MainState {
 			score = new IRScoreData();
 		}
 		boolean ln = false;
-		for(BMSModel model : models) {
+		for (BMSModel model : models) {
 			ln |= model.getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
-					+ model.getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH) > 0;			
+					+ model.getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH) > 0;
 		}
 		if (ln && resource.getConfig().getLnmode() == 2) {
 			oldclear = score.getExclear();
@@ -167,8 +197,8 @@ public class GradeResult extends MainState {
 
 	public int getJudgeCount(int judge, boolean fast) {
 		IRScoreData score = resource.getCourseScoreData();
-		if(score != null) {
-			switch(judge) {
+		if (score != null) {
+			switch (judge) {
 			case 0:
 				return fast ? score.getFpg() : score.getSpg();
 			case 1:
@@ -188,8 +218,8 @@ public class GradeResult extends MainState {
 
 	@Override
 	public int getScore() {
-		if(resource.getScoreData() != null) {
-			return resource.getScoreData().getExscore();			
+		if (resource.getScoreData() != null) {
+			return resource.getScoreData().getExscore();
 		}
 		return Integer.MIN_VALUE;
 	}
@@ -201,24 +231,24 @@ public class GradeResult extends MainState {
 
 	@Override
 	public int getMaxcombo() {
-		if(resource.getScoreData() != null) {
-			return resource.getScoreData().getCombo();			
+		if (resource.getScoreData() != null) {
+			return resource.getScoreData().getCombo();
 		}
 		return Integer.MIN_VALUE;
 	}
 
 	@Override
 	public int getTargetMaxcombo() {
-		if(oldcombo > 0) {
-			return oldcombo;			
+		if (oldcombo > 0) {
+			return oldcombo;
 		}
 		return Integer.MIN_VALUE;
 	}
 
 	@Override
 	public int getMisscount() {
-		if(resource.getScoreData() != null) {
-			return resource.getScoreData().getMinbp();			
+		if (resource.getScoreData() != null) {
+			return resource.getScoreData().getMinbp();
 		}
 		return Integer.MIN_VALUE;
 	}
@@ -231,6 +261,18 @@ public class GradeResult extends MainState {
 	@Override
 	public void dispose() {
 		// TODO Auto-generated method stub
-		
+
+	}
+
+	private void saveReplayData() {
+		if (resource.getCourseScoreData() != null) {
+			if (!saveReplay && resource.isUpdateScore()) {
+				// 保存されているリプレイデータがない場合は、EASY以上で自動保存
+				ReplayData[] rd = resource.getCourseReplay();
+				main.getPlayDataAccessor().wrireReplayData(rd, resource.getCourseBMSModels(),
+						resource.getConfig().getLnmode());
+				saveReplay = true;
+			}
+		}
 	}
 }

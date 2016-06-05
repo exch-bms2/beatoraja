@@ -91,6 +91,10 @@ public class MusicResult extends MainState {
 						resource.getConfig().getLnmode())) {
 			saveReplayData();
 		}
+		// コースモードの場合はリプレイデータをストックする
+		if(resource.getCourseBMSModels() != null) {
+			resource.addCourseReplay(resource.getReplayData());
+		}
 
 		if (resource.getConfig().getLr2resultskin() != null) {
 			LR2ResultSkinLoader loader = new LR2ResultSkinLoader();

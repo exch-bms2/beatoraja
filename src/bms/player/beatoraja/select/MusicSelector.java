@@ -589,6 +589,10 @@ public class MusicSelector extends MainState {
                 titlefont.draw(sprite, "CLEAR / PLAY : " + score.getClearcount() + " / " + score.getPlaycount(), 100,
                         180);
             }
+            if (((GradeBar) currentsongs[selectedindex]).existsReplayData()) {
+                titlefont.setColor(Color.GREEN);
+                titlefont.draw(sprite, "7 KEY : Replay", 450, 300);
+            }
         }
         if (currentsongs[selectedindex] instanceof TableLevelBar) {
         	titlefont.draw(sprite, currentsongs[selectedindex].getTitle(), 100, 600);
@@ -781,7 +785,6 @@ public class MusicSelector extends MainState {
                         dir.add(bar);
                     }
                 } else if (currentsongs[selectedindex] instanceof SongBar) {
-                    main.setAuto(0);
                     resource.clear();
                     if (resource.setBMSFile(new File(((SongBar) currentsongs[selectedindex]).getSongData().getPath()),
                             config, 0)) {
@@ -792,7 +795,6 @@ public class MusicSelector extends MainState {
                     }
                 } else if (currentsongs[selectedindex] instanceof GradeBar) {
                     if (((GradeBar) currentsongs[selectedindex]).existsAllSongs()) {
-                        main.setAuto(0);
                         List<File> files = new ArrayList<File>();
                         for (SongData song : ((GradeBar) currentsongs[selectedindex]).getSongDatas()) {
                             files.add(new File(song.getPath()));
@@ -837,7 +839,7 @@ public class MusicSelector extends MainState {
                     }
                 }
             }
-
+            // 5鍵 (オートプレイ)
             if (keystate[4]) {
                 if (currentsongs[selectedindex] instanceof SongBar) {
                     resource.clear();
@@ -848,6 +850,23 @@ public class MusicSelector extends MainState {
                         }
                         main.changeState(MainController.STATE_DECIDE);
 
+                    }
+                } else if (currentsongs[selectedindex] instanceof GradeBar) {
+                    if (((GradeBar) currentsongs[selectedindex]).existsAllSongs()) {
+                        List<File> files = new ArrayList<File>();
+                        for (SongData song : ((GradeBar) currentsongs[selectedindex]).getSongDatas()) {
+                            files.add(new File(song.getPath()));
+                        }
+                        resource.clear();
+                        resource.setCoursetitle(((GradeBar) currentsongs[selectedindex]).getTitle());
+                        resource.setBMSFile(files.get(0), config, 1);
+                        resource.setCourseBMSFiles(files.toArray(new File[0]));
+                        if (bgm != null) {
+                            bgm.stop();
+                        }
+                        main.changeState(MainController.STATE_DECIDE);
+                    } else {
+                        Logger.getGlobal().info("段位の楽曲が揃っていません");
                     }
                 }
             }
@@ -860,6 +879,23 @@ public class MusicSelector extends MainState {
                             bgm.stop();
                         }
                         main.changeState(MainController.STATE_DECIDE);
+                    }
+                } else if (currentsongs[selectedindex] instanceof GradeBar) {
+                    if (((GradeBar) currentsongs[selectedindex]).existsAllSongs()) {
+                        List<File> files = new ArrayList<File>();
+                        for (SongData song : ((GradeBar) currentsongs[selectedindex]).getSongDatas()) {
+                            files.add(new File(song.getPath()));
+                        }
+                        resource.clear();
+                        resource.setCoursetitle(((GradeBar) currentsongs[selectedindex]).getTitle());
+                        resource.setBMSFile(files.get(0), config, 2);
+                        resource.setCourseBMSFiles(files.toArray(new File[0]));
+                        if (bgm != null) {
+                            bgm.stop();
+                        }
+                        main.changeState(MainController.STATE_DECIDE);
+                    } else {
+                        Logger.getGlobal().info("段位の楽曲が揃っていません");
                     }
                 }
             }
@@ -1030,11 +1066,11 @@ public class MusicSelector extends MainState {
                 if (currentsongs[i] instanceof GradeBar) {
                     GradeBar gb = (GradeBar) currentsongs[i];
                     if (gb.existsAllSongs()) {
-                        String hash = "";
+                        String[] hash = new String[gb.getSongDatas().length];
                         boolean ln = false;
-                        for (SongData sd : gb.getSongDatas()) {
-                            hash += sd.getHash();
-                            ln |= sd.getLongnote() == 1;
+                        for (int j = 0;j < gb.getSongDatas().length;j++) {
+                            hash[j] = gb.getSongDatas()[j].getHash();
+                            ln |= gb.getSongDatas()[j].getLongnote() == 1;
                         }
                         gb.setScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), false));
                         if (gb.getScore() != null && config.getLnmode() == 2 && ln) {
@@ -1044,6 +1080,8 @@ public class MusicSelector extends MainState {
                         if (gb.getMirrorScore() != null && config.getLnmode() == 2 && ln) {
                             gb.getMirrorScore().setClear(gb.getMirrorScore().getExclear());
                         }
+                        ((GradeBar) currentsongs[i]).setExistsReplayData(main.getPlayDataAccessor().existsReplayData(
+                                hash, ln, config.getLnmode()));
                     }
                 }
             }

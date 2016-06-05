@@ -19,7 +19,24 @@ public abstract class Bar {
 	}
 }
 
-class SongBar extends Bar {
+abstract class SelectableBar extends Bar {
+
+	/**
+	 * リプレイデータが存在するか
+	 */
+	private boolean existsReplay;
+
+	public boolean existsReplayData() {
+		return existsReplay;
+		}
+
+	public void setExistsReplayData(boolean existsReplay) {
+		this.existsReplay = existsReplay;
+		}
+
+}
+
+class SongBar extends SelectableBar {
 
 	private SongData song;
 
@@ -39,14 +56,6 @@ class SongBar extends Bar {
 	@Override
 	public String getTitle() {
 		return song.getTitle();
-	}
-
-	public boolean existsReplayData() {
-		return existsReplay;
-	}
-
-	public void setExistsReplayData(boolean existsReplay) {
-		this.existsReplay = existsReplay;
 	}
 }
 
@@ -156,7 +165,7 @@ class TableLevelBar extends Bar {
 	}
 }
 
-class GradeBar extends Bar {
+class GradeBar extends SelectableBar {
 
 	private SongData[] songs;
 	private String name;

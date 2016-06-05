@@ -126,9 +126,29 @@ public class BMSPlayer extends MainState {
 		this.autoplay = resource.getAutoplay();
 		Config config = resource.getConfig();
 		if (autoplay == 2) {
-			replay = main.getPlayDataAccessor().readReplayData(model, config.getLnmode());
-			if (replay == null) {
-				autoplay = 0;
+			if(resource.getCourseBMSModels() != null) {
+				if(resource.getCourseReplay().length == 0) {
+					ReplayData[] replays = main.getPlayDataAccessor().readReplayData(resource.getCourseBMSModels(), config.getLnmode());
+					if(replays != null) {
+						for(ReplayData rd : replays) {
+							resource.addCourseReplay(rd);
+						}
+						replay = replays[0];
+					} else {
+						autoplay = 0;
+					}
+				} else {
+					for(int i = 0;i < resource.getCourseBMSModels().length;i++) {
+						if(resource.getCourseBMSModels()[i].getHash().equals(resource.getBMSModel().getHash())) {
+							replay = resource.getCourseReplay()[i];
+						}
+					}
+				}
+			} else {
+				replay = main.getPlayDataAccessor().readReplayData(model, config.getLnmode());
+				if (replay == null) {
+					autoplay = 0;
+				}
 			}
 		}
 
