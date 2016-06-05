@@ -179,12 +179,20 @@ public class PlayDataAccessor {
 	}
 
 	public IRScoreData readScoreData(BMSModel[] models, int lnmode, boolean mirror) {
-		String hash = "";
+		String[] hash = new String[models.length];
 		boolean ln = false;
-		for (BMSModel model : models) {
-			hash += model.getHash();
-			ln |= model.getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
-					+ model.getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH) > 0;
+		for (int i = 0;i < models.length;i++) {
+			hash[i] = models[i].getHash();
+			ln |= models[i].getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
+					+ models[i].getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH) > 0;
+		}
+		return readScoreData(hash, ln, lnmode, mirror);
+	}
+
+	public IRScoreData readScoreData(String[] hashes, boolean ln, int lnmode, boolean mirror) {
+		String hash = "";
+		for (String s : hashes) {
+			hash += s;
 		}
 		return readScoreData(hash, ln, lnmode, mirror);
 	}

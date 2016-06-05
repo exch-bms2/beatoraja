@@ -2,6 +2,7 @@ package bms.player.beatoraja.result;
 
 import java.util.logging.Logger;
 
+import bms.player.beatoraja.skin.SkinImage;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -34,6 +35,7 @@ public class GradeResult extends MainState {
 	private int oldclear;
 	private int oldexscore;
 	private int oldmisscount;
+	private int oldcombo;
 
     private MusicResultSkin skin;
 
@@ -100,41 +102,42 @@ public class GradeResult extends MainState {
 					titlefont.draw(sprite, "Replay Saved", w * 3 / 4, h / 4);
 				}
 			}
-			titlefont.draw(sprite, "CLEAR : ", 100, 400);
+
+			for(SkinImage img : skin.getSkinPart()) {
+				if(img.getTiming() != 2) {
+					img.draw(sprite, time);
+				}
+			}
+
 			if (oldclear != 0) {
 				titlefont.setColor(Color.valueOf(LAMP[oldclear]));
-				titlefont.draw(sprite, CLEAR[oldclear] + " -> ", 240, 400);
+				titlefont.draw(sprite, CLEAR[oldclear] + " -> ", 240, 425);
 			}
 			titlefont.setColor(Color.valueOf(LAMP[score.getClear()]));
-			titlefont.draw(sprite, CLEAR[score.getClear()], 440, 400);
+			titlefont.draw(sprite, CLEAR[score.getClear()], 440, 425);
 			titlefont.setColor(Color.WHITE);
 
-			titlefont.draw(sprite, "SCORE : ", 100, 370);
 			if (oldexscore != 0) {
-				titlefont.draw(sprite, oldexscore + " -> ", 240, 370);
+				skin.getScore(1).draw(sprite, time, oldexscore);
+				titlefont.setColor(Color.WHITE);
+				titlefont.draw(sprite, " -> ", 360, 395);
+				skin.getScore(score.getExscore() > oldexscore ? 2 : 3).draw(sprite, time, Math.abs(score.getExscore() - oldexscore));
 			}
-			titlefont.draw(sprite,
-					score.getExscore() + " ( " + (score.getExscore() > oldexscore ? "+" : "")
-							+ (score.getExscore() - oldexscore) + " )", 440, 370);
-			titlefont.setColor(Color.WHITE);
+			skin.getScore(0).draw(sprite, time, score.getExscore());
 
-			titlefont.draw(sprite, "MISS COUNT : ", 100, 340);
 			if (oldmisscount < 65535) {
-				titlefont.draw(sprite, oldmisscount + " -> ", 240, 340);
-				titlefont.draw(sprite,
-						score.getMinbp() + " ( " + (score.getMinbp() > oldmisscount ? "+" : "")
-								+ (score.getMinbp() - oldmisscount) + " )", 440, 340);
-			} else {
-				titlefont.draw(sprite, String.valueOf(score.getMinbp()), 440, 340);
+				skin.getMisscount(1).draw(sprite, time, oldmisscount);
+				titlefont.draw(sprite, " -> ", 360, 365);
+				skin.getMisscount(score.getMinbp() > oldmisscount ? 3 : 2).draw(sprite, time, Math.abs(score.getMinbp() - oldmisscount));
 			}
+			skin.getMisscount(0).draw(sprite, time, score.getMinbp());
 
-            titlefont.draw(sprite, "PGREAT : ", 100, 280);
-            titlefont.draw(sprite, "GREAT  : ", 100, 250);
-            titlefont.draw(sprite, "GOOD   : ", 100, 220);
-            titlefont.draw(sprite, "BAD    : ",  100, 190);
-            titlefont.draw(sprite, "POOR   : ", 100, 160);
-            titlefont.draw(sprite, "MISS   : ", 100, 130);
-            titlefont.draw(sprite, "FAST / SLOW  :  ", 100, 100);
+			if(oldcombo > 0) {
+				skin.getMaxcombo(1).draw(sprite, time, oldcombo);
+				titlefont.draw(sprite, " -> ", 360, 335);
+				skin.getMaxcombo(score.getCombo() > oldcombo ? 2 : 3).draw(sprite, time, Math.abs(score.getCombo() - oldcombo));
+			}
+			skin.getMaxcombo(0).draw(sprite, time, score.getCombo());
 
     		skin.getJudgeCount(true).draw(sprite, time, score.getFgr() + score.getFgd() + score.getFbd() + score.getFpr() + score.getFms());
     		skin.getJudgeCount(false).draw(sprite, time, score.getSgr() + score.getSgd() + score.getSbd() + score.getSpr() + score.getSms());
@@ -146,6 +149,10 @@ public class GradeResult extends MainState {
 				|| ((System.currentTimeMillis() > time + 500 && (keystate[0] || keystate[2] || keystate[4] || keystate[6])))) {
 			keytime[0] = keytime[2] = keytime[4] = keytime[6] = 0;
 			main.changeState(MainController.STATE_SELECTMUSIC);
+		}
+
+		if (resource.getAutoplay() == 0 && main.getInputProcessor().getNumberState()[1]) {
+			saveReplayData();
 		}
 	}
 
@@ -172,6 +179,7 @@ public class GradeResult extends MainState {
 		}
 		oldexscore = score.getExscore();
 		oldmisscount = score.getMinbp();
+		oldcombo = score.getCombo();
 
 		main.getPlayDataAccessor().writeScoreDara(newscore, models, resource.getConfig().getLnmode(),
 				resource.getConfig().getRandom() == 1, resource.isUpdateScore());
@@ -207,7 +215,7 @@ public class GradeResult extends MainState {
 	}
 
 	private void saveReplayData() {
-		if (resource.getCourseBMSModels() == null && resource.getScoreData() != null) {
+		if (resource.getCourseScoreData() != null) {
 			if (!saveReplay && resource.isUpdateScore()) {
 				// 保存されているリプレイデータがない場合は、EASY以上で自動保存
 				ReplayData[] rd = resource.getCourseReplay();
