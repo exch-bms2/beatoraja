@@ -227,26 +227,20 @@ public class MusicResult extends MainState {
 			titlefont.setColor(Color.WHITE);
 
 			if (oldexscore != 0) {
-				skin.getScore(1).draw(sprite, time, oldexscore);
 				titlefont.setColor(Color.WHITE);
 				titlefont.draw(sprite, " -> ", 360, 395);
 				skin.getScore(score.getExscore() > oldexscore ? 2 : 3).draw(sprite, time, Math.abs(score.getExscore() - oldexscore));
 			}
-			skin.getScore(0).draw(sprite, time, score.getExscore());
 
 			if (oldmisscount < 65535) {
-				skin.getMisscount(1).draw(sprite, time, oldmisscount);
 				titlefont.draw(sprite, " -> ", 360, 365);
 				skin.getMisscount(score.getMinbp() > oldmisscount ? 3 : 2).draw(sprite, time, Math.abs(score.getMinbp() - oldmisscount));
 			}
-			skin.getMisscount(0).draw(sprite, time, score.getMinbp());
 			
 			if(oldcombo > 0) {
-				skin.getMaxcombo(1).draw(sprite, time, oldcombo);
 				titlefont.draw(sprite, " -> ", 360, 335);
 				skin.getMaxcombo(score.getCombo() > oldcombo ? 2 : 3).draw(sprite, time, Math.abs(score.getCombo() - oldcombo));
 			}
-			skin.getMaxcombo(0).draw(sprite, time, score.getCombo());				
 
 			titlefont.draw(sprite, "FAST / SLOW  :  ", 100, 100);
 
@@ -423,6 +417,49 @@ public class MusicResult extends MainState {
 		return 0;
 	}
 	
+	
+	@Override
+	public int getScore() {
+		if(resource.getScoreData() != null) {
+			return resource.getScoreData().getExscore();			
+		}
+		return Integer.MIN_VALUE;
+	}
+
+	@Override
+	public int getTargetScore() {
+		return oldexscore;
+	}
+
+	@Override
+	public int getMaxcombo() {
+		if(resource.getScoreData() != null) {
+			return resource.getScoreData().getCombo();			
+		}
+		return Integer.MIN_VALUE;
+	}
+
+	@Override
+	public int getTargetMaxcombo() {
+		if(oldcombo > 0) {
+			return oldcombo;			
+		}
+		return Integer.MIN_VALUE;
+	}
+
+	@Override
+	public int getMisscount() {
+		if(resource.getScoreData() != null) {
+			return resource.getScoreData().getMinbp();			
+		}
+		return Integer.MIN_VALUE;
+	}
+
+	@Override
+	public int getTargetMisscount() {
+		return oldmisscount;
+	}
+
 	@Override
 	public void dispose() {
 		// TODO Auto-generated method stub

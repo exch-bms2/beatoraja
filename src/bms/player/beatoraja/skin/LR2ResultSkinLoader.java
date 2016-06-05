@@ -23,29 +23,9 @@ public class LR2ResultSkinLoader extends LR2SkinLoader {
 				skin.setTotalnotes(number);
 			}
 			
-			if(number.getId() == 105) {
-				skin.setMaxcombo(0, number);
-			}
-			if(number.getId() == 175) {
-				skin.setMaxcombo(1, number);
-			}
-			
-			if(number.getId() == 101) {
-				skin.setScore(0, number);
-			}
-			if(number.getId() == 170) {
-				skin.setScore(1, number);
-			}
 			if(number.getId() == 152) {
 				skin.setScore(2, number);
 			}
-			if(number.getId() == 177) {
-				skin.setMisscount(0, number);
-			}
-			if(number.getId() == 178) {
-				skin.setMisscount(1, number);
-			}
-			
 		}
 
 		return skin;

@@ -81,7 +81,10 @@ public class SkinNumber extends SkinObject {
 	
 	public  void draw(SpriteBatch sprite, long time, MainState state) {
 		if(resource != null) {
-			draw(sprite, time, resource.getValue(state));			
+			final int value = resource.getValue(state);
+			if(value != Integer.MIN_VALUE && value != Integer.MAX_VALUE) {
+				draw(sprite, time, resource.getValue(state));				
+			}
 		}
 	}
 	

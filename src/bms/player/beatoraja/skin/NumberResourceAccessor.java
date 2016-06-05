@@ -17,7 +17,35 @@ public interface NumberResourceAccessor {
 	public static NumberResourceAccessor TARGET_SCORE = new NumberResourceAccessor() {
 		@Override
 		public int getValue(MainState state) {
-			return (state.getJudgeCount(0, true) + state.getJudgeCount(0, false)) * 2 + state.getJudgeCount(1, true) + state.getJudgeCount(1, false);
+			return state.getTargetScore();
+		}
+	};
+	
+	public static NumberResourceAccessor MISSCOUNT = new NumberResourceAccessor() {
+		@Override
+		public int getValue(MainState state) {
+			return state.getMisscount();
+		}
+	};
+	
+	public static NumberResourceAccessor TARGET_MISSCOUNT = new NumberResourceAccessor() {
+		@Override
+		public int getValue(MainState state) {
+			return state.getTargetMisscount();
+		}
+	};
+	
+	public static NumberResourceAccessor MAXCOMBO = new NumberResourceAccessor() {
+		@Override
+		public int getValue(MainState state) {
+			return state.getMaxcombo();
+		}
+	};
+	
+	public static NumberResourceAccessor TARGET_MAXCOMBO = new NumberResourceAccessor() {
+		@Override
+		public int getValue(MainState state) {
+			return state.getTargetMaxcombo();
 		}
 	};
 	

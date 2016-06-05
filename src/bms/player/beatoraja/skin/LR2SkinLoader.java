@@ -215,6 +215,9 @@ public abstract class LR2SkinLoader {
 									if(num.getId() == 101) {
 										num.setNumberResourceAccessor(NumberResourceAccessor.SCORE);
 									}
+									if(num.getId() == 105) {
+										num.setNumberResourceAccessor(NumberResourceAccessor.MAXCOMBO);
+									}
 									if(num.getId() == 110) {
 										num.setNumberResourceAccessor(NumberResourceAccessor.PERFECT);
 									}
@@ -244,7 +247,19 @@ public abstract class LR2SkinLoader {
 									if(num.getId() == 164) {
 										num.setNumberResourceAccessor(NumberResourceAccessor.TIMELEFT_SECOND);
 									}
-
+									if(num.getId() == 170) {
+										num.setNumberResourceAccessor(NumberResourceAccessor.TARGET_SCORE);
+									}
+									if(num.getId() == 175) {
+										num.setNumberResourceAccessor(NumberResourceAccessor.TARGET_MAXCOMBO);
+									}
+									if(num.getId() == 177) {
+										num.setNumberResourceAccessor(NumberResourceAccessor.MISSCOUNT);
+									}
+									if(num.getId() == 178) {
+										num.setNumberResourceAccessor(NumberResourceAccessor.TARGET_MISSCOUNT);
+									}
+								
 
 									numlist.add(num);
 //									System.out.println("Number Added - " + (num.getId()));

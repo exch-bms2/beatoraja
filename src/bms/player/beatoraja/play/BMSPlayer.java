@@ -998,7 +998,10 @@ public class BMSPlayer extends MainState {
 
 	@Override
 	public int getMinBPM() {
-		return minbpm;
+		if(minbpm != maxbpm) {
+			return minbpm;			
+		}
+		return Integer.MIN_VALUE;
 	}
 
 	@Override
@@ -1008,7 +1011,10 @@ public class BMSPlayer extends MainState {
 
 	@Override
 	public int getMaxBPM() {
-		return maxbpm;
+		if(minbpm != maxbpm) {
+			return maxbpm;			
+		}
+		return Integer.MIN_VALUE;
 	}
 	
 	@Override

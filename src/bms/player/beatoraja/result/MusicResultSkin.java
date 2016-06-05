@@ -72,12 +72,12 @@ public class MusicResultSkin extends Skin {
 			setJudgeCount(i == 0, sn);
 		}
 
-		SkinNumber score = new SkinNumber(ntr[0], 0, 5, 0);
+		SkinNumber score = new SkinNumber(ntr[0], 0, 5, 0, NumberResourceAccessor.TARGET_SCORE);
 		score.setDestination(0, 240, 375, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		setScore(1, score);
-		SkinNumber nscore = new SkinNumber(ntr[0], 0, 5, 0);
+		numbers.add(score);
+		SkinNumber nscore = new SkinNumber(ntr[0], 0, 5, 0, NumberResourceAccessor.SCORE);
 		nscore.setDestination(0, 410, 375, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		setScore(0, nscore);
+		numbers.add(nscore);
 
 		SkinNumber dscore = new SkinNumber(ntr[1], 0, 5, 0);
 		dscore.setDestination(0, 550, 375, 12, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -86,12 +86,13 @@ public class MusicResultSkin extends Skin {
 		dscore.setDestination(0, 550, 375, 12, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		setScore(3, dscore);
 
-		SkinNumber minbp = new SkinNumber(ntr[0], 0, 5, 0);
+		SkinNumber minbp = new SkinNumber(ntr[0], 0, 5, 0, NumberResourceAccessor.TARGET_MISSCOUNT);
 		minbp.setDestination(0, 240, 345, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		setMisscount(1, minbp);
-		SkinNumber nminbp = new SkinNumber(ntr[0], 0, 5, 0);
+		numbers.add(minbp);
+		SkinNumber nminbp = new SkinNumber(ntr[0], 0, 5, 0, NumberResourceAccessor.MISSCOUNT);
 		nminbp.setDestination(0, 410, 345, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		setMisscount(0, nminbp);
+		numbers.add(nminbp);
+		
 		SkinNumber dminbp = new SkinNumber(ntr[1], 0, 5, 0);
 		dminbp.setDestination(0, 550, 345, 12, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		setMisscount(2, dminbp);
@@ -99,12 +100,13 @@ public class MusicResultSkin extends Skin {
 		dminbp.setDestination(0, 550, 345, 12, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		setMisscount(3, dminbp);
 
-		SkinNumber combo = new SkinNumber(ntr[0], 0, 5, 0);
+		SkinNumber combo = new SkinNumber(ntr[0], 0, 5, 0, NumberResourceAccessor.TARGET_MAXCOMBO);
 		combo.setDestination(0, 240, 315, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		setMaxcombo(1, combo);
-		SkinNumber ncombo = new SkinNumber(ntr[0], 0, 5, 0);
+		numbers.add(combo);
+		SkinNumber ncombo = new SkinNumber(ntr[0], 0, 5, 0, NumberResourceAccessor.MAXCOMBO);
 		ncombo.setDestination(0, 410, 315, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		setMaxcombo(0, ncombo);
+		numbers.add(ncombo);
+		
 		SkinNumber dcombo = new SkinNumber(ntr[1], 0, 5, 0);
 		dcombo.setDestination(0, 550, 315, 12, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		setMaxcombo(2, dcombo);

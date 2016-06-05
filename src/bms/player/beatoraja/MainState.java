@@ -50,10 +50,18 @@ public abstract class MainState {
 		return 0;
 	}
 	
+	public int getTargetScore() {
+		return 0;
+	}
+	
 	public int getMaxcombo() {
 		return 0;
 	}
 	
+	public int getTargetMaxcombo() {
+		return 0;
+	}
+
 	public int getJudgeCount(int judge, boolean fast) {
 		return 0;
 	}
@@ -87,6 +95,14 @@ public abstract class MainState {
 	}
 
 	public int getTimeleftSecond() {
+		return 0;
+	}
+	
+	public int getMisscount() {
+		return 0;
+	}
+
+	public int getTargetMisscount() {
 		return 0;
 	}
 
