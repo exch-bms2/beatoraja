@@ -173,6 +173,7 @@ class GradeBar extends SelectableBar {
 	private int[] constraint = new int[0];
 
 	private IRScoreData score;
+	private IRScoreData rscore;
 
 	public GradeBar(String name, SongData[] songs, int[] constraint) {
 		this.songs = songs;
@@ -206,6 +207,14 @@ class GradeBar extends SelectableBar {
 
 	public void setMirrorScore(IRScoreData score) {
 		this.score = score;
+	}
+
+	public IRScoreData getRandomScore() {
+		return rscore;
+	}
+
+	public void setRandomScore(IRScoreData score) {
+		this.rscore = score;
 	}
 
 	public int[] getConstraint() {

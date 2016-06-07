@@ -8,8 +8,11 @@ import java.util.*;
 import java.util.logging.Logger;
 
 import bms.model.BMSModel;
+import bms.player.beatoraja.TableData.CourseData;
+import bms.player.beatoraja.TableData.TrophyData;
 import bms.player.lunaticrave2.LunaticRave2SongDatabaseManager;
 import bms.table.Course;
+import bms.table.Course.Trophy;
 import bms.table.DifficultyTable;
 import bms.table.DifficultyTableElement;
 import bms.table.DifficultyTableParser;
@@ -361,13 +364,12 @@ public class PlayConfigurationView implements Initializable {
 				td.setHash(levels);
 
 				if (dt.getCourse() != null && dt.getCourse().length > 0) {
-					List<String> gname = new ArrayList<String>();
-					HashMap<String, String[]> l = new HashMap<String, String[]>();
-					HashMap<String, int[]> constraint = new HashMap<String, int[]>();
+					List<CourseData> gname = new ArrayList<CourseData>();
 					for(Course[] course : dt.getCourse()) {
 						for (Course g : course) {
-							gname.add(g.getName());
-							l.put(g.getName(), g.getHash());
+							CourseData cd = new CourseData();
+							cd.setName(g.getName());
+							cd.setHash(g.getHash());
 							int[] con = new int[g.getConstraint().length];
 							for(int i = 0;i < con.length;i++) {
 								for(int index = 0;index < CONSTRAINT.length;index++) {
@@ -377,16 +379,28 @@ public class PlayConfigurationView implements Initializable {
 									}
 								}								
 							}
-							constraint.put(g.getName(), con);
+							cd.setConstraint(con);
+							if(g.getTrophy() != null) {
+								List<TrophyData> tr = new ArrayList<TrophyData>();
+								for(Trophy trophy : g.getTrophy()) {
+									TrophyData t = new TrophyData();
+									t.setName(trophy.getName());
+									t.setMissrate((float) trophy.getMissrate());
+									t.setScorerate((float) trophy.getScorerate());
+									tr.add(t);
+								}
+								cd.setTrophy(tr.toArray(new TrophyData[0]));
+							}
+							gname.add(cd);
 						}						
 					}
-					td.setGrade(gname.toArray(new String[0]));
-					td.setGradehash(l);
-					td.setGradeconstraint(constraint);
+					
+					td.setCourse(gname.toArray(new CourseData[0]));
 				}
 				Json json = new Json();
 				json.setElementType(TableData.class, "hash", HashMap.class);
-				json.setElementType(TableData.class, "gradehash", HashMap.class);
+				json.setElementType(TableData.class, "course", ArrayList.class);
+				json.setElementType(CourseData.class, "trophy", ArrayList.class);
 				json.setOutputType(OutputType.json);
 				FileWriter fw = new FileWriter("table/" + td.getName() + ".json");
 				fw.write(json.prettyPrint(td));

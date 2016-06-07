@@ -108,7 +108,7 @@ public class GradeResult extends MainState {
 			}
 			if (score != null) {
 				// totalnotes
-				skin.getTotalnotes().draw(sprite, time, resource.getScoreData().getNotes());
+				skin.getTotalnotes().draw(sprite, time, score.getNotes());
 
 				if (oldclear != 0) {
 					titlefont.setColor(Color.valueOf(LAMP[oldclear]));
@@ -170,8 +170,16 @@ public class GradeResult extends MainState {
 		if (newscore == null) {
 			return;
 		}
-		IRScoreData score = main.getPlayDataAccessor().readScoreData(models, resource.getConfig().getLnmode(),
-				resource.getConfig().getRandom() == 1);
+		int random = 0;
+		if (resource.getConfig().getRandom() > 0 || resource.getConfig().getRandom2() > 0
+				|| resource.getConfig().getDoubleoption() > 0) {
+			random = 2;
+		}
+		if (resource.getConfig().getRandom() == 1 && resource.getConfig().getRandom2() == 1
+				&& resource.getConfig().getDoubleoption() == 1) {
+			random = 1;
+		}
+		IRScoreData score = main.getPlayDataAccessor().readScoreData(models, resource.getConfig().getLnmode(), random);
 		if (score == null) {
 			score = new IRScoreData();
 		}
@@ -189,8 +197,8 @@ public class GradeResult extends MainState {
 		oldmisscount = score.getMinbp();
 		oldcombo = score.getCombo();
 
-		main.getPlayDataAccessor().writeScoreDara(newscore, models, resource.getConfig().getLnmode(),
-				resource.getConfig().getRandom() == 1, resource.isUpdateScore());
+		main.getPlayDataAccessor().writeScoreDara(newscore, models, resource.getConfig().getLnmode(), random,
+				resource.isUpdateScore());
 
 		Logger.getGlobal().info("スコアデータベース更新完了 ");
 	}

@@ -5,6 +5,7 @@ import java.util.*;
 import java.util.logging.Logger;
 
 import bms.player.beatoraja.*;
+import bms.player.beatoraja.TableData.CourseData;
 import bms.player.lunaticrave2.*;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.skin.*;
@@ -143,9 +144,9 @@ public class MusicSelector extends MainState {
 						levels.add(new TableLevelBar(lv, td.getHash().get(lv)));
 					}
 					List<GradeBar> l = new ArrayList();
-					for (String s : td.getGrade()) {
+					for (CourseData course : td.getCourse()) {
 						List<SongData> songlist = new ArrayList();
-						for (String hash : td.getGradehash().get(s)) {
+						for (String hash : course.getHash()) {
 							SongData[] songs = songdb.getSongDatas("hash", hash, new File(".").getAbsolutePath());
 							if (songs.length > 0) {
 								songlist.add(songs[0]);
@@ -154,7 +155,7 @@ public class MusicSelector extends MainState {
 							}
 						}
 
-						l.add(new GradeBar(s, songlist.toArray(new SongData[0]), td.getGradeconstraint().get(s)));
+						l.add(new GradeBar(course.getName(), songlist.toArray(new SongData[0]), course.getConstraint()));
 					}
 					tables.add(new TableBar(td.getName(), levels.toArray(new TableLevelBar[0]), l
 							.toArray(new GradeBar[0])));
@@ -436,6 +437,9 @@ public class MusicSelector extends MainState {
 				if (gb.getMirrorScore() != null) {
 					lamp = (lamp > gb.getMirrorScore().getClear()) ? lamp : gb.getMirrorScore().getClear();
 				}
+				if (gb.getRandomScore() != null) {
+					lamp = (lamp > gb.getRandomScore().getClear()) ? lamp : gb.getRandomScore().getClear();
+				}
 				if (lamp != -1) {
 					// sprite.setBlendFunction(GL11.GL_ONE, GL11.GL_ONE);
 					sprite.begin();
@@ -560,6 +564,29 @@ public class MusicSelector extends MainState {
 		if (currentsongs[selectedindex] instanceof GradeBar) {
 			GradeBar gb = (GradeBar) currentsongs[selectedindex];
 			titlefont.draw(sprite, gb.getTitle(), 100, 600);
+			
+			int random = 0;
+			for(int con : gb.getConstraint()) {
+				switch(con) {
+				case TableData.GRADE_NORMAL:
+					break;
+				case TableData.GRADE_MIRROR:
+					random = 1;
+					break;
+				case TableData.GRADE_RANDOM:
+					random = 2;
+					break;
+				}
+			}
+			
+			if(random == 1) {
+				titlefont.setColor(Color.CYAN);
+				titlefont.draw(sprite, "MIRROR OK", 350, 600);
+			}
+			if(random == 2) {
+				titlefont.setColor(Color.CORAL);
+				titlefont.draw(sprite, "RANDOM OK", 350, 600);
+			}
 
 			for (int i = 0; i < gb.getSongDatas().length; i++) {
 				if (gb.getSongDatas()[i] != null) {
@@ -590,6 +617,16 @@ public class MusicSelector extends MainState {
 				titlefont.draw(sprite, "MISS COUNT: " + score.getMinbp(), 100, 210);
 				titlefont.draw(sprite, "CLEAR / PLAY : " + score.getClearcount() + " / " + score.getPlaycount(), 100,
 						180);
+			}
+			if (gb.getRandomScore() != null) {
+				IRScoreData score = gb.getRandomScore();
+				titlefont.setColor(Color.valueOf(LAMP[score.getClear()]));
+				titlefont.draw(sprite, CLEAR[score.getClear()], 100, 130);
+//				titlefont.setColor(Color.WHITE);
+//				titlefont.draw(sprite, "EX-SCORE  : " + score.getExscore() + " / " + (score.getNotes() * 2), 100, 240);
+//				titlefont.draw(sprite, "MISS COUNT: " + score.getMinbp(), 100, 210);
+//				titlefont.draw(sprite, "CLEAR / PLAY : " + score.getClearcount() + " / " + score.getPlaycount(), 100,
+//						180);
 			}
 			if (((GradeBar) currentsongs[selectedindex]).existsReplayData()) {
 				titlefont.setColor(Color.GREEN);
@@ -1130,13 +1167,17 @@ public class MusicSelector extends MainState {
 							hash[j] = gb.getSongDatas()[j].getHash();
 							ln |= gb.getSongDatas()[j].getLongnote() == 1;
 						}
-						gb.setScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), false));
+						gb.setScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 0));
 						if (gb.getScore() != null && config.getLnmode() == 2 && ln) {
 							gb.getScore().setClear(gb.getScore().getExclear());
 						}
-						gb.setMirrorScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), true));
+						gb.setMirrorScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 1));
 						if (gb.getMirrorScore() != null && config.getLnmode() == 2 && ln) {
 							gb.getMirrorScore().setClear(gb.getMirrorScore().getExclear());
+						}
+						gb.setRandomScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 2));
+						if (gb.getRandomScore() != null && config.getLnmode() == 2 && ln) {
+							gb.getRandomScore().setClear(gb.getRandomScore().getExclear());
 						}
 						((GradeBar) currentsongs[i]).setExistsReplayData(main.getPlayDataAccessor().existsReplayData(
 								hash, ln, config.getLnmode()));

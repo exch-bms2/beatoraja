@@ -168,17 +168,20 @@ public class PlayDataAccessor {
 
 	}
 
-	public IRScoreData readScoreData(String hash, boolean ln, int lnmode, boolean mirror) {
+	public IRScoreData readScoreData(String hash, boolean ln, int lnmode, int option) {
 		if (ln && lnmode > 0) {
 			hash = "C" + hash;
 		}
-		if (mirror) {
+		if (option == 1) {
 			hash = "M" + hash;
+		}
+		if (option == 2) {
+			hash = "R" + hash;
 		}
 		return scoredb.getScoreData(player, hash, false);
 	}
 
-	public IRScoreData readScoreData(BMSModel[] models, int lnmode, boolean mirror) {
+	public IRScoreData readScoreData(BMSModel[] models, int lnmode, int option) {
 		String[] hash = new String[models.length];
 		boolean ln = false;
 		for (int i = 0;i < models.length;i++) {
@@ -186,18 +189,18 @@ public class PlayDataAccessor {
 			ln |= models[i].getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
 					+ models[i].getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH) > 0;
 		}
-		return readScoreData(hash, ln, lnmode, mirror);
+		return readScoreData(hash, ln, lnmode, option);
 	}
 
-	public IRScoreData readScoreData(String[] hashes, boolean ln, int lnmode, boolean mirror) {
+	public IRScoreData readScoreData(String[] hashes, boolean ln, int lnmode, int option) {
 		String hash = "";
 		for (String s : hashes) {
 			hash += s;
 		}
-		return readScoreData(hash, ln, lnmode, mirror);
+		return readScoreData(hash, ln, lnmode, option);
 	}
 
-	public void writeScoreDara(IRScoreData newscore, BMSModel[] models, int lnmode, boolean mirror, boolean updateScore) {
+	public void writeScoreDara(IRScoreData newscore, BMSModel[] models, int lnmode, int option, boolean updateScore) {
 		String hash = "";
 		int totalnotes = 0;
 		boolean ln = false;
@@ -210,8 +213,11 @@ public class PlayDataAccessor {
 		if (ln && lnmode > 0) {
 			hash = "C" + hash;
 		}
-		if (mirror) {
+		if (option == 1) {
 			hash = "M" + hash;
+		}
+		if (option == 2) {
+			hash = "R" + hash;
 		}
 		if (newscore == null) {
 			return;
