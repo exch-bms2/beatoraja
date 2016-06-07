@@ -1,5 +1,7 @@
 package bms.player.beatoraja.skin;
 
+import java.util.Calendar;
+
 import bms.player.beatoraja.MainState;
 
 public interface NumberResourceAccessor {
@@ -244,7 +246,31 @@ public interface NumberResourceAccessor {
 			return state.getTimeleftSecond();
 		}
 	};
+
+	public static NumberResourceAccessor TIME_YEAR = new TimeAccessor(Calendar.YEAR);	
+	public static NumberResourceAccessor TIME_MONTH = new TimeAccessor(Calendar.MONTH);	
+	public static NumberResourceAccessor TIME_DAY = new TimeAccessor(Calendar.DATE);	
+	public static NumberResourceAccessor TIME_HOUR = new TimeAccessor(Calendar.HOUR_OF_DAY);	
+	public static NumberResourceAccessor TIME_MINUTE = new TimeAccessor(Calendar.MINUTE);	
+	public static NumberResourceAccessor TIME_SECOND = new TimeAccessor(Calendar.SECOND);
 	
+}
+
+class TimeAccessor implements NumberResourceAccessor {
+
+	protected Calendar cl = Calendar.getInstance();
+	
+	private int field;
+	
+	public TimeAccessor(int field) {
+		this.field = field;
+	}
+	
+	@Override
+	public int getValue(MainState state) {
+		cl.setTimeInMillis(System.currentTimeMillis());
+		return cl.get(field) + (field == Calendar.MONTH ? 1 : 0);
+	}	
 }
 
 /*
