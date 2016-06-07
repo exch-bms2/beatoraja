@@ -1,5 +1,7 @@
 package bms.player.beatoraja.result;
 
+import java.util.*;
+import com.badlogic.gdx.math.Rectangle;
 import java.util.logging.Logger;
 
 import bms.player.beatoraja.skin.SkinImage;
@@ -14,10 +16,10 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFont
 import bms.model.BMSModel;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.gauge.GrooveGauge;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
 public class GradeResult extends MainState {
 	
-	// TODO 段位リプレイの保存
 	// TODO 段位ゲージ繊維の表示
 
 	private static final String[] LAMP = { "000000", "808080", "800080", "ff00ff", "40ff40", "f0c000", "ffffff",
@@ -40,6 +42,8 @@ public class GradeResult extends MainState {
     private MusicResultSkin skin;
 
 	private boolean saveReplay = false;
+
+	private GaugeGraphRenderer gaugegraph;
 
 	public GradeResult(MainController main) {
 		this.main = main;
@@ -75,11 +79,14 @@ public class GradeResult extends MainState {
 				resource.getConfig().getLnmode())) {
 			saveReplayData();
 		}
+
+		gaugegraph = new GaugeGraphRenderer();
 	}
 
 	public void render() {
 		int time = getNowTime();
 		final SpriteBatch sprite = main.getSpriteBatch();
+		final ShapeRenderer shape = main.getShapeRenderer();
 		IRScoreData score = resource.getCourseScoreData();
 
 		if (score != null) {
@@ -92,6 +99,27 @@ public class GradeResult extends MainState {
 
 			final float w = 1280;
 			final float h = 720;
+
+			// ゲージグラフ描画
+			final List<List<Float>> coursegauge = resource.getCourseGauge();
+			final int cg = resource.getCourseBMSModels().length;
+			for(int i = 0;i < cg;i++) {
+				Rectangle graph = new Rectangle(40 + i * (1200 / cg), 500, 1200 / cg, 200);
+				if(coursegauge.size() <= i) {
+					shape.begin(ShapeRenderer.ShapeType.Filled);
+					shape.setColor(Color.DARK_GRAY);
+					shape.rect(graph.x, graph.y, graph.width, graph.height);
+					shape.end();
+					Gdx.gl.glLineWidth(4);
+					shape.begin(ShapeRenderer.ShapeType.Line);
+					shape.setColor(Color.WHITE);
+					shape.rect(graph.x, graph.y, graph.width, graph.height);
+					shape.end();
+					Gdx.gl.glLineWidth(1);
+				} else {
+					gaugegraph.render(shape, time, resource, graph, coursegauge.get(i));
+				}
+			}
 
 			sprite.begin();
 			if (score != null) {

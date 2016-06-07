@@ -49,6 +49,8 @@ public class PlayerResource {
 	 */
 	private List<Float> gauge;
 
+	private List<List<Float>> coursegauge = new ArrayList();
+
 	/**
 	 * コースタイトル
 	 */
@@ -82,6 +84,7 @@ public class PlayerResource {
 		score = null;
 		gauge = null;
 		courseReplay.clear();
+		coursegauge.clear();
 	}
 
 	public boolean setBMSFile(final File f, final Config config, int autoplay) {
@@ -279,5 +282,13 @@ public class PlayerResource {
 
 	public void addCourseReplay(ReplayData rd) {
 		courseReplay.add(rd);
+	}
+
+	public List<List<Float>> getCourseGauge() {
+		return coursegauge;
+	}
+
+	public void addCourseGauge(List<Float> gauge) {
+		coursegauge.add(new ArrayList(gauge));
 	}
 }
