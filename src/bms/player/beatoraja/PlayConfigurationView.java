@@ -9,10 +9,10 @@ import java.util.logging.Logger;
 
 import bms.model.BMSModel;
 import bms.player.lunaticrave2.LunaticRave2SongDatabaseManager;
+import bms.table.Course;
 import bms.table.DifficultyTable;
 import bms.table.DifficultyTableElement;
 import bms.table.DifficultyTableParser;
-import bms.table.DifficultyTable.Grade;
 
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter.OutputType;
@@ -323,6 +323,8 @@ public class PlayConfigurationView implements Initializable {
 			e.printStackTrace();
 		}
 	}
+	
+	private static final String[] CONSTRAINT = {"null", "grade", "grade_mirror", "grade_random"}; 
 
 	public void loadTable() {
 		commit();
@@ -358,15 +360,29 @@ public class PlayConfigurationView implements Initializable {
 				}
 				td.setHash(levels);
 
-				if (dt.getGrade() != null) {
+				if (dt.getCourse() != null && dt.getCourse().length > 0) {
 					List<String> gname = new ArrayList<String>();
 					HashMap<String, String[]> l = new HashMap<String, String[]>();
-					for (Grade g : dt.getGrade()) {
-						gname.add(g.getName());
-						l.put(g.getName(), g.getHashes());
+					HashMap<String, int[]> constraint = new HashMap<String, int[]>();
+					for(Course[] course : dt.getCourse()) {
+						for (Course g : course) {
+							gname.add(g.getName());
+							l.put(g.getName(), g.getHash());
+							int[] con = new int[g.getConstraint().length];
+							for(int i = 0;i < con.length;i++) {
+								for(int index = 0;index < CONSTRAINT.length;index++) {
+									if(CONSTRAINT[index].equals(g.getConstraint()[i])) {
+										con[i] = index;
+										break;
+									}
+								}								
+							}
+							constraint.put(g.getName(), con);
+						}						
 					}
 					td.setGrade(gname.toArray(new String[0]));
 					td.setGradehash(l);
+					td.setGradeconstraint(constraint);
 				}
 				Json json = new Json();
 				json.setElementType(TableData.class, "hash", HashMap.class);

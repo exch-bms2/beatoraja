@@ -13,8 +13,14 @@ public class TableData {
 	
 	private String[] grade = new String[0];
 	
-	private HashMap<String, String[]> gradehash;
+	private HashMap<String, String[]> gradehash = new HashMap<String, String[]>();;
+	
+	private  HashMap<String, int[]> gradeconstraint = new HashMap<String, int[]>();;
 
+	public static final int GRADE_NORMAL = 1;
+	public static final int GRADE_MIRROR = 2;
+	public static final int GRADE_RANDOM = 3;
+	
 	public String getName() {
 		return name;
 	}
@@ -53,5 +59,13 @@ public class TableData {
 
 	public void setGradehash(HashMap<String, String[]> gradehash) {
 		this.gradehash = gradehash;
+	}
+
+	public HashMap<String, int[]> getGradeconstraint() {
+		return gradeconstraint;
+	}
+
+	public void setGradeconstraint(HashMap<String, int[]> gradeconstraint) {
+		this.gradeconstraint = gradeconstraint;
 	}	
 }

@@ -216,16 +216,6 @@ public class BMSPlayer extends MainState {
 			PatternModifier.modify(model, Arrays.asList(resource.getReplayData().pattern));
 			Logger.getGlobal().info("譜面オプション : 保存された譜面変更ログから譜面再現");
 		} else {
-			if (resource.getCourseBMSModels() != null) {
-				if(config.getRandom() == 1) {
-					config.setRandom2(1);
-					config.setDoubleoption(1);
-				} else {
-					config.setRandom(0);
-					config.setRandom2(0);
-					config.setDoubleoption(0);
-				}
-			}
 			switch (model.getUseKeys()) {
 			case 10:
 			case 14:
