@@ -56,6 +56,7 @@ public class MusicResult extends MainState {
 	private MusicResultSkin skin;
 
 	private DetailGraphRenderer detail;
+	private GaugeGraphRenderer gaugegraph;
 
 	public MusicResult(MainController main) {
 		this.main = main;
@@ -94,6 +95,7 @@ public class MusicResult extends MainState {
 		// コースモードの場合はリプレイデータをストックする
 		if(resource.getCourseBMSModels() != null) {
 			resource.addCourseReplay(resource.getReplayData());
+			resource.addCourseGauge(resource.getGauge());
 		}
 
 		if (resource.getConfig().getLr2resultskin() != null) {
@@ -111,6 +113,7 @@ public class MusicResult extends MainState {
 		this.setSkin(skin);
 
 		detail = new DetailGraphRenderer(resource.getBMSModel());
+		gaugegraph = new GaugeGraphRenderer();
 	}
 
 	public void render() {
@@ -134,58 +137,7 @@ public class MusicResult extends MainState {
 
 		IRScoreData score = resource.getScoreData();
 		// ゲージグラフ描画
-		String graphcolor = "444444";
-		String graphline = "cccccc";
-		if(resource.getGrooveGauge() instanceof AssistEasyGrooveGauge) {
-			graphcolor = "440044";
-			graphline = "ff00ff";
-		}
-		if(resource.getGrooveGauge() instanceof EasyGrooveGauge) {
-			graphcolor = "004444";
-			graphline = "00ffff";
-		}
-		if(resource.getGrooveGauge() instanceof NormalGrooveGauge) {
-			graphcolor = "004400";
-			graphline = "00ff00";
-		}
-		if(resource.getGrooveGauge() instanceof HardGrooveGauge || resource.getGrooveGauge() instanceof GradeGrooveGauge) {
-			graphcolor = "440000";
-			graphline = "ff0000";
-		}
-		if(resource.getGrooveGauge() instanceof ExhardGrooveGauge || resource.getGrooveGauge() instanceof ExgradeGrooveGauge) {
-			graphcolor = "444400";
-			graphline = "ffff00";
-		}
-
-		shape.begin(ShapeType.Filled);
-		shape.setColor(Color.valueOf(graphcolor));
-		shape.rect(graph.x, graph.y, graph.width, graph.height);
-		if (resource.getGrooveGauge().getBorder() > 0) {
-			shape.setColor(Color.valueOf("440000"));
-			shape.rect(graph.x, graph.y + graph.height * resource.getGrooveGauge().getBorder() / 100, graph.width,
-					graph.height * (100 - resource.getGrooveGauge().getBorder()) / 100);
-		}
-		shape.setColor(Color.valueOf(graphcolor));
-		shape.end();
-
-		Gdx.gl.glLineWidth(4);
-		shape.begin(ShapeType.Line);
-		shape.setColor(Color.WHITE);
-		shape.rect(graph.x, graph.y, graph.width, graph.height);
-
-		Float f1 = null;
-		for (int i = 0; i < resource.getGauge().size(); i++) {
-			Float f2 = resource.getGauge().get(i);
-			if (f1 != null) {
-				shape.setColor(Color.valueOf(graphline));
-				shape.line(graph.x + graph.width * (i - 1) / resource.getGauge().size(), graph.y + (f1 / 100.0f)
-						* graph.height, graph.x + graph.width * i / resource.getGauge().size(), graph.y + (f2 / 100.0f)
-						* graph.height);
-			}
-			f1 = f2;
-		}
-		shape.end();
-		Gdx.gl.glLineWidth(1);
+		gaugegraph.render(shape, time, resource, graph, resource.getGauge());
 
 		Gdx.gl.glEnable(GL11.GL_BLEND);
 		Gdx.gl.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
