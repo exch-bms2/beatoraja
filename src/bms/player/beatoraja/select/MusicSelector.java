@@ -31,9 +31,8 @@ import com.badlogic.gdx.utils.Json;
  */
 public class MusicSelector extends MainState {
 
-	// TODO フォルダのクリアランプ/スコア状況内訳
 	// TODO バナー、テキスト表示
-	// TODO 詳細オプション(BGA ON/OFF、JUDGE TIMING、JUDGE DETAIL等
+	// TODO 譜面情報表示
 
 	private MainController main;
 
@@ -155,7 +154,7 @@ public class MusicSelector extends MainState {
 							}
 						}
 
-						l.add(new GradeBar(course.getName(), songlist.toArray(new SongData[0]), course.getConstraint()));
+						l.add(new GradeBar(course.getName(), songlist.toArray(new SongData[0]), course));
 					}
 					tables.add(new TableBar(td.getName(), levels.toArray(new TableLevelBar[0]), l
 							.toArray(new GradeBar[0])));
@@ -456,6 +455,20 @@ public class MusicSelector extends MainState {
 						}
 					}
 				}
+				// trophy
+				TableData.TrophyData trophy = gb.getTrophy();
+				if(trophy != null) {
+					shape.begin(ShapeType.Filled);
+					shape.setColor(Color.valueOf("222200"));
+					shape.rect(x - 72, y, 30, barh - 6);
+					shape.setColor(Color.CYAN);
+					shape.rect(x - 76, y + 4, 30, barh - 6);
+					shape.end();
+					sprite.begin();
+					titlefont.setColor(Color.BLACK);
+					titlefont.draw(sprite, trophy.getName(), x - 72, y + barh - 8);
+					sprite.end();
+				}
 			} else {
 				if (sd.getScore() != null && sd.getScore().getClear() != 0
 						&& skin.getLamp()[sd.getScore().getClear()] != null) {
@@ -489,13 +502,13 @@ public class MusicSelector extends MainState {
 			if (ln) {
 				shape.begin(ShapeType.Filled);
 				shape.setColor(Color.valueOf("222200"));
-				shape.rect(x - 36, y - 4, 30, barh - 6);
+				shape.rect(x - 36, y, 30, barh - 6);
 				shape.setColor(Color.YELLOW);
-				shape.rect(x - 40, y, 30, barh - 6);
+				shape.rect(x - 40, y + 4, 30, barh - 6);
 				shape.end();
 				sprite.begin();
 				titlefont.setColor(Color.BLACK);
-				titlefont.draw(sprite, "LN", x - 36, y + barh - 12);
+				titlefont.draw(sprite, "LN", x - 36, y + barh - 8);
 				sprite.end();
 			}
 		}
@@ -1133,6 +1146,10 @@ public class MusicSelector extends MainState {
 						if (sd != null) {
 							str.append(sd.getTitle());
 						}
+					}
+
+					for (TableData.TrophyData tr : ((GradeBar) song).getAllTrophy()) {
+						str.append(tr.getName());
 					}
 				}
 			}

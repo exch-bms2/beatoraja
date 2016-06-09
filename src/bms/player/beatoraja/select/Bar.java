@@ -3,6 +3,7 @@ package bms.player.beatoraja.select;
 import bms.player.lunaticrave2.FolderData;
 import bms.player.lunaticrave2.SongData;
 import bms.player.beatoraja.*;
+import bms.table.Course;
 
 public abstract class Bar {
 
@@ -170,17 +171,14 @@ class GradeBar extends SelectableBar {
 	private SongData[] songs;
 	private String name;
 	
-	private int[] constraint = new int[0];
-
-	private IRScoreData score;
+	private TableData.CourseData course;
+	private IRScoreData mscore;
 	private IRScoreData rscore;
 
-	public GradeBar(String name, SongData[] songs, int[] constraint) {
+	public GradeBar(String name, SongData[] songs, TableData.CourseData course) {
 		this.songs = songs;
 		this.name = name;
-		if(constraint != null) {
-			this.constraint = constraint;			
-		}
+		this.course = course;
 	}
 
 	public SongData[] getSongDatas() {
@@ -202,11 +200,11 @@ class GradeBar extends SelectableBar {
 	}
 
 	public IRScoreData getMirrorScore() {
-		return score;
+		return mscore;
 	}
 
 	public void setMirrorScore(IRScoreData score) {
-		this.score = score;
+		this.mscore = score;
 	}
 
 	public IRScoreData getRandomScore() {
@@ -218,11 +216,32 @@ class GradeBar extends SelectableBar {
 	}
 
 	public int[] getConstraint() {
-		return constraint;
+		if(course.getConstraint() != null) {
+			return course.getConstraint();
+		}
+		return new int[0];
 	}
 
-	public void setConstraint(int[] constraint) {
-		this.constraint = constraint;
+	public TableData.TrophyData[] getAllTrophy() {
+		return course.getTrophy();
+	}
+	public TableData.TrophyData getTrophy() {
+		for(TableData.TrophyData trophy : course.getTrophy()) {
+			if(qualified(this.getScore(), trophy)) {
+				return trophy;
+			}
+			if(qualified(mscore, trophy)) {
+				return trophy;
+			}
+			if(qualified(rscore, trophy)) {
+				return trophy;
+			}
+		}
+		return null;
 	}
 
+	private boolean qualified(IRScoreData score, TableData.TrophyData trophy) {
+		return score != null && score.getNotes() != 0 && trophy.getMissrate() >= score.getMinbp() * 100.0 / score.getNotes()
+				&& trophy.getScorerate() <= score.getExscore() * 100.0 / (score.getNotes() * 2);
+	}
 }
