@@ -43,6 +43,10 @@ public class JudgeManager {
      * 最大コンボ数
      */
     private int maxcombo;
+
+    private int coursecombo;
+
+    private int coursemaxcombo;
     /**
      * 現在表示中の判定
      */
@@ -475,10 +479,13 @@ public class JudgeManager {
         if (j < 3) {
             combo++;
             maxcombo = maxcombo > combo ? maxcombo : combo;
+            coursecombo++;
+            coursemaxcombo = coursemaxcombo > coursecombo ? coursemaxcombo : coursecombo;
         } else if ((j >= 3 && j < 5) || (pmsjudge && j >= 3)) {
             combo = 0;
+            coursecombo = 0;
         }
-        judgecombo[lane / (noteassign.length / judgenow.length)] = combo;
+        judgecombo[lane / (noteassign.length / judgenow.length)] = coursecombo;
         main.update(lane, j, time, fast);
     }
 
@@ -514,8 +521,28 @@ public class JudgeManager {
         return inclease;
     }
 
+    public int getCombo() {
+        return combo;
+    }
+
+    public int getCourseCombo() {
+        return coursecombo;
+    }
+
+    public void setCourseCombo(int combo) {
+        this.coursecombo = combo;
+    }
+
     public int getMaxcombo() {
         return maxcombo;
+    }
+
+    public int getCourseMaxcombo() {
+        return coursemaxcombo;
+    }
+
+    public void setCourseMaxcombo(int combo) {
+        this.coursemaxcombo = combo;
     }
 
     public int getJudgeCount() {

@@ -2,6 +2,7 @@ package bms.player.beatoraja.result;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import bms.player.beatoraja.gauge.*;
 import org.lwjgl.opengl.GL11;
@@ -226,6 +227,14 @@ public class MusicResult extends MainState {
 				|| ((time > 500 && (keystate[0] || keystate[2] || keystate[4] || keystate[6])))) {
 			if (resource.getCourseBMSModels() != null) {
 				if (resource.getGauge().get(resource.getGauge().size() - 1) <= 0) {
+					// 未達曲のノーツをPOORとして加算
+					final List<List<Float>> coursegauge = resource.getCourseGauge();
+					final int cg = resource.getCourseBMSModels().length;
+					for(int i = 0;i < cg;i++) {
+						if (coursegauge.size() <= i) {
+							resource.getCourseScoreData().setMinbp(resource.getCourseScoreData().getMinbp() + resource.getCourseBMSModels()[i].getTotalNotes());
+						}
+					}
 					// 不合格リザルト
 					main.changeState(MainController.STATE_GRADE_RESULT);
 				} else if (resource.nextCourse()) {
@@ -302,6 +311,11 @@ public class MusicResult extends MainState {
 			if (cscore == null) {
 				cscore = new IRScoreData();
 				cscore.setMinbp(0);
+				int notes = 0;
+				for(BMSModel mo : resource.getCourseBMSModels()) {
+					notes += mo.getTotalNotes();
+				}
+				cscore.setNotes(notes);
 				resource.setCourseScoreData(cscore);
 			}
 			cscore.setFpg(cscore.getFpg() + newscore.getFpg());
