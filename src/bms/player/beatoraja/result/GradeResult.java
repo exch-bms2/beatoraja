@@ -195,6 +195,7 @@ public class GradeResult extends MainState {
 		if (newscore == null) {
 			return;
 		}
+		newscore.setCombo(resource.getMaxcombo());
 		int random = 0;
 		if (resource.getConfig().getRandom() > 0 || resource.getConfig().getRandom2() > 0
 				|| resource.getConfig().getDoubleoption() > 0) {
@@ -251,8 +252,8 @@ public class GradeResult extends MainState {
 
 	@Override
 	public int getScore() {
-		if (resource.getScoreData() != null) {
-			return resource.getScoreData().getExscore();
+		if (resource.getCourseScoreData() != null) {
+			return resource.getCourseScoreData().getExscore();
 		}
 		return Integer.MIN_VALUE;
 	}
@@ -264,8 +265,8 @@ public class GradeResult extends MainState {
 
 	@Override
 	public int getMaxcombo() {
-		if (resource.getScoreData() != null) {
-			return resource.getScoreData().getCombo();
+		if (resource.getCourseScoreData() != null) {
+			return resource.getCourseScoreData().getCombo();
 		}
 		return Integer.MIN_VALUE;
 	}
@@ -280,8 +281,8 @@ public class GradeResult extends MainState {
 
 	@Override
 	public int getMisscount() {
-		if (resource.getScoreData() != null) {
-			return resource.getScoreData().getMinbp();
+		if (resource.getCourseScoreData() != null) {
+			return resource.getCourseScoreData().getMinbp();
 		}
 		return Integer.MIN_VALUE;
 	}

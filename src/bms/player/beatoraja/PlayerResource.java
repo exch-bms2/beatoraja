@@ -71,7 +71,11 @@ public class PlayerResource {
 	 * コーススコア
 	 */
 	private IRScoreData cscore;
-	
+
+	private int combo;
+
+	private int maxcombo;
+
 	public PlayerResource(Config config) {
 		this.config = config;
 	}
@@ -85,6 +89,8 @@ public class PlayerResource {
 		gauge = null;
 		courseReplay.clear();
 		coursegauge.clear();
+		combo = 0;
+		maxcombo = 0;
 	}
 
 	public boolean setBMSFile(final File f, final Config config, int autoplay) {
@@ -290,5 +296,21 @@ public class PlayerResource {
 
 	public void addCourseGauge(List<Float> gauge) {
 		coursegauge.add(new ArrayList(gauge));
+	}
+
+	public int getCombo() {
+		return combo;
+	}
+
+	public void setCombo(int combo) {
+		this.combo = combo;
+	}
+
+	public int getMaxcombo() {
+		return maxcombo;
+	}
+
+	public void setMaxcombo(int maxcombo) {
+		this.maxcombo = maxcombo;
 	}
 }
