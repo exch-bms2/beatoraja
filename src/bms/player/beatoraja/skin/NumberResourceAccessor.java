@@ -23,6 +23,13 @@ public interface NumberResourceAccessor {
 		}
 	};
 	
+	public static NumberResourceAccessor MAX_SCORE = new NumberResourceAccessor() {
+		@Override
+		public int getValue(MainState state) {
+			return state.getTotalNotes() * 2;
+		}
+	};
+	
 	public static NumberResourceAccessor MISSCOUNT = new NumberResourceAccessor() {
 		@Override
 		public int getValue(MainState state) {
@@ -48,6 +55,90 @@ public interface NumberResourceAccessor {
 		@Override
 		public int getValue(MainState state) {
 			return state.getTargetMaxcombo();
+		}
+	};
+	
+	public static NumberResourceAccessor PLAYCOUNT = new NumberResourceAccessor() {
+		@Override
+		public int getValue(MainState state) {
+			return state.getPlayCount(true) + state.getPlayCount(false);
+		}
+	};
+	
+	public static NumberResourceAccessor CLEARCOUNT = new NumberResourceAccessor() {
+		@Override
+		public int getValue(MainState state) {
+			return state.getPlayCount(true);
+		}
+	};
+	
+	public static NumberResourceAccessor FAILCOUNT = new NumberResourceAccessor() {
+		@Override
+		public int getValue(MainState state) {
+			return state.getPlayCount(false);
+		}
+	};
+	
+	public static NumberResourceAccessor PLAYER_PLAYCOUNT = new NumberResourceAccessor() {
+		@Override
+		public int getValue(MainState state) {
+			return state.getTotalPlayCount(true) + state.getTotalPlayCount(false);
+		}
+	};
+	
+	public static NumberResourceAccessor PLAYER_CLEARCOUNT = new NumberResourceAccessor() {
+		@Override
+		public int getValue(MainState state) {
+			return state.getTotalPlayCount(true);
+		}
+	};
+	
+	public static NumberResourceAccessor PLAYER_FAILCOUNT = new NumberResourceAccessor() {
+		@Override
+		public int getValue(MainState state) {
+			return state.getTotalPlayCount(false);
+		}
+	};
+	
+	public static NumberResourceAccessor PLAYER_PERFECT = new NumberResourceAccessor() {
+		@Override
+		public int getValue(MainState state) {
+			return state.getTotalJudgeCount(0);
+		}
+	};
+	
+	public static NumberResourceAccessor PLAYER_GREAT = new NumberResourceAccessor() {
+		@Override
+		public int getValue(MainState state) {
+			return state.getTotalJudgeCount(1);
+		}
+	};
+	
+	public static NumberResourceAccessor PLAYER_GOOD = new NumberResourceAccessor() {
+		@Override
+		public int getValue(MainState state) {
+			return state.getTotalJudgeCount(2);
+		}
+	};
+	
+	public static NumberResourceAccessor PLAYER_BAD = new NumberResourceAccessor() {
+		@Override
+		public int getValue(MainState state) {
+			return state.getTotalJudgeCount(3);
+		}
+	};
+	
+	public static NumberResourceAccessor PLAYER_POOR = new NumberResourceAccessor() {
+		@Override
+		public int getValue(MainState state) {
+			return state.getTotalJudgeCount(4);
+		}
+	};
+	
+	public static NumberResourceAccessor PLAYER_MISS = new NumberResourceAccessor() {
+		@Override
+		public int getValue(MainState state) {
+			return state.getTotalJudgeCount(5);
 		}
 	};
 	
@@ -174,6 +265,13 @@ public interface NumberResourceAccessor {
 		@Override
 		public int getValue(MainState state) {
 			return state.getJudgeCount(5, false);
+		}
+	};
+	
+	public static NumberResourceAccessor TOTALNOTES = new NumberResourceAccessor() {
+		@Override
+		public int getValue(MainState state) {
+			return state.getTotalNotes();
 		}
 	};
 	

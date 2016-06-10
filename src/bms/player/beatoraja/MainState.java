@@ -62,6 +62,18 @@ public abstract class MainState {
 		return 0;
 	}
 
+	public int getTotalJudgeCount(int judge) {
+		return 0;
+	}
+	
+	public int getTotalPlayCount(boolean clear) {
+		return 0;
+	}
+	
+	public int getPlayCount(boolean clear) {
+		return 0;
+	}
+	
 	public int getJudgeCount(int judge, boolean fast) {
 		return 0;
 	}
@@ -75,6 +87,10 @@ public abstract class MainState {
 	}
 	
 	public int getMaxBPM() {
+		return 0;
+	}
+	
+	public int getTotalNotes() {
 		return 0;
 	}
 	

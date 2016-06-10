@@ -204,6 +204,50 @@ public abstract class LR2SkinLoader {
 									}
 									num = new SkinNumber(images, values[9], values[13], 0);
 									num.setId(values[11]);
+									
+									if(num.getId() == 30) {
+										num.setNumberResourceAccessor(NumberResourceAccessor.PLAYER_PLAYCOUNT);
+									}
+									if(num.getId() == 31) {
+										num.setNumberResourceAccessor(NumberResourceAccessor.PLAYER_CLEARCOUNT);
+									}
+									if(num.getId() == 32) {
+										num.setNumberResourceAccessor(NumberResourceAccessor.PLAYER_FAILCOUNT);
+									}
+									if(num.getId() == 33) {
+										num.setNumberResourceAccessor(NumberResourceAccessor.PLAYER_PERFECT);
+									}
+									if(num.getId() == 34) {
+										num.setNumberResourceAccessor(NumberResourceAccessor.PLAYER_GREAT);
+									}
+									if(num.getId() == 35) {
+										num.setNumberResourceAccessor(NumberResourceAccessor.PLAYER_GOOD);
+									}
+									if(num.getId() == 36) {
+										num.setNumberResourceAccessor(NumberResourceAccessor.PLAYER_BAD);
+									}
+									if(num.getId() == 37) {
+										num.setNumberResourceAccessor(NumberResourceAccessor.PLAYER_POOR);
+									}
+
+									if(num.getId() == 72) {
+										num.setNumberResourceAccessor(NumberResourceAccessor.MAX_SCORE);
+									}
+									if(num.getId() == 74) {
+										num.setNumberResourceAccessor(NumberResourceAccessor.TOTALNOTES);
+									}
+									if(num.getId() == 76) {
+										num.setNumberResourceAccessor(NumberResourceAccessor.MISSCOUNT);
+									}
+									if(num.getId() == 77) {
+										num.setNumberResourceAccessor(NumberResourceAccessor.PLAYCOUNT);
+									}
+									if(num.getId() == 78) {
+										num.setNumberResourceAccessor(NumberResourceAccessor.CLEARCOUNT);
+									}
+									if(num.getId() == 79) {
+										num.setNumberResourceAccessor(NumberResourceAccessor.FAILCOUNT);
+									}
 									if(num.getId() == 90) {
 										num.setNumberResourceAccessor(NumberResourceAccessor.MAX_BPM);
 									}
@@ -212,25 +256,25 @@ public abstract class LR2SkinLoader {
 									}
 
 									
-									if(num.getId() == 101) {
+									if(num.getId() == 71 || num.getId() == 101) {
 										num.setNumberResourceAccessor(NumberResourceAccessor.SCORE);
 									}
-									if(num.getId() == 105) {
+									if(num.getId() == 75 || num.getId() == 105) {
 										num.setNumberResourceAccessor(NumberResourceAccessor.MAXCOMBO);
 									}
-									if(num.getId() == 110) {
+									if(num.getId() == 80 || num.getId() == 110) {
 										num.setNumberResourceAccessor(NumberResourceAccessor.PERFECT);
 									}
-									if(num.getId() == 111) {
+									if(num.getId() == 81 || num.getId() == 111) {
 										num.setNumberResourceAccessor(NumberResourceAccessor.GREAT);
 									}
-									if(num.getId() == 112) {
+									if(num.getId() == 82 || num.getId() == 112) {
 										num.setNumberResourceAccessor(NumberResourceAccessor.GOOD);
 									}
-									if(num.getId() == 113) {
+									if(num.getId() == 83 || num.getId() == 113) {
 										num.setNumberResourceAccessor(NumberResourceAccessor.BAD);
 									}
-									if(num.getId() == 114) {
+									if(num.getId() == 84 || num.getId() == 114) {
 										num.setNumberResourceAccessor(NumberResourceAccessor.POOR);
 									}
 
