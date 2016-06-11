@@ -1,18 +1,7 @@
 package bms.player.beatoraja.play.audio;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.*;
+import java.util.*;
 import java.util.logging.Logger;
 
 import javax.sound.sampled.*;
@@ -33,8 +22,6 @@ import com.badlogic.gdx.utils.GdxRuntimeException;
  */
 public class SoundProcessor implements AudioProcessor {
 
-	private BMSModel model;
-
 	private Sound[] wavmap = new Sound[0];
 
 	private long[] playmap = new long[0];
@@ -50,8 +37,6 @@ public class SoundProcessor implements AudioProcessor {
 	public void setModel(BMSModel model, String filepath) {
 		dispose();
 		progress = 0;
-
-		this.model = model;
 		// BMS格納ディレクトリ
 		String directorypath = filepath.substring(0, filepath.lastIndexOf(File.separatorChar) + 1);
 
@@ -62,32 +47,66 @@ public class SoundProcessor implements AudioProcessor {
 			Sound sound = null;
 			final File wavfile = new File(directorypath + name + ".wav");
 			File oggfile = new File(directorypath + name + ".ogg");
+			File mp3file = new File(directorypath + name + ".mp3");
 			try {
 				if (wavfile.exists()) {
-					sound = Gdx.audio.newSound(new FileHandleStream("tempwav.wav") {
-						@Override
-						public InputStream read() {
-							try {
-								return new ByteArrayInputStream(convertWav(wavfile));
-							} catch (UnsupportedAudioFileException e) {
-								e.printStackTrace();
-							} catch (IOException e) {
-								e.printStackTrace();
-							}
-							try {
-								return new FileInputStream(wavfile);
-							} catch (FileNotFoundException e) {
-								// TODO 自動生成された catch ブロック
-								e.printStackTrace();
-							}
-							return null;
-						}
+					RandomAccessFile f;
+					try {
+						f = new RandomAccessFile(wavfile, "r");
+						byte[] header = new byte[44];
+						f.read(header, 0, 44);
+						f.close();
+						if(header[20] == 85) {
+							// WAVの中身がmp3の場合
+							sound = Gdx.audio.newSound(new FileHandleStream("tempwav.mp3") {
+								@Override
+								public InputStream read() {
+									try {
+										BufferedInputStream input =new BufferedInputStream(new FileInputStream(wavfile));
+										input.skip(44);
+										return input;
+									} catch (IOException e) {
+										e.printStackTrace();
+									}
+									return null;
+								}
 
-						@Override
-						public OutputStream write(boolean overwrite) {
-							return null;
+								@Override
+								public OutputStream write(boolean overwrite) {
+									return null;
+								}
+							});							
+						} else {
+							sound = Gdx.audio.newSound(new FileHandleStream("tempwav.wav") {
+								@Override
+								public InputStream read() {
+									try {
+										return new ByteArrayInputStream(convertWav(wavfile));
+									} catch (UnsupportedAudioFileException e) {
+										e.printStackTrace();
+									} catch (IOException e) {
+										e.printStackTrace();
+									}
+									try {
+										return new FileInputStream(wavfile);
+									} catch (FileNotFoundException e) {
+										e.printStackTrace();
+									}
+									return null;
+								}
+
+								@Override
+								public OutputStream write(boolean overwrite) {
+									return null;
+								}
+							});							
 						}
-					});
+					} catch (FileNotFoundException e1) {
+						e1.printStackTrace();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					
 				}
 			} catch (GdxRuntimeException e) {
 				Logger.getGlobal().warning("音源(wav)ファイル読み込み失敗。" + e.getMessage());
@@ -103,6 +122,16 @@ public class SoundProcessor implements AudioProcessor {
 					// e.printStackTrace();
 				}
 			}
+			if (sound == null) {
+				try {
+					if (mp3file.exists()) {
+						sound = Gdx.audio.newSound(Gdx.files.internal(mp3file.getPath()));
+					}
+				} catch (GdxRuntimeException e) {
+					Logger.getGlobal().warning("音源(mp3)ファイル読み込み失敗。" + e.getMessage());
+					// e.printStackTrace();
+				}
+			}
 			sounds.add(sound);
 			progress += 1f / model.getWavList().length;
 		}
@@ -113,7 +142,7 @@ public class SoundProcessor implements AudioProcessor {
 		progress = 1;
 	}
 
-	public void play(int id, int starttime) {
+	synchronized public void play(int id, int starttime) {
 		if (starttime != 0) {
 			// TODO 音切りのロジック実装までは途中からの再生は行わない
 			return;
