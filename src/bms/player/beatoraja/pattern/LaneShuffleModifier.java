@@ -15,21 +15,42 @@ import bms.model.TimeLine;
  */
 public class LaneShuffleModifier extends PatternModifier {
 
+	/**
+	 * 各レーンの移動先
+	 */
 	private int[] random;
+	/**
+	 * ランダムのタイプ
+	 */
 	private int type;
-
+	/**
+	 * ミラー
+	 */
 	public static final int MIRROR = 0;
+	/**
+	 * ローテート
+	 */
 	public static final int R_RANDOM = 1;
+	/**
+	 * ランダム
+	 */
 	public static final int RANDOM = 2;
+	/**
+	 * スクラッチレーンを含むランダム
+	 */
 	public static final int RANDOM_EX = 3;
 	/**
 	 * 1P-2Pを入れ替える
 	 */
 	public static final int FLIP = 4;
-
+	/**
+	 * 1Pの譜面を2Pにコピーする
+	 */
+	public static final int BATTLE = 5;
+	
 	private static final int[][] MIRROR_LANE = { { 6, 5, 4, 3, 2, 1, 0, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 },
 			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 15, 14, 13, 12, 11, 10, 9, 16, 17 },
-			{ 12, 11, 10, 9, 4, 5, 6, 7, 8, 3, 2, 1, 0, 13, 14, 15, 16, 17 } };
+			{ 13, 12, 11, 10, 4, 5, 6, 7, 8, 9, 3, 2, 1, 0, 14, 15, 16, 17 } };
 
 	public LaneShuffleModifier(int type) {
 		super(type == RANDOM_EX ? 1 : 0);
@@ -120,12 +141,15 @@ public class LaneShuffleModifier extends PatternModifier {
 				}
 				break;
 			case NINEKEYS:
-				// TODO 9keyにはSCがないため、EX-RANDOMがない
+				// 9keyにはSCがないため、EX-RANDOMがない。そもそもここには飛んでこない
 				break;
 			}
 			break;
 		case FLIP:
 			random = new int[] { 9, 10, 11, 12, 13, 14, 15, 16, 17, 0, 1, 2, 3, 4, 5, 6, 7, 8 };
+			break;
+		case BATTLE:
+			random = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 0, 1, 2, 3, 4, 5, 6, 7, 8};
 			break;
 
 		}		
