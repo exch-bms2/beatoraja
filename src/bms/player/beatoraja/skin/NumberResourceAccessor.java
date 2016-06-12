@@ -1,6 +1,7 @@
 package bms.player.beatoraja.skin;
 
 import java.util.Calendar;
+import java.util.zip.Inflater;
 
 import bms.player.beatoraja.MainState;
 
@@ -12,10 +13,10 @@ public interface NumberResourceAccessor {
 	public static NumberResourceAccessor SCORE = new NumberResourceAccessor() {
 		@Override
 		public int getValue(MainState state) {
-			return (state.getJudgeCount(0, true) + state.getJudgeCount(0, false)) * 2 + state.getJudgeCount(1, true) + state.getJudgeCount(1, false);
+			return state.getScore();
 		}
 	};
-	
+
 	public static NumberResourceAccessor TARGET_SCORE = new NumberResourceAccessor() {
 		@Override
 		public int getValue(MainState state) {
@@ -61,7 +62,10 @@ public interface NumberResourceAccessor {
 	public static NumberResourceAccessor PLAYCOUNT = new NumberResourceAccessor() {
 		@Override
 		public int getValue(MainState state) {
-			return state.getPlayCount(true) + state.getPlayCount(false);
+			if(state.getPlayCount(true) != Integer.MIN_VALUE) {
+				return state.getPlayCount(true) + state.getPlayCount(false);
+			}
+			return Integer.MIN_VALUE;
 		}
 	};
 	
@@ -82,7 +86,10 @@ public interface NumberResourceAccessor {
 	public static NumberResourceAccessor PLAYER_PLAYCOUNT = new NumberResourceAccessor() {
 		@Override
 		public int getValue(MainState state) {
-			return state.getTotalPlayCount(true) + state.getTotalPlayCount(false);
+			if(state.getTotalPlayCount(true) != Integer.MIN_VALUE) {
+				return state.getTotalPlayCount(true) + state.getTotalPlayCount(false);
+			}
+			return Integer.MIN_VALUE;
 		}
 	};
 	
@@ -141,7 +148,15 @@ public interface NumberResourceAccessor {
 			return state.getTotalJudgeCount(5);
 		}
 	};
-	
+
+	public static NumberResourceAccessor PLAYER_TOTALNOTES = new NumberResourceAccessor() {
+		@Override
+		public int getValue(MainState state) {
+			return state.getTotalJudgeCount(0) + state.getTotalJudgeCount(1) + state.getTotalJudgeCount(2)
+					+ state.getTotalJudgeCount(3);
+		}
+	};
+
 	public static NumberResourceAccessor PERFECT = new NumberResourceAccessor() {
 		@Override
 		public int getValue(MainState state) {

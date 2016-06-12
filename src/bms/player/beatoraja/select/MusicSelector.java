@@ -179,9 +179,6 @@ public class MusicSelector extends MainState {
 		if (songs.length > 0) {
 			IRScoreData score = main.getPlayDataAccessor().readScoreData(songs[0].getHash(),
 					songs[0].getLongnote() == 1, lnmode);
-			if (score == null) {
-				score = new IRScoreData();
-			}
 			if (score != null && config.getLnmode() == 2 && (songs[0].getLongnote() == 1)) {
 				score.setClear(score.getExclear());
 			}
@@ -353,25 +350,7 @@ public class MusicSelector extends MainState {
 			boolean ln = false;
 
 			if (sd instanceof GradeBar) {
-				int lamp = -1;
-				if (sd.getScore() != null) {
-					lamp = sd.getScore().getClear();
-				}
 				GradeBar gb = (GradeBar) sd;
-				if (gb.getMirrorScore() != null) {
-					lamp = (lamp > gb.getMirrorScore().getClear()) ? lamp : gb.getMirrorScore().getClear();
-				}
-				if (gb.getRandomScore() != null) {
-					lamp = (lamp > gb.getRandomScore().getClear()) ? lamp : gb.getRandomScore().getClear();
-				}
-				if (lamp != -1) {
-					// sprite.setBlendFunction(GL11.GL_ONE, GL11.GL_ONE);
-					sprite.begin();
-					sprite.draw(skin.getLamp()[lamp].getKeyFrame(time / 1000f), x, y + 2, 15, barh - 2);
-					sprite.end();
-					// sprite.setBlendFunction(GL11.GL_SRC_ALPHA,
-					// GL11.GL_ONE_MINUS_SRC_ALPHA);
-				}
 				if (gb.existsAllSongs()) {
 					for (SongData song : gb.getSongDatas()) {
 						if (song.getLongnote() != 0) {
@@ -394,18 +373,15 @@ public class MusicSelector extends MainState {
 					titlefont.draw(sprite, trophy.getName(), x - 72, y + barh - 8);
 					sprite.end();
 				}
-			} else {
-				if (sd.getScore() != null && sd.getScore().getClear() != 0
-						&& skin.getLamp()[sd.getScore().getClear()] != null) {
-					// sprite.setBlendFunction(GL11.GL_ONE, GL11.GL_ONE);
-					sprite.begin();
-					sprite.draw(skin.getLamp()[sd.getScore().getClear()].getKeyFrame(time / 1000f), x, y + 2, 15,
-							barh - 2);
-					sprite.end();
-					// sprite.setBlendFunction(GL11.GL_SRC_ALPHA,
-					// GL11.GL_ONE_MINUS_SRC_ALPHA);
-				}
 			}
+
+			if (skin.getLamp()[sd.getLamp()] != null) {
+				sprite.begin();
+				sprite.draw(skin.getLamp()[sd.getLamp()].getKeyFrame(time / 1000f), x, y + 2, 15,
+						barh - 2);
+				sprite.end();
+			}
+
 
 			if (sd instanceof SongBar) {
 				SongData song = ((SongBar) sd).getSongData();
@@ -484,14 +460,14 @@ public class MusicSelector extends MainState {
 				titlefont.setColor(Color.valueOf(LAMP[score.getClear()]));
 				titlefont.draw(sprite, CLEAR[score.getClear()], 100, 420);
 				titlefont.setColor(Color.WHITE);
-				titlefont.draw(
-						sprite,
-						"EX-SCORE  : " + score.getExscore() + " / " + (score.getNotes() * 2) + "    RANK : "
-								+ RANK[(score.getExscore() * 27 / (score.getNotes() * 2))] + " ( "
-								+ ((score.getExscore() * 1000 / (score.getNotes() * 2)) / 10.0f) + "% )", 100, 390);
-				titlefont.draw(sprite, "MISS COUNT: " + score.getMinbp(), 100, 360);
-				titlefont.draw(sprite, "CLEAR / PLAY : " + score.getClearcount() + " / " + score.getPlaycount(), 100,
-						330);
+				titlefont.draw(sprite, "EX-SCORE  : ", 50, 390);
+				titlefont.draw(sprite, "RANK : "
+						+ RANK[(score.getExscore() * 27 / (score.getNotes() * 2))] + " ( "
+						+ ((score.getExscore() * 1000 / (score.getNotes() * 2)) / 10.0f) + "% )", 300, 390);
+				titlefont.draw(sprite, "MISS COUNT: ", 50, 360);
+				titlefont.draw(sprite, "MAX COMBO : ", 300, 360);
+
+				titlefont.draw(sprite, "CLEAR / PLAY : ", 50, 330);
 			}
 			if (((SongBar) currentsongs[selectedindex]).existsReplayData()) {
 				titlefont.setColor(Color.GREEN);
@@ -541,9 +517,10 @@ public class MusicSelector extends MainState {
 				titlefont.setColor(Color.valueOf(LAMP[score.getClear()]));
 				titlefont.draw(sprite, CLEAR[score.getClear()], 100, 420);
 				titlefont.setColor(Color.WHITE);
-				titlefont.draw(sprite, "EX-SCORE  : " + score.getExscore() + " / " + (score.getNotes() * 2), 100, 390);
-				titlefont.draw(sprite, "MISS COUNT: " + score.getMinbp(), 100, 360);
-				titlefont.draw(sprite, "CLEAR / PLAY : " + score.getClearcount() + " / " + score.getPlaycount(), 100,
+				titlefont.draw(sprite, "EX-SCORE  : ", 50, 390);
+				titlefont.draw(sprite, "MISS COUNT: ", 50, 360);
+				titlefont.draw(sprite, "MAX COMBO : ", 300, 360);
+				titlefont.draw(sprite, "CLEAR / PLAY : ", 50,
 						330);
 			}
 			if (gb.getMirrorScore() != null) {
@@ -576,9 +553,8 @@ public class MusicSelector extends MainState {
 		}
 
 		titlefont.setColor(Color.WHITE);
-		titlefont.draw(sprite, "PLAYCOUNT : " + playerdata.getPlaycount() + " NOTESCOUNT : "
-				+ (playerdata.getPerfect() + playerdata.getGreat() + playerdata.getGood() + playerdata.getBad()), 20,
-				120);
+		titlefont.draw(sprite, "PLAYCOUNT : ", 20, 120);
+		titlefont.draw(sprite, " NOTESCOUNT : ", 300, 120);
 
 		titlefont.setColor(Color.WHITE);
 		if (currentsongs[selectedindex] instanceof FolderBar) {
@@ -649,9 +625,9 @@ public class MusicSelector extends MainState {
 			}
 		}
 
-		titlefont.draw(sprite, "MODE : " + MODE[mode], 20, 60);
-		titlefont.draw(sprite, "SORT : " + SORT[sort].getName(), 220, 60);
-		titlefont.draw(sprite, "LN MODE : " + LNMODE[config.getLnmode()], 20, 30);
+		titlefont.draw(sprite, "MODE : " + MODE[mode], 20, 30);
+		titlefont.draw(sprite, "SORT : " + SORT[sort].getName(), 180, 30);
+		titlefont.draw(sprite, "LN MODE : " + LNMODE[config.getLnmode()], 440, 30);
 		sprite.end();
 
 		boolean[] numberstate = input.getNumberState();
@@ -982,11 +958,6 @@ public class MusicSelector extends MainState {
 						}
 						cfolder.setLamps(clears);
 						cfolder.setRanks(ranks);
-						if (clear != 0 && clear != 255) {
-							IRScoreData dummyscore = new IRScoreData();
-							dummyscore.setClear(clear);
-							cfolder.setScore(dummyscore);
-						}
 					}
 				}
 			} else {
@@ -1019,11 +990,6 @@ public class MusicSelector extends MainState {
 					}
 					levelbar.setLamps(clears);
 					levelbar.setRanks(ranks);
-					if (clear != 0 && clear != 255) {
-						IRScoreData dummyscore = new IRScoreData();
-						dummyscore.setClear(clear);
-						levelbar.setScore(dummyscore);
-					}
 				}
 			}
 		}
@@ -1165,4 +1131,77 @@ public class MusicSelector extends MainState {
 		titlefont.dispose();
 	}
 
+	public int getScore() {
+		if(currentsongs[selectedindex].getScore() != null) {
+			return currentsongs[selectedindex].getScore().getExscore();
+		}
+		return Integer.MIN_VALUE;
+	}
+
+	public int getMaxcombo() {
+		if(currentsongs[selectedindex].getScore() != null) {
+			return currentsongs[selectedindex].getScore().getCombo();
+		}
+		return Integer.MIN_VALUE;
+	}
+
+	public int getMisscount() {
+		if(currentsongs[selectedindex].getScore() != null) {
+			return currentsongs[selectedindex].getScore().getMinbp();
+		}
+		return Integer.MIN_VALUE;
+	}
+
+	public int getJudgeCount(int judge, boolean fast) {
+		return 0;
+	}
+
+	public int getPlayCount(boolean clear) {
+		if(currentsongs[selectedindex].getScore() != null) {
+			if(clear) {
+				return currentsongs[selectedindex].getScore().getClearcount();
+			} else {
+				return currentsongs[selectedindex].getScore().getPlaycount() - currentsongs[selectedindex].getScore().getClearcount();
+			}
+		}
+		return Integer.MIN_VALUE;
+	}
+
+	public int getMinBPM() {
+		if(currentsongs[selectedindex] instanceof SongBar) {
+			((SongBar)currentsongs[selectedindex]).getSongData().getMinbpm();
+		}
+		return 0;
+	}
+
+	public int getMaxBPM() {
+		if(currentsongs[selectedindex] instanceof SongBar) {
+			((SongBar)currentsongs[selectedindex]).getSongData().getMaxbpm();
+		}
+		return 0;
+	}
+
+	public int getTotalJudgeCount(int judge) {
+		if(playerdata != null) {
+			switch(judge) {
+				case 0:
+					return (int) playerdata.getPerfect();
+				case 1:
+					return (int) playerdata.getGreat();
+				case 2:
+					return (int) playerdata.getGood();
+				case 3:
+					return (int) playerdata.getBad();
+				case 4:
+					return (int) playerdata.getPoor();
+				case 5:
+					return 0;
+			}
+		}
+		return 0;
+	}
+
+	public int getTotalPlayCount(boolean clear) {
+		return (int) (clear ? playerdata.getClear() : playerdata.getFail());
+	}
 }

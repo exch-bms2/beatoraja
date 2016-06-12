@@ -25,6 +25,8 @@ public class SongData {
 	private int mode;
 	private int longnote;
 	private int difficulty;
+	private int minbpm;
+	private int maxbpm;
 
 	public int getFavorite() {
 		return favorite;
@@ -140,5 +142,21 @@ public class SongData {
 
 	public void setDifficulty(int difficulty) {
 		this.difficulty = difficulty;
+	}
+
+	public int getMinbpm() {
+		return minbpm;
+	}
+
+	public void setMinbpm(int minbpm) {
+		this.minbpm = minbpm;
+	}
+
+	public int getMaxbpm() {
+		return maxbpm;
+	}
+
+	public void setMaxbpm(int maxbpm) {
+		this.maxbpm = maxbpm;
 	}
 }

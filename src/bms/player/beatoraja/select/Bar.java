@@ -18,6 +18,8 @@ public abstract class Bar {
 	public void setScore(IRScoreData score) {
 		this.score = score;
 	}
+
+	public abstract int getLamp();
 }
 
 abstract class SelectableBar extends Bar {
@@ -57,6 +59,13 @@ class SongBar extends SelectableBar {
 	@Override
 	public String getTitle() {
 		return song.getTitle();
+	}
+
+	public int getLamp() {
+		if(getScore() != null) {
+			return getScore().getClear();
+		}
+		return 0;
 	}
 }
 
@@ -100,6 +109,15 @@ class FolderBar extends Bar {
 	public void setRanks(int[] ranks) {
 		this.ranks = ranks;
 	}
+
+	public int getLamp() {
+		for(int i = 0;i < lamps.length;i++) {
+			if(lamps[i] > 0) {
+				return i;
+			}
+		}
+		return 0;
+	}
 }
 
 class TableBar extends Bar {
@@ -125,6 +143,10 @@ class TableBar extends Bar {
 
 	public GradeBar[] getGrades() {
 		return grades;
+	}
+
+	public int getLamp() {
+		return 0;
 	}
 
 }
@@ -163,6 +185,15 @@ class TableLevelBar extends Bar {
 
 	public void setRanks(int[] ranks) {
 		this.ranks = ranks;
+	}
+
+	public int getLamp() {
+		for(int i = 0;i < lamps.length;i++) {
+			if(lamps[i] > 0) {
+				return i;
+			}
+		}
+		return 0;
 	}
 }
 
@@ -243,5 +274,19 @@ class GradeBar extends SelectableBar {
 	private boolean qualified(IRScoreData score, TableData.TrophyData trophy) {
 		return score != null && score.getNotes() != 0 && trophy.getMissrate() >= score.getMinbp() * 100.0 / score.getNotes()
 				&& trophy.getScorerate() <= score.getExscore() * 100.0 / (score.getNotes() * 2);
+	}
+
+	public int getLamp() {
+		int result = 0;
+		if(getScore() != null && getScore().getClear() > result) {
+			result = getScore().getClear();
+		}
+		if(getMirrorScore() != null && getMirrorScore().getClear() > result) {
+			result = getMirrorScore().getClear();
+		}
+		if(getScore() != null && getScore().getClear() > result) {
+			result = getMirrorScore().getClear();
+		}
+		return result;
 	}
 }
