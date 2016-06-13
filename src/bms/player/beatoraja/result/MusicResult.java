@@ -227,16 +227,21 @@ public class MusicResult extends MainState {
 				|| ((time > 500 && (keystate[0] || keystate[2] || keystate[4] || keystate[6])))) {
 			if (resource.getCourseBMSModels() != null) {
 				if (resource.getGauge().get(resource.getGauge().size() - 1) <= 0) {
-					// 未達曲のノーツをPOORとして加算
-					final List<List<Float>> coursegauge = resource.getCourseGauge();
-					final int cg = resource.getCourseBMSModels().length;
-					for(int i = 0;i < cg;i++) {
-						if (coursegauge.size() <= i) {
-							resource.getCourseScoreData().setMinbp(resource.getCourseScoreData().getMinbp() + resource.getCourseBMSModels()[i].getTotalNotes());
+					if(resource.getCourseScoreData() != null) {
+						// 未達曲のノーツをPOORとして加算
+						final List<List<Float>> coursegauge = resource.getCourseGauge();
+						final int cg = resource.getCourseBMSModels().length;
+						for(int i = 0;i < cg;i++) {
+							if (coursegauge.size() <= i) {
+								resource.getCourseScoreData().setMinbp(resource.getCourseScoreData().getMinbp() + resource.getCourseBMSModels()[i].getTotalNotes());
+							}
 						}
+						// 不合格リザルト
+						main.changeState(MainController.STATE_GRADE_RESULT);						
+					} else {
+						// コーススコアがない場合は選曲画面へ
+						main.changeState(MainController.STATE_SELECTMUSIC);
 					}
-					// 不合格リザルト
-					main.changeState(MainController.STATE_GRADE_RESULT);
 				} else if (resource.nextCourse()) {
 					main.changeState(MainController.STATE_PLAYBMS);
 				} else {
@@ -287,6 +292,10 @@ public class MusicResult extends MainState {
 		boolean ln = model.getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
 				+ model.getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH) > 0;
 		if (newscore == null) {
+			if (resource.getCourseScoreData() != null) {
+				resource.getCourseScoreData().setMinbp(resource.getCourseScoreData().getMinbp() + resource.getBMSModel().getTotalNotes());
+				resource.getCourseScoreData().setClear(GrooveGauge.CLEARTYPE_FAILED);
+			}
 			return;
 		}
 		IRScoreData score = main.getPlayDataAccessor().readScoreData(resource.getBMSModel(),
