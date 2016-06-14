@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.TableData.CourseData;
+import bms.player.beatoraja.config.KeyConfiguration;
 import bms.player.lunaticrave2.*;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.skin.*;
@@ -119,6 +120,14 @@ public class MusicSelector extends MainState {
 	 */
 	private Map<String, IRScoreData>[] scorecache;
 
+	public static final int KEY_PLAY = 1;
+	public static final int KEY_AUTO = 2;
+	public static final int KEY_REPLAY = 3;
+	public static final int KEY_UP = 4;
+	public static final int KEY_DOWN = 5;
+	public static final int KEY_FOLDER_OPEN = 6;
+	public static final int KEY_FOLDER_CLOSE = 7;
+
 	public MusicSelector(MainController main, Config config) {
 		this.main = main;
 		this.config = config;
@@ -201,6 +210,11 @@ public class MusicSelector extends MainState {
 		for (Map cache : scorecache) {
 			cache.clear();
 		}
+
+		BMSPlayerInputProcessor input = main.getInputProcessor();
+		PlayConfig pc = (config.getMusicselectinput() == 0 ? config.getMode7() : config.getMode9());
+		input.setKeyassign(pc.getKeyassign());
+		input.setControllerassign(pc.getControllerassign());
 
 		if (dir.size() > 0) {
 			updateBar(dir.get(dir.size() - 1));
@@ -471,7 +485,7 @@ public class MusicSelector extends MainState {
 			}
 			if (((SongBar) currentsongs[selectedindex]).existsReplayData()) {
 				titlefont.setColor(Color.GREEN);
-				titlefont.draw(sprite, "7 KEY : Replay", 100, 270);
+				titlefont.draw(sprite, "Replay exists", 100, 270);
 			}
 		}
 		// 段位用の表示(ミラー段位、EX段位)
@@ -545,7 +559,7 @@ public class MusicSelector extends MainState {
 			}
 			if (((GradeBar) currentsongs[selectedindex]).existsReplayData()) {
 				titlefont.setColor(Color.GREEN);
-				titlefont.draw(sprite, "7 KEY : Replay", 450, 300);
+				titlefont.draw(sprite, "Replay exists", 450, 300);
 			}
 		}
 		if (currentsongs[selectedindex] instanceof TableLevelBar) {
@@ -669,7 +683,7 @@ public class MusicSelector extends MainState {
 		boolean[] keystate = input.getKeystate();
 		long[] keytime = input.getTime();
 		boolean[] cursor = input.getCursorState();
-		if (keystate[7] || cursor[1]) {
+		if (isPressed(keystate, keytime, KEY_UP, false) || cursor[1]) {
 			long l = System.currentTimeMillis();
 			if (duration == 0) {
 				selectedindex++;
@@ -687,7 +701,7 @@ public class MusicSelector extends MainState {
 				}
 				angle = 50;
 			}
-		} else if (keystate[8] || cursor[0]) {
+		} else if (isPressed(keystate, keytime, KEY_DOWN, false) || cursor[0]) {
 			long l = System.currentTimeMillis();
 			if (duration == 0) {
 				selectedindex += currentsongs.length - 1;
@@ -726,8 +740,7 @@ public class MusicSelector extends MainState {
 			main.changeState(MainController.STATE_CONFIG);
 		} else {
 			// 1鍵 (選曲 or フォルダを開く)
-			if ((keystate[0] && keytime[0] != 0) || cursor[3]) {
-				keytime[0] = 0;
+			if (isPressed(keystate, keytime, KEY_PLAY, true) || cursor[3]) {
 				cursor[3] = false;
 				if (currentsongs[selectedindex] instanceof FolderBar || currentsongs[selectedindex] instanceof TableBar
 						|| currentsongs[selectedindex] instanceof TableLevelBar) {
@@ -793,9 +806,23 @@ public class MusicSelector extends MainState {
 					}
 				}
 			}
+			// 白鍵 (フォルダを開く)
+			if (isPressed(keystate, keytime, KEY_FOLDER_OPEN, true) || cursor[3]) {
+				cursor[3] = false;
+				if (currentsongs[selectedindex] instanceof FolderBar || currentsongs[selectedindex] instanceof TableBar
+						|| currentsongs[selectedindex] instanceof TableLevelBar) {
+					Bar bar = currentsongs[selectedindex];
+					if (updateBar(bar)) {
+						if (folderopen != null) {
+							folderopen.play();
+						}
+						dir.add(bar);
+					}
+				}
+			}
 
-			// 2鍵 (フォルダを閉じる)
-			if ((keystate[1] && keytime[1] != 0) || cursor[2]) {
+			// 黒鍵 (フォルダを閉じる)
+			if (isPressed(keystate, keytime, KEY_FOLDER_CLOSE, true) || cursor[2]) {
 				keytime[1] = 0;
 				cursor[2] = false;
 				Bar pbar = null;
@@ -821,7 +848,7 @@ public class MusicSelector extends MainState {
 				}
 			}
 			// 5鍵 (オートプレイ)
-			if (keystate[4]) {
+			if (isPressed(keystate, keytime, KEY_AUTO, true)) {
 				if (currentsongs[selectedindex] instanceof SongBar) {
 					resource.clear();
 					if (resource.setBMSFile(new File(((SongBar) currentsongs[selectedindex]).getSongData().getPath()),
@@ -879,7 +906,7 @@ public class MusicSelector extends MainState {
 				}
 			}
 			// 7鍵 (リプレイ)
-			if (keystate[6]) {
+			if (isPressed(keystate, keytime, KEY_REPLAY, true)) {
 				if (currentsongs[selectedindex] instanceof SongBar) {
 					resource.clear();
 					if (resource.setBMSFile(new File(((SongBar) currentsongs[selectedindex]).getSongData().getPath()),
@@ -912,6 +939,27 @@ public class MusicSelector extends MainState {
 		if (input.isExitPressed()) {
 			exit();
 		}
+	}
+
+	private boolean isPressed(boolean[] keystate,long[] keytime, int code, boolean resetState) {
+		int[][] keyassign = KeyConfiguration.keyassign[config.getMusicselectinput()];
+		for(int i = 0;i < keyassign.length;i++) {
+			for(int index : keyassign[i]) {
+				if(code == index && keystate[i]) {
+					if(resetState) {
+						if(keytime[i] != 0) {
+							keytime[i] = 0;
+							return true;
+						}
+						return false;
+					} else {
+						return true;
+					}
+
+				}
+			}
+		}
+		return false;
 	}
 
 	private boolean updateBar(Bar bar) {
@@ -1171,14 +1219,14 @@ public class MusicSelector extends MainState {
 		if(currentsongs[selectedindex] instanceof SongBar) {
 			((SongBar)currentsongs[selectedindex]).getSongData().getMinbpm();
 		}
-		return 0;
+		return Integer.MIN_VALUE;
 	}
 
 	public int getMaxBPM() {
 		if(currentsongs[selectedindex] instanceof SongBar) {
 			((SongBar)currentsongs[selectedindex]).getSongData().getMaxbpm();
 		}
-		return 0;
+		return Integer.MIN_VALUE;
 	}
 
 	public int getTotalJudgeCount(int judge) {

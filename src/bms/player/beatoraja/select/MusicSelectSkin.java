@@ -47,6 +47,12 @@ public class MusicSelectSkin extends Skin {
 		Texture nt = new Texture("skin/number.png");
 		TextureRegion[][] ntr = TextureRegion.split(nt, 24, 24);
 
+		SkinNumber minbpm = new SkinNumber(ntr[0], 0, 4, 0, NumberResourceAccessor.MIN_BPM);
+		minbpm.setDestination(0, 300, 512, 18, 18, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		numbers.add(minbpm);
+		SkinNumber maxbpm = new SkinNumber(ntr[0], 0, 4, 0, NumberResourceAccessor.MAX_BPM);
+		maxbpm.setDestination(0, 372, 512, 18, 18, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		numbers.add(maxbpm);
 		SkinNumber score = new SkinNumber(ntr[0], 0, 4, 0, NumberResourceAccessor.SCORE);
 		score.setDestination(0, 200, 372, 18, 18, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		numbers.add(score);
