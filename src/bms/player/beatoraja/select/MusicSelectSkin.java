@@ -47,6 +47,34 @@ public class MusicSelectSkin extends Skin {
 		Texture nt = new Texture("skin/number.png");
 		TextureRegion[][] ntr = TextureRegion.split(nt, 24, 24);
 
+		SkinNumber minbpm = new SkinNumber(ntr[0], 0, 4, 0, NumberResourceAccessor.MIN_BPM);
+		minbpm.setDestination(0, 300, 512, 18, 18, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		numbers.add(minbpm);
+		SkinNumber maxbpm = new SkinNumber(ntr[0], 0, 4, 0, NumberResourceAccessor.MAX_BPM);
+		maxbpm.setDestination(0, 372, 512, 18, 18, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		numbers.add(maxbpm);
+		SkinNumber score = new SkinNumber(ntr[0], 0, 4, 0, NumberResourceAccessor.SCORE);
+		score.setDestination(0, 200, 372, 18, 18, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		numbers.add(score);
+		SkinNumber minbp = new SkinNumber(ntr[0], 0, 4, 0, NumberResourceAccessor.MISSCOUNT);
+		minbp.setDestination(0, 200, 342, 18, 18, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		numbers.add(minbp);
+		SkinNumber combo = new SkinNumber(ntr[0], 0, 4, 0, NumberResourceAccessor.MAXCOMBO);
+		combo.setDestination(0, 450, 342, 18, 18, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		numbers.add(combo);
+		SkinNumber clear = new SkinNumber(ntr[0], 0, 4, 0, NumberResourceAccessor.CLEARCOUNT);
+		clear.setDestination(0, 250, 312, 18, 18, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		numbers.add(clear);
+		SkinNumber play = new SkinNumber(ntr[0], 0, 4, 0, NumberResourceAccessor.PLAYCOUNT);
+		play.setDestination(0, 400, 312, 18, 18, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		numbers.add(play);
+		SkinNumber tplay = new SkinNumber(ntr[0], 0, 6, 0, NumberResourceAccessor.PLAYER_PLAYCOUNT);
+		tplay.setDestination(0, 160, 102, 18, 18, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		numbers.add(tplay);
+		SkinNumber tnote = new SkinNumber(ntr[0], 0, 10, 0, NumberResourceAccessor.PLAYER_TOTALNOTES);
+		tnote.setDestination(0, 430, 102, 18, 18, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		numbers.add(tnote);
+
 		SkinNumber year = new SkinNumber(ntr[0], 0, 4, 1, NumberResourceAccessor.TIME_YEAR);
 		year.setDestination(0, 1028, 2, 12, 12, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		numbers.add(year);

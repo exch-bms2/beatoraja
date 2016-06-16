@@ -42,6 +42,21 @@ public class KeyConfiguration extends MainState {
 	private static final int[][] BMKEYSA = { { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 },
 			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }, { 0, 1, 2, 3, 4, 5, 6, 7, 8, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 } };
 
+	public static final int KEY_PLAY = 1;
+	public static final int KEY_AUTO = 2;
+	public static final int KEY_REPLAY = 3;
+	public static final int KEY_UP = 4;
+	public static final int KEY_DOWN = 5;
+	public static final int KEY_FOLDER_OPEN = 6;
+	public static final int KEY_FOLDER_CLOSE = 7;
+
+	private static final String[] SELECTKEY = {"2dx", "popn"};
+
+	public static final int[][][] keyassign = {{{KEY_PLAY, KEY_FOLDER_OPEN}, {KEY_FOLDER_CLOSE}, {KEY_FOLDER_OPEN}, {KEY_FOLDER_CLOSE}
+			, {KEY_FOLDER_OPEN, KEY_AUTO}, {KEY_FOLDER_CLOSE},{KEY_FOLDER_OPEN, KEY_REPLAY}, {KEY_UP}, {KEY_DOWN}},
+			{{KEY_AUTO}, {}, {KEY_FOLDER_CLOSE}, {KEY_DOWN}
+					, {KEY_PLAY}, {KEY_UP},{KEY_FOLDER_OPEN}, {}, {KEY_REPLAY}}};
+
 	/**
 	 * 専コンのキーコードに対応したテキスト
 	 */
@@ -90,6 +105,7 @@ public class KeyConfiguration extends MainState {
 		final float h = 720;
 
 		boolean[] cursor = input.getCursorState();
+		boolean[] number = input.getNumberState();
 		if (cursor[0]) {
 			cursor[0] = false;
 			cursorpos = (cursorpos + keys.length - 1) % keys.length;
@@ -105,6 +121,11 @@ public class KeyConfiguration extends MainState {
 		if (cursor[3]) {
 			cursor[3] = false;
 			mode = (mode + 1) % KEYS.length;
+		}
+
+		if (number[1]) {
+			number[1] = false;
+			config.setMusicselectinput((config.getMusicselectinput() + 1) % 2);
 		}
 
 		if (input.getKeyBoardInputProcesseor().getLastPressedKey() == Keys.ENTER) {
@@ -135,6 +156,8 @@ public class KeyConfiguration extends MainState {
 		titlefont.setColor(Color.YELLOW);
 		titlefont.draw(sprite, "Key Board", 180, 620);
 		titlefont.draw(sprite, "Controller", 330, 620);
+		titlefont.setColor(Color.ORANGE);
+		titlefont.draw(sprite, "Music Select (press [1] to change) :   " + SELECTKEY[config.getMusicselectinput()], 600, 620);
 		sprite.end();
 		for (int i = 0; i < keys.length; i++) {
 			if (i == cursorpos) {

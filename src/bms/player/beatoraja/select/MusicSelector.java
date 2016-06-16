@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.TableData.CourseData;
+import bms.player.beatoraja.config.KeyConfiguration;
 import bms.player.lunaticrave2.*;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.skin.*;
@@ -31,8 +32,10 @@ import com.badlogic.gdx.utils.Json;
  */
 public class MusicSelector extends MainState {
 
-	// TODO バナー、テキスト表示
+	// TODO テキスト表示
 	// TODO 譜面情報表示
+	// TODO 特殊フォルダの作成(ルートフォルダ皆無だと落ちるため)
+	// TODO スコア取得のバックグラウンド化
 
 	private MainController main;
 
@@ -110,6 +113,9 @@ public class MusicSelector extends MainState {
 
 	private Texture background;
 
+	private Texture banner;
+	private Bar bannerbar;
+
 	private GameOptionRenderer option;
 	private AssistOptionRenderer aoption;
 	private DetailOptionRenderer doption;
@@ -118,6 +124,14 @@ public class MusicSelector extends MainState {
 	 * スコアデータのキャッシュ
 	 */
 	private Map<String, IRScoreData>[] scorecache;
+
+	public static final int KEY_PLAY = 1;
+	public static final int KEY_AUTO = 2;
+	public static final int KEY_REPLAY = 3;
+	public static final int KEY_UP = 4;
+	public static final int KEY_DOWN = 5;
+	public static final int KEY_FOLDER_OPEN = 6;
+	public static final int KEY_FOLDER_CLOSE = 7;
 
 	public MusicSelector(MainController main, Config config) {
 		this.main = main;
@@ -179,9 +193,6 @@ public class MusicSelector extends MainState {
 		if (songs.length > 0) {
 			IRScoreData score = main.getPlayDataAccessor().readScoreData(songs[0].getHash(),
 					songs[0].getLongnote() == 1, lnmode);
-			if (score == null) {
-				score = new IRScoreData();
-			}
 			if (score != null && config.getLnmode() == 2 && (songs[0].getLongnote() == 1)) {
 				score.setClear(score.getExclear());
 			}
@@ -204,6 +215,11 @@ public class MusicSelector extends MainState {
 		for (Map cache : scorecache) {
 			cache.clear();
 		}
+
+		BMSPlayerInputProcessor input = main.getInputProcessor();
+		PlayConfig pc = (config.getMusicselectinput() == 0 ? config.getMode7() : config.getMode9());
+		input.setKeyassign(pc.getKeyassign());
+		input.setControllerassign(pc.getControllerassign());
 
 		if (dir.size() > 0) {
 			updateBar(dir.get(dir.size() - 1));
@@ -353,25 +369,7 @@ public class MusicSelector extends MainState {
 			boolean ln = false;
 
 			if (sd instanceof GradeBar) {
-				int lamp = -1;
-				if (sd.getScore() != null) {
-					lamp = sd.getScore().getClear();
-				}
 				GradeBar gb = (GradeBar) sd;
-				if (gb.getMirrorScore() != null) {
-					lamp = (lamp > gb.getMirrorScore().getClear()) ? lamp : gb.getMirrorScore().getClear();
-				}
-				if (gb.getRandomScore() != null) {
-					lamp = (lamp > gb.getRandomScore().getClear()) ? lamp : gb.getRandomScore().getClear();
-				}
-				if (lamp != -1) {
-					// sprite.setBlendFunction(GL11.GL_ONE, GL11.GL_ONE);
-					sprite.begin();
-					sprite.draw(skin.getLamp()[lamp].getKeyFrame(time / 1000f), x, y + 2, 15, barh - 2);
-					sprite.end();
-					// sprite.setBlendFunction(GL11.GL_SRC_ALPHA,
-					// GL11.GL_ONE_MINUS_SRC_ALPHA);
-				}
 				if (gb.existsAllSongs()) {
 					for (SongData song : gb.getSongDatas()) {
 						if (song.getLongnote() != 0) {
@@ -394,18 +392,15 @@ public class MusicSelector extends MainState {
 					titlefont.draw(sprite, trophy.getName(), x - 72, y + barh - 8);
 					sprite.end();
 				}
-			} else {
-				if (sd.getScore() != null && sd.getScore().getClear() != 0
-						&& skin.getLamp()[sd.getScore().getClear()] != null) {
-					// sprite.setBlendFunction(GL11.GL_ONE, GL11.GL_ONE);
-					sprite.begin();
-					sprite.draw(skin.getLamp()[sd.getScore().getClear()].getKeyFrame(time / 1000f), x, y + 2, 15,
-							barh - 2);
-					sprite.end();
-					// sprite.setBlendFunction(GL11.GL_SRC_ALPHA,
-					// GL11.GL_ONE_MINUS_SRC_ALPHA);
-				}
 			}
+
+			if (skin.getLamp()[sd.getLamp()] != null) {
+				sprite.begin();
+				sprite.draw(skin.getLamp()[sd.getLamp()].getKeyFrame(time / 1000f), x, y + 2, 15,
+						barh - 2);
+				sprite.end();
+			}
+
 
 			if (sd instanceof SongBar) {
 				SongData song = ((SongBar) sd).getSongData();
@@ -484,18 +479,18 @@ public class MusicSelector extends MainState {
 				titlefont.setColor(Color.valueOf(LAMP[score.getClear()]));
 				titlefont.draw(sprite, CLEAR[score.getClear()], 100, 420);
 				titlefont.setColor(Color.WHITE);
-				titlefont.draw(
-						sprite,
-						"EX-SCORE  : " + score.getExscore() + " / " + (score.getNotes() * 2) + "    RANK : "
-								+ RANK[(score.getExscore() * 27 / (score.getNotes() * 2))] + " ( "
-								+ ((score.getExscore() * 1000 / (score.getNotes() * 2)) / 10.0f) + "% )", 100, 390);
-				titlefont.draw(sprite, "MISS COUNT: " + score.getMinbp(), 100, 360);
-				titlefont.draw(sprite, "CLEAR / PLAY : " + score.getClearcount() + " / " + score.getPlaycount(), 100,
-						330);
+				titlefont.draw(sprite, "EX-SCORE  : ", 50, 390);
+				titlefont.draw(sprite, "RANK : "
+						+ RANK[(score.getExscore() * 27 / (score.getNotes() * 2))] + " ( "
+						+ ((score.getExscore() * 1000 / (score.getNotes() * 2)) / 10.0f) + "% )", 300, 390);
+				titlefont.draw(sprite, "MISS COUNT: ", 50, 360);
+				titlefont.draw(sprite, "MAX COMBO : ", 300, 360);
+
+				titlefont.draw(sprite, "CLEAR / PLAY : ", 50, 330);
 			}
 			if (((SongBar) currentsongs[selectedindex]).existsReplayData()) {
 				titlefont.setColor(Color.GREEN);
-				titlefont.draw(sprite, "7 KEY : Replay", 100, 270);
+				titlefont.draw(sprite, "Replay exists", 100, 270);
 			}
 		}
 		// 段位用の表示(ミラー段位、EX段位)
@@ -541,9 +536,10 @@ public class MusicSelector extends MainState {
 				titlefont.setColor(Color.valueOf(LAMP[score.getClear()]));
 				titlefont.draw(sprite, CLEAR[score.getClear()], 100, 420);
 				titlefont.setColor(Color.WHITE);
-				titlefont.draw(sprite, "EX-SCORE  : " + score.getExscore() + " / " + (score.getNotes() * 2), 100, 390);
-				titlefont.draw(sprite, "MISS COUNT: " + score.getMinbp(), 100, 360);
-				titlefont.draw(sprite, "CLEAR / PLAY : " + score.getClearcount() + " / " + score.getPlaycount(), 100,
+				titlefont.draw(sprite, "EX-SCORE  : ", 50, 390);
+				titlefont.draw(sprite, "MISS COUNT: ", 50, 360);
+				titlefont.draw(sprite, "MAX COMBO : ", 300, 360);
+				titlefont.draw(sprite, "CLEAR / PLAY : ", 50,
 						330);
 			}
 			if (gb.getMirrorScore() != null) {
@@ -568,7 +564,7 @@ public class MusicSelector extends MainState {
 			}
 			if (((GradeBar) currentsongs[selectedindex]).existsReplayData()) {
 				titlefont.setColor(Color.GREEN);
-				titlefont.draw(sprite, "7 KEY : Replay", 450, 300);
+				titlefont.draw(sprite, "Replay exists", 450, 300);
 			}
 		}
 		if (currentsongs[selectedindex] instanceof TableLevelBar) {
@@ -576,9 +572,8 @@ public class MusicSelector extends MainState {
 		}
 
 		titlefont.setColor(Color.WHITE);
-		titlefont.draw(sprite, "PLAYCOUNT : " + playerdata.getPlaycount() + " NOTESCOUNT : "
-				+ (playerdata.getPerfect() + playerdata.getGreat() + playerdata.getGood() + playerdata.getBad()), 20,
-				120);
+		titlefont.draw(sprite, "PLAYCOUNT : ", 20, 120);
+		titlefont.draw(sprite, " NOTESCOUNT : ", 300, 120);
 
 		titlefont.setColor(Color.WHITE);
 		if (currentsongs[selectedindex] instanceof FolderBar) {
@@ -649,9 +644,23 @@ public class MusicSelector extends MainState {
 			}
 		}
 
-		titlefont.draw(sprite, "MODE : " + MODE[mode], 20, 60);
-		titlefont.draw(sprite, "SORT : " + SORT[sort].getName(), 220, 60);
-		titlefont.draw(sprite, "LN MODE : " + LNMODE[config.getLnmode()], 20, 30);
+		titlefont.draw(sprite, "MODE : " + MODE[mode], 20, 30);
+		titlefont.draw(sprite, "SORT : " + SORT[sort].getName(), 180, 30);
+		titlefont.draw(sprite, "LN MODE : " + LNMODE[config.getLnmode()], 440, 30);
+		// banner
+		if(currentsongs[selectedindex] != bannerbar) {
+			bannerbar = currentsongs[selectedindex];
+			if(banner != null) {
+				banner.dispose();
+				banner = null;
+			}
+			if(bannerbar instanceof SongBar && ((SongBar) bannerbar).getBanner() != null) {
+				banner = new Texture(((SongBar) bannerbar).getBanner());
+			}
+		}
+		if(banner != null) {
+			sprite.draw(banner, 400, 450, 300, 90);
+		}
 		sprite.end();
 
 		boolean[] numberstate = input.getNumberState();
@@ -693,7 +702,7 @@ public class MusicSelector extends MainState {
 		boolean[] keystate = input.getKeystate();
 		long[] keytime = input.getTime();
 		boolean[] cursor = input.getCursorState();
-		if (keystate[7] || cursor[1]) {
+		if (isPressed(keystate, keytime, KEY_UP, false) || cursor[1]) {
 			long l = System.currentTimeMillis();
 			if (duration == 0) {
 				selectedindex++;
@@ -711,7 +720,7 @@ public class MusicSelector extends MainState {
 				}
 				angle = 50;
 			}
-		} else if (keystate[8] || cursor[0]) {
+		} else if (isPressed(keystate, keytime, KEY_DOWN, false) || cursor[0]) {
 			long l = System.currentTimeMillis();
 			if (duration == 0) {
 				selectedindex += currentsongs.length - 1;
@@ -750,8 +759,7 @@ public class MusicSelector extends MainState {
 			main.changeState(MainController.STATE_CONFIG);
 		} else {
 			// 1鍵 (選曲 or フォルダを開く)
-			if ((keystate[0] && keytime[0] != 0) || cursor[3]) {
-				keytime[0] = 0;
+			if (isPressed(keystate, keytime, KEY_PLAY, true) || cursor[3]) {
 				cursor[3] = false;
 				if (currentsongs[selectedindex] instanceof FolderBar || currentsongs[selectedindex] instanceof TableBar
 						|| currentsongs[selectedindex] instanceof TableLevelBar) {
@@ -773,6 +781,7 @@ public class MusicSelector extends MainState {
 					}
 				} else if (currentsongs[selectedindex] instanceof GradeBar) {
 					if (((GradeBar) currentsongs[selectedindex]).existsAllSongs()) {
+						resource.clear();
 						for(int constraint : ((GradeBar) currentsongs[selectedindex]).getConstraint()) {
 							switch(constraint) {
 							case TableData.GRADE_NORMAL:
@@ -798,13 +807,15 @@ public class MusicSelector extends MainState {
 									config.setRandom2(0);
 								}
 								break;
+							case TableData.NO_HISPEED:
+								resource.setConstraint(TableData.NO_HISPEED);
+								break;
 							}
 						}
 						List<File> files = new ArrayList<File>();
 						for (SongData song : ((GradeBar) currentsongs[selectedindex]).getSongDatas()) {
 							files.add(new File(song.getPath()));
 						}
-						resource.clear();
 						resource.setCoursetitle(((GradeBar) currentsongs[selectedindex]).getTitle());
 						resource.setBMSFile(files.get(0), config, 0);
 						resource.setCourseBMSFiles(files.toArray(new File[0]));
@@ -817,35 +828,8 @@ public class MusicSelector extends MainState {
 					}
 				}
 			}
-
-			// 2鍵 (フォルダを閉じる)
-			if ((keystate[1] && keytime[1] != 0) || cursor[2]) {
-				keytime[1] = 0;
-				cursor[2] = false;
-				Bar pbar = null;
-				Bar cbar = null;
-				if (dir.size() > 1) {
-					pbar = dir.get(dir.size() - 2);
-				}
-				if (dir.size() > 0) {
-					cbar = dir.get(dir.size() - 1);
-					dir.remove(dir.size() - 1);
-					if (folderclose != null) {
-						folderclose.play();
-					}
-				}
-				updateBar(pbar);
-				if (cbar != null) {
-					for (int i = 0; i < currentsongs.length; i++) {
-						if (currentsongs[i].getTitle().equals(cbar.getTitle())) {
-							selectedindex = i;
-							break;
-						}
-					}
-				}
-			}
 			// 5鍵 (オートプレイ)
-			if (keystate[4]) {
+			if (isPressed(keystate, keytime, KEY_AUTO, true)) {
 				if (currentsongs[selectedindex] instanceof SongBar) {
 					resource.clear();
 					if (resource.setBMSFile(new File(((SongBar) currentsongs[selectedindex]).getSongData().getPath()),
@@ -858,6 +842,7 @@ public class MusicSelector extends MainState {
 					}
 				} else if (currentsongs[selectedindex] instanceof GradeBar) {
 					if (((GradeBar) currentsongs[selectedindex]).existsAllSongs()) {
+						resource.clear();
 						for(int constraint : ((GradeBar) currentsongs[selectedindex]).getConstraint()) {
 							switch(constraint) {
 							case TableData.GRADE_NORMAL:
@@ -883,13 +868,15 @@ public class MusicSelector extends MainState {
 									config.setRandom2(0);
 								}
 								break;
+							case TableData.NO_HISPEED:
+								resource.setConstraint(TableData.NO_HISPEED);
+								break;
 							}
 						}
 						List<File> files = new ArrayList<File>();
 						for (SongData song : ((GradeBar) currentsongs[selectedindex]).getSongDatas()) {
 							files.add(new File(song.getPath()));
 						}
-						resource.clear();
 						resource.setCoursetitle(((GradeBar) currentsongs[selectedindex]).getTitle());
 						resource.setBMSFile(files.get(0), config, 1);
 						resource.setCourseBMSFiles(files.toArray(new File[0]));
@@ -903,7 +890,7 @@ public class MusicSelector extends MainState {
 				}
 			}
 			// 7鍵 (リプレイ)
-			if (keystate[6]) {
+			if (isPressed(keystate, keytime, KEY_REPLAY, true)) {
 				if (currentsongs[selectedindex] instanceof SongBar) {
 					resource.clear();
 					if (resource.setBMSFile(new File(((SongBar) currentsongs[selectedindex]).getSongData().getPath()),
@@ -932,10 +919,72 @@ public class MusicSelector extends MainState {
 					}
 				}
 			}
+			// 白鍵 (フォルダを開く)
+			if (isPressed(keystate, keytime, KEY_FOLDER_OPEN, true) || cursor[3]) {
+				cursor[3] = false;
+				if (currentsongs[selectedindex] instanceof FolderBar || currentsongs[selectedindex] instanceof TableBar
+						|| currentsongs[selectedindex] instanceof TableLevelBar) {
+					Bar bar = currentsongs[selectedindex];
+					if (updateBar(bar)) {
+						if (folderopen != null) {
+							folderopen.play();
+						}
+						dir.add(bar);
+					}
+				}
+			}
+
+			// 黒鍵 (フォルダを閉じる)
+			if (isPressed(keystate, keytime, KEY_FOLDER_CLOSE, true) || cursor[2]) {
+				keytime[1] = 0;
+				cursor[2] = false;
+				Bar pbar = null;
+				Bar cbar = null;
+				if (dir.size() > 1) {
+					pbar = dir.get(dir.size() - 2);
+				}
+				if (dir.size() > 0) {
+					cbar = dir.get(dir.size() - 1);
+					dir.remove(dir.size() - 1);
+					if (folderclose != null) {
+						folderclose.play();
+					}
+				}
+				updateBar(pbar);
+				if (cbar != null) {
+					for (int i = 0; i < currentsongs.length; i++) {
+						if (currentsongs[i].getTitle().equals(cbar.getTitle())) {
+							selectedindex = i;
+							break;
+						}
+					}
+				}
+			}
 		}
 		if (input.isExitPressed()) {
 			exit();
 		}
+	}
+
+	private boolean isPressed(boolean[] keystate,long[] keytime, int code, boolean resetState) {
+		int[][] keyassign = KeyConfiguration.keyassign[config.getMusicselectinput()];
+		for(int i = 0;i < keyassign.length;i++) {
+			for(int index : keyassign[i]) {
+				if(code == index && keystate[i]) {
+					if(resetState) {
+						if(keytime[i] != 0) {
+							keytime[i] = 0;
+							return true;
+						}
+						return false;
+					} else {
+						return true;
+					}
+
+				}
+			}
+		}
+		return false;
 	}
 
 	private boolean updateBar(Bar bar) {
@@ -982,11 +1031,6 @@ public class MusicSelector extends MainState {
 						}
 						cfolder.setLamps(clears);
 						cfolder.setRanks(ranks);
-						if (clear != 0 && clear != 255) {
-							IRScoreData dummyscore = new IRScoreData();
-							dummyscore.setClear(clear);
-							cfolder.setScore(dummyscore);
-						}
 					}
 				}
 			} else {
@@ -1019,11 +1063,6 @@ public class MusicSelector extends MainState {
 					}
 					levelbar.setLamps(clears);
 					levelbar.setRanks(ranks);
-					if (clear != 0 && clear != 255) {
-						IRScoreData dummyscore = new IRScoreData();
-						dummyscore.setClear(clear);
-						levelbar.setScore(dummyscore);
-					}
 				}
 			}
 		}
@@ -1165,4 +1204,77 @@ public class MusicSelector extends MainState {
 		titlefont.dispose();
 	}
 
+	public int getScore() {
+		if(currentsongs[selectedindex].getScore() != null) {
+			return currentsongs[selectedindex].getScore().getExscore();
+		}
+		return Integer.MIN_VALUE;
+	}
+
+	public int getMaxcombo() {
+		if(currentsongs[selectedindex].getScore() != null) {
+			return currentsongs[selectedindex].getScore().getCombo();
+		}
+		return Integer.MIN_VALUE;
+	}
+
+	public int getMisscount() {
+		if(currentsongs[selectedindex].getScore() != null) {
+			return currentsongs[selectedindex].getScore().getMinbp();
+		}
+		return Integer.MIN_VALUE;
+	}
+
+	public int getJudgeCount(int judge, boolean fast) {
+		return 0;
+	}
+
+	public int getPlayCount(boolean clear) {
+		if(currentsongs[selectedindex].getScore() != null) {
+			if(clear) {
+				return currentsongs[selectedindex].getScore().getClearcount();
+			} else {
+				return currentsongs[selectedindex].getScore().getPlaycount() - currentsongs[selectedindex].getScore().getClearcount();
+			}
+		}
+		return Integer.MIN_VALUE;
+	}
+
+	public int getMinBPM() {
+		if(currentsongs[selectedindex] instanceof SongBar) {
+			((SongBar)currentsongs[selectedindex]).getSongData().getMinbpm();
+		}
+		return Integer.MIN_VALUE;
+	}
+
+	public int getMaxBPM() {
+		if(currentsongs[selectedindex] instanceof SongBar) {
+			((SongBar)currentsongs[selectedindex]).getSongData().getMaxbpm();
+		}
+		return Integer.MIN_VALUE;
+	}
+
+	public int getTotalJudgeCount(int judge) {
+		if(playerdata != null) {
+			switch(judge) {
+				case 0:
+					return (int) playerdata.getPerfect();
+				case 1:
+					return (int) playerdata.getGreat();
+				case 2:
+					return (int) playerdata.getGood();
+				case 3:
+					return (int) playerdata.getBad();
+				case 4:
+					return (int) playerdata.getPoor();
+				case 5:
+					return 0;
+			}
+		}
+		return 0;
+	}
+
+	public int getTotalPlayCount(boolean clear) {
+		return (int) (clear ? playerdata.getClear() : playerdata.getFail());
+	}
 }

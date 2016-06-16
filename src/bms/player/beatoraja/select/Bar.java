@@ -4,6 +4,10 @@ import bms.player.lunaticrave2.FolderData;
 import bms.player.lunaticrave2.SongData;
 import bms.player.beatoraja.*;
 import bms.table.Course;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Pixmap;
+
+import java.io.File;
 
 public abstract class Bar {
 
@@ -18,6 +22,8 @@ public abstract class Bar {
 	public void setScore(IRScoreData score) {
 		this.score = score;
 	}
+
+	public abstract int getLamp();
 }
 
 abstract class SelectableBar extends Bar {
@@ -41,6 +47,8 @@ class SongBar extends SelectableBar {
 
 	private SongData song;
 
+	private Pixmap banner;
+
 	/**
 	 * リプレイデータが存在するか
 	 */
@@ -48,15 +56,31 @@ class SongBar extends SelectableBar {
 
 	public SongBar(SongData song) {
 		this.song = song;
+		File bannerfile = new File(song.getPath().substring(0, song.getPath().lastIndexOf(File.separatorChar) + 1) + song.getBanner());
+//		System.out.println(bannerfile.getPath());
+		if(song.getBanner().length() > 0 && bannerfile.exists()) {
+			banner = new Pixmap(Gdx.files.internal(bannerfile.getPath()));
+		}
 	}
 
 	public SongData getSongData() {
 		return song;
 	}
 
+	public Pixmap getBanner() {
+		return banner;
+	}
+
 	@Override
 	public String getTitle() {
 		return song.getTitle();
+	}
+
+	public int getLamp() {
+		if(getScore() != null) {
+			return getScore().getClear();
+		}
+		return 0;
 	}
 }
 
@@ -100,6 +124,15 @@ class FolderBar extends Bar {
 	public void setRanks(int[] ranks) {
 		this.ranks = ranks;
 	}
+
+	public int getLamp() {
+		for(int i = 0;i < lamps.length;i++) {
+			if(lamps[i] > 0) {
+				return i;
+			}
+		}
+		return 0;
+	}
 }
 
 class TableBar extends Bar {
@@ -125,6 +158,10 @@ class TableBar extends Bar {
 
 	public GradeBar[] getGrades() {
 		return grades;
+	}
+
+	public int getLamp() {
+		return 0;
 	}
 
 }
@@ -163,6 +200,15 @@ class TableLevelBar extends Bar {
 
 	public void setRanks(int[] ranks) {
 		this.ranks = ranks;
+	}
+
+	public int getLamp() {
+		for(int i = 0;i < lamps.length;i++) {
+			if(lamps[i] > 0) {
+				return i;
+			}
+		}
+		return 0;
 	}
 }
 
@@ -243,5 +289,19 @@ class GradeBar extends SelectableBar {
 	private boolean qualified(IRScoreData score, TableData.TrophyData trophy) {
 		return score != null && score.getNotes() != 0 && trophy.getMissrate() >= score.getMinbp() * 100.0 / score.getNotes()
 				&& trophy.getScorerate() <= score.getExscore() * 100.0 / (score.getNotes() * 2);
+	}
+
+	public int getLamp() {
+		int result = 0;
+		if(getScore() != null && getScore().getClear() > result) {
+			result = getScore().getClear();
+		}
+		if(getMirrorScore() != null && getMirrorScore().getClear() > result) {
+			result = getMirrorScore().getClear();
+		}
+		if(getScore() != null && getScore().getClear() > result) {
+			result = getMirrorScore().getClear();
+		}
+		return result;
 	}
 }

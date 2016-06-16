@@ -21,6 +21,8 @@ public class PlayerResource {
 	private Config config;
 	private int auto;
 	
+	private int constraint;
+	
 	private int bgashow;
 	/**
 	 * BMSの音源リソース
@@ -312,5 +314,13 @@ public class PlayerResource {
 
 	public void setMaxcombo(int maxcombo) {
 		this.maxcombo = maxcombo;
+	}
+
+	public int getConstraint() {
+		return constraint;
+	}
+
+	public void setConstraint(int constraint) {
+		this.constraint = constraint;
 	}
 }

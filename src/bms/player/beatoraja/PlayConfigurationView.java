@@ -34,6 +34,8 @@ import javafx.util.Callback;
  * @author exch
  */
 public class PlayConfigurationView implements Initializable {
+	
+	// TODO bug:song.dbを読み込まない状態で起動すると落ちる
 
 	/**
 	 * ハイスピード
@@ -327,7 +329,7 @@ public class PlayConfigurationView implements Initializable {
 		}
 	}
 	
-	private static final String[] CONSTRAINT = {"null", "grade", "grade_mirror", "grade_random"}; 
+	private static final String[] CONSTRAINT = {"null", "grade", "grade_mirror", "grade_random", "no_speed"}; 
 
 	public void loadTable() {
 		commit();

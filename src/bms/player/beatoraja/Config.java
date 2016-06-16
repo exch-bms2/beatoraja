@@ -201,7 +201,9 @@ public class Config {
 			BMKeys.BUTTON_3, BMKeys.BUTTON_6, BMKeys.BUTTON_2,
 			BMKeys.BUTTON_7, BMKeys.BUTTON_1, BMKeys.BUTTON_4,
 			BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN, BMKeys.BUTTON_8,
-			BMKeys.BUTTON_9 });	
+			BMKeys.BUTTON_9 });
+
+	private int musicselectinput = 0;
 	
 	public Config() {
 //		lr2playskin = "skin/spdframe/csv/left_ACwide.csv";
@@ -562,5 +564,13 @@ public class Config {
 
 	public void setLr2resultskinoption(int[] lr2resultskinoption) {
 		this.lr2resultskinoption = lr2resultskinoption;
+	}
+
+	public int getMusicselectinput() {
+		return musicselectinput;
+	}
+
+	public void setMusicselectinput(int musicselectinput) {
+		this.musicselectinput = musicselectinput;
 	}
 }
