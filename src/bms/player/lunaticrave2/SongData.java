@@ -18,6 +18,7 @@ public class SongData {
 	private List<String> path = new ArrayList<String>();
 	private String tag;	
 	private String hash;
+	private String banner;
 	private int date;
 	private int adddate;
 	private int level;
@@ -158,5 +159,13 @@ public class SongData {
 
 	public void setMaxbpm(int maxbpm) {
 		this.maxbpm = maxbpm;
+	}
+
+	public String getBanner() {
+		return banner;
+	}
+
+	public void setBanner(String banner) {
+		this.banner = banner;
 	}
 }

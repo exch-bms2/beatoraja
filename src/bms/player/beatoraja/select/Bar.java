@@ -4,6 +4,10 @@ import bms.player.lunaticrave2.FolderData;
 import bms.player.lunaticrave2.SongData;
 import bms.player.beatoraja.*;
 import bms.table.Course;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Pixmap;
+
+import java.io.File;
 
 public abstract class Bar {
 
@@ -43,6 +47,8 @@ class SongBar extends SelectableBar {
 
 	private SongData song;
 
+	private Pixmap banner;
+
 	/**
 	 * リプレイデータが存在するか
 	 */
@@ -50,10 +56,19 @@ class SongBar extends SelectableBar {
 
 	public SongBar(SongData song) {
 		this.song = song;
+		File bannerfile = new File(song.getPath().substring(0, song.getPath().lastIndexOf(File.separatorChar) + 1) + song.getBanner());
+//		System.out.println(bannerfile.getPath());
+		if(song.getBanner().length() > 0 && bannerfile.exists()) {
+			banner = new Pixmap(Gdx.files.internal(bannerfile.getPath()));
+		}
 	}
 
 	public SongData getSongData() {
 		return song;
+	}
+
+	public Pixmap getBanner() {
+		return banner;
 	}
 
 	@Override

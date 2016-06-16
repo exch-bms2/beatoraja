@@ -32,8 +32,10 @@ import com.badlogic.gdx.utils.Json;
  */
 public class MusicSelector extends MainState {
 
-	// TODO バナー、テキスト表示
+	// TODO テキスト表示
 	// TODO 譜面情報表示
+	// TODO 特殊フォルダの作成(ルートフォルダ皆無だと落ちるため)
+	// TODO スコア取得のバックグラウンド化
 
 	private MainController main;
 
@@ -110,6 +112,9 @@ public class MusicSelector extends MainState {
 	private Sound sorts;
 
 	private Texture background;
+
+	private Texture banner;
+	private Bar bannerbar;
 
 	private GameOptionRenderer option;
 	private AssistOptionRenderer aoption;
@@ -642,6 +647,20 @@ public class MusicSelector extends MainState {
 		titlefont.draw(sprite, "MODE : " + MODE[mode], 20, 30);
 		titlefont.draw(sprite, "SORT : " + SORT[sort].getName(), 180, 30);
 		titlefont.draw(sprite, "LN MODE : " + LNMODE[config.getLnmode()], 440, 30);
+		// banner
+		if(currentsongs[selectedindex] != bannerbar) {
+			bannerbar = currentsongs[selectedindex];
+			if(banner != null) {
+				banner.dispose();
+				banner = null;
+			}
+			if(bannerbar instanceof SongBar && ((SongBar) bannerbar).getBanner() != null) {
+				banner = new Texture(((SongBar) bannerbar).getBanner());
+			}
+		}
+		if(banner != null) {
+			sprite.draw(banner, 400, 450, 300, 90);
+		}
 		sprite.end();
 
 		boolean[] numberstate = input.getNumberState();
@@ -806,47 +825,6 @@ public class MusicSelector extends MainState {
 					}
 				}
 			}
-			// 白鍵 (フォルダを開く)
-			if (isPressed(keystate, keytime, KEY_FOLDER_OPEN, true) || cursor[3]) {
-				cursor[3] = false;
-				if (currentsongs[selectedindex] instanceof FolderBar || currentsongs[selectedindex] instanceof TableBar
-						|| currentsongs[selectedindex] instanceof TableLevelBar) {
-					Bar bar = currentsongs[selectedindex];
-					if (updateBar(bar)) {
-						if (folderopen != null) {
-							folderopen.play();
-						}
-						dir.add(bar);
-					}
-				}
-			}
-
-			// 黒鍵 (フォルダを閉じる)
-			if (isPressed(keystate, keytime, KEY_FOLDER_CLOSE, true) || cursor[2]) {
-				keytime[1] = 0;
-				cursor[2] = false;
-				Bar pbar = null;
-				Bar cbar = null;
-				if (dir.size() > 1) {
-					pbar = dir.get(dir.size() - 2);
-				}
-				if (dir.size() > 0) {
-					cbar = dir.get(dir.size() - 1);
-					dir.remove(dir.size() - 1);
-					if (folderclose != null) {
-						folderclose.play();
-					}
-				}
-				updateBar(pbar);
-				if (cbar != null) {
-					for (int i = 0; i < currentsongs.length; i++) {
-						if (currentsongs[i].getTitle().equals(cbar.getTitle())) {
-							selectedindex = i;
-							break;
-						}
-					}
-				}
-			}
 			// 5鍵 (オートプレイ)
 			if (isPressed(keystate, keytime, KEY_AUTO, true)) {
 				if (currentsongs[selectedindex] instanceof SongBar) {
@@ -932,6 +910,47 @@ public class MusicSelector extends MainState {
 						main.changeState(MainController.STATE_DECIDE);
 					} else {
 						Logger.getGlobal().info("段位の楽曲が揃っていません");
+					}
+				}
+			}
+			// 白鍵 (フォルダを開く)
+			if (isPressed(keystate, keytime, KEY_FOLDER_OPEN, true) || cursor[3]) {
+				cursor[3] = false;
+				if (currentsongs[selectedindex] instanceof FolderBar || currentsongs[selectedindex] instanceof TableBar
+						|| currentsongs[selectedindex] instanceof TableLevelBar) {
+					Bar bar = currentsongs[selectedindex];
+					if (updateBar(bar)) {
+						if (folderopen != null) {
+							folderopen.play();
+						}
+						dir.add(bar);
+					}
+				}
+			}
+
+			// 黒鍵 (フォルダを閉じる)
+			if (isPressed(keystate, keytime, KEY_FOLDER_CLOSE, true) || cursor[2]) {
+				keytime[1] = 0;
+				cursor[2] = false;
+				Bar pbar = null;
+				Bar cbar = null;
+				if (dir.size() > 1) {
+					pbar = dir.get(dir.size() - 2);
+				}
+				if (dir.size() > 0) {
+					cbar = dir.get(dir.size() - 1);
+					dir.remove(dir.size() - 1);
+					if (folderclose != null) {
+						folderclose.play();
+					}
+				}
+				updateBar(pbar);
+				if (cbar != null) {
+					for (int i = 0; i < currentsongs.length; i++) {
+						if (currentsongs[i].getTitle().equals(cbar.getTitle())) {
+							selectedindex = i;
+							break;
+						}
 					}
 				}
 			}
