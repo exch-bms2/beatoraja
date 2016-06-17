@@ -64,6 +64,9 @@ public class BGAProcessor {
 		bgamap = new Pixmap[model.getBgaList().length];
 		int id = 0;
 		for (String name : model.getBgaList()) {
+			if (progress == 1) {
+				break;
+			}
 			File f = null;
 			if (new File(directorypath + name).exists()) {
 				f = new File(directorypath + name);
@@ -146,7 +149,7 @@ public class BGAProcessor {
 	 * BGAの初期データをあらかじめキャッシュする
 	 */
 	public void prepare() {
-		if(model == null) {
+		if (model == null) {
 			return;
 		}
 		long l = System.currentTimeMillis();
@@ -171,8 +174,8 @@ public class BGAProcessor {
 				}
 			}
 		}
-		Logger.getGlobal()
-				.info("BGAデータの事前Texture化 - BGAデータ数:" + count + " time(ms):" + (System.currentTimeMillis() - l));
+		Logger.getGlobal().info(
+				"BGAデータの事前Texture化 - BGAデータ数:" + count + " time(ms):" + (System.currentTimeMillis() - l));
 	}
 
 	public Texture getBackbmpData() {
@@ -250,4 +253,9 @@ public class BGAProcessor {
 	public float getProgress() {
 		return progress;
 	}
+
+	public void forceFinish() {
+		progress = 1;
+	}
+
 }
