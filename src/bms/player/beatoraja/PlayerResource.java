@@ -93,6 +93,7 @@ public class PlayerResource {
 		coursegauge.clear();
 		combo = 0;
 		maxcombo = 0;
+		constraint = 0;
 	}
 
 	public boolean setBMSFile(final File f, final Config config, int autoplay) {

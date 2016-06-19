@@ -1,6 +1,7 @@
 package bms.player.beatoraja.select;
 
 import bms.player.lunaticrave2.FolderData;
+import bms.player.lunaticrave2.LunaticRave2SongDatabaseManager;
 import bms.player.lunaticrave2.SongData;
 import bms.player.beatoraja.*;
 import bms.table.Course;
@@ -303,5 +304,58 @@ class GradeBar extends SelectableBar {
 			result = getMirrorScore().getClear();
 		}
 		return result;
+	}
+}
+
+abstract class CommandBar extends Bar {
+
+	public abstract SongData[] getSongData(LunaticRave2SongDatabaseManager songdb);
+}
+
+class MyBestBar extends CommandBar {
+
+	public MyBestBar() {
+
+	}
+
+	@Override
+	public String getTitle() {
+		return "MY BEST";
+	}
+
+	@Override
+	public int getLamp() {
+		return 0;
+	}
+
+	@Override
+	public SongData[] getSongData(LunaticRave2SongDatabaseManager songdb) {
+		return new SongData[0];
+	}
+}
+
+class ClearLampBar extends CommandBar {
+
+	private int clear;
+	private String name;
+
+	public ClearLampBar(int clear, String name) {
+		this.clear = clear;
+		this.name = name;
+	}
+
+	@Override
+	public String getTitle() {
+		return name;
+	}
+
+	@Override
+	public int getLamp() {
+		return 0;
+	}
+
+	@Override
+	public SongData[] getSongData(LunaticRave2SongDatabaseManager songdb) {
+		return new SongData[0];
 	}
 }

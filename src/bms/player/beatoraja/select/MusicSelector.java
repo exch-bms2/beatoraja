@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.TableData.CourseData;
 import bms.player.beatoraja.config.KeyConfiguration;
+import bms.player.beatoraja.gauge.GrooveGauge;
 import bms.player.lunaticrave2.*;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.skin.*;
@@ -102,6 +103,8 @@ public class MusicSelector extends MainState {
 	private PlayerData playerdata;
 
 	private TableBar[] tables = new TableBar[0];
+
+	private CommandBar[] commands = {new MyBestBar(), new ClearLampBar(GrooveGauge.CLEARTYPE_FULLCOMBO, "FULL COMBO")};
 
 	private MusicSelectSkin skin;
 
@@ -994,6 +997,7 @@ public class MusicSelector extends MainState {
 		if (bar == null) {
 			crc = "e2977170";
 			l.addAll(Arrays.asList(tables));
+			l.addAll(Arrays.asList(commands));
 		} else if (bar instanceof FolderBar) {
 			crc = ((FolderBar) bar).getCRC();
 		}

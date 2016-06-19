@@ -592,14 +592,16 @@ public class BMSPlayer extends MainState {
 	}
 
 	private void saveConfig() {
-		Config config = resource.getConfig();
-		if (lanerender.getFixHispeed() != Config.FIX_HISPEED_OFF) {
-			config.setGreenvalue(lanerender.getGreenValue());
-		} else {
-			config.setHispeed(lanerender.getHispeed());
+		if (resource.getConstraint() == 0) {
+			Config config = resource.getConfig();
+			if (lanerender.getFixHispeed() != Config.FIX_HISPEED_OFF) {
+				config.setGreenvalue(lanerender.getGreenValue());
+			} else {
+				config.setHispeed(lanerender.getHispeed());
+			}
+			config.setLanecover(lanerender.getLaneCoverRegion());
+			config.setLift(lanerender.getLiftRegion());
 		}
-		config.setLanecover(lanerender.getLaneCoverRegion());
-		config.setLift(lanerender.getLiftRegion());
 	}
 
 	public IRScoreData createScoreData() {
