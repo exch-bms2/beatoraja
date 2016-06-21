@@ -202,9 +202,9 @@ public class MusicResult extends MainState {
 			titlefont.draw(sprite, "FAST / SLOW  :  ", 100, 100);
 
 			skin.getJudgeCount(true).draw(sprite, time,
-					score.getFgr() + score.getFgd() + score.getFbd() + score.getFpr() + score.getFms());
+					score.getEgr() + score.getEgd() + score.getEbd() + score.getEpr() + score.getEms());
 			skin.getJudgeCount(false).draw(sprite, time,
-					score.getSgr() + score.getSgd() + score.getSbd() + score.getSpr() + score.getSms());
+					score.getLgr() + score.getLgd() + score.getLbd() + score.getLpr() + score.getLms());
 		}
 		sprite.end();
 
@@ -327,18 +327,18 @@ public class MusicResult extends MainState {
 				cscore.setNotes(notes);
 				resource.setCourseScoreData(cscore);
 			}
-			cscore.setFpg(cscore.getFpg() + newscore.getFpg());
-			cscore.setSpg(cscore.getSpg() + newscore.getSpg());
-			cscore.setFgr(cscore.getFgr() + newscore.getFgr());
-			cscore.setSgr(cscore.getSgr() + newscore.getSgr());
-			cscore.setFgd(cscore.getFgd() + newscore.getFgd());
-			cscore.setSgd(cscore.getSgd() + newscore.getSgd());
-			cscore.setFbd(cscore.getFbd() + newscore.getFbd());
-			cscore.setSbd(cscore.getSbd() + newscore.getSbd());
-			cscore.setFpr(cscore.getFpr() + newscore.getFpr());
-			cscore.setSpr(cscore.getSpr() + newscore.getSpr());
-			cscore.setFms(cscore.getFms() + newscore.getFms());
-			cscore.setSms(cscore.getSms() + newscore.getSms());
+			cscore.setEpg(cscore.getEpg() + newscore.getEpg());
+			cscore.setLpg(cscore.getLpg() + newscore.getLpg());
+			cscore.setEgr(cscore.getEgr() + newscore.getEgr());
+			cscore.setLgr(cscore.getLgr() + newscore.getLgr());
+			cscore.setEgd(cscore.getEgd() + newscore.getEgd());
+			cscore.setLgd(cscore.getLgd() + newscore.getLgd());
+			cscore.setEbd(cscore.getEbd() + newscore.getEbd());
+			cscore.setLbd(cscore.getLbd() + newscore.getLbd());
+			cscore.setEpr(cscore.getEpr() + newscore.getEpr());
+			cscore.setLpr(cscore.getLpr() + newscore.getLpr());
+			cscore.setEms(cscore.getEms() + newscore.getEms());
+			cscore.setLms(cscore.getLms() + newscore.getLms());
 			cscore.setMinbp(cscore.getMinbp() + newscore.getMinbp());
 			if (resource.getGauge().get(resource.getGauge().size() - 1) > 0) {
 				cscore.setClear(resource.getGrooveGauge().getClearType());
@@ -380,17 +380,17 @@ public class MusicResult extends MainState {
 		if(score != null) {
 			switch(judge) {
 			case 0:
-				return fast ? score.getFpg() : score.getSpg();
+				return fast ? score.getEpg() : score.getLpg();
 			case 1:
-				return fast ? score.getFgr() : score.getSgr();
+				return fast ? score.getEgr() : score.getLgr();
 			case 2:
-				return fast ? score.getFgd() : score.getSgd();
+				return fast ? score.getEgd() : score.getLgd();
 			case 3:
-				return fast ? score.getFbd() : score.getSbd();
+				return fast ? score.getEbd() : score.getLbd();
 			case 4:
-				return fast ? score.getFpr() : score.getSpr();
+				return fast ? score.getEpr() : score.getLpr();
 			case 5:
-				return fast ? score.getFms() : score.getSms();
+				return fast ? score.getEms() : score.getLms();
 			}
 		}
 		return 0;

@@ -99,9 +99,9 @@ public class GradeResult extends MainState {
 			// ゲージグラフ描画
 			final List<List<Float>> coursegauge = resource.getCourseGauge();
 			final int cg = resource.getCourseBMSModels().length;
-			for(int i = 0;i < cg;i++) {
+			for (int i = 0; i < cg; i++) {
 				Rectangle graph = new Rectangle(40 + i * (1200 / cg), 500, 1200 / cg, 200);
-				if(coursegauge.size() <= i) {
+				if (coursegauge.size() <= i) {
 					shape.begin(ShapeRenderer.ShapeType.Filled);
 					shape.setColor(Color.DARK_GRAY);
 					shape.rect(graph.x, graph.y, graph.width, graph.height);
@@ -118,62 +118,54 @@ public class GradeResult extends MainState {
 			}
 
 			sprite.begin();
-			if (score != null) {
-				titlefont.setColor(Color.WHITE);
-				titlefont.draw(sprite, resource.getCoursetitle()
-						+ (score.getClear() > GrooveGauge.CLEARTYPE_FAILED ? "  合格" : "  不合格"), w * 3 / 4, h / 2);
-				if (saveReplay) {
-					titlefont.draw(sprite, "Replay Saved", w * 3 / 4, h / 4);
-				}
+			titlefont.setColor(Color.WHITE);
+			titlefont.draw(sprite, resource.getCoursetitle()
+					+ (score.getClear() > GrooveGauge.CLEARTYPE_FAILED ? "  合格" : "  不合格"), w * 3 / 4, h / 2);
+			if (saveReplay) {
+				titlefont.draw(sprite, "Replay Saved", w * 3 / 4, h / 4);
 			}
 			for (SkinImage img : skin.getSkinPart()) {
 				if (img.getTiming() != 2) {
 					img.draw(sprite, time);
 				}
 			}
-			if (score != null) {
-				// totalnotes
-				skin.getTotalnotes().draw(sprite, time, score.getNotes());
+			// totalnotes
+			skin.getTotalnotes().draw(sprite, time, score.getNotes());
 
-				if (oldclear != 0) {
-					titlefont.setColor(Color.valueOf(LAMP[oldclear]));
-					titlefont.draw(sprite, CLEAR[oldclear] + " -> ", 240, 425);
-				}
-				titlefont.setColor(Color.valueOf(LAMP[score.getClear()]));
-				titlefont.draw(sprite, CLEAR[score.getClear()], 440, 425);
+			if (oldclear != 0) {
+				titlefont.setColor(Color.valueOf(LAMP[oldclear]));
+				titlefont.draw(sprite, CLEAR[oldclear] + " -> ", 240, 425);
+			}
+			titlefont.setColor(Color.valueOf(LAMP[score.getClear()]));
+			titlefont.draw(sprite, CLEAR[score.getClear()], 440, 425);
+			titlefont.setColor(Color.WHITE);
+
+			if (oldexscore != 0) {
 				titlefont.setColor(Color.WHITE);
-
-				if (oldexscore != 0) {
-					titlefont.setColor(Color.WHITE);
-					titlefont.draw(sprite, " -> ", 360, 395);
-					skin.getScore(score.getExscore() > oldexscore ? 2 : 3).draw(sprite, time,
-							Math.abs(score.getExscore() - oldexscore));
-				}
-
-				if (oldmisscount < 65535) {
-					titlefont.draw(sprite, " -> ", 360, 365);
-					skin.getMisscount(score.getMinbp() > oldmisscount ? 3 : 2).draw(sprite, time,
-							Math.abs(score.getMinbp() - oldmisscount));
-				}
-
-				if (oldcombo > 0) {
-					titlefont.draw(sprite, " -> ", 360, 335);
-					skin.getMaxcombo(score.getCombo() > oldcombo ? 2 : 3).draw(sprite, time,
-							Math.abs(score.getCombo() - oldcombo));
-				}
-
-				titlefont.draw(sprite, "FAST / SLOW  :  ", 100, 100);
-
-				skin.getJudgeCount(true).draw(sprite, time,
-						score.getFgr() + score.getFgd() + score.getFbd() + score.getFpr() + score.getFms());
-				skin.getJudgeCount(false).draw(sprite, time,
-						score.getSgr() + score.getSgd() + score.getSbd() + score.getSpr() + score.getSms());
+				titlefont.draw(sprite, " -> ", 360, 395);
+				skin.getScore(score.getExscore() > oldexscore ? 2 : 3).draw(sprite, time,
+						Math.abs(score.getExscore() - oldexscore));
 			}
 
+			if (oldmisscount < 65535) {
+				titlefont.draw(sprite, " -> ", 360, 365);
+				skin.getMisscount(score.getMinbp() > oldmisscount ? 3 : 2).draw(sprite, time,
+						Math.abs(score.getMinbp() - oldmisscount));
+			}
+
+			if (oldcombo > 0) {
+				titlefont.draw(sprite, " -> ", 360, 335);
+				skin.getMaxcombo(score.getCombo() > oldcombo ? 2 : 3).draw(sprite, time,
+						Math.abs(score.getCombo() - oldcombo));
+			}
+
+			titlefont.draw(sprite, "FAST / SLOW  :  ", 100, 100);
+
 			skin.getJudgeCount(true).draw(sprite, time,
-					score.getFgr() + score.getFgd() + score.getFbd() + score.getFpr() + score.getFms());
+					score.getEgr() + score.getEgd() + score.getEbd() + score.getEpr() + score.getEms());
 			skin.getJudgeCount(false).draw(sprite, time,
-					score.getSgr() + score.getSgd() + score.getSbd() + score.getSpr() + score.getSms());
+					score.getLgr() + score.getLgd() + score.getLbd() + score.getLpr() + score.getLms());
+
 			sprite.end();
 		}
 		boolean[] keystate = main.getInputProcessor().getKeystate();
@@ -234,17 +226,17 @@ public class GradeResult extends MainState {
 		if (score != null) {
 			switch (judge) {
 			case 0:
-				return fast ? score.getFpg() : score.getSpg();
+				return fast ? score.getEpg() : score.getLpg();
 			case 1:
-				return fast ? score.getFgr() : score.getSgr();
+				return fast ? score.getEgr() : score.getLgr();
 			case 2:
-				return fast ? score.getFgd() : score.getSgd();
+				return fast ? score.getEgd() : score.getLgd();
 			case 3:
-				return fast ? score.getFbd() : score.getSbd();
+				return fast ? score.getEbd() : score.getLbd();
 			case 4:
-				return fast ? score.getFpr() : score.getSpr();
+				return fast ? score.getEpr() : score.getLpr();
 			case 5:
-				return fast ? score.getFms() : score.getSms();
+				return fast ? score.getEms() : score.getLms();
 			}
 		}
 		return 0;

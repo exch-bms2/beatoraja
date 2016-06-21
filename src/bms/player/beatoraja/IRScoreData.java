@@ -9,16 +9,11 @@ package bms.player.beatoraja;
 public class IRScoreData {
     private static final long serialVersionUID = 1L;
 
-    private int irid;
     private String logdate;
     /**
      * BMSのハッシュ値
      */
     private String hash = "";
-    /**
-     * BMSのタイトル
-     */
-    private String title = "";
     /**
      * クリア状況(0-5)
      */
@@ -27,8 +22,6 @@ public class IRScoreData {
     private int exclear;
 
     private int rank;
-
-    private int sync;
 
     private int notes = 0;
     /**
@@ -82,30 +75,12 @@ public class IRScoreData {
 
     private int clearcount;
 
-    /**
-     * 過去のベストクリア状況
-     */
-    private int bestclear = 0;
-    /**
-     * 過去のベストスコア
-     */
-    private int bestexscore = 0;
-    /**
-     * 過去のベストコンボ数
-     */
-    private int bestcombo = 0;
-    /**
-     * 過去のベスト最小ミスカウント数
-     */
-    private int bestminbp = Integer.MAX_VALUE;
-
     public IRScoreData() {
     }
 
     public IRScoreData(String hash, String title, int clear, int notes, int combo, int pg,
                        int gr, int gd, int bd, int pr, int minbp, int option, int lastudate) {
         setHash(hash);
-        setTitle(title);
         setClear(clear);
         setNotes(notes);
         setCombo(combo);
@@ -125,14 +100,6 @@ public class IRScoreData {
 
     public void setHash(String hash) {
         this.hash = hash;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
     }
 
     public int getClear() {
@@ -234,71 +201,6 @@ public class IRScoreData {
         return getPg() * 2 + getGr();
     }
 
-    public int getBestclear() {
-        return bestclear;
-    }
-
-    public void setBestclear(int bestclear) {
-        this.bestclear = bestclear;
-    }
-
-    public int getBestexscore() {
-        return bestexscore;
-    }
-
-    public void setBestexscore(int bestnotes) {
-        this.bestexscore = bestnotes;
-    }
-
-    public int getBestcombo() {
-        return bestcombo;
-    }
-
-    public void setBestcombo(int bestcombo) {
-        this.bestcombo = bestcombo;
-    }
-
-    public int getBestminbp() {
-        return bestminbp;
-    }
-
-    public void setBestminbp(int bestminbp) {
-        this.bestminbp = bestminbp;
-    }
-
-    public int getCleardetail() {
-        return clear > bestclear ? clear : -clear;
-    }
-
-    public String getMinbpdetail() {
-        if(bestminbp == Integer.MAX_VALUE || bestminbp <= minbp) {
-            return String.valueOf(minbp);
-        }
-        return minbp + " (-" + (bestminbp - minbp) + ")";
-    }
-
-    public String getCombodetail() {
-        if(bestcombo == 0 || bestcombo >= combo) {
-            return String.valueOf(combo);
-        }
-        return combo + " (+" + (combo - bestcombo) + ")";
-    }
-
-    public String getExscoredetail() {
-        if(bestexscore == 0 || bestexscore >= this.getExscore()) {
-            return String.valueOf(this.getExscore());
-        }
-        return this.getExscore() + " (+" + (this.getExscore() - bestexscore) + ")";
-    }
-
-    public int getIrid() {
-        return irid;
-    }
-
-    public void setIrid(int irid) {
-        this.irid = irid;
-    }
-
     public String getLogdate() {
         return logdate;
     }
@@ -339,107 +241,99 @@ public class IRScoreData {
         this.rank = rank;
     }
 
-    public int getSync() {
-        return sync;
-    }
-
-    public void setSync(int sync) {
-        this.sync = sync;
-    }
-
-    public int getFpg() {
+    public int getEpg() {
         return fpg;
     }
 
-    public void setFpg(int fpg) {
+    public void setEpg(int fpg) {
         this.fpg = fpg;
     }
 
-    public int getSpg() {
+    public int getLpg() {
         return spg;
     }
 
-    public void setSpg(int spg) {
+    public void setLpg(int spg) {
         this.spg = spg;
     }
 
-    public int getFgr() {
+    public int getEgr() {
         return fgr;
     }
 
-    public void setFgr(int fgr) {
+    public void setEgr(int fgr) {
         this.fgr = fgr;
     }
 
-    public int getSgr() {
+    public int getLgr() {
         return sgr;
     }
 
-    public void setSgr(int sgr) {
+    public void setLgr(int sgr) {
         this.sgr = sgr;
     }
 
-    public int getFgd() {
+    public int getEgd() {
         return fgd;
     }
 
-    public void setFgd(int fgd) {
+    public void setEgd(int fgd) {
         this.fgd = fgd;
     }
 
-    public int getSgd() {
+    public int getLgd() {
         return sgd;
     }
 
-    public void setSgd(int sgd) {
+    public void setLgd(int sgd) {
         this.sgd = sgd;
     }
 
-    public int getFbd() {
+    public int getEbd() {
         return fbd;
     }
 
-    public void setFbd(int fbd) {
+    public void setEbd(int fbd) {
         this.fbd = fbd;
     }
 
-    public int getSbd() {
+    public int getLbd() {
         return sbd;
     }
 
-    public void setSbd(int sbd) {
+    public void setLbd(int sbd) {
         this.sbd = sbd;
     }
 
-    public int getFpr() {
+    public int getEpr() {
         return fpr;
     }
 
-    public void setFpr(int fpr) {
+    public void setEpr(int fpr) {
         this.fpr = fpr;
     }
 
-    public int getSpr() {
+    public int getLpr() {
         return spr;
     }
 
-    public void setSpr(int spr) {
+    public void setLpr(int spr) {
         this.spr = spr;
     }
 
-    public int getFms() {
+    public int getEms() {
         return fms;
     }
 
-    public void setFms(int fms) {
+    public void setEms(int fms) {
         this.fms = fms;
     }
 
-    public int getSms() {
+    public int getLms() {
         return sms;
     }
 
-    public void setSms(int sms) {
+    public void setLms(int sms) {
         this.sms = sms;
     }
 }
