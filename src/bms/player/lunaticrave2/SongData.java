@@ -9,10 +9,25 @@ import java.util.*;
  */
 public class SongData {
 
+	/**
+	 * 楽曲タイトル
+	 */
 	private String title;
+	/**
+	 * 楽曲サブタイトル
+	 */
 	private String subtitle;
+	/**
+	 * 楽曲ジャンル
+	 */
 	private String genre;
+	/**
+	 * 楽曲アーティスト名
+	 */
 	private String artist;
+	/**
+	 * 楽曲サブアーティスト名
+	 */
 	private String subartist;
 	private int favorite;
 	private List<String> path = new ArrayList<String>();
@@ -28,6 +43,7 @@ public class SongData {
 	private int difficulty;
 	private int minbpm;
 	private int maxbpm;
+	private int txt;
 
 	public int getFavorite() {
 		return favorite;
@@ -168,4 +184,31 @@ public class SongData {
 	public void setBanner(String banner) {
 		this.banner = banner;
 	}
+	public int getTxt() {
+		return txt;
+	}
+	public void setTxt(int txt) {
+		this.txt = txt;
+	}
+	
+	public boolean hasDocument() {
+		return (txt & 1) != 0;
+	}
+	
+	public boolean hasBGA() {
+		return (txt & 2) != 0;
+	}
+	
+	public boolean hasRandomSequence() {
+		return (longnote & 4) != 0;
+	}
+
+	public boolean hasMineNote() {
+		return (longnote & 2) != 0;
+	}
+
+	public boolean hasLongNote() {
+		return (longnote & 1) != 0;
+	}
+
 }

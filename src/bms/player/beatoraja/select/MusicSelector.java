@@ -366,16 +366,13 @@ public class MusicSelector extends MainState {
 			titlefont.draw(sprite, sd.getTitle(), x + 60, y + barh - 6);
 			sprite.end();
 
-			boolean ln = false;
+			int flag = 0;
 
 			if (sd instanceof GradeBar) {
 				GradeBar gb = (GradeBar) sd;
 				if (gb.existsAllSongs()) {
 					for (SongData song : gb.getSongDatas()) {
-						if (song.getLongnote() != 0) {
-							ln = true;
-							break;
-						}
+						flag |= song.getLongnote();
 					}
 				}
 				// trophy
@@ -414,12 +411,11 @@ public class MusicSelector extends MainState {
 				titlefont.draw(sprite, level, x + 20, y + barh - 6);
 				sprite.end();
 
-				if (song.getLongnote() != 0) {
-					ln = true;
-				}
+				flag |= song.getLongnote();
 			}
 
-			if (ln) {
+			// LN
+			if ((flag & 1) != 0) {
 				shape.begin(ShapeType.Filled);
 				shape.setColor(Color.valueOf("222200"));
 				shape.rect(x - 36, y, 30, barh - 6);
@@ -431,6 +427,33 @@ public class MusicSelector extends MainState {
 				titlefont.draw(sprite, "LN", x - 36, y + barh - 8);
 				sprite.end();
 			}
+			//MINE
+			if ((flag & 2) != 0) {
+				shape.begin(ShapeType.Filled);
+				shape.setColor(Color.valueOf("222200"));
+				shape.rect(x - 70, y, 30, barh - 6);
+				shape.setColor(Color.PURPLE);
+				shape.rect(x - 74, y + 4, 30, barh - 6);
+				shape.end();
+				sprite.begin();
+				titlefont.setColor(Color.BLACK);
+				titlefont.draw(sprite, "MI", x - 70, y + barh - 8);
+				sprite.end();
+			}
+			// RANDOM
+			if ((flag & 4) != 0) {
+				shape.begin(ShapeType.Filled);
+				shape.setColor(Color.valueOf("222200"));
+				shape.rect(x - 104, y, 30, barh - 6);
+				shape.setColor(Color.GREEN);
+				shape.rect(x - 108, y + 4, 30, barh - 6);
+				shape.end();
+				sprite.begin();
+				titlefont.setColor(Color.BLACK);
+				titlefont.draw(sprite, "RA", x - 104, y + barh - 8);
+				sprite.end();
+			}
+
 		}
 
 		// draw song bar position
@@ -1133,11 +1156,11 @@ public class MusicSelector extends MainState {
 					SongData sd = ((SongBar) currentsongs[i]).getSongData();
 					currentsongs[i].setScore(readScoreData(sd.getHash(), config.getLnmode()));
 					if (currentsongs[i].getScore() != null && config.getLnmode() == 2
-							&& ((SongBar) currentsongs[i]).getSongData().getLongnote() == 1) {
+							&& ((SongBar) currentsongs[i]).getSongData().hasLongNote()) {
 						currentsongs[i].getScore().setClear(currentsongs[i].getScore().getExclear());
 					}
 					((SongBar) currentsongs[i]).setExistsReplayData(main.getPlayDataAccessor().existsReplayData(
-							sd.getHash(), sd.getLongnote() == 1, config.getLnmode()));
+							sd.getHash(), sd.hasLongNote(), config.getLnmode()));
 				}
 				if (currentsongs[i] instanceof GradeBar) {
 					GradeBar gb = (GradeBar) currentsongs[i];
@@ -1146,7 +1169,7 @@ public class MusicSelector extends MainState {
 						boolean ln = false;
 						for (int j = 0; j < gb.getSongDatas().length; j++) {
 							hash[j] = gb.getSongDatas()[j].getHash();
-							ln |= gb.getSongDatas()[j].getLongnote() == 1;
+							ln |= gb.getSongDatas()[j].hasLongNote();
 						}
 						gb.setScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 0));
 						if (gb.getScore() != null && config.getLnmode() == 2 && ln) {
