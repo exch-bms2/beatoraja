@@ -4,11 +4,13 @@ import bms.player.lunaticrave2.FolderData;
 import bms.player.lunaticrave2.LunaticRave2SongDatabaseManager;
 import bms.player.lunaticrave2.SongData;
 import bms.player.beatoraja.*;
-import bms.table.Course;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Pixmap;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public abstract class Bar {
 
@@ -80,134 +82,6 @@ class SongBar extends SelectableBar {
 	public int getLamp() {
 		if(getScore() != null) {
 			return getScore().getClear();
-		}
-		return 0;
-	}
-}
-
-class FolderBar extends Bar {
-
-	private FolderData folder;
-	private String crc;
-	private int[] lamps = new int[11];
-	private int[] ranks = new int[0];
-
-	public FolderBar(FolderData folder, String crc) {
-		this.folder = folder;
-		this.crc = crc;
-	}
-
-	public FolderData getFolderData() {
-		return folder;
-	}
-
-	public String getCRC() {
-		return crc;
-	}
-
-	@Override
-	public String getTitle() {
-		return folder.getTitle();
-	}
-
-	public int[] getLamps() {
-		return lamps;
-	}
-
-	public void setLamps(int[] lamps) {
-		this.lamps = lamps;
-	}
-
-	public int[] getRanks() {
-		return ranks;
-	}
-
-	public void setRanks(int[] ranks) {
-		this.ranks = ranks;
-	}
-
-	public int getLamp() {
-		for(int i = 0;i < lamps.length;i++) {
-			if(lamps[i] > 0) {
-				return i;
-			}
-		}
-		return 0;
-	}
-}
-
-class TableBar extends Bar {
-
-	private String name;
-	private TableLevelBar[] levels;
-	private GradeBar[] grades;
-
-	public TableBar(String name, TableLevelBar[] levels, GradeBar[] grades) {
-		this.name = name;
-		this.levels = levels;
-		this.grades = grades;
-	}
-
-	@Override
-	public String getTitle() {
-		return name;
-	}
-
-	public TableLevelBar[] getLevels() {
-		return levels;
-	}
-
-	public GradeBar[] getGrades() {
-		return grades;
-	}
-
-	public int getLamp() {
-		return 0;
-	}
-
-}
-
-class TableLevelBar extends Bar {
-	private String level;
-	private String[] hashes;
-	private int[] lamps = new int[11];
-	private int[] ranks = new int[0];
-
-	public TableLevelBar(String level, String[] hashes) {
-		this.level = level;
-		this.hashes = hashes;
-	}
-
-	@Override
-	public String getTitle() {
-		return "LEVEL " + level;
-	}
-
-	public String[] getHashes() {
-		return hashes;
-	}
-
-	public int[] getLamps() {
-		return lamps;
-	}
-
-	public void setLamps(int[] lamps) {
-		this.lamps = lamps;
-	}
-
-	public int[] getRanks() {
-		return ranks;
-	}
-
-	public void setRanks(int[] ranks) {
-		this.ranks = ranks;
-	}
-
-	public int getLamp() {
-		for(int i = 0;i < lamps.length;i++) {
-			if(lamps[i] > 0) {
-				return i;
-			}
 		}
 		return 0;
 	}
@@ -307,9 +181,218 @@ class GradeBar extends SelectableBar {
 	}
 }
 
-abstract class CommandBar extends Bar {
+abstract class DirectoryBar extends Bar {
 
-	public abstract SongData[] getSongData(LunaticRave2SongDatabaseManager songdb);
+	private int[] lamps = new int[11];
+	private int[] ranks = new int[0];
+
+	public int[] getLamps() {
+		return lamps;
+	}
+
+	public void setLamps(int[] lamps) {
+		this.lamps = lamps;
+	}
+
+	public int[] getRanks() {
+		return ranks;
+	}
+
+	public void setRanks(int[] ranks) {
+		this.ranks = ranks;
+	}
+
+	public int getLamp() {
+		for(int i = 0;i < lamps.length;i++) {
+			if(lamps[i] > 0) {
+				return i;
+			}
+		}
+		return 0;
+	}
+
+	public abstract Bar[] getChildren();
+
+}
+
+class FolderBar extends DirectoryBar {
+
+	private FolderData folder;
+	private String crc;
+	private MusicSelector selector;
+
+	public FolderBar(MusicSelector selector, FolderData folder, String crc) {
+		this.selector = selector;
+		this.folder = folder;
+		this.crc = crc;
+	}
+
+	public FolderData getFolderData() {
+		return folder;
+	}
+
+	public String getCRC() {
+		return crc;
+	}
+
+	@Override
+	public String getTitle() {
+		return folder.getTitle();
+	}
+
+	@Override
+	public Bar[] getChildren() {
+		List<Bar> l = new ArrayList();
+		LunaticRave2SongDatabaseManager songdb = selector.getSongDatabase();
+		FolderData[] folders = songdb.getFolderDatas("parent", crc, new File(".").getAbsolutePath());
+		SongData[] songs = songdb.getSongDatas("parent", crc, new File(".").getAbsolutePath());
+		if (songs.length == 0) {
+			for (FolderData folder : folders) {
+				String path = folder.getPath();
+				if (path.endsWith(String.valueOf(File.separatorChar))) {
+					path = path.substring(0, path.length() - 1);
+				}
+
+				String ccrc = songdb.crc32(path, new String[0], new File(".").getAbsolutePath());
+				FolderBar cfolder = new FolderBar(selector, folder, ccrc);
+				l.add(cfolder);
+				if (selector.getResource().getConfig().isFolderlamp()) {
+					int clear = 255;
+					int[] clears = new int[11];
+					int[] ranks = new int[28];
+					for (SongData sd : songdb.getSongDatas("parent", ccrc, new File(".").getAbsolutePath())) {
+						IRScoreData score = selector.readScoreData(sd.getHash(), selector.getResource().getConfig().getLnmode());
+						if (score != null) {
+							clears[score.getClear()]++;
+							if (score.getNotes() != 0) {
+								ranks[(score.getExscore() * 27 / (score.getNotes() * 2))]++;
+							} else {
+								ranks[0]++;
+							}
+							if (score.getClear() < clear) {
+								clear = score.getClear();
+							}
+						}else {
+							ranks[0]++;
+							clears[0]++;
+							clear = 0;
+						}
+					}
+					cfolder.setLamps(clears);
+					cfolder.setRanks(ranks);
+				}
+			}
+		} else {
+			for (SongData song : songs) {
+				l.add(new SongBar(song));
+			}
+		}
+		return l.toArray(new Bar[0]);
+	}
+}
+
+class TableBar extends DirectoryBar {
+
+	private String name;
+	private TableLevelBar[] levels;
+	private GradeBar[] grades;
+	private MusicSelector selector;
+
+	public TableBar(MusicSelector selector, String name, TableLevelBar[] levels, GradeBar[] grades) {
+		this.selector = selector;
+		this.name = name;
+		this.levels = levels;
+		this.grades = grades;
+	}
+
+	@Override
+	public String getTitle() {
+		return name;
+	}
+
+	public TableLevelBar[] getLevels() {
+		return levels;
+	}
+
+	public GradeBar[] getGrades() {
+		return grades;
+	}
+
+	@Override
+	public Bar[] getChildren() {
+		List<Bar> l = new ArrayList<Bar>();
+		l.addAll(Arrays.asList(getLevels()));
+		l.addAll(Arrays.asList(getGrades()));
+		LunaticRave2SongDatabaseManager songdb = selector.getSongDatabase();
+		if (selector.getResource().getConfig().isFolderlamp()) {
+			for (TableLevelBar levelbar : getLevels()) {
+				int clear = 255;
+				int[] clears = new int[11];
+				int[] ranks = new int[28];
+				for (String hash : ((TableLevelBar) levelbar).getHashes()) {
+					IRScoreData score = selector.readScoreData(hash, selector.getResource().getConfig().getLnmode());
+					if(songdb.getSongDatas("hash", hash, new File(".").getAbsolutePath()).length > 0) {
+						if (score != null) {
+							clears[score.getClear()]++;
+							if (score.getNotes() != 0) {
+								ranks[(score.getExscore() * 27 / (score.getNotes() * 2))]++;
+							} else {
+								ranks[0]++;
+							}
+							if (score.getClear() < clear) {
+								clear = score.getClear();
+							}
+						} else {
+							ranks[0]++;
+							clears[0]++;
+							clear = 0;
+						}
+					}
+				}
+				levelbar.setLamps(clears);
+				levelbar.setRanks(ranks);
+			}
+		}
+		return l.toArray(new Bar[0]);
+	}
+
+}
+
+class TableLevelBar extends DirectoryBar {
+	private String level;
+	private String[] hashes;
+	private MusicSelector selector;
+
+	public TableLevelBar(MusicSelector selector, String level, String[] hashes) {
+		this.selector = selector;
+		this.level = level;
+		this.hashes = hashes;
+	}
+
+	@Override
+	public String getTitle() {
+		return "LEVEL " + level;
+	}
+
+	public String[] getHashes() {
+		return hashes;
+	}
+
+	@Override
+	public Bar[] getChildren() {
+		List<SongBar> songbars = new ArrayList<SongBar>();
+		for (String hash : getHashes()) {
+			SongData[] songs = selector.getSongDatabase().getSongDatas("hash", hash, new File(".").getAbsolutePath());
+			if (songs.length > 0) {
+				songbars.add(new SongBar(songs[0]));
+			}
+		}
+		return songbars.toArray(new Bar[0]);
+	}
+}
+
+abstract class CommandBar extends DirectoryBar {
+
 }
 
 class MyBestBar extends CommandBar {
@@ -329,9 +412,11 @@ class MyBestBar extends CommandBar {
 	}
 
 	@Override
-	public SongData[] getSongData(LunaticRave2SongDatabaseManager songdb) {
-		return new SongData[0];
+	public Bar[] getChildren() {
+		// TODO 未実装
+		return new Bar[0];
 	}
+
 }
 
 class ClearLampBar extends CommandBar {
@@ -355,7 +440,9 @@ class ClearLampBar extends CommandBar {
 	}
 
 	@Override
-	public SongData[] getSongData(LunaticRave2SongDatabaseManager songdb) {
-		return new SongData[0];
+	public Bar[] getChildren() {
+		// TODO 未実装
+		return new Bar[0];
 	}
+
 }

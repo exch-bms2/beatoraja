@@ -35,7 +35,6 @@ public class MusicSelector extends MainState {
 
 	// TODO テキスト表示
 	// TODO 譜面情報表示
-	// TODO 特殊フォルダの作成(ルートフォルダ皆無だと落ちるため)
 	// TODO スコア取得のバックグラウンド化
 
 	private MainController main;
@@ -157,7 +156,7 @@ public class MusicSelector extends MainState {
 					TableData td = json.fromJson(TableData.class, new FileReader(f));
 					List<TableLevelBar> levels = new ArrayList<TableLevelBar>();
 					for (String lv : td.getLevel()) {
-						levels.add(new TableLevelBar(lv, td.getHash().get(lv)));
+						levels.add(new TableLevelBar(this, lv, td.getHash().get(lv)));
 					}
 					List<GradeBar> l = new ArrayList();
 					for (CourseData course : td.getCourse()) {
@@ -173,7 +172,7 @@ public class MusicSelector extends MainState {
 
 						l.add(new GradeBar(course.getName(), songlist.toArray(new SongData[0]), course));
 					}
-					tables.add(new TableBar(td.getName(), levels.toArray(new TableLevelBar[0]), l
+					tables.add(new TableBar(this, td.getName(), levels.toArray(new TableLevelBar[0]), l
 							.toArray(new GradeBar[0])));
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -188,7 +187,7 @@ public class MusicSelector extends MainState {
 		}
 	}
 
-	private IRScoreData readScoreData(String hash, int lnmode) {
+	IRScoreData readScoreData(String hash, int lnmode) {
 		if (scorecache[lnmode].containsKey(hash)) {
 			return scorecache[lnmode].get(hash);
 		}
@@ -764,8 +763,7 @@ public class MusicSelector extends MainState {
 			// 1鍵 (選曲 or フォルダを開く)
 			if (isPressed(keystate, keytime, KEY_PLAY, true) || cursor[3]) {
 				cursor[3] = false;
-				if (currentsongs[selectedindex] instanceof FolderBar || currentsongs[selectedindex] instanceof TableBar
-						|| currentsongs[selectedindex] instanceof TableLevelBar) {
+				if (currentsongs[selectedindex] instanceof DirectoryBar) {
 					Bar bar = currentsongs[selectedindex];
 					if (updateBar(bar)) {
 						if (folderopen != null) {
@@ -925,8 +923,7 @@ public class MusicSelector extends MainState {
 			// 白鍵 (フォルダを開く)
 			if (isPressed(keystate, keytime, KEY_FOLDER_OPEN, true) || cursor[3]) {
 				cursor[3] = false;
-				if (currentsongs[selectedindex] instanceof FolderBar || currentsongs[selectedindex] instanceof TableBar
-						|| currentsongs[selectedindex] instanceof TableLevelBar) {
+				if (currentsongs[selectedindex] instanceof DirectoryBar) {
 					Bar bar = currentsongs[selectedindex];
 					if (updateBar(bar)) {
 						if (folderopen != null) {
@@ -995,90 +992,11 @@ public class MusicSelector extends MainState {
 		String crc = null;
 		List<Bar> l = new ArrayList<Bar>();
 		if (bar == null) {
-			crc = "e2977170";
+			l.addAll(Arrays.asList(new FolderBar(this, null, "e2977170").getChildren()));
 			l.addAll(Arrays.asList(tables));
 			l.addAll(Arrays.asList(commands));
-		} else if (bar instanceof FolderBar) {
-			crc = ((FolderBar) bar).getCRC();
-		}
-		if (crc != null) {
-			Logger.getGlobal().info("crc :" + crc);
-			FolderData[] folders = songdb.getFolderDatas("parent", crc, new File(".").getAbsolutePath());
-			SongData[] songs = songdb.getSongDatas("parent", crc, new File(".").getAbsolutePath());
-			if (songs.length == 0) {
-				for (FolderData folder : folders) {
-					String path = folder.getPath();
-					if (path.endsWith(String.valueOf(File.separatorChar))) {
-						path = path.substring(0, path.length() - 1);
-					}
-
-					String ccrc = songdb.crc32(path, new String[0], new File(".").getAbsolutePath());
-					FolderBar cfolder = new FolderBar(folder, ccrc);
-					l.add(cfolder);
-					if (config.isFolderlamp()) {
-						int clear = 255;
-						int[] clears = new int[11];
-						int[] ranks = new int[28];
-						for (SongData sd : songdb.getSongDatas("parent", ccrc, new File(".").getAbsolutePath())) {
-							IRScoreData score = readScoreData(sd.getHash(), config.getLnmode());
-							if (score != null) {
-								clears[score.getClear()]++;
-								if (score.getNotes() != 0) {
-									ranks[(score.getExscore() * 27 / (score.getNotes() * 2))]++;
-								} else {
-									ranks[0]++;
-								}
-								if (score.getClear() < clear) {
-									clear = score.getClear();
-								}
-							}
-						}
-						cfolder.setLamps(clears);
-						cfolder.setRanks(ranks);
-					}
-				}
-			} else {
-				for (SongData song : songs) {
-					l.add(new SongBar(song));
-				}
-			}
-		}
-		if (bar instanceof TableBar) {
-			l.addAll((Arrays.asList(((TableBar) bar).getLevels())));
-			l.addAll((Arrays.asList(((TableBar) bar).getGrades())));
-			if (config.isFolderlamp()) {
-				for (TableLevelBar levelbar : ((TableBar) bar).getLevels()) {
-					int clear = 255;
-					int[] clears = new int[11];
-					int[] ranks = new int[28];
-					for (String hash : ((TableLevelBar) levelbar).getHashes()) {
-						IRScoreData score = readScoreData(hash, config.getLnmode());
-						if (score != null) {
-							clears[score.getClear()]++;
-							if (score.getNotes() != 0) {
-								ranks[(score.getExscore() * 27 / (score.getNotes() * 2))]++;
-							} else {
-								ranks[0]++;
-							}
-							if (score.getClear() < clear) {
-								clear = score.getClear();
-							}
-						}
-					}
-					levelbar.setLamps(clears);
-					levelbar.setRanks(ranks);
-				}
-			}
-		}
-		if (bar instanceof TableLevelBar) {
-			List<SongBar> songbars = new ArrayList<SongBar>();
-			for (String hash : ((TableLevelBar) bar).getHashes()) {
-				SongData[] songs = songdb.getSongDatas("hash", hash, new File(".").getAbsolutePath());
-				if (songs.length > 0) {
-					songbars.add(new SongBar(songs[0]));
-				}
-			}
-			l.addAll(songbars);
+		} else if(bar instanceof DirectoryBar) {
+			l.addAll(Arrays.asList(((DirectoryBar)bar).getChildren()));
 		}
 
 		List<Bar> remove = new ArrayList<Bar>();
@@ -1280,5 +1198,13 @@ public class MusicSelector extends MainState {
 
 	public int getTotalPlayCount(boolean clear) {
 		return (int) (clear ? playerdata.getClear() : playerdata.getFail());
+	}
+
+	PlayerResource getResource() {
+		return resource;
+	}
+
+	LunaticRave2SongDatabaseManager getSongDatabase() {
+		return songdb;
 	}
 }
