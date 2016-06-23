@@ -18,7 +18,7 @@ public class GameOptionRenderer {
 	private static final String[] SCOREOP = { "OFF", "MIRROR", "RANDOM", "R-RANDOM", "S-RANDOM", "SPIRAL", "H-RANDOM",
 			"ALL-SCR", "RANDOM-EX", "S-RANDOM-EX" };
 
-	private static final String[] DOUBLEOP = { "OFF", "FLIP" };
+	private static final String[] DOUBLEOP = { "OFF", "FLIP", "BATTLE" };
 
 	private static final String[] GAUGEOP = { "ASSIST EASY", "EASY", "NORMAL", "HARD", "EX-HARD", "HAZARD" };
 

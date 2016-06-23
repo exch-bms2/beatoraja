@@ -168,8 +168,6 @@ public class BMSPlayer extends MainState {
 		// 通常プレイの場合は最後のノーツ、オートプレイの場合はBG/BGAを含めた最後のノーツ
 		playtime = (autoplay == 1 ? model.getLastTime() : model.getLastNoteTime()) + 5000;
 
-		judge = new JudgeManager(this, model);
-
 		boolean score = true;
 
 		model.setLntype(config.getLnmode());
@@ -206,7 +204,16 @@ public class BMSPlayer extends MainState {
 					score = false;
 				}
 			}
+			if (config.getDoubleoption() == 2 && (model.getUseKeys() == 5 || model.getUseKeys() == 7)) {
+				// 地雷ノートがなければアシストなし
+				LaneShuffleModifier mod = new LaneShuffleModifier(LaneShuffleModifier.BATTLE);
+				mod.modify(model);
+				model.setUseKeys(model.getUseKeys() * 2);
+				assist = 1;
+				score = false;
+			}
 		}
+		judge = new JudgeManager(this, model);
 		totalnotes = model.getTotalNotes();
 
 		Logger.getGlobal().info("アシストオプション設定完了");

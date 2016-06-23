@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import bms.model.BMSModel;
+import bms.model.LongNote;
 import bms.model.Note;
 import bms.model.TimeLine;
 
@@ -168,9 +169,28 @@ public class LaneShuffleModifier extends PatternModifier {
 					notes[i] = tl.getNote(i);
 					hnotes[i] = tl.getHiddenNote(i);
 				}
+				boolean[] clone = new boolean[lanes];
 				for (int i = 0; i < lanes; i++) {
-					tl.setNote(i, notes[random[i]]);
-					tl.setHiddenNote(i, hnotes[random[i]]);
+					if(clone[random[i]]) {
+						if(notes[random[i]] != null) {
+							if(notes[random[i]] instanceof LongNote && ((LongNote)notes[random[i]]).getEnd() == tl) {
+								tl.setNote(i, ((LongNote) notes[random[i]]).getStart().getNote(i));
+							} else {
+								tl.setNote(i, (Note) notes[random[i]].clone());
+							}
+						} else {
+							tl.setNote(i, null);
+						}
+						if(hnotes[random[i]] != null) {
+							tl.setHiddenNote(i, (Note) hnotes[random[i]].clone());
+						} else {
+							tl.setHiddenNote(i, null);
+						}
+					} else {
+						tl.setNote(i, notes[random[i]]);
+						tl.setHiddenNote(i, hnotes[random[i]]);
+						clone[random[i]] = true;
+					}
 				}
 				log.add(new PatternModifyLog(tl.getTime(), random));				
 			}
