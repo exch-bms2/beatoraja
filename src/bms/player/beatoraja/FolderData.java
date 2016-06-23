@@ -1,12 +1,9 @@
-package bms.player.lunaticrave2;
+package bms.player.beatoraja;
 
 public class FolderData {
 
 	private String title;
 	private String subtitle;
-	private String category;
-	private String info_a;
-	private String info_b;
 	private String command;
 	private String path;
 	private String banner;	
@@ -27,24 +24,6 @@ public class FolderData {
 	}
 	public void setSubtitle(String subtitle) {
 		this.subtitle = subtitle;
-	}
-	public String getCategory() {
-		return category;
-	}
-	public void setCategory(String category) {
-		this.category = category;
-	}
-	public String getInfo_a() {
-		return info_a;
-	}
-	public void setInfo_a(String info_a) {
-		this.info_a = info_a;
-	}
-	public String getInfo_b() {
-		return info_b;
-	}
-	public void setInfo_b(String info_b) {
-		this.info_b = info_b;
 	}
 	public String getCommand() {
 		return command;

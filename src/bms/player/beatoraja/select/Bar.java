@@ -1,8 +1,5 @@
 package bms.player.beatoraja.select;
 
-import bms.player.lunaticrave2.FolderData;
-import bms.player.lunaticrave2.LunaticRave2SongDatabaseManager;
-import bms.player.lunaticrave2.SongData;
 import bms.player.beatoraja.*;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Pixmap;
@@ -174,8 +171,8 @@ class GradeBar extends SelectableBar {
 		if(getMirrorScore() != null && getMirrorScore().getClear() > result) {
 			result = getMirrorScore().getClear();
 		}
-		if(getScore() != null && getScore().getClear() > result) {
-			result = getMirrorScore().getClear();
+		if(getRandomScore() != null && getRandomScore().getClear() > result) {
+			result = getRandomScore().getClear();
 		}
 		return result;
 	}
@@ -243,7 +240,7 @@ class FolderBar extends DirectoryBar {
 	@Override
 	public Bar[] getChildren() {
 		List<Bar> l = new ArrayList();
-		LunaticRave2SongDatabaseManager songdb = selector.getSongDatabase();
+		SongDatabaseAccessor songdb = selector.getSongDatabase();
 		FolderData[] folders = songdb.getFolderDatas("parent", crc, new File(".").getAbsolutePath());
 		SongData[] songs = songdb.getSongDatas("parent", crc, new File(".").getAbsolutePath());
 		if (songs.length == 0) {
@@ -261,7 +258,7 @@ class FolderBar extends DirectoryBar {
 					int[] clears = new int[11];
 					int[] ranks = new int[28];
 					for (SongData sd : songdb.getSongDatas("parent", ccrc, new File(".").getAbsolutePath())) {
-						IRScoreData score = selector.readScoreData(sd.getHash(), selector.getResource().getConfig().getLnmode());
+						IRScoreData score = selector.readScoreData(sd.getSha256(), selector.getResource().getConfig().getLnmode());
 						if (score != null) {
 							clears[score.getClear()]++;
 							if (score.getNotes() != 0) {
@@ -323,15 +320,16 @@ class TableBar extends DirectoryBar {
 		List<Bar> l = new ArrayList<Bar>();
 		l.addAll(Arrays.asList(getLevels()));
 		l.addAll(Arrays.asList(getGrades()));
-		LunaticRave2SongDatabaseManager songdb = selector.getSongDatabase();
+		SongDatabaseAccessor songdb = selector.getSongDatabase();
 		if (selector.getResource().getConfig().isFolderlamp()) {
 			for (TableLevelBar levelbar : getLevels()) {
 				int clear = 255;
 				int[] clears = new int[11];
 				int[] ranks = new int[28];
 				for (String hash : ((TableLevelBar) levelbar).getHashes()) {
-					IRScoreData score = selector.readScoreData(hash, selector.getResource().getConfig().getLnmode());
-					if(songdb.getSongDatas("hash", hash, new File(".").getAbsolutePath()).length > 0) {
+					SongData[] song = songdb.getSongDatas("md5", hash, new File(".").getAbsolutePath());
+					if(song.length > 0) {
+						IRScoreData score = selector.readScoreData(song[0].getSha256(), selector.getResource().getConfig().getLnmode());						
 						if (score != null) {
 							clears[score.getClear()]++;
 							if (score.getNotes() != 0) {
@@ -382,7 +380,7 @@ class TableLevelBar extends DirectoryBar {
 	public Bar[] getChildren() {
 		List<SongBar> songbars = new ArrayList<SongBar>();
 		for (String hash : getHashes()) {
-			SongData[] songs = selector.getSongDatabase().getSongDatas("hash", hash, new File(".").getAbsolutePath());
+			SongData[] songs = selector.getSongDatabase().getSongDatas("md5", hash, new File(".").getAbsolutePath());
 			if (songs.length > 0) {
 				songbars.add(new SongBar(songs[0]));
 			}

@@ -1,4 +1,4 @@
-package bms.player.lunaticrave2;
+package bms.player.beatoraja;
 
 import java.io.File;
 import java.sql.*;
@@ -13,59 +13,34 @@ import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 
 import utils.sql.SqliteDBManager;
-import bms.model.*;
+import bms.model.BMSDecoder;
+import bms.model.BMSModel;
+import bms.model.BMSONDecoder;
 
 /**
- * LR2の楽曲データベースへのアクセスクラス
+ * 楽曲データベースへのアクセスクラス
  * 
  * @author exch
  */
-public class LunaticRave2SongDatabaseManager {
+public class SongDatabaseAccessor {
 
 	public static final String HASH = "hash";
 	public static final String TITLE = "title";
 	public static final String SUBTITLE = "subtitle";
 	public static final String TAG = "tag";
 
+	public static final int FEATURE_LONGNOTE = 1;
+	public static final int FEATURE_MINENOTE = 2;
+	public static final int FEATURE_RANDOM = 4;
+
+	public static final int CONTENT_TEXT = 1;
+	public static final int CONTENT_BGA = 2;
+
 	private SqliteDBManager songdb;
 
-	/**
-	 * bmsonを対象に入れる場合はtrue
-	 */
-	private boolean enableBMSON = false;
-
-	private int lntype;
-
-	public LunaticRave2SongDatabaseManager(String filepath) throws ClassNotFoundException {
-		this(filepath, BMSModel.LNTYPE_LONGNOTE);
-	}
-
-	/**
-	 * ファイルパスで指定したLR2楽曲データベースへのアクセサを作成する
-	 * 
-	 * @param filepath
-	 *            LR2楽曲データベースのファイルパス
-	 * @throws ClassNotFoundException
-	 */
-	public LunaticRave2SongDatabaseManager(String filepath, int lntype) throws ClassNotFoundException {
-		this.lntype = lntype;
+	public SongDatabaseAccessor(String filepath) throws ClassNotFoundException {
 		Class.forName("org.sqlite.JDBC");
 		songdb = new SqliteDBManager(filepath);
-	}
-
-	/**
-	 * ファイルパスで指定したLR2楽曲データベースへのアクセサを作成する
-	 * 
-	 * @param filepath
-	 *            LR2楽曲データベースのファイルパス
-	 * @param enableBMSON
-	 *            bmsonを対象に入れる場合はtrue
-	 * @throws ClassNotFoundException
-	 */
-	public LunaticRave2SongDatabaseManager(String path, boolean enableBMSON, int lntype) throws ClassNotFoundException {
-		Class.forName("org.sqlite.JDBC");
-		songdb = new SqliteDBManager(path);
-		this.enableBMSON = enableBMSON;
 	}
 
 	/**
@@ -87,14 +62,14 @@ public class LunaticRave2SongDatabaseManager {
 			if (!rs.next()) {
 				QueryRunner qr = new QueryRunner();
 				if (qr.query(conn, sql, new MapListHandler(), "song").size() == 0) {
-					sql = "CREATE TABLE [song] ([hash] TEXT NOT NULL," + "[title] TEXT," + "[subtitle] TEXT,"
-							+ "[genre] TEXT," + "[artist] TEXT," + "[subartist] TEXT," + "[tag] TEXT," + "[path] TEXT,"
-							+ "[type] INTEGER," + "[folder] TEXT," + "[stagefile] TEXT," + "[banner] TEXT,"
-							+ "[backbmp] TEXT," + "[parent] TEXT," + "[level] INTEGER," + "[difficulty] INTEGER,"
-							+ "[maxbpm] INTEGER," + "[minbpm] INTEGER," + "[mode] INTEGER," + "[judge] INTEGER,"
-							+ "[longnote] INTEGER," + "[bga] INTEGER," + "[random] INTEGER," + "[date] INTEGER,"
-							+ "[favorite] INTEGER," + "[txt] INTEGER," + "[karinotes] INTEGER," + "[adddate] INTEGER,"
-							+ "[exlevel] INTEGER," + "PRIMARY KEY(hash, path));";
+					sql = "CREATE TABLE [song] ([md5] TEXT NOT NULL," + "[sha256] TEXT NOT NULL," + "[title] TEXT,"
+							+ "[subtitle] TEXT," + "[genre] TEXT," + "[artist] TEXT," + "[subartist] TEXT,"
+							+ "[tag] TEXT," + "[path] TEXT," + "[folder] TEXT," + "[stagefile] TEXT,"
+							+ "[banner] TEXT," + "[backbmp] TEXT," + "[parent] TEXT," + "[level] INTEGER,"
+							+ "[difficulty] INTEGER," + "[maxbpm] INTEGER," + "[minbpm] INTEGER," + "[mode] INTEGER,"
+							+ "[judge] INTEGER," + "[feature] INTEGER," + "[content] INTEGER," + "[date] INTEGER,"
+							+ "[favorite] INTEGER," + "[notes] INTEGER," + "[adddate] INTEGER,"
+							+ "PRIMARY KEY(sha256, path));";
 					qr.update(conn, sql);
 				}
 			}
@@ -107,8 +82,7 @@ public class LunaticRave2SongDatabaseManager {
 			if (!rs.next()) {
 				QueryRunner qr = new QueryRunner();
 				if (qr.query(conn, sql, new MapListHandler(), "folder").size() == 0) {
-					sql = "CREATE TABLE [folder] (" + "[title] TEXT," + "[subtitle] TEXT," + "[category] TEXT,"
-							+ "[info_a] TEXT," + "[info_b] TEXT," + "[command] TEXT," + "[path] TEXT,"
+					sql = "CREATE TABLE [folder] (" + "[title] TEXT," + "[subtitle] TEXT," + "[command] TEXT," + "[path] TEXT,"
 							+ "[type] INTEGER," + "[banner] TEXT," + "[parent] TEXT," + "[date] INTEGER,"
 							+ "[max] INTEGER," + "[adddate] INTEGER," + "PRIMARY KEY(path));";
 					qr.update(conn, sql);
@@ -281,145 +255,6 @@ public class LunaticRave2SongDatabaseManager {
 	}
 
 	/**
-	 * 検索条件に該当する楽曲を取得する。getSongDataに統合予定
-	 * 
-	 * @param title
-	 *            タイトル
-	 * @param artist
-	 *            アーティスト
-	 * @param and
-	 *            タイトル/アーティストの検索条件演算子
-	 * @return 検索結果
-	 */
-	public SongData[] getBMSData(String title, String artist, boolean and, Map<String, Object> values) {
-		List<SongData> result = new ArrayList<SongData>();
-		try {
-			QueryRunner qr = new QueryRunner(songdb.getDataSource());
-			// titleもしくはartistが空、もしくはnullの場合はAND検索に切り換える
-			if (title == null || title.length() == 0) {
-				and = true;
-				title = "";
-			}
-			if (artist == null || artist.length() == 0) {
-				and = true;
-				artist = "";
-			}
-
-			String sql = null;
-			String cond = "";
-			for (String key : values.keySet()) {
-				if (key.equals("bpmchange")) {
-					cond += (cond.length() > 0 ? " AND " : "") + "minbpm < maxbpm";
-				} else if (values.get(key) != null) {
-					cond += (cond.length() > 0 ? " AND " : "") + key + " = " + values.get(key).toString();
-				}
-			}
-			if (values.get("favorite") != null) {
-				sql = "SELECT * FROM song WHERE " + cond + " group by hash;";
-			} else {
-				sql = "SELECT * FROM song WHERE (rtrim(title||' '||subtitle) LIKE '%" + title.replaceAll("'", "''")
-						+ "%' " + (and ? "AND" : "OR") + " rtrim(artist||' '||subartist) LIKE '%"
-						+ artist.replaceAll("'", "''") + "%') " + (cond.length() > 0 ? "AND " : "") + cond
-						+ " group by hash";
-
-			}
-			if (sql != null) {
-				ResultSetHandler<List<SongData>> rh = new BeanListHandler<SongData>(SongData.class);
-				result.addAll(qr.query(sql, rh));
-			}
-		} catch (Exception e) {
-			Logger.getGlobal().severe("song.db検索時の例外:" + e.getMessage());
-		}
-		return result.toArray(new SongData[0]);
-	}
-
-	public void appendDifficultyTableTag(String mark, Map<String, List<String>> hashtag) {
-		this.appendDifficultyTableTag(mark, hashtag, new HashMap<String, Integer>());
-	}
-
-	/**
-	 * タグ付加を行う
-	 * 
-	 * @param hashtag
-	 *            <ハッシュ値, 難易度表タグ>のマップ
-	 * @param mark
-	 *            難易度記号
-	 * @param hashlevel
-	 *            <ハッシュ値, レベル>のマップ
-	 */
-	public Map<String, Integer> appendDifficultyTableTag(String mark, Map<String, List<String>> hashtag,
-			Map<String, Integer> hashlevel) {
-		Map<String, Integer> backup = new HashMap<String, Integer>();
-		DataSource ds = songdb.getDataSource();
-		Connection con = null;
-
-		try {
-			con = ds.getConnection();
-			con.setAutoCommit(false);
-			Statement stmt = con.createStatement();
-			// タグ全消去
-			long time = System.currentTimeMillis();
-			for (int id = 0; id < hashtag.keySet().size() + 5; id++) {
-				String did = String.format("t" + mark + "%03d", id);
-				stmt.executeUpdate("UPDATE song SET tag = replace(replace(tag, '" + did
-						+ "', ''), ',,', ',') WHERE tag like '%" + did + "%'");
-				// System.out.println("タグ消去:" + did);
-			}
-			for (int id = 0; id < hashtag.keySet().size() + 5; id++) {
-				String did = String.format("t" + mark + "%02d", id);
-				stmt.executeUpdate("UPDATE song SET tag = replace(replace(tag, '" + did
-						+ "', ''), ',,', ',') WHERE tag like '%" + did + "%'");
-			}
-			for (int id = 0; id < 10; id++) {
-				String did = String.format("t" + mark + "S%02d", id);
-				stmt.executeUpdate("UPDATE song SET tag = replace(replace(tag, '" + did
-						+ "', ''), ',,', ',') WHERE tag like '%" + did + "%'");
-			}
-
-			for (String hash : hashtag.keySet()) {
-				List<String> tags = hashtag.get(hash);
-				String tag = "";
-				for (String s : tags) {
-					tag += ",t" + s;
-				}
-				stmt.executeUpdate("UPDATE song SET tag = CASE WHEN tag IS NULL THEN '" + tag + "' ELSE tag||'" + tag
-						+ "' end WHERE hash = '" + hash + "'");
-				// レベル表記があればレベルも変更
-				if (hashlevel.get(hash) != null) {
-					// 変更前レベルのバックアップ
-					ResultSet rs = stmt.executeQuery("SELECT * FROM song WHERE hash = '" + hash + "'");
-					while (rs.next()) {
-						int level = rs.getInt("level");
-						if (level != hashlevel.get(hash)) {
-							backup.put(hash, level);
-						}
-					}
-					stmt.executeUpdate("UPDATE song SET level = " + hashlevel.get(hash) + " WHERE hash = '" + hash
-							+ "'");
-					// System.out.println("レベル更新:" + hash + " -> " +
-					// hashlevel.get(hash));
-				}
-				// System.out.println("タグ更新:" + hash + " -> " + tag);
-			}
-			con.commit();
-			stmt.close();
-			con.close();
-			Logger.getGlobal().info("タグ更新 所要時間(ms):" + (System.currentTimeMillis() - time));
-		} catch (Exception e) {
-			Logger.getGlobal().severe("song.dbタグ付加時の例外:" + e.getMessage());
-		} finally {
-			if (con != null) {
-				try {
-					con.close();
-				} catch (SQLException e) {
-				}
-			}
-		}
-
-		return backup;
-	}
-
-	/**
 	 * 譜面のパスを取得する
 	 * 
 	 * @param hash
@@ -487,7 +322,7 @@ public class LunaticRave2SongDatabaseManager {
 				}
 				List<SongData> records = qr.query(conn, sql, rh, s + "%");
 				for (SongData record : records) {
-					tags.put(record.getHash(), record.getTag());
+					tags.put(record.getMd5(), record.getTag());
 				}
 			}
 			boolean txt = false;
@@ -573,9 +408,9 @@ public class LunaticRave2SongDatabaseManager {
 			}
 			qr.update(conn, sql, s);
 
-			sql = "insert into folder " + "(title, subtitle, category, info_a, info_b, command, path, type, "
-					+ "banner, parent, date, max, adddate)" + "values(?,?,?,?,?,?,?,?,?,?,?,?,?);";
-			qr.update(conn, sql, dir.getName(), "", "", "", "", "", s, 1, "",
+			sql = "insert into folder " + "(title, subtitle, command, path, type, "
+					+ "banner, parent, date, max, adddate)" + "values(?,?,?,?,?,?,?,?,?,?);";
+			qr.update(conn, sql, dir.getName(), "", "", s, 1, "",
 					crc32(dir.getParentFile().getAbsolutePath(), rootdirs, path), dir.lastModified() / 1000, null,
 					Calendar.getInstance().getTimeInMillis() / 1000);
 			List<FolderData> folders = qr.query(conn, "select * from folder where parent = ?", rh2,
@@ -608,11 +443,11 @@ public class LunaticRave2SongDatabaseManager {
 			String name = dir.getName().toLowerCase();
 			BMSModel model = null;
 			if (name.endsWith(".bms") || name.endsWith(".bme") || name.endsWith(".bml") || name.endsWith(".pms")) {
-				BMSDecoder decoder = new BMSDecoder(lntype);
+				BMSDecoder decoder = new BMSDecoder(BMSModel.LNTYPE_LONGNOTE);
 				model = decoder.decode(dir);
 			}
-			if (enableBMSON && name.endsWith(".bmson")) {
-				BMSONDecoder decoder = new BMSONDecoder(lntype);
+			if (name.endsWith(".bmson")) {
+				BMSONDecoder decoder = new BMSONDecoder(BMSModel.LNTYPE_LONGNOTE);
 				model = decoder.decode(dir);
 			}
 
@@ -634,28 +469,25 @@ public class LunaticRave2SongDatabaseManager {
 					}
 				}
 
-				int ln = model.containsLongNote() ? 1 : 0;
-				int txt = containstxt ? 1 : 0;
-				if (enableBMSON) {
-					ln += model.containsMineNote() ? 2 : 0;
-					ln += model.getRandom() > 1 ? 4 : 0;
-					txt += model.getBgaList().length > 0 ? 2 : 0;
-				}
-				sql = "insert into song " + "(hash, title, subtitle, genre, artist, subartist, tag, path, type, "
+				int ln = model.containsLongNote() ? FEATURE_LONGNOTE : 0;
+				ln += model.containsMineNote() ? FEATURE_MINENOTE : 0;
+				ln += model.getRandom() > 1 ? FEATURE_RANDOM : 0;
+				int txt = containstxt ? CONTENT_TEXT : 0;
+				txt += model.getBgaList().length > 0 ? CONTENT_BGA : 0;
+				sql = "insert into song " + "(md5, sha256, title, subtitle, genre, artist, subartist, tag, path,"
 						+ "folder, stagefile, banner, backbmp, parent, level, difficulty, "
-						+ "maxbpm, minbpm, mode, judge, longnote, bga, random, "
-						+ "date, favorite, txt, karinotes, adddate, exlevel)"
-						+ "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
-				qr.update(conn, sql, model.getHash(), model.getTitle(), model.getSubTitle(), model.getGenre(),
-						model.getArtist(), model.getSubArtist(),
-						tags.get(model.getHash()) != null ? tags.get(model.getHash()) : "", s, 0,
-						crc32(dir.getParentFile().getAbsolutePath(), rootdirs, path), model.getStagefile(),
-						model.getBanner(), model.getBackbmp(),
-						crc32(dir.getParentFile().getParentFile().getAbsolutePath(), rootdirs, path),
-						model.getPlaylevel(), model.getDifficulty(), model.getMaxBPM(), model.getMinBPM(),
-						model.getUseKeys(), model.getJudgerank(), ln, model.getBgaList().length > 0 ? 1 : 0,
-						model.getRandom() > 1 ? 1 : 0, dir.lastModified() / 1000, 0, txt,
-						model.getTotalNotes(), Calendar.getInstance().getTimeInMillis() / 1000, 0);
+						+ "maxbpm, minbpm, mode, judge, feature, content, "
+						+ "date, favorite, notes, adddate)"
+						+ "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
+				qr.update(conn, sql, model.getMD5(), model.getSHA256(), model.getTitle(), model.getSubTitle(), model
+						.getGenre(), model.getArtist(), model.getSubArtist(),
+						tags.get(model.getMD5()) != null ? tags.get(model.getMD5()) : "", s,
+						crc32(dir.getParentFile().getAbsolutePath(), rootdirs, path), model.getStagefile(), model
+								.getBanner(), model.getBackbmp(),
+						crc32(dir.getParentFile().getParentFile().getAbsolutePath(), rootdirs, path), model
+								.getPlaylevel(), model.getDifficulty(), model.getMaxBPM(), model.getMinBPM(), model
+								.getUseKeys(), model.getJudgerank(), ln, txt, dir.lastModified() / 1000, 0, model
+								.getTotalNotes(), Calendar.getInstance().getTimeInMillis() / 1000);
 			}
 		}
 	}

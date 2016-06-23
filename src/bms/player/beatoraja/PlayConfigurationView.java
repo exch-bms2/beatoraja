@@ -10,7 +10,6 @@ import java.util.logging.Logger;
 import bms.model.BMSModel;
 import bms.player.beatoraja.TableData.CourseData;
 import bms.player.beatoraja.TableData.TrophyData;
-import bms.player.lunaticrave2.LunaticRave2SongDatabaseManager;
 import bms.table.Course;
 import bms.table.Course.Trophy;
 import bms.table.DifficultyTable;
@@ -314,8 +313,7 @@ public class PlayConfigurationView implements Initializable {
 		commit();
 		try {
 			Class.forName("org.sqlite.JDBC");
-			LunaticRave2SongDatabaseManager songdb = new LunaticRave2SongDatabaseManager(new File("song.db").getPath(),
-					true, BMSModel.LNTYPE_CHARGENOTE);
+			SongDatabaseAccessor songdb = new SongDatabaseAccessor(new File("songdata.db").getPath());
 			songdb.createTable();
 			Logger.getGlobal().info("song.db更新開始");
 			File[] files = new File[config.getBmsroot().length];

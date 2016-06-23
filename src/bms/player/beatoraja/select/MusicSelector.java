@@ -12,7 +12,6 @@ import bms.player.lunaticrave2.*;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.skin.*;
 
-import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
@@ -65,7 +64,7 @@ public class MusicSelector extends MainState {
 	/**
 	 * 楽曲DBアクセサ
 	 */
-	private LunaticRave2SongDatabaseManager songdb;
+	private SongDatabaseAccessor songdb;
 	/**
 	 * 選択中のモードフィルタ
 	 */
@@ -162,7 +161,7 @@ public class MusicSelector extends MainState {
 					for (CourseData course : td.getCourse()) {
 						List<SongData> songlist = new ArrayList();
 						for (String hash : course.getHash()) {
-							SongData[] songs = songdb.getSongDatas("hash", hash, new File(".").getAbsolutePath());
+							SongData[] songs = songdb.getSongDatas("md5", hash, new File(".").getAbsolutePath());
 							if (songs.length > 0) {
 								songlist.add(songs[0]);
 							} else {
@@ -191,15 +190,15 @@ public class MusicSelector extends MainState {
 		if (scorecache[lnmode].containsKey(hash)) {
 			return scorecache[lnmode].get(hash);
 		}
-		SongData[] songs = songdb.getSongDatas("hash", hash, new File(".").getAbsolutePath());
+		SongData[] songs = songdb.getSongDatas("sha256", hash, new File(".").getAbsolutePath());
 		if (songs.length > 0) {
-			IRScoreData score = main.getPlayDataAccessor().readScoreData(songs[0].getHash(),
-					songs[0].getLongnote() == 1, lnmode);
-			if (score != null && config.getLnmode() == 2 && (songs[0].getLongnote() == 1)) {
+			IRScoreData score = main.getPlayDataAccessor().readScoreData(songs[0].getSha256(),
+					songs[0].hasLongNote(), lnmode);
+			if (score != null && config.getLnmode() == 2 && (songs[0].hasLongNote())) {
 				score.setClear(score.getExclear());
 			}
 			for (int i = 0; i < scorecache.length; i++) {
-				if (songs[0].getLongnote() == 0 || i == lnmode) {
+				if (!songs[0].hasLongNote() || i == lnmode) {
 					scorecache[i].put(hash, score);
 				}
 			}
@@ -374,7 +373,7 @@ public class MusicSelector extends MainState {
 				GradeBar gb = (GradeBar) sd;
 				if (gb.existsAllSongs()) {
 					for (SongData song : gb.getSongDatas()) {
-						flag |= song.getLongnote();
+						flag |= song.getFeature();
 					}
 				}
 				// trophy
@@ -413,7 +412,7 @@ public class MusicSelector extends MainState {
 				titlefont.draw(sprite, level, x + 20, y + barh - 6);
 				sprite.end();
 
-				flag |= song.getLongnote();
+				flag |= song.getFeature();
 			}
 
 			// LN
@@ -1025,13 +1024,13 @@ public class MusicSelector extends MainState {
 			for (int i = 0; i < currentsongs.length; i++) {
 				if (currentsongs[i] instanceof SongBar) {
 					SongData sd = ((SongBar) currentsongs[i]).getSongData();
-					currentsongs[i].setScore(readScoreData(sd.getHash(), config.getLnmode()));
+					currentsongs[i].setScore(readScoreData(sd.getSha256(), config.getLnmode()));
 					if (currentsongs[i].getScore() != null && config.getLnmode() == 2
 							&& ((SongBar) currentsongs[i]).getSongData().hasLongNote()) {
 						currentsongs[i].getScore().setClear(currentsongs[i].getScore().getExclear());
 					}
 					((SongBar) currentsongs[i]).setExistsReplayData(main.getPlayDataAccessor().existsReplayData(
-							sd.getHash(), sd.hasLongNote(), config.getLnmode()));
+							sd.getSha256(), sd.hasLongNote(), config.getLnmode()));
 				}
 				if (currentsongs[i] instanceof GradeBar) {
 					GradeBar gb = (GradeBar) currentsongs[i];
@@ -1039,7 +1038,7 @@ public class MusicSelector extends MainState {
 						String[] hash = new String[gb.getSongDatas().length];
 						boolean ln = false;
 						for (int j = 0; j < gb.getSongDatas().length; j++) {
-							hash[j] = gb.getSongDatas()[j].getHash();
+							hash[j] = gb.getSongDatas()[j].getSha256();
 							ln |= gb.getSongDatas()[j].hasLongNote();
 						}
 						gb.setScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 0));
@@ -1068,8 +1067,8 @@ public class MusicSelector extends MainState {
 					final SongBar prevsong = (SongBar) prevbar;
 					for (int i = 0; i < currentsongs.length; i++) {
 						if (currentsongs[i] instanceof SongBar
-								&& ((SongBar) currentsongs[i]).getSongData().getHash()
-										.equals(prevsong.getSongData().getHash())) {
+								&& ((SongBar) currentsongs[i]).getSongData().getSha256()
+										.equals(prevsong.getSongData().getSha256())) {
 							selectedindex = i;
 							break;
 						}
@@ -1176,7 +1175,7 @@ public class MusicSelector extends MainState {
 		return resource;
 	}
 
-	LunaticRave2SongDatabaseManager getSongDatabase() {
+	SongDatabaseAccessor getSongDatabase() {
 		return songdb;
 	}
 }

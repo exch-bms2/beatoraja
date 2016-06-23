@@ -1,6 +1,7 @@
-package bms.player.lunaticrave2;
+package bms.player.beatoraja;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 楽曲データ
@@ -8,7 +9,7 @@ import java.util.*;
  * @author exch
  */
 public class SongData {
-
+	
 	/**
 	 * 楽曲タイトル
 	 */
@@ -32,18 +33,18 @@ public class SongData {
 	private int favorite;
 	private List<String> path = new ArrayList<String>();
 	private String tag;	
-	private String hash;
+	private String md5;
+	private String sha256;
 	private String banner;
 	private int date;
 	private int adddate;
 	private int level;
-	private int exlevel;
 	private int mode;
-	private int longnote;
+	private int feature;
 	private int difficulty;
 	private int minbpm;
 	private int maxbpm;
-	private int txt;
+	private int content;
 
 	public int getFavorite() {
 		return favorite;
@@ -80,12 +81,6 @@ public class SongData {
 	public void setTag(String tag) {
 		this.tag = tag;
 	}
-	public String getHash() {
-		return hash;
-	}
-	public void setHash(String hash) {
-		this.hash = hash;
-	}
 	public int getAdddate() {
 		return adddate;
 	}
@@ -97,12 +92,6 @@ public class SongData {
 	}
 	public void setLevel(int level) {
 		this.level = level;
-	}
-	public int getExlevel() {
-		return exlevel;
-	}
-	public void setExlevel(int exlevel) {
-		this.exlevel = exlevel;
 	}
 	public String getTitle() {
 		return title;
@@ -146,12 +135,6 @@ public class SongData {
 	public void setDate(int date) {
 		this.date = date;
 	}
-	public int getLongnote() {
-		return longnote;
-	}
-	public void setLongnote(int longnote) {
-		this.longnote = longnote;
-	}
 
 	public int getDifficulty() {
 		return difficulty;
@@ -184,31 +167,49 @@ public class SongData {
 	public void setBanner(String banner) {
 		this.banner = banner;
 	}
-	public int getTxt() {
-		return txt;
-	}
-	public void setTxt(int txt) {
-		this.txt = txt;
-	}
 	
 	public boolean hasDocument() {
-		return (txt & 1) != 0;
+		return (content & 1) != 0;
 	}
 	
 	public boolean hasBGA() {
-		return (txt & 2) != 0;
+		return (content & 2) != 0;
 	}
 	
 	public boolean hasRandomSequence() {
-		return (longnote & 4) != 0;
+		return (feature & 4) != 0;
 	}
 
 	public boolean hasMineNote() {
-		return (longnote & 2) != 0;
+		return (feature & 2) != 0;
 	}
 
 	public boolean hasLongNote() {
-		return (longnote & 1) != 0;
+		return (feature & 1) != 0;
+	}
+	public String getMd5() {
+		return md5;
+	}
+	public void setMd5(String md5) {
+		this.md5 = md5;
+	}
+	public String getSha256() {
+		return sha256;
+	}
+	public void setSha256(String sha256) {
+		this.sha256 = sha256;
+	}
+	public int getFeature() {
+		return feature;
+	}
+	public void setFeature(int feature) {
+		this.feature = feature;
+	}
+	public int getContent() {
+		return content;
+	}
+	public void setContent(int content) {
+		this.content = content;
 	}
 
 }

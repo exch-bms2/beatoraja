@@ -71,7 +71,7 @@ public class PlayDataAccessor {
      * @return スコアデータ
      */
 	public IRScoreData readScoreData(BMSModel model, int lnmode) {
-		String hash = model.getHash();
+		String hash = model.getSHA256();
 		boolean ln = model.getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
 				+ model.getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH) > 0;
 		return readScoreData(hash, ln, lnmode);
@@ -98,7 +98,7 @@ public class PlayDataAccessor {
 	 * @param updateScore プレイ回数のみ反映する場合はfalse
      */
 	public void writeScoreDara(IRScoreData newscore, BMSModel model, int lnmode, boolean updateScore) {
-		String hash = model.getHash();
+		String hash = model.getSHA256();
 		boolean ln = model.getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
 				+ model.getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH) > 0;
 		if (ln && lnmode > 0) {
@@ -185,7 +185,7 @@ public class PlayDataAccessor {
 		String[] hash = new String[models.length];
 		boolean ln = false;
 		for (int i = 0;i < models.length;i++) {
-			hash[i] = models[i].getHash();
+			hash[i] = models[i].getSHA256();
 			ln |= models[i].getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
 					+ models[i].getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH) > 0;
 		}
@@ -205,7 +205,7 @@ public class PlayDataAccessor {
 		int totalnotes = 0;
 		boolean ln = false;
 		for (BMSModel model : models) {
-			hash += model.getHash();
+			hash += model.getSHA256();
 			totalnotes += model.getTotalNotes();
 			ln |= model.getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
 					+ model.getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH) > 0;
@@ -338,7 +338,7 @@ public class PlayDataAccessor {
 		String[] hashes = new String[models.length];
 		boolean ln = false;
 		for(int i = 0;i < models.length;i++) {
-			hashes[i] = models[i].getHash();
+			hashes[i] = models[i].getSHA256();
 			ln |= models[i].getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
 					+ models[i].getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH) > 0;
 		}
@@ -372,7 +372,7 @@ public class PlayDataAccessor {
 		String[] hashes = new String[models.length];
 		boolean ln = false;
 		for(int i = 0;i < models.length;i++) {
-			hashes[i] = models[i].getHash();
+			hashes[i] = models[i].getSHA256();
 			ln |= models[i].getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
 					+ models[i].getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH) > 0;
 		}
@@ -410,7 +410,7 @@ public class PlayDataAccessor {
 	private String getReplayDataFilePath(BMSModel model, int lnmode) {
 		boolean ln = model.getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
 				+ model.getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH) > 0;
-		return getReplayDataFilePath(model.getHash(), ln, lnmode);
+		return getReplayDataFilePath(model.getSHA256(), ln, lnmode);
 	}
 
 	private String getReplayDataFilePath(String hash, boolean ln, int lnmode) {

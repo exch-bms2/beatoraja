@@ -52,7 +52,7 @@ public class MainController extends ApplicationAdapter {
 	private Config config;
 	private int auto;
 
-	private LunaticRave2SongDatabaseManager songdb;
+	private SongDatabaseAccessor songdb;
 
 	private SpriteBatch sprite;
 	private ShapeRenderer shape;
@@ -80,8 +80,7 @@ public class MainController extends ApplicationAdapter {
 
 		try {
 			Class.forName("org.sqlite.JDBC");
-			songdb = new LunaticRave2SongDatabaseManager(new File("song.db").getPath(), true,
-					BMSModel.LNTYPE_CHARGENOTE);
+			songdb = new SongDatabaseAccessor(new File("songdata.db").getPath());
 			songdb.createTable();
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
@@ -90,7 +89,7 @@ public class MainController extends ApplicationAdapter {
 		playdata = new PlayDataAccessor("Player");
 	}
 
-	public LunaticRave2SongDatabaseManager getSongDatabase() {
+	public SongDatabaseAccessor getSongDatabase() {
 		return songdb;
 	}
 
