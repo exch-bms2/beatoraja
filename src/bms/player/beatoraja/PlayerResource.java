@@ -20,23 +20,19 @@ public class PlayerResource {
 	private BMSModel model;
 	private Config config;
 	private int auto;
-	
+
 	private int constraint;
-	
+
 	private int bgashow;
 	/**
 	 * BMSの音源リソース
 	 */
-	private AudioProcessor audio;
+	private SoundProcessor audio;
 	/**
 	 * BMSのBGAリソース
 	 */
 	private BGAProcessor bga;
-	/**
-	 * BMSのリソースの読み込みが完了したかどうか
-	 */
-	private boolean finished = false;
-	
+
 	/**
 	 * スコア
 	 */
@@ -81,7 +77,7 @@ public class PlayerResource {
 	public PlayerResource(Config config) {
 		this.config = config;
 	}
-	
+
 	public void clear() {
 		coursetitle = null;
 		course = null;
@@ -102,19 +98,22 @@ public class PlayerResource {
 		replay = new ReplayData();
 		String bmspath = model != null ? model.getPath() : null;
 		model = loadBMSModel(f);
-		if(model.getAllTimeLines().length == 0) {
+		if(model == null) {
+			Logger.getGlobal().warning("楽曲が存在しないか、解析時にエラーが発生しました:" + f.getPath());
 			return false;
 		}
-		if(bmspath == null || !f.getAbsolutePath().equals(bmspath) || bgashow != config.getBga()) {
+		if (model.getAllTimeLines().length == 0) {
+			return false;
+		}
+		if (bmspath == null || !f.getAbsolutePath().equals(bmspath) || bgashow != config.getBga()) {
 			// 前回と違うbmsファイルを読み込んだ場合、BGAオプション変更時はリソースのロード
 			// 同フォルダの違うbmsファイルでも、WAV/,BMP定義が違う可能性があるのでロード
 			this.bgashow = config.getBga();
-			this.finished = false;
-			if(audio != null) {
+			if (audio != null) {
 				audio.dispose();
 			}
 			audio = new SoundProcessor();
-			if(bga != null) {
+			if (bga != null) {
 				bga.dispose();
 			}
 			bga = new BGAProcessor(config);
@@ -122,37 +121,37 @@ public class PlayerResource {
 				@Override
 				public void run() {
 					try {
-						if (config.getBga() == Config.BGA_ON
-								|| (config.getBga() == Config.BGA_AUTO && (auto != 0))) {
+						if (config.getBga() == Config.BGA_ON || (config.getBga() == Config.BGA_AUTO && (auto != 0))) {
 							bga.setModel(model, f.getPath());
+						} else {
+							bga.forceFinish();
 						}
 						audio.setModel(model, f.getPath());
 					} catch (Exception e) {
-						Logger.getGlobal()
-								.severe(e.getClass().getName() + " : "
-										+ e.getMessage());
+						Logger.getGlobal().severe(e.getClass().getName() + " : " + e.getMessage());
 						e.printStackTrace();
 					} catch (Error e) {
-						Logger.getGlobal()
-								.severe(e.getClass().getName() + " : "
-										+ e.getMessage());
+						Logger.getGlobal().severe(e.getClass().getName() + " : " + e.getMessage());
 					} finally {
-						finished = true;
+						bga.forceFinish();
+						audio.forceFinish();
 					}
 				}
 			};
-			medialoader.start();				
+			medialoader.start();
 		}
 		return true;
 	}
-	
+
 	private BMSModel loadBMSModel(File f) {
 		BMSModel model;
 		if (f.getPath().toLowerCase().endsWith(".bmson")) {
-			BMSONDecoder decoder = new BMSONDecoder(
-					BMSModel.LNTYPE_CHARGENOTE);
+			BMSONDecoder decoder = new BMSONDecoder(BMSModel.LNTYPE_CHARGENOTE);
 			model = decoder.decode(f);
-			if(model.getTotal() <= 0.0) {
+			if(model == null) {
+				return null;
+			}
+			if (model.getTotal() <= 0.0) {
 				model.setTotal(100.0);
 			}
 			int totalnotes = model.getTotalNotes();
@@ -160,15 +159,18 @@ public class PlayerResource {
 		} else {
 			BMSDecoder decoder = new BMSDecoder(BMSModel.LNTYPE_CHARGENOTE);
 			model = decoder.decode(f);
+			if(model == null) {
+				return null;
+			}
 			// JUDGERANKをbmson互換に変換
-			if(model.getJudgerank() < 0 || model.getJudgerank() > 2) {
+			if (model.getJudgerank() < 0 || model.getJudgerank() > 2) {
 				model.setJudgerank(100);
 			} else {
-				final int[] judgetable = {40, 70 ,90};
+				final int[] judgetable = { 40, 70, 90 };
 				model.setJudgerank(judgetable[model.getJudgerank()]);
 			}
 			// TOTAL未定義の場合
-			if(model.getTotal() <= 0.0) {
+			if (model.getTotal() <= 0.0) {
 				int totalnotes = model.getTotalNotes();
 				model.setTotal(7.605 * totalnotes / (0.01 * totalnotes + 6.5));
 			}
@@ -198,7 +200,7 @@ public class PlayerResource {
 	}
 
 	public boolean mediaLoadFinished() {
-		return finished;
+		return audio != null && audio.getProgress() == 1 && bga != null && bga.getProgress() == 1;
 	}
 
 	public IRScoreData getScoreData() {
@@ -209,12 +211,17 @@ public class PlayerResource {
 		this.score = score;
 	}
 
-	public void setCourseBMSFiles(File[] files) {
+	public boolean setCourseBMSFiles(File[] files) {
 		List<BMSModel> models = new ArrayList();
 		for (File f : files) {
-			models.add(loadBMSModel(f));
+			BMSModel model = loadBMSModel(f);
+			if(model == null) {
+				return false;
+			}
+			models.add(model);
 		}
 		course = models.toArray(new BMSModel[0]);
+		return true;
 	}
 
 	public BMSModel[] getCourseBMSModels() {
@@ -232,8 +239,10 @@ public class PlayerResource {
 	}
 
 	public void reloadBMSFile() {
-		File f = new File(model.getPath());
-		model = loadBMSModel(f);
+		if(model != null) {
+			File f = new File(model.getPath());
+			model = loadBMSModel(f);
+		}
 		clear();
 	}
 
@@ -272,7 +281,7 @@ public class PlayerResource {
 	public boolean isUpdateScore() {
 		return updateScore;
 	}
-	
+
 	public void setUpdateScore(boolean b) {
 		this.updateScore = b;
 	}

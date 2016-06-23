@@ -651,18 +651,18 @@ public class BMSPlayer extends MainState {
 		resource.getReplayData().random = model.getSelectedIndexOfTimeLines();
 		resource.getReplayData().gauge = resource.getConfig().getGauge();
 
-		score.setFpg(judge.getJudgeCount(0,true));
-		score.setSpg(judge.getJudgeCount(0,false));
-		score.setFgr(judge.getJudgeCount(1,true));
-		score.setSgr(judge.getJudgeCount(1,false));
-		score.setFgd(judge.getJudgeCount(2,true));
-		score.setSgd(judge.getJudgeCount(2,false));
-		score.setFbd(judge.getJudgeCount(3,true));
-		score.setSbd(judge.getJudgeCount(3,false));
-		score.setFpr(judge.getJudgeCount(4,true));
-		score.setSpr(judge.getJudgeCount(4,false));
-		score.setFms(judge.getJudgeCount(5,true));
-		score.setSms(judge.getJudgeCount(5,false));
+		score.setEpg(judge.getJudgeCount(0,true));
+		score.setLpg(judge.getJudgeCount(0,false));
+		score.setEgr(judge.getJudgeCount(1,true));
+		score.setLgr(judge.getJudgeCount(1,false));
+		score.setEgd(judge.getJudgeCount(2,true));
+		score.setLgd(judge.getJudgeCount(2,false));
+		score.setEbd(judge.getJudgeCount(3,true));
+		score.setLbd(judge.getJudgeCount(3,false));
+		score.setEpr(judge.getJudgeCount(4,true));
+		score.setLpr(judge.getJudgeCount(4,false));
+		score.setEms(judge.getJudgeCount(5,true));
+		score.setLms(judge.getJudgeCount(5,false));
 
 		final int misscount = bad + poor + miss + totalnotes - notes;
 		score.setMinbp(misscount);

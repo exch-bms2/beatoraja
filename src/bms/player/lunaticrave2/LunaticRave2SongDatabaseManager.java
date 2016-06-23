@@ -474,7 +474,8 @@ public class LunaticRave2SongDatabaseManager {
 					dsql += " and ";
 				}
 			}
-			qr.update(conn, "delete from folder where path not like 'LR2files%' and path not like '%.lr2folder' and " + dsql);
+			qr.update(conn, "delete from folder where path not like 'LR2files%' and path not like '%.lr2folder' and "
+					+ dsql);
 			qr.update(conn, "delete from song where " + dsql);
 			// 楽曲のタグの保持
 			for (File f : files) {
@@ -489,8 +490,15 @@ public class LunaticRave2SongDatabaseManager {
 					tags.put(record.getHash(), record.getTag());
 				}
 			}
+			boolean txt = false;
 			for (File f : files) {
-				this.listBMSFiles(conn, f, rootdirs, tags, path, updateAll);
+				if (f.getPath().toLowerCase().endsWith(".txt")) {
+					txt = true;
+					break;
+				}
+			}
+			for (File f : files) {
+				this.listBMSFiles(conn, f, rootdirs, tags, path, txt, updateAll);
 			}
 			conn.commit();
 			conn.close();
@@ -507,7 +515,7 @@ public class LunaticRave2SongDatabaseManager {
 	}
 
 	private void listBMSFiles(Connection conn, File dir, String[] rootdirs, Map<String, String> tags, String path,
-			boolean updateAll) throws SQLException {
+			boolean containstxt, boolean updateAll) throws SQLException {
 		QueryRunner qr = new QueryRunner();
 		ResultSetHandler<List<SongData>> rh = new BeanListHandler<SongData>(SongData.class);
 		ResultSetHandler<List<FolderData>> rh2 = new BeanListHandler<FolderData>(FolderData.class);
@@ -515,6 +523,13 @@ public class LunaticRave2SongDatabaseManager {
 			// ディレクトリ処理
 			List<SongData> records = qr.query(conn, "select * from song where folder = ?", rh,
 					crc32(dir.getAbsolutePath(), rootdirs, path));
+			boolean txt = false;
+			for (File f : dir.listFiles()) {
+				if (f.getPath().toLowerCase().endsWith(".txt")) {
+					txt = true;
+					break;
+				}
+			}
 			for (File f : dir.listFiles()) {
 				boolean b = true;
 				if (!updateAll && f.isFile()) {
@@ -526,7 +541,7 @@ public class LunaticRave2SongDatabaseManager {
 					}
 				}
 				if (b) {
-					this.listBMSFiles(conn, f, rootdirs, tags, path, updateAll);
+					this.listBMSFiles(conn, f, rootdirs, tags, path, txt, updateAll);
 				}
 			}
 			// ディレクトリ内のファイルに存在しないレコードを削除
@@ -607,34 +622,40 @@ public class LunaticRave2SongDatabaseManager {
 				s = s.substring(path.length() + 1);
 			}
 			qr.update(conn, sql, s);
-			
+
 			if (model != null && (model.getTotalNotes() != 0 || model.getWavList().length != 0)) {
 				// TODO LR2ではDIFFICULTY未定義の場合に同梱譜面を見て振り分けている
 				if (model.getDifficulty() == 0) {
 					try {
 						int level = (Integer.parseInt(model.getPlaylevel()) - 1) / 3 + 1;
 						model.setDifficulty(level <= 5 ? level : 5);
-					} catch(NumberFormatException e) {
-						model.setDifficulty(5);						
+					} catch (NumberFormatException e) {
+						model.setDifficulty(5);
 					}
 				}
-				// TODO txtファイルの有無の判定とrecordへの反映
+
+				int ln = model.containsLongNote() ? 1 : 0;
+				int txt = containstxt ? 1 : 0;
+				if (enableBMSON) {
+					ln += model.containsMineNote() ? 2 : 0;
+					ln += model.getRandom() > 1 ? 4 : 0;
+					txt += model.getBgaList().length > 0 ? 2 : 0;
+				}
 				sql = "insert into song " + "(hash, title, subtitle, genre, artist, subartist, tag, path, type, "
 						+ "folder, stagefile, banner, backbmp, parent, level, difficulty, "
 						+ "maxbpm, minbpm, mode, judge, longnote, bga, random, "
 						+ "date, favorite, txt, karinotes, adddate, exlevel)"
 						+ "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
-				qr.update(conn, sql, model.getHash(), model.getTitle(), model.getSubTitle(), model.getGenre(), model
-						.getArtist(), model.getSubArtist(),
+				qr.update(conn, sql, model.getHash(), model.getTitle(), model.getSubTitle(), model.getGenre(),
+						model.getArtist(), model.getSubArtist(),
 						tags.get(model.getHash()) != null ? tags.get(model.getHash()) : "", s, 0,
-						crc32(dir.getParentFile().getAbsolutePath(), rootdirs, path), model.getStagefile(), model
-								.getBanner(), model.getBackbmp(),
-						crc32(dir.getParentFile().getParentFile().getAbsolutePath(), rootdirs, path), model
-								.getPlaylevel(), model.getDifficulty(), model.getMaxBPM(), model.getMinBPM(), model
-								.getUseKeys(), model.getJudgerank(), model.containsLongNote() ? 1 : 0, model
-								.getBgaList().length > 0 ? 1 : 0, model.getRandom() > 1 ? 1 : 0,
-						dir.lastModified() / 1000, 0, 0, model.getTotalNotes(), Calendar.getInstance()
-								.getTimeInMillis() / 1000, 0);
+						crc32(dir.getParentFile().getAbsolutePath(), rootdirs, path), model.getStagefile(),
+						model.getBanner(), model.getBackbmp(),
+						crc32(dir.getParentFile().getParentFile().getAbsolutePath(), rootdirs, path),
+						model.getPlaylevel(), model.getDifficulty(), model.getMaxBPM(), model.getMinBPM(),
+						model.getUseKeys(), model.getJudgerank(), ln, model.getBgaList().length > 0 ? 1 : 0,
+						model.getRandom() > 1 ? 1 : 0, dir.lastModified() / 1000, 0, txt,
+						model.getTotalNotes(), Calendar.getInstance().getTimeInMillis() / 1000, 0);
 			}
 		}
 	}
