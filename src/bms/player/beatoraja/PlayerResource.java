@@ -27,7 +27,7 @@ public class PlayerResource {
 	/**
 	 * BMSの音源リソース
 	 */
-	private AudioProcessor audio;
+	private SoundProcessor audio;
 	/**
 	 * BMSのBGAリソース
 	 */
@@ -97,6 +97,10 @@ public class PlayerResource {
 		replay = new ReplayData();
 		String bmspath = model != null ? model.getPath() : null;
 		model = loadBMSModel(f);
+		if(model == null) {
+			Logger.getGlobal().warning("楽曲が存在しないか、解析時にエラーが発生しました:" + f.getPath());
+			return false;
+		}
 		if (model.getAllTimeLines().length == 0) {
 			return false;
 		}
@@ -127,6 +131,9 @@ public class PlayerResource {
 						e.printStackTrace();
 					} catch (Error e) {
 						Logger.getGlobal().severe(e.getClass().getName() + " : " + e.getMessage());
+					} finally {
+						bga.forceFinish();
+						audio.forceFinish();
 					}
 				}
 			};
@@ -140,6 +147,9 @@ public class PlayerResource {
 		if (f.getPath().toLowerCase().endsWith(".bmson")) {
 			BMSONDecoder decoder = new BMSONDecoder(BMSModel.LNTYPE_CHARGENOTE);
 			model = decoder.decode(f);
+			if(model == null) {
+				return null;
+			}
 			if (model.getTotal() <= 0.0) {
 				model.setTotal(100.0);
 			}
@@ -148,6 +158,9 @@ public class PlayerResource {
 		} else {
 			BMSDecoder decoder = new BMSDecoder(BMSModel.LNTYPE_CHARGENOTE);
 			model = decoder.decode(f);
+			if(model == null) {
+				return null;
+			}
 			// JUDGERANKをbmson互換に変換
 			if (model.getJudgerank() < 0 || model.getJudgerank() > 2) {
 				model.setJudgerank(100);
@@ -197,12 +210,17 @@ public class PlayerResource {
 		this.score = score;
 	}
 
-	public void setCourseBMSFiles(File[] files) {
+	public boolean setCourseBMSFiles(File[] files) {
 		List<BMSModel> models = new ArrayList();
 		for (File f : files) {
-			models.add(loadBMSModel(f));
+			BMSModel model = loadBMSModel(f);
+			if(model == null) {
+				return false;
+			}
+			models.add(model);
 		}
 		course = models.toArray(new BMSModel[0]);
+		return true;
 	}
 
 	public BMSModel[] getCourseBMSModels() {
@@ -220,8 +238,10 @@ public class PlayerResource {
 	}
 
 	public void reloadBMSFile() {
-		File f = new File(model.getPath());
-		model = loadBMSModel(f);
+		if(model != null) {
+			File f = new File(model.getPath());
+			model = loadBMSModel(f);
+		}
 		clear();
 	}
 

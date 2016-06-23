@@ -803,52 +803,7 @@ public class MusicSelector extends MainState {
 						main.changeState(MainController.STATE_DECIDE);
 					}
 				} else if (currentsongs[selectedindex] instanceof GradeBar) {
-					if (((GradeBar) currentsongs[selectedindex]).existsAllSongs()) {
-						resource.clear();
-						for(int constraint : ((GradeBar) currentsongs[selectedindex]).getConstraint()) {
-							switch(constraint) {
-							case TableData.GRADE_NORMAL:
-								config.setRandom(0);
-								config.setRandom2(0);
-								config.setDoubleoption(0);
-								break;
-							case TableData.GRADE_MIRROR:
-								if (config.getRandom() == 1) {
-									config.setRandom2(1);
-									config.setDoubleoption(1);
-								} else {
-									config.setRandom(0);
-									config.setRandom2(0);
-									config.setDoubleoption(0);
-								}
-								break;
-							case TableData.GRADE_RANDOM:
-								if (config.getRandom() > 5) {
-									config.setRandom(0);
-								}
-								if (config.getRandom2() > 5) {
-									config.setRandom2(0);
-								}
-								break;
-							case TableData.NO_HISPEED:
-								resource.setConstraint(TableData.NO_HISPEED);
-								break;
-							}
-						}
-						List<File> files = new ArrayList<File>();
-						for (SongData song : ((GradeBar) currentsongs[selectedindex]).getSongDatas()) {
-							files.add(new File(song.getPath()));
-						}
-						resource.setCoursetitle(((GradeBar) currentsongs[selectedindex]).getTitle());
-						resource.setBMSFile(files.get(0), config, 0);
-						resource.setCourseBMSFiles(files.toArray(new File[0]));
-						if (bgm != null) {
-							bgm.stop();
-						}
-						main.changeState(MainController.STATE_DECIDE);
-					} else {
-						Logger.getGlobal().info("段位の楽曲が揃っていません");
-					}
+					readCourse(0);
 				}
 			}
 			// 5鍵 (オートプレイ)
@@ -864,52 +819,7 @@ public class MusicSelector extends MainState {
 
 					}
 				} else if (currentsongs[selectedindex] instanceof GradeBar) {
-					if (((GradeBar) currentsongs[selectedindex]).existsAllSongs()) {
-						resource.clear();
-						for(int constraint : ((GradeBar) currentsongs[selectedindex]).getConstraint()) {
-							switch(constraint) {
-							case TableData.GRADE_NORMAL:
-								config.setRandom(0);
-								config.setRandom2(0);
-								config.setDoubleoption(0);
-								break;
-							case TableData.GRADE_MIRROR:
-								if (config.getRandom() == 1) {
-									config.setRandom2(1);
-									config.setDoubleoption(1);
-								} else {
-									config.setRandom(0);
-									config.setRandom2(0);
-									config.setDoubleoption(0);
-								}
-								break;
-							case TableData.GRADE_RANDOM:
-								if (config.getRandom() > 5) {
-									config.setRandom(0);
-								}
-								if (config.getRandom2() > 5) {
-									config.setRandom2(0);
-								}
-								break;
-							case TableData.NO_HISPEED:
-								resource.setConstraint(TableData.NO_HISPEED);
-								break;
-							}
-						}
-						List<File> files = new ArrayList<File>();
-						for (SongData song : ((GradeBar) currentsongs[selectedindex]).getSongDatas()) {
-							files.add(new File(song.getPath()));
-						}
-						resource.setCoursetitle(((GradeBar) currentsongs[selectedindex]).getTitle());
-						resource.setBMSFile(files.get(0), config, 1);
-						resource.setCourseBMSFiles(files.toArray(new File[0]));
-						if (bgm != null) {
-							bgm.stop();
-						}
-						main.changeState(MainController.STATE_DECIDE);
-					} else {
-						Logger.getGlobal().info("段位の楽曲が揃っていません");
-					}
+					readCourse(1);
 				}
 			}
 			// 7鍵 (リプレイ)
@@ -924,22 +834,7 @@ public class MusicSelector extends MainState {
 						main.changeState(MainController.STATE_DECIDE);
 					}
 				} else if (currentsongs[selectedindex] instanceof GradeBar) {
-					if (((GradeBar) currentsongs[selectedindex]).existsAllSongs()) {
-						List<File> files = new ArrayList<File>();
-						for (SongData song : ((GradeBar) currentsongs[selectedindex]).getSongDatas()) {
-							files.add(new File(song.getPath()));
-						}
-						resource.clear();
-						resource.setCoursetitle(((GradeBar) currentsongs[selectedindex]).getTitle());
-						resource.setBMSFile(files.get(0), config, 2);
-						resource.setCourseBMSFiles(files.toArray(new File[0]));
-						if (bgm != null) {
-							bgm.stop();
-						}
-						main.changeState(MainController.STATE_DECIDE);
-					} else {
-						Logger.getGlobal().info("段位の楽曲が揃っていません");
-					}
+					readCourse(2);
 				}
 			}
 			// 白鍵 (フォルダを開く)
@@ -986,6 +881,60 @@ public class MusicSelector extends MainState {
 		}
 		if (input.isExitPressed()) {
 			exit();
+		}
+	}
+	
+	private void readCourse(int autoplay) {
+		if (((GradeBar) currentsongs[selectedindex]).existsAllSongs()) {
+			resource.clear();
+			List<File> files = new ArrayList<File>();
+			for (SongData song : ((GradeBar) currentsongs[selectedindex]).getSongDatas()) {
+				files.add(new File(song.getPath()));
+			}
+			if(resource.setCourseBMSFiles(files.toArray(new File[0]))) {
+				if(autoplay != 2) {
+					for(int constraint : ((GradeBar) currentsongs[selectedindex]).getConstraint()) {
+						switch(constraint) {
+						case TableData.GRADE_NORMAL:
+							config.setRandom(0);
+							config.setRandom2(0);
+							config.setDoubleoption(0);
+							break;
+						case TableData.GRADE_MIRROR:
+							if (config.getRandom() == 1) {
+								config.setRandom2(1);
+								config.setDoubleoption(1);
+							} else {
+								config.setRandom(0);
+								config.setRandom2(0);
+								config.setDoubleoption(0);
+							}
+							break;
+						case TableData.GRADE_RANDOM:
+							if (config.getRandom() > 5) {
+								config.setRandom(0);
+							}
+							if (config.getRandom2() > 5) {
+								config.setRandom2(0);
+							}
+							break;
+						case TableData.NO_HISPEED:
+							resource.setConstraint(TableData.NO_HISPEED);
+							break;
+						}
+					}					
+				}
+				if (bgm != null) {
+					bgm.stop();
+				}
+				resource.setCoursetitle(((GradeBar) currentsongs[selectedindex]).getTitle());
+				resource.setBMSFile(files.get(0), config, autoplay);
+				main.changeState(MainController.STATE_DECIDE);						
+			} else {
+				Logger.getGlobal().info("段位の楽曲が揃っていません");							
+			}
+		} else {
+			Logger.getGlobal().info("段位の楽曲が揃っていません");
 		}
 	}
 
