@@ -187,24 +187,26 @@ public class GradeResult extends MainState {
 		if (newscore == null) {
 			return;
 		}
+		boolean ln = false;
+		boolean dp = false;
+		for (BMSModel model : models) {
+			ln |= model.getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
+					+ model.getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH) > 0;
+			dp |= (model.getUseKeys() == 10 || model.getUseKeys() == 14);
+		}
 		newscore.setCombo(resource.getMaxcombo());
 		int random = 0;
-		if (resource.getConfig().getRandom() > 0 || resource.getConfig().getRandom2() > 0
-				|| resource.getConfig().getDoubleoption() > 0) {
+		if (resource.getConfig().getRandom() > 0 || (dp && (resource.getConfig().getRandom2() > 0
+				|| resource.getConfig().getDoubleoption() > 0))) {
 			random = 2;
 		}
-		if (resource.getConfig().getRandom() == 1 && resource.getConfig().getRandom2() == 1
-				&& resource.getConfig().getDoubleoption() == 1) {
+		if (resource.getConfig().getRandom() == 1 && (!dp || (resource.getConfig().getRandom2() == 1
+				&& resource.getConfig().getDoubleoption() == 1))) {
 			random = 1;
 		}
 		IRScoreData score = main.getPlayDataAccessor().readScoreData(models, resource.getConfig().getLnmode(), random);
 		if (score == null) {
 			score = new IRScoreData();
-		}
-		boolean ln = false;
-		for (BMSModel model : models) {
-			ln |= model.getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
-					+ model.getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH) > 0;
 		}
 		if (ln && resource.getConfig().getLnmode() == 2) {
 			oldclear = score.getExclear();

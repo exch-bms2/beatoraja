@@ -539,6 +539,8 @@ public class BMSPlayer extends MainState {
 				if (autoplay != 1) {
 					resource.setScoreData(createScoreData());
 				}
+				resource.setCombo(judge.getCourseCombo());
+				resource.setMaxcombo(judge.getCourseMaxcombo());
 				saveConfig();
 				gaugelog.add(0f);
 				resource.setGauge(gaugelog);
@@ -571,6 +573,8 @@ public class BMSPlayer extends MainState {
 				if (autoplay != 1) {
 					resource.setScoreData(createScoreData());
 				}
+				resource.setCombo(judge.getCourseCombo());
+				resource.setMaxcombo(judge.getCourseMaxcombo());
 				saveConfig();
 				resource.setGauge(gaugelog);
 				resource.setGrooveGauge(gauge);
@@ -626,8 +630,6 @@ public class BMSPlayer extends MainState {
 		score.setHash(model.getHash());
 		score.setNotes(model.getTotalNotes());
 		score.setCombo(judge.getMaxcombo());
-		resource.setCombo(judge.getCourseCombo());
-		resource.setMaxcombo(judge.getCourseMaxcombo());
 		int clear = GrooveGauge.CLEARTYPE_FAILED;
 		if (state != STATE_FAILED && gauge.isQualified()) {
 			if (assist > 0) {
