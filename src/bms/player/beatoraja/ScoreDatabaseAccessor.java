@@ -1,21 +1,22 @@
-package bms.player.lunaticrave2;
+package bms.player.beatoraja;
 
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
-import bms.player.beatoraja.*;
 
-/**
- * LR2のスコアデータベースへのアクセスクラス
- * 
- * @author exch
- */
-public class LunaticRave2ScoreDatabaseManager {
+public class ScoreDatabaseAccessor {
 
 	private String rootpath;
 
@@ -25,11 +26,11 @@ public class LunaticRave2ScoreDatabaseManager {
 
 	private final QueryRunner qr = new QueryRunner();
 
-	public LunaticRave2ScoreDatabaseManager(String path) throws ClassNotFoundException {
+	public ScoreDatabaseAccessor(String path) throws ClassNotFoundException {
 		rootpath = path;
 	}
 
-	public LunaticRave2ScoreDatabaseManager(String path, String player, String rival) throws ClassNotFoundException {
+	public ScoreDatabaseAccessor(String path, String player, String rival) throws ClassNotFoundException {
 		rootpath = path;
 		this.playerpath = player;
 		this.rivalpath = rival;
@@ -48,43 +49,36 @@ public class LunaticRave2ScoreDatabaseManager {
 			// conn.setAutoCommit(false);
 			pstmt = conn.prepareStatement(sql);
 
-			// scoreテーブル作成(存在しない場合)
+			// playerテーブル作成(存在しない場合)
 			pstmt.setString(1, "player");
 			rs = pstmt.executeQuery();
 			if (!rs.next()) {
 				if (qr.query(conn, sql, new MapListHandler(), "player").size() == 0) {
-					sql = "CREATE TABLE [player] ([id] TEXT NOT NULL," + "[hash] TEXT," + "[name] TEXT,"
-							+ "[irid] INTEGER," + "[irname] TEXT," + "[playcount] INTEGER," + "[clear] INTEGER,"
-							+ "[fail] INTEGER," + "[perfect] INTEGER," + "[great] INTEGER," + "[good] INTEGER,"
-							+ "[bad] INTEGER," + "[poor] INTEGER," + "[playtime] INTEGER," + "[combo] INTEGER,"
-							+ "[maxcombo] INTEGER," + "[grade_7] INTEGER," + "[grade_5] INTEGER,"
-							+ "[grade_14] INTEGER," + "[grade_10] INTEGER," + "[grade_9] INTEGER," + "[trial] INTEGER,"
-							+ "[option] INTEGER," + "[systemversion] INTEGER," + "[gradeversion] INTEGER,"
-							+ "[trialversion] INTEGER," + "[scorehash] TEXT," + "PRIMARY KEY(id));";
-					qr.update(conn, sql);
+					qr.update(conn, "CREATE TABLE [player] ([date] INTEGER,[playcount] INTEGER," + "[clear] INTEGER,"
+							+ "[epg] INTEGER," + "[lpg] INTEGER," + "[egr] INTEGER," + "[lgr] INTEGER,"
+							+ "[egd] INTEGER," + "[lgd] INTEGER," + "[ebd] INTEGER," + "[lbd] INTEGER,"
+							+ "[epr] INTEGER," + "[lpr] INTEGER," + "[ems] INTEGER," + "[lms] INTEGER,"
+							+ "[playtime] INTEGER," + "[combo] INTEGER," + "[maxcombo] INTEGER," + "[scorehash] TEXT,"
+							+ "PRIMARY KEY(date));");
 
-					sql = "insert into player "
-							+ "(id, hash, name, irid, irname, playcount, clear, fail, perfect, great, good, bad, poor, playtime, combo, maxcombo, "
-							+ "grade_7, grade_5, grade_14, grade_10, grade_9, trial, option, "
-							+ "systemversion, gradeversion, trialversion, scorehash)"
-							+ "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
-					qr.update(conn, sql, playername, "", "", 0, "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-							0, 0, 0, 0, "");
+					qr.update(conn, "insert into player "
+							+ "(date, playcount, clear, epg, lpg, egr, lgr, egd, lgd, ebd, lbd, epr, lpr, ems, lms, playtime, combo, maxcombo, "
+							+ "scorehash) " + "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "");
 				}
 			}
+			// scoreテーブル作成(存在しない場合)
 			pstmt.setString(1, "score");
 			rs = pstmt.executeQuery();
 			if (!rs.next()) {
 				if (qr.query(conn, sql, new MapListHandler(), "score").size() == 0) {
-					sql = "CREATE TABLE [score] ([hash] TEXT NOT NULL," + "[clear] INTEGER," + "[perfect] INTEGER,"
-							+ "[great] INTEGER," + "[good] INTEGER," + "[bad] INTEGER," + "[poor] INTEGER,"
-							+ "[totalnotes] INTEGER," + "[maxcombo] INTEGER," + "[minbp] INTEGER,"
-							+ "[playcount] INTEGER," + "[clearcount] INTEGER," + "[failcount] INTEGER,"
-							+ "[rank] INTEGER," + "[rate] INTEGER," + "[clear_db] INTEGER," + "[op_history] INTEGER,"
-							+ "[scorehash] TEXT," + "[ghost] TEXT," + "[clear_sd] INTEGER," + "[clear_ex] INTEGER,"
-							+ "[op_best] INTEGER," + "[random] INTEGER," + "[date] INTEGER," + "[rseed] INTEGER,"
-							+ "[complete] INTEGER," + "PRIMARY KEY(hash));";
-					qr.update(conn, sql);
+					qr.update(conn,  "CREATE TABLE [score] ([sha256] TEXT NOT NULL," + "[mode] INTEGER," + "[clear] INTEGER,"
+							+ "[epg] INTEGER," + "[lpg] INTEGER," + "[egr] INTEGER," + "[lgr] INTEGER,"
+							+ "[egd] INTEGER," + "[lgd] INTEGER," + "[ebd] INTEGER," + "[lbd] INTEGER,"
+							+ "[epr] INTEGER," + "[lpr] INTEGER," + "[ems] INTEGER," + "[lms] INTEGER,"
+							+ "[notes] INTEGER," + "[combo] INTEGER," + "[minbp] INTEGER," + "[playcount] INTEGER,"
+							+ "[clearcount] INTEGER," + "[history] INTEGER," + "[scorehash] TEXT,"
+							+ "[option] INTEGER," + "[random] INTEGER," + "[date] INTEGER," + "[state] INTEGER,"
+							+ "PRIMARY KEY(sha256, mode));");
 				}
 			}
 		} catch (SQLException e) {
@@ -108,70 +102,81 @@ public class LunaticRave2ScoreDatabaseManager {
 		}
 	}
 
-	/**
-	 * ライバルスコアを最新状態にする
-	 * 
-	 * @param rivalId
-	 *            ライバルID
-	 * @param scores
-	 *            スコアデータ
-	 * @return 更新スコアデータ数
-	 * @author KASAKON
-	 */
-	public int updateRivalData(String rivalId, List<IRScoreData> scores) {
-		int num = 0;
-		try {
-			Connection con = DriverManager.getConnection("jdbc:sqlite:" + rootpath + rivalpath + rivalId + ".db");
-			con.setAutoCommit(false);
-			Statement stmt = con.createStatement();
+	// /**
+	// * ライバルスコアを最新状態にする
+	// *
+	// * @param rivalId
+	// * ライバルID
+	// * @param scores
+	// * スコアデータ
+	// * @return 更新スコアデータ数
+	// * @author KASAKON
+	// */
+	// public int updateRivalData(String rivalId, List<IRScoreData> scores) {
+	// int num = 0;
+	// try {
+	// Connection con = DriverManager.getConnection("jdbc:sqlite:" + rootpath +
+	// rivalpath + rivalId + ".db");
+	// con.setAutoCommit(false);
+	// Statement stmt = con.createStatement();
+	//
+	// for (IRScoreData score : scores) {
+	// // ハッシュが存在し、スコアの更新があったか？
+	// String sql = "SELECT hash FROM rival WHERE hash = '" + score.getHash() +
+	// "' and (r_clear != "
+	// + score.getClear() + " or r_maxcombo != " + score.getCombo() +
+	// " or r_perfect != "
+	// + score.getPg() + " or r_great != " + score.getGr() + " or r_minbp != " +
+	// score.getMinbp()
+	// + ");";
+	// ResultSet rs = stmt.executeQuery(sql);
+	// boolean isUpdate = false;
+	// boolean isExist = false;
+	//
+	// isUpdate = rs.next();
+	// if (isUpdate == true) {
+	// // 更新処理
+	// sql = "UPDATE rival SET r_clear = " + score.getClear() +
+	// ", r_maxcombo = " + score.getCombo()
+	// + ", r_perfect = " + score.getPg() + ", r_great = " + score.getGr() +
+	// ", r_good = "
+	// + score.getGd() + ", r_bad = " + score.getBd() + ", r_poor = " +
+	// score.getPr()
+	// + ", r_minbp = " + score.getMinbp() + ", r_option = " + score.getOption()
+	// + ", r_lastupdate = " + score.getLastupdate() + " WHERE hash = '" +
+	// score.getHash() + "';";
+	// stmt.executeUpdate(sql);
+	// num++;
+	// } else {
+	// // ハッシュが存在するか？
+	// sql = "SELECT hash FROM rival WHERE hash = '" + score.getHash() + "';";
+	// rs = stmt.executeQuery(sql);
+	// isExist = rs.next();
+	// if (isExist == false) {
+	// // 新規追加処理
+	// sql = "INSERT INTO rival VALUES ('" + score.getHash() + "'," +
+	// score.getClear() + ","
+	// + score.getNotes() + "," + score.getCombo() + "," + score.getPg() + "," +
+	// score.getGr()
+	// + "," + score.getGd() + "," + score.getBd() + "," + score.getPr() + ","
+	// + score.getMinbp() + "," + score.getOption() + "," +
+	// score.getLastupdate() + ");";
+	// stmt.executeUpdate(sql);
+	// num++;
+	// }
+	// }
+	// }
+	// con.commit();
+	// // クローズ処理
+	// stmt.close();
+	// con.close();
+	// } catch (Exception e) {
+	// Logger.getGlobal().severe("ライバルデータ更新時の例外:" + e.getMessage());
+	// }
+	// return num;
+	// }
 
-			for (IRScoreData score : scores) {
-				// ハッシュが存在し、スコアの更新があったか？
-				String sql = "SELECT hash FROM rival WHERE hash = '" + score.getHash() + "' and (r_clear != "
-						+ score.getClear() + " or r_maxcombo != " + score.getCombo() + " or r_perfect != "
-						+ score.getPg() + " or r_great != " + score.getGr() + " or r_minbp != " + score.getMinbp()
-						+ ");";
-				ResultSet rs = stmt.executeQuery(sql);
-				boolean isUpdate = false;
-				boolean isExist = false;
-
-				isUpdate = rs.next();
-				if (isUpdate == true) {
-					// 更新処理
-					sql = "UPDATE rival SET r_clear = " + score.getClear() + ", r_maxcombo = " + score.getCombo()
-							+ ", r_perfect = " + score.getPg() + ", r_great = " + score.getGr() + ", r_good = "
-							+ score.getGd() + ", r_bad = " + score.getBd() + ", r_poor = " + score.getPr()
-							+ ", r_minbp = " + score.getMinbp() + ", r_option = " + score.getOption()
-							+ ", r_lastupdate = " + score.getLastupdate() + " WHERE hash = '" + score.getHash() + "';";
-					stmt.executeUpdate(sql);
-					num++;
-				} else {
-					// ハッシュが存在するか？
-					sql = "SELECT hash FROM rival WHERE hash = '" + score.getHash() + "';";
-					rs = stmt.executeQuery(sql);
-					isExist = rs.next();
-					if (isExist == false) {
-						// 新規追加処理
-						sql = "INSERT INTO rival VALUES ('" + score.getHash() + "'," + score.getClear() + ","
-								+ score.getNotes() + "," + score.getCombo() + "," + score.getPg() + "," + score.getGr()
-								+ "," + score.getGd() + "," + score.getBd() + "," + score.getPr() + ","
-								+ score.getMinbp() + "," + score.getOption() + "," + score.getLastupdate() + ");";
-						stmt.executeUpdate(sql);
-						num++;
-					}
-				}
-			}
-			con.commit();
-			// クローズ処理
-			stmt.close();
-			con.close();
-		} catch (Exception e) {
-			Logger.getGlobal().severe("ライバルデータ更新時の例外:" + e.getMessage());
-		}
-		return num;
-	}
-
-	public IRScoreData getScoreData(String playername, String hash, boolean grade) {
+	public IRScoreData getScoreData(String playername, String hash, int mode, boolean grade) {
 		Connection con = null;
 		IRScoreData result = null;
 		try {
@@ -179,18 +184,9 @@ public class LunaticRave2ScoreDatabaseManager {
 			ResultSetHandler<List<IRScoreData>> rh = new BeanListHandler<IRScoreData>(IRScoreData.class);
 			List<IRScoreData> score;
 			if (grade) {
-				score = qr
-						.query(con,
-								"SELECT hash, clear, clear_ex as exclear , totalnotes as notes, maxcombo as combo, rank, perfect as pg, great as gr  , minbp, "
-										+ "playcount, clearcount, op_best as option FROM score WHERE hash LIKE '%"
-										+ hash + "'", rh);
+				score = qr.query(con, "SELECT * FROM score WHERE sha256 LIKE '%" + hash + "' AND mode = " + mode, rh);
 			} else {
-				score = qr
-						.query(con,
-								"SELECT hash, clear, clear_ex as exclear , totalnotes as notes, maxcombo as combo, rank, perfect as pg, great as gr  , minbp, "
-										+ "playcount, clearcount, op_best as option FROM score WHERE hash = '"
-										+ hash
-										+ "'", rh);
+				score = qr.query(con, "SELECT * FROM score WHERE sha256 = '" + hash + "' AND mode = " + mode, rh);
 			}
 			if (score.size() > 0) {
 				IRScoreData sc = null;
@@ -274,17 +270,17 @@ public class LunaticRave2ScoreDatabaseManager {
 		try {
 			con = DriverManager.getConnection("jdbc:sqlite:" + rootpath + playerpath + playername + ".db");
 			con.setAutoCommit(false);
-			String sql = "delete from score where hash = ?";
-			qr.update(con, sql, score.getHash());
+			String sql = "delete from score where sha256 = ? and mode = ?";
+			qr.update(con, sql, score.getSha256(), score.getMode());
 
-			sql = "insert into score " + "(hash, clear, perfect, great, good, bad, poor, totalnotes, maxcombo, "
-					+ "minbp, playcount, clearcount, failcount, rank, rate, clear_db, "
-					+ "op_history, scorehash, ghost, clear_sd, clear_ex, op_best, rseed, " + "complete)"
-					+ "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
-			qr.update(con, sql, score.getHash(), score.getClear(), score.getPg(), score.getGr(), score.getGd(),
-					score.getBd(), score.getPr(), score.getNotes(), score.getCombo(), score.getMinbp(),
-					score.getPlaycount(), score.getClearcount(), score.getPlaycount() - score.getClearcount(),
-					score.getRank(), 0, 0, 0, "", "", 0, score.getExclear(), score.getOption(), 0, 0);
+			sql = "insert into score "
+					+ "(sha256, mode, clear, epg, lpg, egr, lgr, egd, lgd, ebd, lbd, epr, lpr, ems, lms, notes, combo, "
+					+ "minbp, playcount, clearcount, history, scorehash, option, random, date, state)"
+					+ "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
+			qr.update(con, sql, score.getSha256(), score.getMode(), score.getClear(), score.getEpg(), score.getLpg(),
+					score.getEgr(), score.getLgr(), score.getEgd(), score.getLgd(), score.getEbd(), score.getLbd(),
+					score.getEpr(), score.getLpr(), score.getEms(), score.getLms(), score.getNotes(), score.getCombo(),
+					score.getMinbp(), score.getPlaycount(), score.getClearcount(), 0, "", score.getOption(), 0, 0, 0);
 			con.commit();
 			con.close();
 		} catch (Exception e) {
@@ -312,7 +308,7 @@ public class LunaticRave2ScoreDatabaseManager {
 				}
 				if (vs.length() > 0) {
 					vs = vs.substring(0, vs.length() - 1) + " ";
-					qr.update(con, "UPDATE score SET " + vs + "WHERE hash = '" + hash + "'");
+					qr.update(con, "UPDATE score SET " + vs + "WHERE sha256 = '" + hash + "'");
 				}
 			}
 			con.commit();
@@ -397,13 +393,19 @@ public class LunaticRave2ScoreDatabaseManager {
 	}
 
 	public void setPlayerData(String playername, PlayerData pd) {
+		// TODO 日単位でログを取れるようにしたい
 		Connection con = null;
 		try {
 			con = DriverManager.getConnection("jdbc:sqlite:" + rootpath + playerpath + playername + ".db");
 			con.setAutoCommit(false);
-			qr.update(con, "UPDATE player SET " + "playcount = ? , clear = ? , fail = ?, perfect = ?, " +
-					"great = ?, good = ?, bad = ?, poor = ?, playtime = ? WHERE id = ?", pd.getPlaycount(), pd.getClear(), pd.getFail(),
-					pd.getPerfect(), pd.getGreat(), pd.getGood(), pd.getBad(), pd.getPoor(), pd.getPlaytime(), playername);
+			qr.update(
+					con,
+					"UPDATE player SET "
+							+ "playcount = ? , clear = ? , epg = ?, lpg = ?, "
+							+ "egr = ?, lgr = ?, egd = ?, lgd = ?, ebd = ?, lbd = ?, epr = ?, lpr = ?, ems = ?, lms = ?, playtime = ? WHERE date = ?",
+					pd.getPlaycount(), pd.getClear(), pd.getEpg(), pd.getLpg(), pd.getEgr(), pd.getLgr(), pd.getEgd(),
+					pd.getLgd(), pd.getEbd(), pd.getLbd(), pd.getEpr(), pd.getLpr(), pd.getEms(), pd.getLms(),
+					pd.getPlaytime(), 0);
 			con.commit();
 			con.close();
 		} catch (Exception e) {
@@ -417,4 +419,5 @@ public class LunaticRave2ScoreDatabaseManager {
 			}
 		}
 	}
+
 }

@@ -86,7 +86,7 @@ public class MainController extends ApplicationAdapter {
 			e.printStackTrace();
 		}
 
-		playdata = new PlayDataAccessor("Player");
+		playdata = new PlayDataAccessor("playerscore");
 	}
 
 	public SongDatabaseAccessor getSongDatabase() {

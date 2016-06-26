@@ -623,7 +623,7 @@ public class BMSPlayer extends MainState {
 		}
 
 		IRScoreData score = new IRScoreData();
-		score.setHash(model.getHash());
+		score.setSha256(model.getSHA256());
 		score.setNotes(model.getTotalNotes());
 		score.setCombo(judge.getMaxcombo());
 		resource.setCombo(judge.getCourseCombo());

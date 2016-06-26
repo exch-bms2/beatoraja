@@ -206,11 +206,7 @@ public class GradeResult extends MainState {
 			ln |= model.getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
 					+ model.getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH) > 0;
 		}
-		if (ln && resource.getConfig().getLnmode() == 2) {
-			oldclear = score.getExclear();
-		} else {
-			oldclear = score.getClear();
-		}
+		oldclear = score.getClear();
 		oldexscore = score.getExscore();
 		oldmisscount = score.getMinbp();
 		oldcombo = score.getCombo();

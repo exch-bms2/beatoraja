@@ -194,9 +194,6 @@ public class MusicSelector extends MainState {
 		if (songs.length > 0) {
 			IRScoreData score = main.getPlayDataAccessor().readScoreData(songs[0].getSha256(),
 					songs[0].hasLongNote(), lnmode);
-			if (score != null && config.getLnmode() == 2 && (songs[0].hasLongNote())) {
-				score.setClear(score.getExclear());
-			}
 			for (int i = 0; i < scorecache.length; i++) {
 				if (!songs[0].hasLongNote() || i == lnmode) {
 					scorecache[i].put(hash, score);
@@ -1025,10 +1022,6 @@ public class MusicSelector extends MainState {
 				if (currentsongs[i] instanceof SongBar) {
 					SongData sd = ((SongBar) currentsongs[i]).getSongData();
 					currentsongs[i].setScore(readScoreData(sd.getSha256(), config.getLnmode()));
-					if (currentsongs[i].getScore() != null && config.getLnmode() == 2
-							&& ((SongBar) currentsongs[i]).getSongData().hasLongNote()) {
-						currentsongs[i].getScore().setClear(currentsongs[i].getScore().getExclear());
-					}
 					((SongBar) currentsongs[i]).setExistsReplayData(main.getPlayDataAccessor().existsReplayData(
 							sd.getSha256(), sd.hasLongNote(), config.getLnmode()));
 				}
@@ -1042,17 +1035,8 @@ public class MusicSelector extends MainState {
 							ln |= gb.getSongDatas()[j].hasLongNote();
 						}
 						gb.setScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 0));
-						if (gb.getScore() != null && config.getLnmode() == 2 && ln) {
-							gb.getScore().setClear(gb.getScore().getExclear());
-						}
 						gb.setMirrorScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 1));
-						if (gb.getMirrorScore() != null && config.getLnmode() == 2 && ln) {
-							gb.getMirrorScore().setClear(gb.getMirrorScore().getExclear());
-						}
 						gb.setRandomScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 2));
-						if (gb.getRandomScore() != null && config.getLnmode() == 2 && ln) {
-							gb.getRandomScore().setClear(gb.getRandomScore().getExclear());
-						}
 						((GradeBar) currentsongs[i]).setExistsReplayData(main.getPlayDataAccessor().existsReplayData(
 								hash, ln, config.getLnmode()));
 					}
@@ -1151,24 +1135,24 @@ public class MusicSelector extends MainState {
 		if(playerdata != null) {
 			switch(judge) {
 				case 0:
-					return (int) playerdata.getPerfect();
+					return (int) (playerdata.getEpg() + playerdata.getLpg());
 				case 1:
-					return (int) playerdata.getGreat();
+					return  (int) (playerdata.getEgr() + playerdata.getLgr());
 				case 2:
-					return (int) playerdata.getGood();
+					return  (int) (playerdata.getEgd() + playerdata.getLgd());
 				case 3:
-					return (int) playerdata.getBad();
+					return  (int) (playerdata.getEbd() + playerdata.getLbd());
 				case 4:
-					return (int) playerdata.getPoor();
+					return  (int) (playerdata.getEpr() + playerdata.getLpr());
 				case 5:
-					return 0;
+					return  (int) (playerdata.getEms() + playerdata.getLms());
 			}
 		}
 		return 0;
 	}
 
 	public int getTotalPlayCount(boolean clear) {
-		return (int) (clear ? playerdata.getClear() : playerdata.getFail());
+		return (int) (clear ? playerdata.getClear() : playerdata.getPlaycount() - playerdata.getClear());
 	}
 
 	PlayerResource getResource() {

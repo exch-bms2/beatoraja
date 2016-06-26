@@ -303,11 +303,7 @@ public class MusicResult extends MainState {
 		if (score == null) {
 			score = new IRScoreData();
 		}
-		if (ln && resource.getConfig().getLnmode() == 2) {
-			oldclear = score.getExclear();
-		} else {
-			oldclear = score.getClear();
-		}
+		oldclear = score.getClear();
 		oldexscore = score.getExscore();
 		oldmisscount = score.getMinbp();
 		oldcombo = score.getCombo();

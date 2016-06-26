@@ -8,9 +8,6 @@ import java.util.logging.Logger;
 import bms.model.BMSModel;
 import bms.model.TimeLine;
 import bms.player.beatoraja.gauge.GrooveGauge;
-import bms.player.lunaticrave2.LunaticRave2ScoreDatabaseManager;
-
-import bms.player.lunaticrave2.PlayerData;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter.OutputType;
 
@@ -20,7 +17,7 @@ import com.badlogic.gdx.utils.JsonWriter.OutputType;
  * @author exch
  */
 public class PlayDataAccessor {
-
+	
 	/**
 	 * プレイヤー名
 	 */
@@ -28,14 +25,16 @@ public class PlayDataAccessor {
 	/**
 	 * スコアデータベースアクセサ
 	 */
-	private LunaticRave2ScoreDatabaseManager scoredb;
+	private ScoreDatabaseAccessor scoredb;
+
+	private static final String[] replay = {"", "C", "H"};
 
 	public PlayDataAccessor(String player) {
 		this.player = player;
 
 		try {
 			Class.forName("org.sqlite.JDBC");
-			scoredb = new LunaticRave2ScoreDatabaseManager(new File(".").getAbsoluteFile().getParent(), "/", "/");
+			scoredb = new ScoreDatabaseAccessor(new File(".").getAbsoluteFile().getParent(), "/", "/");
 			scoredb.createTable(player);
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
@@ -48,17 +47,22 @@ public class PlayDataAccessor {
 
 	public void updatePlayerData(IRScoreData score, long time) {
 		PlayerData pd = readPlayerData();
-		pd.setPerfect(pd.getPerfect() + score.getPg());
-		pd.setGreat(pd.getGreat() + score.getGr());
-		pd.setGood(pd.getGood() + score.getGd());
-		pd.setBad(pd.getBad()+ score.getBd());
-		pd.setPoor(pd.getPoor() + score.getPr());
+		pd.setEpg(pd.getEpg() + score.getEpg());
+		pd.setLpg(pd.getLpg() + score.getLpg());
+		pd.setEgr(pd.getEgr() + score.getEgr());
+		pd.setLgr(pd.getLgr() + score.getLgr());
+		pd.setEgd(pd.getEgd() + score.getEgd());
+		pd.setLgd(pd.getLgd() + score.getLgd());
+		pd.setEbd(pd.getEbd() + score.getEbd());
+		pd.setLbd(pd.getLbd() + score.getLbd());
+		pd.setEpr(pd.getEpr() + score.getEpr());
+		pd.setLpr(pd.getLpr() + score.getLpr());
+		pd.setEms(pd.getEms() + score.getEms());
+		pd.setLms(pd.getLms() + score.getLms());
 
 		pd.setPlaycount(pd.getPlaycount() + 1);
 		if(score.getClear() > GrooveGauge.CLEARTYPE_FAILED) {
 			pd.setClear(pd.getClear() + 1);
-		} else {
-			pd.setFail(pd.getFail() + 1);
 		}
 		pd.setPlaytime(pd.getPlaytime() + time);
 		scoredb.setPlayerData(player, pd);
@@ -84,10 +88,7 @@ public class PlayDataAccessor {
      * @return スコアデータ
      */
 	public IRScoreData readScoreData(String hash, boolean ln, int lnmode) {
-		if (ln && lnmode > 0) {
-			hash = "C" + hash;
-		}
-		return scoredb.getScoreData(player, hash, false);
+		return scoredb.getScoreData(player, hash, ln ? lnmode : 0, false);
 	}
 
 	/**
@@ -101,49 +102,39 @@ public class PlayDataAccessor {
 		String hash = model.getSHA256();
 		boolean ln = model.getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
 				+ model.getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH) > 0;
-		if (ln && lnmode > 0) {
-			hash = "C" + hash;
-		}
 		if (newscore == null) {
 			return;
 		}
-		IRScoreData score = scoredb.getScoreData(player, hash, false);
+		IRScoreData score = scoredb.getScoreData(player, hash, ln ? lnmode : 0, false);
 		if (score == null) {
 			score = new IRScoreData();
+			score.setMode(ln ? lnmode : 0);
 		}
-		int clear;
-		if (ln && lnmode == 2) {
-			clear = score.getExclear();
-		} else {
-			clear = score.getClear();
-		}
-		score.setHash(hash);
+		int clear = score.getClear();
+		score.setSha256(hash);
 		score.setNotes(model.getTotalNotes());
 
 		if (newscore.getClear() > GrooveGauge.CLEARTYPE_FAILED) {
 			score.setClearcount(score.getClearcount() + 1);
 		}
 		if (clear < newscore.getClear()) {
-			if (ln && lnmode == 2) {
-				score.setExclear(newscore.getClear());
-			} else {
-				score.setClear(newscore.getClear());
-			}
+			score.setClear(newscore.getClear());
 			score.setOption(newscore.getOption());
 		}
 
-		final int pgreat = newscore.getPg();
-		final int great = newscore.getGr();
-		final int good = newscore.getGd();
-		final int bad = newscore.getBd();
-		final int poor = newscore.getPr();
-		int exscore = pgreat * 2 + great;
-		if (score.getExscore() < exscore && updateScore) {
-			score.setPg(pgreat);
-			score.setGr(great);
-			score.setGd(good);
-			score.setBd(bad);
-			score.setPr(poor);
+		if (score.getExscore() < newscore.getExscore() && updateScore) {
+			score.setEpg(newscore.getEpg());
+			score.setLpg(newscore.getLpg());
+			score.setEgr(newscore.getEgr());
+			score.setLgr(newscore.getLgr());
+			score.setEgd(newscore.getEgd());
+			score.setLgd(newscore.getLgd());
+			score.setEbd(newscore.getEbd());
+			score.setLbd(newscore.getLbd());
+			score.setEpr(newscore.getEpr());
+			score.setLpr(newscore.getLpr());
+			score.setEms(newscore.getEms());
+			score.setLms(newscore.getLms());
 		}
 		if (score.getMinbp() > newscore.getMinbp() && updateScore) {
 			score.setMinbp(newscore.getMinbp());
@@ -152,7 +143,7 @@ public class PlayDataAccessor {
 			score.setCombo(newscore.getCombo());
 		}
 		score.setPlaycount(score.getPlaycount() + 1);
-		score.setLastupdate(Calendar.getInstance(TimeZone.getDefault()).getTimeInMillis() / 1000L);
+		score.setDate(Calendar.getInstance(TimeZone.getDefault()).getTimeInMillis() / 1000L);
 		scoredb.setScoreData(player, score);
 
 		int time = 0;
@@ -169,16 +160,7 @@ public class PlayDataAccessor {
 	}
 
 	public IRScoreData readScoreData(String hash, boolean ln, int lnmode, int option) {
-		if (ln && lnmode > 0) {
-			hash = "C" + hash;
-		}
-		if (option == 1) {
-			hash = "M" + hash;
-		}
-		if (option == 2) {
-			hash = "R" + hash;
-		}
-		return scoredb.getScoreData(player, hash, false);
+		return scoredb.getScoreData(player, hash, (ln ? lnmode : 0) + option * 10, false);
 	}
 
 	public IRScoreData readScoreData(BMSModel[] models, int lnmode, int option) {
@@ -210,73 +192,55 @@ public class PlayDataAccessor {
 			ln |= model.getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
 					+ model.getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH) > 0;
 		}
-		if (ln && lnmode > 0) {
-			hash = "C" + hash;
-		}
-		if (option == 1) {
-			hash = "M" + hash;
-		}
-		if (option == 2) {
-			hash = "R" + hash;
-		}
 		if (newscore == null) {
 			return;
 		}
-		IRScoreData score = scoredb.getScoreData(player, hash, false);
+		IRScoreData score = scoredb.getScoreData(player, hash, (ln ? lnmode : 0) + option * 10, false);
 		if (score == null) {
 			score = new IRScoreData();
+			score.setMode((ln ? lnmode : 0) + option * 10);
 		}
-		int clear;
-		if (ln && lnmode == 2) {
-			clear = score.getExclear();
-		} else {
-			clear = score.getClear();
-		}
-		score.setHash(hash);
+		int clear = score.getClear();
+		score.setSha256(hash);
 		score.setNotes(totalnotes);
 
 		if (newscore.getClear() != GrooveGauge.CLEARTYPE_FAILED) {
 			score.setClearcount(score.getClearcount() + 1);
 		}
 		if (clear < newscore.getClear()) {
-			if (ln && lnmode == 2) {
-				score.setExclear(newscore.getClear());
-			} else {
-				score.setClear(newscore.getClear());
-			}
+			score.setClear(newscore.getClear());
 			score.setOption(newscore.getOption());
 		}
 
-		final int pgreat = newscore.getPg();
-		final int great = newscore.getGr();
-		final int good = newscore.getGd();
-		final int bad = newscore.getBd();
-		final int poor = newscore.getPr();
-		int exscore = pgreat * 2 + great;
-		if (score.getExscore() < exscore && updateScore) {
-			score.setPg(pgreat);
-			score.setGr(great);
-			score.setGd(good);
-			score.setBd(bad);
-			score.setPr(poor);
+		if (score.getExscore() < newscore.getExscore() && updateScore) {
+			score.setEpg(newscore.getEpg());
+			score.setLpg(newscore.getLpg());
+			score.setEgr(newscore.getEgr());
+			score.setLgr(newscore.getLgr());
+			score.setEgd(newscore.getEgd());
+			score.setLgd(newscore.getLgd());
+			score.setEbd(newscore.getEbd());
+			score.setLbd(newscore.getLbd());
+			score.setEpr(newscore.getEpr());
+			score.setLpr(newscore.getLpr());
+			score.setEms(newscore.getEms());
+			score.setLms(newscore.getLms());
 		}
 		if (score.getMinbp() > newscore.getMinbp() && updateScore) {
 			score.setMinbp(newscore.getMinbp());
 		}
 		score.setPlaycount(score.getPlaycount() + 1);
-		score.setLastupdate(Calendar.getInstance(TimeZone.getDefault()).getTimeInMillis() / 1000L);
+		score.setDate(Calendar.getInstance(TimeZone.getDefault()).getTimeInMillis() / 1000L);
 		scoredb.setScoreData(player, score);
 
 		Logger.getGlobal().info("スコアデータベース更新完了 ");
 
 	}
 
-	private static final String[] replay = {"", "C", "H"};
-
 	public boolean existsReplayData(BMSModel model, int lnmode) {
 		boolean ln = model.getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
 				+ model.getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH) > 0;
-		return new File(this.getReplayDataFilePath(model.getHash(), ln, lnmode)).exists();
+		return new File(this.getReplayDataFilePath(model.getSHA256(), ln, lnmode)).exists();
 	}
 
 	public boolean existsReplayData(String hash, boolean ln, int lnmode) {
