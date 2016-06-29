@@ -358,7 +358,7 @@ public class BMSPlayer extends MainState {
 				.getUseKeys() == 10 || model.getUseKeys() == 14 ? config.getMode14() : config.getMode9()));
 		input.setKeyassign(pc.getKeyassign());
 		input.setControllerassign(pc.getControllerassign());
-		lanerender = new LaneRenderer(this, sprite, skin, resource, model, resource.getConstraint());
+		lanerender = new LaneRenderer(this, sprite, shape, skin, resource, model, resource.getConstraint());
 		Logger.getGlobal().info("描画クラス準備");
 
 		Logger.getGlobal().info("hash");
@@ -733,7 +733,7 @@ public class BMSPlayer extends MainState {
 				progress.width - 2, 20);
 		shape.end();
 		// レーン描画
-		lanerender.drawLane(shape, systemfont, model, timelines, starttime, time);
+		lanerender.drawLane(systemfont, time);
 
 		// BGA再生
 		for (TimeLine tl : timelines) {
