@@ -1,7 +1,10 @@
 package bms.player.beatoraja;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 import java.util.logging.Logger;
 
@@ -17,6 +20,9 @@ import com.badlogic.gdx.utils.JsonWriter.OutputType;
  * @author exch
  */
 public class PlayDataAccessor {
+	
+	// TODO スコアハッシュ付加
+	// TODO リプレイ暗号、復号化
 	
 	/**
 	 * プレイヤー名
@@ -88,7 +94,22 @@ public class PlayDataAccessor {
      * @return スコアデータ
      */
 	public IRScoreData readScoreData(String hash, boolean ln, int lnmode) {
-		return scoredb.getScoreData(player, hash, ln ? lnmode : 0, false);
+		return scoredb.getScoreData(player, hash, ln ? lnmode : 0);
+	}
+
+	public Map<String, IRScoreData> readScoreDatas(SongData[] songs, int lnmode) {
+		List<String> noln = new ArrayList<String>();
+		List<String> ln = new ArrayList<String>();
+		for(SongData song : songs) {
+			if(song.hasLongNote()) {
+				ln.add(song.getSha256());
+			} else {
+				noln.add(song.getSha256());
+			}
+		}
+		Map<String, IRScoreData> result = scoredb.getScoreDatas(player, noln.toArray(new String[0]),0);
+		result.putAll(scoredb.getScoreDatas(player, ln.toArray(new String[0]),lnmode));
+		return result;
 	}
 
 	/**
@@ -105,7 +126,7 @@ public class PlayDataAccessor {
 		if (newscore == null) {
 			return;
 		}
-		IRScoreData score = scoredb.getScoreData(player, hash, ln ? lnmode : 0, false);
+		IRScoreData score = scoredb.getScoreData(player, hash, ln ? lnmode : 0);
 		if (score == null) {
 			score = new IRScoreData();
 			score.setMode(ln ? lnmode : 0);
@@ -160,7 +181,7 @@ public class PlayDataAccessor {
 	}
 
 	public IRScoreData readScoreData(String hash, boolean ln, int lnmode, int option) {
-		return scoredb.getScoreData(player, hash, (ln ? lnmode : 0) + option * 10, false);
+		return scoredb.getScoreData(player, hash, (ln ? lnmode : 0) + option * 10);
 	}
 
 	public IRScoreData readScoreData(BMSModel[] models, int lnmode, int option) {
@@ -195,7 +216,7 @@ public class PlayDataAccessor {
 		if (newscore == null) {
 			return;
 		}
-		IRScoreData score = scoredb.getScoreData(player, hash, (ln ? lnmode : 0) + option * 10, false);
+		IRScoreData score = scoredb.getScoreData(player, hash, (ln ? lnmode : 0) + option * 10);
 		if (score == null) {
 			score = new IRScoreData();
 			score.setMode((ln ? lnmode : 0) + option * 10);

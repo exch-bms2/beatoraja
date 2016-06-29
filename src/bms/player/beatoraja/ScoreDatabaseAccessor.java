@@ -1,14 +1,7 @@
 package bms.player.beatoraja;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.sql.*;
+import java.util.*;
 import java.util.logging.Logger;
 
 import org.apache.commons.dbutils.QueryRunner;
@@ -38,59 +31,41 @@ public class ScoreDatabaseAccessor {
 
 	public void createTable(String playername) {
 		Connection conn = null;
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
 		try {
 			conn = DriverManager.getConnection("jdbc:sqlite:" + rootpath + playerpath + playername + ".db");
 
 			String sql = "SELECT * FROM sqlite_master WHERE name = ? and type='table';";
-			// conn.setAutoCommit(false);
-			sql = "SELECT * FROM sqlite_master WHERE name = ? and type='table';";
-			// conn.setAutoCommit(false);
-			pstmt = conn.prepareStatement(sql);
-
 			// playerテーブル作成(存在しない場合)
-			pstmt.setString(1, "player");
-			rs = pstmt.executeQuery();
-			if (!rs.next()) {
-				if (qr.query(conn, sql, new MapListHandler(), "player").size() == 0) {
-					qr.update(conn, "CREATE TABLE [player] ([date] INTEGER,[playcount] INTEGER," + "[clear] INTEGER,"
-							+ "[epg] INTEGER," + "[lpg] INTEGER," + "[egr] INTEGER," + "[lgr] INTEGER,"
-							+ "[egd] INTEGER," + "[lgd] INTEGER," + "[ebd] INTEGER," + "[lbd] INTEGER,"
-							+ "[epr] INTEGER," + "[lpr] INTEGER," + "[ems] INTEGER," + "[lms] INTEGER,"
-							+ "[playtime] INTEGER," + "[combo] INTEGER," + "[maxcombo] INTEGER," + "[scorehash] TEXT,"
-							+ "PRIMARY KEY(date));");
+			if (qr.query(conn, sql, new MapListHandler(), "player").size() == 0) {
+				qr.update(conn, "CREATE TABLE [player] ([date] INTEGER,[playcount] INTEGER," + "[clear] INTEGER,"
+						+ "[epg] INTEGER," + "[lpg] INTEGER," + "[egr] INTEGER," + "[lgr] INTEGER,"
+						+ "[egd] INTEGER," + "[lgd] INTEGER," + "[ebd] INTEGER," + "[lbd] INTEGER,"
+						+ "[epr] INTEGER," + "[lpr] INTEGER," + "[ems] INTEGER," + "[lms] INTEGER,"
+						+ "[playtime] INTEGER," + "[combo] INTEGER," + "[maxcombo] INTEGER," + "[scorehash] TEXT,"
+						+ "PRIMARY KEY(date));");
 
-					qr.update(conn, "insert into player "
-							+ "(date, playcount, clear, epg, lpg, egr, lgr, egd, lgd, ebd, lbd, epr, lpr, ems, lms, playtime, combo, maxcombo, "
-							+ "scorehash) " + "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "");
-				}
+				qr.update(
+						conn,
+						"insert into player "
+								+ "(date, playcount, clear, epg, lpg, egr, lgr, egd, lgd, ebd, lbd, epr, lpr, ems, lms, playtime, combo, maxcombo, "
+								+ "scorehash) " + "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);", 0, 0, 0, 0, 0,
+						0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "");
 			}
 			// scoreテーブル作成(存在しない場合)
-			pstmt.setString(1, "score");
-			rs = pstmt.executeQuery();
-			if (!rs.next()) {
-				if (qr.query(conn, sql, new MapListHandler(), "score").size() == 0) {
-					qr.update(conn,  "CREATE TABLE [score] ([sha256] TEXT NOT NULL," + "[mode] INTEGER," + "[clear] INTEGER,"
-							+ "[epg] INTEGER," + "[lpg] INTEGER," + "[egr] INTEGER," + "[lgr] INTEGER,"
-							+ "[egd] INTEGER," + "[lgd] INTEGER," + "[ebd] INTEGER," + "[lbd] INTEGER,"
-							+ "[epr] INTEGER," + "[lpr] INTEGER," + "[ems] INTEGER," + "[lms] INTEGER,"
-							+ "[notes] INTEGER," + "[combo] INTEGER," + "[minbp] INTEGER," + "[playcount] INTEGER,"
-							+ "[clearcount] INTEGER," + "[history] INTEGER," + "[scorehash] TEXT,"
-							+ "[option] INTEGER," + "[random] INTEGER," + "[date] INTEGER," + "[state] INTEGER,"
-							+ "PRIMARY KEY(sha256, mode));");
-				}
+			if (qr.query(conn, sql, new MapListHandler(), "score").size() == 0) {
+				qr.update(conn, "CREATE TABLE [score] ([sha256] TEXT NOT NULL," + "[mode] INTEGER,"
+						+ "[clear] INTEGER," + "[epg] INTEGER," + "[lpg] INTEGER," + "[egr] INTEGER,"
+						+ "[lgr] INTEGER," + "[egd] INTEGER," + "[lgd] INTEGER," + "[ebd] INTEGER,"
+						+ "[lbd] INTEGER," + "[epr] INTEGER," + "[lpr] INTEGER," + "[ems] INTEGER,"
+						+ "[lms] INTEGER," + "[notes] INTEGER," + "[combo] INTEGER," + "[minbp] INTEGER,"
+						+ "[playcount] INTEGER," + "[clearcount] INTEGER," + "[history] INTEGER,"
+						+ "[scorehash] TEXT," + "[option] INTEGER," + "[random] INTEGER," + "[date] INTEGER,"
+						+ "[state] INTEGER," + "PRIMARY KEY(sha256, mode));");
 			}
 		} catch (SQLException e) {
 			Logger.getGlobal().severe("スコアデータベース初期化中の例外:" + e.getMessage());
 		} finally {
 			try {
-				if (rs != null /* && !rs.isClosed() */) {
-					rs.close();
-				}
-				if (pstmt != null /* isClosedは使えないので && !pstmt.isClosed() */) {
-					pstmt.close();
-				}
 				if (conn != null && !conn.isClosed()) {
 					// conn.rollback();
 					conn.close();
@@ -176,18 +151,14 @@ public class ScoreDatabaseAccessor {
 	// return num;
 	// }
 
-	public IRScoreData getScoreData(String playername, String hash, int mode, boolean grade) {
+	public IRScoreData getScoreData(String playername, String hash, int mode) {
 		Connection con = null;
 		IRScoreData result = null;
 		try {
 			con = DriverManager.getConnection("jdbc:sqlite:" + rootpath + playerpath + playername + ".db");
 			ResultSetHandler<List<IRScoreData>> rh = new BeanListHandler<IRScoreData>(IRScoreData.class);
 			List<IRScoreData> score;
-			if (grade) {
-				score = qr.query(con, "SELECT * FROM score WHERE sha256 LIKE '%" + hash + "' AND mode = " + mode, rh);
-			} else {
-				score = qr.query(con, "SELECT * FROM score WHERE sha256 = '" + hash + "' AND mode = " + mode, rh);
-			}
+			score = qr.query(con, "SELECT * FROM score WHERE sha256 = '" + hash + "' AND mode = " + mode, rh);
 			if (score.size() > 0) {
 				IRScoreData sc = null;
 				for (IRScoreData s : score) {
@@ -218,38 +189,26 @@ public class ScoreDatabaseAccessor {
 	 *            スコアを取得する楽曲のhash
 	 * @return <ハッシュ, スコアデータ>のマップ
 	 */
-	public Map<String, IRScoreData> getScoreDatas(String playername, String[] hashes, boolean grade) {
+	public Map<String, IRScoreData> getScoreDatas(String playername, String[] hashes, int mode) {
 		Map<String, IRScoreData> result = new HashMap<String, IRScoreData>();
 		Connection con = null;
 		try {
 			con = DriverManager.getConnection("jdbc:sqlite:" + rootpath + playerpath + playername + ".db");
 			ResultSetHandler<List<IRScoreData>> rh = new BeanListHandler<IRScoreData>(IRScoreData.class);
+			StringBuilder str = new StringBuilder();
 			for (String hash : hashes) {
-				List<IRScoreData> score;
-				if (grade) {
-					score = qr
-							.query(con,
-									"SELECT hash, clear, clear_ex as exclear ,totalnotes as notes,  maxcombo as combo, rank, perfect as pg, great as gr  , minbp, "
-											+ "playcount, clearcount, op_best as option FROM score WHERE hash LIKE '%"
-											+ hash + "'", rh);
-				} else {
-					score = qr
-							.query(con,
-									"SELECT hash, clear, clear_ex as exclear ,totalnotes as notes,  maxcombo as combo, rank, perfect as pg, great as gr  , minbp, "
-											+ "playcount, clearcount, op_best as option FROM score WHERE hash = '"
-											+ hash + "'", rh);
+				if (str.length() > 0) {
+					str.append(',');
 				}
-				if (score.size() > 0) {
-					IRScoreData sc = null;
-					for (IRScoreData s : score) {
-						if (sc == null || s.getClear() > sc.getClear()) {
-							sc = s;
-						}
-					}
-					result.put(hash, sc);
-				} else {
-					result.put(hash, null);
-				}
+				str.append('\'').append(hash).append('\'');
+			}
+
+			List<IRScoreData> scores = qr
+					.query(con,
+							"SELECT * FROM score WHERE sha256 IN ("
+									+ str.toString() + ") AND mode = " + mode, rh);
+			for (IRScoreData score : scores) {
+				result.put(score.getSha256(),  score);
 			}
 			con.close();
 		} catch (Exception e) {

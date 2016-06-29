@@ -1,13 +1,18 @@
 package bms.player.beatoraja.select;
 
 import bms.player.beatoraja.*;
+import bms.player.beatoraja.play.bga.GdxVideoProcessor;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.utils.GdxRuntimeException;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
 
 public abstract class Bar {
 
@@ -35,11 +40,11 @@ abstract class SelectableBar extends Bar {
 
 	public boolean existsReplayData() {
 		return existsReplay;
-		}
+	}
 
 	public void setExistsReplayData(boolean existsReplay) {
 		this.existsReplay = existsReplay;
-		}
+	}
 
 }
 
@@ -49,18 +54,9 @@ class SongBar extends SelectableBar {
 
 	private Pixmap banner;
 
-	/**
-	 * リプレイデータが存在するか
-	 */
-	private boolean existsReplay;
-
 	public SongBar(SongData song) {
 		this.song = song;
-		File bannerfile = new File(song.getPath().substring(0, song.getPath().lastIndexOf(File.separatorChar) + 1) + song.getBanner());
-//		System.out.println(bannerfile.getPath());
-		if(song.getBanner().length() > 0 && bannerfile.exists()) {
-			banner = new Pixmap(Gdx.files.internal(bannerfile.getPath()));
-		}
+		loadBanner();
 	}
 
 	public SongData getSongData() {
@@ -77,10 +73,23 @@ class SongBar extends SelectableBar {
 	}
 
 	public int getLamp() {
-		if(getScore() != null) {
+		if (getScore() != null) {
 			return getScore().getClear();
 		}
 		return 0;
+	}
+
+	public void loadBanner() {
+		File bannerfile = new File(song.getPath().substring(0, song.getPath().lastIndexOf(File.separatorChar) + 1)
+				+ song.getBanner());
+		// System.out.println(bannerfile.getPath());
+		if (song.getBanner().length() > 0 && bannerfile.exists()) {
+			try {
+				banner = new Pixmap(Gdx.files.internal(bannerfile.getPath()));
+			} catch (GdxRuntimeException e) {
+				Logger.getGlobal().warning("banner読み込み失敗: " + e.getMessage());
+			}
+		}
 	}
 }
 
@@ -88,7 +97,7 @@ class GradeBar extends SelectableBar {
 
 	private SongData[] songs;
 	private String name;
-	
+
 	private TableData.CourseData course;
 	private IRScoreData mscore;
 	private IRScoreData rscore;
@@ -134,7 +143,7 @@ class GradeBar extends SelectableBar {
 	}
 
 	public int[] getConstraint() {
-		if(course.getConstraint() != null) {
+		if (course.getConstraint() != null) {
 			return course.getConstraint();
 		}
 		return new int[0];
@@ -143,15 +152,16 @@ class GradeBar extends SelectableBar {
 	public TableData.TrophyData[] getAllTrophy() {
 		return course.getTrophy();
 	}
+
 	public TableData.TrophyData getTrophy() {
-		for(TableData.TrophyData trophy : course.getTrophy()) {
-			if(qualified(this.getScore(), trophy)) {
+		for (TableData.TrophyData trophy : course.getTrophy()) {
+			if (qualified(this.getScore(), trophy)) {
 				return trophy;
 			}
-			if(qualified(mscore, trophy)) {
+			if (qualified(mscore, trophy)) {
 				return trophy;
 			}
-			if(qualified(rscore, trophy)) {
+			if (qualified(rscore, trophy)) {
 				return trophy;
 			}
 		}
@@ -159,19 +169,20 @@ class GradeBar extends SelectableBar {
 	}
 
 	private boolean qualified(IRScoreData score, TableData.TrophyData trophy) {
-		return score != null && score.getNotes() != 0 && trophy.getMissrate() >= score.getMinbp() * 100.0 / score.getNotes()
+		return score != null && score.getNotes() != 0
+				&& trophy.getMissrate() >= score.getMinbp() * 100.0 / score.getNotes()
 				&& trophy.getScorerate() <= score.getExscore() * 100.0 / (score.getNotes() * 2);
 	}
 
 	public int getLamp() {
 		int result = 0;
-		if(getScore() != null && getScore().getClear() > result) {
+		if (getScore() != null && getScore().getClear() > result) {
 			result = getScore().getClear();
 		}
-		if(getMirrorScore() != null && getMirrorScore().getClear() > result) {
+		if (getMirrorScore() != null && getMirrorScore().getClear() > result) {
 			result = getMirrorScore().getClear();
 		}
-		if(getRandomScore() != null && getRandomScore().getClear() > result) {
+		if (getRandomScore() != null && getRandomScore().getClear() > result) {
 			result = getRandomScore().getClear();
 		}
 		return result;
@@ -200,8 +211,8 @@ abstract class DirectoryBar extends Bar {
 	}
 
 	public int getLamp() {
-		for(int i = 0;i < lamps.length;i++) {
-			if(lamps[i] > 0) {
+		for (int i = 0; i < lamps.length; i++) {
+			if (lamps[i] > 0) {
 				return i;
 			}
 		}
@@ -239,7 +250,7 @@ class FolderBar extends DirectoryBar {
 
 	@Override
 	public Bar[] getChildren() {
-		List<Bar> l = new ArrayList();
+		List<Bar> l = new ArrayList<Bar>();
 		SongDatabaseAccessor songdb = selector.getSongDatabase();
 		FolderData[] folders = songdb.getFolderDatas("parent", crc, new File(".").getAbsolutePath());
 		SongData[] songs = songdb.getSongDatas("parent", crc, new File(".").getAbsolutePath());
@@ -257,8 +268,11 @@ class FolderBar extends DirectoryBar {
 					int clear = 255;
 					int[] clears = new int[11];
 					int[] ranks = new int[28];
-					for (SongData sd : songdb.getSongDatas("parent", ccrc, new File(".").getAbsolutePath())) {
-						IRScoreData score = selector.readScoreData(sd.getSha256(), selector.getResource().getConfig().getLnmode());
+					SongData[] songdatas = songdb.getSongDatas("parent", ccrc, new File(".").getAbsolutePath());
+					Map<String,IRScoreData> scores = selector.readScoreDatas(songdatas, selector.getResource().getConfig()
+							.getLnmode());
+					for (SongData sd : songdatas) {
+						IRScoreData score = scores.get(sd.getSha256());
 						if (score != null) {
 							clears[score.getClear()]++;
 							if (score.getNotes() != 0) {
@@ -269,7 +283,7 @@ class FolderBar extends DirectoryBar {
 							if (score.getClear() < clear) {
 								clear = score.getClear();
 							}
-						}else {
+						} else {
 							ranks[0]++;
 							clears[0]++;
 							clear = 0;
@@ -320,31 +334,31 @@ class TableBar extends DirectoryBar {
 		List<Bar> l = new ArrayList<Bar>();
 		l.addAll(Arrays.asList(getLevels()));
 		l.addAll(Arrays.asList(getGrades()));
-		SongDatabaseAccessor songdb = selector.getSongDatabase();
 		if (selector.getResource().getConfig().isFolderlamp()) {
 			for (TableLevelBar levelbar : getLevels()) {
 				int clear = 255;
 				int[] clears = new int[11];
 				int[] ranks = new int[28];
-				for (String hash : ((TableLevelBar) levelbar).getHashes()) {
-					SongData[] song = songdb.getSongDatas("md5", hash, new File(".").getAbsolutePath());
-					if(song.length > 0) {
-						IRScoreData score = selector.readScoreData(song[0].getSha256(), selector.getResource().getConfig().getLnmode());						
-						if (score != null) {
-							clears[score.getClear()]++;
-							if (score.getNotes() != 0) {
-								ranks[(score.getExscore() * 27 / (score.getNotes() * 2))]++;
-							} else {
-								ranks[0]++;
-							}
-							if (score.getClear() < clear) {
-								clear = score.getClear();
-							}
+				SongData[] songs = selector.getSongDatabase().getSongDatas(((TableLevelBar) levelbar).getHashes(),
+						new File(".").getAbsolutePath());
+				Map<String,IRScoreData> scores = selector.readScoreDatas(songs, selector.getResource().getConfig()
+						.getLnmode());
+				for (SongData song : songs) {
+					IRScoreData score = scores.get(song.getSha256());
+					if (score != null) {
+						clears[score.getClear()]++;
+						if (score.getNotes() != 0) {
+							ranks[(score.getExscore() * 27 / (score.getNotes() * 2))]++;
 						} else {
 							ranks[0]++;
-							clears[0]++;
-							clear = 0;
 						}
+						if (score.getClear() < clear) {
+							clear = score.getClear();
+						}
+					} else {
+						ranks[0]++;
+						clears[0]++;
+						clear = 0;
 					}
 				}
 				levelbar.setLamps(clears);
@@ -379,11 +393,9 @@ class TableLevelBar extends DirectoryBar {
 	@Override
 	public Bar[] getChildren() {
 		List<SongBar> songbars = new ArrayList<SongBar>();
-		for (String hash : getHashes()) {
-			SongData[] songs = selector.getSongDatabase().getSongDatas("md5", hash, new File(".").getAbsolutePath());
-			if (songs.length > 0) {
-				songbars.add(new SongBar(songs[0]));
-			}
+		SongData[] songs = selector.getSongDatabase().getSongDatas(getHashes(), new File(".").getAbsolutePath());
+		for (SongData song : songs) {
+			songbars.add(new SongBar(song));
 		}
 		return songbars.toArray(new Bar[0]);
 	}
