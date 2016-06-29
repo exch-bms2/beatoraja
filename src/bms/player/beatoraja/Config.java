@@ -135,6 +135,8 @@ public class Config {
 	private boolean showjudgearea = false;
 	
 	private boolean markprocessednote = false;
+
+	private boolean showhiddennote = true;
 	
 	private String lr2playskin;
 	
@@ -572,5 +574,13 @@ public class Config {
 
 	public void setMusicselectinput(int musicselectinput) {
 		this.musicselectinput = musicselectinput;
+	}
+
+	public boolean isShowhiddennote() {
+		return showhiddennote;
+	}
+
+	public void setShowhiddennote(boolean showhiddennote) {
+		this.showhiddennote = showhiddennote;
 	}
 }

@@ -38,29 +38,27 @@ public class ScoreDatabaseAccessor {
 			// playerテーブル作成(存在しない場合)
 			if (qr.query(conn, sql, new MapListHandler(), "player").size() == 0) {
 				qr.update(conn, "CREATE TABLE [player] ([date] INTEGER,[playcount] INTEGER," + "[clear] INTEGER,"
-						+ "[epg] INTEGER," + "[lpg] INTEGER," + "[egr] INTEGER," + "[lgr] INTEGER,"
-						+ "[egd] INTEGER," + "[lgd] INTEGER," + "[ebd] INTEGER," + "[lbd] INTEGER,"
-						+ "[epr] INTEGER," + "[lpr] INTEGER," + "[ems] INTEGER," + "[lms] INTEGER,"
-						+ "[playtime] INTEGER," + "[combo] INTEGER," + "[maxcombo] INTEGER," + "[scorehash] TEXT,"
-						+ "PRIMARY KEY(date));");
+						+ "[epg] INTEGER," + "[lpg] INTEGER," + "[egr] INTEGER," + "[lgr] INTEGER," + "[egd] INTEGER,"
+						+ "[lgd] INTEGER," + "[ebd] INTEGER," + "[lbd] INTEGER," + "[epr] INTEGER," + "[lpr] INTEGER,"
+						+ "[ems] INTEGER," + "[lms] INTEGER," + "[playtime] INTEGER," + "[combo] INTEGER,"
+						+ "[maxcombo] INTEGER," + "[scorehash] TEXT," + "PRIMARY KEY(date));");
 
 				qr.update(
 						conn,
 						"insert into player "
 								+ "(date, playcount, clear, epg, lpg, egr, lgr, egd, lgd, ebd, lbd, epr, lpr, ems, lms, playtime, combo, maxcombo, "
-								+ "scorehash) " + "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);", 0, 0, 0, 0, 0,
-						0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "");
+								+ "scorehash) " + "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);", 0, 0, 0, 0, 0, 0,
+						0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "");
 			}
 			// scoreテーブル作成(存在しない場合)
 			if (qr.query(conn, sql, new MapListHandler(), "score").size() == 0) {
 				qr.update(conn, "CREATE TABLE [score] ([sha256] TEXT NOT NULL," + "[mode] INTEGER,"
 						+ "[clear] INTEGER," + "[epg] INTEGER," + "[lpg] INTEGER," + "[egr] INTEGER,"
-						+ "[lgr] INTEGER," + "[egd] INTEGER," + "[lgd] INTEGER," + "[ebd] INTEGER,"
-						+ "[lbd] INTEGER," + "[epr] INTEGER," + "[lpr] INTEGER," + "[ems] INTEGER,"
-						+ "[lms] INTEGER," + "[notes] INTEGER," + "[combo] INTEGER," + "[minbp] INTEGER,"
-						+ "[playcount] INTEGER," + "[clearcount] INTEGER," + "[history] INTEGER,"
-						+ "[scorehash] TEXT," + "[option] INTEGER," + "[random] INTEGER," + "[date] INTEGER,"
-						+ "[state] INTEGER," + "PRIMARY KEY(sha256, mode));");
+						+ "[lgr] INTEGER," + "[egd] INTEGER," + "[lgd] INTEGER," + "[ebd] INTEGER," + "[lbd] INTEGER,"
+						+ "[epr] INTEGER," + "[lpr] INTEGER," + "[ems] INTEGER," + "[lms] INTEGER,"
+						+ "[notes] INTEGER," + "[combo] INTEGER," + "[minbp] INTEGER," + "[playcount] INTEGER,"
+						+ "[clearcount] INTEGER," + "[history] INTEGER," + "[scorehash] TEXT," + "[option] INTEGER,"
+						+ "[random] INTEGER," + "[date] INTEGER," + "[state] INTEGER," + "PRIMARY KEY(sha256, mode));");
 			}
 		} catch (SQLException e) {
 			Logger.getGlobal().severe("スコアデータベース初期化中の例外:" + e.getMessage());
@@ -203,12 +201,10 @@ public class ScoreDatabaseAccessor {
 				str.append('\'').append(hash).append('\'');
 			}
 
-			List<IRScoreData> scores = qr
-					.query(con,
-							"SELECT * FROM score WHERE sha256 IN ("
-									+ str.toString() + ") AND mode = " + mode, rh);
+			List<IRScoreData> scores = qr.query(con, "SELECT * FROM score WHERE sha256 IN (" + str.toString()
+					+ ") AND mode = " + mode, rh);
 			for (IRScoreData score : scores) {
-				result.put(score.getSha256(),  score);
+				result.put(score.getSha256(), score);
 			}
 			con.close();
 		} catch (Exception e) {
@@ -327,17 +323,22 @@ public class ScoreDatabaseAccessor {
 	 * 
 	 * @return プレイヤーデータ
 	 */
-	public PlayerData getPlayerDatas(String playername) {
-		PlayerData result = null;
+	public PlayerData getPlayerData(String playername) {
+		PlayerData[] pd = getPlayerDatas(playername, 1);
+		if(pd.length > 0) {
+			return pd[0];
+		}
+		return null;
+	}
+	
+	public PlayerData[] getPlayerDatas(String playername, int count) {
 		Connection conn = null;
 		try {
 			conn = DriverManager.getConnection("jdbc:sqlite:" + rootpath + playerpath + playername + ".db");
 			ResultSetHandler<List<PlayerData>> rh = new BeanListHandler<PlayerData>(PlayerData.class);
-			List<PlayerData> pd = qr.query(conn, "SELECT * FROM player;", rh);
-			if (pd.size() > 0) {
-				result = pd.get(0);
-			}
+			List<PlayerData> pd = qr.query(conn, "SELECT * FROM player order by date desc" + (count > 0 ? " limit " + count : ""), rh);
 			conn.close();
+			return pd.toArray(new PlayerData[0]);
 		} catch (Exception e) {
 			Logger.getGlobal().severe("プレイヤーデータ" + playername + "取得時の例外:" + e.getMessage());
 		} finally {
@@ -348,23 +349,41 @@ public class ScoreDatabaseAccessor {
 				}
 			}
 		}
-		return result;
+		return new PlayerData[0];	
 	}
 
 	public void setPlayerData(String playername, PlayerData pd) {
-		// TODO 日単位でログを取れるようにしたい
 		Connection con = null;
+		PlayerData lpd = getPlayerData(playername);
 		try {
 			con = DriverManager.getConnection("jdbc:sqlite:" + rootpath + playerpath + playername + ".db");
 			con.setAutoCommit(false);
-			qr.update(
-					con,
-					"UPDATE player SET "
-							+ "playcount = ? , clear = ? , epg = ?, lpg = ?, "
-							+ "egr = ?, lgr = ?, egd = ?, lgd = ?, ebd = ?, lbd = ?, epr = ?, lpr = ?, ems = ?, lms = ?, playtime = ? WHERE date = ?",
-					pd.getPlaycount(), pd.getClear(), pd.getEpg(), pd.getLpg(), pd.getEgr(), pd.getLgr(), pd.getEgd(),
-					pd.getLgd(), pd.getEbd(), pd.getLbd(), pd.getEpr(), pd.getLpr(), pd.getEms(), pd.getLms(),
-					pd.getPlaytime(), 0);
+			Calendar cal = Calendar.getInstance(TimeZone.getDefault());
+			cal.set(Calendar.HOUR_OF_DAY, 0);
+			cal.set(Calendar.MINUTE, 0);
+			cal.set(Calendar.SECOND, 0);
+			cal.set(Calendar.MILLISECOND, 0);
+			long unixtime = cal.getTimeInMillis() / 1000L;
+
+			if (lpd.getDate() == unixtime) {
+				qr.update(
+						con,
+						"UPDATE player SET "
+								+ "playcount = ? , clear = ? , epg = ?, lpg = ?, "
+								+ "egr = ?, lgr = ?, egd = ?, lgd = ?, ebd = ?, lbd = ?, epr = ?, lpr = ?, ems = ?, lms = ?, playtime = ? WHERE date = ?",
+						pd.getPlaycount(), pd.getClear(), pd.getEpg(), pd.getLpg(), pd.getEgr(), pd.getLgr(),
+						pd.getEgd(), pd.getLgd(), pd.getEbd(), pd.getLbd(), pd.getEpr(), pd.getLpr(), pd.getEms(),
+						pd.getLms(), pd.getPlaytime(), unixtime);
+			} else {
+				qr.update(
+						con,
+						"insert into player "
+								+ "(date, playcount, clear, epg, lpg, egr, lgr, egd, lgd, ebd, lbd, epr, lpr, ems, lms, playtime, combo, maxcombo, "
+								+ "scorehash) " + "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);", unixtime,
+						pd.getPlaycount(), pd.getClear(), pd.getEpg(), pd.getLpg(), pd.getEgr(), pd.getLgr(),
+						pd.getEgd(), pd.getLgd(), pd.getEbd(), pd.getLbd(), pd.getEpr(), pd.getLpr(), pd.getEms(),
+						pd.getLms(), pd.getPlaytime(), 0, 0, "");
+			}
 			con.commit();
 			con.close();
 		} catch (Exception e) {

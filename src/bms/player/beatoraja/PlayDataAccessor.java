@@ -48,7 +48,32 @@ public class PlayDataAccessor {
 	}
 
 	public PlayerData readPlayerData() {
-		return scoredb.getPlayerDatas(player);
+		return scoredb.getPlayerData(player);
+	}
+
+	public PlayerData readTodayPlayerData() {
+		PlayerData[] pd = scoredb.getPlayerDatas(player, 2);
+		if(pd.length > 1) {
+			pd[0].setPlaycount(pd[0].getPlaycount() - pd[1].getPlaycount());
+			pd[0].setClear(pd[0].getClear() - pd[1].getClear());
+			pd[0].setEpg(pd[0].getEpg() - pd[1].getEpg() );
+			pd[0].setLpg(pd[0].getLpg() - pd[1].getLpg());
+			pd[0].setEgr(pd[0].getEgr() - pd[1].getEgr());
+			pd[0].setLgr(pd[0].getLgr() - pd[1].getLgr());
+			pd[0].setEgd(pd[0].getEgd() - pd[1].getEgd());
+			pd[0].setLgd(pd[0].getLgd() - pd[1].getLgd());
+			pd[0].setEbd(pd[0].getEbd() - pd[1].getEbd());
+			pd[0].setLbd(pd[0].getLbd() - pd[1].getLbd());
+			pd[0].setEpr(pd[0].getEpr() - pd[1].getEpr());
+			pd[0].setLpr(pd[0].getLpr() - pd[1].getLpr());
+			pd[0].setEms(pd[0].getEms() - pd[1].getEms());
+			pd[0].setLms(pd[0].getLms() - pd[1].getLms());
+			pd[0].setPlaytime(pd[0].getPlaytime() - pd[1].getPlaytime());
+			return pd[0];
+		} else if(pd.length == 1) {
+			return pd[0];
+		}
+		return null;
 	}
 
 	public void updatePlayerData(IRScoreData score, long time) {

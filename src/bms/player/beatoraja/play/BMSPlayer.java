@@ -358,7 +358,7 @@ public class BMSPlayer extends MainState {
 				.getUseKeys() == 10 || model.getUseKeys() == 14 ? config.getMode14() : config.getMode9()));
 		input.setKeyassign(pc.getKeyassign());
 		input.setControllerassign(pc.getControllerassign());
-		lanerender = new LaneRenderer(this, sprite, skin, resource, model, resource.getConstraint());
+		lanerender = new LaneRenderer(this, sprite, shape, skin, resource, model, resource.getConstraint());
 		Logger.getGlobal().info("描画クラス準備");
 
 		Logger.getGlobal().info("hash");
@@ -539,6 +539,8 @@ public class BMSPlayer extends MainState {
 				if (autoplay != 1) {
 					resource.setScoreData(createScoreData());
 				}
+				resource.setCombo(judge.getCourseCombo());
+				resource.setMaxcombo(judge.getCourseMaxcombo());
 				saveConfig();
 				gaugelog.add(0f);
 				resource.setGauge(gaugelog);
@@ -571,6 +573,8 @@ public class BMSPlayer extends MainState {
 				if (autoplay != 1) {
 					resource.setScoreData(createScoreData());
 				}
+				resource.setCombo(judge.getCourseCombo());
+				resource.setMaxcombo(judge.getCourseMaxcombo());
 				saveConfig();
 				resource.setGauge(gaugelog);
 				resource.setGrooveGauge(gauge);
@@ -626,8 +630,6 @@ public class BMSPlayer extends MainState {
 		score.setSha256(model.getSHA256());
 		score.setNotes(model.getTotalNotes());
 		score.setCombo(judge.getMaxcombo());
-		resource.setCombo(judge.getCourseCombo());
-		resource.setMaxcombo(judge.getCourseMaxcombo());
 		int clear = GrooveGauge.CLEARTYPE_FAILED;
 		if (state != STATE_FAILED && gauge.isQualified()) {
 			if (assist > 0) {
@@ -731,7 +733,7 @@ public class BMSPlayer extends MainState {
 				progress.width - 2, 20);
 		shape.end();
 		// レーン描画
-		lanerender.drawLane(shape, systemfont, model, timelines, starttime, time);
+		lanerender.drawLane(systemfont, time);
 
 		// BGA再生
 		for (TimeLine tl : timelines) {
