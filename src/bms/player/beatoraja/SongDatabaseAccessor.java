@@ -39,7 +39,7 @@ public class SongDatabaseAccessor {
 	private SqliteDBManager songdb;
 
 	private QueryRunner qr;
-	
+
 	public SongDatabaseAccessor(String filepath) throws ClassNotFoundException {
 		Class.forName("org.sqlite.JDBC");
 		songdb = new SqliteDBManager(filepath);
@@ -170,7 +170,7 @@ public class SongDatabaseAccessor {
 		try {
 			StringBuilder str = new StringBuilder();
 			for (String hash : hashes) {
-				if(str.length() > 0) {
+				if (str.length() > 0) {
 					str.append(',');
 				}
 				str.append('\'').append(hash).append('\'');
@@ -359,6 +359,8 @@ public class SongDatabaseAccessor {
 		private final BMSDecoder bmsdecoder = new BMSDecoder(BMSModel.LNTYPE_LONGNOTE);
 		private final BMSONDecoder bmsondecoder = new BMSONDecoder(BMSModel.LNTYPE_LONGNOTE);
 
+		private int count = 0;
+
 		/**
 		 * データベースを更新する
 		 * 
@@ -370,6 +372,8 @@ public class SongDatabaseAccessor {
 		 *            LR2のルートパス
 		 */
 		public void updateSongDatas(File[] files, String[] rootdirs, String path, boolean updateAll) {
+			long time = System.currentTimeMillis();
+			count = 0;
 			DataSource ds = songdb.getDataSource();
 			Map<String, String> tags = new HashMap<String, String>();
 			Connection conn = null;
@@ -379,23 +383,22 @@ public class SongDatabaseAccessor {
 				// ルートディレクトリに含まれないフォルダの削除
 				String dsql = "";
 				for (int i = 0; i < rootdirs.length; i++) {
-					dsql += "path not like '" + rootdirs[i] + "%'";
+					dsql += "path NOT LIKE '" + rootdirs[i] + "%'";
 					if (i < rootdirs.length - 1) {
-						dsql += " and ";
+						dsql += " AND ";
 					}
 				}
 				qr.update(conn,
-						"delete from folder where path not like 'LR2files%' and path not like '%.lr2folder' and "
+						"DELETE FROM folder WHERE path NOT LIKE 'LR2files%' AND path NOT LIKE '%.lr2folder' AND "
 								+ dsql);
-				qr.update(conn, "delete from song where " + dsql);
+				qr.update(conn, "DELETE FROM song WHERE " + dsql);
 				// 楽曲のタグの保持
 				for (File f : files) {
-					String sql = "select * from song where path like ?";
 					String s = f.getAbsolutePath();
 					if (s.startsWith(path)) {
 						s = s.substring(path.length() + 1);
 					}
-					List<SongData> records = qr.query(conn, sql, rh, s + "%");
+					List<SongData> records = qr.query(conn, "SELECT * FROM song WHERE path LIKE ?", rh, s + "%");
 					for (SongData record : records) {
 						tags.put(record.getMd5(), record.getTag());
 					}
@@ -423,22 +426,27 @@ public class SongDatabaseAccessor {
 					}
 				}
 			}
+			long nowtime = System.currentTimeMillis();
+			Logger.getGlobal().info(
+					"楽曲更新完了 : Time - " + (nowtime - time) + " 1曲あたりの時間 - "
+							+ (count > 0 ? (nowtime - time) / count : "不明"));
 		}
 
-		private void listBMSFiles(Connection conn, File dir, String[] rootdirs, Map<String, String> tags, String path,
-				boolean containstxt, boolean updateAll) throws SQLException {
+		private void listBMSFiles(Connection conn, final File dir, String[] rootdirs, Map<String, String> tags,
+				String path, boolean containstxt, boolean updateAll) throws SQLException {
 			if (dir.isDirectory()) {
 				// ディレクトリ処理
-				List<SongData> records = qr.query(conn, "select * from song where folder = ?", rh,
+				List<SongData> records = qr.query(conn, "SELECT path,date FROM song WHERE folder = ?", rh,
 						crc32(dir.getAbsolutePath(), rootdirs, path));
 				boolean txt = false;
-				for (File f : dir.listFiles()) {
+				final File[] files = dir.listFiles();
+				for (File f : files) {
 					if (f.getPath().toLowerCase().endsWith(".txt")) {
 						txt = true;
 						break;
 					}
 				}
-				for (File f : dir.listFiles()) {
+				for (File f : files) {
 					boolean b = true;
 					if (!updateAll && f.isFile()) {
 						for (SongData record : records) {
@@ -455,7 +463,7 @@ public class SongDatabaseAccessor {
 				// ディレクトリ内のファイルに存在しないレコードを削除
 				List<SongData> removes = new ArrayList<SongData>(records);
 				for (SongData record : records) {
-					for (File f : dir.listFiles()) {
+					for (File f : files) {
 						if (f.isFile()) {
 							String s = f.getAbsolutePath();
 							if (s.startsWith(path)) {
@@ -470,7 +478,7 @@ public class SongDatabaseAccessor {
 					}
 				}
 				for (SongData record : removes) {
-					qr.update(conn, "delete from song where path = ?", record.getPath());
+					qr.update(conn, "DELETE FROM song WHERE path = ?", record.getPath());
 				}
 
 				// folderテーブルの更新
@@ -478,17 +486,17 @@ public class SongDatabaseAccessor {
 				if (s.startsWith(path)) {
 					s = s.substring(path.length() + 1);
 				}
-				qr.update(conn, "delete from folder where path = ?", s);
 
-				qr.update(conn, "insert into folder " + "(title, subtitle, command, path, type, "
-						+ "banner, parent, date, max, adddate)" + "values(?,?,?,?,?,?,?,?,?,?);", dir.getName(), "",
-						"", s, 1, "", crc32(dir.getParentFile().getAbsolutePath(), rootdirs, path),
-						dir.lastModified() / 1000, null, Calendar.getInstance().getTimeInMillis() / 1000);
-				List<FolderData> folders = qr.query(conn, "select * from folder where parent = ?", rh2,
+				qr.update(conn,
+						"INSERT OR REPLACE INTO folder (title, subtitle, command, path, type, banner, parent, date, max, adddate)"
+								+ "VALUES(?,?,?,?,?,?,?,?,?,?);", dir.getName(), "", "", s, 1, "",
+						crc32(dir.getParentFile().getAbsolutePath(), rootdirs, path), dir.lastModified() / 1000, null,
+						Calendar.getInstance().getTimeInMillis() / 1000);
+				List<FolderData> folders = qr.query(conn, "SELECT path FROM folder WHERE parent = ?", rh2,
 						crc32(dir.getAbsolutePath(), rootdirs, path));
 				List<FolderData> fremoves = new ArrayList<FolderData>(folders);
 				for (FolderData record : folders) {
-					for (File f : dir.listFiles()) {
+					for (File f : files) {
 						if (f.isDirectory()) {
 							s = f.getAbsolutePath() + File.separatorChar;
 							if (s.startsWith(path)) {
@@ -505,25 +513,25 @@ public class SongDatabaseAccessor {
 				for (FolderData record : fremoves) {
 					// System.out.println("Song Database : folder deleted - " +
 					// record.getPath());
-					qr.update(conn, "delete from folder where path = ?", record.getPath());
-					qr.update(conn, "delete from song where path like ?", record.getPath() + "%");
+					qr.update(conn, "DELETE FROM folder WHERE path = ?", record.getPath());
+					qr.update(conn, "DELETE FROM song WHERE path like ?", record.getPath() + "%");
 				}
 
 			} else {
 				// ファイル処理
 				String name = dir.getName().toLowerCase();
-				BMSModel model = null;
-				if (name.endsWith(".bms") || name.endsWith(".bme") || name.endsWith(".bml") || name.endsWith(".pms")) {
-					model = bmsdecoder.decode(dir);
-				} else if (name.endsWith(".bmson")) {
-					model = bmsondecoder.decode(dir);
-				}
-
 				String s = dir.getAbsolutePath();
 				if (s.startsWith(path)) {
 					s = s.substring(path.length() + 1);
 				}
-				qr.update(conn, "delete from song where path = ?", s);
+				BMSModel model = null;
+				if (name.endsWith(".bms") || name.endsWith(".bme") || name.endsWith(".bml") || name.endsWith(".pms")) {
+					model = bmsdecoder.decode(dir);
+					qr.update(conn, "DELETE FROM song WHERE path = ?", s);
+				} else if (name.endsWith(".bmson")) {
+					model = bmsondecoder.decode(dir);
+					qr.update(conn, "DELETE FROM song WHERE path = ?", s);
+				}
 
 				if (model != null && (model.getTotalNotes() != 0 || model.getWavList().length != 0)) {
 					// TODO LR2ではDIFFICULTY未定義の場合に同梱譜面を見て振り分けている
@@ -541,11 +549,11 @@ public class SongDatabaseAccessor {
 					ln += model.getRandom() > 1 ? FEATURE_RANDOM : 0;
 					int txt = containstxt ? CONTENT_TEXT : 0;
 					txt += model.getBgaList().length > 0 ? CONTENT_BGA : 0;
-					qr.update(conn, "insert into song "
+					qr.update(conn, "INSERT INTO song "
 							+ "(md5, sha256, title, subtitle, genre, artist, subartist, tag, path,"
 							+ "folder, stagefile, banner, backbmp, parent, level, difficulty, "
 							+ "maxbpm, minbpm, mode, judge, feature, content, " + "date, favorite, notes, adddate)"
-							+ "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);", model.getMD5(),
+							+ "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);", model.getMD5(),
 							model.getSHA256(), model.getTitle(), model.getSubTitle(), model.getGenre(),
 							model.getArtist(), model.getSubArtist(),
 							tags.get(model.getMD5()) != null ? tags.get(model.getMD5()) : "", s,
@@ -555,6 +563,7 @@ public class SongDatabaseAccessor {
 							model.getPlaylevel(), model.getDifficulty(), model.getMaxBPM(), model.getMinBPM(),
 							model.getUseKeys(), model.getJudgerank(), ln, txt, dir.lastModified() / 1000, 0,
 							model.getTotalNotes(), Calendar.getInstance().getTimeInMillis() / 1000);
+					count++;
 				}
 			}
 		}
