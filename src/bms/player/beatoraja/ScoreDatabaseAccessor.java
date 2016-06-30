@@ -225,17 +225,15 @@ public class ScoreDatabaseAccessor {
 		try {
 			con = DriverManager.getConnection("jdbc:sqlite:" + rootpath + playerpath + playername + ".db");
 			con.setAutoCommit(false);
-			String sql = "delete from score where sha256 = ? and mode = ?";
-			qr.update(con, sql, score.getSha256(), score.getMode());
-
-			sql = "insert into score "
+			String sql = "INSERT OR REPLACE INTO score "
 					+ "(sha256, mode, clear, epg, lpg, egr, lgr, egd, lgd, ebd, lbd, epr, lpr, ems, lms, notes, combo, "
 					+ "minbp, playcount, clearcount, history, scorehash, option, random, date, state)"
-					+ "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
+					+ "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
 			qr.update(con, sql, score.getSha256(), score.getMode(), score.getClear(), score.getEpg(), score.getLpg(),
 					score.getEgr(), score.getLgr(), score.getEgd(), score.getLgd(), score.getEbd(), score.getLbd(),
 					score.getEpr(), score.getLpr(), score.getEms(), score.getLms(), score.getNotes(), score.getCombo(),
-					score.getMinbp(), score.getPlaycount(), score.getClearcount(), 0, "", score.getOption(), 0, 0, 0);
+					score.getMinbp(), score.getPlaycount(), score.getClearcount(), score.getHistory(),
+					score.getScorehash(), score.getOption(), score.getRandom(), score.getDate(), score.getState());
 			con.commit();
 			con.close();
 		} catch (Exception e) {
@@ -325,18 +323,19 @@ public class ScoreDatabaseAccessor {
 	 */
 	public PlayerData getPlayerData(String playername) {
 		PlayerData[] pd = getPlayerDatas(playername, 1);
-		if(pd.length > 0) {
+		if (pd.length > 0) {
 			return pd[0];
 		}
 		return null;
 	}
-	
+
 	public PlayerData[] getPlayerDatas(String playername, int count) {
 		Connection conn = null;
 		try {
 			conn = DriverManager.getConnection("jdbc:sqlite:" + rootpath + playerpath + playername + ".db");
 			ResultSetHandler<List<PlayerData>> rh = new BeanListHandler<PlayerData>(PlayerData.class);
-			List<PlayerData> pd = qr.query(conn, "SELECT * FROM player order by date desc" + (count > 0 ? " limit " + count : ""), rh);
+			List<PlayerData> pd = qr.query(conn, "SELECT * FROM player ORDER BY date DESC"
+					+ (count > 0 ? " limit " + count : ""), rh);
 			conn.close();
 			return pd.toArray(new PlayerData[0]);
 		} catch (Exception e) {
@@ -349,7 +348,7 @@ public class ScoreDatabaseAccessor {
 				}
 			}
 		}
-		return new PlayerData[0];	
+		return new PlayerData[0];
 	}
 
 	public void setPlayerData(String playername, PlayerData pd) {
@@ -365,25 +364,14 @@ public class ScoreDatabaseAccessor {
 			cal.set(Calendar.MILLISECOND, 0);
 			long unixtime = cal.getTimeInMillis() / 1000L;
 
-			if (lpd.getDate() == unixtime) {
-				qr.update(
-						con,
-						"UPDATE player SET "
-								+ "playcount = ? , clear = ? , epg = ?, lpg = ?, "
-								+ "egr = ?, lgr = ?, egd = ?, lgd = ?, ebd = ?, lbd = ?, epr = ?, lpr = ?, ems = ?, lms = ?, playtime = ? WHERE date = ?",
-						pd.getPlaycount(), pd.getClear(), pd.getEpg(), pd.getLpg(), pd.getEgr(), pd.getLgr(),
-						pd.getEgd(), pd.getLgd(), pd.getEbd(), pd.getLbd(), pd.getEpr(), pd.getLpr(), pd.getEms(),
-						pd.getLms(), pd.getPlaytime(), unixtime);
-			} else {
-				qr.update(
-						con,
-						"insert into player "
-								+ "(date, playcount, clear, epg, lpg, egr, lgr, egd, lgd, ebd, lbd, epr, lpr, ems, lms, playtime, combo, maxcombo, "
-								+ "scorehash) " + "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);", unixtime,
-						pd.getPlaycount(), pd.getClear(), pd.getEpg(), pd.getLpg(), pd.getEgr(), pd.getLgr(),
-						pd.getEgd(), pd.getLgd(), pd.getEbd(), pd.getLbd(), pd.getEpr(), pd.getLpr(), pd.getEms(),
-						pd.getLms(), pd.getPlaytime(), 0, 0, "");
-			}
+			qr.update(
+					con,
+					"INSERT OR REPLACE INTO player "
+							+ "(date, playcount, clear, epg, lpg, egr, lgr, egd, lgd, ebd, lbd, epr, lpr, ems, lms, playtime, combo, maxcombo, "
+							+ "scorehash) " + "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);", unixtime,
+					pd.getPlaycount(), pd.getClear(), pd.getEpg(), pd.getLpg(), pd.getEgr(), pd.getLgr(),
+					pd.getEgd(), pd.getLgd(), pd.getEbd(), pd.getLbd(), pd.getEpr(), pd.getLpr(), pd.getEms(),
+					pd.getLms(), pd.getPlaytime(), 0, 0, "");
 			con.commit();
 			con.close();
 		} catch (Exception e) {

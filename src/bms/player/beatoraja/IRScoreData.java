@@ -15,7 +15,7 @@ public class IRScoreData {
 	private int clear = 0;
 
 	/**
-	 * プレイヤーデータ取得日時(unixtime, 1日刻み)
+	 * スコア最終取得日時(unixtime, 秒単位)
 	 */
 	private long date = 0;	
 	/**
@@ -61,12 +61,22 @@ public class IRScoreData {
 	private int notes = 0;
 	
 	private int minbp = Integer.MAX_VALUE;
-	
+	/**
+	 * 各譜面オプションのクリア履歴
+	 */
 	private int history;
-	
+	/**
+	 * 更新時のRANDOM配列
+	 */
+	private int random;
+	/**
+	 * 更新時のオプション
+	 */
 	private int option;
 	
 	private int state;
+	
+	private String scorehash = "";
 	
 	public long getDate() {
 		return date;
@@ -215,5 +225,17 @@ public class IRScoreData {
 
 	public int getExscore() {
 		return (epg + lpg) * 2 + egr + lgr;
+	}
+	public int getRandom() {
+		return random;
+	}
+	public void setRandom(int random) {
+		this.random = random;
+	}
+	public String getScorehash() {
+		return scorehash;
+	}
+	public void setScorehash(String scorehash) {
+		this.scorehash = scorehash;
 	}
 }

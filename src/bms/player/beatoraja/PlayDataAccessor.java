@@ -146,15 +146,13 @@ public class PlayDataAccessor {
      */
 	public void writeScoreDara(IRScoreData newscore, BMSModel model, int lnmode, boolean updateScore) {
 		String hash = model.getSHA256();
-		boolean ln = model.getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
-				+ model.getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH) > 0;
 		if (newscore == null) {
 			return;
 		}
-		IRScoreData score = scoredb.getScoreData(player, hash, ln ? lnmode : 0);
+		IRScoreData score = scoredb.getScoreData(player, hash, model.containsLongNote() ? lnmode : 0);
 		if (score == null) {
 			score = new IRScoreData();
-			score.setMode(ln ? lnmode : 0);
+			score.setMode(model.containsLongNote() ? lnmode : 0);
 		}
 		int clear = score.getClear();
 		score.setSha256(hash);
@@ -166,6 +164,21 @@ public class PlayDataAccessor {
 		if (clear < newscore.getClear()) {
 			score.setClear(newscore.getClear());
 			score.setOption(newscore.getOption());
+		}
+		if(model.getUseKeys() < 10) {
+			int history = score.getHistory();
+			for(int i = 0;i < newscore.getOption();i++) {
+				history /= 10;
+			}
+			if(history % 10 < newscore.getClear() - GrooveGauge.CLEARTYPE_LIGHT_ASSTST) {
+				int add = newscore.getClear() - GrooveGauge.CLEARTYPE_LIGHT_ASSTST - (history % 10);
+				for(int i = 0;i < newscore.getOption();i++) {
+					add *= 10;
+				}
+				score.setHistory(score.getHistory() + add);
+			}
+		} else {
+			// TODO DPのhistoryはどうする？			
 		}
 
 		if (score.getExscore() < newscore.getExscore() && updateScore) {
@@ -181,12 +194,15 @@ public class PlayDataAccessor {
 			score.setLpr(newscore.getLpr());
 			score.setEms(newscore.getEms());
 			score.setLms(newscore.getLms());
+			score.setOption(newscore.getOption());
 		}
 		if (score.getMinbp() > newscore.getMinbp() && updateScore) {
 			score.setMinbp(newscore.getMinbp());
+			score.setOption(newscore.getOption());
 		}
 		if (score.getCombo() < newscore.getCombo() && updateScore) {
 			score.setCombo(newscore.getCombo());
+			score.setOption(newscore.getOption());
 		}
 		score.setPlaycount(score.getPlaycount() + 1);
 		score.setDate(Calendar.getInstance(TimeZone.getDefault()).getTimeInMillis() / 1000L);
@@ -271,9 +287,15 @@ public class PlayDataAccessor {
 			score.setLpr(newscore.getLpr());
 			score.setEms(newscore.getEms());
 			score.setLms(newscore.getLms());
+			score.setOption(newscore.getOption());
 		}
 		if (score.getMinbp() > newscore.getMinbp() && updateScore) {
 			score.setMinbp(newscore.getMinbp());
+			score.setOption(newscore.getOption());
+		}
+		if (score.getCombo() < newscore.getCombo() && updateScore) {
+			score.setCombo(newscore.getCombo());
+			score.setOption(newscore.getOption());
 		}
 		score.setPlaycount(score.getPlaycount() + 1);
 		score.setDate(Calendar.getInstance(TimeZone.getDefault()).getTimeInMillis() / 1000L);
