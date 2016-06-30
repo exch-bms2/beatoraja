@@ -1001,7 +1001,7 @@ public class MusicSelector extends MainState {
 			FreeTypeFontParameter parameter = new FreeTypeFontParameter();
 			parameter.size = 24;
 
-			StringBuffer str = new StringBuffer(parameter.characters);
+			StringBuilder str = new StringBuilder(parameter.characters);
 
 			for (Bar song : currentsongs) {
 				str.append(song.getTitle());
@@ -1034,31 +1034,6 @@ public class MusicSelector extends MainState {
 
 			parameter.characters = str.toString();
 			titlefont = generator.generateFont(parameter);
-
-			for (int i = 0; i < currentsongs.length; i++) {
-				if (currentsongs[i] instanceof SongBar) {
-					SongData sd = ((SongBar) currentsongs[i]).getSongData();
-					currentsongs[i].setScore(readScoreData(sd, config.getLnmode()));
-					((SongBar) currentsongs[i]).setExistsReplayData(main.getPlayDataAccessor().existsReplayData(
-							sd.getSha256(), sd.hasLongNote(), config.getLnmode()));
-				}
-				if (currentsongs[i] instanceof GradeBar) {
-					GradeBar gb = (GradeBar) currentsongs[i];
-					if (gb.existsAllSongs()) {
-						String[] hash = new String[gb.getSongDatas().length];
-						boolean ln = false;
-						for (int j = 0; j < gb.getSongDatas().length; j++) {
-							hash[j] = gb.getSongDatas()[j].getSha256();
-							ln |= gb.getSongDatas()[j].hasLongNote();
-						}
-						gb.setScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 0));
-						gb.setMirrorScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 1));
-						gb.setRandomScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 2));
-						((GradeBar) currentsongs[i]).setExistsReplayData(main.getPlayDataAccessor().existsReplayData(
-								hash, ln, config.getLnmode()));
-					}
-				}
-			}
 			Arrays.sort(currentsongs, SORT[sort]);
 
 			selectedindex = 0;
@@ -1084,6 +1059,12 @@ public class MusicSelector extends MainState {
 
 				}
 			}
+			
+			if(loader != null) {
+				loader.stopRunning();
+			}
+			loader = new BarContentsLoaderThread(currentsongs);
+			loader.start();
 			return true;
 		}
 		Logger.getGlobal().warning("楽曲がありません");
@@ -1179,5 +1160,62 @@ public class MusicSelector extends MainState {
 
 	SongDatabaseAccessor getSongDatabase() {
 		return songdb;
+	}
+	
+	private BarContentsLoaderThread loader;
+	
+	class BarContentsLoaderThread extends Thread {
+
+		private Bar[] bars;
+		private boolean stop = false;
+		
+		public BarContentsLoaderThread(Bar[] bar) {
+			this.bars = bar;
+		}
+		
+		@Override
+		public void run() {
+			for(Bar bar : bars) {
+				if(bar instanceof SongBar) {
+					((SongBar)bar).loadBanner();
+					SongData sd = ((SongBar) bar).getSongData();
+					bar.setScore(readScoreData(sd, config.getLnmode()));
+					((SongBar) bar).setExistsReplayData(main.getPlayDataAccessor().existsReplayData(
+							sd.getSha256(), sd.hasLongNote(), config.getLnmode()));
+				}
+				if (bar instanceof GradeBar) {
+					GradeBar gb = (GradeBar) bar;
+					if (gb.existsAllSongs()) {
+						String[] hash = new String[gb.getSongDatas().length];
+						boolean ln = false;
+						for (int j = 0; j < gb.getSongDatas().length; j++) {
+							hash[j] = gb.getSongDatas()[j].getSha256();
+							ln |= gb.getSongDatas()[j].hasLongNote();
+						}
+						gb.setScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 0));
+						gb.setMirrorScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 1));
+						gb.setRandomScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 2));
+						gb.setExistsReplayData(main.getPlayDataAccessor().existsReplayData(
+								hash, ln, config.getLnmode()));
+					}
+				}
+
+				if(config.isFolderlamp()) {
+					if(bar instanceof FolderBar) {
+						((FolderBar)bar).updateFolderStatus();
+					}
+					if(bar instanceof TableLevelBar) {
+						((TableLevelBar)bar).updateFolderStatus();
+					}					
+				}
+				if(stop) {
+					break;
+				}
+			}
+		}
+		
+		public void stopRunning() {
+			stop = true;
+		}
 	}
 }

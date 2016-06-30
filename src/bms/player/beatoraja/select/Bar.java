@@ -56,7 +56,6 @@ class SongBar extends SelectableBar {
 
 	public SongBar(SongData song) {
 		this.song = song;
-		loadBanner();
 	}
 
 	public SongData getSongData() {
@@ -264,34 +263,6 @@ class FolderBar extends DirectoryBar {
 				String ccrc = songdb.crc32(path, new String[0], new File(".").getAbsolutePath());
 				FolderBar cfolder = new FolderBar(selector, folder, ccrc);
 				l.add(cfolder);
-				if (selector.getResource().getConfig().isFolderlamp()) {
-					int clear = 255;
-					int[] clears = new int[11];
-					int[] ranks = new int[28];
-					SongData[] songdatas = songdb.getSongDatas("parent", ccrc, new File(".").getAbsolutePath());
-					Map<String,IRScoreData> scores = selector.readScoreDatas(songdatas, selector.getResource().getConfig()
-							.getLnmode());
-					for (SongData sd : songdatas) {
-						IRScoreData score = scores.get(sd.getSha256());
-						if (score != null) {
-							clears[score.getClear()]++;
-							if (score.getNotes() != 0) {
-								ranks[(score.getExscore() * 27 / (score.getNotes() * 2))]++;
-							} else {
-								ranks[0]++;
-							}
-							if (score.getClear() < clear) {
-								clear = score.getClear();
-							}
-						} else {
-							ranks[0]++;
-							clears[0]++;
-							clear = 0;
-						}
-					}
-					cfolder.setLamps(clears);
-					cfolder.setRanks(ranks);
-				}
 			}
 		} else {
 			for (SongData song : songs) {
@@ -299,6 +270,42 @@ class FolderBar extends DirectoryBar {
 			}
 		}
 		return l.toArray(new Bar[0]);
+	}
+
+	public void updateFolderStatus() {
+		SongDatabaseAccessor songdb = selector.getSongDatabase();
+		String path = folder.getPath();
+		if (path.endsWith(String.valueOf(File.separatorChar))) {
+			path = path.substring(0, path.length() - 1);
+		}
+		String ccrc = songdb.crc32(path, new String[0], new File(".").getAbsolutePath());
+		int clear = 255;
+		int[] clears = new int[11];
+		int[] ranks = new int[28];
+		SongData[] songdatas = songdb.getSongDatas("parent", ccrc, new File(".").getAbsolutePath());
+		Map<String, IRScoreData> scores = selector.readScoreDatas(songdatas, selector.getResource().getConfig()
+				.getLnmode());
+		for (SongData sd : songdatas) {
+			IRScoreData score = scores.get(sd.getSha256());
+			if (score != null) {
+				clears[score.getClear()]++;
+				if (score.getNotes() != 0) {
+					ranks[(score.getExscore() * 27 / (score.getNotes() * 2))]++;
+				} else {
+					ranks[0]++;
+				}
+				if (score.getClear() < clear) {
+					clear = score.getClear();
+				}
+			} else {
+				ranks[0]++;
+				clears[0]++;
+				clear = 0;
+			}
+		}
+		setLamps(clears);
+		setRanks(ranks);
+
 	}
 }
 
@@ -334,37 +341,6 @@ class TableBar extends DirectoryBar {
 		List<Bar> l = new ArrayList<Bar>();
 		l.addAll(Arrays.asList(getLevels()));
 		l.addAll(Arrays.asList(getGrades()));
-		if (selector.getResource().getConfig().isFolderlamp()) {
-			for (TableLevelBar levelbar : getLevels()) {
-				int clear = 255;
-				int[] clears = new int[11];
-				int[] ranks = new int[28];
-				SongData[] songs = selector.getSongDatabase().getSongDatas(((TableLevelBar) levelbar).getHashes(),
-						new File(".").getAbsolutePath());
-				Map<String,IRScoreData> scores = selector.readScoreDatas(songs, selector.getResource().getConfig()
-						.getLnmode());
-				for (SongData song : songs) {
-					IRScoreData score = scores.get(song.getSha256());
-					if (score != null) {
-						clears[score.getClear()]++;
-						if (score.getNotes() != 0) {
-							ranks[(score.getExscore() * 27 / (score.getNotes() * 2))]++;
-						} else {
-							ranks[0]++;
-						}
-						if (score.getClear() < clear) {
-							clear = score.getClear();
-						}
-					} else {
-						ranks[0]++;
-						clears[0]++;
-						clear = 0;
-					}
-				}
-				levelbar.setLamps(clears);
-				levelbar.setRanks(ranks);
-			}
-		}
 		return l.toArray(new Bar[0]);
 	}
 
@@ -398,6 +374,35 @@ class TableLevelBar extends DirectoryBar {
 			songbars.add(new SongBar(song));
 		}
 		return songbars.toArray(new Bar[0]);
+	}
+
+	public void updateFolderStatus() {
+		int clear = 255;
+		int[] clears = new int[11];
+		int[] ranks = new int[28];
+		SongData[] songs = selector.getSongDatabase().getSongDatas(getHashes(), new File(".").getAbsolutePath());
+		Map<String, IRScoreData> scores = selector
+				.readScoreDatas(songs, selector.getResource().getConfig().getLnmode());
+		for (SongData song : songs) {
+			IRScoreData score = scores.get(song.getSha256());
+			if (score != null) {
+				clears[score.getClear()]++;
+				if (score.getNotes() != 0) {
+					ranks[(score.getExscore() * 27 / (score.getNotes() * 2))]++;
+				} else {
+					ranks[0]++;
+				}
+				if (score.getClear() < clear) {
+					clear = score.getClear();
+				}
+			} else {
+				ranks[0]++;
+				clears[0]++;
+				clear = 0;
+			}
+		}
+		setLamps(clears);
+		setRanks(ranks);
 	}
 }
 
