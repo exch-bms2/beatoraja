@@ -11,6 +11,9 @@ import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.filefilter.FileFilterUtils;
 
 import utils.sql.SqliteDBManager;
 import bms.model.BMSDecoder;
@@ -318,8 +321,8 @@ public class SongDatabaseAccessor {
 	 *            LR2のルートパス
 	 */
 	public void updateSongDatas(File[] files, String[] rootdirs, String path, boolean updateAll) {
-		SongDatabaseUpdater updater = new SongDatabaseUpdater();
-		updater.updateSongDatas(files, rootdirs, path, updateAll);
+		SongDatabaseUpdater updater = new SongDatabaseUpdater(rootdirs, path, updateAll);
+		updater.updateSongDatas(files);
 	}
 
 	private static final int Polynomial = 0xEDB88320;
@@ -361,6 +364,24 @@ public class SongDatabaseAccessor {
 
 		private int count = 0;
 
+		private String[] rootdirs;
+		private String path;
+
+		private Map<String, String> tags = new HashMap<String, String>();
+		private Connection conn;
+		private boolean updateAll;
+
+		private final String[] TEXT = { "txt" };
+		private final String[] BMSON = { "bmson" };
+		private final String[] BMS = { "bms", "bme", "bml", "pms" };
+		private final String[] ALLBMS = { "bms", "bme", "bml", "pms", "bmson" };
+
+		public SongDatabaseUpdater(String[] rootdirs, String path, boolean updateAll) {
+			this.rootdirs = rootdirs;
+			this.path = path;
+			this.updateAll = updateAll;
+		}
+
 		/**
 		 * データベースを更新する
 		 * 
@@ -371,12 +392,10 @@ public class SongDatabaseAccessor {
 		 * @param path
 		 *            LR2のルートパス
 		 */
-		public void updateSongDatas(File[] files, String[] rootdirs, String path, boolean updateAll) {
+		public void updateSongDatas(File[] files) {
 			long time = System.currentTimeMillis();
 			count = 0;
 			DataSource ds = songdb.getDataSource();
-			Map<String, String> tags = new HashMap<String, String>();
-			Connection conn = null;
 			try {
 				conn = ds.getConnection();
 				conn.setAutoCommit(false);
@@ -403,15 +422,8 @@ public class SongDatabaseAccessor {
 						tags.put(record.getMd5(), record.getTag());
 					}
 				}
-				boolean txt = false;
 				for (File f : files) {
-					if (f.getPath().toLowerCase().endsWith(".txt")) {
-						txt = true;
-						break;
-					}
-				}
-				for (File f : files) {
-					this.listBMSFiles(conn, f, rootdirs, tags, path, txt, updateAll);
+					this.processDirectory(f, true);
 				}
 				conn.commit();
 				conn.close();
@@ -432,139 +444,128 @@ public class SongDatabaseAccessor {
 							+ (count > 0 ? (nowtime - time) / count : "不明"));
 		}
 
-		private void listBMSFiles(Connection conn, final File dir, String[] rootdirs, Map<String, String> tags,
-				String path, boolean containstxt, boolean updateAll) throws SQLException {
-			if (dir.isDirectory()) {
-				// ディレクトリ処理
-				List<SongData> records = qr.query(conn, "SELECT path,date FROM song WHERE folder = ?", rh,
-						crc32(dir.getAbsolutePath(), rootdirs, path));
-				boolean txt = false;
-				final File[] files = dir.listFiles();
-				for (File f : files) {
-					if (f.getPath().toLowerCase().endsWith(".txt")) {
-						txt = true;
+		private void processDirectory(final File dir, boolean updateFolder) throws SQLException {
+			List<SongData> records = qr.query(conn, "SELECT path,date FROM song WHERE folder = ?", rh,
+					crc32(dir.getAbsolutePath(), rootdirs, path));
+			List<FolderData> folders = qr.query(conn, "SELECT path,date FROM folder WHERE parent = ?", rh2,
+					crc32(dir.getAbsolutePath(), rootdirs, path));
+			boolean txt = FileUtils.listFiles(dir, TEXT, false).size() > 0;
+			final Collection<File> bmsfiles = FileUtils.listFiles(dir, ALLBMS, false);
+
+			List<SongData> removes = new ArrayList<SongData>(records);
+
+			for (File f : bmsfiles) {
+				boolean b = true;
+				String s = f.getAbsolutePath();
+				if (s.startsWith(path)) {
+					s = s.substring(path.length() + 1);
+				}
+				for (SongData record : records) {
+					if (record.getPath().equals(s)) {
+						removes.remove(record);
+						if (!updateAll && record.getDate() == f.lastModified() / 1000) {
+							b = false;
+						}
 						break;
 					}
 				}
-				for (File f : files) {
+				if (b) {
+					this.processFile(f, txt);
+				}
+			}
+			// ディレクトリ内のファイルに存在しないレコードを削除
+			for (SongData record : removes) {
+				qr.update(conn, "DELETE FROM song WHERE path = ?", record.getPath());
+			}
+
+			List<FolderData> fremoves = new ArrayList<FolderData>(folders);
+			for (File f : dir.listFiles()) {
+				if (f.isDirectory()) {
 					boolean b = true;
-					if (!updateAll && f.isFile()) {
-						for (SongData record : records) {
-							if (record.getDate() == f.lastModified() / 1000) {
+					String s = f.getAbsolutePath() + File.separatorChar;
+					if (s.startsWith(path)) {
+						s = s.substring(path.length() + 1);
+					}
+					for (FolderData record : folders) {
+						if (record.getPath().equals(s)) {
+							fremoves.remove(record);
+							if(!updateAll && record.getDate() == f.lastModified() / 1000) {
 								b = false;
-								break;
 							}
+							break;
 						}
 					}
-					if (b) {
-						this.listBMSFiles(conn, f, rootdirs, tags, path, txt, updateAll);
-					}
+					this.processDirectory(f, b);
 				}
-				// ディレクトリ内のファイルに存在しないレコードを削除
-				List<SongData> removes = new ArrayList<SongData>(records);
-				for (SongData record : records) {
-					for (File f : files) {
-						if (f.isFile()) {
-							String s = f.getAbsolutePath();
-							if (s.startsWith(path)) {
-								s = s.substring(path.length() + 1);
-							}
+			}
+			// folderテーブルの更新
 
-							if (s.equals(record.getPath())) {
-								removes.remove(record);
-								break;
-							}
-						}
-					}
-				}
-				for (SongData record : removes) {
-					qr.update(conn, "DELETE FROM song WHERE path = ?", record.getPath());
-				}
-
-				// folderテーブルの更新
+			if (updateFolder) {
 				String s = dir.getAbsolutePath() + File.separatorChar;
 				if (s.startsWith(path)) {
 					s = s.substring(path.length() + 1);
 				}
-
+				System.out.println("folder更新 : " + s);
 				qr.update(conn,
 						"INSERT OR REPLACE INTO folder (title, subtitle, command, path, type, banner, parent, date, max, adddate)"
 								+ "VALUES(?,?,?,?,?,?,?,?,?,?);", dir.getName(), "", "", s, 1, "",
 						crc32(dir.getParentFile().getAbsolutePath(), rootdirs, path), dir.lastModified() / 1000, null,
 						Calendar.getInstance().getTimeInMillis() / 1000);
-				List<FolderData> folders = qr.query(conn, "SELECT path FROM folder WHERE parent = ?", rh2,
-						crc32(dir.getAbsolutePath(), rootdirs, path));
-				List<FolderData> fremoves = new ArrayList<FolderData>(folders);
-				for (FolderData record : folders) {
-					for (File f : files) {
-						if (f.isDirectory()) {
-							s = f.getAbsolutePath() + File.separatorChar;
-							if (s.startsWith(path)) {
-								s = s.substring(path.length() + 1);
-							}
+			}
+			// ディレクトリ内に存在しないフォルダレコードを削除
+			for (FolderData record : fremoves) {
+				System.out.println("Song Database : folder deleted - " + record.getPath());
+				qr.update(conn, "DELETE FROM folder WHERE path = ?", record.getPath());
+				qr.update(conn, "DELETE FROM song WHERE path LIKE ?", record.getPath() + "%");
+			}
+		}
 
-							if (s.equals(record.getPath())) {
-								fremoves.remove(record);
-								break;
-							}
-						}
+		private void processFile(final File dir, boolean containstxt) throws SQLException {
+			// ファイル処理
+			String name = dir.getName().toLowerCase();
+			String s = dir.getAbsolutePath();
+			if (s.startsWith(path)) {
+				s = s.substring(path.length() + 1);
+			}
+			BMSModel model = null;
+			if (FilenameUtils.isExtension(name, BMS)) {
+				model = bmsdecoder.decode(dir);
+				qr.update(conn, "DELETE FROM song WHERE path = ?", s);
+			} else if (FilenameUtils.isExtension(name, BMSON)) {
+				model = bmsondecoder.decode(dir);
+				qr.update(conn, "DELETE FROM song WHERE path = ?", s);
+			}
+
+			if (model != null && (model.getTotalNotes() != 0 || model.getWavList().length != 0)) {
+				// TODO LR2ではDIFFICULTY未定義の場合に同梱譜面を見て振り分けている
+				if (model.getDifficulty() == 0) {
+					try {
+						int level = (Integer.parseInt(model.getPlaylevel()) - 1) / 3 + 1;
+						model.setDifficulty(level <= 5 ? level : 5);
+					} catch (NumberFormatException e) {
+						model.setDifficulty(5);
 					}
 				}
-				for (FolderData record : fremoves) {
-					// System.out.println("Song Database : folder deleted - " +
-					// record.getPath());
-					qr.update(conn, "DELETE FROM folder WHERE path = ?", record.getPath());
-					qr.update(conn, "DELETE FROM song WHERE path like ?", record.getPath() + "%");
-				}
 
-			} else {
-				// ファイル処理
-				String name = dir.getName().toLowerCase();
-				String s = dir.getAbsolutePath();
-				if (s.startsWith(path)) {
-					s = s.substring(path.length() + 1);
-				}
-				BMSModel model = null;
-				if (name.endsWith(".bms") || name.endsWith(".bme") || name.endsWith(".bml") || name.endsWith(".pms")) {
-					model = bmsdecoder.decode(dir);
-					qr.update(conn, "DELETE FROM song WHERE path = ?", s);
-				} else if (name.endsWith(".bmson")) {
-					model = bmsondecoder.decode(dir);
-					qr.update(conn, "DELETE FROM song WHERE path = ?", s);
-				}
-
-				if (model != null && (model.getTotalNotes() != 0 || model.getWavList().length != 0)) {
-					// TODO LR2ではDIFFICULTY未定義の場合に同梱譜面を見て振り分けている
-					if (model.getDifficulty() == 0) {
-						try {
-							int level = (Integer.parseInt(model.getPlaylevel()) - 1) / 3 + 1;
-							model.setDifficulty(level <= 5 ? level : 5);
-						} catch (NumberFormatException e) {
-							model.setDifficulty(5);
-						}
-					}
-
-					int ln = model.containsLongNote() ? FEATURE_LONGNOTE : 0;
-					ln += model.containsMineNote() ? FEATURE_MINENOTE : 0;
-					ln += model.getRandom() > 1 ? FEATURE_RANDOM : 0;
-					int txt = containstxt ? CONTENT_TEXT : 0;
-					txt += model.getBgaList().length > 0 ? CONTENT_BGA : 0;
-					qr.update(conn, "INSERT INTO song "
-							+ "(md5, sha256, title, subtitle, genre, artist, subartist, tag, path,"
-							+ "folder, stagefile, banner, backbmp, parent, level, difficulty, "
-							+ "maxbpm, minbpm, mode, judge, feature, content, " + "date, favorite, notes, adddate)"
-							+ "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);", model.getMD5(),
-							model.getSHA256(), model.getTitle(), model.getSubTitle(), model.getGenre(),
-							model.getArtist(), model.getSubArtist(),
-							tags.get(model.getMD5()) != null ? tags.get(model.getMD5()) : "", s,
-							crc32(dir.getParentFile().getAbsolutePath(), rootdirs, path), model.getStagefile(),
-							model.getBanner(), model.getBackbmp(),
-							crc32(dir.getParentFile().getParentFile().getAbsolutePath(), rootdirs, path),
-							model.getPlaylevel(), model.getDifficulty(), model.getMaxBPM(), model.getMinBPM(),
-							model.getUseKeys(), model.getJudgerank(), ln, txt, dir.lastModified() / 1000, 0,
-							model.getTotalNotes(), Calendar.getInstance().getTimeInMillis() / 1000);
-					count++;
-				}
+				int ln = model.containsLongNote() ? FEATURE_LONGNOTE : 0;
+				ln += model.containsMineNote() ? FEATURE_MINENOTE : 0;
+				ln += model.getRandom() > 1 ? FEATURE_RANDOM : 0;
+				int txt = containstxt ? CONTENT_TEXT : 0;
+				txt += model.getBgaList().length > 0 ? CONTENT_BGA : 0;
+				qr.update(conn, "INSERT INTO song "
+						+ "(md5, sha256, title, subtitle, genre, artist, subartist, tag, path,"
+						+ "folder, stagefile, banner, backbmp, parent, level, difficulty, "
+						+ "maxbpm, minbpm, mode, judge, feature, content, " + "date, favorite, notes, adddate)"
+						+ "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);", model.getMD5(),
+						model.getSHA256(), model.getTitle(), model.getSubTitle(), model.getGenre(), model.getArtist(),
+						model.getSubArtist(), tags.get(model.getMD5()) != null ? tags.get(model.getMD5()) : "", s,
+						crc32(dir.getParentFile().getAbsolutePath(), rootdirs, path), model.getStagefile(),
+						model.getBanner(), model.getBackbmp(),
+						crc32(dir.getParentFile().getParentFile().getAbsolutePath(), rootdirs, path),
+						model.getPlaylevel(), model.getDifficulty(), model.getMaxBPM(), model.getMinBPM(),
+						model.getUseKeys(), model.getJudgerank(), ln, txt, dir.lastModified() / 1000, 0,
+						model.getTotalNotes(), Calendar.getInstance().getTimeInMillis() / 1000);
+				count++;
 			}
 		}
 	}
