@@ -48,6 +48,8 @@ public class MusicSelector extends MainState {
 	 * 選択中のバーのインデックス
 	 */
 	private int selectedindex;
+
+	private int selectedreplay;
 	/**
 	 * 現在のフォルダ階層
 	 */
@@ -93,6 +95,8 @@ public class MusicSelector extends MainState {
 			"ffffcc" };
 
 	private static final String[] LNMODE = { "LONG NOTE", "CHARGE NOTE", "HELL CHARGE NOTE" };
+
+	public static final int REPLAY = 4;
 
 	private Config config;
 
@@ -304,6 +308,7 @@ public class MusicSelector extends MainState {
 		final SpriteBatch sprite = main.getSpriteBatch();
 		final ShapeRenderer shape = main.getShapeRenderer();
 		BMSPlayerInputProcessor input = main.getInputProcessor();
+		int currentindex = selectedindex;
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
@@ -525,8 +530,16 @@ public class MusicSelector extends MainState {
 				titlefont.draw(sprite, "CLEAR / PLAY : ", 50, 330);
 			}
 			if (((SongBar) currentsongs[selectedindex]).existsReplayData()) {
+				StringBuilder sb = new StringBuilder();
+				for(int i = 0;i < ((SongBar) currentsongs[selectedindex]).getExistsReplayData().length;i++) {
+					if(selectedreplay == i) {
+						sb.append("[" + (i + 1) + "]");
+					} else if(((SongBar) currentsongs[selectedindex]).getExistsReplayData()[i]) {
+						sb.append(" " + (i + 1) + " ");
+					}
+				}
 				titlefont.setColor(Color.GREEN);
-				titlefont.draw(sprite, "Replay exists", 100, 270);
+				titlefont.draw(sprite, "Replay exists : " + sb.toString(), 100, 270);
 			}
 		}
 		// 段位用の表示(ミラー段位、EX段位)
@@ -600,9 +613,17 @@ public class MusicSelector extends MainState {
 				// score.getClearcount() + " / " + score.getPlaycount(), 100,
 				// 180);
 			}
-			if (((GradeBar) currentsongs[selectedindex]).existsReplayData()) {
+			if (gb.existsReplayData()) {
+				StringBuilder sb = new StringBuilder();
+				for(int i = 0;i < gb.getExistsReplayData().length;i++) {
+					if(selectedreplay == i) {
+						sb.append("[" + (i + 1) + "]");
+					} else if(gb.getExistsReplayData()[i]) {
+						sb.append(" " + (i + 1) + " ");
+					}
+				}
 				titlefont.setColor(Color.GREEN);
-				titlefont.draw(sprite, "Replay exists", 450, 300);
+				titlefont.draw(sprite, "Replay exists : " + sb.toString(), 450, 300);
 			}
 		}
 		if (currentsongs[selectedindex] instanceof TableLevelBar) {
@@ -736,6 +757,21 @@ public class MusicSelector extends MainState {
 				sorts.play();
 			}
 		}
+		if (numberstate[4] && numtime[4] != 0) {
+			if(selectedindex != -1) {
+				boolean[] replays = ((SelectableBar)currentsongs[currentindex]).getExistsReplayData();
+				for(int i = 1; i < replays.length;i++) {
+					if(replays[(i + selectedreplay) % replays.length]) {
+						selectedreplay = (i + selectedreplay) % replays.length;
+						break;
+					}
+				}
+			}
+			numtime[4] = 0;
+			if (sorts != null) {
+				sorts.play();
+			}
+		}
 
 		boolean[] keystate = input.getKeystate();
 		long[] keytime = input.getTime();
@@ -807,6 +843,7 @@ public class MusicSelector extends MainState {
 						}
 						dir.add(bar);
 					}
+					resetReplayIndex();
 				} else if (currentsongs[selectedindex] instanceof SongBar) {
 					resource.clear();
 					if (resource.setBMSFile(new File(((SongBar) currentsongs[selectedindex]).getSongData().getPath()),
@@ -841,7 +878,7 @@ public class MusicSelector extends MainState {
 				if (currentsongs[selectedindex] instanceof SongBar) {
 					resource.clear();
 					if (resource.setBMSFile(new File(((SongBar) currentsongs[selectedindex]).getSongData().getPath()),
-							config, 2)) {
+							config, 2 + selectedreplay)) {
 						if (bgm != null) {
 							bgm.stop();
 						}
@@ -862,6 +899,7 @@ public class MusicSelector extends MainState {
 						}
 						dir.add(bar);
 					}
+					resetReplayIndex();
 				}
 			}
 
@@ -886,15 +924,33 @@ public class MusicSelector extends MainState {
 					for (int i = 0; i < currentsongs.length; i++) {
 						if (currentsongs[i].getTitle().equals(cbar.getTitle())) {
 							selectedindex = i;
+							resetReplayIndex();
 							break;
 						}
 					}
 				}
 			}
 		}
+		if(selectedindex != currentindex || selectedreplay == -1) {
+			resetReplayIndex();
+		}
+
 		if (input.isExitPressed()) {
 			exit();
 		}
+	}
+
+	private void resetReplayIndex() {
+		if(currentsongs[selectedindex] instanceof SelectableBar) {
+			boolean[] replays = ((SelectableBar)currentsongs[selectedindex]).getExistsReplayData();
+			for(int i = 0;i < replays.length;i++) {
+				if(replays[i]) {
+					selectedreplay = i;
+					return;
+				}
+			}
+ 		}
+		selectedreplay = -1;
 	}
 
 	private void readCourse(int autoplay) {
@@ -1180,8 +1236,12 @@ public class MusicSelector extends MainState {
 					((SongBar)bar).loadBanner();
 					SongData sd = ((SongBar) bar).getSongData();
 					bar.setScore(readScoreData(sd, config.getLnmode()));
-					((SongBar) bar).setExistsReplayData(main.getPlayDataAccessor().existsReplayData(
-							sd.getSha256(), sd.hasLongNote(), config.getLnmode()));
+					boolean[] replay = new boolean[REPLAY];
+					for(int i = 0;i < REPLAY;i++) {
+						replay[i] = main.getPlayDataAccessor().existsReplayData(
+								sd.getSha256(), sd.hasLongNote(), config.getLnmode(), i);
+					}
+					((SongBar) bar).setExistsReplayData(replay);
 				}
 				if (bar instanceof GradeBar) {
 					GradeBar gb = (GradeBar) bar;
@@ -1195,8 +1255,12 @@ public class MusicSelector extends MainState {
 						gb.setScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 0));
 						gb.setMirrorScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 1));
 						gb.setRandomScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 2));
-						gb.setExistsReplayData(main.getPlayDataAccessor().existsReplayData(
-								hash, ln, config.getLnmode()));
+						boolean[] replay = new boolean[REPLAY];
+						for(int i = 0;i < REPLAY;i++) {
+							replay[i] = main.getPlayDataAccessor().existsReplayData(
+									hash, ln, config.getLnmode(), 0);
+						}
+						gb.setExistsReplayData(replay);
 					}
 				}
 

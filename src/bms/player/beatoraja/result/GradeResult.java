@@ -1,6 +1,8 @@
 package bms.player.beatoraja.result;
 
 import java.util.*;
+
+import bms.player.beatoraja.select.MusicSelector;
 import com.badlogic.gdx.math.Rectangle;
 import java.util.logging.Logger;
 
@@ -72,8 +74,8 @@ public class GradeResult extends MainState {
 		}
 		if (resource.getAutoplay() == 0 && resource.getCourseScoreData() != null
 				&& resource.getCourseScoreData().getClear() >= GrooveGauge.CLEARTYPE_EASY
-				&& !main.getPlayDataAccessor().existsReplayData(hashes, ln, resource.getConfig().getLnmode())) {
-			saveReplayData();
+				&& !main.getPlayDataAccessor().existsReplayData(hashes, ln, resource.getConfig().getLnmode(), 0)) {
+			saveReplayData(0);
 		}
 
 		gaugegraph = new GaugeGraphRenderer();
@@ -176,8 +178,11 @@ public class GradeResult extends MainState {
 			main.changeState(MainController.STATE_SELECTMUSIC);
 		}
 
-		if (resource.getAutoplay() == 0 && main.getInputProcessor().getNumberState()[1]) {
-			saveReplayData();
+		for(int i = 0;i < MusicSelector.REPLAY;i++) {
+			if (resource.getAutoplay() == 0 && main.getInputProcessor().getNumberState()[i + 1]) {
+				saveReplayData(i);
+				break;
+			}
 		}
 	}
 
@@ -288,13 +293,13 @@ public class GradeResult extends MainState {
 
 	}
 
-	private void saveReplayData() {
+	private void saveReplayData(int index) {
 		if (resource.getCourseScoreData() != null) {
 			if (!saveReplay && resource.isUpdateScore()) {
 				// 保存されているリプレイデータがない場合は、EASY以上で自動保存
 				ReplayData[] rd = resource.getCourseReplay();
 				main.getPlayDataAccessor().wrireReplayData(rd, resource.getCourseBMSModels(),
-						resource.getConfig().getLnmode());
+						resource.getConfig().getLnmode(), index);
 				saveReplay = true;
 			}
 		}

@@ -125,10 +125,10 @@ public class BMSPlayer extends MainState {
 		this.model = resource.getBMSModel();
 		this.autoplay = resource.getAutoplay();
 		Config config = resource.getConfig();
-		if (autoplay == 2) {
+		if (autoplay >= 2) {
 			if(resource.getCourseBMSModels() != null) {
 				if(resource.getCourseReplay().length == 0) {
-					ReplayData[] replays = main.getPlayDataAccessor().readReplayData(resource.getCourseBMSModels(), config.getLnmode());
+					ReplayData[] replays = main.getPlayDataAccessor().readReplayData(resource.getCourseBMSModels(), config.getLnmode(), autoplay - 2);
 					if(replays != null) {
 						for(ReplayData rd : replays) {
 							resource.addCourseReplay(rd);
@@ -145,7 +145,7 @@ public class BMSPlayer extends MainState {
 					}
 				}
 			} else {
-				replay = main.getPlayDataAccessor().readReplayData(model, config.getLnmode());
+				replay = main.getPlayDataAccessor().readReplayData(model, config.getLnmode(), autoplay - 2);
 				if (replay == null) {
 					autoplay = 0;
 				}
@@ -153,7 +153,7 @@ public class BMSPlayer extends MainState {
 		}
 
 		if(model.getRandom() > 1) {
-			if(autoplay == 2) {
+			if(autoplay >= 2) {
 				model.setSelectedIndexOfTimeLines(replay.random);								
 			} else if(resource.getReplayData().pattern != null) {
 				model.setSelectedIndexOfTimeLines(resource.getReplayData().random);												
@@ -476,7 +476,7 @@ public class BMSPlayer extends MainState {
 				List<KeyInputLog> keylog = null;
 				if (autoplay == 1) {
 					keylog = this.createAutoplayLog();
-				} else if (autoplay == 2) {
+				} else if (autoplay >= 2) {
 					keylog = Arrays.asList(replay.keylog);
 				}
 				autoThread = new AutoplayThread();

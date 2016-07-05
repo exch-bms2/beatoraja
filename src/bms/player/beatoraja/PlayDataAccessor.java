@@ -20,10 +20,10 @@ import com.badlogic.gdx.utils.JsonWriter.OutputType;
  * @author exch
  */
 public class PlayDataAccessor {
-	
+
 	// TODO スコアハッシュ付加
 	// TODO リプレイ暗号、復号化
-	
+
 	/**
 	 * プレイヤー名
 	 */
@@ -137,6 +137,15 @@ public class PlayDataAccessor {
 		return result;
 	}
 
+	public List<IRScoreData> readScoreDatas(String sql, int lnmode) {
+		List<IRScoreData> scores = new ArrayList();
+		for(IRScoreData score : scoredb.getScoreDatas(player, sql)) {
+			if((lnmode == 0 && !score.getSha256().startsWith("C")) || (lnmode > 0 && score.getSha256().startsWith("C"))) {
+				scores.add(score);
+			}
+		}
+		return scores;
+	}
 	/**
 	 * スコアデータを書き込む
 	 * @param newscore スコアデータ
@@ -305,22 +314,22 @@ public class PlayDataAccessor {
 
 	}
 
-	public boolean existsReplayData(BMSModel model, int lnmode) {
+	public boolean existsReplayData(BMSModel model, int lnmode, int index) {
 		boolean ln = model.getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
 				+ model.getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH) > 0;
-		return new File(this.getReplayDataFilePath(model.getSHA256(), ln, lnmode)).exists();
+		return new File(this.getReplayDataFilePath(model.getSHA256(), ln, lnmode, index)).exists();
 	}
 
-	public boolean existsReplayData(String hash, boolean ln, int lnmode) {
-		return new File(this.getReplayDataFilePath(hash, ln, lnmode)).exists();
+	public boolean existsReplayData(String hash, boolean ln, int lnmode, int index) {
+		return new File(this.getReplayDataFilePath(hash, ln, lnmode,index)).exists();
 	}
 
-	public boolean existsReplayData(String[] hash, boolean ln, int lnmode) {
+	public boolean existsReplayData(String[] hash, boolean ln, int lnmode, int index) {
 		String hashes = "";
 		for(String s : hash) {
 			hashes += s;
 		}
-		return new File(this.getReplayDataFilePath(hashes, ln, lnmode)).exists();
+		return new File(this.getReplayDataFilePath(hashes, ln, lnmode, index)).exists();
 	}
 
 	/**
@@ -329,12 +338,12 @@ public class PlayDataAccessor {
 	 * @param lnmode LNモード
      * @return リプレイデータ
      */
-	public ReplayData readReplayData(BMSModel model, int lnmode) {
-		if (existsReplayData(model, lnmode)) {
+	public ReplayData readReplayData(BMSModel model, int lnmode, int index) {
+		if (existsReplayData(model, lnmode, index)) {
 			Json json = new Json();
 			try {
 				return json.fromJson(ReplayData.class,
-						new FileReader(this.getReplayDataFilePath(model, lnmode)));
+						new FileReader(this.getReplayDataFilePath(model, lnmode, index)));
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
@@ -348,7 +357,7 @@ public class PlayDataAccessor {
 	 * @param model 対象のBMS
 	 * @param lnmode LNモード
      */
-	public void wrireReplayData(ReplayData rd, BMSModel model, int lnmode) {
+	public void wrireReplayData(ReplayData rd, BMSModel model, int lnmode, int index) {
 		File replaydir = new File("replay");
 		if (!replaydir.exists()) {
 			replaydir.mkdirs();
@@ -356,7 +365,7 @@ public class PlayDataAccessor {
 		Json json = new Json();
 		json.setOutputType(OutputType.json);
 		try {
-			FileWriter fw = new FileWriter(this.getReplayDataFilePath(model, lnmode));
+			FileWriter fw = new FileWriter(this.getReplayDataFilePath(model, lnmode,index));
 			fw.write(json.prettyPrint(rd));
 			fw.flush();
 			fw.close();
@@ -366,7 +375,7 @@ public class PlayDataAccessor {
 
 	}
 
-	public ReplayData[] readReplayData(BMSModel[] models, int lnmode) {
+	public ReplayData[] readReplayData(BMSModel[] models, int lnmode, int index) {
 		String[] hashes = new String[models.length];
 		boolean ln = false;
 		for(int i = 0;i < models.length;i++) {
@@ -374,7 +383,7 @@ public class PlayDataAccessor {
 			ln |= models[i].getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
 					+ models[i].getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH) > 0;
 		}
-		return this.readReplayData(hashes, ln, lnmode);
+		return this.readReplayData(hashes, ln, lnmode,index);
 	}
 
 	/**
@@ -383,8 +392,8 @@ public class PlayDataAccessor {
 	 * @param lnmode LNモード
 	 * @return リプレイデータ
 	 */
-	public ReplayData[] readReplayData(String[] hash, boolean ln , int lnmode) {
-		if (existsReplayData(hash, ln, lnmode)) {
+	public ReplayData[] readReplayData(String[] hash, boolean ln , int lnmode, int index) {
+		if (existsReplayData(hash, ln, lnmode, index)) {
 			Json json = new Json();
 			try {
 				String hashes = "";
@@ -392,7 +401,7 @@ public class PlayDataAccessor {
 					hashes += s;
 				}
 				return json.fromJson(ReplayData[].class,
-						new FileReader(this.getReplayDataFilePath(hashes, ln, lnmode)));
+						new FileReader(this.getReplayDataFilePath(hashes, ln, lnmode, index)));
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
@@ -400,7 +409,7 @@ public class PlayDataAccessor {
 		return null;
 	}
 
-	public void wrireReplayData(ReplayData[] rd, BMSModel[] models, int lnmode) {
+	public void wrireReplayData(ReplayData[] rd, BMSModel[] models, int lnmode, int index) {
 		String[] hashes = new String[models.length];
 		boolean ln = false;
 		for(int i = 0;i < models.length;i++) {
@@ -408,7 +417,7 @@ public class PlayDataAccessor {
 			ln |= models[i].getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
 					+ models[i].getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH) > 0;
 		}
-		this.wrireReplayData(rd, hashes, ln, lnmode);
+		this.wrireReplayData(rd, hashes, ln, lnmode, index);
 
 	}
 
@@ -418,7 +427,7 @@ public class PlayDataAccessor {
          * @param hash 対象のBMSハッシュ群
          * @param lnmode LNモード
          */
-	public void wrireReplayData(ReplayData[] rd, String[] hash, boolean ln, int lnmode) {
+	public void wrireReplayData(ReplayData[] rd, String[] hash, boolean ln, int lnmode, int index) {
 		File replaydir = new File("replay");
 		if (!replaydir.exists()) {
 			replaydir.mkdirs();
@@ -430,7 +439,7 @@ public class PlayDataAccessor {
 			for(String s : hash) {
 				hashes += s;
 			}
-			FileWriter fw = new FileWriter(this.getReplayDataFilePath(hashes, ln, lnmode));
+			FileWriter fw = new FileWriter(this.getReplayDataFilePath(hashes, ln, lnmode, index));
 			fw.write(json.prettyPrint(rd));
 			fw.flush();
 			fw.close();
@@ -439,13 +448,13 @@ public class PlayDataAccessor {
 		}
 	}
 
-	private String getReplayDataFilePath(BMSModel model, int lnmode) {
+	private String getReplayDataFilePath(BMSModel model, int lnmode, int index) {
 		boolean ln = model.getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
 				+ model.getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH) > 0;
-		return getReplayDataFilePath(model.getSHA256(), ln, lnmode);
+		return getReplayDataFilePath(model.getSHA256(), ln, lnmode, index);
 	}
 
-	private String getReplayDataFilePath(String hash, boolean ln, int lnmode) {
-		return "replay" + File.separatorChar +  (ln ? replay[lnmode] : "") + hash + ".json";
+	private String getReplayDataFilePath(String hash, boolean ln, int lnmode, int index) {
+		return "replay" + File.separatorChar +  (ln ? replay[lnmode] : "") + hash + (index > 0 ? "_" + index : "") + ".json";
 	}
 }

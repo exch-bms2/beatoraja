@@ -36,13 +36,22 @@ abstract class SelectableBar extends Bar {
 	/**
 	 * リプレイデータが存在するか
 	 */
-	private boolean existsReplay;
+	private boolean[] existsReplay = new boolean[0];
 
 	public boolean existsReplayData() {
+		for(boolean b : existsReplay) {
+			if(b) {
+				return b;
+			}
+		}
+		return false;
+	}
+
+	public boolean[] getExistsReplayData() {
 		return existsReplay;
 	}
 
-	public void setExistsReplayData(boolean existsReplay) {
+	public void setExistsReplayData(boolean[] existsReplay) {
 		this.existsReplay = existsReplay;
 	}
 
