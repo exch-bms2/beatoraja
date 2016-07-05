@@ -1,5 +1,6 @@
 package bms.player.beatoraja.play;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -7,6 +8,7 @@ import org.lwjgl.opengl.GL11;
 
 import bms.model.*;
 import bms.player.beatoraja.Config;
+import bms.player.beatoraja.MainController;
 import bms.player.beatoraja.PlayerResource;
 import bms.player.beatoraja.TableData;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
@@ -76,8 +78,34 @@ public class LaneRenderer {
     private boolean cursorpressed;
 
     private boolean enableControl = true;
+    
+    private final float dw;
+    private final float dh;
+    
+	/**
+	 * ボムの表示開始時間
+	 */
+	private long[] bomb;
+	/**
+	 * 現在表示中の判定
+	 */
+	private int[] judgenow;
+	/**
+	 * 判定の最終更新時間
+	 */
+	private int[] judgenowt;
+
+	private int[] judgecombo;
 
     public LaneRenderer(BMSPlayer main, SpriteBatch sprite, ShapeRenderer shape, PlaySkin skin, PlayerResource resource, BMSModel model, int mode) {
+    	dw = MainController.RESOLUTION[resource.getConfig().getResolution()].width / 1280f;
+    	dh = MainController.RESOLUTION[resource.getConfig().getResolution()].height / 720f;
+		bomb = new long[skin.getLaneregion().length];
+		judgenow = new int[skin.getJudgeregion().length];
+		judgenowt = new int[skin.getJudgeregion().length];
+		judgecombo = new int[skin.getJudgeregion().length];
+
+		Arrays.fill(bomb, -1000);
         this.main = main;
         this.sprite = sprite;
         this.shape = shape;
@@ -519,8 +547,6 @@ public class LaneRenderer {
         // + (ltime * (hu - hl) / yy));
 
         sprite.begin();
-
-        long[] bomb = judge.getBomb();
         // sprite.enableBlending();
         sprite.setBlendFunction(GL11.GL_ONE, GL11.GL_ONE);
         for (int lane = 0; lane < laneregion.length; lane++) {
@@ -529,25 +555,22 @@ public class LaneRenderer {
                 sprite.draw(
                         skin.getBomb()[judge.getProcessingLongNotes()[lane] != null ? 2 : 0]
                                 .getKeyFrame((time - bomb[lane]) / 1000f),
-                        laneregion[lane].x + laneregion[lane].width / 2 - 110, hl - 155, 260, 270);
+                        laneregion[lane].x + laneregion[lane].width / 2 - 110 * dw, hl - 155 * dh, 260 * dw, 270 * dh);
             }
         }
         sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         // sprite.disableBlending();
 
-        final int[] judgenow = judge.getJudgeNow();
-        final int[] judgenowt = judge.getJudgeTime();
-        final int[] combo = judge.getJudgeCombo();
         // 判定文字描画
         for (int jr = 0; jr < skin.getJudgeregion().length; jr++) {
             if (judgenow[jr] > 0 && time < judgenowt[jr] + 500) {
-                final float f = 1.5f;
+                final float f = 1.5f * dw;
                 Sprite s = skin.getJudge()[(judgenow[jr] == 6 ? 5 : judgenow[jr]) - 1];
                 int w = s.getRegionWidth();
                 if (judgenow[jr] < 4) {
                     w += 20;
                     int count = 0;
-                    for (int i = combo[jr]; ; count++) {
+                    for (int i = judgecombo[jr]; ; count++) {
                         w += 25;
                         if (i < 10) {
                             break;
@@ -555,11 +578,11 @@ public class LaneRenderer {
                             i /= 10;
                         }
                     }
-                    for (int i = combo[jr], j = 0; ; j++) {
+                    for (int i = judgecombo[jr], j = 0; ; j++) {
                         sprite.draw(skin.getJudgenum()[judgenow[jr] - 1][i % 10],
                                 skin.getJudgeregion()[jr].x + skin.getJudgeregion()[jr].width / 2
                                         + (-w / 2 + s.getRegionWidth() + 20 + (count - j) * 25) * f,
-                                hl + 100, 25 * f, 52 * f);
+                                hl + 100 * dh, 25 * f, 52 * f);
                         if (i < 10) {
                             break;
                         } else {
@@ -567,7 +590,7 @@ public class LaneRenderer {
                         }
                     }
                 }
-                sprite.draw(s, skin.getJudgeregion()[jr].x + skin.getJudgeregion()[jr].width / 2 - w * f / 2, hl + 100,
+                sprite.draw(s, skin.getJudgeregion()[jr].x + skin.getJudgeregion()[jr].width / 2 - w * f / 2, hl + 100 * dh,
                         s.getRegionWidth() * f, s.getRegionHeight() * f);
                 // FAST, SLOW描画
                 if (config.getJudgedetail() == 1) {
@@ -575,7 +598,7 @@ public class LaneRenderer {
 
                         font.setColor(judge.getRecentJudgeTiming() >= 0 ? Color.CYAN : Color.RED);
                         font.draw(sprite, judge.getRecentJudgeTiming() >= 0 ? "FAST" : "SLOW",
-                                skin.getJudgeregion()[jr].x + skin.getJudgeregion()[jr].width / 2, hl + 180);
+                                skin.getJudgeregion()[jr].x + skin.getJudgeregion()[jr].width / 2, hl + 180 * dh);
                     }
 
                 } else if (config.getJudgedetail() == 2) {
@@ -588,7 +611,7 @@ public class LaneRenderer {
                         }
                         font.draw(sprite,
                                 (judge.getRecentJudgeTiming() >= 0 ? "+" : "") + judge.getRecentJudgeTiming() + " ms",
-                                skin.getJudgeregion()[jr].x + skin.getJudgeregion()[jr].width / 2, hl + 180);
+                                skin.getJudgeregion()[jr].x + skin.getJudgeregion()[jr].width / 2, hl + 180 * dh);
                     }
 
                 }
@@ -648,7 +671,7 @@ public class LaneRenderer {
 
                 if (main.getJudgeManager().getProcessingLongNotes()[lane] == note) {
                     sprite.draw(skin.getLongnote()[6][lane], x, y - height - 2, width, height + 4);
-                } else if (judge.getPassingLongNotes()[lane] == note) {
+                } else if (judge.getPassingLongNotes()[lane] == note && note.getState() != 0) {
                     sprite.draw(skin.getLongnote()[judge.getHellChargeJudges()[lane] ? 8 : 9][lane], x, y - height - 2, width, height + 4);
                 } else {
                     sprite.draw(skin.getLongnote()[7][lane], x, y - height - 2, width, height + 4);
@@ -695,4 +718,11 @@ public class LaneRenderer {
             sprite.end();
         }
     }
+
+	public void update(int lane,int judge, int time) {
+		bomb[lane] = time;
+		judgenow[lane / (bomb.length / judgenow.length)] = judge + 1;
+		judgenowt[lane / (bomb.length / judgenow.length)] = time;
+		judgecombo[lane / (bomb.length / judgenow.length)] = main.getJudgeManager().getCourseCombo();;
+	}
 }

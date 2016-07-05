@@ -25,6 +25,12 @@
                                  </children>
                               </HBox>
                               <CheckBox fx:id="folderlamp" mnemonicParsing="false" prefHeight="25.0" prefWidth="133.0" text="フォルダランプ" />
+                              <HBox alignment="CENTER_LEFT" prefHeight="30.0" prefWidth="552.0">
+                                 <children>
+                                    <Label text="解像度" />
+                                    <ComboBox fx:id="resolution" prefWidth="200.0" />
+                                 </children>
+                              </HBox>
                            </children>
                         </VBox>
                      </children>

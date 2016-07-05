@@ -34,7 +34,8 @@ import javafx.util.Callback;
  */
 public class PlayConfigurationView implements Initializable {
 	
-	// TODO bug:song.dbを読み込まない状態で起動すると落ちる
+	@FXML
+	private ComboBox<Integer> resolution;
 
 	/**
 	 * ハイスピード
@@ -121,10 +122,19 @@ public class PlayConfigurationView implements Initializable {
 
 	private static final String[] JUDGEDETAIL = { "なし", "FAST/SLOW", "±ms" };
 
+	private static final String[] RESOLUTION = { "SD (640 x 480)", "HD (1280 x 720)", "FULL HD (1920 x 1080)", "ULTRA HD (3940 x 2160)" };
+
 	public void initialize(URL arg0, ResourceBundle arg1) {
 		lr2configuration.setHgap(25);
 		lr2configuration.setVgap(4);
 
+		resolution.setCellFactory(new Callback<ListView<Integer>, ListCell<Integer>>() {
+			public ListCell<Integer> call(ListView<Integer> param) {
+				return new OptionListCell(RESOLUTION);
+			}
+		});
+		resolution.setButtonCell(new OptionListCell(RESOLUTION));
+		resolution.getItems().setAll(0, 1, 2);
 		scoreop.setCellFactory(new Callback<ListView<Integer>, ListCell<Integer>>() {
 			public ListCell<Integer> call(ListView<Integer> param) {
 				return new OptionListCell(SCOREOP);
@@ -182,6 +192,7 @@ public class PlayConfigurationView implements Initializable {
 	 */
 	public void update(Config config) {
 		this.config = config;
+		resolution.setValue(config.getResolution());
 		fullscreen.setSelected(config.isFullscreen());
 		vsync.setSelected(config.isVsync());
 		bgaop.setValue(config.getBga());
@@ -221,6 +232,7 @@ public class PlayConfigurationView implements Initializable {
 	 * ダイアログの項目をconfig.xmlに反映する
 	 */
 	public void commit() {
+		config.setResolution(resolution.getValue());
 		config.setFullscreen(fullscreen.isSelected());
 		config.setVsync(vsync.isSelected());
 		config.setBga(bgaop.getValue());

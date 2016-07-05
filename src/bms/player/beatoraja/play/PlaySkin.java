@@ -8,6 +8,7 @@ import bms.player.beatoraja.skin.NumberResourceAccessor;
 import bms.player.beatoraja.skin.Skin;
 import bms.player.beatoraja.skin.SkinImage;
 import bms.player.beatoraja.skin.SkinNumber;
+import bms.player.beatoraja.skin.SkinObject;
 
 import bms.player.beatoraja.skin.SkinText;
 import com.badlogic.gdx.graphics.Texture;
@@ -77,6 +78,9 @@ public class PlaySkin extends Skin {
 
 	private Sprite slider;
 
+	private float dw;
+	private float dh;
+	
 	private final NumberResourceAccessor[] judgecount = { NumberResourceAccessor.FAST_PERFECT,
 			NumberResourceAccessor.SLOW_PERFECT, NumberResourceAccessor.FAST_GREAT, NumberResourceAccessor.SLOW_GREAT,
 			NumberResourceAccessor.FAST_GOOD, NumberResourceAccessor.SLOW_GOOD, NumberResourceAccessor.FAST_BAD,
@@ -84,6 +88,13 @@ public class PlaySkin extends Skin {
 			NumberResourceAccessor.FAST_MISS, NumberResourceAccessor.SLOW_MISS };
 
 	public PlaySkin(int mode) {
+		
+	}
+
+	public PlaySkin(int mode, Rectangle r) {
+		dw = r.width / 1280f;
+		dh = r.height / 720f;
+		
 		List<SkinNumber> numbers = new ArrayList();
 		makeCommonSkin(numbers);
 		if (mode == 5 || mode == 7) {
@@ -141,36 +152,36 @@ public class PlaySkin extends Skin {
 		// bpm
 		SkinNumber[] bpm = new SkinNumber[3];
 		bpm[0] = new SkinNumber(ntr[0], 0, 4, 0, NumberResourceAccessor.MIN_BPM);
-		bpm[0].setDestination(0, 520, 2, 18, 18, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		setDestination(bpm[0], 0, 520, 2, 18, 18, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		bpm[1] = new SkinNumber(ntr[0], 0, 4, 0, NumberResourceAccessor.NOW_BPM);
-		bpm[1].setDestination(0, 592, 2, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		setDestination(bpm[1], 0, 592, 2, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		bpm[2] = new SkinNumber(ntr[0], 0, 4, 0, NumberResourceAccessor.MAX_BPM);
-		bpm[2].setDestination(0, 688, 2, 18, 18, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		setDestination(bpm[2], 0, 688, 2, 18, 18, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		numbers.addAll(Arrays.asList(bpm));
 		// 残り時間
 		SkinNumber[] timecount = new SkinNumber[2];
 		timecount[0] = new SkinNumber(ntr[0], 0, 2, 1, NumberResourceAccessor.TIMELEFT_MINUTE);
-		timecount[0].setDestination(0, 1148, 2, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		setDestination(timecount[0], 0, 1148, 2, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		timecount[1] = new SkinNumber(ntr[0], 0, 2, 1, NumberResourceAccessor.TIMELEFT_SECOND);
-		timecount[1].setDestination(0, 1220, 2, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		setDestination(timecount[1], 0, 1220, 2, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		numbers.addAll(Arrays.asList(timecount));
 
 		SkinNumber[] hispeed = new SkinNumber[2];
 		hispeed[0] = new SkinNumber(ntr[0], 0, 2, 0, NumberResourceAccessor.HISPEED);
-		hispeed[0].setDestination(0, 116, 2, 12, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		setDestination(hispeed[0], 0, 116, 2, 12, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		hispeed[1] = new SkinNumber(ntr[0], 0, 2, 1, NumberResourceAccessor.HISPEED_AFTERDOT);
-		hispeed[1].setDestination(0, 154, 2, 10, 20, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		setDestination(hispeed[1], 0, 154, 2, 10, 20, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		numbers.addAll(Arrays.asList(hispeed));
 
 		SkinNumber duration = new SkinNumber(ntr[0], 0, 4, 0, NumberResourceAccessor.DURATION);
-		duration.setDestination(0, 318, 2, 12, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		setDestination(duration,0, 318, 2, 12, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		numbers.add(duration);
 
 		Texture bg = new Texture("skin/playbg.png");
 		SkinImage[] images = new SkinImage[1];
 		images[0] = new SkinImage();
 		images[0].setImage(new TextureRegion[] { new TextureRegion(bg) }, 0);
-		images[0].setDestination(0, 0, 0, 1280, 720, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		setDestination(images[0], 0, 0, 0, 1280, 720, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		this.setSkinPart(images);
 	}
 
@@ -231,53 +242,53 @@ public class PlaySkin extends Skin {
 		keybeam[1] = keybeam[3] = keybeam[5] = new Sprite(kbt, 47, 0, 28, 255);
 		keybeam[7] = new Sprite(kbt, 0, 0, 47, 255);
 
-		judgeregion = new Rectangle[] { new Rectangle(20, 240, 390, 20) };
+		judgeregion = new Rectangle[] { rect(20, 240, 390, 20) };
 
-		bgaregion = new Rectangle(500, 50, 740, 650);
+		bgaregion = rect(500, 50, 740, 650);
 
 		SkinText title = new SkinText("skin/VL-Gothic-Regular.ttf", 0, 24);
-		title.setDestination(0, 502, 698, 18, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		title.setDestination(1000, 502, 698, 18, 18, 0, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		title.setDestination(2000, 502, 698, 18, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		setDestination(title, 0, 502, 698, 18, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		setDestination(title, 1000, 502, 698, 18, 18, 0, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		setDestination(title, 2000, 502, 698, 18, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		this.setTitle(title);
 
-		graphregion = new Rectangle(410, 220, 90, 480);
+		graphregion = rect(410, 220, 90, 480);
 
-		judgecountregion = new Rectangle(500, 50, 144, 108);
+		judgecountregion = rect(500, 50, 144, 108);
 		// judge count
 		Texture nt = new Texture("skin/number.png");
 		TextureRegion[][] ntr = TextureRegion.split(nt, 24, 24);
 		for (int i = 0; i < 6; i++) {
 			for (int j = 0; j < 2; j++) {
 				SkinNumber number = new SkinNumber(ntr[j + 1], 0, 4, 2, judgecount[i * 2 + j]);
-				number.setDestination(0, 536 + j * 60, 50 + (5 - i) * 18, 12, 18, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+				setDestination(number, 0, 536 + j * 60, 50 + (5 - i) * 18, 12, 18, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,
 						0, 0);
 				numbers.add(number);
 			}
 		}
 
 		laneregion = new Rectangle[8];
-		laneregion[0] = new Rectangle(90, 140, 50, 580);
-		laneregion[1] = new Rectangle(140, 140, 40, 580);
-		laneregion[2] = new Rectangle(180, 140, 50, 580);
-		laneregion[3] = new Rectangle(230, 140, 40, 580);
-		laneregion[4] = new Rectangle(270, 140, 50, 580);
-		laneregion[5] = new Rectangle(320, 140, 40, 580);
-		laneregion[6] = new Rectangle(360, 140, 50, 580);
-		laneregion[7] = new Rectangle(20, 140, 70, 580);
+		laneregion[0] = rect(90, 140, 50, 580);
+		laneregion[1] = rect(140, 140, 40, 580);
+		laneregion[2] = rect(180, 140, 50, 580);
+		laneregion[3] = rect(230, 140, 40, 580);
+		laneregion[4] = rect(270, 140, 50, 580);
+		laneregion[5] = rect(320, 140, 40, 580);
+		laneregion[6] = rect(360, 140, 50, 580);
+		laneregion[7] = rect(20, 140, 70, 580);
 
-		lanegroupregion = new Rectangle[] { new Rectangle(20, 140, 390, 580) };
+		lanegroupregion = new Rectangle[] { rect(20, 140, 390, 580) };
 
-		gaugeregion = new Rectangle(20, 30, 390, 30);
+		gaugeregion = rect(20, 30, 390, 30);
 		
 		SkinNumber[] gaugecount = new SkinNumber[2];
 		gaugecount[0] = new SkinNumber(ntr[0], 0, 3, 0, NumberResourceAccessor.GROOVEGAUGE);
 		gaugecount[1] = new SkinNumber(ntr[0], 0, 1, 0, NumberResourceAccessor.GROOVEGAUGE_AFTERDOT);
-		gaugecount[0].setDestination(0, 314, 60, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		gaugecount[1].setDestination(0, 386, 60, 18, 18, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		setDestination(gaugecount[0],0, 314, 60, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		setDestination(gaugecount[1],0, 386, 60, 18, 18, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		numbers.addAll(Arrays.asList(gaugecount));
 		
-		progressregion = new Rectangle(4, 140, 12, 540);
+		progressregion = rect(4, 140, 12, 540);
 	}
 
 	private void make9KeySkin(List<SkinNumber> numbers) {
@@ -301,7 +312,7 @@ public class PlaySkin extends Skin {
 				longnote[7][i] = new Sprite(notet, 0, 38, 36, 1);
 				longnote[8][i] = new Sprite(notet, 0, 38, 36, 1);
 				longnote[9][i] = new Sprite(notet, 0, 38, 36, 1);
-				minenote[i] = new Sprite(notet, 0, 18, 36, 18);
+				minenote[i] = new Sprite(notet, 0, 56, 36, 18);
 			}
 			if (i == 1 || i == 7) {
 				note[i] = new Sprite(notet, 38, 0, 28, 18);
@@ -315,7 +326,7 @@ public class PlaySkin extends Skin {
 				longnote[7][i] = new Sprite(notet, 38, 38, 28, 1);
 				longnote[8][i] = new Sprite(notet, 38, 38, 28, 1);
 				longnote[9][i] = new Sprite(notet, 38, 38, 28, 1);
-				minenote[i] = new Sprite(notet, 38, 0, 28, 18);
+				minenote[i] = new Sprite(notet, 38, 56, 28, 18);
 			}
 			if (i == 2 || i == 6) {
 				note[i] = new Sprite(notet, 68, 0, 36, 18);
@@ -329,7 +340,7 @@ public class PlaySkin extends Skin {
 				longnote[7][i] = new Sprite(notet, 68, 38, 36, 1);
 				longnote[8][i] = new Sprite(notet, 68, 38, 36, 1);
 				longnote[9][i] = new Sprite(notet, 68, 38, 36, 1);
-				minenote[i] = new Sprite(notet, 68, 18, 36, 18);
+				minenote[i] = new Sprite(notet, 68, 56, 36, 18);
 			}
 			if (i == 3 || i == 5) {
 				note[i] = new Sprite(notet, 106, 0, 28, 18);
@@ -343,7 +354,7 @@ public class PlaySkin extends Skin {
 				longnote[7][i] = new Sprite(notet, 106, 38, 28, 1);
 				longnote[8][i] = new Sprite(notet, 106, 38, 28, 1);
 				longnote[9][i] = new Sprite(notet, 106, 38, 28, 1);
-				minenote[i] = new Sprite(notet, 106, 0, 28, 18);
+				minenote[i] = new Sprite(notet, 106, 56, 28, 18);
 			}
 			if (i == 4) {
 				note[i] = new Sprite(notet, 136, 0, 36, 18);
@@ -357,7 +368,7 @@ public class PlaySkin extends Skin {
 				longnote[7][i] = new Sprite(notet, 136, 38, 36, 1);
 				longnote[8][i] = new Sprite(notet, 136, 38, 36, 1);
 				longnote[9][i] = new Sprite(notet, 136, 38, 36, 1);
-				minenote[i] = new Sprite(notet, 136, 18, 36, 18);
+				minenote[i] = new Sprite(notet, 136, 56, 36, 18);
 			}
 		}
 
@@ -366,52 +377,53 @@ public class PlaySkin extends Skin {
 		keybeam[0] = keybeam[2] = keybeam[4] = keybeam[6] = keybeam[8] = new Sprite(kbt, 75, 0, 21, 255);
 		keybeam[1] = keybeam[3] = keybeam[5] = keybeam[7] = new Sprite(kbt, 47, 0, 28, 255);
 
-		judgeregion = new Rectangle[] { new Rectangle(300, 240, 680, 20) };
-		bgaregion = new Rectangle(10, 390, 330, 330);
+//		judgeregion = new Rectangle[] { rect(345, 240, 190, 20),  rect(545, 240, 190, 20),  rect(745, 240, 190, 20) };
+		judgeregion = new Rectangle[] { rect(300, 240, 680, 20) };
+		bgaregion = rect(10, 390, 330, 330);
 		SkinText title = new SkinText("skin/VL-Gothic-Regular.ttf", 0, 24);
-		title.setDestination(0, 12, 720, 18, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		title.setDestination(1000, 12, 720, 18, 18, 0, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		title.setDestination(2000, 12, 720, 18, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		setDestination(title, 0, 12, 720, 18, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		setDestination(title, 1000, 12, 720, 18, 18, 0, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		setDestination(title, 2000, 12, 720, 18, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		this.setTitle(title);
 
-		graphregion = new Rectangle(1090, 220, 90, 480);
+		graphregion = rect(1090, 220, 90, 480);
 
-		judgecountregion = new Rectangle(1090, 40, 144, 108);
+		judgecountregion = rect(1090, 40, 144, 108);
 		// judge count
 		Texture nt = new Texture("skin/number.png");
 		TextureRegion[][] ntr = TextureRegion.split(nt, 24, 24);
 		for (int i = 0; i < 6; i++) {
 			for (int j = 0; j < 2; j++) {
 				SkinNumber number = new SkinNumber(ntr[j + 1], 0, 4, 2, judgecount[i * 2 + j]);
-				number.setDestination(0, 1126 + j * 60, 40 + (5 - i) * 18, 12, 18, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+				setDestination(number, 0, 1126 + j * 60, 40 + (5 - i) * 18, 12, 18, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,
 						0, 0);
 				numbers.add(number);
 			}
 		}
 
 		laneregion = new Rectangle[9];
-		laneregion[0] = new Rectangle(345, 140, 70, 580);
-		laneregion[1] = new Rectangle(415, 140, 60, 580);
-		laneregion[2] = new Rectangle(475, 140, 70, 580);
-		laneregion[3] = new Rectangle(545, 140, 60, 580);
-		laneregion[4] = new Rectangle(605, 140, 70, 580);
-		laneregion[5] = new Rectangle(675, 140, 60, 580);
-		laneregion[6] = new Rectangle(735, 140, 70, 580);
-		laneregion[7] = new Rectangle(805, 140, 60, 580);
-		laneregion[8] = new Rectangle(865, 140, 70, 580);
+		laneregion[0] = rect(345, 140, 70, 580);
+		laneregion[1] = rect(415, 140, 60, 580);
+		laneregion[2] = rect(475, 140, 70, 580);
+		laneregion[3] = rect(545, 140, 60, 580);
+		laneregion[4] = rect(605, 140, 70, 580);
+		laneregion[5] = rect(675, 140, 60, 580);
+		laneregion[6] = rect(735, 140, 70, 580);
+		laneregion[7] = rect(805, 140, 60, 580);
+		laneregion[8] = rect(865, 140, 70, 580);
 
-		lanegroupregion = new Rectangle[] { new Rectangle(345, 140, 590, 580) };
+		lanegroupregion = new Rectangle[] { rect(345, 140, 590, 580) };
 
-		gaugeregion = new Rectangle(345, 30, 590, 30);
+		gaugeregion = rect(345, 30, 590, 30);
 
 		SkinNumber[] gaugecount = new SkinNumber[2];
 		gaugecount[0] = new SkinNumber(ntr[0], 0, 3, 0, NumberResourceAccessor.GROOVEGAUGE);
 		gaugecount[1] = new SkinNumber(ntr[0], 0, 1, 0, NumberResourceAccessor.GROOVEGAUGE_AFTERDOT);
-		gaugecount[0].setDestination(0, 600, 60, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		gaugecount[1].setDestination(0, 672, 60, 18, 18, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		setDestination(gaugecount[0], 0, 600, 60, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		setDestination(gaugecount[1],0, 672, 60, 18, 18, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		numbers.addAll(Arrays.asList(gaugecount));
 
-		progressregion = new Rectangle(990, 140, 10, 540);
+		progressregion = rect(990, 140, 10, 540);
 	}
 
 	private void make14KeySkin(List<SkinNumber> numbers) {
@@ -472,60 +484,60 @@ public class PlaySkin extends Skin {
 		keybeam[1] = keybeam[3] = keybeam[5] = keybeam[9] = keybeam[11] = keybeam[13] = new Sprite(kbt, 47, 0, 28, 255);
 		keybeam[7] = keybeam[15] = new Sprite(kbt, 0, 0, 47, 255);
 
-		judgeregion = new Rectangle[] { new Rectangle(210, 240, 390, 20), new Rectangle(680, 240, 390, 20) };
+		judgeregion = new Rectangle[] { rect(210, 240, 390, 20), rect(680, 240, 390, 20) };
 
-		bgaregion = new Rectangle(10, 500, 180, 220);
+		bgaregion = rect(10, 500, 180, 220);
 		SkinText title = new SkinText("skin/VL-Gothic-Regular.ttf", 0, 24);
-		title.setDestination(0, 12, 678, 18, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		title.setDestination(1000, 12, 678, 18, 18, 0, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		title.setDestination(2000, 12, 678, 18, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		setDestination(title, 0, 12, 720, 18, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		setDestination(title, 1000, 12, 720, 18, 18, 0, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		setDestination(title, 2000, 12, 720, 18, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		this.setTitle(title);
 
-		graphregion = new Rectangle(1090, 220, 90, 480);
+		graphregion = rect(1090, 220, 90, 480);
 
-		judgecountregion = new Rectangle(1090, 40, 144, 108);
+		judgecountregion = rect(1090, 40, 144, 108);
 		// judge count
 		Texture nt = new Texture("skin/number.png");
 		TextureRegion[][] ntr = TextureRegion.split(nt, 24, 24);
 		for (int i = 0; i < 6; i++) {
 			for (int j = 0; j < 2; j++) {
 				SkinNumber number = new SkinNumber(ntr[j + 1], 0, 4, 2, judgecount[i * 2 + j]);
-				number.setDestination(0, 1126 + j * 60, 40 + (5 - i) * 18, 12, 18, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+				setDestination(number, 0, 1126 + j * 60, 40 + (5 - i) * 18, 12, 18, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,
 						0, 0);
 				numbers.add(number);
 			}
 		}
 
 		laneregion = new Rectangle[16];
-		laneregion[0] = new Rectangle(280, 140, 50, 580);
-		laneregion[1] = new Rectangle(330, 140, 40, 580);
-		laneregion[2] = new Rectangle(370, 140, 50, 580);
-		laneregion[3] = new Rectangle(420, 140, 40, 580);
-		laneregion[4] = new Rectangle(460, 140, 50, 580);
-		laneregion[5] = new Rectangle(510, 140, 40, 580);
-		laneregion[6] = new Rectangle(550, 140, 50, 580);
-		laneregion[7] = new Rectangle(210, 140, 70, 580);
-		laneregion[8] = new Rectangle(680, 140, 50, 580);
-		laneregion[9] = new Rectangle(730, 140, 40, 580);
-		laneregion[10] = new Rectangle(770, 140, 50, 580);
-		laneregion[11] = new Rectangle(820, 140, 40, 580);
-		laneregion[12] = new Rectangle(860, 140, 50, 580);
-		laneregion[13] = new Rectangle(910, 140, 40, 580);
-		laneregion[14] = new Rectangle(950, 140, 50, 580);
-		laneregion[15] = new Rectangle(1000, 140, 70, 580);
+		laneregion[0] = rect(280, 140, 50, 580);
+		laneregion[1] = rect(330, 140, 40, 580);
+		laneregion[2] = rect(370, 140, 50, 580);
+		laneregion[3] = rect(420, 140, 40, 580);
+		laneregion[4] = rect(460, 140, 50, 580);
+		laneregion[5] = rect(510, 140, 40, 580);
+		laneregion[6] = rect(550, 140, 50, 580);
+		laneregion[7] = rect(210, 140, 70, 580);
+		laneregion[8] = rect(680, 140, 50, 580);
+		laneregion[9] = rect(730, 140, 40, 580);
+		laneregion[10] = rect(770, 140, 50, 580);
+		laneregion[11] = rect(820, 140, 40, 580);
+		laneregion[12] = rect(860, 140, 50, 580);
+		laneregion[13] = rect(910, 140, 40, 580);
+		laneregion[14] = rect(950, 140, 50, 580);
+		laneregion[15] = rect(1000, 140, 70, 580);
 
-		lanegroupregion = new Rectangle[] { new Rectangle(210, 140, 390, 580), new Rectangle(680, 140, 390, 580) };
+		lanegroupregion = new Rectangle[] { rect(210, 140, 390, 580), rect(680, 140, 390, 580) };
 
-		gaugeregion = new Rectangle(445, 30, 390, 30);
+		gaugeregion = rect(445, 30, 390, 30);
 
 		SkinNumber[] gaugecount = new SkinNumber[2];
 		gaugecount[0] = new SkinNumber(ntr[0], 0, 3, 0, NumberResourceAccessor.GROOVEGAUGE);
 		gaugecount[1] = new SkinNumber(ntr[0], 0, 1, 0, NumberResourceAccessor.GROOVEGAUGE_AFTERDOT);
-		gaugecount[0].setDestination(0, 600, 60, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		gaugecount[1].setDestination(0, 672, 60, 18, 18, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		setDestination(gaugecount[0], 0, 600, 60, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		setDestination(gaugecount[1], 0, 672, 60, 18, 18, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		numbers.addAll(Arrays.asList(gaugecount));
 
-		progressregion = new Rectangle(1072, 140, 6, 540);
+		progressregion = rect(1072, 140, 6, 540);
 	}
 
 	public Sprite[] getNote() {
@@ -623,4 +635,13 @@ public class PlaySkin extends Skin {
 	public Rectangle getProgressRegion() {
 		return progressregion;
 	}
+	
+	private Rectangle rect(float x, float y, float width, float height) {
+		return new Rectangle(x * dw, y * dh, width * dw, height * dh);
+	}
+	
+    private void setDestination(SkinObject object, long time, float x, float y, float w, float h, int acc, int a, int r,
+			int g, int b, int blend, int filter, int angle, int center, int loop, int timer, int op1, int op2, int op3) {
+    	object.setDestination(time, x * dw, y * dh, w * dw, h * dh, acc, a, r, g, b, blend, filter, angle, center, loop, timer, op1, op2, op3);
+    }
 }

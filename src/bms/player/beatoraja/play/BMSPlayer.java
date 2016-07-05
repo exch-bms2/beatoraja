@@ -42,7 +42,6 @@ public class BMSPlayer extends MainState {
 	private BitmapFont judgefont;
 	private BitmapFont systemfont;
 	private BMSModel model;
-	private TimeLine[] timelines;
 	private int totalnotes;
 	private int minbpm;
 	private int maxbpm;
@@ -81,16 +80,11 @@ public class BMSPlayer extends MainState {
 	 */
 	private KeyInputThread keyinput;
 
-	private final String[] judgename = { "PG ", "GR ", "GD ", "BD ", "PR ", "MS " };
-
-	private int prevrendertime;
-
 	private int assist = 0;
 
 	private List<PatternModifyLog> pattern = new ArrayList<PatternModifyLog>();
 
 	private ReplayData replay = null;
-	private ShaderProgram layershader;
 
 	private MainController main;
 
@@ -102,22 +96,6 @@ public class BMSPlayer extends MainState {
 	 * 処理済ノート数
 	 */
 	private int notes;
-	/**
-	 * 再生中のBGAID
-	 */
-	private int playingbgaid = -1;
-	/**
-	 * 再生中のレイヤーID
-	 */
-	private int playinglayerid = -1;
-	/**
-	 * ミスレイヤー表示開始時間
-	 */
-	private int misslayertime;
-	/**
-	 * 現在のミスレイヤーシーケンス
-	 */
-	private int[] misslayer = null;
 
 	public BMSPlayer(MainController main, PlayerResource resource) {
 		this.main = main;
@@ -125,6 +103,19 @@ public class BMSPlayer extends MainState {
 		this.model = resource.getBMSModel();
 		this.autoplay = resource.getAutoplay();
 		Config config = resource.getConfig();
+		
+		if (config.getLR2PlaySkinPath() != null) {
+			try {
+				skin = new LR2PlaySkinLoader().loadPlaySkin(new File(config.getLR2PlaySkinPath()));
+			} catch (IOException e) {
+				e.printStackTrace();
+				skin = new PlaySkin(model.getUseKeys(), main.RESOLUTION[resource.getConfig().getResolution()]);
+			}
+		} else {
+			skin = new PlaySkin(model.getUseKeys(), main.RESOLUTION[resource.getConfig().getResolution()]);
+		}
+		this.setSkin(skin);
+
 		if (autoplay == 2) {
 			if(resource.getCourseBMSModels() != null) {
 				if(resource.getCourseReplay().length == 0) {
@@ -164,7 +155,6 @@ public class BMSPlayer extends MainState {
 		}
 		minbpm = (int) model.getMinBPM();
 		maxbpm = (int) model.getMaxBPM();
-		timelines = model.getAllTimeLines();
 		// 通常プレイの場合は最後のノーツ、オートプレイの場合はBG/BGAを含めた最後のノーツ
 		playtime = (autoplay == 1 ? model.getLastTime() : model.getLastNoteTime()) + 5000;
 
@@ -339,17 +329,6 @@ public class BMSPlayer extends MainState {
 
 		Config config = resource.getConfig();
 		Logger.getGlobal().info("create");
-		if (config.getLR2PlaySkinPath() != null) {
-			try {
-				skin = new LR2PlaySkinLoader().loadPlaySkin(new File(config.getLR2PlaySkinPath()));
-			} catch (IOException e) {
-				e.printStackTrace();
-				skin = new PlaySkin(model.getUseKeys());
-			}
-		} else {
-			skin = new PlaySkin(model.getUseKeys());
-		}
-		this.setSkin(skin);
 		skin.setText(resource.getBMSModel());
 
 		input = main.getInputProcessor();
@@ -380,40 +359,6 @@ public class BMSPlayer extends MainState {
 		judgefont = generator.generateFont(parameter);
 		generator.dispose();
 
-		String vertex = "attribute vec4 " + ShaderProgram.POSITION_ATTRIBUTE + ";\n" //
-				+ "attribute vec4 " + ShaderProgram.COLOR_ATTRIBUTE + ";\n" //
-				+ "attribute vec2 " + ShaderProgram.TEXCOORD_ATTRIBUTE + "0;\n" //
-				+ "uniform mat4 u_projTrans;\n" //
-				+ "varying vec4 v_color;\n" //
-				+ "varying vec2 v_texCoords;\n" //
-				+ "\n" //
-				+ "void main()\n" //
-				+ "{\n" //
-				+ "   v_color = " + ShaderProgram.COLOR_ATTRIBUTE + ";\n" //
-				+ "   v_texCoords = " + ShaderProgram.TEXCOORD_ATTRIBUTE + "0;\n" //
-				+ "   gl_Position =  u_projTrans * " + ShaderProgram.POSITION_ATTRIBUTE + ";\n" //
-				+ "}\n";
-
-		String fragment = "#ifdef GL_ES\n" //
-				+ "#define LOWP lowp\n" //
-				+ "precision mediump float;\n" //
-				+ "#else\n" //
-				+ "#define LOWP \n" //
-				+ "#endif\n" //
-				+ "varying LOWP vec4 v_color;\n" //
-				+ "varying vec2 v_texCoords;\n" //
-				+ "uniform sampler2D u_texture;\n" //
-				+ "void main()\n"//
-				+ "{\n" //
-				+ "    vec4 c4 = texture2D(u_texture, v_texCoords);\n"
-				+ "    if(c4.r == 0.0 && c4.g == 0.0 && c4.b == 0.0) "
-				+ "{ gl_FragColor = v_color * vec4(c4.r, c4.g, c4.b, 0.0);}"
-				+ " else {gl_FragColor = v_color * c4;}\n"
-				+ "}";
-		layershader = new ShaderProgram(vertex, fragment);
-
-		System.out.println(layershader.getLog());
-
 		audio = resource.getAudioProcessor();
 		bga = resource.getBGAManager();
 	}
@@ -437,6 +382,9 @@ public class BMSPlayer extends MainState {
 	public void render() {
 		final ShapeRenderer shape = main.getShapeRenderer();
 		final SpriteBatch sprite = main.getSpriteBatch();
+
+		final float w = main.RESOLUTION[resource.getConfig().getResolution()].width;
+		final float h = main.RESOLUTION[resource.getConfig().getResolution()].height;
 
 		final long nowtime = System.currentTimeMillis() ;
 		final int time = (int) (nowtime - starttime);
@@ -472,10 +420,9 @@ public class BMSPlayer extends MainState {
 				state = STATE_PLAY;
 				starttime = System.currentTimeMillis();
 				input.setStartTime(starttime);
-				prevrendertime = -1;
 				List<KeyInputLog> keylog = null;
 				if (autoplay == 1) {
-					keylog = this.createAutoplayLog();
+					keylog = createAutoplayLog(model);
 				} else if (autoplay == 2) {
 					keylog = Arrays.asList(replay.keylog);
 				}
@@ -489,7 +436,6 @@ public class BMSPlayer extends MainState {
 		// プレイ
 		case STATE_PLAY:
 			starttime += (nowtime - prevtime) * (100 - playspeed) / 100;
-			final long pretime = prevrendertime;
 			final float g = gauge.getValue();
 			if (gaugelog.size() <= time / 500) {
 				gaugelog.add(g);
@@ -524,12 +470,12 @@ public class BMSPlayer extends MainState {
 			shape.begin(ShapeType.Filled);
 			long l = System.currentTimeMillis() - finishtime;
 			shape.setColor(0, 0, 0, ((float) l) / 1000f);
-			float height = 360f * l / 1000;
-			shape.rect(0, 720 - height * 2, 1280, height * 2);
-			shape.rect(0, 0, 1280, height * 2);
+			float height = h / 2 * l / 1000;
+			shape.rect(0, h - height * 2, w, height * 2);
+			shape.rect(0, 0, w, height * 2);
 			shape.setColor(0, 0, 0, 1);
-			shape.rect(0, 720 - height, 1280, height);
-			shape.rect(0, 0, 1280, height);
+			shape.rect(0, h - height, w, height);
+			shape.rect(0, 0, w, height);
 			shape.end();
 			Gdx.gl.glDisable(GL11.GL_BLEND);
 			if (l > 1000) {
@@ -563,7 +509,7 @@ public class BMSPlayer extends MainState {
 			shape.begin(ShapeType.Filled);
 			long l2 = System.currentTimeMillis() - finishtime;
 			shape.setColor(1, 1, 1, ((float) l2) / 5000f);
-			shape.rect(0, 0, 1280, 720);
+			shape.rect(0, 0, w, h);
 			shape.end();
 			Gdx.gl.glDisable(GL11.GL_BLEND);
 			if (l2 > 1000) {
@@ -699,9 +645,6 @@ public class BMSPlayer extends MainState {
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-		float w = 1280;
-		float h = 720;
-
 		// 背景描画
 		sprite.begin();
 		for (SkinImage part : skin.getSkinPart()) {
@@ -736,24 +679,6 @@ public class BMSPlayer extends MainState {
 		lanerender.drawLane(systemfont, time);
 
 		// BGA再生
-		for (TimeLine tl : timelines) {
-			if (tl.getTime() > time) {
-				break;
-			}
-
-			if (tl.getTime() > prevrendertime) {
-				if (tl.getBGA() != -1) {
-					playingbgaid = tl.getBGA();
-				}
-				if (tl.getLayer() != -1) {
-					playinglayerid = tl.getLayer();
-				}
-				if (tl.getPoor() != null && tl.getPoor().length > 0) {
-					misslayer = tl.getPoor();
-				}
-			}
-		}
-
 		Rectangle r = skin.getBGAregion();
 		shape.begin(ShapeType.Line);
 		shape.setColor(Color.WHITE);
@@ -763,41 +688,8 @@ public class BMSPlayer extends MainState {
 		shape.setColor(Color.BLACK);
 		shape.rect(r.x, r.y, r.width, r.height);
 		shape.end();
-		if (state == STATE_PRELOAD && bga.getBackbmpData() != null) {
-			sprite.begin();
-			sprite.draw(bga.getBackbmpData(), r.x, r.y, r.width, r.height);
-			sprite.end();
-		} else if (misslayer != null && misslayertime != 0 && time >= misslayertime
-				&& time < misslayertime + 500) {
-			// draw miss layer
-			Texture miss = bga.getBGAData(misslayer[misslayer.length * (time - misslayertime) / 500]);
-			if (miss != null) {
-				sprite.begin();
-				sprite.draw(miss, r.x, r.y, r.width, r.height);
-				sprite.end();
-			}
-		} else {
-			// draw BGA
-			Texture playingbgatex = bga.getBGAData(playingbgaid);
-			if (playingbgatex != null) {
-				sprite.begin();
-				sprite.draw(playingbgatex, r.x, r.y, r.width, r.height);
-				sprite.end();
-			}
-			// draw layer
-			Texture playinglayertex = bga.getBGAData(playinglayerid);
-			if (playinglayertex != null) {
-				sprite.begin();
-				if (layershader.isCompiled()) {
-					sprite.setShader(layershader);
-					sprite.draw(playinglayertex, r.x, r.y, r.width, r.height);
-					sprite.setShader(null);
-				} else {
-					sprite.draw(playinglayertex, r.x, r.y, r.width, r.height);
-				}
-				sprite.end();
-			}
-		}
+		
+		bga.drawBGA(sprite, r, state == STATE_PRELOAD ? -1 : time);
 
 		sprite.begin();
 		skin.drawAllObjects(sprite, time);
@@ -820,8 +712,6 @@ public class BMSPlayer extends MainState {
 		shape.rect(judge.x, judge.y, judge.width, judge.height);
 		shape.end();
 		Gdx.gl.glDisable(GL11.GL_BLEND);
-
-		prevrendertime = time;
 	}
 
 	@Override
@@ -871,11 +761,15 @@ public class BMSPlayer extends MainState {
 			notes++;
 		}
 		if(judge == 3 || judge == 4) {
-			misslayertime = time;
+			bga.setMisslayerTme(time);
 		}
 		gauge.update(judge);
 		// System.out.println(
 		// "Now count : " + notes + " - " + totalnotes);
+		if (judge < 2) {
+			lanerender.update(lane, judge, time);
+		}
+
 	}
 
 	public GrooveGauge getGauge() {
@@ -887,7 +781,7 @@ public class BMSPlayer extends MainState {
 	 * 
 	 * @return AUTOPLAY用のKeyInputLog
 	 */
-	private final List<KeyInputLog> createAutoplayLog() {
+	public static final List<KeyInputLog> createAutoplayLog(BMSModel model) {
 		List<KeyInputLog> keylog = new ArrayList<KeyInputLog>();
 		int keys = (model.getUseKeys() == 5 || model.getUseKeys() == 7) ? 9 : ((model.getUseKeys() == 10 || model
 				.getUseKeys() == 14) ? 18 : 9);

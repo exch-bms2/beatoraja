@@ -11,6 +11,9 @@ import bms.player.beatoraja.Config;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.math.Rectangle;
 
 /**
  * BGAのリソース管理用クラス
@@ -38,9 +41,64 @@ public class BGAProcessor {
 
 	private Texture[] bgacache = new Texture[256];
 	private int[] bgacacheid = new int[256];
+	
+	/**
+	 * 再生中のBGAID
+	 */
+	private int playingbgaid = -1;
+	/**
+	 * 再生中のレイヤーID
+	 */
+	private int playinglayerid = -1;
+	/**
+	 * ミスレイヤー表示開始時間
+	 */
+	private int misslayertime;
+	/**
+	 * 現在のミスレイヤーシーケンス
+	 */
+	private int[] misslayer = null;
+
+	private int prevrendertime;
+
+	private ShaderProgram layershader;
 
 	public BGAProcessor(Config config) {
 		this.config = config;
+		
+		String vertex = "attribute vec4 " + ShaderProgram.POSITION_ATTRIBUTE + ";\n" //
+				+ "attribute vec4 " + ShaderProgram.COLOR_ATTRIBUTE + ";\n" //
+				+ "attribute vec2 " + ShaderProgram.TEXCOORD_ATTRIBUTE + "0;\n" //
+				+ "uniform mat4 u_projTrans;\n" //
+				+ "varying vec4 v_color;\n" //
+				+ "varying vec2 v_texCoords;\n" //
+				+ "\n" //
+				+ "void main()\n" //
+				+ "{\n" //
+				+ "   v_color = " + ShaderProgram.COLOR_ATTRIBUTE + ";\n" //
+				+ "   v_texCoords = " + ShaderProgram.TEXCOORD_ATTRIBUTE + "0;\n" //
+				+ "   gl_Position =  u_projTrans * " + ShaderProgram.POSITION_ATTRIBUTE + ";\n" //
+				+ "}\n";
+
+		String fragment = "#ifdef GL_ES\n" //
+				+ "#define LOWP lowp\n" //
+				+ "precision mediump float;\n" //
+				+ "#else\n" //
+				+ "#define LOWP \n" //
+				+ "#endif\n" //
+				+ "varying LOWP vec4 v_color;\n" //
+				+ "varying vec2 v_texCoords;\n" //
+				+ "uniform sampler2D u_texture;\n" //
+				+ "void main()\n"//
+				+ "{\n" //
+				+ "    vec4 c4 = texture2D(u_texture, v_texCoords);\n"
+				+ "    if(c4.r == 0.0 && c4.g == 0.0 && c4.b == 0.0) "
+				+ "{ gl_FragColor = v_color * vec4(c4.r, c4.g, c4.b, 0.0);}"
+				+ " else {gl_FragColor = v_color * c4;}\n"
+				+ "}";
+		layershader = new ShaderProgram(vertex, fragment);
+
+		System.out.println(layershader.getLog());
 	}
 
 	public void setModel(BMSModel model, String filepath) {
@@ -130,7 +188,7 @@ public class BGAProcessor {
 			if (dir.getName().endsWith(mov)) {
 				try {
 					tex = new Pixmap(Gdx.files.internal(dir.getPath()));
-					System.out.println("BGA Picture loaded  : " + dir.getName());
+//					System.out.println("BGA Picture loaded  : " + dir.getName());
 					break;
 				} catch (Exception e) {
 					Logger.getGlobal().warning("BGAファイル読み込み失敗。" + e.getMessage());
@@ -218,6 +276,68 @@ public class BGAProcessor {
 			return bgacache[id % bgacache.length];
 		}
 		return null;
+	}
+	
+	public void drawBGA(SpriteBatch sprite, Rectangle r, int time) {
+		for (TimeLine tl : model.getAllTimeLines()) {
+			if (tl.getTime() > time) {
+				break;
+			}
+
+			if (tl.getTime() > prevrendertime) {
+				if (tl.getBGA() != -1) {
+					playingbgaid = tl.getBGA();
+				}
+				if (tl.getLayer() != -1) {
+					playinglayerid = tl.getLayer();
+				}
+				if (tl.getPoor() != null && tl.getPoor().length > 0) {
+					misslayer = tl.getPoor();
+				}
+			}
+		}
+
+		if (time < 0 && getBackbmpData() != null) {
+			sprite.begin();
+			sprite.draw(getBackbmpData(), r.x, r.y, r.width, r.height);
+			sprite.end();
+		} else if (misslayer != null && misslayertime != 0 && time >= misslayertime
+				&& time < misslayertime + 500) {
+			// draw miss layer
+			Texture miss = getBGAData(misslayer[misslayer.length * (time - misslayertime) / 500]);
+			if (miss != null) {
+				sprite.begin();
+				sprite.draw(miss, r.x, r.y, r.width, r.height);
+				sprite.end();
+			}
+		} else {
+			// draw BGA
+			Texture playingbgatex = getBGAData(playingbgaid);
+			if (playingbgatex != null) {
+				sprite.begin();
+				sprite.draw(playingbgatex, r.x, r.y, r.width, r.height);
+				sprite.end();
+			}
+			// draw layer
+			Texture playinglayertex = getBGAData(playinglayerid);
+			if (playinglayertex != null) {
+				sprite.begin();
+				if (layershader.isCompiled()) {
+					sprite.setShader(layershader);
+					sprite.draw(playinglayertex, r.x, r.y, r.width, r.height);
+					sprite.setShader(null);
+				} else {
+					sprite.draw(playinglayertex, r.x, r.y, r.width, r.height);
+				}
+				sprite.end();
+			}
+		}
+		
+		prevrendertime = time;
+	}
+	
+	public void setMisslayerTme(int time) {
+		misslayertime = time;
 	}
 
 	/**
