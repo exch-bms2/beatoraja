@@ -284,13 +284,13 @@ public class MusicSelector extends MainState {
 						config.getLr2selectskinoption());
 			} catch (IOException e) {
 				e.printStackTrace();
-				skin = new MusicSelectSkin();
+				skin = new MusicSelectSkin(main.RESOLUTION[config.getResolution()]);
 			}
 
 			// lr2playskin = "skin/spdframe/csv/left_ACwide.csv";
 
 		} else {
-			skin = new MusicSelectSkin();
+			skin = new MusicSelectSkin(main.RESOLUTION[config.getResolution()]);
 		}
 		this.setSkin(skin);
 
@@ -307,8 +307,8 @@ public class MusicSelector extends MainState {
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-		final float w = 1280;
-		final float h = 720;
+		final float w = main.RESOLUTION[config.getResolution()].width;
+		final float h = main.RESOLUTION[config.getResolution()].height;
 
 		// 背景描画
 		// if (background != null) {
@@ -347,7 +347,7 @@ public class MusicSelector extends MainState {
 			int index = (int) (selectedindex + currentsongs.length * 100 + i - h / barh / 2) % currentsongs.length;
 			Bar sd = currentsongs[index];
 			float x = w * 3 / 5;
-			if (i == (int) (h / barh / 2)) {
+			if (i == (int) ((h / barh + 1) / 2)) {
 				x -= 20;
 			}
 			sprite.begin();

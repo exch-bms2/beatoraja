@@ -1,6 +1,5 @@
 package bms.player.beatoraja;
 
-import java.awt.Rectangle;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -12,7 +11,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import bms.model.*;
 import bms.player.beatoraja.config.KeyConfiguration;
 import bms.player.beatoraja.decide.MusicDecide;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
@@ -21,7 +19,6 @@ import bms.player.beatoraja.result.GradeResult;
 import bms.player.beatoraja.result.MusicResult;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.skin.SkinNumber;
-import bms.player.lunaticrave2.*;
 
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.backends.lwjgl.*;
@@ -31,6 +28,7 @@ import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.*;
 import com.badlogic.gdx.utils.JsonWriter.OutputType;
 
@@ -71,7 +69,8 @@ public class MainController extends ApplicationAdapter {
 	 */
 	private PlayDataAccessor playdata;
 
-	public static final Rectangle[] RESOLUTION = {new Rectangle(640, 480),new Rectangle(1280, 720),new Rectangle(1920, 1280),new Rectangle(3840, 2560)};
+	public static final Rectangle[] RESOLUTION = { new Rectangle(0, 0, 640, 480), new Rectangle(0, 0, 1280, 720),
+			new Rectangle(0, 0, 1920, 1080), new Rectangle(0, 0, 3840, 2560) };
 
 	public MainController(File f, Config config, int auto) {
 		this.auto = auto;
@@ -185,11 +184,11 @@ public class MainController extends ApplicationAdapter {
 	public void render() {
 		final int time = current.getNowTime();
 		current.render();
-		
+
 		SkinNumber[] numbers = current.getSkin().getSkinNumbers();
 		sprite.begin();
-		for(SkinNumber number : numbers) {
-			number.draw(sprite, time ,current);
+		for (SkinNumber number : numbers) {
+			number.draw(sprite, time, current);
 		}
 		sprite.end();
 
@@ -201,7 +200,8 @@ public class MainController extends ApplicationAdapter {
 		if (showfps) {
 			sprite.begin();
 			systemfont.setColor(Color.PURPLE);
-			systemfont.draw(sprite, String.format("FPS %d", Gdx.graphics.getFramesPerSecond()), 10, 718);
+			systemfont.draw(sprite, String.format("FPS %d", Gdx.graphics.getFramesPerSecond()), 10,
+					RESOLUTION[config.getResolution()].height - 2);
 			sprite.end();
 		}
 
@@ -317,8 +317,8 @@ public class MainController extends ApplicationAdapter {
 		try {
 			MainController player = new MainController(f, config, auto);
 			LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
-			cfg.width = RESOLUTION[config.getResolution()].width;
-			cfg.height = RESOLUTION[config.getResolution()].height;
+			cfg.width = (int) RESOLUTION[config.getResolution()].width;
+			cfg.height = (int) RESOLUTION[config.getResolution()].height;
 
 			// fullscreen
 			cfg.fullscreen = config.isFullscreen();

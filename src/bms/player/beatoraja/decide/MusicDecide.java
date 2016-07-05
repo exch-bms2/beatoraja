@@ -42,10 +42,10 @@ public class MusicDecide extends MainState {
 						.getConfig().getLr2decideskinoption()));
 			} catch (IOException e) {
 				e.printStackTrace();
-				setSkin(new MusicDecideSkin());
+				setSkin(new MusicDecideSkin(main.RESOLUTION[resource.getConfig().getResolution()]));
 			}
 		} else {
-			setSkin(new MusicDecideSkin());
+			setSkin(new MusicDecideSkin(main.RESOLUTION[resource.getConfig().getResolution()]));
 		}
 
 		if(resource.getCourseBMSModels() != null) {
@@ -63,8 +63,8 @@ public class MusicDecide extends MainState {
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-		final float w = 1280;
-		final float h = 720;
+		final float w = main.RESOLUTION[resource.getConfig().getResolution()].width;
+		final float h = main.RESOLUTION[resource.getConfig().getResolution()].height;
 
 		if (resource.getCourseBMSModels() == null && resource.getBGAManager().getStagefileData() != null) {
 			sprite.begin();

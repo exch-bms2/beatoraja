@@ -106,10 +106,10 @@ public class MusicResult extends MainState {
 						.getConfig().getLr2resultskinoption());
 			} catch (IOException e) {
 				e.printStackTrace();
-				skin = new MusicResultSkin();
+				skin = new MusicResultSkin(main.RESOLUTION[resource.getConfig().getResolution()]);
 			}
 		} else {
-			skin = new MusicResultSkin();
+			skin = new MusicResultSkin(main.RESOLUTION[resource.getConfig().getResolution()]);
 		}
 		this.setSkin(skin);
 
@@ -125,8 +125,8 @@ public class MusicResult extends MainState {
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-		final float w = 1280;
-		final float h = 720;
+		final float w = main.RESOLUTION[resource.getConfig().getResolution()].width;
+		final float h = main.RESOLUTION[resource.getConfig().getResolution()].height;
 
 		Rectangle graph = skin.getGaugeRegion();
 
@@ -144,7 +144,7 @@ public class MusicResult extends MainState {
 		Gdx.gl.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		shape.begin(ShapeType.Filled);
 		shape.setColor(0, 0, 0, 0.8f);
-		shape.rect(80, 70, 1120, 380);
+		shape.rect(w / 40, h / 8, w * 0.95f, h / 2);
 		shape.end();
 		Gdx.gl.glDisable(GL11.GL_BLEND);
 
@@ -177,29 +177,29 @@ public class MusicResult extends MainState {
 			
 			if (oldclear != 0) {
 				titlefont.setColor(Color.valueOf(LAMP[oldclear]));
-				titlefont.draw(sprite, CLEAR[oldclear] + " -> ", 240, 425);
+				titlefont.draw(sprite, CLEAR[oldclear] + " -> ", 240 * w / 1280, 425 * h / 720);
 			}
 			titlefont.setColor(Color.valueOf(LAMP[score.getClear()]));
-			titlefont.draw(sprite, CLEAR[score.getClear()], 440, 425);
+			titlefont.draw(sprite, CLEAR[score.getClear()], 440 * w / 1280, 425 * h / 720);
 			titlefont.setColor(Color.WHITE);
 
 			if (oldexscore != 0) {
 				titlefont.setColor(Color.WHITE);
-				titlefont.draw(sprite, " -> ", 360, 395);
+				titlefont.draw(sprite, " -> ", 360 * w / 1280, 395 * h / 720);
 				skin.getScore(score.getExscore() > oldexscore ? 2 : 3).draw(sprite, time, Math.abs(score.getExscore() - oldexscore));
 			}
 
 			if (oldmisscount < 65535) {
-				titlefont.draw(sprite, " -> ", 360, 365);
+				titlefont.draw(sprite, " -> ", 360 * w / 1280, 365 * h / 720);
 				skin.getMisscount(score.getMinbp() > oldmisscount ? 3 : 2).draw(sprite, time, Math.abs(score.getMinbp() - oldmisscount));
 			}
 			
 			if(oldcombo > 0) {
-				titlefont.draw(sprite, " -> ", 360, 335);
+				titlefont.draw(sprite, " -> ", 360 * w / 1280, 335 * h / 720);
 				skin.getMaxcombo(score.getCombo() > oldcombo ? 2 : 3).draw(sprite, time, Math.abs(score.getCombo() - oldcombo));
 			}
 
-			titlefont.draw(sprite, "FAST / SLOW  :  ", 100, 100);
+			titlefont.draw(sprite, "FAST / SLOW  :  ", 100 * w / 1280, 100 * h / 720);
 
 			skin.getJudgeCount(true).draw(sprite, time,
 					score.getEgr() + score.getEgd() + score.getEbd() + score.getEpr() + score.getEms());
@@ -212,7 +212,7 @@ public class MusicResult extends MainState {
 		Gdx.gl.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		shape.begin(ShapeType.Filled);
 		shape.setColor(0, 0, 0, 0.8f);
-		shape.rect(0, 0, 1280, 25);
+		shape.rect(0, 0, w, 25);
 		shape.end();
 		Gdx.gl.glDisable(GL11.GL_BLEND);
 		sprite.begin();
