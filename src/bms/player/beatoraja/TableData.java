@@ -17,6 +17,8 @@ public class TableData {
 	public static final int GRADE_MIRROR = 2;
 	public static final int GRADE_RANDOM = 3;
 	public static final int NO_HISPEED = 4;
+	public static final int NO_GOOD = 5;
+	public static final int NO_GREAT = 6;
 	
 	public String getName() {
 		return name;

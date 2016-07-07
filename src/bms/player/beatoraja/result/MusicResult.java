@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.List;
 
 import bms.player.beatoraja.gauge.*;
+import bms.player.beatoraja.select.MusicSelector;
 import org.lwjgl.opengl.GL11;
 
 import bms.model.BMSModel;
@@ -90,8 +91,8 @@ public class MusicResult extends MainState {
 				&& resource.getScoreData() != null
 				&& resource.getScoreData().getClear() >= GrooveGauge.CLEARTYPE_EASY
 				&& !main.getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
-						resource.getConfig().getLnmode())) {
-			saveReplayData();
+						resource.getConfig().getLnmode(), 0)) {
+			saveReplayData(0);
 		}
 		// コースモードの場合はリプレイデータをストックする
 		if(resource.getCourseBMSModels() != null) {
@@ -267,19 +268,22 @@ public class MusicResult extends MainState {
 			}
 		}
 
-		if (resource.getAutoplay() == 0 && main.getInputProcessor().getNumberState()[1]) {
-			saveReplayData();
+		for(int i = 0;i < MusicSelector.REPLAY;i++) {
+			if (resource.getAutoplay() == 0 && main.getInputProcessor().getNumberState()[i + 1]) {
+				saveReplayData(i);
+				break;
+			}
 		}
 	}
 
 	private boolean saveReplay = false;
 
-	private void saveReplayData() {
+	private void saveReplayData(int index) {
 		if (resource.getCourseBMSModels() == null && resource.getScoreData() != null) {
 			if (!saveReplay && resource.isUpdateScore()) {
 				ReplayData rd = resource.getReplayData();
 				main.getPlayDataAccessor()
-						.wrireReplayData(rd, resource.getBMSModel(), resource.getConfig().getLnmode());
+						.wrireReplayData(rd, resource.getBMSModel(), resource.getConfig().getLnmode(), index);
 				saveReplay = true;
 			}
 		}

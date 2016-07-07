@@ -116,10 +116,10 @@ public class BMSPlayer extends MainState {
 		}
 		this.setSkin(skin);
 
-		if (autoplay == 2) {
+		if (autoplay >= 2) {
 			if(resource.getCourseBMSModels() != null) {
 				if(resource.getCourseReplay().length == 0) {
-					ReplayData[] replays = main.getPlayDataAccessor().readReplayData(resource.getCourseBMSModels(), config.getLnmode());
+					ReplayData[] replays = main.getPlayDataAccessor().readReplayData(resource.getCourseBMSModels(), config.getLnmode(), autoplay - 2);
 					if(replays != null) {
 						for(ReplayData rd : replays) {
 							resource.addCourseReplay(rd);
@@ -136,7 +136,7 @@ public class BMSPlayer extends MainState {
 					}
 				}
 			} else {
-				replay = main.getPlayDataAccessor().readReplayData(model, config.getLnmode());
+				replay = main.getPlayDataAccessor().readReplayData(model, config.getLnmode(), autoplay - 2);
 				if (replay == null) {
 					autoplay = 0;
 				}
@@ -144,7 +144,7 @@ public class BMSPlayer extends MainState {
 		}
 
 		if(model.getRandom() > 1) {
-			if(autoplay == 2) {
+			if(autoplay >= 2) {
 				model.setSelectedIndexOfTimeLines(replay.random);								
 			} else if(resource.getReplayData().pattern != null) {
 				model.setSelectedIndexOfTimeLines(resource.getReplayData().random);												
@@ -181,7 +181,7 @@ public class BMSPlayer extends MainState {
 				score = false;
 			}
 			if (config.isExpandjudge()) {
-				judge.setExpandJudge();
+				judge.setExpandJudge(JudgeManager.EXPAND_JUDGE);
 				assist = 2;
 				score = false;
 			}
@@ -203,7 +203,7 @@ public class BMSPlayer extends MainState {
 				score = false;
 			}
 		}
-		judge = new JudgeManager(this, model);
+		judge = new JudgeManager(this, model, resource.getConstraint());
 		totalnotes = model.getTotalNotes();
 
 		Logger.getGlobal().info("アシストオプション設定完了");
@@ -423,7 +423,7 @@ public class BMSPlayer extends MainState {
 				List<KeyInputLog> keylog = null;
 				if (autoplay == 1) {
 					keylog = createAutoplayLog(model);
-				} else if (autoplay == 2) {
+				} else if (autoplay >= 2) {
 					keylog = Arrays.asList(replay.keylog);
 				}
 				autoThread = new AutoplayThread();
@@ -549,16 +549,19 @@ public class BMSPlayer extends MainState {
 	}
 
 	private void saveConfig() {
-		if (resource.getConstraint() == 0) {
-			Config config = resource.getConfig();
-			if (lanerender.getFixHispeed() != Config.FIX_HISPEED_OFF) {
-				config.setGreenvalue(lanerender.getGreenValue());
-			} else {
-				config.setHispeed(lanerender.getHispeed());
+		for(int c : resource.getConstraint()) {
+			if(c == TableData.NO_HISPEED) {
+				return;
 			}
-			config.setLanecover(lanerender.getLaneCoverRegion());
-			config.setLift(lanerender.getLiftRegion());
 		}
+		Config config = resource.getConfig();
+		if (lanerender.getFixHispeed() != Config.FIX_HISPEED_OFF) {
+			config.setGreenvalue(lanerender.getGreenValue());
+		} else {
+			config.setHispeed(lanerender.getHispeed());
+		}
+		config.setLanecover(lanerender.getLaneCoverRegion());
+		config.setLift(lanerender.getLiftRegion());
 	}
 
 	public IRScoreData createScoreData() {
@@ -839,10 +842,10 @@ public class BMSPlayer extends MainState {
 
 		@Override
 		public void run() {
-			final TimeLine[] timelines = model.getAllTimeLines();
 			int index = 0;
 
 			int time = 0;
+			final TimeLine[] timelines = model.getAllTimeLines();
 			while (time < timelines[timelines.length - 1].getTime() + 5000 && !stop) {
 				time = (int) (System.currentTimeMillis() - starttime);
 				// リプレイデータ再生
@@ -878,8 +881,8 @@ public class BMSPlayer extends MainState {
 
 		@Override
 		public void run() {
-			final TimeLine[] timelines = model.getAllTimeLines();
 			int time = 0;
+			final TimeLine[] timelines = model.getAllTimeLines();
 			for (int p = 0; time < timelines[timelines.length - 1].getTime() + 5000 && !stop;) {
 				time = (int) (System.currentTimeMillis() - starttime);
 				// BGレーン再生

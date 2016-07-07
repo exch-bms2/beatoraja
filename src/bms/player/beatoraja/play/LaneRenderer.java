@@ -97,7 +97,7 @@ public class LaneRenderer {
 
 	private int[] judgecombo;
 
-    public LaneRenderer(BMSPlayer main, SpriteBatch sprite, ShapeRenderer shape, PlaySkin skin, PlayerResource resource, BMSModel model, int mode) {
+    public LaneRenderer(BMSPlayer main, SpriteBatch sprite, ShapeRenderer shape, PlaySkin skin, PlayerResource resource, BMSModel model, int[] mode) {
     	dw = MainController.RESOLUTION[resource.getConfig().getResolution()].width / 1280f;
     	dh = MainController.RESOLUTION[resource.getConfig().getResolution()].height / 720f;
 		bomb = new long[skin.getLaneregion().length];
@@ -159,11 +159,13 @@ public class LaneRenderer {
             basehispeed = hispeed;
         }
 
-        if (mode == TableData.NO_HISPEED) {
-            enableControl = false;
-            hispeed = 1.0f;
-            lanecover = 0;
-            lift = 0;
+        for(int i : mode) {
+            if (i == TableData.NO_HISPEED) {
+                enableControl = false;
+                hispeed = 1.0f;
+                lanecover = 0;
+                lift = 0;
+            }
         }
     }
 

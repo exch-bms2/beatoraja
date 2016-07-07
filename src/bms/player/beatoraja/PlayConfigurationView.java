@@ -339,7 +339,7 @@ public class PlayConfigurationView implements Initializable {
 		}
 	}
 	
-	private static final String[] CONSTRAINT = {"null", "grade", "grade_mirror", "grade_random", "no_speed"}; 
+	private static final String[] CONSTRAINT = {"null", "grade", "grade_mirror", "grade_random", "no_speed", "no_good", "no_great"};
 
 	public void loadTable() {
 		commit();

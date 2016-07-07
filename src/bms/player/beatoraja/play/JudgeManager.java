@@ -3,6 +3,7 @@ package bms.player.beatoraja.play;
 import java.util.Arrays;
 
 import bms.model.*;
+import bms.player.beatoraja.TableData;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 
 /**
@@ -114,7 +115,7 @@ public class JudgeManager {
 		sckey = new int[sckeyassign.length];
 	}
 
-	public JudgeManager(BMSPlayer main, BMSModel model) {
+	public JudgeManager(BMSPlayer main, BMSModel model, int[] constraint) {
 		this.main = main;
 		this.model = model;
 		switch (model.getUseKeys()) {
@@ -141,18 +142,27 @@ public class JudgeManager {
 		}
 		prepareAttr(((PlaySkin) main.getSkin()).getJudgeregion().length);
 
-		njudge = new int[6];
-		sjudge = new int[6];
-		for (int i = 0; i < judgetable.length; i++) {
-			if (i < 4) {
-				njudge[i] = (model.getUseKeys() == 9 ? pjudgetable[i] : judgetable[i]) * model.getJudgerank() / 100;
-				sjudge[i] = njudge[i] * sjudgerate / 100;
-			} else {
-				sjudge[i] = njudge[i] = (model.getUseKeys() == 9 ? pjudgetable[i] : judgetable[i]);
+        njudge = new int[6];
+        sjudge = new int[6];
+        for (int i = 0; i < judgetable.length; i++) {
+            if (i < 4) {
+                njudge[i] = (model.getUseKeys() == 9 ? pjudgetable[i] : judgetable[i]) * model.getJudgerank() / 100;
+                sjudge[i] = njudge[i] * sjudgerate / 100;
+            } else {
+                sjudge[i] = njudge[i] = (model.getUseKeys() == 9 ? pjudgetable[i] : judgetable[i]);
+                
+            }
+        }
 
-			}
-		}
-	}
+        for(int mode : constraint) {
+            if(mode == TableData.NO_GREAT) {
+                setExpandJudge(NO_GREAT_JUDGE);
+            }
+            if(mode == TableData.NO_GOOD) {
+                setExpandJudge(NO_GOOD_JUDGE);
+            }
+        }
+    }
 
 	public void update(TimeLine[] timelines, int time) {
 		BMSPlayerInputProcessor input = main.getBMSPlayerInputProcessor();
@@ -532,15 +542,32 @@ public class JudgeManager {
 		return fast ? count[judge][0] : count[judge][1];
 	}
 
-	public void setExpandJudge() {
-		njudge[0] = njudge[1];
-		njudge[1] = njudge[2];
-		njudge[2] = njudge[3];
-		sjudge[0] = sjudge[1];
-		sjudge[1] = sjudge[2];
-		sjudge[2] = sjudge[3];
-	}
+    public static final int EXPAND_JUDGE = 0;
+    public static final int NO_GREAT_JUDGE = 1;
+    public static final int NO_GOOD_JUDGE = 2;
 
+    public void setExpandJudge(int mode) {
+        switch (mode) {
+            case EXPAND_JUDGE:
+                njudge[0] = njudge[1];
+                njudge[1] = njudge[2];
+                njudge[2] = njudge[3];
+                sjudge[0] = sjudge[1];
+                sjudge[1] = sjudge[2];
+                sjudge[2] = sjudge[3];
+                break;
+            case NO_GREAT_JUDGE:
+                njudge[1] = njudge[0];
+                sjudge[1] = sjudge[0];
+                njudge[2] = njudge[0];
+                sjudge[2] = sjudge[0];
+                break;
+            case NO_GOOD_JUDGE:
+                njudge[2] = njudge[0];
+                sjudge[2] = sjudge[0];
+                break;
+        }
+    }
 }
 
 /**
