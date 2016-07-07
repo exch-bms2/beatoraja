@@ -220,6 +220,31 @@ public class ScoreDatabaseAccessor {
 		return result;
 	}
 
+	public List<IRScoreData> getScoreDatas(String playername, String sql) {
+		Connection con = null;
+		List<IRScoreData> score = null;
+		try {
+			con = DriverManager.getConnection("jdbc:sqlite:" + rootpath + playerpath + playername + ".db");
+			ResultSetHandler<List<IRScoreData>> rh = new BeanListHandler<IRScoreData>(IRScoreData.class);
+			score = qr
+					.query(con,
+							"SELECT * FROM score WHERE " + sql
+							, rh);
+			con.close();
+		} catch (Exception e) {
+			Logger.getGlobal().severe("スコア" + playername + "取得時の例外:" + e.getMessage());
+		} finally {
+			if (con != null) {
+				try {
+					con.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
+		return score;
+
+	}
+
 	public void setScoreData(String playername, IRScoreData score) {
 		Connection con = null;
 		try {

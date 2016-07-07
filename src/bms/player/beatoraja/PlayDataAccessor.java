@@ -138,13 +138,7 @@ public class PlayDataAccessor {
 	}
 
 	public List<IRScoreData> readScoreDatas(String sql, int lnmode) {
-		List<IRScoreData> scores = new ArrayList();
-		for(IRScoreData score : scoredb.getScoreDatas(player, sql)) {
-			if((lnmode == 0 && !score.getSha256().startsWith("C")) || (lnmode > 0 && score.getSha256().startsWith("C"))) {
-				scores.add(score);
-			}
-		}
-		return scores;
+		return scoredb.getScoreDatas(player, "mode = " + lnmode + " AND " + sql);
 	}
 	/**
 	 * スコアデータを書き込む

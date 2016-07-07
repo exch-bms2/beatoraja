@@ -106,7 +106,7 @@ public class MusicSelector extends MainState {
 
 	private TableBar[] tables = new TableBar[0];
 
-	private CommandBar[] commands = { new MyBestBar(), new ClearLampBar(GrooveGauge.CLEARTYPE_FULLCOMBO, "FULL COMBO") };
+	private CommandBar[] commands;
 
 	private MusicSelectSkin skin;
 
@@ -188,6 +188,14 @@ public class MusicSelector extends MainState {
 		for (int i = 0; i < scorecache.length; i++) {
 			scorecache[i] = new HashMap();
 		}
+
+		commands = new CommandBar[]{new CommandBar(main, this, "MY BEST", "playcount > 0 ORDER BY playcount DESC "),
+				new CommandBar(main, this, "FULL COMBO", "clear >= 8"),
+				new CommandBar(main, this, "EX HARD CLEAR", "clear = 7"),
+				new CommandBar(main, this, "HARD CLEAR", "clear = 6"),
+				new CommandBar(main, this, "CLEAR", "clear = 5"),
+				new CommandBar(main, this, "EASY CLEAR", "clear = 4"),
+				new CommandBar(main, this, "ASSIST CLEAR", "clear IN (2, 3)")};
 	}
 
 	IRScoreData readScoreData(SongData song, int lnmode) {

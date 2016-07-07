@@ -415,19 +415,23 @@ class TableLevelBar extends DirectoryBar {
 	}
 }
 
-abstract class CommandBar extends DirectoryBar {
+class CommandBar extends DirectoryBar {
 
-}
+	private MainController main;
+	private MusicSelector selector;
+	private String title;
+	private String sql;
 
-class MyBestBar extends CommandBar {
-
-	public MyBestBar() {
-
+	public CommandBar(MainController main, MusicSelector selector,String title, String sql) {
+		this.main = main;
+		this.selector = selector;
+		this.title = title;
+		this.sql = sql;
 	}
 
 	@Override
 	public String getTitle() {
-		return "MY BEST";
+		return title;
 	}
 
 	@Override
@@ -437,36 +441,15 @@ class MyBestBar extends CommandBar {
 
 	@Override
 	public Bar[] getChildren() {
-		// TODO 未実装
-		return new Bar[0];
-	}
-
-}
-
-class ClearLampBar extends CommandBar {
-
-	private int clear;
-	private String name;
-
-	public ClearLampBar(int clear, String name) {
-		this.clear = clear;
-		this.name = name;
-	}
-
-	@Override
-	public String getTitle() {
-		return name;
-	}
-
-	@Override
-	public int getLamp() {
-		return 0;
-	}
-
-	@Override
-	public Bar[] getChildren() {
-		// TODO 未実装
-		return new Bar[0];
+		List<IRScoreData> scores = main.getPlayDataAccessor().readScoreDatas(sql, selector.getResource().getConfig().getLnmode());
+		List<Bar> l = new ArrayList<Bar>();
+		for(IRScoreData score : scores) {
+			SongData[] song = selector.getSongDatabase().getSongDatas("sha256", score.getSha256(), new File(".").getAbsolutePath());
+			if(song.length > 0) {
+				l.add(new SongBar(song[0]));
+			}
+		}
+		return l.toArray(new Bar[0]);
 	}
 
 }
