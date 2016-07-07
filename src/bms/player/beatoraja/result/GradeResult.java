@@ -47,13 +47,12 @@ public class GradeResult extends MainState {
 
 	public GradeResult(MainController main) {
 		this.main = main;
-
-		skin = new MusicResultSkin();
-		this.setSkin(skin);
 	}
 
 	public void create(PlayerResource resource) {
 		this.resource = resource;
+		skin = new MusicResultSkin(main.RESOLUTION[resource.getConfig().getResolution()]);
+		this.setSkin(skin);
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/VL-Gothic-Regular.ttf"));
 		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
 		parameter.size = 24;

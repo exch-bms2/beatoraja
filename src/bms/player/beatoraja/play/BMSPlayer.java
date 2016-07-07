@@ -769,9 +769,7 @@ public class BMSPlayer extends MainState {
 		gauge.update(judge);
 		// System.out.println(
 		// "Now count : " + notes + " - " + totalnotes);
-		if (judge < 2) {
-			lanerender.update(lane, judge, time);
-		}
+		lanerender.update(lane, judge, time);
 
 	}
 

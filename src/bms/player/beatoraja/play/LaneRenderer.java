@@ -722,7 +722,9 @@ public class LaneRenderer {
     }
 
 	public void update(int lane,int judge, int time) {
-		bomb[lane] = time;
+		if (judge < 2) {
+			bomb[lane] = time;			
+		}
 		judgenow[lane / (bomb.length / judgenow.length)] = judge + 1;
 		judgenowt[lane / (bomb.length / judgenow.length)] = time;
 		judgecombo[lane / (bomb.length / judgenow.length)] = main.getJudgeManager().getCourseCombo();;

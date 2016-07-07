@@ -564,36 +564,40 @@ public class MusicSelector extends MainState {
 			GradeBar gb = (GradeBar) currentsongs[selectedindex];
 			titlefont.draw(sprite, gb.getTitle(), 100, 600);
 
-			int random = 0;
 			for (int con : gb.getConstraint()) {
 				switch (con) {
 				case TableData.GRADE_NORMAL:
 					break;
 				case TableData.GRADE_MIRROR:
-					random = 1;
+					titlefont.setColor(Color.CYAN);
+					titlefont.draw(sprite, "MIRROR OK", 150, 570);
 					break;
 				case TableData.GRADE_RANDOM:
-					random = 2;
+					titlefont.setColor(Color.CORAL);
+					titlefont.draw(sprite, "RANDOM OK", 150, 570);
+					break;
+				case TableData.NO_HISPEED:
+					titlefont.setColor(Color.RED);
+					titlefont.draw(sprite, "x1.0 HI SPEED", 300, 570);
+					break;
+				case TableData.NO_GOOD:
+					titlefont.setColor(Color.PURPLE);
+					titlefont.draw(sprite, "NO GOOD", 450, 570);
+					break;
+				case TableData.NO_GREAT:
+					titlefont.setColor(Color.PURPLE);
+					titlefont.draw(sprite, "NO GREAT", 450, 570);
 					break;
 				}
-			}
-
-			if (random == 1) {
-				titlefont.setColor(Color.CYAN);
-				titlefont.draw(sprite, "MIRROR OK", 350, 600);
-			}
-			if (random == 2) {
-				titlefont.setColor(Color.CORAL);
-				titlefont.draw(sprite, "RANDOM OK", 350, 600);
 			}
 
 			for (int i = 0; i < gb.getSongDatas().length; i++) {
 				if (gb.getSongDatas()[i] != null) {
 					titlefont.setColor(Color.YELLOW);
-					titlefont.draw(sprite, gb.getSongDatas()[i].getTitle(), 120, 570 - i * 30);
+					titlefont.draw(sprite, gb.getSongDatas()[i].getTitle(), 120, 540 - i * 30);
 				} else {
 					titlefont.setColor(Color.GRAY);
-					titlefont.draw(sprite, "no song", 120, 570 - i * 30);
+					titlefont.draw(sprite, "no song", 120, 540 - i * 30);
 				}
 			}
 
