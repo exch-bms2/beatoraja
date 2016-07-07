@@ -193,6 +193,26 @@ public class SongDatabaseAccessor {
 
 		return result;
 	}
+	
+	public SongData[] getSongDatas(String text, String lr2path) {
+		SongData[] result = new SongData[0];
+		try {
+			List<SongData> m = qr.query( "SELECT * FROM song WHERE rtrim(title||' '||subtitle||' '||artist||' '||subartist) LIKE ?"
+					+ " GROUP BY sha256",
+					new BeanListHandler<SongData>(SongData.class), "%" + text.replaceAll("'", "''") + "%");
+
+			for (SongData song : m) {
+				if (!song.getPath().startsWith("/") && !song.getPath().contains(":\\")) {
+					song.setPath(lr2path + "\\" + song.getPath());
+				}
+			}
+			result = m.toArray(new SongData[0]);
+		} catch (Exception e) {
+			Logger.getGlobal().severe("song.db更新時の例外:" + e.getMessage());
+		}
+
+		return result;
+	}
 
 	/**
 	 * 楽曲を取得する
@@ -530,10 +550,8 @@ public class SongDatabaseAccessor {
 			BMSModel model = null;
 			if (FilenameUtils.isExtension(name, BMS)) {
 				model = bmsdecoder.decode(dir);
-				qr.update(conn, "DELETE FROM song WHERE path = ?", s);
 			} else if (FilenameUtils.isExtension(name, BMSON)) {
 				model = bmsondecoder.decode(dir);
-				qr.update(conn, "DELETE FROM song WHERE path = ?", s);
 			}
 
 			if (model != null && (model.getTotalNotes() != 0 || model.getWavList().length != 0)) {
@@ -552,7 +570,7 @@ public class SongDatabaseAccessor {
 				ln += model.getRandom() > 1 ? FEATURE_RANDOM : 0;
 				int txt = containstxt ? CONTENT_TEXT : 0;
 				txt += model.getBgaList().length > 0 ? CONTENT_BGA : 0;
-				qr.update(conn, "INSERT INTO song "
+				qr.update(conn, "INSERT OR REPLACE INTO song "
 						+ "(md5, sha256, title, subtitle, genre, artist, subartist, tag, path,"
 						+ "folder, stagefile, banner, backbmp, parent, level, difficulty, "
 						+ "maxbpm, minbpm, mode, judge, feature, content, " + "date, favorite, notes, adddate)"
@@ -566,6 +584,8 @@ public class SongDatabaseAccessor {
 						model.getUseKeys(), model.getJudgerank(), ln, txt, dir.lastModified() / 1000, 0,
 						model.getTotalNotes(), Calendar.getInstance().getTimeInMillis() / 1000);
 				count++;
+			} else {
+				qr.update(conn, "DELETE FROM song WHERE path = ?", s);
 			}
 		}
 	}

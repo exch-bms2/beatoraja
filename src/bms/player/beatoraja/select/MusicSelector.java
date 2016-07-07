@@ -13,6 +13,7 @@ import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.skin.*;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.TextInputListener;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -103,6 +104,8 @@ public class MusicSelector extends MainState {
 	private TableBar[] tables = new TableBar[0];
 
 	private CommandBar[] commands = { new MyBestBar(), new ClearLampBar(GrooveGauge.CLEARTYPE_FULLCOMBO, "FULL COMBO") };
+	
+	private List<SearchWordBar> search = new ArrayList<SearchWordBar>();
 
 	private MusicSelectSkin skin;
 
@@ -190,8 +193,7 @@ public class MusicSelector extends MainState {
 		if (scorecache[lnmode].containsKey(song.getSha256())) {
 			return scorecache[lnmode].get(song.getSha256());
 		}
-		IRScoreData score = main.getPlayDataAccessor().readScoreData(song.getSha256(), song.hasLongNote(),
-				lnmode);
+		IRScoreData score = main.getPlayDataAccessor().readScoreData(song.getSha256(), song.hasLongNote(), lnmode);
 		for (int i = 0; i < scorecache.length; i++) {
 			if (!song.hasLongNote() || i == lnmode) {
 				scorecache[i].put(song.getSha256(), score);
@@ -203,23 +205,24 @@ public class MusicSelector extends MainState {
 	Map<String, IRScoreData> readScoreDatas(SongData[] songs, int lnmode) {
 		Map<String, IRScoreData> result = new HashMap();
 		List<SongData> noscore = new ArrayList();
-		for(SongData song : songs) {
+		for (SongData song : songs) {
 			if (scorecache[lnmode].containsKey(song.getSha256())) {
-				result.put(song.getSha256(),scorecache[lnmode].get(song.getSha256()));
+				result.put(song.getSha256(), scorecache[lnmode].get(song.getSha256()));
 			} else {
 				noscore.add(song);
-			}			
+			}
 		}
-		
-		Map<String, IRScoreData> scores = main.getPlayDataAccessor().readScoreDatas(noscore.toArray(new SongData[0]), lnmode);
-		for(SongData song : noscore) {
+
+		Map<String, IRScoreData> scores = main.getPlayDataAccessor().readScoreDatas(noscore.toArray(new SongData[0]),
+				lnmode);
+		for (SongData song : noscore) {
 			IRScoreData score = scores.get(song.getSha256());
 			for (int i = 0; i < scorecache.length; i++) {
 				if (!song.hasLongNote() || i == lnmode) {
 					scorecache[i].put(song.getSha256(), score);
 				}
 			}
-			result.put(song.getSha256(),score);	
+			result.put(song.getSha256(), score);
 		}
 		return result;
 
@@ -373,6 +376,12 @@ public class MusicSelector extends MainState {
 			}
 			if (sd instanceof SongBar) {
 				barimage = skin.getBar()[0];
+			}
+			if (sd instanceof SearchWordBar) {
+				barimage = skin.getBar()[6];
+			}
+			if (sd instanceof CommandBar) {
+				barimage = skin.getBar()[5];
 			}
 
 			sprite.draw(barimage, x, y, w * 2 / 5, barh);
@@ -703,6 +712,23 @@ public class MusicSelector extends MainState {
 
 		boolean[] numberstate = input.getNumberState();
 		long[] numtime = input.getNumberTime();
+		if (numberstate[0] && numtime[0] != 0) {
+			numtime[0] = 0;
+			Gdx.input.getTextInput(new TextInputListener() {
+				@Override
+				public void input(String text) {
+					if(text.length() > 1) {
+						search.add(new SearchWordBar(MusicSelector.this, text));
+						dir.clear();
+						updateBar(null);
+					}
+				}
+				@Override
+				public void canceled() {
+				}
+			}, "Search", "", "Search bms title");
+		}
+
 		if (numberstate[1] && numtime[1] != 0) {
 			// KEYフィルターの切り替え
 			mode = (mode + 1) % MODE.length;
@@ -980,6 +1006,7 @@ public class MusicSelector extends MainState {
 			l.addAll(Arrays.asList(new FolderBar(this, null, "e2977170").getChildren()));
 			l.addAll(Arrays.asList(tables));
 			l.addAll(Arrays.asList(commands));
+			l.addAll(search);
 		} else if (bar instanceof DirectoryBar) {
 			l.addAll(Arrays.asList(((DirectoryBar) bar).getChildren()));
 		}
@@ -1059,8 +1086,8 @@ public class MusicSelector extends MainState {
 
 				}
 			}
-			
-			if(loader != null) {
+
+			if (loader != null) {
 				loader.stopRunning();
 			}
 			loader = new BarContentsLoaderThread(currentsongs);
@@ -1161,27 +1188,27 @@ public class MusicSelector extends MainState {
 	SongDatabaseAccessor getSongDatabase() {
 		return songdb;
 	}
-	
+
 	private BarContentsLoaderThread loader;
-	
+
 	class BarContentsLoaderThread extends Thread {
 
 		private Bar[] bars;
 		private boolean stop = false;
-		
+
 		public BarContentsLoaderThread(Bar[] bar) {
 			this.bars = bar;
 		}
-		
+
 		@Override
 		public void run() {
-			for(Bar bar : bars) {
-				if(bar instanceof SongBar) {
-					((SongBar)bar).loadBanner();
+			for (Bar bar : bars) {
+				if (bar instanceof SongBar) {
+					((SongBar) bar).loadBanner();
 					SongData sd = ((SongBar) bar).getSongData();
 					bar.setScore(readScoreData(sd, config.getLnmode()));
-					((SongBar) bar).setExistsReplayData(main.getPlayDataAccessor().existsReplayData(
-							sd.getSha256(), sd.hasLongNote(), config.getLnmode()));
+					((SongBar) bar).setExistsReplayData(main.getPlayDataAccessor().existsReplayData(sd.getSha256(),
+							sd.hasLongNote(), config.getLnmode()));
 				}
 				if (bar instanceof GradeBar) {
 					GradeBar gb = (GradeBar) bar;
@@ -1195,25 +1222,25 @@ public class MusicSelector extends MainState {
 						gb.setScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 0));
 						gb.setMirrorScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 1));
 						gb.setRandomScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 2));
-						gb.setExistsReplayData(main.getPlayDataAccessor().existsReplayData(
-								hash, ln, config.getLnmode()));
+						gb.setExistsReplayData(main.getPlayDataAccessor()
+								.existsReplayData(hash, ln, config.getLnmode()));
 					}
 				}
 
-				if(config.isFolderlamp()) {
-					if(bar instanceof FolderBar) {
-						((FolderBar)bar).updateFolderStatus();
+				if (config.isFolderlamp()) {
+					if (bar instanceof FolderBar) {
+						((FolderBar) bar).updateFolderStatus();
 					}
-					if(bar instanceof TableLevelBar) {
-						((TableLevelBar)bar).updateFolderStatus();
-					}					
+					if (bar instanceof TableLevelBar) {
+						((TableLevelBar) bar).updateFolderStatus();
+					}
 				}
-				if(stop) {
+				if (stop) {
 					break;
 				}
 			}
 		}
-		
+
 		public void stopRunning() {
 			stop = true;
 		}
