@@ -2,6 +2,7 @@ package bms.player.beatoraja;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -21,7 +22,7 @@ public class PlayerResource {
 	private Config config;
 	private int auto;
 
-	private int constraint;
+	private List<Integer> constraint = new ArrayList<Integer>();
 
 	private int bgashow;
 	/**
@@ -89,7 +90,7 @@ public class PlayerResource {
 		coursegauge.clear();
 		combo = 0;
 		maxcombo = 0;
-		constraint = 0;
+		constraint.clear();
 	}
 
 	public boolean setBMSFile(final File f, final Config config, int autoplay) {
@@ -326,11 +327,15 @@ public class PlayerResource {
 		this.maxcombo = maxcombo;
 	}
 
-	public int getConstraint() {
-		return constraint;
+	public int[] getConstraint() {
+		int[] result = new int[constraint.size()];
+		for(int i = 0;i < result.length;i++) {
+			result[i] = constraint.get(i);
+		}
+		return result;
 	}
 
-	public void setConstraint(int constraint) {
-		this.constraint = constraint;
+	public void addConstraint(int constraint) {
+		this.constraint.add(constraint);
 	}
 }

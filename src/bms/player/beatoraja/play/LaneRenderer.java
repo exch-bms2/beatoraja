@@ -77,7 +77,7 @@ public class LaneRenderer {
 
     private boolean enableControl = true;
 
-    public LaneRenderer(BMSPlayer main, SpriteBatch sprite, ShapeRenderer shape, PlaySkin skin, PlayerResource resource, BMSModel model, int mode) {
+    public LaneRenderer(BMSPlayer main, SpriteBatch sprite, ShapeRenderer shape, PlaySkin skin, PlayerResource resource, BMSModel model, int[] mode) {
         this.main = main;
         this.sprite = sprite;
         this.shape = shape;
@@ -131,11 +131,13 @@ public class LaneRenderer {
             basehispeed = hispeed;
         }
 
-        if (mode == TableData.NO_HISPEED) {
-            enableControl = false;
-            hispeed = 1.0f;
-            lanecover = 0;
-            lift = 0;
+        for(int i : mode) {
+            if (i == TableData.NO_HISPEED) {
+                enableControl = false;
+                hispeed = 1.0f;
+                lanecover = 0;
+                lift = 0;
+            }
         }
     }
 

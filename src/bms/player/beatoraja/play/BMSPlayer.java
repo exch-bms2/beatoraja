@@ -191,7 +191,7 @@ public class BMSPlayer extends MainState {
 				score = false;
 			}
 			if (config.isExpandjudge()) {
-				judge.setExpandJudge();
+				judge.setExpandJudge(JudgeManager.EXPAND_JUDGE);
 				assist = 2;
 				score = false;
 			}
@@ -213,7 +213,7 @@ public class BMSPlayer extends MainState {
 				score = false;
 			}
 		}
-		judge = new JudgeManager(this, model);
+		judge = new JudgeManager(this, model, resource.getConstraint());
 		totalnotes = model.getTotalNotes();
 
 		Logger.getGlobal().info("アシストオプション設定完了");
@@ -603,16 +603,19 @@ public class BMSPlayer extends MainState {
 	}
 
 	private void saveConfig() {
-		if (resource.getConstraint() == 0) {
-			Config config = resource.getConfig();
-			if (lanerender.getFixHispeed() != Config.FIX_HISPEED_OFF) {
-				config.setGreenvalue(lanerender.getGreenValue());
-			} else {
-				config.setHispeed(lanerender.getHispeed());
+		for(int c : resource.getConstraint()) {
+			if(c == TableData.NO_HISPEED) {
+				return;
 			}
-			config.setLanecover(lanerender.getLaneCoverRegion());
-			config.setLift(lanerender.getLiftRegion());
 		}
+		Config config = resource.getConfig();
+		if (lanerender.getFixHispeed() != Config.FIX_HISPEED_OFF) {
+			config.setGreenvalue(lanerender.getGreenValue());
+		} else {
+			config.setHispeed(lanerender.getHispeed());
+		}
+		config.setLanecover(lanerender.getLaneCoverRegion());
+		config.setLift(lanerender.getLiftRegion());
 	}
 
 	public IRScoreData createScoreData() {
@@ -945,7 +948,6 @@ public class BMSPlayer extends MainState {
 
 		@Override
 		public void run() {
-			final TimeLine[] timelines = model.getAllTimeLines();
 			int index = 0;
 
 			int time = 0;
@@ -984,7 +986,6 @@ public class BMSPlayer extends MainState {
 
 		@Override
 		public void run() {
-			final TimeLine[] timelines = model.getAllTimeLines();
 			int time = 0;
 			for (int p = 0; time < timelines[timelines.length - 1].getTime() + 5000 && !stop;) {
 				time = (int) (System.currentTimeMillis() - starttime);

@@ -988,8 +988,14 @@ public class MusicSelector extends MainState {
 							}
 							break;
 						case TableData.NO_HISPEED:
-							resource.setConstraint(TableData.NO_HISPEED);
+							resource.addConstraint(TableData.NO_HISPEED);
 							break;
+							case TableData.NO_GOOD:
+								resource.addConstraint(TableData.NO_GOOD);
+								break;
+							case TableData.NO_GREAT:
+								resource.addConstraint(TableData.NO_GREAT);
+								break;
 						}
 					}
 				}
