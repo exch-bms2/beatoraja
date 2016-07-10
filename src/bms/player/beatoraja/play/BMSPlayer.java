@@ -119,7 +119,7 @@ public class BMSPlayer extends MainState {
 		if (autoplay >= 2) {
 			if(resource.getCourseBMSModels() != null) {
 				if(resource.getCourseReplay().length == 0) {
-					ReplayData[] replays = main.getPlayDataAccessor().readReplayData(resource.getCourseBMSModels(), config.getLnmode(), autoplay - 2);
+					ReplayData[] replays = main.getPlayDataAccessor().readReplayData(resource.getCourseBMSModels(), config.getLnmode(), autoplay - 2, resource.getConstraint());
 					if(replays != null) {
 						for(ReplayData rd : replays) {
 							resource.addCourseReplay(rd);
@@ -161,7 +161,8 @@ public class BMSPlayer extends MainState {
 		boolean score = true;
 
 		model.setLntype(config.getLnmode());
-		if (resource.getCourseBMSModels() == null && autoplay != 2) {
+		boolean exjudge = false;
+		if (resource.getCourseBMSModels() == null && autoplay < 2) {
 			if (config.isBpmguide() && (model.getMinBPM() < model.getMaxBPM())) {
 				// BPM変化がなければBPMガイドなし
 				assist = 1;
@@ -181,7 +182,7 @@ public class BMSPlayer extends MainState {
 				score = false;
 			}
 			if (config.isExpandjudge()) {
-				judge.setExpandJudge(JudgeManager.EXPAND_JUDGE);
+				exjudge = true;
 				assist = 2;
 				score = false;
 			}
@@ -204,6 +205,9 @@ public class BMSPlayer extends MainState {
 			}
 		}
 		judge = new JudgeManager(this, model, resource.getConstraint());
+		if(exjudge) {
+			judge.setExpandJudge(JudgeManager.EXPAND_JUDGE);
+		}
 		totalnotes = model.getTotalNotes();
 
 		Logger.getGlobal().info("アシストオプション設定完了");
@@ -584,7 +588,7 @@ public class BMSPlayer extends MainState {
 			if (assist > 0) {
 				clear = assist == 1 ? GrooveGauge.CLEARTYPE_LIGHT_ASSTST : GrooveGauge.CLEARTYPE_ASSTST;
 			} else {
-				if (judge.getJudgeCount(3) + judge.getJudgeCount(4) == 0) {
+				if (judge.getJudgeCount(3) + judge.getJudgeCount(4) == 0 && (model.getUseKeys() != 9 || judge.getJudgeCount(5) == 0)) {
 					if (judge.getJudgeCount(2) == 0) {
 						if (judge.getJudgeCount(1) == 0) {
 							clear = GrooveGauge.CLEARTYPE_MAX;

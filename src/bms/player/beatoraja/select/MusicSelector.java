@@ -923,7 +923,7 @@ public class MusicSelector extends MainState {
 						main.changeState(MainController.STATE_DECIDE);
 					}
 				} else if (currentsongs[selectedindex] instanceof GradeBar) {
-					readCourse(2);
+					readCourse(2 + selectedreplay);
 				}
 			}
 			// 白鍵 (フォルダを開く)
@@ -999,33 +999,38 @@ public class MusicSelector extends MainState {
 				files.add(new File(song.getPath()));
 			}
 			if (resource.setCourseBMSFiles(files.toArray(new File[0]))) {
-				if (autoplay != 2) {
 					for (int constraint : ((GradeBar) currentsongs[selectedindex]).getConstraint()) {
 						switch (constraint) {
 						case TableData.GRADE_NORMAL:
-							config.setRandom(0);
-							config.setRandom2(0);
-							config.setDoubleoption(0);
-							break;
-						case TableData.GRADE_MIRROR:
-							if (config.getRandom() == 1) {
-								config.setRandom2(1);
-								config.setDoubleoption(1);
-							} else {
+							if(autoplay < 2) {
 								config.setRandom(0);
 								config.setRandom2(0);
 								config.setDoubleoption(0);
 							}
 							break;
-						case TableData.GRADE_RANDOM:
-							if (config.getRandom() > 5) {
-								config.setRandom(0);
-							}
-							if (config.getRandom2() > 5) {
-								config.setRandom2(0);
+						case TableData.GRADE_MIRROR:
+							if(autoplay < 2) {
+								if (config.getRandom() == 1) {
+									config.setRandom2(1);
+									config.setDoubleoption(1);
+								} else {
+									config.setRandom(0);
+									config.setRandom2(0);
+									config.setDoubleoption(0);
+								}
 							}
 							break;
-						case TableData.NO_HISPEED:
+						case TableData.GRADE_RANDOM:
+							if(autoplay < 2) {
+								if (config.getRandom() > 5) {
+									config.setRandom(0);
+								}
+								if (config.getRandom2() > 5) {
+									config.setRandom2(0);
+								}
+							}
+							break;
+							case TableData.NO_HISPEED:
 							resource.addConstraint(TableData.NO_HISPEED);
 							break;
 							case TableData.NO_GOOD:
@@ -1035,7 +1040,6 @@ public class MusicSelector extends MainState {
 								resource.addConstraint(TableData.NO_GREAT);
 								break;
 						}
-					}
 				}
 				if (bgm != null) {
 					bgm.stop();
@@ -1297,13 +1301,13 @@ public class MusicSelector extends MainState {
 							hash[j] = gb.getSongDatas()[j].getSha256();
 							ln |= gb.getSongDatas()[j].hasLongNote();
 						}
-						gb.setScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 0));
-						gb.setMirrorScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 1));
-						gb.setRandomScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 2));
+						gb.setScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 0, gb.getConstraint()));
+						gb.setMirrorScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 1, gb.getConstraint()));
+						gb.setRandomScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 2, gb.getConstraint()));
 						boolean[] replay = new boolean[REPLAY];
 						for(int i = 0;i < REPLAY;i++) {
 							replay[i] = main.getPlayDataAccessor().existsReplayData(
-									hash, ln, config.getLnmode(), 0);
+									hash, ln, config.getLnmode(), i, gb.getConstraint());
 						}
 						gb.setExistsReplayData(replay);
 					}
