@@ -138,8 +138,8 @@ public class PlayDataAccessor {
 		return result;
 	}
 
-	public List<IRScoreData> readScoreDatas(String sql, int lnmode) {
-		return scoredb.getScoreDatas(player, "mode = " + lnmode + " AND " + sql);
+	public List<IRScoreData> readScoreDatas(String sql) {
+		return scoredb.getScoreDatas(player, sql);
 	}
 	/**
 	 * スコアデータを書き込む

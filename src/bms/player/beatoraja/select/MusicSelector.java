@@ -35,7 +35,8 @@ public class MusicSelector extends MainState {
 
 	// TODO テキスト表示
 	// TODO 譜面情報表示
-	// TODO スコア取得のバックグラウンド化
+	// TODO オプション常時表示(スキン実装で実現？)
+	// TODO SonbBarの描画、管理部分を分離
 
 	private MainController main;
 
@@ -198,7 +199,11 @@ public class MusicSelector extends MainState {
 				new CommandBar(main, this, "HARD CLEAR", "clear = 6"),
 				new CommandBar(main, this, "CLEAR", "clear = 5"),
 				new CommandBar(main, this, "EASY CLEAR", "clear = 4"),
-				new CommandBar(main, this, "ASSIST CLEAR", "clear IN (2, 3)")};
+				new CommandBar(main, this, "ASSIST CLEAR", "clear IN (2, 3)"),
+				new CommandBar(main, this, "RANK AAA", "(lpg * 2 + epg * 2 + lgr + egr) * 50 / notes >= 88.88"),
+				new CommandBar(main, this, "RANK AA", "(lpg * 2 + epg * 2 + lgr + egr) * 50 / notes >= 77.77 AND (lpg * 2 + epg * 2 + lgr + egr) * 50 / notes < 88.88"),
+				new CommandBar(main, this, "RANK A", "(lpg * 2 + epg * 2 + lgr + egr) * 50 / notes >= 66.66 AND (lpg * 2 + epg * 2 + lgr + egr) * 50 / notes < 77.77"),
+		};
 	}
 
 	IRScoreData readScoreData(SongData song, int lnmode) {
@@ -1269,9 +1274,18 @@ public class MusicSelector extends MainState {
 
 	private BarContentsLoaderThread loader;
 
+	/**
+	 * 選曲バー内のスコアデータ等を読み込むためのスレッド
+	 */
 	class BarContentsLoaderThread extends Thread {
 
+		/**
+		 * データ読み込み対象の選曲バー
+		 */
 		private Bar[] bars;
+		/**
+		 * 読み込み終了フラグ
+		 */
 		private boolean stop = false;
 
 		public BarContentsLoaderThread(Bar[] bar) {
@@ -1327,6 +1341,9 @@ public class MusicSelector extends MainState {
 			}
 		}
 
+		/**
+		 * データ読み込みを中断する
+		 */
 		public void stopRunning() {
 			stop = true;
 		}
