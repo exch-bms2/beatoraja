@@ -739,8 +739,8 @@ public class BMSPlayer extends MainState {
 		Logger.getGlobal().info("BGAのリソース解放");
 	}
 
-	public void play(int id, int starttime) {
-		audio.play(id, starttime);
+	public void play(Note note) {
+		audio.play(note.getWav(), note.getStarttime(), note.getDuration());
 	}
 
 	public BMSPlayerInputProcessor getBMSPlayerInputProcessor() {
@@ -886,7 +886,7 @@ public class BMSPlayer extends MainState {
 				// BGレーン再生
 				while (p < timelines.length && timelines[p].getTime() <= time) {
 					for (Note n : timelines[p].getBackGroundNotes()) {
-						audio.play(n.getWav(), n.getStarttime());
+						play(n);
 					}
 					p++;
 				}

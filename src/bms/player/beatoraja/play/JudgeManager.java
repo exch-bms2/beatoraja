@@ -278,7 +278,7 @@ public class JudgeManager {
 								// ロングノート処理
 								LongNote ln = (LongNote) note;
 								if (ln.getStart() == tl) {
-									main.play(note.getWav(), note.getStarttime());
+									main.play(note);
 									if (model.getLntype() == BMSModel.LNTYPE_LONGNOTE) {
 										passingcount[lane] = (int) (tl.getTime() - ptime);
 									} else {
@@ -303,7 +303,7 @@ public class JudgeManager {
 									}
 								}
 							} else {
-								main.play(note.getWav(), note.getStarttime());
+								main.play(note);
 								// 通常ノート処理
 								final int dtime = (int) (tl.getTime() - ptime);
 								this.update(lane, j, time, dtime);
@@ -325,13 +325,13 @@ public class JudgeManager {
 									n = tl2.getHiddenNote(lane);
 								}
 								if (n != null && tl2.getTime() >= ptime) {
-									main.play(n.getWav(), n.getStarttime());
+									main.play(n);
 									sound = true;
 									break;
 								}
 							}
 							if (!sound && n != null) {
-								main.play(n.getWav(), n.getStarttime());
+								main.play(n);
 							}
 						}
 					}

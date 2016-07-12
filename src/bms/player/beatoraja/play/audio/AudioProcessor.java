@@ -21,7 +21,7 @@ public interface AudioProcessor {
 	 * 音を鳴らす
 	 * @param id
 	 */
-	public void play(int id, int starttime);
+	public void play(int id, int starttime, int duration);
 	
 	public void stop(int id);
 
