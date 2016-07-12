@@ -61,19 +61,9 @@ public class GradeResult extends MainState {
 		titlefont = generator.generateFont(parameter);
 		updateScoreDatabase();
 
-		// 保存されているリプレイデータがない場合は、EASY以上で自動保存
-		String[] hashes = new String[resource.getCourseBMSModels().length];
-
-		boolean ln = false;
-		for (int i = 0; i < hashes.length; i++) {
-			BMSModel model = resource.getCourseBMSModels()[i];
-			hashes[i] = model.getHash();
-			ln |= model.getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
-					+ model.getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH) > 0;
-		}
 		if (resource.getAutoplay() == 0 && resource.getCourseScoreData() != null
 				&& resource.getCourseScoreData().getClear() >= GrooveGauge.CLEARTYPE_EASY
-				&& !main.getPlayDataAccessor().existsReplayData(hashes, ln, resource.getConfig().getLnmode(), 0)) {
+				&& !main.getPlayDataAccessor().existsReplayData(resource.getCourseBMSModels(), resource.getConfig().getLnmode(), 0, resource.getConstraint())) {
 			saveReplayData(0);
 		}
 
@@ -186,6 +176,7 @@ public class GradeResult extends MainState {
 	}
 
 	public void updateScoreDatabase() {
+		saveReplay = false;
 		BMSModel[] models = resource.getCourseBMSModels();
 		IRScoreData newscore = resource.getCourseScoreData();
 		if (newscore == null) {
@@ -208,7 +199,7 @@ public class GradeResult extends MainState {
 				&& resource.getConfig().getDoubleoption() == 1))) {
 			random = 1;
 		}
-		IRScoreData score = main.getPlayDataAccessor().readScoreData(models, resource.getConfig().getLnmode(), random);
+		IRScoreData score = main.getPlayDataAccessor().readScoreData(models, resource.getConfig().getLnmode(), random, resource.getConstraint());
 		if (score == null) {
 			score = new IRScoreData();
 		}
@@ -217,7 +208,7 @@ public class GradeResult extends MainState {
 		oldmisscount = score.getMinbp();
 		oldcombo = score.getCombo();
 
-		main.getPlayDataAccessor().writeScoreDara(newscore, models, resource.getConfig().getLnmode(), random,
+		main.getPlayDataAccessor().writeScoreDara(newscore, models, resource.getConfig().getLnmode(), random,resource.getConstraint(),
 				resource.isUpdateScore());
 
 		Logger.getGlobal().info("スコアデータベース更新完了 ");
@@ -298,7 +289,7 @@ public class GradeResult extends MainState {
 				// 保存されているリプレイデータがない場合は、EASY以上で自動保存
 				ReplayData[] rd = resource.getCourseReplay();
 				main.getPlayDataAccessor().wrireReplayData(rd, resource.getCourseBMSModels(),
-						resource.getConfig().getLnmode(), index);
+						resource.getConfig().getLnmode(), index, resource.getConstraint());
 				saveReplay = true;
 			}
 		}

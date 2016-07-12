@@ -13,6 +13,7 @@ import bms.model.TimeLine;
 import bms.player.beatoraja.gauge.GrooveGauge;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter.OutputType;
+import com.badlogic.gdx.utils.StringBuilder;
 
 /**
  * プレイデータアクセス用クラス
@@ -137,8 +138,8 @@ public class PlayDataAccessor {
 		return result;
 	}
 
-	public List<IRScoreData> readScoreDatas(String sql, int lnmode) {
-		return scoredb.getScoreDatas(player, "mode = " + lnmode + " AND " + sql);
+	public List<IRScoreData> readScoreDatas(String sql) {
+		return scoredb.getScoreDatas(player, sql);
 	}
 	/**
 	 * スコアデータを書き込む
@@ -224,11 +225,24 @@ public class PlayDataAccessor {
 
 	}
 
-	public IRScoreData readScoreData(String hash, boolean ln, int lnmode, int option) {
-		return scoredb.getScoreData(player, hash, (ln ? lnmode : 0) + option * 10);
+	public IRScoreData readScoreData(String hash, boolean ln, int lnmode, int option, int[] constraint) {
+		int hispeed = 0;
+		int judge = 0;
+		for(int c : constraint) {
+			if(c == TableData.NO_HISPEED) {
+				hispeed = 1;
+			}
+			if(c == TableData.NO_GOOD) {
+				judge = 1;
+			}
+			if(c == TableData.NO_GREAT) {
+				judge = 2;
+			}
+		}
+		return scoredb.getScoreData(player, hash, (ln ? lnmode : 0) + option * 10 + hispeed * 100 + judge * 1000);
 	}
 
-	public IRScoreData readScoreData(BMSModel[] models, int lnmode, int option) {
+	public IRScoreData readScoreData(BMSModel[] models, int lnmode, int option, int[] constraint) {
 		String[] hash = new String[models.length];
 		boolean ln = false;
 		for (int i = 0;i < models.length;i++) {
@@ -236,18 +250,18 @@ public class PlayDataAccessor {
 			ln |= models[i].getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
 					+ models[i].getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH) > 0;
 		}
-		return readScoreData(hash, ln, lnmode, option);
+		return readScoreData(hash, ln, lnmode, option, constraint);
 	}
 
-	public IRScoreData readScoreData(String[] hashes, boolean ln, int lnmode, int option) {
+	public IRScoreData readScoreData(String[] hashes, boolean ln, int lnmode, int option, int[] constraint) {
 		String hash = "";
 		for (String s : hashes) {
 			hash += s;
 		}
-		return readScoreData(hash, ln, lnmode, option);
+		return readScoreData(hash, ln, lnmode, option, constraint);
 	}
 
-	public void writeScoreDara(IRScoreData newscore, BMSModel[] models, int lnmode, int option, boolean updateScore) {
+	public void writeScoreDara(IRScoreData newscore, BMSModel[] models, int lnmode, int option, int[] constraint, boolean updateScore) {
 		String hash = "";
 		int totalnotes = 0;
 		boolean ln = false;
@@ -260,10 +274,23 @@ public class PlayDataAccessor {
 		if (newscore == null) {
 			return;
 		}
-		IRScoreData score = scoredb.getScoreData(player, hash, (ln ? lnmode : 0) + option * 10);
+		int hispeed = 0;
+		int judge = 0;
+		for(int c : constraint) {
+			if(c == TableData.NO_HISPEED) {
+				hispeed = 1;
+			}
+			if(c == TableData.NO_GOOD) {
+				judge = 1;
+			}
+			if(c == TableData.NO_GREAT) {
+				judge = 2;
+			}
+		}
+		IRScoreData score = scoredb.getScoreData(player, hash, (ln ? lnmode : 0) + option * 10 + hispeed * 100 + judge * 1000);
 		if (score == null) {
 			score = new IRScoreData();
-			score.setMode((ln ? lnmode : 0) + option * 10);
+			score.setMode((ln ? lnmode : 0) + option * 10 + hispeed * 100 + judge * 1000);
 		}
 		int clear = score.getClear();
 		score.setSha256(hash);
@@ -318,12 +345,18 @@ public class PlayDataAccessor {
 		return new File(this.getReplayDataFilePath(hash, ln, lnmode,index)).exists();
 	}
 
-	public boolean existsReplayData(String[] hash, boolean ln, int lnmode, int index) {
-		String hashes = "";
-		for(String s : hash) {
-			hashes += s;
+	public boolean existsReplayData(BMSModel[] models, int lnmode, int index, int[] constraint) {
+		String[] hash = new String[models.length];
+		boolean ln = false;
+		for (int i = 0; i < models.length; i++) {
+			BMSModel model = models[i];
+			hash[i] = model.getSHA256();
+			ln |= model.containsLongNote();
 		}
-		return new File(this.getReplayDataFilePath(hashes, ln, lnmode, index)).exists();
+		return new File(this.getReplayDataFilePath(hash, ln, lnmode, index, constraint)).exists();
+	}
+	public boolean existsReplayData(String[] hash, boolean ln, int lnmode, int index, int[] constraint) {
+		return new File(this.getReplayDataFilePath(hash, ln, lnmode, index, constraint)).exists();
 	}
 
 	/**
@@ -369,7 +402,7 @@ public class PlayDataAccessor {
 
 	}
 
-	public ReplayData[] readReplayData(BMSModel[] models, int lnmode, int index) {
+	public ReplayData[] readReplayData(BMSModel[] models, int lnmode, int index, int[] constraint) {
 		String[] hashes = new String[models.length];
 		boolean ln = false;
 		for(int i = 0;i < models.length;i++) {
@@ -377,7 +410,7 @@ public class PlayDataAccessor {
 			ln |= models[i].getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
 					+ models[i].getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH) > 0;
 		}
-		return this.readReplayData(hashes, ln, lnmode,index);
+		return this.readReplayData(hashes, ln, lnmode,index, constraint);
 	}
 
 	/**
@@ -386,16 +419,12 @@ public class PlayDataAccessor {
 	 * @param lnmode LNモード
 	 * @return リプレイデータ
 	 */
-	public ReplayData[] readReplayData(String[] hash, boolean ln , int lnmode, int index) {
-		if (existsReplayData(hash, ln, lnmode, index)) {
+	public ReplayData[] readReplayData(String[] hash, boolean ln , int lnmode, int index, int[] constraint) {
+		if (existsReplayData(hash, ln, lnmode, index, constraint)) {
 			Json json = new Json();
 			try {
-				String hashes = "";
-				for(String s : hash) {
-					hashes += s;
-				}
 				return json.fromJson(ReplayData[].class,
-						new FileReader(this.getReplayDataFilePath(hashes, ln, lnmode, index)));
+						new FileReader(this.getReplayDataFilePath(hash, ln, lnmode, index, constraint)));
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
@@ -403,7 +432,7 @@ public class PlayDataAccessor {
 		return null;
 	}
 
-	public void wrireReplayData(ReplayData[] rd, BMSModel[] models, int lnmode, int index) {
+	public void wrireReplayData(ReplayData[] rd, BMSModel[] models, int lnmode, int index, int[] constraint) {
 		String[] hashes = new String[models.length];
 		boolean ln = false;
 		for(int i = 0;i < models.length;i++) {
@@ -411,7 +440,7 @@ public class PlayDataAccessor {
 			ln |= models[i].getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
 					+ models[i].getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH) > 0;
 		}
-		this.wrireReplayData(rd, hashes, ln, lnmode, index);
+		this.wrireReplayData(rd, hashes, ln, lnmode, index,constraint);
 
 	}
 
@@ -421,7 +450,7 @@ public class PlayDataAccessor {
          * @param hash 対象のBMSハッシュ群
          * @param lnmode LNモード
          */
-	public void wrireReplayData(ReplayData[] rd, String[] hash, boolean ln, int lnmode, int index) {
+	public void wrireReplayData(ReplayData[] rd, String[] hash, boolean ln, int lnmode, int index, int[] constraint) {
 		File replaydir = new File("replay");
 		if (!replaydir.exists()) {
 			replaydir.mkdirs();
@@ -429,14 +458,12 @@ public class PlayDataAccessor {
 		Json json = new Json();
 		json.setOutputType(OutputType.json);
 		try {
-			String hashes = "";
-			for(String s : hash) {
-				hashes += s;
-			}
-			FileWriter fw = new FileWriter(this.getReplayDataFilePath(hashes, ln, lnmode, index));
+			String path = this.getReplayDataFilePath(hash, ln, lnmode, index, constraint);
+			FileWriter fw = new FileWriter(path);
 			fw.write(json.prettyPrint(rd));
 			fw.flush();
 			fw.close();
+			Logger.getGlobal().info("コースリプレイを保存:" + path);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -451,4 +478,19 @@ public class PlayDataAccessor {
 	private String getReplayDataFilePath(String hash, boolean ln, int lnmode, int index) {
 		return "replay" + File.separatorChar +  (ln ? replay[lnmode] : "") + hash + (index > 0 ? "_" + index : "") + ".json";
 	}
+
+	private String getReplayDataFilePath(String[] hashes, boolean ln, int lnmode, int index, int[] constraint) {
+		StringBuilder hash = new StringBuilder();
+		for(String s : hashes) {
+			hash.append(s.substring(0,10));
+		}
+		StringBuilder sb = new StringBuilder();
+		for(int c : constraint) {
+			if(c != TableData.GRADE_NORMAL && c != TableData.GRADE_MIRROR && c != TableData.GRADE_RANDOM) {
+				sb.append(String.format("%02d", c));
+			}
+		}
+		return "replay" + File.separatorChar +  (ln ? replay[lnmode] : "") + hash + (sb.length() > 0 ? "_" + sb.toString() : "") + (index > 0 ? "_" + index : "") + ".json";
+	}
+
 }

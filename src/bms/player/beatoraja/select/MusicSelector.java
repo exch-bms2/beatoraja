@@ -35,7 +35,8 @@ public class MusicSelector extends MainState {
 
 	// TODO テキスト表示
 	// TODO 譜面情報表示
-	// TODO スコア取得のバックグラウンド化
+	// TODO オプション常時表示(スキン実装で実現？)
+	// TODO SonbBarの描画、管理部分を分離
 
 	private MainController main;
 
@@ -192,13 +193,17 @@ public class MusicSelector extends MainState {
 			scorecache[i] = new HashMap();
 		}
 
-		commands = new CommandBar[]{new CommandBar(main, this, "MY BEST", "playcount > 0 ORDER BY playcount DESC "),
+		commands = new CommandBar[]{new CommandBar(main, this, "MY BEST", "playcount > 0 ORDER BY playcount DESC LIMIT 10"),
 				new CommandBar(main, this, "FULL COMBO", "clear >= 8"),
 				new CommandBar(main, this, "EX HARD CLEAR", "clear = 7"),
 				new CommandBar(main, this, "HARD CLEAR", "clear = 6"),
 				new CommandBar(main, this, "CLEAR", "clear = 5"),
 				new CommandBar(main, this, "EASY CLEAR", "clear = 4"),
-				new CommandBar(main, this, "ASSIST CLEAR", "clear IN (2, 3)")};
+				new CommandBar(main, this, "ASSIST CLEAR", "clear IN (2, 3)"),
+				new CommandBar(main, this, "RANK AAA", "(lpg * 2 + epg * 2 + lgr + egr) * 50 / notes >= 88.88"),
+				new CommandBar(main, this, "RANK AA", "(lpg * 2 + epg * 2 + lgr + egr) * 50 / notes >= 77.77 AND (lpg * 2 + epg * 2 + lgr + egr) * 50 / notes < 88.88"),
+				new CommandBar(main, this, "RANK A", "(lpg * 2 + epg * 2 + lgr + egr) * 50 / notes >= 66.66 AND (lpg * 2 + epg * 2 + lgr + egr) * 50 / notes < 77.77"),
+		};
 	}
 
 	IRScoreData readScoreData(SongData song, int lnmode) {
@@ -532,8 +537,7 @@ public class MusicSelector extends MainState {
 			titlefont.draw(sprite, song.getArtist() + " " + song.getSubartist(), 100, 570);
 			titlefont.draw(sprite, song.getMode() + " KEYS", 100, 530);
 			titlefont.draw(sprite, "LEVEL : " + song.getLevel(), 100, 500);
-			if (currentsongs[selectedindex].getScore() != null
-					&& currentsongs[selectedindex].getScore().getClear() != 0) {
+			if (currentsongs[selectedindex].getScore() != null) {
 				IRScoreData score = currentsongs[selectedindex].getScore();
 				titlefont.setColor(Color.valueOf(LAMP[score.getClear()]));
 				titlefont.draw(sprite, CLEAR[score.getClear()], 100, 420);
@@ -923,7 +927,7 @@ public class MusicSelector extends MainState {
 						main.changeState(MainController.STATE_DECIDE);
 					}
 				} else if (currentsongs[selectedindex] instanceof GradeBar) {
-					readCourse(2);
+					readCourse(2 + selectedreplay);
 				}
 			}
 			// 白鍵 (フォルダを開く)
@@ -999,33 +1003,38 @@ public class MusicSelector extends MainState {
 				files.add(new File(song.getPath()));
 			}
 			if (resource.setCourseBMSFiles(files.toArray(new File[0]))) {
-				if (autoplay != 2) {
 					for (int constraint : ((GradeBar) currentsongs[selectedindex]).getConstraint()) {
 						switch (constraint) {
 						case TableData.GRADE_NORMAL:
-							config.setRandom(0);
-							config.setRandom2(0);
-							config.setDoubleoption(0);
-							break;
-						case TableData.GRADE_MIRROR:
-							if (config.getRandom() == 1) {
-								config.setRandom2(1);
-								config.setDoubleoption(1);
-							} else {
+							if(autoplay < 2) {
 								config.setRandom(0);
 								config.setRandom2(0);
 								config.setDoubleoption(0);
 							}
 							break;
-						case TableData.GRADE_RANDOM:
-							if (config.getRandom() > 5) {
-								config.setRandom(0);
-							}
-							if (config.getRandom2() > 5) {
-								config.setRandom2(0);
+						case TableData.GRADE_MIRROR:
+							if(autoplay < 2) {
+								if (config.getRandom() == 1) {
+									config.setRandom2(1);
+									config.setDoubleoption(1);
+								} else {
+									config.setRandom(0);
+									config.setRandom2(0);
+									config.setDoubleoption(0);
+								}
 							}
 							break;
-						case TableData.NO_HISPEED:
+						case TableData.GRADE_RANDOM:
+							if(autoplay < 2) {
+								if (config.getRandom() > 5) {
+									config.setRandom(0);
+								}
+								if (config.getRandom2() > 5) {
+									config.setRandom2(0);
+								}
+							}
+							break;
+							case TableData.NO_HISPEED:
 							resource.addConstraint(TableData.NO_HISPEED);
 							break;
 							case TableData.NO_GOOD:
@@ -1035,7 +1044,6 @@ public class MusicSelector extends MainState {
 								resource.addConstraint(TableData.NO_GREAT);
 								break;
 						}
-					}
 				}
 				if (bgm != null) {
 					bgm.stop();
@@ -1265,9 +1273,18 @@ public class MusicSelector extends MainState {
 
 	private BarContentsLoaderThread loader;
 
+	/**
+	 * 選曲バー内のスコアデータ等を読み込むためのスレッド
+	 */
 	class BarContentsLoaderThread extends Thread {
 
+		/**
+		 * データ読み込み対象の選曲バー
+		 */
 		private Bar[] bars;
+		/**
+		 * 読み込み終了フラグ
+		 */
 		private boolean stop = false;
 
 		public BarContentsLoaderThread(Bar[] bar) {
@@ -1297,13 +1314,13 @@ public class MusicSelector extends MainState {
 							hash[j] = gb.getSongDatas()[j].getSha256();
 							ln |= gb.getSongDatas()[j].hasLongNote();
 						}
-						gb.setScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 0));
-						gb.setMirrorScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 1));
-						gb.setRandomScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 2));
+						gb.setScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 0, gb.getConstraint()));
+						gb.setMirrorScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 1, gb.getConstraint()));
+						gb.setRandomScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 2, gb.getConstraint()));
 						boolean[] replay = new boolean[REPLAY];
 						for(int i = 0;i < REPLAY;i++) {
 							replay[i] = main.getPlayDataAccessor().existsReplayData(
-									hash, ln, config.getLnmode(), 0);
+									hash, ln, config.getLnmode(), i, gb.getConstraint());
 						}
 						gb.setExistsReplayData(replay);
 					}
@@ -1323,6 +1340,9 @@ public class MusicSelector extends MainState {
 			}
 		}
 
+		/**
+		 * データ読み込みを中断する
+		 */
 		public void stopRunning() {
 			stop = true;
 		}
