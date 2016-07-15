@@ -1,7 +1,9 @@
 package bms.player.beatoraja.input;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.math.Rectangle;
 
 /**
  * キーボード入力処理用クラス
@@ -27,9 +29,12 @@ public class KeyBoardInputProcesseor implements InputProcessor {
 	
 	private int lastPressedKey = -1;
 
-	public KeyBoardInputProcesseor(BMSPlayerInputProcessor bmsPlayerInputProcessor, int[] keys) {
+	private Rectangle resolution;
+
+	public KeyBoardInputProcesseor(BMSPlayerInputProcessor bmsPlayerInputProcessor, int[] keys, Rectangle resolution) {
 		this.bmsPlayerInputProcessor = bmsPlayerInputProcessor;
 		this.setKeyAssign(keys);
+		this.resolution = resolution;
 	}
 
 	public void setKeyAssign(int[] keys) {
@@ -126,18 +131,22 @@ public class KeyBoardInputProcesseor implements InputProcessor {
 		return false;
 	}
 
-	public boolean scrolled(int arg0) {
-		// TODO 自動生成されたメソッド・スタブ
+	public boolean scrolled(int amount) {
+		this.bmsPlayerInputProcessor.scroll += amount;
 		return false;
 	}
 
-	public boolean touchDown(int arg0, int arg1, int arg2, int arg3) {
-		// TODO 自動生成されたメソッド・スタブ
+	public boolean touchDown(int x, int y, int point, int button) {
+		this.bmsPlayerInputProcessor.mousex = (int) (x * resolution.width / Gdx.graphics.getWidth());
+		this.bmsPlayerInputProcessor.mousey = (int) (y * resolution.height / Gdx.graphics.getHeight());
+		this.bmsPlayerInputProcessor.mouseconsumed = true;
 		return false;
 	}
 
-	public boolean touchDragged(int arg0, int arg1, int arg2) {
-		// TODO 自動生成されたメソッド・スタブ
+	public boolean touchDragged(int x, int y, int point) {
+		this.bmsPlayerInputProcessor.mousex = (int) (x * resolution.width / Gdx.graphics.getWidth());
+		this.bmsPlayerInputProcessor.mousey = (int) (y * resolution.height / Gdx.graphics.getHeight());
+		this.bmsPlayerInputProcessor.mouseconsumed = true;
 		return false;
 	}
 

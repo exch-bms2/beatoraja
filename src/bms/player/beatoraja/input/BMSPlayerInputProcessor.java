@@ -12,6 +12,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.Controllers;
+import com.badlogic.gdx.math.Rectangle;
 
 /**
  * キーボードやコントローラからの入力を管理するクラス
@@ -24,10 +25,10 @@ public class BMSPlayerInputProcessor {
 
 	private List<BMControllerInputProcessor> bminput = new ArrayList();
 
-	public BMSPlayerInputProcessor() {
+	public BMSPlayerInputProcessor(Rectangle resolution) {
 		kbinput = new KeyBoardInputProcesseor(this, new int[] { Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.F, Keys.V,
 				Keys.SHIFT_LEFT, Keys.CONTROL_LEFT, Keys.COMMA, Keys.L, Keys.PERIOD, Keys.SEMICOLON, Keys.SLASH,
-				Keys.APOSTROPHE, Keys.UNKNOWN, Keys.SHIFT_RIGHT, Keys.CONTROL_RIGHT, Keys.Q, Keys.W });
+				Keys.APOSTROPHE, Keys.UNKNOWN, Keys.SHIFT_RIGHT, Keys.CONTROL_RIGHT, Keys.Q, Keys.W }, resolution);
 		Gdx.input.setInputProcessor(kbinput);
 		int player = 0;
 		for (Controller controller : Controllers.getControllers()) {
@@ -71,6 +72,14 @@ public class BMSPlayerInputProcessor {
 	long[] functiontime = new long[12];
 
 	long starttime;
+
+	int mousex;
+
+	int mousey;
+
+	boolean mouseconsumed;
+
+	int scroll;
 
 	private boolean enableKeyInput = true;
 
@@ -207,4 +216,27 @@ public class BMSPlayerInputProcessor {
 		return bminput.toArray(new BMControllerInputProcessor[0]);
 	}
 
+	public int getMouseX() {
+		return mousex;
+	}
+
+	public int getMouseY() {
+		return mousey;
+	}
+
+	public boolean isMouseConsumed() {
+		return mouseconsumed;
+	}
+
+	public void setMouseConsumed() {
+		mouseconsumed = false;
+	}
+
+	public int getScroll() {
+		return scroll;
+	}
+
+	public void resetScroll() {
+		scroll = 0;
+	}
 }

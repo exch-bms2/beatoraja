@@ -133,6 +133,8 @@ public class MusicSelector extends MainState {
 		for (int i = 0; i < scorecache.length; i++) {
 			scorecache[i] = new HashMap();
 		}
+
+		bar = new BarRenderer(main, this, songdb);
 	}
 
 	IRScoreData readScoreData(SongData song, int lnmode) {
@@ -181,7 +183,6 @@ public class MusicSelector extends MainState {
 			cache.clear();
 		}
 
-		bar = new BarRenderer(main, this, songdb);
 		BMSPlayerInputProcessor input = main.getInputProcessor();
 		PlayConfig pc = (config.getMusicselectinput() == 0 ? config.getMode7() : config.getMode9());
 		input.setKeyassign(pc.getKeyassign());
@@ -739,6 +740,19 @@ public class MusicSelector extends MainState {
 			if (l > duration) {
 				duration = 0;
 			}
+		}
+
+		if(input.getScroll() > 0) {
+			for(int i = 0;i < input.getScroll();i++) {
+				bar.move(false);
+			}
+			input.resetScroll();
+		}
+		if(input.getScroll() < 0) {
+			for(int i = 0;i < -input.getScroll();i++) {
+				bar.move(true);
+			}
+			input.resetScroll();
 		}
 
 		if (bar.getSelected() != current || selectedreplay == -1) {

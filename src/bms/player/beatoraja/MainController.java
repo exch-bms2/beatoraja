@@ -155,7 +155,7 @@ public class MainController extends ApplicationAdapter {
 		sprite = new SpriteBatch();
 		shape = new ShapeRenderer();
 
-		input = new BMSPlayerInputProcessor();
+		input = new BMSPlayerInputProcessor(RESOLUTION[config.getResolution()]);
 
 		selector = new MusicSelector(this, config);
 		decide = new MusicDecide(this);
