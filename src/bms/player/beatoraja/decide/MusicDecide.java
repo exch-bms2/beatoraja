@@ -47,14 +47,6 @@ public class MusicDecide extends MainState {
 		} else {
 			setSkin(new MusicDecideSkin(main.RESOLUTION[resource.getConfig().getResolution()]));
 		}
-
-		if(resource.getCourseBMSModels() != null) {
-			getSkin().getTitle().setText(resource.getCoursetitle());
-			getSkin().getGenre().setText("");
-			getSkin().getArtist().setText("");
-		} else {
-			getSkin().setText(resource.getBMSModel());
-		}
 	}
 
 	public void render() {
@@ -71,21 +63,6 @@ public class MusicDecide extends MainState {
 			sprite.draw(resource.getBGAManager().getStagefileData(), 0, 0, w, h);
 			sprite.end();
 		}
-		sprite.begin();
-		getSkin().drawAllObjects(sprite, nowtime);
-		sprite.end();
-
-		sprite.begin();
-		for (SkinImage part : getSkin().getSkinPart()) {
-			int[] op = part.getOption();
-			if (true) {
-				Rectangle r = part.getDestination(nowtime);
-				if (r != null) {
-					sprite.draw(part.getImage(nowtime), r.x, r.y, r.width, r.height);
-				}
-			}
-		}
-		sprite.end();
 
 		if (nowtime > 1500) {
 			main.changeState(MainController.STATE_PLAYBMS);
@@ -97,4 +74,26 @@ public class MusicDecide extends MainState {
 		// TODO Auto-generated method stub
 		
 	}
+
+	public String getTitle() {
+		if(resource.getCourseBMSModels() != null) {
+			return resource.getCoursetitle();
+		}
+		return resource.getBMSModel().getTitle();
+	}
+
+	public String getArtist() {
+		if(resource.getCourseBMSModels() != null) {
+			return "";
+		}
+		return resource.getBMSModel().getArtist();
+	}
+
+	public String getGenre() {
+		if(resource.getCourseBMSModels() != null) {
+			return "";
+		}
+		return resource.getBMSModel().getGenre();
+	}
+
 }

@@ -15,19 +15,6 @@ public class LR2ResultSkinLoader extends LR2SkinLoader {
 
 		this.loadSkin(skin, f, option);
 		
-		System.out.println("result skin objects : " + skin.getSkinPart().length);
-		System.out.println("result skin numbers : " + skin.getSkinNumbers().length);
-		for(SkinNumber number : skin.getSkinNumbers()) {
-//			System.out.println("result skin number id : " + number.getId());
-			if(number.getId() == 106) {
-				skin.setTotalnotes(number);
-			}
-			
-			if(number.getId() == 152) {
-				skin.setScore(2, number);
-			}
-		}
-
 		return skin;
 	}
 

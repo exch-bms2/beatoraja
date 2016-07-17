@@ -165,17 +165,10 @@ public class MusicResult extends MainState {
 				titlefont.draw(sprite, "Replay Saved", w * 3 / 4, h / 4);
 			}
 		}
-		
-		for(SkinImage img : skin.getSkinPart()) {
-			if(img.getTiming() != 2) {
-				img.draw(sprite, time);				
-			}
-		}
 
 		if (score != null) {
 			// totalnotes
-			skin.getTotalnotes().draw(sprite, time, resource.getScoreData().getNotes());
-			
+
 			if (oldclear != 0) {
 				titlefont.setColor(Color.valueOf(LAMP[oldclear]));
 				titlefont.draw(sprite, CLEAR[oldclear] + " -> ", 240 * w / 1280, 425 * h / 720);
@@ -443,5 +436,9 @@ public class MusicResult extends MainState {
 	public void dispose() {
 		// TODO Auto-generated method stub
 		
+	}
+
+	public int getTotalNotes() {
+		return resource.getBMSModel().getTotalNotes();
 	}
 }

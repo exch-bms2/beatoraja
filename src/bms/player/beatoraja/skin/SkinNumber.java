@@ -96,9 +96,5 @@ public class SkinNumber extends SkinObject {
 				sprite.draw(values[j], r.x + r.width * j, r.y, r.width, r.height);				
 			}
 		}
-
-
-		
 	}
-
 }

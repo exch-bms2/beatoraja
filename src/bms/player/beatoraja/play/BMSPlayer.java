@@ -333,7 +333,6 @@ public class BMSPlayer extends MainState {
 
 		Config config = resource.getConfig();
 		Logger.getGlobal().info("create");
-		skin.setText(resource.getBMSModel());
 
 		input = main.getInputProcessor();
 		input.setEnableKeyInput(autoplay == 0);
@@ -652,19 +651,6 @@ public class BMSPlayer extends MainState {
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-		// 背景描画
-		sprite.begin();
-		for (SkinImage part : skin.getSkinPart()) {
-			int[] op = part.getOption();
-			if (part.getTiming() != 3) {
-				Rectangle r = part.getDestination(time);
-				if (r != null) {
-					sprite.draw(part.getImage(time), r.x, r.y, r.width, r.height);
-				}
-			}
-		}
-		sprite.end();
-
 		// グラフ描画
 		graphrender.drawGraph(skin, sprite, systemfont, shape, this.judge);
 
@@ -697,10 +683,6 @@ public class BMSPlayer extends MainState {
 		shape.end();
 		
 		bga.drawBGA(sprite, r, state == STATE_PRELOAD ? -1 : time);
-
-		sprite.begin();
-		skin.drawAllObjects(sprite, time);
-		sprite.end();
 
 		// ゲージ描画
 		Rectangle gr = skin.getGaugeRegion();
@@ -967,5 +949,9 @@ public class BMSPlayer extends MainState {
 
 	public int getTimeleftSecond() {
 		return ((playtime - (int) (starttime != 0 ? System.currentTimeMillis() - starttime : 0) + 1000) / 1000) % 60;
+	}
+
+	public String getTitle() {
+		return resource.getBMSModel().getTitle();
 	}
 }

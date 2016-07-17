@@ -29,16 +29,14 @@ public class MusicSelectSkin extends Skin {
 
 	private List<SkinNumber> numbers = new ArrayList<SkinNumber>();
 
-	private float dw;
-	private float dh;
-
 	public MusicSelectSkin() {
-		
+		super(640, 480, 1280, 720);
 	}
 	
 	public MusicSelectSkin(Rectangle r) {
-		dw = r.width / 1280.0f;
-		dh = r.height / 720.0f;
+		super(1280, 720, r.width, r.height);
+		float dw = r.width / 1280.0f;
+		float dh = r.height / 720.0f;
 
 		Texture bart = new Texture("skin/songbar.png");
 		for (int i = 0; i < bar.length; i++) {
@@ -90,15 +88,6 @@ public class MusicSelectSkin extends Skin {
 				1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		addNumber(new SkinNumber(ntr[0], 0, 2, 1, NumberResourceAccessor.TIME_SECOND), 0, 1250, 2, 12, 12, 0, 1, 1, 1,
 				1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-
-		this.setSkinNumbers(numbers.toArray(new SkinNumber[0]));
-	}
-
-	private void addNumber(SkinNumber number, long time, float x, float y, float w, float h, int acc, int a, int r,
-			int g, int b, int blend, int filter, int angle, int center, int loop, int timer, int op1, int op2, int op3) {
-		number.setDestination(time, x * dw, y * dh, w * dw, h * dh, acc, a, r, g, b, blend, filter, angle, center,
-				loop, timer, op1, op2, op3);
-		numbers.add(number);
 	}
 
 	public Sprite[] getBar() {

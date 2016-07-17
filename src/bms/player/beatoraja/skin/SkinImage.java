@@ -1,5 +1,6 @@
 package bms.player.beatoraja.skin;
 
+import bms.player.beatoraja.MainState;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -55,7 +56,7 @@ public class SkinImage extends SkinObject {
 		this.option = option;
 	}
 
-	public void draw(SpriteBatch sprite, long time) {
+	public void draw(SpriteBatch sprite, long time, MainState state) {
 		Rectangle r = this.getDestination(time);
         if (r != null) {
         	Color c = sprite.getColor();

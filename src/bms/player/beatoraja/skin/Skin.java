@@ -1,83 +1,43 @@
 package bms.player.beatoraja.skin;
 
 import bms.model.BMSModel;
+import bms.player.beatoraja.MainState;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Skin {
 
-	private SkinImage[] skinparts = new SkinImage[0];
+	private float dw;
+	private float dh;
 
-	private SkinNumber[] numbers = new SkinNumber[0];
+	private List<SkinObject> objects = new ArrayList();
 
-	private SkinText genre;
-
-	private SkinText title;
-	private SkinText artist;
-
-	public SkinImage[] getSkinPart() {
-		return skinparts;
+	public Skin(float orgw, float orgh, float dstw, float dsth) {
+		dw = dstw / orgw;
+		dh = dsth / orgh;
 	}
 
-	public void setSkinPart(SkinImage[] parts) {
-		skinparts = parts;
+	protected void add(SkinObject object) {
+		objects.add(object);
 	}
 
-	public SkinNumber[] getSkinNumbers() {
-		return numbers;
+	protected void setDestination(SkinObject object, long time, float x, float y, float w, float h, int acc, int a, int r,
+								int g, int b, int blend, int filter, int angle, int center, int loop, int timer, int op1, int op2, int op3) {
+		object.setDestination(time, x * dw, y * dh, w * dw, h * dh, acc, a, r, g, b, blend, filter, angle, center, loop, timer, op1, op2, op3);
 	}
 
-	public void setSkinNumbers(SkinNumber[] numbers) {
-		this.numbers = numbers;
+	protected void addNumber(SkinNumber number, long time, float x, float y, float w, float h, int acc, int a, int r,
+						   int g, int b, int blend, int filter, int angle, int center, int loop, int timer, int op1, int op2, int op3) {
+		number.setDestination(time, x * dw, y * dh, w * dw, h * dh, acc, a, r, g, b, blend, filter, angle, center,
+				loop, timer, op1, op2, op3);
+		objects.add(number);
 	}
 
-	public SkinText getGenre() {
-		return genre;
-	}
-
-	public void setGenre(SkinText genre) {
-		this.genre = genre;
-	}
-
-	public SkinText getTitle() {
-		return title;
-	}
-
-	public void setTitle(SkinText title) {
-		this.title = title;
-	}
-
-	public SkinText getArtist() {
-		return artist;
-	}
-
-	public void setArtist(SkinText artist) {
-		this.artist = artist;
-	}
-
-	public void setText(BMSModel model) {
-		if(genre != null) {
-			genre.setText(model.getGenre());
-		}
-		if(title != null) {
-			title.setText(model.getFullTitle());
-		}
-		if(artist != null) {
-			artist.setText(model.getFullArtist());
-		}
-	}
-
-	public void drawAllObjects(SpriteBatch sprite, long time) {
-		for(SkinImage obj : skinparts) {
-			obj.draw(sprite, time);
-		}
-		if(genre != null) {
-			genre.draw(sprite, time);
-		}
-		if(title != null) {
-			title.draw(sprite, time);
-		}
-		if(artist != null) {
-			artist.draw(sprite, time);
+	public void drawAllObjects(SpriteBatch sprite, long time, MainState state) {
+		for(SkinObject obj : objects) {
+			obj.draw(sprite, time, state);
 		}
 	}
 }

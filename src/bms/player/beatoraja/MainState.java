@@ -122,4 +122,16 @@ public abstract class MainState {
 		return 0;
 	}
 
+	public String getTitle() {
+		return "";
+	}
+
+	public String getArtist() {
+		return "";
+	}
+
+	public String getGenre() {
+		return "";
+	}
+
 }

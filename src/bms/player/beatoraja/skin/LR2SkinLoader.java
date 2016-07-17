@@ -29,8 +29,6 @@ public abstract class LR2SkinLoader {
 		float dstw = 1280;
 		float dsth = 720;
 
-		List<SkinImage> partlist = new ArrayList<SkinImage>();
-		List<SkinNumber> numlist = new ArrayList<SkinNumber>();
 		SkinImage part = null;
 		SkinNumber num = null;
 		BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(f), "MS932"));
@@ -150,7 +148,7 @@ public abstract class LR2SkinLoader {
 									part = new SkinImage();
 									part.setImage(images, values[9]);
 									part.setTiming(values[10]);
-									partlist.add(part);
+									skin.add(part);
 //									System.out.println("Object Added - " + (part.getTiming()));
 								} catch (NumberFormatException e) {
 									e.printStackTrace();
@@ -277,9 +275,15 @@ public abstract class LR2SkinLoader {
 									if(num.getId() == 84 || num.getId() == 114) {
 										num.setNumberResourceAccessor(NumberResourceAccessor.POOR);
 									}
-
+									if(num.getId() == 106) {
+										num.setNumberResourceAccessor(NumberResourceAccessor.TOTALNOTES);
+									}
 									if(num.getId() == 121) {
 										num.setNumberResourceAccessor(NumberResourceAccessor.TARGET_SCORE);
+									}
+
+									if(num.getId() == 152) {
+										num.setNumberResourceAccessor(NumberResourceAccessor.SCORE);
 									}
 
 									if(num.getId() == 160) {
@@ -305,7 +309,7 @@ public abstract class LR2SkinLoader {
 									}
 								
 
-									numlist.add(num);
+									skin.add(num);
 //									System.out.println("Number Added - " + (num.getId()));
 								} catch (NumberFormatException e) {
 									e.printStackTrace();
@@ -348,8 +352,6 @@ public abstract class LR2SkinLoader {
 			}
 		}
 
-		skin.setSkinPart(partlist.toArray(new SkinImage[0]));
-		skin.setSkinNumbers(numlist.toArray(new SkinNumber[0]));
 	}
 
 	private int[] parseInt(String[] s) {

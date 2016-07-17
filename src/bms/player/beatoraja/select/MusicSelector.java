@@ -272,28 +272,6 @@ public class MusicSelector extends MainState {
 
 		final int time = getNowTime();
 
-		sprite.begin();
-		for (SkinImage part : skin.getSkinPart()) {
-			int[] op = part.getOption();
-			boolean draw = true;
-			for (int option : op) {
-				if (option != 0) {
-					draw = false;
-					break;
-				}
-			}
-			if (part.getTiming() == 0 && draw) {
-				Rectangle r = part.getDestination(time);
-				if (r != null) {
-					sprite.setColor(part.getColor(time));
-					sprite.draw(part.getImage(time), r.x, r.y, r.width, r.height);
-					sprite.setColor(Color.WHITE);
-				}
-			}
-		}
-
-		sprite.end();
-
 		bar.render(sprite, shape, skin, w, h, duration, angle, time);
 		// draw song information
 		sprite.begin();

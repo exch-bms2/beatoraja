@@ -115,13 +115,7 @@ public class GradeResult extends MainState {
 			if (saveReplay) {
 				titlefont.draw(sprite, "Replay Saved", w * 3 / 4, h / 4);
 			}
-			for (SkinImage img : skin.getSkinPart()) {
-				if (img.getTiming() != 2) {
-					img.draw(sprite, time);
-				}
-			}
 			// totalnotes
-			skin.getTotalnotes().draw(sprite, time, score.getNotes());
 
 			if (oldclear != 0) {
 				titlefont.setColor(Color.valueOf(LAMP[oldclear]));
@@ -275,6 +269,14 @@ public class GradeResult extends MainState {
 	@Override
 	public int getTargetMisscount() {
 		return oldmisscount;
+	}
+
+	public int getTotalNotes() {
+		int notes = 0;
+		for(BMSModel model : resource.getCourseBMSModels()) {
+			notes += model.getTotalNotes();
+		}
+		return notes;
 	}
 
 	@Override

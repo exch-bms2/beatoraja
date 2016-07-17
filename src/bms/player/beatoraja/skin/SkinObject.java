@@ -1,6 +1,8 @@
 package bms.player.beatoraja.skin;
 
+import bms.player.beatoraja.MainState;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 
 import java.util.ArrayList;
@@ -105,6 +107,7 @@ public abstract class SkinObject {
         return dst.get(0).color;
     }
 
+    public abstract void draw(SpriteBatch sprite, long time, MainState state);
 
     private class SkinObjectDestination {
 

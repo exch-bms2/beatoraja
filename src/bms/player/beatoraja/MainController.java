@@ -184,12 +184,8 @@ public class MainController extends ApplicationAdapter {
 	public void render() {
 		final int time = current.getNowTime();
 		current.render();
-
-		SkinNumber[] numbers = current.getSkin().getSkinNumbers();
 		sprite.begin();
-		for (SkinNumber number : numbers) {
-			number.draw(sprite, time, current);
-		}
+		current.getSkin().drawAllObjects(sprite, time, current);
 		sprite.end();
 
 		// FPS表示切替
