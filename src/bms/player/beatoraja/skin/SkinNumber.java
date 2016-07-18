@@ -17,7 +17,8 @@ public class SkinNumber extends SkinObject {
 	 * イメージ
 	 */
 	private TextureRegion[] image;
-	
+	private TextureRegion[] mimage;
+
 	private int id;
 
 	private int cycle;
@@ -35,13 +36,18 @@ public class SkinNumber extends SkinObject {
 	}
 	
 	public SkinNumber(TextureRegion[] image, int cycle, int keta, int zeropadding, NumberResourceAccessor resource) {
+		this(image, null, cycle, keta, zeropadding, resource);
+	}
+
+	public SkinNumber(TextureRegion[] image, TextureRegion[] mimage, int cycle, int keta, int zeropadding, NumberResourceAccessor resource) {
 		this.image = image;
+		this.mimage = mimage;
 		this.cycle = cycle;
 		this.setKeta(keta);
 		this.zeropadding = zeropadding;
 		this.resource = resource;
 	}
-	
+
 	public void setNumberResourceAccessor(NumberResourceAccessor resource) {
 		this.resource = resource;
 	}
@@ -68,9 +74,11 @@ public class SkinNumber extends SkinObject {
 	}
 	
 	public TextureRegion[] getValue(int value, int zeropadding) {
+		final TextureRegion[] image = (value >= 0 || mimage == null) ? this.image : mimage;
+		value = Math.abs(value);
 		for (int j = values.length - 1; j >= 0; j--) {
 			if(value > 0 || j == values.length - 1) {
-				values[j] = image[value % 10];				
+				values[j] = image[value % 10];
 			} else {
 				values[j] = (zeropadding == 2 ? image[10] : (zeropadding == 1 ? image[0] : null));
 			}

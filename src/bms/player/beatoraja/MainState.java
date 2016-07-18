@@ -45,7 +45,15 @@ public abstract class MainState {
 	public void setSkin(Skin skin) {
 		this.skin = skin;
 	}
-	
+
+	public int getClear() {
+		return 0;
+	}
+
+	public int getTargetClear() {
+		return 0;
+	}
+
 	public int getScore() {
 		return 0;
 	}

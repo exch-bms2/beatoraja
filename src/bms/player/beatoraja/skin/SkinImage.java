@@ -16,26 +16,38 @@ public class SkinImage extends SkinObject {
 	/**
 	 * イメージ
 	 */
-	private TextureRegion[] image;
+	private TextureRegion[][] image;
 	private int cycle;
 	
 	private int timing;
 	private int[] option = new int[3];
 
+	private NumberResourceAccessor resource;
+
 	public TextureRegion[] getImage() {
-		return image;
+		return image[0];
 	}
-	
+
 	public TextureRegion getImage(long time) {
+		return getImage(0 ,time);
+	}
+
+	public TextureRegion getImage(int value, long time) {
 		if(cycle == 0) {
-			return image[0];
+			return image[value][0];
 		}
 		final int index = (int) ((time / (cycle / image.length))) % image.length;
 //		System.out.println(index + " / " + image.length);
-		return image[index];
+		return image[value][index];
 	}
 	
 	public void setImage(TextureRegion[] image, int cycle) {
+		this.image = new TextureRegion[1][];
+		this.image[0] = image;
+		this.cycle = cycle;
+	}
+
+	public void setImage(TextureRegion[][] image, int cycle) {
 		this.image = image;
 		this.cycle = cycle;
 	}
@@ -56,13 +68,20 @@ public class SkinImage extends SkinObject {
 		this.option = option;
 	}
 
+	public void setNumberResourceAccessor(NumberResourceAccessor resource) {
+		this.resource = resource;
+	}
+
 	public void draw(SpriteBatch sprite, long time, MainState state) {
 		Rectangle r = this.getDestination(time);
         if (r != null) {
-        	Color c = sprite.getColor();
-            sprite.setColor(getColor(time));
-            sprite.draw(getImage(time), r.x, r.y, r.width, r.height);
-            sprite.setColor(c);
+			final int value = resource != null ? resource.getValue(state) : 0;
+			if(value >= 0 && value < image.length) {
+				Color c = sprite.getColor();
+				sprite.setColor(getColor(time));
+				sprite.draw(getImage(value, time), r.x, r.y, r.width, r.height);
+				sprite.setColor(c);
+			}
         }
 	}
 

@@ -115,42 +115,8 @@ public class GradeResult extends MainState {
 			if (saveReplay) {
 				titlefont.draw(sprite, "Replay Saved", w * 3 / 4, h / 4);
 			}
-			// totalnotes
-
-			if (oldclear != 0) {
-				titlefont.setColor(Color.valueOf(LAMP[oldclear]));
-				titlefont.draw(sprite, CLEAR[oldclear] + " -> ", 240, 425);
-			}
-			titlefont.setColor(Color.valueOf(LAMP[score.getClear()]));
-			titlefont.draw(sprite, CLEAR[score.getClear()], 440, 425);
-			titlefont.setColor(Color.WHITE);
-
-			if (oldexscore != 0) {
-				titlefont.setColor(Color.WHITE);
-				titlefont.draw(sprite, " -> ", 360, 395);
-				skin.getScore(score.getExscore() > oldexscore ? 2 : 3).draw(sprite, time,
-						Math.abs(score.getExscore() - oldexscore));
-			}
-
-			if (oldmisscount < 65535) {
-				titlefont.draw(sprite, " -> ", 360, 365);
-				skin.getMisscount(score.getMinbp() > oldmisscount ? 3 : 2).draw(sprite, time,
-						Math.abs(score.getMinbp() - oldmisscount));
-			}
-
-			if (oldcombo > 0) {
-				titlefont.draw(sprite, " -> ", 360, 335);
-				skin.getMaxcombo(score.getCombo() > oldcombo ? 2 : 3).draw(sprite, time,
-						Math.abs(score.getCombo() - oldcombo));
-			}
 
 			titlefont.draw(sprite, "FAST / SLOW  :  ", 100, 100);
-
-			skin.getJudgeCount(true).draw(sprite, time,
-					score.getEgr() + score.getEgd() + score.getEbd() + score.getEpr() + score.getEms());
-			skin.getJudgeCount(false).draw(sprite, time,
-					score.getLgr() + score.getLgd() + score.getLbd() + score.getLpr() + score.getLms());
-
 			sprite.end();
 		}
 		boolean[] keystate = main.getInputProcessor().getKeystate();
@@ -227,6 +193,19 @@ public class GradeResult extends MainState {
 			}
 		}
 		return 0;
+	}
+
+	@Override
+	public int getClear() {
+		if(resource.getCourseScoreData() != null) {
+			return resource.getCourseScoreData().getClear();
+		}
+		return Integer.MIN_VALUE;
+	}
+
+	@Override
+	public int getTargetClear() {
+		return oldclear;
 	}
 
 	@Override

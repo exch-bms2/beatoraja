@@ -166,40 +166,8 @@ public class MusicResult extends MainState {
 			}
 		}
 
-		if (score != null) {
-			// totalnotes
-
-			if (oldclear != 0) {
-				titlefont.setColor(Color.valueOf(LAMP[oldclear]));
-				titlefont.draw(sprite, CLEAR[oldclear] + " -> ", 240 * w / 1280, 425 * h / 720);
-			}
-			titlefont.setColor(Color.valueOf(LAMP[score.getClear()]));
-			titlefont.draw(sprite, CLEAR[score.getClear()], 440 * w / 1280, 425 * h / 720);
-			titlefont.setColor(Color.WHITE);
-
-			if (oldexscore != 0) {
-				titlefont.setColor(Color.WHITE);
-				titlefont.draw(sprite, " -> ", 360 * w / 1280, 395 * h / 720);
-				skin.getScore(score.getExscore() > oldexscore ? 2 : 3).draw(sprite, time, Math.abs(score.getExscore() - oldexscore));
-			}
-
-			if (oldmisscount < 65535) {
-				titlefont.draw(sprite, " -> ", 360 * w / 1280, 365 * h / 720);
-				skin.getMisscount(score.getMinbp() > oldmisscount ? 3 : 2).draw(sprite, time, Math.abs(score.getMinbp() - oldmisscount));
-			}
-			
-			if(oldcombo > 0) {
-				titlefont.draw(sprite, " -> ", 360 * w / 1280, 335 * h / 720);
-				skin.getMaxcombo(score.getCombo() > oldcombo ? 2 : 3).draw(sprite, time, Math.abs(score.getCombo() - oldcombo));
-			}
-
-			titlefont.draw(sprite, "FAST / SLOW  :  ", 100 * w / 1280, 100 * h / 720);
-
-			skin.getJudgeCount(true).draw(sprite, time,
-					score.getEgr() + score.getEgd() + score.getEbd() + score.getEpr() + score.getEms());
-			skin.getJudgeCount(false).draw(sprite, time,
-					score.getLgr() + score.getLgd() + score.getLbd() + score.getLpr() + score.getLms());
-		}
+		titlefont.setColor(Color.WHITE);
+		titlefont.draw(sprite, "FAST / SLOW  :  ", 100 * w / 1280, 100 * h / 720);
 		sprite.end();
 
 		Gdx.gl.glEnable(GL11.GL_BLEND);
@@ -388,8 +356,20 @@ public class MusicResult extends MainState {
 		}
 		return 0;
 	}
-	
-	
+
+	@Override
+	public int getClear() {
+		if(resource.getScoreData() != null) {
+			return resource.getScoreData().getClear();
+		}
+		return Integer.MIN_VALUE;
+	}
+
+	@Override
+	public int getTargetClear() {
+		return oldclear;
+	}
+
 	@Override
 	public int getScore() {
 		if(resource.getScoreData() != null) {

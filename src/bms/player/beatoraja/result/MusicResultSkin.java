@@ -61,34 +61,35 @@ public class MusicResultSkin extends Skin {
 			}
 		}
 
-		for (int i = 0; i < 2; i++) {
-			SkinNumber sn = new SkinNumber(ntr[0], 0, 4, 0);
-			setDestination(sn, 0, 320 + i * 90, 75, 18, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-			setJudgeCount(i == 0, sn);
-		}
+		Texture cl = new Texture("skin/clear.png");
+		SkinImage clear = new SkinImage();
+		clear.setImage(TextureRegion.split(cl, 200, 20),0);
+		clear.setNumberResourceAccessor(NumberResourceAccessor.CLEAR);
+		setDestination(clear, 0, 440, 405, 200, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		add(clear);
+		SkinImage tclear = new SkinImage();
+		tclear.setImage(TextureRegion.split(cl, 200, 20),0);
+		tclear.setNumberResourceAccessor(NumberResourceAccessor.TARGET_CLEAR);
+		setDestination(tclear, 0, 230, 405, 200, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		add(tclear);
+
+		addNumber(new SkinNumber(ntr[0], 0, 4, 0, NumberResourceAccessor.FAST_TOTAL), 0, 320, 75, 18, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		addNumber(new SkinNumber(ntr[0], 0, 4, 0, NumberResourceAccessor.SLOW_TOTAL), 0, 410, 75, 18, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 		addNumber(new SkinNumber(ntr[0], 0, 5, 0, NumberResourceAccessor.TARGET_SCORE), 0, 240, 375, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		addNumber(new SkinNumber(ntr[0], 0, 5, 0, NumberResourceAccessor.SCORE), 0, 410, 375, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
-		SkinNumber dscore = new SkinNumber(ntr[1], 0, 5, 0);
-		setDestination(dscore, 0, 550, 375, 12, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		setScore(2, dscore);
-		dscore = new SkinNumber(ntr[2], 0, 5, 0);
-		setDestination(dscore, 0, 550, 375, 12, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		setScore(3, dscore);
+		addNumber(new SkinNumber(ntr[1], ntr[2], 0, 5, 0, NumberResourceAccessor.DIFF_SCORE), 0, 550, 375, 12, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 		addNumber(new SkinNumber(ntr[0], 0, 5, 0, NumberResourceAccessor.TARGET_MISSCOUNT), 0, 240, 345, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		addNumber(new SkinNumber(ntr[0], 0, 5, 0, NumberResourceAccessor.MISSCOUNT), 0, 410, 345, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
-		SkinNumber dminbp = new SkinNumber(ntr[1], 0, 5, 0);
-		setDestination(dminbp, 0, 550, 345, 12, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		setMisscount(2, dminbp);
-		dminbp = new SkinNumber(ntr[2], 0, 5, 0);
-		setDestination(dminbp, 0, 550, 345, 12, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		setMisscount(3, dminbp);
+		addNumber(new SkinNumber(ntr[1], ntr[2], 0, 5, 0, NumberResourceAccessor.DIFF_MISSCOUNT), 0, 550, 345, 12, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 		addNumber(new SkinNumber(ntr[0], 0, 5, 0, NumberResourceAccessor.TARGET_MAXCOMBO), 0, 240, 315, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		addNumber(new SkinNumber(ntr[0], 0, 5, 0, NumberResourceAccessor.MAXCOMBO), 0, 410, 315, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+
+		addNumber(new SkinNumber(ntr[1], ntr[2], 0, 5, 0, NumberResourceAccessor.DIFF_MAXCOMBO), 0, 550, 315, 12, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 		SkinNumber dcombo = new SkinNumber(ntr[1], 0, 5, 0);
 		setDestination(dcombo, 0, 550, 315, 12, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -107,14 +108,6 @@ public class MusicResultSkin extends Skin {
 
 	public Rectangle getJudgeRegion() {
 		return judgeregion;
-	}
-
-	public SkinNumber getJudgeCount(boolean fast) {
-		return fastslow[(fast ? 0 : 1)];
-	}
-
-	public void setJudgeCount(boolean fast, SkinNumber number) {
-		fastslow[(fast ? 0 : 1)] = number;
 	}
 
 	public SkinNumber getScore(int status) {
