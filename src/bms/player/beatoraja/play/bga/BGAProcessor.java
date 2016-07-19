@@ -182,7 +182,12 @@ public class BGAProcessor {
 	}
 
 	private MovieProcessor loadMovie(int id, File f) throws Exception {
-		if (config.getVlcpath().length() > 0) {
+		if (config.getMovieplayer() == Config.MOVIEPLAYER_FFMPEG) {
+			MovieProcessor mm = new FFmpegProcessor(config.getFrameskip());
+			mm.create(f.getPath());
+			return mm;
+		}
+		if (config.getMovieplayer() == Config.MOVIEPLAYER_VLC && config.getVlcpath().length() > 0) {
 			MovieProcessor mm = new VLCMovieProcessor(config.getVlcpath());
 			mm.create(f.getPath());
 			return mm;
@@ -241,12 +246,12 @@ public class BGAProcessor {
 		return stagefile;
 	}
 
-	private Texture getBGAData(int id) {
+	private Texture getBGAData(int id, boolean cont) {
 		if (progress != 1 || id == -1) {
 			return null;
 		}
 		if (mpgmap.get(id) != null) {
-			return mpgmap.get(id).getBGAData();
+			return mpgmap.get(id).getBGAData(cont);
 		}
 		return cache.getTexture(id);
 	}
@@ -255,6 +260,8 @@ public class BGAProcessor {
 		if(model == null) {
 			return;
 		}
+		final int bgaid = playingbgaid;
+		final int layerid = playinglayerid;
 		for (TimeLine tl : model.getAllTimeLines()) {
 			if (tl.getTime() > time) {
 				break;
@@ -280,7 +287,7 @@ public class BGAProcessor {
 		} else if (misslayer != null && misslayertime != 0 && time >= misslayertime
 				&& time < misslayertime + 500) {
 			// draw miss layer
-			Texture miss = getBGAData(misslayer[misslayer.length * (time - misslayertime) / 500]);
+			Texture miss = getBGAData(misslayer[misslayer.length * (time - misslayertime) / 500], true);
 			if (miss != null) {
 				sprite.begin();
 				sprite.draw(miss, r.x, r.y, r.width, r.height);
@@ -288,14 +295,14 @@ public class BGAProcessor {
 			}
 		} else {
 			// draw BGA
-			Texture playingbgatex = getBGAData(playingbgaid);
+			Texture playingbgatex = getBGAData(playingbgaid, bgaid == playingbgaid);
 			if (playingbgatex != null) {
 				sprite.begin();
 				sprite.draw(playingbgatex, r.x, r.y, r.width, r.height);
 				sprite.end();
 			}
 			// draw layer
-			Texture playinglayertex = getBGAData(playinglayerid);
+			Texture playinglayertex = getBGAData(playinglayerid, layerid == playinglayerid);
 			if (playinglayertex != null) {
 				sprite.begin();
 				if (layershader.isCompiled()) {

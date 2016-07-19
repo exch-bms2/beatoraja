@@ -82,7 +82,11 @@ public class VLCMovieProcessor implements MovieProcessor {
 	private Pixmap showing;
 	private Texture showingtex;
 
-	public Texture getBGAData() {
+	public Texture getBGAData(boolean cont) {
+		if(!cont) {
+			mediaPlayer.stop();
+			play = false;
+		}
 		if (!play) {
 			mediaPlayer.start();
 			play = true;

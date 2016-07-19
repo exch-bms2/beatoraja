@@ -170,6 +170,11 @@ public class Config {
 	public static final int BGA_AUTO = 1;
 	public static final int BGA_OFF = 2;	
 	
+	private int movieplayer = MOVIEPLAYER_FFMPEG;
+	public static final int MOVIEPLAYER_FFMPEG = 0;
+	public static final int MOVIEPLAYER_VLC = 1;
+	
+	private int frameskip = 1;
 	private String vlcpath = "";
 	
 	private PlayConfig mode7 = new PlayConfig(new int[]{
@@ -582,5 +587,21 @@ public class Config {
 
 	public void setShowhiddennote(boolean showhiddennote) {
 		this.showhiddennote = showhiddennote;
+	}
+
+	public int getMovieplayer() {
+		return movieplayer;
+	}
+
+	public void setMovieplayer(int movieplayer) {
+		this.movieplayer = movieplayer;
+	}
+
+	public int getFrameskip() {
+		return frameskip;
+	}
+
+	public void setFrameskip(int frameskip) {
+		this.frameskip = frameskip;
 	}
 }

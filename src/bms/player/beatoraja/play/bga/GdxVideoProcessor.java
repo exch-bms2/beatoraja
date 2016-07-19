@@ -15,7 +15,7 @@ public class GdxVideoProcessor implements MovieProcessor {
 	}
 
 	@Override
-	public Texture getBGAData() {
+	public Texture getBGAData(boolean cont) {
 		// TODO 自動生成されたメソッド・スタブ
 		return null;
 	}

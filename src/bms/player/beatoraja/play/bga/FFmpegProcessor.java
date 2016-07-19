@@ -1,128 +1,125 @@
 package bms.player.beatoraja.play.bga;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Logger;
+
+import javax.imageio.ImageIO;
+
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 
+import org.bytedeco.javacv.*;
+
 public class FFmpegProcessor implements MovieProcessor {
+
+	private List<Pixmap> frames = new ArrayList<Pixmap>();
+	private int showingframe = -1;
+	private Texture showingtex;
+
+	private long starttime;
+	
+	private double fps;
+	
+	private int fpsd = 2;
+
+	private FrameGrabber grabber;
+
+	public FFmpegProcessor(int fpsd) {
+		this.fpsd = fpsd;
+	}
 
 	@Override
 	public void create(String filepath) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public Texture getBGAData() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void dispose() {
-		// TODO Auto-generated method stub
-
-	}
-
-}
-
-/*
- JavaCVを見てテストプレイヤーを実装してみよう
- 
- public class TestPlayer {
-
-	CanvasFrame videoCanvas;
-	SourceDataLine audioLine;
-
-	public TestPlayer() {
-		videoCanvas = new CanvasFrame("VideoCanvas");
-		videoCanvas.setDefaultCloseOperation(javax.swing.JFrame.EXIT_ON_CLOSE);
-	}
-
-	void play() throws Exception {
-
-	    //FrameGrabber grabber = new FFmpegFrameGrabber("mmsh://localhost:8080/");
-	    //grabber.setFormat("asf");
-	    FrameGrabber grabber = new FFmpegFrameGrabber("test.mp4");
-		grabber.start();
-
-		startAudioLine(grabber.getSampleRate());
-
+		grabber = new FFmpegFrameGrabber(filepath);
 		try {
-			Frame frame = grabber.grabFrame();
-			while (frame!=null) {
-				if(frame.image!=null){
-					onFrameVideo(frame.image);
-				}
-				if(frame.samples!=null){
-					onFrameAudio(frame.samples);
-				}
-				frame = grabber.grabFrame();
+			createFramePixmap();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public Texture getBGAData(boolean cont) {
+		if (starttime == 0 || !cont) {
+			starttime = System.currentTimeMillis();
+		}
+		final long nowtime = System.currentTimeMillis() - starttime;
+
+		final int nowframe = (int) (nowtime / (1000 / fps));
+		if (showingframe != nowframe) {
+			showingframe = nowframe;
+			if (showingtex != null) {
+				showingtex.dispose();
 			}
+			if (showingframe < frames.size()) {
+				showingtex = new Texture(frames.get(showingframe));
+//				System.out.println("FFmpegProcessor : showing frame - " + showingframe);
+			} else {
+				showingtex = null;
+			}
+		}
+		return showingtex;
+	}
+
+	private void createFramePixmap() throws Exception {
+		grabber.start();
+		try {
+			Logger.getGlobal().info(
+					"decode開始 - fps : " + grabber.getFrameRate() + " format : " + grabber.getFormat() + " size : "
+							+ grabber.getImageWidth() + " x " + grabber.getImageHeight());
+			fps = grabber.getFrameRate() / fpsd;
+			Java2DFrameConverter converter = new Java2DFrameConverter();
+			long start = System.currentTimeMillis();
+			Frame frame = grabber.grab();
+			while (frame != null) {
+				if (frame.image[0] != null) {
+					BufferedImage image = converter.convert(frame);
+					final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+					ImageIO.write(image, "bmp", baos);
+					// Pixmap pixmap = new Pixmap(new
+					// FileHandleStream("tempimage.bmp") {
+					// @Override
+					// public InputStream read() {
+					// return new ByteArrayInputStream(baos.toByteArray());
+					// }
+					//
+					// @Override
+					// public OutputStream write(boolean overwrite) {
+					// return null;
+					// }
+					// });
+					byte[] data = baos.toByteArray();
+					Pixmap pixmap = new Pixmap(data, 0, data.length);
+					frames.add(pixmap);
+					// System.out.println("FFmpegProcessor : encoded frames - "
+					// + grabber.getFrameNumber());
+				}
+				for(int i = 0;i < fpsd;i++) {
+					frame = grabber.grab();					
+				}
+			}
+			System.out.println("FFmpegProcessor : encoded time - " + (System.currentTimeMillis() - start));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
-		stopAudioLine();
+		grabber.stop();
+		grabber.release();
 
-        grabber.stop();
-        grabber.release();
 	}
 
-	void onFrameVideo(IplImage iplImage){
-		int w = iplImage.cvSize().width();
-		int h = iplImage.cvSize().height();
-		videoCanvas.setCanvasSize(w, h);
-		videoCanvas.showImage(iplImage);
-	}
-
-	void onFrameAudio(Buffer[] buffer) throws Exception{
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		float left = 0, right = 0;
-		for (int i = 0; i < buffer[0].limit(); i++) {
-			if(buffer.length==1){//mono
-				left = ((FloatBuffer)buffer[0]).get();
-				right = left;
-			}
-			if(buffer.length==2){//stereo
-				left = ((FloatBuffer)buffer[0]).get();
-				right = ((FloatBuffer)buffer[1]).get();
-			}
-			baos.write(float2shortBytes(left));
-			baos.write(float2shortBytes(right));
+	@Override
+	public void dispose() {
+		if (showingtex != null) {
+			showingtex.dispose();
 		}
-		audioLine.write(baos.toByteArray(), 0, baos.size());
-	}
-
-	void startAudioLine(int sampleRate) throws Exception{
-		AudioFormat audioFormat = new AudioFormat(sampleRate, 16, 2, true, false);
-		DataLine.Info info = new DataLine.Info(SourceDataLine.class, audioFormat);
-		audioLine = (SourceDataLine) AudioSystem.getLine(info);
-		audioLine.open(audioFormat);
-        audioLine.start();
-	}
-
-	void stopAudioLine(){
-		audioLine.drain();
-        audioLine.stop();
-        audioLine.close();
-	}
-
-	byte[] float2shortBytes(float f){
-		int t = (int) (32768.0f * f);
-		t = (t<-32768) ? -32768 : t;
- 		t = (t> 32767) ?  32767 : t;
-		short s = (short) t;
-		byte[] bytes = new byte[2];
-		bytes[0] = (byte) (s & 0xff);
-		bytes[1] = (byte) ((s >>> 8) & 0xff);
-		return bytes;
-	}
-
-	public static void main(String[] args) throws Exception {
-		TestPlayer test = new TestPlayer();
-		test.play();
+		for (Pixmap p : frames) {
+			p.dispose();
+		}
 	}
 
 }
-
-*/

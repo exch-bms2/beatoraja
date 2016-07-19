@@ -7,7 +7,7 @@ public interface MovieProcessor {
 
 	public abstract void create(String filepath);
 
-	public abstract Texture getBGAData();
+	public abstract Texture getBGAData(boolean cont);
 	
 	public abstract void dispose();
 }
