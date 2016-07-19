@@ -3,6 +3,7 @@ package bms.player.beatoraja.select;
 import java.util.ArrayList;
 import java.util.List;
 
+import bms.player.beatoraja.skin.SkinImage;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -29,6 +30,8 @@ public class MusicSelectSkin extends Skin {
 
 	private List<SkinNumber> numbers = new ArrayList<SkinNumber>();
 
+	private Sprite[] trophy = new Sprite[3];
+
 	public MusicSelectSkin() {
 		super(640, 480, 1280, 720);
 	}
@@ -50,6 +53,17 @@ public class MusicSelectSkin extends Skin {
 
 		seekRegion = new Rectangle(1240 * dw, 90 * dh, 10 * dw, 540 * dh);
 
+		TextureRegion[][] ttrophy = TextureRegion.split(new Texture("skin/trophy.png"), 32, 32);
+		trophy[0] = new Sprite(ttrophy[0][10]);
+		trophy[1] = new Sprite(ttrophy[0][11]);
+		trophy[2] = new Sprite(ttrophy[0][12]);
+
+		Texture cl = new Texture("skin/clear.png");
+		SkinImage clear = new SkinImage();
+		clear.setImage(TextureRegion.split(cl, 200, 20),0);
+		clear.setNumberResourceAccessor(NumberResourceAccessor.CLEAR);
+		setDestination(clear, 0, 100, 405, 200, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		add(clear);
 		// 数字
 		Texture nt = new Texture("skin/number.png");
 		TextureRegion[][] ntr = TextureRegion.split(nt, 24, 24);
@@ -113,4 +127,9 @@ public class MusicSelectSkin extends Skin {
 	public void setSeekRegion(Rectangle positionRegion) {
 		this.seekRegion = positionRegion;
 	}
+
+	public Sprite[] getTrophy() {
+		return trophy;
+	}
+
 }

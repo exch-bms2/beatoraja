@@ -47,6 +47,8 @@ public class BarRenderer {
 
 	private BitmapFont titlefont;
 
+	private final String[] TROPHY = {"goldmedal","silvermedal","bronzemedal"};
+
 	public BarRenderer(MainController main, MusicSelector select, SongDatabaseAccessor songdb) {
 		this.main = main;
 		this.select = select;
@@ -185,16 +187,14 @@ public class BarRenderer {
 				// trophy
 				TableData.TrophyData trophy = gb.getTrophy();
 				if (trophy != null) {
-					shape.begin(ShapeType.Filled);
-					shape.setColor(Color.valueOf("222200"));
-					shape.rect(x - 72, y, 30, barh - 6);
-					shape.setColor(Color.CYAN);
-					shape.rect(x - 76, y + 4, 30, barh - 6);
-					shape.end();
-					sprite.begin();
-					titlefont.setColor(Color.BLACK);
-					titlefont.draw(sprite, trophy.getName(), x - 72, y + barh - 8);
-					sprite.end();
+					for(int j = 0;j < TROPHY.length;j++) {
+						if(TROPHY[j].equals(trophy.getName())) {
+							sprite.begin();
+							sprite.draw(skin.getTrophy()[j], x + 20 , y + 4);
+							sprite.end();
+							break;
+						}
+					}
 				}
 			}
 

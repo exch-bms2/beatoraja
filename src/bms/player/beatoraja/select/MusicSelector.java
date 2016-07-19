@@ -66,8 +66,6 @@ public class MusicSelector extends MainState {
 
 	private static final String[] LAMP = { "404040", "800000", "800080", "ff00ff", "40ff40", "f0c000", "ffffff",
 			"ffff88", "88ffff", "ff8888", "ff0000" };
-	private static final String[] CLEAR = { "NO PLAY", "FAILED", "ASSIST CLEAR", "L-ASSIST CLEAR", "EASY CLEAR",
-			"CLEAR", "HARD CLEAR", "EX-HARD CLEAR", "FULL COMBO", "PERFECT", "MAX" };
 
 	private static final String[] RANK = { "F-", "F-", "F", "F", "F+", "F+", "E-", "E", "E+", "D-", "D", "D+", "C-",
 			"C", "C+", "B-", "B", "B+", "A-", "A", "A+", "AA-", "AA", "AA+", "AAA-", "AAA", "AAA+", "MAX" };
@@ -295,7 +293,6 @@ public class MusicSelector extends MainState {
 			if (current.getScore() != null) {
 				IRScoreData score = current.getScore();
 				titlefont.setColor(Color.valueOf(LAMP[score.getClear()]));
-				titlefont.draw(sprite, CLEAR[score.getClear()], 100, 420);
 				titlefont.setColor(Color.WHITE);
 				titlefont.draw(sprite, "EX-SCORE  : ", 50, 390);
 				titlefont.draw(sprite, "RANK : " + RANK[(score.getExscore() * 27 / (score.getNotes() * 2))] + " ( "
@@ -363,7 +360,6 @@ public class MusicSelector extends MainState {
 			if (current.getScore() != null) {
 				IRScoreData score = current.getScore();
 				titlefont.setColor(Color.valueOf(LAMP[score.getClear()]));
-				titlefont.draw(sprite, CLEAR[score.getClear()], 100, 420);
 				titlefont.setColor(Color.WHITE);
 				titlefont.draw(sprite, "EX-SCORE  : ", 50, 390);
 				titlefont.draw(sprite, "MISS COUNT: ", 50, 360);
@@ -373,7 +369,7 @@ public class MusicSelector extends MainState {
 			if (gb.getMirrorScore() != null) {
 				IRScoreData score = gb.getMirrorScore();
 				titlefont.setColor(Color.valueOf(LAMP[score.getClear()]));
-				titlefont.draw(sprite, CLEAR[score.getClear()], 100, 270);
+//				titlefont.draw(sprite, CLEAR[score.getClear()], 100, 270);
 				titlefont.setColor(Color.WHITE);
 				titlefont.draw(sprite, "EX-SCORE  : " + score.getExscore() + " / " + (score.getNotes() * 2), 100, 240);
 				titlefont.draw(sprite, "MISS COUNT: " + score.getMinbp(), 100, 210);
@@ -383,7 +379,7 @@ public class MusicSelector extends MainState {
 			if (gb.getRandomScore() != null) {
 				IRScoreData score = gb.getRandomScore();
 				titlefont.setColor(Color.valueOf(LAMP[score.getClear()]));
-				titlefont.draw(sprite, CLEAR[score.getClear()], 100, 130);
+//				titlefont.draw(sprite, CLEAR[score.getClear()], 100, 130);
 				// titlefont.setColor(Color.WHITE);
 				// titlefont.draw(sprite, "EX-SCORE  : " + score.getExscore() +
 				// " / " + (score.getNotes() * 2), 100, 240);
@@ -858,6 +854,14 @@ public class MusicSelector extends MainState {
 
 	public void dispose() {
 		bar.dispose();
+	}
+
+	@Override
+	public int getClear() {
+		if(bar.getSelected().getScore() != null) {
+			return bar.getSelected().getScore().getClear();
+		}
+		return Integer.MIN_VALUE;
 	}
 
 	public int getScore() {
