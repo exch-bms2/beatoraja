@@ -48,7 +48,7 @@ public class SkinText extends SkinObject {
         if(resource != null) {
             final String value = resource.getValue(state);
             Rectangle r = this.getDestination(time);
-            if(r != null) {
+            if(r != null && value.length() > 0) {
                 if(value != parameter.characters) {
                     parameter.characters = value;
                     font = generator.generateFont(parameter);
