@@ -45,18 +45,22 @@ public class SkinText extends SkinObject {
     }
 
     public void draw(SpriteBatch sprite, long time, MainState state) {
-        if(resource != null) {
-            final String value = resource.getValue(state);
-            Rectangle r = this.getDestination(time);
-            if(r != null) {
-                if(value != parameter.characters) {
-                    parameter.characters = value;
-                    font = generator.generateFont(parameter);
-                }
-                if(font != null) {
-                    font.setColor(getColor(time));
-                    font.draw(sprite, parameter.characters, r.x, r.y);
-                }
+        if(resource == null) {
+            return;
+        }
+        final String value = resource.getValue(state);
+        if(value == null || value.length() == 0) {
+            return;
+        }
+        Rectangle r = this.getDestination(time);
+        if(r != null) {
+            if(value != parameter.characters) {
+                parameter.characters = value;
+                font = generator.generateFont(parameter);
+            }
+            if(font != null) {
+                font.setColor(getColor(time));
+                font.draw(sprite, parameter.characters, r.x, r.y);
             }
         }
     }

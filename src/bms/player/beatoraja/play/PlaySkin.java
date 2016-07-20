@@ -102,6 +102,11 @@ public class PlaySkin extends Skin {
 	}
 
 	private void makeCommonSkin() {
+		Texture bg = new Texture("skin/playbg.png");
+		SkinImage images = new SkinImage();
+		images.setImage(new TextureRegion[] { new TextureRegion(bg) }, 0);
+		setDestination(images, 0, 0, 0, 1280, 720, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		add(images);
 		// ボムのスプライト作成
 		Texture bombt = new Texture("skin/bomb.png");
 		TextureRegion[][] bombtr = TextureRegion.split(bombt, 181, 191);
@@ -155,12 +160,6 @@ public class PlaySkin extends Skin {
 		addNumber(new SkinNumber(ntr[0], 0, 2, 1, NumberResourceAccessor.HISPEED_AFTERDOT), 0, 154, 2, 10, 20, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 		addNumber(new SkinNumber(ntr[0], 0, 4, 0, NumberResourceAccessor.DURATION), 0, 318, 2, 12, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-
-		Texture bg = new Texture("skin/playbg.png");
-		SkinImage images = new SkinImage();
-		images.setImage(new TextureRegion[] { new TextureRegion(bg) }, 0);
-		setDestination(images, 0, 0, 0, 1280, 720, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		add(images);
 	}
 
 	private void make7KeySkin() {
