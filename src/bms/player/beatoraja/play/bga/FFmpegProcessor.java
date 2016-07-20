@@ -2,6 +2,7 @@ package bms.player.beatoraja.play.bga;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -10,23 +11,39 @@ import javax.imageio.ImageIO;
 
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Gdx2DPixmap;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.utils.GdxRuntimeException;
 
 import org.bytedeco.javacv.*;
 
+/**
+ * ffmpegを使用した動画表示用クラス
+ * 
+ * @author exch
+ */
 public class FFmpegProcessor implements MovieProcessor {
 
-	private List<Pixmap> frames = new ArrayList<Pixmap>();
-	private int showingframe = -1;
-	private Texture showingtex;
+	// TODO メモリ消費量が大きすぎる
 
-	private long starttime;
-	
+	/**
+	 * 現在表示中のフレームのTexture
+	 */
+	private Texture showingtex;
+	/**
+	 * 動画のfps
+	 */
 	private double fps;
 	
-	private int fpsd = 2;
+	private int fpsd = 1;
+	
+	private FFmpegFrameGrabber grabber;
+	
+	private Pixmap pixmap;
+	private Pixmap showing;
 
-	private FrameGrabber grabber;
-
+	private MovieSeekThread movieseek;
+	
 	public FFmpegProcessor(int fpsd) {
 		this.fpsd = fpsd;
 	}
@@ -35,8 +52,8 @@ public class FFmpegProcessor implements MovieProcessor {
 	public void create(String filepath) {
 		grabber = new FFmpegFrameGrabber(filepath);
 		try {
-			createFramePixmap();
-		} catch (Exception e) {
+			grabber.start();
+		} catch (org.bytedeco.javacv.FrameGrabber.Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -44,82 +61,102 @@ public class FFmpegProcessor implements MovieProcessor {
 
 	@Override
 	public Texture getBGAData(boolean cont) {
-		if (starttime == 0 || !cont) {
-			starttime = System.currentTimeMillis();
+		if (movieseek == null || !cont) {
+			if(movieseek != null) {
+				movieseek.stop = true;
+			}
+			movieseek = new MovieSeekThread();
+			movieseek.start();
 		}
-		final long nowtime = System.currentTimeMillis() - starttime;
-
-		final int nowframe = (int) (nowtime / (1000 / fps));
-		if (showingframe != nowframe) {
-			showingframe = nowframe;
-			if (showingtex != null) {
+		if(showing != pixmap) {
+			showing = pixmap;
+			if(showingtex != null) {
 				showingtex.dispose();
 			}
-			if (showingframe < frames.size()) {
-				showingtex = new Texture(frames.get(showingframe));
-//				System.out.println("FFmpegProcessor : showing frame - " + showingframe);
+			if(pixmap != null) {
+				showingtex = new Texture(pixmap);				
 			} else {
 				showingtex = null;
 			}
 		}
 		return showingtex;
 	}
-
-	private void createFramePixmap() throws Exception {
-		grabber.start();
-		try {
-			Logger.getGlobal().info(
-					"decode開始 - fps : " + grabber.getFrameRate() + " format : " + grabber.getFormat() + " size : "
-							+ grabber.getImageWidth() + " x " + grabber.getImageHeight());
-			fps = grabber.getFrameRate() / fpsd;
-			Java2DFrameConverter converter = new Java2DFrameConverter();
-			long start = System.currentTimeMillis();
-			Frame frame = grabber.grab();
-			while (frame != null) {
-				if (frame.image[0] != null) {
-					BufferedImage image = converter.convert(frame);
-					final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-					ImageIO.write(image, "bmp", baos);
-					// Pixmap pixmap = new Pixmap(new
-					// FileHandleStream("tempimage.bmp") {
-					// @Override
-					// public InputStream read() {
-					// return new ByteArrayInputStream(baos.toByteArray());
-					// }
-					//
-					// @Override
-					// public OutputStream write(boolean overwrite) {
-					// return null;
-					// }
-					// });
-					byte[] data = baos.toByteArray();
-					Pixmap pixmap = new Pixmap(data, 0, data.length);
-					frames.add(pixmap);
-					// System.out.println("FFmpegProcessor : encoded frames - "
-					// + grabber.getFrameNumber());
+	
+	class MovieSeekThread extends Thread {
+		
+		public boolean stop = false;
+		
+		public void run() {
+			try {
+				grabber.restart();
+				Logger.getGlobal().info(
+						"decode開始 - fps : " + grabber.getFrameRate() + " format : " + grabber.getFormat() + " size : "
+								+ grabber.getImageWidth() + " x " + grabber.getImageHeight());
+				fps = grabber.getFrameRate();
+				final long[] nativeData = new long[] { 0, grabber.getImageWidth(), grabber.getImageHeight(), Gdx2DPixmap.GDX2D_FORMAT_RGB888 };
+				final long start = System.currentTimeMillis();
+				int framecount = 0;
+				Frame frame = null;
+				while (!stop) {
+					final long time = System.currentTimeMillis() - start;
+					if(time >= framecount * 1000 / fps) {
+						while(time >= framecount * 1000 / fps || framecount % fpsd != 0) {
+							frame = grabber.grabImage();
+							framecount++;
+						}
+						if(frame == null) {
+//							System.out.println("decode end");
+							break;
+						}
+						if (frame.image != null && frame.image[0] != null) {
+							try {
+								Gdx2DPixmap pixmapData = new Gdx2DPixmap((ByteBuffer) frame.image[0], nativeData);
+								pixmap = new Pixmap(pixmapData);
+//								System.out.println("movie pixmap created : " + time);
+							} catch (Exception e) {
+								pixmap = null;
+								throw new GdxRuntimeException("Couldn't load pixmap from image data", e);
+							}
+						}						
+					} else {
+						final long sleeptime = (long) (framecount * 1000 / fps - time + 1);
+						if(sleeptime > 0) {
+							sleep(sleeptime);							
+						}
+					}
 				}
-				for(int i = 0;i < fpsd;i++) {
-					frame = grabber.grab();					
+			} catch (Exception e) {
+				e.printStackTrace();
+			} finally {
+				try {
+					grabber.stop();
+				} catch (org.bytedeco.javacv.FrameGrabber.Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 			}
-			System.out.println("FFmpegProcessor : encoded time - " + (System.currentTimeMillis() - start));
-		} catch (Exception e) {
-			e.printStackTrace();
+
+
 		}
-
-		grabber.stop();
-		grabber.release();
-
 	}
-
+	
 	@Override
 	public void dispose() {
+		stop();
+		try {
+			grabber.release();					
+		} catch(Exception e) {
+			
+		}
 		if (showingtex != null) {
 			showingtex.dispose();
 		}
-		for (Pixmap p : frames) {
-			p.dispose();
-		}
+	}
+	
+	public void stop() {
+		if(movieseek != null) {
+			movieseek.stop = true;
+		}		
 	}
 
 }

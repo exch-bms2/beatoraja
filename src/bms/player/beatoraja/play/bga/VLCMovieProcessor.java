@@ -162,4 +162,10 @@ public class VLCMovieProcessor implements MovieProcessor {
 		public int time;
 		public Pixmap frame;
 	}
+
+	@Override
+	public void stop() {
+		mediaPlayer.stop();
+		play = false;
+	}
 }

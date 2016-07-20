@@ -9,5 +9,7 @@ public interface MovieProcessor {
 
 	public abstract Texture getBGAData(boolean cont);
 	
+	public abstract void stop();
+	
 	public abstract void dispose();
 }
