@@ -16,9 +16,9 @@ public class NormalGrooveGauge extends GrooveGauge {
 
 	public NormalGrooveGauge(BMSModel model) {
 		if(model.getUseKeys() == 9) {
-			init(2,100, 25, 66.6f, CLEARTYPE_NORMAL,new float[] { (float) (model.getTotal() / model.getTotalNotes()),
+			init(2,120, 30, 80, CLEARTYPE_NORMAL,new float[] { (float) (model.getTotal() / model.getTotalNotes()),
 					(float) (model.getTotal() / model.getTotalNotes()), (float) (model.getTotal() / model.getTotalNotes()) / 2,
-					-1.6f, -5.0f, -5.0f })	;
+					-2.0f, -6.0f, -6.0f })	;
 			ispms = true;
 		} else {
 			init(2,100, 20, 80, CLEARTYPE_NORMAL,new float[] { (float) (model.getTotal() / model.getTotalNotes()),
@@ -32,7 +32,7 @@ public class NormalGrooveGauge extends GrooveGauge {
 		sprite.begin();
 		final int count = ispms ? 24 : 50;
 		for(int i = 1; i <= count; i++) {
-			final float border = i * 100f / count;
+			final float border = i * getMaxValue() / count;
 			if(getValue() >= border) {
 				if (border < getBorder()) {
 					sprite.draw(skin.getGauge()[0], x + w * (i - 1) / count,

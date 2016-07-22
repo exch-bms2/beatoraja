@@ -99,7 +99,7 @@ public abstract class GrooveGauge {
 			this.value = value;
 		}
 	}
-
+	
 	public boolean isQualified() {
 		return value >= norm;
 	}
@@ -109,6 +109,14 @@ public abstract class GrooveGauge {
 	}
 
 	public abstract void draw(PlaySkin skin, SpriteBatch sprite, float x, float y, float w, float h);
+
+	public float getMaxValue() {
+		return maxValue;
+	}
+
+	public float getMinValue() {
+		return minValue;
+	}
 
 	public float getBorder() {
 		return norm;

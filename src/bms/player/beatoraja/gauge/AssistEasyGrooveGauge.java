@@ -16,9 +16,9 @@ public class AssistEasyGrooveGauge extends GrooveGauge {
 
     public AssistEasyGrooveGauge(BMSModel model) {
         if (model.getUseKeys() == 9) {
-            init(2, 100, 25, 50, CLEARTYPE_LIGHT_ASSTST, new float[]{(float) (model.getTotal() / model.getTotalNotes()),
+            init(2, 120, 30, 60, CLEARTYPE_LIGHT_ASSTST, new float[]{(float) (model.getTotal() / model.getTotalNotes()),
                     (float) (model.getTotal() / model.getTotalNotes()), (float) (model.getTotal() / model.getTotalNotes()) / 2,
-                    -0.8f, -2.5f, -0.8f});
+                    -1.0f, -3.0f, -1.0f});
             ispms = true;
         } else {
             init(2, 100, 20, 60, CLEARTYPE_LIGHT_ASSTST, new float[]{(float) (model.getTotal() / model.getTotalNotes()),
@@ -33,7 +33,7 @@ public class AssistEasyGrooveGauge extends GrooveGauge {
         sprite.begin();
         final int count = ispms ? 24 : 50;
         for (int i = 1; i <= count; i++) {
-            final float border = i * 100f / count;
+            final float border = i * getMaxValue() / count;
             if (getValue() >= border) {
                 if (border < getBorder()) {
                     sprite.draw(skin.getGauge()[2], x + w * (i - 1) / count,

@@ -280,9 +280,11 @@ public class BMSPlayer extends MainState {
 				gauge = new GradeGrooveGauge(model);
 				break;
 			case 3:
+				gauge = new ExgradeGrooveGauge(model);
+				break;
 			case 4:
 			case 5:
-				gauge = new ExgradeGrooveGauge(model);
+				gauge = new ExhardGradeGrooveGauge(model);
 				break;
 			}
 		} else {

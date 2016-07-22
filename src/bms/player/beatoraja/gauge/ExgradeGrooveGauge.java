@@ -16,9 +16,9 @@ public class ExgradeGrooveGauge extends GrooveGauge {
 	public ExgradeGrooveGauge(BMSModel model) {
 		if(model.getUseKeys() == 9) {
 			// TODO ポップンの段位ゲージ仕様は？
-			init(0, 100, 100, 0, CLEARTYPE_HARD,new float[] { 0.15f, 0.15f, 0.03f, -3.0f, -6.0f, -3.0f });
+			init(0, 100, 100, 0, CLEARTYPE_HARD,new float[] { 0.15f, 0.12f, 0.03f, -3.0f, -6.0f, -3.0f });
 		} else {
-			init(0, 100, 100, 0, CLEARTYPE_HARD,new float[] { 0.15f, 0.15f, 0.03f, -3.0f, -6.0f, -3.0f });
+			init(0, 100, 100, 0, CLEARTYPE_HARD,new float[] { 0.15f, 0.12f, 0.03f, -3.0f, -6.0f, -3.0f });
 		}
 
 	}

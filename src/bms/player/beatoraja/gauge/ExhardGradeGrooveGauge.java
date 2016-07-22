@@ -1,22 +1,23 @@
 package bms.player.beatoraja.gauge;
 
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-
 import bms.model.BMSModel;
 import bms.player.beatoraja.play.PlaySkin;
 
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+
 /**
- * ハザードゲージ
+ * EXHARD段位ゲージ
  *
  * @author exch
  */
-public class HazardGrooveGauge extends GrooveGauge {
+public class ExhardGradeGrooveGauge extends GrooveGauge {
 
-	public HazardGrooveGauge(BMSModel model) {
+	public ExhardGradeGrooveGauge(BMSModel model) {
 		if(model.getUseKeys() == 9) {
-			init(0, 120, 120, 0, CLEARTYPE_FULLCOMBO, new float[] { 0.15f, 0.15f, 0, -120.0f, -120.0f, -120.0f });
+			// TODO ポップンの段位ゲージ仕様は？
+			init(0, 100, 100, 0, CLEARTYPE_EXHARD,new float[] { 0.15f, 0.05f, 0, -5.0f, -10.0f, -10.0f });
 		} else {
-			init(0, 100, 100, 0, CLEARTYPE_FULLCOMBO, new float[] { 0.15f, 0.15f, 0, -100.0f, -100.0f, -2.5f });
+			init(0, 100, 100, 0, CLEARTYPE_EXHARD,new float[] { 0.15f, 0.05f, 0, -5.0f, -10.0f, -5.0f });
 		}
 
 	}
