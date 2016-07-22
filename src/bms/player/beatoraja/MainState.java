@@ -134,7 +134,15 @@ public abstract class MainState {
 		return "";
 	}
 
+	public String getSubtitle() {
+		return "";
+	}
+
 	public String getArtist() {
+		return "";
+	}
+
+	public String getSubartist() {
 		return "";
 	}
 

@@ -62,26 +62,26 @@ public class GameOptionRenderer {
 		
 		shape.begin(ShapeType.Filled);
 		shape.setColor(Color.BLACK);
-		shape.rect(100, 200, 400, 400);
+		shape.rect(800, 200, 400, 400);
 		shape.end();
 		shape.begin(ShapeType.Line);
 		shape.setColor(Color.WHITE);
-		shape.rect(100, 200, 400, 400);
-		shape.rect(150, 250, 55, 95);
-		shape.rect(180, 350, 55, 95);
-		shape.rect(210, 250, 55, 95);
-		shape.rect(240, 350, 55, 95);
-		shape.rect(270, 250, 55, 95);
-		shape.rect(300, 350, 55, 95);
-		shape.rect(330, 250, 55, 95);
+		shape.rect(800, 200, 400, 400);
+		shape.rect(850, 250, 55, 95);
+		shape.rect(880, 350, 55, 95);
+		shape.rect(910, 250, 55, 95);
+		shape.rect(940, 350, 55, 95);
+		shape.rect(970, 250, 55, 95);
+		shape.rect(1000, 350, 55, 95);
+		shape.rect(1030, 250, 55, 95);
 		shape.end();
 
 		sprite.begin();
-		titlefont.draw(sprite, SCOREOP[config.getRandom()], 110, 520);
-		titlefont.draw(sprite, DOUBLEOP[config.getDoubleoption()], 220, 520);
-		titlefont.draw(sprite, GAUGEOP[config.getGauge()], 110, 220);
-		titlefont.draw(sprite, SCOREOP[config.getRandom2()], 330, 520);
-		titlefont.draw(sprite, FIXHISPEEDOP[config.getFixhispeed()], 300, 220);
+		titlefont.draw(sprite, SCOREOP[config.getRandom()], 810, 520);
+		titlefont.draw(sprite, DOUBLEOP[config.getDoubleoption()], 920, 520);
+		titlefont.draw(sprite, GAUGEOP[config.getGauge()], 810, 220);
+		titlefont.draw(sprite, SCOREOP[config.getRandom2()], 1030, 520);
+		titlefont.draw(sprite, FIXHISPEEDOP[config.getFixhispeed()], 1000, 220);
 		sprite.end();
 
 	}

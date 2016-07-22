@@ -223,7 +223,7 @@ public class PlaySkin extends Skin {
 
 		bgaregion = rect(500, 50, 740, 650);
 
-		SkinText title = new SkinText("skin/VL-Gothic-Regular.ttf", 0, 24);
+		SkinText title = new SkinText("skin/VL-Gothic-Regular.ttf", 0, 24,2);
 		title.setTextResourceAccessor(TextResourceAccessor.TITLE);
 		setDestination(title, 0, 502, 698, 18, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		setDestination(title, 1000, 502, 698, 18, 18, 0, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);

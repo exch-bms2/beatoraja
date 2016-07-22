@@ -64,29 +64,29 @@ public class DetailOptionRenderer {
 		}
 		shape.begin(ShapeType.Filled);
 		shape.setColor(Color.BLACK);
-		shape.rect(100, 200, 400, 400);
+		shape.rect(800, 200, 400, 400);
 		shape.end();
 		shape.begin(ShapeType.Line);
 		shape.setColor(Color.PINK);
-		shape.rect(100, 200, 400, 400);
-		shape.rect(150, 250, 55, 95);
-		shape.rect(180, 350, 55, 95);
-		shape.rect(210, 250, 55, 95);
-		shape.rect(240, 350, 55, 95);
-		shape.rect(270, 250, 55, 95);
-		shape.rect(300, 350, 55, 95);
-		shape.rect(330, 250, 55, 95);
+		shape.rect(800, 200, 400, 400);
+		shape.rect(850, 250, 55, 95);
+		shape.rect(880, 350, 55, 95);
+		shape.rect(910, 250, 55, 95);
+		shape.rect(940, 350, 55, 95);
+		shape.rect(970, 250, 55, 95);
+		shape.rect(1000, 350, 55, 95);
+		shape.rect(1030, 250, 55, 95);
 		shape.end();
 
 		sprite.begin();
 
 		titlefont.setColor(Color.WHITE);
-		titlefont.draw(sprite, BGA[config.getBga()], 130, 250);
-		titlefont.draw(sprite, JUDGE[config.getJudgedetail()], 110, 480);
-		titlefont.draw(sprite, "- DURATION + ", 240, 480);
-		titlefont.draw(sprite, String.valueOf(config.getGreenvalue()), 300, 510);
-		titlefont.draw(sprite, "- JUDGE TIMING + ", 270, 250);
-		titlefont.draw(sprite, config.getJudgetiming() + " ms", 330, 220);
+		titlefont.draw(sprite, BGA[config.getBga()], 830, 250);
+		titlefont.draw(sprite, JUDGE[config.getJudgedetail()], 810, 480);
+		titlefont.draw(sprite, "- DURATION + ", 940, 480);
+		titlefont.draw(sprite, String.valueOf(config.getGreenvalue()), 1000, 510);
+		titlefont.draw(sprite, "- JUDGE TIMING + ", 970, 250);
+		titlefont.draw(sprite, config.getJudgetiming() + " ms", 1030, 220);
 		sprite.end();
 	}
 

@@ -59,36 +59,36 @@ public class AssistOptionRenderer {
 		}
 		shape.begin(ShapeType.Filled);
 		shape.setColor(Color.BLACK);
-		shape.rect(100, 200, 400, 400);
+		shape.rect(800, 200, 400, 400);
 		shape.end();
 		shape.begin(ShapeType.Line);
 		shape.setColor(Color.CYAN);
-		shape.rect(100, 200, 400, 400);
-		shape.rect(150, 250, 55, 95);
-		shape.rect(180, 350, 55, 95);
-		shape.rect(210, 250, 55, 95);
-		shape.rect(240, 350, 55, 95);
-		shape.rect(270, 250, 55, 95);
-		shape.rect(300, 350, 55, 95);
-		shape.rect(330, 250, 55, 95);
+		shape.rect(800, 200, 400, 400);
+		shape.rect(850, 250, 55, 95);
+		shape.rect(880, 350, 55, 95);
+		shape.rect(910, 250, 55, 95);
+		shape.rect(940, 350, 55, 95);
+		shape.rect(970, 250, 55, 95);
+		shape.rect(1000, 350, 55, 95);
+		shape.rect(1030, 250, 55, 95);
 		shape.end();
 
 		sprite.begin();
 
 		titlefont.setColor(config.isConstant() ? Color.WHITE : Color.valueOf("444444"));
-		titlefont.draw(sprite, "CONSTANT", 110, 490);
+		titlefont.draw(sprite, "CONSTANT", 810, 490);
 		titlefont.setColor(config.isLegacynote() ? Color.WHITE : Color.valueOf("444444"));
-		titlefont.draw(sprite, "LEGACY NOTE", 200, 520);
+		titlefont.draw(sprite, "LEGACY NOTE", 900, 520);
 		titlefont.setColor(config.isShowjudgearea() ? Color.WHITE : Color.valueOf("444444"));
-		titlefont.draw(sprite, "JUDGE AREA", 150, 220);
+		titlefont.draw(sprite, "JUDGE AREA", 850, 220);
 		titlefont.setColor(config.isBpmguide() ? Color.WHITE : Color.valueOf("444444"));
-		titlefont.draw(sprite, "BPM GUIDE", 300, 490);
+		titlefont.draw(sprite, "BPM GUIDE", 1000, 490);
 		titlefont.setColor(config.isMarkprocessednote() ? Color.WHITE : Color.valueOf("444444"));
-		titlefont.draw(sprite, "MARK", 300, 220);
+		titlefont.draw(sprite, "MARK", 1000, 220);
 		titlefont.setColor(config.isExpandjudge() ? Color.WHITE : Color.valueOf("444444"));
-		titlefont.draw(sprite, "EXPAND JUDGE", 90, 250);
+		titlefont.draw(sprite, "EXPAND JUDGE", 790, 250);
 		titlefont.setColor(config.isNomine() ? Color.WHITE : Color.valueOf("444444"));
-		titlefont.draw(sprite, "NO MINE", 330, 250);
+		titlefont.draw(sprite, "NO MINE", 1030, 250);
 		sprite.end();
 	}
 

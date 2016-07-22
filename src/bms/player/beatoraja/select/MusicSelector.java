@@ -255,8 +255,6 @@ public class MusicSelector extends MainState {
 		final ShapeRenderer shape = main.getShapeRenderer();
 		BMSPlayerInputProcessor input = main.getInputProcessor();
 		final Bar current = bar.getSelected();
-		Gdx.gl.glClearColor(0, 0, 0, 1);
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 		final float w = main.RESOLUTION[config.getResolution()].width;
 		final float h = main.RESOLUTION[config.getResolution()].height;
@@ -285,9 +283,6 @@ public class MusicSelector extends MainState {
 		titlefont.setColor(Color.WHITE);
 		if (current instanceof SongBar) {
 			SongData song = ((SongBar) current).getSongData();
-			titlefont.draw(sprite, song.getGenre(), 100, 630);
-			titlefont.draw(sprite, song.getTitle() + " " + song.getSubtitle(), 100, 600);
-			titlefont.draw(sprite, song.getArtist() + " " + song.getSubartist(), 100, 570);
 			titlefont.draw(sprite, song.getMode() + " KEYS", 100, 530);
 			titlefont.draw(sprite, "LEVEL : " + song.getLevel(), 100, 500);
 			if (current.getScore() != null) {
@@ -318,7 +313,6 @@ public class MusicSelector extends MainState {
 		// 段位用の表示(ミラー段位、EX段位)
 		if (current instanceof GradeBar) {
 			GradeBar gb = (GradeBar) current;
-			titlefont.draw(sprite, gb.getTitle(), 100, 600);
 
 			for (int con : gb.getConstraint()) {
 				switch (con) {
@@ -412,7 +406,6 @@ public class MusicSelector extends MainState {
 
 		titlefont.setColor(Color.WHITE);
 		if (current instanceof FolderBar) {
-			titlefont.draw(sprite, current.getTitle(), 100, 600);
 			if (config.isFolderlamp()) {
 				int[] lamps = ((FolderBar) current).getLamps();
 				int[] ranks = ((FolderBar) current).getRanks();
@@ -444,11 +437,9 @@ public class MusicSelector extends MainState {
 		}
 
 		if (current instanceof TableBar) {
-			titlefont.draw(sprite, current.getTitle(), 100, 600);
 		}
 
 		if (current instanceof TableLevelBar) {
-			titlefont.draw(sprite, current.getTitle(), 100, 600);
 			if (config.isFolderlamp()) {
 				int[] lamps = ((TableLevelBar) current).getLamps();
 				int[] ranks = ((TableLevelBar) current).getRanks();
@@ -936,6 +927,38 @@ public class MusicSelector extends MainState {
 
 	public int getTotalPlayCount(boolean clear) {
 		return (int) (clear ? playerdata.getClear() : playerdata.getPlaycount() - playerdata.getClear());
+	}
+
+	public String getTitle() {
+		return bar.getSelected().getTitle();
+	}
+
+	public String getSubtitle() {
+		if(bar.getSelected() instanceof SongBar) {
+			return ((SongBar) bar.getSelected()).getSongData().getSubtitle();
+		}
+		return "";
+	}
+
+	public String getArtist() {
+		if(bar.getSelected() instanceof SongBar) {
+			return ((SongBar) bar.getSelected()).getSongData().getArtist();
+		}
+		return "";
+	}
+
+	public String getSubartist() {
+		if(bar.getSelected() instanceof SongBar) {
+			return ((SongBar) bar.getSelected()).getSongData().getSubartist();
+		}
+		return "";
+	}
+
+	public String getGenre() {
+		if(bar.getSelected() instanceof SongBar) {
+			return ((SongBar) bar.getSelected()).getSongData().getGenre();
+		}
+		return "";
 	}
 
 	PlayerResource getResource() {

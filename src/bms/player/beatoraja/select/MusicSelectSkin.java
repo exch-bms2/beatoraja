@@ -3,17 +3,13 @@ package bms.player.beatoraja.select;
 import java.util.ArrayList;
 import java.util.List;
 
-import bms.player.beatoraja.skin.SkinImage;
+import bms.player.beatoraja.skin.*;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
 import com.badlogic.gdx.math.Rectangle;
-
-import bms.player.beatoraja.skin.NumberResourceAccessor;
-import bms.player.beatoraja.skin.Skin;
-import bms.player.beatoraja.skin.SkinNumber;
 
 public class MusicSelectSkin extends Skin {
 
@@ -57,6 +53,19 @@ public class MusicSelectSkin extends Skin {
 		trophy[0] = new Sprite(ttrophy[0][10]);
 		trophy[1] = new Sprite(ttrophy[0][11]);
 		trophy[2] = new Sprite(ttrophy[0][12]);
+
+		SkinText genre = new SkinText("skin/VL-Gothic-Regular.ttf",0,20, 2);
+		genre.setTextResourceAccessor(TextResourceAccessor.GENRE);
+		setDestination(genre, 0, 100, 630, 18, 18, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		this.add(genre);
+		SkinText title = new SkinText("skin/VL-Gothic-Regular.ttf",0,24, 2);
+		title.setTextResourceAccessor(TextResourceAccessor.FULLTITLE);
+		setDestination(title, 0, 100, 600, 18, 18, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		this.add(title);
+		SkinText artist = new SkinText("skin/VL-Gothic-Regular.ttf",0,20, 2);
+		artist.setTextResourceAccessor(TextResourceAccessor.FULLARTIST);
+		setDestination(artist, 0, 100, 570, 18, 18, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		this.add(artist);
 
 		Texture cl = new Texture("skin/clear.png");
 		SkinImage clear = new SkinImage();
