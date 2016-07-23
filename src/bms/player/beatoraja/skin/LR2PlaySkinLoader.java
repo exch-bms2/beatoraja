@@ -18,11 +18,13 @@ import bms.player.beatoraja.play.PlaySkin;
 
 public class LR2PlaySkinLoader extends LR2SkinLoader {
 
+	private List<Rectangle> bgaregion = new ArrayList();
+	
 	public LR2PlaySkinLoader() {
 		addCommandWord(new CommandWord("DST_BGA") {
 			@Override
 			public void execute(String[] str) {
-				skin.setBGAregion(new Rectangle(Integer.parseInt(str[3]) * dstw / srcw, dsth - Integer.parseInt(str[4])
+				bgaregion.add(new Rectangle(Integer.parseInt(str[3]) * dstw / srcw, dsth - Integer.parseInt(str[4])
 						* dsth / srch - Integer.parseInt(str[6]) * dsth / srch, Integer.parseInt(str[5]) * dstw / srcw,
 						Integer.parseInt(str[6]) * dsth / srch));
 			}
@@ -142,6 +144,7 @@ public class LR2PlaySkinLoader extends LR2SkinLoader {
 		skin.setMinenote(mine);
 		skin.setLongnote(new Sprite[][] { lnend, lnstart, lnbodya, lnbody });
 		skin.setLaneregion(laner);
+		skin.setBGAregion(bgaregion.toArray(new Rectangle[0]));
 		return skin;
 	}
 }

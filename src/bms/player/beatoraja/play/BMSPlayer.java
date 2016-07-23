@@ -59,6 +59,8 @@ public class BMSPlayer extends MainState {
 	private PlaySkin skin;
 
 	private GrooveGauge gauge;
+
+	private long readytime;
 	/**
 	 * プレイ開始時間。0の場合はプレイ開始前
 	 */
@@ -409,7 +411,7 @@ public class BMSPlayer extends MainState {
 			if (resource.mediaLoadFinished() && !input.startPressed()) {
 				bga.prepare();
 				state = STATE_READY;
-				starttime = System.currentTimeMillis();
+				readytime = System.currentTimeMillis();
 				Logger.getGlobal().info("STATE_READYに移行");
 			}
 			break;
@@ -421,7 +423,8 @@ public class BMSPlayer extends MainState {
 			systemfont.draw(sprite, "GET READY", skin.getLaneGroupRegion()[0].x + skin.getLaneGroupRegion()[0].width / 2 - 35,
 					skin.getLaneGroupRegion()[0].y + 200);
 			sprite.end();
-			if (time > 1000) {
+			final long rt = System.currentTimeMillis() - readytime;
+			if (rt > 1000) {
 				state = STATE_PLAY;
 				starttime = System.currentTimeMillis();
 				input.setStartTime(starttime);
@@ -513,7 +516,7 @@ public class BMSPlayer extends MainState {
 			Gdx.gl.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 			shape.begin(ShapeType.Filled);
 			long l2 = System.currentTimeMillis() - finishtime;
-			shape.setColor(1, 1, 1, ((float) l2) / 5000f);
+			shape.setColor(1, 1, 1, ((float) l2) / 1000f);
 			shape.rect(0, 0, w, h);
 			shape.end();
 			Gdx.gl.glDisable(GL11.GL_BLEND);
@@ -650,9 +653,6 @@ public class BMSPlayer extends MainState {
 		final ShapeRenderer shape = main.getShapeRenderer();
 		final SpriteBatch sprite = main.getSpriteBatch();
 
-		Gdx.gl.glClearColor(0, 0, 0, 1);
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
 		// グラフ描画
 		graphrender.drawGraph(skin, sprite, systemfont, shape, this.judge);
 
@@ -674,17 +674,19 @@ public class BMSPlayer extends MainState {
 		lanerender.drawLane(systemfont, time);
 
 		// BGA再生
-		Rectangle r = skin.getBGAregion();
-		shape.begin(ShapeType.Line);
-		shape.setColor(Color.WHITE);
-		shape.rect(r.x - 1, r.y - 1, r.width + 2, r.height + 2);
-		shape.end();
-		shape.begin(ShapeType.Filled);
-		shape.setColor(Color.BLACK);
-		shape.rect(r.x, r.y, r.width, r.height);
-		shape.end();
+		Rectangle[] region = skin.getBGAregion();
+		for(Rectangle r : region) {
+			shape.begin(ShapeType.Line);
+			shape.setColor(Color.GRAY);
+			shape.rect(r.x - 1, r.y - 1, r.width + 2, r.height + 2);
+			shape.end();
+			shape.begin(ShapeType.Filled);
+			shape.setColor(Color.BLACK);
+			shape.rect(r.x, r.y, r.width, r.height);
+			shape.end();			
+		}
 		
-		bga.drawBGA(sprite, r, state == STATE_PRELOAD ? -1 : time);
+		bga.drawBGA(sprite, region, state == STATE_PRELOAD || state == STATE_READY ? -1 : time);
 
 		// ゲージ描画
 		Rectangle gr = skin.getGaugeRegion();

@@ -116,7 +116,6 @@ public class GradeResult extends MainState {
 				titlefont.draw(sprite, "Replay Saved", w * 3 / 4, h / 4);
 			}
 
-			titlefont.draw(sprite, "FAST / SLOW  :  ", 100, 100);
 			sprite.end();
 		}
 		boolean[] keystate = main.getInputProcessor().getKeystate();
@@ -247,6 +246,9 @@ public class GradeResult extends MainState {
 
 	@Override
 	public int getTargetMisscount() {
+		if(oldmisscount == Integer.MAX_VALUE) {
+			return Integer.MIN_VALUE;
+		}
 		return oldmisscount;
 	}
 
@@ -260,8 +262,7 @@ public class GradeResult extends MainState {
 
 	@Override
 	public void dispose() {
-		// TODO Auto-generated method stub
-
+		titlefont.dispose();
 	}
 
 	private void saveReplayData(int index) {

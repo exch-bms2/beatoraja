@@ -41,7 +41,7 @@ public class BGAProcessor {
 	private Pixmap stagefilep;
 	private Texture stagefile;
 
-	private final String[] mov_extension = { "mpg", "mpeg", "avi", "wmv" };
+	private final String[] mov_extension = { "mpg", "mpeg", "avi", "wmv", "mp4" };
 	private final String[] pic_extension = { "jpg", "jpeg", "gif", "bmp", "png" };
 
 	private static final int BGACACHE_SIZE = 256;
@@ -292,7 +292,7 @@ public class BGAProcessor {
 		return cache.getTexture(id);
 	}
 	
-	public void drawBGA(SpriteBatch sprite, Rectangle r, int time) {
+	public void drawBGA(SpriteBatch sprite, Rectangle[] region, int time) {
 		if(model == null) {
 			return;
 		}
@@ -318,7 +318,9 @@ public class BGAProcessor {
 
 		if (time < 0 && getBackbmpData() != null) {
 			sprite.begin();
-			sprite.draw(getBackbmpData(), r.x, r.y, r.width, r.height);
+			for(Rectangle r : region) {
+				sprite.draw(getBackbmpData(), r.x, r.y, r.width, r.height);				
+			}
 			sprite.end();
 		} else if (misslayer != null && misslayertime != 0 && time >= misslayertime
 				&& time < misslayertime + 500) {
@@ -326,7 +328,9 @@ public class BGAProcessor {
 			Texture miss = getBGAData(misslayer[misslayer.length * (time - misslayertime) / 500], true);
 			if (miss != null) {
 				sprite.begin();
-				sprite.draw(miss, r.x, r.y, r.width, r.height);
+				for(Rectangle r : region) {
+					sprite.draw(miss, r.x, r.y, r.width, r.height);
+				}
 				sprite.end();
 			}
 		} else {
@@ -336,10 +340,14 @@ public class BGAProcessor {
 				sprite.begin();
 				if(mpgmap.containsKey(playingbgaid) && bgrshader.isCompiled()) {
 					sprite.setShader(bgrshader);
-					sprite.draw(playingbgatex, r.x, r.y, r.width, r.height);					
+					for(Rectangle r : region) {
+						sprite.draw(playingbgatex, r.x, r.y, r.width, r.height);											
+					}
 					sprite.setShader(null);					
 				} else {
-					sprite.draw(playingbgatex, r.x, r.y, r.width, r.height);					
+					for(Rectangle r : region) {
+						sprite.draw(playingbgatex, r.x, r.y, r.width, r.height);						
+					}
 				}
 				sprite.end();
 			}
@@ -348,11 +356,15 @@ public class BGAProcessor {
 			if (playinglayertex != null) {
 				sprite.begin();
 				if (layershader.isCompiled()) {
-					sprite.setShader(layershader);
-					sprite.draw(playinglayertex, r.x, r.y, r.width, r.height);
+					sprite.setShader(layershader);					
+					for(Rectangle r : region) {
+						sprite.draw(playinglayertex, r.x, r.y, r.width, r.height);						
+					}
 					sprite.setShader(null);
 				} else {
-					sprite.draw(playinglayertex, r.x, r.y, r.width, r.height);
+					for(Rectangle r : region) {
+						sprite.draw(playinglayertex, r.x, r.y, r.width, r.height);						
+					}
 				}
 				sprite.end();
 			}

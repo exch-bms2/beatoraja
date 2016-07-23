@@ -17,10 +17,38 @@ public interface TextResourceAccessor {
         }
     };
 
+    public static TextResourceAccessor SUBTITLE = new TextResourceAccessor() {
+        @Override
+        public String getValue(MainState state) {
+            return state.getSubtitle();
+        }
+    };
+
+    public static TextResourceAccessor FULLTITLE = new TextResourceAccessor() {
+        @Override
+        public String getValue(MainState state) {
+            return state.getTitle() + " " + state.getSubtitle();
+        }
+    };
+
     public static TextResourceAccessor ARTIST = new TextResourceAccessor() {
         @Override
         public String getValue(MainState state) {
             return state.getArtist();
+        }
+    };
+
+    public static TextResourceAccessor SUBARTIST = new TextResourceAccessor() {
+        @Override
+        public String getValue(MainState state) {
+            return state.getSubartist();
+        }
+    };
+
+    public static TextResourceAccessor FULLARTIST = new TextResourceAccessor() {
+        @Override
+        public String getValue(MainState state) {
+            return state.getArtist() + " " + state.getSubartist();
         }
     };
 

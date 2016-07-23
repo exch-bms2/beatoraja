@@ -52,9 +52,6 @@ public class MusicDecide extends MainState {
 	public void render() {
 		SpriteBatch sprite = main.getSpriteBatch();
 		long nowtime = getNowTime();
-		Gdx.gl.glClearColor(0, 0, 0, 1);
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
 		final float w = main.RESOLUTION[resource.getConfig().getResolution()].width;
 		final float h = main.RESOLUTION[resource.getConfig().getResolution()].height;
 

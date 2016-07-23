@@ -42,7 +42,6 @@ public class MusicResult extends MainState {
 	private MainController main;
 
 	private BitmapFont titlefont;
-	private GlyphLayout layout;
 	private String title;
 
 	private PlayerResource resource;
@@ -84,7 +83,6 @@ public class MusicResult extends MainState {
 		title = "result";
 		parameter.characters = title + resource.getBMSModel().getFullTitle() + parameter.characters;
 		titlefont = generator.generateFont(parameter);
-		layout = new GlyphLayout(titlefont, resource.getBMSModel().getFullTitle());
 		updateScoreDatabase();
 		// 保存されているリプレイデータがない場合は、EASY以上で自動保存
 		if (resource.getAutoplay() == 0
@@ -122,9 +120,6 @@ public class MusicResult extends MainState {
 		int time = getNowTime();
 		final SpriteBatch sprite = main.getSpriteBatch();
 		final ShapeRenderer shape = main.getShapeRenderer();
-
-		Gdx.gl.glClearColor(0, 0, 0, 1);
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 		final float w = main.RESOLUTION[resource.getConfig().getResolution()].width;
 		final float h = main.RESOLUTION[resource.getConfig().getResolution()].height;
@@ -166,8 +161,6 @@ public class MusicResult extends MainState {
 			}
 		}
 
-		titlefont.setColor(Color.WHITE);
-		titlefont.draw(sprite, "FAST / SLOW  :  ", 100 * w / 1280, 100 * h / 720);
 		sprite.end();
 
 		Gdx.gl.glEnable(GL11.GL_BLEND);
@@ -177,9 +170,6 @@ public class MusicResult extends MainState {
 		shape.rect(0, 0, w, 25);
 		shape.end();
 		Gdx.gl.glDisable(GL11.GL_BLEND);
-		sprite.begin();
-		titlefont.draw(sprite, resource.getBMSModel().getFullTitle(), w / 2 - layout.width / 2, 23);
-		sprite.end();
 
 		detail.render(sprite, titlefont, shape, time, skin.getJudgeRegion());
 
@@ -409,13 +399,29 @@ public class MusicResult extends MainState {
 
 	@Override
 	public int getTargetMisscount() {
+		if(oldmisscount == Integer.MAX_VALUE) {
+			return Integer.MIN_VALUE;
+		}
 		return oldmisscount;
 	}
 
 	@Override
 	public void dispose() {
-		// TODO Auto-generated method stub
-		
+		titlefont.dispose();
+		if(clear != null) {
+			clear.dispose();
+		}
+		if(fail != null) {
+			fail.dispose();
+		}
+	}
+
+	public String getTitle() {
+		return resource.getBMSModel().getTitle();
+	}
+
+	public String getSubtitle() {
+		return resource.getBMSModel().getSubTitle();
 	}
 
 	public int getTotalNotes() {

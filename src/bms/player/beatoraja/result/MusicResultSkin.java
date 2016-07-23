@@ -3,11 +3,7 @@ package bms.player.beatoraja.result;
 import java.util.ArrayList;
 import java.util.List;
 
-import bms.player.beatoraja.skin.NumberResourceAccessor;
-import bms.player.beatoraja.skin.Skin;
-import bms.player.beatoraja.skin.SkinImage;
-import bms.player.beatoraja.skin.SkinNumber;
-import bms.player.beatoraja.skin.SkinObject;
+import bms.player.beatoraja.skin.*;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -99,7 +95,12 @@ public class MusicResultSkin extends Skin {
 		setMaxcombo(3, dcombo);
 
 		addNumber(new SkinNumber(ntr[0], 0, 5, 0, NumberResourceAccessor.TOTALNOTES), 0, 360, 486, 12, 12, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		
+
+		SkinText title = new SkinText("skin/VL-Gothic-Regular.ttf",0,24, 2);
+		title.setTextResourceAccessor(TextResourceAccessor.FULLTITLE);
+		title.setAlign(SkinText.ALIGN_CENTER);
+		setDestination(title, 0, 640, 23, 24, 24, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		this.add(title);
 	}
 
 	public Rectangle getGaugeRegion() {
