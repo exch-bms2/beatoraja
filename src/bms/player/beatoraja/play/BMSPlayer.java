@@ -514,7 +514,7 @@ public class BMSPlayer extends MainState {
 			Gdx.gl.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 			shape.begin(ShapeType.Filled);
 			long l2 = System.currentTimeMillis() - finishtime;
-			shape.setColor(1, 1, 1, ((float) l2) / 5000f);
+			shape.setColor(1, 1, 1, ((float) l2) / 1000f);
 			shape.rect(0, 0, w, h);
 			shape.end();
 			Gdx.gl.glDisable(GL11.GL_BLEND);
@@ -651,9 +651,6 @@ public class BMSPlayer extends MainState {
 		final ShapeRenderer shape = main.getShapeRenderer();
 		final SpriteBatch sprite = main.getSpriteBatch();
 
-		Gdx.gl.glClearColor(0, 0, 0, 1);
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
 		// グラフ描画
 		graphrender.drawGraph(skin, sprite, systemfont, shape, this.judge);
 
@@ -685,7 +682,7 @@ public class BMSPlayer extends MainState {
 		shape.rect(r.x, r.y, r.width, r.height);
 		shape.end();
 		
-		bga.drawBGA(sprite, r, state == STATE_PRELOAD ? -1 : time);
+		bga.drawBGA(sprite, r, state == STATE_PRELOAD || state == STATE_READY ? -1 : time);
 
 		// ゲージ描画
 		Rectangle gr = skin.getGaugeRegion();

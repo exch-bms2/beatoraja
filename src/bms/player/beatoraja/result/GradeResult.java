@@ -247,6 +247,9 @@ public class GradeResult extends MainState {
 
 	@Override
 	public int getTargetMisscount() {
+		if(oldmisscount == Integer.MAX_VALUE) {
+			return Integer.MIN_VALUE;
+		}
 		return oldmisscount;
 	}
 
@@ -260,8 +263,7 @@ public class GradeResult extends MainState {
 
 	@Override
 	public void dispose() {
-		// TODO Auto-generated method stub
-
+		titlefont.dispose();
 	}
 
 	private void saveReplayData(int index) {

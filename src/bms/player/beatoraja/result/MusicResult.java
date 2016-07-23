@@ -401,13 +401,21 @@ public class MusicResult extends MainState {
 
 	@Override
 	public int getTargetMisscount() {
+		if(oldmisscount == Integer.MAX_VALUE) {
+			return Integer.MIN_VALUE;
+		}
 		return oldmisscount;
 	}
 
 	@Override
 	public void dispose() {
-		// TODO Auto-generated method stub
-		
+		titlefont.dispose();
+		if(clear != null) {
+			clear.dispose();
+		}
+		if(fail != null) {
+			fail.dispose();
+		}
 	}
 
 	public String getTitle() {

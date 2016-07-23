@@ -198,6 +198,7 @@ public class LaneRenderer {
     }
 
     public void setLanecover(float lanecover) {
+        lanecover = (lanecover < 0 ? 0 : (lanecover > 1 ? 1 : lanecover));
         this.lanecover = lanecover;
         if (this.fixhispeed != Config.FIX_HISPEED_OFF) {
             hispeed = (float) ((2400f / (basebpm / 100) / gvalue) * 0.6 * (1 - (enableLanecover ? lanecover : 0)));
@@ -322,26 +323,21 @@ public class LaneRenderer {
             BMSPlayerInputProcessor input = main.getBMSPlayerInputProcessor();
             if (input.getCursorState()[0]) {
                 if (!cursorpressed) {
-                    float f = lanecover;
-                    f = f - 0.01f;
-                    if (f < 0) {
-                        f = 0;
-                    }
-                    this.setLanecover(f);
+                    this.setLanecover(lanecover - 0.01f);
                     cursorpressed = true;
                 }
             } else if (input.getCursorState()[1]) {
                 if (!cursorpressed) {
-                    float f = lanecover;
-                    f = f + 0.01f;
-                    if (f > 1) {
-                        f = 1;
-                    }
-                    this.setLanecover(f);
+                    this.setLanecover(lanecover + 0.01f);
                     cursorpressed = true;
                 }
             } else {
                 cursorpressed = false;
+            }
+            // move lane cover by mouse wheel
+            if(input.getScroll() != 0) {
+                this.setLanecover(lanecover - input.getScroll() * 0.005f);
+                input.resetScroll();
             }
             if (input.startPressed()) {
                 if (auto == 0) {
@@ -365,15 +361,7 @@ public class LaneRenderer {
                     if (keystate[7] | keystate[8]) {
                         long l = System.currentTimeMillis();
                         if (l - lanecovertiming > 50) {
-                            float f = lanecover;
-                            f = f + (keystate[7] ? 0.001f : -0.001f);
-                            if (f > 1) {
-                                f = 1;
-                            }
-                            if (f < 0) {
-                                f = 0;
-                            }
-                            this.setLanecover(f);
+                            this.setLanecover(lanecover+ (keystate[7] ? 0.001f : -0.001f));
                             lanecovertiming = l;
                         }
                     }
