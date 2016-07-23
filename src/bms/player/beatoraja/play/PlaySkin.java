@@ -63,7 +63,7 @@ public class PlaySkin extends Skin {
 
 	private Rectangle gaugeregion;
 
-	private Rectangle[] judgeregion;
+	private JudgeRegion[] judgeregion;
 
 	private Rectangle judgecountregion;
 
@@ -123,19 +123,16 @@ public class PlaySkin extends Skin {
 		// 判定文字
 		Texture jt = new Texture("skin/judge.png");
 		judge = new Sprite[5];
-		judge[0] = new Sprite(jt, 0, 0, 115, 52);
-		judge[1] = new Sprite(jt, 0, 52 * 3, 115, 52);
-		judge[2] = new Sprite(jt, 25 * 16, 0, 25 * 5, 52);
-		judge[3] = new Sprite(jt, 25 * 22, 0, 25 * 4, 52);
-		judge[4] = new Sprite(jt, 25 * 26, 0, 25 * 4, 52);
+		judge[0] = new Sprite(jt, 0, 0, 180, 50);
+		judge[1] = new Sprite(jt, 0, 150, 180, 50);
+		judge[2] = new Sprite(jt, 0, 200, 180, 50);
+		judge[3] = new Sprite(jt, 0, 250, 180, 50);
+		judge[4] = new Sprite(jt, 0, 300, 180, 50);
 		judgenum = new Sprite[3][10];
-		for (int j = 0; j < 2; j++) {
-			for (int i = 0; i < 10; i++) {
-				judgenum[j][i] = new Sprite(jt, 28 * i + 115, j * 52 * 3, 28, 52);
-			}
-			for (int i = 0; i < 10; i++) {
-				judgenum[2][i] = new Sprite(jt, 28 * i + 115, 52 * 3, 28, 52);
-			}
+		for (int i = 0; i < 10; i++) {
+			judgenum[0][i] = new Sprite(jt, 30 * i + 200, 0, 30, 50);
+			judgenum[1][i] = new Sprite(jt, 30 * i + 200, 150, 30, 50);
+			judgenum[2][i] = new Sprite(jt, 30 * i + 200, 200, 30, 50);
 		}
 		// 数字
 		Texture nt = new Texture("skin/number.png");
@@ -220,7 +217,16 @@ public class PlaySkin extends Skin {
 		keybeam[1] = keybeam[3] = keybeam[5] = new Sprite(kbt, 47, 0, 28, 255);
 		keybeam[7] = new Sprite(kbt, 0, 0, 47, 255);
 
-		judgeregion = new Rectangle[] { rect(20, 240, 390, 20) };
+		SkinImage[] images = new SkinImage[6];
+		SkinNumber[] number = new SkinNumber[6];
+		for(int i = 0;i < 6;i++) {
+			images[i] = new SkinImage();
+			images[i].setImage(new TextureRegion[] { judge[i == 5 ? 4 : i] }, 0);
+			setDestination(images[i], 0, 115, 240, 180, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);			
+			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 0, 3, 0, NumberResourceAccessor.MAXCOMBO);
+			setDestination(number[i],0, 200, 0, 40, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		}
+		judgeregion = new JudgeRegion[] { new JudgeRegion(images, number, true) };
 
 		bgaregion = rect(500, 50, 740, 650);
 
@@ -350,8 +356,39 @@ public class PlaySkin extends Skin {
 		keybeam[0] = keybeam[2] = keybeam[4] = keybeam[6] = keybeam[8] = new Sprite(kbt, 75, 0, 21, 255);
 		keybeam[1] = keybeam[3] = keybeam[5] = keybeam[7] = new Sprite(kbt, 47, 0, 28, 255);
 
-//		judgeregion = new Rectangle[] { rect(345, 240, 190, 20),  rect(545, 240, 190, 20),  rect(745, 240, 190, 20) };
-		judgeregion = new Rectangle[] { rect(300, 240, 680, 20) };
+		SkinImage[] images = new SkinImage[6];
+		SkinNumber[] number = new SkinNumber[6];
+		for(int i = 0;i < 6;i++) {
+			images[i] = new SkinImage();
+			images[i].setImage(new TextureRegion[] { judge[i == 5 ? 4 : i] }, 0);
+			setDestination(images[i], 0, 375, 240, 140, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);			
+			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 0, 3, 0, NumberResourceAccessor.MAXCOMBO);
+			setDestination(number[i],0, 70, -30, 20, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		}
+		JudgeRegion jr1 = new JudgeRegion(images, number, false);
+		images = new SkinImage[6];
+		number = new SkinNumber[6];
+		for(int i = 0;i < 6;i++) {
+			images[i] = new SkinImage();
+			images[i].setImage(new TextureRegion[] { judge[i == 5 ? 4 : i] }, 0);
+			setDestination(images[i], 0, 570, 240, 140, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);			
+			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 0, 3, 0, NumberResourceAccessor.MAXCOMBO);
+			setDestination(number[i],0, 70, -30, 20, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		}
+		JudgeRegion jr2 = new JudgeRegion(images, number, false);
+		images = new SkinImage[6];
+		number = new SkinNumber[6];
+		for(int i = 0;i < 6;i++) {
+			images[i] = new SkinImage();
+			images[i].setImage(new TextureRegion[] { judge[i == 5 ? 4 : i] }, 0);
+			setDestination(images[i], 0, 765, 240, 140, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);			
+			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 0, 3, 0, NumberResourceAccessor.MAXCOMBO);
+			setDestination(number[i],0, 70, -30, 20, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		}
+		JudgeRegion jr3 = new JudgeRegion(images, number, false);
+		
+		judgeregion = new JudgeRegion[] { jr1, jr2, jr3 };
+
 		bgaregion = rect(10, 390, 330, 330);
 		SkinText title = new SkinText("skin/VL-Gothic-Regular.ttf", 0, 24);
 		title.setTextResourceAccessor(TextResourceAccessor.TITLE);
@@ -452,7 +489,28 @@ public class PlaySkin extends Skin {
 		keybeam[1] = keybeam[3] = keybeam[5] = keybeam[9] = keybeam[11] = keybeam[13] = new Sprite(kbt, 47, 0, 28, 255);
 		keybeam[7] = keybeam[15] = new Sprite(kbt, 0, 0, 47, 255);
 
-		judgeregion = new Rectangle[] { rect(210, 240, 390, 20), rect(680, 240, 390, 20) };
+		SkinImage[] images = new SkinImage[6];
+		SkinNumber[] number = new SkinNumber[6];
+		for(int i = 0;i < 6;i++) {
+			images[i] = new SkinImage();
+			images[i].setImage(new TextureRegion[] { judge[i == 5 ? 4 : i] }, 0);
+			setDestination(images[i], 0, 315, 240, 180, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);			
+			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 0, 3, 0, NumberResourceAccessor.MAXCOMBO);
+			setDestination(number[i],0, 200, 0, 40, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		}
+		JudgeRegion jr1 = new JudgeRegion(images, number, true);
+		images = new SkinImage[6];
+		number = new SkinNumber[6];
+		for(int i = 0;i < 6;i++) {
+			images[i] = new SkinImage();
+			images[i].setImage(new TextureRegion[] { judge[i == 5 ? 4 : i] }, 0);
+			setDestination(images[i], 0, 785, 240, 180, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);			
+			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 0, 3, 0, NumberResourceAccessor.MAXCOMBO);
+			setDestination(number[i],0, 200, 0, 40, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		}
+		JudgeRegion jr2 = new JudgeRegion(images, number, true);
+		
+		judgeregion = new JudgeRegion[] { jr1, jr2 };
 
 		bgaregion = rect(10, 500, 180, 220);
 		SkinText title = new SkinText("skin/VL-Gothic-Regular.ttf", 0, 24);
@@ -543,14 +601,6 @@ public class PlaySkin extends Skin {
 		return gauge;
 	}
 
-	public Sprite[] getJudge() {
-		return judge;
-	}
-
-	public Sprite[][] getJudgenum() {
-		return judgenum;
-	}
-
 	public Rectangle getBGAregion() {
 		return bgaregion;
 	}
@@ -579,12 +629,8 @@ public class PlaySkin extends Skin {
 		return background;
 	}
 
-	public Rectangle[] getJudgeregion() {
+	public JudgeRegion[] getJudgeregion() {
 		return judgeregion;
-	}
-
-	public void setJudgeregion(Rectangle[] judgeregion) {
-		this.judgeregion = judgeregion;
 	}
 
 	public Rectangle getJudgecountregion() {
@@ -601,5 +647,18 @@ public class PlaySkin extends Skin {
 	
 	private Rectangle rect(float x, float y, float width, float height) {
 		return new Rectangle(x * dw, y * dh, width * dw, height * dh);
+	}
+	
+	public static class JudgeRegion {
+		
+		public SkinImage[] judge;
+		public SkinNumber[] count;
+		public boolean shift;
+		
+		public JudgeRegion(SkinImage[] judge, SkinNumber[] count, boolean shift) {
+			this.judge = judge;
+			this.count = count;
+			this.shift = shift;
+		}
 	}
 }

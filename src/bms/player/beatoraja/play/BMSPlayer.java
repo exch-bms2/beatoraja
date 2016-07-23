@@ -400,10 +400,10 @@ public class BMSPlayer extends MainState {
 			shape.begin(ShapeType.Filled);
 			shape.setColor(Color.YELLOW);
 			shape.rect(
-					skin.getJudgeregion()[0].x,
-					skin.getJudgeregion()[0].y + 200,
+					skin.getLaneGroupRegion()[0].x,
+					skin.getLaneGroupRegion()[0].y + 200,
 					(audio.getProgress() + bga.getProgress())
-							* (skin.getJudgeregion()[0].width) / 2, 4);
+							* (skin.getLaneGroupRegion()[0].width) / 2, 4);
 			shape.end();
 
 			if (resource.mediaLoadFinished() && !input.startPressed()) {
@@ -418,8 +418,8 @@ public class BMSPlayer extends MainState {
 			renderMain(0);
 			sprite.begin();
 			systemfont.setColor(Color.WHITE);
-			systemfont.draw(sprite, "GET READY", skin.getJudgeregion()[0].x + skin.getJudgeregion()[0].width / 2 - 35,
-					skin.getJudgeregion()[0].y + 200);
+			systemfont.draw(sprite, "GET READY", skin.getLaneGroupRegion()[0].x + skin.getLaneGroupRegion()[0].width / 2 - 35,
+					skin.getLaneGroupRegion()[0].y + 200);
 			sprite.end();
 			if (time > 1000) {
 				state = STATE_PLAY;
