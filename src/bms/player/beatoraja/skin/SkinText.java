@@ -76,6 +76,9 @@ public class SkinText extends SkinObject {
         if(r != null) {
             if(value != parameter.characters) {
                 parameter.characters = value;
+                if(font != null) {
+                    font.dispose();                	
+                }
                 font = generator.generateFont(parameter);
                 layout = new GlyphLayout(font, value);
             }

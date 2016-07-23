@@ -220,7 +220,7 @@ public class PlaySkin extends Skin {
 			images[i] = new SkinImage();
 			images[i].setImage(new TextureRegion[] { judge[i == 5 ? 4 : i] }, 0);
 			setDestination(images[i], 0, 115, 240, 180, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);			
-			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 0, 3, 0, NumberResourceAccessor.MAXCOMBO);
+			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 0, 6, 0, NumberResourceAccessor.MAXCOMBO);
 			setDestination(number[i],0, 200, 0, 40, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		}
 		judgeregion = new JudgeRegion[] { new JudgeRegion(images, number, true) };
@@ -359,7 +359,7 @@ public class PlaySkin extends Skin {
 			images[i] = new SkinImage();
 			images[i].setImage(new TextureRegion[] { judge[i == 5 ? 4 : i] }, 0);
 			setDestination(images[i], 0, 375, 240, 140, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);			
-			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 0, 3, 0, NumberResourceAccessor.MAXCOMBO);
+			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 0, 6, 0, NumberResourceAccessor.MAXCOMBO);
 			setDestination(number[i],0, 70, -30, 20, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		}
 		JudgeRegion jr1 = new JudgeRegion(images, number, false);
@@ -369,7 +369,7 @@ public class PlaySkin extends Skin {
 			images[i] = new SkinImage();
 			images[i].setImage(new TextureRegion[] { judge[i == 5 ? 4 : i] }, 0);
 			setDestination(images[i], 0, 570, 240, 140, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);			
-			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 0, 3, 0, NumberResourceAccessor.MAXCOMBO);
+			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 0, 6, 0, NumberResourceAccessor.MAXCOMBO);
 			setDestination(number[i],0, 70, -30, 20, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		}
 		JudgeRegion jr2 = new JudgeRegion(images, number, false);
@@ -379,7 +379,7 @@ public class PlaySkin extends Skin {
 			images[i] = new SkinImage();
 			images[i].setImage(new TextureRegion[] { judge[i == 5 ? 4 : i] }, 0);
 			setDestination(images[i], 0, 765, 240, 140, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);			
-			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 0, 3, 0, NumberResourceAccessor.MAXCOMBO);
+			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 0, 6, 0, NumberResourceAccessor.MAXCOMBO);
 			setDestination(number[i],0, 70, -30, 20, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		}
 		JudgeRegion jr3 = new JudgeRegion(images, number, false);
@@ -492,7 +492,7 @@ public class PlaySkin extends Skin {
 			images[i] = new SkinImage();
 			images[i].setImage(new TextureRegion[] { judge[i == 5 ? 4 : i] }, 0);
 			setDestination(images[i], 0, 315, 240, 180, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);			
-			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 0, 3, 0, NumberResourceAccessor.MAXCOMBO);
+			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 0, 6, 0, NumberResourceAccessor.MAXCOMBO);
 			setDestination(number[i],0, 200, 0, 40, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		}
 		JudgeRegion jr1 = new JudgeRegion(images, number, true);
@@ -502,7 +502,7 @@ public class PlaySkin extends Skin {
 			images[i] = new SkinImage();
 			images[i].setImage(new TextureRegion[] { judge[i == 5 ? 4 : i] }, 0);
 			setDestination(images[i], 0, 785, 240, 180, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);			
-			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 0, 3, 0, NumberResourceAccessor.MAXCOMBO);
+			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 0, 6, 0, NumberResourceAccessor.MAXCOMBO);
 			setDestination(number[i],0, 200, 0, 40, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		}
 		JudgeRegion jr2 = new JudgeRegion(images, number, true);

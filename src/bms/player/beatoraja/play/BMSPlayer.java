@@ -155,8 +155,6 @@ public class BMSPlayer extends MainState {
 			}
 			Logger.getGlobal().info("譜面分岐 : " + model.getSelectedIndexOfTimeLines());
 		}
-		minbpm = (int) model.getMinBPM();
-		maxbpm = (int) model.getMaxBPM();
 		// 通常プレイの場合は最後のノーツ、オートプレイの場合はBG/BGAを含めた最後のノーツ
 		playtime = (autoplay == 1 ? model.getLastTime() : model.getLastNoteTime()) + 5000;
 
@@ -206,6 +204,8 @@ public class BMSPlayer extends MainState {
 				score = false;
 			}
 		}
+		minbpm = (int) model.getMinBPM();
+		maxbpm = (int) model.getMaxBPM();
 		judge = new JudgeManager(this, model, resource.getConstraint());
 		if(exjudge) {
 			judge.setExpandJudge(JudgeManager.EXPAND_JUDGE);

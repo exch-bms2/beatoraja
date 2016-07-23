@@ -1,6 +1,5 @@
 package bms.player.beatoraja.select;
 
-
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -25,13 +24,13 @@ import bms.player.beatoraja.*;
 import bms.player.beatoraja.TableData.CourseData;
 
 public class BarRenderer {
-	
+
 	private MainController main;
-	
+
 	private MusicSelector select;
-	
+
 	private BarContentsLoaderThread loader;
-	
+
 	/**
 	 * 現在表示中のバー一覧
 	 */
@@ -45,14 +44,16 @@ public class BarRenderer {
 	private TableBar[] tables = new TableBar[0];
 	private List<SearchWordBar> search = new ArrayList<SearchWordBar>();
 
+	private FreeTypeFontGenerator generator;
 	private BitmapFont titlefont;
 
-	private final String[] TROPHY = {"goldmedal","silvermedal","bronzemedal"};
+	private final String[] TROPHY = { "goldmedal", "silvermedal", "bronzemedal" };
 
 	public BarRenderer(MainController main, MusicSelector select, SongDatabaseAccessor songdb) {
 		this.main = main;
 		this.select = select;
-		
+
+		generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/VL-Gothic-Regular.ttf"));
 		File dir = new File("table");
 		if (dir.exists()) {
 			List<TableBar> tables = new ArrayList<TableBar>();
@@ -88,7 +89,8 @@ public class BarRenderer {
 			this.tables = tables.toArray(new TableBar[0]);
 		}
 
-		commands = new CommandBar[]{new CommandBar(main, select, "MY BEST", "playcount > 0 ORDER BY playcount DESC LIMIT 10"),
+		commands = new CommandBar[] {
+				new CommandBar(main, select, "MY BEST", "playcount > 0 ORDER BY playcount DESC LIMIT 10"),
 				new CommandBar(main, select, "FULL COMBO", "clear >= 8"),
 				new CommandBar(main, select, "EX HARD CLEAR", "clear = 7"),
 				new CommandBar(main, select, "HARD CLEAR", "clear = 6"),
@@ -96,15 +98,16 @@ public class BarRenderer {
 				new CommandBar(main, select, "EASY CLEAR", "clear = 4"),
 				new CommandBar(main, select, "ASSIST CLEAR", "clear IN (2, 3)"),
 				new CommandBar(main, select, "RANK AAA", "(lpg * 2 + epg * 2 + lgr + egr) * 50 / notes >= 88.88"),
-				new CommandBar(main, select, "RANK AA", "(lpg * 2 + epg * 2 + lgr + egr) * 50 / notes >= 77.77 AND (lpg * 2 + epg * 2 + lgr + egr) * 50 / notes < 88.88"),
-				new CommandBar(main, select, "RANK A", "(lpg * 2 + epg * 2 + lgr + egr) * 50 / notes >= 66.66 AND (lpg * 2 + epg * 2 + lgr + egr) * 50 / notes < 77.77"),
-		};
+				new CommandBar(main, select, "RANK AA",
+						"(lpg * 2 + epg * 2 + lgr + egr) * 50 / notes >= 77.77 AND (lpg * 2 + epg * 2 + lgr + egr) * 50 / notes < 88.88"),
+				new CommandBar(main, select, "RANK A",
+						"(lpg * 2 + epg * 2 + lgr + egr) * 50 / notes >= 66.66 AND (lpg * 2 + epg * 2 + lgr + egr) * 50 / notes < 77.77"), };
 	}
-	
+
 	public Bar getSelected() {
 		return currentsongs[selectedindex];
 	}
-	
+
 	public void setSelected(Bar bar) {
 		for (int i = 0; i < currentsongs.length; i++) {
 			if (currentsongs[i].getTitle().equals(bar.getTitle())) {
@@ -113,21 +116,22 @@ public class BarRenderer {
 			}
 		}
 	}
-	
+
 	public void move(boolean inclease) {
-		if(inclease) {
+		if (inclease) {
 			selectedindex++;
 		} else {
 			selectedindex += currentsongs.length - 1;
 		}
 		selectedindex = selectedindex % currentsongs.length;
 	}
-	
+
 	public void addSearch(SearchWordBar bar) {
 		search.add(bar);
 	}
-	
-	public void render(SpriteBatch sprite, ShapeRenderer shape, MusicSelectSkin skin, float w,float h, long duration, int angle, int time) {
+
+	public void render(SpriteBatch sprite, ShapeRenderer shape, MusicSelectSkin skin, float w, float h, long duration,
+			int angle, int time) {
 		// draw song bar
 		final float barh = 36;
 		for (int i = 0; i < h / barh + 2; i++) {
@@ -187,10 +191,10 @@ public class BarRenderer {
 				// trophy
 				TableData.TrophyData trophy = gb.getTrophy();
 				if (trophy != null) {
-					for(int j = 0;j < TROPHY.length;j++) {
-						if(TROPHY[j].equals(trophy.getName())) {
+					for (int j = 0; j < TROPHY.length; j++) {
+						if (TROPHY[j].equals(trophy.getName())) {
 							sprite.begin();
-							sprite.draw(skin.getTrophy()[j], x + 20 , y + 4);
+							sprite.draw(skin.getTrophy()[j], x + 20, y + 4);
 							sprite.end();
 							break;
 						}
@@ -211,8 +215,9 @@ public class BarRenderer {
 				titlefont.setColor(Color.BLACK);
 				titlefont.draw(sprite, level, x + 22, y + barh - 8);
 				final Color[] difficulty = { Color.GRAY, Color.GREEN, Color.BLUE, Color.YELLOW, Color.RED, Color.PURPLE };
-				titlefont.setColor(song.getDifficulty() < difficulty.length ? difficulty[song.getDifficulty()]
-						: Color.WHITE);
+				titlefont
+						.setColor(song.getDifficulty() >= 0 && song.getDifficulty() < difficulty.length ? difficulty[song
+								.getDifficulty()] : Color.WHITE);
 				titlefont.draw(sprite, level, x + 20, y + barh - 6);
 				sprite.end();
 
@@ -274,9 +279,8 @@ public class BarRenderer {
 		shape.setColor(Color.ORANGE);
 		float dy = progress.y + 1 + (progress.height - 20) * (1.0f - (float) selectedindex / currentsongs.length);
 		if (duration != 0) {
-			dy -= progress.height / currentsongs.length
-					* (Math.abs(angle) - duration + System.currentTimeMillis()) / angle + (angle >= 0 ? -1 : 1)
-					* progress.height / currentsongs.length;
+			dy -= progress.height / currentsongs.length * (Math.abs(angle) - duration + System.currentTimeMillis())
+					/ angle + (angle >= 0 ? -1 : 1) * progress.height / currentsongs.length;
 		}
 		while (dy > progress.y + progress.height) {
 			dy -= progress.height;
@@ -284,12 +288,12 @@ public class BarRenderer {
 		shape.rect(progress.x + 1, dy, progress.width - 2, 20);
 		shape.end();
 
-		if(main.getInputProcessor().isMouseConsumed()) {
+		if (main.getInputProcessor().isMouseConsumed()) {
 			main.getInputProcessor().setMouseConsumed();
 			progress = new Rectangle(skin.getSeekRegion());
 			progress.x -= progress.width * 2;
 			progress.width *= 5;
-			if(progress.contains(main.getInputProcessor().getMouseX(),main.getInputProcessor().getMouseY())) {
+			if (progress.contains(main.getInputProcessor().getMouseX(), main.getInputProcessor().getMouseY())) {
 				selectedindex = (int) ((main.getInputProcessor().getMouseY() - progress.y) * 0.999 / progress.height * currentsongs.length);
 			}
 		}
@@ -310,7 +314,8 @@ public class BarRenderer {
 		List<Bar> remove = new ArrayList<Bar>();
 		for (Bar b : l) {
 			final int[] modes = { 0, 7, 14, 9, 5, 10 };
-			if (modes[select.getMode()] != 0 && b instanceof SongBar && ((SongBar) b).getSongData().getMode() != modes[select.getMode()]) {
+			if (modes[select.getMode()] != 0 && b instanceof SongBar
+					&& ((SongBar) b).getSongData().getMode() != modes[select.getMode()]) {
 				remove.add(b);
 			}
 		}
@@ -319,8 +324,6 @@ public class BarRenderer {
 		if (l.size() > 0) {
 			// 変更前と同じバーがあればカーソル位置を保持する
 			currentsongs = l.toArray(new Bar[0]);
-			FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
-					Gdx.files.internal("skin/VL-Gothic-Regular.ttf"));
 			FreeTypeFontParameter parameter = new FreeTypeFontParameter();
 			parameter.size = 24;
 
@@ -356,6 +359,9 @@ public class BarRenderer {
 			}
 
 			parameter.characters = str.toString();
+			if (titlefont != null) {
+				titlefont.dispose();
+			}
 			titlefont = generator.generateFont(parameter);
 			Arrays.sort(currentsongs, MusicSelector.SORT[select.getSort()]);
 
@@ -393,11 +399,11 @@ public class BarRenderer {
 		return false;
 
 	}
-	
+
 	public BitmapFont getFont() {
 		return titlefont;
 	}
-	
+
 	public void dispose() {
 		titlefont.dispose();
 	}
@@ -429,9 +435,9 @@ public class BarRenderer {
 					SongData sd = ((SongBar) bar).getSongData();
 					bar.setScore(select.readScoreData(sd, config.getLnmode()));
 					boolean[] replay = new boolean[MusicSelector.REPLAY];
-					for(int i = 0;i < MusicSelector.REPLAY;i++) {
-						replay[i] = main.getPlayDataAccessor().existsReplayData(
-								sd.getSha256(), sd.hasLongNote(), config.getLnmode(), i);
+					for (int i = 0; i < MusicSelector.REPLAY; i++) {
+						replay[i] = main.getPlayDataAccessor().existsReplayData(sd.getSha256(), sd.hasLongNote(),
+								config.getLnmode(), i);
 					}
 					((SongBar) bar).setExistsReplayData(replay);
 				}
@@ -444,13 +450,16 @@ public class BarRenderer {
 							hash[j] = gb.getSongDatas()[j].getSha256();
 							ln |= gb.getSongDatas()[j].hasLongNote();
 						}
-						gb.setScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 0, gb.getConstraint()));
-						gb.setMirrorScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 1, gb.getConstraint()));
-						gb.setRandomScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 2, gb.getConstraint()));
+						gb.setScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 0,
+								gb.getConstraint()));
+						gb.setMirrorScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 1,
+								gb.getConstraint()));
+						gb.setRandomScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 2,
+								gb.getConstraint()));
 						boolean[] replay = new boolean[MusicSelector.REPLAY];
-						for(int i = 0;i < MusicSelector.REPLAY;i++) {
-							replay[i] = main.getPlayDataAccessor().existsReplayData(
-									hash, ln, config.getLnmode(), i, gb.getConstraint());
+						for (int i = 0; i < MusicSelector.REPLAY; i++) {
+							replay[i] = main.getPlayDataAccessor().existsReplayData(hash, ln, config.getLnmode(), i,
+									gb.getConstraint());
 						}
 						gb.setExistsReplayData(replay);
 					}

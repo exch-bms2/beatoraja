@@ -16,7 +16,7 @@ public class NormalGrooveGauge extends GrooveGauge {
 
 	public NormalGrooveGauge(BMSModel model) {
 		if(model.getUseKeys() == 9) {
-			init(2,120, 30, 80, CLEARTYPE_NORMAL,new float[] { (float) (model.getTotal() / model.getTotalNotes()),
+			init(2,120, 30, 85, CLEARTYPE_NORMAL,new float[] { (float) (model.getTotal() / model.getTotalNotes()),
 					(float) (model.getTotal() / model.getTotalNotes()), (float) (model.getTotal() / model.getTotalNotes()) / 2,
 					-2.0f, -6.0f, -6.0f })	;
 			ispms = true;

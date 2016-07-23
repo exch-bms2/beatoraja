@@ -16,7 +16,7 @@ public class EasyGrooveGauge extends GrooveGauge {
 
     public EasyGrooveGauge(BMSModel model) {
         if (model.getUseKeys() == 9) {
-            init(2, 120, 30, 80, CLEARTYPE_EASY, new float[]{(float) (model.getTotal() / model.getTotalNotes()),
+            init(2, 120, 30, 85, CLEARTYPE_EASY, new float[]{(float) (model.getTotal() / model.getTotalNotes()),
                     (float) (model.getTotal() / model.getTotalNotes()), (float) (model.getTotal() / model.getTotalNotes()) / 2,
                     -1.0f, -3.0f, -3.0f});
             ispms = true;
