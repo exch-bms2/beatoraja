@@ -128,4 +128,6 @@ public abstract class SkinObject {
 
     }
 
+    public abstract void dispose();
+
 }

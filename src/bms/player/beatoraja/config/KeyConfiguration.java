@@ -15,6 +15,9 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.utils.GdxRuntimeException;
+
+import java.util.logging.Logger;
 
 /**
  * キーコンフィグ画面
@@ -183,7 +186,13 @@ public class KeyConfiguration extends MainState {
 
 	@Override
 	public void dispose() {
-		// TODO Auto-generated method stub
-		
+		if(titlefont != null) {
+			titlefont.dispose();
+			titlefont = null;
+		}
+		if(getSkin() != null) {
+			getSkin().dispose();
+			setSkin(null);
+		}
 	}
 }

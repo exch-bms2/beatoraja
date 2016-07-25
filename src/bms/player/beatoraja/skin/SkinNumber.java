@@ -75,6 +75,9 @@ public class SkinNumber extends SkinObject {
 	
 	public TextureRegion[] getValue(int value, int zeropadding) {
 		final TextureRegion[] image = (value >= 0 || mimage == null) ? this.image : mimage;
+		if(image == null) {
+			return new TextureRegion[0];
+		}
 		value = Math.abs(value);
 		for (int j = values.length - 1; j >= 0; j--) {
 			if(value > 0 || j == values.length - 1) {
@@ -103,6 +106,21 @@ public class SkinNumber extends SkinObject {
 			if(values[j] != null) {
 				sprite.draw(values[j], r.x + r.width * j, r.y, r.width, r.height);				
 			}
+		}
+	}
+
+	public void dispose() {
+		if(image != null) {
+			for(TextureRegion tr : image) {
+				tr.getTexture().dispose();
+			}
+			image = null;
+		}
+		if(mimage != null) {
+			for(TextureRegion tr : mimage) {
+				tr.getTexture().dispose();
+			}
+			mimage = null;
 		}
 	}
 }

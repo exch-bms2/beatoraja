@@ -125,6 +125,9 @@ public class MainController extends ApplicationAdapter {
 			current = decide;
 			break;
 		case STATE_PLAYBMS:
+			if(player != null) {
+				player.dispose();
+			}
 			player = new BMSPlayer(this, resource);
 			player.create();
 			current = player;
@@ -223,8 +226,8 @@ public class MainController extends ApplicationAdapter {
 
 	@Override
 	public void dispose() {
-		shape.dispose();
-		sprite.dispose();
+//		shape.dispose();
+//		sprite.dispose();
 		if (player != null) {
 			player.dispose();
 		}
@@ -237,6 +240,13 @@ public class MainController extends ApplicationAdapter {
 		if (result != null) {
 			result.dispose();
 		}
+		if (gresult != null) {
+			gresult.dispose();
+		}
+		if(keyconfig != null) {
+			keyconfig.dispose();
+		}
+		resource.dispose();
 	}
 
 	@Override
@@ -354,6 +364,7 @@ public class MainController extends ApplicationAdapter {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		dispose();
 		Gdx.app.exit();
 	}
 

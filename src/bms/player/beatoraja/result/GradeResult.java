@@ -19,6 +19,7 @@ import bms.model.BMSModel;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.gauge.GrooveGauge;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.utils.GdxRuntimeException;
 
 public class GradeResult extends MainState {
 
@@ -262,7 +263,14 @@ public class GradeResult extends MainState {
 
 	@Override
 	public void dispose() {
-		titlefont.dispose();
+		if(titlefont != null) {
+			titlefont.dispose();
+			titlefont = null;
+		}
+		if(skin != null) {
+			skin.dispose();
+			skin = null;
+		}
 	}
 
 	private void saveReplayData(int index) {

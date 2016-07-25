@@ -489,10 +489,12 @@ class BGImageManager {
 				bga.dispose();
 			}
 		}
+		bgacache = new Texture[0];
 		for (Pixmap id : bgamap) {
 			if (id != null) {
 				id.dispose();
 			}
 		}
+		bgamap = new Pixmap[0];
 	}
 }

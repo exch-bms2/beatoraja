@@ -18,6 +18,7 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFont
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.Json;
 
 import bms.player.beatoraja.*;
@@ -400,12 +401,11 @@ public class BarRenderer {
 
 	}
 
-	public BitmapFont getFont() {
-		return titlefont;
-	}
-
 	public void dispose() {
-		titlefont.dispose();
+		if(titlefont != null) {
+			titlefont.dispose();
+			titlefont = null;
+		}
 	}
 
 	/**

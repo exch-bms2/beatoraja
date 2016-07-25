@@ -3,9 +3,11 @@ package bms.player.beatoraja.result;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.logging.Logger;
 
 import bms.player.beatoraja.gauge.*;
 import bms.player.beatoraja.select.MusicSelector;
+import com.badlogic.gdx.utils.GdxRuntimeException;
 import org.lwjgl.opengl.GL11;
 
 import bms.model.BMSModel;
@@ -407,12 +409,21 @@ public class MusicResult extends MainState {
 
 	@Override
 	public void dispose() {
-		titlefont.dispose();
 		if(clear != null) {
 			clear.dispose();
+			clear = null;
 		}
 		if(fail != null) {
 			fail.dispose();
+			fail = null;
+		}
+		if(titlefont != null) {
+			titlefont.dispose();
+			titlefont = null;
+		}
+		if(skin != null) {
+			skin.dispose();
+			skin = null;
 		}
 	}
 

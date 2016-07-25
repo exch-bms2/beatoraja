@@ -73,6 +73,9 @@ public class SkinImage extends SkinObject {
 	}
 
 	public void draw(SpriteBatch sprite, long time, MainState state) {
+		if(image == null) {
+			return;
+		}
 		Rectangle r = this.getDestination(time);
         if (r != null) {
 			final int value = resource != null ? resource.getValue(state) : 0;
@@ -83,6 +86,17 @@ public class SkinImage extends SkinObject {
 				sprite.setColor(c);
 			}
         }
+	}
+
+	public void dispose() {
+		if(image != null) {
+			for(TextureRegion[] tr : image) {
+				for(TextureRegion ctr : tr) {
+					ctr.getTexture().dispose();
+				}
+			}
+			image = null;
+		}
 	}
 
 }

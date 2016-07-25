@@ -14,6 +14,7 @@ import com.badlogic.gdx.Input.TextInputListener;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.*;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Rectangle;
@@ -94,6 +95,8 @@ public class MusicSelector extends MainState {
 	private Sound sorts;
 
 	private Texture background;
+
+	private BitmapFont titlefont;
 
 	private Texture banner;
 	private Bar bannerbar;
@@ -243,7 +246,11 @@ public class MusicSelector extends MainState {
 		}
 		this.setSkin(skin);
 
-		BitmapFont titlefont = bar.getFont();
+		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/VL-Gothic-Regular.ttf"));
+		FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+		parameter.size = 24;
+		titlefont = generator.generateFont(parameter);
+
 		option = new GameOptionRenderer(main.getShapeRenderer(), main.getSpriteBatch(), titlefont, config);
 		aoption = new AssistOptionRenderer(main.getShapeRenderer(), main.getSpriteBatch(), titlefont, config);
 		doption = new DetailOptionRenderer(main.getShapeRenderer(), main.getSpriteBatch(), titlefont, config);
@@ -276,7 +283,6 @@ public class MusicSelector extends MainState {
 		for (Bar b : dir) {
 			str.append(b.getTitle() + " > ");
 		}
-		BitmapFont titlefont = bar.getFont();
 		titlefont.setColor(Color.VIOLET);
 		titlefont.draw(sprite, str.toString(), 40, 670);
 
@@ -845,6 +851,10 @@ public class MusicSelector extends MainState {
 
 	public void dispose() {
 		bar.dispose();
+		if(skin != null) {
+			skin.dispose();
+			skin = null;
+		}
 	}
 
 	@Override

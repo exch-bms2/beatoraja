@@ -40,4 +40,11 @@ public class Skin {
 			obj.draw(sprite, time, state);
 		}
 	}
+
+	public void dispose() {
+		for(SkinObject obj : objects) {
+			obj.dispose();
+		}
+
+	}
 }

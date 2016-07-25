@@ -94,4 +94,11 @@ public class SkinText extends SkinObject {
             }
         }
     }
+
+    public void dispose() {
+        if(font != null) {
+            font.dispose();;
+            font = null;
+        }
+    }
 }

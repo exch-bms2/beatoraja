@@ -4,6 +4,7 @@ import java.io.*;
 import java.util.*;
 import java.util.logging.Logger;
 
+import com.badlogic.gdx.utils.GdxRuntimeException;
 import org.lwjgl.opengl.GL11;
 
 import bms.model.*;
@@ -719,14 +720,23 @@ public class BMSPlayer extends MainState {
 
 	@Override
 	public void dispose() {
-		titlefont.dispose();
-		judgefont.dispose();
-		systemfont.dispose();
+		if(titlefont != null) {
+			titlefont.dispose();
+			titlefont = null;
+		}
+		if(judgefont != null) {
+			judgefont.dispose();
+			judgefont = null;
+		}
+		if(systemfont != null) {
+			systemfont.dispose();
+			systemfont = null;
+		}
+		if(skin != null) {
+			skin.dispose();
+			skin = null;
+		}
 		Logger.getGlobal().info("システム描画のリソース解放");
-		audio.dispose();
-		Logger.getGlobal().info("音源のリソース解放");
-		bga.dispose();
-		Logger.getGlobal().info("BGAのリソース解放");
 	}
 
 	public void play(Note note) {

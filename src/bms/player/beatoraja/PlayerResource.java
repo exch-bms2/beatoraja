@@ -338,4 +338,15 @@ public class PlayerResource {
 	public void addConstraint(int constraint) {
 		this.constraint.add(constraint);
 	}
+
+	public void dispose() {
+		if(audio != null) {
+			audio.dispose();
+			audio = null;
+		}
+		if(bga != null) {
+			bga.dispose();
+			bga = null;
+		}
+	}
 }
