@@ -73,32 +73,6 @@ public class ScoreGraphRenderer {
 		if (notes != 0) {
 			rate = (float) notes * 2 / max;
 		}
-
-		shape.begin(ShapeType.Filled);
-		shape.setColor(Color.BLUE);
-		shape.rect(graph.x + 3, graph.y, (graph.width - 9) / 3, graph.height
-				* now / max);
-		shape.end();
-		shape.begin(ShapeType.Line);
-		shape.setColor(Color.GREEN);
-		shape.rect(graph.x + graph.width / 3 + 3, graph.y,
-				(graph.width - 9) / 3, graph.height * best / max);
-		shape.end();
-		shape.begin(ShapeType.Filled);
-		shape.setColor(Color.GREEN);
-		shape.rect(graph.x + graph.width / 3 + 3, graph.y,
-				(graph.width - 9) / 3, graph.height * best * rate / max);
-		shape.end();
-		shape.begin(ShapeType.Line);
-		shape.setColor(Color.RED);
-		shape.rect(graph.x + graph.width * 2 / 3 + 3, graph.y,
-				(graph.width - 9) / 3, graph.height * rival / max);
-		shape.end();
-		shape.begin(ShapeType.Filled);
-		shape.setColor(Color.RED);
-		shape.rect(graph.x + graph.width * 2 / 3 + 3, graph.y,
-				(graph.width - 9) / 3, graph.height * rival * rate / max);
-		shape.end();
 		
 		Gdx.gl.glEnable(GL11.GL_BLEND);
 		Gdx.gl.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
@@ -120,4 +94,11 @@ public class ScoreGraphRenderer {
 		sprite.end();
 	}
 
+	public int getBest() {
+		return best;
+	}
+	
+	public int getTarget() {
+		return rival;
+	}
 }

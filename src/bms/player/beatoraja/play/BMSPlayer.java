@@ -354,7 +354,7 @@ public class BMSPlayer extends MainState {
 		if (score == null) {
 			score = new IRScoreData();
 		}
-		graphrender = new ScoreGraphRenderer(model, score.getExscore(), score.getExscore());
+		graphrender = new ScoreGraphRenderer(model, score.getExscore(), model.getTotalNotes() * 8 / 5);
 		Logger.getGlobal().info("スコアグラフ描画クラス準備");
 
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/VL-Gothic-Regular.ttf"));
@@ -967,5 +967,25 @@ public class BMSPlayer extends MainState {
 
 	public String getTitle() {
 		return resource.getBMSModel().getTitle();
+	}
+
+	@Override
+	public int getTotalNotes() {
+		return totalnotes;
+	}
+
+	@Override
+	public int getScore() {
+		return judge.getJudgeCount(0) * 2 + judge.getJudgeCount(1);
+	}
+	
+	@Override
+	public int getBestScore() {
+		return graphrender.getBest();
+	}
+	
+	@Override
+	public int getTargetScore() {
+		return graphrender.getTarget();
 	}
 }

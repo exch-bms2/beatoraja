@@ -66,6 +66,8 @@ public class LaneRenderer {
 
 	private Config config;
 	private int auto;
+	
+	private boolean drawline = true;
 
 	Color[] lanebg = { new Color(0.05f, 0.05f, 0.05f, 1), Color.BLACK, new Color(0.05f, 0.05f, 0.05f, 1), Color.BLACK,
 			new Color(0.05f, 0.05f, 0.05f, 1), Color.BLACK, new Color(0.05f, 0.05f, 0.05f, 1), Color.BLACK,
@@ -121,11 +123,12 @@ public class LaneRenderer {
 		this.model = model;
 		this.timelines = model.getAllTimeLines();
 		if (model.getUseKeys() == 9) {
-			lanebg = new Color[] { new Color(0.1f, 0.1f, 0.1f, 1), new Color(0.1f, 0.1f, 0.0f, 1),
-					new Color(0.0f, 0.1f, 0.0f, 1), new Color(0.0f, 0.0f, 0.1f, 1), new Color(0.1f, 0.0f, 0.0f, 1),
-					new Color(0.0f, 0.0f, 0.1f, 1), new Color(0.0f, 0.1f, 0.0f, 1), new Color(0.1f, 0.1f, 0.0f, 1),
-					new Color(0.1f, 0.1f, 0.1f, 1), Color.BLACK, new Color(0.1f, 0.1f, 0.1f, 1), Color.BLACK,
-					new Color(0.1f, 0.1f, 0.1f, 1), Color.BLACK, new Color(0.1f, 0.1f, 0.1f, 1), Color.BLACK };
+			lanebg = new Color[] { new Color(0.2f, 0.2f, 0.2f, 1), new Color(0.2f, 0.2f, 0.0f, 1),
+					new Color(0.0f, 0.2f, 0.0f, 1), new Color(0.0f, 0.0f, 0.2f, 1), new Color(0.2f, 0.0f, 0.0f, 1),
+					new Color(0.0f, 0.0f, 0.2f, 1), new Color(0.0f, 0.2f, 0.0f, 1), new Color(0.2f, 0.2f, 0.0f, 1),
+					new Color(0.2f, 0.2f, 0.2f, 1), Color.BLACK, new Color(0.2f, 0.2f, 0.2f, 1), Color.BLACK,
+					new Color(0.2f, 0.2f, 0.2f, 1), Color.BLACK, new Color(0.2f, 0.2f, 0.2f, 1), Color.BLACK };
+			drawline = false;
 		}
 		hispeed = config.getHispeed();
 		switch (config.getFixhispeed()) {
@@ -312,10 +315,12 @@ public class LaneRenderer {
 			}
 			sprite.end();
 
-			shape.begin(ShapeType.Line);
-			shape.setColor(Color.GRAY);
-			shape.rect(x, hl, dx, hu - hl);
-			shape.end();
+			if(drawline) {
+				shape.begin(ShapeType.Line);
+				shape.setColor(Color.GRAY);
+				shape.rect(x, hl, dx, hu - hl);
+				shape.end();				
+			}
 		}
 
         // 各種コントロール入力判定
@@ -453,7 +458,7 @@ public class LaneRenderer {
 						sprite.end();
 					}
 					// 小節線描画
-					if (tl.getSectionLine()) {
+					if (drawline && tl.getSectionLine()) {
 						shape.begin(ShapeType.Line);
 						shape.setColor(Color.GRAY);
 						shape.line(playerr[p].x, y, playerr[p].x + playerr[p].width, y);

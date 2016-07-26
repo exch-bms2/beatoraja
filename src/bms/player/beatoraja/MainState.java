@@ -58,6 +58,10 @@ public abstract class MainState {
 		return 0;
 	}
 	
+	public int getBestScore() {
+		return 0;
+	}
+	
 	public int getTargetScore() {
 		return 0;
 	}

@@ -31,6 +31,13 @@ public interface NumberResourceAccessor {
 		}
 	};
 
+	public static NumberResourceAccessor BEST_SCORE = new NumberResourceAccessor() {
+		@Override
+		public int getValue(MainState state) {
+			return state.getBestScore();
+		}
+	};
+
 	public static NumberResourceAccessor TARGET_SCORE = new NumberResourceAccessor() {
 		@Override
 		public int getValue(MainState state) {

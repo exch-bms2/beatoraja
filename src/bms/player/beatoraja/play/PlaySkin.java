@@ -1,9 +1,5 @@
 package bms.player.beatoraja.play;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import bms.player.beatoraja.skin.*;
 
 import com.badlogic.gdx.graphics.Texture;
@@ -49,6 +45,8 @@ public class PlaySkin extends Skin {
 	private Sprite[] judge;
 
 	private Sprite[][] judgenum;
+	
+	private SkinGraph[] graph;
 
 	/**
 	 * レーン描画エリア
@@ -155,6 +153,26 @@ public class PlaySkin extends Skin {
 		addNumber(new SkinNumber(ntr[0], 0, 2, 1, NumberResourceAccessor.HISPEED_AFTERDOT), 0, 154, 2, 10, 20, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 		addNumber(new SkinNumber(ntr[0], 0, 4, 0, NumberResourceAccessor.DURATION), 0, 318, 2, 12, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		
+		Texture grapht = new Texture("skin/scoregraph.png");
+		TextureRegion[] graphtr = new TextureRegion[3];
+		graphtr[0] = new TextureRegion(grapht, 0,0,100,296);
+		graphtr[1] = new TextureRegion(grapht, 100,0,100,296);
+		graphtr[2] = new TextureRegion(grapht, 200,0,100,296);
+
+		graph = new SkinGraph[3];
+		graph[0] = new SkinGraph();
+		graph[0].setImage(new TextureRegion[]{new TextureRegion(grapht, 0,0,100,296)}, 0);
+		graph[0].setNumberResourceAccessor(NumberResourceAccessor.SCORE, NumberResourceAccessor.MAX_SCORE);
+		add(graph[0]);
+		graph[1] = new SkinGraph();
+		graph[1].setImage(new TextureRegion[]{new TextureRegion(grapht, 100,0,100,296)}, 0);
+		graph[1].setNumberResourceAccessor(NumberResourceAccessor.BEST_SCORE, NumberResourceAccessor.MAX_SCORE);
+		add(graph[1]);
+		graph[2] = new SkinGraph();
+		graph[2].setImage(new TextureRegion[]{new TextureRegion(grapht, 200,0,100,296)}, 0);
+		graph[2].setNumberResourceAccessor(NumberResourceAccessor.TARGET_SCORE, NumberResourceAccessor.MAX_SCORE);
+		add(graph[2]);
 	}
 
 	private void make7KeySkin() {
@@ -207,6 +225,7 @@ public class PlaySkin extends Skin {
 				minenote[i] = new Sprite(notet, 127, 23, 21, 8);
 			}
 		}
+		
 
 		Texture kbt = new Texture("skin/keybeam.png");
 		keybeam = new Sprite[8];
@@ -234,6 +253,10 @@ public class PlaySkin extends Skin {
 		setDestination(title, 2000, 502, 698, 18, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(title);
 
+		setDestination(graph[0], 0, 411, 220, 28, 480, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);	
+		setDestination(graph[1], 0, 441, 220, 28, 480, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);	
+		setDestination(graph[2], 0, 471, 220, 28, 480, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);	
+		
 		graphregion = rect(410, 220, 90, 480);
 
 		judgecountregion = rect(500, 50, 144, 108);
@@ -281,13 +304,13 @@ public class PlaySkin extends Skin {
 				longnote[0][i] = new Sprite(notet, 0, 18, 36, 18);
 				longnote[1][i] = new Sprite(notet, 0, 38, 36, 18);
 				longnote[2][i] = new Sprite(notet, 0, 38, 36, 1);
-				longnote[3][i] = new Sprite(notet, 0, 38, 36, 1);
+				longnote[3][i] = new Sprite(notet, 0, 36, 36, 1);
 				longnote[4][i] = new Sprite(notet, 0, 18, 36, 18);
 				longnote[5][i] = new Sprite(notet, 0, 38, 36, 18);
 				longnote[6][i] = new Sprite(notet, 0, 38, 36, 1);
-				longnote[7][i] = new Sprite(notet, 0, 38, 36, 1);
+				longnote[7][i] = new Sprite(notet, 0, 36, 36, 1);
 				longnote[8][i] = new Sprite(notet, 0, 38, 36, 1);
-				longnote[9][i] = new Sprite(notet, 0, 38, 36, 1);
+				longnote[9][i] = new Sprite(notet, 0, 64, 36, 1);
 				minenote[i] = new Sprite(notet, 0, 56, 36, 18);
 			}
 			if (i == 1 || i == 7) {
@@ -295,13 +318,13 @@ public class PlaySkin extends Skin {
 				longnote[0][i] = new Sprite(notet, 38, 18, 28, 18);
 				longnote[1][i] = new Sprite(notet, 38, 38, 28, 18);
 				longnote[2][i] = new Sprite(notet, 38, 38, 28, 1);
-				longnote[3][i] = new Sprite(notet, 38, 38, 28, 1);
+				longnote[3][i] = new Sprite(notet, 38, 36, 28, 1);
 				longnote[4][i] = new Sprite(notet, 38, 18, 28, 18);
 				longnote[5][i] = new Sprite(notet, 38, 38, 28, 18);
 				longnote[6][i] = new Sprite(notet, 38, 38, 28, 1);
-				longnote[7][i] = new Sprite(notet, 38, 38, 28, 1);
+				longnote[7][i] = new Sprite(notet, 38, 36, 28, 1);
 				longnote[8][i] = new Sprite(notet, 38, 38, 28, 1);
-				longnote[9][i] = new Sprite(notet, 38, 38, 28, 1);
+				longnote[9][i] = new Sprite(notet, 38, 64, 28, 1);
 				minenote[i] = new Sprite(notet, 38, 56, 28, 18);
 			}
 			if (i == 2 || i == 6) {
@@ -309,13 +332,13 @@ public class PlaySkin extends Skin {
 				longnote[0][i] = new Sprite(notet, 68, 18, 36, 18);
 				longnote[1][i] = new Sprite(notet, 68, 38, 36, 18);
 				longnote[2][i] = new Sprite(notet, 68, 38, 36, 1);
-				longnote[3][i] = new Sprite(notet, 68, 38, 36, 1);
+				longnote[3][i] = new Sprite(notet, 68, 36, 36, 1);
 				longnote[4][i] = new Sprite(notet, 68, 18, 36, 18);
 				longnote[5][i] = new Sprite(notet, 68, 38, 36, 18);
 				longnote[6][i] = new Sprite(notet, 68, 38, 36, 1);
-				longnote[7][i] = new Sprite(notet, 68, 38, 36, 1);
+				longnote[7][i] = new Sprite(notet, 68, 36, 36, 1);
 				longnote[8][i] = new Sprite(notet, 68, 38, 36, 1);
-				longnote[9][i] = new Sprite(notet, 68, 38, 36, 1);
+				longnote[9][i] = new Sprite(notet, 68, 64, 36, 1);
 				minenote[i] = new Sprite(notet, 68, 56, 36, 18);
 			}
 			if (i == 3 || i == 5) {
@@ -323,13 +346,13 @@ public class PlaySkin extends Skin {
 				longnote[0][i] = new Sprite(notet, 106, 18, 28, 18);
 				longnote[1][i] = new Sprite(notet, 106, 38, 28, 18);
 				longnote[2][i] = new Sprite(notet, 106, 38, 28, 1);
-				longnote[3][i] = new Sprite(notet, 106, 38, 28, 1);
+				longnote[3][i] = new Sprite(notet, 106, 36, 28, 1);
 				longnote[4][i] = new Sprite(notet, 106, 18, 28, 18);
 				longnote[5][i] = new Sprite(notet, 106, 38, 28, 18);
 				longnote[6][i] = new Sprite(notet, 106, 38, 28, 1);
-				longnote[7][i] = new Sprite(notet, 106, 38, 28, 1);
+				longnote[7][i] = new Sprite(notet, 106, 36, 28, 1);
 				longnote[8][i] = new Sprite(notet, 106, 38, 28, 1);
-				longnote[9][i] = new Sprite(notet, 106, 38, 28, 1);
+				longnote[9][i] = new Sprite(notet, 106, 64, 28, 1);
 				minenote[i] = new Sprite(notet, 106, 56, 28, 18);
 			}
 			if (i == 4) {
@@ -337,13 +360,13 @@ public class PlaySkin extends Skin {
 				longnote[0][i] = new Sprite(notet, 136, 18, 36, 18);
 				longnote[1][i] = new Sprite(notet, 136, 38, 36, 18);
 				longnote[2][i] = new Sprite(notet, 136, 38, 36, 1);
-				longnote[3][i] = new Sprite(notet, 136, 38, 36, 1);
+				longnote[3][i] = new Sprite(notet, 136, 36, 36, 1);
 				longnote[4][i] = new Sprite(notet, 136, 18, 36, 18);
 				longnote[5][i] = new Sprite(notet, 136, 38, 36, 18);
 				longnote[6][i] = new Sprite(notet, 136, 38, 36, 1);
-				longnote[7][i] = new Sprite(notet, 136, 38, 36, 1);
+				longnote[7][i] = new Sprite(notet, 136, 36, 36, 1);
 				longnote[8][i] = new Sprite(notet, 136, 38, 36, 1);
-				longnote[9][i] = new Sprite(notet, 136, 38, 36, 1);
+				longnote[9][i] = new Sprite(notet, 136, 64, 36, 1);
 				minenote[i] = new Sprite(notet, 136, 56, 36, 18);
 			}
 		}
@@ -394,6 +417,9 @@ public class PlaySkin extends Skin {
 		setDestination(title, 2000, 12, 720, 18, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(title);
 
+		setDestination(graph[0], 0, 962, 220, 56, 480, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);	
+		setDestination(graph[1], 0, 1022, 220, 56, 480, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);	
+		setDestination(graph[2], 0, 1082, 220, 56, 480, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);	
 		graphregion = rect(960, 220, 180, 480);
 
 		judgecountregion = rect(1090, 40, 144, 108);
@@ -516,6 +542,10 @@ public class PlaySkin extends Skin {
 		setDestination(title, 1000, 12, 720, 18, 18, 0, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		setDestination(title, 2000, 12, 720, 18, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(title);
+
+		setDestination(graph[0], 0, 1092, 220, 56, 480, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);	
+		setDestination(graph[1], 0, 1152, 220, 56, 480, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);	
+		setDestination(graph[2], 0, 1212, 220, 56, 480, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);	
 
 		graphregion = rect(1090, 220, 180, 480);
 
