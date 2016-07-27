@@ -17,7 +17,6 @@ import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-import com.badlogic.gdx.math.Rectangle;
 
 /**
  * 選曲部分。 楽曲一覧とカーソルが指す楽曲のステータスを表示し、選択した楽曲を 曲決定部分に渡す。
@@ -29,7 +28,6 @@ public class MusicSelector extends MainState {
 	// TODO テキスト表示
 	// TODO 譜面情報表示
 	// TODO オプション常時表示(スキン実装で実現？)
-	// TODO SonbBarの描画、管理部分を分離
 
 	private MainController main;
 
@@ -94,8 +92,7 @@ public class MusicSelector extends MainState {
 	private Sound folderclose;
 	private Sound sorts;
 
-	private Texture background;
-
+	private FreeTypeFontGenerator generator;
 	private BitmapFont titlefont;
 
 	private Texture banner;
@@ -224,12 +221,6 @@ public class MusicSelector extends MainState {
 			}
 		}
 
-		if (background == null) {
-			if (new File("skin/select.png").exists()) {
-				background = new Texture("skin/select.png");
-			}
-		}
-
 		if (config.getLr2selectskin() != null) {
 			try {
 				skin = new LR2SelectSkinLoader().loadSelectSkin(new File(config.getLr2selectskin()),
@@ -246,7 +237,7 @@ public class MusicSelector extends MainState {
 		}
 		this.setSkin(skin);
 
-		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/VL-Gothic-Regular.ttf"));
+		generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/VL-Gothic-Regular.ttf"));
 		FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
 		parameter.size = 24;
 		titlefont = generator.generateFont(parameter);
@@ -278,14 +269,6 @@ public class MusicSelector extends MainState {
 		bar.render(sprite, shape, skin, w, h, duration, angle, time);
 		// draw song information
 		sprite.begin();
-
-		StringBuffer str = new StringBuffer();
-		for (Bar b : dir) {
-			str.append(b.getTitle() + " > ");
-		}
-		titlefont.setColor(Color.VIOLET);
-		titlefont.draw(sprite, str.toString(), 40, 670);
-
 		titlefont.setColor(Color.WHITE);
 		if (current instanceof SongBar) {
 			SongData song = ((SongBar) current).getSongData();
@@ -969,6 +952,14 @@ public class MusicSelector extends MainState {
 			return ((SongBar) bar.getSelected()).getSongData().getGenre();
 		}
 		return "";
+	}
+	
+	public String getDirectory() {
+		StringBuffer str = new StringBuffer();
+		for (Bar b : dir) {
+			str.append(b.getTitle() + " > ");
+		}
+		return str.toString();
 	}
 
 	PlayerResource getResource() {

@@ -65,6 +65,9 @@ public class SkinText extends SkinObject {
     }
 
     public void draw(SpriteBatch sprite, long time, MainState state) {
+    	if(generator == null) {
+    		return;
+    	}
         if(resource == null) {
             return;
         }
@@ -86,7 +89,7 @@ public class SkinText extends SkinObject {
                 final float x = r.x - (align == ALIGN_CENTER ? layout.width / 2 : (align == ALIGN_RIGHT ? layout.width : 0));
                 Color c = getColor(time);
                 if(shadow > 0) {
-                    font.setColor(new Color(c.r / 4, c.g / 4, c.b / 4, c.a));
+                    font.setColor(new Color(c.r / 2, c.g / 2, c.b / 2, c.a));
                     font.draw(sprite, parameter.characters, x + shadow, r.y - shadow);
                 }
                 font.setColor(getColor(time));
@@ -96,6 +99,10 @@ public class SkinText extends SkinObject {
     }
 
     public void dispose() {
+        if(generator != null) {
+        	generator.dispose();
+        	generator = null;
+        }
         if(font != null) {
             font.dispose();;
             font = null;

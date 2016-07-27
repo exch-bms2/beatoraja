@@ -83,7 +83,7 @@ public class SkinNumber extends SkinObject {
 			if(value > 0 || j == values.length - 1) {
 				values[j] = image[value % 10];
 			} else {
-				values[j] = (zeropadding == 2 ? image[10] : (zeropadding == 1 ? image[0] : null));
+				values[j] = (zeropadding == 2 ? image[10] : (zeropadding == 1 ? image[0] : (mimage != null && values[j + 1] != image[11] ? image[11] : null)));
 			}
 			value /= 10;
 		}

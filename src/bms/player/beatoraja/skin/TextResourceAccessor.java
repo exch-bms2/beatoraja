@@ -59,4 +59,11 @@ public interface TextResourceAccessor {
         }
     };
 
+    public static TextResourceAccessor DIRECTORY = new TextResourceAccessor() {
+        @Override
+        public String getValue(MainState state) {
+            return state.getDirectory();
+        }
+    };
+
 }

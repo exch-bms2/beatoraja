@@ -274,8 +274,12 @@ class FolderBar extends DirectoryBar {
                 l.add(cfolder);
             }
         } else {
+        	List<String> sha = new ArrayList();
             for (SongData song : songs) {
-                l.add(new SongBar(song));
+            	if(!sha.contains(song.getSha256())) {
+                    l.add(new SongBar(song));
+                    sha.add(song.getSha256());
+            	}
             }
         }
         return l.toArray(new Bar[0]);
@@ -379,8 +383,12 @@ class TableLevelBar extends DirectoryBar {
     public Bar[] getChildren() {
         List<SongBar> songbars = new ArrayList<SongBar>();
         SongData[] songs = selector.getSongDatabase().getSongDatas(getHashes(), new File(".").getAbsolutePath());
+    	List<String> sha = new ArrayList();
         for (SongData song : songs) {
-            songbars.add(new SongBar(song));
+        	if(!sha.contains(song.getSha256())) {
+        		songbars.add(new SongBar(song));
+                sha.add(song.getSha256());
+        	}
         }
         return songbars.toArray(new Bar[0]);
     }

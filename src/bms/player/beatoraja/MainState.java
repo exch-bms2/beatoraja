@@ -154,4 +154,8 @@ public abstract class MainState {
 		return "";
 	}
 
+	public String getDirectory() {
+		return "";
+	}
+
 }

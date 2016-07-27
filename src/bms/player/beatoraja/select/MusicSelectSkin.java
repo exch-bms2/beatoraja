@@ -54,6 +54,10 @@ public class MusicSelectSkin extends Skin {
 		trophy[1] = new Sprite(ttrophy[0][11]);
 		trophy[2] = new Sprite(ttrophy[0][12]);
 
+		SkinText dir = new SkinText("skin/VL-Gothic-Regular.ttf",0,24, 2);
+		dir.setTextResourceAccessor(TextResourceAccessor.DIRECTORY);
+		setDestination(dir, 0, 40, 670, 18, 18, 0, 255,255,128,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		this.add(dir);
 		SkinText genre = new SkinText("skin/VL-Gothic-Regular.ttf",0,20, 2);
 		genre.setTextResourceAccessor(TextResourceAccessor.GENRE);
 		setDestination(genre, 0, 100, 630, 18, 18, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
