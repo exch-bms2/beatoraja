@@ -1,12 +1,20 @@
 package bms.player.beatoraja;
 
+import java.util.Arrays;
+
 import bms.player.beatoraja.skin.Skin;
 
 public abstract class MainState {
 
 	private long starttime;
 	
+	private long[] timer = new long[256];
+	
 	private Skin skin;
+	
+	public MainState() {
+		Arrays.fill(timer, -1);
+	}
 	
 	public abstract void create(PlayerResource resource);
 	
@@ -38,6 +46,10 @@ public abstract class MainState {
 		return (int) (System.currentTimeMillis() - starttime);
 	}
 
+	public long[] getTimer() {
+		return timer;
+	}
+	
 	public Skin getSkin() {
 		return skin;
 	}

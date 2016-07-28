@@ -39,6 +39,10 @@ public class BMSPlayer extends MainState {
 
 	// TODO GLAssistから起動すると楽曲ロード中に止まる
 
+	public static final int TIMER_FADEOUT = 2;
+	public static final int TIMER_FAILED = 3;
+	public static final int TIMER_READY = 40;
+
 	private BitmapFont titlefont;
 	private BitmapFont judgefont;
 	private BitmapFont systemfont;
@@ -61,7 +65,6 @@ public class BMSPlayer extends MainState {
 
 	private GrooveGauge gauge;
 
-	private long readytime;
 	/**
 	 * プレイ開始時間。0の場合はプレイ開始前
 	 */
@@ -394,7 +397,8 @@ public class BMSPlayer extends MainState {
 		final float w = main.RESOLUTION[resource.getConfig().getResolution()].width;
 		final float h = main.RESOLUTION[resource.getConfig().getResolution()].height;
 
-		final long nowtime = System.currentTimeMillis() ;
+		final long now = getNowTime();
+		final long nowtime = System.currentTimeMillis();
 		final int time = (int) (nowtime - starttime);
 		switch (state) {
 		// 楽曲ロード
@@ -412,7 +416,7 @@ public class BMSPlayer extends MainState {
 			if (resource.mediaLoadFinished() && !input.startPressed()) {
 				bga.prepare();
 				state = STATE_READY;
-				readytime = System.currentTimeMillis();
+				getTimer()[TIMER_READY] = now;
 				Logger.getGlobal().info("STATE_READYに移行");
 			}
 			break;
@@ -424,7 +428,7 @@ public class BMSPlayer extends MainState {
 			systemfont.draw(sprite, "GET READY", skin.getLaneGroupRegion()[0].x + skin.getLaneGroupRegion()[0].width / 2 - 35,
 					skin.getLaneGroupRegion()[0].y + 200);
 			sprite.end();
-			final long rt = System.currentTimeMillis() - readytime;
+			final long rt = now - getTimer()[TIMER_READY];
 			if (rt > 1000) {
 				state = STATE_PLAY;
 				starttime = System.currentTimeMillis();

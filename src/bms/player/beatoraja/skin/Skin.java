@@ -35,7 +35,8 @@ public class Skin {
 		objects.add(number);
 	}
 
-	public void drawAllObjects(SpriteBatch sprite, long time, MainState state) {
+	public void drawAllObjects(SpriteBatch sprite, MainState state) {
+		final long time = state.getNowTime();
 		for(SkinObject obj : objects) {
 			obj.draw(sprite, time, state);
 		}

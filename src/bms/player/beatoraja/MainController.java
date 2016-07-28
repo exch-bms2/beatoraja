@@ -188,10 +188,9 @@ public class MainController extends ApplicationAdapter {
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-		final int time = current.getNowTime();
 		current.render();
 		sprite.begin();
-		current.getSkin().drawAllObjects(sprite, time, current);
+		current.getSkin().drawAllObjects(sprite, current);
 		sprite.end();
 
 		// FPS表示切替

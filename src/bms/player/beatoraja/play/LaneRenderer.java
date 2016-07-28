@@ -542,8 +542,7 @@ public class LaneRenderer {
 		// System.out.println("time :" + ltime + " y :" + yy + " real time : "
 		// + (ltime * (hu - hl) / yy));
 
-		// ボム描画
-		// TODO 描画座標等はSkinに移行したい
+		// ボム描画。描画座標等はリフト量によって可変のためSkin移行は特殊な定義が必要
 		sprite.begin();
 		// sprite.enableBlending();
 		sprite.setBlendFunction(GL11.GL_ONE, GL11.GL_ONE);
@@ -561,8 +560,7 @@ public class LaneRenderer {
 		sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		// sprite.disableBlending();
 
-		// 判定文字描画
-		// TODO 描画座標等はSkinに移行したい
+		// 判定文字描画。描画座標等はリフト量によって可変のためSkin移行は特殊な定義が必要
 		for (int jr = 0; jr < skin.getJudgeregion().length; jr++) {
 			if (judgenow[jr] > 0 && time < judgenowt[jr] + 500) {
 				Rectangle r = skin.getJudgeregion()[jr].judge[judgenow[jr] - 1].getDestination(time);
@@ -588,7 +586,7 @@ public class LaneRenderer {
 					if (judgenow[jr] > 1) {
 
 						font.setColor(judge.getRecentJudgeTiming() >= 0 ? Color.CYAN : Color.RED);
-						font.draw(sprite, judge.getRecentJudgeTiming() >= 0 ? "FAST" : "SLOW", r.x + r.width / 2, r.y
+						font.draw(sprite, judge.getRecentJudgeTiming() >= 0 ? "EARLY" : "LATE", r.x + r.width / 2, r.y
 								+ r.height + 20);
 					}
 

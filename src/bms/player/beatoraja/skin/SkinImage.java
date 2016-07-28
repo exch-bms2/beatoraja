@@ -84,6 +84,12 @@ public class SkinImage extends SkinObject {
 		if(image == null) {
 			return;
 		}
+		if(timing != 0) {
+			if(state.getTimer()[timing] == -1) {
+				return;
+			}
+			time -= state.getTimer()[timing];
+		}
 		Rectangle r = this.getDestination(time);
         if (r != null) {
 			final int value = resource != null ? resource.getValue(state) : 0;
