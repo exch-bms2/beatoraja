@@ -66,7 +66,7 @@ public class LaneRenderer {
 
 	private Config config;
 	private int auto;
-	
+
 	private boolean drawline = true;
 
 	Color[] lanebg = { new Color(0.05f, 0.05f, 0.05f, 1), Color.BLACK, new Color(0.05f, 0.05f, 0.05f, 1), Color.BLACK,
@@ -88,6 +88,7 @@ public class LaneRenderer {
 	 * ボムの表示開始時間
 	 */
 	private long[] bomb;
+	private int[] bombtype;
 	/**
 	 * 現在表示中の判定
 	 */
@@ -104,6 +105,7 @@ public class LaneRenderer {
 		dw = MainController.RESOLUTION[resource.getConfig().getResolution()].width / 1280f;
 		dh = MainController.RESOLUTION[resource.getConfig().getResolution()].height / 720f;
 		bomb = new long[skin.getLaneregion().length];
+		bombtype = new int[skin.getLaneregion().length];
 		judgenow = new int[skin.getJudgeregion().length];
 		judgenowt = new int[skin.getJudgeregion().length];
 		judgecombo = new int[skin.getJudgeregion().length];
@@ -201,13 +203,13 @@ public class LaneRenderer {
 		return lanecover;
 	}
 
-    public void setLanecover(float lanecover) {
-        lanecover = (lanecover < 0 ? 0 : (lanecover > 1 ? 1 : lanecover));
-        this.lanecover = lanecover;
-        if (this.fixhispeed != Config.FIX_HISPEED_OFF) {
-            hispeed = (float) ((2400f / (basebpm / 100) / gvalue) * 0.6 * (1 - (enableLanecover ? lanecover : 0)));
-        }
-    }
+	public void setLanecover(float lanecover) {
+		lanecover = (lanecover < 0 ? 0 : (lanecover > 1 ? 1 : lanecover));
+		this.lanecover = lanecover;
+		if (this.fixhispeed != Config.FIX_HISPEED_OFF) {
+			hispeed = (float) ((2400f / (basebpm / 100) / gvalue) * 0.6 * (1 - (enableLanecover ? lanecover : 0)));
+		}
+	}
 
 	public void setEnableLanecover(boolean b) {
 		enableLanecover = b;
@@ -315,78 +317,78 @@ public class LaneRenderer {
 			}
 			sprite.end();
 
-			if(drawline) {
+			if (drawline) {
 				shape.begin(ShapeType.Line);
 				shape.setColor(Color.GRAY);
 				shape.rect(x, hl, dx, hu - hl);
-				shape.end();				
+				shape.end();
 			}
 		}
 
-        // 各種コントロール入力判定
-        // TODO ここで各種コントロール入力判定をやるべきではないかも
-        if (enableControl) {
-            BMSPlayerInputProcessor input = main.getBMSPlayerInputProcessor();
-            if (input.getCursorState()[0]) {
-                if (!cursorpressed) {
-                    this.setLanecover(lanecover - 0.01f);
-                    cursorpressed = true;
-                }
-            } else if (input.getCursorState()[1]) {
-                if (!cursorpressed) {
-                    this.setLanecover(lanecover + 0.01f);
-                    cursorpressed = true;
-                }
-            } else {
-                cursorpressed = false;
-            }
-            // move lane cover by mouse wheel
-            if(input.getScroll() != 0) {
-                this.setLanecover(lanecover - input.getScroll() * 0.005f);
-                input.resetScroll();
-            }
-            if (input.startPressed()) {
-                if (auto == 0) {
-                    // change hi speed by START + Keys
-                    boolean[] key = input.getKeystate();
-                    if (key[0] || key[2] || key[4] || key[6]) {
-                        if (!hschanged) {
-                            changeHispeed(false);
-                            hschanged = true;
-                        }
-                    } else if (key[1] || key[3] || key[5]) {
-                        if (!hschanged) {
-                            changeHispeed(true);
-                            hschanged = true;
-                        }
-                    } else {
-                        hschanged = false;
-                    }
+		// 各種コントロール入力判定
+		// TODO ここで各種コントロール入力判定をやるべきではないかも
+		if (enableControl) {
+			BMSPlayerInputProcessor input = main.getBMSPlayerInputProcessor();
+			if (input.getCursorState()[0]) {
+				if (!cursorpressed) {
+					this.setLanecover(lanecover - 0.01f);
+					cursorpressed = true;
+				}
+			} else if (input.getCursorState()[1]) {
+				if (!cursorpressed) {
+					this.setLanecover(lanecover + 0.01f);
+					cursorpressed = true;
+				}
+			} else {
+				cursorpressed = false;
+			}
+			// move lane cover by mouse wheel
+			if (input.getScroll() != 0) {
+				this.setLanecover(lanecover - input.getScroll() * 0.005f);
+				input.resetScroll();
+			}
+			if (input.startPressed()) {
+				if (auto == 0) {
+					// change hi speed by START + Keys
+					boolean[] key = input.getKeystate();
+					if (key[0] || key[2] || key[4] || key[6]) {
+						if (!hschanged) {
+							changeHispeed(false);
+							hschanged = true;
+						}
+					} else if (key[1] || key[3] || key[5]) {
+						if (!hschanged) {
+							changeHispeed(true);
+							hschanged = true;
+						}
+					} else {
+						hschanged = false;
+					}
 
-                    // move lane cover by START + Scratch
-                    if (keystate[7] | keystate[8]) {
-                        long l = System.currentTimeMillis();
-                        if (l - lanecovertiming > 50) {
-                            this.setLanecover(lanecover+ (keystate[7] ? 0.001f : -0.001f));
-                            lanecovertiming = l;
-                        }
-                    }
-                }
-                // show-hide lane cover by double-press START
-                if (!startpressed) {
-                    long stime = System.currentTimeMillis();
-                    if (stime < startpressedtime + 500) {
-                        setEnableLanecover(!isEnableLanecover());
-                        startpressedtime = 0;
-                    } else {
-                        startpressedtime = stime;
-                    }
-                }
-                startpressed = true;
-            } else {
-                startpressed = false;
-            }
-        }
+					// move lane cover by START + Scratch
+					if (keystate[7] | keystate[8]) {
+						long l = System.currentTimeMillis();
+						if (l - lanecovertiming > 50) {
+							this.setLanecover(lanecover + (keystate[7] ? 0.001f : -0.001f));
+							lanecovertiming = l;
+						}
+					}
+				}
+				// show-hide lane cover by double-press START
+				if (!startpressed) {
+					long stime = System.currentTimeMillis();
+					if (stime < startpressedtime + 500) {
+						setEnableLanecover(!isEnableLanecover());
+						startpressedtime = 0;
+					} else {
+						startpressedtime = stime;
+					}
+				}
+				startpressed = true;
+			} else {
+				startpressed = false;
+			}
+		}
 
 		float y = hl;
 
@@ -547,9 +549,13 @@ public class LaneRenderer {
 		sprite.setBlendFunction(GL11.GL_ONE, GL11.GL_ONE);
 		for (int lane = 0; lane < laneregion.length; lane++) {
 			if (time >= bomb[lane]) {
-				sprite.draw(skin.getBomb()[judge.getProcessingLongNotes()[lane] != null ? 2 : 0]
-						.getKeyFrame((time - bomb[lane]) / 1000f), laneregion[lane].x + laneregion[lane].width / 2
-						- 110 * dw, hl - 155 * dh, 260 * dw, 270 * dh);
+				if (judge.getProcessingLongNotes()[lane] != null) {
+					sprite.draw(skin.getBomb()[3].getImage(time - bomb[lane]), laneregion[lane].x
+							+ laneregion[lane].width / 2 - 110 * dw, hl - 155 * dh, 260 * dw, 270 * dh);
+				} else if (time <= bomb[lane] + 150) {
+					sprite.draw(skin.getBomb()[bombtype[lane]].getImage(time - bomb[lane]), laneregion[lane].x
+							+ laneregion[lane].width / 2 - 110 * dw, hl - 155 * dh, 260 * dw, 270 * dh);
+				}
 			}
 		}
 		sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
@@ -582,7 +588,8 @@ public class LaneRenderer {
 					if (judgenow[jr] > 1) {
 
 						font.setColor(judge.getRecentJudgeTiming() >= 0 ? Color.CYAN : Color.RED);
-						font.draw(sprite, judge.getRecentJudgeTiming() >= 0 ? "FAST" : "SLOW", r.x + r.width / 2, r.y + r.height + 20);
+						font.draw(sprite, judge.getRecentJudgeTiming() >= 0 ? "FAST" : "SLOW", r.x + r.width / 2, r.y
+								+ r.height + 20);
 					}
 
 				} else if (config.getJudgedetail() == 2) {
@@ -702,9 +709,10 @@ public class LaneRenderer {
 		}
 	}
 
-	public void update(int lane, int judge, int time) {
+	public void update(int lane, int judge, int time, int fast) {
 		if (judge < 2) {
 			bomb[lane] = time;
+			bombtype[lane] = judge == 0 ? 0 : (fast > 0 ? 1 : 2);
 		}
 		judgenow[lane / (bomb.length / judgenow.length)] = judge + 1;
 		judgenowt[lane / (bomb.length / judgenow.length)] = time;

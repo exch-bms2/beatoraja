@@ -5,11 +5,14 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -49,6 +52,8 @@ public class BarRenderer {
 	private BitmapFont titlefont;
 
 	private final String[] TROPHY = { "goldmedal", "silvermedal", "bronzemedal" };
+
+    private Map<String, Pixmap> bannermap = new HashMap<String, Pixmap>();
 
 	public BarRenderer(MainController main, MusicSelector select, SongDatabaseAccessor songdb) {
 		this.main = main;
@@ -406,8 +411,35 @@ public class BarRenderer {
 			titlefont.dispose();
 			titlefont = null;
 		}
+		for(String path : bannermap.keySet()) {
+			if(bannermap.get(path) != null) {
+				bannermap.get(path).dispose();
+			}
+		}
+		bannermap.clear();
 	}
 
+    private void setBanner(SongBar songbar) {
+    	SongData song = songbar.getSongData();
+        File bannerfile = new File(song.getPath().substring(0, song.getPath().lastIndexOf(File.separatorChar) + 1)
+                + song.getBanner());
+        // System.out.println(bannerfile.getPath());
+        if (song.getBanner().length() > 0 && bannerfile.exists()) {
+            try {
+            	if(bannermap.containsKey(bannerfile.getPath())) {
+            		songbar.setBanner(bannermap.get(bannerfile.getPath()));
+            	} else {
+            		Pixmap pixmap = new Pixmap(Gdx.files.internal(bannerfile.getPath()));
+                    songbar.setBanner(pixmap);
+                    bannermap.put(bannerfile.getPath(), pixmap);
+            	}
+            } catch (GdxRuntimeException e) {
+        		bannermap.put(bannerfile.getParent(), null);
+                Logger.getGlobal().warning("banner読み込み失敗: " + e.getMessage());
+            }
+        }
+    }
+    
 	/**
 	 * 選曲バー内のスコアデータ等を読み込むためのスレッド
 	 */
@@ -431,7 +463,7 @@ public class BarRenderer {
 			Config config = select.getResource().getConfig();
 			for (Bar bar : bars) {
 				if (bar instanceof SongBar) {
-					((SongBar) bar).loadBanner();
+					setBanner((SongBar) bar);
 					SongData sd = ((SongBar) bar).getSongData();
 					bar.setScore(select.readScoreData(sd, config.getLnmode()));
 					boolean[] replay = new boolean[MusicSelector.REPLAY];

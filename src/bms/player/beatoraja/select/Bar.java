@@ -74,6 +74,10 @@ class SongBar extends SelectableBar {
     public Pixmap getBanner() {
         return banner;
     }
+    
+    public void setBanner(Pixmap banner) {
+    	this.banner = banner;
+    }
 
     @Override
     public String getTitle() {
@@ -85,19 +89,6 @@ class SongBar extends SelectableBar {
             return getScore().getClear();
         }
         return 0;
-    }
-
-    public void loadBanner() {
-        File bannerfile = new File(song.getPath().substring(0, song.getPath().lastIndexOf(File.separatorChar) + 1)
-                + song.getBanner());
-        // System.out.println(bannerfile.getPath());
-        if (song.getBanner().length() > 0 && bannerfile.exists()) {
-            try {
-                banner = new Pixmap(Gdx.files.internal(bannerfile.getPath()));
-            } catch (GdxRuntimeException e) {
-                Logger.getGlobal().warning("banner読み込み失敗: " + e.getMessage());
-            }
-        }
     }
 }
 

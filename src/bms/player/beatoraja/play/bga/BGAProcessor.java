@@ -10,7 +10,9 @@ import bms.player.beatoraja.Config;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Pixmap.Filter;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Rectangle;
@@ -297,7 +299,9 @@ public class BGAProcessor {
 			return;
 		}
 		final int bgaid = playingbgaid;
+		boolean rbga = true;
 		final int layerid = playinglayerid;
+		boolean rlayer = true;
 		for (TimeLine tl : model.getAllTimeLines()) {
 			if (tl.getTime() > time) {
 				break;
@@ -306,9 +310,11 @@ public class BGAProcessor {
 			if (tl.getTime() > prevrendertime) {
 				if (tl.getBGA() != -1) {
 					playingbgaid = tl.getBGA();
+					rbga = false;
 				}
 				if (tl.getLayer() != -1) {
 					playinglayerid = tl.getLayer();
+					rlayer = false;
 				}
 				if (tl.getPoor() != null && tl.getPoor().length > 0) {
 					misslayer = tl.getPoor();
@@ -327,6 +333,7 @@ public class BGAProcessor {
 			// draw miss layer
 			Texture miss = getBGAData(misslayer[misslayer.length * (time - misslayertime) / 500], true);
 			if (miss != null) {
+				miss.setFilter(TextureFilter.Linear, TextureFilter.Linear);
 				sprite.begin();
 				for(Rectangle r : region) {
 					sprite.draw(miss, r.x, r.y, r.width, r.height);
@@ -335,8 +342,9 @@ public class BGAProcessor {
 			}
 		} else {
 			// draw BGA
-			Texture playingbgatex = getBGAData(playingbgaid, bgaid == playingbgaid);
+			Texture playingbgatex = getBGAData(playingbgaid, rbga);
 			if (playingbgatex != null) {
+				playingbgatex.setFilter(TextureFilter.Linear, TextureFilter.Linear);
 				sprite.begin();
 				if(mpgmap.containsKey(playingbgaid) && bgrshader.isCompiled()) {
 					sprite.setShader(bgrshader);
@@ -352,8 +360,9 @@ public class BGAProcessor {
 				sprite.end();
 			}
 			// draw layer
-			Texture playinglayertex = getBGAData(playinglayerid, layerid == playinglayerid);
+			Texture playinglayertex = getBGAData(playinglayerid, rlayer);
 			if (playinglayertex != null) {
+				playinglayertex.setFilter(TextureFilter.Linear, TextureFilter.Linear);
 				sprite.begin();
 				if (layershader.isCompiled()) {
 					sprite.setShader(layershader);					

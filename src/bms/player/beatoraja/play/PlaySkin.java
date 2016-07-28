@@ -30,7 +30,7 @@ public class PlaySkin extends Skin {
 	/**
 	 * ボム画像
 	 */
-	private Animation[] bomb;
+	private SkinImage[] bomb;
 	/**
 	 * キービーム画像
 	 */
@@ -99,21 +99,17 @@ public class PlaySkin extends Skin {
 
 	private void makeCommonSkin() {
 		Texture bg = new Texture("skin/playbg.png");
-		SkinImage images = new SkinImage();
-		images.setImage(new TextureRegion[] { new TextureRegion(bg) }, 0);
+		SkinImage images = new SkinImage(new TextureRegion[] { new TextureRegion(bg) }, 0);
 		setDestination(images, 0, 0, 0, 1280, 720, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(images);
 		// ボムのスプライト作成
 		Texture bombt = new Texture("skin/bomb.png");
-		TextureRegion[][] bombtr = TextureRegion.split(bombt, 181, 191);
-		bomb = new Animation[bombtr.length];
-		for (int i = 0; i < bombtr.length; i++) {
-			bomb[i] = new Animation(1 / 60f, bombtr[i]);
-		}
-		bomb[0].setPlayMode(Animation.PlayMode.NORMAL);
-		bomb[1].setPlayMode(Animation.PlayMode.LOOP);
-		bomb[2].setPlayMode(Animation.PlayMode.LOOP);
-		bomb[3].setPlayMode(Animation.PlayMode.LOOP);
+		TextureRegion[][] bombtr = TextureRegion.split(bombt, 181, 192);
+		bomb = new SkinImage[4];
+		bomb[0] = new SkinImage(bombtr[2], 150);
+		bomb[1] = new SkinImage(bombtr[0], 150);
+		bomb[2] = new SkinImage(bombtr[1], 150);
+		bomb[3] = new SkinImage(bombtr[3], 120);
 		// ゲージ
 		Texture gt = new Texture("skin/gauge.png");
 		gauge = new Sprite[4];
@@ -612,7 +608,7 @@ public class PlaySkin extends Skin {
 		this.minenote = mine;
 	}
 
-	public Animation[] getBomb() {
+	public SkinImage[] getBomb() {
 		return bomb;
 	}
 

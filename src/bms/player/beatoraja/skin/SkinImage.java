@@ -24,6 +24,14 @@ public class SkinImage extends SkinObject {
 
 	private NumberResourceAccessor resource;
 
+	public SkinImage() {
+		
+	}
+	
+	public SkinImage(TextureRegion[] image, int cycle) {
+		setImage(image, cycle);
+	}
+		
 	public TextureRegion[] getImage() {
 		return image[0];
 	}
@@ -36,7 +44,7 @@ public class SkinImage extends SkinObject {
 		if(cycle == 0) {
 			return image[value][0];
 		}
-		final int index = (int) ((time / (cycle / image.length))) % image.length;
+		final int index = (int) ((time / (cycle / image[value].length))) % image[value].length;
 //		System.out.println(index + " / " + image.length);
 		return image[value][index];
 	}
