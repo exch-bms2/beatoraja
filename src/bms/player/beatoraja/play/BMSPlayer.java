@@ -4,7 +4,6 @@ import java.io.*;
 import java.util.*;
 import java.util.logging.Logger;
 
-import com.badlogic.gdx.utils.GdxRuntimeException;
 import org.lwjgl.opengl.GL11;
 
 import bms.model.*;
@@ -16,16 +15,12 @@ import bms.player.beatoraja.pattern.*;
 import bms.player.beatoraja.play.audio.AudioProcessor;
 import bms.player.beatoraja.play.bga.BGAProcessor;
 import bms.player.beatoraja.skin.LR2PlaySkinLoader;
-import bms.player.beatoraja.skin.SkinNumber;
-import bms.player.beatoraja.skin.SkinImage;
 
-import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
-import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Rectangle;
@@ -69,10 +64,6 @@ public class BMSPlayer extends MainState {
 	 * プレイ開始時間。0の場合はプレイ開始前
 	 */
 	private long starttime;
-	/**
-	 * プレイ終了時間。0の場合はプレイ終了前
-	 */
-	private long finishtime;
 
 	private int playtime;
 
@@ -414,7 +405,7 @@ public class BMSPlayer extends MainState {
 			shape.end();
 
 			if (resource.mediaLoadFinished() && !input.startPressed()) {
-				bga.prepare();
+				bga.prepare(this);
 				state = STATE_READY;
 				getTimer()[TIMER_READY] = now;
 				Logger.getGlobal().info("STATE_READYに移行");
@@ -456,12 +447,12 @@ public class BMSPlayer extends MainState {
 			// System.out.println("playing time : " + time);
 			if (starttime != 0 && playtime < time) {
 				state = STATE_FINISHED;
-				finishtime = System.currentTimeMillis();
+				getTimer()[TIMER_FADEOUT] = now;
 				Logger.getGlobal().info("STATE_FINISHEDに移行");
 			}
 			if (g == 0) {
 				state = STATE_FAILED;
-				finishtime = System.currentTimeMillis();
+				getTimer()[TIMER_FAILED] = now;
 				Logger.getGlobal().info("STATE_FAILEDに移行");
 			}
 			renderMain(time);
@@ -481,7 +472,7 @@ public class BMSPlayer extends MainState {
 			Gdx.gl.glEnable(GL11.GL_BLEND);
 			Gdx.gl.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 			shape.begin(ShapeType.Filled);
-			long l = System.currentTimeMillis() - finishtime;
+			long l = now - getTimer()[TIMER_FAILED];
 			shape.setColor(0, 0, 0, ((float) l) / 1000f);
 			float height = h / 2 * l / 1000;
 			shape.rect(0, h - height * 2, w, height * 2);
@@ -520,7 +511,7 @@ public class BMSPlayer extends MainState {
 			Gdx.gl.glEnable(GL11.GL_BLEND);
 			Gdx.gl.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 			shape.begin(ShapeType.Filled);
-			long l2 = System.currentTimeMillis() - finishtime;
+			long l2 = now - getTimer()[TIMER_FADEOUT];
 			shape.setColor(1, 1, 1, ((float) l2) / 1000f);
 			shape.rect(0, 0, w, h);
 			shape.end();
@@ -641,17 +632,18 @@ public class BMSPlayer extends MainState {
 	}
 
 	public void stopPlay() {
-		if (finishtime != 0) {
+		if (getTimer()[TIMER_FAILED] != -1 || getTimer()[TIMER_FADEOUT] != -1) {
 			return;
 		}
 		if (notes == totalnotes) {
 			state = STATE_FINISHED;
+			getTimer()[TIMER_FADEOUT] = getNowTime();
 			Logger.getGlobal().info("STATE_FINISHEDに移行");
 		} else {
 			state = STATE_FAILED;
+			getTimer()[TIMER_FAILED] = getNowTime();
 			Logger.getGlobal().info("STATE_FAILEDに移行");
 		}
-		finishtime = System.currentTimeMillis();
 	}
 
 	private void renderMain(int time) {
@@ -991,5 +983,9 @@ public class BMSPlayer extends MainState {
 	@Override
 	public int getTargetScore() {
 		return graphrender.getTarget();
+	}
+
+	public long getPlayTime() {
+		return starttime;
 	}
 }

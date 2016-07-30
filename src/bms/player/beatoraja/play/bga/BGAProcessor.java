@@ -8,6 +8,7 @@ import bms.model.BMSModel;
 import bms.model.TimeLine;
 import bms.player.beatoraja.Config;
 
+import bms.player.beatoraja.play.BMSPlayer;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Pixmap.Filter;
@@ -252,7 +253,7 @@ public class BGAProcessor {
 	/**
 	 * BGAの初期データをあらかじめキャッシュする
 	 */
-	public void prepare() {
+	public void prepare(BMSPlayer player) {
 		if (model == null) {
 			return;
 		}
@@ -262,6 +263,12 @@ public class BGAProcessor {
 		}
 		playingbgaid = -1;
 		playinglayerid = -1;
+
+		for(Integer id : mpgmap.keySet()) {
+			if(mpgmap.get(id) instanceof FFmpegProcessor) {
+				((FFmpegProcessor) mpgmap.get(id)).setBMSPlayer(player);
+			}
+		}
 	}
 
 	public Texture getBackbmpData() {

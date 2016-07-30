@@ -446,18 +446,33 @@ public class LaneRenderer {
 				// ltime = tl.getTime() - time;
 				// yy = y - hl;
 				for (int p = 0; p < playerr.length; p++) {
-					if (config.isBpmguide() && tl.getBPM() != nbpm) {
-						// BPMガイド描画
-						shape.begin(ShapeType.Line);
-						shape.setColor(Color.valueOf("00c000"));
-						shape.line(playerr[p].x, y + 2, playerr[p].x + playerr[p].width, y + 2);
-						shape.line(playerr[p].x, y, playerr[p].x + playerr[p].width, y);
-						shape.line(playerr[p].x, y - 2, playerr[p].x + playerr[p].width, y - 2);
-						shape.end();
-						sprite.begin();
-						font.setColor(Color.valueOf("00c000"));
-						font.draw(sprite, "BPM" + ((int) tl.getBPM()), playerr[p].x + playerr[p].width / 2, y + 20);
-						sprite.end();
+					if (config.isBpmguide()) {
+						if(tl.getBPM() != nbpm) {
+							// BPMガイド描画
+							shape.begin(ShapeType.Line);
+							shape.setColor(Color.valueOf("00c000"));
+							shape.line(playerr[p].x, y + 2, playerr[p].x + playerr[p].width, y + 2);
+							shape.line(playerr[p].x, y, playerr[p].x + playerr[p].width, y);
+							shape.line(playerr[p].x, y - 2, playerr[p].x + playerr[p].width, y - 2);
+							shape.end();
+							sprite.begin();
+							font.setColor(Color.valueOf("00c000"));
+							font.draw(sprite, "BPM" + ((int) tl.getBPM()), playerr[p].x + playerr[p].width / 2, y + 20);
+							sprite.end();
+						}
+						if(tl.getStop() > 0) {
+							// STOPガイド描画
+							shape.begin(ShapeType.Line);
+							shape.setColor(Color.valueOf("c0c000"));
+							shape.line(playerr[p].x, y + 2, playerr[p].x + playerr[p].width, y + 2);
+							shape.line(playerr[p].x, y, playerr[p].x + playerr[p].width, y);
+							shape.line(playerr[p].x, y - 2, playerr[p].x + playerr[p].width, y - 2);
+							shape.end();
+							sprite.begin();
+							font.setColor(Color.valueOf("c0c000"));
+							font.draw(sprite, "STOP " + ((int) tl.getStop()) + "ms", playerr[p].x + playerr[p].width / 2, y + 20);
+							sprite.end();
+						}
 					}
 					// 小節線描画
 					if (drawline && tl.getSectionLine()) {

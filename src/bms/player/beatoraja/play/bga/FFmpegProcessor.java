@@ -1,18 +1,12 @@
 package bms.player.beatoraja.play.bga;
 
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Logger;
 
-import javax.imageio.ImageIO;
-
+import bms.player.beatoraja.play.BMSPlayer;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Gdx2DPixmap;
-import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 
 import org.bytedeco.javacv.*;
@@ -26,6 +20,7 @@ public class FFmpegProcessor implements MovieProcessor {
 
 	// TODO リスタートでエラーが出る場合がある(Ex.KRAKEN)
 	// TODO フレームレートが違う場合がある
+	// TODO 再生速度との同期(スロー再生等)
 
 	/**
 	 * 現在表示中のフレームのTexture
@@ -45,8 +40,14 @@ public class FFmpegProcessor implements MovieProcessor {
 
 	private MovieSeekThread movieseek;
 
+	private BMSPlayer player;
+
 	public FFmpegProcessor(int fpsd) {
 		this.fpsd = fpsd;
+	}
+
+	public void setBMSPlayer(BMSPlayer player) {
+		this.player = player;
 	}
 
 	@Override
@@ -102,11 +103,11 @@ public class FFmpegProcessor implements MovieProcessor {
 				}
 				final long[] nativeData = new long[] { 0, grabber.getImageWidth(), grabber.getImageHeight(),
 						Gdx2DPixmap.GDX2D_FORMAT_RGB888 };
-				final long start = System.currentTimeMillis();
+				final long start = System.currentTimeMillis() - player.getPlayTime();
 				int framecount = 0;
 				Frame frame = null;
 				while (!stop) {
-					final long time = System.currentTimeMillis() - start;
+					final long time = System.currentTimeMillis() - start - player.getPlayTime();
 					if (time >= framecount * 1000 / fps) {
 						while (time >= framecount * 1000 / fps || framecount % fpsd != 0) {
 							frame = grabber.grabImage();
