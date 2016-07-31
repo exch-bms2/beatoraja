@@ -969,4 +969,12 @@ public class MusicSelector extends MainState {
 		return songdb;
 	}
 
+	@Override
+	public float getSliderValue(int id) {
+		if(id == MainState.SLIDER_MUSICSELECT_POSITION) {
+			return bar.getSelectedPosition();
+		}
+		return 0;
+	}
+
 }

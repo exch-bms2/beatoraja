@@ -14,6 +14,22 @@ public abstract class MainState {
 	
 	private Skin skin;
 	
+	public static final int TIMER_FADEOUT = 2;
+	public static final int TIMER_FAILED = 3;
+	public static final int TIMER_READY = 40;
+	public static final int TIMER_PLAY = 41;
+	public static final int TIMER_FULLCOMBO1 = 48;
+	public static final int TIMER_FULLCOMBO2 = 49;
+	public static final int TIMER_BOMB = 50;
+	public static final int TIMER_HOLD = 70;
+	public static final int TIMER_KEYON = 100;
+	public static final int TIMER_KEYOFF = 120;
+	
+	// 選曲専用
+	public static final int SLIDER_MUSICSELECT_POSITION = 1;
+	// プレイ専用
+	public static final int SLIDER_MUSIC_PROGRESS = 6;
+	
 	public MainState() {
 		this(null);
 	}
@@ -181,4 +197,7 @@ public abstract class MainState {
 		return "";
 	}
 
+	public float getSliderValue(int id) {
+		return 0;
+	}
 }

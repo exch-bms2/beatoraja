@@ -3,10 +3,13 @@ package bms.player.beatoraja.skin;
 import bms.player.beatoraja.MainState;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.lwjgl.opengl.GL11;
 
 /**
  * スキンオブジェクト
@@ -109,6 +112,23 @@ public abstract class SkinObject {
 
     public abstract void draw(SpriteBatch sprite, long time, MainState state);
 
+	protected void draw(SpriteBatch sprite, TextureRegion image, float x, float y, float width, float height, Color color) {
+		Color c = sprite.getColor();
+		final int blend = dst.get(0).blend;
+		final int angle = dst.get(0).angle;
+		final int center = dst.get(0).center;
+		final int filter = dst.get(0).filter;
+		if(blend == 2) {
+			sprite.setBlendFunction(GL11.GL_ONE, GL11.GL_ONE);			
+		}
+		sprite.setColor(color);
+		sprite.draw(image, x, y, width, height);
+		sprite.setColor(c);
+		if(blend >= 2) {
+			sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);			
+		}	
+	}
+	
     private class SkinObjectDestination {
 
         public long time;

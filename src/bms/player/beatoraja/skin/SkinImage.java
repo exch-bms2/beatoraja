@@ -1,5 +1,7 @@
 package bms.player.beatoraja.skin;
 
+import org.lwjgl.opengl.GL11;
+
 import bms.player.beatoraja.MainState;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -84,7 +86,7 @@ public class SkinImage extends SkinObject {
 		if(image == null) {
 			return;
 		}
-		if(timing != 0) {
+		if(timing != 0 && timing < 256) {
 			if(state.getTimer()[timing] == -1) {
 				return;
 			}
@@ -94,14 +96,11 @@ public class SkinImage extends SkinObject {
         if (r != null) {
 			final int value = resource != null ? resource.getValue(state) : 0;
 			if(value >= 0 && value < image.length) {
-				Color c = sprite.getColor();
-				sprite.setColor(getColor(time));
-				sprite.draw(getImage(value, time), r.x, r.y, r.width, r.height);
-				sprite.setColor(c);
+				draw(sprite, getImage(value, time), r.x, r.y, r.width, r.height, getColor(time));
 			}
         }
 	}
-
+	
 	public void dispose() {
 		if(image != null) {
 			for(TextureRegion[] tr : image) {

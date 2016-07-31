@@ -83,7 +83,7 @@ public class SkinNumber extends SkinObject {
 			if(value > 0 || j == values.length - 1) {
 				values[j] = image[value % 10];
 			} else {
-				values[j] = (zeropadding == 2 ? image[10] : (zeropadding == 1 ? image[0] : (mimage != null && values[j + 1] != image[11] ? image[11] : null)));
+				values[j] = (zeropadding == 2 ? image[10] : (zeropadding == 1 ? image[0] : (mimage != null && (values[j + 1] != image[11] && values[j + 1] != null) ? image[11] : null)));
 			}
 			value /= 10;
 		}
@@ -104,7 +104,7 @@ public class SkinNumber extends SkinObject {
 		TextureRegion[] values = getValue(value, zeropadding);
 		for (int j = 0; j < values.length; j++) {
 			if(values[j] != null) {
-				sprite.draw(values[j], r.x + r.width * j, r.y, r.width, r.height);				
+				draw(sprite, values[j], r.x + r.width * j, r.y, r.width, r.height, getColor(time));				
 			}
 		}
 	}

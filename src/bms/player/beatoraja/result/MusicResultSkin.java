@@ -54,7 +54,7 @@ public class MusicResultSkin extends Skin {
 
 		for (int i = 0; i < 6; i++) {
 			for (int j = 0; j < 3; j++) {
-				addNumber(new SkinNumber(ntr[0], 0, 4, 0, judgecount[i * 3 + j]), 0, 230 + j * 90, 255 - i * 30, 18, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+				addNumber(new SkinNumber(ntr[0], 0, 4, 0, judgecount[i * 3 + j]), 0, 230 + j * 90, 255 - i * 30, 18, 24, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 			}
 		}
 
@@ -70,32 +70,32 @@ public class MusicResultSkin extends Skin {
 		setDestination(tclear, 0, 230, 405, 200, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(tclear);
 
-		addNumber(new SkinNumber(ntr[0], 0, 4, 0, NumberResourceAccessor.FAST_TOTAL), 0, 320, 75, 18, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		addNumber(new SkinNumber(ntr[0], 0, 4, 0, NumberResourceAccessor.SLOW_TOTAL), 0, 410, 75, 18, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		addNumber(new SkinNumber(ntr[0], 0, 4, 0, NumberResourceAccessor.FAST_TOTAL), 0, 320, 75, 18, 24, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		addNumber(new SkinNumber(ntr[0], 0, 4, 0, NumberResourceAccessor.SLOW_TOTAL), 0, 410, 75, 18, 24, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
-		addNumber(new SkinNumber(ntr[0], 0, 5, 0, NumberResourceAccessor.TARGET_SCORE), 0, 240, 375, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		addNumber(new SkinNumber(ntr[0], 0, 5, 0, NumberResourceAccessor.SCORE), 0, 410, 375, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		addNumber(new SkinNumber(ntr[0], 0, 5, 0, NumberResourceAccessor.TARGET_SCORE), 0, 240, 375, 24, 24, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		addNumber(new SkinNumber(ntr[0], 0, 5, 0, NumberResourceAccessor.SCORE), 0, 410, 375, 24, 24, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
-		addNumber(new SkinNumber(ntr[1], ntr[2], 0, 5, 0, NumberResourceAccessor.DIFF_SCORE), 0, 550, 375, 12, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		addNumber(new SkinNumber(ntr[1], ntr[2], 0, 5, 0, NumberResourceAccessor.DIFF_SCORE), 0, 550, 375, 12, 24, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
-		addNumber(new SkinNumber(ntr[0], 0, 5, 0, NumberResourceAccessor.TARGET_MISSCOUNT), 0, 240, 345, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		addNumber(new SkinNumber(ntr[0], 0, 5, 0, NumberResourceAccessor.MISSCOUNT), 0, 410, 345, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		addNumber(new SkinNumber(ntr[0], 0, 5, 0, NumberResourceAccessor.TARGET_MISSCOUNT), 0, 240, 345, 24, 24, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		addNumber(new SkinNumber(ntr[0], 0, 5, 0, NumberResourceAccessor.MISSCOUNT), 0, 410, 345, 24, 24, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
-		addNumber(new SkinNumber(ntr[1], ntr[2], 0, 5, 0, NumberResourceAccessor.DIFF_MISSCOUNT), 0, 550, 345, 12, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		addNumber(new SkinNumber(ntr[1], ntr[2], 0, 5, 0, NumberResourceAccessor.DIFF_MISSCOUNT), 0, 550, 345, 12, 24, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
-		addNumber(new SkinNumber(ntr[0], 0, 5, 0, NumberResourceAccessor.TARGET_MAXCOMBO), 0, 240, 315, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		addNumber(new SkinNumber(ntr[0], 0, 5, 0, NumberResourceAccessor.MAXCOMBO), 0, 410, 315, 24, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		addNumber(new SkinNumber(ntr[0], 0, 5, 0, NumberResourceAccessor.TARGET_MAXCOMBO), 0, 240, 315, 24, 24, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		addNumber(new SkinNumber(ntr[0], 0, 5, 0, NumberResourceAccessor.MAXCOMBO), 0, 410, 315, 24, 24, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
-		addNumber(new SkinNumber(ntr[1], ntr[2], 0, 5, 0, NumberResourceAccessor.DIFF_MAXCOMBO), 0, 550, 315, 12, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		addNumber(new SkinNumber(ntr[1], ntr[2], 0, 5, 0, NumberResourceAccessor.DIFF_MAXCOMBO), 0, 550, 315, 12, 24, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 		SkinNumber dcombo = new SkinNumber(ntr[1], 0, 5, 0);
-		setDestination(dcombo, 0, 550, 315, 12, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		setDestination(dcombo, 0, 550, 315, 12, 24, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		setMaxcombo(2, dcombo);
 		dcombo = new SkinNumber(ntr[2], 0, 5, 0);
-		setDestination(dcombo, 0, 550, 315, 12, 24, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		setDestination(dcombo, 0, 550, 315, 12, 24, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		setMaxcombo(3, dcombo);
 
-		addNumber(new SkinNumber(ntr[0], 0, 5, 0, NumberResourceAccessor.TOTALNOTES), 0, 360, 486, 12, 12, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		addNumber(new SkinNumber(ntr[0], 0, 5, 0, NumberResourceAccessor.TOTALNOTES), 0, 360, 486, 12, 12, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 		SkinText title = new SkinText("skin/VL-Gothic-Regular.ttf",0,24, 2);
 		title.setTextResourceAccessor(TextResourceAccessor.FULLTITLE);

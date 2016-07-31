@@ -4,7 +4,6 @@ import java.io.*;
 import java.util.*;
 import java.util.logging.Logger;
 
-import com.badlogic.gdx.utils.GdxRuntimeException;
 import org.lwjgl.opengl.GL11;
 
 import bms.model.*;
@@ -16,16 +15,12 @@ import bms.player.beatoraja.pattern.*;
 import bms.player.beatoraja.play.audio.AudioProcessor;
 import bms.player.beatoraja.play.bga.BGAProcessor;
 import bms.player.beatoraja.skin.LR2PlaySkinLoader;
-import bms.player.beatoraja.skin.SkinNumber;
-import bms.player.beatoraja.skin.SkinImage;
 
-import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
-import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Rectangle;
@@ -38,10 +33,6 @@ import com.badlogic.gdx.math.Rectangle;
 public class BMSPlayer extends MainState {
 
 	// TODO GLAssistから起動すると楽曲ロード中に止まる
-
-	public static final int TIMER_FADEOUT = 2;
-	public static final int TIMER_FAILED = 3;
-	public static final int TIMER_READY = 40;
 
 	private BitmapFont titlefont;
 	private BitmapFont judgefont;
@@ -59,8 +50,6 @@ public class BMSPlayer extends MainState {
 
 	private BGAProcessor bga;
 
-	private PlayerResource resource;
-
 	private PlaySkin skin;
 
 	private GrooveGauge gauge;
@@ -69,10 +58,6 @@ public class BMSPlayer extends MainState {
 	 * プレイ開始時間。0の場合はプレイ開始前
 	 */
 	private long starttime;
-	/**
-	 * プレイ終了時間。0の場合はプレイ終了前
-	 */
-	private long finishtime;
 
 	private int playtime;
 
@@ -92,8 +77,6 @@ public class BMSPlayer extends MainState {
 
 	private ReplayData replay = null;
 
-	private MainController main;
-
 	private List<Float> gaugelog = new ArrayList<Float>();
 	
 	private int playspeed = 100;
@@ -104,8 +87,7 @@ public class BMSPlayer extends MainState {
 	private int notes;
 
 	public BMSPlayer(MainController main, PlayerResource resource) {
-		this.main = main;
-		this.resource = resource;
+		super(main);
 		this.model = resource.getBMSModel();
 		this.autoplay = resource.getAutoplay();
 		Config config = resource.getConfig();
@@ -115,10 +97,10 @@ public class BMSPlayer extends MainState {
 				skin = new LR2PlaySkinLoader().loadPlaySkin(new File(config.getLR2PlaySkinPath()));
 			} catch (IOException e) {
 				e.printStackTrace();
-				skin = new PlaySkin(model.getUseKeys(), main.RESOLUTION[resource.getConfig().getResolution()]);
+				skin = new PlaySkin(model.getUseKeys(), MainController.RESOLUTION[resource.getConfig().getResolution()]);
 			}
 		} else {
-			skin = new PlaySkin(model.getUseKeys(), main.RESOLUTION[resource.getConfig().getResolution()]);
+			skin = new PlaySkin(model.getUseKeys(), MainController.RESOLUTION[resource.getConfig().getResolution()]);
 		}
 		this.setSkin(skin);
 
@@ -336,6 +318,8 @@ public class BMSPlayer extends MainState {
 			new NoteShuffleModifier(NoteShuffleModifier.S_RANDOM_EX) };
 
 	public void create() {
+		final MainController main = getMainController();
+		final PlayerResource resource = main.getPlayerResource();
 		final ShapeRenderer shape = main.getShapeRenderer();
 		final SpriteBatch sprite = main.getSpriteBatch();
 
@@ -391,11 +375,9 @@ public class BMSPlayer extends MainState {
 	
 	@Override
 	public void render() {
+		final MainController main = getMainController();
+		final PlayerResource resource = main.getPlayerResource();
 		final ShapeRenderer shape = main.getShapeRenderer();
-		final SpriteBatch sprite = main.getSpriteBatch();
-
-		final float w = main.RESOLUTION[resource.getConfig().getResolution()].width;
-		final float h = main.RESOLUTION[resource.getConfig().getResolution()].height;
 
 		final long now = getNowTime();
 		final long nowtime = System.currentTimeMillis();
@@ -414,7 +396,7 @@ public class BMSPlayer extends MainState {
 			shape.end();
 
 			if (resource.mediaLoadFinished() && !input.startPressed()) {
-				bga.prepare();
+				bga.prepare(this);
 				state = STATE_READY;
 				getTimer()[TIMER_READY] = now;
 				Logger.getGlobal().info("STATE_READYに移行");
@@ -423,14 +405,10 @@ public class BMSPlayer extends MainState {
 		// GET READY
 		case STATE_READY:
 			renderMain(0);
-			sprite.begin();
-			systemfont.setColor(Color.WHITE);
-			systemfont.draw(sprite, "GET READY", skin.getLaneGroupRegion()[0].x + skin.getLaneGroupRegion()[0].width / 2 - 35,
-					skin.getLaneGroupRegion()[0].y + 200);
-			sprite.end();
 			final long rt = now - getTimer()[TIMER_READY];
 			if (rt > 1000) {
 				state = STATE_PLAY;
+				getTimer()[TIMER_READY] = -1;
 				starttime = System.currentTimeMillis();
 				input.setStartTime(starttime);
 				List<KeyInputLog> keylog = null;
@@ -456,12 +434,12 @@ public class BMSPlayer extends MainState {
 			// System.out.println("playing time : " + time);
 			if (starttime != 0 && playtime < time) {
 				state = STATE_FINISHED;
-				finishtime = System.currentTimeMillis();
+				getTimer()[TIMER_FADEOUT] = now;
 				Logger.getGlobal().info("STATE_FINISHEDに移行");
 			}
 			if (g == 0) {
 				state = STATE_FAILED;
-				finishtime = System.currentTimeMillis();
+				getTimer()[TIMER_FAILED] = now;
 				Logger.getGlobal().info("STATE_FAILEDに移行");
 			}
 			renderMain(time);
@@ -478,20 +456,7 @@ public class BMSPlayer extends MainState {
 			resource.getAudioProcessor().stop(-1);
 			renderMain(starttime != 0 ? time : 0);
 
-			Gdx.gl.glEnable(GL11.GL_BLEND);
-			Gdx.gl.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-			shape.begin(ShapeType.Filled);
-			long l = System.currentTimeMillis() - finishtime;
-			shape.setColor(0, 0, 0, ((float) l) / 1000f);
-			float height = h / 2 * l / 1000;
-			shape.rect(0, h - height * 2, w, height * 2);
-			shape.rect(0, 0, w, height * 2);
-			shape.setColor(0, 0, 0, 1);
-			shape.rect(0, h - height, w, height);
-			shape.rect(0, 0, w, height);
-			shape.end();
-			Gdx.gl.glDisable(GL11.GL_BLEND);
-			if (l > 1000) {
+			if (now - getTimer()[TIMER_FAILED] > skin.getCloseTime()) {
 				if (keyinput != null) {
 					Logger.getGlobal().info("入力パフォーマンス(max ms) : " + keyinput.frametimes);
 				}
@@ -506,7 +471,11 @@ public class BMSPlayer extends MainState {
 				resource.setGrooveGauge(gauge);
 				input.setEnableKeyInput(true);
 				input.setStartTime(0);
-				main.changeState(MainController.STATE_RESULT);
+				if(resource.getScoreData() != null) {
+					main.changeState(MainController.STATE_RESULT);
+				} else {
+					main.changeState(MainController.STATE_SELECTMUSIC);
+				}
 			}
 			break;
 		// 完奏処理
@@ -517,15 +486,8 @@ public class BMSPlayer extends MainState {
 			if (keyinput != null) {
 				keyinput.stop = true;
 			}
-			Gdx.gl.glEnable(GL11.GL_BLEND);
-			Gdx.gl.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-			shape.begin(ShapeType.Filled);
-			long l2 = System.currentTimeMillis() - finishtime;
-			shape.setColor(1, 1, 1, ((float) l2) / 1000f);
-			shape.rect(0, 0, w, h);
-			shape.end();
-			Gdx.gl.glDisable(GL11.GL_BLEND);
-			if (l2 > 1000) {
+			long l2 = now - getTimer()[TIMER_FADEOUT];
+			if (l2 > skin.getFadeoutTime()) {
 				if (keyinput != null) {
 					Logger.getGlobal().info("入力パフォーマンス(max ms) : " + keyinput.frametimes);
 				}
@@ -539,7 +501,11 @@ public class BMSPlayer extends MainState {
 				resource.setGrooveGauge(gauge);
 				input.setEnableKeyInput(true);
 				input.setStartTime(0);
-				main.changeState(MainController.STATE_RESULT);
+				if(resource.getScoreData() != null) {
+					main.changeState(MainController.STATE_RESULT);
+				} else {
+					main.changeState(MainController.STATE_SELECTMUSIC);
+				}
 			}
 			break;
 		}
@@ -562,6 +528,7 @@ public class BMSPlayer extends MainState {
 	}
 
 	private void saveConfig() {
+		final PlayerResource resource = getMainController().getPlayerResource();
 		for(int c : resource.getConstraint()) {
 			if(c == TableData.NO_HISPEED) {
 				return;
@@ -578,6 +545,7 @@ public class BMSPlayer extends MainState {
 	}
 
 	public IRScoreData createScoreData() {
+		final PlayerResource resource = getMainController().getPlayerResource();
 		final int pgreat = judge.getJudgeCount(0);
 		final int great = judge.getJudgeCount(1);
 		final int good = judge.getJudgeCount(2);
@@ -641,20 +609,22 @@ public class BMSPlayer extends MainState {
 	}
 
 	public void stopPlay() {
-		if (finishtime != 0) {
+		if (getTimer()[TIMER_FAILED] != -1 || getTimer()[TIMER_FADEOUT] != -1) {
 			return;
 		}
 		if (notes == totalnotes) {
 			state = STATE_FINISHED;
+			getTimer()[TIMER_FADEOUT] = getNowTime();
 			Logger.getGlobal().info("STATE_FINISHEDに移行");
 		} else {
 			state = STATE_FAILED;
+			getTimer()[TIMER_FAILED] = getNowTime();
 			Logger.getGlobal().info("STATE_FAILEDに移行");
 		}
-		finishtime = System.currentTimeMillis();
 	}
 
 	private void renderMain(int time) {
+		final MainController main = getMainController();
 		final ShapeRenderer shape = main.getShapeRenderer();
 		final SpriteBatch sprite = main.getSpriteBatch();
 
@@ -964,7 +934,7 @@ public class BMSPlayer extends MainState {
 	}
 
 	public String getTitle() {
-		return resource.getBMSModel().getTitle();
+		return getMainController().getPlayerResource().getBMSModel().getTitle();
 	}
 
 	@Override
@@ -985,5 +955,17 @@ public class BMSPlayer extends MainState {
 	@Override
 	public int getTargetScore() {
 		return graphrender.getTarget();
+	}
+
+	public long getPlayTime() {
+		return starttime;
+	}
+	
+	@Override
+	public float getSliderValue(int id) {
+		if(id == MainState.SLIDER_MUSIC_PROGRESS && starttime != 0) {
+			return (float) (System.currentTimeMillis() - starttime) / playtime;
+		}
+		return 0;
 	}
 }

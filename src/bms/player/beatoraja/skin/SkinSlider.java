@@ -7,7 +7,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 
-public class SkinGraph extends SkinObject {
+public class SkinSlider extends SkinObject {
 
 	/**
 	 * イメージ
@@ -18,9 +18,17 @@ public class SkinGraph extends SkinObject {
 	private int timing;
 	private int[] option = new int[3];
 
-	private NumberResourceAccessor resource;
-	private NumberResourceAccessor maxresource;
-	private int max = 100;
+	private int muki;
+	private int range = 100;
+	private int type;
+
+	public SkinSlider(TextureRegion[] image, int cycle, int muki, int range, int type) {
+		this.image = image;
+		this.cycle = cycle;
+		this.muki = muki;
+		this.range = range;
+		this.type = type;
+	}
 
 	public TextureRegion[] getImage() {
 		return image;
@@ -56,30 +64,17 @@ public class SkinGraph extends SkinObject {
 		this.option = option;
 	}
 
-	public void setNumberResourceAccessor(NumberResourceAccessor resource, NumberResourceAccessor maxresource) {
-		this.resource = resource;
-		this.maxresource = maxresource;
-	}
-
-	public void setMaxValue(int max) {
-		this.max = max;
-	}
-
 	public void draw(SpriteBatch sprite, long time, MainState state) {
 		if (image == null) {
 			return;
 		}
 		Rectangle r = this.getDestination(time);
 		if (r != null) {
-			final int value = resource != null ? resource.getValue(state) : 0;
-			final int maxvalue = maxresource != null ? maxresource.getValue(state) : max;
-			if (maxvalue > 0) {
-				TextureRegion image = getImage(time);
-//				sprite.draw(image, r.x, r.y, r.width, r.height);
-				draw(sprite, new TextureRegion(image, 0, image.getRegionY() + image.getRegionHeight()
-						- (image.getRegionHeight() * value / maxvalue), image.getRegionWidth(), image.getRegionHeight()
-						* value / maxvalue), r.x, r.y, r.width, r.height * value / maxvalue, getColor(time));
-			}
+			TextureRegion image = getImage(time);
+			draw(sprite, image, r.x
+					+ (muki == 1 ? state.getSliderValue(type) * range : (muki == 3 ? -state.getSliderValue(type) * range : 0)), r.y
+					+ (muki == 0 ? state.getSliderValue(type) * range : (muki == 2 ? -state.getSliderValue(type) * range : 0)),
+					r.width, r.height, getColor(time));
 		}
 	}
 

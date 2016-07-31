@@ -72,9 +72,9 @@ public class BarRenderer {
 					for (String lv : td.getLevel()) {
 						levels.add(new TableLevelBar(select, lv, td.getHash().get(lv)));
 					}
-					List<GradeBar> l = new ArrayList();
+					List<GradeBar> l = new ArrayList<GradeBar>();
 					for (CourseData course : td.getCourse()) {
-						List<SongData> songlist = new ArrayList();
+						List<SongData> songlist = new ArrayList<SongData>();
 						for (String hash : course.getHash()) {
 							SongData[] songs = songdb.getSongDatas("md5", hash, new File(".").getAbsolutePath());
 							if (songs.length > 0) {
@@ -121,6 +121,10 @@ public class BarRenderer {
 				break;
 			}
 		}
+	}
+	
+	public float getSelectedPosition() {
+		return ((float)selectedindex) / currentsongs.length;
 	}
 
 	public void move(boolean inclease) {
@@ -269,34 +273,12 @@ public class BarRenderer {
 				titlefont.draw(sprite, "RA", x - 104, y + barh - 8);
 				sprite.end();
 			}
-
 		}
 
-		// draw song bar position
-		Rectangle progress = skin.getSeekRegion();
-		shape.begin(ShapeType.Line);
-		shape.setColor(Color.WHITE);
-		shape.rect(progress.x, progress.y, progress.width, progress.height);
-		shape.end();
-		shape.begin(ShapeType.Filled);
-		shape.setColor(Color.BLACK);
-		shape.rect(progress.x + 1, progress.y + 1, progress.width - 2, progress.height - 2);
-
-		shape.setColor(Color.ORANGE);
-		float dy = progress.y + 1 + (progress.height - 20) * (1.0f - (float) selectedindex / currentsongs.length);
-		if (duration != 0) {
-			dy -= progress.height / currentsongs.length * (Math.abs(angle) - duration + System.currentTimeMillis())
-					/ angle + (angle >= 0 ? -1 : 1) * progress.height / currentsongs.length;
-		}
-		while (dy > progress.y + progress.height) {
-			dy -= progress.height;
-		}
-		shape.rect(progress.x + 1, dy, progress.width - 2, 20);
-		shape.end();
-
+		// move song bar position by mouse
 		if (main.getInputProcessor().isMouseConsumed()) {
 			main.getInputProcessor().setMouseConsumed();
-			progress = new Rectangle(skin.getSeekRegion());
+			Rectangle progress = new Rectangle(skin.getSeekRegion());
 			progress.x -= progress.width * 2;
 			progress.width *= 5;
 			if (progress.contains(main.getInputProcessor().getMouseX(), main.getInputProcessor().getMouseY())) {

@@ -3,6 +3,7 @@ package bms.player.beatoraja.select;
 import java.util.ArrayList;
 import java.util.List;
 
+import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.skin.*;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
@@ -47,8 +48,6 @@ public class MusicSelectSkin extends Skin {
 			lamp[i].setPlayMode(PlayMode.LOOP);
 		}
 
-		seekRegion = new Rectangle(1240 * dw, 90 * dh, 10 * dw, 540 * dh);
-
 		TextureRegion[][] ttrophy = TextureRegion.split(new Texture("skin/trophy.png"), 32, 32);
 		trophy[0] = new Sprite(ttrophy[0][10]);
 		trophy[1] = new Sprite(ttrophy[0][11]);
@@ -81,40 +80,43 @@ public class MusicSelectSkin extends Skin {
 		Texture nt = new Texture("skin/number.png");
 		TextureRegion[][] ntr = TextureRegion.split(nt, 24, 24);
 
-		addNumber(new SkinNumber(ntr[0], 0, 4, 0, NumberResourceAccessor.MIN_BPM), 0, 300, 512, 18, 18, 0, 1, 1, 1, 1,
+		addNumber(new SkinNumber(ntr[0], 0, 4, 0, NumberResourceAccessor.MIN_BPM), 0, 300, 512, 18, 18, 0, 255,255,255,255,
 				0, 0, 0, 0, 0, 0, 0, 0, 0);
 
-		addNumber(new SkinNumber(ntr[0], 0, 4, 0, NumberResourceAccessor.MAX_BPM), 0, 372, 512, 18, 18, 0, 1, 1, 1, 1,
+		addNumber(new SkinNumber(ntr[0], 0, 4, 0, NumberResourceAccessor.MAX_BPM), 0, 372, 512, 18, 18, 0, 255,255,255,255,
 				0, 0, 0, 0, 0, 0, 0, 0, 0);
-		addNumber(new SkinNumber(ntr[0], 0, 4, 0, NumberResourceAccessor.SCORE), 0, 200, 372, 18, 18, 0, 1, 1, 1, 1, 0,
+		addNumber(new SkinNumber(ntr[0], 0, 4, 0, NumberResourceAccessor.SCORE), 0, 200, 372, 18, 18, 0, 255,255,255,255, 0,
 				0, 0, 0, 0, 0, 0, 0, 0);
-		addNumber(new SkinNumber(ntr[0], 0, 4, 0, NumberResourceAccessor.MISSCOUNT), 0, 200, 342, 18, 18, 0, 1, 1, 1,
-				1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		addNumber(new SkinNumber(ntr[0], 0, 4, 0, NumberResourceAccessor.MAXCOMBO), 0, 450, 342, 18, 18, 0, 1, 1, 1, 1,
+		addNumber(new SkinNumber(ntr[0], 0, 4, 0, NumberResourceAccessor.MISSCOUNT), 0, 200, 342, 18, 18, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		addNumber(new SkinNumber(ntr[0], 0, 4, 0, NumberResourceAccessor.MAXCOMBO), 0, 450, 342, 18, 18, 0, 255,255,255,255,
 				0, 0, 0, 0, 0, 0, 0, 0, 0);
-		addNumber(new SkinNumber(ntr[0], 0, 4, 0, NumberResourceAccessor.CLEARCOUNT), 0, 250, 312, 18, 18, 0, 1, 1, 1,
-				1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		addNumber(new SkinNumber(ntr[0], 0, 4, 0, NumberResourceAccessor.CLEARCOUNT), 0, 250, 312, 18, 18, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
-		addNumber(new SkinNumber(ntr[0], 0, 4, 0, NumberResourceAccessor.PLAYCOUNT), 0, 400, 312, 18, 18, 0, 1, 1, 1,
-				1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		addNumber(new SkinNumber(ntr[0], 0, 6, 0, NumberResourceAccessor.PLAYER_PLAYCOUNT), 0, 160, 102, 18, 18, 0, 1,
-				1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		addNumber(new SkinNumber(ntr[0], 0, 4, 0, NumberResourceAccessor.PLAYCOUNT), 0, 400, 312, 18, 18, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		addNumber(new SkinNumber(ntr[0], 0, 6, 0, NumberResourceAccessor.PLAYER_PLAYCOUNT), 0, 160, 102, 18, 18, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 		addNumber(new SkinNumber(ntr[0], 0, 10, 0, NumberResourceAccessor.PLAYER_TOTALNOTES), 0, 430, 102, 18, 18, 0,
-				1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+				255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
-		addNumber(new SkinNumber(ntr[0], 0, 4, 1, NumberResourceAccessor.TIME_YEAR), 0, 1028, 2, 12, 12, 0, 1, 1, 1, 1,
+		addNumber(new SkinNumber(ntr[0], 0, 4, 1, NumberResourceAccessor.TIME_YEAR), 0, 1028, 2, 12, 12, 0, 255,255,255,255,
 				0, 0, 0, 0, 0, 0, 0, 0, 0);
-		addNumber(new SkinNumber(ntr[0], 0, 2, 1, NumberResourceAccessor.TIME_MONTH), 0, 1088, 2, 12, 12, 0, 1, 1, 1,
-				1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		addNumber(new SkinNumber(ntr[0], 0, 2, 1, NumberResourceAccessor.TIME_DAY), 0, 1130, 2, 12, 12, 0, 1, 1, 1, 1,
+		addNumber(new SkinNumber(ntr[0], 0, 2, 1, NumberResourceAccessor.TIME_MONTH), 0, 1088, 2, 12, 12, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		addNumber(new SkinNumber(ntr[0], 0, 2, 1, NumberResourceAccessor.TIME_DAY), 0, 1130, 2, 12, 12, 0, 255,255,255,255,
 				0, 0, 0, 0, 0, 0, 0, 0, 0);
-		addNumber(new SkinNumber(ntr[0], 0, 2, 1, NumberResourceAccessor.TIME_HOUR), 0, 1178, 2, 12, 12, 0, 1, 1, 1, 1,
+		addNumber(new SkinNumber(ntr[0], 0, 2, 1, NumberResourceAccessor.TIME_HOUR), 0, 1178, 2, 12, 12, 0, 255,255,255,255,
 				0, 0, 0, 0, 0, 0, 0, 0, 0);
-		addNumber(new SkinNumber(ntr[0], 0, 2, 1, NumberResourceAccessor.TIME_MINUTE), 0, 1214, 2, 12, 12, 0, 1, 1, 1,
-				1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		addNumber(new SkinNumber(ntr[0], 0, 2, 1, NumberResourceAccessor.TIME_SECOND), 0, 1250, 2, 12, 12, 0, 1, 1, 1,
-				1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		addNumber(new SkinNumber(ntr[0], 0, 2, 1, NumberResourceAccessor.TIME_MINUTE), 0, 1214, 2, 12, 12, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		addNumber(new SkinNumber(ntr[0], 0, 2, 1, NumberResourceAccessor.TIME_SECOND), 0, 1250, 2, 12, 12, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		
+		seekRegion = new Rectangle(1240 * dw, 90 * dh, 10 * dw, 540 * dh);
+
+		Texture st = new Texture("skin/system.png");
+		SkinImage si = new SkinImage(new TextureRegion[]{new TextureRegion(st, 0,10,10,251)}, 0);
+		setDestination(si, 0, 1240, 75, 10, 570, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		add(si);
+		SkinSlider seek = new SkinSlider(new TextureRegion[]{new TextureRegion(st, 0,265,17,24)}, 0, 2, (int) (516 * dh), MainState.SLIDER_MUSICSELECT_POSITION);
+		setDestination(seek, 0, 1237, 606, 17, 24, 0, 255,255,255,255, 2, 0, 0, 0, 0, 0, 0, 0, 0);
+		add(seek);
 	}
 
 	public Sprite[] getBar() {
