@@ -911,12 +911,6 @@ public class BMSPlayer extends MainState {
 	}
 
 	@Override
-	public void create(PlayerResource resource) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
 	public int getMaxcombo() {
 		return judge.getMaxcombo();
 	}

@@ -13,6 +13,12 @@ public class Skin {
 	private float dh;
 
 	private List<SkinObject> objects = new ArrayList();
+	
+	private int input;
+	
+	private int scene;
+
+	private int fadeout;
 
 	public Skin(float orgw, float orgh, float dstw, float dsth) {
 		dw = dstw / orgw;
@@ -47,5 +53,29 @@ public class Skin {
 			obj.dispose();
 		}
 
+	}
+
+	public int getFadeoutTime() {
+		return fadeout;
+	}
+
+	public void setFadeoutTime(int fadeout) {
+		this.fadeout = fadeout;
+	}
+
+	public int getInputTime() {
+		return input;
+	}
+
+	public void setInputTime(int input) {
+		this.input = input;
+	}
+
+	public int getSceneTime() {
+		return scene;
+	}
+
+	public void setSceneTime(int scene) {
+		this.scene = scene;
 	}
 }

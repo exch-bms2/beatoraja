@@ -26,9 +26,6 @@ import java.util.logging.Logger;
  */
 public class KeyConfiguration extends MainState {
 
-	private MainController main;
-	private PlayerResource resource;
-
 	private BitmapFont titlefont;
 
 	private static final String[] MODE = { "7 KEYS", "9 KEYS", "14 KEYS" };
@@ -72,14 +69,13 @@ public class KeyConfiguration extends MainState {
 	private int mode = 0;
 
 	public KeyConfiguration(MainController main) {
-		this.main = main;
+		super(main);
 		
 		this.setSkin(new MusicDecideSkin());
 
 	}
 
-	public void create(PlayerResource resource) {
-		this.resource = resource;
+	public void create() {
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/VL-Gothic-Regular.ttf"));
 		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
 		parameter.size = 20;
@@ -87,10 +83,11 @@ public class KeyConfiguration extends MainState {
 	}
 
 	public void render() {
+		final MainController main = getMainController();
 		final SpriteBatch sprite = main.getSpriteBatch();
 		final ShapeRenderer shape = main.getShapeRenderer();
 		BMSPlayerInputProcessor input = main.getInputProcessor();
-		Config config = resource.getConfig();
+		Config config = getMainController().getPlayerResource().getConfig();
 		BMControllerInputProcessor[] controllers = input.getBMInputProcessor();
 
 		String[] keys = KEYS[mode];

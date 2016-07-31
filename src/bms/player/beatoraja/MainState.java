@@ -6,6 +6,8 @@ import bms.player.beatoraja.skin.Skin;
 
 public abstract class MainState {
 
+	private final MainController main;
+	
 	private long starttime;
 	
 	private long[] timer = new long[256];
@@ -13,10 +15,19 @@ public abstract class MainState {
 	private Skin skin;
 	
 	public MainState() {
+		this(null);
+	}
+	
+	public MainState(MainController main) {
+		this.main = main;
 		Arrays.fill(timer, -1);
 	}
 	
-	public abstract void create(PlayerResource resource);
+	public MainController getMainController() {
+		return main;
+	}
+	
+	public abstract void create();
 	
 	public abstract void render();
 	

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import bms.player.beatoraja.gauge.*;
+import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.select.MusicSelector;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import org.lwjgl.opengl.GL11;
@@ -13,6 +14,7 @@ import org.lwjgl.opengl.GL11;
 import bms.model.BMSModel;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.gauge.GrooveGauge;
+import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.skin.LR2ResultSkinLoader;
 import bms.player.beatoraja.skin.SkinImage;
 
@@ -41,12 +43,8 @@ public class MusicResult extends MainState {
 	private static final String[] CLEAR = { "NO PLAY", "FAILED", "ASSIST CLEAR", "L-ASSIST CLEAR", "EASY CLEAR",
 			"CLEAR", "HARD CLEAR", "EX-HARD CLEAR", "FULL COMBO", "PERFECT", "MAX" };
 
-	private MainController main;
-
 	private BitmapFont titlefont;
 	private String title;
-
-	private PlayerResource resource;
 
 	private int oldclear;
 	private int oldexscore;
@@ -62,7 +60,7 @@ public class MusicResult extends MainState {
 	private GaugeGraphRenderer gaugegraph;
 
 	public MusicResult(MainController main) {
-		this.main = main;
+		super(main);
 
 		if (clear == null) {
 			if (new File("skin/clear.wav").exists()) {
@@ -77,8 +75,8 @@ public class MusicResult extends MainState {
 		
 	}
 
-	public void create(PlayerResource resource) {
-		this.resource = resource;
+	public void create() {
+		final PlayerResource resource = getMainController().getPlayerResource();
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/VL-Gothic-Regular.ttf"));
 		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
 		parameter.size = 24;
@@ -90,7 +88,7 @@ public class MusicResult extends MainState {
 		if (resource.getAutoplay() == 0
 				&& resource.getScoreData() != null
 				&& resource.getScoreData().getClear() >= GrooveGauge.CLEARTYPE_EASY
-				&& !main.getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
+				&& !getMainController().getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
 						resource.getConfig().getLnmode(), 0)) {
 			saveReplayData(0);
 		}
@@ -107,10 +105,10 @@ public class MusicResult extends MainState {
 						.getConfig().getLr2resultskinoption());
 			} catch (IOException e) {
 				e.printStackTrace();
-				skin = new MusicResultSkin(main.RESOLUTION[resource.getConfig().getResolution()]);
+				skin = new MusicResultSkin(MainController.RESOLUTION[resource.getConfig().getResolution()]);
 			}
 		} else {
-			skin = new MusicResultSkin(main.RESOLUTION[resource.getConfig().getResolution()]);
+			skin = new MusicResultSkin(MainController.RESOLUTION[resource.getConfig().getResolution()]);
 		}
 		this.setSkin(skin);
 
@@ -120,11 +118,14 @@ public class MusicResult extends MainState {
 
 	public void render() {
 		int time = getNowTime();
+		final MainController main = getMainController();
+
 		final SpriteBatch sprite = main.getSpriteBatch();
 		final ShapeRenderer shape = main.getShapeRenderer();
+		final PlayerResource resource = getMainController().getPlayerResource();
 
-		final float w = main.RESOLUTION[resource.getConfig().getResolution()].width;
-		final float h = main.RESOLUTION[resource.getConfig().getResolution()].height;
+		final float w = MainController.RESOLUTION[resource.getConfig().getResolution()].width;
+		final float h = MainController.RESOLUTION[resource.getConfig().getResolution()].height;
 
 		Rectangle graph = skin.getGaugeRegion();
 
@@ -175,67 +176,80 @@ public class MusicResult extends MainState {
 
 		detail.render(sprite, titlefont, shape, time, skin.getJudgeRegion());
 
-		boolean[] keystate = main.getInputProcessor().getKeystate();
-		long[] keytime = main.getInputProcessor().getTime();
-		if (resource.getScoreData() == null
-				|| ((time > 500 && (keystate[0] || keystate[2] || keystate[4] || keystate[6])))) {
-			if (resource.getCourseBMSModels() != null) {
-				if (resource.getGauge().get(resource.getGauge().size() - 1) <= 0) {
-					if(resource.getCourseScoreData() != null) {
-						// 未達曲のノーツをPOORとして加算
-						final List<List<Float>> coursegauge = resource.getCourseGauge();
-						final int cg = resource.getCourseBMSModels().length;
-						for(int i = 0;i < cg;i++) {
-							if (coursegauge.size() <= i) {
-								resource.getCourseScoreData().setMinbp(resource.getCourseScoreData().getMinbp() + resource.getCourseBMSModels()[i].getTotalNotes());
+		if(getTimer()[BMSPlayer.TIMER_FADEOUT] != -1) {
+			if (time > getTimer()[BMSPlayer.TIMER_FADEOUT] + getSkin().getFadeoutTime()) {
+				boolean[] keystate = main.getInputProcessor().getKeystate();
+				long[] keytime = main.getInputProcessor().getTime();
+				keytime[0] = keytime[2] = keytime[4] = keytime[6] = 0;
+
+				if (resource.getCourseBMSModels() != null) {
+					if (resource.getGauge().get(resource.getGauge().size() - 1) <= 0) {
+						if(resource.getCourseScoreData() != null) {
+							// 未達曲のノーツをPOORとして加算
+							final List<List<Float>> coursegauge = resource.getCourseGauge();
+							final int cg = resource.getCourseBMSModels().length;
+							for(int i = 0;i < cg;i++) {
+								if (coursegauge.size() <= i) {
+									resource.getCourseScoreData().setMinbp(resource.getCourseScoreData().getMinbp() + resource.getCourseBMSModels()[i].getTotalNotes());
+								}
 							}
+							// 不合格リザルト
+							main.changeState(MainController.STATE_GRADE_RESULT);						
+						} else {
+							// コーススコアがない場合は選曲画面へ
+							main.changeState(MainController.STATE_SELECTMUSIC);
 						}
-						// 不合格リザルト
-						main.changeState(MainController.STATE_GRADE_RESULT);						
+					} else if (resource.nextCourse()) {
+						main.changeState(MainController.STATE_PLAYBMS);
 					} else {
-						// コーススコアがない場合は選曲画面へ
+						// 合格リザルト
+						main.changeState(MainController.STATE_GRADE_RESULT);
+					}
+				} else {
+					if (keystate[4]) {
+						// オプションを変更せず同じ譜面でリプレイ
+						resource.getReplayData().pattern = null;
+						resource.reloadBMSFile();
+						main.changeState(MainController.STATE_PLAYBMS);
+					} else if (keystate[6]) {
+						// 同じ譜面でリプレイ
+						resource.reloadBMSFile();
+						main.changeState(MainController.STATE_PLAYBMS);
+					} else {
 						main.changeState(MainController.STATE_SELECTMUSIC);
 					}
-				} else if (resource.nextCourse()) {
-					main.changeState(MainController.STATE_PLAYBMS);
-				} else {
-					// 合格リザルト
-					main.changeState(MainController.STATE_GRADE_RESULT);
 				}
-			} else {
-				if (keystate[4]) {
-					keytime[4] = 0;
-					// オプションを変更せず同じ譜面でリプレイ
-					resource.getReplayData().pattern = null;
-					resource.reloadBMSFile();
-					main.changeState(MainController.STATE_PLAYBMS);
-				} else if (keystate[6]) {
-					keytime[6] = 0;
-					// 同じ譜面でリプレイ
-					resource.reloadBMSFile();
-					main.changeState(MainController.STATE_PLAYBMS);
-				} else {
-					keytime[0] = keytime[2] = 0;
-					main.changeState(MainController.STATE_SELECTMUSIC);
+			}			
+		} else {
+			if(time > getSkin().getInputTime()) {
+				boolean[] keystate = main.getInputProcessor().getKeystate();
+				if (resource.getScoreData() == null
+						|| (keystate[0] || keystate[2] || keystate[4] || keystate[6])) {
+					getTimer()[BMSPlayer.TIMER_FADEOUT] = time;					
 				}
+
+				for(int i = 0;i < MusicSelector.REPLAY;i++) {
+					if (resource.getAutoplay() == 0 && main.getInputProcessor().getNumberState()[i + 1]) {
+						saveReplayData(i);
+						break;
+					}
+				}
+			}
+			if(time > getSkin().getSceneTime()) {
+				getTimer()[BMSPlayer.TIMER_FADEOUT] = time;
 			}
 		}
 
-		for(int i = 0;i < MusicSelector.REPLAY;i++) {
-			if (resource.getAutoplay() == 0 && main.getInputProcessor().getNumberState()[i + 1]) {
-				saveReplayData(i);
-				break;
-			}
-		}
 	}
 
 	private boolean saveReplay = false;
 
 	private void saveReplayData(int index) {
+		final PlayerResource resource = getMainController().getPlayerResource();
 		if (resource.getCourseBMSModels() == null && resource.getScoreData() != null) {
 			if (!saveReplay && resource.isUpdateScore()) {
 				ReplayData rd = resource.getReplayData();
-				main.getPlayDataAccessor()
+				getMainController().getPlayDataAccessor()
 						.wrireReplayData(rd, resource.getBMSModel(), resource.getConfig().getLnmode(), index);
 				saveReplay = true;
 			}
@@ -244,6 +258,7 @@ public class MusicResult extends MainState {
 
 	private void updateScoreDatabase() {
 		saveReplay = false;
+		final PlayerResource resource = getMainController().getPlayerResource();
 		BMSModel model = resource.getBMSModel();
 		IRScoreData newscore = resource.getScoreData();
 		boolean ln = model.getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
@@ -255,7 +270,7 @@ public class MusicResult extends MainState {
 			}
 			return;
 		}
-		IRScoreData score = main.getPlayDataAccessor().readScoreData(resource.getBMSModel(),
+		IRScoreData score = getMainController().getPlayDataAccessor().readScoreData(resource.getBMSModel(),
 				resource.getConfig().getLnmode());
 		if (score == null) {
 			score = new IRScoreData();
@@ -313,7 +328,7 @@ public class MusicResult extends MainState {
 		}
 
 		if (resource.getAutoplay() == 0) {
-			main.getPlayDataAccessor().writeScoreDara(resource.getScoreData(), resource.getBMSModel(),
+			getMainController().getPlayDataAccessor().writeScoreDara(resource.getScoreData(), resource.getBMSModel(),
 					resource.getConfig().getLnmode(), resource.isUpdateScore());
 		}
 
@@ -329,7 +344,7 @@ public class MusicResult extends MainState {
 	}
 
 	public int getJudgeCount(int judge, boolean fast) {
-		IRScoreData score = resource.getScoreData();
+		IRScoreData score = getMainController().getPlayerResource().getScoreData();
 		if(score != null) {
 			switch(judge) {
 			case 0:
@@ -351,6 +366,7 @@ public class MusicResult extends MainState {
 
 	@Override
 	public int getClear() {
+		final PlayerResource resource = getMainController().getPlayerResource();
 		if(resource.getScoreData() != null) {
 			return resource.getScoreData().getClear();
 		}
@@ -364,6 +380,7 @@ public class MusicResult extends MainState {
 
 	@Override
 	public int getScore() {
+		final PlayerResource resource = getMainController().getPlayerResource();
 		if(resource.getScoreData() != null) {
 			return resource.getScoreData().getExscore();			
 		}
@@ -377,6 +394,7 @@ public class MusicResult extends MainState {
 
 	@Override
 	public int getMaxcombo() {
+		final PlayerResource resource = getMainController().getPlayerResource();
 		if(resource.getScoreData() != null) {
 			return resource.getScoreData().getCombo();			
 		}
@@ -393,6 +411,7 @@ public class MusicResult extends MainState {
 
 	@Override
 	public int getMisscount() {
+		final PlayerResource resource = getMainController().getPlayerResource();
 		if(resource.getScoreData() != null) {
 			return resource.getScoreData().getMinbp();			
 		}
@@ -428,14 +447,17 @@ public class MusicResult extends MainState {
 	}
 
 	public String getTitle() {
+		final PlayerResource resource = getMainController().getPlayerResource();
 		return resource.getBMSModel().getTitle();
 	}
 
 	public String getSubtitle() {
+		final PlayerResource resource = getMainController().getPlayerResource();
 		return resource.getBMSModel().getSubTitle();
 	}
 
 	public int getTotalNotes() {
+		final PlayerResource resource = getMainController().getPlayerResource();
 		return resource.getBMSModel().getTotalNotes();
 	}
 }

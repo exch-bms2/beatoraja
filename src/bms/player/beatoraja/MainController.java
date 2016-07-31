@@ -2,6 +2,7 @@ package bms.player.beatoraja;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
@@ -18,7 +19,6 @@ import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.result.GradeResult;
 import bms.player.beatoraja.result.MusicResult;
 import bms.player.beatoraja.select.MusicSelector;
-import bms.player.beatoraja.skin.SkinNumber;
 
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.backends.lwjgl.*;
@@ -103,6 +103,10 @@ public class MainController extends ApplicationAdapter {
 	public ShapeRenderer getShapeRenderer() {
 		return shape;
 	}
+	
+	public PlayerResource getPlayerResource() {
+		return resource;
+	}
 
 	public static final int STATE_SELECTMUSIC = 0;
 	public static final int STATE_DECIDE = 1;
@@ -112,40 +116,41 @@ public class MainController extends ApplicationAdapter {
 	public static final int STATE_CONFIG = 5;
 
 	public void changeState(int state) {
+		MainState newState = null;
 		switch (state) {
 		case STATE_SELECTMUSIC:
 			if (this.bmsfile != null) {
 				exit();
 			}
-			selector.create(resource);
-			current = selector;
+			newState = selector;
 			break;
 		case STATE_DECIDE:
-			decide.create(resource);
-			current = decide;
+			newState = decide;
 			break;
 		case STATE_PLAYBMS:
 			if(player != null) {
 				player.dispose();
 			}
 			player = new BMSPlayer(this, resource);
-			player.create();
-			current = player;
+			newState = player;
 			break;
 		case STATE_RESULT:
-			result.create(resource);
-			current = result;
+			newState = result;
 			break;
 		case STATE_GRADE_RESULT:
-			gresult.create(resource);
-			current = gresult;
+			newState = gresult;
 			break;
 		case STATE_CONFIG:
-			keyconfig.create(resource);
-			current = keyconfig;
+			newState = keyconfig;
 			break;
 		}
-		current.setStartTime(System.currentTimeMillis());
+		
+		if(newState != null && current != newState) {
+			Arrays.fill(newState.getTimer(), -1);
+			newState.create();
+			current = newState;
+			current.setStartTime(System.currentTimeMillis());			
+		}
 	}
 
 	public void setAuto(int auto) {

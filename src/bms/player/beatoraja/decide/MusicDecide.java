@@ -2,10 +2,13 @@ package bms.player.beatoraja.decide;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 
 import bms.player.beatoraja.MainController;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.PlayerResource;
+import bms.player.beatoraja.input.BMSPlayerInputProcessor;
+import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.skin.LR2DecideSkinLoader;
 import bms.player.beatoraja.skin.SkinImage;
 
@@ -21,20 +24,16 @@ import com.badlogic.gdx.math.Rectangle;
  */
 public class MusicDecide extends MainState {
 
-	private MainController main;
-	private PlayerResource resource;
-
 	public MusicDecide(MainController main) {
-		this.main = main;
+		super(main);
 	}
 
-	public void create(PlayerResource resource) {
-		this.resource = resource;
-
+	public void create() {		
 		if (new File("skin/decide.wav").exists()) {
 			Gdx.audio.newSound(Gdx.files.internal("skin/decide.wav")).play();
 		}
 
+		final PlayerResource resource = getMainController().getPlayerResource();
 		if (resource.getConfig().getLr2decideskin() != null) {
 			LR2DecideSkinLoader loader = new LR2DecideSkinLoader();
 			try {
@@ -42,18 +41,19 @@ public class MusicDecide extends MainState {
 						.getConfig().getLr2decideskinoption()));
 			} catch (IOException e) {
 				e.printStackTrace();
-				setSkin(new MusicDecideSkin(main.RESOLUTION[resource.getConfig().getResolution()]));
+				setSkin(new MusicDecideSkin(MainController.RESOLUTION[resource.getConfig().getResolution()]));
 			}
 		} else {
-			setSkin(new MusicDecideSkin(main.RESOLUTION[resource.getConfig().getResolution()]));
+			setSkin(new MusicDecideSkin(MainController.RESOLUTION[resource.getConfig().getResolution()]));
 		}
 	}
 
 	public void render() {
-		SpriteBatch sprite = main.getSpriteBatch();
+		SpriteBatch sprite = getMainController().getSpriteBatch();
+		final PlayerResource resource = getMainController().getPlayerResource();
 		long nowtime = getNowTime();
-		final float w = main.RESOLUTION[resource.getConfig().getResolution()].width;
-		final float h = main.RESOLUTION[resource.getConfig().getResolution()].height;
+		final float w = MainController.RESOLUTION[resource.getConfig().getResolution()].width;
+		final float h = MainController.RESOLUTION[resource.getConfig().getResolution()].height;
 
 		if (resource.getCourseBMSModels() == null && resource.getBGAManager().getStagefileData() != null) {
 			sprite.begin();
@@ -61,8 +61,20 @@ public class MusicDecide extends MainState {
 			sprite.end();
 		}
 
-		if (nowtime > 1500) {
-			main.changeState(MainController.STATE_PLAYBMS);
+		if(getTimer()[BMSPlayer.TIMER_FADEOUT] != -1) {
+			if (nowtime > getTimer()[BMSPlayer.TIMER_FADEOUT] + getSkin().getFadeoutTime()) {
+				getMainController().changeState(MainController.STATE_PLAYBMS);
+			}			
+		} else {
+			if(nowtime > getSkin().getInputTime()) {
+				BMSPlayerInputProcessor input = getMainController().getInputProcessor();
+				if(input.getKeystate()[0] || input.getKeystate()[2] || input.getKeystate()[4] || input.getKeystate()[6]) {
+					getTimer()[BMSPlayer.TIMER_FADEOUT] = nowtime;					
+				}
+			}
+			if(nowtime > getSkin().getSceneTime()) {
+				getTimer()[BMSPlayer.TIMER_FADEOUT] = nowtime;
+			}
 		}
 	}
 
@@ -73,6 +85,7 @@ public class MusicDecide extends MainState {
 	}
 
 	public String getTitle() {
+		final PlayerResource resource = getMainController().getPlayerResource();
 		if(resource.getCourseBMSModels() != null) {
 			return resource.getCoursetitle();
 		}
@@ -80,6 +93,7 @@ public class MusicDecide extends MainState {
 	}
 
 	public String getArtist() {
+		final PlayerResource resource = getMainController().getPlayerResource();
 		if(resource.getCourseBMSModels() != null) {
 			return "";
 		}
@@ -87,6 +101,7 @@ public class MusicDecide extends MainState {
 	}
 
 	public String getGenre() {
+		final PlayerResource resource = getMainController().getPlayerResource();
 		if(resource.getCourseBMSModels() != null) {
 			return "";
 		}

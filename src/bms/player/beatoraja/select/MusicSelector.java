@@ -29,8 +29,6 @@ public class MusicSelector extends MainState {
 	// TODO 譜面情報表示
 	// TODO オプション常時表示(スキン実装で実現？)
 
-	private MainController main;
-
 	private int selectedreplay;
 	/**
 	 * 現在のフォルダ階層
@@ -80,8 +78,6 @@ public class MusicSelector extends MainState {
 
 	private Config config;
 
-	private PlayerResource resource;
-
 	private PlayerData playerdata;
 
 	private MusicSelectSkin skin;
@@ -117,7 +113,7 @@ public class MusicSelector extends MainState {
 	public static final int KEY_FOLDER_CLOSE = 7;
 
 	public MusicSelector(MainController main, Config config) {
-		this.main = main;
+		super(main);
 		this.config = config;
 		try {
 			Class.forName("org.sqlite.JDBC");
@@ -139,7 +135,7 @@ public class MusicSelector extends MainState {
 		if (scorecache[lnmode].containsKey(song.getSha256())) {
 			return scorecache[lnmode].get(song.getSha256());
 		}
-		IRScoreData score = main.getPlayDataAccessor().readScoreData(song.getSha256(), song.hasLongNote(), lnmode);
+		IRScoreData score = getMainController().getPlayDataAccessor().readScoreData(song.getSha256(), song.hasLongNote(), lnmode);
 		for (int i = 0; i < scorecache.length; i++) {
 			if (!song.hasLongNote() || i == lnmode) {
 				scorecache[i].put(song.getSha256(), score);
@@ -159,7 +155,7 @@ public class MusicSelector extends MainState {
 			}
 		}
 
-		Map<String, IRScoreData> scores = main.getPlayDataAccessor().readScoreDatas(noscore.toArray(new SongData[0]),
+		Map<String, IRScoreData> scores = getMainController().getPlayDataAccessor().readScoreDatas(noscore.toArray(new SongData[0]),
 				lnmode);
 		for (SongData song : noscore) {
 			IRScoreData score = scores.get(song.getSha256());
@@ -174,9 +170,9 @@ public class MusicSelector extends MainState {
 
 	}
 
-	public void create(PlayerResource resource) {
+	public void create() {
+		final MainController main = getMainController();
 		playerdata = main.getPlayDataAccessor().readPlayerData();
-		this.resource = resource;
 		for (Map cache : scorecache) {
 			cache.clear();
 		}
@@ -249,13 +245,15 @@ public class MusicSelector extends MainState {
 	}
 
 	public void render() {
+		final MainController main = getMainController();
 		final SpriteBatch sprite = main.getSpriteBatch();
 		final ShapeRenderer shape = main.getShapeRenderer();
 		BMSPlayerInputProcessor input = main.getInputProcessor();
+		final PlayerResource resource = main.getPlayerResource();
 		final Bar current = bar.getSelected();
 
-		final float w = main.RESOLUTION[config.getResolution()].width;
-		final float h = main.RESOLUTION[config.getResolution()].height;
+		final float w = MainController.RESOLUTION[config.getResolution()].width;
+		final float h = MainController.RESOLUTION[config.getResolution()].height;
 
 		// 背景描画
 		// if (background != null) {
@@ -732,6 +730,7 @@ public class MusicSelector extends MainState {
 	}
 
 	private void readCourse(int autoplay) {
+		final PlayerResource resource = getMainController().getPlayerResource();
 		if (((GradeBar) bar.getSelected()).existsAllSongs()) {
 			resource.clear();
 			List<File> files = new ArrayList<File>();
@@ -786,7 +785,7 @@ public class MusicSelector extends MainState {
 				}
 				resource.setCoursetitle(((GradeBar) bar.getSelected()).getTitle());
 				resource.setBMSFile(files.get(0), config, autoplay);
-				main.changeState(MainController.STATE_DECIDE);
+				getMainController().changeState(MainController.STATE_DECIDE);
 			} else {
 				Logger.getGlobal().info("段位の楽曲が揃っていません");
 			}
@@ -829,7 +828,7 @@ public class MusicSelector extends MainState {
 	}
 
 	public void exit() {
-		main.exit();
+		getMainController().exit();
 	}
 
 	public void dispose() {
@@ -963,7 +962,7 @@ public class MusicSelector extends MainState {
 	}
 
 	PlayerResource getResource() {
-		return resource;
+		return getMainController().getPlayerResource();
 	}
 
 	SongDatabaseAccessor getSongDatabase() {

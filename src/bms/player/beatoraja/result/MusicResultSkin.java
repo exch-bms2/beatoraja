@@ -3,6 +3,7 @@ package bms.player.beatoraja.result;
 import java.util.ArrayList;
 import java.util.List;
 
+import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.skin.*;
 
 import com.badlogic.gdx.graphics.Texture;
@@ -101,6 +102,17 @@ public class MusicResultSkin extends Skin {
 		title.setAlign(SkinText.ALIGN_CENTER);
 		setDestination(title, 0, 640, 23, 24, 24, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		this.add(title);
+		
+		Texture st = new Texture("skin/system.png");
+		SkinImage fi = new SkinImage(new TextureRegion[]{new TextureRegion(st,8,0,8,8)},0);
+		fi.setTiming(BMSPlayer.TIMER_FADEOUT);
+        setDestination(fi, 0, 0, 0,1280, 720, 0, 0,255,255,255, 0, 0, 0, 0, 500, 0, 0, 0, 0);
+        setDestination(fi, 500, 0, 0,1280, 720, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        add(fi);
+
+        setFadeoutTime(500);
+        setSceneTime(3600000 * 24);
+        setInputTime(500);
 	}
 
 	public Rectangle getGaugeRegion() {

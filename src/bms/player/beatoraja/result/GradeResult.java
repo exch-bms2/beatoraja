@@ -2,6 +2,7 @@ package bms.player.beatoraja.result;
 
 import java.util.*;
 
+import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.select.MusicSelector;
 import com.badlogic.gdx.math.Rectangle;
 import java.util.logging.Logger;
@@ -28,12 +29,8 @@ public class GradeResult extends MainState {
 	private static final String[] CLEAR = { "NO PLAY", "FAILED", "ASSIST CLEAR", "L-ASSIST CLEAR", "EASY CLEAR",
 			"CLEAR", "HARD CLEAR", "EX-HARD CLEAR", "FULL COMBO", "PERFECT", "MAX" };
 
-	private MainController main;
-
 	private BitmapFont titlefont;
 	private String title;
-
-	private PlayerResource resource;
 
 	private int oldclear;
 	private int oldexscore;
@@ -47,12 +44,12 @@ public class GradeResult extends MainState {
 	private GaugeGraphRenderer gaugegraph;
 
 	public GradeResult(MainController main) {
-		this.main = main;
+		super(main);
 	}
 
-	public void create(PlayerResource resource) {
-		this.resource = resource;
-		skin = new MusicResultSkin(main.RESOLUTION[resource.getConfig().getResolution()]);
+	public void create() {
+		final PlayerResource resource = getMainController().getPlayerResource();
+		skin = new MusicResultSkin(MainController.RESOLUTION[resource.getConfig().getResolution()]);
 		this.setSkin(skin);
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/VL-Gothic-Regular.ttf"));
 		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
@@ -62,9 +59,11 @@ public class GradeResult extends MainState {
 		titlefont = generator.generateFont(parameter);
 		updateScoreDatabase();
 
-		if (resource.getAutoplay() == 0 && resource.getCourseScoreData() != null
+		if (resource.getAutoplay() == 0
+				&& resource.getCourseScoreData() != null
 				&& resource.getCourseScoreData().getClear() >= GrooveGauge.CLEARTYPE_EASY
-				&& !main.getPlayDataAccessor().existsReplayData(resource.getCourseBMSModels(), resource.getConfig().getLnmode(), 0, resource.getConstraint())) {
+				&& !getMainController().getPlayDataAccessor().existsReplayData(resource.getCourseBMSModels(),
+						resource.getConfig().getLnmode(), 0, resource.getConstraint())) {
 			saveReplayData(0);
 		}
 
@@ -73,8 +72,10 @@ public class GradeResult extends MainState {
 
 	public void render() {
 		int time = getNowTime();
+		final MainController main = getMainController();
 		final SpriteBatch sprite = main.getSpriteBatch();
 		final ShapeRenderer shape = main.getShapeRenderer();
+		final PlayerResource resource = getMainController().getPlayerResource();
 		IRScoreData score = resource.getCourseScoreData();
 
 		if (score != null) {
@@ -119,24 +120,36 @@ public class GradeResult extends MainState {
 
 			sprite.end();
 		}
-		boolean[] keystate = main.getInputProcessor().getKeystate();
-		long[] keytime = main.getInputProcessor().getTime();
-		if (score == null
-				|| ((System.currentTimeMillis() > time + 500 && (keystate[0] || keystate[2] || keystate[4] || keystate[6])))) {
-			keytime[0] = keytime[2] = keytime[4] = keytime[6] = 0;
-			main.changeState(MainController.STATE_SELECTMUSIC);
-		}
+		
+		if(getTimer()[BMSPlayer.TIMER_FADEOUT] != -1) {
+			if (time > getTimer()[BMSPlayer.TIMER_FADEOUT] + getSkin().getFadeoutTime()) {
+				main.changeState(MainController.STATE_SELECTMUSIC);				
+			}
+		} else {
+			if(time > getSkin().getInputTime()) {
+				boolean[] keystate = main.getInputProcessor().getKeystate();
+				if (resource.getScoreData() == null
+						|| (keystate[0] || keystate[2] || keystate[4] || keystate[6])) {
+					getTimer()[BMSPlayer.TIMER_FADEOUT] = time;					
+				}
 
-		for(int i = 0;i < MusicSelector.REPLAY;i++) {
-			if (resource.getAutoplay() == 0 && main.getInputProcessor().getNumberState()[i + 1]) {
-				saveReplayData(i);
-				break;
+				for (int i = 0; i < MusicSelector.REPLAY; i++) {
+					if (resource.getAutoplay() == 0 && main.getInputProcessor().getNumberState()[i + 1]) {
+						saveReplayData(i);
+						break;
+					}
+				}
+			}
+			if(time > getSkin().getSceneTime()) {
+				getTimer()[BMSPlayer.TIMER_FADEOUT] = time;
 			}
 		}
+
 	}
 
 	public void updateScoreDatabase() {
 		saveReplay = false;
+		final PlayerResource resource = getMainController().getPlayerResource();
 		BMSModel[] models = resource.getCourseBMSModels();
 		IRScoreData newscore = resource.getCourseScoreData();
 		if (newscore == null) {
@@ -151,15 +164,16 @@ public class GradeResult extends MainState {
 		}
 		newscore.setCombo(resource.getMaxcombo());
 		int random = 0;
-		if (resource.getConfig().getRandom() > 0 || (dp && (resource.getConfig().getRandom2() > 0
-				|| resource.getConfig().getDoubleoption() > 0))) {
+		if (resource.getConfig().getRandom() > 0
+				|| (dp && (resource.getConfig().getRandom2() > 0 || resource.getConfig().getDoubleoption() > 0))) {
 			random = 2;
 		}
-		if (resource.getConfig().getRandom() == 1 && (!dp || (resource.getConfig().getRandom2() == 1
-				&& resource.getConfig().getDoubleoption() == 1))) {
+		if (resource.getConfig().getRandom() == 1
+				&& (!dp || (resource.getConfig().getRandom2() == 1 && resource.getConfig().getDoubleoption() == 1))) {
 			random = 1;
 		}
-		IRScoreData score = main.getPlayDataAccessor().readScoreData(models, resource.getConfig().getLnmode(), random, resource.getConstraint());
+		IRScoreData score = getMainController().getPlayDataAccessor().readScoreData(models,
+				resource.getConfig().getLnmode(), random, resource.getConstraint());
 		if (score == null) {
 			score = new IRScoreData();
 		}
@@ -168,13 +182,14 @@ public class GradeResult extends MainState {
 		oldmisscount = score.getMinbp();
 		oldcombo = score.getCombo();
 
-		main.getPlayDataAccessor().writeScoreDara(newscore, models, resource.getConfig().getLnmode(), random,resource.getConstraint(),
-				resource.isUpdateScore());
+		getMainController().getPlayDataAccessor().writeScoreDara(newscore, models, resource.getConfig().getLnmode(),
+				random, resource.getConstraint(), resource.isUpdateScore());
 
 		Logger.getGlobal().info("スコアデータベース更新完了 ");
 	}
 
 	public int getJudgeCount(int judge, boolean fast) {
+		final PlayerResource resource = getMainController().getPlayerResource();
 		IRScoreData score = resource.getCourseScoreData();
 		if (score != null) {
 			switch (judge) {
@@ -197,7 +212,8 @@ public class GradeResult extends MainState {
 
 	@Override
 	public int getClear() {
-		if(resource.getCourseScoreData() != null) {
+		final PlayerResource resource = getMainController().getPlayerResource();
+		if (resource.getCourseScoreData() != null) {
 			return resource.getCourseScoreData().getClear();
 		}
 		return Integer.MIN_VALUE;
@@ -210,6 +226,7 @@ public class GradeResult extends MainState {
 
 	@Override
 	public int getScore() {
+		final PlayerResource resource = getMainController().getPlayerResource();
 		if (resource.getCourseScoreData() != null) {
 			return resource.getCourseScoreData().getExscore();
 		}
@@ -223,6 +240,7 @@ public class GradeResult extends MainState {
 
 	@Override
 	public int getMaxcombo() {
+		final PlayerResource resource = getMainController().getPlayerResource();
 		if (resource.getCourseScoreData() != null) {
 			return resource.getCourseScoreData().getCombo();
 		}
@@ -239,6 +257,7 @@ public class GradeResult extends MainState {
 
 	@Override
 	public int getMisscount() {
+		final PlayerResource resource = getMainController().getPlayerResource();
 		if (resource.getCourseScoreData() != null) {
 			return resource.getCourseScoreData().getMinbp();
 		}
@@ -247,7 +266,7 @@ public class GradeResult extends MainState {
 
 	@Override
 	public int getTargetMisscount() {
-		if(oldmisscount == Integer.MAX_VALUE) {
+		if (oldmisscount == Integer.MAX_VALUE) {
 			return Integer.MIN_VALUE;
 		}
 		return oldmisscount;
@@ -255,7 +274,8 @@ public class GradeResult extends MainState {
 
 	public int getTotalNotes() {
 		int notes = 0;
-		for(BMSModel model : resource.getCourseBMSModels()) {
+		final PlayerResource resource = getMainController().getPlayerResource();
+		for (BMSModel model : resource.getCourseBMSModels()) {
 			notes += model.getTotalNotes();
 		}
 		return notes;
@@ -263,22 +283,23 @@ public class GradeResult extends MainState {
 
 	@Override
 	public void dispose() {
-		if(titlefont != null) {
+		if (titlefont != null) {
 			titlefont.dispose();
 			titlefont = null;
 		}
-		if(skin != null) {
+		if (skin != null) {
 			skin.dispose();
 			skin = null;
 		}
 	}
 
 	private void saveReplayData(int index) {
+		final PlayerResource resource = getMainController().getPlayerResource();
 		if (resource.getCourseScoreData() != null) {
 			if (!saveReplay && resource.isUpdateScore()) {
 				// 保存されているリプレイデータがない場合は、EASY以上で自動保存
 				ReplayData[] rd = resource.getCourseReplay();
-				main.getPlayDataAccessor().wrireReplayData(rd, resource.getCourseBMSModels(),
+				getMainController().getPlayDataAccessor().wrireReplayData(rd, resource.getCourseBMSModels(),
 						resource.getConfig().getLnmode(), index, resource.getConstraint());
 				saveReplay = true;
 			}
