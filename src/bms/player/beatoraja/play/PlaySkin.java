@@ -94,6 +94,23 @@ public class PlaySkin extends Skin {
 		} else {
 			make9KeySkin();
 		}
+
+		// 閉店
+		Texture close = new Texture("skin/close.png");
+		SkinImage ci = new SkinImage(new TextureRegion[] { new TextureRegion(close,0,500,640,240) }, 0);
+		ci.setTiming(BMSPlayer.TIMER_FAILED);
+		setDestination(ci, 0, 0, -360, 1280, 360, 0, 255, 255, 255, 255, 0, 0, 0, 0, 700, 0, 0, 0, 0);
+		setDestination(ci, 500, 0, 0, 1280, 360, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		setDestination(ci, 600, 0, -40, 1280, 360, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		setDestination(ci, 700, 0, 0, 1280, 360, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		add(ci);
+		ci = new SkinImage(new TextureRegion[] { new TextureRegion(close,0,740,640,240) }, 0);
+		ci.setTiming(BMSPlayer.TIMER_FAILED);
+		setDestination(ci, 0, 0, 720, 1280, 360, 0, 255, 255, 255, 255, 0, 0, 0, 0, 700, 0, 0, 0, 0);
+		setDestination(ci, 500, 0, 360, 1280, 360, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		setDestination(ci, 600, 0, 400, 1280, 360, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		setDestination(ci, 700, 0, 360, 1280, 360, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		add(ci);
 	}
 
 	private void makeCommonSkin() {
@@ -168,6 +185,7 @@ public class PlaySkin extends Skin {
 		graph[2].setImage(new TextureRegion[]{new TextureRegion(grapht, 200,0,100,296)}, 0);
 		graph[2].setNumberResourceAccessor(NumberResourceAccessor.TARGET_SCORE, NumberResourceAccessor.MAX_SCORE);
 		add(graph[2]);
+
 	}
 
 	private void make7KeySkin() {
@@ -276,6 +294,13 @@ public class PlaySkin extends Skin {
 		laneregion[7] = rect(20, 140, 70, 580);
 
 		lanegroupregion = new Rectangle[] { rect(20, 140, 390, 580) };
+		// READY
+		Texture ready = new Texture("skin/ready.png");
+		SkinImage ri = new SkinImage(new TextureRegion[] { new TextureRegion(ready) }, 0);
+		ri.setTiming(BMSPlayer.TIMER_READY);
+		setDestination(ri, 0, 40, 250, 350, 60, 0, 0, 255, 255, 255, 0, 0, 0, 0, 750, 0, 0, 0, 0);
+		setDestination(ri, 750, 40, 300, 350, 60, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		add(ri);
 
 		gaugeregion = rect(20, 30, 390, 30);
 		
@@ -416,6 +441,13 @@ public class PlaySkin extends Skin {
 		setDestination(graph[1], 0, 1022, 220, 56, 480, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);	
 		setDestination(graph[2], 0, 1082, 220, 56, 480, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);	
 		graphregion = rect(960, 220, 180, 480);
+		// READY
+		Texture ready = new Texture("skin/ready.png");
+		SkinImage ri = new SkinImage(new TextureRegion[] { new TextureRegion(ready) }, 0);
+		ri.setTiming(BMSPlayer.TIMER_READY);
+		setDestination(ri, 0, 465, 250, 350, 60, 0, 0, 255, 255, 255, 0, 0, 0, 0, 750, 0, 0, 0, 0);
+		setDestination(ri, 750, 465, 300, 350, 60, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		add(ri);
 
 		judgecountregion = rect(1090, 40, 144, 108);
 		// judge count
@@ -574,6 +606,18 @@ public class PlaySkin extends Skin {
 		laneregion[15] = rect(1000, 140, 70, 580);
 
 		lanegroupregion = new Rectangle[] { rect(210, 140, 390, 580), rect(680, 140, 390, 580) };
+		// READY
+		Texture ready = new Texture("skin/ready.png");
+		SkinImage ri = new SkinImage(new TextureRegion[] { new TextureRegion(ready) }, 0);
+		ri.setTiming(BMSPlayer.TIMER_READY);
+		setDestination(ri, 0, 230, 250, 350, 60, 0, 0, 255, 255, 255, 0, 0, 0, 0, 750, 0, 0, 0, 0);
+		setDestination(ri, 750, 230, 300, 350, 60, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		add(ri);
+		ri = new SkinImage(new TextureRegion[] { new TextureRegion(ready) }, 0);
+		ri.setTiming(BMSPlayer.TIMER_READY);
+		setDestination(ri, 0, 700, 250, 350, 60, 0, 0, 255, 255, 255, 0, 0, 0, 0, 750, 0, 0, 0, 0);
+		setDestination(ri, 750, 700, 300, 350, 60, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		add(ri);
 
 		gaugeregion = rect(445, 30, 390, 30);
 

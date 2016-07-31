@@ -414,14 +414,10 @@ public class BMSPlayer extends MainState {
 		// GET READY
 		case STATE_READY:
 			renderMain(0);
-			sprite.begin();
-			systemfont.setColor(Color.WHITE);
-			systemfont.draw(sprite, "GET READY", skin.getLaneGroupRegion()[0].x + skin.getLaneGroupRegion()[0].width / 2 - 35,
-					skin.getLaneGroupRegion()[0].y + 200);
-			sprite.end();
 			final long rt = now - getTimer()[TIMER_READY];
 			if (rt > 1000) {
 				state = STATE_PLAY;
+				getTimer()[TIMER_READY] = -1;
 				starttime = System.currentTimeMillis();
 				input.setStartTime(starttime);
 				List<KeyInputLog> keylog = null;
@@ -469,20 +465,7 @@ public class BMSPlayer extends MainState {
 			resource.getAudioProcessor().stop(-1);
 			renderMain(starttime != 0 ? time : 0);
 
-			Gdx.gl.glEnable(GL11.GL_BLEND);
-			Gdx.gl.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-			shape.begin(ShapeType.Filled);
-			long l = now - getTimer()[TIMER_FAILED];
-			shape.setColor(0, 0, 0, ((float) l) / 1000f);
-			float height = h / 2 * l / 1000;
-			shape.rect(0, h - height * 2, w, height * 2);
-			shape.rect(0, 0, w, height * 2);
-			shape.setColor(0, 0, 0, 1);
-			shape.rect(0, h - height, w, height);
-			shape.rect(0, 0, w, height);
-			shape.end();
-			Gdx.gl.glDisable(GL11.GL_BLEND);
-			if (l > 1000) {
+			if (now - getTimer()[TIMER_FAILED] > 1500) {
 				if (keyinput != null) {
 					Logger.getGlobal().info("入力パフォーマンス(max ms) : " + keyinput.frametimes);
 				}
@@ -497,7 +480,11 @@ public class BMSPlayer extends MainState {
 				resource.setGrooveGauge(gauge);
 				input.setEnableKeyInput(true);
 				input.setStartTime(0);
-				main.changeState(MainController.STATE_RESULT);
+				if(resource.getScoreData() != null) {
+					main.changeState(MainController.STATE_RESULT);
+				} else {
+					main.changeState(MainController.STATE_SELECTMUSIC);
+				}
 			}
 			break;
 		// 完奏処理
@@ -530,7 +517,11 @@ public class BMSPlayer extends MainState {
 				resource.setGrooveGauge(gauge);
 				input.setEnableKeyInput(true);
 				input.setStartTime(0);
-				main.changeState(MainController.STATE_RESULT);
+				if(resource.getScoreData() != null) {
+					main.changeState(MainController.STATE_RESULT);
+				} else {
+					main.changeState(MainController.STATE_SELECTMUSIC);
+				}
 			}
 			break;
 		}
