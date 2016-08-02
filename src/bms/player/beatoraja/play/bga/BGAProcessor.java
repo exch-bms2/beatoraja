@@ -48,7 +48,7 @@ public class BGAProcessor {
 	private final String[] pic_extension = { "jpg", "jpeg", "gif", "bmp", "png" };
 
 	private static final int BGACACHE_SIZE = 256;
-	
+
 	/**
 	 * 再生中のBGAID
 	 */
@@ -77,7 +77,7 @@ public class BGAProcessor {
 
 	public BGAProcessor(Config config) {
 		this.config = config;
-		
+
 		String vertex = "attribute vec4 " + ShaderProgram.POSITION_ATTRIBUTE + ";\n" //
 				+ "attribute vec4 " + ShaderProgram.COLOR_ATTRIBUTE + ";\n" //
 				+ "attribute vec2 " + ShaderProgram.TEXCOORD_ATTRIBUTE + "0;\n" //
@@ -136,10 +136,9 @@ public class BGAProcessor {
 				+ "void main()\n"//
 				+ "{\n" //
 				+ "    vec4 c4 = texture2D(u_texture, v_texCoords);\n"
-				+ "gl_FragColor = v_color * vec4(c4.b, c4.g, c4.r, c4.a);\n"
-				+ "}";
+				+ "gl_FragColor = v_color * vec4(c4.b, c4.g, c4.r, c4.a);\n" + "}";
 		bgrshader = new ShaderProgram(vertex, fragment);
-		
+
 		System.out.println(layershader.getLog());
 	}
 
@@ -235,7 +234,8 @@ public class BGAProcessor {
 			if (dir.getName().endsWith(mov)) {
 				try {
 					tex = new Pixmap(Gdx.files.internal(dir.getPath()));
-//					System.out.println("BGA Picture loaded  : " + dir.getName());
+					// System.out.println("BGA Picture loaded  : " +
+					// dir.getName());
 					break;
 				} catch (Exception e) {
 					Logger.getGlobal().warning("BGAファイル読み込み失敗。" + e.getMessage());
@@ -258,14 +258,14 @@ public class BGAProcessor {
 			return;
 		}
 		cache.prepare(model.getAllTimeLines());
-		for(MovieProcessor mp : mpgmap.values()) {
+		for (MovieProcessor mp : mpgmap.values()) {
 			mp.stop();
 		}
 		playingbgaid = -1;
 		playinglayerid = -1;
 
-		for(Integer id : mpgmap.keySet()) {
-			if(mpgmap.get(id) instanceof FFmpegProcessor) {
+		for (Integer id : mpgmap.keySet()) {
+			if (mpgmap.get(id) instanceof FFmpegProcessor) {
 				((FFmpegProcessor) mpgmap.get(id)).setBMSPlayer(player);
 			}
 		}
@@ -300,14 +300,12 @@ public class BGAProcessor {
 		}
 		return cache.getTexture(id);
 	}
-	
+
 	public void drawBGA(SpriteBatch sprite, Rectangle[] region, int time) {
-		if(model == null) {
+		if (model == null) {
 			return;
 		}
-		final int bgaid = playingbgaid;
 		boolean rbga = true;
-		final int layerid = playinglayerid;
 		boolean rlayer = true;
 		for (TimeLine tl : model.getAllTimeLines()) {
 			if (tl.getTime() > time) {
@@ -315,14 +313,21 @@ public class BGAProcessor {
 			}
 
 			if (tl.getTime() > prevrendertime) {
-				if (tl.getBGA() != -1) {
+				if (tl.getBGA() == -2) {
+					playingbgaid = -1;
+					rbga = false;
+				} else if (tl.getBGA() >= 0) {
 					playingbgaid = tl.getBGA();
 					rbga = false;
 				}
-				if (tl.getLayer() != -1) {
+				if (tl.getLayer() == -2) {
+					playinglayerid = -1;
+					rlayer = false;
+				} else if (tl.getLayer() >= 0) {
 					playinglayerid = tl.getLayer();
 					rlayer = false;
 				}
+
 				if (tl.getPoor() != null && tl.getPoor().length > 0) {
 					misslayer = tl.getPoor();
 				}
@@ -331,18 +336,17 @@ public class BGAProcessor {
 
 		if (time < 0 && getBackbmpData() != null) {
 			sprite.begin();
-			for(Rectangle r : region) {
-				sprite.draw(getBackbmpData(), r.x, r.y, r.width, r.height);				
+			for (Rectangle r : region) {
+				sprite.draw(getBackbmpData(), r.x, r.y, r.width, r.height);
 			}
 			sprite.end();
-		} else if (misslayer != null && misslayertime != 0 && time >= misslayertime
-				&& time < misslayertime + 500) {
+		} else if (misslayer != null && misslayertime != 0 && time >= misslayertime && time < misslayertime + 500) {
 			// draw miss layer
 			Texture miss = getBGAData(misslayer[misslayer.length * (time - misslayertime) / 500], true);
 			if (miss != null) {
 				miss.setFilter(TextureFilter.Linear, TextureFilter.Linear);
 				sprite.begin();
-				for(Rectangle r : region) {
+				for (Rectangle r : region) {
 					sprite.draw(miss, r.x, r.y, r.width, r.height);
 				}
 				sprite.end();
@@ -353,15 +357,15 @@ public class BGAProcessor {
 			if (playingbgatex != null) {
 				playingbgatex.setFilter(TextureFilter.Linear, TextureFilter.Linear);
 				sprite.begin();
-				if(mpgmap.containsKey(playingbgaid) && bgrshader.isCompiled()) {
+				if (mpgmap.containsKey(playingbgaid) && bgrshader.isCompiled()) {
 					sprite.setShader(bgrshader);
-					for(Rectangle r : region) {
-						sprite.draw(playingbgatex, r.x, r.y, r.width, r.height);											
+					for (Rectangle r : region) {
+						sprite.draw(playingbgatex, r.x, r.y, r.width, r.height);
 					}
-					sprite.setShader(null);					
+					sprite.setShader(null);
 				} else {
-					for(Rectangle r : region) {
-						sprite.draw(playingbgatex, r.x, r.y, r.width, r.height);						
+					for (Rectangle r : region) {
+						sprite.draw(playingbgatex, r.x, r.y, r.width, r.height);
 					}
 				}
 				sprite.end();
@@ -371,27 +375,35 @@ public class BGAProcessor {
 			if (playinglayertex != null) {
 				playinglayertex.setFilter(TextureFilter.Linear, TextureFilter.Linear);
 				sprite.begin();
-				if (layershader.isCompiled()) {
-					sprite.setShader(layershader);					
-					for(Rectangle r : region) {
-						sprite.draw(playinglayertex, r.x, r.y, r.width, r.height);						
+				if (mpgmap.containsKey(playinglayerid) && bgrshader.isCompiled()) {
+					sprite.setShader(bgrshader);
+					for (Rectangle r : region) {
+						sprite.draw(playinglayertex, r.x, r.y, r.width, r.height);
+					}
+					sprite.setShader(null);
+				} else if (layershader.isCompiled()) {
+					sprite.setShader(layershader);
+					for (Rectangle r : region) {
+						sprite.draw(playinglayertex, r.x, r.y, r.width, r.height);
 					}
 					sprite.setShader(null);
 				} else {
-					for(Rectangle r : region) {
-						sprite.draw(playinglayertex, r.x, r.y, r.width, r.height);						
+					for (Rectangle r : region) {
+						sprite.draw(playinglayertex, r.x, r.y, r.width, r.height);
 					}
 				}
 				sprite.end();
 			}
 		}
-		
+
 		prevrendertime = time;
 	}
-	
+
 	/**
 	 * ミスレイヤー開始時間を設定する
-	 * @param time ミスレイヤー開始時間(ms)
+	 * 
+	 * @param time
+	 *            ミスレイヤー開始時間(ms)
 	 */
 	public void setMisslayerTme(int time) {
 		misslayertime = time;
@@ -409,8 +421,8 @@ public class BGAProcessor {
 			backbmp.dispose();
 			backbmpp.dispose();
 		}
-		if(cache != null) {
-			cache.dispose();			
+		if (cache != null) {
+			cache.dispose();
 		}
 		for (int id : mpgmap.keySet()) {
 			if (mpgmap.get(id) != null) {
@@ -435,21 +447,21 @@ public class BGAProcessor {
  * @author exch
  */
 class BGImageManager {
-	
+
 	private Pixmap[] bgamap;
 	/**
 	 * BGイメージのキャッシュ
 	 */
 	private Texture[] bgacache;
 	private int[] bgacacheid;
-	
+
 	public BGImageManager(Pixmap[] pixmap, int size) {
 		this.bgamap = pixmap;
 		bgacache = new Texture[size];
 		bgacacheid = new int[size];
 		Arrays.fill(bgacacheid, -1);
 	}
-	
+
 	/**
 	 * BGAの初期データをあらかじめキャッシュする
 	 */
@@ -458,7 +470,7 @@ class BGImageManager {
 		int count = 0;
 		for (TimeLine tl : timelines) {
 			int bga = tl.getBGA();
-			if (bga != -1 && bgacache[bga % bgacache.length] == null) {
+			if (bga >= 0 && bgacache[bga % bgacache.length] == null) {
 				Pixmap pix = bgamap[bga];
 				if (pix != null) {
 					bgacache[bga % bgacache.length] = new Texture(pix);
@@ -467,7 +479,7 @@ class BGImageManager {
 				}
 			}
 			bga = tl.getLayer();
-			if (bga != -1 && bgacache[bga % bgacache.length] == null) {
+			if (bga >= 0 && bgacache[bga % bgacache.length] == null) {
 				Pixmap pix = bgamap[bga];
 				if (pix != null) {
 					bgacache[bga % bgacache.length] = new Texture(pix);
@@ -496,6 +508,7 @@ class BGImageManager {
 		return null;
 
 	}
+
 	/**
 	 * リソースを開放する
 	 */

@@ -65,10 +65,12 @@ public class FFmpegProcessor implements MovieProcessor {
 	public Texture getBGAData(boolean cont) {
 		if (movieseek == null || !cont) {
 			if (movieseek != null) {
-				movieseek.stop = true;
+				movieseek.restart = true;
+				movieseek.interrupt();
+			} else {
+				movieseek = new MovieSeekThread();
+				movieseek.start();				
 			}
-			movieseek = new MovieSeekThread();
-			movieseek.start();
 		}
 		if (showing != pixmap) {
 			showing = pixmap;
@@ -87,6 +89,7 @@ public class FFmpegProcessor implements MovieProcessor {
 	class MovieSeekThread extends Thread {
 
 		public boolean stop = false;
+		public boolean restart = false;
 
 		public void run() {
 			try {
@@ -97,16 +100,16 @@ public class FFmpegProcessor implements MovieProcessor {
 								+ " length (frame / time) : " + grabber.getLengthInFrames() + " / "
 								+ grabber.getLengthInTime());
 				fps = grabber.getFrameRate();
-				if(fps > 240) {
+				if (fps > 240) {
 					// フレームレートが大きすぎる場合は手動で修正(暫定処置)
 					fps = 30;
 				}
 				final long[] nativeData = new long[] { 0, grabber.getImageWidth(), grabber.getImageHeight(),
 						Gdx2DPixmap.GDX2D_FORMAT_RGB888 };
-				final long start = System.currentTimeMillis() - player.getPlayTime();
+				long start = System.currentTimeMillis() - player.getPlayTime();
 				int framecount = 0;
 				Frame frame = null;
-				while (!stop) {
+				for (;;) {
 					final long time = System.currentTimeMillis() - start - player.getPlayTime();
 					if (time >= framecount * 1000 / fps) {
 						while (time >= framecount * 1000 / fps || framecount % fpsd != 0) {
@@ -114,10 +117,12 @@ public class FFmpegProcessor implements MovieProcessor {
 							framecount++;
 						}
 						if (frame == null) {
-							// System.out.println("decode end");
-							break;
-						}
-						if (frame.image != null && frame.image[0] != null) {
+							try {
+								sleep(3600000);
+							} catch (InterruptedException e) {
+
+							}
+						} else if (frame.image != null && frame.image[0] != null) {
 							try {
 								Gdx2DPixmap pixmapData = new Gdx2DPixmap((ByteBuffer) frame.image[0], nativeData);
 								pixmap = new Pixmap(pixmapData);
@@ -131,8 +136,22 @@ public class FFmpegProcessor implements MovieProcessor {
 					} else {
 						final long sleeptime = (long) (framecount * 1000 / fps - time + 1);
 						if (sleeptime > 0) {
-							sleep(sleeptime);
+							try {
+								sleep(sleeptime);
+							} catch (InterruptedException e) {
+
+							}
 						}
+					}
+					if (restart) {
+						restart = false;
+						grabber.restart();
+						start = System.currentTimeMillis() - player.getPlayTime();
+						framecount = 0;
+//						System.out.println("movie restart - starttime : " + start);
+					}
+					if (stop) {
+						break;
 					}
 				}
 			} catch (Exception e) {
@@ -165,6 +184,8 @@ public class FFmpegProcessor implements MovieProcessor {
 	public void stop() {
 		if (movieseek != null) {
 			movieseek.stop = true;
+			movieseek.interrupt();
+			movieseek = null;
 		}
 	}
 

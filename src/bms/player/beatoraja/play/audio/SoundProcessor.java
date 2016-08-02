@@ -66,7 +66,7 @@ public class SoundProcessor implements AudioProcessor {
 			notes.addAll(Arrays.asList(tl.getBackGroundNotes()));
 
 			for (Note note : notes) {
-				if (note.getWav() != -1) {
+				if (note.getWav() >= 0) {
 					String name = model.getWavList()[note.getWav()];
 					name = name.substring(0, name.lastIndexOf('.'));
 					final File wavfile = new File(directorypath + name + ".wav");
@@ -279,7 +279,7 @@ public class SoundProcessor implements AudioProcessor {
 		try {
 			 if(starttime == 0) {
 //			if (starttime == 0 && duration == 0) {
-				if (id != -1 && wavmap[id] != null) {
+				if (id >= 0 && wavmap[id] != null) {
 					if (playmap[id] != -1) {
 						wavmap[id].stop(playmap[id]);
 					}
@@ -301,7 +301,7 @@ public class SoundProcessor implements AudioProcessor {
 	}
 
 	public void stop(int id) {
-		if (id == -1) {
+		if (id < 0) {
 			for (Sound s : wavmap) {
 				if (s != null) {
 					s.stop();
