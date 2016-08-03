@@ -1,9 +1,11 @@
 package bms.player.beatoraja.play;
 
+import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.skin.*;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 
@@ -78,6 +80,8 @@ public class PlaySkin extends Skin {
 			NumberResourceAccessor.FAST_GOOD, NumberResourceAccessor.SLOW_GOOD, NumberResourceAccessor.FAST_BAD,
 			NumberResourceAccessor.SLOW_BAD, NumberResourceAccessor.FAST_POOR, NumberResourceAccessor.SLOW_POOR,
 			NumberResourceAccessor.FAST_MISS, NumberResourceAccessor.SLOW_MISS };
+
+	private LaneRenderer lanerender;
 
 	public PlaySkin(int mode) {
 		super(640, 480, 1280, 720);
@@ -250,20 +254,13 @@ public class PlaySkin extends Skin {
 				minenote[i] = new Sprite(notet, 127, 23, 21, 8);
 			}
 		}
-		
-
-		Texture kbt = new Texture("skin/keybeam.png");
-		keybeam = new Sprite[8];
-		keybeam[0] = keybeam[2] = keybeam[4] = keybeam[6] = new Sprite(kbt, 75, 0, 21, 255);
-		keybeam[1] = keybeam[3] = keybeam[5] = new Sprite(kbt, 47, 0, 28, 255);
-		keybeam[7] = new Sprite(kbt, 0, 0, 47, 255);
 
 		SkinImage[] images = new SkinImage[6];
 		SkinNumber[] number = new SkinNumber[6];
 		for(int i = 0;i < 6;i++) {
 			images[i] = new SkinImage();
 			images[i].setImage(new TextureRegion[] { judge[i == 5 ? 4 : i] }, 0);
-			setDestination(images[i], 0, 115, 240, 180, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);			
+			setDestination(images[i], 0, 115, 240, 180, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 0, 6, 0, NumberResourceAccessor.MAXCOMBO);
 			setDestination(number[i],0, 200, 0, 40, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		}
@@ -284,6 +281,35 @@ public class PlaySkin extends Skin {
 		
 		graphregion = rect(410, 220, 90, 480);
 
+		laneregion = new Rectangle[8];
+		laneregion[0] = rect(90, 140, 50, 580);
+		laneregion[1] = rect(140, 140, 40, 580);
+		laneregion[2] = rect(180, 140, 50, 580);
+		laneregion[3] = rect(230, 140, 40, 580);
+		laneregion[4] = rect(270, 140, 50, 580);
+		laneregion[5] = rect(320, 140, 40, 580);
+		laneregion[6] = rect(360, 140, 50, 580);
+		laneregion[7] = rect(20, 140, 70, 580);
+		Texture st = new Texture("skin/system.png");
+		SkinImage si = new SkinImage(new TextureRegion[] { new TextureRegion(st,30,0,390,10) }, 0);
+		setDestination(si, 0, 20, 140, 390, 0, 0, 0, 255, 255, 255, 0, 0, 0, 0, 1000, 0, 0, 0, 0);
+		setDestination(si, 1000, 20, 140, 390, 580, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		add(si);
+
+		Texture kbt = new Texture("skin/keybeam.png");
+		keybeam = new Sprite[8];
+		keybeam[0] = keybeam[2] = keybeam[4] = keybeam[6] = new Sprite(kbt, 75, 0, 21, 255);
+		keybeam[1] = keybeam[3] = keybeam[5] = new Sprite(kbt, 47, 0, 28, 255);
+		keybeam[7] = new Sprite(kbt, 0, 0, 47, 255);
+		for(int i = 0;i < laneregion.length;i++) {
+			SkinImage ri = new SkinImage(new TextureRegion[] { keybeam[i] }, 0);
+			ri.setTiming(BMSPlayer.TIMER_KEYON_1P_KEY1 + (i % 8 == 7 ? -1 : i));
+			setDestination(ri, 0, laneregion[i].x + laneregion[i].width / 4, laneregion[i].y, laneregion[i].width / 2, laneregion[i].height, 0, 255, 255, 255, 255, 0, 0, 0, 0, 100, 0, 0, 0, 0);
+			setDestination(ri, 100, laneregion[i].x, laneregion[i].y, laneregion[i].width, laneregion[i].height, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+			add(ri);
+		}
+		add(new SkinLaneObject());
+
 		judgecountregion = rect(500, 50, 144, 108);
 		// judge count
 		Texture nt = new Texture("skin/number.png");
@@ -295,17 +321,11 @@ public class PlaySkin extends Skin {
 			}
 		}
 
-		laneregion = new Rectangle[8];
-		laneregion[0] = rect(90, 140, 50, 580);
-		laneregion[1] = rect(140, 140, 40, 580);
-		laneregion[2] = rect(180, 140, 50, 580);
-		laneregion[3] = rect(230, 140, 40, 580);
-		laneregion[4] = rect(270, 140, 50, 580);
-		laneregion[5] = rect(320, 140, 40, 580);
-		laneregion[6] = rect(360, 140, 50, 580);
-		laneregion[7] = rect(20, 140, 70, 580);
-
 		lanegroupregion = new Rectangle[] { rect(20, 140, 390, 580) };
+
+		SkinSlider seek = new SkinSlider(new TextureRegion[]{new TextureRegion(st, 0,265,17,24)}, 0, 1, (int) (360 * dh), MainState.SLIDER_MUSICSELECT_POSITION);
+		setDestination(seek, 0, 20, 440, 30, 24, 0, 255,255,255,255, 2, 0, 0, 0, 0, 0, 0, 0, 0);
+		add(seek);
 		// READY
 		Texture ready = new Texture("skin/ready.png");
 		SkinImage ri = new SkinImage(new TextureRegion[] { new TextureRegion(ready) }, 0);
@@ -403,11 +423,6 @@ public class PlaySkin extends Skin {
 			}
 		}
 
-		Texture kbt = new Texture("skin/keybeam.png");
-		keybeam = new Sprite[9];
-		keybeam[0] = keybeam[2] = keybeam[4] = keybeam[6] = keybeam[8] = new Sprite(kbt, 75, 0, 21, 255);
-		keybeam[1] = keybeam[3] = keybeam[5] = keybeam[7] = new Sprite(kbt, 47, 0, 28, 255);
-
 		SkinImage[] images = new SkinImage[6];
 		SkinNumber[] number = new SkinNumber[6];
 		for(int i = 0;i < 6;i++) {
@@ -453,13 +468,34 @@ public class PlaySkin extends Skin {
 		setDestination(graph[1], 0, 1022, 220, 56, 480, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);	
 		setDestination(graph[2], 0, 1082, 220, 56, 480, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);	
 		graphregion = rect(960, 220, 180, 480);
-		// READY
-		Texture ready = new Texture("skin/ready.png");
-		SkinImage ri = new SkinImage(new TextureRegion[] { new TextureRegion(ready) }, 0);
-		ri.setTiming(BMSPlayer.TIMER_READY);
-		setDestination(ri, 0, 465, 250, 350, 60, 0, 0, 255, 255, 255, 0, 0, 0, 0, 750, 0, 0, 0, 0);
-		setDestination(ri, 750, 465, 300, 350, 60, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		add(ri);
+		laneregion = new Rectangle[9];
+		laneregion[0] = rect(345, 140, 70, 580);
+		laneregion[1] = rect(415, 140, 60, 580);
+		laneregion[2] = rect(475, 140, 70, 580);
+		laneregion[3] = rect(545, 140, 60, 580);
+		laneregion[4] = rect(605, 140, 70, 580);
+		laneregion[5] = rect(675, 140, 60, 580);
+		laneregion[6] = rect(735, 140, 70, 580);
+		laneregion[7] = rect(805, 140, 60, 580);
+		laneregion[8] = rect(865, 140, 70, 580);
+		Texture st = new Texture("skin/system.png");
+		SkinImage si = new SkinImage(new TextureRegion[] { new TextureRegion(st,30,30,590,10) }, 0);
+		setDestination(si, 0, 345, 140, 590, 0, 0, 0, 255, 255, 255, 0, 0, 0, 0, 1000, 0, 0, 0, 0);
+		setDestination(si, 1000, 345, 140, 590, 580, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		add(si);
+
+		Texture kbt = new Texture("skin/keybeam.png");
+		keybeam = new Sprite[9];
+		keybeam[0] = keybeam[2] = keybeam[4] = keybeam[6] = keybeam[8] = new Sprite(kbt, 75, 0, 21, 255);
+		keybeam[1] = keybeam[3] = keybeam[5] = keybeam[7] = new Sprite(kbt, 47, 0, 28, 255);
+		for(int i = 0;i < laneregion.length;i++) {
+			SkinImage bi = new SkinImage(new TextureRegion[] { keybeam[i] }, 0);
+			bi.setTiming(BMSPlayer.TIMER_KEYON_1P_KEY1 + i);
+			setDestination(bi, 0, laneregion[i].x + laneregion[i].width / 4, laneregion[i].y, laneregion[i].width / 2, laneregion[i].height, 0, 255, 255, 255, 255, 0, 0, 0, 0, 100, 0, 0, 0, 0);
+			setDestination(bi, 100, laneregion[i].x, laneregion[i].y, laneregion[i].width, laneregion[i].height, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+			add(bi);
+		}
+		add(new SkinLaneObject());
 
 		judgecountregion = rect(1090, 40, 144, 108);
 		// judge count
@@ -471,17 +507,16 @@ public class PlaySkin extends Skin {
 						0, 0);
 			}
 		}
-
-		laneregion = new Rectangle[9];
-		laneregion[0] = rect(345, 140, 70, 580);
-		laneregion[1] = rect(415, 140, 60, 580);
-		laneregion[2] = rect(475, 140, 70, 580);
-		laneregion[3] = rect(545, 140, 60, 580);
-		laneregion[4] = rect(605, 140, 70, 580);
-		laneregion[5] = rect(675, 140, 60, 580);
-		laneregion[6] = rect(735, 140, 70, 580);
-		laneregion[7] = rect(805, 140, 60, 580);
-		laneregion[8] = rect(865, 140, 70, 580);
+		SkinSlider seek = new SkinSlider(new TextureRegion[]{new TextureRegion(st, 0,265,17,24)}, 0, 1, (int) (560 * dh), MainState.SLIDER_MUSICSELECT_POSITION);
+		setDestination(seek, 0, 345, 440, 30, 24, 0, 255,255,255,255, 2, 0, 0, 0, 0, 0, 0, 0, 0);
+		add(seek);
+		// READY
+		Texture ready = new Texture("skin/ready.png");
+		SkinImage ri = new SkinImage(new TextureRegion[] { new TextureRegion(ready) }, 0);
+		ri.setTiming(BMSPlayer.TIMER_READY);
+		setDestination(ri, 0, 465, 250, 350, 60, 0, 0, 255, 255, 255, 0, 0, 0, 0, 750, 0, 0, 0, 0);
+		setDestination(ri, 750, 465, 300, 350, 60, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		add(ri);
 
 		lanegroupregion = new Rectangle[] { rect(345, 140, 590, 580) };
 
@@ -588,17 +623,6 @@ public class PlaySkin extends Skin {
 
 		graphregion = rect(1090, 220, 180, 480);
 
-		judgecountregion = rect(1090, 40, 144, 108);
-		// judge count
-		Texture nt = new Texture("skin/number.png");
-		TextureRegion[][] ntr = TextureRegion.split(nt, 24, 24);
-		for (int i = 0; i < 6; i++) {
-			for (int j = 0; j < 2; j++) {
-				addNumber(new SkinNumber(ntr[j + 1], 0, 4, 2, judgecount[i * 2 + j]), 0, 1126 + j * 60, 40 + (5 - i) * 18, 12, 18, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0,
-						0, 0);
-			}
-		}
-
 		laneregion = new Rectangle[16];
 		laneregion[0] = rect(280, 140, 50, 580);
 		laneregion[1] = rect(330, 140, 40, 580);
@@ -616,6 +640,40 @@ public class PlaySkin extends Skin {
 		laneregion[13] = rect(910, 140, 40, 580);
 		laneregion[14] = rect(950, 140, 50, 580);
 		laneregion[15] = rect(1000, 140, 70, 580);
+
+		Texture st = new Texture("skin/system.png");
+		SkinImage si = new SkinImage(new TextureRegion[] { new TextureRegion(st,30,0,390,10) }, 0);
+		setDestination(si, 0, 210, 140, 390, 0, 0, 0, 255, 255, 255, 0, 0, 0, 0, 1000, 0, 0, 0, 0);
+		setDestination(si, 1000, 210, 140, 390, 580, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		add(si);
+		si = new SkinImage(new TextureRegion[] { new TextureRegion(st,30,15,390,10) }, 0);
+		setDestination(si, 0, 680, 140, 390, 0, 0, 0, 255, 255, 255, 0, 0, 0, 0, 1000, 0, 0, 0, 0);
+		setDestination(si, 1000, 680, 140, 390, 580, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		add(si);
+
+		for(int i = 0;i < laneregion.length;i++) {
+			SkinImage ri = new SkinImage(new TextureRegion[] { keybeam[i] }, 0);
+			ri.setTiming(BMSPlayer.TIMER_KEYON_1P_KEY1 + (i % 8 == 7 ? -1 : (i % 8)) + (i >= 8 ? 10 : 0));
+			setDestination(ri, 0, laneregion[i].x + laneregion[i].width / 4, laneregion[i].y, laneregion[i].width / 2, laneregion[i].height, 0, 255, 255, 255, 255, 0, 0, 0, 0, 100, 0, 0, 0, 0);
+			setDestination(ri, 100, laneregion[i].x, laneregion[i].y, laneregion[i].width, laneregion[i].height, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+			add(ri);
+		}
+		add(new SkinLaneObject());
+
+		judgecountregion = rect(1090, 40, 144, 108);
+		// judge count
+		Texture nt = new Texture("skin/number.png");
+		TextureRegion[][] ntr = TextureRegion.split(nt, 24, 24);
+		for (int i = 0; i < 6; i++) {
+			for (int j = 0; j < 2; j++) {
+				addNumber(new SkinNumber(ntr[j + 1], 0, 4, 2, judgecount[i * 2 + j]), 0, 1126 + j * 60, 40 + (5 - i) * 18, 12, 18, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0,
+						0, 0);
+			}
+		}
+
+		SkinSlider seek = new SkinSlider(new TextureRegion[]{new TextureRegion(st, 0,265,17,24)}, 0, 1, (int) (360 * dh), MainState.SLIDER_MUSICSELECT_POSITION);
+		setDestination(seek, 0, 210, 440, 30, 24, 0, 255,255,255,255, 2, 0, 0, 0, 0, 0, 0, 0, 0);
+		add(seek);
 
 		lanegroupregion = new Rectangle[] { rect(210, 140, 390, 580), rect(680, 140, 390, 580) };
 		// READY
@@ -665,10 +723,6 @@ public class PlaySkin extends Skin {
 
 	public SkinImage[] getBomb() {
 		return bomb;
-	}
-
-	public Sprite[] getKeybeam() {
-		return keybeam;
 	}
 
 	public Sprite getLanecover() {
@@ -743,4 +797,23 @@ public class PlaySkin extends Skin {
 			this.shift = shift;
 		}
 	}
-}
+
+	public void setLaneRenderer(LaneRenderer lanerender) {
+		this.lanerender = lanerender;
+	}
+
+	class SkinLaneObject extends SkinObject {
+
+		@Override
+		public void draw(SpriteBatch sprite, long time, MainState state) {
+			if(lanerender != null) {
+				lanerender.drawLane();
+			}
+		}
+
+		@Override
+		public void dispose() {
+
+		}
+	}
+ }
