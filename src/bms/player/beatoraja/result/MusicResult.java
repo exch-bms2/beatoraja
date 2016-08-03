@@ -8,6 +8,7 @@ import java.util.logging.Logger;
 import bms.player.beatoraja.gauge.*;
 import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.select.MusicSelector;
+
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import org.lwjgl.opengl.GL11;
 
@@ -446,18 +447,21 @@ public class MusicResult extends MainState {
 		}
 	}
 
-	public String getTitle() {
-		final PlayerResource resource = getMainController().getPlayerResource();
-		return resource.getBMSModel().getTitle();
-	}
-
-	public String getSubtitle() {
-		final PlayerResource resource = getMainController().getPlayerResource();
-		return resource.getBMSModel().getSubTitle();
-	}
-
 	public int getTotalNotes() {
 		final PlayerResource resource = getMainController().getPlayerResource();
 		return resource.getBMSModel().getTotalNotes();
+	}
+	
+	public String getTextValue(int id) {
+		final PlayerResource resource = getMainController().getPlayerResource();
+		switch(id) {
+		case STRING_TITLE:
+			return resource.getBMSModel().getTitle();
+		case STRING_SUBTITLE:
+			return resource.getBMSModel().getSubTitle();
+		case STRING_FULLTITLE:
+			return resource.getBMSModel().getTitle() + " " + resource.getBMSModel().getSubTitle();
+		}
+		return "";
 	}
 }

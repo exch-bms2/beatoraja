@@ -54,20 +54,20 @@ public class MusicSelectSkin extends Skin {
 		trophy[2] = new Sprite(ttrophy[0][12]);
 
 		SkinText dir = new SkinText("skin/VL-Gothic-Regular.ttf",0,24, 2);
-		dir.setTextResourceAccessor(TextResourceAccessor.DIRECTORY);
-		setDestination(dir, 0, 40, 670, 18, 18, 0, 255,255,128,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		dir.setReferenceID(MainState.STRING_DIRECTORY);
+		setDestination(dir, 0, 40, 670, 18, 24, 0, 255,255,128,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		this.add(dir);
 		SkinText genre = new SkinText("skin/VL-Gothic-Regular.ttf",0,20, 2);
-		genre.setTextResourceAccessor(TextResourceAccessor.GENRE);
-		setDestination(genre, 0, 100, 630, 18, 18, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		genre.setReferenceID(MainState.STRING_GENRE);
+		setDestination(genre, 0, 100, 630, 18, 20, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		this.add(genre);
 		SkinText title = new SkinText("skin/VL-Gothic-Regular.ttf",0,24, 2);
-		title.setTextResourceAccessor(TextResourceAccessor.FULLTITLE);
-		setDestination(title, 0, 100, 600, 18, 18, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		title.setReferenceID(MainState.STRING_FULLTITLE);
+		setDestination(title, 0, 100, 600, 18, 24, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		this.add(title);
 		SkinText artist = new SkinText("skin/VL-Gothic-Regular.ttf",0,20, 2);
-		artist.setTextResourceAccessor(TextResourceAccessor.FULLARTIST);
-		setDestination(artist, 0, 100, 570, 18, 18, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		artist.setReferenceID(MainState.STRING_ARTIST);
+		setDestination(artist, 0, 100, 570, 18, 20, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		this.add(artist);
 
 		Texture cl = new Texture("skin/clear.png");

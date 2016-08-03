@@ -921,46 +921,45 @@ public class MusicSelector extends MainState {
 		return (int) (clear ? playerdata.getClear() : playerdata.getPlaycount() - playerdata.getClear());
 	}
 
-	public String getTitle() {
-		return bar.getSelected().getTitle();
-	}
-
-	public String getSubtitle() {
-		if(bar.getSelected() instanceof SongBar) {
-			return ((SongBar) bar.getSelected()).getSongData().getSubtitle();
-		}
-		return "";
-	}
-
-	public String getArtist() {
-		if(bar.getSelected() instanceof SongBar) {
-			return ((SongBar) bar.getSelected()).getSongData().getArtist();
-		}
-		return "";
-	}
-
-	public String getSubartist() {
-		if(bar.getSelected() instanceof SongBar) {
-			return ((SongBar) bar.getSelected()).getSongData().getSubartist();
-		}
-		return "";
-	}
-
-	public String getGenre() {
-		if(bar.getSelected() instanceof SongBar) {
-			return ((SongBar) bar.getSelected()).getSongData().getGenre();
+	public String getTextValue(int id) {
+		switch(id) {
+		case STRING_TITLE:
+			return bar.getSelected().getTitle();
+		case STRING_SUBTITLE:
+			if(bar.getSelected() instanceof SongBar) {
+				return ((SongBar) bar.getSelected()).getSongData().getSubtitle();
+			}
+			return "";
+		case STRING_FULLTITLE:
+			if(bar.getSelected() instanceof SongBar) {
+				return bar.getSelected().getTitle() + " " + ((SongBar) bar.getSelected()).getSongData().getSubtitle();
+			}
+			return bar.getSelected().getTitle();
+		case STRING_GENRE:
+			if(bar.getSelected() instanceof SongBar) {
+				return ((SongBar) bar.getSelected()).getSongData().getGenre();
+			}
+			return "";
+		case STRING_ARTIST:
+			if(bar.getSelected() instanceof SongBar) {
+				return ((SongBar) bar.getSelected()).getSongData().getArtist();
+			}
+			return "";
+		case STRING_SUBARTIST:
+			if(bar.getSelected() instanceof SongBar) {
+				return ((SongBar) bar.getSelected()).getSongData().getSubartist();
+			}
+			return "";
+		case STRING_DIRECTORY:
+			StringBuffer str = new StringBuffer();
+			for (Bar b : dir) {
+				str.append(b.getTitle() + " > ");
+			}
+			return str.toString();
 		}
 		return "";
 	}
 	
-	public String getDirectory() {
-		StringBuffer str = new StringBuffer();
-		for (Bar b : dir) {
-			str.append(b.getTitle() + " > ");
-		}
-		return str.toString();
-	}
-
 	PlayerResource getResource() {
 		return getMainController().getPlayerResource();
 	}

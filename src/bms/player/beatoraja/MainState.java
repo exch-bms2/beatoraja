@@ -30,6 +30,14 @@ public abstract class MainState {
 	// プレイ専用
 	public static final int SLIDER_MUSIC_PROGRESS = 6;
 	
+	public static final int STRING_TITLE = 10;
+	public static final int STRING_SUBTITLE = 11;
+	public static final int STRING_FULLTITLE = 12;
+	public static final int STRING_GENRE = 13;
+	public static final int STRING_ARTIST = 14;
+	public static final int STRING_SUBARTIST = 15;
+	public static final int STRING_DIRECTORY = 1000;
+	
 	public MainState() {
 		this(null);
 	}
@@ -173,31 +181,11 @@ public abstract class MainState {
 		return 0;
 	}
 
-	public String getTitle() {
-		return "";
-	}
-
-	public String getSubtitle() {
-		return "";
-	}
-
-	public String getArtist() {
-		return "";
-	}
-
-	public String getSubartist() {
-		return "";
-	}
-
-	public String getGenre() {
-		return "";
-	}
-
-	public String getDirectory() {
-		return "";
-	}
-
 	public float getSliderValue(int id) {
 		return 0;
+	}
+	
+	public String getTextValue(int id) {
+		return "";
 	}
 }

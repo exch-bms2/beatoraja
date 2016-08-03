@@ -84,28 +84,25 @@ public class MusicDecide extends MainState {
 		
 	}
 
-	public String getTitle() {
+	public String getTextValue(int id) {
 		final PlayerResource resource = getMainController().getPlayerResource();
-		if(resource.getCourseBMSModels() != null) {
-			return resource.getCoursetitle();
+		switch(id) {
+		case STRING_TITLE:
+			if(resource.getCourseBMSModels() != null) {
+				return resource.getCoursetitle();
+			}
+			return resource.getBMSModel().getTitle();
+		case STRING_GENRE:
+			if(resource.getCourseBMSModels() != null) {
+				return "";
+			}
+			return resource.getBMSModel().getGenre();
+		case STRING_ARTIST:
+			if(resource.getCourseBMSModels() != null) {
+				return "";
+			}
+			return resource.getBMSModel().getArtist();
 		}
-		return resource.getBMSModel().getTitle();
+		return "";
 	}
-
-	public String getArtist() {
-		final PlayerResource resource = getMainController().getPlayerResource();
-		if(resource.getCourseBMSModels() != null) {
-			return "";
-		}
-		return resource.getBMSModel().getArtist();
-	}
-
-	public String getGenre() {
-		final PlayerResource resource = getMainController().getPlayerResource();
-		if(resource.getCourseBMSModels() != null) {
-			return "";
-		}
-		return resource.getBMSModel().getGenre();
-	}
-
 }

@@ -3,6 +3,7 @@ package bms.player.beatoraja.result;
 import java.util.ArrayList;
 import java.util.List;
 
+import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.skin.*;
 
@@ -98,7 +99,7 @@ public class MusicResultSkin extends Skin {
 		addNumber(new SkinNumber(ntr[0], 0, 5, 0, NumberResourceAccessor.TOTALNOTES), 0, 360, 486, 12, 12, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 		SkinText title = new SkinText("skin/VL-Gothic-Regular.ttf",0,24, 2);
-		title.setTextResourceAccessor(TextResourceAccessor.FULLTITLE);
+		title.setReferenceID(MainState.STRING_FULLTITLE);
 		title.setAlign(SkinText.ALIGN_CENTER);
 		setDestination(title, 0, 640, 23, 24, 24, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		this.add(title);

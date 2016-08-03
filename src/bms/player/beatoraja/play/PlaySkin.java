@@ -1,5 +1,6 @@
 package bms.player.beatoraja.play;
 
+import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.skin.*;
 
 import com.badlogic.gdx.graphics.Texture;
@@ -272,7 +273,7 @@ public class PlaySkin extends Skin {
 		bgaregion = new Rectangle[]{rect(500, 50, 740, 650)};
 
 		SkinText title = new SkinText("skin/VL-Gothic-Regular.ttf", 0, 24,2);
-		title.setTextResourceAccessor(TextResourceAccessor.TITLE);
+		title.setReferenceID(MainState.STRING_FULLTITLE);
 		setDestination(title, 0, 502, 698, 18, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		setDestination(title, 1000, 502, 698, 18, 18, 0, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		setDestination(title, 2000, 502, 698, 18, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -443,7 +444,7 @@ public class PlaySkin extends Skin {
 
 		bgaregion = new Rectangle[]{rect(10, 390, 330, 330), rect(10, 50, 330, 330)};
 		SkinText title = new SkinText("skin/VL-Gothic-Regular.ttf", 0, 24);
-		title.setTextResourceAccessor(TextResourceAccessor.TITLE);
+		title.setReferenceID(MainState.STRING_FULLTITLE);
 		setDestination(title, 0, 12, 720, 18, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		setDestination(title, 1000, 12, 720, 18, 18, 0, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		setDestination(title, 2000, 12, 720, 18, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -576,7 +577,7 @@ public class PlaySkin extends Skin {
 
 		bgaregion = new Rectangle[]{rect(10, 500, 180, 220), rect(10, 270, 180, 220), rect(10, 40, 180, 220)};
 		SkinText title = new SkinText("skin/VL-Gothic-Regular.ttf", 0, 24);
-		title.setTextResourceAccessor(TextResourceAccessor.TITLE);
+		title.setReferenceID(MainState.STRING_FULLTITLE);
 		setDestination(title, 0, 12, 720, 18, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		setDestination(title, 1000, 12, 720, 18, 18, 0, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		setDestination(title, 2000, 12, 720, 18, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);

@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 
+import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.skin.*;
 
@@ -27,16 +28,16 @@ public class MusicDecideSkin extends Skin {
 		dh = r.height / 720.0f;
 
         SkinText genre = new SkinText("skin/VL-Gothic-Regular.ttf",0,20, 2);
-        genre.setTextResourceAccessor(TextResourceAccessor.GENRE);
+		genre.setReferenceID(MainState.STRING_GENRE);
         setDestination(genre, 0, 300, 420, 18, 18, 0, 255,255,255,255, 0, 0, 0, 0, 2000, 0, 0, 0, 0);
         setDestination(genre, 2000, 380, 420, 18, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         this.add(genre);
         SkinText title = new SkinText("skin/VL-Gothic-Regular.ttf",0,24, 2);
-        title.setTextResourceAccessor(TextResourceAccessor.TITLE);
+		title.setReferenceID(MainState.STRING_FULLTITLE);
         setDestination(title, 0, 340, 360, 18, 18, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         this.add(title);
         SkinText artist = new SkinText("skin/VL-Gothic-Regular.ttf",0,20, 2);
-        artist.setTextResourceAccessor(TextResourceAccessor.ARTIST);
+        artist.setReferenceID(MainState.STRING_ARTIST);
         setDestination(artist, 0, 380, 300,18, 18, 0, 255,255,255,255, 0, 0, 0, 0, 2000, 0, 0, 0, 0);
         setDestination(artist, 2000, 300, 300,18, 18, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         this.add(artist);

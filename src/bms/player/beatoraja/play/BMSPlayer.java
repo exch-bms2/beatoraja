@@ -933,10 +933,18 @@ public class BMSPlayer extends MainState {
 		return ((playtime - (int) (starttime != 0 ? System.currentTimeMillis() - starttime : 0) + 1000) / 1000) % 60;
 	}
 
-	public String getTitle() {
-		return getMainController().getPlayerResource().getBMSModel().getTitle();
+	public String getTextValue(int id) {
+		switch(id) {
+		case STRING_TITLE:
+			return getMainController().getPlayerResource().getBMSModel().getTitle();
+		case STRING_SUBTITLE:
+			return getMainController().getPlayerResource().getBMSModel().getSubTitle();
+		case STRING_FULLTITLE:
+			return getMainController().getPlayerResource().getBMSModel().getTitle() + " " + getMainController().getPlayerResource().getBMSModel().getSubTitle();
+		}
+		return "";
 	}
-
+	
 	@Override
 	public int getTotalNotes() {
 		return totalnotes;
