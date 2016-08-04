@@ -186,6 +186,22 @@ public abstract class MainState {
 	}
 	
 	public String getTextValue(int id) {
+		if(getMainController().getPlayerResource() != null) {
+			switch(id) {
+			case STRING_TITLE:
+				return getMainController().getPlayerResource().getBMSModel().getTitle();
+			case STRING_SUBTITLE:
+				return getMainController().getPlayerResource().getBMSModel().getSubTitle();
+			case STRING_FULLTITLE:
+				return getMainController().getPlayerResource().getBMSModel().getFullTitle();
+			case STRING_ARTIST:
+				return getMainController().getPlayerResource().getBMSModel().getArtist();
+			case STRING_SUBARTIST:
+				return getMainController().getPlayerResource().getBMSModel().getSubTitle();
+			case STRING_GENRE:
+				return getMainController().getPlayerResource().getBMSModel().getGenre();
+			}
+		}
 		return "";
 	}
 }

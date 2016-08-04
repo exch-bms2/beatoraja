@@ -62,17 +62,13 @@ public class LaneRenderer {
 
 	private SpriteBatch sprite;
 	private ShapeRenderer shape;
+	private BitmapFont font;
 	private PlaySkin skin;
 
 	private Config config;
 	private int auto;
 
 	private boolean drawline = true;
-
-	Color[] lanebg = { new Color(0.05f, 0.05f, 0.05f, 1), Color.BLACK, new Color(0.05f, 0.05f, 0.05f, 1), Color.BLACK,
-			new Color(0.05f, 0.05f, 0.05f, 1), Color.BLACK, new Color(0.05f, 0.05f, 0.05f, 1), Color.BLACK,
-			new Color(0.05f, 0.05f, 0.05f, 1), Color.BLACK, new Color(0.05f, 0.05f, 0.05f, 1), Color.BLACK,
-			new Color(0.05f, 0.05f, 0.05f, 1), Color.BLACK, new Color(0.05f, 0.05f, 0.05f, 1), Color.BLACK };
 
 	private boolean hschanged;
 	private long startpressedtime;
@@ -100,7 +96,7 @@ public class LaneRenderer {
 
 	private int[] judgecombo;
 
-	public LaneRenderer(BMSPlayer main, SpriteBatch sprite, ShapeRenderer shape, PlaySkin skin,
+	public LaneRenderer(BMSPlayer main, SpriteBatch sprite, ShapeRenderer shape, BitmapFont font, PlaySkin skin,
 			PlayerResource resource, BMSModel model, int[] mode) {
 		dw = MainController.RESOLUTION[resource.getConfig().getResolution()].width / 1280f;
 		dh = MainController.RESOLUTION[resource.getConfig().getResolution()].height / 720f;
@@ -114,6 +110,7 @@ public class LaneRenderer {
 		this.main = main;
 		this.sprite = sprite;
 		this.shape = shape;
+		this.font = font;
 		this.skin = skin;
 		this.config = resource.getConfig();
 		auto = resource.getAutoplay();
@@ -125,11 +122,6 @@ public class LaneRenderer {
 		this.model = model;
 		this.timelines = model.getAllTimeLines();
 		if (model.getUseKeys() == 9) {
-			lanebg = new Color[] { new Color(0.2f, 0.2f, 0.2f, 1), new Color(0.2f, 0.2f, 0.0f, 1),
-					new Color(0.0f, 0.2f, 0.0f, 1), new Color(0.0f, 0.0f, 0.2f, 1), new Color(0.2f, 0.0f, 0.0f, 1),
-					new Color(0.0f, 0.0f, 0.2f, 1), new Color(0.0f, 0.2f, 0.0f, 1), new Color(0.2f, 0.2f, 0.0f, 1),
-					new Color(0.2f, 0.2f, 0.2f, 1), Color.BLACK, new Color(0.2f, 0.2f, 0.2f, 1), Color.BLACK,
-					new Color(0.2f, 0.2f, 0.2f, 1), Color.BLACK, new Color(0.2f, 0.2f, 0.2f, 1), Color.BLACK };
 			drawline = false;
 		}
 		hispeed = config.getHispeed();
@@ -234,7 +226,9 @@ public class LaneRenderer {
 	private double basebpm;
 	private double nowbpm;
 
-	public void drawLane(BitmapFont font, long time) {
+	public void drawLane() {
+		sprite.end();
+		long time = main.getPlayTime() != 0 ? (System.currentTimeMillis() - main.getPlayTime()) : 0;
 		time += config.getJudgetiming();
 		JudgeManager judge = main.getJudgeManager();
 		final Rectangle[] laneregion = skin.getLaneregion();
@@ -287,42 +281,37 @@ public class LaneRenderer {
 
 		boolean[] keystate = main.getBMSPlayerInputProcessor().getKeystate();
 		for (int lane = 0; lane < laneregion.length; lane++) {
-			float x = laneregion[lane].x;
-			float dx = laneregion[lane].width;
-			shape.begin(ShapeType.Filled);
-			shape.setColor(lanebg[lane]);
-			shape.rect(x, hl, dx, hu - hl);
-			shape.end();
-			// キービーム描画
+			// キービームフラグON/OFF
 			sprite.begin();
 			if (model.getUseKeys() == 9) {
 				if (keystate[lane]) {
-					if (lane % 2 == 0) {
-						sprite.draw(skin.getKeybeam()[0], x, hl, dx, hu - hl);
-					} else {
-						sprite.draw(skin.getKeybeam()[1], x, hl, dx, hu - hl);
+					if(main.getTimer()[BMSPlayer.TIMER_KEYON_1P_KEY1 + lane] == -1) {
+						main.getTimer()[BMSPlayer.TIMER_KEYON_1P_KEY1 + lane] = main.getNowTime();
+						main.getTimer()[BMSPlayer.TIMER_KEYOFF_1P_KEY1 + lane] = -1;
+					}
+				} else {
+					if(main.getTimer()[BMSPlayer.TIMER_KEYOFF_1P_KEY1 + lane] == -1) {
+						main.getTimer()[BMSPlayer.TIMER_KEYOFF_1P_KEY1 + lane] = main.getNowTime();
+						main.getTimer()[BMSPlayer.TIMER_KEYON_1P_KEY1 + lane] = -1;
 					}
 				}
 			} else {
 				int key = (model.getUseKeys() > 9 && lane >= 8 ? lane + 1 : lane);
 				if (keystate[key] || (key == 7 && keystate[8]) || (key == 16 && keystate[17])) {
-					if (lane == 7) {
-						sprite.draw(skin.getKeybeam()[2], x, hl, dx, hu - hl);
-					} else if (lane % 2 == 0) {
-						sprite.draw(skin.getKeybeam()[0], x, hl, dx, hu - hl);
-					} else {
-						sprite.draw(skin.getKeybeam()[1], x, hl, dx, hu - hl);
+					int offset = (lane % 8 == 7 ? -1 : (lane % 8)) + (lane >= 8 ? 10 : 0);
+					if (main.getTimer()[BMSPlayer.TIMER_KEYON_1P_KEY1 + offset] == -1) {
+						main.getTimer()[BMSPlayer.TIMER_KEYON_1P_KEY1 + offset] = main.getNowTime();
+						main.getTimer()[BMSPlayer.TIMER_KEYOFF_1P_KEY1 + offset] = -1;
+					}
+				} else {
+					int offset = (lane % 8 == 7 ? -1 : (lane % 8)) + (lane >= 8 ? 10 : 0);
+					if (main.getTimer()[BMSPlayer.TIMER_KEYOFF_1P_KEY1 + offset] == -1) {
+						main.getTimer()[BMSPlayer.TIMER_KEYOFF_1P_KEY1 + offset] = main.getNowTime();
+						main.getTimer()[BMSPlayer.TIMER_KEYON_1P_KEY1 + offset] = -1;
 					}
 				}
 			}
 			sprite.end();
-
-			if (drawline) {
-				shape.begin(ShapeType.Line);
-				shape.setColor(Color.GRAY);
-				shape.rect(x, hl, dx, hu - hl);
-				shape.end();
-			}
 		}
 
 		// 各種コントロール入力判定
@@ -551,7 +540,6 @@ public class LaneRenderer {
 					}
 				}
 			}
-
 		}
 
 		// System.out.println("time :" + ltime + " y :" + yy + " real time : "
@@ -640,7 +628,7 @@ public class LaneRenderer {
 			}
 		}
 		sprite.end();
-
+		sprite.begin();
 	}
 
 	public double getNowBPM() {

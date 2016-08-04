@@ -450,18 +450,5 @@ public class MusicResult extends MainState {
 	public int getTotalNotes() {
 		final PlayerResource resource = getMainController().getPlayerResource();
 		return resource.getBMSModel().getTotalNotes();
-	}
-	
-	public String getTextValue(int id) {
-		final PlayerResource resource = getMainController().getPlayerResource();
-		switch(id) {
-		case STRING_TITLE:
-			return resource.getBMSModel().getTitle();
-		case STRING_SUBTITLE:
-			return resource.getBMSModel().getSubTitle();
-		case STRING_FULLTITLE:
-			return resource.getBMSModel().getTitle() + " " + resource.getBMSModel().getSubTitle();
-		}
-		return "";
-	}
+	}	
 }

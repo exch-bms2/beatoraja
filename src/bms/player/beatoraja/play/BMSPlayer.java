@@ -34,6 +34,68 @@ public class BMSPlayer extends MainState {
 
 	// TODO GLAssistから起動すると楽曲ロード中に止まる
 
+	public static final int TIMER_BOMB_1P_SCRATCH = 50;
+	public static final int TIMER_BOMB_1P_KEY1 = 51;
+	public static final int TIMER_BOMB_1P_KEY2 = 52;
+	public static final int TIMER_BOMB_1P_KEY3 = 53;
+	public static final int TIMER_BOMB_1P_KEY4 = 54;
+	public static final int TIMER_BOMB_1P_KEY5 = 55;
+	public static final int TIMER_BOMB_1P_KEY6 = 56;
+	public static final int TIMER_BOMB_1P_KEY7 = 57;
+	public static final int TIMER_BOMB_1P_KEY8 = 58;
+	public static final int TIMER_BOMB_1P_KEY9 = 59;
+	public static final int TIMER_BOMB_2P_SCRATCH = 60;
+	public static final int TIMER_BOMB_2P_KEY1 = 61;
+	public static final int TIMER_BOMB_2P_KEY2 = 62;
+	public static final int TIMER_BOMB_2P_KEY3 = 63;
+	public static final int TIMER_BOMB_2P_KEY4 = 64;
+	public static final int TIMER_BOMB_2P_KEY5 = 65;
+	public static final int TIMER_BOMB_2P_KEY6 = 66;
+	public static final int TIMER_BOMB_2P_KEY7 = 67;
+	public static final int TIMER_BOMB_2P_KEY8 = 68;
+	public static final int TIMER_BOMB_2P_KEY9 = 69;
+	public static final int TIMER_HOLD = 70;
+	public static final int TIMER_KEYON_1P_SCRATCH = 100;
+	public static final int TIMER_KEYON_1P_KEY1 = 101;
+	public static final int TIMER_KEYON_1P_KEY2 = 102;
+	public static final int TIMER_KEYON_1P_KEY3 = 103;
+	public static final int TIMER_KEYON_1P_KEY4 = 104;
+	public static final int TIMER_KEYON_1P_KEY5 = 105;
+	public static final int TIMER_KEYON_1P_KEY6 = 106;
+	public static final int TIMER_KEYON_1P_KEY7 = 107;
+	public static final int TIMER_KEYON_1P_KEY8 = 108;
+	public static final int TIMER_KEYON_1P_KEY9 = 109;
+	public static final int TIMER_KEYON_2P_SCRATCH = 110;
+	public static final int TIMER_KEYON_2P_KEY1 = 111;
+	public static final int TIMER_KEYON_2P_KEY2 = 112;
+	public static final int TIMER_KEYON_2P_KEY3 = 113;
+	public static final int TIMER_KEYON_2P_KEY4 = 114;
+	public static final int TIMER_KEYON_2P_KEY5 = 115;
+	public static final int TIMER_KEYON_2P_KEY6 = 116;
+	public static final int TIMER_KEYON_2P_KEY7 = 117;
+	public static final int TIMER_KEYON_2P_KEY8 = 118;
+	public static final int TIMER_KEYON_2P_KEY9 = 119;
+	public static final int TIMER_KEYOFF_1P_SCRATCH = 120;
+	public static final int TIMER_KEYOFF_1P_KEY1 = 121;
+	public static final int TIMER_KEYOFF_1P_KEY2 = 122;
+	public static final int TIMER_KEYOFF_1P_KEY3 = 123;
+	public static final int TIMER_KEYOFF_1P_KEY4 = 124;
+	public static final int TIMER_KEYOFF_1P_KEY5 = 125;
+	public static final int TIMER_KEYOFF_1P_KEY6 = 126;
+	public static final int TIMER_KEYOFF_1P_KEY7 = 127;
+	public static final int TIMER_KEYOFF_1P_KEY8 = 128;
+	public static final int TIMER_KEYOFF_1P_KEY9 = 129;
+	public static final int TIMER_KEYOFF_2P_SCRATCH = 130;
+	public static final int TIMER_KEYOFF_2P_KEY1 = 131;
+	public static final int TIMER_KEYOFF_2P_KEY2 = 132;
+	public static final int TIMER_KEYOFF_2P_KEY3 = 133;
+	public static final int TIMER_KEYOFF_2P_KEY4 = 134;
+	public static final int TIMER_KEYOFF_2P_KEY5 = 135;
+	public static final int TIMER_KEYOFF_2P_KEY6 = 136;
+	public static final int TIMER_KEYOFF_2P_KEY7 = 137;
+	public static final int TIMER_KEYOFF_2P_KEY8 = 138;
+	public static final int TIMER_KEYOFF_2P_KEY9 = 139;
+
 	private BitmapFont titlefont;
 	private BitmapFont judgefont;
 	private BitmapFont systemfont;
@@ -323,6 +385,16 @@ public class BMSPlayer extends MainState {
 		final ShapeRenderer shape = main.getShapeRenderer();
 		final SpriteBatch sprite = main.getSpriteBatch();
 
+		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/VL-Gothic-Regular.ttf"));
+		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
+		parameter.size = 24;
+		parameter.characters += model.getFullTitle();
+		titlefont = generator.generateFont(parameter);
+		parameter.size = 18;
+		systemfont = generator.generateFont(parameter);
+		judgefont = generator.generateFont(parameter);
+		generator.dispose();
+
 		Config config = resource.getConfig();
 		Logger.getGlobal().info("create");
 
@@ -332,7 +404,8 @@ public class BMSPlayer extends MainState {
 				.getUseKeys() == 10 || model.getUseKeys() == 14 ? config.getMode14() : config.getMode9()));
 		input.setKeyassign(pc.getKeyassign());
 		input.setControllerassign(pc.getControllerassign());
-		lanerender = new LaneRenderer(this, sprite, shape, skin, resource, model, resource.getConstraint());
+		lanerender = new LaneRenderer(this, sprite, shape, systemfont, skin, resource, model, resource.getConstraint());
+		skin.setLaneRenderer(lanerender);
 		Logger.getGlobal().info("描画クラス準備");
 
 		Logger.getGlobal().info("hash");
@@ -343,16 +416,6 @@ public class BMSPlayer extends MainState {
 		}
 		graphrender = new ScoreGraphRenderer(model, score.getExscore(), model.getTotalNotes() * 8 / 5);
 		Logger.getGlobal().info("スコアグラフ描画クラス準備");
-
-		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/VL-Gothic-Regular.ttf"));
-		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
-		parameter.size = 24;
-		parameter.characters += model.getFullTitle();
-		titlefont = generator.generateFont(parameter);
-		parameter.size = 18;
-		systemfont = generator.generateFont(parameter);
-		judgefont = generator.generateFont(parameter);
-		generator.dispose();
 
 		audio = resource.getAudioProcessor();
 		bga = resource.getBGAManager();
@@ -386,15 +449,6 @@ public class BMSPlayer extends MainState {
 		// 楽曲ロード
 		case STATE_PRELOAD:
 			renderMain(0);
-			shape.begin(ShapeType.Filled);
-			shape.setColor(Color.YELLOW);
-			shape.rect(
-					skin.getLaneGroupRegion()[0].x,
-					skin.getLaneGroupRegion()[0].y + 200,
-					(audio.getProgress() + bga.getProgress())
-							* (skin.getLaneGroupRegion()[0].width) / 2, 4);
-			shape.end();
-
 			if (resource.mediaLoadFinished() && !input.startPressed()) {
 				bga.prepare(this);
 				state = STATE_READY;
@@ -504,7 +558,11 @@ public class BMSPlayer extends MainState {
 				if(resource.getScoreData() != null) {
 					main.changeState(MainController.STATE_RESULT);
 				} else {
-					main.changeState(MainController.STATE_SELECTMUSIC);
+					if(resource.getCourseBMSModels() != null && resource.nextCourse()) {
+						main.changeState(MainController.STATE_PLAYBMS);
+					} else {
+						main.changeState(MainController.STATE_SELECTMUSIC);						
+					}
 				}
 			}
 			break;
@@ -628,10 +686,10 @@ public class BMSPlayer extends MainState {
 		final ShapeRenderer shape = main.getShapeRenderer();
 		final SpriteBatch sprite = main.getSpriteBatch();
 
-		// グラフ描画
+		// グラフ描画 TODO スキン描画への移行
 		graphrender.drawGraph(skin, sprite, systemfont, shape, this.judge);
 
-		// プログレス描画
+		// プログレス描画 TODO スキン描画への移行
 		Rectangle progress = skin.getProgressRegion();
 		shape.begin(ShapeType.Line);
 		shape.setColor(Color.WHITE);
@@ -645,10 +703,8 @@ public class BMSPlayer extends MainState {
 		shape.rect(progress.x + 1, progress.y + 1 + progress.height * (1.0f - (float) time / playtime),
 				progress.width - 2, 20);
 		shape.end();
-		// レーン描画
-		lanerender.drawLane(systemfont, time);
 
-		// BGA再生
+		// BGA再生 TODO スキン描画への移行
 		Rectangle[] region = skin.getBGAregion();
 		for(Rectangle r : region) {
 			shape.begin(ShapeType.Line);
@@ -663,7 +719,7 @@ public class BMSPlayer extends MainState {
 		
 		bga.drawBGA(sprite, region, state == STATE_PRELOAD || state == STATE_READY ? -1 : time);
 
-		// ゲージ描画
+		// ゲージ描画 TODO スキン描画への移行
 		Rectangle gr = skin.getGaugeRegion();
 		shape.begin(ShapeType.Filled);
 		shape.setColor(Color.valueOf("#001000"));
@@ -671,7 +727,7 @@ public class BMSPlayer extends MainState {
 		shape.end();
 		gauge.draw(skin, sprite, gr.x, gr.y, gr.width, gr.height);
 
-		// ジャッジカウント描画
+		// ジャッジカウント描画 TODO スキン描画への移行
 		Rectangle judge = skin.getJudgecountregion();
 		Gdx.gl.glEnable(GL11.GL_BLEND);
 		Gdx.gl.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
@@ -721,10 +777,6 @@ public class BMSPlayer extends MainState {
 		return input;
 	}
 
-	public LaneRenderer getLaneRenderer() {
-		return lanerender;
-	}
-	
 	public int getJudgeCount(int judge, boolean fast) {
 		return this.judge.getJudgeCount(judge, fast);
 	}
@@ -933,18 +985,6 @@ public class BMSPlayer extends MainState {
 		return ((playtime - (int) (starttime != 0 ? System.currentTimeMillis() - starttime : 0) + 1000) / 1000) % 60;
 	}
 
-	public String getTextValue(int id) {
-		switch(id) {
-		case STRING_TITLE:
-			return getMainController().getPlayerResource().getBMSModel().getTitle();
-		case STRING_SUBTITLE:
-			return getMainController().getPlayerResource().getBMSModel().getSubTitle();
-		case STRING_FULLTITLE:
-			return getMainController().getPlayerResource().getBMSModel().getTitle() + " " + getMainController().getPlayerResource().getBMSModel().getSubTitle();
-		}
-		return "";
-	}
-	
 	@Override
 	public int getTotalNotes() {
 		return totalnotes;
@@ -971,6 +1011,13 @@ public class BMSPlayer extends MainState {
 	
 	@Override
 	public float getSliderValue(int id) {
+		if(id == MainState.SLIDER_MUSICSELECT_POSITION) {
+			float value = (audio.getProgress() + bga.getProgress()) / 2;
+			if(value >= 1) {
+				return -20;
+			}
+			return value;
+		}
 		if(id == MainState.SLIDER_MUSIC_PROGRESS && starttime != 0) {
 			return (float) (System.currentTimeMillis() - starttime) / playtime;
 		}
