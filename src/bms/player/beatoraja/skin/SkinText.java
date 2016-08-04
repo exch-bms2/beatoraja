@@ -75,7 +75,7 @@ public class SkinText extends SkinObject {
         if(value == null || value.length() == 0) {
             return;
         }        	
-        Rectangle r = this.getDestination(time);
+        Rectangle r = this.getDestination(time,state);
         if(r != null) {
             if(!value.equals(parameter.characters)) {
                 parameter.characters = value;

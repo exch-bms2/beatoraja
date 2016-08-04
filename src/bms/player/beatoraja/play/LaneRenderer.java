@@ -77,14 +77,10 @@ public class LaneRenderer {
 
 	private boolean enableControl = true;
 
-	private final float dw;
-	private final float dh;
-
 	/**
 	 * ボムの表示開始時間
 	 */
-	private long[] bomb;
-	private int[] bombtype;
+	private int[] judge;
 	/**
 	 * 現在表示中の判定
 	 */
@@ -98,15 +94,11 @@ public class LaneRenderer {
 
 	public LaneRenderer(BMSPlayer main, SpriteBatch sprite, ShapeRenderer shape, BitmapFont font, PlaySkin skin,
 			PlayerResource resource, BMSModel model, int[] mode) {
-		dw = MainController.RESOLUTION[resource.getConfig().getResolution()].width / 1280f;
-		dh = MainController.RESOLUTION[resource.getConfig().getResolution()].height / 720f;
-		bomb = new long[skin.getLaneregion().length];
-		bombtype = new int[skin.getLaneregion().length];
+		judge = new int[20];
 		judgenow = new int[skin.getJudgeregion().length];
 		judgenowt = new int[skin.getJudgeregion().length];
 		judgecombo = new int[skin.getJudgeregion().length];
 
-		Arrays.fill(bomb, -1000);
 		this.main = main;
 		this.sprite = sprite;
 		this.shape = shape;
@@ -282,15 +274,14 @@ public class LaneRenderer {
 		boolean[] keystate = main.getBMSPlayerInputProcessor().getKeystate();
 		for (int lane = 0; lane < laneregion.length; lane++) {
 			// キービームフラグON/OFF
-			sprite.begin();
 			if (model.getUseKeys() == 9) {
 				if (keystate[lane]) {
-					if(main.getTimer()[BMSPlayer.TIMER_KEYON_1P_KEY1 + lane] == -1) {
+					if (main.getTimer()[BMSPlayer.TIMER_KEYON_1P_KEY1 + lane] == -1) {
 						main.getTimer()[BMSPlayer.TIMER_KEYON_1P_KEY1 + lane] = main.getNowTime();
 						main.getTimer()[BMSPlayer.TIMER_KEYOFF_1P_KEY1 + lane] = -1;
 					}
 				} else {
-					if(main.getTimer()[BMSPlayer.TIMER_KEYOFF_1P_KEY1 + lane] == -1) {
+					if (main.getTimer()[BMSPlayer.TIMER_KEYOFF_1P_KEY1 + lane] == -1) {
 						main.getTimer()[BMSPlayer.TIMER_KEYOFF_1P_KEY1 + lane] = main.getNowTime();
 						main.getTimer()[BMSPlayer.TIMER_KEYON_1P_KEY1 + lane] = -1;
 					}
@@ -311,7 +302,6 @@ public class LaneRenderer {
 					}
 				}
 			}
-			sprite.end();
 		}
 
 		// 各種コントロール入力判定
@@ -436,7 +426,7 @@ public class LaneRenderer {
 				// yy = y - hl;
 				for (int p = 0; p < playerr.length; p++) {
 					if (config.isBpmguide()) {
-						if(tl.getBPM() != nbpm) {
+						if (tl.getBPM() != nbpm) {
 							// BPMガイド描画
 							shape.begin(ShapeType.Line);
 							shape.setColor(Color.valueOf("00c000"));
@@ -449,7 +439,7 @@ public class LaneRenderer {
 							font.draw(sprite, "BPM" + ((int) tl.getBPM()), playerr[p].x + playerr[p].width / 2, y + 20);
 							sprite.end();
 						}
-						if(tl.getStop() > 0) {
+						if (tl.getStop() > 0) {
 							// STOPガイド描画
 							shape.begin(ShapeType.Line);
 							shape.setColor(Color.valueOf("c0c000"));
@@ -459,7 +449,8 @@ public class LaneRenderer {
 							shape.end();
 							sprite.begin();
 							font.setColor(Color.valueOf("c0c000"));
-							font.draw(sprite, "STOP " + ((int) tl.getStop()) + "ms", playerr[p].x + playerr[p].width / 2, y + 20);
+							font.draw(sprite, "STOP " + ((int) tl.getStop()) + "ms", playerr[p].x + playerr[p].width
+									/ 2, y + 20);
 							sprite.end();
 						}
 					}
@@ -547,29 +538,35 @@ public class LaneRenderer {
 
 		// ボム描画。描画座標等はリフト量によって可変のためSkin移行は特殊な定義が必要
 		sprite.begin();
-		// sprite.enableBlending();
-		sprite.setBlendFunction(GL11.GL_ONE, GL11.GL_ONE);
 		for (int lane = 0; lane < laneregion.length; lane++) {
-			if (time >= bomb[lane]) {
-				if (judge.getProcessingLongNotes()[lane] != null) {
-					sprite.draw(skin.getBomb()[3].getImage(time - bomb[lane]), laneregion[lane].x
-							+ laneregion[lane].width / 2 - 110 * dw, hl - 155 * dh, 260 * dw, 270 * dh);
-				} else if (time <= bomb[lane] + 150) {
-					sprite.draw(skin.getBomb()[bombtype[lane]].getImage(time - bomb[lane]), laneregion[lane].x
-							+ laneregion[lane].width / 2 - 110 * dw, hl - 155 * dh, 260 * dw, 270 * dh);
+			if (judge.getProcessingLongNotes()[lane] != null) {
+				if (model.getUseKeys() == 9) {
+					if (main.getTimer()[BMSPlayer.TIMER_HOLD_1P_KEY1 + lane] == -1) {
+						main.getTimer()[BMSPlayer.TIMER_HOLD_1P_KEY1 + lane] = main.getNowTime();
+					}
+				} else {
+					int offset = (lane % 8 == 7 ? -1 : (lane % 8)) + (lane >= 8 ? 10 : 0);
+					if (main.getTimer()[BMSPlayer.TIMER_HOLD_1P_KEY1 + offset] == -1) {
+						main.getTimer()[BMSPlayer.TIMER_HOLD_1P_KEY1 + offset] = main.getNowTime();
+					}
+				}
+			} else {
+				if (model.getUseKeys() == 9) {
+					main.getTimer()[BMSPlayer.TIMER_HOLD_1P_KEY1 + lane] = -1;
+				} else {
+					int offset = (lane % 8 == 7 ? -1 : (lane % 8)) + (lane >= 8 ? 10 : 0);
+					main.getTimer()[BMSPlayer.TIMER_HOLD_1P_KEY1 + offset] = -1;
 				}
 			}
 		}
-		sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-		// sprite.disableBlending();
 
 		// 判定文字描画。描画座標等はリフト量によって可変のためSkin移行は特殊な定義が必要
 		for (int jr = 0; jr < skin.getJudgeregion().length; jr++) {
 			if (judgenow[jr] > 0 && time < judgenowt[jr] + 500) {
-				Rectangle r = skin.getJudgeregion()[jr].judge[judgenow[jr] - 1].getDestination(time);
+				Rectangle r = skin.getJudgeregion()[jr].judge[judgenow[jr] - 1].getDestination(time, main);
 				int shift = 0;
 				if (judgenow[jr] < 4) {
-					Rectangle nr = skin.getJudgeregion()[jr].count[judgenow[jr] - 1].getDestination(time);
+					Rectangle nr = skin.getJudgeregion()[jr].count[judgenow[jr] - 1].getDestination(time, main);
 					TextureRegion[] ntr = skin.getJudgeregion()[jr].count[judgenow[jr] - 1].getValue(judgecombo[jr], 0);
 					int index = 0;
 					for (; index < ntr.length && ntr[index] == null; index++)
@@ -712,12 +709,26 @@ public class LaneRenderer {
 
 	public void update(int lane, int judge, int time, int fast) {
 		if (judge < 2) {
-			bomb[lane] = time;
-			bombtype[lane] = judge == 0 ? 0 : (fast > 0 ? 1 : 2);
+			if (model.getUseKeys() == 9) {
+				main.getTimer()[BMSPlayer.TIMER_BOMB_1P_KEY1 + lane] = main.getNowTime();
+			} else {
+				int offset = (lane % 8 == 7 ? -1 : (lane % 8)) + (lane >= 8 ? 10 : 0);
+				main.getTimer()[BMSPlayer.TIMER_BOMB_1P_KEY1 + offset] = main.getNowTime();
+			}
+
 		}
-		judgenow[lane / (bomb.length / judgenow.length)] = judge + 1;
-		judgenowt[lane / (bomb.length / judgenow.length)] = time;
-		judgecombo[lane / (bomb.length / judgenow.length)] = main.getJudgeManager().getCourseCombo();
-		;
+		if (model.getUseKeys() == 9) {
+			this.judge[lane + 1] = judge == 0 ? 1 : judge * 2 + (fast > 0 ? 0 : 1);
+		} else {
+			int offset = (lane % 8 == 7 ? -1 : (lane % 8)) + (lane >= 8 ? 10 : 0);
+			this.judge[offset + 1] = judge == 0 ? 1 : judge * 2 + (fast > 0 ? 0 : 1);
+		}
+		judgenow[lane / (skin.getLaneregion().length / judgenow.length)] = judge + 1;
+		judgenowt[lane / (skin.getLaneregion().length / judgenow.length)] = time;
+		judgecombo[lane / (skin.getLaneregion().length / judgenow.length)] = main.getJudgeManager().getCourseCombo();
+	}
+
+	public int[] getJudge() {
+		return judge;
 	}
 }

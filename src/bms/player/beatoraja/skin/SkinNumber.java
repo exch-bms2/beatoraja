@@ -19,7 +19,7 @@ public class SkinNumber extends SkinObject {
 	private TextureRegion[] image;
 	private TextureRegion[] mimage;
 
-	private int id;
+	private int id = -1;
 
 	private int cycle;
 	
@@ -39,6 +39,19 @@ public class SkinNumber extends SkinObject {
 		this(image, null, cycle, keta, zeropadding, resource);
 	}
 
+	public SkinNumber(TextureRegion[] image, int cycle, int keta, int zeropadding, int rid) {
+		this(image, null, cycle, keta, zeropadding, rid);
+	}
+
+	public SkinNumber(TextureRegion[] image, TextureRegion[] mimage, int cycle, int keta, int zeropadding, int id) {
+		this.image = image;
+		this.mimage = mimage;
+		this.cycle = cycle;
+		this.setKeta(keta);
+		this.zeropadding = zeropadding;
+		this.id = id;
+	}
+	
 	public SkinNumber(TextureRegion[] image, TextureRegion[] mimage, int cycle, int keta, int zeropadding, NumberResourceAccessor resource) {
 		this.image = image;
 		this.mimage = mimage;
@@ -91,16 +104,20 @@ public class SkinNumber extends SkinObject {
 	}
 	
 	public  void draw(SpriteBatch sprite, long time, MainState state) {
-		if(resource != null) {
-			final int value = resource.getValue(state);
-			if(value != Integer.MIN_VALUE && value != Integer.MAX_VALUE) {
-				draw(sprite, time, resource.getValue(state));				
-			}
+		int value = Integer.MIN_VALUE;
+		if(id != -1) {
+			value = state.getNumberValue(id);
+		}
+		else if(resource != null) {
+			value = resource.getValue(state);
+		}
+		if(value != Integer.MIN_VALUE && value != Integer.MAX_VALUE) {
+			draw(sprite, time, value, state);				
 		}
 	}
 	
-	public void draw(SpriteBatch sprite, long time, int value) {
-		Rectangle r = this.getDestination(time);
+	public void draw(SpriteBatch sprite, long time, int value, MainState state) {
+		Rectangle r = this.getDestination(time,state);
 		TextureRegion[] values = getValue(value, zeropadding);
 		for (int j = 0; j < values.length; j++) {
 			if(values[j] != null) {

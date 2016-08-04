@@ -355,12 +355,6 @@ public abstract class LR2SkinLoader {
 									if (num.getId() == 160) {
 										num.setNumberResourceAccessor(NumberResourceAccessor.NOW_BPM);
 									}
-									if (num.getId() == 163) {
-										num.setNumberResourceAccessor(NumberResourceAccessor.TIMELEFT_MINUTE);
-									}
-									if (num.getId() == 164) {
-										num.setNumberResourceAccessor(NumberResourceAccessor.TIMELEFT_SECOND);
-									}
 									if (num.getId() == 170) {
 										num.setNumberResourceAccessor(NumberResourceAccessor.TARGET_SCORE);
 									}

@@ -1,9 +1,6 @@
 package bms.player.beatoraja.skin;
 
-import org.lwjgl.opengl.GL11;
-
 import bms.player.beatoraja.MainState;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
@@ -25,12 +22,18 @@ public class SkinImage extends SkinObject {
 	private int[] option = new int[3];
 
 	private NumberResourceAccessor resource;
+	
+	private int id = -1;
 
 	public SkinImage() {
 		
 	}
 	
 	public SkinImage(TextureRegion[] image, int cycle) {
+		setImage(image, cycle);
+	}
+		
+	public SkinImage(TextureRegion[][] image, int cycle) {
 		setImage(image, cycle);
 	}
 		
@@ -86,15 +89,30 @@ public class SkinImage extends SkinObject {
 		if(image == null) {
 			return;
 		}
+		int value = 0;
+        if(id != -1) {
+        	value = state.getNumberValue(id);
+        } else if(resource != null){
+        	value = resource.getValue(state);
+        }
+        if(value < 0 || value >= image.length) {
+            value = 0;
+        }
+        if(image[value].length == 0) {
+        	return;
+        }
+
 		if(timing != 0 && timing < 256) {
 			if(state.getTimer()[timing] == -1) {
 				return;
 			}
 			time -= state.getTimer()[timing];
 		}
-		Rectangle r = this.getDestination(time);
+		if(time < 0) {
+			return;
+		}
+		Rectangle r = this.getDestination(time, state);
         if (r != null) {
-			final int value = resource != null ? resource.getValue(state) : 0;
 			if(value >= 0 && value < image.length) {
 				draw(sprite, getImage(value, time), r.x, r.y, r.width, r.height, getColor(time));
 			}
@@ -112,4 +130,7 @@ public class SkinImage extends SkinObject {
 		}
 	}
 
+	public void setReferenceID(int id) {
+		this.id = id;
+	}
 }

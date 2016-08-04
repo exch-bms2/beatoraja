@@ -18,6 +18,9 @@ import org.lwjgl.opengl.GL11;
  */
 public abstract class SkinObject {
 
+	private int offsetX = -1;
+	private int offsetY = -1;
+	
     private List<SkinObjectDestination> dst = new ArrayList<SkinObjectDestination>();
 
     public void setDestination(long time, float x, float y, float w, float h, int acc, int a, int r, int g, int b,
@@ -43,12 +46,15 @@ public abstract class SkinObject {
         dst.add(obj);
     }
 
+    public Rectangle getDestination(long time) {
+    	return this.getDestination(time, null);
+    }
     /**
      * 指定して時間に応じた描画領域を返す
      * @param time 時間(ms)
      * @return 描画領域
      */
-    public Rectangle getDestination(long time) {
+    public Rectangle getDestination(long time, MainState state) {
         if(dst.size() == 0) {
             System.out.println("void image");
             return new Rectangle(0,0,0,0);
@@ -74,10 +80,26 @@ public abstract class SkinObject {
                     float y = r1.y + (r2.y - r1.y) * (time - obj1.time) / (time2 - obj1.time);
                     float w = r1.width + (r2.width - r1.width) * (time - obj1.time) / (time2 - obj1.time);
                     float h = r1.height + (r2.height - r1.height) * (time - obj1.time) / (time2 - obj1.time);
+                    if(state != null && offsetX != -1) {
+                    	x += state.getSliderValue(offsetX);
+                    }
+                    if(state != null && offsetY != -1) {
+                    	y += state.getSliderValue(offsetY);                    	
+                    }
                     return new Rectangle(x,y,w,h);
             }
         }
-        return dst.get(0).region;
+        float x = dst.get(0).region.x ;
+        float y = dst.get(0).region.y;
+        float w = dst.get(0).region.width;
+        float h = dst.get(0).region.height;
+        if(state != null && offsetX != -1) {
+        	x += state.getSliderValue(offsetX);
+        }
+        if(state != null && offsetY != -1) {
+        	y += state.getSliderValue(offsetY);                    	
+        }
+        return new Rectangle(x,y,w,h);
     }
 
     public Color getColor(long time) {
@@ -149,5 +171,13 @@ public abstract class SkinObject {
     }
 
     public abstract void dispose();
+
+	public void setOffsetXReferenceID(int offsetX) {
+		this.offsetX = offsetX;
+	}
+
+	public void setOffsetYReferenceID(int offsetY) {
+		this.offsetY = offsetY;
+	}
 
 }

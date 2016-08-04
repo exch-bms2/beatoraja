@@ -1,6 +1,7 @@
 package bms.player.beatoraja;
 
 import java.util.Arrays;
+import java.util.Calendar;
 
 import bms.player.beatoraja.skin.Skin;
 
@@ -29,6 +30,7 @@ public abstract class MainState {
 	public static final int SLIDER_MUSICSELECT_POSITION = 1;
 	// プレイ専用
 	public static final int SLIDER_MUSIC_PROGRESS = 6;
+	public static final int OFFSET_LIFT = 100;
 	
 	public static final int STRING_TITLE = 10;
 	public static final int STRING_SUBTITLE = 11;
@@ -38,6 +40,18 @@ public abstract class MainState {
 	public static final int STRING_SUBARTIST = 15;
 	public static final int STRING_DIRECTORY = 1000;
 	
+	public static final int NUMBER_TIME_YEAR = 21;
+	public static final int NUMBER_TIME_MONTH = 22;
+	public static final int NUMBER_TIME_DAY = 23;
+	public static final int NUMBER_TIME_HOUR = 24;
+	public static final int NUMBER_TIME_MINUTE = 25;
+	public static final int NUMBER_TIME_SECOND = 26;
+
+	public static final int NUMBER_GROOVEGAUGE = 107;
+	public static final int NUMBER_GROOVEGAUGE_AFTERDOT = 207;
+	public static final int NUMBER_TIMELEFT_MINUTE = 163;
+	public static final int NUMBER_TIMELEFT_SECOND = 164;
+
 	public MainState() {
 		this(null);
 	}
@@ -161,18 +175,6 @@ public abstract class MainState {
 		return 0;
 	}
 
-	public float getGrooveGauge() {
-		return 0;
-	}
-
-	public int getTimeleftMinute() {
-		return 0;
-	}
-
-	public int getTimeleftSecond() {
-		return 0;
-	}
-	
 	public int getMisscount() {
 		return 0;
 	}
@@ -181,6 +183,31 @@ public abstract class MainState {
 		return 0;
 	}
 
+	private Calendar cl = Calendar.getInstance();
+	public int getNumberValue(int id) {
+		switch(id) {
+		case NUMBER_TIME_YEAR:
+			cl.setTimeInMillis(System.currentTimeMillis());
+			return cl.get(Calendar.YEAR);
+		case NUMBER_TIME_MONTH:
+			cl.setTimeInMillis(System.currentTimeMillis());
+			return cl.get(Calendar.MONTH) +1;
+		case NUMBER_TIME_DAY:
+			cl.setTimeInMillis(System.currentTimeMillis());
+			return cl.get(Calendar.DATE);
+		case NUMBER_TIME_HOUR:
+			cl.setTimeInMillis(System.currentTimeMillis());
+			return cl.get(Calendar.HOUR_OF_DAY);
+		case NUMBER_TIME_MINUTE:
+			cl.setTimeInMillis(System.currentTimeMillis());
+			return cl.get(Calendar.MINUTE);
+		case NUMBER_TIME_SECOND:
+			cl.setTimeInMillis(System.currentTimeMillis());
+			return cl.get(Calendar.SECOND);
+		}
+		return 0;
+	}
+	
 	public float getSliderValue(int id) {
 		return 0;
 	}

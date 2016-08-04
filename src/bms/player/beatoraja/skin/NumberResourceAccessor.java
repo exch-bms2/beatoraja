@@ -1,8 +1,5 @@
 package bms.player.beatoraja.skin;
 
-import java.util.Calendar;
-import java.util.zip.Inflater;
-
 import bms.player.beatoraja.MainState;
 
 public interface NumberResourceAccessor {
@@ -384,20 +381,6 @@ public interface NumberResourceAccessor {
 		}
 	};
 	
-	public static NumberResourceAccessor GROOVEGAUGE = new NumberResourceAccessor() {
-		@Override
-		public int getValue(MainState state) {
-			return (int) state.getGrooveGauge();
-		}
-	};
-	
-	public static NumberResourceAccessor GROOVEGAUGE_AFTERDOT = new NumberResourceAccessor() {
-		@Override
-		public int getValue(MainState state) {
-			return ((int)(state.getGrooveGauge() * 10)) % 10;
-		}
-	};
-	
 	public static NumberResourceAccessor HISPEED = new NumberResourceAccessor() {
 		@Override
 		public int getValue(MainState state) {
@@ -417,46 +400,7 @@ public interface NumberResourceAccessor {
 		public int getValue(MainState state) {
 			return state.getDuration();
 		}
-	};
-	
-	public static NumberResourceAccessor TIMELEFT_MINUTE = new NumberResourceAccessor() {
-		@Override
-		public int getValue(MainState state) {
-			return state.getTimeleftMinute();
-		}
-	};
-	
-	public static NumberResourceAccessor TIMELEFT_SECOND = new NumberResourceAccessor() {
-		@Override
-		public int getValue(MainState state) {
-			return state.getTimeleftSecond();
-		}
-	};
-
-	public static NumberResourceAccessor TIME_YEAR = new TimeAccessor(Calendar.YEAR);	
-	public static NumberResourceAccessor TIME_MONTH = new TimeAccessor(Calendar.MONTH);	
-	public static NumberResourceAccessor TIME_DAY = new TimeAccessor(Calendar.DATE);	
-	public static NumberResourceAccessor TIME_HOUR = new TimeAccessor(Calendar.HOUR_OF_DAY);	
-	public static NumberResourceAccessor TIME_MINUTE = new TimeAccessor(Calendar.MINUTE);	
-	public static NumberResourceAccessor TIME_SECOND = new TimeAccessor(Calendar.SECOND);
-	
-}
-
-class TimeAccessor implements NumberResourceAccessor {
-
-	protected Calendar cl = Calendar.getInstance();
-	
-	private int field;
-	
-	public TimeAccessor(int field) {
-		this.field = field;
-	}
-	
-	@Override
-	public int getValue(MainState state) {
-		cl.setTimeInMillis(System.currentTimeMillis());
-		return cl.get(field) + (field == Calendar.MONTH ? 1 : 0);
-	}	
+	};	
 }
 
 /*

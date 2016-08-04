@@ -2,7 +2,6 @@ package bms.player.beatoraja.skin;
 
 import bms.player.beatoraja.MainState;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
@@ -68,7 +67,7 @@ public class SkinSlider extends SkinObject {
 		if (image == null) {
 			return;
 		}
-		Rectangle r = this.getDestination(time);
+		Rectangle r = this.getDestination(time,state);
 		if (r != null) {
 			TextureRegion image = getImage(time);
 			draw(sprite, image, r.x

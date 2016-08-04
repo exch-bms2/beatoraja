@@ -2,7 +2,6 @@ package bms.player.beatoraja.skin;
 
 import bms.player.beatoraja.MainState;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
@@ -69,7 +68,7 @@ public class SkinGraph extends SkinObject {
 		if (image == null) {
 			return;
 		}
-		Rectangle r = this.getDestination(time);
+		Rectangle r = this.getDestination(time,state);
 		if (r != null) {
 			final int value = resource != null ? resource.getValue(state) : 0;
 			final int maxvalue = maxresource != null ? maxresource.getValue(state) : max;
