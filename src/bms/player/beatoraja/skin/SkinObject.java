@@ -45,6 +45,13 @@ public abstract class SkinObject {
         }
         dst.add(obj);
     }
+    
+    public int[] getOption() {
+    	if(dst.size() > 0) {
+        	return dst.get(0).op;    		
+    	}
+    	return new int[0];
+    }
 
     public Rectangle getDestination(long time) {
     	return this.getDestination(time, null);

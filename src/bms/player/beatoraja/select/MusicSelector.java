@@ -135,7 +135,8 @@ public class MusicSelector extends MainState {
 		if (scorecache[lnmode].containsKey(song.getSha256())) {
 			return scorecache[lnmode].get(song.getSha256());
 		}
-		IRScoreData score = getMainController().getPlayDataAccessor().readScoreData(song.getSha256(), song.hasLongNote(), lnmode);
+		IRScoreData score = getMainController().getPlayDataAccessor().readScoreData(song.getSha256(),
+				song.hasLongNote(), lnmode);
 		for (int i = 0; i < scorecache.length; i++) {
 			if (!song.hasLongNote() || i == lnmode) {
 				scorecache[i].put(song.getSha256(), score);
@@ -155,8 +156,8 @@ public class MusicSelector extends MainState {
 			}
 		}
 
-		Map<String, IRScoreData> scores = getMainController().getPlayDataAccessor().readScoreDatas(noscore.toArray(new SongData[0]),
-				lnmode);
+		Map<String, IRScoreData> scores = getMainController().getPlayDataAccessor().readScoreDatas(
+				noscore.toArray(new SongData[0]), lnmode);
 		for (SongData song : noscore) {
 			IRScoreData score = scores.get(song.getSha256());
 			for (int i = 0; i < scorecache.length; i++) {
@@ -350,7 +351,7 @@ public class MusicSelector extends MainState {
 			if (gb.getMirrorScore() != null) {
 				IRScoreData score = gb.getMirrorScore();
 				titlefont.setColor(Color.valueOf(LAMP[score.getClear()]));
-//				titlefont.draw(sprite, CLEAR[score.getClear()], 100, 270);
+				// titlefont.draw(sprite, CLEAR[score.getClear()], 100, 270);
 				titlefont.setColor(Color.WHITE);
 				titlefont.draw(sprite, "EX-SCORE  : " + score.getExscore() + " / " + (score.getNotes() * 2), 100, 240);
 				titlefont.draw(sprite, "MISS COUNT: " + score.getMinbp(), 100, 210);
@@ -360,7 +361,7 @@ public class MusicSelector extends MainState {
 			if (gb.getRandomScore() != null) {
 				IRScoreData score = gb.getRandomScore();
 				titlefont.setColor(Color.valueOf(LAMP[score.getClear()]));
-//				titlefont.draw(sprite, CLEAR[score.getClear()], 100, 130);
+				// titlefont.draw(sprite, CLEAR[score.getClear()], 100, 130);
 				// titlefont.setColor(Color.WHITE);
 				// titlefont.draw(sprite, "EX-SCORE  : " + score.getExscore() +
 				// " / " + (score.getNotes() * 2), 100, 240);
@@ -694,14 +695,14 @@ public class MusicSelector extends MainState {
 			}
 		}
 
-		if(input.getScroll() > 0) {
-			for(int i = 0;i < input.getScroll();i++) {
+		if (input.getScroll() > 0) {
+			for (int i = 0; i < input.getScroll(); i++) {
 				bar.move(false);
 			}
 			input.resetScroll();
 		}
-		if(input.getScroll() < 0) {
-			for(int i = 0;i < -input.getScroll();i++) {
+		if (input.getScroll() < 0) {
+			for (int i = 0; i < -input.getScroll(); i++) {
 				bar.move(true);
 			}
 			input.resetScroll();
@@ -833,7 +834,7 @@ public class MusicSelector extends MainState {
 
 	public void dispose() {
 		bar.dispose();
-		if(skin != null) {
+		if (skin != null) {
 			skin.dispose();
 			skin = null;
 		}
@@ -841,7 +842,7 @@ public class MusicSelector extends MainState {
 
 	@Override
 	public int getClear() {
-		if(bar.getSelected().getScore() != null) {
+		if (bar.getSelected().getScore() != null) {
 			return bar.getSelected().getScore().getClear();
 		}
 		return Integer.MIN_VALUE;
@@ -872,17 +873,6 @@ public class MusicSelector extends MainState {
 		return 0;
 	}
 
-	public int getPlayCount(boolean clear) {
-		if (bar.getSelected().getScore() != null) {
-			if (clear) {
-				return bar.getSelected().getScore().getClearcount();
-			} else {
-				return bar.getSelected().getScore().getPlaycount() - bar.getSelected().getScore().getClearcount();
-			}
-		}
-		return Integer.MIN_VALUE;
-	}
-
 	public int getMinBPM() {
 		if (bar.getSelected() instanceof SongBar) {
 			((SongBar) bar.getSelected()).getSongData().getMinbpm();
@@ -897,56 +887,68 @@ public class MusicSelector extends MainState {
 		return Integer.MIN_VALUE;
 	}
 
-	public int getTotalJudgeCount(int judge) {
-		if (playerdata != null) {
-			switch (judge) {
-			case 0:
-				return (int) (playerdata.getEpg() + playerdata.getLpg());
-			case 1:
-				return (int) (playerdata.getEgr() + playerdata.getLgr());
-			case 2:
-				return (int) (playerdata.getEgd() + playerdata.getLgd());
-			case 3:
-				return (int) (playerdata.getEbd() + playerdata.getLbd());
-			case 4:
-				return (int) (playerdata.getEpr() + playerdata.getLpr());
-			case 5:
-				return (int) (playerdata.getEms() + playerdata.getLms());
-			}
+	public int getNumberValue(int id) {
+		switch (id) {
+		case NUMBER_TOTALPLAYCOUNT:
+			return (int) playerdata.getPlaycount();
+		case NUMBER_TOTALCLEARCOUNT:
+			return (int) playerdata.getClear();
+		case NUMBER_TOTALFAILCOUNT:
+			return (int) ((int) playerdata.getPlaycount() - playerdata.getClear());
+		case NUMBER_TOTALPERFECT:
+			return (int) (playerdata.getEpg() + playerdata.getLpg());
+		case NUMBER_TOTALGREAT:
+			return (int) (playerdata.getEgr() + playerdata.getLgr());
+		case NUMBER_TOTALGOOD:
+			return (int) (playerdata.getEgd() + playerdata.getLgd());
+		case NUMBER_TOTALBAD:
+			return (int) (playerdata.getEbd() + playerdata.getLbd());
+		case NUMBER_TOTALPOOR:
+			return (int) (playerdata.getEpr() + playerdata.getLpr());
+		case NUMBER_TOTALPLAYNOTES:
+			return (int) (playerdata.getEpg() + playerdata.getLpg())
+					+ (int) (playerdata.getEgr() + playerdata.getLgr())
+					+ (int) (playerdata.getEgd() + playerdata.getLgd())
+					+ (int) (playerdata.getEbd() + playerdata.getLbd());
+		case NUMBER_PLAYCOUNT:
+			return bar.getSelected().getScore() != null ? bar.getSelected().getScore().getPlaycount()
+					: Integer.MIN_VALUE;
+		case NUMBER_CLEARCOUNT:
+			return bar.getSelected().getScore() != null ? bar.getSelected().getScore().getClearcount()
+					: Integer.MIN_VALUE;
+		case NUMBER_FAILCOUNT:
+			return bar.getSelected().getScore() != null ? bar.getSelected().getScore().getPlaycount()
+					- bar.getSelected().getScore().getClearcount() : Integer.MIN_VALUE;
 		}
-		return 0;
-	}
-
-	public int getTotalPlayCount(boolean clear) {
-		return (int) (clear ? playerdata.getClear() : playerdata.getPlaycount() - playerdata.getClear());
+		return super.getNumberValue(id);
 	}
 
 	public String getTextValue(int id) {
-		switch(id) {
+		switch (id) {
 		case STRING_TITLE:
 			return bar.getSelected().getTitle();
 		case STRING_SUBTITLE:
-			if(bar.getSelected() instanceof SongBar) {
+			if (bar.getSelected() instanceof SongBar) {
 				return ((SongBar) bar.getSelected()).getSongData().getSubtitle();
 			}
 			return "";
 		case STRING_FULLTITLE:
-			if(bar.getSelected() instanceof SongBar) {
+			if (bar.getSelected() instanceof SongBar) {
 				return bar.getSelected().getTitle() + " " + ((SongBar) bar.getSelected()).getSongData().getSubtitle();
 			}
 			return bar.getSelected().getTitle();
 		case STRING_GENRE:
-			if(bar.getSelected() instanceof SongBar) {
+			if (bar.getSelected() instanceof SongBar) {
 				return ((SongBar) bar.getSelected()).getSongData().getGenre();
 			}
 			return "";
 		case STRING_ARTIST:
-			if(bar.getSelected() instanceof SongBar) {
+			if (bar.getSelected() instanceof SongBar) {
 				return ((SongBar) bar.getSelected()).getSongData().getArtist();
 			}
 			return "";
 		case STRING_SUBARTIST:
-			if(bar.getSelected() instanceof SongBar) {
+			if (bar.getSelected() instanceof SongBar) {
 				return ((SongBar) bar.getSelected()).getSongData().getSubartist();
 			}
 			return "";
@@ -959,7 +961,7 @@ public class MusicSelector extends MainState {
 		}
 		return "";
 	}
-	
+
 	PlayerResource getResource() {
 		return getMainController().getPlayerResource();
 	}
@@ -970,7 +972,7 @@ public class MusicSelector extends MainState {
 
 	@Override
 	public float getSliderValue(int id) {
-		if(id == MainState.SLIDER_MUSICSELECT_POSITION) {
+		if (id == MainState.SLIDER_MUSICSELECT_POSITION) {
 			return bar.getSelectedPosition();
 		}
 		return 0;

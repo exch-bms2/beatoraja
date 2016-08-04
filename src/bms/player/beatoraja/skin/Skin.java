@@ -44,7 +44,16 @@ public class Skin {
 	public void drawAllObjects(SpriteBatch sprite, MainState state) {
 		final long time = state.getNowTime();
 		for(SkinObject obj : objects) {
-			obj.draw(sprite, time, state);
+			boolean draw = true;
+			for(int op :obj.getOption()) {
+				if((op > 0 && !state.getOption()[op]) || (op < 0 && state.getOption()[-op])) {
+					draw = false;
+					break;
+				}
+			}
+			if(draw) {
+				obj.draw(sprite, time, state);
+			}
 		}
 	}
 

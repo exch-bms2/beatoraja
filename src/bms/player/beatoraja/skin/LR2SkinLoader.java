@@ -270,31 +270,6 @@ public abstract class LR2SkinLoader {
 									num = new SkinNumber(images, values[9], values[13], 0);
 									num.setId(values[11]);
 
-									if (num.getId() == 30) {
-										num.setNumberResourceAccessor(NumberResourceAccessor.PLAYER_PLAYCOUNT);
-									}
-									if (num.getId() == 31) {
-										num.setNumberResourceAccessor(NumberResourceAccessor.PLAYER_CLEARCOUNT);
-									}
-									if (num.getId() == 32) {
-										num.setNumberResourceAccessor(NumberResourceAccessor.PLAYER_FAILCOUNT);
-									}
-									if (num.getId() == 33) {
-										num.setNumberResourceAccessor(NumberResourceAccessor.PLAYER_PERFECT);
-									}
-									if (num.getId() == 34) {
-										num.setNumberResourceAccessor(NumberResourceAccessor.PLAYER_GREAT);
-									}
-									if (num.getId() == 35) {
-										num.setNumberResourceAccessor(NumberResourceAccessor.PLAYER_GOOD);
-									}
-									if (num.getId() == 36) {
-										num.setNumberResourceAccessor(NumberResourceAccessor.PLAYER_BAD);
-									}
-									if (num.getId() == 37) {
-										num.setNumberResourceAccessor(NumberResourceAccessor.PLAYER_POOR);
-									}
-
 									if (num.getId() == 72) {
 										num.setNumberResourceAccessor(NumberResourceAccessor.MAX_SCORE);
 									}
@@ -303,15 +278,6 @@ public abstract class LR2SkinLoader {
 									}
 									if (num.getId() == 76) {
 										num.setNumberResourceAccessor(NumberResourceAccessor.MISSCOUNT);
-									}
-									if (num.getId() == 77) {
-										num.setNumberResourceAccessor(NumberResourceAccessor.PLAYCOUNT);
-									}
-									if (num.getId() == 78) {
-										num.setNumberResourceAccessor(NumberResourceAccessor.CLEARCOUNT);
-									}
-									if (num.getId() == 79) {
-										num.setNumberResourceAccessor(NumberResourceAccessor.FAILCOUNT);
 									}
 									if (num.getId() == 90) {
 										num.setNumberResourceAccessor(NumberResourceAccessor.MAX_BPM);
@@ -441,7 +407,7 @@ public abstract class LR2SkinLoader {
 				}
 			}
 		}
-
+		br.close();
 	}
 
 	private int[] parseInt(String[] s) {

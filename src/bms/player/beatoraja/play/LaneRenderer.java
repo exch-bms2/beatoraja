@@ -286,20 +286,33 @@ public class LaneRenderer {
 						main.getTimer()[BMSPlayer.TIMER_KEYON_1P_KEY1 + lane] = -1;
 					}
 				}
+				if (judge.getProcessingLongNotes()[lane] != null) {
+					if (main.getTimer()[BMSPlayer.TIMER_HOLD_1P_KEY1 + lane] == -1) {
+						main.getTimer()[BMSPlayer.TIMER_HOLD_1P_KEY1 + lane] = main.getNowTime();
+					}					
+				} else {
+					main.getTimer()[BMSPlayer.TIMER_HOLD_1P_KEY1 + lane] = -1;
+				}
 			} else {
 				int key = (model.getUseKeys() > 9 && lane >= 8 ? lane + 1 : lane);
+				int offset = (lane % 8 == 7 ? -1 : (lane % 8)) + (lane >= 8 ? 10 : 0);
 				if (keystate[key] || (key == 7 && keystate[8]) || (key == 16 && keystate[17])) {
-					int offset = (lane % 8 == 7 ? -1 : (lane % 8)) + (lane >= 8 ? 10 : 0);
 					if (main.getTimer()[BMSPlayer.TIMER_KEYON_1P_KEY1 + offset] == -1) {
 						main.getTimer()[BMSPlayer.TIMER_KEYON_1P_KEY1 + offset] = main.getNowTime();
 						main.getTimer()[BMSPlayer.TIMER_KEYOFF_1P_KEY1 + offset] = -1;
 					}
 				} else {
-					int offset = (lane % 8 == 7 ? -1 : (lane % 8)) + (lane >= 8 ? 10 : 0);
 					if (main.getTimer()[BMSPlayer.TIMER_KEYOFF_1P_KEY1 + offset] == -1) {
 						main.getTimer()[BMSPlayer.TIMER_KEYOFF_1P_KEY1 + offset] = main.getNowTime();
 						main.getTimer()[BMSPlayer.TIMER_KEYON_1P_KEY1 + offset] = -1;
 					}
+				}
+				if (judge.getProcessingLongNotes()[lane] != null) {
+					if (main.getTimer()[BMSPlayer.TIMER_HOLD_1P_KEY1 + offset] == -1) {
+						main.getTimer()[BMSPlayer.TIMER_HOLD_1P_KEY1 + offset] = main.getNowTime();
+					}					
+				} else {
+					main.getTimer()[BMSPlayer.TIMER_HOLD_1P_KEY1 + offset] = -1;
 				}
 			}
 		}
@@ -536,38 +549,15 @@ public class LaneRenderer {
 		// System.out.println("time :" + ltime + " y :" + yy + " real time : "
 		// + (ltime * (hu - hl) / yy));
 
-		// ボム描画。描画座標等はリフト量によって可変のためSkin移行は特殊な定義が必要
-		sprite.begin();
-		for (int lane = 0; lane < laneregion.length; lane++) {
-			if (judge.getProcessingLongNotes()[lane] != null) {
-				if (model.getUseKeys() == 9) {
-					if (main.getTimer()[BMSPlayer.TIMER_HOLD_1P_KEY1 + lane] == -1) {
-						main.getTimer()[BMSPlayer.TIMER_HOLD_1P_KEY1 + lane] = main.getNowTime();
-					}
-				} else {
-					int offset = (lane % 8 == 7 ? -1 : (lane % 8)) + (lane >= 8 ? 10 : 0);
-					if (main.getTimer()[BMSPlayer.TIMER_HOLD_1P_KEY1 + offset] == -1) {
-						main.getTimer()[BMSPlayer.TIMER_HOLD_1P_KEY1 + offset] = main.getNowTime();
-					}
-				}
-			} else {
-				if (model.getUseKeys() == 9) {
-					main.getTimer()[BMSPlayer.TIMER_HOLD_1P_KEY1 + lane] = -1;
-				} else {
-					int offset = (lane % 8 == 7 ? -1 : (lane % 8)) + (lane >= 8 ? 10 : 0);
-					main.getTimer()[BMSPlayer.TIMER_HOLD_1P_KEY1 + offset] = -1;
-				}
-			}
-		}
-
 		// 判定文字描画。描画座標等はリフト量によって可変のためSkin移行は特殊な定義が必要
+		sprite.begin();
 		for (int jr = 0; jr < skin.getJudgeregion().length; jr++) {
 			if (judgenow[jr] > 0 && time < judgenowt[jr] + 500) {
 				Rectangle r = skin.getJudgeregion()[jr].judge[judgenow[jr] - 1].getDestination(time, main);
 				int shift = 0;
 				if (judgenow[jr] < 4) {
 					Rectangle nr = skin.getJudgeregion()[jr].count[judgenow[jr] - 1].getDestination(time, main);
-					TextureRegion[] ntr = skin.getJudgeregion()[jr].count[judgenow[jr] - 1].getValue(judgecombo[jr], 0);
+					TextureRegion[] ntr = skin.getJudgeregion()[jr].count[judgenow[jr] - 1].getValue(time, judgecombo[jr], 0);
 					int index = 0;
 					for (; index < ntr.length && ntr[index] == null; index++)
 						;

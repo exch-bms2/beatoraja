@@ -16,8 +16,8 @@ public class SkinNumber extends SkinObject {
 	/**
 	 * イメージ
 	 */
-	private TextureRegion[] image;
-	private TextureRegion[] mimage;
+	private TextureRegion[][] image;
+	private TextureRegion[][] mimage;
 
 	private int id = -1;
 
@@ -39,13 +39,22 @@ public class SkinNumber extends SkinObject {
 		this(image, null, cycle, keta, zeropadding, resource);
 	}
 
+	public SkinNumber(TextureRegion[][] image, int cycle, int keta, int zeropadding, NumberResourceAccessor resource) {
+		this.image = image;
+		this.mimage = null;
+		this.cycle = cycle;
+		this.setKeta(keta);
+		this.zeropadding = zeropadding;
+		this.resource = resource;
+	}
+
 	public SkinNumber(TextureRegion[] image, int cycle, int keta, int zeropadding, int rid) {
 		this(image, null, cycle, keta, zeropadding, rid);
 	}
 
 	public SkinNumber(TextureRegion[] image, TextureRegion[] mimage, int cycle, int keta, int zeropadding, int id) {
-		this.image = image;
-		this.mimage = mimage;
+		this.image = new TextureRegion[][]{image};
+		this.mimage = mimage != null ? new TextureRegion[][]{mimage} : null;
 		this.cycle = cycle;
 		this.setKeta(keta);
 		this.zeropadding = zeropadding;
@@ -53,8 +62,8 @@ public class SkinNumber extends SkinObject {
 	}
 	
 	public SkinNumber(TextureRegion[] image, TextureRegion[] mimage, int cycle, int keta, int zeropadding, NumberResourceAccessor resource) {
-		this.image = image;
-		this.mimage = mimage;
+		this.image = new TextureRegion[][]{image};
+		this.mimage = mimage != null ? new TextureRegion[][]{mimage} : null;
 		this.cycle = cycle;
 		this.setKeta(keta);
 		this.zeropadding = zeropadding;
@@ -65,10 +74,6 @@ public class SkinNumber extends SkinObject {
 		this.resource = resource;
 	}
 	
-	public TextureRegion[] getImage() {
-		return image;
-	}
-
 	public int getId() {
 		return id;
 	}
@@ -86,11 +91,19 @@ public class SkinNumber extends SkinObject {
 		this.values = new TextureRegion[keta];
 	}
 	
-	public TextureRegion[] getValue(int value, int zeropadding) {
-		final TextureRegion[] image = (value >= 0 || mimage == null) ? this.image : mimage;
-		if(image == null) {
+	
+	public TextureRegion[] getValue(long time, int value, int zeropadding) {
+		final TextureRegion[][] images = (value >= 0 || mimage == null) ? this.image : mimage;
+		if(images == null) {
 			return new TextureRegion[0];
 		}
+		TextureRegion[] image = images[0];
+		if(cycle != 0) {
+			final int index = (int) ((time / (cycle / images.length))) % images.length;
+//			System.out.println(index + " / " + image.length);
+			image = images[index];
+		}
+
 		value = Math.abs(value);
 		for (int j = values.length - 1; j >= 0; j--) {
 			if(value > 0 || j == values.length - 1) {
@@ -118,7 +131,7 @@ public class SkinNumber extends SkinObject {
 	
 	public void draw(SpriteBatch sprite, long time, int value, MainState state) {
 		Rectangle r = this.getDestination(time,state);
-		TextureRegion[] values = getValue(value, zeropadding);
+		TextureRegion[] values = getValue(time, value, zeropadding);
 		for (int j = 0; j < values.length; j++) {
 			if(values[j] != null) {
 				draw(sprite, values[j], r.x + r.width * j, r.y, r.width, r.height, getColor(time));				
@@ -128,14 +141,22 @@ public class SkinNumber extends SkinObject {
 
 	public void dispose() {
 		if(image != null) {
-			for(TextureRegion tr : image) {
-				tr.getTexture().dispose();
+			for(TextureRegion[] ptr : image) {
+				if(ptr != null) {
+					for(TextureRegion tr : ptr) {
+						tr.getTexture().dispose();					
+					}					
+				}
 			}
 			image = null;
 		}
 		if(mimage != null) {
-			for(TextureRegion tr : mimage) {
-				tr.getTexture().dispose();
+			for(TextureRegion[] ptr : mimage) {
+				if(ptr != null) {
+					for(TextureRegion tr : ptr) {
+						tr.getTexture().dispose();					
+					}					
+				}
 			}
 			mimage = null;
 		}

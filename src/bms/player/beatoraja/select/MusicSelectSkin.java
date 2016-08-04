@@ -86,15 +86,14 @@ public class MusicSelectSkin extends Skin {
 				255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		addNumber(new SkinNumber(ntr[0], 0, 4, 0, NumberResourceAccessor.MAXCOMBO), 0, 450, 342, 18, 18, 0, 255, 255,
 				255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		addNumber(new SkinNumber(ntr[0], 0, 4, 0, NumberResourceAccessor.CLEARCOUNT), 0, 250, 312, 18, 18, 0, 255, 255,
+		addNumber(new SkinNumber(ntr[0], 0, 4, 0, MainState.NUMBER_CLEARCOUNT), 0, 250, 312, 18, 18, 0, 255, 255,
 				255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-
-		addNumber(new SkinNumber(ntr[0], 0, 4, 0, NumberResourceAccessor.PLAYCOUNT), 0, 400, 312, 18, 18, 0, 255, 255,
+		addNumber(new SkinNumber(ntr[0], 0, 4, 0, MainState.NUMBER_PLAYCOUNT), 0, 400, 312, 18, 18, 0, 255, 255,
 				255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		addNumber(new SkinNumber(ntr[0], 0, 6, 0, NumberResourceAccessor.PLAYER_PLAYCOUNT), 0, 160, 102, 18, 18, 0,
+		addNumber(new SkinNumber(ntr[0], 0, 6, 0, MainState.NUMBER_TOTALPLAYCOUNT), 0, 160, 102, 18, 18, 0,
 				255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
-		addNumber(new SkinNumber(ntr[0], 0, 10, 0, NumberResourceAccessor.PLAYER_TOTALNOTES), 0, 430, 102, 18, 18, 0,
+		addNumber(new SkinNumber(ntr[0], 0, 10, 0, MainState.NUMBER_TOTALPLAYNOTES), 0, 430, 102, 18, 18, 0,
 				255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 		addNumber(new SkinNumber(ntr[0], 0, 4, 1, MainState.NUMBER_TIME_YEAR), 0, 1028, 2, 12, 12, 0, 255, 255, 255,

@@ -157,18 +157,6 @@ public class BMSPlayer extends MainState {
 		this.autoplay = resource.getAutoplay();
 		Config config = resource.getConfig();
 
-		if (config.getLR2PlaySkinPath() != null) {
-			try {
-				skin = new LR2PlaySkinLoader().loadPlaySkin(new File(config.getLR2PlaySkinPath()));
-			} catch (IOException e) {
-				e.printStackTrace();
-				skin = new PlaySkin(model.getUseKeys(), MainController.RESOLUTION[resource.getConfig().getResolution()]);
-			}
-		} else {
-			skin = new PlaySkin(model.getUseKeys(), MainController.RESOLUTION[resource.getConfig().getResolution()]);
-		}
-		this.setSkin(skin);
-
 		if (autoplay >= 2) {
 			if (resource.getCourseBMSModels() != null) {
 				if (resource.getCourseReplay().length == 0) {
@@ -256,6 +244,19 @@ public class BMSPlayer extends MainState {
 				score = false;
 			}
 		}
+		
+		if (config.getLR2PlaySkinPath() != null) {
+			try {
+				skin = new LR2PlaySkinLoader().loadPlaySkin(new File(config.getLR2PlaySkinPath()));
+			} catch (IOException e) {
+				e.printStackTrace();
+				skin = new PlaySkin(model.getUseKeys(), MainController.RESOLUTION[resource.getConfig().getResolution()]);
+			}
+		} else {
+			skin = new PlaySkin(model.getUseKeys(), MainController.RESOLUTION[resource.getConfig().getResolution()]);
+		}
+		this.setSkin(skin);
+
 		minbpm = (int) model.getMinBPM();
 		maxbpm = (int) model.getMaxBPM();
 		judge = new JudgeManager(this, model, resource.getConstraint());
