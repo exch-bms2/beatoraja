@@ -366,68 +366,6 @@ public class MusicResult extends MainState {
 	}
 
 	@Override
-	public int getClear() {
-		final PlayerResource resource = getMainController().getPlayerResource();
-		if(resource.getScoreData() != null) {
-			return resource.getScoreData().getClear();
-		}
-		return Integer.MIN_VALUE;
-	}
-
-	@Override
-	public int getTargetClear() {
-		return oldclear;
-	}
-
-	@Override
-	public int getScore() {
-		final PlayerResource resource = getMainController().getPlayerResource();
-		if(resource.getScoreData() != null) {
-			return resource.getScoreData().getExscore();			
-		}
-		return Integer.MIN_VALUE;
-	}
-
-	@Override
-	public int getTargetScore() {
-		return oldexscore;
-	}
-
-	@Override
-	public int getMaxcombo() {
-		final PlayerResource resource = getMainController().getPlayerResource();
-		if(resource.getScoreData() != null) {
-			return resource.getScoreData().getCombo();			
-		}
-		return Integer.MIN_VALUE;
-	}
-
-	@Override
-	public int getTargetMaxcombo() {
-		if(oldcombo > 0) {
-			return oldcombo;			
-		}
-		return Integer.MIN_VALUE;
-	}
-
-	@Override
-	public int getMisscount() {
-		final PlayerResource resource = getMainController().getPlayerResource();
-		if(resource.getScoreData() != null) {
-			return resource.getScoreData().getMinbp();			
-		}
-		return Integer.MIN_VALUE;
-	}
-
-	@Override
-	public int getTargetMisscount() {
-		if(oldmisscount == Integer.MAX_VALUE) {
-			return Integer.MIN_VALUE;
-		}
-		return oldmisscount;
-	}
-
-	@Override
 	public void dispose() {
 		if(clear != null) {
 			clear.dispose();
@@ -450,5 +388,72 @@ public class MusicResult extends MainState {
 	public int getTotalNotes() {
 		final PlayerResource resource = getMainController().getPlayerResource();
 		return resource.getBMSModel().getTotalNotes();
-	}	
+	}
+
+	public int getNumberValue(int id) {
+		final PlayerResource resource = getMainController().getPlayerResource();
+		switch(id) {
+			case NUMBER_CLEAR:
+				if(resource.getScoreData() != null) {
+					return resource.getScoreData().getClear();
+				}
+				return Integer.MIN_VALUE;
+			case NUMBER_TARGET_CLEAR:
+				return oldclear;
+			case NUMBER_TARGET_SCORE:
+				return oldexscore;
+			case NUMBER_SCORE:
+				if(resource.getScoreData() != null) {
+					return resource.getScoreData().getExscore();
+				}
+				return Integer.MIN_VALUE;
+			case NUMBER_DIFF_SCORE:
+				return resource.getScoreData().getExscore() - oldexscore;
+			case NUMBER_MISSCOUNT:
+				if(resource.getScoreData() != null) {
+					return resource.getScoreData().getMinbp();
+				}
+				return Integer.MIN_VALUE;
+			case NUMBER_TARGET_MISSCOUNT:
+				if(oldmisscount == Integer.MAX_VALUE) {
+					return Integer.MIN_VALUE;
+				}
+				return oldmisscount;
+			case NUMBER_DIFF_MISSCOUNT:
+				if(oldmisscount == Integer.MAX_VALUE) {
+					return Integer.MIN_VALUE;
+				}
+				return resource.getScoreData().getMinbp() - oldmisscount;
+			case NUMBER_TARGET_MAXCOMBO:
+				if (oldcombo > 0) {
+					return oldcombo;
+				}
+				return Integer.MIN_VALUE;
+			case NUMBER_MAXCOMBO:
+				if(resource.getScoreData() != null) {
+					return resource.getScoreData().getCombo();
+				}
+				return Integer.MIN_VALUE;
+			case NUMBER_DIFF_MAXCOMBO:
+				if(oldcombo == 0) {
+					return Integer.MIN_VALUE;
+				}
+				return resource.getScoreData().getCombo() - oldcombo;
+			case NUMBER_TOTALNOTES:
+				return resource.getBMSModel().getTotalNotes();
+			case NUMBER_TOTALEARLY:
+				int ecount = 0;
+				for(int i = 1;i < 6;i++) {
+					ecount += getJudgeCount(i,true);
+				}
+				return ecount;
+			case NUMBER_TOTALLATE:
+				int count = 0;
+				for(int i = 1;i < 6;i++) {
+					count += getJudgeCount(i,false);
+				}
+				return count;
+		}
+		return super.getNumberValue(id);
+	}
 }

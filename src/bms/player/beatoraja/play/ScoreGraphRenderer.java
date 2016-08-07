@@ -82,16 +82,16 @@ public class ScoreGraphRenderer {
 		shape.end();
 		Gdx.gl.glDisable(GL11.GL_BLEND);
 
-		sprite.begin();
-		font.setColor(Color.valueOf("bbbbff"));
-		font.setColor(Color.WHITE);
-		font.draw(sprite, String.format("%5.1f", notes != 0 ? ((float)now * 100 / (notes * 2)) : 0f) + "%", graph.x + 20, graph.y - 5);
-		font.draw(sprite, "P:" + String.format("%5d", now) , graph.x + 5, graph.y - 23);
-		font.setColor(Color.valueOf("bbffbb"));
-		font.draw(sprite, "B:" + String.format("%5d", best) , graph.x + 5, graph.y - 41);
-		font.setColor(Color.valueOf("ffbbbb"));
-		font.draw(sprite, "R:" + String.format("%5d", rival) , graph.x + 5, graph.y - 59);
-		sprite.end();
+//		sprite.begin();
+//		font.setColor(Color.valueOf("bbbbff"));
+//		font.setColor(Color.WHITE);
+//		font.draw(sprite, String.format("%5.1f", notes != 0 ? ((float)now * 100 / (notes * 2)) : 0f) + "%", graph.x + 20, graph.y - 5);
+//		font.draw(sprite, "P:" + String.format("%5d", now) , graph.x + 5, graph.y - 23);
+//		font.setColor(Color.valueOf("bbffbb"));
+//		font.draw(sprite, "B:" + String.format("%5d", best) , graph.x + 5, graph.y - 41);
+//		font.setColor(Color.valueOf("ffbbbb"));
+//		font.draw(sprite, "R:" + String.format("%5d", rival) , graph.x + 5, graph.y - 59);
+//		sprite.end();
 	}
 
 	public int getBest() {

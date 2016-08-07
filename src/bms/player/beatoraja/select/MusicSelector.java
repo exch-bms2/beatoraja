@@ -840,51 +840,8 @@ public class MusicSelector extends MainState {
 		}
 	}
 
-	@Override
-	public int getClear() {
-		if (bar.getSelected().getScore() != null) {
-			return bar.getSelected().getScore().getClear();
-		}
-		return Integer.MIN_VALUE;
-	}
-
-	public int getScore() {
-		if (bar.getSelected().getScore() != null) {
-			return bar.getSelected().getScore().getExscore();
-		}
-		return Integer.MIN_VALUE;
-	}
-
-	public int getMaxcombo() {
-		if (bar.getSelected().getScore() != null) {
-			return bar.getSelected().getScore().getCombo();
-		}
-		return Integer.MIN_VALUE;
-	}
-
-	public int getMisscount() {
-		if (bar.getSelected().getScore() != null) {
-			return bar.getSelected().getScore().getMinbp();
-		}
-		return Integer.MIN_VALUE;
-	}
-
 	public int getJudgeCount(int judge, boolean fast) {
 		return 0;
-	}
-
-	public int getMinBPM() {
-		if (bar.getSelected() instanceof SongBar) {
-			((SongBar) bar.getSelected()).getSongData().getMinbpm();
-		}
-		return Integer.MIN_VALUE;
-	}
-
-	public int getMaxBPM() {
-		if (bar.getSelected() instanceof SongBar) {
-			((SongBar) bar.getSelected()).getSongData().getMaxbpm();
-		}
-		return Integer.MIN_VALUE;
 	}
 
 	public int getNumberValue(int id) {
@@ -919,6 +876,36 @@ public class MusicSelector extends MainState {
 		case NUMBER_FAILCOUNT:
 			return bar.getSelected().getScore() != null ? bar.getSelected().getScore().getPlaycount()
 					- bar.getSelected().getScore().getClearcount() : Integer.MIN_VALUE;
+			case NUMBER_CLEAR:
+				if (bar.getSelected().getScore() != null) {
+					return bar.getSelected().getScore().getClear();
+				}
+				return Integer.MIN_VALUE;
+			case NUMBER_SCORE:
+				if (bar.getSelected().getScore() != null) {
+					return bar.getSelected().getScore().getExscore();
+				}
+				return Integer.MIN_VALUE;
+			case NUMBER_MISSCOUNT:
+				if (bar.getSelected().getScore() != null) {
+					return bar.getSelected().getScore().getMinbp();
+				}
+				return Integer.MIN_VALUE;
+			case NUMBER_MAXCOMBO:
+				if (bar.getSelected().getScore() != null) {
+					return bar.getSelected().getScore().getCombo();
+				}
+				return Integer.MIN_VALUE;
+			case NUMBER_MINBPM:
+				if (bar.getSelected() instanceof SongBar) {
+					return ((SongBar) bar.getSelected()).getSongData().getMinbpm();
+				}
+				return Integer.MIN_VALUE;
+			case NUMBER_MAXBPM:
+				if (bar.getSelected() instanceof SongBar) {
+					return ((SongBar) bar.getSelected()).getSongData().getMaxbpm();
+				}
+				return Integer.MIN_VALUE;
 		}
 		return super.getNumberValue(id);
 	}

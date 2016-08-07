@@ -19,10 +19,6 @@ public class SkinImage extends SkinObject {
 	private int cycle;
 	
 	private int timing;
-	private int[] option = new int[3];
-
-	private NumberResourceAccessor resource;
-	
 	private int id = -1;
 
 	public SkinImage() {
@@ -73,18 +69,6 @@ public class SkinImage extends SkinObject {
 		this.timing = timing;
 	}
 
-	public int[] getOption() {
-		return option;
-	}
-
-	public void setOption(int[] option) {
-		this.option = option;
-	}
-
-	public void setNumberResourceAccessor(NumberResourceAccessor resource) {
-		this.resource = resource;
-	}
-
 	public void draw(SpriteBatch sprite, long time, MainState state) {
 		if(image == null) {
 			return;
@@ -92,13 +76,11 @@ public class SkinImage extends SkinObject {
 		int value = 0;
         if(id != -1) {
         	value = state.getNumberValue(id);
-        } else if(resource != null){
-        	value = resource.getValue(state);
         }
-        if(value < 0 || value >= image.length) {
+        if(value >= image.length) {
             value = 0;
         }
-        if(image[value].length == 0) {
+        if(value < 0 || image[value].length == 0) {
         	return;
         }
 

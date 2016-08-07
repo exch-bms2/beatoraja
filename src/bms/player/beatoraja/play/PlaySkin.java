@@ -69,11 +69,15 @@ public class PlaySkin extends Skin {
 
 	private int close;
 
-	private final NumberResourceAccessor[] judgecount = { NumberResourceAccessor.FAST_PERFECT,
-			NumberResourceAccessor.SLOW_PERFECT, NumberResourceAccessor.FAST_GREAT, NumberResourceAccessor.SLOW_GREAT,
-			NumberResourceAccessor.FAST_GOOD, NumberResourceAccessor.SLOW_GOOD, NumberResourceAccessor.FAST_BAD,
-			NumberResourceAccessor.SLOW_BAD, NumberResourceAccessor.FAST_POOR, NumberResourceAccessor.SLOW_POOR,
-			NumberResourceAccessor.FAST_MISS, NumberResourceAccessor.SLOW_MISS };
+	private final int[] judgecount = { MainState.NUMBER_EARLY_PERFECT,
+			MainState.NUMBER_LATE_PERFECT, MainState.NUMBER_EARLY_GREAT,
+			MainState.NUMBER_LATE_GREAT,
+			MainState.NUMBER_EARLY_GOOD,
+			MainState.NUMBER_LATE_GOOD, MainState.NUMBER_EARLY_BAD,
+			MainState.NUMBER_LATE_BAD, MainState.NUMBER_EARLY_POOR,
+			MainState.NUMBER_LATE_POOR,
+			MainState.NUMBER_EARLY_MISS,
+			MainState.NUMBER_LATE_MISS };
 
 	private LaneRenderer lanerender;
 
@@ -159,11 +163,11 @@ public class PlaySkin extends Skin {
 		Texture lct = new Texture("skin/lanecover.png");
 		lanecover = new Sprite(lct, 0, 0, 390, 580);
 		// bpm
-		addNumber(new SkinNumber(ntr[0], 0, 4, 0, NumberResourceAccessor.MIN_BPM), 0, 520, 2, 18, 18, 0, 255, 255, 255,
+		addNumber(new SkinNumber(ntr[0], 0, 4, 0, MainState.NUMBER_MINBPM), 0, 520, 2, 18, 18, 0, 255, 255, 255,
 				255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		addNumber(new SkinNumber(ntr[0], 0, 4, 0, NumberResourceAccessor.NOW_BPM), 0, 592, 2, 24, 24, 0, 255, 255, 255,
+		addNumber(new SkinNumber(ntr[0], 0, 4, 0, MainState.NUMBER_NOWBPM), 0, 592, 2, 24, 24, 0, 255, 255, 255,
 				255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		addNumber(new SkinNumber(ntr[0], 0, 4, 0, NumberResourceAccessor.MAX_BPM), 0, 688, 2, 18, 18, 0, 255, 255, 255,
+		addNumber(new SkinNumber(ntr[0], 0, 4, 0, MainState.NUMBER_MAXBPM), 0, 688, 2, 18, 18, 0, 255, 255, 255,
 				255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		// 残り時間
 		addNumber(new SkinNumber(ntr[0], 0, 2, 1, MainState.NUMBER_TIMELEFT_MINUTE), 0, 1148, 2, 24, 24, 0, 255, 255,
@@ -171,12 +175,12 @@ public class PlaySkin extends Skin {
 		addNumber(new SkinNumber(ntr[0], 0, 2, 1, MainState.NUMBER_TIMELEFT_SECOND), 0, 1220, 2, 24, 24, 0, 255, 255,
 				255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
-		addNumber(new SkinNumber(ntr[0], 0, 2, 0, NumberResourceAccessor.HISPEED), 0, 116, 2, 12, 24, 0, 255, 255, 255,
+		addNumber(new SkinNumber(ntr[0], 0, 2, 0, MainState.NUMBER_HISPEED), 0, 116, 2, 12, 24, 0, 255, 255, 255,
 				255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		addNumber(new SkinNumber(ntr[0], 0, 2, 1, NumberResourceAccessor.HISPEED_AFTERDOT), 0, 154, 2, 10, 20, 0, 255,
+		addNumber(new SkinNumber(ntr[0], 0, 2, 1, MainState.NUMBER_HISPEED_AFTERDOT), 0, 154, 2, 10, 20, 0, 255,
 				255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
-		addNumber(new SkinNumber(ntr[0], 0, 4, 0, NumberResourceAccessor.DURATION), 0, 318, 2, 12, 24, 0, 255, 255,
+		addNumber(new SkinNumber(ntr[0], 0, 4, 0, MainState.NUMBER_DURATION), 0, 318, 2, 12, 24, 0, 255, 255,
 				255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 		Texture grapht = new Texture("skin/scoregraph.png");
@@ -188,15 +192,15 @@ public class PlaySkin extends Skin {
 		graph = new SkinGraph[3];
 		graph[0] = new SkinGraph();
 		graph[0].setImage(new TextureRegion[] { new TextureRegion(grapht, 0, 0, 100, 296) }, 0);
-		graph[0].setNumberResourceAccessor(NumberResourceAccessor.SCORE, NumberResourceAccessor.MAX_SCORE);
+		graph[0].setReferenceID(MainState.SLIDER_SCORERATE);
 		add(graph[0]);
 		graph[1] = new SkinGraph();
 		graph[1].setImage(new TextureRegion[] { new TextureRegion(grapht, 100, 0, 100, 296) }, 0);
-		graph[1].setNumberResourceAccessor(NumberResourceAccessor.BEST_SCORE, NumberResourceAccessor.MAX_SCORE);
+		graph[1].setReferenceID(MainState.SLIDER_BESTSCORERATE);
 		add(graph[1]);
 		graph[2] = new SkinGraph();
 		graph[2].setImage(new TextureRegion[] { new TextureRegion(grapht, 200, 0, 100, 296) }, 0);
-		graph[2].setNumberResourceAccessor(NumberResourceAccessor.TARGET_SCORE, NumberResourceAccessor.MAX_SCORE);
+		graph[2].setReferenceID(MainState.SLIDER_TARGETSCORERATE);
 		add(graph[2]);
 
 	}
@@ -259,7 +263,7 @@ public class PlaySkin extends Skin {
 			images[i].setImage(judge[i == 5 ? 4 : i], 100);
 			setDestination(images[i], 0, 115, 240, 180, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 			images[i].setOffsetYReferenceID(MainState.OFFSET_LIFT);
-			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 100, 6, 0, NumberResourceAccessor.MAXCOMBO);
+			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 100, 6, 0, MainState.NUMBER_MAXCOMBO);
 			setDestination(number[i], 0, 200, 0, 40, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		}
 		judgeregion = new JudgeRegion[] { new JudgeRegion(images, number, true) };
@@ -349,6 +353,16 @@ public class PlaySkin extends Skin {
 						50 + (5 - i) * 18, 12, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 			}
 		}
+		addNumber(new SkinNumber(ntr[0], 100, 4, 0, MainState.NUMBER_SCORE_RATE), 0, 420,
+				200, 12, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		addNumber(new SkinNumber(ntr[0], 100, 1, 0, MainState.NUMBER_SCORE_RATE_AFTERDOT), 0, 468,
+				200, 8, 12, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		addNumber(new SkinNumber(ntr[0], 100, 5, 0, MainState.NUMBER_SCORE), 0, 420,
+				180, 12, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		addNumber(new SkinNumber(ntr[1], 100, 5, 0, MainState.NUMBER_HIGHSCORE), 0, 420,
+				160, 12, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		addNumber(new SkinNumber(ntr[2], 100, 5, 0, MainState.NUMBER_TARGET_SCORE), 0, 420,
+				140, 12, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 		lanegroupregion = new Rectangle[] { rect(20, 140, 390, 580) };
 
@@ -462,7 +476,7 @@ public class PlaySkin extends Skin {
 			images[i].setImage(judge[i == 5 ? 4 : i], 100);
 			setDestination(images[i], 0, 375, 240, 140, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 			images[i].setOffsetYReferenceID(MainState.OFFSET_LIFT);
-			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 100, 6, 0, NumberResourceAccessor.MAXCOMBO);
+			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 100, 6, 0, MainState.NUMBER_MAXCOMBO);
 			setDestination(number[i], 0, 70, -30, 20, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		}
 		JudgeRegion jr1 = new JudgeRegion(images, number, false);
@@ -473,7 +487,7 @@ public class PlaySkin extends Skin {
 			images[i].setImage(judge[i == 5 ? 4 : i], 100);
 			setDestination(images[i], 0, 570, 240, 140, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 			images[i].setOffsetYReferenceID(MainState.OFFSET_LIFT);
-			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 100, 6, 0, NumberResourceAccessor.MAXCOMBO);
+			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 100, 6, 0, MainState.NUMBER_MAXCOMBO);
 			setDestination(number[i], 0, 70, -30, 20, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		}
 		JudgeRegion jr2 = new JudgeRegion(images, number, false);
@@ -484,7 +498,7 @@ public class PlaySkin extends Skin {
 			images[i].setImage(judge[i == 5 ? 4 : i], 100);
 			setDestination(images[i], 0, 765, 240, 140, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 			images[i].setOffsetYReferenceID(MainState.OFFSET_LIFT);
-			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 100, 6, 0, NumberResourceAccessor.MAXCOMBO);
+			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 100, 6, 0, MainState.NUMBER_MAXCOMBO);
 			setDestination(number[i], 0, 70, -30, 20, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		}
 		JudgeRegion jr3 = new JudgeRegion(images, number, false);
@@ -567,16 +581,27 @@ public class PlaySkin extends Skin {
 			add(hbombi);
 		}
 
-		judgecountregion = rect(1090, 40, 144, 108);
+		judgecountregion = rect(1090, 30, 144, 108);
 		// judge count
 		Texture nt = new Texture("skin/number.png");
 		TextureRegion[][] ntr = TextureRegion.split(nt, 24, 24);
 		for (int i = 0; i < 6; i++) {
 			for (int j = 0; j < 2; j++) {
 				addNumber(new SkinNumber(ntr[j + 1], 0, 4, 2, judgecount[i * 2 + j]), 0, 1126 + j * 60,
-						40 + (5 - i) * 18, 12, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+						30 + (5 - i) * 18, 12, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 			}
 		}
+		addNumber(new SkinNumber(ntr[0], 100, 4, 0, MainState.NUMBER_SCORE_RATE), 0, 970,
+				200, 12, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		addNumber(new SkinNumber(ntr[0], 100, 1, 0, MainState.NUMBER_SCORE_RATE_AFTERDOT), 0, 1018,
+				200, 8, 12, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		addNumber(new SkinNumber(ntr[0], 100, 5, 0, MainState.NUMBER_SCORE), 0, 970,
+				180, 12, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		addNumber(new SkinNumber(ntr[1], 100, 5, 0, MainState.NUMBER_HIGHSCORE), 0, 970,
+				160, 12, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		addNumber(new SkinNumber(ntr[2], 100, 5, 0, MainState.NUMBER_TARGET_SCORE), 0, 970,
+				140, 12, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+
 		SkinSlider seek = new SkinSlider(new TextureRegion[] { new TextureRegion(st, 0, 265, 17, 24) }, 0, 1,
 				(int) (560 * dh), MainState.SLIDER_MUSICSELECT_POSITION);
 		setDestination(seek, 0, 345, 440, 30, 24, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -666,7 +691,7 @@ public class PlaySkin extends Skin {
 			images[i].setImage(judge[i == 5 ? 4 : i], 100);
 			setDestination(images[i], 0, 315, 240, 180, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 			images[i].setOffsetYReferenceID(MainState.OFFSET_LIFT);
-			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 100, 6, 0, NumberResourceAccessor.MAXCOMBO);
+			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 100, 6, 0, MainState.NUMBER_MAXCOMBO);
 			setDestination(number[i], 0, 200, 0, 40, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		}
 		JudgeRegion jr1 = new JudgeRegion(images, number, true);
@@ -677,7 +702,7 @@ public class PlaySkin extends Skin {
 			images[i].setImage(judge[i == 5 ? 4 : i], 100);
 			setDestination(images[i], 0, 785, 240, 180, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 			images[i].setOffsetYReferenceID(MainState.OFFSET_LIFT);
-			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 100, 6, 0, NumberResourceAccessor.MAXCOMBO);
+			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 100, 6, 0, MainState.NUMBER_MAXCOMBO);
 			setDestination(number[i], 0, 200, 0, 40, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		}
 		JudgeRegion jr2 = new JudgeRegion(images, number, true);
@@ -770,6 +795,16 @@ public class PlaySkin extends Skin {
 						40 + (5 - i) * 18, 12, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 			}
 		}
+		addNumber(new SkinNumber(ntr[0], 100, 4, 0, MainState.NUMBER_SCORE_RATE), 0, 1100,
+				200, 12, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		addNumber(new SkinNumber(ntr[0], 100, 1, 0, MainState.NUMBER_SCORE_RATE_AFTERDOT), 0, 1148,
+				200, 8, 12, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		addNumber(new SkinNumber(ntr[0], 100, 5, 0, MainState.NUMBER_SCORE), 0, 1100,
+				180, 12, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		addNumber(new SkinNumber(ntr[1], 100, 5, 0, MainState.NUMBER_HIGHSCORE), 0, 1100,
+				160, 12, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		addNumber(new SkinNumber(ntr[2], 100, 5, 0, MainState.NUMBER_TARGET_SCORE), 0, 1100,
+				140, 12, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 		SkinSlider seek = new SkinSlider(new TextureRegion[] { new TextureRegion(st, 0, 265, 17, 24) }, 0, 1,
 				(int) (360 * dh), MainState.SLIDER_MUSICSELECT_POSITION);
