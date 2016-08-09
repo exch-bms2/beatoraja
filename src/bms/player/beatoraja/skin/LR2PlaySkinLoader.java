@@ -18,15 +18,24 @@ import bms.player.beatoraja.play.PlaySkin;
 
 public class LR2PlaySkinLoader extends LR2SkinLoader {
 
-	private List<Rectangle> bgaregion = new ArrayList();
-	
+	private PlaySkin.SkinBGAObject bga;
+
 	public LR2PlaySkinLoader() {
+		addCommandWord(new CommandWord("SRC_BGA") {
+			@Override
+			public void execute(String[] str) {
+				bga = new PlaySkin.SkinBGAObject(skin);
+				skin.add(bga);
+			}
+		});
 		addCommandWord(new CommandWord("DST_BGA") {
 			@Override
 			public void execute(String[] str) {
-				bgaregion.add(new Rectangle(Integer.parseInt(str[3]) * dstw / srcw, dsth - Integer.parseInt(str[4])
-						* dsth / srch - Integer.parseInt(str[6]) * dsth / srch, Integer.parseInt(str[5]) * dstw / srcw,
-						Integer.parseInt(str[6]) * dsth / srch));
+				if(bga != null) {
+					skin.setDestination(bga, 0, Integer.parseInt(str[3]) * dstw / srcw, dsth - Integer.parseInt(str[4])
+							* dsth / srch - Integer.parseInt(str[6]) * dsth / srch, Integer.parseInt(str[5]) * dstw / srcw,
+							Integer.parseInt(str[6]) * dsth / srch,0,255,255,255,255,0,0,0,0,0,0,0,0,0);
+				}
 			}
 		});
 		addCommandWord(new CommandWord("DST_LINE") {
@@ -144,7 +153,6 @@ public class LR2PlaySkinLoader extends LR2SkinLoader {
 		skin.setMinenote(mine);
 		skin.setLongnote(new Sprite[][] { lnend, lnstart, lnbodya, lnbody });
 		skin.setLaneregion(laner);
-		skin.setBGAregion(bgaregion.toArray(new Rectangle[0]));
 		return skin;
 	}
 }

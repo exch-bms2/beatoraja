@@ -4,8 +4,6 @@ import java.io.*;
 import java.util.*;
 import java.util.logging.Logger;
 
-import org.lwjgl.opengl.GL11;
-
 import bms.model.*;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.gauge.*;
@@ -17,13 +15,10 @@ import bms.player.beatoraja.play.bga.BGAProcessor;
 import bms.player.beatoraja.skin.LR2PlaySkinLoader;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-import com.badlogic.gdx.math.Rectangle;
 
 /**
  * BMSプレイヤー本体
@@ -109,7 +104,6 @@ public class BMSPlayer extends MainState {
 
 	private BMSPlayerInputProcessor input;
 	private LaneRenderer lanerender;
-	private ScoreGraphRenderer graphrender;
 	private JudgeManager judge;
 	private AudioProcessor audio;
 
@@ -407,7 +401,8 @@ public class BMSPlayer extends MainState {
 		input.setKeyassign(pc.getKeyassign());
 		input.setControllerassign(pc.getControllerassign());
 		lanerender = new LaneRenderer(this, sprite, shape, systemfont, skin, resource, model, resource.getConstraint());
-		skin.setLaneRenderer(lanerender);
+		skin.setBMSPlayer(this);
+		bga = resource.getBGAManager();
 		Logger.getGlobal().info("描画クラス準備");
 
 		Logger.getGlobal().info("hash");
@@ -416,23 +411,26 @@ public class BMSPlayer extends MainState {
 		if (score == null) {
 			score = new IRScoreData();
 		}
-		graphrender = new ScoreGraphRenderer(model, score.getExscore(), model.getTotalNotes() * 8 / 5);
+		bestscore = score.getExscore();
+		rivalscore = model.getTotalNotes() * 8 / 5;
 		Logger.getGlobal().info("スコアグラフ描画クラス準備");
 
 		audio = resource.getAudioProcessor();
-		bga = resource.getBGAManager();
 	}
+
+	private int bestscore;
+	private int rivalscore;
 
 	@Override
 	public void resize(int w, int h) {
 		System.out.println("resize" + w + "," + h);
 	}
 
-	private static final int STATE_PRELOAD = 0;
-	private static final int STATE_READY = 1;
-	private static final int STATE_PLAY = 2;
-	private static final int STATE_FAILED = 3;
-	private static final int STATE_FINISHED = 4;
+	protected static final int STATE_PRELOAD = 0;
+	protected static final int STATE_READY = 1;
+	protected static final int STATE_PLAY = 2;
+	protected static final int STATE_FAILED = 3;
+	protected static final int STATE_FINISHED = 4;
 
 	private int state = STATE_PRELOAD;
 
@@ -450,7 +448,6 @@ public class BMSPlayer extends MainState {
 		switch (state) {
 		// 楽曲ロード
 		case STATE_PRELOAD:
-			renderMain(0);
 			if (resource.mediaLoadFinished() && !input.startPressed()) {
 				bga.prepare(this);
 				state = STATE_READY;
@@ -460,7 +457,6 @@ public class BMSPlayer extends MainState {
 			break;
 		// GET READY
 		case STATE_READY:
-			renderMain(0);
 			final long rt = now - getTimer()[TIMER_READY];
 			if (rt > 1000) {
 				state = STATE_PLAY;
@@ -498,7 +494,6 @@ public class BMSPlayer extends MainState {
 				getTimer()[TIMER_FAILED] = now;
 				Logger.getGlobal().info("STATE_FAILEDに移行");
 			}
-			renderMain(time);
 
 			break;
 		// 閉店処理
@@ -510,7 +505,6 @@ public class BMSPlayer extends MainState {
 				keyinput.stop = true;
 			}
 			resource.getAudioProcessor().stop(-1);
-			renderMain(starttime != 0 ? time : 0);
 
 			if (now - getTimer()[TIMER_FAILED] > skin.getCloseTime()) {
 				if (keyinput != null) {
@@ -585,6 +579,14 @@ public class BMSPlayer extends MainState {
 		}
 
 		prevtime = nowtime;
+	}
+
+	public int getState() {
+		return state;
+	}
+
+	public LaneRenderer getLanerender() {
+		return lanerender;
 	}
 
 	private void saveConfig() {
@@ -682,63 +684,6 @@ public class BMSPlayer extends MainState {
 			getTimer()[TIMER_FAILED] = getNowTime();
 			Logger.getGlobal().info("STATE_FAILEDに移行");
 		}
-	}
-
-	private void renderMain(int time) {
-		final MainController main = getMainController();
-		final ShapeRenderer shape = main.getShapeRenderer();
-		final SpriteBatch sprite = main.getSpriteBatch();
-
-		// グラフ描画 TODO スキン描画への移行
-		graphrender.drawGraph(skin, sprite, systemfont, shape, this.judge);
-
-		// プログレス描画 TODO スキン描画への移行
-		Rectangle progress = skin.getProgressRegion();
-		shape.begin(ShapeType.Line);
-		shape.setColor(Color.WHITE);
-		shape.rect(progress.x, progress.y, progress.width, progress.height);
-		shape.end();
-		shape.begin(ShapeType.Filled);
-		shape.setColor(Color.BLACK);
-		shape.rect(progress.x + 1, progress.y + 1, progress.width - 2, progress.height - 2);
-
-		shape.setColor(notes == totalnotes ? Color.BLUE : Color.ORANGE);
-		shape.rect(progress.x + 1, progress.y + 1 + progress.height * (1.0f - (float) time / playtime),
-				progress.width - 2, 20);
-		shape.end();
-
-		// BGA再生 TODO スキン描画への移行
-		Rectangle[] region = skin.getBGAregion();
-		for (Rectangle r : region) {
-			shape.begin(ShapeType.Line);
-			shape.setColor(Color.GRAY);
-			shape.rect(r.x - 1, r.y - 1, r.width + 2, r.height + 2);
-			shape.end();
-			shape.begin(ShapeType.Filled);
-			shape.setColor(Color.BLACK);
-			shape.rect(r.x, r.y, r.width, r.height);
-			shape.end();
-		}
-
-		bga.drawBGA(sprite, region, state == STATE_PRELOAD || state == STATE_READY ? -1 : time);
-
-		// ゲージ描画 TODO スキン描画への移行
-		Rectangle gr = skin.getGaugeRegion();
-		shape.begin(ShapeType.Filled);
-		shape.setColor(Color.valueOf("#001000"));
-		shape.rect(gr.x, gr.y, gr.width, gr.height + 24);
-		shape.end();
-		gauge.draw(skin, sprite, gr.x, gr.y, gr.width, gr.height);
-
-		// ジャッジカウント描画 TODO スキン描画への移行
-		Rectangle judge = skin.getJudgecountregion();
-		Gdx.gl.glEnable(GL11.GL_BLEND);
-		Gdx.gl.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-		shape.begin(ShapeType.Filled);
-		shape.setColor(0, 0, 0, 0.5f);
-		shape.rect(judge.x, judge.y, judge.width, judge.height);
-		shape.end();
-		Gdx.gl.glDisable(GL11.GL_BLEND);
 	}
 
 	@Override
@@ -974,13 +919,13 @@ public class BMSPlayer extends MainState {
 			case NUMBER_SCORE:
 				return judge.getJudgeCount(0) * 2 + judge.getJudgeCount(1);
 			case NUMBER_TARGET_SCORE:
-				return graphrender.getTarget();
+				return rivalscore;
 			case NUMBER_SCORE_RATE:
 				return (judge.getJudgeCount(0) * 2 + judge.getJudgeCount(1)) * 100 / (totalnotes * 2);
 			case NUMBER_SCORE_RATE_AFTERDOT:
 				return ((judge.getJudgeCount(0) * 2 + judge.getJudgeCount(1)) * 1000 / (totalnotes * 2)) % 10;
 			case NUMBER_HIGHSCORE:
-				return graphrender.getBest();
+				return bestscore;
 			case NUMBER_MAXCOMBO:
 				return judge.getMaxcombo();
 		}
@@ -1012,9 +957,9 @@ public class BMSPlayer extends MainState {
 			case SLIDER_SCORERATE:
 				return (float)(judge.getJudgeCount(0) * 2 + judge.getJudgeCount(1)) / (totalnotes * 2);
 			case SLIDER_BESTSCORERATE:
-				return (float)(graphrender.getBest()) / (totalnotes * 2);
+				return (float)(bestscore) / (totalnotes * 2);
 			case SLIDER_TARGETSCORERATE:
-				return (float)(graphrender.getTarget()) / (totalnotes * 2);
+				return (float)(rivalscore) / (totalnotes * 2);
 		}
 		return 0;
 	}

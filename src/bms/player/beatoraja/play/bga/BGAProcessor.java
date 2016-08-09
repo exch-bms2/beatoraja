@@ -10,6 +10,7 @@ import bms.player.beatoraja.Config;
 
 import bms.player.beatoraja.play.BMSPlayer;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Pixmap.Filter;
 import com.badlogic.gdx.graphics.Texture;
@@ -74,6 +75,8 @@ public class BGAProcessor {
 	private ShaderProgram bgrshader;
 
 	private BGImageManager cache;
+
+	private Texture blanktex;
 
 	public BGAProcessor(Config config) {
 		this.config = config;
@@ -140,6 +143,11 @@ public class BGAProcessor {
 		bgrshader = new ShaderProgram(vertex, fragment);
 
 		System.out.println(layershader.getLog());
+
+		Pixmap blank = new Pixmap(1,1, Pixmap.Format.RGBA8888);
+		blank.setColor(Color.BLACK);
+		blank.fill();
+		blanktex = new Texture(blank);
 	}
 
 	public void setModel(BMSModel model, String filepath) {
@@ -301,7 +309,8 @@ public class BGAProcessor {
 		return cache.getTexture(id);
 	}
 
-	public void drawBGA(SpriteBatch sprite, Rectangle[] region, int time) {
+	public void drawBGA(SpriteBatch sprite, Rectangle r, int time) {
+		sprite.end();
 		if (model == null) {
 			return;
 		}
@@ -336,8 +345,10 @@ public class BGAProcessor {
 
 		if (time < 0 && getBackbmpData() != null) {
 			sprite.begin();
-			for (Rectangle r : region) {
+			if(getBackbmpData() != null) {
 				sprite.draw(getBackbmpData(), r.x, r.y, r.width, r.height);
+			} else {
+				sprite.draw(blanktex, r.x, r.y, r.width, r.height);
 			}
 			sprite.end();
 		} else if (misslayer != null && misslayertime != 0 && time >= misslayertime && time < misslayertime + 500) {
@@ -346,30 +357,26 @@ public class BGAProcessor {
 			if (miss != null) {
 				miss.setFilter(TextureFilter.Linear, TextureFilter.Linear);
 				sprite.begin();
-				for (Rectangle r : region) {
 					sprite.draw(miss, r.x, r.y, r.width, r.height);
-				}
 				sprite.end();
 			}
 		} else {
 			// draw BGA
 			Texture playingbgatex = getBGAData(playingbgaid, rbga);
+			sprite.begin();
 			if (playingbgatex != null) {
 				playingbgatex.setFilter(TextureFilter.Linear, TextureFilter.Linear);
-				sprite.begin();
 				if (mpgmap.containsKey(playingbgaid) && bgrshader.isCompiled()) {
 					sprite.setShader(bgrshader);
-					for (Rectangle r : region) {
 						sprite.draw(playingbgatex, r.x, r.y, r.width, r.height);
-					}
 					sprite.setShader(null);
 				} else {
-					for (Rectangle r : region) {
 						sprite.draw(playingbgatex, r.x, r.y, r.width, r.height);
-					}
 				}
-				sprite.end();
+			} else {
+				sprite.draw(blanktex, r.x, r.y, r.width, r.height);
 			}
+			sprite.end();
 			// draw layer
 			Texture playinglayertex = getBGAData(playinglayerid, rlayer);
 			if (playinglayertex != null) {
@@ -377,26 +384,21 @@ public class BGAProcessor {
 				sprite.begin();
 				if (mpgmap.containsKey(playinglayerid) && bgrshader.isCompiled()) {
 					sprite.setShader(bgrshader);
-					for (Rectangle r : region) {
 						sprite.draw(playinglayertex, r.x, r.y, r.width, r.height);
-					}
 					sprite.setShader(null);
 				} else if (layershader.isCompiled()) {
 					sprite.setShader(layershader);
-					for (Rectangle r : region) {
 						sprite.draw(playinglayertex, r.x, r.y, r.width, r.height);
-					}
 					sprite.setShader(null);
 				} else {
-					for (Rectangle r : region) {
 						sprite.draw(playinglayertex, r.x, r.y, r.width, r.height);
-					}
 				}
 				sprite.end();
 			}
 		}
 
 		prevrendertime = time;
+		sprite.begin();
 	}
 
 	/**
