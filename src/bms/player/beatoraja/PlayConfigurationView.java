@@ -368,7 +368,7 @@ public class PlayConfigurationView implements Initializable {
 					List<String> hashes = new ArrayList<String>();
 					for (DifficultyTableElement dte : dt.getElements()) {
 						if (lv.equals(dte.getDifficultyID())) {
-							hashes.add(dte.getHash());
+							hashes.add(dte.getSHA256() != null ? dte.getSHA256() : dte.getMD5());
 						}
 					}
 					levels.put(lv, hashes.toArray(new String[0]));

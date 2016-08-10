@@ -178,7 +178,8 @@ public class SongDatabaseAccessor {
 				}
 				str.append('\'').append(hash).append('\'');
 			}
-			List<SongData> m = qr.query("SELECT * FROM song WHERE md5 IN (" + str.toString() + ")",
+			List<SongData> m = qr.query(
+					"SELECT * FROM song WHERE md5 IN (" + str.toString() + ") OR sha256 IN (" + str.toString() + ")",
 					new BeanListHandler<SongData>(SongData.class));
 
 			for (SongData song : m) {
@@ -193,13 +194,14 @@ public class SongDatabaseAccessor {
 
 		return result;
 	}
-	
+
 	public SongData[] getSongDatas(String text, String lr2path) {
 		SongData[] result = new SongData[0];
 		try {
-			List<SongData> m = qr.query( "SELECT * FROM song WHERE rtrim(title||' '||subtitle||' '||artist||' '||subartist) LIKE ?"
-					+ " GROUP BY sha256",
-					new BeanListHandler<SongData>(SongData.class), "%" + text.replaceAll("'", "''") + "%");
+			List<SongData> m = qr.query(
+					"SELECT * FROM song WHERE rtrim(title||' '||subtitle||' '||artist||' '||subartist) LIKE ?"
+							+ " GROUP BY sha256", new BeanListHandler<SongData>(SongData.class),
+					"%" + text.replaceAll("'", "''") + "%");
 
 			for (SongData song : m) {
 				if (!song.getPath().startsWith("/") && !song.getPath().contains(":\\")) {
@@ -509,7 +511,7 @@ public class SongDatabaseAccessor {
 					for (FolderData record : folders) {
 						if (record.getPath().equals(s)) {
 							fremoves.remove(record);
-							if(!updateAll && record.getDate() == f.lastModified() / 1000) {
+							if (!updateAll && record.getDate() == f.lastModified() / 1000) {
 								b = false;
 							}
 							break;
