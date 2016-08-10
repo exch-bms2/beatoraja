@@ -17,9 +17,7 @@ public class SkinGraph extends SkinObject {
 	private int timing;
 	private int[] option = new int[3];
 
-	private NumberResourceAccessor resource;
-	private NumberResourceAccessor maxresource;
-	private int max = 100;
+	private int id = -1;
 
 	public TextureRegion[] getImage() {
 		return image;
@@ -55,30 +53,21 @@ public class SkinGraph extends SkinObject {
 		this.option = option;
 	}
 
-	public void setNumberResourceAccessor(NumberResourceAccessor resource, NumberResourceAccessor maxresource) {
-		this.resource = resource;
-		this.maxresource = maxresource;
-	}
-
-	public void setMaxValue(int max) {
-		this.max = max;
-	}
-
 	public void draw(SpriteBatch sprite, long time, MainState state) {
 		if (image == null) {
 			return;
 		}
 		Rectangle r = this.getDestination(time,state);
 		if (r != null) {
-			final int value = resource != null ? resource.getValue(state) : 0;
-			final int maxvalue = maxresource != null ? maxresource.getValue(state) : max;
-			if (maxvalue > 0) {
+			float value = 0;
+			if(id != -1) {
+				value = state.getSliderValue(id);
+			}
 				TextureRegion image = getImage(time);
 //				sprite.draw(image, r.x, r.y, r.width, r.height);
 				draw(sprite, new TextureRegion(image, 0, image.getRegionY() + image.getRegionHeight()
-						- (image.getRegionHeight() * value / maxvalue), image.getRegionWidth(), image.getRegionHeight()
-						* value / maxvalue), r.x, r.y, r.width, r.height * value / maxvalue, getColor(time,state));
-			}
+						- (int)(image.getRegionHeight() * value), image.getRegionWidth(), (int) ((int)image.getRegionHeight()
+                                                * value)), r.x, r.y, r.width, r.height * value, getColor(time, state));
 		}
 	}
 
@@ -89,5 +78,9 @@ public class SkinGraph extends SkinObject {
 			}
 			image = null;
 		}
+	}
+
+	public void setReferenceID(int id) {
+		this.id = id;
 	}
 }

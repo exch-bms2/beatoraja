@@ -31,6 +31,11 @@ public abstract class MainState {
 	public static final int SLIDER_MUSICSELECT_POSITION = 1;
 	// プレイ専用
 	public static final int SLIDER_MUSIC_PROGRESS = 6;
+
+	public static final int SLIDER_SCORERATE = 1000;
+	public static final int SLIDER_BESTSCORERATE = 1001;
+	public static final int SLIDER_TARGETSCORERATE = 1002;
+
 	public static final int OFFSET_LIFT = 100;
 	
 	public static final int STRING_TITLE = 10;
@@ -57,13 +62,75 @@ public abstract class MainState {
 	public static final int NUMBER_TOTALBAD = 36;
 	public static final int NUMBER_TOTALPOOR = 37;
 	public static final int NUMBER_TOTALPLAYNOTES = 1037;
+	public static final int NUMBER_SCORE = 71;
+	public static final int NUMBER_MAXSCORE = 72;
+	public static final int NUMBER_TOTALNOTES = 74;
+	public static final int NUMBER_MAXCOMBO = 75;
+	public static final int NUMBER_MISSCOUNT = 76;
 	public static final int NUMBER_PLAYCOUNT = 77;
 	public static final int NUMBER_CLEARCOUNT = 78;
 	public static final int NUMBER_FAILCOUNT = 79;
+	public static final int NUMBER_PERFECT2 = 80;
+	public static final int NUMBER_GREAT2 = 81;
+	public static final int NUMBER_GOOD2 = 82;
+	public static final int NUMBER_BAD2 = 83;
+	public static final int NUMBER_POOR2 = 84;
+	public static final int NUMBER_PERFECT_RATE = 85;
+	public static final int NUMBER_GREAT_RATE = 86;
+	public static final int NUMBER_GOOD_RATE = 87;
+	public static final int NUMBER_BAD_RATE = 88;
+	public static final int NUMBER_POOR_RATE = 89;
+	public static final int NUMBER_MAXBPM = 90;
+	public static final int NUMBER_MINBPM = 91;
+	public static final int NUMBER_SCORE2 = 101;
+	public static final int NUMBER_SCORE_RATE = 102;
+	public static final int NUMBER_SCORE_RATE_AFTERDOT = 103;
+	public static final int NUMBER_COMBO = 104;
+	public static final int NUMBER_MAXCOMBO2 = 105;
 	public static final int NUMBER_GROOVEGAUGE = 107;
 	public static final int NUMBER_GROOVEGAUGE_AFTERDOT = 207;
+	public static final int NUMBER_DIFF_EXSCORE = 108;
+	public static final int NUMBER_PERFECT = 110;
+	public static final int NUMBER_EARLY_PERFECT = 1110;
+	public static final int NUMBER_LATE_PERFECT = 2110;
+	public static final int NUMBER_GREAT = 111;
+	public static final int NUMBER_EARLY_GREAT= 1111;
+	public static final int NUMBER_LATE_GREAT = 2111;
+	public static final int NUMBER_GOOD = 112;
+	public static final int NUMBER_EARLY_GOOD= 1112;
+	public static final int NUMBER_LATE_GOOD = 2112;
+	public static final int NUMBER_BAD = 113;
+	public static final int NUMBER_EARLY_BAD= 1113;
+	public static final int NUMBER_LATE_BAD = 2113;
+	public static final int NUMBER_POOR = 114;
+	public static final int NUMBER_EARLY_POOR= 1114;
+	public static final int NUMBER_LATE_POOR = 2114;
+	public static final int NUMBER_MISS = 1115;
+	public static final int NUMBER_EARLY_MISS= 2115;
+	public static final int NUMBER_LATE_MISS = 3115;
+	public static final int NUMBER_TOTAL_RATE = 115;
+	public static final int NUMBER_TOTAL_RATE_AFTERDOT = 116;
+	public static final int NUMBER_TARGET_SCORE = 121;
+	public static final int NUMBER_HIGHSCORE = 150;
+	public static final int NUMBER_SCORE3 = 152;
+	public static final int NUMBER_NOWBPM = 160;
 	public static final int NUMBER_TIMELEFT_MINUTE = 163;
 	public static final int NUMBER_TIMELEFT_SECOND = 164;
+	public static final int NUMBER_DIFF_SCORE = 170;
+	public static final int NUMBER_TARGET_MAXCOMBO = 173;
+	public static final int NUMBER_MAXCOMBO3 = 174;
+	public static final int NUMBER_DIFF_MAXCOMBO = 175;
+	public static final int NUMBER_TARGET_MISSCOUNT = 176;
+	public static final int NUMBER_MISSCOUNT2 = 177;
+	public static final int NUMBER_DIFF_MISSCOUNT = 178;
+
+	public static final int NUMBER_CLEAR = 20000;
+	public static final int NUMBER_TARGET_CLEAR = 20001;
+	public static final int NUMBER_HISPEED = 30000;
+	public static final int NUMBER_HISPEED_AFTERDOT = 30001;
+	public static final int NUMBER_DURATION = 30002;
+	public static final int NUMBER_TOTALEARLY = 40001;
+	public static final int NUMBER_TOTALLATE = 40002;
 
 	public MainState() {
 		this(null);
@@ -125,67 +192,7 @@ public abstract class MainState {
 		this.skin = skin;
 	}
 
-	public int getClear() {
-		return 0;
-	}
-
-	public int getTargetClear() {
-		return 0;
-	}
-
-	public int getScore() {
-		return 0;
-	}
-	
-	public int getBestScore() {
-		return 0;
-	}
-	
-	public int getTargetScore() {
-		return 0;
-	}
-	
-	public int getMaxcombo() {
-		return 0;
-	}
-	
-	public int getTargetMaxcombo() {
-		return 0;
-	}
-
 	public int getJudgeCount(int judge, boolean fast) {
-		return 0;
-	}
-
-	public int getMinBPM() {
-		return 0;
-	}
-	
-	public int getBPM() {
-		return 0;
-	}
-	
-	public int getMaxBPM() {
-		return 0;
-	}
-	
-	public int getTotalNotes() {
-		return 0;
-	}
-	
-	public float getHispeed() {
-		return 0;
-	}
-
-	public int getDuration() {
-		return 0;
-	}
-
-	public int getMisscount() {
-		return 0;
-	}
-
-	public int getTargetMisscount() {
 		return 0;
 	}
 
@@ -210,6 +217,42 @@ public abstract class MainState {
 		case NUMBER_TIME_SECOND:
 			cl.setTimeInMillis(System.currentTimeMillis());
 			return cl.get(Calendar.SECOND);
+			case NUMBER_PERFECT:
+				return getJudgeCount(0, true) + getJudgeCount(0,false);
+			case NUMBER_EARLY_PERFECT:
+				return getJudgeCount(0, true);
+			case NUMBER_LATE_PERFECT:
+				return getJudgeCount(0,false);
+			case NUMBER_GREAT:
+				return getJudgeCount(1, true) + getJudgeCount(1,false);
+			case NUMBER_EARLY_GREAT:
+				return getJudgeCount(1, true);
+			case NUMBER_LATE_GREAT:
+				return getJudgeCount(1,false);
+			case NUMBER_GOOD:
+				return getJudgeCount(2, true) + getJudgeCount(2,false);
+			case NUMBER_EARLY_GOOD:
+				return getJudgeCount(2, true);
+			case NUMBER_LATE_GOOD:
+				return getJudgeCount(2,false);
+			case NUMBER_BAD:
+				return getJudgeCount(3, true) + getJudgeCount(3,false);
+			case NUMBER_EARLY_BAD:
+				return getJudgeCount(3, true);
+			case NUMBER_LATE_BAD:
+				return getJudgeCount(3,false);
+			case NUMBER_POOR:
+				return getJudgeCount(4, true) + getJudgeCount(4,false);
+			case NUMBER_EARLY_POOR:
+				return getJudgeCount(4, true);
+			case NUMBER_LATE_POOR:
+				return getJudgeCount(4,false);
+			case NUMBER_MISS:
+				return getJudgeCount(5, true) + getJudgeCount(5,false);
+			case NUMBER_EARLY_MISS:
+				return getJudgeCount(5, true);
+			case NUMBER_LATE_MISS:
+				return getJudgeCount(5,false);
 		}
 		return 0;
 	}

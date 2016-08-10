@@ -49,8 +49,10 @@ public class GradeResult extends MainState {
 
 	public void create() {
 		final PlayerResource resource = getMainController().getPlayerResource();
-		skin = new MusicResultSkin(MainController.RESOLUTION[resource.getConfig().getResolution()]);
-		this.setSkin(skin);
+		if(skin == null) {
+			skin = new MusicResultSkin(MainController.RESOLUTION[resource.getConfig().getResolution()]);
+			this.setSkin(skin);			
+		}
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/VL-Gothic-Regular.ttf"));
 		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
 		parameter.size = 24;
@@ -210,75 +212,75 @@ public class GradeResult extends MainState {
 		return 0;
 	}
 
-	@Override
-	public int getClear() {
+	public int getNumberValue(int id) {
 		final PlayerResource resource = getMainController().getPlayerResource();
-		if (resource.getCourseScoreData() != null) {
-			return resource.getCourseScoreData().getClear();
+		switch(id) {
+			case NUMBER_CLEAR:
+				if (resource.getCourseScoreData() != null) {
+					return resource.getCourseScoreData().getClear();
+				}
+				return Integer.MIN_VALUE;
+			case NUMBER_TARGET_CLEAR:
+				return oldclear;
+			case NUMBER_TARGET_SCORE:
+				return oldexscore;
+			case NUMBER_SCORE:
+				if (resource.getCourseScoreData() != null) {
+					return resource.getCourseScoreData().getExscore();
+				}
+				return Integer.MIN_VALUE;
+			case NUMBER_DIFF_SCORE:
+				return resource.getCourseScoreData().getExscore() - oldexscore;
+			case NUMBER_MISSCOUNT:
+				if (resource.getCourseScoreData() != null) {
+					return resource.getCourseScoreData().getMinbp();
+				}
+				return Integer.MIN_VALUE;
+			case NUMBER_TARGET_MISSCOUNT:
+				if (oldmisscount == Integer.MAX_VALUE) {
+					return Integer.MIN_VALUE;
+				}
+				return oldmisscount;
+			case NUMBER_DIFF_MISSCOUNT:
+				if(oldmisscount == Integer.MAX_VALUE) {
+					return Integer.MIN_VALUE;
+				}
+				return resource.getCourseScoreData().getMinbp() - oldmisscount;
+			case NUMBER_TARGET_MAXCOMBO:
+				if (oldcombo > 0) {
+					return oldcombo;
+				}
+				return Integer.MIN_VALUE;
+			case NUMBER_MAXCOMBO:
+				if (resource.getCourseScoreData() != null) {
+					return resource.getCourseScoreData().getCombo();
+				}
+				return Integer.MIN_VALUE;
+			case NUMBER_DIFF_MAXCOMBO:
+				if(oldcombo == 0) {
+					return Integer.MIN_VALUE;
+				}
+				return resource.getCourseScoreData().getCombo() - oldcombo;
+			case NUMBER_TOTALNOTES:
+				int notes = 0;
+				for (BMSModel model : resource.getCourseBMSModels()) {
+					notes += model.getTotalNotes();
+				}
+				return notes;
+			case NUMBER_TOTALEARLY:
+				int ecount = 0;
+				for(int i = 1;i < 6;i++) {
+					ecount += getJudgeCount(i,true);
+				}
+				return ecount;
+			case NUMBER_TOTALLATE:
+				int count = 0;
+				for(int i = 1;i < 6;i++) {
+					count += getJudgeCount(i,false);
+				}
+				return count;
 		}
-		return Integer.MIN_VALUE;
-	}
-
-	@Override
-	public int getTargetClear() {
-		return oldclear;
-	}
-
-	@Override
-	public int getScore() {
-		final PlayerResource resource = getMainController().getPlayerResource();
-		if (resource.getCourseScoreData() != null) {
-			return resource.getCourseScoreData().getExscore();
-		}
-		return Integer.MIN_VALUE;
-	}
-
-	@Override
-	public int getTargetScore() {
-		return oldexscore;
-	}
-
-	@Override
-	public int getMaxcombo() {
-		final PlayerResource resource = getMainController().getPlayerResource();
-		if (resource.getCourseScoreData() != null) {
-			return resource.getCourseScoreData().getCombo();
-		}
-		return Integer.MIN_VALUE;
-	}
-
-	@Override
-	public int getTargetMaxcombo() {
-		if (oldcombo > 0) {
-			return oldcombo;
-		}
-		return Integer.MIN_VALUE;
-	}
-
-	@Override
-	public int getMisscount() {
-		final PlayerResource resource = getMainController().getPlayerResource();
-		if (resource.getCourseScoreData() != null) {
-			return resource.getCourseScoreData().getMinbp();
-		}
-		return Integer.MIN_VALUE;
-	}
-
-	@Override
-	public int getTargetMisscount() {
-		if (oldmisscount == Integer.MAX_VALUE) {
-			return Integer.MIN_VALUE;
-		}
-		return oldmisscount;
-	}
-
-	public int getTotalNotes() {
-		int notes = 0;
-		final PlayerResource resource = getMainController().getPlayerResource();
-		for (BMSModel model : resource.getCourseBMSModels()) {
-			notes += model.getTotalNotes();
-		}
-		return notes;
+		return super.getNumberValue(id);
 	}
 
 	@Override

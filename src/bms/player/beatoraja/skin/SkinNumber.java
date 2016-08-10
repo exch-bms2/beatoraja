@@ -29,23 +29,17 @@ public class SkinNumber extends SkinObject {
 	
 	private TextureRegion[] values;
 	
-	private NumberResourceAccessor resource;
-	
 	public SkinNumber(TextureRegion[] image, int cycle, int keta, int zeropadding) {
-		this(image, cycle, keta, zeropadding, null);
+		this(image, cycle, keta, zeropadding, -1);
 	}
 	
-	public SkinNumber(TextureRegion[] image, int cycle, int keta, int zeropadding, NumberResourceAccessor resource) {
-		this(image, null, cycle, keta, zeropadding, resource);
-	}
-
-	public SkinNumber(TextureRegion[][] image, int cycle, int keta, int zeropadding, NumberResourceAccessor resource) {
+	public SkinNumber(TextureRegion[][] image, int cycle, int keta, int zeropadding, int rid) {
 		this.image = image;
 		this.mimage = null;
 		this.cycle = cycle;
 		this.setKeta(keta);
 		this.zeropadding = zeropadding;
-		this.resource = resource;
+		this.id = rid;
 	}
 
 	public SkinNumber(TextureRegion[] image, int cycle, int keta, int zeropadding, int rid) {
@@ -60,20 +54,7 @@ public class SkinNumber extends SkinObject {
 		this.zeropadding = zeropadding;
 		this.id = id;
 	}
-	
-	public SkinNumber(TextureRegion[] image, TextureRegion[] mimage, int cycle, int keta, int zeropadding, NumberResourceAccessor resource) {
-		this.image = new TextureRegion[][]{image};
-		this.mimage = mimage != null ? new TextureRegion[][]{mimage} : null;
-		this.cycle = cycle;
-		this.setKeta(keta);
-		this.zeropadding = zeropadding;
-		this.resource = resource;
-	}
 
-	public void setNumberResourceAccessor(NumberResourceAccessor resource) {
-		this.resource = resource;
-	}
-	
 	public int getId() {
 		return id;
 	}
@@ -120,9 +101,6 @@ public class SkinNumber extends SkinObject {
 		int value = Integer.MIN_VALUE;
 		if(id != -1) {
 			value = state.getNumberValue(id);
-		}
-		else if(resource != null) {
-			value = resource.getValue(state);
 		}
 		if(value != Integer.MIN_VALUE && value != Integer.MAX_VALUE) {
 			draw(sprite, time, value, state);				

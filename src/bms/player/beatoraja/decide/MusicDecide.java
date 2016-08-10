@@ -34,17 +34,19 @@ public class MusicDecide extends MainState {
 		}
 
 		final PlayerResource resource = getMainController().getPlayerResource();
-		if (resource.getConfig().getLr2decideskin() != null) {
-			LR2DecideSkinLoader loader = new LR2DecideSkinLoader();
-			try {
-				setSkin(loader.loadMusicDecideSkin(new File(resource.getConfig().getLr2decideskin()), resource
-						.getConfig().getLr2decideskinoption()));
-			} catch (IOException e) {
-				e.printStackTrace();
+		if(getSkin() == null) {
+			if (resource.getConfig().getLr2decideskin() != null) {
+				LR2DecideSkinLoader loader = new LR2DecideSkinLoader();
+				try {
+					setSkin(loader.loadMusicDecideSkin(new File(resource.getConfig().getLr2decideskin()), resource
+							.getConfig().getLr2decideskinoption()));
+				} catch (IOException e) {
+					e.printStackTrace();
+					setSkin(new MusicDecideSkin(MainController.RESOLUTION[resource.getConfig().getResolution()]));
+				}
+			} else {
 				setSkin(new MusicDecideSkin(MainController.RESOLUTION[resource.getConfig().getResolution()]));
-			}
-		} else {
-			setSkin(new MusicDecideSkin(MainController.RESOLUTION[resource.getConfig().getResolution()]));
+			}			
 		}
 	}
 

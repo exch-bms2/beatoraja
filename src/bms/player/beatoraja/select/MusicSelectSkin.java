@@ -68,23 +68,22 @@ public class MusicSelectSkin extends Skin {
 		Texture cl = new Texture("skin/clear.png");
 		SkinImage clear = new SkinImage();
 		clear.setImage(TextureRegion.split(cl, 200, 20), 0);
-		clear.setNumberResourceAccessor(NumberResourceAccessor.CLEAR);
+		clear.setReferenceID(MainState.NUMBER_CLEAR);
 		setDestination(clear, 0, 100, 405, 200, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(clear);
 		// 数字
 		Texture nt = new Texture("skin/number.png");
 		TextureRegion[][] ntr = TextureRegion.split(nt, 24, 24);
 
-		addNumber(new SkinNumber(ntr[0], 0, 4, 0, NumberResourceAccessor.MIN_BPM), 0, 300, 512, 18, 18, 0, 255, 255,
+		addNumber(new SkinNumber(ntr[0], 0, 4, 0, MainState.NUMBER_MINBPM), 0, 300, 512, 18, 18, 0, 255, 255,
 				255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-
-		addNumber(new SkinNumber(ntr[0], 0, 4, 0, NumberResourceAccessor.MAX_BPM), 0, 372, 512, 18, 18, 0, 255, 255,
+		addNumber(new SkinNumber(ntr[0], 0, 4, 0, MainState.NUMBER_MAXBPM), 0, 372, 512, 18, 18, 0, 255, 255,
 				255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		addNumber(new SkinNumber(ntr[0], 0, 4, 0, NumberResourceAccessor.SCORE), 0, 200, 372, 18, 18, 0, 255, 255, 255,
+		addNumber(new SkinNumber(ntr[0], 0, 4, 0, MainState.NUMBER_SCORE), 0, 200, 372, 18, 18, 0, 255, 255, 255,
 				255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		addNumber(new SkinNumber(ntr[0], 0, 4, 0, NumberResourceAccessor.MISSCOUNT), 0, 200, 342, 18, 18, 0, 255, 255,
+		addNumber(new SkinNumber(ntr[0], 0, 4, 0, MainState.NUMBER_MISSCOUNT), 0, 200, 342, 18, 18, 0, 255, 255,
 				255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		addNumber(new SkinNumber(ntr[0], 0, 4, 0, NumberResourceAccessor.MAXCOMBO), 0, 450, 342, 18, 18, 0, 255, 255,
+		addNumber(new SkinNumber(ntr[0], 0, 4, 0, MainState.NUMBER_MAXCOMBO), 0, 450, 342, 18, 18, 0, 255, 255,
 				255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		addNumber(new SkinNumber(ntr[0], 0, 4, 0, MainState.NUMBER_CLEARCOUNT), 0, 250, 312, 18, 18, 0, 255, 255,
 				255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
