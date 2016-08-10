@@ -76,7 +76,9 @@ public class DetailGraphRenderer {
     }
 
     private void drawGraph(Rectangle judge, ShapeRenderer shape, int[][] data, String[] GRAPH) {
-
+    	if(judge == null) {
+    		return;
+    	}
         int max = 40;
         Gdx.gl.glEnable(GL11.GL_BLEND);
         Gdx.gl.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);

@@ -220,8 +220,8 @@ public class LaneRenderer {
 
 	public void drawLane() {
 		sprite.end();
-		long time = main.getPlayTime() != 0 ? (System.currentTimeMillis() - main.getPlayTime()) : 0;
-		time += config.getJudgetiming();
+		final long time = (main.getPlayTime() != 0 ? (System.currentTimeMillis() - main.getPlayTime()) : 0)
+				+ config.getJudgetiming();
 		JudgeManager judge = main.getJudgeManager();
 		final Rectangle[] laneregion = skin.getLaneregion();
 		final Rectangle[] playerr = skin.getLaneGroupRegion();
@@ -244,28 +244,28 @@ public class LaneRenderer {
 
 		// リフト描画
 		if (enableLift) {
-			for (int p = 0; p < playerr.length; p++) {
+			for (Rectangle r : playerr) {
 				sprite.begin();
-				sprite.draw(skin.getLanecover(), playerr[p].x, hl, playerr[p].width, (hu - hl) * lift);
+				sprite.draw(skin.getLanecover(), r.x, hl, r.width, (hu - hl) * lift);
 				// 緑数字、白数字描画
 				if (main.getBMSPlayerInputProcessor().startPressed()) {
 					font.setColor(Color.WHITE);
-					font.draw(sprite, String.format("%5d", Math.round(lift * 1000)), playerr[p].x + playerr[p].width
-							* 0.25f, hl + (hu - hl) * lift);
+					font.draw(sprite, String.format("%5d", Math.round(lift * 1000)), r.x + r.width * 0.25f, hl
+							+ (hu - hl) * lift);
 					font.setColor(Color.GREEN);
 					font.draw(sprite,
 							String.format("%5d", Math.round(region * 0.6 * (1 - (enableLanecover ? lanecover : 0)))),
-							playerr[p].x + playerr[p].width * 0.75f, hl + (hu - hl) * lift);
+							r.x + r.width * 0.75f, hl + (hu - hl) * lift);
 				}
 				sprite.end();
 			}
 			hl = hl + (hu - hl) * lift;
 		}
 		// 判定ライン描画
-		for (int p = 0; p < playerr.length; p++) {
+		for (Rectangle r : playerr) {
 			shape.begin(ShapeType.Filled);
 			shape.setColor(Color.RED);
-			shape.rect(playerr[p].x, hl - 3, playerr[p].width, 6);
+			shape.rect(r.x, hl - 3, r.width, 6);
 
 			shape.end();
 
@@ -289,7 +289,7 @@ public class LaneRenderer {
 				if (judge.getProcessingLongNotes()[lane] != null) {
 					if (main.getTimer()[BMSPlayer.TIMER_HOLD_1P_KEY1 + lane] == -1) {
 						main.getTimer()[BMSPlayer.TIMER_HOLD_1P_KEY1 + lane] = main.getNowTime();
-					}					
+					}
 				} else {
 					main.getTimer()[BMSPlayer.TIMER_HOLD_1P_KEY1 + lane] = -1;
 				}
@@ -310,7 +310,7 @@ public class LaneRenderer {
 				if (judge.getProcessingLongNotes()[lane] != null) {
 					if (main.getTimer()[BMSPlayer.TIMER_HOLD_1P_KEY1 + offset] == -1) {
 						main.getTimer()[BMSPlayer.TIMER_HOLD_1P_KEY1 + offset] = main.getNowTime();
-					}					
+					}
 				} else {
 					main.getTimer()[BMSPlayer.TIMER_HOLD_1P_KEY1 + offset] = -1;
 				}
@@ -416,7 +416,7 @@ public class LaneRenderer {
 		}
 
 		for (int i = pos; i < timelines.length && y <= hu; i++) {
-			TimeLine tl = timelines[i];
+			final TimeLine tl = timelines[i];
 			if (tl.getTime() >= time) {
 				if (nbpm > 0) {
 					if ((i > 0 && timelines[i - 1].getTime() + timelines[i - 1].getStop() > time)) {
@@ -437,33 +437,32 @@ public class LaneRenderer {
 				}
 				// ltime = tl.getTime() - time;
 				// yy = y - hl;
-				for (int p = 0; p < playerr.length; p++) {
+				for (Rectangle r : playerr) {
 					if (config.isBpmguide()) {
 						if (tl.getBPM() != nbpm) {
 							// BPMガイド描画
 							shape.begin(ShapeType.Line);
 							shape.setColor(Color.valueOf("00c000"));
-							shape.line(playerr[p].x, y + 2, playerr[p].x + playerr[p].width, y + 2);
-							shape.line(playerr[p].x, y, playerr[p].x + playerr[p].width, y);
-							shape.line(playerr[p].x, y - 2, playerr[p].x + playerr[p].width, y - 2);
+							shape.line(r.x, y + 2, r.x + r.width, y + 2);
+							shape.line(r.x, y, r.x + r.width, y);
+							shape.line(r.x, y - 2, r.x + r.width, y - 2);
 							shape.end();
 							sprite.begin();
 							font.setColor(Color.valueOf("00c000"));
-							font.draw(sprite, "BPM" + ((int) tl.getBPM()), playerr[p].x + playerr[p].width / 2, y + 20);
+							font.draw(sprite, "BPM" + ((int) tl.getBPM()), r.x + r.width / 2, y + 20);
 							sprite.end();
 						}
 						if (tl.getStop() > 0) {
 							// STOPガイド描画
 							shape.begin(ShapeType.Line);
 							shape.setColor(Color.valueOf("c0c000"));
-							shape.line(playerr[p].x, y + 2, playerr[p].x + playerr[p].width, y + 2);
-							shape.line(playerr[p].x, y, playerr[p].x + playerr[p].width, y);
-							shape.line(playerr[p].x, y - 2, playerr[p].x + playerr[p].width, y - 2);
+							shape.line(r.x, y + 2, r.x + r.width, y + 2);
+							shape.line(r.x, y, r.x + r.width, y);
+							shape.line(r.x, y - 2, r.x + r.width, y - 2);
 							shape.end();
 							sprite.begin();
 							font.setColor(Color.valueOf("c0c000"));
-							font.draw(sprite, "STOP " + ((int) tl.getStop()) + "ms", playerr[p].x + playerr[p].width
-									/ 2, y + 20);
+							font.draw(sprite, "STOP " + ((int) tl.getStop()) + "ms", r.x + r.width / 2, y + 20);
 							sprite.end();
 						}
 					}
@@ -471,7 +470,7 @@ public class LaneRenderer {
 					if (drawline && tl.getSectionLine()) {
 						shape.begin(ShapeType.Line);
 						shape.setColor(Color.GRAY);
-						shape.line(playerr[p].x, y, playerr[p].x + playerr[p].width, y);
+						shape.line(r.x, y, r.x + r.width, y);
 						shape.end();
 					}
 				}
@@ -479,8 +478,8 @@ public class LaneRenderer {
 			} else if (pos == i - 1) {
 				boolean b = true;
 				for (int lane = 0; lane < laneregion.length; lane++) {
-					Note note = tl.getNote(model.getUseKeys() == 9 && lane >= 5 ? lane + 5 : (model.getUseKeys() > 9
-							&& lane >= 8 ? lane + 1 : lane));
+					final Note note = tl.getNote(model.getUseKeys() == 9 && lane >= 5 ? lane + 5
+							: (model.getUseKeys() > 9 && lane >= 8 ? lane + 1 : lane));
 					if (note != null && note instanceof LongNote && ((LongNote) note).getEnd().getTime() >= time) {
 						b = false;
 						break;
@@ -492,7 +491,7 @@ public class LaneRenderer {
 			}
 			// ノート描画
 			for (int lane = 0; lane < laneregion.length; lane++) {
-				Note note = tl.getNote(model.getUseKeys() == 9 && lane >= 5 ? lane + 5 : (model.getUseKeys() > 9
+				final Note note = tl.getNote(model.getUseKeys() == 9 && lane >= 5 ? lane + 5 : (model.getUseKeys() > 9
 						&& lane >= 8 ? lane + 1 : lane));
 				if (note != null) {
 					float dy = 1;
@@ -534,8 +533,8 @@ public class LaneRenderer {
 				}
 				// hidden note
 				if (config.isShowhiddennote()) {
-					Note hnote = tl.getHiddenNote(model.getUseKeys() == 9 && lane >= 5 ? lane + 5
-							: (model.getUseKeys() > 9 && lane >= 8 ? lane + 1 : lane));
+					final Note hnote = tl.getHiddenNote(model.getUseKeys() == 9 && lane >= 5 ? lane + 5 : (model
+							.getUseKeys() > 9 && lane >= 8 ? lane + 1 : lane));
 					if (hnote != null) {
 						shape.begin(ShapeType.Line);
 						shape.setColor(Color.ORANGE);
@@ -557,7 +556,8 @@ public class LaneRenderer {
 				int shift = 0;
 				if (judgenow[jr] < 4) {
 					Rectangle nr = skin.getJudgeregion()[jr].count[judgenow[jr] - 1].getDestination(time, main);
-					TextureRegion[] ntr = skin.getJudgeregion()[jr].count[judgenow[jr] - 1].getValue(time, judgecombo[jr], 0);
+					TextureRegion[] ntr = skin.getJudgeregion()[jr].count[judgenow[jr] - 1].getValue(time,
+							judgecombo[jr], 0);
 					int index = 0;
 					for (; index < ntr.length && ntr[index] == null; index++)
 						;
@@ -569,7 +569,7 @@ public class LaneRenderer {
 								r.y + nr.y, nr.width, nr.height);
 					}
 				}
-				sprite.draw(skin.getJudgeregion()[jr].judge[judgenow[jr] - 1].getImage(time), r.x - shift, r.y,
+				sprite.draw(skin.getJudgeregion()[jr].judge[judgenow[jr] - 1].getImage(time, main), r.x - shift, r.y,
 						r.width, r.height);
 				// FAST, SLOW描画
 				if (config.getJudgedetail() == 1) {
@@ -597,21 +597,19 @@ public class LaneRenderer {
 		}
 
 		// レーンカバー描画
-		for (int p = 0; p < playerr.length; p++) {
+		for (Rectangle r : playerr) {
 			if (enableLanecover) {
-				sprite.draw(skin.getLanecover(), playerr[p].x, hl + (hu - hl) * (1 - lanecover), playerr[p].width,
-						(hu - hl));
+				sprite.draw(skin.getLanecover(), r.x, hl + (hu - hl) * (1 - lanecover), r.width, (hu - hl));
 			}
 			// 緑数字、白数字描画
 			if (main.getBMSPlayerInputProcessor().startPressed()) {
 				font.setColor(Color.WHITE);
-				font.draw(sprite, String.format("%5d", Math.round(lanecover * 1000)), playerr[p].x + playerr[p].width
-						* 0.25f, hl + (hu - hl) * (enableLanecover ? (1 - lanecover) : 1));
+				font.draw(sprite, String.format("%5d", Math.round(lanecover * 1000)), r.x + r.width * 0.25f, hl
+						+ (hu - hl) * (enableLanecover ? (1 - lanecover) : 1));
 				font.setColor(Color.GREEN);
 				font.draw(sprite,
-						String.format("%5d", Math.round(region * 0.6 * (1 - (enableLanecover ? lanecover : 0)))),
-						playerr[p].x + playerr[p].width * 0.75f, hl + (hu - hl)
-								* (enableLanecover ? (1 - lanecover) : 1));
+						String.format("%5d", Math.round(region * 0.6 * (1 - (enableLanecover ? lanecover : 0)))), r.x
+								+ r.width * 0.75f, hl + (hu - hl) * (enableLanecover ? (1 - lanecover) : 1));
 			}
 		}
 		sprite.end();
@@ -636,8 +634,7 @@ public class LaneRenderer {
 				sprite.draw(s, x, y - s.getHeight() * scale / 2, width, s.getHeight() * scale);
 				sprite.end();
 			}
-		}
-		if (note instanceof LongNote) {
+		} else if (note instanceof LongNote) {
 			sprite.begin();
 			if (model.getLntype() == BMSModel.LNTYPE_HELLCHARGENOTE) {
 				// HCN
@@ -688,8 +685,7 @@ public class LaneRenderer {
 				sprite.draw(le, x, y - height - le.getHeight() * scale / 2, width, le.getHeight() * scale);
 			}
 			sprite.end();
-		}
-		if (note instanceof MineNote) {
+		} else if (note instanceof MineNote) {
 			sprite.begin();
 			Sprite s = skin.getMinenote()[lane];
 			sprite.draw(s, x, y - s.getHeight() * scale / 2, width, s.getHeight() * scale);

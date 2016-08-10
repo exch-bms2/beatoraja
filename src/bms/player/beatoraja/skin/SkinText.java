@@ -86,7 +86,7 @@ public class SkinText extends SkinObject {
                 layout = new GlyphLayout(font, value);
             }
             if(font != null) {
-                Color c = getColor(time);
+                Color c = getColor(time,state);
                 font.getData().setScale(r.height / parameter.size);
                 if(shadow > 0) {
                     layout.setText(font, value, new Color(c.r / 2, c.g / 2, c.b / 2, c.a), r.getWidth(),ALIGN[align], false);

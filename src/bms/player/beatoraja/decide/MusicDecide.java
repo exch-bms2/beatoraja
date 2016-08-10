@@ -89,6 +89,7 @@ public class MusicDecide extends MainState {
 		if(resource.getCourseBMSModels() != null) {
 			switch(id) {
 			case STRING_TITLE:
+			case STRING_FULLTITLE:
 				return resource.getCoursetitle();
 			}
 			return "";

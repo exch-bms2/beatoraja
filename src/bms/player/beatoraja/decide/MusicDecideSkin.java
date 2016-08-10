@@ -44,8 +44,7 @@ public class MusicDecideSkin extends Skin {
         
 		Texture nt = new Texture("skin/system.png");
 		SkinImage fi = new SkinImage(new TextureRegion[]{new TextureRegion(nt,0,0,8,8)},0);
-		fi.setTiming(BMSPlayer.TIMER_FADEOUT);
-        setDestination(fi, 0, 0, 0,1280, 720, 0, 0,255,255,255, 0, 0, 0, 0, 500, 0, 0, 0, 0);
+        setDestination(fi, 0, 0, 0,1280, 720, 0, 0,255,255,255, 0, 0, 0, 0, 500, BMSPlayer.TIMER_FADEOUT, 0, 0, 0);
         setDestination(fi, 500, 0, 0,1280, 720, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         add(fi);
 

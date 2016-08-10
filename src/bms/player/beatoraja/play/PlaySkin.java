@@ -98,15 +98,13 @@ public class PlaySkin extends Skin {
 		// 閉店
 		Texture close = new Texture("skin/close.png");
 		SkinImage ci = new SkinImage(new TextureRegion[] { new TextureRegion(close, 0, 500, 640, 240) }, 0);
-		ci.setTiming(BMSPlayer.TIMER_FAILED);
-		setDestination(ci, 0, 0, -360, 1280, 360, 0, 255, 255, 255, 255, 0, 0, 0, 0, 700, 0, 0, 0, 0);
+		setDestination(ci, 0, 0, -360, 1280, 360, 0, 255, 255, 255, 255, 0, 0, 0, 0, 700, BMSPlayer.TIMER_FAILED, 0, 0, 0);
 		setDestination(ci, 500, 0, 0, 1280, 360, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		setDestination(ci, 600, 0, -40, 1280, 360, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		setDestination(ci, 700, 0, 0, 1280, 360, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(ci);
 		ci = new SkinImage(new TextureRegion[] { new TextureRegion(close, 0, 740, 640, 240) }, 0);
-		ci.setTiming(BMSPlayer.TIMER_FAILED);
-		setDestination(ci, 0, 0, 720, 1280, 360, 0, 255, 255, 255, 255, 0, 0, 0, 0, 700, 0, 0, 0, 0);
+		setDestination(ci, 0, 0, 720, 1280, 360, 0, 255, 255, 255, 255, 0, 0, 0, 0, 700, BMSPlayer.TIMER_FAILED, 0, 0, 0);
 		setDestination(ci, 500, 0, 360, 1280, 360, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		setDestination(ci, 600, 0, 400, 1280, 360, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		setDestination(ci, 700, 0, 360, 1280, 360, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -114,8 +112,7 @@ public class PlaySkin extends Skin {
 
 		Texture nt = new Texture("skin/system.png");
 		SkinImage fi = new SkinImage(new TextureRegion[] { new TextureRegion(nt, 0, 0, 8, 8) }, 0);
-		fi.setTiming(BMSPlayer.TIMER_FADEOUT);
-		setDestination(fi, 0, 0, 0, 1280, 720, 0, 0, 255, 255, 255, 0, 0, 0, 0, 500, 0, 0, 0, 0);
+		setDestination(fi, 0, 0, 0, 1280, 720, 0, 0, 255, 255, 255, 0, 0, 0, 0, 500, BMSPlayer.TIMER_FADEOUT, 0, 0, 0);
 		setDestination(fi, 500, 0, 0, 1280, 720, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(fi);
 
@@ -308,9 +305,8 @@ public class PlaySkin extends Skin {
 
 		for (int i = 0; i < laneregion.length; i++) {
 			SkinImage ri = new SkinImage(new TextureRegion[][] { { keybeam[i] }, { keybeaml[i] } }, 0);
-			ri.setTiming(BMSPlayer.TIMER_KEYON_1P_KEY1 + (i % 8 == 7 ? -1 : i));
 			setDestination(ri, 0, laneregion[i].x + laneregion[i].width / 4, laneregion[i].y, laneregion[i].width / 2,
-					laneregion[i].height, 0, 255, 255, 255, 255, 0, 0, 0, 0, 100, 0, 0, 0, 0);
+					laneregion[i].height, 0, 255, 255, 255, 255, 0, 0, 0, 0, 100, BMSPlayer.TIMER_KEYON_1P_KEY1 + (i % 8 == 7 ? -1 : i), 0, 0, 0);
 			setDestination(ri, 100, laneregion[i].x, laneregion[i].y, laneregion[i].width, laneregion[i].height, 0,
 					255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 			ri.setOffsetYReferenceID(MainState.OFFSET_LIFT);
@@ -322,7 +318,7 @@ public class PlaySkin extends Skin {
 			SkinImage bombi = new SkinImage(new TextureRegion[][] { {}, bombtr[3], bombtr[0], bombtr[1] }, 160);
 			bombi.setTiming(BMSPlayer.TIMER_BOMB_1P_KEY1 + (i % 8 == 7 ? -1 : i));
 			setDestination(bombi, 0, laneregion[i].x + laneregion[i].width / 2 - 141, laneregion[i].y - 202, 322, 344,
-					0, 255, 255, 255, 255, 2, 0, 0, 0, 161, 0, 0, 0, 0);
+					0, 255, 255, 255, 255, 2, 0, 0, 0, 161, BMSPlayer.TIMER_BOMB_1P_KEY1 + (i % 8 == 7 ? -1 : i), 0, 0, 0);
 			setDestination(bombi, 160, laneregion[i].x + laneregion[i].width / 2 - 141, laneregion[i].y - 202, 322,
 					344, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0);
 			setDestination(bombi, 161, laneregion[i].x, laneregion[i].y, 0, 0, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, 0,
@@ -334,7 +330,7 @@ public class PlaySkin extends Skin {
 			SkinImage hbombi = new SkinImage(bombtr[2], 160);
 			hbombi.setTiming(BMSPlayer.TIMER_HOLD_1P_KEY1 + (i % 8 == 7 ? -1 : i));
 			setDestination(hbombi, 0, laneregion[i].x + laneregion[i].width / 2 - 141, laneregion[i].y - 202, 322, 344,
-					0, 255, 255, 255, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0);
+					0, 255, 255, 255, 255, 2, 0, 0, 0, 0, BMSPlayer.TIMER_HOLD_1P_KEY1 + (i % 8 == 7 ? -1 : i), 0, 0, 0);
 			hbombi.setOffsetYReferenceID(MainState.OFFSET_LIFT);
 			add(hbombi);
 		}
@@ -359,8 +355,7 @@ public class PlaySkin extends Skin {
 		// READY
 		Texture ready = new Texture("skin/ready.png");
 		SkinImage ri = new SkinImage(new TextureRegion[] { new TextureRegion(ready) }, 0);
-		ri.setTiming(BMSPlayer.TIMER_READY);
-		setDestination(ri, 0, 40, 250, 350, 60, 0, 0, 255, 255, 255, 0, 0, 0, 0, 750, 0, 0, 0, 0);
+		setDestination(ri, 0, 40, 250, 350, 60, 0, 0, 255, 255, 255, 0, 0, 0, 0, 750, BMSPlayer.TIMER_READY, 0, 0, 0);
 		setDestination(ri, 750, 40, 300, 350, 60, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(ri);
 
@@ -536,9 +531,8 @@ public class PlaySkin extends Skin {
 		for (int i = 0; i < laneregion.length; i++) {
 			SkinImage bi = new SkinImage(new TextureRegion[][] { { keybeam[i] }, { keybeaml[i] }, { keybeamg[i] },
 					{ keybeamg[i] } }, 0);
-			bi.setTiming(BMSPlayer.TIMER_KEYON_1P_KEY1 + i);
 			setDestination(bi, 0, laneregion[i].x + laneregion[i].width / 4, laneregion[i].y, laneregion[i].width / 2,
-					laneregion[i].height, 0, 255, 255, 255, 255, 0, 0, 0, 0, 100, 0, 0, 0, 0);
+					laneregion[i].height, 0, 255, 255, 255, 255, 0, 0, 0, 0, 100, BMSPlayer.TIMER_KEYON_1P_KEY1 + i, 0, 0, 0);
 			setDestination(bi, 100, laneregion[i].x, laneregion[i].y, laneregion[i].width, laneregion[i].height, 0,
 					255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 			bi.setOffsetYReferenceID(MainState.OFFSET_LIFT);
@@ -551,7 +545,7 @@ public class PlaySkin extends Skin {
 			SkinImage bombi = new SkinImage(bombtr[0], 160);
 			bombi.setTiming(BMSPlayer.TIMER_BOMB_1P_KEY1 + i);
 			setDestination(bombi, 0, laneregion[i].x + laneregion[i].width / 2 - 156, laneregion[i].y - 222, 362, 384,
-					0, 255, 255, 255, 255, 2, 0, 0, 0, 161, 0, 0, 0, 0);
+					0, 255, 255, 255, 255, 2, 0, 0, 0, 161, BMSPlayer.TIMER_BOMB_1P_KEY1 + i, 0, 0, 0);
 			setDestination(bombi, 160, laneregion[i].x + laneregion[i].width / 2 - 156, laneregion[i].y - 222, 362,
 					384, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0);
 			setDestination(bombi, 161, laneregion[i].x, laneregion[i].y, 0, 0, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, 0,
@@ -562,7 +556,7 @@ public class PlaySkin extends Skin {
 			SkinImage hbombi = new SkinImage(bombtr[2], 160);
 			hbombi.setTiming(BMSPlayer.TIMER_HOLD_1P_KEY1 + i);
 			setDestination(hbombi, 0, laneregion[i].x + laneregion[i].width / 2 - 156, laneregion[i].y - 222, 362, 384,
-					0, 255, 255, 255, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0);
+					0, 255, 255, 255, 255, 2, 0, 0, 0, 0, BMSPlayer.TIMER_HOLD_1P_KEY1 + i, 0, 0, 0);
 			hbombi.setOffsetYReferenceID(MainState.OFFSET_LIFT);
 			add(hbombi);
 		}
@@ -584,8 +578,7 @@ public class PlaySkin extends Skin {
 		// READY
 		Texture ready = new Texture("skin/ready.png");
 		SkinImage ri = new SkinImage(new TextureRegion[] { new TextureRegion(ready) }, 0);
-		ri.setTiming(BMSPlayer.TIMER_READY);
-		setDestination(ri, 0, 465, 250, 350, 60, 0, 0, 255, 255, 255, 0, 0, 0, 0, 750, 0, 0, 0, 0);
+		setDestination(ri, 0, 465, 250, 350, 60, 0, 0, 255, 255, 255, 0, 0, 0, 0, 750, BMSPlayer.TIMER_READY, 0, 0, 0);
 		setDestination(ri, 750, 465, 300, 350, 60, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(ri);
 
@@ -730,9 +723,8 @@ public class PlaySkin extends Skin {
 		TextureRegion[][] bombtr = TextureRegion.split(bombt, 181, 192);
 		for (int i = 0; i < laneregion.length; i++) {
 			SkinImage ri = new SkinImage(new TextureRegion[] { keybeam[i] }, 0);
-			ri.setTiming(BMSPlayer.TIMER_KEYON_1P_KEY1 + (i % 8 == 7 ? -1 : (i % 8)) + (i >= 8 ? 10 : 0));
 			setDestination(ri, 0, laneregion[i].x + laneregion[i].width / 4, laneregion[i].y, laneregion[i].width / 2,
-					laneregion[i].height, 0, 255, 255, 255, 255, 0, 0, 0, 0, 100, 0, 0, 0, 0);
+					laneregion[i].height, 0, 255, 255, 255, 255, 0, 0, 0, 0, 100, BMSPlayer.TIMER_KEYON_1P_KEY1 + (i % 8 == 7 ? -1 : (i % 8)) + (i >= 8 ? 10 : 0), 0, 0, 0);
 			setDestination(ri, 100, laneregion[i].x, laneregion[i].y, laneregion[i].width, laneregion[i].height, 0,
 					255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 			ri.setOffsetYReferenceID(MainState.OFFSET_LIFT);
@@ -743,7 +735,7 @@ public class PlaySkin extends Skin {
 			SkinImage bombi = new SkinImage(new TextureRegion[][] { {}, bombtr[3], bombtr[0], bombtr[1] }, 160);
 			bombi.setTiming(BMSPlayer.TIMER_BOMB_1P_KEY1 + (i % 8 == 7 ? -1 : (i % 8)) + (i >= 8 ? 10 : 0));
 			setDestination(bombi, 0, laneregion[i].x + laneregion[i].width / 2 - 141, laneregion[i].y - 202, 322, 344,
-					0, 255, 255, 255, 255, 2, 0, 0, 0, 161, 0, 0, 0, 0);
+					0, 255, 255, 255, 255, 2, 0, 0, 0, 161, BMSPlayer.TIMER_BOMB_1P_KEY1 + (i % 8 == 7 ? -1 : (i % 8)) + (i >= 8 ? 10 : 0), 0, 0, 0);
 			setDestination(bombi, 160, laneregion[i].x + laneregion[i].width / 2 - 141, laneregion[i].y - 202, 322,
 					344, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0);
 			setDestination(bombi, 161, laneregion[i].x, laneregion[i].y, 0, 0, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, 0,
@@ -755,7 +747,7 @@ public class PlaySkin extends Skin {
 			SkinImage hbombi = new SkinImage(bombtr[2], 160);
 			hbombi.setTiming(BMSPlayer.TIMER_HOLD_1P_KEY1 + (i % 8 == 7 ? -1 : (i % 8)) + (i >= 8 ? 10 : 0));
 			setDestination(hbombi, 0, laneregion[i].x + laneregion[i].width / 2 - 141, laneregion[i].y - 202, 322, 344,
-					0, 255, 255, 255, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0);
+					0, 255, 255, 255, 255, 2, 0, 0, 0, 0, BMSPlayer.TIMER_HOLD_1P_KEY1 + (i % 8 == 7 ? -1 : (i % 8)) + (i >= 8 ? 10 : 0), 0, 0, 0);
 			hbombi.setOffsetYReferenceID(MainState.OFFSET_LIFT);
 			add(hbombi);
 		}
@@ -780,13 +772,11 @@ public class PlaySkin extends Skin {
 		// READY
 		Texture ready = new Texture("skin/ready.png");
 		SkinImage ri = new SkinImage(new TextureRegion[] { new TextureRegion(ready) }, 0);
-		ri.setTiming(BMSPlayer.TIMER_READY);
-		setDestination(ri, 0, 230, 250, 350, 60, 0, 0, 255, 255, 255, 0, 0, 0, 0, 750, 0, 0, 0, 0);
+		setDestination(ri, 0, 230, 250, 350, 60, 0, 0, 255, 255, 255, 0, 0, 0, 0, 750, BMSPlayer.TIMER_READY, 0, 0, 0);
 		setDestination(ri, 750, 230, 300, 350, 60, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(ri);
 		ri = new SkinImage(new TextureRegion[] { new TextureRegion(ready) }, 0);
-		ri.setTiming(BMSPlayer.TIMER_READY);
-		setDestination(ri, 0, 700, 250, 350, 60, 0, 0, 255, 255, 255, 0, 0, 0, 0, 750, 0, 0, 0, 0);
+		setDestination(ri, 0, 700, 250, 350, 60, 0, 0, 255, 255, 255, 0, 0, 0, 0, 750, BMSPlayer.TIMER_READY, 0, 0, 0);
 		setDestination(ri, 750, 700, 300, 350, 60, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(ri);
 

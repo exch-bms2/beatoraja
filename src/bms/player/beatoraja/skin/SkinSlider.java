@@ -73,7 +73,7 @@ public class SkinSlider extends SkinObject {
 			draw(sprite, image, r.x
 					+ (muki == 1 ? state.getSliderValue(type) * range : (muki == 3 ? -state.getSliderValue(type) * range : 0)), r.y
 					+ (muki == 0 ? state.getSliderValue(type) * range : (muki == 2 ? -state.getSliderValue(type) * range : 0)),
-					r.width, r.height, getColor(time));
+					r.width, r.height, getColor(time,state));
 		}
 	}
 

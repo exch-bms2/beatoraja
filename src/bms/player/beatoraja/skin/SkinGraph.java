@@ -77,7 +77,7 @@ public class SkinGraph extends SkinObject {
 //				sprite.draw(image, r.x, r.y, r.width, r.height);
 				draw(sprite, new TextureRegion(image, 0, image.getRegionY() + image.getRegionHeight()
 						- (image.getRegionHeight() * value / maxvalue), image.getRegionWidth(), image.getRegionHeight()
-						* value / maxvalue), r.x, r.y, r.width, r.height * value / maxvalue, getColor(time));
+						* value / maxvalue), r.x, r.y, r.width, r.height * value / maxvalue, getColor(time,state));
 			}
 		}
 	}

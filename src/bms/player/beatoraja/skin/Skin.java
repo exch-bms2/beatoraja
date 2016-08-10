@@ -16,7 +16,7 @@ public class Skin {
 	
 	private int input;
 	
-	private int scene;
+	private int scene = 3600000 * 24;
 
 	private int fadeout;
 
