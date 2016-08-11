@@ -139,6 +139,13 @@ public abstract class MainState {
 	public static final int NUMBER_TOTALEARLY = 40001;
 	public static final int NUMBER_TOTALLATE = 40002;
 
+	public static final int OPTION_BGANORMAL = 30;
+	public static final int OPTION_BGAEXTEND = 31;
+	public static final int OPTION_AUTOPLAYOFF = 32;
+	public static final int OPTION_AUTOPLAYON = 33;
+	public static final int OPTION_BGAOFF = 40;
+	public static final int OPTION_BGAON = 41;
+	
 	public MainState() {
 		this(null);
 	}

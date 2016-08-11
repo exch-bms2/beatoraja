@@ -711,9 +711,11 @@ public class LaneRenderer {
 			int offset = (lane % 8 == 7 ? -1 : (lane % 8)) + (lane >= 8 ? 10 : 0);
 			this.judge[offset + 1] = judge == 0 ? 1 : judge * 2 + (fast > 0 ? 0 : 1);
 		}
-		judgenow[lane / (skin.getLaneregion().length / judgenow.length)] = judge + 1;
-		judgenowt[lane / (skin.getLaneregion().length / judgenow.length)] = time;
-		judgecombo[lane / (skin.getLaneregion().length / judgenow.length)] = main.getJudgeManager().getCourseCombo();
+		if(judgenow.length > 0) {
+			judgenow[lane / (skin.getLaneregion().length / judgenow.length)] = judge + 1;
+			judgenowt[lane / (skin.getLaneregion().length / judgenow.length)] = time;
+			judgecombo[lane / (skin.getLaneregion().length / judgenow.length)] = main.getJudgeManager().getCourseCombo();			
+		}
 	}
 
 	public int[] getJudge() {

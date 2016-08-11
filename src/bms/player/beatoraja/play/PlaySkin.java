@@ -55,7 +55,7 @@ public class PlaySkin extends Skin {
 
 	private Rectangle gaugeregion;
 
-	private JudgeRegion[] judgeregion;
+	private JudgeRegion[] judgeregion = new JudgeRegion[0];
 
 	private float dw;
 	private float dh;
@@ -324,9 +324,9 @@ public class PlaySkin extends Skin {
 
 		for (int i = 0; i < laneregion.length; i++) {
 			SkinImage ri = new SkinImage(new TextureRegion[][] { { keybeam[i] }, { keybeaml[i] } }, 0);
-			setDestination(ri, 0, laneregion[i].x + laneregion[i].width / 4, laneregion[i].y, laneregion[i].width / 2,
-					laneregion[i].height, 0, 255, 255, 255, 255, 0, 0, 0, 0, 100, BMSPlayer.TIMER_KEYON_1P_KEY1 + (i % 8 == 7 ? -1 : i), 0, 0, 0);
-			setDestination(ri, 100, laneregion[i].x, laneregion[i].y, laneregion[i].width, laneregion[i].height, 0,
+			setDestination(ri, 0, laneregion[i].x / dw  + laneregion[i].width / dw / 4, laneregion[i].y / dh , laneregion[i].width / dw / 2,
+					laneregion[i].height / dh , 0, 255, 255, 255, 255, 0, 0, 0, 0, 100, BMSPlayer.TIMER_KEYON_1P_KEY1 + (i % 8 == 7 ? -1 : i), 0, 0, 0);
+			setDestination(ri, 100, laneregion[i].x / dw , laneregion[i].y / dh , laneregion[i].width / dw , laneregion[i].height / dh , 0,
 					255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 			ri.setOffsetYReferenceID(MainState.OFFSET_LIFT);
 			ri.setReferenceID(BMSPlayer.VALUE_JUDGE_1P_KEY1 + (i % 8 == 7 ? -1 : i));
@@ -336,11 +336,11 @@ public class PlaySkin extends Skin {
 		for (int i = 0; i < laneregion.length; i++) {
 			SkinImage bombi = new SkinImage(new TextureRegion[][] { {}, bombtr[3], bombtr[0], bombtr[1] }, 160);
 			bombi.setTiming(BMSPlayer.TIMER_BOMB_1P_KEY1 + (i % 8 == 7 ? -1 : i));
-			setDestination(bombi, 0, laneregion[i].x + laneregion[i].width / 2 - 141, laneregion[i].y - 202, 322, 344,
+			setDestination(bombi, 0, laneregion[i].x / dw + laneregion[i].width / dw / 2 - 141, laneregion[i].y / dh - 202, 322, 344,
 					0, 255, 255, 255, 255, 2, 0, 0, 0, 161, BMSPlayer.TIMER_BOMB_1P_KEY1 + (i % 8 == 7 ? -1 : i), 0, 0, 0);
-			setDestination(bombi, 160, laneregion[i].x + laneregion[i].width / 2 - 141, laneregion[i].y - 202, 322,
+			setDestination(bombi, 160, laneregion[i].x / dw  + laneregion[i].width /dw / 2 - 141, laneregion[i].y / dh - 202, 322,
 					344, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0);
-			setDestination(bombi, 161, laneregion[i].x, laneregion[i].y, 0, 0, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, 0,
+			setDestination(bombi, 161, laneregion[i].x / dw , laneregion[i].y / dh , 0, 0, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, 0,
 					0, 0, 0);
 			bombi.setOffsetYReferenceID(MainState.OFFSET_LIFT);
 			bombi.setReferenceID(BMSPlayer.VALUE_JUDGE_1P_KEY1 + (i % 8 == 7 ? -1 : i));
@@ -348,7 +348,7 @@ public class PlaySkin extends Skin {
 
 			SkinImage hbombi = new SkinImage(bombtr[2], 160);
 			hbombi.setTiming(BMSPlayer.TIMER_HOLD_1P_KEY1 + (i % 8 == 7 ? -1 : i));
-			setDestination(hbombi, 0, laneregion[i].x + laneregion[i].width / 2 - 141, laneregion[i].y - 202, 322, 344,
+			setDestination(hbombi, 0, laneregion[i].x / dw + laneregion[i].width / dw / 2 - 141, laneregion[i].y / dh - 202, 322, 344,
 					0, 255, 255, 255, 255, 2, 0, 0, 0, 0, BMSPlayer.TIMER_HOLD_1P_KEY1 + (i % 8 == 7 ? -1 : i), 0, 0, 0);
 			hbombi.setOffsetYReferenceID(MainState.OFFSET_LIFT);
 			add(hbombi);

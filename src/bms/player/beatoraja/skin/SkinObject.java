@@ -175,6 +175,9 @@ public abstract class SkinObject {
 
 	protected void draw(SpriteBatch sprite, TextureRegion image, float x, float y, float width, float height,
 			Color color) {
+		if(color == null || image == null) {
+			return;
+		}
 		Color c = sprite.getColor();
 		final int blend = dst.get(0).blend;
 		final int angle = dst.get(0).angle;

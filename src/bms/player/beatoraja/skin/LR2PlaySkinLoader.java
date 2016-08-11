@@ -21,6 +21,12 @@ public class LR2PlaySkinLoader extends LR2SkinLoader {
 	private PlaySkin.SkinBGAObject bga;
 
 	public LR2PlaySkinLoader() {
+		addCommandWord(new CommandWord("CLOSE") {
+			@Override
+			public void execute(String[] str) {
+				skin.setCloseTime(Integer.parseInt(str[1]));
+			}
+		});
 		addCommandWord(new CommandWord("SRC_BGA") {
 			@Override
 			public void execute(String[] str) {
@@ -31,10 +37,10 @@ public class LR2PlaySkinLoader extends LR2SkinLoader {
 		addCommandWord(new CommandWord("DST_BGA") {
 			@Override
 			public void execute(String[] str) {
-				if(bga != null) {
-					skin.setDestination(bga, 0, Integer.parseInt(str[3]) * dstw / srcw, dsth - Integer.parseInt(str[4])
-							* dsth / srch - Integer.parseInt(str[6]) * dsth / srch, Integer.parseInt(str[5]) * dstw / srcw,
-							Integer.parseInt(str[6]) * dsth / srch,0,255,255,255,255,0,0,0,0,0,0,0,0,0);
+				if (bga != null) {
+					skin.setDestination(bga, 0, Integer.parseInt(str[3]),
+							480 - Integer.parseInt(str[4]) - Integer.parseInt(str[6]), Integer.parseInt(str[5]),
+							Integer.parseInt(str[6]), 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 				}
 			}
 		});
@@ -128,6 +134,19 @@ public class LR2PlaySkinLoader extends LR2SkinLoader {
 			}
 		});
 
+		addCommandWord(new CommandWord("SRC_NOWJUDGE_1P") {
+			@Override
+			public void execute(String[] str) {
+				// TODO 未実装
+			}
+		});
+
+		addCommandWord(new CommandWord("DST_NOWJUDGE_1P") {
+			@Override
+			public void execute(String[] str) {
+			}
+		});
+
 	}
 
 	private PlaySkin skin;
@@ -143,11 +162,11 @@ public class LR2PlaySkinLoader extends LR2SkinLoader {
 	Sprite[] mine = new Sprite[8];
 	Rectangle[] laner = new Rectangle[8];
 
-	public PlaySkin loadPlaySkin(File f) throws IOException {
+	public PlaySkin loadPlaySkin(File f, int[] option) throws IOException {
 
 		skin = new PlaySkin(7);
 
-		this.loadSkin(skin, f);
+		this.loadSkin(skin, f, option);
 
 		skin.setNote(note);
 		skin.setMinenote(mine);
