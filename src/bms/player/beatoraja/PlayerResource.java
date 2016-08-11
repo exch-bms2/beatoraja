@@ -39,6 +39,10 @@ public class PlayerResource {
 	 */
 	private IRScoreData score;
 	/**
+	 * ライバルスコア
+	 */
+	private int rscore;
+	/**
 	 * スコア更新するかどうか
 	 */
 	private boolean updateScore = true;
@@ -85,6 +89,7 @@ public class PlayerResource {
 		courseindex = 0;
 		cscore = null;
 		score = null;
+		rscore = 0;
 		gauge = null;
 		courseReplay.clear();
 		coursegauge.clear();
@@ -210,6 +215,14 @@ public class PlayerResource {
 
 	public void setScoreData(IRScoreData score) {
 		this.score = score;
+	}
+
+	public int getRivalScoreData() {
+		return rscore;
+	}
+
+	public void setRivalScoreData(int rscore) {
+		this.rscore = rscore;
 	}
 
 	public boolean setCourseBMSFiles(File[] files) {

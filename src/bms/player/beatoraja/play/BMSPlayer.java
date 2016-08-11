@@ -413,6 +413,7 @@ public class BMSPlayer extends MainState {
 		}
 		bestscore = score.getExscore();
 		rivalscore = model.getTotalNotes() * 8 / 5;
+		resource.setRivalScoreData(rivalscore);
 		Logger.getGlobal().info("スコアグラフ描画クラス準備");
 
 		audio = resource.getAudioProcessor();
@@ -440,7 +441,6 @@ public class BMSPlayer extends MainState {
 	public void render() {
 		final MainController main = getMainController();
 		final PlayerResource resource = main.getPlayerResource();
-		final ShapeRenderer shape = main.getShapeRenderer();
 
 		final long now = getNowTime();
 		final long nowtime = System.currentTimeMillis();
@@ -484,7 +484,7 @@ public class BMSPlayer extends MainState {
 				gaugelog.add(g);
 			}
 			// System.out.println("playing time : " + time);
-			if (starttime != 0 && playtime < time) {
+			if (playtime < time) {
 				state = STATE_FINISHED;
 				getTimer()[TIMER_FADEOUT] = now;
 				Logger.getGlobal().info("STATE_FINISHEDに移行");
@@ -814,13 +814,17 @@ public class BMSPlayer extends MainState {
 			int index = 0;
 
 			int time = 0;
+			long framet = 1;
 			final TimeLine[] timelines = model.getAllTimeLines();
-			while (time < timelines[timelines.length - 1].getTime() + 5000 && !stop) {
+			final KeyInputLog[] keylog = this.keylog != null ? this.keylog.toArray(new KeyInputLog[0]) : null;
+			
+			final int lasttime = timelines[timelines.length - 1].getTime() + 5000;
+			while (time < lasttime && !stop) {
 				time = (int) (System.currentTimeMillis() - starttime);
 				// リプレイデータ再生
 				if (keylog != null) {
-					while (index < keylog.size() && keylog.get(index).time <= time) {
-						KeyInputLog key = keylog.get(index);
+					while (index < keylog.length && keylog[index].time <= time) {
+						final KeyInputLog key = keylog[index];
 						// if(input.getKeystate()[key.keycode] == key.pressed) {
 						// System.out.println("押し離しが行われていません : key - " +
 						// key.keycode + " pressed - " + key.pressed +
@@ -831,12 +835,12 @@ public class BMSPlayer extends MainState {
 						index++;
 					}
 				}
-				judge.update(timelines, time);
+				judge.update(time);
 
-				long nowtime = System.currentTimeMillis() - starttime - time;
-				frametimes = nowtime < frametimes ? frametimes : nowtime;
+				final long nowtime = System.currentTimeMillis() - starttime - time;
+				framet = nowtime < framet ? framet : nowtime;
 			}
-
+			frametimes = framet;
 		}
 
 	}
@@ -854,7 +858,8 @@ public class BMSPlayer extends MainState {
 		public void run() {
 			int time = 0;
 			final TimeLine[] timelines = model.getAllTimeLines();
-			for (int p = 0; time < timelines[timelines.length - 1].getTime() + 5000 && !stop;) {
+			final int lasttime = timelines[timelines.length - 1].getTime() + 5000;
+			for (int p = 0; time < lasttime && !stop;) {
 				time = (int) (System.currentTimeMillis() - starttime);
 				// BGレーン再生
 				while (p < timelines.length && timelines[p].getTime() <= time) {

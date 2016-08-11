@@ -3,28 +3,20 @@ package bms.player.beatoraja.result;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.logging.Logger;
-
-import bms.player.beatoraja.gauge.*;
 import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.select.MusicSelector;
 
-import com.badlogic.gdx.utils.GdxRuntimeException;
 import org.lwjgl.opengl.GL11;
 
 import bms.model.BMSModel;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.gauge.GrooveGauge;
-import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.skin.LR2ResultSkinLoader;
-import bms.player.beatoraja.skin.SkinImage;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
@@ -38,11 +30,6 @@ import com.badlogic.gdx.math.Rectangle;
  * @author exch
  */
 public class MusicResult extends MainState {
-
-	private static final String[] LAMP = { "000000", "808080", "800080", "ff00ff", "40ff40", "f0c000", "ffffff",
-			"ffff88", "88ffff", "ff8888", "ff0000" };
-	private static final String[] CLEAR = { "NO PLAY", "FAILED", "ASSIST CLEAR", "L-ASSIST CLEAR", "EASY CLEAR",
-			"CLEAR", "HARD CLEAR", "EX-HARD CLEAR", "FULL COMBO", "PERFECT", "MAX" };
 
 	private BitmapFont titlefont;
 	private String title;
@@ -80,7 +67,7 @@ public class MusicResult extends MainState {
 		final PlayerResource resource = getMainController().getPlayerResource();
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/VL-Gothic-Regular.ttf"));
 		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
-		parameter.size = 24;
+		parameter.size = 30;
 		title = "result";
 		parameter.characters = title + resource.getBMSModel().getFullTitle() + parameter.characters;
 		titlefont = generator.generateFont(parameter);
@@ -121,6 +108,12 @@ public class MusicResult extends MainState {
 
 	public void render() {
 		int time = getNowTime();
+		if(getTimer()[TIMER_RESULTGRAPH_BEGIN] == -1) {
+			getTimer()[TIMER_RESULTGRAPH_BEGIN] = time;
+		}
+		if(getTimer()[TIMER_RESULTGRAPH_END] == -1) {
+			getTimer()[TIMER_RESULTGRAPH_END] = time;
+		}
 		final MainController main = getMainController();
 
 		final SpriteBatch sprite = main.getSpriteBatch();
@@ -142,14 +135,6 @@ public class MusicResult extends MainState {
 		// ゲージグラフ描画
 		gaugegraph.render(shape, time, resource, graph, resource.getGauge());
 
-		Gdx.gl.glEnable(GL11.GL_BLEND);
-		Gdx.gl.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-		shape.begin(ShapeType.Filled);
-		shape.setColor(0, 0, 0, 0.8f);
-		shape.rect(w / 40, h / 8, w * 0.95f, h / 2);
-		shape.end();
-		Gdx.gl.glDisable(GL11.GL_BLEND);
-
 		sprite.begin();
 		if (resource.getCourseBMSModels() != null) {
 			titlefont.setColor(Color.WHITE);
@@ -168,14 +153,6 @@ public class MusicResult extends MainState {
 		}
 
 		sprite.end();
-
-		Gdx.gl.glEnable(GL11.GL_BLEND);
-		Gdx.gl.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-		shape.begin(ShapeType.Filled);
-		shape.setColor(0, 0, 0, 0.8f);
-		shape.rect(0, 0, w, 25);
-		shape.end();
-		Gdx.gl.glDisable(GL11.GL_BLEND);
 
 		detail.render(sprite, titlefont, shape, time, skin.getJudgeRegion());
 
@@ -264,8 +241,6 @@ public class MusicResult extends MainState {
 		final PlayerResource resource = getMainController().getPlayerResource();
 		BMSModel model = resource.getBMSModel();
 		IRScoreData newscore = resource.getScoreData();
-		boolean ln = model.getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
-				+ model.getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH) > 0;
 		if (newscore == null) {
 			if (resource.getCourseScoreData() != null) {
 				resource.getCourseScoreData().setMinbp(resource.getCourseScoreData().getMinbp() + resource.getBMSModel().getTotalNotes());
@@ -402,16 +377,26 @@ public class MusicResult extends MainState {
 				return Integer.MIN_VALUE;
 			case NUMBER_TARGET_CLEAR:
 				return oldclear;
-			case NUMBER_TARGET_SCORE:
+			case NUMBER_HIGHSCORE:
+			case NUMBER_HIGHSCORE2:
 				return oldexscore;
+			case NUMBER_TARGET_SCORE:
+			case NUMBER_TARGET_SCORE2:
+				return resource.getRivalScoreData();
+			case NUMBER_DIFF_TARGETSCORE:
+				return resource.getScoreData().getExscore() - resource.getRivalScoreData();				
 			case NUMBER_SCORE:
+			case NUMBER_SCORE2:
+			case NUMBER_SCORE3:
 				if(resource.getScoreData() != null) {
 					return resource.getScoreData().getExscore();
 				}
 				return Integer.MIN_VALUE;
-			case NUMBER_DIFF_SCORE:
+			case NUMBER_DIFF_HIGHSCORE:
+			case NUMBER_DIFF_HIGHSCORE2:
 				return resource.getScoreData().getExscore() - oldexscore;
 			case NUMBER_MISSCOUNT:
+			case NUMBER_MISSCOUNT2:
 				if(resource.getScoreData() != null) {
 					return resource.getScoreData().getMinbp();
 				}
@@ -432,6 +417,7 @@ public class MusicResult extends MainState {
 				}
 				return Integer.MIN_VALUE;
 			case NUMBER_MAXCOMBO:
+			case NUMBER_MAXCOMBO2:
 				if(resource.getScoreData() != null) {
 					return resource.getScoreData().getCombo();
 				}
@@ -442,7 +428,10 @@ public class MusicResult extends MainState {
 				}
 				return resource.getScoreData().getCombo() - oldcombo;
 			case NUMBER_TOTALNOTES:
+			case NUMBER_TOTALNOTES2:
 				return resource.getBMSModel().getTotalNotes();
+			case NUMBER_GROOVEGAUGE:
+				return resource.getGauge().get(resource.getGauge().size() - 1).intValue();
 			case NUMBER_TOTALEARLY:
 				int ecount = 0;
 				for(int i = 1;i < 6;i++) {

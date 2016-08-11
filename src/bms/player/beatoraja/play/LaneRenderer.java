@@ -92,6 +92,8 @@ public class LaneRenderer {
 
 	private int[] judgecombo;
 
+	private int[] laneassign;
+
 	public LaneRenderer(BMSPlayer main, SpriteBatch sprite, ShapeRenderer shape, BitmapFont font, PlaySkin skin,
 			PlayerResource resource, BMSModel model, int[] mode) {
 		judge = new int[20];
@@ -114,7 +116,10 @@ public class LaneRenderer {
 		this.model = model;
 		this.timelines = model.getAllTimeLines();
 		if (model.getUseKeys() == 9) {
+			laneassign = new int[]{0,1,2,3,4,10,11,12,13};
 			drawline = false;
+		} else {			
+			laneassign = new int[]{0,1,2,3,4,5,6,7,9,10,11,12,13,14,15,16};
 		}
 		hispeed = config.getHispeed();
 		switch (config.getFixhispeed()) {
@@ -478,8 +483,7 @@ public class LaneRenderer {
 			} else if (pos == i - 1) {
 				boolean b = true;
 				for (int lane = 0; lane < laneregion.length; lane++) {
-					final Note note = tl.getNote(model.getUseKeys() == 9 && lane >= 5 ? lane + 5
-							: (model.getUseKeys() > 9 && lane >= 8 ? lane + 1 : lane));
+					final Note note = tl.getNote(laneassign[lane]);
 					if (note != null && note instanceof LongNote && ((LongNote) note).getEnd().getTime() >= time) {
 						b = false;
 						break;
@@ -491,8 +495,7 @@ public class LaneRenderer {
 			}
 			// ノート描画
 			for (int lane = 0; lane < laneregion.length; lane++) {
-				final Note note = tl.getNote(model.getUseKeys() == 9 && lane >= 5 ? lane + 5 : (model.getUseKeys() > 9
-						&& lane >= 8 ? lane + 1 : lane));
+				final Note note = tl.getNote(laneassign[lane]);
 				if (note != null) {
 					float dy = 1;
 					if (note instanceof LongNote) {
@@ -523,7 +526,7 @@ public class LaneRenderer {
 							dy = 0;
 						}
 					} else {
-						if (timelines[i].getTime() < time) {
+						if (tl.getTime() < time) {
 							dy = 0;
 						}
 					}
@@ -532,9 +535,8 @@ public class LaneRenderer {
 					}
 				}
 				// hidden note
-				if (config.isShowhiddennote()) {
-					final Note hnote = tl.getHiddenNote(model.getUseKeys() == 9 && lane >= 5 ? lane + 5 : (model
-							.getUseKeys() > 9 && lane >= 8 ? lane + 1 : lane));
+				if (config.isShowhiddennote() && tl.getTime() >= time) {
+					final Note hnote = tl.getHiddenNote(laneassign[lane]);
 					if (hnote != null) {
 						shape.begin(ShapeType.Line);
 						shape.setColor(Color.ORANGE);
@@ -552,10 +554,10 @@ public class LaneRenderer {
 		sprite.begin();
 		for (int jr = 0; jr < skin.getJudgeregion().length; jr++) {
 			if (judgenow[jr] > 0 && time < judgenowt[jr] + 500) {
-				Rectangle r = skin.getJudgeregion()[jr].judge[judgenow[jr] - 1].getDestination(time, main);
+				final Rectangle r = skin.getJudgeregion()[jr].judge[judgenow[jr] - 1].getDestination(time, main);
 				int shift = 0;
 				if (judgenow[jr] < 4) {
-					Rectangle nr = skin.getJudgeregion()[jr].count[judgenow[jr] - 1].getDestination(time, main);
+					final Rectangle nr = skin.getJudgeregion()[jr].count[judgenow[jr] - 1].getDestination(time, main);
 					TextureRegion[] ntr = skin.getJudgeregion()[jr].count[judgenow[jr] - 1].getValue(time,
 							judgecombo[jr], 0);
 					int index = 0;

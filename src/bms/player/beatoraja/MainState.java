@@ -26,6 +26,8 @@ public abstract class MainState {
 	public static final int TIMER_HOLD = 70;
 	public static final int TIMER_KEYON = 100;
 	public static final int TIMER_KEYOFF = 120;
+	public static final int TIMER_RESULTGRAPH_BEGIN = 150;
+	public static final int TIMER_RESULTGRAPH_END = 151;
 	
 	// 選曲専用
 	public static final int SLIDER_MUSICSELECT_POSITION = 1;
@@ -87,6 +89,7 @@ public abstract class MainState {
 	public static final int NUMBER_SCORE_RATE_AFTERDOT = 103;
 	public static final int NUMBER_COMBO = 104;
 	public static final int NUMBER_MAXCOMBO2 = 105;
+	public static final int NUMBER_TOTALNOTES2 = 106;
 	public static final int NUMBER_GROOVEGAUGE = 107;
 	public static final int NUMBER_GROOVEGAUGE_AFTERDOT = 207;
 	public static final int NUMBER_DIFF_EXSCORE = 108;
@@ -112,11 +115,15 @@ public abstract class MainState {
 	public static final int NUMBER_TOTAL_RATE_AFTERDOT = 116;
 	public static final int NUMBER_TARGET_SCORE = 121;
 	public static final int NUMBER_HIGHSCORE = 150;
-	public static final int NUMBER_SCORE3 = 152;
+	public static final int NUMBER_TARGET_SCORE2 = 151;
+	public static final int NUMBER_DIFF_HIGHSCORE = 152;
+	public static final int NUMBER_DIFF_TARGETSCORE = 153;
 	public static final int NUMBER_NOWBPM = 160;
 	public static final int NUMBER_TIMELEFT_MINUTE = 163;
 	public static final int NUMBER_TIMELEFT_SECOND = 164;
-	public static final int NUMBER_DIFF_SCORE = 170;
+	public static final int NUMBER_HIGHSCORE2 = 170;
+	public static final int NUMBER_SCORE3 = 171;
+	public static final int NUMBER_DIFF_HIGHSCORE2 = 172;
 	public static final int NUMBER_TARGET_MAXCOMBO = 173;
 	public static final int NUMBER_MAXCOMBO3 = 174;
 	public static final int NUMBER_DIFF_MAXCOMBO = 175;

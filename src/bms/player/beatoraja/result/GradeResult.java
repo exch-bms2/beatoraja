@@ -229,7 +229,7 @@ public class GradeResult extends MainState {
 					return resource.getCourseScoreData().getExscore();
 				}
 				return Integer.MIN_VALUE;
-			case NUMBER_DIFF_SCORE:
+			case NUMBER_DIFF_HIGHSCORE:
 				return resource.getCourseScoreData().getExscore() - oldexscore;
 			case NUMBER_MISSCOUNT:
 				if (resource.getCourseScoreData() != null) {

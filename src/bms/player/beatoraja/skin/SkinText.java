@@ -88,12 +88,13 @@ public class SkinText extends SkinObject {
             if(font != null) {
                 Color c = getColor(time,state);
                 font.getData().setScale(r.height / parameter.size);
+                final float x = (align == 2 ? r.x - r.width : (align == 1 ? r.x - r.width / 2 : r.x));
                 if(shadow > 0) {
                     layout.setText(font, value, new Color(c.r / 2, c.g / 2, c.b / 2, c.a), r.getWidth(),ALIGN[align], false);
-                    font.draw(sprite, layout, r.x + shadow, r.y - shadow);
+                    font.draw(sprite, layout, x + shadow, r.y - shadow);
                 }                
                 layout.setText(font, value, c, r.getWidth(),ALIGN[align], false);
-                font.draw(sprite, layout, r.x, r.y);
+                font.draw(sprite, layout, x, r.y);
             }
         }
     }

@@ -71,10 +71,10 @@ public class MusicResultSkin extends Skin {
 		addNumber(new SkinNumber(ntr[0], 0, 4, 0, MainState.NUMBER_TOTALEARLY), 0, 320, 75, 18, 24, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		addNumber(new SkinNumber(ntr[0], 0, 4, 0, MainState.NUMBER_TOTALLATE), 0, 410, 75, 18, 24, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
-		addNumber(new SkinNumber(ntr[0], 0, 5, 0, MainState.NUMBER_TARGET_SCORE), 0, 240, 375, 24, 24, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		addNumber(new SkinNumber(ntr[0], 0, 5, 0, MainState.NUMBER_HIGHSCORE), 0, 240, 375, 24, 24, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		addNumber(new SkinNumber(ntr[0], 0, 5, 0, MainState.NUMBER_SCORE), 0, 410, 375, 24, 24, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
-		addNumber(new SkinNumber(ntr[1], ntr[2], 0, 5, 0, MainState.NUMBER_DIFF_SCORE), 0, 550, 375, 12, 24, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		addNumber(new SkinNumber(ntr[1], ntr[2], 0, 5, 0, MainState.NUMBER_DIFF_HIGHSCORE), 0, 550, 375, 12, 24, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 		addNumber(new SkinNumber(ntr[0], 0, 5, 0, MainState.NUMBER_TARGET_MISSCOUNT), 0, 240, 345, 24, 24, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		addNumber(new SkinNumber(ntr[0], 0, 5, 0, MainState.NUMBER_MISSCOUNT), 0, 410, 345, 24, 24, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
