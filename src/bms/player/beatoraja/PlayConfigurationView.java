@@ -116,7 +116,7 @@ public class PlayConfigurationView implements Initializable {
 
 	private static final String[] BGAOP = { "ON", "AUTOPLAY ", "OFF" };
 
-	private static final String[] FIXHISPEEDOP = { "OFF", "START BPM", "MAX BPM", "MAIN BPM" };
+	private static final String[] FIXHISPEEDOP = { "OFF", "START BPM", "MAX BPM", "MAIN BPM", "MIN BPM" };
 
 	private static final String[] JUDGEALGORITHM = { "LR2風", "本家風", "最下ノーツ最優先" };
 

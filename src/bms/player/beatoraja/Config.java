@@ -68,7 +68,8 @@ public class Config {
 	public static final int FIX_HISPEED_STARTBPM = 1;
 	public static final int FIX_HISPEED_MAXBPM = 2;
 	public static final int FIX_HISPEED_MAINBPM = 3;
-	
+	public static final int FIX_HISPEED_MINBPM = 4;
+
 	/**
 	 * ハイスピード。1.0で等速
 	 */
