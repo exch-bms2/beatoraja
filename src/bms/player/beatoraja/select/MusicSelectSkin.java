@@ -5,6 +5,7 @@ import bms.player.beatoraja.skin.*;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
 import com.badlogic.gdx.math.Rectangle;
@@ -24,6 +25,8 @@ public class MusicSelectSkin extends Skin {
 
 	private Sprite[] trophy = new Sprite[3];
 
+	private MusicSelector selector;
+
 	public MusicSelectSkin() {
 		super(640, 480, 1280, 720);
 	}
@@ -32,6 +35,10 @@ public class MusicSelectSkin extends Skin {
 		super(1280, 720, r.width, r.height);
 		float dw = r.width / 1280.0f;
 		float dh = r.height / 720.0f;
+
+//		SkinImage back = new SkinImage(new TextureRegion[] { new TextureRegion(new Texture("skin/select.png")) }, 0);
+//		setDestination(back, 0, 0, 0, 1280, 720, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+//		add(back);
 
 		Texture bart = new Texture("skin/songbar.png");
 		for (int i = 0; i < bar.length; i++) {
@@ -148,4 +155,19 @@ public class MusicSelectSkin extends Skin {
 		return trophy;
 	}
 
+	public void setMusicSelector(MusicSelector select) {
+		this.selector = select;
+	}
+
+	public class SkinBarObject extends SkinObject {
+
+		@Override
+		public void draw(SpriteBatch sprite, long time, MainState state) {
+		}
+
+		@Override
+		public void dispose() {
+
+		}
+	}
 }

@@ -16,6 +16,8 @@ public class SkinImage extends SkinObject {
 	 * イメージ
 	 */
 	private TextureRegion[][] image;
+
+	private int imageid = -1;
 	private int cycle;
 	
 	private int timing;
@@ -24,7 +26,11 @@ public class SkinImage extends SkinObject {
 	public SkinImage() {
 		
 	}
-	
+
+	public SkinImage(int imageid) {
+		this.imageid = imageid;
+	}
+
 	public SkinImage(TextureRegion[] image, int cycle) {
 		setImage(image, cycle);
 	}
@@ -42,6 +48,9 @@ public class SkinImage extends SkinObject {
 	}
 
 	public TextureRegion getImage(int value, long time, MainState state) {
+		if(imageid != -1) {
+			return state.getImage(imageid);
+		}
 		if(cycle == 0) {
 			return image[value][0];
 		}

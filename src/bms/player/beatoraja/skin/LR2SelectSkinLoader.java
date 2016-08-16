@@ -35,6 +35,41 @@ public class LR2SelectSkinLoader extends LR2SkinLoader {
 				}
 			}
 		});
+		addCommandWord(new CommandWord("DST_BAR_BODY") {
+			@Override
+			public void execute(String[] str) {
+			}
+		});
+		addCommandWord(new CommandWord("BAR_CENTER") {
+			@Override
+			public void execute(String[] str) {
+			}
+		});
+		addCommandWord(new CommandWord("BAR_AVAILABLE") {
+			@Override
+			public void execute(String[] str) {
+			}
+		});
+		addCommandWord(new CommandWord("SRC_BAR_FLASH") {
+			@Override
+			public void execute(String[] str) {
+			}
+		});
+		addCommandWord(new CommandWord("DST_BAR_FLASH") {
+			@Override
+			public void execute(String[] str) {
+			}
+		});
+		addCommandWord(new CommandWord("SRC_BAR_LEVEL") {
+			@Override
+			public void execute(String[] str) {
+			}
+		});
+		addCommandWord(new CommandWord("DST_BAR_LEVEL") {
+			@Override
+			public void execute(String[] str) {
+			}
+		});
 		addCommandWord(new CommandWord("SRC_BAR_LAMP") {
 
 			private final int[][] lampg = { { 0 }, { 1 }, { 2, 3, 4 }, { 5 }, { 6, 7 }, { 8, 9, 10 } };
@@ -68,6 +103,42 @@ public class LR2SelectSkinLoader extends LR2SkinLoader {
 				}
 			}
 		});
+		addCommandWord(new CommandWord("DST_BAR_LAMP") {
+			@Override
+			public void execute(String[] str) {
+			}
+		});
+		addCommandWord(new CommandWord("SRC_BAR_TITLE") {
+			@Override
+			public void execute(String[] str) {
+			}
+		});
+		addCommandWord(new CommandWord("DST_BAR_TITLE") {
+			@Override
+			public void execute(String[] str) {
+			}
+		});
+		addCommandWord(new CommandWord("SRC_BAR_RANK") {
+			@Override
+			public void execute(String[] str) {
+			}
+		});
+		addCommandWord(new CommandWord("DST_BAR_RANK") {
+			@Override
+			public void execute(String[] str) {
+			}
+		});
+		addCommandWord(new CommandWord("SRC_README") {
+			@Override
+			public void execute(String[] str) {
+			}
+		});
+		addCommandWord(new CommandWord("DST_README") {
+			@Override
+			public void execute(String[] str) {
+			}
+		});
+
 	}
 
 	public MusicSelectSkin loadSelectSkin(File f, int[] option) throws IOException {

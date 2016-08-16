@@ -20,11 +20,19 @@ public class LR2PlaySkinLoader extends LR2SkinLoader {
 
 	private PlaySkin.SkinBGAObject bga;
 
+	private PlaySkin.SkinLaneObject lanerender;
+
 	public LR2PlaySkinLoader() {
 		addCommandWord(new CommandWord("CLOSE") {
 			@Override
 			public void execute(String[] str) {
 				skin.setCloseTime(Integer.parseInt(str[1]));
+			}
+		});
+		addCommandWord(new CommandWord("PLAYSTART") {
+			@Override
+			public void execute(String[] str) {
+				skin.setPlaystartTime(Integer.parseInt(str[1]));
 			}
 		});
 		addCommandWord(new CommandWord("SRC_BGA") {
@@ -59,6 +67,10 @@ public class LR2PlaySkinLoader extends LR2SkinLoader {
 						note[lane] = new Sprite(imagelist.get(Integer.parseInt(str[2])), Integer.parseInt(str[3]),
 								Integer.parseInt(str[4]), Integer.parseInt(str[5]), Integer.parseInt(str[6]));
 					}
+				}
+				if(lanerender == null) {
+					lanerender = new PlaySkin.SkinLaneObject(skin);
+					skin.add(lanerender);
 				}
 			}
 		});

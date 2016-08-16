@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.Calendar;
 
 import bms.player.beatoraja.skin.Skin;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 public abstract class MainState {
 
@@ -15,17 +17,32 @@ public abstract class MainState {
 	private boolean[] option = new boolean[1000];
 	
 	private Skin skin;
-	
+
+	public static final int IMAGE_STAGEFILE = 100;
+	public static final int IMAGE_BACKBMP = 101;
+	public static final int IMAGE_BANNER = 102;
+
+	public static final int TIMER_STARTINPUT = 1;
 	public static final int TIMER_FADEOUT = 2;
 	public static final int TIMER_FAILED = 3;
 	public static final int TIMER_READY = 40;
 	public static final int TIMER_PLAY = 41;
-	public static final int TIMER_FULLCOMBO1 = 48;
-	public static final int TIMER_FULLCOMBO2 = 49;
+	public static final int TIMER_GAUGE_INCLEASE_1P = 42;
+	public static final int TIMER_GAUGE_INCLEASE_2P = 43;
+	public static final int TIMER_GAUGE_MAX_1P = 44;
+	public static final int TIMER_GAUGE_MAX_2P = 45;
+	public static final int TIMER_JUDGE_1P = 46;
+	public static final int TIMER_JUDGE_2P = 47;
+	public static final int TIMER_FULLCOMBO_1P = 48;
+	public static final int TIMER_FULLCOMBO_2P = 49;
 	public static final int TIMER_BOMB = 50;
 	public static final int TIMER_HOLD = 70;
 	public static final int TIMER_KEYON = 100;
 	public static final int TIMER_KEYOFF = 120;
+	public static final int TIMER_RHYTHM = 140;
+	public static final int TIMER_ENDOFNOTE_1P = 143;
+	public static final int TIMER_ENDOFNOTE_2P = 144;
+
 	public static final int TIMER_RESULTGRAPH_BEGIN = 150;
 	public static final int TIMER_RESULTGRAPH_END = 151;
 	
@@ -34,12 +51,19 @@ public abstract class MainState {
 	// プレイ専用
 	public static final int SLIDER_MUSIC_PROGRESS = 6;
 
-	public static final int SLIDER_SCORERATE = 1000;
-	public static final int SLIDER_BESTSCORERATE = 1001;
-	public static final int SLIDER_TARGETSCORERATE = 1002;
+	public static final int BARGRAPH_MUSIC_PROGRESS = 1001;
+	public static final int BARGRAPH_LOAD_PROGRESS = 1002;
+	public static final int BARGRAPH_SCORERATE = 1010;
+	public static final int BARGRAPH_SCORERATE_FINAL = 1011;
+	public static final int BARGRAPH_BESTSCORERATE_NOW = 1012;
+	public static final int BARGRAPH_BESTSCORERATE = 1013;
+	public static final int BARGRAPH_TARGETSCORERATE_NOW = 1014;
+	public static final int BARGRAPH_TARGETSCORERATE = 1015;
 
 	public static final int OFFSET_LIFT = 100;
-	
+
+	public static final int STRING_RIVAL = 1;
+	public static final int STRING_PLAYER = 2;
 	public static final int STRING_TITLE = 10;
 	public static final int STRING_SUBTITLE = 11;
 	public static final int STRING_FULLTITLE = 12;
@@ -145,7 +169,102 @@ public abstract class MainState {
 	public static final int OPTION_AUTOPLAYON = 33;
 	public static final int OPTION_BGAOFF = 40;
 	public static final int OPTION_BGAON = 41;
-	
+
+	public static final int OPTION_1P_AAA = 200;
+	public static final int OPTION_1P_AA = 201;
+	public static final int OPTION_1P_A = 202;
+	public static final int OPTION_1P_B = 203;
+	public static final int OPTION_1P_C = 204;
+	public static final int OPTION_1P_D = 205;
+	public static final int OPTION_1P_E = 206;
+	public static final int OPTION_1P_F = 207;
+	public static final int OPTION_2P_AAA = 210;
+	public static final int OPTION_2P_AA = 211;
+	public static final int OPTION_2P_A = 212;
+	public static final int OPTION_2P_B = 213;
+	public static final int OPTION_2P_C = 214;
+	public static final int OPTION_2P_D = 215;
+	public static final int OPTION_2P_E = 216;
+	public static final int OPTION_2P_F = 217;
+	public static final int OPTION_AAA = 220;
+	public static final int OPTION_AA = 221;
+	public static final int OPTION_A = 222;
+	public static final int OPTION_B = 223;
+	public static final int OPTION_C = 224;
+	public static final int OPTION_D = 225;
+	public static final int OPTION_E = 226;
+	public static final int OPTION_F = 227;
+
+	public static final int OPTION_1P_0_9 = 230;
+	public static final int OPTION_1P_10_19 = 231;
+	public static final int OPTION_1P_20_29 = 232;
+	public static final int OPTION_1P_30_39 = 233;
+	public static final int OPTION_1P_40_49 = 234;
+	public static final int OPTION_1P_50_59 = 235;
+	public static final int OPTION_1P_60_69 = 236;
+	public static final int OPTION_1P_70_79 = 237;
+	public static final int OPTION_1P_80_89 = 238;
+	public static final int OPTION_1P_90_99 = 239;
+	public static final int OPTION_1P_100 = 240;
+
+	public static final int OPTION_1P_PERFECT = 241;
+	public static final int OPTION_1P_GREAT = 242;
+	public static final int OPTION_1P_GOOD = 243;
+	public static final int OPTION_1P_BAD = 244;
+	public static final int OPTION_1P_POOR = 245;
+	public static final int OPTION_1P_MISS = 246;
+
+	public static final int OPTION_RESULT_AAA_1P = 300;
+	public static final int OPTION_RESULT_AA_1P = 301;
+	public static final int OPTION_RESULT_A_1P = 302;
+	public static final int OPTION_RESULT_B_1P = 303;
+	public static final int OPTION_RESULT_C_1P = 304;
+	public static final int OPTION_RESULT_D_1P = 305;
+	public static final int OPTION_RESULT_E_1P = 306;
+	public static final int OPTION_RESULT_F_1P = 307;
+	public static final int OPTION_RESULT_0_1P = 308;
+
+	public static final int OPTION_RESULT_AAA_2P = 310;
+	public static final int OPTION_RESULT_AA_2P = 311;
+	public static final int OPTION_RESULT_A_2P = 312;
+	public static final int OPTION_RESULT_B_2P = 313;
+	public static final int OPTION_RESULT_C_2P = 314;
+	public static final int OPTION_RESULT_D_2P = 315;
+	public static final int OPTION_RESULT_E_2P = 316;
+	public static final int OPTION_RESULT_F_2P = 317;
+	public static final int OPTION_RESULT_0_2P = 318;
+
+	public static final int OPTION_BEST_AAA_1P = 320;
+	public static final int OPTION_BEST_AA_1P = 321;
+	public static final int OPTION_BEST_A_1P = 322;
+	public static final int OPTION_BEST_B_1P = 323;
+	public static final int OPTION_BEST_C_1P = 324;
+	public static final int OPTION_BEST_D_1P = 325;
+	public static final int OPTION_BEST_E_1P = 326;
+	public static final int OPTION_BEST_F_1P = 327;
+
+	public static final int OPTION_UPDATE_SCORE = 330;
+	public static final int OPTION_UPDATE_MAXCOMBO = 331;
+	public static final int OPTION_UPDATE_MISSCOUNT = 332;
+	public static final int OPTION_UPDATE_TRIAL = 333;
+	public static final int OPTION_UPDATE_IRRANK = 334;
+	public static final int OPTION_UPDATE_SCORERANK = 335;
+
+	public static final int OPTION_NOW_AAA_1P = 340;
+	public static final int OPTION_NOW_AA_1P = 341;
+	public static final int OPTION_NOW_A_1P = 342;
+	public static final int OPTION_NOW_B_1P = 343;
+	public static final int OPTION_NOW_C_1P = 344;
+	public static final int OPTION_NOW_D_1P = 345;
+	public static final int OPTION_NOW_E_1P = 346;
+	public static final int OPTION_NOW_F_1P = 347;
+
+	public static final int OPTION_DISABLE_RESULTFLIP = 350;
+	public static final int OPTION_ENABLE_RESULTFLIP = 351;
+	public static final int OPTION_1PWIN = 352;
+	public static final int OPTION_2PWIN = 353;
+	public static final int OPTION_DRAW = 354;
+
 	public MainState() {
 		this(null);
 	}
@@ -293,6 +412,10 @@ public abstract class MainState {
 			}
 		}
 		return "";
+	}
+
+	public TextureRegion getImage(int id) {
+		return null;
 	}
 }
 

@@ -91,7 +91,7 @@ public class MusicSelector extends MainState {
 	private FreeTypeFontGenerator generator;
 	private BitmapFont titlefont;
 
-	private Texture banner;
+	private TextureRegion banner;
 	private Bar bannerbar;
 
 	private BarRenderer bar;
@@ -467,11 +467,11 @@ public class MusicSelector extends MainState {
 		if (current != bannerbar) {
 			bannerbar = current;
 			if (banner != null) {
-				banner.dispose();
+				banner.getTexture().dispose();
 				banner = null;
 			}
 			if (bannerbar instanceof SongBar && ((SongBar) bannerbar).getBanner() != null) {
-				banner = new Texture(((SongBar) bannerbar).getBanner());
+				banner = new TextureRegion(new Texture(((SongBar) bannerbar).getBanner()));
 			}
 		}
 		if (banner != null) {
@@ -652,62 +652,63 @@ public class MusicSelector extends MainState {
 					bar.setSelected(cbar);
 				}
 			}
-		}
 
-		if (isPressed(keystate, keytime, KEY_UP, false) || cursor[1]) {
-			long l = System.currentTimeMillis();
-			if (duration == 0) {
-				bar.move(true);
-				if (move != null) {
-					move.play();
+			// song bar scroll
+			if (isPressed(keystate, keytime, KEY_UP, false) || cursor[1]) {
+				long l = System.currentTimeMillis();
+				if (duration == 0) {
+					bar.move(true);
+					if (move != null) {
+						move.play();
+					}
+					duration = l + 300;
+					angle = 300;
 				}
-				duration = l + 300;
-				angle = 300;
-			}
-			if (l > duration) {
-				duration = l + 50;
-				bar.move(true);
-				if (move != null) {
-					move.play();
+				if (l > duration) {
+					duration = l + 50;
+					bar.move(true);
+					if (move != null) {
+						move.play();
+					}
+					angle = 50;
 				}
-				angle = 50;
-			}
-		} else if (isPressed(keystate, keytime, KEY_DOWN, false) || cursor[0]) {
-			long l = System.currentTimeMillis();
-			if (duration == 0) {
-				bar.move(false);
-				if (move != null) {
-					move.play();
+			} else if (isPressed(keystate, keytime, KEY_DOWN, false) || cursor[0]) {
+				long l = System.currentTimeMillis();
+				if (duration == 0) {
+					bar.move(false);
+					if (move != null) {
+						move.play();
+					}
+					duration = l + 300;
+					angle = -300;
 				}
-				duration = l + 300;
-				angle = -300;
-			}
-			if (l > duration) {
-				duration = l + 50;
-				bar.move(false);
-				if (move != null) {
-					move.play();
+				if (l > duration) {
+					duration = l + 50;
+					bar.move(false);
+					if (move != null) {
+						move.play();
+					}
+					angle = -50;
 				}
-				angle = -50;
+			} else {
+				long l = System.currentTimeMillis();
+				if (l > duration) {
+					duration = 0;
+				}
 			}
-		} else {
-			long l = System.currentTimeMillis();
-			if (l > duration) {
-				duration = 0;
+			// song bar scroll on mouse wheel
+			if (input.getScroll() > 0) {
+				for (int i = 0; i < input.getScroll(); i++) {
+					bar.move(false);
+				}
+				input.resetScroll();
 			}
-		}
-
-		if (input.getScroll() > 0) {
-			for (int i = 0; i < input.getScroll(); i++) {
-				bar.move(false);
+			if (input.getScroll() < 0) {
+				for (int i = 0; i < -input.getScroll(); i++) {
+					bar.move(true);
+				}
+				input.resetScroll();
 			}
-			input.resetScroll();
-		}
-		if (input.getScroll() < 0) {
-			for (int i = 0; i < -input.getScroll(); i++) {
-				bar.move(true);
-			}
-			input.resetScroll();
 		}
 
 		if (bar.getSelected() != current || selectedreplay == -1) {
@@ -965,6 +966,13 @@ public class MusicSelector extends MainState {
 			return bar.getSelectedPosition();
 		}
 		return 0;
+	}
+
+	public TextureRegion getImage(int imageid) {
+		if(imageid == IMAGE_BANNER) {
+			return banner;
+		}
+		return null;
 	}
 
 }

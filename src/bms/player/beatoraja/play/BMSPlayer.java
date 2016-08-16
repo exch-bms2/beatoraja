@@ -404,7 +404,11 @@ public class BMSPlayer extends MainState {
 		lanerender = new LaneRenderer(this, sprite, shape, systemfont, skin, resource, model, resource.getConstraint());
 		skin.setBMSPlayer(this);
 		bga = resource.getBGAManager();
+		// initialize option
 		getOption()[OPTION_BGAEXTEND] = true;
+		getOption()[OPTION_1P_0_9] = true;
+		getOption()[OPTION_1P_F] = true;
+		getOption()[OPTION_F] = true;
 		if (autoplay != 0) {
 			getOption()[OPTION_AUTOPLAYON] = true;
 		} else {
@@ -471,7 +475,7 @@ public class BMSPlayer extends MainState {
 		// GET READY
 		case STATE_READY:
 			final long rt = now - getTimer()[TIMER_READY];
-			if (rt > 1000) {
+			if (rt > skin.getPlayStartTime()) {
 				state = STATE_PLAY;
 				getTimer()[TIMER_READY] = -1;
 				starttime = System.currentTimeMillis();
@@ -746,6 +750,22 @@ public class BMSPlayer extends MainState {
 		if (judge < 5) {
 			notes++;
 		}
+
+		final int score = this.judge.getJudgeCount(0) * 2 + this.judge.getJudgeCount(1);
+		for(int i = 0;i < 8;i++) {
+			final int rate = score * 10000 / totalnotes;
+			if(i == 0) {
+				getOption()[OPTION_1P_F] = (rate <= 2222);
+				getOption()[OPTION_F] = true;
+			} else if(i == 7){
+				getOption()[OPTION_1P_AAA] = (rate >= 8889);
+				getOption()[OPTION_AAA] = (rate >= 8889);
+			} else {
+				getOption()[OPTION_1P_F - i ] = (rate >= 1111 * i + 1112 && rate < 1111 * i + 2223);
+				getOption()[OPTION_F - i ] = (rate >= 1111 * i + 1112);
+			}
+		}
+
 		if (judge == 3 || judge == 4) {
 			bga.setMisslayerTme(time);
 		}
@@ -973,11 +993,11 @@ public class BMSPlayer extends MainState {
 				return lanerender.getLiftRegion() * skin.getLaneregion()[0].height;
 			}
 			return 0;
-		case SLIDER_SCORERATE:
+		case BARGRAPH_SCORERATE:
 			return (float) (judge.getJudgeCount(0) * 2 + judge.getJudgeCount(1)) / (totalnotes * 2);
-		case SLIDER_BESTSCORERATE:
+		case BARGRAPH_BESTSCORERATE:
 			return (float) (bestscore) / (totalnotes * 2);
-		case SLIDER_TARGETSCORERATE:
+		case BARGRAPH_TARGETSCORERATE:
 			return (float) (rivalscore) / (totalnotes * 2);
 		}
 		return 0;
