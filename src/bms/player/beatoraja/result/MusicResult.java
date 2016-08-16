@@ -257,6 +257,29 @@ public class MusicResult extends MainState {
 		oldexscore = score.getExscore();
 		oldmisscount = score.getMinbp();
 		oldcombo = score.getCombo();
+
+		for(int i = 0;i < 8;i++) {
+			final int rate = score.getExscore() * 10000 / (resource.getBMSModel().getTotalNotes() * 2);
+			final int oldrate = oldexscore * 10000 / (resource.getBMSModel().getTotalNotes() * 2);
+			if(i == 0) {
+				getOption()[OPTION_RESULT_F_1P] = (rate <= 2222);
+				getOption()[OPTION_NOW_F_1P] = (rate <= 2222);
+				getOption()[OPTION_BEST_F_1P] = (oldrate <= 2222);
+			} else if(i == 7){
+				getOption()[OPTION_RESULT_AAA_1P] = (rate >= 8889);
+				getOption()[OPTION_NOW_AAA_1P] = (rate >= 8889);
+				getOption()[OPTION_BEST_AAA_1P] = (oldrate >= 8889);
+			} else {
+				getOption()[OPTION_RESULT_F_1P - i ] = (rate >= 1111 * i + 1112 && rate < 1111 * i + 2223);
+				getOption()[OPTION_NOW_F_1P - i ] = (rate >= 1111 * i + 1112 && rate < 1111 * i + 2223);
+				getOption()[OPTION_BEST_F_1P - i ] = (oldrate >= 1111 * i + 1112 && oldrate < 1111 * i + 2223);
+			}
+			getOption()[OPTION_UPDATE_SCORERANK] = rate / 1111 > oldrate / 1111;
+		}
+		getOption()[OPTION_UPDATE_SCORE] = newscore.getExscore() > oldexscore;
+		getOption()[OPTION_UPDATE_MAXCOMBO] = newscore.getCombo() > oldcombo;
+		getOption()[OPTION_UPDATE_MISSCOUNT] = newscore.getMinbp() < oldmisscount;
+
 		// コースモードの場合はコーススコアに加算・累積する
 		if (resource.getCourseBMSModels() != null) {
 			if (resource.getScoreData().getClear() == GrooveGauge.CLEARTYPE_FAILED) {

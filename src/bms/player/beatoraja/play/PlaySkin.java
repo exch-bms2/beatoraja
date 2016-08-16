@@ -17,6 +17,7 @@ import com.badlogic.gdx.math.Rectangle;
  */
 public class PlaySkin extends Skin {
 
+	private int playstart;
 	/**
 	 * ノーツ画像
 	 */
@@ -36,7 +37,7 @@ public class PlaySkin extends Skin {
 	/**
 	 * レーンカバー画像
 	 */
-	private Sprite lanecover;
+	public Sprite lanecover;
 
 	private Sprite[] gauge;
 
@@ -113,6 +114,7 @@ public class PlaySkin extends Skin {
 		setDestination(fi, 500, 0, 0, 1280, 720, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(fi);
 
+		setPlaystartTime(1000);
 		setCloseTime(1500);
 		setFadeoutTime(1000);
 	}
@@ -185,13 +187,13 @@ public class PlaySkin extends Skin {
 		graph = new SkinGraph[3];
 		graph[0] = new SkinGraph();
 		graph[0].setImage(new TextureRegion[] { new TextureRegion(grapht, 0, 0, 100, 296) }, 0);
-		graph[0].setReferenceID(MainState.SLIDER_SCORERATE);
+		graph[0].setReferenceID(MainState.BARGRAPH_SCORERATE);
 		graph[1] = new SkinGraph();
 		graph[1].setImage(new TextureRegion[] { new TextureRegion(grapht, 100, 0, 100, 296) }, 0);
-		graph[1].setReferenceID(MainState.SLIDER_BESTSCORERATE);
+		graph[1].setReferenceID(MainState.BARGRAPH_BESTSCORERATE);
 		graph[2] = new SkinGraph();
 		graph[2].setImage(new TextureRegion[] { new TextureRegion(grapht, 200, 0, 100, 296) }, 0);
-		graph[2].setReferenceID(MainState.SLIDER_TARGETSCORERATE);
+		graph[2].setReferenceID(MainState.BARGRAPH_TARGETSCORERATE);
 
 	}
 
@@ -332,7 +334,7 @@ public class PlaySkin extends Skin {
 			ri.setReferenceID(BMSPlayer.VALUE_JUDGE_1P_KEY1 + (i % 8 == 7 ? -1 : i));
 			add(ri);
 		}
-		add(new SkinLaneObject());
+		add(new SkinLaneObject(this));
 		for (int i = 0; i < laneregion.length; i++) {
 			SkinImage bombi = new SkinImage(new TextureRegion[][] { {}, bombtr[3], bombtr[0], bombtr[1] }, 160);
 			bombi.setTiming(BMSPlayer.TIMER_BOMB_1P_KEY1 + (i % 8 == 7 ? -1 : i));
@@ -585,7 +587,7 @@ public class PlaySkin extends Skin {
 			add(bi);
 
 		}
-		add(new SkinLaneObject());
+		add(new SkinLaneObject(this));
 		for (int i = 0; i < laneregion.length; i++) {
 			SkinImage bombi = new SkinImage(bombtr[0], 160);
 			bombi.setTiming(BMSPlayer.TIMER_BOMB_1P_KEY1 + i);
@@ -812,7 +814,7 @@ public class PlaySkin extends Skin {
 			ri.setOffsetYReferenceID(MainState.OFFSET_LIFT);
 			add(ri);
 		}
-		add(new SkinLaneObject());
+		add(new SkinLaneObject(this));
 		for (int i = 0; i < laneregion.length; i++) {
 			SkinImage bombi = new SkinImage(new TextureRegion[][] { {}, bombtr[3], bombtr[0], bombtr[1] }, 160);
 			bombi.setTiming(BMSPlayer.TIMER_BOMB_1P_KEY1 + (i % 8 == 7 ? -1 : (i % 8)) + (i >= 8 ? 10 : 0));
@@ -933,6 +935,10 @@ public class PlaySkin extends Skin {
 		return lanegroupregion;
 	}
 
+	public void setLaneGroupRegion(Rectangle[] r) {
+		lanegroupregion = r;
+	}
+
 	public void setLaneregion(Rectangle[] laneregion) {
 		this.laneregion = laneregion;
 	}
@@ -953,6 +959,14 @@ public class PlaySkin extends Skin {
 		this.close = close;
 	}
 
+	public int getPlayStartTime() {
+		return playstart;
+	}
+
+	public void setPlaystartTime(int playstart) {
+		this.playstart = playstart;
+	}
+
 	public static class JudgeRegion {
 
 		public SkinImage[] judge;
@@ -970,12 +984,18 @@ public class PlaySkin extends Skin {
 		this.player = player;
 	}
 
-	class SkinLaneObject extends SkinObject {
+	public static class SkinLaneObject extends SkinObject {
+
+		private PlaySkin skin;
+
+		public SkinLaneObject(PlaySkin skin) {
+			this.skin = skin;
+		}
 
 		@Override
 		public void draw(SpriteBatch sprite, long time, MainState state) {
-			if (player.getLanerender() != null) {
-				player.getLanerender().drawLane();
+			if (skin.player.getLanerender() != null) {
+				skin.player.getLanerender().drawLane();
 			}
 		}
 

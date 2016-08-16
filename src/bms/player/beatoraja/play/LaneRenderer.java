@@ -128,6 +128,9 @@ public class LaneRenderer {
 		case Config.FIX_HISPEED_STARTBPM:
 			basebpm = model.getBpm();
 			break;
+			case Config.FIX_HISPEED_MINBPM:
+				basebpm = model.getMinBPM();
+				break;
 		case Config.FIX_HISPEED_MAXBPM:
 			basebpm = model.getMaxBPM();
 			break;

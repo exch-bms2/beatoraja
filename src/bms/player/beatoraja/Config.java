@@ -68,7 +68,8 @@ public class Config {
 	public static final int FIX_HISPEED_STARTBPM = 1;
 	public static final int FIX_HISPEED_MAXBPM = 2;
 	public static final int FIX_HISPEED_MAINBPM = 3;
-	
+	public static final int FIX_HISPEED_MINBPM = 4;
+
 	/**
 	 * ハイスピード。1.0で等速
 	 */
@@ -136,7 +137,7 @@ public class Config {
 	
 	private boolean markprocessednote = false;
 
-	private boolean showhiddennote = true;
+	private boolean showhiddennote = false;
 	
 	private String lr2playskin;
 	
@@ -214,7 +215,7 @@ public class Config {
 	
 	public Config() {
 //		lr2playskin = "skin/spdframe/csv/left_ACwide.csv";
-//
+//		lr2playskinoption = new int[] { 900, 918, 906, 940, 913, 920, 908, 997 };		
 //		lr2decideskin = "skin/Seraphic/Decide/[+]decide.csv";
 //		lr2decideskinoption = new int[]{900, 920, 910};
 //		lr2selectskin = "skin/green_ary/Select/select.csv";

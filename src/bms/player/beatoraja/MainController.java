@@ -147,6 +147,7 @@ public class MainController extends ApplicationAdapter {
 		
 		if(newState != null && current != newState) {
 			Arrays.fill(newState.getTimer(), -1);
+			Arrays.fill(newState.getOption(), false);
 			newState.create();
 			current = newState;
 			current.setStartTime(System.currentTimeMillis());			

@@ -20,11 +20,21 @@ public class LR2PlaySkinLoader extends LR2SkinLoader {
 
 	private PlaySkin.SkinBGAObject bga;
 
+	private PlaySkin.SkinLaneObject lanerender;
+	
+	private Rectangle playerr = new Rectangle(0,0,0,0);
+	
 	public LR2PlaySkinLoader() {
 		addCommandWord(new CommandWord("CLOSE") {
 			@Override
 			public void execute(String[] str) {
 				skin.setCloseTime(Integer.parseInt(str[1]));
+			}
+		});
+		addCommandWord(new CommandWord("PLAYSTART") {
+			@Override
+			public void execute(String[] str) {
+				skin.setPlaystartTime(Integer.parseInt(str[1]));
 			}
 		});
 		addCommandWord(new CommandWord("SRC_BGA") {
@@ -59,6 +69,10 @@ public class LR2PlaySkinLoader extends LR2SkinLoader {
 						note[lane] = new Sprite(imagelist.get(Integer.parseInt(str[2])), Integer.parseInt(str[3]),
 								Integer.parseInt(str[4]), Integer.parseInt(str[5]), Integer.parseInt(str[6]));
 					}
+				}
+				if(lanerender == null) {
+					lanerender = new PlaySkin.SkinLaneObject(skin);
+					skin.add(lanerender);
 				}
 			}
 		});
@@ -130,6 +144,17 @@ public class LR2PlaySkinLoader extends LR2SkinLoader {
 								- Integer.parseInt(str[4]) * dsth / srch, Integer.parseInt(str[5]) * dstw / srcw,
 								Integer.parseInt(str[4]) * dsth / srch);
 					}
+					if(laner[lane].x < playerr.x) {
+						playerr.width += playerr.x - laner[lane].x;
+						playerr.x = laner[lane].x;
+					}
+					if(laner[lane].x + laner[lane].width > playerr.x + playerr.width) {
+						playerr.width += laner[lane].x + laner[lane].width - (playerr.x + playerr.width);
+					}
+					if(laner[lane].y > playerr.y) {
+						playerr.y = laner[lane].y;
+						playerr.height = laner[lane].height;
+					}
 				}
 			}
 		});
@@ -168,6 +193,10 @@ public class LR2PlaySkinLoader extends LR2SkinLoader {
 
 		this.loadSkin(skin, f, option);
 
+		Texture lct = new Texture("skin/lanecover.png");
+		skin.lanecover = new Sprite(lct, 0, 0, 390, 580);
+
+		skin.setLaneGroupRegion(new Rectangle[]{playerr});
 		skin.setNote(note);
 		skin.setMinenote(mine);
 		skin.setLongnote(new Sprite[][] { lnend, lnstart, lnbodya, lnbody });

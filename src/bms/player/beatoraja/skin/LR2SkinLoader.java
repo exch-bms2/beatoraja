@@ -322,6 +322,24 @@ public abstract class LR2SkinLoader {
 								}
 							}
 						}
+						if (str[0].equals("#SRC_BARGRAPH")) {
+
+						}
+						if (str[0].equals("#DST_BARGRAPH")) {
+
+						}
+						if (str[0].equals("#SRC_BUTTON")) {
+
+						}
+						if (str[0].equals("#DST_BUTTON")) {
+
+						}
+						if (str[0].equals("#SRC_ONMOUSE")) {
+
+						}
+						if (str[0].equals("#DST_ONMOUSE")) {
+
+						}
 
 						for (CommandWord cm : commands) {
 							if (str[0].equals("#" + cm.str)) {

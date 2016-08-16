@@ -22,7 +22,7 @@ public class GameOptionRenderer {
 
 	private static final String[] GAUGEOP = { "ASSIST EASY", "EASY", "NORMAL", "HARD", "EX-HARD", "HAZARD" };
 
-	private static final String[] FIXHISPEEDOP = { "OFF", "STARTBPM", "MAXBPM", "MAINBPM" };
+	private static final String[] FIXHISPEEDOP = { "OFF", "STARTBPM", "MAXBPM", "MAINBPM", "MINBPM" };
 
 	private ShapeRenderer shape;
 	private SpriteBatch sprite;
