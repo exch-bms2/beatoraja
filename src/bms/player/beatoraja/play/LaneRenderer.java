@@ -116,10 +116,10 @@ public class LaneRenderer {
 		this.model = model;
 		this.timelines = model.getAllTimeLines();
 		if (model.getUseKeys() == 9) {
-			laneassign = new int[]{0,1,2,3,4,10,11,12,13};
+			laneassign = new int[] { 0, 1, 2, 3, 4, 10, 11, 12, 13 };
 			drawline = false;
-		} else {			
-			laneassign = new int[]{0,1,2,3,4,5,6,7,9,10,11,12,13,14,15,16};
+		} else {
+			laneassign = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13, 14, 15, 16 };
 		}
 		hispeed = config.getHispeed();
 		switch (config.getFixhispeed()) {
@@ -637,8 +637,10 @@ public class LaneRenderer {
 				sprite.end();
 			}
 		} else if (note instanceof LongNote) {
+			final LongNote ln = (LongNote) note;
 			sprite.begin();
-			if (model.getLntype() == BMSModel.LNTYPE_HELLCHARGENOTE) {
+			if ((model.getLntype() == BMSModel.LNTYPE_HELLCHARGENOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
+					|| ln.getType() == LongNote.TYPE_HELLCHARGENOTE) {
 				// HCN
 				if (y - height < skin.getLaneregion()[lane].y) {
 					height = y - skin.getLaneregion()[lane].y;
@@ -658,7 +660,8 @@ public class LaneRenderer {
 				Sprite le = skin.getLongnote()[5][lane];
 				sprite.draw(le, x, y - height - le.getHeight() * scale / 2, width, le.getHeight() * scale);
 			}
-			if (model.getLntype() == BMSModel.LNTYPE_CHARGENOTE) {
+			if ((model.getLntype() == BMSModel.LNTYPE_CHARGENOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
+					|| ln.getType() == LongNote.TYPE_CHARGENOTE) {
 				// CN
 				if (y - height < skin.getLaneregion()[lane].y) {
 					height = y - skin.getLaneregion()[lane].y;
@@ -673,7 +676,8 @@ public class LaneRenderer {
 				Sprite le = skin.getLongnote()[1][lane];
 				sprite.draw(le, x, y - height - le.getHeight() * scale / 2, width, le.getHeight() * scale);
 			}
-			if (model.getLntype() == BMSModel.LNTYPE_LONGNOTE) {
+			if ((model.getLntype() == BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
+					|| ln.getType() == LongNote.TYPE_LONGNOTE) {
 				// LN
 				if (y - height < skin.getLaneregion()[lane].y) {
 					height = y - skin.getLaneregion()[lane].y;
@@ -711,10 +715,11 @@ public class LaneRenderer {
 			int offset = (lane % 8 == 7 ? -1 : (lane % 8)) + (lane >= 8 ? 10 : 0);
 			this.judge[offset + 1] = judge == 0 ? 1 : judge * 2 + (fast > 0 ? 0 : 1);
 		}
-		if(judgenow.length > 0) {
+		if (judgenow.length > 0) {
 			judgenow[lane / (skin.getLaneregion().length / judgenow.length)] = judge + 1;
 			judgenowt[lane / (skin.getLaneregion().length / judgenow.length)] = time;
-			judgecombo[lane / (skin.getLaneregion().length / judgenow.length)] = main.getJudgeManager().getCourseCombo();			
+			judgecombo[lane / (skin.getLaneregion().length / judgenow.length)] = main.getJudgeManager()
+					.getCourseCombo();
 		}
 	}
 

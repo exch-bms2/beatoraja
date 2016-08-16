@@ -166,7 +166,7 @@ public class JudgeManager {
 		}
 	}
 
-	public void update(final  int time) {
+	public void update(final int time) {
 		final BMSPlayerInputProcessor input = main.getBMSPlayerInputProcessor();
 		final long[] keytime = input.getTime();
 		final boolean[] keystate = input.getKeystate();
@@ -184,15 +184,18 @@ public class JudgeManager {
 						main.getGauge().addValue(-mnote.getDamage());
 						System.out.println("Mine Damage : " + mnote.getWav());
 					}
-					if (model.getLntype() == BMSModel.LNTYPE_HELLCHARGENOTE && note instanceof LongNote) {
+					if (note instanceof LongNote) {
 						// HCN判定
 						final LongNote lnote = (LongNote) note;
-						if (lnote.getStart() == timelines[i]) {
-							passing[keyassign[key]] = lnote;
-						}
-						if (lnote.getEnd() == timelines[i]) {
-							passing[keyassign[key]] = null;
-							passingcount[keyassign[key]] = 0;
+						if ((lnote.getType() == LongNote.TYPE_UNDEFINED && model.getLntype() == BMSModel.LNTYPE_HELLCHARGENOTE)
+								|| lnote.getType() == LongNote.TYPE_HELLCHARGENOTE) {
+							if (lnote.getStart() == timelines[i]) {
+								passing[keyassign[key]] = lnote;
+							}
+							if (lnote.getEnd() == timelines[i]) {
+								passing[keyassign[key]] = null;
+								passingcount[keyassign[key]] = 0;
+							}
 						}
 					}
 				}
@@ -247,7 +250,9 @@ public class JudgeManager {
 			if (keystate[key]) {
 				// キーが押されたときの処理
 				if (processing[lane] != null) {
-					if (model.getLntype() != BMSModel.LNTYPE_LONGNOTE && sc >= 0 && key != sckey[sc]) {
+					if (((model.getLntype() != BMSModel.LNTYPE_LONGNOTE && processing[lane].getType() == LongNote.TYPE_UNDEFINED)
+							|| processing[lane].getType() == LongNote.TYPE_CHARGENOTE || processing[lane].getType() == LongNote.TYPE_HELLCHARGENOTE)
+							&& sc >= 0 && key != sckey[sc]) {
 						for (int j = 0; j < judge.length; j++) {
 							if (j > 3) {
 								j = 4;
@@ -282,10 +287,11 @@ public class JudgeManager {
 						// TODO この時点で空POOR処理を分岐させるべきか
 						if (note instanceof LongNote) {
 							// ロングノート処理
-							LongNote ln = (LongNote) note;
+							final LongNote ln = (LongNote) note;
 							if (ln.getStart() == tl) {
 								main.play(note);
-								if (model.getLntype() == BMSModel.LNTYPE_LONGNOTE) {
+								if ((model.getLntype() == BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
+										|| ln.getType() == LongNote.TYPE_LONGNOTE) {
 									passingcount[lane] = (int) (tl.getTime() - ptime);
 								} else {
 									final int dtime = (int) (tl.getTime() - ptime);
@@ -354,7 +360,9 @@ public class JudgeManager {
 								|| (ptime > processing[lane].getEnd().getTime() - judge[j] && ptime < processing[lane]
 										.getEnd().getTime() + judge[j])) {
 							int dtime = (int) (processing[lane].getEnd().getTime() - ptime);
-							if (model.getLntype() != BMSModel.LNTYPE_LONGNOTE) {
+							if ((model.getLntype() != BMSModel.LNTYPE_LONGNOTE && processing[lane].getType() == LongNote.TYPE_UNDEFINED)
+									|| processing[lane].getType() == LongNote.TYPE_CHARGENOTE
+									|| processing[lane].getType() == LongNote.TYPE_HELLCHARGENOTE) {
 								if (sc >= 0) {
 									if (j != 4 || key != sckey[sc]) {
 										break;
@@ -396,8 +404,9 @@ public class JudgeManager {
 			final int[] judge = sc >= 0 ? sjudge : njudge;
 
 			// LN終端判定
-			if (model.getLntype() == BMSModel.LNTYPE_LONGNOTE && processing[lane] != null
-					&& processing[lane].getEnd().getTime() < time) {
+			if (processing[lane] != null
+					&& ((model.getLntype() == BMSModel.LNTYPE_LONGNOTE && processing[lane].getType() == LongNote.TYPE_UNDEFINED) || processing[lane]
+							.getType() == LongNote.TYPE_LONGNOTE) && processing[lane].getEnd().getTime() < time) {
 				int j = 0;
 				for (; j < judge.length; j++) {
 					if (Math.abs(passingcount[lane]) <= judge[j]) {
@@ -421,34 +430,40 @@ public class JudgeManager {
 					note.setState(5);
 					note.setTime(jud);
 				}
-				if (note instanceof LongNote && ((LongNote) note).getStart() == timelines[i] && note.getState() == 0) {
-					if (model.getLntype() != BMSModel.LNTYPE_LONGNOTE) {
-						// System.out.println("CN start poor");
-						this.update(lane, 4, time, jud);
-						note.setState(5);
-						note.setTime(jud);
+				if(note instanceof LongNote) {
+					final LongNote ln = (LongNote) note;
+					if (((LongNote) note).getStart() == timelines[i] && note.getState() == 0) {
+						if ((model.getLntype() != BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
+								|| ln.getType() == LongNote.TYPE_CHARGENOTE || ln.getType() == LongNote.TYPE_HELLCHARGENOTE) {
+							// System.out.println("CN start poor");
+							this.update(lane, 4, time, jud);
+							note.setState(5);
+							note.setTime(jud);
+							this.update(lane, 4, time, jud);
+							((LongNote) note).setEndstate(5);
+							((LongNote) note).setEndtime(jud);
+						}
+						if (((model.getLntype() == BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
+								|| ln.getType() == LongNote.TYPE_LONGNOTE) && processing[lane] != note) {
+							// System.out.println("LN start poor");
+							this.update(lane, 4, time, jud);
+							note.setState(5);
+							note.setTime(jud);
+						}
+
+					}
+					if (((model.getLntype() != BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
+							|| ln.getType() == LongNote.TYPE_CHARGENOTE || ln.getType() == LongNote.TYPE_HELLCHARGENOTE)
+							&& ((LongNote) note).getEnd() == timelines[i] && ((LongNote) note).getEndstate() == 0) {
+						// System.out.println("CN end poor");
 						this.update(lane, 4, time, jud);
 						((LongNote) note).setEndstate(5);
 						((LongNote) note).setEndtime(jud);
-					}
-					if (model.getLntype() == BMSModel.LNTYPE_LONGNOTE && processing[lane] != note) {
-						// System.out.println("LN start poor");
-						this.update(lane, 4, time, jud);
-						note.setState(5);
-						note.setTime(jud);
-					}
-
-				}
-				if (model.getLntype() != BMSModel.LNTYPE_LONGNOTE && note instanceof LongNote
-						&& ((LongNote) note).getEnd() == timelines[i] && ((LongNote) note).getEndstate() == 0) {
-					// System.out.println("CN end poor");
-					this.update(lane, 4, time, jud);
-					((LongNote) note).setEndstate(5);
-					((LongNote) note).setEndtime(jud);
-					processing[lane] = null;
-					if (sc >= 0) {
-						sckey[sc] = 0;
-					}
+						processing[lane] = null;
+						if (sc >= 0) {
+							sckey[sc] = 0;
+						}
+					}					
 				}
 			}
 		}

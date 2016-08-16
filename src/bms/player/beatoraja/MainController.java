@@ -280,7 +280,7 @@ public class MainController extends ApplicationAdapter {
 
 		File f = null;
 		int auto = 0;
-		boolean config = (!new File("song.db").exists());
+		boolean config = (!new File("songdata.db").exists());
 		for (String s : args) {
 			if (s.startsWith("-")) {
 				if (s.equals("-a")) {

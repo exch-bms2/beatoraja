@@ -108,8 +108,7 @@ public class PlayDataAccessor {
      */
 	public IRScoreData readScoreData(BMSModel model, int lnmode) {
 		String hash = model.getSHA256();
-		boolean ln = model.getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
-				+ model.getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH) > 0;
+		boolean ln = model.containsUndefinedLongNote();
 		return readScoreData(hash, ln, lnmode);
 	}
 
@@ -247,8 +246,7 @@ public class PlayDataAccessor {
 		boolean ln = false;
 		for (int i = 0;i < models.length;i++) {
 			hash[i] = models[i].getSHA256();
-			ln |= models[i].getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
-					+ models[i].getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH) > 0;
+			ln |= models[i].containsUndefinedLongNote();
 		}
 		return readScoreData(hash, ln, lnmode, option, constraint);
 	}
@@ -268,8 +266,7 @@ public class PlayDataAccessor {
 		for (BMSModel model : models) {
 			hash += model.getSHA256();
 			totalnotes += model.getTotalNotes();
-			ln |= model.getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
-					+ model.getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH) > 0;
+			ln |= model.containsUndefinedLongNote();
 		}
 		if (newscore == null) {
 			return;
@@ -336,8 +333,7 @@ public class PlayDataAccessor {
 	}
 
 	public boolean existsReplayData(BMSModel model, int lnmode, int index) {
-		boolean ln = model.getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
-				+ model.getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH) > 0;
+		boolean ln = model.containsUndefinedLongNote();
 		return new File(this.getReplayDataFilePath(model.getSHA256(), ln, lnmode, index)).exists();
 	}
 
@@ -407,8 +403,7 @@ public class PlayDataAccessor {
 		boolean ln = false;
 		for(int i = 0;i < models.length;i++) {
 			hashes[i] = models[i].getSHA256();
-			ln |= models[i].getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
-					+ models[i].getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH) > 0;
+			ln |= models[i].containsUndefinedLongNote();
 		}
 		return this.readReplayData(hashes, ln, lnmode,index, constraint);
 	}
