@@ -117,23 +117,13 @@ public class MusicResult extends MainState {
 		final MainController main = getMainController();
 
 		final SpriteBatch sprite = main.getSpriteBatch();
-		final ShapeRenderer shape = main.getShapeRenderer();
 		final PlayerResource resource = getMainController().getPlayerResource();
 
 		final float w = MainController.RESOLUTION[resource.getConfig().getResolution()].width;
 		final float h = MainController.RESOLUTION[resource.getConfig().getResolution()].height;
 
-		Rectangle graph = skin.getGaugeRegion();
-
-		if (resource.getBGAManager().getStagefileData() != null) {
-			sprite.begin();
-			sprite.draw(resource.getBGAManager().getStagefileData(), 0, 0, w, h);
-			sprite.end();
-		}
-
 		IRScoreData score = resource.getScoreData();
 		// ゲージグラフ描画
-		gaugegraph.render(shape, time, resource, graph, resource.getGauge());
 
 		sprite.begin();
 		if (resource.getCourseBMSModels() != null) {
@@ -151,10 +141,7 @@ public class MusicResult extends MainState {
 				titlefont.draw(sprite, "Replay Saved", w * 3 / 4, h / 4);
 			}
 		}
-
 		sprite.end();
-
-		detail.render(sprite, titlefont, shape, time, skin.getJudgeRegion());
 
 		if(getTimer()[BMSPlayer.TIMER_FADEOUT] != -1) {
 			if (time > getTimer()[BMSPlayer.TIMER_FADEOUT] + getSkin().getFadeoutTime()) {
@@ -239,7 +226,6 @@ public class MusicResult extends MainState {
 	private void updateScoreDatabase() {
 		saveReplay = false;
 		final PlayerResource resource = getMainController().getPlayerResource();
-		BMSModel model = resource.getBMSModel();
 		IRScoreData newscore = resource.getScoreData();
 		if (newscore == null) {
 			if (resource.getCourseScoreData() != null) {
@@ -469,5 +455,18 @@ public class MusicResult extends MainState {
 				return count;
 		}
 		return super.getNumberValue(id);
+	}
+
+	public void renderGraph(long time) {
+		Rectangle graph = skin.getGaugeRegion();
+		final ShapeRenderer shape = getMainController().getShapeRenderer();
+		final PlayerResource resource = getMainController().getPlayerResource();
+		gaugegraph.render(shape, time, resource, graph, resource.getGauge());
+	}
+
+	public void renderDetail(long time) {
+		final ShapeRenderer shape = getMainController().getShapeRenderer();
+		final SpriteBatch sprite = getMainController().getSpriteBatch();
+		detail.render(sprite, titlefont, shape, time, skin.getJudgeRegion());
 	}
 }

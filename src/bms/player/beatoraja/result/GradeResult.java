@@ -24,11 +24,6 @@ import com.badlogic.gdx.utils.GdxRuntimeException;
 
 public class GradeResult extends MainState {
 
-	private static final String[] LAMP = { "000000", "808080", "800080", "ff00ff", "40ff40", "f0c000", "ffffff",
-			"ffff88", "88ffff", "ff8888", "ff0000" };
-	private static final String[] CLEAR = { "NO PLAY", "FAILED", "ASSIST CLEAR", "L-ASSIST CLEAR", "EASY CLEAR",
-			"CLEAR", "HARD CLEAR", "EX-HARD CLEAR", "FULL COMBO", "PERFECT", "MAX" };
-
 	private BitmapFont titlefont;
 	private String title;
 
@@ -76,7 +71,6 @@ public class GradeResult extends MainState {
 		int time = getNowTime();
 		final MainController main = getMainController();
 		final SpriteBatch sprite = main.getSpriteBatch();
-		final ShapeRenderer shape = main.getShapeRenderer();
 		final PlayerResource resource = getMainController().getPlayerResource();
 		IRScoreData score = resource.getCourseScoreData();
 
@@ -90,27 +84,6 @@ public class GradeResult extends MainState {
 
 			final float w = 1280;
 			final float h = 720;
-
-			// ゲージグラフ描画
-			final List<List<Float>> coursegauge = resource.getCourseGauge();
-			final int cg = resource.getCourseBMSModels().length;
-			for (int i = 0; i < cg; i++) {
-				Rectangle graph = new Rectangle(40 + i * (1200 / cg), 500, 1200 / cg, 200);
-				if (coursegauge.size() <= i) {
-					shape.begin(ShapeRenderer.ShapeType.Filled);
-					shape.setColor(Color.DARK_GRAY);
-					shape.rect(graph.x, graph.y, graph.width, graph.height);
-					shape.end();
-					Gdx.gl.glLineWidth(4);
-					shape.begin(ShapeRenderer.ShapeType.Line);
-					shape.setColor(Color.WHITE);
-					shape.rect(graph.x, graph.y, graph.width, graph.height);
-					shape.end();
-					Gdx.gl.glLineWidth(1);
-				} else {
-					gaugegraph.render(shape, time, resource, graph, coursegauge.get(i));
-				}
-			}
 
 			sprite.begin();
 			titlefont.setColor(Color.WHITE);
@@ -157,11 +130,8 @@ public class GradeResult extends MainState {
 		if (newscore == null) {
 			return;
 		}
-		boolean ln = false;
 		boolean dp = false;
 		for (BMSModel model : models) {
-			ln |= model.getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
-					+ model.getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH) > 0;
 			dp |= (model.getUseKeys() == 10 || model.getUseKeys() == 14);
 		}
 		newscore.setCombo(resource.getMaxcombo());
@@ -307,4 +277,31 @@ public class GradeResult extends MainState {
 			}
 		}
 	}
+
+	public void renderGraph(long time) {
+		final ShapeRenderer shape = getMainController().getShapeRenderer();
+		final PlayerResource resource = getMainController().getPlayerResource();
+
+		final List<List<Float>> coursegauge = resource.getCourseGauge();
+		final int cg = resource.getCourseBMSModels().length;
+
+		for (int i = 0; i < cg; i++) {
+			Rectangle graph = new Rectangle(40 + i * (1200 / cg), 500, 1200 / cg, 200);
+			if (coursegauge.size() <= i) {
+				shape.begin(ShapeRenderer.ShapeType.Filled);
+				shape.setColor(Color.DARK_GRAY);
+				shape.rect(graph.x, graph.y, graph.width, graph.height);
+				shape.end();
+				Gdx.gl.glLineWidth(4);
+				shape.begin(ShapeRenderer.ShapeType.Line);
+				shape.setColor(Color.WHITE);
+				shape.rect(graph.x, graph.y, graph.width, graph.height);
+				shape.end();
+				Gdx.gl.glLineWidth(1);
+			} else {
+				gaugegraph.render(shape, time, resource, graph, coursegauge.get(i));
+			}
+		}
+	}
+
 }

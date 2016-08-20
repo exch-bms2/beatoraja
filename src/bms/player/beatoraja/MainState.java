@@ -170,6 +170,13 @@ public abstract class MainState {
 	public static final int OPTION_BGAOFF = 40;
 	public static final int OPTION_BGAON = 41;
 
+	public static final int OPTION_STAGEFILE = 190;
+	public static final int OPTION_NO_STAGEFILE = 191;
+	public static final int OPTION_BANNER = 192;
+	public static final int OPTION_NO_BANNER = 193;
+	public static final int OPTION_BACKBMP = 194;
+	public static final int OPTION_NO_BACKBMP = 195;
+
 	public static final int OPTION_1P_AAA = 200;
 	public static final int OPTION_1P_AA = 201;
 	public static final int OPTION_1P_A = 202;
@@ -414,7 +421,15 @@ public abstract class MainState {
 		return "";
 	}
 
-	public TextureRegion getImage(int id) {
+	public TextureRegion getImage(int imageid) {
+		if(getMainController().getPlayerResource().getBGAManager() != null) {
+			if(imageid == IMAGE_BACKBMP) {
+				return getMainController().getPlayerResource().getBGAManager().getBackbmpData();
+			}
+			if(imageid == IMAGE_STAGEFILE) {
+				return getMainController().getPlayerResource().getBGAManager().getStagefileData();
+			}
+		}
 		return null;
 	}
 }
