@@ -124,6 +124,8 @@ public class PlayConfigurationView implements Initializable {
 
 	private static final String[] RESOLUTION = { "SD (640 x 480)", "HD (1280 x 720)", "FULL HD (1920 x 1080)", "ULTRA HD (3940 x 2160)" };
 
+	private MainController.BMSInformationLoader loader;
+
 	public void initialize(URL arg0, ResourceBundle arg1) {
 		lr2configuration.setHgap(25);
 		lr2configuration.setVgap(4);
@@ -162,7 +164,7 @@ public class PlayConfigurationView implements Initializable {
 			}
 		});
 		fixhispeed.setButtonCell(new OptionListCell(FIXHISPEEDOP));
-		fixhispeed.getItems().setAll(0, 1, 2, 3);
+		fixhispeed.getItems().setAll(0, 1, 2, 3, 4);
 		lntype.setCellFactory(new Callback<ListView<Integer>, ListCell<Integer>>() {
 			public ListCell<Integer> call(ListView<Integer> param) {
 				return new OptionListCell(LNTYPE);
@@ -185,6 +187,10 @@ public class PlayConfigurationView implements Initializable {
 		judgedetail.setButtonCell(new OptionListCell(JUDGEDETAIL));
 		judgedetail.getItems().setAll(0, 1, 2);
 
+	}
+
+	public void setBMSInformationLoader(MainController.BMSInformationLoader loader) {
+		this.loader = loader;
 	}
 
 	/**
@@ -304,7 +310,7 @@ public class PlayConfigurationView implements Initializable {
 
 	public void start() {
 		commit();
-		Platform.exit();
+		loader.hide();
 		MainController.play(null, 0, true);
 	}
 
