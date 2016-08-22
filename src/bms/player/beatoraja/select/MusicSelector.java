@@ -189,32 +189,47 @@ public class MusicSelector extends MainState {
 			bar.updateBar(null);
 		}
 
-		if (bgm == null) {
-			if (new File("skin/select.wav").exists()) {
-				bgm = Gdx.audio.newSound(Gdx.files.internal("skin/select.wav"));
+		if(config.getBgmpath().length() > 0) {
+			final File bgmfolder = new File(config.getBgmpath());
+			if(bgmfolder.exists() && bgmfolder.isDirectory()) {
+				for(File f : bgmfolder.listFiles()) {
+					if (bgm == null) {
+						if (f.getName().equals("select.wav")) {
+							bgm = Gdx.audio.newSound(Gdx.files.internal(f.getPath()));
+							break;
+						}
+					}			
+				}
 			}
 		}
 		if (bgm != null) {
 			bgm.loop();
 		}
-		if (move == null) {
-			if (new File("skin/cursor.wav").exists()) {
-				move = Gdx.audio.newSound(Gdx.files.internal("skin/cursor.wav"));
-			}
-		}
-		if (folderopen == null) {
-			if (new File("skin/folder_open.wav").exists()) {
-				folderopen = Gdx.audio.newSound(Gdx.files.internal("skin/folder_open.wav"));
-			}
-		}
-		if (folderclose == null) {
-			if (new File("skin/folder_close.wav").exists()) {
-				folderclose = Gdx.audio.newSound(Gdx.files.internal("skin/folder_close.wav"));
-			}
-		}
-		if (sorts == null) {
-			if (new File("skin/sort.wav").exists()) {
-				sorts = Gdx.audio.newSound(Gdx.files.internal("skin/sort.wav"));
+		if(config.getSoundpath().length() > 0) {
+			final File soundfolder = new File(config.getSoundpath());
+			if(soundfolder.exists() && soundfolder.isDirectory()) {
+				for(File f : soundfolder.listFiles()) {
+					if (move == null) {
+						if (f.getName().equals("scratch.wav")) {
+							move = Gdx.audio.newSound(Gdx.files.internal(f.getPath()));
+						}
+					}
+					if (folderopen == null) {
+						if (f.getName().equals("f-open.wav")) {
+							folderopen = Gdx.audio.newSound(Gdx.files.internal(f.getPath()));
+						}
+					}
+					if (folderclose == null) {
+						if (f.getName().equals("f-close.wav")) {
+							folderclose = Gdx.audio.newSound(Gdx.files.internal(f.getPath()));
+						}
+					}
+					if (sorts == null) {
+						if (f.getName().equals("o-change.wav")) {
+							sorts = Gdx.audio.newSound(Gdx.files.internal(f.getPath()));
+						}
+					}
+				}
 			}
 		}
 

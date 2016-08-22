@@ -81,7 +81,9 @@ public class PlayConfigurationView implements Initializable {
 	private Spinner<Double> lift;
 
 	@FXML
-	private TextField vlcpath;
+	private TextField bgmpath;
+	@FXML
+	private TextField soundpath;
 
 	@FXML
 	private Spinner<Integer> judgetiming;
@@ -209,7 +211,8 @@ public class PlayConfigurationView implements Initializable {
 		lift.getValueFactory().setValue((double) config.getLift());
 		judgetiming.getValueFactory().setValue(config.getJudgetiming());
 
-		vlcpath.setText(config.getVlcpath());
+		bgmpath.setText(config.getBgmpath());
+		soundpath.setText(config.getSoundpath());
 
 		bmsroot.getItems().setAll(config.getBmsroot());
 		tableurl.getItems().setAll(config.getTableURL());
@@ -248,7 +251,8 @@ public class PlayConfigurationView implements Initializable {
 		config.setLift(lift.getValue().floatValue());
 		config.setJudgetiming(judgetiming.getValue());
 
-		config.setVlcpath(vlcpath.getText());
+		config.setBgmpath(bgmpath.getText());
+		config.setSoundpath(soundpath.getText());
 
 		config.setBmsroot(bmsroot.getItems().toArray(new String[0]));
 		config.setTableURL(tableurl.getItems().toArray(new String[0]));

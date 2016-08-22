@@ -139,7 +139,11 @@ public class Config {
 
 	private boolean showhiddennote = false;
 	
-	private String lr2playskin;
+	private String bgmpath;
+	
+	private String soundpath = "";
+	
+	private String lr2playskin = "";
 	
 	private int[] lr2playskinoption = new int[0];
 	
@@ -604,5 +608,21 @@ public class Config {
 
 	public void setFrameskip(int frameskip) {
 		this.frameskip = frameskip;
+	}
+
+	public String getBgmpath() {
+		return bgmpath;
+	}
+
+	public void setBgmpath(String bgmpath) {
+		this.bgmpath = bgmpath;
+	}
+
+	public String getSoundpath() {
+		return soundpath;
+	}
+
+	public void setSoundpath(String soundpath) {
+		this.soundpath = soundpath;
 	}
 }

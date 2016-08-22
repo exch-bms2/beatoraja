@@ -200,8 +200,14 @@
                               </HBox>
                               <HBox prefHeight="30.0" prefWidth="723.0">
                                  <children>
-                                    <Label layoutX="10.0" layoutY="10.0" text="VLCディレクトリパス" />
-                                    <TextField fx:id="vlcpath" prefHeight="28.0" prefWidth="278.0" />
+                                    <Label layoutX="10.0" layoutY="10.0" text="BGM Path(LR2)" />
+                                    <TextField fx:id="bgmpath" prefHeight="28.0" prefWidth="278.0" />
+                                 </children>
+                              </HBox>
+                              <HBox prefHeight="30.0" prefWidth="723.0">
+                                 <children>
+                                    <Label layoutX="10.0" layoutY="10.0" text="Sound Path(LR2)" />
+                                    <TextField fx:id="soundpath" prefHeight="28.0" prefWidth="278.0" />
                                  </children>
                               </HBox>
                            </children>

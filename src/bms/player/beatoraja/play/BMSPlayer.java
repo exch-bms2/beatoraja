@@ -15,6 +15,7 @@ import bms.player.beatoraja.play.bga.BGAProcessor;
 import bms.player.beatoraja.skin.LR2PlaySkinLoader;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
@@ -110,6 +111,8 @@ public class BMSPlayer extends MainState {
 	private BGAProcessor bga;
 
 	private PlaySkin skin;
+	
+	private Sound playstop;
 
 	private GrooveGauge gauge;
 
@@ -384,6 +387,19 @@ public class BMSPlayer extends MainState {
 		final PlayerResource resource = main.getPlayerResource();
 		final ShapeRenderer shape = main.getShapeRenderer();
 		final SpriteBatch sprite = main.getSpriteBatch();
+		
+		if(resource.getConfig().getSoundpath().length() > 0) {
+			final File soundfolder = new File(resource.getConfig().getSoundpath());
+			if(soundfolder.exists() && soundfolder.isDirectory()) {
+				for(File f : soundfolder.listFiles()) {
+					if (playstop == null) {
+						if (f.getName().equals("playstop.wav")) {
+							playstop = Gdx.audio.newSound(Gdx.files.internal(f.getPath()));
+						}
+					}
+				}
+			}
+		}
 
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/VL-Gothic-Regular.ttf"));
 		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
@@ -509,6 +525,9 @@ public class BMSPlayer extends MainState {
 			if (g == 0) {
 				state = STATE_FAILED;
 				getTimer()[TIMER_FAILED] = now;
+				if(playstop != null) {
+					playstop.play();
+				}
 				Logger.getGlobal().info("STATE_FAILEDに移行");
 			}
 
@@ -521,7 +540,7 @@ public class BMSPlayer extends MainState {
 			if (keyinput != null) {
 				keyinput.stop = true;
 			}
-			resource.getAudioProcessor().stop(-1);
+			resource.getAudioProcessor().stop(-1,0,0);
 
 			if (now - getTimer()[TIMER_FAILED] > skin.getCloseTime()) {
 				if (keyinput != null) {
@@ -699,6 +718,9 @@ public class BMSPlayer extends MainState {
 		} else {
 			state = STATE_FAILED;
 			getTimer()[TIMER_FAILED] = getNowTime();
+			if(playstop != null) {
+				playstop.play();
+			}
 			Logger.getGlobal().info("STATE_FAILEDに移行");
 		}
 	}

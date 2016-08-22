@@ -1,5 +1,6 @@
 package bms.player.beatoraja.result;
 
+import java.io.File;
 import java.util.*;
 
 import bms.player.beatoraja.play.BMSPlayer;
@@ -9,6 +10,7 @@ import java.util.logging.Logger;
 
 import bms.player.beatoraja.skin.SkinImage;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -43,12 +45,34 @@ public class GradeResult extends MainState {
 
 	private GaugeGraphRenderer gaugegraph;
 
+	private Sound clear;
+	private Sound fail;
+
 	public GradeResult(MainController main) {
 		super(main);
 	}
 
 	public void create() {
 		final PlayerResource resource = getMainController().getPlayerResource();
+		
+		if(resource.getConfig().getSoundpath().length() > 0) {
+			final File soundfolder = new File(resource.getConfig().getSoundpath());
+			if(soundfolder.exists() && soundfolder.isDirectory()) {
+				for(File f : soundfolder.listFiles()) {
+					if (clear == null) {
+						if (f.getName().equals("course_clear.wav")) {
+							clear = Gdx.audio.newSound(Gdx.files.internal(f.getPath()));
+						}
+					}
+					if (fail == null) {
+						if (f.getName().equals("course_fail.wav")) {
+							fail = Gdx.audio.newSound(Gdx.files.internal(f.getPath()));
+						}
+					}
+				}
+			}
+		}
+
 		if(skin == null) {
 			skin = new MusicResultSkin(MainController.RESOLUTION[resource.getConfig().getResolution()]);
 			this.setSkin(skin);			
@@ -187,6 +211,16 @@ public class GradeResult extends MainState {
 		getMainController().getPlayDataAccessor().writeScoreDara(newscore, models, resource.getConfig().getLnmode(),
 				random, resource.getConstraint(), resource.isUpdateScore());
 
+		if (newscore.getClear() != GrooveGauge.CLEARTYPE_FAILED) {
+			if (this.clear != null) {
+				this.clear.play();
+			}
+		} else {
+			if (fail != null) {
+				fail.play();
+			}
+		}
+		
 		Logger.getGlobal().info("スコアデータベース更新完了 ");
 	}
 

@@ -73,7 +73,7 @@ public class SoundProcessor implements AudioProcessor {
 					final File oggfile = new File(directorypath + name + ".ogg");
 					final File mp3file = new File(directorypath + name + ".mp3");
 					if (note.getStarttime() == 0 && note.getDuration() == 0) {
-//					if (true) {
+						// if (true) {
 						// BMSのケース(音切りなし)
 						if (soundmap.get(note.getWav()) == null) {
 							Sound sound = null;
@@ -196,13 +196,14 @@ public class SoundProcessor implements AudioProcessor {
 
 					} else {
 						boolean b = true;
-						for(SliceWav slice : slicesound) {
-							if(slice.id == note.getWav() && slice.starttime == note.getStarttime() && slice.duration == note.getDuration()) {
+						for (SliceWav slice : slicesound) {
+							if (slice.id == note.getWav() && slice.starttime == note.getStarttime()
+									&& slice.duration == note.getDuration()) {
 								b = false;
 								break;
 							}
 						}
-						if(b) {
+						if (b) {
 							// TODO BMSONのケース(音切りあり)
 							byte[] wav = null;
 							if (orgwavmap.get(note.getWav()) != null) {
@@ -256,7 +257,10 @@ public class SoundProcessor implements AudioProcessor {
 										}
 									});
 									slicesound.add(new SliceWav(note, sound));
-//									System.out.println("WAV slicing - Name:" + name + " ID:" + note.getWav() + " start:" + note.getStarttime() + " duration:" + note.getDuration());
+									// System.out.println("WAV slicing - Name:"
+									// + name + " ID:" + note.getWav() +
+									// " start:" + note.getStarttime() +
+									// " duration:" + note.getDuration());
 								} catch (UnsupportedAudioFileException e1) {
 									e1.printStackTrace();
 								} catch (IOException e1) {
@@ -265,7 +269,7 @@ public class SoundProcessor implements AudioProcessor {
 									Logger.getGlobal().warning("音源(wav)ファイルスライシング失敗。" + e.getMessage());
 									e.printStackTrace();
 								}
-							}							
+							}
 						}
 					}
 				}
@@ -285,7 +289,7 @@ public class SoundProcessor implements AudioProcessor {
 
 	synchronized public void play(int id, int starttime, int duration) {
 		try {
-//			 if(starttime == 0) {
+			// if(starttime == 0) {
 			if (starttime == 0 && duration == 0) {
 				if (id >= 0 && wavmap[id] != null) {
 					if (playmap[id] != -1) {
@@ -294,13 +298,14 @@ public class SoundProcessor implements AudioProcessor {
 					playmap[id] = wavmap[id].play();
 				}
 			} else {
-				for(SliceWav slice : slicesound) {
-					if(slice.id == id && slice.starttime == starttime && slice.duration == duration) {
+				for (SliceWav slice : slicesound) {
+					if (slice.id == id && slice.starttime == starttime && slice.duration == duration) {
 						if (slice.playid != -1) {
 							slice.wav.stop(slice.playid);
 						}
 						slice.playid = slice.wav.play();
-//						System.out.println("slice WAV play - ID:" + id + " start:" + starttime + " duration:" + duration);
+						// System.out.println("slice WAV play - ID:" + id +
+						// " start:" + starttime + " duration:" + duration);
 						break;
 					}
 				}
@@ -310,15 +315,29 @@ public class SoundProcessor implements AudioProcessor {
 		}
 	}
 
-	public void stop(int id) {
+	public void stop(int id, int starttime, int duration) {
 		if (id < 0) {
 			for (Sound s : wavmap) {
 				if (s != null) {
 					s.stop();
 				}
 			}
+			for (SliceWav slice : slicesound) {
+				slice.wav.stop();
+			}
+
 		} else {
-			wavmap[id].stop();
+			if (starttime == 0 && duration == 0) {
+				wavmap[id].stop();
+			} else {
+				for (SliceWav slice : slicesound) {
+					if (slice.id == id && slice.starttime == starttime && slice.duration == duration) {
+						slice.wav.stop(slice.playid);
+						break;
+					}
+				}
+			}
+
 		}
 	}
 
@@ -371,7 +390,7 @@ public class SoundProcessor implements AudioProcessor {
 			Path tmp = Files.createTempFile("wav", "tmp");
 			AudioSystem.write(targetStream, Type.WAVE, tmp.toFile());
 			result = Files.readAllBytes(tmp);
-//			System.out.println(result.length);
+			// System.out.println(result.length);
 			Files.delete(tmp);
 		} else {
 			AudioFormat targetFormat = new AudioFormat(Encoding.PCM_SIGNED, sourceFormat.getSampleRate(), 16,
@@ -409,12 +428,14 @@ public class SoundProcessor implements AudioProcessor {
 		sourceStream.skip(starttime * bytesPerSecond / 1000);
 		long framesOfAudioToCopy = duration * (int) format.getFrameRate() / 1000;
 		if (duration == 0) {
-			framesOfAudioToCopy = sourceStream.getFrameLength() * format.getFrameSize() - starttime * bytesPerSecond / 1000;
+			framesOfAudioToCopy = sourceStream.getFrameLength() * format.getFrameSize() - starttime * bytesPerSecond
+					/ 1000;
 		}
 		AudioInputStream shortenedStream = new AudioInputStream(is, format, framesOfAudioToCopy);
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		AudioSystem.write(shortenedStream, Type.WAVE, bos);
-//		System.out.println("sliced WAV status - offset : " + (starttime * bytesPerSecond / 1000) + " len : " + framesOfAudioToCopy);
+		// System.out.println("sliced WAV status - offset : " + (starttime *
+		// bytesPerSecond / 1000) + " len : " + framesOfAudioToCopy);
 		return bos.toByteArray();
 	}
 
@@ -423,7 +444,7 @@ public class SoundProcessor implements AudioProcessor {
 		public final int starttime;
 		public final int duration;
 		public final Sound wav;
-		
+
 		public long playid = -1;
 
 		public SliceWav(Note note, Sound wav) {

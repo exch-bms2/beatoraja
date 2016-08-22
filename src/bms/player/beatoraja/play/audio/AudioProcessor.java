@@ -23,7 +23,7 @@ public interface AudioProcessor {
 	 */
 	public void play(int id, int starttime, int duration);
 	
-	public void stop(int id);
+	public void stop(int id, int starttime, int duration);
 
 	/**
 	 * リソースを開放する

@@ -13,6 +13,7 @@ import bms.player.beatoraja.skin.LR2DecideSkinLoader;
 import bms.player.beatoraja.skin.SkinImage;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
@@ -24,16 +25,31 @@ import com.badlogic.gdx.math.Rectangle;
  */
 public class MusicDecide extends MainState {
 
+	private Sound bgm;
+	
 	public MusicDecide(MainController main) {
 		super(main);
 	}
 
-	public void create() {		
-		if (new File("skin/decide.wav").exists()) {
-			Gdx.audio.newSound(Gdx.files.internal("skin/decide.wav")).play();
+	public void create() {
+		final PlayerResource resource = getMainController().getPlayerResource();
+		if(resource.getConfig().getBgmpath().length() > 0) {
+			final File bgmfolder = new File(resource.getConfig().getBgmpath());
+			if(bgmfolder.exists() && bgmfolder.isDirectory()) {
+				for(File f : bgmfolder.listFiles()) {
+					if (bgm == null) {
+						if (f.getName().equals("decide.wav")) {
+							bgm = Gdx.audio.newSound(Gdx.files.internal(f.getPath()));
+							break;
+						}
+					}			
+				}
+			}
+		}
+		if(bgm != null) {
+			bgm.play();			
 		}
 
-		final PlayerResource resource = getMainController().getPlayerResource();
 		if(getSkin() == null) {
 			if (resource.getConfig().getLr2decideskin() != null) {
 				LR2DecideSkinLoader loader = new LR2DecideSkinLoader();
@@ -82,8 +98,10 @@ public class MusicDecide extends MainState {
 
 	@Override
 	public void dispose() {
-		// TODO Auto-generated method stub
-		
+		if(bgm != null) {
+			bgm.dispose();
+			bgm = null;
+		}
 	}
 
 	public String getTextValue(int id) {

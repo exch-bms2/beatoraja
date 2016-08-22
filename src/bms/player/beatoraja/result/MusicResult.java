@@ -49,22 +49,30 @@ public class MusicResult extends MainState {
 
 	public MusicResult(MainController main) {
 		super(main);
-
-		if (clear == null) {
-			if (new File("skin/clear.wav").exists()) {
-				clear = Gdx.audio.newSound(Gdx.files.internal("skin/clear.wav"));
-			}
-		}
-		if (fail == null) {
-			if (new File("skin/fail.wav").exists()) {
-				fail = Gdx.audio.newSound(Gdx.files.internal("skin/fail.wav"));
-			}
-		}
-		
 	}
+
 
 	public void create() {
 		final PlayerResource resource = getMainController().getPlayerResource();
+		
+		if(resource.getConfig().getSoundpath().length() > 0) {
+			final File soundfolder = new File(resource.getConfig().getSoundpath());
+			if(soundfolder.exists() && soundfolder.isDirectory()) {
+				for(File f : soundfolder.listFiles()) {
+					if (clear == null) {
+						if (f.getName().equals("clear.wav")) {
+							clear = Gdx.audio.newSound(Gdx.files.internal(f.getPath()));
+						}
+					}
+					if (fail == null) {
+						if (f.getName().equals("fail.wav")) {
+							fail = Gdx.audio.newSound(Gdx.files.internal(f.getPath()));
+						}
+					}
+				}
+			}
+		}
+
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/VL-Gothic-Regular.ttf"));
 		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
 		parameter.size = 30;
