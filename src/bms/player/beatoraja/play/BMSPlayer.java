@@ -11,6 +11,7 @@ import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyInputLog;
 import bms.player.beatoraja.pattern.*;
 import bms.player.beatoraja.play.audio.AudioProcessor;
+import bms.player.beatoraja.play.audio.SoundProcessor;
 import bms.player.beatoraja.play.bga.BGAProcessor;
 import bms.player.beatoraja.skin.LR2PlaySkinLoader;
 
@@ -392,10 +393,8 @@ public class BMSPlayer extends MainState {
 			final File soundfolder = new File(resource.getConfig().getSoundpath());
 			if(soundfolder.exists() && soundfolder.isDirectory()) {
 				for(File f : soundfolder.listFiles()) {
-					if (playstop == null) {
-						if (f.getName().equals("playstop.wav")) {
-							playstop = Gdx.audio.newSound(Gdx.files.internal(f.getPath()));
-						}
+					if (playstop == null && f.getName().startsWith("playstop.")) {
+						playstop = SoundProcessor.getSound(f.getPath());
 					}
 				}
 			}
@@ -540,7 +539,9 @@ public class BMSPlayer extends MainState {
 			if (keyinput != null) {
 				keyinput.stop = true;
 			}
-			resource.getAudioProcessor().stop(-1,0,0);
+			if(resource.mediaLoadFinished()) {
+				resource.getAudioProcessor().stop(-1,0,0);				
+			}
 
 			if (now - getTimer()[TIMER_FAILED] > skin.getCloseTime()) {
 				if (keyinput != null) {

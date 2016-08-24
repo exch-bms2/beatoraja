@@ -68,130 +68,11 @@ public class SoundProcessor implements AudioProcessor {
 			for (Note note : notes) {
 				if (note.getWav() >= 0) {
 					String name = model.getWavList()[note.getWav()];
-					name = name.substring(0, name.lastIndexOf('.'));
-					final File wavfile = new File(directorypath + name + ".wav");
-					final File oggfile = new File(directorypath + name + ".ogg");
-					final File mp3file = new File(directorypath + name + ".mp3");
 					if (note.getStarttime() == 0 && note.getDuration() == 0) {
-						// if (true) {
 						// BMSのケース(音切りなし)
 						if (soundmap.get(note.getWav()) == null) {
-							Sound sound = null;
-							try {
-								if (wavfile.exists()) {
-									RandomAccessFile f;
-									try {
-										f = new RandomAccessFile(wavfile, "r");
-										byte[] header = new byte[44];
-										f.read(header, 0, 44);
-										f.close();
-										if (header[20] == 85) {
-											// WAVの中身がmp3の場合
-											sound = Gdx.audio.newSound(new FileHandleStream("tempwav.mp3") {
-												@Override
-												public InputStream read() {
-													try {
-														BufferedInputStream input = new BufferedInputStream(
-																new FileInputStream(wavfile));
-														input.skip(44);
-														return input;
-													} catch (IOException e) {
-														e.printStackTrace();
-													}
-													return null;
-												}
-
-												@Override
-												public OutputStream write(boolean overwrite) {
-													return null;
-												}
-											});
-										} else {
-											sound = Gdx.audio.newSound(new FileHandleStream("tempwav.wav") {
-												@Override
-												public InputStream read() {
-													try {
-														return new ByteArrayInputStream(convertWav(wavfile));
-													} catch (UnsupportedAudioFileException e) {
-														e.printStackTrace();
-													} catch (IOException e) {
-														e.printStackTrace();
-													}
-													try {
-														return new FileInputStream(wavfile);
-													} catch (FileNotFoundException e) {
-														e.printStackTrace();
-													}
-													return null;
-												}
-
-												@Override
-												public OutputStream write(boolean overwrite) {
-													return null;
-												}
-											});
-										}
-									} catch (FileNotFoundException e1) {
-										e1.printStackTrace();
-									} catch (IOException e) {
-										e.printStackTrace();
-									}
-
-								}
-							} catch (GdxRuntimeException e) {
-								Logger.getGlobal().warning("音源(wav)ファイル読み込み失敗。" + e.getMessage());
-								e.printStackTrace();
-							}
-							if (sound == null) {
-								if (oggfile.exists()) {
-									try {
-										sound = Gdx.audio.newSound(Gdx.files.internal(oggfile.getPath()));
-										// sound = Gdx.audio.newSound(new
-										// FileHandleStream("tempwav.wav") {
-										// @Override
-										// public InputStream read() {
-										// try {
-										// return new
-										// ByteArrayInputStream(convertWav(oggfile));
-										// } catch
-										// (UnsupportedAudioFileException e) {
-										// e.printStackTrace();
-										// } catch (IOException e) {
-										// e.printStackTrace();
-										// }
-										// try {
-										// return new FileInputStream(wavfile);
-										// } catch (FileNotFoundException e) {
-										// e.printStackTrace();
-										// }
-										// return null;
-										// }
-										//
-										// @Override
-										// public OutputStream write(boolean
-										// overwrite) {
-										// return null;
-										// }
-										// });
-
-									} catch (GdxRuntimeException e) {
-										Logger.getGlobal().warning("音源(ogg)ファイル読み込み失敗。" + e.getMessage());
-										// e.printStackTrace();
-									}
-								}
-							}
-							if (sound == null) {
-								try {
-									if (mp3file.exists()) {
-										sound = Gdx.audio.newSound(Gdx.files.internal(mp3file.getPath()));
-									}
-								} catch (GdxRuntimeException e) {
-									Logger.getGlobal().warning("音源(mp3)ファイル読み込み失敗。" + e.getMessage());
-									// e.printStackTrace();
-								}
-							}
+							Sound sound = getSound(directorypath + name);
 							soundmap.put(note.getWav(), sound);
-
 						}
 
 					} else {
@@ -204,7 +85,12 @@ public class SoundProcessor implements AudioProcessor {
 							}
 						}
 						if (b) {
-							// TODO BMSONのケース(音切りあり)
+							// BMSONのケース(音切りあり)
+							name = name.substring(0, name.lastIndexOf('.'));
+							final File wavfile = new File(directorypath + name + ".wav");
+							final File oggfile = new File(directorypath + name + ".ogg");
+							final File mp3file = new File(directorypath + name + ".mp3");
+
 							byte[] wav = null;
 							if (orgwavmap.get(note.getWav()) != null) {
 								wav = orgwavmap.get(note.getWav());
@@ -372,7 +258,7 @@ public class SoundProcessor implements AudioProcessor {
 	 * @throws UnsupportedAudioFileException
 	 * @throws IOException
 	 */
-	private byte[] convertWav(File sourceFile) throws UnsupportedAudioFileException, IOException {
+	private static byte[] convertWav(File sourceFile) throws UnsupportedAudioFileException, IOException {
 
 		byte[] result = null;
 		AudioInputStream sourceStream = null;
@@ -453,5 +339,101 @@ public class SoundProcessor implements AudioProcessor {
 			this.duration = note.getDuration();
 			this.wav = wav;
 		}
+	}
+	
+	public static Sound getSound(String name) {
+		name = name.substring(0, name.lastIndexOf('.'));
+		final File wavfile = new File(name + ".wav");
+		final File oggfile = new File(name + ".ogg");
+		final File mp3file = new File(name + ".mp3");
+
+		Sound sound = null;
+		try {
+			if (wavfile.exists()) {
+				RandomAccessFile f;
+				try {
+					f = new RandomAccessFile(wavfile, "r");
+					byte[] header = new byte[44];
+					f.read(header, 0, 44);
+					f.close();
+					if (header[20] == 85) {
+						// WAVの中身がmp3の場合
+						sound = Gdx.audio.newSound(new FileHandleStream("tempwav.mp3") {
+							@Override
+							public InputStream read() {
+								try {
+									BufferedInputStream input = new BufferedInputStream(
+											new FileInputStream(wavfile));
+									input.skip(44);
+									return input;
+								} catch (IOException e) {
+									e.printStackTrace();
+								}
+								return null;
+							}
+
+							@Override
+							public OutputStream write(boolean overwrite) {
+								return null;
+							}
+						});
+					} else {
+						sound = Gdx.audio.newSound(new FileHandleStream("tempwav.wav") {
+							@Override
+							public InputStream read() {
+								try {
+									return new ByteArrayInputStream(convertWav(wavfile));
+								} catch (UnsupportedAudioFileException e) {
+									e.printStackTrace();
+								} catch (IOException e) {
+									e.printStackTrace();
+								}
+								try {
+									return new FileInputStream(wavfile);
+								} catch (FileNotFoundException e) {
+									e.printStackTrace();
+								}
+								return null;
+							}
+
+							@Override
+							public OutputStream write(boolean overwrite) {
+								return null;
+							}
+						});
+					}
+				} catch (FileNotFoundException e1) {
+					e1.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+
+			}
+		} catch (GdxRuntimeException e) {
+			Logger.getGlobal().warning("音源(wav)ファイル読み込み失敗。" + e.getMessage());
+			e.printStackTrace();
+		}
+		if (sound == null) {
+			if (oggfile.exists()) {
+				try {
+					sound = Gdx.audio.newSound(Gdx.files.internal(oggfile.getPath()));
+				} catch (GdxRuntimeException e) {
+					Logger.getGlobal().warning("音源(ogg)ファイル読み込み失敗。" + e.getMessage());
+					// e.printStackTrace();
+				}
+			}
+		}
+		if (sound == null) {
+			try {
+				if (mp3file.exists()) {
+					sound = Gdx.audio.newSound(Gdx.files.internal(mp3file.getPath()));
+				}
+			} catch (GdxRuntimeException e) {
+				Logger.getGlobal().warning("音源(mp3)ファイル読み込み失敗。" + e.getMessage());
+				// e.printStackTrace();
+			}
+		}
+		
+		return sound;
 	}
 }

@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.*;
 
 import bms.player.beatoraja.play.BMSPlayer;
+import bms.player.beatoraja.play.audio.SoundProcessor;
 import bms.player.beatoraja.select.MusicSelector;
 import com.badlogic.gdx.math.Rectangle;
 import java.util.logging.Logger;
@@ -54,28 +55,24 @@ public class GradeResult extends MainState {
 
 	public void create() {
 		final PlayerResource resource = getMainController().getPlayerResource();
-		
-		if(resource.getConfig().getSoundpath().length() > 0) {
+
+		if (resource.getConfig().getSoundpath().length() > 0) {
 			final File soundfolder = new File(resource.getConfig().getSoundpath());
-			if(soundfolder.exists() && soundfolder.isDirectory()) {
-				for(File f : soundfolder.listFiles()) {
-					if (clear == null) {
-						if (f.getName().equals("course_clear.wav")) {
-							clear = Gdx.audio.newSound(Gdx.files.internal(f.getPath()));
-						}
+			if (soundfolder.exists() && soundfolder.isDirectory()) {
+				for (File f : soundfolder.listFiles()) {
+					if (clear == null && f.getName().startsWith("course_clear.")) {
+						clear = SoundProcessor.getSound(f.getPath());
 					}
-					if (fail == null) {
-						if (f.getName().equals("course_fail.wav")) {
-							fail = Gdx.audio.newSound(Gdx.files.internal(f.getPath()));
-						}
+					if (fail == null && f.getName().startsWith("course_fail.")) {
+						fail = SoundProcessor.getSound(f.getPath());
 					}
 				}
 			}
 		}
 
-		if(skin == null) {
+		if (skin == null) {
 			skin = new MusicResultSkin(MainController.RESOLUTION[resource.getConfig().getResolution()]);
-			this.setSkin(skin);			
+			this.setSkin(skin);
 		}
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/VL-Gothic-Regular.ttf"));
 		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
@@ -146,17 +143,23 @@ public class GradeResult extends MainState {
 
 			sprite.end();
 		}
-		
-		if(getTimer()[BMSPlayer.TIMER_FADEOUT] != -1) {
+
+		if (getTimer()[BMSPlayer.TIMER_FADEOUT] != -1) {
 			if (time > getTimer()[BMSPlayer.TIMER_FADEOUT] + getSkin().getFadeoutTime()) {
-				main.changeState(MainController.STATE_SELECTMUSIC);				
+				if (clear != null) {
+					clear.stop();
+				}
+				if (fail != null) {
+					fail.stop();
+				}
+
+				main.changeState(MainController.STATE_SELECTMUSIC);
 			}
 		} else {
-			if(time > getSkin().getInputTime()) {
+			if (time > getSkin().getInputTime()) {
 				boolean[] keystate = main.getInputProcessor().getKeystate();
-				if (resource.getScoreData() == null
-						|| (keystate[0] || keystate[2] || keystate[4] || keystate[6])) {
-					getTimer()[BMSPlayer.TIMER_FADEOUT] = time;					
+				if (resource.getScoreData() == null || (keystate[0] || keystate[2] || keystate[4] || keystate[6])) {
+					getTimer()[BMSPlayer.TIMER_FADEOUT] = time;
 				}
 
 				for (int i = 0; i < MusicSelector.REPLAY; i++) {
@@ -166,7 +169,7 @@ public class GradeResult extends MainState {
 					}
 				}
 			}
-			if(time > getSkin().getSceneTime()) {
+			if (time > getSkin().getSceneTime()) {
 				getTimer()[BMSPlayer.TIMER_FADEOUT] = time;
 			}
 		}
@@ -213,14 +216,14 @@ public class GradeResult extends MainState {
 
 		if (newscore.getClear() != GrooveGauge.CLEARTYPE_FAILED) {
 			if (this.clear != null) {
-				this.clear.play();
+				this.clear.loop();
 			}
 		} else {
 			if (fail != null) {
-				fail.play();
+				fail.loop();
 			}
 		}
-		
+
 		Logger.getGlobal().info("スコアデータベース更新完了 ");
 	}
 
@@ -248,71 +251,71 @@ public class GradeResult extends MainState {
 
 	public int getNumberValue(int id) {
 		final PlayerResource resource = getMainController().getPlayerResource();
-		switch(id) {
-			case NUMBER_CLEAR:
-				if (resource.getCourseScoreData() != null) {
-					return resource.getCourseScoreData().getClear();
-				}
+		switch (id) {
+		case NUMBER_CLEAR:
+			if (resource.getCourseScoreData() != null) {
+				return resource.getCourseScoreData().getClear();
+			}
+			return Integer.MIN_VALUE;
+		case NUMBER_TARGET_CLEAR:
+			return oldclear;
+		case NUMBER_TARGET_SCORE:
+			return oldexscore;
+		case NUMBER_SCORE:
+			if (resource.getCourseScoreData() != null) {
+				return resource.getCourseScoreData().getExscore();
+			}
+			return Integer.MIN_VALUE;
+		case NUMBER_DIFF_HIGHSCORE:
+			return resource.getCourseScoreData().getExscore() - oldexscore;
+		case NUMBER_MISSCOUNT:
+			if (resource.getCourseScoreData() != null) {
+				return resource.getCourseScoreData().getMinbp();
+			}
+			return Integer.MIN_VALUE;
+		case NUMBER_TARGET_MISSCOUNT:
+			if (oldmisscount == Integer.MAX_VALUE) {
 				return Integer.MIN_VALUE;
-			case NUMBER_TARGET_CLEAR:
-				return oldclear;
-			case NUMBER_TARGET_SCORE:
-				return oldexscore;
-			case NUMBER_SCORE:
-				if (resource.getCourseScoreData() != null) {
-					return resource.getCourseScoreData().getExscore();
-				}
+			}
+			return oldmisscount;
+		case NUMBER_DIFF_MISSCOUNT:
+			if (oldmisscount == Integer.MAX_VALUE) {
 				return Integer.MIN_VALUE;
-			case NUMBER_DIFF_HIGHSCORE:
-				return resource.getCourseScoreData().getExscore() - oldexscore;
-			case NUMBER_MISSCOUNT:
-				if (resource.getCourseScoreData() != null) {
-					return resource.getCourseScoreData().getMinbp();
-				}
+			}
+			return resource.getCourseScoreData().getMinbp() - oldmisscount;
+		case NUMBER_TARGET_MAXCOMBO:
+			if (oldcombo > 0) {
+				return oldcombo;
+			}
+			return Integer.MIN_VALUE;
+		case NUMBER_MAXCOMBO:
+			if (resource.getCourseScoreData() != null) {
+				return resource.getCourseScoreData().getCombo();
+			}
+			return Integer.MIN_VALUE;
+		case NUMBER_DIFF_MAXCOMBO:
+			if (oldcombo == 0) {
 				return Integer.MIN_VALUE;
-			case NUMBER_TARGET_MISSCOUNT:
-				if (oldmisscount == Integer.MAX_VALUE) {
-					return Integer.MIN_VALUE;
-				}
-				return oldmisscount;
-			case NUMBER_DIFF_MISSCOUNT:
-				if(oldmisscount == Integer.MAX_VALUE) {
-					return Integer.MIN_VALUE;
-				}
-				return resource.getCourseScoreData().getMinbp() - oldmisscount;
-			case NUMBER_TARGET_MAXCOMBO:
-				if (oldcombo > 0) {
-					return oldcombo;
-				}
-				return Integer.MIN_VALUE;
-			case NUMBER_MAXCOMBO:
-				if (resource.getCourseScoreData() != null) {
-					return resource.getCourseScoreData().getCombo();
-				}
-				return Integer.MIN_VALUE;
-			case NUMBER_DIFF_MAXCOMBO:
-				if(oldcombo == 0) {
-					return Integer.MIN_VALUE;
-				}
-				return resource.getCourseScoreData().getCombo() - oldcombo;
-			case NUMBER_TOTALNOTES:
-				int notes = 0;
-				for (BMSModel model : resource.getCourseBMSModels()) {
-					notes += model.getTotalNotes();
-				}
-				return notes;
-			case NUMBER_TOTALEARLY:
-				int ecount = 0;
-				for(int i = 1;i < 6;i++) {
-					ecount += getJudgeCount(i,true);
-				}
-				return ecount;
-			case NUMBER_TOTALLATE:
-				int count = 0;
-				for(int i = 1;i < 6;i++) {
-					count += getJudgeCount(i,false);
-				}
-				return count;
+			}
+			return resource.getCourseScoreData().getCombo() - oldcombo;
+		case NUMBER_TOTALNOTES:
+			int notes = 0;
+			for (BMSModel model : resource.getCourseBMSModels()) {
+				notes += model.getTotalNotes();
+			}
+			return notes;
+		case NUMBER_TOTALEARLY:
+			int ecount = 0;
+			for (int i = 1; i < 6; i++) {
+				ecount += getJudgeCount(i, true);
+			}
+			return ecount;
+		case NUMBER_TOTALLATE:
+			int count = 0;
+			for (int i = 1; i < 6; i++) {
+				count += getJudgeCount(i, false);
+			}
+			return count;
 		}
 		return super.getNumberValue(id);
 	}

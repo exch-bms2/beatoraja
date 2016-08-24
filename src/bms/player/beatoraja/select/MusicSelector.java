@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.config.KeyConfiguration;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
+import bms.player.beatoraja.play.audio.SoundProcessor;
 import bms.player.beatoraja.skin.*;
 
 import com.badlogic.gdx.Gdx;
@@ -189,51 +190,41 @@ public class MusicSelector extends MainState {
 			bar.updateBar(null);
 		}
 
-		if(config.getBgmpath().length() > 0) {
+		if (config.getBgmpath().length() > 0) {
 			final File bgmfolder = new File(config.getBgmpath());
-			if(bgmfolder.exists() && bgmfolder.isDirectory()) {
-				for(File f : bgmfolder.listFiles()) {
-					if (bgm == null) {
-						if (f.getName().equals("select.wav")) {
-							bgm = Gdx.audio.newSound(Gdx.files.internal(f.getPath()));
-							break;
-						}
-					}			
+			if (bgmfolder.exists() && bgmfolder.isDirectory()) {
+				for (File f : bgmfolder.listFiles()) {
+					if (bgm == null && f.getName().startsWith("select.")) {
+						bgm = SoundProcessor.getSound(f.getPath());
+						break;
+					}
 				}
 			}
 		}
 		if (bgm != null) {
 			bgm.loop();
 		}
-		if(config.getSoundpath().length() > 0) {
+		if (config.getSoundpath().length() > 0) {
 			final File soundfolder = new File(config.getSoundpath());
-			if(soundfolder.exists() && soundfolder.isDirectory()) {
-				for(File f : soundfolder.listFiles()) {
-					if (move == null) {
-						if (f.getName().equals("scratch.wav")) {
-							move = Gdx.audio.newSound(Gdx.files.internal(f.getPath()));
-						}
+			if (soundfolder.exists() && soundfolder.isDirectory()) {
+				for (File f : soundfolder.listFiles()) {
+					if (move == null && f.getName().startsWith("scratch.")) {
+						move = SoundProcessor.getSound(f.getPath());
 					}
-					if (folderopen == null) {
-						if (f.getName().equals("f-open.wav")) {
-							folderopen = Gdx.audio.newSound(Gdx.files.internal(f.getPath()));
-						}
+					if (folderopen == null && f.getName().startsWith("f-open.")) {
+						folderopen = SoundProcessor.getSound(f.getPath());
 					}
-					if (folderclose == null) {
-						if (f.getName().equals("f-close.wav")) {
-							folderclose = Gdx.audio.newSound(Gdx.files.internal(f.getPath()));
-						}
+					if (folderclose == null && f.getName().startsWith("f-close.")) {
+						folderclose = SoundProcessor.getSound(f.getPath());
 					}
-					if (sorts == null) {
-						if (f.getName().equals("o-change.wav")) {
-							sorts = Gdx.audio.newSound(Gdx.files.internal(f.getPath()));
-						}
+					if (sorts == null && f.getName().startsWith("o-change.")) {
+						sorts = SoundProcessor.getSound(f.getPath());
 					}
 				}
 			}
 		}
 
-		if(skin == null) {
+		if (skin == null) {
 			if (config.getLr2selectskin() != null) {
 				try {
 					skin = new LR2SelectSkinLoader().loadSelectSkin(new File(config.getLr2selectskin()),
@@ -248,7 +239,7 @@ public class MusicSelector extends MainState {
 			} else {
 				skin = new MusicSelectSkin(main.RESOLUTION[config.getResolution()]);
 			}
-			this.setSkin(skin);			
+			this.setSkin(skin);
 		}
 
 		generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/VL-Gothic-Regular.ttf"));
@@ -894,36 +885,36 @@ public class MusicSelector extends MainState {
 		case NUMBER_FAILCOUNT:
 			return bar.getSelected().getScore() != null ? bar.getSelected().getScore().getPlaycount()
 					- bar.getSelected().getScore().getClearcount() : Integer.MIN_VALUE;
-			case NUMBER_CLEAR:
-				if (bar.getSelected().getScore() != null) {
-					return bar.getSelected().getScore().getClear();
-				}
-				return Integer.MIN_VALUE;
-			case NUMBER_SCORE:
-				if (bar.getSelected().getScore() != null) {
-					return bar.getSelected().getScore().getExscore();
-				}
-				return Integer.MIN_VALUE;
-			case NUMBER_MISSCOUNT:
-				if (bar.getSelected().getScore() != null) {
-					return bar.getSelected().getScore().getMinbp();
-				}
-				return Integer.MIN_VALUE;
-			case NUMBER_MAXCOMBO:
-				if (bar.getSelected().getScore() != null) {
-					return bar.getSelected().getScore().getCombo();
-				}
-				return Integer.MIN_VALUE;
-			case NUMBER_MINBPM:
-				if (bar.getSelected() instanceof SongBar) {
-					return ((SongBar) bar.getSelected()).getSongData().getMinbpm();
-				}
-				return Integer.MIN_VALUE;
-			case NUMBER_MAXBPM:
-				if (bar.getSelected() instanceof SongBar) {
-					return ((SongBar) bar.getSelected()).getSongData().getMaxbpm();
-				}
-				return Integer.MIN_VALUE;
+		case NUMBER_CLEAR:
+			if (bar.getSelected().getScore() != null) {
+				return bar.getSelected().getScore().getClear();
+			}
+			return Integer.MIN_VALUE;
+		case NUMBER_SCORE:
+			if (bar.getSelected().getScore() != null) {
+				return bar.getSelected().getScore().getExscore();
+			}
+			return Integer.MIN_VALUE;
+		case NUMBER_MISSCOUNT:
+			if (bar.getSelected().getScore() != null) {
+				return bar.getSelected().getScore().getMinbp();
+			}
+			return Integer.MIN_VALUE;
+		case NUMBER_MAXCOMBO:
+			if (bar.getSelected().getScore() != null) {
+				return bar.getSelected().getScore().getCombo();
+			}
+			return Integer.MIN_VALUE;
+		case NUMBER_MINBPM:
+			if (bar.getSelected() instanceof SongBar) {
+				return ((SongBar) bar.getSelected()).getSongData().getMinbpm();
+			}
+			return Integer.MIN_VALUE;
+		case NUMBER_MAXBPM:
+			if (bar.getSelected() instanceof SongBar) {
+				return ((SongBar) bar.getSelected()).getSongData().getMaxbpm();
+			}
+			return Integer.MIN_VALUE;
 		}
 		return super.getNumberValue(id);
 	}
@@ -984,7 +975,7 @@ public class MusicSelector extends MainState {
 	}
 
 	public TextureRegion getImage(int imageid) {
-		if(imageid == IMAGE_BANNER) {
+		if (imageid == IMAGE_BANNER) {
 			return banner;
 		}
 		return null;

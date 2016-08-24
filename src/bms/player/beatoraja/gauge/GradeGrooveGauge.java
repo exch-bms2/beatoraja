@@ -33,12 +33,16 @@ public class GradeGrooveGauge extends GrooveGauge {
 	@Override
 	protected float getGaugeValue(int judge) {
 		float value = super.getGaugeValue(judge);
-		if(this.getValue() > 40 || judge < 3) {
+		if(this.getValue() > 50 || judge < 3) {
 			return value;
-		} else if(this.getValue() > 20) {
+		} else if(this.getValue() > 40) {
 			return value * 0.8f;
-		} else if(this.getValue() > 10) {
+		} else if(this.getValue() > 30) {
+			return value * 0.7f;
+		} else if(this.getValue() > 20) {
 			return value * 0.6f;
+		} else if(this.getValue() > 10) {
+			return value * 0.5f;
 		} else {
 			return value * 0.4f;
 		}

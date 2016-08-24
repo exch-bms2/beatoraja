@@ -139,7 +139,7 @@ public class Config {
 
 	private boolean showhiddennote = false;
 	
-	private String bgmpath;
+	private String bgmpath = "";
 	
 	private String soundpath = "";
 	
