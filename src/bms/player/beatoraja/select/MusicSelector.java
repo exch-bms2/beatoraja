@@ -338,16 +338,6 @@ public class MusicSelector extends MainState {
 				}
 			}
 
-			for (int i = 0; i < gb.getSongDatas().length; i++) {
-				if (gb.getSongDatas()[i] != null) {
-					titlefont.setColor(Color.YELLOW);
-					titlefont.draw(sprite, gb.getSongDatas()[i].getTitle(), 120, 540 - i * 30);
-				} else {
-					titlefont.setColor(Color.GRAY);
-					titlefont.draw(sprite, "no song", 120, 540 - i * 30);
-				}
-			}
-
 			if (current.getScore() != null) {
 				IRScoreData score = current.getScore();
 				titlefont.setColor(Color.valueOf(LAMP[score.getClear()]));
@@ -968,6 +958,54 @@ public class MusicSelector extends MainState {
 				return ((SongBar) bar.getSelected()).getSongData().getSubartist();
 			}
 			return "";
+			case STRING_COURSE1_TITLE:
+				if (bar.getSelected() instanceof GradeBar) {
+					if(((GradeBar) bar.getSelected()).getSongDatas().length > 0) {
+						SongData song = ((GradeBar) bar.getSelected()).getSongDatas()[0];
+						return song != null ? song.getTitle() : "-----";
+					}
+				}
+				return "";
+			case STRING_COURSE2_TITLE:
+				if (bar.getSelected() instanceof GradeBar) {
+					if(((GradeBar) bar.getSelected()).getSongDatas().length > 1) {
+						SongData song = ((GradeBar) bar.getSelected()).getSongDatas()[1];
+						return song != null ? song.getTitle() : "-----";
+					}
+				}
+				return "";
+			case STRING_COURSE3_TITLE:
+				if (bar.getSelected() instanceof GradeBar) {
+					if(((GradeBar) bar.getSelected()).getSongDatas().length > 2) {
+						SongData song = ((GradeBar) bar.getSelected()).getSongDatas()[2];
+						return song != null ? song.getTitle() : "-----";
+					}
+				}
+				return "";
+			case STRING_COURSE4_TITLE:
+				if (bar.getSelected() instanceof GradeBar) {
+					if(((GradeBar) bar.getSelected()).getSongDatas().length > 3) {
+						SongData song = ((GradeBar) bar.getSelected()).getSongDatas()[3];
+						return song != null ? song.getTitle() : "-----";
+					}
+				}
+				return "";
+			case STRING_COURSE5_TITLE:
+				if (bar.getSelected() instanceof GradeBar) {
+					if(((GradeBar) bar.getSelected()).getSongDatas().length > 4) {
+						SongData song = ((GradeBar) bar.getSelected()).getSongDatas()[4];
+						return song != null ? song.getTitle() : "-----";
+					}
+				}
+				return "";
+			case STRING_COURSE6_TITLE:
+				if (bar.getSelected() instanceof GradeBar) {
+					if(((GradeBar) bar.getSelected()).getSongDatas().length > 5) {
+						SongData song = ((GradeBar) bar.getSelected()).getSongDatas()[5];
+						return song != null ? song.getTitle() : "-----";
+					}
+				}
+				return "";
 		case STRING_DIRECTORY:
 			StringBuffer str = new StringBuffer();
 			for (Bar b : dir) {

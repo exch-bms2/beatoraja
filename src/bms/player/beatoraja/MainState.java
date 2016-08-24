@@ -70,6 +70,16 @@ public abstract class MainState {
 	public static final int STRING_GENRE = 13;
 	public static final int STRING_ARTIST = 14;
 	public static final int STRING_SUBARTIST = 15;
+	public static final int STRING_COURSE1_TITLE = 150;
+	public static final int STRING_COURSE2_TITLE = 151;
+	public static final int STRING_COURSE3_TITLE = 152;
+	public static final int STRING_COURSE4_TITLE = 153;
+	public static final int STRING_COURSE5_TITLE = 154;
+	public static final int STRING_COURSE6_TITLE = 155;
+	public static final int STRING_COURSE7_TITLE = 156;
+	public static final int STRING_COURSE8_TITLE = 157;
+	public static final int STRING_COURSE9_TITLE = 158;
+	public static final int STRING_COURSE10_TITLE = 159;
 	public static final int STRING_DIRECTORY = 1000;
 
 	public static final int NUMBER_JUDGETIMING = 12;

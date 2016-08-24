@@ -72,6 +72,23 @@ public class MusicSelectSkin extends Skin {
 		setDestination(artist, 0, 100, 570, 18, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		this.add(artist);
 
+		SkinText grade1 = new SkinText("skin/VL-Gothic-Regular.ttf", 0, 24, 2);
+		grade1.setReferenceID(MainState.STRING_COURSE1_TITLE);
+		setDestination(grade1, 0, 80, 540, 18, 24, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		this.add(grade1);
+		SkinText grade2 = new SkinText("skin/VL-Gothic-Regular.ttf", 0, 24, 2);
+		grade2.setReferenceID(MainState.STRING_COURSE2_TITLE);
+		setDestination(grade2, 0, 80, 510, 18, 24, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		this.add(grade2);
+		SkinText grade3 = new SkinText("skin/VL-Gothic-Regular.ttf", 0, 24, 2);
+		grade3.setReferenceID(MainState.STRING_COURSE3_TITLE);
+		setDestination(grade3, 0, 80, 480, 18, 24, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		this.add(grade3);
+		SkinText grade4 = new SkinText("skin/VL-Gothic-Regular.ttf", 0, 24, 2);
+		grade4.setReferenceID(MainState.STRING_COURSE4_TITLE);
+		setDestination(grade4, 0, 80, 450, 18, 24, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		this.add(grade4);
+
 		Texture cl = new Texture("skin/clear.png");
 		SkinImage clear = new SkinImage();
 		clear.setImage(TextureRegion.split(cl, 200, 20), 0);
