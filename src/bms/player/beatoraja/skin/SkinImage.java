@@ -89,25 +89,33 @@ public class SkinImage extends SkinObject {
 	}
 
 	public void draw(SpriteBatch sprite, long time, MainState state) {
-		if(image == null) {
-			return;
-		}
-		int value = 0;
-        if(id != -1) {
-        	value = state.getNumberValue(id);
-        }
-        if(value >= image.length) {
-            value = 0;
-        }
-        if(value < 0 || image[value].length == 0) {
-        	return;
-        }
+	    if(imageid != -1) {
+            Rectangle r = this.getDestination(time, state);
+            TextureRegion tr = state.getImage(imageid);
+            if (r != null && tr != null) {
+                draw(sprite, tr, r.x, r.y, r.width, r.height, getColor(time,state));
+            }
+        } else {
+            if(image == null) {
+                return;
+            }
+            int value = 0;
+            if(id != -1) {
+                value = state.getNumberValue(id);
+            }
+            if(value >= image.length) {
+                value = 0;
+            }
+            if(value < 0 || image[value].length == 0) {
+                return;
+            }
 
-		Rectangle r = this.getDestination(time, state);
-        if (r != null) {
-			if(value >= 0 && value < image.length) {
-				draw(sprite, getImage(value, time, state), r.x, r.y, r.width, r.height, getColor(time,state));
-			}
+            Rectangle r = this.getDestination(time, state);
+            if (r != null) {
+                if(value >= 0 && value < image.length) {
+                    draw(sprite, getImage(value, time, state), r.x, r.y, r.width, r.height, getColor(time,state));
+                }
+            }
         }
 	}
 	

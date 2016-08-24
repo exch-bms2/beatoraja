@@ -142,6 +142,9 @@ public class BarRenderer {
 
 	public void render(SpriteBatch sprite, ShapeRenderer shape, MusicSelectSkin skin, float w, float h, long duration,
 			int angle, int time) {
+		if(skin == null) {
+			return;
+		}
 		// draw song bar
 		final float barh = 36;
 		for (int i = 0; i < h / barh + 2; i++) {

@@ -16,6 +16,7 @@ import com.badlogic.gdx.graphics.Pixmap.Filter;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Rectangle;
 
@@ -38,12 +39,12 @@ public class BGAProcessor {
 	 * backbmp
 	 */
 	private Pixmap backbmpp;
-	private Texture backbmp;
+	private TextureRegion backbmp;
 	/**
 	 * stagefile
 	 */
 	private Pixmap stagefilep;
-	private Texture stagefile;
+	private TextureRegion stagefile;
 
 	private final String[] mov_extension = { "mpg", "mpeg", "m1v", "m2v", "avi", "wmv", "mp4" };
 	private final String[] pic_extension = { "jpg", "jpeg", "gif", "bmp", "png" };
@@ -279,22 +280,22 @@ public class BGAProcessor {
 		}
 	}
 
-	public Texture getBackbmpData() {
+	public TextureRegion getBackbmpData() {
 		if (backbmpp == null) {
 			return null;
 		}
 		if (backbmp == null) {
-			backbmp = new Texture(backbmpp);
+			backbmp = new TextureRegion(new Texture(backbmpp));
 		}
 		return backbmp;
 	}
 
-	public Texture getStagefileData() {
+	public TextureRegion getStagefileData() {
 		if (stagefilep == null) {
 			return null;
 		}
 		if (stagefile == null) {
-			stagefile = new Texture(stagefilep);
+			stagefile = new TextureRegion(new Texture(stagefilep));
 		}
 		return stagefile;
 	}
@@ -310,10 +311,11 @@ public class BGAProcessor {
 	}
 
 	public void drawBGA(SpriteBatch sprite, Rectangle r, int time) {
-		sprite.end();
 		if (model == null) {
+			sprite.draw(blanktex, r.x, r.y, r.width, r.height);
 			return;
 		}
+		sprite.end();
 		boolean rbga = true;
 		boolean rlayer = true;
 		for (TimeLine tl : model.getAllTimeLines()) {
@@ -416,11 +418,11 @@ public class BGAProcessor {
 	 */
 	public void dispose() {
 		if (stagefile != null) {
-			stagefile.dispose();
+			stagefile.getTexture().dispose();
 			stagefilep.dispose();
 		}
 		if (backbmp != null) {
-			backbmp.dispose();
+			backbmp.getTexture().dispose();
 			backbmpp.dispose();
 		}
 		if (cache != null) {

@@ -51,17 +51,7 @@ public class MusicDecide extends MainState {
 	}
 
 	public void render() {
-		SpriteBatch sprite = getMainController().getSpriteBatch();
-		final PlayerResource resource = getMainController().getPlayerResource();
 		long nowtime = getNowTime();
-		final float w = MainController.RESOLUTION[resource.getConfig().getResolution()].width;
-		final float h = MainController.RESOLUTION[resource.getConfig().getResolution()].height;
-
-		if (resource.getCourseBMSModels() == null && resource.getBGAManager().getStagefileData() != null) {
-			sprite.begin();
-			sprite.draw(resource.getBGAManager().getStagefileData(), 0, 0, w, h);
-			sprite.end();
-		}
 
 		if(getTimer()[BMSPlayer.TIMER_FADEOUT] != -1) {
 			if (nowtime > getTimer()[BMSPlayer.TIMER_FADEOUT] + getSkin().getFadeoutTime()) {
