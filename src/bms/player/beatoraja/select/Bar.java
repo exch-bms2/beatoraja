@@ -282,15 +282,15 @@ class FolderBar extends DirectoryBar {
         if (path.endsWith(String.valueOf(File.separatorChar))) {
             path = path.substring(0, path.length() - 1);
         }
-        String ccrc = songdb.crc32(path, new String[0], new File(".").getAbsolutePath());
+        final String ccrc = songdb.crc32(path, new String[0], new File(".").getAbsolutePath());
         int clear = 255;
         int[] clears = new int[11];
         int[] ranks = new int[28];
-        SongData[] songdatas = songdb.getSongDatas("parent", ccrc, new File(".").getAbsolutePath());
-        Map<String, IRScoreData> scores = selector.readScoreDatas(songdatas, selector.getResource().getConfig()
+        final SongData[] songdatas = songdb.getSongDatas("parent", ccrc, new File(".").getAbsolutePath());
+        final Map<String, IRScoreData> scores = selector.readScoreDatas(songdatas, selector.getResource().getConfig()
                 .getLnmode());
         for (SongData sd : songdatas) {
-            IRScoreData score = scores.get(sd.getSha256());
+            final IRScoreData score = scores.get(sd.getSha256());
             if (score != null) {
                 clears[score.getClear()]++;
                 if (score.getNotes() != 0) {
@@ -354,6 +354,7 @@ class TableLevelBar extends DirectoryBar {
     private String level;
     private String[] hashes;
     private MusicSelector selector;
+    private SongData[] songs;
 
     public TableLevelBar(MusicSelector selector, String level, String[] hashes) {
         this.selector = selector;
@@ -373,7 +374,9 @@ class TableLevelBar extends DirectoryBar {
     @Override
     public Bar[] getChildren() {
         List<SongBar> songbars = new ArrayList<SongBar>();
-        SongData[] songs = selector.getSongDatabase().getSongDatas(getHashes(), new File(".").getAbsolutePath());
+        if(songs == null) {
+            songs = selector.getSongDatabase().getSongDatas(getHashes(), new File(".").getAbsolutePath());
+        }
     	List<String> sha = new ArrayList();
         for (SongData song : songs) {
         	if(!sha.contains(song.getSha256())) {
@@ -388,11 +391,11 @@ class TableLevelBar extends DirectoryBar {
         int clear = 255;
         int[] clears = new int[11];
         int[] ranks = new int[28];
-        SongData[] songs = selector.getSongDatabase().getSongDatas(getHashes(), new File(".").getAbsolutePath());
-        Map<String, IRScoreData> scores = selector
+        songs = selector.getSongDatabase().getSongDatas(getHashes(), new File(".").getAbsolutePath());
+        final Map<String, IRScoreData> scores = selector
                 .readScoreDatas(songs, selector.getResource().getConfig().getLnmode());
         for (SongData song : songs) {
-            IRScoreData score = scores.get(song.getSha256());
+            final IRScoreData score = scores.get(song.getSha256());
             if (score != null) {
                 clears[score.getClear()]++;
                 if (score.getNotes() != 0) {

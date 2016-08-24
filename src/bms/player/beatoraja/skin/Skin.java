@@ -3,6 +3,7 @@ package bms.player.beatoraja.skin;
 import bms.model.BMSModel;
 import bms.player.beatoraja.MainState;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +40,14 @@ public class Skin {
 		number.setDestination(time, x * dw, y * dh, w * dw, h * dh, acc, a, r, g, b, blend, filter, angle, center,
 				loop, timer, op1, op2, op3);
 		objects.add(number);
+	}
+
+	protected void addImage(TextureRegion tr, long time, float x, float y, float w, float h, int acc, int a, int r,
+							int g, int b, int blend, int filter, int angle, int center, int loop, int timer, int op1, int op2, int op3) {
+		SkinImage si = new SkinImage(new TextureRegion[] {tr}, 0);
+		si.setDestination(time, x * dw, y * dh, w * dw, h * dh, acc, a, r, g, b, blend, filter, angle, center,
+				loop, timer, op1, op2, op3);
+		objects.add(si);
 	}
 
 	public void drawAllObjects(SpriteBatch sprite, MainState state) {

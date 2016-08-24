@@ -241,15 +241,16 @@ public class MusicSelector extends MainState {
 			}
 			this.setSkin(skin);
 		}
+		skin.setMusicSelector(this);
 
 		generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/VL-Gothic-Regular.ttf"));
 		FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
 		parameter.size = 24;
 		titlefont = generator.generateFont(parameter);
 
-		option = new GameOptionRenderer(main.getShapeRenderer(), main.getSpriteBatch(), titlefont, config);
-		aoption = new AssistOptionRenderer(main.getShapeRenderer(), main.getSpriteBatch(), titlefont, config);
-		doption = new DetailOptionRenderer(main.getShapeRenderer(), main.getSpriteBatch(), titlefont, config);
+		option = new GameOptionRenderer(config);
+		aoption = new AssistOptionRenderer(config);
+		doption = new DetailOptionRenderer(config);
 
 	}
 
@@ -261,37 +262,44 @@ public class MusicSelector extends MainState {
 		final PlayerResource resource = main.getPlayerResource();
 		final Bar current = bar.getSelected();
 
-		final float w = MainController.RESOLUTION[config.getResolution()].width;
-		final float h = MainController.RESOLUTION[config.getResolution()].height;
+		getOption()[OPTION_SONGBAR] = false;
+		getOption()[OPTION_FOLDERBAR] = false;
+		getOption()[OPTION_7KEYSONG] = false;
+		getOption()[OPTION_5KEYSONG] = false;
+		getOption()[OPTION_14KEYSONG] = false;
+		getOption()[OPTION_10KEYSONG] = false;
+		getOption()[OPTION_9KEYSONG] = false;
 
-		// 背景描画
-		// if (background != null) {
-		// sprite.begin();
-		// sprite.draw(background, 0, 0, w, h);
-		// sprite.end();
-		// }
-
-		final int time = getNowTime();
-
-		bar.render(sprite, shape, skin, w, h, duration, angle, time);
 		// draw song information
 		sprite.begin();
 		titlefont.setColor(Color.WHITE);
 		if (current instanceof SongBar) {
+			getOption()[OPTION_SONGBAR] = true;
 			SongData song = ((SongBar) current).getSongData();
-			titlefont.draw(sprite, song.getMode() + " KEYS", 100, 530);
+			switch (song.getMode()) {
+			case 5:
+				getOption()[OPTION_5KEYSONG] = true;
+				break;
+			case 7:
+				getOption()[OPTION_7KEYSONG] = true;
+				break;
+			case 9:
+				getOption()[OPTION_9KEYSONG] = true;
+				break;
+			case 10:
+				getOption()[OPTION_10KEYSONG] = true;
+				break;
+			case 14:
+				getOption()[OPTION_14KEYSONG] = true;
+				break;
+			}
 			titlefont.draw(sprite, "LEVEL : " + song.getLevel(), 100, 500);
 			if (current.getScore() != null) {
 				IRScoreData score = current.getScore();
-				titlefont.setColor(Color.valueOf(LAMP[score.getClear()]));
 				titlefont.setColor(Color.WHITE);
-				titlefont.draw(sprite, "EX-SCORE  : ", 50, 390);
-				titlefont.draw(sprite, "RANK : " + RANK[(score.getExscore() * 27 / (score.getNotes() * 2))] + " ( "
-						+ ((score.getExscore() * 1000 / (score.getNotes() * 2)) / 10.0f) + "% )", 300, 390);
-				titlefont.draw(sprite, "MISS COUNT: ", 50, 360);
-				titlefont.draw(sprite, "MAX COMBO : ", 300, 360);
-
-				titlefont.draw(sprite, "CLEAR / PLAY : ", 50, 330);
+				titlefont.draw(sprite,
+						RANK[(score.getExscore() * 27 / (score.getNotes() * 2))] + " ( "
+								+ ((score.getExscore() * 1000 / (score.getNotes() * 2)) / 10.0f) + "% )", 460, 390);
 			}
 			if (((SongBar) current).existsReplayData()) {
 				StringBuilder sb = new StringBuilder();
@@ -334,16 +342,6 @@ public class MusicSelector extends MainState {
 					titlefont.setColor(Color.PURPLE);
 					titlefont.draw(sprite, "NO GREAT", 450, 570);
 					break;
-				}
-			}
-
-			for (int i = 0; i < gb.getSongDatas().length; i++) {
-				if (gb.getSongDatas()[i] != null) {
-					titlefont.setColor(Color.YELLOW);
-					titlefont.draw(sprite, gb.getSongDatas()[i].getTitle(), 120, 540 - i * 30);
-				} else {
-					titlefont.setColor(Color.GRAY);
-					titlefont.draw(sprite, "no song", 120, 540 - i * 30);
 				}
 			}
 
@@ -397,11 +395,8 @@ public class MusicSelector extends MainState {
 		}
 
 		titlefont.setColor(Color.WHITE);
-		titlefont.draw(sprite, "PLAYCOUNT : ", 20, 120);
-		titlefont.draw(sprite, " NOTESCOUNT : ", 300, 120);
-
-		titlefont.setColor(Color.WHITE);
 		if (current instanceof FolderBar) {
+			getOption()[OPTION_FOLDERBAR] = true;
 			if (config.isFolderlamp()) {
 				int[] lamps = ((FolderBar) current).getLamps();
 				int[] ranks = ((FolderBar) current).getRanks();
@@ -409,7 +404,7 @@ public class MusicSelector extends MainState {
 				for (int lamp : lamps) {
 					count += lamp;
 				}
-				titlefont.draw(sprite, "TOTAL SONGS : " + count, 100, 500);
+				titlefont.draw(sprite, "TOTAL SONGS : ", 100, 500);
 				titlefont.draw(sprite, "LAMP:", 36, 386);
 				titlefont.draw(sprite, "RANK:", 36, 346);
 				sprite.end();
@@ -481,7 +476,7 @@ public class MusicSelector extends MainState {
 			}
 		}
 		if (banner != null) {
-			sprite.draw(banner, 400, 450, 300, 90);
+			sprite.draw(banner, 400, 400, 300, 90);
 		}
 		sprite.end();
 
@@ -558,11 +553,18 @@ public class MusicSelector extends MainState {
 		long[] keytime = input.getTime();
 		boolean[] cursor = input.getCursorState();
 
+		getOption()[OPTION_PANEL1] = false;
+		getOption()[OPTION_PANEL2] = false;
+		getOption()[OPTION_PANEL3] = false;
+
 		if (input.startPressed()) {
+			getOption()[OPTION_PANEL1] = true;
 			option.render(keystate, keytime);
 		} else if (input.isSelectPressed()) {
+			getOption()[OPTION_PANEL2] = true;
 			aoption.render(keystate, keytime);
 		} else if (input.getNumberState()[5]) {
+			getOption()[OPTION_PANEL3] = true;
 			doption.render(keystate, keytime);
 		} else if (input.getNumberState()[6]) {
 			if (bgm != null) {
@@ -658,63 +660,63 @@ public class MusicSelector extends MainState {
 					bar.setSelected(cbar);
 				}
 			}
+		}
 
-			// song bar scroll
-			if (isPressed(keystate, keytime, KEY_UP, false) || cursor[1]) {
-				long l = System.currentTimeMillis();
-				if (duration == 0) {
-					bar.move(true);
-					if (move != null) {
-						move.play();
-					}
-					duration = l + 300;
-					angle = 300;
+		// song bar scroll
+		if (!getOption()[OPTION_PANEL1] && (isPressed(keystate, keytime, KEY_UP, false)) || cursor[1]) {
+			long l = System.currentTimeMillis();
+			if (duration == 0) {
+				bar.move(true);
+				if (move != null) {
+					move.play();
 				}
-				if (l > duration) {
-					duration = l + 50;
-					bar.move(true);
-					if (move != null) {
-						move.play();
-					}
-					angle = 50;
-				}
-			} else if (isPressed(keystate, keytime, KEY_DOWN, false) || cursor[0]) {
-				long l = System.currentTimeMillis();
-				if (duration == 0) {
-					bar.move(false);
-					if (move != null) {
-						move.play();
-					}
-					duration = l + 300;
-					angle = -300;
-				}
-				if (l > duration) {
-					duration = l + 50;
-					bar.move(false);
-					if (move != null) {
-						move.play();
-					}
-					angle = -50;
-				}
-			} else {
-				long l = System.currentTimeMillis();
-				if (l > duration) {
-					duration = 0;
-				}
+				duration = l + 300;
+				angle = 300;
 			}
-			// song bar scroll on mouse wheel
-			if (input.getScroll() > 0) {
-				for (int i = 0; i < input.getScroll(); i++) {
-					bar.move(false);
+			if (l > duration) {
+				duration = l + 50;
+				bar.move(true);
+				if (move != null) {
+					move.play();
 				}
-				input.resetScroll();
+				angle = 50;
 			}
-			if (input.getScroll() < 0) {
-				for (int i = 0; i < -input.getScroll(); i++) {
-					bar.move(true);
+		} else if (!getOption()[OPTION_PANEL1] && (isPressed(keystate, keytime, KEY_DOWN, false)) || cursor[0]) {
+			long l = System.currentTimeMillis();
+			if (duration == 0) {
+				bar.move(false);
+				if (move != null) {
+					move.play();
 				}
-				input.resetScroll();
+				duration = l + 300;
+				angle = -300;
 			}
+			if (l > duration) {
+				duration = l + 50;
+				bar.move(false);
+				if (move != null) {
+					move.play();
+				}
+				angle = -50;
+			}
+		} else {
+			long l = System.currentTimeMillis();
+			if (l > duration) {
+				duration = 0;
+			}
+		}
+		// song bar scroll on mouse wheel
+		if (input.getScroll() > 0) {
+			for (int i = 0; i < input.getScroll(); i++) {
+				bar.move(false);
+			}
+			input.resetScroll();
+		}
+		if (input.getScroll() < 0) {
+			for (int i = 0; i < -input.getScroll(); i++) {
+				bar.move(true);
+			}
+			input.resetScroll();
 		}
 
 		if (bar.getSelected() != current || selectedreplay == -1) {
@@ -915,6 +917,20 @@ public class MusicSelector extends MainState {
 				return ((SongBar) bar.getSelected()).getSongData().getMaxbpm();
 			}
 			return Integer.MIN_VALUE;
+		case NUMBER_FOLDER_TOTALSONGS:
+			if (bar.getSelected() instanceof FolderBar) {
+				int[] lamps = ((FolderBar) bar.getSelected()).getLamps();
+				int count = 0;
+				for (int lamp : lamps) {
+					count += lamp;
+				}
+				return count;
+			}
+			return Integer.MIN_VALUE;
+		case NUMBER_DURATION:
+			return config.getGreenvalue();
+		case NUMBER_JUDGETIMING:
+			return config.getJudgetiming();
 		}
 		return super.getNumberValue(id);
 	}
@@ -946,6 +962,54 @@ public class MusicSelector extends MainState {
 		case STRING_SUBARTIST:
 			if (bar.getSelected() instanceof SongBar) {
 				return ((SongBar) bar.getSelected()).getSongData().getSubartist();
+			}
+			return "";
+		case STRING_COURSE1_TITLE:
+			if (bar.getSelected() instanceof GradeBar) {
+				if (((GradeBar) bar.getSelected()).getSongDatas().length > 0) {
+					SongData song = ((GradeBar) bar.getSelected()).getSongDatas()[0];
+					return song != null ? song.getTitle() : "-----";
+				}
+			}
+			return "";
+		case STRING_COURSE2_TITLE:
+			if (bar.getSelected() instanceof GradeBar) {
+				if (((GradeBar) bar.getSelected()).getSongDatas().length > 1) {
+					SongData song = ((GradeBar) bar.getSelected()).getSongDatas()[1];
+					return song != null ? song.getTitle() : "-----";
+				}
+			}
+			return "";
+		case STRING_COURSE3_TITLE:
+			if (bar.getSelected() instanceof GradeBar) {
+				if (((GradeBar) bar.getSelected()).getSongDatas().length > 2) {
+					SongData song = ((GradeBar) bar.getSelected()).getSongDatas()[2];
+					return song != null ? song.getTitle() : "-----";
+				}
+			}
+			return "";
+		case STRING_COURSE4_TITLE:
+			if (bar.getSelected() instanceof GradeBar) {
+				if (((GradeBar) bar.getSelected()).getSongDatas().length > 3) {
+					SongData song = ((GradeBar) bar.getSelected()).getSongDatas()[3];
+					return song != null ? song.getTitle() : "-----";
+				}
+			}
+			return "";
+		case STRING_COURSE5_TITLE:
+			if (bar.getSelected() instanceof GradeBar) {
+				if (((GradeBar) bar.getSelected()).getSongDatas().length > 4) {
+					SongData song = ((GradeBar) bar.getSelected()).getSongDatas()[4];
+					return song != null ? song.getTitle() : "-----";
+				}
+			}
+			return "";
+		case STRING_COURSE6_TITLE:
+			if (bar.getSelected() instanceof GradeBar) {
+				if (((GradeBar) bar.getSelected()).getSongDatas().length > 5) {
+					SongData song = ((GradeBar) bar.getSelected()).getSongDatas()[5];
+					return song != null ? song.getTitle() : "-----";
+				}
 			}
 			return "";
 		case STRING_DIRECTORY:
@@ -981,4 +1045,14 @@ public class MusicSelector extends MainState {
 		return null;
 	}
 
+	public void renderBar(int time) {
+		final MainController main = getMainController();
+		final SpriteBatch sprite = main.getSpriteBatch();
+		final ShapeRenderer shape = main.getShapeRenderer();
+		final float w = MainController.RESOLUTION[config.getResolution()].width;
+		final float h = MainController.RESOLUTION[config.getResolution()].height;
+		sprite.end();
+		bar.render(sprite, shape, skin, w, h, duration, angle, time);
+		sprite.begin();
+	}
 }

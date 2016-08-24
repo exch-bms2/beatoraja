@@ -27,6 +27,9 @@ public class MusicDecideSkin extends Skin {
 		dw = r.width / 1280.0f;
 		dh = r.height / 720.0f;
 
+        SkinImage bg = new SkinImage(MainState.IMAGE_STAGEFILE);
+        setDestination(bg, 0, 0, 0, 1280, 720, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        this.add(bg);
         SkinText genre = new SkinText("skin/VL-Gothic-Regular.ttf",0,20, 2);
 		genre.setReferenceID(MainState.STRING_GENRE);
         setDestination(genre, 0, 300, 420, 18, 18, 0, 255,255,255,255, 0, 0, 0, 0, 2000, 0, 0, 0, 0);

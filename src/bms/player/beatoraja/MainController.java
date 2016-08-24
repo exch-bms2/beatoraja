@@ -7,6 +7,7 @@ import java.util.Calendar;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
+import bms.model.BMSModel;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -149,6 +150,24 @@ public class MainController extends ApplicationAdapter {
 			Arrays.fill(newState.getTimer(), -1);
 			Arrays.fill(newState.getOption(), false);
 			newState.create();
+			if(getPlayerResource().getBMSModel() != null) {
+				BMSModel model = getPlayerResource().getBMSModel();
+				if(model.getStagefile().length() > 0) {
+					current.getOption()[MainState.OPTION_STAGEFILE] = true;
+				} else {
+					current.getOption()[MainState.OPTION_NO_STAGEFILE] = true;
+				}
+				if(model.getBackbmp().length() > 0) {
+					current.getOption()[MainState.OPTION_BACKBMP] = true;
+				} else {
+					current.getOption()[MainState.OPTION_NO_BACKBMP] = true;
+				}
+				if(model.getBanner().length() > 0) {
+					current.getOption()[MainState.OPTION_BANNER] = true;
+				} else {
+					current.getOption()[MainState.OPTION_NO_BANNER] = true;
+				}
+			}
 			current = newState;
 			current.setStartTime(System.currentTimeMillis());			
 		}
@@ -381,6 +400,8 @@ public class MainController extends ApplicationAdapter {
 
 		private PlayConfigurationView bmsinfo;
 
+		private VBox stackPane;
+
 		public static void main(String[] args) {
 			launch(args);
 		}
@@ -411,14 +432,11 @@ public class MainController extends ApplicationAdapter {
 			try {
 				FXMLLoader loader = new FXMLLoader(
 						BMSInformationLoader.class.getResource("/bms/player/beatoraja/PlayConfigurationView.fxml"));
-				VBox stackPane = (VBox) loader.load();
+				stackPane = (VBox) loader.load();
 				bmsinfo = (PlayConfigurationView) loader.getController();
+				bmsinfo.setBMSInformationLoader(this);
 				bmsinfo.update(config);
-				// scene.getStylesheets().addAll("/bms/res/win7glass.css",
-				// "/bms/res/style.css");
-				// primaryStage.getIcons().addAll(this.primaryStage.getIcons());
 				Scene scene = new Scene(stackPane, stackPane.getPrefWidth(), stackPane.getPrefHeight());
-
 				primaryStage.setScene(scene);
 				primaryStage.setTitle("beatoraja configuration");
 				primaryStage.show();
@@ -429,5 +447,8 @@ public class MainController extends ApplicationAdapter {
 			}
 		}
 
+		public void hide() {
+			stackPane.setDisable(true);
+		}
 	}
 }

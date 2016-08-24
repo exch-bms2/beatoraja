@@ -70,8 +70,19 @@ public abstract class MainState {
 	public static final int STRING_GENRE = 13;
 	public static final int STRING_ARTIST = 14;
 	public static final int STRING_SUBARTIST = 15;
+	public static final int STRING_COURSE1_TITLE = 150;
+	public static final int STRING_COURSE2_TITLE = 151;
+	public static final int STRING_COURSE3_TITLE = 152;
+	public static final int STRING_COURSE4_TITLE = 153;
+	public static final int STRING_COURSE5_TITLE = 154;
+	public static final int STRING_COURSE6_TITLE = 155;
+	public static final int STRING_COURSE7_TITLE = 156;
+	public static final int STRING_COURSE8_TITLE = 157;
+	public static final int STRING_COURSE9_TITLE = 158;
+	public static final int STRING_COURSE10_TITLE = 159;
 	public static final int STRING_DIRECTORY = 1000;
-	
+
+	public static final int NUMBER_JUDGETIMING = 12;
 	public static final int NUMBER_TIME_YEAR = 21;
 	public static final int NUMBER_TIME_MONTH = 22;
 	public static final int NUMBER_TIME_DAY = 23;
@@ -162,6 +173,30 @@ public abstract class MainState {
 	public static final int NUMBER_DURATION = 30002;
 	public static final int NUMBER_TOTALEARLY = 40001;
 	public static final int NUMBER_TOTALLATE = 40002;
+	public static final int NUMBER_FOLDER_TOTALSONGS = 50000;
+
+	public static final int BUTTON_GAUGE_1P = 1040;
+	public static final int BUTTON_GAUGE_2P = 1041;
+	public static final int BUTTON_RANDOM_1P = 1042;
+	public static final int BUTTON_RANDOM_2P = 1043;
+	public static final int BUTTON_DPOPTION = 1054;
+	public static final int BUTTON_HSFIX = 1055;
+	public static final int BUTTON_BGA = 1072;
+	public static final int BUTTON_JUDGEDETAIL = 1078;
+	public static final int BUTTON_ASSIST_EXJUDGE = 2001;
+	public static final int BUTTON_ASSIST_CONSTANT = 2002;
+	public static final int BUTTON_ASSIST_JUDGEAREA = 2003;
+	public static final int BUTTON_ASSIST_LEGACY = 2004;
+	public static final int BUTTON_ASSIST_MARKNOTE = 2005;
+	public static final int BUTTON_ASSIST_BPMGUIDE = 2006;
+	public static final int BUTTON_ASSIST_NOMINE = 2007;
+
+	public static final int OPTION_FOLDERBAR = 1;
+	public static final int OPTION_SONGBAR = 2;
+
+	public static final int OPTION_PANEL1 = 21;
+	public static final int OPTION_PANEL2 = 22;
+	public static final int OPTION_PANEL3 = 23;
 
 	public static final int OPTION_BGANORMAL = 30;
 	public static final int OPTION_BGAEXTEND = 31;
@@ -169,6 +204,36 @@ public abstract class MainState {
 	public static final int OPTION_AUTOPLAYON = 33;
 	public static final int OPTION_BGAOFF = 40;
 	public static final int OPTION_BGAON = 41;
+
+	public static final int OPTION_GROOVE = 118;
+	public static final int OPTION_HARD = 119;
+	public static final int OPTION_HAZARD = 120;
+	public static final int OPTION_EASY = 121;
+	public static final int OPTION_AEASY = 124;
+	public static final int OPTION_EXHARD = 125;
+
+	public static final int OPTION_NORMAL = 126;
+	public static final int OPTION_MIRROR = 127;
+	public static final int OPTION_RANDOM = 128;
+	public static final int OPTION_SRANDOM = 129;
+	public static final int OPTION_HRANDOM = 130;
+	public static final int OPTION_ALLSCR = 131;
+	public static final int OPTION_RRANDOM = 928;
+	public static final int OPTION_SPIRAL = 929;
+	public static final int OPTION_EXRANDOM = 930;
+	public static final int OPTION_EXSRANDOM = 931;
+
+	public static final int OPTION_7KEYSONG = 160;
+	public static final int OPTION_5KEYSONG = 161;
+	public static final int OPTION_14KEYSONG = 162;
+	public static final int OPTION_10KEYSONG = 163;
+	public static final int OPTION_9KEYSONG = 164;
+	public static final int OPTION_STAGEFILE = 190;
+	public static final int OPTION_NO_STAGEFILE = 191;
+	public static final int OPTION_BANNER = 192;
+	public static final int OPTION_NO_BANNER = 193;
+	public static final int OPTION_BACKBMP = 194;
+	public static final int OPTION_NO_BACKBMP = 195;
 
 	public static final int OPTION_1P_AAA = 200;
 	public static final int OPTION_1P_AA = 201;
@@ -332,7 +397,9 @@ public abstract class MainState {
 	private Calendar cl = Calendar.getInstance();
 	public int getNumberValue(int id) {
 		switch(id) {
-		case NUMBER_TIME_YEAR:
+			case NUMBER_JUDGETIMING:
+				return getMainController().getPlayerResource().getConfig().getJudgetiming();
+			case NUMBER_TIME_YEAR:
 			cl.setTimeInMillis(System.currentTimeMillis());
 			return cl.get(Calendar.YEAR);
 		case NUMBER_TIME_MONTH:
@@ -386,6 +453,34 @@ public abstract class MainState {
 				return getJudgeCount(5, true);
 			case NUMBER_LATE_MISS:
 				return getJudgeCount(5,false);
+			case BUTTON_GAUGE_1P:
+				return getMainController().getPlayerResource().getConfig().getGauge();
+			case BUTTON_RANDOM_1P:
+				return getMainController().getPlayerResource().getConfig().getRandom();
+			case BUTTON_RANDOM_2P:
+				return getMainController().getPlayerResource().getConfig().getRandom2();
+			case BUTTON_DPOPTION:
+				return getMainController().getPlayerResource().getConfig().getDoubleoption();
+			case BUTTON_HSFIX:
+				return getMainController().getPlayerResource().getConfig().getFixhispeed();
+			case BUTTON_BGA:
+				return getMainController().getPlayerResource().getConfig().getBga();
+			case BUTTON_JUDGEDETAIL:
+				return getMainController().getPlayerResource().getConfig().getJudgedetail();
+			case BUTTON_ASSIST_EXJUDGE:
+				return getMainController().getPlayerResource().getConfig().isExpandjudge() ? 1 : 0;
+			case BUTTON_ASSIST_CONSTANT:
+				return getMainController().getPlayerResource().getConfig().isConstant() ? 1 : 0;
+			case BUTTON_ASSIST_JUDGEAREA:
+				return getMainController().getPlayerResource().getConfig().isShowjudgearea() ? 1 : 0;
+			case BUTTON_ASSIST_LEGACY:
+				return getMainController().getPlayerResource().getConfig().isLegacynote() ? 1 : 0;
+			case BUTTON_ASSIST_MARKNOTE:
+				return getMainController().getPlayerResource().getConfig().isMarkprocessednote() ? 1 : 0;
+			case BUTTON_ASSIST_BPMGUIDE:
+				return getMainController().getPlayerResource().getConfig().isBpmguide() ? 1 : 0;
+			case BUTTON_ASSIST_NOMINE:
+				return getMainController().getPlayerResource().getConfig().isNomine() ? 1 : 0;
 		}
 		return 0;
 	}
@@ -414,7 +509,15 @@ public abstract class MainState {
 		return "";
 	}
 
-	public TextureRegion getImage(int id) {
+	public TextureRegion getImage(int imageid) {
+		if(getMainController().getPlayerResource().getBGAManager() != null) {
+			if(imageid == IMAGE_BACKBMP) {
+				return getMainController().getPlayerResource().getBGAManager().getBackbmpData();
+			}
+			if(imageid == IMAGE_STAGEFILE) {
+				return getMainController().getPlayerResource().getBGAManager().getStagefileData();
+			}
+		}
 		return null;
 	}
 }

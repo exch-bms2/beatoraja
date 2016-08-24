@@ -15,16 +15,9 @@ import bms.player.beatoraja.Config;
  */
 public class AssistOptionRenderer {
 	
-	private ShapeRenderer shape;
-	private SpriteBatch sprite;
-	private BitmapFont titlefont;
-
 	private Config config;
 
-	public AssistOptionRenderer(ShapeRenderer shape, SpriteBatch sprite, BitmapFont titlefont, Config config) {
-		this.sprite = sprite;
-		this.shape = shape;
-		this.titlefont = titlefont;
+	public AssistOptionRenderer(Config config) {
 		this.config = config;
 	}
 
@@ -57,39 +50,6 @@ public class AssistOptionRenderer {
 			keytime[6] = 0;
 			config.setNomine(!config.isNomine());
 		}
-		shape.begin(ShapeType.Filled);
-		shape.setColor(Color.BLACK);
-		shape.rect(800, 200, 400, 400);
-		shape.end();
-		shape.begin(ShapeType.Line);
-		shape.setColor(Color.CYAN);
-		shape.rect(800, 200, 400, 400);
-		shape.rect(850, 250, 55, 95);
-		shape.rect(880, 350, 55, 95);
-		shape.rect(910, 250, 55, 95);
-		shape.rect(940, 350, 55, 95);
-		shape.rect(970, 250, 55, 95);
-		shape.rect(1000, 350, 55, 95);
-		shape.rect(1030, 250, 55, 95);
-		shape.end();
-
-		sprite.begin();
-
-		titlefont.setColor(config.isConstant() ? Color.WHITE : Color.valueOf("444444"));
-		titlefont.draw(sprite, "CONSTANT", 810, 490);
-		titlefont.setColor(config.isLegacynote() ? Color.WHITE : Color.valueOf("444444"));
-		titlefont.draw(sprite, "LEGACY NOTE", 900, 520);
-		titlefont.setColor(config.isShowjudgearea() ? Color.WHITE : Color.valueOf("444444"));
-		titlefont.draw(sprite, "JUDGE AREA", 850, 220);
-		titlefont.setColor(config.isBpmguide() ? Color.WHITE : Color.valueOf("444444"));
-		titlefont.draw(sprite, "BPM GUIDE", 1000, 490);
-		titlefont.setColor(config.isMarkprocessednote() ? Color.WHITE : Color.valueOf("444444"));
-		titlefont.draw(sprite, "MARK", 1000, 220);
-		titlefont.setColor(config.isExpandjudge() ? Color.WHITE : Color.valueOf("444444"));
-		titlefont.draw(sprite, "EXPAND JUDGE", 790, 250);
-		titlefont.setColor(config.isNomine() ? Color.WHITE : Color.valueOf("444444"));
-		titlefont.draw(sprite, "NO MINE", 1030, 250);
-		sprite.end();
 	}
 
 }

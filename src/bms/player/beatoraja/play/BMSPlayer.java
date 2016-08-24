@@ -540,10 +540,13 @@ public class BMSPlayer extends MainState {
 				keyinput.stop = true;
 			}
 			if(resource.mediaLoadFinished()) {
-				resource.getAudioProcessor().stop(-1,0,0);				
+				resource.getAudioProcessor().stop(-1,0,0);
 			}
 
 			if (now - getTimer()[TIMER_FAILED] > skin.getCloseTime()) {
+				if(resource.mediaLoadFinished()) {
+					resource.getBGAManager().stop();
+				}
 				if (keyinput != null) {
 					Logger.getGlobal().info("入力パフォーマンス(max ms) : " + keyinput.frametimes);
 				}
@@ -573,8 +576,10 @@ public class BMSPlayer extends MainState {
 			if (keyinput != null) {
 				keyinput.stop = true;
 			}
+			resource.getAudioProcessor().stop(-1,0,0);
 			long l2 = now - getTimer()[TIMER_FADEOUT];
 			if (l2 > skin.getFadeoutTime()) {
+				resource.getBGAManager().stop();
 				if (keyinput != null) {
 					Logger.getGlobal().info("入力パフォーマンス(max ms) : " + keyinput.frametimes);
 				}
@@ -745,6 +750,10 @@ public class BMSPlayer extends MainState {
 		if (systemfont != null) {
 			systemfont.dispose();
 			systemfont = null;
+		}
+		if (playstop != null) {
+			playstop.dispose();
+			playstop = null;
 		}
 		if (skin != null) {
 			skin.dispose();

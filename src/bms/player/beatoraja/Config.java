@@ -143,7 +143,7 @@ public class Config {
 	
 	private String soundpath = "";
 	
-	private String lr2playskin = "";
+	private String lr2playskin;
 	
 	private int[] lr2playskinoption = new int[0];
 	
