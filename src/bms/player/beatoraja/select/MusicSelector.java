@@ -26,6 +26,8 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
  */
 public class MusicSelector extends MainState {
 
+	public static final int OPTION_GRADEBAR = 3;
+
 	// TODO テキスト表示
 	// TODO 譜面情報表示
 	// TODO オプション常時表示(スキン実装で実現？)
@@ -264,6 +266,7 @@ public class MusicSelector extends MainState {
 
 		getOption()[OPTION_SONGBAR] = false;
 		getOption()[OPTION_FOLDERBAR] = false;
+		getOption()[OPTION_GRADEBAR] = false;
 		getOption()[OPTION_7KEYSONG] = false;
 		getOption()[OPTION_5KEYSONG] = false;
 		getOption()[OPTION_14KEYSONG] = false;
@@ -316,6 +319,7 @@ public class MusicSelector extends MainState {
 		}
 		// 段位用の表示(ミラー段位、EX段位)
 		if (current instanceof GradeBar) {
+			getOption()[OPTION_GRADEBAR] = true;
 			GradeBar gb = (GradeBar) current;
 
 			for (int con : gb.getConstraint()) {
@@ -345,15 +349,6 @@ public class MusicSelector extends MainState {
 				}
 			}
 
-			if (current.getScore() != null) {
-				IRScoreData score = current.getScore();
-				titlefont.setColor(Color.valueOf(LAMP[score.getClear()]));
-				titlefont.setColor(Color.WHITE);
-				titlefont.draw(sprite, "EX-SCORE  : ", 50, 390);
-				titlefont.draw(sprite, "MISS COUNT: ", 50, 360);
-				titlefont.draw(sprite, "MAX COMBO : ", 300, 360);
-				titlefont.draw(sprite, "CLEAR / PLAY : ", 50, 330);
-			}
 			if (gb.getMirrorScore() != null) {
 				IRScoreData score = gb.getMirrorScore();
 				titlefont.setColor(Color.valueOf(LAMP[score.getClear()]));
@@ -405,8 +400,6 @@ public class MusicSelector extends MainState {
 					count += lamp;
 				}
 				titlefont.draw(sprite, "TOTAL SONGS : ", 100, 500);
-				titlefont.draw(sprite, "LAMP:", 36, 386);
-				titlefont.draw(sprite, "RANK:", 36, 346);
 				sprite.end();
 				shape.begin(ShapeType.Filled);
 
@@ -431,6 +424,7 @@ public class MusicSelector extends MainState {
 		}
 
 		if (current instanceof TableLevelBar) {
+			getOption()[OPTION_FOLDERBAR] = true;
 			if (config.isFolderlamp()) {
 				int[] lamps = ((TableLevelBar) current).getLamps();
 				int[] ranks = ((TableLevelBar) current).getRanks();
@@ -438,9 +432,7 @@ public class MusicSelector extends MainState {
 				for (int lamp : lamps) {
 					count += lamp;
 				}
-				titlefont.draw(sprite, "TOTAL SONGS : " + count, 100, 500);
-				titlefont.draw(sprite, "LAMP:", 36, 386);
-				titlefont.draw(sprite, "RANK:", 36, 346);
+				titlefont.draw(sprite, "TOTAL SONGS : ", 100, 500);
 				sprite.end();
 				shape.begin(ShapeType.Filled);
 
@@ -474,9 +466,6 @@ public class MusicSelector extends MainState {
 			if (bannerbar instanceof SongBar && ((SongBar) bannerbar).getBanner() != null) {
 				banner = new TextureRegion(new Texture(((SongBar) bannerbar).getBanner()));
 			}
-		}
-		if (banner != null) {
-			sprite.draw(banner, 400, 400, 300, 90);
 		}
 		sprite.end();
 
@@ -918,8 +907,8 @@ public class MusicSelector extends MainState {
 			}
 			return Integer.MIN_VALUE;
 		case NUMBER_FOLDER_TOTALSONGS:
-			if (bar.getSelected() instanceof FolderBar) {
-				int[] lamps = ((FolderBar) bar.getSelected()).getLamps();
+			if (bar.getSelected() instanceof DirectoryBar) {
+				int[] lamps = ((DirectoryBar) bar.getSelected()).getLamps();
 				int count = 0;
 				for (int lamp : lamps) {
 					count += lamp;
