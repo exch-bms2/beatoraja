@@ -311,6 +311,10 @@ public class PlaySkin extends Skin {
 				(int) (520 * dh), MainState.SLIDER_MUSIC_PROGRESS);
 		setDestination(pseek, 0, 2, 660, 16, 20, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(pseek);
+		pseek = new SkinSlider(new TextureRegion[] { new TextureRegion(st, 15, 289, 14, 20) }, 0, 2,
+				(int) (520 * dh), MainState.SLIDER_MUSIC_PROGRESS);
+		setDestination(pseek, 0, 2, 660, 16, 20, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, MainState.TIMER_ENDOFNOTE_1P, 0, 0, 0);
+		add(pseek);
 
 		Texture kbt = new Texture("skin/keybeam.png");
 		keybeam = new Sprite[8];
@@ -656,6 +660,10 @@ public class PlaySkin extends Skin {
 				(int) (520 * dh), MainState.SLIDER_MUSIC_PROGRESS);
 		setDestination(pseek, 0, 938, 660, 16, 20, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(pseek);
+		pseek = new SkinSlider(new TextureRegion[] { new TextureRegion(st, 15, 289, 14, 20) }, 0, 2,
+				(int) (520 * dh), MainState.SLIDER_MUSIC_PROGRESS);
+		setDestination(pseek, 0, 938, 660, 16, 20, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, MainState.TIMER_ENDOFNOTE_1P, 0, 0, 0);
+		add(pseek);
 	}
 
 	private void make14KeySkin() {
@@ -887,6 +895,10 @@ public class PlaySkin extends Skin {
 		SkinSlider pseek = new SkinSlider(new TextureRegion[] { new TextureRegion(st, 0, 289, 14, 20) }, 0, 2,
 				(int) (520 * dh), MainState.SLIDER_MUSIC_PROGRESS);
 		setDestination(pseek, 0, 1073, 660, 16, 20, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0);
+		add(pseek);
+		pseek = new SkinSlider(new TextureRegion[] { new TextureRegion(st, 15, 289, 14, 20) }, 0, 2,
+				(int) (520 * dh), MainState.SLIDER_MUSIC_PROGRESS);
+		setDestination(pseek, 0, 1073, 660, 16, 20, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, MainState.TIMER_ENDOFNOTE_1P, 0, 0, 0);
 		add(pseek);
 
 	}

@@ -113,6 +113,8 @@ public class MusicSelector extends MainState {
 	public static final int KEY_FOLDER_OPEN = 6;
 	public static final int KEY_FOLDER_CLOSE = 7;
 
+	private int panelstate;
+	
 	public MusicSelector(MainController main, Config config) {
 		super(main);
 		this.config = config;
@@ -262,37 +264,11 @@ public class MusicSelector extends MainState {
 		final PlayerResource resource = main.getPlayerResource();
 		final Bar current = bar.getSelected();
 
-		getOption()[OPTION_SONGBAR] = false;
-		getOption()[OPTION_FOLDERBAR] = false;
-		getOption()[OPTION_7KEYSONG] = false;
-		getOption()[OPTION_5KEYSONG] = false;
-		getOption()[OPTION_14KEYSONG] = false;
-		getOption()[OPTION_10KEYSONG] = false;
-		getOption()[OPTION_9KEYSONG] = false;
-
 		// draw song information
 		sprite.begin();
 		titlefont.setColor(Color.WHITE);
 		if (current instanceof SongBar) {
-			getOption()[OPTION_SONGBAR] = true;
 			SongData song = ((SongBar) current).getSongData();
-			switch (song.getMode()) {
-			case 5:
-				getOption()[OPTION_5KEYSONG] = true;
-				break;
-			case 7:
-				getOption()[OPTION_7KEYSONG] = true;
-				break;
-			case 9:
-				getOption()[OPTION_9KEYSONG] = true;
-				break;
-			case 10:
-				getOption()[OPTION_10KEYSONG] = true;
-				break;
-			case 14:
-				getOption()[OPTION_14KEYSONG] = true;
-				break;
-			}
 			titlefont.draw(sprite, "LEVEL : " + song.getLevel(), 100, 500);
 			if (current.getScore() != null) {
 				IRScoreData score = current.getScore();
@@ -396,7 +372,6 @@ public class MusicSelector extends MainState {
 
 		titlefont.setColor(Color.WHITE);
 		if (current instanceof FolderBar) {
-			getOption()[OPTION_FOLDERBAR] = true;
 			if (config.isFolderlamp()) {
 				int[] lamps = ((FolderBar) current).getLamps();
 				int[] ranks = ((FolderBar) current).getRanks();
@@ -553,18 +528,16 @@ public class MusicSelector extends MainState {
 		long[] keytime = input.getTime();
 		boolean[] cursor = input.getCursorState();
 
-		getOption()[OPTION_PANEL1] = false;
-		getOption()[OPTION_PANEL2] = false;
-		getOption()[OPTION_PANEL3] = false;
-
+		panelstate = 0;
+		
 		if (input.startPressed()) {
-			getOption()[OPTION_PANEL1] = true;
+			panelstate = 1;
 			option.render(keystate, keytime);
 		} else if (input.isSelectPressed()) {
-			getOption()[OPTION_PANEL2] = true;
+			panelstate = 2;
 			aoption.render(keystate, keytime);
 		} else if (input.getNumberState()[5]) {
-			getOption()[OPTION_PANEL3] = true;
+			panelstate = 3;
 			doption.render(keystate, keytime);
 		} else if (input.getNumberState()[6]) {
 			if (bgm != null) {
@@ -663,7 +636,7 @@ public class MusicSelector extends MainState {
 		}
 
 		// song bar scroll
-		if (!getOption()[OPTION_PANEL1] && (isPressed(keystate, keytime, KEY_UP, false)) || cursor[1]) {
+		if (panelstate == 0 && (isPressed(keystate, keytime, KEY_UP, false)) || cursor[1]) {
 			long l = System.currentTimeMillis();
 			if (duration == 0) {
 				bar.move(true);
@@ -681,7 +654,7 @@ public class MusicSelector extends MainState {
 				}
 				angle = 50;
 			}
-		} else if (!getOption()[OPTION_PANEL1] && (isPressed(keystate, keytime, KEY_DOWN, false)) || cursor[0]) {
+		} else if (panelstate == 0 && (isPressed(keystate, keytime, KEY_DOWN, false)) || cursor[0]) {
 			long l = System.currentTimeMillis();
 			if (duration == 0) {
 				bar.move(false);
@@ -1054,5 +1027,32 @@ public class MusicSelector extends MainState {
 		sprite.end();
 		bar.render(sprite, shape, skin, w, h, duration, angle, time);
 		sprite.begin();
+	}
+	
+	public boolean getBooleanValue(int id) {
+		final Bar current = bar.getSelected();
+		switch(id) {
+		case OPTION_PANEL1:
+			return panelstate == 1;
+		case OPTION_PANEL2:
+			return panelstate == 2;
+		case OPTION_PANEL3:
+			return panelstate == 3;
+		case OPTION_SONGBAR:
+			return current instanceof SongBar;
+		case OPTION_FOLDERBAR:
+			return current instanceof DirectoryBar;
+		case OPTION_5KEYSONG:
+			return (current instanceof SongBar) && (((SongBar)current).getSongData().getMode() == 5);
+		case OPTION_7KEYSONG:
+			return (current instanceof SongBar) && (((SongBar)current).getSongData().getMode() == 7);
+		case OPTION_9KEYSONG:
+			return (current instanceof SongBar) && (((SongBar)current).getSongData().getMode() == 9);
+		case OPTION_10KEYSONG:
+			return (current instanceof SongBar) && (((SongBar)current).getSongData().getMode() == 10);
+		case OPTION_14KEYSONG:			
+			return (current instanceof SongBar) && (((SongBar)current).getSongData().getMode() == 14);
+		}
+		return super.getBooleanValue(id);
 	}
 }

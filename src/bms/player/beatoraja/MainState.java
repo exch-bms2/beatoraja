@@ -3,6 +3,7 @@ package bms.player.beatoraja;
 import java.util.Arrays;
 import java.util.Calendar;
 
+import bms.model.BMSModel;
 import bms.player.beatoraja.skin.Skin;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -14,7 +15,6 @@ public abstract class MainState {
 	private long starttime;
 	
 	private long[] timer = new long[256];
-	private boolean[] option = new boolean[1000];
 	
 	private Skin skin;
 
@@ -337,7 +337,6 @@ public abstract class MainState {
 	public MainState(MainController main) {
 		this.main = main;
 		Arrays.fill(timer, -1);
-		Arrays.fill(option, false);
 	}
 	
 	public MainController getMainController() {
@@ -378,8 +377,25 @@ public abstract class MainState {
 		return timer;
 	}
 	
-	public boolean[] getOption() {
-		return option;
+	public boolean getBooleanValue(int id) {
+		final BMSModel model = getMainController().getPlayerResource().getBMSModel();
+		switch(id) {
+		case OPTION_STAGEFILE:
+			return model != null && model.getStagefile().length() > 0;
+		case OPTION_NO_STAGEFILE:
+			return model != null && model.getStagefile().length() == 0;
+		case OPTION_BACKBMP:
+			return model != null && model.getBackbmp().length() > 0;
+		case OPTION_NO_BACKBMP:
+			return model != null && model.getBackbmp().length() == 0;
+		case OPTION_BANNER:
+			return model != null && model.getBanner().length() > 0;
+		case OPTION_NO_BANNER:
+			return model != null && model.getBanner().length() == 0;
+		case OPTION_BGAEXTEND:
+			return true;
+		}
+		return false;
 	}
 	
 	public Skin getSkin() {

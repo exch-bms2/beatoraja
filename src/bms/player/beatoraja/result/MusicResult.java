@@ -257,28 +257,6 @@ public class MusicResult extends MainState {
 		oldmisscount = score.getMinbp();
 		oldcombo = score.getCombo();
 
-		for (int i = 0; i < 8; i++) {
-			final int rate = score.getExscore() * 10000 / (resource.getBMSModel().getTotalNotes() * 2);
-			final int oldrate = oldexscore * 10000 / (resource.getBMSModel().getTotalNotes() * 2);
-			if (i == 0) {
-				getOption()[OPTION_RESULT_F_1P] = (rate <= 2222);
-				getOption()[OPTION_NOW_F_1P] = (rate <= 2222);
-				getOption()[OPTION_BEST_F_1P] = (oldrate <= 2222);
-			} else if (i == 7) {
-				getOption()[OPTION_RESULT_AAA_1P] = (rate >= 8889);
-				getOption()[OPTION_NOW_AAA_1P] = (rate >= 8889);
-				getOption()[OPTION_BEST_AAA_1P] = (oldrate >= 8889);
-			} else {
-				getOption()[OPTION_RESULT_F_1P - i] = (rate >= 1111 * i + 1112 && rate < 1111 * i + 2223);
-				getOption()[OPTION_NOW_F_1P - i] = (rate >= 1111 * i + 1112 && rate < 1111 * i + 2223);
-				getOption()[OPTION_BEST_F_1P - i] = (oldrate >= 1111 * i + 1112 && oldrate < 1111 * i + 2223);
-			}
-			getOption()[OPTION_UPDATE_SCORERANK] = rate / 1111 > oldrate / 1111;
-		}
-		getOption()[OPTION_UPDATE_SCORE] = newscore.getExscore() > oldexscore;
-		getOption()[OPTION_UPDATE_MAXCOMBO] = newscore.getCombo() > oldcombo;
-		getOption()[OPTION_UPDATE_MISSCOUNT] = newscore.getMinbp() < oldmisscount;
-
 		// コースモードの場合はコーススコアに加算・累積する
 		if (resource.getCourseBMSModels() != null) {
 			if (resource.getScoreData().getClear() == GrooveGauge.CLEARTYPE_FAILED) {
@@ -482,4 +460,64 @@ public class MusicResult extends MainState {
 		final SpriteBatch sprite = getMainController().getSpriteBatch();
 		detail.render(sprite, titlefont, shape, time, skin.getJudgeRegion());
 	}
+	
+	public boolean getBooleanValue(int id) {
+		final PlayerResource resource = getMainController().getPlayerResource();
+		final IRScoreData score = resource.getScoreData();
+		final int rate = score.getExscore() * 10000 / (resource.getBMSModel().getTotalNotes() * 2);
+		final int oldrate = oldexscore * 10000 / (resource.getBMSModel().getTotalNotes() * 2);
+		switch(id) {
+		case OPTION_RESULT_F_1P:
+		case OPTION_NOW_F_1P:
+			return rate <= 2222;
+		case OPTION_RESULT_E_1P:
+		case OPTION_NOW_E_1P:
+			return rate > 2222 && rate <= 3333;
+		case OPTION_RESULT_D_1P:
+		case OPTION_NOW_D_1P:
+			return rate > 3333 && rate <= 4444;
+		case OPTION_RESULT_C_1P:
+		case OPTION_NOW_C_1P:
+			return rate > 4444 && rate <= 5555;
+		case OPTION_RESULT_B_1P:
+		case OPTION_NOW_B_1P:
+			return rate > 5555 && rate <= 6666;
+		case OPTION_RESULT_A_1P:
+		case OPTION_NOW_A_1P:
+			return rate > 6666 && rate <= 7777;
+		case OPTION_RESULT_AA_1P:
+		case OPTION_NOW_AA_1P:
+			return rate > 7777 && rate <= 8888;
+		case OPTION_RESULT_AAA_1P:
+		case OPTION_NOW_AAA_1P:
+			return rate > 8888;
+		case OPTION_BEST_F_1P:
+			return oldrate <= 2222;
+		case OPTION_BEST_E_1P:
+			return oldrate > 2222 && oldrate <= 3333;
+		case OPTION_BEST_D_1P:
+			return oldrate > 3333 && oldrate <= 4444;
+		case OPTION_BEST_C_1P:
+			return oldrate > 4444 && oldrate <= 5555;
+		case OPTION_BEST_B_1P:
+			return oldrate > 5555 && oldrate <= 6666;
+		case OPTION_BEST_A_1P:
+			return oldrate > 6666 && oldrate <= 7777;
+		case OPTION_BEST_AA_1P:
+			return oldrate > 7777 && oldrate <= 8888;
+		case OPTION_BEST_AAA_1P:			
+			return oldrate > 8888;
+		case OPTION_UPDATE_SCORE:
+			return score.getExscore() > oldexscore;
+		case OPTION_UPDATE_MAXCOMBO:
+			return score.getCombo() > oldcombo;
+		case OPTION_UPDATE_MISSCOUNT:
+			return score.getMinbp() < oldmisscount;
+		case OPTION_UPDATE_SCORERANK:			
+			return rate / 1111 > oldrate / 1111;
+
+		}
+		return super.getBooleanValue(id);
+	}
+
 }

@@ -148,26 +148,7 @@ public class MainController extends ApplicationAdapter {
 		
 		if(newState != null && current != newState) {
 			Arrays.fill(newState.getTimer(), -1);
-			Arrays.fill(newState.getOption(), false);
 			newState.create();
-			if(getPlayerResource().getBMSModel() != null) {
-				BMSModel model = getPlayerResource().getBMSModel();
-				if(model.getStagefile().length() > 0) {
-					current.getOption()[MainState.OPTION_STAGEFILE] = true;
-				} else {
-					current.getOption()[MainState.OPTION_NO_STAGEFILE] = true;
-				}
-				if(model.getBackbmp().length() > 0) {
-					current.getOption()[MainState.OPTION_BACKBMP] = true;
-				} else {
-					current.getOption()[MainState.OPTION_NO_BACKBMP] = true;
-				}
-				if(model.getBanner().length() > 0) {
-					current.getOption()[MainState.OPTION_BANNER] = true;
-				} else {
-					current.getOption()[MainState.OPTION_NO_BANNER] = true;
-				}
-			}
 			current = newState;
 			current.setStartTime(System.currentTimeMillis());			
 		}

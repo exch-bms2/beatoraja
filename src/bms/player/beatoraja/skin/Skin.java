@@ -55,7 +55,8 @@ public class Skin {
 		for(SkinObject obj : objects) {
 			boolean draw = true;
 			for(int op :obj.getOption()) {
-				if((op > 0 && !state.getOption()[op]) || (op < 0 && state.getOption()[-op])) {
+				final boolean b = state.getBooleanValue(op);
+				if((op > 0 && !b) || (op < 0 && b)) {
 					draw = false;
 					break;
 				}

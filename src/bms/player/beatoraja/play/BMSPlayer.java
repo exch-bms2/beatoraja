@@ -112,7 +112,7 @@ public class BMSPlayer extends MainState {
 	private BGAProcessor bga;
 
 	private PlaySkin skin;
-	
+
 	private Sound playstop;
 
 	private GrooveGauge gauge;
@@ -388,11 +388,11 @@ public class BMSPlayer extends MainState {
 		final PlayerResource resource = main.getPlayerResource();
 		final ShapeRenderer shape = main.getShapeRenderer();
 		final SpriteBatch sprite = main.getSpriteBatch();
-		
-		if(resource.getConfig().getSoundpath().length() > 0) {
+
+		if (resource.getConfig().getSoundpath().length() > 0) {
 			final File soundfolder = new File(resource.getConfig().getSoundpath());
-			if(soundfolder.exists() && soundfolder.isDirectory()) {
-				for(File f : soundfolder.listFiles()) {
+			if (soundfolder.exists() && soundfolder.isDirectory()) {
+				for (File f : soundfolder.listFiles()) {
 					if (playstop == null && f.getName().startsWith("playstop.")) {
 						playstop = SoundProcessor.getSound(f.getPath());
 					}
@@ -419,21 +419,6 @@ public class BMSPlayer extends MainState {
 		lanerender = new LaneRenderer(this, sprite, shape, systemfont, skin, resource, model, resource.getConstraint());
 		skin.setBMSPlayer(this);
 		bga = resource.getBGAManager();
-		// initialize option
-		getOption()[OPTION_BGAEXTEND] = true;
-		getOption()[OPTION_1P_0_9] = true;
-		getOption()[OPTION_1P_F] = true;
-		getOption()[OPTION_F] = true;
-		if (autoplay != 0) {
-			getOption()[OPTION_AUTOPLAYON] = true;
-		} else {
-			getOption()[OPTION_AUTOPLAYOFF] = true;
-		}
-		if (config.getBga() == Config.BGA_ON || (config.getBga() == Config.BGA_AUTO && (autoplay != 0))) {
-			getOption()[OPTION_BGAON] = true;
-		} else {
-			getOption()[OPTION_BGAOFF] = true;
-		}
 
 		Logger.getGlobal().info("描画クラス準備");
 
@@ -524,7 +509,7 @@ public class BMSPlayer extends MainState {
 			if (g == 0) {
 				state = STATE_FAILED;
 				getTimer()[TIMER_FAILED] = now;
-				if(playstop != null) {
+				if (playstop != null) {
 					playstop.play();
 				}
 				Logger.getGlobal().info("STATE_FAILEDに移行");
@@ -539,12 +524,12 @@ public class BMSPlayer extends MainState {
 			if (keyinput != null) {
 				keyinput.stop = true;
 			}
-			if(resource.mediaLoadFinished()) {
-				resource.getAudioProcessor().stop(-1,0,0);
+			if (resource.mediaLoadFinished()) {
+				resource.getAudioProcessor().stop(-1, 0, 0);
 			}
 
 			if (now - getTimer()[TIMER_FAILED] > skin.getCloseTime()) {
-				if(resource.mediaLoadFinished()) {
+				if (resource.mediaLoadFinished()) {
 					resource.getBGAManager().stop();
 				}
 				if (keyinput != null) {
@@ -576,7 +561,7 @@ public class BMSPlayer extends MainState {
 			if (keyinput != null) {
 				keyinput.stop = true;
 			}
-			resource.getAudioProcessor().stop(-1,0,0);
+			resource.getAudioProcessor().stop(-1, 0, 0);
 			long l2 = now - getTimer()[TIMER_FADEOUT];
 			if (l2 > skin.getFadeoutTime()) {
 				resource.getBGAManager().stop();
@@ -724,7 +709,7 @@ public class BMSPlayer extends MainState {
 		} else {
 			state = STATE_FAILED;
 			getTimer()[TIMER_FAILED] = getNowTime();
-			if(playstop != null) {
+			if (playstop != null) {
 				playstop.play();
 			}
 			Logger.getGlobal().info("STATE_FAILEDに移行");
@@ -783,21 +768,6 @@ public class BMSPlayer extends MainState {
 			notes++;
 		}
 
-		final int score = this.judge.getJudgeCount(0) * 2 + this.judge.getJudgeCount(1);
-		for(int i = 0;i < 8;i++) {
-			final int rate = score * 10000 / totalnotes;
-			if(i == 0) {
-				getOption()[OPTION_1P_F] = (rate <= 2222);
-				getOption()[OPTION_F] = true;
-			} else if(i == 7){
-				getOption()[OPTION_1P_AAA] = (rate >= 8889);
-				getOption()[OPTION_AAA] = (rate >= 8889);
-			} else {
-				getOption()[OPTION_1P_F - i ] = (rate >= 1111 * i + 1112 && rate < 1111 * i + 2223);
-				getOption()[OPTION_F - i ] = (rate >= 1111 * i + 1112);
-			}
-		}
-
 		if (judge == 3 || judge == 4) {
 			bga.setMisslayerTme(time);
 		}
@@ -806,6 +776,9 @@ public class BMSPlayer extends MainState {
 		// "Now count : " + notes + " - " + totalnotes);
 		lanerender.update(lane, judge, time, fast);
 
+		if(notes == totalnotes && getTimer()[TIMER_ENDOFNOTE_1P] == -1) {
+			getTimer()[TIMER_ENDOFNOTE_1P] = time;
+		}
 	}
 
 	public GrooveGauge getGauge() {
@@ -1034,4 +1007,54 @@ public class BMSPlayer extends MainState {
 		}
 		return 0;
 	}
+
+	public boolean getBooleanValue(int id) {
+		final int rate = (this.judge.getJudgeCount(0) * 2 + this.judge.getJudgeCount(1)) * 10000 / totalnotes;
+		switch (id) {
+		case OPTION_F:
+			return true;
+		case OPTION_E:
+			return rate > 2222;
+		case OPTION_D:
+			return rate > 3333;
+		case OPTION_C:
+			return rate > 4444;
+		case OPTION_B:
+			return rate > 5555;
+		case OPTION_A:
+			return rate > 6666;
+		case OPTION_AA:
+			return rate > 7777;
+		case OPTION_AAA:
+			return rate > 8888;
+		case OPTION_1P_F:
+			return rate <= 2222;
+		case OPTION_1P_E:
+			return rate > 2222 && rate <= 3333;
+		case OPTION_1P_D:
+			return rate > 3333 && rate <= 4444;
+		case OPTION_1P_C:
+			return rate > 4444 && rate <= 5555;
+		case OPTION_1P_B:
+			return rate > 5555 && rate <= 6666;
+		case OPTION_1P_A:
+			return rate > 6666 && rate <= 7777;
+		case OPTION_1P_AA:
+			return rate > 7777 && rate <= 8888;
+		case OPTION_1P_AAA:
+			return rate > 8888;
+		case OPTION_AUTOPLAYON:
+			return autoplay != 0;
+		case OPTION_AUTOPLAYOFF:
+			return autoplay == 0;
+		case OPTION_BGAON:
+			return getMainController().getPlayerResource().getConfig().getBga() == Config.BGA_ON
+					|| (getMainController().getPlayerResource().getConfig().getBga() == Config.BGA_AUTO && (autoplay != 0));
+		case OPTION_BGAOFF:
+			return getMainController().getPlayerResource().getConfig().getBga() == Config.BGA_OFF
+			|| (getMainController().getPlayerResource().getConfig().getBga() == Config.BGA_AUTO && (autoplay == 0));
+		}
+		return super.getBooleanValue(id);
+	}
+
 }
