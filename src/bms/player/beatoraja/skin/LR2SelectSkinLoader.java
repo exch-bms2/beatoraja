@@ -5,6 +5,8 @@ import java.io.IOException;
 
 import bms.player.beatoraja.play.PlaySkin;
 import bms.player.beatoraja.select.MusicSelectSkin;
+import bms.player.beatoraja.select.MusicSelectSkin.SkinBarObject;
+import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.skin.LR2SkinLoader.CommandWord;
 
 import com.badlogic.gdx.graphics.g2d.Animation;
@@ -15,10 +17,16 @@ import com.badlogic.gdx.math.Rectangle;
 
 public class LR2SelectSkinLoader extends LR2SkinLoader {
 
+	private MusicSelector selector;
+	
+	private MusicSelectSkin skin;
+	
 	private Sprite[] bar = new Sprite[10];
 
 	private Animation[] lamp = new Animation[11];
 
+	private SkinBarObject skinbar;
+	
 	public LR2SelectSkinLoader() {
 		addCommandWord(new CommandWord("SRC_BAR_BODY") {
 			@Override
@@ -35,7 +43,16 @@ public class LR2SelectSkinLoader extends LR2SkinLoader {
 				}
 			}
 		});
-		addCommandWord(new CommandWord("DST_BAR_BODY") {
+		addCommandWord(new CommandWord("DST_BAR_BODY_OFF") {
+			@Override
+			public void execute(String[] str) {
+				if(skinbar == null) {
+					skinbar = new SkinBarObject();
+					skin.add(skinbar);
+				}
+			}
+		});
+		addCommandWord(new CommandWord("DST_BAR_BODY_ON") {
 			@Override
 			public void execute(String[] str) {
 			}
@@ -142,8 +159,7 @@ public class LR2SelectSkinLoader extends LR2SkinLoader {
 	}
 
 	public MusicSelectSkin loadSelectSkin(File f, int[] option) throws IOException {
-
-		MusicSelectSkin skin = new MusicSelectSkin();
+		skin = new MusicSelectSkin();
 
 		this.loadSkin(skin, f, option);
 

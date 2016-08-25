@@ -256,6 +256,8 @@ public class MusicResult extends MainState {
 		oldexscore = score.getExscore();
 		oldmisscount = score.getMinbp();
 		oldcombo = score.getCombo();
+		rate = score.getExscore() * 10000 / (resource.getBMSModel().getTotalNotes() * 2);
+		oldrate = oldexscore * 10000 / (resource.getBMSModel().getTotalNotes() * 2);
 
 		// コースモードの場合はコーススコアに加算・累積する
 		if (resource.getCourseBMSModels() != null) {
@@ -461,11 +463,12 @@ public class MusicResult extends MainState {
 		detail.render(sprite, titlefont, shape, time, skin.getJudgeRegion());
 	}
 	
+	private int rate;
+	private int oldrate;
+	
 	public boolean getBooleanValue(int id) {
 		final PlayerResource resource = getMainController().getPlayerResource();
 		final IRScoreData score = resource.getScoreData();
-		final int rate = score.getExscore() * 10000 / (resource.getBMSModel().getTotalNotes() * 2);
-		final int oldrate = oldexscore * 10000 / (resource.getBMSModel().getTotalNotes() * 2);
 		switch(id) {
 		case OPTION_RESULT_F_1P:
 		case OPTION_NOW_F_1P:

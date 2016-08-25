@@ -4,6 +4,8 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import bms.player.beatoraja.MainState;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -30,6 +32,7 @@ public abstract class LR2SkinLoader {
 		float dsth = 720;
 
 		SkinImage part = null;
+		SkinImage button = null;
 		SkinSlider slider = null;
 		SkinNumber num = null;
 		SkinText text = null;
@@ -184,6 +187,13 @@ public abstract class LR2SkinLoader {
 
 						if (str[0].equals("#SRC_IMAGE")) {
 							int gr = Integer.parseInt(str[2]);
+							if(gr == 100) {
+								part = new SkinImage(MainState.IMAGE_STAGEFILE);
+							} else if(gr == 101) {
+								part = new SkinImage(MainState.IMAGE_BACKBMP);
+							} else if(gr == 102) {
+								part = new SkinImage(MainState.IMAGE_BANNER);								
+							} else 
 							if (gr < imagelist.size() && imagelist.get(gr) != null) {
 								try {
 									int[] values = parseInt(str);
@@ -214,12 +224,14 @@ public abstract class LR2SkinLoader {
 									}
 									part = new SkinImage(images, values[9]);
 									part.setTiming(values[10]);
-									skin.add(part);
 									// System.out.println("Object Added - " +
 									// (part.getTiming()));
 								} catch (NumberFormatException e) {
 									e.printStackTrace();
 								}
+							}
+							if(part != null) {
+								skin.add(part);
 							}
 						}
 						if (str[0].equals("#DST_IMAGE")) {
@@ -329,10 +341,60 @@ public abstract class LR2SkinLoader {
 
 						}
 						if (str[0].equals("#SRC_BUTTON")) {
+							int gr = Integer.parseInt(str[2]);
+							if (gr < imagelist.size() && imagelist.get(gr) != null) {
+								try {
+									int[] values = parseInt(str);
+									int x = values[3];
+									int y = values[4];
+									int w = values[5];
+									if (w == -1) {
+										w = imagelist.get(gr).getWidth();
+									}
+									int h = values[6];
+									if (h == -1) {
+										h = imagelist.get(gr).getHeight();
+									}
+									int divx = values[7];
+									if (divx <= 0) {
+										divx = 1;
+									}
+									int divy = values[8];
+									if (divy <= 0) {
+										divy = 1;
+									}
+									TextureRegion[][] images = new TextureRegion[divx * divy][];
+									for (int i = 0; i < divx; i++) {
+										for (int j = 0; j < divy; j++) {
+											images[divx * j + i] = new TextureRegion[]{new TextureRegion(imagelist.get(gr), x + w / divx
+													* i, y + h / divy * j, w / divx, h / divy)};
+										}
+									}
+									button = new SkinImage(images, values[9]);
+									button.setTiming(values[10]);
+									button.setReferenceID(values[11] + 1000);
+									skin.add(button);
+									// System.out.println("Object Added - " +
+									// (part.getTiming()));
+								} catch (NumberFormatException e) {
+									e.printStackTrace();
+								}
+							}
 
 						}
 						if (str[0].equals("#DST_BUTTON")) {
-
+							if (button != null) {
+								try {
+									int[] values = parseInt(str);
+									button.setDestination(values[2], values[3] * dstw / srcw, dsth
+											- (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw, values[6]
+											* dsth / srch, values[7], values[8], values[9], values[10], values[11],
+											values[12], values[13], values[14], values[15], values[16], values[17],
+											values[18], values[19], values[20]);
+								} catch (NumberFormatException e) {
+									e.printStackTrace();
+								}
+							}
 						}
 						if (str[0].equals("#SRC_ONMOUSE")) {
 

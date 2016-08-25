@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Rectangle;
 
 import bms.player.beatoraja.result.MusicResultSkin;
+import bms.player.beatoraja.result.MusicResultSkin.SkinGaugeGraphObject;
 import bms.player.beatoraja.skin.LR2SkinLoader.CommandWord;
 
 public class LR2ResultSkinLoader extends LR2SkinLoader {
@@ -40,6 +41,7 @@ public class LR2ResultSkinLoader extends LR2SkinLoader {
 						Rectangle gaugechart = skin.getGaugeRegion();
 						gaugechart.x = Integer.parseInt(str[3]) * dstw / srcw;		
 						gaugechart.y = dsth - Integer.parseInt(str[4]) * dsth / srch;
+						skin.add(new SkinGaugeGraphObject());
 					} catch (NumberFormatException e) {
 						e.printStackTrace();
 					}

@@ -199,7 +199,7 @@ public class LR2PlaySkinLoader extends LR2SkinLoader {
 		skin.setLaneGroupRegion(new Rectangle[]{playerr});
 		skin.setNote(note);
 		skin.setMinenote(mine);
-		skin.setLongnote(new Sprite[][] { lnend, lnstart, lnbodya, lnbody });
+		skin.setLongnote(new Sprite[][] { lnend, lnstart, lnbodya, lnbody,lnend, lnstart, lnbodya, lnbody, lnbodya, lnbody });
 		skin.setLaneregion(laner);
 		return skin;
 	}

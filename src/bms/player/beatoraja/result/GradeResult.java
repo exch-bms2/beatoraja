@@ -35,7 +35,7 @@ public class GradeResult extends MainState {
 	private int oldmisscount;
 	private int oldcombo;
 
-	private MusicResultSkin skin;
+	private GradeResultSkin skin;
 
 	private boolean saveReplay = false;
 
@@ -66,7 +66,7 @@ public class GradeResult extends MainState {
 		}
 
 		if (skin == null) {
-			skin = new MusicResultSkin(MainController.RESOLUTION[resource.getConfig().getResolution()]);
+			skin = new GradeResultSkin(MainController.RESOLUTION[resource.getConfig().getResolution()]);
 			this.setSkin(skin);
 		}
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/VL-Gothic-Regular.ttf"));

@@ -776,6 +776,8 @@ public class BMSPlayer extends MainState {
 		// "Now count : " + notes + " - " + totalnotes);
 		lanerender.update(lane, judge, time, fast);
 
+		rate = (this.judge.getJudgeCount(0) * 2 + this.judge.getJudgeCount(1)) * 10000 / totalnotes;
+
 		if(notes == totalnotes && getTimer()[TIMER_ENDOFNOTE_1P] == -1) {
 			getTimer()[TIMER_ENDOFNOTE_1P] = time;
 		}
@@ -1008,8 +1010,9 @@ public class BMSPlayer extends MainState {
 		return 0;
 	}
 
+	private int rate;
+	
 	public boolean getBooleanValue(int id) {
-		final int rate = (this.judge.getJudgeCount(0) * 2 + this.judge.getJudgeCount(1)) * 10000 / totalnotes;
 		switch (id) {
 		case OPTION_F:
 			return true;

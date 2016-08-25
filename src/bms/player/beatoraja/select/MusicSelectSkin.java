@@ -25,8 +25,6 @@ public class MusicSelectSkin extends Skin {
 
 	private Sprite[] trophy = new Sprite[3];
 
-	private MusicSelector selector;
-
 	public MusicSelectSkin() {
 		super(640, 480, 1280, 720);
 	}
@@ -78,15 +76,15 @@ public class MusicSelectSkin extends Skin {
 		this.add(grade1);
 		SkinText grade2 = new SkinText("skin/VL-Gothic-Regular.ttf", 0, 24, 2);
 		grade2.setReferenceID(MainState.STRING_COURSE2_TITLE);
-		setDestination(grade2, 0, 80, 510, 18, 24, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		setDestination(grade2, 0, 80, 512, 18, 24, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		this.add(grade2);
 		SkinText grade3 = new SkinText("skin/VL-Gothic-Regular.ttf", 0, 24, 2);
 		grade3.setReferenceID(MainState.STRING_COURSE3_TITLE);
-		setDestination(grade3, 0, 80, 480, 18, 24, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		setDestination(grade3, 0, 80, 484, 18, 24, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		this.add(grade3);
 		SkinText grade4 = new SkinText("skin/VL-Gothic-Regular.ttf", 0, 24, 2);
 		grade4.setReferenceID(MainState.STRING_COURSE4_TITLE);
-		setDestination(grade4, 0, 80, 450, 18, 24, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		setDestination(grade4, 0, 80, 456, 18, 24, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		this.add(grade4);
 
 		Texture cl = new Texture("skin/clear.png");
@@ -103,33 +101,45 @@ public class MusicSelectSkin extends Skin {
 
 		addNumber(new SkinNumber(ntr[0], 0, 5, 0, MainState.NUMBER_FOLDER_TOTALSONGS), 0, 260, 482, 18, 18, 0, 255, 255,
 				255, 255, 0, 0, 0, 0, 0, 0, MainState.OPTION_FOLDERBAR, 0, 0);
+		addImage(new TextureRegion(st, 400, 648, 96, 24),0, 36, 362, 48, 24, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, MainState.OPTION_FOLDERBAR, 0, 0);
+		addImage(new TextureRegion(st, 0, 672, 96, 24),0, 36, 322, 48, 24, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, MainState.OPTION_FOLDERBAR, 0, 0);
 
 		// key
+		SkinImage bg = new SkinImage(MainState.IMAGE_BANNER);
+		setDestination(bg, 0, 400, 400, 300, 90, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		this.add(bg);
+
 		addImage(new TextureRegion(st, 240, 600, 144, 24),0, 100, 512, 108, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, MainState.OPTION_7KEYSONG, 0, 0);
 		addImage(new TextureRegion(st, 240, 624, 144, 24),0, 100, 512, 108, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, MainState.OPTION_14KEYSONG, 0, 0);
 		addImage(new TextureRegion(st, 240, 648, 144, 24),0, 100, 512, 108, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, MainState.OPTION_9KEYSONG, 0, 0);
 		addImage(new TextureRegion(st, 240, 672, 144, 24),0, 100, 512, 108, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, MainState.OPTION_5KEYSONG, 0, 0);
 		addImage(new TextureRegion(st, 240, 696, 144, 24),0, 100, 512, 108, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, MainState.OPTION_10KEYSONG, 0, 0);
 
-		addImage(new TextureRegion(st, 0, 768, 72, 24),0, 300, 512, 60, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, MainState.OPTION_SONGBAR, 0, 0);
+		addImage(new TextureRegion(st, 0, 768, 72, 24),0, 300, 512, 60, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, MusicSelector.OPTION_SONGBAR, 0, 0);
 		addNumber(new SkinNumber(ntr[0], 0, 4, 0, MainState.NUMBER_MINBPM), 0, 370, 512, 18, 18, 0, 255, 255,
 				255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		addNumber(new SkinNumber(ntr[0], 0, 4, 0, MainState.NUMBER_MAXBPM), 0, 442, 512, 18, 18, 0, 255, 255,
 				255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		addImage(new TextureRegion(st, 0, 600, 120, 24),0, 80, 372, 100, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, MainState.OPTION_SONGBAR, 0, 0);
+		addImage(new TextureRegion(st, 0, 600, 120, 24),0, 80, 372, 100, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, MusicSelector.OPTION_SONGBAR, 0, 0);
+		addImage(new TextureRegion(st, 0, 600, 120, 24),0, 80, 372, 100, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, MusicSelector.OPTION_GRADEBAR, 0, 0);
 		addNumber(new SkinNumber(ntr[0], 0, 4, 0, MainState.NUMBER_SCORE), 0, 200, 372, 18, 18, 0, 255, 255, 255,
 				255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		addImage(new TextureRegion(st, 0, 672, 96, 24),0, 330, 372, 100, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, MainState.OPTION_SONGBAR, 0, 0);
-		addImage(new TextureRegion(st, 0, 624, 220, 24),0, 80, 342, 100, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, MainState.OPTION_SONGBAR, 0, 0);
+		addImage(new TextureRegion(st, 0, 672, 96, 24),0, 330, 372, 100, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, MusicSelector.OPTION_SONGBAR, 0, 0);
+		addImage(new TextureRegion(st, 0, 672, 96, 24),0, 330, 372, 100, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, MusicSelector.OPTION_GRADEBAR, 0, 0);
+		addImage(new TextureRegion(st, 0, 624, 220, 24),0, 80, 342, 100, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, MusicSelector.OPTION_SONGBAR, 0, 0);
+		addImage(new TextureRegion(st, 0, 624, 220, 24),0, 80, 342, 100, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, MusicSelector.OPTION_GRADEBAR, 0, 0);
 		addNumber(new SkinNumber(ntr[0], 0, 4, 0, MainState.NUMBER_MISSCOUNT), 0, 200, 342, 18, 18, 0, 255, 255,
 				255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		addImage(new TextureRegion(st, 0, 648, 192, 24),0, 330, 342, 100, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, MainState.OPTION_SONGBAR, 0, 0);
+		addImage(new TextureRegion(st, 0, 648, 192, 24),0, 330, 342, 100, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, MusicSelector.OPTION_SONGBAR, 0, 0);
+		addImage(new TextureRegion(st, 0, 648, 192, 24),0, 330, 342, 100, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, MusicSelector.OPTION_GRADEBAR, 0, 0);
 		addNumber(new SkinNumber(ntr[0], 0, 4, 0, MainState.NUMBER_MAXCOMBO), 0, 450, 342, 18, 18, 0, 255, 255,
 				255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		addImage(new TextureRegion(st, 0, 696, 120, 24),0, 80, 312, 100, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, MainState.OPTION_SONGBAR, 0, 0);
+		addImage(new TextureRegion(st, 0, 696, 120, 24),0, 80, 312, 100, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, MusicSelector.OPTION_SONGBAR, 0, 0);
+		addImage(new TextureRegion(st, 0, 696, 120, 24),0, 80, 312, 100, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, MusicSelector.OPTION_GRADEBAR, 0, 0);
 		addNumber(new SkinNumber(ntr[0], 0, 4, 0, MainState.NUMBER_CLEARCOUNT), 0, 320, 312, 18, 18, 0, 255, 255,
 				255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		addImage(new TextureRegion(st, 0, 720, 96, 24),0, 200, 312, 100, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, MainState.OPTION_SONGBAR, 0, 0);
+		addImage(new TextureRegion(st, 0, 720, 96, 24),0, 200, 312, 100, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, MusicSelector.OPTION_SONGBAR, 0, 0);
+		addImage(new TextureRegion(st, 0, 720, 96, 24),0, 200, 312, 100, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, MusicSelector.OPTION_GRADEBAR, 0, 0);
 		addNumber(new SkinNumber(ntr[0], 0, 4, 0, MainState.NUMBER_PLAYCOUNT), 0, 400, 312, 18, 18, 0, 255, 255,
 				255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
@@ -304,15 +314,11 @@ public class MusicSelectSkin extends Skin {
 		return trophy;
 	}
 
-	public void setMusicSelector(MusicSelector select) {
-		this.selector = select;
-	}
-
-	public class SkinBarObject extends SkinObject {
+	public static class SkinBarObject extends SkinObject {
 
 		@Override
 		public void draw(SpriteBatch sprite, long time, MainState state) {
-			selector.renderBar((int)time);
+			((MusicSelector)state).renderBar((int)time);
 		}
 
 		@Override

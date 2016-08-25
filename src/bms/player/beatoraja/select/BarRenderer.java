@@ -205,7 +205,7 @@ public class BarRenderer {
 				TableData.TrophyData trophy = gb.getTrophy();
 				if (trophy != null) {
 					for (int j = 0; j < TROPHY.length; j++) {
-						if (TROPHY[j].equals(trophy.getName())) {
+						if (TROPHY[j].equals(trophy.getName()) && skin.getTrophy()[j] != null) {
 							sprite.begin();
 							sprite.draw(skin.getTrophy()[j], x + 20, y + 4);
 							sprite.end();
