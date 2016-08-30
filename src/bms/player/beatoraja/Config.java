@@ -78,7 +78,10 @@ public class Config {
 	 * デュレーション(ノーツ表示時間)
 	 */
 	private int greenvalue = 300;
-	
+	/**
+	 * 最小入力感覚
+     */
+	private int inputduration = 10;
 	/**
 	 * レーンカバー表示量(0-1)
 	 */
@@ -107,6 +110,8 @@ public class Config {
 	 * 判定アルゴリズム
 	 */
 	private int judgeAlgorithm = JudgeManager.JUDGE_ALGORITHM_LR2;
+
+	private boolean use2pside = false;
 	/**
 	 * アシストオプション:コンスタント
 	 */
@@ -624,5 +629,21 @@ public class Config {
 
 	public void setSoundpath(String soundpath) {
 		this.soundpath = soundpath;
+	}
+
+	public boolean isUse2pside() {
+		return use2pside;
+	}
+
+	public void setUse2pside(boolean use2pside) {
+		this.use2pside = use2pside;
+	}
+
+	public int getInputduration() {
+		return inputduration;
+	}
+
+	public void setInputduration(int inputduration) {
+		this.inputduration = inputduration;
 	}
 }

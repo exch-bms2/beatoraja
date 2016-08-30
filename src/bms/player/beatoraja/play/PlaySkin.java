@@ -79,14 +79,18 @@ public class PlaySkin extends Skin {
 		super(640, 480, 1280, 720);
 	}
 
-	public PlaySkin(int mode, Rectangle r) {
+	public PlaySkin(int mode, boolean use2p, Rectangle r) {
 		super(1280, 720, r.width, r.height);
 		dw = r.width / 1280f;
 		dh = r.height / 720f;
 
 		makeCommonSkin();
 		if (mode == 5 || mode == 7) {
-			make7KeySkin();
+			if(use2p) {
+				make7KeySkin2();
+			} else {
+				make7KeySkin();
+			}
 		} else if (mode == 10 || mode == 14) {
 			make14KeySkin();
 		} else {
@@ -398,6 +402,211 @@ public class PlaySkin extends Skin {
 		addNumber(new SkinNumber(ntr[0], 0, 3, 0, MainState.NUMBER_GROOVEGAUGE), 0, 314, 60, 24, 24, 0, 255, 255, 255,
 				255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		addNumber(new SkinNumber(ntr[0], 0, 1, 0, MainState.NUMBER_GROOVEGAUGE_AFTERDOT), 0, 386, 60, 18, 18, 0, 255,
+				255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+
+	}
+
+	private void make7KeySkin2() {
+		// 背景
+		// background = new Texture("skin/bg.jpg");
+		// ノーツ
+		note = new Sprite[8];
+		longnote = new Sprite[10][8];
+		minenote = new Sprite[8];
+		Texture notet = new Texture("skin/note.png");
+		for (int i = 0; i < 8; i++) {
+			if (i % 2 == 0) {
+				note[i] = new Sprite(notet, 99, 5, 27, 8);
+				longnote[0][i] = new Sprite(notet, 99, 43, 27, 13);
+				longnote[1][i] = new Sprite(notet, 99, 57, 27, 13);
+				longnote[2][i] = new Sprite(notet, 99, 80, 27, 1);
+				longnote[3][i] = new Sprite(notet, 99, 76, 27, 1);
+				longnote[4][i] = new Sprite(notet, 99, 94, 27, 13);
+				longnote[5][i] = new Sprite(notet, 99, 108, 27, 13);
+				longnote[6][i] = new Sprite(notet, 99, 131, 27, 1);
+				longnote[7][i] = new Sprite(notet, 99, 127, 27, 1);
+				longnote[8][i] = new Sprite(notet, 99, 128, 27, 1);
+				longnote[9][i] = new Sprite(notet, 99, 129, 27, 1);
+				minenote[i] = new Sprite(notet, 99, 23, 27, 8);
+			} else if (i == 7) {
+				note[i] = new Sprite(notet, 50, 5, 46, 8);
+				longnote[0][i] = new Sprite(notet, 50, 43, 46, 13);
+				longnote[1][i] = new Sprite(notet, 50, 57, 46, 13);
+				longnote[2][i] = new Sprite(notet, 50, 80, 46, 1);
+				longnote[3][i] = new Sprite(notet, 50, 76, 46, 1);
+				longnote[4][i] = new Sprite(notet, 50, 94, 46, 13);
+				longnote[5][i] = new Sprite(notet, 50, 108, 46, 13);
+				longnote[6][i] = new Sprite(notet, 50, 131, 46, 1);
+				longnote[7][i] = new Sprite(notet, 50, 127, 46, 1);
+				longnote[8][i] = new Sprite(notet, 50, 128, 46, 1);
+				longnote[9][i] = new Sprite(notet, 50, 129, 46, 1);
+				minenote[i] = new Sprite(notet, 50, 23, 46, 8);
+			} else {
+				note[i] = new Sprite(notet, 127, 5, 21, 8);
+				longnote[0][i] = new Sprite(notet, 127, 43, 21, 13);
+				longnote[1][i] = new Sprite(notet, 127, 57, 21, 13);
+				longnote[2][i] = new Sprite(notet, 127, 80, 21, 1);
+				longnote[3][i] = new Sprite(notet, 127, 76, 21, 1);
+				longnote[4][i] = new Sprite(notet, 127, 94, 21, 13);
+				longnote[5][i] = new Sprite(notet, 127, 108, 21, 13);
+				longnote[6][i] = new Sprite(notet, 127, 131, 21, 1);
+				longnote[7][i] = new Sprite(notet, 127, 127, 21, 1);
+				longnote[8][i] = new Sprite(notet, 127, 128, 21, 1);
+				longnote[9][i] = new Sprite(notet, 127, 129, 21, 1);
+				minenote[i] = new Sprite(notet, 127, 23, 21, 8);
+			}
+		}
+
+		SkinImage[] images = new SkinImage[6];
+		SkinNumber[] number = new SkinNumber[6];
+		for (int i = 0; i < 6; i++) {
+			images[i] = new SkinImage();
+			images[i].setImage(judge[i == 5 ? 4 : i], 100);
+			setDestination(images[i], 0, 965, 240, 180, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+			images[i].setOffsetYReferenceID(MainState.OFFSET_LIFT);
+			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 100, 6, 0, MainState.NUMBER_MAXCOMBO);
+			setDestination(number[i], 0, 200, 0, 40, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		}
+		judgeregion = new JudgeRegion[] { new JudgeRegion(images, number, true) };
+
+		SkinBGAObject bga = new SkinBGAObject(this);
+		setDestination(bga,0,40,50,740,650,0,255,255,255,255,0,0,0,0,0,0,0,0,0);
+		add(bga);
+		add(new SkinGaugeObject(this));
+
+		SkinText title = new SkinText("skin/VL-Gothic-Regular.ttf", 0, 24, 2);
+		title.setReferenceID(MainState.STRING_FULLTITLE);
+		setDestination(title, 0, 42, 698, 24, 24, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		setDestination(title, 1000, 42, 698, 24, 24, 0, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		setDestination(title, 2000, 42, 698, 24, 24, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		add(title);
+
+		laneregion = new Rectangle[8];
+		laneregion[0] = rect(870, 140, 50, 580);
+		laneregion[1] = rect(920, 140, 40, 580);
+		laneregion[2] = rect(960, 140, 50, 580);
+		laneregion[3] = rect(1010, 140, 40, 580);
+		laneregion[4] = rect(1050, 140, 50, 580);
+		laneregion[5] = rect(1100, 140, 40, 580);
+		laneregion[6] = rect(1140, 140, 50, 580);
+		laneregion[7] = rect(1190, 140, 70, 580);
+		Texture st = new Texture("skin/system.png");
+		SkinImage si = new SkinImage(new TextureRegion[] { new TextureRegion(st, 30, 0, 390, 10) }, 0);
+		setDestination(si, 0, 1260, 140, -390, 0, 0, 0, 255, 255, 255, 0, 0, 0, 0, 1000, 0, 0, 0, 0);
+		setDestination(si, 1000, 1260, 140, -390, 580, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		add(si);
+
+		// graph
+		SkinImage gbi = new SkinImage(new TextureRegion[] { new TextureRegion(st, 168, 108, 126, 303) }, 0);
+		setDestination(gbi, 0, 780, 220, 90,480, 0, 255, 255, 255, 255, 0, 0, 0, 0, 1000, 0, 0, 0, 0);
+		add(gbi);
+
+		setDestination(graph[0], 0, 841, 220, 28, 480, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		add(graph[0]);
+		setDestination(graph[1], 0, 811, 220, 28, 480, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		add(graph[1]);
+		setDestination(graph[2], 0, 781, 220, 28, 480, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		add(graph[2]);
+
+		SkinImage gi = new SkinImage(new TextureRegion[] { new TextureRegion(st, 40, 108, 126, 303) }, 0);
+		setDestination(gi, 0, 780, 220, 90,480, 0, 255, 255, 255, 255, 0, 0, 0, 0, 1000, 0, 0, 0, 0);
+		add(gi);
+
+		// progress
+		SkinImage progress = new SkinImage(new TextureRegion[] { new TextureRegion(st, 10, 10, 10, 251) }, 0);
+		setDestination(progress, 0, 1264, 140, 12, 540, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		add(progress);
+		SkinSlider pseek = new SkinSlider(new TextureRegion[] { new TextureRegion(st, 0, 289, 14, 20) }, 0, 2,
+				(int) (520 * dh), MainState.SLIDER_MUSIC_PROGRESS);
+		setDestination(pseek, 0, 1264, 660, 16, 20, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0);
+		add(pseek);
+		pseek = new SkinSlider(new TextureRegion[] { new TextureRegion(st, 15, 289, 14, 20) }, 0, 2,
+				(int) (520 * dh), MainState.SLIDER_MUSIC_PROGRESS);
+		setDestination(pseek, 0, 1264, 660, 16, 20, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, MainState.TIMER_ENDOFNOTE_1P, 0, 0, 0);
+		add(pseek);
+
+		Texture kbt = new Texture("skin/keybeam.png");
+		keybeam = new Sprite[8];
+		keybeam[0] = keybeam[2] = keybeam[4] = keybeam[6] = new Sprite(kbt, 47, 0, 28, 255);
+		keybeam[1] = keybeam[3] = keybeam[5] = new Sprite(kbt, 75, 0, 21, 255);
+		keybeam[7] = new Sprite(kbt, 0, 0, 47, 255);
+		TextureRegion[] keybeaml = new Sprite[8];
+		keybeaml[0] = keybeaml[2] = keybeaml[4] = keybeaml[6] = new Sprite(kbt, 144, 0, 28, 255);
+		keybeaml[1] = keybeaml[3] = keybeaml[5] = new Sprite(kbt, 172, 0, 21, 255);
+		keybeaml[7] = new Sprite(kbt, 97, 0, 47, 255);
+		Texture bombt = new Texture("skin/bomb.png");
+		TextureRegion[][] bombtr = TextureRegion.split(bombt, 181, 192);
+
+		for (int i = 0; i < laneregion.length; i++) {
+			SkinImage ri = new SkinImage(new TextureRegion[][] { { keybeam[i] }, { keybeaml[i] } }, 0);
+			setDestination(ri, 0, laneregion[i].x / dw  + laneregion[i].width / dw / 4, laneregion[i].y / dh , laneregion[i].width / dw / 2,
+					laneregion[i].height / dh , 0, 255, 255, 255, 255, 0, 0, 0, 0, 100, BMSPlayer.TIMER_KEYON_1P_KEY1 + (i % 8 == 7 ? -1 : i), 0, 0, 0);
+			setDestination(ri, 100, laneregion[i].x / dw , laneregion[i].y / dh , laneregion[i].width / dw , laneregion[i].height / dh , 0,
+					255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+			ri.setOffsetYReferenceID(MainState.OFFSET_LIFT);
+			ri.setReferenceID(BMSPlayer.VALUE_JUDGE_1P_KEY1 + (i % 8 == 7 ? -1 : i));
+			add(ri);
+		}
+		add(new SkinLaneObject(this));
+		for (int i = 0; i < laneregion.length; i++) {
+			SkinImage bombi = new SkinImage(new TextureRegion[][] { {}, bombtr[3], bombtr[0], bombtr[1] }, 160);
+			bombi.setTiming(BMSPlayer.TIMER_BOMB_1P_KEY1 + (i % 8 == 7 ? -1 : i));
+			setDestination(bombi, 0, laneregion[i].x / dw + laneregion[i].width / dw / 2 - 141, laneregion[i].y / dh - 202, 322, 344,
+					0, 255, 255, 255, 255, 2, 0, 0, 0, 161, BMSPlayer.TIMER_BOMB_1P_KEY1 + (i % 8 == 7 ? -1 : i), 0, 0, 0);
+			setDestination(bombi, 160, laneregion[i].x / dw  + laneregion[i].width /dw / 2 - 141, laneregion[i].y / dh - 202, 322,
+					344, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0);
+			setDestination(bombi, 161, laneregion[i].x / dw , laneregion[i].y / dh , 0, 0, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, 0,
+					0, 0, 0);
+			bombi.setOffsetYReferenceID(MainState.OFFSET_LIFT);
+			bombi.setReferenceID(BMSPlayer.VALUE_JUDGE_1P_KEY1 + (i % 8 == 7 ? -1 : i));
+			add(bombi);
+
+			SkinImage hbombi = new SkinImage(bombtr[2], 160);
+			hbombi.setTiming(BMSPlayer.TIMER_HOLD_1P_KEY1 + (i % 8 == 7 ? -1 : i));
+			setDestination(hbombi, 0, laneregion[i].x / dw + laneregion[i].width / dw / 2 - 141, laneregion[i].y / dh - 202, 322, 344,
+					0, 255, 255, 255, 255, 2, 0, 0, 0, 0, BMSPlayer.TIMER_HOLD_1P_KEY1 + (i % 8 == 7 ? -1 : i), 0, 0, 0);
+			hbombi.setOffsetYReferenceID(MainState.OFFSET_LIFT);
+			add(hbombi);
+		}
+
+		// judge count
+		Texture nt = new Texture("skin/number.png");
+		TextureRegion[][] ntr = TextureRegion.split(nt, 24, 24);
+		for (int i = 0; i < 6; i++) {
+			for (int j = 0; j < 2; j++) {
+				addNumber(new SkinNumber(ntr[j + 1], 0, 4, 2, judgecount[i * 2 + j]), 0, 660 + j * 60,
+						50 + (5 - i) * 18, 12, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+			}
+		}
+		addNumber(new SkinNumber(ntr[0], 100, 4, 0, MainState.NUMBER_SCORE_RATE), 0, 790,
+				200, 12, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		addNumber(new SkinNumber(ntr[0], 100, 1, 0, MainState.NUMBER_SCORE_RATE_AFTERDOT), 0, 838,
+				200, 8, 12, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		addNumber(new SkinNumber(ntr[0], 100, 5, 0, MainState.NUMBER_SCORE), 0, 790,
+				180, 12, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		addNumber(new SkinNumber(ntr[1], 100, 5, 0, MainState.NUMBER_HIGHSCORE), 0, 790,
+				160, 12, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		addNumber(new SkinNumber(ntr[2], 100, 5, 0, MainState.NUMBER_TARGET_SCORE), 0, 790,
+				140, 12, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+
+		lanegroupregion = new Rectangle[] { rect(870, 140, 390, 580) };
+
+		SkinSlider seek = new SkinSlider(new TextureRegion[] { new TextureRegion(st, 0, 265, 17, 24) }, 0, 1,
+				(int) (360 * dh), MainState.SLIDER_MUSICSELECT_POSITION);
+		setDestination(seek, 0, 870, 440, 30, 24, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0);
+		add(seek);
+		// READY
+		Texture ready = new Texture("skin/ready.png");
+		SkinImage ri = new SkinImage(new TextureRegion[] { new TextureRegion(ready) }, 0);
+		setDestination(ri, 0, 870, 250, 350, 60, 0, 0, 255, 255, 255, 0, 0, 0, 0, 750, BMSPlayer.TIMER_READY, 0, 0, 0);
+		setDestination(ri, 750, 870, 300, 350, 60, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		add(ri);
+
+		gaugeregion = rect(1260, 30, -390, 30);
+
+		addNumber(new SkinNumber(ntr[0], 0, 3, 0, MainState.NUMBER_GROOVEGAUGE), 0, 870, 60, 24, 24, 0, 255, 255, 255,
+				255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		addNumber(new SkinNumber(ntr[0], 0, 1, 0, MainState.NUMBER_GROOVEGAUGE_AFTERDOT), 0, 942, 60, 18, 18, 0, 255,
 				255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 	}
@@ -849,7 +1058,7 @@ public class PlaySkin extends Skin {
 		TextureRegion[][] ntr = TextureRegion.split(nt, 24, 24);
 		for (int i = 0; i < 6; i++) {
 			for (int j = 0; j < 2; j++) {
-				addNumber(new SkinNumber(ntr[j + 1], 0, 4, 2, judgecount[i * 2 + j]), 0, 1126 + j * 60,
+				addNumber(new SkinNumber(ntr[j + 1], 0, 4, 2, judgecount[i * 2 + j]), 0, 1166 + j * 60,
 						40 + (5 - i) * 18, 12, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 			}
 		}

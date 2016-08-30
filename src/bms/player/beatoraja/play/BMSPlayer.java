@@ -249,10 +249,10 @@ public class BMSPlayer extends MainState {
 						config.getLr2playskinoption());
 			} catch (IOException e) {
 				e.printStackTrace();
-				skin = new PlaySkin(model.getUseKeys(), MainController.RESOLUTION[resource.getConfig().getResolution()]);
+				skin = new PlaySkin(model.getUseKeys(), config.isUse2pside(), MainController.RESOLUTION[resource.getConfig().getResolution()]);
 			}
 		} else {
-			skin = new PlaySkin(model.getUseKeys(), MainController.RESOLUTION[resource.getConfig().getResolution()]);
+			skin = new PlaySkin(model.getUseKeys(), config.isUse2pside(), MainController.RESOLUTION[resource.getConfig().getResolution()]);
 		}
 		this.setSkin(skin);
 
@@ -411,6 +411,7 @@ public class BMSPlayer extends MainState {
 		Logger.getGlobal().info("create");
 
 		input = main.getInputProcessor();
+		input.setMinimumInputDutration(config.getInputduration());
 		input.setEnableKeyInput(autoplay == 0);
 		PlayConfig pc = (model.getUseKeys() == 5 || model.getUseKeys() == 7 ? config.getMode7()
 				: (model.getUseKeys() == 10 || model.getUseKeys() == 14 ? config.getMode14() : config.getMode9()));
@@ -561,9 +562,9 @@ public class BMSPlayer extends MainState {
 			if (keyinput != null) {
 				keyinput.stop = true;
 			}
-			resource.getAudioProcessor().stop(-1, 0, 0);
 			long l2 = now - getTimer()[TIMER_FADEOUT];
 			if (l2 > skin.getFadeoutTime()) {
+				resource.getAudioProcessor().stop(-1, 0, 0);
 				resource.getBGAManager().stop();
 				if (keyinput != null) {
 					Logger.getGlobal().info("入力パフォーマンス(max ms) : " + keyinput.frametimes);
@@ -780,6 +781,9 @@ public class BMSPlayer extends MainState {
 
 		if(notes == totalnotes && getTimer()[TIMER_ENDOFNOTE_1P] == -1) {
 			getTimer()[TIMER_ENDOFNOTE_1P] = time;
+			if(this.judge.getJudgeCount(3) == 0 && this.judge.getJudgeCount(4) == 0) {
+				getTimer()[TIMER_FULLCOMBO_1P] = time;
+			}
 		}
 	}
 

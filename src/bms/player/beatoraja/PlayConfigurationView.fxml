@@ -5,7 +5,6 @@
 <?import javafx.scene.control.*?>
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
-<?import utils.javafx.*?>
 
 <VBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="bms.player.beatoraja.PlayConfigurationView">
    <children>
@@ -31,6 +30,7 @@
                                     <ComboBox fx:id="resolution" prefWidth="200.0" />
                                  </children>
                               </HBox>
+                               <CheckBox fx:id="use2p" mnemonicParsing="false" prefHeight="25.0" prefWidth="133.0" text="2P side" />
                            </children>
                         </VBox>
                      </children>
@@ -192,6 +192,16 @@
           </Spinner>
                                  </children>
                               </HBox>
+                               <HBox prefHeight="37.0" prefWidth="723.0">
+                                   <children>
+                                       <Label prefHeight="18.0" prefWidth="127.0" text="最小入力間隔(ms)" />
+                                       <Spinner fx:id="inputduration" prefWidth="150.0">
+                                           <valueFactory>
+                                               <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" max="100" min="1" value="10" />
+                                           </valueFactory>
+                                       </Spinner>
+                                   </children>
+                               </HBox>
                               <HBox prefHeight="37.0" prefWidth="723.0">
                                  <children>
                                     <Label prefHeight="18.0" prefWidth="127.0" text="判定アルゴリズム" />

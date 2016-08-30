@@ -265,6 +265,7 @@ public class MusicSelector extends MainState {
 		final PlayerResource resource = main.getPlayerResource();
 		final Bar current = bar.getSelected();
 
+		final int nowtime = getNowTime();
 		// draw song information
 		sprite.begin();
 		titlefont.setColor(Color.WHITE);
@@ -513,6 +514,7 @@ public class MusicSelector extends MainState {
 		long[] keytime = input.getTime();
 		boolean[] cursor = input.getCursorState();
 
+		final int prevpanelstate = panelstate;
 		panelstate = 0;
 		
 		if (input.startPressed()) {
@@ -617,6 +619,17 @@ public class MusicSelector extends MainState {
 				if (cbar != null) {
 					bar.setSelected(cbar);
 				}
+			}
+		}
+
+		if(prevpanelstate != panelstate) {
+			if(prevpanelstate != 0) {
+				getTimer()[TIMER_PANEL1_OFF + prevpanelstate - 1] = nowtime;
+				getTimer()[TIMER_PANEL1_ON + prevpanelstate - 1] = -1;
+			}
+			if(panelstate != 0) {
+				getTimer()[TIMER_PANEL1_ON + panelstate - 1] = nowtime;
+				getTimer()[TIMER_PANEL1_OFF + panelstate - 1] = -1;
 			}
 		}
 
@@ -1039,6 +1052,39 @@ public class MusicSelector extends MainState {
 			return (current instanceof SongBar) && (((SongBar)current).getSongData().getMode() == 10);
 		case OPTION_14KEYSONG:			
 			return (current instanceof SongBar) && (((SongBar)current).getSongData().getMode() == 14);
+			case OPTION_DIFFICULTY0:
+				return (current instanceof SongBar) && (((SongBar)current).getSongData().getDifficulty() <= 0 ||
+						((SongBar)current).getSongData().getDifficulty() > 5);
+			case OPTION_DIFFICULTY1:
+				return (current instanceof SongBar) && (((SongBar)current).getSongData().getDifficulty() == 1);
+			case OPTION_DIFFICULTY2:
+				return (current instanceof SongBar) && (((SongBar)current).getSongData().getDifficulty() == 2);
+			case OPTION_DIFFICULTY3:
+				return (current instanceof SongBar) && (((SongBar)current).getSongData().getDifficulty() == 3);
+			case OPTION_DIFFICULTY4:
+				return (current instanceof SongBar) && (((SongBar)current).getSongData().getDifficulty() == 4);
+			case OPTION_DIFFICULTY5:
+				return (current instanceof SongBar) && (((SongBar)current).getSongData().getDifficulty() == 5);
+			case OPTION_NO_TEXT:
+				return (current instanceof SongBar) && (!((SongBar)current).getSongData().hasDocument());
+			case OPTION_TEXT:
+				return (current instanceof SongBar) && (((SongBar)current).getSongData().hasDocument());
+			case OPTION_NO_LN:
+				return (current instanceof SongBar) && (!((SongBar)current).getSongData().hasLongNote());
+			case OPTION_LN:
+				return (current instanceof SongBar) && (((SongBar)current).getSongData().hasLongNote());
+			case OPTION_NO_BGA:
+				return (current instanceof SongBar) && (!((SongBar)current).getSongData().hasBGA());
+			case OPTION_BGA:
+				return (current instanceof SongBar) && (((SongBar)current).getSongData().hasBGA());
+			case OPTION_NO_RANDOMSEQUENCE:
+				return (current instanceof SongBar) && (!((SongBar)current).getSongData().hasRandomSequence());
+			case OPTION_RANDOMSEQUENCE:
+				return (current instanceof SongBar) && (((SongBar)current).getSongData().hasRandomSequence());
+			case OPTION_NO_BPMCHANGE:
+				return (current instanceof SongBar) && (((SongBar)current).getSongData().getMaxbpm() == ((SongBar)current).getSongData().getMinbpm());
+			case OPTION_BPMCHANGE:
+				return (current instanceof SongBar) && (((SongBar)current).getSongData().getMaxbpm() != ((SongBar)current).getSongData().getMinbpm());
 		}
 		return super.getBooleanValue(id);
 	}

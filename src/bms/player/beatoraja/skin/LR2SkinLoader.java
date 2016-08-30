@@ -272,15 +272,18 @@ public abstract class LR2SkinLoader {
 									if (divy <= 0) {
 										divy = 1;
 									}
-									TextureRegion[] images = new TextureRegion[divx * divy];
+									TextureRegion[][] images = new TextureRegion[divy][divx];
 									for (int i = 0; i < divx; i++) {
 										for (int j = 0; j < divy; j++) {
-											images[divx * j + i] = new TextureRegion(imagelist.get(gr), x + w / divx
+											images[j][i] = new TextureRegion(imagelist.get(gr), x + w / divx
 													* i, y + h / divy * j, w / divx, h / divy);
 										}
 									}
-									num = new SkinNumber(images, values[9], values[13], 0);
-									num.setId(values[11]);
+									if(images.length > 1) {
+										num = new SkinNumber(images[0], images[1], values[9], values[13], 0, values[11]);
+									} else {
+										num = new SkinNumber(images[0], values[9], values[13], images[0].length > 10 ? 2 : 0, values[11]);
+									}
 
 									skin.add(num);
 									// System.out.println("Number Added - " +
