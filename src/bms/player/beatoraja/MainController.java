@@ -1,13 +1,14 @@
 package bms.player.beatoraja;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.nio.file.*;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
-import bms.model.BMSModel;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -21,7 +22,8 @@ import bms.player.beatoraja.result.GradeResult;
 import bms.player.beatoraja.result.MusicResult;
 import bms.player.beatoraja.select.MusicSelector;
 
-import com.badlogic.gdx.*;
+import com.badlogic.gdx.ApplicationAdapter;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl.*;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.*;
@@ -58,7 +60,7 @@ public class MainController extends ApplicationAdapter {
 	/**
 	 * 1曲プレイで指定したBMSファイル
 	 */
-	private File bmsfile;
+	private Path bmsfile;
 
 	private BMSPlayerInputProcessor input;
 	/**
@@ -69,18 +71,21 @@ public class MainController extends ApplicationAdapter {
 	 * プレイデータアクセサ
 	 */
 	private PlayDataAccessor playdata;
+	
+	private static final Path configpath = Paths.get("config.json");
+	private static final Path songdbpath = Paths.get("songdata.db");
 
 	public static final Rectangle[] RESOLUTION = { new Rectangle(0, 0, 640, 480), new Rectangle(0, 0, 1280, 720),
 			new Rectangle(0, 0, 1920, 1080), new Rectangle(0, 0, 3840, 2560) };
 
-	public MainController(File f, Config config, int auto) {
+	public MainController(Path f, Config config, int auto) {
 		this.auto = auto;
 		this.config = config;
 		this.bmsfile = f;
 
 		try {
 			Class.forName("org.sqlite.JDBC");
-			songdb = new SongDatabaseAccessor(new File("songdata.db").getPath());
+			songdb = new SongDatabaseAccessor(songdbpath.toString());
 			songdb.createTable();
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
@@ -279,9 +284,9 @@ public class MainController extends ApplicationAdapter {
 			e.printStackTrace();
 		}
 
-		File f = null;
+		Path f = null;
 		int auto = 0;
-		boolean config = (!new File("songdata.db").exists());
+		boolean config = (!Files.exists(Paths.get("songdata.db")));
 		for (String s : args) {
 			if (s.startsWith("-")) {
 				if (s.equals("-a")) {
@@ -294,7 +299,7 @@ public class MainController extends ApplicationAdapter {
 					config = true;
 				}
 			} else {
-				f = new File(s);
+				f = Paths.get(s);
 			}
 		}
 		if (config) {
@@ -304,22 +309,20 @@ public class MainController extends ApplicationAdapter {
 		}
 	}
 
-	public static void play(File f, int auto, boolean forceExit) {
+	public static void play(Path f, int auto, boolean forceExit) {
 		Config config = new Config();
-		if (new File("config.json").exists()) {
+		if (Files.exists(configpath)) {
 			Json json = new Json();
 			try {
-				config = json.fromJson(Config.class, new FileReader("config.json"));
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			} catch (SerializationException e) {
+				config = json.fromJson(Config.class, Files.newBufferedReader(configpath));
+			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		} else {
 			Json json = new Json();
 			json.setOutputType(OutputType.json);
 			try {
-				FileWriter fw = new FileWriter("config.json");
+				BufferedWriter fw = Files.newBufferedWriter(configpath);
 				fw.write(json.prettyPrint(config));
 				fw.flush();
 				fw.close();
@@ -362,7 +365,7 @@ public class MainController extends ApplicationAdapter {
 		Json json = new Json();
 		json.setOutputType(OutputType.json);
 		try {
-			FileWriter fw = new FileWriter("config.json");
+			BufferedWriter fw = Files.newBufferedWriter(configpath);
 			fw.write(json.prettyPrint(config));
 			fw.flush();
 			fw.close();
@@ -390,10 +393,10 @@ public class MainController extends ApplicationAdapter {
 		@Override
 		public void start(Stage primaryStage) throws Exception {
 			Config config = new Config();
-			if (new File("config.json").exists()) {
+			if (Files.exists(configpath)) {
 				Json json = new Json();
 				try {
-					config = json.fromJson(Config.class, new FileReader("config.json"));
+					config = json.fromJson(Config.class, Files.newBufferedReader(configpath));
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -401,7 +404,7 @@ public class MainController extends ApplicationAdapter {
 				Json json = new Json();
 				json.setOutputType(OutputType.json);
 				try {
-					FileWriter fw = new FileWriter("config.json");
+					BufferedWriter fw = Files.newBufferedWriter(configpath);
 					fw.write(json.prettyPrint(config));
 					fw.flush();
 					fw.close();

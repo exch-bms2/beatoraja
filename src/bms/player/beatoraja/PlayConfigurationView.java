@@ -338,11 +338,7 @@ public class PlayConfigurationView implements Initializable {
 			SongDatabaseAccessor songdb = new SongDatabaseAccessor(new File("songdata.db").getPath());
 			songdb.createTable();
 			Logger.getGlobal().info("song.db更新開始");
-			File[] files = new File[config.getBmsroot().length];
-			for (int i = 0; i < files.length; i++) {
-				files[i] = new File(config.getBmsroot()[i]);
-			}
-			songdb.updateSongDatas(files, config.getBmsroot(), new File(".").getAbsolutePath(), updateAll);
+			songdb.updateSongDatas(config.getBmsroot(), new File(".").getAbsolutePath(), updateAll);
 			Logger.getGlobal().info("song.db更新完了");
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();

@@ -4,7 +4,7 @@ import bms.model.BMSModel;
 
 public class AudioDeviceProcessor implements AudioProcessor {
 
-	public void setModel(BMSModel model, String filepath) {
+	public void setModel(BMSModel model) {
 		// TODO Auto-generated method stub
 
 	}

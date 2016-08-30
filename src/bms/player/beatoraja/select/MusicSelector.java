@@ -1,6 +1,8 @@
 package bms.player.beatoraja.select;
 
 import java.io.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -543,7 +545,7 @@ public class MusicSelector extends MainState {
 					resetReplayIndex();
 				} else if (current instanceof SongBar) {
 					resource.clear();
-					if (resource.setBMSFile(new File(((SongBar) current).getSongData().getPath()), config, 0)) {
+					if (resource.setBMSFile(Paths.get(((SongBar) current).getSongData().getPath()), config, 0)) {
 						if (bgm != null) {
 							bgm.stop();
 						}
@@ -557,7 +559,7 @@ public class MusicSelector extends MainState {
 			if (isPressed(keystate, keytime, KEY_AUTO, true)) {
 				if (current instanceof SongBar) {
 					resource.clear();
-					if (resource.setBMSFile(new File(((SongBar) current).getSongData().getPath()), config, 1)) {
+					if (resource.setBMSFile(Paths.get(((SongBar) current).getSongData().getPath()), config, 1)) {
 						if (bgm != null) {
 							bgm.stop();
 						}
@@ -572,7 +574,7 @@ public class MusicSelector extends MainState {
 			if (isPressed(keystate, keytime, KEY_REPLAY, true)) {
 				if (current instanceof SongBar) {
 					resource.clear();
-					if (resource.setBMSFile(new File(((SongBar) current).getSongData().getPath()), config,
+					if (resource.setBMSFile(Paths.get(((SongBar) current).getSongData().getPath()), config,
 							2 + selectedreplay)) {
 						if (bgm != null) {
 							bgm.stop();
@@ -703,11 +705,11 @@ public class MusicSelector extends MainState {
 		final PlayerResource resource = getMainController().getPlayerResource();
 		if (((GradeBar) bar.getSelected()).existsAllSongs()) {
 			resource.clear();
-			List<File> files = new ArrayList<File>();
+			List<Path> files = new ArrayList<Path>();
 			for (SongData song : ((GradeBar) bar.getSelected()).getSongDatas()) {
-				files.add(new File(song.getPath()));
+				files.add(Paths.get(song.getPath()));
 			}
-			if (resource.setCourseBMSFiles(files.toArray(new File[0]))) {
+			if (resource.setCourseBMSFiles(files.toArray(new Path[files.size()]))) {
 				for (int constraint : ((GradeBar) bar.getSelected()).getConstraint()) {
 					switch (constraint) {
 					case TableData.GRADE_NORMAL:

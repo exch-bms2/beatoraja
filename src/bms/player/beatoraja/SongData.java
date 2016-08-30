@@ -3,12 +3,22 @@ package bms.player.beatoraja;
 import java.util.ArrayList;
 import java.util.List;
 
+import bms.model.BMSModel;
+import bms.model.TimeLine;
+
 /**
  * 楽曲データ
  * 
  * @author exch
  */
 public class SongData {
+	
+	public static final int FEATURE_LONGNOTE = 1;
+	public static final int FEATURE_MINENOTE = 2;
+	public static final int FEATURE_RANDOM = 4;
+
+	public static final int CONTENT_TEXT = 1;
+	public static final int CONTENT_BGA = 2;
 	
 	/**
 	 * 楽曲タイトル
@@ -42,9 +52,47 @@ public class SongData {
 	private int mode;
 	private int feature;
 	private int difficulty;
+	private int judge;
 	private int minbpm;
 	private int maxbpm;
 	private int content;
+	private int notes;
+	
+	private TimeLine[] timelines;
+	
+	public SongData() {
+		
+	}
+	
+	public SongData(BMSModel model, boolean containstxt) {
+		title = model.getTitle();
+		subtitle = model.getSubTitle();
+		genre = model.getGenre();
+		artist = model.getArtist();
+		subartist = model.getSubArtist();
+		path.add(model.getPath());
+		md5 = model.getMD5();
+		sha256 = model.getSHA256();
+		banner = model.getBanner();
+		try {
+			level = Integer.parseInt(model.getPlaylevel());			
+		} catch(NumberFormatException e) {
+			
+		}
+		mode = model.getUseKeys();
+		difficulty = model.getDifficulty();
+		minbpm = (int) model.getMinBPM();
+		maxbpm = (int) model.getMaxBPM();
+		notes = model.getTotalNotes();
+		
+		timelines = model.getAllTimeLines();
+		
+		feature = model.containsLongNote() ? FEATURE_LONGNOTE : 0;
+		feature += model.containsMineNote() ? FEATURE_MINENOTE : 0;
+		feature += model.getRandom() > 1 ? FEATURE_RANDOM : 0;
+		content = containstxt ? CONTENT_TEXT : 0;
+		content += model.getBgaList().length > 0 ? CONTENT_BGA : 0;
+	}
 
 	public int getFavorite() {
 		return favorite;
@@ -212,4 +260,23 @@ public class SongData {
 		this.content = content;
 	}
 
+	public int getNotes() {
+		return notes;
+	}
+
+	public void setNotes(int totalnotes) {
+		this.notes = totalnotes;
+	}
+
+	public int getJudge() {
+		return judge;
+	}
+
+	public void setJudge(int judge) {
+		this.judge = judge;
+	}
+
+	public TimeLine[] getTimelines() {
+		return timelines;
+	}
 }

@@ -1,6 +1,9 @@
 package bms.player.beatoraja.play.bga;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -26,8 +29,6 @@ import com.badlogic.gdx.math.Rectangle;
  * @author exch
  */
 public class BGAProcessor {
-
-	// TODO VLC依存の切り離し
 
 	private BMSModel model;
 	private Config config;
@@ -151,21 +152,21 @@ public class BGAProcessor {
 		blanktex = new Texture(blank);
 	}
 
-	public void setModel(BMSModel model, String filepath) {
+	public void setModel(BMSModel model) {
 		this.model = model;
 		// BMS格納ディレクトリ
-		String directorypath = filepath.substring(0, filepath.lastIndexOf(File.separatorChar) + 1);
+		Path dpath = Paths.get(model.getPath()).getParent();
 
 		dispose();
 		progress = 0;
 
 		String stage = model.getStagefile();
 		if (stage != null && stage.length() > 0) {
-			stagefilep = this.loadPicture(new File(directorypath + stage));
+			stagefilep = this.loadPicture(dpath.resolve(stage));
 		}
 		String back = model.getBackbmp();
 		if (back != null && back.length() > 0) {
-			backbmpp = this.loadPicture(new File(directorypath + back));
+			backbmpp = this.loadPicture(dpath.resolve(back));
 		}
 
 		Pixmap[] bgamap = new Pixmap[model.getBgaList().length];
@@ -174,22 +175,22 @@ public class BGAProcessor {
 			if (progress == 1) {
 				break;
 			}
-			File f = null;
-			if (new File(directorypath + name).exists()) {
-				f = new File(directorypath + name);
+			Path f = null;
+			if (Files.exists(dpath.resolve(name))) {
+				f = dpath.resolve(name);
 			}
 			if (f == null) {
 				name = name.substring(0, name.lastIndexOf('.'));
 				for (String mov : mov_extension) {
-					File mpgfile = new File(directorypath + name + "." + mov);
-					if (mpgfile.exists()) {
+					final Path mpgfile = dpath.resolve(name + "." + mov);
+					if (Files.exists(mpgfile)) {
 						f = mpgfile;
 						break;
 					}
 				}
 				for (String mov : pic_extension) {
-					File picfile = new File(directorypath + name + "." + mov);
-					if (picfile.exists()) {
+					final Path picfile = dpath.resolve(name + "." + mov);
+					if (Files.exists(picfile)) {
 						f = picfile;
 						break;
 					}
@@ -198,7 +199,7 @@ public class BGAProcessor {
 
 			if (f != null) {
 				for (String mov : mov_extension) {
-					if (f.getName().endsWith(mov)) {
+					if (f.getFileName().toString().endsWith(mov)) {
 						try {
 							MovieProcessor mm = this.loadMovie(id, f);
 							mpgmap.put(id, mm);
@@ -223,26 +224,26 @@ public class BGAProcessor {
 		progress = 1;
 	}
 
-	private MovieProcessor loadMovie(int id, File f) throws Exception {
+	private MovieProcessor loadMovie(int id, Path p) throws Exception {
 		if (config.getMovieplayer() == Config.MOVIEPLAYER_FFMPEG) {
 			MovieProcessor mm = new FFmpegProcessor(config.getFrameskip());
-			mm.create(f.getPath());
+			mm.create(p.toString());
 			return mm;
 		}
 		if (config.getMovieplayer() == Config.MOVIEPLAYER_VLC && config.getVlcpath().length() > 0) {
 			MovieProcessor mm = new VLCMovieProcessor(config.getVlcpath());
-			mm.create(f.getPath());
+			mm.create(p.toString());
 			return mm;
 		}
 		return null;
 	}
 
-	private Pixmap loadPicture(File dir) {
+	private Pixmap loadPicture(Path dir) {
 		Pixmap tex = null;
 		for (String mov : pic_extension) {
-			if (dir.getName().endsWith(mov)) {
+			if (dir.toString().endsWith(mov)) {
 				try {
-					tex = new Pixmap(Gdx.files.internal(dir.getPath()));
+					tex = new Pixmap(Gdx.files.internal(dir.toString()));
 					// System.out.println("BGA Picture loaded  : " +
 					// dir.getName());
 					break;

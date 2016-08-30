@@ -1,8 +1,9 @@
 package bms.player.beatoraja;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -52,7 +53,7 @@ public class PlayerResource {
 	 */
 	private List<Float> gauge;
 
-	private List<List<Float>> coursegauge = new ArrayList();
+	private List<List<Float>> coursegauge = new ArrayList<List<Float>>();
 
 	/**
 	 * コースタイトル
@@ -98,20 +99,20 @@ public class PlayerResource {
 		constraint.clear();
 	}
 
-	public boolean setBMSFile(final File f, final Config config, int autoplay) {
+	public boolean setBMSFile(final Path f, final Config config, int autoplay) {
 		this.config = config;
 		this.auto = autoplay;
 		replay = new ReplayData();
 		String bmspath = model != null ? model.getPath() : null;
 		model = loadBMSModel(f);
 		if(model == null) {
-			Logger.getGlobal().warning("楽曲が存在しないか、解析時にエラーが発生しました:" + f.getPath());
+			Logger.getGlobal().warning("楽曲が存在しないか、解析時にエラーが発生しました:" + f.toString());
 			return false;
 		}
 		if (model.getAllTimeLines().length == 0) {
 			return false;
 		}
-		if (bmspath == null || !f.getAbsolutePath().equals(bmspath) || bgashow != config.getBga()) {
+		if (bmspath == null || !f.toAbsolutePath().toString().equals(bmspath) || bgashow != config.getBga()) {
 			// 前回と違うbmsファイルを読み込んだ場合、BGAオプション変更時はリソースのロード
 			// 同フォルダの違うbmsファイルでも、WAV/,BMP定義が違う可能性があるのでロード
 			this.bgashow = config.getBga();
@@ -128,11 +129,11 @@ public class PlayerResource {
 				public void run() {
 					try {
 						if (config.getBga() == Config.BGA_ON || (config.getBga() == Config.BGA_AUTO && (auto != 0))) {
-							bga.setModel(model, f.getPath());
+							bga.setModel(model);
 						} else {
 							bga.forceFinish();
 						}
-						audio.setModel(model, f.getPath());
+						audio.setModel(model);
 					} catch (Exception e) {
 						Logger.getGlobal().severe(e.getClass().getName() + " : " + e.getMessage());
 						e.printStackTrace();
@@ -149,11 +150,11 @@ public class PlayerResource {
 		return true;
 	}
 
-	private BMSModel loadBMSModel(File f) {
+	private BMSModel loadBMSModel(Path f) {
 		BMSModel model;
-		if (f.getPath().toLowerCase().endsWith(".bmson")) {
+		if (f.toString().toLowerCase().endsWith(".bmson")) {
 			BMSONDecoder decoder = new BMSONDecoder(BMSModel.LNTYPE_CHARGENOTE);
-			model = decoder.decode(f);
+			model = decoder.decode(f.toFile());
 			if(model == null) {
 				return null;
 			}
@@ -164,7 +165,7 @@ public class PlayerResource {
 			model.setTotal(model.getTotal() / 100.0 * 7.605 * totalnotes / (0.01 * totalnotes + 6.5));
 		} else {
 			BMSDecoder decoder = new BMSDecoder(BMSModel.LNTYPE_CHARGENOTE);
-			model = decoder.decode(f);
+			model = decoder.decode(f.toFile());
 			if(model == null) {
 				return null;
 			}
@@ -225,9 +226,9 @@ public class PlayerResource {
 		this.rscore = rscore;
 	}
 
-	public boolean setCourseBMSFiles(File[] files) {
+	public boolean setCourseBMSFiles(Path[] files) {
 		List<BMSModel> models = new ArrayList();
-		for (File f : files) {
+		for (Path f : files) {
 			BMSModel model = loadBMSModel(f);
 			if(model == null) {
 				return false;
@@ -247,15 +248,14 @@ public class PlayerResource {
 		if (courseindex == course.length) {
 			return false;
 		} else {
-			setBMSFile(new File(course[courseindex].getPath()), config, auto);
+			setBMSFile(Paths.get(course[courseindex].getPath()), config, auto);
 			return true;
 		}
 	}
 
 	public void reloadBMSFile() {
 		if(model != null) {
-			File f = new File(model.getPath());
-			model = loadBMSModel(f);
+			model = loadBMSModel(Paths.get(model.getPath()));
 		}
 		clear();
 	}
@@ -321,7 +321,7 @@ public class PlayerResource {
 	}
 
 	public void addCourseGauge(List<Float> gauge) {
-		coursegauge.add(new ArrayList(gauge));
+		coursegauge.add(new ArrayList<Float>(gauge));
 	}
 
 	public int getCombo() {

@@ -9,7 +9,7 @@ public interface AudioProcessor {
 	 * @param model
 	 * @param filepath
 	 */
-	public void setModel(BMSModel model, String filepath);
+	public void setModel(BMSModel model);
 
 	/**
 	 * 音源の読み込み状況を返す
