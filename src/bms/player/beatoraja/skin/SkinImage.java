@@ -93,7 +93,7 @@ public class SkinImage extends SkinObject {
             Rectangle r = this.getDestination(time, state);
             TextureRegion tr = state.getImage(imageid);
             if (r != null && tr != null) {
-                draw(sprite, tr, r.x, r.y, r.width, r.height, getColor(time,state));
+                draw(sprite, tr, r.x, r.y, r.width, r.height, getColor(time,state),getAngle(time,state));
             }
         } else {
             if(image == null) {
@@ -113,7 +113,7 @@ public class SkinImage extends SkinObject {
             Rectangle r = this.getDestination(time, state);
             if (r != null) {
                 if(value >= 0 && value < image.length) {
-                    draw(sprite, getImage(value, time, state), r.x, r.y, r.width, r.height, getColor(time,state));
+                    draw(sprite, getImage(value, time, state), r.x, r.y, r.width, r.height, getColor(time,state),getAngle(time,state));
                 }
             }
         }

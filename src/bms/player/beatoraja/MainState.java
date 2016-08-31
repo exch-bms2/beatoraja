@@ -3,9 +3,7 @@ package bms.player.beatoraja;
 import java.util.Arrays;
 import java.util.Calendar;
 
-import bms.model.BMSModel;
 import bms.player.beatoraja.skin.Skin;
-import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 public abstract class MainState {
@@ -25,6 +23,28 @@ public abstract class MainState {
 	public static final int TIMER_STARTINPUT = 1;
 	public static final int TIMER_FADEOUT = 2;
 	public static final int TIMER_FAILED = 3;
+
+	public static final int TIMER_SONGBAR_MOVE = 10;
+	public static final int TIMER_SONGBAR_CHANGE = 11;
+	public static final int TIMER_SONGBAR_MOVE_UP = 12;
+	public static final int TIMER_SONGBAR_MOVE_DOWN = 13;
+	public static final int TIMER_SONGBAR_STOP = 14;
+	public static final int TIMER_README_BEGIN = 15;
+	public static final int TIMER_README_END = 16;
+
+	public static final int TIMER_PANEL1_ON = 21;
+	public static final int TIMER_PANEL2_ON = 22;
+	public static final int TIMER_PANEL3_ON = 23;
+	public static final int TIMER_PANEL4_ON = 24;
+	public static final int TIMER_PANEL5_ON = 25;
+	public static final int TIMER_PANEL6_ON = 26;
+	public static final int TIMER_PANEL1_OFF = 31;
+	public static final int TIMER_PANEL2_OFF = 32;
+	public static final int TIMER_PANEL3_OFF = 33;
+	public static final int TIMER_PANEL4_OFF = 34;
+	public static final int TIMER_PANEL5_OFF = 35;
+	public static final int TIMER_PANEL6_OFF = 36;
+
 	public static final int TIMER_READY = 40;
 	public static final int TIMER_PLAY = 41;
 	public static final int TIMER_GAUGE_INCLEASE_1P = 42;
@@ -223,17 +243,43 @@ public abstract class MainState {
 	public static final int OPTION_EXRANDOM = 930;
 	public static final int OPTION_EXSRANDOM = 931;
 
+	public static final int OPTION_DIFFICULTY0 = 150;
+	public static final int OPTION_DIFFICULTY1 = 151;
+	public static final int OPTION_DIFFICULTY2 = 152;
+	public static final int OPTION_DIFFICULTY3 = 153;
+	public static final int OPTION_DIFFICULTY4 = 154;
+	public static final int OPTION_DIFFICULTY5 = 155;
+
 	public static final int OPTION_7KEYSONG = 160;
 	public static final int OPTION_5KEYSONG = 161;
 	public static final int OPTION_14KEYSONG = 162;
 	public static final int OPTION_10KEYSONG = 163;
 	public static final int OPTION_9KEYSONG = 164;
-	public static final int OPTION_STAGEFILE = 190;
-	public static final int OPTION_NO_STAGEFILE = 191;
-	public static final int OPTION_BANNER = 192;
-	public static final int OPTION_NO_BANNER = 193;
-	public static final int OPTION_BACKBMP = 194;
-	public static final int OPTION_NO_BACKBMP = 195;
+
+	public static final int OPTION_NO_BGA = 170;
+	public static final int OPTION_BGA = 171;
+	public static final int OPTION_NO_LN = 172;
+	public static final int OPTION_LN = 173;
+	public static final int OPTION_NO_TEXT = 174;
+	public static final int OPTION_TEXT = 175;
+	public static final int OPTION_NO_BPMCHANGE = 176;
+	public static final int OPTION_BPMCHANGE = 177;
+	public static final int OPTION_NO_RANDOMSEQUENCE = 178;
+	public static final int OPTION_RANDOMSEQUENCE = 179;
+
+	public static final int OPTION_JUDGE_VERYHARD = 180;
+	public static final int OPTION_JUDGE_HARD = 181;
+	public static final int OPTION_JUDGE_NORMAL = 182;
+	public static final int OPTION_JUDGE_EASY = 183;
+
+	public static final int OPTION_NO_STAGEFILE = 190;
+	public static final int OPTION_STAGEFILE = 191;
+	public static final int OPTION_NO_BANNER = 192;
+	public static final int OPTION_BANNER = 193;
+	public static final int OPTION_NO_BACKBMP = 194;
+	public static final int OPTION_BACKBMP = 195;
+	public static final int OPTION_NO_REPLAYDATA = 196;
+	public static final int OPTION_REPLAYDATA = 197;
 
 	public static final int OPTION_1P_AAA = 200;
 	public static final int OPTION_1P_AA = 201;
@@ -378,7 +424,7 @@ public abstract class MainState {
 	}
 	
 	public boolean getBooleanValue(int id) {
-		final BMSModel model = getMainController().getPlayerResource().getBMSModel();
+		final SongData model = getMainController().getPlayerResource().getSongdata();
 		switch(id) {
 		case OPTION_STAGEFILE:
 			return model != null && model.getStagefile().length() > 0;
@@ -394,6 +440,50 @@ public abstract class MainState {
 			return model != null && model.getBanner().length() == 0;
 		case OPTION_BGAEXTEND:
 			return true;
+			case OPTION_DIFFICULTY0:
+				return model != null && (model.getDifficulty() <= 0 || model.getDifficulty() > 5);
+			case OPTION_DIFFICULTY1:
+				return model != null && model.getDifficulty() == 1;
+			case OPTION_DIFFICULTY2:
+				return model != null && model.getDifficulty() == 2;
+			case OPTION_DIFFICULTY3:
+				return model != null && model.getDifficulty() == 3;
+			case OPTION_DIFFICULTY4:
+				return model != null && model.getDifficulty() == 4;
+			case OPTION_DIFFICULTY5:
+				return model != null && model.getDifficulty() == 5;
+				
+			case OPTION_5KEYSONG:
+				return model != null && model.getMode() == 5;
+			case OPTION_7KEYSONG:
+				return model != null && model.getMode() == 7;
+			case OPTION_9KEYSONG:
+				return model != null && model.getMode() == 9;
+			case OPTION_10KEYSONG:
+				return model != null && model.getMode() == 10;
+			case OPTION_14KEYSONG:			
+				return model != null && model.getMode() == 14;
+				case OPTION_NO_TEXT:
+					return model != null && !model.hasDocument();
+				case OPTION_TEXT:
+					return model != null && model.hasDocument();
+				case OPTION_NO_LN:
+					return model != null && !model.hasLongNote();
+				case OPTION_LN:
+					return model != null && model.hasLongNote();
+				case OPTION_NO_BGA:
+					return model != null && !model.hasBGA();
+				case OPTION_BGA:
+					return model != null && model.hasBGA();
+				case OPTION_NO_RANDOMSEQUENCE:
+					return model != null && !model.hasRandomSequence();
+				case OPTION_RANDOMSEQUENCE:
+					return model != null && model.hasRandomSequence();
+				case OPTION_NO_BPMCHANGE:
+					return model != null && model.getMinbpm() == model.getMaxbpm();
+				case OPTION_BPMCHANGE:
+					return model != null && model.getMinbpm() < model.getMaxbpm();
+
 		}
 		return false;
 	}
@@ -497,6 +587,22 @@ public abstract class MainState {
 				return getMainController().getPlayerResource().getConfig().isBpmguide() ? 1 : 0;
 			case BUTTON_ASSIST_NOMINE:
 				return getMainController().getPlayerResource().getConfig().isNomine() ? 1 : 0;
+			case NUMBER_TOTALNOTES:
+				if (getMainController().getPlayerResource().getSongdata() != null) {
+					return getMainController().getPlayerResource().getSongdata().getNotes();
+				}
+				return Integer.MIN_VALUE;
+			case NUMBER_MINBPM:
+				if (getMainController().getPlayerResource().getSongdata() != null) {
+					return getMainController().getPlayerResource().getSongdata().getMinbpm();
+				}
+				return Integer.MIN_VALUE;
+			case NUMBER_MAXBPM:
+				if (getMainController().getPlayerResource().getSongdata() != null) {
+					return getMainController().getPlayerResource().getSongdata().getMaxbpm();
+				}
+				return Integer.MIN_VALUE;
+
 		}
 		return 0;
 	}
@@ -507,19 +613,20 @@ public abstract class MainState {
 	
 	public String getTextValue(int id) {
 		if(getMainController().getPlayerResource() != null) {
+			SongData song = getMainController().getPlayerResource().getSongdata();
 			switch(id) {
 			case STRING_TITLE:
-				return getMainController().getPlayerResource().getBMSModel().getTitle();
+				return song != null ? song.getTitle() : "";
 			case STRING_SUBTITLE:
-				return getMainController().getPlayerResource().getBMSModel().getSubTitle();
+				return song != null ? song.getSubtitle() : "";
 			case STRING_FULLTITLE:
-				return getMainController().getPlayerResource().getBMSModel().getFullTitle();
+				return song != null ? song.getTitle() + " " + song.getSubtitle() : "";
 			case STRING_ARTIST:
-				return getMainController().getPlayerResource().getBMSModel().getArtist();
+				return song != null ? song.getArtist() : "";
 			case STRING_SUBARTIST:
-				return getMainController().getPlayerResource().getBMSModel().getSubTitle();
+				return song != null ? song.getSubartist() : "";
 			case STRING_GENRE:
-				return getMainController().getPlayerResource().getBMSModel().getGenre();
+				return song != null ? song.getGenre() : "";
 			}
 		}
 		return "";

@@ -448,7 +448,6 @@ public class BarRenderer {
 			Config config = select.getResource().getConfig();
 			for (Bar bar : bars) {
 				if (bar instanceof SongBar) {
-					setBanner((SongBar) bar);
 					SongData sd = ((SongBar) bar).getSongData();
 					bar.setScore(select.readScoreData(sd, config.getLnmode()));
 					boolean[] replay = new boolean[MusicSelector.REPLAY];
@@ -489,6 +488,14 @@ public class BarRenderer {
 					if (bar instanceof TableLevelBar) {
 						((TableLevelBar) bar).updateFolderStatus();
 					}
+				}
+				if (stop) {
+					break;
+				}
+			}
+			for (Bar bar : bars) {
+				if (bar instanceof SongBar) {
+					setBanner((SongBar) bar);
 				}
 				if (stop) {
 					break;

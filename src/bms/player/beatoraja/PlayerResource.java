@@ -1,6 +1,5 @@
 package bms.player.beatoraja;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -19,7 +18,13 @@ import bms.player.beatoraja.play.bga.BGAProcessor;
  * @author exch
  */
 public class PlayerResource {
+	/**
+	 * 選曲中のBMS
+	 */
 	private BMSModel model;
+	
+	private SongData songdata;
+	
 	private Config config;
 	private int auto;
 
@@ -361,5 +366,13 @@ public class PlayerResource {
 			bga.dispose();
 			bga = null;
 		}
+	}
+
+	public SongData getSongdata() {
+		return songdata;
+	}
+
+	public void setSongdata(SongData songdata) {
+		this.songdata = songdata;
 	}
 }

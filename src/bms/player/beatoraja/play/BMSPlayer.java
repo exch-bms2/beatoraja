@@ -100,9 +100,6 @@ public class BMSPlayer extends MainState {
 	private BitmapFont judgefont;
 	private BitmapFont systemfont;
 	private BMSModel model;
-	private int totalnotes;
-	private int minbpm;
-	private int maxbpm;
 
 	private BMSPlayerInputProcessor input;
 	private LaneRenderer lanerender;
@@ -249,20 +246,19 @@ public class BMSPlayer extends MainState {
 						config.getLr2playskinoption());
 			} catch (IOException e) {
 				e.printStackTrace();
-				skin = new PlaySkin(model.getUseKeys(), MainController.RESOLUTION[resource.getConfig().getResolution()]);
+				skin = new PlaySkin(model.getUseKeys(), config.isUse2pside(), MainController.RESOLUTION[resource
+						.getConfig().getResolution()]);
 			}
 		} else {
-			skin = new PlaySkin(model.getUseKeys(), MainController.RESOLUTION[resource.getConfig().getResolution()]);
+			skin = new PlaySkin(model.getUseKeys(), config.isUse2pside(), MainController.RESOLUTION[resource
+					.getConfig().getResolution()]);
 		}
 		this.setSkin(skin);
 
-		minbpm = (int) model.getMinBPM();
-		maxbpm = (int) model.getMaxBPM();
 		judge = new JudgeManager(this, model, resource.getConstraint());
 		if (exjudge) {
 			judge.setExpandJudge(JudgeManager.EXPAND_JUDGE);
 		}
-		totalnotes = model.getTotalNotes();
 
 		Logger.getGlobal().info("アシストオプション設定完了");
 		if (replay != null) {
@@ -364,6 +360,7 @@ public class BMSPlayer extends MainState {
 			}
 		}
 		resource.setUpdateScore(score);
+		resource.setSongdata(new SongData(model, false));
 
 		List<Float> f = resource.getGauge();
 		if (f != null) {
@@ -411,6 +408,7 @@ public class BMSPlayer extends MainState {
 		Logger.getGlobal().info("create");
 
 		input = main.getInputProcessor();
+		input.setMinimumInputDutration(config.getInputduration());
 		input.setEnableKeyInput(autoplay == 0);
 		PlayConfig pc = (model.getUseKeys() == 5 || model.getUseKeys() == 7 ? config.getMode7()
 				: (model.getUseKeys() == 10 || model.getUseKeys() == 14 ? config.getMode14() : config.getMode9()));
@@ -561,9 +559,9 @@ public class BMSPlayer extends MainState {
 			if (keyinput != null) {
 				keyinput.stop = true;
 			}
-			resource.getAudioProcessor().stop(-1, 0, 0);
 			long l2 = now - getTimer()[TIMER_FADEOUT];
 			if (l2 > skin.getFadeoutTime()) {
+				resource.getAudioProcessor().stop(-1, 0, 0);
 				resource.getBGAManager().stop();
 				if (keyinput != null) {
 					Logger.getGlobal().info("入力パフォーマンス(max ms) : " + keyinput.frametimes);
@@ -693,7 +691,7 @@ public class BMSPlayer extends MainState {
 		score.setEms(judge.getJudgeCount(5, true));
 		score.setLms(judge.getJudgeCount(5, false));
 
-		final int misscount = bad + poor + miss + totalnotes - notes;
+		final int misscount = bad + poor + miss + resource.getSongdata().getNotes() - notes;
 		score.setMinbp(misscount);
 		return score;
 	}
@@ -702,7 +700,7 @@ public class BMSPlayer extends MainState {
 		if (getTimer()[TIMER_FAILED] != -1 || getTimer()[TIMER_FADEOUT] != -1) {
 			return;
 		}
-		if (notes == totalnotes) {
+		if (notes == getMainController().getPlayerResource().getSongdata().getNotes()) {
 			state = STATE_FINISHED;
 			getTimer()[TIMER_FADEOUT] = getNowTime();
 			Logger.getGlobal().info("STATE_FINISHEDに移行");
@@ -776,10 +774,15 @@ public class BMSPlayer extends MainState {
 		// "Now count : " + notes + " - " + totalnotes);
 		lanerender.update(lane, judge, time, fast);
 
-		rate = (this.judge.getJudgeCount(0) * 2 + this.judge.getJudgeCount(1)) * 10000 / totalnotes;
+		rate = (this.judge.getJudgeCount(0) * 2 + this.judge.getJudgeCount(1)) * 10000
+				/ getMainController().getPlayerResource().getSongdata().getNotes();
 
-		if(notes == totalnotes && getTimer()[TIMER_ENDOFNOTE_1P] == -1) {
+		if (notes == getMainController().getPlayerResource().getSongdata().getNotes()
+				&& getTimer()[TIMER_ENDOFNOTE_1P] == -1) {
 			getTimer()[TIMER_ENDOFNOTE_1P] = time;
+			if (this.judge.getJudgeCount(3) == 0 && this.judge.getJudgeCount(4) == 0) {
+				getTimer()[TIMER_FULLCOMBO_1P] = time;
+			}
 		}
 	}
 
@@ -947,28 +950,16 @@ public class BMSPlayer extends MainState {
 			return (int) (lanerender.getHispeed() * 100) % 100;
 		case NUMBER_DURATION:
 			return lanerender.getGreenValue();
-		case NUMBER_TOTALNOTES:
-			return totalnotes;
-		case NUMBER_MINBPM:
-			if (minbpm != maxbpm) {
-				return minbpm;
-			}
-			return Integer.MIN_VALUE;
 		case NUMBER_NOWBPM:
 			return (int) lanerender.getNowBPM();
-		case NUMBER_MAXBPM:
-			if (minbpm != maxbpm) {
-				return maxbpm;
-			}
-			return Integer.MIN_VALUE;
 		case NUMBER_SCORE:
 			return judge.getJudgeCount(0) * 2 + judge.getJudgeCount(1);
 		case NUMBER_TARGET_SCORE:
 			return rivalscore;
 		case NUMBER_SCORE_RATE:
-			return (judge.getJudgeCount(0) * 2 + judge.getJudgeCount(1)) * 100 / (totalnotes * 2);
+			return (judge.getJudgeCount(0) * 2 + judge.getJudgeCount(1)) * 100 / (getMainController().getPlayerResource().getSongdata().getNotes() * 2);
 		case NUMBER_SCORE_RATE_AFTERDOT:
-			return ((judge.getJudgeCount(0) * 2 + judge.getJudgeCount(1)) * 1000 / (totalnotes * 2)) % 10;
+			return ((judge.getJudgeCount(0) * 2 + judge.getJudgeCount(1)) * 1000 / (getMainController().getPlayerResource().getSongdata().getNotes() * 2)) % 10;
 		case NUMBER_HIGHSCORE:
 			return bestscore;
 		case NUMBER_MAXCOMBO:
@@ -1001,17 +992,17 @@ public class BMSPlayer extends MainState {
 			}
 			return 0;
 		case BARGRAPH_SCORERATE:
-			return (float) (judge.getJudgeCount(0) * 2 + judge.getJudgeCount(1)) / (totalnotes * 2);
+			return (float) (judge.getJudgeCount(0) * 2 + judge.getJudgeCount(1)) / (getMainController().getPlayerResource().getSongdata().getNotes() * 2);
 		case BARGRAPH_BESTSCORERATE:
-			return (float) (bestscore) / (totalnotes * 2);
+			return (float) (bestscore) / (getMainController().getPlayerResource().getSongdata().getNotes() * 2);
 		case BARGRAPH_TARGETSCORERATE:
-			return (float) (rivalscore) / (totalnotes * 2);
+			return (float) (rivalscore) / (getMainController().getPlayerResource().getSongdata().getNotes() * 2);
 		}
 		return 0;
 	}
 
 	private int rate;
-	
+
 	public boolean getBooleanValue(int id) {
 		switch (id) {
 		case OPTION_F:
@@ -1055,7 +1046,7 @@ public class BMSPlayer extends MainState {
 					|| (getMainController().getPlayerResource().getConfig().getBga() == Config.BGA_AUTO && (autoplay != 0));
 		case OPTION_BGAOFF:
 			return getMainController().getPlayerResource().getConfig().getBga() == Config.BGA_OFF
-			|| (getMainController().getPlayerResource().getConfig().getBga() == Config.BGA_AUTO && (autoplay == 0));
+					|| (getMainController().getPlayerResource().getConfig().getBga() == Config.BGA_AUTO && (autoplay == 0));
 		}
 		return super.getBooleanValue(id);
 	}

@@ -22,12 +22,22 @@ public abstract class SkinObject {
 	private int offsetY = -1;
 
 	private int dsttimer = 0;
+	private int dstloop = 0;
+	private int dstblend = 0;
+	private int dstfilter;
+	private int dstcenter;
+
 	private int[] dstop = new int[0];
+
 	private List<SkinObjectDestination> dst = new ArrayList<SkinObjectDestination>();
 
 	private Rectangle r = new Rectangle();
 	private Color c = new Color();
-	
+
+	private Rectangle fixr = null;
+	private Color fixc = null;
+	private int fixa = Integer.MIN_VALUE;
+
 	public void setDestination(long time, float x, float y, float w, float h, int acc, int a, int r, int g, int b,
 			int blend, int filter, int angle, int center, int loop, int timer, int op1, int op2, int op3) {
 		SkinObjectDestination obj = new SkinObjectDestination();
@@ -35,13 +45,37 @@ public abstract class SkinObject {
 		obj.region = new Rectangle(x, y, w, h);
 		obj.acc = acc;
 		obj.color = new Color(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f);
-		obj.blend = blend;
-		obj.filter = filter;
 		obj.angle = angle;
-		obj.center = center;
-		obj.loop = loop;
+		if(dst.size() == 0) {
+			fixr = obj.region;
+			fixc = obj.color;
+			fixa = obj.angle;
+		} else {
+			if(!obj.region.equals(fixr)) {
+				fixr = null;
+			}
+			if(!obj.color.equals(fixc)) {
+				fixc = null;
+			}
+			if(!(fixa == obj.angle)) {
+				fixa = Integer.MIN_VALUE;
+			}
+		}
+		if(dstblend == 0) {
+			dstblend = blend;
+		}
+		if(dstfilter == 0) {
+			dstfilter = filter;
+		}
+		obj.angle = angle;
+		if(dstcenter == 0) {
+			dstcenter = center;
+		}
 		if(dsttimer == 0) {
 			dsttimer = timer;			
+		}
+		if(dstloop == 0) {
+			dstloop = loop;
 		}
 		if(dstop.length == 0) {
 			dstop = new int[] { op1, op2, op3 };
@@ -87,39 +121,53 @@ public abstract class SkinObject {
 			return null;
 		}
 		long lasttime = dst.get(dst.size() - 1).time;
-		int loop = dst.get(0).loop;
-		if (lasttime > 0 && time > loop) {
-			if (lasttime - loop == 0) {
-				time = loop;
-			} else {
-				time = (time - loop) % (lasttime - loop) + loop;
+		if(dstloop == -1) {
+			if(lasttime < time) {
+				return null;
 			}
+		} else if (lasttime > 0 && time > dstloop) {
+			if (lasttime == dstloop) {
+				time = dstloop;
+			} else {
+				time = (time - dstloop) % (lasttime - dstloop) + dstloop;
+			}
+		}
+		if(fixr == null) {
+			for (int i = 0; i < dst.size() - 1; i++) {
+				final SkinObjectDestination obj1 = dst.get(i);
+				final SkinObjectDestination obj2 = dst.get(i + 1);
+				if (obj1.time <= time && obj2.time >= time) {
+					final Rectangle r1 = obj1.region;
+					final long time2 = obj2.time;
+					final Rectangle r2 = dst.get(i + 1).region;
+					r.x = r1.x + (r2.x - r1.x) * (time - obj1.time) / (time2 - obj1.time);
+					r.y = r1.y + (r2.y - r1.y) * (time - obj1.time) / (time2 - obj1.time);
+					r.width = r1.width + (r2.width - r1.width) * (time - obj1.time) / (time2 - obj1.time);
+					r.height = r1.height + (r2.height - r1.height) * (time - obj1.time) / (time2 - obj1.time);
+					if (state != null && offsetX != -1) {
+						r.x += state.getSliderValue(offsetX);
+					}
+					if (state != null && offsetY != -1) {
+						r.y += state.getSliderValue(offsetY);
+					}
+					return r;
+				}
+			}
+		} else {
+			if(offsetX == -1 && offsetY == -1) {
+				return fixr;
+			}
+			r.set(fixr);
+			if (state != null && offsetX != -1) {
+				r.x += state.getSliderValue(offsetX);
+			}
+			if (state != null && offsetY != -1) {
+				r.y += state.getSliderValue(offsetY);
+			}
+			return r;
 		}
 
-		for (int i = 0; i < dst.size() - 1; i++) {
-			final SkinObjectDestination obj1 = dst.get(i);
-			final SkinObjectDestination obj2 = dst.get(i + 1);
-			if (obj1.time <= time && obj2.time >= time) {
-				final Rectangle r1 = obj1.region;
-				final long time2 = obj2.time;
-				final Rectangle r2 = dst.get(i + 1).region;
-				r.x = r1.x + (r2.x - r1.x) * (time - obj1.time) / (time2 - obj1.time);
-				r.y = r1.y + (r2.y - r1.y) * (time - obj1.time) / (time2 - obj1.time);
-				r.width = r1.width + (r2.width - r1.width) * (time - obj1.time) / (time2 - obj1.time);
-				r.height = r1.height + (r2.height - r1.height) * (time - obj1.time) / (time2 - obj1.time);
-				if (state != null && offsetX != -1) {
-					r.x += state.getSliderValue(offsetX);
-				}
-				if (state != null && offsetY != -1) {
-					r.y += state.getSliderValue(offsetY);
-				}
-				return r;
-			}
-		}
-		r.x = dst.get(0).region.x;
-		r.y = dst.get(0).region.y;
-		r.width = dst.get(0).region.width;
-		r.height = dst.get(0).region.height;
+		r.set(dst.get(0).region);
 		if (state != null && offsetX != -1) {
 			r.x += state.getSliderValue(offsetX);
 		}
@@ -130,6 +178,9 @@ public abstract class SkinObject {
 	}
 
 	public Color getColor(long time, MainState state) {
+		if(fixc != null) {
+			return fixc;
+		}
 		final int timer = dsttimer;
 
 		if (timer != 0 && timer < 256) {
@@ -147,12 +198,11 @@ public abstract class SkinObject {
 			return new Color(0, 0, 0, 0);
 		}
 		long lasttime = dst.get(dst.size() - 1).time;
-		int loop = dst.get(0).loop;
-		if (lasttime > 0 && time > loop) {
-			if (lasttime - loop == 0) {
-				time = loop;
+		if (lasttime > 0 && time > dstloop) {
+			if (lasttime == dstloop) {
+				time = dstloop;
 			} else {
-				time = (time - loop) % (lasttime - loop) + loop;
+				time = (time - dstloop) % (lasttime - dstloop) + dstloop;
 			}
 		}
 		for (int i = 0; i < dst.size() - 1; i++) {
@@ -171,25 +221,63 @@ public abstract class SkinObject {
 		return dst.get(0).color;
 	}
 
+	public int getAngle(long time, MainState state) {
+		if(fixa != Integer.MIN_VALUE) {
+			return fixa;
+		}
+		final int timer = dsttimer;
+
+		if (timer != 0 && timer < 256) {
+			if (state.getTimer()[timer] == -1) {
+				return 0;
+			}
+			time -= state.getTimer()[timer];
+		}
+		if(time < 0) {
+			return 0;
+		}
+
+		if (dst.size() == 0) {
+			return 0;
+		}
+		long lasttime = dst.get(dst.size() - 1).time;
+		if (lasttime > 0 && time > dstloop) {
+			if (lasttime == dstloop) {
+				time = dstloop;
+			} else {
+				time = (time - dstloop) % (lasttime - dstloop) + dstloop;
+			}
+		}
+		for (int i = 0; i < dst.size() - 1; i++) {
+			final SkinObjectDestination obj1 = dst.get(i);
+			final SkinObjectDestination obj2 = dst.get(i + 1);
+			if (obj1.time <= time && obj2.time >= time) {
+				final int r1 = obj1.angle;
+				final int r2 = dst.get(i + 1).angle;
+				return (int) (r1 + (r2 - r1) * (time - obj1.time) / (obj2.time - obj1.time));
+			}
+		}
+		return dst.get(0).angle;
+	}
+
 	public abstract void draw(SpriteBatch sprite, long time, MainState state);
 
+	private final float[] centerx = {0,-0.5f,0, 0.5f, -0.5f,0,0.5f, -0.5f,0,0.5f};
+	private final float[] centery = {0,-0.5f,-0.5f,-0.5f, 0,0,0,0.5f,0.5f,0.5f};
+
 	protected void draw(SpriteBatch sprite, TextureRegion image, float x, float y, float width, float height,
-			Color color) {
+			Color color, int angle) {
 		if(color == null || image == null) {
 			return;
 		}
 		Color c = sprite.getColor();
-		final int blend = dst.get(0).blend;
-		final int angle = dst.get(0).angle;
-		final int center = dst.get(0).center;
-		final int filter = dst.get(0).filter;
-		if (blend == 2) {
+		if (dstblend == 2) {
 			sprite.setBlendFunction(GL11.GL_ONE, GL11.GL_ONE);
 		}
 		sprite.setColor(color);
-		sprite.draw(image, x, y, width, height);
+		sprite.draw(image, x, y, centerx[dstcenter] * width, centery[dstcenter] * height, width, height, 1,1,angle);
 		sprite.setColor(c);
-		if (blend >= 2) {
+		if (dstblend >= 2) {
 			sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		}
 	}
@@ -203,11 +291,7 @@ public abstract class SkinObject {
 		public Rectangle region;
 		public int acc;
 		public Color color;
-		public int blend;
-		public int filter;
 		public int angle;
-		public int center;
-		public int loop;
 	}
 
 	public abstract void dispose();

@@ -6,6 +6,9 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 
+/**
+ * グラフイメージ
+ */
 public class SkinGraph extends SkinObject {
 
 	/**
@@ -15,7 +18,6 @@ public class SkinGraph extends SkinObject {
 	private int cycle;
 
 	private int timing;
-	private int[] option = new int[3];
 
 	private int id = -1;
 
@@ -45,14 +47,6 @@ public class SkinGraph extends SkinObject {
 		this.timing = timing;
 	}
 
-	public int[] getOption() {
-		return option;
-	}
-
-	public void setOption(int[] option) {
-		this.option = option;
-	}
-
 	public void draw(SpriteBatch sprite, long time, MainState state) {
 		if (image == null) {
 			return;
@@ -67,7 +61,7 @@ public class SkinGraph extends SkinObject {
 //				sprite.draw(image, r.x, r.y, r.width, r.height);
 				draw(sprite, new TextureRegion(image, 0, image.getRegionY() + image.getRegionHeight()
 						- (int)(image.getRegionHeight() * value), image.getRegionWidth(), (int) ((int)image.getRegionHeight()
-                                                * value)), r.x, r.y, r.width, r.height * value, getColor(time, state));
+                                                * value)), r.x, r.y, r.width, r.height * value, getColor(time, state),getAngle(time,state));
 		}
 	}
 

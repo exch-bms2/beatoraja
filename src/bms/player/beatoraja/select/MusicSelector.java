@@ -118,7 +118,7 @@ public class MusicSelector extends MainState {
 	public static final int KEY_FOLDER_CLOSE = 7;
 
 	private int panelstate;
-	
+
 	public MusicSelector(MainController main, Config config) {
 		super(main);
 		this.config = config;
@@ -257,6 +257,7 @@ public class MusicSelector extends MainState {
 		aoption = new AssistOptionRenderer(config);
 		doption = new DetailOptionRenderer(config);
 
+		getTimer()[TIMER_SONGBAR_CHANGE] = getNowTime();
 	}
 
 	public void render() {
@@ -267,12 +268,13 @@ public class MusicSelector extends MainState {
 		final PlayerResource resource = main.getPlayerResource();
 		final Bar current = bar.getSelected();
 
+		final int nowtime = getNowTime();
 		// draw song information
 		sprite.begin();
 		titlefont.setColor(Color.WHITE);
 		if (current instanceof SongBar) {
-			SongData song = ((SongBar) current).getSongData();
-			titlefont.draw(sprite, "LEVEL : " + song.getLevel(), 100, 500);
+			resource.setSongdata(((SongBar) current).getSongData());
+			titlefont.draw(sprite, "LEVEL : " + resource.getSongdata().getLevel(), 100, 500);
 			if (current.getScore() != null) {
 				IRScoreData score = current.getScore();
 				titlefont.setColor(Color.WHITE);
@@ -292,6 +294,8 @@ public class MusicSelector extends MainState {
 				titlefont.setColor(Color.GREEN);
 				titlefont.draw(sprite, "Replay exists : " + sb.toString(), 100, 270);
 			}
+		} else {
+			resource.setSongdata(null);
 		}
 		// 段位用の表示(ミラー段位、EX段位)
 		if (current instanceof GradeBar) {
@@ -515,8 +519,9 @@ public class MusicSelector extends MainState {
 		long[] keytime = input.getTime();
 		boolean[] cursor = input.getCursorState();
 
+		final int prevpanelstate = panelstate;
 		panelstate = 0;
-		
+
 		if (input.startPressed()) {
 			panelstate = 1;
 			option.render(keystate, keytime);
@@ -622,6 +627,17 @@ public class MusicSelector extends MainState {
 			}
 		}
 
+		if (prevpanelstate != panelstate) {
+			if (prevpanelstate != 0) {
+				getTimer()[TIMER_PANEL1_OFF + prevpanelstate - 1] = nowtime;
+				getTimer()[TIMER_PANEL1_ON + prevpanelstate - 1] = -1;
+			}
+			if (panelstate != 0) {
+				getTimer()[TIMER_PANEL1_ON + panelstate - 1] = nowtime;
+				getTimer()[TIMER_PANEL1_OFF + panelstate - 1] = -1;
+			}
+		}
+
 		// song bar scroll
 		if (panelstate == 0 && (isPressed(keystate, keytime, KEY_UP, false)) || cursor[1]) {
 			long l = System.currentTimeMillis();
@@ -681,6 +697,9 @@ public class MusicSelector extends MainState {
 
 		if (bar.getSelected() != current || selectedreplay == -1) {
 			resetReplayIndex();
+		}
+		if (bar.getSelected() != current) {
+			getTimer()[TIMER_SONGBAR_CHANGE] = nowtime;
 		}
 
 		if (input.isExitPressed()) {
@@ -867,16 +886,6 @@ public class MusicSelector extends MainState {
 				return bar.getSelected().getScore().getCombo();
 			}
 			return Integer.MIN_VALUE;
-		case NUMBER_MINBPM:
-			if (bar.getSelected() instanceof SongBar) {
-				return ((SongBar) bar.getSelected()).getSongData().getMinbpm();
-			}
-			return Integer.MIN_VALUE;
-		case NUMBER_MAXBPM:
-			if (bar.getSelected() instanceof SongBar) {
-				return ((SongBar) bar.getSelected()).getSongData().getMaxbpm();
-			}
-			return Integer.MIN_VALUE;
 		case NUMBER_FOLDER_TOTALSONGS:
 			if (bar.getSelected() instanceof DirectoryBar) {
 				int[] lamps = ((DirectoryBar) bar.getSelected()).getLamps();
@@ -897,33 +906,6 @@ public class MusicSelector extends MainState {
 
 	public String getTextValue(int id) {
 		switch (id) {
-		case STRING_TITLE:
-			return bar.getSelected().getTitle();
-		case STRING_SUBTITLE:
-			if (bar.getSelected() instanceof SongBar) {
-				return ((SongBar) bar.getSelected()).getSongData().getSubtitle();
-			}
-			return "";
-		case STRING_FULLTITLE:
-			if (bar.getSelected() instanceof SongBar) {
-				return bar.getSelected().getTitle() + " " + ((SongBar) bar.getSelected()).getSongData().getSubtitle();
-			}
-			return bar.getSelected().getTitle();
-		case STRING_GENRE:
-			if (bar.getSelected() instanceof SongBar) {
-				return ((SongBar) bar.getSelected()).getSongData().getGenre();
-			}
-			return "";
-		case STRING_ARTIST:
-			if (bar.getSelected() instanceof SongBar) {
-				return ((SongBar) bar.getSelected()).getSongData().getArtist();
-			}
-			return "";
-		case STRING_SUBARTIST:
-			if (bar.getSelected() instanceof SongBar) {
-				return ((SongBar) bar.getSelected()).getSongData().getSubartist();
-			}
-			return "";
 		case STRING_COURSE1_TITLE:
 			if (bar.getSelected() instanceof GradeBar) {
 				if (((GradeBar) bar.getSelected()).getSongDatas().length > 0) {
@@ -979,7 +961,7 @@ public class MusicSelector extends MainState {
 			}
 			return str.toString();
 		}
-		return "";
+		return super.getTextValue(id);
 	}
 
 	PlayerResource getResource() {
@@ -1015,10 +997,10 @@ public class MusicSelector extends MainState {
 		bar.render(sprite, shape, skin, w, h, duration, angle, time);
 		sprite.begin();
 	}
-	
+
 	public boolean getBooleanValue(int id) {
 		final Bar current = bar.getSelected();
-		switch(id) {
+		switch (id) {
 		case OPTION_PANEL1:
 			return panelstate == 1;
 		case OPTION_PANEL2:
@@ -1031,16 +1013,6 @@ public class MusicSelector extends MainState {
 			return current instanceof DirectoryBar;
 		case OPTION_GRADEBAR:
 			return current instanceof GradeBar;
-		case OPTION_5KEYSONG:
-			return (current instanceof SongBar) && (((SongBar)current).getSongData().getMode() == 5);
-		case OPTION_7KEYSONG:
-			return (current instanceof SongBar) && (((SongBar)current).getSongData().getMode() == 7);
-		case OPTION_9KEYSONG:
-			return (current instanceof SongBar) && (((SongBar)current).getSongData().getMode() == 9);
-		case OPTION_10KEYSONG:
-			return (current instanceof SongBar) && (((SongBar)current).getSongData().getMode() == 10);
-		case OPTION_14KEYSONG:			
-			return (current instanceof SongBar) && (((SongBar)current).getSongData().getMode() == 14);
 		}
 		return super.getBooleanValue(id);
 	}

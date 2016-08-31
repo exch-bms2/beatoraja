@@ -27,6 +27,9 @@ import com.badlogic.gdx.utils.GdxRuntimeException;
 
 public class GradeResult extends MainState {
 
+	public static final int OPTION_RESULT_CLEAR = 90;
+	public static final int OPTION_RESULT_FAIL = 91;
+
 	private BitmapFont titlefont;
 	private String title;
 
@@ -81,7 +84,7 @@ public class GradeResult extends MainState {
 				&& resource.getCourseScoreData() != null
 				&& resource.getCourseScoreData().getClear() >= GrooveGauge.CLEARTYPE_EASY
 				&& !getMainController().getPlayDataAccessor().existsReplayData(resource.getCourseBMSModels(),
-						resource.getConfig().getLnmode(), 0, resource.getConstraint())) {
+				resource.getConfig().getLnmode(), 0, resource.getConstraint())) {
 			saveReplayData(0);
 		}
 
@@ -180,6 +183,12 @@ public class GradeResult extends MainState {
 		oldexscore = score.getExscore();
 		oldmisscount = score.getMinbp();
 		oldcombo = score.getCombo();
+		int notes = 0;
+		for (BMSModel model : resource.getCourseBMSModels()) {
+			notes += model.getTotalNotes();
+		}
+		rate = score.getExscore() * 10000 / (notes * 2);
+		oldrate = oldexscore * 10000 / (notes * 2);
 
 		getMainController().getPlayDataAccessor().writeScoreDara(newscore, models, resource.getConfig().getLnmode(),
 				random, resource.getConstraint(), resource.isUpdateScore());
@@ -202,18 +211,18 @@ public class GradeResult extends MainState {
 		IRScoreData score = resource.getCourseScoreData();
 		if (score != null) {
 			switch (judge) {
-			case 0:
-				return fast ? score.getEpg() : score.getLpg();
-			case 1:
-				return fast ? score.getEgr() : score.getLgr();
-			case 2:
-				return fast ? score.getEgd() : score.getLgd();
-			case 3:
-				return fast ? score.getEbd() : score.getLbd();
-			case 4:
-				return fast ? score.getEpr() : score.getLpr();
-			case 5:
-				return fast ? score.getEms() : score.getLms();
+				case 0:
+					return fast ? score.getEpg() : score.getLpg();
+				case 1:
+					return fast ? score.getEgr() : score.getLgr();
+				case 2:
+					return fast ? score.getEgd() : score.getLgd();
+				case 3:
+					return fast ? score.getEbd() : score.getLbd();
+				case 4:
+					return fast ? score.getEpr() : score.getLpr();
+				case 5:
+					return fast ? score.getEms() : score.getLms();
 			}
 		}
 		return 0;
@@ -222,70 +231,70 @@ public class GradeResult extends MainState {
 	public int getNumberValue(int id) {
 		final PlayerResource resource = getMainController().getPlayerResource();
 		switch (id) {
-		case NUMBER_CLEAR:
-			if (resource.getCourseScoreData() != null) {
-				return resource.getCourseScoreData().getClear();
-			}
-			return Integer.MIN_VALUE;
-		case NUMBER_TARGET_CLEAR:
-			return oldclear;
-		case NUMBER_TARGET_SCORE:
-			return oldexscore;
-		case NUMBER_SCORE:
-			if (resource.getCourseScoreData() != null) {
-				return resource.getCourseScoreData().getExscore();
-			}
-			return Integer.MIN_VALUE;
-		case NUMBER_DIFF_HIGHSCORE:
-			return resource.getCourseScoreData().getExscore() - oldexscore;
-		case NUMBER_MISSCOUNT:
-			if (resource.getCourseScoreData() != null) {
-				return resource.getCourseScoreData().getMinbp();
-			}
-			return Integer.MIN_VALUE;
-		case NUMBER_TARGET_MISSCOUNT:
-			if (oldmisscount == Integer.MAX_VALUE) {
+			case NUMBER_CLEAR:
+				if (resource.getCourseScoreData() != null) {
+					return resource.getCourseScoreData().getClear();
+				}
 				return Integer.MIN_VALUE;
-			}
-			return oldmisscount;
-		case NUMBER_DIFF_MISSCOUNT:
-			if (oldmisscount == Integer.MAX_VALUE) {
+			case NUMBER_TARGET_CLEAR:
+				return oldclear;
+			case NUMBER_TARGET_SCORE:
+				return oldexscore;
+			case NUMBER_SCORE:
+				if (resource.getCourseScoreData() != null) {
+					return resource.getCourseScoreData().getExscore();
+				}
 				return Integer.MIN_VALUE;
-			}
-			return resource.getCourseScoreData().getMinbp() - oldmisscount;
-		case NUMBER_TARGET_MAXCOMBO:
-			if (oldcombo > 0) {
-				return oldcombo;
-			}
-			return Integer.MIN_VALUE;
-		case NUMBER_MAXCOMBO:
-			if (resource.getCourseScoreData() != null) {
-				return resource.getCourseScoreData().getCombo();
-			}
-			return Integer.MIN_VALUE;
-		case NUMBER_DIFF_MAXCOMBO:
-			if (oldcombo == 0) {
+			case NUMBER_DIFF_HIGHSCORE:
+				return resource.getCourseScoreData().getExscore() - oldexscore;
+			case NUMBER_MISSCOUNT:
+				if (resource.getCourseScoreData() != null) {
+					return resource.getCourseScoreData().getMinbp();
+				}
 				return Integer.MIN_VALUE;
-			}
-			return resource.getCourseScoreData().getCombo() - oldcombo;
-		case NUMBER_TOTALNOTES:
-			int notes = 0;
-			for (BMSModel model : resource.getCourseBMSModels()) {
-				notes += model.getTotalNotes();
-			}
-			return notes;
-		case NUMBER_TOTALEARLY:
-			int ecount = 0;
-			for (int i = 1; i < 6; i++) {
-				ecount += getJudgeCount(i, true);
-			}
-			return ecount;
-		case NUMBER_TOTALLATE:
-			int count = 0;
-			for (int i = 1; i < 6; i++) {
-				count += getJudgeCount(i, false);
-			}
-			return count;
+			case NUMBER_TARGET_MISSCOUNT:
+				if (oldmisscount == Integer.MAX_VALUE) {
+					return Integer.MIN_VALUE;
+				}
+				return oldmisscount;
+			case NUMBER_DIFF_MISSCOUNT:
+				if (oldmisscount == Integer.MAX_VALUE) {
+					return Integer.MIN_VALUE;
+				}
+				return resource.getCourseScoreData().getMinbp() - oldmisscount;
+			case NUMBER_TARGET_MAXCOMBO:
+				if (oldcombo > 0) {
+					return oldcombo;
+				}
+				return Integer.MIN_VALUE;
+			case NUMBER_MAXCOMBO:
+				if (resource.getCourseScoreData() != null) {
+					return resource.getCourseScoreData().getCombo();
+				}
+				return Integer.MIN_VALUE;
+			case NUMBER_DIFF_MAXCOMBO:
+				if (oldcombo == 0) {
+					return Integer.MIN_VALUE;
+				}
+				return resource.getCourseScoreData().getCombo() - oldcombo;
+			case NUMBER_TOTALNOTES:
+				int notes = 0;
+				for (BMSModel model : resource.getCourseBMSModels()) {
+					notes += model.getTotalNotes();
+				}
+				return notes;
+			case NUMBER_TOTALEARLY:
+				int ecount = 0;
+				for (int i = 1; i < 6; i++) {
+					ecount += getJudgeCount(i, true);
+				}
+				return ecount;
+			case NUMBER_TOTALLATE:
+				int count = 0;
+				for (int i = 1; i < 6; i++) {
+					count += getJudgeCount(i, false);
+				}
+				return count;
 		}
 		return super.getNumberValue(id);
 	}
@@ -341,4 +350,68 @@ public class GradeResult extends MainState {
 		}
 	}
 
+	private int rate;
+	private int oldrate;
+
+	public boolean getBooleanValue(int id) {
+		final PlayerResource resource = getMainController().getPlayerResource();
+		final IRScoreData score = resource.getScoreData();
+		switch (id) {
+			case OPTION_RESULT_CLEAR:
+				return score.getClear() != GrooveGauge.CLEARTYPE_FAILED;
+			case OPTION_RESULT_FAIL:
+				return score.getClear() == GrooveGauge.CLEARTYPE_FAILED;
+			case OPTION_RESULT_F_1P:
+			case OPTION_NOW_F_1P:
+				return rate <= 2222;
+			case OPTION_RESULT_E_1P:
+			case OPTION_NOW_E_1P:
+				return rate > 2222 && rate <= 3333;
+			case OPTION_RESULT_D_1P:
+			case OPTION_NOW_D_1P:
+				return rate > 3333 && rate <= 4444;
+			case OPTION_RESULT_C_1P:
+			case OPTION_NOW_C_1P:
+				return rate > 4444 && rate <= 5555;
+			case OPTION_RESULT_B_1P:
+			case OPTION_NOW_B_1P:
+				return rate > 5555 && rate <= 6666;
+			case OPTION_RESULT_A_1P:
+			case OPTION_NOW_A_1P:
+				return rate > 6666 && rate <= 7777;
+			case OPTION_RESULT_AA_1P:
+			case OPTION_NOW_AA_1P:
+				return rate > 7777 && rate <= 8888;
+			case OPTION_RESULT_AAA_1P:
+			case OPTION_NOW_AAA_1P:
+				return rate > 8888;
+			case OPTION_BEST_F_1P:
+				return oldrate <= 2222;
+			case OPTION_BEST_E_1P:
+				return oldrate > 2222 && oldrate <= 3333;
+			case OPTION_BEST_D_1P:
+				return oldrate > 3333 && oldrate <= 4444;
+			case OPTION_BEST_C_1P:
+				return oldrate > 4444 && oldrate <= 5555;
+			case OPTION_BEST_B_1P:
+				return oldrate > 5555 && oldrate <= 6666;
+			case OPTION_BEST_A_1P:
+				return oldrate > 6666 && oldrate <= 7777;
+			case OPTION_BEST_AA_1P:
+				return oldrate > 7777 && oldrate <= 8888;
+			case OPTION_BEST_AAA_1P:
+				return oldrate > 8888;
+			case OPTION_UPDATE_SCORE:
+				return score.getExscore() > oldexscore;
+			case OPTION_UPDATE_MAXCOMBO:
+				return score.getCombo() > oldcombo;
+			case OPTION_UPDATE_MISSCOUNT:
+				return score.getMinbp() < oldmisscount;
+			case OPTION_UPDATE_SCORERANK:
+				return rate / 1111 > oldrate / 1111;
+
+		}
+		return super.getBooleanValue(id);
+
+	}
 }

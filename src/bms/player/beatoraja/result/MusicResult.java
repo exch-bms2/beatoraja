@@ -32,6 +32,9 @@ import com.badlogic.gdx.math.Rectangle;
  */
 public class MusicResult extends MainState {
 
+	public static final int OPTION_RESULT_CLEAR = 90;
+	public static final int OPTION_RESULT_FAIL = 91;
+
 	private BitmapFont titlefont;
 	private String title;
 
@@ -429,9 +432,6 @@ public class MusicResult extends MainState {
 				return Integer.MIN_VALUE;
 			}
 			return resource.getScoreData().getCombo() - oldcombo;
-		case NUMBER_TOTALNOTES:
-		case NUMBER_TOTALNOTES2:
-			return resource.getBMSModel().getTotalNotes();
 		case NUMBER_GROOVEGAUGE:
 			return resource.getGauge().get(resource.getGauge().size() - 1).intValue();
 		case NUMBER_TOTALEARLY:
@@ -470,6 +470,10 @@ public class MusicResult extends MainState {
 		final PlayerResource resource = getMainController().getPlayerResource();
 		final IRScoreData score = resource.getScoreData();
 		switch(id) {
+			case OPTION_RESULT_CLEAR:
+				return score.getClear() != GrooveGauge.CLEARTYPE_FAILED;
+			case OPTION_RESULT_FAIL:
+				return score.getClear() == GrooveGauge.CLEARTYPE_FAILED;
 		case OPTION_RESULT_F_1P:
 		case OPTION_NOW_F_1P:
 			return rate <= 2222;

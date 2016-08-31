@@ -50,11 +50,15 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private Spinner<Integer> gvalue;
 	@FXML
+	private Spinner<Integer> inputduration;
+	@FXML
 	private CheckBox fullscreen;
 	@FXML
 	private CheckBox vsync;
 	@FXML
 	private ComboBox<Integer> bgaop;
+	@FXML
+	private CheckBox use2p;
 
 	@FXML
 	private ListView<String> bmsroot;
@@ -203,6 +207,7 @@ public class PlayConfigurationView implements Initializable {
 		resolution.setValue(config.getResolution());
 		fullscreen.setSelected(config.isFullscreen());
 		vsync.setSelected(config.isVsync());
+		use2p.setSelected(config.isUse2pside());
 		bgaop.setValue(config.getBga());
 		scoreop.getSelectionModel().select(config.getRandom());
 		gaugeop.getSelectionModel().select(config.getGauge());
@@ -235,6 +240,8 @@ public class PlayConfigurationView implements Initializable {
 		
 		folderlamp.setSelected(config.isFolderlamp());
 		judgedetail.setValue(config.getJudgedetail());
+
+		inputduration.getValueFactory().setValue(config.getInputduration());
 	}
 
 	/**
@@ -244,6 +251,7 @@ public class PlayConfigurationView implements Initializable {
 		config.setResolution(resolution.getValue());
 		config.setFullscreen(fullscreen.isSelected());
 		config.setVsync(vsync.isSelected());
+		config.setUse2pside(use2p.isSelected());
 		config.setBga(bgaop.getValue());
 		config.setRandom(scoreop.getValue());
 		config.setGauge(gaugeop.getValue());
@@ -275,6 +283,8 @@ public class PlayConfigurationView implements Initializable {
 		
 		config.setFolderlamp(folderlamp.isSelected());
 		config.setJudgedetail(judgedetail.getValue());
+
+		config.setInputduration(inputduration.getValue());
 
 		Json json = new Json();
 		json.setOutputType(OutputType.json);

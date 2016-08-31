@@ -1,11 +1,20 @@
 package bms.player.beatoraja.play.bga;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.RandomAccessFile;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.logging.Logger;
+
+import javax.imageio.ImageIO;
+
+import org.apache.commons.io.output.ByteArrayOutputStream;
 
 import bms.model.BMSModel;
 import bms.model.TimeLine;
@@ -13,6 +22,7 @@ import bms.player.beatoraja.Config;
 
 import bms.player.beatoraja.play.BMSPlayer;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandleStream;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Pixmap.Filter;
@@ -146,7 +156,7 @@ public class BGAProcessor {
 
 		System.out.println(layershader.getLog());
 
-		Pixmap blank = new Pixmap(1,1, Pixmap.Format.RGBA8888);
+		Pixmap blank = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
 		blank.setColor(Color.BLACK);
 		blank.fill();
 		blanktex = new Texture(blank);
@@ -243,13 +253,30 @@ public class BGAProcessor {
 		for (String mov : pic_extension) {
 			if (dir.toString().endsWith(mov)) {
 				try {
-					tex = new Pixmap(Gdx.files.internal(dir.toString()));
-					// System.out.println("BGA Picture loaded  : " +
-					// dir.getName());
+					if (mov.equals("bmp")) {
+						tex = new Pixmap(Gdx.files.internal(dir.toString()));
+//						BufferedImage bi = ImageIO.read(dir.toFile());
+//						final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+//						ImageIO.write(bi, "jpeg", baos);
+//						tex = new Pixmap((new FileHandleStream("tempwav.jpeg") {
+//							@Override
+//							public InputStream read() {
+//								return new ByteArrayInputStream(baos.toByteArray());
+//							}
+//
+//							@Override
+//							public OutputStream write(boolean overwrite) {
+//								return null;
+//							}
+//						}));
+					} else {
+						tex = new Pixmap(Gdx.files.internal(dir.toString()));
+					}
+//					System.out.println("BGA Picture loaded  : " + dir.toString());
 					break;
 				} catch (Exception e) {
-					Logger.getGlobal().warning("BGAファイル読み込み失敗。" + e.getMessage());
-					e.printStackTrace();
+					Logger.getGlobal().warning("BGAファイル読み込み失敗。" + e.getMessage());					
+//					e.printStackTrace();
 				} catch (Error e) {
 					Logger.getGlobal().severe("BGAファイル読み込み失敗。" + e.getMessage());
 					e.printStackTrace();
@@ -348,7 +375,7 @@ public class BGAProcessor {
 
 		if (time < 0 && getBackbmpData() != null) {
 			sprite.begin();
-			if(getBackbmpData() != null) {
+			if (getBackbmpData() != null) {
 				sprite.draw(getBackbmpData(), r.x, r.y, r.width, r.height);
 			} else {
 				sprite.draw(blanktex, r.x, r.y, r.width, r.height);
@@ -360,7 +387,7 @@ public class BGAProcessor {
 			if (miss != null) {
 				miss.setFilter(TextureFilter.Linear, TextureFilter.Linear);
 				sprite.begin();
-					sprite.draw(miss, r.x, r.y, r.width, r.height);
+				sprite.draw(miss, r.x, r.y, r.width, r.height);
 				sprite.end();
 			}
 		} else {
@@ -371,10 +398,10 @@ public class BGAProcessor {
 				playingbgatex.setFilter(TextureFilter.Linear, TextureFilter.Linear);
 				if (mpgmap.containsKey(playingbgaid) && bgrshader.isCompiled()) {
 					sprite.setShader(bgrshader);
-						sprite.draw(playingbgatex, r.x, r.y, r.width, r.height);
+					sprite.draw(playingbgatex, r.x, r.y, r.width, r.height);
 					sprite.setShader(null);
 				} else {
-						sprite.draw(playingbgatex, r.x, r.y, r.width, r.height);
+					sprite.draw(playingbgatex, r.x, r.y, r.width, r.height);
 				}
 			} else {
 				sprite.draw(blanktex, r.x, r.y, r.width, r.height);
@@ -387,14 +414,14 @@ public class BGAProcessor {
 				sprite.begin();
 				if (mpgmap.containsKey(playinglayerid) && bgrshader.isCompiled()) {
 					sprite.setShader(bgrshader);
-						sprite.draw(playinglayertex, r.x, r.y, r.width, r.height);
+					sprite.draw(playinglayertex, r.x, r.y, r.width, r.height);
 					sprite.setShader(null);
 				} else if (layershader.isCompiled()) {
 					sprite.setShader(layershader);
-						sprite.draw(playinglayertex, r.x, r.y, r.width, r.height);
+					sprite.draw(playinglayertex, r.x, r.y, r.width, r.height);
 					sprite.setShader(null);
 				} else {
-						sprite.draw(playinglayertex, r.x, r.y, r.width, r.height);
+					sprite.draw(playinglayertex, r.x, r.y, r.width, r.height);
 				}
 				sprite.end();
 			}
@@ -419,7 +446,7 @@ public class BGAProcessor {
 			if (mpgmap.get(id) != null) {
 				mpgmap.get(id).stop();
 			}
-		}		
+		}
 	}
 
 	/**

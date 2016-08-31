@@ -15,7 +15,6 @@ public class SkinSlider extends SkinObject {
 	private int cycle;
 
 	private int timing;
-	private int[] option = new int[3];
 
 	private int muki;
 	private int range = 100;
@@ -55,14 +54,6 @@ public class SkinSlider extends SkinObject {
 		this.timing = timing;
 	}
 
-	public int[] getOption() {
-		return option;
-	}
-
-	public void setOption(int[] option) {
-		this.option = option;
-	}
-
 	public void draw(SpriteBatch sprite, long time, MainState state) {
 		if (image == null) {
 			return;
@@ -73,7 +64,7 @@ public class SkinSlider extends SkinObject {
 			draw(sprite, image, r.x
 					+ (muki == 1 ? state.getSliderValue(type) * range : (muki == 3 ? -state.getSliderValue(type) * range : 0)), r.y
 					+ (muki == 0 ? state.getSliderValue(type) * range : (muki == 2 ? -state.getSliderValue(type) * range : 0)),
-					r.width, r.height, getColor(time,state));
+					r.width, r.height, getColor(time,state),getAngle(time,state));
 		}
 	}
 

@@ -43,8 +43,15 @@ public class MusicResultSkin extends Skin {
 		gaugeregion = new Rectangle(20 * dw, 500 * dh, 400 * dw, 200 * dh);
 		judgeregion = new Rectangle(500 * dw, 500 * dh, 700 * dw, 200 * dh);
 
+		Texture st = new Texture("skin/system.png");
+
+		this.addImage(new TextureRegion(st,0,0,8,8), 0, 0, 0, 1280, 720, 0, 255,0,0,64, 0, 0, 0, 0, 0, 0, MusicResult.OPTION_RESULT_CLEAR, 0, 0);
 		SkinImage bgi = new SkinImage(MainState.IMAGE_STAGEFILE);
-		setDestination(bgi, 0, 0, 0, 1280, 720, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		setDestination(bgi, 0, 0, 0, 1280, 720, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, MusicResult.OPTION_RESULT_CLEAR, 0, 0);
+		this.add(bgi);
+		this.addImage(new TextureRegion(st,0,0,8,8), 0, 0, 0, 1280, 720, 0, 255,64,0,0, 0, 0, 0, 0, 0, 0, MusicResult.OPTION_RESULT_FAIL, 0, 0);
+		bgi = new SkinImage(MainState.IMAGE_STAGEFILE);
+		setDestination(bgi, 0, 0, 0, 1280, 720, 0, 255,128,32,32, 0, 0, 0, 0, 0, 0, MusicResult.OPTION_RESULT_FAIL, 0, 0);
 		this.add(bgi);
 		Texture bg = new Texture("skin/resultbg.png");
 		SkinImage image = new SkinImage();
@@ -107,7 +114,6 @@ public class MusicResultSkin extends Skin {
 		add(new SkinGaugeGraphObject());
 		add(new SkinDetailGraphObject());
 
-		Texture st = new Texture("skin/system.png");
 		SkinImage fi = new SkinImage(new TextureRegion[]{new TextureRegion(st,8,0,8,8)},0);
         setDestination(fi, 0, 0, 0,1280, 720, 0, 0,255,255,255, 0, 0, 0, 0, 500, BMSPlayer.TIMER_FADEOUT, 0, 0, 0);
         setDestination(fi, 500, 0, 0,1280, 720, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);

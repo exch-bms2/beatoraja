@@ -57,6 +57,8 @@ public class SongData {
 	private int maxbpm;
 	private int content;
 	private int notes;
+	private String stagefile = "";
+	private String backbmp = "";
 	
 	private TimeLine[] timelines;
 	
@@ -74,6 +76,9 @@ public class SongData {
 		md5 = model.getMD5();
 		sha256 = model.getSHA256();
 		banner = model.getBanner();
+		
+		setStagefile(model.getStagefile());
+		setBackbmp(model.getBackbmp());
 		try {
 			level = Integer.parseInt(model.getPlaylevel());			
 		} catch(NumberFormatException e) {
@@ -278,5 +283,21 @@ public class SongData {
 
 	public TimeLine[] getTimelines() {
 		return timelines;
+	}
+
+	public String getStagefile() {
+		return stagefile;
+	}
+
+	public void setStagefile(String stagefile) {
+		this.stagefile = stagefile;
+	}
+
+	public String getBackbmp() {
+		return backbmp;
+	}
+
+	public void setBackbmp(String backbmp) {
+		this.backbmp = backbmp;
 	}
 }

@@ -25,6 +25,8 @@ public class BMSPlayerInputProcessor {
 
 	private List<BMControllerInputProcessor> bminput = new ArrayList();
 
+	private int minduration = 10;
+
 	public BMSPlayerInputProcessor(Rectangle resolution) {
 		kbinput = new KeyBoardInputProcesseor(this, new int[] { Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.F, Keys.V,
 				Keys.SHIFT_LEFT, Keys.CONTROL_LEFT, Keys.COMMA, Keys.L, Keys.PERIOD, Keys.SEMICOLON, Keys.SLASH,
@@ -54,6 +56,7 @@ public class BMSPlayerInputProcessor {
 	 * 各キーの最終更新時間 TODO これを他クラスから編集させない方がいいかも
 	 */
 	private long[] time = new long[18];
+	private long[] lasttime = new long[18];
 	/**
 	 * 0-9キーのON/OFF状態
 	 */
@@ -92,6 +95,10 @@ public class BMSPlayerInputProcessor {
 
 	boolean[] cursor = new boolean[4];
 
+	public void setMinimumInputDutration(int minduration) {
+		this.minduration = minduration;
+	}
+
 	public void setKeyassign(int[] keyassign) {
 		kbinput.setKeyAssign(keyassign);
 	}
@@ -106,6 +113,7 @@ public class BMSPlayerInputProcessor {
 		this.starttime = starttime;
 		if (starttime != 0) {
 			Arrays.fill(time, 0);
+			Arrays.fill(lasttime, -minduration);
 			keylog.clear();
 		}
 	}
@@ -141,9 +149,12 @@ public class BMSPlayerInputProcessor {
 	public void keyChanged(int presstime, int i, boolean pressed) {
 		if (enableKeyInput) {
 			keystate[i] = pressed;
-			time[i] = presstime;
-			if (this.getStartTime() != 0) {
-				keylog.add(new KeyInputLog(presstime, i, pressed));
+			if(this.getStartTime() == 0 || presstime >= lasttime[i] + minduration) {
+				time[i] = presstime;
+				lasttime[i] = presstime;
+				if (this.getStartTime() != 0) {
+					keylog.add(new KeyInputLog(presstime, i, pressed));
+				}
 			}
 		}
 	}
