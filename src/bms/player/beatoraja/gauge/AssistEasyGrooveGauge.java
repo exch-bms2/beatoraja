@@ -34,15 +34,8 @@ public class AssistEasyGrooveGauge extends GrooveGauge {
         final int count = ispms ? 24 : 50;
         for (int i = 1; i <= count; i++) {
             final float border = i * getMaxValue() / count;
-            if (getValue() >= border) {
-                if (border < getBorder()) {
-                    sprite.draw(skin.getGauge()[2], x + w * (i - 1) / count,
-                            y, w / count, h);
-                } else {
-                    sprite.draw(skin.getGauge()[1], x + w * (i - 1) / count,
-                            y, w / count, h);
-                }
-            }
+			sprite.draw(skin.getGauge()[4 + (getValue() >= border ? 0 : 2) + (border < getBorder() ? 1 : 0)], x + w * (i - 1) / count,
+					y, w / count, h);			
         }
         sprite.end();
     }

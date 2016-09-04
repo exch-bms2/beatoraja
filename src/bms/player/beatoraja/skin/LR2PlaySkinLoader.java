@@ -253,12 +253,14 @@ public class LR2PlaySkinLoader extends LR2SkinLoader {
 				int playside = Integer.parseInt(str[1]);
 				final int divx = Integer.parseInt(str[7]);
 				final int divy = Integer.parseInt(str[8]);
-				gauge = new Sprite[divx * divy];
+				gauge = new Sprite[divx * divy * 2];
 				final int w = Integer.parseInt(str[5]);
 				final int h = Integer.parseInt(str[6]);
 				for(int x = 0;x < divx;x++) {
 					for(int y = 0;y < divy;y++) {
 						gauge[y * divx + x] = new Sprite(imagelist.get(Integer.parseInt(str[2])), Integer.parseInt(str[3]) + w * x / divx,
+								Integer.parseInt(str[4]) + h * y / divy, w / divx, h / divy);
+						gauge[y * divx + x + divx * divy] = new Sprite(imagelist.get(Integer.parseInt(str[2])), Integer.parseInt(str[3]) + w * x / divx,
 								Integer.parseInt(str[4]) + h * y / divy, w / divx, h / divy);
 					}
 				}

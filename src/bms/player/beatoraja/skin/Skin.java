@@ -1,6 +1,5 @@
 package bms.player.beatoraja.skin;
 
-import bms.model.BMSModel;
 import bms.player.beatoraja.MainState;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -14,13 +13,15 @@ public class Skin {
 	private float dw;
 	private float dh;
 
-	private List<SkinObject> objects = new ArrayList();
+	private List<SkinObject> objects = new ArrayList<SkinObject>();
 
 	private int input;
 
 	private int scene = 3600000 * 24;
 
 	private int fadeout;
+
+	private int[] option = new int[0];
 
 	public Skin(float orgw, float orgh, float dstw, float dsth) {
 		dw = dstw / orgw;
@@ -53,11 +54,39 @@ public class Skin {
 		objects.add(si);
 	}
 
+	public SkinObject[] getAllSkinObjects() {
+		return objects.toArray(new SkinObject[objects.size()]);
+	}
+	
+	public void removeSkinObject(SkinObject obj) {
+		objects.remove(obj);
+	}
+	
 	public void drawAllObjects(SpriteBatch sprite, MainState state) {
 		final long time = state.getNowTime();
 		for (SkinObject obj : objects) {
 			boolean draw = true;
 			for (int op : obj.getOption()) {
+				boolean soption = false;
+				if(op > 0) {
+					for(int sop : option) {
+						if(op == sop) {
+							soption = true;
+							break;
+						}
+					}					
+				} else {
+					soption = true;
+					for(int sop : option) {
+						if(-op == sop) {
+							soption = false;
+							break;
+						}
+					}					
+				}
+				if(soption) {
+					continue;
+				}
 				final boolean b = state.getBooleanValue(op);
 				if ((op > 0 && !b) || (op < 0 && b)) {
 					draw = false;
@@ -77,6 +106,26 @@ public class Skin {
 				final SkinSlider slider = (SkinSlider) obj;
 				boolean draw = true;
 				for (int op : obj.getOption()) {
+					boolean soption = false;
+					if(op > 0) {
+						for(int sop : option) {
+							if(op == sop) {
+								soption = true;
+								break;
+							}
+						}					
+					} else {
+						soption = true;
+						for(int sop : option) {
+							if(-op == sop) {
+								soption = false;
+								break;
+							}
+						}					
+					}
+					if(soption) {
+						continue;
+					}
 					final boolean b = state.getBooleanValue(op);
 					if ((op > 0 && !b) || (op < 0 && b)) {
 						draw = false;
@@ -145,5 +194,13 @@ public class Skin {
 
 	public void setSceneTime(int scene) {
 		this.scene = scene;
+	}
+
+	public int[] getOption() {
+		return option;
+	}
+
+	public void setOption(int[] option) {
+		this.option = option;
 	}
 }

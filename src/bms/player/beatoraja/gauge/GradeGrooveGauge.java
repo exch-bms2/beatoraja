@@ -23,11 +23,13 @@ public class GradeGrooveGauge extends GrooveGauge {
 
 	@Override
 	public void draw(PlaySkin skin, SpriteBatch sprite, float x, float y, float w, float h) {
-		sprite.begin();
-		for (int i = 2; i <= getMaxValue() && i <= getValue(); i += 2) {
-			sprite.draw(skin.getGauge()[1], x + w * (i - 2) / getMaxValue(), y, w / 50, h);
-		}
-		sprite.end();
+        sprite.begin();
+        for (int i = 1; i <= 50; i++) {
+            final float border = i * getMaxValue() / 50;
+			sprite.draw(skin.getGauge()[(getValue() >= border ? 0 : 2) + (border < getBorder() ? 1 : 0)], x + w * (i - 1) / 50,
+					y, w / 50, h);			
+        }
+        sprite.end();
 	}
 	
 	@Override

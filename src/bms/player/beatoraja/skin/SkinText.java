@@ -23,8 +23,6 @@ public class SkinText extends SkinObject {
 
     private GlyphLayout layout;
 
-    private int cycle;
-
     private int shadow = 0;
 
     private int align = ALIGN_LEFT;
@@ -46,7 +44,7 @@ public class SkinText extends SkinObject {
     public SkinText(String fontpath, int cycle, int size, int shadow) {
         generator = new FreeTypeFontGenerator(Gdx.files.internal(fontpath));
         parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-        this.cycle = cycle;
+        this.setCycle(cycle);
         parameter.size = size;
         this.shadow = shadow;
     }

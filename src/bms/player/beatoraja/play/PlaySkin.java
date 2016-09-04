@@ -31,10 +31,6 @@ public class PlaySkin extends Skin {
 	 */
 	private Sprite[] minenote = new Sprite[8];
 	/**
-	 * キービーム画像
-	 */
-	private Sprite[] keybeam = new Sprite[0];
-	/**
 	 * レーンカバー画像
 	 */
 	public Sprite lanecover;
@@ -133,11 +129,15 @@ public class PlaySkin extends Skin {
 		add(images);
 		// ゲージ
 		Texture gt = new Texture("skin/gauge.png");
-		gauge = new Sprite[4];
-		gauge[0] = new Sprite(gt, 5, 0, 5, 17);
-		gauge[1] = new Sprite(gt, 0, 0, 5, 17);
-		gauge[2] = new Sprite(gt, 5, 17, 5, 17);
-		gauge[3] = new Sprite(gt, 0, 17, 5, 17);
+		gauge = new Sprite[8];
+		gauge[0] = new Sprite(gt, 0, 0, 5, 17);
+		gauge[1] = new Sprite(gt, 5, 0, 5, 17);
+		gauge[2] = new Sprite(gt, 10, 0, 5, 17);
+		gauge[3] = new Sprite(gt, 15, 0, 5, 17);
+		gauge[4] = new Sprite(gt, 0, 17, 5, 17);
+		gauge[5] = new Sprite(gt, 5, 17, 5, 17);
+		gauge[6] = new Sprite(gt, 10, 17, 5, 17);
+		gauge[7] = new Sprite(gt, 15, 17, 5, 17);
 		// 判定文字
 		Texture jt = new Texture("skin/judge.png");
 		judge = new TextureRegion[6][];
@@ -318,7 +318,7 @@ public class PlaySkin extends Skin {
 		add(pseek);
 
 		Texture kbt = new Texture("skin/keybeam.png");
-		keybeam = new Sprite[8];
+		Sprite[] keybeam = new Sprite[8];
 		keybeam[0] = keybeam[2] = keybeam[4] = keybeam[6] = new Sprite(kbt, 47, 0, 28, 255);
 		keybeam[1] = keybeam[3] = keybeam[5] = new Sprite(kbt, 75, 0, 21, 255);
 		keybeam[7] = new Sprite(kbt, 0, 0, 47, 255);
@@ -523,7 +523,7 @@ public class PlaySkin extends Skin {
 		add(pseek);
 
 		Texture kbt = new Texture("skin/keybeam.png");
-		keybeam = new Sprite[8];
+		Sprite[] keybeam = new Sprite[8];
 		keybeam[0] = keybeam[2] = keybeam[4] = keybeam[6] = new Sprite(kbt, 47, 0, 28, 255);
 		keybeam[1] = keybeam[3] = keybeam[5] = new Sprite(kbt, 75, 0, 21, 255);
 		keybeam[7] = new Sprite(kbt, 0, 0, 47, 255);
@@ -772,7 +772,7 @@ public class PlaySkin extends Skin {
 		add(gi);
 
 		Texture kbt = new Texture("skin/keybeaml.png");
-		keybeam = new Sprite[9];
+		Sprite[] keybeam = new Sprite[9];
 		keybeam[0] = keybeam[2] = keybeam[4] = keybeam[6] = keybeam[8] = new Sprite(kbt, 75, 0, 21, 255);
 		keybeam[1] = keybeam[3] = keybeam[5] = keybeam[7] = new Sprite(kbt, 47, 0, 28, 255);
 		TextureRegion[] keybeaml = new Sprite[9];
@@ -924,7 +924,7 @@ public class PlaySkin extends Skin {
 		}
 
 		Texture kbt = new Texture("skin/keybeam.png");
-		keybeam = new Sprite[16];
+		Sprite[] keybeam = new Sprite[16];
 		keybeam[0] = keybeam[2] = keybeam[4] = keybeam[6] = keybeam[8] = keybeam[10] = keybeam[12] = keybeam[14] = new Sprite(
 				kbt, 75, 0, 21, 255);
 		keybeam[1] = keybeam[3] = keybeam[5] = keybeam[9] = keybeam[11] = keybeam[13] = new Sprite(kbt, 47, 0, 28, 255);

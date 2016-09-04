@@ -17,18 +17,17 @@ public class SkinImage extends SkinObject {
 	 */
 	private TextureRegion[][] image;
 
-	private int imageid = -1;
-	private int cycle;
-	
 	private int timing;
 	private int id = -1;
+
+	private int imageid = -1;
 
 	public SkinImage() {
 		
 	}
 
 	public SkinImage(int imageid) {
-		this.imageid = imageid;
+		setImageID(imageid);
 	}
 
 	public SkinImage(TextureRegion[] image, int cycle) {
@@ -48,10 +47,10 @@ public class SkinImage extends SkinObject {
 	}
 
 	public TextureRegion getImage(int value, long time, MainState state) {
-		if(imageid != -1) {
-			return state.getImage(imageid);
+		if(getImageID() != -1) {
+			return state.getImage(getImageID());
 		}
-		if(cycle == 0) {
+		if(getCycle() == 0) {
 			return image[value][0];
 		}
 		if(timing != 0 && timing < 256) {
@@ -64,7 +63,7 @@ public class SkinImage extends SkinObject {
 			return image[value][0];
 		}
 
-		final int index = (int) ((time / (cycle / image[value].length))) % image[value].length;
+		final int index = (int) ((time / (getCycle()  / image[value].length))) % image[value].length;
 //		System.out.println(index + " / " + image.length);
 		return image[value][index];
 	}
@@ -72,12 +71,12 @@ public class SkinImage extends SkinObject {
 	public void setImage(TextureRegion[] image, int cycle) {
 		this.image = new TextureRegion[1][];
 		this.image[0] = image;
-		this.cycle = cycle;
+		setCycle(cycle);
 	}
 
 	public void setImage(TextureRegion[][] image, int cycle) {
 		this.image = image;
-		this.cycle = cycle;
+		setCycle(cycle);
 	}
 
 	public int getTiming() {
@@ -89,9 +88,9 @@ public class SkinImage extends SkinObject {
 	}
 
 	public void draw(SpriteBatch sprite, long time, MainState state) {
-	    if(imageid != -1) {
+	    if(getImageID() != -1) {
             Rectangle r = this.getDestination(time, state);
-            TextureRegion tr = state.getImage(imageid);
+            TextureRegion tr = state.getImage(getImageID());
             if (r != null && tr != null) {
                 draw(sprite, tr, r.x, r.y, r.width, r.height, getColor(time,state),getAngle(time,state));
             }
@@ -132,5 +131,13 @@ public class SkinImage extends SkinObject {
 
 	public void setReferenceID(int id) {
 		this.id = id;
+	}
+	
+	public int getImageID() {
+		return imageid;
+	}
+
+	public void setImageID(int imageid) {
+		this.imageid = imageid;
 	}
 }

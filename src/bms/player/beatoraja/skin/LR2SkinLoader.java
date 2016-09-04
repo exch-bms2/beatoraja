@@ -13,10 +13,10 @@ import com.badlogic.gdx.utils.GdxRuntimeException;
 
 public abstract class LR2SkinLoader {
 
-	private List<CommandWord> commands = new ArrayList();
+	private List<CommandWord> commands = new ArrayList<CommandWord>();
 
-	List<Texture> imagelist = new ArrayList();
-
+	List<Texture> imagelist = new ArrayList<Texture>();
+	
 	protected void addCommandWord(CommandWord cm) {
 		commands.add(cm);
 	}
@@ -26,6 +26,10 @@ public abstract class LR2SkinLoader {
 	}
 
 	protected void loadSkin(Skin skin, File f, MainState state, int[] option) throws IOException {
+		List<Integer> op = new ArrayList<Integer>();
+		for(int i : option) {
+			op.add(i);
+		}
 		float srcw = 640;
 		float srch = 480;
 		float dstw = 1280;
@@ -51,12 +55,13 @@ public abstract class LR2SkinLoader {
 						for (int i = 1; i < str.length; i++) {
 							try {
 								int opt = Integer.parseInt(str[i]);
-								for (int j = 0; j < option.length; j++) {
-									if (option[j] == opt) {
+								for (Integer o : op) {
+									if (o == opt) {
 										ifs = true;
+										break;
 									}
 								}
-								if(!ifs) {
+								if (!ifs) {
 									ifs = state.getBooleanValue(opt);
 								}
 							} catch (NumberFormatException e) {
@@ -73,12 +78,13 @@ public abstract class LR2SkinLoader {
 							for (int i = 1; i < str.length; i++) {
 								try {
 									int opt = Integer.parseInt(str[i]);
-									for (int j = 0; j < option.length; j++) {
-										if (option[j] == opt) {
+									for (Integer o : op) {
+										if (o == opt) {
 											ifs = true;
+											break;
 										}
 									}
-									if(!ifs) {
+									if (!ifs) {
 										ifs = state.getBooleanValue(opt);
 									}
 								} catch (NumberFormatException e) {
@@ -98,6 +104,11 @@ public abstract class LR2SkinLoader {
 					}
 					if (!skip) {
 
+						if (str[0].equals("#SETOPTION")) {
+							if(Integer.parseInt(str[2]) >= 1) {
+								op.add(Integer.parseInt(str[1]));
+							}
+						}
 						if (str[0].equals("#STARTINPUT")) {
 							skin.setInputTime(Integer.parseInt(str[1]));
 						}
@@ -133,11 +144,12 @@ public abstract class LR2SkinLoader {
 							} else {
 								imagelist.add(null);
 							}
-							System.out
-									.println("Image Loaded - " + (imagelist.size() - 1) + " : " + imagefile.getPath());
+//							System.out
+//									.println("Image Loaded - " + (imagelist.size() - 1) + " : " + imagefile.getPath());
 						}
 
 						if (str[0].equals("#SRC_SLIDER")) {
+							slider = null;
 							int gr = Integer.parseInt(str[2]);
 							if (gr < imagelist.size() && imagelist.get(gr) != null) {
 								try {
@@ -196,15 +208,11 @@ public abstract class LR2SkinLoader {
 						}
 
 						if (str[0].equals("#SRC_IMAGE")) {
+							part = null;
 							int gr = Integer.parseInt(str[2]);
-							if(gr == 100) {
+							if (gr >= 100) {
 								part = new SkinImage(MainState.IMAGE_STAGEFILE);
-							} else if(gr == 101) {
-								part = new SkinImage(MainState.IMAGE_BACKBMP);
-							} else if(gr == 102) {
-								part = new SkinImage(MainState.IMAGE_BANNER);								
-							} else 
-							if (gr < imagelist.size() && imagelist.get(gr) != null) {
+							} else if (gr < imagelist.size() && imagelist.get(gr) != null) {
 								try {
 									int[] values = parseInt(str);
 									int x = values[3];
@@ -240,21 +248,24 @@ public abstract class LR2SkinLoader {
 									e.printStackTrace();
 								}
 							}
-							if(part != null) {
+							if (part != null) {
 								skin.add(part);
+							} else {
+								System.out.println("NO_DESTINATION : " + line);								
 							}
+
 						}
 						if (str[0].equals("#DST_IMAGE")) {
 							if (part != null) {
 								try {
 									int[] values = parseInt(str);
-									if(values[5] < 0) {
+									if (values[5] < 0) {
 										values[3] += values[5];
 										values[5] = -values[5];
 									}
-									if(values[6] < 0) {
+									if (values[6] < 0) {
 										values[4] += values[6];
-										values[6] = -values[6];										
+										values[6] = -values[6];
 									}
 									part.setDestination(values[2], values[3] * dstw / srcw, dsth
 											- (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw, values[6]
@@ -268,6 +279,7 @@ public abstract class LR2SkinLoader {
 						}
 
 						if (str[0].equals("#SRC_NUMBER")) {
+							num = null;
 							int gr = Integer.parseInt(str[2]);
 							if (gr < imagelist.size() && imagelist.get(gr) != null) {
 								try {
@@ -297,16 +309,17 @@ public abstract class LR2SkinLoader {
 													* i, y + h / divy * j, w / divx, h / divy);
 										}
 									}
-									if(images.length >= 24) {
+									if (images.length >= 24) {
 										TextureRegion[] pn = new TextureRegion[12];
 										TextureRegion[] mn = new TextureRegion[12];
-										for(int i = 0;i < 12;i++) {
+										for (int i = 0; i < 12; i++) {
 											pn[i] = images[i];
 											mn[i] = images[i + 12];
 										}
 										num = new SkinNumber(pn, mn, values[9], values[13] + 1, 0, values[11]);
 									} else {
-										num = new SkinNumber(images, values[9], values[13], images.length > 10 ? 2 : 0, values[11]);
+										num = new SkinNumber(images, values[9], values[13], images.length > 10 ? 2 : 0,
+												values[11]);
 									}
 
 									skin.add(num);
@@ -333,6 +346,7 @@ public abstract class LR2SkinLoader {
 						}
 
 						if (str[0].equals("#SRC_TEXT")) {
+							text = null;
 							int gr = Integer.parseInt(str[2]);
 							try {
 								text = new SkinText("skin/VL-Gothic-Regular.ttf", 0, 40, 2);
@@ -342,7 +356,7 @@ public abstract class LR2SkinLoader {
 								int edit = values[5];
 								int panel = values[6];
 								skin.add(text);
-								System.out.println("Text Added - " + (values[3]));
+//								System.out.println("Text Added - " + (values[3]));
 							} catch (NumberFormatException e) {
 								e.printStackTrace();
 							}
@@ -351,21 +365,27 @@ public abstract class LR2SkinLoader {
 							if (text != null) {
 								try {
 									int[] values = parseInt(str);
-									text.setDestination(values[2], values[3] * dstw / srcw, dsth
-											- values[4] * dsth / srch, values[5] * dstw / srcw, values[6]
-											* dsth / srch, values[7], values[8], values[9], values[10], values[11],
-											values[12], values[13], values[14], values[15], values[16], values[17],
-											values[18], values[19], values[20]);
+									text.setDestination(values[2], values[3] * dstw / srcw, dsth - values[4] * dsth
+											/ srch, values[5] * dstw / srcw, values[6] * dsth / srch, values[7],
+											values[8], values[9], values[10], values[11], values[12], values[13],
+											values[14], values[15], values[16], values[17], values[18], values[19],
+											values[20]);
 								} catch (NumberFormatException e) {
 									e.printStackTrace();
 								}
 							}
 						}
 						if (str[0].equals("#SRC_BARGRAPH")) {
-							int gr = Integer.parseInt(str[2]);
-							if (gr < imagelist.size() && imagelist.get(gr) != null) {
-								try {
-									int[] values = parseInt(str);
+							bar = null;
+							try {
+								int[] values = parseInt(str);
+								int gr = values[2];
+								if (gr >= 100) {
+									bar = new SkinGraph(gr);
+									bar.setTiming(values[10]);
+									bar.setReferenceID(values[11] + 1000);
+									bar.setDirection(values[12]);
+								} else if (gr < imagelist.size() && imagelist.get(gr) != null) {
 									int x = values[3];
 									int y = values[4];
 									int w = values[5];
@@ -397,11 +417,11 @@ public abstract class LR2SkinLoader {
 									bar.setDirection(values[12]);
 									// System.out.println("Object Added - " +
 									// (part.getTiming()));
-								} catch (NumberFormatException e) {
-									e.printStackTrace();
 								}
+							} catch (NumberFormatException e) {
+								e.printStackTrace();
 							}
-							if(bar != null) {
+							if (bar != null) {
 								skin.add(bar);
 							}
 
@@ -410,13 +430,13 @@ public abstract class LR2SkinLoader {
 							if (bar != null) {
 								try {
 									int[] values = parseInt(str);
-									if(bar.getDirection() == 1) {
+									if (bar.getDirection() == 1) {
 										values[4] += values[6];
 										values[6] = -values[6];
 									}
 									bar.setDestination(values[2], values[3] * dstw / srcw, dsth
-													- (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw, values[6]
-													* dsth / srch, values[7], values[8], values[9], values[10], values[11],
+											- (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw, values[6]
+											* dsth / srch, values[7], values[8], values[9], values[10], values[11],
 											values[12], values[13], values[14], values[15], values[16], values[17],
 											values[18], values[19], values[20]);
 								} catch (NumberFormatException e) {
@@ -426,6 +446,7 @@ public abstract class LR2SkinLoader {
 
 						}
 						if (str[0].equals("#SRC_BUTTON")) {
+							button = null;
 							int gr = Integer.parseInt(str[2]);
 							if (gr < imagelist.size() && imagelist.get(gr) != null) {
 								try {
@@ -451,8 +472,9 @@ public abstract class LR2SkinLoader {
 									TextureRegion[][] images = new TextureRegion[divx * divy][];
 									for (int i = 0; i < divx; i++) {
 										for (int j = 0; j < divy; j++) {
-											images[divx * j + i] = new TextureRegion[]{new TextureRegion(imagelist.get(gr), x + w / divx
-													* i, y + h / divy * j, w / divx, h / divy)};
+											images[divx * j + i] = new TextureRegion[] { new TextureRegion(
+													imagelist.get(gr), x + w / divx * i, y + h / divy * j, w / divx, h
+															/ divy) };
 										}
 									}
 									button = new SkinImage(images, values[9]);
@@ -496,19 +518,23 @@ public abstract class LR2SkinLoader {
 					} else {
 						// System.out.println("line skip : " + line);
 					}
-
-					// if (str[0].equals("#DST_SLIDER")) {
-					// slider = new Sprite(imagelist.get(Integer
-					// .parseInt(str[2])),
-					// Integer.parseInt(str[3]),
-					// Integer.parseInt(str[4]),
-					// Integer.parseInt(str[5]),
-					// Integer.parseInt(str[6]));
-					// }
 				}
 			}
 		}
 		br.close();
+		
+		int[] soption = new int[op.size()];
+		for(int i = 0;i < op.size();i++) {
+			soption[i] = op.get(i);
+		}
+		skin.setOption(soption);
+		
+		for(SkinObject obj : skin.getAllSkinObjects()) {
+			if(obj instanceof SkinImage && obj.getAllDestination().length == 0) {
+				skin.removeSkinObject(obj);
+				System.out.println("NO_DESTINATION : " + obj);
+			}
+		}
 	}
 
 	protected int[] parseInt(String[] s) {

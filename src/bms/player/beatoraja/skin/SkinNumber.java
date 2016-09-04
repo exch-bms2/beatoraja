@@ -21,8 +21,6 @@ public class SkinNumber extends SkinObject {
 
 	private int id = -1;
 
-	private int cycle;
-	
 	private int keta;
 	
 	private int zeropadding;
@@ -36,7 +34,7 @@ public class SkinNumber extends SkinObject {
 	public SkinNumber(TextureRegion[][] image, int cycle, int keta, int zeropadding, int rid) {
 		this.image = image;
 		this.mimage = null;
-		this.cycle = cycle;
+		setCycle(cycle);
 		this.setKeta(keta);
 		this.zeropadding = zeropadding;
 		this.id = rid;
@@ -49,7 +47,7 @@ public class SkinNumber extends SkinObject {
 	public SkinNumber(TextureRegion[] image, TextureRegion[] mimage, int cycle, int keta, int zeropadding, int id) {
 		this.image = new TextureRegion[][]{image};
 		this.mimage = mimage != null ? new TextureRegion[][]{mimage} : null;
-		this.cycle = cycle;
+		setCycle(cycle);
 		this.setKeta(keta);
 		this.zeropadding = zeropadding;
 		this.id = id;
@@ -79,8 +77,8 @@ public class SkinNumber extends SkinObject {
 			return new TextureRegion[0];
 		}
 		TextureRegion[] image = images[0];
-		if(cycle != 0) {
-			final int index = (int) ((time / (cycle / images.length))) % images.length;
+		if(getCycle() != 0) {
+			final int index = (int) ((time / (getCycle() / images.length))) % images.length;
 //			System.out.println(index + " / " + image.length);
 			image = images[index];
 		}

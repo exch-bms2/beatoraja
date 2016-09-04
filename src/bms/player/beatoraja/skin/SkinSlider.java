@@ -12,7 +12,6 @@ public class SkinSlider extends SkinObject {
 	 * イメージ
 	 */
 	private TextureRegion[] image;
-	private int cycle;
 
 	private int timing;
 
@@ -24,7 +23,7 @@ public class SkinSlider extends SkinObject {
 
 	public SkinSlider(TextureRegion[] image, int cycle, int muki, int range, int type) {
 		this.image = image;
-		this.cycle = cycle;
+		setCycle(cycle);
 		this.muki = muki;
 		this.range = range;
 		this.type = type;
@@ -35,17 +34,17 @@ public class SkinSlider extends SkinObject {
 	}
 
 	public TextureRegion getImage(long time) {
-		if (cycle == 0) {
+		if (getCycle() == 0) {
 			return image[0];
 		}
-		final int index = (int) ((time / (cycle / image.length))) % image.length;
+		final int index = (int) ((time / (getCycle() / image.length))) % image.length;
 		// System.out.println(index + " / " + image.length);
 		return image[index];
 	}
 
 	public void setImage(TextureRegion[] image, int cycle) {
 		this.image = image;
-		this.cycle = cycle;
+		setCycle(cycle);
 	}
 
 	public int getTiming() {
