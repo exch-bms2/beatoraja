@@ -158,10 +158,10 @@ public class LR2SelectSkinLoader extends LR2SkinLoader {
 
 	}
 
-	public MusicSelectSkin loadSelectSkin(File f, int[] option) throws IOException {
+	public MusicSelectSkin loadSelectSkin(File f, MusicSelector selector,int[] option) throws IOException {
 		skin = new MusicSelectSkin();
 
-		this.loadSkin(skin, f, option);
+		this.loadSkin(skin, f, selector, option);
 
 		skin.setBar(bar);
 		skin.setLamp(lamp);

@@ -21,11 +21,11 @@ public abstract class LR2SkinLoader {
 		commands.add(cm);
 	}
 
-	protected void loadSkin(Skin skin, File f) throws IOException {
-		this.loadSkin(skin, f, new int[0]);
+	protected void loadSkin(Skin skin, File f, MainState state) throws IOException {
+		this.loadSkin(skin, f, state, new int[0]);
 	}
 
-	protected void loadSkin(Skin skin, File f, int[] option) throws IOException {
+	protected void loadSkin(Skin skin, File f, MainState state, int[] option) throws IOException {
 		float srcw = 640;
 		float srch = 480;
 		float dstw = 1280;
@@ -33,6 +33,7 @@ public abstract class LR2SkinLoader {
 
 		SkinImage part = null;
 		SkinImage button = null;
+		SkinGraph bar = null;
 		SkinSlider slider = null;
 		SkinNumber num = null;
 		SkinText text = null;
@@ -55,6 +56,9 @@ public abstract class LR2SkinLoader {
 										ifs = true;
 									}
 								}
+								if(!ifs) {
+									ifs = state.getBooleanValue(opt);
+								}
 							} catch (NumberFormatException e) {
 								break;
 							}
@@ -73,6 +77,9 @@ public abstract class LR2SkinLoader {
 										if (option[j] == opt) {
 											ifs = true;
 										}
+									}
+									if(!ifs) {
+										ifs = state.getBooleanValue(opt);
 									}
 								} catch (NumberFormatException e) {
 									break;
@@ -272,17 +279,23 @@ public abstract class LR2SkinLoader {
 									if (divy <= 0) {
 										divy = 1;
 									}
-									TextureRegion[][] images = new TextureRegion[divy][divx];
+									TextureRegion[] images = new TextureRegion[divy * divx];
 									for (int i = 0; i < divx; i++) {
 										for (int j = 0; j < divy; j++) {
-											images[j][i] = new TextureRegion(imagelist.get(gr), x + w / divx
+											images[j * divx + i] = new TextureRegion(imagelist.get(gr), x + w / divx
 													* i, y + h / divy * j, w / divx, h / divy);
 										}
 									}
-									if(images.length > 1) {
-										num = new SkinNumber(images[0], images[1], values[9], values[13], 0, values[11]);
+									if(images.length >= 24) {
+										TextureRegion[] pn = new TextureRegion[12];
+										TextureRegion[] mn = new TextureRegion[12];
+										for(int i = 0;i < 12;i++) {
+											pn[i] = images[i];
+											mn[i] = images[i + 12];
+										}
+										num = new SkinNumber(pn, mn, values[9], values[13] + 1, 0, values[11]);
 									} else {
-										num = new SkinNumber(images[0], values[9], values[13], images[0].length > 10 ? 2 : 0, values[11]);
+										num = new SkinNumber(images, values[9], values[13], images.length > 10 ? 2 : 0, values[11]);
 									}
 
 									skin.add(num);
@@ -338,9 +351,67 @@ public abstract class LR2SkinLoader {
 							}
 						}
 						if (str[0].equals("#SRC_BARGRAPH")) {
+							int gr = Integer.parseInt(str[2]);
+							if (gr < imagelist.size() && imagelist.get(gr) != null) {
+								try {
+									int[] values = parseInt(str);
+									int x = values[3];
+									int y = values[4];
+									int w = values[5];
+									if (w == -1) {
+										w = imagelist.get(gr).getWidth();
+									}
+									int h = values[6];
+									if (h == -1) {
+										h = imagelist.get(gr).getHeight();
+									}
+									int divx = values[7];
+									if (divx <= 0) {
+										divx = 1;
+									}
+									int divy = values[8];
+									if (divy <= 0) {
+										divy = 1;
+									}
+									TextureRegion[] images = new TextureRegion[divx * divy];
+									for (int i = 0; i < divx; i++) {
+										for (int j = 0; j < divy; j++) {
+											images[divx * j + i] = new TextureRegion(imagelist.get(gr), x + w / divx
+													* i, y + h / divy * j, w / divx, h / divy);
+										}
+									}
+									bar = new SkinGraph(images, values[9]);
+									bar.setTiming(values[10]);
+									bar.setReferenceID(values[11] + 1000);
+									bar.setDirection(values[12]);
+									// System.out.println("Object Added - " +
+									// (part.getTiming()));
+								} catch (NumberFormatException e) {
+									e.printStackTrace();
+								}
+							}
+							if(bar != null) {
+								skin.add(bar);
+							}
 
 						}
 						if (str[0].equals("#DST_BARGRAPH")) {
+							if (bar != null) {
+								try {
+									int[] values = parseInt(str);
+									if(bar.getDirection() == 1) {
+										values[4] += values[6];
+										values[6] = -values[6];
+									}
+									bar.setDestination(values[2], values[3] * dstw / srcw, dsth
+													- (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw, values[6]
+													* dsth / srch, values[7], values[8], values[9], values[10], values[11],
+											values[12], values[13], values[14], values[15], values[16], values[17],
+											values[18], values[19], values[20]);
+								} catch (NumberFormatException e) {
+									e.printStackTrace();
+								}
+							}
 
 						}
 						if (str[0].equals("#SRC_BUTTON")) {

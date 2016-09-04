@@ -223,14 +223,14 @@ public class Config {
 	private int musicselectinput = 0;
 	
 	public Config() {
-//		lr2playskin = "skin/spdframe/csv/left_ACwide.csv";
-//		lr2playskinoption = new int[] { 900, 918, 906, 940, 913, 920, 908, 997 };		
-//		lr2decideskin = "skin/Seraphic/Decide/[+]decide.csv";
-//		lr2decideskinoption = new int[]{900, 920, 910};
-//		lr2selectskin = "skin/green_ary/Select/select.csv";
-//		lr2selectskinoption = new int[] { 915, 918, 928, 920, 936, 950, 925, 930, 932 };		
-//		lr2resultskin = "skin/RESULT SIMPLE FM/result_left.csv";
-//		lr2resultskinoption = new int[] { 900, 905, 907, 909};		
+		lr2playskin = "skin/spdframe/csv/left_ACwide.csv";
+		lr2playskinoption = new int[] { 900, 918, 906, 940, 913, 920, 908, 997 };
+		lr2decideskin = "skin/Seraphic/Decide/[+]decide.csv";
+		lr2decideskinoption = new int[]{900, 920, 910};
+		lr2selectskin = "skin/green_ary/Select/select.csv";
+		lr2selectskinoption = new int[] { 915, 918, 928, 920, 936, 950, 925, 930, 932 };
+		lr2resultskin = "skin/RESULT SIMPLE FM/result_left.csv";
+		lr2resultskinoption = new int[] { 900, 905, 907, 909};
 		tableURL = new String[]{"http://bmsnormal2.syuriken.jp/table.html"};
 		judgedetail = 2;
 	}

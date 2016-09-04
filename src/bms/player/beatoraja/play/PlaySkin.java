@@ -189,14 +189,11 @@ public class PlaySkin extends Skin {
 		graphtr[2] = new TextureRegion(grapht, 200, 0, 100, 296);
 
 		graph = new SkinGraph[3];
-		graph[0] = new SkinGraph();
-		graph[0].setImage(new TextureRegion[] { new TextureRegion(grapht, 0, 0, 100, 296) }, 0);
+		graph[0] = new SkinGraph(new TextureRegion[] { new TextureRegion(grapht, 0, 0, 100, 296) }, 0);
 		graph[0].setReferenceID(MainState.BARGRAPH_SCORERATE);
-		graph[1] = new SkinGraph();
-		graph[1].setImage(new TextureRegion[] { new TextureRegion(grapht, 100, 0, 100, 296) }, 0);
+		graph[1] = new SkinGraph(new TextureRegion[] { new TextureRegion(grapht, 100, 0, 100, 296) }, 0);
 		graph[1].setReferenceID(MainState.BARGRAPH_BESTSCORERATE);
-		graph[2] = new SkinGraph();
-		graph[2].setImage(new TextureRegion[] { new TextureRegion(grapht, 200, 0, 100, 296) }, 0);
+		graph[2] = new SkinGraph(new TextureRegion[] { new TextureRegion(grapht, 200, 0, 100, 296) }, 0);
 		graph[2].setReferenceID(MainState.BARGRAPH_TARGETSCORERATE);
 
 	}
@@ -1144,8 +1141,16 @@ public class PlaySkin extends Skin {
 		return gauge;
 	}
 
+	public void setGauge(Sprite[] gauge) {
+		this.gauge = gauge;
+	}
+
 	public Rectangle getGaugeRegion() {
 		return gaugeregion;
+	}
+
+	public void setGaugeRegion(Rectangle r) {
+		gaugeregion = r;
 	}
 
 	public Rectangle[] getLaneregion() {
@@ -1244,7 +1249,6 @@ public class PlaySkin extends Skin {
 		public void draw(SpriteBatch sprite, long time, MainState state) {
 			if (skin.player.getGauge() != null) {
 				Rectangle gr = skin.getGaugeRegion();
-				sprite.draw(backtex, gr.x, gr.y, gr.width, gr.height * 2);
 				sprite.end();
 				skin.player.getGauge().draw(skin, sprite, gr.x, gr.y, gr.width, gr.height);
 				sprite.begin();
@@ -1269,7 +1273,7 @@ public class PlaySkin extends Skin {
 		public void draw(SpriteBatch sprite, long time, MainState state) {
 			if (skin.player.getMainController().getPlayerResource().getBGAManager() != null) {
 				BMSPlayer player = (BMSPlayer) state;
-				skin.player.getMainController().getPlayerResource().getBGAManager().drawBGA(sprite, getDestination(time, state), player.getState() == BMSPlayer.STATE_PRELOAD || player.getState() == BMSPlayer.STATE_READY ? -1 : (int)(System.currentTimeMillis() - player.getPlayTime()));
+				skin.player.getMainController().getPlayerResource().getBGAManager().drawBGA(sprite, getDestination(time, state), player.getState() == BMSPlayer.STATE_PRELOAD || player.getState() == BMSPlayer.STATE_READY ? -1 : (int)(player.getNowTime() - player.getTimer()[MainState.TIMER_PLAY]));
 			}
 		}
 

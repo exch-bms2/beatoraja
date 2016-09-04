@@ -65,7 +65,8 @@ public abstract class MainState {
 
 	public static final int TIMER_RESULTGRAPH_BEGIN = 150;
 	public static final int TIMER_RESULTGRAPH_END = 151;
-	
+	public static final int TIMER_RESULT_UPDATESCORE = 152;
+
 	// 選曲専用
 	public static final int SLIDER_MUSICSELECT_POSITION = 1;
 	// プレイ専用
@@ -73,12 +74,27 @@ public abstract class MainState {
 
 	public static final int BARGRAPH_MUSIC_PROGRESS = 1001;
 	public static final int BARGRAPH_LOAD_PROGRESS = 1002;
+	public static final int BARGRAPH_LEVEL = 1003;
+	public static final int BARGRAPH_LEVEL_BEGINNER = 1005;
+	public static final int BARGRAPH_LEVEL_NORMAL = 1006;
+	public static final int BARGRAPH_LEVEL_HYPER = 1007;
+	public static final int BARGRAPH_LEVEL_ANOTHER = 1008;
+	public static final int BARGRAPH_LEVEL_INSANE = 1009;
 	public static final int BARGRAPH_SCORERATE = 1010;
 	public static final int BARGRAPH_SCORERATE_FINAL = 1011;
 	public static final int BARGRAPH_BESTSCORERATE_NOW = 1012;
 	public static final int BARGRAPH_BESTSCORERATE = 1013;
 	public static final int BARGRAPH_TARGETSCORERATE_NOW = 1014;
 	public static final int BARGRAPH_TARGETSCORERATE = 1015;
+
+	public static final int BARGRAPH_RATE_PGREAT = 1040;
+	public static final int BARGRAPH_RATE_GREAT = 1041;
+	public static final int BARGRAPH_RATE_GOOD = 1042;
+	public static final int BARGRAPH_RATE_BAD = 1043;
+	public static final int BARGRAPH_RATE_POOR = 1044;
+	public static final int BARGRAPH_RATE_MAXCOMBO = 1045;
+	public static final int BARGRAPH_RATE_SCORE = 1046;
+	public static final int BARGRAPH_RATE_EXSCORE = 1047;
 
 	public static final int OFFSET_LIFT = 100;
 
@@ -102,6 +118,7 @@ public abstract class MainState {
 	public static final int STRING_COURSE10_TITLE = 159;
 	public static final int STRING_DIRECTORY = 1000;
 
+	public static final int NUMBER_HISPEED_LR2 = 10;
 	public static final int NUMBER_JUDGETIMING = 12;
 	public static final int NUMBER_TIME_YEAR = 21;
 	public static final int NUMBER_TIME_MONTH = 22;
@@ -139,6 +156,7 @@ public abstract class MainState {
 	public static final int NUMBER_POOR_RATE = 89;
 	public static final int NUMBER_MAXBPM = 90;
 	public static final int NUMBER_MINBPM = 91;
+	public static final int NUMBER_PLAYLEVEL = 96;
 	public static final int NUMBER_SCORE2 = 101;
 	public static final int NUMBER_SCORE_RATE = 102;
 	public static final int NUMBER_SCORE_RATE_AFTERDOT = 103;
@@ -213,6 +231,7 @@ public abstract class MainState {
 
 	public static final int OPTION_FOLDERBAR = 1;
 	public static final int OPTION_SONGBAR = 2;
+	public static final int OPTION_PLAYABLEBAR = 5;
 
 	public static final int OPTION_PANEL1 = 21;
 	public static final int OPTION_PANEL2 = 22;
@@ -222,8 +241,13 @@ public abstract class MainState {
 	public static final int OPTION_BGAEXTEND = 31;
 	public static final int OPTION_AUTOPLAYOFF = 32;
 	public static final int OPTION_AUTOPLAYON = 33;
+	public static final int OPTION_SCOREGRAPHOFF = 38;
+	public static final int OPTION_SCOREGRAPHON = 39;
+
 	public static final int OPTION_BGAOFF = 40;
 	public static final int OPTION_BGAON = 41;
+	public static final int OPTION_GAUGE_GROOVE = 42;
+	public static final int OPTION_GAUGE_HARD = 43;
 
 	public static final int OPTION_GROOVE = 118;
 	public static final int OPTION_HARD = 119;
@@ -382,7 +406,7 @@ public abstract class MainState {
 	
 	public MainState(MainController main) {
 		this.main = main;
-		Arrays.fill(timer, -1);
+		Arrays.fill(timer, Long.MIN_VALUE);
 	}
 	
 	public MainController getMainController() {
@@ -440,6 +464,10 @@ public abstract class MainState {
 			return model != null && model.getBanner().length() == 0;
 		case OPTION_BGAEXTEND:
 			return true;
+			case OPTION_SCOREGRAPHOFF:
+				return false;
+			case OPTION_SCOREGRAPHON:
+				return true;
 			case OPTION_DIFFICULTY0:
 				return model != null && (model.getDifficulty() <= 0 || model.getDifficulty() > 5);
 			case OPTION_DIFFICULTY1:
@@ -600,6 +628,11 @@ public abstract class MainState {
 			case NUMBER_MAXBPM:
 				if (getMainController().getPlayerResource().getSongdata() != null) {
 					return getMainController().getPlayerResource().getSongdata().getMaxbpm();
+				}
+				return Integer.MIN_VALUE;
+			case NUMBER_PLAYLEVEL:
+				if (getMainController().getPlayerResource().getSongdata() != null) {
+					return getMainController().getPlayerResource().getSongdata().getLevel();
 				}
 				return Integer.MIN_VALUE;
 

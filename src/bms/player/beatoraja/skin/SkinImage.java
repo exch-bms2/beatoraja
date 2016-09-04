@@ -55,7 +55,7 @@ public class SkinImage extends SkinObject {
 			return image[value][0];
 		}
 		if(timing != 0 && timing < 256) {
-			if(state.getTimer()[timing] == -1) {
+			if(state.getTimer()[timing] == Long.MIN_VALUE) {
 				return image[value][0];
 			}
 			time -= state.getTimer()[timing];

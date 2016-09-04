@@ -97,7 +97,7 @@ public class MusicResult extends MainState {
 			if (resource.getConfig().getLr2resultskin() != null) {
 				LR2ResultSkinLoader loader = new LR2ResultSkinLoader();
 				try {
-					skin = loader.loadResultSkin(new File(resource.getConfig().getLr2resultskin()), resource
+					skin = loader.loadResultSkin(new File(resource.getConfig().getLr2resultskin()), this, resource
 							.getConfig().getLr2resultskinoption());
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -115,11 +115,14 @@ public class MusicResult extends MainState {
 
 	public void render() {
 		int time = getNowTime();
-		if (getTimer()[TIMER_RESULTGRAPH_BEGIN] == -1) {
+		if (getTimer()[TIMER_RESULTGRAPH_BEGIN] == Long.MIN_VALUE) {
 			getTimer()[TIMER_RESULTGRAPH_BEGIN] = time;
 		}
-		if (getTimer()[TIMER_RESULTGRAPH_END] == -1) {
+		if (getTimer()[TIMER_RESULTGRAPH_END] == Long.MIN_VALUE) {
 			getTimer()[TIMER_RESULTGRAPH_END] = time;
+		}
+		if (getTimer()[TIMER_RESULT_UPDATESCORE] == Long.MIN_VALUE) {
+			getTimer()[TIMER_RESULT_UPDATESCORE] = time;
 		}
 		final MainController main = getMainController();
 
@@ -150,7 +153,7 @@ public class MusicResult extends MainState {
 		}
 		sprite.end();
 
-		if (getTimer()[BMSPlayer.TIMER_FADEOUT] != -1) {
+		if (getTimer()[BMSPlayer.TIMER_FADEOUT] != Long.MIN_VALUE) {
 			if (time > getTimer()[BMSPlayer.TIMER_FADEOUT] + getSkin().getFadeoutTime()) {
 				if (this.clear != null) {
 					this.clear.stop();

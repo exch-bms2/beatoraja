@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.StringTokenizer;
 import java.util.logging.Logger;
 
+import bms.player.beatoraja.play.BMSPlayer;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
@@ -172,6 +173,39 @@ public class LR2PlaySkinLoader extends LR2SkinLoader {
 			}
 		});
 
+		addCommandWord(new CommandWord("SRC_GROOVEGAUGE") {
+			@Override
+			public void execute(String[] str) {
+				int playside = Integer.parseInt(str[1]);
+				final int divx = Integer.parseInt(str[7]);
+				final int divy = Integer.parseInt(str[8]);
+				gauge = new Sprite[divx * divy];
+				final int w = Integer.parseInt(str[5]);
+				final int h = Integer.parseInt(str[6]);
+				for(int x = 0;x < divx;x++) {
+					for(int y = 0;y < divy;y++) {
+						gauge[y * divx + x] = new Sprite(imagelist.get(Integer.parseInt(str[2])), Integer.parseInt(str[3]) + w * x / divx,
+								Integer.parseInt(str[4]) + h * y / divy, w / divx, h / divy);
+					}
+				}
+				final int addx = Integer.parseInt(str[11]);
+				final int addy = Integer.parseInt(str[12]);
+				gauger.width = (addx > 0 ? addx * 50 : w) * dstw / srcw;
+				gauger.height = (addy > 0 ? addy * 50 : h) * dsth / srch;
+			}
+		});
+		addCommandWord(new CommandWord("DST_GROOVEGAUGE") {
+			@Override
+			public void execute(String[] str) {
+				if(gauger.x == 0) {
+					skin.add(new PlaySkin.SkinGaugeObject(skin));
+
+				}
+				gauger.x = Integer.parseInt(str[3]) * dstw / srcw;
+				gauger.y = dsth - Integer.parseInt(str[4]) * dsth / srch - gauger.height;
+			}
+		});
+
 	}
 
 	private PlaySkin skin;
@@ -186,12 +220,13 @@ public class LR2PlaySkinLoader extends LR2SkinLoader {
 	Sprite[] lnbodya = new Sprite[8];
 	Sprite[] mine = new Sprite[8];
 	Rectangle[] laner = new Rectangle[8];
+	Sprite[] gauge = new Sprite[4];
+	Rectangle gauger = new Rectangle();
 
-	public PlaySkin loadPlaySkin(File f, int[] option) throws IOException {
+	public PlaySkin loadPlaySkin(File f, BMSPlayer player, int[] option) throws IOException {
 
 		skin = new PlaySkin(7);
-
-		this.loadSkin(skin, f, option);
+		this.loadSkin(skin, f, player, option);
 
 		Texture lct = new Texture("skin/lanecover.png");
 		skin.lanecover = new Sprite(lct, 0, 0, 390, 580);
@@ -201,6 +236,8 @@ public class LR2PlaySkinLoader extends LR2SkinLoader {
 		skin.setMinenote(mine);
 		skin.setLongnote(new Sprite[][] { lnend, lnstart, lnbodya, lnbody,lnend, lnstart, lnbodya, lnbody, lnbodya, lnbody });
 		skin.setLaneregion(laner);
+		skin.setGauge(gauge);
+		skin.setGaugeRegion(gauger);
 		return skin;
 	}
 }

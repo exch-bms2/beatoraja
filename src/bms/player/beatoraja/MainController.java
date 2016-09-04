@@ -9,6 +9,7 @@ import java.util.Calendar;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
+import com.badlogic.gdx.Graphics;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -152,7 +153,7 @@ public class MainController extends ApplicationAdapter {
 		}
 		
 		if(newState != null && current != newState) {
-			Arrays.fill(newState.getTimer(), -1);
+			Arrays.fill(newState.getTimer(), Long.MIN_VALUE);
 			newState.create();
 			current = newState;
 			current.setStartTime(System.currentTimeMillis());			
@@ -215,6 +216,34 @@ public class MainController extends ApplicationAdapter {
 			systemfont.draw(sprite, String.format("FPS %d", Gdx.graphics.getFramesPerSecond()), 10,
 					RESOLUTION[config.getResolution()].height - 2);
 			sprite.end();
+		}
+
+		// fullscrees - windowed
+		if (input.getFunctionstate()[3] && input.getFunctiontime()[3] != 0) {
+			boolean fullscreen = Gdx.graphics.isFullscreen();
+			Graphics.DisplayMode currentMode = Gdx.graphics.getDisplayMode();
+			if (fullscreen) {
+				Gdx.graphics.setWindowedMode(currentMode.width, currentMode.height);
+			}
+			else {
+				Gdx.graphics.setFullscreenMode(currentMode);
+			}
+			config.setFullscreen(!fullscreen);
+			input.getFunctiontime()[3] = 0;
+		}
+		if (input.getFunctionstate()[4] && input.getFunctiontime()[4] != 0) {
+			int resolution = config.getResolution();
+			resolution = (resolution + 1) % RESOLUTION.length;
+			if (config.isFullscreen()) {
+				Gdx.graphics.setWindowedMode((int) RESOLUTION[resolution].width, (int) RESOLUTION[resolution].height);
+				Graphics.DisplayMode currentMode = Gdx.graphics.getDisplayMode();
+				Gdx.graphics.setFullscreenMode(currentMode);
+			}
+			else {
+				Gdx.graphics.setWindowedMode((int) RESOLUTION[resolution].width, (int) RESOLUTION[resolution].height);
+			}
+			config.setResolution(resolution);
+			input.getFunctiontime()[4] = 0;
 		}
 
 		// スクリーンショット
