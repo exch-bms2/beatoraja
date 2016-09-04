@@ -21,8 +21,6 @@ public class MusicSelectSkin extends Skin {
 	 */
 	private Animation[] lamp = new Animation[11];
 
-	private Rectangle seekRegion;
-
 	private Sprite[] trophy = new Sprite[3];
 
 	public MusicSelectSkin() {
@@ -151,12 +149,12 @@ public class MusicSelectSkin extends Skin {
 				255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 		add(new SkinBarObject());
-		seekRegion = new Rectangle(1240 * dw, 90 * dh, 10 * dw, 540 * dh);
 
 		addImage(new TextureRegion(st, 0, 10, 10, 251), 0, 1240, 75, 10, 570, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		SkinSlider seek = new SkinSlider(new TextureRegion[] { new TextureRegion(st, 0, 265, 17, 24) }, 0, 2,
 				(int) (516 * dh), MainState.SLIDER_MUSICSELECT_POSITION);
 		setDestination(seek, 0, 1237, 606, 17, 24, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0);
+		seek.setChangable(true);
 		add(seek);
 
 		// option panel1
@@ -300,14 +298,6 @@ public class MusicSelectSkin extends Skin {
 
 	public void setLamp(Animation[] lamp) {
 		this.lamp = lamp;
-	}
-
-	public Rectangle getSeekRegion() {
-		return seekRegion;
-	}
-
-	public void setSeekRegion(Rectangle positionRegion) {
-		this.seekRegion = positionRegion;
 	}
 
 	public Sprite[] getTrophy() {

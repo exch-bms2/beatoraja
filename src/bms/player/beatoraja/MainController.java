@@ -9,11 +9,11 @@ import java.util.Calendar;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
+import com.badlogic.gdx.Graphics;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 import bms.player.beatoraja.config.KeyConfiguration;
 import bms.player.beatoraja.decide.MusicDecide;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
@@ -32,8 +32,12 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.*;
 import com.badlogic.gdx.utils.JsonWriter.OutputType;
+import com.badlogic.gdx.utils.viewport.FitViewport;
 
 public class MainController extends ApplicationAdapter {
 
@@ -74,6 +78,8 @@ public class MainController extends ApplicationAdapter {
 	
 	private static final Path configpath = Paths.get("config.json");
 	private static final Path songdbpath = Paths.get("songdata.db");
+	
+	private TextField search;
 
 	public static final Rectangle[] RESOLUTION = { new Rectangle(0, 0, 640, 480), new Rectangle(0, 0, 1280, 720),
 			new Rectangle(0, 0, 1920, 1080), new Rectangle(0, 0, 3840, 2560) };
@@ -152,7 +158,7 @@ public class MainController extends ApplicationAdapter {
 		}
 		
 		if(newState != null && current != newState) {
-			Arrays.fill(newState.getTimer(), -1);
+			Arrays.fill(newState.getTimer(), Long.MIN_VALUE);
 			newState.create();
 			current = newState;
 			current.setStartTime(System.currentTimeMillis());			
@@ -192,6 +198,31 @@ public class MainController extends ApplicationAdapter {
 		systemfont = generator.generateFont(parameter);
 		generator.dispose();
 
+//		Stage stage = new Stage(new FitViewport(RESOLUTION[config.getResolution()].width, RESOLUTION[config.getResolution()].height));
+//		/* TextfieldStyleの定義 */
+//		TextField.TextFieldStyle textFieldStyle = new TextField.TextFieldStyle(
+//				systemfont,                           // BitmapFont
+//		    Color.BLACK,                    // font color
+//		    new TextureRegionDrawable(new TextureRegion(new Texture("skin/system.png"),0,0,8,8)),      // cusor image 
+//		    new TextureRegionDrawable(new TextureRegion(new Texture("skin/system.png"),0,0,2,8)),   // selectoin image 
+//		    new TextureRegionDrawable(new TextureRegion(new Texture("skin/system.png"),0,8,8,8))); // background image
+//
+//		/* textFieldの生成 */
+//		search = new TextField("sample", textFieldStyle);
+//
+//		/* 文字数を10に制限する */
+//		search.setMaxLength(10);
+//
+//		/* tabキーでTextField間をできなくする(デフォルトはtrue)   */
+//		search.setFocusTraversal(false);
+//
+//		/* TextFieldをStageに追加 */
+//		stage.addActor(search);
+//
+//		/* TextFieldをフォーカス状態にする(複数ある場合） */
+//		stage.setKeyboardFocus(search);
+//		
+//		search.setVisible(true);
 	}
 
 	@Override
@@ -203,6 +234,11 @@ public class MainController extends ApplicationAdapter {
 		sprite.begin();
 		current.getSkin().drawAllObjects(sprite, current);
 		sprite.end();
+		// move song bar position by mouse
+		if (input.isMouseConsumed()) {
+			input.setMouseConsumed();
+			current.getSkin().mousePressed(current, input.getMouseX(), input.getMouseY());
+		}
 
 		// FPS表示切替
 		if (input.getFunctionstate()[0] && input.getFunctiontime()[0] != 0) {
@@ -215,6 +251,34 @@ public class MainController extends ApplicationAdapter {
 			systemfont.draw(sprite, String.format("FPS %d", Gdx.graphics.getFramesPerSecond()), 10,
 					RESOLUTION[config.getResolution()].height - 2);
 			sprite.end();
+		}
+
+		// fullscrees - windowed
+		if (input.getFunctionstate()[3] && input.getFunctiontime()[3] != 0) {
+			boolean fullscreen = Gdx.graphics.isFullscreen();
+			Graphics.DisplayMode currentMode = Gdx.graphics.getDisplayMode();
+			if (fullscreen) {
+				Gdx.graphics.setWindowedMode(currentMode.width, currentMode.height);
+			}
+			else {
+				Gdx.graphics.setFullscreenMode(currentMode);
+			}
+			config.setFullscreen(!fullscreen);
+			input.getFunctiontime()[3] = 0;
+		}
+		if (input.getFunctionstate()[4] && input.getFunctiontime()[4] != 0) {
+			int resolution = config.getResolution();
+			resolution = (resolution + 1) % RESOLUTION.length;
+			if (config.isFullscreen()) {
+				Gdx.graphics.setWindowedMode((int) RESOLUTION[resolution].width, (int) RESOLUTION[resolution].height);
+				Graphics.DisplayMode currentMode = Gdx.graphics.getDisplayMode();
+				Gdx.graphics.setFullscreenMode(currentMode);
+			}
+			else {
+				Gdx.graphics.setWindowedMode((int) RESOLUTION[resolution].width, (int) RESOLUTION[resolution].height);
+			}
+			config.setResolution(resolution);
+			input.getFunctiontime()[4] = 0;
 		}
 
 		// スクリーンショット
@@ -391,7 +455,7 @@ public class MainController extends ApplicationAdapter {
 		}
 
 		@Override
-		public void start(Stage primaryStage) throws Exception {
+		public void start(javafx.stage.Stage primaryStage) throws Exception {
 			Config config = new Config();
 			if (Files.exists(configpath)) {
 				Json json = new Json();

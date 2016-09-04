@@ -112,7 +112,7 @@ public abstract class SkinObject {
 		final int timer = dsttimer;
 
 		if (timer != 0 && timer < 256) {
-			if (state.getTimer()[timer] == -1) {
+			if (state.getTimer()[timer] == Long.MIN_VALUE) {
 				return null;
 			}
 			time -= state.getTimer()[timer];
@@ -131,6 +131,9 @@ public abstract class SkinObject {
 			} else {
 				time = (time - dstloop) % (lasttime - dstloop) + dstloop;
 			}
+		}
+		if(dst.get(0).time > time) {
+			return null;
 		}
 		if(fixr == null) {
 			for (int i = 0; i < dst.size() - 1; i++) {
@@ -184,7 +187,7 @@ public abstract class SkinObject {
 		final int timer = dsttimer;
 
 		if (timer != 0 && timer < 256) {
-			if (state.getTimer()[timer] == -1) {
+			if (state.getTimer()[timer] == Long.MIN_VALUE) {
 				return null;
 			}
 			time -= state.getTimer()[timer];
@@ -228,7 +231,7 @@ public abstract class SkinObject {
 		final int timer = dsttimer;
 
 		if (timer != 0 && timer < 256) {
-			if (state.getTimer()[timer] == -1) {
+			if (state.getTimer()[timer] == Long.MIN_VALUE) {
 				return 0;
 			}
 			time -= state.getTimer()[timer];
@@ -272,7 +275,7 @@ public abstract class SkinObject {
 		}
 		Color c = sprite.getColor();
 		if (dstblend == 2) {
-			sprite.setBlendFunction(GL11.GL_ONE, GL11.GL_ONE);
+			sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
 		}
 		sprite.setColor(color);
 		sprite.draw(image, x, y, centerx[dstcenter] * width, centery[dstcenter] * height, width, height, 1,1,angle);

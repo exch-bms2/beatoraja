@@ -20,6 +20,12 @@ public class SkinGraph extends SkinObject {
 	private int timing;
 
 	private int id = -1;
+	private int direction = 1;
+
+	public SkinGraph(TextureRegion[] image, int cycle) {
+		setImage(image, cycle);
+	}
+
 
 	public TextureRegion[] getImage() {
 		return image;
@@ -59,9 +65,13 @@ public class SkinGraph extends SkinObject {
 			}
 				TextureRegion image = getImage(time);
 //				sprite.draw(image, r.x, r.y, r.width, r.height);
+			if(direction == 1) {
 				draw(sprite, new TextureRegion(image, 0, image.getRegionY() + image.getRegionHeight()
 						- (int)(image.getRegionHeight() * value), image.getRegionWidth(), (int) ((int)image.getRegionHeight()
-                                                * value)), r.x, r.y, r.width, r.height * value, getColor(time, state),getAngle(time,state));
+						* value)), r.x, r.y, r.width, r.height * value, getColor(time, state),getAngle(time,state));
+			} else {
+				draw(sprite, new TextureRegion(image, 0, image.getRegionY(), (int) (image.getRegionWidth()* value), image.getRegionHeight()), r.x, r.y, r.width * value, r.height, getColor(time, state),getAngle(time,state));
+			}
 		}
 	}
 
@@ -76,5 +86,13 @@ public class SkinGraph extends SkinObject {
 
 	public void setReferenceID(int id) {
 		this.id = id;
+	}
+
+	public int getDirection() {
+		return direction;
+	}
+
+	public void setDirection(int direction) {
+		this.direction = direction;
 	}
 }

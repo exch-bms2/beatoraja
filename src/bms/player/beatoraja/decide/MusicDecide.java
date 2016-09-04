@@ -56,7 +56,7 @@ public class MusicDecide extends MainState {
 			if (resource.getConfig().getLr2decideskin() != null) {
 				LR2DecideSkinLoader loader = new LR2DecideSkinLoader();
 				try {
-					setSkin(loader.loadMusicDecideSkin(new File(resource.getConfig().getLr2decideskin()), resource
+					setSkin(loader.loadMusicDecideSkin(new File(resource.getConfig().getLr2decideskin()), this, resource
 							.getConfig().getLr2decideskinoption()));
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -71,7 +71,7 @@ public class MusicDecide extends MainState {
 	public void render() {
 		long nowtime = getNowTime();
 
-		if (getTimer()[BMSPlayer.TIMER_FADEOUT] != -1) {
+		if (getTimer()[BMSPlayer.TIMER_FADEOUT] != Long.MIN_VALUE) {
 			if (nowtime > getTimer()[BMSPlayer.TIMER_FADEOUT] + getSkin().getFadeoutTime()) {
 				getMainController().changeState(cancel ? MainController.STATE_SELECTMUSIC : MainController.STATE_PLAYBMS);					
 			}

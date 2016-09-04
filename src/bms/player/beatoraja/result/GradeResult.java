@@ -93,6 +93,16 @@ public class GradeResult extends MainState {
 
 	public void render() {
 		int time = getNowTime();
+		if (getTimer()[TIMER_RESULTGRAPH_BEGIN] == Long.MIN_VALUE) {
+			getTimer()[TIMER_RESULTGRAPH_BEGIN] = time;
+		}
+		if (getTimer()[TIMER_RESULTGRAPH_END] == Long.MIN_VALUE) {
+			getTimer()[TIMER_RESULTGRAPH_END] = time;
+		}
+		if (getTimer()[TIMER_RESULT_UPDATESCORE] == Long.MIN_VALUE) {
+			getTimer()[TIMER_RESULT_UPDATESCORE] = time;
+		}
+
 		final MainController main = getMainController();
 		final SpriteBatch sprite = main.getSpriteBatch();
 		final PlayerResource resource = getMainController().getPlayerResource();
@@ -120,7 +130,7 @@ public class GradeResult extends MainState {
 			sprite.end();
 		}
 
-		if (getTimer()[BMSPlayer.TIMER_FADEOUT] != -1) {
+		if (getTimer()[BMSPlayer.TIMER_FADEOUT] != Long.MIN_VALUE) {
 			if (time > getTimer()[BMSPlayer.TIMER_FADEOUT] + getSkin().getFadeoutTime()) {
 				if (clear != null) {
 					clear.stop();

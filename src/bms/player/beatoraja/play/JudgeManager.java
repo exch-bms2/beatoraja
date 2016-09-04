@@ -107,7 +107,7 @@ public class JudgeManager {
 
 	private int prevtime;
 
-	private void prepareAttr(int judges) {
+	private void prepareAttr() {
 		processing = new LongNote[noteassign.length];
 		passing = new LongNote[noteassign.length];
 		passingcount = new int[noteassign.length];
@@ -142,7 +142,7 @@ public class JudgeManager {
 			pmsjudge = true;
 			break;
 		}
-		prepareAttr(((PlaySkin) main.getSkin()).getJudgeregion().length);
+		prepareAttr();
 
 		njudge = new int[6];
 		sjudge = new int[6];

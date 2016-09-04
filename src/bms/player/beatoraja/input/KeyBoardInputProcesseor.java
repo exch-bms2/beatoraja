@@ -138,14 +138,14 @@ public class KeyBoardInputProcesseor implements InputProcessor {
 
 	public boolean touchDown(int x, int y, int point, int button) {
 		this.bmsPlayerInputProcessor.mousex = (int) (x * resolution.width / Gdx.graphics.getWidth());
-		this.bmsPlayerInputProcessor.mousey = (int) (y * resolution.height / Gdx.graphics.getHeight());
+		this.bmsPlayerInputProcessor.mousey = (int) (resolution.height - y * resolution.height / Gdx.graphics.getHeight());
 		this.bmsPlayerInputProcessor.mouseconsumed = true;
 		return false;
 	}
 
 	public boolean touchDragged(int x, int y, int point) {
 		this.bmsPlayerInputProcessor.mousex = (int) (x * resolution.width / Gdx.graphics.getWidth());
-		this.bmsPlayerInputProcessor.mousey = (int) (y * resolution.height / Gdx.graphics.getHeight());
+		this.bmsPlayerInputProcessor.mousey = (int) (resolution.height - y * resolution.height / Gdx.graphics.getHeight());
 		this.bmsPlayerInputProcessor.mouseconsumed = true;
 		return false;
 	}

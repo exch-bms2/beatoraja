@@ -1,20 +1,10 @@
 package bms.player.beatoraja.play.bga;
 
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.RandomAccessFile;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.logging.Logger;
-
-import javax.imageio.ImageIO;
-
-import org.apache.commons.io.output.ByteArrayOutputStream;
 
 import bms.model.BMSModel;
 import bms.model.TimeLine;
@@ -22,10 +12,8 @@ import bms.player.beatoraja.Config;
 
 import bms.player.beatoraja.play.BMSPlayer;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.files.FileHandleStream;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Pixmap.Filter;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;

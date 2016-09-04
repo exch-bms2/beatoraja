@@ -19,6 +19,8 @@ public class SkinSlider extends SkinObject {
 	private int muki;
 	private int range = 100;
 	private int type;
+	
+	private boolean changable;
 
 	public SkinSlider(TextureRegion[] image, int cycle, int muki, int range, int type) {
 		this.image = image;
@@ -75,5 +77,25 @@ public class SkinSlider extends SkinObject {
 			}
 			image = null;
 		}
+	}
+
+	public boolean isChangable() {
+		return changable;
+	}
+
+	public void setChangable(boolean changable) {
+		this.changable = changable;
+	}
+	
+	public int getRange() {
+		return range;
+	}
+	
+	public int getType() {
+		return type;
+	}
+	
+	public int getSliderAngle() {
+		return muki;
 	}
 }

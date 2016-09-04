@@ -126,6 +126,12 @@ public class BarRenderer {
 	public float getSelectedPosition() {
 		return ((float)selectedindex) / currentsongs.length;
 	}
+	
+	public void setSelectedPosition(float value) {
+		if(value >= 0 && value < 1) {
+			selectedindex = (int) (currentsongs.length * value);
+		}
+	}
 
 	public void move(boolean inclease) {
 		if (inclease) {
@@ -275,17 +281,6 @@ public class BarRenderer {
 				titlefont.setColor(Color.BLACK);
 				titlefont.draw(sprite, "RA", x - 104, y + barh - 8);
 				sprite.end();
-			}
-		}
-
-		// move song bar position by mouse
-		if (main.getInputProcessor().isMouseConsumed()) {
-			main.getInputProcessor().setMouseConsumed();
-			Rectangle progress = new Rectangle(skin.getSeekRegion());
-			progress.x -= progress.width * 2;
-			progress.width *= 5;
-			if (progress.contains(main.getInputProcessor().getMouseX(), main.getInputProcessor().getMouseY())) {
-				selectedindex = (int) ((main.getInputProcessor().getMouseY() - progress.y) * 0.999 / progress.height * currentsongs.length);
 			}
 		}
 	}

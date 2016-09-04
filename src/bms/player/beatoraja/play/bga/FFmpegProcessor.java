@@ -3,6 +3,7 @@ package bms.player.beatoraja.play.bga;
 import java.nio.ByteBuffer;
 import java.util.logging.Logger;
 
+import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.play.BMSPlayer;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
@@ -106,11 +107,11 @@ public class FFmpegProcessor implements MovieProcessor {
 				}
 				final long[] nativeData = new long[] { 0, grabber.getImageWidth(), grabber.getImageHeight(),
 						Gdx2DPixmap.GDX2D_FORMAT_RGB888 };
-				long start = System.currentTimeMillis() - player.getPlayTime();
+				long start = player.getNowTime() - player.getTimer()[MainState.TIMER_PLAY];
 				int framecount = 0;
 				Frame frame = null;
 				for (;;) {
-					final long time = System.currentTimeMillis() - start - player.getPlayTime();
+					final long time = player.getNowTime() - player.getTimer()[MainState.TIMER_PLAY] - start;
 					if (time >= framecount * 1000 / fps) {
 						while (time >= framecount * 1000 / fps || framecount % fpsd != 0) {
 							frame = grabber.grabImage();
@@ -146,7 +147,7 @@ public class FFmpegProcessor implements MovieProcessor {
 					if (restart) {
 						restart = false;
 						grabber.restart();
-						start = System.currentTimeMillis() - player.getPlayTime();
+						start = player.getNowTime() - player.getTimer()[MainState.TIMER_PLAY];
 						framecount = 0;
 //						System.out.println("movie restart - starttime : " + start);
 					}
