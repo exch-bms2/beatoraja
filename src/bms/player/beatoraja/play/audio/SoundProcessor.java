@@ -263,8 +263,7 @@ public class SoundProcessor implements AudioProcessor {
 		AudioInputStream sourceStream = null;
 		sourceStream = AudioSystem.getAudioInputStream(sourceFile.toFile());
 		AudioFormat sourceFormat = sourceStream.getFormat();
-		// System.out.println(sourceFormat + " length : " +
-		// sourceStream.getFrameLength());
+//		System.out.println(sourceFormat + " length : " + sourceStream.getFrameLength());
 		if (sourceFormat.getEncoding().toString().equals("VORBIS")) {
 			AudioFormat targetFormat = new AudioFormat(Encoding.PCM_SIGNED, 44100, 16, 2, 4, 44100, false);
 			// System.out.println(sourceFormat + " : "
@@ -277,6 +276,9 @@ public class SoundProcessor implements AudioProcessor {
 			result = Files.readAllBytes(tmp);
 			// System.out.println(result.length);
 			Files.delete(tmp);
+		} else if((sourceFormat.getEncoding() == Encoding.PCM_SIGNED && sourceFormat.getSampleSizeInBits() == 16) || 
+				(sourceFormat.getEncoding() == Encoding.PCM_FLOAT && sourceFormat.getSampleSizeInBits() == 32)) {
+			return Files.readAllBytes(sourceFile);
 		} else {
 			AudioFormat targetFormat = new AudioFormat(Encoding.PCM_SIGNED, sourceFormat.getSampleRate(), 16,
 					sourceFormat.getChannels(), sourceFormat.getFrameSize() * 16 / sourceFormat.getSampleSizeInBits(),
@@ -287,7 +289,7 @@ public class SoundProcessor implements AudioProcessor {
 			// +targetFormat.getFrameSize());
 			AudioInputStream targetStream = AudioSystem.getAudioInputStream(targetFormat, sourceStream);
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			AudioSystem.write(targetStream, Type.WAVE, new BufferedOutputStream(bos));
+			AudioSystem.write(targetStream, Type.WAVE, bos);
 			result = bos.toByteArray();
 		}
 
@@ -318,7 +320,7 @@ public class SoundProcessor implements AudioProcessor {
 		}
 		AudioInputStream shortenedStream = new AudioInputStream(is, format, framesOfAudioToCopy);
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		AudioSystem.write(shortenedStream, Type.WAVE, new BufferedOutputStream(bos));
+		AudioSystem.write(shortenedStream, Type.WAVE, bos);
 		// System.out.println("sliced WAV status - offset : " + (starttime *
 		// bytesPerSecond / 1000) + " len : " + framesOfAudioToCopy);
 		return bos.toByteArray();
@@ -381,14 +383,7 @@ public class SoundProcessor implements AudioProcessor {
 							public InputStream read() {
 								try {
 									return new ByteArrayInputStream(convertWav(wavfile));
-								} catch (UnsupportedAudioFileException e) {
-									e.printStackTrace();
-								} catch (IOException e) {
-									e.printStackTrace();
-								}
-								try {
-									return Files.newInputStream(wavfile);
-								} catch (IOException e) {
+								} catch (Exception e) {
 									e.printStackTrace();
 								}
 								return null;
