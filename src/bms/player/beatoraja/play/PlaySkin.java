@@ -339,6 +339,10 @@ public class PlaySkin extends Skin {
 			ri.setReferenceID(BMSPlayer.VALUE_JUDGE_1P_KEY1 + (i % 8 == 7 ? -1 : i));
 			add(ri);
 		}
+		SkinImage line = new SkinImage(new TextureRegion[]{new TextureRegion(st, 16,0,8,8)},0);
+		line.setOffsetYReferenceID(BMSPlayer.OFFSET_LIFT);
+		setDestination(line, 0, 20, 137, 390, 6, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		add(line);
 		add(new SkinLaneObject(this));
 		for (int i = 0; i < laneregion.length; i++) {
 			SkinImage bombi = new SkinImage(new TextureRegion[][] { {}, bombtr[3], bombtr[0], bombtr[1] }, 160);
@@ -544,6 +548,10 @@ public class PlaySkin extends Skin {
 			ri.setReferenceID(BMSPlayer.VALUE_JUDGE_1P_KEY1 + (i % 8 == 7 ? -1 : i));
 			add(ri);
 		}
+		SkinImage line = new SkinImage(new TextureRegion[]{new TextureRegion(st, 16,0,8,8)},0);
+		line.setOffsetYReferenceID(BMSPlayer.OFFSET_LIFT);
+		setDestination(line, 0, 870, 137, 390, 6, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		add(line);
 		add(new SkinLaneObject(this));
 		for (int i = 0; i < laneregion.length; i++) {
 			SkinImage bombi = new SkinImage(new TextureRegion[][] { {}, bombtr[3], bombtr[0], bombtr[1] }, 160);
@@ -797,6 +805,10 @@ public class PlaySkin extends Skin {
 			add(bi);
 
 		}
+		SkinImage line = new SkinImage(new TextureRegion[]{new TextureRegion(st, 16,0,8,8)},0);
+		line.setOffsetYReferenceID(BMSPlayer.OFFSET_LIFT);
+		setDestination(line, 0, 345, 137, 590, 6, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		add(line);
 		add(new SkinLaneObject(this));
 		for (int i = 0; i < laneregion.length; i++) {
 			SkinImage bombi = new SkinImage(bombtr[0], 160);
@@ -1028,6 +1040,15 @@ public class PlaySkin extends Skin {
 			ri.setOffsetYReferenceID(MainState.OFFSET_LIFT);
 			add(ri);
 		}
+		
+		SkinImage line = new SkinImage(new TextureRegion[]{new TextureRegion(st, 16,0,8,8)},0);
+		line.setOffsetYReferenceID(BMSPlayer.OFFSET_LIFT);
+		setDestination(line, 0, 210, 137, 390, 6, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		add(line);
+		line = new SkinImage(new TextureRegion[]{new TextureRegion(st, 16,0,8,8)},0);
+		line.setOffsetYReferenceID(BMSPlayer.OFFSET_LIFT);
+		setDestination(line, 0, 680, 137, 390, 6, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		add(line);
 		add(new SkinLaneObject(this));
 		for (int i = 0; i < laneregion.length; i++) {
 			SkinImage bombi = new SkinImage(new TextureRegion[][] { {}, bombtr[3], bombtr[0], bombtr[1] }, 160);

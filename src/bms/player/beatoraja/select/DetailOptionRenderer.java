@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 
 import bms.player.beatoraja.Config;
+import bms.player.beatoraja.PlayConfig;
 
 public class DetailOptionRenderer {
 	
@@ -22,7 +23,13 @@ public class DetailOptionRenderer {
 		this.config = config;
 	}
 
-	public void render(boolean[] keystate, long[] keytime) {
+	public void render(boolean[] keystate, long[] keytime, Bar bar) {
+		PlayConfig pc = null;
+		if(bar instanceof SongBar) {
+			SongBar song = (SongBar)bar;
+			pc = (song.getSongData().getMode() == 5 || song.getSongData().getMode() == 7 ? config.getMode7()
+					: (song.getSongData().getMode() == 10 || song.getSongData().getMode() == 14 ? config.getMode14() : config.getMode9()));			
+		}
 		if (keystate[0] && keytime[0] != 0) {
 			keytime[0] = 0;
 			config.setBga((config.getBga() + 1) % BGA.length);
@@ -33,8 +40,8 @@ public class DetailOptionRenderer {
 		}
 		if (keystate[3] && keytime[3] != 0) {
 			keytime[3] = 0;
-			if (config.getGreenvalue() > 1) {
-				config.setGreenvalue(config.getGreenvalue() - 1);
+			if (pc != null && pc.getDuration() > 1) {
+				pc.setDuration(pc.getDuration() - 1);
 			}
 		}
 		if (keystate[4] && keytime[4] != 0) {
@@ -45,8 +52,8 @@ public class DetailOptionRenderer {
 		}
 		if (keystate[5] && keytime[5] != 0) {
 			keytime[5] = 0;
-			if (config.getGreenvalue() < 2000) {
-				config.setGreenvalue(config.getGreenvalue() + 1);
+			if (pc != null && pc.getDuration() < 2000) {
+				pc.setDuration(pc.getDuration() + 1);
 			}
 		}
 		if (keystate[6] && keytime[6] != 0) {

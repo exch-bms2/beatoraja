@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import bms.player.beatoraja.*;
+
 import org.lwjgl.opengl.GL11;
 
 import bms.model.*;
@@ -63,6 +64,7 @@ public class LaneRenderer {
 	private PlaySkin skin;
 
 	private Config config;
+	private PlayConfig playconfig;
 	private int auto;
 
 	private boolean drawline = true;
@@ -104,12 +106,14 @@ public class LaneRenderer {
 		this.font = font;
 		this.skin = skin;
 		this.config = resource.getConfig();
+		this.playconfig = (model.getUseKeys() == 5 || model.getUseKeys() == 7 ? config.getMode7()
+				: (model.getUseKeys() == 10 || model.getUseKeys() == 14 ? config.getMode14() : config.getMode9()));
 		auto = resource.getAutoplay();
-		this.enableLanecover = config.isEnablelanecover();
-		this.enableLift = config.isEnablelift();
-		this.lift = config.getLift();
+		this.enableLanecover = playconfig.isEnablelanecover();
+		this.enableLift = playconfig.isEnablelift();
+		this.lift = playconfig.getLift();
 		this.fixhispeed = config.getFixhispeed();
-		this.gvalue = config.getGreenvalue();
+		this.gvalue = playconfig.getDuration();
 		this.model = model;
 		this.timelines = model.getAllTimeLines();
 		if (model.getUseKeys() == 9) {
@@ -118,7 +122,7 @@ public class LaneRenderer {
 		} else {
 			laneassign = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13, 14, 15, 16 };
 		}
-		hispeed = config.getHispeed();
+		hispeed = playconfig.getHispeed();
 		switch (config.getFixhispeed()) {
 		case Config.FIX_HISPEED_OFF:
 			break;
@@ -149,7 +153,7 @@ public class LaneRenderer {
 			}
 			break;
 		}
-		this.setLanecover(config.getLanecover());
+		this.setLanecover(playconfig.getLanecover());
 		if (this.fixhispeed != Config.FIX_HISPEED_OFF) {
 			basehispeed = hispeed;
 		}
@@ -196,7 +200,7 @@ public class LaneRenderer {
 		lanecover = (lanecover < 0 ? 0 : (lanecover > 1 ? 1 : lanecover));
 		this.lanecover = lanecover;
 		if (this.fixhispeed != Config.FIX_HISPEED_OFF) {
-			hispeed = (float) ((2400f / (basebpm / 100) / gvalue) * 0.6 * (1 - (enableLanecover ? lanecover : 0)));
+			hispeed = (float) ((2400f / (basebpm / 100) / gvalue) * (1 - (enableLanecover ? lanecover : 0)));
 		}
 	}
 
@@ -599,9 +603,9 @@ public class LaneRenderer {
 				font.setColor(Color.WHITE);
 				font.draw(sprite, String.format("%5d", Math.round(lanecover * 1000)), r.x + r.width * 0.25f, hl
 						+ (hu - hl) * (enableLanecover ? (1 - lanecover) : 1));
-				font.setColor(Color.GREEN);
+				font.setColor(Color.YELLOW);
 				font.draw(sprite,
-						String.format("%5d", Math.round(region * 0.6 * (1 - (enableLanecover ? lanecover : 0)))), r.x
+						String.format("%5d", Math.round(region *(1 - (enableLanecover ? lanecover : 0)))), r.x
 								+ r.width * 0.75f, hl + (hu - hl) * (enableLanecover ? (1 - lanecover) : 1));
 			}
 		}

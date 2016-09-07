@@ -71,33 +71,9 @@ public class Config {
 	public static final int FIX_HISPEED_MINBPM = 4;
 
 	/**
-	 * ハイスピード。1.0で等速
-	 */
-	private float hispeed = 1.0f;
-	/**
-	 * デュレーション(ノーツ表示時間)
-	 */
-	private int greenvalue = 300;
-	/**
 	 * 最小入力感覚
      */
 	private int inputduration = 10;
-	/**
-	 * レーンカバー表示量(0-1)
-	 */
-	private float lanecover = 0.2f;
-	/**
-	 * レーンカバー使用
-	 */
-	private boolean enablelanecover = true;
-	/**
-	 * リフト表示量(0-1)
-	 */
-	private float lift = 0.1f;
-	/**
-	 * リフト使用
-	 */
-	private boolean enablelift = true;
 	/**
 	 * 判定タイミング
 	 */
@@ -267,60 +243,12 @@ public class Config {
 		this.random = random;
 	}
 
-	public float getHispeed() {
-		return hispeed;
-	}
-
-	public void setHispeed(float hispeed) {
-		this.hispeed = hispeed;
-	}
-
 	public int getFixhispeed() {
 		return fixhispeed;
 	}
 
 	public void setFixhispeed(int fixhispeed) {
 		this.fixhispeed = fixhispeed;
-	}
-
-	public int getGreenvalue() {
-		return greenvalue;
-	}
-
-	public void setGreenvalue(int greenvalue) {
-		this.greenvalue = greenvalue;
-	}
-
-	public float getLanecover() {
-		return lanecover;
-	}
-
-	public void setLanecover(float lanecover) {
-		this.lanecover = lanecover;
-	}
-
-	public boolean isEnablelanecover() {
-		return enablelanecover;
-	}
-
-	public void setEnablelanecover(boolean enablelanecover) {
-		this.enablelanecover = enablelanecover;
-	}
-
-	public float getLift() {
-		return lift;
-	}
-
-	public void setLift(float lift) {
-		this.lift = lift;
-	}
-
-	public boolean isEnablelift() {
-		return enablelift;
-	}
-
-	public void setEnablelift(boolean enablelift) {
-		this.enablelift = enablelift;
 	}
 
 	public int getBga() {

@@ -617,14 +617,15 @@ public class BMSPlayer extends MainState {
 				return;
 			}
 		}
-		Config config = resource.getConfig();
+		PlayConfig pc = (model.getUseKeys() == 5 || model.getUseKeys() == 7 ? resource.getConfig().getMode7()
+				: (model.getUseKeys() == 10 || model.getUseKeys() == 14 ? resource.getConfig().getMode14() : resource.getConfig().getMode9()));
 		if (lanerender.getFixHispeed() != Config.FIX_HISPEED_OFF) {
-			config.setGreenvalue(lanerender.getGreenValue());
+			pc.setDuration(lanerender.getGreenValue());
 		} else {
-			config.setHispeed(lanerender.getHispeed());
+			pc.setHispeed(lanerender.getHispeed());
 		}
-		config.setLanecover(lanerender.getLaneCoverRegion());
-		config.setLift(lanerender.getLiftRegion());
+		pc.setLanecover(lanerender.getLaneCoverRegion());
+		pc.setLift(lanerender.getLiftRegion());
 	}
 
 	public IRScoreData createScoreData() {

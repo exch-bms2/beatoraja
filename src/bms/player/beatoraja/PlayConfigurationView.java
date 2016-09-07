@@ -214,12 +214,12 @@ public class PlayConfigurationView implements Initializable {
 		lntype.getSelectionModel().select(config.getLnmode());
 
 		fixhispeed.setValue(config.getFixhispeed());
-		hispeed.getValueFactory().setValue((double) config.getHispeed());
-		gvalue.getValueFactory().setValue(config.getGreenvalue());
-		enableLanecover.setSelected(config.isEnablelanecover());
-		lanecover.getValueFactory().setValue((double) config.getLanecover());
-		enableLift.setSelected(config.isEnablelift());
-		lift.getValueFactory().setValue((double) config.getLift());
+		hispeed.getValueFactory().setValue((double) config.getMode7().getHispeed());
+		gvalue.getValueFactory().setValue(config.getMode7().getDuration());
+		enableLanecover.setSelected(config.getMode7().isEnablelanecover());
+		lanecover.getValueFactory().setValue((double) config.getMode7().getLanecover());
+		enableLift.setSelected(config.getMode7().isEnablelift());
+		lift.getValueFactory().setValue((double) config.getMode7().getLift());
 		judgetiming.getValueFactory().setValue(config.getJudgetiming());
 
 		bgmpath.setText(config.getBgmpath());
@@ -256,13 +256,13 @@ public class PlayConfigurationView implements Initializable {
 		config.setRandom(scoreop.getValue());
 		config.setGauge(gaugeop.getValue());
 		config.setLnmode(lntype.getValue());
-		config.setHispeed(hispeed.getValue().floatValue());
+		config.getMode7().setHispeed(hispeed.getValue().floatValue());
 		config.setFixhispeed(fixhispeed.getValue());
-		config.setGreenvalue(gvalue.getValue());
-		config.setEnablelanecover(enableLanecover.isSelected());
-		config.setLanecover(lanecover.getValue().floatValue());
-		config.setEnablelift(enableLift.isSelected());
-		config.setLift(lift.getValue().floatValue());
+		config.getMode7().setDuration(gvalue.getValue());
+		config.getMode7().setEnablelanecover(enableLanecover.isSelected());
+		config.getMode7().setLanecover(lanecover.getValue().floatValue());
+		config.getMode7().setEnablelift(enableLift.isSelected());
+		config.getMode7().setLift(lift.getValue().floatValue());
 		config.setJudgetiming(judgetiming.getValue());
 
 		config.setBgmpath(bgmpath.getText());

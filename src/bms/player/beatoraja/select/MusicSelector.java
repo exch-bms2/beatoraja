@@ -530,7 +530,7 @@ public class MusicSelector extends MainState {
 			aoption.render(keystate, keytime);
 		} else if (input.getNumberState()[5]) {
 			panelstate = 3;
-			doption.render(keystate, keytime);
+			doption.render(keystate, keytime, current);
 		} else if (input.getNumberState()[6]) {
 			if (bgm != null) {
 				bgm.stop();
@@ -897,7 +897,13 @@ public class MusicSelector extends MainState {
 			}
 			return Integer.MIN_VALUE;
 		case NUMBER_DURATION:
-			return config.getGreenvalue();
+			if(bar.getSelected() instanceof SongBar) {
+				SongBar song = (SongBar)bar.getSelected();
+				PlayConfig pc = (song.getSongData().getMode() == 5 || song.getSongData().getMode() == 7 ? config.getMode7()
+						: (song.getSongData().getMode() == 10 || song.getSongData().getMode() == 14 ? config.getMode14() : config.getMode9()));
+				return pc.getDuration();
+			}
+			return Integer.MIN_VALUE;
 		case NUMBER_JUDGETIMING:
 			return config.getJudgetiming();
 		}
