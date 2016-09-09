@@ -120,6 +120,7 @@ public abstract class MainState {
 
 	public static final int NUMBER_HISPEED_LR2 = 10;
 	public static final int NUMBER_JUDGETIMING = 12;
+    public static final int NUMBER_LANECOVER1 = 14;
 	public static final int NUMBER_TIME_YEAR = 21;
 	public static final int NUMBER_TIME_MONTH = 22;
 	public static final int NUMBER_TIME_DAY = 23;
@@ -484,7 +485,14 @@ public abstract class MainState {
 			return model != null && model.getDifficulty() == 4;
 		case OPTION_DIFFICULTY5:
 			return model != null && model.getDifficulty() == 5;
-
+		case OPTION_JUDGE_EASY:
+			return model != null && (model.getJudge() == 3 || model.getJudge() >= 100);
+		case OPTION_JUDGE_NORMAL:
+			return model != null && (model.getJudge() == 2 || (model.getJudge() >= 80 && model.getJudge() < 100));
+		case OPTION_JUDGE_HARD:
+			return model != null && (model.getJudge() == 1 || (model.getJudge() >= 50 && model.getJudge() < 80));
+		case OPTION_JUDGE_VERYHARD:
+			return model != null && (model.getJudge() == 0 || (model.getJudge() >= 10 && model.getJudge() < 50));
 		case OPTION_5KEYSONG:
 			return model != null && model.getMode() == 5;
 		case OPTION_7KEYSONG:
@@ -621,6 +629,7 @@ public abstract class MainState {
 		case BUTTON_ASSIST_NOMINE:
 			return getMainController().getPlayerResource().getConfig().isNomine() ? 1 : 0;
 		case NUMBER_TOTALNOTES:
+		case NUMBER_TOTALNOTES2:
 			if (getMainController().getPlayerResource().getSongdata() != null) {
 				return getMainController().getPlayerResource().getSongdata().getNotes();
 			}

@@ -317,11 +317,13 @@ public abstract class LR2SkinLoader {
 											mn[i] = images[i + 12];
 										}
 										num = new SkinNumber(pn, mn, values[9], values[13] + 1, 0, values[11]);
+										num.setAlign(values[12]);
 									} else {
 										num = new SkinNumber(images, values[9], values[13], images.length > 10 ? 2 : 0,
 												values[11]);
+										num.setAlign(values[12]);
 									}
-
+									num.setTiming(values[10]);
 									skin.add(num);
 									// System.out.println("Number Added - " +
 									// (num.getId()));
@@ -539,7 +541,7 @@ public abstract class LR2SkinLoader {
 
 	protected int[] parseInt(String[] s) {
 		int[] result = new int[21];
-		for (int i = 2; i < s.length; i++) {
+		for (int i = 1; i < s.length; i++) {
 			try {
 				result[i] = Integer.parseInt(s[i]);
 			} catch (Exception e) {

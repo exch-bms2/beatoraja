@@ -24,6 +24,10 @@ public class SkinNumber extends SkinObject {
 	private int keta;
 	
 	private int zeropadding;
+
+	private int align;
+	
+	private int timing;
 	
 	private TextureRegion[] values;
 	
@@ -70,16 +74,28 @@ public class SkinNumber extends SkinObject {
 		this.values = new TextureRegion[keta];
 	}
 	
-	
-	public TextureRegion[] getValue(long time, int value, int zeropadding) {
+	public int getTiming() {
+		return timing;
+	}
+
+	public void setTiming(int timing) {
+		this.timing = timing;
+	}
+
+	public TextureRegion[] getValue(long time, int value, int zeropadding, MainState state) {
 		final TextureRegion[][] images = (value >= 0 || mimage == null) ? this.image : mimage;
 		if(images == null) {
 			return new TextureRegion[0];
 		}
 		TextureRegion[] image = images[0];
-		if(getCycle() != 0) {
-			final int index = (int) ((time / (getCycle() / images.length))) % images.length;
-//			System.out.println(index + " / " + image.length);
+		if(timing != 0 && timing < 256) {
+			if(state.getTimer()[timing] != Long.MIN_VALUE) {
+				time -= state.getTimer()[timing];
+			}
+		}
+		if(time >= 0 && getCycle() != 0) {			
+			final int index = ((int) (time / (((float)getCycle())  / images.length))) % images.length;
+//			System.out.println("time : " + time + " - index : " + index + " / " + image.length);
 			image = images[index];
 		}
 
@@ -91,6 +107,15 @@ public class SkinNumber extends SkinObject {
 				values[j] = (zeropadding == 2 ? image[10] : (zeropadding == 1 ? image[0] : (mimage != null && (values[j + 1] != image[11] && values[j + 1] != null) ? image[11] : null)));
 			}
 			value /= 10;
+		}
+		if(align == 1) {
+			int shift = 0;
+			while(values[shift] == null) {
+				shift++;
+			}
+			for(int i = 0;i < values.length;i++) {
+				values[i] = i + shift < values.length ? values[i + shift] : null;
+			}
 		}
 		return values;
 	}
@@ -108,7 +133,7 @@ public class SkinNumber extends SkinObject {
 	public void draw(SpriteBatch sprite, long time, int value, MainState state) {
 		Rectangle r = this.getDestination(time,state);
 		if(r != null) {
-			TextureRegion[] values = getValue(time, value, zeropadding);
+			TextureRegion[] values = getValue(time, value, zeropadding, state);
 			for (int j = 0; j < values.length; j++) {
 				if(values[j] != null) {
 					draw(sprite, values[j], r.x + r.width * j, r.y, r.width, r.height, getColor(time,state),getAngle(time,state));
@@ -138,5 +163,13 @@ public class SkinNumber extends SkinObject {
 			}
 			mimage = null;
 		}
+	}
+
+	public int getAlign() {
+		return align;
+	}
+
+	public void setAlign(int align) {
+		this.align = align;
 	}
 }

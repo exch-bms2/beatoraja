@@ -63,7 +63,7 @@ public class SkinImage extends SkinObject {
 			return image[value][0];
 		}
 
-		final int index = (int) ((time / (getCycle()  / image[value].length))) % image[value].length;
+		final int index = ((int) (time / (((float)getCycle())  / image[value].length))) % image[value].length;
 //		System.out.println(index + " / " + image.length);
 		return image[value][index];
 	}
@@ -88,11 +88,15 @@ public class SkinImage extends SkinObject {
 	}
 
 	public void draw(SpriteBatch sprite, long time, MainState state) {
+		draw(sprite, time, state, 0,0);
+	}
+
+	public void draw(SpriteBatch sprite, long time, MainState state, int offsetX, int offsetY) {
 	    if(getImageID() != -1) {
             Rectangle r = this.getDestination(time, state);
             TextureRegion tr = state.getImage(getImageID());
             if (r != null && tr != null) {
-                draw(sprite, tr, r.x, r.y, r.width, r.height, getColor(time,state),getAngle(time,state));
+                draw(sprite, tr, r.x + offsetX, r.y + offsetY, r.width, r.height, getColor(time,state),getAngle(time,state));
             }
         } else {
             if(image == null) {
@@ -112,7 +116,7 @@ public class SkinImage extends SkinObject {
             Rectangle r = this.getDestination(time, state);
             if (r != null) {
                 if(value >= 0 && value < image.length) {
-                    draw(sprite, getImage(value, time, state), r.x, r.y, r.width, r.height, getColor(time,state),getAngle(time,state));
+                    draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height, getColor(time,state),getAngle(time,state));
                 }
             }
         }
