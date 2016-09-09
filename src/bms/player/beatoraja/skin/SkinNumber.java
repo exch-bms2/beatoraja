@@ -24,6 +24,8 @@ public class SkinNumber extends SkinObject {
 	private int keta;
 	
 	private int zeropadding;
+
+	private int align;
 	
 	private TextureRegion[] values;
 	
@@ -78,7 +80,7 @@ public class SkinNumber extends SkinObject {
 		}
 		TextureRegion[] image = images[0];
 		if(getCycle() != 0) {
-			final int index = (int) ((time / (getCycle() / images.length))) % images.length;
+			final int index = ((int) (time / (((float)getCycle())  / images.length))) % images.length;
 //			System.out.println(index + " / " + image.length);
 			image = images[index];
 		}
@@ -91,6 +93,15 @@ public class SkinNumber extends SkinObject {
 				values[j] = (zeropadding == 2 ? image[10] : (zeropadding == 1 ? image[0] : (mimage != null && (values[j + 1] != image[11] && values[j + 1] != null) ? image[11] : null)));
 			}
 			value /= 10;
+		}
+		if(align == 1) {
+			int shift = 0;
+			while(values[shift] == null) {
+				shift++;
+			}
+			for(int i = 0;i < values.length;i++) {
+				values[i] = i + shift < values.length ? values[i + shift] : null;
+			}
 		}
 		return values;
 	}
@@ -138,5 +149,13 @@ public class SkinNumber extends SkinObject {
 			}
 			mimage = null;
 		}
+	}
+
+	public int getAlign() {
+		return align;
+	}
+
+	public void setAlign(int align) {
+		this.align = align;
 	}
 }

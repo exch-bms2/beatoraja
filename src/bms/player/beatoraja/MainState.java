@@ -120,6 +120,7 @@ public abstract class MainState {
 
 	public static final int NUMBER_HISPEED_LR2 = 10;
 	public static final int NUMBER_JUDGETIMING = 12;
+    public static final int NUMBER_LANECOVER1 = 14;
 	public static final int NUMBER_TIME_YEAR = 21;
 	public static final int NUMBER_TIME_MONTH = 22;
 	public static final int NUMBER_TIME_DAY = 23;

@@ -93,9 +93,15 @@ public class BMSPlayer extends MainState {
 	public static final int TIMER_KEYOFF_2P_KEY7 = 137;
 	public static final int TIMER_KEYOFF_2P_KEY8 = 138;
 	public static final int TIMER_KEYOFF_2P_KEY9 = 139;
+	public static final int TIMER_RHYTHM = 140;
 
 	public static final int VALUE_JUDGE_1P_SCRATCH = 500;
 	public static final int VALUE_JUDGE_1P_KEY1 = 501;
+
+	public static final int SLIDER_LANECOVER = 4;
+	public static final int SLIDER_LANECOVER2 = 5;
+
+	public static final int OPTION_LANECOVER1_CHANGING = 270;
 
 	private BitmapFont judgefont;
 	private BitmapFont systemfont;
@@ -470,10 +476,10 @@ public class BMSPlayer extends MainState {
 			final long rt = now - getTimer()[TIMER_READY];
 			if (rt > skin.getPlayStartTime()) {
 				state = STATE_PLAY;
-				getTimer()[TIMER_READY] = Long.MIN_VALUE;
                 getTimer()[TIMER_PLAY] = now;
+				getTimer()[TIMER_RHYTHM] = now;
 
-				input.setStartTime(now + getStartTime());
+						input.setStartTime(now + getStartTime());
 				List<KeyInputLog> keylog = null;
 				if (autoplay == 1) {
 					keylog = createAutoplayLog(model);
@@ -490,9 +496,15 @@ public class BMSPlayer extends MainState {
 		// プレイ
 		case STATE_PLAY:
             getTimer()[TIMER_PLAY] += (nowtime - prevtime) * (100 - playspeed) / 100;
+			// TODO リズムタイマー算出
 			final float g = gauge.getValue();
 			if (gaugelog.size() <= (now - getTimer()[TIMER_PLAY]) / 500) {
 				gaugelog.add(g);
+			}
+			if(g == gauge.getMaxValue() && getTimer()[TIMER_GAUGE_MAX_1P] == Long.MIN_VALUE) {
+				getTimer()[TIMER_GAUGE_MAX_1P] = now;
+			} else if(g < gauge.getMaxValue() && getTimer()[TIMER_GAUGE_MAX_1P] != Long.MIN_VALUE){
+				getTimer()[TIMER_GAUGE_MAX_1P] = Long.MIN_VALUE;
 			}
 			// System.out.println("playing time : " + time);
 			if (playtime < (now - getTimer()[TIMER_PLAY])) {
@@ -623,7 +635,7 @@ public class BMSPlayer extends MainState {
 		} else {
 			config.setHispeed(lanerender.getHispeed());
 		}
-		config.setLanecover(lanerender.getLaneCoverRegion());
+		config.setLanecover(lanerender.getLanecover());
 		config.setLift(lanerender.getLiftRegion());
 	}
 
@@ -774,9 +786,9 @@ public class BMSPlayer extends MainState {
 
 		if (notes == getMainController().getPlayerResource().getSongdata().getNotes()
 				&& getTimer()[TIMER_ENDOFNOTE_1P] == Long.MIN_VALUE) {
-			getTimer()[TIMER_ENDOFNOTE_1P] = time;
+			getTimer()[TIMER_ENDOFNOTE_1P] = getNowTime();
 			if (this.judge.getJudgeCount(3) == 0 && this.judge.getJudgeCount(4) == 0) {
-				getTimer()[TIMER_FULLCOMBO_1P] = time;
+				getTimer()[TIMER_FULLCOMBO_1P] = getNowTime();
 			}
 		}
 	}
@@ -926,7 +938,10 @@ public class BMSPlayer extends MainState {
 	}
 
 	public int getNumberValue(int id) {
+		final SongData song = getMainController().getPlayerResource().getSongdata();
 		switch (id) {
+			case NUMBER_LANECOVER1:
+				return (int) (lanerender.getLanecover() * 1000);
 		case NUMBER_TIMELEFT_MINUTE:
 			return (int) ((playtime - (int) (getTimer()[TIMER_PLAY] != Long.MIN_VALUE ? getNowTime() - getTimer()[TIMER_PLAY] : 0) + 1000) / 60000);
 		case NUMBER_TIMELEFT_SECOND:
@@ -948,9 +963,15 @@ public class BMSPlayer extends MainState {
 		case NUMBER_NOWBPM:
 			return (int) lanerender.getNowBPM();
 		case NUMBER_SCORE:
+			case NUMBER_SCORE2:
 			return judge.getJudgeCount(0) * 2 + judge.getJudgeCount(1);
 		case NUMBER_TARGET_SCORE:
+			case NUMBER_TARGET_SCORE2:
 			return rivalscore;
+			case NUMBER_DIFF_HIGHSCORE:
+				return (judge.getJudgeCount(0) * 2 + judge.getJudgeCount(1))- (bestscore * notes / song.getNotes());
+			case NUMBER_DIFF_TARGETSCORE:
+				return (judge.getJudgeCount(0) * 2 + judge.getJudgeCount(1)) - (rivalscore * notes / song.getNotes());
 		case NUMBER_SCORE_RATE:
 			return (judge.getJudgeCount(0) * 2 + judge.getJudgeCount(1)) * 100 / (getMainController().getPlayerResource().getSongdata().getNotes() * 2);
 		case NUMBER_SCORE_RATE_AFTERDOT:
@@ -976,6 +997,16 @@ public class BMSPlayer extends MainState {
 				return (float) (getNowTime() - getTimer()[TIMER_PLAY]) / playtime;
 			}
 			return 0;
+			case SLIDER_LANECOVER:
+			case SLIDER_LANECOVER2:
+				if(lanerender.isEnableLanecover()) {
+					float lane = lanerender.getLanecover();
+					if(lanerender.isEnableLift()) {
+						lane = lane * (1 - lanerender.getLiftRegion());
+					}
+					return lane;
+				}
+				return 0;
 		case OFFSET_LIFT:
 			if (lanerender.isEnableLift()) {
 				return lanerender.getLiftRegion() * skin.getLaneregion()[0].height;
@@ -1058,6 +1089,8 @@ public class BMSPlayer extends MainState {
 			return state == STATE_PRELOAD;			
 		case OPTION_LOADED:
 			return state != STATE_PRELOAD;
+			case OPTION_LANECOVER1_CHANGING:
+				return input.startPressed();
 		}
 		return super.getBooleanValue(id);
 	}

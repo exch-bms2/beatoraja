@@ -37,7 +37,7 @@ public class SkinSlider extends SkinObject {
 		if (getCycle() == 0) {
 			return image[0];
 		}
-		final int index = (int) ((time / (getCycle() / image.length))) % image.length;
+		final int index = ((int) (time / (((float)getCycle())  / image.length))) % image.length;
 		// System.out.println(index + " / " + image.length);
 		return image[index];
 	}
