@@ -175,11 +175,11 @@ public class PlayerResource {
 				return null;
 			}
 			// JUDGERANKをbmson互換に変換
-			if (model.getJudgerank() < 0 || model.getJudgerank() > 2) {
+			if(model.getJudgerank() >= 0 && model.getJudgerank() < 4) {
+				final int[] judgetable = { 40, 70, 90, 100 };
+				model.setJudgerank(judgetable[model.getJudgerank()]);				
+			} else if (model.getJudgerank() < 0) {
 				model.setJudgerank(100);
-			} else {
-				final int[] judgetable = { 40, 70, 90 };
-				model.setJudgerank(judgetable[model.getJudgerank()]);
 			}
 			// TOTAL未定義の場合
 			if (model.getTotal() <= 0.0) {

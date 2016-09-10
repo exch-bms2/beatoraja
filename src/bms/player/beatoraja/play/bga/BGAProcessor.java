@@ -398,7 +398,7 @@ public class BGAProcessor {
 			// draw layer
 			Texture playinglayertex = getBGAData(playinglayerid, rlayer);
 			if (playinglayertex != null) {
-				playinglayertex.setFilter(TextureFilter.Linear, TextureFilter.Linear);
+//				playinglayertex.setFilter(TextureFilter.Linear, TextureFilter.Linear);
 				sprite.begin();
 				if (mpgmap.containsKey(playinglayerid) && bgrshader.isCompiled()) {
 					sprite.setShader(bgrshader);

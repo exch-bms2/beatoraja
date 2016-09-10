@@ -86,6 +86,7 @@ public class SongData {
 		}
 		mode = model.getUseKeys();
 		difficulty = model.getDifficulty();
+		judge = model.getJudgerank();
 		minbpm = (int) model.getMinBPM();
 		maxbpm = (int) model.getMaxBPM();
 		notes = model.getTotalNotes();
