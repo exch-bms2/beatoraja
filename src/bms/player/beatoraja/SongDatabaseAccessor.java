@@ -36,6 +36,9 @@ public class SongDatabaseAccessor {
 
 	private SqliteDBManager songdb;
 
+	private final ResultSetHandler<List<SongData>> songhandler = new BeanListHandler<SongData>(SongData.class);
+	private final ResultSetHandler<List<FolderData>> folderhandler = new BeanListHandler<FolderData>(FolderData.class);
+
 	private QueryRunner qr;
 
 	public SongDatabaseAccessor(String filepath) throws ClassNotFoundException {
@@ -48,66 +51,27 @@ public class SongDatabaseAccessor {
 	 * 楽曲データベースを初期テーブルを作成する。 すでに初期テーブルを作成している場合は何もしない。
 	 */
 	public void createTable() {
-		Connection conn = null;
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
 		try {
-			conn = songdb.getDataSource().getConnection();
-			String sql = "SELECT * FROM sqlite_master WHERE name = ? and type='table';";
-			// conn.setAutoCommit(false);
-			pstmt = conn.prepareStatement(sql);
-
 			// songテーブル作成(存在しない場合)
-			pstmt.setString(1, "song");
-			rs = pstmt.executeQuery();
-			if (!rs.next()) {
-				QueryRunner qr = new QueryRunner();
-				if (qr.query(conn, sql, new MapListHandler(), "song").size() == 0) {
-					sql = "CREATE TABLE [song] ([md5] TEXT NOT NULL," + "[sha256] TEXT NOT NULL," + "[title] TEXT,"
-							+ "[subtitle] TEXT," + "[genre] TEXT," + "[artist] TEXT," + "[subartist] TEXT,"
-							+ "[tag] TEXT," + "[path] TEXT," + "[folder] TEXT," + "[stagefile] TEXT,"
-							+ "[banner] TEXT," + "[backbmp] TEXT," + "[parent] TEXT," + "[level] INTEGER,"
-							+ "[difficulty] INTEGER," + "[maxbpm] INTEGER," + "[minbpm] INTEGER," + "[mode] INTEGER,"
-							+ "[judge] INTEGER," + "[feature] INTEGER," + "[content] INTEGER," + "[date] INTEGER,"
-							+ "[favorite] INTEGER," + "[notes] INTEGER," + "[adddate] INTEGER,"
-							+ "PRIMARY KEY(sha256, path));";
-					qr.update(conn, sql);
-				}
+			if (qr.query("SELECT * FROM sqlite_master WHERE name = ? and type='table';", new MapListHandler(), "song")
+					.size() == 0) {
+				qr.update("CREATE TABLE [song] ([md5] TEXT NOT NULL," + "[sha256] TEXT NOT NULL," + "[title] TEXT,"
+						+ "[subtitle] TEXT," + "[genre] TEXT," + "[artist] TEXT," + "[subartist] TEXT," + "[tag] TEXT,"
+						+ "[path] TEXT," + "[folder] TEXT," + "[stagefile] TEXT," + "[banner] TEXT,"
+						+ "[backbmp] TEXT," + "[parent] TEXT," + "[level] INTEGER," + "[difficulty] INTEGER,"
+						+ "[maxbpm] INTEGER," + "[minbpm] INTEGER," + "[mode] INTEGER," + "[judge] INTEGER,"
+						+ "[feature] INTEGER," + "[content] INTEGER," + "[date] INTEGER," + "[favorite] INTEGER,"
+						+ "[notes] INTEGER," + "[adddate] INTEGER," + "PRIMARY KEY(sha256, path));");
 			}
-			rs.close();
 
-			sql = "SELECT * FROM sqlite_master WHERE name = ? and type='table';";
-			// conn.setAutoCommit(false);
-			pstmt.setString(1, "folder");
-			rs = pstmt.executeQuery();
-			if (!rs.next()) {
-				QueryRunner qr = new QueryRunner();
-				if (qr.query(conn, sql, new MapListHandler(), "folder").size() == 0) {
-					sql = "CREATE TABLE [folder] (" + "[title] TEXT," + "[subtitle] TEXT," + "[command] TEXT,"
-							+ "[path] TEXT," + "[type] INTEGER," + "[banner] TEXT," + "[parent] TEXT,"
-							+ "[date] INTEGER," + "[max] INTEGER," + "[adddate] INTEGER," + "PRIMARY KEY(path));";
-					qr.update(conn, sql);
-				}
+			if (qr.query("SELECT * FROM sqlite_master WHERE name = ? and type='table';", new MapListHandler(), "folder")
+					.size() == 0) {
+				qr.update("CREATE TABLE [folder] (" + "[title] TEXT," + "[subtitle] TEXT," + "[command] TEXT,"
+						+ "[path] TEXT," + "[type] INTEGER," + "[banner] TEXT," + "[parent] TEXT," + "[date] INTEGER,"
+						+ "[max] INTEGER," + "[adddate] INTEGER," + "PRIMARY KEY(path));");
 			}
-			rs.close();
 		} catch (SQLException e) {
 			Logger.getGlobal().severe("楽曲データベース初期化中の例外:" + e.getMessage());
-		} finally {
-			try {
-				if (rs != null /* && !rs.isClosed() */) {
-					rs.close();
-				}
-				if (pstmt != null /* isClosedは使えないので && !pstmt.isClosed() */) {
-					pstmt.close();
-				}
-				if (conn != null && !conn.isClosed()) {
-					// conn.rollback();
-					conn.close();
-				}
-			} catch (SQLException e) {
-				// どうしようもない
-				Logger.getGlobal().severe("楽曲データベース初期化中の例外:" + e.getMessage());
-			}
 		}
 	}
 
@@ -118,14 +82,18 @@ public class SongDatabaseAccessor {
 	 *            属性
 	 * @param value
 	 *            属性値
-	 * @param lr2path
-	 *            LR2ルートパス
 	 * @return 検索結果
 	 */
-	public SongData[] getSongDatas(String key, String value, String lr2path) {
-		Map<String, String> values = new HashMap<String, String>();
-		values.put(key, value);
-		return getSongDatas(values, lr2path);
+	public SongData[] getSongDatas(String key, String value) {
+		try {
+			List<SongData> m = qr.query("SELECT * FROM song WHERE " + key + " = ?", songhandler, value);
+
+			return m.toArray(new SongData[m.size()]);
+		} catch (Exception e) {
+			Logger.getGlobal().severe("song.db更新時の例外:" + e.getMessage());
+		}
+
+		return new SongData[0];
 	}
 
 	/**
@@ -163,34 +131,41 @@ public class SongDatabaseAccessor {
 		return result;
 	}
 
-	public SongData[] getSongDatas(String[] hashes, String lr2path) {
-		SongData[] result = new SongData[0];
+	/**
+	 * MD5/SHA256で指定した楽曲をまとめて取得する
+	 * 
+	 * @param lr2path
+	 * @return
+	 */
+	public SongData[] getSongDatas(String[] hashes) {
 		try {
-			StringBuilder str = new StringBuilder();
+			StringBuilder md5str = new StringBuilder();
+			StringBuilder sha256str = new StringBuilder();
 			for (String hash : hashes) {
-				if (str.length() > 0) {
-					str.append(',');
+				if (hash.length() > 32) {
+					if (sha256str.length() > 0) {
+						sha256str.append(',');
+					}
+					sha256str.append('\'').append(hash).append('\'');
+				} else {
+					if (md5str.length() > 0) {
+						md5str.append(',');
+					}
+					md5str.append('\'').append(hash).append('\'');
 				}
-				str.append('\'').append(hash).append('\'');
 			}
-			List<SongData> m = qr.query(
-					"SELECT * FROM song WHERE md5 IN (" + str.toString() + ") OR sha256 IN (" + str.toString() + ")",
-					new BeanListHandler<SongData>(SongData.class));
+			List<SongData> m = qr.query("SELECT * FROM song WHERE md5 IN (" + md5str.toString() + ") OR sha256 IN ("
+					+ sha256str.toString() + ")", songhandler);
 
-			for (SongData song : m) {
-				if (!song.getPath().startsWith("/") && !song.getPath().contains(":\\")) {
-					song.setPath(lr2path + "\\" + song.getPath());
-				}
-			}
-			result = m.toArray(new SongData[0]);
+			return m.toArray(new SongData[m.size()]);
 		} catch (Exception e) {
 			Logger.getGlobal().severe("song.db更新時の例外:" + e.getMessage());
 		}
 
-		return result;
+		return new SongData[0];
 	}
 
-	public SongData[] getSongDatas(String text, String lr2path) {
+	public SongData[] getSongDatasByText(String text, String lr2path) {
 		SongData[] result = new SongData[0];
 		try {
 			List<SongData> m = qr.query(
@@ -222,10 +197,16 @@ public class SongDatabaseAccessor {
 	 *            LR2ルートパス
 	 * @return 検索結果
 	 */
-	public FolderData[] getFolderDatas(String key, String value, String lr2path) {
-		Map<String, String> values = new HashMap<String, String>();
-		values.put(key, value);
-		return getFolderDatas(values, lr2path);
+	public FolderData[] getFolderDatas(String key, String value) {
+		try {
+			List<FolderData> m = qr.query("SELECT * FROM folder WHERE " + key + " = ?", folderhandler, value);
+
+			return m.toArray(new FolderData[m.size()]);
+		} catch (Exception e) {
+			Logger.getGlobal().severe("song.db更新時の例外:" + e.getMessage());
+		}
+
+		return new FolderData[0];
 	}
 
 	/**
@@ -298,35 +279,7 @@ public class SongDatabaseAccessor {
 			}
 		}
 	}
-
-	/**
-	 * 譜面のパスを取得する
-	 * 
-	 * @param hash
-	 *            譜面のhash値
-	 * @return <譜面のhash値, 譜面パス>のマップ
-	 */
-	public Map<String, String> getSongPaths(String[] hash, String lr2path) {
-		Map<String, String> result = new HashMap<String, String>();
-		try {
-			ResultSetHandler<List<SongData>> rh = new BeanListHandler<SongData>(SongData.class);
-			for (int i = 0; i < hash.length; i++) {
-				List<SongData> rs = qr.query("SELECT * FROM song WHERE hash = '" + hash[i] + "'", rh);
-
-				for (SongData song : rs) {
-					String path = song.getPath();
-					if (!song.getPath().startsWith("/") && !song.getPath().contains(":\\")) {
-						path = lr2path + "\\" + path;
-					}
-					result.put(hash[i], path);
-				}
-			}
-		} catch (Exception e) {
-			Logger.getGlobal().severe("譜面パス取得時の例外:" + e.getMessage());
-		}
-		return result;
-	}
-
+	
 	/**
 	 * データベースを更新する
 	 * 
@@ -472,24 +425,28 @@ public class SongDatabaseAccessor {
 					crc32(dir.toString(), rootdirs, path.toString()));
 			boolean txt = false;
 			List<Path> bmsfiles = new ArrayList<Path>();
-			try(DirectoryStream<Path> paths = Files.newDirectoryStream(dir)) {
-				for(Path p : paths) {
+			try (DirectoryStream<Path> paths = Files.newDirectoryStream(dir)) {
+				for (Path p : paths) {
 					final String s = p.toString().toLowerCase();
-					if(!txt && s.endsWith(".txt")) {
+					if (!txt && s.endsWith(".txt")) {
 						txt = true;
 					}
-					if(s.endsWith(".bms") || s.endsWith(".bme") ||s.endsWith(".bml") ||s.endsWith(".pms") ||s.endsWith(".bmson")) {
+					if (s.endsWith(".bms") || s.endsWith(".bme") || s.endsWith(".bml") || s.endsWith(".pms")
+							|| s.endsWith(".bmson")) {
 						bmsfiles.add(p);
 					}
 				}
-			} catch(IOException e) {
+			} catch (IOException e) {
 				e.printStackTrace();
 			}
 
 			List<SongData> removes = new ArrayList<SongData>(records);
 			List<SongData> addsongs = new ArrayList<SongData>();
 			List<Path> addsongpaths = new ArrayList<Path>();
-			List<SongData> nodifsongs = new ArrayList<SongData>();
+			List<SongData>[] nodifsonglists = new List[5];
+			for (int i = 0; i < 5; i++) {
+				nodifsonglists[i] = new ArrayList<SongData>();
+			}
 			for (Path f : bmsfiles) {
 				boolean b = true;
 				for (SongData record : records) {
@@ -516,14 +473,30 @@ public class SongDatabaseAccessor {
 							addsongs.add(sd);
 							addsongpaths.add(f);
 							if (sd.getDifficulty() == 0) {
-								if (nodifsongs.size() == 0
-										|| nodifsongs.get(nodifsongs.size() - 1).getLevel() <= sd.getLevel()) {
-									nodifsongs.add(sd);
+								final String fulltitle = (sd.getTitle() + sd.getSubtitle()).toLowerCase();
+								if (fulltitle.contains("beginner")) {
+									sd.setDifficulty(1);
+								} else if (fulltitle.contains("normal")) {
+									sd.setDifficulty(2);
+								} else if (fulltitle.contains("hyper")) {
+									sd.setDifficulty(3);
+								} else if (fulltitle.contains("another")) {
+									sd.setDifficulty(4);
+								} else if (fulltitle.contains("insane")) {
+									sd.setDifficulty(5);
 								} else {
-									for (int i = 0; i < nodifsongs.size(); i++) {
-										if (nodifsongs.get(i).getLevel() > sd.getLevel()) {
-											nodifsongs.add(i, sd);
-											break;
+									final List<SongData> nodifsongs = nodifsonglists[sd.getMode() == 5 ? 0 : (sd
+											.getMode() == 7 ? 1
+											: (sd.getMode() == 9 ? 2 : (sd.getMode() == 10 ? 3 : 4)))];
+									if (nodifsongs.size() == 0
+											|| nodifsongs.get(nodifsongs.size() - 1).getLevel() <= sd.getLevel()) {
+										nodifsongs.add(sd);
+									} else {
+										for (int i = 0; i < nodifsongs.size(); i++) {
+											if (nodifsongs.get(i).getLevel() > sd.getLevel()) {
+												nodifsongs.add(i, sd);
+												break;
+											}
 										}
 									}
 								}
@@ -536,11 +509,21 @@ public class SongDatabaseAccessor {
 				}
 			}
 			// difficulty未定義のsongdataのdifiicultyを定義
-			int difficulty = nodifsongs.size() >= 5 ? 1 : 2;
-			for (SongData sd : nodifsongs) {
-				sd.setDifficulty(difficulty);
-				if (difficulty < 5) {
-					difficulty++;
+			for (List<SongData> nodifsongs : nodifsonglists) {
+				if (nodifsongs.size() == 0) {
+					continue;
+				}
+				int difficulty = (nodifsongs.get(0).getLevel() >= 13) ? 5 : (nodifsongs.get(0).getLevel() + 2) / 3;
+				int prevlevel = Integer.MIN_VALUE;
+				for (SongData sd : nodifsongs) {
+					if (prevlevel == sd.getLevel()) {
+						difficulty--;
+					}
+					prevlevel = sd.getLevel();
+					sd.setDifficulty(difficulty);
+					if (difficulty < 5) {
+						difficulty++;
+					}
 				}
 			}
 
@@ -586,11 +569,10 @@ public class SongDatabaseAccessor {
 				}
 			}
 			// folderテーブルの更新
-
 			if (updateFolder) {
 				final String s = (dir.startsWith(path) ? path.relativize(dir).toString() : dir.toString())
 						+ File.separatorChar;
-//				System.out.println("folder更新 : " + s);
+				// System.out.println("folder更新 : " + s);
 				qr.update(conn,
 						"INSERT OR REPLACE INTO folder (title, subtitle, command, path, type, banner, parent, date, max, adddate)"
 								+ "VALUES(?,?,?,?,?,?,?,?,?,?);", dir.getFileName().toString(), "", "", s, 1, "",
@@ -599,7 +581,8 @@ public class SongDatabaseAccessor {
 			}
 			// ディレクトリ内に存在しないフォルダレコードを削除
 			for (FolderData record : fremoves) {
-//				System.out.println("Song Database : folder deleted - " + record.getPath());
+				// System.out.println("Song Database : folder deleted - " +
+				// record.getPath());
 				qr.update(conn, "DELETE FROM folder WHERE path = ?", record.getPath());
 				qr.update(conn, "DELETE FROM song WHERE path LIKE ?", record.getPath() + "%");
 			}

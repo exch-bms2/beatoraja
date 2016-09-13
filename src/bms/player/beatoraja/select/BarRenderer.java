@@ -1,13 +1,12 @@
 package bms.player.beatoraja.select;
 
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
 import java.util.logging.Logger;
 
 import com.badlogic.gdx.Gdx;
@@ -20,7 +19,6 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.Json;
 
@@ -60,39 +58,40 @@ public class BarRenderer {
 		this.select = select;
 
 		generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/VL-Gothic-Regular.ttf"));
-		File dir = new File("table");
-		if (dir.exists()) {
+		try {
+			Files.createDirectory(Paths.get("table"));
+		} catch(Exception e) {
+			
+		}
+		try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get("table"))) {
 			List<TableBar> tables = new ArrayList<TableBar>();
-
-			for (File f : dir.listFiles()) {
-				try {
-					Json json = new Json();
-					TableData td = json.fromJson(TableData.class, new FileReader(f));
-					List<TableLevelBar> levels = new ArrayList<TableLevelBar>();
-					for (String lv : td.getLevel()) {
-						levels.add(new TableLevelBar(select, lv, td.getHash().get(lv)));
-					}
-					List<GradeBar> l = new ArrayList<GradeBar>();
-					for (CourseData course : td.getCourse()) {
-						List<SongData> songlist = new ArrayList<SongData>();
-						for (String hash : course.getHash()) {
-							SongData[] songs = songdb.getSongDatas("md5", hash, new File(".").getAbsolutePath());
-							if (songs.length > 0) {
-								songlist.add(songs[0]);
-							} else {
-								songlist.add(null);
-							}
-						}
-
-						l.add(new GradeBar(course.getName(), songlist.toArray(new SongData[0]), course));
-					}
-					tables.add(new TableBar(select, td.getName(), levels.toArray(new TableLevelBar[0]), l
-							.toArray(new GradeBar[0])));
-				} catch (IOException e) {
-					e.printStackTrace();
+			for(Path p : paths) {
+				Json json = new Json();
+				TableData td = json.fromJson(TableData.class, Files.newBufferedReader(p));
+				List<TableLevelBar> levels = new ArrayList<TableLevelBar>();
+				for (String lv : td.getLevel()) {
+					levels.add(new TableLevelBar(select, lv, td.getHash().get(lv)));
 				}
+				List<GradeBar> l = new ArrayList<GradeBar>();
+				for (CourseData course : td.getCourse()) {
+					List<SongData> songlist = new ArrayList<SongData>();
+					for (String hash : course.getHash()) {
+						SongData[] songs = songdb.getSongDatas("md5", hash);
+						if (songs.length > 0) {
+							songlist.add(songs[0]);
+						} else {
+							songlist.add(null);
+						}
+					}
+
+					l.add(new GradeBar(course.getName(), songlist.toArray(new SongData[0]), course));
+				}
+				tables.add(new TableBar(select, td.getName(), levels.toArray(new TableLevelBar[0]), l
+						.toArray(new GradeBar[0])));				
 			}
-			this.tables = tables.toArray(new TableBar[0]);
+			this.tables = tables.toArray(new TableBar[0]);			
+		} catch(IOException e) {
+			
 		}
 
 		commands = new CommandBar[] {
@@ -309,7 +308,7 @@ public class BarRenderer {
 
 		if (l.size() > 0) {
 			// 変更前と同じバーがあればカーソル位置を保持する
-			currentsongs = l.toArray(new Bar[0]);
+			currentsongs = l.toArray(new Bar[l.size()]);
 			FreeTypeFontParameter parameter = new FreeTypeFontParameter();
 			parameter.size = 24;
 
@@ -401,20 +400,19 @@ public class BarRenderer {
 
     private void setBanner(SongBar songbar) {
     	SongData song = songbar.getSongData();
-        File bannerfile = new File(song.getPath().substring(0, song.getPath().lastIndexOf(File.separatorChar) + 1)
-                + song.getBanner());
+        Path bannerfile = Paths.get(song.getPath()).getParent().resolve(song.getBanner());
         // System.out.println(bannerfile.getPath());
-        if (song.getBanner().length() > 0 && bannerfile.exists()) {
+        if (song.getBanner().length() > 0 && Files.exists(bannerfile)) {
             try {
-            	if(bannermap.containsKey(bannerfile.getPath())) {
-            		songbar.setBanner(bannermap.get(bannerfile.getPath()));
+            	if(bannermap.containsKey(bannerfile.toString())) {
+            		songbar.setBanner(bannermap.get(bannerfile.toString()));
             	} else {
-            		Pixmap pixmap = new Pixmap(Gdx.files.internal(bannerfile.getPath()));
+            		Pixmap pixmap = new Pixmap(Gdx.files.internal(bannerfile.toString()));
                     songbar.setBanner(pixmap);
-                    bannermap.put(bannerfile.getPath(), pixmap);
+                    bannermap.put(bannerfile.toString(), pixmap);
             	}
             } catch (GdxRuntimeException e) {
-        		bannermap.put(bannerfile.getParent(), null);
+        		bannermap.put(bannerfile.toString(), null);
                 Logger.getGlobal().warning("banner読み込み失敗: " + e.getMessage());
             }
         }

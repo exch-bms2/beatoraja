@@ -1,17 +1,10 @@
 package bms.player.beatoraja.select;
 
 import bms.player.beatoraja.*;
-import bms.player.beatoraja.play.bga.GdxVideoProcessor;
-
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.utils.GdxRuntimeException;
-
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.nio.file.Paths;
+import java.util.*;
 import java.util.logging.Logger;
 
 public abstract class Bar {
@@ -250,9 +243,10 @@ class FolderBar extends DirectoryBar {
     @Override
     public Bar[] getChildren() {
         List<Bar> l = new ArrayList<Bar>();
+        final String rootpath = Paths.get(".").toAbsolutePath().toString();
         SongDatabaseAccessor songdb = selector.getSongDatabase();
-        FolderData[] folders = songdb.getFolderDatas("parent", crc, new File(".").getAbsolutePath());
-        SongData[] songs = songdb.getSongDatas("parent", crc, new File(".").getAbsolutePath());
+        FolderData[] folders = songdb.getFolderDatas("parent", crc);
+        SongData[] songs = songdb.getSongDatas("parent", crc);
         if (songs.length == 0) {
             for (FolderData folder : folders) {
                 String path = folder.getPath();
@@ -260,12 +254,12 @@ class FolderBar extends DirectoryBar {
                     path = path.substring(0, path.length() - 1);
                 }
 
-                String ccrc = songdb.crc32(path, new String[0], new File(".").getAbsolutePath());
+                String ccrc = songdb.crc32(path, new String[0], rootpath);
                 FolderBar cfolder = new FolderBar(selector, folder, ccrc);
                 l.add(cfolder);
             }
         } else {
-        	List<String> sha = new ArrayList();
+        	List<String> sha = new ArrayList<String>();
             for (SongData song : songs) {
             	if(!sha.contains(song.getSha256())) {
                     l.add(new SongBar(song));
@@ -286,7 +280,7 @@ class FolderBar extends DirectoryBar {
         int clear = 255;
         int[] clears = new int[11];
         int[] ranks = new int[28];
-        final SongData[] songdatas = songdb.getSongDatas("parent", ccrc, new File(".").getAbsolutePath());
+        final SongData[] songdatas = songdb.getSongDatas("parent", ccrc);
         final Map<String, IRScoreData> scores = selector.readScoreDatas(songdatas, selector.getResource().getConfig()
                 .getLnmode());
         for (SongData sd : songdatas) {
@@ -375,9 +369,9 @@ class TableLevelBar extends DirectoryBar {
     public Bar[] getChildren() {
         List<SongBar> songbars = new ArrayList<SongBar>();
         if(songs == null) {
-            songs = selector.getSongDatabase().getSongDatas(getHashes(), new File(".").getAbsolutePath());
+            songs = selector.getSongDatabase().getSongDatas(getHashes());
         }
-    	List<String> sha = new ArrayList();
+    	List<String> sha = new ArrayList<String>();
         for (SongData song : songs) {
         	if(!sha.contains(song.getSha256())) {
         		songbars.add(new SongBar(song));
@@ -391,7 +385,7 @@ class TableLevelBar extends DirectoryBar {
         int clear = 255;
         int[] clears = new int[11];
         int[] ranks = new int[28];
-        songs = selector.getSongDatabase().getSongDatas(getHashes(), new File(".").getAbsolutePath());
+        songs = selector.getSongDatabase().getSongDatas(getHashes());
         final Map<String, IRScoreData> scores = selector
                 .readScoreDatas(songs, selector.getResource().getConfig().getLnmode());
         for (SongData song : songs) {
@@ -453,7 +447,7 @@ class CommandBar extends DirectoryBar {
         List<IRScoreData> scores = main.getPlayDataAccessor().readScoreDatas(sql);
         List<Bar> l = new ArrayList<Bar>();
         for (IRScoreData score : scores) {
-            SongData[] song = selector.getSongDatabase().getSongDatas("sha256", score.getSha256(), new File(".").getAbsolutePath());
+            SongData[] song = selector.getSongDatabase().getSongDatas("sha256", score.getSha256());
             if (song.length > 0 && (!song[0].hasLongNote() || selector.getResource().getConfig().getLnmode() == score.getMode())) {
                 l.add(new SongBar(song[0]));
             }
