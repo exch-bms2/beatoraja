@@ -2,8 +2,10 @@ package bms.player.beatoraja.decide;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.Arrays;
 
+import bms.player.beatoraja.Config.SkinConfig;
 import bms.player.beatoraja.MainController;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.PlayerResource;
@@ -11,6 +13,8 @@ import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.play.audio.SoundProcessor;
 import bms.player.beatoraja.skin.LR2DecideSkinLoader;
+import bms.player.beatoraja.skin.LR2SkinHeader;
+import bms.player.beatoraja.skin.LR2SkinHeaderLoader;
 import bms.player.beatoraja.skin.SkinImage;
 
 import com.badlogic.gdx.Gdx;
@@ -27,7 +31,7 @@ import com.badlogic.gdx.math.Rectangle;
 public class MusicDecide extends MainState {
 
 	private Sound bgm;
-	
+
 	private boolean cancel;
 
 	public MusicDecide(MainController main) {
@@ -53,12 +57,16 @@ public class MusicDecide extends MainState {
 		}
 
 		if (getSkin() == null) {
-			if (resource.getConfig().getLr2decideskin() != null) {
-				LR2DecideSkinLoader loader = new LR2DecideSkinLoader();
+			if (resource.getConfig().getSkin()[6] != null) {
 				try {
-					setSkin(loader.loadMusicDecideSkin(new File(resource.getConfig().getLr2decideskin()), this, resource
-							.getConfig().getLr2decideskinoption()));
+					SkinConfig sc = resource.getConfig().getSkin()[6];
+					LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
+					LR2SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
+					LR2DecideSkinLoader dloader = new LR2DecideSkinLoader();
+					setSkin(dloader.loadMusicDecideSkin(new File(header.getInclude()), this, header,
+							loader.getOption(), sc.getProperty()));
 				} catch (IOException e) {
+					// TODO Auto-generated catch block
 					e.printStackTrace();
 					setSkin(new MusicDecideSkin(MainController.RESOLUTION[resource.getConfig().getResolution()]));
 				}
@@ -73,7 +81,8 @@ public class MusicDecide extends MainState {
 
 		if (getTimer()[BMSPlayer.TIMER_FADEOUT] != Long.MIN_VALUE) {
 			if (nowtime > getTimer()[BMSPlayer.TIMER_FADEOUT] + getSkin().getFadeoutTime()) {
-				getMainController().changeState(cancel ? MainController.STATE_SELECTMUSIC : MainController.STATE_PLAYBMS);					
+				getMainController().changeState(
+						cancel ? MainController.STATE_SELECTMUSIC : MainController.STATE_PLAYBMS);
 			}
 		} else {
 			if (nowtime > getSkin().getInputTime()) {
@@ -82,9 +91,9 @@ public class MusicDecide extends MainState {
 						|| input.getKeystate()[6]) {
 					getTimer()[BMSPlayer.TIMER_FADEOUT] = nowtime;
 				}
-				if(input.isExitPressed()) {
+				if (input.isExitPressed()) {
 					cancel = true;
-					getTimer()[BMSPlayer.TIMER_FADEOUT] = nowtime;					
+					getTimer()[BMSPlayer.TIMER_FADEOUT] = nowtime;
 				}
 			}
 			if (nowtime > getSkin().getSceneTime()) {

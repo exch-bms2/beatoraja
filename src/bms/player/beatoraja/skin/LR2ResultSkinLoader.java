@@ -2,6 +2,7 @@ package bms.player.beatoraja.skin;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 
 import bms.player.beatoraja.MainState;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -51,11 +52,11 @@ public class LR2ResultSkinLoader extends LR2SkinLoader {
 		});
 	}
 	
-	public MusicResultSkin loadResultSkin(File f, MainState state, int[] option) throws IOException {
+	public MusicResultSkin loadResultSkin(File f, MainState state, LR2SkinHeader header, int[] option, Map property) throws IOException {
 
 		skin = new MusicResultSkin();
 
-		this.loadSkin(skin, f, state, option);
+		this.loadSkin(skin, f, state, header, option, property);
 		
 		return skin;
 	}

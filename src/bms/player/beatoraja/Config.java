@@ -1,5 +1,7 @@
 package bms.player.beatoraja;
 
+import java.util.Map;
+
 import bms.player.beatoraja.input.BMControllerInputProcessor.BMKeys;
 import bms.player.beatoraja.play.JudgeManager;
 
@@ -132,14 +134,7 @@ public class Config {
 	
 	private int[] lr2selectskinoption = new int[0];
 	
-	private String lr2decideskin;
-	
-	private int[] lr2decideskinoption = new int[0];
-	
-	private String lr2resultskin;
-	
-	private int[] lr2resultskinoption = new int[0];
-	
+	private SkinConfig[] skin = new SkinConfig[15];
 	/**
 	 * BMSルートディレクトリパス
 	 */
@@ -201,8 +196,6 @@ public class Config {
 	public Config() {
 //		lr2playskin = "skin/spdframe/csv/left_ACwide.csv";
 //		lr2playskinoption = new int[] { 900, 965, 918, 906, 940, 913, 920, 908, 997 };
-//		lr2decideskin = "skin/Seraphic/Decide/[+]decide.csv";
-//		lr2decideskinoption = new int[]{900, 920, 910};
 //		lr2selectskin = "skin/green_ary/Select/select.csv";
 //		lr2selectskinoption = new int[] { 915, 918, 928, 920, 936, 950, 925, 930, 932 };
 //		lr2resultskin = "skin/RESULT SIMPLE FM/result_left.csv";
@@ -439,22 +432,6 @@ public class Config {
 		this.lr2selectskinoption = lr2selectskinoption;
 	}
 
-	public String getLr2decideskin() {
-		return lr2decideskin;
-	}
-
-	public void setLr2decideskin(String lr2decideskin) {
-		this.lr2decideskin = lr2decideskin;
-	}
-
-	public int[] getLr2decideskinoption() {
-		return lr2decideskinoption;
-	}
-
-	public void setLr2decideskinoption(int[] lr2decideskinoption) {
-		this.lr2decideskinoption = lr2decideskinoption;
-	}
-
 	public boolean isFolderlamp() {
 		return folderlamp;
 	}
@@ -493,22 +470,6 @@ public class Config {
 
 	public void setResolution(int resolution) {
 		this.resolution = resolution;
-	}
-
-	public String getLr2resultskin() {
-		return lr2resultskin;
-	}
-
-	public void setLr2resultskin(String lr2resultskin) {
-		this.lr2resultskin = lr2resultskin;
-	}
-
-	public int[] getLr2resultskinoption() {
-		return lr2resultskinoption;
-	}
-
-	public void setLr2resultskinoption(int[] lr2resultskinoption) {
-		this.lr2resultskinoption = lr2resultskinoption;
 	}
 
 	public int getMusicselectinput() {
@@ -573,5 +534,36 @@ public class Config {
 
 	public void setInputduration(int inputduration) {
 		this.inputduration = inputduration;
+	}
+	
+	public SkinConfig[] getSkin() {
+		return skin;
+	}
+
+	public void setSkin(SkinConfig[] skin) {
+		this.skin = skin;
+	}
+
+	public static class SkinConfig {
+		
+		private String path;
+		
+		private Map property;
+
+		public String getPath() {
+			return path;
+		}
+
+		public void setPath(String path) {
+			this.path = path;
+		}
+
+		public Map getProperty() {
+			return property;
+		}
+
+		public void setProperty(Map property) {
+			this.property = property;
+		}
 	}
 }

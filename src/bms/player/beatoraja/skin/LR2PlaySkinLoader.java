@@ -3,10 +3,12 @@ package bms.player.beatoraja.skin;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.logging.Logger;
 
 import bms.player.beatoraja.MainState;
+import bms.player.beatoraja.decide.MusicDecide;
 import bms.player.beatoraja.play.BMSPlayer;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Pixmap;
@@ -150,13 +152,19 @@ public class LR2PlaySkinLoader extends LR2SkinLoader {
 			@Override
 			public void execute(String[] str) {
 				int lane = Integer.parseInt(str[1]);
-				if (lane <= 7) {
-					lane = (lane == 0 ? 7 : lane - 1);
+				if(lane == 10) {
+					lane = 15;
+				} else if(lane >= 10) {
+					lane -= 3;
+				} else if(lane == 0) {
+					lane = 7;
+				} else {
+					lane -= 1;
+				}
 					if (note[lane] == null) {
 						note[lane] = new Sprite(imagelist.get(Integer.parseInt(str[2])), Integer.parseInt(str[3]),
 								Integer.parseInt(str[4]), Integer.parseInt(str[5]), Integer.parseInt(str[6]));
 					}
-				}
 				if(lanerender == null) {
 					lanerender = new PlaySkin.SkinLaneObject(skin);
 					skin.add(lanerender);
@@ -167,42 +175,60 @@ public class LR2PlaySkinLoader extends LR2SkinLoader {
 			@Override
 			public void execute(String[] str) {
 				int lane = Integer.parseInt(str[1]);
-				if (lane <= 7) {
-					lane = (lane == 0 ? 7 : lane - 1);
+				if(lane == 10) {
+					lane = 15;
+				} else if(lane >= 10) {
+					lane -= 3;
+				} else if(lane == 0) {
+					lane = 7;
+				} else {
+					lane -= 1;
+				}
 					if (lnend[lane] == null) {
 						lnend[lane] = new Sprite(imagelist.get(Integer.parseInt(str[2])), Integer.parseInt(str[3]),
 								Integer.parseInt(str[4]), Integer.parseInt(str[5]), Integer.parseInt(str[6]));
 					}
-				}
 			}
 		});
 		addCommandWord(new CommandWord("SRC_LN_START") {
 			@Override
 			public void execute(String[] str) {
 				int lane = Integer.parseInt(str[1]);
-				if (lane <= 7) {
-					lane = (lane == 0 ? 7 : lane - 1);
+				if(lane == 10) {
+					lane = 15;
+				} else if(lane >= 10) {
+					lane -= 3;
+				} else if(lane == 0) {
+					lane = 7;
+				} else {
+					lane -= 1;
+				}
 					if (lnstart[lane] == null) {
 						lnstart[lane] = new Sprite(imagelist.get(Integer.parseInt(str[2])), Integer.parseInt(str[3]),
 								Integer.parseInt(str[4]), Integer.parseInt(str[5]), Integer.parseInt(str[6]));
 					}
 				}
-			}
 		});
 
 		addCommandWord(new CommandWord("SRC_LN_BODY") {
 			@Override
 			public void execute(String[] str) {
 				int lane = Integer.parseInt(str[1]);
-				if (lane <= 7) {
-					lane = (lane == 0 ? 7 : lane - 1);
+				if(lane == 10) {
+					lane = 15;
+				} else if(lane >= 10) {
+					lane -= 3;
+				} else if(lane == 0) {
+					lane = 7;
+				} else {
+					lane -= 1;
+				}
 					if (lnbody[lane] == null) {
 						lnbody[lane] = new Sprite(imagelist.get(Integer.parseInt(str[2])), Integer.parseInt(str[3]),
 								Integer.parseInt(str[4]), Integer.parseInt(str[5]), 1);
 						lnbodya[lane] = new Sprite(imagelist.get(Integer.parseInt(str[2])), Integer.parseInt(str[3]),
 								Integer.parseInt(str[4]) + Integer.parseInt(str[6]) - 1, Integer.parseInt(str[5]), 1);
 					}
-				}
 			}
 		});
 
@@ -210,13 +236,19 @@ public class LR2PlaySkinLoader extends LR2SkinLoader {
 			@Override
 			public void execute(String[] str) {
 				int lane = Integer.parseInt(str[1]);
-				if (lane <= 7) {
-					lane = (lane == 0 ? 7 : lane - 1);
+				if(lane == 10) {
+					lane = 15;
+				} else if(lane >= 10) {
+					lane -= 3;
+				} else if(lane == 0) {
+					lane = 7;
+				} else {
+					lane -= 1;
+				}
 					if (mine[lane] == null) {
 						mine[lane] = new Sprite(imagelist.get(Integer.parseInt(str[2])), Integer.parseInt(str[3]),
 								Integer.parseInt(str[4]), Integer.parseInt(str[5]), Integer.parseInt(str[6]));
 					}
-				}
 			}
 		});
 
@@ -224,8 +256,15 @@ public class LR2PlaySkinLoader extends LR2SkinLoader {
 			@Override
 			public void execute(String[] str) {
 				int lane = Integer.parseInt(str[1]);
-				if (lane <= 7) {
-					lane = (lane == 0 ? 7 : lane - 1);
+				if(lane == 10) {
+					lane = 15;
+				} else if(lane >= 10) {
+					lane -= 3;
+				} else if(lane == 0) {
+					lane = 7;
+				} else {
+					lane -= 1;
+				}
 					if (laner[lane] == null) {
 						laner[lane] = new Rectangle(Integer.parseInt(str[3]) * dstw / srcw, dsth
 								- (Integer.parseInt(str[4]) + Integer.parseInt(str[6])) * dsth / srch, Integer.parseInt(str[5]) * dstw / srcw,
@@ -242,7 +281,6 @@ public class LR2PlaySkinLoader extends LR2SkinLoader {
 						playerr.y = laner[lane].y;
 						playerr.height = laner[lane].height;
 					}
-				}
 			}
 		});
 
@@ -488,10 +526,28 @@ public class LR2PlaySkinLoader extends LR2SkinLoader {
 
 	}
 
-	public PlaySkin loadPlaySkin(File f, BMSPlayer player, int[] option) throws IOException {
+	public PlaySkin loadPlaySkin(File f, BMSPlayer player, LR2SkinHeader header, int[] option, Map property) throws IOException {
 
 		skin = new PlaySkin(7);
-		this.loadSkin(skin, f, player, option);
+		if(header.getMode() == 2 || header.getMode() == 3) {
+			note = new Sprite[16];
+			lnstart = new Sprite[16];
+			lnend = new Sprite[16];
+			lnbody = new Sprite[16];
+			lnbodya = new Sprite[16];
+			mine = new Sprite[16];
+			laner = new Rectangle[16];
+		}
+		if(header.getMode() == 4) {
+			note = new Sprite[9];
+			lnstart = new Sprite[9];
+			lnend = new Sprite[9];
+			lnbody = new Sprite[9];
+			lnbodya = new Sprite[9];
+			mine = new Sprite[9];
+			laner = new Rectangle[9];			
+		}
+		this.loadSkin(skin, f, player, header, option, property);
 
 		skin.setLaneGroupRegion(new Rectangle[]{playerr});
 		skin.setNote(note);

@@ -2,6 +2,7 @@ package bms.player.beatoraja.result;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.List;
 import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.play.audio.SoundProcessor;
@@ -11,8 +12,13 @@ import org.lwjgl.opengl.GL11;
 
 import bms.model.BMSModel;
 import bms.player.beatoraja.*;
+import bms.player.beatoraja.Config.SkinConfig;
+import bms.player.beatoraja.decide.MusicDecideSkin;
 import bms.player.beatoraja.gauge.GrooveGauge;
+import bms.player.beatoraja.skin.LR2DecideSkinLoader;
 import bms.player.beatoraja.skin.LR2ResultSkinLoader;
+import bms.player.beatoraja.skin.LR2SkinHeader;
+import bms.player.beatoraja.skin.LR2SkinHeaderLoader;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
@@ -94,12 +100,16 @@ public class MusicResult extends MainState {
 		}
 
 		if (skin == null) {
-			if (resource.getConfig().getLr2resultskin() != null) {
-				LR2ResultSkinLoader loader = new LR2ResultSkinLoader();
+			if (resource.getConfig().getSkin()[7] != null) {
 				try {
-					skin = loader.loadResultSkin(new File(resource.getConfig().getLr2resultskin()), this, resource
-							.getConfig().getLr2resultskinoption());
+					SkinConfig sc = resource.getConfig().getSkin()[7];
+					LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
+					LR2SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
+					LR2ResultSkinLoader dloader = new LR2ResultSkinLoader();
+					skin = dloader.loadResultSkin(new File(header.getInclude()), this, header,
+							loader.getOption(), sc.getProperty());
 				} catch (IOException e) {
+					// TODO Auto-generated catch block
 					e.printStackTrace();
 					skin = new MusicResultSkin(MainController.RESOLUTION[resource.getConfig().getResolution()]);
 				}

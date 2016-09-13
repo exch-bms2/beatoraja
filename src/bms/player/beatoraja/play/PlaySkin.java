@@ -203,7 +203,7 @@ public class PlaySkin extends Skin {
 		Texture notet = new Texture("skin/note.png");
 		for (int i = 0; i < 8; i++) {
 			if (i % 2 == 0) {
-				note[i] = new Sprite(notet, 99, 5, 27, 8);
+				note[i] = new Sprite(notet, 99, 5, 27, 12);
 				longnote[0][i] = new Sprite(notet, 99, 43, 27, 13);
 				longnote[1][i] = new Sprite(notet, 99, 57, 27, 13);
 				longnote[2][i] = new Sprite(notet, 99, 80, 27, 1);
@@ -216,7 +216,7 @@ public class PlaySkin extends Skin {
 				longnote[9][i] = new Sprite(notet, 99, 129, 27, 1);
 				minenote[i] = new Sprite(notet, 99, 23, 27, 8);
 			} else if (i == 7) {
-				note[i] = new Sprite(notet, 50, 5, 46, 8);
+				note[i] = new Sprite(notet, 50, 5, 46, 12);
 				longnote[0][i] = new Sprite(notet, 50, 43, 46, 13);
 				longnote[1][i] = new Sprite(notet, 50, 57, 46, 13);
 				longnote[2][i] = new Sprite(notet, 50, 80, 46, 1);
@@ -229,7 +229,7 @@ public class PlaySkin extends Skin {
 				longnote[9][i] = new Sprite(notet, 50, 129, 46, 1);
 				minenote[i] = new Sprite(notet, 50, 23, 46, 8);
 			} else {
-				note[i] = new Sprite(notet, 127, 5, 21, 8);
+				note[i] = new Sprite(notet, 127, 5, 21, 12);
 				longnote[0][i] = new Sprite(notet, 127, 43, 21, 13);
 				longnote[1][i] = new Sprite(notet, 127, 57, 21, 13);
 				longnote[2][i] = new Sprite(notet, 127, 80, 21, 1);
@@ -421,7 +421,7 @@ public class PlaySkin extends Skin {
 		Texture notet = new Texture("skin/note.png");
 		for (int i = 0; i < 8; i++) {
 			if (i % 2 == 0) {
-				note[i] = new Sprite(notet, 99, 5, 27, 8);
+				note[i] = new Sprite(notet, 99, 5, 27, 12);
 				longnote[0][i] = new Sprite(notet, 99, 43, 27, 13);
 				longnote[1][i] = new Sprite(notet, 99, 57, 27, 13);
 				longnote[2][i] = new Sprite(notet, 99, 80, 27, 1);
@@ -434,7 +434,7 @@ public class PlaySkin extends Skin {
 				longnote[9][i] = new Sprite(notet, 99, 129, 27, 1);
 				minenote[i] = new Sprite(notet, 99, 23, 27, 8);
 			} else if (i == 7) {
-				note[i] = new Sprite(notet, 50, 5, 46, 8);
+				note[i] = new Sprite(notet, 50, 5, 46, 12);
 				longnote[0][i] = new Sprite(notet, 50, 43, 46, 13);
 				longnote[1][i] = new Sprite(notet, 50, 57, 46, 13);
 				longnote[2][i] = new Sprite(notet, 50, 80, 46, 1);
@@ -447,7 +447,7 @@ public class PlaySkin extends Skin {
 				longnote[9][i] = new Sprite(notet, 50, 129, 46, 1);
 				minenote[i] = new Sprite(notet, 50, 23, 46, 8);
 			} else {
-				note[i] = new Sprite(notet, 127, 5, 21, 8);
+				note[i] = new Sprite(notet, 127, 5, 21, 12);
 				longnote[0][i] = new Sprite(notet, 127, 43, 21, 13);
 				longnote[1][i] = new Sprite(notet, 127, 57, 21, 13);
 				longnote[2][i] = new Sprite(notet, 127, 80, 21, 1);
@@ -914,7 +914,7 @@ public class PlaySkin extends Skin {
 		Texture notet = new Texture("skin/note.png");
 		for (int i = 0; i < 16; i++) {
 			if (i % 2 == 0) {
-				note[i] = new Sprite(notet, 99, 5, 27, 8);
+				note[i] = new Sprite(notet, 99, 5, 27, 12);
 				longnote[0][i] = new Sprite(notet, 99, 43, 27, 13);
 				longnote[1][i] = new Sprite(notet, 99, 57, 27, 13);
 				longnote[2][i] = new Sprite(notet, 99, 80, 27, 1);
@@ -927,7 +927,7 @@ public class PlaySkin extends Skin {
 				longnote[9][i] = new Sprite(notet, 99, 129, 27, 1);
 				minenote[i] = new Sprite(notet, 99, 23, 27, 8);
 			} else if (i == 7 || i == 15) {
-				note[i] = new Sprite(notet, 50, 5, 46, 8);
+				note[i] = new Sprite(notet, 50, 5, 46, 12);
 				longnote[0][i] = new Sprite(notet, 50, 43, 46, 13);
 				longnote[1][i] = new Sprite(notet, 50, 57, 46, 13);
 				longnote[2][i] = new Sprite(notet, 50, 80, 46, 1);
@@ -940,7 +940,7 @@ public class PlaySkin extends Skin {
 				longnote[9][i] = new Sprite(notet, 50, 129, 46, 1);
 				minenote[i] = new Sprite(notet, 50, 23, 46, 8);
 			} else {
-				note[i] = new Sprite(notet, 127, 5, 21, 8);
+				note[i] = new Sprite(notet, 127, 5, 21, 12);
 				longnote[0][i] = new Sprite(notet, 127, 43, 21, 13);
 				longnote[1][i] = new Sprite(notet, 127, 57, 21, 13);
 				longnote[2][i] = new Sprite(notet, 127, 80, 21, 1);

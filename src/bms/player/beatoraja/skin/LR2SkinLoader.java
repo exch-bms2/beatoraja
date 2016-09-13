@@ -2,9 +2,13 @@ package bms.player.beatoraja.skin;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import bms.player.beatoraja.MainState;
+import bms.player.beatoraja.skin.LR2SkinHeader.CustomFile;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
@@ -16,7 +20,7 @@ public abstract class LR2SkinLoader {
 	private List<CommandWord> commands = new ArrayList<CommandWord>();
 
 	List<Texture> imagelist = new ArrayList<Texture>();
-	
+
 	protected void addCommandWord(CommandWord cm) {
 		commands.add(cm);
 	}
@@ -26,8 +30,42 @@ public abstract class LR2SkinLoader {
 	}
 
 	protected void loadSkin(Skin skin, File f, MainState state, int[] option) throws IOException {
-		List<Integer> op = new ArrayList<Integer>();
+		this.loadSkin0(skin, f, state, option, new HashMap());
+	}
+
+	protected void loadSkin(Skin skin, File f, MainState state, LR2SkinHeader header, int[] option,
+			Map<String, Object> property) throws IOException {
+		List<Integer> op = new ArrayList();
+		Map<String, String> filemap = new HashMap();
+		for (String key : property.keySet()) {
+			if (property.get(key) != null) {
+				if (property.get(key) instanceof Integer) {
+					op.add((Integer) property.get(key));
+				}
+				if (property.get(key) instanceof String) {
+					for (CustomFile file : header.getCustomFiles()) {
+						if (file.name.equals(key)) {
+							filemap.put(file.path, (String) property.get(key));
+							break;
+						}
+					}
+				}
+			}
+		}
 		for(int i : option) {
+			op.add(i);
+		}
+		option = new int[op.size()];
+		for(int i = 0;i < op.size();i++) {
+			option[i] = op.get(i);
+		}
+		this.loadSkin0(skin, f, state, option, filemap);
+	}
+
+	protected void loadSkin0(Skin skin, File f, MainState state, int[] option, Map<String, String> filemap)
+			throws IOException {
+		List<Integer> op = new ArrayList<Integer>();
+		for (int i : option) {
 			op.add(i);
 		}
 		float srcw = 640;
@@ -105,7 +143,7 @@ public abstract class LR2SkinLoader {
 					if (!skip) {
 
 						if (str[0].equals("#SETOPTION")) {
-							if(Integer.parseInt(str[2]) >= 1) {
+							if (Integer.parseInt(str[2]) >= 1) {
 								op.add(Integer.parseInt(str[1]));
 							}
 						}
@@ -122,7 +160,10 @@ public abstract class LR2SkinLoader {
 						if (str[0].equals("#IMAGE")) {
 							String imagepath = str[1].replace("LR2files\\Theme", "skin").replace("\\", "/");
 							File imagefile = new File(imagepath);
-							if (imagepath.contains("*")) {
+							if (filemap.get(imagepath) != null) {
+								imagefile = new File(imagepath.substring(0, imagepath.lastIndexOf('/') + 1)
+										+ filemap.get(imagepath));
+							} else if (imagepath.contains("*")) {
 								String ext = imagepath.substring(imagepath.lastIndexOf("*") + 1);
 								File imagedir = new File(imagepath.substring(0, imagepath.lastIndexOf('/')));
 								if (imagedir.exists() && imagedir.isDirectory()) {
@@ -251,7 +292,7 @@ public abstract class LR2SkinLoader {
 							if (part != null) {
 								skin.add(part);
 							} else {
-								System.out.println("NO_DESTINATION : " + line);								
+								System.out.println("NO_DESTINATION : " + line);
 							}
 
 						}
@@ -358,7 +399,8 @@ public abstract class LR2SkinLoader {
 								int edit = values[5];
 								int panel = values[6];
 								skin.add(text);
-//								System.out.println("Text Added - " + (values[3]));
+								// System.out.println("Text Added - " +
+								// (values[3]));
 							} catch (NumberFormatException e) {
 								e.printStackTrace();
 							}
@@ -524,15 +566,15 @@ public abstract class LR2SkinLoader {
 			}
 		}
 		br.close();
-		
+
 		int[] soption = new int[op.size()];
-		for(int i = 0;i < op.size();i++) {
+		for (int i = 0; i < op.size(); i++) {
 			soption[i] = op.get(i);
 		}
 		skin.setOption(soption);
-		
-		for(SkinObject obj : skin.getAllSkinObjects()) {
-			if(obj instanceof SkinImage && obj.getAllDestination().length == 0) {
+
+		for (SkinObject obj : skin.getAllSkinObjects()) {
+			if (obj instanceof SkinImage && obj.getAllDestination().length == 0) {
 				skin.removeSkinObject(obj);
 				System.out.println("NO_DESTINATION : " + obj);
 			}

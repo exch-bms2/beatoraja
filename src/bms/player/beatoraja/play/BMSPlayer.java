@@ -1,11 +1,13 @@
 package bms.player.beatoraja.play;
 
 import java.io.*;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.logging.Logger;
 
 import bms.model.*;
 import bms.player.beatoraja.*;
+import bms.player.beatoraja.Config.SkinConfig;
 import bms.player.beatoraja.gauge.*;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyInputLog;
@@ -13,7 +15,11 @@ import bms.player.beatoraja.pattern.*;
 import bms.player.beatoraja.play.audio.AudioProcessor;
 import bms.player.beatoraja.play.audio.SoundProcessor;
 import bms.player.beatoraja.play.bga.BGAProcessor;
+import bms.player.beatoraja.result.MusicResultSkin;
 import bms.player.beatoraja.skin.LR2PlaySkinLoader;
+import bms.player.beatoraja.skin.LR2ResultSkinLoader;
+import bms.player.beatoraja.skin.LR2SkinHeader;
+import bms.player.beatoraja.skin.LR2SkinHeaderLoader;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
@@ -358,18 +364,24 @@ public class BMSPlayer extends MainState {
 		}
 		Logger.getGlobal().info("ゲージ設定完了");
 
-		if (config.getLR2PlaySkinPath() != null) {
+		int skinmode = (model.getUseKeys() == 7 ? 0 : (model.getUseKeys() == 5 ? 1 : (model.getUseKeys() == 14 ? 2 : (model.getUseKeys() == 10 ? 3 : 4))));
+		if (resource.getConfig().getSkin()[skinmode] != null) {
 			try {
-				skin = new LR2PlaySkinLoader().loadPlaySkin(new File(config.getLR2PlaySkinPath()),this,
-						config.getLr2playskinoption());
+				SkinConfig sc = resource.getConfig().getSkin()[skinmode];
+				LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
+				LR2SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
+				LR2PlaySkinLoader dloader = new LR2PlaySkinLoader();
+				skin = dloader.loadPlaySkin(new File(header.getInclude()), this, header,
+						loader.getOption(), sc.getProperty());
 			} catch (IOException e) {
+				// TODO Auto-generated catch block
 				e.printStackTrace();
 				skin = new PlaySkin(model.getUseKeys(), config.isUse2pside(), MainController.RESOLUTION[resource
 						.getConfig().getResolution()]);
 			}
 		} else {
 			skin = new PlaySkin(model.getUseKeys(), config.isUse2pside(), MainController.RESOLUTION[resource
-					.getConfig().getResolution()]);
+			                                                                    					.getConfig().getResolution()]);
 		}
 		this.setSkin(skin);
 	}
