@@ -10,5 +10,7 @@ Features :
 - real-time play speed controller (x0.25 - x4.0. auto play mode, replay mode only)
 - Various assist options : legacy note, expand judge, bpm guide, and no mine
 - pms judge (nax 1 miss / 1 notes, combo is reset when miss)
-- bmson support (1.0.0, but now sound slicing not implemented)
+- support bmson 1.0.0
 - import difficulty table and create table folder, create course with various constraint (mirror/random OK, no hispeed, and so on)
+- import LunaticRave2 skin (now working in progress)
+
