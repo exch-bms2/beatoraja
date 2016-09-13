@@ -80,9 +80,11 @@ public class MainController extends ApplicationAdapter {
 	private static final Path songdbpath = Paths.get("songdata.db");
 	
 	private TextField search;
+	
+	private ScreenShotThread screenshot;
 
 	public static final Rectangle[] RESOLUTION = { new Rectangle(0, 0, 640, 480), new Rectangle(0, 0, 1280, 720),
-			new Rectangle(0, 0, 1920, 1080), new Rectangle(0, 0, 3840, 2560) };
+			new Rectangle(0, 0, 1920, 1080), new Rectangle(0, 0, 3840, 2160) };
 
 	public MainController(Path f, Config config, int auto) {
 		this.auto = auto;
@@ -281,20 +283,22 @@ public class MainController extends ApplicationAdapter {
 			input.getFunctiontime()[4] = 0;
 		}
 
-		// スクリーンショット
+		// screen shot
 		if (input.getFunctionstate()[5] && input.getFunctiontime()[5] != 0) {
-			byte[] pixels = ScreenUtils.getFrameBufferPixels(0, 0, Gdx.graphics.getBackBufferWidth(),
-					Gdx.graphics.getBackBufferHeight(), true);
-
-			Pixmap pixmap = new Pixmap(Gdx.graphics.getBackBufferWidth(), Gdx.graphics.getBackBufferHeight(),
-					Pixmap.Format.RGBA8888);
-			BufferUtils.copy(pixels, 0, pixmap.getPixels(), pixels.length);
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
-			String path = "screenshot/" + sdf.format(Calendar.getInstance().getTime()) + ".png";
-			PixmapIO.writePNG(new FileHandle(path), pixmap);
-			pixmap.dispose();
-			input.getFunctiontime()[5] = 0;
-			Logger.getGlobal().info("スクリーンショット保存:" + path);
+			if(screenshot == null || screenshot.isCompleted) {
+				screenshot = new ScreenShotThread();
+				screenshot.pixels = ScreenUtils.getFrameBufferPixels(0, 0, Gdx.graphics.getBackBufferWidth(),
+						Gdx.graphics.getBackBufferHeight(), true);
+				screenshot.start();
+				screenshot.savetime = System.currentTimeMillis();
+			}
+		}
+		if(screenshot != null && screenshot.savetime + 2000 > System.currentTimeMillis()) {
+			sprite.begin();
+			systemfont.setColor(Color.GOLD);
+			systemfont.draw(sprite, "Screen shot saved : " + screenshot.path, 100,
+					RESOLUTION[config.getResolution()].height - 2);
+			sprite.end();			
 		}
 	}
 
@@ -414,7 +418,7 @@ public class MainController extends ApplicationAdapter {
 			cfg.audioDeviceBufferSize = config.getAudioDeviceBufferSize();
 			cfg.audioDeviceSimultaneousSources = config.getAudioDeviceSimultaneousSources();
 			cfg.forceExit = forceExit;
-
+//			System.setProperty("org.lwjgl.opengl.Display.allowSoftwareOpenGL", "true");
 			new LwjglApplication(player, cfg);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -498,5 +502,27 @@ public class MainController extends ApplicationAdapter {
 		public void hide() {
 			stackPane.setDisable(true);
 		}
+	}
+	
+	class ScreenShotThread extends Thread {
+
+		private boolean isCompleted;
+		private String path = "";
+		private long savetime;
+		private byte[] pixels;
+		@Override
+		public void run() {
+			Pixmap pixmap = new Pixmap(Gdx.graphics.getBackBufferWidth(), Gdx.graphics.getBackBufferHeight(),
+					Pixmap.Format.RGBA8888);
+			BufferUtils.copy(pixels, 0, pixmap.getPixels(), pixels.length);
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
+			path = "screenshot/" + sdf.format(Calendar.getInstance().getTime()) + ".png";
+			PixmapIO.writePNG(new FileHandle(path), pixmap);
+			pixmap.dispose();
+			input.getFunctiontime()[5] = 0;
+			Logger.getGlobal().info("スクリーンショット保存:" + path);
+			isCompleted = true;
+		}
+		
 	}
 }

@@ -252,9 +252,9 @@ public class LaneRenderer {
 					font.setColor(Color.WHITE);
 					font.draw(sprite, String.format("%5d", Math.round(lift * 1000)), r.x + r.width * 0.25f, hl
 							+ (hu - hl) * lift);
-					font.setColor(Color.GREEN);
+					font.setColor(Color.YELLOW);
 					font.draw(sprite,
-							String.format("%5d", Math.round(region * 0.6 * (1 - (enableLanecover ? lanecover : 0)))),
+							String.format("%5d", Math.round(region * (1 - (enableLanecover ? lanecover : 0)))),
 							r.x + r.width * 0.75f, hl + (hu - hl) * lift);
 				}
 				sprite.end();
@@ -389,7 +389,7 @@ public class LaneRenderer {
 			for (int i = pos; i < timelines.length && y <= hu; i++) {
 				TimeLine tl = timelines[i];
 				if (tl.getTime() >= time) {
-					float rate = (float) (timelines[i].getSection() - (i > 0 ? timelines[i - 1].getSection() : 0))
+					float rate = (timelines[i].getSection() - (i > 0 ? timelines[i - 1].getSection() : 0))
 							/ (timelines[i].getTime() - (i > 0 ? timelines[i - 1].getTime()
 									+ timelines[i - 1].getStop() : 0)) * (hu - hl) * hispeed;
 					for (int j = color.length - 1; j >= 0; j--) {
@@ -411,9 +411,9 @@ public class LaneRenderer {
 			if (tl.getTime() >= time) {
 				if (nbpm > 0) {
 					if ((i > 0 && timelines[i - 1].getTime() + timelines[i - 1].getStop() > time)) {
-						y += (float) (timelines[i].getSection() - timelines[i - 1].getSection()) * (hu - hl) * hispeed;
+						y += (timelines[i].getSection() - timelines[i - 1].getSection()) * (hu - hl) * hispeed;
 					} else {
-						y += (float) (timelines[i].getSection() - (i > 0 ? timelines[i - 1].getSection() : 0))
+						y += (timelines[i].getSection() - (i > 0 ? timelines[i - 1].getSection() : 0))
 								* (timelines[i].getTime() - time)
 								/ (timelines[i].getTime() - (i > 0 ? timelines[i - 1].getTime()
 										+ timelines[i - 1].getStop() : 0)) * (hu - hl) * hispeed;
@@ -596,19 +596,6 @@ public class LaneRenderer {
 			}
 		}
 
-		// レーンカバー描画
-		for (Rectangle r : playerr) {
-			// 緑数字、白数字描画
-			if (main.getBMSPlayerInputProcessor().startPressed()) {
-				font.setColor(Color.WHITE);
-				font.draw(sprite, String.format("%5d", Math.round(lanecover * 1000)), r.x + r.width * 0.25f, hl
-						+ (hu - hl) * (enableLanecover ? (1 - lanecover) : 1));
-				font.setColor(Color.YELLOW);
-				font.draw(sprite,
-						String.format("%5d", Math.round(region *(1 - (enableLanecover ? lanecover : 0)))), r.x
-								+ r.width * 0.75f, hl + (hu - hl) * (enableLanecover ? (1 - lanecover) : 1));
-			}
-		}
 		sprite.end();
 		sprite.begin();
 	}

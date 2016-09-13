@@ -611,16 +611,19 @@ public class BMSPlayer extends MainState {
 		if (input.isExitPressed()) {
 			stopPlay();
 		}
-		if (autoplay != 0 && input.getNumberState()[1]) {
-			playspeed = 25;
-		} else if (autoplay != 0 && input.getNumberState()[2]) {
-			playspeed = 50;
-		} else if (autoplay != 0 && input.getNumberState()[3]) {
-			playspeed = 200;
-		} else if (autoplay != 0 && input.getNumberState()[4]) {
-			playspeed = 300;
-		} else {
-			playspeed = 100;
+		// play speed change (autoplay or replay only)
+		if(autoplay != 0) {
+			if (input.getNumberState()[1]) {
+				playspeed = 25;
+			} else if (input.getNumberState()[2]) {
+				playspeed = 50;
+			} else if (input.getNumberState()[3]) {
+				playspeed = 200;
+			} else if (input.getNumberState()[4]) {
+				playspeed = 300;
+			} else {
+				playspeed = 100;
+			}
 		}
 
 		prevtime = nowtime;
