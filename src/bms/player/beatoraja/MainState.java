@@ -4,6 +4,9 @@ import java.util.Arrays;
 import java.util.Calendar;
 
 import bms.player.beatoraja.skin.Skin;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 public abstract class MainState {
@@ -19,6 +22,8 @@ public abstract class MainState {
 	public static final int IMAGE_STAGEFILE = 100;
 	public static final int IMAGE_BACKBMP = 101;
 	public static final int IMAGE_BANNER = 102;
+	public static final int IMAGE_BLACK = 110;
+	public static final int IMAGE_WHITE = 111;
 
 	public static final int TIMER_STARTINPUT = 1;
 	public static final int TIMER_FADEOUT = 2;
@@ -192,6 +197,7 @@ public abstract class MainState {
 	public static final int NUMBER_TARGET_SCORE2 = 151;
 	public static final int NUMBER_DIFF_HIGHSCORE = 152;
 	public static final int NUMBER_DIFF_TARGETSCORE = 153;
+	public static final int NUMBER_DIFF_NEXTRANK = 154;
 	public static final int NUMBER_NOWBPM = 160;
 	public static final int NUMBER_TIMELEFT_MINUTE = 163;
 	public static final int NUMBER_TIMELEFT_SECOND = 164;
@@ -412,6 +418,12 @@ public abstract class MainState {
 	public MainState(MainController main) {
 		this.main = main;
 		Arrays.fill(timer, Long.MIN_VALUE);
+		Pixmap bp = new Pixmap(1,1, Pixmap.Format.RGBA8888);
+		bp.drawPixel(0,0, Color.toIntBits(0,0,0,255));
+		black = new TextureRegion(new Texture(bp));
+		Pixmap hp = new Pixmap(1,1, Pixmap.Format.RGBA8888);
+		hp.drawPixel(0,0, Color.toIntBits(255,255,255,255));
+		white = new TextureRegion(new Texture(hp));
 	}
 
 	public MainController getMainController() {
@@ -682,6 +694,9 @@ public abstract class MainState {
 		return "";
 	}
 
+	private TextureRegion black;
+	private TextureRegion white;
+
 	public TextureRegion getImage(int imageid) {
 		if (getMainController().getPlayerResource().getBGAManager() != null) {
 			if (imageid == IMAGE_BACKBMP) {
@@ -689,6 +704,12 @@ public abstract class MainState {
 			}
 			if (imageid == IMAGE_STAGEFILE) {
 				return getMainController().getPlayerResource().getBGAManager().getStagefileData();
+			}
+			if(imageid == IMAGE_BLACK) {
+				return black;
+			}
+			if(imageid == IMAGE_WHITE) {
+				return white;
 			}
 		}
 		return null;

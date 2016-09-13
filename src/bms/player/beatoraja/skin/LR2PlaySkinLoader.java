@@ -112,6 +112,7 @@ public class LR2PlaySkinLoader extends LR2SkinLoader {
 						}
 						li = new SkinImage(images, values[9]);
 						li.setTiming(values[10]);
+                        li.setOffsetYReferenceID(BMSPlayer.OFFSET_LIFT);
 						lines.add(li);
 						// System.out.println("Object Added - " +
 						// (part.getTiming()));

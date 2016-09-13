@@ -340,7 +340,8 @@ public class PlaySkin extends Skin {
 		add(judgeline);
 		line = new SkinImage[1];
 		line[0] = new SkinImage(new TextureRegion[]{new TextureRegion(st,0,0,1,1)},0);
-		setDestination(line[0], 0, 20, 140, 390, 1, 0, 255,255,255,255,0,0,0,0,0,0,0,0,0);
+		line[0].setOffsetYReferenceID(BMSPlayer.OFFSET_LIFT);
+		setDestination(line[0], 0, 20, 140, 390, 1, 0, 255,128,128,128,0,0,0,0,0,0,0,0,0);
 		add(new SkinLaneObject(this));
 		Texture lct = new Texture("skin/lanecover.png");
 		SkinSlider lanecover = new SkinSlider(new TextureRegion[]{new TextureRegion(lct)},0,2, (int) (580*dh), BMSPlayer.SLIDER_LANECOVER);
@@ -558,7 +559,8 @@ public class PlaySkin extends Skin {
 		add(judgeline);
 		line = new SkinImage[1];
 		line[0] = new SkinImage(new TextureRegion[]{new TextureRegion(st,0,0,1,1)},0);
-		setDestination(line[0], 0, 870, 140, 390, 1, 0, 255,255,255,255,0,0,0,0,0,0,0,0,0);
+		line[0].setOffsetYReferenceID(BMSPlayer.OFFSET_LIFT);
+		setDestination(line[0], 0, 870, 140, 390, 1, 0, 255,128,128,128,0,0,0,0,0,0,0,0,0);
 		add(new SkinLaneObject(this));
 		Texture lct = new Texture("skin/lanecover.png");
 		SkinSlider lanecover = new SkinSlider(new TextureRegion[]{new TextureRegion(lct)},0,2, (int) (580*dh), BMSPlayer.SLIDER_LANECOVER);
@@ -1071,9 +1073,11 @@ public class PlaySkin extends Skin {
 		add(judgeline);
 		line = new SkinImage[2];
 		line[0] = new SkinImage(new TextureRegion[]{new TextureRegion(st,0,0,1,1)},0);
-		setDestination(line[0], 0, 210, 140, 390, 1, 0, 255,255,255,255,0,0,0,0,0,0,0,0,0);
+		setDestination(line[0], 0, 210, 140, 390, 1, 0, 255,128,128,128,0,0,0,0,0,0,0,0,0);
+		line[0].setOffsetYReferenceID(BMSPlayer.OFFSET_LIFT);
 		line[1] = new SkinImage(new TextureRegion[]{new TextureRegion(st,0,0,1,1)},0);
-		setDestination(line[1], 0, 680, 140, 390, 1, 0, 255,255,255,255,0,0,0,0,0,0,0,0,0);
+		setDestination(line[1], 0, 680, 140, 390, 1, 0, 255,128,128,128,0,0,0,0,0,0,0,0,0);
+		line[1].setOffsetYReferenceID(BMSPlayer.OFFSET_LIFT);
 		add(new SkinLaneObject(this));
 		Texture lct = new Texture("skin/lanecover.png");
 		SkinSlider lanecover = new SkinSlider(new TextureRegion[]{new TextureRegion(lct)},0,2, (int) (580*dh), BMSPlayer.SLIDER_LANECOVER);
