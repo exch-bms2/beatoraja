@@ -279,7 +279,7 @@ public class SongDatabaseAccessor {
 			}
 		}
 	}
-	
+
 	/**
 	 * データベースを更新する
 	 * 
@@ -425,6 +425,7 @@ public class SongDatabaseAccessor {
 					crc32(dir.toString(), rootdirs, path.toString()));
 			boolean txt = false;
 			List<Path> bmsfiles = new ArrayList<Path>();
+			List<Path> dirs = new ArrayList<Path>();
 			try (DirectoryStream<Path> paths = Files.newDirectoryStream(dir)) {
 				for (Path p : paths) {
 					final String s = p.toString().toLowerCase();
@@ -434,6 +435,9 @@ public class SongDatabaseAccessor {
 					if (s.endsWith(".bms") || s.endsWith(".bme") || s.endsWith(".bml") || s.endsWith(".pms")
 							|| s.endsWith(".bmson")) {
 						bmsfiles.add(p);
+					}
+					if (Files.isDirectory(p)) {
+						dirs.add(p);
 					}
 				}
 			} catch (IOException e) {
@@ -551,22 +555,20 @@ public class SongDatabaseAccessor {
 			}
 
 			List<FolderData> fremoves = new ArrayList<FolderData>(folders);
-			for (Path f : Files.newDirectoryStream(dir)) {
-				if (Files.isDirectory(f)) {
-					boolean b = true;
-					for (FolderData record : folders) {
-						final String s = (f.startsWith(path) ? path.relativize(f).toString() : f.toString())
-								+ File.separatorChar;
-						if (record.getPath().equals(s)) {
-							fremoves.remove(record);
-							if (!updateAll && record.getDate() == Files.getLastModifiedTime(f).toMillis() / 1000) {
-								b = false;
-							}
-							break;
+			for (Path f : dirs) {
+				boolean b = true;
+				for (FolderData record : folders) {
+					final String s = (f.startsWith(path) ? path.relativize(f).toString() : f.toString())
+							+ File.separatorChar;
+					if (record.getPath().equals(s)) {
+						fremoves.remove(record);
+						if (!updateAll && record.getDate() == Files.getLastModifiedTime(f).toMillis() / 1000) {
+							b = false;
 						}
+						break;
 					}
-					this.processDirectory(f, b);
 				}
+				this.processDirectory(f, b);
 			}
 			// folderテーブルの更新
 			if (updateFolder) {
