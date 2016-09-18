@@ -131,7 +131,7 @@ public class MusicResult extends MainState {
 		if (getTimer()[TIMER_RESULTGRAPH_END] == Long.MIN_VALUE) {
 			getTimer()[TIMER_RESULTGRAPH_END] = time;
 		}
-		if (getTimer()[TIMER_RESULT_UPDATESCORE] == Long.MIN_VALUE) {
+		if (getTimer()[TIMER_RESULT_UPDATESCORE] == Long.MIN_VALUE && skin.getRankTime() == 0) {
 			getTimer()[TIMER_RESULT_UPDATESCORE] = time;
 		}
 		final MainController main = getMainController();
@@ -219,8 +219,16 @@ public class MusicResult extends MainState {
 		} else {
 			if (time > getSkin().getInputTime()) {
 				boolean[] keystate = main.getInputProcessor().getKeystate();
-				if (resource.getScoreData() == null || (keystate[0] || keystate[2] || keystate[4] || keystate[6])) {
-					getTimer()[BMSPlayer.TIMER_FADEOUT] = time;
+				long[] keytime = main.getInputProcessor().getTime();
+				if (resource.getScoreData() == null || ((keystate[0] && keytime[0] != 0)
+						|| (keystate[2] && keytime[2] != 0) || (keystate[4] && keytime[4] != 0)
+						|| (keystate[6] && keytime[6] != 0))) {
+					keytime[0] = keytime[2] = keytime[4] = keytime[6] = 0;
+					if(skin.getRankTime() != 0 && getTimer()[TIMER_RESULT_UPDATESCORE] == Long.MIN_VALUE) {
+						getTimer()[TIMER_RESULT_UPDATESCORE] = time;
+					} else {
+						getTimer()[BMSPlayer.TIMER_FADEOUT] = time;
+					}
 				}
 
 				for (int i = 0; i < MusicSelector.REPLAY; i++) {
@@ -251,6 +259,8 @@ public class MusicResult extends MainState {
 		}
 	}
 
+	private final int[] rates = {2222,3333,4444,5555,6666,7777,8888,10000};
+
 	private void updateScoreDatabase() {
 		saveReplay = false;
 		final PlayerResource resource = getMainController().getPlayerResource();
@@ -272,7 +282,14 @@ public class MusicResult extends MainState {
 		oldexscore = score.getExscore();
 		oldmisscount = score.getMinbp();
 		oldcombo = score.getCombo();
-		rate = score.getExscore() * 10000 / (resource.getBMSModel().getTotalNotes() * 2);
+		rate = newscore.getExscore() * 10000 / (resource.getBMSModel().getTotalNotes() * 2);
+		next = 0;
+		for(int i = 2;i < 9;i++) {
+			if(newscore.getExscore() < i * 1111 * (resource.getBMSModel().getTotalNotes() * 2) / 10000) {
+				next = newscore.getExscore() - i * 1111 * (resource.getBMSModel().getTotalNotes() * 2) / 10000;
+				break;
+			}
+		}
 		oldrate = oldexscore * 10000 / (resource.getBMSModel().getTotalNotes() * 2);
 
 		// コースモードの場合はコーススコアに加算・累積する
@@ -413,6 +430,8 @@ public class MusicResult extends MainState {
 		case NUMBER_DIFF_HIGHSCORE:
 		case NUMBER_DIFF_HIGHSCORE2:
 			return resource.getScoreData().getExscore() - oldexscore;
+			case NUMBER_DIFF_NEXTRANK:
+				return next;
 		case NUMBER_MISSCOUNT:
 		case NUMBER_MISSCOUNT2:
 			if (resource.getScoreData() != null) {
@@ -478,6 +497,7 @@ public class MusicResult extends MainState {
 	
 	private int rate;
 	private int oldrate;
+	private int next;
 	
 	public boolean getBooleanValue(int id) {
 		final PlayerResource resource = getMainController().getPlayerResource();

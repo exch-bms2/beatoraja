@@ -35,7 +35,7 @@ public class PlayConfig {
 	/**
 	 * リフト使用
 	 */
-	private boolean enablelift = true;
+	private boolean enablelift = false;
 
 	private int[] keyassign = { Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.F, Keys.V, Keys.SHIFT_LEFT,
 			Keys.CONTROL_LEFT, Keys.COMMA, Keys.L, Keys.PERIOD, Keys.SEMICOLON, Keys.SLASH, Keys.APOSTROPHE,

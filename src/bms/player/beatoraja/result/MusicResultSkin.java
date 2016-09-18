@@ -22,6 +22,8 @@ public class MusicResultSkin extends Skin {
 
 	private Rectangle judgeregion;
 
+	private int ranktime;
+
 	private final int[] judgecount = { MainState.NUMBER_PERFECT, MainState.NUMBER_EARLY_PERFECT,
 			MainState.NUMBER_LATE_PERFECT, MainState.NUMBER_GREAT, MainState.NUMBER_EARLY_GREAT,
 			MainState.NUMBER_LATE_GREAT, MainState.NUMBER_GOOD,
@@ -134,6 +136,14 @@ public class MusicResultSkin extends Skin {
 
 	public Rectangle getJudgeRegion() {
 		return judgeregion;
+	}
+
+	public int getRankTime() {
+		return ranktime;
+	}
+
+	public void setRankTime(int ranktime) {
+		this.ranktime = ranktime;
 	}
 
 	public static class SkinGaugeGraphObject extends SkinObject {

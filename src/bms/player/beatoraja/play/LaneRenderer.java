@@ -682,6 +682,7 @@ public class LaneRenderer {
 
 	public void update(int lane, int judge, int time, int fast) {
 		main.getTimer()[BMSPlayer.TIMER_JUDGE_1P] = main.getNowTime();
+		main.getTimer()[BMSPlayer.TIMER_JUDGE_2P] = main.getNowTime();
 		if (judge < 2) {
 			if (model.getUseKeys() == 9) {
 				main.getTimer()[BMSPlayer.TIMER_BOMB_1P_KEY1 + lane] = main.getNowTime();

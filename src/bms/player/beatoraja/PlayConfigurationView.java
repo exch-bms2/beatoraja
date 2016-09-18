@@ -279,6 +279,9 @@ public class PlayConfigurationView implements Initializable {
 		inputduration.getValueFactory().setValue(config.getInputduration());
 		
 		skinview = new SkinConfigurationView();
+		
+		skincategory.setValue(0);
+		updateSkinCategory();
 	}
 
 	/**
@@ -323,6 +326,8 @@ public class PlayConfigurationView implements Initializable {
 
 		config.setInputduration(inputduration.getValue());
 
+		updateSkinCategory();
+		
 		Json json = new Json();
 		json.setOutputType(OutputType.json);
 		try {
@@ -359,6 +364,8 @@ public class PlayConfigurationView implements Initializable {
 		tableurl.getItems().removeAll(tableurl.getSelectionModel().getSelectedItems());
 	}
 	
+	private int mode = -1;
+	
 	public void updateSkinCategory() {
 		if(skinview.getSelectedHeader() != null) {
 			LR2SkinHeader header = skinview.getSelectedHeader();
@@ -366,16 +373,26 @@ public class PlayConfigurationView implements Initializable {
 			skin.setPath(header.getPath().toString());
 			skin.setProperty(skinview.getProperty());
 			config.getSkin()[header.getMode()] = skin;
+		} else if(mode != -1){
+			config.getSkin()[mode] = null;	
 		}
-		skin.getItems().setAll(skinview.getSkinHeader(skincategory.getValue()));
+		
+		skin.getItems().clear();
+		skin.getItems().add(null);
+		skin.getItems().addAll(skinview.getSkinHeader(skincategory.getValue()));
+		mode = skincategory.getValue();
 		if(config.getSkin()[skincategory.getValue()] != null) {
 			SkinConfig skinconf = config.getSkin()[skincategory.getValue()];
-			for(LR2SkinHeader header : skin.getItems()) {
-				if(header.getPath().equals(Paths.get(skinconf.getPath()))) {
-					skin.setValue(header);
-					skinconfig.setContent(skinview.create(skin.getValue(), skinconf.getProperty()));
-					break;
-				}
+			if(skinconf != null) {
+				for(LR2SkinHeader header : skin.getItems()) {
+					if(header != null && header.getPath().equals(Paths.get(skinconf.getPath()))) {
+						skin.setValue(header);
+						skinconfig.setContent(skinview.create(skin.getValue(), skinconf.getProperty()));
+						break;
+					}
+				}				
+			} else {
+				skin.getSelectionModel().select(0);
 			}
 		}
 	}
@@ -538,6 +555,8 @@ public class PlayConfigurationView implements Initializable {
 			super.updateItem(arg0, arg1);
 			if (arg0 != null) {
 				setText(arg0.getName());
+			} else {
+				setText("");
 			}
 		}
 	}
@@ -568,10 +587,10 @@ class SkinConfigurationView {
 	}
 	
 	public VBox create(LR2SkinHeader header, Map<String, Object> property) {
+		selected = header;
 		if(header == null) {
 			return null;
 		}
-		selected = header;
 		VBox main = new VBox();
 		optionbox.clear();
 		for(CustomOption option : header.getCustomOptions()) {
@@ -590,6 +609,9 @@ class SkinConfigurationView {
 		}
 		filebox.clear();
 		for(CustomFile file : header.getCustomFiles()) {
+			if(!Files.isDirectory(Paths.get(file.path).getParent())) {
+				continue;
+			}
 			try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get(file.path).getParent(), Paths.get(file.path).getFileName().toString())){
 				HBox hbox = new HBox();
 				ComboBox<String> combo = new ComboBox<String>();

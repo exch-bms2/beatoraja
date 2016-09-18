@@ -508,7 +508,7 @@ public class BMSPlayer extends MainState {
 		// プレイ
 		case STATE_PLAY:
             getTimer()[TIMER_PLAY] += (nowtime - prevtime) * (100 - playspeed) / 100;
-			// TODO リズムタイマー算出
+            getTimer()[TIMER_RHYTHM] += (nowtime - prevtime) * (100 - lanerender.getNowBPM() * 100 / 60) / 100;
 			final float g = gauge.getValue();
 			if (gaugelog.size() <= (now - getTimer()[TIMER_PLAY]) / 500) {
 				gaugelog.add(g);
@@ -799,6 +799,8 @@ public class BMSPlayer extends MainState {
 
 		rate = (this.judge.getJudgeCount(0) * 2 + this.judge.getJudgeCount(1)) * 10000
 				/ getMainController().getPlayerResource().getSongdata().getNotes() / 2;
+        drate = notes == 0 ? 10000 : (this.judge.getJudgeCount(0) * 2 + this.judge.getJudgeCount(1)) * 10000
+                / notes / 2;
 
 		if (notes == getMainController().getPlayerResource().getSongdata().getNotes()
 				&& getTimer()[TIMER_ENDOFNOTE_1P] == Long.MIN_VALUE) {
@@ -989,9 +991,9 @@ public class BMSPlayer extends MainState {
 			case NUMBER_DIFF_TARGETSCORE:
 				return (judge.getJudgeCount(0) * 2 + judge.getJudgeCount(1)) - (rivalscore * notes / song.getNotes());
 		case NUMBER_SCORE_RATE:
-			return (judge.getJudgeCount(0) * 2 + judge.getJudgeCount(1)) * 100 / (getMainController().getPlayerResource().getSongdata().getNotes() * 2);
+			return notes == 0 ? 100 : (judge.getJudgeCount(0) * 2 + judge.getJudgeCount(1)) * 100 / (notes * 2);
 		case NUMBER_SCORE_RATE_AFTERDOT:
-			return ((judge.getJudgeCount(0) * 2 + judge.getJudgeCount(1)) * 1000 / (getMainController().getPlayerResource().getSongdata().getNotes() * 2)) % 10;
+			return notes == 0 ? 0 : ((judge.getJudgeCount(0) * 2 + judge.getJudgeCount(1)) * 1000 / (notes * 2)) % 10;
 		case NUMBER_HIGHSCORE:
 			return bestscore;
 		case NUMBER_MAXCOMBO:
@@ -1051,6 +1053,7 @@ public class BMSPlayer extends MainState {
 	}
 
 	private int rate;
+    private int drate;
 
 	public boolean getBooleanValue(int id) {
 		switch (id) {
@@ -1076,21 +1079,21 @@ public class BMSPlayer extends MainState {
 		case OPTION_AAA:
 			return rate > 8888;
 		case OPTION_1P_F:
-			return rate <= 2222;
+			return drate <= 2222;
 		case OPTION_1P_E:
-			return rate > 2222 && rate <= 3333;
+			return drate > 2222 && drate <= 3333;
 		case OPTION_1P_D:
-			return rate > 3333 && rate <= 4444;
+			return drate > 3333 && drate <= 4444;
 		case OPTION_1P_C:
-			return rate > 4444 && rate <= 5555;
+			return drate > 4444 && drate <= 5555;
 		case OPTION_1P_B:
-			return rate > 5555 && rate <= 6666;
+			return drate > 5555 && drate <= 6666;
 		case OPTION_1P_A:
-			return rate > 6666 && rate <= 7777;
+			return drate > 6666 && drate <= 7777;
 		case OPTION_1P_AA:
-			return rate > 7777 && rate <= 8888;
+			return drate > 7777 && drate <= 8888;
 		case OPTION_1P_AAA:
-			return rate > 8888;
+			return drate > 8888;
 		case OPTION_AUTOPLAYON:
 			return autoplay == 1;
 		case OPTION_AUTOPLAYOFF:

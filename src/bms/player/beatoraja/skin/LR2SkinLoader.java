@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import bms.player.beatoraja.MainState;
+import bms.player.beatoraja.result.MusicResultSkin;
 import bms.player.beatoraja.skin.LR2SkinHeader.CustomFile;
 
 import com.badlogic.gdx.Gdx;
@@ -149,6 +150,14 @@ public abstract class LR2SkinLoader {
 						}
 						if (str[0].equals("#STARTINPUT")) {
 							skin.setInputTime(Integer.parseInt(str[1]));
+							if(skin instanceof MusicResultSkin) {
+								MusicResultSkin resultskin = (MusicResultSkin) skin;
+								try {
+									resultskin.setRankTime(Integer.parseInt(str[2]));
+								} catch (NumberFormatException e) {
+
+								}
+							}
 						}
 						if (str[0].equals("#SCENETIME")) {
 							skin.setSceneTime(Integer.parseInt(str[1]));
@@ -252,7 +261,8 @@ public abstract class LR2SkinLoader {
 							part = null;
 							int gr = Integer.parseInt(str[2]);
 							if (gr >= 100) {
-								part = new SkinImage(MainState.IMAGE_STAGEFILE);
+								part = new SkinImage(gr);
+//								System.out.println("add reference image : " + gr);
 							} else if (gr < imagelist.size() && imagelist.get(gr) != null) {
 								try {
 									int[] values = parseInt(str);
