@@ -34,8 +34,8 @@ public class MusicResultSkin extends Skin {
 			MainState.NUMBER_EARLY_MISS,
 			MainState.NUMBER_LATE_MISS };
 
-	public MusicResultSkin() {
-		super(640, 480, 1280, 720);
+	public MusicResultSkin(float srcw, float srch, float dstw, float dsth) {
+		super(srcw, srch, dstw, dsth);
 	}
 	
 	public MusicResultSkin(Rectangle r) {

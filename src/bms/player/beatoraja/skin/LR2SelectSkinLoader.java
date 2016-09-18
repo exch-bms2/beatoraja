@@ -2,7 +2,9 @@ package bms.player.beatoraja.skin;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 
+import bms.player.beatoraja.decide.MusicDecide;
 import bms.player.beatoraja.play.PlaySkin;
 import bms.player.beatoraja.select.MusicSelectSkin;
 import bms.player.beatoraja.select.MusicSelectSkin.SkinBarObject;
@@ -27,7 +29,8 @@ public class LR2SelectSkinLoader extends LR2SkinLoader {
 
 	private SkinBarObject skinbar;
 	
-	public LR2SelectSkinLoader() {
+	public LR2SelectSkinLoader(float srcw, float srch, float dstw, float dsth) {
+		super(srcw, srch, dstw, dsth);
 		addCommandWord(new CommandWord("SRC_BAR_BODY") {
 			@Override
 			public void execute(String[] str) {
@@ -158,10 +161,10 @@ public class LR2SelectSkinLoader extends LR2SkinLoader {
 
 	}
 
-	public MusicSelectSkin loadSelectSkin(File f, MusicSelector selector,int[] option) throws IOException {
-		skin = new MusicSelectSkin();
+	public MusicSelectSkin loadSelectSkin(File f, MusicSelector selector, LR2SkinHeader header, int[] option, Map property) throws IOException {
+		skin = new MusicSelectSkin(srcw, srch, dstw, dsth);
 
-		this.loadSkin(skin, f, selector, option);
+		this.loadSkin(skin, f, selector, header, option, property);
 
 		skin.setBar(bar);
 		skin.setLamp(lamp);

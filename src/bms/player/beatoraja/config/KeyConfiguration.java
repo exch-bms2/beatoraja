@@ -71,7 +71,7 @@ public class KeyConfiguration extends MainState {
 	public KeyConfiguration(MainController main) {
 		super(main);
 		
-		this.setSkin(new MusicDecideSkin());
+		this.setSkin(new MusicDecideSkin(640,480,1280,720));
 
 	}
 

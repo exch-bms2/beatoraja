@@ -16,12 +16,9 @@ public class LR2ResultSkinLoader extends LR2SkinLoader {
 
 	private MusicResultSkin skin;
 	
-	public LR2ResultSkinLoader() {
-		final float srcw = 640;
-		final float srch = 480;
-		final float dstw = 1280;
-		final float dsth = 720;
-
+	public LR2ResultSkinLoader(final float srcw, final float srch, final float dstw, final float dsth) {
+		super(srcw, srch, dstw, dsth);
+		
 		addCommandWord(new CommandWord("SRC_GAUGECHART_1P") {
 			@Override
 			public void execute(String[] str) {
@@ -54,7 +51,7 @@ public class LR2ResultSkinLoader extends LR2SkinLoader {
 	
 	public MusicResultSkin loadResultSkin(File f, MainState state, LR2SkinHeader header, int[] option, Map property) throws IOException {
 
-		skin = new MusicResultSkin();
+		skin = new MusicResultSkin(srcw, srch, dstw, dsth);
 
 		this.loadSkin(skin, f, state, header, option, property);
 		

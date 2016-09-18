@@ -126,14 +126,6 @@ public class Config {
 	
 	private String soundpath = "";
 	
-	private String lr2playskin;
-	
-	private int[] lr2playskinoption = new int[0];
-	
-	private String lr2selectskin;
-	
-	private int[] lr2selectskinoption = new int[0];
-	
 	private SkinConfig[] skin = new SkinConfig[15];
 	/**
 	 * BMSルートディレクトリパス
@@ -194,13 +186,7 @@ public class Config {
 	private int musicselectinput = 0;
 	
 	public Config() {
-//		lr2playskin = "skin/spdframe/csv/left_ACwide.csv";
-//		lr2playskinoption = new int[] { 900, 965, 918, 906, 940, 913, 920, 908, 997 };
-//		lr2selectskin = "skin/green_ary/Select/select.csv";
-//		lr2selectskinoption = new int[] { 915, 918, 928, 920, 936, 950, 925, 930, 932 };
-//		lr2resultskin = "skin/RESULT SIMPLE FM/result_left.csv";
-//		lr2resultskinoption = new int[] { 900, 905, 907, 909};
-//		tableURL = new String[]{"http://bmsnormal2.syuriken.jp/table.html"};
+		tableURL = new String[]{"http://bmsnormal2.syuriken.jp/table.html"};
 		judgedetail = 2;
 	}
 	
@@ -290,10 +276,6 @@ public class Config {
 
 	public void setVlcpath(String vlcpath) {
 		this.vlcpath = vlcpath;
-	}
-	
-	public String getLR2PlaySkinPath() {
-		return lr2playskin;
 	}
 	
 	public int getAudioDeviceBufferSize() {
@@ -406,30 +388,6 @@ public class Config {
 
 	public void setMarkprocessednote(boolean markprocessednote) {
 		this.markprocessednote = markprocessednote;
-	}
-
-	public int[] getLr2playskinoption() {
-		return lr2playskinoption;
-	}
-
-	public void setLr2playskinoption(int[] lr2playskinoption) {
-		this.lr2playskinoption = lr2playskinoption;
-	}
-
-	public String getLr2selectskin() {
-		return lr2selectskin;
-	}
-
-	public void setLr2selectskin(String lr2selectskin) {
-		this.lr2selectskin = lr2selectskin;
-	}
-
-	public int[] getLr2selectskinoption() {
-		return lr2selectskinoption;
-	}
-
-	public void setLr2selectskinoption(int[] lr2selectskinoption) {
-		this.lr2selectskinoption = lr2selectskinoption;
 	}
 
 	public boolean isFolderlamp() {

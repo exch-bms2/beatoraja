@@ -27,6 +27,7 @@ import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Rectangle;
 
 /**
  * BMSプレイヤー本体
@@ -370,7 +371,9 @@ public class BMSPlayer extends MainState {
 				SkinConfig sc = resource.getConfig().getSkin()[skinmode];
 				LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
 				LR2SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
-				LR2PlaySkinLoader dloader = new LR2PlaySkinLoader();
+				Rectangle srcr = MainController.RESOLUTION[header.getResolution()];
+				Rectangle dstr = MainController.RESOLUTION[resource.getConfig().getResolution()];
+				LR2PlaySkinLoader dloader = new LR2PlaySkinLoader(srcr.width, srcr.height, dstr.width, dstr.height);
 				skin = dloader.loadPlaySkin(new File(header.getInclude()), this, header,
 						loader.getOption(), sc.getProperty());
 			} catch (IOException e) {

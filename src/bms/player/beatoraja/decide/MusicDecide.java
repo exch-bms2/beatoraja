@@ -13,6 +13,7 @@ import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.play.audio.SoundProcessor;
 import bms.player.beatoraja.skin.LR2DecideSkinLoader;
+import bms.player.beatoraja.skin.LR2PlaySkinLoader;
 import bms.player.beatoraja.skin.LR2SkinHeader;
 import bms.player.beatoraja.skin.LR2SkinHeaderLoader;
 import bms.player.beatoraja.skin.SkinImage;
@@ -62,7 +63,9 @@ public class MusicDecide extends MainState {
 					SkinConfig sc = resource.getConfig().getSkin()[6];
 					LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
 					LR2SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
-					LR2DecideSkinLoader dloader = new LR2DecideSkinLoader();
+					Rectangle srcr = MainController.RESOLUTION[header.getResolution()];
+					Rectangle dstr = MainController.RESOLUTION[resource.getConfig().getResolution()];
+					LR2DecideSkinLoader dloader = new LR2DecideSkinLoader(srcr.width, srcr.height, dstr.width, dstr.height);
 					setSkin(dloader.loadMusicDecideSkin(new File(header.getInclude()), this, header,
 							loader.getOption(), sc.getProperty()));
 				} catch (IOException e) {

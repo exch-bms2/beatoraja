@@ -4,8 +4,6 @@ import bms.player.beatoraja.PlayerResource;
 import bms.player.beatoraja.gauge.*;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 
@@ -53,10 +51,8 @@ public class GaugeGraphRenderer {
         shape.setColor(Color.valueOf(graphcolor));
         shape.end();
 
-        Gdx.gl.glLineWidth(4);
+        Gdx.gl.glLineWidth(2);
         shape.begin(ShapeRenderer.ShapeType.Line);
-        shape.setColor(Color.WHITE);
-        shape.rect(graph.x, graph.y, graph.width, graph.height);
 
         Float f1 = null;
         for (int i = 0; i < gauge.size(); i++) {

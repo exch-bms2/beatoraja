@@ -22,6 +22,18 @@ public abstract class LR2SkinLoader {
 
 	List<Texture> imagelist = new ArrayList<Texture>();
 
+	public final float srcw;
+	public final float srch;
+	public final float dstw;
+	public final float dsth;
+
+	public LR2SkinLoader(float srcw, float srch, float dstw, float dsth) {
+		this.srcw = srcw;
+		this.srch = srch;
+		this.dstw = dstw;
+		this.dsth = dsth;
+	}
+
 	protected void addCommandWord(CommandWord cm) {
 		commands.add(cm);
 	}
@@ -53,11 +65,11 @@ public abstract class LR2SkinLoader {
 				}
 			}
 		}
-		for(int i : option) {
+		for (int i : option) {
 			op.add(i);
 		}
 		option = new int[op.size()];
-		for(int i = 0;i < op.size();i++) {
+		for (int i = 0; i < op.size(); i++) {
 			option[i] = op.get(i);
 		}
 		this.loadSkin0(skin, f, state, option, filemap);
@@ -69,10 +81,6 @@ public abstract class LR2SkinLoader {
 		for (int i : option) {
 			op.add(i);
 		}
-		float srcw = 640;
-		float srch = 480;
-		float dstw = 1280;
-		float dsth = 720;
 
 		SkinImage part = null;
 		SkinImage button = null;
@@ -91,17 +99,23 @@ public abstract class LR2SkinLoader {
 				String[] str = line.split(",", -1);
 				if (str.length > 0) {
 					if (str[0].equals("#IF")) {
+						ifs =true;
 						for (int i = 1; i < str.length; i++) {
+							boolean b = false;
 							try {
 								int opt = Integer.parseInt(str[i]);
 								for (Integer o : op) {
 									if (o == opt) {
-										ifs = true;
+										b = true;
 										break;
 									}
 								}
-								if (!ifs) {
-									ifs = state.getBooleanValue(opt);
+								if (!b) {
+									b = state.getBooleanValue(opt);
+								}
+								if(!b) {
+									ifs = false;
+									break;
 								}
 							} catch (NumberFormatException e) {
 								break;
@@ -115,16 +129,21 @@ public abstract class LR2SkinLoader {
 							skip = true;
 						} else {
 							for (int i = 1; i < str.length; i++) {
+								boolean b = false;
 								try {
 									int opt = Integer.parseInt(str[i]);
 									for (Integer o : op) {
 										if (o == opt) {
-											ifs = true;
+											b = true;
 											break;
 										}
 									}
-									if (!ifs) {
-										ifs = state.getBooleanValue(opt);
+									if (!b) {
+										b = state.getBooleanValue(opt);
+									}
+									if(!b) {
+										ifs = false;
+										break;
 									}
 								} catch (NumberFormatException e) {
 									break;
@@ -150,7 +169,7 @@ public abstract class LR2SkinLoader {
 						}
 						if (str[0].equals("#STARTINPUT")) {
 							skin.setInputTime(Integer.parseInt(str[1]));
-							if(skin instanceof MusicResultSkin) {
+							if (skin instanceof MusicResultSkin) {
 								MusicResultSkin resultskin = (MusicResultSkin) skin;
 								try {
 									resultskin.setRankTime(Integer.parseInt(str[2]));
@@ -194,8 +213,9 @@ public abstract class LR2SkinLoader {
 							} else {
 								imagelist.add(null);
 							}
-//							System.out
-//									.println("Image Loaded - " + (imagelist.size() - 1) + " : " + imagefile.getPath());
+							// System.out
+							// .println("Image Loaded - " + (imagelist.size() -
+							// 1) + " : " + imagefile.getPath());
 						}
 
 						if (str[0].equals("#SRC_SLIDER")) {
@@ -258,13 +278,14 @@ public abstract class LR2SkinLoader {
 						}
 
 						if (str[0].equals("#SRC_IMAGE")) {
-							part = null;
-							int gr = Integer.parseInt(str[2]);
-							if (gr >= 100) {
-								part = new SkinImage(gr);
-//								System.out.println("add reference image : " + gr);
-							} else if (gr < imagelist.size() && imagelist.get(gr) != null) {
-								try {
+							try {
+								part = null;
+								int gr = Integer.parseInt(str[2]);
+								if (gr >= 100) {
+									part = new SkinImage(gr);
+									// System.out.println("add reference image : "
+									// + gr);
+								} else if (gr < imagelist.size() && imagelist.get(gr) != null) {
 									int[] values = parseInt(str);
 									int x = values[3];
 									int y = values[4];
@@ -295,16 +316,15 @@ public abstract class LR2SkinLoader {
 									part.setTiming(values[10]);
 									// System.out.println("Object Added - " +
 									// (part.getTiming()));
-								} catch (NumberFormatException e) {
-									e.printStackTrace();
 								}
+								if (part != null) {
+									skin.add(part);
+								} else {
+									System.out.println("NO_DESTINATION : " + line);
+								}
+							} catch (NumberFormatException e) {
+								e.printStackTrace();
 							}
-							if (part != null) {
-								skin.add(part);
-							} else {
-								System.out.println("NO_DESTINATION : " + line);
-							}
-
 						}
 						if (str[0].equals("#DST_IMAGE")) {
 							if (part != null) {

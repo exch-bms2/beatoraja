@@ -30,6 +30,8 @@ public class LR2SkinHeader {
 	private CustomFile[] files = new CustomFile[0];
 	
 	private String include;
+	
+	private int resolution;
 
 	public int getMode() {
 		return mode;
@@ -77,6 +79,14 @@ public class LR2SkinHeader {
 
 	public void setPath(Path path) {
 		this.path = path;
+	}
+
+	public int getResolution() {
+		return resolution;
+	}
+
+	public void setResolution(int resolution) {
+		this.resolution = resolution;
 	}
 
 	public static class CustomOption {

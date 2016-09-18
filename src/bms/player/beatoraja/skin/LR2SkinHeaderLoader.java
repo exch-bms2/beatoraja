@@ -120,6 +120,9 @@ public class LR2SkinHeaderLoader {
 						if (str[0].equals("#CUSTOMFILE")) {
 							files.add(new CustomFile(str[1], str[2].replace("LR2files\\Theme", "skin").replace("\\", "/")));
 						}	
+						if (str[0].equals("#RESOLUTION")) {
+							header.setResolution(Integer.parseInt(str[1]));
+						}
 						if (str[0].equals("#INCLUDE")) {
 							header.setInclude(str[1].replace("LR2files\\Theme", "skin").replace("\\", "/"));
 						}	

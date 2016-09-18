@@ -23,8 +23,8 @@ public class MusicSelectSkin extends Skin {
 
 	private Sprite[] trophy = new Sprite[3];
 
-	public MusicSelectSkin() {
-		super(640, 480, 1280, 720);
+	public MusicSelectSkin(float srcw, float srch, float dstw, float dsth) {
+		super(srcw, srch, dstw, dsth);
 	}
 
 	public MusicSelectSkin(Rectangle r) {

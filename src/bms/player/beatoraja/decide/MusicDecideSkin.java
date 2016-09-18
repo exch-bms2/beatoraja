@@ -18,8 +18,8 @@ public class MusicDecideSkin extends Skin {
 	private float dw;
 	private float dh;
 	
-    public MusicDecideSkin() {
-        super(640, 480, 1280, 720);
+    public MusicDecideSkin(float srcw, float srch, float dstw, float dsth) {
+        super(srcw, srch, dstw, dsth);
     }
 
 	public MusicDecideSkin(Rectangle r) {

@@ -68,8 +68,8 @@ public class PlaySkin extends Skin {
 
 	private BMSPlayer player;
 
-	public PlaySkin(int mode) {
-		super(640, 480, 1280, 720);
+	public PlaySkin(float srcw, float srch, float dstw, float dsth) {
+		super(srcw, srch, dstw, dsth);
 	}
 
 	public PlaySkin(int mode, boolean use2p, Rectangle r) {

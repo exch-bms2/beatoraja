@@ -7,7 +7,9 @@ import java.util.*;
 import java.util.logging.Logger;
 
 import bms.player.beatoraja.*;
+import bms.player.beatoraja.Config.SkinConfig;
 import bms.player.beatoraja.config.KeyConfiguration;
+import bms.player.beatoraja.decide.MusicDecideSkin;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.play.audio.SoundProcessor;
 import bms.player.beatoraja.skin.*;
@@ -20,6 +22,7 @@ import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.math.Rectangle;
 
 /**
  * 選曲部分。 楽曲一覧とカーソルが指す楽曲のステータスを表示し、選択した楽曲を 曲決定部分に渡す。
@@ -231,17 +234,21 @@ public class MusicSelector extends MainState {
 		}
 
 		if (skin == null) {
-			if (config.getLr2selectskin() != null) {
+			if (config.getSkin()[5] != null) {
 				try {
-					skin = new LR2SelectSkinLoader().loadSelectSkin(new File(config.getLr2selectskin()),this,
-							config.getLr2selectskinoption());
+					SkinConfig sc = config.getSkin()[5];
+					LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
+					LR2SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
+					Rectangle srcr = MainController.RESOLUTION[header.getResolution()];
+					Rectangle dstr = MainController.RESOLUTION[config.getResolution()];
+					LR2SelectSkinLoader dloader = new LR2SelectSkinLoader(srcr.width, srcr.height, dstr.width, dstr.height);
+					skin = dloader.loadSelectSkin(new File(header.getInclude()), this, header,
+							loader.getOption(), sc.getProperty());
 				} catch (IOException e) {
+					// TODO Auto-generated catch block
 					e.printStackTrace();
 					skin = new MusicSelectSkin(main.RESOLUTION[config.getResolution()]);
 				}
-
-				// lr2playskin = "skin/spdframe/csv/left_ACwide.csv";
-
 			} else {
 				skin = new MusicSelectSkin(main.RESOLUTION[config.getResolution()]);
 			}
