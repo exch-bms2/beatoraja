@@ -419,7 +419,7 @@ public abstract class MainState {
 		this.main = main;
 		Arrays.fill(timer, Long.MIN_VALUE);
 		Pixmap bp = new Pixmap(1,1, Pixmap.Format.RGBA8888);
-		bp.drawPixel(0,0, Color.toIntBits(0,0,0,255));
+		bp.drawPixel(0,0, Color.toIntBits(255,0,0,0));
 		black = new TextureRegion(new Texture(bp));
 		Pixmap hp = new Pixmap(1,1, Pixmap.Format.RGBA8888);
 		hp.drawPixel(0,0, Color.toIntBits(255,255,255,255));
@@ -705,12 +705,12 @@ public abstract class MainState {
 			if (imageid == IMAGE_STAGEFILE) {
 				return getMainController().getPlayerResource().getBGAManager().getStagefileData();
 			}
-			if(imageid == IMAGE_BLACK) {
-				return black;
-			}
-			if(imageid == IMAGE_WHITE) {
-				return white;
-			}
+		}
+		if(imageid == IMAGE_BLACK) {
+			return black;
+		}
+		if(imageid == IMAGE_WHITE) {
+			return white;
 		}
 		return null;
 	}

@@ -275,8 +275,13 @@ public abstract class SkinObject {
 			return;
 		}
 		Color c = sprite.getColor();
-		if (dstblend == 2) {
-			sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
+		switch(dstblend) {
+			case 2:
+				sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
+				break;
+			case 9:
+				sprite.setBlendFunction(GL11.GL_ONE_MINUS_DST_COLOR, GL11.GL_ZERO);
+				break;
 		}
 		sprite.setColor(color);
 		sprite.draw(image, x, y, centerx[dstcenter] * width, centery[dstcenter] * height, width, height, 1, 1, angle);
