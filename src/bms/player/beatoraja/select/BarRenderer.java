@@ -67,7 +67,7 @@ public class BarRenderer {
 			List<TableBar> tables = new ArrayList<TableBar>();
 			for(Path p : paths) {
 				Json json = new Json();
-				TableData td = json.fromJson(TableData.class, Files.newBufferedReader(p));
+				TableData td = json.fromJson(TableData.class, new FileReader(p.toFile()));
 				List<TableLevelBar> levels = new ArrayList<TableLevelBar>();
 				for (String lv : td.getLevel()) {
 					levels.add(new TableLevelBar(select, lv, td.getHash().get(lv)));

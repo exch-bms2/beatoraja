@@ -26,7 +26,7 @@ public class SkinText extends SkinObject {
     private int shadow = 0;
 
     private int align = ALIGN_LEFT;
-    public static final int ALIGN_LEFT = 0;
+	public static final int ALIGN_LEFT = 0;
     public static final int ALIGN_CENTER = 1;
     public static final int ALIGN_RIGHT = 2;
     
@@ -48,6 +48,10 @@ public class SkinText extends SkinObject {
         parameter.size = size;
         this.shadow = shadow;
     }
+
+    public int getAlign() {
+		return align;
+	}
 
     public void setAlign(int align) {
         this.align = align;

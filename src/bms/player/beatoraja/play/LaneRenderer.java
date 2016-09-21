@@ -89,6 +89,8 @@ public class LaneRenderer {
 	private int[] judgecombo;
 
 	private int[] laneassign;
+	
+	private int currentduration;
 
 	public LaneRenderer(BMSPlayer main, SpriteBatch sprite, ShapeRenderer shape, BitmapFont font, PlaySkin skin,
 			PlayerResource resource, BMSModel model, int[] mode) {
@@ -175,6 +177,10 @@ public class LaneRenderer {
 	public int getGreenValue() {
 		return gvalue;
 	}
+	
+	public int getCurrentDuration() {
+		return currentduration;
+	}
 
 	public boolean isEnableLift() {
 		return enableLift;
@@ -241,26 +247,9 @@ public class LaneRenderer {
 		int region = (int) (240000 / nbpm / hispeed);
 		// double sect = (bpm / 60) * 4 * 1000;
 		float hu = laneregion[0].y + laneregion[0].height;
-		float hl = laneregion[0].y;
+		float hl = enableLift ?  laneregion[0].y + laneregion[0].height * lift : laneregion[0].y;
 
-		// リフト描画
-		if (enableLift) {
-			for (Rectangle r : playerr) {
-				sprite.begin();
-				// 緑数字、白数字描画
-				if (main.getBMSPlayerInputProcessor().startPressed()) {
-					font.setColor(Color.WHITE);
-					font.draw(sprite, String.format("%5d", Math.round(lift * 1000)), r.x + r.width * 0.25f, hl
-							+ (hu - hl) * lift);
-					font.setColor(Color.YELLOW);
-					font.draw(sprite,
-							String.format("%5d", Math.round(region * (1 - (enableLanecover ? lanecover : 0)))),
-							r.x + r.width * 0.75f, hl + (hu - hl) * lift);
-				}
-				sprite.end();
-			}
-			hl = hl + (hu - hl) * lift;
-		}
+		currentduration = Math.round(region * (1 - (enableLanecover ? lanecover : 0)));
 
 		boolean[] keystate = main.getBMSPlayerInputProcessor().getKeystate();
 		for (int lane = 0; lane < laneregion.length; lane++) {

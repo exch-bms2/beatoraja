@@ -16,8 +16,6 @@ public class SkinGraph extends SkinObject {
 	 */
 	private TextureRegion[] image;
 
-	private int timing;
-
 	private int id = -1;
 	private int direction = 1;
 	
@@ -47,14 +45,6 @@ public class SkinGraph extends SkinObject {
 	public void setImage(TextureRegion[] image, int cycle) {
 		this.image = image;
 		setCycle(cycle);
-	}
-
-	public int getTiming() {
-		return timing;
-	}
-
-	public void setTiming(int timing) {
-		this.timing = timing;
 	}
 
 	public void draw(SpriteBatch sprite, long time, MainState state) {

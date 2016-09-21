@@ -27,8 +27,6 @@ public class SkinNumber extends SkinObject {
 
 	private int align;
 	
-	private int timing;
-	
 	private TextureRegion[] values;
 	
 	public SkinNumber(TextureRegion[] image, int cycle, int keta, int zeropadding) {
@@ -74,23 +72,15 @@ public class SkinNumber extends SkinObject {
 		this.values = new TextureRegion[keta];
 	}
 	
-	public int getTiming() {
-		return timing;
-	}
-
-	public void setTiming(int timing) {
-		this.timing = timing;
-	}
-
 	public TextureRegion[] getValue(long time, int value, int zeropadding, MainState state) {
 		final TextureRegion[][] images = (value >= 0 || mimage == null) ? this.image : mimage;
 		if(images == null) {
 			return new TextureRegion[0];
 		}
 		TextureRegion[] image = images[0];
-		if(timing != 0 && timing < 256) {
-			if(state.getTimer()[timing] != Long.MIN_VALUE) {
-				time -= state.getTimer()[timing];
+		if(getTimer() != 0 && getTimer() < 256) {
+			if(state.getTimer()[getTimer()] != Long.MIN_VALUE) {
+				time -= state.getTimer()[getTimer()];
 			}
 		}
 		if(time >= 0 && getCycle() != 0) {			

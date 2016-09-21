@@ -15,17 +15,12 @@ import bms.player.beatoraja.skin.*;
  */
 public class MusicDecideSkin extends Skin {
 
-	private float dw;
-	private float dh;
-	
     public MusicDecideSkin(float srcw, float srch, float dstw, float dsth) {
         super(srcw, srch, dstw, dsth);
     }
 
 	public MusicDecideSkin(Rectangle r) {
         super(1280, 720, r.width, r.height);
-		dw = r.width / 1280.0f;
-		dh = r.height / 720.0f;
 
         SkinImage bg = new SkinImage(MainState.IMAGE_STAGEFILE);
         setDestination(bg, 0, 0, 0, 1280, 720, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -51,8 +46,8 @@ public class MusicDecideSkin extends Skin {
         setDestination(fi, 500, 0, 0,1280, 720, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         add(fi);
 
-        setFadeoutTime(500);
-        setSceneTime(3000);
-        setInputTime(500);
+        setFadeout(500);
+        setScene(3000);
+        setInput(500);
     }
 }

@@ -14,11 +14,17 @@ public class Skin {
 	private float dh;
 
 	private List<SkinObject> objects = new ArrayList<SkinObject>();
-
+	/**
+	 * 入力受付開始時間(ms)
+	 */
 	private int input;
-
+	/**
+	 * シーンの時間(ms)
+	 */
 	private int scene = 3600000 * 24;
-
+	/**
+	 * シーン以降準備開始からシーン移行までの時間(ms)
+	 */
 	private int fadeout;
 
 	private int[] option = new int[0];
@@ -172,27 +178,27 @@ public class Skin {
 
 	}
 
-	public int getFadeoutTime() {
+	public int getFadeout() {
 		return fadeout;
 	}
 
-	public void setFadeoutTime(int fadeout) {
+	public void setFadeout(int fadeout) {
 		this.fadeout = fadeout;
 	}
 
-	public int getInputTime() {
+	public int getInput() {
 		return input;
 	}
 
-	public void setInputTime(int input) {
+	public void setInput(int input) {
 		this.input = input;
 	}
 
-	public int getSceneTime() {
+	public int getScene() {
 		return scene;
 	}
 
-	public void setSceneTime(int scene) {
+	public void setScene(int scene) {
 		this.scene = scene;
 	}
 

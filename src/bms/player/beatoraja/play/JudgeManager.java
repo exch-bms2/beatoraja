@@ -13,10 +13,8 @@ import bms.player.beatoraja.input.BMSPlayerInputProcessor;
  */
 public class JudgeManager {
 
-	// TODO bug:稀にノーツカウント漏れがある(BSS絡み？)
-
 	private final BMSPlayer main;
-	private final BMSModel model;
+	private final int lntype;
 	private final TimeLine[] timelines;
 
 	private final JudgeAlgorithm[] judgeAlgorithms = { new JudgeAlgorithmLR2(), new JudgeAlgorithm2DX(),
@@ -118,7 +116,7 @@ public class JudgeManager {
 
 	public JudgeManager(BMSPlayer main, BMSModel model, int[] constraint) {
 		this.main = main;
-		this.model = model;
+		this.lntype = model.getLntype();
 		this.timelines = model.getAllTimeLines();
 		switch (model.getUseKeys()) {
 		case 5:
@@ -158,10 +156,10 @@ public class JudgeManager {
 
 		for (int mode : constraint) {
 			if (mode == TableData.NO_GREAT) {
-				setExpandJudge(NO_GREAT_JUDGE);
+				setJudgeMode(NO_GREAT_JUDGE);
 			}
 			if (mode == TableData.NO_GOOD) {
-				setExpandJudge(NO_GOOD_JUDGE);
+				setJudgeMode(NO_GOOD_JUDGE);
 			}
 		}
 	}
@@ -187,7 +185,7 @@ public class JudgeManager {
 					if (note instanceof LongNote) {
 						// HCN判定
 						final LongNote lnote = (LongNote) note;
-						if ((lnote.getType() == LongNote.TYPE_UNDEFINED && model.getLntype() == BMSModel.LNTYPE_HELLCHARGENOTE)
+						if ((lnote.getType() == LongNote.TYPE_UNDEFINED && lntype == BMSModel.LNTYPE_HELLCHARGENOTE)
 								|| lnote.getType() == LongNote.TYPE_HELLCHARGENOTE) {
 							if (lnote.getStart() == timelines[i]) {
 								passing[keyassign[key]] = lnote;
@@ -250,7 +248,7 @@ public class JudgeManager {
 			if (keystate[key]) {
 				// キーが押されたときの処理
 				if (processing[lane] != null) {
-					if (((model.getLntype() != BMSModel.LNTYPE_LONGNOTE && processing[lane].getType() == LongNote.TYPE_UNDEFINED)
+					if (((lntype != BMSModel.LNTYPE_LONGNOTE && processing[lane].getType() == LongNote.TYPE_UNDEFINED)
 							|| processing[lane].getType() == LongNote.TYPE_CHARGENOTE || processing[lane].getType() == LongNote.TYPE_HELLCHARGENOTE)
 							&& sc >= 0 && key != sckey[sc]) {
 						for (int j = 0; j < judge.length; j++) {
@@ -290,7 +288,7 @@ public class JudgeManager {
 							final LongNote ln = (LongNote) note;
 							if (ln.getStart() == tl) {
 								main.play(note);
-								if ((model.getLntype() == BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
+								if ((lntype == BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
 										|| ln.getType() == LongNote.TYPE_LONGNOTE) {
 									passingcount[lane] = (int) (tl.getTime() - ptime);
 								} else {
@@ -360,7 +358,7 @@ public class JudgeManager {
 								|| (ptime > processing[lane].getEnd().getTime() - judge[j] && ptime < processing[lane]
 										.getEnd().getTime() + judge[j])) {
 							int dtime = (int) (processing[lane].getEnd().getTime() - ptime);
-							if ((model.getLntype() != BMSModel.LNTYPE_LONGNOTE && processing[lane].getType() == LongNote.TYPE_UNDEFINED)
+							if ((lntype != BMSModel.LNTYPE_LONGNOTE && processing[lane].getType() == LongNote.TYPE_UNDEFINED)
 									|| processing[lane].getType() == LongNote.TYPE_CHARGENOTE
 									|| processing[lane].getType() == LongNote.TYPE_HELLCHARGENOTE) {
 								if (sc >= 0) {
@@ -405,7 +403,7 @@ public class JudgeManager {
 
 			// LN終端判定
 			if (processing[lane] != null
-					&& ((model.getLntype() == BMSModel.LNTYPE_LONGNOTE && processing[lane].getType() == LongNote.TYPE_UNDEFINED) || processing[lane]
+					&& ((lntype == BMSModel.LNTYPE_LONGNOTE && processing[lane].getType() == LongNote.TYPE_UNDEFINED) || processing[lane]
 							.getType() == LongNote.TYPE_LONGNOTE) && processing[lane].getEnd().getTime() < time) {
 				int j = 0;
 				for (; j < judge.length; j++) {
@@ -433,7 +431,7 @@ public class JudgeManager {
 				if(note instanceof LongNote) {
 					final LongNote ln = (LongNote) note;
 					if (((LongNote) note).getStart() == timelines[i] && note.getState() == 0) {
-						if ((model.getLntype() != BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
+						if ((lntype != BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
 								|| ln.getType() == LongNote.TYPE_CHARGENOTE || ln.getType() == LongNote.TYPE_HELLCHARGENOTE) {
 							// System.out.println("CN start poor");
 							this.update(lane, 4, time, jud);
@@ -443,7 +441,7 @@ public class JudgeManager {
 							((LongNote) note).setEndstate(5);
 							((LongNote) note).setEndtime(jud);
 						}
-						if (((model.getLntype() == BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
+						if (((lntype == BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
 								|| ln.getType() == LongNote.TYPE_LONGNOTE) && processing[lane] != note) {
 							// System.out.println("LN start poor");
 							this.update(lane, 4, time, jud);
@@ -452,7 +450,7 @@ public class JudgeManager {
 						}
 
 					}
-					if (((model.getLntype() != BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
+					if (((lntype != BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
 							|| ln.getType() == LongNote.TYPE_CHARGENOTE || ln.getType() == LongNote.TYPE_HELLCHARGENOTE)
 							&& ((LongNote) note).getEnd() == timelines[i] && ((LongNote) note).getEndstate() == 0) {
 						// System.out.println("CN end poor");
@@ -566,7 +564,7 @@ public class JudgeManager {
 	public static final int NO_GREAT_JUDGE = 1;
 	public static final int NO_GOOD_JUDGE = 2;
 
-	public void setExpandJudge(int mode) {
+	public void setJudgeMode(int mode) {
 		switch (mode) {
 		case EXPAND_JUDGE:
 			njudge[0] = njudge[1];

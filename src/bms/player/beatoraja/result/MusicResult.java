@@ -166,7 +166,7 @@ public class MusicResult extends MainState {
 		sprite.end();
 
 		if (getTimer()[BMSPlayer.TIMER_FADEOUT] != Long.MIN_VALUE) {
-			if (time > getTimer()[BMSPlayer.TIMER_FADEOUT] + getSkin().getFadeoutTime()) {
+			if (time > getTimer()[BMSPlayer.TIMER_FADEOUT] + getSkin().getFadeout()) {
 				if (this.clear != null) {
 					this.clear.stop();
 				}
@@ -219,7 +219,7 @@ public class MusicResult extends MainState {
 				}
 			}
 		} else {
-			if (time > getSkin().getInputTime()) {
+			if (time > getSkin().getInput()) {
 				boolean[] keystate = main.getInputProcessor().getKeystate();
 				long[] keytime = main.getInputProcessor().getTime();
 				if (resource.getScoreData() == null || ((keystate[0] && keytime[0] != 0)
@@ -240,7 +240,7 @@ public class MusicResult extends MainState {
 					}
 				}
 			}
-			if (time > getSkin().getSceneTime()) {
+			if (time > getSkin().getScene()) {
 				getTimer()[BMSPlayer.TIMER_FADEOUT] = time;
 			}
 		}

@@ -17,7 +17,6 @@ public class SkinImage extends SkinObject {
 	 */
 	private TextureRegion[][] image;
 
-	private int timing;
 	private int id = -1;
 
 	private int imageid = -1;
@@ -53,11 +52,12 @@ public class SkinImage extends SkinObject {
 		if(getCycle() == 0) {
 			return image[value][0];
 		}
-		if(timing != 0 && timing < 256) {
-			if(state.getTimer()[timing] == Long.MIN_VALUE) {
+		
+		if(getTimer() != 0 && getTimer() < 256) {
+			if(state.getTimer()[getTimer()] == Long.MIN_VALUE) {
 				return image[value][0];
 			}
-			time -= state.getTimer()[timing];
+			time -= state.getTimer()[getTimer()];
 		}
 		if(time < 0) {
 			return image[value][0];
@@ -77,14 +77,6 @@ public class SkinImage extends SkinObject {
 	public void setImage(TextureRegion[][] image, int cycle) {
 		this.image = image;
 		setCycle(cycle);
-	}
-
-	public int getTiming() {
-		return timing;
-	}
-
-	public void setTiming(int timing) {
-		this.timing = timing;
 	}
 
 	public void draw(SpriteBatch sprite, long time, MainState state) {

@@ -18,9 +18,16 @@ import org.lwjgl.opengl.GL11;
  */
 public abstract class SkinObject {
 
-	private int offsetX = -1;
-	private int offsetY = -1;
+	/**
+	 * X座標オフセットの参照ID
+	 */
+	private int offsetx = -1;
+	/**
+	 * Y座標オフセットの参照ID
+	 */
+	private int offsety = -1;
 
+	private int timer;
 	private int cycle;
 
 	private int dsttimer = 0;
@@ -148,35 +155,35 @@ public abstract class SkinObject {
 					r.y = r1.y + (r2.y - r1.y) * (time - obj1.time) / (time2 - obj1.time);
 					r.width = r1.width + (r2.width - r1.width) * (time - obj1.time) / (time2 - obj1.time);
 					r.height = r1.height + (r2.height - r1.height) * (time - obj1.time) / (time2 - obj1.time);
-					if (state != null && offsetX != -1) {
-						r.x += state.getSliderValue(offsetX);
+					if (state != null && offsetx != -1) {
+						r.x += state.getSliderValue(offsetx);
 					}
-					if (state != null && offsetY != -1) {
-						r.y += state.getSliderValue(offsetY);
+					if (state != null && offsety != -1) {
+						r.y += state.getSliderValue(offsety);
 					}
 					return r;
 				}
 			}
 		} else {
-			if (offsetX == -1 && offsetY == -1) {
+			if (offsetx == -1 && offsety == -1) {
 				return fixr;
 			}
 			r.set(fixr);
-			if (state != null && offsetX != -1) {
-				r.x += state.getSliderValue(offsetX);
+			if (state != null && offsetx != -1) {
+				r.x += state.getSliderValue(offsetx);
 			}
-			if (state != null && offsetY != -1) {
-				r.y += state.getSliderValue(offsetY);
+			if (state != null && offsety != -1) {
+				r.y += state.getSliderValue(offsety);
 			}
 			return r;
 		}
 
 		r.set(dst.get(0).region);
-		if (state != null && offsetX != -1) {
-			r.x += state.getSliderValue(offsetX);
+		if (state != null && offsetx != -1) {
+			r.x += state.getSliderValue(offsetx);
 		}
-		if (state != null && offsetY != -1) {
-			r.y += state.getSliderValue(offsetY);
+		if (state != null && offsety != -1) {
+			r.y += state.getSliderValue(offsety);
 		}
 		return r;
 	}
@@ -313,12 +320,28 @@ public abstract class SkinObject {
 
 	public abstract void dispose();
 
-	public void setOffsetXReferenceID(int offsetX) {
-		this.offsetX = offsetX;
+	public int getOffsetx() {
+		return offsetx;
 	}
 
-	public void setOffsetYReferenceID(int offsetY) {
-		this.offsetY = offsetY;
+	public void setOffsetx(int offsetX) {
+		this.offsetx = offsetX;
+	}
+
+	public int getOffsety() {
+		return offsety;
+	}
+
+	public void setOffsety(int offsetY) {
+		this.offsety = offsetY;
+	}
+
+	public int getTimer() {
+		return timer;
+	}
+
+	public void setTimer(int timing) {
+		this.timer = timing;
 	}
 
 	public int getCycle() {

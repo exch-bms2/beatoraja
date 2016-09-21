@@ -58,13 +58,13 @@ public class LR2PlaySkinLoader extends LR2SkinLoader {
 		addCommandWord(new CommandWord("CLOSE") {
 			@Override
 			public void execute(String[] str) {
-				skin.setCloseTime(Integer.parseInt(str[1]));
+				skin.setClose(Integer.parseInt(str[1]));
 			}
 		});
 		addCommandWord(new CommandWord("PLAYSTART") {
 			@Override
 			public void execute(String[] str) {
-				skin.setPlaystartTime(Integer.parseInt(str[1]));
+				skin.setPlaystart(Integer.parseInt(str[1]));
 			}
 		});
 		addCommandWord(new CommandWord("SRC_BGA") {
@@ -118,8 +118,8 @@ public class LR2PlaySkinLoader extends LR2SkinLoader {
 							}
 						}
 						li = new SkinImage(images, values[9]);
-						li.setTiming(values[10]);
-						li.setOffsetYReferenceID(BMSPlayer.OFFSET_LIFT);
+						li.setTimer(values[10]);
+						li.setOffsety(BMSPlayer.OFFSET_LIFT);
 						lines.add(li);
 						// System.out.println("Object Added - " +
 						// (part.getTiming()));
@@ -323,7 +323,7 @@ public class LR2PlaySkinLoader extends LR2SkinLoader {
 							}
 						}
 						nowjudge[5 - values[1]] = new SkinImage(images, values[9]);
-						nowjudge[5 - values[1]].setTiming(values[10]);
+						nowjudge[5 - values[1]].setTimer(values[10]);
 						shift = (values[11] != 1);
 						// System.out.println("Nowjudge Added - " + (5 -
 						// values[1]));
@@ -393,7 +393,7 @@ public class LR2PlaySkinLoader extends LR2SkinLoader {
 							}
 						}
 						nowjudge2[5 - values[1]] = new SkinImage(images, values[9]);
-						nowjudge2[5 - values[1]].setTiming(values[10]);
+						nowjudge2[5 - values[1]].setTimer(values[10]);
 						shift2 = (values[11] != 1);
 						// System.out.println("Nowjudge Added - " + (5 -
 						// values[1]));
@@ -465,7 +465,7 @@ public class LR2PlaySkinLoader extends LR2SkinLoader {
 
 						nowcombo[5 - values[1]] = new SkinNumber(images, values[9], values[13], images.length > 10 ? 2
 								: 0, values[11]);
-						nowcombo[5 - values[1]].setTiming(values[10]);
+						nowcombo[5 - values[1]].setTimer(values[10]);
 						nowcombo[5 - values[1]].setAlign(values[12]);
 						// System.out.println("Number Added - " +
 						// (num.getId()));
@@ -528,7 +528,7 @@ public class LR2PlaySkinLoader extends LR2SkinLoader {
 
 						nowcombo2[5 - values[1]] = new SkinNumber(images, values[9], values[13], images.length > 10 ? 2
 								: 0, values[11]);
-						nowcombo2[5 - values[1]].setTiming(values[10]);
+						nowcombo2[5 - values[1]].setTimer(values[10]);
 						nowcombo2[5 - values[1]].setAlign(values[12]);
 						// System.out.println("Number Added - " +
 						// (num.getId()));
@@ -589,8 +589,8 @@ public class LR2PlaySkinLoader extends LR2SkinLoader {
 							}
 						}
 						line = new SkinImage(images, values[9]);
-						line.setTiming(values[10]);
-						line.setOffsetYReferenceID(BMSPlayer.OFFSET_LIFT);
+						line.setTimer(values[10]);
+						line.setOffsety(BMSPlayer.OFFSET_LIFT);
 						// System.out.println("Object Added - " +
 						// (part.getTiming()));
 					} catch (NumberFormatException e) {

@@ -13,8 +13,6 @@ public class SkinSlider extends SkinObject {
 	 */
 	private TextureRegion[] image;
 
-	private int timing;
-
 	private int muki;
 	private int range = 100;
 	private int type;
@@ -45,14 +43,6 @@ public class SkinSlider extends SkinObject {
 	public void setImage(TextureRegion[] image, int cycle) {
 		this.image = image;
 		setCycle(cycle);
-	}
-
-	public int getTiming() {
-		return timing;
-	}
-
-	public void setTiming(int timing) {
-		this.timing = timing;
 	}
 
 	public void draw(SpriteBatch sprite, long time, MainState state) {

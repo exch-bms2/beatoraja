@@ -112,9 +112,9 @@ public class GradeResultSkin extends Skin {
         setDestination(fi, 500, 0, 0,1280, 720, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         add(fi);
 
-        setFadeoutTime(500);
-        setSceneTime(3600000 * 24);
-        setInputTime(500);
+        setFadeout(500);
+        setScene(3600000 * 24);
+        setInput(500);
 	}
 
 	public void setGaugeRegion(Rectangle region) {

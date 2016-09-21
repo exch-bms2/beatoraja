@@ -141,6 +141,11 @@ public abstract class MainState {
 	public static final int NUMBER_TOTALGOOD = 35;
 	public static final int NUMBER_TOTALBAD = 36;
 	public static final int NUMBER_TOTALPOOR = 37;
+	public static final int NUMBER_FOLDER_BEGINNER = 45;
+	public static final int NUMBER_FOLDER_NORMAL = 46;
+	public static final int NUMBER_FOLDER_HYPER = 47;
+	public static final int NUMBER_FOLDER_ANOTHER = 48;
+	public static final int NUMBER_FOLDER_INSANE = 49;
 	public static final int NUMBER_TOTALPLAYNOTES = 1037;
 	public static final int NUMBER_SCORE = 71;
 	public static final int NUMBER_MAXSCORE = 72;
@@ -657,6 +662,11 @@ public abstract class MainState {
 			}
 			return Integer.MIN_VALUE;
 		case NUMBER_PLAYLEVEL:
+		case NUMBER_FOLDER_BEGINNER:
+		case NUMBER_FOLDER_NORMAL:
+		case NUMBER_FOLDER_HYPER:
+		case NUMBER_FOLDER_ANOTHER:
+		case NUMBER_FOLDER_INSANE:
 			if (getMainController().getPlayerResource().getSongdata() != null) {
 				return getMainController().getPlayerResource().getSongdata().getLevel();
 			}

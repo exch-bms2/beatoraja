@@ -168,7 +168,7 @@ public abstract class LR2SkinLoader {
 							}
 						}
 						if (str[0].equals("#STARTINPUT")) {
-							skin.setInputTime(Integer.parseInt(str[1]));
+							skin.setInput(Integer.parseInt(str[1]));
 							if (skin instanceof MusicResultSkin) {
 								MusicResultSkin resultskin = (MusicResultSkin) skin;
 								try {
@@ -179,10 +179,10 @@ public abstract class LR2SkinLoader {
 							}
 						}
 						if (str[0].equals("#SCENETIME")) {
-							skin.setSceneTime(Integer.parseInt(str[1]));
+							skin.setScene(Integer.parseInt(str[1]));
 						}
 						if (str[0].equals("#FADEOUT")) {
-							skin.setFadeoutTime(Integer.parseInt(str[1]));
+							skin.setFadeout(Integer.parseInt(str[1]));
 						}
 
 						if (str[0].equals("#IMAGE")) {
@@ -252,7 +252,7 @@ public abstract class LR2SkinLoader {
 									slider = new SkinSlider(images, values[9], values[11],
 											(int) (values[12] * (values[11] == 1 || values[11] == 3 ? (dstw / srcw)
 													: (dsth / srch))), values[13]);
-									slider.setTiming(values[10]);
+									slider.setTimer(values[10]);
 									slider.setChangable(values[14] == 0);
 									skin.add(slider);
 									// System.out.println("Object Added - " +
@@ -313,7 +313,7 @@ public abstract class LR2SkinLoader {
 										}
 									}
 									part = new SkinImage(images, values[9]);
-									part.setTiming(values[10]);
+									part.setTimer(values[10]);
 									// System.out.println("Object Added - " +
 									// (part.getTiming()));
 								}
@@ -394,7 +394,7 @@ public abstract class LR2SkinLoader {
 												values[11]);
 										num.setAlign(values[12]);
 									}
-									num.setTiming(values[10]);
+									num.setTimer(values[10]);
 									skin.add(num);
 									// System.out.println("Number Added - " +
 									// (num.getId()));
@@ -456,7 +456,7 @@ public abstract class LR2SkinLoader {
 								int gr = values[2];
 								if (gr >= 100) {
 									bar = new SkinGraph(gr);
-									bar.setTiming(values[10]);
+									bar.setTimer(values[10]);
 									bar.setReferenceID(values[11] + 1000);
 									bar.setDirection(values[12]);
 								} else if (gr < imagelist.size() && imagelist.get(gr) != null) {
@@ -486,7 +486,7 @@ public abstract class LR2SkinLoader {
 										}
 									}
 									bar = new SkinGraph(images, values[9]);
-									bar.setTiming(values[10]);
+									bar.setTimer(values[10]);
 									bar.setReferenceID(values[11] + 1000);
 									bar.setDirection(values[12]);
 									// System.out.println("Object Added - " +
@@ -552,7 +552,7 @@ public abstract class LR2SkinLoader {
 										}
 									}
 									button = new SkinImage(images, values[9]);
-									button.setTiming(values[10]);
+									button.setTimer(values[10]);
 									button.setReferenceID(values[11] + 1000);
 									skin.add(button);
 									// System.out.println("Object Added - " +

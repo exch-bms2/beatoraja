@@ -131,7 +131,7 @@ public class GradeResult extends MainState {
 		}
 
 		if (getTimer()[BMSPlayer.TIMER_FADEOUT] != Long.MIN_VALUE) {
-			if (time > getTimer()[BMSPlayer.TIMER_FADEOUT] + getSkin().getFadeoutTime()) {
+			if (time > getTimer()[BMSPlayer.TIMER_FADEOUT] + getSkin().getFadeout()) {
 				if (clear != null) {
 					clear.stop();
 				}
@@ -142,7 +142,7 @@ public class GradeResult extends MainState {
 				main.changeState(MainController.STATE_SELECTMUSIC);
 			}
 		} else {
-			if (time > getSkin().getInputTime()) {
+			if (time > getSkin().getInput()) {
 				boolean[] keystate = main.getInputProcessor().getKeystate();
 				if (resource.getScoreData() == null || (keystate[0] || keystate[2] || keystate[4] || keystate[6])) {
 					getTimer()[BMSPlayer.TIMER_FADEOUT] = time;
@@ -155,7 +155,7 @@ public class GradeResult extends MainState {
 					}
 				}
 			}
-			if (time > getSkin().getSceneTime()) {
+			if (time > getSkin().getScene()) {
 				getTimer()[BMSPlayer.TIMER_FADEOUT] = time;
 			}
 		}
