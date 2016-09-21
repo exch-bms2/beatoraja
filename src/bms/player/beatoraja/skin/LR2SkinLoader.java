@@ -16,15 +16,32 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 
+/**
+ * LR2のスキン定義用csvファイルのローダー
+ *
+ * @author exch
+ */
 public abstract class LR2SkinLoader {
 
 	private List<CommandWord> commands = new ArrayList<CommandWord>();
 
 	List<Texture> imagelist = new ArrayList<Texture>();
 
+	/**
+	 * スキンの元サイズのwidth
+	 */
 	public final float srcw;
+	/**
+	 * スキンの元サイズのheight
+	 */
 	public final float srch;
+	/**
+	 * 描画サイズのwidth
+	 */
 	public final float dstw;
+	/**
+	 * 描画サイズのheight
+	 */
 	public final float dsth;
 
 	public LR2SkinLoader(float srcw, float srch, float dstw, float dsth) {
@@ -102,6 +119,9 @@ public abstract class LR2SkinLoader {
 						ifs =true;
 						for (int i = 1; i < str.length; i++) {
 							boolean b = false;
+							if(str[i].length() == 0) {
+								continue;
+							}
 							try {
 								int opt = Integer.parseInt(str[i]);
 								for (Integer o : op) {
@@ -118,6 +138,7 @@ public abstract class LR2SkinLoader {
 									break;
 								}
 							} catch (NumberFormatException e) {
+								e.printStackTrace();
 								break;
 							}
 						}
@@ -128,6 +149,7 @@ public abstract class LR2SkinLoader {
 						if (ifs) {
 							skip = true;
 						} else {
+							ifs = true;
 							for (int i = 1; i < str.length; i++) {
 								boolean b = false;
 								try {
@@ -163,8 +185,16 @@ public abstract class LR2SkinLoader {
 					if (!skip) {
 
 						if (str[0].equals("#SETOPTION")) {
+							int index = Integer.parseInt(str[1]);
 							if (Integer.parseInt(str[2]) >= 1) {
-								op.add(Integer.parseInt(str[1]));
+								op.add(index);
+							} else {
+								for(int i = 0;i < op.size();i++) {
+									if(op.get(i) == index) {
+										op.remove(i);
+										break;
+									}
+								}
 							}
 						}
 						if (str[0].equals("#STARTINPUT")) {

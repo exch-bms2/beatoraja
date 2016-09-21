@@ -100,8 +100,16 @@ public class LR2SkinHeaderLoader {
 					}
 					if (!skip) {
 						if (str[0].equals("#SETOPTION")) {
-							if(Integer.parseInt(str[2]) >= 1) {
-								op.add(Integer.parseInt(str[1]));
+							int index = Integer.parseInt(str[1]);
+							if (Integer.parseInt(str[2]) >= 1) {
+								op.add(index);
+							} else {
+								for(int i = 0;i < op.size();i++) {
+									if(op.get(i) == index) {
+										op.remove(i);
+										break;
+									}
+								}
 							}
 						}
 						if (str[0].equals("#INFORMATION")) {
