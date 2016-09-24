@@ -269,20 +269,21 @@ public class MainController extends ApplicationAdapter {
 			config.setFullscreen(!fullscreen);
 			input.getFunctiontime()[3] = 0;
 		}
-		if (input.getFunctionstate()[4] && input.getFunctiontime()[4] != 0) {
-			int resolution = config.getResolution();
-			resolution = (resolution + 1) % RESOLUTION.length;
-			if (config.isFullscreen()) {
-				Gdx.graphics.setWindowedMode((int) RESOLUTION[resolution].width, (int) RESOLUTION[resolution].height);
-				Graphics.DisplayMode currentMode = Gdx.graphics.getDisplayMode();
-				Gdx.graphics.setFullscreenMode(currentMode);
-			}
-			else {
-				Gdx.graphics.setWindowedMode((int) RESOLUTION[resolution].width, (int) RESOLUTION[resolution].height);
-			}
-			config.setResolution(resolution);
-			input.getFunctiontime()[4] = 0;
-		}
+		
+//		if (input.getFunctionstate()[4] && input.getFunctiontime()[4] != 0) {
+//			int resolution = config.getResolution();
+//			resolution = (resolution + 1) % RESOLUTION.length;
+//			if (config.isFullscreen()) {
+//				Gdx.graphics.setWindowedMode((int) RESOLUTION[resolution].width, (int) RESOLUTION[resolution].height);
+//				Graphics.DisplayMode currentMode = Gdx.graphics.getDisplayMode();
+//				Gdx.graphics.setFullscreenMode(currentMode);
+//			}
+//			else {
+//				Gdx.graphics.setWindowedMode((int) RESOLUTION[resolution].width, (int) RESOLUTION[resolution].height);
+//			}
+//			config.setResolution(resolution);
+//			input.getFunctiontime()[4] = 0;
+//		}
 
 		// screen shot
 		if (input.getFunctionstate()[5] && input.getFunctiontime()[5] != 0) {

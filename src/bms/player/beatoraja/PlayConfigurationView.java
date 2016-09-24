@@ -150,7 +150,7 @@ public class PlayConfigurationView implements Initializable {
 	private static final String[] RESOLUTION = { "SD (640 x 480)", "HD (1280 x 720)", "FULL HD (1920 x 1080)", "ULTRA HD (3940 x 2160)" };
 
 	private static final String[] SKIN_CATEGORY = { "7KEYS", "5KEYS", "14KEYS", "10KEYS", "9KEYS", "MUSIC SELECT","DECIDE","RESULT","KEY CONFIG"
-		,"SKIN SELECT", "SOUND SET", "THEME", "7KEYS BATTLE", "5KEYS BATTLE", "9KEYS BATTLE"};
+		,"SKIN SELECT", "SOUND SET", "THEME", "7KEYS BATTLE", "5KEYS BATTLE", "9KEYS BATTLE", "COURSE RESULT"};
 
 	private MainController.BMSInformationLoader loader;
 
@@ -221,7 +221,8 @@ public class PlayConfigurationView implements Initializable {
 			}
 		});
 		skincategory.setButtonCell(new OptionListCell(SKIN_CATEGORY));
-		skincategory.getItems().setAll(0, 1, 2,3,4,5,6,7,8,9,10,11,12,13,14);
+//		skincategory.getItems().setAll(0, 1, 2,3,4,5,6,7,8,9,10,11,12,13,14,15);
+		skincategory.getItems().setAll(0, 1, 2,3,4,6,7);
 
 		skin.setCellFactory(new Callback<ListView<LR2SkinHeader>, ListCell<LR2SkinHeader>>() {
 			public ListCell<LR2SkinHeader> call(ListView<LR2SkinHeader> param) {
@@ -332,11 +333,9 @@ public class PlayConfigurationView implements Initializable {
 		
 		Json json = new Json();
 		json.setOutputType(OutputType.json);
-		try {
-			FileWriter fw = new FileWriter("config.json");
+		try (FileWriter fw = new FileWriter("config.json")){
 			fw.write(json.prettyPrint(config));
 			fw.flush();
-			fw.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

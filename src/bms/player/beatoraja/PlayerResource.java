@@ -23,7 +23,9 @@ public class PlayerResource {
 	 * 選曲中のBMS
 	 */
 	private BMSModel model;
-	
+	/**
+	 * 選択中のBMSの情報
+	 */
 	private SongData songdata;
 	
 	private Config config;
@@ -81,9 +83,13 @@ public class PlayerResource {
 	 * コーススコア
 	 */
 	private IRScoreData cscore;
-
+	/**
+	 * コンボ数。コースプレイ時の引継ぎに使用
+	 */
 	private int combo;
-
+	/**
+	 * 最大コンボ数。コースプレイ時の引継ぎに使用
+	 */
 	private int maxcombo;
 
 	public PlayerResource(Config config) {

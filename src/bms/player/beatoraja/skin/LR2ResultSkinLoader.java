@@ -18,7 +18,14 @@ public class LR2ResultSkinLoader extends LR2SkinLoader {
 	
 	public LR2ResultSkinLoader(final float srcw, final float srch, final float dstw, final float dsth) {
 		super(srcw, srch, dstw, dsth);
-		
+
+		addCommandWord(new CommandWord("STARTINPUT") {
+			@Override
+			public void execute(String[] str) {
+				skin.setInput(Integer.parseInt(str[1]));
+				skin.setRankTime(Integer.parseInt(str[2]));
+			}
+		});
 		addCommandWord(new CommandWord("SRC_GAUGECHART_1P") {
 			@Override
 			public void execute(String[] str) {

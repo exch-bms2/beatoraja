@@ -348,12 +348,6 @@ public class GradeResult extends MainState {
 				shape.setColor(Color.DARK_GRAY);
 				shape.rect(graph.x, graph.y, graph.width, graph.height);
 				shape.end();
-				Gdx.gl.glLineWidth(4);
-				shape.begin(ShapeRenderer.ShapeType.Line);
-				shape.setColor(Color.WHITE);
-				shape.rect(graph.x, graph.y, graph.width, graph.height);
-				shape.end();
-				Gdx.gl.glLineWidth(1);
 			} else {
 				gaugegraph.render(shape, time, resource, graph, coursegauge.get(i));
 			}

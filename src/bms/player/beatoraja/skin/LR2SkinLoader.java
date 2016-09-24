@@ -199,14 +199,6 @@ public abstract class LR2SkinLoader {
 						}
 						if (str[0].equals("#STARTINPUT")) {
 							skin.setInput(Integer.parseInt(str[1]));
-							if (skin instanceof MusicResultSkin) {
-								MusicResultSkin resultskin = (MusicResultSkin) skin;
-								try {
-									resultskin.setRankTime(Integer.parseInt(str[2]));
-								} catch (NumberFormatException e) {
-
-								}
-							}
 						}
 						if (str[0].equals("#SCENETIME")) {
 							skin.setScene(Integer.parseInt(str[1]));
@@ -225,11 +217,14 @@ public abstract class LR2SkinLoader {
 								String ext = imagepath.substring(imagepath.lastIndexOf("*") + 1);
 								File imagedir = new File(imagepath.substring(0, imagepath.lastIndexOf('/')));
 								if (imagedir.exists() && imagedir.isDirectory()) {
+									List<File> l = new ArrayList();
 									for (File subfile : imagedir.listFiles()) {
 										if (subfile.getPath().toLowerCase().endsWith(ext)) {
-											imagefile = subfile;
-											break;
+											l.add(subfile);
 										}
+									}
+									if(l.size() > 0) {
+										imagefile = l.get((int) (Math.random() * l.size()));
 									}
 								}
 							}
@@ -645,7 +640,7 @@ public abstract class LR2SkinLoader {
 		int[] result = new int[21];
 		for (int i = 1; i < s.length; i++) {
 			try {
-				result[i] = Integer.parseInt(s[i]);
+				result[i] = Integer.parseInt(s[i].replace('!','-'));
 			} catch (Exception e) {
 
 			}

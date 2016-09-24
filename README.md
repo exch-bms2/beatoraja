@@ -14,3 +14,5 @@ Features :
 - import difficulty table and create table folder, create course with various constraint (mirror/random OK, no hispeed, and so on)
 - import LunaticRave2 skin (now working in progress)
 
+System Requirement :
+- Java Runtime Environment 1.8.0 64bit (32bit is not recomended)
