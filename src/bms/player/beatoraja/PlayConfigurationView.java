@@ -17,6 +17,8 @@ import bms.player.beatoraja.skin.LR2SkinHeader;
 import bms.player.beatoraja.skin.LR2SkinHeader.CustomFile;
 import bms.player.beatoraja.skin.LR2SkinHeader.CustomOption;
 import bms.player.beatoraja.skin.LR2SkinHeaderLoader;
+import bms.player.beatoraja.song.SQLiteSongDatabaseAccessor;
+import bms.player.beatoraja.song.SongDatabaseAccessor;
 import bms.table.Course;
 import bms.table.Course.Trophy;
 import bms.table.DifficultyTable;
@@ -424,8 +426,7 @@ public class PlayConfigurationView implements Initializable {
 		commit();
 		try {
 			Class.forName("org.sqlite.JDBC");
-			SongDatabaseAccessor songdb = new SongDatabaseAccessor(Paths.get("songdata.db").toString());
-			songdb.createTable();
+			SongDatabaseAccessor songdb = new SQLiteSongDatabaseAccessor(Paths.get("songdata.db").toString());
 			Logger.getGlobal().info("song.db更新開始");
 			songdb.updateSongDatas(config.getBmsroot(), Paths.get(".").toAbsolutePath().toString(), updateAll);
 			Logger.getGlobal().info("song.db更新完了");

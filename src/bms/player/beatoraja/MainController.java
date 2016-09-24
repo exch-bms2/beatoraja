@@ -21,6 +21,8 @@ import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.result.GradeResult;
 import bms.player.beatoraja.result.MusicResult;
 import bms.player.beatoraja.select.MusicSelector;
+import bms.player.beatoraja.song.SQLiteSongDatabaseAccessor;
+import bms.player.beatoraja.song.SongDatabaseAccessor;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -93,8 +95,7 @@ public class MainController extends ApplicationAdapter {
 
 		try {
 			Class.forName("org.sqlite.JDBC");
-			songdb = new SongDatabaseAccessor(songdbpath.toString());
-			songdb.createTable();
+			songdb = new SQLiteSongDatabaseAccessor(songdbpath.toString());
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}

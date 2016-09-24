@@ -16,6 +16,7 @@ import bms.player.beatoraja.play.audio.AudioProcessor;
 import bms.player.beatoraja.play.audio.SoundProcessor;
 import bms.player.beatoraja.play.bga.BGAProcessor;
 import bms.player.beatoraja.skin.*;
+import bms.player.beatoraja.song.SongData;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;

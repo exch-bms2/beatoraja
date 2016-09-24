@@ -13,6 +13,8 @@ import bms.player.beatoraja.decide.MusicDecideSkin;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.play.audio.SoundProcessor;
 import bms.player.beatoraja.skin.*;
+import bms.player.beatoraja.song.SongData;
+import bms.player.beatoraja.song.SongDatabaseAccessor;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.TextInputListener;
@@ -131,7 +133,6 @@ public class MusicSelector extends MainState {
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
-		songdb.createTable();
 
 		scorecache = new Map[3];
 		for (int i = 0; i < scorecache.length; i++) {

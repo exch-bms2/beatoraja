@@ -1,4 +1,4 @@
-package bms.player.beatoraja;
+package bms.player.beatoraja.song;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,7 +27,7 @@ import bms.model.BMSONDecoder;
  * 
  * @author exch
  */
-public class SongDatabaseAccessor {
+public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 
 	public static final String HASH = "hash";
 	public static final String TITLE = "title";
@@ -41,16 +41,18 @@ public class SongDatabaseAccessor {
 
 	private QueryRunner qr;
 
-	public SongDatabaseAccessor(String filepath) throws ClassNotFoundException {
+	public SQLiteSongDatabaseAccessor(String filepath) throws ClassNotFoundException {
 		Class.forName("org.sqlite.JDBC");
 		songdb = new SqliteDBManager(filepath);
 		qr = new QueryRunner(songdb.getDataSource());
+		
+		createTable();
 	}
 
 	/**
 	 * 楽曲データベースを初期テーブルを作成する。 すでに初期テーブルを作成している場合は何もしない。
 	 */
-	public void createTable() {
+	private void createTable() {
 		try {
 			// songテーブル作成(存在しない場合)
 			if (qr.query("SELECT * FROM sqlite_master WHERE name = ? and type='table';", new MapListHandler(), "song")
@@ -299,32 +301,6 @@ public class SongDatabaseAccessor {
 		updater.updateSongDatas(paths);
 	}
 
-	private static final int Polynomial = 0xEDB88320;
-
-	public String crc32(String path, String[] rootdirs, String bmspath) {
-		for (String s : rootdirs) {
-			if (Paths.get(s).getParent().toString().equals(path)) {
-				return "e2977170";
-			}
-		}
-
-		if (path.startsWith(bmspath)) {
-			path = path.substring(bmspath.length() + 1);
-		}
-		final int previousCrc32 = 0;
-		int crc = ~previousCrc32; // same as previousCrc32 ^ 0xFFFFFFFF
-
-		for (byte b : (path + "\\\0").getBytes()) {
-			crc ^= b;
-			for (int j = 0; j < 8; j++)
-				if ((crc & 1) != 0)
-					crc = (crc >>> 1) ^ Polynomial;
-				else
-					crc = crc >>> 1;
-		}
-		return Integer.toHexString(~crc); // same as crc ^ 0xFFFFFFFF
-	}
-
 	/**
 	 * song database更新用クラス
 	 * 
@@ -347,7 +323,6 @@ public class SongDatabaseAccessor {
 		private Path path;
 
 		private Map<String, String> tags = new HashMap<String, String>();
-		private Connection conn;
 		private boolean updateAll;
 
 		private long updatetime;
@@ -373,8 +348,7 @@ public class SongDatabaseAccessor {
 			updatetime = Calendar.getInstance().getTimeInMillis() / 1000;
 			count = 0;
 			DataSource ds = songdb.getDataSource();
-			try {
-				conn = ds.getConnection();
+			try (Connection conn = ds.getConnection()){
 				conn.setAutoCommit(false);
 				// ルートディレクトリに含まれないフォルダの削除
 				String dsql = "";
@@ -397,20 +371,12 @@ public class SongDatabaseAccessor {
 					}
 				}
 				for (Path f : paths) {
-					this.processDirectory(f, true);
+					this.processDirectory(conn, f, true);
 				}
 				conn.commit();
-				conn.close();
 			} catch (Exception e) {
 				Logger.getGlobal().severe("楽曲データベース更新時の例外:" + e.getMessage());
 				e.printStackTrace();
-			} finally {
-				if (conn != null) {
-					try {
-						conn.close();
-					} catch (SQLException e) {
-					}
-				}
 			}
 			long nowtime = System.currentTimeMillis();
 			Logger.getGlobal().info(
@@ -418,11 +384,11 @@ public class SongDatabaseAccessor {
 							+ (count > 0 ? (nowtime - time) / count : "不明"));
 		}
 
-		private void processDirectory(final Path dir, boolean updateFolder) throws IOException, SQLException {
+		private void processDirectory(Connection conn, final Path dir, boolean updateFolder) throws IOException, SQLException {
 			List<SongData> records = qr.query(conn, "SELECT path,date FROM song WHERE folder = ?", rh,
-					crc32(dir.toString(), rootdirs, path.toString()));
+					SongUtils.crc32(dir.toString(), rootdirs, path.toString()));
 			List<FolderData> folders = qr.query(conn, "SELECT path,date FROM folder WHERE parent = ?", rh2,
-					crc32(dir.toString(), rootdirs, path.toString()));
+					SongUtils.crc32(dir.toString(), rootdirs, path.toString()));
 			boolean txt = false;
 			List<Path> bmsfiles = new ArrayList<Path>();
 			List<Path> dirs = new ArrayList<Path>();
@@ -542,8 +508,8 @@ public class SongDatabaseAccessor {
 						sd.getTitle(), sd.getSubtitle(), sd.getGenre(), sd.getArtist(), sd.getSubartist(), tags.get(sd
 								.getMd5()) != null ? tags.get(sd.getMd5()) : "", f.startsWith(path) ? path
 								.relativize(f).toString() : f.toString(),
-						crc32(f.getParent().toString(), rootdirs, path.toString()), sd.getStagefile(), sd.getBanner(),
-						sd.getBackbmp(), crc32(f.getParent().getParent().toString(), rootdirs, path.toString()), sd
+								SongUtils.crc32(f.getParent().toString(), rootdirs, path.toString()), sd.getStagefile(), sd.getBanner(),
+						sd.getBackbmp(), SongUtils.crc32(f.getParent().getParent().toString(), rootdirs, path.toString()), sd
 								.getLevel(), sd.getDifficulty(), sd.getMaxbpm(), sd.getMinbpm(), sd.getMode(), sd
 								.getJudge(), sd.getFeature(), sd.getContent(),
 						Files.getLastModifiedTime(f).toMillis() / 1000, 0, sd.getNotes(), updatetime);
@@ -568,7 +534,7 @@ public class SongDatabaseAccessor {
 						break;
 					}
 				}
-				this.processDirectory(f, b);
+				this.processDirectory(conn, f, b);
 			}
 			// folderテーブルの更新
 			if (updateFolder) {
@@ -578,7 +544,7 @@ public class SongDatabaseAccessor {
 				qr.update(conn,
 						"INSERT OR REPLACE INTO folder (title, subtitle, command, path, type, banner, parent, date, max, adddate)"
 								+ "VALUES(?,?,?,?,?,?,?,?,?,?);", dir.getFileName().toString(), "", "", s, 1, "",
-						crc32(dir.getParent().toString(), rootdirs, path.toString()), Files.getLastModifiedTime(dir)
+								SongUtils.crc32(dir.getParent().toString(), rootdirs, path.toString()), Files.getLastModifiedTime(dir)
 								.toMillis() / 1000, null, Calendar.getInstance().getTimeInMillis() / 1000);
 			}
 			// ディレクトリ内に存在しないフォルダレコードを削除

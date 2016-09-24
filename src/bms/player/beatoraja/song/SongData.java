@@ -1,4 +1,4 @@
-package bms.player.beatoraja;
+package bms.player.beatoraja.song;
 
 import java.util.ArrayList;
 import java.util.List;

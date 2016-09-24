@@ -1,6 +1,12 @@
 package bms.player.beatoraja.select;
 
 import bms.player.beatoraja.*;
+import bms.player.beatoraja.song.FolderData;
+import bms.player.beatoraja.song.SQLiteSongDatabaseAccessor;
+import bms.player.beatoraja.song.SongData;
+import bms.player.beatoraja.song.SongDatabaseAccessor;
+import bms.player.beatoraja.song.SongUtils;
+
 import com.badlogic.gdx.graphics.Pixmap;
 import java.io.File;
 import java.nio.file.Paths;
@@ -254,7 +260,7 @@ class FolderBar extends DirectoryBar {
                     path = path.substring(0, path.length() - 1);
                 }
 
-                String ccrc = songdb.crc32(path, new String[0], rootpath);
+                String ccrc = SongUtils.crc32(path, new String[0], rootpath);
                 FolderBar cfolder = new FolderBar(selector, folder, ccrc);
                 l.add(cfolder);
             }
@@ -276,7 +282,7 @@ class FolderBar extends DirectoryBar {
         if (path.endsWith(String.valueOf(File.separatorChar))) {
             path = path.substring(0, path.length() - 1);
         }
-        final String ccrc = songdb.crc32(path, new String[0], new File(".").getAbsolutePath());
+        final String ccrc = SongUtils.crc32(path, new String[0], new File(".").getAbsolutePath());
         int clear = 255;
         int[] clears = new int[11];
         int[] ranks = new int[28];

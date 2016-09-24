@@ -24,6 +24,8 @@ import com.badlogic.gdx.utils.Json;
 
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.TableData.CourseData;
+import bms.player.beatoraja.song.SongData;
+import bms.player.beatoraja.song.SongDatabaseAccessor;
 
 public class BarRenderer {
 
