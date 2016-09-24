@@ -99,27 +99,27 @@ public class MusicResult extends MainState {
 			resource.addCourseGauge(resource.getGauge());
 		}
 
-		if (skin == null) {
-			if (resource.getConfig().getSkin()[7] != null) {
-				try {
-					SkinConfig sc = resource.getConfig().getSkin()[7];
-					LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
-					LR2SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
-					Rectangle srcr = MainController.RESOLUTION[header.getResolution()];
-					Rectangle dstr = MainController.RESOLUTION[resource.getConfig().getResolution()];
-					LR2ResultSkinLoader dloader = new LR2ResultSkinLoader(srcr.width, srcr.height, dstr.width, dstr.height);
-					skin = dloader.loadResultSkin(new File(header.getInclude()), this, header,
-							loader.getOption(), sc.getProperty());
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					skin = new MusicResultSkin(MainController.RESOLUTION[resource.getConfig().getResolution()]);
-				}
-			} else {
+		if(skin != null) {
+			skin.dispose();
+		}
+		if (resource.getConfig().getSkin()[7] != null) {
+			try {
+				SkinConfig sc = resource.getConfig().getSkin()[7];
+				LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
+				LR2SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
+				Rectangle srcr = MainController.RESOLUTION[header.getResolution()];
+				Rectangle dstr = MainController.RESOLUTION[resource.getConfig().getResolution()];
+				LR2ResultSkinLoader dloader = new LR2ResultSkinLoader(srcr.width, srcr.height, dstr.width, dstr.height);
+				skin = dloader.loadResultSkin(new File(header.getInclude()), this, header,
+						loader.getOption(), sc.getProperty());
+			} catch (IOException e) {
+				e.printStackTrace();
 				skin = new MusicResultSkin(MainController.RESOLUTION[resource.getConfig().getResolution()]);
 			}
-			this.setSkin(skin);
+		} else {
+			skin = new MusicResultSkin(MainController.RESOLUTION[resource.getConfig().getResolution()]);
 		}
+		this.setSkin(skin);
 
 		detail = new DetailGraphRenderer(resource.getBMSModel());
 		gaugegraph = new GaugeGraphRenderer();
@@ -505,6 +505,10 @@ public class MusicResult extends MainState {
 		final PlayerResource resource = getMainController().getPlayerResource();
 		final IRScoreData score = resource.getScoreData();
 		switch(id) {
+			case OPTION_DISABLE_SAVE_SCORE:
+				return !resource.isUpdateScore();
+			case OPTION_ENABLE_SAVE_SCORE:
+				return resource.isUpdateScore();
 			case OPTION_RESULT_CLEAR:
 				return score.getClear() != GrooveGauge.CLEARTYPE_FAILED;
 			case OPTION_RESULT_FAIL:

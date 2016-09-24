@@ -262,6 +262,14 @@ public abstract class MainState {
 	public static final int OPTION_GAUGE_GROOVE = 42;
 	public static final int OPTION_GAUGE_HARD = 43;
 
+	public static final int OPTION_DISABLE_SAVE_SCORE = 60;
+	public static final int OPTION_ENABLE_SAVE_SCORE = 61;
+	public static final int OPTION_NO_SAVE_CLEAR = 62;
+	public static final int OPTION_EASY_SAVE_CLEAR = 63;
+	public static final int OPTION_NORMAL_SAVE_CLEAR = 64;
+	public static final int OPTION_HARD_SAVE_CLEAR = 65;
+	public static final int OPTION_FULLCOMBO_SAVE_CLEAR = 66;
+
 	public static final int OPTION_NOW_LOADING = 80;
 	public static final int OPTION_LOADED = 81;
 
