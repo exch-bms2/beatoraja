@@ -3,6 +3,7 @@ package bms.player.beatoraja;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
 import java.nio.file.*;
 import java.util.*;
@@ -27,6 +28,7 @@ import bms.table.DifficultyTableParser;
 
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter.OutputType;
+import com.sun.jndi.toolkit.url.Uri;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -44,7 +46,7 @@ import javafx.util.Callback;
  * @author exch
  */
 public class PlayConfigurationView implements Initializable {
-	
+
 	@FXML
 	private ComboBox<Integer> resolution;
 
@@ -123,7 +125,7 @@ public class PlayConfigurationView implements Initializable {
 	private CheckBox folderlamp;
 	@FXML
 	private ComboBox<Integer> judgedetail;
-	
+
 	private SkinConfigurationView skinview;
 	@FXML
 	private ComboBox<Integer> skincategory;
@@ -147,10 +149,12 @@ public class PlayConfigurationView implements Initializable {
 
 	private static final String[] JUDGEDETAIL = { "なし", "FAST/SLOW", "±ms" };
 
-	private static final String[] RESOLUTION = { "SD (640 x 480)", "HD (1280 x 720)", "FULL HD (1920 x 1080)", "ULTRA HD (3940 x 2160)" };
+	private static final String[] RESOLUTION = { "SD (640 x 480)", "HD (1280 x 720)", "FULL HD (1920 x 1080)",
+			"ULTRA HD (3940 x 2160)" };
 
-	private static final String[] SKIN_CATEGORY = { "7KEYS", "5KEYS", "14KEYS", "10KEYS", "9KEYS", "MUSIC SELECT","DECIDE","RESULT","KEY CONFIG"
-		,"SKIN SELECT", "SOUND SET", "THEME", "7KEYS BATTLE", "5KEYS BATTLE", "9KEYS BATTLE", "COURSE RESULT"};
+	private static final String[] SKIN_CATEGORY = { "7KEYS", "5KEYS", "14KEYS", "10KEYS", "9KEYS", "MUSIC SELECT",
+			"DECIDE", "RESULT", "KEY CONFIG", "SKIN SELECT", "SOUND SET", "THEME", "7KEYS BATTLE", "5KEYS BATTLE",
+			"9KEYS BATTLE", "COURSE RESULT" };
 
 	private MainController.BMSInformationLoader loader;
 
@@ -214,15 +218,16 @@ public class PlayConfigurationView implements Initializable {
 		});
 		judgedetail.setButtonCell(new OptionListCell(JUDGEDETAIL));
 		judgedetail.getItems().setAll(0, 1, 2);
-		
+
 		skincategory.setCellFactory(new Callback<ListView<Integer>, ListCell<Integer>>() {
 			public ListCell<Integer> call(ListView<Integer> param) {
 				return new OptionListCell(SKIN_CATEGORY);
 			}
 		});
 		skincategory.setButtonCell(new OptionListCell(SKIN_CATEGORY));
-//		skincategory.getItems().setAll(0, 1, 2,3,4,5,6,7,8,9,10,11,12,13,14,15);
-		skincategory.getItems().setAll(0, 1, 2,3,4,6,7);
+		// skincategory.getItems().setAll(0, 1,
+		// 2,3,4,5,6,7,8,9,10,11,12,13,14,15);
+		skincategory.getItems().setAll(0, 1, 2, 3, 4, 6, 7);
 
 		skin.setCellFactory(new Callback<ListView<LR2SkinHeader>, ListCell<LR2SkinHeader>>() {
 			public ListCell<LR2SkinHeader> call(ListView<LR2SkinHeader> param) {
@@ -275,14 +280,14 @@ public class PlayConfigurationView implements Initializable {
 		audiosim.getValueFactory().setValue(config.getAudioDeviceSimultaneousSources());
 
 		judgealgorithm.setValue(config.getJudgeAlgorithm());
-		
+
 		folderlamp.setSelected(config.isFolderlamp());
 		judgedetail.setValue(config.getJudgedetail());
 
 		inputduration.getValueFactory().setValue(config.getInputduration());
-		
+
 		skinview = new SkinConfigurationView();
-		
+
 		skincategory.setValue(0);
 		updateSkinCategory();
 	}
@@ -323,17 +328,17 @@ public class PlayConfigurationView implements Initializable {
 		config.setAudioDeviceSimultaneousSources(audiosim.getValue());
 
 		config.setJudgeAlgorithm(judgealgorithm.getValue());
-		
+
 		config.setFolderlamp(folderlamp.isSelected());
 		config.setJudgedetail(judgedetail.getValue());
 
 		config.setInputduration(inputduration.getValue());
 
 		updateSkinCategory();
-		
+
 		Json json = new Json();
 		json.setOutputType(OutputType.json);
-		try (FileWriter fw = new FileWriter("config.json")){
+		try (FileWriter fw = new FileWriter("config.json")) {
 			fw.write(json.prettyPrint(config));
 			fw.flush();
 		} catch (IOException e) {
@@ -364,44 +369,44 @@ public class PlayConfigurationView implements Initializable {
 	public void removeTableURL() {
 		tableurl.getItems().removeAll(tableurl.getSelectionModel().getSelectedItems());
 	}
-	
+
 	private int mode = -1;
-	
+
 	public void updateSkinCategory() {
-		if(skinview.getSelectedHeader() != null) {
+		if (skinview.getSelectedHeader() != null) {
 			LR2SkinHeader header = skinview.getSelectedHeader();
 			SkinConfig skin = new SkinConfig();
 			skin.setPath(header.getPath().toString());
 			skin.setProperty(skinview.getProperty());
 			config.getSkin()[header.getMode()] = skin;
-		} else if(mode != -1){
-			config.getSkin()[mode] = null;	
+		} else if (mode != -1) {
+			config.getSkin()[mode] = null;
 		}
-		
+
 		skin.getItems().clear();
 		skin.getItems().add(null);
 		skin.getItems().addAll(skinview.getSkinHeader(skincategory.getValue()));
 		mode = skincategory.getValue();
-		if(config.getSkin()[skincategory.getValue()] != null) {
+		if (config.getSkin()[skincategory.getValue()] != null) {
 			SkinConfig skinconf = config.getSkin()[skincategory.getValue()];
-			if(skinconf != null) {
-				for(LR2SkinHeader header : skin.getItems()) {
-					if(header != null && header.getPath().equals(Paths.get(skinconf.getPath()))) {
+			if (skinconf != null) {
+				for (LR2SkinHeader header : skin.getItems()) {
+					if (header != null && header.getPath().equals(Paths.get(skinconf.getPath()))) {
 						skin.setValue(header);
 						skinconfig.setContent(skinview.create(skin.getValue(), skinconf.getProperty()));
 						break;
 					}
-				}				
+				}
 			} else {
 				skin.getSelectionModel().select(0);
 			}
 		}
 	}
-	
-	public void updateSkin() {		
+
+	public void updateSkin() {
 		skinconfig.setContent(skinview.create(skin.getValue(), null));
 	}
-	
+
 	public void start() {
 		commit();
 		loader.hide();
@@ -419,7 +424,8 @@ public class PlayConfigurationView implements Initializable {
 	/**
 	 * BMSを読み込み、楽曲データベースを更新する
 	 * 
-	 * @param updateAll falseの場合は追加削除分のみを更新する
+	 * @param updateAll
+	 *            falseの場合は追加削除分のみを更新する
 	 */
 	public void loadBMS(boolean updateAll) {
 		commit();
@@ -433,8 +439,9 @@ public class PlayConfigurationView implements Initializable {
 			e.printStackTrace();
 		}
 	}
-	
-	private static final String[] CONSTRAINT = {"null", "grade", "grade_mirror", "grade_random", "no_speed", "no_good", "no_great"};
+
+	private static final String[] CONSTRAINT = { "null", "grade", "grade_mirror", "grade_random", "no_speed",
+			"no_good", "no_great" };
 
 	public void loadTable() {
 		commit();
@@ -442,15 +449,15 @@ public class PlayConfigurationView implements Initializable {
 			Files.createDirectories(Paths.get("table"));
 		} catch (IOException e) {
 		}
-		
-		try(DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get("table"))) {
-			for(Path p : paths) {
+
+		try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get("table"))) {
+			for (Path p : paths) {
 				Files.deleteIfExists(p);
 			}
-		} catch(IOException e) {
-			
+		} catch (IOException e) {
+
 		}
-		
+
 		for (String url : config.getTableURL()) {
 			DifficultyTableParser dtp = new DifficultyTableParser();
 			DifficultyTable dt = new DifficultyTable();
@@ -478,24 +485,24 @@ public class PlayConfigurationView implements Initializable {
 
 				if (dt.getCourse() != null && dt.getCourse().length > 0) {
 					List<CourseData> gname = new ArrayList<CourseData>();
-					for(Course[] course : dt.getCourse()) {
+					for (Course[] course : dt.getCourse()) {
 						for (Course g : course) {
 							CourseData cd = new CourseData();
 							cd.setName(g.getName());
 							cd.setHash(g.getHash());
 							int[] con = new int[g.getConstraint().length];
-							for(int i = 0;i < con.length;i++) {
-								for(int index = 0;index < CONSTRAINT.length;index++) {
-									if(CONSTRAINT[index].equals(g.getConstraint()[i])) {
+							for (int i = 0; i < con.length; i++) {
+								for (int index = 0; index < CONSTRAINT.length; index++) {
+									if (CONSTRAINT[index].equals(g.getConstraint()[i])) {
 										con[i] = index;
 										break;
 									}
-								}								
+								}
 							}
 							cd.setConstraint(con);
-							if(g.getTrophy() != null) {
+							if (g.getTrophy() != null) {
 								List<TrophyData> tr = new ArrayList<TrophyData>();
-								for(Trophy trophy : g.getTrophy()) {
+								for (Trophy trophy : g.getTrophy()) {
 									TrophyData t = new TrophyData();
 									t.setName(trophy.getName());
 									t.setMissrate((float) trophy.getMissrate());
@@ -505,9 +512,9 @@ public class PlayConfigurationView implements Initializable {
 								cd.setTrophy(tr.toArray(new TrophyData[0]));
 							}
 							gname.add(cd);
-						}						
+						}
 					}
-					
+
 					td.setCourse(gname.toArray(new CourseData[0]));
 				}
 				Json json = new Json();
@@ -564,17 +571,17 @@ public class PlayConfigurationView implements Initializable {
 }
 
 class SkinConfigurationView {
-	
+
 	private List<LR2SkinHeader> lr2skinheader = new ArrayList();
-	
+
 	private LR2SkinHeader selected = null;
 	private Map<CustomOption, ComboBox> optionbox = new HashMap();
 	private Map<CustomFile, ComboBox> filebox = new HashMap();
-	
+
 	public SkinConfigurationView() {
 		List<Path> lr2skinpaths = new ArrayList();
 		scan(Paths.get("skin"), lr2skinpaths);
-		for(Path path : lr2skinpaths) {
+		for (Path path : lr2skinpaths) {
 			LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
 			try {
 				LR2SkinHeader header = loader.loadSkin(path, null);
@@ -585,19 +592,19 @@ class SkinConfigurationView {
 			}
 		}
 	}
-	
+
 	public VBox create(LR2SkinHeader header, Map<String, Object> property) {
 		selected = header;
-		if(header == null) {
+		if (header == null) {
 			return null;
 		}
 		VBox main = new VBox();
 		optionbox.clear();
-		for(CustomOption option : header.getCustomOptions()) {
+		for (CustomOption option : header.getCustomOptions()) {
 			HBox hbox = new HBox();
 			ComboBox<String> combo = new ComboBox<String>();
 			combo.getItems().setAll(option.contents);
-			if(property != null) {
+			if (property != null) {
 				int i = (int) property.get(option.name);
 				combo.getSelectionModel().select(i - option.option);
 			} else {
@@ -608,17 +615,16 @@ class SkinConfigurationView {
 			main.getChildren().add(hbox);
 		}
 		filebox.clear();
-		for(CustomFile file : header.getCustomFiles()) {
-			if(!Files.isDirectory(Paths.get(file.path).getParent())) {
-				continue;
-			}
-			try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get(file.path).getParent(), Paths.get(file.path).getFileName().toString())){
+		for (CustomFile file : header.getCustomFiles()) {			
+			try (DirectoryStream<Path> paths = Files.newDirectoryStream(
+					Paths.get(file.path.substring(0, file.path.lastIndexOf('/'))),
+					file.path.substring(file.path.lastIndexOf('/') + 1))) {
 				HBox hbox = new HBox();
 				ComboBox<String> combo = new ComboBox<String>();
-				for(Path p : paths) {
+				for (Path p : paths) {
 					combo.getItems().add(p.getFileName().toString());
 				}
-				if(property != null) {
+				if (property != null) {
 					String s = (String) property.get(file.name);
 					combo.setValue(s);
 				} else {
@@ -626,18 +632,18 @@ class SkinConfigurationView {
 				}
 				hbox.getChildren().addAll(new Label(file.name), combo);
 				filebox.put(file, combo);
-				main.getChildren().add(hbox);				
-			} catch(IOException e) {
+				main.getChildren().add(hbox);
+			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
 		return main;
 	}
-	
+
 	private void scan(Path p, final List<Path> paths) {
-		if(Files.isDirectory(p)) {
-			try(Stream<Path> sub = Files.list(p)) {
-				sub.forEach(new Consumer<Path>(){
+		if (Files.isDirectory(p)) {
+			try (Stream<Path> sub = Files.list(p)) {
+				sub.forEach(new Consumer<Path>() {
 					@Override
 					public void accept(Path t) {
 						scan(t, paths);
@@ -645,35 +651,35 @@ class SkinConfigurationView {
 				});
 			} catch (IOException e) {
 			}
-		} else if(p.getFileName().toString().toLowerCase().endsWith(".lr2skin")){
+		} else if (p.getFileName().toString().toLowerCase().endsWith(".lr2skin")) {
 			paths.add(p);
 		}
 	}
-	
+
 	public LR2SkinHeader getSelectedHeader() {
 		return selected;
 	}
-	
+
 	public Map<String, Object> getProperty() {
 		Map<String, Object> result = new HashMap();
-		for(CustomOption option : selected.getCustomOptions()) {
-			if(optionbox.get(option) != null) {
+		for (CustomOption option : selected.getCustomOptions()) {
+			if (optionbox.get(option) != null) {
 				int index = optionbox.get(option).getSelectionModel().getSelectedIndex();
-				result.put(option.name, index + option.option);				
+				result.put(option.name, index + option.option);
 			}
 		}
-		for(CustomFile file : selected.getCustomFiles()) {
-			if(filebox.get(file) != null) {
-				result.put(file.name, filebox.get(file).getValue());							
+		for (CustomFile file : selected.getCustomFiles()) {
+			if (filebox.get(file) != null) {
+				result.put(file.name, filebox.get(file).getValue());
 			}
 		}
 		return result;
 	}
-	
+
 	public LR2SkinHeader[] getSkinHeader(int mode) {
 		List<LR2SkinHeader> result = new ArrayList();
-		for(LR2SkinHeader header : lr2skinheader) {
-			if(header.getMode() == mode) {
+		for (LR2SkinHeader header : lr2skinheader) {
+			if (header.getMode() == mode) {
 				result.add(header);
 			}
 		}

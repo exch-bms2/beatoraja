@@ -9,7 +9,6 @@ import bms.player.beatoraja.play.PlaySkin;
 import bms.player.beatoraja.select.MusicSelectSkin;
 import bms.player.beatoraja.select.MusicSelectSkin.SkinBarObject;
 import bms.player.beatoraja.select.MusicSelector;
-import bms.player.beatoraja.skin.LR2SkinLoader.CommandWord;
 
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
@@ -17,7 +16,7 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 
-public class LR2SelectSkinLoader extends LR2SkinLoader {
+public class LR2SelectSkinLoader extends LR2SkinCSVLoader {
 
 	private MusicSelector selector;
 	

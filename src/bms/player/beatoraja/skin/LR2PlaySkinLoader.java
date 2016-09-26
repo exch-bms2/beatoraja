@@ -4,23 +4,16 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
-import java.util.logging.Logger;
-
-import bms.player.beatoraja.MainState;
-import bms.player.beatoraja.decide.MusicDecide;
 import bms.player.beatoraja.play.BMSPlayer;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.utils.GdxRuntimeException;
 
 import bms.player.beatoraja.play.PlaySkin;
 
-public class LR2PlaySkinLoader extends LR2SkinLoader {
+public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
+	
+	// TODO bug:OADXのノーツが多重表示される(NOTEのSkinImage化が必要)
 
 	private PlaySkin.SkinBGAObject bga;
 
@@ -37,7 +30,7 @@ public class LR2PlaySkinLoader extends LR2SkinLoader {
 	private Sprite[] mine = new Sprite[8];
 	private Rectangle[] laner = new Rectangle[8];
 	private Sprite[] gauge = new Sprite[4];
-	private Rectangle gauger = new Rectangle();
+	private Rectangle gauger = null;
 	private SkinImage line;
 	private List<SkinImage> lines = new ArrayList<SkinImage>();
 	private SkinImage li;
@@ -166,7 +159,7 @@ public class LR2PlaySkinLoader extends LR2SkinLoader {
 				} else {
 					lane -= 1;
 				}
-				if (note[lane] == null) {
+				if (lane < note.length && note[lane] == null) {
 					note[lane] = new Sprite(imagelist.get(Integer.parseInt(str[2])), Integer.parseInt(str[3]),
 							Integer.parseInt(str[4]), Integer.parseInt(str[5]), Integer.parseInt(str[6]));
 				}
@@ -189,7 +182,7 @@ public class LR2PlaySkinLoader extends LR2SkinLoader {
 				} else {
 					lane -= 1;
 				}
-				if (lnend[lane] == null) {
+				if (lane < lnend.length && lnend[lane] == null) {
 					lnend[lane] = new Sprite(imagelist.get(Integer.parseInt(str[2])), Integer.parseInt(str[3]),
 							Integer.parseInt(str[4]), Integer.parseInt(str[5]), Integer.parseInt(str[6]));
 				}
@@ -208,7 +201,7 @@ public class LR2PlaySkinLoader extends LR2SkinLoader {
 				} else {
 					lane -= 1;
 				}
-				if (lnstart[lane] == null) {
+				if (lane < lnstart.length && lnstart[lane] == null) {
 					lnstart[lane] = new Sprite(imagelist.get(Integer.parseInt(str[2])), Integer.parseInt(str[3]),
 							Integer.parseInt(str[4]), Integer.parseInt(str[5]), Integer.parseInt(str[6]));
 				}
@@ -228,7 +221,7 @@ public class LR2PlaySkinLoader extends LR2SkinLoader {
 				} else {
 					lane -= 1;
 				}
-				if (lnbody[lane] == null) {
+				if (lane < lnbody.length && lnbody[lane] == null) {
 					lnbody[lane] = new Sprite(imagelist.get(Integer.parseInt(str[2])), Integer.parseInt(str[3]),
 							Integer.parseInt(str[4]), Integer.parseInt(str[5]), 1);
 					lnbodya[lane] = new Sprite(imagelist.get(Integer.parseInt(str[2])), Integer.parseInt(str[3]),
@@ -250,7 +243,7 @@ public class LR2PlaySkinLoader extends LR2SkinLoader {
 				} else {
 					lane -= 1;
 				}
-				if (mine[lane] == null) {
+				if (lane < mine.length && mine[lane] == null) {
 					mine[lane] = new Sprite(imagelist.get(Integer.parseInt(str[2])), Integer.parseInt(str[3]),
 							Integer.parseInt(str[4]), Integer.parseInt(str[5]), Integer.parseInt(str[6]));
 				}
@@ -631,37 +624,42 @@ public class LR2PlaySkinLoader extends LR2SkinLoader {
 		addCommandWord(new CommandWord("SRC_GROOVEGAUGE") {
 			@Override
 			public void execute(String[] str) {
-				int playside = Integer.parseInt(str[1]);
-				final int divx = Integer.parseInt(str[7]);
-				final int divy = Integer.parseInt(str[8]);
-				gauge = new Sprite[divx * divy * 2];
-				final int w = Integer.parseInt(str[5]);
-				final int h = Integer.parseInt(str[6]);
-				for (int x = 0; x < divx; x++) {
-					for (int y = 0; y < divy; y++) {
-						gauge[y * divx + x] = new Sprite(imagelist.get(Integer.parseInt(str[2])),
-								Integer.parseInt(str[3]) + w * x / divx, Integer.parseInt(str[4]) + h * y / divy, w
-										/ divx, h / divy);
-						gauge[y * divx + x + divx * divy] = new Sprite(imagelist.get(Integer.parseInt(str[2])),
-								Integer.parseInt(str[3]) + w * x / divx, Integer.parseInt(str[4]) + h * y / divy, w
-										/ divx, h / divy);
+				int[] values = parseInt(str);
+				if (values[2] < imagelist.size()) {
+					int playside = values[1];
+					final int divx = values[7];
+					final int divy = values[8];
+					gauge = new Sprite[divx * divy * 2];
+					final int w = values[5];
+					final int h = values[6];
+					for (int x = 0; x < divx; x++) {
+						for (int y = 0; y < divy; y++) {
+							gauge[y * divx + x] = new Sprite(imagelist.get(values[2]), values[3] + w * x / divx,
+									values[4] + h * y / divy, w / divx, h / divy);
+							gauge[y * divx + x + divx * divy] = new Sprite(imagelist.get(values[2]), values[3] + w * x
+									/ divx, values[4] + h * y / divy, w / divx, h / divy);
+						}
+					}
+					groovex = values[11];
+					groovey = values[12];
+					if (gauger == null) {
+						gauger = new Rectangle();
+						skin.add(new PlaySkin.SkinGaugeObject(skin));
 					}
 				}
-				groovex = Integer.parseInt(str[11]);
-				groovey = Integer.parseInt(str[12]);
 			}
 		});
 		addCommandWord(new CommandWord("DST_GROOVEGAUGE") {
 			@Override
 			public void execute(String[] str) {
-				if (gauger.x == 0) {
-					skin.add(new PlaySkin.SkinGaugeObject(skin));
+				if (gauger != null) {
+					gauger.width = (Math.abs(groovex) >= 1) ? (groovex * 50 * dstw / srcw)
+							: (Integer.parseInt(str[5]) * dstw / srcw);
+					gauger.height = (Math.abs(groovey) >= 1) ? (groovey * 50 * dsth / srch)
+							: (Integer.parseInt(str[6]) * dsth / srch);
+					gauger.x = Integer.parseInt(str[3]) * dstw / srcw - (groovex < 0 ? groovex * dstw / srcw : 0);
+					gauger.y = dsth - Integer.parseInt(str[4]) * dsth / srch - gauger.height;
 				}
-				gauger.width = (groovex >= 1) ? (groovex * 50 * dstw / srcw) : (Integer.parseInt(str[5]) * dstw / srcw);
-				gauger.height = (groovey >= 1) ? (groovey * 50 * dsth / srch)
-						: (Integer.parseInt(str[6]) * dsth / srch);
-				gauger.x = Integer.parseInt(str[3]) * dstw / srcw;
-				gauger.y = dsth - Integer.parseInt(str[4]) * dsth / srch - gauger.height;
 			}
 		});
 
@@ -698,7 +696,9 @@ public class LR2PlaySkinLoader extends LR2SkinLoader {
 		skin.setLaneregion(laner);
 		skin.setGauge(gauge);
 		skin.setLine(lines.toArray(new SkinImage[lines.size()]));
-		skin.setGaugeRegion(gauger);
+		if(gauger != null) {
+			skin.setGaugeRegion(gauger);			
+		}
 
 		if (nowjudge2[0] != null) {
 			skin.setJudgeregion(new PlaySkin.JudgeRegion[] { new PlaySkin.JudgeRegion(nowjudge, nowcombo, shift),

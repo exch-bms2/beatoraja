@@ -10,9 +10,8 @@ import com.badlogic.gdx.math.Rectangle;
 
 import bms.player.beatoraja.result.MusicResultSkin;
 import bms.player.beatoraja.result.MusicResultSkin.SkinGaugeGraphObject;
-import bms.player.beatoraja.skin.LR2SkinLoader.CommandWord;
 
-public class LR2ResultSkinLoader extends LR2SkinLoader {
+public class LR2ResultSkinLoader extends LR2SkinCSVLoader {
 
 	private MusicResultSkin skin;
 	
