@@ -374,7 +374,7 @@ public class BMSPlayer extends MainState {
 				Rectangle srcr = MainController.RESOLUTION[header.getResolution()];
 				Rectangle dstr = MainController.RESOLUTION[resource.getConfig().getResolution()];
 				LR2PlaySkinLoader dloader = new LR2PlaySkinLoader(srcr.width, srcr.height, dstr.width, dstr.height);
-				skin = dloader.loadPlaySkin(new File(header.getInclude()), this, header, loader.getOption(),
+				skin = dloader.loadPlaySkin(Paths.get(sc.getPath()).toFile(), this, header, loader.getOption(),
 						sc.getProperty());
 			} catch (IOException e) {
 				// TODO Auto-generated catch block

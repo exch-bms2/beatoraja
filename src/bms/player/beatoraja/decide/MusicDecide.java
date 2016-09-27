@@ -66,7 +66,7 @@ public class MusicDecide extends MainState {
 					Rectangle srcr = MainController.RESOLUTION[header.getResolution()];
 					Rectangle dstr = MainController.RESOLUTION[resource.getConfig().getResolution()];
 					LR2DecideSkinLoader dloader = new LR2DecideSkinLoader(srcr.width, srcr.height, dstr.width, dstr.height);
-					setSkin(dloader.loadMusicDecideSkin(new File(header.getInclude()), this, header,
+					setSkin(dloader.loadMusicDecideSkin(Paths.get(sc.getPath()).toFile(), this, header,
 							loader.getOption(), sc.getProperty()));
 				} catch (IOException e) {
 					// TODO Auto-generated catch block

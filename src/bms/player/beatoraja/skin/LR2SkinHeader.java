@@ -29,8 +29,6 @@ public class LR2SkinHeader {
 	private CustomOption[] options = new CustomOption[0];
 	private CustomFile[] files = new CustomFile[0];
 	
-	private String include;
-	
 	private int resolution;
 
 	public int getMode() {
@@ -47,14 +45,6 @@ public class LR2SkinHeader {
 	
 	public void setName(String name) {
 		this.name = name;
-	}
-	
-	public String getInclude() {
-		return include;
-	}
-	
-	public void setInclude(String include) {
-		this.include = include;
 	}
 	
 	public CustomOption[] getCustomOptions() {

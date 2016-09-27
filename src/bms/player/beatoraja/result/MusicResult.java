@@ -110,7 +110,7 @@ public class MusicResult extends MainState {
 				Rectangle srcr = MainController.RESOLUTION[header.getResolution()];
 				Rectangle dstr = MainController.RESOLUTION[resource.getConfig().getResolution()];
 				LR2ResultSkinLoader dloader = new LR2ResultSkinLoader(srcr.width, srcr.height, dstr.width, dstr.height);
-				skin = dloader.loadResultSkin(new File(header.getInclude()), this, header,
+				skin = dloader.loadResultSkin(Paths.get(sc.getPath()).toFile(), this, header,
 						loader.getOption(), sc.getProperty());
 			} catch (IOException e) {
 				e.printStackTrace();

@@ -1,10 +1,9 @@
 package bms.player.beatoraja.skin;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import bms.player.beatoraja.play.BMSPlayer;
+
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
@@ -12,7 +11,7 @@ import com.badlogic.gdx.math.Rectangle;
 import bms.player.beatoraja.play.PlaySkin;
 
 public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
-	
+
 	// TODO bug:OADXのノーツが多重表示される(NOTEのSkinImage化が必要)
 
 	private PlaySkin.SkinBGAObject bga;
@@ -81,44 +80,19 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 		addCommandWord(new CommandWord("SRC_LINE") {
 			@Override
 			public void execute(String[] str) {
-				int gr = Integer.parseInt(str[2]);
-				if (gr < imagelist.size() && imagelist.get(gr) != null) {
-					try {
-						int[] values = parseInt(str);
-						int x = values[3];
-						int y = values[4];
-						int w = values[5];
-						if (w == -1) {
-							w = imagelist.get(gr).getWidth();
-						}
-						int h = values[6];
-						if (h == -1) {
-							h = imagelist.get(gr).getHeight();
-						}
-						int divx = values[7];
-						if (divx <= 0) {
-							divx = 1;
-						}
-						int divy = values[8];
-						if (divy <= 0) {
-							divy = 1;
-						}
-						TextureRegion[] images = new TextureRegion[divx * divy];
-						for (int i = 0; i < divx; i++) {
-							for (int j = 0; j < divy; j++) {
-								images[divx * j + i] = new TextureRegion(imagelist.get(gr), x + w / divx * i, y + h
-										/ divy * j, w / divx, h / divy);
-							}
-						}
+				try {
+					int[] values = parseInt(str);
+					TextureRegion[] images = getSourceImage(values);
+					if(images != null) {
 						li = new SkinImage(images, values[9]);
 						li.setTimer(values[10]);
 						li.setOffsety(BMSPlayer.OFFSET_LIFT);
 						lines.add(li);
 						// System.out.println("Object Added - " +
-						// (part.getTiming()));
-					} catch (NumberFormatException e) {
-						e.printStackTrace();
+						// (part.getTiming()));						
 					}
+				} catch (NumberFormatException e) {
+					e.printStackTrace();
 				}
 			}
 		});
@@ -149,6 +123,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 		addCommandWord(new CommandWord("SRC_NOTE") {
 			@Override
 			public void execute(String[] str) {
+				int[] values = parseInt(str);
 				int lane = Integer.parseInt(str[1]);
 				if (lane == 10) {
 					lane = 15;
@@ -160,8 +135,8 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 					lane -= 1;
 				}
 				if (lane < note.length && note[lane] == null) {
-					note[lane] = new Sprite(imagelist.get(Integer.parseInt(str[2])), Integer.parseInt(str[3]),
-							Integer.parseInt(str[4]), Integer.parseInt(str[5]), Integer.parseInt(str[6]));
+					TextureRegion[] images = getSourceImage(values);
+					note[lane] = new Sprite(images[0]);
 				}
 				if (lanerender == null) {
 					lanerender = new PlaySkin.SkinLaneObject(skin);
@@ -172,6 +147,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 		addCommandWord(new CommandWord("SRC_LN_END") {
 			@Override
 			public void execute(String[] str) {
+				int[] values = parseInt(str);
 				int lane = Integer.parseInt(str[1]);
 				if (lane == 10) {
 					lane = 15;
@@ -183,15 +159,16 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 					lane -= 1;
 				}
 				if (lane < lnend.length && lnend[lane] == null) {
-					lnend[lane] = new Sprite(imagelist.get(Integer.parseInt(str[2])), Integer.parseInt(str[3]),
-							Integer.parseInt(str[4]), Integer.parseInt(str[5]), Integer.parseInt(str[6]));
+					TextureRegion[] images = getSourceImage(values);
+					lnend[lane] = new Sprite(images[0]);
 				}
 			}
 		});
 		addCommandWord(new CommandWord("SRC_LN_START") {
 			@Override
 			public void execute(String[] str) {
-				int lane = Integer.parseInt(str[1]);
+				int[] values = parseInt(str);
+				int lane = values[1];
 				if (lane == 10) {
 					lane = 15;
 				} else if (lane >= 10) {
@@ -202,8 +179,8 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 					lane -= 1;
 				}
 				if (lane < lnstart.length && lnstart[lane] == null) {
-					lnstart[lane] = new Sprite(imagelist.get(Integer.parseInt(str[2])), Integer.parseInt(str[3]),
-							Integer.parseInt(str[4]), Integer.parseInt(str[5]), Integer.parseInt(str[6]));
+					TextureRegion[] images = getSourceImage(values);
+					lnstart[lane] = new Sprite(images[0]);
 				}
 			}
 		});
@@ -211,6 +188,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 		addCommandWord(new CommandWord("SRC_LN_BODY") {
 			@Override
 			public void execute(String[] str) {
+				int[] values = parseInt(str);
 				int lane = Integer.parseInt(str[1]);
 				if (lane == 10) {
 					lane = 15;
@@ -222,10 +200,9 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 					lane -= 1;
 				}
 				if (lane < lnbody.length && lnbody[lane] == null) {
-					lnbody[lane] = new Sprite(imagelist.get(Integer.parseInt(str[2])), Integer.parseInt(str[3]),
-							Integer.parseInt(str[4]), Integer.parseInt(str[5]), 1);
-					lnbodya[lane] = new Sprite(imagelist.get(Integer.parseInt(str[2])), Integer.parseInt(str[3]),
-							Integer.parseInt(str[4]) + Integer.parseInt(str[6]) - 1, Integer.parseInt(str[5]), 1);
+					TextureRegion[] images = getSourceImage(values);
+					lnbody[lane] = new Sprite(images[0]);
+					lnbodya[lane] = new Sprite(images[images.length - 1]);
 				}
 			}
 		});
@@ -233,6 +210,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 		addCommandWord(new CommandWord("SRC_MINE") {
 			@Override
 			public void execute(String[] str) {
+				int[] values = parseInt(str);
 				int lane = Integer.parseInt(str[1]);
 				if (lane == 10) {
 					lane = 15;
@@ -244,8 +222,8 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 					lane -= 1;
 				}
 				if (lane < mine.length && mine[lane] == null) {
-					mine[lane] = new Sprite(imagelist.get(Integer.parseInt(str[2])), Integer.parseInt(str[3]),
-							Integer.parseInt(str[4]), Integer.parseInt(str[5]), Integer.parseInt(str[6]));
+					TextureRegion[] images = getSourceImage(values);
+					mine[lane] = new Sprite(images[0]);
 				}
 			}
 		});
@@ -253,6 +231,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 		addCommandWord(new CommandWord("DST_NOTE") {
 			@Override
 			public void execute(String[] str) {
+				int[] values = parseInt(str);
 				int lane = Integer.parseInt(str[1]);
 				if (lane == 10) {
 					lane = 15;
@@ -264,10 +243,10 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 					lane -= 1;
 				}
 				if (laner[lane] == null) {
-					laner[lane] = new Rectangle(Integer.parseInt(str[3]) * dstw / srcw, dsth
-							- (Integer.parseInt(str[4]) + Integer.parseInt(str[6])) * dsth / srch,
-							Integer.parseInt(str[5]) * dstw / srcw,
-							(Integer.parseInt(str[4]) + Integer.parseInt(str[6])) * dsth / srch);
+					laner[lane] = new Rectangle(values[3] * dstw / srcw, dsth
+							- (values[4] + values[6]) * dsth / srch,
+							values[5] * dstw / srcw,
+							(values[4] + values[6]) * dsth / srch);
 				}
 				if (laner[lane].x < playerr.x) {
 					playerr.width += playerr.x - laner[lane].x;
@@ -286,43 +265,18 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 		addCommandWord(new CommandWord("SRC_NOWJUDGE_1P") {
 			@Override
 			public void execute(String[] str) {
-				int gr = Integer.parseInt(str[2]);
-				if (gr < imagelist.size() && imagelist.get(gr) != null) {
-					try {
-						int[] values = parseInt(str);
-						int x = values[3];
-						int y = values[4];
-						int w = values[5];
-						if (w == -1) {
-							w = imagelist.get(gr).getWidth();
-						}
-						int h = values[6];
-						if (h == -1) {
-							h = imagelist.get(gr).getHeight();
-						}
-						int divx = values[7];
-						if (divx <= 0) {
-							divx = 1;
-						}
-						int divy = values[8];
-						if (divy <= 0) {
-							divy = 1;
-						}
-						TextureRegion[] images = new TextureRegion[divx * divy];
-						for (int i = 0; i < divx; i++) {
-							for (int j = 0; j < divy; j++) {
-								images[divx * j + i] = new TextureRegion(imagelist.get(gr), x + w / divx * i, y + h
-										/ divy * j, w / divx, h / divy);
-							}
-						}
+				try {
+					int[] values = parseInt(str);
+					TextureRegion[] images = getSourceImage(values);
+					if (images != null) {
 						nowjudge[5 - values[1]] = new SkinImage(images, values[9]);
 						nowjudge[5 - values[1]].setTimer(values[10]);
 						shift = (values[11] != 1);
 						// System.out.println("Nowjudge Added - " + (5 -
 						// values[1]));
-					} catch (NumberFormatException e) {
-						e.printStackTrace();
 					}
+				} catch (NumberFormatException e) {
+					e.printStackTrace();
 				}
 			}
 		});
@@ -356,43 +310,18 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 		addCommandWord(new CommandWord("SRC_NOWJUDGE_2P") {
 			@Override
 			public void execute(String[] str) {
-				int gr = Integer.parseInt(str[2]);
-				if (gr < imagelist.size() && imagelist.get(gr) != null) {
-					try {
-						int[] values = parseInt(str);
-						int x = values[3];
-						int y = values[4];
-						int w = values[5];
-						if (w == -1) {
-							w = imagelist.get(gr).getWidth();
-						}
-						int h = values[6];
-						if (h == -1) {
-							h = imagelist.get(gr).getHeight();
-						}
-						int divx = values[7];
-						if (divx <= 0) {
-							divx = 1;
-						}
-						int divy = values[8];
-						if (divy <= 0) {
-							divy = 1;
-						}
-						TextureRegion[] images = new TextureRegion[divx * divy];
-						for (int i = 0; i < divx; i++) {
-							for (int j = 0; j < divy; j++) {
-								images[divx * j + i] = new TextureRegion(imagelist.get(gr), x + w / divx * i, y + h
-										/ divy * j, w / divx, h / divy);
-							}
-						}
+				try {
+					int[] values = parseInt(str);
+					TextureRegion[] images = getSourceImage(values);
+					if (images != null) {
 						nowjudge2[5 - values[1]] = new SkinImage(images, values[9]);
 						nowjudge2[5 - values[1]].setTimer(values[10]);
 						shift2 = (values[11] != 1);
 						// System.out.println("Nowjudge Added - " + (5 -
 						// values[1]));
-					} catch (NumberFormatException e) {
-						e.printStackTrace();
 					}
+				} catch (NumberFormatException e) {
+					e.printStackTrace();
 				}
 			}
 		});
@@ -426,33 +355,22 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 		addCommandWord(new CommandWord("SRC_NOWCOMBO_1P") {
 			@Override
 			public void execute(String[] str) {
-				int gr = Integer.parseInt(str[2]);
-				if (gr < imagelist.size() && imagelist.get(gr) != null) {
-					try {
-						int[] values = parseInt(str);
-						int x = values[3];
-						int y = values[4];
-						int w = values[5];
-						if (w == -1) {
-							w = imagelist.get(gr).getWidth();
-						}
-						int h = values[6];
-						if (h == -1) {
-							h = imagelist.get(gr).getHeight();
-						}
-						int divx = values[7];
-						if (divx <= 0) {
-							divx = 1;
-						}
-						int divy = values[8];
-						if (divy <= 0) {
-							divy = 1;
-						}
+				try {
+					int[] values = parseInt(str);
+					int divx = values[7];
+					if (divx <= 0) {
+						divx = 1;
+					}
+					int divy = values[8];
+					if (divy <= 0) {
+						divy = 1;
+					}
+					TextureRegion[] simages = getSourceImage(values);
+					if (simages != null) {
 						TextureRegion[][] images = new TextureRegion[divy][divx];
 						for (int i = 0; i < divx; i++) {
 							for (int j = 0; j < divy; j++) {
-								images[j][i] = new TextureRegion(imagelist.get(gr), x + w / divx * i, y + h / divy * j,
-										w / divx, h / divy);
+								images[j][i] = simages[j * divx + i];
 							}
 						}
 
@@ -462,9 +380,9 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 						nowcombo[5 - values[1]].setAlign(values[12]);
 						// System.out.println("Number Added - " +
 						// (num.getId()));
-					} catch (NumberFormatException e) {
-						e.printStackTrace();
 					}
+				} catch (NumberFormatException e) {
+					e.printStackTrace();
 				}
 			}
 		});
@@ -489,33 +407,22 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 		addCommandWord(new CommandWord("SRC_NOWCOMBO_2P") {
 			@Override
 			public void execute(String[] str) {
-				int gr = Integer.parseInt(str[2]);
-				if (gr < imagelist.size() && imagelist.get(gr) != null) {
-					try {
-						int[] values = parseInt(str);
-						int x = values[3];
-						int y = values[4];
-						int w = values[5];
-						if (w == -1) {
-							w = imagelist.get(gr).getWidth();
-						}
-						int h = values[6];
-						if (h == -1) {
-							h = imagelist.get(gr).getHeight();
-						}
-						int divx = values[7];
-						if (divx <= 0) {
-							divx = 1;
-						}
-						int divy = values[8];
-						if (divy <= 0) {
-							divy = 1;
-						}
+				try {
+					int[] values = parseInt(str);
+					int divx = values[7];
+					if (divx <= 0) {
+						divx = 1;
+					}
+					int divy = values[8];
+					if (divy <= 0) {
+						divy = 1;
+					}
+					TextureRegion[] simages = getSourceImage(values);
+					if (simages != null) {
 						TextureRegion[][] images = new TextureRegion[divy][divx];
 						for (int i = 0; i < divx; i++) {
 							for (int j = 0; j < divy; j++) {
-								images[j][i] = new TextureRegion(imagelist.get(gr), x + w / divx * i, y + h / divy * j,
-										w / divx, h / divy);
+								images[j][i] = simages[j * divx + i];
 							}
 						}
 
@@ -525,9 +432,9 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 						nowcombo2[5 - values[1]].setAlign(values[12]);
 						// System.out.println("Number Added - " +
 						// (num.getId()));
-					} catch (NumberFormatException e) {
-						e.printStackTrace();
 					}
+				} catch (NumberFormatException e) {
+					e.printStackTrace();
 				}
 			}
 		});
@@ -552,43 +459,18 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 		addCommandWord(new CommandWord("SRC_JUDGELINE") {
 			@Override
 			public void execute(String[] str) {
-				int gr = Integer.parseInt(str[2]);
-				if (gr < imagelist.size() && imagelist.get(gr) != null) {
-					try {
-						int[] values = parseInt(str);
-						int x = values[3];
-						int y = values[4];
-						int w = values[5];
-						if (w == -1) {
-							w = imagelist.get(gr).getWidth();
-						}
-						int h = values[6];
-						if (h == -1) {
-							h = imagelist.get(gr).getHeight();
-						}
-						int divx = values[7];
-						if (divx <= 0) {
-							divx = 1;
-						}
-						int divy = values[8];
-						if (divy <= 0) {
-							divy = 1;
-						}
-						TextureRegion[] images = new TextureRegion[divx * divy];
-						for (int i = 0; i < divx; i++) {
-							for (int j = 0; j < divy; j++) {
-								images[divx * j + i] = new TextureRegion(imagelist.get(gr), x + w / divx * i, y + h
-										/ divy * j, w / divx, h / divy);
-							}
-						}
+				try {
+					int[] values = parseInt(str);
+					TextureRegion[] images = getSourceImage(values);
+					if (images != null) {
 						line = new SkinImage(images, values[9]);
 						line.setTimer(values[10]);
 						line.setOffsety(BMSPlayer.OFFSET_LIFT);
 						// System.out.println("Object Added - " +
 						// (part.getTiming()));
-					} catch (NumberFormatException e) {
-						e.printStackTrace();
 					}
+				} catch (NumberFormatException e) {
+					e.printStackTrace();
 				}
 				if (line != null) {
 					skin.add(line);
@@ -653,10 +535,10 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 			@Override
 			public void execute(String[] str) {
 				if (gauger != null) {
-					gauger.width = (Math.abs(groovex) >= 1) ? (groovex * 50 * dstw / srcw)
-							: (Integer.parseInt(str[5]) * dstw / srcw);
-					gauger.height = (Math.abs(groovey) >= 1) ? (groovey * 50 * dsth / srch)
-							: (Integer.parseInt(str[6]) * dsth / srch);
+					gauger.width = (Math.abs(groovex) >= 1) ? (groovex * 50 * dstw / srcw) : (Integer.parseInt(str[5])
+							* dstw / srcw);
+					gauger.height = (Math.abs(groovey) >= 1) ? (groovey * 50 * dsth / srch) : (Integer.parseInt(str[6])
+							* dsth / srch);
 					gauger.x = Integer.parseInt(str[3]) * dstw / srcw - (groovex < 0 ? groovex * dstw / srcw : 0);
 					gauger.y = dsth - Integer.parseInt(str[4]) * dsth / srch - gauger.height;
 				}
@@ -696,8 +578,8 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 		skin.setLaneregion(laner);
 		skin.setGauge(gauge);
 		skin.setLine(lines.toArray(new SkinImage[lines.size()]));
-		if(gauger != null) {
-			skin.setGaugeRegion(gauger);			
+		if (gauger != null) {
+			skin.setGaugeRegion(gauger);
 		}
 
 		if (nowjudge2[0] != null) {

@@ -243,7 +243,7 @@ public class MusicSelector extends MainState {
 					Rectangle srcr = MainController.RESOLUTION[header.getResolution()];
 					Rectangle dstr = MainController.RESOLUTION[config.getResolution()];
 					LR2SelectSkinLoader dloader = new LR2SelectSkinLoader(srcr.width, srcr.height, dstr.width, dstr.height);
-					skin = dloader.loadSelectSkin(new File(header.getInclude()), this, header,
+					skin = dloader.loadSelectSkin(Paths.get(sc.getPath()).toFile(), this, header,
 							loader.getOption(), sc.getProperty());
 				} catch (IOException e) {
 					// TODO Auto-generated catch block

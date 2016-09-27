@@ -1,15 +1,9 @@
 package bms.player.beatoraja.skin;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import bms.player.beatoraja.MainState;
-import bms.player.beatoraja.play.PlaySkin;
-import bms.player.beatoraja.result.MusicResultSkin;
 import bms.player.beatoraja.skin.LR2SkinHeader.CustomFile;
 
 import com.badlogic.gdx.Gdx;
@@ -42,9 +36,9 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 	 * 描画サイズのheight
 	 */
 	public final float dsth;
-	
+
 	private Skin skin;
-	
+
 	private MainState state;
 
 	public LR2SkinCSVLoader(final float srcw, final float srch, final float dstw, final float dsth) {
@@ -52,7 +46,7 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 		this.srch = srch;
 		this.dstw = dstw;
 		this.dsth = dsth;
-		
+
 		addCommandWord(new CommandWord("STARTINPUT") {
 			@Override
 			public void execute(String[] str) {
@@ -96,18 +90,18 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 					}
 				}
 				if (imagefile.exists()) {
-					try(BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(imagefile),
+					try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(imagefile),
 							"MS932"));) {
 						while ((line = br.readLine()) != null) {
 							processLine(line, state);
-						}						
-					} catch(IOException e) {
+						}
+					} catch (IOException e) {
 						e.printStackTrace();
-					}					
+					}
 				}
 			}
 		});
-		
+
 		addCommandWord(new CommandWord("IMAGE") {
 			@Override
 			public void execute(String[] str) {
@@ -157,37 +151,15 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 						part = new SkinImage(gr);
 						// System.out.println("add reference image : "
 						// + gr);
-					} else if (gr < imagelist.size() && imagelist.get(gr) != null) {
+					} else {
 						int[] values = parseInt(str);
-						int x = values[3];
-						int y = values[4];
-						int w = values[5];
-						if (w == -1) {
-							w = imagelist.get(gr).getWidth();
+						TextureRegion[] images = getSourceImage(values);
+						if(images != null) {
+							part = new SkinImage(images, values[9]);
+							part.setTimer(values[10]);
+							// System.out.println("Object Added - " +
+							// (part.getTiming()));							
 						}
-						int h = values[6];
-						if (h == -1) {
-							h = imagelist.get(gr).getHeight();
-						}
-						int divx = values[7];
-						if (divx <= 0) {
-							divx = 1;
-						}
-						int divy = values[8];
-						if (divy <= 0) {
-							divy = 1;
-						}
-						TextureRegion[] images = new TextureRegion[divx * divy];
-						for (int i = 0; i < divx; i++) {
-							for (int j = 0; j < divy; j++) {
-								images[divx * j + i] = new TextureRegion(imagelist.get(gr), x + w / divx * i, y + h
-										/ divy * j, w / divx, h / divy);
-							}
-						}
-						part = new SkinImage(images, values[9]);
-						part.setTimer(values[10]);
-						// System.out.println("Object Added - " +
-						// (part.getTiming()));
 					}
 					if (part != null) {
 						skin.add(part);
@@ -199,7 +171,7 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 				}
 			}
 		});
-		
+
 		addCommandWord(new CommandWord("DST_IMAGE") {
 			@Override
 			public void execute(String[] str) {
@@ -214,50 +186,25 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 							values[4] += values[6];
 							values[6] = -values[6];
 						}
-						part.setDestination(values[2], values[3] * dstw / srcw, dsth - (values[4] + values[6])
-								* dsth / srch, values[5] * dstw / srcw, values[6] * dsth / srch, values[7],
-								values[8], values[9], values[10], values[11], values[12], values[13], values[14],
-								values[15], values[16], values[17], values[18], values[19], values[20]);
+						part.setDestination(values[2], values[3] * dstw / srcw, dsth - (values[4] + values[6]) * dsth
+								/ srch, values[5] * dstw / srcw, values[6] * dsth / srch, values[7], values[8],
+								values[9], values[10], values[11], values[12], values[13], values[14], values[15],
+								values[16], values[17], values[18], values[19], values[20]);
 					} catch (NumberFormatException e) {
 						e.printStackTrace();
 					}
 				}
 			}
 		});
-		
+
 		addCommandWord(new CommandWord("SRC_NUMBER") {
 			@Override
 			public void execute(String[] str) {
 				num = null;
-				int gr = Integer.parseInt(str[2]);
-				if (gr < imagelist.size() && imagelist.get(gr) != null) {
-					try {
-						int[] values = parseInt(str);
-						int x = values[3];
-						int y = values[4];
-						int w = values[5];
-						if (w == -1) {
-							w = imagelist.get(gr).getWidth();
-						}
-						int h = values[6];
-						if (h == -1) {
-							h = imagelist.get(gr).getHeight();
-						}
-						int divx = values[7];
-						if (divx <= 0) {
-							divx = 1;
-						}
-						int divy = values[8];
-						if (divy <= 0) {
-							divy = 1;
-						}
-						TextureRegion[] images = new TextureRegion[divy * divx];
-						for (int i = 0; i < divx; i++) {
-							for (int j = 0; j < divy; j++) {
-								images[j * divx + i] = new TextureRegion(imagelist.get(gr), x + w / divx * i, y + h
-										/ divy * j, w / divx, h / divy);
-							}
-						}
+				try {
+					int[] values = parseInt(str);
+					TextureRegion[] images = getSourceImage(values);
+					if(images != null) {
 						if (images.length >= 24) {
 							TextureRegion[] pn = new TextureRegion[12];
 							TextureRegion[] mn = new TextureRegion[12];
@@ -268,17 +215,16 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 							num = new SkinNumber(pn, mn, values[9], values[13] + 1, 0, values[11]);
 							num.setAlign(values[12]);
 						} else {
-							num = new SkinNumber(images, values[9], values[13], images.length > 10 ? 2 : 0,
-									values[11]);
+							num = new SkinNumber(images, values[9], values[13], images.length > 10 ? 2 : 0, values[11]);
 							num.setAlign(values[12]);
 						}
 						num.setTimer(values[10]);
 						skin.add(num);
 						// System.out.println("Number Added - " +
-						// (num.getId()));
-					} catch (NumberFormatException e) {
-						e.printStackTrace();
+						// (num.getId()));						
 					}
+				} catch (NumberFormatException e) {
+					e.printStackTrace();
 				}
 			}
 		});
@@ -288,10 +234,10 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 				if (num != null) {
 					try {
 						int[] values = parseInt(str);
-						num.setDestination(values[2], values[3] * dstw / srcw, dsth - (values[4] + values[6])
-								* dsth / srch, values[5] * dstw / srcw, values[6] * dsth / srch, values[7],
-								values[8], values[9], values[10], values[11], values[12], values[13], values[14],
-								values[15], values[16], values[17], values[18], values[19], values[20]);
+						num.setDestination(values[2], values[3] * dstw / srcw, dsth - (values[4] + values[6]) * dsth
+								/ srch, values[5] * dstw / srcw, values[6] * dsth / srch, values[7], values[8],
+								values[9], values[10], values[11], values[12], values[13], values[14], values[15],
+								values[16], values[17], values[18], values[19], values[20]);
 					} catch (NumberFormatException e) {
 						e.printStackTrace();
 					}
@@ -340,35 +286,10 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 			@Override
 			public void execute(String[] str) {
 				slider = null;
-				int gr = Integer.parseInt(str[2]);
-				if (gr < imagelist.size() && imagelist.get(gr) != null) {
-					try {
-						int[] values = parseInt(str);
-						int x = values[3];
-						int y = values[4];
-						int w = values[5];
-						if (w == -1) {
-							w = imagelist.get(gr).getWidth();
-						}
-						int h = values[6];
-						if (h == -1) {
-							h = imagelist.get(gr).getHeight();
-						}
-						int divx = values[7];
-						if (divx <= 0) {
-							divx = 1;
-						}
-						int divy = values[8];
-						if (divy <= 0) {
-							divy = 1;
-						}
-						TextureRegion[] images = new TextureRegion[divx * divy];
-						for (int i = 0; i < divx; i++) {
-							for (int j = 0; j < divy; j++) {
-								images[divx * j + i] = new TextureRegion(imagelist.get(gr), x + w / divx * i, y + h
-										/ divy * j, w / divx, h / divy);
-							}
-						}
+				try {
+					int[] values = parseInt(str);
+					TextureRegion[] images = getSourceImage(values);
+					if (images != null) {
 						slider = new SkinSlider(images, values[9], values[11], (int) (values[12] * (values[11] == 1
 								|| values[11] == 3 ? (dstw / srcw) : (dsth / srch))), values[13]);
 						slider.setTimer(values[10]);
@@ -376,9 +297,9 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 						skin.add(slider);
 						// System.out.println("Object Added - " +
 						// (part.getTiming()));
-					} catch (NumberFormatException e) {
-						e.printStackTrace();
 					}
+				} catch (NumberFormatException e) {
+					e.printStackTrace();
 				}
 			}
 		});
@@ -388,10 +309,10 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 				if (slider != null) {
 					try {
 						int[] values = parseInt(str);
-						slider.setDestination(values[2], values[3] * dstw / srcw, dsth - (values[4] + values[6])
-								* dsth / srch, values[5] * dstw / srcw, values[6] * dsth / srch, values[7],
-								values[8], values[9], values[10], values[11], values[12], values[13], values[14],
-								values[15], values[16], values[17], values[18], values[19], values[20]);
+						slider.setDestination(values[2], values[3] * dstw / srcw, dsth - (values[4] + values[6]) * dsth
+								/ srch, values[5] * dstw / srcw, values[6] * dsth / srch, values[7], values[8],
+								values[9], values[10], values[11], values[12], values[13], values[14], values[15],
+								values[16], values[17], values[18], values[19], values[20]);
 					} catch (NumberFormatException e) {
 						e.printStackTrace();
 					}
@@ -411,38 +332,16 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 						bar.setTimer(values[10]);
 						bar.setReferenceID(values[11] + 1000);
 						bar.setDirection(values[12]);
-					} else if (gr < imagelist.size() && imagelist.get(gr) != null) {
-						int x = values[3];
-						int y = values[4];
-						int w = values[5];
-						if (w == -1) {
-							w = imagelist.get(gr).getWidth();
+					} else {
+						TextureRegion[] images = getSourceImage(values);
+						if (images != null) {
+							bar = new SkinGraph(images, values[9]);
+							bar.setTimer(values[10]);
+							bar.setReferenceID(values[11] + 1000);
+							bar.setDirection(values[12]);
+							// System.out.println("Object Added - " +
+							// (part.getTiming()));
 						}
-						int h = values[6];
-						if (h == -1) {
-							h = imagelist.get(gr).getHeight();
-						}
-						int divx = values[7];
-						if (divx <= 0) {
-							divx = 1;
-						}
-						int divy = values[8];
-						if (divy <= 0) {
-							divy = 1;
-						}
-						TextureRegion[] images = new TextureRegion[divx * divy];
-						for (int i = 0; i < divx; i++) {
-							for (int j = 0; j < divy; j++) {
-								images[divx * j + i] = new TextureRegion(imagelist.get(gr), x + w / divx * i, y + h
-										/ divy * j, w / divx, h / divy);
-							}
-						}
-						bar = new SkinGraph(images, values[9]);
-						bar.setTimer(values[10]);
-						bar.setReferenceID(values[11] + 1000);
-						bar.setDirection(values[12]);
-						// System.out.println("Object Added - " +
-						// (part.getTiming()));
 					}
 				} catch (NumberFormatException e) {
 					e.printStackTrace();
@@ -462,10 +361,10 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 							values[4] += values[6];
 							values[6] = -values[6];
 						}
-						bar.setDestination(values[2], values[3] * dstw / srcw, dsth - (values[4] + values[6])
-								* dsth / srch, values[5] * dstw / srcw, values[6] * dsth / srch, values[7],
-								values[8], values[9], values[10], values[11], values[12], values[13], values[14],
-								values[15], values[16], values[17], values[18], values[19], values[20]);
+						bar.setDestination(values[2], values[3] * dstw / srcw, dsth - (values[4] + values[6]) * dsth
+								/ srch, values[5] * dstw / srcw, values[6] * dsth / srch, values[7], values[8],
+								values[9], values[10], values[11], values[12], values[13], values[14], values[15],
+								values[16], values[17], values[18], values[19], values[20]);
 					} catch (NumberFormatException e) {
 						e.printStackTrace();
 					}
@@ -501,8 +400,8 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 						TextureRegion[][] images = new TextureRegion[divx * divy][];
 						for (int i = 0; i < divx; i++) {
 							for (int j = 0; j < divy; j++) {
-								images[divx * j + i] = new TextureRegion[] { new TextureRegion(imagelist.get(gr), x
-										+ w / divx * i, y + h / divy * j, w / divx, h / divy) };
+								images[divx * j + i] = new TextureRegion[] { new TextureRegion(imagelist.get(gr), x + w
+										/ divx * i, y + h / divy * j, w / divx, h / divy) };
 							}
 						}
 						button = new SkinImage(images, values[9]);
@@ -523,10 +422,10 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 				if (button != null) {
 					try {
 						int[] values = parseInt(str);
-						button.setDestination(values[2], values[3] * dstw / srcw, dsth - (values[4] + values[6])
-								* dsth / srch, values[5] * dstw / srcw, values[6] * dsth / srch, values[7],
-								values[8], values[9], values[10], values[11], values[12], values[13], values[14],
-								values[15], values[16], values[17], values[18], values[19], values[20]);
+						button.setDestination(values[2], values[3] * dstw / srcw, dsth - (values[4] + values[6]) * dsth
+								/ srch, values[5] * dstw / srcw, values[6] * dsth / srch, values[7], values[8],
+								values[9], values[10], values[11], values[12], values[13], values[14], values[15],
+								values[16], values[17], values[18], values[19], values[20]);
 					} catch (NumberFormatException e) {
 						e.printStackTrace();
 					}
@@ -543,13 +442,13 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 	protected void loadSkin(Skin skin, File f, MainState state, int[] option) throws IOException {
 		this.loadSkin0(skin, f, state, option, new HashMap());
 	}
-	
+
 	private Map<String, String> filemap = new HashMap();
-	
+
 	protected void loadSkin(Skin skin, File f, MainState state, LR2SkinHeader header, int[] option,
 			Map<String, Object> property) throws IOException {
 		this.skin = skin;
-		this.state =state;
+		this.state = state;
 		for (String key : property.keySet()) {
 			if (property.get(key) != null) {
 				if (property.get(key) instanceof Integer) {
@@ -583,9 +482,6 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 	SkinText text = null;
 	String line = null;
 
-	boolean skip = false;
-	boolean ifs = false;
-
 	protected void loadSkin0(Skin skin, File f, MainState state, int[] option, Map<String, String> filemap)
 			throws IOException {
 		for (int i : option) {
@@ -617,11 +513,41 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 		int[] result = new int[21];
 		for (int i = 1; i < s.length; i++) {
 			try {
-				result[i] = Integer.parseInt(s[i].replace('!', '-'));
+				result[i] = Integer.parseInt(s[i].replace('!', '-').replaceAll(" ", ""));
 			} catch (Exception e) {
 
 			}
 		}
 		return result;
+	}
+
+	protected TextureRegion[] getSourceImage(int[] values) {
+		if (values[2] < imagelist.size() && imagelist.get(values[2]) != null) {
+			return getSourceImage(imagelist.get(values[2]), values[3], values[4], values[5], values[6], values[7],
+					values[8]);
+		}
+		return null;
+	}
+
+	protected TextureRegion[] getSourceImage(Texture image, int x, int y, int w, int h, int divx, int divy) {
+		if (w == -1) {
+			w = image.getWidth();
+		}
+		if (h == -1) {
+			h = image.getHeight();
+		}
+		if (divx <= 0) {
+			divx = 1;
+		}
+		if (divy <= 0) {
+			divy = 1;
+		}
+		TextureRegion[] images = new TextureRegion[divx * divy];
+		for (int i = 0; i < divx; i++) {
+			for (int j = 0; j < divy; j++) {
+				images[divx * j + i] = new TextureRegion(image, x + w / divx * i, y + h / divy * j, w / divx, h / divy);
+			}
+		}
+		return images;
 	}
 }

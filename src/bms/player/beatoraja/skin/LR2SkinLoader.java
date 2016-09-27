@@ -28,7 +28,7 @@ public class LR2SkinLoader {
 	boolean ifs = false;
 
 	protected void processLine(String line, MainState state) {
-		if (line.startsWith("//")) {
+		if (!line.startsWith("#") ) {
 			return;
 		}
 		String[] str = line.split(",", -1);
@@ -62,8 +62,7 @@ public class LR2SkinLoader {
 				}
 
 				skip = !ifs;
-			}
-			if (str[0].equals("#ELSEIF")) {
+			} else if (str[0].equals("#ELSEIF")) {
 				if (ifs) {
 					skip = true;
 				} else {
@@ -92,11 +91,9 @@ public class LR2SkinLoader {
 
 					skip = !ifs;
 				}
-			}
-			if (str[0].equals("#ELSE")) {
+			} else if (str[0].equals("#ELSE")) {
 				skip = ifs;
-			}
-			if (str[0].equals("#ENDIF")) {
+			} else if (str[0].equals("#ENDIF")) {
 				skip = false;
 				ifs = false;
 			}

@@ -1,26 +1,27 @@
 package bms.player.beatoraja.skin;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.skin.LR2SkinHeader.CustomFile;
 import bms.player.beatoraja.skin.LR2SkinHeader.CustomOption;
 
+/**
+ * LR2スキンヘッダファイル(lr2skin)のローダー
+ * 
+ * @author exch
+ */
 public class LR2SkinHeaderLoader extends LR2SkinLoader {
 	
-	// TODO bug:headerでSkin定義するケースがある(RED BELT RESULT)。ENDOFHEADER移行は全部Skin側に引き継ぎ？
-	
+	private LR2SkinHeader header = new LR2SkinHeader();
+	private List<CustomFile> files = new ArrayList();
+	private List<CustomOption> options = new ArrayList();
+
 	public LR2SkinHeaderLoader() {
 		
 		addCommandWord(new CommandWord("INFORMATION") {
@@ -57,21 +58,19 @@ public class LR2SkinHeaderLoader extends LR2SkinLoader {
 		addCommandWord(new CommandWord("INCLUDE") {
 			@Override
 			public void execute(String[] str) {
-				header.setInclude(str[1].replace("LR2files\\Theme", "skin").replace("\\", "/"));
 			}
 		});
 
 	}
 	
-	private LR2SkinHeader header = new LR2SkinHeader();
-	private List<CustomFile> files = new ArrayList();
-	private List<CustomOption> options = new ArrayList();
-
 	public LR2SkinHeader loadSkin(Path f, MainState state) throws IOException {
 		return this.loadSkin(f, state, new HashMap());
 	}
 	
 	public LR2SkinHeader loadSkin(Path f, MainState state, Map<String, Object> property) throws IOException {
+		header = new LR2SkinHeader();
+		files.clear();
+		options.clear();
 		
 		header.setPath(f);
 
@@ -89,7 +88,7 @@ public class LR2SkinHeaderLoader extends LR2SkinLoader {
 		}
 		header.setCustomOptions(options.toArray(new CustomOption[options.size()]));
 		header.setCustomFiles(files.toArray(new CustomFile[files.size()]));
-		
+
 		return header;
 	}	
 }
