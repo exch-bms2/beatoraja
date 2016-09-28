@@ -21,6 +21,8 @@ public interface SongDatabaseAccessor {
 	 */
 	public SongData[] getSongDatas(String[] hashes);
 
+	public SongData[] getSongDatasByText(String text, String lr2path);
+
 	/**
 	 * 楽曲を取得する
 	 * 

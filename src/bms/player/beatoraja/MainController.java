@@ -1,7 +1,6 @@
 package bms.player.beatoraja;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.*;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -26,6 +25,7 @@ import bms.player.beatoraja.song.SongDatabaseAccessor;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.backends.lwjgl.*;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.*;
@@ -36,6 +36,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.*;
 import com.badlogic.gdx.utils.JsonWriter.OutputType;
@@ -77,12 +78,10 @@ public class MainController extends ApplicationAdapter {
 	 * プレイデータアクセサ
 	 */
 	private PlayDataAccessor playdata;
-	
+
 	private static final Path configpath = Paths.get("config.json");
 	private static final Path songdbpath = Paths.get("songdata.db");
-	
-	private TextField search;
-	
+
 	private ScreenShotThread screenshot;
 
 	public static final Rectangle[] RESOLUTION = { new Rectangle(0, 0, 640, 480), new Rectangle(0, 0, 1280, 720),
@@ -118,7 +117,7 @@ public class MainController extends ApplicationAdapter {
 	public ShapeRenderer getShapeRenderer() {
 		return shape;
 	}
-	
+
 	public PlayerResource getPlayerResource() {
 		return resource;
 	}
@@ -143,7 +142,7 @@ public class MainController extends ApplicationAdapter {
 			newState = decide;
 			break;
 		case STATE_PLAYBMS:
-			if(player != null) {
+			if (player != null) {
 				player.dispose();
 			}
 			player = new BMSPlayer(this, resource);
@@ -159,12 +158,17 @@ public class MainController extends ApplicationAdapter {
 			newState = keyconfig;
 			break;
 		}
-		
-		if(newState != null && current != newState) {
+
+		if (newState != null && current != newState) {
 			Arrays.fill(newState.getTimer(), Long.MIN_VALUE);
 			newState.create();
 			current = newState;
-			current.setStartTime(System.currentTimeMillis());			
+			current.setStartTime(System.currentTimeMillis());
+		}
+		if(current.getStage() != null) {
+			Gdx.input.setInputProcessor(new InputMultiplexer(current.getStage(), input.getKeyBoardInputProcesseor()));
+		} else {
+			Gdx.input.setInputProcessor(input.getKeyBoardInputProcesseor());			
 		}
 	}
 
@@ -200,32 +204,6 @@ public class MainController extends ApplicationAdapter {
 		parameter.size = 24;
 		systemfont = generator.generateFont(parameter);
 		generator.dispose();
-
-//		Stage stage = new Stage(new FitViewport(RESOLUTION[config.getResolution()].width, RESOLUTION[config.getResolution()].height));
-//		/* TextfieldStyleの定義 */
-//		TextField.TextFieldStyle textFieldStyle = new TextField.TextFieldStyle(
-//				systemfont,                           // BitmapFont
-//		    Color.BLACK,                    // font color
-//		    new TextureRegionDrawable(new TextureRegion(new Texture("skin/system.png"),0,0,8,8)),      // cusor image 
-//		    new TextureRegionDrawable(new TextureRegion(new Texture("skin/system.png"),0,0,2,8)),   // selectoin image 
-//		    new TextureRegionDrawable(new TextureRegion(new Texture("skin/system.png"),0,8,8,8))); // background image
-//
-//		/* textFieldの生成 */
-//		search = new TextField("sample", textFieldStyle);
-//
-//		/* 文字数を10に制限する */
-//		search.setMaxLength(10);
-//
-//		/* tabキーでTextField間をできなくする(デフォルトはtrue)   */
-//		search.setFocusTraversal(false);
-//
-//		/* TextFieldをStageに追加 */
-//		stage.addActor(search);
-//
-//		/* TextFieldをフォーカス状態にする(複数ある場合） */
-//		stage.setKeyboardFocus(search);
-//		
-//		search.setVisible(true);
 	}
 
 	@Override
@@ -237,6 +215,12 @@ public class MainController extends ApplicationAdapter {
 		sprite.begin();
 		current.getSkin().drawAllObjects(sprite, current);
 		sprite.end();
+
+		Stage stage = current.getStage();
+		if(stage != null) {
+			stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
+			stage.draw();			
+		}
 		// move song bar position by mouse
 		if (input.isMouseConsumed()) {
 			input.setMouseConsumed();
@@ -262,32 +246,33 @@ public class MainController extends ApplicationAdapter {
 			Graphics.DisplayMode currentMode = Gdx.graphics.getDisplayMode();
 			if (fullscreen) {
 				Gdx.graphics.setWindowedMode(currentMode.width, currentMode.height);
-			}
-			else {
+			} else {
 				Gdx.graphics.setFullscreenMode(currentMode);
 			}
 			config.setFullscreen(!fullscreen);
 			input.getFunctiontime()[3] = 0;
 		}
-		
-//		if (input.getFunctionstate()[4] && input.getFunctiontime()[4] != 0) {
-//			int resolution = config.getResolution();
-//			resolution = (resolution + 1) % RESOLUTION.length;
-//			if (config.isFullscreen()) {
-//				Gdx.graphics.setWindowedMode((int) RESOLUTION[resolution].width, (int) RESOLUTION[resolution].height);
-//				Graphics.DisplayMode currentMode = Gdx.graphics.getDisplayMode();
-//				Gdx.graphics.setFullscreenMode(currentMode);
-//			}
-//			else {
-//				Gdx.graphics.setWindowedMode((int) RESOLUTION[resolution].width, (int) RESOLUTION[resolution].height);
-//			}
-//			config.setResolution(resolution);
-//			input.getFunctiontime()[4] = 0;
-//		}
+
+		// if (input.getFunctionstate()[4] && input.getFunctiontime()[4] != 0) {
+		// int resolution = config.getResolution();
+		// resolution = (resolution + 1) % RESOLUTION.length;
+		// if (config.isFullscreen()) {
+		// Gdx.graphics.setWindowedMode((int) RESOLUTION[resolution].width,
+		// (int) RESOLUTION[resolution].height);
+		// Graphics.DisplayMode currentMode = Gdx.graphics.getDisplayMode();
+		// Gdx.graphics.setFullscreenMode(currentMode);
+		// }
+		// else {
+		// Gdx.graphics.setWindowedMode((int) RESOLUTION[resolution].width,
+		// (int) RESOLUTION[resolution].height);
+		// }
+		// config.setResolution(resolution);
+		// input.getFunctiontime()[4] = 0;
+		// }
 
 		// screen shot
 		if (input.getFunctionstate()[5] && input.getFunctiontime()[5] != 0) {
-			if(screenshot == null || screenshot.isCompleted) {
+			if (screenshot == null || screenshot.isCompleted) {
 				screenshot = new ScreenShotThread();
 				screenshot.pixels = ScreenUtils.getFrameBufferPixels(0, 0, Gdx.graphics.getBackBufferWidth(),
 						Gdx.graphics.getBackBufferHeight(), true);
@@ -295,19 +280,19 @@ public class MainController extends ApplicationAdapter {
 				screenshot.savetime = System.currentTimeMillis();
 			}
 		}
-		if(screenshot != null && screenshot.savetime + 2000 > System.currentTimeMillis()) {
+		if (screenshot != null && screenshot.savetime + 2000 > System.currentTimeMillis()) {
 			sprite.begin();
 			systemfont.setColor(Color.GOLD);
 			systemfont.draw(sprite, "Screen shot saved : " + screenshot.path, 100,
 					RESOLUTION[config.getResolution()].height - 2);
-			sprite.end();			
+			sprite.end();
 		}
 	}
 
 	@Override
 	public void dispose() {
-//		shape.dispose();
-//		sprite.dispose();
+		// shape.dispose();
+		// sprite.dispose();
 		if (player != null) {
 			player.dispose();
 		}
@@ -323,7 +308,7 @@ public class MainController extends ApplicationAdapter {
 		if (gresult != null) {
 			gresult.dispose();
 		}
-		if(keyconfig != null) {
+		if (keyconfig != null) {
 			keyconfig.dispose();
 		}
 		resource.dispose();
@@ -384,7 +369,7 @@ public class MainController extends ApplicationAdapter {
 		if (Files.exists(configpath)) {
 			Json json = new Json();
 			try {
-				config = json.fromJson(Config.class, Files.newBufferedReader(configpath));
+				config = json.fromJson(Config.class, new FileReader(configpath.toFile()));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -420,7 +405,8 @@ public class MainController extends ApplicationAdapter {
 			cfg.audioDeviceBufferSize = config.getAudioDeviceBufferSize();
 			cfg.audioDeviceSimultaneousSources = config.getAudioDeviceSimultaneousSources();
 			cfg.forceExit = forceExit;
-//			System.setProperty("org.lwjgl.opengl.Display.allowSoftwareOpenGL", "true");
+			// System.setProperty("org.lwjgl.opengl.Display.allowSoftwareOpenGL",
+			// "true");
 			new LwjglApplication(player, cfg);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -435,7 +421,7 @@ public class MainController extends ApplicationAdapter {
 		Json json = new Json();
 		json.setOutputType(OutputType.json);
 		try {
-			BufferedWriter fw = Files.newBufferedWriter(configpath);
+			FileWriter fw = new FileWriter(configpath.toFile());
 			fw.write(json.prettyPrint(config));
 			fw.flush();
 			fw.close();
@@ -466,7 +452,7 @@ public class MainController extends ApplicationAdapter {
 			if (Files.exists(configpath)) {
 				Json json = new Json();
 				try {
-					config = json.fromJson(Config.class, Files.newBufferedReader(configpath));
+					config = json.fromJson(Config.class, new FileReader(configpath.toFile()));
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -474,7 +460,7 @@ public class MainController extends ApplicationAdapter {
 				Json json = new Json();
 				json.setOutputType(OutputType.json);
 				try {
-					BufferedWriter fw = Files.newBufferedWriter(configpath);
+					FileWriter fw = new FileWriter(configpath.toFile());
 					fw.write(json.prettyPrint(config));
 					fw.flush();
 					fw.close();
@@ -505,13 +491,14 @@ public class MainController extends ApplicationAdapter {
 			stackPane.setDisable(true);
 		}
 	}
-	
+
 	class ScreenShotThread extends Thread {
 
 		private boolean isCompleted;
 		private String path = "";
 		private long savetime;
 		private byte[] pixels;
+
 		@Override
 		public void run() {
 			Pixmap pixmap = new Pixmap(Gdx.graphics.getBackBufferWidth(), Gdx.graphics.getBackBufferHeight(),
@@ -525,6 +512,6 @@ public class MainController extends ApplicationAdapter {
 			Logger.getGlobal().info("スクリーンショット保存:" + path);
 			isCompleted = true;
 		}
-		
+
 	}
 }

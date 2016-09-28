@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 
 public abstract class MainState {
 
@@ -20,6 +21,8 @@ public abstract class MainState {
 	private long[] timer = new long[256];
 
 	private Skin skin;
+
+	private Stage stage;
 
 	public static final int IMAGE_STAGEFILE = 100;
 	public static final int IMAGE_BACKBMP = 101;
@@ -566,7 +569,7 @@ public abstract class MainState {
 	public int getJudgeCount(int judge, boolean fast) {
 		return 0;
 	}
-
+	
 	private Calendar cl = Calendar.getInstance();
 
 	public int getNumberValue(int id) {
@@ -733,5 +736,13 @@ public abstract class MainState {
 			return white;
 		}
 		return null;
+	}
+
+	public Stage getStage() {
+		return stage;
+	}
+
+	public void setStage(Stage stage) {
+		this.stage = stage;
 	}
 }

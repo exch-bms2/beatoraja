@@ -481,7 +481,7 @@ class SearchWordBar extends DirectoryBar {
     @Override
     public Bar[] getChildren() {
         List<SongBar> songbars = new ArrayList<SongBar>();
-        SongData[] songs = selector.getSongDatabase().getSongDatas(text, new File(".").getAbsolutePath());
+        SongData[] songs = selector.getSongDatabase().getSongDatasByText(text, new File(".").getAbsolutePath());
         for (SongData song : songs) {
             songbars.add(new SongBar(song));
         }

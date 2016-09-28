@@ -25,6 +25,11 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.viewport.FitViewport;
 
 /**
  * 選曲部分。 楽曲一覧とカーソルが指す楽曲のステータスを表示し、選択した楽曲を 曲決定部分に渡す。
@@ -112,6 +117,8 @@ public class MusicSelector extends MainState {
 	private AssistOptionRenderer aoption;
 	private DetailOptionRenderer doption;
 
+	private TextField search;
+
 	/**
 	 * スコアデータのキャッシュ
 	 */
@@ -182,7 +189,6 @@ public class MusicSelector extends MainState {
 			result.put(song.getSha256(), score);
 		}
 		return result;
-
 	}
 
 	public void create() {
@@ -269,6 +275,54 @@ public class MusicSelector extends MainState {
 		doption = new DetailOptionRenderer(config);
 
 		getTimer()[TIMER_SONGBAR_CHANGE] = getNowTime();
+		
+		if(getStage() == null) {
+			final Stage stage = new Stage(new FitViewport(MainController.RESOLUTION[config.getResolution()].width,
+					MainController.RESOLUTION[config.getResolution()].height));
+			/* TextfieldStyleの定義 */
+			TextField.TextFieldStyle textFieldStyle = new TextField.TextFieldStyle(titlefont, // BitmapFont
+					Color.WHITE, // font color
+					new TextureRegionDrawable(new TextureRegion(new Texture("skin/system.png"), 0, 8, 8, 8)), // cusor
+					new TextureRegionDrawable(new TextureRegion(new Texture("skin/system.png"), 0, 8, 2, 8)), // selectoin
+					new TextureRegionDrawable(new TextureRegion(new Texture("skin/system.png"), 0, 8, 1, 8))); // background
+			textFieldStyle.messageFont = titlefont;
+			textFieldStyle.messageFontColor = Color.DARK_GRAY;
+			
+			/* textFieldの生成 */
+			search = new TextField("", textFieldStyle);
+			search.setMessageText("search song");
+			search.setTextFieldListener(new TextFieldListener() {
+				public void keyTyped(TextField textField, char key) {
+					if (key == '\n' || key == 13) {
+						if (textField.getText().length() > 1) {
+							SearchWordBar swb = new SearchWordBar(MusicSelector.this, textField.getText());
+							int count = swb.getChildren().length;
+							if(count > 0) {
+								bar.addSearch(swb);
+								dir.clear();
+								bar.updateBar(null);
+								textField.setText("");
+								textField.setMessageText(count + " song(s) found");								
+							} else {
+								textField.setText("");
+								textField.setMessageText("no song found");								
+							}
+						}
+						textField.getOnscreenKeyboard().show(false);
+						stage.setKeyboardFocus(null);
+					}
+				}
+
+			});
+			search.setBounds(10, 60, 400, 24);
+			search.setMaxLength(50);
+			search.setFocusTraversal(false);
+			stage.addActor(search);
+
+			search.setVisible(true);
+			
+			setStage(stage);
+		}
 	}
 
 	public void render() {
