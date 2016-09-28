@@ -4,6 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.List;
+
+import bms.model.LongNote;
+import bms.model.Note;
+import bms.model.TimeLine;
 import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.play.audio.SoundProcessor;
 import bms.player.beatoraja.select.MusicSelector;
@@ -40,6 +44,8 @@ public class MusicResult extends MainState {
 
 	public static final int OPTION_RESULT_CLEAR = 90;
 	public static final int OPTION_RESULT_FAIL = 91;
+	public static final int NUMBER_AVERAGE_DURATION = 5555;
+	public static final int NUMBER_AVERAGE_DURATION_AFTERDOT = 5556;
 
 	private BitmapFont titlefont;
 	private String title;
@@ -48,6 +54,8 @@ public class MusicResult extends MainState {
 	private int oldexscore;
 	private int oldmisscount;
 	private int oldcombo;
+
+	private float avgduration;
 
 	private Sound clear;
 	private Sound fail;
@@ -293,6 +301,27 @@ public class MusicResult extends MainState {
 			}
 		}
 		oldrate = oldexscore * 10000 / (resource.getBMSModel().getTotalNotes() * 2);
+		// duration average
+		int count = 0;
+		avgduration = 0;
+		for (TimeLine tl : resource.getBMSModel().getAllTimeLines()) {
+			for (int i = 0; i < 18; i++) {
+				Note n = tl.getNote(i);
+				if (n != null && !(resource.getBMSModel().getLntype() == BMSModel.LNTYPE_LONGNOTE && n instanceof LongNote && ((LongNote)n).getEnd() == tl)) {
+					int state = n.getState();
+					int time = n.getTime();
+					if(n instanceof LongNote && ((LongNote)n).getEnd() == tl) {
+						state = ((LongNote)n).getEndstate();
+						time = ((LongNote)n).getEndtime();
+					}
+					if (state >= 1) {
+						count++;
+						avgduration += Math.abs(time);
+					}
+				}
+			}
+		}
+		avgduration /= count;
 
 		// コースモードの場合はコーススコアに加算・累積する
 		if (resource.getCourseBMSModels() != null) {
@@ -480,6 +509,10 @@ public class MusicResult extends MainState {
 				count += getJudgeCount(i, false);
 			}
 			return count;
+			case NUMBER_AVERAGE_DURATION:
+				return (int)avgduration;
+			case NUMBER_AVERAGE_DURATION_AFTERDOT:
+				return ((int)(avgduration * 100)) % 100;
 		}
 		return super.getNumberValue(id);
 	}

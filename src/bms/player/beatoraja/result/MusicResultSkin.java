@@ -107,6 +107,9 @@ public class MusicResultSkin extends Skin {
 
 		addNumber(new SkinNumber(ntr[0], 0, 5, 0, MainState.NUMBER_TOTALNOTES), 0, 360, 486, 12, 12, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
+		addNumber(new SkinNumber(ntr[0], 0, 4, 0, MusicResult.NUMBER_AVERAGE_DURATION), 0, 20, 60, 18, 18, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		addNumber(new SkinNumber(ntr[0], 0, 2, 0, MusicResult.NUMBER_AVERAGE_DURATION), 0, 92, 60, 12, 12, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+
 		SkinText title = new SkinText("skin/VL-Gothic-Regular.ttf",0,24, 2);
 		title.setReferenceID(MainState.STRING_FULLTITLE);
 		title.setAlign(SkinText.ALIGN_CENTER);

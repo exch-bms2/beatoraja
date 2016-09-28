@@ -34,6 +34,9 @@ import com.badlogic.gdx.math.Rectangle;
 public class MusicSelector extends MainState {
 
 	public static final int OPTION_GRADEBAR = 3;
+	public static final int BUTTON_MODE = 1011;
+	public static final int BUTTON_SORT = 1012;
+	public static final int BUTTON_LNMODE = 1911;
 
 	// TODO テキスト表示
 	// TODO 譜面情報表示
@@ -438,9 +441,6 @@ public class MusicSelector extends MainState {
 			}
 		}
 
-		titlefont.draw(sprite, "MODE : " + MODE[mode], 20, 30);
-		titlefont.draw(sprite, "SORT : " + SORT[sort].getName(), 180, 30);
-		titlefont.draw(sprite, "LN MODE : " + LNMODE[config.getLnmode()], 440, 30);
 		// banner
 		if (current != bannerbar) {
 			bannerbar = current;
@@ -914,9 +914,17 @@ public class MusicSelector extends MainState {
 			return Integer.MIN_VALUE;
 		case NUMBER_JUDGETIMING:
 			return config.getJudgetiming();
+			case BUTTON_MODE:
+				final int[] mode_lr2 = {0,2,4,5,1,3};
+				return mode_lr2[mode];
+			case BUTTON_SORT:
+				return sort;
+			case BUTTON_LNMODE:
+				return config.getLnmode();
 		}
 		return super.getNumberValue(id);
 	}
+
 
 	public String getTextValue(int id) {
 		switch (id) {
