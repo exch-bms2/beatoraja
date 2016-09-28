@@ -43,10 +43,14 @@ public class GaugeGraphRenderer {
         shape.setColor(Color.valueOf(graphcolor));
         shape.rect(graph.x, graph.y, graph.width, graph.height);
         final GrooveGauge gg = resource.getGrooveGauge();
-        if (gg.getBorder() > 0) {
+        final float border = gg.getBorder();
+        String borderline = "ff0000";
+        if (border > 0) {
             shape.setColor(Color.valueOf("440000"));
             shape.rect(graph.x, graph.y + graph.height * gg.getBorder() / gg.getMaxValue(), graph.width,
                     graph.height * (gg.getMaxValue() - gg.getBorder()) / gg.getMaxValue());
+        } else {
+            borderline = graphline;
         }
         shape.setColor(Color.valueOf(graphcolor));
         shape.end();
@@ -58,10 +62,41 @@ public class GaugeGraphRenderer {
         for (int i = 0; i < gauge.size(); i++) {
             Float f2 = gauge.get(i);
             if (f1 != null) {
-                shape.setColor(Color.valueOf(graphline));
-                shape.line(graph.x + graph.width * (i - 1) / gauge.size(), graph.y + (f1 / gg.getMaxValue())
-                        * graph.height, graph.x + graph.width * i / gauge.size(), graph.y + (f2 / gg.getMaxValue())
-                        * graph.height);
+                if(f1 < border) {
+                    if(f2 < border) {
+                        shape.setColor(Color.valueOf(graphline));
+                        shape.line(graph.x + graph.width * (i - 1) / gauge.size(), graph.y + (f1 / gg.getMaxValue())
+                                * graph.height, graph.x + graph.width * i / gauge.size(), graph.y + (f2 / gg.getMaxValue())
+                                * graph.height);
+                    } else {
+                        final float dx = graph.width * (border - f1) / (f2 - f1)/ gauge.size();
+                        shape.setColor(Color.valueOf(graphline));
+                        shape.line(graph.x + graph.width * (i - 1) / gauge.size(), graph.y + (f1 / gg.getMaxValue())
+                                * graph.height, graph.x + graph.width * (i - 1) / gauge.size() + dx, graph.y + (border / gg.getMaxValue())
+                                * graph.height);
+                        shape.setColor(Color.valueOf(borderline));
+                        shape.line(graph.x + graph.width * (i - 1) / gauge.size() + dx, graph.y + (border / gg.getMaxValue())
+                                * graph.height, graph.x + graph.width * i / gauge.size(), graph.y + (f2 / gg.getMaxValue())
+                                * graph.height);
+                    }
+                } else {
+                    if(f2 >= border) {
+                        shape.setColor(Color.valueOf(borderline));
+                        shape.line(graph.x + graph.width * (i - 1) / gauge.size(), graph.y + (f1 / gg.getMaxValue())
+                                * graph.height, graph.x + graph.width * i / gauge.size(), graph.y + (f2 / gg.getMaxValue())
+                                * graph.height);
+                    } else {
+                        final float dx = graph.width * (f1 - border) / (f1 - f2)/ gauge.size();
+                        shape.setColor(Color.valueOf(borderline));
+                        shape.line(graph.x + graph.width * (i - 1) / gauge.size(), graph.y + (f1 / gg.getMaxValue())
+                                * graph.height, graph.x + graph.width * (i - 1) / gauge.size() + dx, graph.y + (border / gg.getMaxValue())
+                                * graph.height);
+                        shape.setColor(Color.valueOf(graphline));
+                        shape.line(graph.x + graph.width * (i - 1) / gauge.size() + dx, graph.y + (border / gg.getMaxValue())
+                                * graph.height, graph.x + graph.width * i / gauge.size(), graph.y + (f2 / gg.getMaxValue())
+                                * graph.height);
+                    }
+                }
             }
             f1 = f2;
         }

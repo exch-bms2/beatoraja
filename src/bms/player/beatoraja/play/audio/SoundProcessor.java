@@ -306,7 +306,7 @@ public class SoundProcessor implements AudioProcessor {
 	 * @throws UnsupportedAudioFileException
 	 * @throws IOException
 	 */
-	private byte[] sliceWav(InputStream is, long starttime, long duration) throws UnsupportedAudioFileException,
+	public static byte[] sliceWav(InputStream is, long starttime, long duration) throws UnsupportedAudioFileException,
 			IOException {
 		AudioInputStream sourceStream = AudioSystem.getAudioInputStream(is);
 		AudioFormat format = sourceStream.getFormat();
@@ -343,7 +343,10 @@ public class SoundProcessor implements AudioProcessor {
 	}
 
 	public static Sound getSound(String name) {
-		name = name.substring(0, name.lastIndexOf('.'));
+		final int index = name.lastIndexOf('.');
+		if(index != -1) {
+			name = name.substring(0, index);					
+		}
 		final Path wavfile = Paths.get(name + ".wav");
 		final Path oggfile = Paths.get(name + ".ogg");
 		final Path mp3file = Paths.get(name + ".mp3");

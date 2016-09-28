@@ -48,6 +48,9 @@ public class BGAProcessor {
 	private final String[] mov_extension = { "mpg", "mpeg", "m1v", "m2v", "avi", "wmv", "mp4" };
 	private final String[] pic_extension = { "jpg", "jpeg", "gif", "bmp", "png" };
 
+	/**
+	 * BGAイメージのキャッシュ枚数
+	 */
 	private static final int BGACACHE_SIZE = 256;
 
 	/**
@@ -178,7 +181,10 @@ public class BGAProcessor {
 				f = dpath.resolve(name);
 			}
 			if (f == null) {
-				name = name.substring(0, name.lastIndexOf('.'));
+				final int index = name.lastIndexOf('.');
+				if(index != -1) {
+					name = name.substring(0, index);					
+				}
 				for (String mov : mov_extension) {
 					final Path mpgfile = dpath.resolve(name + "." + mov);
 					if (Files.exists(mpgfile)) {
