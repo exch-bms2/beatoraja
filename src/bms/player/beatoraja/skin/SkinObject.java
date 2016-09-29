@@ -76,7 +76,7 @@ public abstract class SkinObject {
 		if (dstfilter == 0) {
 			dstfilter = filter;
 		}
-		if (dstcenter == 0) {
+		if (dstcenter == 0 && center < 10) {
 			dstcenter = center;
 		}
 		if (dsttimer == 0) {

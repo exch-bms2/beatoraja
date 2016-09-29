@@ -136,7 +136,9 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 				}
 				if (lane < note.length && note[lane] == null) {
 					TextureRegion[] images = getSourceImage(values);
-					note[lane] = new Sprite(images[0]);
+					if(images != null) {
+						note[lane] = new Sprite(images[0]);						
+					}
 				}
 				if (lanerender == null) {
 					lanerender = new PlaySkin.SkinLaneObject(skin);
@@ -160,7 +162,9 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 				}
 				if (lane < lnend.length && lnend[lane] == null) {
 					TextureRegion[] images = getSourceImage(values);
-					lnend[lane] = new Sprite(images[0]);
+					if(images != null) {
+						lnend[lane] = new Sprite(images[0]);						
+					}
 				}
 			}
 		});
@@ -180,7 +184,9 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 				}
 				if (lane < lnstart.length && lnstart[lane] == null) {
 					TextureRegion[] images = getSourceImage(values);
-					lnstart[lane] = new Sprite(images[0]);
+					if(images != null) {
+						lnstart[lane] = new Sprite(images[0]);						
+					}
 				}
 			}
 		});
@@ -201,8 +207,10 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 				}
 				if (lane < lnbody.length && lnbody[lane] == null) {
 					TextureRegion[] images = getSourceImage(values);
-					lnbody[lane] = new Sprite(images[0]);
-					lnbodya[lane] = new Sprite(images[images.length - 1]);
+					if(images != null) {
+						lnbody[lane] = new Sprite(images[0]);
+						lnbodya[lane] = new Sprite(images[images.length - 1]);
+					}
 				}
 			}
 		});
@@ -223,7 +231,9 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 				}
 				if (lane < mine.length && mine[lane] == null) {
 					TextureRegion[] images = getSourceImage(values);
-					mine[lane] = new Sprite(images[0]);
+					if(images != null) {
+						mine[lane] = new Sprite(images[0]);
+					}
 				}
 			}
 		});

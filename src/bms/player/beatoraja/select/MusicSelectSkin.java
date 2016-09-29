@@ -278,9 +278,9 @@ public class MusicSelectSkin extends Skin {
 		SkinImage mode = new SkinImage();
 		mode.setImage(modet, 0);
 		mode.setReferenceID(MusicSelector.BUTTON_MODE);
-		setDestination(mode, 0, 120, 10, 144, 24, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		setDestination(mode, 0, 120, 10, 108, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(mode);
-		addImage(new TextureRegion(st, 240,744 ,144,24), 0, 10, 10,144, 24, 0, 128,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		addImage(new TextureRegion(st, 240,744 ,144,24), 0, 10, 10,108, 18, 0, 128,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 		TextureRegion[][] sortt = new TextureRegion[5][];
 		for(int i = 0;i < sortt.length;i++) {
@@ -289,9 +289,9 @@ public class MusicSelectSkin extends Skin {
 		SkinImage sort = new SkinImage();
 		sort.setImage(sortt, 0);
 		sort.setReferenceID(MusicSelector.BUTTON_SORT);
-		setDestination(sort, 0, 390, 10, 120, 24, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		setDestination(sort, 0, 390, 10, 108, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(sort);
-		addImage(new TextureRegion(st, 400,720 ,96,24), 0, 280, 10,96, 24, 0, 128,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		addImage(new TextureRegion(st, 400,720 ,96,24), 0, 280, 10,72, 18, 0, 128,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 		TextureRegion[][] lnt = new TextureRegion[3][];
 		for(int i = 0;i < lnt.length;i++) {
@@ -300,9 +300,9 @@ public class MusicSelectSkin extends Skin {
 		SkinImage lnmode = new SkinImage();
 		lnmode.setImage(lnt, 0);
 		lnmode.setReferenceID(MusicSelector.BUTTON_LNMODE);
-		setDestination(lnmode, 0, 700, 10, 72, 24, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		setDestination(lnmode, 0, 700, 10, 54, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(lnmode);
-		addImage(new TextureRegion(st, 550,672 ,144,24), 0, 540, 10,144, 24, 0, 128,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		addImage(new TextureRegion(st, 550,672 ,144,24), 0, 540, 10,108, 18, 0, 128,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 
 		// timer

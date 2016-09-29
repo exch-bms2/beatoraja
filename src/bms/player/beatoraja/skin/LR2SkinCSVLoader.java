@@ -203,25 +203,46 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 				num = null;
 				try {
 					int[] values = parseInt(str);
-					TextureRegion[] images = getSourceImage(values);
-					if(images != null) {
-						if (images.length >= 24) {
-							TextureRegion[] pn = new TextureRegion[12];
-							TextureRegion[] mn = new TextureRegion[12];
-							for (int i = 0; i < 12; i++) {
-								pn[i] = images[i];
-								mn[i] = images[i + 12];
+					int divx = values[7];
+					if (divx <= 0) {
+						divx = 1;
+					}
+					int divy = values[8];
+					if (divy <= 0) {
+						divy = 1;
+					}
+
+					if(divx * divy >= 10) {
+						TextureRegion[] images = getSourceImage(values);
+						if(images != null) {
+							if (images.length % 24 == 0) {
+								TextureRegion[] pn = new TextureRegion[12];
+								TextureRegion[] mn = new TextureRegion[12];
+
+								for (int i = 0; i < 12; i++) {
+									pn[i] = images[i];
+									mn[i] = images[i + 12];
+								}
+								num = new SkinNumber(pn, mn, values[9], values[13] + 1, 0, values[11]);
+								num.setAlign(values[12]);
+							} else {
+								int d = images.length % 10 == 0 ? 10 :11;
+								
+								TextureRegion[][] nimages = new TextureRegion[divx * divy / d][d];
+								for (int i = 0; i < d; i++) {
+									for (int j = 0; j < divx * divy / d; j++) {
+										nimages[j][i] = images[j * d + i];
+									}
+								}
+								
+								num = new SkinNumber(nimages, values[9], values[13], d > 10 ? 2 : 0, values[11]);
+								num.setAlign(values[12]);
 							}
-							num = new SkinNumber(pn, mn, values[9], values[13] + 1, 0, values[11]);
-							num.setAlign(values[12]);
-						} else {
-							num = new SkinNumber(images, values[9], values[13], images.length > 10 ? 2 : 0, values[11]);
-							num.setAlign(values[12]);
-						}
-						num.setTimer(values[10]);
-						skin.add(num);
-						// System.out.println("Number Added - " +
-						// (num.getId()));						
+							num.setTimer(values[10]);
+							skin.add(num);
+							// System.out.println("Number Added - " +
+							// (num.getId()));						
+						}						
 					}
 				} catch (NumberFormatException e) {
 					e.printStackTrace();
@@ -526,6 +547,7 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 			return getSourceImage(imagelist.get(values[2]), values[3], values[4], values[5], values[6], values[7],
 					values[8]);
 		}
+		System.out.println("failed to load image : " + line);
 		return null;
 	}
 
