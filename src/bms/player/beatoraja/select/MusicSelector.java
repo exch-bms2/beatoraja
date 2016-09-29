@@ -25,6 +25,8 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.scenes.scene2d.Event;
+import com.badlogic.gdx.scenes.scene2d.EventListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldListener;
@@ -108,6 +110,7 @@ public class MusicSelector extends MainState {
 
 	private FreeTypeFontGenerator generator;
 	private BitmapFont titlefont;
+	private BitmapFont searchfont;
 
 	private TextureRegion banner;
 	private Bar bannerbar;
@@ -269,6 +272,7 @@ public class MusicSelector extends MainState {
 		FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
 		parameter.size = 24;
 		titlefont = generator.generateFont(parameter);
+		searchfont = generator.generateFont(parameter);
 
 		option = new GameOptionRenderer(config);
 		aoption = new AssistOptionRenderer(config);
@@ -276,24 +280,24 @@ public class MusicSelector extends MainState {
 
 		getTimer()[TIMER_SONGBAR_CHANGE] = getNowTime();
 		
+		// search text field
 		if(getStage() == null) {
 			final Stage stage = new Stage(new FitViewport(MainController.RESOLUTION[config.getResolution()].width,
 					MainController.RESOLUTION[config.getResolution()].height));
-			/* TextfieldStyleの定義 */
-			TextField.TextFieldStyle textFieldStyle = new TextField.TextFieldStyle(titlefont, // BitmapFont
+			final TextField.TextFieldStyle textFieldStyle = new TextField.TextFieldStyle(searchfont, // BitmapFont
 					Color.WHITE, // font color
 					new TextureRegionDrawable(new TextureRegion(new Texture("skin/system.png"), 0, 8, 8, 8)), // cusor
 					new TextureRegionDrawable(new TextureRegion(new Texture("skin/system.png"), 0, 8, 2, 8)), // selectoin
 					new TextureRegionDrawable(new TextureRegion(new Texture("skin/system.png"), 0, 8, 1, 8))); // background
-			textFieldStyle.messageFont = titlefont;
-			textFieldStyle.messageFontColor = Color.DARK_GRAY;
+			textFieldStyle.messageFont = searchfont;
+			textFieldStyle.messageFontColor = Color.GRAY;
 			
-			/* textFieldの生成 */
 			search = new TextField("", textFieldStyle);
 			search.setMessageText("search song");
 			search.setTextFieldListener(new TextFieldListener() {
 				public void keyTyped(TextField textField, char key) {
 					if (key == '\n' || key == 13) {
+						// TODO 検索結果重複は除外
 						if (textField.getText().length() > 1) {
 							SearchWordBar swb = new SearchWordBar(MusicSelector.this, textField.getText());
 							int count = swb.getChildren().length;
@@ -303,14 +307,28 @@ public class MusicSelector extends MainState {
 								bar.updateBar(null);
 								textField.setText("");
 								textField.setMessageText(count + " song(s) found");								
+								textFieldStyle.messageFontColor = Color.valueOf("00c0c0");
 							} else {
 								textField.setText("");
-								textField.setMessageText("no song found");								
+								textField.setMessageText("no song found");
+								textFieldStyle.messageFontColor = Color.DARK_GRAY;
 							}
 						}
 						textField.getOnscreenKeyboard().show(false);
 						stage.setKeyboardFocus(null);
 					}
+					if(!searchfont.getData().hasGlyph(key)) {
+						FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+						parameter.size = 24;
+						parameter.characters += textField.getText() + key;
+						BitmapFont newsearchfont = generator.generateFont(parameter);
+						textFieldStyle.font = newsearchfont;
+						textFieldStyle.messageFont = newsearchfont;
+						searchfont.dispose();
+						searchfont = newsearchfont;
+						textField.appendText(String.valueOf(key));
+					}
+					
 				}
 
 			});

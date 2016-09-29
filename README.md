@@ -2,7 +2,7 @@
 Codename beatoraja is a Cross-platform rhythm game based on Java and libGDX.
 It works on Windows, Mac OS, and Linux.
 
-Features :
+# Features
 - 3 types of Long Note mode : Long Notes, Charge Notes, Hell Charge Notes, and Back Spin Scratch like iidx
 - show notes duration (like iidx green number), judge details (fast/slow or +-ms)
 - 8 types of groove gauge (ex. assist-easy, ex-hard, ex-grade)
@@ -12,7 +12,8 @@ Features :
 - pms judge (nax 1 miss / 1 notes, combo is reset when miss)
 - support bmson 1.0.0
 - import difficulty table and create table folder, create course with various constraint (mirror/random OK, no hispeed, and so on)
-- import LunaticRave2 skin (now working in progress)
+- import LunaticRave2 skin (now working in progress. not supporting DirectXArchive(.dxa) and DirectDrawSurface(.dds) file)
 
-System Requirement :
+# System Requirement
 - Java Runtime Environment 1.8.0 64bit (32bit is not recomended)
+- OpenGL 3.1- (may not work under Windows 10 + Intel HD Graphics 2000/3000. See also https://github.com/LWJGL/lwjgl/issues/119)
