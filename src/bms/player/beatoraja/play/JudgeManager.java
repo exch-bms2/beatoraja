@@ -14,6 +14,9 @@ import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 public class JudgeManager {
 
 	private final BMSPlayer main;
+	/**
+	 * LN type
+	 */
 	private final int lntype;
 	private final TimeLine[] timelines;
 
@@ -44,9 +47,13 @@ public class JudgeManager {
 	 * 最大コンボ数
 	 */
 	private int maxcombo;
-
+	/**
+	 * コース時の現在のコンボ数
+	 */
 	private int coursecombo;
-
+	/**
+	 * コース時の最大コンボ数
+	 */
 	private int coursemaxcombo;
 	/**
 	 * 判定差時間(ms , +は早押しで-は遅押し)
@@ -78,26 +85,45 @@ public class JudgeManager {
 	// private static final int[] judgetable = {20, 60, 165, 315, 0, 1000};
 	private static final int[] judgetable = { 20, 60, 160, 250, 0, 1000 };
 	/**
+	 * CN終端の各判定の範囲(+-ms)。PGREAT, GREAT, GOOD, BAD, POOR, MISS空POORの順
+	 */
+	private static final int[] cnendjudgetable = { 100, 150, 200, 250, 0, 1000 };
+	/**
+	 * スクラッチの各判定の範囲(+-ms)。PGREAT, GREAT, GOOD, BAD, POOR, MISS空POORの順
+	 */
+	private static final int[] sjudgetable = { 30, 75, 200, 300, 0, 1000 };
+	/**
+	 * BSS終端の各判定の範囲(+-ms)。PGREAT, GREAT, GOOD, BAD, POOR, MISS空POORの順
+	 */
+	private static final int[] scnendjudgetable = {100, 150, 250, 300, 0, 1000 };
+	/**
 	 * PMSの各判定の範囲(+-ms)。PGREAT, GREAT, GOOD, BAD, POOR, MISS空POORの順
 	 */
 	private static final int[] pjudgetable = { 25, 75, 175, 200, 0, 1000 };
 	/**
-	 * スクラッチレーンの判定拡大幅
+	 * PMSのCN終端の各判定の範囲(+-ms)。PGREAT, GREAT, GOOD, BAD, POOR, MISS空POORの順
 	 */
-	private static final int sjudgerate = 110;
+	private static final int[] pcnendjudgetable = { 100, 150, 175, 200, 0, 1000 };
 	/**
 	 * HCNの増減間隔(ms)
 	 */
-	private static final int hcnduration = 100;
+	private static final int hcnduration = 200;
 	/**
 	 * ノーツ判定テーブル
 	 */
 	private int[] njudge;
 	/**
+	 * CN終端判定テーブル
+	 */
+	private int[] cnendjudge;
+	/**
 	 * スクラッチ判定テーブル
 	 */
 	private int[] sjudge;
-
+	private int[] scnendjudge;
+	/**
+	 * PMS用判定システム(空POORでコンボカット、1ノーツにつき1空POORまで)の有効/無効
+	 */
 	private boolean pmsjudge = false;
 
 	private int pos = 0;
@@ -144,12 +170,16 @@ public class JudgeManager {
 
 		njudge = new int[6];
 		sjudge = new int[6];
+		cnendjudge = new int[6];
+		scnendjudge = new int[6];
 		for (int i = 0; i < judgetable.length; i++) {
 			if (i < 4) {
 				njudge[i] = (model.getUseKeys() == 9 ? pjudgetable[i] : judgetable[i]) * model.getJudgerank() / 100;
-				sjudge[i] = njudge[i] * sjudgerate / 100;
+				sjudge[i] = sjudgetable[i] * model.getJudgerank() / 100;
+				cnendjudge[i] = (model.getUseKeys() == 9 ? pcnendjudgetable[i] : cnendjudgetable[i]) * model.getJudgerank() / 100;
+				scnendjudge[i] = scnendjudgetable[i] * model.getJudgerank() / 100;
 			} else {
-				sjudge[i] = njudge[i] = (model.getUseKeys() == 9 ? pjudgetable[i] : judgetable[i]);
+				sjudge[i] = njudge[i] = cnendjudge[i] = scnendjudge[i] = (model.getUseKeys() == 9 ? pjudgetable[i] : judgetable[i]);
 
 			}
 		}
@@ -222,14 +252,14 @@ public class JudgeManager {
 			if (inclease[keyassign[key]]) {
 				passingcount[keyassign[key]] += (time - prevtime);
 				if (passingcount[keyassign[key]] > hcnduration) {
-					main.getGauge().update(1);
+					main.getGauge().update(1, 2f);
 					// System.out.println("HCN : Gauge increase");
 					passingcount[keyassign[key]] -= hcnduration;
 				}
 			} else {
 				passingcount[keyassign[key]] -= (time - prevtime);
 				if (passingcount[keyassign[key]] < -hcnduration) {
-					main.getGauge().update(4, 0.2f);
+					main.getGauge().update(4, 0.5f);
 					// System.out.println("HCN : Gauge decrease");
 					passingcount[keyassign[key]] += hcnduration;
 				}
@@ -244,13 +274,13 @@ public class JudgeManager {
 			}
 			final int lane = keyassign[key];
 			final int sc = Arrays.binarySearch(sckeyassign, lane);
-			final int[] judge = sc >= 0 ? sjudge : njudge;
 			if (keystate[key]) {
 				// キーが押されたときの処理
 				if (processing[lane] != null) {
 					if (((lntype != BMSModel.LNTYPE_LONGNOTE && processing[lane].getType() == LongNote.TYPE_UNDEFINED)
 							|| processing[lane].getType() == LongNote.TYPE_CHARGENOTE || processing[lane].getType() == LongNote.TYPE_HELLCHARGENOTE)
 							&& sc >= 0 && key != sckey[sc]) {
+						final int[] judge = scnendjudge;
 						for (int j = 0; j < judge.length; j++) {
 							if (j > 3) {
 								j = 4;
@@ -275,6 +305,7 @@ public class JudgeManager {
 						// ここに来るのはマルチキーアサイン以外ありえないはず
 					}
 				} else {
+					final int[] judge = sc >= 0 ? sjudge : njudge;
 					// 対象ノーツの抽出
 					final TimeLine tl = judgeAlgorithms[judgetype].getNote(pos, timelines, ptime, judge,
 							noteassign[lane], pmsjudge);
@@ -350,6 +381,7 @@ public class JudgeManager {
 			} else {
 				// キーが離されたときの処理
 				if (processing[lane] != null) {
+					final int[] judge = sc >= 0 ? scnendjudge : cnendjudge;
 					for (int j = 0; j < judge.length; j++) {
 						if (j > 3) {
 							j = 4;
