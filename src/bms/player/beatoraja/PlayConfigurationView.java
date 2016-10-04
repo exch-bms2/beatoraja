@@ -572,14 +572,14 @@ public class PlayConfigurationView implements Initializable {
 
 class SkinConfigurationView {
 
-	private List<LR2SkinHeader> lr2skinheader = new ArrayList();
+	private List<LR2SkinHeader> lr2skinheader = new ArrayList<LR2SkinHeader>();
 
 	private LR2SkinHeader selected = null;
-	private Map<CustomOption, ComboBox> optionbox = new HashMap();
-	private Map<CustomFile, ComboBox> filebox = new HashMap();
+	private Map<CustomOption, ComboBox<String>> optionbox = new HashMap<CustomOption, ComboBox<String>>();
+	private Map<CustomFile, ComboBox<String>> filebox = new HashMap<CustomFile, ComboBox<String>>();
 
 	public SkinConfigurationView() {
-		List<Path> lr2skinpaths = new ArrayList();
+		List<Path> lr2skinpaths = new ArrayList<Path>();
 		scan(Paths.get("skin"), lr2skinpaths);
 		for (Path path : lr2skinpaths) {
 			LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
@@ -615,10 +615,11 @@ class SkinConfigurationView {
 			main.getChildren().add(hbox);
 		}
 		filebox.clear();
-		for (CustomFile file : header.getCustomFiles()) {			
+		for (CustomFile file : header.getCustomFiles()) {
+			String name = file.path.substring(file.path.lastIndexOf('/') + 1);
 			try (DirectoryStream<Path> paths = Files.newDirectoryStream(
-					Paths.get(file.path.substring(0, file.path.lastIndexOf('/'))),
-					file.path.substring(file.path.lastIndexOf('/') + 1))) {
+					Paths.get(file.path.substring(0, file.path.lastIndexOf('/'))), "{" + name.toLowerCase() + ","
+							+ name.toUpperCase() + "}")) {
 				HBox hbox = new HBox();
 				ComboBox<String> combo = new ComboBox<String>();
 				for (Path p : paths) {
