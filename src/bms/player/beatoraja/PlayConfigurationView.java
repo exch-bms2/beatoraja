@@ -617,9 +617,12 @@ class SkinConfigurationView {
 		filebox.clear();
 		for (CustomFile file : header.getCustomFiles()) {
 			String name = file.path.substring(file.path.lastIndexOf('/') + 1);
-			try (DirectoryStream<Path> paths = Files.newDirectoryStream(
-					Paths.get(file.path.substring(0, file.path.lastIndexOf('/'))), "{" + name.toLowerCase() + ","
-							+ name.toUpperCase() + "}")) {
+			final Path dirpath = Paths.get(file.path.substring(0, file.path.lastIndexOf('/')));
+			if (!Files.exists(dirpath)) {
+				continue;
+			}
+			try (DirectoryStream<Path> paths = Files.newDirectoryStream(dirpath,
+					"{" + name.toLowerCase() + "," + name.toUpperCase() + "}")) {
 				HBox hbox = new HBox();
 				ComboBox<String> combo = new ComboBox<String>();
 				for (Path p : paths) {

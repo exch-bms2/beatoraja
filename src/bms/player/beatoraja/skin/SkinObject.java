@@ -273,8 +273,8 @@ public abstract class SkinObject {
 
 	public abstract void draw(SpriteBatch sprite, long time, MainState state);
 
-	private final float[] centerx = { 0, -0.5f, 0, 0.5f, -0.5f, 0, 0.5f, -0.5f, 0, 0.5f };
-	private final float[] centery = { 0, -0.5f, -0.5f, -0.5f, 0, 0, 0, 0.5f, 0.5f, 0.5f };
+	private final float[] centerx = { 0.5f, 0, 0.5f, 1,0, 0.5f, 1,0, 0.5f, 1,};
+	private final float[] centery = { 0.5f, 0, 0, 0, 0.5f, 0.5f, 0.5f, 1, 1, 1 };
 
 	protected void draw(SpriteBatch sprite, TextureRegion image, float x, float y, float width, float height,
 			Color color, int angle) {

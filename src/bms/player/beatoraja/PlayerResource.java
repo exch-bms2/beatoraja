@@ -158,6 +158,35 @@ public class PlayerResource {
 				}
 			};
 			medialoader.start();
+		} else {
+			// windowsだけ動画を含むBGAがあれば読み直す(ffmpegがエラー終了する。今後のupdateで直れば外す)
+			if("\\".equals(System.getProperty("file.separator"))) {
+				Logger.getGlobal().info("WindowsのためBGA再読み込み");
+				if (bga != null) {
+					bga.dispose();
+				}
+				bga = new BGAProcessor(config);
+				Thread medialoader = new Thread() {
+					@Override
+					public void run() {
+						try {
+							if (config.getBga() == Config.BGA_ON || (config.getBga() == Config.BGA_AUTO && (auto != 0))) {
+								bga.setModel(model);
+							} else {
+								bga.forceFinish();
+							}
+						} catch (Exception e) {
+							Logger.getGlobal().severe(e.getClass().getName() + " : " + e.getMessage());
+							e.printStackTrace();
+						} catch (Error e) {
+							Logger.getGlobal().severe(e.getClass().getName() + " : " + e.getMessage());
+						} finally {
+							bga.forceFinish();
+						}
+					}
+				};
+				medialoader.start();				
+			}
 		}
 		return true;
 	}
@@ -381,5 +410,5 @@ public class PlayerResource {
 
 	public void setSongdata(SongData songdata) {
 		this.songdata = songdata;
-	}
+	}	
 }
