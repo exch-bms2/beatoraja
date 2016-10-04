@@ -400,11 +400,11 @@ public class LaneRenderer {
 			if (tl.getTime() >= time) {
 				if (nbpm > 0) {
 					if ((i > 0 && timelines[i - 1].getTime() + timelines[i - 1].getStop() > time)) {
-						y += (timelines[i].getSection() - timelines[i - 1].getSection()) * (hu - hl) * hispeed;
+						y += (tl.getSection() - timelines[i - 1].getSection()) * (hu - hl) * hispeed;
 					} else {
-						y += (timelines[i].getSection() - (i > 0 ? timelines[i - 1].getSection() : 0))
-								* (timelines[i].getTime() - time)
-								/ (timelines[i].getTime() - (i > 0 ? timelines[i - 1].getTime()
+						y += (tl.getSection() - (i > 0 ? timelines[i - 1].getSection() : 0))
+								* (tl.getTime() - time)
+								/ (tl.getTime() - (i > 0 ? timelines[i - 1].getTime()
 										+ timelines[i - 1].getStop() : 0)) * (hu - hl) * hispeed;
 					}
 					// if(y < 0) {
@@ -473,7 +473,6 @@ public class LaneRenderer {
 			for (int lane = 0; lane < laneregion.length; lane++) {
 				final Note note = tl.getNote(laneassign[lane]);
 				if (note != null) {
-					float dy = 1;
 					if (note instanceof LongNote) {
 						if (((LongNote) note).getStart() == tl && ((LongNote) note).getEnd().getTime() >= time) {
 							// if (((LongNote) note).getEnd() == null) {
@@ -483,7 +482,7 @@ public class LaneRenderer {
 							// .getStart()
 							// .getTime());
 							// } else {
-							dy = 0;
+							float dy = 0;
 							for (int j = 0; timelines[i + j] != ((LongNote) note).getEnd(); j++) {
 								if (timelines[i + j + 1].getTime() >= time) {
 									if (timelines[i + j].getTime() + timelines[i + j].getStop() > time) {
@@ -497,17 +496,16 @@ public class LaneRenderer {
 									}
 								}
 							}
+							if (dy > 0) {
+								this.drawNote(laneregion[lane].x, y + dy, laneregion[lane].width, dy, 1.0f, lane, note);
+							}
 							// System.out.println(dy);
-						} else {
-							dy = 0;
 						}
 					} else {
-						if (tl.getTime() < time) {
-							dy = 0;
+						// draw normal/mine note
+						if (tl.getTime() >= time) {
+							this.drawNote(laneregion[lane].x, y, laneregion[lane].width, 0, 1.0f, lane, note);
 						}
-					}
-					if (dy > 0) {
-						this.drawNote(laneregion[lane].x, y + dy, laneregion[lane].width, dy, 1.0f, lane, note);
 					}
 				}
 				// hidden note
