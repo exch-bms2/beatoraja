@@ -174,7 +174,7 @@ public class BMSPlayer extends MainState {
 					}
 				} else {
 					for (int i = 0; i < resource.getCourseBMSModels().length; i++) {
-						if (resource.getCourseBMSModels()[i].getHash().equals(resource.getBMSModel().getHash())) {
+						if (resource.getCourseBMSModels()[i].getMD5().equals(resource.getBMSModel().getMD5())) {
 							replay = resource.getCourseReplay()[i];
 						}
 					}
