@@ -431,9 +431,9 @@ public class PlayConfigurationView implements Initializable {
 		commit();
 		try {
 			Class.forName("org.sqlite.JDBC");
-			SongDatabaseAccessor songdb = new SQLiteSongDatabaseAccessor(Paths.get("songdata.db").toString());
+			SongDatabaseAccessor songdb = new SQLiteSongDatabaseAccessor(Paths.get("songdata.db").toString(), config.getBmsroot());
 			Logger.getGlobal().info("song.db更新開始");
-			songdb.updateSongDatas(config.getBmsroot(), Paths.get(".").toAbsolutePath().toString(), updateAll);
+			songdb.updateSongDatas(null, updateAll);
 			Logger.getGlobal().info("song.db更新完了");
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();

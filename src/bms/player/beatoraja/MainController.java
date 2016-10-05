@@ -94,7 +94,7 @@ public class MainController extends ApplicationAdapter {
 
 		try {
 			Class.forName("org.sqlite.JDBC");
-			songdb = new SQLiteSongDatabaseAccessor(songdbpath.toString());
+			songdb = new SQLiteSongDatabaseAccessor(songdbpath.toString(), config.getBmsroot());
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}

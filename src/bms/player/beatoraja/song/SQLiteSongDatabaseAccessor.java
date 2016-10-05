@@ -35,17 +35,21 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 	public static final String TAG = "tag";
 
 	private SqliteDBManager songdb;
+	
+	private Path root;
+	private String[] bmsroot;
 
 	private final ResultSetHandler<List<SongData>> songhandler = new BeanListHandler<SongData>(SongData.class);
 	private final ResultSetHandler<List<FolderData>> folderhandler = new BeanListHandler<FolderData>(FolderData.class);
 
 	private QueryRunner qr;
 
-	public SQLiteSongDatabaseAccessor(String filepath) throws ClassNotFoundException {
+	public SQLiteSongDatabaseAccessor(String filepath, String[] bmsroot) throws ClassNotFoundException {
 		Class.forName("org.sqlite.JDBC");
 		songdb = new SqliteDBManager(filepath);
 		qr = new QueryRunner(songdb.getDataSource());
-		
+		root = Paths.get(".");
+		this.bmsroot = bmsroot;
 		createTable();
 	}
 
@@ -292,13 +296,19 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 	 * @param path
 	 *            LR2のルートパス
 	 */
-	public void updateSongDatas(String[] rootdirs, String path, boolean updateAll) {
-		SongDatabaseUpdater updater = new SongDatabaseUpdater(rootdirs, Paths.get(path), updateAll);
-		Path[] paths = new Path[rootdirs.length];
-		for (int i = 0; i < paths.length; i++) {
-			paths[i] = Paths.get(rootdirs[i]);
+	public void updateSongDatas(String path, boolean updateAll) {
+		SongDatabaseUpdater updater = new SongDatabaseUpdater(updateAll);
+		Path[] paths = null;
+		if(path == null) {
+			paths = new Path[bmsroot.length];
+			for (int i = 0; i < paths.length; i++) {
+				paths[i] = Paths.get(bmsroot[i]);
+			}
+		} else {
+			paths = new Path[1];
+			paths[0] = Paths.get(path);
 		}
-		updater.updateSongDatas(paths);
+		updater.updateSongDatas(paths);			
 	}
 
 	/**
@@ -319,17 +329,12 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 
 		private int count = 0;
 
-		private String[] rootdirs;
-		private Path path;
-
 		private Map<String, String> tags = new HashMap<String, String>();
 		private boolean updateAll;
 
 		private long updatetime;
 
-		public SongDatabaseUpdater(String[] rootdirs, Path path, boolean updateAll) {
-			this.rootdirs = rootdirs;
-			this.path = path;
+		public SongDatabaseUpdater(boolean updateAll) {
 			this.updateAll = updateAll;
 		}
 
@@ -338,10 +343,6 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 		 * 
 		 * @param files
 		 *            更新するディレクトリ(ルートディレクトリでなくても可)
-		 * @param rootdirs
-		 *            楽曲のルートパス
-		 * @param path
-		 *            LR2のルートパス
 		 */
 		public void updateSongDatas(Path[] paths) {
 			long time = System.currentTimeMillis();
@@ -352,9 +353,9 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 				conn.setAutoCommit(false);
 				// ルートディレクトリに含まれないフォルダの削除
 				String dsql = "";
-				for (int i = 0; i < rootdirs.length; i++) {
-					dsql += "path NOT LIKE '" + rootdirs[i] + "%'";
-					if (i < rootdirs.length - 1) {
+				for (int i = 0; i < bmsroot.length; i++) {
+					dsql += "path NOT LIKE '" + bmsroot[i] + "%'";
+					if (i < bmsroot.length - 1) {
 						dsql += " AND ";
 					}
 				}
@@ -364,7 +365,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 				qr.update(conn, "DELETE FROM song WHERE " + dsql);
 				// 楽曲のタグの保持
 				for (Path f : paths) {
-					final String s = (f.startsWith(path) ? path.relativize(f).toString() : f.toString());
+					final String s = (f.startsWith(root) ? root.relativize(f).toString() : f.toString());
 					List<SongData> records = qr.query(conn, "SELECT * FROM song WHERE path LIKE ?", rh, s + "%");
 					for (SongData record : records) {
 						tags.put(record.getMd5(), record.getTag());
@@ -386,9 +387,9 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 
 		private void processDirectory(Connection conn, final Path dir, boolean updateFolder) throws IOException, SQLException {
 			List<SongData> records = qr.query(conn, "SELECT path,date FROM song WHERE folder = ?", rh,
-					SongUtils.crc32(dir.toString(), rootdirs, path.toString()));
+					SongUtils.crc32(dir.toString(), bmsroot, root.toString()));
 			List<FolderData> folders = qr.query(conn, "SELECT path,date FROM folder WHERE parent = ?", rh2,
-					SongUtils.crc32(dir.toString(), rootdirs, path.toString()));
+					SongUtils.crc32(dir.toString(), bmsroot, root.toString()));
 			boolean txt = false;
 			List<Path> bmsfiles = new ArrayList<Path>();
 			List<Path> dirs = new ArrayList<Path>();
@@ -420,7 +421,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 			for (Path f : bmsfiles) {
 				boolean b = true;
 				for (SongData record : records) {
-					final String s = (f.startsWith(path) ? path.relativize(f).toString() : f.toString());
+					final String s = (f.startsWith(root) ? root.relativize(f).toString() : f.toString());
 					if (record.getPath().equals(s)) {
 						removes.remove(record);
 						if (!updateAll && record.getDate() == Files.getLastModifiedTime(f).toMillis() / 1000) {
@@ -472,7 +473,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 								}
 							}
 						} else {
-							qr.update(conn, "DELETE FROM song WHERE path = ?", f.startsWith(path) ? path.relativize(f)
+							qr.update(conn, "DELETE FROM song WHERE path = ?", f.startsWith(root) ? root.relativize(f)
 									.toString() : f.toString());
 						}
 					}
@@ -506,10 +507,10 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 						+ "maxbpm, minbpm, mode, judge, feature, content, " + "date, favorite, notes, adddate)"
 						+ "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);", sd.getMd5(), sd.getSha256(),
 						sd.getTitle(), sd.getSubtitle(), sd.getGenre(), sd.getArtist(), sd.getSubartist(), tags.get(sd
-								.getMd5()) != null ? tags.get(sd.getMd5()) : "", f.startsWith(path) ? path
+								.getMd5()) != null ? tags.get(sd.getMd5()) : "", f.startsWith(root) ? root
 								.relativize(f).toString() : f.toString(),
-								SongUtils.crc32(f.getParent().toString(), rootdirs, path.toString()), sd.getStagefile(), sd.getBanner(),
-						sd.getBackbmp(), SongUtils.crc32(f.getParent().getParent().toString(), rootdirs, path.toString()), sd
+								SongUtils.crc32(f.getParent().toString(), bmsroot, root.toString()), sd.getStagefile(), sd.getBanner(),
+						sd.getBackbmp(), SongUtils.crc32(f.getParent().getParent().toString(), bmsroot, root.toString()), sd
 								.getLevel(), sd.getDifficulty(), sd.getMaxbpm(), sd.getMinbpm(), sd.getMode(), sd
 								.getJudge(), sd.getFeature(), sd.getContent(),
 						Files.getLastModifiedTime(f).toMillis() / 1000, 0, sd.getNotes(), updatetime);
@@ -524,7 +525,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 			for (Path f : dirs) {
 				boolean b = true;
 				for (FolderData record : folders) {
-					final String s = (f.startsWith(path) ? path.relativize(f).toString() : f.toString())
+					final String s = (f.startsWith(root) ? root.relativize(f).toString() : f.toString())
 							+ File.separatorChar;
 					if (record.getPath().equals(s)) {
 						fremoves.remove(record);
@@ -538,13 +539,13 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 			}
 			// folderテーブルの更新
 			if (updateFolder) {
-				final String s = (dir.startsWith(path) ? path.relativize(dir).toString() : dir.toString())
+				final String s = (dir.startsWith(root) ? root.relativize(dir).toString() : dir.toString())
 						+ File.separatorChar;
 				// System.out.println("folder更新 : " + s);
 				qr.update(conn,
 						"INSERT OR REPLACE INTO folder (title, subtitle, command, path, type, banner, parent, date, max, adddate)"
 								+ "VALUES(?,?,?,?,?,?,?,?,?,?);", dir.getFileName().toString(), "", "", s, 1, "",
-								SongUtils.crc32(dir.getParent().toString(), rootdirs, path.toString()), Files.getLastModifiedTime(dir)
+								SongUtils.crc32(dir.getParent().toString(), bmsroot, root.toString()), Files.getLastModifiedTime(dir)
 								.toMillis() / 1000, null, Calendar.getInstance().getTimeInMillis() / 1000);
 			}
 			// ディレクトリ内に存在しないフォルダレコードを削除

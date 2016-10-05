@@ -781,6 +781,18 @@ public class MusicSelector extends MainState {
 		if (bar.getSelected() != current) {
 			getTimer()[TIMER_SONGBAR_CHANGE] = nowtime;
 		}
+		
+		if (input.getFunctionstate()[1] && input.getFunctiontime()[1] != 0) {
+			input.getFunctiontime()[1] = 0;
+			if(bar.getSelected() instanceof FolderBar) {
+				FolderBar fb = (FolderBar) bar.getSelected();
+				songdb.updateSongDatas(fb.getFolderData().getPath(), false);				
+			}
+			if(bar.getSelected() instanceof TableBar) {
+				// TODO 難易度表の読み込み
+				TableBar tb = (TableBar) bar.getSelected();
+			}
+		}
 
 		if (input.isExitPressed()) {
 			exit();

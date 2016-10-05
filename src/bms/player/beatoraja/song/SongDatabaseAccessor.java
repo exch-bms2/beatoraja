@@ -39,13 +39,11 @@ public interface SongDatabaseAccessor {
 	/**
 	 * データベースを更新する
 	 * 
-	 * @param rootdirs
-	 *            楽曲のルートパス
-	 * @param path
-	 *            LR2のルートパス
+	 * @param updatepath
+	 *         		更新するフォルダのパス。全更新する場合はnull
 	 * @param updateAll
 	 *            更新の必要がないものも更新するかどうか
 	 */
-	public void updateSongDatas(String[] rootdirs, String path, boolean updateAll);
+	public void updateSongDatas(String updatepath, boolean updateAll);
 
 }
