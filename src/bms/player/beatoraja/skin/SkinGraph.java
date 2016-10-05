@@ -18,7 +18,7 @@ public class SkinGraph extends SkinObject {
 
 	private int id = -1;
 	private int direction = 1;
-	
+
 	private int imageid = -1;
 
 	public SkinGraph(int imageid) {
@@ -37,7 +37,7 @@ public class SkinGraph extends SkinObject {
 		if (getCycle() == 0) {
 			return image[0];
 		}
-		final int index = ((int) (time / (((float)getCycle())  / image.length))) % image.length;
+		final int index = ((int) (time / (((float) getCycle()) / image.length))) % image.length;
 		// System.out.println(index + " / " + image.length);
 		return image[index];
 	}
@@ -78,19 +78,22 @@ public class SkinGraph extends SkinObject {
 				float value = 0;
 				if (id != -1) {
 					value = state.getSliderValue(id);
+					// System.out.println("bargraph id : " + id + " value : " +
+					// value);
 				}
 				TextureRegion image = getImage(time);
 				// sprite.draw(image, r.x, r.y, r.width, r.height);
 				if (direction == 1) {
 					draw(sprite,
-							new TextureRegion(image, 0, image.getRegionY() + image.getRegionHeight()
+							new TextureRegion(image, 0, image.getRegionHeight()
 									- (int) (image.getRegionHeight() * value), image.getRegionWidth(),
 									(int) ((int) image.getRegionHeight() * value)), r.x, r.y, r.width,
 							r.height * value, getColor(time, state), getAngle(time, state));
 				} else {
-					draw(sprite, new TextureRegion(image, 0, image.getRegionY(),
-							(int) (image.getRegionWidth() * value), image.getRegionHeight()), r.x, r.y,
-							r.width * value, r.height, getColor(time, state), getAngle(time, state));
+					draw(sprite,
+							new TextureRegion(image, 0, 0, (int) (image.getRegionWidth() * value), image
+									.getRegionHeight()), r.x, r.y, r.width * value, r.height, getColor(time, state),
+							getAngle(time, state));
 				}
 			}
 		}
@@ -120,7 +123,7 @@ public class SkinGraph extends SkinObject {
 	public void setDirection(int direction) {
 		this.direction = direction;
 	}
-	
+
 	public int getImageID() {
 		return imageid;
 	}

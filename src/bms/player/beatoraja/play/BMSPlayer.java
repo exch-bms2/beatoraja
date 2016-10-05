@@ -964,6 +964,10 @@ public class BMSPlayer extends MainState {
 		switch (id) {
 		case NUMBER_LANECOVER1:
 			return (int) (lanerender.getLanecover() * 1000);
+		case NUMBER_PLAYTIME_MINUTE:
+			return (int) (((int) (getTimer()[TIMER_PLAY] != Long.MIN_VALUE ? getNowTime() - getTimer()[TIMER_PLAY] : 0)) / 60000);
+		case NUMBER_PLAYTIME_SECOND:
+			return (((int) (getTimer()[TIMER_PLAY] != Long.MIN_VALUE ? getNowTime() - getTimer()[TIMER_PLAY] : 0)) / 1000) % 60;
 		case NUMBER_TIMELEFT_MINUTE:
 			return (int) ((playtime
 					- (int) (getTimer()[TIMER_PLAY] != Long.MIN_VALUE ? getNowTime() - getTimer()[TIMER_PLAY] : 0) + 1000) / 60000);

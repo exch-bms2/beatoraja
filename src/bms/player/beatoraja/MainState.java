@@ -209,6 +209,8 @@ public abstract class MainState {
 	public static final int NUMBER_DIFF_TARGETSCORE = 153;
 	public static final int NUMBER_DIFF_NEXTRANK = 154;
 	public static final int NUMBER_NOWBPM = 160;
+	public static final int NUMBER_PLAYTIME_MINUTE = 161;
+	public static final int NUMBER_PLAYTIME_SECOND = 162;
 	public static final int NUMBER_TIMELEFT_MINUTE = 163;
 	public static final int NUMBER_TIMELEFT_SECOND = 164;
 	public static final int NUMBER_LOADING_PROGRESS = 165;
