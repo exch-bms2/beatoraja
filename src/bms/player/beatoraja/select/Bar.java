@@ -1,6 +1,7 @@
 package bms.player.beatoraja.select;
 
 import bms.player.beatoraja.*;
+import bms.player.beatoraja.TableData.CourseData;
 import bms.player.beatoraja.song.FolderData;
 import bms.player.beatoraja.song.SQLiteSongDatabaseAccessor;
 import bms.player.beatoraja.song.SongData;
@@ -315,21 +316,47 @@ class FolderBar extends DirectoryBar {
 
 class TableBar extends DirectoryBar {
 
-    private String name;
+	private TableData td;
     private TableLevelBar[] levels;
     private GradeBar[] grades;
     private MusicSelector selector;
 
-    public TableBar(MusicSelector selector, String name, TableLevelBar[] levels, GradeBar[] grades) {
+    public TableBar(MusicSelector selector, TableData td) {
         this.selector = selector;
-        this.name = name;
-        this.levels = levels;
-        this.grades = grades;
+        setTableData(td);
     }
 
     @Override
     public String getTitle() {
-        return name;
+        return td.getName();
+    }
+    
+    public String getUrl() {
+    	return td.getUrl();
+    }
+    
+    public void setTableData(TableData td) {
+    	this.td = td;
+		List<TableLevelBar> levels = new ArrayList<TableLevelBar>();
+		for (String lv : td.getLevel()) {
+			levels.add(new TableLevelBar(selector, lv, td.getHash().get(lv)));
+		}
+		this.levels = levels.toArray(new TableLevelBar[levels.size()]);
+		List<GradeBar> l = new ArrayList<GradeBar>();
+		for (CourseData course : td.getCourse()) {
+			List<SongData> songlist = new ArrayList<SongData>();
+			for (String hash : course.getHash()) {
+				SongData[] songs = selector.getSongDatabase().getSongDatas("md5", hash);
+				if (songs.length > 0) {
+					songlist.add(songs[0]);
+				} else {
+					songlist.add(null);
+				}
+			}
+
+			l.add(new GradeBar(course.getName(), songlist.toArray(new SongData[0]), course));
+		}
+		grades = l.toArray(new GradeBar[l.size()]);
     }
 
     public TableLevelBar[] getLevels() {

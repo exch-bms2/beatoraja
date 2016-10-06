@@ -70,26 +70,7 @@ public class BarRenderer {
 			for(Path p : paths) {
 				Json json = new Json();
 				TableData td = json.fromJson(TableData.class, new FileReader(p.toFile()));
-				List<TableLevelBar> levels = new ArrayList<TableLevelBar>();
-				for (String lv : td.getLevel()) {
-					levels.add(new TableLevelBar(select, lv, td.getHash().get(lv)));
-				}
-				List<GradeBar> l = new ArrayList<GradeBar>();
-				for (CourseData course : td.getCourse()) {
-					List<SongData> songlist = new ArrayList<SongData>();
-					for (String hash : course.getHash()) {
-						SongData[] songs = songdb.getSongDatas("md5", hash);
-						if (songs.length > 0) {
-							songlist.add(songs[0]);
-						} else {
-							songlist.add(null);
-						}
-					}
-
-					l.add(new GradeBar(course.getName(), songlist.toArray(new SongData[0]), course));
-				}
-				tables.add(new TableBar(select, td.getName(), levels.toArray(new TableLevelBar[0]), l
-						.toArray(new GradeBar[0])));				
+				tables.add(new TableBar(select, td));				
 			}
 			this.tables = tables.toArray(new TableBar[0]);			
 		} catch(IOException e) {
@@ -109,6 +90,10 @@ public class BarRenderer {
 						"(lpg * 2 + epg * 2 + lgr + egr) * 50 / notes >= 77.77 AND (lpg * 2 + epg * 2 + lgr + egr) * 50 / notes < 88.88"),
 				new CommandBar(main, select, "RANK A",
 						"(lpg * 2 + epg * 2 + lgr + egr) * 50 / notes >= 66.66 AND (lpg * 2 + epg * 2 + lgr + egr) * 50 / notes < 77.77"), };
+	}
+	
+	public void updateTableBar(TableBar tb) {
+		
 	}
 
 	public Bar getSelected() {

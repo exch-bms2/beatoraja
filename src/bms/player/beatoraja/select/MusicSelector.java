@@ -789,8 +789,16 @@ public class MusicSelector extends MainState {
 				songdb.updateSongDatas(fb.getFolderData().getPath(), false);				
 			}
 			if(bar.getSelected() instanceof TableBar) {
-				// TODO 難易度表の読み込み
 				TableBar tb = (TableBar) bar.getSelected();
+				if(tb.getUrl() != null && tb.getUrl().length() > 0) {
+					TableDataAccessor tda = new TableDataAccessor();
+					String[] url = new String[]{tb.getUrl()};
+					tda.updateTableData(url);
+					TableData td = tda.read(tb.getTitle());
+					if(td != null) {
+						tb.setTableData(td);						
+					}
+				}
 			}
 		}
 

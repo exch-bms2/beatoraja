@@ -5,6 +5,8 @@ import java.util.Map;
 
 public class TableData {
 
+	private String url = "";
+	
 	private String name = "";
 	
 	private String[] level = new String[0];
@@ -50,6 +52,14 @@ public class TableData {
 
 	public void setHash(HashMap<String, String[]> hash) {
 		this.hash = hash;
+	}
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
 	}
 
 	public static class CourseData {
