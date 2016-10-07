@@ -6,10 +6,18 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
+
+import org.apache.commons.dbutils.QueryRunner;
+import org.apache.commons.dbutils.ResultSetHandler;
+import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.dbutils.handlers.MapListHandler;
 
 import bms.player.beatoraja.Config.SkinConfig;
 import bms.player.beatoraja.TableData.CourseData;
@@ -19,6 +27,7 @@ import bms.player.beatoraja.skin.LR2SkinHeader.CustomFile;
 import bms.player.beatoraja.skin.LR2SkinHeader.CustomOption;
 import bms.player.beatoraja.skin.LR2SkinHeaderLoader;
 import bms.player.beatoraja.song.SQLiteSongDatabaseAccessor;
+import bms.player.beatoraja.song.SongData;
 import bms.player.beatoraja.song.SongDatabaseAccessor;
 import bms.table.Course;
 import bms.table.Course.Trophy;
@@ -38,6 +47,8 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.util.Callback;
 
 /**
@@ -431,7 +442,8 @@ public class PlayConfigurationView implements Initializable {
 		commit();
 		try {
 			Class.forName("org.sqlite.JDBC");
-			SongDatabaseAccessor songdb = new SQLiteSongDatabaseAccessor(Paths.get("songdata.db").toString(), config.getBmsroot());
+			SongDatabaseAccessor songdb = new SQLiteSongDatabaseAccessor(Paths.get("songdata.db").toString(),
+					config.getBmsroot());
 			Logger.getGlobal().info("song.db更新開始");
 			songdb.updateSongDatas(null, updateAll);
 			Logger.getGlobal().info("song.db更新完了");
@@ -460,6 +472,63 @@ public class PlayConfigurationView implements Initializable {
 
 		TableDataAccessor tda = new TableDataAccessor();
 		tda.updateTableData(config.getTableURL());
+	}
+
+	public void importScoreDataFromLR2() {
+		FileChooser chooser = new FileChooser();
+		chooser.getExtensionFilters().setAll(
+				new ExtensionFilter("Lunatic Rave 2 Score Database File", "*.db"));
+		chooser.setTitle("LRのスコアデータベースを選択してください");
+		File dir = chooser.showOpenDialog(null);
+		if (dir == null) {
+			return;
+		}
+
+		final int[] clears = { 0, 1, 4, 5, 6, 8, 9 };
+		try {
+			Class.forName("org.sqlite.JDBC");
+			PlayDataAccessor playdata = new PlayDataAccessor("playerscore");
+			SongDatabaseAccessor songdb = new SQLiteSongDatabaseAccessor(Paths.get("songdata.db").toString(),
+					config.getBmsroot());
+			String player = "playerscore";
+			ScoreDatabaseAccessor scoredb = new ScoreDatabaseAccessor(new File(".").getAbsoluteFile().getParent(), "/", "/");
+			scoredb.createTable(player);
+
+			try (Connection con = DriverManager.getConnection("jdbc:sqlite:" + dir.getPath())) {
+				QueryRunner qr = new QueryRunner();
+				MapListHandler rh = new MapListHandler();
+				List<Map<String, Object>> scores = qr.query(con, "SELECT * FROM score", rh);
+
+				List<IRScoreData> result = new ArrayList<IRScoreData>();
+				for (Map<String, Object> score : scores) {
+					final String md5 = (String) score.get("hash");
+					SongData[] song = songdb.getSongDatas(new String[] { md5 });
+					if (song.length > 0) {
+						IRScoreData sd = new IRScoreData();
+						sd.setEpg((int) score.get("perfect"));
+						sd.setEgr((int) score.get("great"));
+						sd.setEgd((int) score.get("good"));
+						sd.setEbd((int) score.get("bad"));
+						sd.setEpr((int) score.get("poor"));
+						sd.setMinbp((int) score.get("minbp"));
+						sd.setClear(clears[(int) score.get("clear")]);
+						sd.setPlaycount((int) score.get("playcount"));
+						sd.setClearcount((int) score.get("clearcount"));
+						sd.setNotes(song[0].getNotes());
+						sd.setSha256(song[0].getSha256());
+						IRScoreData oldsd = scoredb.getScoreData(player, sd.getSha256(), 0);
+						if(oldsd == null || oldsd.getClear() <= sd.getClear()) {
+							result.add(sd);
+						}
+					}
+				}
+				scoredb.setScoreData(player, result.toArray(new IRScoreData[result.size()]));
+			} catch (Exception e) {
+				Logger.getGlobal().severe("スコア移行時の例外:" + e.getMessage());
+			}
+		} catch (ClassNotFoundException e1) {
+		}
+
 	}
 
 	public void exit() {

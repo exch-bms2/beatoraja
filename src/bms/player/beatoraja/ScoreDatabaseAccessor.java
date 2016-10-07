@@ -246,30 +246,26 @@ public class ScoreDatabaseAccessor {
 	}
 
 	public void setScoreData(String playername, IRScoreData score) {
-		Connection con = null;
-		try {
-			con = DriverManager.getConnection("jdbc:sqlite:" + rootpath + playerpath + playername + ".db");
+		setScoreData(playername, new IRScoreData[]{score});
+	}
+
+	public void setScoreData(String playername, IRScoreData[] scores) {
+		try (Connection con = DriverManager.getConnection("jdbc:sqlite:" + rootpath + playerpath + playername + ".db")){
 			con.setAutoCommit(false);
 			String sql = "INSERT OR REPLACE INTO score "
 					+ "(sha256, mode, clear, epg, lpg, egr, lgr, egd, lgd, ebd, lbd, epr, lpr, ems, lms, notes, combo, "
 					+ "minbp, playcount, clearcount, history, scorehash, option, random, date, state)"
 					+ "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
-			qr.update(con, sql, score.getSha256(), score.getMode(), score.getClear(), score.getEpg(), score.getLpg(),
-					score.getEgr(), score.getLgr(), score.getEgd(), score.getLgd(), score.getEbd(), score.getLbd(),
-					score.getEpr(), score.getLpr(), score.getEms(), score.getLms(), score.getNotes(), score.getCombo(),
-					score.getMinbp(), score.getPlaycount(), score.getClearcount(), score.getHistory(),
-					score.getScorehash(), score.getOption(), score.getRandom(), score.getDate(), score.getState());
+			for(IRScoreData score : scores) {
+				qr.update(con, sql, score.getSha256(), score.getMode(), score.getClear(), score.getEpg(), score.getLpg(),
+						score.getEgr(), score.getLgr(), score.getEgd(), score.getLgd(), score.getEbd(), score.getLbd(),
+						score.getEpr(), score.getLpr(), score.getEms(), score.getLms(), score.getNotes(), score.getCombo(),
+						score.getMinbp(), score.getPlaycount(), score.getClearcount(), score.getHistory(),
+						score.getScorehash(), score.getOption(), score.getRandom(), score.getDate(), score.getState());				
+			}
 			con.commit();
-			con.close();
 		} catch (Exception e) {
 			Logger.getGlobal().severe("スコア" + playername + "更新時の例外:" + e.getMessage());
-		} finally {
-			if (con != null) {
-				try {
-					con.close();
-				} catch (SQLException e) {
-				}
-			}
 		}
 	}
 

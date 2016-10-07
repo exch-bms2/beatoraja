@@ -234,6 +234,7 @@
                                     <TextField fx:id="soundpath" prefHeight="28.0" prefWidth="278.0" />
                                  </children>
                               </HBox>
+                              <Button mnemonicParsing="false" onAction="#importScoreDataFromLR2" text="import LR2 score" />
                            </children>
                         </VBox>
                      </children>
