@@ -19,8 +19,6 @@ public class SkinImage extends SkinObject {
 
 	private int id = -1;
 
-	private int imageid = -1;
-
 	public SkinImage() {
 		
 	}
@@ -49,23 +47,7 @@ public class SkinImage extends SkinObject {
 		if(getImageID() != -1) {
 			return state.getImage(getImageID());
 		}
-		if(getCycle() == 0) {
-			return image[value][0];
-		}
-		
-		if(getTimer() != 0 && getTimer() < 256) {
-			if(state.getTimer()[getTimer()] == Long.MIN_VALUE) {
-				return image[value][0];
-			}
-			time -= state.getTimer()[getTimer()];
-		}
-		if(time < 0) {
-			return image[value][0];
-		}
-
-		final int index = ((int) (time / (((float)getCycle())  / image[value].length))) % image[value].length;
-//		System.out.println(index + " / " + image.length);
-		return image[value][index];
+		return image[value][getImageIndex(image[value].length, time, state)];
 	}
 	
 	public void setImage(TextureRegion[] image, int cycle) {
@@ -127,13 +109,5 @@ public class SkinImage extends SkinObject {
 
 	public void setReferenceID(int id) {
 		this.id = id;
-	}
-	
-	public int getImageID() {
-		return imageid;
-	}
-
-	public void setImageID(int imageid) {
-		this.imageid = imageid;
 	}
 }

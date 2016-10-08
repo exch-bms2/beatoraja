@@ -77,17 +77,7 @@ public class SkinNumber extends SkinObject {
 		if(images == null) {
 			return new TextureRegion[0];
 		}
-		TextureRegion[] image = images[0];
-		if(getTimer() != 0 && getTimer() < 256) {
-			if(state.getTimer()[getTimer()] != Long.MIN_VALUE) {
-				time -= state.getTimer()[getTimer()];
-			}
-		}
-		if(time >= 0 && getCycle() != 0) {			
-			final int index = ((int) (time / (((float)getCycle())  / images.length))) % images.length;
-//			System.out.println("time : " + time + " - index : " + index + " / " + image.length);
-			image = images[index];
-		}
+		TextureRegion[] image = images[getImageIndex(images.length, time, state)];
 
 		value = Math.abs(value);
 		for (int j = values.length - 1; j >= 0; j--) {

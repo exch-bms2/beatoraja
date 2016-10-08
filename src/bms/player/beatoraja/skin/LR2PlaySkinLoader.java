@@ -28,7 +28,6 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 	private Sprite[] lnbodya = new Sprite[8];
 	private Sprite[] mine = new Sprite[8];
 	private Rectangle[] laner = new Rectangle[8];
-	private Sprite[] gauge = new Sprite[4];
 	private Rectangle gauger = null;
 	private SkinImage line;
 	private List<SkinImage> lines = new ArrayList<SkinImage>();
@@ -521,14 +520,14 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 					int playside = values[1];
 					final int divx = values[7];
 					final int divy = values[8];
-					gauge = new Sprite[divx * divy * 2];
+					TextureRegion[][] gauge = new TextureRegion[divx * divy / 4][8];
 					final int w = values[5];
 					final int h = values[6];
 					for (int x = 0; x < divx; x++) {
 						for (int y = 0; y < divy; y++) {
-							gauge[y * divx + x] = new Sprite(imagelist.get(values[2]), values[3] + w * x / divx,
+							gauge[(y * divx + x) / 4][(y * divx + x) % 4] = new TextureRegion(imagelist.get(values[2]), values[3] + w * x / divx,
 									values[4] + h * y / divy, w / divx, h / divy);
-							gauge[y * divx + x + divx * divy] = new Sprite(imagelist.get(values[2]), values[3] + w * x
+							gauge[(y * divx + x) / 4][(y * divx + x) % 4 + 4] = new TextureRegion(imagelist.get(values[2]), values[3] + w * x
 									/ divx, values[4] + h * y / divy, w / divx, h / divy);
 						}
 					}
@@ -536,7 +535,10 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 					groovey = values[12];
 					if (gauger == null) {
 						gauger = new Rectangle();
-						skin.add(new PlaySkin.SkinGaugeObject(skin));
+						PlaySkin.SkinGaugeObject gaugeo = new PlaySkin.SkinGaugeObject(skin, gauge);
+						gaugeo.setCycle(values[9]);
+						gaugeo.setTimer(values[10]);
+						skin.add(gaugeo);
 					}
 				}
 			}
@@ -586,7 +588,6 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 		skin.setLongnote(new Sprite[][] { lnend, lnstart, lnbodya, lnbody, lnend, lnstart, lnbodya, lnbody, lnbodya,
 				lnbody });
 		skin.setLaneregion(laner);
-		skin.setGauge(gauge);
 		skin.setLine(lines.toArray(new SkinImage[lines.size()]));
 		if (gauger != null) {
 			skin.setGaugeRegion(gauger);

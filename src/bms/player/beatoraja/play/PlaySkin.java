@@ -31,7 +31,7 @@ public class PlaySkin extends Skin {
 	 */
 	private Sprite[] minenote = new Sprite[8];
 
-	private Sprite[] gauge;
+	private TextureRegion[][] gauge;
 
 	private TextureRegion[][] judge;
 
@@ -126,15 +126,15 @@ public class PlaySkin extends Skin {
 		add(images);
 		// ゲージ
 		Texture gt = new Texture("skin/gauge.png");
-		gauge = new Sprite[8];
-		gauge[0] = new Sprite(gt, 0, 0, 5, 17);
-		gauge[1] = new Sprite(gt, 5, 0, 5, 17);
-		gauge[2] = new Sprite(gt, 10, 0, 5, 17);
-		gauge[3] = new Sprite(gt, 15, 0, 5, 17);
-		gauge[4] = new Sprite(gt, 0, 17, 5, 17);
-		gauge[5] = new Sprite(gt, 5, 17, 5, 17);
-		gauge[6] = new Sprite(gt, 10, 17, 5, 17);
-		gauge[7] = new Sprite(gt, 15, 17, 5, 17);
+		gauge = new TextureRegion[1][8];
+		gauge[0][0] = new TextureRegion(gt, 0, 0, 5, 17);
+		gauge[0][1] = new TextureRegion(gt, 5, 0, 5, 17);
+		gauge[0][2] = new TextureRegion(gt, 10, 0, 5, 17);
+		gauge[0][3] = new TextureRegion(gt, 15, 0, 5, 17);
+		gauge[0][4] = new TextureRegion(gt, 0, 17, 5, 17);
+		gauge[0][5] = new TextureRegion(gt, 5, 17, 5, 17);
+		gauge[0][6] = new TextureRegion(gt, 10, 17, 5, 17);
+		gauge[0][7] = new TextureRegion(gt, 15, 17, 5, 17);
 		// 判定文字
 		Texture jt = new Texture("skin/judge.png");
 		judge = new TextureRegion[6][];
@@ -259,7 +259,7 @@ public class PlaySkin extends Skin {
 		SkinBGAObject bga = new SkinBGAObject(this);
 		setDestination(bga,0,500,50,740,650,0,255,255,255,255,0,0,0,0,0,0,0,0,0);
 		add(bga);
-		add(new SkinGaugeObject(this));
+		add(new SkinGaugeObject(this, gauge));
 
 		SkinText title = new SkinText("skin/VL-Gothic-Regular.ttf", 0, 24, 2);
 		title.setReferenceID(MainState.STRING_FULLTITLE);
@@ -493,7 +493,7 @@ public class PlaySkin extends Skin {
 		SkinBGAObject bga = new SkinBGAObject(this);
 		setDestination(bga,0,40,50,740,650,0,255,255,255,255,0,0,0,0,0,0,0,0,0);
 		add(bga);
-		add(new SkinGaugeObject(this));
+		add(new SkinGaugeObject(this,gauge));
 
 		SkinText title = new SkinText("skin/VL-Gothic-Regular.ttf", 0, 24, 2);
 		title.setReferenceID(MainState.STRING_FULLTITLE);
@@ -785,7 +785,7 @@ public class PlaySkin extends Skin {
 		SkinBGAObject bga2 = new SkinBGAObject(this);
 		setDestination(bga2,0,10,50,330,330,0,255,255,255,255,0,0,0,0,0,0,0,0,0);
 		add(bga2);
-		add(new SkinGaugeObject(this));
+		add(new SkinGaugeObject(this,gauge));
 
 		SkinText title = new SkinText("skin/VL-Gothic-Regular.ttf", 0, 24);
 		title.setReferenceID(MainState.STRING_FULLTITLE);
@@ -1044,7 +1044,7 @@ public class PlaySkin extends Skin {
 		SkinBGAObject bga3 = new SkinBGAObject(this);
 		setDestination(bga3,0,10,40,180,220,0,255,255,255,255,0,0,0,0,0,0,0,0,0);
 		add(bga3);
-		add(new SkinGaugeObject(this));
+		add(new SkinGaugeObject(this,gauge));
 
 		SkinText title = new SkinText("skin/VL-Gothic-Regular.ttf", 0, 24);
 		title.setReferenceID(MainState.STRING_FULLTITLE);
@@ -1254,14 +1254,6 @@ public class PlaySkin extends Skin {
 		this.minenote = mine;
 	}
 
-	public Sprite[] getGauge() {
-		return gauge;
-	}
-
-	public void setGauge(Sprite[] gauge) {
-		this.gauge = gauge;
-	}
-
 	public Rectangle getGaugeRegion() {
 		return gaugeregion;
 	}
@@ -1362,16 +1354,31 @@ public class PlaySkin extends Skin {
 
 	public static class SkinGaugeObject extends SkinObject {
 
+		/**
+		 * イメージ
+		 */
+		private TextureRegion[][] image;
+
 		private PlaySkin skin;
 
 		private Texture backtex;
 
-		public SkinGaugeObject(PlaySkin skin) {
+		public SkinGaugeObject(PlaySkin skin, TextureRegion[][] image) {
 			this.skin = skin;
+			this.image = image;
 			Pixmap back = new Pixmap(1,1, Pixmap.Format.RGBA8888);
 			back.setColor(0,0,0,0.7f);
 			back.fill();
 			backtex = new Texture(back);
+		}
+
+		public TextureRegion[] getImage(MainState state, long time) {
+			return image[getImageIndex(image.length, time, state)];
+		}
+
+		public void setImage(TextureRegion[][] image, int cycle) {
+			this.image = image;
+			setCycle(cycle);
 		}
 
 		@Override
@@ -1379,7 +1386,7 @@ public class PlaySkin extends Skin {
 			if (skin.player.getGauge() != null) {
 				Rectangle gr = skin.getGaugeRegion();
 				sprite.end();
-				skin.player.getGauge().draw(skin, sprite, gr.x, gr.y, gr.width, gr.height);
+				skin.player.getGauge().draw(sprite, getImage(state, time), gr.x, gr.y, gr.width, gr.height);
 				sprite.begin();
 			}
 		}

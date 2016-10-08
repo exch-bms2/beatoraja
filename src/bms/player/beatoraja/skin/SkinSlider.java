@@ -13,16 +13,25 @@ public class SkinSlider extends SkinObject {
 	 */
 	private TextureRegion[] image;
 
-	private int muki;
+	/**
+	 * slider移動方向
+	 */
+	private int direction;
+	/**
+	 * slider移動範囲
+	 */
 	private int range = 100;
+	/**
+	 * slider値参照ID
+	 */
 	private int type;
 	
 	private boolean changable;
 
-	public SkinSlider(TextureRegion[] image, int cycle, int muki, int range, int type) {
+	public SkinSlider(TextureRegion[] image, int cycle, int angle, int range, int type) {
 		this.image = image;
 		setCycle(cycle);
-		this.muki = muki;
+		this.direction = angle;
 		this.range = range;
 		this.type = type;
 	}
@@ -31,13 +40,11 @@ public class SkinSlider extends SkinObject {
 		return image;
 	}
 
-	public TextureRegion getImage(long time) {
-		if (getCycle() == 0) {
-			return image[0];
+	public TextureRegion getImage(long time, MainState state) {
+		if(getImageID() != -1) {
+			return state.getImage(getImageID());
 		}
-		final int index = ((int) (time / (((float)getCycle())  / image.length))) % image.length;
-		// System.out.println(index + " / " + image.length);
-		return image[index];
+		return image[getImageIndex(image.length, time, state)];
 	}
 
 	public void setImage(TextureRegion[] image, int cycle) {
@@ -51,10 +58,10 @@ public class SkinSlider extends SkinObject {
 		}
 		Rectangle r = this.getDestination(time,state);
 		if (r != null) {
-			TextureRegion image = getImage(time);
+			TextureRegion image = getImage(time, state);
 			draw(sprite, image, r.x
-					+ (muki == 1 ? state.getSliderValue(type) * range : (muki == 3 ? -state.getSliderValue(type) * range : 0)), r.y
-					+ (muki == 0 ? state.getSliderValue(type) * range : (muki == 2 ? -state.getSliderValue(type) * range : 0)),
+					+ (direction == 1 ? state.getSliderValue(type) * range : (direction == 3 ? -state.getSliderValue(type) * range : 0)), r.y
+					+ (direction == 0 ? state.getSliderValue(type) * range : (direction == 2 ? -state.getSliderValue(type) * range : 0)),
 					r.width, r.height, getColor(time,state),getAngle(time,state));
 		}
 	}
@@ -85,6 +92,6 @@ public class SkinSlider extends SkinObject {
 	}
 	
 	public int getSliderAngle() {
-		return muki;
+		return direction;
 	}
 }

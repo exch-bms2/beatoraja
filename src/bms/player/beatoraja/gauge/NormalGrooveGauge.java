@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 import bms.model.BMSModel;
 import bms.player.beatoraja.play.PlaySkin;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 /**
  * ノーマルゲージ
@@ -29,12 +30,12 @@ public class NormalGrooveGauge extends GrooveGauge {
 	}
 	
 	@Override
-	public void draw(PlaySkin skin, SpriteBatch sprite, float x, float y, float w, float h) {
+	public void draw(SpriteBatch sprite, TextureRegion[] images, float x, float y, float w, float h) {
 		sprite.begin();
 		final int count = ispms ? 24 : 50;
 		for(int i = 1; i <= count; i++) {
 			final float border = i * getMaxValue() / count;
-			sprite.draw(skin.getGauge()[(getValue() >= border ? 0 : 2) + (border < getBorder() ? 1 : 0)], x + w * (i - 1) / count,
+			sprite.draw(images[(getValue() >= border ? 0 : 2) + (border < getBorder() ? 1 : 0)], x + w * (i - 1) / count,
 					y, w / count, h);			
 		}
 		sprite.end();
