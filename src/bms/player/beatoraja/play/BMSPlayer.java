@@ -109,6 +109,9 @@ public class BMSPlayer extends MainState {
 
 	public static final int OFFSET_LANECOVER = 101;
 
+	public static final int NUMBER_SCRATCHANGLE_1P = 60000;
+	public static final int NUMBER_SCRATCHANGLE_2P = 60001;
+
 	private BitmapFont judgefont;
 	private BitmapFont systemfont;
 	private BMSModel model;
@@ -152,6 +155,9 @@ public class BMSPlayer extends MainState {
 	 * 処理済ノート数
 	 */
 	private int notes;
+
+	private int scratch1;
+	private int scratch2;
 
 	public BMSPlayer(MainController main, PlayerResource resource) {
 		super(main);
@@ -512,6 +518,23 @@ public class BMSPlayer extends MainState {
 		case STATE_PLAY:
 			getTimer()[TIMER_PLAY] += (nowtime - prevtime) * (100 - playspeed) / 100;
 			getTimer()[TIMER_RHYTHM] += (nowtime - prevtime) * (100 - lanerender.getNowBPM() * 100 / 60) / 100;
+			scratch1 += 2160 - (nowtime - prevtime);
+			scratch2 += nowtime - prevtime;
+			if(model.getUseKeys() != 9) {
+				final boolean[] state = input.getKeystate();
+				if(state[7]) {
+					scratch1 += (nowtime - prevtime) * 2;
+				} else if(state[8]) {
+					scratch1 += 2160 - (nowtime - prevtime) * 2;
+				}
+				if(state[16]) {
+					scratch2 += (nowtime - prevtime) * 2;
+				} else if(state[17]) {
+					scratch2 += 2160 - (nowtime - prevtime) * 2;
+				}
+			}
+			scratch1 %= 2160;
+			scratch2 %= 2160;
 			final float g = gauge.getValue();
 			if (gaugelog.size() <= (now - getTimer()[TIMER_PLAY]) / 500) {
 				gaugelog.add(g);
@@ -1009,6 +1032,10 @@ public class BMSPlayer extends MainState {
 		case NUMBER_MAXCOMBO:
 		case NUMBER_MAXCOMBO2:
 			return judge.getMaxcombo();
+			case NUMBER_SCRATCHANGLE_1P:
+				return scratch1 / 6;
+			case NUMBER_SCRATCHANGLE_2P:
+				return scratch2 / 6;
 		}
 		if (id >= VALUE_JUDGE_1P_SCRATCH && id < VALUE_JUDGE_1P_SCRATCH + 20) {
 			return lanerender.getJudge()[id - VALUE_JUDGE_1P_SCRATCH];

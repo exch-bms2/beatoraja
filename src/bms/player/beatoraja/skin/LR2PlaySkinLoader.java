@@ -518,17 +518,25 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 				int[] values = parseInt(str);
 				if (values[2] < imagelist.size()) {
 					int playside = values[1];
-					final int divx = values[7];
-					final int divy = values[8];
-					TextureRegion[][] gauge = new TextureRegion[divx * divy / 4][8];
+					int divx = values[7];
+					if (divx <= 0) {
+						divx = 1;
+					}
+					int divy = values[8];
+					if (divy <= 0) {
+						divy = 1;
+					}
+					TextureRegion[][] gauge = new TextureRegion[(divx * divy) / 4][8];
 					final int w = values[5];
 					final int h = values[6];
 					for (int x = 0; x < divx; x++) {
 						for (int y = 0; y < divy; y++) {
-							gauge[(y * divx + x) / 4][(y * divx + x) % 4] = new TextureRegion(imagelist.get(values[2]), values[3] + w * x / divx,
-									values[4] + h * y / divy, w / divx, h / divy);
-							gauge[(y * divx + x) / 4][(y * divx + x) % 4 + 4] = new TextureRegion(imagelist.get(values[2]), values[3] + w * x
-									/ divx, values[4] + h * y / divy, w / divx, h / divy);
+							if((y * divx + x) / 4 < gauge.length) {
+								gauge[(y * divx + x) / 4][(y * divx + x) % 4] = new TextureRegion(imagelist.get(values[2]), values[3] + w * x / divx,
+										values[4] + h * y / divy, w / divx, h / divy);
+								gauge[(y * divx + x) / 4][(y * divx + x) % 4 + 4] = new TextureRegion(imagelist.get(values[2]), values[3] + w * x
+										/ divx, values[4] + h * y / divy, w / divx, h / divy);
+							}
 						}
 					}
 					groovex = values[11];

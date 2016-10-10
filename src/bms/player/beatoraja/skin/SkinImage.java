@@ -1,6 +1,7 @@
 package bms.player.beatoraja.skin;
 
 import bms.player.beatoraja.MainState;
+import bms.player.beatoraja.play.BMSPlayer;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
@@ -18,6 +19,8 @@ public class SkinImage extends SkinObject {
 	private TextureRegion[][] image;
 
 	private int id = -1;
+
+	private int scratch = 0;
 
 	public SkinImage() {
 		
@@ -90,7 +93,13 @@ public class SkinImage extends SkinObject {
             Rectangle r = this.getDestination(time, state);
             if (r != null) {
                 if(value >= 0 && value < image.length) {
-                    draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height, getColor(time,state),getAngle(time,state));
+                	if(scratch == 1) {
+						draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height, getColor(time,state),state.getNumberValue(BMSPlayer.NUMBER_SCRATCHANGLE_1P));
+					} else if(scratch == 2) {
+						draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height, getColor(time,state),state.getNumberValue(BMSPlayer.NUMBER_SCRATCHANGLE_2P));
+					} else {
+						draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height, getColor(time,state),getAngle(time,state));
+					}
                 }
             }
         }
@@ -109,5 +118,13 @@ public class SkinImage extends SkinObject {
 
 	public void setReferenceID(int id) {
 		this.id = id;
+	}
+
+	public int getScratch() {
+		return scratch;
+	}
+
+	public void setScratch(int scratch) {
+		this.scratch = scratch;
 	}
 }
