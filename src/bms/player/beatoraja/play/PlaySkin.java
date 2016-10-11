@@ -1351,15 +1351,24 @@ public class PlaySkin extends Skin {
 		}
 
 		public TextureRegion getNoteImage(MainState state, long time, int lane) {
-			return note[lane][getImageIndex(note[lane].length, time, state)];
+			if (note[lane] != null) {
+				return note[lane][getImageIndex(note[lane].length, time, state)];
+			}
+			return null;
 		}
 
 		public TextureRegion getLongNoteImage(MainState state, long time, int lane, int type) {
-			return longnote[type][lane][getImageIndex(longnote[type][lane].length, time, state)];
+			if (longnote[type][lane] != null) {
+				return longnote[type][lane][getImageIndex(longnote[type][lane].length, time, state)];
+			}
+			return null;
 		}
 
 		public TextureRegion getMineNoteImage(MainState state, long time, int lane) {
-			return minenote[lane][getImageIndex(minenote[lane].length, time, state)];
+			if (minenote[lane] != null) {
+				return minenote[lane][getImageIndex(minenote[lane].length, time, state)];
+			}
+			return null;
 		}
 
 		@Override

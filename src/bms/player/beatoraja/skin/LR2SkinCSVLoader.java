@@ -71,10 +71,17 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 			public void execute(String[] str) {
 				String imagepath = str[1].replace("LR2files\\Theme", "skin").replace("\\", "/");
 				File imagefile = new File(imagepath);
-				if (filemap.get(imagepath) != null) {
-					imagefile = new File(imagepath.substring(0, imagepath.lastIndexOf('/') + 1)
-							+ filemap.get(imagepath));
-				} else if (imagepath.contains("*")) {
+				for(String key : filemap.keySet()) {
+					if(imagepath.startsWith(key)) {
+						String foot = imagepath.substring(key.length());
+						imagefile = new File(imagepath.substring(0, imagepath.lastIndexOf('*'))
+								+ filemap.get(key) + foot);
+						System.out.println(imagefile.getPath());
+						imagepath = "";
+						break;
+					}
+				}
+				if (imagepath.contains("*")) {
 					String ext = imagepath.substring(imagepath.lastIndexOf("*") + 1);
 					File imagedir = new File(imagepath.substring(0, imagepath.lastIndexOf('/')));
 					if (imagedir.exists() && imagedir.isDirectory()) {
@@ -107,10 +114,17 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 			public void execute(String[] str) {
 				String imagepath = str[1].replace("LR2files\\Theme", "skin").replace("\\", "/");
 				File imagefile = new File(imagepath);
-				if (filemap.get(imagepath) != null) {
-					imagefile = new File(imagepath.substring(0, imagepath.lastIndexOf('/') + 1)
-							+ filemap.get(imagepath));
-				} else if (imagepath.contains("*")) {
+				for(String key : filemap.keySet()) {
+					if(imagepath.startsWith(key)) {
+						String foot = imagepath.substring(key.length());
+						imagefile = new File(imagepath.substring(0, imagepath.lastIndexOf('*'))
+								+ filemap.get(key) + foot);
+						System.out.println(imagefile.getPath());
+						imagepath = "";
+						break;
+					}
+				}
+				if (imagepath.contains("*")) {
 					String ext = imagepath.substring(imagepath.lastIndexOf("*") + 1);
 					File imagedir = new File(imagepath.substring(0, imagepath.lastIndexOf('/')));
 					if (imagedir.exists() && imagedir.isDirectory()) {

@@ -520,7 +520,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 			@Override
 			public void execute(String[] str) {
 				int[] values = parseInt(str);
-				if (values[2] < imagelist.size()) {
+				if (values[2] < imagelist.size() && imagelist.get(values[2]) != null) {
 					int playside = values[1];
 					int divx = values[7];
 					if (divx <= 0) {
