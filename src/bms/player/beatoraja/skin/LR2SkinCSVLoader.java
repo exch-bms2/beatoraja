@@ -190,6 +190,10 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 								/ srch, values[5] * dstw / srcw, values[6] * dsth / srch, values[7], values[8],
 								values[9], values[10], values[11], values[12], values[13], values[14], values[15],
 								values[16], values[17], values[18], values[19], values[20]);
+						if(values[21] != 0) {
+							System.out.println("set scratch image : " + values[21]);
+							part.setScratch(values[21]);
+						}
 					} catch (NumberFormatException e) {
 						e.printStackTrace();
 					}
@@ -531,7 +535,7 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 	}
 
 	protected int[] parseInt(String[] s) {
-		int[] result = new int[21];
+		int[] result = new int[22];
 		for (int i = 1; i < s.length; i++) {
 			try {
 				result[i] = Integer.parseInt(s[i].replace('!', '-').replaceAll(" ", ""));

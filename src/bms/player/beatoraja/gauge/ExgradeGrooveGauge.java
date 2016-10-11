@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 import bms.model.BMSModel;
 import bms.player.beatoraja.play.PlaySkin;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 
 /**
@@ -24,11 +25,11 @@ public class ExgradeGrooveGauge extends GrooveGauge {
 	}
 
 	@Override
-	public void draw(PlaySkin skin, SpriteBatch sprite, float x, float y, float w, float h) {
+	public void draw(SpriteBatch sprite, TextureRegion[] images, float x, float y, float w, float h) {
         sprite.begin();
         for (int i = 1; i <= 50; i++) {
             final float border = i * getMaxValue() / 50;
-			sprite.draw(skin.getGauge()[4 + (getValue() >= border ? 0 : 2) + (border < getBorder() ? 1 : 0)], x + w * (i - 1) / 50,
+			sprite.draw(images[4 + (getValue() >= border ? 0 : 2) + (border < getBorder() ? 1 : 0)], x + w * (i - 1) / 50,
 					y, w / 50, h);			
         }
         sprite.end();

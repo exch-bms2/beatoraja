@@ -21,14 +21,14 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 	private Rectangle playerr = new Rectangle(0, 0, 0, 0);
 
 	private PlaySkin skin;
-	private Sprite[] note = new Sprite[8];
-	private Sprite[] lnstart = new Sprite[8];
-	private Sprite[] lnend = new Sprite[8];
-	private Sprite[] lnbody = new Sprite[8];
-	private Sprite[] lnbodya = new Sprite[8];
-	private Sprite[] mine = new Sprite[8];
+	private TextureRegion[][] note = new TextureRegion[8][];
+	private TextureRegion[][] lnstart = new TextureRegion[8][];
+	private TextureRegion[][] lnend = new TextureRegion[8][];
+	private TextureRegion[][] lnbody = new TextureRegion[8][];
+	private TextureRegion[][] lnbodya = new TextureRegion[8][];
+	private TextureRegion[][] mine = new TextureRegion[8][];
+	private int notecycle;
 	private Rectangle[] laner = new Rectangle[8];
-	private Sprite[] gauge = new Sprite[4];
 	private Rectangle gauger = null;
 	private SkinImage line;
 	private List<SkinImage> lines = new ArrayList<SkinImage>();
@@ -137,12 +137,9 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 				if (lane < note.length && note[lane] == null) {
 					TextureRegion[] images = getSourceImage(values);
 					if(images != null) {
-						note[lane] = new Sprite(images[0]);						
+						note[lane] = images;
+						notecycle = values[9];
 					}
-				}
-				if (lanerender == null) {
-					lanerender = new PlaySkin.SkinLaneObject(skin);
-					skin.add(lanerender);
 				}
 			}
 		});
@@ -163,7 +160,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 				if (lane < lnend.length && lnend[lane] == null) {
 					TextureRegion[] images = getSourceImage(values);
 					if(images != null) {
-						lnend[lane] = new Sprite(images[0]);						
+						lnend[lane] = images;
 					}
 				}
 			}
@@ -185,7 +182,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 				if (lane < lnstart.length && lnstart[lane] == null) {
 					TextureRegion[] images = getSourceImage(values);
 					if(images != null) {
-						lnstart[lane] = new Sprite(images[0]);						
+						lnstart[lane] = images;
 					}
 				}
 			}
@@ -208,8 +205,8 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 				if (lane < lnbody.length && lnbody[lane] == null) {
 					TextureRegion[] images = getSourceImage(values);
 					if(images != null) {
-						lnbody[lane] = new Sprite(images[0]);
-						lnbodya[lane] = new Sprite(images[images.length - 1]);
+						lnbody[lane] = images;
+						lnbodya[lane] = new TextureRegion[]{(images[images.length - 1])};
 					}
 				}
 			}
@@ -232,7 +229,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 				if (lane < mine.length && mine[lane] == null) {
 					TextureRegion[] images = getSourceImage(values);
 					if(images != null) {
-						mine[lane] = new Sprite(images[0]);
+						mine[lane] = images;
 					}
 				}
 			}
@@ -268,6 +265,12 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 				if (laner[lane].y > playerr.y) {
 					playerr.y = laner[lane].y;
 					playerr.height = laner[lane].height;
+				}
+				if (lanerender == null) {
+					lanerender = new PlaySkin.SkinLaneObject(skin, note, new TextureRegion[][][] { lnend, lnstart, lnbodya, lnbody, lnend, lnstart, lnbodya, lnbody, lnbodya,
+							lnbody },mine);
+					lanerender.setCycle(notecycle);
+					skin.add(lanerender);
 				}
 			}
 		});
@@ -519,24 +522,35 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 				int[] values = parseInt(str);
 				if (values[2] < imagelist.size()) {
 					int playside = values[1];
-					final int divx = values[7];
-					final int divy = values[8];
-					gauge = new Sprite[divx * divy * 2];
+					int divx = values[7];
+					if (divx <= 0) {
+						divx = 1;
+					}
+					int divy = values[8];
+					if (divy <= 0) {
+						divy = 1;
+					}
+					TextureRegion[][] gauge = new TextureRegion[(divx * divy) / 4][8];
 					final int w = values[5];
 					final int h = values[6];
 					for (int x = 0; x < divx; x++) {
 						for (int y = 0; y < divy; y++) {
-							gauge[y * divx + x] = new Sprite(imagelist.get(values[2]), values[3] + w * x / divx,
-									values[4] + h * y / divy, w / divx, h / divy);
-							gauge[y * divx + x + divx * divy] = new Sprite(imagelist.get(values[2]), values[3] + w * x
-									/ divx, values[4] + h * y / divy, w / divx, h / divy);
+							if((y * divx + x) / 4 < gauge.length) {
+								gauge[(y * divx + x) / 4][(y * divx + x) % 4] = new TextureRegion(imagelist.get(values[2]), values[3] + w * x / divx,
+										values[4] + h * y / divy, w / divx, h / divy);
+								gauge[(y * divx + x) / 4][(y * divx + x) % 4 + 4] = new TextureRegion(imagelist.get(values[2]), values[3] + w * x
+										/ divx, values[4] + h * y / divy, w / divx, h / divy);
+							}
 						}
 					}
 					groovex = values[11];
 					groovey = values[12];
 					if (gauger == null) {
 						gauger = new Rectangle();
-						skin.add(new PlaySkin.SkinGaugeObject(skin));
+						PlaySkin.SkinGaugeObject gaugeo = new PlaySkin.SkinGaugeObject(skin, gauge);
+						gaugeo.setCycle(values[9]);
+						gaugeo.setTimer(values[10]);
+						skin.add(gaugeo);
 					}
 				}
 			}
@@ -562,31 +576,26 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 
 		skin = new PlaySkin(srcw, srch, dstw, dsth);
 		if (header.getMode() == 2 || header.getMode() == 3) {
-			note = new Sprite[16];
-			lnstart = new Sprite[16];
-			lnend = new Sprite[16];
-			lnbody = new Sprite[16];
-			lnbodya = new Sprite[16];
-			mine = new Sprite[16];
+			note = new TextureRegion[16][];
+			lnstart = new TextureRegion[16][];
+			lnend = new TextureRegion[16][];
+			lnbody = new TextureRegion[16][];
+			lnbodya = new TextureRegion[16][];
+			mine = new TextureRegion[16][];
 			laner = new Rectangle[16];
 		}
 		if (header.getMode() == 4) {
-			note = new Sprite[9];
-			lnstart = new Sprite[9];
-			lnend = new Sprite[9];
-			lnbody = new Sprite[9];
-			lnbodya = new Sprite[9];
-			mine = new Sprite[9];
+			note = new TextureRegion[9][];
+			lnstart = new TextureRegion[9][];
+			lnend = new TextureRegion[9][];
+			lnbody = new TextureRegion[9][];
+			lnbodya = new TextureRegion[9][];
+			mine = new TextureRegion[9][];
 			laner = new Rectangle[9];
 		}
 		this.loadSkin(skin, f, player, header, option, property);
 
-		skin.setNote(note);
-		skin.setMinenote(mine);
-		skin.setLongnote(new Sprite[][] { lnend, lnstart, lnbodya, lnbody, lnend, lnstart, lnbodya, lnbody, lnbodya,
-				lnbody });
 		skin.setLaneregion(laner);
-		skin.setGauge(gauge);
 		skin.setLine(lines.toArray(new SkinImage[lines.size()]));
 		if (gauger != null) {
 			skin.setGaugeRegion(gauger);

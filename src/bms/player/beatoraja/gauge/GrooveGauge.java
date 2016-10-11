@@ -3,6 +3,7 @@ package bms.player.beatoraja.gauge;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 import bms.player.beatoraja.play.PlaySkin;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 /**
  * プレイゲージの抽象クラス
@@ -108,7 +109,7 @@ public abstract class GrooveGauge {
 		return cleartype;
 	}
 
-	public abstract void draw(PlaySkin skin, SpriteBatch sprite, float x, float y, float w, float h);
+	public abstract void draw(SpriteBatch sprite, TextureRegion[] images, float x, float y, float w, float h);
 
 	public float getMaxValue() {
 		return maxValue;

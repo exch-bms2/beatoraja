@@ -15,11 +15,14 @@ public class SkinGraph extends SkinObject {
 	 * イメージ
 	 */
 	private TextureRegion[] image;
-
+	/**
+	 * グラフの参照値
+	 */
 	private int id = -1;
+	/**
+	 * グラフの伸びる向き(1:下, それ以外:右)
+	 */
 	private int direction = 1;
-
-	private int imageid = -1;
 
 	public SkinGraph(int imageid) {
 		setImageID(imageid);
@@ -33,13 +36,11 @@ public class SkinGraph extends SkinObject {
 		return image;
 	}
 
-	public TextureRegion getImage(long time) {
-		if (getCycle() == 0) {
-			return image[0];
+	public TextureRegion getImage(long time, MainState state) {
+		if(getImageID() != -1) {
+			return state.getImage(getImageID());
 		}
-		final int index = ((int) (time / (((float) getCycle()) / image.length))) % image.length;
-		// System.out.println(index + " / " + image.length);
-		return image[index];
+		return image[getImageIndex(image.length, time, state)];
 	}
 
 	public void setImage(TextureRegion[] image, int cycle) {
@@ -81,7 +82,7 @@ public class SkinGraph extends SkinObject {
 					// System.out.println("bargraph id : " + id + " value : " +
 					// value);
 				}
-				TextureRegion image = getImage(time);
+				TextureRegion image = getImage(time, state);
 				// sprite.draw(image, r.x, r.y, r.width, r.height);
 				if (direction == 1) {
 					draw(sprite,
@@ -122,13 +123,5 @@ public class SkinGraph extends SkinObject {
 
 	public void setDirection(int direction) {
 		this.direction = direction;
-	}
-
-	public int getImageID() {
-		return imageid;
-	}
-
-	public void setImageID(int imageid) {
-		this.imageid = imageid;
 	}
 }
