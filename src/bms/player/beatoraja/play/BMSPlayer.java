@@ -569,7 +569,7 @@ public class BMSPlayer extends MainState {
 				keyinput.stop = true;
 			}
 			if (resource.mediaLoadFinished()) {
-				resource.getAudioProcessor().stop(-1, 0, 0);
+				resource.getAudioProcessor().stop(null);
 			}
 
 			if (now - getTimer()[TIMER_FAILED] > skin.getClose()) {
@@ -607,7 +607,7 @@ public class BMSPlayer extends MainState {
 			}
 			long l2 = now - getTimer()[TIMER_FADEOUT];
 			if (l2 > skin.getFadeout()) {
-				resource.getAudioProcessor().stop(-1, 0, 0);
+				resource.getAudioProcessor().stop(null);
 				resource.getBGAManager().stop();
 				if (keyinput != null) {
 					Logger.getGlobal().info("入力パフォーマンス(max ms) : " + keyinput.frametimes);
@@ -796,7 +796,11 @@ public class BMSPlayer extends MainState {
 	}
 
 	public void play(Note note) {
-		audio.play(note.getWav(), note.getStarttime(), note.getDuration());
+		audio.play(note);
+	}
+
+	public void stop(Note note) {
+		audio.stop(note);
 	}
 
 	public BMSPlayerInputProcessor getBMSPlayerInputProcessor() {

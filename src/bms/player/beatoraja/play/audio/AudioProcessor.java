@@ -1,6 +1,7 @@
 package bms.player.beatoraja.play.audio;
 
 import bms.model.BMSModel;
+import bms.model.Note;
 
 public interface AudioProcessor {
 
@@ -18,16 +19,16 @@ public interface AudioProcessor {
 	public float getProgress();
 
 	/**
-	 * 音を鳴らす
-	 * @param id
+	 * 指定したNoteの音を鳴らす
 	 */
-	public void play(int id, int starttime, int duration);
-	
-	public void stop(int id, int starttime, int duration);
+	public void play(Note n);
+	/**
+	 * 指定したNoteの音を止める。nullの場合は再生されている音を全て止める
+	 */
+	public void stop(Note n);
 
 	/**
 	 * リソースを開放する
 	 */
-	public void dispose();
-	
+	public void dispose();	
 }

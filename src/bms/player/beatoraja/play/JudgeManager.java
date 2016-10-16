@@ -12,6 +12,8 @@ import bms.player.beatoraja.input.BMSPlayerInputProcessor;
  * @author exch
  */
 public class JudgeManager {
+	
+	// TODO HCN押し直しの発音はどうする？
 
 	private final BMSPlayer main;
 	/**
@@ -361,8 +363,9 @@ public class JudgeManager {
 						Note n = null;
 						boolean sound = false;
 						for (TimeLine tl2 : timelines) {
-							if (tl2.getNote(lane) != null) {
-								n = tl2.getNote(lane);
+							final Note note = tl2.getNote(lane);
+							if (note != null && !(note instanceof LongNote && note.getState() != 0)) {
+								n = note;
 							}
 							if (tl2.getHiddenNote(lane) != null) {
 								n = tl2.getHiddenNote(lane);
@@ -402,6 +405,7 @@ public class JudgeManager {
 									// + processing[lane]);
 									sckey[sc] = 0;
 								}
+								main.stop(processing[lane]);
 								this.update(lane, j, time, dtime);
 								processing[lane].setEndstate(j + 1);
 								processing[lane].setEndtime(dtime);
@@ -414,6 +418,9 @@ public class JudgeManager {
 											break;
 										}
 									}
+								}
+								if(j >= 3) {
+									main.stop(processing[lane]);
 								}
 								this.update(lane, j, time, dtime);
 								processing[lane].setState(j + 1);

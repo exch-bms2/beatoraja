@@ -1,33 +1,37 @@
 package bms.player.beatoraja.play.audio;
 
 import bms.model.BMSModel;
+import bms.model.Note;
 
 public class AudioDeviceProcessor implements AudioProcessor {
 
+	@Override
 	public void setModel(BMSModel model) {
 		// TODO Auto-generated method stub
 
 	}
 
+	@Override
 	public float getProgress() {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
-	public void play(int id, int starttime, int duration) {
-		// TODO Auto-generated method stub
-
-	}
-
-	public void dispose() {
+	@Override
+	public void play(Note n) {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public void stop(int id, int starttime, int duration) {
+	public void stop(Note n) {
 		// TODO Auto-generated method stub
 		
 	}
+	
+	@Override
+	public void dispose() {
+		// TODO Auto-generated method stub
 
+	}
 }
