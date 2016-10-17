@@ -14,7 +14,7 @@ public class SkinSlider extends SkinObject {
 	private TextureRegion[] image;
 
 	/**
-	 * slider移動方向
+	 * slider移動方向(0:上, 1:右, 2:下, 3:左)
 	 */
 	private int direction;
 	/**
@@ -25,7 +25,9 @@ public class SkinSlider extends SkinObject {
 	 * slider値参照ID
 	 */
 	private int type;
-	
+	/**
+	 * ユーザーによる値変更を受け付けるかどうか
+	 */
 	private boolean changable;
 
 	public SkinSlider(TextureRegion[] image, int cycle, int angle, int range, int type) {

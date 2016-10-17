@@ -33,8 +33,17 @@ public abstract class SkinObject {
 
 	private int dsttimer = 0;
 	private int dstloop = 0;
+	/**
+	 * ブレンド(2:加算, 9:反転)
+	 */
 	private int dstblend = 0;
+	/**
+	 * フィルター
+	 */
 	private int dstfilter;
+	/**
+	 * 画像回転の中心
+	 */
 	private int dstcenter;
 
 	private int[] dstop = new int[0];

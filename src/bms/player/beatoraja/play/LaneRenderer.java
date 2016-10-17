@@ -8,7 +8,6 @@ import org.lwjgl.opengl.GL11;
 
 import bms.model.*;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
-import bms.player.beatoraja.play.PlaySkin.SkinLaneObject;
 import bms.player.beatoraja.skin.SkinImage;
 
 import com.badlogic.gdx.Gdx;
@@ -252,7 +251,7 @@ public class LaneRenderer {
 
 		currentduration = Math.round(region * (1 - (enableLanecover ? lanecover : 0)));
 
-		boolean[] keystate = main.getBMSPlayerInputProcessor().getKeystate();
+		final boolean[] keystate = main.getBMSPlayerInputProcessor().getKeystate();
 		for (int lane = 0; lane < laneregion.length; lane++) {
 			// キービームフラグON/OFF
 			if (model.getUseKeys() == 9) {
@@ -546,9 +545,8 @@ public class LaneRenderer {
 									length++;
 								}
 							}
-							if (skin.getJudgeregion()[jr].shift) {
-								shift = (int) (length * nr.width / 2);
-							}
+							shift = (int) (length * nr.width / 2);
+							// コンボカウント描画
 							for (int i = index; i < index + length; i++) {
 								if(ntr[i] != null) {
 									sprite.draw(ntr[i], r.x + nr.x + (i - index) * nr.width - shift,
@@ -557,12 +555,11 @@ public class LaneRenderer {
 							}
 						}
 					}
-					sprite.draw(skin.getJudgeregion()[jr].judge[judgenow[jr] - 1].getImage(main.getNowTime(), main), r.x - shift, r.y,
-							r.width, r.height);
+					sprite.draw(skin.getJudgeregion()[jr].judge[judgenow[jr] - 1].getImage(main.getNowTime(), main), r.x -
+									(skin.getJudgeregion()[jr].shift ? shift : 0), r.y, r.width, r.height);
 					// FAST, SLOW描画
 					if (config.getJudgedetail() == 1) {
 						if (judgenow[jr] > 1) {
-
 							font.setColor(judge.getRecentJudgeTiming() >= 0 ? Color.CYAN : Color.RED);
 							font.draw(sprite, judge.getRecentJudgeTiming() >= 0 ? "EARLY" : "LATE", r.x + r.width / 2, r.y
 									+ r.height + 20);
@@ -570,7 +567,6 @@ public class LaneRenderer {
 
 					} else if (config.getJudgedetail() == 2) {
 						if (judgenow[jr] > 0) {
-
 							if (judgenow[jr] == 1) {
 								font.setColor(judge.getRecentJudgeTiming() >= 0 ? Color.SKY : Color.PINK);
 							} else {
@@ -583,7 +579,6 @@ public class LaneRenderer {
 				}
 			}
 		}
-
 		sprite.end();
 		sprite.begin();
 	}

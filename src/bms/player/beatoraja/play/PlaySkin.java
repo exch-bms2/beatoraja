@@ -3,10 +3,8 @@ package bms.player.beatoraja.play;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.skin.*;
 
-import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 
@@ -50,7 +48,7 @@ public class PlaySkin extends Skin {
 			MainState.NUMBER_EARLY_POOR, MainState.NUMBER_LATE_POOR, MainState.NUMBER_EARLY_MISS,
 			MainState.NUMBER_LATE_MISS };
 
-	private BMSPlayer player;
+	protected BMSPlayer player;
 
 	public PlaySkin(float srcw, float srch, float dstw, float dsth) {
 		super(srcw, srch, dstw, dsth);
@@ -242,10 +240,10 @@ public class PlaySkin extends Skin {
 		}
 		judgeregion = new JudgeRegion[] { new JudgeRegion(images, number, true) };
 
-		SkinBGAObject bga = new SkinBGAObject(this);
+		SkinBGA bga = new SkinBGA(this);
 		setDestination(bga, 0, 500, 50, 740, 650, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(bga);
-		add(new SkinGaugeObject(this, gauge));
+		add(new SkinGauge(this, gauge));
 
 		SkinText title = new SkinText("skin/VL-Gothic-Regular.ttf", 0, 24, 2);
 		title.setReferenceID(MainState.STRING_FULLTITLE);
@@ -330,7 +328,7 @@ public class PlaySkin extends Skin {
 		line[0] = new SkinImage(new TextureRegion[] { new TextureRegion(st, 0, 0, 1, 1) }, 0);
 		line[0].setOffsety(BMSPlayer.OFFSET_LIFT);
 		setDestination(line[0], 0, 20, 140, 390, 1, 0, 255, 128, 128, 128, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		add(new SkinLaneObject(this, note, longnote, minenote));
+		add(new SkinNote(this, note, longnote, minenote));
 		Texture lct = new Texture("skin/lanecover.png");
 		SkinSlider lanecover = new SkinSlider(new TextureRegion[] { new TextureRegion(lct) }, 0, 2, (int) (580 * dh),
 				BMSPlayer.SLIDER_LANECOVER);
@@ -483,10 +481,10 @@ public class PlaySkin extends Skin {
 		}
 		judgeregion = new JudgeRegion[] { new JudgeRegion(images, number, true) };
 
-		SkinBGAObject bga = new SkinBGAObject(this);
+		SkinBGA bga = new SkinBGA(this);
 		setDestination(bga, 0, 40, 50, 740, 650, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(bga);
-		add(new SkinGaugeObject(this, gauge));
+		add(new SkinGauge(this, gauge));
 
 		SkinText title = new SkinText("skin/VL-Gothic-Regular.ttf", 0, 24, 2);
 		title.setReferenceID(MainState.STRING_FULLTITLE);
@@ -571,7 +569,7 @@ public class PlaySkin extends Skin {
 		line[0] = new SkinImage(new TextureRegion[] { new TextureRegion(st, 0, 0, 1, 1) }, 0);
 		line[0].setOffsety(BMSPlayer.OFFSET_LIFT);
 		setDestination(line[0], 0, 870, 140, 390, 1, 0, 255, 128, 128, 128, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		add(new SkinLaneObject(this, note, longnote, minenote));
+		add(new SkinNote(this, note, longnote, minenote));
 		Texture lct = new Texture("skin/lanecover.png");
 		SkinSlider lanecover = new SkinSlider(new TextureRegion[] { new TextureRegion(lct) }, 0, 2, (int) (580 * dh),
 				BMSPlayer.SLIDER_LANECOVER);
@@ -778,13 +776,13 @@ public class PlaySkin extends Skin {
 
 		judgeregion = new JudgeRegion[] { jr1, jr2, jr3 };
 
-		SkinBGAObject bga = new SkinBGAObject(this);
+		SkinBGA bga = new SkinBGA(this);
 		setDestination(bga, 0, 10, 390, 330, 330, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(bga);
-		SkinBGAObject bga2 = new SkinBGAObject(this);
+		SkinBGA bga2 = new SkinBGA(this);
 		setDestination(bga2, 0, 10, 50, 330, 330, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(bga2);
-		add(new SkinGaugeObject(this, gauge));
+		add(new SkinGauge(this, gauge));
 
 		SkinText title = new SkinText("skin/VL-Gothic-Regular.ttf", 0, 24);
 		title.setReferenceID(MainState.STRING_FULLTITLE);
@@ -856,7 +854,7 @@ public class PlaySkin extends Skin {
 		line.setOffsety(BMSPlayer.OFFSET_LIFT);
 		setDestination(line, 0, 345, 137, 590, 6, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(line);
-		add(new SkinLaneObject(this, note, longnote, minenote));
+		add(new SkinNote(this, note, longnote, minenote));
 		Texture lct = new Texture("skin/lanecover.png");
 		SkinSlider lanecover = new SkinSlider(new TextureRegion[] { new TextureRegion(lct) }, 0, 2, (int) (580 * dh),
 				BMSPlayer.SLIDER_LANECOVER);
@@ -1039,16 +1037,16 @@ public class PlaySkin extends Skin {
 
 		judgeregion = new JudgeRegion[] { jr1, jr2 };
 
-		SkinBGAObject bga = new SkinBGAObject(this);
+		SkinBGA bga = new SkinBGA(this);
 		setDestination(bga, 0, 10, 500, 180, 220, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(bga);
-		SkinBGAObject bga2 = new SkinBGAObject(this);
+		SkinBGA bga2 = new SkinBGA(this);
 		setDestination(bga2, 0, 10, 270, 180, 220, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(bga2);
-		SkinBGAObject bga3 = new SkinBGAObject(this);
+		SkinBGA bga3 = new SkinBGA(this);
 		setDestination(bga3, 0, 10, 40, 180, 220, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(bga3);
-		add(new SkinGaugeObject(this, gauge));
+		add(new SkinGauge(this, gauge));
 
 		SkinText title = new SkinText("skin/VL-Gothic-Regular.ttf", 0, 24);
 		title.setReferenceID(MainState.STRING_FULLTITLE);
@@ -1129,7 +1127,7 @@ public class PlaySkin extends Skin {
 		line[1] = new SkinImage(new TextureRegion[] { new TextureRegion(st, 0, 0, 1, 1) }, 0);
 		setDestination(line[1], 0, 680, 140, 390, 1, 0, 255, 128, 128, 128, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		line[1].setOffsety(BMSPlayer.OFFSET_LIFT);
-		add(new SkinLaneObject(this, note, longnote, minenote));
+		add(new SkinNote(this, note, longnote, minenote));
 		Texture lct = new Texture("skin/lanecover.png");
 		SkinSlider lanecover = new SkinSlider(new TextureRegion[] { new TextureRegion(lct) }, 0, 2, (int) (580 * dh),
 				BMSPlayer.SLIDER_LANECOVER);
@@ -1317,158 +1315,6 @@ public class PlaySkin extends Skin {
 
 	public void setBMSPlayer(BMSPlayer player) {
 		this.player = player;
-	}
-
-	public static class SkinLaneObject extends SkinObject {
-
-		/**
-		 * ノーツ画像
-		 */
-		private TextureRegion[][] note;
-		/**
-		 * ロングノーツ画像
-		 */
-		private TextureRegion[][][] longnote;
-		/**
-		 * 地雷ノーツ画像
-		 */
-		private TextureRegion[][] minenote;
-
-		private TextureRegion[] cnote;
-		private TextureRegion[][] clongnote;
-		private TextureRegion[] cminenote;
-		private PlaySkin skin;
-
-		public SkinLaneObject(PlaySkin skin, TextureRegion[][] note, TextureRegion[][][] longnote,
-				TextureRegion[][] minenote) {
-			this.skin = skin;
-			this.note = note;
-			this.longnote = longnote;
-			this.minenote = minenote;
-			cnote = new TextureRegion[note.length];
-			clongnote = new TextureRegion[10][note.length];
-			cminenote = new TextureRegion[note.length];
-		}
-
-		public TextureRegion getNoteImage(MainState state, long time, int lane) {
-			if (note[lane] != null) {
-				return note[lane][getImageIndex(note[lane].length, time, state)];
-			}
-			return null;
-		}
-
-		public TextureRegion getLongNoteImage(MainState state, long time, int lane, int type) {
-			if (longnote[type][lane] != null) {
-				return longnote[type][lane][getImageIndex(longnote[type][lane].length, time, state)];
-			}
-			return null;
-		}
-
-		public TextureRegion getMineNoteImage(MainState state, long time, int lane) {
-			if (minenote[lane] != null) {
-				return minenote[lane][getImageIndex(minenote[lane].length, time, state)];
-			}
-			return null;
-		}
-
-		@Override
-		public void draw(SpriteBatch sprite, long time, MainState state) {
-			if (skin.player.getLanerender() != null) {
-				for (int i = 0; i < note.length; i++) {
-					cnote[i] = getNoteImage(state, time, i);
-				}
-				for (int type = 0; type < 10; type++) {
-					for (int i = 0; i < longnote[0].length; i++) {
-						clongnote[type][i] = getLongNoteImage(state, time, i, type);
-					}
-				}
-				for (int i = 0; i < minenote.length; i++) {
-					cminenote[i] = getMineNoteImage(state, time, i);
-				}
-				skin.player.getLanerender().drawLane(cnote, clongnote, cminenote);
-			}
-		}
-
-		@Override
-		public void dispose() {
-
-		}
-	}
-
-	public static class SkinGaugeObject extends SkinObject {
-
-		/**
-		 * イメージ
-		 */
-		private TextureRegion[][] image;
-
-		private PlaySkin skin;
-
-		private Texture backtex;
-
-		public SkinGaugeObject(PlaySkin skin, TextureRegion[][] image) {
-			this.skin = skin;
-			this.image = image;
-			Pixmap back = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
-			back.setColor(0, 0, 0, 0.7f);
-			back.fill();
-			backtex = new Texture(back);
-		}
-
-		public TextureRegion[] getImage(MainState state, long time) {
-			return image[getImageIndex(image.length, time, state)];
-		}
-
-		public void setImage(TextureRegion[][] image, int cycle) {
-			this.image = image;
-			setCycle(cycle);
-		}
-
-		@Override
-		public void draw(SpriteBatch sprite, long time, MainState state) {
-			if (skin.player.getGauge() != null) {
-				Rectangle gr = skin.getGaugeRegion();
-				sprite.end();
-				skin.player.getGauge().draw(sprite, getImage(state, time), gr.x, gr.y, gr.width, gr.height);
-				sprite.begin();
-			}
-		}
-
-		@Override
-		public void dispose() {
-
-		}
-	}
-
-	public static class SkinBGAObject extends SkinObject {
-
-		private PlaySkin skin;
-
-		public SkinBGAObject(PlaySkin skin) {
-			this.skin = skin;
-		}
-
-		@Override
-		public void draw(SpriteBatch sprite, long time, MainState state) {
-			if (skin.player.getMainController().getPlayerResource().getBGAManager() != null) {
-				BMSPlayer player = (BMSPlayer) state;
-				skin.player
-						.getMainController()
-						.getPlayerResource()
-						.getBGAManager()
-						.drawBGA(
-								sprite,
-								getDestination(time, state),
-								player.getState() == BMSPlayer.STATE_PRELOAD
-										|| player.getState() == BMSPlayer.STATE_READY ? -1
-										: (int) (player.getNowTime() - player.getTimer()[MainState.TIMER_PLAY]));
-			}
-		}
-
-		@Override
-		public void dispose() {
-
-		}
 	}
 
 }
