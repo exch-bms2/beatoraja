@@ -9,7 +9,6 @@ import java.util.logging.Logger;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.Config.SkinConfig;
 import bms.player.beatoraja.config.KeyConfiguration;
-import bms.player.beatoraja.decide.MusicDecideSkin;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.play.audio.SoundProcessor;
 import bms.player.beatoraja.skin.*;
@@ -25,13 +24,14 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.scenes.scene2d.Event;
-import com.badlogic.gdx.scenes.scene2d.EventListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+
+import static bms.player.beatoraja.Resolution.*;
+import static bms.player.beatoraja.skin.SkinProperty.*;
 
 /**
  * 選曲部分。 楽曲一覧とカーソルが指す楽曲のステータスを表示し、選択した楽曲を 曲決定部分に渡す。
@@ -39,11 +39,6 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
  * @author exch
  */
 public class MusicSelector extends MainState {
-
-	public static final int OPTION_GRADEBAR = 3;
-	public static final int BUTTON_MODE = 1011;
-	public static final int BUTTON_SORT = 1012;
-	public static final int BUTTON_LNMODE = 1911;
 
 	// TODO テキスト表示
 	// TODO 譜面情報表示
@@ -252,18 +247,18 @@ public class MusicSelector extends MainState {
 					SkinConfig sc = config.getSkin()[5];
 					LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
 					LR2SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
-					Rectangle srcr = MainController.RESOLUTION[header.getResolution()];
-					Rectangle dstr = MainController.RESOLUTION[config.getResolution()];
+					Rectangle srcr = RESOLUTION[header.getResolution()];
+					Rectangle dstr = RESOLUTION[config.getResolution()];
 					LR2SelectSkinLoader dloader = new LR2SelectSkinLoader(srcr.width, srcr.height, dstr.width, dstr.height);
 					skin = dloader.loadSelectSkin(Paths.get(sc.getPath()).toFile(), this, header,
 							loader.getOption(), sc.getProperty());
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-					skin = new MusicSelectSkin(main.RESOLUTION[config.getResolution()]);
+					skin = new MusicSelectSkin(RESOLUTION[config.getResolution()]);
 				}
 			} else {
-				skin = new MusicSelectSkin(main.RESOLUTION[config.getResolution()]);
+				skin = new MusicSelectSkin(RESOLUTION[config.getResolution()]);
 			}
 			this.setSkin(skin);
 		}
@@ -282,8 +277,8 @@ public class MusicSelector extends MainState {
 		
 		// search text field
 		if(getStage() == null) {
-			final Stage stage = new Stage(new FitViewport(MainController.RESOLUTION[config.getResolution()].width,
-					MainController.RESOLUTION[config.getResolution()].height));
+			final Stage stage = new Stage(new FitViewport(RESOLUTION[config.getResolution()].width,
+					RESOLUTION[config.getResolution()].height));
 			final TextField.TextFieldStyle textFieldStyle = new TextField.TextFieldStyle(searchfont, // BitmapFont
 					Color.WHITE, // font color
 					new TextureRegionDrawable(new TextureRegion(new Texture("skin/system.png"), 0, 8, 8, 8)), // cusor
@@ -1254,8 +1249,8 @@ public class MusicSelector extends MainState {
 		final MainController main = getMainController();
 		final SpriteBatch sprite = main.getSpriteBatch();
 		final ShapeRenderer shape = main.getShapeRenderer();
-		final float w = MainController.RESOLUTION[config.getResolution()].width;
-		final float h = MainController.RESOLUTION[config.getResolution()].height;
+		final float w = RESOLUTION[config.getResolution()].width;
+		final float h = RESOLUTION[config.getResolution()].height;
 		sprite.end();
 		bar.render(sprite, shape, skin, w, h, duration, angle, time);
 		sprite.begin();

@@ -3,13 +3,11 @@ package bms.player.beatoraja.result;
 import java.io.File;
 import java.util.*;
 
-import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.play.audio.SoundProcessor;
 import bms.player.beatoraja.select.MusicSelector;
 import com.badlogic.gdx.math.Rectangle;
 import java.util.logging.Logger;
 
-import bms.player.beatoraja.skin.SkinImage;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
@@ -23,12 +21,11 @@ import bms.model.BMSModel;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.gauge.GrooveGauge;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.utils.GdxRuntimeException;
+
+import static bms.player.beatoraja.Resolution.*;
+import static bms.player.beatoraja.skin.SkinProperty.*;
 
 public class GradeResult extends MainState {
-
-	public static final int OPTION_RESULT_CLEAR = 90;
-	public static final int OPTION_RESULT_FAIL = 91;
 
 	private BitmapFont titlefont;
 	private String title;
@@ -69,7 +66,7 @@ public class GradeResult extends MainState {
 		}
 
 		if (skin == null) {
-			skin = new GradeResultSkin(MainController.RESOLUTION[resource.getConfig().getResolution()]);
+			skin = new GradeResultSkin(RESOLUTION[resource.getConfig().getResolution()]);
 			this.setSkin(skin);
 		}
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/VL-Gothic-Regular.ttf"));
@@ -130,8 +127,8 @@ public class GradeResult extends MainState {
 			sprite.end();
 		}
 
-		if (getTimer()[BMSPlayer.TIMER_FADEOUT] != Long.MIN_VALUE) {
-			if (time > getTimer()[BMSPlayer.TIMER_FADEOUT] + getSkin().getFadeout()) {
+		if (getTimer()[TIMER_FADEOUT] != Long.MIN_VALUE) {
+			if (time > getTimer()[TIMER_FADEOUT] + getSkin().getFadeout()) {
 				if (clear != null) {
 					clear.stop();
 				}
@@ -145,7 +142,7 @@ public class GradeResult extends MainState {
 			if (time > getSkin().getInput()) {
 				boolean[] keystate = main.getInputProcessor().getKeystate();
 				if (resource.getScoreData() == null || (keystate[0] || keystate[2] || keystate[4] || keystate[6])) {
-					getTimer()[BMSPlayer.TIMER_FADEOUT] = time;
+					getTimer()[TIMER_FADEOUT] = time;
 				}
 
 				for (int i = 0; i < MusicSelector.REPLAY; i++) {
@@ -156,7 +153,7 @@ public class GradeResult extends MainState {
 				}
 			}
 			if (time > getSkin().getScene()) {
-				getTimer()[BMSPlayer.TIMER_FADEOUT] = time;
+				getTimer()[TIMER_FADEOUT] = time;
 			}
 		}
 

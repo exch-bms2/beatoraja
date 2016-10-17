@@ -4,11 +4,12 @@ import java.io.*;
 import java.util.*;
 import bms.player.beatoraja.play.BMSPlayer;
 
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 
 import bms.player.beatoraja.play.PlaySkin;
+
+import static bms.player.beatoraja.skin.SkinProperty.*;
 
 public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 
@@ -86,7 +87,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 					if(images != null) {
 						li = new SkinImage(images, values[9]);
 						li.setTimer(values[10]);
-						li.setOffsety(BMSPlayer.OFFSET_LIFT);
+						li.setOffsety(OFFSET_LIFT);
 						lines.add(li);
 						// System.out.println("Object Added - " +
 						// (part.getTiming()));						
@@ -478,7 +479,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 					if (images != null) {
 						line = new SkinImage(images, values[9]);
 						line.setTimer(values[10]);
-						line.setOffsety(BMSPlayer.OFFSET_LIFT);
+						line.setOffsety(OFFSET_LIFT);
 						// System.out.println("Object Added - " +
 						// (part.getTiming()));
 					}

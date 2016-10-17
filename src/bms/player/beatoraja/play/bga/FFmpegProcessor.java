@@ -12,6 +12,8 @@ import com.badlogic.gdx.utils.GdxRuntimeException;
 
 import org.bytedeco.javacv.*;
 
+import static bms.player.beatoraja.skin.SkinProperty.*;
+
 /**
  * ffmpegを使用した動画表示用クラス
  * 
@@ -107,11 +109,11 @@ public class FFmpegProcessor implements MovieProcessor {
 				}
 				final long[] nativeData = new long[] { 0, grabber.getImageWidth(), grabber.getImageHeight(),
 						Gdx2DPixmap.GDX2D_FORMAT_RGB888 };
-				long start = player.getNowTime() - player.getTimer()[MainState.TIMER_PLAY];
+				long start = player.getNowTime() - player.getTimer()[TIMER_PLAY];
 				int framecount = 0;
 				Frame frame = null;
 				for (;;) {
-					final long time = player.getNowTime() - player.getTimer()[MainState.TIMER_PLAY] - start;
+					final long time = player.getNowTime() - player.getTimer()[TIMER_PLAY] - start;
 					if (time >= framecount * 1000 / fps) {
 						while (time >= framecount * 1000 / fps || framecount % fpsd != 0) {
 							frame = grabber.grabImage();
@@ -147,7 +149,7 @@ public class FFmpegProcessor implements MovieProcessor {
 					if (restart) {
 						restart = false;
 						grabber.restart();
-						start = player.getNowTime() - player.getTimer()[MainState.TIMER_PLAY];
+						start = player.getNowTime() - player.getTimer()[TIMER_PLAY];
 						framecount = 0;
 //						System.out.println("movie restart - starttime : " + start);
 					}

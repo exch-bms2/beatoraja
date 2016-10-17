@@ -26,6 +26,9 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFont
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 
+import static bms.player.beatoraja.Resolution.*;
+import static bms.player.beatoraja.skin.SkinProperty.*;
+
 /**
  * BMSプレイヤー本体
  * 
@@ -35,82 +38,6 @@ public class BMSPlayer extends MainState {
 
 	// TODO GLAssistから起動すると楽曲ロード中に止まる
 
-	public static final int TIMER_BOMB_1P_SCRATCH = 50;
-	public static final int TIMER_BOMB_1P_KEY1 = 51;
-	public static final int TIMER_BOMB_1P_KEY2 = 52;
-	public static final int TIMER_BOMB_1P_KEY3 = 53;
-	public static final int TIMER_BOMB_1P_KEY4 = 54;
-	public static final int TIMER_BOMB_1P_KEY5 = 55;
-	public static final int TIMER_BOMB_1P_KEY6 = 56;
-	public static final int TIMER_BOMB_1P_KEY7 = 57;
-	public static final int TIMER_BOMB_1P_KEY8 = 58;
-	public static final int TIMER_BOMB_1P_KEY9 = 59;
-	public static final int TIMER_BOMB_2P_SCRATCH = 60;
-	public static final int TIMER_BOMB_2P_KEY1 = 61;
-	public static final int TIMER_BOMB_2P_KEY2 = 62;
-	public static final int TIMER_BOMB_2P_KEY3 = 63;
-	public static final int TIMER_BOMB_2P_KEY4 = 64;
-	public static final int TIMER_BOMB_2P_KEY5 = 65;
-	public static final int TIMER_BOMB_2P_KEY6 = 66;
-	public static final int TIMER_BOMB_2P_KEY7 = 67;
-	public static final int TIMER_BOMB_2P_KEY8 = 68;
-	public static final int TIMER_BOMB_2P_KEY9 = 69;
-	public static final int TIMER_HOLD = 70;
-	public static final int TIMER_HOLD_1P_KEY1 = 71;
-	public static final int TIMER_KEYON_1P_SCRATCH = 100;
-	public static final int TIMER_KEYON_1P_KEY1 = 101;
-	public static final int TIMER_KEYON_1P_KEY2 = 102;
-	public static final int TIMER_KEYON_1P_KEY3 = 103;
-	public static final int TIMER_KEYON_1P_KEY4 = 104;
-	public static final int TIMER_KEYON_1P_KEY5 = 105;
-	public static final int TIMER_KEYON_1P_KEY6 = 106;
-	public static final int TIMER_KEYON_1P_KEY7 = 107;
-	public static final int TIMER_KEYON_1P_KEY8 = 108;
-	public static final int TIMER_KEYON_1P_KEY9 = 109;
-	public static final int TIMER_KEYON_2P_SCRATCH = 110;
-	public static final int TIMER_KEYON_2P_KEY1 = 111;
-	public static final int TIMER_KEYON_2P_KEY2 = 112;
-	public static final int TIMER_KEYON_2P_KEY3 = 113;
-	public static final int TIMER_KEYON_2P_KEY4 = 114;
-	public static final int TIMER_KEYON_2P_KEY5 = 115;
-	public static final int TIMER_KEYON_2P_KEY6 = 116;
-	public static final int TIMER_KEYON_2P_KEY7 = 117;
-	public static final int TIMER_KEYON_2P_KEY8 = 118;
-	public static final int TIMER_KEYON_2P_KEY9 = 119;
-	public static final int TIMER_KEYOFF_1P_SCRATCH = 120;
-	public static final int TIMER_KEYOFF_1P_KEY1 = 121;
-	public static final int TIMER_KEYOFF_1P_KEY2 = 122;
-	public static final int TIMER_KEYOFF_1P_KEY3 = 123;
-	public static final int TIMER_KEYOFF_1P_KEY4 = 124;
-	public static final int TIMER_KEYOFF_1P_KEY5 = 125;
-	public static final int TIMER_KEYOFF_1P_KEY6 = 126;
-	public static final int TIMER_KEYOFF_1P_KEY7 = 127;
-	public static final int TIMER_KEYOFF_1P_KEY8 = 128;
-	public static final int TIMER_KEYOFF_1P_KEY9 = 129;
-	public static final int TIMER_KEYOFF_2P_SCRATCH = 130;
-	public static final int TIMER_KEYOFF_2P_KEY1 = 131;
-	public static final int TIMER_KEYOFF_2P_KEY2 = 132;
-	public static final int TIMER_KEYOFF_2P_KEY3 = 133;
-	public static final int TIMER_KEYOFF_2P_KEY4 = 134;
-	public static final int TIMER_KEYOFF_2P_KEY5 = 135;
-	public static final int TIMER_KEYOFF_2P_KEY6 = 136;
-	public static final int TIMER_KEYOFF_2P_KEY7 = 137;
-	public static final int TIMER_KEYOFF_2P_KEY8 = 138;
-	public static final int TIMER_KEYOFF_2P_KEY9 = 139;
-	public static final int TIMER_RHYTHM = 140;
-
-	public static final int VALUE_JUDGE_1P_SCRATCH = 500;
-	public static final int VALUE_JUDGE_1P_KEY1 = 501;
-
-	public static final int SLIDER_LANECOVER = 4;
-	public static final int SLIDER_LANECOVER2 = 5;
-
-	public static final int OPTION_LANECOVER1_CHANGING = 270;
-
-	public static final int OFFSET_LANECOVER = 101;
-
-	public static final int NUMBER_SCRATCHANGLE_1P = 60000;
-	public static final int NUMBER_SCRATCHANGLE_2P = 60001;
 
 	private BitmapFont judgefont;
 	private BitmapFont systemfont;
@@ -377,19 +304,19 @@ public class BMSPlayer extends MainState {
 				SkinConfig sc = resource.getConfig().getSkin()[skinmode];
 				LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
 				LR2SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
-				Rectangle srcr = MainController.RESOLUTION[header.getResolution()];
-				Rectangle dstr = MainController.RESOLUTION[resource.getConfig().getResolution()];
+				Rectangle srcr = RESOLUTION[header.getResolution()];
+				Rectangle dstr = RESOLUTION[resource.getConfig().getResolution()];
 				LR2PlaySkinLoader dloader = new LR2PlaySkinLoader(srcr.width, srcr.height, dstr.width, dstr.height);
 				skin = dloader.loadPlaySkin(Paths.get(sc.getPath()).toFile(), this, header, loader.getOption(),
 						sc.getProperty());
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-				skin = new PlaySkin(model.getUseKeys(), config.isUse2pside(), MainController.RESOLUTION[resource
+				skin = new PlaySkin(model.getUseKeys(), config.isUse2pside(), RESOLUTION[resource
 						.getConfig().getResolution()]);
 			}
 		} else {
-			skin = new PlaySkin(model.getUseKeys(), config.isUse2pside(), MainController.RESOLUTION[resource
+			skin = new PlaySkin(model.getUseKeys(), config.isUse2pside(), RESOLUTION[resource
 					.getConfig().getResolution()]);
 		}
 		this.setSkin(skin);

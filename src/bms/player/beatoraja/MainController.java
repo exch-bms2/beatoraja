@@ -33,14 +33,11 @@ import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.TextField;
-import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldListener;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.*;
 import com.badlogic.gdx.utils.JsonWriter.OutputType;
-import com.badlogic.gdx.utils.viewport.FitViewport;
+
+import static bms.player.beatoraja.Resolution.*;
 
 public class MainController extends ApplicationAdapter {
 
@@ -83,9 +80,6 @@ public class MainController extends ApplicationAdapter {
 	private static final Path songdbpath = Paths.get("songdata.db");
 
 	private ScreenShotThread screenshot;
-
-	public static final Rectangle[] RESOLUTION = { new Rectangle(0, 0, 640, 480), new Rectangle(0, 0, 1280, 720),
-			new Rectangle(0, 0, 1920, 1080), new Rectangle(0, 0, 3840, 2160) };
 
 	public MainController(Path f, Config config, int auto) {
 		this.auto = auto;

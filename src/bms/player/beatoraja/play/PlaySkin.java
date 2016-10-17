@@ -10,6 +10,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 
+import static bms.player.beatoraja.skin.SkinProperty.*;
+
 /**
  * プレイスキン
  * 
@@ -44,11 +46,11 @@ public class PlaySkin extends Skin {
 
 	private int close;
 
-	private final int[] judgecount = { MainState.NUMBER_EARLY_PERFECT, MainState.NUMBER_LATE_PERFECT,
-			MainState.NUMBER_EARLY_GREAT, MainState.NUMBER_LATE_GREAT, MainState.NUMBER_EARLY_GOOD,
-			MainState.NUMBER_LATE_GOOD, MainState.NUMBER_EARLY_BAD, MainState.NUMBER_LATE_BAD,
-			MainState.NUMBER_EARLY_POOR, MainState.NUMBER_LATE_POOR, MainState.NUMBER_EARLY_MISS,
-			MainState.NUMBER_LATE_MISS };
+	private final int[] judgecount = { NUMBER_EARLY_PERFECT, NUMBER_LATE_PERFECT,
+			NUMBER_EARLY_GREAT, NUMBER_LATE_GREAT, NUMBER_EARLY_GOOD,
+			NUMBER_LATE_GOOD, NUMBER_EARLY_BAD, NUMBER_LATE_BAD,
+			NUMBER_EARLY_POOR, NUMBER_LATE_POOR, NUMBER_EARLY_MISS,
+			NUMBER_LATE_MISS };
 
 	private BMSPlayer player;
 
@@ -77,14 +79,14 @@ public class PlaySkin extends Skin {
 		// 閉店
 		Texture close = new Texture("skin/close.png");
 		SkinImage ci = new SkinImage(new TextureRegion[] { new TextureRegion(close, 0, 500, 640, 240) }, 0);
-		setDestination(ci, 0, 0, -360, 1280, 360, 0, 255, 255, 255, 255, 0, 0, 0, 0, 700, BMSPlayer.TIMER_FAILED, 0, 0,
+		setDestination(ci, 0, 0, -360, 1280, 360, 0, 255, 255, 255, 255, 0, 0, 0, 0, 700, TIMER_FAILED, 0, 0,
 				0);
 		setDestination(ci, 500, 0, 0, 1280, 360, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		setDestination(ci, 600, 0, -40, 1280, 360, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		setDestination(ci, 700, 0, 0, 1280, 360, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(ci);
 		ci = new SkinImage(new TextureRegion[] { new TextureRegion(close, 0, 740, 640, 240) }, 0);
-		setDestination(ci, 0, 0, 720, 1280, 360, 0, 255, 255, 255, 255, 0, 0, 0, 0, 700, BMSPlayer.TIMER_FAILED, 0, 0,
+		setDestination(ci, 0, 0, 720, 1280, 360, 0, 255, 255, 255, 255, 0, 0, 0, 0, 700, TIMER_FAILED, 0, 0,
 				0);
 		setDestination(ci, 500, 0, 360, 1280, 360, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		setDestination(ci, 600, 0, 400, 1280, 360, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -93,7 +95,7 @@ public class PlaySkin extends Skin {
 
 		Texture nt = new Texture("skin/system.png");
 		SkinImage fi = new SkinImage(new TextureRegion[] { new TextureRegion(nt, 0, 0, 8, 8) }, 0);
-		setDestination(fi, 0, 0, 0, 1280, 720, 0, 0, 255, 255, 255, 0, 0, 0, 0, 500, BMSPlayer.TIMER_FADEOUT, 0, 0, 0);
+		setDestination(fi, 0, 0, 0, 1280, 720, 0, 0, 255, 255, 255, 0, 0, 0, 0, 500, TIMER_FADEOUT, 0, 0, 0);
 		setDestination(fi, 500, 0, 0, 1280, 720, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(fi);
 
@@ -143,24 +145,24 @@ public class PlaySkin extends Skin {
 		TextureRegion[][] ntr = TextureRegion.split(nt, 24, 24);
 
 		// bpm
-		addNumber(new SkinNumber(ntr[0], 0, 4, 0, MainState.NUMBER_MINBPM), 0, 520, 2, 18, 18, 0, 255, 255, 255, 255,
-				0, 0, 0, 0, 0, 0, MainState.OPTION_BPMCHANGE, 0, 0);
-		addNumber(new SkinNumber(ntr[0], 0, 4, 0, MainState.NUMBER_NOWBPM), 0, 592, 2, 24, 24, 0, 255, 255, 255, 255,
+		addNumber(new SkinNumber(ntr[0], 0, 4, 0, NUMBER_MINBPM), 0, 520, 2, 18, 18, 0, 255, 255, 255, 255,
+				0, 0, 0, 0, 0, 0, OPTION_BPMCHANGE, 0, 0);
+		addNumber(new SkinNumber(ntr[0], 0, 4, 0, NUMBER_NOWBPM), 0, 592, 2, 24, 24, 0, 255, 255, 255, 255,
 				0, 0, 0, 0, 0, 0, 0, 0, 0);
-		addNumber(new SkinNumber(ntr[0], 0, 4, 0, MainState.NUMBER_MAXBPM), 0, 688, 2, 18, 18, 0, 255, 255, 255, 255,
-				0, 0, 0, 0, 0, 0, MainState.OPTION_BPMCHANGE, 0, 0);
+		addNumber(new SkinNumber(ntr[0], 0, 4, 0, NUMBER_MAXBPM), 0, 688, 2, 18, 18, 0, 255, 255, 255, 255,
+				0, 0, 0, 0, 0, 0, OPTION_BPMCHANGE, 0, 0);
 		// 残り時間
-		addNumber(new SkinNumber(ntr[0], 0, 2, 1, MainState.NUMBER_TIMELEFT_MINUTE), 0, 1148, 2, 24, 24, 0, 255, 255,
+		addNumber(new SkinNumber(ntr[0], 0, 2, 1, NUMBER_TIMELEFT_MINUTE), 0, 1148, 2, 24, 24, 0, 255, 255,
 				255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		addNumber(new SkinNumber(ntr[0], 0, 2, 1, MainState.NUMBER_TIMELEFT_SECOND), 0, 1220, 2, 24, 24, 0, 255, 255,
+		addNumber(new SkinNumber(ntr[0], 0, 2, 1, NUMBER_TIMELEFT_SECOND), 0, 1220, 2, 24, 24, 0, 255, 255,
 				255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
-		addNumber(new SkinNumber(ntr[0], 0, 2, 0, MainState.NUMBER_HISPEED), 0, 116, 2, 12, 24, 0, 255, 255, 255, 255,
+		addNumber(new SkinNumber(ntr[0], 0, 2, 0, NUMBER_HISPEED), 0, 116, 2, 12, 24, 0, 255, 255, 255, 255,
 				0, 0, 0, 0, 0, 0, 0, 0, 0);
-		addNumber(new SkinNumber(ntr[0], 0, 2, 1, MainState.NUMBER_HISPEED_AFTERDOT), 0, 154, 2, 10, 20, 0, 255, 255,
+		addNumber(new SkinNumber(ntr[0], 0, 2, 1, NUMBER_HISPEED_AFTERDOT), 0, 154, 2, 10, 20, 0, 255, 255,
 				255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
-		addNumber(new SkinNumber(ntr[0], 0, 4, 0, MainState.NUMBER_DURATION), 0, 318, 2, 12, 24, 0, 255, 255, 255, 255,
+		addNumber(new SkinNumber(ntr[0], 0, 4, 0, NUMBER_DURATION), 0, 318, 2, 12, 24, 0, 255, 255, 255, 255,
 				0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 		Texture grapht = new Texture("skin/scoregraph.png");
@@ -171,11 +173,11 @@ public class PlaySkin extends Skin {
 
 		graph = new SkinGraph[3];
 		graph[0] = new SkinGraph(new TextureRegion[] { new TextureRegion(grapht, 0, 0, 100, 296) }, 0);
-		graph[0].setReferenceID(MainState.BARGRAPH_SCORERATE);
+		graph[0].setReferenceID(BARGRAPH_SCORERATE);
 		graph[1] = new SkinGraph(new TextureRegion[] { new TextureRegion(grapht, 100, 0, 100, 296) }, 0);
-		graph[1].setReferenceID(MainState.BARGRAPH_BESTSCORERATE);
+		graph[1].setReferenceID(BARGRAPH_BESTSCORERATE);
 		graph[2] = new SkinGraph(new TextureRegion[] { new TextureRegion(grapht, 200, 0, 100, 296) }, 0);
-		graph[2].setReferenceID(MainState.BARGRAPH_TARGETSCORERATE);
+		graph[2].setReferenceID(BARGRAPH_TARGETSCORERATE);
 
 	}
 
@@ -236,8 +238,8 @@ public class PlaySkin extends Skin {
 			images[i] = new SkinImage();
 			images[i].setImage(judge[i == 5 ? 4 : i], 100);
 			setDestination(images[i], 0, 115, 240, 180, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-			images[i].setOffsety(MainState.OFFSET_LIFT);
-			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 100, 6, 0, MainState.NUMBER_MAXCOMBO);
+			images[i].setOffsety(OFFSET_LIFT);
+			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 100, 6, 0, NUMBER_MAXCOMBO);
 			setDestination(number[i], 0, 200, 0, 40, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		}
 		judgeregion = new JudgeRegion[] { new JudgeRegion(images, number, true) };
@@ -248,7 +250,7 @@ public class PlaySkin extends Skin {
 		add(new SkinGaugeObject(this, gauge));
 
 		SkinText title = new SkinText("skin/VL-Gothic-Regular.ttf", 0, 24, 2);
-		title.setReferenceID(MainState.STRING_FULLTITLE);
+		title.setReferenceID(STRING_FULLTITLE);
 		setDestination(title, 0, 502, 698, 24, 24, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		setDestination(title, 1000, 502, 698, 24, 24, 0, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		setDestination(title, 2000, 502, 698, 24, 24, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -290,12 +292,12 @@ public class PlaySkin extends Skin {
 		setDestination(progress, 0, 4, 140, 12, 540, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(progress);
 		SkinSlider pseek = new SkinSlider(new TextureRegion[] { new TextureRegion(st, 0, 289, 14, 20) }, 0, 2,
-				(int) (520 * dh), MainState.SLIDER_MUSIC_PROGRESS);
+				(int) (520 * dh), SLIDER_MUSIC_PROGRESS);
 		setDestination(pseek, 0, 2, 660, 16, 20, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(pseek);
 		pseek = new SkinSlider(new TextureRegion[] { new TextureRegion(st, 15, 289, 14, 20) }, 0, 2, (int) (520 * dh),
-				MainState.SLIDER_MUSIC_PROGRESS);
-		setDestination(pseek, 0, 2, 660, 16, 20, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, MainState.TIMER_ENDOFNOTE_1P, 0,
+				SLIDER_MUSIC_PROGRESS);
+		setDestination(pseek, 0, 2, 660, 16, 20, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, TIMER_ENDOFNOTE_1P, 0,
 				0, 0);
 		add(pseek);
 
@@ -315,48 +317,48 @@ public class PlaySkin extends Skin {
 			SkinImage ri = new SkinImage(new TextureRegion[][] { { keybeam[i] }, { keybeaml[i] } }, 0);
 			setDestination(ri, 0, laneregion[i].x / dw + laneregion[i].width / dw / 4, laneregion[i].y / dh,
 					laneregion[i].width / dw / 2, laneregion[i].height / dh, 0, 255, 255, 255, 255, 0, 0, 0, 0, 100,
-					BMSPlayer.TIMER_KEYON_1P_KEY1 + (i % 8 == 7 ? -1 : i), 0, 0, 0);
+					TIMER_KEYON_1P_KEY1 + (i % 8 == 7 ? -1 : i), 0, 0, 0);
 			setDestination(ri, 100, laneregion[i].x / dw, laneregion[i].y / dh, laneregion[i].width / dw,
 					laneregion[i].height / dh, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-			ri.setOffsety(MainState.OFFSET_LIFT);
-			ri.setReferenceID(BMSPlayer.VALUE_JUDGE_1P_KEY1 + (i % 8 == 7 ? -1 : i));
+			ri.setOffsety(OFFSET_LIFT);
+			ri.setReferenceID(VALUE_JUDGE_1P_KEY1 + (i % 8 == 7 ? -1 : i));
 			add(ri);
 		}
 		SkinImage judgeline = new SkinImage(new TextureRegion[] { new TextureRegion(st, 16, 0, 8, 8) }, 0);
-		judgeline.setOffsety(BMSPlayer.OFFSET_LIFT);
+		judgeline.setOffsety(OFFSET_LIFT);
 		setDestination(judgeline, 0, 20, 137, 390, 6, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(judgeline);
 		line = new SkinImage[1];
 		line[0] = new SkinImage(new TextureRegion[] { new TextureRegion(st, 0, 0, 1, 1) }, 0);
-		line[0].setOffsety(BMSPlayer.OFFSET_LIFT);
+		line[0].setOffsety(OFFSET_LIFT);
 		setDestination(line[0], 0, 20, 140, 390, 1, 0, 255, 128, 128, 128, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(new SkinLaneObject(this, note, longnote, minenote));
 		Texture lct = new Texture("skin/lanecover.png");
 		SkinSlider lanecover = new SkinSlider(new TextureRegion[] { new TextureRegion(lct) }, 0, 2, (int) (580 * dh),
-				BMSPlayer.SLIDER_LANECOVER);
+				SLIDER_LANECOVER);
 		setDestination(lanecover, 0, 20, 720, 390, 580, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(lanecover);
 
 		for (int i = 0; i < laneregion.length; i++) {
 			SkinImage bombi = new SkinImage(new TextureRegion[][] { {}, bombtr[3], bombtr[0], bombtr[1] }, 160);
-			bombi.setTimer(BMSPlayer.TIMER_BOMB_1P_KEY1 + (i % 8 == 7 ? -1 : i));
+			bombi.setTimer(TIMER_BOMB_1P_KEY1 + (i % 8 == 7 ? -1 : i));
 			setDestination(bombi, 0, laneregion[i].x / dw + laneregion[i].width / dw / 2 - 141, laneregion[i].y / dh
-					- 202, 322, 344, 0, 255, 255, 255, 255, 2, 0, 0, 0, 161, BMSPlayer.TIMER_BOMB_1P_KEY1
+					- 202, 322, 344, 0, 255, 255, 255, 255, 2, 0, 0, 0, 161, TIMER_BOMB_1P_KEY1
 					+ (i % 8 == 7 ? -1 : i), 0, 0, 0);
 			setDestination(bombi, 160, laneregion[i].x / dw + laneregion[i].width / dw / 2 - 141, laneregion[i].y / dh
 					- 202, 322, 344, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0);
 			setDestination(bombi, 161, laneregion[i].x / dw, laneregion[i].y / dh, 0, 0, 0, 255, 255, 255, 255, 2, 0,
 					0, 0, 0, 0, 0, 0, 0);
-			bombi.setOffsety(MainState.OFFSET_LIFT);
-			bombi.setReferenceID(BMSPlayer.VALUE_JUDGE_1P_KEY1 + (i % 8 == 7 ? -1 : i));
+			bombi.setOffsety(OFFSET_LIFT);
+			bombi.setReferenceID(VALUE_JUDGE_1P_KEY1 + (i % 8 == 7 ? -1 : i));
 			add(bombi);
 
 			SkinImage hbombi = new SkinImage(bombtr[2], 160);
-			hbombi.setTimer(BMSPlayer.TIMER_HOLD_1P_KEY1 + (i % 8 == 7 ? -1 : i));
+			hbombi.setTimer(TIMER_HOLD_1P_KEY1 + (i % 8 == 7 ? -1 : i));
 			setDestination(hbombi, 0, laneregion[i].x / dw + laneregion[i].width / dw / 2 - 141, laneregion[i].y / dh
-					- 202, 322, 344, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, BMSPlayer.TIMER_HOLD_1P_KEY1
+					- 202, 322, 344, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, TIMER_HOLD_1P_KEY1
 					+ (i % 8 == 7 ? -1 : i), 0, 0, 0);
-			hbombi.setOffsety(MainState.OFFSET_LIFT);
+			hbombi.setOffsety(OFFSET_LIFT);
 			add(hbombi);
 		}
 
@@ -369,27 +371,27 @@ public class PlaySkin extends Skin {
 						50 + (5 - i) * 18, 12, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 			}
 		}
-		addNumber(new SkinNumber(ntr[0], 100, 4, 0, MainState.NUMBER_SCORE_RATE), 0, 420, 200, 12, 18, 0, 255, 255,
+		addNumber(new SkinNumber(ntr[0], 100, 4, 0, NUMBER_SCORE_RATE), 0, 420, 200, 12, 18, 0, 255, 255,
 				255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		addNumber(new SkinNumber(ntr[0], 100, 1, 0, MainState.NUMBER_SCORE_RATE_AFTERDOT), 0, 468, 200, 8, 12, 0, 255,
+		addNumber(new SkinNumber(ntr[0], 100, 1, 0, NUMBER_SCORE_RATE_AFTERDOT), 0, 468, 200, 8, 12, 0, 255,
 				255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		addNumber(new SkinNumber(ntr[0], 100, 5, 0, MainState.NUMBER_SCORE), 0, 420, 180, 12, 18, 0, 255, 255, 255,
+		addNumber(new SkinNumber(ntr[0], 100, 5, 0, NUMBER_SCORE), 0, 420, 180, 12, 18, 0, 255, 255, 255,
 				255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		addNumber(new SkinNumber(ntr[1], 100, 5, 0, MainState.NUMBER_HIGHSCORE), 0, 420, 160, 12, 18, 0, 255, 255, 255,
+		addNumber(new SkinNumber(ntr[1], 100, 5, 0, NUMBER_HIGHSCORE), 0, 420, 160, 12, 18, 0, 255, 255, 255,
 				255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		addNumber(new SkinNumber(ntr[2], 100, 5, 0, MainState.NUMBER_TARGET_SCORE), 0, 420, 140, 12, 18, 0, 255, 255,
+		addNumber(new SkinNumber(ntr[2], 100, 5, 0, NUMBER_TARGET_SCORE), 0, 420, 140, 12, 18, 0, 255, 255,
 				255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 		lanegroupregion = new Rectangle[] { rect(20, 140, 390, 580) };
 
 		SkinSlider seek = new SkinSlider(new TextureRegion[] { new TextureRegion(st, 0, 265, 17, 24) }, 0, 1,
-				(int) (360 * dh), MainState.BARGRAPH_LOAD_PROGRESS);
+				(int) (360 * dh), BARGRAPH_LOAD_PROGRESS);
 		setDestination(seek, 0, 20, 440, 30, 24, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(seek);
 		// READY
 		Texture ready = new Texture("skin/ready.png");
 		SkinImage ri = new SkinImage(new TextureRegion[] { new TextureRegion(ready) }, 0);
-		setDestination(ri, 0, 40, 250, 350, 60, 0, 0, 255, 255, 255, 0, 0, 0, 0, -1, BMSPlayer.TIMER_READY, 0, 0, 0);
+		setDestination(ri, 0, 40, 250, 350, 60, 0, 0, 255, 255, 255, 0, 0, 0, 0, -1, TIMER_READY, 0, 0, 0);
 		setDestination(ri, 750, 40, 300, 350, 60, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		setDestination(ri, 1000, 40, 300, 350, 60, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(ri);
@@ -400,22 +402,22 @@ public class PlaySkin extends Skin {
 			wv[i] = new TextureRegion(st, i * 10, 550, 10, 15);
 			yv[i] = new TextureRegion(st, i * 10, 565, 10, 15);
 		}
-		SkinNumber white = new SkinNumber(wv, 0, 3, 0, MainState.NUMBER_LANECOVER1);
-		white.setOffsety(BMSPlayer.OFFSET_LANECOVER);
+		SkinNumber white = new SkinNumber(wv, 0, 3, 0, NUMBER_LANECOVER1);
+		white.setOffsety(OFFSET_LANECOVER);
 		setDestination(white, 0, 120, 720, 10, 15, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0,
-				BMSPlayer.OPTION_LANECOVER1_CHANGING, 0, 0);
+				OPTION_LANECOVER1_CHANGING, 0, 0);
 		add(white);
-		SkinNumber yellow = new SkinNumber(yv, 0, 4, 0, MainState.NUMBER_DURATION);
-		yellow.setOffsety(BMSPlayer.OFFSET_LANECOVER);
+		SkinNumber yellow = new SkinNumber(yv, 0, 4, 0, NUMBER_DURATION);
+		yellow.setOffsety(OFFSET_LANECOVER);
 		setDestination(yellow, 0, 310, 720, 10, 15, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0,
-				BMSPlayer.OPTION_LANECOVER1_CHANGING, 0, 0);
+				OPTION_LANECOVER1_CHANGING, 0, 0);
 		add(yellow);
 
 		gaugeregion = rect(20, 30, 390, 30);
 
-		addNumber(new SkinNumber(ntr[0], 0, 3, 0, MainState.NUMBER_GROOVEGAUGE), 0, 314, 60, 24, 24, 0, 255, 255, 255,
+		addNumber(new SkinNumber(ntr[0], 0, 3, 0, NUMBER_GROOVEGAUGE), 0, 314, 60, 24, 24, 0, 255, 255, 255,
 				255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		addNumber(new SkinNumber(ntr[0], 0, 1, 0, MainState.NUMBER_GROOVEGAUGE_AFTERDOT), 0, 386, 60, 18, 18, 0, 255,
+		addNumber(new SkinNumber(ntr[0], 0, 1, 0, NUMBER_GROOVEGAUGE_AFTERDOT), 0, 386, 60, 18, 18, 0, 255,
 				255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 	}
@@ -477,8 +479,8 @@ public class PlaySkin extends Skin {
 			images[i] = new SkinImage();
 			images[i].setImage(judge[i == 5 ? 4 : i], 100);
 			setDestination(images[i], 0, 965, 240, 180, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-			images[i].setOffsety(MainState.OFFSET_LIFT);
-			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 100, 6, 0, MainState.NUMBER_MAXCOMBO);
+			images[i].setOffsety(OFFSET_LIFT);
+			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 100, 6, 0, NUMBER_MAXCOMBO);
 			setDestination(number[i], 0, 200, 0, 40, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		}
 		judgeregion = new JudgeRegion[] { new JudgeRegion(images, number, true) };
@@ -489,7 +491,7 @@ public class PlaySkin extends Skin {
 		add(new SkinGaugeObject(this, gauge));
 
 		SkinText title = new SkinText("skin/VL-Gothic-Regular.ttf", 0, 24, 2);
-		title.setReferenceID(MainState.STRING_FULLTITLE);
+		title.setReferenceID(STRING_FULLTITLE);
 		setDestination(title, 0, 42, 698, 24, 24, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		setDestination(title, 1000, 42, 698, 24, 24, 0, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		setDestination(title, 2000, 42, 698, 24, 24, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -531,12 +533,12 @@ public class PlaySkin extends Skin {
 		setDestination(progress, 0, 1264, 140, 12, 540, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(progress);
 		SkinSlider pseek = new SkinSlider(new TextureRegion[] { new TextureRegion(st, 0, 289, 14, 20) }, 0, 2,
-				(int) (520 * dh), MainState.SLIDER_MUSIC_PROGRESS);
+				(int) (520 * dh), SLIDER_MUSIC_PROGRESS);
 		setDestination(pseek, 0, 1264, 660, 16, 20, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(pseek);
 		pseek = new SkinSlider(new TextureRegion[] { new TextureRegion(st, 15, 289, 14, 20) }, 0, 2, (int) (520 * dh),
-				MainState.SLIDER_MUSIC_PROGRESS);
-		setDestination(pseek, 0, 1264, 660, 16, 20, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, MainState.TIMER_ENDOFNOTE_1P,
+				SLIDER_MUSIC_PROGRESS);
+		setDestination(pseek, 0, 1264, 660, 16, 20, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, TIMER_ENDOFNOTE_1P,
 				0, 0, 0);
 		add(pseek);
 
@@ -556,48 +558,48 @@ public class PlaySkin extends Skin {
 			SkinImage ri = new SkinImage(new TextureRegion[][] { { keybeam[i] }, { keybeaml[i] } }, 0);
 			setDestination(ri, 0, laneregion[i].x / dw + laneregion[i].width / dw / 4, laneregion[i].y / dh,
 					laneregion[i].width / dw / 2, laneregion[i].height / dh, 0, 255, 255, 255, 255, 0, 0, 0, 0, 100,
-					BMSPlayer.TIMER_KEYON_1P_KEY1 + (i % 8 == 7 ? -1 : i), 0, 0, 0);
+					TIMER_KEYON_1P_KEY1 + (i % 8 == 7 ? -1 : i), 0, 0, 0);
 			setDestination(ri, 100, laneregion[i].x / dw, laneregion[i].y / dh, laneregion[i].width / dw,
 					laneregion[i].height / dh, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-			ri.setOffsety(MainState.OFFSET_LIFT);
-			ri.setReferenceID(BMSPlayer.VALUE_JUDGE_1P_KEY1 + (i % 8 == 7 ? -1 : i));
+			ri.setOffsety(OFFSET_LIFT);
+			ri.setReferenceID(VALUE_JUDGE_1P_KEY1 + (i % 8 == 7 ? -1 : i));
 			add(ri);
 		}
 		SkinImage judgeline = new SkinImage(new TextureRegion[] { new TextureRegion(st, 16, 0, 8, 8) }, 0);
-		judgeline.setOffsety(BMSPlayer.OFFSET_LIFT);
+		judgeline.setOffsety(OFFSET_LIFT);
 		setDestination(judgeline, 0, 870, 137, 390, 6, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(judgeline);
 		line = new SkinImage[1];
 		line[0] = new SkinImage(new TextureRegion[] { new TextureRegion(st, 0, 0, 1, 1) }, 0);
-		line[0].setOffsety(BMSPlayer.OFFSET_LIFT);
+		line[0].setOffsety(OFFSET_LIFT);
 		setDestination(line[0], 0, 870, 140, 390, 1, 0, 255, 128, 128, 128, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(new SkinLaneObject(this, note, longnote, minenote));
 		Texture lct = new Texture("skin/lanecover.png");
 		SkinSlider lanecover = new SkinSlider(new TextureRegion[] { new TextureRegion(lct) }, 0, 2, (int) (580 * dh),
-				BMSPlayer.SLIDER_LANECOVER);
+				SLIDER_LANECOVER);
 		setDestination(lanecover, 0, 870, 720, 390, 580, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(lanecover);
 
 		for (int i = 0; i < laneregion.length; i++) {
 			SkinImage bombi = new SkinImage(new TextureRegion[][] { {}, bombtr[3], bombtr[0], bombtr[1] }, 160);
-			bombi.setTimer(BMSPlayer.TIMER_BOMB_1P_KEY1 + (i % 8 == 7 ? -1 : i));
+			bombi.setTimer(TIMER_BOMB_1P_KEY1 + (i % 8 == 7 ? -1 : i));
 			setDestination(bombi, 0, laneregion[i].x / dw + laneregion[i].width / dw / 2 - 141, laneregion[i].y / dh
-					- 202, 322, 344, 0, 255, 255, 255, 255, 2, 0, 0, 0, 161, BMSPlayer.TIMER_BOMB_1P_KEY1
+					- 202, 322, 344, 0, 255, 255, 255, 255, 2, 0, 0, 0, 161, TIMER_BOMB_1P_KEY1
 					+ (i % 8 == 7 ? -1 : i), 0, 0, 0);
 			setDestination(bombi, 160, laneregion[i].x / dw + laneregion[i].width / dw / 2 - 141, laneregion[i].y / dh
 					- 202, 322, 344, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0);
 			setDestination(bombi, 161, laneregion[i].x / dw, laneregion[i].y / dh, 0, 0, 0, 255, 255, 255, 255, 2, 0,
 					0, 0, 0, 0, 0, 0, 0);
-			bombi.setOffsety(MainState.OFFSET_LIFT);
-			bombi.setReferenceID(BMSPlayer.VALUE_JUDGE_1P_KEY1 + (i % 8 == 7 ? -1 : i));
+			bombi.setOffsety(OFFSET_LIFT);
+			bombi.setReferenceID(VALUE_JUDGE_1P_KEY1 + (i % 8 == 7 ? -1 : i));
 			add(bombi);
 
 			SkinImage hbombi = new SkinImage(bombtr[2], 160);
-			hbombi.setTimer(BMSPlayer.TIMER_HOLD_1P_KEY1 + (i % 8 == 7 ? -1 : i));
+			hbombi.setTimer(TIMER_HOLD_1P_KEY1 + (i % 8 == 7 ? -1 : i));
 			setDestination(hbombi, 0, laneregion[i].x / dw + laneregion[i].width / dw / 2 - 141, laneregion[i].y / dh
-					- 202, 322, 344, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, BMSPlayer.TIMER_HOLD_1P_KEY1
+					- 202, 322, 344, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, TIMER_HOLD_1P_KEY1
 					+ (i % 8 == 7 ? -1 : i), 0, 0, 0);
-			hbombi.setOffsety(MainState.OFFSET_LIFT);
+			hbombi.setOffsety(OFFSET_LIFT);
 			add(hbombi);
 		}
 
@@ -610,27 +612,27 @@ public class PlaySkin extends Skin {
 						50 + (5 - i) * 18, 12, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 			}
 		}
-		addNumber(new SkinNumber(ntr[0], 100, 4, 0, MainState.NUMBER_SCORE_RATE), 0, 790, 200, 12, 18, 0, 255, 255,
+		addNumber(new SkinNumber(ntr[0], 100, 4, 0, NUMBER_SCORE_RATE), 0, 790, 200, 12, 18, 0, 255, 255,
 				255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		addNumber(new SkinNumber(ntr[0], 100, 1, 0, MainState.NUMBER_SCORE_RATE_AFTERDOT), 0, 838, 200, 8, 12, 0, 255,
+		addNumber(new SkinNumber(ntr[0], 100, 1, 0, NUMBER_SCORE_RATE_AFTERDOT), 0, 838, 200, 8, 12, 0, 255,
 				255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		addNumber(new SkinNumber(ntr[0], 100, 5, 0, MainState.NUMBER_SCORE), 0, 790, 180, 12, 18, 0, 255, 255, 255,
+		addNumber(new SkinNumber(ntr[0], 100, 5, 0, NUMBER_SCORE), 0, 790, 180, 12, 18, 0, 255, 255, 255,
 				255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		addNumber(new SkinNumber(ntr[1], 100, 5, 0, MainState.NUMBER_HIGHSCORE), 0, 790, 160, 12, 18, 0, 255, 255, 255,
+		addNumber(new SkinNumber(ntr[1], 100, 5, 0, NUMBER_HIGHSCORE), 0, 790, 160, 12, 18, 0, 255, 255, 255,
 				255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		addNumber(new SkinNumber(ntr[2], 100, 5, 0, MainState.NUMBER_TARGET_SCORE), 0, 790, 140, 12, 18, 0, 255, 255,
+		addNumber(new SkinNumber(ntr[2], 100, 5, 0, NUMBER_TARGET_SCORE), 0, 790, 140, 12, 18, 0, 255, 255,
 				255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 		lanegroupregion = new Rectangle[] { rect(870, 140, 390, 580) };
 
 		SkinSlider seek = new SkinSlider(new TextureRegion[] { new TextureRegion(st, 0, 265, 17, 24) }, 0, 1,
-				(int) (360 * dh), MainState.BARGRAPH_LOAD_PROGRESS);
+				(int) (360 * dh), BARGRAPH_LOAD_PROGRESS);
 		setDestination(seek, 0, 870, 440, 30, 24, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(seek);
 		// READY
 		Texture ready = new Texture("skin/ready.png");
 		SkinImage ri = new SkinImage(new TextureRegion[] { new TextureRegion(ready) }, 0);
-		setDestination(ri, 0, 870, 250, 350, 60, 0, 0, 255, 255, 255, 0, 0, 0, 0, -1, BMSPlayer.TIMER_READY, 0, 0, 0);
+		setDestination(ri, 0, 870, 250, 350, 60, 0, 0, 255, 255, 255, 0, 0, 0, 0, -1, TIMER_READY, 0, 0, 0);
 		setDestination(ri, 750, 870, 300, 350, 60, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		setDestination(ri, 1000, 870, 300, 350, 60, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(ri);
@@ -641,22 +643,22 @@ public class PlaySkin extends Skin {
 			wv[i] = new TextureRegion(st, i * 10, 550, 10, 15);
 			yv[i] = new TextureRegion(st, i * 10, 565, 10, 15);
 		}
-		SkinNumber white = new SkinNumber(wv, 0, 3, 0, MainState.NUMBER_LANECOVER1);
-		white.setOffsety(BMSPlayer.OFFSET_LANECOVER);
+		SkinNumber white = new SkinNumber(wv, 0, 3, 0, NUMBER_LANECOVER1);
+		white.setOffsety(OFFSET_LANECOVER);
 		setDestination(white, 0, 970, 720, 10, 15, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0,
-				BMSPlayer.OPTION_LANECOVER1_CHANGING, 0, 0);
+				OPTION_LANECOVER1_CHANGING, 0, 0);
 		add(white);
-		SkinNumber yellow = new SkinNumber(yv, 0, 4, 0, MainState.NUMBER_DURATION);
-		yellow.setOffsety(BMSPlayer.OFFSET_LANECOVER);
+		SkinNumber yellow = new SkinNumber(yv, 0, 4, 0, NUMBER_DURATION);
+		yellow.setOffsety(OFFSET_LANECOVER);
 		setDestination(yellow, 0, 1160, 720, 10, 15, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0,
-				BMSPlayer.OPTION_LANECOVER1_CHANGING, 0, 0);
+				OPTION_LANECOVER1_CHANGING, 0, 0);
 		add(yellow);
 
 		gaugeregion = rect(1260, 30, -390, 30);
 
-		addNumber(new SkinNumber(ntr[0], 0, 3, 0, MainState.NUMBER_GROOVEGAUGE), 0, 870, 60, 24, 24, 0, 255, 255, 255,
+		addNumber(new SkinNumber(ntr[0], 0, 3, 0, NUMBER_GROOVEGAUGE), 0, 870, 60, 24, 24, 0, 255, 255, 255,
 				255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		addNumber(new SkinNumber(ntr[0], 0, 1, 0, MainState.NUMBER_GROOVEGAUGE_AFTERDOT), 0, 942, 60, 18, 18, 0, 255,
+		addNumber(new SkinNumber(ntr[0], 0, 1, 0, NUMBER_GROOVEGAUGE_AFTERDOT), 0, 942, 60, 18, 18, 0, 255,
 				255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 	}
@@ -748,8 +750,8 @@ public class PlaySkin extends Skin {
 			images[i] = new SkinImage();
 			images[i].setImage(judge[i == 5 ? 4 : i], 100);
 			setDestination(images[i], 0, 375, 240, 140, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-			images[i].setOffsety(MainState.OFFSET_LIFT);
-			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 100, 6, 0, MainState.NUMBER_MAXCOMBO);
+			images[i].setOffsety(OFFSET_LIFT);
+			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 100, 6, 0, NUMBER_MAXCOMBO);
 			setDestination(number[i], 0, 70, -30, 20, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		}
 		JudgeRegion jr1 = new JudgeRegion(images, number, false);
@@ -759,8 +761,8 @@ public class PlaySkin extends Skin {
 			images[i] = new SkinImage();
 			images[i].setImage(judge[i == 5 ? 4 : i], 100);
 			setDestination(images[i], 0, 570, 240, 140, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-			images[i].setOffsety(MainState.OFFSET_LIFT);
-			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 100, 6, 0, MainState.NUMBER_MAXCOMBO);
+			images[i].setOffsety(OFFSET_LIFT);
+			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 100, 6, 0, NUMBER_MAXCOMBO);
 			setDestination(number[i], 0, 70, -30, 20, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		}
 		JudgeRegion jr2 = new JudgeRegion(images, number, false);
@@ -770,8 +772,8 @@ public class PlaySkin extends Skin {
 			images[i] = new SkinImage();
 			images[i].setImage(judge[i == 5 ? 4 : i], 100);
 			setDestination(images[i], 0, 765, 240, 140, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-			images[i].setOffsety(MainState.OFFSET_LIFT);
-			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 100, 6, 0, MainState.NUMBER_MAXCOMBO);
+			images[i].setOffsety(OFFSET_LIFT);
+			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 100, 6, 0, NUMBER_MAXCOMBO);
 			setDestination(number[i], 0, 70, -30, 20, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		}
 		JudgeRegion jr3 = new JudgeRegion(images, number, false);
@@ -787,7 +789,7 @@ public class PlaySkin extends Skin {
 		add(new SkinGaugeObject(this, gauge));
 
 		SkinText title = new SkinText("skin/VL-Gothic-Regular.ttf", 0, 24);
-		title.setReferenceID(MainState.STRING_FULLTITLE);
+		title.setReferenceID(STRING_FULLTITLE);
 		setDestination(title, 0, 12, 720, 18, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		setDestination(title, 1000, 12, 720, 18, 18, 0, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		setDestination(title, 2000, 12, 720, 18, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -842,44 +844,44 @@ public class PlaySkin extends Skin {
 			SkinImage bi = new SkinImage(new TextureRegion[][] { { keybeam[i] }, { keybeaml[i] }, { keybeamg[i] },
 					{ keybeamg[i] } }, 0);
 			setDestination(bi, 0, laneregion[i].x + laneregion[i].width / 4, laneregion[i].y, laneregion[i].width / 2,
-					laneregion[i].height, 0, 255, 255, 255, 255, 0, 0, 0, 0, 100, BMSPlayer.TIMER_KEYON_1P_KEY1 + i, 0,
+					laneregion[i].height, 0, 255, 255, 255, 255, 0, 0, 0, 0, 100, TIMER_KEYON_1P_KEY1 + i, 0,
 					0, 0);
 			setDestination(bi, 100, laneregion[i].x, laneregion[i].y, laneregion[i].width, laneregion[i].height, 0,
 					255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-			bi.setOffsety(MainState.OFFSET_LIFT);
-			bi.setReferenceID(BMSPlayer.VALUE_JUDGE_1P_KEY1 + i);
+			bi.setOffsety(OFFSET_LIFT);
+			bi.setReferenceID(VALUE_JUDGE_1P_KEY1 + i);
 			add(bi);
 
 		}
 
 		SkinImage line = new SkinImage(new TextureRegion[] { new TextureRegion(st, 16, 0, 8, 8) }, 0);
-		line.setOffsety(BMSPlayer.OFFSET_LIFT);
+		line.setOffsety(OFFSET_LIFT);
 		setDestination(line, 0, 345, 137, 590, 6, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(line);
 		add(new SkinLaneObject(this, note, longnote, minenote));
 		Texture lct = new Texture("skin/lanecover.png");
 		SkinSlider lanecover = new SkinSlider(new TextureRegion[] { new TextureRegion(lct) }, 0, 2, (int) (580 * dh),
-				BMSPlayer.SLIDER_LANECOVER);
+				SLIDER_LANECOVER);
 		setDestination(lanecover, 0, 345, 720, 590, 580, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(lanecover);
 
 		for (int i = 0; i < laneregion.length; i++) {
 			SkinImage bombi = new SkinImage(bombtr[0], 160);
-			bombi.setTimer(BMSPlayer.TIMER_BOMB_1P_KEY1 + i);
+			bombi.setTimer(TIMER_BOMB_1P_KEY1 + i);
 			setDestination(bombi, 0, laneregion[i].x + laneregion[i].width / 2 - 156, laneregion[i].y - 222, 362, 384,
-					0, 255, 255, 255, 255, 2, 0, 0, 0, 161, BMSPlayer.TIMER_BOMB_1P_KEY1 + i, 0, 0, 0);
+					0, 255, 255, 255, 255, 2, 0, 0, 0, 161, TIMER_BOMB_1P_KEY1 + i, 0, 0, 0);
 			setDestination(bombi, 160, laneregion[i].x + laneregion[i].width / 2 - 156, laneregion[i].y - 222, 362,
 					384, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0);
 			setDestination(bombi, 161, laneregion[i].x, laneregion[i].y, 0, 0, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, 0,
 					0, 0, 0);
-			bombi.setOffsety(MainState.OFFSET_LIFT);
+			bombi.setOffsety(OFFSET_LIFT);
 			add(bombi);
 
 			SkinImage hbombi = new SkinImage(bombtr[2], 160);
-			hbombi.setTimer(BMSPlayer.TIMER_HOLD_1P_KEY1 + i);
+			hbombi.setTimer(TIMER_HOLD_1P_KEY1 + i);
 			setDestination(hbombi, 0, laneregion[i].x + laneregion[i].width / 2 - 156, laneregion[i].y - 222, 362, 384,
-					0, 255, 255, 255, 255, 2, 0, 0, 0, 0, BMSPlayer.TIMER_HOLD_1P_KEY1 + i, 0, 0, 0);
-			hbombi.setOffsety(MainState.OFFSET_LIFT);
+					0, 255, 255, 255, 255, 2, 0, 0, 0, 0, TIMER_HOLD_1P_KEY1 + i, 0, 0, 0);
+			hbombi.setOffsety(OFFSET_LIFT);
 			add(hbombi);
 		}
 
@@ -892,25 +894,25 @@ public class PlaySkin extends Skin {
 						30 + (5 - i) * 18, 12, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 			}
 		}
-		addNumber(new SkinNumber(ntr[0], 100, 4, 0, MainState.NUMBER_SCORE_RATE), 0, 970, 200, 12, 18, 0, 255, 255,
+		addNumber(new SkinNumber(ntr[0], 100, 4, 0, NUMBER_SCORE_RATE), 0, 970, 200, 12, 18, 0, 255, 255,
 				255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		addNumber(new SkinNumber(ntr[0], 100, 1, 0, MainState.NUMBER_SCORE_RATE_AFTERDOT), 0, 1018, 200, 8, 12, 0, 255,
+		addNumber(new SkinNumber(ntr[0], 100, 1, 0, NUMBER_SCORE_RATE_AFTERDOT), 0, 1018, 200, 8, 12, 0, 255,
 				255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		addNumber(new SkinNumber(ntr[0], 100, 5, 0, MainState.NUMBER_SCORE), 0, 970, 180, 12, 18, 0, 255, 255, 255,
+		addNumber(new SkinNumber(ntr[0], 100, 5, 0, NUMBER_SCORE), 0, 970, 180, 12, 18, 0, 255, 255, 255,
 				255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		addNumber(new SkinNumber(ntr[1], 100, 5, 0, MainState.NUMBER_HIGHSCORE), 0, 970, 160, 12, 18, 0, 255, 255, 255,
+		addNumber(new SkinNumber(ntr[1], 100, 5, 0, NUMBER_HIGHSCORE), 0, 970, 160, 12, 18, 0, 255, 255, 255,
 				255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		addNumber(new SkinNumber(ntr[2], 100, 5, 0, MainState.NUMBER_TARGET_SCORE), 0, 970, 140, 12, 18, 0, 255, 255,
+		addNumber(new SkinNumber(ntr[2], 100, 5, 0, NUMBER_TARGET_SCORE), 0, 970, 140, 12, 18, 0, 255, 255,
 				255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 		SkinSlider seek = new SkinSlider(new TextureRegion[] { new TextureRegion(st, 0, 265, 17, 24) }, 0, 1,
-				(int) (560 * dh), MainState.BARGRAPH_LOAD_PROGRESS);
+				(int) (560 * dh), BARGRAPH_LOAD_PROGRESS);
 		setDestination(seek, 0, 345, 440, 30, 24, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(seek);
 		// READY
 		Texture ready = new Texture("skin/ready.png");
 		SkinImage ri = new SkinImage(new TextureRegion[] { new TextureRegion(ready) }, 0);
-		setDestination(ri, 0, 465, 250, 350, 60, 0, 0, 255, 255, 255, 0, 0, 0, 0, -1, BMSPlayer.TIMER_READY, 0, 0, 0);
+		setDestination(ri, 0, 465, 250, 350, 60, 0, 0, 255, 255, 255, 0, 0, 0, 0, -1, TIMER_READY, 0, 0, 0);
 		setDestination(ri, 750, 465, 300, 350, 60, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		setDestination(ri, 1000, 465, 300, 350, 60, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(ri);
@@ -921,24 +923,24 @@ public class PlaySkin extends Skin {
 			wv[i] = new TextureRegion(st, i * 10, 550, 10, 15);
 			yv[i] = new TextureRegion(st, i * 10, 565, 10, 15);
 		}
-		SkinNumber white = new SkinNumber(wv, 0, 3, 0, MainState.NUMBER_LANECOVER1);
-		white.setOffsety(BMSPlayer.OFFSET_LANECOVER);
+		SkinNumber white = new SkinNumber(wv, 0, 3, 0, NUMBER_LANECOVER1);
+		white.setOffsety(OFFSET_LANECOVER);
 		setDestination(white, 0, 445, 720, 10, 15, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0,
-				BMSPlayer.OPTION_LANECOVER1_CHANGING, 0, 0);
+				OPTION_LANECOVER1_CHANGING, 0, 0);
 		add(white);
-		SkinNumber yellow = new SkinNumber(yv, 0, 4, 0, MainState.NUMBER_DURATION);
-		yellow.setOffsety(BMSPlayer.OFFSET_LANECOVER);
+		SkinNumber yellow = new SkinNumber(yv, 0, 4, 0, NUMBER_DURATION);
+		yellow.setOffsety(OFFSET_LANECOVER);
 		setDestination(yellow, 0, 835, 720, 10, 15, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0,
-				BMSPlayer.OPTION_LANECOVER1_CHANGING, 0, 0);
+				OPTION_LANECOVER1_CHANGING, 0, 0);
 		add(yellow);
 
 		lanegroupregion = new Rectangle[] { rect(345, 140, 590, 580) };
 
 		gaugeregion = rect(345, 30, 590, 30);
 
-		addNumber(new SkinNumber(ntr[0], 0, 3, 0, MainState.NUMBER_GROOVEGAUGE), 0, 600, 60, 24, 24, 0, 255, 255, 255,
+		addNumber(new SkinNumber(ntr[0], 0, 3, 0, NUMBER_GROOVEGAUGE), 0, 600, 60, 24, 24, 0, 255, 255, 255,
 				255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		addNumber(new SkinNumber(ntr[0], 0, 1, 0, MainState.NUMBER_GROOVEGAUGE_AFTERDOT), 0, 672, 60, 18, 18, 0, 255,
+		addNumber(new SkinNumber(ntr[0], 0, 1, 0, NUMBER_GROOVEGAUGE_AFTERDOT), 0, 672, 60, 18, 18, 0, 255,
 				255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 		// progress
@@ -946,12 +948,12 @@ public class PlaySkin extends Skin {
 		setDestination(progress, 0, 940, 140, 12, 540, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(progress);
 		SkinSlider pseek = new SkinSlider(new TextureRegion[] { new TextureRegion(st, 0, 289, 14, 20) }, 0, 2,
-				(int) (520 * dh), MainState.SLIDER_MUSIC_PROGRESS);
+				(int) (520 * dh), SLIDER_MUSIC_PROGRESS);
 		setDestination(pseek, 0, 938, 660, 16, 20, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(pseek);
 		pseek = new SkinSlider(new TextureRegion[] { new TextureRegion(st, 15, 289, 14, 20) }, 0, 2, (int) (520 * dh),
-				MainState.SLIDER_MUSIC_PROGRESS);
-		setDestination(pseek, 0, 938, 660, 16, 20, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, MainState.TIMER_ENDOFNOTE_1P,
+				SLIDER_MUSIC_PROGRESS);
+		setDestination(pseek, 0, 938, 660, 16, 20, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, TIMER_ENDOFNOTE_1P,
 				0, 0, 0);
 		add(pseek);
 	}
@@ -1020,8 +1022,8 @@ public class PlaySkin extends Skin {
 			images[i] = new SkinImage();
 			images[i].setImage(judge[i == 5 ? 4 : i], 100);
 			setDestination(images[i], 0, 315, 240, 180, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-			images[i].setOffsety(MainState.OFFSET_LIFT);
-			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 100, 6, 0, MainState.NUMBER_MAXCOMBO);
+			images[i].setOffsety(OFFSET_LIFT);
+			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 100, 6, 0, NUMBER_MAXCOMBO);
 			setDestination(number[i], 0, 200, 0, 40, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		}
 		JudgeRegion jr1 = new JudgeRegion(images, number, true);
@@ -1031,8 +1033,8 @@ public class PlaySkin extends Skin {
 			images[i] = new SkinImage();
 			images[i].setImage(judge[i == 5 ? 4 : i], 100);
 			setDestination(images[i], 0, 785, 240, 180, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-			images[i].setOffsety(MainState.OFFSET_LIFT);
-			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 100, 6, 0, MainState.NUMBER_MAXCOMBO);
+			images[i].setOffsety(OFFSET_LIFT);
+			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 100, 6, 0, NUMBER_MAXCOMBO);
 			setDestination(number[i], 0, 200, 0, 40, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		}
 		JudgeRegion jr2 = new JudgeRegion(images, number, true);
@@ -1051,7 +1053,7 @@ public class PlaySkin extends Skin {
 		add(new SkinGaugeObject(this, gauge));
 
 		SkinText title = new SkinText("skin/VL-Gothic-Regular.ttf", 0, 24);
-		title.setReferenceID(MainState.STRING_FULLTITLE);
+		title.setReferenceID(STRING_FULLTITLE);
 		setDestination(title, 0, 12, 720, 18, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		setDestination(title, 1000, 12, 720, 18, 18, 0, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		setDestination(title, 2000, 12, 720, 18, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -1106,60 +1108,60 @@ public class PlaySkin extends Skin {
 		for (int i = 0; i < laneregion.length; i++) {
 			SkinImage ri = new SkinImage(new TextureRegion[] { keybeam[i] }, 0);
 			setDestination(ri, 0, laneregion[i].x + laneregion[i].width / 4, laneregion[i].y, laneregion[i].width / 2,
-					laneregion[i].height, 0, 255, 255, 255, 255, 0, 0, 0, 0, 100, BMSPlayer.TIMER_KEYON_1P_KEY1
+					laneregion[i].height, 0, 255, 255, 255, 255, 0, 0, 0, 0, 100, TIMER_KEYON_1P_KEY1
 							+ (i % 8 == 7 ? -1 : (i % 8)) + (i >= 8 ? 10 : 0), 0, 0, 0);
 			setDestination(ri, 100, laneregion[i].x, laneregion[i].y, laneregion[i].width, laneregion[i].height, 0,
 					255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-			ri.setOffsety(MainState.OFFSET_LIFT);
+			ri.setOffsety(OFFSET_LIFT);
 			add(ri);
 		}
 
 		SkinImage judgeline = new SkinImage(new TextureRegion[] { new TextureRegion(st, 16, 0, 8, 8) }, 0);
-		judgeline.setOffsety(BMSPlayer.OFFSET_LIFT);
+		judgeline.setOffsety(OFFSET_LIFT);
 		setDestination(judgeline, 0, 210, 137, 390, 6, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(judgeline);
 		judgeline = new SkinImage(new TextureRegion[] { new TextureRegion(st, 16, 0, 8, 8) }, 0);
-		judgeline.setOffsety(BMSPlayer.OFFSET_LIFT);
+		judgeline.setOffsety(OFFSET_LIFT);
 		setDestination(judgeline, 0, 680, 137, 390, 6, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(judgeline);
 		line = new SkinImage[2];
 		line[0] = new SkinImage(new TextureRegion[] { new TextureRegion(st, 0, 0, 1, 1) }, 0);
 		setDestination(line[0], 0, 210, 140, 390, 1, 0, 255, 128, 128, 128, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		line[0].setOffsety(BMSPlayer.OFFSET_LIFT);
+		line[0].setOffsety(OFFSET_LIFT);
 		line[1] = new SkinImage(new TextureRegion[] { new TextureRegion(st, 0, 0, 1, 1) }, 0);
 		setDestination(line[1], 0, 680, 140, 390, 1, 0, 255, 128, 128, 128, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		line[1].setOffsety(BMSPlayer.OFFSET_LIFT);
+		line[1].setOffsety(OFFSET_LIFT);
 		add(new SkinLaneObject(this, note, longnote, minenote));
 		Texture lct = new Texture("skin/lanecover.png");
 		SkinSlider lanecover = new SkinSlider(new TextureRegion[] { new TextureRegion(lct) }, 0, 2, (int) (580 * dh),
-				BMSPlayer.SLIDER_LANECOVER);
+				SLIDER_LANECOVER);
 		setDestination(lanecover, 0, 210, 720, 390, 580, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(lanecover);
 		SkinSlider lanecover2 = new SkinSlider(new TextureRegion[] { new TextureRegion(lct) }, 0, 2, (int) (580 * dh),
-				BMSPlayer.SLIDER_LANECOVER);
+				SLIDER_LANECOVER);
 		setDestination(lanecover2, 0, 680, 720, 390, 580, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(lanecover2);
 
 		for (int i = 0; i < laneregion.length; i++) {
 			SkinImage bombi = new SkinImage(new TextureRegion[][] { {}, bombtr[3], bombtr[0], bombtr[1] }, 160);
-			bombi.setTimer(BMSPlayer.TIMER_BOMB_1P_KEY1 + (i % 8 == 7 ? -1 : (i % 8)) + (i >= 8 ? 10 : 0));
+			bombi.setTimer(TIMER_BOMB_1P_KEY1 + (i % 8 == 7 ? -1 : (i % 8)) + (i >= 8 ? 10 : 0));
 			setDestination(bombi, 0, laneregion[i].x + laneregion[i].width / 2 - 141, laneregion[i].y - 202, 322, 344,
-					0, 255, 255, 255, 255, 2, 0, 0, 0, 161, BMSPlayer.TIMER_BOMB_1P_KEY1 + (i % 8 == 7 ? -1 : (i % 8))
+					0, 255, 255, 255, 255, 2, 0, 0, 0, 161, TIMER_BOMB_1P_KEY1 + (i % 8 == 7 ? -1 : (i % 8))
 							+ (i >= 8 ? 10 : 0), 0, 0, 0);
 			setDestination(bombi, 160, laneregion[i].x + laneregion[i].width / 2 - 141, laneregion[i].y - 202, 322,
 					344, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0);
 			setDestination(bombi, 161, laneregion[i].x, laneregion[i].y, 0, 0, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, 0,
 					0, 0, 0);
-			bombi.setOffsety(MainState.OFFSET_LIFT);
-			bombi.setReferenceID(BMSPlayer.VALUE_JUDGE_1P_KEY1 + (i % 8 == 7 ? -1 : (i % 8)) + (i >= 8 ? 10 : 0));
+			bombi.setOffsety(OFFSET_LIFT);
+			bombi.setReferenceID(VALUE_JUDGE_1P_KEY1 + (i % 8 == 7 ? -1 : (i % 8)) + (i >= 8 ? 10 : 0));
 			add(bombi);
 
 			SkinImage hbombi = new SkinImage(bombtr[2], 160);
-			hbombi.setTimer(BMSPlayer.TIMER_HOLD_1P_KEY1 + (i % 8 == 7 ? -1 : (i % 8)) + (i >= 8 ? 10 : 0));
+			hbombi.setTimer(TIMER_HOLD_1P_KEY1 + (i % 8 == 7 ? -1 : (i % 8)) + (i >= 8 ? 10 : 0));
 			setDestination(hbombi, 0, laneregion[i].x + laneregion[i].width / 2 - 141, laneregion[i].y - 202, 322, 344,
-					0, 255, 255, 255, 255, 2, 0, 0, 0, 0, BMSPlayer.TIMER_HOLD_1P_KEY1 + (i % 8 == 7 ? -1 : (i % 8))
+					0, 255, 255, 255, 255, 2, 0, 0, 0, 0, TIMER_HOLD_1P_KEY1 + (i % 8 == 7 ? -1 : (i % 8))
 							+ (i >= 8 ? 10 : 0), 0, 0, 0);
-			hbombi.setOffsety(MainState.OFFSET_LIFT);
+			hbombi.setOffsety(OFFSET_LIFT);
 			add(hbombi);
 		}
 
@@ -1172,19 +1174,19 @@ public class PlaySkin extends Skin {
 						40 + (5 - i) * 18, 12, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 			}
 		}
-		addNumber(new SkinNumber(ntr[0], 100, 4, 0, MainState.NUMBER_SCORE_RATE), 0, 1100, 200, 12, 18, 0, 255, 255,
+		addNumber(new SkinNumber(ntr[0], 100, 4, 0, NUMBER_SCORE_RATE), 0, 1100, 200, 12, 18, 0, 255, 255,
 				255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		addNumber(new SkinNumber(ntr[0], 100, 1, 0, MainState.NUMBER_SCORE_RATE_AFTERDOT), 0, 1148, 200, 8, 12, 0, 255,
+		addNumber(new SkinNumber(ntr[0], 100, 1, 0, NUMBER_SCORE_RATE_AFTERDOT), 0, 1148, 200, 8, 12, 0, 255,
 				255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		addNumber(new SkinNumber(ntr[0], 100, 5, 0, MainState.NUMBER_SCORE), 0, 1100, 180, 12, 18, 0, 255, 255, 255,
+		addNumber(new SkinNumber(ntr[0], 100, 5, 0, NUMBER_SCORE), 0, 1100, 180, 12, 18, 0, 255, 255, 255,
 				255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		addNumber(new SkinNumber(ntr[1], 100, 5, 0, MainState.NUMBER_HIGHSCORE), 0, 1100, 160, 12, 18, 0, 255, 255,
+		addNumber(new SkinNumber(ntr[1], 100, 5, 0, NUMBER_HIGHSCORE), 0, 1100, 160, 12, 18, 0, 255, 255,
 				255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		addNumber(new SkinNumber(ntr[2], 100, 5, 0, MainState.NUMBER_TARGET_SCORE), 0, 1100, 140, 12, 18, 0, 255, 255,
+		addNumber(new SkinNumber(ntr[2], 100, 5, 0, NUMBER_TARGET_SCORE), 0, 1100, 140, 12, 18, 0, 255, 255,
 				255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 		SkinSlider seek = new SkinSlider(new TextureRegion[] { new TextureRegion(st, 0, 265, 17, 24) }, 0, 1,
-				(int) (360 * dh), MainState.BARGRAPH_LOAD_PROGRESS);
+				(int) (360 * dh), BARGRAPH_LOAD_PROGRESS);
 		setDestination(seek, 0, 210, 440, 30, 24, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(seek);
 
@@ -1192,12 +1194,12 @@ public class PlaySkin extends Skin {
 		// READY
 		Texture ready = new Texture("skin/ready.png");
 		SkinImage ri = new SkinImage(new TextureRegion[] { new TextureRegion(ready) }, 0);
-		setDestination(ri, 0, 230, 250, 350, 60, 0, 0, 255, 255, 255, 0, 0, 0, 0, -1, BMSPlayer.TIMER_READY, 0, 0, 0);
+		setDestination(ri, 0, 230, 250, 350, 60, 0, 0, 255, 255, 255, 0, 0, 0, 0, -1, TIMER_READY, 0, 0, 0);
 		setDestination(ri, 750, 230, 300, 350, 60, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		setDestination(ri, 1000, 230, 300, 350, 60, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(ri);
 		ri = new SkinImage(new TextureRegion[] { new TextureRegion(ready) }, 0);
-		setDestination(ri, 0, 700, 250, 350, 60, 0, 0, 255, 255, 255, 0, 0, 0, 0, -1, BMSPlayer.TIMER_READY, 0, 0, 0);
+		setDestination(ri, 0, 700, 250, 350, 60, 0, 0, 255, 255, 255, 0, 0, 0, 0, -1, TIMER_READY, 0, 0, 0);
 		setDestination(ri, 750, 700, 300, 350, 60, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		setDestination(ri, 1000, 700, 300, 350, 60, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(ri);
@@ -1208,22 +1210,22 @@ public class PlaySkin extends Skin {
 			wv[i] = new TextureRegion(st, i * 10, 550, 10, 15);
 			yv[i] = new TextureRegion(st, i * 10, 565, 10, 15);
 		}
-		SkinNumber white = new SkinNumber(wv, 0, 3, 0, MainState.NUMBER_LANECOVER1);
-		white.setOffsety(BMSPlayer.OFFSET_LANECOVER);
+		SkinNumber white = new SkinNumber(wv, 0, 3, 0, NUMBER_LANECOVER1);
+		white.setOffsety(OFFSET_LANECOVER);
 		setDestination(white, 0, 540, 720, 10, 15, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0,
-				BMSPlayer.OPTION_LANECOVER1_CHANGING, 0, 0);
+				OPTION_LANECOVER1_CHANGING, 0, 0);
 		add(white);
-		SkinNumber yellow = new SkinNumber(yv, 0, 4, 0, MainState.NUMBER_DURATION);
-		yellow.setOffsety(BMSPlayer.OFFSET_LANECOVER);
+		SkinNumber yellow = new SkinNumber(yv, 0, 4, 0, NUMBER_DURATION);
+		yellow.setOffsety(OFFSET_LANECOVER);
 		setDestination(yellow, 0, 740, 720, 10, 15, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0,
-				BMSPlayer.OPTION_LANECOVER1_CHANGING, 0, 0);
+				OPTION_LANECOVER1_CHANGING, 0, 0);
 		add(yellow);
 
 		gaugeregion = rect(445, 30, 390, 30);
 
-		addNumber(new SkinNumber(ntr[0], 0, 3, 0, MainState.NUMBER_GROOVEGAUGE), 0, 600, 60, 24, 24, 0, 255, 255, 255,
+		addNumber(new SkinNumber(ntr[0], 0, 3, 0, NUMBER_GROOVEGAUGE), 0, 600, 60, 24, 24, 0, 255, 255, 255,
 				255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		addNumber(new SkinNumber(ntr[0], 0, 1, 0, MainState.NUMBER_GROOVEGAUGE_AFTERDOT), 0, 672, 60, 18, 18, 0, 255,
+		addNumber(new SkinNumber(ntr[0], 0, 1, 0, NUMBER_GROOVEGAUGE_AFTERDOT), 0, 672, 60, 18, 18, 0, 255,
 				255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 		// progress
@@ -1231,12 +1233,12 @@ public class PlaySkin extends Skin {
 		setDestination(progress, 0, 1075, 140, 12, 540, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(progress);
 		SkinSlider pseek = new SkinSlider(new TextureRegion[] { new TextureRegion(st, 0, 289, 14, 20) }, 0, 2,
-				(int) (520 * dh), MainState.SLIDER_MUSIC_PROGRESS);
+				(int) (520 * dh), SLIDER_MUSIC_PROGRESS);
 		setDestination(pseek, 0, 1073, 660, 16, 20, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(pseek);
 		pseek = new SkinSlider(new TextureRegion[] { new TextureRegion(st, 15, 289, 14, 20) }, 0, 2, (int) (520 * dh),
-				MainState.SLIDER_MUSIC_PROGRESS);
-		setDestination(pseek, 0, 1073, 660, 16, 20, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, MainState.TIMER_ENDOFNOTE_1P,
+				SLIDER_MUSIC_PROGRESS);
+		setDestination(pseek, 0, 1073, 660, 16, 20, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, TIMER_ENDOFNOTE_1P,
 				0, 0, 0);
 		add(pseek);
 
@@ -1461,7 +1463,7 @@ public class PlaySkin extends Skin {
 								getDestination(time, state),
 								player.getState() == BMSPlayer.STATE_PRELOAD
 										|| player.getState() == BMSPlayer.STATE_READY ? -1
-										: (int) (player.getNowTime() - player.getTimer()[MainState.TIMER_PLAY]));
+										: (int) (player.getNowTime() - player.getTimer()[TIMER_PLAY]));
 			}
 		}
 

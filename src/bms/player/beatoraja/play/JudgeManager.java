@@ -12,7 +12,7 @@ import bms.player.beatoraja.input.BMSPlayerInputProcessor;
  * @author exch
  */
 public class JudgeManager {
-	
+
 	// TODO HCN押し直しの発音はどうする？
 
 	private final BMSPlayer main;
@@ -97,7 +97,7 @@ public class JudgeManager {
 	/**
 	 * BSS終端の各判定の範囲(+-ms)。PGREAT, GREAT, GOOD, BAD, POOR, MISS空POORの順
 	 */
-	private static final int[] scnendjudgetable = {100, 150, 250, 300, 0, 1000 };
+	private static final int[] scnendjudgetable = { 100, 150, 250, 300, 0, 1000 };
 	/**
 	 * PMSの各判定の範囲(+-ms)。PGREAT, GREAT, GOOD, BAD, POOR, MISS空POORの順
 	 */
@@ -178,10 +178,12 @@ public class JudgeManager {
 			if (i < 4) {
 				njudge[i] = (model.getUseKeys() == 9 ? pjudgetable[i] : judgetable[i]) * model.getJudgerank() / 100;
 				sjudge[i] = sjudgetable[i] * model.getJudgerank() / 100;
-				cnendjudge[i] = (model.getUseKeys() == 9 ? pcnendjudgetable[i] : cnendjudgetable[i]) * model.getJudgerank() / 100;
+				cnendjudge[i] = (model.getUseKeys() == 9 ? pcnendjudgetable[i] : cnendjudgetable[i])
+						* model.getJudgerank() / 100;
 				scnendjudge[i] = scnendjudgetable[i] * model.getJudgerank() / 100;
 			} else {
-				sjudge[i] = njudge[i] = cnendjudge[i] = scnendjudge[i] = (model.getUseKeys() == 9 ? pjudgetable[i] : judgetable[i]);
+				sjudge[i] = njudge[i] = cnendjudge[i] = scnendjudge[i] = (model.getUseKeys() == 9 ? pjudgetable[i]
+						: judgetable[i]);
 
 			}
 		}
@@ -339,9 +341,8 @@ public class JudgeManager {
 									if (sc >= 0) {
 										// BSS処理開始
 										// System.out.println("BSS開始判定 - Time : "
-										// + ptime + " Judge : " + j
-										// + " KEY : " + key + " LN : " +
-										// note.hashCode());
+										// + ptime + " Judge : " + j + " KEY : "
+										// + key + " LN : " + note.hashCode());
 										sckey[sc] = key;
 
 									}
@@ -405,7 +406,9 @@ public class JudgeManager {
 									// + processing[lane]);
 									sckey[sc] = 0;
 								}
-								main.stop(processing[lane]);
+								if (j >= 3) {
+									main.stop(processing[lane]);
+								}
 								this.update(lane, j, time, dtime);
 								processing[lane].setEndstate(j + 1);
 								processing[lane].setEndtime(dtime);
@@ -419,7 +422,7 @@ public class JudgeManager {
 										}
 									}
 								}
-								if(j >= 3) {
+								if (j >= 3) {
 									main.stop(processing[lane]);
 								}
 								this.update(lane, j, time, dtime);
@@ -467,11 +470,12 @@ public class JudgeManager {
 					note.setState(5);
 					note.setTime(jud);
 				}
-				if(note instanceof LongNote) {
+				if (note instanceof LongNote) {
 					final LongNote ln = (LongNote) note;
 					if (((LongNote) note).getStart() == timelines[i] && note.getState() == 0) {
 						if ((lntype != BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
-								|| ln.getType() == LongNote.TYPE_CHARGENOTE || ln.getType() == LongNote.TYPE_HELLCHARGENOTE) {
+								|| ln.getType() == LongNote.TYPE_CHARGENOTE
+								|| ln.getType() == LongNote.TYPE_HELLCHARGENOTE) {
 							// System.out.println("CN start poor");
 							this.update(lane, 4, time, jud);
 							note.setState(5);
@@ -480,8 +484,8 @@ public class JudgeManager {
 							((LongNote) note).setEndstate(5);
 							((LongNote) note).setEndtime(jud);
 						}
-						if (((lntype == BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
-								|| ln.getType() == LongNote.TYPE_LONGNOTE) && processing[lane] != note) {
+						if (((lntype == BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED) || ln
+								.getType() == LongNote.TYPE_LONGNOTE) && processing[lane] != note) {
 							// System.out.println("LN start poor");
 							this.update(lane, 4, time, jud);
 							note.setState(5);
@@ -500,7 +504,7 @@ public class JudgeManager {
 						if (sc >= 0) {
 							sckey[sc] = 0;
 						}
-					}					
+					}
 				}
 			}
 		}
@@ -537,10 +541,18 @@ public class JudgeManager {
 		return inclease;
 	}
 
+	/**
+	 * 現在の1曲内のコンボ数を取得する
+	 * @return 現在のコンボ数
+	 */
 	public int getCombo() {
 		return combo;
 	}
 
+	/**
+	 * 現在のコース内のコンボ数を取得する
+	 * @return 現在のコンボ数
+	 */
 	public int getCourseCombo() {
 		return coursecombo;
 	}
@@ -599,8 +611,17 @@ public class JudgeManager {
 		return fast ? count[judge][0] : count[judge][1];
 	}
 
+	/**
+	 * 判定モード:EXPAND JUDGE
+	 */
 	public static final int EXPAND_JUDGE = 0;
+	/**
+	 * 判定モード:NO GREAT
+	 */
 	public static final int NO_GREAT_JUDGE = 1;
+	/**
+	 * 判定モード:NO GOOD
+	 */
 	public static final int NO_GOOD_JUDGE = 2;
 
 	public void setJudgeMode(int mode) {
@@ -609,19 +630,26 @@ public class JudgeManager {
 			njudge[0] = njudge[1];
 			njudge[1] = njudge[2];
 			njudge[2] = njudge[3];
+			cnendjudge[0] = cnendjudge[1];
+			cnendjudge[1] = cnendjudge[2];
+			cnendjudge[2] = cnendjudge[3];
 			sjudge[0] = sjudge[1];
 			sjudge[1] = sjudge[2];
 			sjudge[2] = sjudge[3];
+			scnendjudge[0] = scnendjudge[1];
+			scnendjudge[1] = scnendjudge[2];
+			scnendjudge[2] = scnendjudge[3];
 			break;
 		case NO_GREAT_JUDGE:
 			njudge[1] = njudge[0];
 			sjudge[1] = sjudge[0];
-			njudge[2] = njudge[0];
-			sjudge[2] = sjudge[0];
-			break;
+			cnendjudge[1] = cnendjudge[0];
+			scnendjudge[1] = scnendjudge[0];
 		case NO_GOOD_JUDGE:
 			njudge[2] = njudge[0];
 			sjudge[2] = sjudge[0];
+			cnendjudge[2] = cnendjudge[0];
+			scnendjudge[2] = scnendjudge[0];
 			break;
 		}
 	}

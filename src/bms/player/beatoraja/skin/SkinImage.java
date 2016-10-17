@@ -6,6 +6,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 
+import static bms.player.beatoraja.skin.SkinProperty.*;
+
 /**
  * スキンイメージ
  * 
@@ -94,9 +96,9 @@ public class SkinImage extends SkinObject {
             if (r != null) {
                 if(value >= 0 && value < image.length) {
                 	if(scratch == 1) {
-						draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height, getColor(time,state),state.getNumberValue(BMSPlayer.NUMBER_SCRATCHANGLE_1P));
+						draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height, getColor(time,state),state.getNumberValue(NUMBER_SCRATCHANGLE_1P));
 					} else if(scratch == 2) {
-						draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height, getColor(time,state),state.getNumberValue(BMSPlayer.NUMBER_SCRATCHANGLE_2P));
+						draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height, getColor(time,state),state.getNumberValue(NUMBER_SCRATCHANGLE_2P));
 					} else {
 						draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height, getColor(time,state),getAngle(time,state));
 					}

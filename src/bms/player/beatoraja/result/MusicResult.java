@@ -8,18 +8,13 @@ import java.util.List;
 import bms.model.LongNote;
 import bms.model.Note;
 import bms.model.TimeLine;
-import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.play.audio.SoundProcessor;
 import bms.player.beatoraja.select.MusicSelector;
-
-import org.lwjgl.opengl.GL11;
 
 import bms.model.BMSModel;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.Config.SkinConfig;
-import bms.player.beatoraja.decide.MusicDecideSkin;
 import bms.player.beatoraja.gauge.GrooveGauge;
-import bms.player.beatoraja.skin.LR2DecideSkinLoader;
 import bms.player.beatoraja.skin.LR2ResultSkinLoader;
 import bms.player.beatoraja.skin.LR2SkinHeader;
 import bms.player.beatoraja.skin.LR2SkinHeaderLoader;
@@ -32,8 +27,10 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Rectangle;
+
+import static bms.player.beatoraja.Resolution.*;
+import static bms.player.beatoraja.skin.SkinProperty.*;
 
 /**
  * リザルト
@@ -42,8 +39,6 @@ import com.badlogic.gdx.math.Rectangle;
  */
 public class MusicResult extends MainState {
 
-	public static final int OPTION_RESULT_CLEAR = 90;
-	public static final int OPTION_RESULT_FAIL = 91;
 	public static final int NUMBER_AVERAGE_DURATION = 5555;
 	public static final int NUMBER_AVERAGE_DURATION_AFTERDOT = 5556;
 
@@ -115,17 +110,17 @@ public class MusicResult extends MainState {
 				SkinConfig sc = resource.getConfig().getSkin()[7];
 				LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
 				LR2SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
-				Rectangle srcr = MainController.RESOLUTION[header.getResolution()];
-				Rectangle dstr = MainController.RESOLUTION[resource.getConfig().getResolution()];
+				Rectangle srcr = RESOLUTION[header.getResolution()];
+				Rectangle dstr = RESOLUTION[resource.getConfig().getResolution()];
 				LR2ResultSkinLoader dloader = new LR2ResultSkinLoader(srcr.width, srcr.height, dstr.width, dstr.height);
 				skin = dloader.loadResultSkin(Paths.get(sc.getPath()).toFile(), this, header,
 						loader.getOption(), sc.getProperty());
 			} catch (IOException e) {
 				e.printStackTrace();
-				skin = new MusicResultSkin(MainController.RESOLUTION[resource.getConfig().getResolution()]);
+				skin = new MusicResultSkin(RESOLUTION[resource.getConfig().getResolution()]);
 			}
 		} else {
-			skin = new MusicResultSkin(MainController.RESOLUTION[resource.getConfig().getResolution()]);
+			skin = new MusicResultSkin(RESOLUTION[resource.getConfig().getResolution()]);
 		}
 		this.setSkin(skin);
 
@@ -149,8 +144,8 @@ public class MusicResult extends MainState {
 		final SpriteBatch sprite = main.getSpriteBatch();
 		final PlayerResource resource = getMainController().getPlayerResource();
 
-		final float w = MainController.RESOLUTION[resource.getConfig().getResolution()].width;
-		final float h = MainController.RESOLUTION[resource.getConfig().getResolution()].height;
+		final float w = RESOLUTION[resource.getConfig().getResolution()].width;
+		final float h = RESOLUTION[resource.getConfig().getResolution()].height;
 
 		IRScoreData score = resource.getScoreData();
 		// ゲージグラフ描画
@@ -173,8 +168,8 @@ public class MusicResult extends MainState {
 		}
 		sprite.end();
 
-		if (getTimer()[BMSPlayer.TIMER_FADEOUT] != Long.MIN_VALUE) {
-			if (time > getTimer()[BMSPlayer.TIMER_FADEOUT] + getSkin().getFadeout()) {
+		if (getTimer()[TIMER_FADEOUT] != Long.MIN_VALUE) {
+			if (time > getTimer()[TIMER_FADEOUT] + getSkin().getFadeout()) {
 				if (this.clear != null) {
 					this.clear.stop();
 				}
@@ -237,7 +232,7 @@ public class MusicResult extends MainState {
 					if(skin.getRankTime() != 0 && getTimer()[TIMER_RESULT_UPDATESCORE] == Long.MIN_VALUE) {
 						getTimer()[TIMER_RESULT_UPDATESCORE] = time;
 					} else {
-						getTimer()[BMSPlayer.TIMER_FADEOUT] = time;
+						getTimer()[TIMER_FADEOUT] = time;
 					}
 				}
 
@@ -249,7 +244,7 @@ public class MusicResult extends MainState {
 				}
 			}
 			if (time > getSkin().getScene()) {
-				getTimer()[BMSPlayer.TIMER_FADEOUT] = time;
+				getTimer()[TIMER_FADEOUT] = time;
 			}
 		}
 
@@ -268,8 +263,6 @@ public class MusicResult extends MainState {
 			}
 		}
 	}
-
-	private final int[] rates = {2222,3333,4444,5555,6666,7777,8888,10000};
 
 	private void updateScoreDatabase() {
 		saveReplay = false;

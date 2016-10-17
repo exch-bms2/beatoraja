@@ -18,6 +18,8 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Rectangle;
 
+import static bms.player.beatoraja.skin.SkinProperty.*;
+
 /**
  * レーン描画用クラス
  * 
@@ -228,7 +230,7 @@ public class LaneRenderer {
 
 	public void drawLane(TextureRegion[] noteimage, TextureRegion[][] lnoteimage, TextureRegion[] mnoteimage) {
 		sprite.end();
-		final long time = (main.getTimer()[MainState.TIMER_PLAY] != Long.MIN_VALUE ? (main.getNowTime() - main.getTimer()[MainState.TIMER_PLAY]) : 0)
+		final long time = (main.getTimer()[TIMER_PLAY] != Long.MIN_VALUE ? (main.getNowTime() - main.getTimer()[TIMER_PLAY]) : 0)
 				+ config.getJudgetiming();
 		JudgeManager judge = main.getJudgeManager();
 		final Rectangle[] laneregion = skin.getLaneregion();
@@ -257,43 +259,43 @@ public class LaneRenderer {
 			// キービームフラグON/OFF
 			if (model.getUseKeys() == 9) {
 				if (keystate[lane]) {
-					if (main.getTimer()[BMSPlayer.TIMER_KEYON_1P_KEY1 + lane] == Long.MIN_VALUE) {
-						main.getTimer()[BMSPlayer.TIMER_KEYON_1P_KEY1 + lane] = main.getNowTime();
-						main.getTimer()[BMSPlayer.TIMER_KEYOFF_1P_KEY1 + lane] = Long.MIN_VALUE;
+					if (main.getTimer()[TIMER_KEYON_1P_KEY1 + lane] == Long.MIN_VALUE) {
+						main.getTimer()[TIMER_KEYON_1P_KEY1 + lane] = main.getNowTime();
+						main.getTimer()[TIMER_KEYOFF_1P_KEY1 + lane] = Long.MIN_VALUE;
 					}
 				} else {
-					if (main.getTimer()[BMSPlayer.TIMER_KEYOFF_1P_KEY1 + lane] == Long.MIN_VALUE) {
-						main.getTimer()[BMSPlayer.TIMER_KEYOFF_1P_KEY1 + lane] = main.getNowTime();
-						main.getTimer()[BMSPlayer.TIMER_KEYON_1P_KEY1 + lane] = Long.MIN_VALUE;
+					if (main.getTimer()[TIMER_KEYOFF_1P_KEY1 + lane] == Long.MIN_VALUE) {
+						main.getTimer()[TIMER_KEYOFF_1P_KEY1 + lane] = main.getNowTime();
+						main.getTimer()[TIMER_KEYON_1P_KEY1 + lane] = Long.MIN_VALUE;
 					}
 				}
 				if (judge.getProcessingLongNotes()[lane] != null) {
-					if (main.getTimer()[BMSPlayer.TIMER_HOLD_1P_KEY1 + lane] == Long.MIN_VALUE) {
-						main.getTimer()[BMSPlayer.TIMER_HOLD_1P_KEY1 + lane] = main.getNowTime();
+					if (main.getTimer()[TIMER_HOLD_1P_KEY1 + lane] == Long.MIN_VALUE) {
+						main.getTimer()[TIMER_HOLD_1P_KEY1 + lane] = main.getNowTime();
 					}
 				} else {
-					main.getTimer()[BMSPlayer.TIMER_HOLD_1P_KEY1 + lane] = Long.MIN_VALUE;
+					main.getTimer()[TIMER_HOLD_1P_KEY1 + lane] = Long.MIN_VALUE;
 				}
 			} else {
 				int key = (model.getUseKeys() > 9 && lane >= 8 ? lane + 1 : lane);
 				int offset = (lane % 8 == 7 ? -1 : (lane % 8)) + (lane >= 8 ? 10 : 0);
 				if (keystate[key] || (key == 7 && keystate[8]) || (key == 16 && keystate[17])) {
-					if (main.getTimer()[BMSPlayer.TIMER_KEYON_1P_KEY1 + offset] == Long.MIN_VALUE) {
-						main.getTimer()[BMSPlayer.TIMER_KEYON_1P_KEY1 + offset] = main.getNowTime();
-						main.getTimer()[BMSPlayer.TIMER_KEYOFF_1P_KEY1 + offset] = Long.MIN_VALUE;
+					if (main.getTimer()[TIMER_KEYON_1P_KEY1 + offset] == Long.MIN_VALUE) {
+						main.getTimer()[TIMER_KEYON_1P_KEY1 + offset] = main.getNowTime();
+						main.getTimer()[TIMER_KEYOFF_1P_KEY1 + offset] = Long.MIN_VALUE;
 					}
 				} else {
-					if (main.getTimer()[BMSPlayer.TIMER_KEYOFF_1P_KEY1 + offset] == Long.MIN_VALUE) {
-						main.getTimer()[BMSPlayer.TIMER_KEYOFF_1P_KEY1 + offset] = main.getNowTime();
-						main.getTimer()[BMSPlayer.TIMER_KEYON_1P_KEY1 + offset] = Long.MIN_VALUE;
+					if (main.getTimer()[TIMER_KEYOFF_1P_KEY1 + offset] == Long.MIN_VALUE) {
+						main.getTimer()[TIMER_KEYOFF_1P_KEY1 + offset] = main.getNowTime();
+						main.getTimer()[TIMER_KEYON_1P_KEY1 + offset] = Long.MIN_VALUE;
 					}
 				}
 				if (judge.getProcessingLongNotes()[lane] != null) {
-					if (main.getTimer()[BMSPlayer.TIMER_HOLD_1P_KEY1 + offset] == Long.MIN_VALUE) {
-						main.getTimer()[BMSPlayer.TIMER_HOLD_1P_KEY1 + offset] = main.getNowTime();
+					if (main.getTimer()[TIMER_HOLD_1P_KEY1 + offset] == Long.MIN_VALUE) {
+						main.getTimer()[TIMER_HOLD_1P_KEY1 + offset] = main.getNowTime();
 					}
 				} else {
-					main.getTimer()[BMSPlayer.TIMER_HOLD_1P_KEY1 + offset] = Long.MIN_VALUE;
+					main.getTimer()[TIMER_HOLD_1P_KEY1 + offset] = Long.MIN_VALUE;
 				}
 			}
 		}
@@ -669,14 +671,14 @@ public class LaneRenderer {
 	}
 
 	public void update(int lane, int judge, int time, int fast) {
-		main.getTimer()[BMSPlayer.TIMER_JUDGE_1P] = main.getNowTime();
-		main.getTimer()[BMSPlayer.TIMER_JUDGE_2P] = main.getNowTime();
+		main.getTimer()[TIMER_JUDGE_1P] = main.getNowTime();
+		main.getTimer()[TIMER_JUDGE_2P] = main.getNowTime();
 		if (judge < 2) {
 			if (model.getUseKeys() == 9) {
-				main.getTimer()[BMSPlayer.TIMER_BOMB_1P_KEY1 + lane] = main.getNowTime();
+				main.getTimer()[TIMER_BOMB_1P_KEY1 + lane] = main.getNowTime();
 			} else {
 				int offset = (lane % 8 == 7 ? -1 : (lane % 8)) + (lane >= 8 ? 10 : 0);
-				main.getTimer()[BMSPlayer.TIMER_BOMB_1P_KEY1 + offset] = main.getNowTime();
+				main.getTimer()[TIMER_BOMB_1P_KEY1 + offset] = main.getNowTime();
 			}
 
 		}
