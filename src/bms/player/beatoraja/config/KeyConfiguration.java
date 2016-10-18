@@ -57,12 +57,6 @@ public class KeyConfiguration extends MainState {
 			{{KEY_AUTO}, {}, {KEY_FOLDER_CLOSE}, {KEY_DOWN}
 					, {KEY_PLAY}, {KEY_UP},{KEY_FOLDER_OPEN}, {}, {KEY_REPLAY}}};
 
-	/**
-	 * 専コンのキーコードに対応したテキスト
-	 */
-	private static final String[] BMCODE = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "UP", "DOWN", "LEFT",
-			"RIGHT" };
-
 	private int cursorpos = 0;
 	private boolean keyinput = false;
 
@@ -171,7 +165,7 @@ public class KeyConfiguration extends MainState {
 			titlefont.setColor(Color.WHITE);
 			titlefont.draw(sprite, keys[i], 50, 598 - i * 24);
 			titlefont.draw(sprite, Keys.toString(keyassign[keysa[i]]), 202, 598 - i * 24);
-			titlefont.draw(sprite, BMCODE[bmkeyassign[bmkeysa[i]]], 352, 598 - i * 24);
+			titlefont.draw(sprite, BMControllerInputProcessor.BMKeys.toString(bmkeyassign[bmkeysa[i]]), 352, 598 - i * 24);
 			sprite.end();
 		}
 
