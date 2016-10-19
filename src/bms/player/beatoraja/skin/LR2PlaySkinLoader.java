@@ -2,12 +2,10 @@ package bms.player.beatoraja.skin;
 
 import java.io.*;
 import java.util.*;
-import bms.player.beatoraja.play.BMSPlayer;
 
+import bms.player.beatoraja.play.*;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
-
-import bms.player.beatoraja.play.PlaySkin;
 
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
@@ -15,9 +13,9 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 
 	// TODO bug:OADXのノーツが多重表示される(NOTEのSkinImage化が必要)
 
-	private PlaySkin.SkinBGAObject bga;
+	private SkinBGA bga;
 
-	private PlaySkin.SkinLaneObject lanerender;
+	private SkinNote lanerender;
 
 	private Rectangle playerr = new Rectangle(0, 0, 0, 0);
 
@@ -63,7 +61,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 		addCommandWord(new CommandWord("SRC_BGA") {
 			@Override
 			public void execute(String[] str) {
-				bga = new PlaySkin.SkinBGAObject(skin);
+				bga = new SkinBGA(skin);
 				skin.add(bga);
 			}
 		});
@@ -268,7 +266,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 					playerr.height = laner[lane].height;
 				}
 				if (lanerender == null) {
-					lanerender = new PlaySkin.SkinLaneObject(skin, note, new TextureRegion[][][] { lnend, lnstart, lnbodya, lnbody, lnend, lnstart, lnbodya, lnbody, lnbodya,
+					lanerender = new SkinNote(skin, note, new TextureRegion[][][] { lnend, lnstart, lnbodya, lnbody, lnend, lnstart, lnbodya, lnbody, lnbodya,
 							lnbody },mine);
 					lanerender.setCycle(notecycle);
 					skin.add(lanerender);
@@ -548,7 +546,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 					groovey = values[12];
 					if (gauger == null) {
 						gauger = new Rectangle();
-						PlaySkin.SkinGaugeObject gaugeo = new PlaySkin.SkinGaugeObject(skin, gauge);
+						SkinGauge gaugeo = new SkinGauge(skin, gauge);
 						gaugeo.setCycle(values[9]);
 						gaugeo.setTimer(values[10]);
 						skin.add(gaugeo);

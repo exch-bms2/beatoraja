@@ -23,7 +23,9 @@ public class SkinNumber extends SkinObject {
 	private TextureRegion[][] mimage;
 
 	private int id = -1;
-
+	/**
+	 * 表示桁数
+	 */
 	private int keta;
 	
 	private int zeropadding;
