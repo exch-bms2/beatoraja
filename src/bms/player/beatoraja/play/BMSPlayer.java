@@ -38,7 +38,6 @@ public class BMSPlayer extends MainState {
 
 	// TODO GLAssistから起動すると楽曲ロード中に止まる
 
-
 	private BitmapFont judgefont;
 	private BitmapFont systemfont;
 	private BMSModel model;
@@ -86,6 +85,8 @@ public class BMSPlayer extends MainState {
 	private int scratch1;
 	private int scratch2;
 
+	private static final int TIME_MARGIN = 5000;
+
 	public BMSPlayer(MainController main, PlayerResource resource) {
 		super(main);
 		this.model = resource.getBMSModel();
@@ -131,7 +132,7 @@ public class BMSPlayer extends MainState {
 			Logger.getGlobal().info("譜面分岐 : " + model.getSelectedIndexOfTimeLines());
 		}
 		// 通常プレイの場合は最後のノーツ、オートプレイの場合はBG/BGAを含めた最後のノーツ
-		playtime = (autoplay == 1 ? model.getLastTime() : model.getLastNoteTime()) + 5000;
+		playtime = (autoplay == 1 ? model.getLastTime() : model.getLastNoteTime()) + TIME_MARGIN;
 
 		boolean score = true;
 
@@ -310,14 +311,13 @@ public class BMSPlayer extends MainState {
 				skin = dloader.loadPlaySkin(Paths.get(sc.getPath()).toFile(), this, header, loader.getOption(),
 						sc.getProperty());
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
-				skin = new PlaySkin(model.getUseKeys(), config.isUse2pside(), RESOLUTION[resource
-						.getConfig().getResolution()]);
+				skin = new PlaySkin(model.getUseKeys(), config.isUse2pside(), RESOLUTION[resource.getConfig()
+						.getResolution()]);
 			}
 		} else {
-			skin = new PlaySkin(model.getUseKeys(), config.isUse2pside(), RESOLUTION[resource
-					.getConfig().getResolution()]);
+			skin = new PlaySkin(model.getUseKeys(), config.isUse2pside(), RESOLUTION[resource.getConfig()
+					.getResolution()]);
 		}
 		this.setSkin(skin);
 	}
@@ -447,16 +447,16 @@ public class BMSPlayer extends MainState {
 			getTimer()[TIMER_RHYTHM] += (nowtime - prevtime) * (100 - lanerender.getNowBPM() * 100 / 60) / 100;
 			scratch1 += 2160 - (nowtime - prevtime);
 			scratch2 += nowtime - prevtime;
-			if(model.getUseKeys() != 9) {
+			if (model.getUseKeys() != 9) {
 				final boolean[] state = input.getKeystate();
-				if(state[7]) {
+				if (state[7]) {
 					scratch1 += (nowtime - prevtime) * 2;
-				} else if(state[8]) {
+				} else if (state[8]) {
 					scratch1 += 2160 - (nowtime - prevtime) * 2;
 				}
-				if(state[16]) {
+				if (state[16]) {
 					scratch2 += (nowtime - prevtime) * 2;
-				} else if(state[17]) {
+				} else if (state[17]) {
 					scratch2 += 2160 - (nowtime - prevtime) * 2;
 				}
 			}
@@ -471,6 +471,12 @@ public class BMSPlayer extends MainState {
 			} else if (g < gauge.getMaxValue() && getTimer()[TIMER_GAUGE_MAX_1P] != Long.MIN_VALUE) {
 				getTimer()[TIMER_GAUGE_MAX_1P] = Long.MIN_VALUE;
 			}
+			if (notes == getMainController().getPlayerResource().getSongdata().getNotes()
+					&& getTimer()[TIMER_ENDOFNOTE_1P] == Long.MIN_VALUE
+					&& playtime - TIME_MARGIN < (now - getTimer()[TIMER_PLAY])) {
+				getTimer()[TIMER_ENDOFNOTE_1P] = getNowTime();
+			}
+
 			// System.out.println("playing time : " + time);
 			if (playtime < (now - getTimer()[TIMER_PLAY])) {
 				state = STATE_FINISHED;
@@ -761,11 +767,9 @@ public class BMSPlayer extends MainState {
 				/ 2;
 
 		if (notes == getMainController().getPlayerResource().getSongdata().getNotes()
-				&& getTimer()[TIMER_ENDOFNOTE_1P] == Long.MIN_VALUE) {
-			getTimer()[TIMER_ENDOFNOTE_1P] = getNowTime();
-			if (this.judge.getJudgeCount(3) == 0 && this.judge.getJudgeCount(4) == 0) {
-				getTimer()[TIMER_FULLCOMBO_1P] = getNowTime();
-			}
+				&& getTimer()[TIMER_FULLCOMBO_1P] == Long.MIN_VALUE && this.judge.getJudgeCount(3) == 0
+				&& this.judge.getJudgeCount(4) == 0) {
+			getTimer()[TIMER_FULLCOMBO_1P] = getNowTime();
 		}
 	}
 
@@ -844,7 +848,7 @@ public class BMSPlayer extends MainState {
 			final TimeLine[] timelines = model.getAllTimeLines();
 			final KeyInputLog[] keylog = this.keylog != null ? this.keylog.toArray(new KeyInputLog[0]) : null;
 
-			final int lasttime = timelines[timelines.length - 1].getTime() + 5000;
+			final int lasttime = timelines[timelines.length - 1].getTime() + BMSPlayer.TIME_MARGIN;
 			while (time < lasttime && !stop) {
 				time = (int) (getNowTime() - getTimer()[TIMER_PLAY]);
 				// リプレイデータ再生
@@ -884,7 +888,7 @@ public class BMSPlayer extends MainState {
 		public void run() {
 			int time = 0;
 			final TimeLine[] timelines = model.getAllTimeLines();
-			final int lasttime = timelines[timelines.length - 1].getTime() + 5000;
+			final int lasttime = timelines[timelines.length - 1].getTime() + BMSPlayer.TIME_MARGIN;
 			for (int p = 0; time < lasttime && !stop;) {
 				time = (int) (getNowTime() - getTimer()[TIMER_PLAY]);
 				// BGレーン再生
@@ -963,10 +967,10 @@ public class BMSPlayer extends MainState {
 		case NUMBER_MAXCOMBO:
 		case NUMBER_MAXCOMBO2:
 			return judge.getMaxcombo();
-			case NUMBER_SCRATCHANGLE_1P:
-				return scratch1 / 6;
-			case NUMBER_SCRATCHANGLE_2P:
-				return scratch2 / 6;
+		case NUMBER_SCRATCHANGLE_1P:
+			return scratch1 / 6;
+		case NUMBER_SCRATCHANGLE_2P:
+			return scratch2 / 6;
 		}
 		if (id >= VALUE_JUDGE_1P_SCRATCH && id < VALUE_JUDGE_1P_SCRATCH + 20) {
 			return lanerender.getJudge()[id - VALUE_JUDGE_1P_SCRATCH];

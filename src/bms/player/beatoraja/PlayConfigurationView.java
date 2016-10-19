@@ -584,7 +584,7 @@ class SkinConfigurationView {
 			LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
 			try {
 				LR2SkinHeader header = loader.loadSkin(path, null);
-				System.out.println(path.toString() + " : " + header.getName() + " - " + header.getMode());
+//				System.out.println(path.toString() + " : " + header.getName() + " - " + header.getMode());
 				lr2skinheader.add(header);
 			} catch (IOException e) {
 				e.printStackTrace();
