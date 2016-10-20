@@ -22,7 +22,7 @@
 
 <VBox xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="bms.player.beatoraja.PlayConfigurationView">
    <children>
-      <TabPane>
+      <TabPane prefWidth="723.0">
          <tabs>
             <Tab closable="false" text="表示">
               <content>
@@ -46,6 +46,9 @@
                               </HBox>
                                <CheckBox fx:id="use2p" mnemonicParsing="false" prefHeight="25.0" prefWidth="133.0" text="2P side" />
                            </children>
+                           <padding>
+                              <Insets left="10.0" />
+                           </padding>
                         </VBox>
                      </children>
                   </AnchorPane>
@@ -103,16 +106,27 @@
                <content>
                   <VBox prefHeight="241.0" prefWidth="723.0">
                   	<children>
+                        <HBox prefHeight="18.0" prefWidth="703.0">
+                           <children>
+                              <Label text="MODE" />
+                              <ComboBox fx:id="playconfig" onAction="#updatePlayConfig" prefWidth="150.0" />
+                           </children>
+                           <VBox.margin>
+                              <Insets bottom="10.0" />
+                           </VBox.margin>
+                        </HBox>
                   		<GridPane fx:id="lr2configuration" prefHeight="154.0" prefWidth="632.0">
                   			<columnConstraints>
                   				<ColumnConstraints maxWidth="278.0" minWidth="0.0" prefWidth="135.0" />
                   				<ColumnConstraints maxWidth="402.0" minWidth="0.0" prefWidth="188.0" />
-                              <ColumnConstraints maxWidth="438.0" minWidth="0.0" prefWidth="108.0" />
-                              <ColumnConstraints maxWidth="423.0" minWidth="0.0" prefWidth="278.0" />
+                              <ColumnConstraints maxWidth="438.0" minWidth="0.0" prefWidth="152.0" />
+                              <ColumnConstraints maxWidth="423.0" minWidth="0.0" prefWidth="232.0" />
                   			</columnConstraints>
                   			<rowConstraints>
                   				<RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
                   				<RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
+                              <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
+                              <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
                               <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
                               <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
                               <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
@@ -123,7 +137,7 @@
                   				<Label prefHeight="18.0" prefWidth="78.0" text="HI-SPEED" />
                   				    <Spinner fx:id="hispeed" GridPane.columnIndex="1">
             <valueFactory>
-              <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.1" max="9.9" min="1.0" initialValue="1.0" />
+              <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.1" initialValue="1.0" max="9.9" min="1.0" />
             </valueFactory>
           </Spinner>
                               <Label text="ハイスピード固定" GridPane.columnIndex="2" GridPane.rowIndex="2" />
@@ -137,19 +151,19 @@
                               <Label text="ノーツ表示時間" GridPane.columnIndex="2" />
                   				    <Spinner fx:id="gvalue" GridPane.columnIndex="3">
             <valueFactory>
-              <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" max="2000" min="1" initialValue="300" />
+              <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="300" max="2000" min="1" />
             </valueFactory>
           </Spinner>
                               <CheckBox fx:id="enableLanecover" mnemonicParsing="false" text="レーンカバー" GridPane.rowIndex="1" />
                   				    <Spinner fx:id="lanecover" GridPane.columnIndex="1" GridPane.rowIndex="1">
             <valueFactory>
-              <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.001" max="1.0" min="0.0" initialValue="0.1" />
+              <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.001" initialValue="0.1" max="1.0" min="0.0" />
             </valueFactory>
           </Spinner>
                               <CheckBox fx:id="enableLift" mnemonicParsing="false" text="リフト" GridPane.columnIndex="2" GridPane.rowIndex="1" />
                   				    <Spinner fx:id="lift" GridPane.columnIndex="3" GridPane.rowIndex="1">
             <valueFactory>
-              <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.001" max="1.0" min="0.0" initialValue="0.1" />
+              <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.001" initialValue="0.1" max="1.0" min="0.0" />
             </valueFactory>
           </Spinner>
                               <CheckBox fx:id="constant" mnemonicParsing="false" text="CONSTANT" GridPane.columnIndex="1" GridPane.rowIndex="5" />
@@ -159,11 +173,17 @@
                               <Label text="判定タイミング" GridPane.rowIndex="2" />
                   				    <Spinner fx:id="judgetiming" GridPane.columnIndex="1" GridPane.rowIndex="2">
             <valueFactory>
-              <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" max="99" min="-99" initialValue="0" />
+              <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="0" max="99" min="-99" />
             </valueFactory>
           </Spinner>
-                              <Label text="判定詳細表示" GridPane.rowIndex="6" />
-                              <ComboBox fx:id="judgedetail" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                              <ComboBox fx:id="judgedetail" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+                              <Label text="判定詳細表示" GridPane.rowIndex="7" />
+                              <CheckBox fx:id="exjudge" mnemonicParsing="false" text="EXPAND JUDGE" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                              <CheckBox fx:id="nomine" mnemonicParsing="false" text="NO MINE" GridPane.columnIndex="2" GridPane.rowIndex="6" />
+                              <Label text="その他" GridPane.rowIndex="8" />
+                              <CheckBox fx:id="showhiddennote" mnemonicParsing="false" text="不可視ノーツ表示" GridPane.columnIndex="2" GridPane.rowIndex="8" />
+                              <CheckBox fx:id="judgeregion" mnemonicParsing="false" text="判定エリア表示" GridPane.columnIndex="1" GridPane.rowIndex="8" />
+                              <CheckBox fx:id="markprocessednote" mnemonicParsing="false" text="処理済ノーツ別表示" GridPane.columnIndex="3" GridPane.rowIndex="8" />
                            </children>
                         </GridPane>
                   	</children>
@@ -185,7 +205,7 @@
                                     <Label text="最大FPS" />
                   				    <Spinner fx:id="maxfps" prefWidth="150.0">
             <valueFactory>
-              <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" max="1000" min="0" initialValue="60" />
+              <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="60" max="1000" min="0" />
             </valueFactory>
           </Spinner>
                                  </children>
@@ -195,13 +215,13 @@
                                     <Label text="オーデイオバッファ(KB)" />
                   				    <Spinner fx:id="audiobuffer" prefWidth="150.0">
             <valueFactory>
-              <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" max="1024" min="16" initialValue="384" />
+              <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="384" max="1024" min="16" />
             </valueFactory>
           </Spinner>
                                     <Label text="同時発音数" />
                   				    <Spinner fx:id="audiosim" prefWidth="150.0">
             <valueFactory>
-              <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" max="1024" min="8" initialValue="64" />
+              <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="64" max="1024" min="8" />
             </valueFactory>
           </Spinner>
                                  </children>
@@ -211,7 +231,7 @@
                                        <Label prefHeight="18.0" prefWidth="127.0" text="最小入力間隔(ms)" />
                                        <Spinner fx:id="inputduration" prefWidth="150.0">
                                            <valueFactory>
-                                               <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" max="100" min="1" initialValue="10" />
+                                               <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="10" max="100" min="1" />
                                            </valueFactory>
                                        </Spinner>
                                    </children>
@@ -236,6 +256,9 @@
                               </HBox>
                               <Button mnemonicParsing="false" onAction="#importScoreDataFromLR2" text="import LR2 score" />
                            </children>
+                           <padding>
+                              <Insets left="10.0" top="10.0" />
+                           </padding>
                         </VBox>
                      </children>
                   </AnchorPane>
@@ -254,6 +277,9 @@
                                     <Label text="Skin" />
                                     <ComboBox fx:id="skin" onAction="#updateSkin" prefHeight="24.0" prefWidth="294.0" />
                                  </children>
+                                 <VBox.margin>
+                                    <Insets bottom="10.0" left="10.0" top="10.0" />
+                                 </VBox.margin>
                               </HBox>
                               <ScrollPane fx:id="skinconfig" prefHeight="239.0" prefWidth="723.0" VBox.vgrow="ALWAYS">
                                 <content>

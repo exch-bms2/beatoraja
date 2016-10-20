@@ -1,27 +1,18 @@
 package bms.player.beatoraja;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.net.URI;
+import java.io.*;
 import java.net.URL;
 import java.nio.file.*;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import org.apache.commons.dbutils.QueryRunner;
-import org.apache.commons.dbutils.ResultSetHandler;
-import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 
 import bms.player.beatoraja.Config.SkinConfig;
-import bms.player.beatoraja.TableData.CourseData;
-import bms.player.beatoraja.TableData.TrophyData;
 import bms.player.beatoraja.skin.LR2SkinHeader;
 import bms.player.beatoraja.skin.LR2SkinHeader.CustomFile;
 import bms.player.beatoraja.skin.LR2SkinHeader.CustomOption;
@@ -29,23 +20,15 @@ import bms.player.beatoraja.skin.LR2SkinHeaderLoader;
 import bms.player.beatoraja.song.SQLiteSongDatabaseAccessor;
 import bms.player.beatoraja.song.SongData;
 import bms.player.beatoraja.song.SongDatabaseAccessor;
-import bms.table.Course;
-import bms.table.Course.Trophy;
-import bms.table.DifficultyTable;
-import bms.table.DifficultyTableElement;
-import bms.table.DifficultyTableParser;
 
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter.OutputType;
-import com.sun.jndi.toolkit.url.Uri;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
@@ -61,6 +44,8 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private ComboBox<Integer> resolution;
 
+	@FXML
+	private ComboBox<Integer> playconfig;
 	/**
 	 * ハイスピード
 	 */
@@ -121,7 +106,18 @@ public class PlayConfigurationView implements Initializable {
 	private CheckBox bpmguide;
 	@FXML
 	private CheckBox legacy;
+	@FXML
+	private CheckBox exjudge;
+	@FXML
+	private CheckBox nomine;
 
+	@FXML
+	private CheckBox judgeregion;
+	@FXML
+	private CheckBox markprocessednote;
+	@FXML
+	private CheckBox showhiddennote;
+	
 	@FXML
 	private Spinner<Integer> maxfps;
 	@FXML
@@ -158,11 +154,13 @@ public class PlayConfigurationView implements Initializable {
 
 	private static final String[] JUDGEALGORITHM = { "LR2風", "本家風", "最下ノーツ最優先" };
 
-	private static final String[] JUDGEDETAIL = { "なし", "FAST/SLOW", "±ms" };
+	private static final String[] JUDGEDETAIL = { "なし", "EARLY/LATE", "±ms" };
 
 	private static final String[] RESOLUTION = { "SD (640 x 480)", "HD (1280 x 720)", "FULL HD (1920 x 1080)",
 			"ULTRA HD (3940 x 2160)" };
 
+	private static final String[] PLAYCONFIG = { "5/7KEYS", "10/14KEYS", "9KEYS"};
+	
 	private static final String[] SKIN_CATEGORY = { "7KEYS", "5KEYS", "14KEYS", "10KEYS", "9KEYS", "MUSIC SELECT",
 			"DECIDE", "RESULT", "KEY CONFIG", "SKIN SELECT", "SOUND SET", "THEME", "7KEYS BATTLE", "5KEYS BATTLE",
 			"9KEYS BATTLE", "COURSE RESULT" };
@@ -206,6 +204,14 @@ public class PlayConfigurationView implements Initializable {
 				return new OptionListCell(FIXHISPEEDOP);
 			}
 		});
+		playconfig.setCellFactory(new Callback<ListView<Integer>, ListCell<Integer>>() {
+			public ListCell<Integer> call(ListView<Integer> param) {
+				return new OptionListCell(PLAYCONFIG);
+			}
+		});
+		playconfig.setButtonCell(new OptionListCell(PLAYCONFIG));
+		playconfig.getItems().setAll(0, 1, 2);
+
 		fixhispeed.setButtonCell(new OptionListCell(FIXHISPEEDOP));
 		fixhispeed.getItems().setAll(0, 1, 2, 3, 4);
 		lntype.setCellFactory(new Callback<ListView<Integer>, ListCell<Integer>>() {
@@ -268,12 +274,6 @@ public class PlayConfigurationView implements Initializable {
 		lntype.getSelectionModel().select(config.getLnmode());
 
 		fixhispeed.setValue(config.getFixhispeed());
-		hispeed.getValueFactory().setValue((double) config.getMode7().getHispeed());
-		gvalue.getValueFactory().setValue(config.getMode7().getDuration());
-		enableLanecover.setSelected(config.getMode7().isEnablelanecover());
-		lanecover.getValueFactory().setValue((double) config.getMode7().getLanecover());
-		enableLift.setSelected(config.getMode7().isEnablelift());
-		lift.getValueFactory().setValue((double) config.getMode7().getLift());
 		judgetiming.getValueFactory().setValue(config.getJudgetiming());
 
 		bgmpath.setText(config.getBgmpath());
@@ -285,6 +285,12 @@ public class PlayConfigurationView implements Initializable {
 		constant.setSelected(config.isConstant());
 		bpmguide.setSelected(config.isBpmguide());
 		legacy.setSelected(config.isLegacynote());
+		exjudge.setSelected(config.isExpandjudge());
+		nomine.setSelected(config.isNomine());
+		
+		judgeregion.setSelected(config.isShowjudgearea());
+		showhiddennote.setSelected(config.isShowhiddennote());
+		markprocessednote.setSelected(config.isMarkprocessednote());
 
 		maxfps.getValueFactory().setValue(config.getMaxFramePerSecond());
 		audiobuffer.getValueFactory().setValue(config.getAudioDeviceBufferSize());
@@ -299,6 +305,8 @@ public class PlayConfigurationView implements Initializable {
 
 		skinview = new SkinConfigurationView();
 
+		playconfig.setValue(0);
+		updatePlayConfig();
 		skincategory.setValue(0);
 		updateSkinCategory();
 	}
@@ -315,13 +323,7 @@ public class PlayConfigurationView implements Initializable {
 		config.setRandom(scoreop.getValue());
 		config.setGauge(gaugeop.getValue());
 		config.setLnmode(lntype.getValue());
-		config.getMode7().setHispeed(hispeed.getValue().floatValue());
 		config.setFixhispeed(fixhispeed.getValue());
-		config.getMode7().setDuration(gvalue.getValue());
-		config.getMode7().setEnablelanecover(enableLanecover.isSelected());
-		config.getMode7().setLanecover(lanecover.getValue().floatValue());
-		config.getMode7().setEnablelift(enableLift.isSelected());
-		config.getMode7().setLift(lift.getValue().floatValue());
 		config.setJudgetiming(judgetiming.getValue());
 
 		config.setBgmpath(bgmpath.getText());
@@ -333,6 +335,12 @@ public class PlayConfigurationView implements Initializable {
 		config.setConstant(constant.isSelected());
 		config.setBpmguide(bpmguide.isSelected());
 		config.setLegacynote(legacy.isSelected());
+		config.setExpandjudge(exjudge.isSelected());
+		config.setNomine(nomine.isSelected());
+		
+		config.setShowjudgearea(judgeregion.isSelected());
+		config.setShowhiddennote(showhiddennote.isSelected());
+		config.setMarkprocessednote(markprocessednote.isSelected());
 
 		config.setMaxFramePerSecond(maxfps.getValue());
 		config.setAudioDeviceBufferSize(audiobuffer.getValue());
@@ -345,6 +353,7 @@ public class PlayConfigurationView implements Initializable {
 
 		config.setInputduration(inputduration.getValue());
 
+		updatePlayConfig();
 		updateSkinCategory();
 
 		Json json = new Json();
@@ -383,6 +392,28 @@ public class PlayConfigurationView implements Initializable {
 
 	private int mode = -1;
 
+	private int pc = -1;
+	
+	public void updatePlayConfig() {
+		if(pc != -1) {
+			PlayConfig conf = (pc == 0 ? config.getMode7() : (pc == 1 ? config.getMode14() : config.getMode9()));			
+			conf.setHispeed(hispeed.getValue().floatValue());
+			conf.setDuration(gvalue.getValue());
+			conf.setEnablelanecover(enableLanecover.isSelected());
+			conf.setLanecover(lanecover.getValue().floatValue());
+			conf.setEnablelift(enableLift.isSelected());
+			conf.setLift(lift.getValue().floatValue());
+		}
+		pc = playconfig.getValue();
+		PlayConfig conf = (pc == 0 ? config.getMode7() : (pc == 1 ? config.getMode14() : config.getMode9()));
+		hispeed.getValueFactory().setValue((double) conf.getHispeed());
+		gvalue.getValueFactory().setValue(conf.getDuration());
+		enableLanecover.setSelected(conf.isEnablelanecover());
+		lanecover.getValueFactory().setValue((double) conf.getLanecover());
+		enableLift.setSelected(conf.isEnablelift());
+		lift.getValueFactory().setValue((double) conf.getLift());
+	}
+	
 	public void updateSkinCategory() {
 		if (skinview.getSelectedHeader() != null) {
 			LR2SkinHeader header = skinview.getSelectedHeader();
@@ -569,6 +600,11 @@ public class PlayConfigurationView implements Initializable {
 
 }
 
+/**
+ * スキンコンフィグ
+ * 
+ * @author exch
+ */
 class SkinConfigurationView {
 
 	private List<LR2SkinHeader> lr2skinheader = new ArrayList<LR2SkinHeader>();
