@@ -72,19 +72,19 @@ public class MusicSelectSkin extends Skin {
 
 		SkinText grade1 = new SkinText("skin/VL-Gothic-Regular.ttf", 0, 24, 2);
 		grade1.setReferenceID(STRING_COURSE1_TITLE);
-		setDestination(grade1, 0, 80, 540, 18, 24, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		setDestination(grade1, 0, 80, 596, 18, 24, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		this.add(grade1);
 		SkinText grade2 = new SkinText("skin/VL-Gothic-Regular.ttf", 0, 24, 2);
 		grade2.setReferenceID(STRING_COURSE2_TITLE);
-		setDestination(grade2, 0, 80, 512, 18, 24, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		setDestination(grade2, 0, 80, 568, 18, 24, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		this.add(grade2);
 		SkinText grade3 = new SkinText("skin/VL-Gothic-Regular.ttf", 0, 24, 2);
 		grade3.setReferenceID(STRING_COURSE3_TITLE);
-		setDestination(grade3, 0, 80, 484, 18, 24, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		setDestination(grade3, 0, 80, 540, 18, 24, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		this.add(grade3);
 		SkinText grade4 = new SkinText("skin/VL-Gothic-Regular.ttf", 0, 24, 2);
 		grade4.setReferenceID(STRING_COURSE4_TITLE);
-		setDestination(grade4, 0, 80, 456, 18, 24, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		setDestination(grade4, 0, 80, 512, 18, 24, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		this.add(grade4);
 
 		Texture cl = new Texture("skin/clear.png");
@@ -142,6 +142,13 @@ public class MusicSelectSkin extends Skin {
 		addImage(new TextureRegion(st, 0, 720, 96, 24),0, 200, 312, 100, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_GRADEBAR, 0, 0);
 		addNumber(new SkinNumber(ntr[0], 0, 4, 0, NUMBER_PLAYCOUNT), 0, 400, 312, 18, 18, 0, 255, 255,
 				255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		// play, autoplay, replay button
+		addImage(new TextureRegion(st, 0, 310, 15, 15),0, 80, 450, 30, 30, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_SONGBAR, 0, 0).setClickevent(BUTTON_PLAY);
+		addImage(new TextureRegion(st, 0, 310, 15, 15),0, 80, 450, 30, 30, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_GRADEBAR, 0, 0).setClickevent(BUTTON_PLAY);
+		addImage(new TextureRegion(st, 0, 325, 15, 15),0, 130, 450, 30, 30, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_SONGBAR, 0, 0).setClickevent(BUTTON_AUTOPLAY);
+		addImage(new TextureRegion(st, 0, 325, 15, 15),0, 130, 450, 30, 30, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_GRADEBAR, 0, 0).setClickevent(BUTTON_AUTOPLAY);
+		addImage(new TextureRegion(st, 0, 340, 15, 15),0, 180, 450, 30, 30, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_SONGBAR, 0, 0).setClickevent(BUTTON_REPLAY);
+		addImage(new TextureRegion(st, 0, 340, 15, 15),0, 180, 450, 30, 30, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_GRADEBAR, 0, 0).setClickevent(BUTTON_REPLAY);
 
 		addImage(new TextureRegion(st, 0, 720, 96, 24),0, 60, 102, 100, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		addNumber(new SkinNumber(ntr[0], 0, 6, 0, NUMBER_TOTALPLAYCOUNT), 0, 160, 102, 18, 18, 0,

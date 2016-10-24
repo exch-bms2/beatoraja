@@ -52,12 +52,13 @@ public class Skin {
 		objects.add(number);
 	}
 
-	protected void addImage(TextureRegion tr, long time, float x, float y, float w, float h, int acc, int a, int r,
+	protected SkinImage addImage(TextureRegion tr, long time, float x, float y, float w, float h, int acc, int a, int r,
 			int g, int b, int blend, int filter, int angle, int center, int loop, int timer, int op1, int op2, int op3) {
 		SkinImage si = new SkinImage(new TextureRegion[] { tr }, 0);
 		si.setDestination(time, x * dw, y * dh, w * dw, h * dh, acc, a, r, g, b, blend, filter, angle, center, loop,
 				timer, op1, op2, op3);
 		objects.add(si);
+		return si;
 	}
 
 	public SkinObject[] getAllSkinObjects() {
@@ -106,6 +107,49 @@ public class Skin {
 	}
 
 	public void mousePressed(MainState state, int x, int y) {
+		for (SkinObject obj : objects) {
+			if(obj.getClickevent() != -1) {
+				boolean draw = true;
+				for (int op : obj.getOption()) {
+					boolean soption = false;
+					if(op > 0) {
+						for(int sop : option) {
+							if(op == sop) {
+								soption = true;
+								break;
+							}
+						}
+					} else {
+						soption = true;
+						for(int sop : option) {
+							if(-op == sop) {
+								soption = false;
+								break;
+							}
+						}
+					}
+					if(soption) {
+						continue;
+					}
+					final boolean b = state.getBooleanValue(op);
+					if ((op > 0 && !b) || (op < 0 && b)) {
+						draw = false;
+						break;
+					}
+				}
+				if (draw) {
+					Rectangle r = obj.getDestination(state.getNowTime(), state);
+					System.out.println(obj.getClickevent() + " : " + r.x + "," + r.y + "," + r.width + "," + r.height + " - " + x + "," + y);
+					if (r != null && r.x <= x && r.x + r.width >= x && r.y <= y && r.y + r.height >= y) {
+						state.executeClickEvent(obj.getClickevent());
+					}
+				}
+
+			}
+		}
+	}
+
+	public void mouseDragged(MainState state, int x, int y) {
 		final long time = state.getNowTime();
 		for (SkinObject obj : objects) {
 			if (obj instanceof SkinSlider && ((SkinSlider) obj).isChangable()) {

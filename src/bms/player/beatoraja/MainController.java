@@ -216,9 +216,13 @@ public class MainController extends ApplicationAdapter {
 			stage.draw();			
 		}
 		// move song bar position by mouse
-		if (input.isMouseConsumed()) {
-			input.setMouseConsumed();
+		if (input.isMousePressed()) {
+			input.setMousePressed();
 			current.getSkin().mousePressed(current, input.getMouseX(), input.getMouseY());
+		}
+		if (input.isMouseDragged()) {
+			input.setMouseDragged();
+			current.getSkin().mouseDragged(current, input.getMouseX(), input.getMouseY());
 		}
 
 		// FPS表示切替
