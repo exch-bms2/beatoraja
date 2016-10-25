@@ -488,8 +488,13 @@ public class SkinProperty {
 	public static final int NUMBER_SCRATCHANGLE_2P = 60001;
 
 	public static final int OPTION_GRADEBAR = 3;
+
 	public static final int BUTTON_MODE = 1011;
 	public static final int BUTTON_SORT = 1012;
+	public static final int BUTTON_PLAY = 1015;
+	public static final int BUTTON_AUTOPLAY = 1016;
+	public static final int BUTTON_READTEXT = 1017;
+	public static final int BUTTON_REPLAY = 1019;
 	public static final int BUTTON_LNMODE = 1911;
 
 

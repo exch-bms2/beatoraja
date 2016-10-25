@@ -46,6 +46,8 @@ public abstract class SkinObject {
 	 */
 	private int dstcenter;
 
+	private int clickevent = -1;
+
 	private int[] dstop = new int[0];
 
 	private List<SkinObjectDestination> dst = new ArrayList<SkinObjectDestination>();
@@ -324,6 +326,14 @@ public abstract class SkinObject {
 		if (dstblend >= 2) {
 			sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		}
+	}
+
+	public int getClickevent() {
+		return clickevent;
+	}
+
+	public void setClickevent(int clickevent) {
+		this.clickevent = clickevent;
 	}
 
 	public class SkinObjectDestination {

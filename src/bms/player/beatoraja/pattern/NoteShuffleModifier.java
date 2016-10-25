@@ -192,7 +192,7 @@ public class NoteShuffleModifier extends PatternModifier {
                                     // 初期値の作成
                                     random = new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17};
                                     int index = (int) (Math.random() * 9);
-                                    int j = (int) (Math.random() * 2) >= 1 ? 1 : 6;
+                                    int j = (int) (Math.random() * 2) >= 1 ? 1 : 8;
                                     for (int i = 0; i < 9; i++) {
                                         int plane = i >= 5 ? i + 5 : i;
                                         random[plane] = index >= 5 ? index + 5 : index;

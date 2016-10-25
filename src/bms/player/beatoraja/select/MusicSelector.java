@@ -385,23 +385,23 @@ public class MusicSelector extends MainState {
 					break;
 				case TableData.GRADE_MIRROR:
 					titlefont.setColor(Color.CYAN);
-					titlefont.draw(sprite, "MIRROR OK", 150, 570);
+					titlefont.draw(sprite, "MIRROR OK", 150, 620);
 					break;
 				case TableData.GRADE_RANDOM:
 					titlefont.setColor(Color.CORAL);
-					titlefont.draw(sprite, "RANDOM OK", 150, 570);
+					titlefont.draw(sprite, "RANDOM OK", 150, 620);
 					break;
 				case TableData.NO_HISPEED:
 					titlefont.setColor(Color.RED);
-					titlefont.draw(sprite, "x1.0 HI SPEED", 300, 570);
+					titlefont.draw(sprite, "x1.0 HI SPEED", 300, 620);
 					break;
 				case TableData.NO_GOOD:
 					titlefont.setColor(Color.PURPLE);
-					titlefont.draw(sprite, "NO GOOD", 450, 570);
+					titlefont.draw(sprite, "NO GOOD", 450, 620);
 					break;
 				case TableData.NO_GREAT:
 					titlefont.setColor(Color.PURPLE);
-					titlefont.draw(sprite, "NO GREAT", 450, 570);
+					titlefont.draw(sprite, "NO GREAT", 450, 620);
 					break;
 				}
 			}
@@ -623,47 +623,17 @@ public class MusicSelector extends MainState {
 						dir.add(current);
 					}
 					resetReplayIndex();
-				} else if (current instanceof SongBar) {
-					resource.clear();
-					if (resource.setBMSFile(Paths.get(((SongBar) current).getSongData().getPath()), config, 0)) {
-						if (bgm != null) {
-							bgm.stop();
-						}
-						main.changeState(MainController.STATE_DECIDE);
-					}
-				} else if (current instanceof GradeBar) {
-					readCourse(0);
+				} else {
+					play(0);
 				}
 			}
 			// 5鍵 (オートプレイ)
 			if (isPressed(keystate, keytime, KEY_AUTO, true)) {
-				if (current instanceof SongBar) {
-					resource.clear();
-					if (resource.setBMSFile(Paths.get(((SongBar) current).getSongData().getPath()), config, 1)) {
-						if (bgm != null) {
-							bgm.stop();
-						}
-						main.changeState(MainController.STATE_DECIDE);
-
-					}
-				} else if (current instanceof GradeBar) {
-					readCourse(1);
-				}
+				play(1);
 			}
 			// 7鍵 (リプレイ)
 			if (isPressed(keystate, keytime, KEY_REPLAY, true)) {
-				if (current instanceof SongBar) {
-					resource.clear();
-					if (resource.setBMSFile(Paths.get(((SongBar) current).getSongData().getPath()), config,
-							2 + selectedreplay)) {
-						if (bgm != null) {
-							bgm.stop();
-						}
-						main.changeState(MainController.STATE_DECIDE);
-					}
-				} else if (current instanceof GradeBar) {
-					readCourse(2 + selectedreplay);
-				}
+				play(2 + selectedreplay);
 			}
 			// 白鍵 (フォルダを開く)
 			if (isPressed(keystate, keytime, KEY_FOLDER_OPEN, true) || cursor[3]) {
@@ -813,6 +783,22 @@ public class MusicSelector extends MainState {
 			}
 		}
 		selectedreplay = -1;
+	}
+
+	private void play(int autoplay) {
+		final Bar current = bar.getSelected();
+		if (current instanceof SongBar) {
+			PlayerResource resource = this.getMainController().getPlayerResource();
+			resource.clear();
+			if (resource.setBMSFile(Paths.get(((SongBar) current).getSongData().getPath()), config, autoplay)) {
+				if (bgm != null) {
+					bgm.stop();
+				}
+				getMainController().changeState(MainController.STATE_DECIDE);
+			}
+		} else if (current instanceof GradeBar) {
+			readCourse(autoplay);
+		}
 	}
 
 	private void readCourse(int autoplay) {
@@ -1275,5 +1261,19 @@ public class MusicSelector extends MainState {
 				return (current instanceof SongBar) || ((current instanceof GradeBar) && ((GradeBar) current).existsAllSongs());
 		}
 		return super.getBooleanValue(id);
+	}
+
+	public void executeClickEvent(int id) {
+		switch (id) {
+			case BUTTON_PLAY:
+				play(0);
+				break;
+			case BUTTON_AUTOPLAY:
+				play(1);
+				break;
+			case BUTTON_REPLAY:
+				play(2 + selectedreplay);
+				break;
+		}
 	}
 }

@@ -41,6 +41,8 @@ import static bms.player.beatoraja.Resolution.*;
 
 public class MainController extends ApplicationAdapter {
 
+	public static final String VERSION = "beatoraja 0.3.5";
+	
 	private BMSPlayer player;
 	private MusicDecide decide;
 	private MusicSelector selector;
@@ -216,9 +218,13 @@ public class MainController extends ApplicationAdapter {
 			stage.draw();			
 		}
 		// move song bar position by mouse
-		if (input.isMouseConsumed()) {
-			input.setMouseConsumed();
+		if (input.isMousePressed()) {
+			input.setMousePressed();
 			current.getSkin().mousePressed(current, input.getMouseX(), input.getMouseY());
+		}
+		if (input.isMouseDragged()) {
+			input.setMouseDragged();
+			current.getSkin().mouseDragged(current, input.getMouseX(), input.getMouseY());
 		}
 
 		// FPS表示切替
@@ -394,7 +400,7 @@ public class MainController extends ApplicationAdapter {
 				cfg.backgroundFPS = config.getMaxFramePerSecond();
 				cfg.foregroundFPS = config.getMaxFramePerSecond();
 			}
-			cfg.title = "Beatoraja";
+			cfg.title = VERSION;
 
 			cfg.audioDeviceBufferSize = config.getAudioDeviceBufferSize();
 			cfg.audioDeviceSimultaneousSources = config.getAudioDeviceSimultaneousSources();
@@ -472,7 +478,7 @@ public class MainController extends ApplicationAdapter {
 				bmsinfo.update(config);
 				Scene scene = new Scene(stackPane, stackPane.getPrefWidth(), stackPane.getPrefHeight());
 				primaryStage.setScene(scene);
-				primaryStage.setTitle("beatoraja configuration");
+				primaryStage.setTitle(VERSION + " configuration");
 				primaryStage.show();
 
 			} catch (IOException e) {

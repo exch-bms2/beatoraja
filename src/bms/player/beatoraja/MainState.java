@@ -80,6 +80,10 @@ public abstract class MainState {
 		return timer;
 	}
 
+	public void executeClickEvent(int id) {
+
+	}
+
 	public boolean getBooleanValue(int id) {
 		final SongData model = getMainController().getPlayerResource().getSongdata();
 		switch (id) {

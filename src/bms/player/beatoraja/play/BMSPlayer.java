@@ -226,7 +226,7 @@ public class BMSPlayer extends MainState {
 					config.setRandom(0);
 				}
 				if (config.getRandom() == 8) {
-					config.setRandom(3);
+					config.setRandom(2);
 				}
 				if (config.getRandom() == 9) {
 					config.setRandom(4);

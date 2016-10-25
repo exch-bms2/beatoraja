@@ -88,7 +88,7 @@ public class LaneShuffleModifier extends PatternModifier {
 				j = (int) (Math.random() * 2);
 				for (int lane = 0; lane < 9; lane++) {
 					i = (i + 1) % 9;
-					int k = (j == 0 ? i : 9 - i);
+					int k = (j == 0 ? i : 8 - i);
 					random[lane >= 5 ? lane + 5 : lane] = (k >= 5 ? k + 5 : k);
 				}
 				break;

@@ -17,9 +17,7 @@ import bms.player.beatoraja.skin.LR2SkinHeader;
 import bms.player.beatoraja.skin.LR2SkinHeader.CustomFile;
 import bms.player.beatoraja.skin.LR2SkinHeader.CustomOption;
 import bms.player.beatoraja.skin.LR2SkinHeaderLoader;
-import bms.player.beatoraja.song.SQLiteSongDatabaseAccessor;
-import bms.player.beatoraja.song.SongData;
-import bms.player.beatoraja.song.SongDatabaseAccessor;
+import bms.player.beatoraja.song.*;
 
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter.OutputType;
@@ -28,6 +26,7 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
@@ -87,11 +86,11 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private CheckBox enableLanecover;
 	@FXML
-	private Spinner<Double> lanecover;
+	private Spinner<Integer> lanecover;
 	@FXML
 	private CheckBox enableLift;
 	@FXML
-	private Spinner<Double> lift;
+	private Spinner<Integer> lift;
 
 	@FXML
 	private TextField bgmpath;
@@ -117,9 +116,11 @@ public class PlayConfigurationView implements Initializable {
 	private CheckBox markprocessednote;
 	@FXML
 	private CheckBox showhiddennote;
-	
+
 	@FXML
 	private Spinner<Integer> maxfps;
+	@FXML
+	private ComboBox<String> audio;
 	@FXML
 	private Spinner<Integer> audiobuffer;
 	@FXML
@@ -141,109 +142,38 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private ScrollPane skinconfig;
 
-	private static final String[] SCOREOP = { "OFF", "MIRROR", "RANDOM", "R-RANDOM", "S-RANDOM", "SPIRAL", "H-RANDOM",
-			"ALL-SCR", "RANDOM-EX", "S-RANDOM-EX" };
-
-	private static final String[] GAUGEOP = { "ASSIST EASY", "EASY", "NORMAL", "HARD", "EX-HARD", "HAZARD" };
-
-	private static final String[] LNTYPE = { "LONG NOTE", "CHARGE NOTE", "HELL CHARGE NOTE" };
-
-	private static final String[] BGAOP = { "ON", "AUTOPLAY ", "OFF" };
-
-	private static final String[] FIXHISPEEDOP = { "OFF", "START BPM", "MAX BPM", "MAIN BPM", "MIN BPM" };
-
-	private static final String[] JUDGEALGORITHM = { "LR2風", "本家風", "最下ノーツ最優先" };
-
-	private static final String[] JUDGEDETAIL = { "なし", "EARLY/LATE", "±ms" };
-
-	private static final String[] RESOLUTION = { "SD (640 x 480)", "HD (1280 x 720)", "FULL HD (1920 x 1080)",
-			"ULTRA HD (3940 x 2160)" };
-
-	private static final String[] PLAYCONFIG = { "5/7KEYS", "10/14KEYS", "9KEYS"};
-	
-	private static final String[] SKIN_CATEGORY = { "7KEYS", "5KEYS", "14KEYS", "10KEYS", "9KEYS", "MUSIC SELECT",
-			"DECIDE", "RESULT", "KEY CONFIG", "SKIN SELECT", "SOUND SET", "THEME", "7KEYS BATTLE", "5KEYS BATTLE",
-			"9KEYS BATTLE", "COURSE RESULT" };
-
 	private MainController.BMSInformationLoader loader;
+
+	private void initComboBox(ComboBox<Integer> combo, final String[] values) {
+		combo.setCellFactory(new Callback<ListView<Integer>, ListCell<Integer>>() {
+			public ListCell<Integer> call(ListView<Integer> param) {
+				return new OptionListCell(values);
+			}
+		});
+		combo.setButtonCell(new OptionListCell(values));
+		for (int i = 0; i < values.length; i++) {
+			combo.getItems().add(i);
+		}
+	}
 
 	public void initialize(URL arg0, ResourceBundle arg1) {
 		lr2configuration.setHgap(25);
 		lr2configuration.setVgap(4);
 
-		resolution.setCellFactory(new Callback<ListView<Integer>, ListCell<Integer>>() {
-			public ListCell<Integer> call(ListView<Integer> param) {
-				return new OptionListCell(RESOLUTION);
-			}
-		});
-		resolution.setButtonCell(new OptionListCell(RESOLUTION));
-		resolution.getItems().setAll(0, 1, 2);
-		scoreop.setCellFactory(new Callback<ListView<Integer>, ListCell<Integer>>() {
-			public ListCell<Integer> call(ListView<Integer> param) {
-				return new OptionListCell(SCOREOP);
-			}
-		});
-		scoreop.setButtonCell(new OptionListCell(SCOREOP));
-		scoreop.getItems().setAll(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
-		gaugeop.setCellFactory(new Callback<ListView<Integer>, ListCell<Integer>>() {
-			public ListCell<Integer> call(ListView<Integer> param) {
-				return new OptionListCell(GAUGEOP);
-			}
-		});
-		gaugeop.setButtonCell(new OptionListCell(GAUGEOP));
-		gaugeop.getItems().setAll(0, 1, 2, 3, 4, 5);
-		bgaop.setCellFactory(new Callback<ListView<Integer>, ListCell<Integer>>() {
-			public ListCell<Integer> call(ListView<Integer> param) {
-				return new OptionListCell(BGAOP);
-			}
-		});
-		bgaop.setButtonCell(new OptionListCell(BGAOP));
-		bgaop.getItems().setAll(0, 1, 2);
-		fixhispeed.setCellFactory(new Callback<ListView<Integer>, ListCell<Integer>>() {
-			public ListCell<Integer> call(ListView<Integer> param) {
-				return new OptionListCell(FIXHISPEEDOP);
-			}
-		});
-		playconfig.setCellFactory(new Callback<ListView<Integer>, ListCell<Integer>>() {
-			public ListCell<Integer> call(ListView<Integer> param) {
-				return new OptionListCell(PLAYCONFIG);
-			}
-		});
-		playconfig.setButtonCell(new OptionListCell(PLAYCONFIG));
-		playconfig.getItems().setAll(0, 1, 2);
-
-		fixhispeed.setButtonCell(new OptionListCell(FIXHISPEEDOP));
-		fixhispeed.getItems().setAll(0, 1, 2, 3, 4);
-		lntype.setCellFactory(new Callback<ListView<Integer>, ListCell<Integer>>() {
-			public ListCell<Integer> call(ListView<Integer> param) {
-				return new OptionListCell(LNTYPE);
-			}
-		});
-		lntype.setButtonCell(new OptionListCell(LNTYPE));
-		lntype.getItems().setAll(0, 1, 2);
-		judgealgorithm.setButtonCell(new OptionListCell(JUDGEALGORITHM));
-		judgealgorithm.setCellFactory(new Callback<ListView<Integer>, ListCell<Integer>>() {
-			public ListCell<Integer> call(ListView<Integer> param) {
-				return new OptionListCell(JUDGEALGORITHM);
-			}
-		});
-		judgealgorithm.getItems().setAll(0, 1, 2);
-		judgedetail.setCellFactory(new Callback<ListView<Integer>, ListCell<Integer>>() {
-			public ListCell<Integer> call(ListView<Integer> param) {
-				return new OptionListCell(JUDGEDETAIL);
-			}
-		});
-		judgedetail.setButtonCell(new OptionListCell(JUDGEDETAIL));
-		judgedetail.getItems().setAll(0, 1, 2);
-
-		skincategory.setCellFactory(new Callback<ListView<Integer>, ListCell<Integer>>() {
-			public ListCell<Integer> call(ListView<Integer> param) {
-				return new OptionListCell(SKIN_CATEGORY);
-			}
-		});
-		skincategory.setButtonCell(new OptionListCell(SKIN_CATEGORY));
-		// skincategory.getItems().setAll(0, 1,
-		// 2,3,4,5,6,7,8,9,10,11,12,13,14,15);
+		initComboBox(resolution, new String[] { "SD (640 x 480)", "HD (1280 x 720)", "FULL HD (1920 x 1080)",
+				"ULTRA HD (3940 x 2160)" });
+		initComboBox(scoreop, new String[] { "OFF", "MIRROR", "RANDOM", "R-RANDOM", "S-RANDOM", "SPIRAL", "H-RANDOM",
+				"ALL-SCR", "RANDOM-EX", "S-RANDOM-EX" });
+		initComboBox(gaugeop, new String[] { "ASSIST EASY", "EASY", "NORMAL", "HARD", "EX-HARD", "HAZARD" });
+		initComboBox(bgaop, new String[] { "ON", "AUTOPLAY ", "OFF" });
+		initComboBox(fixhispeed, new String[] { "OFF", "START BPM", "MAX BPM", "MAIN BPM", "MIN BPM" });
+		initComboBox(playconfig, new String[] { "5/7KEYS", "10/14KEYS", "9KEYS" });
+		initComboBox(lntype, new String[] { "LONG NOTE", "CHARGE NOTE", "HELL CHARGE NOTE" });
+		initComboBox(judgealgorithm, new String[] { "LR2風", "本家風", "最下ノーツ最優先" });
+		initComboBox(judgedetail, new String[] { "なし", "EARLY/LATE", "±ms" });
+		initComboBox(skincategory, new String[] { "7KEYS", "5KEYS", "14KEYS", "10KEYS", "9KEYS", "MUSIC SELECT",
+				"DECIDE", "RESULT", "KEY CONFIG", "SKIN SELECT", "SOUND SET", "THEME", "7KEYS BATTLE", "5KEYS BATTLE",
+				"9KEYS BATTLE", "COURSE RESULT" });
 		skincategory.getItems().setAll(0, 1, 2, 3, 4, 6, 7);
 
 		skin.setCellFactory(new Callback<ListView<LR2SkinHeader>, ListCell<LR2SkinHeader>>() {
@@ -287,7 +217,7 @@ public class PlayConfigurationView implements Initializable {
 		legacy.setSelected(config.isLegacynote());
 		exjudge.setSelected(config.isExpandjudge());
 		nomine.setSelected(config.isNomine());
-		
+
 		judgeregion.setSelected(config.isShowjudgearea());
 		showhiddennote.setSelected(config.isShowhiddennote());
 		markprocessednote.setSelected(config.isMarkprocessednote());
@@ -324,7 +254,7 @@ public class PlayConfigurationView implements Initializable {
 		config.setGauge(gaugeop.getValue());
 		config.setLnmode(lntype.getValue());
 		config.setFixhispeed(fixhispeed.getValue());
-		config.setJudgetiming(judgetiming.getValue());
+		config.setJudgetiming(getValue(judgetiming));
 
 		config.setBgmpath(bgmpath.getText());
 		config.setSoundpath(soundpath.getText());
@@ -337,21 +267,21 @@ public class PlayConfigurationView implements Initializable {
 		config.setLegacynote(legacy.isSelected());
 		config.setExpandjudge(exjudge.isSelected());
 		config.setNomine(nomine.isSelected());
-		
+
 		config.setShowjudgearea(judgeregion.isSelected());
 		config.setShowhiddennote(showhiddennote.isSelected());
 		config.setMarkprocessednote(markprocessednote.isSelected());
 
-		config.setMaxFramePerSecond(maxfps.getValue());
-		config.setAudioDeviceBufferSize(audiobuffer.getValue());
-		config.setAudioDeviceSimultaneousSources(audiosim.getValue());
+		config.setMaxFramePerSecond(getValue(maxfps));
+		config.setAudioDeviceBufferSize(getValue(audiobuffer));
+		config.setAudioDeviceSimultaneousSources(getValue(audiosim));
 
 		config.setJudgeAlgorithm(judgealgorithm.getValue());
 
 		config.setFolderlamp(folderlamp.isSelected());
 		config.setJudgedetail(judgedetail.getValue());
 
-		config.setInputduration(inputduration.getValue());
+		config.setInputduration(getValue(inputduration));
 
 		updatePlayConfig();
 		updateSkinCategory();
@@ -369,9 +299,46 @@ public class PlayConfigurationView implements Initializable {
 	public void addSongPath() {
 		DirectoryChooser chooser = new DirectoryChooser();
 		chooser.setTitle("楽曲のルートフォルダを選択してください");
-		File dir = chooser.showDialog(null);
-		if (dir != null) {
-			bmsroot.getItems().add(dir.getPath());
+		File f = chooser.showDialog(null);
+		if (f != null) {
+			boolean unique = true;
+			for (String path : bmsroot.getItems()) {
+				if (path.equals(f.getPath()) || f.getPath().startsWith(path + File.separatorChar)) {
+					unique = false;
+					break;
+				}
+			}
+			if (unique) {
+				bmsroot.getItems().add(f.getPath());
+			}
+		}
+	}
+
+	public void onSongPathDragOver(DragEvent ev) {
+		Dragboard db = ev.getDragboard();
+		if (db.hasFiles()) {
+			ev.acceptTransferModes(TransferMode.COPY_OR_MOVE);
+		}
+		ev.consume();
+	}
+
+	public void songPathDragDropped(final DragEvent ev) {
+		Dragboard db = ev.getDragboard();
+		if (db.hasFiles()) {
+			for (File f : db.getFiles()) {
+				if (f.isDirectory()) {
+					boolean unique = true;
+					for (String path : bmsroot.getItems()) {
+						if (path.equals(f.getPath()) || f.getPath().startsWith(path + File.separatorChar)) {
+							unique = false;
+							break;
+						}
+					}
+					if (unique) {
+						bmsroot.getItems().add(f.getPath());
+					}
+				}
+			}
 		}
 	}
 
@@ -393,27 +360,33 @@ public class PlayConfigurationView implements Initializable {
 	private int mode = -1;
 
 	private int pc = -1;
-	
+
 	public void updatePlayConfig() {
-		if(pc != -1) {
-			PlayConfig conf = (pc == 0 ? config.getMode7() : (pc == 1 ? config.getMode14() : config.getMode9()));			
-			conf.setHispeed(hispeed.getValue().floatValue());
-			conf.setDuration(gvalue.getValue());
+		if (pc != -1) {
+			PlayConfig conf = (pc == 0 ? config.getMode7() : (pc == 1 ? config.getMode14() : config.getMode9()));
+			conf.setHispeed(getValue(hispeed).floatValue());
+			conf.setDuration(getValue(gvalue));
 			conf.setEnablelanecover(enableLanecover.isSelected());
-			conf.setLanecover(lanecover.getValue().floatValue());
+			conf.setLanecover(getValue(lanecover) / 1000f);
 			conf.setEnablelift(enableLift.isSelected());
-			conf.setLift(lift.getValue().floatValue());
+			conf.setLift(getValue(lift) / 1000f);
 		}
 		pc = playconfig.getValue();
 		PlayConfig conf = (pc == 0 ? config.getMode7() : (pc == 1 ? config.getMode14() : config.getMode9()));
 		hispeed.getValueFactory().setValue((double) conf.getHispeed());
 		gvalue.getValueFactory().setValue(conf.getDuration());
 		enableLanecover.setSelected(conf.isEnablelanecover());
-		lanecover.getValueFactory().setValue((double) conf.getLanecover());
+		lanecover.getValueFactory().setValue((int) (conf.getLanecover() * 1000));
 		enableLift.setSelected(conf.isEnablelift());
-		lift.getValueFactory().setValue((double) conf.getLift());
+		lift.getValueFactory().setValue((int) conf.getLift() * 1000);
 	}
-	
+
+	private <T> T getValue(Spinner<T> spinner) {
+		spinner.getValueFactory().setValue(
+				spinner.getValueFactory().getConverter().fromString(spinner.getEditor().getText()));
+		return spinner.getValue();
+	}
+
 	public void updateSkinCategory() {
 		if (skinview.getSelectedHeader() != null) {
 			LR2SkinHeader header = skinview.getSelectedHeader();
@@ -483,9 +456,6 @@ public class PlayConfigurationView implements Initializable {
 		}
 	}
 
-	private static final String[] CONSTRAINT = { "null", "grade", "grade_mirror", "grade_random", "no_speed",
-			"no_good", "no_great" };
-
 	public void loadTable() {
 		commit();
 		try {
@@ -507,8 +477,7 @@ public class PlayConfigurationView implements Initializable {
 
 	public void importScoreDataFromLR2() {
 		FileChooser chooser = new FileChooser();
-		chooser.getExtensionFilters().setAll(
-				new ExtensionFilter("Lunatic Rave 2 Score Database File", "*.db"));
+		chooser.getExtensionFilters().setAll(new ExtensionFilter("Lunatic Rave 2 Score Database File", "*.db"));
 		chooser.setTitle("LRのスコアデータベースを選択してください");
 		File dir = chooser.showOpenDialog(null);
 		if (dir == null) {
@@ -518,11 +487,11 @@ public class PlayConfigurationView implements Initializable {
 		final int[] clears = { 0, 1, 4, 5, 6, 8, 9 };
 		try {
 			Class.forName("org.sqlite.JDBC");
-			PlayDataAccessor playdata = new PlayDataAccessor("playerscore");
 			SongDatabaseAccessor songdb = new SQLiteSongDatabaseAccessor(Paths.get("songdata.db").toString(),
 					config.getBmsroot());
 			String player = "playerscore";
-			ScoreDatabaseAccessor scoredb = new ScoreDatabaseAccessor(new File(".").getAbsoluteFile().getParent(), "/", "/");
+			ScoreDatabaseAccessor scoredb = new ScoreDatabaseAccessor(new File(".").getAbsoluteFile().getParent(), "/",
+					"/");
 			scoredb.createTable(player);
 
 			try (Connection con = DriverManager.getConnection("jdbc:sqlite:" + dir.getPath())) {
@@ -548,7 +517,7 @@ public class PlayConfigurationView implements Initializable {
 						sd.setNotes(song[0].getNotes());
 						sd.setSha256(song[0].getSha256());
 						IRScoreData oldsd = scoredb.getScoreData(player, sd.getSha256(), 0);
-						if(oldsd == null || oldsd.getClear() <= sd.getClear()) {
+						if (oldsd == null || oldsd.getClear() <= sd.getClear()) {
 							result.add(sd);
 						}
 					}
@@ -591,7 +560,9 @@ public class PlayConfigurationView implements Initializable {
 		protected void updateItem(LR2SkinHeader arg0, boolean arg1) {
 			super.updateItem(arg0, arg1);
 			if (arg0 != null) {
-				setText(arg0.getName());
+				if(arg0 instanceof LR2SkinHeader) {
+					setText(arg0.getName() + " (LR2 Skin)");
+				}
 			} else {
 				setText("");
 			}
@@ -620,7 +591,8 @@ class SkinConfigurationView {
 			LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
 			try {
 				LR2SkinHeader header = loader.loadSkin(path, null);
-//				System.out.println(path.toString() + " : " + header.getName() + " - " + header.getMode());
+				// System.out.println(path.toString() + " : " + header.getName()
+				// + " - " + header.getMode());
 				lr2skinheader.add(header);
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -700,7 +672,7 @@ class SkinConfigurationView {
 	}
 
 	public Map<String, Object> getProperty() {
-		Map<String, Object> result = new HashMap();
+		Map<String, Object> result = new HashMap<String, Object>();
 		for (CustomOption option : selected.getCustomOptions()) {
 			if (optionbox.get(option) != null) {
 				int index = optionbox.get(option).getSelectionModel().getSelectedIndex();
@@ -716,7 +688,7 @@ class SkinConfigurationView {
 	}
 
 	public LR2SkinHeader[] getSkinHeader(int mode) {
-		List<LR2SkinHeader> result = new ArrayList();
+		List<LR2SkinHeader> result = new ArrayList<LR2SkinHeader>();
 		for (LR2SkinHeader header : lr2skinheader) {
 			if (header.getMode() == mode) {
 				result.add(header);

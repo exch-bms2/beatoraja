@@ -446,6 +446,9 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 						button = new SkinImage(images, values[9]);
 						button.setTimer(values[10]);
 						button.setReferenceID(values[11] + 1000);
+						if(values[12] == 1) {
+							button.setClickevent(values[11] + 1000);
+						}
 						skin.add(button);
 						// System.out.println("Object Added - " +
 						// (part.getTiming()));

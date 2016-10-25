@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import bms.player.beatoraja.input.BMControllerInputProcessor.BMKeys;
-import bms.player.beatoraja.play.BMSPlayer;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
@@ -77,10 +76,10 @@ public class BMSPlayerInputProcessor {
 	long starttime;
 
 	int mousex;
-
 	int mousey;
-
-	boolean mouseconsumed;
+	int mousebutton;
+	boolean mousepressed;
+	boolean mousedragged;
 
 	int scroll;
 
@@ -235,12 +234,20 @@ public class BMSPlayerInputProcessor {
 		return mousey;
 	}
 
-	public boolean isMouseConsumed() {
-		return mouseconsumed;
+	public boolean isMousePressed() {
+		return mousepressed;
 	}
 
-	public void setMouseConsumed() {
-		mouseconsumed = false;
+	public void setMousePressed() {
+		mousepressed = false;
+	}
+
+	public boolean isMouseDragged() {
+		return mousedragged;
+	}
+
+	public void setMouseDragged() {
+		mousedragged = false;
 	}
 
 	public int getScroll() {
