@@ -1,10 +1,14 @@
 package bms.player.beatoraja.play;
 
+import static bms.player.beatoraja.skin.SkinProperty.TIMER_PLAY;
+
 import java.util.Arrays;
+import java.util.List;
 
 import bms.model.*;
 import bms.player.beatoraja.TableData;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
+import bms.player.beatoraja.input.KeyInputLog;
 
 /**
  * ノーツ判定管理用クラス
@@ -64,23 +68,23 @@ public class JudgeManager {
 	/**
 	 * 処理中のLN
 	 */
-	private LongNote[] processing = new LongNote[8];
+	private final LongNote[] processing;
 	/**
 	 * 通過中のHCN
 	 */
-	private LongNote[] passing = new LongNote[8];
+	private final LongNote[] passing;
 	/**
 	 * HCN増加判定
 	 */
 	private boolean[] inclease = new boolean[8];
 	private boolean[] next_inclease = new boolean[8];
-	private int[] passingcount;
+	private final int[] passingcount;
 
-	private int[] keyassign;
-	private int[] noteassign;
+	private final int[] keyassign;
+	private final int[] noteassign;
 
-	private int[] sckeyassign;
-	private int[] sckey;
+	private final int[] sckeyassign;
+	private final int[] sckey;
 	/**
 	 * 各判定の範囲(+-ms)。PGREAT, GREAT, GOOD, BAD, POOR, MISS空POORの順
 	 */
@@ -113,16 +117,16 @@ public class JudgeManager {
 	/**
 	 * ノーツ判定テーブル
 	 */
-	private int[] njudge;
+	private final int[] njudge;
 	/**
 	 * CN終端判定テーブル
 	 */
-	private int[] cnendjudge;
+	private final int[] cnendjudge;
 	/**
 	 * スクラッチ判定テーブル
 	 */
-	private int[] sjudge;
-	private int[] scnendjudge;
+	private final int[] sjudge;
+	private final int[] scnendjudge;
 	/**
 	 * PMS用判定システム(空POORでコンボカット、1ノーツにつき1空POORまで)の有効/無効
 	 */
@@ -133,42 +137,50 @@ public class JudgeManager {
 
 	private int prevtime;
 
-	private void prepareAttr() {
-		processing = new LongNote[noteassign.length];
-		passing = new LongNote[noteassign.length];
-		passingcount = new int[noteassign.length];
-		inclease = new boolean[noteassign.length];
-		next_inclease = new boolean[noteassign.length];
-		sckey = new int[sckeyassign.length];
-	}
-
 	public JudgeManager(BMSPlayer main, BMSModel model, int[] constraint) {
 		this.main = main;
 		this.lntype = model.getLntype();
 		this.timelines = model.getAllTimeLines();
+
+		int[] keyassign = null;
+		int[] noteassign = null;
+		int[] sckeyassign = null;
+		int[] sckey = null;
 		switch (model.getUseKeys()) {
 		case 5:
 		case 7:
 			keyassign = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 7 };
 			noteassign = new int[] { 0, 1, 2, 3, 4, 5, 6, 7 };
-			sckeyassign = new int[] { 7 };
+			sckeyassign = new int[] { -1,-1,-1,-1,-1,-1,-1,0 };
+			sckey = new int[1];
 			pmsjudge = false;
 			break;
 		case 10:
 		case 14:
 			keyassign = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 7, 8, 9, 10, 11, 12, 13, 14, 15, 15 };
 			noteassign = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13, 14, 15, 16 };
-			sckeyassign = new int[] { 7, 15 };
+			sckeyassign = new int[] { -1,-1,-1,-1,-1,-1,-1,0, -1,-1,-1,-1,-1,-1,-1,1 };
+			sckey = new int[2];
 			pmsjudge = false;
 			break;
 		case 9:
 			keyassign = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8 };
 			noteassign = new int[] { 0, 1, 2, 3, 4, 10, 11, 12, 13 };
-			sckeyassign = new int[] {};
+			sckeyassign = new int[] { -1,-1,-1,-1,-1,-1,-1,-1,-1};
+			sckey = new int[0];
 			pmsjudge = true;
 			break;
 		}
-		prepareAttr();
+		this.keyassign = keyassign;
+		this.noteassign = noteassign;
+		this.sckeyassign = sckeyassign;
+		this.sckey = sckey;
+
+		processing = new LongNote[noteassign.length];
+		passing = new LongNote[noteassign.length];
+		passingcount = new int[noteassign.length];
+		inclease = new boolean[noteassign.length];
+		next_inclease = new boolean[noteassign.length];
 
 		njudge = new int[6];
 		sjudge = new int[6];
@@ -204,35 +216,35 @@ public class JudgeManager {
 		final boolean[] keystate = input.getKeystate();
 
 		for (int i = pos; i < timelines.length && timelines[i].getTime() <= time; i++) {
-			if (timelines[i].getTime() > prevtime) {
+			final TimeLine tl = timelines[i];
+			if (tl.getTime() > prevtime) {
 				for (int key = 0; key < keyassign.length; key++) {
-					final Note note = timelines[i].getNote(noteassign[keyassign[key]]);
+					final Note note = tl.getNote(noteassign[keyassign[key]]);
 					if (note == null) {
 						continue;
-					}
-					if (note instanceof MineNote && keystate[key]) {
-						final MineNote mnote = (MineNote) note;
-						// 地雷ノート判定
-						main.getGauge().addValue(-mnote.getDamage());
-						System.out.println("Mine Damage : " + mnote.getWav());
 					}
 					if (note instanceof LongNote) {
 						// HCN判定
 						final LongNote lnote = (LongNote) note;
 						if ((lnote.getType() == LongNote.TYPE_UNDEFINED && lntype == BMSModel.LNTYPE_HELLCHARGENOTE)
 								|| lnote.getType() == LongNote.TYPE_HELLCHARGENOTE) {
-							if (lnote.getStart() == timelines[i]) {
+							if (lnote.getStart() == tl) {
 								passing[keyassign[key]] = lnote;
 							}
-							if (lnote.getEnd() == timelines[i]) {
+							if (lnote.getEnd() == tl) {
 								passing[keyassign[key]] = null;
 								passingcount[keyassign[key]] = 0;
 							}
 						}
+					} else if (note instanceof MineNote && keystate[key]) {
+						final MineNote mnote = (MineNote) note;
+						// 地雷ノート判定
+						main.getGauge().addValue(-mnote.getDamage());
+						System.out.println("Mine Damage : " + mnote.getWav());
 					}
 				}
 			}
-			if (pos < i && timelines[i].getTime() < prevtime - njudge[5]) {
+			if (pos < i && tl.getTime() < prevtime - njudge[5]) {
 				pos = i;
 				// System.out.println("judge first position : " +
 				// timelines[i].getTime() + " time : " + time);
@@ -250,22 +262,23 @@ public class JudgeManager {
 		next_inclease = b;
 
 		for (int key = 0; key < keyassign.length; key++) {
-			if (passing[keyassign[key]] == null) {
+			final int rkey = keyassign[key];
+			if (passing[rkey] == null) {
 				continue;
 			}
-			if (inclease[keyassign[key]]) {
-				passingcount[keyassign[key]] += (time - prevtime);
-				if (passingcount[keyassign[key]] > hcnduration) {
+			if (inclease[rkey]) {
+				passingcount[rkey] += (time - prevtime);
+				if (passingcount[rkey] > hcnduration) {
 					main.getGauge().update(1, 2f);
 					// System.out.println("HCN : Gauge increase");
-					passingcount[keyassign[key]] -= hcnduration;
+					passingcount[rkey] -= hcnduration;
 				}
 			} else {
-				passingcount[keyassign[key]] -= (time - prevtime);
-				if (passingcount[keyassign[key]] < -hcnduration) {
+				passingcount[rkey] -= (time - prevtime);
+				if (passingcount[rkey] < -hcnduration) {
 					main.getGauge().update(4, 0.5f);
 					// System.out.println("HCN : Gauge decrease");
-					passingcount[keyassign[key]] += hcnduration;
+					passingcount[rkey] += hcnduration;
 				}
 			}
 		}
@@ -277,7 +290,7 @@ public class JudgeManager {
 				continue;
 			}
 			final int lane = keyassign[key];
-			final int sc = Arrays.binarySearch(sckeyassign, lane);
+			final int sc = sckeyassign[lane];
 			if (keystate[key]) {
 				// キーが押されたときの処理
 				if (processing[lane] != null) {
@@ -440,7 +453,7 @@ public class JudgeManager {
 		}
 
 		for (int lane = 0; lane < noteassign.length; lane++) {
-			final int sc = Arrays.binarySearch(sckeyassign, lane);
+			final int sc = sckeyassign[lane];
 			final int[] judge = sc >= 0 ? sjudge : njudge;
 
 			// LN終端判定
@@ -459,8 +472,9 @@ public class JudgeManager {
 				processing[lane] = null;
 			}
 			// 見逃しPOOR判定
+			final int nlane = noteassign[lane];
 			for (int i = pos; i < timelines.length && timelines[i].getTime() < time - judge[3]; i++) {
-				final Note note = timelines[i].getNote(noteassign[lane]);
+				final Note note = timelines[i].getNote(nlane);
 				if (note == null) {
 					continue;
 				}
@@ -543,6 +557,7 @@ public class JudgeManager {
 
 	/**
 	 * 現在の1曲内のコンボ数を取得する
+	 * 
 	 * @return 現在のコンボ数
 	 */
 	public int getCombo() {
@@ -551,6 +566,7 @@ public class JudgeManager {
 
 	/**
 	 * 現在のコース内のコンボ数を取得する
+	 * 
 	 * @return 現在のコンボ数
 	 */
 	public int getCourseCombo() {
@@ -712,7 +728,7 @@ abstract class JudgeAlgorithm {
 		return judge;
 	}
 
-	public abstract TimeLine compare(TimeLine t1, TimeLine t2, int lane, long ptime);
+	public abstract TimeLine compare(TimeLine t1, TimeLine t2, int lane, long ptime);	
 }
 
 /**

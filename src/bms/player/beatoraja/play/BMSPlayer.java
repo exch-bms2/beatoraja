@@ -486,6 +486,9 @@ public class BMSPlayer extends MainState {
 			if (g == 0) {
 				state = STATE_FAILED;
 				getTimer()[TIMER_FAILED] = now;
+				if (resource.mediaLoadFinished()) {
+					resource.getAudioProcessor().stop(null);
+				}
 				if (playstop != null) {
 					playstop.play();
 				}
@@ -500,9 +503,6 @@ public class BMSPlayer extends MainState {
 			}
 			if (keyinput != null) {
 				keyinput.stop = true;
-			}
-			if (resource.mediaLoadFinished()) {
-				resource.getAudioProcessor().stop(null);
 			}
 
 			if (now - getTimer()[TIMER_FAILED] > skin.getClose()) {
@@ -690,6 +690,9 @@ public class BMSPlayer extends MainState {
 		} else {
 			state = STATE_FAILED;
 			getTimer()[TIMER_FAILED] = getNowTime();
+			if (getMainController().getPlayerResource().mediaLoadFinished()) {
+				getMainController().getPlayerResource().getAudioProcessor().stop(null);
+			}
 			if (playstop != null) {
 				playstop.play();
 			}
@@ -843,14 +846,13 @@ public class BMSPlayer extends MainState {
 		public void run() {
 			int index = 0;
 
-			int time = 0;
 			long framet = 1;
 			final TimeLine[] timelines = model.getAllTimeLines();
 			final KeyInputLog[] keylog = this.keylog != null ? this.keylog.toArray(new KeyInputLog[0]) : null;
 
 			final int lasttime = timelines[timelines.length - 1].getTime() + BMSPlayer.TIME_MARGIN;
-			while (time < lasttime && !stop) {
-				time = (int) (getNowTime() - getTimer()[TIMER_PLAY]);
+			while (!stop) {
+				final int time = (int) (getNowTime() - getTimer()[TIMER_PLAY]);
 				// リプレイデータ再生
 				if (keylog != null) {
 					while (index < keylog.length && keylog[index].time <= time) {
@@ -869,6 +871,10 @@ public class BMSPlayer extends MainState {
 
 				final long nowtime = (int) (getNowTime() - getTimer()[TIMER_PLAY]) - time;
 				framet = nowtime < framet ? framet : nowtime;
+				
+				if(time >= lasttime) {
+					break;
+				}
 			}
 			frametimes = framet;
 		}
@@ -886,11 +892,10 @@ public class BMSPlayer extends MainState {
 
 		@Override
 		public void run() {
-			int time = 0;
 			final TimeLine[] timelines = model.getAllTimeLines();
 			final int lasttime = timelines[timelines.length - 1].getTime() + BMSPlayer.TIME_MARGIN;
-			for (int p = 0; time < lasttime && !stop;) {
-				time = (int) (getNowTime() - getTimer()[TIMER_PLAY]);
+			for (int p = 0; !stop;) {
+				final int time = (int) (getNowTime() - getTimer()[TIMER_PLAY]);
 				// BGレーン再生
 				while (p < timelines.length && timelines[p].getTime() <= time) {
 					for (Note n : timelines[p].getBackGroundNotes()) {
@@ -908,8 +913,10 @@ public class BMSPlayer extends MainState {
 						e.printStackTrace();
 					}
 				}
+				if(time >= lasttime) {
+					break;
+				}
 			}
-
 		}
 	}
 

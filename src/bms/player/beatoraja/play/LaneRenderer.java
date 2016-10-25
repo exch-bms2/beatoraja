@@ -365,11 +365,9 @@ public class LaneRenderer {
 				startpressed = false;
 			}
 		}
-
+		
+		final float rxhs = (hu - hl) * hispeed;
 		float y = hl;
-
-		// long ltime = 0;
-		// float yy = 0;
 
 		// 判定エリア表示
 		if (config.isShowjudgearea()) {
@@ -378,13 +376,13 @@ public class LaneRenderer {
 			shape.begin(ShapeType.Filled);
 			final Color[] color = { Color.valueOf("0000ff20"), Color.valueOf("00ff0020"), Color.valueOf("ffff0020"),
 					Color.valueOf("ff800020"), Color.valueOf("00000000"), Color.valueOf("ff000020") };
-			int[] judgetime = judge.getJudgeTimeRegion();
-			for (int i = pos; i < timelines.length && y <= hu; i++) {
-				TimeLine tl = timelines[i];
+			final int[] judgetime = judge.getJudgeTimeRegion();
+			for (int i = pos; i < timelines.length; i++) {
+				final TimeLine tl = timelines[i];
 				if (tl.getTime() >= time) {
-					float rate = (timelines[i].getSection() - (i > 0 ? timelines[i - 1].getSection() : 0))
-							/ (timelines[i].getTime() - (i > 0 ? timelines[i - 1].getTime()
-									+ timelines[i - 1].getStop() : 0)) * (hu - hl) * hispeed;
+					float rate = (tl.getSection() - (i > 0 ? timelines[i - 1].getSection() : 0))
+							/ (tl.getTime() - (i > 0 ? timelines[i - 1].getTime()
+									+ timelines[i - 1].getStop() : 0)) * rxhs;
 					for (int j = color.length - 1; j >= 0; j--) {
 						shape.setColor(color[j]);
 						int nj = j > 0 ? judgetime[j - 1] : 0;
@@ -404,14 +402,18 @@ public class LaneRenderer {
 			final TimeLine tl = timelines[i];
 			if (tl.getTime() >= time) {
 				if (nbpm > 0) {
-					if ((i > 0 && timelines[i - 1].getTime() + timelines[i - 1].getStop() > time)) {
-						y += (tl.getSection() - timelines[i - 1].getSection()) * (hu - hl) * hispeed;
+					if (i > 0) {
+						final TimeLine prevtl = timelines[i - 1];
+						if (prevtl.getTime() + prevtl.getStop() > time) {
+							y += (tl.getSection() - prevtl.getSection()) * rxhs;
+						} else {
+							y += (tl.getSection() - prevtl.getSection()) * (tl.getTime() - time)
+									/ (tl.getTime() - prevtl.getTime() - prevtl.getStop()) * rxhs;
+						}
 					} else {
-						y += (tl.getSection() - (i > 0 ? timelines[i - 1].getSection() : 0))
-								* (tl.getTime() - time)
-								/ (tl.getTime() - (i > 0 ? timelines[i - 1].getTime() + timelines[i - 1].getStop() : 0))
-								* (hu - hl) * hispeed;
+						y += tl.getSection() * (tl.getTime() - time) / tl.getTime() * rxhs;
 					}
+
 					// if(y < 0) {
 					// System.out.println(" y : " + y + " line : " + (i > 0 ?
 					// timelines[i]
@@ -498,12 +500,12 @@ public class LaneRenderer {
 								if (timelines[i + j + 1].getTime() >= time) {
 									if (timelines[i + j].getTime() + timelines[i + j].getStop() > time) {
 										dy += (float) (timelines[i + j + 1].getSection() - timelines[i + j]
-												.getSection()) * (hu - hl) * hispeed;
+												.getSection()) * rxhs;
 									} else {
 										dy += (timelines[i + j + 1].getSection() - timelines[i + j].getSection())
 												* (timelines[i + j + 1].getTime() - time)
 												/ (timelines[i + j + 1].getTime() - timelines[i + j].getTime())
-												* (hu - hl) * hispeed;
+												* rxhs;
 									}
 								}
 							}
@@ -525,8 +527,7 @@ public class LaneRenderer {
 				if (config.isShowhiddennote() && tl.getTime() >= time) {
 					final Note hnote = tl.getHiddenNote(laneassign[lane]);
 					if (hnote != null) {
-						sprite.draw(hnoteimage[lane], laneregion[lane].x, y, laneregion[lane].width,
-								scale);
+						sprite.draw(hnoteimage[lane], laneregion[lane].x, y, laneregion[lane].width, scale);
 					}
 				}
 			}
@@ -641,7 +642,7 @@ public class LaneRenderer {
 						height - le.getRegionHeight());
 			}
 			TextureRegion ls = longnote[0][lane];
-			sprite.draw(ls, x, y, width,  scale);
+			sprite.draw(ls, x, y, width, scale);
 			sprite.draw(le, x, y - height, width, scale);
 		}
 		if ((model.getLntype() == BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
