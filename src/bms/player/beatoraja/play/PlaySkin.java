@@ -329,7 +329,7 @@ public class PlaySkin extends Skin {
 		line[0] = new SkinImage(new TextureRegion[] { new TextureRegion(st, 0, 0, 1, 1) }, 0);
 		line[0].setOffsety(OFFSET_LIFT);
 		setDestination(line[0], 0, 20, 140, 390, 1, 0, 255, 128, 128, 128, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		add(new SkinNote(this, note, longnote, minenote));
+		add(new SkinNote(this, note, longnote, minenote, 12 / dh));
 		Texture lct = new Texture("skin/lanecover.png");
 		SkinSlider lanecover = new SkinSlider(new TextureRegion[] { new TextureRegion(lct) }, 0, 2, (int) (580 * dh),
 				SLIDER_LANECOVER);
@@ -570,7 +570,7 @@ public class PlaySkin extends Skin {
 		line[0] = new SkinImage(new TextureRegion[] { new TextureRegion(st, 0, 0, 1, 1) }, 0);
 		line[0].setOffsety(OFFSET_LIFT);
 		setDestination(line[0], 0, 870, 140, 390, 1, 0, 255, 128, 128, 128, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		add(new SkinNote(this, note, longnote, minenote));
+		add(new SkinNote(this, note, longnote, minenote, 12 / dh));
 		Texture lct = new Texture("skin/lanecover.png");
 		SkinSlider lanecover = new SkinSlider(new TextureRegion[] { new TextureRegion(lct) }, 0, 2, (int) (580 * dh),
 				SLIDER_LANECOVER);
@@ -855,7 +855,7 @@ public class PlaySkin extends Skin {
 		line.setOffsety(OFFSET_LIFT);
 		setDestination(line, 0, 345, 137, 590, 6, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(line);
-		add(new SkinNote(this, note, longnote, minenote));
+		add(new SkinNote(this, note, longnote, minenote, 18 / dh));
 		Texture lct = new Texture("skin/lanecover.png");
 		SkinSlider lanecover = new SkinSlider(new TextureRegion[] { new TextureRegion(lct) }, 0, 2, (int) (580 * dh),
 				SLIDER_LANECOVER);
@@ -1128,7 +1128,7 @@ public class PlaySkin extends Skin {
 		line[1] = new SkinImage(new TextureRegion[] { new TextureRegion(st, 0, 0, 1, 1) }, 0);
 		setDestination(line[1], 0, 680, 140, 390, 1, 0, 255, 128, 128, 128, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		line[1].setOffsety(OFFSET_LIFT);
-		add(new SkinNote(this, note, longnote, minenote));
+		add(new SkinNote(this, note, longnote, minenote, 12 / dh));
 		Texture lct = new Texture("skin/lanecover.png");
 		SkinSlider lanecover = new SkinSlider(new TextureRegion[] { new TextureRegion(lct) }, 0, 2, (int) (580 * dh),
 				SLIDER_LANECOVER);

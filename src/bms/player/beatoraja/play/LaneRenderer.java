@@ -78,19 +78,19 @@ public class LaneRenderer {
 	/**
 	 * ボムの表示開始時間
 	 */
-	private int[] judge;
+	private final int[] judge;
 	/**
 	 * 現在表示中の判定
 	 */
-	private int[] judgenow;
+	private final int[] judgenow;
 	/**
 	 * 判定の最終更新時間
 	 */
-	private int[] judgenowt;
+	private final int[] judgenowt;
 
-	private int[] judgecombo;
+	private final int[] judgecombo;
 
-	private int[] laneassign;
+	private final int[] laneassign;
 
 	private int currentduration;
 
@@ -228,7 +228,7 @@ public class LaneRenderer {
 	private double nowbpm;
 
 	public void drawLane(TextureRegion[] noteimage, TextureRegion[][] lnoteimage, TextureRegion[] mnoteimage,
-			TextureRegion[] pnoteimage, TextureRegion[] hnoteimage) {
+			TextureRegion[] pnoteimage, TextureRegion[] hnoteimage, float scale) {
 		sprite.end();
 		final long time = (main.getTimer()[TIMER_PLAY] != Long.MIN_VALUE ? (main.getNowTime() - main.getTimer()[TIMER_PLAY])
 				: 0)
@@ -248,10 +248,10 @@ public class LaneRenderer {
 			nbpm = timelines[i].getBPM();
 		}
 		nowbpm = nbpm;
-		int region = (int) (240000 / nbpm / hispeed);
+		final int region = (int) (240000 / nbpm / hispeed);
 		// double sect = (bpm / 60) * 4 * 1000;
-		float hu = laneregion[0].y + laneregion[0].height;
-		float hl = enableLift ? laneregion[0].y + laneregion[0].height * lift : laneregion[0].y;
+		final float hu = laneregion[0].y + laneregion[0].height;
+		final float hl = enableLift ? laneregion[0].y + laneregion[0].height * lift : laneregion[0].y;
 
 		currentduration = Math.round(region * (1 - (enableLanecover ? lanecover : 0)));
 
@@ -304,7 +304,7 @@ public class LaneRenderer {
 		// 各種コントロール入力判定
 		// TODO ここで各種コントロール入力判定をやるべきではないかも
 		if (enableControl) {
-			BMSPlayerInputProcessor input = main.getBMSPlayerInputProcessor();
+			final BMSPlayerInputProcessor input = main.getBMSPlayerInputProcessor();
 			if (input.getCursorState()[0]) {
 				if (!cursorpressed) {
 					this.setLanecover(lanecover - 0.01f);
@@ -477,11 +477,11 @@ public class LaneRenderer {
 				final Note note = tl.getNote(laneassign[lane]);
 				if (note != null) {
 					if (note instanceof NormalNote) {
-						// draw normal/mine note
+						// draw normal note
 						if (tl.getTime() >= time) {
 							final TextureRegion s = config.isMarkprocessednote() && note.getState() != 0 ? pnoteimage[lane]
 									: noteimage[lane];
-							sprite.draw(s, laneregion[lane].x, y, laneregion[lane].width, s.getRegionHeight() * 1.0f);
+							sprite.draw(s, laneregion[lane].x, y, laneregion[lane].width, scale);
 						}
 					} else if (note instanceof LongNote) {
 						final LongNote ln = (LongNote) note;
@@ -508,16 +508,16 @@ public class LaneRenderer {
 								}
 							}
 							if (dy > 0) {
-								this.drawLongNote(laneregion[lane].x, y + dy, laneregion[lane].width, dy, 1.0f, lane,
+								this.drawLongNote(laneregion[lane].x, y + dy, laneregion[lane].width, dy, scale, lane,
 										ln, lnoteimage);
 							}
 							// System.out.println(dy);
 						}
 					} else if (note instanceof MineNote) {
-						// draw normal/mine note
+						// draw mine note
 						if (tl.getTime() >= time) {
 							final TextureRegion s = mnoteimage[lane];
-							sprite.draw(s, laneregion[lane].x, y, laneregion[lane].width, s.getRegionHeight() * 1.0f);
+							sprite.draw(s, laneregion[lane].x, y, laneregion[lane].width, scale);
 						}
 					}
 				}
@@ -526,7 +526,7 @@ public class LaneRenderer {
 					final Note hnote = tl.getHiddenNote(laneassign[lane]);
 					if (hnote != null) {
 						sprite.draw(hnoteimage[lane], laneregion[lane].x, y, laneregion[lane].width,
-								hnoteimage[lane].getRegionHeight());
+								scale);
 					}
 				}
 			}
@@ -623,8 +623,8 @@ public class LaneRenderer {
 						height - le.getRegionHeight());
 			}
 			TextureRegion ls = longnote[4][lane];
-			sprite.draw(ls, x, y, width, ls.getRegionHeight() * scale);
-			sprite.draw(le, x, y - height, width, le.getRegionHeight() * scale);
+			sprite.draw(ls, x, y, width, scale);
+			sprite.draw(le, x, y - height, width, scale);
 		}
 		if ((model.getLntype() == BMSModel.LNTYPE_CHARGENOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
 				|| ln.getType() == LongNote.TYPE_CHARGENOTE) {
@@ -641,8 +641,8 @@ public class LaneRenderer {
 						height - le.getRegionHeight());
 			}
 			TextureRegion ls = longnote[0][lane];
-			sprite.draw(ls, x, y, width, ls.getRegionHeight() * scale);
-			sprite.draw(le, x, y - height, width, le.getRegionHeight() * scale);
+			sprite.draw(ls, x, y, width,  scale);
+			sprite.draw(le, x, y - height, width, scale);
 		}
 		if ((model.getLntype() == BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
 				|| ln.getType() == LongNote.TYPE_LONGNOTE) {
@@ -658,7 +658,7 @@ public class LaneRenderer {
 				sprite.draw(longnote[3][lane], x, y - height + le.getRegionHeight(), width,
 						height - le.getRegionHeight());
 			}
-			sprite.draw(le, x, y - height, width, le.getRegionHeight() * scale);
+			sprite.draw(le, x, y - height, width, scale);
 		}
 	}
 

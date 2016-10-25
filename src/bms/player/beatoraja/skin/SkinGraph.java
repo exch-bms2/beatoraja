@@ -14,7 +14,7 @@ public class SkinGraph extends SkinObject {
 	/**
 	 * イメージ
 	 */
-	private TextureRegion[] image;
+	private SkinSource source;
 	/**
 	 * グラフの参照値
 	 */
@@ -29,23 +29,7 @@ public class SkinGraph extends SkinObject {
 	}
 
 	public SkinGraph(TextureRegion[] image, int cycle) {
-		setImage(image, cycle);
-	}
-
-	public TextureRegion[] getImage() {
-		return image;
-	}
-
-	public TextureRegion getImage(long time, MainState state) {
-		if(getImageID() != -1) {
-			return state.getImage(getImageID());
-		}
-		return image[getImageIndex(image.length, time, state)];
-	}
-
-	public void setImage(TextureRegion[] image, int cycle) {
-		this.image = image;
-		setCycle(cycle);
+		source = new SkinSource(image, 0, cycle);
 	}
 
 	public void draw(SpriteBatch sprite, long time, MainState state) {
@@ -70,10 +54,7 @@ public class SkinGraph extends SkinObject {
 							r.width * value, r.height, getColor(time, state), getAngle(time, state));
 				}
 			}
-		} else {
-			if (image == null) {
-				return;
-			}
+		} else if(source != null){
 			Rectangle r = this.getDestination(time, state);
 			if (r != null) {
 				float value = 0;
@@ -82,7 +63,7 @@ public class SkinGraph extends SkinObject {
 					// System.out.println("bargraph id : " + id + " value : " +
 					// value);
 				}
-				TextureRegion image = getImage(time, state);
+				TextureRegion image = source.getImage(time, state);
 				// sprite.draw(image, r.x, r.y, r.width, r.height);
 				if (direction == 1) {
 					draw(sprite,
@@ -101,11 +82,9 @@ public class SkinGraph extends SkinObject {
 	}
 
 	public void dispose() {
-		if (image != null) {
-			for (TextureRegion tr : image) {
-				tr.getTexture().dispose();
-			}
-			image = null;
+		if (source != null) {
+			source.dispose();
+			source = null;
 		}
 	}
 

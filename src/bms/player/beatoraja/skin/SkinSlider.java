@@ -11,7 +11,7 @@ public class SkinSlider extends SkinObject {
 	/**
 	 * イメージ
 	 */
-	private TextureRegion[] image;
+	private SkinSource source;
 
 	/**
 	 * slider移動方向(0:上, 1:右, 2:下, 3:左)
@@ -31,36 +31,19 @@ public class SkinSlider extends SkinObject {
 	private boolean changable;
 
 	public SkinSlider(TextureRegion[] image, int cycle, int angle, int range, int type) {
-		this.image = image;
-		setCycle(cycle);
+		source = new SkinSource(image, 0 ,cycle);
 		this.direction = angle;
 		this.range = range;
 		this.type = type;
 	}
 
-	public TextureRegion[] getImage() {
-		return image;
-	}
-
-	public TextureRegion getImage(long time, MainState state) {
-		if(getImageID() != -1) {
-			return state.getImage(getImageID());
-		}
-		return image[getImageIndex(image.length, time, state)];
-	}
-
-	public void setImage(TextureRegion[] image, int cycle) {
-		this.image = image;
-		setCycle(cycle);
-	}
-
 	public void draw(SpriteBatch sprite, long time, MainState state) {
-		if (image == null) {
+		if(source == null) {
 			return;
 		}
 		Rectangle r = this.getDestination(time,state);
 		if (r != null) {
-			TextureRegion image = getImage(time, state);
+			TextureRegion image = source.getImage(time, state);
 			draw(sprite, image, r.x
 					+ (direction == 1 ? state.getSliderValue(type) * range : (direction == 3 ? -state.getSliderValue(type) * range : 0)), r.y
 					+ (direction == 0 ? state.getSliderValue(type) * range : (direction == 2 ? -state.getSliderValue(type) * range : 0)),
@@ -69,11 +52,9 @@ public class SkinSlider extends SkinObject {
 	}
 
 	public void dispose() {
-		if (image != null) {
-			for (TextureRegion tr : image) {
-				tr.getTexture().dispose();
-			}
-			image = null;
+		if (source != null) {
+			source.dispose();
+			source = null;
 		}
 	}
 
