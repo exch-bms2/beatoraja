@@ -41,6 +41,15 @@ public class Config {
 	 */
 	private int audioDeviceSimultaneousSources = 64;
 	/**
+	 * キー音のボリューム
+	 */
+	private float keyvolume = 1.0f;
+	/**
+	 * BGノート音のボリューム
+	 */
+	private float bgvolume = 1.0f;
+
+	/**
 	 * 最大FPS。垂直同期OFFの時のみ有効
 	 */
 	private int maxFramePerSecond = 240;
@@ -494,6 +503,22 @@ public class Config {
 
 	public void setSkin(SkinConfig[] skin) {
 		this.skin = skin;
+	}
+
+	public float getKeyvolume() {
+		return keyvolume;
+	}
+
+	public void setKeyvolume(float keyvolume) {
+		this.keyvolume = keyvolume;
+	}
+
+	public float getBgvolume() {
+		return bgvolume;
+	}
+
+	public void setBgvolume(float bgvolume) {
+		this.bgvolume = bgvolume;
 	}
 
 	public static class SkinConfig {

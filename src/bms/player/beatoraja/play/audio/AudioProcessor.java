@@ -21,7 +21,7 @@ public interface AudioProcessor {
 	/**
 	 * 指定したNoteの音を鳴らす
 	 */
-	public void play(Note n);
+	public void play(Note n, float volume);
 	/**
 	 * 指定したNoteの音を止める。nullの場合は再生されている音を全て止める
 	 */

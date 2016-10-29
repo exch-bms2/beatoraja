@@ -731,8 +731,8 @@ public class BMSPlayer extends MainState {
 		Logger.getGlobal().info("システム描画のリソース解放");
 	}
 
-	public void play(Note note) {
-		audio.play(note);
+	public void play(Note note, float volume) {
+		audio.play(note, volume);
 	}
 
 	public void stop(Note note) {
@@ -894,12 +894,13 @@ public class BMSPlayer extends MainState {
 		public void run() {
 			final TimeLine[] timelines = model.getAllTimeLines();
 			final int lasttime = timelines[timelines.length - 1].getTime() + BMSPlayer.TIME_MARGIN;
+			final Config config = getMainController().getPlayerResource().getConfig();
 			for (int p = 0; !stop;) {
 				final int time = (int) (getNowTime() - getTimer()[TIMER_PLAY]);
 				// BGレーン再生
 				while (p < timelines.length && timelines[p].getTime() <= time) {
 					for (Note n : timelines[p].getBackGroundNotes()) {
-						play(n);
+						play(n, config.getBgvolume());
 					}
 					p++;
 				}

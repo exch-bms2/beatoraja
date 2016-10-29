@@ -31,11 +31,12 @@ public class SoundProcessor implements AudioProcessor {
 
 	private float progress = 0;
 
+	private float volume = 1.0f;
+
 	/**
 	 * BMSの音源データを読み込む
 	 * 
 	 * @param model
-	 * @param filepath
 	 */
 	public void setModel(BMSModel model) {
 		dispose();
@@ -47,6 +48,9 @@ public class SoundProcessor implements AudioProcessor {
 		Map<Integer, Sound> soundmap = new HashMap<Integer, Sound>();
 
 		TimeLine[] timelines = model.getAllTimeLines();
+		if(model.getVolwav() > 0 && model.getVolwav() < 100) {
+			volume = model.getVolwav() / 100f;
+		}
 		int wavcount = model.getWavList().length;
 
 		for (TimeLine tl : timelines) {
@@ -172,7 +176,7 @@ public class SoundProcessor implements AudioProcessor {
 		progress = 1;
 	}
 
-	synchronized public void play(Note n) {
+	synchronized public void play(Note n, float volume) {
 		try {
 			final int id = n.getWav();
 			final int starttime = n.getStarttime();
@@ -182,7 +186,7 @@ public class SoundProcessor implements AudioProcessor {
 					if (playmap[id] != -1) {
 						wavmap[id].stop(playmap[id]);
 					}
-					playmap[id] = wavmap[id].play();
+					playmap[id] = wavmap[id].play(this.volume * volume);
 				}
 			} else {
 				for (SliceWav slice : slicesound) {
@@ -190,7 +194,7 @@ public class SoundProcessor implements AudioProcessor {
 						if (slice.playid != -1) {
 							slice.wav.stop(slice.playid);
 						}
-						slice.playid = slice.wav.play();
+						slice.playid = slice.wav.play(this.volume * volume);
 						// System.out.println("slice WAV play - ID:" + id +
 						// " start:" + starttime + " duration:" + duration);
 						break;
