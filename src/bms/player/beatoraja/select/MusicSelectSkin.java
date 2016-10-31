@@ -21,9 +21,12 @@ public class MusicSelectSkin extends Skin {
 	/**
 	 * ランプ画像
 	 */
-	private Animation[] lamp = new Animation[11];
+	private SkinImage[] lamp = new SkinImage[11];
 
 	private Sprite[] trophy = new Sprite[3];
+
+	private int centerBar;
+	private int[] clickableBar = new int[0];
 
 	public MusicSelectSkin(float srcw, float srch, float dstw, float dsth) {
 		super(srcw, srch, dstw, dsth);
@@ -44,8 +47,8 @@ public class MusicSelectSkin extends Skin {
 		}
 		TextureRegion[][] lampt = TextureRegion.split(new Texture("skin/lamp.png"), 15, 30);
 		for (int i = 0; i < lamp.length; i++) {
-			lamp[i] = new Animation(2 / 60f, lampt[i]);
-			lamp[i].setPlayMode(PlayMode.LOOP);
+			lamp[i] = new SkinImage(lampt[i], 100);
+			setDestination(lamp[i], 0, 0, 2, 15, 34, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		}
 
 		TextureRegion[][] ttrophy = TextureRegion.split(new Texture("skin/trophy.png"), 32, 32);
@@ -337,16 +340,32 @@ public class MusicSelectSkin extends Skin {
 		this.bar = bar;
 	}
 
-	public Animation[] getLamp() {
+	public SkinImage[] getLamp() {
 		return lamp;
 	}
 
-	public void setLamp(Animation[] lamp) {
+	public void setLamp(SkinImage[] lamp) {
 		this.lamp = lamp;
 	}
 
 	public Sprite[] getTrophy() {
 		return trophy;
+	}
+
+	public int[] getClickableBar() {
+		return clickableBar;
+	}
+
+	public void setClickableBar(int[] clickableBar) {
+		this.clickableBar = clickableBar;
+	}
+
+	public int getCenterBar() {
+		return centerBar;
+	}
+
+	public void setCenterBar(int centerBar) {
+		this.centerBar = centerBar;
 	}
 
 	public static class SkinBarObject extends SkinObject {

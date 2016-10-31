@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.logging.Logger;
 
+import bms.player.beatoraja.skin.SkinImage;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
@@ -19,6 +20,7 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.Json;
 
@@ -209,7 +211,7 @@ public class BarRenderer {
 
 			if (skin.getLamp()[sd.getLamp()] != null) {
 				sprite.begin();
-				sprite.draw(skin.getLamp()[sd.getLamp()].getKeyFrame(time / 1000f), x, y + 2, 15, barh - 2);
+				skin.getLamp()[sd.getLamp()].draw(sprite, time, select, (int)x, (int)y);
 				sprite.end();
 			}
 
