@@ -1,10 +1,17 @@
 package bms.player.beatoraja.play.bga;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.logging.Logger;
+
+import javax.imageio.ImageIO;
 
 import bms.model.BMSModel;
 import bms.model.TimeLine;
@@ -12,6 +19,7 @@ import bms.player.beatoraja.Config;
 
 import bms.player.beatoraja.play.BMSPlayer;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandleStream;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
@@ -80,6 +88,9 @@ public class BGAProcessor {
 	private BGImageManager cache;
 
 	private Texture blanktex;
+	
+	private TimeLine[] timelines;
+	private int pos;
 
 	public BGAProcessor(Config config) {
 		this.config = config;
@@ -247,33 +258,35 @@ public class BGAProcessor {
 		for (String mov : pic_extension) {
 			if (dir.toString().endsWith(mov)) {
 				try {
-					if (mov.equals("bmp")) {
-						tex = new Pixmap(Gdx.files.internal(dir.toString()));
-//						BufferedImage bi = ImageIO.read(dir.toFile());
-//						final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-//						ImageIO.write(bi, "jpeg", baos);
-//						tex = new Pixmap((new FileHandleStream("tempwav.jpeg") {
-//							@Override
-//							public InputStream read() {
-//								return new ByteArrayInputStream(baos.toByteArray());
-//							}
-//
-//							@Override
-//							public OutputStream write(boolean overwrite) {
-//								return null;
-//							}
-//						}));
-					} else {
-						tex = new Pixmap(Gdx.files.internal(dir.toString()));
-					}
-//					System.out.println("BGA Picture loaded  : " + dir.toString());
-					break;
+					tex = new Pixmap(Gdx.files.internal(dir.toString()));
 				} catch (Exception e) {
-					Logger.getGlobal().warning("BGAファイル読み込み失敗。" + e.getMessage());					
-//					e.printStackTrace();
-				} catch (Error e) {
-					Logger.getGlobal().severe("BGAファイル読み込み失敗。" + e.getMessage());
 					e.printStackTrace();
+				} catch (Error e) {
+				}
+				if(tex == null) {
+					Logger.getGlobal().warning("BGAファイル読み込み再試行:" + dir.toString());
+					try {
+						BufferedImage bi = ImageIO.read(dir.toFile());
+						final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+						ImageIO.write(bi, "gif", baos);
+						tex = new Pixmap((new FileHandleStream("tempwav.gif") {
+							@Override
+							public InputStream read() {
+								return new ByteArrayInputStream(baos.toByteArray());
+							}
+
+							@Override
+							public OutputStream write(boolean overwrite) {
+								return null;
+							}
+						}));						
+					} catch (Exception e) {
+						Logger.getGlobal().warning("BGAファイル読み込み失敗。" + e.getMessage());
+						e.printStackTrace();
+					} catch (Error e) {
+						Logger.getGlobal().severe("BGAファイル読み込み失敗。" + e.getMessage());
+						e.printStackTrace();
+					}
 				}
 			}
 		}
@@ -288,7 +301,9 @@ public class BGAProcessor {
 		if (model == null) {
 			return;
 		}
-		cache.prepare(model.getAllTimeLines());
+		timelines = model.getAllTimeLines();
+		pos = 0;
+		cache.prepare(timelines);
 		for (MovieProcessor mp : mpgmap.values()) {
 			mp.stop();
 		}
@@ -333,14 +348,15 @@ public class BGAProcessor {
 	}
 
 	public void drawBGA(SpriteBatch sprite, Rectangle r, int time) {
-		if (model == null) {
+		if (timelines == null) {
 			sprite.draw(blanktex, r.x, r.y, r.width, r.height);
 			return;
 		}
 		sprite.end();
 		boolean rbga = true;
 		boolean rlayer = true;
-		for (TimeLine tl : model.getAllTimeLines()) {
+		for (int i = pos ; i < timelines.length;i++) {
+			final TimeLine tl = timelines[i];
 			if (tl.getTime() > time) {
 				break;
 			}
@@ -364,6 +380,8 @@ public class BGAProcessor {
 				if (tl.getPoor() != null && tl.getPoor().length > 0) {
 					misslayer = tl.getPoor();
 				}
+			} else {
+				pos++;
 			}
 		}
 
@@ -527,17 +545,18 @@ class BGImageManager {
 	}
 
 	public Texture getTexture(int id) {
-		if (bgacacheid[id % bgacache.length] == id) {
-			return bgacache[id % bgacache.length];
+		final int cid = id % bgacache.length;
+		if (bgacacheid[cid] == id) {
+			return bgacache[cid];
 		}
-		if (bgacache[id % bgacache.length] != null) {
-			bgacache[id % bgacache.length].dispose();
+		if (bgacache[cid] != null) {
+			bgacache[cid].dispose();
 		}
 		Pixmap pix = bgamap[id];
 		if (pix != null) {
-			bgacache[id % bgacache.length] = new Texture(pix);
-			bgacacheid[id % bgacache.length] = id;
-			return bgacache[id % bgacache.length];
+			bgacache[cid] = new Texture(pix);
+			bgacacheid[cid] = id;
+			return bgacache[cid];
 		}
 		return null;
 
