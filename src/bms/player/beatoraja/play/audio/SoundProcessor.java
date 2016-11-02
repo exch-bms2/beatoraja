@@ -25,7 +25,7 @@ public class SoundProcessor implements AudioProcessor {
 
 	private Sound[] wavmap = new Sound[0];
 
-	private List<SliceWav> slicesound = new ArrayList<SliceWav>();
+	private SliceWav[][] slicesound = new SliceWav[0][];
 
 	private long[] playmap = new long[0];
 
@@ -48,6 +48,8 @@ public class SoundProcessor implements AudioProcessor {
 
 		TimeLine[] timelines = model.getAllTimeLines();
 		int wavcount = model.getWavList().length;
+		
+		List<SliceWav>[] slicesound = new List[wavcount];
 
 		for (TimeLine tl : timelines) {
 			if (progress == 1) {
@@ -77,8 +79,11 @@ public class SoundProcessor implements AudioProcessor {
 					} else {
 						// BMSONのケース(音切りあり)
 						boolean b = true;
-						for (SliceWav slice : slicesound) {
-							if (slice.id == note.getWav() && slice.starttime == note.getStarttime()
+						if(slicesound[note.getWav()] == null) {
+							slicesound[note.getWav()] = new ArrayList();
+						}
+						for (SliceWav slice : slicesound[note.getWav()]) {
+							if (slice.starttime == note.getStarttime()
 									&& slice.duration == note.getDuration()) {
 								b = false;
 								break;
@@ -141,7 +146,7 @@ public class SoundProcessor implements AudioProcessor {
 											return null;
 										}
 									});
-									slicesound.add(new SliceWav(note, sound));
+									slicesound[note.getWav()].add(new SliceWav(note, sound));
 									// System.out.println("WAV slicing - Name:"
 									// + name + " ID:" + note.getWav() +
 									// " start:" + note.getStarttime() +
@@ -164,29 +169,43 @@ public class SoundProcessor implements AudioProcessor {
 
 		Logger.getGlobal().info("音源ファイル読み込み完了。音源数:" + soundmap.keySet().size());
 		wavmap = new Sound[wavcount];
+		this.slicesound = new SliceWav[wavcount][];
 		for (int i = 0; i < wavmap.length; i++) {
 			wavmap[i] = soundmap.get(i);
+			
+			if(slicesound[i] != null) {
+				this.slicesound[i] = slicesound[i].toArray(new SliceWav[slicesound[i].size()]);
+			} else {
+				this.slicesound[i] = new SliceWav[0];
+			}
 		}
 		playmap = new long[wavmap.length];
 		Arrays.fill(playmap, -1);
+		
+		
 		progress = 1;
 	}
 
 	synchronized public void play(Note n) {
 		try {
 			final int id = n.getWav();
+			if(id < 0) {
+				return;
+			}
 			final int starttime = n.getStarttime();
 			final int duration = n.getDuration();
 			if (starttime == 0 && duration == 0) {
-				if (id >= 0 && wavmap[id] != null) {
-					if (playmap[id] != -1) {
-						wavmap[id].stop(playmap[id]);
+				final Sound sound = wavmap[id];
+				final long pid = playmap[id];
+				if (sound != null) {
+					if (pid != -1) {
+						sound.stop(pid);
 					}
-					playmap[id] = wavmap[id].play();
+					playmap[id] = sound.play();
 				}
 			} else {
-				for (SliceWav slice : slicesound) {
-					if (slice.id == id && slice.starttime == starttime && slice.duration == duration) {
+				for (SliceWav slice : slicesound[id]) {
+					if (slice.starttime == starttime && slice.duration == duration) {
 						if (slice.playid != -1) {
 							slice.wav.stop(slice.playid);
 						}
@@ -203,31 +222,46 @@ public class SoundProcessor implements AudioProcessor {
 	}
 
 	public void stop(Note n) {
-		if (n == null) {
-			for (Sound s : wavmap) {
-				if (s != null) {
-					s.stop();
-				}
-			}
-			for (SliceWav slice : slicesound) {
-				slice.wav.stop();
-			}
-
-		} else {
-			final int id = n.getWav();
-			final int starttime = n.getStarttime();
-			final int duration = n.getDuration();			
-			if (starttime == 0 && duration == 0) {
-				wavmap[id].stop();
-			} else {
-				for (SliceWav slice : slicesound) {
-					if (slice.id == id && slice.starttime == starttime && slice.duration == duration) {
-						slice.wav.stop(slice.playid);
-						break;
+		try {
+			if (n == null) {
+				for (Sound s : wavmap) {
+					if (s != null) {
+						s.stop();
 					}
 				}
-			}
+				for (SliceWav[] slices : slicesound) {
+					for (SliceWav slice : slices) {
+						slice.wav.stop();						
+					}
+				}
 
+			} else {
+				final int id = n.getWav();
+				if(id < 0) {
+					return;
+				}
+				final int starttime = n.getStarttime();
+				final int duration = n.getDuration();			
+				if (starttime == 0 && duration == 0) {
+					final Sound sound = wavmap[id];
+					final long pid = playmap[id];
+					if(sound != null && pid != -1) {
+						sound.stop();	
+						playmap[id] = -1;
+					}
+				} else {
+					for (SliceWav slice : slicesound[id]) {
+						if (slice.starttime == starttime && slice.duration == duration) {
+							slice.wav.stop(slice.playid);
+							slice.playid = -1;
+							break;
+						}
+					}
+				}
+
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -240,10 +274,12 @@ public class SoundProcessor implements AudioProcessor {
 				id.dispose();
 			}
 		}
-		for (SliceWav slice : slicesound) {
-			slice.wav.dispose();
+		for (SliceWav[] slices : slicesound) {
+			for (SliceWav slice : slices) {
+				slice.wav.dispose();
+			}
 		}
-		slicesound.clear();
+		slicesound = new SliceWav[0][];
 	}
 
 	public float getProgress() {
@@ -255,7 +291,6 @@ public class SoundProcessor implements AudioProcessor {
 	}
 
 	class SliceWav {
-		public final int id;
 		public final int starttime;
 		public final int duration;
 		public final Sound wav;
@@ -263,7 +298,6 @@ public class SoundProcessor implements AudioProcessor {
 		public long playid = -1;
 
 		public SliceWav(Note note, Sound wav) {
-			this.id = note.getWav();
 			this.starttime = note.getStarttime();
 			this.duration = note.getDuration();
 			this.wav = wav;
