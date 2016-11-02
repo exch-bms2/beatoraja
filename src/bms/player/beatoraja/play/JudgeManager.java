@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import bms.model.*;
+import bms.player.beatoraja.Config;
 import bms.player.beatoraja.TableData;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyInputLog;
@@ -212,6 +213,7 @@ public class JudgeManager {
 
 	public void update(final int time) {
 		final BMSPlayerInputProcessor input = main.getBMSPlayerInputProcessor();
+		final Config config = main.getMainController().getPlayerResource().getConfig();
 		final long[] keytime = input.getTime();
 		final boolean[] keystate = input.getKeystate();
 
@@ -335,7 +337,7 @@ public class JudgeManager {
 							// ロングノート処理
 							final LongNote ln = (LongNote) note;
 							if (ln.getStart() == tl) {
-								main.play(note);
+								main.play(note, config.getKeyvolume());
 								if ((lntype == BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
 										|| ln.getType() == LongNote.TYPE_LONGNOTE) {
 									passingcount[lane] = (int) (tl.getTime() - ptime);
@@ -362,7 +364,7 @@ public class JudgeManager {
 								}
 							}
 						} else {
-							main.play(note);
+							main.play(note, config.getKeyvolume());
 							// 通常ノート処理
 							final int dtime = (int) (tl.getTime() - ptime);
 							this.update(lane, j, time, dtime);
@@ -385,13 +387,13 @@ public class JudgeManager {
 								n = tl2.getHiddenNote(lane);
 							}
 							if (n != null && tl2.getTime() >= ptime) {
-								main.play(n);
+								main.play(n, config.getKeyvolume());
 								sound = true;
 								break;
 							}
 						}
 						if (!sound && n != null) {
-							main.play(n);
+							main.play(n, config.getKeyvolume());
 						}
 					}
 				}

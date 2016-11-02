@@ -6,8 +6,6 @@ import java.util.*;
 import java.util.logging.Logger;
 
 import javax.sound.sampled.*;
-import javax.sound.sampled.AudioFileFormat.Type;
-import javax.sound.sampled.AudioFormat.Encoding;
 
 import bms.model.*;
 
@@ -31,11 +29,12 @@ public class SoundProcessor implements AudioProcessor {
 
 	private float progress = 0;
 
+	private float volume = 1.0f;
+
 	/**
 	 * BMSの音源データを読み込む
 	 * 
 	 * @param model
-	 * @param filepath
 	 */
 	public void setModel(BMSModel model) {
 		dispose();
@@ -47,6 +46,9 @@ public class SoundProcessor implements AudioProcessor {
 		Map<Integer, Sound> soundmap = new HashMap<Integer, Sound>();
 
 		TimeLine[] timelines = model.getAllTimeLines();
+		if(model.getVolwav() > 0 && model.getVolwav() < 100) {
+			volume = model.getVolwav() / 100f;
+		}
 		int wavcount = model.getWavList().length;
 		
 		List<SliceWav>[] slicesound = new List[wavcount];
@@ -80,7 +82,7 @@ public class SoundProcessor implements AudioProcessor {
 						// BMSONのケース(音切りあり)
 						boolean b = true;
 						if(slicesound[note.getWav()] == null) {
-							slicesound[note.getWav()] = new ArrayList();
+							slicesound[note.getWav()] = new ArrayList<SliceWav>();
 						}
 						for (SliceWav slice : slicesound[note.getWav()]) {
 							if (slice.starttime == note.getStarttime()
@@ -186,7 +188,7 @@ public class SoundProcessor implements AudioProcessor {
 		progress = 1;
 	}
 
-	synchronized public void play(Note n) {
+	synchronized public void play(Note n, float volume) {
 		try {
 			final int id = n.getWav();
 			if(id < 0) {
@@ -201,7 +203,7 @@ public class SoundProcessor implements AudioProcessor {
 					if (pid != -1) {
 						sound.stop(pid);
 					}
-					playmap[id] = sound.play();
+					playmap[id] = wavmap[id].play(this.volume * volume);
 				}
 			} else {
 				for (SliceWav slice : slicesound[id]) {
@@ -209,7 +211,7 @@ public class SoundProcessor implements AudioProcessor {
 						if (slice.playid != -1) {
 							slice.wav.stop(slice.playid);
 						}
-						slice.playid = slice.wav.play();
+						slice.playid = slice.wav.play(this.volume * volume);
 						// System.out.println("slice WAV play - ID:" + id +
 						// " start:" + starttime + " duration:" + duration);
 						break;

@@ -32,6 +32,10 @@ public class SkinImage extends SkinObject {
 		setImageID(imageid);
 	}
 
+	public SkinImage(TextureRegion image) {
+		setImage(new TextureRegion[]{image}, 0);
+	}
+
 	public SkinImage(TextureRegion[] image, int cycle) {
 		setImage(image, cycle);
 	}

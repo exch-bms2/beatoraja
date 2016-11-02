@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.logging.Logger;
 
+import bms.player.beatoraja.skin.SkinImage;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
@@ -19,6 +20,7 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.Json;
 
@@ -149,7 +151,7 @@ public class BarRenderer {
 			sprite.begin();
 			float y = h - i * barh;
 
-			Sprite barimage = skin.getBar()[0];
+			SkinImage barimage = skin.getBar()[0];
 			if (duration != 0) {
 				float dy = barh * (Math.abs(angle) - duration + System.currentTimeMillis()) / angle
 						+ (angle >= 0 ? -1 : 1) * barh;
@@ -177,7 +179,7 @@ public class BarRenderer {
 				barimage = skin.getBar()[5];
 			}
 
-			sprite.draw(barimage, x, y, w * 2 / 5, barh);
+			sprite.draw(barimage.getImage(time, select), x, y, w * 2 / 5, barh);
 			titlefont.setColor(Color.BLACK);
 			titlefont.draw(sprite, sd.getTitle(), x + 62, y + barh - 8);
 			titlefont.setColor(Color.WHITE);
@@ -199,7 +201,7 @@ public class BarRenderer {
 					for (int j = 0; j < TROPHY.length; j++) {
 						if (TROPHY[j].equals(trophy.getName()) && skin.getTrophy()[j] != null) {
 							sprite.begin();
-							sprite.draw(skin.getTrophy()[j], x + 20, y + 4);
+							sprite.draw(skin.getTrophy()[j].getImage(time, select), x + 20, y + 4);
 							sprite.end();
 							break;
 						}
@@ -209,7 +211,7 @@ public class BarRenderer {
 
 			if (skin.getLamp()[sd.getLamp()] != null) {
 				sprite.begin();
-				sprite.draw(skin.getLamp()[sd.getLamp()].getKeyFrame(time / 1000f), x, y + 2, 15, barh - 2);
+				skin.getLamp()[sd.getLamp()].draw(sprite, time, select, (int)x, (int)y);
 				sprite.end();
 			}
 

@@ -18,7 +18,7 @@ public class AudioDeviceProcessor implements AudioProcessor {
 	}
 
 	@Override
-	public void play(Note n) {
+	public void play(Note n, float volume) {
 		// TODO Auto-generated method stub
 
 	}
