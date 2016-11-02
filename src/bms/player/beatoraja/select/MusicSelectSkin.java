@@ -17,13 +17,13 @@ public class MusicSelectSkin extends Skin {
 	/**
 	 * 楽曲バー画像
 	 */
-	private Sprite[] bar = new Sprite[10];
+	private SkinImage[] bar = new SkinImage[10];
 	/**
 	 * ランプ画像
 	 */
 	private SkinImage[] lamp = new SkinImage[11];
 
-	private Sprite[] trophy = new Sprite[3];
+	private SkinImage[] trophy = new SkinImage[3];
 
 	private int centerBar;
 	private int[] clickableBar = new int[0];
@@ -43,18 +43,20 @@ public class MusicSelectSkin extends Skin {
 
 		Texture bart = new Texture("skin/songbar.png");
 		for (int i = 0; i < bar.length; i++) {
-			bar[i] = new Sprite(bart, 0, i * 30, 500, 30);
+			bar[i] = new SkinImage(new TextureRegion(bart, 0, i * 30, 500, 30));
 		}
 		TextureRegion[][] lampt = TextureRegion.split(new Texture("skin/lamp.png"), 15, 30);
 		for (int i = 0; i < lamp.length; i++) {
 			lamp[i] = new SkinImage(lampt[i], 100);
-			setDestination(lamp[i], 0, 0, 2, 15, 34, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+			// TODO ソングバーのスケーリング実装時点で切り替え
+//			setDestination(lamp[i], 0, 0, 2, 15, 34, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+			lamp[i].setDestination(0, 0, 2, 15, 34, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		}
 
 		TextureRegion[][] ttrophy = TextureRegion.split(new Texture("skin/trophy.png"), 32, 32);
-		trophy[0] = new Sprite(ttrophy[0][10]);
-		trophy[1] = new Sprite(ttrophy[0][11]);
-		trophy[2] = new Sprite(ttrophy[0][12]);
+		trophy[0] = new SkinImage(ttrophy[0][10]);
+		trophy[1] = new SkinImage(ttrophy[0][11]);
+		trophy[2] = new SkinImage(ttrophy[0][12]);
 
 		SkinText dir = new SkinText("skin/VL-Gothic-Regular.ttf", 0, 24, 2);
 		dir.setReferenceID(STRING_DIRECTORY);
@@ -332,11 +334,11 @@ public class MusicSelectSkin extends Skin {
 				255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 	}
 
-	public Sprite[] getBar() {
+	public SkinImage[] getBar() {
 		return bar;
 	}
 
-	public void setBar(Sprite[] bar) {
+	public void setBar(SkinImage[] bar) {
 		this.bar = bar;
 	}
 
@@ -348,7 +350,7 @@ public class MusicSelectSkin extends Skin {
 		this.lamp = lamp;
 	}
 
-	public Sprite[] getTrophy() {
+	public SkinImage[] getTrophy() {
 		return trophy;
 	}
 
@@ -369,6 +371,18 @@ public class MusicSelectSkin extends Skin {
 	}
 
 	public static class SkinBarObject extends SkinObject {
+
+		private SkinImage[] barimage = new SkinImage[30];
+
+		public void setImage(TextureRegion[][] images, int cycle) {
+			for(int i = 0;i < barimage.length;i++) {
+				barimage[i] = new SkinImage(images, cycle);
+			}
+		}
+
+		public SkinImage[] getBarImages() {
+			return barimage;
+		}
 
 		@Override
 		public void draw(SpriteBatch sprite, long time, MainState state) {

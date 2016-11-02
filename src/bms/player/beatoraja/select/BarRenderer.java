@@ -151,7 +151,7 @@ public class BarRenderer {
 			sprite.begin();
 			float y = h - i * barh;
 
-			Sprite barimage = skin.getBar()[0];
+			SkinImage barimage = skin.getBar()[0];
 			if (duration != 0) {
 				float dy = barh * (Math.abs(angle) - duration + System.currentTimeMillis()) / angle
 						+ (angle >= 0 ? -1 : 1) * barh;
@@ -179,7 +179,7 @@ public class BarRenderer {
 				barimage = skin.getBar()[5];
 			}
 
-			sprite.draw(barimage, x, y, w * 2 / 5, barh);
+			sprite.draw(barimage.getImage(time, select), x, y, w * 2 / 5, barh);
 			titlefont.setColor(Color.BLACK);
 			titlefont.draw(sprite, sd.getTitle(), x + 62, y + barh - 8);
 			titlefont.setColor(Color.WHITE);
@@ -201,7 +201,7 @@ public class BarRenderer {
 					for (int j = 0; j < TROPHY.length; j++) {
 						if (TROPHY[j].equals(trophy.getName()) && skin.getTrophy()[j] != null) {
 							sprite.begin();
-							sprite.draw(skin.getTrophy()[j], x + 20, y + 4);
+							sprite.draw(skin.getTrophy()[j].getImage(time, select), x + 20, y + 4);
 							sprite.end();
 							break;
 						}

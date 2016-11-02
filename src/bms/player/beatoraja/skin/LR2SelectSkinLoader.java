@@ -22,10 +22,6 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader {
 	
 	private MusicSelectSkin skin;
 	
-	private Sprite[] bar = new Sprite[10];
-
-	private SkinImage[] lamp = new SkinImage[11];
-
 	private SkinBarObject skinbar;
 
 	private SkinNumber[] levels = new SkinNumber[7];
@@ -40,9 +36,9 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader {
 				int gr = Integer.parseInt(str[2]);
 				if (gr < imagelist.size() && imagelist.get(gr) != null) {
 					try {
-						bar[Integer.parseInt(str[1])] = new Sprite(imagelist.get(Integer.parseInt(str[2])),
+						skin.getBar()[Integer.parseInt(str[1])] = new SkinImage(new TextureRegion(imagelist.get(Integer.parseInt(str[2])),
 								Integer.parseInt(str[3]), Integer.parseInt(str[4]), Integer.parseInt(str[5]),
-								Integer.parseInt(str[6]));
+								Integer.parseInt(str[6])));
 					} catch (NumberFormatException e) {
 						e.printStackTrace();
 					}
@@ -167,8 +163,8 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader {
 					if (images != null) {
 						int[] lamps = lampg[values[1]];
 						for(int i = 0; i < lamps.length;i++) {
-							lamp[lamps[i]] = new SkinImage(images, values[9]);
-							lamp[lamps[i]].setTimer(values[10]);
+							skin.getLamp()[lamps[i]] = new SkinImage(images, values[9]);
+							skin.getLamp()[lamps[i]].setTimer(values[10]);
 						}
 						// System.out.println("Nowjudge Added - " + (5 -
 						// values[1]));
@@ -184,7 +180,7 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader {
 				int[] values = parseInt(str);
 				int[] lamps = lampg[values[1]];
 				for(int i = 0; i < lamps.length;i++) {
-					if (lamp[lamps[i]] != null) {
+					if (skin.getLamp()[lamps[i]] != null) {
 						try {
 							if (values[5] < 0) {
 								values[3] += values[5];
@@ -194,7 +190,7 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader {
 								values[4] += values[6];
 								values[6] = -values[6];
 							}
-							lamp[lamps[i]].setDestination(values[2], values[3] * dstw / srcw, dsth
+							skin.getLamp()[lamps[i]].setDestination(values[2], values[3] * dstw / srcw, dsth
 											- (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw, values[6] * dsth
 											/ srch, values[7], values[8], values[9], values[10], values[11], values[12],
 									values[13], values[14], values[15], values[16], values[17], values[18], values[19],
@@ -244,9 +240,6 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader {
 
 		this.loadSkin(skin, f, selector, header, option, property);
 
-		skin.setBar(bar);
-		skin.setLamp(lamp);
-		
 		return skin;
 	}
 }
