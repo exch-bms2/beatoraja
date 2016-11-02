@@ -76,8 +76,8 @@ public class SkinImage extends SkinObject {
 
 	public void draw(SpriteBatch sprite, long time, MainState state, int offsetX, int offsetY) {
 	    if(getImageID() != -1) {
-            Rectangle r = this.getDestination(time, state);
-            TextureRegion tr = state.getImage(getImageID());
+            final Rectangle r = this.getDestination(time, state);
+            final TextureRegion tr = state.getImage(getImageID());
             if (r != null && tr != null) {
                 draw(sprite, tr, r.x + offsetX, r.y + offsetY, r.width, r.height, getColor(time,state),getAngle(time,state));
             }
@@ -96,7 +96,7 @@ public class SkinImage extends SkinObject {
                 return;
             }
 
-            Rectangle r = this.getDestination(time, state);
+            final Rectangle r = this.getDestination(time, state);
             if (r != null) {
                 if(value >= 0 && value < image.length) {
                 	if(scratch == 1) {

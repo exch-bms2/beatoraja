@@ -11,6 +11,7 @@ import bms.player.beatoraja.Config.SkinConfig;
 import bms.player.beatoraja.config.KeyConfiguration;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.play.audio.SoundProcessor;
+import bms.player.beatoraja.select.MusicSelectSkin.SkinBarObject;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.song.SongData;
 import bms.player.beatoraja.song.SongDatabaseAccessor;
@@ -249,11 +250,11 @@ public class MusicSelector extends MainState {
 					LR2SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
 					Rectangle srcr = RESOLUTION[header.getResolution()];
 					Rectangle dstr = RESOLUTION[config.getResolution()];
-					LR2SelectSkinLoader dloader = new LR2SelectSkinLoader(srcr.width, srcr.height, dstr.width, dstr.height);
-					skin = dloader.loadSelectSkin(Paths.get(sc.getPath()).toFile(), this, header,
-							loader.getOption(), sc.getProperty());
+					LR2SelectSkinLoader dloader = new LR2SelectSkinLoader(srcr.width, srcr.height, dstr.width,
+							dstr.height);
+					skin = dloader.loadSelectSkin(Paths.get(sc.getPath()).toFile(), this, header, loader.getOption(),
+							sc.getProperty());
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 					skin = new MusicSelectSkin(RESOLUTION[config.getResolution()]);
 				}
@@ -274,9 +275,9 @@ public class MusicSelector extends MainState {
 		doption = new DetailOptionRenderer(config);
 
 		getTimer()[TIMER_SONGBAR_CHANGE] = getNowTime();
-		
+
 		// search text field
-		if(getStage() == null) {
+		if (getStage() == null) {
 			final Stage stage = new Stage(new FitViewport(RESOLUTION[config.getResolution()].width,
 					RESOLUTION[config.getResolution()].height));
 			final TextField.TextFieldStyle textFieldStyle = new TextField.TextFieldStyle(searchfont, // BitmapFont
@@ -286,7 +287,7 @@ public class MusicSelector extends MainState {
 					new TextureRegionDrawable(new TextureRegion(new Texture("skin/system.png"), 0, 8, 1, 8))); // background
 			textFieldStyle.messageFont = searchfont;
 			textFieldStyle.messageFontColor = Color.GRAY;
-			
+
 			search = new TextField("", textFieldStyle);
 			search.setMessageText("search song");
 			search.setTextFieldListener(new TextFieldListener() {
@@ -296,12 +297,12 @@ public class MusicSelector extends MainState {
 						if (textField.getText().length() > 1) {
 							SearchWordBar swb = new SearchWordBar(MusicSelector.this, textField.getText());
 							int count = swb.getChildren().length;
-							if(count > 0) {
+							if (count > 0) {
 								bar.addSearch(swb);
 								dir.clear();
 								bar.updateBar(null);
 								textField.setText("");
-								textField.setMessageText(count + " song(s) found");								
+								textField.setMessageText(count + " song(s) found");
 								textFieldStyle.messageFontColor = Color.valueOf("00c0c0");
 							} else {
 								textField.setText("");
@@ -312,7 +313,7 @@ public class MusicSelector extends MainState {
 						textField.getOnscreenKeyboard().show(false);
 						stage.setKeyboardFocus(null);
 					}
-					if(!searchfont.getData().hasGlyph(key)) {
+					if (!searchfont.getData().hasGlyph(key)) {
 						FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
 						parameter.size = 24;
 						parameter.characters += textField.getText() + key;
@@ -323,7 +324,7 @@ public class MusicSelector extends MainState {
 						searchfont = newsearchfont;
 						textField.appendText(String.valueOf(key));
 					}
-					
+
 				}
 
 			});
@@ -333,7 +334,7 @@ public class MusicSelector extends MainState {
 			stage.addActor(search);
 
 			search.setVisible(true);
-			
+
 			setStage(stage);
 		}
 	}
@@ -352,25 +353,12 @@ public class MusicSelector extends MainState {
 		titlefont.setColor(Color.WHITE);
 		if (current instanceof SongBar) {
 			resource.setSongdata(((SongBar) current).getSongData());
-			titlefont.draw(sprite, "LEVEL : " + resource.getSongdata().getLevel(), 100, 500);
 			if (current.getScore() != null) {
 				IRScoreData score = current.getScore();
 				titlefont.setColor(Color.WHITE);
 				titlefont.draw(sprite,
 						RANK[(score.getExscore() * 27 / (score.getNotes() * 2))] + " ( "
 								+ ((score.getExscore() * 1000 / (score.getNotes() * 2)) / 10.0f) + "% )", 460, 390);
-			}
-			if (((SongBar) current).existsReplayData()) {
-				StringBuilder sb = new StringBuilder();
-				for (int i = 0; i < ((SongBar) current).getExistsReplayData().length; i++) {
-					if (selectedreplay == i) {
-						sb.append("[" + (i + 1) + "]");
-					} else if (((SongBar) current).getExistsReplayData()[i]) {
-						sb.append(" " + (i + 1) + " ");
-					}
-				}
-				titlefont.setColor(Color.GREEN);
-				titlefont.draw(sprite, "Replay exists : " + sb.toString(), 100, 270);
 			}
 		} else {
 			resource.setSongdata(null);
@@ -429,18 +417,6 @@ public class MusicSelector extends MainState {
 				// score.getClearcount() + " / " + score.getPlaycount(), 100,
 				// 180);
 			}
-			if (gb.existsReplayData()) {
-				StringBuilder sb = new StringBuilder();
-				for (int i = 0; i < gb.getExistsReplayData().length; i++) {
-					if (selectedreplay == i) {
-						sb.append("[" + (i + 1) + "]");
-					} else if (gb.getExistsReplayData()[i]) {
-						sb.append(" " + (i + 1) + " ");
-					}
-				}
-				titlefont.setColor(Color.GREEN);
-				titlefont.draw(sprite, "Replay exists : " + sb.toString(), 450, 300);
-			}
 		}
 		if (current instanceof TableLevelBar) {
 			titlefont.draw(sprite, current.getTitle(), 100, 600);
@@ -455,7 +431,6 @@ public class MusicSelector extends MainState {
 				for (int lamp : lamps) {
 					count += lamp;
 				}
-				titlefont.draw(sprite, "TOTAL SONGS : ", 100, 500);
 				sprite.end();
 				shape.begin(ShapeType.Filled);
 
@@ -487,7 +462,6 @@ public class MusicSelector extends MainState {
 				for (int lamp : lamps) {
 					count += lamp;
 				}
-				titlefont.draw(sprite, "TOTAL SONGS : ", 100, 500);
 				sprite.end();
 				shape.begin(ShapeType.Filled);
 
@@ -746,22 +720,22 @@ public class MusicSelector extends MainState {
 		if (bar.getSelected() != current) {
 			getTimer()[TIMER_SONGBAR_CHANGE] = nowtime;
 		}
-		
+
 		if (input.getFunctionstate()[1] && input.getFunctiontime()[1] != 0) {
 			input.getFunctiontime()[1] = 0;
-			if(bar.getSelected() instanceof FolderBar) {
+			if (bar.getSelected() instanceof FolderBar) {
 				FolderBar fb = (FolderBar) bar.getSelected();
-				songdb.updateSongDatas(fb.getFolderData().getPath(), false);				
+				songdb.updateSongDatas(fb.getFolderData().getPath(), false);
 			}
-			if(bar.getSelected() instanceof TableBar) {
+			if (bar.getSelected() instanceof TableBar) {
 				TableBar tb = (TableBar) bar.getSelected();
-				if(tb.getUrl() != null && tb.getUrl().length() > 0) {
+				if (tb.getUrl() != null && tb.getUrl().length() > 0) {
 					TableDataAccessor tda = new TableDataAccessor();
-					String[] url = new String[]{tb.getUrl()};
+					String[] url = new String[] { tb.getUrl() };
 					tda.updateTableData(url);
 					TableData td = tda.read(tb.getTitle());
-					if(td != null) {
-						tb.setTableData(td);						
+					if (td != null) {
+						tb.setTableData(td);
 					}
 				}
 			}
@@ -978,26 +952,27 @@ public class MusicSelector extends MainState {
 			}
 			return Integer.MIN_VALUE;
 		case NUMBER_DURATION:
-			if(bar.getSelected() instanceof SongBar) {
-				SongBar song = (SongBar)bar.getSelected();
-				PlayConfig pc = (song.getSongData().getMode() == 5 || song.getSongData().getMode() == 7 ? config.getMode7()
-						: (song.getSongData().getMode() == 10 || song.getSongData().getMode() == 14 ? config.getMode14() : config.getMode9()));
+			if (bar.getSelected() instanceof SongBar) {
+				SongBar song = (SongBar) bar.getSelected();
+				PlayConfig pc = (song.getSongData().getMode() == 5 || song.getSongData().getMode() == 7 ? config
+						.getMode7()
+						: (song.getSongData().getMode() == 10 || song.getSongData().getMode() == 14 ? config
+								.getMode14() : config.getMode9()));
 				return pc.getDuration();
 			}
 			return Integer.MIN_VALUE;
 		case NUMBER_JUDGETIMING:
 			return config.getJudgetiming();
-			case BUTTON_MODE:
-				final int[] mode_lr2 = {0,2,4,5,1,3};
-				return mode_lr2[mode];
-			case BUTTON_SORT:
-				return sort;
-			case BUTTON_LNMODE:
-				return config.getLnmode();
+		case BUTTON_MODE:
+			final int[] mode_lr2 = { 0, 2, 4, 5, 1, 3 };
+			return mode_lr2[mode];
+		case BUTTON_SORT:
+			return sort;
+		case BUTTON_LNMODE:
+			return config.getLnmode();
 		}
 		return super.getNumberValue(id);
 	}
-
 
 	public String getTextValue(int id) {
 		switch (id) {
@@ -1069,156 +1044,163 @@ public class MusicSelector extends MainState {
 
 	@Override
 	public float getSliderValue(int id) {
-		switch(id) {
-			case SLIDER_MUSICSELECT_POSITION:
-				return bar.getSelectedPosition();
-			case BARGRAPH_RATE_PGREAT:
-				if (bar.getSelected() instanceof SongBar) {
+		switch (id) {
+		case SLIDER_MUSICSELECT_POSITION:
+			return bar.getSelectedPosition();
+		case BARGRAPH_RATE_PGREAT:
+			if (bar.getSelected() instanceof SongBar) {
 				IRScoreData score = bar.getSelected().getScore();
-					return score != null ? ((float)(score.getEpg() + score.getLpg())) / ((SongBar) bar.getSelected()).getSongData().getNotes() : 0;
+				return score != null ? ((float) (score.getEpg() + score.getLpg()))
+						/ ((SongBar) bar.getSelected()).getSongData().getNotes() : 0;
+			}
+			return 0;
+		case BARGRAPH_LEVEL:
+			if (bar.getSelected() instanceof SongBar) {
+				SongData sd = ((SongBar) bar.getSelected()).getSongData();
+				if (sd.getMode() == 5 || sd.getMode() == 10) {
+					return sd.getLevel() / 9.0f;
 				}
-				return 0;
-			case BARGRAPH_LEVEL:
-				if (bar.getSelected() instanceof SongBar) {
-					SongData sd = ((SongBar) bar.getSelected()).getSongData();
-					if(sd.getMode() == 5 || sd.getMode() == 10) {
-						return sd.getLevel() / 9.0f;
-					}
-					if(sd.getMode() == 7 || sd.getMode() == 14) {
-						return sd.getLevel() / 12.0f;
-					}
-					if(sd.getMode() == 9) {
-						return sd.getLevel() / 50.0f;
-					}
+				if (sd.getMode() == 7 || sd.getMode() == 14) {
+					return sd.getLevel() / 12.0f;
 				}
-				return 0;
-			case BARGRAPH_LEVEL_BEGINNER:
-				if (bar.getSelected() instanceof SongBar) {
-					SongData sd = ((SongBar) bar.getSelected()).getSongData();
-					if(sd.getDifficulty() != 1) {
-						return 0;
-					}
-					if(sd.getMode() == 5 || sd.getMode() == 10) {
-						return sd.getLevel() / 9.0f;
-					}
-					if(sd.getMode() == 7 || sd.getMode() == 14) {
-						return sd.getLevel() / 12.0f;
-					}
-					if(sd.getMode() == 9) {
-						return sd.getLevel() / 50.0f;
-					}
+				if (sd.getMode() == 9) {
+					return sd.getLevel() / 50.0f;
 				}
-				return 0;
-			case BARGRAPH_LEVEL_NORMAL:
-				if (bar.getSelected() instanceof SongBar) {
-					SongData sd = ((SongBar) bar.getSelected()).getSongData();
-					if(sd.getDifficulty() != 2) {
-						return 0;
-					}
-					if(sd.getMode() == 5 || sd.getMode() == 10) {
-						return sd.getLevel() / 9.0f;
-					}
-					if(sd.getMode() == 7 || sd.getMode() == 14) {
-						return sd.getLevel() / 12.0f;
-					}
-					if(sd.getMode() == 9) {
-						return sd.getLevel() / 50.0f;
-					}
+			}
+			return 0;
+		case BARGRAPH_LEVEL_BEGINNER:
+			if (bar.getSelected() instanceof SongBar) {
+				SongData sd = ((SongBar) bar.getSelected()).getSongData();
+				if (sd.getDifficulty() != 1) {
+					return 0;
 				}
-				return 0;
-			case BARGRAPH_LEVEL_HYPER:
-				if (bar.getSelected() instanceof SongBar) {
-					SongData sd = ((SongBar) bar.getSelected()).getSongData();
-					if(sd.getDifficulty() != 3) {
-						return 0;
-					}
-					if(sd.getMode() == 5 || sd.getMode() == 10) {
-						return sd.getLevel() / 9.0f;
-					}
-					if(sd.getMode() == 7 || sd.getMode() == 14) {
-						return sd.getLevel() / 12.0f;
-					}
-					if(sd.getMode() == 9) {
-						return sd.getLevel() / 50.0f;
-					}
+				if (sd.getMode() == 5 || sd.getMode() == 10) {
+					return sd.getLevel() / 9.0f;
 				}
-				return 0;
-			case BARGRAPH_LEVEL_ANOTHER:
-				if (bar.getSelected() instanceof SongBar) {
-					SongData sd = ((SongBar) bar.getSelected()).getSongData();
-					if(sd.getDifficulty() != 4) {
-						return 0;
-					}
-					if(sd.getMode() == 5 || sd.getMode() == 10) {
-						return sd.getLevel() / 9.0f;
-					}
-					if(sd.getMode() == 7 || sd.getMode() == 14) {
-						return sd.getLevel() / 12.0f;
-					}
-					if(sd.getMode() == 9) {
-						return sd.getLevel() / 50.0f;
-					}
+				if (sd.getMode() == 7 || sd.getMode() == 14) {
+					return sd.getLevel() / 12.0f;
 				}
-				return 0;
-			case BARGRAPH_LEVEL_INSANE:
-				if (bar.getSelected() instanceof SongBar) {
-					SongData sd = ((SongBar) bar.getSelected()).getSongData();
-					if(sd.getDifficulty() != 5) {
-						return 0;
-					}
-					if(sd.getMode() == 5 || sd.getMode() == 10) {
-						return sd.getLevel() / 9.0f;
-					}
-					if(sd.getMode() == 7 || sd.getMode() == 14) {
-						return sd.getLevel() / 12.0f;
-					}
-					if(sd.getMode() == 9) {
-						return sd.getLevel() / 50.0f;
-					}
+				if (sd.getMode() == 9) {
+					return sd.getLevel() / 50.0f;
 				}
-				return 0;
-			case BARGRAPH_RATE_GREAT:
-				if (bar.getSelected() instanceof SongBar) {
-					IRScoreData score = bar.getSelected().getScore();
-					return score != null ? ((float)(score.getEgr() + score.getLgr())) / ((SongBar) bar.getSelected()).getSongData().getNotes() : 0;
+			}
+			return 0;
+		case BARGRAPH_LEVEL_NORMAL:
+			if (bar.getSelected() instanceof SongBar) {
+				SongData sd = ((SongBar) bar.getSelected()).getSongData();
+				if (sd.getDifficulty() != 2) {
+					return 0;
 				}
-				return 0;
-			case BARGRAPH_RATE_GOOD:
-				if (bar.getSelected() instanceof SongBar) {
-					IRScoreData score = bar.getSelected().getScore();
-					return score != null ? ((float)(score.getEgd() + score.getLgd())) / ((SongBar) bar.getSelected()).getSongData().getNotes() : 0;
+				if (sd.getMode() == 5 || sd.getMode() == 10) {
+					return sd.getLevel() / 9.0f;
 				}
-				return 0;
-			case BARGRAPH_RATE_BAD:
-				if (bar.getSelected() instanceof SongBar) {
-					IRScoreData score = bar.getSelected().getScore();
-					return score != null ? ((float)(score.getEbd() + score.getLbd())) / ((SongBar) bar.getSelected()).getSongData().getNotes() : 0;
+				if (sd.getMode() == 7 || sd.getMode() == 14) {
+					return sd.getLevel() / 12.0f;
 				}
-				return 0;
-			case BARGRAPH_RATE_POOR:
-				if (bar.getSelected() instanceof SongBar) {
-					IRScoreData score = bar.getSelected().getScore();
-					return score != null ? ((float)(score.getEpr() + score.getLpr())) / ((SongBar) bar.getSelected()).getSongData().getNotes() : 0;
+				if (sd.getMode() == 9) {
+					return sd.getLevel() / 50.0f;
 				}
-				return 0;
-			case BARGRAPH_RATE_MAXCOMBO:
-				if (bar.getSelected() instanceof SongBar) {
-					IRScoreData score = bar.getSelected().getScore();
-					return score != null ? ((float)score.getCombo()) / ((SongBar) bar.getSelected()).getSongData().getNotes() : 0;
+			}
+			return 0;
+		case BARGRAPH_LEVEL_HYPER:
+			if (bar.getSelected() instanceof SongBar) {
+				SongData sd = ((SongBar) bar.getSelected()).getSongData();
+				if (sd.getDifficulty() != 3) {
+					return 0;
 				}
-				return 0;
-			case BARGRAPH_RATE_EXSCORE:
-				if (bar.getSelected() instanceof SongBar) {
-					IRScoreData score = bar.getSelected().getScore();
-					return score != null ? ((float)score.getExscore()) / ((SongBar) bar.getSelected()).getSongData().getNotes() / 2 : 0;
+				if (sd.getMode() == 5 || sd.getMode() == 10) {
+					return sd.getLevel() / 9.0f;
 				}
-				return 0;
+				if (sd.getMode() == 7 || sd.getMode() == 14) {
+					return sd.getLevel() / 12.0f;
+				}
+				if (sd.getMode() == 9) {
+					return sd.getLevel() / 50.0f;
+				}
+			}
+			return 0;
+		case BARGRAPH_LEVEL_ANOTHER:
+			if (bar.getSelected() instanceof SongBar) {
+				SongData sd = ((SongBar) bar.getSelected()).getSongData();
+				if (sd.getDifficulty() != 4) {
+					return 0;
+				}
+				if (sd.getMode() == 5 || sd.getMode() == 10) {
+					return sd.getLevel() / 9.0f;
+				}
+				if (sd.getMode() == 7 || sd.getMode() == 14) {
+					return sd.getLevel() / 12.0f;
+				}
+				if (sd.getMode() == 9) {
+					return sd.getLevel() / 50.0f;
+				}
+			}
+			return 0;
+		case BARGRAPH_LEVEL_INSANE:
+			if (bar.getSelected() instanceof SongBar) {
+				SongData sd = ((SongBar) bar.getSelected()).getSongData();
+				if (sd.getDifficulty() != 5) {
+					return 0;
+				}
+				if (sd.getMode() == 5 || sd.getMode() == 10) {
+					return sd.getLevel() / 9.0f;
+				}
+				if (sd.getMode() == 7 || sd.getMode() == 14) {
+					return sd.getLevel() / 12.0f;
+				}
+				if (sd.getMode() == 9) {
+					return sd.getLevel() / 50.0f;
+				}
+			}
+			return 0;
+		case BARGRAPH_RATE_GREAT:
+			if (bar.getSelected() instanceof SongBar) {
+				IRScoreData score = bar.getSelected().getScore();
+				return score != null ? ((float) (score.getEgr() + score.getLgr()))
+						/ ((SongBar) bar.getSelected()).getSongData().getNotes() : 0;
+			}
+			return 0;
+		case BARGRAPH_RATE_GOOD:
+			if (bar.getSelected() instanceof SongBar) {
+				IRScoreData score = bar.getSelected().getScore();
+				return score != null ? ((float) (score.getEgd() + score.getLgd()))
+						/ ((SongBar) bar.getSelected()).getSongData().getNotes() : 0;
+			}
+			return 0;
+		case BARGRAPH_RATE_BAD:
+			if (bar.getSelected() instanceof SongBar) {
+				IRScoreData score = bar.getSelected().getScore();
+				return score != null ? ((float) (score.getEbd() + score.getLbd()))
+						/ ((SongBar) bar.getSelected()).getSongData().getNotes() : 0;
+			}
+			return 0;
+		case BARGRAPH_RATE_POOR:
+			if (bar.getSelected() instanceof SongBar) {
+				IRScoreData score = bar.getSelected().getScore();
+				return score != null ? ((float) (score.getEpr() + score.getLpr()))
+						/ ((SongBar) bar.getSelected()).getSongData().getNotes() : 0;
+			}
+			return 0;
+		case BARGRAPH_RATE_MAXCOMBO:
+			if (bar.getSelected() instanceof SongBar) {
+				IRScoreData score = bar.getSelected().getScore();
+				return score != null ? ((float) score.getCombo())
+						/ ((SongBar) bar.getSelected()).getSongData().getNotes() : 0;
+			}
+			return 0;
+		case BARGRAPH_RATE_EXSCORE:
+			if (bar.getSelected() instanceof SongBar) {
+				IRScoreData score = bar.getSelected().getScore();
+				return score != null ? ((float) score.getExscore())
+						/ ((SongBar) bar.getSelected()).getSongData().getNotes() / 2 : 0;
+			}
+			return 0;
 		}
 		return 0;
 	}
-	
+
 	public void setSliderValue(int id, float value) {
-		switch(id) {
+		switch (id) {
 		case SLIDER_MUSICSELECT_POSITION:
 			bar.setSelectedPosition(value);
 		}
@@ -1231,14 +1213,14 @@ public class MusicSelector extends MainState {
 		return null;
 	}
 
-	public void renderBar(int time) {
+	public void renderBar(SkinBarObject baro, int time) {
 		final MainController main = getMainController();
 		final SpriteBatch sprite = main.getSpriteBatch();
 		final ShapeRenderer shape = main.getShapeRenderer();
 		final float w = RESOLUTION[config.getResolution()].width;
 		final float h = RESOLUTION[config.getResolution()].height;
 		sprite.end();
-		bar.render(sprite, shape, skin, w, h, duration, angle, time);
+		bar.render(sprite, shape, skin, baro, w, h, duration, angle, time);
 		sprite.begin();
 	}
 
@@ -1257,23 +1239,57 @@ public class MusicSelector extends MainState {
 			return current instanceof DirectoryBar;
 		case OPTION_GRADEBAR:
 			return current instanceof GradeBar;
-			case OPTION_PLAYABLEBAR:
-				return (current instanceof SongBar) || ((current instanceof GradeBar) && ((GradeBar) current).existsAllSongs());
+		case OPTION_PLAYABLEBAR:
+			return (current instanceof SongBar)
+					|| ((current instanceof GradeBar) && ((GradeBar) current).existsAllSongs());
+		case OPTION_REPLAYDATA:
+			return (current instanceof SelectableBar) && ((SelectableBar) current).getExistsReplayData().length > 0
+					&& ((SelectableBar) current).getExistsReplayData()[0];
+		case OPTION_NO_REPLAYDATA:
+			return (current instanceof SelectableBar) && ((SelectableBar) current).getExistsReplayData().length > 0
+					&& !((SelectableBar) current).getExistsReplayData()[0];
+		case OPTION_REPLAYDATA2:
+			return (current instanceof SelectableBar) && ((SelectableBar) current).getExistsReplayData().length > 1
+					&& ((SelectableBar) current).getExistsReplayData()[1];
+		case OPTION_NO_REPLAYDATA2:
+			return (current instanceof SelectableBar) && ((SelectableBar) current).getExistsReplayData().length > 1
+					&& !((SelectableBar) current).getExistsReplayData()[1];
+		case OPTION_REPLAYDATA3:
+			return (current instanceof SelectableBar) && ((SelectableBar) current).getExistsReplayData().length > 2
+					&& ((SelectableBar) current).getExistsReplayData()[2];
+		case OPTION_NO_REPLAYDATA3:
+			return (current instanceof SelectableBar) && ((SelectableBar) current).getExistsReplayData().length > 2
+					&& !((SelectableBar) current).getExistsReplayData()[2];
+		case OPTION_REPLAYDATA4:
+			return (current instanceof SelectableBar) && ((SelectableBar) current).getExistsReplayData().length > 3
+					&& ((SelectableBar) current).getExistsReplayData()[3];
+		case OPTION_NO_REPLAYDATA4:
+			return (current instanceof SelectableBar) && ((SelectableBar) current).getExistsReplayData().length > 3
+					&& !((SelectableBar) current).getExistsReplayData()[3];
 		}
 		return super.getBooleanValue(id);
 	}
 
 	public void executeClickEvent(int id) {
 		switch (id) {
-			case BUTTON_PLAY:
-				play(0);
-				break;
-			case BUTTON_AUTOPLAY:
-				play(1);
-				break;
-			case BUTTON_REPLAY:
-				play(2 + selectedreplay);
-				break;
+		case BUTTON_PLAY:
+			play(0);
+			break;
+		case BUTTON_AUTOPLAY:
+			play(1);
+			break;
+		case BUTTON_REPLAY:
+			play(2);
+			break;
+		case BUTTON_REPLAY2:
+			play(3);
+			break;
+		case BUTTON_REPLAY3:
+			play(4);
+			break;
+		case BUTTON_REPLAY4:
+			play(5);
+			break;
 		}
 	}
 }

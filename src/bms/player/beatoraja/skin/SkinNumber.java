@@ -27,17 +27,17 @@ public class SkinNumber extends SkinObject {
 	 * 表示桁数
 	 */
 	private int keta;
-	
+
 	private int zeropadding;
 
 	private int align;
-	
+
 	private TextureRegion[] values;
-	
+
 	public SkinNumber(TextureRegion[] image, int cycle, int keta, int zeropadding) {
 		this(image, cycle, keta, zeropadding, -1);
 	}
-	
+
 	public SkinNumber(TextureRegion[][] image, int cycle, int keta, int zeropadding, int rid) {
 		this.image = image;
 		this.mimage = null;
@@ -52,8 +52,8 @@ public class SkinNumber extends SkinObject {
 	}
 
 	public SkinNumber(TextureRegion[] image, TextureRegion[] mimage, int cycle, int keta, int zeropadding, int id) {
-		this.image = new TextureRegion[][]{image};
-		this.mimage = mimage != null ? new TextureRegion[][]{mimage} : null;
+		this.image = new TextureRegion[][] { image };
+		this.mimage = mimage != null ? new TextureRegion[][] { mimage } : null;
 		setCycle(cycle);
 		this.setKeta(keta);
 		this.zeropadding = zeropadding;
@@ -76,74 +76,76 @@ public class SkinNumber extends SkinObject {
 		this.keta = keta;
 		this.values = new TextureRegion[keta];
 	}
-	
+
 	public TextureRegion[] getValue(long time, int value, int zeropadding, MainState state) {
 		final TextureRegion[][] images = (value >= 0 || mimage == null) ? this.image : mimage;
-		if(images == null) {
+		if (images == null) {
 			return new TextureRegion[0];
 		}
 		TextureRegion[] image = images[getImageIndex(images.length, time, state)];
 
 		value = Math.abs(value);
 		for (int j = values.length - 1; j >= 0; j--) {
-			if(value > 0 || j == values.length - 1) {
+			if (value > 0 || j == values.length - 1) {
 				values[j] = image[value % 10];
 			} else {
-				values[j] = (zeropadding == 2 ? image[10] : (zeropadding == 1 ? image[0] : (mimage != null && (values[j + 1] != image[11] && values[j + 1] != null) ? image[11] : null)));
+				values[j] = (zeropadding == 2 ? image[10] : (zeropadding == 1 ? image[0] : (mimage != null
+						&& (values[j + 1] != image[11] && values[j + 1] != null) ? image[11] : null)));
 			}
 			value /= 10;
 		}
-		if(align == 1) {
+		if (align == 1) {
 			int shift = 0;
-			while(values[shift] == null) {
+			while (values[shift] == null) {
 				shift++;
 			}
-			for(int i = 0;i < values.length;i++) {
+			for (int i = 0; i < values.length; i++) {
 				values[i] = i + shift < values.length ? values[i + shift] : null;
 			}
 		}
 		return values;
 	}
-	
-	public  void draw(SpriteBatch sprite, long time, MainState state) {
+
+	public void draw(SpriteBatch sprite, long time, MainState state) {
 		int value = Integer.MIN_VALUE;
-		if(id != -1) {
+		if (id != -1) {
 			value = state.getNumberValue(id);
 		}
-		if(value != Integer.MIN_VALUE && value != Integer.MAX_VALUE) {
-			draw(sprite, time, value, state);				
+		if (value != Integer.MIN_VALUE && value != Integer.MAX_VALUE) {
+			draw(sprite, time, value, state);
 		}
 	}
-	
+
 	public void draw(SpriteBatch sprite, long time, int value, MainState state) {
-		Rectangle r = this.getDestination(time,state);
-		if(r != null) {
+		Rectangle r = this.getDestination(time, state);
+		if (r != null) {
 			TextureRegion[] values = getValue(time, value, zeropadding, state);
 			for (int j = 0; j < values.length; j++) {
-				if(values[j] != null) {
-					draw(sprite, values[j], r.x + r.width * j, r.y, r.width, r.height, getColor(time,state),getAngle(time,state));
+				if (values[j] != null) {
+					draw(sprite, values[j], r.x + r.width * j, r.y, r.width, r.height, getColor(time, state),
+							getAngle(time, state));
 				}
-			}			
+			}
 		}
 	}
 
 	public void dispose() {
-		if(image != null) {
-			for(TextureRegion[] ptr : image) {
-				if(ptr != null) {
-					for(TextureRegion tr : ptr) {
-						tr.getTexture().dispose();					
-					}					
+		if (image != null) {
+			for (TextureRegion[] ptr : image) {
+				if (ptr != null) {
+					for (TextureRegion tr : ptr) {
+						tr.getTexture().dispose();
+					}
 				}
 			}
 			image = null;
 		}
-		if(mimage != null) {
-			for(TextureRegion[] ptr : mimage) {
-				if(ptr != null) {
-					for(TextureRegion tr : ptr) {
-						tr.getTexture().dispose();					
-					}					
+		if (mimage != null) {
+			for (TextureRegion[] ptr : mimage) {
+				if (ptr != null) {
+					for (TextureRegion tr : ptr) {
+						tr.getTexture().dispose();
+					}
 				}
 			}
 			mimage = null;

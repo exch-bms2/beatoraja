@@ -314,6 +314,12 @@ public class SkinProperty {
 	public static final int OPTION_BACKBMP = 195;
 	public static final int OPTION_NO_REPLAYDATA = 196;
 	public static final int OPTION_REPLAYDATA = 197;
+	public static final int OPTION_NO_REPLAYDATA2 = 1196;
+	public static final int OPTION_REPLAYDATA2 = 1197;
+	public static final int OPTION_NO_REPLAYDATA3 = 2196;
+	public static final int OPTION_REPLAYDATA3 = 2197;
+	public static final int OPTION_NO_REPLAYDATA4 = 3196;
+	public static final int OPTION_REPLAYDATA4 = 3197;
 
 	public static final int OPTION_1P_AAA = 200;
 	public static final int OPTION_1P_AA = 201;
@@ -495,6 +501,9 @@ public class SkinProperty {
 	public static final int BUTTON_AUTOPLAY = 1016;
 	public static final int BUTTON_READTEXT = 1017;
 	public static final int BUTTON_REPLAY = 1019;
+	public static final int BUTTON_REPLAY2 = 2019;
+	public static final int BUTTON_REPLAY3 = 3019;
+	public static final int BUTTON_REPLAY4 = 4019;
 	public static final int BUTTON_LNMODE = 1911;
 
 

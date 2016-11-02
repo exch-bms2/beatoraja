@@ -90,6 +90,8 @@ public abstract class SkinObject {
 		}
 		if (dstcenter == 0 && center < 10) {
 			dstcenter = center;
+			centerx = CENTERX[center];
+			centery = CENTERY[center];
 		}
 		if (dsttimer == 0) {
 			dsttimer = timer;
@@ -132,15 +134,17 @@ public abstract class SkinObject {
 		final int timer = dsttimer;
 
 		if (timer != 0 && timer < 256) {
-			if (state.getTimer()[timer] == Long.MIN_VALUE) {
+			final long stime = state.getTimer()[timer];
+			if (stime == Long.MIN_VALUE) {
 				return null;
 			}
-			time -= state.getTimer()[timer];
+			time -= stime;
 		}
 		if (time < 0) {
 			return null;
 		}
-		long lasttime = dst.get(dst.size() - 1).time;
+		
+		final long lasttime = dst.get(dst.size() - 1).time;
 		if (dstloop == -1) {
 			if (lasttime < time) {
 				return null;
@@ -161,12 +165,12 @@ public abstract class SkinObject {
 				final SkinObjectDestination obj2 = dst.get(i + 1);
 				if (obj1.time <= time && obj2.time >= time) {
 					final Rectangle r1 = obj1.region;
-					final long time2 = obj2.time;
-					final Rectangle r2 = dst.get(i + 1).region;
-					r.x = r1.x + (r2.x - r1.x) * (time - obj1.time) / (time2 - obj1.time);
-					r.y = r1.y + (r2.y - r1.y) * (time - obj1.time) / (time2 - obj1.time);
-					r.width = r1.width + (r2.width - r1.width) * (time - obj1.time) / (time2 - obj1.time);
-					r.height = r1.height + (r2.height - r1.height) * (time - obj1.time) / (time2 - obj1.time);
+					final Rectangle r2 = obj2.region;
+					final float rate = (float)(time - obj1.time) / (obj2.time - obj1.time);
+					r.x = r1.x + (r2.x - r1.x) * rate;
+					r.y = r1.y + (r2.y - r1.y) * rate;
+					r.width = r1.width + (r2.width - r1.width) * rate;
+					r.height = r1.height + (r2.height - r1.height) * rate;
 					if (state != null && offsetx != -1) {
 						r.x += state.getSliderValue(offsetx);
 					}
@@ -233,11 +237,12 @@ public abstract class SkinObject {
 			final SkinObjectDestination obj2 = dst.get(i + 1);
 			if (obj1.time <= time && obj2.time >= time) {
 				final Color r1 = obj1.color;
-				final Color r2 = dst.get(i + 1).color;
-				c.r = r1.r + (r2.r - r1.r) * (time - obj1.time) / (obj2.time - obj1.time);
-				c.g = r1.g + (r2.g - r1.g) * (time - obj1.time) / (obj2.time - obj1.time);
-				c.b = r1.b + (r2.b - r1.b) * (time - obj1.time) / (obj2.time - obj1.time);
-				c.a = r1.a + (r2.a - r1.a) * (time - obj1.time) / (obj2.time - obj1.time);
+				final Color r2 = obj2.color;
+				final float rate = (float)(time - obj1.time) / (obj2.time - obj1.time);
+				c.r = r1.r + (r2.r - r1.r) * rate;
+				c.g = r1.g + (r2.g - r1.g) * rate;
+				c.b = r1.b + (r2.b - r1.b) * rate;
+				c.a = r1.a + (r2.a - r1.a) * rate;
 				return c;
 			}
 		}
@@ -276,7 +281,7 @@ public abstract class SkinObject {
 			final SkinObjectDestination obj2 = dst.get(i + 1);
 			if (obj1.time <= time && obj2.time >= time) {
 				final int r1 = obj1.angle;
-				final int r2 = dst.get(i + 1).angle;
+				final int r2 = obj2.angle;
 				return (int) (r1 + (r2 - r1) * (time - obj1.time) / (obj2.time - obj1.time));
 			}
 		}
@@ -284,15 +289,15 @@ public abstract class SkinObject {
 	}
 
 	public int getImageIndex(int length, long time, MainState state) {
-		if(getCycle() == 0) {
+		if(cycle == 0) {
 			return 0;
 		}
 
-		if(getTimer() != 0 && getTimer() < 256) {
-			if(state.getTimer()[getTimer()] == Long.MIN_VALUE) {
+		if(timer != 0 && timer < 256) {
+			if(state.getTimer()[timer] == Long.MIN_VALUE) {
 				return 0;
 			}
-			time -= state.getTimer()[getTimer()];
+			time -= state.getTimer()[timer];
 		}
 		if(time < 0) {
 			return 0;
@@ -303,15 +308,18 @@ public abstract class SkinObject {
 
 	public abstract void draw(SpriteBatch sprite, long time, MainState state);
 
-	private final float[] centerx = { 0.5f, 0, 0.5f, 1,0, 0.5f, 1,0, 0.5f, 1,};
-	private final float[] centery = { 0.5f, 0, 0, 0, 0.5f, 0.5f, 0.5f, 1, 1, 1 };
+	private final float[] CENTERX = { 0.5f, 0, 0.5f, 1,0, 0.5f, 1,0, 0.5f, 1,};
+	private final float[] CENTERY = { 0.5f, 0, 0, 0, 0.5f, 0.5f, 0.5f, 1, 1, 1 };
+	
+	private float centerx;
+	private float centery;
 
 	protected void draw(SpriteBatch sprite, TextureRegion image, float x, float y, float width, float height,
 			Color color, int angle) {
 		if (color == null || image == null) {
 			return;
 		}
-		Color c = sprite.getColor();
+		final Color c = sprite.getColor();
 		switch(dstblend) {
 			case 2:
 				sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
@@ -321,7 +329,11 @@ public abstract class SkinObject {
 				break;
 		}
 		sprite.setColor(color);
-		sprite.draw(image, x, y, centerx[dstcenter] * width, centery[dstcenter] * height, width, height, 1, 1, angle);
+		if(angle != 0) {
+			sprite.draw(image, x, y, centerx * width, centery * height, width, height, 1, 1, angle);			
+		} else {
+			sprite.draw(image, x, y, width, height);
+		}
 		sprite.setColor(c);
 		if (dstblend >= 2) {
 			sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);

@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.logging.Logger;
 
+import bms.player.beatoraja.select.MusicSelectSkin.SkinBarObject;
 import bms.player.beatoraja.skin.SkinImage;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -16,6 +17,7 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -134,7 +136,7 @@ public class BarRenderer {
 		search.add(bar);
 	}
 
-	public void render(SpriteBatch sprite, ShapeRenderer shape, MusicSelectSkin skin, float w, float h, long duration,
+	public void render(SpriteBatch sprite, ShapeRenderer shape, MusicSelectSkin skin, SkinBarObject baro, float w, float h, long duration,
 			int angle, int time) {
 		if(skin == null) {
 			return;
@@ -148,43 +150,46 @@ public class BarRenderer {
 			if (i == (int) ((h / barh + 1) / 2)) {
 				x -= 20;
 			}
-			sprite.begin();
 			float y = h - i * barh;
 
-			SkinImage barimage = skin.getBar()[0];
 			if (duration != 0) {
 				float dy = barh * (Math.abs(angle) - duration + System.currentTimeMillis()) / angle
 						+ (angle >= 0 ? -1 : 1) * barh;
 				y += dy;
 			}
+			int value = -1;
 			if (sd instanceof TableBar) {
-				barimage = skin.getBar()[2];
+				value = 2;
 			}
 			if (sd instanceof TableLevelBar) {
-				barimage = skin.getBar()[2];
+				value = 2;
 			}
 			if (sd instanceof GradeBar) {
-				barimage = skin.getBar()[((GradeBar) sd).existsAllSongs() ? 3 : 4];
+				value = ((GradeBar) sd).existsAllSongs() ? 3 : 4;
 			}
 			if (sd instanceof FolderBar) {
-				barimage = skin.getBar()[1];
+				value = 1;
 			}
 			if (sd instanceof SongBar) {
-				barimage = skin.getBar()[0];
+				value = 0;
 			}
 			if (sd instanceof SearchWordBar) {
-				barimage = skin.getBar()[6];
+				value = 6;
 			}
 			if (sd instanceof CommandBar) {
-				barimage = skin.getBar()[5];
+				value = 5;
 			}
-
-			sprite.draw(barimage.getImage(time, select), x, y, w * 2 / 5, barh);
-			titlefont.setColor(Color.BLACK);
-			titlefont.draw(sprite, sd.getTitle(), x + 62, y + barh - 8);
-			titlefont.setColor(Color.WHITE);
-			titlefont.draw(sprite, sd.getTitle(), x + 60, y + barh - 6);
-			sprite.end();
+			
+			if(value != -1) {
+				sprite.begin();
+				TextureRegion barimage = baro.getBarImages(true)[0].getImage(value, time, select);				
+				sprite.draw(barimage, x, y, w * 2 / 5, barh);
+				titlefont.setColor(Color.BLACK);
+				titlefont.draw(sprite, sd.getTitle(), x + 62, y + barh - 8);
+				titlefont.setColor(Color.WHITE);
+				titlefont.draw(sprite, sd.getTitle(), x + 60, y + barh - 6);
+				sprite.end();
+			}
 
 			int flag = 0;
 

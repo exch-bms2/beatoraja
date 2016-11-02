@@ -3,10 +3,7 @@ package bms.player.beatoraja.select;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.skin.*;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
 import com.badlogic.gdx.math.Rectangle;
 
@@ -14,10 +11,6 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
 
 public class MusicSelectSkin extends Skin {
 
-	/**
-	 * 楽曲バー画像
-	 */
-	private SkinImage[] bar = new SkinImage[10];
 	/**
 	 * ランプ画像
 	 */
@@ -42,8 +35,10 @@ public class MusicSelectSkin extends Skin {
 		add(back);
 
 		Texture bart = new Texture("skin/songbar.png");
+		
+		TextureRegion[][] bar = new TextureRegion[10][];
 		for (int i = 0; i < bar.length; i++) {
-			bar[i] = new SkinImage(new TextureRegion(bart, 0, i * 30, 500, 30));
+			bar[i] = new TextureRegion[]{new TextureRegion(bart, 0, i * 30, 500, 30)};
 		}
 		TextureRegion[][] lampt = TextureRegion.split(new Texture("skin/lamp.png"), 15, 30);
 		for (int i = 0; i < lamp.length; i++) {
@@ -104,6 +99,7 @@ public class MusicSelectSkin extends Skin {
 		Texture nt = new Texture("skin/number.png");
 		TextureRegion[][] ntr = TextureRegion.split(nt, 24, 24);
 
+		addImage(new TextureRegion(st, 0, 816, 220, 24),0, 95, 482, 165, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_FOLDERBAR, 0, 0);
 		addNumber(new SkinNumber(ntr[0], 0, 5, 0, NUMBER_FOLDER_TOTALSONGS), 0, 260, 482, 18, 18, 0, 255, 255,
 				255, 255, 0, 0, 0, 0, 0, 0, OPTION_FOLDERBAR, 0, 0);
 		addImage(new TextureRegion(st, 400, 648, 96, 24),0, 36, 362, 48, 24, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_FOLDERBAR, 0, 0);
@@ -124,6 +120,9 @@ public class MusicSelectSkin extends Skin {
 		addNumber(new SkinNumber(ntr[0], 0, 4, 0, NUMBER_MINBPM), 0, 370, 512, 18, 18, 0, 255, 255,
 				255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		addNumber(new SkinNumber(ntr[0], 0, 4, 0, NUMBER_MAXBPM), 0, 442, 512, 18, 18, 0, 255, 255,
+				255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		addImage(new TextureRegion(st, 0, 790, 120, 24),0, 100, 482, 90, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_SONGBAR, 0, 0);
+		addNumber(new SkinNumber(ntr[0], 0, 3, 0, NUMBER_PLAYLEVEL), 0, 200, 482, 18, 18, 0, 255, 255,
 				255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		addImage(new TextureRegion(st, 0, 600, 120, 24),0, 80, 372, 100, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_SONGBAR, 0, 0);
 		addImage(new TextureRegion(st, 0, 600, 120, 24),0, 80, 372, 100, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_GRADEBAR, 0, 0);
@@ -152,8 +151,10 @@ public class MusicSelectSkin extends Skin {
 		addImage(new TextureRegion(st, 0, 310, 15, 15),0, 80, 450, 30, 30, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_GRADEBAR, 0, 0).setClickevent(BUTTON_PLAY);
 		addImage(new TextureRegion(st, 0, 325, 15, 15),0, 130, 450, 30, 30, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_SONGBAR, 0, 0).setClickevent(BUTTON_AUTOPLAY);
 		addImage(new TextureRegion(st, 0, 325, 15, 15),0, 130, 450, 30, 30, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_GRADEBAR, 0, 0).setClickevent(BUTTON_AUTOPLAY);
-		addImage(new TextureRegion(st, 0, 340, 15, 15),0, 180, 450, 30, 30, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_SONGBAR, 0, 0).setClickevent(BUTTON_REPLAY);
-		addImage(new TextureRegion(st, 0, 340, 15, 15),0, 180, 450, 30, 30, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_GRADEBAR, 0, 0).setClickevent(BUTTON_REPLAY);
+		addImage(new TextureRegion(st, 0, 340, 15, 15),0, 180, 450, 30, 30, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_REPLAYDATA, 0, 0).setClickevent(BUTTON_REPLAY);
+		addImage(new TextureRegion(st, 0, 355, 15, 15),0, 230, 450, 30, 30, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_REPLAYDATA2, 0, 0).setClickevent(BUTTON_REPLAY2);
+		addImage(new TextureRegion(st, 0, 370, 15, 15),0, 280, 450, 30, 30, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_REPLAYDATA3, 0, 0).setClickevent(BUTTON_REPLAY3);
+		addImage(new TextureRegion(st, 0, 385, 15, 15),0, 330, 450, 30, 30, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_REPLAYDATA4, 0, 0).setClickevent(BUTTON_REPLAY4);
 
 		addImage(new TextureRegion(st, 0, 720, 96, 24),0, 60, 102, 100, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		addNumber(new SkinNumber(ntr[0], 0, 6, 0, NUMBER_TOTALPLAYCOUNT), 0, 160, 102, 18, 18, 0,
@@ -162,7 +163,7 @@ public class MusicSelectSkin extends Skin {
 		addNumber(new SkinNumber(ntr[0], 0, 10, 0, NUMBER_TOTALPLAYNOTES), 0, 430, 102, 18, 18, 0,
 				255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
-		add(new SkinBarObject());
+		add(new SkinBarObject(bar, 0));
 
 		addImage(new TextureRegion(st, 0, 10, 10, 251), 0, 1240, 75, 10, 570, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		SkinSlider seek = new SkinSlider(new TextureRegion[] { new TextureRegion(st, 0, 265, 17, 24) }, 0, 2,
@@ -259,8 +260,7 @@ public class MusicSelectSkin extends Skin {
 		ac.setReferenceID(BUTTON_ASSIST_BPMGUIDE);
 		setDestination(ac, 0, 404, 596, 134, 30, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_PANEL2, 0, 0);
 		add(ac);
-		ac = new SkinImage();
-		ac.setImage(aot, 0);
+		ac = new SkinImage(aot, 0);
 		ac.setReferenceID(BUTTON_ASSIST_NOMINE);
 		setDestination(ac, 0, 472, 368, 134, 30, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_PANEL2, 0, 0);
 		add(ac);
@@ -268,13 +268,11 @@ public class MusicSelectSkin extends Skin {
 		addImage(new TextureRegion(st, 8,0,8,8), 500, 0, 0,1280, 720, 0, 128,255,255,255, 0, 0, 0, 0, 0, 0, OPTION_PANEL3, 0, 0);
 		addImage(new TextureRegion(pt, 598, 0, 300, 188), 0, 50, 314, 600, 374, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_PANEL3, 0, 0);
 
-		ac = new SkinImage();
-		ac.setImage(fct, 0);
+		ac = new SkinImage(fct, 0);
 		ac.setReferenceID(BUTTON_BGA);
 		setDestination(ac, 0, 52, 312, 134, 90, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_PANEL3, 0, 0);
 		add(ac);
-		ac = new SkinImage();
-		ac.setImage(fct, 0);
+		ac = new SkinImage(fct, 0);
 		ac.setReferenceID(BUTTON_JUDGEDETAIL);
 		setDestination(ac, 0, 120, 594, 134, 90, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_PANEL3, 0, 0);
 		add(ac);
@@ -334,14 +332,6 @@ public class MusicSelectSkin extends Skin {
 				255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 	}
 
-	public SkinImage[] getBar() {
-		return bar;
-	}
-
-	public void setBar(SkinImage[] bar) {
-		this.bar = bar;
-	}
-
 	public SkinImage[] getLamp() {
 		return lamp;
 	}
@@ -372,21 +362,23 @@ public class MusicSelectSkin extends Skin {
 
 	public static class SkinBarObject extends SkinObject {
 
-		private SkinImage[] barimage = new SkinImage[30];
+		private SkinImage[] barimageon = new SkinImage[30];
+		private SkinImage[] barimageoff = new SkinImage[30];
 
-		public void setImage(TextureRegion[][] images, int cycle) {
-			for(int i = 0;i < barimage.length;i++) {
-				barimage[i] = new SkinImage(images, cycle);
+		public SkinBarObject(TextureRegion[][] images, int cycle) {
+			for(int i = 0;i < barimageon.length;i++) {
+				barimageon[i] = new SkinImage(images, cycle);
+				barimageoff[i] = new SkinImage(images, cycle);
 			}
 		}
 
-		public SkinImage[] getBarImages() {
-			return barimage;
+		public SkinImage[] getBarImages(boolean on) {
+			return on ? barimageon : barimageoff;
 		}
 
 		@Override
 		public void draw(SpriteBatch sprite, long time, MainState state) {
-			((MusicSelector)state).renderBar((int)time);
+			((MusicSelector)state).renderBar(this, (int)time);
 		}
 
 		@Override
