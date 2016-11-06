@@ -25,5 +25,5 @@ public class ReplayData {
 	/**
 	 * ランダムシーケンスを含むbmsの場合、選択されたRANDOM番号
 	 */
-	public int random;
+	public int[] rand = new int[0];
 }

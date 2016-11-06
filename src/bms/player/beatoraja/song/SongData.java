@@ -95,7 +95,7 @@ public class SongData {
 		
 		feature = model.containsLongNote() ? FEATURE_LONGNOTE : 0;
 		feature += model.containsMineNote() ? FEATURE_MINENOTE : 0;
-		feature += model.getRandom() > 1 ? FEATURE_RANDOM : 0;
+		feature += model.getRandom() != null && model.getRandom().length > 0 ? FEATURE_RANDOM : 0;
 		content = containstxt ? CONTENT_TEXT : 0;
 		content += model.getBgaList().length > 0 ? CONTENT_BGA : 0;
 	}

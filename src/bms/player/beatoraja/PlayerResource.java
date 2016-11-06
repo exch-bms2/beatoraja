@@ -23,11 +23,13 @@ public class PlayerResource {
 	 * 選曲中のBMS
 	 */
 	private BMSModel model;
+
+	private BMSGenerator generator;
 	/**
 	 * 選択中のBMSの情報
 	 */
 	private SongData songdata;
-	
+
 	private Config config;
 	private int auto;
 
@@ -117,16 +119,18 @@ public class PlayerResource {
 		replay = new ReplayData();
 		String bmspath = model != null ? model.getPath() : null;
 		model = loadBMSModel(f);
-		if(model == null) {
+		if (model == null) {
 			Logger.getGlobal().warning("楽曲が存在しないか、解析時にエラーが発生しました:" + f.toString());
 			return false;
 		}
 		if (model.getAllTimeLines().length == 0) {
 			return false;
 		}
-		if (bmspath == null || !f.toAbsolutePath().toString().equals(bmspath) || bgashow != config.getBga()) {
+		if (bmspath == null || !f.toAbsolutePath().toString().equals(bmspath) || bgashow != config.getBga()
+				|| (model.getRandom() != null && model.getRandom().length > 0)) {
 			// 前回と違うbmsファイルを読み込んだ場合、BGAオプション変更時はリソースのロード
 			// 同フォルダの違うbmsファイルでも、WAV/,BMP定義が違う可能性があるのでロード
+			// RANDOM定義がある場合はリロード
 			this.bgashow = config.getBga();
 			if (audio != null) {
 				audio.dispose();
@@ -160,7 +164,7 @@ public class PlayerResource {
 			medialoader.start();
 		} else {
 			// windowsだけ動画を含むBGAがあれば読み直す(ffmpegがエラー終了する。今後のupdateで直れば外す)
-			if("\\".equals(System.getProperty("file.separator"))) {
+			if ("\\".equals(System.getProperty("file.separator"))) {
 				Logger.getGlobal().info("WindowsのためBGA再読み込み");
 				if (bga != null) {
 					bga.dispose();
@@ -185,7 +189,7 @@ public class PlayerResource {
 						}
 					}
 				};
-				medialoader.start();				
+				medialoader.start();
 			}
 		}
 		return true;
@@ -196,7 +200,7 @@ public class PlayerResource {
 		if (f.toString().toLowerCase().endsWith(".bmson")) {
 			BMSONDecoder decoder = new BMSONDecoder(BMSModel.LNTYPE_CHARGENOTE);
 			model = decoder.decode(f.toFile());
-			if(model == null) {
+			if (model == null) {
 				return null;
 			}
 			if (model.getTotal() <= 0.0) {
@@ -207,13 +211,14 @@ public class PlayerResource {
 		} else {
 			BMSDecoder decoder = new BMSDecoder(BMSModel.LNTYPE_CHARGENOTE);
 			model = decoder.decode(f.toFile());
-			if(model == null) {
+			if (model == null) {
 				return null;
 			}
+			generator = decoder.getBMSGenerator();
 			// JUDGERANKをbmson互換に変換
-			if(model.getJudgerank() >= 0 && model.getJudgerank() < 4) {
+			if (model.getJudgerank() >= 0 && model.getJudgerank() < 4) {
 				final int[] judgetable = { 40, 70, 90, 100 };
-				model.setJudgerank(judgetable[model.getJudgerank()]);				
+				model.setJudgerank(judgetable[model.getJudgerank()]);
 			} else if (model.getJudgerank() < 0) {
 				model.setJudgerank(100);
 			}
@@ -271,7 +276,7 @@ public class PlayerResource {
 		List<BMSModel> models = new ArrayList();
 		for (Path f : files) {
 			BMSModel model = loadBMSModel(f);
-			if(model == null) {
+			if (model == null) {
 				return false;
 			}
 			models.add(model);
@@ -295,7 +300,7 @@ public class PlayerResource {
 	}
 
 	public void reloadBMSFile() {
-		if(model != null) {
+		if (model != null) {
 			model = loadBMSModel(Paths.get(model.getPath()));
 		}
 		clear();
@@ -383,7 +388,7 @@ public class PlayerResource {
 
 	public int[] getConstraint() {
 		int[] result = new int[constraint.size()];
-		for(int i = 0;i < result.length;i++) {
+		for (int i = 0; i < result.length; i++) {
 			result[i] = constraint.get(i);
 		}
 		return result;
@@ -394,11 +399,11 @@ public class PlayerResource {
 	}
 
 	public void dispose() {
-		if(audio != null) {
+		if (audio != null) {
 			audio.dispose();
 			audio = null;
 		}
-		if(bga != null) {
+		if (bga != null) {
 			bga.dispose();
 			bga = null;
 		}
@@ -410,5 +415,9 @@ public class PlayerResource {
 
 	public void setSongdata(SongData songdata) {
 		this.songdata = songdata;
-	}	
+	}
+
+	public BMSGenerator getGenerator() {
+		return generator;
+	}
 }

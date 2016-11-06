@@ -121,15 +121,13 @@ public class BMSPlayer extends MainState {
 			}
 		}
 
-		if (model.getRandom() > 1) {
+		if (model.getRandom().length > 0) {
 			if (autoplay >= 2) {
-				model.setSelectedIndexOfTimeLines(replay.random);
+				model = resource.getGenerator().generate(replay.rand);
 			} else if (resource.getReplayData().pattern != null) {
-				model.setSelectedIndexOfTimeLines(resource.getReplayData().random);
-			} else {
-				model.setSelectedIndexOfTimeLines((int) (Math.random() * model.getRandom()) + 1);
+				model = resource.getGenerator().generate(resource.getReplayData().rand);
 			}
-			Logger.getGlobal().info("譜面分岐 : " + model.getSelectedIndexOfTimeLines());
+			Logger.getGlobal().info("譜面分岐 : " + Arrays.toString(model.getRandom()));
 		}
 		// 通常プレイの場合は最後のノーツ、オートプレイの場合はBG/BGAを含めた最後のノーツ
 		playtime = (autoplay == 1 ? model.getLastTime() : model.getLastNoteTime()) + TIME_MARGIN;
@@ -659,7 +657,7 @@ public class BMSPlayer extends MainState {
 		// リプレイデータ保存。スコア保存されない場合はリプレイ保存しない
 		resource.getReplayData().keylog = input.getKeyInputLog().toArray(new KeyInputLog[0]);
 		resource.getReplayData().pattern = pattern.toArray(new PatternModifyLog[pattern.size()]);
-		resource.getReplayData().random = model.getSelectedIndexOfTimeLines();
+		resource.getReplayData().rand = model.getRandom();
 		resource.getReplayData().gauge = resource.getConfig().getGauge();
 
 		score.setEpg(judge.getJudgeCount(0, true));
