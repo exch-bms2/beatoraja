@@ -82,15 +82,7 @@ public class VLCMovieProcessor implements MovieProcessor {
 	private Pixmap showing;
 	private Texture showingtex;
 
-	public Texture getBGAData(boolean cont) {
-		if(!cont) {
-			mediaPlayer.stop();
-			play = false;
-		}
-		if (!play) {
-			mediaPlayer.start();
-			play = true;
-		}
+	public Texture getFrame() {
 		if(showing != pixmap) {
 			showing = pixmap;
 			if(showingtex != null) {
@@ -103,6 +95,16 @@ public class VLCMovieProcessor implements MovieProcessor {
 			}
 		}
 		return showingtex;
+	}
+
+	@Override
+	public void play(boolean loop) {
+		mediaPlayer.stop();
+		play = false;
+		if (!play) {
+			mediaPlayer.start();
+			play = true;
+		}
 	}
 
 	public void dispose() {

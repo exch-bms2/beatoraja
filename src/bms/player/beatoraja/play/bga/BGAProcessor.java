@@ -85,7 +85,7 @@ public class BGAProcessor {
 	private ShaderProgram layershader;
 	private ShaderProgram bgrshader;
 
-	private BGImageManager cache;
+	private BGImageProcessor cache;
 
 	private Texture blanktex;
 	
@@ -166,6 +166,7 @@ public class BGAProcessor {
 
 	public void setModel(BMSModel model) {
 		this.model = model;
+		timelines = model.getAllTimeLines();
 		// BMS格納ディレクトリ
 		Path dpath = Paths.get(model.getPath()).getParent();
 
@@ -214,7 +215,7 @@ public class BGAProcessor {
 
 			if (f != null) {
 				for (String mov : mov_extension) {
-					if (f.getFileName().toString().endsWith(mov)) {
+					if (f.getFileName().toString().toLowerCase().endsWith(mov)) {
 						try {
 							MovieProcessor mm = this.loadMovie(id, f);
 							mpgmap.put(id, mm);
@@ -234,7 +235,7 @@ public class BGAProcessor {
 			progress += 1f / model.getBgaList().length;
 			id++;
 		}
-		cache = new BGImageManager(bgamap, BGACACHE_SIZE);
+		cache = new BGImageProcessor(bgamap, BGACACHE_SIZE);
 		Logger.getGlobal().info("BGAファイル読み込み完了。BGA数:" + model.getBgaList().length);
 		progress = 1;
 	}
@@ -256,7 +257,7 @@ public class BGAProcessor {
 	private Pixmap loadPicture(Path dir) {
 		Pixmap tex = null;
 		for (String mov : pic_extension) {
-			if (dir.toString().endsWith(mov)) {
+			if (dir.toString().toLowerCase().endsWith(mov)) {
 				try {
 					tex = new Pixmap(Gdx.files.internal(dir.toString()));
 				} catch (Exception e) {
@@ -301,7 +302,6 @@ public class BGAProcessor {
 		if (model == null) {
 			return;
 		}
-		timelines = model.getAllTimeLines();
 		pos = 0;
 		cache.prepare(timelines);
 		for (MovieProcessor mp : mpgmap.values()) {
@@ -342,7 +342,10 @@ public class BGAProcessor {
 			return null;
 		}
 		if (mpgmap.get(id) != null) {
-			return mpgmap.get(id).getBGAData(cont);
+			if(!cont) {
+				mpgmap.get(id).play(false);
+			}
+			return mpgmap.get(id).getFrame();
 		}
 		return cache.getTexture(id);
 	}
@@ -493,90 +496,3 @@ public class BGAProcessor {
 	}
 }
 
-/**
- * BGIリソース管理用クラス
- * 
- * @author exch
- */
-class BGImageManager {
-
-	private Pixmap[] bgamap;
-	/**
-	 * BGイメージのキャッシュ
-	 */
-	private Texture[] bgacache;
-	private int[] bgacacheid;
-
-	public BGImageManager(Pixmap[] pixmap, int size) {
-		this.bgamap = pixmap;
-		bgacache = new Texture[size];
-		bgacacheid = new int[size];
-		Arrays.fill(bgacacheid, -1);
-	}
-
-	/**
-	 * BGAの初期データをあらかじめキャッシュする
-	 */
-	public void prepare(TimeLine[] timelines) {
-		long l = System.currentTimeMillis();
-		int count = 0;
-		for (TimeLine tl : timelines) {
-			int bga = tl.getBGA();
-			if (bga >= 0 && bgacache[bga % bgacache.length] == null) {
-				Pixmap pix = bgamap[bga];
-				if (pix != null) {
-					bgacache[bga % bgacache.length] = new Texture(pix);
-					bgacacheid[bga % bgacache.length] = bga;
-					count++;
-				}
-			}
-			bga = tl.getLayer();
-			if (bga >= 0 && bgacache[bga % bgacache.length] == null) {
-				Pixmap pix = bgamap[bga];
-				if (pix != null) {
-					bgacache[bga % bgacache.length] = new Texture(pix);
-					bgacacheid[bga % bgacache.length] = bga;
-					count++;
-				}
-			}
-		}
-		Logger.getGlobal().info(
-				"BGAデータの事前Texture化 - BGAデータ数:" + count + " time(ms):" + (System.currentTimeMillis() - l));
-	}
-
-	public Texture getTexture(int id) {
-		final int cid = id % bgacache.length;
-		if (bgacacheid[cid] == id) {
-			return bgacache[cid];
-		}
-		if (bgacache[cid] != null) {
-			bgacache[cid].dispose();
-		}
-		Pixmap pix = bgamap[id];
-		if (pix != null) {
-			bgacache[cid] = new Texture(pix);
-			bgacacheid[cid] = id;
-			return bgacache[cid];
-		}
-		return null;
-
-	}
-
-	/**
-	 * リソースを開放する
-	 */
-	public void dispose() {
-		for (Texture bga : bgacache) {
-			if (bga != null) {
-				bga.dispose();
-			}
-		}
-		bgacache = new Texture[0];
-		for (Pixmap id : bgamap) {
-			if (id != null) {
-				id.dispose();
-			}
-		}
-		bgamap = new Pixmap[0];
-	}
-}
