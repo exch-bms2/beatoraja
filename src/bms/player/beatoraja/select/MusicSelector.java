@@ -77,16 +77,8 @@ public class MusicSelector extends MainState {
 	public static final BarSorter[] SORT = { BarSorter.NAME_SORTER, BarSorter.LEVEL_SORTER, BarSorter.LAMP_SORTER,
 			BarSorter.SCORE_SORTER, BarSorter.MISSCOUNT_SORTER };
 
-	private static final String[] LAMP = { "404040", "800000", "800080", "ff00ff", "40ff40", "f0c000", "ffffff",
-			"ffff88", "88ffff", "ff8888", "ff0000" };
-
 	private static final String[] RANK = { "F-", "F-", "F", "F", "F+", "F+", "E-", "E", "E+", "D-", "D", "D+", "C-",
 			"C", "C+", "B-", "B", "B+", "A-", "A", "A+", "AA-", "AA", "AA+", "AAA-", "AAA", "AAA+", "MAX" };
-
-	private static final String[] RANKCOLOR = { "404040", "400040", "400040", "400040", "400040", "400040", "000040",
-			"000040", "000040", "004040", "004040", "004040", "00c000", "00c000", "00c000", "80c000", "80c000",
-			"80c000", "f08000", "f08000", "f08000", "e0e0e0", "e0e0e0", "e0e0e0", "ffff44", "ffff44", "ffff44",
-			"ffffcc" };
 
 	private static final String[] LNMODE = { "LONG NOTE", "CHARGE NOTE", "HELL CHARGE NOTE" };
 
@@ -149,6 +141,10 @@ public class MusicSelector extends MainState {
 		}
 
 		bar = new BarRenderer(main, this, songdb);
+	}
+
+	boolean existsScoreDataCache(SongData song, int lnmode) {
+		return scorecache[lnmode].containsKey(song.getSha256());
 	}
 
 	IRScoreData readScoreData(SongData song, int lnmode) {
@@ -396,7 +392,7 @@ public class MusicSelector extends MainState {
 
 			if (gb.getMirrorScore() != null) {
 				IRScoreData score = gb.getMirrorScore();
-				titlefont.setColor(Color.valueOf(LAMP[score.getClear()]));
+//				titlefont.setColor(Color.valueOf(LAMP[score.getClear()]));
 				// titlefont.draw(sprite, CLEAR[score.getClear()], 100, 270);
 				titlefont.setColor(Color.WHITE);
 				titlefont.draw(sprite, "EX-SCORE  : " + score.getExscore() + " / " + (score.getNotes() * 2), 100, 240);
@@ -406,7 +402,7 @@ public class MusicSelector extends MainState {
 			}
 			if (gb.getRandomScore() != null) {
 				IRScoreData score = gb.getRandomScore();
-				titlefont.setColor(Color.valueOf(LAMP[score.getClear()]));
+//				titlefont.setColor(Color.valueOf(LAMP[score.getClear()]));
 				// titlefont.draw(sprite, CLEAR[score.getClear()], 100, 130);
 				// titlefont.setColor(Color.WHITE);
 				// titlefont.draw(sprite, "EX-SCORE  : " + score.getExscore() +
@@ -423,64 +419,6 @@ public class MusicSelector extends MainState {
 		}
 
 		titlefont.setColor(Color.WHITE);
-		if (current instanceof FolderBar) {
-			if (config.isFolderlamp()) {
-				int[] lamps = ((FolderBar) current).getLamps();
-				int[] ranks = ((FolderBar) current).getRanks();
-				int count = 0;
-				for (int lamp : lamps) {
-					count += lamp;
-				}
-				sprite.end();
-				shape.begin(ShapeType.Filled);
-
-				if (count != 0) {
-					for (int i = 10, x = 0; i >= 0; i--) {
-						shape.setColor(Color.valueOf(LAMP[i]));
-						shape.rect(100 + x * 400 / count, 360, lamps[i] * 400 / count, 30);
-						x += lamps[i];
-					}
-					for (int i = 27, x = 0; i >= 0; i--) {
-						shape.setColor(Color.valueOf(RANKCOLOR[i]));
-						shape.rect(100 + x * 400 / count, 320, ranks[i] * 400 / count, 30);
-						x += ranks[i];
-					}
-				}
-				shape.end();
-				sprite.begin();
-			}
-		}
-
-		if (current instanceof TableBar) {
-		}
-
-		if (current instanceof TableLevelBar) {
-			if (config.isFolderlamp()) {
-				int[] lamps = ((TableLevelBar) current).getLamps();
-				int[] ranks = ((TableLevelBar) current).getRanks();
-				int count = 0;
-				for (int lamp : lamps) {
-					count += lamp;
-				}
-				sprite.end();
-				shape.begin(ShapeType.Filled);
-
-				if (count != 0) {
-					for (int i = 10, x = 0; i >= 0; i--) {
-						shape.setColor(Color.valueOf(LAMP[i]));
-						shape.rect(100 + x * 400 / count, 360, lamps[i] * 400 / count, 30);
-						x += lamps[i];
-					}
-					for (int i = 27, x = 0; i >= 0; i--) {
-						shape.setColor(Color.valueOf(RANKCOLOR[i]));
-						shape.rect(100 + x * 400 / count, 320, ranks[i] * 400 / count, 30);
-						x += ranks[i];
-					}
-				}
-				shape.end();
-				sprite.begin();
-			}
-		}
 
 		// banner
 		if (current != bannerbar) {
@@ -1291,5 +1229,9 @@ public class MusicSelector extends MainState {
 			play(5);
 			break;
 		}
+	}
+
+	public Bar getSelectedBar() {
+		return bar.getSelected();
 	}
 }

@@ -140,6 +140,7 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 					}
 				}
 				if (imagefile.exists()) {
+					// TODO ムービー形式対応
 					try {
 						imagelist.add(new Texture(Gdx.files.internal(imagefile.getPath())));
 					} catch (GdxRuntimeException e) {
