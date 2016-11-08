@@ -102,7 +102,7 @@ public class MusicResult extends MainState {
 			resource.addCourseGauge(resource.getGauge());
 		}
 
-		if(skin != null) {
+		if (skin != null) {
 			skin.dispose();
 		}
 		if (resource.getConfig().getSkin()[7] != null) {
@@ -113,8 +113,8 @@ public class MusicResult extends MainState {
 				Rectangle srcr = RESOLUTION[header.getResolution()];
 				Rectangle dstr = RESOLUTION[resource.getConfig().getResolution()];
 				LR2ResultSkinLoader dloader = new LR2ResultSkinLoader(srcr.width, srcr.height, dstr.width, dstr.height);
-				skin = dloader.loadResultSkin(Paths.get(sc.getPath()).toFile(), this, header,
-						loader.getOption(), sc.getProperty());
+				skin = dloader.loadResultSkin(Paths.get(sc.getPath()).toFile(), this, header, loader.getOption(),
+						sc.getProperty());
 			} catch (IOException e) {
 				e.printStackTrace();
 				skin = new MusicResultSkin(RESOLUTION[resource.getConfig().getResolution()]);
@@ -225,11 +225,11 @@ public class MusicResult extends MainState {
 			if (time > getSkin().getInput()) {
 				boolean[] keystate = main.getInputProcessor().getKeystate();
 				long[] keytime = main.getInputProcessor().getTime();
-				if (resource.getScoreData() == null || ((keystate[0] && keytime[0] != 0)
-						|| (keystate[2] && keytime[2] != 0) || (keystate[4] && keytime[4] != 0)
-						|| (keystate[6] && keytime[6] != 0))) {
+				if (resource.getScoreData() == null
+						|| ((keystate[0] && keytime[0] != 0) || (keystate[2] && keytime[2] != 0)
+								|| (keystate[4] && keytime[4] != 0) || (keystate[6] && keytime[6] != 0))) {
 					keytime[0] = keytime[2] = keytime[4] = keytime[6] = 0;
-					if(skin.getRankTime() != 0 && getTimer()[TIMER_RESULT_UPDATESCORE] == Long.MIN_VALUE) {
+					if (skin.getRankTime() != 0 && getTimer()[TIMER_RESULT_UPDATESCORE] == Long.MIN_VALUE) {
 						getTimer()[TIMER_RESULT_UPDATESCORE] = time;
 					} else {
 						getTimer()[TIMER_FADEOUT] = time;
@@ -287,8 +287,8 @@ public class MusicResult extends MainState {
 		oldcombo = score.getCombo();
 		rate = newscore.getExscore() * 10000 / (resource.getBMSModel().getTotalNotes() * 2);
 		next = 0;
-		for(int i = 2;i < 9;i++) {
-			if(newscore.getExscore() < i * 1111 * (resource.getBMSModel().getTotalNotes() * 2) / 10000) {
+		for (int i = 2; i < 9; i++) {
+			if (newscore.getExscore() < i * 1111 * (resource.getBMSModel().getTotalNotes() * 2) / 10000) {
 				next = newscore.getExscore() - i * 1111 * (resource.getBMSModel().getTotalNotes() * 2) / 10000;
 				break;
 			}
@@ -300,12 +300,14 @@ public class MusicResult extends MainState {
 		for (TimeLine tl : resource.getBMSModel().getAllTimeLines()) {
 			for (int i = 0; i < 18; i++) {
 				Note n = tl.getNote(i);
-				if (n != null && !(resource.getBMSModel().getLntype() == BMSModel.LNTYPE_LONGNOTE && n instanceof LongNote && ((LongNote)n).getEnd() == tl)) {
+				if (n != null
+						&& !(resource.getBMSModel().getLntype() == BMSModel.LNTYPE_LONGNOTE && n instanceof LongNote && ((LongNote) n)
+								.getEndnote().getSection() == tl.getSection())) {
 					int state = n.getState();
 					int time = n.getTime();
-					if(n instanceof LongNote && ((LongNote)n).getEnd() == tl) {
-						state = ((LongNote)n).getEndstate();
-						time = ((LongNote)n).getEndtime();
+					if (n instanceof LongNote && ((LongNote) n).getEndnote().getSection() == tl.getSection()) {
+						state = ((LongNote) n).getEndnote().getState();
+						time = ((LongNote) n).getEndnote().getTime();
 					}
 					if (state >= 1) {
 						count++;
@@ -454,8 +456,8 @@ public class MusicResult extends MainState {
 		case NUMBER_DIFF_HIGHSCORE:
 		case NUMBER_DIFF_HIGHSCORE2:
 			return resource.getScoreData().getExscore() - oldexscore;
-			case NUMBER_DIFF_NEXTRANK:
-				return next;
+		case NUMBER_DIFF_NEXTRANK:
+			return next;
 		case NUMBER_MISSCOUNT:
 		case NUMBER_MISSCOUNT2:
 			if (resource.getScoreData() != null) {
@@ -502,10 +504,10 @@ public class MusicResult extends MainState {
 				count += getJudgeCount(i, false);
 			}
 			return count;
-			case NUMBER_AVERAGE_DURATION:
-				return (int)avgduration;
-			case NUMBER_AVERAGE_DURATION_AFTERDOT:
-				return ((int)(avgduration * 100)) % 100;
+		case NUMBER_AVERAGE_DURATION:
+			return (int) avgduration;
+		case NUMBER_AVERAGE_DURATION_AFTERDOT:
+			return ((int) (avgduration * 100)) % 100;
 		}
 		return super.getNumberValue(id);
 	}
@@ -522,23 +524,23 @@ public class MusicResult extends MainState {
 		final SpriteBatch sprite = getMainController().getSpriteBatch();
 		detail.render(sprite, titlefont, shape, time, skin.getJudgeRegion());
 	}
-	
+
 	private int rate;
 	private int oldrate;
 	private int next;
-	
+
 	public boolean getBooleanValue(int id) {
 		final PlayerResource resource = getMainController().getPlayerResource();
 		final IRScoreData score = resource.getScoreData();
-		switch(id) {
-			case OPTION_DISABLE_SAVE_SCORE:
-				return !resource.isUpdateScore();
-			case OPTION_ENABLE_SAVE_SCORE:
-				return resource.isUpdateScore();
-			case OPTION_RESULT_CLEAR:
-				return score.getClear() != GrooveGauge.CLEARTYPE_FAILED;
-			case OPTION_RESULT_FAIL:
-				return score.getClear() == GrooveGauge.CLEARTYPE_FAILED;
+		switch (id) {
+		case OPTION_DISABLE_SAVE_SCORE:
+			return !resource.isUpdateScore();
+		case OPTION_ENABLE_SAVE_SCORE:
+			return resource.isUpdateScore();
+		case OPTION_RESULT_CLEAR:
+			return score.getClear() != GrooveGauge.CLEARTYPE_FAILED;
+		case OPTION_RESULT_FAIL:
+			return score.getClear() == GrooveGauge.CLEARTYPE_FAILED;
 		case OPTION_RESULT_F_1P:
 		case OPTION_NOW_F_1P:
 			return rate <= 2222;
@@ -577,7 +579,7 @@ public class MusicResult extends MainState {
 			return oldrate > 6666 && oldrate <= 7777;
 		case OPTION_BEST_AA_1P:
 			return oldrate > 7777 && oldrate <= 8888;
-		case OPTION_BEST_AAA_1P:			
+		case OPTION_BEST_AAA_1P:
 			return oldrate > 8888;
 		case OPTION_UPDATE_SCORE:
 			return score.getExscore() > oldexscore;
@@ -585,7 +587,7 @@ public class MusicResult extends MainState {
 			return score.getCombo() > oldcombo;
 		case OPTION_UPDATE_MISSCOUNT:
 			return score.getMinbp() < oldmisscount;
-		case OPTION_UPDATE_SCORERANK:			
+		case OPTION_UPDATE_SCORERANK:
 			return rate / 1111 > oldrate / 1111;
 
 		}

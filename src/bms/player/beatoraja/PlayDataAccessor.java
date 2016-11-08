@@ -366,6 +366,7 @@ public class PlayDataAccessor {
 	public ReplayData readReplayData(BMSModel model, int lnmode, int index) {
 		if (existsReplayData(model, lnmode, index)) {
 			Json json = new Json();
+			json.setIgnoreUnknownFields(true);
 			try {
 				return json.fromJson(ReplayData.class,
 						new FileReader(this.getReplayDataFilePath(model, lnmode, index)));
