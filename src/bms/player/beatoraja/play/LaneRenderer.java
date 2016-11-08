@@ -93,7 +93,7 @@ public class LaneRenderer {
 	private final int[] laneassign;
 
 	private int currentduration;
-
+	
 	public LaneRenderer(BMSPlayer main, SpriteBatch sprite, ShapeRenderer shape, BitmapFont font, PlaySkin skin,
 			PlayerResource resource, BMSModel model, int[] mode) {
 		judge = new int[20];
@@ -465,7 +465,8 @@ public class LaneRenderer {
 				boolean b = true;
 				for (int lane = 0; lane < laneregion.length; lane++) {
 					final Note note = tl.getNote(laneassign[lane]);
-					if (note != null && note instanceof LongNote && ((LongNote) note).getEnd().getTime() >= time) {
+					if (note != null && ((note instanceof LongNote && ((LongNote) note).getEnd().getTime() >= time)
+							|| (config.isShowpastnote() && note instanceof NormalNote && note.getState() == 0))) {
 						b = false;
 						break;
 					}
@@ -480,7 +481,7 @@ public class LaneRenderer {
 				if (note != null) {
 					if (note instanceof NormalNote) {
 						// draw normal note
-						if (tl.getTime() >= time) {
+						if (tl.getTime() >= time || (config.isShowpastnote() && note.getState() == 0)) {
 							final TextureRegion s = config.isMarkprocessednote() && note.getState() != 0 ? pnoteimage[lane]
 									: noteimage[lane];
 							sprite.draw(s, laneregion[lane].x, y, laneregion[lane].width, scale);

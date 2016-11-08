@@ -131,6 +131,8 @@ public class Config {
 
 	private boolean showhiddennote = false;
 	
+	private boolean showpastnote = false;
+	
 	private String bgmpath = "";
 	
 	private String soundpath = "";
@@ -519,6 +521,14 @@ public class Config {
 
 	public void setBgvolume(float bgvolume) {
 		this.bgvolume = bgvolume;
+	}
+
+	public boolean isShowpastnote() {
+		return showpastnote;
+	}
+
+	public void setShowpastnote(boolean showpastnote) {
+		this.showpastnote = showpastnote;
 	}
 
 	public static class SkinConfig {
