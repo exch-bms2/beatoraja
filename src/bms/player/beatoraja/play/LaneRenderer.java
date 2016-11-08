@@ -93,7 +93,7 @@ public class LaneRenderer {
 	private final int[] laneassign;
 
 	private int currentduration;
-	
+
 	public LaneRenderer(BMSPlayer main, SpriteBatch sprite, ShapeRenderer shape, BitmapFont font, PlaySkin skin,
 			PlayerResource resource, BMSModel model, int[] mode) {
 		judge = new int[20];
@@ -365,7 +365,7 @@ public class LaneRenderer {
 				startpressed = false;
 			}
 		}
-		
+
 		final float rxhs = (hu - hl) * hispeed;
 		float y = hl;
 
@@ -381,8 +381,8 @@ public class LaneRenderer {
 				final TimeLine tl = timelines[i];
 				if (tl.getTime() >= time) {
 					float rate = (tl.getSection() - (i > 0 ? timelines[i - 1].getSection() : 0))
-							/ (tl.getTime() - (i > 0 ? timelines[i - 1].getTime()
-									+ timelines[i - 1].getStop() : 0)) * rxhs;
+							/ (tl.getTime() - (i > 0 ? timelines[i - 1].getTime() + timelines[i - 1].getStop() : 0))
+							* rxhs;
 					for (int j = color.length - 1; j >= 0; j--) {
 						shape.setColor(color[j]);
 						int nj = j > 0 ? judgetime[j - 1] : 0;
@@ -465,8 +465,9 @@ public class LaneRenderer {
 				boolean b = true;
 				for (int lane = 0; lane < laneregion.length; lane++) {
 					final Note note = tl.getNote(laneassign[lane]);
-					if (note != null && ((note instanceof LongNote && ((LongNote) note).getEnd().getTime() >= time)
-							|| (config.isShowpastnote() && note instanceof NormalNote && note.getState() == 0))) {
+					if (note != null
+							&& ((note instanceof LongNote && ((LongNote) note).getEndnote().getSectiontime() >= time) || (config
+									.isShowpastnote() && note instanceof NormalNote && note.getState() == 0))) {
 						b = false;
 						break;
 					}
@@ -488,7 +489,7 @@ public class LaneRenderer {
 						}
 					} else if (note instanceof LongNote) {
 						final LongNote ln = (LongNote) note;
-						if (ln.getStart() == tl && ln.getEnd().getTime() >= time) {
+						if (ln.getSection() == tl.getSection() && ln.getEndnote().getSectiontime() >= time) {
 							// if (((LongNote) note).getEnd() == null) {
 							// Logger.getGlobal().warning(
 							// "LN終端がなく、モデルが正常に表示されません。LN開始時間:"
@@ -497,7 +498,7 @@ public class LaneRenderer {
 							// .getTime());
 							// } else {
 							float dy = 0;
-							for (int j = 0; timelines[i + j] != ln.getEnd(); j++) {
+							for (int j = 0; timelines[i + j].getSection() != ln.getEndnote().getSection(); j++) {
 								if (timelines[i + j + 1].getTime() >= time) {
 									if (timelines[i + j].getTime() + timelines[i + j].getStop() > time) {
 										dy += (float) (timelines[i + j + 1].getSection() - timelines[i + j]
@@ -505,8 +506,7 @@ public class LaneRenderer {
 									} else {
 										dy += (timelines[i + j + 1].getSection() - timelines[i + j].getSection())
 												* (timelines[i + j + 1].getTime() - time)
-												/ (timelines[i + j + 1].getTime() - timelines[i + j].getTime())
-												* rxhs;
+												/ (timelines[i + j + 1].getTime() - timelines[i + j].getTime()) * rxhs;
 									}
 								}
 							}

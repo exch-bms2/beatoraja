@@ -415,7 +415,7 @@ public class NoteShuffleModifier extends PatternModifier {
                     Note hn = hnotes[random[i]];
                     if (n instanceof LongNote) {
                         LongNote ln2 = (LongNote) n;
-                        if (ln2.getStart() == tl) {
+                        if (ln2.getSection() == tl.getSection()) {
                             tl.setNote(i, n);
                             ln[i] = random[i];
                         } else {

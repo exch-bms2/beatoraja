@@ -173,8 +173,9 @@ public class LaneShuffleModifier extends PatternModifier {
 				for (int i = 0; i < lanes; i++) {
 					if(clone[random[i]]) {
 						if(notes[random[i]] != null) {
-							if(notes[random[i]] instanceof LongNote && ((LongNote)notes[random[i]]).getEnd() == tl) {
-								tl.setNote(i, ((LongNote) notes[random[i]]).getStart().getNote(i));
+							if(notes[random[i]] instanceof LongNote && ((LongNote)notes[random[i]]).getEndnote().getSection() == tl.getSection()) {
+								LongNote ln = (LongNote) model.getTimeLine(notes[random[i]].getSection(), notes[random[i]].getSectiontime()).getNote(i);
+								tl.setNote(i, ln);
 							} else {
 								tl.setNote(i, (Note) notes[random[i]].clone());
 							}

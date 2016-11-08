@@ -121,7 +121,7 @@ public class BMSPlayer extends MainState {
 			}
 		}
 
-		if (model.getRandom().length > 0) {
+		if (model.getRandom() != null && model.getRandom().length > 0) {
 			if (autoplay >= 2) {
 				model = resource.getGenerator().generate(replay.rand);
 			} else if (resource.getReplayData().pattern != null) {
@@ -798,7 +798,7 @@ public class BMSPlayer extends MainState {
 					Note note = tl.getNote(model.getUseKeys() == 9 && lane >= 5 ? lane + 5 : lane);
 					if (note != null) {
 						if (note instanceof LongNote) {
-							if (((LongNote) note).getEnd() == tl) {
+							if (((LongNote) note).getEndnote().getSection() == tl.getSection()) {
 								keylog.add(new KeyInputLog(i, lane, false));
 								if (model.getLntype() != 0 && sc && (lane == 7 || lane == 16)) {
 									// BSS処理
