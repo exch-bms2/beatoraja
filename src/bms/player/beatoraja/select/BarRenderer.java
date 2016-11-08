@@ -342,7 +342,18 @@ public class BarRenderer {
 				titlefont.dispose();
 			}
 			titlefont = generator.generateFont(parameter);
-			Arrays.sort(currentsongs, MusicSelector.SORT[select.getSort()]);
+
+            final Config config = select.getResource().getConfig();
+            for (Bar b : currentsongs) {
+                if (b instanceof SongBar) {
+                    SongData sd = ((SongBar) b).getSongData();
+                    if(select.existsScoreDataCache(sd, config.getLnmode())) {
+                        b.setScore(select.readScoreData(sd, config.getLnmode()));
+                    }
+                }
+            }
+
+            Arrays.sort(currentsongs, MusicSelector.SORT[select.getSort()]);
 
 			selectedindex = 0;
 
@@ -436,7 +447,9 @@ public class BarRenderer {
 			for (Bar bar : bars) {
 				if (bar instanceof SongBar) {
 					SongData sd = ((SongBar) bar).getSongData();
-					bar.setScore(select.readScoreData(sd, config.getLnmode()));
+                    if(bar.getScore() == null) {
+                        bar.setScore(select.readScoreData(sd, config.getLnmode()));
+                    }
 					boolean[] replay = new boolean[MusicSelector.REPLAY];
 					for (int i = 0; i < MusicSelector.REPLAY; i++) {
 						replay[i] = main.getPlayDataAccessor().existsReplayData(sd.getSha256(), sd.hasLongNote(),

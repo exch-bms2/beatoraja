@@ -65,16 +65,7 @@ public class FFmpegProcessor implements MovieProcessor {
 	}
 
 	@Override
-	public Texture getBGAData(boolean cont) {
-		if (movieseek == null || !cont) {
-			if (movieseek != null) {
-				movieseek.restart = true;
-				movieseek.interrupt();
-			} else {
-				movieseek = new MovieSeekThread();
-				movieseek.start();				
-			}
-		}
+	public Texture getFrame() {
 		if (showing != pixmap) {
 			showing = pixmap;
 			if (showingtex != null) {
@@ -93,6 +84,7 @@ public class FFmpegProcessor implements MovieProcessor {
 
 		public boolean stop = false;
 		public boolean restart = false;
+		public boolean loop = false;
 
 		public void run() {
 			try {
@@ -120,6 +112,9 @@ public class FFmpegProcessor implements MovieProcessor {
 							framecount++;
 						}
 						if (frame == null) {
+							if(loop) {
+								restart = true;
+							}
 							try {
 								sleep(3600000);
 							} catch (InterruptedException e) {
@@ -181,6 +176,18 @@ public class FFmpegProcessor implements MovieProcessor {
 		}
 		if (showingtex != null) {
 			showingtex.dispose();
+		}
+	}
+
+	public void play(boolean loop) {
+		if (movieseek != null) {
+			movieseek.loop = loop;
+			movieseek.restart = true;
+			movieseek.interrupt();
+		} else {
+			movieseek = new MovieSeekThread();
+			movieseek.loop = loop;
+			movieseek.start();
 		}
 	}
 

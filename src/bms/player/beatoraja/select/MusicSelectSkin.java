@@ -102,8 +102,15 @@ public class MusicSelectSkin extends Skin {
 		addImage(new TextureRegion(st, 0, 816, 220, 24),0, 95, 482, 165, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_FOLDERBAR, 0, 0);
 		addNumber(new SkinNumber(ntr[0], 0, 5, 0, NUMBER_FOLDER_TOTALSONGS), 0, 260, 482, 18, 18, 0, 255, 255,
 				255, 255, 0, 0, 0, 0, 0, 0, OPTION_FOLDERBAR, 0, 0);
+		// lamp/rank distribution graph
 		addImage(new TextureRegion(st, 400, 648, 96, 24),0, 36, 362, 48, 24, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_FOLDERBAR, 0, 0);
+		SkinDistributionGraph lampgraph = new SkinDistributionGraph(0);
+		setDestination(lampgraph,0, 90, 362, 300, 24, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_FOLDERBAR, 0, 0);
+		add(lampgraph);
 		addImage(new TextureRegion(st, 0, 672, 96, 24),0, 36, 322, 48, 24, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_FOLDERBAR, 0, 0);
+		SkinDistributionGraph rankgraph = new SkinDistributionGraph(1);
+		setDestination(rankgraph,0, 90, 322, 300, 24, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_FOLDERBAR, 0, 0);
+		add(rankgraph);
 
 		// key
 		SkinImage bg = new SkinImage(IMAGE_BANNER);
