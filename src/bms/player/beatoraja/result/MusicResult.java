@@ -9,12 +9,12 @@ import bms.model.LongNote;
 import bms.model.Note;
 import bms.model.TimeLine;
 import bms.player.beatoraja.play.audio.SoundProcessor;
+import bms.player.beatoraja.play.gauge.GrooveGauge;
 import bms.player.beatoraja.select.MusicSelector;
 
 import bms.model.BMSModel;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.Config.SkinConfig;
-import bms.player.beatoraja.gauge.GrooveGauge;
 import bms.player.beatoraja.skin.LR2ResultSkinLoader;
 import bms.player.beatoraja.skin.LR2SkinHeader;
 import bms.player.beatoraja.skin.LR2SkinHeaderLoader;

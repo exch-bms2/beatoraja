@@ -1,4 +1,4 @@
-package bms.player.beatoraja.gauge;
+package bms.player.beatoraja.play.gauge;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
@@ -108,8 +108,6 @@ public abstract class GrooveGauge {
 	public int getClearType() {
 		return cleartype;
 	}
-
-	public abstract void draw(SpriteBatch sprite, TextureRegion[] images, float x, float y, float w, float h);
 
 	public float getMaxValue() {
 		return maxValue;

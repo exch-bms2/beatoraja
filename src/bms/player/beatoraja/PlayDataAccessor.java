@@ -10,7 +10,7 @@ import java.util.logging.Logger;
 
 import bms.model.BMSModel;
 import bms.model.TimeLine;
-import bms.player.beatoraja.gauge.GrooveGauge;
+import bms.player.beatoraja.play.gauge.GrooveGauge;
 import bms.player.beatoraja.song.SongData;
 
 import com.badlogic.gdx.utils.Json;

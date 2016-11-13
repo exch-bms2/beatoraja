@@ -1,7 +1,8 @@
 package bms.player.beatoraja.result;
 
 import bms.player.beatoraja.PlayerResource;
-import bms.player.beatoraja.gauge.*;
+import bms.player.beatoraja.play.gauge.*;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;

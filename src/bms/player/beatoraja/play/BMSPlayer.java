@@ -8,13 +8,13 @@ import java.util.logging.Logger;
 import bms.model.*;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.Config.SkinConfig;
-import bms.player.beatoraja.gauge.*;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyInputLog;
 import bms.player.beatoraja.pattern.*;
 import bms.player.beatoraja.play.audio.AudioProcessor;
 import bms.player.beatoraja.play.audio.SoundProcessor;
 import bms.player.beatoraja.play.bga.BGAProcessor;
+import bms.player.beatoraja.play.gauge.*;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.song.SongData;
 

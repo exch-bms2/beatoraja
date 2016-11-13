@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.*;
 
 import bms.player.beatoraja.play.audio.SoundProcessor;
+import bms.player.beatoraja.play.gauge.GrooveGauge;
 import bms.player.beatoraja.select.MusicSelector;
 import com.badlogic.gdx.math.Rectangle;
 import java.util.logging.Logger;
@@ -19,7 +20,6 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFont
 
 import bms.model.BMSModel;
 import bms.player.beatoraja.*;
-import bms.player.beatoraja.gauge.GrooveGauge;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
 import static bms.player.beatoraja.Resolution.*;

@@ -7,10 +7,10 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import bms.model.*;
-import bms.player.beatoraja.gauge.GrooveGauge;
 import bms.player.beatoraja.play.audio.AudioProcessor;
 import bms.player.beatoraja.play.audio.SoundProcessor;
 import bms.player.beatoraja.play.bga.BGAProcessor;
+import bms.player.beatoraja.play.gauge.GrooveGauge;
 import bms.player.beatoraja.song.SongData;
 
 /**
