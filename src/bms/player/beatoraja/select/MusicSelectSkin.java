@@ -1,22 +1,13 @@
 package bms.player.beatoraja.select;
 
-import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.skin.*;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.*;
-import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
 import com.badlogic.gdx.math.Rectangle;
 
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
 public class MusicSelectSkin extends Skin {
-
-	/**
-	 * ランプ画像
-	 */
-	private SkinImage[] lamp = new SkinImage[11];
-
-	private SkinImage[] trophy = new SkinImage[3];
 
 	private int centerBar;
 	private int[] clickableBar = new int[0];
@@ -41,14 +32,14 @@ public class MusicSelectSkin extends Skin {
 			bar[i] = new TextureRegion[]{new TextureRegion(bart, 0, i * 30, 500, 30)};
 		}
 		TextureRegion[][] lampt = TextureRegion.split(new Texture("skin/lamp.png"), 15, 30);
+        SkinImage[] lamp = new SkinImage[11];
 		for (int i = 0; i < lamp.length; i++) {
 			lamp[i] = new SkinImage(lampt[i], 100);
-			// TODO ソングバーのスケーリング実装時点で切り替え
-//			setDestination(lamp[i], 0, 0, 2, 15, 34, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-			lamp[i].setDestination(0, 0, 2, 15, 34, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+			setDestination(lamp[i], 0, 0, 2, 15, 34, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		}
 
 		TextureRegion[][] ttrophy = TextureRegion.split(new Texture("skin/trophy.png"), 32, 32);
+		SkinImage[] trophy = new SkinImage[3];
 		trophy[0] = new SkinImage(ttrophy[0][10]);
 		trophy[1] = new SkinImage(ttrophy[0][11]);
 		trophy[2] = new SkinImage(ttrophy[0][12]);
@@ -170,7 +161,28 @@ public class MusicSelectSkin extends Skin {
 		addNumber(new SkinNumber(ntr[0], 0, 10, 0, NUMBER_TOTALPLAYNOTES), 0, 430, 102, 18, 18, 0,
 				255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
-		add(new SkinBarObject(bar, 0));
+        SkinBar barobj = new SkinBar(bar, 0);
+		add(barobj);
+        for(int i = 0;i < 22;i++) {
+            setDestination(barobj.makeBarImages(false, i),0, 800, 720 - i * 36, 500, 36, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+            setDestination(barobj.makeBarImages(true, i),0, 780, 720 - i * 36, 500, 36, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        }
+        setCenterBar(10);
+        barobj.setLamp(lamp);
+		barobj.setTrophy(trophy);
+		SkinBar.SkinBarText bartext = new SkinBar.SkinBarText("skin/VL-Gothic-Regular.ttf", 0, 24, 2);
+		setDestination(bartext, 0, 80, 30, 18, 24, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		barobj.setBarText(bartext);
+		for(int i = 0;i < 7;i++) {
+			barobj.getBarlevel()[i] = new SkinNumber(ntr[0], 0, 2, 0);
+		}
+		setDestination(barobj.getBarlevel()[0], 0, 20, 8, 24, 24, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		setDestination(barobj.getBarlevel()[1], 0, 20, 8, 24, 24, 0, 255, 0, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		setDestination(barobj.getBarlevel()[2], 0, 20, 8, 24, 24, 0, 255, 0, 0, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		setDestination(barobj.getBarlevel()[3], 0, 20, 8, 24, 24, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		setDestination(barobj.getBarlevel()[4], 0, 20, 8, 24, 24, 0, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		setDestination(barobj.getBarlevel()[5], 0, 20, 8, 24, 24, 0, 255, 255, 0, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		setDestination(barobj.getBarlevel()[6], 0, 20, 8, 24, 24, 0, 255, 128, 128, 128, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 		addImage(new TextureRegion(st, 0, 10, 10, 251), 0, 1240, 75, 10, 570, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		SkinSlider seek = new SkinSlider(new TextureRegion[] { new TextureRegion(st, 0, 265, 17, 24) }, 0, 2,
@@ -339,18 +351,6 @@ public class MusicSelectSkin extends Skin {
 				255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 	}
 
-	public SkinImage[] getLamp() {
-		return lamp;
-	}
-
-	public void setLamp(SkinImage[] lamp) {
-		this.lamp = lamp;
-	}
-
-	public SkinImage[] getTrophy() {
-		return trophy;
-	}
-
 	public int[] getClickableBar() {
 		return clickableBar;
 	}
@@ -367,30 +367,4 @@ public class MusicSelectSkin extends Skin {
 		this.centerBar = centerBar;
 	}
 
-	public static class SkinBarObject extends SkinObject {
-
-		private SkinImage[] barimageon = new SkinImage[30];
-		private SkinImage[] barimageoff = new SkinImage[30];
-
-		public SkinBarObject(TextureRegion[][] images, int cycle) {
-			for(int i = 0;i < barimageon.length;i++) {
-				barimageon[i] = new SkinImage(images, cycle);
-				barimageoff[i] = new SkinImage(images, cycle);
-			}
-		}
-
-		public SkinImage[] getBarImages(boolean on) {
-			return on ? barimageon : barimageoff;
-		}
-
-		@Override
-		public void draw(SpriteBatch sprite, long time, MainState state) {
-			((MusicSelector)state).renderBar(this, (int)time);
-		}
-
-		@Override
-		public void dispose() {
-
-		}
-	}
 }

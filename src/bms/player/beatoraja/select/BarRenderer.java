@@ -9,13 +9,11 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.logging.Logger;
 
-import bms.player.beatoraja.select.MusicSelectSkin.SkinBarObject;
-import bms.player.beatoraja.skin.SkinImage;
+import bms.player.beatoraja.skin.SkinNumber;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
@@ -27,10 +25,14 @@ import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.Json;
 
 import bms.player.beatoraja.*;
-import bms.player.beatoraja.TableData.CourseData;
 import bms.player.beatoraja.song.SongData;
 import bms.player.beatoraja.song.SongDatabaseAccessor;
 
+/**
+ * 楽曲バー描画用クラス
+ *
+ * @author exch
+ */
 public class BarRenderer {
 
 	private MainController main;
@@ -64,6 +66,9 @@ public class BarRenderer {
 		this.select = select;
 
 		generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/VL-Gothic-Regular.ttf"));
+		FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+		parameter.size = 24;
+		titlefont = generator.generateFont(parameter);
 		try {
 			Files.createDirectory(Paths.get("table"));
 		} catch(Exception e) {
@@ -136,27 +141,38 @@ public class BarRenderer {
 		search.add(bar);
 	}
 
-	public void render(SpriteBatch sprite, ShapeRenderer shape, MusicSelectSkin skin, SkinBarObject baro, float w, float h, long duration,
-			int angle, int time) {
+	public void render(SpriteBatch sprite, ShapeRenderer shape, MusicSelectSkin skin, SkinBar baro, float w, float h, long duration,
+                       int angle, int time) {
 		if(skin == null) {
 			return;
 		}
-		// draw song bar
-		final float barh = 36;
-		for (int i = 0; i < h / barh + 2; i++) {
-			int index = (int) (selectedindex + currentsongs.length * 100 + i - h / barh / 2) % currentsongs.length;
-			Bar sd = currentsongs[index];
-			float x = w * 3 / 5;
-			if (i == (int) ((h / barh + 1) / 2)) {
-				x -= 20;
-			}
-			float y = h - i * barh;
 
-			if (duration != 0) {
-				float dy = barh * (Math.abs(angle) - duration + System.currentTimeMillis()) / angle
-						+ (angle >= 0 ? -1 : 1) * barh;
-				y += dy;
+		if(bartextupdate) {
+			bartextupdate = false;
+			Set<Character> charset = new HashSet<Character>();
+
+			for (Bar song : currentsongs) {
+				for(char c : song.getTitle().toCharArray()) {
+					charset.add(c);
+				}
 			}
+
+			char[] chars = new char[charset.size()];
+			Character[] chars2 = charset.toArray(new Character[0]);
+			for(int i = 0;i < chars.length;i++) {
+				chars[i] = chars2[i];
+			}
+			baro.getBarText().setText(String.valueOf(chars));
+		}
+		// draw song bar
+		for (int i = 0; i < 60; i++) {
+            boolean on = (i == skin.getCenterBar());
+            if(baro.getBarImages(on, i) == null) {
+                continue;
+            }
+			int index = (int) (selectedindex + currentsongs.length * 100 + i - skin.getCenterBar()) % currentsongs.length;
+			Bar sd = currentsongs[index];
+
 			int value = -1;
 			if (sd instanceof TableBar) {
 				value = 2;
@@ -179,15 +195,18 @@ public class BarRenderer {
 			if (sd instanceof CommandBar) {
 				value = 5;
 			}
-			
-			if(value != -1) {
+
+            float dy = 0;
+            Rectangle r = baro.getBarImages(on, i).getDestination(time, select);
+            if (duration != 0) {
+                dy = r.height * (Math.abs(angle) - duration + System.currentTimeMillis()) / angle
+                        + (angle >= 0 ? -1 : 1) * r.height;
+            }
+            if(value != -1) {
 				sprite.begin();
-				TextureRegion barimage = baro.getBarImages(true)[0].getImage(value, time, select);				
-				sprite.draw(barimage, x, y, w * 2 / 5, barh);
-				titlefont.setColor(Color.BLACK);
-				titlefont.draw(sprite, sd.getTitle(), x + 62, y + barh - 8);
-				titlefont.setColor(Color.WHITE);
-				titlefont.draw(sprite, sd.getTitle(), x + 60, y + barh - 6);
+				TextureRegion barimage = baro.getBarImages(on, i).getImage(value, time, select);
+                baro.getBarImages(on, i).draw(sprite, time, select, value, 0, (int) dy);
+				baro.getBarText().draw(sprite, time, select, sd.getTitle(), (int)r.x, (int)(r.y + dy));
 				sprite.end();
 			}
 
@@ -204,9 +223,9 @@ public class BarRenderer {
 				TableData.TrophyData trophy = gb.getTrophy();
 				if (trophy != null) {
 					for (int j = 0; j < TROPHY.length; j++) {
-						if (TROPHY[j].equals(trophy.getName()) && skin.getTrophy()[j] != null) {
+						if (TROPHY[j].equals(trophy.getName()) && baro.getTrophy()[j] != null) {
 							sprite.begin();
-							sprite.draw(skin.getTrophy()[j].getImage(time, select), x + 20, y + 4);
+							sprite.draw(baro.getTrophy()[j].getImage(time, select), r.x + 20, r.y + dy + 4);
 							sprite.end();
 							break;
 						}
@@ -214,24 +233,31 @@ public class BarRenderer {
 				}
 			}
 
-			if (skin.getLamp()[sd.getLamp()] != null) {
+			if (baro.getLamp()[sd.getLamp()] != null) {
 				sprite.begin();
-				skin.getLamp()[sd.getLamp()].draw(sprite, time, select, (int)x, (int)y);
+				baro.getLamp()[sd.getLamp()].draw(sprite, time, select, (int)r.x, (int)(r.y + dy));
 				sprite.end();
 			}
 
 			if (sd instanceof SongBar) {
-				SongData song = ((SongBar) sd).getSongData();
 				sprite.begin();
-				String level = String.format("%2d", song.getLevel());
-				titlefont.setColor(Color.BLACK);
-				titlefont.draw(sprite, level, x + 22, y + barh - 8);
-				final Color[] difficulty = { Color.GRAY, Color.GREEN, Color.BLUE, Color.YELLOW, Color.RED, Color.PURPLE };
-				titlefont
-						.setColor(song.getDifficulty() >= 0 && song.getDifficulty() < difficulty.length ? difficulty[song
-								.getDifficulty()] : Color.WHITE);
-				titlefont.draw(sprite, level, x + 20, y + barh - 6);
+				SongData song = ((SongBar) sd).getSongData();
+
+				SkinNumber leveln = baro.getBarlevel()[song.getDifficulty() >= 0 && song.getDifficulty() < 7 ? song
+						.getDifficulty() : 0];
+				if(leveln != null) {
+					leveln.draw(sprite, time, song.getLevel(), select, (int)r.x, (int)(r.y + dy));
+				}
 				sprite.end();
+
+//				String level = String.format("%2d", song.getLevel());
+//				titlefont.setColor(Color.BLACK);
+//				titlefont.draw(sprite, level, r.x + 22, r.y + dy + r.height - 8);
+//				final Color[] difficulty = { Color.GRAY, Color.GREEN, Color.BLUE, Color.YELLOW, Color.RED, Color.PURPLE };
+//				titlefont
+//						.setColor(song.getDifficulty() >= 0 && song.getDifficulty() < difficulty.length ? difficulty[song
+//								.getDifficulty()] : Color.WHITE);
+//				titlefont.draw(sprite, level, r.x + 20, r.y + dy + r.height - 6);
 
 				flag |= song.getFeature();
 			}
@@ -240,43 +266,45 @@ public class BarRenderer {
 			if ((flag & 1) != 0) {
 				shape.begin(ShapeType.Filled);
 				shape.setColor(Color.valueOf("222200"));
-				shape.rect(x - 36, y, 30, barh - 6);
+				shape.rect(r.x - 36, r.y + dy, 30, r.height - 6);
 				shape.setColor(Color.YELLOW);
-				shape.rect(x - 40, y + 4, 30, barh - 6);
+				shape.rect(r.x - 40, r.y + dy + 4, 30, r.height - 6);
 				shape.end();
 				sprite.begin();
 				titlefont.setColor(Color.BLACK);
-				titlefont.draw(sprite, "LN", x - 36, y + barh - 8);
+				titlefont.draw(sprite, "LN", r.x - 36, r.y + dy + r.height - 8);
 				sprite.end();
 			}
 			// MINE
 			if ((flag & 2) != 0) {
 				shape.begin(ShapeType.Filled);
 				shape.setColor(Color.valueOf("222200"));
-				shape.rect(x - 70, y, 30, barh - 6);
+				shape.rect(r.x - 70, r.y + dy, 30, r.height - 6);
 				shape.setColor(Color.PURPLE);
-				shape.rect(x - 74, y + 4, 30, barh - 6);
+				shape.rect(r.x - 74, r.y + dy + 4, 30, r.height - 6);
 				shape.end();
 				sprite.begin();
 				titlefont.setColor(Color.BLACK);
-				titlefont.draw(sprite, "MI", x - 70, y + barh - 8);
+				titlefont.draw(sprite, "MI", r.x - 70, r.y + dy + r.height - 8);
 				sprite.end();
 			}
 			// RANDOM
 			if ((flag & 4) != 0) {
 				shape.begin(ShapeType.Filled);
 				shape.setColor(Color.valueOf("222200"));
-				shape.rect(x - 104, y, 30, barh - 6);
+				shape.rect(r.x - 104, r.y + dy, 30, r.height - 6);
 				shape.setColor(Color.GREEN);
-				shape.rect(x - 108, y + 4, 30, barh - 6);
+				shape.rect(r.x - 108, r.y + dy + 4, 30, r.height - 6);
 				shape.end();
 				sprite.begin();
 				titlefont.setColor(Color.BLACK);
-				titlefont.draw(sprite, "RA", x - 104, y + barh - 8);
+				titlefont.draw(sprite, "RA", r.x - 104, r.y + dy + r.height - 8);
 				sprite.end();
 			}
 		}
 	}
+
+	private boolean bartextupdate = false;
 
 	public boolean updateBar(Bar bar) {
 		final Bar prevbar = currentsongs != null ? currentsongs[selectedindex] : null;
@@ -303,45 +331,7 @@ public class BarRenderer {
 		if (l.size() > 0) {
 			// 変更前と同じバーがあればカーソル位置を保持する
 			currentsongs = l.toArray(new Bar[l.size()]);
-			FreeTypeFontParameter parameter = new FreeTypeFontParameter();
-			parameter.size = 24;
-
-			StringBuilder str = new StringBuilder(parameter.characters);
-
-			for (Bar song : currentsongs) {
-				str.append(song.getTitle());
-				if (song instanceof SongBar) {
-					SongData s = ((SongBar) song).getSongData();
-					str.append(s.getSubtitle());
-					str.append(s.getArtist());
-					str.append(s.getSubartist());
-					str.append(s.getGenre());
-				}
-				if (song instanceof GradeBar) {
-					for (SongData sd : ((GradeBar) song).getSongDatas()) {
-						if (sd != null) {
-							str.append(sd.getTitle());
-						}
-					}
-
-					for (TableData.TrophyData tr : ((GradeBar) song).getAllTrophy()) {
-						str.append(tr.getName());
-					}
-				}
-			}
-
-			if (bar != null) {
-				str.append(bar.getTitle());
-			}
-			for (Bar b : select.getDir()) {
-				str.append(b.getTitle());
-			}
-
-			parameter.characters = str.toString();
-			if (titlefont != null) {
-				titlefont.dispose();
-			}
-			titlefont = generator.generateFont(parameter);
+			bartextupdate = true;
 
             final Config config = select.getResource().getConfig();
             for (Bar b : currentsongs) {

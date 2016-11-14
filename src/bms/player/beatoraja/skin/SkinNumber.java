@@ -117,12 +117,16 @@ public class SkinNumber extends SkinObject {
 	}
 
 	public void draw(SpriteBatch sprite, long time, int value, MainState state) {
+		draw(sprite, time, value, state, 0,0);
+	}
+
+	public void draw(SpriteBatch sprite, long time, int value, MainState state, int offsetX, int offsetY) {
 		Rectangle r = this.getDestination(time, state);
 		if (r != null) {
 			TextureRegion[] values = getValue(time, value, zeropadding, state);
 			for (int j = 0; j < values.length; j++) {
 				if (values[j] != null) {
-					draw(sprite, values[j], r.x + r.width * j, r.y, r.width, r.height, getColor(time, state),
+					draw(sprite, values[j], r.x + r.width * j + offsetX, r.y + offsetY, r.width, r.height, getColor(time, state),
 							getAngle(time, state));
 				}
 			}

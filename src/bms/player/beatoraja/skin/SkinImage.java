@@ -110,8 +110,34 @@ public class SkinImage extends SkinObject {
             }
         }
 	}
-	
-	public void dispose() {
+
+    public void draw(SpriteBatch sprite, long time, MainState state, int value, int offsetX, int offsetY) {
+        if(getImageID() != -1) {
+            final Rectangle r = this.getDestination(time, state);
+            final TextureRegion tr = state.getImage(getImageID());
+            if (r != null && tr != null) {
+                draw(sprite, tr, r.x + offsetX, r.y + offsetY, r.width, r.height, getColor(time,state),getAngle(time,state));
+            }
+        } else {
+            if(image == null) {
+                return;
+            }
+            final Rectangle r = this.getDestination(time, state);
+            if (r != null) {
+                if(value >= 0 && value < image.length) {
+                    if(scratch == 1) {
+                        draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height, getColor(time,state),state.getNumberValue(NUMBER_SCRATCHANGLE_1P));
+                    } else if(scratch == 2) {
+                        draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height, getColor(time,state),state.getNumberValue(NUMBER_SCRATCHANGLE_2P));
+                    } else {
+                        draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height, getColor(time,state),getAngle(time,state));
+                    }
+                }
+            }
+        }
+    }
+
+    public void dispose() {
 		if(image != null) {
 			for(TextureRegion[] tr : image) {
 				for(TextureRegion ctr : tr) {
