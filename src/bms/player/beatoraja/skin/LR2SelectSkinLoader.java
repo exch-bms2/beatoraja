@@ -16,7 +16,7 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader {
 
 	private MusicSelectSkin skin;
 
-	private SkinBar skinbar = new SkinBar();
+	private SkinBar skinbar = new SkinBar(1);
 
 	private TextureRegion[][] barimage = new TextureRegion[10][];
 	private int barcycle;
@@ -66,7 +66,7 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader {
 						values[4] += values[6];
 						values[6] = -values[6];
 					}
-					skinbar.getBarImages(false,values[1]).setDestination(values[2], values[3] * dstw / srcw, dsth
+					skinbar.makeBarImages(false,values[1]).setDestination(values[2], values[3] * dstw / srcw, dsth
 							- (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw, values[6] * dsth / srch,
 							values[7], values[8], values[9], values[10], values[11], values[12], values[13],
 							values[14], values[15], values[16], values[17], values[18], values[19], values[20]);
@@ -88,7 +88,7 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader {
 						values[4] += values[6];
 						values[6] = -values[6];
 					}
-					skinbar.getBarImages(true, values[1]).setDestination(values[2], values[3] * dstw / srcw, dsth
+					skinbar.makeBarImages(true, values[1]).setDestination(values[2], values[3] * dstw / srcw, dsth
 							- (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw, values[6] * dsth / srch,
 							values[7], values[8], values[9], values[10], values[11], values[12], values[13],
 							values[14], values[15], values[16], values[17], values[18], values[19], values[20]);
@@ -182,7 +182,7 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader {
 				int[] values = parseInt(str);
 				if (skinbar.getBarlevel()[values[1]] != null) {
 					try {
-						skinbar.getBarlevel()[values[1]].setDestination(values[2], values[3] * dstw / srcw, -values[4] * dsth / srch,
+						skinbar.getBarlevel()[values[1]].setDestination(values[2], values[3] * dstw / srcw, -(values[4] + values[6]) * dsth / srch,
 								values[5] * dstw / srcw, values[6] * dsth / srch, values[7], values[8], values[9],
 								values[10], values[11], values[12], values[13], values[14], values[15], values[16],
 								values[17], values[18], values[19], values[20]);
@@ -229,8 +229,7 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader {
 								values[4] += values[6];
 								values[6] = -values[6];
 							}
-							skinbar.getLamp()[lamps[i]].setDestination(values[2], values[3] * dstw / srcw, dsth
-									- (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw, values[6] * dsth
+							skinbar.getLamp()[lamps[i]].setDestination(values[2], values[3] * dstw / srcw, -(values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw, values[6] * dsth
 									/ srch, values[7], values[8], values[9], values[10], values[11], values[12],
 									values[13], values[14], values[15], values[16], values[17], values[18], values[19],
 									values[20]);
@@ -244,11 +243,28 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader {
 		addCommandWord(new CommandWord("SRC_BAR_TITLE") {
 			@Override
 			public void execute(String[] str) {
+				try {
+					SkinBar.SkinBarText text = new SkinBar.SkinBarText("skin/VL-Gothic-Regular.ttf", 0, 40, 2);
+					int[] values = parseInt(str);
+					text.setAlign(values[4]);
+					skinbar.getBarText()[values[1]] = text;
+				} catch (NumberFormatException e) {
+					e.printStackTrace();
+				}
 			}
 		});
 		addCommandWord(new CommandWord("DST_BAR_TITLE") {
 			@Override
 			public void execute(String[] str) {
+				try {
+					int[] values = parseInt(str);
+					skinbar.getBarText()[values[1]].setDestination(values[2], values[3] * dstw / srcw, -values[4] * dsth / srch,
+							values[5] * dstw / srcw, values[6] * dsth / srch, values[7], values[8], values[9],
+							values[10], values[11], values[12], values[13], values[14], values[15], values[16],
+							values[17], values[18], values[19], values[20]);
+				} catch (NumberFormatException e) {
+					e.printStackTrace();
+				}
 			}
 		});
 		addCommandWord(new CommandWord("SRC_BAR_RANK") {

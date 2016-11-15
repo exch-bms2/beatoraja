@@ -161,7 +161,7 @@ public class MusicSelectSkin extends Skin {
 		addNumber(new SkinNumber(ntr[0], 0, 10, 0, NUMBER_TOTALPLAYNOTES), 0, 430, 102, 18, 18, 0,
 				255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
-        SkinBar barobj = new SkinBar(bar, 0);
+        SkinBar barobj = new SkinBar(0, bar, 0);
 		add(barobj);
         for(int i = 0;i < 22;i++) {
             setDestination(barobj.makeBarImages(false, i),0, 800, 720 - i * 36, 500, 36, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -172,7 +172,10 @@ public class MusicSelectSkin extends Skin {
 		barobj.setTrophy(trophy);
 		SkinBar.SkinBarText bartext = new SkinBar.SkinBarText("skin/VL-Gothic-Regular.ttf", 0, 24, 2);
 		setDestination(bartext, 0, 80, 30, 18, 24, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		barobj.setBarText(bartext);
+		barobj.getBarText()[0] = bartext;
+		bartext = new SkinBar.SkinBarText("skin/VL-Gothic-Regular.ttf", 0, 24, 2);
+		setDestination(bartext, 0, 80, 30, 18, 24, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+		barobj.getBarText()[1] = bartext;
 		for(int i = 0;i < 7;i++) {
 			barobj.getBarlevel()[i] = new SkinNumber(ntr[0], 0, 2, 0);
 		}

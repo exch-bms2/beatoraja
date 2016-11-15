@@ -25,9 +25,11 @@ public class SkinBar extends SkinObject {
 
     private SkinImage[] trophy = new SkinImage[3];
 
-    private SkinBarText text;
+    private SkinBarText[] text = new SkinBarText[2];
 
     private SkinNumber[] barlevel = new SkinNumber[7];
+
+    private int position = 0;
 
     private TextureRegion[][] images;
     private int cycle;
@@ -37,11 +39,11 @@ public class SkinBar extends SkinObject {
      */
     private SkinImage[] lamp = new SkinImage[11];
 
-    public SkinBar() {
-
+    public SkinBar(int position) {
+        this.position = position;
     }
 
-    public SkinBar(TextureRegion[][] images, int cycle) {
+    public SkinBar(int position, TextureRegion[][] images, int cycle) {
         setBarImages(images, cycle);
     }
 
@@ -73,12 +75,8 @@ public class SkinBar extends SkinObject {
         return trophy;
     }
 
-    public SkinBarText getBarText() {
+    public SkinBarText[] getBarText() {
         return text;
-    }
-
-    public void setBarText(SkinBarText text) {
-        this.text = text;
     }
 
     public void setTrophy(SkinImage[] trophy) {
@@ -105,6 +103,10 @@ public class SkinBar extends SkinObject {
 
     public void setBarlevel(SkinNumber[] barlevel) {
         this.barlevel = barlevel;
+    }
+
+    public int getPosition() {
+        return position;
     }
 
     public static class SkinBarText extends SkinObject {

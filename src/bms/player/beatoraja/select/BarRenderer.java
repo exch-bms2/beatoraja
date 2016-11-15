@@ -162,7 +162,8 @@ public class BarRenderer {
 			for(int i = 0;i < chars.length;i++) {
 				chars[i] = chars2[i];
 			}
-			baro.getBarText().setText(String.valueOf(chars));
+			baro.getBarText()[0].setText(String.valueOf(chars));
+			baro.getBarText()[1].setText(String.valueOf(chars));
 		}
 		// draw song bar
 		for (int i = 0; i < 60; i++) {
@@ -198,15 +199,19 @@ public class BarRenderer {
 
             float dy = 0;
             Rectangle r = baro.getBarImages(on, i).getDestination(time, select);
+			if(r != null) {
+
             if (duration != 0) {
                 dy = r.height * (Math.abs(angle) - duration + System.currentTimeMillis()) / angle
                         + (angle >= 0 ? -1 : 1) * r.height;
             }
+            final int y = (int) (r.y + dy + (baro.getPosition() == 1 ? r.height : 0));
             if(value != -1) {
 				sprite.begin();
 				TextureRegion barimage = baro.getBarImages(on, i).getImage(value, time, select);
                 baro.getBarImages(on, i).draw(sprite, time, select, value, 0, (int) dy);
-				baro.getBarText().draw(sprite, time, select, sd.getTitle(), (int)r.x, (int)(r.y + dy));
+				// TODO 新規追加曲はテキストを変える
+				baro.getBarText()[0].draw(sprite, time, select, sd.getTitle(), (int)r.x, y);
 				sprite.end();
 			}
 
@@ -225,7 +230,7 @@ public class BarRenderer {
 					for (int j = 0; j < TROPHY.length; j++) {
 						if (TROPHY[j].equals(trophy.getName()) && baro.getTrophy()[j] != null) {
 							sprite.begin();
-							sprite.draw(baro.getTrophy()[j].getImage(time, select), r.x + 20, r.y + dy + 4);
+							sprite.draw(baro.getTrophy()[j].getImage(time, select), r.x + 20, y + 4);
 							sprite.end();
 							break;
 						}
@@ -235,7 +240,7 @@ public class BarRenderer {
 
 			if (baro.getLamp()[sd.getLamp()] != null) {
 				sprite.begin();
-				baro.getLamp()[sd.getLamp()].draw(sprite, time, select, (int)r.x, (int)(r.y + dy));
+				baro.getLamp()[sd.getLamp()].draw(sprite, time, select, (int)r.x, y);
 				sprite.end();
 			}
 
@@ -246,7 +251,7 @@ public class BarRenderer {
 				SkinNumber leveln = baro.getBarlevel()[song.getDifficulty() >= 0 && song.getDifficulty() < 7 ? song
 						.getDifficulty() : 0];
 				if(leveln != null) {
-					leveln.draw(sprite, time, song.getLevel(), select, (int)r.x, (int)(r.y + dy));
+					leveln.draw(sprite, time, song.getLevel(), select, (int)r.x, y);
 				}
 				sprite.end();
 
@@ -300,6 +305,7 @@ public class BarRenderer {
 				titlefont.setColor(Color.BLACK);
 				titlefont.draw(sprite, "RA", r.x - 104, r.y + dy + r.height - 8);
 				sprite.end();
+			}
 			}
 		}
 	}
