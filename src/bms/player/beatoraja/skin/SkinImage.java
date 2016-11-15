@@ -18,7 +18,7 @@ public class SkinImage extends SkinObject {
 	/**
 	 * イメージ
 	 */
-	private TextureRegion[][] image;
+	private SkinSource[] image;
 
 	private int id = -1;
 
@@ -44,10 +44,6 @@ public class SkinImage extends SkinObject {
 		setImage(image, cycle);
 	}
 		
-	public TextureRegion[] getImage() {
-		return image[0];
-	}
-
 	public TextureRegion getImage(long time, MainState state) {
 		return getImage(0 ,time, state);
 	}
@@ -56,18 +52,19 @@ public class SkinImage extends SkinObject {
 		if(getImageID() != -1) {
 			return state.getImage(getImageID());
 		}
-		return image[value][getImageIndex(image[value].length, time, state)];
+		return image[value].getImage(time, state);
 	}
 	
 	public void setImage(TextureRegion[] image, int cycle) {
-		this.image = new TextureRegion[1][];
-		this.image[0] = image;
-		setCycle(cycle);
+		this.image = new SkinSource[1];
+		this.image[0] = new SkinSource(image, 0, cycle);
 	}
 
 	public void setImage(TextureRegion[][] image, int cycle) {
-		this.image = image;
-		setCycle(cycle);
+		this.image = new SkinSource[image.length];
+		for(int i = 0;i < image.length;i++) {
+			this.image[i] = new SkinSource(image[i], 0, cycle);
+		}		
 	}
 
 	public void draw(SpriteBatch sprite, long time, MainState state) {
@@ -92,9 +89,6 @@ public class SkinImage extends SkinObject {
             if(value >= image.length) {
                 value = 0;
             }
-            if(value < 0 || image[value].length == 0) {
-                return;
-            }
 
             final Rectangle r = this.getDestination(time, state);
             if (r != null) {
@@ -110,13 +104,37 @@ public class SkinImage extends SkinObject {
             }
         }
 	}
-	
-	public void dispose() {
+
+    public void draw(SpriteBatch sprite, long time, MainState state, int value, int offsetX, int offsetY) {
+        if(getImageID() != -1) {
+            final Rectangle r = this.getDestination(time, state);
+            final TextureRegion tr = state.getImage(getImageID());
+            if (r != null && tr != null) {
+                draw(sprite, tr, r.x + offsetX, r.y + offsetY, r.width, r.height, getColor(time,state),getAngle(time,state));
+            }
+        } else {
+            if(image == null) {
+                return;
+            }
+            final Rectangle r = this.getDestination(time, state);
+            if (r != null) {
+                if(value >= 0 && value < image.length) {
+                    if(scratch == 1) {
+                        draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height, getColor(time,state),state.getNumberValue(NUMBER_SCRATCHANGLE_1P));
+                    } else if(scratch == 2) {
+                        draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height, getColor(time,state),state.getNumberValue(NUMBER_SCRATCHANGLE_2P));
+                    } else {
+                        draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height, getColor(time,state),getAngle(time,state));
+                    }
+                }
+            }
+        }
+    }
+
+    public void dispose() {
 		if(image != null) {
-			for(TextureRegion[] tr : image) {
-				for(TextureRegion ctr : tr) {
-					ctr.getTexture().dispose();
-				}
+			for(SkinSource tr : image) {
+				tr.dispose();
 			}
 			image = null;
 		}

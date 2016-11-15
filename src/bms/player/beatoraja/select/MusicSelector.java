@@ -11,7 +11,6 @@ import bms.player.beatoraja.Config.SkinConfig;
 import bms.player.beatoraja.config.KeyConfiguration;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.play.audio.SoundProcessor;
-import bms.player.beatoraja.select.MusicSelectSkin.SkinBarObject;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.song.SongData;
 import bms.player.beatoraja.song.SongDatabaseAccessor;
@@ -23,7 +22,6 @@ import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
@@ -1151,7 +1149,7 @@ public class MusicSelector extends MainState {
 		return null;
 	}
 
-	public void renderBar(SkinBarObject baro, int time) {
+	public void renderBar(SkinBar baro, int time) {
 		final MainController main = getMainController();
 		final SpriteBatch sprite = main.getSpriteBatch();
 		final ShapeRenderer shape = main.getShapeRenderer();

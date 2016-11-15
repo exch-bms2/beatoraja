@@ -6,9 +6,13 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Align;
+
+import static bms.player.beatoraja.skin.SkinProperty.NUMBER_SCRATCHANGLE_1P;
+import static bms.player.beatoraja.skin.SkinProperty.NUMBER_SCRATCHANGLE_2P;
 
 /**
  * テキストオブジェクト
@@ -69,7 +73,6 @@ public class SkinText extends SkinObject {
     	if(generator == null) {
     		return;
     	}
-        
         if(id == -1) {
         	return;
         }
@@ -97,6 +100,34 @@ public class SkinText extends SkinObject {
                 }
                 layout.setText(font, value, c, r.getWidth(),ALIGN[align], false);
                 font.draw(sprite, layout, x, r.y);
+            }
+        }
+    }
+
+    public void draw(SpriteBatch sprite, long time, MainState state, String value, int offsetX, int offsetY) {
+        if(generator == null) {
+            return;
+        }
+        Rectangle r = this.getDestination(time,state);
+        if(r != null) {
+            if(!value.equals(parameter.characters)) {
+                parameter.characters = value;
+                if(font != null) {
+                    font.dispose();
+                }
+                font = generator.generateFont(parameter);
+                layout = new GlyphLayout(font, value);
+            }
+            if(font != null) {
+                Color c = getColor(time,state);
+                font.getData().setScale(r.height / parameter.size);
+                final float x = (align == 2 ? r.x - r.width : (align == 1 ? r.x - r.width / 2 : r.x));
+                if(shadow > 0) {
+                    layout.setText(font, value, new Color(c.r / 2, c.g / 2, c.b / 2, c.a), r.getWidth(),ALIGN[align], false);
+                    font.draw(sprite, layout, x + shadow + offsetX, r.y - shadow + offsetY);
+                }
+                layout.setText(font, value, c, r.getWidth(),ALIGN[align], false);
+                font.draw(sprite, layout, x + offsetX, r.y + offsetY);
             }
         }
     }
