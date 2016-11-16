@@ -69,7 +69,7 @@ public class GradeResult extends MainState {
 			skin = new GradeResultSkin(RESOLUTION[resource.getConfig().getResolution()]);
 			this.setSkin(skin);
 		}
-		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/VL-Gothic-Regular.ttf"));
+		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/default/VL-Gothic-Regular.ttf"));
 		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
 		parameter.size = 24;
 		title = "result";

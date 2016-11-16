@@ -74,7 +74,7 @@ public class PlaySkin extends Skin {
 		}
 
 		// 閉店
-		Texture close = new Texture("skin/close.png");
+		Texture close = new Texture("skin/default/close.png");
 		SkinImage ci = new SkinImage(new TextureRegion[] { new TextureRegion(close, 0, 500, 640, 240) }, 0);
 		setDestination(ci, 0, 0, -360, 1280, 360, 0, 255, 255, 255, 255, 0, 0, 0, 0, 700, TIMER_FAILED, 0, 0,
 				0);
@@ -90,7 +90,7 @@ public class PlaySkin extends Skin {
 		setDestination(ci, 700, 0, 360, 1280, 360, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(ci);
 
-		Texture nt = new Texture("skin/system.png");
+		Texture nt = new Texture("skin/default/system.png");
 		SkinImage fi = new SkinImage(new TextureRegion[] { new TextureRegion(nt, 0, 0, 8, 8) }, 0);
 		setDestination(fi, 0, 0, 0, 1280, 720, 0, 0, 255, 255, 255, 0, 0, 0, 0, 500, TIMER_FADEOUT, 0, 0, 0);
 		setDestination(fi, 500, 0, 0, 1280, 720, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -102,15 +102,15 @@ public class PlaySkin extends Skin {
 	}
 
 	private void makeCommonSkin() {
-		SkinImage back = new SkinImage(new TextureRegion[] { new TextureRegion(new Texture("skin/play.png")) }, 0);
+		SkinImage back = new SkinImage(new TextureRegion[] { new TextureRegion(new Texture("skin/default/play.png")) }, 0);
 		setDestination(back, 0, 0, 0, 1280, 720, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(back);
-		Texture bg = new Texture("skin/playbg.png");
+		Texture bg = new Texture("skin/default/playbg.png");
 		SkinImage images = new SkinImage(new TextureRegion[] { new TextureRegion(bg) }, 0);
 		setDestination(images, 0, 0, 0, 1280, 720, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(images);
 		// ゲージ
-		Texture gt = new Texture("skin/gauge.png");
+		Texture gt = new Texture("skin/default/gauge.png");
 		gauge = new TextureRegion[1][8];
 		gauge[0][0] = new TextureRegion(gt, 0, 0, 5, 17);
 		gauge[0][1] = new TextureRegion(gt, 5, 0, 5, 17);
@@ -121,7 +121,7 @@ public class PlaySkin extends Skin {
 		gauge[0][6] = new TextureRegion(gt, 10, 17, 5, 17);
 		gauge[0][7] = new TextureRegion(gt, 15, 17, 5, 17);
 		// 判定文字
-		Texture jt = new Texture("skin/judge.png");
+		Texture jt = new Texture("skin/default/judge.png");
 		judge = new TextureRegion[6][];
 		judge[0] = new TextureRegion[] { new TextureRegion(jt, 0, 0, 180, 50), new TextureRegion(jt, 0, 50, 180, 50) };
 		judge[1] = new TextureRegion[] { new TextureRegion(jt, 0, 150, 180, 50), new TextureRegion(jt, 0, 350, 180, 50) };
@@ -138,7 +138,7 @@ public class PlaySkin extends Skin {
 			judgenum[2][1][i] = new Sprite(jt, 30 * i + 200, 350, 30, 50);
 		}
 		// 数字
-		Texture nt = new Texture("skin/number.png");
+		Texture nt = new Texture("skin/default/number.png");
 		TextureRegion[][] ntr = TextureRegion.split(nt, 24, 24);
 
 		// bpm
@@ -162,7 +162,7 @@ public class PlaySkin extends Skin {
 		addNumber(new SkinNumber(ntr[0], 0, 4, 0, NUMBER_DURATION), 0, 318, 2, 12, 24, 0, 255, 255, 255, 255,
 				0, 0, 0, 0, 0, 0, 0, 0, 0);
 
-		Texture grapht = new Texture("skin/scoregraph.png");
+		Texture grapht = new Texture("skin/default/scoregraph.png");
 		TextureRegion[] graphtr = new TextureRegion[3];
 		graphtr[0] = new TextureRegion(grapht, 0, 0, 100, 296);
 		graphtr[1] = new TextureRegion(grapht, 100, 0, 100, 296);
@@ -180,12 +180,12 @@ public class PlaySkin extends Skin {
 
 	private void make7KeySkin() {
 		// 背景
-		// background = new Texture("skin/bg.jpg");
+		// background = new Texture("skin/default/bg.jpg");
 		// ノーツ
 		TextureRegion[][] note = new TextureRegion[8][];
 		TextureRegion[][][] longnote = new TextureRegion[10][8][];
 		TextureRegion[][] minenote = new TextureRegion[8][];
-		Texture notet = new Texture("skin/note.png");
+		Texture notet = new Texture("skin/default/note.png");
 		for (int i = 0; i < 8; i++) {
 			if (i % 2 == 0) {
 				note[i] = new TextureRegion[] { new TextureRegion(notet, 99, 5, 27, 12) };
@@ -246,7 +246,7 @@ public class PlaySkin extends Skin {
 		add(bga);
 		add(new SkinGauge(this, gauge));
 
-		SkinText title = new SkinText("skin/VL-Gothic-Regular.ttf", 0, 24, 2);
+		SkinText title = new SkinText("skin/default/VL-Gothic-Regular.ttf", 0, 24, 2);
 		title.setReferenceID(STRING_FULLTITLE);
 		setDestination(title, 0, 502, 698, 24, 24, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		setDestination(title, 1000, 502, 698, 24, 24, 0, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -262,7 +262,7 @@ public class PlaySkin extends Skin {
 		laneregion[5] = rect(320, 140, 40, 580);
 		laneregion[6] = rect(360, 140, 50, 580);
 		laneregion[7] = rect(20, 140, 70, 580);
-		Texture st = new Texture("skin/system.png");
+		Texture st = new Texture("skin/default/system.png");
 		SkinImage si = new SkinImage(new TextureRegion[] { new TextureRegion(st, 30, 0, 390, 10) }, 0);
 		setDestination(si, 0, 20, 140, 390, 0, 0, 0, 255, 255, 255, 0, 0, 0, 0, 1000, 0, 0, 0, 0);
 		setDestination(si, 1000, 20, 140, 390, 580, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -298,7 +298,7 @@ public class PlaySkin extends Skin {
 				0, 0);
 		add(pseek);
 
-		Texture kbt = new Texture("skin/keybeam.png");
+		Texture kbt = new Texture("skin/default/keybeam.png");
 		Sprite[] keybeam = new Sprite[8];
 		keybeam[0] = keybeam[2] = keybeam[4] = keybeam[6] = new Sprite(kbt, 47, 0, 28, 255);
 		keybeam[1] = keybeam[3] = keybeam[5] = new Sprite(kbt, 75, 0, 21, 255);
@@ -307,7 +307,7 @@ public class PlaySkin extends Skin {
 		keybeaml[0] = keybeaml[2] = keybeaml[4] = keybeaml[6] = new Sprite(kbt, 144, 0, 28, 255);
 		keybeaml[1] = keybeaml[3] = keybeaml[5] = new Sprite(kbt, 172, 0, 21, 255);
 		keybeaml[7] = new Sprite(kbt, 97, 0, 47, 255);
-		Texture bombt = new Texture("skin/bomb.png");
+		Texture bombt = new Texture("skin/default/bomb.png");
 		TextureRegion[][] bombtr = TextureRegion.split(bombt, 181, 192);
 
 		for (int i = 0; i < laneregion.length; i++) {
@@ -330,7 +330,7 @@ public class PlaySkin extends Skin {
 		line[0].setOffsety(OFFSET_LIFT);
 		setDestination(line[0], 0, 20, 140, 390, 1, 0, 255, 128, 128, 128, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(new SkinNote(this, note, longnote, minenote, 12 / dh));
-		Texture lct = new Texture("skin/lanecover.png");
+		Texture lct = new Texture("skin/default/lanecover.png");
 		SkinSlider lanecover = new SkinSlider(new TextureRegion[] { new TextureRegion(lct) }, 0, 2, (int) (580 * dh),
 				SLIDER_LANECOVER);
 		setDestination(lanecover, 0, 20, 720, 390, 580, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -360,7 +360,7 @@ public class PlaySkin extends Skin {
 		}
 
 		// judge count
-		Texture nt = new Texture("skin/number.png");
+		Texture nt = new Texture("skin/default/number.png");
 		TextureRegion[][] ntr = TextureRegion.split(nt, 24, 24);
 		for (int i = 0; i < 6; i++) {
 			for (int j = 0; j < 2; j++) {
@@ -386,7 +386,7 @@ public class PlaySkin extends Skin {
 		setDestination(seek, 0, 20, 440, 30, 24, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(seek);
 		// READY
-		Texture ready = new Texture("skin/ready.png");
+		Texture ready = new Texture("skin/default/ready.png");
 		SkinImage ri = new SkinImage(new TextureRegion[] { new TextureRegion(ready) }, 0);
 		setDestination(ri, 0, 40, 250, 350, 60, 0, 0, 255, 255, 255, 0, 0, 0, 0, -1, TIMER_READY, 0, 0, 0);
 		setDestination(ri, 750, 40, 300, 350, 60, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -421,12 +421,12 @@ public class PlaySkin extends Skin {
 
 	private void make7KeySkin2() {
 		// 背景
-		// background = new Texture("skin/bg.jpg");
+		// background = new Texture("skin/default/bg.jpg");
 		// ノーツ
 		TextureRegion[][] note = new TextureRegion[8][];
 		TextureRegion[][][] longnote = new TextureRegion[10][8][];
 		TextureRegion[][] minenote = new TextureRegion[8][];
-		Texture notet = new Texture("skin/note.png");
+		Texture notet = new Texture("skin/default/note.png");
 		for (int i = 0; i < 8; i++) {
 			if (i % 2 == 0) {
 				note[i] = new TextureRegion[] { new TextureRegion(notet, 99, 5, 27, 12) };
@@ -487,7 +487,7 @@ public class PlaySkin extends Skin {
 		add(bga);
 		add(new SkinGauge(this, gauge));
 
-		SkinText title = new SkinText("skin/VL-Gothic-Regular.ttf", 0, 24, 2);
+		SkinText title = new SkinText("skin/default/VL-Gothic-Regular.ttf", 0, 24, 2);
 		title.setReferenceID(STRING_FULLTITLE);
 		setDestination(title, 0, 42, 698, 24, 24, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		setDestination(title, 1000, 42, 698, 24, 24, 0, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -503,7 +503,7 @@ public class PlaySkin extends Skin {
 		laneregion[5] = rect(1100, 140, 40, 580);
 		laneregion[6] = rect(1140, 140, 50, 580);
 		laneregion[7] = rect(1190, 140, 70, 580);
-		Texture st = new Texture("skin/system.png");
+		Texture st = new Texture("skin/default/system.png");
 		SkinImage si = new SkinImage(new TextureRegion[] { new TextureRegion(st, 30, 0, 390, 10) }, 0);
 		setDestination(si, 0, 1260, 140, -390, 0, 0, 0, 255, 255, 255, 0, 0, 0, 0, 1000, 0, 0, 0, 0);
 		setDestination(si, 1000, 1260, 140, -390, 580, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -539,7 +539,7 @@ public class PlaySkin extends Skin {
 				0, 0, 0);
 		add(pseek);
 
-		Texture kbt = new Texture("skin/keybeam.png");
+		Texture kbt = new Texture("skin/default/keybeam.png");
 		Sprite[] keybeam = new Sprite[8];
 		keybeam[0] = keybeam[2] = keybeam[4] = keybeam[6] = new Sprite(kbt, 47, 0, 28, 255);
 		keybeam[1] = keybeam[3] = keybeam[5] = new Sprite(kbt, 75, 0, 21, 255);
@@ -548,7 +548,7 @@ public class PlaySkin extends Skin {
 		keybeaml[0] = keybeaml[2] = keybeaml[4] = keybeaml[6] = new Sprite(kbt, 144, 0, 28, 255);
 		keybeaml[1] = keybeaml[3] = keybeaml[5] = new Sprite(kbt, 172, 0, 21, 255);
 		keybeaml[7] = new Sprite(kbt, 97, 0, 47, 255);
-		Texture bombt = new Texture("skin/bomb.png");
+		Texture bombt = new Texture("skin/default/bomb.png");
 		TextureRegion[][] bombtr = TextureRegion.split(bombt, 181, 192);
 
 		for (int i = 0; i < laneregion.length; i++) {
@@ -571,7 +571,7 @@ public class PlaySkin extends Skin {
 		line[0].setOffsety(OFFSET_LIFT);
 		setDestination(line[0], 0, 870, 140, 390, 1, 0, 255, 128, 128, 128, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(new SkinNote(this, note, longnote, minenote, 12 / dh));
-		Texture lct = new Texture("skin/lanecover.png");
+		Texture lct = new Texture("skin/default/lanecover.png");
 		SkinSlider lanecover = new SkinSlider(new TextureRegion[] { new TextureRegion(lct) }, 0, 2, (int) (580 * dh),
 				SLIDER_LANECOVER);
 		setDestination(lanecover, 0, 870, 720, 390, 580, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -601,7 +601,7 @@ public class PlaySkin extends Skin {
 		}
 
 		// judge count
-		Texture nt = new Texture("skin/number.png");
+		Texture nt = new Texture("skin/default/number.png");
 		TextureRegion[][] ntr = TextureRegion.split(nt, 24, 24);
 		for (int i = 0; i < 6; i++) {
 			for (int j = 0; j < 2; j++) {
@@ -627,7 +627,7 @@ public class PlaySkin extends Skin {
 		setDestination(seek, 0, 870, 440, 30, 24, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(seek);
 		// READY
-		Texture ready = new Texture("skin/ready.png");
+		Texture ready = new Texture("skin/default/ready.png");
 		SkinImage ri = new SkinImage(new TextureRegion[] { new TextureRegion(ready) }, 0);
 		setDestination(ri, 0, 870, 250, 350, 60, 0, 0, 255, 255, 255, 0, 0, 0, 0, -1, TIMER_READY, 0, 0, 0);
 		setDestination(ri, 750, 870, 300, 350, 60, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -662,12 +662,12 @@ public class PlaySkin extends Skin {
 
 	private void make9KeySkin() {
 		// 背景
-		// background = new Texture("skin/bg.jpg");
+		// background = new Texture("skin/default/bg.jpg");
 		// ノーツ
 		TextureRegion[][] note = new TextureRegion[9][];
 		TextureRegion[][][] longnote = new TextureRegion[10][9][];
 		TextureRegion[][] minenote = new TextureRegion[9][];
-		Texture notet = new Texture("skin/pop.png");
+		Texture notet = new Texture("skin/default/pop.png");
 		for (int i = 0; i < 9; i++) {
 			if (i == 0 || i == 8) {
 				note[i] = new TextureRegion[] { new TextureRegion(notet, 0, 0, 36, 18) };
@@ -785,7 +785,7 @@ public class PlaySkin extends Skin {
 		add(bga2);
 		add(new SkinGauge(this, gauge));
 
-		SkinText title = new SkinText("skin/VL-Gothic-Regular.ttf", 0, 24);
+		SkinText title = new SkinText("skin/default/VL-Gothic-Regular.ttf", 0, 24);
 		title.setReferenceID(STRING_FULLTITLE);
 		setDestination(title, 0, 12, 720, 18, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		setDestination(title, 1000, 12, 720, 18, 18, 0, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -802,7 +802,7 @@ public class PlaySkin extends Skin {
 		laneregion[6] = rect(735, 140, 70, 580);
 		laneregion[7] = rect(805, 140, 60, 580);
 		laneregion[8] = rect(865, 140, 70, 580);
-		Texture st = new Texture("skin/system.png");
+		Texture st = new Texture("skin/default/system.png");
 		SkinImage si = new SkinImage(new TextureRegion[] { new TextureRegion(st, 30, 30, 590, 10) }, 0);
 		setDestination(si, 0, 345, 140, 590, 0, 0, 0, 255, 255, 255, 0, 0, 0, 0, 1000, 0, 0, 0, 0);
 		setDestination(si, 1000, 345, 140, 590, 580, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -823,7 +823,7 @@ public class PlaySkin extends Skin {
 		setDestination(gi, 0, 960, 220, 180, 480, 0, 255, 255, 255, 255, 0, 0, 0, 0, 1000, 0, 0, 0, 0);
 		add(gi);
 
-		Texture kbt = new Texture("skin/keybeaml.png");
+		Texture kbt = new Texture("skin/default/keybeaml.png");
 		Sprite[] keybeam = new Sprite[9];
 		keybeam[0] = keybeam[2] = keybeam[4] = keybeam[6] = keybeam[8] = new Sprite(kbt, 75, 0, 21, 255);
 		keybeam[1] = keybeam[3] = keybeam[5] = keybeam[7] = new Sprite(kbt, 47, 0, 28, 255);
@@ -834,7 +834,7 @@ public class PlaySkin extends Skin {
 		keybeamg[0] = keybeamg[2] = keybeamg[4] = keybeamg[6] = keybeamg[8] = new Sprite(kbt, 269, 0, 21, 255);
 		keybeamg[1] = keybeamg[3] = keybeamg[5] = keybeamg[7] = new Sprite(kbt, 241, 0, 28, 255);
 
-		Texture bombt = new Texture("skin/bomb.png");
+		Texture bombt = new Texture("skin/default/bomb.png");
 		TextureRegion[][] bombtr = TextureRegion.split(bombt, 181, 192);
 
 		for (int i = 0; i < laneregion.length; i++) {
@@ -856,7 +856,7 @@ public class PlaySkin extends Skin {
 		setDestination(line, 0, 345, 137, 590, 6, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(line);
 		add(new SkinNote(this, note, longnote, minenote, 18 / dh));
-		Texture lct = new Texture("skin/lanecover.png");
+		Texture lct = new Texture("skin/default/lanecover.png");
 		SkinSlider lanecover = new SkinSlider(new TextureRegion[] { new TextureRegion(lct) }, 0, 2, (int) (580 * dh),
 				SLIDER_LANECOVER);
 		setDestination(lanecover, 0, 345, 720, 590, 580, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -883,7 +883,7 @@ public class PlaySkin extends Skin {
 		}
 
 		// judge count
-		Texture nt = new Texture("skin/number.png");
+		Texture nt = new Texture("skin/default/number.png");
 		TextureRegion[][] ntr = TextureRegion.split(nt, 24, 24);
 		for (int i = 0; i < 6; i++) {
 			for (int j = 0; j < 2; j++) {
@@ -907,7 +907,7 @@ public class PlaySkin extends Skin {
 		setDestination(seek, 0, 345, 440, 30, 24, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(seek);
 		// READY
-		Texture ready = new Texture("skin/ready.png");
+		Texture ready = new Texture("skin/default/ready.png");
 		SkinImage ri = new SkinImage(new TextureRegion[] { new TextureRegion(ready) }, 0);
 		setDestination(ri, 0, 465, 250, 350, 60, 0, 0, 255, 255, 255, 0, 0, 0, 0, -1, TIMER_READY, 0, 0, 0);
 		setDestination(ri, 750, 465, 300, 350, 60, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -957,12 +957,12 @@ public class PlaySkin extends Skin {
 
 	private void make14KeySkin() {
 		// 背景
-		// background = new Texture("skin/bg.jpg");
+		// background = new Texture("skin/default/bg.jpg");
 		// ノーツ
 		TextureRegion[][] note = new TextureRegion[16][];
 		TextureRegion[][][] longnote = new TextureRegion[10][16][];
 		TextureRegion[][] minenote = new TextureRegion[16][];
-		Texture notet = new Texture("skin/note.png");
+		Texture notet = new Texture("skin/default/note.png");
 		for (int i = 0; i < 16; i++) {
 			if (i % 2 == 0) {
 				note[i] = new TextureRegion[] { new TextureRegion(notet, 99, 5, 27, 12) };
@@ -1006,7 +1006,7 @@ public class PlaySkin extends Skin {
 			}
 		}
 
-		Texture kbt = new Texture("skin/keybeam.png");
+		Texture kbt = new Texture("skin/default/keybeam.png");
 		Sprite[] keybeam = new Sprite[16];
 		keybeam[0] = keybeam[2] = keybeam[4] = keybeam[6] = keybeam[8] = keybeam[10] = keybeam[12] = keybeam[14] = new Sprite(
 				kbt, 75, 0, 21, 255);
@@ -1049,7 +1049,7 @@ public class PlaySkin extends Skin {
 		add(bga3);
 		add(new SkinGauge(this, gauge));
 
-		SkinText title = new SkinText("skin/VL-Gothic-Regular.ttf", 0, 24);
+		SkinText title = new SkinText("skin/default/VL-Gothic-Regular.ttf", 0, 24);
 		title.setReferenceID(STRING_FULLTITLE);
 		setDestination(title, 0, 12, 720, 18, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		setDestination(title, 1000, 12, 720, 18, 18, 0, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -1074,7 +1074,7 @@ public class PlaySkin extends Skin {
 		laneregion[14] = rect(950, 140, 50, 580);
 		laneregion[15] = rect(1000, 140, 70, 580);
 
-		Texture st = new Texture("skin/system.png");
+		Texture st = new Texture("skin/default/system.png");
 		SkinImage si = new SkinImage(new TextureRegion[] { new TextureRegion(st, 30, 0, 390, 10) }, 0);
 		setDestination(si, 0, 210, 140, 390, 0, 0, 0, 255, 255, 255, 0, 0, 0, 0, 1000, 0, 0, 0, 0);
 		setDestination(si, 1000, 210, 140, 390, 580, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -1100,7 +1100,7 @@ public class PlaySkin extends Skin {
 		setDestination(gi, 0, 1090, 220, 180, 480, 0, 255, 255, 255, 255, 0, 0, 0, 0, 1000, 0, 0, 0, 0);
 		add(gi);
 
-		Texture bombt = new Texture("skin/bomb.png");
+		Texture bombt = new Texture("skin/default/bomb.png");
 		TextureRegion[][] bombtr = TextureRegion.split(bombt, 181, 192);
 		for (int i = 0; i < laneregion.length; i++) {
 			SkinImage ri = new SkinImage(new TextureRegion[] { keybeam[i] }, 0);
@@ -1129,7 +1129,7 @@ public class PlaySkin extends Skin {
 		setDestination(line[1], 0, 680, 140, 390, 1, 0, 255, 128, 128, 128, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		line[1].setOffsety(OFFSET_LIFT);
 		add(new SkinNote(this, note, longnote, minenote, 12 / dh));
-		Texture lct = new Texture("skin/lanecover.png");
+		Texture lct = new Texture("skin/default/lanecover.png");
 		SkinSlider lanecover = new SkinSlider(new TextureRegion[] { new TextureRegion(lct) }, 0, 2, (int) (580 * dh),
 				SLIDER_LANECOVER);
 		setDestination(lanecover, 0, 210, 720, 390, 580, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -1163,7 +1163,7 @@ public class PlaySkin extends Skin {
 		}
 
 		// judge count
-		Texture nt = new Texture("skin/number.png");
+		Texture nt = new Texture("skin/default/number.png");
 		TextureRegion[][] ntr = TextureRegion.split(nt, 24, 24);
 		for (int i = 0; i < 6; i++) {
 			for (int j = 0; j < 2; j++) {
@@ -1189,7 +1189,7 @@ public class PlaySkin extends Skin {
 
 		lanegroupregion = new Rectangle[] { rect(210, 140, 390, 580), rect(680, 140, 390, 580) };
 		// READY
-		Texture ready = new Texture("skin/ready.png");
+		Texture ready = new Texture("skin/default/ready.png");
 		SkinImage ri = new SkinImage(new TextureRegion[] { new TextureRegion(ready) }, 0);
 		setDestination(ri, 0, 230, 250, 350, 60, 0, 0, 255, 255, 255, 0, 0, 0, 0, -1, TIMER_READY, 0, 0, 0);
 		setDestination(ri, 750, 230, 300, 350, 60, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);

@@ -40,13 +40,13 @@ public class GradeResultSkin extends Skin {
 //		SkinImage bgi = new SkinImage(IMAGE_STAGEFILE);
 //		setDestination(bgi, 0, 0, 0, 1280, 720, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 //		this.add(bgi);
-		Texture bg = new Texture("skin/resultbg.png");
+		Texture bg = new Texture("skin/default/resultbg.png");
 		SkinImage image = new SkinImage();
 		image.setImage(new TextureRegion[] { new TextureRegion(bg) }, 0);
 		setDestination(image, 0, 0, 0, 1280, 720, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(image);
 		// 数字
-		Texture nt = new Texture("skin/number.png");
+		Texture nt = new Texture("skin/default/number.png");
 		TextureRegion[][] ntr = TextureRegion.split(nt, 24, 24);
 
 		for (int i = 0; i < 6; i++) {
@@ -55,7 +55,7 @@ public class GradeResultSkin extends Skin {
 			}
 		}
 
-		Texture cl = new Texture("skin/clear.png");
+		Texture cl = new Texture("skin/default/clear.png");
 		SkinImage clear = new SkinImage();
 		clear.setImage(TextureRegion.split(cl, 200, 20),0);
 		clear.setReferenceID(NUMBER_CLEAR);
@@ -101,7 +101,7 @@ public class GradeResultSkin extends Skin {
 		add(new SkinGaugeGraphObject());
 		add(new SkinDetailGraphObject());
 
-		Texture st = new Texture("skin/system.png");
+		Texture st = new Texture("skin/default/system.png");
 		SkinImage fi = new SkinImage(new TextureRegion[]{new TextureRegion(st,8,0,8,8)},0);
         setDestination(fi, 0, 0, 0,1280, 720, 0, 0,255,255,255, 0, 0, 0, 0, 500, TIMER_FADEOUT, 0, 0, 0);
         setDestination(fi, 500, 0, 0,1280, 720, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);

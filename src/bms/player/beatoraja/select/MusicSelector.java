@@ -258,7 +258,7 @@ public class MusicSelector extends MainState {
 			this.setSkin(skin);
 		}
 
-		generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/VL-Gothic-Regular.ttf"));
+		generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/default/VL-Gothic-Regular.ttf"));
 		FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
 		parameter.size = 24;
 		titlefont = generator.generateFont(parameter);
@@ -276,9 +276,9 @@ public class MusicSelector extends MainState {
 					RESOLUTION[config.getResolution()].height));
 			final TextField.TextFieldStyle textFieldStyle = new TextField.TextFieldStyle(searchfont, // BitmapFont
 					Color.WHITE, // font color
-					new TextureRegionDrawable(new TextureRegion(new Texture("skin/system.png"), 0, 8, 8, 8)), // cusor
-					new TextureRegionDrawable(new TextureRegion(new Texture("skin/system.png"), 0, 8, 2, 8)), // selectoin
-					new TextureRegionDrawable(new TextureRegion(new Texture("skin/system.png"), 0, 8, 1, 8))); // background
+					new TextureRegionDrawable(new TextureRegion(new Texture("skin/default/system.png"), 0, 8, 8, 8)), // cusor
+					new TextureRegionDrawable(new TextureRegion(new Texture("skin/default/system.png"), 0, 8, 2, 8)), // selectoin
+					new TextureRegionDrawable(new TextureRegion(new Texture("skin/default/system.png"), 0, 8, 1, 8))); // background
 			textFieldStyle.messageFont = searchfont;
 			textFieldStyle.messageFontColor = Color.GRAY;
 

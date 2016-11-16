@@ -21,73 +21,73 @@ public class MusicSelectSkin extends Skin {
 		float dw = r.width / 1280.0f;
 		float dh = r.height / 720.0f;
 
-		SkinImage back = new SkinImage(new TextureRegion[] { new TextureRegion(new Texture("skin/select.png")) }, 0);
+		SkinImage back = new SkinImage(new TextureRegion[] { new TextureRegion(new Texture("skin/default/select.png")) }, 0);
 		setDestination(back, 0, 0, 0, 1280, 720, 0, 48, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(back);
 
-		Texture bart = new Texture("skin/songbar.png");
+		Texture bart = new Texture("skin/default/songbar.png");
 		
 		TextureRegion[][] bar = new TextureRegion[10][];
 		for (int i = 0; i < bar.length; i++) {
 			bar[i] = new TextureRegion[]{new TextureRegion(bart, 0, i * 30, 500, 30)};
 		}
-		TextureRegion[][] lampt = TextureRegion.split(new Texture("skin/lamp.png"), 15, 30);
+		TextureRegion[][] lampt = TextureRegion.split(new Texture("skin/default/lamp.png"), 15, 30);
         SkinImage[] lamp = new SkinImage[11];
 		for (int i = 0; i < lamp.length; i++) {
 			lamp[i] = new SkinImage(lampt[i], 100);
 			setDestination(lamp[i], 0, 0, 2, 15, 34, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		}
 
-		TextureRegion[][] ttrophy = TextureRegion.split(new Texture("skin/trophy.png"), 32, 32);
+		TextureRegion[][] ttrophy = TextureRegion.split(new Texture("skin/default/trophy.png"), 32, 32);
 		SkinImage[] trophy = new SkinImage[3];
 		trophy[0] = new SkinImage(ttrophy[0][10]);
 		trophy[1] = new SkinImage(ttrophy[0][11]);
 		trophy[2] = new SkinImage(ttrophy[0][12]);
 
-		SkinText dir = new SkinText("skin/VL-Gothic-Regular.ttf", 0, 24, 2);
+		SkinText dir = new SkinText("skin/default/VL-Gothic-Regular.ttf", 0, 24, 2);
 		dir.setReferenceID(STRING_DIRECTORY);
 		setDestination(dir, 0, 40, 670, 18, 24, 0, 255, 255, 128, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		this.add(dir);
-		SkinText genre = new SkinText("skin/VL-Gothic-Regular.ttf", 0, 20, 2);
+		SkinText genre = new SkinText("skin/default/VL-Gothic-Regular.ttf", 0, 20, 2);
 		genre.setReferenceID(STRING_GENRE);
 		setDestination(genre, 0, 100, 630, 18, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		this.add(genre);
-		SkinText title = new SkinText("skin/VL-Gothic-Regular.ttf", 0, 24, 2);
+		SkinText title = new SkinText("skin/default/VL-Gothic-Regular.ttf", 0, 24, 2);
 		title.setReferenceID(STRING_FULLTITLE);
 		setDestination(title, 0, 100, 600, 18, 24, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		this.add(title);
-		SkinText artist = new SkinText("skin/VL-Gothic-Regular.ttf", 0, 20, 2);
+		SkinText artist = new SkinText("skin/default/VL-Gothic-Regular.ttf", 0, 20, 2);
 		artist.setReferenceID(STRING_ARTIST);
 		setDestination(artist, 0, 100, 570, 18, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		this.add(artist);
 
-		SkinText grade1 = new SkinText("skin/VL-Gothic-Regular.ttf", 0, 24, 2);
+		SkinText grade1 = new SkinText("skin/default/VL-Gothic-Regular.ttf", 0, 24, 2);
 		grade1.setReferenceID(STRING_COURSE1_TITLE);
 		setDestination(grade1, 0, 80, 596, 18, 24, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		this.add(grade1);
-		SkinText grade2 = new SkinText("skin/VL-Gothic-Regular.ttf", 0, 24, 2);
+		SkinText grade2 = new SkinText("skin/default/VL-Gothic-Regular.ttf", 0, 24, 2);
 		grade2.setReferenceID(STRING_COURSE2_TITLE);
 		setDestination(grade2, 0, 80, 568, 18, 24, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		this.add(grade2);
-		SkinText grade3 = new SkinText("skin/VL-Gothic-Regular.ttf", 0, 24, 2);
+		SkinText grade3 = new SkinText("skin/default/VL-Gothic-Regular.ttf", 0, 24, 2);
 		grade3.setReferenceID(STRING_COURSE3_TITLE);
 		setDestination(grade3, 0, 80, 540, 18, 24, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		this.add(grade3);
-		SkinText grade4 = new SkinText("skin/VL-Gothic-Regular.ttf", 0, 24, 2);
+		SkinText grade4 = new SkinText("skin/default/VL-Gothic-Regular.ttf", 0, 24, 2);
 		grade4.setReferenceID(STRING_COURSE4_TITLE);
 		setDestination(grade4, 0, 80, 512, 18, 24, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		this.add(grade4);
 
-		Texture cl = new Texture("skin/clear.png");
+		Texture cl = new Texture("skin/default/clear.png");
 		SkinImage clear = new SkinImage();
 		clear.setImage(TextureRegion.split(cl, 200, 20), 0);
 		clear.setReferenceID(NUMBER_CLEAR);
 		setDestination(clear, 0, 100, 405, 200, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(clear);
 		// 数字
-		Texture st = new Texture("skin/system.png");
+		Texture st = new Texture("skin/default/system.png");
 
-		Texture nt = new Texture("skin/number.png");
+		Texture nt = new Texture("skin/default/number.png");
 		TextureRegion[][] ntr = TextureRegion.split(nt, 24, 24);
 
 		addImage(new TextureRegion(st, 0, 816, 220, 24),0, 95, 482, 165, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_FOLDERBAR, 0, 0);
@@ -170,10 +170,10 @@ public class MusicSelectSkin extends Skin {
         setCenterBar(10);
         barobj.setLamp(lamp);
 		barobj.setTrophy(trophy);
-		SkinBar.SkinBarText bartext = new SkinBar.SkinBarText("skin/VL-Gothic-Regular.ttf", 0, 24, 2);
+		SkinBar.SkinBarText bartext = new SkinBar.SkinBarText("skin/default/VL-Gothic-Regular.ttf", 0, 24, 2);
 		setDestination(bartext, 0, 80, 30, 18, 24, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		barobj.getBarText()[0] = bartext;
-		bartext = new SkinBar.SkinBarText("skin/VL-Gothic-Regular.ttf", 0, 24, 2);
+		bartext = new SkinBar.SkinBarText("skin/default/VL-Gothic-Regular.ttf", 0, 24, 2);
 		setDestination(bartext, 0, 80, 30, 18, 24, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		barobj.getBarText()[1] = bartext;
 		for(int i = 0;i < 7;i++) {
@@ -196,7 +196,7 @@ public class MusicSelectSkin extends Skin {
 
 		// option panel1
 		addImage(new TextureRegion(st, 8,0,8,8), 500, 0, 0,1280, 720, 0, 128,255,255,255, 0, 0, 0, 0, 0, 0, OPTION_PANEL1, 0, 0);
-		Texture pt = new Texture("skin/panel.png");
+		Texture pt = new Texture("skin/default/panel.png");
 		addImage(new TextureRegion(pt, 0, 0, 290, 294), 0, 50, 100, 580, 588, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_PANEL1, 0, 0);
 		SkinImage rc = new SkinImage();
 		TextureRegion[][] rct = new TextureRegion[10][];

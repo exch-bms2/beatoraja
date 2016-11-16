@@ -291,7 +291,7 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 				text = null;
 				int gr = Integer.parseInt(str[2]);
 				try {
-					text = new SkinText("skin/VL-Gothic-Regular.ttf", 0, 40, 2);
+					text = new SkinText("skin/default/VL-Gothic-Regular.ttf", 0, 40, 2);
 					int[] values = parseInt(str);
 					text.setReferenceID(values[3]);
 					text.setAlign(values[4]);

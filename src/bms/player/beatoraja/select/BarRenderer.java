@@ -65,7 +65,7 @@ public class BarRenderer {
 		this.main = main;
 		this.select = select;
 
-		generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/VL-Gothic-Regular.ttf"));
+		generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/default/VL-Gothic-Regular.ttf"));
 		FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
 		parameter.size = 24;
 		titlefont = generator.generateFont(parameter);

@@ -70,7 +70,7 @@ public class KeyConfiguration extends MainState {
 	}
 
 	public void create() {
-		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/VL-Gothic-Regular.ttf"));
+		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/default/VL-Gothic-Regular.ttf"));
 		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
 		parameter.size = 20;
 		titlefont = generator.generateFont(parameter);

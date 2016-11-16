@@ -41,8 +41,8 @@ import static bms.player.beatoraja.Resolution.*;
 
 public class MainController extends ApplicationAdapter {
 
-	public static final String VERSION = "beatoraja 0.3.5";
-	
+	public static final String VERSION = "beatoraja 0.3.6";
+
 	private BMSPlayer player;
 	private MusicDecide decide;
 	private MusicSelector selector;
@@ -161,10 +161,10 @@ public class MainController extends ApplicationAdapter {
 			current = newState;
 			current.setStartTime(System.currentTimeMillis());
 		}
-		if(current.getStage() != null) {
+		if (current.getStage() != null) {
 			Gdx.input.setInputProcessor(new InputMultiplexer(current.getStage(), input.getKeyBoardInputProcesseor()));
 		} else {
-			Gdx.input.setInputProcessor(input.getKeyBoardInputProcesseor());			
+			Gdx.input.setInputProcessor(input.getKeyBoardInputProcesseor());
 		}
 	}
 
@@ -175,6 +175,7 @@ public class MainController extends ApplicationAdapter {
 
 	@Override
 	public void create() {
+		final long t = System.currentTimeMillis();
 		sprite = new SpriteBatch();
 		shape = new ShapeRenderer();
 
@@ -185,9 +186,7 @@ public class MainController extends ApplicationAdapter {
 		result = new MusicResult(this);
 		gresult = new GradeResult(this);
 		keyconfig = new KeyConfiguration(this);
-
 		resource = new PlayerResource(config);
-
 		if (bmsfile != null) {
 			resource.setBMSFile(bmsfile, config, auto);
 			changeState(STATE_PLAYBMS);
@@ -195,11 +194,12 @@ public class MainController extends ApplicationAdapter {
 			changeState(STATE_SELECTMUSIC);
 		}
 
-		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/VL-Gothic-Regular.ttf"));
+		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/default/VL-Gothic-Regular.ttf"));
 		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
 		parameter.size = 24;
 		systemfont = generator.generateFont(parameter);
 		generator.dispose();
+		Logger.getGlobal().info("初期化時間(ms) : " + (System.currentTimeMillis() - t));
 	}
 
 	@Override
@@ -213,9 +213,9 @@ public class MainController extends ApplicationAdapter {
 		sprite.end();
 
 		Stage stage = current.getStage();
-		if(stage != null) {
+		if (stage != null) {
 			stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
-			stage.draw();			
+			stage.draw();
 		}
 		// move song bar position by mouse
 		if (input.isMousePressed()) {
@@ -272,13 +272,12 @@ public class MainController extends ApplicationAdapter {
 
 		// screen shot
 		if (input.getFunctionstate()[5] && input.getFunctiontime()[5] != 0) {
-			if (screenshot == null || screenshot.isCompleted) {
-				screenshot = new ScreenShotThread();
-				screenshot.pixels = ScreenUtils.getFrameBufferPixels(0, 0, Gdx.graphics.getBackBufferWidth(),
-						Gdx.graphics.getBackBufferHeight(), true);
+			if (screenshot == null || screenshot.savetime != 0) {
+				screenshot = new ScreenShotThread(ScreenUtils.getFrameBufferPixels(0, 0, Gdx.graphics.getBackBufferWidth(),
+						Gdx.graphics.getBackBufferHeight(), true));
 				screenshot.start();
-				screenshot.savetime = System.currentTimeMillis();
 			}
+			input.getFunctiontime()[5] = 0;
 		}
 		if (screenshot != null && screenshot.savetime + 2000 > System.currentTimeMillis()) {
 			sprite.begin();
@@ -388,6 +387,7 @@ public class MainController extends ApplicationAdapter {
 
 		try {
 			MainController player = new MainController(f, config, auto);
+			
 			LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
 			cfg.width = (int) RESOLUTION[config.getResolution()].width;
 			cfg.height = (int) RESOLUTION[config.getResolution()].height;
@@ -408,6 +408,38 @@ public class MainController extends ApplicationAdapter {
 			// System.setProperty("org.lwjgl.opengl.Display.allowSoftwareOpenGL",
 			// "true");
 			new LwjglApplication(player, cfg);
+			
+//			Lwjgl3ApplicationConfiguration cfg = new Lwjgl3ApplicationConfiguration();
+//
+//			final int w = (int) RESOLUTION[config.getResolution()].width;
+//			final int h = (int) RESOLUTION[config.getResolution()].height;
+//			if (config.isFullscreen()) {
+//				DisplayMode d = null;
+//				for (DisplayMode display : cfg.getDisplayModes()) {
+//					System.out.println("available DisplayMode : w - " + display.width + " h - " + display.height
+//							+ " refresh - " + display.refreshRate + " color bit - " + display.bitsPerPixel);
+//					if (display.width == w
+//							&& display.height == h
+//							&& (d == null || (d.refreshRate <= display.refreshRate && d.bitsPerPixel <= display.bitsPerPixel))) {
+//						d = display;
+//					}
+//				}
+//				if (d != null) {
+//					cfg.setFullscreenMode(d);
+//				} else {
+//					cfg.setWindowedMode(w, h);
+//				}
+//			} else {
+//				cfg.setWindowedMode(w, h);
+//			}
+//			// vSync
+//			cfg.useVsync(config.isVsync());
+//			cfg.setIdleFPS(config.getMaxFramePerSecond());
+//			cfg.setTitle(VERSION);
+//
+//			cfg.setAudioConfig(config.getAudioDeviceSimultaneousSources(), config.getAudioDeviceBufferSize(), 1);
+//
+//			new Lwjgl3Application(player, cfg);
 		} catch (Exception e) {
 			e.printStackTrace();
 			Logger.getGlobal().severe(e.getClass().getName() + " : " + e.getMessage());
@@ -492,26 +524,42 @@ public class MainController extends ApplicationAdapter {
 		}
 	}
 
+	/**
+	 * スクリーンショット処理用スレッド
+	 * 
+	 * @author exch
+	 */
 	class ScreenShotThread extends Thread {
 
-		private boolean isCompleted;
-		private String path = "";
+		/**
+		 * 処理が完了した時間
+		 */
 		private long savetime;
-		private byte[] pixels;
+		/**
+		 * スクリーンショット保存先
+		 */
+		private final String path;
+		/**
+		 * スクリーンショットのpixelデータ
+		 */
+		private final byte[] pixels;
+		
+		public ScreenShotThread(byte[] pixels) {
+			this.pixels = pixels;
+			final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
+			path = "screenshot/" + sdf.format(Calendar.getInstance().getTime()) + ".png";
+		}
 
 		@Override
 		public void run() {
 			Pixmap pixmap = new Pixmap(Gdx.graphics.getBackBufferWidth(), Gdx.graphics.getBackBufferHeight(),
 					Pixmap.Format.RGBA8888);
 			BufferUtils.copy(pixels, 0, pixmap.getPixels(), pixels.length);
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
-			path = "screenshot/" + sdf.format(Calendar.getInstance().getTime()) + ".png";
 			PixmapIO.writePNG(new FileHandle(path), pixmap);
 			pixmap.dispose();
 			input.getFunctiontime()[5] = 0;
 			Logger.getGlobal().info("スクリーンショット保存:" + path);
-			isCompleted = true;
+			screenshot.savetime = System.currentTimeMillis();
 		}
-
 	}
 }
