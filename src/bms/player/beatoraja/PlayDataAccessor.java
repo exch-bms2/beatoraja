@@ -1,11 +1,8 @@
 package bms.player.beatoraja;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
+import java.security.MessageDigest;
+import java.util.*;
 import java.util.logging.Logger;
 
 import bms.model.BMSModel;
@@ -24,7 +21,9 @@ import com.badlogic.gdx.utils.StringBuilder;
  */
 public class PlayDataAccessor {
 
-	// TODO スコアハッシュ付加
+	private final String hashkey;
+
+	// TODO スコアハッシュを付与するかどうかの判定(前のスコアハッシュの正当性を確認できなかった時)
 	// TODO リプレイ暗号、復号化
 
 	/**
@@ -36,7 +35,7 @@ public class PlayDataAccessor {
 	 */
 	private ScoreDatabaseAccessor scoredb;
 
-	private static final String[] replay = {"", "C", "H"};
+	private static final String[] replay = { "", "C", "H" };
 
 	public PlayDataAccessor(String player) {
 		this.player = player;
@@ -48,6 +47,8 @@ public class PlayDataAccessor {
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
+
+		hashkey = "";
 	}
 
 	public PlayerData readPlayerData() {
@@ -56,10 +57,10 @@ public class PlayDataAccessor {
 
 	public PlayerData readTodayPlayerData() {
 		PlayerData[] pd = scoredb.getPlayerDatas(player, 2);
-		if(pd.length > 1) {
+		if (pd.length > 1) {
 			pd[0].setPlaycount(pd[0].getPlaycount() - pd[1].getPlaycount());
 			pd[0].setClear(pd[0].getClear() - pd[1].getClear());
-			pd[0].setEpg(pd[0].getEpg() - pd[1].getEpg() );
+			pd[0].setEpg(pd[0].getEpg() - pd[1].getEpg());
 			pd[0].setLpg(pd[0].getLpg() - pd[1].getLpg());
 			pd[0].setEgr(pd[0].getEgr() - pd[1].getEgr());
 			pd[0].setLgr(pd[0].getLgr() - pd[1].getLgr());
@@ -73,7 +74,7 @@ public class PlayDataAccessor {
 			pd[0].setLms(pd[0].getLms() - pd[1].getLms());
 			pd[0].setPlaytime(pd[0].getPlaytime() - pd[1].getPlaytime());
 			return pd[0];
-		} else if(pd.length == 1) {
+		} else if (pd.length == 1) {
 			return pd[0];
 		}
 		return null;
@@ -95,7 +96,7 @@ public class PlayDataAccessor {
 		pd.setLms(pd.getLms() + score.getLms());
 
 		pd.setPlaycount(pd.getPlaycount() + 1);
-		if(score.getClear() > GrooveGauge.CLEARTYPE_FAILED) {
+		if (score.getClear() > GrooveGauge.CLEARTYPE_FAILED) {
 			pd.setClear(pd.getClear() + 1);
 		}
 		pd.setPlaytime(pd.getPlaytime() + time);
@@ -104,10 +105,13 @@ public class PlayDataAccessor {
 
 	/**
 	 * スコアデータを読み込む
-	 * @param model　対象のモデル
-	 * @param lnmode LNモード
-     * @return スコアデータ
-     */
+	 * 
+	 * @param model
+	 *            　対象のモデル
+	 * @param lnmode
+	 *            LNモード
+	 * @return スコアデータ
+	 */
 	public IRScoreData readScoreData(BMSModel model, int lnmode) {
 		String hash = model.getSHA256();
 		boolean ln = model.containsUndefinedLongNote();
@@ -116,10 +120,13 @@ public class PlayDataAccessor {
 
 	/**
 	 * スコアデータを読み込む
-	 * @param ln 対象のbmsがLNを含む場合はtrueを入れる
-	 * @param lnmode LNモード
-     * @return スコアデータ
-     */
+	 * 
+	 * @param ln
+	 *            対象のbmsがLNを含む場合はtrueを入れる
+	 * @param lnmode
+	 *            LNモード
+	 * @return スコアデータ
+	 */
 	public IRScoreData readScoreData(String hash, boolean ln, int lnmode) {
 		return scoredb.getScoreData(player, hash, ln ? lnmode : 0);
 	}
@@ -127,28 +134,34 @@ public class PlayDataAccessor {
 	public Map<String, IRScoreData> readScoreDatas(SongData[] songs, int lnmode) {
 		List<String> noln = new ArrayList<String>();
 		List<String> ln = new ArrayList<String>();
-		for(SongData song : songs) {
-			if(song.hasLongNote()) {
+		for (SongData song : songs) {
+			if (song.hasLongNote()) {
 				ln.add(song.getSha256());
 			} else {
 				noln.add(song.getSha256());
 			}
 		}
-		Map<String, IRScoreData> result = scoredb.getScoreDatas(player, noln.toArray(new String[0]),0);
-		result.putAll(scoredb.getScoreDatas(player, ln.toArray(new String[0]),lnmode));
+		Map<String, IRScoreData> result = scoredb.getScoreDatas(player, noln.toArray(new String[0]), 0);
+		result.putAll(scoredb.getScoreDatas(player, ln.toArray(new String[0]), lnmode));
 		return result;
 	}
 
 	public List<IRScoreData> readScoreDatas(String sql) {
 		return scoredb.getScoreDatas(player, sql);
 	}
+
 	/**
 	 * スコアデータを書き込む
-	 * @param newscore スコアデータ
-	 * @param model　対象のモデル
-	 * @param lnmode LNモード
-	 * @param updateScore プレイ回数のみ反映する場合はfalse
-     */
+	 * 
+	 * @param newscore
+	 *            スコアデータ
+	 * @param model
+	 *            　対象のモデル
+	 * @param lnmode
+	 *            LNモード
+	 * @param updateScore
+	 *            プレイ回数のみ反映する場合はfalse
+	 */
 	public void writeScoreDara(IRScoreData newscore, BMSModel model, int lnmode, boolean updateScore) {
 		String hash = model.getSHA256();
 		if (newscore == null) {
@@ -170,20 +183,20 @@ public class PlayDataAccessor {
 			score.setClear(newscore.getClear());
 			score.setOption(newscore.getOption());
 		}
-		if(model.getUseKeys() < 10) {
+		if (model.getUseKeys() < 10) {
 			int history = score.getHistory();
-			for(int i = 0;i < newscore.getOption();i++) {
+			for (int i = 0; i < newscore.getOption(); i++) {
 				history /= 10;
 			}
-			if(history % 10 < newscore.getClear() - GrooveGauge.CLEARTYPE_LIGHT_ASSTST) {
+			if (history % 10 < newscore.getClear() - GrooveGauge.CLEARTYPE_LIGHT_ASSTST) {
 				int add = newscore.getClear() - GrooveGauge.CLEARTYPE_LIGHT_ASSTST - (history % 10);
-				for(int i = 0;i < newscore.getOption();i++) {
+				for (int i = 0; i < newscore.getOption(); i++) {
 					add *= 10;
 				}
 				score.setHistory(score.getHistory() + add);
 			}
 		} else {
-			// TODO DPのhistoryはどうする？			
+			// TODO DPのhistoryはどうする？
 		}
 
 		if (score.getExscore() < newscore.getExscore() && updateScore) {
@@ -211,13 +224,14 @@ public class PlayDataAccessor {
 		}
 		score.setPlaycount(score.getPlaycount() + 1);
 		score.setDate(Calendar.getInstance(TimeZone.getDefault()).getTimeInMillis() / 1000L);
+		score.setScorehash(getScoreHash(score));
 		scoredb.setScoreData(player, score);
 
 		int time = 0;
-		for(TimeLine tl : model.getAllTimeLines()) {
-			for(int i = 0;i < 18;i++) {
-				if(tl.getNote(i) != null && tl.getNote(i).getState() != 0) {
-					time =tl.getTime() / 1000;
+		for (TimeLine tl : model.getAllTimeLines()) {
+			for (int i = 0; i < 18; i++) {
+				if (tl.getNote(i) != null && tl.getNote(i).getState() != 0) {
+					time = tl.getTime() / 1000;
 				}
 			}
 		}
@@ -229,14 +243,14 @@ public class PlayDataAccessor {
 	public IRScoreData readScoreData(String hash, boolean ln, int lnmode, int option, int[] constraint) {
 		int hispeed = 0;
 		int judge = 0;
-		for(int c : constraint) {
-			if(c == TableData.NO_HISPEED) {
+		for (int c : constraint) {
+			if (c == TableData.NO_HISPEED) {
 				hispeed = 1;
 			}
-			if(c == TableData.NO_GOOD) {
+			if (c == TableData.NO_GOOD) {
 				judge = 1;
 			}
-			if(c == TableData.NO_GREAT) {
+			if (c == TableData.NO_GREAT) {
 				judge = 2;
 			}
 		}
@@ -246,7 +260,7 @@ public class PlayDataAccessor {
 	public IRScoreData readScoreData(BMSModel[] models, int lnmode, int option, int[] constraint) {
 		String[] hash = new String[models.length];
 		boolean ln = false;
-		for (int i = 0;i < models.length;i++) {
+		for (int i = 0; i < models.length; i++) {
 			hash[i] = models[i].getSHA256();
 			ln |= models[i].containsUndefinedLongNote();
 		}
@@ -261,7 +275,8 @@ public class PlayDataAccessor {
 		return readScoreData(hash, ln, lnmode, option, constraint);
 	}
 
-	public void writeScoreDara(IRScoreData newscore, BMSModel[] models, int lnmode, int option, int[] constraint, boolean updateScore) {
+	public void writeScoreDara(IRScoreData newscore, BMSModel[] models, int lnmode, int option, int[] constraint,
+			boolean updateScore) {
 		String hash = "";
 		int totalnotes = 0;
 		boolean ln = false;
@@ -275,18 +290,19 @@ public class PlayDataAccessor {
 		}
 		int hispeed = 0;
 		int judge = 0;
-		for(int c : constraint) {
-			if(c == TableData.NO_HISPEED) {
+		for (int c : constraint) {
+			if (c == TableData.NO_HISPEED) {
 				hispeed = 1;
 			}
-			if(c == TableData.NO_GOOD) {
+			if (c == TableData.NO_GOOD) {
 				judge = 1;
 			}
-			if(c == TableData.NO_GREAT) {
+			if (c == TableData.NO_GREAT) {
 				judge = 2;
 			}
 		}
-		IRScoreData score = scoredb.getScoreData(player, hash, (ln ? lnmode : 0) + option * 10 + hispeed * 100 + judge * 1000);
+		IRScoreData score = scoredb.getScoreData(player, hash, (ln ? lnmode : 0) + option * 10 + hispeed * 100 + judge
+				* 1000);
 		if (score == null) {
 			score = new IRScoreData();
 			score.setMode((ln ? lnmode : 0) + option * 10 + hispeed * 100 + judge * 1000);
@@ -328,10 +344,34 @@ public class PlayDataAccessor {
 		}
 		score.setPlaycount(score.getPlaycount() + 1);
 		score.setDate(Calendar.getInstance(TimeZone.getDefault()).getTimeInMillis() / 1000L);
+		score.setScorehash(getScoreHash(score));
 		scoredb.setScoreData(player, score);
 
 		Logger.getGlobal().info("スコアデータベース更新完了 ");
 
+	}
+
+	private String getScoreHash(IRScoreData score) {
+		byte[] cipher_byte;
+		try {
+			MessageDigest md = MessageDigest.getInstance("SHA-256");
+			md.update((hashkey + score.getSha256() + "," + score.getExscore() + "," + score.getEpg() + ","
+					+ score.getLpg() + "," + score.getEgr() + "," + score.getLgr() + "," + score.getEgd() + ","
+					+ score.getLgd() + "," + score.getEbd() + "," + score.getLbd() + "," + score.getEpr() + ","
+					+ score.getLpr() + "," + score.getEms() + "," + score.getLms() + "," + score.getClear() + ","
+					+ score.getMinbp() + "," + score.getCombo() + "," + score.getMode() + "," + score.getClearcount()
+					+ "," + score.getPlaycount() + "," + score.getOption() + "," + score.getRandom() + ","
+					+ score.getHistory() + "," + score.getDate()).getBytes());
+			cipher_byte = md.digest();
+			StringBuilder sb = new StringBuilder(2 * cipher_byte.length);
+			for (byte b : cipher_byte) {
+				sb.append(String.format("%02x", b & 0xff));
+			}
+			return "035" + sb.toString();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	public boolean existsReplayData(BMSModel model, int lnmode, int index) {
@@ -340,7 +380,7 @@ public class PlayDataAccessor {
 	}
 
 	public boolean existsReplayData(String hash, boolean ln, int lnmode, int index) {
-		return new File(this.getReplayDataFilePath(hash, ln, lnmode,index)).exists();
+		return new File(this.getReplayDataFilePath(hash, ln, lnmode, index)).exists();
 	}
 
 	public boolean existsReplayData(BMSModel[] models, int lnmode, int index, int[] constraint) {
@@ -353,23 +393,27 @@ public class PlayDataAccessor {
 		}
 		return new File(this.getReplayDataFilePath(hash, ln, lnmode, index, constraint)).exists();
 	}
+
 	public boolean existsReplayData(String[] hash, boolean ln, int lnmode, int index, int[] constraint) {
 		return new File(this.getReplayDataFilePath(hash, ln, lnmode, index, constraint)).exists();
 	}
 
 	/**
 	 * リプレイデータを読み込む
-	 * @param model 対象のBMS
-	 * @param lnmode LNモード
-     * @return リプレイデータ
-     */
+	 * 
+	 * @param model
+	 *            対象のBMS
+	 * @param lnmode
+	 *            LNモード
+	 * @return リプレイデータ
+	 */
 	public ReplayData readReplayData(BMSModel model, int lnmode, int index) {
 		if (existsReplayData(model, lnmode, index)) {
 			Json json = new Json();
 			json.setIgnoreUnknownFields(true);
 			try {
-				return json.fromJson(ReplayData.class,
-						new FileReader(this.getReplayDataFilePath(model, lnmode, index)));
+				return json
+						.fromJson(ReplayData.class, new FileReader(this.getReplayDataFilePath(model, lnmode, index)));
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
@@ -379,10 +423,14 @@ public class PlayDataAccessor {
 
 	/**
 	 * リプレイデータを書き込む
-	 * @param rd リプレイデータ
-	 * @param model 対象のBMS
-	 * @param lnmode LNモード
-     */
+	 * 
+	 * @param rd
+	 *            リプレイデータ
+	 * @param model
+	 *            対象のBMS
+	 * @param lnmode
+	 *            LNモード
+	 */
 	public void wrireReplayData(ReplayData rd, BMSModel model, int lnmode, int index) {
 		File replaydir = new File("replay");
 		if (!replaydir.exists()) {
@@ -391,7 +439,7 @@ public class PlayDataAccessor {
 		Json json = new Json();
 		json.setOutputType(OutputType.json);
 		try {
-			FileWriter fw = new FileWriter(this.getReplayDataFilePath(model, lnmode,index));
+			FileWriter fw = new FileWriter(this.getReplayDataFilePath(model, lnmode, index));
 			fw.write(json.prettyPrint(rd));
 			fw.flush();
 			fw.close();
@@ -404,22 +452,26 @@ public class PlayDataAccessor {
 	public ReplayData[] readReplayData(BMSModel[] models, int lnmode, int index, int[] constraint) {
 		String[] hashes = new String[models.length];
 		boolean ln = false;
-		for(int i = 0;i < models.length;i++) {
+		for (int i = 0; i < models.length; i++) {
 			hashes[i] = models[i].getSHA256();
 			ln |= models[i].containsUndefinedLongNote();
 		}
-		return this.readReplayData(hashes, ln, lnmode,index, constraint);
+		return this.readReplayData(hashes, ln, lnmode, index, constraint);
 	}
 
 	/**
 	 * コースリプレイデータを読み込む
-	 * @param hash 対象のBMSハッシュ群
-	 * @param lnmode LNモード
+	 * 
+	 * @param hash
+	 *            対象のBMSハッシュ群
+	 * @param lnmode
+	 *            LNモード
 	 * @return リプレイデータ
 	 */
-	public ReplayData[] readReplayData(String[] hash, boolean ln , int lnmode, int index, int[] constraint) {
+	public ReplayData[] readReplayData(String[] hash, boolean ln, int lnmode, int index, int[] constraint) {
 		if (existsReplayData(hash, ln, lnmode, index, constraint)) {
 			Json json = new Json();
+			json.setIgnoreUnknownFields(true);
 			try {
 				return json.fromJson(ReplayData[].class,
 						new FileReader(this.getReplayDataFilePath(hash, ln, lnmode, index, constraint)));
@@ -433,21 +485,25 @@ public class PlayDataAccessor {
 	public void wrireReplayData(ReplayData[] rd, BMSModel[] models, int lnmode, int index, int[] constraint) {
 		String[] hashes = new String[models.length];
 		boolean ln = false;
-		for(int i = 0;i < models.length;i++) {
+		for (int i = 0; i < models.length; i++) {
 			hashes[i] = models[i].getSHA256();
 			ln |= models[i].getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
 					+ models[i].getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH) > 0;
 		}
-		this.wrireReplayData(rd, hashes, ln, lnmode, index,constraint);
+		this.wrireReplayData(rd, hashes, ln, lnmode, index, constraint);
 
 	}
 
-		/**
-         * コースリプレイデータを書き込む
-         * @param rd リプレイデータ
-         * @param hash 対象のBMSハッシュ群
-         * @param lnmode LNモード
-         */
+	/**
+	 * コースリプレイデータを書き込む
+	 * 
+	 * @param rd
+	 *            リプレイデータ
+	 * @param hash
+	 *            対象のBMSハッシュ群
+	 * @param lnmode
+	 *            LNモード
+	 */
 	public void wrireReplayData(ReplayData[] rd, String[] hash, boolean ln, int lnmode, int index, int[] constraint) {
 		File replaydir = new File("replay");
 		if (!replaydir.exists()) {
@@ -474,21 +530,23 @@ public class PlayDataAccessor {
 	}
 
 	private String getReplayDataFilePath(String hash, boolean ln, int lnmode, int index) {
-		return "replay" + File.separatorChar +  (ln ? replay[lnmode] : "") + hash + (index > 0 ? "_" + index : "") + ".json";
+		return "replay" + File.separatorChar + (ln ? replay[lnmode] : "") + hash + (index > 0 ? "_" + index : "")
+				+ ".json";
 	}
 
 	private String getReplayDataFilePath(String[] hashes, boolean ln, int lnmode, int index, int[] constraint) {
 		StringBuilder hash = new StringBuilder();
-		for(String s : hashes) {
-			hash.append(s.substring(0,10));
+		for (String s : hashes) {
+			hash.append(s.substring(0, 10));
 		}
 		StringBuilder sb = new StringBuilder();
-		for(int c : constraint) {
-			if(c != TableData.GRADE_NORMAL && c != TableData.GRADE_MIRROR && c != TableData.GRADE_RANDOM) {
+		for (int c : constraint) {
+			if (c != TableData.GRADE_NORMAL && c != TableData.GRADE_MIRROR && c != TableData.GRADE_RANDOM) {
 				sb.append(String.format("%02d", c));
 			}
 		}
-		return "replay" + File.separatorChar +  (ln ? replay[lnmode] : "") + hash + (sb.length() > 0 ? "_" + sb.toString() : "") + (index > 0 ? "_" + index : "") + ".json";
+		return "replay" + File.separatorChar + (ln ? replay[lnmode] : "") + hash
+				+ (sb.length() > 0 ? "_" + sb.toString() : "") + (index > 0 ? "_" + index : "") + ".json";
 	}
 
 }

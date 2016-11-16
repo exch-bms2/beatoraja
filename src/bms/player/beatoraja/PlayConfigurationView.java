@@ -517,6 +517,7 @@ public class PlayConfigurationView implements Initializable {
 						sd.setNotes(song[0].getNotes());
 						sd.setSha256(song[0].getSha256());
 						IRScoreData oldsd = scoredb.getScoreData(player, sd.getSha256(), 0);
+						sd.setScorehash("LR2");
 						if (oldsd == null || oldsd.getClear() <= sd.getClear()) {
 							result.add(sd);
 						}
