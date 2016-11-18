@@ -55,9 +55,9 @@ public class SkinBar extends SkinObject {
     public SkinImage makeBarImages(boolean on, int index) {
         if ((on ? barimageon[index] : barimageoff[index]) == null) {
             if (on) {
-                barimageon[index] = new SkinImage(images, cycle);
+                barimageon[index] = new SkinImage(images, 0, cycle);
             } else {
-                barimageoff[index] = new SkinImage(images, cycle);
+                barimageoff[index] = new SkinImage(images, 0, cycle);
             }
         }
         return on ? barimageon[index] : barimageoff[index];
@@ -138,7 +138,7 @@ public class SkinBar extends SkinObject {
         public SkinBarText(String fontpath, int cycle, int size, int shadow) {
             generator = new FreeTypeFontGenerator(Gdx.files.internal(fontpath));
             parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-            this.setCycle(cycle);
+//            this.setCycle(cycle);
             parameter.size = size;
             this.shadow = shadow;
         }

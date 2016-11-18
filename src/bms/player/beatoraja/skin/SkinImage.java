@@ -33,15 +33,15 @@ public class SkinImage extends SkinObject {
 	}
 
 	public SkinImage(TextureRegion image) {
-		setImage(new TextureRegion[]{image}, 0);
+		setImage(new TextureRegion[]{image}, 0, 0);
 	}
 
-	public SkinImage(TextureRegion[] image, int cycle) {
-		setImage(image, cycle);
+	public SkinImage(TextureRegion[] image, int timer, int cycle) {
+		setImage(image, timer, cycle);
 	}
 		
-	public SkinImage(TextureRegion[][] image, int cycle) {
-		setImage(image, cycle);
+	public SkinImage(TextureRegion[][] image, int timer, int cycle) {
+		setImage(image, timer, cycle);
 	}
 		
 	public TextureRegion getImage(long time, MainState state) {
@@ -55,15 +55,15 @@ public class SkinImage extends SkinObject {
 		return image[value].getImage(time, state);
 	}
 	
-	public void setImage(TextureRegion[] image, int cycle) {
+	public void setImage(TextureRegion[] image, int timer, int cycle) {
 		this.image = new SkinSource[1];
-		this.image[0] = new SkinSource(image, 0, cycle);
+		this.image[0] = new SkinSource(image, timer, cycle);
 	}
 
-	public void setImage(TextureRegion[][] image, int cycle) {
+	public void setImage(TextureRegion[][] image, int timer, int cycle) {
 		this.image = new SkinSource[image.length];
 		for(int i = 0;i < image.length;i++) {
-			this.image[i] = new SkinSource(image[i], 0, cycle);
+			this.image[i] = new SkinSource(image[i], timer, cycle);
 		}		
 	}
 

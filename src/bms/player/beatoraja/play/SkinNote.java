@@ -42,11 +42,11 @@ public class SkinNote extends SkinObject {
 	/**
 	 * 不可視ノーツ画像
 	 */
-	private TextureRegion[][] hiddennote;
+	private SkinSource[] hiddennote;
 	/**
 	 * 処理済ノーツ画像
 	 */
-	private TextureRegion[][] processednote;
+	private SkinSource[] processednote;
 
 	public SkinNote(PlaySkin skin, TextureRegion[][] note, TextureRegion[][][] longnote, TextureRegion[][] minenote, float scale) {
 		this(skin, note, longnote, minenote, 0, scale);
@@ -84,11 +84,11 @@ public class SkinNote extends SkinObject {
 		pn.setColor(Color.CYAN);
 		pn.drawRectangle(0, 0, hn.getWidth(), hn.getHeight());
 		pn.drawRectangle(1, 1, hn.getWidth() - 2, hn.getHeight() - 2);
-		hiddennote = new TextureRegion[note.length][];
-		processednote = new TextureRegion[note.length][];
+		hiddennote = new SkinSource[note.length];
+		processednote = new SkinSource[note.length];
 		for (int i = 0; i < note.length; i++) {
-			hiddennote[i] = new TextureRegion[] { new TextureRegion(new Texture(hn)) };
-			processednote[i] = new TextureRegion[] { new TextureRegion(new Texture(pn)) };
+			hiddennote[i] = new SkinSource(new TextureRegion(new Texture(hn)));
+			processednote[i] = new SkinSource(new TextureRegion(new Texture(pn)));
 		}
 	}
 
@@ -114,12 +114,12 @@ public class SkinNote extends SkinObject {
 			}
 			for (int i = 0; i < hiddennote.length; i++) {
 				if (hiddennote[i] != null) {
-					chiddennote[i] = hiddennote[i][getImageIndex(hiddennote[i].length, time, state)];
+					chiddennote[i] = hiddennote[i].getImage(time, state);
 				}
 			}
 			for (int i = 0; i < processednote.length; i++) {
 				if (processednote[i] != null) {
-					cprocessednote[i] = processednote[i][getImageIndex(processednote[i].length, time, state)];
+					cprocessednote[i] = processednote[i].getImage(time, state);
 				}
 			}
 			skin.player.getLanerender().drawLane(cnote, clongnote, cminenote, cprocessednote, chiddennote, scale);
@@ -149,18 +149,14 @@ public class SkinNote extends SkinObject {
 			minenote = null;
 		}
 		if (hiddennote != null) {
-			for (TextureRegion[] trs : hiddennote) {
-				for (TextureRegion tr : trs) {
-					tr.getTexture().dispose();
-				}
+			for (SkinSource trs : hiddennote) {
+				trs.dispose();
 			}
 			hiddennote = null;
 		}
 		if (processednote != null) {
-			for (TextureRegion[] trs : processednote) {
-				for (TextureRegion tr : trs) {
-					tr.getTexture().dispose();
-				}
+			for (SkinSource trs : processednote) {
+				trs.dispose();
 			}
 			processednote = null;
 		}

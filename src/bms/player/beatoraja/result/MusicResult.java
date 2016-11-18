@@ -512,13 +512,6 @@ public class MusicResult extends MainState {
 		return super.getNumberValue(id);
 	}
 
-	public void renderGraph(long time) {
-		Rectangle graph = skin.getGaugeRegion();
-		final ShapeRenderer shape = getMainController().getShapeRenderer();
-		final PlayerResource resource = getMainController().getPlayerResource();
-		gaugegraph.render(shape, time, resource, graph, resource.getGauge());
-	}
-
 	public void renderDetail(long time) {
 		final ShapeRenderer shape = getMainController().getShapeRenderer();
 		final SpriteBatch sprite = getMainController().getSpriteBatch();

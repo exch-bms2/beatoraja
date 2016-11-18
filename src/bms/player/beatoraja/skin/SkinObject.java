@@ -27,8 +27,6 @@ public abstract class SkinObject {
 	 */
 	private int offsety = -1;
 
-	private int timer;
-	private int cycle;
 	private int imageid = -1;
 
 	private int dsttimer = 0;
@@ -288,24 +286,6 @@ public abstract class SkinObject {
 		return dst.get(0).angle;
 	}
 
-	public int getImageIndex(int length, long time, MainState state) {
-		if(cycle == 0) {
-			return 0;
-		}
-
-		if(timer != 0 && timer < 256) {
-			if(state.getTimer()[timer] == Long.MIN_VALUE) {
-				return 0;
-			}
-			time -= state.getTimer()[timer];
-		}
-		if(time < 0) {
-			return 0;
-		}
-//		System.out.println(index + " / " + image.length);
-		return ((int) (time / (((float)getCycle())  / length))) % length;
-	}
-
 	public abstract void draw(SpriteBatch sprite, long time, MainState state);
 
 	private final float[] CENTERX = { 0.5f, 0, 0.5f, 1,0, 0.5f, 1,0, 0.5f, 1,};
@@ -384,22 +364,6 @@ public abstract class SkinObject {
 
 	public void setOffsety(int offsetY) {
 		this.offsety = offsetY;
-	}
-
-	public int getTimer() {
-		return timer;
-	}
-
-	public void setTimer(int timing) {
-		this.timer = timing;
-	}
-
-	public int getCycle() {
-		return cycle;
-	}
-
-	public void setCycle(int cycle) {
-		this.cycle = cycle;
 	}
 
 	public int getImageID() {

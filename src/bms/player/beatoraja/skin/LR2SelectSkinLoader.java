@@ -143,14 +143,20 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader {
 						TextureRegion[] images = getSourceImage(values);
 						if (images != null) {
 							if (images.length % 24 == 0) {
-								TextureRegion[] pn = new TextureRegion[12];
-								TextureRegion[] mn = new TextureRegion[12];
+								TextureRegion[][] pn = new TextureRegion[images.length / 24][];
+								TextureRegion[][] mn = new TextureRegion[images.length / 24][];
 
-								for (int i = 0; i < 12; i++) {
-									pn[i] = images[i];
-									mn[i] = images[i + 12];
+								for(int j = 0;j < pn.length;j++) {
+									pn[j] = new TextureRegion[12];
+									mn[j] = new TextureRegion[12];
+
+									for (int i = 0; i < 12; i++) {
+										pn[j][i] = images[j * 24 + i];
+										mn[j][i] = images[j * 24 + i + 12];
+									}
 								}
-								skinbar.getBarlevel()[values[1]] = new SkinNumber(pn, mn, values[9], values[13] + 1, 0, values[11]);
+
+								skinbar.getBarlevel()[values[1]] = new SkinNumber(pn, mn, values[10], values[9], values[13] + 1, 0, values[11]);
 								skinbar.getBarlevel()[values[1]].setAlign(values[12]);
 							} else {
 								int d = images.length % 10 == 0 ? 10 : 11;
@@ -162,11 +168,10 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader {
 									}
 								}
 
-								skinbar.getBarlevel()[values[1]] = new SkinNumber(nimages, values[9], values[13], d > 10 ? 2 : 0,
+								skinbar.getBarlevel()[values[1]] = new SkinNumber(nimages, values[10], values[9], values[13], d > 10 ? 2 : 0,
 										values[11]);
 								skinbar.getBarlevel()[values[1]].setAlign(values[12]);
 							}
-							skinbar.getBarlevel()[values[1]].setTimer(values[10]);
 							// System.out.println("Number Added - " +
 							// (num.getId()));
 						}
@@ -202,8 +207,7 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader {
 					if (images != null) {
 						int[] lamps = lampg[values[1]];
 						for (int i = 0; i < lamps.length; i++) {
-							skinbar.getLamp()[lamps[i]] = new SkinImage(images, values[9]);
-							skinbar.getLamp()[lamps[i]].setTimer(values[10]);
+							skinbar.getLamp()[lamps[i]] = new SkinImage(images, values[10], values[9]);
 						}
 						// System.out.println("Nowjudge Added - " + (5 -
 						// values[1]));

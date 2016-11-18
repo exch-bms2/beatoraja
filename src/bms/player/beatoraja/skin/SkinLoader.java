@@ -47,7 +47,7 @@ public class SkinLoader {
 									}
 									
 									obj = new SkinImage(getSourceImage(texmap.get(src.id),  img.x, img.y, img.w,
-											img.h, img.divx, img.divy), img.cycle);
+											img.h, img.divx, img.divy), img.timer, img.cycle);
 									break;
 								}
 							}
@@ -64,14 +64,19 @@ public class SkinLoader {
 									TextureRegion[] images = getSourceImage(texmap.get(src.id),  value.x, value.y, value.w,
 											value.h, value.divx, value.divy);
 									if (images.length % 24 == 0) {
-										TextureRegion[] pn = new TextureRegion[12];
-										TextureRegion[] mn = new TextureRegion[12];
+										TextureRegion[][] pn = new TextureRegion[images.length / 24][];
+										TextureRegion[][] mn = new TextureRegion[images.length / 24][];
 
-										for (int i = 0; i < 12; i++) {
-											pn[i] = images[i];
-											mn[i] = images[i + 12];
+										for(int j = 0;j < pn.length;j++) {
+											pn[j] = new TextureRegion[12];
+											mn[j] = new TextureRegion[12];
+
+											for (int i = 0; i < 12; i++) {
+												pn[j][i] = images[j * 24 + i];
+												mn[j][i] = images[j * 24 + i + 12];
+											}
 										}
-										SkinNumber num = new SkinNumber(pn, mn, value.cycle, value.digit, 0, value.ref);										
+										SkinNumber num = new SkinNumber(pn, mn, value.timer, value.cycle, value.digit, 0, value.ref);										
 										num.setAlign(value.align);
 										obj = num;
 									} else {
@@ -84,7 +89,7 @@ public class SkinLoader {
 											}
 										}
 										
-										SkinNumber num = new SkinNumber(nimages, value.cycle, value.digit, d > 10 ? 2 : 0, value.ref);
+										SkinNumber num = new SkinNumber(nimages, value.timer, value.cycle, value.digit, d > 10 ? 2 : 0, value.ref);
 										num.setAlign(value.align);
 										obj = num;
 									}

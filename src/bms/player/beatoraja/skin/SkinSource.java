@@ -14,20 +14,37 @@ public class SkinSource {
 	/**
 	 * イメージ
 	 */
-	private TextureRegion[] image;
+	private TextureRegion[][] image;
 
 	private final int timer;
 	private final int cycle;
 
+	public SkinSource(TextureRegion image) {
+		this(new TextureRegion[]{image},0,0);
+	}
+
 	public SkinSource(TextureRegion[] image, int timer, int cycle) {
+		this(new TextureRegion[][]{image},timer,cycle);
+	}
+
+	public SkinSource(TextureRegion[][] image, int timer, int cycle) {
 		this.image = image;
 		this.timer = timer;
 		this.cycle = cycle;
 	}
-	
+
 	public TextureRegion getImage(long time, MainState state) {
-		if(image != null) {
-			return image[getImageIndex(image.length, time, state)];			
+		if(image != null && image.length > 0) {
+			if(image[0].length > 0) {
+				return image[0][getImageIndex(image[0].length, time, state)];
+			}
+		}
+		return null;
+	}
+
+	public TextureRegion[] getImages(long time, MainState state) {
+		if(image != null && image.length > 0) {
+			return image[getImageIndex(image.length, time, state)];
 		}
 		return null;
 	}
@@ -52,8 +69,10 @@ public class SkinSource {
 	
 	public void dispose() {
 		if(image != null) {
-			for(TextureRegion tr : image) {
-				tr.getTexture().dispose();
+			for(TextureRegion[] trs : image) {
+				for(TextureRegion tr : trs) {
+					tr.getTexture().dispose();
+				}
 			}
 			image = null;
 		}

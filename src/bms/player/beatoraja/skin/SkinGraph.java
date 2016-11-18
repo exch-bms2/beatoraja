@@ -28,8 +28,12 @@ public class SkinGraph extends SkinObject {
 		setImageID(imageid);
 	}
 
-	public SkinGraph(TextureRegion[] image, int cycle) {
-		source = new SkinSource(image, 0, cycle);
+	public SkinGraph(TextureRegion image) {
+		source = new SkinSource(new TextureRegion[]{image}, 0, 0);
+	}
+
+	public SkinGraph(TextureRegion[] image, int timer, int cycle) {
+		source = new SkinSource(image, timer, cycle);
 	}
 
 	public void draw(SpriteBatch sprite, long time, MainState state) {

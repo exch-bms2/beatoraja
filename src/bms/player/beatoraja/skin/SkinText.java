@@ -48,7 +48,7 @@ public class SkinText extends SkinObject {
     public SkinText(String fontpath, int cycle, int size, int shadow) {
         generator = new FreeTypeFontGenerator(Gdx.files.internal(fontpath));
         parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-        this.setCycle(cycle);
+//        this.setCycle(cycle);
         parameter.size = size;
         this.shadow = shadow;
     }
