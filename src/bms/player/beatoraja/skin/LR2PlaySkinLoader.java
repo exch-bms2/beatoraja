@@ -81,8 +81,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 					int[] values = parseInt(str);
 					TextureRegion[] images = getSourceImage(values);
 					if (images != null) {
-						li = new SkinImage(images, values[9]);
-						li.setTimer(values[10]);
+						li = new SkinImage(images, values[10], values[9]);
 						li.setOffsety(OFFSET_LIFT);
 						lines.add(li);
 						// System.out.println("Object Added - " +
@@ -268,8 +267,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 					int[] values = parseInt(str);
 					TextureRegion[] images = getSourceImage(values);
 					if (images != null) {
-						nowjudge[5 - values[1]] = new SkinImage(images, values[9]);
-						nowjudge[5 - values[1]].setTimer(values[10]);
+						nowjudge[5 - values[1]] = new SkinImage(images, values[10], values[9]);
 						shift = (values[11] != 1);
 						// System.out.println("Nowjudge Added - " + (5 -
 						// values[1]));
@@ -313,8 +311,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 					int[] values = parseInt(str);
 					TextureRegion[] images = getSourceImage(values);
 					if (images != null) {
-						nowjudge2[5 - values[1]] = new SkinImage(images, values[9]);
-						nowjudge2[5 - values[1]].setTimer(values[10]);
+						nowjudge2[5 - values[1]] = new SkinImage(images, values[10], values[9]);
 						shift2 = (values[11] != 1);
 						// System.out.println("Nowjudge Added - " + (5 -
 						// values[1]));
@@ -373,9 +370,8 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 							}
 						}
 
-						nowcombo[5 - values[1]] = new SkinNumber(images, values[9], values[13], images.length > 10 ? 2
+						nowcombo[5 - values[1]] = new SkinNumber(images, values[10], values[9], values[13], images.length > 10 ? 2
 								: 0, values[11]);
-						nowcombo[5 - values[1]].setTimer(values[10]);
 						nowcombo[5 - values[1]].setAlign(values[12]);
 						// System.out.println("Number Added - " +
 						// (num.getId()));
@@ -425,9 +421,8 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 							}
 						}
 
-						nowcombo2[5 - values[1]] = new SkinNumber(images, values[9], values[13], images.length > 10 ? 2
+						nowcombo2[5 - values[1]] = new SkinNumber(images, values[10], values[9], values[13], images.length > 10 ? 2
 								: 0, values[11]);
-						nowcombo2[5 - values[1]].setTimer(values[10]);
 						nowcombo2[5 - values[1]].setAlign(values[12]);
 						// System.out.println("Number Added - " +
 						// (num.getId()));
@@ -462,8 +457,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 					int[] values = parseInt(str);
 					TextureRegion[] images = getSourceImage(values);
 					if (images != null) {
-						line = new SkinImage(images, values[9]);
-						line.setTimer(values[10]);
+						line = new SkinImage(images, values[10], values[9]);
 						line.setOffsety(OFFSET_LIFT);
 						// System.out.println("Object Added - " +
 						// (part.getTiming()));
@@ -535,9 +529,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 					groovey = values[12];
 					if (gauger == null) {
 						gauger = new Rectangle();
-						SkinGauge gaugeo = new SkinGauge(skin, gauge);
-						gaugeo.setCycle(values[9]);
-						gaugeo.setTimer(values[10]);
+						SkinGauge gaugeo = new SkinGauge(skin, gauge, values[10], values[9]);
 						skin.add(gaugeo);
 					}
 				}

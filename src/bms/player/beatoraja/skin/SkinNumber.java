@@ -16,11 +16,11 @@ public class SkinNumber extends SkinObject {
 	/**
 	 * プラス値用イメージ
 	 */
-	private TextureRegion[][] image;
+	private SkinSource image;
 	/**
 	 * マイナス値用イメージ
 	 */
-	private TextureRegion[][] mimage;
+	private SkinSource mimage;
 
 	private int id = -1;
 	/**
@@ -34,27 +34,29 @@ public class SkinNumber extends SkinObject {
 
 	private TextureRegion[] values;
 
-	public SkinNumber(TextureRegion[] image, int cycle, int keta, int zeropadding) {
-		this(image, cycle, keta, zeropadding, -1);
+	public SkinNumber(TextureRegion[] image, int keta, int zeropadding) {
+		this(image, keta, zeropadding, -1);
 	}
 
-	public SkinNumber(TextureRegion[][] image, int cycle, int keta, int zeropadding, int rid) {
-		this.image = image;
-		this.mimage = null;
-		setCycle(cycle);
+	public SkinNumber(TextureRegion[][] image, int timer, int cycle, int keta, int zeropadding, int rid) {
+		this(image, null, timer, cycle, keta, zeropadding, rid);
+	}
+
+	public SkinNumber(TextureRegion[] image, int keta, int zeropadding, int rid) {
+		this(image, null, keta, zeropadding, rid);
+	}
+
+	public SkinNumber(TextureRegion[] image, TextureRegion[] mimage, int keta, int zeropadding, int id) {
+		this.image = new SkinSource(new TextureRegion[][]{ image }, 0, 0) ;
+		this.mimage = mimage != null ? new SkinSource(new TextureRegion[][]{ mimage }, 0, 0) : null;
 		this.setKeta(keta);
 		this.zeropadding = zeropadding;
-		this.id = rid;
+		this.id = id;
 	}
 
-	public SkinNumber(TextureRegion[] image, int cycle, int keta, int zeropadding, int rid) {
-		this(image, null, cycle, keta, zeropadding, rid);
-	}
-
-	public SkinNumber(TextureRegion[] image, TextureRegion[] mimage, int cycle, int keta, int zeropadding, int id) {
-		this.image = new TextureRegion[][] { image };
-		this.mimage = mimage != null ? new TextureRegion[][] { mimage } : null;
-		setCycle(cycle);
+	public SkinNumber(TextureRegion[][] image, TextureRegion[][] mimage, int timer, int cycle, int keta, int zeropadding, int id) {
+		this.image = new SkinSource(image, timer, cycle) ;
+		this.mimage = mimage != null ? new SkinSource(mimage, timer, cycle) : null;
 		this.setKeta(keta);
 		this.zeropadding = zeropadding;
 		this.id = id;
@@ -78,11 +80,11 @@ public class SkinNumber extends SkinObject {
 	}
 
 	public TextureRegion[] getValue(long time, int value, int zeropadding, MainState state) {
-		final TextureRegion[][] images = (value >= 0 || mimage == null) ? this.image : mimage;
+		final SkinSource images = (value >= 0 || mimage == null) ? this.image : mimage;
 		if (images == null) {
 			return new TextureRegion[0];
 		}
-		TextureRegion[] image = images[getImageIndex(images.length, time, state)];
+		TextureRegion[] image = images.getImages(time, state);
 
 		value = Math.abs(value);
 		for (int j = values.length - 1; j >= 0; j--) {
@@ -135,23 +137,11 @@ public class SkinNumber extends SkinObject {
 
 	public void dispose() {
 		if (image != null) {
-			for (TextureRegion[] ptr : image) {
-				if (ptr != null) {
-					for (TextureRegion tr : ptr) {
-						tr.getTexture().dispose();
-					}
-				}
-			}
+			image.dispose();
 			image = null;
 		}
 		if (mimage != null) {
-			for (TextureRegion[] ptr : mimage) {
-				if (ptr != null) {
-					for (TextureRegion tr : ptr) {
-						tr.getTexture().dispose();
-					}
-				}
-			}
+			mimage.dispose();
 			mimage = null;
 		}
 	}

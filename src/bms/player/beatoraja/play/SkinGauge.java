@@ -3,6 +3,7 @@ package bms.player.beatoraja.play;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.play.gauge.*;
 import bms.player.beatoraja.skin.SkinObject;
+import bms.player.beatoraja.skin.SkinSource;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -18,25 +19,16 @@ public class SkinGauge extends SkinObject {
     /**
      * イメージ
      */
-    private TextureRegion[][] image;
+    private SkinSource image;
 
     private PlaySkin skin;
 
-    public SkinGauge(PlaySkin skin, TextureRegion[][] image) {
+    public SkinGauge(PlaySkin skin, TextureRegion[][] image, int timer, int cycle) {
         this.skin = skin;
-        this.image = image;
+        this.image = new SkinSource(image, timer, cycle);
         Pixmap back = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
         back.setColor(0, 0, 0, 0.7f);
         back.fill();
-    }
-
-    public TextureRegion[] getImage(MainState state, long time) {
-        return image[getImageIndex(image.length, time, state)];
-    }
-
-    public void setImage(TextureRegion[][] image, int cycle) {
-        this.image = image;
-        setCycle(cycle);
     }
 
     @Override
@@ -45,7 +37,7 @@ public class SkinGauge extends SkinObject {
             Rectangle gr = skin.getGaugeRegion();
             
             final GrooveGauge gauge = skin.player.getGauge();
-            final TextureRegion[] images = getImage(state, time);
+            final TextureRegion[] images = image.getImages(time, state);
             
             int count = gauge.getMaxValue() > 100 ? 24 : 50;
             int exgauge = 0;
@@ -63,6 +55,5 @@ public class SkinGauge extends SkinObject {
 
     @Override
     public void dispose() {
-
     }
 }

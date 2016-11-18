@@ -170,8 +170,7 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 						int[] values = parseInt(str);
 						TextureRegion[] images = getSourceImage(values);
 						if(images != null) {
-							part = new SkinImage(images, values[9]);
-							part.setTimer(values[10]);
+							part = new SkinImage(images, values[10], values[9]);
 							// System.out.println("Object Added - " +
 							// (part.getTiming()));							
 						}
@@ -235,14 +234,20 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 						TextureRegion[] images = getSourceImage(values);
 						if(images != null) {
 							if (images.length % 24 == 0) {
-								TextureRegion[] pn = new TextureRegion[12];
-								TextureRegion[] mn = new TextureRegion[12];
+								TextureRegion[][] pn = new TextureRegion[images.length / 24][];
+								TextureRegion[][] mn = new TextureRegion[images.length / 24][];
 
-								for (int i = 0; i < 12; i++) {
-									pn[i] = images[i];
-									mn[i] = images[i + 12];
+								for(int j = 0;j < pn.length;j++) {
+									pn[j] = new TextureRegion[12];
+									mn[j] = new TextureRegion[12];
+
+									for (int i = 0; i < 12; i++) {
+										pn[j][i] = images[j * 24 + i];
+										mn[j][i] = images[j * 24 + i + 12];
+									}
 								}
-								num = new SkinNumber(pn, mn, values[9], values[13] + 1, 0, values[11]);
+
+								num = new SkinNumber(pn, mn, values[10], values[9], values[13] + 1, 0, values[11]);
 								num.setAlign(values[12]);
 							} else {
 								int d = images.length % 10 == 0 ? 10 :11;
@@ -254,10 +259,9 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 									}
 								}
 								
-								num = new SkinNumber(nimages, values[9], values[13], d > 10 ? 2 : 0, values[11]);
+								num = new SkinNumber(nimages, values[10], values[9], values[13], d > 10 ? 2 : 0, values[11]);
 								num.setAlign(values[12]);
 							}
-							num.setTimer(values[10]);
 							skin.add(num);
 							// System.out.println("Number Added - " +
 							// (num.getId()));						
@@ -330,9 +334,8 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 					int[] values = parseInt(str);
 					TextureRegion[] images = getSourceImage(values);
 					if (images != null) {
-						slider = new SkinSlider(images, values[9], values[11], (int) (values[12] * (values[11] == 1
+						slider = new SkinSlider(images, values[10], values[9], values[11], (int) (values[12] * (values[11] == 1
 								|| values[11] == 3 ? (dstw / srcw) : (dsth / srch))), values[13]);
-						slider.setTimer(values[10]);
 						slider.setChangable(values[14] == 0);
 						skin.add(slider);
 						// System.out.println("Object Added - " +
@@ -369,14 +372,12 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 					int gr = values[2];
 					if (gr >= 100) {
 						bar = new SkinGraph(gr);
-						bar.setTimer(values[10]);
 						bar.setReferenceID(values[11] + 1000);
 						bar.setDirection(values[12]);
 					} else {
 						TextureRegion[] images = getSourceImage(values);
 						if (images != null) {
-							bar = new SkinGraph(images, values[9]);
-							bar.setTimer(values[10]);
+							bar = new SkinGraph(images, values[10], values[9]);
 							bar.setReferenceID(values[11] + 1000);
 							bar.setDirection(values[12]);
 							// System.out.println("Object Added - " +
@@ -444,8 +445,7 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 										/ divx * i, y + h / divy * j, w / divx, h / divy) };
 							}
 						}
-						button = new SkinImage(images, values[9]);
-						button.setTimer(values[10]);
+						button = new SkinImage(images, values[10], values[9]);
 						button.setReferenceID(values[11] + 1000);
 						if(values[12] == 1) {
 							button.setClickevent(values[11] + 1000);

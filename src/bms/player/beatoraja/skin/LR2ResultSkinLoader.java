@@ -5,15 +5,16 @@ import java.io.IOException;
 import java.util.Map;
 
 import bms.player.beatoraja.MainState;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Rectangle;
 
 import bms.player.beatoraja.result.MusicResultSkin;
-import bms.player.beatoraja.result.MusicResultSkin.SkinGaugeGraphObject;
+import bms.player.beatoraja.result.SkinGaugeGraphObject;
 
 public class LR2ResultSkinLoader extends LR2SkinCSVLoader {
 
 	private MusicResultSkin skin;
+
+	private Rectangle gauge = new Rectangle();
 	
 	public LR2ResultSkinLoader(final float srcw, final float srch, final float dstw, final float dsth) {
 		super(srcw, srch, dstw, dsth);
@@ -31,8 +32,7 @@ public class LR2ResultSkinLoader extends LR2SkinCSVLoader {
 					try {
 						int fieldw = Integer.parseInt(str[11]);
 						int fieldh = Integer.parseInt(str[12]);
-						Rectangle gaugechart = new Rectangle(0, 0, fieldw * dstw / srcw, fieldh * dsth / srch);
-						skin.setGaugeRegion(gaugechart);
+						gauge = new Rectangle(0, 0, fieldw * dstw / srcw, fieldh * dsth / srch);
 					} catch (NumberFormatException e) {
 						e.printStackTrace();
 					}
@@ -41,16 +41,15 @@ public class LR2ResultSkinLoader extends LR2SkinCSVLoader {
 		addCommandWord(new CommandWord("DST_GAUGECHART_1P") {
 			@Override
 			public void execute(String[] str) {
-				if (skin.getGaugeRegion() != null) {
 					try {
-						Rectangle gaugechart = skin.getGaugeRegion();
-						gaugechart.x = Integer.parseInt(str[3]) * dstw / srcw;		
-						gaugechart.y = dsth - Integer.parseInt(str[4]) * dsth / srch;
-						skin.add(new SkinGaugeGraphObject());
+						gauge.x = Integer.parseInt(str[3]) * dstw / srcw;
+						gauge.y = dsth - Integer.parseInt(str[4]) * dsth / srch;
+						SkinGaugeGraphObject obj = new SkinGaugeGraphObject();
+						skin.setDestination(obj,0,gauge.x, gauge.y, gauge.width,gauge.height,0,255,255,255,255,0,0,0,0,0,0,0,0,0);
+						skin.add(obj);
 					} catch (NumberFormatException e) {
 						e.printStackTrace();
 					}
-				}
 			}
 		});
 	}
