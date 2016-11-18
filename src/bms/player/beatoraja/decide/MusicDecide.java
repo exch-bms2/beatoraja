@@ -13,6 +13,7 @@ import bms.player.beatoraja.play.audio.SoundProcessor;
 import bms.player.beatoraja.skin.LR2DecideSkinLoader;
 import bms.player.beatoraja.skin.LR2SkinHeader;
 import bms.player.beatoraja.skin.LR2SkinHeaderLoader;
+import bms.player.beatoraja.skin.SkinLoader;
 
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.math.Rectangle;
@@ -65,12 +66,13 @@ public class MusicDecide extends MainState {
 					setSkin(dloader.loadMusicDecideSkin(Paths.get(sc.getPath()).toFile(), this, header,
 							loader.getOption(), sc.getProperty()));
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
-					setSkin(new MusicDecideSkin(RESOLUTION[resource.getConfig().getResolution()]));
+					SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
+					setSkin(sl.load(Paths.get("skin/default/decide.json")));
 				}
 			} else {
-				setSkin(new MusicDecideSkin(RESOLUTION[resource.getConfig().getResolution()]));
+				SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
+				setSkin(sl.load(Paths.get("skin/default/decide.json")));
 			}
 		}
 	}
