@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -28,6 +29,12 @@ public class SkinGaugeGraphObject extends SkinObject {
         sprite.end();
         PlayerResource resource = state.getMainController().getPlayerResource();
         List<Float> gauge = resource.getGauge();
+        if(state instanceof GradeResult) {
+            gauge = new ArrayList<Float>();
+            for(List<Float> l : resource.getCourseGauge()) {
+                gauge.addAll(l);
+            }
+        }
         // ゲージグラフ描画
         String graphcolor = "444444";
         String graphline = "cccccc";

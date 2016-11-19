@@ -85,6 +85,9 @@ public class SkinNumber extends SkinObject {
 			return new TextureRegion[0];
 		}
 		TextureRegion[] image = images.getImages(time, state);
+		if(image == null) {
+			return new TextureRegion[0];
+		}
 
 		value = Math.abs(value);
 		for (int j = values.length - 1; j >= 0; j--) {

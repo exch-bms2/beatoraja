@@ -68,11 +68,11 @@ public class MusicDecide extends MainState {
 				} catch (IOException e) {
 					e.printStackTrace();
 					SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
-					setSkin(sl.load(Paths.get("skin/default/decide.json")));
+					setSkin(sl.loadDecideSkin(Paths.get("skin/default/decide.json")));
 				}
 			} else {
 				SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
-				setSkin(sl.load(Paths.get("skin/default/decide.json")));
+				setSkin(sl.loadDecideSkin(Paths.get("skin/default/decide.json")));
 			}
 		}
 	}

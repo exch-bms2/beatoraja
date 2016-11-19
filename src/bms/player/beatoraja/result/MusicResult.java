@@ -18,6 +18,7 @@ import bms.player.beatoraja.Config.SkinConfig;
 import bms.player.beatoraja.skin.LR2ResultSkinLoader;
 import bms.player.beatoraja.skin.LR2SkinHeader;
 import bms.player.beatoraja.skin.LR2SkinHeaderLoader;
+import bms.player.beatoraja.skin.SkinLoader;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
@@ -54,11 +55,6 @@ public class MusicResult extends MainState {
 
 	private Sound clear;
 	private Sound fail;
-
-	private MusicResultSkin skin;
-
-	private DetailGraphRenderer detail;
-	private GaugeGraphRenderer gaugegraph;
 
 	public MusicResult(MainController main) {
 		super(main);
@@ -102,8 +98,8 @@ public class MusicResult extends MainState {
 			resource.addCourseGauge(resource.getGauge());
 		}
 
-		if (skin != null) {
-			skin.dispose();
+		if (getSkin() != null) {
+			getSkin().dispose();
 		}
 		if (resource.getConfig().getSkin()[7] != null) {
 			try {
@@ -113,19 +109,17 @@ public class MusicResult extends MainState {
 				Rectangle srcr = RESOLUTION[header.getResolution()];
 				Rectangle dstr = RESOLUTION[resource.getConfig().getResolution()];
 				LR2ResultSkinLoader dloader = new LR2ResultSkinLoader(srcr.width, srcr.height, dstr.width, dstr.height);
-				skin = dloader.loadResultSkin(Paths.get(sc.getPath()).toFile(), this, header, loader.getOption(),
-						sc.getProperty());
+				setSkin(dloader.loadResultSkin(Paths.get(sc.getPath()).toFile(), this, header, loader.getOption(),
+						sc.getProperty()));
 			} catch (IOException e) {
 				e.printStackTrace();
-				skin = new MusicResultSkin(RESOLUTION[resource.getConfig().getResolution()]);
+				SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
+				setSkin(sl.loadResultSkin(Paths.get("skin/default/result.json")));
 			}
 		} else {
-			skin = new MusicResultSkin(RESOLUTION[resource.getConfig().getResolution()]);
+			SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
+			setSkin(sl.loadResultSkin(Paths.get("skin/default/result.json")));
 		}
-		this.setSkin(skin);
-
-		detail = new DetailGraphRenderer(resource.getBMSModel());
-		gaugegraph = new GaugeGraphRenderer();
 	}
 
 	public void render() {
@@ -136,7 +130,7 @@ public class MusicResult extends MainState {
 		if (getTimer()[TIMER_RESULTGRAPH_END] == Long.MIN_VALUE) {
 			getTimer()[TIMER_RESULTGRAPH_END] = time;
 		}
-		if (getTimer()[TIMER_RESULT_UPDATESCORE] == Long.MIN_VALUE && skin.getRankTime() == 0) {
+		if (getTimer()[TIMER_RESULT_UPDATESCORE] == Long.MIN_VALUE && ((MusicResultSkin) getSkin()).getRankTime() == 0) {
 			getTimer()[TIMER_RESULT_UPDATESCORE] = time;
 		}
 		final MainController main = getMainController();
@@ -229,7 +223,7 @@ public class MusicResult extends MainState {
 						|| ((keystate[0] && keytime[0] != 0) || (keystate[2] && keytime[2] != 0)
 								|| (keystate[4] && keytime[4] != 0) || (keystate[6] && keytime[6] != 0))) {
 					keytime[0] = keytime[2] = keytime[4] = keytime[6] = 0;
-					if (skin.getRankTime() != 0 && getTimer()[TIMER_RESULT_UPDATESCORE] == Long.MIN_VALUE) {
+					if (((MusicResultSkin) getSkin()).getRankTime() != 0 && getTimer()[TIMER_RESULT_UPDATESCORE] == Long.MIN_VALUE) {
 						getTimer()[TIMER_RESULT_UPDATESCORE] = time;
 					} else {
 						getTimer()[TIMER_FADEOUT] = time;
@@ -417,9 +411,9 @@ public class MusicResult extends MainState {
 			titlefont.dispose();
 			titlefont = null;
 		}
-		if (skin != null) {
-			skin.dispose();
-			skin = null;
+		if (getSkin() != null) {
+			getSkin().dispose();
+			setSkin(null);
 		}
 	}
 
@@ -510,12 +504,6 @@ public class MusicResult extends MainState {
 			return ((int) (avgduration * 100)) % 100;
 		}
 		return super.getNumberValue(id);
-	}
-
-	public void renderDetail(long time) {
-		final ShapeRenderer shape = getMainController().getShapeRenderer();
-		final SpriteBatch sprite = getMainController().getSpriteBatch();
-		detail.render(sprite, titlefont, shape, time, skin.getJudgeRegion());
 	}
 
 	private int rate;

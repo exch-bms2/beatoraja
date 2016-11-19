@@ -11,6 +11,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Json;
 
 import bms.player.beatoraja.decide.MusicDecideSkin;
+import bms.player.beatoraja.result.*;
 
 public class SkinLoader {
 	
@@ -20,15 +21,30 @@ public class SkinLoader {
 		dstr = r;
 	}
 
-	public MusicDecideSkin load(Path p) {
-		MusicDecideSkin skin = null;
+	public MusicResultSkin loadResultSkin(Path p) {
+		return (MusicResultSkin) load(p, 7);		
+	}
+
+	public MusicDecideSkin loadDecideSkin(Path p) {
+		return (MusicDecideSkin) load(p, 6);
+	}
+
+	public Skin load(Path p, int type) {
+		Skin skin = null;
 		try {
 			Json json = new Json();
-			Skin sk = json.fromJson(Skin.class, new FileReader(p.toFile()));
+			json.setIgnoreUnknownFields(true);
+			
+			JsonSkin sk = json.fromJson(JsonSkin.class, new FileReader(p.toFile()));
 
 			Map<Integer, Texture> texmap = new HashMap();
 			
-			skin = new MusicDecideSkin(sk.w, sk.h, dstr.width, dstr.height);
+			if(type == 6) {
+				skin = new MusicDecideSkin(sk.w, sk.h, dstr.width, dstr.height);				
+			}
+			if(type == 7) {
+				skin = new MusicResultSkin(sk.w, sk.h, dstr.width, dstr.height);				
+			}
 			skin.setFadeout(sk.fadeout);
 			skin.setInput(sk.input);
 			skin.setScene(sk.scene);
@@ -46,8 +62,24 @@ public class SkinLoader {
 										texmap.put(src.id, new Texture(p.getParent().resolve(src.path).toString()));
 									}
 									
-									obj = new SkinImage(getSourceImage(texmap.get(src.id),  img.x, img.y, img.w,
-											img.h, img.divx, img.divy), img.timer, img.cycle);
+									if(img.len > 1) {
+										TextureRegion[] srcimg = getSourceImage(texmap.get(src.id),  img.x, img.y, img.w,
+												img.h, img.divx, img.divy);
+										TextureRegion[][] tr = new TextureRegion[img.len][];
+										for(int i = 0;i < tr.length;i++) {
+											tr[i] = new TextureRegion[srcimg.length / img.len];
+											for(int j = 0;j < tr[i].length;j++) {
+												tr[i][j] = srcimg[i * tr[i].length + j];
+											}
+										}
+										SkinImage si = new SkinImage(tr, img.timer, img.cycle);
+										si.setReferenceID(img.ref);
+										obj = si;
+									} else {
+										obj = new SkinImage(getSourceImage(texmap.get(src.id),  img.x, img.y, img.w,
+												img.h, img.divx, img.divy), img.timer, img.cycle);										
+									}
+									
 									break;
 								}
 							}
@@ -105,11 +137,26 @@ public class SkinLoader {
 								if (text.font == font.id) {
 									SkinText st = new SkinText(p.getParent().resolve(font.path).toString(), 0,
 											text.size);
+									st.setAlign(text.align);
 									st.setReferenceID(text.ref);
 									obj = st;
 									break;
 								}
 							}
+							break;
+						}
+					}
+					for (GaugeGraph ggraph : sk.gaugegraph) {
+						if (dst.id == ggraph.id) {
+							SkinGaugeGraphObject st = new SkinGaugeGraphObject();
+							obj = st;
+							break;
+						}
+					}
+					for (JudgeGraph ggraph : sk.judgegraph) {
+						if (dst.id == ggraph.id) {
+							SkinDetailGraphObject st = new SkinDetailGraphObject();
+							obj = st;
 							break;
 						}
 					}
@@ -143,8 +190,11 @@ public class SkinLoader {
 							a.g = (a.g == Integer.MIN_VALUE ? prev.g : a.g);
 							a.b = (a.b == Integer.MIN_VALUE ? prev.b : a.b);
 						}
+						int op1 = dst.op.length > 0 ? dst.op[0] : 0;
+						int op2 = dst.op.length > 1 ? dst.op[1] : 0;
+						int op3 = dst.op.length > 2 ? dst.op[2] : 0;
 						skin.setDestination(obj, a.time, a.x, a.y, a.w, a.h, a.acc, a.a, a.r, a.g, a.b, dst.blend,
-								dst.filter, a.angle, dst.center, dst.loop, dst.timer, 0, 0, 0);
+								dst.filter, a.angle, dst.center, dst.loop, dst.timer, op1, op2, op3);
 						prev = a;
 					}
 					skin.add(obj);
@@ -178,7 +228,7 @@ public class SkinLoader {
 		return images;
 	}
 
-	public static class Skin {
+	public static class JsonSkin {
 
 		public int type;
 		public int w = 1280;
@@ -192,6 +242,8 @@ public class SkinLoader {
 		public Image[] image = new Image[0];
 		public Value[] value = new Value[0];
 		public Text[] text = new Text[0];
+		public GaugeGraph[] gaugegraph = new GaugeGraph[0];
+		public JudgeGraph[] judgegraph = new JudgeGraph[0];
 
 		public Destination[] destination;
 	}
@@ -213,10 +265,12 @@ public class SkinLoader {
 		public int y;
 		public int w;
 		public int h;
-		public int divx;
-		public int divy;
+		public int divx = 1;
+		public int divy = 1;
 		public int timer;
 		public int cycle;
+		public int len;
+		public int ref;
 	}
 
 	public static class Value {
@@ -226,8 +280,8 @@ public class SkinLoader {
 		public int y;
 		public int w;
 		public int h;
-		public int divx;
-		public int divy;
+		public int divx = 1;
+		public int divy = 1;
 		public int timer;
 		public int cycle;
 		public int align;
@@ -239,7 +293,16 @@ public class SkinLoader {
 		public int id;
 		public int font;
 		public int size;
+		public int align;
 		public int ref;
+	}
+
+	public static class GaugeGraph {
+		public int id;
+	}
+
+	public static class JudgeGraph {
+		public int id;
 	}
 
 	public static class Destination {
@@ -249,6 +312,7 @@ public class SkinLoader {
 		public int timer;
 		public int loop;
 		public int center;
+		public int[] op = new int[0];
 		public Animation[] dst;
 	}
 
