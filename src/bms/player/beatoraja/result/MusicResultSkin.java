@@ -1,10 +1,8 @@
 package bms.player.beatoraja.result;
 
-import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.skin.*;
 
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 
@@ -14,8 +12,6 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
  * リサルトスキン
  */
 public class MusicResultSkin extends Skin {
-
-	private Rectangle judgeregion;
 
 	private int ranktime;
 
@@ -37,7 +33,6 @@ public class MusicResultSkin extends Skin {
 		super(1280, 720, r.width, r.height);
 		float dw = r.width / 1280.0f;
 		float dh = r.height / 720.0f;
-		judgeregion = new Rectangle(500 * dw, 500 * dh, 700 * dw, 200 * dh);
 
 		Texture st = new Texture("skin/default/system.png");
 
@@ -111,7 +106,9 @@ public class MusicResultSkin extends Skin {
 		setDestination(gauge, 0, 20, 500, 400,200,0,255,255,255,255,0,0,0,0,0,0,0,0,0);
 		add(gauge);
 
-		add(new SkinDetailGraphObject());
+		SkinDetailGraphObject detail = new SkinDetailGraphObject();
+		setDestination(detail, 0, 500, 500, 700,200,0,255,255,255,255,0,0,0,0,0,0,0,0,0);
+		add(detail);
 
 		SkinImage fi = new SkinImage(new TextureRegion(st,8,0,8,8));
         setDestination(fi, 0, 0, 0,1280, 720, 0, 0,255,255,255, 0, 0, 0, 0, 500, TIMER_FADEOUT, 0, 0, 0);
@@ -123,33 +120,12 @@ public class MusicResultSkin extends Skin {
         setInput(500);
 	}
 
-	public Rectangle getJudgeRegion() {
-		return judgeregion;
-	}
-
 	public int getRankTime() {
 		return ranktime;
 	}
 
 	public void setRankTime(int ranktime) {
 		this.ranktime = ranktime;
-	}
-
-	public static class SkinDetailGraphObject extends SkinObject {
-
-		@Override
-		public void draw(SpriteBatch sprite, long time, MainState state) {
-			sprite.end();
-			if(state instanceof MusicResult) {
-				((MusicResult)state).renderDetail(time);
-			}
-			sprite.begin();
-		}
-
-		@Override
-		public void dispose() {
-
-		}
 	}
 
 }

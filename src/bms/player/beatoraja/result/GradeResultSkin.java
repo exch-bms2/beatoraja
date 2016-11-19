@@ -12,10 +12,6 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
 
 public class GradeResultSkin extends Skin {
 
-	private Rectangle gaugeregion;
-
-	private Rectangle judgeregion;
-
 	private final int[] judgecount = { NUMBER_PERFECT, NUMBER_EARLY_PERFECT,
 			NUMBER_LATE_PERFECT, NUMBER_GREAT, NUMBER_EARLY_GREAT,
 			NUMBER_LATE_GREAT, NUMBER_GOOD,
@@ -34,8 +30,6 @@ public class GradeResultSkin extends Skin {
 		super(1280, 720, r.width, r.height);
 		float dw = r.width / 1280.0f;
 		float dh = r.height / 720.0f;
-		gaugeregion = new Rectangle(20 * dw, 500 * dh, 400 * dw, 200 * dh);
-		judgeregion = new Rectangle(500 * dw, 500 * dh, 700 * dw, 200 * dh);
 
 //		SkinImage bgi = new SkinImage(IMAGE_STAGEFILE);
 //		setDestination(bgi, 0, 0, 0, 1280, 720, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -95,8 +89,9 @@ public class GradeResultSkin extends Skin {
 //		setDestination(title, 0, 640, 23, 24, 24, 0, 255,255,255,255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 //		this.add(title);
 
-		add(new SkinGaugeGraphObject());
-		add(new SkinDetailGraphObject());
+		SkinGaugeGraphObject gauge = new SkinGaugeGraphObject();
+		setDestination(gauge, 0, 20, 500, 1240,200,0,255,255,255,255,0,0,0,0,0,0,0,0,0);
+		add(gauge);
 
 		Texture st = new Texture("skin/default/system.png");
 		SkinImage fi = new SkinImage(new TextureRegion(st,8,0,8,8));
@@ -108,52 +103,4 @@ public class GradeResultSkin extends Skin {
         setScene(3600000 * 24);
         setInput(500);
 	}
-
-	public void setGaugeRegion(Rectangle region) {
-		gaugeregion = region;
-	}
-
-	public Rectangle getGaugeRegion() {
-		return gaugeregion;
-	}
-
-	public Rectangle getJudgeRegion() {
-		return judgeregion;
-	}
-
-	public static class SkinGaugeGraphObject extends SkinObject {
-
-		@Override
-		public void draw(SpriteBatch sprite, long time, MainState state) {
-			sprite.end();
-			if(state instanceof GradeResult) {
-				((GradeResult)state).renderGraph(time);
-			}
-			sprite.begin();
-		}
-
-		@Override
-		public void dispose() {
-
-		}
-	}
-
-	public static class SkinDetailGraphObject extends SkinObject {
-
-		@Override
-		public void draw(SpriteBatch sprite, long time, MainState state) {
-			sprite.end();
-			if(state instanceof MusicResult) {
-				((MusicResult)state).renderDetail(time);
-			}
-			sprite.begin();
-		}
-
-		@Override
-		public void dispose() {
-
-		}
-	}
-
-
 }

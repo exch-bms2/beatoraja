@@ -39,8 +39,6 @@ public class GradeResult extends MainState {
 
 	private boolean saveReplay = false;
 
-	private GaugeGraphRenderer gaugegraph;
-
 	private Sound clear;
 	private Sound fail;
 
@@ -84,8 +82,6 @@ public class GradeResult extends MainState {
 				resource.getConfig().getLnmode(), 0, resource.getConstraint())) {
 			saveReplayData(0);
 		}
-
-		gaugegraph = new GaugeGraphRenderer();
 	}
 
 	public void render() {
@@ -327,26 +323,6 @@ public class GradeResult extends MainState {
 				getMainController().getPlayDataAccessor().wrireReplayData(rd, resource.getCourseBMSModels(),
 						resource.getConfig().getLnmode(), index, resource.getConstraint());
 				saveReplay = true;
-			}
-		}
-	}
-
-	public void renderGraph(long time) {
-		final ShapeRenderer shape = getMainController().getShapeRenderer();
-		final PlayerResource resource = getMainController().getPlayerResource();
-
-		final List<List<Float>> coursegauge = resource.getCourseGauge();
-		final int cg = resource.getCourseBMSModels().length;
-
-		for (int i = 0; i < cg; i++) {
-			Rectangle graph = new Rectangle(40 + i * (1200 / cg), 500, 1200 / cg, 200);
-			if (coursegauge.size() <= i) {
-				shape.begin(ShapeRenderer.ShapeType.Filled);
-				shape.setColor(Color.DARK_GRAY);
-				shape.rect(graph.x, graph.y, graph.width, graph.height);
-				shape.end();
-			} else {
-				gaugegraph.render(shape, time, resource, graph, coursegauge.get(i));
 			}
 		}
 	}

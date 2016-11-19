@@ -57,9 +57,6 @@ public class MusicResult extends MainState {
 
 	private MusicResultSkin skin;
 
-	private DetailGraphRenderer detail;
-	private GaugeGraphRenderer gaugegraph;
-
 	public MusicResult(MainController main) {
 		super(main);
 	}
@@ -123,9 +120,6 @@ public class MusicResult extends MainState {
 			skin = new MusicResultSkin(RESOLUTION[resource.getConfig().getResolution()]);
 		}
 		this.setSkin(skin);
-
-		detail = new DetailGraphRenderer(resource.getBMSModel());
-		gaugegraph = new GaugeGraphRenderer();
 	}
 
 	public void render() {
@@ -510,12 +504,6 @@ public class MusicResult extends MainState {
 			return ((int) (avgduration * 100)) % 100;
 		}
 		return super.getNumberValue(id);
-	}
-
-	public void renderDetail(long time) {
-		final ShapeRenderer shape = getMainController().getShapeRenderer();
-		final SpriteBatch sprite = getMainController().getSpriteBatch();
-		detail.render(sprite, titlefont, shape, time, skin.getJudgeRegion());
 	}
 
 	private int rate;
