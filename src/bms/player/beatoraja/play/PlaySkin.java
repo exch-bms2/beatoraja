@@ -42,6 +42,9 @@ public class PlaySkin extends Skin {
 	private float dh;
 
 	private int close;
+	
+	private int loadstart;
+	private int loadend;
 
 	private final int[] judgecount = { NUMBER_EARLY_PERFECT, NUMBER_LATE_PERFECT,
 			NUMBER_EARLY_GREAT, NUMBER_LATE_GREAT, NUMBER_EARLY_GOOD,
@@ -1302,6 +1305,22 @@ public class PlaySkin extends Skin {
 
 	public void setBMSPlayer(BMSPlayer player) {
 		this.player = player;
+	}
+
+	public int getLoadstart() {
+		return loadstart;
+	}
+
+	public void setLoadstart(int loadstart) {
+		this.loadstart = loadstart;
+	}
+
+	public int getLoadend() {
+		return loadend;
+	}
+
+	public void setLoadend(int loadend) {
+		this.loadend = loadend;
 	}
 	
 }

@@ -410,7 +410,7 @@ public class BMSPlayer extends MainState {
 		switch (state) {
 		// 楽曲ロード
 		case STATE_PRELOAD:
-			if (resource.mediaLoadFinished() && !input.startPressed()) {
+			if (resource.mediaLoadFinished() && now > skin.getLoadstart() + skin.getLoadend() && !input.startPressed()) {
 				bga.prepare(this);
 				state = STATE_READY;
 				getTimer()[TIMER_READY] = now;
@@ -1019,9 +1019,6 @@ public class BMSPlayer extends MainState {
 			return 0;
 		case BARGRAPH_LOAD_PROGRESS:
 			float value = (audio.getProgress() + bga.getProgress()) / 2;
-			if (value >= 1) {
-				return -20;
-			}
 			return value;
 		case BARGRAPH_SCORERATE:
 			return (float) (judge.getJudgeCount(0) * 2 + judge.getJudgeCount(1)) / (song.getNotes() * 2);

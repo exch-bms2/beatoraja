@@ -56,6 +56,18 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 				skin.setPlaystart(Integer.parseInt(str[1]));
 			}
 		});
+		addCommandWord(new CommandWord("LOADSTART") {
+			@Override
+			public void execute(String[] str) {
+				skin.setLoadstart(Integer.parseInt(str[1]));
+			}
+		});
+		addCommandWord(new CommandWord("LOADEND") {
+			@Override
+			public void execute(String[] str) {
+				skin.setLoadend(Integer.parseInt(str[1]));
+			}
+		});
 		addCommandWord(new CommandWord("SRC_BGA") {
 			@Override
 			public void execute(String[] str) {
