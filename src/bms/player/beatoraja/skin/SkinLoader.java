@@ -52,7 +52,7 @@ public class SkinLoader {
 			for (Destination dst : sk.destination) {
 				SkinObject obj = null;
 				if (dst.id < 0) {
-
+					obj = new SkinImage(-dst.id);
 				} else {
 					for (Image img : sk.image) {
 						if (dst.id == img.id) {
