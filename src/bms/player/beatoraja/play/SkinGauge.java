@@ -21,22 +21,17 @@ public class SkinGauge extends SkinObject {
      */
     private SkinSource image;
 
-    private PlaySkin skin;
-
-    public SkinGauge(PlaySkin skin, TextureRegion[][] image, int timer, int cycle) {
-        this.skin = skin;
+    public SkinGauge(TextureRegion[][] image, int timer, int cycle) {
         this.image = new SkinSource(image, timer, cycle);
-        Pixmap back = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
-        back.setColor(0, 0, 0, 0.7f);
-        back.fill();
     }
 
     @Override
     public void draw(SpriteBatch sprite, long time, MainState state) {
-        if (skin.player.getGauge() != null) {
-            Rectangle gr = skin.getGaugeRegion();
+        final BMSPlayer player = (BMSPlayer) state;
+        if (player.getGauge() != null) {
+            Rectangle gr = getDestination(time, state);
             
-            final GrooveGauge gauge = skin.player.getGauge();
+            final GrooveGauge gauge = player.getGauge();
             final TextureRegion[] images = image.getImages(time, state);
             
             int count = gauge.getMaxValue() > 100 ? 24 : 50;
