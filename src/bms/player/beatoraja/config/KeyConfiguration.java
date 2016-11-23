@@ -4,7 +4,6 @@ import bms.player.beatoraja.*;
 import bms.player.beatoraja.decide.MusicDecideSkin;
 import bms.player.beatoraja.input.*;
 
-import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
@@ -15,9 +14,6 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-import com.badlogic.gdx.utils.GdxRuntimeException;
-
-import java.util.logging.Logger;
 
 /**
  * キーコンフィグ画面
@@ -49,13 +45,14 @@ public class KeyConfiguration extends MainState {
 	public static final int KEY_DOWN = 5;
 	public static final int KEY_FOLDER_OPEN = 6;
 	public static final int KEY_FOLDER_CLOSE = 7;
+	public static final int KEY_PRACTICE = 8;
 
 	private static final String[] SELECTKEY = {"2dx", "popn"};
 
-	public static final int[][][] keyassign = {{{KEY_PLAY, KEY_FOLDER_OPEN}, {KEY_FOLDER_CLOSE}, {KEY_FOLDER_OPEN}, {KEY_FOLDER_CLOSE}
+	public static final int[][][] keyassign = {{{KEY_PLAY, KEY_FOLDER_OPEN}, {KEY_FOLDER_CLOSE}, {KEY_PRACTICE, KEY_FOLDER_OPEN}, {KEY_FOLDER_CLOSE}
 			, {KEY_FOLDER_OPEN, KEY_AUTO}, {KEY_FOLDER_CLOSE},{KEY_FOLDER_OPEN, KEY_REPLAY}, {KEY_UP}, {KEY_DOWN}},
 			{{KEY_AUTO}, {}, {KEY_FOLDER_CLOSE}, {KEY_DOWN}
-					, {KEY_PLAY}, {KEY_UP},{KEY_FOLDER_OPEN}, {}, {KEY_REPLAY}}};
+					, {KEY_PLAY}, {KEY_UP},{KEY_PRACTICE, KEY_FOLDER_OPEN}, {}, {KEY_REPLAY}}};
 
 	private int cursorpos = 0;
 	private boolean keyinput = false;
@@ -94,9 +91,6 @@ public class KeyConfiguration extends MainState {
 
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
-		final float w = 1280;
-		final float h = 720;
 
 		boolean[] cursor = input.getCursorState();
 		boolean[] number = input.getNumberState();

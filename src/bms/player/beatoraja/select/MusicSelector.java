@@ -120,6 +120,7 @@ public class MusicSelector extends MainState {
 	public static final int KEY_DOWN = 5;
 	public static final int KEY_FOLDER_OPEN = 6;
 	public static final int KEY_FOLDER_CLOSE = 7;
+	public static final int KEY_PRACTICE = 8;
 
 	private int panelstate;
 
@@ -537,13 +538,17 @@ public class MusicSelector extends MainState {
 					play(0);
 				}
 			}
+			// 3鍵 (プラクティス)
+			if (isPressed(keystate, keytime, KEY_PRACTICE, true)) {
+				play(2);
+			}
 			// 5鍵 (オートプレイ)
 			if (isPressed(keystate, keytime, KEY_AUTO, true)) {
 				play(1);
 			}
 			// 7鍵 (リプレイ)
 			if (isPressed(keystate, keytime, KEY_REPLAY, true)) {
-				play(2 + selectedreplay);
+				play(3 + selectedreplay);
 			}
 			// 白鍵 (フォルダを開く)
 			if (isPressed(keystate, keytime, KEY_FOLDER_OPEN, true) || cursor[3]) {
@@ -1215,16 +1220,16 @@ public class MusicSelector extends MainState {
 			play(1);
 			break;
 		case BUTTON_REPLAY:
-			play(2);
-			break;
-		case BUTTON_REPLAY2:
 			play(3);
 			break;
-		case BUTTON_REPLAY3:
+		case BUTTON_REPLAY2:
 			play(4);
 			break;
-		case BUTTON_REPLAY4:
+		case BUTTON_REPLAY3:
 			play(5);
+			break;
+		case BUTTON_REPLAY4:
+			play(6);
 			break;
 		}
 	}

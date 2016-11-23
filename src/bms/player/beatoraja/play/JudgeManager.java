@@ -20,8 +20,8 @@ public class JudgeManager {
 	/**
 	 * LN type
 	 */
-	private final int lntype;
-	private final TimeLine[] timelines;
+	private int lntype;
+	private TimeLine[] timelines;
 
 	private final JudgeAlgorithm[] judgeAlgorithms = { new JudgeAlgorithmLR2(), new JudgeAlgorithm2DX(),
 			new JudgeAlgorithmLowestNote() };
@@ -65,23 +65,23 @@ public class JudgeManager {
 	/**
 	 * 処理中のLN
 	 */
-	private final LongNote[] processing;
+	private LongNote[] processing;
 	/**
 	 * 通過中のHCN
 	 */
-	private final LongNote[] passing;
+	private LongNote[] passing;
 	/**
 	 * HCN増加判定
 	 */
 	private boolean[] inclease = new boolean[8];
 	private boolean[] next_inclease = new boolean[8];
-	private final int[] passingcount;
+	private int[] passingcount;
 
-	private final int[] keyassign;
-	private final int[] noteassign;
+	private int[] keyassign;
+	private int[] noteassign;
 
-	private final int[] sckeyassign;
-	private final int[] sckey;
+	private int[] sckeyassign;
+	private int[] sckey;
 	/**
 	 * 各判定の範囲(+-ms)。PGREAT, GREAT, GOOD, BAD, POOR, MISS空POORの順
 	 */
@@ -114,16 +114,16 @@ public class JudgeManager {
 	/**
 	 * ノーツ判定テーブル
 	 */
-	private final int[] njudge;
+	private int[] njudge;
 	/**
 	 * CN終端判定テーブル
 	 */
-	private final int[] cnendjudge;
+	private int[] cnendjudge;
 	/**
 	 * スクラッチ判定テーブル
 	 */
-	private final int[] sjudge;
-	private final int[] scnendjudge;
+	private int[] sjudge;
+	private int[] scnendjudge;
 	/**
 	 * PMS用判定システム(空POORでコンボカット、1ノーツにつき1空POORまで)の有効/無効
 	 */
@@ -136,6 +136,24 @@ public class JudgeManager {
 
 	public JudgeManager(BMSPlayer main, BMSModel model, int[] constraint) {
 		this.main = main;
+		init(model);
+		for (int mode : constraint) {
+			if (mode == TableData.NO_GREAT) {
+				setJudgeMode(NO_GREAT_JUDGE);
+			}
+			if (mode == TableData.NO_GOOD) {
+				setJudgeMode(NO_GOOD_JUDGE);
+			}
+		}		
+	}
+	
+	public void init(BMSModel model) {
+		prevtime = 0;
+		pos = 0;
+		for(int i = 0;i < count.length;i++) {
+			Arrays.fill(count[i], 0);			
+		}
+		
 		this.lntype = model.getLntype();
 		this.timelines = model.getAllTimeLines();
 
@@ -197,16 +215,8 @@ public class JudgeManager {
 			}
 		}
 
-		for (int mode : constraint) {
-			if (mode == TableData.NO_GREAT) {
-				setJudgeMode(NO_GREAT_JUDGE);
-			}
-			if (mode == TableData.NO_GOOD) {
-				setJudgeMode(NO_GOOD_JUDGE);
-			}
-		}
 	}
-
+ 
 	public void update(final int time) {
 		final BMSPlayerInputProcessor input = main.getBMSPlayerInputProcessor();
 		final Config config = main.getMainController().getPlayerResource().getConfig();

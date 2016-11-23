@@ -52,8 +52,8 @@ public class LaneRenderer {
 	private int fixhispeed;
 	private float basehispeed;
 
-	private final BMSModel model;
-	private final TimeLine[] timelines;
+	private BMSModel model;
+	private TimeLine[] timelines;
 
 	private int pos;
 
@@ -65,7 +65,7 @@ public class LaneRenderer {
 	private final PlaySkin skin;
 
 	private final Config config;
-	private final PlayConfig playconfig;
+	private PlayConfig playconfig;
 	private final int auto;
 
 	private boolean hschanged;
@@ -90,7 +90,7 @@ public class LaneRenderer {
 
 	private final int[] judgecombo;
 
-	private final int[] laneassign;
+	private int[] laneassign;
 
 	private int currentduration;
 
@@ -107,14 +107,33 @@ public class LaneRenderer {
 		this.font = font;
 		this.skin = skin;
 		this.config = resource.getConfig();
+		auto = resource.getAutoplay();
 		this.playconfig = (model.getUseKeys() == 5 || model.getUseKeys() == 7 ? config.getMode7()
 				: (model.getUseKeys() == 10 || model.getUseKeys() == 14 ? config.getMode14() : config.getMode9()));
-		auto = resource.getAutoplay();
 		this.enableLanecover = playconfig.isEnablelanecover();
 		this.enableLift = playconfig.isEnablelift();
 		this.lift = playconfig.getLift();
 		this.fixhispeed = config.getFixhispeed();
 		this.gvalue = playconfig.getDuration();
+		hispeed = playconfig.getHispeed();
+		init(model);
+		this.setLanecover(playconfig.getLanecover());
+		if (this.fixhispeed != Config.FIX_HISPEED_OFF) {
+			basehispeed = hispeed;
+		}
+
+		for (int i : mode) {
+			if (i == TableData.NO_HISPEED) {
+				enableControl = false;
+				hispeed = 1.0f;
+				lanecover = 0;
+				lift = 0;
+			}
+		}
+	}
+
+	public void init(BMSModel model) {
+		pos = 0;
 		this.model = model;
 		this.timelines = model.getAllTimeLines();
 		if (model.getUseKeys() == 9) {
@@ -122,7 +141,6 @@ public class LaneRenderer {
 		} else {
 			laneassign = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13, 14, 15, 16 };
 		}
-		hispeed = playconfig.getHispeed();
 		switch (config.getFixhispeed()) {
 		case Config.FIX_HISPEED_OFF:
 			break;
@@ -153,19 +171,7 @@ public class LaneRenderer {
 			}
 			break;
 		}
-		this.setLanecover(playconfig.getLanecover());
-		if (this.fixhispeed != Config.FIX_HISPEED_OFF) {
-			basehispeed = hispeed;
-		}
 
-		for (int i : mode) {
-			if (i == TableData.NO_HISPEED) {
-				enableControl = false;
-				hispeed = 1.0f;
-				lanecover = 0;
-				lift = 0;
-			}
-		}
 	}
 
 	public int getFixHispeed() {
@@ -230,9 +236,12 @@ public class LaneRenderer {
 	public void drawLane(TextureRegion[] noteimage, TextureRegion[][] lnoteimage, TextureRegion[] mnoteimage,
 			TextureRegion[] pnoteimage, TextureRegion[] hnoteimage, float scale) {
 		sprite.end();
-		final long time = (main.getTimer()[TIMER_PLAY] != Long.MIN_VALUE ? (main.getNowTime() - main.getTimer()[TIMER_PLAY])
-				: 0)
-				+ config.getJudgetiming();
+		long time = (main.getTimer()[TIMER_PLAY] != Long.MIN_VALUE ? (main.getNowTime() - main.getTimer()[TIMER_PLAY])
+				: 0) + config.getJudgetiming();
+		if (main.getState() == BMSPlayer.STATE_PRACTICE) {
+			 time = main.getPracticeConfiguration().getStartTime();
+			 pos = 0;
+		}
 		JudgeManager judge = main.getJudgeManager();
 		final Rectangle[] laneregion = skin.getLaneregion();
 		final Rectangle[] playerr = skin.getLaneGroupRegion();
@@ -692,5 +701,9 @@ public class LaneRenderer {
 
 	public int[] getJudge() {
 		return judge;
+	}
+
+	public void setEnableControlInput(boolean enableControl) {
+		this.enableControl = enableControl;
 	}
 }

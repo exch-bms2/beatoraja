@@ -144,7 +144,7 @@ public class PlayerResource {
 				@Override
 				public void run() {
 					try {
-						if (config.getBga() == Config.BGA_ON || (config.getBga() == Config.BGA_AUTO && (auto != 0))) {
+						if (config.getBga() == Config.BGA_ON || (config.getBga() == Config.BGA_AUTO && (auto == 1 || auto >= 3))) {
 							bga.setModel(model);
 						} else {
 							bga.forceFinish();
@@ -174,7 +174,7 @@ public class PlayerResource {
 					@Override
 					public void run() {
 						try {
-							if (config.getBga() == Config.BGA_ON || (config.getBga() == Config.BGA_AUTO && (auto != 0))) {
+							if (config.getBga() == Config.BGA_ON || (config.getBga() == Config.BGA_AUTO && (auto == 1 || auto >= 3))) {
 								bga.setModel(model);
 							} else {
 								bga.forceFinish();

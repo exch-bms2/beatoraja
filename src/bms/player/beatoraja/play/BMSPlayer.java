@@ -93,11 +93,11 @@ public class BMSPlayer extends MainState {
 		this.autoplay = resource.getAutoplay();
 		Config config = resource.getConfig();
 
-		if (autoplay >= 2) {
+		if (autoplay >= 3) {
 			if (resource.getCourseBMSModels() != null) {
 				if (resource.getCourseReplay().length == 0) {
 					ReplayData[] replays = main.getPlayDataAccessor().readReplayData(resource.getCourseBMSModels(),
-							config.getLnmode(), autoplay - 2, resource.getConstraint());
+							config.getLnmode(), autoplay - 3, resource.getConstraint());
 					if (replays != null) {
 						for (ReplayData rd : replays) {
 							resource.addCourseReplay(rd);
@@ -114,7 +114,7 @@ public class BMSPlayer extends MainState {
 					}
 				}
 			} else {
-				replay = main.getPlayDataAccessor().readReplayData(model, config.getLnmode(), autoplay - 2);
+				replay = main.getPlayDataAccessor().readReplayData(model, config.getLnmode(), autoplay - 3);
 				if (replay == null) {
 					autoplay = 0;
 				}
@@ -122,7 +122,7 @@ public class BMSPlayer extends MainState {
 		}
 
 		if (model.getRandom() != null && model.getRandom().length > 0) {
-			if (autoplay >= 2) {
+			if (autoplay >= 3) {
 				model = resource.getGenerator().generate(replay.rand);
 			} else if (resource.getReplayData().pattern != null) {
 				model = resource.getGenerator().generate(resource.getReplayData().rand);
@@ -183,14 +183,14 @@ public class BMSPlayer extends MainState {
 		if (exjudge) {
 			judge.setJudgeMode(JudgeManager.EXPAND_JUDGE);
 		}
-
 		Logger.getGlobal().info("アシストオプション設定完了");
+		
 		if (replay != null) {
 			PatternModifier.modify(model, Arrays.asList(replay.pattern));
 		} else if (resource.getReplayData().pattern != null) {
 			PatternModifier.modify(model, Arrays.asList(resource.getReplayData().pattern));
 			Logger.getGlobal().info("譜面オプション : 保存された譜面変更ログから譜面再現");
-		} else {
+		} else if(autoplay != 2) {
 			switch (model.getUseKeys()) {
 			case 10:
 			case 14:
@@ -345,7 +345,8 @@ public class BMSPlayer extends MainState {
 			}
 		}
 
-		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/default/VL-Gothic-Regular.ttf"));
+		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
+				Gdx.files.internal("skin/default/VL-Gothic-Regular.ttf"));
 		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
 		parameter.size = 18;
 		systemfont = generator.generateFont(parameter);
@@ -357,7 +358,7 @@ public class BMSPlayer extends MainState {
 
 		input = main.getInputProcessor();
 		input.setMinimumInputDutration(config.getInputduration());
-		input.setEnableKeyInput(autoplay == 0);
+		input.setEnableKeyInput(autoplay == 0 || autoplay == 2);
 		PlayConfig pc = (model.getUseKeys() == 5 || model.getUseKeys() == 7 ? config.getMode7()
 				: (model.getUseKeys() == 10 || model.getUseKeys() == 14 ? config.getMode14() : config.getMode9()));
 		input.setKeyassign(pc.getKeyassign());
@@ -380,6 +381,11 @@ public class BMSPlayer extends MainState {
 		Logger.getGlobal().info("スコアグラフ描画クラス準備");
 
 		audio = resource.getAudioProcessor();
+
+		if (autoplay == 2) {
+			practice.create(model);
+			state = STATE_PRACTICE;
+		}
 	}
 
 	private int bestscore;
@@ -391,15 +397,19 @@ public class BMSPlayer extends MainState {
 	}
 
 	protected static final int STATE_PRELOAD = 0;
-	protected static final int STATE_READY = 1;
-	protected static final int STATE_PLAY = 2;
-	protected static final int STATE_FAILED = 3;
-	protected static final int STATE_FINISHED = 4;
+	protected static final int STATE_PRACTICE = 1;
+	protected static final int STATE_READY = 2;
+	protected static final int STATE_PLAY = 3;
+	protected static final int STATE_FAILED = 4;
+	protected static final int STATE_FINISHED = 5;
 
 	private int state = STATE_PRELOAD;
 
 	private long prevtime;
 
+	private PracticeConfiguration practice = new PracticeConfiguration();
+	private int starttimeoffset;
+	
 	@Override
 	public void render() {
 		final MainController main = getMainController();
@@ -417,19 +427,58 @@ public class BMSPlayer extends MainState {
 				Logger.getGlobal().info("STATE_READYに移行");
 			}
 			break;
+		// 楽曲ロード
+		case STATE_PRACTICE:
+			if(getTimer()[TIMER_PLAY] != Long.MIN_VALUE) {
+				resource.reloadBMSFile();
+				model = resource.getBMSModel();
+				lanerender.init(model);
+				getTimer()[TIMER_PLAY] = Long.MIN_VALUE;
+				getTimer()[TIMER_RHYTHM] = Long.MIN_VALUE;
+				getTimer()[TIMER_FAILED] = Long.MIN_VALUE;
+				getTimer()[TIMER_FADEOUT] = Long.MIN_VALUE;
+			}
+			lanerender.setEnableControlInput(false);
+			practice.processInput(input);
+			
+			if (input.getKeystate()[0] && resource.mediaLoadFinished() && now > skin.getLoadstart() + skin.getLoadend() && !input.startPressed()) {
+				lanerender.setEnableControlInput(true);				
+				PracticeModifier pm = new PracticeModifier(practice.getStartSection(), practice.getEndSection());
+				pm.modify(model);
+				gauge = practice.getGauge(model);
+				lanerender.init(model);
+				judge.init(model);
+				for (TimeLine tl : model.getAllTimeLines()) {
+					if (tl.getSection() >= practice.getStartSection() - 1) {
+						starttimeoffset = tl.getTime();
+						break;
+					}
+				}
+				for (TimeLine tl : model.getAllTimeLines()) {
+					if (tl.getSection() >= practice.getEndSection()) {
+						playtime = tl.getTime() + 1000;
+						break;
+					}
+				}
+				bga.prepare(this);
+				state = STATE_READY;
+				getTimer()[TIMER_READY] = now;
+				Logger.getGlobal().info("STATE_READYに移行");
+			}
+			break;
 		// GET READY
 		case STATE_READY:
 			final long rt = now - getTimer()[TIMER_READY];
 			if (rt > skin.getPlaystart()) {
 				state = STATE_PLAY;
-				getTimer()[TIMER_PLAY] = now;
-				getTimer()[TIMER_RHYTHM] = now;
+				getTimer()[TIMER_PLAY] = now - starttimeoffset;
+				getTimer()[TIMER_RHYTHM] = now - starttimeoffset;
 
-				input.setStartTime(now + getStartTime());
+				input.setStartTime(now + getStartTime() - starttimeoffset);
 				List<KeyInputLog> keylog = null;
 				if (autoplay == 1) {
 					keylog = createAutoplayLog(model);
-				} else if (autoplay >= 2) {
+				} else if (autoplay >= 3) {
 					keylog = Arrays.asList(replay.keylog);
 				}
 				autoThread = new AutoplayThread();
@@ -510,7 +559,7 @@ public class BMSPlayer extends MainState {
 				if (keyinput != null) {
 					Logger.getGlobal().info("入力パフォーマンス(max ms) : " + keyinput.frametimes);
 				}
-				if (autoplay != 1) {
+				if (autoplay != 1 && autoplay != 2) {
 					resource.setScoreData(createScoreData());
 				}
 				resource.setCombo(judge.getCourseCombo());
@@ -521,7 +570,9 @@ public class BMSPlayer extends MainState {
 				resource.setGrooveGauge(gauge);
 				input.setEnableKeyInput(true);
 				input.setStartTime(0);
-				if (resource.getScoreData() != null) {
+				if (autoplay == 2) {
+					state = STATE_PRACTICE;
+				} else if (resource.getScoreData() != null) {
 					main.changeState(MainController.STATE_RESULT);
 				} else {
 					main.changeState(MainController.STATE_SELECTMUSIC);
@@ -543,7 +594,7 @@ public class BMSPlayer extends MainState {
 				if (keyinput != null) {
 					Logger.getGlobal().info("入力パフォーマンス(max ms) : " + keyinput.frametimes);
 				}
-				if (autoplay != 1) {
+				if (autoplay != 1 && autoplay != 2) {
 					resource.setScoreData(createScoreData());
 				}
 				resource.setCombo(judge.getCourseCombo());
@@ -553,7 +604,9 @@ public class BMSPlayer extends MainState {
 				resource.setGrooveGauge(gauge);
 				input.setEnableKeyInput(true);
 				input.setStartTime(0);
-				if (resource.getScoreData() != null) {
+				if (autoplay == 2) {
+					state = STATE_PRACTICE;
+				} else if (resource.getScoreData() != null) {
 					main.changeState(MainController.STATE_RESULT);
 				} else {
 					if (resource.getCourseBMSModels() != null && resource.nextCourse()) {
@@ -566,10 +619,11 @@ public class BMSPlayer extends MainState {
 			break;
 		}
 		if (input.isExitPressed()) {
+			input.setExitPressed(false);
 			stopPlay();
 		}
 		// play speed change (autoplay or replay only)
-		if (autoplay != 0) {
+		if (autoplay == 1 || autoplay >= 3) {
 			if (input.getNumberState()[1]) {
 				playspeed = 25;
 			} else if (input.getNumberState()[2]) {
@@ -678,6 +732,10 @@ public class BMSPlayer extends MainState {
 	}
 
 	public void stopPlay() {
+		if(state == STATE_PRACTICE) {
+			getMainController().changeState(MainController.STATE_SELECTMUSIC);
+			return;
+		}
 		if (getTimer()[TIMER_FAILED] != Long.MIN_VALUE || getTimer()[TIMER_FADEOUT] != Long.MIN_VALUE) {
 			return;
 		}
@@ -739,6 +797,10 @@ public class BMSPlayer extends MainState {
 
 	public BMSPlayerInputProcessor getBMSPlayerInputProcessor() {
 		return input;
+	}
+
+	public PracticeConfiguration getPracticeConfiguration() {
+		return practice;
 	}
 
 	public int getJudgeCount(int judge, boolean fast) {
@@ -869,8 +931,8 @@ public class BMSPlayer extends MainState {
 
 				final long nowtime = (int) (getNowTime() - getTimer()[TIMER_PLAY]) - time;
 				framet = nowtime < framet ? framet : nowtime;
-				
-				if(time >= lasttime) {
+
+				if (time >= lasttime) {
 					break;
 				}
 			}
@@ -912,7 +974,7 @@ public class BMSPlayer extends MainState {
 						e.printStackTrace();
 					}
 				}
-				if(time >= lasttime) {
+				if (time >= lasttime) {
 					break;
 				}
 			}
@@ -1086,10 +1148,10 @@ public class BMSPlayer extends MainState {
 			return autoplay != 1;
 		case OPTION_BGAON:
 			return getMainController().getPlayerResource().getConfig().getBga() == Config.BGA_ON
-					|| (getMainController().getPlayerResource().getConfig().getBga() == Config.BGA_AUTO && (autoplay != 0));
+					|| (getMainController().getPlayerResource().getConfig().getBga() == Config.BGA_AUTO && (autoplay == 1 || autoplay >= 3));
 		case OPTION_BGAOFF:
 			return getMainController().getPlayerResource().getConfig().getBga() == Config.BGA_OFF
-					|| (getMainController().getPlayerResource().getConfig().getBga() == Config.BGA_AUTO && (autoplay == 0));
+					|| (getMainController().getPlayerResource().getConfig().getBga() == Config.BGA_AUTO && (autoplay == 0 || autoplay == 2));
 		case OPTION_NOW_LOADING:
 			return state == STATE_PRELOAD;
 		case OPTION_LOADED:
