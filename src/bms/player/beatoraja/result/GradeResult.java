@@ -1,11 +1,13 @@
 package bms.player.beatoraja.result;
 
 import java.io.File;
+import java.nio.file.Paths;
 import java.util.*;
 
 import bms.player.beatoraja.play.audio.SoundProcessor;
 import bms.player.beatoraja.play.gauge.GrooveGauge;
 import bms.player.beatoraja.select.MusicSelector;
+import bms.player.beatoraja.skin.SkinLoader;
 import com.badlogic.gdx.math.Rectangle;
 import java.util.logging.Logger;
 
@@ -27,15 +29,10 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
 
 public class GradeResult extends MainState {
 
-	private BitmapFont titlefont;
-	private String title;
-
 	private int oldclear;
 	private int oldexscore;
 	private int oldmisscount;
 	private int oldcombo;
-
-	private GradeResultSkin skin;
 
 	private boolean saveReplay = false;
 
@@ -63,16 +60,12 @@ public class GradeResult extends MainState {
 			}
 		}
 
-		if (skin == null) {
-			skin = new GradeResultSkin(RESOLUTION[resource.getConfig().getResolution()]);
-			this.setSkin(skin);
+		if (getSkin() != null) {
+			getSkin().dispose();
 		}
-		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/default/VL-Gothic-Regular.ttf"));
-		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
-		parameter.size = 24;
-		title = "result";
-		parameter.characters = title + parameter.characters + "段位認定 " + resource.getCoursetitle() + "不合格";
-		titlefont = generator.generateFont(parameter);
+		SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
+		setSkin(sl.loadResultSkin(Paths.get("skin/default/graderesult.json")));
+
 		updateScoreDatabase();
 
 		if (resource.getAutoplay() == 0
@@ -97,7 +90,6 @@ public class GradeResult extends MainState {
 		}
 
 		final MainController main = getMainController();
-		final SpriteBatch sprite = main.getSpriteBatch();
 		final PlayerResource resource = getMainController().getPlayerResource();
 		IRScoreData score = resource.getCourseScoreData();
 
@@ -111,16 +103,6 @@ public class GradeResult extends MainState {
 
 			final float w = 1280;
 			final float h = 720;
-
-			sprite.begin();
-			titlefont.setColor(Color.WHITE);
-			titlefont.draw(sprite, resource.getCoursetitle()
-					+ (score.getClear() > GrooveGauge.CLEARTYPE_FAILED ? "  合格" : "  不合格"), w * 3 / 4, h / 2);
-			if (saveReplay) {
-				titlefont.draw(sprite, "Replay Saved", w * 3 / 4, h / 4);
-			}
-
-			sprite.end();
 		}
 
 		if (getTimer()[TIMER_FADEOUT] != Long.MIN_VALUE) {
@@ -231,6 +213,16 @@ public class GradeResult extends MainState {
 		return 0;
 	}
 
+	public String getTextValue(int id) {
+		final PlayerResource resource = getMainController().getPlayerResource();
+		switch (id) {
+			case STRING_TITLE:
+			case STRING_FULLTITLE:
+				return resource.getCoursetitle();
+		}
+		return super.getTextValue(id);
+	}
+
 	public int getNumberValue(int id) {
 		final PlayerResource resource = getMainController().getPlayerResource();
 		switch (id) {
@@ -304,13 +296,9 @@ public class GradeResult extends MainState {
 
 	@Override
 	public void dispose() {
-		if (titlefont != null) {
-			titlefont.dispose();
-			titlefont = null;
-		}
-		if (skin != null) {
-			skin.dispose();
-			skin = null;
+		if (getSkin() != null) {
+			getSkin().dispose();
+			setSkin(null);
 		}
 	}
 
@@ -332,7 +320,7 @@ public class GradeResult extends MainState {
 
 	public boolean getBooleanValue(int id) {
 		final PlayerResource resource = getMainController().getPlayerResource();
-		final IRScoreData score = resource.getScoreData();
+		final IRScoreData score = resource.getCourseScoreData();
 		switch (id) {
 			case OPTION_RESULT_CLEAR:
 				return score.getClear() != GrooveGauge.CLEARTYPE_FAILED;

@@ -26,7 +26,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 	private TextureRegion[][] mine = new TextureRegion[8][];
 	private int notecycle;
 	private Rectangle[] laner = new Rectangle[8];
-	private Rectangle gauger = null;
+	private SkinGauge gauger = null;
 	private SkinImage line;
 	private List<SkinImage> lines = new ArrayList<SkinImage>();
 	private SkinImage li;
@@ -265,7 +265,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 							values[5] * dstw / srcw, (values[4] + values[6]) * dsth / srch);
 				}
 				if (lanerender == null) {
-					lanerender = new SkinNote(skin, note, new TextureRegion[][][] { lnend, lnstart, lnbodya, lnbody,
+					lanerender = new SkinNote(note, new TextureRegion[][][] { lnend, lnstart, lnbodya, lnbody,
 							lnend, lnstart, lnbodya, lnbody, lnbodya, lnbody }, mine, notecycle, values[6] * dsth / srch);
 					skin.add(lanerender);
 				}
@@ -540,9 +540,8 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 					groovex = values[11];
 					groovey = values[12];
 					if (gauger == null) {
-						gauger = new Rectangle();
-						SkinGauge gaugeo = new SkinGauge(skin, gauge, values[10], values[9]);
-						skin.add(gaugeo);
+						gauger = new SkinGauge(gauge, values[10], values[9]);
+						skin.add(gauger);
 					}
 				}
 			}
@@ -551,12 +550,13 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 			@Override
 			public void execute(String[] str) {
 				if (gauger != null) {
-					gauger.width = (Math.abs(groovex) >= 1) ? (groovex * 50 * dstw / srcw) : (Integer.parseInt(str[5])
+					float width = (Math.abs(groovex) >= 1) ? (groovex * 50 * dstw / srcw) : (Integer.parseInt(str[5])
 							* dstw / srcw);
-					gauger.height = (Math.abs(groovey) >= 1) ? (groovey * 50 * dsth / srch) : (Integer.parseInt(str[6])
+					float height = (Math.abs(groovey) >= 1) ? (groovey * 50 * dsth / srch) : (Integer.parseInt(str[6])
 							* dsth / srch);
-					gauger.x = Integer.parseInt(str[3]) * dstw / srcw - (groovex < 0 ? groovex * dstw / srcw : 0);
-					gauger.y = dsth - Integer.parseInt(str[4]) * dsth / srch - gauger.height;
+					float x = Integer.parseInt(str[3]) * dstw / srcw - (groovex < 0 ? groovex * dstw / srcw : 0);
+					float y = dsth - Integer.parseInt(str[4]) * dsth / srch - height;
+					gauger.setDestination(0, x,y,width,height,0,255,255,255,255,0,0,0,0,0,0,0,0,0);
 				}
 			}
 		});
@@ -591,9 +591,6 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 
 		skin.setLaneregion(laner);
 		skin.setLine(lines.toArray(new SkinImage[lines.size()]));
-		if (gauger != null) {
-			skin.setGaugeRegion(gauger);
-		}
 
 		if (nowjudge2[0] != null) {
 			skin.setJudgeregion(new PlaySkin.JudgeRegion[] { new PlaySkin.JudgeRegion(nowjudge, nowcombo, shift),

@@ -22,12 +22,17 @@ public class PracticeConfiguration {
 	private int endsection = 10;
 	private int gaugetype;
 	private int startgauge = 20;
+	private int random = 0;
+	private int random2 = 0;
+	private int doubleop = 0;
 	
 	private int cursorpos = 0;
 	
 	private BMSModel model;
 
 	private static final String[] GAUGE = { "ASSIST EASY", "EASY", "NORMAL", "HARD", "EX-HARD", "HAZARD" ,"GRADE", "EX GRADE", "EXHARD GRADE"};
+	private static final String[] RANDOM = { "NORMAL", "MIRROR", "RANDOM", "R-RANDOM", "S-RANDOM", "SPIRAL" ,"H-RANDOM", "ALL-SCR", "RANDOM-EX","S-RANDOM-EX"};
+	
 	public void create(BMSModel model) {
 		this.model = model;
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/default/VL-Gothic-Regular.ttf"));
@@ -52,6 +57,10 @@ public class PracticeConfiguration {
 
 	public int getEndSection() {
 		return endsection;
+	}
+	
+	public int getOption() {
+		return random;
 	}
 	
 	public GrooveGauge getGauge(BMSModel model) {
@@ -94,11 +103,11 @@ public class PracticeConfiguration {
 		boolean[] cursor = input.getCursorState();
 		if (cursor[0]) {
 			cursor[0] = false;
-			cursorpos = (cursorpos + 3) % 4;
+			cursorpos = (cursorpos + 4) % 5;
 		}
 		if (cursor[1]) {
 			cursor[1] = false;
-			cursorpos = (cursorpos + 1) % 4;
+			cursorpos = (cursorpos + 1) % 5;
 		}
 		if (cursor[2]) {
 			cursor[2] = false;
@@ -120,6 +129,9 @@ public class PracticeConfiguration {
 				if(startgauge > 1) {
 					startgauge--;
 				}
+				break;
+			case 4:
+				random = (random + 9) % 10;
 				break;
 			}
 		}
@@ -148,12 +160,15 @@ public class PracticeConfiguration {
 					startgauge++;
 				}
 				break;
+			case 4:
+				random = (random + 1) % 10;
+				break;
 			}
 		}		
 	}
 
 	public void draw(Rectangle r, SpriteBatch sprite, long time, MainState state) {
-		float x = r.x;
+		float x = r.x + r.width / 4;
 		float y = r.y + r.height;
 		titlefont.setColor(cursorpos == 0 ? Color.YELLOW : Color.CYAN);
 		titlefont.draw(sprite, "START SECTION : " + startsection, x, y);
@@ -163,6 +178,7 @@ public class PracticeConfiguration {
 		titlefont.draw(sprite, "GAUGE TYPE : " + GAUGE[gaugetype], x, y - 56);
 		titlefont.setColor(cursorpos == 3 ? Color.YELLOW : Color.CYAN);
 		titlefont.draw(sprite, "GAUGE VALUE : " + startgauge, x, y - 84);
-
+		titlefont.setColor(cursorpos == 4 ? Color.YELLOW : Color.CYAN);
+		titlefont.draw(sprite, "OPTION : " + RANDOM[random], x, y - 112);
 	}
 }

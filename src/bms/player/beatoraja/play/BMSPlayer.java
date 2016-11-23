@@ -427,7 +427,7 @@ public class BMSPlayer extends MainState {
 				Logger.getGlobal().info("STATE_READYに移行");
 			}
 			break;
-		// 楽曲ロード
+		// practice mode
 		case STATE_PRACTICE:
 			if(getTimer()[TIMER_PLAY] != Long.MIN_VALUE) {
 				resource.reloadBMSFile();
@@ -445,6 +445,9 @@ public class BMSPlayer extends MainState {
 				lanerender.setEnableControlInput(true);				
 				PracticeModifier pm = new PracticeModifier(practice.getStartSection(), practice.getEndSection());
 				pm.modify(model);
+				if(random[practice.getOption()] != null) {
+					random[practice.getOption()].modify(model);
+				}
 				gauge = practice.getGauge(model);
 				lanerender.init(model);
 				judge.init(model);

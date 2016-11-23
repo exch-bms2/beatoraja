@@ -34,8 +34,6 @@ public class PlaySkin extends Skin {
 
 	private Rectangle[] lanegroupregion;
 
-	private Rectangle gaugeregion;
-
 	private JudgeRegion[] judgeregion = new JudgeRegion[0];
 
 	private float dw;
@@ -247,7 +245,10 @@ public class PlaySkin extends Skin {
 		SkinBGA bga = new SkinBGA(this);
 		setDestination(bga, 0, 500, 50, 740, 650, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(bga);
-		add(new SkinGauge(this, gauge, 0 ,0));
+
+		SkinGauge sgauge = new SkinGauge(gauge,0,0);
+		setDestination(sgauge, 0, 20, 30, 390, 30, 0, 255,255,255,255,0,0,0,0,0,0,0,0,0);
+		add(sgauge);
 
 		SkinText title = new SkinText("skin/default/VL-Gothic-Regular.ttf", 0, 24, 2);
 		title.setReferenceID(STRING_FULLTITLE);
@@ -332,7 +333,7 @@ public class PlaySkin extends Skin {
 		line[0] = new SkinImage(new TextureRegion(st, 0, 0, 1, 1));
 		line[0].setOffsety(OFFSET_LIFT);
 		setDestination(line[0], 0, 20, 140, 390, 1, 0, 255, 128, 128, 128, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		add(new SkinNote(this, note, longnote, minenote, 12 / dh));
+		add(new SkinNote(note, longnote, minenote, 12 / dh));
 		Texture lct = new Texture("skin/default/lanecover.png");
 		SkinSlider lanecover = new SkinSlider(new TextureRegion[] { new TextureRegion(lct) }, 0, 0, 2, (int) (580 * dh),
 				SLIDER_LANECOVER);
@@ -411,8 +412,6 @@ public class PlaySkin extends Skin {
 				OPTION_LANECOVER1_CHANGING, 0, 0);
 		add(yellow);
 
-		gaugeregion = rect(20, 30, 390, 30);
-
 		addNumber(new SkinNumber(ntr[0], 3, 0, NUMBER_GROOVEGAUGE), 0, 314, 60, 24, 24, 0, 255, 255, 255,
 				255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		addNumber(new SkinNumber(ntr[0], 1, 0, NUMBER_GROOVEGAUGE_AFTERDOT), 0, 386, 60, 18, 18, 0, 255,
@@ -485,7 +484,10 @@ public class PlaySkin extends Skin {
 		SkinBGA bga = new SkinBGA(this);
 		setDestination(bga, 0, 40, 50, 740, 650, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(bga);
-		add(new SkinGauge(this, gauge, 0 , 0));
+
+		SkinGauge sgauge = new SkinGauge(gauge,0,0);
+		setDestination(sgauge, 0, 1260, 30, -390, 30, 0, 255,255,255,255,0,0,0,0,0,0,0,0,0);
+		add(sgauge);
 
 		SkinText title = new SkinText("skin/default/VL-Gothic-Regular.ttf", 0, 24, 2);
 		title.setReferenceID(STRING_FULLTITLE);
@@ -570,7 +572,7 @@ public class PlaySkin extends Skin {
 		line[0] = new SkinImage(new TextureRegion(st, 0, 0, 1, 1));
 		line[0].setOffsety(OFFSET_LIFT);
 		setDestination(line[0], 0, 870, 140, 390, 1, 0, 255, 128, 128, 128, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		add(new SkinNote(this, note, longnote, minenote, 12 / dh));
+		add(new SkinNote(note, longnote, minenote, 12 / dh));
 		Texture lct = new Texture("skin/default/lanecover.png");
 		SkinSlider lanecover = new SkinSlider(new TextureRegion[] { new TextureRegion(lct) }, 0, 0, 2, (int) (580 * dh),
 				SLIDER_LANECOVER);
@@ -648,8 +650,6 @@ public class PlaySkin extends Skin {
 		setDestination(yellow, 0, 1160, 720, 10, 15, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0,
 				OPTION_LANECOVER1_CHANGING, 0, 0);
 		add(yellow);
-
-		gaugeregion = rect(1260, 30, -390, 30);
 
 		addNumber(new SkinNumber(ntr[0], 3, 0, NUMBER_GROOVEGAUGE), 0, 870, 60, 24, 24, 0, 255, 255, 255,
 				255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -778,7 +778,10 @@ public class PlaySkin extends Skin {
 		SkinBGA bga2 = new SkinBGA(this);
 		setDestination(bga2, 0, 10, 50, 330, 330, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(bga2);
-		add(new SkinGauge(this, gauge,0,0));
+
+		SkinGauge sgauge = new SkinGauge(gauge,0,0);
+		setDestination(sgauge, 0, 345, 30, 590, 30, 0, 255,255,255,255,0,0,0,0,0,0,0,0,0);
+		add(sgauge);
 
 		SkinText title = new SkinText("skin/default/VL-Gothic-Regular.ttf", 0, 24);
 		title.setReferenceID(STRING_FULLTITLE);
@@ -850,7 +853,7 @@ public class PlaySkin extends Skin {
 		line.setOffsety(OFFSET_LIFT);
 		setDestination(line, 0, 345, 137, 590, 6, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(line);
-		add(new SkinNote(this, note, longnote, minenote, 18 / dh));
+		add(new SkinNote(note, longnote, minenote, 18 / dh));
 		Texture lct = new Texture("skin/default/lanecover.png");
 		SkinSlider lanecover = new SkinSlider(new TextureRegion[] { new TextureRegion(lct) }, 0, 0, 2, (int) (580 * dh),
 				SLIDER_LANECOVER);
@@ -925,8 +928,6 @@ public class PlaySkin extends Skin {
 		add(yellow);
 
 		lanegroupregion = new Rectangle[] { rect(345, 140, 590, 580) };
-
-		gaugeregion = rect(345, 30, 590, 30);
 
 		addNumber(new SkinNumber(ntr[0],3, 0, NUMBER_GROOVEGAUGE), 0, 600, 60, 24, 24, 0, 255, 255, 255,
 				255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -1038,7 +1039,10 @@ public class PlaySkin extends Skin {
 		SkinBGA bga3 = new SkinBGA(this);
 		setDestination(bga3, 0, 10, 40, 180, 220, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(bga3);
-		add(new SkinGauge(this, gauge,0,0));
+
+		SkinGauge sgauge = new SkinGauge(gauge,0,0);
+		setDestination(sgauge, 0, 445, 30, 390, 30, 0, 255,255,255,255,0,0,0,0,0,0,0,0,0);
+		add(sgauge);
 
 		SkinText title = new SkinText("skin/default/VL-Gothic-Regular.ttf", 0, 24);
 		title.setReferenceID(STRING_FULLTITLE);
@@ -1119,7 +1123,7 @@ public class PlaySkin extends Skin {
 		line[1] = new SkinImage(new TextureRegion(st, 0, 0, 1, 1));
 		setDestination(line[1], 0, 680, 140, 390, 1, 0, 255, 128, 128, 128, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		line[1].setOffsety(OFFSET_LIFT);
-		add(new SkinNote(this, note, longnote, minenote, 12 / dh));
+		add(new SkinNote(note, longnote, minenote, 12 / dh));
 		Texture lct = new Texture("skin/default/lanecover.png");
 		SkinSlider lanecover = new SkinSlider(new TextureRegion[] { new TextureRegion(lct) }, 0, 0, 2, (int) (580 * dh),
 				SLIDER_LANECOVER);
@@ -1207,8 +1211,6 @@ public class PlaySkin extends Skin {
 				OPTION_LANECOVER1_CHANGING, 0, 0);
 		add(yellow);
 
-		gaugeregion = rect(445, 30, 390, 30);
-
 		addNumber(new SkinNumber(ntr[0], 3, 0, NUMBER_GROOVEGAUGE), 0, 600, 60, 24, 24, 0, 255, 255, 255,
 				255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		addNumber(new SkinNumber(ntr[0], 1, 0, NUMBER_GROOVEGAUGE_AFTERDOT), 0, 672, 60, 18, 18, 0, 255,
@@ -1228,14 +1230,6 @@ public class PlaySkin extends Skin {
 				0, 0, 0);
 		add(pseek);
 
-	}
-
-	public Rectangle getGaugeRegion() {
-		return gaugeregion;
-	}
-
-	public void setGaugeRegion(Rectangle r) {
-		gaugeregion = r;
 	}
 
 	public Rectangle[] getLaneregion() {

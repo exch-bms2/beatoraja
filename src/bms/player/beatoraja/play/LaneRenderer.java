@@ -242,6 +242,7 @@ public class LaneRenderer {
 			 time = main.getPracticeConfiguration().getStartTime();
 			 pos = 0;
 		}
+		final float hispeed = main.getState() != BMSPlayer.STATE_PRACTICE ? this.hispeed : 1.0f;
 		JudgeManager judge = main.getJudgeManager();
 		final Rectangle[] laneregion = skin.getLaneregion();
 		final Rectangle[] playerr = skin.getLaneGroupRegion();
@@ -261,6 +262,8 @@ public class LaneRenderer {
 		// double sect = (bpm / 60) * 4 * 1000;
 		final float hu = laneregion[0].y + laneregion[0].height;
 		final float hl = enableLift ? laneregion[0].y + laneregion[0].height * lift : laneregion[0].y;
+		final float rxhs = (hu - hl) * hispeed;
+		float y = hl;
 
 		currentduration = Math.round(region * (1 - (enableLanecover ? lanecover : 0)));
 
@@ -374,9 +377,6 @@ public class LaneRenderer {
 				startpressed = false;
 			}
 		}
-
-		final float rxhs = (hu - hl) * hispeed;
-		float y = hl;
 
 		// 判定エリア表示
 		if (config.isShowjudgearea()) {

@@ -37,7 +37,6 @@ public class SkinNote extends SkinObject {
 	private TextureRegion[] cminenote;
 	private TextureRegion[] chiddennote;
 	private TextureRegion[] cprocessednote;
-	private PlaySkin skin;
 
 	/**
 	 * 不可視ノーツ画像
@@ -48,13 +47,12 @@ public class SkinNote extends SkinObject {
 	 */
 	private SkinSource[] processednote;
 
-	public SkinNote(PlaySkin skin, TextureRegion[][] note, TextureRegion[][][] longnote, TextureRegion[][] minenote, float scale) {
-		this(skin, note, longnote, minenote, 0, scale);
+	public SkinNote(TextureRegion[][] note, TextureRegion[][][] longnote, TextureRegion[][] minenote, float scale) {
+		this(note, longnote, minenote, 0, scale);
 	}
 
-	public SkinNote(PlaySkin skin, TextureRegion[][] note, TextureRegion[][][] longnote, TextureRegion[][] minenote,
+	public SkinNote(TextureRegion[][] note, TextureRegion[][][] longnote, TextureRegion[][] minenote,
 			int cycle, float scale) {
-		this.skin = skin;
 		this.scale = scale;
 		this.note = new SkinSource[note.length];
 		for(int i = 0;i < note.length;i++) {
@@ -94,7 +92,8 @@ public class SkinNote extends SkinObject {
 
 	@Override
 	public void draw(SpriteBatch sprite, long time, MainState state) {
-		if (skin.player.getLanerender() != null) {
+		final BMSPlayer player = (BMSPlayer) state;
+		if (player.getLanerender() != null) {
 			for (int i = 0; i < note.length; i++) {
 				if (note[i] != null) {
 					cnote[i] = note[i].getImage(time, state);
@@ -122,7 +121,7 @@ public class SkinNote extends SkinObject {
 					cprocessednote[i] = processednote[i].getImage(time, state);
 				}
 			}
-			skin.player.getLanerender().drawLane(cnote, clongnote, cminenote, cprocessednote, chiddennote, scale);
+			player.getLanerender().drawLane(cnote, clongnote, cminenote, cprocessednote, chiddennote, scale);
 		}
 	}
 

@@ -513,15 +513,16 @@ public class MusicResult extends MainState {
 	public boolean getBooleanValue(int id) {
 		final PlayerResource resource = getMainController().getPlayerResource();
 		final IRScoreData score = resource.getScoreData();
+		final IRScoreData cscore = resource.getCourseScoreData();
 		switch (id) {
 		case OPTION_DISABLE_SAVE_SCORE:
 			return !resource.isUpdateScore();
 		case OPTION_ENABLE_SAVE_SCORE:
 			return resource.isUpdateScore();
 		case OPTION_RESULT_CLEAR:
-			return score.getClear() != GrooveGauge.CLEARTYPE_FAILED;
+			return score.getClear() != GrooveGauge.CLEARTYPE_FAILED && (cscore == null || cscore.getClear() != GrooveGauge.CLEARTYPE_FAILED);
 		case OPTION_RESULT_FAIL:
-			return score.getClear() == GrooveGauge.CLEARTYPE_FAILED;
+			return score.getClear() == GrooveGauge.CLEARTYPE_FAILED || (cscore != null && cscore.getClear() == GrooveGauge.CLEARTYPE_FAILED);
 		case OPTION_RESULT_F_1P:
 		case OPTION_NOW_F_1P:
 			return rate <= 2222;
