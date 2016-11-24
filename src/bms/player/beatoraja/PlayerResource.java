@@ -198,7 +198,7 @@ public class PlayerResource {
 	private BMSModel loadBMSModel(Path f) {
 		BMSModel model;
 		if (f.toString().toLowerCase().endsWith(".bmson")) {
-			BMSONDecoder decoder = new BMSONDecoder(BMSModel.LNTYPE_CHARGENOTE);
+			BMSONDecoder decoder = new BMSONDecoder(config.getLnmode());
 			model = decoder.decode(f.toFile());
 			if (model == null) {
 				return null;
@@ -209,7 +209,7 @@ public class PlayerResource {
 			int totalnotes = model.getTotalNotes();
 			model.setTotal(model.getTotal() / 100.0 * 7.605 * totalnotes / (0.01 * totalnotes + 6.5));
 		} else {
-			BMSDecoder decoder = new BMSDecoder(BMSModel.LNTYPE_CHARGENOTE);
+			BMSDecoder decoder = new BMSDecoder(config.getLnmode());
 			model = decoder.decode(f.toFile());
 			if (model == null) {
 				return null;

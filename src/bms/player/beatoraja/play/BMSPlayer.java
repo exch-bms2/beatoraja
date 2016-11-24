@@ -134,7 +134,6 @@ public class BMSPlayer extends MainState {
 
 		boolean score = true;
 
-		model.setLntype(config.getLnmode());
 		boolean exjudge = false;
 		if (resource.getCourseBMSModels() == null && autoplay < 2) {
 			if (config.isBpmguide() && (model.getMinBPM() < model.getMaxBPM())) {
@@ -451,6 +450,7 @@ public class BMSPlayer extends MainState {
 				gauge = practice.getGauge(model);
 				lanerender.init(model);
 				judge.init(model);
+				notes = 0;
 				for (TimeLine tl : model.getAllTimeLines()) {
 					if (tl.getSection() >= practice.getStartSection() - 1) {
 						starttimeoffset = tl.getTime();
@@ -958,7 +958,10 @@ public class BMSPlayer extends MainState {
 			final TimeLine[] timelines = model.getAllTimeLines();
 			final int lasttime = timelines[timelines.length - 1].getTime() + BMSPlayer.TIME_MARGIN;
 			final Config config = getMainController().getPlayerResource().getConfig();
-			for (int p = 0; !stop;) {
+			int p = 0;
+			for (int time = (int) (getNowTime() - getTimer()[TIMER_PLAY]); p < timelines.length && timelines[p].getTime() < time;p++);
+
+			for (; !stop;) {
 				final int time = (int) (getNowTime() - getTimer()[TIMER_PLAY]);
 				// BGレーン再生
 				while (p < timelines.length && timelines[p].getTime() <= time) {

@@ -18,7 +18,7 @@ public class PracticeConfiguration {
 
 	private BitmapFont titlefont;
 
-	private int startsection = 5;
+	private int startsection = 0;
 	private int endsection = 10;
 	private int gaugetype;
 	private int startgauge = 20;
@@ -47,12 +47,14 @@ public class PracticeConfiguration {
 	}
 
 	public int getStartTime() {
+		int time = 0;
 		for(TimeLine tl : model.getAllTimeLines()) {
-			if(startsection == tl.getSection()) {
-				return tl.getTime();
+			if(startsection < tl.getSection()) {
+				break;
 			}
+			time = tl.getTime();
 		}
-		return 0;
+		return time;
 	}
 
 	public int getEndSection() {
