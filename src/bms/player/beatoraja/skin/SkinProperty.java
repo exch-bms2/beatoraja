@@ -499,6 +499,7 @@ public class SkinProperty {
 	public static final int BUTTON_SORT = 1012;
 	public static final int BUTTON_PLAY = 1015;
 	public static final int BUTTON_AUTOPLAY = 1016;
+	public static final int BUTTON_PRACTICE = 2015;
 	public static final int BUTTON_READTEXT = 1017;
 	public static final int BUTTON_REPLAY = 1019;
 	public static final int BUTTON_REPLAY2 = 2019;

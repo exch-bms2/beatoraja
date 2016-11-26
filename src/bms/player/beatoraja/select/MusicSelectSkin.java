@@ -143,15 +143,17 @@ public class MusicSelectSkin extends Skin {
 		addImage(new TextureRegion(st, 0, 720, 96, 24),0, 200, 312, 100, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_GRADEBAR, 0, 0);
 		addNumber(new SkinNumber(ntr[0], 4, 0, NUMBER_PLAYCOUNT), 0, 400, 312, 18, 18, 0, 255, 255,
 				255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		// play, autoplay, replay button
+		// play, autoplay, practice, replay button
 		addImage(new TextureRegion(st, 0, 310, 15, 15),0, 80, 450, 30, 30, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_SONGBAR, 0, 0).setClickevent(BUTTON_PLAY);
 		addImage(new TextureRegion(st, 0, 310, 15, 15),0, 80, 450, 30, 30, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_GRADEBAR, 0, 0).setClickevent(BUTTON_PLAY);
 		addImage(new TextureRegion(st, 0, 325, 15, 15),0, 130, 450, 30, 30, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_SONGBAR, 0, 0).setClickevent(BUTTON_AUTOPLAY);
 		addImage(new TextureRegion(st, 0, 325, 15, 15),0, 130, 450, 30, 30, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_GRADEBAR, 0, 0).setClickevent(BUTTON_AUTOPLAY);
-		addImage(new TextureRegion(st, 0, 340, 15, 15),0, 180, 450, 30, 30, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_REPLAYDATA, 0, 0).setClickevent(BUTTON_REPLAY);
-		addImage(new TextureRegion(st, 0, 355, 15, 15),0, 230, 450, 30, 30, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_REPLAYDATA2, 0, 0).setClickevent(BUTTON_REPLAY2);
-		addImage(new TextureRegion(st, 0, 370, 15, 15),0, 280, 450, 30, 30, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_REPLAYDATA3, 0, 0).setClickevent(BUTTON_REPLAY3);
-		addImage(new TextureRegion(st, 0, 385, 15, 15),0, 330, 450, 30, 30, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_REPLAYDATA4, 0, 0).setClickevent(BUTTON_REPLAY4);
+		addImage(new TextureRegion(st, 0, 340, 15, 15),0, 180, 450, 30, 30, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_SONGBAR, 0, 0).setClickevent(BUTTON_PRACTICE);
+		addImage(new TextureRegion(st, 0, 340, 15, 15),0, 180, 450, 30, 30, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_GRADEBAR, 0, 0).setClickevent(BUTTON_PRACTICE);
+		addImage(new TextureRegion(st, 0, 355, 15, 15),0, 230, 450, 30, 30, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_REPLAYDATA, 0, 0).setClickevent(BUTTON_REPLAY);
+		addImage(new TextureRegion(st, 0, 370, 15, 15),0, 280, 450, 30, 30, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_REPLAYDATA2, 0, 0).setClickevent(BUTTON_REPLAY2);
+		addImage(new TextureRegion(st, 0, 385, 15, 15),0, 330, 450, 30, 30, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_REPLAYDATA3, 0, 0).setClickevent(BUTTON_REPLAY3);
+		addImage(new TextureRegion(st, 0, 400, 15, 15),0, 380, 450, 30, 30, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_REPLAYDATA4, 0, 0).setClickevent(BUTTON_REPLAY4);
 
 		addImage(new TextureRegion(st, 0, 720, 96, 24),0, 60, 102, 100, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		addNumber(new SkinNumber(ntr[0], 6, 0, NUMBER_TOTALPLAYCOUNT), 0, 160, 102, 18, 18, 0,
