@@ -167,6 +167,7 @@ public class MusicSelectSkin extends Skin {
             setDestination(barobj.makeBarImages(true, i),0, 780, 720 - i * 36, 500, 36, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         }
         setCenterBar(10);
+        setClickableBar(new int[]{2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19});
         barobj.setLamp(lamp);
 		barobj.setTrophy(trophy);
 		SkinBar.SkinBarText bartext = new SkinBar.SkinBarText("skin/default/VL-Gothic-Regular.ttf", 0, 24, 2);

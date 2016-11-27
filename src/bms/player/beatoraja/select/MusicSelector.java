@@ -558,22 +558,7 @@ public class MusicSelector extends MainState {
 			if (isPressed(keystate, keytime, KEY_FOLDER_CLOSE, true) || cursor[2]) {
 				keytime[1] = 0;
 				cursor[2] = false;
-				Bar pbar = null;
-				Bar cbar = null;
-				if (dir.size() > 1) {
-					pbar = dir.get(dir.size() - 2);
-				}
-				if (dir.size() > 0) {
-					cbar = dir.get(dir.size() - 1);
-					dir.remove(dir.size() - 1);
-					if (folderclose != null) {
-						folderclose.play();
-					}
-				}
-				bar.updateBar(pbar);
-				if (cbar != null) {
-					bar.setSelected(cbar);
-				}
+				close();
 			}
 		}
 
@@ -689,6 +674,25 @@ public class MusicSelector extends MainState {
 		} else {
 			play(current, 0);
 		}
+	}
+
+	public void close() {
+		Bar pbar = null;
+		Bar cbar = null;
+		if (dir.size() > 1) {
+			pbar = dir.get(dir.size() - 2);
+		}
+		if (dir.size() > 0) {
+			cbar = dir.get(dir.size() - 1);
+			dir.remove(dir.size() - 1);
+			if (folderclose != null) {
+				folderclose.play();
+			}
+		}
+		bar.updateBar(pbar);
+		if (cbar != null) {
+			bar.setSelected(cbar);
+		}		
 	}
 
 	private void resetReplayIndex() {

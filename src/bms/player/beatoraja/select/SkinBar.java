@@ -104,8 +104,8 @@ public class SkinBar extends SkinObject {
     }
     
     @Override
-	protected void mousePressed(MainState state, int x, int y) {
-        ((MusicSelector) state).getBarRender().mousePressed(this, x, y);
+	protected void mousePressed(MainState state, int button, int x, int y) {
+        ((MusicSelector) state).getBarRender().mousePressed(this, button, x, y);
 	}
 
     public static class SkinBarText extends SkinObject {

@@ -342,7 +342,7 @@ public abstract class SkinObject {
 		}
 	}
 	
-	protected void mousePressed(MainState state, int x, int y) {
+	protected void mousePressed(MainState state, int button, int x, int y) {
 		if (clickevent != -1) {
 			Rectangle r = getDestination(state.getNowTime(), state);
 			// System.out.println(obj.getClickevent() + " : " + r.x +

@@ -120,15 +120,15 @@ public class Skin {
 		return true;
 	}
 
-	public void mousePressed(MainState state, int x, int y) {
+	public void mousePressed(MainState state, int button, int x, int y) {
 		for (SkinObject obj : objects) {
 			if (isDraw(obj.getOption(), state)) {
-				obj.mousePressed(state, x, y);
+				obj.mousePressed(state, button, x, y);
 			}
 		}
 	}
 
-	public void mouseDragged(MainState state, int x, int y) {
+	public void mouseDragged(MainState state, int button, int x, int y) {
 		final long time = state.getNowTime();
 		for (SkinObject obj : objects) {
 			if (obj instanceof SkinSlider && ((SkinSlider) obj).isChangable() && isDraw(obj.getOption(), state)) {

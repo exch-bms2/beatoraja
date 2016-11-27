@@ -141,8 +141,8 @@ public class BarRenderer {
 		search.add(bar);
 	}
 
-	public void mousePressed(SkinBar baro, int x, int y) {
-		for (int i = 0; i < 60; i++) {
+	public void mousePressed(SkinBar baro, int button, int x, int y) {
+		for (int i : ((MusicSelectSkin) select.getSkin()).getClickableBar()) {
 			boolean on = (i == ((MusicSelectSkin) select.getSkin()).getCenterBar());
 			if (baro.getBarImages(on, i) == null) {
 				continue;
@@ -154,7 +154,11 @@ public class BarRenderer {
 			Rectangle r = baro.getBarImages(on, i).getDestination(select.getNowTime(), select);
 			if (r != null) {
 				if (r != null && r.x <= x && r.x + r.width >= x && r.y <= y && r.y + r.height >= y) {
-					select.select(sd);
+					if(button == 0) {
+						select.select(sd);						
+					} else {
+						select.close();
+					}
 					break;
 				}
 			}
@@ -276,20 +280,6 @@ public class BarRenderer {
 						leveln.draw(sprite, time, song.getLevel(), select, (int) r.x, y);
 					}
 					sprite.end();
-
-					// String level = String.format("%2d", song.getLevel());
-					// titlefont.setColor(Color.BLACK);
-					// titlefont.draw(sprite, level, r.x + 22, r.y + dy +
-					// r.height - 8);
-					// final Color[] difficulty = { Color.GRAY, Color.GREEN,
-					// Color.BLUE, Color.YELLOW, Color.RED, Color.PURPLE };
-					// titlefont
-					// .setColor(song.getDifficulty() >= 0 &&
-					// song.getDifficulty() < difficulty.length ?
-					// difficulty[song
-					// .getDifficulty()] : Color.WHITE);
-					// titlefont.draw(sprite, level, r.x + 20, r.y + dy +
-					// r.height - 6);
 
 					flag |= song.getFeature();
 				}

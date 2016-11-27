@@ -234,6 +234,10 @@ public class BMSPlayerInputProcessor {
 		return mousey;
 	}
 
+	public int getMouseButton() {
+		return mousebutton;
+	}
+
 	public boolean isMousePressed() {
 		return mousepressed;
 	}
