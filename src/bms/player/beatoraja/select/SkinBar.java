@@ -1,16 +1,10 @@
 package bms.player.beatoraja.select;
 
 import bms.player.beatoraja.MainState;
-import bms.player.beatoraja.skin.SkinImage;
-import bms.player.beatoraja.skin.SkinNumber;
-import bms.player.beatoraja.skin.SkinObject;
-import bms.player.beatoraja.skin.SkinText;
+import bms.player.beatoraja.skin.*;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.GlyphLayout;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Align;
@@ -108,6 +102,11 @@ public class SkinBar extends SkinObject {
     public int getPosition() {
         return position;
     }
+    
+    @Override
+	protected void mousePressed(MainState state, int x, int y) {
+        ((MusicSelector) state).getBarRender().mousePressed(this, x, y);
+	}
 
     public static class SkinBarText extends SkinObject {
         /**
@@ -128,8 +127,6 @@ public class SkinBar extends SkinObject {
 
         private FreeTypeFontGenerator generator;
         private FreeTypeFontGenerator.FreeTypeFontParameter parameter;
-
-        private int id = -1;
 
         public SkinBarText(String fontpath, int cycle, int size) {
             this(fontpath, cycle, size, 0);
@@ -187,8 +184,8 @@ public class SkinBar extends SkinObject {
         public void draw(SpriteBatch sprite, long time, MainState state) {
 
         }
-
-        public void dispose() {
+        
+		public void dispose() {
             if (generator != null) {
                 generator.dispose();
                 generator = null;

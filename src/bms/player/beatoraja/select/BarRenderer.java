@@ -30,7 +30,7 @@ import bms.player.beatoraja.song.SongDatabaseAccessor;
 
 /**
  * 楽曲バー描画用クラス
- *
+ * 
  * @author exch
  */
 public class BarRenderer {
@@ -59,7 +59,7 @@ public class BarRenderer {
 
 	private final String[] TROPHY = { "goldmedal", "silvermedal", "bronzemedal" };
 
-    private Map<String, Pixmap> bannermap = new HashMap<String, Pixmap>();
+	private Map<String, Pixmap> bannermap = new HashMap<String, Pixmap>();
 
 	public BarRenderer(MainController main, MusicSelector select, SongDatabaseAccessor songdb) {
 		this.main = main;
@@ -71,19 +71,19 @@ public class BarRenderer {
 		titlefont = generator.generateFont(parameter);
 		try {
 			Files.createDirectory(Paths.get("table"));
-		} catch(Exception e) {
-			
+		} catch (Exception e) {
+
 		}
 		try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get("table"))) {
 			List<TableBar> tables = new ArrayList<TableBar>();
-			for(Path p : paths) {
+			for (Path p : paths) {
 				Json json = new Json();
 				TableData td = json.fromJson(TableData.class, new FileReader(p.toFile()));
-				tables.add(new TableBar(select, td));				
+				tables.add(new TableBar(select, td));
 			}
-			this.tables = tables.toArray(new TableBar[0]);			
-		} catch(IOException e) {
-			
+			this.tables = tables.toArray(new TableBar[0]);
+		} catch (IOException e) {
+
 		}
 
 		commands = new CommandBar[] {
@@ -100,9 +100,9 @@ public class BarRenderer {
 				new CommandBar(main, select, "RANK A",
 						"(lpg * 2 + epg * 2 + lgr + egr) * 50 / notes >= 66.66 AND (lpg * 2 + epg * 2 + lgr + egr) * 50 / notes < 77.77"), };
 	}
-	
+
 	public void updateTableBar(TableBar tb) {
-		
+
 	}
 
 	public Bar getSelected() {
@@ -117,13 +117,13 @@ public class BarRenderer {
 			}
 		}
 	}
-	
+
 	public float getSelectedPosition() {
-		return ((float)selectedindex) / currentsongs.length;
+		return ((float) selectedindex) / currentsongs.length;
 	}
-	
+
 	public void setSelectedPosition(float value) {
-		if(value >= 0 && value < 1) {
+		if (value >= 0 && value < 1) {
 			selectedindex = (int) (currentsongs.length * value);
 		}
 	}
@@ -141,25 +141,46 @@ public class BarRenderer {
 		search.add(bar);
 	}
 
-	public void render(SpriteBatch sprite, ShapeRenderer shape, MusicSelectSkin skin, SkinBar baro, float w, float h, long duration,
-                       int angle, int time) {
-		if(skin == null) {
+	public void mousePressed(SkinBar baro, int x, int y) {
+		for (int i = 0; i < 60; i++) {
+			boolean on = (i == ((MusicSelectSkin) select.getSkin()).getCenterBar());
+			if (baro.getBarImages(on, i) == null) {
+				continue;
+			}
+			int index = (int) (selectedindex + currentsongs.length * 100 + i -  ((MusicSelectSkin) select.getSkin()).getCenterBar())
+					% currentsongs.length;
+			Bar sd = currentsongs[index];
+
+			Rectangle r = baro.getBarImages(on, i).getDestination(select.getNowTime(), select);
+			if (r != null) {
+				if (r != null && r.x <= x && r.x + r.width >= x && r.y <= y && r.y + r.height >= y) {
+					select.select(sd);
+					break;
+				}
+			}
+		}
+
+	}
+
+	public void render(SpriteBatch sprite, ShapeRenderer shape, MusicSelectSkin skin, SkinBar baro, float w, float h,
+			long duration, int angle, int time) {
+		if (skin == null) {
 			return;
 		}
 
-		if(bartextupdate) {
+		if (bartextupdate) {
 			bartextupdate = false;
 			Set<Character> charset = new HashSet<Character>();
 
 			for (Bar song : currentsongs) {
-				for(char c : song.getTitle().toCharArray()) {
+				for (char c : song.getTitle().toCharArray()) {
 					charset.add(c);
 				}
 			}
 
 			char[] chars = new char[charset.size()];
 			Character[] chars2 = charset.toArray(new Character[0]);
-			for(int i = 0;i < chars.length;i++) {
+			for (int i = 0; i < chars.length; i++) {
 				chars[i] = chars2[i];
 			}
 			baro.getBarText()[0].setText(String.valueOf(chars));
@@ -167,11 +188,12 @@ public class BarRenderer {
 		}
 		// draw song bar
 		for (int i = 0; i < 60; i++) {
-            boolean on = (i == skin.getCenterBar());
-            if(baro.getBarImages(on, i) == null) {
-                continue;
-            }
-			int index = (int) (selectedindex + currentsongs.length * 100 + i - skin.getCenterBar()) % currentsongs.length;
+			boolean on = (i == skin.getCenterBar());
+			if (baro.getBarImages(on, i) == null) {
+				continue;
+			}
+			int index = (int) (selectedindex + currentsongs.length * 100 + i - skin.getCenterBar())
+					% currentsongs.length;
 			Bar sd = currentsongs[index];
 
 			int value = -1;
@@ -197,115 +219,120 @@ public class BarRenderer {
 				value = 5;
 			}
 
-            float dy = 0;
-            Rectangle r = baro.getBarImages(on, i).getDestination(time, select);
-			if(r != null) {
+			float dy = 0;
+			Rectangle r = baro.getBarImages(on, i).getDestination(time, select);
+			if (r != null) {
 
-            if (duration != 0) {
-                dy = r.height * (Math.abs(angle) - duration + System.currentTimeMillis()) / angle
-                        + (angle >= 0 ? -1 : 1) * r.height;
-            }
-            final int y = (int) (r.y + dy + (baro.getPosition() == 1 ? r.height : 0));
-            if(value != -1) {
-				sprite.begin();
-				TextureRegion barimage = baro.getBarImages(on, i).getImage(value, time, select);
-                baro.getBarImages(on, i).draw(sprite, time, select, value, 0, (int) dy);
-				// TODO 新規追加曲はテキストを変える
-				baro.getBarText()[0].draw(sprite, time, select, sd.getTitle(), (int)r.x, y);
-				sprite.end();
-			}
-
-			int flag = 0;
-
-			if (sd instanceof GradeBar) {
-				GradeBar gb = (GradeBar) sd;
-				if (gb.existsAllSongs()) {
-					for (SongData song : gb.getSongDatas()) {
-						flag |= song.getFeature();
-					}
+				if (duration != 0) {
+					dy = r.height * (Math.abs(angle) - duration + System.currentTimeMillis()) / angle
+							+ (angle >= 0 ? -1 : 1) * r.height;
 				}
-				// trophy
-				TableData.TrophyData trophy = gb.getTrophy();
-				if (trophy != null) {
-					for (int j = 0; j < TROPHY.length; j++) {
-						if (TROPHY[j].equals(trophy.getName()) && baro.getTrophy()[j] != null) {
-							sprite.begin();
-							sprite.draw(baro.getTrophy()[j].getImage(time, select), r.x + 20, y + 4);
-							sprite.end();
-							break;
+				final int y = (int) (r.y + dy + (baro.getPosition() == 1 ? r.height : 0));
+				if (value != -1) {
+					sprite.begin();
+					TextureRegion barimage = baro.getBarImages(on, i).getImage(value, time, select);
+					baro.getBarImages(on, i).draw(sprite, time, select, value, 0, (int) dy);
+					// TODO 新規追加曲はテキストを変える
+					baro.getBarText()[0].draw(sprite, time, select, sd.getTitle(), (int) r.x, y);
+					sprite.end();
+				}
+
+				int flag = 0;
+
+				if (sd instanceof GradeBar) {
+					GradeBar gb = (GradeBar) sd;
+					if (gb.existsAllSongs()) {
+						for (SongData song : gb.getSongDatas()) {
+							flag |= song.getFeature();
+						}
+					}
+					// trophy
+					TableData.TrophyData trophy = gb.getTrophy();
+					if (trophy != null) {
+						for (int j = 0; j < TROPHY.length; j++) {
+							if (TROPHY[j].equals(trophy.getName()) && baro.getTrophy()[j] != null) {
+								sprite.begin();
+								sprite.draw(baro.getTrophy()[j].getImage(time, select), r.x + 20, y + 4);
+								sprite.end();
+								break;
+							}
 						}
 					}
 				}
-			}
 
-			if (baro.getLamp()[sd.getLamp()] != null) {
-				sprite.begin();
-				baro.getLamp()[sd.getLamp()].draw(sprite, time, select, (int)r.x, y);
-				sprite.end();
-			}
-
-			if (sd instanceof SongBar) {
-				sprite.begin();
-				SongData song = ((SongBar) sd).getSongData();
-
-				SkinNumber leveln = baro.getBarlevel()[song.getDifficulty() >= 0 && song.getDifficulty() < 7 ? song
-						.getDifficulty() : 0];
-				if(leveln != null) {
-					leveln.draw(sprite, time, song.getLevel(), select, (int)r.x, y);
+				if (baro.getLamp()[sd.getLamp()] != null) {
+					sprite.begin();
+					baro.getLamp()[sd.getLamp()].draw(sprite, time, select, (int) r.x, y);
+					sprite.end();
 				}
-				sprite.end();
 
-//				String level = String.format("%2d", song.getLevel());
-//				titlefont.setColor(Color.BLACK);
-//				titlefont.draw(sprite, level, r.x + 22, r.y + dy + r.height - 8);
-//				final Color[] difficulty = { Color.GRAY, Color.GREEN, Color.BLUE, Color.YELLOW, Color.RED, Color.PURPLE };
-//				titlefont
-//						.setColor(song.getDifficulty() >= 0 && song.getDifficulty() < difficulty.length ? difficulty[song
-//								.getDifficulty()] : Color.WHITE);
-//				titlefont.draw(sprite, level, r.x + 20, r.y + dy + r.height - 6);
+				if (sd instanceof SongBar) {
+					sprite.begin();
+					SongData song = ((SongBar) sd).getSongData();
 
-				flag |= song.getFeature();
-			}
+					SkinNumber leveln = baro.getBarlevel()[song.getDifficulty() >= 0 && song.getDifficulty() < 7 ? song
+							.getDifficulty() : 0];
+					if (leveln != null) {
+						leveln.draw(sprite, time, song.getLevel(), select, (int) r.x, y);
+					}
+					sprite.end();
 
-			// LN
-			if ((flag & 1) != 0) {
-				shape.begin(ShapeType.Filled);
-				shape.setColor(Color.valueOf("222200"));
-				shape.rect(r.x - 36, r.y + dy, 30, r.height - 6);
-				shape.setColor(Color.YELLOW);
-				shape.rect(r.x - 40, r.y + dy + 4, 30, r.height - 6);
-				shape.end();
-				sprite.begin();
-				titlefont.setColor(Color.BLACK);
-				titlefont.draw(sprite, "LN", r.x - 36, r.y + dy + r.height - 8);
-				sprite.end();
-			}
-			// MINE
-			if ((flag & 2) != 0) {
-				shape.begin(ShapeType.Filled);
-				shape.setColor(Color.valueOf("222200"));
-				shape.rect(r.x - 70, r.y + dy, 30, r.height - 6);
-				shape.setColor(Color.PURPLE);
-				shape.rect(r.x - 74, r.y + dy + 4, 30, r.height - 6);
-				shape.end();
-				sprite.begin();
-				titlefont.setColor(Color.BLACK);
-				titlefont.draw(sprite, "MI", r.x - 70, r.y + dy + r.height - 8);
-				sprite.end();
-			}
-			// RANDOM
-			if ((flag & 4) != 0) {
-				shape.begin(ShapeType.Filled);
-				shape.setColor(Color.valueOf("222200"));
-				shape.rect(r.x - 104, r.y + dy, 30, r.height - 6);
-				shape.setColor(Color.GREEN);
-				shape.rect(r.x - 108, r.y + dy + 4, 30, r.height - 6);
-				shape.end();
-				sprite.begin();
-				titlefont.setColor(Color.BLACK);
-				titlefont.draw(sprite, "RA", r.x - 104, r.y + dy + r.height - 8);
-				sprite.end();
-			}
+					// String level = String.format("%2d", song.getLevel());
+					// titlefont.setColor(Color.BLACK);
+					// titlefont.draw(sprite, level, r.x + 22, r.y + dy +
+					// r.height - 8);
+					// final Color[] difficulty = { Color.GRAY, Color.GREEN,
+					// Color.BLUE, Color.YELLOW, Color.RED, Color.PURPLE };
+					// titlefont
+					// .setColor(song.getDifficulty() >= 0 &&
+					// song.getDifficulty() < difficulty.length ?
+					// difficulty[song
+					// .getDifficulty()] : Color.WHITE);
+					// titlefont.draw(sprite, level, r.x + 20, r.y + dy +
+					// r.height - 6);
+
+					flag |= song.getFeature();
+				}
+
+				// LN
+				if ((flag & 1) != 0) {
+					shape.begin(ShapeType.Filled);
+					shape.setColor(Color.valueOf("222200"));
+					shape.rect(r.x - 36, r.y + dy, 30, r.height - 6);
+					shape.setColor(Color.YELLOW);
+					shape.rect(r.x - 40, r.y + dy + 4, 30, r.height - 6);
+					shape.end();
+					sprite.begin();
+					titlefont.setColor(Color.BLACK);
+					titlefont.draw(sprite, "LN", r.x - 36, r.y + dy + r.height - 8);
+					sprite.end();
+				}
+				// MINE
+				if ((flag & 2) != 0) {
+					shape.begin(ShapeType.Filled);
+					shape.setColor(Color.valueOf("222200"));
+					shape.rect(r.x - 70, r.y + dy, 30, r.height - 6);
+					shape.setColor(Color.PURPLE);
+					shape.rect(r.x - 74, r.y + dy + 4, 30, r.height - 6);
+					shape.end();
+					sprite.begin();
+					titlefont.setColor(Color.BLACK);
+					titlefont.draw(sprite, "MI", r.x - 70, r.y + dy + r.height - 8);
+					sprite.end();
+				}
+				// RANDOM
+				if ((flag & 4) != 0) {
+					shape.begin(ShapeType.Filled);
+					shape.setColor(Color.valueOf("222200"));
+					shape.rect(r.x - 104, r.y + dy, 30, r.height - 6);
+					shape.setColor(Color.GREEN);
+					shape.rect(r.x - 108, r.y + dy + 4, 30, r.height - 6);
+					shape.end();
+					sprite.begin();
+					titlefont.setColor(Color.BLACK);
+					titlefont.draw(sprite, "RA", r.x - 104, r.y + dy + r.height - 8);
+					sprite.end();
+				}
 			}
 		}
 	}
@@ -339,17 +366,17 @@ public class BarRenderer {
 			currentsongs = l.toArray(new Bar[l.size()]);
 			bartextupdate = true;
 
-            final Config config = select.getResource().getConfig();
-            for (Bar b : currentsongs) {
-                if (b instanceof SongBar) {
-                    SongData sd = ((SongBar) b).getSongData();
-                    if(select.existsScoreDataCache(sd, config.getLnmode())) {
-                        b.setScore(select.readScoreData(sd, config.getLnmode()));
-                    }
-                }
-            }
+			final Config config = select.getResource().getConfig();
+			for (Bar b : currentsongs) {
+				if (b instanceof SongBar) {
+					SongData sd = ((SongBar) b).getSongData();
+					if (select.existsScoreDataCache(sd, config.getLnmode())) {
+						b.setScore(select.readScoreData(sd, config.getLnmode()));
+					}
+				}
+			}
 
-            Arrays.sort(currentsongs, MusicSelector.SORT[select.getSort()]);
+			Arrays.sort(currentsongs, MusicSelector.SORT[select.getSort()]);
 
 			selectedindex = 0;
 
@@ -387,38 +414,38 @@ public class BarRenderer {
 	}
 
 	public void dispose() {
-		if(titlefont != null) {
+		if (titlefont != null) {
 			titlefont.dispose();
 			titlefont = null;
 		}
-		for(String path : bannermap.keySet()) {
-			if(bannermap.get(path) != null) {
+		for (String path : bannermap.keySet()) {
+			if (bannermap.get(path) != null) {
 				bannermap.get(path).dispose();
 			}
 		}
 		bannermap.clear();
 	}
 
-    private void setBanner(SongBar songbar) {
-    	SongData song = songbar.getSongData();
-        Path bannerfile = Paths.get(song.getPath()).getParent().resolve(song.getBanner());
-        // System.out.println(bannerfile.getPath());
-        if (song.getBanner().length() > 0 && Files.exists(bannerfile)) {
-            try {
-            	if(bannermap.containsKey(bannerfile.toString())) {
-            		songbar.setBanner(bannermap.get(bannerfile.toString()));
-            	} else {
-            		Pixmap pixmap = new Pixmap(Gdx.files.internal(bannerfile.toString()));
-                    songbar.setBanner(pixmap);
-                    bannermap.put(bannerfile.toString(), pixmap);
-            	}
-            } catch (GdxRuntimeException e) {
-        		bannermap.put(bannerfile.toString(), null);
-                Logger.getGlobal().warning("banner読み込み失敗: " + e.getMessage());
-            }
-        }
-    }
-    
+	private void setBanner(SongBar songbar) {
+		SongData song = songbar.getSongData();
+		Path bannerfile = Paths.get(song.getPath()).getParent().resolve(song.getBanner());
+		// System.out.println(bannerfile.getPath());
+		if (song.getBanner().length() > 0 && Files.exists(bannerfile)) {
+			try {
+				if (bannermap.containsKey(bannerfile.toString())) {
+					songbar.setBanner(bannermap.get(bannerfile.toString()));
+				} else {
+					Pixmap pixmap = new Pixmap(Gdx.files.internal(bannerfile.toString()));
+					songbar.setBanner(pixmap);
+					bannermap.put(bannerfile.toString(), pixmap);
+				}
+			} catch (GdxRuntimeException e) {
+				bannermap.put(bannerfile.toString(), null);
+				Logger.getGlobal().warning("banner読み込み失敗: " + e.getMessage());
+			}
+		}
+	}
+
 	/**
 	 * 選曲バー内のスコアデータ等を読み込むためのスレッド
 	 */
@@ -443,9 +470,9 @@ public class BarRenderer {
 			for (Bar bar : bars) {
 				if (bar instanceof SongBar) {
 					SongData sd = ((SongBar) bar).getSongData();
-                    if(bar.getScore() == null) {
-                        bar.setScore(select.readScoreData(sd, config.getLnmode()));
-                    }
+					if (bar.getScore() == null) {
+						bar.setScore(select.readScoreData(sd, config.getLnmode()));
+					}
 					boolean[] replay = new boolean[MusicSelector.REPLAY];
 					for (int i = 0; i < MusicSelector.REPLAY; i++) {
 						replay[i] = main.getPlayDataAccessor().existsReplayData(sd.getSha256(), sd.hasLongNote(),

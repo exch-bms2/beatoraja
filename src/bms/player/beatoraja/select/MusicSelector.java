@@ -526,17 +526,7 @@ public class MusicSelector extends MainState {
 			// 1鍵 (選曲 or フォルダを開く)
 			if (isPressed(keystate, keytime, KEY_PLAY, true) || cursor[3]) {
 				cursor[3] = false;
-				if (current instanceof DirectoryBar) {
-					if (bar.updateBar(current)) {
-						if (folderopen != null) {
-							folderopen.play();
-						}
-						dir.add(current);
-					}
-					resetReplayIndex();
-				} else {
-					play(0);
-				}
+				select(current);
 			}
 			// 3鍵 (プラクティス)
 			if (isPressed(keystate, keytime, KEY_PRACTICE, true)) {
@@ -686,6 +676,20 @@ public class MusicSelector extends MainState {
 			exit();
 		}
 	}
+	
+	public void select(Bar current) {
+		if (current instanceof DirectoryBar) {
+			if (bar.updateBar(current)) {
+				if (folderopen != null) {
+					folderopen.play();
+				}
+				dir.add(current);
+			}
+			resetReplayIndex();
+		} else {
+			play(current, 0);
+		}
+	}
 
 	private void resetReplayIndex() {
 		if (bar.getSelected() instanceof SelectableBar) {
@@ -701,7 +705,10 @@ public class MusicSelector extends MainState {
 	}
 
 	private void play(int autoplay) {
-		final Bar current = bar.getSelected();
+		play(bar.getSelected(), autoplay);
+	}
+	
+	private void play(Bar current, int autoplay) {
 		if (current instanceof SongBar) {
 			PlayerResource resource = this.getMainController().getPlayerResource();
 			resource.clear();
@@ -1236,5 +1243,9 @@ public class MusicSelector extends MainState {
 
 	public Bar getSelectedBar() {
 		return bar.getSelected();
+	}
+	
+	public BarRenderer getBarRender() {
+		return bar;
 	}
 }
