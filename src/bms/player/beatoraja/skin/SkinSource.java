@@ -20,11 +20,11 @@ public class SkinSource {
 	private final int cycle;
 
 	public SkinSource(TextureRegion image) {
-		this(new TextureRegion[]{image},0,0);
+		this(new TextureRegion[] { image }, 0, 0);
 	}
 
 	public SkinSource(TextureRegion[] image, int timer, int cycle) {
-		this(new TextureRegion[][]{image},timer,cycle);
+		this(new TextureRegion[][] { image }, timer, cycle);
 	}
 
 	public SkinSource(TextureRegion[][] image, int timer, int cycle) {
@@ -34,44 +34,44 @@ public class SkinSource {
 	}
 
 	public TextureRegion getImage(long time, MainState state) {
-		if(image != null && image.length > 0) {
-			if(image[0].length > 0) {
-				return image[0][getImageIndex(image[0].length, time, state)];
-			}
+		if (image != null && image.length > 0 & image[0] != null && image[0].length > 0) {
+			return image[0][getImageIndex(image[0].length, time, state)];
 		}
 		return null;
 	}
 
 	public TextureRegion[] getImages(long time, MainState state) {
-		if(image != null && image.length > 0) {
+		if (image != null && image.length > 0) {
 			return image[getImageIndex(image.length, time, state)];
 		}
 		return null;
 	}
 
 	public int getImageIndex(int length, long time, MainState state) {
-		if(cycle == 0) {
+		if (cycle == 0) {
 			return 0;
 		}
 
-		if(timer != 0 && timer < 256) {
-			if(state.getTimer()[timer] == Long.MIN_VALUE) {
+		if (timer != 0 && timer < 256) {
+			if (state.getTimer()[timer] == Long.MIN_VALUE) {
 				return 0;
 			}
 			time -= state.getTimer()[timer];
 		}
-		if(time < 0) {
+		if (time < 0) {
 			return 0;
 		}
-//		System.out.println(index + " / " + image.length);
-		return ((int) (time / (((float)cycle)  / length))) % length;
+		// System.out.println(index + " / " + image.length);
+		return (int) ((time * length / cycle) % length);
 	}
-	
+
 	public void dispose() {
-		if(image != null) {
-			for(TextureRegion[] trs : image) {
-				for(TextureRegion tr : trs) {
-					tr.getTexture().dispose();
+		if (image != null) {
+			for (TextureRegion[] trs : image) {
+				if (trs != null) {
+					for (TextureRegion tr : trs) {
+						tr.getTexture().dispose();
+					}
 				}
 			}
 			image = null;

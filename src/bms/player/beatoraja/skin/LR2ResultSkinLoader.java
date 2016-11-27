@@ -10,6 +10,11 @@ import com.badlogic.gdx.math.Rectangle;
 import bms.player.beatoraja.result.MusicResultSkin;
 import bms.player.beatoraja.result.SkinGaugeGraphObject;
 
+/**
+ * LR2リザルトスキン読み込み用クラス
+ * 
+ * @author exch
+ */
 public class LR2ResultSkinLoader extends LR2SkinCSVLoader {
 
 	private MusicResultSkin skin;
@@ -32,7 +37,7 @@ public class LR2ResultSkinLoader extends LR2SkinCSVLoader {
 					try {
 						int fieldw = Integer.parseInt(str[11]);
 						int fieldh = Integer.parseInt(str[12]);
-						gauge = new Rectangle(0, 0, fieldw * dstw / srcw, fieldh * dsth / srch);
+						gauge = new Rectangle(0, 0, fieldw, fieldh);
 					} catch (NumberFormatException e) {
 						e.printStackTrace();
 					}
@@ -42,8 +47,8 @@ public class LR2ResultSkinLoader extends LR2SkinCSVLoader {
 			@Override
 			public void execute(String[] str) {
 					try {
-						gauge.x = Integer.parseInt(str[3]) * dstw / srcw;
-						gauge.y = dsth - Integer.parseInt(str[4]) * dsth / srch;
+						gauge.x = Integer.parseInt(str[3]);
+						gauge.y = srch - Integer.parseInt(str[4]);
 						SkinGaugeGraphObject obj = new SkinGaugeGraphObject();
 						skin.setDestination(obj,0,gauge.x, gauge.y, gauge.width,gauge.height,0,255,255,255,255,0,0,0,0,0,0,0,0,0);
 						skin.add(obj);

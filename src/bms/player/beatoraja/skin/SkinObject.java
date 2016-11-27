@@ -2,6 +2,7 @@ package bms.player.beatoraja.skin;
 
 import bms.player.beatoraja.MainState;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
@@ -63,6 +64,11 @@ public abstract class SkinObject {
 
 	public void setDestination(long time, float x, float y, float w, float h, int acc, int a, int r, int g, int b,
 			int blend, int filter, int angle, int center, int loop, int timer, int op1, int op2, int op3) {
+		setDestination(time, x, y, w, h, acc, a, r, g, b, blend, filter, angle, center, loop, timer, new int[]{op1,op2,op3});
+	}
+
+	public void setDestination(long time, float x, float y, float w, float h, int acc, int a, int r, int g, int b,
+			int blend, int filter, int angle, int center, int loop, int timer, int[] op) {
 		SkinObjectDestination obj = new SkinObjectDestination(time, new Rectangle(x, y, w, h), new Color(r / 255.0f,
 				g / 255.0f, b / 255.0f, a / 255.0f), angle, acc);
 		if (dst.size() == 0) {
@@ -98,7 +104,17 @@ public abstract class SkinObject {
 			dstloop = loop;
 		}
 		if (dstop.length == 0) {
-			dstop = new int[] { op1, op2, op3 };
+			List<Integer> l = new ArrayList<Integer>();
+			for(int i : op) {
+				if(i != 0) {
+					l.add(i);
+				}
+			}
+			op = new int[l.size()];
+			for (int i = 0; i < l.size(); i++) {
+				op[i] = l.get(i);
+			}
+			dstop = op;
 		}
 		for (int i = 0; i < dst.size(); i++) {
 			if (dst.get(i).time > time) {
@@ -126,7 +142,7 @@ public abstract class SkinObject {
 	 */
 	public Rectangle getDestination(long time, MainState state) {
 		if (dst.size() == 0) {
-//			System.out.println("void image");
+			// System.out.println("void image");
 			return new Rectangle(0, 0, 0, 0);
 		}
 		final int timer = dsttimer;
@@ -141,7 +157,7 @@ public abstract class SkinObject {
 		if (time < 0) {
 			return null;
 		}
-		
+
 		final long lasttime = dst.get(dst.size() - 1).time;
 		if (dstloop == -1) {
 			if (lasttime < time) {
@@ -164,7 +180,7 @@ public abstract class SkinObject {
 				if (obj1.time <= time && obj2.time >= time) {
 					final Rectangle r1 = obj1.region;
 					final Rectangle r2 = obj2.region;
-					final float rate = (float)(time - obj1.time) / (obj2.time - obj1.time);
+					final float rate = (float) (time - obj1.time) / (obj2.time - obj1.time);
 					r.x = r1.x + (r2.x - r1.x) * rate;
 					r.y = r1.y + (r2.y - r1.y) * rate;
 					r.width = r1.width + (r2.width - r1.width) * rate;
@@ -219,7 +235,7 @@ public abstract class SkinObject {
 		}
 
 		if (dst.size() == 0) {
-//			System.out.println("void color");
+			// System.out.println("void color");
 			return new Color(0, 0, 0, 0);
 		}
 		long lasttime = dst.get(dst.size() - 1).time;
@@ -236,7 +252,7 @@ public abstract class SkinObject {
 			if (obj1.time <= time && obj2.time >= time) {
 				final Color r1 = obj1.color;
 				final Color r2 = obj2.color;
-				final float rate = (float)(time - obj1.time) / (obj2.time - obj1.time);
+				final float rate = (float) (time - obj1.time) / (obj2.time - obj1.time);
 				c.r = r1.r + (r2.r - r1.r) * rate;
 				c.g = r1.g + (r2.g - r1.g) * rate;
 				c.b = r1.b + (r2.b - r1.b) * rate;
@@ -288,9 +304,9 @@ public abstract class SkinObject {
 
 	public abstract void draw(SpriteBatch sprite, long time, MainState state);
 
-	private final float[] CENTERX = { 0.5f, 0, 0.5f, 1,0, 0.5f, 1,0, 0.5f, 1,};
+	private final float[] CENTERX = { 0.5f, 0, 0.5f, 1, 0, 0.5f, 1, 0, 0.5f, 1, };
 	private final float[] CENTERY = { 0.5f, 0, 0, 0, 0.5f, 0.5f, 0.5f, 1, 1, 1 };
-	
+
 	private float centerx;
 	private float centery;
 
@@ -300,23 +316,41 @@ public abstract class SkinObject {
 			return;
 		}
 		final Color c = sprite.getColor();
-		switch(dstblend) {
-			case 2:
-				sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
-				break;
-			case 9:
-				sprite.setBlendFunction(GL11.GL_ONE_MINUS_DST_COLOR, GL11.GL_ZERO);
-				break;
+		switch (dstblend) {
+		case 2:
+			sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
+			break;
+		case 9:
+			sprite.setBlendFunction(GL11.GL_ONE_MINUS_DST_COLOR, GL11.GL_ZERO);
+			break;
 		}
 		sprite.setColor(color);
-		if(angle != 0) {
-			sprite.draw(image, x, y, centerx * width, centery * height, width, height, 1, 1, angle);			
+		
+		if(dstfilter == 1) {
+			image.getTexture().setFilter(TextureFilter.Linear, TextureFilter.Linear);
+		} else {
+			image.getTexture().setFilter(TextureFilter.Nearest, TextureFilter.Nearest);			
+		}
+		if (angle != 0) {
+			sprite.draw(image, x, y, centerx * width, centery * height, width, height, 1, 1, angle);
 		} else {
 			sprite.draw(image, x, y, width, height);
 		}
 		sprite.setColor(c);
 		if (dstblend >= 2) {
 			sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+		}
+	}
+	
+	protected void mousePressed(MainState state, int x, int y) {
+		if (clickevent != -1) {
+			Rectangle r = getDestination(state.getNowTime(), state);
+			// System.out.println(obj.getClickevent() + " : " + r.x +
+			// "," + r.y + "," + r.width + "," + r.height + " - " + x +
+			// "," + y);
+			if (r != null && r.x <= x && r.x + r.width >= x && r.y <= y && r.y + r.height >= y) {
+				state.executeClickEvent(clickevent);
+			}
 		}
 	}
 

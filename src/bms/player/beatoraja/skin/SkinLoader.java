@@ -190,11 +190,8 @@ public class SkinLoader {
 							a.g = (a.g == Integer.MIN_VALUE ? prev.g : a.g);
 							a.b = (a.b == Integer.MIN_VALUE ? prev.b : a.b);
 						}
-						int op1 = dst.op.length > 0 ? dst.op[0] : 0;
-						int op2 = dst.op.length > 1 ? dst.op[1] : 0;
-						int op3 = dst.op.length > 2 ? dst.op[2] : 0;
 						skin.setDestination(obj, a.time, a.x, a.y, a.w, a.h, a.acc, a.a, a.r, a.g, a.b, dst.blend,
-								dst.filter, a.angle, dst.center, dst.loop, dst.timer, op1, op2, op3);
+								dst.filter, a.angle, dst.center, dst.loop, dst.timer, dst.op);
 						prev = a;
 					}
 					skin.add(obj);
