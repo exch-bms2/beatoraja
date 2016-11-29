@@ -10,17 +10,13 @@ import java.sql.*;
 import java.util.*;
 import java.util.logging.Logger;
 
-import javax.sql.DataSource;
-
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 
 import utils.sql.SqliteDBManager;
-import bms.model.BMSDecoder;
-import bms.model.BMSModel;
-import bms.model.BMSONDecoder;
+import bms.model.*;
 
 /**
  * 楽曲データベースへのアクセスクラス
@@ -140,8 +136,8 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 	/**
 	 * MD5/SHA256で指定した楽曲をまとめて取得する
 	 * 
-	 * @param lr2path
-	 * @return
+	 * @param hashes 楽曲のMD5/SHA256
+	 * @return 取得した楽曲
 	 */
 	public SongData[] getSongDatas(String[] hashes) {
 		try {
@@ -318,12 +314,6 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 	 */
 	class SongDatabaseUpdater {
 
-		private final ResultSetHandler<List<SongData>> rh = new BeanListHandler<SongData>(SongData.class);
-
-		private final ResultSetHandler<List<FolderData>> rh2 = new BeanListHandler<FolderData>(FolderData.class);
-
-		private final QueryRunner qr = new QueryRunner();
-
 		private final BMSDecoder bmsdecoder = new BMSDecoder(BMSModel.LNTYPE_LONGNOTE);
 		private final BMSONDecoder bmsondecoder = new BMSONDecoder(BMSModel.LNTYPE_LONGNOTE);
 
@@ -348,25 +338,24 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 			long time = System.currentTimeMillis();
 			updatetime = Calendar.getInstance().getTimeInMillis() / 1000;
 			count = 0;
-			DataSource ds = songdb.getDataSource();
-			try (Connection conn = ds.getConnection()){
+			try (Connection conn = songdb.getDataSource().getConnection()){
 				conn.setAutoCommit(false);
 				// ルートディレクトリに含まれないフォルダの削除
-				String dsql = "";
+				StringBuilder dsql = new StringBuilder();
 				for (int i = 0; i < bmsroot.length; i++) {
-					dsql += "path NOT LIKE '" + bmsroot[i] + "%'";
+					dsql.append("path NOT LIKE '").append(bmsroot[i]).append("%'");
 					if (i < bmsroot.length - 1) {
-						dsql += " AND ";
+						dsql.append(" AND ");
 					}
 				}
 				qr.update(conn,
 						"DELETE FROM folder WHERE path NOT LIKE 'LR2files%' AND path NOT LIKE '%.lr2folder' AND "
-								+ dsql);
-				qr.update(conn, "DELETE FROM song WHERE " + dsql);
+								+ dsql.toString());
+				qr.update(conn, "DELETE FROM song WHERE " + dsql.toString());
 				// 楽曲のタグの保持
 				for (Path f : paths) {
 					final String s = (f.startsWith(root) ? root.relativize(f).toString() : f.toString());
-					List<SongData> records = qr.query(conn, "SELECT * FROM song WHERE path LIKE ?", rh, s + "%");
+					List<SongData> records = qr.query(conn, "SELECT * FROM song WHERE path LIKE ?", songhandler, s + "%");
 					for (SongData record : records) {
 						tags.put(record.getMd5(), record.getTag());
 					}
@@ -386,9 +375,9 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 		}
 
 		private void processDirectory(Connection conn, final Path dir, boolean updateFolder) throws IOException, SQLException {
-			List<SongData> records = qr.query(conn, "SELECT path,date FROM song WHERE folder = ?", rh,
+			List<SongData> records = qr.query(conn, "SELECT path,date FROM song WHERE folder = ?", songhandler,
 					SongUtils.crc32(dir.toString(), bmsroot, root.toString()));
-			List<FolderData> folders = qr.query(conn, "SELECT path,date FROM folder WHERE parent = ?", rh2,
+			List<FolderData> folders = qr.query(conn, "SELECT path,date FROM folder WHERE parent = ?", folderhandler,
 					SongUtils.crc32(dir.toString(), bmsroot, root.toString()));
 			boolean txt = false;
 			List<Path> bmsfiles = new ArrayList<Path>();

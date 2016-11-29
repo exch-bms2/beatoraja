@@ -38,7 +38,6 @@ public class BMSPlayer extends MainState {
 
 	// TODO GLAssistから起動すると楽曲ロード中に止まる
 
-	private BitmapFont judgefont;
 	private BitmapFont systemfont;
 	private BMSModel model;
 
@@ -169,7 +168,7 @@ public class BMSPlayer extends MainState {
 				}
 			}
 			if (config.getDoubleoption() == 2 && (model.getUseKeys() == 5 || model.getUseKeys() == 7)) {
-				// 地雷ノートがなければアシストなし
+				// SPでなければBATTLEは未適用
 				LaneShuffleModifier mod = new LaneShuffleModifier(LaneShuffleModifier.BATTLE);
 				mod.modify(model);
 				model.setUseKeys(model.getUseKeys() * 2);
@@ -349,7 +348,6 @@ public class BMSPlayer extends MainState {
 		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
 		parameter.size = 18;
 		systemfont = generator.generateFont(parameter);
-		judgefont = generator.generateFont(parameter);
 		generator.dispose();
 
 		Config config = resource.getConfig();
@@ -366,9 +364,6 @@ public class BMSPlayer extends MainState {
 		skin.setBMSPlayer(this);
 		bga = resource.getBGAManager();
 
-		Logger.getGlobal().info("描画クラス準備");
-
-		Logger.getGlobal().info("hash");
 		IRScoreData score = main.getPlayDataAccessor().readScoreData(model, config.getLnmode());
 		Logger.getGlobal().info("スコアデータベースからスコア取得");
 		if (score == null) {
@@ -771,10 +766,6 @@ public class BMSPlayer extends MainState {
 
 	@Override
 	public void dispose() {
-		if (judgefont != null) {
-			judgefont.dispose();
-			judgefont = null;
-		}
 		if (systemfont != null) {
 			systemfont.dispose();
 			systemfont = null;
@@ -914,26 +905,34 @@ public class BMSPlayer extends MainState {
 			final KeyInputLog[] keylog = this.keylog != null ? this.keylog.toArray(new KeyInputLog[0]) : null;
 
 			final int lasttime = timelines[timelines.length - 1].getTime() + BMSPlayer.TIME_MARGIN;
+			
+			int prevtime = -1;
 			while (!stop) {
 				final int time = (int) (getNowTime() - getTimer()[TIMER_PLAY]);
 				// リプレイデータ再生
-				if (keylog != null) {
-					while (index < keylog.length && keylog[index].time <= time) {
-						final KeyInputLog key = keylog[index];
-						// if(input.getKeystate()[key.keycode] == key.pressed) {
-						// System.out.println("押し離しが行われていません : key - " +
-						// key.keycode + " pressed - " + key.pressed +
-						// " time - " + key.time);
-						// }
-						input.getKeystate()[key.keycode] = key.pressed;
-						input.getTime()[key.keycode] = key.time;
-						index++;
+				if(time != prevtime) {
+					if (keylog != null) {
+						while (index < keylog.length && keylog[index].time <= time) {
+							final KeyInputLog key = keylog[index];
+							// if(input.getKeystate()[key.keycode] == key.pressed) {
+							// System.out.println("押し離しが行われていません : key - " +
+							// key.keycode + " pressed - " + key.pressed +
+							// " time - " + key.time);
+							// }
+							input.getKeystate()[key.keycode] = key.pressed;
+							input.getTime()[key.keycode] = key.time;
+							index++;
+						}
 					}
+					judge.update(time);
+					
+					if(prevtime != -1) {
+						final long nowtime = time  - prevtime;
+						framet = nowtime < framet ? framet : nowtime;						
+					}
+					prevtime = time;
 				}
-				judge.update(time);
 
-				final long nowtime = (int) (getNowTime() - getTimer()[TIMER_PLAY]) - time;
-				framet = nowtime < framet ? framet : nowtime;
 
 				if (time >= lasttime) {
 					break;
