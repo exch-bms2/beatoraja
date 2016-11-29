@@ -436,33 +436,35 @@ public class BMSPlayer extends MainState {
 				getTimer()[TIMER_RHYTHM] = Long.MIN_VALUE;
 				getTimer()[TIMER_FAILED] = Long.MIN_VALUE;
 				getTimer()[TIMER_FADEOUT] = Long.MIN_VALUE;
+				getTimer()[TIMER_ENDOFNOTE_1P] = Long.MIN_VALUE;
 			}
 			lanerender.setEnableControlInput(false);
 			practice.processInput(input);
 			
 			if (input.getKeystate()[0] && resource.mediaLoadFinished() && now > skin.getLoadstart() + skin.getLoadend() && !input.startPressed()) {
 				lanerender.setEnableControlInput(true);				
-				PracticeModifier pm = new PracticeModifier(practice.getStartSection(), practice.getEndSection());
+				PracticeModifier pm = new PracticeModifier(practice.getStartTime(), practice.getEndTime());
 				pm.modify(model);
+				if(model.getUseKeys() >= 10) {
+					if(practice.getDoubleOption() == 1) {
+						new LaneShuffleModifier(LaneShuffleModifier.FLIP).modify(model);
+					}
+					if(random[practice.getOption2()] != null) {
+						random[practice.getOption2()].setModifyTarget(PatternModifier.PLAYER2);
+						random[practice.getOption2()].modify(model);
+					}
+				}
 				if(random[practice.getOption()] != null) {
+					random[practice.getOption()].setModifyTarget(PatternModifier.PLAYER1);
 					random[practice.getOption()].modify(model);
 				}
 				gauge = practice.getGauge(model);
+				model.setJudgerank(practice.getJudgerank());
 				lanerender.init(model);
 				judge.init(model);
 				notes = 0;
-				for (TimeLine tl : model.getAllTimeLines()) {
-					if (tl.getSection() >= practice.getStartSection() - 1) {
-						starttimeoffset = tl.getTime();
-						break;
-					}
-				}
-				for (TimeLine tl : model.getAllTimeLines()) {
-					if (tl.getSection() >= practice.getEndSection()) {
-						playtime = tl.getTime() + 1000;
-						break;
-					}
-				}
+				starttimeoffset = practice.getStartTime() > 1000 ? practice.getStartTime() - 1000 : 0;
+				playtime = practice.getEndTime() + 1000;
 				bga.prepare(this);
 				state = STATE_READY;
 				getTimer()[TIMER_READY] = now;

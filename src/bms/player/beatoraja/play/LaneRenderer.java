@@ -78,17 +78,17 @@ public class LaneRenderer {
 	/**
 	 * ボムの表示開始時間
 	 */
-	private final int[] judge;
+	private int[] judge;
 	/**
 	 * 現在表示中の判定
 	 */
-	private final int[] judgenow;
+	private int[] judgenow;
 	/**
 	 * 判定の最終更新時間
 	 */
-	private final int[] judgenowt;
+	private int[] judgenowt;
 
-	private final int[] judgecombo;
+	private int[] judgecombo;
 
 	private int[] laneassign;
 
@@ -96,10 +96,6 @@ public class LaneRenderer {
 
 	public LaneRenderer(BMSPlayer main, SpriteBatch sprite, ShapeRenderer shape, BitmapFont font, PlaySkin skin,
 			PlayerResource resource, BMSModel model, int[] mode) {
-		judge = new int[20];
-		judgenow = new int[skin.getJudgeregion().length];
-		judgenowt = new int[skin.getJudgeregion().length];
-		judgecombo = new int[skin.getJudgeregion().length];
 
 		this.main = main;
 		this.sprite = sprite;
@@ -134,6 +130,11 @@ public class LaneRenderer {
 
 	public void init(BMSModel model) {
 		pos = 0;
+		judge = new int[20];
+		judgenow = new int[skin.getJudgeregion().length];
+		judgenowt = new int[skin.getJudgeregion().length];
+		judgecombo = new int[skin.getJudgeregion().length];
+
 		this.model = model;
 		this.timelines = model.getAllTimeLines();
 		if (model.getUseKeys() == 9) {

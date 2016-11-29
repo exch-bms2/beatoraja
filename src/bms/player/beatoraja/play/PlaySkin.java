@@ -383,9 +383,14 @@ public class PlaySkin extends Skin {
 
 		lanegroupregion = new Rectangle[] { rect(20, 140, 390, 580) };
 
-		SkinSlider seek = new SkinSlider(new TextureRegion[] { new TextureRegion(st, 0, 265, 17, 24) }, 0, 0, 1,
-				(int) (360 * dh), BARGRAPH_LOAD_PROGRESS);
-		setDestination(seek, 0, 20, 440, 30, 24, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0);
+		SkinGraph seek = new SkinGraph(new TextureRegion(st, 0, 0, 8, 8));
+		seek.setReferenceID(BARGRAPH_LOAD_PROGRESS);
+		seek.setDirection(0);
+		setDestination(seek, 0, 20, 440, 390, 4, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, 0, 80, 0, 0);
+		setDestination(seek, 500, 20, 440, 390, 4, 0, 192, 0, 255, 255, 2, 0, 0, 0, 0, 0, 80, 0, 0);
+		setDestination(seek, 1000, 20, 440, 390, 4, 0, 128, 255, 0, 255, 2, 0, 0, 0, 0, 0, 80, 0, 0);
+		setDestination(seek, 1500, 20, 440, 390, 4, 0, 192, 255, 255, 0, 2, 0, 0, 0, 0, 0, 80, 0, 0);
+		setDestination(seek, 2000, 20, 440, 390, 4, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, 0, 80, 0, 0);
 		add(seek);
 		// READY
 		Texture ready = new Texture("skin/default/ready.png");
@@ -622,10 +627,16 @@ public class PlaySkin extends Skin {
 
 		lanegroupregion = new Rectangle[] { rect(870, 140, 390, 580) };
 
-		SkinSlider seek = new SkinSlider(new TextureRegion[] { new TextureRegion(st, 0, 265, 17, 24) }, 0, 0, 1,
-				(int) (360 * dh), BARGRAPH_LOAD_PROGRESS);
-		setDestination(seek, 0, 870, 440, 30, 24, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0);
+		SkinGraph seek = new SkinGraph(new TextureRegion(st, 0, 0, 8, 8));
+		seek.setReferenceID(BARGRAPH_LOAD_PROGRESS);
+		seek.setDirection(0);
+		setDestination(seek, 0, 870, 440, 390, 4, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, 0, 80, 0, 0);
+		setDestination(seek, 500, 870, 440, 390, 4, 0, 192, 0, 255, 255, 2, 0, 0, 0, 0, 0, 80, 0, 0);
+		setDestination(seek, 1000, 870, 440, 390, 4, 0, 128, 255, 0, 255, 2, 0, 0, 0, 0, 0, 80, 0, 0);
+		setDestination(seek, 1500, 870, 440, 390, 4, 0, 192, 255, 255, 0, 2, 0, 0, 0, 0, 0, 80, 0, 0);
+		setDestination(seek, 2000, 870, 440, 390, 4, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, 0, 80, 0, 0);
 		add(seek);
+
 		// READY
 		Texture ready = new Texture("skin/default/ready.png");
 		SkinImage ri = new SkinImage(new TextureRegion(ready));
@@ -898,9 +909,14 @@ public class PlaySkin extends Skin {
 		addNumber(new SkinNumber(ntr[2], 5, 0, NUMBER_TARGET_SCORE), 0, 970, 140, 12, 18, 0, 255, 255,
 				255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
-		SkinSlider seek = new SkinSlider(new TextureRegion[] { new TextureRegion(st, 0, 265, 17, 24) }, 0, 0, 1,
-				(int) (560 * dh), BARGRAPH_LOAD_PROGRESS);
-		setDestination(seek, 0, 345, 440, 30, 24, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0);
+		SkinGraph seek = new SkinGraph(new TextureRegion(st, 0, 0, 8, 8));
+		seek.setReferenceID(BARGRAPH_LOAD_PROGRESS);
+		seek.setDirection(0);
+		setDestination(seek, 0, 345, 440, 590, 4, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, 0, 80, 0, 0);
+		setDestination(seek, 500, 345, 440, 590, 4, 0, 192, 0, 255, 255, 2, 0, 0, 0, 0, 0, 80, 0, 0);
+		setDestination(seek, 1000, 345, 440, 590, 4, 0, 128, 255, 0, 255, 2, 0, 0, 0, 0, 0, 80, 0, 0);
+		setDestination(seek, 1500, 345, 440, 590, 4, 0, 192, 255, 255, 0, 2, 0, 0, 0, 0, 0, 80, 0, 0);
+		setDestination(seek, 2000, 345, 440, 590, 4, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, 0, 80, 0, 0);
 		add(seek);
 		// READY
 		Texture ready = new Texture("skin/default/ready.png");
@@ -1175,9 +1191,14 @@ public class PlaySkin extends Skin {
 		addNumber(new SkinNumber(ntr[2], 5, 0, NUMBER_TARGET_SCORE), 0, 1100, 140, 12, 18, 0, 255, 255,
 				255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
-		SkinSlider seek = new SkinSlider(new TextureRegion[] { new TextureRegion(st, 0, 265, 17, 24) }, 0, 0, 1,
-				(int) (360 * dh), BARGRAPH_LOAD_PROGRESS);
-		setDestination(seek, 0, 210, 440, 30, 24, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0);
+		SkinGraph seek = new SkinGraph(new TextureRegion(st, 0, 0, 8, 8));
+		seek.setReferenceID(BARGRAPH_LOAD_PROGRESS);
+		seek.setDirection(0);
+		setDestination(seek, 0, 210, 440, 860, 4, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, 0, 80, 0, 0);
+		setDestination(seek, 500, 210, 440, 860, 4, 0, 192, 0, 255, 255, 2, 0, 0, 0, 0, 0, 80, 0, 0);
+		setDestination(seek, 1000, 210, 440, 860, 4, 0, 128, 255, 0, 255, 2, 0, 0, 0, 0, 0, 80, 0, 0);
+		setDestination(seek, 1500, 210, 440, 860, 4, 0, 192, 255, 255, 0, 2, 0, 0, 0, 0, 0, 80, 0, 0);
+		setDestination(seek, 2000, 210, 440, 860, 4, 0, 255, 255, 255, 255, 2, 0, 0, 0, 0, 0, 80, 0, 0);
 		add(seek);
 
 		lanegroupregion = new Rectangle[] { rect(210, 140, 390, 580), rect(680, 140, 390, 580) };
