@@ -77,7 +77,7 @@ class SongBar extends SelectableBar {
 
     @Override
     public String getTitle() {
-        return song.getTitle();
+        return song.getTitle() + " " + song.getSubtitle();
     }
 
     public int getLamp() {

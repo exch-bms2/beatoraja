@@ -1230,6 +1230,9 @@ public class MusicSelector extends MainState {
 		case BUTTON_AUTOPLAY:
 			play(1);
 			break;
+			case BUTTON_PRACTICE:
+				play(2);
+				break;
 		case BUTTON_REPLAY:
 			play(3);
 			break;
