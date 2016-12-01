@@ -312,6 +312,8 @@ public abstract class MainState {
 				return song != null ? song.getArtist() : "";
 			case STRING_SUBARTIST:
 				return song != null ? song.getSubartist() : "";
+				case STRING_FULLARTIST:
+					return song != null ? song.getArtist() + " " + song.getSubartist() : "";
 			case STRING_GENRE:
 				return song != null ? song.getGenre() : "";
 			}

@@ -57,7 +57,7 @@ public class MusicSelectSkin extends Skin {
 		setDestination(title, 0, 100, 600, 18, 24, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		this.add(title);
 		SkinText artist = new SkinText("skin/default/VL-Gothic-Regular.ttf", 0, 20, 2);
-		artist.setReferenceID(STRING_ARTIST);
+		artist.setReferenceID(STRING_FULLARTIST);
 		setDestination(artist, 0, 100, 570, 18, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		this.add(artist);
 
@@ -149,7 +149,6 @@ public class MusicSelectSkin extends Skin {
 		addImage(new TextureRegion(st, 0, 325, 15, 15),0, 130, 450, 30, 30, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_SONGBAR, 0, 0).setClickevent(BUTTON_AUTOPLAY);
 		addImage(new TextureRegion(st, 0, 325, 15, 15),0, 130, 450, 30, 30, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_GRADEBAR, 0, 0).setClickevent(BUTTON_AUTOPLAY);
 		addImage(new TextureRegion(st, 0, 340, 15, 15),0, 180, 450, 30, 30, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_SONGBAR, 0, 0).setClickevent(BUTTON_PRACTICE);
-		addImage(new TextureRegion(st, 0, 340, 15, 15),0, 180, 450, 30, 30, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_GRADEBAR, 0, 0).setClickevent(BUTTON_PRACTICE);
 		addImage(new TextureRegion(st, 0, 355, 15, 15),0, 230, 450, 30, 30, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_REPLAYDATA, 0, 0).setClickevent(BUTTON_REPLAY);
 		addImage(new TextureRegion(st, 0, 370, 15, 15),0, 280, 450, 30, 30, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_REPLAYDATA2, 0, 0).setClickevent(BUTTON_REPLAY2);
 		addImage(new TextureRegion(st, 0, 385, 15, 15),0, 330, 450, 30, 30, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, OPTION_REPLAYDATA3, 0, 0).setClickevent(BUTTON_REPLAY3);
