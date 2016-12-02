@@ -40,10 +40,10 @@ public class PracticeConfiguration {
 		this.model = model;
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/default/VL-Gothic-Regular.ttf"));
 		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
-		parameter.size = 24;
+		parameter.size = 18;
 		titlefont = generator.generateFont(parameter);
 		judgerank = model.getJudgerank();
-		endtime = model.getLastTime();
+		endtime = model.getLastTime() + 1000;
 	}
 
 
@@ -111,11 +111,11 @@ public class PracticeConfiguration {
 		boolean[] cursor = input.getCursorState();
 		if (cursor[0]) {
 			cursor[0] = false;
-			cursorpos = (cursorpos + 7) % 8;
+			cursorpos = (cursorpos + (model.getUseKeys() >= 10 ? 7 : 5)) % (model.getUseKeys() >= 10 ? 8 : 6);
 		}
 		if (cursor[1]) {
 			cursor[1] = false;
-			cursorpos = (cursorpos + 1) % 8;
+			cursorpos = (cursorpos + 1) % (model.getUseKeys() >= 10 ? 8 : 6);
 		}
 		if (cursor[2] && (presscount == 0 || presscount + 10 < System.currentTimeMillis())) {
 			if(presscount == 0) {
@@ -145,16 +145,16 @@ public class PracticeConfiguration {
 					startgauge--;
 				}
 				break;
-			case 4:
-				random = (random + 9) % 10;
+			case 5:
+				random = (random + (model.getUseKeys() == 9 ? 6 : 9)) % (model.getUseKeys() == 9 ? 7 : 10);
 				break;
-				case 5:
+				case 6:
 					random2 = (random2 + 9) % 10;
 					break;
-				case 6:
+				case 7:
 					doubleop = (doubleop + 1) % 2;
 					break;
-				case 7:
+				case 4:
 					if(judgerank > 10) {
 						judgerank -= 10;
 					}
@@ -177,7 +177,7 @@ public class PracticeConfiguration {
 				}
 				break;
 			case 1:
-				if(endtime <= tl[tl.length - 1].getTime()) {
+				if(endtime <= tl[tl.length - 1].getTime() + 1000) {
 					endtime += 100;
 				}
 				break;
@@ -192,16 +192,16 @@ public class PracticeConfiguration {
 					startgauge++;
 				}
 				break;
-			case 4:
-				random = (random + 1) % 10;
+			case 5:
+				random = (random + 1) % (model.getUseKeys() == 9 ? 7 : 10);
 				break;
-				case 5:
+				case 6:
 					random2 = (random2 + 1) % 10;
 					break;
-				case 6:
+				case 7:
 					doubleop = (doubleop + 1) % 2;
 					break;
-				case 7:
+				case 4:
 					judgerank += 10;
 					break;
 
@@ -213,27 +213,29 @@ public class PracticeConfiguration {
 
 	public void draw(Rectangle r, SpriteBatch sprite, long time, MainState state) {
 		float x = r.x + r.width / 8;
-		float y = r.y + r.height;
+		float y = r.y + r.height * 7 / 8;
 		titlefont.setColor(cursorpos == 0 ? Color.YELLOW : Color.CYAN);
 		titlefont.draw(sprite, String.format("START TIME : %2d:%02d.%1d", starttime / 60000, (starttime / 1000) % 60, (starttime / 100) % 10), x, y);
 		titlefont.setColor(cursorpos == 1 ? Color.YELLOW : Color.CYAN);
-		titlefont.draw(sprite, String.format("END TIME : %2d:%02d.%1d", endtime / 60000, (endtime / 1000) % 60, (endtime / 100) % 10), x, y - 28);
+		titlefont.draw(sprite, String.format("END TIME : %2d:%02d.%1d", endtime / 60000, (endtime / 1000) % 60, (endtime / 100) % 10), x, y - 22);
 		titlefont.setColor(cursorpos == 2 ? Color.YELLOW : Color.CYAN);
-		titlefont.draw(sprite, "GAUGE TYPE : " + GAUGE[gaugetype], x, y - 56);
+		titlefont.draw(sprite, "GAUGE TYPE : " + GAUGE[gaugetype], x, y - 44);
 		titlefont.setColor(cursorpos == 3 ? Color.YELLOW : Color.CYAN);
-		titlefont.draw(sprite, "GAUGE VALUE : " + startgauge, x, y - 84);
+		titlefont.draw(sprite, "GAUGE VALUE : " + startgauge, x, y - 66);
 		titlefont.setColor(cursorpos == 4 ? Color.YELLOW : Color.CYAN);
-		titlefont.draw(sprite, "OPTION-1P : " + RANDOM[random], x, y - 112);
+		titlefont.draw(sprite, "JUDGERANK : " + judgerank, x, y - 88);
 		titlefont.setColor(cursorpos == 5 ? Color.YELLOW : Color.CYAN);
-		titlefont.draw(sprite, "OPTION-2P : " + RANDOM[random2], x, y - 140);
-		titlefont.setColor(cursorpos == 6 ? Color.YELLOW : Color.CYAN);
-		titlefont.draw(sprite, "OPTION-DP : " + DPRANDOM[doubleop], x, y - 168);
-		titlefont.setColor(cursorpos == 7 ? Color.YELLOW : Color.CYAN);
-		titlefont.draw(sprite, "JUDGERANK : " + judgerank, x, y - 194);
+		titlefont.draw(sprite, "OPTION-1P : " + RANDOM[random], x, y - 110);
+		if(model.getUseKeys() >= 10) {
+			titlefont.setColor(cursorpos == 6 ? Color.YELLOW : Color.CYAN);
+			titlefont.draw(sprite, "OPTION-2P : " + RANDOM[random2], x, y - 132);
+			titlefont.setColor(cursorpos == 7 ? Color.YELLOW : Color.CYAN);
+			titlefont.draw(sprite, "OPTION-DP : " + DPRANDOM[doubleop], x, y - 154);
+		}
 
 		if(state.getMainController().getPlayerResource().mediaLoadFinished()) {
 			titlefont.setColor(Color.ORANGE);
-			titlefont.draw(sprite, "PRESS 1KEY TO PLAY", x, y - 250);
+			titlefont.draw(sprite, "PRESS 1KEY TO PLAY", x, y - 198);
 		}
 	}
 }

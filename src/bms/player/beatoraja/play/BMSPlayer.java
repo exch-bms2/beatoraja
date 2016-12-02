@@ -450,7 +450,7 @@ public class BMSPlayer extends MainState {
 					}
 				}
 				if(random[practice.getOption()] != null) {
-					random[practice.getOption()].setModifyTarget(PatternModifier.PLAYER1);
+					random[practice.getOption()].setModifyTarget(model.getUseKeys() == 9 ? PatternModifier.NINEKEYS: PatternModifier.PLAYER1);
 					random[practice.getOption()].modify(model);
 				}
 				gauge = practice.getGauge(model);
