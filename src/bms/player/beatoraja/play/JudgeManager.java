@@ -134,8 +134,11 @@ public class JudgeManager {
 
 	private int prevtime;
 
-	public JudgeManager(BMSPlayer main, BMSModel model, int[] constraint) {
+	private boolean autoplay = false;
+
+	public JudgeManager(BMSPlayer main, BMSModel model, boolean autoplay, int[] constraint) {
 		this.main = main;
+		this.autoplay = autoplay;
 		init(model);
 		for (int mode : constraint) {
 			if (mode == TableData.NO_GREAT) {
@@ -250,6 +253,44 @@ public class JudgeManager {
 						main.getGauge().addValue(-mnote.getDamage());
 						System.out.println("Mine Damage : " + mnote.getWav());
 					}
+
+					if(autoplay) {
+						final int lane = keyassign[key];
+						// ここにオートプレイ処理を入れる
+						if(note instanceof NormalNote && note.getState() == 0) {
+							main.play(note, config.getKeyvolume());
+							this.update(lane, 0, time, 0);
+							note.setTime(0);
+							note.setState(1);
+						}
+						if(note instanceof LongNote) {
+							final LongNote ln = (LongNote) note;
+							if (ln.getSection() == tl.getSection() && ln.getState() == 0) {
+								main.play(note, config.getKeyvolume());
+								if ((lntype == BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
+										|| ln.getType() == LongNote.TYPE_LONGNOTE) {
+									passingcount[lane] = 0;
+								} else {
+									this.update(lane, 0, time, 0);
+									ln.setTime(0);
+									ln.setState(1);
+								}
+								processing[lane] = ln;
+							}
+							if (ln.getEndnote().getSection() == tl.getSection() && ln.getEndnote().getState() == 0) {
+								if ((lntype != BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
+										|| ln.getType() == LongNote.TYPE_CHARGENOTE
+										|| ln.getType() == LongNote.TYPE_HELLCHARGENOTE) {
+									this.update(lane, 0, time, 0);
+									ln.getEndnote().setState(1);
+									ln.getEndnote().setTime(0);
+									main.play(processing[lane].getEndnote(), config.getKeyvolume());
+									processing[lane] = null;
+								}
+							}
+						}
+
+					}
 				}
 			}
 			if (pos < i && tl.getTime() < prevtime - njudge[5]) {
@@ -261,7 +302,7 @@ public class JudgeManager {
 		// HCNゲージ増減判定
 		Arrays.fill(next_inclease, false);
 		for (int key = 0; key < keyassign.length; key++) {
-			if (passing[keyassign[key]] != null && keystate[key]) {
+			if (passing[keyassign[key]] != null && (keystate[key] || autoplay)) {
 				next_inclease[keyassign[key]] = true;
 			}
 		}
