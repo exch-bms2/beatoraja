@@ -11,6 +11,7 @@ import bms.player.beatoraja.Config.SkinConfig;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyInputLog;
 import bms.player.beatoraja.pattern.*;
+import bms.player.beatoraja.play.PracticeConfiguration.PracticeProperty;
 import bms.player.beatoraja.play.audio.AudioProcessor;
 import bms.player.beatoraja.play.audio.SoundProcessor;
 import bms.player.beatoraja.play.bga.BGAProcessor;
@@ -437,29 +438,30 @@ public class BMSPlayer extends MainState {
 			practice.processInput(input);
 			
 			if (input.getKeystate()[0] && resource.mediaLoadFinished() && now > skin.getLoadstart() + skin.getLoadend() && !input.startPressed()) {
+				PracticeProperty property = practice.getPracticeProperty();
 				lanerender.setEnableControlInput(true);				
-				PracticeModifier pm = new PracticeModifier(practice.getStartTime(), practice.getEndTime());
+				PracticeModifier pm = new PracticeModifier(property.starttime, property.endtime);
 				pm.modify(model);
 				if(model.getUseKeys() >= 10) {
-					if(practice.getDoubleOption() == 1) {
+					if(property.doubleop == 1) {
 						new LaneShuffleModifier(LaneShuffleModifier.FLIP).modify(model);
 					}
-					if(random[practice.getOption2()] != null) {
-						random[practice.getOption2()].setModifyTarget(PatternModifier.PLAYER2);
-						random[practice.getOption2()].modify(model);
+					if(random[property.random2] != null) {
+						random[property.random2].setModifyTarget(PatternModifier.PLAYER2);
+						random[property.random2].modify(model);
 					}
 				}
-				if(random[practice.getOption()] != null) {
-					random[practice.getOption()].setModifyTarget(PatternModifier.PLAYER1);
-					random[practice.getOption()].modify(model);
+				if(random[property.random] != null) {
+					random[property.random].setModifyTarget(PatternModifier.PLAYER1);
+					random[property.random].modify(model);
 				}
 				gauge = practice.getGauge(model);
-				model.setJudgerank(practice.getJudgerank());
+				model.setJudgerank(property.judgerank);
 				lanerender.init(model);
 				judge.init(model);
 				notes = 0;
-				starttimeoffset = practice.getStartTime() > 1000 ? practice.getStartTime() - 1000 : 0;
-				playtime = practice.getEndTime() + 1000;
+				starttimeoffset = property.starttime > 1000 ? property.starttime - 1000 : 0;
+				playtime = property.endtime + 1000;
 				bga.prepare(this);
 				state = STATE_READY;
 				getTimer()[TIMER_READY] = now;
@@ -734,6 +736,7 @@ public class BMSPlayer extends MainState {
 
 	public void stopPlay() {
 		if(state == STATE_PRACTICE) {
+			practice.saveProperty();
 			getMainController().changeState(MainController.STATE_SELECTMUSIC);
 			return;
 		}

@@ -240,7 +240,7 @@ public class LaneRenderer {
 		long time = (main.getTimer()[TIMER_PLAY] != Long.MIN_VALUE ? (main.getNowTime() - main.getTimer()[TIMER_PLAY])
 				: 0) + config.getJudgetiming();
 		if (main.getState() == BMSPlayer.STATE_PRACTICE) {
-			 time = main.getPracticeConfiguration().getStartTime();
+			 time = main.getPracticeConfiguration().getPracticeProperty().starttime;
 			 pos = 0;
 		}
 		final float hispeed = main.getState() != BMSPlayer.STATE_PRACTICE ? this.hispeed : 1.0f;
