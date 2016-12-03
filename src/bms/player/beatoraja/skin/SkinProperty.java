@@ -92,6 +92,7 @@ public class SkinProperty {
 	public static final int STRING_GENRE = 13;
 	public static final int STRING_ARTIST = 14;
 	public static final int STRING_SUBARTIST = 15;
+	public static final int STRING_FULLARTIST = 16;
 	public static final int STRING_COURSE1_TITLE = 150;
 	public static final int STRING_COURSE2_TITLE = 151;
 	public static final int STRING_COURSE3_TITLE = 152;

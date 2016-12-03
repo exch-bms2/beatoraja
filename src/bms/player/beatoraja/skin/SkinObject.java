@@ -326,11 +326,11 @@ public abstract class SkinObject {
 		}
 		sprite.setColor(color);
 		
-		if(dstfilter == 1) {
-			image.getTexture().setFilter(TextureFilter.Linear, TextureFilter.Linear);
-		} else {
-			image.getTexture().setFilter(TextureFilter.Nearest, TextureFilter.Nearest);			
-		}
+//		if(dstfilter == 1) {
+//			image.getTexture().setFilter(TextureFilter.Linear, TextureFilter.Linear);
+//		} else {
+//			image.getTexture().setFilter(TextureFilter.Nearest, TextureFilter.Nearest);			
+//		}
 		if (angle != 0) {
 			sprite.draw(image, x, y, centerx * width, centery * height, width, height, 1, 1, angle);
 		} else {

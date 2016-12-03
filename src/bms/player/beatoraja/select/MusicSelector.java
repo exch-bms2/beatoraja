@@ -723,6 +723,9 @@ public class MusicSelector extends MainState {
 				getMainController().changeState(MainController.STATE_DECIDE);
 			}
 		} else if (current instanceof GradeBar) {
+			if(autoplay == 2) {
+				autoplay = 0;
+			}
 			readCourse(autoplay);
 		}
 	}

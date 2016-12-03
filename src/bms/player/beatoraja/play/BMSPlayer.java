@@ -178,7 +178,7 @@ public class BMSPlayer extends MainState {
 			}
 		}
 
-		judge = new JudgeManager(this, model, resource.getConstraint());
+		judge = new JudgeManager(this, model, autoplay == 1, resource.getConstraint());
 		if (exjudge) {
 			judge.setJudgeMode(JudgeManager.EXPAND_JUDGE);
 		}
@@ -452,7 +452,7 @@ public class BMSPlayer extends MainState {
 					}
 				}
 				if(random[property.random] != null) {
-					random[property.random].setModifyTarget(PatternModifier.PLAYER1);
+					random[property.random].setModifyTarget(model.getUseKeys() == 9 ? PatternModifier.NINEKEYS: PatternModifier.PLAYER1);
 					random[property.random].modify(model);
 				}
 				gauge = practice.getGauge(model);
@@ -478,9 +478,7 @@ public class BMSPlayer extends MainState {
 
 				input.setStartTime(now + getStartTime() - starttimeoffset);
 				List<KeyInputLog> keylog = null;
-				if (autoplay == 1) {
-					keylog = createAutoplayLog(model);
-				} else if (autoplay >= 3) {
+				if (autoplay >= 3) {
 					keylog = Arrays.asList(replay.keylog);
 				}
 				autoThread = new AutoplayThread();
@@ -568,7 +566,9 @@ public class BMSPlayer extends MainState {
 				resource.setCombo(judge.getCourseCombo());
 				resource.setMaxcombo(judge.getCourseMaxcombo());
 				saveConfig();
-				gaugelog.add(0f);
+				for(long l = getTimer()[TIMER_FAILED] - getTimer()[TIMER_PLAY];l < playtime + 500;l += 500) {
+					gaugelog.add(0f);
+				}
 				resource.setGauge(gaugelog);
 				resource.setGrooveGauge(gauge);
 				input.setEnableKeyInput(true);
@@ -592,7 +592,6 @@ public class BMSPlayer extends MainState {
 			}
 			long l2 = now - getTimer()[TIMER_FADEOUT];
 			if (l2 > skin.getFadeout()) {
-				resource.getAudioProcessor().stop(null);
 				resource.getBGAManager().stop();
 				if (keyinput != null) {
 					Logger.getGlobal().info("入力パフォーマンス(max ms) : " + keyinput.frametimes);
