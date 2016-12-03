@@ -142,7 +142,7 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private ScrollPane skinconfig;
 
-	private MainController.BMSInformationLoader loader;
+	private MainLoader loader;
 
 	private void initComboBox(ComboBox<Integer> combo, final String[] values) {
 		combo.setCellFactory(new Callback<ListView<Integer>, ListCell<Integer>>() {
@@ -185,7 +185,7 @@ public class PlayConfigurationView implements Initializable {
 
 	}
 
-	public void setBMSInformationLoader(MainController.BMSInformationLoader loader) {
+	public void setBMSInformationLoader(MainLoader loader) {
 		this.loader = loader;
 	}
 
@@ -425,7 +425,7 @@ public class PlayConfigurationView implements Initializable {
 	public void start() {
 		commit();
 		loader.hide();
-		MainController.play(null, 0, true);
+		MainLoader.play(null, 0, true);
 	}
 
 	public void loadAllBMS() {

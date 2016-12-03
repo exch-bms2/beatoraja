@@ -50,6 +50,10 @@ public abstract class MainState {
 
 	public abstract void render();
 
+	public void input() {
+		
+	}
+	
 	public void pause() {
 
 	}

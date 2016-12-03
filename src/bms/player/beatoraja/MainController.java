@@ -5,14 +5,9 @@ import java.nio.file.*;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
 import com.badlogic.gdx.Graphics;
-import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
-import javafx.scene.layout.VBox;
 import bms.player.beatoraja.config.KeyConfiguration;
 import bms.player.beatoraja.decide.MusicDecide;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
@@ -26,7 +21,6 @@ import bms.player.beatoraja.song.SongDatabaseAccessor;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
-import com.badlogic.gdx.backends.lwjgl.*;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.*;
@@ -78,10 +72,11 @@ public class MainController extends ApplicationAdapter {
 	 */
 	private PlayDataAccessor playdata;
 
-	private static final Path configpath = Paths.get("config.json");
+	static final Path configpath = Paths.get("config.json");
 	private static final Path songdbpath = Paths.get("songdata.db");
 
 	private ScreenShotThread screenshot;
+	private InputThread inputthread;
 
 	public MainController(Path f, Config config, int auto) {
 		this.auto = auto;
@@ -180,6 +175,8 @@ public class MainController extends ApplicationAdapter {
 		shape = new ShapeRenderer();
 
 		input = new BMSPlayerInputProcessor(RESOLUTION[config.getResolution()]);
+		
+		inputthread = new InputThread();
 
 		selector = new MusicSelector(this, config);
 		decide = new MusicDecide(this);
@@ -193,6 +190,7 @@ public class MainController extends ApplicationAdapter {
 		} else {
 			changeState(STATE_SELECTMUSIC);
 		}
+		inputthread.start();
 
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/default/VL-Gothic-Regular.ttf"));
 		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
@@ -212,26 +210,13 @@ public class MainController extends ApplicationAdapter {
 		current.getSkin().drawAllObjects(sprite, current);
 		sprite.end();
 
-		Stage stage = current.getStage();
+		final Stage stage = current.getStage();
 		if (stage != null) {
 			stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
 			stage.draw();
 		}
-		// move song bar position by mouse
-		if (input.isMousePressed()) {
-			input.setMousePressed();
-			current.getSkin().mousePressed(current, input.getMouseButton(), input.getMouseX(), input.getMouseY());
-		}
-		if (input.isMouseDragged()) {
-			input.setMouseDragged();
-			current.getSkin().mouseDragged(current, input.getMouseButton(), input.getMouseX(), input.getMouseY());
-		}
-
-		// FPS表示切替
-		if (input.getFunctionstate()[0] && input.getFunctiontime()[0] != 0) {
-			showfps = !showfps;
-			input.getFunctiontime()[0] = 0;
-		}
+		
+		// show fps
 		if (showfps) {
 			sprite.begin();
 			systemfont.setColor(Color.PURPLE);
@@ -239,46 +224,7 @@ public class MainController extends ApplicationAdapter {
 					RESOLUTION[config.getResolution()].height - 2);
 			sprite.end();
 		}
-
-		// fullscrees - windowed
-		if (input.getFunctionstate()[3] && input.getFunctiontime()[3] != 0) {
-			boolean fullscreen = Gdx.graphics.isFullscreen();
-			Graphics.DisplayMode currentMode = Gdx.graphics.getDisplayMode();
-			if (fullscreen) {
-				Gdx.graphics.setWindowedMode(currentMode.width, currentMode.height);
-			} else {
-				Gdx.graphics.setFullscreenMode(currentMode);
-			}
-			config.setFullscreen(!fullscreen);
-			input.getFunctiontime()[3] = 0;
-		}
-
-		// if (input.getFunctionstate()[4] && input.getFunctiontime()[4] != 0) {
-		// int resolution = config.getResolution();
-		// resolution = (resolution + 1) % RESOLUTION.length;
-		// if (config.isFullscreen()) {
-		// Gdx.graphics.setWindowedMode((int) RESOLUTION[resolution].width,
-		// (int) RESOLUTION[resolution].height);
-		// Graphics.DisplayMode currentMode = Gdx.graphics.getDisplayMode();
-		// Gdx.graphics.setFullscreenMode(currentMode);
-		// }
-		// else {
-		// Gdx.graphics.setWindowedMode((int) RESOLUTION[resolution].width,
-		// (int) RESOLUTION[resolution].height);
-		// }
-		// config.setResolution(resolution);
-		// input.getFunctiontime()[4] = 0;
-		// }
-
-		// screen shot
-		if (input.getFunctionstate()[5] && input.getFunctiontime()[5] != 0) {
-			if (screenshot == null || screenshot.savetime != 0) {
-				screenshot = new ScreenShotThread(ScreenUtils.getFrameBufferPixels(0, 0, Gdx.graphics.getBackBufferWidth(),
-						Gdx.graphics.getBackBufferHeight(), true));
-				screenshot.start();
-			}
-			input.getFunctiontime()[5] = 0;
-		}
+		// show screenshot status
 		if (screenshot != null && screenshot.savetime + 2000 > System.currentTimeMillis()) {
 			sprite.begin();
 			systemfont.setColor(Color.GOLD);
@@ -328,127 +274,6 @@ public class MainController extends ApplicationAdapter {
 		current.resume();
 	}
 
-	public static void main(String[] args) {
-		Logger logger = Logger.getGlobal();
-		try {
-			logger.addHandler(new FileHandler("beatoraja_log.xml"));
-		} catch (SecurityException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		Path f = null;
-		int auto = 0;
-		boolean config = (!Files.exists(Paths.get("songdata.db")));
-		for (String s : args) {
-			if (s.startsWith("-")) {
-				if (s.equals("-a")) {
-					auto = 1;
-				}
-				if (s.equals("-r")) {
-					auto = 2;
-				}
-				if (s.equals("-c")) {
-					config = true;
-				}
-			} else {
-				f = Paths.get(s);
-			}
-		}
-		if (config) {
-			BMSInformationLoader.main(args);
-		} else {
-			MainController.play(f, auto, true);
-		}
-	}
-
-	public static void play(Path f, int auto, boolean forceExit) {
-		Config config = new Config();
-		if (Files.exists(configpath)) {
-			Json json = new Json();
-			try {
-				config = json.fromJson(Config.class, new FileReader(configpath.toFile()));
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		} else {
-			Json json = new Json();
-			json.setOutputType(OutputType.json);
-			try {
-				BufferedWriter fw = Files.newBufferedWriter(configpath);
-				fw.write(json.prettyPrint(config));
-				fw.flush();
-				fw.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-
-		try {
-			MainController player = new MainController(f, config, auto);
-			
-			LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
-			cfg.width = (int) RESOLUTION[config.getResolution()].width;
-			cfg.height = (int) RESOLUTION[config.getResolution()].height;
-
-			// fullscreen
-			cfg.fullscreen = config.isFullscreen();
-			// vSync
-			cfg.vSyncEnabled = config.isVsync();
-			if (!config.isVsync()) {
-				cfg.backgroundFPS = config.getMaxFramePerSecond();
-				cfg.foregroundFPS = config.getMaxFramePerSecond();
-			}
-			cfg.title = VERSION;
-
-			cfg.audioDeviceBufferSize = config.getAudioDeviceBufferSize();
-			cfg.audioDeviceSimultaneousSources = config.getAudioDeviceSimultaneousSources();
-			cfg.forceExit = forceExit;
-			// System.setProperty("org.lwjgl.opengl.Display.allowSoftwareOpenGL",
-			// "true");
-			new LwjglApplication(player, cfg);
-			
-//			Lwjgl3ApplicationConfiguration cfg = new Lwjgl3ApplicationConfiguration();
-//
-//			final int w = (int) RESOLUTION[config.getResolution()].width;
-//			final int h = (int) RESOLUTION[config.getResolution()].height;
-//			if (config.isFullscreen()) {
-//				DisplayMode d = null;
-//				for (DisplayMode display : cfg.getDisplayModes()) {
-//					System.out.println("available DisplayMode : w - " + display.width + " h - " + display.height
-//							+ " refresh - " + display.refreshRate + " color bit - " + display.bitsPerPixel);
-//					if (display.width == w
-//							&& display.height == h
-//							&& (d == null || (d.refreshRate <= display.refreshRate && d.bitsPerPixel <= display.bitsPerPixel))) {
-//						d = display;
-//					}
-//				}
-//				if (d != null) {
-//					cfg.setFullscreenMode(d);
-//				} else {
-//					cfg.setWindowedMode(w, h);
-//				}
-//			} else {
-//				cfg.setWindowedMode(w, h);
-//			}
-//			// vSync
-//			cfg.useVsync(config.isVsync());
-//			cfg.setIdleFPS(config.getMaxFramePerSecond());
-//			cfg.setTitle(VERSION);
-//
-//			cfg.setAudioConfig(config.getAudioDeviceSimultaneousSources(), config.getAudioDeviceBufferSize(), 1);
-//
-//			new Lwjgl3Application(player, cfg);
-		} catch (Exception e) {
-			e.printStackTrace();
-			Logger.getGlobal().severe(e.getClass().getName() + " : " + e.getMessage());
-		} catch (Error e) {
-			e.printStackTrace();
-			Logger.getGlobal().severe(e.getClass().getName() + " : " + e.getMessage());
-		}
-	}
-
 	public void exit() {
 		Json json = new Json();
 		json.setOutputType(OutputType.json);
@@ -466,62 +291,6 @@ public class MainController extends ApplicationAdapter {
 
 	public BMSPlayerInputProcessor getInputProcessor() {
 		return input;
-	}
-
-	public static class BMSInformationLoader extends Application {
-
-		private PlayConfigurationView bmsinfo;
-
-		private VBox stackPane;
-
-		public static void main(String[] args) {
-			launch(args);
-		}
-
-		@Override
-		public void start(javafx.stage.Stage primaryStage) throws Exception {
-			Config config = new Config();
-			if (Files.exists(configpath)) {
-				Json json = new Json();
-				try {
-					config = json.fromJson(Config.class, new FileReader(configpath.toFile()));
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			} else {
-				Json json = new Json();
-				json.setOutputType(OutputType.json);
-				try {
-					FileWriter fw = new FileWriter(configpath.toFile());
-					fw.write(json.prettyPrint(config));
-					fw.flush();
-					fw.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-
-			try {
-				FXMLLoader loader = new FXMLLoader(
-						BMSInformationLoader.class.getResource("/bms/player/beatoraja/PlayConfigurationView.fxml"));
-				stackPane = (VBox) loader.load();
-				bmsinfo = (PlayConfigurationView) loader.getController();
-				bmsinfo.setBMSInformationLoader(this);
-				bmsinfo.update(config);
-				Scene scene = new Scene(stackPane, stackPane.getPrefWidth(), stackPane.getPrefHeight());
-				primaryStage.setScene(scene);
-				primaryStage.setTitle(VERSION + " configuration");
-				primaryStage.show();
-
-			} catch (IOException e) {
-				Logger.getGlobal().severe(e.getMessage());
-				e.printStackTrace();
-			}
-		}
-
-		public void hide() {
-			stackPane.setDisable(true);
-		}
 	}
 
 	/**
@@ -560,6 +329,82 @@ public class MainController extends ApplicationAdapter {
 			input.getFunctiontime()[5] = 0;
 			Logger.getGlobal().info("スクリーンショット保存:" + path);
 			screenshot.savetime = System.currentTimeMillis();
+		}
+	}
+	
+	/**
+	 * コントロール系入力処理用スレッド
+	 * 
+	 * @author exch
+	 */
+	class InputThread extends Thread {
+
+		private boolean stop = false;
+		
+		@Override
+		public void run() {
+			while(!stop) {
+				current.input();
+				// move song bar position by mouse
+				if (input.isMousePressed()) {
+					input.setMousePressed();
+					current.getSkin().mousePressed(current, input.getMouseButton(), input.getMouseX(), input.getMouseY());
+				}
+				if (input.isMouseDragged()) {
+					input.setMouseDragged();
+					current.getSkin().mouseDragged(current, input.getMouseButton(), input.getMouseX(), input.getMouseY());
+				}
+
+				// FPS表示切替
+				if (input.getFunctionstate()[0] && input.getFunctiontime()[0] != 0) {
+					showfps = !showfps;
+					input.getFunctiontime()[0] = 0;
+				}
+				// fullscrees - windowed
+				if (input.getFunctionstate()[3] && input.getFunctiontime()[3] != 0) {
+					boolean fullscreen = Gdx.graphics.isFullscreen();
+					Graphics.DisplayMode currentMode = Gdx.graphics.getDisplayMode();
+					if (fullscreen) {
+						Gdx.graphics.setWindowedMode(currentMode.width, currentMode.height);
+					} else {
+						Gdx.graphics.setFullscreenMode(currentMode);
+					}
+					config.setFullscreen(!fullscreen);
+					input.getFunctiontime()[3] = 0;
+				}
+
+				// if (input.getFunctionstate()[4] && input.getFunctiontime()[4] != 0) {
+				// int resolution = config.getResolution();
+				// resolution = (resolution + 1) % RESOLUTION.length;
+				// if (config.isFullscreen()) {
+				// Gdx.graphics.setWindowedMode((int) RESOLUTION[resolution].width,
+				// (int) RESOLUTION[resolution].height);
+				// Graphics.DisplayMode currentMode = Gdx.graphics.getDisplayMode();
+				// Gdx.graphics.setFullscreenMode(currentMode);
+				// }
+				// else {
+				// Gdx.graphics.setWindowedMode((int) RESOLUTION[resolution].width,
+				// (int) RESOLUTION[resolution].height);
+				// }
+				// config.setResolution(resolution);
+				// input.getFunctiontime()[4] = 0;
+				// }
+
+				// screen shot
+				if (input.getFunctionstate()[5] && input.getFunctiontime()[5] != 0) {
+					if (screenshot == null || screenshot.savetime != 0) {
+						screenshot = new ScreenShotThread(ScreenUtils.getFrameBufferPixels(0, 0, Gdx.graphics.getBackBufferWidth(),
+								Gdx.graphics.getBackBufferHeight(), true));
+						screenshot.start();
+					}
+					input.getFunctiontime()[5] = 0;
+				}
+				
+				try {
+					sleep(100);
+				} catch (InterruptedException e) {
+				}
+			}
 		}
 	}
 }
