@@ -8,6 +8,7 @@ import bms.player.beatoraja.play.audio.SoundProcessor;
 import bms.player.beatoraja.play.gauge.GrooveGauge;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.skin.SkinLoader;
+import com.badlogic.gdx.graphics.glutils.FloatFrameBuffer;
 import com.badlogic.gdx.math.Rectangle;
 import java.util.logging.Logger;
 
@@ -66,6 +67,14 @@ public class GradeResult extends MainState {
 		SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
 		setSkin(sl.loadResultSkin(Paths.get("skin/default/graderesult.json")));
 
+        for(int i = resource.getCourseGauge().size();i < resource.getCourseBMSModels().length;i++) {
+            List<Float> list = new ArrayList<Float>();
+            for(int l = 0;l < (resource.getCourseBMSModels()[i].getLastNoteTime() + 500) / 500;l++) {
+                list.add(0f);
+            }
+            resource.getCourseGauge().add(list);
+        }
+
 		updateScoreDatabase();
 
 		if (resource.getAutoplay() == 0
@@ -91,19 +100,6 @@ public class GradeResult extends MainState {
 
 		final MainController main = getMainController();
 		final PlayerResource resource = getMainController().getPlayerResource();
-		IRScoreData score = resource.getCourseScoreData();
-
-		if (score != null) {
-			if (score.getClear() > GrooveGauge.CLEARTYPE_FAILED) {
-				Gdx.gl.glClearColor(0, 0, 0.4f, 1);
-			} else {
-				Gdx.gl.glClearColor(0.4f, 0, 0, 1);
-			}
-			Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
-			final float w = 1280;
-			final float h = 720;
-		}
 
 		if (getTimer()[TIMER_FADEOUT] != Long.MIN_VALUE) {
 			if (time > getTimer()[TIMER_FADEOUT] + getSkin().getFadeout()) {

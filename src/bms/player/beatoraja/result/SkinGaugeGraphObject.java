@@ -29,10 +29,12 @@ public class SkinGaugeGraphObject extends SkinObject {
         sprite.end();
         PlayerResource resource = state.getMainController().getPlayerResource();
         List<Float> gauge = resource.getGauge();
+        List<Integer> section = new ArrayList<Integer>();
         if(state instanceof GradeResult) {
             gauge = new ArrayList<Float>();
             for(List<Float> l : resource.getCourseGauge()) {
                 gauge.addAll(l);
+                section.add((section.size() > 0 ? section.get(section.size() - 1) : 0) + l.size());
             }
         }
         // ゲージグラフ描画
@@ -80,6 +82,10 @@ public class SkinGaugeGraphObject extends SkinObject {
 
         Float f1 = null;
         for (int i = 0; i < gauge.size(); i++) {
+            if(section.contains(i)) {
+                shape.setColor(Color.valueOf("ffffff"));
+                shape.line(graph.x + graph.width * (i - 1) / gauge.size(), graph.y, graph.x + graph.width * (i - 1) / gauge.size(), graph.y + graph.height);
+            }
             Float f2 = gauge.get(i);
             if (f1 != null) {
                 if(f1 < border) {
