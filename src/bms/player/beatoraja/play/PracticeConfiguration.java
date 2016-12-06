@@ -111,12 +111,13 @@ public class PracticeConfiguration {
 	
 	public void processInput(BMSPlayerInputProcessor input) {
 		boolean[] cursor = input.getCursorState();
-		if (cursor[0]) {
-			cursor[0] = false;
+		long[] cursortime = input.getCursorTime();
+		if (cursor[0] && cursortime[0] != 0) {
+			cursortime[0] = 0;
 			cursorpos = (cursorpos + (model.getUseKeys() >= 10 ? 7 : 5)) % (model.getUseKeys() >= 10 ? 8 : 6);
 		}
-		if (cursor[1]) {
-			cursor[1] = false;
+		if (cursor[1] && cursortime[1] != 0) {
+			cursortime[1] = 0;
 			cursorpos = (cursorpos + 1) % (model.getUseKeys() >= 10 ? 8 : 6);
 		}
 		if (cursor[2] && (presscount == 0 || presscount + 10 < System.currentTimeMillis())) {

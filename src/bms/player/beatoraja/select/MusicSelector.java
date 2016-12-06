@@ -504,6 +504,7 @@ public class MusicSelector extends MainState {
 		boolean[] keystate = input.getKeystate();
 		long[] keytime = input.getTime();
 		boolean[] cursor = input.getCursorState();
+		long[] cursortime = input.getCursorTime();
 
 		final int prevpanelstate = panelstate;
 		panelstate = 0;
@@ -524,8 +525,8 @@ public class MusicSelector extends MainState {
 			main.changeState(MainController.STATE_CONFIG);
 		} else {
 			// 1鍵 (選曲 or フォルダを開く)
-			if (isPressed(keystate, keytime, KEY_PLAY, true) || cursor[3]) {
-				cursor[3] = false;
+			if (isPressed(keystate, keytime, KEY_PLAY, true) || (cursor[3] && cursortime[3] != 0)) {
+				cursortime[3] = 0;
 				select(current);
 			}
 			// 3鍵 (プラクティス)
@@ -541,8 +542,8 @@ public class MusicSelector extends MainState {
 				play(3 + selectedreplay);
 			}
 			// 白鍵 (フォルダを開く)
-			if (isPressed(keystate, keytime, KEY_FOLDER_OPEN, true) || cursor[3]) {
-				cursor[3] = false;
+			if (isPressed(keystate, keytime, KEY_FOLDER_OPEN, true) || (cursor[3] && cursortime[3] != 0)) {
+				cursortime[3] = 0;
 				if (current instanceof DirectoryBar) {
 					if (bar.updateBar(current)) {
 						if (folderopen != null) {
@@ -555,9 +556,9 @@ public class MusicSelector extends MainState {
 			}
 
 			// 黒鍵 (フォルダを閉じる)
-			if (isPressed(keystate, keytime, KEY_FOLDER_CLOSE, true) || cursor[2]) {
+			if (isPressed(keystate, keytime, KEY_FOLDER_CLOSE, true) || (cursor[2] && cursortime[2] != 0)) {
 				keytime[1] = 0;
-				cursor[2] = false;
+				cursortime[2] = 0;
 				close();
 			}
 		}

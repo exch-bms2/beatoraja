@@ -18,6 +18,8 @@ public class BMControllerInputProcessor implements ControllerListener {
 
 	private final BMSPlayerInputProcessor bmsPlayerInputProcessor;
 
+	private Controller controller;
+
 	private int player = 0;
 	/**
 	 * ボタンキーアサイン
@@ -37,8 +39,10 @@ public class BMControllerInputProcessor implements ControllerListener {
 
 	private int lastPressedButton = -1;
 
-	public BMControllerInputProcessor(BMSPlayerInputProcessor bmsPlayerInputProcessor, int player, int[] buttons) {
+	public BMControllerInputProcessor(BMSPlayerInputProcessor bmsPlayerInputProcessor, Controller controller,
+			int player, int[] buttons) {
 		this.bmsPlayerInputProcessor = bmsPlayerInputProcessor;
+		this.controller = controller;
 		this.player = player;
 		this.setControllerKeyAssign(buttons);
 	}
@@ -58,72 +62,72 @@ public class BMControllerInputProcessor implements ControllerListener {
 	}
 
 	public boolean axisMoved(Controller arg0, int arg1, float arg2) {
-		if (arg1 == 0 || arg1 == 3) {
-			if (arg2 < -0.9) {
-				// LEFT
-				if (axis[arg1] > 0.9) {
-					buttonUp(arg0, BMKeys.RIGHT);
-				}
-				buttonDown(arg0, BMKeys.LEFT);
-			} else if (arg2 > 0.9) {
-				// RIGHT
-				if (axis[arg1] < -0.9) {
-					buttonUp(arg0, BMKeys.LEFT);
-				}
-				buttonDown(arg0, BMKeys.RIGHT);
-			} else {
-				if (axis[arg1] > 0.9) {
-					buttonUp(arg0, BMKeys.RIGHT);
-				}
-				if (axis[arg1] < -0.9) {
-					buttonUp(arg0, BMKeys.LEFT);
-				}
-			}
-			axis[arg1] = arg2;
-		} else {
-			if (arg2 < -0.9) {
-				// UP
-				if (axis[arg1] > 0.9) {
-					buttonUp(arg0, BMKeys.DOWN);
-				}
-				buttonDown(arg0, BMKeys.UP);
-			} else if (arg2 > 0.9) {
-				// DOWN
-				if (axis[arg1] < -0.9) {
-					buttonUp(arg0, BMKeys.UP);
-				}
-				buttonDown(arg0, BMKeys.DOWN);
-			} else {
-				if (axis[arg1] > 0.9) {
-					buttonUp(arg0, BMKeys.DOWN);
-				}
-				if (axis[arg1] < -0.9) {
-					buttonUp(arg0, BMKeys.UP);
-				}
-			}
-		}
-		axis[arg1] = arg2;
+//		if (arg1 == 0 || arg1 == 3) {
+//			if (arg2 < -0.9) {
+//				// LEFT
+//				if (axis[arg1] > 0.9) {
+//					buttonUp(arg0, BMKeys.RIGHT);
+//				}
+//				buttonDown(arg0, BMKeys.LEFT);
+//			} else if (arg2 > 0.9) {
+//				// RIGHT
+//				if (axis[arg1] < -0.9) {
+//					buttonUp(arg0, BMKeys.LEFT);
+//				}
+//				buttonDown(arg0, BMKeys.RIGHT);
+//			} else {
+//				if (axis[arg1] > 0.9) {
+//					buttonUp(arg0, BMKeys.RIGHT);
+//				}
+//				if (axis[arg1] < -0.9) {
+//					buttonUp(arg0, BMKeys.LEFT);
+//				}
+//			}
+//			axis[arg1] = arg2;
+//		} else {
+//			if (arg2 < -0.9) {
+//				// UP
+//				if (axis[arg1] > 0.9) {
+//					buttonUp(arg0, BMKeys.DOWN);
+//				}
+//				buttonDown(arg0, BMKeys.UP);
+//			} else if (arg2 > 0.9) {
+//				// DOWN
+//				if (axis[arg1] < -0.9) {
+//					buttonUp(arg0, BMKeys.UP);
+//				}
+//				buttonDown(arg0, BMKeys.DOWN);
+//			} else {
+//				if (axis[arg1] > 0.9) {
+//					buttonUp(arg0, BMKeys.DOWN);
+//				}
+//				if (axis[arg1] < -0.9) {
+//					buttonUp(arg0, BMKeys.UP);
+//				}
+//			}
+//		}
+//		axis[arg1] = arg2;
 		return false;
 	}
 
 	public boolean buttonDown(Controller arg0, int keycode) {
-		final int presstime = (int) (System.currentTimeMillis() - this.bmsPlayerInputProcessor.starttime);
-		setLastPressedButton(keycode);
-		for (int i = 0; i < buttons.length; i++) {
-			if (buttons[i] == keycode) {
-				this.bmsPlayerInputProcessor.keyChanged(presstime, i + player * 9, true);
-				return true;
-			}
-		}
-
-		if (start == keycode) {
-			this.bmsPlayerInputProcessor.startChanged(true);
-			return true;
-		}
-		if (select == keycode) {
-			this.bmsPlayerInputProcessor.setSelectPressed(true);
-			return true;
-		}
+//		final int presstime = (int) (System.currentTimeMillis() - this.bmsPlayerInputProcessor.starttime);
+//		setLastPressedButton(keycode);
+//		for (int i = 0; i < buttons.length; i++) {
+//			if (buttons[i] == keycode) {
+//				this.bmsPlayerInputProcessor.keyChanged(presstime, i + player * 9, true);
+//				return true;
+//			}
+//		}
+//
+//		if (start == keycode) {
+//			this.bmsPlayerInputProcessor.startChanged(true);
+//			return true;
+//		}
+//		if (select == keycode) {
+//			this.bmsPlayerInputProcessor.setSelectPressed(true);
+//			return true;
+//		}
 
 		// Logger.getGlobal().info("controller : " + player
 		// +" button pressed : " + keycode + " time : " + presstime);
@@ -131,22 +135,22 @@ public class BMControllerInputProcessor implements ControllerListener {
 	}
 
 	public boolean buttonUp(Controller arg0, int keycode) {
-		final int presstime = (int) (System.currentTimeMillis() - this.bmsPlayerInputProcessor.starttime);
-		for (int i = 0; i < buttons.length; i++) {
-			if (buttons[i] == keycode) {
-				this.bmsPlayerInputProcessor.keyChanged(presstime, i + player * 9, false);
-				return true;
-			}
-		}
-
-		if (start == keycode) {
-			this.bmsPlayerInputProcessor.startChanged(false);
-			return true;
-		}
-		if (select == keycode) {
-			this.bmsPlayerInputProcessor.setSelectPressed(false);
-			return true;
-		}
+//		final int presstime = (int) (System.currentTimeMillis() - this.bmsPlayerInputProcessor.starttime);
+//		for (int i = 0; i < buttons.length; i++) {
+//			if (buttons[i] == keycode) {
+//				this.bmsPlayerInputProcessor.keyChanged(presstime, i + player * 9, false);
+//				return true;
+//			}
+//		}
+//
+//		if (start == keycode) {
+//			this.bmsPlayerInputProcessor.startChanged(false);
+//			return true;
+//		}
+//		if (select == keycode) {
+//			this.bmsPlayerInputProcessor.setSelectPressed(false);
+//			return true;
+//		}
 		// Logger.getGlobal().info("controller : " + player
 		// +" button released : " + keycode + " time : " + presstime);
 		return false;
@@ -176,7 +180,46 @@ public class BMControllerInputProcessor implements ControllerListener {
 		Logger.getGlobal().info("controller : " + player + "yslider moved : " + arg1 + " - " + arg2);
 		return false;
 	}
+	
+	private final boolean[] buttonstate = new boolean[20];
+	private final boolean[] buttonchanged = new boolean[20];
 
+	public void poll() {
+		for(int button = 0;button < buttonstate.length;button++) {
+			final boolean prev = buttonstate[button];
+			if (button <= BMKeys.BUTTON_16) {
+				buttonstate[button] = controller.getButton(button);
+			} else if (button == BMKeys.UP) {
+				buttonstate[button] = (controller.getAxis(1) < -0.9) || (controller.getAxis(2) < -0.9);
+			} else if (button == BMKeys.DOWN) {
+				buttonstate[button] = (controller.getAxis(1) > 0.9) || (controller.getAxis(2) > 0.9);
+			} else if (button == BMKeys.LEFT) {
+				buttonstate[button] = (controller.getAxis(0) < -0.9) || (controller.getAxis(3) < -0.9);
+			} else if (button == BMKeys.RIGHT) {
+				buttonstate[button] = (controller.getAxis(0) > 0.9) || (controller.getAxis(3) > 0.9);
+			}
+			
+			buttonchanged[button] = (prev != buttonstate[button]);
+			if(!prev && buttonstate[button]) {
+				setLastPressedButton(button);
+			}
+		}
+		
+		final int presstime = (int) (System.currentTimeMillis() - this.bmsPlayerInputProcessor.starttime);
+		for (int i = 0; i < buttons.length; i++) {
+			if(buttonchanged[buttons[i]]) {
+				this.bmsPlayerInputProcessor.keyChanged(presstime, i + player * 9, buttonstate[buttons[i]]);
+			}
+		}
+		
+		if(buttonchanged[start]) {
+			this.bmsPlayerInputProcessor.startChanged(buttonstate[start]);			
+		}
+		if(buttonchanged[select]) {
+			this.bmsPlayerInputProcessor.setSelectPressed(buttonstate[select]);			
+		}
+	}
+	
 	public int getLastPressedButton() {
 		return lastPressedButton;
 	}
@@ -211,14 +254,13 @@ public class BMControllerInputProcessor implements ControllerListener {
 		/**
 		 * 専コンのキーコードに対応したテキスト
 		 */
-		private static final String[] BMCODE = {"BUTTON 1", "BUTTON 2", "BUTTON 3", "BUTTON 4",
-				"BUTTON 5", "BUTTON 6", "BUTTON 7", "BUTTON 8", "BUTTON 9",
-				"BUTTON 10", "BUTTON 11", "BUTTON 12","BUTTON 13", "BUTTON 14", "BUTTON 15", "BUTTON 16",
-				"UP", "DOWN", "LEFT", "RIGHT"};
+		private static final String[] BMCODE = { "BUTTON 1", "BUTTON 2", "BUTTON 3", "BUTTON 4", "BUTTON 5",
+				"BUTTON 6", "BUTTON 7", "BUTTON 8", "BUTTON 9", "BUTTON 10", "BUTTON 11", "BUTTON 12", "BUTTON 13",
+				"BUTTON 14", "BUTTON 15", "BUTTON 16", "UP", "DOWN", "LEFT", "RIGHT" };
 
 		public static final String toString(int keycode) {
-			if(keycode >= 0 && keycode < BMCODE.length) {
-				return BMCODE[keycode];				
+			if (keycode >= 0 && keycode < BMCODE.length) {
+				return BMCODE[keycode];
 			}
 			return "Unknown";
 		}

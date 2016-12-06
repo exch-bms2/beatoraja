@@ -45,47 +45,47 @@ public class KeyBoardInputProcesseor implements InputProcessor {
 
 	public boolean keyDown(int keycode) {
 		setLastPressedKey(keycode);
-		int presstime = (int) (System.currentTimeMillis() - this.bmsPlayerInputProcessor.starttime);
-		for (int i = 0; i < keys.length; i++) {
-			if (keys[i] == keycode) {
-				this.bmsPlayerInputProcessor.keyChanged(presstime, i, true);
-				return true;
-			}
-		}
-
-		// レーンカバー
-		for (int i = 0; i < this.bmsPlayerInputProcessor.cursor.length; i++) {
-			if (cover[i] == keycode) {
-				this.bmsPlayerInputProcessor.cursor[i] = true;
-			}
-		}
-
-		if (control[0] == keycode) {
-			this.bmsPlayerInputProcessor.startChanged(true);
-		}
-		if (control[1] == keycode) {
-			this.bmsPlayerInputProcessor.setSelectPressed(true);
-		}
-		if (exit == keycode) {
-			this.bmsPlayerInputProcessor.setExitPressed(true);
-		}
-
-		for (int i = 0; i < numbers.length; i++) {
-			if (keycode == numbers[i]) {
-				presstime = (int) (System.currentTimeMillis() - this.bmsPlayerInputProcessor.starttime);
-				this.bmsPlayerInputProcessor.numberstate[i] = true;
-				this.bmsPlayerInputProcessor.numtime[i] = presstime;
-			}
-		}
-
-		for (int i = 0; i < function.length; i++) {
-			if (keycode == function[i]) {
-				presstime = (int) (System.currentTimeMillis() - this.bmsPlayerInputProcessor.starttime);
-				this.bmsPlayerInputProcessor.functionstate[i] = true;
-				this.bmsPlayerInputProcessor.functiontime[i] = presstime;
-			}
-		}
-
+//		int presstime = (int) (System.currentTimeMillis() - this.bmsPlayerInputProcessor.starttime);
+//		for (int i = 0; i < keys.length; i++) {
+//			if (keys[i] == keycode) {
+//				this.bmsPlayerInputProcessor.keyChanged(presstime, i, true);
+//				return true;
+//			}
+//		}
+//
+//		// レーンカバー
+//		for (int i = 0; i < this.bmsPlayerInputProcessor.cursor.length; i++) {
+//			if (cover[i] == keycode) {
+//				this.bmsPlayerInputProcessor.cursor[i] = true;
+//			}
+//		}
+//
+//		if (control[0] == keycode) {
+//			this.bmsPlayerInputProcessor.startChanged(true);
+//		}
+//		if (control[1] == keycode) {
+//			this.bmsPlayerInputProcessor.setSelectPressed(true);
+//		}
+//		if (exit == keycode) {
+//			this.bmsPlayerInputProcessor.setExitPressed(true);
+//		}
+//
+//		for (int i = 0; i < numbers.length; i++) {
+//			if (keycode == numbers[i]) {
+//				presstime = (int) (System.currentTimeMillis() - this.bmsPlayerInputProcessor.starttime);
+//				this.bmsPlayerInputProcessor.numberstate[i] = true;
+//				this.bmsPlayerInputProcessor.numtime[i] = presstime;
+//			}
+//		}
+//
+//		for (int i = 0; i < function.length; i++) {
+//			if (keycode == function[i]) {
+//				presstime = (int) (System.currentTimeMillis() - this.bmsPlayerInputProcessor.starttime);
+//				this.bmsPlayerInputProcessor.functionstate[i] = true;
+//				this.bmsPlayerInputProcessor.functiontime[i] = presstime;
+//			}
+//		}
+//
 		return true;
 	}
 
@@ -94,37 +94,94 @@ public class KeyBoardInputProcesseor implements InputProcessor {
 	}
 
 	public boolean keyUp(int keycode) {
-		int presstime = (int) (System.currentTimeMillis() - this.bmsPlayerInputProcessor.starttime);
+//		int presstime = (int) (System.currentTimeMillis() - this.bmsPlayerInputProcessor.starttime);
+//		for (int i = 0; i < keys.length; i++) {
+//			if (keys[i] == keycode) {
+//				this.bmsPlayerInputProcessor.keyChanged(presstime, i, false);
+//				return true;
+//			}
+//		}
+//		if (control[0] == keycode) {
+//			this.bmsPlayerInputProcessor.startChanged(false);
+//		}
+//		if (control[1] == keycode) {
+//			this.bmsPlayerInputProcessor.setSelectPressed(false);
+//		}
+//		if (exit == keycode) {
+//			this.bmsPlayerInputProcessor.setExitPressed(false);
+//		}
+//
+//		for (int i = 0; i < this.bmsPlayerInputProcessor.cursor.length; i++) {
+//			if (cover[i] == keycode) {
+//				this.bmsPlayerInputProcessor.cursor[i] = false;
+//			}
+//		}
+//		for (int i = 0; i < numbers.length; i++) {
+//			if (keycode == numbers[i]) {
+//				presstime = (int) (System.currentTimeMillis() - this.bmsPlayerInputProcessor.starttime);
+//				this.bmsPlayerInputProcessor.numberstate[i] = false;
+//				this.bmsPlayerInputProcessor.numtime[i] = presstime;
+//			}
+//		}
+		return true;
+	}
+	
+	private boolean[] keystate = new boolean[256];
+	
+	public void poll() {
+		final int presstime = (int) (System.currentTimeMillis() - this.bmsPlayerInputProcessor.starttime);
 		for (int i = 0; i < keys.length; i++) {
-			if (keys[i] == keycode) {
-				this.bmsPlayerInputProcessor.keyChanged(presstime, i, false);
-				return true;
+			final boolean pressed = Gdx.input.isKeyPressed(keys[i]);
+			if(pressed != keystate[keys[i]]) {
+				keystate[keys[i]] = pressed;
+				this.bmsPlayerInputProcessor.keyChanged(presstime, i, pressed);
 			}
 		}
-		if (control[0] == keycode) {
-			this.bmsPlayerInputProcessor.startChanged(false);
-		}
-		if (control[1] == keycode) {
-			this.bmsPlayerInputProcessor.setSelectPressed(false);
-		}
-		if (exit == keycode) {
-			this.bmsPlayerInputProcessor.setExitPressed(false);
+		
+		for (int i = 0; i < cover.length; i++) {
+			final boolean pressed = Gdx.input.isKeyPressed(cover[i]);
+			if (pressed != keystate[cover[i]]) {
+				keystate[cover[i]] = pressed;
+				this.bmsPlayerInputProcessor.cursor[i] = pressed;
+				this.bmsPlayerInputProcessor.cursortime[i] = presstime;
+			}
 		}
 
-		for (int i = 0; i < this.bmsPlayerInputProcessor.cursor.length; i++) {
-			if (cover[i] == keycode) {
-				this.bmsPlayerInputProcessor.cursor[i] = false;
-			}
-		}
 		for (int i = 0; i < numbers.length; i++) {
-			if (keycode == numbers[i]) {
-				presstime = (int) (System.currentTimeMillis() - this.bmsPlayerInputProcessor.starttime);
-				this.bmsPlayerInputProcessor.numberstate[i] = false;
+			final boolean pressed = Gdx.input.isKeyPressed(numbers[i]);
+			if (pressed != keystate[numbers[i]]) {
+				keystate[numbers[i]] = pressed;
+				this.bmsPlayerInputProcessor.numberstate[i] = pressed;
 				this.bmsPlayerInputProcessor.numtime[i] = presstime;
 			}
 		}
-		return true;
+
+		for (int i = 0; i < function.length; i++) {
+			final boolean pressed = Gdx.input.isKeyPressed(function[i]);
+			if (pressed != keystate[function[i]]) {
+				keystate[function[i]] = pressed;
+				this.bmsPlayerInputProcessor.functionstate[i] = pressed;
+				this.bmsPlayerInputProcessor.functiontime[i] = presstime;
+			}
+		}
+
+		final boolean startpressed = Gdx.input.isKeyPressed(control[0]);
+		if(startpressed != keystate[control[0]]) {
+			keystate[control[0]] = startpressed;
+			this.bmsPlayerInputProcessor.startChanged(startpressed);			
+		}
+		final boolean selectpressed = Gdx.input.isKeyPressed(control[1]);
+		if(selectpressed != keystate[control[1]]) {
+			keystate[control[1]] = selectpressed;
+			this.bmsPlayerInputProcessor.setSelectPressed(selectpressed);			
+		}
+		final boolean exitpressed = Gdx.input.isKeyPressed(exit);
+		if(exitpressed != keystate[exit]) {
+			keystate[exit] = exitpressed;
+			this.bmsPlayerInputProcessor.setExitPressed(exitpressed);			
+		}
 	}
+
 
 	public boolean mouseMoved(int arg0, int arg1) {
 		// TODO 自動生成されたメソッド・スタブ

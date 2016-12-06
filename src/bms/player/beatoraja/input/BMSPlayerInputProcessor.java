@@ -22,7 +22,7 @@ public class BMSPlayerInputProcessor {
 
 	private KeyBoardInputProcesseor kbinput;
 
-	private List<BMControllerInputProcessor> bminput = new ArrayList();
+	private BMControllerInputProcessor[] bminput ;
 
 	private int minduration = 10;
 
@@ -30,14 +30,15 @@ public class BMSPlayerInputProcessor {
 		kbinput = new KeyBoardInputProcesseor(this, new int[] { Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.F, Keys.V,
 				Keys.SHIFT_LEFT, Keys.CONTROL_LEFT, Keys.COMMA, Keys.L, Keys.PERIOD, Keys.SEMICOLON, Keys.SLASH,
 				Keys.APOSTROPHE, Keys.UNKNOWN, Keys.SHIFT_RIGHT, Keys.CONTROL_RIGHT, Keys.Q, Keys.W }, resolution);
-		Gdx.input.setInputProcessor(kbinput);
+//		Gdx.input.setInputProcessor(kbinput);
 		int player = 0;
+		List<BMControllerInputProcessor> bminput = new ArrayList<BMControllerInputProcessor>();
 		for (Controller controller : Controllers.getControllers()) {
 			Logger.getGlobal().info("コントローラーを検出 : " + controller.getName());
-			BMControllerInputProcessor bm = new BMControllerInputProcessor(this, player,
+			BMControllerInputProcessor bm = new BMControllerInputProcessor(this, controller, player,
 					new int[] { BMKeys.BUTTON_3, BMKeys.BUTTON_6, BMKeys.BUTTON_2, BMKeys.BUTTON_7, BMKeys.BUTTON_1,
 							BMKeys.BUTTON_4, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN, BMKeys.BUTTON_8, BMKeys.BUTTON_9 });
-			controller.addListener(bm);
+//			controller.addListener(bm);
 			bminput.add(bm);
 			if (player == 1) {
 				break;
@@ -45,6 +46,10 @@ public class BMSPlayerInputProcessor {
 				player++;
 			}
 		}
+		this.bminput = bminput.toArray(new BMControllerInputProcessor[0]);
+		
+		PollingThread polling = new PollingThread();
+		polling.start();
 	}
 
 	/**
@@ -93,6 +98,7 @@ public class BMSPlayerInputProcessor {
 	private boolean exitPressed;
 
 	boolean[] cursor = new boolean[4];
+	long[] cursortime = new long[4];
 
 	public void setMinimumInputDutration(int minduration) {
 		this.minduration = minduration;
@@ -146,7 +152,7 @@ public class BMSPlayerInputProcessor {
 	}
 
 	public void keyChanged(int presstime, int i, boolean pressed) {
-		if (enableKeyInput) {
+		if (enableKeyInput && keystate[i] != pressed) {
 			keystate[i] = pressed;
 			if(this.getStartTime() == 0 || presstime >= lasttime[i] + minduration) {
 				time[i] = presstime;
@@ -180,6 +186,10 @@ public class BMSPlayerInputProcessor {
 
 	public boolean[] getCursorState() {
 		return cursor;
+	}
+
+	public long[] getCursorTime() {
+		return cursortime;
 	}
 
 	public void setCursorState(boolean[] cursor) {
@@ -223,7 +233,7 @@ public class BMSPlayerInputProcessor {
 	}
 	
 	public BMControllerInputProcessor[] getBMInputProcessor() {
-		return bminput.toArray(new BMControllerInputProcessor[0]);
+		return bminput;
 	}
 
 	public int getMouseX() {
@@ -260,5 +270,22 @@ public class BMSPlayerInputProcessor {
 
 	public void resetScroll() {
 		scroll = 0;
+	}
+	
+	class PollingThread extends Thread {
+		
+		public void run() {
+			long time = 0;
+			for(;;) {
+				final long now = System.currentTimeMillis();
+				if(time != now) {
+					time = now;
+					kbinput.poll();
+					for(BMControllerInputProcessor controller : bminput) {
+						controller.poll();
+					}
+				}
+			}
+		}
 	}
 }

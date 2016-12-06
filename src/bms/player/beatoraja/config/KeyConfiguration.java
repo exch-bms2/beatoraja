@@ -93,26 +93,27 @@ public class KeyConfiguration extends MainState {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 		boolean[] cursor = input.getCursorState();
+		long[] cursortime = input.getCursorTime();
 		boolean[] number = input.getNumberState();
-		if (cursor[0]) {
-			cursor[0] = false;
+		if (cursor[0] && cursortime[0] != 0) {
+			cursortime[0] = 0;
 			cursorpos = (cursorpos + keys.length - 1) % keys.length;
 		}
-		if (cursor[1]) {
-			cursor[1] = false;
+		if (cursor[1] && cursortime[1] != 0) {
+			cursortime[1] = 0;
 			cursorpos = (cursorpos + 1) % keys.length;
 		}
-		if (cursor[2]) {
-			cursor[2] = false;
+		if (cursor[2] && cursortime[2] != 0) {
+			cursortime[2] = 0;
 			mode = (mode + KEYS.length - 1) % KEYS.length;
 		}
-		if (cursor[3]) {
-			cursor[3] = false;
+		if (cursor[3] && cursortime[3] != 0) {
+			cursortime[3] = 0;
 			mode = (mode + 1) % KEYS.length;
 		}
 
-		if (number[1]) {
-			number[1] = false;
+		if (number[1] && input.getNumberTime()[1] != 0) {
+			input.getNumberTime()[1] = 0;
 			config.setMusicselectinput((config.getMusicselectinput() + 1) % 2);
 		}
 

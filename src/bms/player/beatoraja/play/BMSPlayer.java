@@ -566,8 +566,10 @@ public class BMSPlayer extends MainState {
 				resource.setCombo(judge.getCourseCombo());
 				resource.setMaxcombo(judge.getCourseMaxcombo());
 				saveConfig();
-				for(long l = getTimer()[TIMER_FAILED] - getTimer()[TIMER_PLAY];l < playtime + 500;l += 500) {
-					gaugelog.add(0f);
+				if(getTimer()[TIMER_PLAY] != Long.MIN_VALUE) {
+					for(long l = getTimer()[TIMER_FAILED] - getTimer()[TIMER_PLAY];l < playtime + 500;l += 500) {
+						gaugelog.add(0f);
+					}
 				}
 				resource.setGauge(gaugelog);
 				resource.setGrooveGauge(gauge);
