@@ -121,43 +121,19 @@ public class Skin {
 	}
 
 	public void mousePressed(MainState state, int button, int x, int y) {
-		for (SkinObject obj : objects) {
-			if (isDraw(obj.getOption(), state)) {
-				obj.mousePressed(state, button, x, y);
+		for (int i = objects.size() - 1; i >= 0; i--) {
+			final SkinObject obj = objects.get(i);
+			if (isDraw(obj.getOption(), state) && obj.mousePressed(state, button, x, y)) {
+				break;
 			}
 		}
 	}
 
 	public void mouseDragged(MainState state, int button, int x, int y) {
-		final long time = state.getNowTime();
-		for (SkinObject obj : objects) {
-			if (obj instanceof SkinSlider && ((SkinSlider) obj).isChangable() && isDraw(obj.getOption(), state)) {
-				Rectangle r = obj.getDestination(time, state);
-				if (r != null) {
-					final SkinSlider slider = (SkinSlider) obj;
-					switch (slider.getSliderAngle()) {
-					case 0:
-						if (r.x <= x && r.x + r.width >= x && r.y <= y && r.y + slider.getRange() >= y) {
-							state.setSliderValue(slider.getType(), (y - r.y) / slider.getRange());
-						}
-						break;
-					case 1:
-						if (r.x <= x && r.x + slider.getRange() >= x && r.y <= y && r.y + r.height >= y) {
-							state.setSliderValue(slider.getType(), (x - r.x) / slider.getRange());
-						}
-						break;
-					case 2:
-						if (r.x <= x && r.x + r.width >= x && r.y - slider.getRange() <= y && r.y >= y) {
-							state.setSliderValue(slider.getType(), (r.y - y) / slider.getRange());
-						}
-						break;
-					case 3:
-						if (r.x <= x && r.x + slider.getRange() >= x && r.y <= y && r.y + r.height >= y) {
-							state.setSliderValue(slider.getType(), (r.x + slider.getRange() - x) / slider.getRange());
-						}
-						break;
-					}
-				}
+		for (int i = objects.size() - 1; i >= 0; i--) {
+			final SkinObject obj = objects.get(i);
+			if (obj instanceof SkinSlider && isDraw(obj.getOption(), state) && obj.mousePressed(state, button, x, y)) {
+				break;
 			}
 		}
 	}

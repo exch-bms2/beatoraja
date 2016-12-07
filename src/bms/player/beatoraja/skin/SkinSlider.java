@@ -51,6 +51,41 @@ public class SkinSlider extends SkinObject {
 		}
 	}
 
+	protected boolean mousePressed(MainState state, int button, int x, int y) {
+		if (isChangable()) {
+			Rectangle r = getDestination(state.getNowTime(), state);
+			if (r != null) {
+				switch (getSliderAngle()) {
+				case 0:
+					if (r.x <= x && r.x + r.width >= x && r.y <= y && r.y + range >= y) {
+						state.setSliderValue(type, (y - r.y) / range);
+						return true;
+					}
+					break;
+				case 1:
+					if (r.x <= x && r.x + range >= x && r.y <= y && r.y + r.height >= y) {
+						state.setSliderValue(type, (x - r.x) / range);
+						return true;
+					}
+					break;
+				case 2:
+					if (r.x <= x && r.x + r.width >= x && r.y - range <= y && r.y >= y) {
+						state.setSliderValue(type, (r.y - y) / range);
+						return true;
+					}
+					break;
+				case 3:
+					if (r.x <= x && r.x + range >= x && r.y <= y && r.y + r.height >= y) {
+						state.setSliderValue(type, (r.x + range - x) / range);
+						return true;
+					}
+					break;
+				}
+			}
+		}
+		return false;
+	}
+
 	public void dispose() {
 		if (source != null) {
 			source.dispose();

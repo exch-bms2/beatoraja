@@ -342,7 +342,7 @@ public abstract class SkinObject {
 		}
 	}
 	
-	protected void mousePressed(MainState state, int button, int x, int y) {
+	protected boolean mousePressed(MainState state, int button, int x, int y) {
 		if (clickevent != -1) {
 			Rectangle r = getDestination(state.getNowTime(), state);
 			// System.out.println(obj.getClickevent() + " : " + r.x +
@@ -350,8 +350,10 @@ public abstract class SkinObject {
 			// "," + y);
 			if (r != null && r.x <= x && r.x + r.width >= x && r.y <= y && r.y + r.height >= y) {
 				state.executeClickEvent(clickevent);
+				return true;
 			}
 		}
+		return false;
 	}
 
 	public int getClickevent() {

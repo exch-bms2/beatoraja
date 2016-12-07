@@ -141,7 +141,7 @@ public class BarRenderer {
 		search.add(bar);
 	}
 
-	public void mousePressed(SkinBar baro, int button, int x, int y) {
+	public boolean mousePressed(SkinBar baro, int button, int x, int y) {
 		for (int i : ((MusicSelectSkin) select.getSkin()).getClickableBar()) {
 			boolean on = (i == ((MusicSelectSkin) select.getSkin()).getCenterBar());
 			if (baro.getBarImages(on, i) == null) {
@@ -155,15 +155,15 @@ public class BarRenderer {
 			if (r != null) {
 				if (r != null && r.x <= x && r.x + r.width >= x && r.y <= y && r.y + r.height >= y) {
 					if(button == 0) {
-						select.select(sd);						
+						select.select(sd);
 					} else {
 						select.close();
 					}
-					break;
+					return true;
 				}
 			}
 		}
-
+		return false;
 	}
 
 	public void render(SpriteBatch sprite, ShapeRenderer shape, MusicSelectSkin skin, SkinBar baro, float w, float h,
