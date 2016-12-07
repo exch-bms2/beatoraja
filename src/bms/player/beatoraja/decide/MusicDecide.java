@@ -86,18 +86,23 @@ public class MusicDecide extends MainState {
 						cancel ? MainController.STATE_SELECTMUSIC : MainController.STATE_PLAYBMS);
 			}
 		} else {
-			if (nowtime > getSkin().getInput()) {
-				BMSPlayerInputProcessor input = getMainController().getInputProcessor();
-				if (input.getKeystate()[0] || input.getKeystate()[2] || input.getKeystate()[4]
-						|| input.getKeystate()[6]) {
-					getTimer()[TIMER_FADEOUT] = nowtime;
-				}
-				if (input.isExitPressed()) {
-					cancel = true;
-					getTimer()[TIMER_FADEOUT] = nowtime;
-				}
-			}
 			if (nowtime > getSkin().getScene()) {
+				getTimer()[TIMER_FADEOUT] = nowtime;
+			}
+		}
+	}
+
+	public void input() {
+		long nowtime = getNowTime();
+
+		if (getTimer()[TIMER_FADEOUT] == Long.MIN_VALUE && nowtime > getSkin().getInput()) {
+			BMSPlayerInputProcessor input = getMainController().getInputProcessor();
+			if (input.getKeystate()[0] || input.getKeystate()[2] || input.getKeystate()[4]
+					|| input.getKeystate()[6]) {
+				getTimer()[TIMER_FADEOUT] = nowtime;
+			}
+			if (input.isExitPressed()) {
+				cancel = true;
 				getTimer()[TIMER_FADEOUT] = nowtime;
 			}
 		}

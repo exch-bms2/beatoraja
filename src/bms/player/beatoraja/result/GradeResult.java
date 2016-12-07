@@ -109,31 +109,45 @@ public class GradeResult extends MainState {
 				if (fail != null) {
 					fail.stop();
 				}
-
 				main.changeState(MainController.STATE_SELECTMUSIC);
 			}
-		} else {
-			if (time > getSkin().getInput()) {
-				boolean[] keystate = main.getInputProcessor().getKeystate();
-				if (resource.getScoreData() == null || (keystate[0] || keystate[2] || keystate[4] || keystate[6])) {
-					getTimer()[TIMER_FADEOUT] = time;
-				}
-
-				for (int i = 0; i < MusicSelector.REPLAY; i++) {
-					if (resource.getAutoplay() == 0 && main.getInputProcessor().getNumberState()[i + 1]) {
-						saveReplayData(i);
-						break;
-					}
-				}
-			}
-			if (time > getSkin().getScene()) {
-				getTimer()[TIMER_FADEOUT] = time;
-			}
+		} else if (time > getSkin().getScene()) {
+            getTimer()[TIMER_FADEOUT] = time;
 		}
 
 	}
 
-	public void updateScoreDatabase() {
+    public void input() {
+        int time = getNowTime();
+        final MainController main = getMainController();
+        final PlayerResource resource = getMainController().getPlayerResource();
+
+        if (getTimer()[TIMER_FADEOUT] == Long.MIN_VALUE && time > getSkin().getInput()) {
+            boolean[] keystate = main.getInputProcessor().getKeystate();
+            long[] keytime = main.getInputProcessor().getTime();
+            if (resource.getScoreData() == null
+                    || ((keystate[0] && keytime[0] != 0) || (keystate[2] && keytime[2] != 0)
+                    || (keystate[4] && keytime[4] != 0) || (keystate[6] && keytime[6] != 0))) {
+                keytime[0] = keytime[2] = keytime[4] = keytime[6] = 0;
+                if (((MusicResultSkin) getSkin()).getRankTime() != 0 && getTimer()[TIMER_RESULT_UPDATESCORE] == Long.MIN_VALUE) {
+                    getTimer()[TIMER_RESULT_UPDATESCORE] = time;
+                } else {
+                    getTimer()[TIMER_FADEOUT] = time;
+                }
+            }
+
+            for (int i = 0; i < MusicSelector.REPLAY; i++) {
+                if (resource.getAutoplay() == 0 && main.getInputProcessor().getNumberState()[i + 1]) {
+                    saveReplayData(i);
+                    break;
+                }
+            }
+        }
+    }
+
+
+
+    public void updateScoreDatabase() {
 		saveReplay = false;
 		final PlayerResource resource = getMainController().getPlayerResource();
 		BMSModel[] models = resource.getCourseBMSModels();

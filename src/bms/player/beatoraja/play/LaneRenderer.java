@@ -66,14 +66,6 @@ public class LaneRenderer {
 
 	private final Config config;
 	private PlayConfig playconfig;
-	private final int auto;
-
-	private boolean hschanged;
-	private long startpressedtime;
-	private boolean startpressed;
-	private boolean cursorpressed;
-
-	private boolean enableControl = true;
 
 	/**
 	 * ボムの表示開始時間
@@ -103,7 +95,6 @@ public class LaneRenderer {
 		this.font = font;
 		this.skin = skin;
 		this.config = resource.getConfig();
-		auto = resource.getAutoplay();
 		this.playconfig = (model.getUseKeys() == 5 || model.getUseKeys() == 7 ? config.getMode7()
 				: (model.getUseKeys() == 10 || model.getUseKeys() == 14 ? config.getMode14() : config.getMode9()));
 		this.enableLanecover = playconfig.isEnablelanecover();
@@ -120,7 +111,6 @@ public class LaneRenderer {
 
 		for (int i : mode) {
 			if (i == TableData.NO_HISPEED) {
-				enableControl = false;
 				hispeed = 1.0f;
 				lanecover = 0;
 				lift = 0;
@@ -311,71 +301,6 @@ public class LaneRenderer {
 				} else {
 					main.getTimer()[TIMER_HOLD_1P_KEY1 + offset] = Long.MIN_VALUE;
 				}
-			}
-		}
-
-		// 各種コントロール入力判定
-		// TODO ここで各種コントロール入力判定をやるべきではないかも
-		if (enableControl) {
-			final BMSPlayerInputProcessor input = main.getBMSPlayerInputProcessor();
-			if (input.getCursorState()[0]) {
-				if (!cursorpressed) {
-					this.setLanecover(lanecover - 0.01f);
-					cursorpressed = true;
-				}
-			} else if (input.getCursorState()[1]) {
-				if (!cursorpressed) {
-					this.setLanecover(lanecover + 0.01f);
-					cursorpressed = true;
-				}
-			} else {
-				cursorpressed = false;
-			}
-			// move lane cover by mouse wheel
-			if (input.getScroll() != 0) {
-				this.setLanecover(lanecover - input.getScroll() * 0.005f);
-				input.resetScroll();
-			}
-			if (input.startPressed()) {
-				if (auto == 0) {
-					// change hi speed by START + Keys
-					boolean[] key = input.getKeystate();
-					if (key[0] || key[2] || key[4] || key[6]) {
-						if (!hschanged) {
-							changeHispeed(false);
-							hschanged = true;
-						}
-					} else if (key[1] || key[3] || key[5]) {
-						if (!hschanged) {
-							changeHispeed(true);
-							hschanged = true;
-						}
-					} else {
-						hschanged = false;
-					}
-
-					// move lane cover by START + Scratch
-					if (keystate[7] | keystate[8]) {
-						long l = System.currentTimeMillis();
-						if (l - lanecovertiming > 50) {
-							this.setLanecover(lanecover + (keystate[7] ? 0.001f : -0.001f));
-							lanecovertiming = l;
-						}
-					}
-				}
-				// show-hide lane cover by double-press START
-				if (!startpressed) {
-					long stime = System.currentTimeMillis();
-					if (stime < startpressedtime + 500) {
-						setEnableLanecover(!isEnableLanecover());
-						startpressedtime = 0;
-					} else {
-						startpressedtime = stime;
-					}
-				}
-				startpressed = true;
-			} else {
-				startpressed = false;
 			}
 		}
 
@@ -702,9 +627,5 @@ public class LaneRenderer {
 
 	public int[] getJudge() {
 		return judge;
-	}
-
-	public void setEnableControlInput(boolean enableControl) {
-		this.enableControl = enableControl;
 	}
 }
