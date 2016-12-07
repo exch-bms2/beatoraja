@@ -216,12 +216,27 @@ public class MusicResult extends MainState {
 				}
 			}
 		} else {
+			if (time > getSkin().getScene()) {
+				getTimer()[TIMER_FADEOUT] = time;
+			}
+		}
+
+	}
+
+	public void input() {
+		int time = getNowTime();
+		final MainController main = getMainController();
+		final PlayerResource resource = getMainController().getPlayerResource();
+
+		if (getTimer()[TIMER_FADEOUT] != Long.MIN_VALUE) {
+
+		} else {
 			if (time > getSkin().getInput()) {
 				boolean[] keystate = main.getInputProcessor().getKeystate();
 				long[] keytime = main.getInputProcessor().getTime();
 				if (resource.getScoreData() == null
 						|| ((keystate[0] && keytime[0] != 0) || (keystate[2] && keytime[2] != 0)
-								|| (keystate[4] && keytime[4] != 0) || (keystate[6] && keytime[6] != 0))) {
+						|| (keystate[4] && keytime[4] != 0) || (keystate[6] && keytime[6] != 0))) {
 					keytime[0] = keytime[2] = keytime[4] = keytime[6] = 0;
 					if (((MusicResultSkin) getSkin()).getRankTime() != 0 && getTimer()[TIMER_RESULT_UPDATESCORE] == Long.MIN_VALUE) {
 						getTimer()[TIMER_RESULT_UPDATESCORE] = time;
@@ -237,11 +252,7 @@ public class MusicResult extends MainState {
 					}
 				}
 			}
-			if (time > getSkin().getScene()) {
-				getTimer()[TIMER_FADEOUT] = time;
-			}
 		}
-
 	}
 
 	private boolean saveReplay = false;

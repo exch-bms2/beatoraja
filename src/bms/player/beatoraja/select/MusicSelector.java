@@ -186,6 +186,7 @@ public class MusicSelector extends MainState {
 	}
 
 	public void create() {
+		play = -1;
 		final MainController main = getMainController();
 		playerdata = main.getPlayDataAccessor().readPlayerData();
 		for (Map cache : scorecache) {
@@ -337,12 +338,9 @@ public class MusicSelector extends MainState {
 	public void render() {
 		final MainController main = getMainController();
 		final SpriteBatch sprite = main.getSpriteBatch();
-		final ShapeRenderer shape = main.getShapeRenderer();
-		BMSPlayerInputProcessor input = main.getInputProcessor();
 		final PlayerResource resource = main.getPlayerResource();
 		final Bar current = bar.getSelected();
 
-		final int nowtime = getNowTime();
 		// draw song information
 		sprite.begin();
 		titlefont.setColor(Color.WHITE);
@@ -431,6 +429,34 @@ public class MusicSelector extends MainState {
 			}
 		}
 		sprite.end();
+
+		if(play >= 0) {
+			if (current instanceof SongBar) {
+				resource.clear();
+				if (resource.setBMSFile(Paths.get(((SongBar) current).getSongData().getPath()), config, play)) {
+					if (bgm != null) {
+						bgm.stop();
+					}
+					getMainController().changeState(MainController.STATE_DECIDE);
+				}
+			} else if (current instanceof GradeBar) {
+				if(play == 2) {
+					play = 0;
+				}
+				readCourse(play);
+			}
+			play = 0;
+		} else if(play == -255) {
+			getMainController().exit();
+		}
+	}
+
+	private int play = -1;
+
+	public void input() {
+		BMSPlayerInputProcessor input = getMainController().getInputProcessor();
+		final Bar current = bar.getSelected();
+		final int nowtime = getNowTime();
 
 		boolean[] numberstate = input.getNumberState();
 		long[] numtime = input.getNumberTime();
@@ -522,24 +548,25 @@ public class MusicSelector extends MainState {
 			if (bgm != null) {
 				bgm.stop();
 			}
-			main.changeState(MainController.STATE_CONFIG);
+			getMainController().changeState(MainController.STATE_CONFIG);
 		} else {
+			final boolean selectable = (current instanceof SelectableBar);
 			// 1鍵 (選曲 or フォルダを開く)
 			if (isPressed(keystate, keytime, KEY_PLAY, true) || (cursor[3] && cursortime[3] != 0)) {
 				cursortime[3] = 0;
 				select(current);
 			}
 			// 3鍵 (プラクティス)
-			if (isPressed(keystate, keytime, KEY_PRACTICE, true)) {
-				play(2);
+			if (isPressed(keystate, keytime, KEY_PRACTICE, selectable)) {
+				play = selectable ? 2 : play;
 			}
 			// 5鍵 (オートプレイ)
-			if (isPressed(keystate, keytime, KEY_AUTO, true)) {
-				play(1);
+			if (isPressed(keystate, keytime, KEY_AUTO, selectable)) {
+				play = selectable ? 1 : play;
 			}
 			// 7鍵 (リプレイ)
-			if (isPressed(keystate, keytime, KEY_REPLAY, true)) {
-				play(3 + selectedreplay);
+			if (isPressed(keystate, keytime, KEY_REPLAY, selectable)) {
+				play = selectable ? 3 + selectedreplay : play;
 			}
 			// 白鍵 (フォルダを開く)
 			if (isPressed(keystate, keytime, KEY_FOLDER_OPEN, true) || (cursor[3] && cursortime[3] != 0)) {
@@ -659,7 +686,7 @@ public class MusicSelector extends MainState {
 		}
 
 		if (input.isExitPressed()) {
-			exit();
+            getMainController().exit();
 		}
 	}
 	
@@ -673,7 +700,7 @@ public class MusicSelector extends MainState {
 			}
 			resetReplayIndex();
 		} else {
-			play(current, 0);
+			play = 0;
 		}
 	}
 
@@ -707,28 +734,6 @@ public class MusicSelector extends MainState {
 			}
 		}
 		selectedreplay = -1;
-	}
-
-	private void play(int autoplay) {
-		play(bar.getSelected(), autoplay);
-	}
-	
-	private void play(Bar current, int autoplay) {
-		if (current instanceof SongBar) {
-			PlayerResource resource = this.getMainController().getPlayerResource();
-			resource.clear();
-			if (resource.setBMSFile(Paths.get(((SongBar) current).getSongData().getPath()), config, autoplay)) {
-				if (bgm != null) {
-					bgm.stop();
-				}
-				getMainController().changeState(MainController.STATE_DECIDE);
-			}
-		} else if (current instanceof GradeBar) {
-			if(autoplay == 2) {
-				autoplay = 0;
-			}
-			readCourse(autoplay);
-		}
 	}
 
 	private void readCourse(int autoplay) {
@@ -827,10 +832,6 @@ public class MusicSelector extends MainState {
 
 	public List<Bar> getDir() {
 		return dir;
-	}
-
-	public void exit() {
-		getMainController().exit();
 	}
 
 	public void dispose() {
@@ -1229,25 +1230,25 @@ public class MusicSelector extends MainState {
 	public void executeClickEvent(int id) {
 		switch (id) {
 		case BUTTON_PLAY:
-			play(0);
+			play = 0;
 			break;
 		case BUTTON_AUTOPLAY:
-			play(1);
+			play = 1;
 			break;
 			case BUTTON_PRACTICE:
-				play(2);
+				play = 2;
 				break;
 		case BUTTON_REPLAY:
-			play(3);
+			play = 3;
 			break;
 		case BUTTON_REPLAY2:
-			play(4);
+			play = 4;
 			break;
 		case BUTTON_REPLAY3:
-			play(5);
+			play = 5;
 			break;
 		case BUTTON_REPLAY4:
-			play(6);
+			play = 6;
 			break;
 		}
 	}

@@ -362,6 +362,13 @@ public class BMSPlayer extends MainState {
 		input.setKeyassign(pc.getKeyassign());
 		input.setControllerassign(pc.getControllerassign());
 		lanerender = new LaneRenderer(this, sprite, shape, systemfont, skin, resource, model, resource.getConstraint());
+		for (int i : resource.getConstraint()) {
+			if (i == TableData.NO_HISPEED) {
+				enableControl = false;
+				break;
+			}
+		}
+
 		skin.setBMSPlayer(this);
 		bga = resource.getBGAManager();
 
@@ -393,10 +400,11 @@ public class BMSPlayer extends MainState {
 
 	protected static final int STATE_PRELOAD = 0;
 	protected static final int STATE_PRACTICE = 1;
-	protected static final int STATE_READY = 2;
-	protected static final int STATE_PLAY = 3;
-	protected static final int STATE_FAILED = 4;
-	protected static final int STATE_FINISHED = 5;
+	protected static final int STATE_PRACTICE_FINISHED = 2;
+	protected static final int STATE_READY = 3;
+	protected static final int STATE_PLAY = 4;
+	protected static final int STATE_FAILED = 5;
+	protected static final int STATE_FINISHED = 6;
 
 	private int state = STATE_PRELOAD;
 
@@ -434,12 +442,12 @@ public class BMSPlayer extends MainState {
 				getTimer()[TIMER_FADEOUT] = Long.MIN_VALUE;
 				getTimer()[TIMER_ENDOFNOTE_1P] = Long.MIN_VALUE;
 			}
-			lanerender.setEnableControlInput(false);
+			enableControl = false;
 			practice.processInput(input);
 			
 			if (input.getKeystate()[0] && resource.mediaLoadFinished() && now > skin.getLoadstart() + skin.getLoadend() && !input.startPressed()) {
 				PracticeProperty property = practice.getPracticeProperty();
-				lanerender.setEnableControlInput(true);				
+				enableControl = true;
 				PracticeModifier pm = new PracticeModifier(property.starttime, property.endtime);
 				pm.modify(model);
 				if(model.getUseKeys() >= 10) {
@@ -469,7 +477,15 @@ public class BMSPlayer extends MainState {
 			}
 			break;
 		// GET READY
-		case STATE_READY:
+			case STATE_PRACTICE_FINISHED:
+				long l3 = now - getTimer()[TIMER_FADEOUT];
+				if (l3 > skin.getFadeout()) {
+                    input.setEnableKeyInput(true);
+                    getMainController().changeState(MainController.STATE_SELECTMUSIC);
+				}
+				break;
+
+			case STATE_READY:
 			final long rt = now - getTimer()[TIMER_READY];
 			if (rt > skin.getPlaystart()) {
 				state = STATE_PLAY;
@@ -622,6 +638,83 @@ public class BMSPlayer extends MainState {
 			}
 			break;
 		}
+		prevtime = nowtime;
+	}
+
+	private boolean hschanged;
+	private long startpressedtime;
+	private boolean startpressed;
+	private boolean cursorpressed;
+	private long lanecovertiming;
+
+	private boolean enableControl = true;
+
+	public void input() {
+		// 各種コントロール入力判定
+		if (enableControl) {
+			if (input.getCursorState()[0]) {
+				if (!cursorpressed) {
+					lanerender.setLanecover(lanerender.getLanecover() - 0.01f);
+					cursorpressed = true;
+				}
+			} else if (input.getCursorState()[1]) {
+				if (!cursorpressed) {
+					lanerender.setLanecover(lanerender.getLanecover() + 0.01f);
+					cursorpressed = true;
+				}
+			} else {
+				cursorpressed = false;
+			}
+			// move lane cover by mouse wheel
+			if (input.getScroll() != 0) {
+				lanerender.setLanecover(lanerender.getLanecover() - input.getScroll() * 0.005f);
+				input.resetScroll();
+			}
+			if (input.startPressed()) {
+				if (autoplay == 0) {
+					// change hi speed by START + Keys
+					boolean[] key = input.getKeystate();
+					if (key[0] || key[2] || key[4] || key[6]) {
+						if (!hschanged) {
+							lanerender.changeHispeed(false);
+							hschanged = true;
+						}
+					} else if (key[1] || key[3] || key[5]) {
+						if (!hschanged) {
+							lanerender.changeHispeed(true);
+							hschanged = true;
+						}
+					} else {
+						hschanged = false;
+					}
+
+					// move lane cover by START + Scratch
+					if (key[7] | key[8]) {
+						long l = System.currentTimeMillis();
+						if (l - lanecovertiming > 50) {
+							lanerender.setLanecover(lanerender.getLanecover() + (key[7] ? 0.001f : -0.001f));
+							lanecovertiming = l;
+						}
+					}
+				}
+				// show-hide lane cover by double-press START
+				if (!startpressed) {
+					long stime = System.currentTimeMillis();
+					if (stime < startpressedtime + 500) {
+						lanerender.setEnableLanecover(!lanerender.isEnableLanecover());
+						startpressedtime = 0;
+					} else {
+						startpressedtime = stime;
+					}
+				}
+				startpressed = true;
+			} else {
+				startpressed = false;
+			}
+		}
+
+
+		// stop playing
 		if (input.isExitPressed()) {
 			input.setExitPressed(false);
 			stopPlay();
@@ -640,8 +733,6 @@ public class BMSPlayer extends MainState {
 				playspeed = 100;
 			}
 		}
-
-		prevtime = nowtime;
 	}
 
 	public int getState() {
@@ -738,9 +829,15 @@ public class BMSPlayer extends MainState {
 	public void stopPlay() {
 		if(state == STATE_PRACTICE) {
 			practice.saveProperty();
-			getMainController().changeState(MainController.STATE_SELECTMUSIC);
+			getTimer()[TIMER_FADEOUT] = getNowTime();
+			state = STATE_PRACTICE_FINISHED;
 			return;
 		}
+		if(state == STATE_PRELOAD || state == STATE_READY) {
+            getTimer()[TIMER_FADEOUT] = getNowTime();
+            state = STATE_PRACTICE_FINISHED;
+            return;
+        }
 		if (getTimer()[TIMER_FAILED] != Long.MIN_VALUE || getTimer()[TIMER_FADEOUT] != Long.MIN_VALUE) {
 			return;
 		}

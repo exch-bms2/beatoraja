@@ -76,7 +76,6 @@ public class MainController extends ApplicationAdapter {
 	private static final Path songdbpath = Paths.get("songdata.db");
 
 	private ScreenShotThread screenshot;
-	private InputThread inputthread;
 
 	public MainController(Path f, Config config, int auto) {
 		this.auto = auto;
@@ -176,8 +175,6 @@ public class MainController extends ApplicationAdapter {
 
 		input = new BMSPlayerInputProcessor(RESOLUTION[config.getResolution()]);
 		
-		inputthread = new InputThread();
-
 		selector = new MusicSelector(this, config);
 		decide = new MusicDecide(this);
 		result = new MusicResult(this);
@@ -190,7 +187,6 @@ public class MainController extends ApplicationAdapter {
 		} else {
 			changeState(STATE_SELECTMUSIC);
 		}
-		inputthread.start();
 
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/default/VL-Gothic-Regular.ttf"));
 		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
@@ -199,6 +195,8 @@ public class MainController extends ApplicationAdapter {
 		generator.dispose();
 		Logger.getGlobal().info("初期化時間(ms) : " + (System.currentTimeMillis() - t));
 	}
+
+	private long prevtime;
 
 	@Override
 	public void render() {
@@ -232,6 +230,66 @@ public class MainController extends ApplicationAdapter {
 					RESOLUTION[config.getResolution()].height - 2);
 			sprite.end();
 		}
+
+		final long time = System.currentTimeMillis();
+		if(time > prevtime + 20) {
+		    prevtime = time;
+            current.input();
+            // move song bar position by mouse
+            if (input.isMousePressed()) {
+                input.setMousePressed();
+                current.getSkin().mousePressed(current, input.getMouseButton(), input.getMouseX(), input.getMouseY());
+            }
+            if (input.isMouseDragged()) {
+                input.setMouseDragged();
+                current.getSkin().mouseDragged(current, input.getMouseButton(), input.getMouseX(), input.getMouseY());
+            }
+
+            // FPS表示切替
+            if (input.getFunctionstate()[0] && input.getFunctiontime()[0] != 0) {
+                showfps = !showfps;
+                input.getFunctiontime()[0] = 0;
+            }
+            // fullscrees - windowed
+            if (input.getFunctionstate()[3] && input.getFunctiontime()[3] != 0) {
+                boolean fullscreen = Gdx.graphics.isFullscreen();
+                Graphics.DisplayMode currentMode = Gdx.graphics.getDisplayMode();
+                if (fullscreen) {
+                    Gdx.graphics.setWindowedMode(currentMode.width, currentMode.height);
+                } else {
+                    Gdx.graphics.setFullscreenMode(currentMode);
+                }
+                config.setFullscreen(!fullscreen);
+                input.getFunctiontime()[3] = 0;
+            }
+
+            // if (input.getFunctionstate()[4] && input.getFunctiontime()[4] != 0) {
+            // int resolution = config.getResolution();
+            // resolution = (resolution + 1) % RESOLUTION.length;
+            // if (config.isFullscreen()) {
+            // Gdx.graphics.setWindowedMode((int) RESOLUTION[resolution].width,
+            // (int) RESOLUTION[resolution].height);
+            // Graphics.DisplayMode currentMode = Gdx.graphics.getDisplayMode();
+            // Gdx.graphics.setFullscreenMode(currentMode);
+            // }
+            // else {
+            // Gdx.graphics.setWindowedMode((int) RESOLUTION[resolution].width,
+            // (int) RESOLUTION[resolution].height);
+            // }
+            // config.setResolution(resolution);
+            // input.getFunctiontime()[4] = 0;
+            // }
+
+            // screen shot
+            if (input.getFunctionstate()[5] && input.getFunctiontime()[5] != 0) {
+                if (screenshot == null || screenshot.savetime != 0) {
+                    screenshot = new ScreenShotThread(ScreenUtils.getFrameBufferPixels(0, 0, Gdx.graphics.getBackBufferWidth(),
+                            Gdx.graphics.getBackBufferHeight(), true));
+                    screenshot.start();
+                }
+                input.getFunctiontime()[5] = 0;
+            }
+        }
 	}
 
 	@Override
@@ -329,82 +387,6 @@ public class MainController extends ApplicationAdapter {
 			input.getFunctiontime()[5] = 0;
 			Logger.getGlobal().info("スクリーンショット保存:" + path);
 			screenshot.savetime = System.currentTimeMillis();
-		}
-	}
-	
-	/**
-	 * コントロール系入力処理用スレッド
-	 * 
-	 * @author exch
-	 */
-	class InputThread extends Thread {
-
-		private boolean stop = false;
-		
-		@Override
-		public void run() {
-			while(!stop) {
-				current.input();
-				// move song bar position by mouse
-				if (input.isMousePressed()) {
-					input.setMousePressed();
-					current.getSkin().mousePressed(current, input.getMouseButton(), input.getMouseX(), input.getMouseY());
-				}
-				if (input.isMouseDragged()) {
-					input.setMouseDragged();
-					current.getSkin().mouseDragged(current, input.getMouseButton(), input.getMouseX(), input.getMouseY());
-				}
-
-				// FPS表示切替
-				if (input.getFunctionstate()[0] && input.getFunctiontime()[0] != 0) {
-					showfps = !showfps;
-					input.getFunctiontime()[0] = 0;
-				}
-				// fullscrees - windowed
-				if (input.getFunctionstate()[3] && input.getFunctiontime()[3] != 0) {
-					boolean fullscreen = Gdx.graphics.isFullscreen();
-					Graphics.DisplayMode currentMode = Gdx.graphics.getDisplayMode();
-					if (fullscreen) {
-						Gdx.graphics.setWindowedMode(currentMode.width, currentMode.height);
-					} else {
-						Gdx.graphics.setFullscreenMode(currentMode);
-					}
-					config.setFullscreen(!fullscreen);
-					input.getFunctiontime()[3] = 0;
-				}
-
-				// if (input.getFunctionstate()[4] && input.getFunctiontime()[4] != 0) {
-				// int resolution = config.getResolution();
-				// resolution = (resolution + 1) % RESOLUTION.length;
-				// if (config.isFullscreen()) {
-				// Gdx.graphics.setWindowedMode((int) RESOLUTION[resolution].width,
-				// (int) RESOLUTION[resolution].height);
-				// Graphics.DisplayMode currentMode = Gdx.graphics.getDisplayMode();
-				// Gdx.graphics.setFullscreenMode(currentMode);
-				// }
-				// else {
-				// Gdx.graphics.setWindowedMode((int) RESOLUTION[resolution].width,
-				// (int) RESOLUTION[resolution].height);
-				// }
-				// config.setResolution(resolution);
-				// input.getFunctiontime()[4] = 0;
-				// }
-
-				// screen shot
-				if (input.getFunctionstate()[5] && input.getFunctiontime()[5] != 0) {
-					if (screenshot == null || screenshot.savetime != 0) {
-						screenshot = new ScreenShotThread(ScreenUtils.getFrameBufferPixels(0, 0, Gdx.graphics.getBackBufferWidth(),
-								Gdx.graphics.getBackBufferHeight(), true));
-						screenshot.start();
-					}
-					input.getFunctiontime()[5] = 0;
-				}
-				
-				try {
-					sleep(100);
-				} catch (InterruptedException e) {
-				}
-			}
 		}
 	}
 }
