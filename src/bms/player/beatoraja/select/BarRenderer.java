@@ -166,7 +166,7 @@ public class BarRenderer {
 		return false;
 	}
 
-	public void render(SpriteBatch sprite, ShapeRenderer shape, MusicSelectSkin skin, SkinBar baro, float w, float h,
+	public void render(SpriteBatch sprite, MusicSelectSkin skin, SkinBar baro,
 			long duration, int angle, int time) {
 		if (skin == null) {
 			return;
@@ -232,13 +232,11 @@ public class BarRenderer {
 							+ (angle >= 0 ? -1 : 1) * r.height;
 				}
 				final int y = (int) (r.y + dy + (baro.getPosition() == 1 ? r.height : 0));
+				sprite.begin();
 				if (value != -1) {
-					sprite.begin();
-					TextureRegion barimage = baro.getBarImages(on, i).getImage(value, time, select);
 					baro.getBarImages(on, i).draw(sprite, time, select, value, 0, (int) dy);
 					// TODO 新規追加曲はテキストを変える
 					baro.getBarText()[0].draw(sprite, time, select, sd.getTitle(), (int) r.x, y);
-					sprite.end();
 				}
 
 				int flag = 0;
@@ -255,9 +253,7 @@ public class BarRenderer {
 					if (trophy != null) {
 						for (int j = 0; j < TROPHY.length; j++) {
 							if (TROPHY[j].equals(trophy.getName()) && baro.getTrophy()[j] != null) {
-								sprite.begin();
-								sprite.draw(baro.getTrophy()[j].getImage(time, select), r.x + 20, y + 4);
-								sprite.end();
+								baro.getTrophy()[j].draw(sprite, time, select, (int) r.x, y);
 								break;
 							}
 						}
@@ -265,13 +261,10 @@ public class BarRenderer {
 				}
 
 				if (baro.getLamp()[sd.getLamp()] != null) {
-					sprite.begin();
 					baro.getLamp()[sd.getLamp()].draw(sprite, time, select, (int) r.x, y);
-					sprite.end();
 				}
 
 				if (sd instanceof SongBar) {
-					sprite.begin();
 					SongData song = ((SongBar) sd).getSongData();
 
 					SkinNumber leveln = baro.getBarlevel()[song.getDifficulty() >= 0 && song.getDifficulty() < 7 ? song
@@ -279,50 +272,22 @@ public class BarRenderer {
 					if (leveln != null) {
 						leveln.draw(sprite, time, song.getLevel(), select, (int) r.x, y);
 					}
-					sprite.end();
-
 					flag |= song.getFeature();
 				}
 
 				// LN
-				if ((flag & 1) != 0) {
-					shape.begin(ShapeType.Filled);
-					shape.setColor(Color.valueOf("222200"));
-					shape.rect(r.x - 36, r.y + dy, 30, r.height - 6);
-					shape.setColor(Color.YELLOW);
-					shape.rect(r.x - 40, r.y + dy + 4, 30, r.height - 6);
-					shape.end();
-					sprite.begin();
-					titlefont.setColor(Color.BLACK);
-					titlefont.draw(sprite, "LN", r.x - 36, r.y + dy + r.height - 8);
-					sprite.end();
+				if ((flag & 1) != 0 && baro.getLabel()[0] != null) {
+					baro.getLabel()[0].draw(sprite, time, select, (int) r.x, y);
 				}
 				// MINE
-				if ((flag & 2) != 0) {
-					shape.begin(ShapeType.Filled);
-					shape.setColor(Color.valueOf("222200"));
-					shape.rect(r.x - 70, r.y + dy, 30, r.height - 6);
-					shape.setColor(Color.PURPLE);
-					shape.rect(r.x - 74, r.y + dy + 4, 30, r.height - 6);
-					shape.end();
-					sprite.begin();
-					titlefont.setColor(Color.BLACK);
-					titlefont.draw(sprite, "MI", r.x - 70, r.y + dy + r.height - 8);
-					sprite.end();
+				if ((flag & 2) != 0 && baro.getLabel()[2] != null) {
+					baro.getLabel()[2].draw(sprite, time, select, (int) r.x, y);
 				}
 				// RANDOM
-				if ((flag & 4) != 0) {
-					shape.begin(ShapeType.Filled);
-					shape.setColor(Color.valueOf("222200"));
-					shape.rect(r.x - 104, r.y + dy, 30, r.height - 6);
-					shape.setColor(Color.GREEN);
-					shape.rect(r.x - 108, r.y + dy + 4, 30, r.height - 6);
-					shape.end();
-					sprite.begin();
-					titlefont.setColor(Color.BLACK);
-					titlefont.draw(sprite, "RA", r.x - 104, r.y + dy + r.height - 8);
-					sprite.end();
+				if ((flag & 4) != 0 && baro.getLabel()[1] != null) {
+					baro.getLabel()[1].draw(sprite, time, select, (int) r.x, y);
 				}
+				sprite.end();
 			}
 		}
 	}

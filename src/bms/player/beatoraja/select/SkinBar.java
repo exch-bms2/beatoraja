@@ -14,14 +14,28 @@ import com.badlogic.gdx.utils.Align;
  */
 public class SkinBar extends SkinObject {
 
+    /**
+     * 選択時のBarのSkinImage
+     */
     private SkinImage[] barimageon = new SkinImage[60];
+    /**
+     * 非選択時のBarのSkinImage
+     */
     private SkinImage[] barimageoff = new SkinImage[60];
-
+    /**
+     * トロフィーのSkinImage。描画位置はBarの相対座標
+     */
     private SkinImage[] trophy = new SkinImage[3];
 
     private SkinBarText[] text = new SkinBarText[2];
-
+    /**
+     * レベルのSkinNumber。描画位置はBarの相対座標
+     */
     private SkinNumber[] barlevel = new SkinNumber[7];
+    /**
+     * 譜面ラベルのSkinImage。描画位置はBarの相対座標
+     */
+    private SkinImage[] label = new SkinImage[3];
 
     private int position = 0;
 
@@ -107,6 +121,14 @@ public class SkinBar extends SkinObject {
 	protected boolean mousePressed(MainState state, int button, int x, int y) {
         return ((MusicSelector) state).getBarRender().mousePressed(this, button, x, y);
 	}
+
+    public SkinImage[] getLabel() {
+        return label;
+    }
+
+    public void setLabel(SkinImage[] label) {
+        this.label = label;
+    }
 
     public static class SkinBarText extends SkinObject {
         /**
