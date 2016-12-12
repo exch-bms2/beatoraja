@@ -120,7 +120,7 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private Spinner<Integer> maxfps;
 	@FXML
-	private ComboBox<String> audio;
+	private ComboBox<Integer> audio;
 	@FXML
 	private Spinner<Integer> audiobuffer;
 	@FXML
@@ -175,6 +175,8 @@ public class PlayConfigurationView implements Initializable {
 				"DECIDE", "RESULT", "KEY CONFIG", "SKIN SELECT", "SOUND SET", "THEME", "7KEYS BATTLE", "5KEYS BATTLE",
 				"9KEYS BATTLE", "COURSE RESULT" });
 		skincategory.getItems().setAll(0, 1, 2, 3, 4, 6, 7);
+		initComboBox(audio, new String[] { "OpenAL (LibGDX Sound)", "OpenAL (LibGDX AudioDevice)", "ASIO"});
+		audio.getItems().setAll(0);
 
 		skin.setCellFactory(new Callback<ListView<LR2SkinHeader>, ListCell<LR2SkinHeader>>() {
 			public ListCell<LR2SkinHeader> call(ListView<LR2SkinHeader> param) {
@@ -222,6 +224,7 @@ public class PlayConfigurationView implements Initializable {
 		showhiddennote.setSelected(config.isShowhiddennote());
 		markprocessednote.setSelected(config.isMarkprocessednote());
 
+		audio.getSelectionModel().select(config.getAudioDriver());
 		maxfps.getValueFactory().setValue(config.getMaxFramePerSecond());
 		audiobuffer.getValueFactory().setValue(config.getAudioDeviceBufferSize());
 		audiosim.getValueFactory().setValue(config.getAudioDeviceSimultaneousSources());
@@ -272,6 +275,7 @@ public class PlayConfigurationView implements Initializable {
 		config.setShowhiddennote(showhiddennote.isSelected());
 		config.setMarkprocessednote(markprocessednote.isSelected());
 
+		config.setAudioDriver(audio.getValue());
 		config.setMaxFramePerSecond(getValue(maxfps));
 		config.setAudioDeviceBufferSize(getValue(audiobuffer));
 		config.setAudioDeviceSimultaneousSources(getValue(audiosim));

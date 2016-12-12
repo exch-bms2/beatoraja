@@ -32,6 +32,11 @@ public class Config {
 	 */
 	private boolean folderlamp = true;
 	
+	private int audioDriver = 0;
+	
+	public static final int AUDIODRIVER_SOUND = 0;
+	public static final int AUDIODRIVER_AUDIODEVICE = 1;
+	public static final int AUDIODRIVER_ASIO = 2;
 	/**
 	 * オーディオバッファサイズ。大きすぎると音声遅延が発生し、少なすぎるとノイズが発生する
 	 */
@@ -529,6 +534,14 @@ public class Config {
 
 	public void setShowpastnote(boolean showpastnote) {
 		this.showpastnote = showpastnote;
+	}
+
+	public int getAudioDriver() {
+		return audioDriver;
+	}
+
+	public void setAudioDriver(int audioDriver) {
+		this.audioDriver = audioDriver;
 	}
 
 	public static class SkinConfig {

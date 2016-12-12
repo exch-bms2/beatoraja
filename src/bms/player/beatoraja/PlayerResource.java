@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import bms.model.*;
+import bms.player.beatoraja.play.audio.AudioDeviceProcessor;
 import bms.player.beatoraja.play.audio.AudioProcessor;
 import bms.player.beatoraja.play.audio.SoundProcessor;
 import bms.player.beatoraja.play.bga.BGAProcessor;
@@ -39,11 +40,13 @@ public class PlayerResource {
 	/**
 	 * BMSの音源リソース
 	 */
-	private SoundProcessor audio;
+	private AudioProcessor audio;
+	private boolean audioLoaded;
 	/**
 	 * BMSのBGAリソース
 	 */
 	private BGAProcessor bga;
+	private boolean bgaLoaded;
 
 	/**
 	 * スコア
@@ -135,33 +138,58 @@ public class PlayerResource {
 			if (audio != null) {
 				audio.dispose();
 			}
-			audio = new SoundProcessor();
+			
+			switch(config.getAudioDriver()) {
+			case Config.AUDIODRIVER_SOUND:
+				audio = new SoundProcessor();
+				break;
+			case Config.AUDIODRIVER_AUDIODEVICE:
+				audio = new AudioDeviceProcessor();
+				break;
+			case Config.AUDIODRIVER_ASIO:
+//				audio = new ASIOProcessor();
+				break;
+			}
+			audioLoaded = false;
+			
 			if (bga != null) {
 				bga.dispose();
 			}
 			bga = new BGAProcessor(config);
-			Thread medialoader = new Thread() {
+			bgaLoaded = false;
+			
+			if (config.getBga() == Config.BGA_ON || (config.getBga() == Config.BGA_AUTO && (auto == 1 || auto >= 3))) {
+				Thread bgaloader = new Thread() {
+					@Override
+					public void run() {
+						try {
+							bga.setModel(model);
+						} catch (Throwable e) {
+							Logger.getGlobal().severe(e.getClass().getName() + " : " + e.getMessage());
+							e.printStackTrace();
+						} finally {
+							bgaLoaded = true;
+						}
+					}
+				};
+				bgaloader.start();					
+			} else {
+				bgaLoaded = true;
+			}
+			Thread audioloader = new Thread() {
 				@Override
 				public void run() {
 					try {
-						if (config.getBga() == Config.BGA_ON || (config.getBga() == Config.BGA_AUTO && (auto == 1 || auto >= 3))) {
-							bga.setModel(model);
-						} else {
-							bga.forceFinish();
-						}
 						audio.setModel(model);
-					} catch (Exception e) {
+					} catch (Throwable e) {
 						Logger.getGlobal().severe(e.getClass().getName() + " : " + e.getMessage());
 						e.printStackTrace();
-					} catch (Error e) {
-						Logger.getGlobal().severe(e.getClass().getName() + " : " + e.getMessage());
 					} finally {
-						bga.forceFinish();
-						audio.forceFinish();
+						audioLoaded = true;
 					}
 				}
 			};
-			medialoader.start();
+			audioloader.start();
 		} else {
 			// windowsだけ動画を含むBGAがあれば読み直す(ffmpegがエラー終了する。今後のupdateで直れば外す)
 			if ("\\".equals(System.getProperty("file.separator"))) {
@@ -170,26 +198,26 @@ public class PlayerResource {
 					bga.dispose();
 				}
 				bga = new BGAProcessor(config);
-				Thread medialoader = new Thread() {
-					@Override
-					public void run() {
-						try {
-							if (config.getBga() == Config.BGA_ON || (config.getBga() == Config.BGA_AUTO && (auto == 1 || auto >= 3))) {
+				bgaLoaded = false;
+				
+				if (config.getBga() == Config.BGA_ON || (config.getBga() == Config.BGA_AUTO && (auto == 1 || auto >= 3))) {
+					Thread bgaloader = new Thread() {
+						@Override
+						public void run() {
+							try {
 								bga.setModel(model);
-							} else {
-								bga.forceFinish();
+							} catch (Throwable e) {
+								Logger.getGlobal().severe(e.getClass().getName() + " : " + e.getMessage());
+								e.printStackTrace();
+							} finally {
+								bgaLoaded = true;
 							}
-						} catch (Exception e) {
-							Logger.getGlobal().severe(e.getClass().getName() + " : " + e.getMessage());
-							e.printStackTrace();
-						} catch (Error e) {
-							Logger.getGlobal().severe(e.getClass().getName() + " : " + e.getMessage());
-						} finally {
-							bga.forceFinish();
 						}
-					}
-				};
-				medialoader.start();
+					};
+					bgaloader.start();					
+				} else {
+					bgaLoaded = true;
+				}
 			}
 		}
 		return true;
@@ -253,7 +281,7 @@ public class PlayerResource {
 	}
 
 	public boolean mediaLoadFinished() {
-		return audio != null && audio.getProgress() == 1 && bga != null && bga.getProgress() == 1;
+		return audioLoaded && bgaLoaded;
 	}
 
 	public IRScoreData getScoreData() {
