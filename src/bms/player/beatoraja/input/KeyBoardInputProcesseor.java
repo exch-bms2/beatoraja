@@ -1,5 +1,7 @@
 package bms.player.beatoraja.input;
 
+import java.util.Arrays;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Input.Keys;
@@ -45,47 +47,6 @@ public class KeyBoardInputProcesseor implements InputProcessor {
 
 	public boolean keyDown(int keycode) {
 		setLastPressedKey(keycode);
-//		int presstime = (int) (System.currentTimeMillis() - this.bmsPlayerInputProcessor.starttime);
-//		for (int i = 0; i < keys.length; i++) {
-//			if (keys[i] == keycode) {
-//				this.bmsPlayerInputProcessor.keyChanged(presstime, i, true);
-//				return true;
-//			}
-//		}
-//
-//		// レーンカバー
-//		for (int i = 0; i < this.bmsPlayerInputProcessor.cursor.length; i++) {
-//			if (cover[i] == keycode) {
-//				this.bmsPlayerInputProcessor.cursor[i] = true;
-//			}
-//		}
-//
-//		if (control[0] == keycode) {
-//			this.bmsPlayerInputProcessor.startChanged(true);
-//		}
-//		if (control[1] == keycode) {
-//			this.bmsPlayerInputProcessor.setSelectPressed(true);
-//		}
-//		if (exit == keycode) {
-//			this.bmsPlayerInputProcessor.setExitPressed(true);
-//		}
-//
-//		for (int i = 0; i < numbers.length; i++) {
-//			if (keycode == numbers[i]) {
-//				presstime = (int) (System.currentTimeMillis() - this.bmsPlayerInputProcessor.starttime);
-//				this.bmsPlayerInputProcessor.numberstate[i] = true;
-//				this.bmsPlayerInputProcessor.numtime[i] = presstime;
-//			}
-//		}
-//
-//		for (int i = 0; i < function.length; i++) {
-//			if (keycode == function[i]) {
-//				presstime = (int) (System.currentTimeMillis() - this.bmsPlayerInputProcessor.starttime);
-//				this.bmsPlayerInputProcessor.functionstate[i] = true;
-//				this.bmsPlayerInputProcessor.functiontime[i] = presstime;
-//			}
-//		}
-//
 		return true;
 	}
 
@@ -94,47 +55,27 @@ public class KeyBoardInputProcesseor implements InputProcessor {
 	}
 
 	public boolean keyUp(int keycode) {
-//		int presstime = (int) (System.currentTimeMillis() - this.bmsPlayerInputProcessor.starttime);
-//		for (int i = 0; i < keys.length; i++) {
-//			if (keys[i] == keycode) {
-//				this.bmsPlayerInputProcessor.keyChanged(presstime, i, false);
-//				return true;
-//			}
-//		}
-//		if (control[0] == keycode) {
-//			this.bmsPlayerInputProcessor.startChanged(false);
-//		}
-//		if (control[1] == keycode) {
-//			this.bmsPlayerInputProcessor.setSelectPressed(false);
-//		}
-//		if (exit == keycode) {
-//			this.bmsPlayerInputProcessor.setExitPressed(false);
-//		}
-//
-//		for (int i = 0; i < this.bmsPlayerInputProcessor.cursor.length; i++) {
-//			if (cover[i] == keycode) {
-//				this.bmsPlayerInputProcessor.cursor[i] = false;
-//			}
-//		}
-//		for (int i = 0; i < numbers.length; i++) {
-//			if (keycode == numbers[i]) {
-//				presstime = (int) (System.currentTimeMillis() - this.bmsPlayerInputProcessor.starttime);
-//				this.bmsPlayerInputProcessor.numberstate[i] = false;
-//				this.bmsPlayerInputProcessor.numtime[i] = presstime;
-//			}
-//		}
 		return true;
 	}
 	
 	private boolean[] keystate = new boolean[256];
+	private long[] keytime = new long[256];
+	private int duration;
+	
+	public void clear() {
+//		Arrays.fill(keystate, false);
+		Arrays.fill(keytime, -duration);
+		lastPressedKey = -1;
+	}
 	
 	public void poll() {
-		final int presstime = (int) (System.currentTimeMillis() - this.bmsPlayerInputProcessor.starttime);
+		final long presstime = System.currentTimeMillis() - this.bmsPlayerInputProcessor.starttime;
 		for (int i = 0; i < keys.length; i++) {
 			final boolean pressed = Gdx.input.isKeyPressed(keys[i]);
-			if(pressed != keystate[keys[i]]) {
+			if(pressed != keystate[keys[i]] && presstime >= keytime[keys[i]] + duration) {
 				keystate[keys[i]] = pressed;
-				this.bmsPlayerInputProcessor.keyChanged(presstime, i, pressed);
+				keytime[keys[i]] = presstime;
+				this.bmsPlayerInputProcessor.keyChanged((int) presstime, i, pressed);
 			}
 		}
 		
@@ -184,7 +125,6 @@ public class KeyBoardInputProcesseor implements InputProcessor {
 
 
 	public boolean mouseMoved(int arg0, int arg1) {
-		// TODO 自動生成されたメソッド・スタブ
 		return false;
 	}
 
@@ -209,7 +149,6 @@ public class KeyBoardInputProcesseor implements InputProcessor {
 	}
 
 	public boolean touchUp(int arg0, int arg1, int arg2, int arg3) {
-		// TODO 自動生成されたメソッド・スタブ
 		return false;
 	}
 
@@ -219,5 +158,9 @@ public class KeyBoardInputProcesseor implements InputProcessor {
 
 	public void setLastPressedKey(int lastPressedKey) {
 		this.lastPressedKey = lastPressedKey;
+	}
+	
+	public void setMinimumDuration(int duration) {
+		this.duration = duration;
 	}
 }

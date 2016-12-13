@@ -22,23 +22,21 @@ public class BMSPlayerInputProcessor {
 
 	private KeyBoardInputProcesseor kbinput;
 
-	private BMControllerInputProcessor[] bminput ;
-
-	private int minduration = 10;
+	private BMControllerInputProcessor[] bminput;
 
 	public BMSPlayerInputProcessor(Rectangle resolution) {
 		kbinput = new KeyBoardInputProcesseor(this, new int[] { Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.F, Keys.V,
 				Keys.SHIFT_LEFT, Keys.CONTROL_LEFT, Keys.COMMA, Keys.L, Keys.PERIOD, Keys.SEMICOLON, Keys.SLASH,
 				Keys.APOSTROPHE, Keys.UNKNOWN, Keys.SHIFT_RIGHT, Keys.CONTROL_RIGHT, Keys.Q, Keys.W }, resolution);
-//		Gdx.input.setInputProcessor(kbinput);
+		// Gdx.input.setInputProcessor(kbinput);
 		int player = 0;
 		List<BMControllerInputProcessor> bminput = new ArrayList<BMControllerInputProcessor>();
 		for (Controller controller : Controllers.getControllers()) {
 			Logger.getGlobal().info("コントローラーを検出 : " + controller.getName());
-			BMControllerInputProcessor bm = new BMControllerInputProcessor(this, controller, player,
-					new int[] { BMKeys.BUTTON_3, BMKeys.BUTTON_6, BMKeys.BUTTON_2, BMKeys.BUTTON_7, BMKeys.BUTTON_1,
-							BMKeys.BUTTON_4, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN, BMKeys.BUTTON_8, BMKeys.BUTTON_9 });
-//			controller.addListener(bm);
+			BMControllerInputProcessor bm = new BMControllerInputProcessor(this, controller, player, new int[] {
+					BMKeys.BUTTON_3, BMKeys.BUTTON_6, BMKeys.BUTTON_2, BMKeys.BUTTON_7, BMKeys.BUTTON_1,
+					BMKeys.BUTTON_4, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN, BMKeys.BUTTON_8, BMKeys.BUTTON_9 });
+			// controller.addListener(bm);
 			bminput.add(bm);
 			if (player == 1) {
 				break;
@@ -47,7 +45,7 @@ public class BMSPlayerInputProcessor {
 			}
 		}
 		this.bminput = bminput.toArray(new BMControllerInputProcessor[0]);
-		
+
 		PollingThread polling = new PollingThread();
 		polling.start();
 	}
@@ -60,7 +58,6 @@ public class BMSPlayerInputProcessor {
 	 * 各キーの最終更新時間 TODO これを他クラスから編集させない方がいいかも
 	 */
 	private long[] time = new long[18];
-	private long[] lasttime = new long[18];
 	/**
 	 * 0-9キーのON/OFF状態
 	 */
@@ -101,7 +98,10 @@ public class BMSPlayerInputProcessor {
 	long[] cursortime = new long[4];
 
 	public void setMinimumInputDutration(int minduration) {
-		this.minduration = minduration;
+		kbinput.setMinimumDuration(minduration);
+		for (BMControllerInputProcessor bm : bminput) {
+			bm.setMinimumDuration(minduration);
+		}
 	}
 
 	public void setKeyassign(int[] keyassign) {
@@ -118,8 +118,11 @@ public class BMSPlayerInputProcessor {
 		this.starttime = starttime;
 		if (starttime != 0) {
 			Arrays.fill(time, 0);
-			Arrays.fill(lasttime, -minduration);
 			keylog.clear();
+			kbinput.clear();
+			for (BMControllerInputProcessor bm : bminput) {
+				bm.clear();
+			}
 		}
 	}
 
@@ -154,12 +157,9 @@ public class BMSPlayerInputProcessor {
 	public void keyChanged(int presstime, int i, boolean pressed) {
 		if (enableKeyInput && keystate[i] != pressed) {
 			keystate[i] = pressed;
-			if(this.getStartTime() == 0 || presstime >= lasttime[i] + minduration) {
-				time[i] = presstime;
-				lasttime[i] = presstime;
-				if (this.getStartTime() != 0) {
-					keylog.add(new KeyInputLog(presstime, i, pressed));
-				}
+			time[i] = presstime;
+			if (this.getStartTime() != 0) {
+				keylog.add(new KeyInputLog(presstime, i, pressed));
 			}
 		}
 	}
@@ -169,6 +169,10 @@ public class BMSPlayerInputProcessor {
 		if (b) {
 			Arrays.fill(keystate, false);
 			Arrays.fill(time, 0);
+			kbinput.clear();
+			for (BMControllerInputProcessor bm : bminput) {
+				bm.clear();
+			}
 		}
 	}
 
@@ -227,11 +231,11 @@ public class BMSPlayerInputProcessor {
 	public void setSelectPressed(boolean selectPressed) {
 		this.selectPressed = selectPressed;
 	}
-	
+
 	public KeyBoardInputProcesseor getKeyBoardInputProcesseor() {
 		return kbinput;
 	}
-	
+
 	public BMControllerInputProcessor[] getBMInputProcessor() {
 		return bminput;
 	}
@@ -271,17 +275,17 @@ public class BMSPlayerInputProcessor {
 	public void resetScroll() {
 		scroll = 0;
 	}
-	
+
 	class PollingThread extends Thread {
-		
+
 		public void run() {
 			long time = 0;
-			for(;;) {
+			for (;;) {
 				final long now = System.currentTimeMillis();
-				if(time != now) {
+				if (time != now) {
 					time = now;
 					kbinput.poll();
-					for(BMControllerInputProcessor controller : bminput) {
+					for (BMControllerInputProcessor controller : bminput) {
 						controller.poll();
 					}
 				}
