@@ -41,6 +41,7 @@ public class SkinProperty {
 	public static final int TIMER_GAUGE_MAX_2P = 45;
 	public static final int TIMER_JUDGE_1P = 46;
 	public static final int TIMER_JUDGE_2P = 47;
+	public static final int TIMER_JUDGE_3P = 247;
 	public static final int TIMER_FULLCOMBO_1P = 48;
 	public static final int TIMER_FULLCOMBO_2P = 49;
 	public static final int TIMER_BOMB = 50;

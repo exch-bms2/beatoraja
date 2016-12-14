@@ -34,8 +34,6 @@ public class LaneRenderer {
 	 * レーンカバーを表示するかどうか
 	 */
 	private boolean enableLanecover = true;
-
-	private long lanecovertiming;
 	/**
 	 * リフトの量
 	 */
@@ -121,9 +119,9 @@ public class LaneRenderer {
 	public void init(BMSModel model) {
 		pos = 0;
 		judge = new int[20];
-		judgenow = new int[skin.getJudgeregion().length];
-		judgenowt = new int[skin.getJudgeregion().length];
-		judgecombo = new int[skin.getJudgeregion().length];
+		judgenow = new int[skin.getJudgeregion()];
+		judgenowt = new int[skin.getJudgeregion()];
+		judgecombo = new int[skin.getJudgeregion()];
 
 		this.model = model;
 		this.timelines = model.getAllTimeLines();
@@ -333,6 +331,7 @@ public class LaneRenderer {
 		}
 
 		sprite.begin();
+		final float orgy = y;
 		for (int i = pos; i < timelines.length && y <= hu; i++) {
 			final TimeLine tl = timelines[i];
 			if (tl.getTime() >= time) {
@@ -349,18 +348,9 @@ public class LaneRenderer {
 						y += tl.getSection() * (tl.getTime() - time) / tl.getTime() * rxhs;
 					}
 
-					// if(y < 0) {
-					// System.out.println(" y : " + y + " line : " + (i > 0 ?
-					// timelines[i]
-					// .getTime() : 0) + " time : " + time + " stop : " + (i > 0
-					// ? timelines[i - 1]
-					// .getStop() : 0));
-					// }
 				}
-				// ltime = tl.getTime() - time;
-				// yy = y - hl;
-				for (Rectangle r : playerr) {
-					if (config.isBpmguide()) {
+				if (config.isBpmguide()) {
+					for (Rectangle r : playerr) {
 						if (tl.getBPM() != nbpm) {
 							// BPMガイド描画
 							sprite.end();
@@ -402,13 +392,34 @@ public class LaneRenderer {
 					final Note note = tl.getNote(laneassign[lane]);
 					if (note != null
 							&& ((note instanceof LongNote && ((LongNote) note).getEndnote().getSectiontime() >= time) || (config
-									.isShowpastnote() && note instanceof NormalNote && note.getState() == 0))) {
+							.isShowpastnote() && note instanceof NormalNote && note.getState() == 0))) {
 						b = false;
 						break;
 					}
 				}
 				if (b) {
 					pos = i;
+				}
+			}
+		}
+
+		y = orgy;
+		for (int i = pos; i < timelines.length && y <= hu; i++) {
+			final TimeLine tl = timelines[i];
+			if (tl.getTime() >= time) {
+				if (nbpm > 0) {
+					if (i > 0) {
+						final TimeLine prevtl = timelines[i - 1];
+						if (prevtl.getTime() + prevtl.getStop() > time) {
+							y += (tl.getSection() - prevtl.getSection()) * rxhs;
+						} else {
+							y += (tl.getSection() - prevtl.getSection()) * (tl.getTime() - time)
+									/ (tl.getTime() - prevtl.getTime() - prevtl.getStop()) * rxhs;
+						}
+					} else {
+						y += tl.getSection() * (tl.getTime() - time) / tl.getTime() * rxhs;
+					}
+
 				}
 			}
 			// ノート描画
@@ -473,65 +484,6 @@ public class LaneRenderer {
 		// System.out.println("time :" + ltime + " y :" + yy + " real time : "
 		// + (ltime * (hu - hl) / yy));
 
-		// 判定文字描画。描画座標等はリフト量によって可変のためSkin移行は特殊な定義が必要
-		sprite.begin();
-		for (int jr = 0; jr < skin.getJudgeregion().length; jr++) {
-			if (judgenow[jr] > 0 && time < judgenowt[jr] + 500) {
-				final Rectangle r = skin.getJudgeregion()[jr].judge[judgenow[jr] - 1].getDestination(main.getNowTime(),
-						main);
-				if (r != null) {
-					int shift = 0;
-					if (judgenow[jr] < 4) {
-						final Rectangle nr = skin.getJudgeregion()[jr].count[judgenow[jr] - 1].getDestination(
-								main.getNowTime(), main);
-						if (nr != null) {
-							TextureRegion[] ntr = skin.getJudgeregion()[jr].count[judgenow[jr] - 1].getValue(
-									main.getNowTime(), judgecombo[jr], 0, main);
-							int index = 0;
-							int length = 0;
-							for (; index < ntr.length && ntr[index] == null; index++)
-								;
-							for (int i = 0; i < ntr.length; i++) {
-								if (ntr[i] != null) {
-									length++;
-								}
-							}
-							shift = (int) (length * nr.width / 2);
-							// コンボカウント描画
-							for (int i = index; i < index + length; i++) {
-								if (ntr[i] != null) {
-									sprite.draw(ntr[i], r.x + nr.x + (i - index) * nr.width - shift, r.y + nr.y,
-											nr.width, nr.height);
-								}
-							}
-						}
-					}
-					sprite.draw(skin.getJudgeregion()[jr].judge[judgenow[jr] - 1].getImage(main.getNowTime(), main),
-							r.x - (skin.getJudgeregion()[jr].shift ? shift : 0), r.y, r.width, r.height);
-					// FAST, SLOW描画
-					if (config.getJudgedetail() == 1) {
-						if (judgenow[jr] > 1) {
-							font.setColor(judge.getRecentJudgeTiming() >= 0 ? Color.CYAN : Color.RED);
-							font.draw(sprite, judge.getRecentJudgeTiming() >= 0 ? "EARLY" : "LATE", r.x + r.width / 2,
-									r.y + r.height + 20);
-						}
-
-					} else if (config.getJudgedetail() == 2) {
-						if (judgenow[jr] > 0) {
-							if (judgenow[jr] == 1) {
-								font.setColor(judge.getRecentJudgeTiming() >= 0 ? Color.SKY : Color.PINK);
-							} else {
-								font.setColor(judge.getRecentJudgeTiming() >= 0 ? Color.BLUE : Color.RED);
-							}
-							font.draw(sprite,
-									(judge.getRecentJudgeTiming() >= 0 ? "+" : "") + judge.getRecentJudgeTiming()
-											+ " ms", r.x + r.width / 2, r.y + r.height + 20);
-						}
-					}
-				}
-			}
-		}
-		sprite.end();
 		sprite.begin();
 	}
 
@@ -599,9 +551,10 @@ public class LaneRenderer {
 		}
 	}
 
+	private final int[] JUDGE_TIMER = {TIMER_JUDGE_1P, TIMER_JUDGE_2P, TIMER_JUDGE_3P};
+
 	public void update(int lane, int judge, int time, int fast) {
-		main.getTimer()[TIMER_JUDGE_1P] = main.getNowTime();
-		main.getTimer()[TIMER_JUDGE_2P] = main.getNowTime();
+		main.getTimer()[JUDGE_TIMER[lane / (skin.getLaneregion().length / judgenow.length)]] = main.getNowTime();
 		if (judge < 2) {
 			if (model.getUseKeys() == 9) {
 				main.getTimer()[TIMER_BOMB_1P_KEY1 + lane] = main.getNowTime();
@@ -627,5 +580,13 @@ public class LaneRenderer {
 
 	public int[] getJudge() {
 		return judge;
+	}
+
+	public int[] getNowJudge() {
+		return judgenow;
+	}
+
+	public int[] getNowCombo() {
+		return judgecombo;
 	}
 }

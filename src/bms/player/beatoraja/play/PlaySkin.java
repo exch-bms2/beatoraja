@@ -34,7 +34,7 @@ public class PlaySkin extends Skin {
 
 	private Rectangle[] lanegroupregion;
 
-	private JudgeRegion[] judgeregion = new JudgeRegion[0];
+	private int judgeregion;
 
 	private float dw;
 	private float dh;
@@ -235,12 +235,13 @@ public class PlaySkin extends Skin {
 		for (int i = 0; i < 6; i++) {
 			images[i] = new SkinImage();
 			images[i].setImage(judge[i == 5 ? 4 : i], 0, 100);
-			setDestination(images[i], 0, 115, 240, 180, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+			setDestination(images[i], 0, 115, 240, 180, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, -1, TIMER_JUDGE_1P, 0, 0, 0);
+			setDestination(images[i], 500, 115, 240, 180, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, -1, TIMER_JUDGE_1P, 0, 0, 0);
 			images[i].setOffsety(OFFSET_LIFT);
 			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 0, 100, 6, 0, NUMBER_MAXCOMBO);
-			setDestination(number[i], 0, 200, 0, 40, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+			setDestination(number[i], 0, 200, 0, 40, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, -1, TIMER_JUDGE_1P, 0, 0, 0);
+			setDestination(number[i], 500, 200, 0, 40, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, -1, TIMER_JUDGE_1P, 0, 0, 0);
 		}
-		judgeregion = new JudgeRegion[] { new JudgeRegion(images, number, true) };
 
 		SkinBGA bga = new SkinBGA(this);
 		setDestination(bga, 0, 500, 50, 740, 650, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -334,6 +335,8 @@ public class PlaySkin extends Skin {
 		line[0].setOffsety(OFFSET_LIFT);
 		setDestination(line[0], 0, 20, 140, 390, 1, 0, 255, 128, 128, 128, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(new SkinNote(note, longnote, minenote, 12 / dh));
+		judgeregion = 1;
+		add(new SkinJudge(images, number, 0, true));
 		Texture lct = new Texture("skin/default/lanecover.png");
 		SkinSlider lanecover = new SkinSlider(new TextureRegion[] { new TextureRegion(lct) }, 0, 0, 2, (int) (580 * dh),
 				SLIDER_LANECOVER);
@@ -479,12 +482,13 @@ public class PlaySkin extends Skin {
 		SkinNumber[] number = new SkinNumber[6];
 		for (int i = 0; i < 6; i++) {
 			images[i] = new SkinImage(judge[i == 5 ? 4 : i],0,100);
-			setDestination(images[i], 0, 965, 240, 180, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+			setDestination(images[i], 0, 965, 240, 180, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, -1, TIMER_JUDGE_1P, 0, 0, 0);
+			setDestination(images[i], 500, 965, 240, 180, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, -1, TIMER_JUDGE_1P, 0, 0, 0);
 			images[i].setOffsety(OFFSET_LIFT);
 			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 0, 100, 6, 0, NUMBER_MAXCOMBO);
-			setDestination(number[i], 0, 200, 0, 40, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+			setDestination(number[i], 0, 200, 0, 40, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, -1, TIMER_JUDGE_1P, 0, 0, 0);
+			setDestination(number[i], 500, 200, 0, 40, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, -1, TIMER_JUDGE_1P, 0, 0, 0);
 		}
-		judgeregion = new JudgeRegion[] { new JudgeRegion(images, number, true) };
 
 		SkinBGA bga = new SkinBGA(this);
 		setDestination(bga, 0, 40, 50, 740, 650, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -578,6 +582,9 @@ public class PlaySkin extends Skin {
 		line[0].setOffsety(OFFSET_LIFT);
 		setDestination(line[0], 0, 870, 140, 390, 1, 0, 255, 128, 128, 128, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(new SkinNote(note, longnote, minenote, 12 / dh));
+		add(new SkinJudge(images, number, 0, true));
+		judgeregion = 1;
+
 		Texture lct = new Texture("skin/default/lanecover.png");
 		SkinSlider lanecover = new SkinSlider(new TextureRegion[] { new TextureRegion(lct) }, 0, 0, 2, (int) (580 * dh),
 				SLIDER_LANECOVER);
@@ -750,39 +757,6 @@ public class PlaySkin extends Skin {
 			}
 		}
 
-		SkinImage[] images = new SkinImage[6];
-		SkinNumber[] number = new SkinNumber[6];
-		for (int i = 0; i < 6; i++) {
-			images[i] = new SkinImage(judge[i == 5 ? 4 : i], 0, 100);
-			setDestination(images[i], 0, 375, 240, 140, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-			images[i].setOffsety(OFFSET_LIFT);
-			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 0, 100, 6, 0, NUMBER_MAXCOMBO);
-			setDestination(number[i], 0, 70, -30, 20, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		}
-		JudgeRegion jr1 = new JudgeRegion(images, number, false);
-		images = new SkinImage[6];
-		number = new SkinNumber[6];
-		for (int i = 0; i < 6; i++) {
-			images[i] = new SkinImage(judge[i == 5 ? 4 : i], 0, 100);
-			setDestination(images[i], 0, 570, 240, 140, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-			images[i].setOffsety(OFFSET_LIFT);
-			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 0, 100, 6, 0, NUMBER_MAXCOMBO);
-			setDestination(number[i], 0, 70, -30, 20, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		}
-		JudgeRegion jr2 = new JudgeRegion(images, number, false);
-		images = new SkinImage[6];
-		number = new SkinNumber[6];
-		for (int i = 0; i < 6; i++) {
-			images[i] = new SkinImage(judge[i == 5 ? 4 : i], 0, 100);
-			setDestination(images[i], 0, 765, 240, 140, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-			images[i].setOffsety(OFFSET_LIFT);
-			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 0, 100, 6, 0, NUMBER_MAXCOMBO);
-			setDestination(number[i], 0, 70, -30, 20, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		}
-		JudgeRegion jr3 = new JudgeRegion(images, number, false);
-
-		judgeregion = new JudgeRegion[] { jr1, jr2, jr3 };
-
 		SkinBGA bga = new SkinBGA(this);
 		setDestination(bga, 0, 10, 390, 330, 330, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(bga);
@@ -865,6 +839,43 @@ public class PlaySkin extends Skin {
 		setDestination(line, 0, 345, 137, 590, 6, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(line);
 		add(new SkinNote(note, longnote, minenote, 18 / dh));
+		SkinImage[] images = new SkinImage[6];
+		SkinNumber[] number = new SkinNumber[6];
+		for (int i = 0; i < 6; i++) {
+			images[i] = new SkinImage(judge[i == 5 ? 4 : i], 0, 100);
+			setDestination(images[i], 0, 375, 240, 140, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, -1, TIMER_JUDGE_1P, 0, 0, 0);
+			setDestination(images[i], 500, 375, 240, 140, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, -1, TIMER_JUDGE_1P, 0, 0, 0);
+			images[i].setOffsety(OFFSET_LIFT);
+			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 0, 100, 6, 0, NUMBER_MAXCOMBO);
+			setDestination(number[i], 0, 70, -30, 20, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, -1, TIMER_JUDGE_1P, 0, 0, 0);
+			setDestination(number[i], 500, 70, -30, 20, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, -1, TIMER_JUDGE_1P, 0, 0, 0);
+		}
+		add(new SkinJudge(images, number, 0, false));
+		images = new SkinImage[6];
+		number = new SkinNumber[6];
+		for (int i = 0; i < 6; i++) {
+			images[i] = new SkinImage(judge[i == 5 ? 4 : i], 0, 100);
+			setDestination(images[i], 0, 570, 240, 140, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, -1, TIMER_JUDGE_2P, 0, 0, 0);
+			setDestination(images[i], 500, 570, 240, 140, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, -1, TIMER_JUDGE_2P, 0, 0, 0);
+			images[i].setOffsety(OFFSET_LIFT);
+			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 0, 100, 6, 0, NUMBER_MAXCOMBO);
+			setDestination(number[i], 0, 70, -30, 20, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, -1, TIMER_JUDGE_2P, 0, 0, 0);
+			setDestination(number[i], 500, 70, -30, 20, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, -1, TIMER_JUDGE_2P, 0, 0, 0);
+		}
+		add(new SkinJudge(images, number, 1, false));
+		images = new SkinImage[6];
+		number = new SkinNumber[6];
+		for (int i = 0; i < 6; i++) {
+			images[i] = new SkinImage(judge[i == 5 ? 4 : i], 0, 100);
+			setDestination(images[i], 0, 765, 240, 140, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, -1, TIMER_JUDGE_3P, 0, 0, 0);
+			setDestination(images[i], 500, 765, 240, 140, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, -1, TIMER_JUDGE_3P, 0, 0, 0);
+			images[i].setOffsety(OFFSET_LIFT);
+			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 0, 100, 6, 0, NUMBER_MAXCOMBO);
+			setDestination(number[i], 0, 70, -30, 20, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, -1, TIMER_JUDGE_3P, 0, 0, 0);
+			setDestination(number[i], 500, 70, -30, 20, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, -1, TIMER_JUDGE_3P, 0, 0, 0);
+		}
+		add(new SkinJudge(images, number, 2, false));
+		judgeregion = 3;
 		Texture lct = new Texture("skin/default/lanecover.png");
 		SkinSlider lanecover = new SkinSlider(new TextureRegion[] { new TextureRegion(lct) }, 0, 0, 2, (int) (580 * dh),
 				SLIDER_LANECOVER);
@@ -1023,29 +1034,6 @@ public class PlaySkin extends Skin {
 		keybeam[1] = keybeam[3] = keybeam[5] = keybeam[9] = keybeam[11] = keybeam[13] = new Sprite(kbt, 47, 0, 28, 255);
 		keybeam[7] = keybeam[15] = new Sprite(kbt, 0, 0, 47, 255);
 
-		SkinImage[] images = new SkinImage[6];
-		SkinNumber[] number = new SkinNumber[6];
-		for (int i = 0; i < 6; i++) {
-			images[i] = new SkinImage(judge[i == 5 ? 4 : i], 0, 100);
-			setDestination(images[i], 0, 315, 240, 180, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-			images[i].setOffsety(OFFSET_LIFT);
-			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 0, 100, 6, 0, NUMBER_MAXCOMBO);
-			setDestination(number[i], 0, 200, 0, 40, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		}
-		JudgeRegion jr1 = new JudgeRegion(images, number, true);
-		images = new SkinImage[6];
-		number = new SkinNumber[6];
-		for (int i = 0; i < 6; i++) {
-			images[i] = new SkinImage(judge[i == 5 ? 4 : i], 0 ,100);
-			setDestination(images[i], 0, 785, 240, 180, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-			images[i].setOffsety(OFFSET_LIFT);
-			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 0, 100, 6, 0, NUMBER_MAXCOMBO);
-			setDestination(number[i], 0, 200, 0, 40, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		}
-		JudgeRegion jr2 = new JudgeRegion(images, number, true);
-
-		judgeregion = new JudgeRegion[] { jr1, jr2 };
-
 		SkinBGA bga = new SkinBGA(this);
 		setDestination(bga, 0, 10, 500, 180, 220, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(bga);
@@ -1140,6 +1128,32 @@ public class PlaySkin extends Skin {
 		setDestination(line[1], 0, 680, 140, 390, 1, 0, 255, 128, 128, 128, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		line[1].setOffsety(OFFSET_LIFT);
 		add(new SkinNote(note, longnote, minenote, 12 / dh));
+		SkinImage[] images = new SkinImage[6];
+		SkinNumber[] number = new SkinNumber[6];
+		for (int i = 0; i < 6; i++) {
+			images[i] = new SkinImage(judge[i == 5 ? 4 : i], 0, 100);
+			setDestination(images[i], 0, 315, 240, 180, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, -1, TIMER_JUDGE_1P, 0, 0, 0);
+			setDestination(images[i], 500, 315, 240, 180, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, -1, TIMER_JUDGE_1P, 0, 0, 0);
+			images[i].setOffsety(OFFSET_LIFT);
+			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 0, 100, 6, 0, NUMBER_MAXCOMBO);
+			setDestination(number[i], 0, 200, 0, 40, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, -1, TIMER_JUDGE_1P, 0, 0, 0);
+			setDestination(number[i], 500, 200, 0, 40, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, -1, TIMER_JUDGE_1P, 0, 0, 0);
+		}
+		add(new SkinJudge(images, number, 0, true));
+		images = new SkinImage[6];
+		number = new SkinNumber[6];
+		for (int i = 0; i < 6; i++) {
+			images[i] = new SkinImage(judge[i == 5 ? 4 : i], 0 ,100);
+			setDestination(images[i], 0, 785, 240, 180, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, -1, TIMER_JUDGE_2P, 0, 0, 0);
+			setDestination(images[i], 500, 785, 240, 180, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, -1, TIMER_JUDGE_2P, 0, 0, 0);
+			images[i].setOffsety(OFFSET_LIFT);
+			number[i] = new SkinNumber(judgenum[i > 2 ? 2 : i], 0, 100, 6, 0, NUMBER_MAXCOMBO);
+			setDestination(number[i], 0, 200, 0, 40, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, -1, TIMER_JUDGE_2P, 0, 0, 0);
+			setDestination(number[i], 500, 200, 0, 40, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, -1, TIMER_JUDGE_2P, 0, 0, 0);
+		}
+		add(new SkinJudge(images, number, 1, true));
+
+		judgeregion = 2;
 		Texture lct = new Texture("skin/default/lanecover.png");
 		SkinSlider lanecover = new SkinSlider(new TextureRegion[] { new TextureRegion(lct) }, 0, 0, 2, (int) (580 * dh),
 				SLIDER_LANECOVER);
@@ -1269,11 +1283,11 @@ public class PlaySkin extends Skin {
 		this.laneregion = laneregion;
 	}
 
-	public void setJudgeregion(JudgeRegion[] jr) {
+	public void setJudgeregion(int jr) {
 		judgeregion = jr;
 	}
 
-	public JudgeRegion[] getJudgeregion() {
+	public int getJudgeregion() {
 		return judgeregion;
 	}
 
