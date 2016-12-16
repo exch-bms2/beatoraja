@@ -479,23 +479,23 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 	}
 
 	protected void loadSkin(Skin skin, File f, MainState state) throws IOException {
-		this.loadSkin(skin, f, state, new int[0]);
+		this.loadSkin(skin, f, state, new HashMap());
 	}
 
-	protected void loadSkin(Skin skin, File f, MainState state, int[] option) throws IOException {
+	protected void loadSkin(Skin skin, File f, MainState state, Map<Integer, Boolean> option) throws IOException {
 		this.loadSkin0(skin, f, state, option, new HashMap());
 	}
 
 	private Map<String, String> filemap = new HashMap();
 
-	protected void loadSkin(Skin skin, File f, MainState state, LR2SkinHeader header, int[] option,
+	protected void loadSkin(Skin skin, File f, MainState state, LR2SkinHeader header, Map<Integer, Boolean> option,
 			Map<String, Object> property) throws IOException {
 		this.skin = skin;
 		this.state = state;
 		for (String key : property.keySet()) {
 			if (property.get(key) != null) {
 				if (property.get(key) instanceof Integer) {
-					op.add((Integer) property.get(key));
+					op.put((Integer) property.get(key), true);
 				}
 				if (property.get(key) instanceof String) {
 					for (CustomFile file : header.getCustomFiles()) {
@@ -507,14 +507,9 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 				}
 			}
 		}
-		for (int i : option) {
-			op.add(i);
-		}
-		option = new int[op.size()];
-		for (int i = 0; i < op.size(); i++) {
-			option[i] = op.get(i);
-		}
-		this.loadSkin0(skin, f, state, option, filemap);
+		
+		op.putAll(option);
+		this.loadSkin0(skin, f, state, op, filemap);
 	}
 
 	SkinImage part = null;
@@ -525,11 +520,8 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 	SkinText text = null;
 	String line = null;
 
-	protected void loadSkin0(Skin skin, File f, MainState state, int[] option, Map<String, String> filemap)
+	protected void loadSkin0(Skin skin, File f, MainState state, Map<Integer,Boolean> option, Map<String, String> filemap)
 			throws IOException {
-		for (int i : option) {
-			op.add(i);
-		}
 
 		BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(f), "MS932"));
 
@@ -538,11 +530,7 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 		}
 		br.close();
 
-		int[] soption = new int[op.size()];
-		for (int i = 0; i < op.size(); i++) {
-			soption[i] = op.get(i);
-		}
-		skin.setOption(soption);
+		skin.setOption(option);
 
 		for (SkinObject obj : skin.getAllSkinObjects()) {
 			if (obj instanceof SkinImage && obj.getAllDestination().length == 0) {

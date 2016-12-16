@@ -79,7 +79,7 @@ public class LR2SkinHeaderLoader extends LR2SkinLoader {
 
 		for(String key : property.keySet()) {
 			if(property.get(key) != null && property.get(key) instanceof Integer) {
-				op.add((Integer) property.get(key));
+				op.put((Integer) property.get(key), true);
 			}
 		}
 
@@ -88,6 +88,14 @@ public class LR2SkinHeaderLoader extends LR2SkinLoader {
 		}
 		header.setCustomOptions(options.toArray(new CustomOption[options.size()]));
 		header.setCustomFiles(files.toArray(new CustomFile[files.size()]));
+		
+		for(CustomOption co : options) {
+			for(int i = 0;i < co.contents.length;i++) {
+				if(!op.containsKey(co.option + i)) {
+					op.put(co.option + i, false);
+				}
+			}
+		}
 
 		return header;
 	}	

@@ -294,12 +294,12 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader {
 
 	}
 
-	public MusicSelectSkin loadSelectSkin(File f, MusicSelector selector, LR2SkinHeader header, int[] option,
+	public MusicSelectSkin loadSelectSkin(File f, MusicSelector selector, LR2SkinHeader header, Map<Integer, Boolean> option,
 			Map property) throws IOException {
 		skin = new MusicSelectSkin(srcw, srch, dstw, dsth);
 
 		this.loadSkin(skin, f, selector, header, option, property);
-
+		
 		return skin;
 	}
 }

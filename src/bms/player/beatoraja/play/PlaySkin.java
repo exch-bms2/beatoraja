@@ -51,13 +51,20 @@ public class PlaySkin extends Skin {
 			NUMBER_LATE_MISS };
 
 	protected BMSPlayer player;
+	
+	private static final int[] fixop = {OPTION_STAGEFILE, OPTION_NO_STAGEFILE, OPTION_BACKBMP, OPTION_NO_BACKBMP, 
+		OPTION_AUTOPLAYON, OPTION_AUTOPLAYOFF, OPTION_BGAON, OPTION_BGAOFF, 
+		OPTION_BGANORMAL, OPTION_BGAEXTEND, OPTION_GAUGE_GROOVE, OPTION_GAUGE_HARD,
+		OPTION_SCOREGRAPHOFF, OPTION_SCOREGRAPHON,OPTION_DIFFICULTY0,OPTION_DIFFICULTY1
+		,OPTION_DIFFICULTY2,OPTION_DIFFICULTY3,OPTION_DIFFICULTY4,OPTION_DIFFICULTY5,
+		OPTION_NO_BPMCHANGE,OPTION_BPMCHANGE};
 
 	public PlaySkin(float srcw, float srch, float dstw, float dsth) {
-		super(srcw, srch, dstw, dsth);
+		super(srcw, srch, dstw, dsth, fixop);
 	}
 
 	public PlaySkin(int mode, boolean use2p, Rectangle r) {
-		super(1280, 720, r.width, r.height);
+		super(1280, 720, r.width, r.height, fixop);
 		dw = r.width / 1280f;
 		dh = r.height / 720f;
 

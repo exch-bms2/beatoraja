@@ -563,7 +563,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 
 	}
 
-	public PlaySkin loadPlaySkin(File f, BMSPlayer player, LR2SkinHeader header, int[] option, Map property)
+	public PlaySkin loadPlaySkin(File f, BMSPlayer player, LR2SkinHeader header, Map<Integer, Boolean> option, Map property)
 			throws IOException {
 
 		skin = new PlaySkin(srcw, srch, dstw, dsth);

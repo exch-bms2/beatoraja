@@ -59,12 +59,12 @@ public class LR2ResultSkinLoader extends LR2SkinCSVLoader {
 		});
 	}
 	
-	public MusicResultSkin loadResultSkin(File f, MainState state, LR2SkinHeader header, int[] option, Map property) throws IOException {
+	public MusicResultSkin loadResultSkin(File f, MainState state, LR2SkinHeader header, Map<Integer, Boolean> option, Map property) throws IOException {
 
 		skin = new MusicResultSkin(srcw, srch, dstw, dsth);
 
 		this.loadSkin(skin, f, state, header, option, property);
-		
+
 		return skin;
 	}
 

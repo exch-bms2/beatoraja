@@ -129,6 +129,10 @@ public abstract class SkinObject {
 		return dstop;
 	}
 
+	public void setOption(int[] dstop) {
+		this.dstop = dstop;
+	}
+
 	public Rectangle getDestination(long time) {
 		return this.getDestination(time, null);
 	}

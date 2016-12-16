@@ -5,8 +5,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.logging.Logger;
 
 public class Skin {
 
@@ -14,6 +14,7 @@ public class Skin {
 	private float dh;
 
 	private List<SkinObject> objects = new ArrayList<SkinObject>();
+	private List<SkinObject> removes = new ArrayList<SkinObject>();
 	/**
 	 * 入力受付開始時間(ms)
 	 */
@@ -27,11 +28,17 @@ public class Skin {
 	 */
 	private int fadeout;
 
-	private int[] option = new int[0];
+	private Map<Integer, Boolean> option = new HashMap<Integer, Boolean>();
+	private int[] fixopt;
 
 	public Skin(float orgw, float orgh, float dstw, float dsth) {
+		this(orgw, orgh, dstw, dsth, new int[0]);
+	}
+
+	public Skin(float orgw, float orgh, float dstw, float dsth, int[] fixopt) {
 		dw = dstw / orgw;
 		dh = dsth / orgh;
+		this.fixopt = fixopt;
 	}
 
 	protected void add(SkinObject object) {
@@ -75,6 +82,65 @@ public class Skin {
 	public void removeSkinObject(SkinObject obj) {
 		objects.remove(obj);
 	}
+	
+	public void prepare(MainState state) {
+		
+		for(SkinObject obj : objects) {
+			List<Integer> l = new ArrayList();
+			for(int op : obj.getOption()) {
+				if(op > 0) {
+					if(option.containsKey(op)) {
+						if(!option.get(op)) {
+							removes.add(obj);						
+						}
+					} else {
+						boolean fix = false;
+						for(int fop : fixopt) {
+							if(op == fop) {
+								fix = true;
+								if(!state.getBooleanValue(op)) {
+									removes.add(obj);						
+								}							
+								break;
+							}
+						}
+						if(!fix) {
+							l.add(op);
+						}
+					}					
+				} else {
+					if(option.containsKey(-op)) {
+						if(option.get(-op)) {
+							removes.add(obj);						
+						}
+					} else {
+						boolean fix = false;
+						for(int fop : fixopt) {
+							if(-op == fop) {
+								fix = true;
+								if(state.getBooleanValue(-op)) {
+									removes.add(obj);						
+								}							
+								break;
+							}
+						}
+						if(!fix) {
+							l.add(op);
+						}
+					}
+				}				
+			}
+			
+			int[] newop = new int[l.size()];
+			for(int i = 0;i < newop.length;i++) {
+				newop[i] = l.get(i);
+			}
+			obj.setOption(newop);
+ 		}
+		Logger.getGlobal().info("描画されないことが確定しているSkinObject削除 : " + removes.size() + " / " + objects.size());
+		objects.removeAll(removes);
+		option.clear();
+	}
 
 	public void drawAllObjects(SpriteBatch sprite, MainState state) {
 		final long time = state.getNowTime();
@@ -88,33 +154,13 @@ public class Skin {
 	private final boolean isDraw(int[] opt, MainState state) {
 		for (int op : opt) {
 			if (op > 0) {
-				if (state.getBooleanValue(op)) {
-					continue;
-				}
-				boolean soption = false;
-				for (int sop : option) {
-					if (op == sop) {
-						soption = true;
-						break;
-					}
-				}
-				if (!soption) {
+				if (!state.getBooleanValue(op)) {
 					return false;
 				}
 			} else {
-				if (!state.getBooleanValue(-op)) {
-					continue;
-				}
-				boolean soption = true;
-				for (int sop : option) {
-					if (-op == sop) {
-						soption = false;
-						break;
-					}
-				}
-				if (!soption) {
+				if (state.getBooleanValue(-op)) {
 					return false;
-				}
+				}				
 			}
 		}
 		return true;
@@ -142,7 +188,9 @@ public class Skin {
 		for (SkinObject obj : objects) {
 			obj.dispose();
 		}
-
+		for (SkinObject obj : removes) {
+			obj.dispose();
+		}
 	}
 
 	public int getFadeout() {
@@ -169,11 +217,11 @@ public class Skin {
 		this.scene = scene;
 	}
 
-	public int[] getOption() {
+	public Map<Integer,Boolean> getOption() {
 		return option;
 	}
 
-	public void setOption(int[] option) {
+	public void setOption(Map<Integer, Boolean> option) {
 		this.option = option;
 	}
 }

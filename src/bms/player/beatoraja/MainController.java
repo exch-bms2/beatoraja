@@ -152,6 +152,7 @@ public class MainController extends ApplicationAdapter {
 		if (newState != null && current != newState) {
 			Arrays.fill(newState.getTimer(), Long.MIN_VALUE);
 			newState.create();
+			newState.getSkin().prepare(newState);
 			current = newState;
 			current.setStartTime(System.currentTimeMillis());
 		}
@@ -232,7 +233,7 @@ public class MainController extends ApplicationAdapter {
 		}
 
 		final long time = System.currentTimeMillis();
-		if(time > prevtime + 20) {
+		if(time > prevtime) {
 		    prevtime = time;
             current.input();
             // move song bar position by mouse

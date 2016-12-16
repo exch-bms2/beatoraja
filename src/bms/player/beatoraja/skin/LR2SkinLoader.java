@@ -18,7 +18,7 @@ public class LR2SkinLoader {
 
 	private List<CommandWord> commands = new ArrayList<CommandWord>();
 
-	protected List<Integer> op = new ArrayList<Integer>();
+	protected Map<Integer, Boolean> op = new HashMap<Integer, Boolean>();
 
 	protected void addCommandWord(CommandWord cm) {
 		commands.add(cm);
@@ -42,11 +42,9 @@ public class LR2SkinLoader {
 					}
 					try {
 						int opt = Integer.parseInt(str[i]);
-						for (Integer o : op) {
-							if (o == opt) {
-								b = true;
-								break;
-							}
+						
+						if(op.containsKey(opt) && op.get(opt)) {
+							b = true;
 						}
 						if (!b && state != null) {
 							b = state.getBooleanValue(opt);
@@ -71,11 +69,8 @@ public class LR2SkinLoader {
 						boolean b = false;
 						try {
 							int opt = Integer.parseInt(str[i]);
-							for (Integer o : op) {
-								if (o == opt) {
-									b = true;
-									break;
-								}
+							if(op.containsKey(opt) && op.get(opt)) {
+								b = true;
 							}
 							if (!b && state != null) {
 								b = state.getBooleanValue(opt);
@@ -100,16 +95,7 @@ public class LR2SkinLoader {
 			if (!skip) {
 				if (str[0].equals("#SETOPTION")) {
 					int index = Integer.parseInt(str[1]);
-					if (Integer.parseInt(str[2]) >= 1) {
-						op.add(index);
-					} else {
-						for (int i = 0; i < op.size(); i++) {
-							if (op.get(i) == index) {
-								op.remove(i);
-								break;
-							}
-						}
-					}
+					op.put(index, Integer.parseInt(str[2]) >= 1);
 				}
 
 				for (CommandWord cm : commands) {
@@ -121,12 +107,8 @@ public class LR2SkinLoader {
 		}
 	}
 
-	public int[] getOption() {
-		int[] result = new int[op.size()];
-		for (int i = 0; i < op.size(); i++) {
-			result[i] = op.get(i);
-		}
-		return result;
+	public Map<Integer, Boolean> getOption() {
+		return op;
 	}
 
 	public abstract class CommandWord {
