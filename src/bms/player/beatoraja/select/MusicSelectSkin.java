@@ -26,8 +26,9 @@ public class MusicSelectSkin extends Skin {
 		add(back);
 
 		Texture bart = new Texture("skin/default/songbar.png");
-		
-		TextureRegion[][] bar = new TextureRegion[10][];
+        Texture st = new Texture("skin/default/system.png");
+
+        TextureRegion[][] bar = new TextureRegion[10][];
 		for (int i = 0; i < bar.length; i++) {
 			bar[i] = new TextureRegion[]{new TextureRegion(bart, 0, i * 30, 500, 30)};
 		}
@@ -43,6 +44,17 @@ public class MusicSelectSkin extends Skin {
 		trophy[0] = new SkinImage(ttrophy[0][10]);
 		trophy[1] = new SkinImage(ttrophy[0][11]);
 		trophy[2] = new SkinImage(ttrophy[0][12]);
+        for (int i = 0; i < trophy.length; i++) {
+            setDestination(trophy[i], 0, 20, 4, 32, 32, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        }
+
+        SkinImage[] label = new SkinImage[3];
+        label[0] = new SkinImage(new TextureRegion(st, 0,420,16,30));
+        setDestination(label[0], 0, -20, 5, 16, 30, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        label[1] = new SkinImage(new TextureRegion(st, 0,450,16,30));
+        setDestination(label[1], 0, -40, 5, 16, 30, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        label[2] = new SkinImage(new TextureRegion(st, 0,480,16,30));
+        setDestination(label[2], 0, -60, 5, 16, 30, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 		SkinText dir = new SkinText("skin/default/VL-Gothic-Regular.ttf", 0, 24, 2);
 		dir.setReferenceID(STRING_DIRECTORY);
@@ -84,8 +96,6 @@ public class MusicSelectSkin extends Skin {
 		setDestination(clear, 0, 100, 405, 200, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(clear);
 		// 数字
-		Texture st = new Texture("skin/default/system.png");
-
 		Texture nt = new Texture("skin/default/number.png");
 		TextureRegion[][] ntr = TextureRegion.split(nt, 24, 24);
 
@@ -171,6 +181,7 @@ public class MusicSelectSkin extends Skin {
         setClickableBar(new int[]{2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19});
         barobj.setLamp(lamp);
 		barobj.setTrophy(trophy);
+        barobj.setLabel(label);
 		SkinBar.SkinBarText bartext = new SkinBar.SkinBarText("skin/default/VL-Gothic-Regular.ttf", 0, 24, 2);
 		setDestination(bartext, 0, 80, 30, 18, 24, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		barobj.getBarText()[0] = bartext;

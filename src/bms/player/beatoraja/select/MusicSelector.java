@@ -102,9 +102,6 @@ public class MusicSelector extends MainState {
 	private Bar bannerbar;
 
 	private BarRenderer bar;
-	private GameOptionRenderer option;
-	private AssistOptionRenderer aoption;
-	private DetailOptionRenderer doption;
 
 	private TextField search;
 
@@ -265,10 +262,6 @@ public class MusicSelector extends MainState {
 		parameter.size = 24;
 		titlefont = generator.generateFont(parameter);
 		searchfont = generator.generateFont(parameter);
-
-		option = new GameOptionRenderer(config);
-		aoption = new AssistOptionRenderer(config);
-		doption = new DetailOptionRenderer(config);
 
 		getTimer()[TIMER_SONGBAR_CHANGE] = getNowTime();
 
@@ -536,14 +529,101 @@ public class MusicSelector extends MainState {
 		panelstate = 0;
 
 		if (input.startPressed()) {
+			//show play option
 			panelstate = 1;
-			option.render(keystate, keytime);
+			if (keystate[0] && keytime[0] != 0) {
+				keytime[0] = 0;
+				config.setRandom(config.getRandom() + 1 < 10 ? config.getRandom() + 1 : 0);
+			}
+			if (keystate[2] && keytime[2] != 0) {
+				keytime[2] = 0;
+				config.setGauge(config.getGauge() + 1 < 6 ? config.getGauge() + 1 : 0);
+			}
+			if (keystate[3] && keytime[3] != 0) {
+				keytime[3] = 0;
+				config.setDoubleoption(
+						config.getDoubleoption() + 1 < 3 ? config.getDoubleoption() + 1 : 0);
+			}
+			if (keystate[6] && keytime[6] != 0) {
+				keytime[6] = 0;
+				config.setRandom2(config.getRandom2() + 1 < 10 ? config.getRandom2() + 1 : 0);
+			}
+			if (keystate[4] && keytime[4] != 0) {
+				keytime[4] = 0;
+				config.setFixhispeed(config.getFixhispeed() + 1 < 5 ? config.getFixhispeed() + 1 : 0);
+			}
 		} else if (input.isSelectPressed()) {
+			//show assist option
 			panelstate = 2;
-			aoption.render(keystate, keytime);
+			if (keystate[0] && keytime[0] != 0) {
+				keytime[0] = 0;
+				config.setExpandjudge(!config.isExpandjudge());
+			}
+			if (keystate[1] && keytime[1] != 0) {
+				keytime[1] = 0;
+				config.setConstant(!config.isConstant());
+			}
+			if (keystate[2] && keytime[2] != 0) {
+				keytime[2] = 0;
+				config.setShowjudgearea(!config.isShowjudgearea());
+			}
+			if (keystate[3] && keytime[3] != 0) {
+				keytime[3] = 0;
+				config.setLegacynote(!config.isLegacynote());
+			}
+			if (keystate[4] && keytime[4] != 0) {
+				keytime[4] = 0;
+				config.setMarkprocessednote(!config.isMarkprocessednote());
+			}
+			if (keystate[5] && keytime[5] != 0) {
+				keytime[5] = 0;
+				config.setBpmguide(!config.isBpmguide());
+			}
+			if (keystate[6] && keytime[6] != 0) {
+				keytime[6] = 0;
+				config.setNomine(!config.isNomine());
+			}
 		} else if (input.getNumberState()[5]) {
+			// show detail option
 			panelstate = 3;
-			doption.render(keystate, keytime, current);
+			PlayConfig pc = null;
+			if(current instanceof SongBar) {
+				SongBar song = (SongBar)current;
+				pc = (song.getSongData().getMode() == 5 || song.getSongData().getMode() == 7 ? config.getMode7()
+						: (song.getSongData().getMode() == 10 || song.getSongData().getMode() == 14 ? config.getMode14() : config.getMode9()));
+			}
+			if (keystate[0] && keytime[0] != 0) {
+				keytime[0] = 0;
+				config.setBga((config.getBga() + 1) % 3);
+			}
+			if (keystate[1] && keytime[1] != 0) {
+				keytime[1] = 0;
+				config.setJudgedetail((config.getJudgedetail() + 1) % 3);
+			}
+			if (keystate[3] && keytime[3] != 0) {
+				keytime[3] = 0;
+				if (pc != null && pc.getDuration() > 1) {
+					pc.setDuration(pc.getDuration() - 1);
+				}
+			}
+			if (keystate[4] && keytime[4] != 0) {
+				keytime[4] = 0;
+				if (config.getJudgetiming() > -99) {
+					config.setJudgetiming(config.getJudgetiming() - 1);
+				}
+			}
+			if (keystate[5] && keytime[5] != 0) {
+				keytime[5] = 0;
+				if (pc != null && pc.getDuration() < 2000) {
+					pc.setDuration(pc.getDuration() + 1);
+				}
+			}
+			if (keystate[6] && keytime[6] != 0) {
+				keytime[6] = 0;
+				if (config.getJudgetiming() < 99) {
+					config.setJudgetiming(config.getJudgetiming() + 1);
+				}
+			}
 		} else if (input.getNumberState()[6]) {
 			if (bgm != null) {
 				bgm.stop();
@@ -1173,11 +1253,8 @@ public class MusicSelector extends MainState {
 	public void renderBar(SkinBar baro, int time) {
 		final MainController main = getMainController();
 		final SpriteBatch sprite = main.getSpriteBatch();
-		final ShapeRenderer shape = main.getShapeRenderer();
-		final float w = RESOLUTION[config.getResolution()].width;
-		final float h = RESOLUTION[config.getResolution()].height;
 		sprite.end();
-		bar.render(sprite, shape, skin, baro, w, h, duration, angle, time);
+		bar.render(sprite, skin, baro, duration, angle, time);
 		sprite.begin();
 	}
 

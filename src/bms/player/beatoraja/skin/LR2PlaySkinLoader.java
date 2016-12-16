@@ -31,10 +31,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 	private List<SkinImage> lines = new ArrayList<SkinImage>();
 	private SkinImage li;
 
-	private SkinImage[] nowjudge = new SkinImage[6];
-	private SkinNumber[] nowcombo = new SkinNumber[6];
-	private SkinImage[] nowjudge2 = new SkinImage[6];
-	private SkinNumber[] nowcombo2 = new SkinNumber[6];
+	private SkinJudge[] judge = new SkinJudge[2];
 	private boolean shift;
 	private boolean shift2;
 
@@ -279,7 +276,11 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 					int[] values = parseInt(str);
 					TextureRegion[] images = getSourceImage(values);
 					if (images != null) {
-						nowjudge[5 - values[1]] = new SkinImage(images, values[10], values[9]);
+						if(judge[0] == null) {
+							judge[0] = new SkinJudge(0 , (values[11] != 1));
+							skin.add(judge[0]);
+						}
+						judge[0].getJudge()[5 - values[1]] = new SkinImage(images, values[10], values[9]);
 						shift = (values[11] != 1);
 						// System.out.println("Nowjudge Added - " + (5 -
 						// values[1]));
@@ -293,7 +294,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 		addCommandWord(new CommandWord("DST_NOWJUDGE_1P") {
 			@Override
 			public void execute(String[] str) {
-				if (nowjudge[5 - Integer.parseInt(str[1])] != null) {
+				if (judge[0].getJudge()[5 - Integer.parseInt(str[1])] != null) {
 					try {
 						int[] values = parseInt(str);
 						if (values[5] < 0) {
@@ -304,7 +305,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 							values[4] += values[6];
 							values[6] = -values[6];
 						}
-						nowjudge[5 - values[1]].setDestination(values[2], values[3] * dstw / srcw, dsth
+						judge[0].getJudge()[5 - values[1]].setDestination(values[2], values[3] * dstw / srcw, dsth
 								- (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw, values[6] * dsth
 								/ srch, values[7], values[8], values[9], values[10], values[11], values[12],
 								values[13], values[14], values[15], values[16], values[17], values[18], values[19],
@@ -323,7 +324,11 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 					int[] values = parseInt(str);
 					TextureRegion[] images = getSourceImage(values);
 					if (images != null) {
-						nowjudge2[5 - values[1]] = new SkinImage(images, values[10], values[9]);
+						if(judge[1] == null) {
+							judge[1] = new SkinJudge(1 , (values[11] != 1));
+							skin.add(judge[1]);
+						}
+						judge[1].getJudge()[5 - values[1]] = new SkinImage(images, values[10], values[9]);
 						shift2 = (values[11] != 1);
 						// System.out.println("Nowjudge Added - " + (5 -
 						// values[1]));
@@ -337,7 +342,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 		addCommandWord(new CommandWord("DST_NOWJUDGE_2P") {
 			@Override
 			public void execute(String[] str) {
-				if (nowjudge2[5 - Integer.parseInt(str[1])] != null) {
+				if (judge[1].getJudge()[5 - Integer.parseInt(str[1])] != null) {
 					try {
 						int[] values = parseInt(str);
 						if (values[5] < 0) {
@@ -348,7 +353,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 							values[4] += values[6];
 							values[6] = -values[6];
 						}
-						nowjudge2[5 - values[1]].setDestination(values[2], values[3] * dstw / srcw, dsth
+						judge[1].getJudge()[5 - values[1]].setDestination(values[2], values[3] * dstw / srcw, dsth
 								- (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw, values[6] * dsth
 								/ srch, values[7], values[8], values[9], values[10], values[11], values[12],
 								values[13], values[14], values[15], values[16], values[17], values[18], values[19],
@@ -382,9 +387,9 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 							}
 						}
 
-						nowcombo[5 - values[1]] = new SkinNumber(images, values[10], values[9], values[13], images.length > 10 ? 2
+						judge[0].getJudgeCount()[5 - values[1]] = new SkinNumber(images, values[10], values[9], values[13], images.length > 10 ? 2
 								: 0, values[11]);
-						nowcombo[5 - values[1]].setAlign(values[12]);
+						judge[0].getJudgeCount()[5 - values[1]].setAlign(values[12]);
 						// System.out.println("Number Added - " +
 						// (num.getId()));
 					}
@@ -397,10 +402,10 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 		addCommandWord(new CommandWord("DST_NOWCOMBO_1P") {
 			@Override
 			public void execute(String[] str) {
-				if (nowcombo[5 - Integer.parseInt(str[1])] != null) {
+				if (judge[0].getJudgeCount()[5 - Integer.parseInt(str[1])] != null) {
 					try {
 						int[] values = parseInt(str);
-						nowcombo[5 - values[1]].setDestination(values[2], values[3] * dstw / srcw, -values[4] * dsth
+						judge[0].getJudgeCount()[5 - values[1]].setDestination(values[2], values[3] * dstw / srcw, -values[4] * dsth
 								/ srch, values[5] * dstw / srcw, values[6] * dsth / srch, values[7], values[8],
 								values[9], values[10], values[11], values[12], values[13], values[14], values[15],
 								values[16], values[17], values[18], values[19], values[20]);
@@ -433,9 +438,9 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 							}
 						}
 
-						nowcombo2[5 - values[1]] = new SkinNumber(images, values[10], values[9], values[13], images.length > 10 ? 2
+						judge[1].getJudgeCount()[5 - values[1]] = new SkinNumber(images, values[10], values[9], values[13], images.length > 10 ? 2
 								: 0, values[11]);
-						nowcombo2[5 - values[1]].setAlign(values[12]);
+						judge[1].getJudgeCount()[5 - values[1]].setAlign(values[12]);
 						// System.out.println("Number Added - " +
 						// (num.getId()));
 					}
@@ -448,10 +453,10 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 		addCommandWord(new CommandWord("DST_NOWCOMBO_2P") {
 			@Override
 			public void execute(String[] str) {
-				if (nowcombo2[5 - Integer.parseInt(str[1])] != null) {
+				if (judge[1].getJudgeCount()[5 - Integer.parseInt(str[1])] != null) {
 					try {
 						int[] values = parseInt(str);
-						nowcombo2[5 - values[1]].setDestination(values[2], values[3] * dstw / srcw, -values[4] * dsth
+						judge[1].getJudgeCount()[5 - values[1]].setDestination(values[2], values[3] * dstw / srcw, -values[4] * dsth
 								/ srch, values[5] * dstw / srcw, values[6] * dsth / srch, values[7], values[8],
 								values[9], values[10], values[11], values[12], values[13], values[14], values[15],
 								values[16], values[17], values[18], values[19], values[20]);
@@ -592,12 +597,8 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 		skin.setLaneregion(laner);
 		skin.setLine(lines.toArray(new SkinImage[lines.size()]));
 
-		if (nowjudge2[0] != null) {
-			skin.setJudgeregion(new PlaySkin.JudgeRegion[] { new PlaySkin.JudgeRegion(nowjudge, nowcombo, shift),
-					new PlaySkin.JudgeRegion(nowjudge2, nowcombo2, shift2) });
-		} else {
-			skin.setJudgeregion(new PlaySkin.JudgeRegion[] { new PlaySkin.JudgeRegion(nowjudge, nowcombo, shift) });
-		}
+		skin.setJudgeregion(judge[1] != null ? 2 : 1);
+
 		skin.setLaneGroupRegion(playerr);
 
 		return skin;
