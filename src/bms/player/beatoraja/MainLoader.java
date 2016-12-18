@@ -16,6 +16,7 @@ import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter.OutputType;
+import java.util.ResourceBundle;
 
 /**
  * 起動用クラス
@@ -183,8 +184,9 @@ public class MainLoader extends Application {
 		}
 
 		try {
+                        ResourceBundle bundle = ResourceBundle.getBundle("resources.UIResources");
 			FXMLLoader loader = new FXMLLoader(
-					MainLoader.class.getResource("/bms/player/beatoraja/PlayConfigurationView.fxml"));
+					MainLoader.class.getResource("/bms/player/beatoraja/PlayConfigurationView.fxml"), bundle);
 			stackPane = (VBox) loader.load();
 			PlayConfigurationView bmsinfo = (PlayConfigurationView) loader.getController();
 			bmsinfo.setBMSInformationLoader(this);
