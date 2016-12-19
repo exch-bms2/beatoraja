@@ -73,10 +73,6 @@ public class LaneRenderer {
 	 * 現在表示中の判定
 	 */
 	private int[] judgenow;
-	/**
-	 * 判定の最終更新時間
-	 */
-	private int[] judgenowt;
 
 	private int[] judgecombo;
 
@@ -120,7 +116,6 @@ public class LaneRenderer {
 		pos = 0;
 		judge = new int[20];
 		judgenow = new int[skin.getJudgeregion()];
-		judgenowt = new int[skin.getJudgeregion()];
 		judgecombo = new int[skin.getJudgeregion()];
 
 		this.model = model;
@@ -231,6 +226,8 @@ public class LaneRenderer {
 			 time = main.getPracticeConfiguration().getPracticeProperty().starttime;
 			 pos = 0;
 		}
+		final boolean showTimeline = (main.getState() == BMSPlayer.STATE_PRACTICE);
+
 		final float hispeed = main.getState() != BMSPlayer.STATE_PRACTICE ? this.hispeed : 1.0f;
 		JudgeManager judge = main.getJudgeManager();
 		final Rectangle[] laneregion = skin.getLaneregion();
@@ -349,7 +346,23 @@ public class LaneRenderer {
 					}
 
 				}
-				if (config.isBpmguide()) {
+				if(showTimeline) {
+					for (Rectangle r : playerr) {
+						if(i > 0 && (tl.getTime() / 1000) > (timelines[i - 1].getTime() / 1000)) {
+							sprite.end();
+							shape.begin(ShapeType.Line);
+							shape.setColor(Color.valueOf("40c0c0"));
+							shape.line(r.x, y, r.x + r.width, y);
+							shape.end();
+							sprite.begin();
+							font.setColor(Color.valueOf("40c0c0"));
+							font.draw(sprite, String.format("%2d:%02d.%1d", tl.getTime() / 60000,
+									(tl.getTime() / 1000) % 60, (tl.getTime() / 100) % 10), r.x + 4, y + 20);
+						}
+					}
+				}
+
+				if (config.isBpmguide() || showTimeline) {
 					for (Rectangle r : playerr) {
 						if (tl.getBPM() != nbpm) {
 							// BPMガイド描画
@@ -514,8 +527,7 @@ public class LaneRenderer {
 			TextureRegion ls = longnote[4][lane];
 			sprite.draw(ls, x, y, width, scale);
 			sprite.draw(le, x, y - height, width, scale);
-		}
-		if ((model.getLntype() == BMSModel.LNTYPE_CHARGENOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
+		} else if ((model.getLntype() == BMSModel.LNTYPE_CHARGENOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
 				|| ln.getType() == LongNote.TYPE_CHARGENOTE) {
 			// CN
 			if (y - height < skin.getLaneregion()[lane].y) {
@@ -532,8 +544,7 @@ public class LaneRenderer {
 			TextureRegion ls = longnote[0][lane];
 			sprite.draw(ls, x, y, width, scale);
 			sprite.draw(le, x, y - height, width, scale);
-		}
-		if ((model.getLntype() == BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
+		} else if ((model.getLntype() == BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
 				|| ln.getType() == LongNote.TYPE_LONGNOTE) {
 			// LN
 			if (y - height < skin.getLaneregion()[lane].y) {
@@ -572,7 +583,6 @@ public class LaneRenderer {
 		}
 		if (judgenow.length > 0) {
 			judgenow[lane / (skin.getLaneregion().length / judgenow.length)] = judge + 1;
-			judgenowt[lane / (skin.getLaneregion().length / judgenow.length)] = time;
 			judgecombo[lane / (skin.getLaneregion().length / judgenow.length)] = main.getJudgeManager()
 					.getCourseCombo();
 		}
