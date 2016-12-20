@@ -40,6 +40,9 @@ import javafx.util.Callback;
  */
 public class PlayConfigurationView implements Initializable {
 
+        @FXML
+        private ResourceBundle resources;
+    
 	@FXML
 	private ComboBox<Integer> resolution;
 
