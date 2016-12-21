@@ -117,6 +117,8 @@ public class SkinJudge extends SkinObject {
 
     @Override
     public void dispose() {
+    	disposeAll(judge);
+    	disposeAll(count);
         font.dispose();
     }
 }

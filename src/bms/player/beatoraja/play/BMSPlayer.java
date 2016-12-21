@@ -49,8 +49,6 @@ public class BMSPlayer extends MainState {
 
 	private BGAProcessor bga;
 
-	private PlaySkin skin;
-
 	private Sound playstop;
 
 	private GrooveGauge gauge;
@@ -305,18 +303,17 @@ public class BMSPlayer extends MainState {
 				Rectangle srcr = RESOLUTION[header.getResolution()];
 				Rectangle dstr = RESOLUTION[resource.getConfig().getResolution()];
 				LR2PlaySkinLoader dloader = new LR2PlaySkinLoader(srcr.width, srcr.height, dstr.width, dstr.height);
-				skin = dloader.loadPlaySkin(Paths.get(sc.getPath()).toFile(), this, header, loader.getOption(),
-						sc.getProperty());
+				setSkin(dloader.loadPlaySkin(Paths.get(sc.getPath()).toFile(), this, header, loader.getOption(),
+						sc.getProperty()));
 			} catch (IOException e) {
 				e.printStackTrace();
-				skin = new PlaySkin(model.getUseKeys(), config.isUse2pside(), RESOLUTION[resource.getConfig()
-						.getResolution()]);
+				setSkin(new PlaySkin(model.getUseKeys(), config.isUse2pside(), RESOLUTION[resource.getConfig()
+						.getResolution()]));
 			}
 		} else {
-			skin = new PlaySkin(model.getUseKeys(), config.isUse2pside(), RESOLUTION[resource.getConfig()
-					.getResolution()]);
+			setSkin(new PlaySkin(model.getUseKeys(), config.isUse2pside(), RESOLUTION[resource.getConfig()
+					.getResolution()]));
 		}
-		this.setSkin(skin);
 	}
 
 	private final PatternModifier[] random = { null, new LaneShuffleModifier(LaneShuffleModifier.MIRROR),
@@ -361,7 +358,7 @@ public class BMSPlayer extends MainState {
 				: (model.getUseKeys() == 10 || model.getUseKeys() == 14 ? config.getMode14() : config.getMode9()));
 		input.setKeyassign(pc.getKeyassign());
 		input.setControllerassign(pc.getControllerassign());
-		lanerender = new LaneRenderer(this, sprite, shape, systemfont, skin, resource, model, resource.getConstraint());
+		lanerender = new LaneRenderer(this, sprite, shape, systemfont, (PlaySkin) getSkin(), resource, model, resource.getConstraint());
 		for (int i : resource.getConstraint()) {
 			if (i == TableData.NO_HISPEED) {
 				enableControl = false;
@@ -369,7 +366,7 @@ public class BMSPlayer extends MainState {
 			}
 		}
 
-		skin.setBMSPlayer(this);
+		((PlaySkin) getSkin()).setBMSPlayer(this);
 		bga = resource.getBGAManager();
 
 		IRScoreData score = main.getPlayDataAccessor().readScoreData(model, config.getLnmode());
@@ -415,6 +412,7 @@ public class BMSPlayer extends MainState {
 	
 	@Override
 	public void render() {
+		final PlaySkin skin = (PlaySkin) getSkin();
 		final MainController main = getMainController();
 		final PlayerResource resource = main.getPlayerResource();
 
@@ -870,6 +868,7 @@ public class BMSPlayer extends MainState {
 
 	@Override
 	public void dispose() {
+		super.dispose();
 		if (systemfont != null) {
 			systemfont.dispose();
 			systemfont = null;
@@ -877,10 +876,6 @@ public class BMSPlayer extends MainState {
 		if (playstop != null) {
 			playstop.dispose();
 			playstop = null;
-		}
-		if (skin != null) {
-			skin.dispose();
-			skin = null;
 		}
 		Logger.getGlobal().info("システム描画のリソース解放");
 	}
@@ -1178,15 +1173,15 @@ public class BMSPlayer extends MainState {
 			return 0;
 		case OFFSET_LIFT:
 			if (lanerender.isEnableLift()) {
-				return lanerender.getLiftRegion() * skin.getLaneregion()[0].height;
+				return lanerender.getLiftRegion() * ((PlaySkin) getSkin()).getLaneregion()[0].height;
 			}
 			return 0;
 		case OFFSET_LANECOVER:
 			if (lanerender.isEnableLanecover()) {
 				if (lanerender.isEnableLift()) {
-					return -lanerender.getLiftRegion() * lanerender.getLanecover() * skin.getLaneregion()[0].height;
+					return -lanerender.getLiftRegion() * lanerender.getLanecover() * ((PlaySkin) getSkin()).getLaneregion()[0].height;
 				} else {
-					return -lanerender.getLanecover() * skin.getLaneregion()[0].height;
+					return -lanerender.getLanecover() * ((PlaySkin) getSkin()).getLaneregion()[0].height;
 				}
 			}
 			return 0;

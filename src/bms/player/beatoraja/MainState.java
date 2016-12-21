@@ -66,7 +66,12 @@ public abstract class MainState {
 
 	}
 
-	public abstract void dispose();
+	public void dispose() {
+		if(skin != null) {
+			skin.dispose();
+			skin = null;
+		}
+	}
 
 	public long getStartTime() {
 		return starttime;
@@ -169,6 +174,9 @@ public abstract class MainState {
 	}
 
 	public void setSkin(Skin skin) {
+		if(this.skin != null) {
+			this.skin.dispose();
+		}
 		this.skin = skin;
 	}
 

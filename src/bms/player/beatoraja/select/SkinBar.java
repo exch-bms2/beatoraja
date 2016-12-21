@@ -102,7 +102,12 @@ public class SkinBar extends SkinObject {
 
     @Override
     public void dispose() {
-
+    	disposeAll(barimageon);
+    	disposeAll(barimageoff);
+    	disposeAll(trophy);
+    	disposeAll(text);
+    	disposeAll(barlevel);
+    	disposeAll(label);
     }
 
     public SkinNumber[] getBarlevel() {
@@ -214,7 +219,6 @@ public class SkinBar extends SkinObject {
             }
             if (font != null) {
                 font.dispose();
-                ;
                 font = null;
             }
         }

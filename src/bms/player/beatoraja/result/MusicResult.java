@@ -98,9 +98,6 @@ public class MusicResult extends MainState {
 			resource.addCourseGauge(resource.getGauge());
 		}
 
-		if (getSkin() != null) {
-			getSkin().dispose();
-		}
 		if (resource.getConfig().getSkin()[7] != null) {
 			try {
 				SkinConfig sc = resource.getConfig().getSkin()[7];
@@ -410,6 +407,7 @@ public class MusicResult extends MainState {
 
 	@Override
 	public void dispose() {
+		super.dispose();
 		if (clear != null) {
 			clear.dispose();
 			clear = null;
@@ -421,10 +419,6 @@ public class MusicResult extends MainState {
 		if (titlefont != null) {
 			titlefont.dispose();
 			titlefont = null;
-		}
-		if (getSkin() != null) {
-			getSkin().dispose();
-			setSkin(null);
 		}
 	}
 

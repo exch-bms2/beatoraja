@@ -61,9 +61,6 @@ public class GradeResult extends MainState {
 			}
 		}
 
-		if (getSkin() != null) {
-			getSkin().dispose();
-		}
 		SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
 		setSkin(sl.loadResultSkin(Paths.get("skin/default/graderesult.json")));
 
@@ -306,10 +303,7 @@ public class GradeResult extends MainState {
 
 	@Override
 	public void dispose() {
-		if (getSkin() != null) {
-			getSkin().dispose();
-			setSkin(null);
-		}
+		super.dispose();
 	}
 
 	private void saveReplayData(int index) {

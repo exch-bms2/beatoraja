@@ -32,8 +32,6 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 	private SkinImage li;
 
 	private SkinJudge[] judge = new SkinJudge[2];
-	private boolean shift;
-	private boolean shift2;
 
 	private int groovex = 0;
 	private int groovey = 0;
@@ -281,7 +279,6 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 							skin.add(judge[0]);
 						}
 						judge[0].getJudge()[5 - values[1]] = new SkinImage(images, values[10], values[9]);
-						shift = (values[11] != 1);
 						// System.out.println("Nowjudge Added - " + (5 -
 						// values[1]));
 					}
@@ -329,7 +326,6 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 							skin.add(judge[1]);
 						}
 						judge[1].getJudge()[5 - values[1]] = new SkinImage(images, values[10], values[9]);
-						shift2 = (values[11] != 1);
 						// System.out.println("Nowjudge Added - " + (5 -
 						// values[1]));
 					}

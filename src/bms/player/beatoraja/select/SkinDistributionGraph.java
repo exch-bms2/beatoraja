@@ -91,6 +91,6 @@ public class SkinDistributionGraph extends SkinObject {
 
     @Override
     public void dispose() {
-
+    	disposeAll(lampimage);
     }
 }

@@ -86,8 +86,6 @@ public class MusicSelector extends MainState {
 
 	private PlayerData playerdata;
 
-	private MusicSelectSkin skin;
-
 	private Sound bgm;
 	private Sound move;
 	private Sound folderopen;
@@ -235,7 +233,7 @@ public class MusicSelector extends MainState {
 			}
 		}
 
-		if (skin == null) {
+		if (getSkin() == null) {
 			if (config.getSkin()[5] != null) {
 				try {
 					SkinConfig sc = config.getSkin()[5];
@@ -245,16 +243,15 @@ public class MusicSelector extends MainState {
 					Rectangle dstr = RESOLUTION[config.getResolution()];
 					LR2SelectSkinLoader dloader = new LR2SelectSkinLoader(srcr.width, srcr.height, dstr.width,
 							dstr.height);
-					skin = dloader.loadSelectSkin(Paths.get(sc.getPath()).toFile(), this, header, loader.getOption(),
-							sc.getProperty());
+					setSkin(dloader.loadSelectSkin(Paths.get(sc.getPath()).toFile(), this, header, loader.getOption(),
+							sc.getProperty()));
 				} catch (IOException e) {
 					e.printStackTrace();
-					skin = new MusicSelectSkin(RESOLUTION[config.getResolution()]);
+					setSkin(new MusicSelectSkin(RESOLUTION[config.getResolution()]));
 				}
 			} else {
-				skin = new MusicSelectSkin(RESOLUTION[config.getResolution()]);
+				setSkin(new MusicSelectSkin(RESOLUTION[config.getResolution()]));
 			}
-			this.setSkin(skin);
 		}
 
 		generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/default/VL-Gothic-Regular.ttf"));
@@ -915,11 +912,8 @@ public class MusicSelector extends MainState {
 	}
 
 	public void dispose() {
+		super.dispose();
 		bar.dispose();
-		if (skin != null) {
-			skin.dispose();
-			skin = null;
-		}
 	}
 
 	public int getJudgeCount(int judge, boolean fast) {
@@ -1254,7 +1248,7 @@ public class MusicSelector extends MainState {
 		final MainController main = getMainController();
 		final SpriteBatch sprite = main.getSpriteBatch();
 		sprite.end();
-		bar.render(sprite, skin, baro, duration, angle, time);
+		bar.render(sprite, (MusicSelectSkin) getSkin(), baro, duration, angle, time);
 		sprite.begin();
 	}
 

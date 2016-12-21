@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.utils.Disposable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +18,7 @@ import org.lwjgl.opengl.GL11;
  * 
  * @author exch
  */
-public abstract class SkinObject {
+public abstract class SkinObject implements Disposable {
 
 	/**
 	 * X座標オフセットの参照ID
@@ -416,6 +417,15 @@ public abstract class SkinObject {
 
 	public int getDestinationTimer() {
 		return dsttimer;
+	}
+	
+	public static void disposeAll(Disposable[] obj) {
+		for(int i = 0;i < obj.length;i++) {
+			if(obj[i] != null) {
+				obj[i].dispose();
+				obj[i] = null;
+			}
+		}
 	}
 
 }

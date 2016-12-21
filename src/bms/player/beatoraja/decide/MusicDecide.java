@@ -54,26 +54,24 @@ public class MusicDecide extends MainState {
 			bgm.play();
 		}
 
-		if (getSkin() == null) {
-			if (resource.getConfig().getSkin()[6] != null) {
-				try {
-					SkinConfig sc = resource.getConfig().getSkin()[6];
-					LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
-					LR2SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
-					Rectangle srcr = RESOLUTION[header.getResolution()];
-					Rectangle dstr = RESOLUTION[resource.getConfig().getResolution()];
-					LR2DecideSkinLoader dloader = new LR2DecideSkinLoader(srcr.width, srcr.height, dstr.width, dstr.height);
-					setSkin(dloader.loadMusicDecideSkin(Paths.get(sc.getPath()).toFile(), this, header,
-							loader.getOption(), sc.getProperty()));
-				} catch (IOException e) {
-					e.printStackTrace();
-					SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
-					setSkin(sl.loadDecideSkin(Paths.get("skin/default/decide.json")));
-				}
-			} else {
+		if (resource.getConfig().getSkin()[6] != null) {
+			try {
+				SkinConfig sc = resource.getConfig().getSkin()[6];
+				LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
+				LR2SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
+				Rectangle srcr = RESOLUTION[header.getResolution()];
+				Rectangle dstr = RESOLUTION[resource.getConfig().getResolution()];
+				LR2DecideSkinLoader dloader = new LR2DecideSkinLoader(srcr.width, srcr.height, dstr.width, dstr.height);
+				setSkin(dloader.loadMusicDecideSkin(Paths.get(sc.getPath()).toFile(), this, header, loader.getOption(),
+						sc.getProperty()));
+			} catch (IOException e) {
+				e.printStackTrace();
 				SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
 				setSkin(sl.loadDecideSkin(Paths.get("skin/default/decide.json")));
 			}
+		} else {
+			SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
+			setSkin(sl.loadDecideSkin(Paths.get("skin/default/decide.json")));
 		}
 	}
 
@@ -97,8 +95,7 @@ public class MusicDecide extends MainState {
 
 		if (getTimer()[TIMER_FADEOUT] == Long.MIN_VALUE && nowtime > getSkin().getInput()) {
 			BMSPlayerInputProcessor input = getMainController().getInputProcessor();
-			if (input.getKeystate()[0] || input.getKeystate()[2] || input.getKeystate()[4]
-					|| input.getKeystate()[6]) {
+			if (input.getKeystate()[0] || input.getKeystate()[2] || input.getKeystate()[4] || input.getKeystate()[6]) {
 				getTimer()[TIMER_FADEOUT] = nowtime;
 			}
 			if (input.isExitPressed()) {
@@ -110,6 +107,7 @@ public class MusicDecide extends MainState {
 
 	@Override
 	public void dispose() {
+		super.dispose();
 		if (bgm != null) {
 			bgm.dispose();
 			bgm = null;

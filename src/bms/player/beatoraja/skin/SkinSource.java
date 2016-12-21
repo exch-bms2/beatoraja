@@ -3,13 +3,14 @@ package bms.player.beatoraja.skin;
 import bms.player.beatoraja.MainState;
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.utils.Disposable;
 
 /**
  * スキンのソースイメージ
  * 
  * @author exch
  */
-public class SkinSource {
+public class SkinSource implements Disposable {
 
 	/**
 	 * イメージ

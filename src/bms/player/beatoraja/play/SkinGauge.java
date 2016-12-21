@@ -50,5 +50,9 @@ public class SkinGauge extends SkinObject {
 
     @Override
     public void dispose() {
+    	if(image != null) {
+        	image.dispose();
+        	image = null;    		
+    	}
     }
 }
