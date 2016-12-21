@@ -88,7 +88,7 @@ public class BGAProcessor {
 	private BGImageProcessor cache;
 
 	private Texture blanktex;
-	
+
 	private TimeLine[] timelines;
 	private int pos;
 
@@ -194,8 +194,8 @@ public class BGAProcessor {
 			}
 			if (f == null) {
 				final int index = name.lastIndexOf('.');
-				if(index != -1) {
-					name = name.substring(0, index);					
+				if (index != -1) {
+					name = name.substring(0, index);
 				}
 				for (String mov : mov_extension) {
 					final Path mpgfile = dpath.resolve(name + "." + mov);
@@ -264,7 +264,7 @@ public class BGAProcessor {
 					e.printStackTrace();
 				} catch (Error e) {
 				}
-				if(tex == null) {
+				if (tex == null) {
 					Logger.getGlobal().warning("BGAファイル読み込み再試行:" + dir.toString());
 					try {
 						BufferedImage bi = ImageIO.read(dir.toFile());
@@ -280,7 +280,7 @@ public class BGAProcessor {
 							public OutputStream write(boolean overwrite) {
 								return null;
 							}
-						}));						
+						}));
 					} catch (Exception e) {
 						Logger.getGlobal().warning("BGAファイル読み込み失敗。" + e.getMessage());
 						e.printStackTrace();
@@ -341,11 +341,13 @@ public class BGAProcessor {
 		if (progress != 1 || id == -1) {
 			return null;
 		}
-		if (mpgmap.get(id) != null) {
-			if(!cont) {
-				mpgmap.get(id).play(false);
+
+		final MovieProcessor mpg = mpgmap.get(id);
+		if (mpg != null) {
+			if (!cont) {
+				mpg.play(false);
 			}
-			return mpgmap.get(id).getFrame();
+			return mpg.getFrame();
 		}
 		return cache.getTexture(id);
 	}
@@ -358,7 +360,7 @@ public class BGAProcessor {
 		sprite.end();
 		boolean rbga = true;
 		boolean rlayer = true;
-		for (int i = pos ; i < timelines.length;i++) {
+		for (int i = pos; i < timelines.length; i++) {
 			final TimeLine tl = timelines[i];
 			if (tl.getTime() > time) {
 				break;
@@ -389,6 +391,7 @@ public class BGAProcessor {
 		}
 
 		if (time < 0 && getBackbmpData() != null) {
+			// draw backbmp
 			sprite.begin();
 			if (getBackbmpData() != null) {
 				sprite.draw(getBackbmpData(), r.x, r.y, r.width, r.height);
@@ -425,7 +428,8 @@ public class BGAProcessor {
 			// draw layer
 			Texture playinglayertex = getBGAData(playinglayerid, rlayer);
 			if (playinglayertex != null) {
-//				playinglayertex.setFilter(TextureFilter.Linear, TextureFilter.Linear);
+				// playinglayertex.setFilter(TextureFilter.Linear,
+				// TextureFilter.Linear);
 				sprite.begin();
 				if (mpgmap.containsKey(playinglayerid) && bgrshader.isCompiled()) {
 					sprite.setShader(bgrshader);
@@ -490,9 +494,4 @@ public class BGAProcessor {
 	public float getProgress() {
 		return progress;
 	}
-
-	public void forceFinish() {
-		progress = 1;
-	}
 }
-

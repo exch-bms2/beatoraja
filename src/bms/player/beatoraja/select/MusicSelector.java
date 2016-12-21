@@ -379,7 +379,7 @@ public class MusicSelector extends MainState {
 
 			if (gb.getMirrorScore() != null) {
 				IRScoreData score = gb.getMirrorScore();
-//				titlefont.setColor(Color.valueOf(LAMP[score.getClear()]));
+				// titlefont.setColor(Color.valueOf(LAMP[score.getClear()]));
 				// titlefont.draw(sprite, CLEAR[score.getClear()], 100, 270);
 				titlefont.setColor(Color.WHITE);
 				titlefont.draw(sprite, "EX-SCORE  : " + score.getExscore() + " / " + (score.getNotes() * 2), 100, 240);
@@ -389,7 +389,7 @@ public class MusicSelector extends MainState {
 			}
 			if (gb.getRandomScore() != null) {
 				IRScoreData score = gb.getRandomScore();
-//				titlefont.setColor(Color.valueOf(LAMP[score.getClear()]));
+				// titlefont.setColor(Color.valueOf(LAMP[score.getClear()]));
 				// titlefont.draw(sprite, CLEAR[score.getClear()], 100, 130);
 				// titlefont.setColor(Color.WHITE);
 				// titlefont.draw(sprite, "EX-SCORE  : " + score.getExscore() +
@@ -420,7 +420,7 @@ public class MusicSelector extends MainState {
 		}
 		sprite.end();
 
-		if(play >= 0) {
+		if (play >= 0) {
 			if (current instanceof SongBar) {
 				resource.clear();
 				if (resource.setBMSFile(Paths.get(((SongBar) current).getSongData().getPath()), config, play)) {
@@ -430,13 +430,13 @@ public class MusicSelector extends MainState {
 					getMainController().changeState(MainController.STATE_DECIDE);
 				}
 			} else if (current instanceof GradeBar) {
-				if(play == 2) {
+				if (play == 2) {
 					play = 0;
 				}
 				readCourse(play);
 			}
 			play = 0;
-		} else if(play == -255) {
+		} else if (play == -255) {
 			getMainController().exit();
 		}
 	}
@@ -526,7 +526,7 @@ public class MusicSelector extends MainState {
 		panelstate = 0;
 
 		if (input.startPressed()) {
-			//show play option
+			// show play option
 			panelstate = 1;
 			if (keystate[0] && keytime[0] != 0) {
 				keytime[0] = 0;
@@ -538,8 +538,7 @@ public class MusicSelector extends MainState {
 			}
 			if (keystate[3] && keytime[3] != 0) {
 				keytime[3] = 0;
-				config.setDoubleoption(
-						config.getDoubleoption() + 1 < 3 ? config.getDoubleoption() + 1 : 0);
+				config.setDoubleoption(config.getDoubleoption() + 1 < 3 ? config.getDoubleoption() + 1 : 0);
 			}
 			if (keystate[6] && keytime[6] != 0) {
 				keytime[6] = 0;
@@ -550,7 +549,7 @@ public class MusicSelector extends MainState {
 				config.setFixhispeed(config.getFixhispeed() + 1 < 5 ? config.getFixhispeed() + 1 : 0);
 			}
 		} else if (input.isSelectPressed()) {
-			//show assist option
+			// show assist option
 			panelstate = 2;
 			if (keystate[0] && keytime[0] != 0) {
 				keytime[0] = 0;
@@ -584,10 +583,11 @@ public class MusicSelector extends MainState {
 			// show detail option
 			panelstate = 3;
 			PlayConfig pc = null;
-			if(current instanceof SongBar) {
-				SongBar song = (SongBar)current;
+			if (current instanceof SongBar) {
+				SongBar song = (SongBar) current;
 				pc = (song.getSongData().getMode() == 5 || song.getSongData().getMode() == 7 ? config.getMode7()
-						: (song.getSongData().getMode() == 10 || song.getSongData().getMode() == 14 ? config.getMode14() : config.getMode9()));
+						: (song.getSongData().getMode() == 10 || song.getSongData().getMode() == 14 ? config
+								.getMode14() : config.getMode9()));
 			}
 			if (keystate[0] && keytime[0] != 0) {
 				keytime[0] = 0;
@@ -631,10 +631,12 @@ public class MusicSelector extends MainState {
 			// 1鍵 (選曲 or フォルダを開く)
 			if (isPressed(keystate, keytime, KEY_PLAY, true) || (cursor[3] && cursortime[3] != 0)) {
 				cursortime[3] = 0;
+				getResource().setPlayDevice(getMainController().getInputProcessor().getLastKeyChangedDevice());
 				select(current);
 			}
 			// 3鍵 (プラクティス)
 			if (isPressed(keystate, keytime, KEY_PRACTICE, selectable)) {
+				getResource().setPlayDevice(getMainController().getInputProcessor().getLastKeyChangedDevice());
 				play = selectable ? 2 : play;
 			}
 			// 5鍵 (オートプレイ)
@@ -763,10 +765,10 @@ public class MusicSelector extends MainState {
 		}
 
 		if (input.isExitPressed()) {
-            getMainController().exit();
+			getMainController().exit();
 		}
 	}
-	
+
 	public void select(Bar current) {
 		if (current instanceof DirectoryBar) {
 			if (bar.updateBar(current)) {
@@ -797,7 +799,7 @@ public class MusicSelector extends MainState {
 		bar.updateBar(pbar);
 		if (cbar != null) {
 			bar.setSelected(cbar);
-		}		
+		}
 	}
 
 	private void resetReplayIndex() {
@@ -1306,9 +1308,9 @@ public class MusicSelector extends MainState {
 		case BUTTON_AUTOPLAY:
 			play = 1;
 			break;
-			case BUTTON_PRACTICE:
-				play = 2;
-				break;
+		case BUTTON_PRACTICE:
+			play = 2;
+			break;
 		case BUTTON_REPLAY:
 			play = 3;
 			break;
@@ -1327,7 +1329,7 @@ public class MusicSelector extends MainState {
 	public Bar getSelectedBar() {
 		return bar.getSelected();
 	}
-	
+
 	public BarRenderer getBarRender() {
 		return bar;
 	}

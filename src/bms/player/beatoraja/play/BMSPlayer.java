@@ -353,7 +353,7 @@ public class BMSPlayer extends MainState {
 
 		input = main.getInputProcessor();
 		input.setMinimumInputDutration(config.getInputduration());
-		input.setEnableKeyInput(autoplay == 0 || autoplay == 2);
+		input.setDisableDevice(autoplay == 0 || autoplay == 2 ? (resource.getPlayDevice() == 0 ? new int[]{1,2} : new int[]{0}) : null);
 		PlayConfig pc = (model.getUseKeys() == 5 || model.getUseKeys() == 7 ? config.getMode7()
 				: (model.getUseKeys() == 10 || model.getUseKeys() == 14 ? config.getMode14() : config.getMode9()));
 		input.setKeyassign(pc.getKeyassign());
@@ -478,7 +478,7 @@ public class BMSPlayer extends MainState {
 			case STATE_PRACTICE_FINISHED:
 				long l3 = now - getTimer()[TIMER_FADEOUT];
 				if (l3 > skin.getFadeout()) {
-                    input.setEnableKeyInput(true);
+                    input.setDisableDevice(new int[0]);
                     getMainController().changeState(MainController.STATE_SELECTMUSIC);
 				}
 				break;
@@ -587,7 +587,7 @@ public class BMSPlayer extends MainState {
 				}
 				resource.setGauge(gaugelog);
 				resource.setGrooveGauge(gauge);
-				input.setEnableKeyInput(true);
+				input.setDisableDevice(new int[0]);
 				input.setStartTime(0);
 				if (autoplay == 2) {
 					state = STATE_PRACTICE;
@@ -620,7 +620,7 @@ public class BMSPlayer extends MainState {
 				saveConfig();
 				resource.setGauge(gaugelog);
 				resource.setGrooveGauge(gauge);
-				input.setEnableKeyInput(true);
+				input.setDisableDevice(new int[0]);
 				input.setStartTime(0);
 				if (autoplay == 2) {
 					state = STATE_PRACTICE;

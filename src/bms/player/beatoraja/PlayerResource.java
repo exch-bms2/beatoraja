@@ -34,6 +34,8 @@ public class PlayerResource {
 	private Config config;
 	private int auto;
 
+	private int playDevice;
+
 	private List<Integer> constraint = new ArrayList<Integer>();
 
 	private int bgashow;
@@ -447,5 +449,13 @@ public class PlayerResource {
 
 	public BMSGenerator getGenerator() {
 		return generator;
+	}
+
+	public int getPlayDevice() {
+		return playDevice;
+	}
+
+	public void setPlayDevice(int playDevice) {
+		this.playDevice = playDevice;
 	}
 }
