@@ -24,23 +24,23 @@
    <children>
       <TabPane prefHeight="390.0" prefWidth="740.0" VBox.vgrow="ALWAYS">
          <tabs>
-            <Tab closable="false" text="Video">
+            <Tab closable="false" text="%Video">
               <content>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
                         <VBox prefHeight="200.0" prefWidth="552.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                            <children>
-                              <CheckBox fx:id="fullscreen" mnemonicParsing="false" prefHeight="25.0" prefWidth="133.0" text="フルスクリーン" />
+                              <CheckBox fx:id="fullscreen" mnemonicParsing="false" prefHeight="25.0" prefWidth="133.0" text="%フルスクリーン" />
                               <HBox alignment="CENTER_LEFT" prefHeight="30.0" prefWidth="552.0">
                                  <children>
-                                    <Label text="解像度" />
+                                    <Label text="%解像度" />
                                     <ComboBox fx:id="resolution" prefWidth="200.0" />
                                  </children>
                               </HBox>
                               <HBox prefHeight="14.0" prefWidth="730.0">
                                  <children>
-                                    <CheckBox fx:id="vsync" mnemonicParsing="false" prefHeight="29.0" prefWidth="104.0" text="垂直同期" />
-                                    <Label prefHeight="25.0" prefWidth="50.0" text="最大FPS" />
+                                    <CheckBox fx:id="vsync" mnemonicParsing="false" prefHeight="29.0" prefWidth="104.0" text="%垂直同期" />
+                                    <Label prefHeight="25.0" prefWidth="50.0" text="%最大FPS" />
                   				    <Spinner fx:id="maxfps" editable="true" prefWidth="150.0">
             <valueFactory>
               <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="60" max="1000" min="0" />
@@ -57,7 +57,7 @@
                   </AnchorPane>
               </content>
             </Tab>
-            <Tab closable="false" text="Audio">
+            <Tab closable="false" text="%Audio">
               <content>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
@@ -65,7 +65,7 @@
                            <children>
                               <HBox prefHeight="13.0" prefWidth="730.0">
                                  <children>
-                                    <Label prefHeight="31.0" prefWidth="83.0" text="Audio Output" />
+                                    <Label prefHeight="31.0" prefWidth="83.0" text="%Audio_Output" />
                                     <ComboBox fx:id="audio" prefHeight="24.0" prefWidth="261.0" />
                                  </children>
                                  <VBox.margin>
@@ -74,13 +74,13 @@
                               </HBox>
                               <HBox prefHeight="30.0" prefWidth="723.0">
                                  <children>
-                                    <Label prefHeight="25.0" prefWidth="125.0" text="オーデイオバッファ(KB)" />
+                                    <Label prefHeight="25.0" prefWidth="125.0" text="%オーデイオバッファ(KB)" />
                   				    <Spinner fx:id="audiobuffer" editable="true" prefWidth="150.0">
             <valueFactory>
               <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="384" max="1024" min="16" />
             </valueFactory>
           </Spinner>
-                                    <Label prefHeight="23.0" prefWidth="65.0" text="同時発音数" />
+                                    <Label prefHeight="23.0" prefWidth="65.0" text="%同時発音数" />
                   				    <Spinner fx:id="audiosim" editable="true" prefWidth="150.0">
             <valueFactory>
               <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="64" max="1024" min="8" />
@@ -97,7 +97,7 @@
                   </AnchorPane>
               </content>
             </Tab>
-            <Tab closable="false" text="Resource">
+            <Tab closable="false" text="%Resource">
               <content>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
@@ -105,12 +105,12 @@
                            <children>
                               <HBox prefHeight="100.0" prefWidth="200.0">
                                  <children>
-                                    <Label prefHeight="101.0" prefWidth="59.0" text="BMS Path" />
+                                    <Label prefHeight="101.0" prefWidth="59.0" text="%BMS_Path" />
                                     <ListView fx:id="bmsroot" onDragDropped="#songPathDragDropped" onDragOver="#onSongPathDragOver" prefHeight="100.0" prefWidth="508.0" />
                                     <VBox prefHeight="200.0" prefWidth="100.0">
                                        <children>
-                                          <Button mnemonicParsing="false" onAction="#addSongPath" prefHeight="28.0" prefWidth="30.0" text="+" />
-                                          <Button mnemonicParsing="false" onAction="#removeSongPath" prefHeight="28.0" prefWidth="30.0" text="-" />
+                                          <Button mnemonicParsing="false" onAction="#addSongPath" prefHeight="28.0" prefWidth="30.0" text="%+" />
+                                          <Button mnemonicParsing="false" onAction="#removeSongPath" prefHeight="28.0" prefWidth="30.0" text="%-" />
                                        </children>
                                     </VBox>
                                  </children>
@@ -120,19 +120,19 @@
                               </HBox>
                               <HBox prefHeight="100.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                  <children>
-                                    <Label prefHeight="110.0" prefWidth="62.0" text="Table URL" />
+                                    <Label prefHeight="110.0" prefWidth="62.0" text="%Table_URL" />
                                     <VBox prefHeight="100.0" prefWidth="536.0">
                                        <children>
                                           <HBox>
                                              <children>
                                                 <TextField fx:id="url" prefHeight="28.0" prefWidth="510.0" />
-                                                <Button mnemonicParsing="false" onAction="#addTableURL" prefHeight="28.0" prefWidth="30.0" text="+" />
+                                                <Button mnemonicParsing="false" onAction="#addTableURL" prefHeight="28.0" prefWidth="30.0" text="%+" />
                                              </children>
                                           </HBox>
                                           <HBox>
                                              <children>
                                                 <ListView fx:id="tableurl" prefHeight="100.0" prefWidth="508.0" />
-                                                <Button mnemonicParsing="false" onAction="#removeTableURL" prefHeight="28.0" prefWidth="30.0" text="-" />
+                                                <Button mnemonicParsing="false" onAction="#removeTableURL" prefHeight="28.0" prefWidth="30.0" text="%-" />
                                              </children>
                                           </HBox>
                                        </children>
@@ -145,13 +145,13 @@
                   </AnchorPane>
               </content>
             </Tab>
-            <Tab closable="false" text="Play Option">
+            <Tab closable="false" text="%Play_Option">
                <content>
                   <VBox prefHeight="241.0" prefWidth="723.0">
                   	<children>
                         <HBox prefHeight="18.0" prefWidth="703.0">
                            <children>
-                              <Label prefHeight="31.0" prefWidth="40.0" text="MODE" />
+                              <Label prefHeight="31.0" prefWidth="40.0" text="%MODE" />
                               <ComboBox fx:id="playconfig" onAction="#updatePlayConfig" prefWidth="150.0" />
                            </children>
                            <VBox.margin>
@@ -176,54 +176,54 @@
                               <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
                   			</rowConstraints>
                            <children>
-                  				<Label prefHeight="18.0" prefWidth="78.0" text="HI-SPEED" />
+                  				<Label prefHeight="18.0" prefWidth="78.0" text="%HI-SPEED" />
                   				    <Spinner fx:id="hispeed" editable="true" GridPane.columnIndex="1">
             <valueFactory>
               <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.1" initialValue="1.0" max="9.9" min="1.0" />
             </valueFactory>
           </Spinner>
-                              <Label text="ハイスピード固定" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                              <Label text="%ハイスピード固定" GridPane.columnIndex="2" GridPane.rowIndex="2" />
                   	    <ComboBox fx:id="fixhispeed" prefWidth="150.0" GridPane.columnIndex="3" GridPane.rowIndex="2" />                  	
-                              <Label text="譜面オプション" GridPane.rowIndex="3" />
+                              <Label text="%譜面オプション" GridPane.rowIndex="3" />
                               <ComboBox fx:id="scoreop" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                              <Label text="ゲージ" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                              <Label text="%ゲージ" GridPane.columnIndex="2" GridPane.rowIndex="3" />
                               <ComboBox fx:id="gaugeop" prefWidth="150.0" GridPane.columnIndex="3" GridPane.rowIndex="3" />
-                              <Label text="ロングノート種類" GridPane.rowIndex="4" />
+                              <Label text="%ロングノート種類" GridPane.rowIndex="4" />
                               <ComboBox fx:id="lntype" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                              <Label text="ノーツ表示時間" GridPane.columnIndex="2" />
+                              <Label text="%ノーツ表示時間" GridPane.columnIndex="2" />
                   				    <Spinner fx:id="gvalue" editable="true" GridPane.columnIndex="3">
             <valueFactory>
               <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="300" max="2000" min="1" />
             </valueFactory>
           </Spinner>
-                              <CheckBox fx:id="enableLanecover" mnemonicParsing="false" text="レーンカバー" GridPane.rowIndex="1" />
+                              <CheckBox fx:id="enableLanecover" mnemonicParsing="false" text="%レーンカバー" GridPane.rowIndex="1" />
                   				    <Spinner fx:id="lanecover" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="1">
             <valueFactory>
               <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="100" max="1000" min="0" />
             </valueFactory>
           </Spinner>
-                              <CheckBox fx:id="enableLift" mnemonicParsing="false" text="リフト" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                              <CheckBox fx:id="enableLift" mnemonicParsing="false" text="%リフト" GridPane.columnIndex="2" GridPane.rowIndex="1" />
                   				    <Spinner fx:id="lift" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="1">
             <valueFactory>
               <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="100" max="1000" min="0" />
             </valueFactory>
           </Spinner>
-                              <CheckBox fx:id="constant" mnemonicParsing="false" text="CONSTANT" GridPane.columnIndex="1" GridPane.rowIndex="5" />
-                              <CheckBox fx:id="bpmguide" mnemonicParsing="false" text="BPMガイド" GridPane.columnIndex="2" GridPane.rowIndex="5" />
-                              <CheckBox fx:id="legacy" mnemonicParsing="false" text="LEGACY NOTE" GridPane.columnIndex="3" GridPane.rowIndex="5" />
-                              <Label text="アシストオプション" GridPane.rowIndex="5" />
-                              <Label text="判定タイミング" GridPane.rowIndex="2" />
+                              <CheckBox fx:id="constant" mnemonicParsing="false" text="%CONSTANT" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                              <CheckBox fx:id="bpmguide" mnemonicParsing="false" text="%BPMガイド" GridPane.columnIndex="2" GridPane.rowIndex="5" />
+                              <CheckBox fx:id="legacy" mnemonicParsing="false" text="%LEGACY_NOTE" GridPane.columnIndex="3" GridPane.rowIndex="5" />
+                              <Label text="%アシストオプション" GridPane.rowIndex="5" />
+                              <Label text="%判定タイミング" GridPane.rowIndex="2" />
                   				    <Spinner fx:id="judgetiming" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="2">
             <valueFactory>
               <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="0" max="99" min="-99" />
             </valueFactory>
           </Spinner>
-                              <CheckBox fx:id="exjudge" mnemonicParsing="false" text="EXPAND JUDGE" GridPane.columnIndex="1" GridPane.rowIndex="6" />
-                              <CheckBox fx:id="nomine" mnemonicParsing="false" text="NO MINE" GridPane.columnIndex="2" GridPane.rowIndex="6" />
-                              <Label text="その他" GridPane.rowIndex="7" />
-                              <CheckBox fx:id="showhiddennote" mnemonicParsing="false" text="不可視ノーツ表示" GridPane.columnIndex="2" GridPane.rowIndex="7" />
-                              <CheckBox fx:id="judgeregion" mnemonicParsing="false" text="判定エリア表示" GridPane.columnIndex="1" GridPane.rowIndex="7" />
-                              <CheckBox fx:id="markprocessednote" mnemonicParsing="false" text="処理済ノーツ別表示" GridPane.columnIndex="3" GridPane.rowIndex="7" />
+                              <CheckBox fx:id="exjudge" mnemonicParsing="false" text="%EXPAND_JUDGE" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                              <CheckBox fx:id="nomine" mnemonicParsing="false" text="%NO_MINE" GridPane.columnIndex="2" GridPane.rowIndex="6" />
+                              <Label text="%その他" GridPane.rowIndex="7" />
+                              <CheckBox fx:id="showhiddennote" mnemonicParsing="false" text="%不可視ノーツ表示" GridPane.columnIndex="2" GridPane.rowIndex="7" />
+                              <CheckBox fx:id="judgeregion" mnemonicParsing="false" text="%判定エリア表示" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+                              <CheckBox fx:id="markprocessednote" mnemonicParsing="false" text="%処理済ノーツ別表示" GridPane.columnIndex="3" GridPane.rowIndex="7" />
                            </children>
                         </GridPane>
                   	</children>
@@ -233,7 +233,7 @@
                   </VBox>
                </content>
             </Tab>
-            <Tab closable="false" text="Skin">
+            <Tab closable="false" text="%Skin">
               <content>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
@@ -241,9 +241,9 @@
                            <children>
                               <HBox prefHeight="23.0" prefWidth="723.0">
                                  <children>
-                                    <Label prefHeight="39.0" prefWidth="55.0" text="Category" />
+                                    <Label prefHeight="39.0" prefWidth="55.0" text="%Category" />
                                     <ComboBox fx:id="skincategory" onAction="#updateSkinCategory" prefWidth="150.0" />
-                                    <Label prefHeight="42.0" prefWidth="26.0" text="Skin">
+                                    <Label prefHeight="42.0" prefWidth="26.0" text="%Skin">
                                        <HBox.margin>
                                           <Insets left="20.0" />
                                        </HBox.margin></Label>
@@ -260,13 +260,13 @@
                               </ScrollPane>
                               <HBox prefHeight="30.0" prefWidth="723.0">
                                  <children>
-                                    <Label layoutX="10.0" layoutY="10.0" prefHeight="35.0" prefWidth="94.0" text="BGM Path(LR2)" />
+                                    <Label layoutX="10.0" layoutY="10.0" prefHeight="35.0" prefWidth="94.0" text="%BGM_Path(LR2)" />
                                     <TextField fx:id="bgmpath" prefHeight="28.0" prefWidth="278.0" />
                                  </children>
                               </HBox>
                               <HBox prefHeight="30.0" prefWidth="723.0">
                                  <children>
-                                    <Label layoutX="10.0" layoutY="10.0" prefHeight="36.0" prefWidth="103.0" text="Sound Path(LR2)" />
+                                    <Label layoutX="10.0" layoutY="10.0" prefHeight="36.0" prefWidth="103.0" text="%Sound_Path(LR2)" />
                                     <TextField fx:id="soundpath" prefHeight="28.0" prefWidth="278.0" />
                                  </children>
                               </HBox>
@@ -276,7 +276,7 @@
                   </AnchorPane>
               </content>
             </Tab>
-            <Tab closable="false" text="Other">
+            <Tab closable="false" text="%Other">
               <content>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
@@ -284,15 +284,15 @@
                            <children>
                               <HBox alignment="CENTER_LEFT" prefHeight="30.0" prefWidth="552.0">
                                  <children>
-                                    <Label text="BGA" />
+                                    <Label text="%BGA" />
                                     <ComboBox fx:id="bgaop" prefWidth="150.0" />
                                  </children>
                               </HBox>
-                              <CheckBox fx:id="folderlamp" mnemonicParsing="false" prefHeight="25.0" prefWidth="133.0" text="フォルダランプ" />
-                               <CheckBox fx:id="use2p" mnemonicParsing="false" prefHeight="25.0" prefWidth="133.0" text="2P side" />
+                              <CheckBox fx:id="folderlamp" mnemonicParsing="false" prefHeight="25.0" prefWidth="133.0" text="%フォルダランプ" />
+                               <CheckBox fx:id="use2p" mnemonicParsing="false" prefHeight="25.0" prefWidth="133.0" text="%2P_side" />
                                <HBox prefHeight="37.0" prefWidth="723.0">
                                    <children>
-                                       <Label prefHeight="24.0" prefWidth="127.0" text="最小入力間隔(ms)" />
+                                       <Label prefHeight="24.0" prefWidth="127.0" text="%最小入力間隔(ms)" />
                                        <Spinner fx:id="inputduration" editable="true" prefWidth="150.0">
                                            <valueFactory>
                                                <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="10" max="100" min="1" />
@@ -302,13 +302,13 @@
                                </HBox>
                               <HBox prefHeight="37.0" prefWidth="723.0">
                                  <children>
-                                    <Label prefHeight="18.0" prefWidth="127.0" text="判定アルゴリズム" />
+                                    <Label prefHeight="18.0" prefWidth="127.0" text="%判定アルゴリズム" />
                                     <ComboBox fx:id="judgealgorithm" prefWidth="150.0" />
                                  </children>
                               </HBox>
                               <HBox prefHeight="23.0" prefWidth="740.0">
                                  <children>
-                                    <Label prefHeight="28.0" prefWidth="78.0" text="判定詳細表示">
+                                    <Label prefHeight="28.0" prefWidth="78.0" text="%判定詳細表示">
                                        <HBox.margin>
                                           <Insets />
                                        </HBox.margin>
@@ -319,7 +319,7 @@
                                     <Insets bottom="10.0" />
                                  </VBox.margin>
                               </HBox>
-                              <Button mnemonicParsing="false" onAction="#importScoreDataFromLR2" text="import LR2 score" />
+                              <Button mnemonicParsing="false" onAction="#importScoreDataFromLR2" text="%import_LR2_score" />
                            </children>
                         </VBox>
                      </children>
@@ -330,23 +330,23 @@
       </TabPane>
       <HBox prefHeight="38.0" prefWidth="552.0">
          <children>
-            <Button mnemonicParsing="false" onAction="#start" text="起動" />
-            <Button mnemonicParsing="false" onAction="#loadDiffBMS" text="楽曲読み込み">
+            <Button mnemonicParsing="false" onAction="#start" text="%起動" />
+            <Button mnemonicParsing="false" onAction="#loadDiffBMS" text="%楽曲読み込み">
                <HBox.margin>
                   <Insets left="20.0" />
                </HBox.margin>
             </Button>
-            <Button mnemonicParsing="false" onAction="#loadTable" text="難易度表読み込み">
+            <Button mnemonicParsing="false" onAction="#loadTable" text="%難易度表読み込み">
                <HBox.margin>
                   <Insets left="20.0" />
                </HBox.margin>
             </Button>
-            <Button mnemonicParsing="false" onAction="#exit" text="終了">
+            <Button mnemonicParsing="false" onAction="#exit" text="%終了">
                <HBox.margin>
                   <Insets left="20.0" />
                </HBox.margin>
             </Button>
-            <Button mnemonicParsing="false" onAction="#loadAllBMS" text="楽曲全更新">
+            <Button mnemonicParsing="false" onAction="#loadAllBMS" text="%楽曲全更新">
                <HBox.margin>
                   <Insets left="100.0" />
                </HBox.margin>
