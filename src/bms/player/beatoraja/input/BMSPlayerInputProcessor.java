@@ -38,10 +38,9 @@ public class BMSPlayerInputProcessor {
 					BMKeys.BUTTON_4, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN, BMKeys.BUTTON_8, BMKeys.BUTTON_9 });
 			// controller.addListener(bm);
 			bminput.add(bm);
-			if (player == 1) {
+			player++;
+			if (player == 2) {
 				break;
-			} else {
-				player++;
 			}
 		}
 		this.bminput = bminput.toArray(new BMControllerInputProcessor[0]);
@@ -58,6 +57,9 @@ public class BMSPlayerInputProcessor {
 	 * 各キーの最終更新時間 TODO これを他クラスから編集させない方がいいかも
 	 */
 	private long[] time = new long[18];
+
+	private int lastKeyDevice;
+	private int[] disableDevice = new int[0];
 	/**
 	 * 0-9キーのON/OFF状態
 	 */
@@ -84,8 +86,6 @@ public class BMSPlayerInputProcessor {
 	boolean mousedragged;
 
 	int scroll;
-
-	private boolean enableKeyInput = true;
 
 	private List<KeyInputLog> keylog = new ArrayList<KeyInputLog>();
 
@@ -146,6 +146,34 @@ public class BMSPlayerInputProcessor {
 		keystate = b;
 	}
 
+	public int getLastKeyChangedDevice() {
+		return lastKeyDevice;
+	}
+
+	public int getNumberOfDevice() {
+		return bminput.length + 1;
+	}
+
+	public void setDisableDevice(int[] devices) {
+		if(devices == null) {
+			devices = new int[bminput.length + 1];
+			for(int i = 0;i < devices.length;i++) {
+				devices[i] = i;
+			}
+			Arrays.fill(keystate, false);
+			Arrays.fill(time, 0);
+		}
+		this.disableDevice = devices;
+		for(int device : devices) {
+			if(device == 0) {
+				kbinput.clear();
+			} else if(device -1 < bminput.length){
+				bminput[device - 1].clear();
+			}
+		}
+
+	}
+
 	public boolean[] getNumberState() {
 		return numberstate;
 	}
@@ -154,24 +182,18 @@ public class BMSPlayerInputProcessor {
 		return numtime;
 	}
 
-	public void keyChanged(int presstime, int i, boolean pressed) {
-		if (enableKeyInput && keystate[i] != pressed) {
-			keystate[i] = pressed;
-			time[i] = presstime;
-			if (this.getStartTime() != 0) {
-				keylog.add(new KeyInputLog(presstime, i, pressed));
+	public void keyChanged(int device, int presstime, int i, boolean pressed) {
+		for(int disable : disableDevice) {
+			if(device == disable) {
+				return;
 			}
 		}
-	}
-
-	public void setEnableKeyInput(boolean b) {
-		enableKeyInput = b;
-		if (b) {
-			Arrays.fill(keystate, false);
-			Arrays.fill(time, 0);
-			kbinput.clear();
-			for (BMControllerInputProcessor bm : bminput) {
-				bm.clear();
+		if (keystate[i] != pressed) {
+			keystate[i] = pressed;
+			time[i] = presstime;
+			lastKeyDevice = device;
+			if (this.getStartTime() != 0) {
+				keylog.add(new KeyInputLog(presstime, i, pressed));
 			}
 		}
 	}

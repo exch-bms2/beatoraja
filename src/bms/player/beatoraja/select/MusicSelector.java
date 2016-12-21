@@ -634,10 +634,12 @@ public class MusicSelector extends MainState {
 			// 1鍵 (選曲 or フォルダを開く)
 			if (isPressed(keystate, keytime, KEY_PLAY, true) || (cursor[3] && cursortime[3] != 0)) {
 				cursortime[3] = 0;
+				getResource().setPlayDevice(getMainController().getInputProcessor().getLastKeyChangedDevice());
 				select(current);
 			}
 			// 3鍵 (プラクティス)
 			if (isPressed(keystate, keytime, KEY_PRACTICE, selectable)) {
+				getResource().setPlayDevice(getMainController().getInputProcessor().getLastKeyChangedDevice());
 				play = selectable ? 2 : play;
 			}
 			// 5鍵 (オートプレイ)

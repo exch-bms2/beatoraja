@@ -75,7 +75,7 @@ public class KeyBoardInputProcesseor implements InputProcessor {
 			if(pressed != keystate[keys[i]] && presstime >= keytime[keys[i]] + duration) {
 				keystate[keys[i]] = pressed;
 				keytime[keys[i]] = presstime;
-				this.bmsPlayerInputProcessor.keyChanged((int) presstime, i, pressed);
+				this.bmsPlayerInputProcessor.keyChanged(0, (int) presstime, i, pressed);
 			}
 		}
 		
