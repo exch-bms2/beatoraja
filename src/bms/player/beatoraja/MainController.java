@@ -196,7 +196,7 @@ public class MainController extends ApplicationAdapter {
 		result = new MusicResult(this);
 		gresult = new GradeResult(this);
 		keyconfig = new KeyConfiguration(this);
-		resource = new PlayerResource(config);
+		resource = new PlayerResource(audio, config);
 		if (bmsfile != null) {
 			resource.setBMSFile(bmsfile, config, auto);
 			changeState(STATE_PLAYBMS);

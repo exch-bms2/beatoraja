@@ -8,6 +8,7 @@ import java.util.logging.Logger;
 import bms.model.*;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.Config.SkinConfig;
+import bms.player.beatoraja.audio.AudioDriver;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyInputLog;
 import bms.player.beatoraja.pattern.*;
@@ -45,7 +46,7 @@ public class BMSPlayer extends MainState {
 	private BMSPlayerInputProcessor input;
 	private LaneRenderer lanerender;
 	private JudgeManager judge;
-	private AudioProcessor audio;
+	private AudioDriver audio;
 
 	private BGAProcessor bga;
 
@@ -379,7 +380,7 @@ public class BMSPlayer extends MainState {
 		resource.setRivalScoreData(rivalscore);
 		Logger.getGlobal().info("スコアグラフ描画クラス準備");
 
-		audio = resource.getAudioProcessor();
+		audio = getMainController().getAudioProcessor();
 
 		if (autoplay == 2) {
 			practice.create(model);
@@ -549,7 +550,7 @@ public class BMSPlayer extends MainState {
 				state = STATE_FAILED;
 				getTimer()[TIMER_FAILED] = now;
 				if (resource.mediaLoadFinished()) {
-					resource.getAudioProcessor().stop(null);
+					getMainController().getAudioProcessor().stop((Note)null);
 				}
 				if (playstop != null) {
 					getMainController().getAudioProcessor().play(playstop, false);
@@ -847,7 +848,7 @@ public class BMSPlayer extends MainState {
 			state = STATE_FAILED;
 			getTimer()[TIMER_FAILED] = getNowTime();
 			if (getMainController().getPlayerResource().mediaLoadFinished()) {
-				getMainController().getPlayerResource().getAudioProcessor().stop(null);
+				getMainController().getAudioProcessor().stop((Note)null);
 			}
 			if (playstop != null) {
 				getMainController().getAudioProcessor().play(playstop, false);

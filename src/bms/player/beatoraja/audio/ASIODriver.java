@@ -1,5 +1,8 @@
 package bms.player.beatoraja.audio;
 
+import bms.model.BMSModel;
+import bms.model.Note;
+
 public class ASIODriver implements AudioDriver {
 
 	@Override
@@ -18,6 +21,30 @@ public class ASIODriver implements AudioDriver {
 	public void stop(String path) {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	public void setModel(BMSModel model) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public float getProgress() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public void play(Note n, float volume) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void stop(Note n) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
