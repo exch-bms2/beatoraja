@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import bms.model.*;
+import bms.player.beatoraja.play.audio.ASIOProcessor;
 import bms.player.beatoraja.play.audio.AudioDeviceProcessor;
 import bms.player.beatoraja.play.audio.AudioProcessor;
 import bms.player.beatoraja.play.audio.SoundProcessor;
@@ -149,7 +150,7 @@ public class PlayerResource {
 				audio = new AudioDeviceProcessor();
 				break;
 			case Config.AUDIODRIVER_ASIO:
-//				audio = new ASIOProcessor();
+				audio = new ASIOProcessor();
 				break;
 			}
 			audioLoaded = false;
