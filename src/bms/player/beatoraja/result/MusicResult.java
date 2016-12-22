@@ -53,8 +53,8 @@ public class MusicResult extends MainState {
 
 	private float avgduration;
 
-	private Sound clear;
-	private Sound fail;
+	private String clear;
+	private String fail;
 
 	public MusicResult(MainController main) {
 		super(main);
@@ -68,10 +68,10 @@ public class MusicResult extends MainState {
 			if (soundfolder.exists() && soundfolder.isDirectory()) {
 				for (File f : soundfolder.listFiles()) {
 					if (clear == null && f.getName().startsWith("clear.")) {
-						clear = SoundProcessor.getSound(f.getPath());
+						clear = f.getPath();
 					}
 					if (fail == null && f.getName().startsWith("fail.")) {
-						fail = SoundProcessor.getSound(f.getPath());
+						fail = f.getPath();
 					}
 				}
 			}
@@ -162,10 +162,10 @@ public class MusicResult extends MainState {
 		if (getTimer()[TIMER_FADEOUT] != Long.MIN_VALUE) {
 			if (time > getTimer()[TIMER_FADEOUT] + getSkin().getFadeout()) {
 				if (this.clear != null) {
-					this.clear.stop();
+					getMainController().getAudioProcessor().stop(this.clear);
 				}
 				if (this.fail != null) {
-					this.fail.stop();
+					getMainController().getAudioProcessor().stop(this.fail);
 				}
 
 				boolean[] keystate = main.getInputProcessor().getKeystate();
@@ -375,11 +375,11 @@ public class MusicResult extends MainState {
 
 		if (newscore.getClear() != GrooveGauge.CLEARTYPE_FAILED) {
 			if (this.clear != null) {
-				this.clear.play();
+				getMainController().getAudioProcessor().play(this.clear, false);
 			}
 		} else {
 			if (fail != null) {
-				fail.play();
+				getMainController().getAudioProcessor().play(this.fail, false);
 			}
 		}
 	}
@@ -408,14 +408,6 @@ public class MusicResult extends MainState {
 	@Override
 	public void dispose() {
 		super.dispose();
-		if (clear != null) {
-			clear.dispose();
-			clear = null;
-		}
-		if (fail != null) {
-			fail.dispose();
-			fail = null;
-		}
 		if (titlefont != null) {
 			titlefont.dispose();
 			titlefont = null;

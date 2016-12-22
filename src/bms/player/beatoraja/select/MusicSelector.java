@@ -86,11 +86,11 @@ public class MusicSelector extends MainState {
 
 	private PlayerData playerdata;
 
-	private Sound bgm;
-	private Sound move;
-	private Sound folderopen;
-	private Sound folderclose;
-	private Sound sorts;
+	private String bgm;
+	private String move;
+	private String folderopen;
+	private String folderclose;
+	private String sorts;
 
 	private FreeTypeFontGenerator generator;
 	private BitmapFont titlefont;
@@ -204,30 +204,30 @@ public class MusicSelector extends MainState {
 			if (bgmfolder.exists() && bgmfolder.isDirectory()) {
 				for (File f : bgmfolder.listFiles()) {
 					if (bgm == null && f.getName().startsWith("select.")) {
-						bgm = SoundProcessor.getSound(f.getPath());
+						bgm = f.getPath();
 						break;
 					}
 				}
 			}
 		}
 		if (bgm != null) {
-			bgm.loop();
+			getMainController().getAudioProcessor().play(bgm , true);
 		}
 		if (config.getSoundpath().length() > 0) {
 			final File soundfolder = new File(config.getSoundpath());
 			if (soundfolder.exists() && soundfolder.isDirectory()) {
 				for (File f : soundfolder.listFiles()) {
 					if (move == null && f.getName().startsWith("scratch.")) {
-						move = SoundProcessor.getSound(f.getPath());
+						move = f.getPath();
 					}
 					if (folderopen == null && f.getName().startsWith("f-open.")) {
-						folderopen = SoundProcessor.getSound(f.getPath());
+						folderopen = f.getPath();
 					}
 					if (folderclose == null && f.getName().startsWith("f-close.")) {
-						folderclose = SoundProcessor.getSound(f.getPath());
+						folderclose = f.getPath();
 					}
 					if (sorts == null && f.getName().startsWith("o-change.")) {
-						sorts = SoundProcessor.getSound(f.getPath());
+						sorts = f.getPath();
 					}
 				}
 			}
@@ -425,7 +425,7 @@ public class MusicSelector extends MainState {
 				resource.clear();
 				if (resource.setBMSFile(Paths.get(((SongBar) current).getSongData().getPath()), config, play)) {
 					if (bgm != null) {
-						bgm.stop();
+						getMainController().getAudioProcessor().stop(bgm);
 					}
 					getMainController().changeState(MainController.STATE_DECIDE);
 				}
@@ -476,7 +476,7 @@ public class MusicSelector extends MainState {
 				bar.updateBar(dir.get(dir.size() - 1));
 			}
 			if (sorts != null) {
-				sorts.play();
+				getMainController().getAudioProcessor().play(sorts, false);
 			}
 		}
 		if (numberstate[2] && numtime[2] != 0) {
@@ -487,7 +487,7 @@ public class MusicSelector extends MainState {
 				bar.updateBar(dir.get(dir.size() - 1));
 			}
 			if (sorts != null) {
-				sorts.play();
+				getMainController().getAudioProcessor().play(sorts, false);
 			}
 		}
 		if (numberstate[3] && numtime[3] != 0) {
@@ -498,7 +498,7 @@ public class MusicSelector extends MainState {
 				bar.updateBar(dir.get(dir.size() - 1));
 			}
 			if (sorts != null) {
-				sorts.play();
+				getMainController().getAudioProcessor().play(sorts, false);
 			}
 		}
 		if (numberstate[4] && numtime[4] != 0) {
@@ -513,7 +513,7 @@ public class MusicSelector extends MainState {
 			}
 			numtime[4] = 0;
 			if (sorts != null) {
-				sorts.play();
+				getMainController().getAudioProcessor().play(sorts, false);
 			}
 		}
 
@@ -623,7 +623,7 @@ public class MusicSelector extends MainState {
 			}
 		} else if (input.getNumberState()[6]) {
 			if (bgm != null) {
-				bgm.stop();
+				getMainController().getAudioProcessor().stop(bgm);
 			}
 			getMainController().changeState(MainController.STATE_CONFIG);
 		} else {
@@ -653,7 +653,7 @@ public class MusicSelector extends MainState {
 				if (current instanceof DirectoryBar) {
 					if (bar.updateBar(current)) {
 						if (folderopen != null) {
-							folderopen.play();
+							getMainController().getAudioProcessor().play(folderopen, false);
 						}
 						dir.add(current);
 					}
@@ -686,7 +686,7 @@ public class MusicSelector extends MainState {
 			if (duration == 0) {
 				bar.move(true);
 				if (move != null) {
-					move.play();
+					getMainController().getAudioProcessor().play(move, false);
 				}
 				duration = l + 300;
 				angle = 300;
@@ -695,7 +695,7 @@ public class MusicSelector extends MainState {
 				duration = l + 50;
 				bar.move(true);
 				if (move != null) {
-					move.play();
+					getMainController().getAudioProcessor().play(move, false);
 				}
 				angle = 50;
 			}
@@ -704,7 +704,7 @@ public class MusicSelector extends MainState {
 			if (duration == 0) {
 				bar.move(false);
 				if (move != null) {
-					move.play();
+					getMainController().getAudioProcessor().play(move, false);
 				}
 				duration = l + 300;
 				angle = -300;
@@ -713,7 +713,7 @@ public class MusicSelector extends MainState {
 				duration = l + 50;
 				bar.move(false);
 				if (move != null) {
-					move.play();
+					getMainController().getAudioProcessor().play(move, false);
 				}
 				angle = -50;
 			}
@@ -773,7 +773,7 @@ public class MusicSelector extends MainState {
 		if (current instanceof DirectoryBar) {
 			if (bar.updateBar(current)) {
 				if (folderopen != null) {
-					folderopen.play();
+					getMainController().getAudioProcessor().play(folderopen, false);
 				}
 				dir.add(current);
 			}
@@ -793,7 +793,7 @@ public class MusicSelector extends MainState {
 			cbar = dir.get(dir.size() - 1);
 			dir.remove(dir.size() - 1);
 			if (folderclose != null) {
-				folderclose.play();
+				getMainController().getAudioProcessor().play(folderclose, false);
 			}
 		}
 		bar.updateBar(pbar);
@@ -867,7 +867,7 @@ public class MusicSelector extends MainState {
 					}
 				}
 				if (bgm != null) {
-					bgm.stop();
+					getMainController().getAudioProcessor().stop(bgm);
 				}
 				resource.setCoursetitle(((GradeBar) bar.getSelected()).getTitle());
 				resource.setBMSFile(files.get(0), config, autoplay);

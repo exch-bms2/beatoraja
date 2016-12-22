@@ -49,7 +49,7 @@ public class BMSPlayer extends MainState {
 
 	private BGAProcessor bga;
 
-	private Sound playstop;
+	private String playstop;
 
 	private GrooveGauge gauge;
 
@@ -335,7 +335,7 @@ public class BMSPlayer extends MainState {
 			if (soundfolder.exists() && soundfolder.isDirectory()) {
 				for (File f : soundfolder.listFiles()) {
 					if (playstop == null && f.getName().startsWith("playstop.")) {
-						playstop = SoundProcessor.getSound(f.getPath());
+						playstop = f.getPath();
 					}
 				}
 			}
@@ -552,7 +552,7 @@ public class BMSPlayer extends MainState {
 					resource.getAudioProcessor().stop(null);
 				}
 				if (playstop != null) {
-					playstop.play();
+					getMainController().getAudioProcessor().play(playstop, false);
 				}
 				Logger.getGlobal().info("STATE_FAILEDに移行");
 			}
@@ -850,7 +850,7 @@ public class BMSPlayer extends MainState {
 				getMainController().getPlayerResource().getAudioProcessor().stop(null);
 			}
 			if (playstop != null) {
-				playstop.play();
+				getMainController().getAudioProcessor().play(playstop, false);
 			}
 			Logger.getGlobal().info("STATE_FAILEDに移行");
 		}
@@ -872,10 +872,6 @@ public class BMSPlayer extends MainState {
 		if (systemfont != null) {
 			systemfont.dispose();
 			systemfont = null;
-		}
-		if (playstop != null) {
-			playstop.dispose();
-			playstop = null;
 		}
 		Logger.getGlobal().info("システム描画のリソース解放");
 	}
