@@ -1,4 +1,4 @@
-package bms.player.beatoraja.play.audio;
+package bms.player.beatoraja.audio;
 
 import java.io.*;
 import java.nio.*;

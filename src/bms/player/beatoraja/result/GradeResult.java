@@ -4,7 +4,6 @@ import java.io.File;
 import java.nio.file.Paths;
 import java.util.*;
 
-import bms.player.beatoraja.play.audio.SoundProcessor;
 import bms.player.beatoraja.play.gauge.GrooveGauge;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.skin.SkinLoader;
