@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import bms.model.*;
+import bms.player.beatoraja.audio.AudioDriver;
 import bms.player.beatoraja.play.audio.AudioDeviceProcessor;
 import bms.player.beatoraja.play.audio.AudioProcessor;
 import bms.player.beatoraja.play.audio.SoundProcessor;
@@ -42,7 +43,7 @@ public class PlayerResource {
 	/**
 	 * BMSの音源リソース
 	 */
-	private AudioProcessor audio;
+	private AudioDriver audio;
 	private boolean audioLoaded;
 	/**
 	 * BMSのBGAリソース
@@ -99,7 +100,8 @@ public class PlayerResource {
 	 */
 	private int maxcombo;
 
-	public PlayerResource(Config config) {
+	public PlayerResource(AudioDriver audio, Config config) {
+		this.audio = audio;
 		this.config = config;
 	}
 
@@ -137,21 +139,7 @@ public class PlayerResource {
 			// 同フォルダの違うbmsファイルでも、WAV/,BMP定義が違う可能性があるのでロード
 			// RANDOM定義がある場合はリロード
 			this.bgashow = config.getBga();
-			if (audio != null) {
-				audio.dispose();
-			}
 			
-			switch(config.getAudioDriver()) {
-			case Config.AUDIODRIVER_SOUND:
-				audio = new SoundProcessor();
-				break;
-			case Config.AUDIODRIVER_AUDIODEVICE:
-				audio = new AudioDeviceProcessor();
-				break;
-			case Config.AUDIODRIVER_ASIO:
-//				audio = new ASIOProcessor();
-				break;
-			}
 			audioLoaded = false;
 			
 			if (bga != null) {
@@ -272,10 +260,6 @@ public class PlayerResource {
 
 	public Config getConfig() {
 		return config;
-	}
-
-	public AudioProcessor getAudioProcessor() {
-		return audio;
 	}
 
 	public BGAProcessor getBGAManager() {

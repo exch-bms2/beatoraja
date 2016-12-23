@@ -37,8 +37,8 @@ public class GradeResult extends MainState {
 
 	private boolean saveReplay = false;
 
-	private Sound clear;
-	private Sound fail;
+	private String clear;
+	private String fail;
 
 	public GradeResult(MainController main) {
 		super(main);
@@ -52,10 +52,10 @@ public class GradeResult extends MainState {
 			if (soundfolder.exists() && soundfolder.isDirectory()) {
 				for (File f : soundfolder.listFiles()) {
 					if (clear == null && f.getName().startsWith("course_clear.")) {
-						clear = SoundProcessor.getSound(f.getPath());
+						clear = f.getPath();
 					}
 					if (fail == null && f.getName().startsWith("course_fail.")) {
-						fail = SoundProcessor.getSound(f.getPath());
+						fail = f.getPath();
 					}
 				}
 			}
@@ -101,10 +101,10 @@ public class GradeResult extends MainState {
 		if (getTimer()[TIMER_FADEOUT] != Long.MIN_VALUE) {
 			if (time > getTimer()[TIMER_FADEOUT] + getSkin().getFadeout()) {
 				if (clear != null) {
-					clear.stop();
+					getMainController().getAudioProcessor().stop(clear);
 				}
 				if (fail != null) {
-					fail.stop();
+					getMainController().getAudioProcessor().stop(fail);
 				}
 				main.changeState(MainController.STATE_SELECTMUSIC);
 			}
@@ -187,11 +187,11 @@ public class GradeResult extends MainState {
 
 		if (newscore.getClear() != GrooveGauge.CLEARTYPE_FAILED) {
 			if (this.clear != null) {
-				this.clear.loop();
+				getMainController().getAudioProcessor().play(clear, true);
 			}
 		} else {
 			if (fail != null) {
-				fail.loop();
+				getMainController().getAudioProcessor().play(fail, true);
 			}
 		}
 
