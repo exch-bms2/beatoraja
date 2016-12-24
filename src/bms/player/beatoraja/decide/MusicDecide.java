@@ -2,6 +2,7 @@ package bms.player.beatoraja.decide;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import bms.player.beatoraja.Config.SkinConfig;
@@ -28,7 +29,7 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
  */
 public class MusicDecide extends MainState {
 
-	private Sound bgm;
+	private String bgm;
 
 	private boolean cancel;
 
@@ -44,14 +45,14 @@ public class MusicDecide extends MainState {
 			if (bgmfolder.exists() && bgmfolder.isDirectory()) {
 				for (File f : bgmfolder.listFiles()) {
 					if (bgm == null && f.getName().startsWith("decide.")) {
-						bgm = SoundProcessor.getSound(f.getPath());
+						bgm = f.getPath();
 						break;
 					}
 				}
 			}
 		}
 		if (bgm != null) {
-			bgm.play();
+			getMainController().getAudioProcessor().play(bgm, false);
 		}
 
 		if (resource.getConfig().getSkin()[6] != null) {
@@ -108,10 +109,6 @@ public class MusicDecide extends MainState {
 	@Override
 	public void dispose() {
 		super.dispose();
-		if (bgm != null) {
-			bgm.dispose();
-			bgm = null;
-		}
 	}
 
 	public String getTextValue(int id) {

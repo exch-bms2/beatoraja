@@ -8,6 +8,8 @@ import java.util.Calendar;
 import java.util.logging.Logger;
 
 import com.badlogic.gdx.Graphics;
+
+import bms.player.beatoraja.audio.*;
 import bms.player.beatoraja.config.KeyConfiguration;
 import bms.player.beatoraja.decide.MusicDecide;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
@@ -44,6 +46,8 @@ public class MainController extends ApplicationAdapter {
 	private GradeResult gresult;
 	private KeyConfiguration keyconfig;
 
+	private AudioDriver audio;
+	
 	private PlayerResource resource;
 
 	private BitmapFont systemfont;
@@ -175,13 +179,24 @@ public class MainController extends ApplicationAdapter {
 		shape = new ShapeRenderer();
 
 		input = new BMSPlayerInputProcessor(RESOLUTION[config.getResolution()]);
-		
+		switch(config.getAudioDriver()) {
+		case Config.AUDIODRIVER_SOUND:
+			audio = new GdxSoundDriver();
+			break;
+		case Config.AUDIODRIVER_AUDIODEVICE:
+			audio = new GdxAudioDeviceDriver();
+			break;
+		case Config.AUDIODRIVER_ASIO:
+			audio = new ASIODriver(config);
+			break;
+		}
+
 		selector = new MusicSelector(this, config);
 		decide = new MusicDecide(this);
 		result = new MusicResult(this);
 		gresult = new GradeResult(this);
 		keyconfig = new KeyConfiguration(this);
-		resource = new PlayerResource(config);
+		resource = new PlayerResource(audio, config);
 		if (bmsfile != null) {
 			resource.setBMSFile(bmsfile, config, auto);
 			changeState(STATE_PLAYBMS);
@@ -350,6 +365,10 @@ public class MainController extends ApplicationAdapter {
 
 	public BMSPlayerInputProcessor getInputProcessor() {
 		return input;
+	}
+
+	public AudioDriver getAudioProcessor() {
+		return audio;
 	}
 
 	/**

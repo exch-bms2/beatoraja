@@ -8,6 +8,7 @@ import java.util.logging.Logger;
 import bms.model.*;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.Config.SkinConfig;
+import bms.player.beatoraja.audio.AudioDriver;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyInputLog;
 import bms.player.beatoraja.pattern.*;
@@ -45,11 +46,11 @@ public class BMSPlayer extends MainState {
 	private BMSPlayerInputProcessor input;
 	private LaneRenderer lanerender;
 	private JudgeManager judge;
-	private AudioProcessor audio;
+	private AudioDriver audio;
 
 	private BGAProcessor bga;
 
-	private Sound playstop;
+	private String playstop;
 
 	private GrooveGauge gauge;
 
@@ -335,7 +336,7 @@ public class BMSPlayer extends MainState {
 			if (soundfolder.exists() && soundfolder.isDirectory()) {
 				for (File f : soundfolder.listFiles()) {
 					if (playstop == null && f.getName().startsWith("playstop.")) {
-						playstop = SoundProcessor.getSound(f.getPath());
+						playstop = f.getPath();
 					}
 				}
 			}
@@ -379,7 +380,7 @@ public class BMSPlayer extends MainState {
 		resource.setRivalScoreData(rivalscore);
 		Logger.getGlobal().info("スコアグラフ描画クラス準備");
 
-		audio = resource.getAudioProcessor();
+		audio = getMainController().getAudioProcessor();
 
 		if (autoplay == 2) {
 			practice.create(model);
@@ -549,10 +550,10 @@ public class BMSPlayer extends MainState {
 				state = STATE_FAILED;
 				getTimer()[TIMER_FAILED] = now;
 				if (resource.mediaLoadFinished()) {
-					resource.getAudioProcessor().stop(null);
+					getMainController().getAudioProcessor().stop((Note)null);
 				}
 				if (playstop != null) {
-					playstop.play();
+					getMainController().getAudioProcessor().play(playstop, false);
 				}
 				Logger.getGlobal().info("STATE_FAILEDに移行");
 			}
@@ -847,10 +848,10 @@ public class BMSPlayer extends MainState {
 			state = STATE_FAILED;
 			getTimer()[TIMER_FAILED] = getNowTime();
 			if (getMainController().getPlayerResource().mediaLoadFinished()) {
-				getMainController().getPlayerResource().getAudioProcessor().stop(null);
+				getMainController().getAudioProcessor().stop((Note)null);
 			}
 			if (playstop != null) {
-				playstop.play();
+				getMainController().getAudioProcessor().play(playstop, false);
 			}
 			Logger.getGlobal().info("STATE_FAILEDに移行");
 		}
@@ -872,10 +873,6 @@ public class BMSPlayer extends MainState {
 		if (systemfont != null) {
 			systemfont.dispose();
 			systemfont = null;
-		}
-		if (playstop != null) {
-			playstop.dispose();
-			playstop = null;
 		}
 		Logger.getGlobal().info("システム描画のリソース解放");
 	}
