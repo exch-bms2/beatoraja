@@ -14,17 +14,29 @@ import com.badlogic.gdx.files.FileHandleStream;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 
 public class GdxSoundDriver implements AudioDriver {
-
+	/**
+	 * 効果音マップ
+	 */
 	private Map<String, Sound> soundmap = new HashMap<String, Sound>();
-
+	/**
+	 * キー音マップ(音切りなし)
+	 */
 	private Sound[] wavmap = new Sound[0];
-
-	private SliceWav[][] slicesound = new SliceWav[0][0];
-
+	/**
+	 * キー音マップ(音切りなし):再生状況
+	 */
 	private long[] playmap = new long[0];
-
+	/**
+	 * キー音マップ(音切りあり)
+	 */
+	private SliceWav[][] slicesound = new SliceWav[0][0];
+	/**
+	 * キー音読み込み進捗状況
+	 */
 	private float progress = 0;
-
+	/**
+	 * キー音ボリューム
+	 */
 	private float volume = 1.0f;
 
 	public void play(String p, boolean loop) {
@@ -60,21 +72,32 @@ public class GdxSoundDriver implements AudioDriver {
 	 * @param model
 	 */
 	public void setModel(BMSModel model) {
-		dispose();
+		final int wavcount = model.getWavList().length;
+		for (Sound id : wavmap) {
+			if (id != null) {
+				id.dispose();
+			}
+		}
+		wavmap = new Sound[wavcount];
+		playmap = new long[wavmap.length];
+		Arrays.fill(playmap, -1);
+
+		for (SliceWav[] slices : slicesound) {
+			for (SliceWav slice : slices) {
+				slice.wav.dispose();
+			}
+		}
+		slicesound = new SliceWav[wavcount][];
+		
 		progress = 0;
 		// BMS格納ディレクトリ
 		Path dpath = Paths.get(model.getPath()).getParent();
 
-		// final Map<Integer, byte[]> orgwavmap = new HashMap<Integer,
-		// byte[]>();
-		final Map<Integer, PCM> orgwavmap = new HashMap<Integer, PCM>();
-		final Map<Integer, Sound> soundmap = new HashMap<Integer, Sound>();
-
 		if (model.getVolwav() > 0 && model.getVolwav() < 100) {
 			volume = model.getVolwav() / 100f;
 		}
-		int wavcount = model.getWavList().length;
 
+		final Map<Integer, PCM> orgwavmap = new HashMap<Integer, PCM>();
 		List<SliceWav>[] slicesound = new List[wavcount];
 
 		List<Note> notes = new ArrayList<Note>();
@@ -97,14 +120,13 @@ public class GdxSoundDriver implements AudioDriver {
 			}
 			String name = model.getWavList()[note.getWav()];
 			if (note.getStarttime() == 0 && note.getDuration() == 0) {
-				// BMSのケース(音切りなし)
-				if (soundmap.get(note.getWav()) == null) {
-					Sound sound = getSound(dpath.resolve(name).toString());
-					soundmap.put(note.getWav(), sound);
+				// 音切りなしのケース
+				if (note.getWav() >= 0 && wavmap[note.getWav()]  == null) {
+					wavmap[note.getWav()] = getSound(dpath.resolve(name).toString());
 				}
 
 			} else {
-				// BMSONのケース(音切りあり)
+				// 音切りありのケース
 				boolean b = true;
 				if (slicesound[note.getWav()] == null) {
 					slicesound[note.getWav()] = new ArrayList<SliceWav>();
@@ -180,20 +202,14 @@ public class GdxSoundDriver implements AudioDriver {
 			progress += 1f / notes.size();
 		}
 
-		Logger.getGlobal().info("音源ファイル読み込み完了。音源数:" + soundmap.keySet().size());
-		wavmap = new Sound[wavcount];
-		this.slicesound = new SliceWav[wavcount][];
+		Logger.getGlobal().info("音源ファイル読み込み完了。音源数:" + wavmap.length);
 		for (int i = 0; i < wavmap.length; i++) {
-			wavmap[i] = soundmap.get(i);
-
 			if (slicesound[i] != null) {
 				this.slicesound[i] = slicesound[i].toArray(new SliceWav[slicesound[i].size()]);
 			} else {
 				this.slicesound[i] = new SliceWav[0];
 			}
 		}
-		playmap = new long[wavmap.length];
-		Arrays.fill(playmap, -1);
 
 		progress = 1;
 	}
@@ -297,19 +313,12 @@ public class GdxSoundDriver implements AudioDriver {
 	 * リソースを開放する
 	 */
 	public void dispose() {
-		progress = 1;
-		for (Sound id : wavmap) {
-			if (id != null) {
-				id.dispose();
+		for(Sound sound : soundmap.values()) {
+			if(sound != null) {
+				sound.dispose();
 			}
 		}
-		for (SliceWav[] slices : slicesound) {
-			for (SliceWav slice : slices) {
-				slice.wav.dispose();
-			}
-		}
-		wavmap = new Sound[0];
-		slicesound = new SliceWav[0][];
+		soundmap.clear();
 	}
 
 	public float getProgress() {
