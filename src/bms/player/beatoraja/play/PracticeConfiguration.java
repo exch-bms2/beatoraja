@@ -9,6 +9,7 @@ import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.play.gauge.*;
 
+import bms.player.beatoraja.skin.SkinNoteDistributionGraph;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -32,7 +33,9 @@ public class PracticeConfiguration {
 	private static final String[] DPRANDOM = { "NORMAL", "FLIP"};
 
 	private PracticeProperty property = new PracticeProperty();
-	
+
+	private SkinNoteDistributionGraph graph = new SkinNoteDistributionGraph();
+
 	public void create(BMSModel model) {
 		property.judgerank = model.getJudgerank();
 		property.endtime = model.getLastTime() + 1000;
@@ -118,7 +121,7 @@ public class PracticeConfiguration {
 		}
 		if (cursor[1] && cursortime[1] != 0) {
 			cursortime[1] = 0;
-			cursorpos = (cursorpos + 1) % (model.getUseKeys() >= 10 ? 8 : 6);
+			cursorpos = (cursorpos + 1) % (model.getUseKeys() >= 10 ? 9 : 7);
 		}
 		if (cursor[2] && (presscount == 0 || presscount + 10 < System.currentTimeMillis())) {
 			if(presscount == 0) {
@@ -148,19 +151,24 @@ public class PracticeConfiguration {
 					property.startgauge--;
 				}
 				break;
-			case 5:
-				property.random = (property.random + (model.getUseKeys() == 9 ? 6 : 9)) % (model.getUseKeys() == 9 ? 7 : 10);
-				break;
-				case 6:
-					property.random2 = (property.random2 + 9) % 10;
-					break;
-				case 7:
-					property.doubleop = (property.doubleop + 1) % 2;
-					break;
 				case 4:
 					if(property.judgerank > 10) {
 						property.judgerank -= 10;
 					}
+					break;
+				case 5:
+					if(property.freq > 50) {
+						property.freq -= 5;
+					}
+					break;
+			case 6:
+				property.random = (property.random + (model.getUseKeys() == 9 ? 6 : 9)) % (model.getUseKeys() == 9 ? 7 : 10);
+				break;
+				case 7:
+					property.random2 = (property.random2 + 9) % 10;
+					break;
+				case 8:
+					property.doubleop = (property.doubleop + 1) % 2;
 					break;
 			}
 		} else if (cursor[3] && (presscount == 0 || presscount + 10 < System.currentTimeMillis())) {
@@ -195,17 +203,24 @@ public class PracticeConfiguration {
 					property.startgauge++;
 				}
 				break;
-			case 5:
+				case 4:
+					if(property.judgerank < 400) {
+						property.judgerank += 10;
+					}
+					break;
+				case 5:
+					if(property.freq < 200) {
+						property.freq += 5;
+					}
+					break;
+				case 6:
 				property.random = (property.random + 1) % (model.getUseKeys() == 9 ? 7 : 10);
 				break;
-				case 6:
+				case 7:
 					property.random2 = (property.random2 + 1) % 10;
 					break;
-				case 7:
+				case 8:
 					property.doubleop = (property.doubleop + 1) % 2;
-					break;
-				case 4:
-					property.judgerank += 10;
 					break;
 
 			}
@@ -228,18 +243,23 @@ public class PracticeConfiguration {
 		titlefont.setColor(cursorpos == 4 ? Color.YELLOW : Color.CYAN);
 		titlefont.draw(sprite, "JUDGERANK : " + property.judgerank, x, y - 88);
 		titlefont.setColor(cursorpos == 5 ? Color.YELLOW : Color.CYAN);
-		titlefont.draw(sprite, "OPTION-1P : " + RANDOM[property.random], x, y - 110);
+		titlefont.draw(sprite, "FREQENCY : " + property.freq, x, y - 110);
+		titlefont.setColor(cursorpos == 6 ? Color.YELLOW : Color.CYAN);
+		titlefont.draw(sprite, "OPTION-1P : " + RANDOM[property.random], x, y - 132);
 		if(model.getUseKeys() >= 10) {
-			titlefont.setColor(cursorpos == 6 ? Color.YELLOW : Color.CYAN);
-			titlefont.draw(sprite, "OPTION-2P : " + RANDOM[property.random2], x, y - 132);
 			titlefont.setColor(cursorpos == 7 ? Color.YELLOW : Color.CYAN);
-			titlefont.draw(sprite, "OPTION-DP : " + DPRANDOM[property.doubleop], x, y - 154);
+			titlefont.draw(sprite, "OPTION-2P : " + RANDOM[property.random2], x, y - 154);
+			titlefont.setColor(cursorpos == 8 ? Color.YELLOW : Color.CYAN);
+			titlefont.draw(sprite, "OPTION-DP : " + DPRANDOM[property.doubleop], x, y - 176);
 		}
 
 		if(state.getMainController().getPlayerResource().mediaLoadFinished()) {
 			titlefont.setColor(Color.ORANGE);
-			titlefont.draw(sprite, "PRESS 1KEY TO PLAY", x, y - 198);
+			titlefont.draw(sprite, "PRESS 1KEY TO PLAY", x, y - 220);
 		}
+
+
+		graph.draw(sprite, time, state, new Rectangle(r.x, r.y, r.width, r.height / 4), property.starttime, property.endtime);
 	}
 	
 	public static class PracticeProperty {
@@ -251,5 +271,6 @@ public class PracticeConfiguration {
 		public int random2 = 0;
 		public int doubleop = 0;
 		public int judgerank = 100;
+		public int freq = 120;
 	}
 }

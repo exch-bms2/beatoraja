@@ -97,10 +97,6 @@ public class LaneRenderer {
 		this.gvalue = playconfig.getDuration();
 		hispeed = playconfig.getHispeed();
 		init(model);
-		this.setLanecover(playconfig.getLanecover());
-		if (this.fixhispeed != Config.FIX_HISPEED_OFF) {
-			basehispeed = hispeed;
-		}
 
 		for (int i : mode) {
 			if (i == TableData.NO_HISPEED) {
@@ -155,6 +151,10 @@ public class LaneRenderer {
 			break;
 		}
 
+		this.setLanecover(playconfig.getLanecover());
+		if (this.fixhispeed != Config.FIX_HISPEED_OFF) {
+			basehispeed = hispeed;
+		}
 	}
 
 	public int getFixHispeed() {

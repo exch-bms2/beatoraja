@@ -447,7 +447,10 @@ public class BMSPlayer extends MainState {
 			if (input.getKeystate()[0] && resource.mediaLoadFinished() && now > skin.getLoadstart() + skin.getLoadend() && !input.startPressed()) {
 				PracticeProperty property = practice.getPracticeProperty();
 				enableControl = true;
-				PracticeModifier pm = new PracticeModifier(property.starttime, property.endtime);
+				if(property.freq != 100) {
+					model.setFrequency(property.freq / 100f);
+				}
+				PracticeModifier pm = new PracticeModifier(property.starttime * 100 / property.freq, property.endtime * 100 / property.freq);
 				pm.modify(model);
 				if(model.getUseKeys() >= 10) {
 					if(property.doubleop == 1) {
@@ -467,8 +470,8 @@ public class BMSPlayer extends MainState {
 				lanerender.init(model);
 				judge.init(model);
 				notes = 0;
-				starttimeoffset = property.starttime > 1000 ? property.starttime - 1000 : 0;
-				playtime = property.endtime + 1000;
+				starttimeoffset = (property.starttime > 1000 ? property.starttime - 1000 : 0) * 100 / property.freq;
+				playtime = (property.endtime + 1000) * 100 / property.freq;
 				bga.prepare(this);
 				state = STATE_READY;
 				getTimer()[TIMER_READY] = now;
