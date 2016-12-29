@@ -28,8 +28,10 @@ public class KeyBoardInputProcesseor implements InputProcessor {
 			Keys.F9, Keys.F10, Keys.F11, Keys.F12 };
 	private int[] control = new int[] { Keys.Q, Keys.W };
 	private int exit = Keys.ESCAPE;
-	
+
 	private int lastPressedKey = -1;
+
+	private boolean enable = true;
 
 	private Rectangle resolution;
 
@@ -57,72 +59,73 @@ public class KeyBoardInputProcesseor implements InputProcessor {
 	public boolean keyUp(int keycode) {
 		return true;
 	}
-	
+
 	private boolean[] keystate = new boolean[256];
 	private long[] keytime = new long[256];
 	private int duration;
-	
+
 	public void clear() {
-//		Arrays.fill(keystate, false);
+		// Arrays.fill(keystate, false);
 		Arrays.fill(keytime, -duration);
 		lastPressedKey = -1;
 	}
-	
+
 	public void poll() {
-		final long presstime = System.currentTimeMillis() - this.bmsPlayerInputProcessor.starttime;
-		for (int i = 0; i < keys.length; i++) {
-			final boolean pressed = Gdx.input.isKeyPressed(keys[i]);
-			if(pressed != keystate[keys[i]] && presstime >= keytime[keys[i]] + duration) {
-				keystate[keys[i]] = pressed;
-				keytime[keys[i]] = presstime;
-				this.bmsPlayerInputProcessor.keyChanged(0, (int) presstime, i, pressed);
+		if (enable) {
+			final long presstime = System.currentTimeMillis() - this.bmsPlayerInputProcessor.starttime;
+			for (int i = 0; i < keys.length; i++) {
+				final boolean pressed = Gdx.input.isKeyPressed(keys[i]);
+				if (pressed != keystate[keys[i]] && presstime >= keytime[keys[i]] + duration) {
+					keystate[keys[i]] = pressed;
+					keytime[keys[i]] = presstime;
+					this.bmsPlayerInputProcessor.keyChanged(0, (int) presstime, i, pressed);
+				}
 			}
-		}
-		
-		for (int i = 0; i < cover.length; i++) {
-			final boolean pressed = Gdx.input.isKeyPressed(cover[i]);
-			if (pressed != keystate[cover[i]]) {
-				keystate[cover[i]] = pressed;
-				this.bmsPlayerInputProcessor.cursor[i] = pressed;
-				this.bmsPlayerInputProcessor.cursortime[i] = presstime;
-			}
-		}
 
-		for (int i = 0; i < numbers.length; i++) {
-			final boolean pressed = Gdx.input.isKeyPressed(numbers[i]);
-			if (pressed != keystate[numbers[i]]) {
-				keystate[numbers[i]] = pressed;
-				this.bmsPlayerInputProcessor.numberstate[i] = pressed;
-				this.bmsPlayerInputProcessor.numtime[i] = presstime;
+			for (int i = 0; i < cover.length; i++) {
+				final boolean pressed = Gdx.input.isKeyPressed(cover[i]);
+				if (pressed != keystate[cover[i]]) {
+					keystate[cover[i]] = pressed;
+					this.bmsPlayerInputProcessor.cursor[i] = pressed;
+					this.bmsPlayerInputProcessor.cursortime[i] = presstime;
+				}
 			}
-		}
 
-		for (int i = 0; i < function.length; i++) {
-			final boolean pressed = Gdx.input.isKeyPressed(function[i]);
-			if (pressed != keystate[function[i]]) {
-				keystate[function[i]] = pressed;
-				this.bmsPlayerInputProcessor.functionstate[i] = pressed;
-				this.bmsPlayerInputProcessor.functiontime[i] = presstime;
+			for (int i = 0; i < numbers.length; i++) {
+				final boolean pressed = Gdx.input.isKeyPressed(numbers[i]);
+				if (pressed != keystate[numbers[i]]) {
+					keystate[numbers[i]] = pressed;
+					this.bmsPlayerInputProcessor.numberstate[i] = pressed;
+					this.bmsPlayerInputProcessor.numtime[i] = presstime;
+				}
 			}
-		}
 
-		final boolean startpressed = Gdx.input.isKeyPressed(control[0]);
-		if(startpressed != keystate[control[0]]) {
-			keystate[control[0]] = startpressed;
-			this.bmsPlayerInputProcessor.startChanged(startpressed);			
-		}
-		final boolean selectpressed = Gdx.input.isKeyPressed(control[1]);
-		if(selectpressed != keystate[control[1]]) {
-			keystate[control[1]] = selectpressed;
-			this.bmsPlayerInputProcessor.setSelectPressed(selectpressed);			
+			for (int i = 0; i < function.length; i++) {
+				final boolean pressed = Gdx.input.isKeyPressed(function[i]);
+				if (pressed != keystate[function[i]]) {
+					keystate[function[i]] = pressed;
+					this.bmsPlayerInputProcessor.functionstate[i] = pressed;
+					this.bmsPlayerInputProcessor.functiontime[i] = presstime;
+				}
+			}
+
+			final boolean startpressed = Gdx.input.isKeyPressed(control[0]);
+			if (startpressed != keystate[control[0]]) {
+				keystate[control[0]] = startpressed;
+				this.bmsPlayerInputProcessor.startChanged(startpressed);
+			}
+			final boolean selectpressed = Gdx.input.isKeyPressed(control[1]);
+			if (selectpressed != keystate[control[1]]) {
+				keystate[control[1]] = selectpressed;
+				this.bmsPlayerInputProcessor.setSelectPressed(selectpressed);
+			}
 		}
 		final boolean exitpressed = Gdx.input.isKeyPressed(exit);
-		if(exitpressed != keystate[exit]) {
+		if (exitpressed != keystate[exit]) {
 			keystate[exit] = exitpressed;
-			this.bmsPlayerInputProcessor.setExitPressed(exitpressed);			
+			this.bmsPlayerInputProcessor.setExitPressed(exitpressed);
 		}
 	}
-
 
 	public boolean mouseMoved(int arg0, int arg1) {
 		return false;
@@ -136,14 +139,16 @@ public class KeyBoardInputProcesseor implements InputProcessor {
 	public boolean touchDown(int x, int y, int point, int button) {
 		this.bmsPlayerInputProcessor.mousebutton = button;
 		this.bmsPlayerInputProcessor.mousex = (int) (x * resolution.width / Gdx.graphics.getWidth());
-		this.bmsPlayerInputProcessor.mousey = (int) (resolution.height - y * resolution.height / Gdx.graphics.getHeight());
+		this.bmsPlayerInputProcessor.mousey = (int) (resolution.height - y * resolution.height
+				/ Gdx.graphics.getHeight());
 		this.bmsPlayerInputProcessor.mousepressed = true;
 		return false;
 	}
 
 	public boolean touchDragged(int x, int y, int point) {
 		this.bmsPlayerInputProcessor.mousex = (int) (x * resolution.width / Gdx.graphics.getWidth());
-		this.bmsPlayerInputProcessor.mousey = (int) (resolution.height - y * resolution.height / Gdx.graphics.getHeight());
+		this.bmsPlayerInputProcessor.mousey = (int) (resolution.height - y * resolution.height
+				/ Gdx.graphics.getHeight());
 		this.bmsPlayerInputProcessor.mousedragged = true;
 		return false;
 	}
@@ -159,8 +164,12 @@ public class KeyBoardInputProcesseor implements InputProcessor {
 	public void setLastPressedKey(int lastPressedKey) {
 		this.lastPressedKey = lastPressedKey;
 	}
-	
+
 	public void setMinimumDuration(int duration) {
 		this.duration = duration;
+	}
+
+	public void setEnable(boolean enable) {
+		this.enable = enable;
 	}
 }

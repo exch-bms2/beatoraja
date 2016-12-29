@@ -10,20 +10,18 @@ import bms.player.beatoraja.*;
 import bms.player.beatoraja.Config.SkinConfig;
 import bms.player.beatoraja.config.KeyConfiguration;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
-import bms.player.beatoraja.play.audio.SoundProcessor;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.song.SongData;
 import bms.player.beatoraja.song.SongDatabaseAccessor;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.TextInputListener;
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.*;
+import com.badlogic.gdx.scenes.scene2d.EventListener;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
@@ -167,7 +165,7 @@ public class MusicSelector extends MainState {
 		}
 
 		Map<String, IRScoreData> scores = getMainController().getPlayDataAccessor().readScoreDatas(
-				noscore.toArray(new SongData[0]), lnmode);
+				noscore.toArray(new SongData[noscore.size()]), lnmode);
 		for (SongData song : noscore) {
 			IRScoreData score = scores.get(song.getSha256());
 			for (int i = 0; i < scorecache.length; i++) {
@@ -188,7 +186,7 @@ public class MusicSelector extends MainState {
 			cache.clear();
 		}
 
-		BMSPlayerInputProcessor input = main.getInputProcessor();
+		final BMSPlayerInputProcessor input = main.getInputProcessor();
 		PlayConfig pc = (config.getMusicselectinput() == 0 ? config.getMode7() : config.getMode9());
 		input.setKeyassign(pc.getKeyassign());
 		input.setControllerassign(pc.getControllerassign());
@@ -320,6 +318,15 @@ public class MusicSelector extends MainState {
 			stage.addActor(search);
 
 			search.setVisible(true);
+			search.addListener(new EventListener() {				
+				@Override
+				public boolean handle(Event e) {
+					if(e.isHandled()) {
+						input.getKeyBoardInputProcesseor().setEnable(stage.getKeyboardFocus() == null);
+					}
+					return false;
+				}
+			});
 
 			setStage(stage);
 		}

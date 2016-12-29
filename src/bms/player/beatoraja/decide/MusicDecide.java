@@ -10,7 +10,6 @@ import bms.player.beatoraja.MainController;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.PlayerResource;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
-import bms.player.beatoraja.play.audio.SoundProcessor;
 import bms.player.beatoraja.skin.LR2DecideSkinLoader;
 import bms.player.beatoraja.skin.LR2SkinHeader;
 import bms.player.beatoraja.skin.LR2SkinHeaderLoader;

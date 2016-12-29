@@ -13,15 +13,12 @@ import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyInputLog;
 import bms.player.beatoraja.pattern.*;
 import bms.player.beatoraja.play.PracticeConfiguration.PracticeProperty;
-import bms.player.beatoraja.play.audio.AudioProcessor;
-import bms.player.beatoraja.play.audio.SoundProcessor;
 import bms.player.beatoraja.play.bga.BGAProcessor;
 import bms.player.beatoraja.play.gauge.*;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.song.SongData;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
@@ -424,6 +421,10 @@ public class BMSPlayer extends MainState {
 		case STATE_PRELOAD:
 			if (resource.mediaLoadFinished() && now > skin.getLoadstart() + skin.getLoadend() && !input.startPressed()) {
 				bga.prepare(this);
+				final long mem = Runtime.getRuntime().freeMemory();
+				System.gc();
+				final long cmem = Runtime.getRuntime().freeMemory();
+				Logger.getGlobal().info("current free memory : " + (cmem / (1024 * 1024)) + "MB , disposed : " + ((cmem - mem) / (1024 * 1024)) + "MB");
 				state = STATE_READY;
 				getTimer()[TIMER_READY] = now;
 				Logger.getGlobal().info("STATE_READYに移行");
@@ -447,7 +448,10 @@ public class BMSPlayer extends MainState {
 			if (input.getKeystate()[0] && resource.mediaLoadFinished() && now > skin.getLoadstart() + skin.getLoadend() && !input.startPressed()) {
 				PracticeProperty property = practice.getPracticeProperty();
 				enableControl = true;
-				PracticeModifier pm = new PracticeModifier(property.starttime, property.endtime);
+				if(property.freq != 100) {
+					model.setFrequency(property.freq / 100f);
+				}
+				PracticeModifier pm = new PracticeModifier(property.starttime * 100 / property.freq, property.endtime * 100 / property.freq);
 				pm.modify(model);
 				if(model.getUseKeys() >= 10) {
 					if(property.doubleop == 1) {
@@ -467,8 +471,8 @@ public class BMSPlayer extends MainState {
 				lanerender.init(model);
 				judge.init(model);
 				notes = 0;
-				starttimeoffset = property.starttime > 1000 ? property.starttime - 1000 : 0;
-				playtime = property.endtime + 1000;
+				starttimeoffset = (property.starttime > 1000 ? property.starttime - 1000 : 0) * 100 / property.freq;
+				playtime = (property.endtime + 1000) * 100 / property.freq;
 				bga.prepare(this);
 				state = STATE_READY;
 				getTimer()[TIMER_READY] = now;

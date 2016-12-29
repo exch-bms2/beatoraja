@@ -9,7 +9,6 @@ import com.synthbot.jasiohost.*;
 
 import bms.model.*;
 import bms.player.beatoraja.Config;
-import bms.player.beatoraja.play.audio.PCM;
 
 /**
  * ASIOサウンドドライバ
@@ -41,7 +40,7 @@ public class ASIODriver implements AudioDriver, AsioDriverListener {
 
 	public ASIODriver(Config config) {
 		List<String> drivers = AsioDriver.getDriverNames();
-//		System.out.println(Arrays.toString(drivers.toArray()));
+		// System.out.println(Arrays.toString(drivers.toArray()));
 		asioDriver = AsioDriver.getDriver(drivers.get(0));
 		asioDriver.addAsioDriverListener(this);
 		activeChannels.add(asioDriver.getChannelOutput(0));
@@ -51,7 +50,7 @@ public class ASIODriver implements AudioDriver, AsioDriverListener {
 		outputbuffer = new float[2][bufferSize];
 		asioDriver.createBuffers(activeChannels);
 		asioDriver.start();
-		
+
 		mixer = new AudioMixer(config.getAudioDeviceSimultaneousSources());
 	}
 
@@ -85,93 +84,90 @@ public class ASIODriver implements AudioDriver, AsioDriverListener {
 			notes.addAll(Arrays.asList(tl.getBackGroundNotes()));
 		}
 
-			for (Note note : notes) {
-				if (note.getWav() >= 0) {
-					String name = model.getWavList()[note.getWav()];
-					if (note.getStarttime() == 0 && note.getDuration() == 0) {
-						// 音切りなし
-						if (soundmap.get(note.getWav()) == null) {
-							name = name.substring(0, name.lastIndexOf('.'));
-							final Path wavfile = dpath.resolve(name + ".wav");
-							final Path oggfile = dpath.resolve(name + ".ogg");
-							final Path mp3file = dpath.resolve(name + ".mp3");
+		for (Note note : notes) {
+			if (note.getWav() >= 0) {
+				String name = model.getWavList()[note.getWav()];
+				if (note.getStarttime() == 0 && note.getDuration() == 0) {
+					// 音切りなし
+					if (wavmap[note.getWav()] == null) {
+						name = name.substring(0, name.lastIndexOf('.'));
+						final Path wavfile = dpath.resolve(name + ".wav");
+						final Path oggfile = dpath.resolve(name + ".ogg");
+						final Path mp3file = dpath.resolve(name + ".mp3");
 
-							PCM wav = null;
-							if (wav == null && Files.exists(wavfile)) {
-								try {
-									wav = new PCM(wavfile);
-								} catch (IOException e) {
-									e.printStackTrace();
-								}
+						PCM wav = null;
+						if (wav == null && Files.exists(wavfile)) {
+							try {
+								wav = new PCM(wavfile);
+							} catch (IOException e) {
+								e.printStackTrace();
 							}
-							if (wav == null && Files.exists(oggfile)) {
-								try {
-									wav = new PCM(oggfile);
-								} catch (IOException e) {
-									e.printStackTrace();
-								}
+						}
+						if (wav == null && Files.exists(oggfile)) {
+							try {
+								wav = new PCM(oggfile);
+							} catch (IOException e) {
+								e.printStackTrace();
 							}
-							if (wav == null && Files.exists(mp3file)) {
-								try {
-									wav = new PCM(mp3file);
-								} catch (IOException e) {
-									e.printStackTrace();
-								}
+						}
+						if (wav == null && Files.exists(mp3file)) {
+							try {
+								wav = new PCM(mp3file);
+							} catch (IOException e) {
+								e.printStackTrace();
 							}
+						}
+						wavmap[note.getWav()] = wav;
+					}
+				} else {
+					// 音切りあり
+					boolean b = true;
+					if (slicesound[note.getWav()] == null) {
+						slicesound[note.getWav()] = new ArrayList<SliceWav>();
+					}
+					for (SliceWav slice : slicesound[note.getWav()]) {
+						if (slice.starttime == note.getStarttime() && slice.duration == note.getDuration()) {
+							b = false;
+							break;
+						}
+					}
+					if (b) {
+						name = name.substring(0, name.lastIndexOf('.'));
+						final Path wavfile = dpath.resolve(name + ".wav");
+						final Path oggfile = dpath.resolve(name + ".ogg");
+						final Path mp3file = dpath.resolve(name + ".mp3");
+
+						PCM wav = wavmap[note.getWav()];
+						if (wav == null && Files.exists(wavfile)) {
+							try {
+								wav = new PCM(wavfile);
+							} catch (IOException e) {
+								e.printStackTrace();
+							}
+						}
+						if (wav == null && Files.exists(oggfile)) {
+							try {
+								wav = new PCM(oggfile);
+							} catch (IOException e) {
+								e.printStackTrace();
+							}
+						}
+						if (wav == null && Files.exists(mp3file)) {
+							try {
+								wav = new PCM(mp3file);
+							} catch (IOException e) {
+								e.printStackTrace();
+							}
+						}
+
+						if (wav != null) {
+							slicesound[note.getWav()]
+									.add(new SliceWav(note, wav.slice(note.getStarttime(), note.getDuration())));
 							wavmap[note.getWav()] = wav;
-						}
-					} else {
-						// 音切りあり
-						boolean b = true;
-						if (slicesound[note.getWav()] == null) {
-							slicesound[note.getWav()] = new ArrayList<SliceWav>();
-						}
-						for (SliceWav slice : slicesound[note.getWav()]) {
-							if (slice.starttime == note.getStarttime() && slice.duration == note.getDuration()) {
-								b = false;
-								break;
-							}
-						}
-						if (b) {
-							name = name.substring(0, name.lastIndexOf('.'));
-							final Path wavfile = dpath.resolve(name + ".wav");
-							final Path oggfile = dpath.resolve(name + ".ogg");
-							final Path mp3file = dpath.resolve(name + ".mp3");
-
-							PCM wav = null;
-							if (soundmap.get(note.getWav()) != null) {
-								wav = soundmap.get(note.getWav());
-							}
-							if (wav == null && Files.exists(wavfile)) {
-								try {
-									wav = new PCM(wavfile);
-								} catch (IOException e) {
-									e.printStackTrace();
-								}
-							}
-							if (wav == null && Files.exists(oggfile)) {
-								try {
-									wav = new PCM(oggfile);
-								} catch (IOException e) {
-									e.printStackTrace();
-								}
-							}
-							if (wav == null && Files.exists(mp3file)) {
-								try {
-									wav = new PCM(mp3file);
-								} catch (IOException e) {
-									e.printStackTrace();
-								}
-							}
-
-							if (wav != null) {
-								slicesound[note.getWav()]
-										.add(new SliceWav(note, wav.slice(note.getStarttime(), note.getDuration())));
-								wavmap[note.getWav()] = wav;
-							}
 						}
 					}
 				}
+			}
 			progress += 1f / notes.size();
 		}
 
@@ -227,9 +223,9 @@ public class ASIODriver implements AudioDriver, AsioDriverListener {
 	}
 
 	public void play(Note n, float volume) {
-		if(n != null) {
+		if (n != null) {
 			play0(n, volume);
-			for(Note ln : n.getLayeredNotes()) {
+			for (Note ln : n.getLayeredNotes()) {
 				play0(ln, volume);
 			}
 		}
@@ -283,7 +279,7 @@ public class ASIODriver implements AudioDriver, AsioDriverListener {
 
 			} else {
 				stop0(n);
-				for(Note ln : n.getLayeredNotes()) {
+				for (Note ln : n.getLayeredNotes()) {
 					stop0(ln);
 				}
 			}
