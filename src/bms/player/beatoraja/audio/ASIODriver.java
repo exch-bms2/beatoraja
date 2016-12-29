@@ -11,6 +11,11 @@ import bms.model.*;
 import bms.player.beatoraja.Config;
 import bms.player.beatoraja.play.audio.PCM;
 
+/**
+ * ASIOサウンドドライバ
+ *
+ * @author exch
+ */
 public class ASIODriver implements AudioDriver, AsioDriverListener {
 
 	private Map<String, PCM> soundmap = new HashMap<String, PCM>();
@@ -52,32 +57,33 @@ public class ASIODriver implements AudioDriver, AsioDriverListener {
 
 	public void setModel(BMSModel model) {
 		progress = 0;
+		final int wavcount = model.getWavList().length;
+		wavmap = new PCM[wavcount];
+		playmap = new int[wavmap.length];
+		Arrays.fill(playmap, -1);
+		this.slicesound = new SliceWav[wavcount][];
+
 		Path dpath = Paths.get(model.getPath()).getParent();
 
-		Map<Integer, PCM> soundmap = new HashMap<Integer, PCM>();
-
-		TimeLine[] timelines = model.getAllTimeLines();
 		if (model.getVolwav() > 0 && model.getVolwav() < 100) {
 			volume = model.getVolwav() / 100f;
 		}
-		int wavcount = model.getWavList().length;
 
 		List<SliceWav>[] slicesound = new List[wavcount];
 
-		for (TimeLine tl : timelines) {
-			if (progress == 1) {
-				break;
-			}
-			List<Note> notes = new ArrayList<Note>();
+		List<Note> notes = new ArrayList<Note>();
+		for (TimeLine tl : model.getAllTimeLines()) {
 			for (int i = 0; i < 18; i++) {
 				if (tl.getNote(i) != null) {
 					notes.add(tl.getNote(i));
+					notes.addAll(tl.getNote(i).getLayeredNotes());
 				}
 				if (tl.getHiddenNote(i) != null) {
 					notes.add(tl.getHiddenNote(i));
 				}
 			}
 			notes.addAll(Arrays.asList(tl.getBackGroundNotes()));
+		}
 
 			for (Note note : notes) {
 				if (note.getWav() >= 0) {
@@ -112,7 +118,7 @@ public class ASIODriver implements AudioDriver, AsioDriverListener {
 									e.printStackTrace();
 								}
 							}
-							soundmap.put(note.getWav(), wav);
+							wavmap[note.getWav()] = wav;
 						}
 					} else {
 						// 音切りあり
@@ -161,20 +167,16 @@ public class ASIODriver implements AudioDriver, AsioDriverListener {
 							if (wav != null) {
 								slicesound[note.getWav()]
 										.add(new SliceWav(note, wav.slice(note.getStarttime(), note.getDuration())));
-								soundmap.put(note.getWav(), wav);
+								wavmap[note.getWav()] = wav;
 							}
 						}
 					}
 				}
-			}
-			progress += 1f / timelines.length;
+			progress += 1f / notes.size();
 		}
 
 		Logger.getGlobal().info("髻ｳ貅舌ヵ繧｡繧､繝ｫ隱ｭ縺ｿ霎ｼ縺ｿ螳御ｺ�縲る浹貅先焚:" + soundmap.keySet().size());
-		wavmap = new PCM[wavcount];
-		this.slicesound = new SliceWav[wavcount][];
 		for (int i = 0; i < wavmap.length; i++) {
-			wavmap[i] = soundmap.get(i);
 			if (wavmap[i] != null && wavmap[i].getSampleRate() != (int) asioDriver.getSampleRate()) {
 				wavmap[i] = wavmap[i].changeSampleRate((int) asioDriver.getSampleRate());
 			}
@@ -196,8 +198,6 @@ public class ASIODriver implements AudioDriver, AsioDriverListener {
 				this.slicesound[i] = new SliceWav[0];
 			}
 		}
-		playmap = new int[wavmap.length];
-		Arrays.fill(playmap, -1);
 
 		progress = 1;
 	}
@@ -227,6 +227,15 @@ public class ASIODriver implements AudioDriver, AsioDriverListener {
 	}
 
 	public void play(Note n, float volume) {
+		if(n != null) {
+			play0(n, volume);
+			for(Note ln : n.getLayeredNotes()) {
+				play0(ln, volume);
+			}
+		}
+	}
+
+	private void play0(Note n, float volume) {
 		try {
 			final int id = n.getWav();
 			if (id < 0) {
@@ -238,6 +247,7 @@ public class ASIODriver implements AudioDriver, AsioDriverListener {
 				final PCM sound = wavmap[id];
 				if (sound != null) {
 					synchronized (this) {
+						mixer.stop(playmap[id]);
 						playmap[id] = mixer.put(sound, false);
 					}
 				}
@@ -245,6 +255,7 @@ public class ASIODriver implements AudioDriver, AsioDriverListener {
 				for (SliceWav slice : slicesound[id]) {
 					if (slice.starttime == starttime && slice.duration == duration) {
 						synchronized (this) {
+							mixer.stop(slice.playid);
 							slice.playid = mixer.put(slice.wav, false);
 						}
 						// System.out.println("slice WAV play - ID:" + id +
@@ -271,26 +282,32 @@ public class ASIODriver implements AudioDriver, AsioDriverListener {
 				}
 
 			} else {
-				final int id = n.getWav();
-				if (id < 0) {
-					return;
+				stop0(n);
+				for(Note ln : n.getLayeredNotes()) {
+					stop0(ln);
 				}
-				final int starttime = n.getStarttime();
-				final int duration = n.getDuration();
-				if (starttime == 0 && duration == 0) {
-					mixer.stop(playmap[id]);
-				} else {
-					for (SliceWav slice : slicesound[id]) {
-						if (slice.starttime == starttime && slice.duration == duration) {
-							mixer.stop(slice.playid);
-							break;
-						}
-					}
-				}
-
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+	}
+
+	private void stop0(Note n) {
+		final int id = n.getWav();
+		if (id < 0) {
+			return;
+		}
+		final int starttime = n.getStarttime();
+		final int duration = n.getDuration();
+		if (starttime == 0 && duration == 0) {
+			mixer.stop(playmap[id]);
+		} else {
+			for (SliceWav slice : slicesound[id]) {
+				if (slice.starttime == starttime && slice.duration == duration) {
+					mixer.stop(slice.playid);
+					break;
+				}
+			}
 		}
 	}
 

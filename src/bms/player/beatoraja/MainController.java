@@ -187,7 +187,12 @@ public class MainController extends ApplicationAdapter {
 			audio = new GdxAudioDeviceDriver();
 			break;
 		case Config.AUDIODRIVER_ASIO:
-			audio = new ASIODriver(config);
+			try {
+				audio = new ASIODriver(config);
+			} catch(Throwable e) {
+				config.setAudioDriver(Config.AUDIODRIVER_SOUND);
+				audio = new GdxSoundDriver();
+			}
 			break;
 		}
 
