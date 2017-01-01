@@ -2,6 +2,7 @@ package bms.player.beatoraja.play.gauge;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
+import bms.model.BMSModel;
 import bms.player.beatoraja.play.PlaySkin;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
@@ -121,4 +122,36 @@ public abstract class GrooveGauge {
 		return norm;
 	}
 
+	public static GrooveGauge create(BMSModel model, int type, boolean grade) {
+		if (grade) {
+			// 段位ゲージ
+			switch (type) {
+			case 0:
+			case 1:
+			case 2:
+				return new GradeGrooveGauge(model);
+			case 3:
+				return new ExgradeGrooveGauge(model);
+			case 4:
+			case 5:
+				return new ExhardGradeGrooveGauge(model);
+			}
+		} else {
+			switch (type) {
+			case 0:
+				return new AssistEasyGrooveGauge(model);
+			case 1:
+				return new EasyGrooveGauge(model);
+			case 2:
+				return new NormalGrooveGauge(model);
+			case 3:
+				return new HardGrooveGauge(model);
+			case 4:
+				return new ExhardGrooveGauge(model);
+			case 5:
+				return new HazardGrooveGauge(model);
+			}
+		}
+		return null;
+	}
 }

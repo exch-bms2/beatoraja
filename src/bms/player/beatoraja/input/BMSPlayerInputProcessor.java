@@ -43,9 +43,6 @@ public class BMSPlayerInputProcessor {
 			}
 		}
 		this.bminput = bminput.toArray(new BMControllerInputProcessor[0]);
-
-		PollingThread polling = new PollingThread();
-		polling.start();
 	}
 
 	/**
@@ -297,25 +294,11 @@ public class BMSPlayerInputProcessor {
 		scroll = 0;
 	}
 
-	class PollingThread extends Thread {
-
-		public void run() {
-			long time = 0;
-			for (;;) {
-				final long now = System.nanoTime() / 1000000 - starttime;
-				if (time != now) {
-					time = now;
-					kbinput.poll(now);
-					for (BMControllerInputProcessor controller : bminput) {
-						controller.poll(now);
-					}
-				} else {
-					try {
-						sleep(0, 500000);
-					} catch (InterruptedException e) {
-					}
-				}
-			}
-		}
-	}
+	public void poll() {
+		final long now = System.nanoTime() / 1000000 - starttime;
+		kbinput.poll(now);
+		for (BMControllerInputProcessor controller : bminput) {
+			controller.poll(now);
+		}		
+	}	
 }

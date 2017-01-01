@@ -210,12 +210,33 @@ public class MainController extends ApplicationAdapter {
 		systemfont = generator.generateFont(parameter);
 		generator.dispose();
 		Logger.getGlobal().info("初期化時間(ms) : " + (System.currentTimeMillis() - t));
+		
+		Thread polling = new Thread() {
+			public void run() {
+				long time = 0;
+				for (;;) {
+					final long now = System.nanoTime() / 1000000;
+					if (time != now) {
+						time = now;
+						input.poll();
+					} else {
+						try {
+							sleep(0, 500000);
+						} catch (InterruptedException e) {
+						}
+					}
+				}
+			}			
+		};
+		polling.start();
 	}
-
+	
 	private long prevtime;
 
 	@Override
 	public void render() {
+//		input.poll();
+
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
@@ -245,7 +266,7 @@ public class MainController extends ApplicationAdapter {
 			systemfont.draw(sprite, "Screen shot saved : " + screenshot.path, 100,
 					RESOLUTION[config.getResolution()].height - 2);
 			sprite.end();
-		}
+		}		
 
 		final long time = System.currentTimeMillis();
 		if(time > prevtime) {

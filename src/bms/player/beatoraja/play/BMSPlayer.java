@@ -241,44 +241,8 @@ public class BMSPlayer extends MainState {
 		if (replay != null) {
 			g = replay.gauge;
 		}
-		if (resource.getCourseBMSModels() != null) {
-			// 段位ゲージ
-			switch (g) {
-			case 0:
-			case 1:
-			case 2:
-				gauge = new GradeGrooveGauge(model);
-				break;
-			case 3:
-				gauge = new ExgradeGrooveGauge(model);
-				break;
-			case 4:
-			case 5:
-				gauge = new ExhardGradeGrooveGauge(model);
-				break;
-			}
-		} else {
-			switch (g) {
-			case 0:
-				gauge = new AssistEasyGrooveGauge(model);
-				break;
-			case 1:
-				gauge = new EasyGrooveGauge(model);
-				break;
-			case 2:
-				gauge = new NormalGrooveGauge(model);
-				break;
-			case 3:
-				gauge = new HardGrooveGauge(model);
-				break;
-			case 4:
-				gauge = new ExhardGrooveGauge(model);
-				break;
-			case 5:
-				gauge = new HazardGrooveGauge(model);
-				break;
-			}
-		}
+		gauge = GrooveGauge.create(model, g, resource.getCourseBMSModels() != null);
+		
 		resource.setUpdateScore(score);
 		final int difficulty = resource.getSongdata() != null ? resource.getSongdata().getDifficulty() : 0;
 		resource.setSongdata(new SongData(model, false));
@@ -933,54 +897,6 @@ public class BMSPlayer extends MainState {
 
 	public GrooveGauge getGauge() {
 		return gauge;
-	}
-
-	/**
-	 * AUTOPLAY用のKeyInputLogを生成する
-	 * 
-	 * @return AUTOPLAY用のKeyInputLog
-	 */
-	public static final List<KeyInputLog> createAutoplayLog(BMSModel model) {
-		// TODO 地雷を確実に回避するアルゴリズム
-		List<KeyInputLog> keylog = new ArrayList<KeyInputLog>();
-		int keys = (model.getUseKeys() == 5 || model.getUseKeys() == 7) ? 9 : ((model.getUseKeys() == 10 || model
-				.getUseKeys() == 14) ? 18 : 9);
-		boolean sc = (model.getUseKeys() == 5 || model.getUseKeys() == 7 || model.getUseKeys() == 10 || model
-				.getUseKeys() == 14);
-		Note[] ln = new Note[keys];
-		for (TimeLine tl : model.getAllTimeLines()) {
-			int i = tl.getTime();
-			for (int lane = 0; lane < keys; lane++) {
-				if (!sc || (lane != 8 && lane != 17)) {
-					Note note = tl.getNote(model.getUseKeys() == 9 && lane >= 5 ? lane + 5 : lane);
-					if (note != null) {
-						if (note instanceof LongNote) {
-							if (((LongNote) note).getEndnote().getSection() == tl.getSection()) {
-								keylog.add(new KeyInputLog(i, lane, false));
-								if (model.getLntype() != 0 && sc && (lane == 7 || lane == 16)) {
-									// BSS処理
-									keylog.add(new KeyInputLog(i, lane + 1, true));
-								}
-								ln[lane] = null;
-							} else {
-								keylog.add(new KeyInputLog(i, lane, true));
-								ln[lane] = note;
-							}
-						} else if (note instanceof NormalNote) {
-							keylog.add(new KeyInputLog(i, lane, true));
-						}
-					} else {
-						if (ln[lane] == null) {
-							keylog.add(new KeyInputLog(i, lane, false));
-							if (sc && (lane == 7 || lane == 16)) {
-								keylog.add(new KeyInputLog(i, lane + 1, false));
-							}
-						}
-					}
-				}
-			}
-		}
-		return keylog;
 	}
 
 	/**
