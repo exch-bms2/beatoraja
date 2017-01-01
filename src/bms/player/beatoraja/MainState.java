@@ -82,7 +82,7 @@ public abstract class MainState {
 	}
 
 	public int getNowTime() {
-		return (int) (System.currentTimeMillis() - starttime);
+		return (int) (System.nanoTime() / 1000000 - starttime);
 	}
 
 	public long[] getTimer() {

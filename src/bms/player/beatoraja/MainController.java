@@ -158,7 +158,7 @@ public class MainController extends ApplicationAdapter {
 			newState.create();
 			newState.getSkin().prepare(newState);
 			current = newState;
-			current.setStartTime(System.currentTimeMillis());
+			current.setStartTime(System.nanoTime() / 1000000);
 		}
 		if (current.getStage() != null) {
 			Gdx.input.setInputProcessor(new InputMultiplexer(current.getStage(), input.getKeyBoardInputProcesseor()));

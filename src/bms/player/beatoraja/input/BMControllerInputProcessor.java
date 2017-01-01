@@ -107,12 +107,11 @@ public class BMControllerInputProcessor implements ControllerListener {
 //		Arrays.fill(buttonstate, false);
 //		Arrays.fill(axis, 0);
 		Arrays.fill(buttonchanged, false);
-		Arrays.fill(buttontime, -duration);
+		Arrays.fill(buttontime, Long.MIN_VALUE);
 		lastPressedButton = -1;
 	}
 	
-	public void poll() {
-		final long presstime = System.currentTimeMillis() - this.bmsPlayerInputProcessor.starttime;
+	public void poll(final long presstime) {
 		for(int i = 0;i < 4;i++) {
 			final float ax = controller.getAxis(i);
 			if(analogaxis[i]) {
@@ -159,8 +158,9 @@ public class BMControllerInputProcessor implements ControllerListener {
 				} else if (button == BMKeys.RIGHT) {
 					buttonstate[button] = (!analogaxis[0] && axis[0] > 0.9) || (!analogaxis[3] && axis[3] > 0.9);
 				}
-				buttonchanged[button] = (prev != buttonstate[button]);
-				buttontime[button] = presstime;
+				if(buttonchanged[button] = (prev != buttonstate[button])) {
+					buttontime[button] = presstime;					
+				}
 				
 				if (!prev && buttonstate[button]) {
 					setLastPressedButton(button);
@@ -170,15 +170,18 @@ public class BMControllerInputProcessor implements ControllerListener {
 
 		for (int i = 0; i < buttons.length; i++) {
 			if (buttonchanged[buttons[i]]) {
-				this.bmsPlayerInputProcessor.keyChanged(player + 1, (int)presstime, i + player * 9, buttonstate[buttons[i]]);
+				this.bmsPlayerInputProcessor.keyChanged(player + 1, presstime, i + player * 9, buttonstate[buttons[i]]);
+				buttonchanged[buttons[i]] = false;
 			}
 		}
 
 		if (buttonchanged[start]) {
 			this.bmsPlayerInputProcessor.startChanged(buttonstate[start]);
+			buttonchanged[start] = false;
 		}
 		if (buttonchanged[select]) {
 			this.bmsPlayerInputProcessor.setSelectPressed(buttonstate[select]);
+			buttonchanged[select] = false;
 		}
 	}
 

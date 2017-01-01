@@ -70,15 +70,14 @@ public class KeyBoardInputProcesseor implements InputProcessor {
 		lastPressedKey = -1;
 	}
 
-	public void poll() {
+	public void poll(final long presstime) {
 		if (enable) {
-			final long presstime = System.currentTimeMillis() - this.bmsPlayerInputProcessor.starttime;
 			for (int i = 0; i < keys.length; i++) {
 				final boolean pressed = Gdx.input.isKeyPressed(keys[i]);
 				if (pressed != keystate[keys[i]] && presstime >= keytime[keys[i]] + duration) {
 					keystate[keys[i]] = pressed;
 					keytime[keys[i]] = presstime;
-					this.bmsPlayerInputProcessor.keyChanged(0, (int) presstime, i, pressed);
+					this.bmsPlayerInputProcessor.keyChanged(0, presstime, i, pressed);
 				}
 			}
 

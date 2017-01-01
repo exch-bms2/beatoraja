@@ -86,7 +86,7 @@ public class BMSPlayerInputProcessor {
 
 	int scroll;
 
-	private List<KeyInputLog> keylog = new ArrayList<KeyInputLog>();
+	private List<KeyInputLog> keylog = new ArrayList<KeyInputLog>(10000);
 
 	private boolean startPressed;
 	private boolean selectPressed;
@@ -181,7 +181,7 @@ public class BMSPlayerInputProcessor {
 		return numtime;
 	}
 
-	public void keyChanged(int device, int presstime, int i, boolean pressed) {
+	public void keyChanged(int device, long presstime, int i, boolean pressed) {
 		for(int disable : disableDevice) {
 			if(device == disable) {
 				return;
@@ -192,7 +192,7 @@ public class BMSPlayerInputProcessor {
 			time[i] = presstime;
 			lastKeyDevice = device;
 			if (this.getStartTime() != 0) {
-				keylog.add(new KeyInputLog(presstime, i, pressed));
+				keylog.add(new KeyInputLog((int) presstime, i, pressed));
 			}
 		}
 	}
@@ -302,12 +302,17 @@ public class BMSPlayerInputProcessor {
 		public void run() {
 			long time = 0;
 			for (;;) {
-				final long now = System.currentTimeMillis();
+				final long now = System.nanoTime() / 1000000 - starttime;
 				if (time != now) {
 					time = now;
-					kbinput.poll();
+					kbinput.poll(now);
 					for (BMControllerInputProcessor controller : bminput) {
-						controller.poll();
+						controller.poll(now);
+					}
+				} else {
+					try {
+						sleep(0, 500000);
+					} catch (InterruptedException e) {
 					}
 				}
 			}

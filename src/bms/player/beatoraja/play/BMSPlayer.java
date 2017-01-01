@@ -69,7 +69,7 @@ public class BMSPlayer extends MainState {
 
 	private ReplayData replay = null;
 
-	private List<Float> gaugelog = new ArrayList<Float>();
+	private final List<Float> gaugelog;
 
 	private int playspeed = 100;
 
@@ -127,7 +127,8 @@ public class BMSPlayer extends MainState {
 		}
 		// 通常プレイの場合は最後のノーツ、オートプレイの場合はBG/BGAを含めた最後のノーツ
 		playtime = (autoplay == 1 ? model.getLastTime() : model.getLastNoteTime()) + TIME_MARGIN;
-
+		gaugelog = new ArrayList<Float>(playtime / 500 + 2);
+		
 		boolean score = true;
 
 		boolean exjudge = false;
@@ -415,7 +416,7 @@ public class BMSPlayer extends MainState {
 		final PlayerResource resource = main.getPlayerResource();
 
 		final long now = getNowTime();
-		final long nowtime = System.currentTimeMillis();
+		final long nowtime = System.nanoTime() / 1000000;
 		switch (state) {
 		// 楽曲ロード
 		case STATE_PRELOAD:
@@ -1002,7 +1003,7 @@ public class BMSPlayer extends MainState {
 
 			long framet = 1;
 			final TimeLine[] timelines = model.getAllTimeLines();
-			final KeyInputLog[] keylog = this.keylog != null ? this.keylog.toArray(new KeyInputLog[0]) : null;
+			final KeyInputLog[] keylog = this.keylog != null ? this.keylog.toArray(new KeyInputLog[this.keylog.size()]) : null;
 
 			final int lasttime = timelines[timelines.length - 1].getTime() + BMSPlayer.TIME_MARGIN;
 			
@@ -1031,6 +1032,11 @@ public class BMSPlayer extends MainState {
 						framet = nowtime < framet ? framet : nowtime;						
 					}
 					prevtime = time;
+				} else {
+					try {
+						sleep(0, 500000);
+					} catch (InterruptedException e) {
+					}
 				}
 
 
@@ -1078,7 +1084,6 @@ public class BMSPlayer extends MainState {
 							sleep(sleeptime);
 						}
 					} catch (InterruptedException e) {
-						e.printStackTrace();
 					}
 				}
 				if (time >= lasttime) {
