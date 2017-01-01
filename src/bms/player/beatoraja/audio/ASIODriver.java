@@ -16,9 +16,6 @@ import bms.player.beatoraja.Config;
  */
 public class ASIODriver extends AbstractAudioDriver<PCM> implements AsioDriverListener {
 
-	private Map<String, PCM> soundmap = new HashMap<String, PCM>();
-	private Map<String, Integer> soundplaymap = new HashMap<String, Integer>();
-
 	private AsioDriver asioDriver;
 	private Set<AsioChannel> activeChannels = new HashSet<AsioChannel>();
 	private int bufferSize;
@@ -41,12 +38,6 @@ public class ASIODriver extends AbstractAudioDriver<PCM> implements AsioDriverLi
 		asioDriver.start();
 
 		mixer = new AudioMixer(config.getAudioDeviceSimultaneousSources());
-	}
-
-	@Override
-	protected void initKeySound(int count) {
-		setWavmap(new PCM[count]);
-		setSlicesound(new SliceWav[count][]);
 	}
 
 	@Override
@@ -102,68 +93,33 @@ public class ASIODriver extends AbstractAudioDriver<PCM> implements AsioDriverLi
 	}
 
 	@Override
-	protected synchronized void play(int id, float volume) {
-		final PCM sound = getWavmap()[id];
-		if (sound != null) {
-			mixer.stop((int) getPlaymap()[id]);
-			getPlaymap()[id] = mixer.put(sound, false);
-		}
+	protected synchronized long play(PCM id, float volume, boolean loop) {
+		return mixer.put(id, loop);
 	}
 
 	@Override
 	protected synchronized void play(SliceWav<PCM> slice, float volume) {
-		mixer.stop((int) slice.playid);
+		mixer.stop(slice.wav);
 		slice.playid = mixer.put(slice.wav, false);
 	}
 
 	@Override
-	protected void stop() {
-		for (long id : getPlaymap()) {
-			mixer.stop((int) id);
-		}
-		for (SliceWav[] slices : getSlicesound()) {
-			for (SliceWav<PCM> slice : slices) {
-				mixer.stop((int) slice.playid);
-			}
-		}
-	}
-
-	@Override
-	protected void stop(int id) {
-		mixer.stop((int) getPlaymap()[id]);
+	protected void stop(PCM id) {
+		mixer.stop(id);
 	}
 
 	@Override
 	protected void stop(SliceWav<PCM> slice) {
-		mixer.stop((int) slice.playid);
+		mixer.stop(slice.wav);
 
 	}
 
 	@Override
-	public void play(String path, boolean loop) {
-		PCM sound = soundmap.get(path);
-		if (!soundmap.containsKey(path)) {
-			try {
-				sound = new PCM(Paths.get(path));
-				soundmap.put(path, sound);
-			} catch (IOException e) {
-				Logger.getGlobal().warning("音源読み込み失敗。" + e.getMessage());
-			}
-		}
-
-		if (sound != null) {
-			soundplaymap.put(path, mixer.put(sound, loop));
-		}
-	}
-
-	public void stop(String p) {
-		Integer sound = soundplaymap.get(p);
-		if (sound != null) {
-			mixer.stop(sound);
-		}
+	protected void disposeKeySound(PCM pcm) {
 	}
 
 	public void dispose() {
+		super.dispose();
 		if (asioDriver != null) {
 			asioDriver.shutdownAndUnloadDriver();
 			activeChannels.clear();
@@ -212,6 +168,7 @@ public class ASIODriver extends AbstractAudioDriver<PCM> implements AsioDriverLi
 	class AudioMixer {
 
 		private MixerInput[] inputs;
+		private long id;
 
 		public AudioMixer(int channels) {
 			inputs = new MixerInput[channels];
@@ -220,21 +177,25 @@ public class ASIODriver extends AbstractAudioDriver<PCM> implements AsioDriverLi
 			}
 		}
 
-		public int put(PCM pcm, boolean loop) {
+		public long put(PCM pcm, boolean loop) {
 			for (int i = 0; i < inputs.length; i++) {
 				if (inputs[i].pos == -1) {
+					inputs[i].pcm = pcm;
 					inputs[i].sample = pcm.getSample();
 					inputs[i].pos = 0;
 					inputs[i].loop = loop;
-					return i;
+					inputs[i].id = id;
+					return id++;
 				}
 			}
 			return -1;
 		}
 
-		public void stop(int id) {
-			if (id >= 0 && id < inputs.length) {
-				inputs[(int) id].pos = -1;
+		public void stop(PCM id) {
+			for (int i = 0; i < inputs.length; i++) {
+				if (inputs[i].pcm == id) {
+					inputs[i].pos = -1;
+				}
 			}
 		}
 
@@ -261,8 +222,10 @@ public class ASIODriver extends AbstractAudioDriver<PCM> implements AsioDriverLi
 	}
 
 	class MixerInput {
+		public PCM pcm;
 		public short[] sample = new short[0];
 		public int pos = -1;
 		public boolean loop;
+		public long id;
 	}
 }
