@@ -7,7 +7,6 @@ import java.util.logging.Logger;
 
 import com.synthbot.jasiohost.*;
 
-import bms.model.*;
 import bms.player.beatoraja.Config;
 
 /**
@@ -15,26 +14,16 @@ import bms.player.beatoraja.Config;
  *
  * @author exch
  */
-public class ASIODriver implements AudioDriver, AsioDriverListener {
+public class ASIODriver extends AbstractAudioDriver<PCM> implements AsioDriverListener {
 
 	private Map<String, PCM> soundmap = new HashMap<String, PCM>();
 	private Map<String, Integer> soundplaymap = new HashMap<String, Integer>();
-
-	private PCM[] wavmap = new PCM[0];
-	private int[] playmap = new int[0];
-	/**
-	 * 
-	 */
-	private SliceWav[][] slicesound = new SliceWav[0][];
 
 	private AsioDriver asioDriver;
 	private Set<AsioChannel> activeChannels = new HashSet<AsioChannel>();
 	private int bufferSize;
 	private double sampleRate;
 	private float[][] outputbuffer;
-
-	private float progress = 0;
-	private float volume = 1.0f;
 
 	private AudioMixer mixer;
 
@@ -54,148 +43,100 @@ public class ASIODriver implements AudioDriver, AsioDriverListener {
 		mixer = new AudioMixer(config.getAudioDeviceSimultaneousSources());
 	}
 
-	public void setModel(BMSModel model) {
-		progress = 0;
-		final int wavcount = model.getWavList().length;
-		wavmap = new PCM[wavcount];
-		playmap = new int[wavmap.length];
-		Arrays.fill(playmap, -1);
-		this.slicesound = new SliceWav[wavcount][];
+	@Override
+	protected void initKeySound(int count) {
+		setWavmap(new PCM[count]);
+		setSlicesound(new SliceWav[count][]);
+	}
 
-		Path dpath = Paths.get(model.getPath()).getParent();
+	@Override
+	protected PCM getKeySound(Path p) {
+		String name = p.toString();
+		name = name.substring(0, name.lastIndexOf('.'));
+		final Path wavfile = Paths.get(name + ".wav");
+		final Path oggfile = Paths.get(name + ".ogg");
+		final Path mp3file = Paths.get(name + ".mp3");
 
-		if (model.getVolwav() > 0 && model.getVolwav() < 100) {
-			volume = model.getVolwav() / 100f;
+		PCM wav = null;
+		if (wav == null && Files.exists(wavfile)) {
+			try {
+				wav = new PCM(wavfile);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
-
-		List<SliceWav>[] slicesound = new List[wavcount];
-
-		List<Note> notes = new ArrayList<Note>();
-		for (TimeLine tl : model.getAllTimeLines()) {
-			for (int i = 0; i < 18; i++) {
-				if (tl.getNote(i) != null) {
-					notes.add(tl.getNote(i));
-					notes.addAll(tl.getNote(i).getLayeredNotes());
-				}
-				if (tl.getHiddenNote(i) != null) {
-					notes.add(tl.getHiddenNote(i));
-				}
+		if (wav == null && Files.exists(oggfile)) {
+			try {
+				wav = new PCM(oggfile);
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
-			notes.addAll(Arrays.asList(tl.getBackGroundNotes()));
 		}
-
-		for (Note note : notes) {
-			if (note.getWav() >= 0) {
-				String name = model.getWavList()[note.getWav()];
-				if (note.getStarttime() == 0 && note.getDuration() == 0) {
-					// 音切りなし
-					if (wavmap[note.getWav()] == null) {
-						name = name.substring(0, name.lastIndexOf('.'));
-						final Path wavfile = dpath.resolve(name + ".wav");
-						final Path oggfile = dpath.resolve(name + ".ogg");
-						final Path mp3file = dpath.resolve(name + ".mp3");
-
-						PCM wav = null;
-						if (wav == null && Files.exists(wavfile)) {
-							try {
-								wav = new PCM(wavfile);
-							} catch (IOException e) {
-								e.printStackTrace();
-							}
-						}
-						if (wav == null && Files.exists(oggfile)) {
-							try {
-								wav = new PCM(oggfile);
-							} catch (IOException e) {
-								e.printStackTrace();
-							}
-						}
-						if (wav == null && Files.exists(mp3file)) {
-							try {
-								wav = new PCM(mp3file);
-							} catch (IOException e) {
-								e.printStackTrace();
-							}
-						}
-						wavmap[note.getWav()] = wav;
-					}
-				} else {
-					// 音切りあり
-					boolean b = true;
-					if (slicesound[note.getWav()] == null) {
-						slicesound[note.getWav()] = new ArrayList<SliceWav>();
-					}
-					for (SliceWav slice : slicesound[note.getWav()]) {
-						if (slice.starttime == note.getStarttime() && slice.duration == note.getDuration()) {
-							b = false;
-							break;
-						}
-					}
-					if (b) {
-						name = name.substring(0, name.lastIndexOf('.'));
-						final Path wavfile = dpath.resolve(name + ".wav");
-						final Path oggfile = dpath.resolve(name + ".ogg");
-						final Path mp3file = dpath.resolve(name + ".mp3");
-
-						PCM wav = wavmap[note.getWav()];
-						if (wav == null && Files.exists(wavfile)) {
-							try {
-								wav = new PCM(wavfile);
-							} catch (IOException e) {
-								e.printStackTrace();
-							}
-						}
-						if (wav == null && Files.exists(oggfile)) {
-							try {
-								wav = new PCM(oggfile);
-							} catch (IOException e) {
-								e.printStackTrace();
-							}
-						}
-						if (wav == null && Files.exists(mp3file)) {
-							try {
-								wav = new PCM(mp3file);
-							} catch (IOException e) {
-								e.printStackTrace();
-							}
-						}
-
-						if (wav != null) {
-							slicesound[note.getWav()]
-									.add(new SliceWav(note, wav.slice(note.getStarttime(), note.getDuration())));
-							wavmap[note.getWav()] = wav;
-						}
-					}
-				}
-			}
-			progress += 1f / notes.size();
-		}
-
-		Logger.getGlobal().info("髻ｳ貅舌ヵ繧｡繧､繝ｫ隱ｭ縺ｿ霎ｼ縺ｿ螳御ｺ�縲る浹貅先焚:" + soundmap.keySet().size());
-		for (int i = 0; i < wavmap.length; i++) {
-			if (wavmap[i] != null && wavmap[i].getSampleRate() != (int) asioDriver.getSampleRate()) {
-				wavmap[i] = wavmap[i].changeSampleRate((int) asioDriver.getSampleRate());
-			}
-			if (wavmap[i] != null && wavmap[i].getChannels() != 2) {
-				wavmap[i] = wavmap[i].changeChannels(2);
-			}
-
-			if (slicesound[i] != null) {
-				this.slicesound[i] = slicesound[i].toArray(new SliceWav[slicesound[i].size()]);
-				for (SliceWav slice : this.slicesound[i]) {
-					if (slice.wav.getSampleRate() != (int) asioDriver.getSampleRate()) {
-						slice.wav = slice.wav.changeSampleRate((int) asioDriver.getSampleRate());
-					}
-					if (slice.wav.getChannels() != 2) {
-						slice.wav = slice.wav.changeChannels(2);
-					}
-				}
-			} else {
-				this.slicesound[i] = new SliceWav[0];
+		if (wav == null && Files.exists(mp3file)) {
+			try {
+				wav = new PCM(mp3file);
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
 		}
 
-		progress = 1;
+		if (wav != null && wav.getSampleRate() != (int) asioDriver.getSampleRate()) {
+			wav = wav.changeSampleRate((int) asioDriver.getSampleRate());
+		}
+		if (wav != null && wav.getChannels() != 2) {
+			wav = wav.changeChannels(2);
+		}
+
+		return wav;
+	}
+
+	@Override
+	protected PCM getKeySound(PCM pcm) {
+		if (pcm.getSampleRate() != (int) asioDriver.getSampleRate()) {
+			pcm = pcm.changeSampleRate((int) asioDriver.getSampleRate());
+		}
+		if (pcm.getChannels() != 2) {
+			pcm = pcm.changeChannels(2);
+		}
+		return pcm;
+	}
+
+	@Override
+	protected synchronized void play(int id, float volume) {
+		final PCM sound = getWavmap()[id];
+		if (sound != null) {
+			mixer.stop((int) getPlaymap()[id]);
+			getPlaymap()[id] = mixer.put(sound, false);
+		}
+	}
+
+	@Override
+	protected synchronized void play(SliceWav<PCM> slice, float volume) {
+		mixer.stop((int) slice.playid);
+		slice.playid = mixer.put(slice.wav, false);
+	}
+
+	@Override
+	protected void stop() {
+		for (long id : getPlaymap()) {
+			mixer.stop((int) id);
+		}
+		for (SliceWav[] slices : getSlicesound()) {
+			for (SliceWav<PCM> slice : slices) {
+				mixer.stop((int) slice.playid);
+			}
+		}
+	}
+
+	@Override
+	protected void stop(int id) {
+		mixer.stop((int) getPlaymap()[id]);
+	}
+
+	@Override
+	protected void stop(SliceWav<PCM> slice) {
+		mixer.stop((int) slice.playid);
+
 	}
 
 	@Override
@@ -222,101 +163,12 @@ public class ASIODriver implements AudioDriver, AsioDriverListener {
 		}
 	}
 
-	public void play(Note n, float volume) {
-		if (n != null) {
-			play0(n, volume);
-			for (Note ln : n.getLayeredNotes()) {
-				play0(ln, volume);
-			}
-		}
-	}
-
-	private void play0(Note n, float volume) {
-		try {
-			final int id = n.getWav();
-			if (id < 0) {
-				return;
-			}
-			final int starttime = n.getStarttime();
-			final int duration = n.getDuration();
-			if (starttime == 0 && duration == 0) {
-				final PCM sound = wavmap[id];
-				if (sound != null) {
-					synchronized (this) {
-						mixer.stop(playmap[id]);
-						playmap[id] = mixer.put(sound, false);
-					}
-				}
-			} else {
-				for (SliceWav slice : slicesound[id]) {
-					if (slice.starttime == starttime && slice.duration == duration) {
-						synchronized (this) {
-							mixer.stop(slice.playid);
-							slice.playid = mixer.put(slice.wav, false);
-						}
-						// System.out.println("slice WAV play - ID:" + id +
-						// " start:" + starttime + " duration:" + duration);
-						break;
-					}
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	public void stop(Note n) {
-		try {
-			if (n == null) {
-				for (int id : playmap) {
-					mixer.stop(id);
-				}
-				for (SliceWav[] slices : slicesound) {
-					for (SliceWav slice : slices) {
-						mixer.stop(slice.playid);
-					}
-				}
-
-			} else {
-				stop0(n);
-				for (Note ln : n.getLayeredNotes()) {
-					stop0(ln);
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	private void stop0(Note n) {
-		final int id = n.getWav();
-		if (id < 0) {
-			return;
-		}
-		final int starttime = n.getStarttime();
-		final int duration = n.getDuration();
-		if (starttime == 0 && duration == 0) {
-			mixer.stop(playmap[id]);
-		} else {
-			for (SliceWav slice : slicesound[id]) {
-				if (slice.starttime == starttime && slice.duration == duration) {
-					mixer.stop(slice.playid);
-					break;
-				}
-			}
-		}
-	}
-
 	public void dispose() {
 		if (asioDriver != null) {
 			asioDriver.shutdownAndUnloadDriver();
 			activeChannels.clear();
 			asioDriver = null;
 		}
-	}
-
-	public float getProgress() {
-		return progress;
 	}
 
 	public void resetRequest() {
@@ -354,20 +206,6 @@ public class ASIODriver implements AudioDriver, AsioDriverListener {
 		mixer.fillBuffer(outputbuffer);
 		for (AsioChannel channelInfo : channels) {
 			channelInfo.write(outputbuffer[channelInfo.getChannelIndex()]);
-		}
-	}
-
-	class SliceWav {
-		public final int starttime;
-		public final int duration;
-		private PCM wav;
-
-		public int playid = -1;
-
-		public SliceWav(Note note, PCM wav) {
-			this.starttime = note.getStarttime();
-			this.duration = note.getDuration();
-			this.wav = wav;
 		}
 	}
 

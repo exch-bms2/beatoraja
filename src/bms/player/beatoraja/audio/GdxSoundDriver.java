@@ -13,31 +13,15 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandleStream;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 
-public class GdxSoundDriver implements AudioDriver {
+public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 	/**
 	 * 効果音マップ
 	 */
 	private Map<String, Sound> soundmap = new HashMap<String, Sound>();
-	/**
-	 * キー音マップ(音切りなし)
-	 */
-	private Sound[] wavmap = new Sound[0];
-	/**
-	 * キー音マップ(音切りなし):再生状況
-	 */
-	private long[] playmap = new long[0];
-	/**
-	 * キー音マップ(音切りあり)
-	 */
-	private SliceWav[][] slicesound = new SliceWav[0][0];
-	/**
-	 * キー音読み込み進捗状況
-	 */
-	private float progress = 0;
-	/**
-	 * キー音ボリューム
-	 */
-	private float volume = 1.0f;
+
+	public GdxSoundDriver() {
+		setWavmap(new Sound[0]);
+	}
 
 	public void play(String p, boolean loop) {
 		Sound sound = soundmap.get(p);
@@ -66,247 +50,86 @@ public class GdxSoundDriver implements AudioDriver {
 		}
 	}
 
-	/**
-	 * BMSの音源データを読み込む
-	 * 
-	 * @param model
-	 */
-	public void setModel(BMSModel model) {
-		final int wavcount = model.getWavList().length;
-		for (Sound id : wavmap) {
+	@Override
+	protected void initKeySound(int count) {
+		for (Sound id : getWavmap()) {
 			if (id != null) {
 				id.dispose();
 			}
 		}
-		wavmap = new Sound[wavcount];
-		playmap = new long[wavmap.length];
-		Arrays.fill(playmap, -1);
-
-		for (SliceWav[] slices : slicesound) {
-			for (SliceWav slice : slices) {
+		setWavmap(new Sound[count]);
+		for (SliceWav[] slices : getSlicesound()) {
+			for (SliceWav<Sound> slice : slices) {
 				slice.wav.dispose();
 			}
 		}
-		slicesound = new SliceWav[wavcount][];
-		
-		progress = 0;
-		// BMS格納ディレクトリ
-		Path dpath = Paths.get(model.getPath()).getParent();
-
-		if (model.getVolwav() > 0 && model.getVolwav() < 100) {
-			volume = model.getVolwav() / 100f;
-		}
-
-		final Map<Integer, PCM> orgwavmap = new HashMap<Integer, PCM>();
-		List<SliceWav>[] slicesound = new List[wavcount];
-
-		List<Note> notes = new ArrayList<Note>();
-		for (TimeLine tl : model.getAllTimeLines()) {
-			for (int i = 0; i < 18; i++) {
-				if (tl.getNote(i) != null) {
-					notes.add(tl.getNote(i));
-					notes.addAll(tl.getNote(i).getLayeredNotes());
-				}
-				if (tl.getHiddenNote(i) != null) {
-					notes.add(tl.getHiddenNote(i));
-				}
-			}
-			notes.addAll(Arrays.asList(tl.getBackGroundNotes()));
-		}
-
-		for (Note note : notes) {
-			if (note.getWav() < 0) {
-				continue;
-			}
-			String name = model.getWavList()[note.getWav()];
-			if (note.getStarttime() == 0 && note.getDuration() == 0) {
-				// 音切りなしのケース
-				if (note.getWav() >= 0 && wavmap[note.getWav()]  == null) {
-					wavmap[note.getWav()] = getSound(dpath.resolve(name).toString());
-				}
-
-			} else {
-				// 音切りありのケース
-				boolean b = true;
-				if (slicesound[note.getWav()] == null) {
-					slicesound[note.getWav()] = new ArrayList<SliceWav>();
-				}
-				for (SliceWav slice : slicesound[note.getWav()]) {
-					if (slice.starttime == note.getStarttime() && slice.duration == note.getDuration()) {
-						b = false;
-						break;
-					}
-				}
-				if (b) {
-					// byte[] wav = null;
-					PCM wav = null;
-					if (orgwavmap.get(note.getWav()) != null) {
-						wav = orgwavmap.get(note.getWav());
-					} else {
-						name = name.substring(0, name.lastIndexOf('.'));
-						final Path wavfile = dpath.resolve(name + ".wav");
-						final Path oggfile = dpath.resolve(name + ".ogg");
-						final Path mp3file = dpath.resolve(name + ".mp3");
-						if (wav == null && Files.exists(wavfile)) {
-							try {
-								wav = new PCM(wavfile);
-								orgwavmap.put(note.getWav(), wav);
-							} catch (Throwable e) {
-								e.printStackTrace();
-							}
-						}
-						if (wav == null && Files.exists(oggfile)) {
-							try {
-								wav = new PCM(oggfile);
-								orgwavmap.put(note.getWav(), wav);
-							} catch (Throwable e) {
-								e.printStackTrace();
-							}
-						}
-						if (wav == null && Files.exists(mp3file)) {
-							try {
-								wav = new PCM(mp3file);
-								orgwavmap.put(note.getWav(), wav);
-							} catch (Throwable e) {
-								e.printStackTrace();
-							}
-						}
-					}
-
-					if (wav != null) {
-						try {
-							final PCM slicewav = wav.slice(note.getStarttime(), note.getDuration());
-							Sound sound = Gdx.audio.newSound(new FileHandleStream("tempwav.wav") {
-								@Override
-								public InputStream read() {
-									return slicewav.getInputStream();
-								}
-
-								@Override
-								public OutputStream write(boolean overwrite) {
-									return null;
-								}
-							});
-							slicesound[note.getWav()].add(new SliceWav(note, sound));
-							// System.out.println("WAV slicing - Name:"
-							// + name + " ID:" + note.getWav() +
-							// " start:" + note.getStarttime() +
-							// " duration:" + note.getDuration());
-						} catch (Throwable e) {
-							Logger.getGlobal().warning("音源(wav)ファイルスライシング失敗。" + e.getMessage());
-							e.printStackTrace();
-						}
-					}
-				}
-			}
-			progress += 1f / notes.size();
-		}
-
-		Logger.getGlobal().info("音源ファイル読み込み完了。音源数:" + wavmap.length);
-		for (int i = 0; i < wavmap.length; i++) {
-			if (slicesound[i] != null) {
-				this.slicesound[i] = slicesound[i].toArray(new SliceWav[slicesound[i].size()]);
-			} else {
-				this.slicesound[i] = new SliceWav[0];
-			}
-		}
-
-		progress = 1;
+		setSlicesound(new SliceWav[count][]);
 	}
 
-	public void play(Note n, float volume) {
-		play0(n, volume);
-		for(Note ln : n.getLayeredNotes()) {
-			play0(ln, volume);			
-		}
+	@Override
+	protected Sound getKeySound(Path p) {
+		return getSound(p.toString());
 	}
-	
-	private final void play0(Note n, float volume) {
-		try {
-			final int id = n.getWav();
-			if (id < 0) {
-				return;
+
+	@Override
+	protected Sound getKeySound(PCM pcm) {
+		return Gdx.audio.newSound(new FileHandleStream("tempwav.wav") {
+			@Override
+			public InputStream read() {
+				return pcm.getInputStream();
 			}
-			final int starttime = n.getStarttime();
-			final int duration = n.getDuration();
-			if (starttime == 0 && duration == 0) {
-				final Sound sound = wavmap[id];
-				if (sound != null) {
-					synchronized (this) {
-						if (playmap[id] != -1) {
-							sound.stop(playmap[id]);
-						}
-						playmap[id] = sound.play(this.volume * volume);
-					}
-				}
-			} else {
-				for (SliceWav slice : slicesound[id]) {
-					if (slice.starttime == starttime && slice.duration == duration) {
-						synchronized (this) {
-							if (slice.playid != -1) {
-								slice.wav.stop(slice.playid);
-							}
-							slice.playid = slice.wav.play(this.volume * volume);
-						}
-						// System.out.println("slice WAV play - ID:" + id +
-						// " start:" + starttime + " duration:" + duration);
-						break;
-					}
-				}
+
+			@Override
+			public OutputStream write(boolean overwrite) {
+				return null;
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
+		});
+	}
+
+	@Override
+	protected synchronized void play(int id, float volume) {
+		if (getPlaymap()[id] != -1) {
+			getWavmap()[id].stop(getPlaymap()[id]);
+		}
+		getPlaymap()[id] = getWavmap()[id].play(getVolume() * volume);
+	}
+
+	@Override
+	protected synchronized void play(SliceWav<Sound> slice, float volume) {
+		if (slice.playid != -1) {
+			slice.wav.stop(slice.playid);
+		}
+		slice.playid = slice.wav.play(getVolume() * volume);
+	}
+
+	@Override
+	protected void stop() {
+		for (Sound s : getWavmap()) {
+			if (s != null) {
+				s.stop();
+			}
+		}
+		for (SliceWav[] slices : getSlicesound()) {
+			for (SliceWav<Sound> slice : slices) {
+				slice.wav.stop();
+			}
 		}
 	}
 
-	public void stop(Note n) {
-		try {
-			if (n == null) {
-				for (Sound s : wavmap) {
-					if (s != null) {
-						s.stop();
-					}
-				}
-				for (SliceWav[] slices : slicesound) {
-					for (SliceWav slice : slices) {
-						slice.wav.stop();
-					}
-				}
-
-			} else {
-				stop0(n);
-				for(Note ln : n.getLayeredNotes()) {
-					stop0(ln);
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
+	@Override
+	protected void stop(int id) {
+		final Sound sound = getWavmap()[id];
+		final long pid = getPlaymap()[id];
+		if (sound != null && pid != -1) {
+			sound.stop();
+			getPlaymap()[id] = -1;
 		}
 	}
-	
-	private final void stop0(Note n) {
-		final int id = n.getWav();
-		if (id < 0) {
-			return;
-		}
-		final int starttime = n.getStarttime();
-		final int duration = n.getDuration();
-		if (starttime == 0 && duration == 0) {
-			final Sound sound = wavmap[id];
-			final long pid = playmap[id];
-			if (sound != null && pid != -1) {
-				sound.stop();
-				playmap[id] = -1;
-			}
-		} else {
-			for (SliceWav slice : slicesound[id]) {
-				if (slice.starttime == starttime && slice.duration == duration) {
-					slice.wav.stop(slice.playid);
-					slice.playid = -1;
-					break;
-				}
-			}
-		}
+
+	@Override
+	protected void stop(SliceWav<Sound> slice) {
+		slice.wav.stop(slice.playid);
+		slice.playid = -1;
 	}
 
 	/**
@@ -319,10 +142,6 @@ public class GdxSoundDriver implements AudioDriver {
 			}
 		}
 		soundmap.clear();
-	}
-
-	public float getProgress() {
-		return progress;
 	}
 
 	private Sound getSound(String name) {
@@ -376,19 +195,5 @@ public class GdxSoundDriver implements AudioDriver {
 		}
 
 		return null;
-	}
-}
-
-class SliceWav {
-	public final int starttime;
-	public final int duration;
-	public final Sound wav;
-
-	public long playid = -1;
-
-	public SliceWav(Note note, Sound wav) {
-		this.starttime = note.getStarttime();
-		this.duration = note.getDuration();
-		this.wav = wav;
 	}
 }
