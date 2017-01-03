@@ -3,7 +3,6 @@ package bms.player.beatoraja.audio;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.*;
-import java.util.logging.Logger;
 
 import com.synthbot.jasiohost.*;
 
@@ -16,12 +15,18 @@ import bms.player.beatoraja.Config;
  */
 public class ASIODriver extends AbstractAudioDriver<PCM> implements AsioDriverListener {
 
+	/**
+	 * ASIOドライバー
+	 */
 	private AsioDriver asioDriver;
 	private Set<AsioChannel> activeChannels = new HashSet<AsioChannel>();
 	private int bufferSize;
 	private double sampleRate;
 	private float[][] outputbuffer;
 
+	/**
+	 * オーディオミキサー
+	 */
 	private AudioMixer mixer;
 
 	public ASIODriver(Config config) {
@@ -93,25 +98,13 @@ public class ASIODriver extends AbstractAudioDriver<PCM> implements AsioDriverLi
 	}
 
 	@Override
-	protected synchronized long play(PCM id, float volume, boolean loop) {
-		return mixer.put(id, loop);
-	}
-
-	@Override
-	protected synchronized void play(SliceWav<PCM> slice, float volume) {
-		mixer.stop(slice.wav);
-		slice.playid = mixer.put(slice.wav, false);
+	protected synchronized void play(PCM id, float volume, boolean loop) {
+		mixer.put(id, volume, loop);
 	}
 
 	@Override
 	protected void stop(PCM id) {
 		mixer.stop(id);
-	}
-
-	@Override
-	protected void stop(SliceWav<PCM> slice) {
-		mixer.stop(slice.wav);
-
 	}
 
 	@Override
@@ -165,10 +158,17 @@ public class ASIODriver extends AbstractAudioDriver<PCM> implements AsioDriverLi
 		}
 	}
 
+	/**
+	 * オーディオミキサー
+	 *
+	 * @author exch
+	 */
 	class AudioMixer {
 
+		/**
+		 * ミキサー入力
+		 */
 		private MixerInput[] inputs;
-		private long id;
 
 		public AudioMixer(int channels) {
 			inputs = new MixerInput[channels];
@@ -177,18 +177,17 @@ public class ASIODriver extends AbstractAudioDriver<PCM> implements AsioDriverLi
 			}
 		}
 
-		public long put(PCM pcm, boolean loop) {
+		public void put(PCM pcm, float volume, boolean loop) {
 			for (int i = 0; i < inputs.length; i++) {
 				if (inputs[i].pos == -1) {
 					inputs[i].pcm = pcm;
 					inputs[i].sample = pcm.getSample();
+					inputs[i].volume = volume;
 					inputs[i].pos = 0;
 					inputs[i].loop = loop;
-					inputs[i].id = id;
-					return id++;
+					break;
 				}
 			}
-			return -1;
 		}
 
 		public void stop(PCM id) {
@@ -206,12 +205,12 @@ public class ASIODriver extends AbstractAudioDriver<PCM> implements AsioDriverLi
 			for (int i = 0; i < size; i++) {
 				for (int j = 0; j < channel; j++) {
 					float wav = 0;
-					for (int k = 0; k < inputs.length; k++) {
-						if (inputs[k].pos != -1) {
-							wav += ((float) inputs[k].sample[inputs[k].pos]) / Short.MAX_VALUE;
-							inputs[k].pos++;
-							if (inputs[k].pos == inputs[k].sample.length) {
-								inputs[k].pos = inputs[k].loop ? 0 : -1;
+					for (MixerInput input : inputs) {
+						if (input.pos != -1) {
+							wav += ((float) input.sample[input.pos]) * input.volume / Short.MAX_VALUE;
+							input.pos++;
+							if (input.pos == input.sample.length) {
+								input.pos = input.loop ? 0 : -1;
 							}
 						}
 					}
@@ -224,8 +223,8 @@ public class ASIODriver extends AbstractAudioDriver<PCM> implements AsioDriverLi
 	class MixerInput {
 		public PCM pcm;
 		public short[] sample = new short[0];
+		public float volume;
 		public int pos = -1;
 		public boolean loop;
-		public long id;
 	}
 }

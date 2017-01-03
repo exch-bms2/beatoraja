@@ -3,27 +3,36 @@ package bms.player.beatoraja.audio;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.*;
-import java.util.*;
 import java.util.logging.Logger;
-
-import bms.model.*;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandleStream;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 
+/**
+ * libGDX Sound(OpenAL)サウンドドライバ
+ *
+ * @author exch
+ */
 public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 
+	private SoundMixer mixer;
+
+	private final boolean soundthread = true;
+
 	public GdxSoundDriver() {
-		setWavmap(new Sound[0]);
+		if(soundthread) {
+			mixer = new SoundMixer();
+			mixer.start();
+		}
 	}
 
 	@Override
 	protected Sound getKeySound(Path p) {
 		String name = p.toString();
 		final int index = name.lastIndexOf('.');
-		if (index != -1) {
+		if (index !=-1 ) {
 			name = name.substring(0, index);
 		}
 		final Path wavfile = Paths.get(name + ".wav");
@@ -89,19 +98,16 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 	}
 
 	@Override
-	protected synchronized long play(Sound id, float volume, boolean loop) {
+	protected synchronized void play(Sound id, float volume, boolean loop) {
 		if(loop) {
-			return id.loop(getVolume() * volume);			
+			id.loop(getVolume() * volume);
+		} else {
+			if(soundthread) {
+				mixer.put(id, getVolume() * volume);
+			} else {
+				id.play(getVolume() * volume);
+			}
 		}
-		return id.play(getVolume() * volume);
-	}
-
-	@Override
-	protected synchronized void play(SliceWav<Sound> slice, float volume) {
-		if (slice.playid != -1) {
-			slice.wav.stop(slice.playid);
-		}
-		slice.playid = slice.wav.play(getVolume() * volume);
 	}
 
 	@Override
@@ -110,13 +116,35 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 	}
 
 	@Override
-	protected void stop(SliceWav<Sound> slice) {
-		slice.wav.stop(slice.playid);
-		slice.playid = -1;
-	}
-	
-	@Override
 	protected void disposeKeySound(Sound pcm) {
 		pcm.dispose();
+	}
+
+	class SoundMixer extends Thread {
+
+		private Sound[] sound = new Sound[256];
+		private float[] volume = new float[256];
+		private int cpos;
+		private int pos;
+
+		public synchronized void put(Sound sound, float volume) {
+			this.sound[cpos] = sound;
+			this.volume[cpos] = volume;
+			cpos = (cpos + 1) % this.sound.length;
+		}
+
+		public void run() {
+			for(;;) {
+				if(pos != cpos) {
+					sound[pos].play(getVolume() * this.volume[pos]);
+					pos = (pos + 1) % this.sound.length;
+				} else {
+					try {
+						sleep(1);
+					} catch (InterruptedException e) {
+					}
+				}
+			}
+		}
 	}
 }

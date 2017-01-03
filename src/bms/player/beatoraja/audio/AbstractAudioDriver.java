@@ -19,10 +19,6 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
      */
     private Object[] wavmap = new Object[0];
     /**
-     * キー音マップ(音切りなし):再生状況
-     */
-    private long[] playmap = new long[0];
-    /**
      * キー音マップ(音切りあり)
      */
     private SliceWav<T>[][] slicesound = new SliceWav[0][0];
@@ -41,33 +37,9 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 
     protected abstract void disposeKeySound(T pcm);
 
-    protected abstract long play(T id, float volume, boolean loop);
-
-    protected abstract void play(SliceWav<T> id, float volume);
+    protected abstract void play(T id, float volume, boolean loop);
 
     protected abstract void stop(T id);
-
-    protected abstract void stop(SliceWav<T> id);
-
-    protected void setWavmap(T[] wavmap) {
-        this.wavmap = wavmap;
-    }
-
-    protected T[] getWavmap() {
-        return (T[]) wavmap;
-    }
-
-    protected long[] getPlaymap() {
-        return playmap;
-    }
-
-    protected void setSlicesound(SliceWav<T>[][] slice) {
-        this.slicesound = slice;
-    }
-
-    protected SliceWav<T>[][] getSlicesound() {
-        return slicesound;
-    }
 
     protected float getVolume() {
         return volume;
@@ -103,20 +75,18 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
      */
     public void setModel(BMSModel model) {
         final int wavcount = model.getWavList().length;
-		for (T id : getWavmap()) {
+		for (Object id : wavmap) {
 			if (id != null) {
-				disposeKeySound(id);
+				disposeKeySound((T) id);
 			}
 		}
 		wavmap = new Object[wavcount];
-		for (SliceWav[] slices : getSlicesound()) {
+		for (SliceWav[] slices : slicesound) {
 			for (SliceWav<T> slice : slices) {
 				disposeKeySound(slice.wav);
 			}
 		}
 		slicesound = new SliceWav[wavcount][];
-        playmap = new long[wavmap.length];
-        Arrays.fill(playmap, -1);
 
         progress = 0;
         // BMS格納ディレクトリ
@@ -249,14 +219,12 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
             final int starttime = n.getStarttime();
             final int duration = n.getDuration();
             if (starttime == 0 && duration == 0) {
-        		if (getPlaymap()[id] != -1) {
-        			stop((T) wavmap[id]);
-        		}
-        		getPlaymap()[id] = play((T) wavmap[id], volume, false);
+                stop((T) wavmap[id]);
+        		play((T) wavmap[id], volume, false);
             } else {
                 for (SliceWav slice : slicesound[id]) {
                     if (slice.starttime == starttime && slice.duration == duration) {
-                        play(slice, volume);
+                        play((T)slice.wav, volume, false);
                         // System.out.println("slice WAV play - ID:" + id +
                         // " start:" + starttime + " duration:" + duration);
                         break;
@@ -276,7 +244,7 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
         				stop((T) s);
         			}
         		}
-        		for (SliceWav[] slices : getSlicesound()) {
+        		for (SliceWav[] slices : slicesound) {
         			for (SliceWav<T> slice : slices) {
         				stop(slice.wav);
         			}
@@ -301,15 +269,13 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
         final int duration = n.getDuration();
         if (starttime == 0 && duration == 0) {
         	final T sound = (T) wavmap[id];
-    		final long pid = getPlaymap()[id];
-    		if (sound != null && pid != -1) {
+    		if (sound != null) {
     			stop(sound);
-    			getPlaymap()[id] = -1;
     		}
         } else {
             for (SliceWav slice : slicesound[id]) {
                 if (slice.starttime == starttime && slice.duration == duration) {
-                    stop(slice);
+                    stop((T)slice.wav);
                     break;
                 }
             }
