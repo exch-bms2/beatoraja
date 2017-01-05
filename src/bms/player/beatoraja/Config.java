@@ -196,7 +196,12 @@ public class Config {
 	private int musicselectinput = 0;
 	
 	public Config() {
-		tableURL = new String[]{"http://bmsnormal2.syuriken.jp/table.html"};
+		tableURL = new String[]{"http://bmsnormal2.syuriken.jp/table.html",
+				"http://bmsnormal2.syuriken.jp/table_insane.html",
+				"http://dpbmsdelta.web.fc2.com/table/dpdelta.html",
+				"http://dpbmsdelta.web.fc2.com/table/insane.html",
+				"http://flowermaster.web.fc2.com/lrnanido/gla/LN.html",
+				"http://stellawingroad.web.fc2.com/new/pms.html"};
 		judgedetail = 2;
 	}
 	
