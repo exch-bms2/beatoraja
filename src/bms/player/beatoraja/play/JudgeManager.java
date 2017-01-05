@@ -221,7 +221,7 @@ public class JudgeManager {
 	}
  
 	public void update(final int time) {
-		final BMSPlayerInputProcessor input = main.getBMSPlayerInputProcessor();
+		final BMSPlayerInputProcessor input = main.getMainController().getInputProcessor();
 		final Config config = main.getMainController().getPlayerResource().getConfig();
 		final long[] keytime = input.getTime();
 		final boolean[] keystate = input.getKeystate();

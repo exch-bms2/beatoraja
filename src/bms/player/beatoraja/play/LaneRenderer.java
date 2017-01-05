@@ -12,6 +12,8 @@ import bms.player.beatoraja.skin.SkinImage;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.*;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Rectangle;
@@ -57,8 +59,8 @@ public class LaneRenderer {
 	private final BMSPlayer main;
 
 	private final SpriteBatch sprite;
-	private final ShapeRenderer shape;
-	private final BitmapFont font;
+	private ShapeRenderer shape;
+	private BitmapFont font;
 	private final PlaySkin skin;
 
 	private final Config config;
@@ -79,15 +81,21 @@ public class LaneRenderer {
 
 	private int currentduration;
 
-	public LaneRenderer(BMSPlayer main, SpriteBatch sprite, ShapeRenderer shape, BitmapFont font, PlaySkin skin,
-			PlayerResource resource, BMSModel model, int[] mode) {
+	public LaneRenderer(BMSPlayer main, BMSModel model) {
 
 		this.main = main;
-		this.sprite = sprite;
-		this.shape = shape;
-		this.font = font;
-		this.skin = skin;
-		this.config = resource.getConfig();
+		this.sprite = main.getMainController().getSpriteBatch();
+		this.shape = new ShapeRenderer();
+
+		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
+				Gdx.files.internal("skin/default/VL-Gothic-Regular.ttf"));
+		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
+		parameter.size = 18;
+		font = generator.generateFont(parameter);
+		generator.dispose();
+
+		this.skin = (PlaySkin) main.getSkin();
+		this.config = main.getMainController().getPlayerResource().getConfig();
 		this.playconfig = (model.getUseKeys() == 5 || model.getUseKeys() == 7 ? config.getMode7()
 				: (model.getUseKeys() == 10 || model.getUseKeys() == 14 ? config.getMode14() : config.getMode9()));
 		this.enableLanecover = playconfig.isEnablelanecover();
@@ -98,7 +106,7 @@ public class LaneRenderer {
 		hispeed = playconfig.getHispeed();
 		init(model);
 
-		for (int i : mode) {
+		for (int i : main.getMainController().getPlayerResource().getConstraint()) {
 			if (i == TableData.NO_HISPEED) {
 				hispeed = 1.0f;
 				lanecover = 0;
@@ -252,7 +260,7 @@ public class LaneRenderer {
 
 		currentduration = Math.round(region * (1 - (enableLanecover ? lanecover : 0)));
 
-		final boolean[] keystate = main.getBMSPlayerInputProcessor().getKeystate();
+		final boolean[] keystate = main.getMainController().getInputProcessor().getKeystate();
 		for (int lane = 0; lane < laneregion.length; lane++) {
 			// キービームフラグON/OFF
 			if (model.getUseKeys() == 9) {
@@ -599,5 +607,16 @@ public class LaneRenderer {
 
 	public int[] getNowCombo() {
 		return judgecombo;
+	}
+
+	public void dispose() {
+		if (font != null) {
+			font.dispose();
+			font = null;
+		}
+		if (shape != null) {
+			shape.dispose();
+			shape = null;
+		}
 	}
 }

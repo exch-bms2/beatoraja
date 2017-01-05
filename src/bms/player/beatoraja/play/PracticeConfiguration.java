@@ -22,15 +22,17 @@ import com.badlogic.gdx.utils.Json;
 public class PracticeConfiguration {
 
 	private BitmapFont titlefont;
-	
+
 	private int cursorpos = 0;
 	private long presscount = 0;
 
 	private BMSModel model;
 
-	private static final String[] GAUGE = { "ASSIST EASY", "EASY", "NORMAL", "HARD", "EX-HARD", "HAZARD" ,"GRADE", "EX GRADE", "EXHARD GRADE"};
-	private static final String[] RANDOM = { "NORMAL", "MIRROR", "RANDOM", "R-RANDOM", "S-RANDOM", "SPIRAL" ,"H-RANDOM", "ALL-SCR", "RANDOM-EX","S-RANDOM-EX"};
-	private static final String[] DPRANDOM = { "NORMAL", "FLIP"};
+	private static final String[] GAUGE = { "ASSIST EASY", "EASY", "NORMAL", "HARD", "EX-HARD", "HAZARD", "GRADE",
+			"EX GRADE", "EXHARD GRADE" };
+	private static final String[] RANDOM = { "NORMAL", "MIRROR", "RANDOM", "R-RANDOM", "S-RANDOM", "SPIRAL",
+			"H-RANDOM", "ALL-SCR", "RANDOM-EX", "S-RANDOM-EX" };
+	private static final String[] DPRANDOM = { "NORMAL", "FLIP" };
 
 	private PracticeProperty property = new PracticeProperty();
 
@@ -40,17 +42,18 @@ public class PracticeConfiguration {
 		property.judgerank = model.getJudgerank();
 		property.endtime = model.getLastTime() + 1000;
 		Path p = Paths.get("practice/" + model.getSHA256() + ".json");
-		if(Files.exists(p)) {
+		if (Files.exists(p)) {
 			Json json = new Json();
 			try {
-				property  = json.fromJson(PracticeProperty.class, new FileReader(p.toFile()));
+				property = json.fromJson(PracticeProperty.class, new FileReader(p.toFile()));
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
-			}			
+			}
 		}
-		
+
 		this.model = model;
-		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/default/VL-Gothic-Regular.ttf"));
+		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
+				Gdx.files.internal("skin/default/VL-Gothic-Regular.ttf"));
 		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
 		parameter.size = 18;
 		titlefont = generator.generateFont(parameter);
@@ -60,13 +63,11 @@ public class PracticeConfiguration {
 		try {
 			Files.createDirectory(Paths.get("practice"));
 		} catch (IOException e1) {
-		}		
-		try {
+		}
+		try (FileWriter fw = new FileWriter("practice/" + model.getSHA256() + ".json")) {
 			Json json = new Json();
-			FileWriter fw = new FileWriter("practice/" + model.getSHA256() + ".json");
 			fw.write(json.prettyPrint(property));
 			fw.flush();
-			fw.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -78,7 +79,7 @@ public class PracticeConfiguration {
 
 	public GrooveGauge getGauge(BMSModel model) {
 		GrooveGauge gauge = null;
-		switch(property.gaugetype) {
+		switch (property.gaugetype) {
 		case 0:
 			gauge = new AssistEasyGrooveGauge(model);
 			break;
@@ -107,11 +108,11 @@ public class PracticeConfiguration {
 			gauge = new ExhardGradeGrooveGauge(model);
 			break;
 		}
-		
+
 		gauge.setValue(property.startgauge);
 		return gauge;
 	}
-	
+
 	public void processInput(BMSPlayerInputProcessor input) {
 		boolean[] cursor = input.getCursorState();
 		long[] cursortime = input.getCursorTime();
@@ -124,107 +125,109 @@ public class PracticeConfiguration {
 			cursorpos = (cursorpos + 1) % (model.getUseKeys() >= 10 ? 9 : 7);
 		}
 		if (cursor[2] && (presscount == 0 || presscount + 10 < System.currentTimeMillis())) {
-			if(presscount == 0) {
+			if (presscount == 0) {
 				presscount = System.currentTimeMillis() + 500;
 			} else {
 				presscount = System.currentTimeMillis();
 			}
-			switch(cursorpos) {
+			switch (cursorpos) {
 			case 0:
-				if(property.starttime >= 100) {
+				if (property.starttime >= 100) {
 					property.starttime -= 100;
 				}
 				break;
 			case 1:
-				if(property.endtime > property.starttime + 1000) {
+				if (property.endtime > property.starttime + 1000) {
 					property.endtime -= 100;
 				}
 				break;
 			case 2:
 				property.gaugetype = (property.gaugetype + 8) % 9;
-				if(model.getUseKeys() == 9 && property.gaugetype >= 3 && property.startgauge > 100) {
+				if (model.getUseKeys() == 9 && property.gaugetype >= 3 && property.startgauge > 100) {
 					property.startgauge = 100;
 				}
 				break;
 			case 3:
-				if(property.startgauge > 1) {
+				if (property.startgauge > 1) {
 					property.startgauge--;
 				}
 				break;
-				case 4:
-					if(property.judgerank > 10) {
-						property.judgerank -= 10;
-					}
-					break;
-				case 5:
-					if(property.freq > 50) {
-						property.freq -= 5;
-					}
-					break;
-			case 6:
-				property.random = (property.random + (model.getUseKeys() == 9 ? 6 : 9)) % (model.getUseKeys() == 9 ? 7 : 10);
+			case 4:
+				if (property.judgerank > 10) {
+					property.judgerank -= 10;
+				}
 				break;
-				case 7:
-					property.random2 = (property.random2 + 9) % 10;
-					break;
-				case 8:
-					property.doubleop = (property.doubleop + 1) % 2;
-					break;
+			case 5:
+				if (property.freq > 50) {
+					property.freq -= 5;
+				}
+				break;
+			case 6:
+				property.random = (property.random + (model.getUseKeys() == 9 ? 6 : 9))
+						% (model.getUseKeys() == 9 ? 7 : 10);
+				break;
+			case 7:
+				property.random2 = (property.random2 + 9) % 10;
+				break;
+			case 8:
+				property.doubleop = (property.doubleop + 1) % 2;
+				break;
 			}
 		} else if (cursor[3] && (presscount == 0 || presscount + 10 < System.currentTimeMillis())) {
-			if(presscount == 0) {
+			if (presscount == 0) {
 				presscount = System.currentTimeMillis() + 500;
 			} else {
 				presscount = System.currentTimeMillis();
 			}
 			TimeLine[] tl = model.getAllTimeLines();
-			switch(cursorpos) {
+			switch (cursorpos) {
 			case 0:
-				if(property.starttime + 2000 <= tl[tl.length - 1].getTime()) {
+				if (property.starttime + 2000 <= tl[tl.length - 1].getTime()) {
 					property.starttime += 100;
 				}
-				if(property.starttime + 900 >= property.endtime) {
+				if (property.starttime + 900 >= property.endtime) {
 					property.endtime += 100;
 				}
 				break;
 			case 1:
-				if(property.endtime <= tl[tl.length - 1].getTime() + 1000) {
+				if (property.endtime <= tl[tl.length - 1].getTime() + 1000) {
 					property.endtime += 100;
 				}
 				break;
 			case 2:
 				property.gaugetype = (property.gaugetype + 1) % 9;
-				if(model.getUseKeys() == 9 && property.gaugetype >= 3 && property.startgauge > 100) {
+				if (model.getUseKeys() == 9 && property.gaugetype >= 3 && property.startgauge > 100) {
 					property.startgauge = 100;
 				}
 				break;
 			case 3:
-				if(property.startgauge < 100 || (model.getUseKeys() == 9 && property.gaugetype <= 2 && property.startgauge < 120)) {
+				if (property.startgauge < 100
+						|| (model.getUseKeys() == 9 && property.gaugetype <= 2 && property.startgauge < 120)) {
 					property.startgauge++;
 				}
 				break;
-				case 4:
-					if(property.judgerank < 400) {
-						property.judgerank += 10;
-					}
-					break;
-				case 5:
-					if(property.freq < 200) {
-						property.freq += 5;
-					}
-					break;
-				case 6:
+			case 4:
+				if (property.judgerank < 400) {
+					property.judgerank += 10;
+				}
+				break;
+			case 5:
+				if (property.freq < 200) {
+					property.freq += 5;
+				}
+				break;
+			case 6:
 				property.random = (property.random + 1) % (model.getUseKeys() == 9 ? 7 : 10);
 				break;
-				case 7:
-					property.random2 = (property.random2 + 1) % 10;
-					break;
-				case 8:
-					property.doubleop = (property.doubleop + 1) % 2;
-					break;
+			case 7:
+				property.random2 = (property.random2 + 1) % 10;
+				break;
+			case 8:
+				property.doubleop = (property.doubleop + 1) % 2;
+				break;
 
 			}
-		} else if(!(cursor[2] || cursor[3])){
+		} else if (!(cursor[2] || cursor[3])) {
 			presscount = 0;
 		}
 	}
@@ -233,9 +236,11 @@ public class PracticeConfiguration {
 		float x = r.x + r.width / 8;
 		float y = r.y + r.height * 7 / 8;
 		titlefont.setColor(cursorpos == 0 ? Color.YELLOW : Color.CYAN);
-		titlefont.draw(sprite, String.format("START TIME : %2d:%02d.%1d", property.starttime / 60000, (property.starttime / 1000) % 60, (property.starttime / 100) % 10), x, y);
+		titlefont.draw(sprite, String.format("START TIME : %2d:%02d.%1d", property.starttime / 60000,
+				(property.starttime / 1000) % 60, (property.starttime / 100) % 10), x, y);
 		titlefont.setColor(cursorpos == 1 ? Color.YELLOW : Color.CYAN);
-		titlefont.draw(sprite, String.format("END TIME : %2d:%02d.%1d", property.endtime / 60000, (property.endtime / 1000) % 60, (property.endtime / 100) % 10), x, y - 22);
+		titlefont.draw(sprite, String.format("END TIME : %2d:%02d.%1d", property.endtime / 60000,
+				(property.endtime / 1000) % 60, (property.endtime / 100) % 10), x, y - 22);
 		titlefont.setColor(cursorpos == 2 ? Color.YELLOW : Color.CYAN);
 		titlefont.draw(sprite, "GAUGE TYPE : " + GAUGE[property.gaugetype], x, y - 44);
 		titlefont.setColor(cursorpos == 3 ? Color.YELLOW : Color.CYAN);
@@ -246,22 +251,22 @@ public class PracticeConfiguration {
 		titlefont.draw(sprite, "FREQENCY : " + property.freq, x, y - 110);
 		titlefont.setColor(cursorpos == 6 ? Color.YELLOW : Color.CYAN);
 		titlefont.draw(sprite, "OPTION-1P : " + RANDOM[property.random], x, y - 132);
-		if(model.getUseKeys() >= 10) {
+		if (model.getUseKeys() >= 10) {
 			titlefont.setColor(cursorpos == 7 ? Color.YELLOW : Color.CYAN);
 			titlefont.draw(sprite, "OPTION-2P : " + RANDOM[property.random2], x, y - 154);
 			titlefont.setColor(cursorpos == 8 ? Color.YELLOW : Color.CYAN);
 			titlefont.draw(sprite, "OPTION-DP : " + DPRANDOM[property.doubleop], x, y - 176);
 		}
 
-		if(state.getMainController().getPlayerResource().mediaLoadFinished()) {
+		if (state.getMainController().getPlayerResource().mediaLoadFinished()) {
 			titlefont.setColor(Color.ORANGE);
 			titlefont.draw(sprite, "PRESS 1KEY TO PLAY", x, y - 220);
 		}
 
-
-		graph.draw(sprite, time, state, new Rectangle(r.x, r.y, r.width, r.height / 4), property.starttime, property.endtime);
+		graph.draw(sprite, time, state, new Rectangle(r.x, r.y, r.width, r.height / 4), property.starttime,
+				property.endtime);
 	}
-	
+
 	public static class PracticeProperty {
 		public int starttime = 0;
 		public int endtime = 10000;
@@ -271,6 +276,6 @@ public class PracticeConfiguration {
 		public int random2 = 0;
 		public int doubleop = 0;
 		public int judgerank = 100;
-		public int freq = 120;
+		public int freq = 100;
 	}
 }
