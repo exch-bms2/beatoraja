@@ -73,9 +73,6 @@ public class MusicSelector extends MainState {
 	public static final BarSorter[] SORT = { BarSorter.NAME_SORTER, BarSorter.LEVEL_SORTER, BarSorter.LAMP_SORTER,
 			BarSorter.SCORE_SORTER, BarSorter.MISSCOUNT_SORTER };
 
-	private static final String[] RANK = { "F-", "F-", "F", "F", "F+", "F+", "E-", "E", "E+", "D-", "D", "D+", "C-",
-			"C", "C+", "B-", "B", "B+", "A-", "A", "A+", "AA-", "AA", "AA+", "AAA-", "AAA", "AAA+", "MAX" };
-
 	private static final String[] LNMODE = { "LONG NOTE", "CHARGE NOTE", "HELL CHARGE NOTE" };
 
 	public static final int REPLAY = 4;
@@ -154,8 +151,8 @@ public class MusicSelector extends MainState {
 	}
 
 	Map<String, IRScoreData> readScoreDatas(SongData[] songs, int lnmode) {
-		Map<String, IRScoreData> result = new HashMap();
-		List<SongData> noscore = new ArrayList();
+		Map<String, IRScoreData> result = new HashMap<String, IRScoreData>();
+		List<SongData> noscore = new ArrayList<SongData>();
 		for (SongData song : songs) {
 			if (scorecache[lnmode].containsKey(song.getSha256())) {
 				result.put(song.getSha256(), scorecache[lnmode].get(song.getSha256()));
@@ -182,7 +179,7 @@ public class MusicSelector extends MainState {
 		play = -1;
 		final MainController main = getMainController();
 		playerdata = main.getPlayDataAccessor().readPlayerData();
-		for (Map cache : scorecache) {
+		for (Map<?, ?> cache : scorecache) {
 			cache.clear();
 		}
 
@@ -262,6 +259,7 @@ public class MusicSelector extends MainState {
 
 		// search text field
 		if (getStage() == null) {
+			final Rectangle r = ((MusicSelectSkin)getSkin()).getSearchTextRegion();
 			final Stage stage = new Stage(new FitViewport(RESOLUTION[config.getResolution()].width,
 					RESOLUTION[config.getResolution()].height));
 			final TextField.TextFieldStyle textFieldStyle = new TextField.TextFieldStyle(searchfont, // BitmapFont
@@ -299,7 +297,7 @@ public class MusicSelector extends MainState {
 					}
 					if (!searchfont.getData().hasGlyph(key)) {
 						FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-						parameter.size = 24;
+						parameter.size = (int) r.height;
 						parameter.characters += textField.getText() + key;
 						BitmapFont newsearchfont = generator.generateFont(parameter);
 						textFieldStyle.font = newsearchfont;
@@ -312,7 +310,7 @@ public class MusicSelector extends MainState {
 				}
 
 			});
-			search.setBounds(10, 60, 400, 24);
+			search.setBounds(r.x, r.y, r.width, r.height);
 			search.setMaxLength(50);
 			search.setFocusTraversal(false);
 			stage.addActor(search);
@@ -343,13 +341,6 @@ public class MusicSelector extends MainState {
 		titlefont.setColor(Color.WHITE);
 		if (current instanceof SongBar) {
 			resource.setSongdata(((SongBar) current).getSongData());
-			if (current.getScore() != null) {
-				IRScoreData score = current.getScore();
-				titlefont.setColor(Color.WHITE);
-				titlefont.draw(sprite,
-						RANK[(score.getExscore() * 27 / (score.getNotes() * 2))] + " ( "
-								+ ((score.getExscore() * 1000 / (score.getNotes() * 2)) / 10.0f) + "% )", 460, 390);
-			}
 		} else {
 			resource.setSongdata(null);
 		}
@@ -388,11 +379,11 @@ public class MusicSelector extends MainState {
 				IRScoreData score = gb.getMirrorScore();
 				// titlefont.setColor(Color.valueOf(LAMP[score.getClear()]));
 				// titlefont.draw(sprite, CLEAR[score.getClear()], 100, 270);
-				titlefont.setColor(Color.WHITE);
-				titlefont.draw(sprite, "EX-SCORE  : " + score.getExscore() + " / " + (score.getNotes() * 2), 100, 240);
-				titlefont.draw(sprite, "MISS COUNT: " + score.getMinbp(), 100, 210);
-				titlefont.draw(sprite, "CLEAR / PLAY : " + score.getClearcount() + " / " + score.getPlaycount(), 100,
-						180);
+//				titlefont.setColor(Color.WHITE);
+//				titlefont.draw(sprite, "EX-SCORE  : " + score.getExscore() + " / " + (score.getNotes() * 2), 100, 240);
+//				titlefont.draw(sprite, "MISS COUNT: " + score.getMinbp(), 100, 210);
+//				titlefont.draw(sprite, "CLEAR / PLAY : " + score.getClearcount() + " / " + score.getPlaycount(), 100,
+//						180);
 			}
 			if (gb.getRandomScore() != null) {
 				IRScoreData score = gb.getRandomScore();
@@ -1010,6 +1001,17 @@ public class MusicSelector extends MainState {
 			return sort;
 		case BUTTON_LNMODE:
 			return config.getLnmode();
+		case NUMBER_SCORE_RATE:
+			if (bar.getSelected().getScore() != null) {
+				final IRScoreData score = bar.getSelected().getScore();
+				return score.getNotes() == 0 ? 0 : score.getExscore() * 100 / (score.getNotes() * 2);
+			}
+			return Integer.MIN_VALUE;
+		case NUMBER_SCORE_RATE_AFTERDOT:
+			if (bar.getSelected().getScore() != null) {
+				final IRScoreData score = bar.getSelected().getScore();
+				return score.getNotes() == 0 ? 0 : (score.getExscore() * 1000 / (score.getNotes() * 2)) % 10;
+			}
 		}
 		return super.getNumberValue(id);
 	}
@@ -1303,6 +1305,62 @@ public class MusicSelector extends MainState {
 		case OPTION_NO_REPLAYDATA4:
 			return (current instanceof SelectableBar) && ((SelectableBar) current).getExistsReplayData().length > 3
 					&& !((SelectableBar) current).getExistsReplayData()[3];
+		case OPTION_1P_F:
+			if (bar.getSelected().getScore() != null) {
+				final IRScoreData score = bar.getSelected().getScore();
+				final int drate = score.getNotes() == 0 ? 0 : score.getExscore() * 10000 / (score.getNotes() * 2);
+				return drate <= 2222;
+			}
+			return false;
+		case OPTION_1P_E:
+			if (bar.getSelected().getScore() != null) {
+				final IRScoreData score = bar.getSelected().getScore();
+				final int drate = score.getNotes() == 0 ? 0 : score.getExscore() * 10000 / (score.getNotes() * 2);
+				return drate > 2222 && drate <= 3333;
+			}
+			return false;
+		case OPTION_1P_D:
+			if (bar.getSelected().getScore() != null) {
+				final IRScoreData score = bar.getSelected().getScore();
+				final int drate = score.getNotes() == 0 ? 0 : score.getExscore() * 10000 / (score.getNotes() * 2);
+				return drate > 3333 && drate <= 4444;
+			}
+			return false;
+		case OPTION_1P_C:
+			if (bar.getSelected().getScore() != null) {
+				final IRScoreData score = bar.getSelected().getScore();
+				final int drate = score.getNotes() == 0 ? 0 : score.getExscore() * 10000 / (score.getNotes() * 2);
+				return drate > 4444 && drate <= 5555;
+			}
+			return false;
+		case OPTION_1P_B:
+			if (bar.getSelected().getScore() != null) {
+				final IRScoreData score = bar.getSelected().getScore();
+				final int drate = score.getNotes() == 0 ? 0 : score.getExscore() * 10000 / (score.getNotes() * 2);
+				return drate > 5555 && drate <= 6666;
+			}
+			return false;
+		case OPTION_1P_A:
+			if (bar.getSelected().getScore() != null) {
+				final IRScoreData score = bar.getSelected().getScore();
+				final int drate = score.getNotes() == 0 ? 0 : score.getExscore() * 10000 / (score.getNotes() * 2);
+				return drate > 6666 && drate <= 7777;
+			}
+			return false;
+		case OPTION_1P_AA:
+			if (bar.getSelected().getScore() != null) {
+				final IRScoreData score = bar.getSelected().getScore();
+				final int drate = score.getNotes() == 0 ? 0 : score.getExscore() * 10000 / (score.getNotes() * 2);
+				return drate > 7777 && drate <= 8888;
+			}
+			return false;
+		case OPTION_1P_AAA:
+			if (bar.getSelected().getScore() != null) {
+				final IRScoreData score = bar.getSelected().getScore();
+				final int drate = score.getNotes() == 0 ? 0 : score.getExscore() * 10000 / (score.getNotes() * 2);
+				return drate > 8888;
+			}
+			return false;
 		}
 		return super.getBooleanValue(id);
 	}
