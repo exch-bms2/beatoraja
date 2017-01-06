@@ -81,6 +81,8 @@ public class MainController extends ApplicationAdapter {
 
 	private ScreenShotThread screenshot;
 
+	private long[] timer = new long[256];
+
 	public MainController(Path f, Config config, int auto) {
 		this.auto = auto;
 		this.config = config;
@@ -94,6 +96,10 @@ public class MainController extends ApplicationAdapter {
 		}
 
 		playdata = new PlayDataAccessor("playerscore");
+	}
+
+	public long[] getTimer() {
+		return timer;
 	}
 
 	public SongDatabaseAccessor getSongDatabase() {
@@ -154,7 +160,7 @@ public class MainController extends ApplicationAdapter {
 		}
 
 		if (newState != null && current != newState) {
-			Arrays.fill(newState.getTimer(), Long.MIN_VALUE);
+			Arrays.fill(timer, Long.MIN_VALUE);
 			newState.create();
 			newState.getSkin().prepare(newState);
 			current = newState;
