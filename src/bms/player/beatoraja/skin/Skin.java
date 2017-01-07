@@ -224,4 +224,12 @@ public class Skin {
 	public void setOption(Map<Integer, Boolean> option) {
 		this.option = option;
 	}
+
+	public double getScaleX() {
+		return dw;
+	}
+
+	public double getScaleY() {
+		return dh;
+	}
 }

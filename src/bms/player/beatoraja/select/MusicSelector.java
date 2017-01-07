@@ -248,10 +248,11 @@ public class MusicSelector extends MainState {
 				setSkin(new MusicSelectSkin(RESOLUTION[config.getResolution()]));
 			}
 		}
+		final Rectangle r = ((MusicSelectSkin)getSkin()).getSearchTextRegion();
 
 		generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/default/VL-Gothic-Regular.ttf"));
 		FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-		parameter.size = 24;
+		parameter.size = (int) r.height;
 		titlefont = generator.generateFont(parameter);
 		searchfont = generator.generateFont(parameter);
 
@@ -259,7 +260,6 @@ public class MusicSelector extends MainState {
 
 		// search text field
 		if (getStage() == null) {
-			final Rectangle r = ((MusicSelectSkin)getSkin()).getSearchTextRegion();
 			final Stage stage = new Stage(new FitViewport(RESOLUTION[config.getResolution()].width,
 					RESOLUTION[config.getResolution()].height));
 			final TextField.TextFieldStyle textFieldStyle = new TextField.TextFieldStyle(searchfont, // BitmapFont
@@ -348,29 +348,31 @@ public class MusicSelector extends MainState {
 		if (current instanceof GradeBar) {
 			GradeBar gb = (GradeBar) current;
 
+			float dw = (float) getSkin().getScaleX();
+			float dh = (float) getSkin().getScaleY();
 			for (int con : gb.getConstraint()) {
 				switch (con) {
 				case TableData.GRADE_NORMAL:
 					break;
 				case TableData.GRADE_MIRROR:
 					titlefont.setColor(Color.CYAN);
-					titlefont.draw(sprite, "MIRROR OK", 150, 620);
+					titlefont.draw(sprite, "MIRROR OK", 150 * dw, 620 * dh);
 					break;
 				case TableData.GRADE_RANDOM:
 					titlefont.setColor(Color.CORAL);
-					titlefont.draw(sprite, "RANDOM OK", 150, 620);
+					titlefont.draw(sprite, "RANDOM OK", 150 * dw, 620 * dh);
 					break;
 				case TableData.NO_HISPEED:
 					titlefont.setColor(Color.RED);
-					titlefont.draw(sprite, "x1.0 HI SPEED", 300, 620);
+					titlefont.draw(sprite, "x1.0 HI SPEED", 300 * dw, 620 * dh);
 					break;
 				case TableData.NO_GOOD:
 					titlefont.setColor(Color.PURPLE);
-					titlefont.draw(sprite, "NO GOOD", 450, 620);
+					titlefont.draw(sprite, "NO GOOD", 450 * dw, 620 * dh);
 					break;
 				case TableData.NO_GREAT:
 					titlefont.setColor(Color.PURPLE);
-					titlefont.draw(sprite, "NO GREAT", 450, 620);
+					titlefont.draw(sprite, "NO GREAT", 450 * dw, 620 * dh);
 					break;
 				}
 			}
@@ -399,11 +401,6 @@ public class MusicSelector extends MainState {
 				// 180);
 			}
 		}
-		if (current instanceof TableLevelBar) {
-			titlefont.draw(sprite, current.getTitle(), 100, 600);
-		}
-
-		titlefont.setColor(Color.WHITE);
 
 		// banner
 		if (current != bannerbar) {
@@ -777,6 +774,7 @@ public class MusicSelector extends MainState {
 			}
 			resetReplayIndex();
 		} else {
+			bar.setSelected(current);
 			play = 0;
 		}
 	}
@@ -1012,13 +1010,19 @@ public class MusicSelector extends MainState {
 				final IRScoreData score = bar.getSelected().getScore();
 				return score.getNotes() == 0 ? 0 : (score.getExscore() * 1000 / (score.getNotes() * 2)) % 10;
 			}
+			return Integer.MIN_VALUE;
 		}
 		return super.getNumberValue(id);
 	}
 
 	public String getTextValue(int id) {
 		switch (id) {
-		case STRING_COURSE1_TITLE:
+			case STRING_FULLTITLE:
+				if(bar.getSelected() instanceof DirectoryBar) {
+					return bar.getSelected().getTitle();
+				}
+				break;
+			case STRING_COURSE1_TITLE:
 			if (bar.getSelected() instanceof GradeBar) {
 				if (((GradeBar) bar.getSelected()).getSongDatas().length > 0) {
 					SongData song = ((GradeBar) bar.getSelected()).getSongDatas()[0];
@@ -1368,12 +1372,14 @@ public class MusicSelector extends MainState {
 	public void executeClickEvent(int id) {
 		switch (id) {
 		case BUTTON_PLAY:
+			getResource().setPlayDevice(getMainController().getInputProcessor().getLastKeyChangedDevice());
 			play = 0;
 			break;
 		case BUTTON_AUTOPLAY:
 			play = 1;
 			break;
 		case BUTTON_PRACTICE:
+			getResource().setPlayDevice(getMainController().getInputProcessor().getLastKeyChangedDevice());
 			play = 2;
 			break;
 		case BUTTON_REPLAY:
