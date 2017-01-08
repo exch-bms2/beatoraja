@@ -73,7 +73,7 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
      *
      * @param model
      */
-    public void setModel(BMSModel model) {
+    public synchronized void setModel(BMSModel model) {
         final int wavcount = model.getWavList().length;
 		for (Object id : wavmap) {
 			if (id != null) {
@@ -114,6 +114,9 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
         }
 
         for (Note note : notes) {
+            if(progress >= 1) {
+                break;
+            }
             if (note.getWav() < 0) {
                 continue;
             }
@@ -200,6 +203,10 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
             }
         }
 
+        progress = 1;
+    }
+
+    public void abort() {
         progress = 1;
     }
 

@@ -123,6 +123,7 @@ public class PlayerResource {
 		replay = new ReplayData();
 		String bmspath = model != null ? model.getPath() : null;
 		model = loadBMSModel(f);
+		final BMSModel loadingModel = model;
 		if (model == null) {
 			Logger.getGlobal().warning("楽曲が存在しないか、解析時にエラーが発生しました:" + f.toString());
 			return false;
@@ -150,12 +151,14 @@ public class PlayerResource {
 					@Override
 					public void run() {
 						try {
-							bga.setModel(model);
+							bga.setModel(loadingModel);
 						} catch (Throwable e) {
 							Logger.getGlobal().severe(e.getClass().getName() + " : " + e.getMessage());
 							e.printStackTrace();
 						} finally {
-							bgaLoaded = true;
+							if(loadingModel == model) {
+								bgaLoaded = true;
+							}
 						}
 					}
 				};
@@ -167,12 +170,15 @@ public class PlayerResource {
 				@Override
 				public void run() {
 					try {
-						audio.setModel(model);
+						audio.abort();
+						audio.setModel(loadingModel);
 					} catch (Throwable e) {
 						Logger.getGlobal().severe(e.getClass().getName() + " : " + e.getMessage());
 						e.printStackTrace();
 					} finally {
-						audioLoaded = true;
+						if(loadingModel == model) {
+							audioLoaded = true;
+						}
 					}
 				}
 			};

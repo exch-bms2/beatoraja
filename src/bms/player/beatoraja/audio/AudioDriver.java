@@ -20,6 +20,7 @@ public interface AudioDriver extends Disposable {
 	 */
 	public void setModel(BMSModel model);
 
+	public void abort();
 	/**
 	 * 音源の読み込み状況を返す
 	 * @return 
