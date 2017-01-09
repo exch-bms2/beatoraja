@@ -28,6 +28,7 @@ public class SongData {
 	 * 楽曲サブタイトル
 	 */
 	private String subtitle;
+	private String fulltitle;
 	/**
 	 * 楽曲ジャンル
 	 */
@@ -40,6 +41,7 @@ public class SongData {
 	 * 楽曲サブアーティスト名
 	 */
 	private String subartist;
+	private String fullartist;
 	private int favorite;
 	private List<String> path = new ArrayList<String>();
 	private String tag;	
@@ -159,6 +161,12 @@ public class SongData {
 	public void setSubtitle(String subtitle) {
 		this.subtitle = subtitle;
 	}
+	public String getFullTitle() {
+		if(fulltitle == null) {
+			fulltitle = title + " " + subtitle;
+		}
+		return fulltitle;
+	}
 	public String getArtist() {
 		return artist;
 	}
@@ -170,6 +178,12 @@ public class SongData {
 	}
 	public void setSubartist(String subartist) {
 		this.subartist = subartist;
+	}
+	public String getFullArtist() {
+		if(fullartist == null) {
+			fullartist = artist + " " + subartist;
+		}
+		return fullartist;
 	}
 	public String getGenre() {
 		return genre;

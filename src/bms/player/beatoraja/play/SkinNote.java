@@ -1,8 +1,7 @@
 package bms.player.beatoraja.play;
 
 import bms.player.beatoraja.MainState;
-import bms.player.beatoraja.skin.SkinObject;
-import bms.player.beatoraja.skin.SkinSource;
+import bms.player.beatoraja.skin.*;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
@@ -56,17 +55,17 @@ public class SkinNote extends SkinObject {
 		this.scale = scale;
 		this.note = new SkinSource[note.length];
 		for(int i = 0;i < note.length;i++) {
-			this.note[i] = new SkinSource(note[i], 0, cycle);
+			this.note[i] = new SkinSourceImage(note[i], 0, cycle);
 		}
 		this.longnote = new SkinSource[10][note.length];
 		for(int type = 0;type < 10;type++) {
 			for(int i = 0;i < note.length;i++) {
-				this.longnote[type][i] = new SkinSource(longnote[type][i], 0, cycle);
+				this.longnote[type][i] = new SkinSourceImage(longnote[type][i], 0, cycle);
 			}			
 		}
 		this.minenote = new SkinSource[minenote.length];
 		for(int i = 0;i < minenote.length;i++) {
-			this.minenote[i] = new SkinSource(minenote[i], 0, cycle);
+			this.minenote[i] = new SkinSourceImage(minenote[i], 0, cycle);
 		}
 		cnote = new TextureRegion[note.length];
 		clongnote = new TextureRegion[10][note.length];
@@ -85,8 +84,8 @@ public class SkinNote extends SkinObject {
 		hiddennote = new SkinSource[note.length];
 		processednote = new SkinSource[note.length];
 		for (int i = 0; i < note.length; i++) {
-			hiddennote[i] = new SkinSource(new TextureRegion(new Texture(hn)));
-			processednote[i] = new SkinSource(new TextureRegion(new Texture(pn)));
+			hiddennote[i] = new SkinSourceImage(new TextureRegion(new Texture(hn)));
+			processednote[i] = new SkinSourceImage(new TextureRegion(new Texture(pn)));
 		}
 	}
 
@@ -121,7 +120,7 @@ public class SkinNote extends SkinObject {
 					cprocessednote[i] = processednote[i].getImage(time, state);
 				}
 			}
-			player.getLanerender().drawLane(cnote, clongnote, cminenote, cprocessednote, chiddennote, scale);
+			player.getLanerender().drawLane(time, cnote, clongnote, cminenote, cprocessednote, chiddennote, scale);
 		}
 	}
 

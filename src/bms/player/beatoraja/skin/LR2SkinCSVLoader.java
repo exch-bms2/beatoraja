@@ -2,8 +2,14 @@ package bms.player.beatoraja.skin;
 
 import java.io.*;
 import java.util.*;
+import java.util.logging.Logger;
 
+import bms.player.beatoraja.Config;
 import bms.player.beatoraja.MainState;
+import bms.player.beatoraja.play.bga.BGAProcessor;
+import bms.player.beatoraja.play.bga.FFmpegProcessor;
+import bms.player.beatoraja.play.bga.MovieProcessor;
+import bms.player.beatoraja.play.bga.VLCMovieProcessor;
 import bms.player.beatoraja.skin.LR2SkinHeader.CustomFile;
 
 import com.badlogic.gdx.Gdx;
@@ -18,7 +24,7 @@ import com.badlogic.gdx.utils.GdxRuntimeException;
  */
 public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 
-	List<Texture> imagelist = new ArrayList<Texture>();
+	List<Object> imagelist = new ArrayList<Object>();
 
 	/**
 	 * スキンの元サイズのwidth
@@ -141,11 +147,31 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 				}
 				if (imagefile.exists()) {
 					// TODO ムービー形式対応
-					try {
-						imagelist.add(new Texture(Gdx.files.internal(imagefile.getPath())));
-					} catch (GdxRuntimeException e) {
-						imagelist.add(null);
-						e.printStackTrace();
+					boolean isMovie = false;
+					for (String mov : BGAProcessor.mov_extension) {
+						if (imagefile.getName().toLowerCase().endsWith(mov)) {
+							try {
+								SkinSourceMovie mm = new SkinSourceMovie(imagefile.getPath());
+								imagelist.add(mm);
+								isMovie = true;
+								break;
+							} catch (Exception e) {
+								Logger.getGlobal().warning("BGAファイル読み込み失敗。" + e.getMessage());
+								e.printStackTrace();
+							} catch (Error e) {
+								Logger.getGlobal().severe("BGAファイル読み込み失敗。" + e.getMessage());
+								e.printStackTrace();
+							}
+						}
+					}
+
+					if(!isMovie) {
+						try {
+							imagelist.add(new Texture(Gdx.files.internal(imagefile.getPath())));
+						} catch (GdxRuntimeException e) {
+							imagelist.add(null);
+							e.printStackTrace();
+						}						
 					}
 				} else {
 					imagelist.add(null);
@@ -168,19 +194,24 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 						// + gr);
 					} else {
 						int[] values = parseInt(str);
-						TextureRegion[] images = getSourceImage(values);
-						if(images != null) {
-							part = new SkinImage(images, values[10], values[9]);
-							// System.out.println("Object Added - " +
-							// (part.getTiming()));							
+						if (values[2] < imagelist.size() && imagelist.get(values[2]) != null && imagelist.get(values[2]) instanceof SkinSourceMovie) {
+							part = new SkinImage((SkinSourceMovie)imagelist.get(values[2]));							
+						} else {
+							TextureRegion[] images = getSourceImage(values);
+							if(images != null) {
+								part = new SkinImage(images, values[10], values[9]);
+								// System.out.println("Object Added - " +
+								// (part.getTiming()));							
+							}							
 						}
+
 					}
 					if (part != null) {
 						skin.add(part);
 					} else {
 						System.out.println("NO_DESTINATION : " + line);
 					}
-				} catch (NumberFormatException e) {
+				} catch (Throwable e) {
 					e.printStackTrace();
 				}
 			}
@@ -424,11 +455,11 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 						int y = values[4];
 						int w = values[5];
 						if (w == -1) {
-							w = imagelist.get(gr).getWidth();
+							w = ((Texture) imagelist.get(gr)).getWidth();
 						}
 						int h = values[6];
 						if (h == -1) {
-							h = imagelist.get(gr).getHeight();
+							h = ((Texture) imagelist.get(gr)).getHeight();
 						}
 						int divx = values[7];
 						if (divx <= 0) {
@@ -441,7 +472,7 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 						TextureRegion[][] images = new TextureRegion[divx * divy][];
 						for (int i = 0; i < divx; i++) {
 							for (int j = 0; j < divy; j++) {
-								images[divx * j + i] = new TextureRegion[] { new TextureRegion(imagelist.get(gr), x + w
+								images[divx * j + i] = new TextureRegion[] { new TextureRegion((Texture) imagelist.get(gr), x + w
 										/ divx * i, y + h / divy * j, w / divx, h / divy) };
 							}
 						}
@@ -553,8 +584,8 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 	}
 
 	protected TextureRegion[] getSourceImage(int[] values) {
-		if (values[2] < imagelist.size() && imagelist.get(values[2]) != null) {
-			return getSourceImage(imagelist.get(values[2]), values[3], values[4], values[5], values[6], values[7],
+		if (values[2] < imagelist.size() && imagelist.get(values[2]) != null && imagelist.get(values[2]) instanceof Texture) {
+			return getSourceImage((Texture) imagelist.get(values[2]), values[3], values[4], values[5], values[6], values[7],
 					values[8]);
 		}
 		System.out.println("failed to load image : " + line);

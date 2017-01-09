@@ -2,8 +2,7 @@ package bms.player.beatoraja.play;
 
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.play.gauge.*;
-import bms.player.beatoraja.skin.SkinObject;
-import bms.player.beatoraja.skin.SkinSource;
+import bms.player.beatoraja.skin.*;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -22,7 +21,7 @@ public class SkinGauge extends SkinObject {
     private SkinSource image;
 
     public SkinGauge(TextureRegion[][] image, int timer, int cycle) {
-        this.image = new SkinSource(image, timer, cycle);
+        this.image = new SkinSourceImage(image, timer, cycle);
     }
 
     @Override

@@ -47,16 +47,16 @@ public class SkinNumber extends SkinObject {
 	}
 
 	public SkinNumber(TextureRegion[] image, TextureRegion[] mimage, int keta, int zeropadding, int id) {
-		this.image = new SkinSource(new TextureRegion[][]{ image }, 0, 0) ;
-		this.mimage = mimage != null ? new SkinSource(new TextureRegion[][]{ mimage }, 0, 0) : null;
+		this.image = new SkinSourceImage(new TextureRegion[][]{ image }, 0, 0) ;
+		this.mimage = mimage != null ? new SkinSourceImage(new TextureRegion[][]{ mimage }, 0, 0) : null;
 		this.setKeta(keta);
 		this.zeropadding = zeropadding;
 		this.id = id;
 	}
 
 	public SkinNumber(TextureRegion[][] image, TextureRegion[][] mimage, int timer, int cycle, int keta, int zeropadding, int id) {
-		this.image = new SkinSource(image, timer, cycle) ;
-		this.mimage = mimage != null ? new SkinSource(mimage, timer, cycle) : null;
+		this.image = new SkinSourceImage(image, timer, cycle) ;
+		this.mimage = mimage != null ? new SkinSourceImage(mimage, timer, cycle) : null;
 		this.setKeta(keta);
 		this.zeropadding = zeropadding;
 		this.id = id;

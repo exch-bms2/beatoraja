@@ -29,11 +29,11 @@ public class SkinGraph extends SkinObject {
 	}
 
 	public SkinGraph(TextureRegion image) {
-		source = new SkinSource(new TextureRegion[]{image}, 0, 0);
+		source = new SkinSourceImage(new TextureRegion[]{image}, 0, 0);
 	}
 
 	public SkinGraph(TextureRegion[] image, int timer, int cycle) {
-		source = new SkinSource(image, timer, cycle);
+		source = new SkinSourceImage(image, timer, cycle);
 	}
 
 	public void draw(SpriteBatch sprite, long time, MainState state) {

@@ -4,6 +4,8 @@ import java.io.*;
 import java.util.*;
 
 import bms.player.beatoraja.play.*;
+
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 
@@ -530,10 +532,10 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 						for (int y = 0; y < divy; y++) {
 							if ((y * divx + x) / 4 < gauge.length) {
 								gauge[(y * divx + x) / 4][(y * divx + x) % 4] = new TextureRegion(
-										imagelist.get(values[2]), values[3] + w * x / divx, values[4] + h * y / divy, w
+										(Texture) imagelist.get(values[2]), values[3] + w * x / divx, values[4] + h * y / divy, w
 												/ divx, h / divy);
 								gauge[(y * divx + x) / 4][(y * divx + x) % 4 + 4] = new TextureRegion(
-										imagelist.get(values[2]), values[3] + w * x / divx, values[4] + h * y / divy, w
+										(Texture) imagelist.get(values[2]), values[3] + w * x / divx, values[4] + h * y / divy, w
 												/ divx, h / divy);
 							}
 						}

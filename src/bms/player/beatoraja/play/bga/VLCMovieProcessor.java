@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Gdx2DPixmap;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.sun.jna.Native;
 import com.sun.jna.NativeLibrary;
@@ -105,6 +106,10 @@ public class VLCMovieProcessor implements MovieProcessor {
 			mediaPlayer.start();
 			play = true;
 		}
+	}
+
+	public ShaderProgram getShader() {
+		return null;
 	}
 
 	public void dispose() {

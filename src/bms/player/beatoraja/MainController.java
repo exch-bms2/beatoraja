@@ -155,6 +155,9 @@ public class MainController extends ApplicationAdapter {
 
 		if (newState != null && current != newState) {
 			Arrays.fill(newState.getTimer(), Long.MIN_VALUE);
+			if(current != null) {
+				current.setSkin(null);
+			}
 			newState.create();
 			newState.getSkin().prepare(newState);
 			current = newState;

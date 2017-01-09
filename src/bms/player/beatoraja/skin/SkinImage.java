@@ -48,6 +48,11 @@ public class SkinImage extends SkinObject {
 		return getImage(0 ,time, state);
 	}
 
+	public SkinImage(SkinSourceMovie image) {
+		this.image = new SkinSource[1];
+		this.image[0] = image;		
+	}
+
 	public TextureRegion getImage(int value, long time, MainState state) {
 		if(getImageID() != -1) {
 			return state.getImage(getImageID());
@@ -57,13 +62,13 @@ public class SkinImage extends SkinObject {
 	
 	public void setImage(TextureRegion[] image, int timer, int cycle) {
 		this.image = new SkinSource[1];
-		this.image[0] = new SkinSource(image, timer, cycle);
+		this.image[0] = new SkinSourceImage(image, timer, cycle);
 	}
 
 	public void setImage(TextureRegion[][] image, int timer, int cycle) {
 		this.image = new SkinSource[image.length];
 		for(int i = 0;i < image.length;i++) {
-			this.image[i] = new SkinSource(image[i], timer, cycle);
+			this.image[i] = new SkinSourceImage(image[i], timer, cycle);
 		}		
 	}
 
@@ -98,7 +103,13 @@ public class SkinImage extends SkinObject {
 					} else if(scratch == 2) {
 						draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height, getColor(time,state),state.getNumberValue(NUMBER_SCRATCHANGLE_2P));
 					} else {
-						draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height, getColor(time,state),getAngle(time,state));
+                    	if(image[0] instanceof SkinSourceMovie) {
+                    		sprite.setShader(((SkinSourceMovie) image[0]).getShader());
+                            draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height, getColor(time,state),getAngle(time,state));
+                            sprite.setShader(null);
+                    	} else {
+    						draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height, getColor(time,state),getAngle(time,state));
+                    	}
 					}
                 }
             }
@@ -124,7 +135,7 @@ public class SkinImage extends SkinObject {
                     } else if(scratch == 2) {
                         draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height, getColor(time,state),state.getNumberValue(NUMBER_SCRATCHANGLE_2P));
                     } else {
-                        draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height, getColor(time,state),getAngle(time,state));
+                        draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height, getColor(time,state),getAngle(time,state));                    		
                     }
                 }
             }

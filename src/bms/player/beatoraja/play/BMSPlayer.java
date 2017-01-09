@@ -361,7 +361,6 @@ public class BMSPlayer extends MainState {
 		final BMSPlayerInputProcessor input = main.getInputProcessor();
 
 		final long now = getNowTime();
-		final long nowtime = System.nanoTime() / 1000000;
 		switch (state) {
 		// 楽曲ロード
 		case STATE_PRELOAD:
@@ -454,21 +453,23 @@ public class BMSPlayer extends MainState {
 			break;
 		// プレイ
 		case STATE_PLAY:
-			getTimer()[TIMER_PLAY] += (nowtime - prevtime) * (100 - playspeed) / 100;
-			getTimer()[TIMER_RHYTHM] += (nowtime - prevtime) * (100 - lanerender.getNowBPM() * 100 / 60) / 100;
-			scratch1 += 2160 - (nowtime - prevtime);
-			scratch2 += nowtime - prevtime;
+			final long deltatime = now - prevtime;
+
+			getTimer()[TIMER_PLAY] += deltatime * (100 - playspeed) / 100;
+			getTimer()[TIMER_RHYTHM] += deltatime * (100 - lanerender.getNowBPM() * 100 / 60) / 100;
+			scratch1 += 2160 - deltatime;
+			scratch2 += deltatime;
 			if (model.getUseKeys() != 9) {
 				final boolean[] state = input.getKeystate();
 				if (state[7]) {
-					scratch1 += (nowtime - prevtime) * 2;
+					scratch1 += deltatime * 2;
 				} else if (state[8]) {
-					scratch1 += 2160 - (nowtime - prevtime) * 2;
+					scratch1 += 2160 - deltatime * 2;
 				}
 				if (state[16]) {
-					scratch2 += (nowtime - prevtime) * 2;
+					scratch2 += deltatime * 2;
 				} else if (state[17]) {
-					scratch2 += 2160 - (nowtime - prevtime) * 2;
+					scratch2 += 2160 - deltatime * 2;
 				}
 			}
 			scratch1 %= 2160;
@@ -485,7 +486,7 @@ public class BMSPlayer extends MainState {
 			if (notes == getMainController().getPlayerResource().getSongdata().getNotes()
 					&& getTimer()[TIMER_ENDOFNOTE_1P] == Long.MIN_VALUE
 					&& playtime - TIME_MARGIN < (now - getTimer()[TIMER_PLAY])) {
-				getTimer()[TIMER_ENDOFNOTE_1P] = getNowTime();
+				getTimer()[TIMER_ENDOFNOTE_1P] = now;
 			}
 
 			// System.out.println("playing time : " + time);
@@ -505,6 +506,8 @@ public class BMSPlayer extends MainState {
 				}
 				Logger.getGlobal().info("STATE_FAILEDに移行");
 			}
+			
+			prevtime = now;
 
 			break;
 		// 閉店処理
@@ -584,7 +587,6 @@ public class BMSPlayer extends MainState {
 			}
 			break;
 		}
-		prevtime = nowtime;
 	}
 
 	private boolean hschanged;

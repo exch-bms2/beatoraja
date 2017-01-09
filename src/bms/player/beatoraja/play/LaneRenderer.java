@@ -224,10 +224,10 @@ public class LaneRenderer {
 	private double basebpm;
 	private double nowbpm;
 
-	public void drawLane(TextureRegion[] noteimage, TextureRegion[][] lnoteimage, TextureRegion[] mnoteimage,
+	public void drawLane(long time, TextureRegion[] noteimage, TextureRegion[][] lnoteimage, TextureRegion[] mnoteimage,
 			TextureRegion[] pnoteimage, TextureRegion[] hnoteimage, float scale) {
 		sprite.end();
-		long time = (main.getTimer()[TIMER_PLAY] != Long.MIN_VALUE ? (main.getNowTime() - main.getTimer()[TIMER_PLAY])
+		time = (main.getTimer()[TIMER_PLAY] != Long.MIN_VALUE ? (time - main.getTimer()[TIMER_PLAY])
 				: 0) + config.getJudgetiming();
 		if (main.getState() == BMSPlayer.STATE_PRACTICE) {
 			time = main.getPracticeConfiguration().getPracticeProperty().starttime;

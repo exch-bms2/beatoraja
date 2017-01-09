@@ -31,7 +31,7 @@ public class SkinSlider extends SkinObject {
 	private boolean changable;
 
 	public SkinSlider(TextureRegion[] image, int timer, int cycle, int angle, int range, int type) {
-		source = new SkinSource(image, timer ,cycle);
+		source = new SkinSourceImage(image, timer ,cycle);
 		this.direction = angle;
 		this.range = range;
 		this.type = type;

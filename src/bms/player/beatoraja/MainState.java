@@ -322,13 +322,13 @@ public abstract class MainState {
 			case STRING_SUBTITLE:
 				return song != null ? song.getSubtitle() : "";
 			case STRING_FULLTITLE:
-				return song != null ? song.getTitle() + " " + song.getSubtitle() : "";
+				return song != null ? song.getFullTitle() : "";
 			case STRING_ARTIST:
 				return song != null ? song.getArtist() : "";
 			case STRING_SUBARTIST:
 				return song != null ? song.getSubartist() : "";
 				case STRING_FULLARTIST:
-					return song != null ? song.getArtist() + " " + song.getSubartist() : "";
+					return song != null ? song.getFullArtist() : "";
 			case STRING_GENRE:
 				return song != null ? song.getGenre() : "";
 			}

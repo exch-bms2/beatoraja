@@ -1,7 +1,7 @@
 package bms.player.beatoraja.play.bga;
 
-import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 
 public interface MovieProcessor {
 
@@ -28,4 +28,6 @@ public interface MovieProcessor {
 	 * リソースを解放する
  	 */
 	public abstract void dispose();
+	
+	public ShaderProgram getShader();
 }

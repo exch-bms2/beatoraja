@@ -1,8 +1,7 @@
 package bms.player.beatoraja.select;
 
 import bms.player.beatoraja.MainState;
-import bms.player.beatoraja.skin.SkinObject;
-import bms.player.beatoraja.skin.SkinSource;
+import bms.player.beatoraja.skin.*;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
@@ -39,7 +38,7 @@ public class SkinDistributionGraph extends SkinObject {
             Texture lampt = new Texture(lampp);
             lampimage = new SkinSource[11];
             for(int i = 0;i < LAMP.length;i++) {
-                lampimage[i] = new SkinSource(new TextureRegion[]{new TextureRegion(lampt,i,0,1,1)},0,0);
+                lampimage[i] = new SkinSourceImage(new TextureRegion[]{new TextureRegion(lampt,i,0,1,1)},0,0);
             }
         } else {
             Pixmap rankp = new Pixmap(28,1, Pixmap.Format.RGBA8888);
@@ -49,7 +48,7 @@ public class SkinDistributionGraph extends SkinObject {
             Texture rankt = new Texture(rankp);
             lampimage = new SkinSource[28];
             for(int i = 0;i < RANK.length;i++) {
-                lampimage[i] = new SkinSource(new TextureRegion[]{new TextureRegion(rankt,i,0,1,1)},0,0);
+                lampimage[i] = new SkinSourceImage(new TextureRegion[]{new TextureRegion(rankt,i,0,1,1)},0,0);
             }
         }
     }
