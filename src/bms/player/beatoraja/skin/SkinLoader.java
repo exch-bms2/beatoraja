@@ -5,6 +5,8 @@ import java.io.FileReader;
 import java.nio.file.Path;
 import java.util.*;
 
+import bms.player.beatoraja.Resolution;
+import com.badlogic.gdx.assets.loaders.resolvers.ResolutionFileResolver;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
@@ -16,6 +18,10 @@ import bms.player.beatoraja.result.*;
 public class SkinLoader {
 	
 	private Rectangle dstr;
+
+	public SkinLoader() {
+		this(Resolution.RESOLUTION[1]);
+	}
 	
 	public SkinLoader(Rectangle r) {
 		dstr = r;
@@ -27,6 +33,26 @@ public class SkinLoader {
 
 	public MusicDecideSkin loadDecideSkin(Path p) {
 		return (MusicDecideSkin) load(p, 6);
+	}
+
+	public LR2SkinHeader loadHeader(Path p) {
+		LR2SkinHeader header = null;
+		try {
+			Json json = new Json();
+			json.setIgnoreUnknownFields(true);
+			JsonSkin sk = json.fromJson(JsonSkin.class, new FileReader(p.toFile()));
+
+			if(sk.type != -1) {
+				header = new LR2SkinHeader();
+				header.setMode(sk.type);
+				header.setName(sk.name);
+				header.setPath(p);
+				header.setType(LR2SkinHeader.TYPE_BEATORJASKIN);
+			}
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		return header;
 	}
 
 	public Skin load(Path p, int type) {
@@ -155,7 +181,7 @@ public class SkinLoader {
 					}
 					for (JudgeGraph ggraph : sk.judgegraph) {
 						if (dst.id == ggraph.id) {
-							SkinDetailGraphObject st = new SkinDetailGraphObject();
+							SkinNoteDistributionGraph st = new SkinNoteDistributionGraph(ggraph.type);
 							obj = st;
 							break;
 						}
@@ -227,7 +253,8 @@ public class SkinLoader {
 
 	public static class JsonSkin {
 
-		public int type;
+		public int type = -1;
+		public String name;
 		public int w = 1280;
 		public int h = 720;
 		public int fadeout;
@@ -300,6 +327,7 @@ public class SkinLoader {
 
 	public static class JudgeGraph {
 		public int id;
+		public int type;
 	}
 
 	public static class Destination {

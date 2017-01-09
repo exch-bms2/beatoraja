@@ -4,6 +4,11 @@ import java.nio.file.Path;
 
 public class LR2SkinHeader {
 
+	private int type;
+
+	public static final int TYPE_LR2SKIN = 0;
+	public static final int TYPE_BEATORJASKIN = 1;
+
 	private Path path;
 	
 	private int mode;
@@ -77,6 +82,14 @@ public class LR2SkinHeader {
 
 	public void setResolution(int resolution) {
 		this.resolution = resolution;
+	}
+
+	public int getType() {
+		return type;
+	}
+
+	public void setType(int type) {
+		this.type = type;
 	}
 
 	public static class CustomOption {

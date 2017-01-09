@@ -9,6 +9,7 @@ import java.util.function.Consumer;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
+import bms.player.beatoraja.skin.SkinLoader;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 
@@ -397,8 +398,7 @@ public class PlayConfigurationView implements Initializable {
 	public void updateSkinCategory() {
 		if (skinview.getSelectedHeader() != null) {
 			LR2SkinHeader header = skinview.getSelectedHeader();
-			SkinConfig skin = new SkinConfig();
-			skin.setPath(header.getPath().toString());
+			SkinConfig skin = new SkinConfig(header.getPath().toString());
 			skin.setProperty(skinview.getProperty());
 			config.getSkin()[header.getMode()] = skin;
 		} else if (mode != -1) {
@@ -406,8 +406,18 @@ public class PlayConfigurationView implements Initializable {
 		}
 
 		skin.getItems().clear();
-		skin.getItems().add(null);
-		skin.getItems().addAll(skinview.getSkinHeader(skincategory.getValue()));
+		LR2SkinHeader[] headers = skinview.getSkinHeader(skincategory.getValue());
+		boolean containsDefault = false;
+		for(LR2SkinHeader h : headers) {
+			if(h.getName().equals("beatoraja default")) {
+				containsDefault = true;
+				break;
+			}
+		}
+		if(!containsDefault) {
+			skin.getItems().add(null);
+		}
+		skin.getItems().addAll(headers);
 		mode = skincategory.getValue();
 		if (config.getSkin()[skincategory.getValue()] != null) {
 			SkinConfig skinconf = config.getSkin()[skincategory.getValue()];
@@ -568,9 +578,7 @@ public class PlayConfigurationView implements Initializable {
 		protected void updateItem(LR2SkinHeader arg0, boolean arg1) {
 			super.updateItem(arg0, arg1);
 			if (arg0 != null) {
-				if(arg0 instanceof LR2SkinHeader) {
-					setText(arg0.getName() + " (LR2 Skin)");
-				}
+				setText(arg0.getName() + (arg0.getType() == LR2SkinHeader.TYPE_BEATORJASKIN ? "" : " (LR2 Skin)"));
 			} else {
 				setText("");
 			}
@@ -596,14 +604,22 @@ class SkinConfigurationView {
 		List<Path> lr2skinpaths = new ArrayList<Path>();
 		scan(Paths.get("skin"), lr2skinpaths);
 		for (Path path : lr2skinpaths) {
-			LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
-			try {
-				LR2SkinHeader header = loader.loadSkin(path, null);
-				// System.out.println(path.toString() + " : " + header.getName()
-				// + " - " + header.getMode());
-				lr2skinheader.add(header);
-			} catch (IOException e) {
-				e.printStackTrace();
+			if(path.toString().toLowerCase().endsWith(".json")) {
+				SkinLoader loader = new SkinLoader();
+				LR2SkinHeader header = loader.loadHeader(path);
+				if(header != null) {
+					lr2skinheader.add(header);
+				}
+			} else {
+				LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
+				try {
+					LR2SkinHeader header = loader.loadSkin(path, null);
+					// System.out.println(path.toString() + " : " + header.getName()
+					// + " - " + header.getMode());
+					lr2skinheader.add(header);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}
@@ -670,7 +686,8 @@ class SkinConfigurationView {
 				});
 			} catch (IOException e) {
 			}
-		} else if (p.getFileName().toString().toLowerCase().endsWith(".lr2skin")) {
+		} else if (p.getFileName().toString().toLowerCase().endsWith(".lr2skin") ||
+				p.getFileName().toString().toLowerCase().endsWith(".json")) {
 			paths.add(p);
 		}
 	}
