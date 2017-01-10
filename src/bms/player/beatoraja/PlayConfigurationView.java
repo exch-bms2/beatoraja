@@ -179,7 +179,7 @@ public class PlayConfigurationView implements Initializable {
 				"9KEYS BATTLE", "COURSE RESULT" });
 		skincategory.getItems().setAll(0, 1, 2, 3, 4, 6, 7);
 		initComboBox(audio, new String[] { "OpenAL (LibGDX Sound)", "OpenAL (LibGDX AudioDevice)", "ASIO"});
-		audio.getItems().setAll(0);
+		audio.getItems().setAll(0,2);
 
 		skin.setCellFactory(new Callback<ListView<LR2SkinHeader>, ListCell<LR2SkinHeader>>() {
 			public ListCell<LR2SkinHeader> call(ListView<LR2SkinHeader> param) {

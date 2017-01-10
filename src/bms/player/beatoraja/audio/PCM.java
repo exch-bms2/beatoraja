@@ -43,7 +43,7 @@ public class PCM {
 	}
 
 	public PCM(Path p) throws IOException {
-//		final long time = System.nanoTime();
+		// final long time = System.nanoTime();
 		byte[] pcm = null;
 		if (p.toString().toLowerCase().endsWith(".mp3")) {
 			try {
@@ -75,8 +75,8 @@ public class PCM {
 			try (WavInputStream input = new WavInputStream(new BufferedInputStream(Files.newInputStream(p)))) {
 				if (type == 85) {
 					try {
-						pcm = decodeMP3(new ByteArrayInputStream(StreamUtils.copyStreamToByteArray(input,
-								input.dataRemaining)));
+						pcm = decodeMP3(new ByteArrayInputStream(
+								StreamUtils.copyStreamToByteArray(input, input.dataRemaining)));
 					} catch (BitstreamException e) {
 						e.printStackTrace();
 					}
@@ -113,18 +113,19 @@ public class PCM {
 				}
 			}
 			if (bitsPerSample == 32) {
-				ByteBuffer buffer = ByteBuffer.allocate(bytes).order(ByteOrder.nativeOrder()).put(pcm, 0, bytes);
-				buffer.flip();
-				float[] buf = buffer.asFloatBuffer().array();
-				this.sample = new short[buf.length];
-				for (int i = 0; i < buf.length; i++) {
-					this.sample[i] = (short) (buf[i] * Short.MAX_VALUE);
+				int pos = 0;
+				this.sample = new short[pcm.length / 4];
+				for (int i = 0; i < this.sample.length; i++) {
+					this.sample[i] = (short) (Float.intBitsToFloat((pcm[pos] & 0xff) | ((pcm[pos + 1] & 0xff) << 8)
+							| ((pcm[pos + 2] & 0xff) << 16) | ((pcm[pos + 3] & 0xff) << 24)) * Short.MAX_VALUE);
+					pos += 4;
 				}
 			}
 		} else if (sample == null) {
 			throw new IOException("can't convert to PCM");
 		}
-//		System.out.println(p.toString() + " : " + (System.nanoTime() - time));
+		// System.out.println(p.toString() + " : " + (System.nanoTime() -
+		// time));
 	}
 
 	private byte[] decodeMP3(InputStream is) throws BitstreamException {
@@ -197,10 +198,12 @@ public class PCM {
 			for (int j = 0; j < channels; j++) {
 				if ((i * sampleRate) % sample != 0
 						&& (int) ((i * sampleRate / sample + 1) * channels + j) < this.sample.length) {
-					pcm.sample[(int) (i * channels + j)] = (short) (this.sample[(int) ((i * sampleRate / sample)
-							* channels + j)] / 2 + this.sample[(int) ((i * sampleRate / sample + 1) * channels + j)] / 2);
+					pcm.sample[(int) (i * channels
+							+ j)] = (short) (this.sample[(int) ((i * sampleRate / sample) * channels + j)] / 2
+									+ this.sample[(int) ((i * sampleRate / sample + 1) * channels + j)] / 2);
 				} else {
-					pcm.sample[(int) (i * channels + j)] = this.sample[(int) ((i * sampleRate / sample) * channels + j)];
+					pcm.sample[(int) (i * channels + j)] = this.sample[(int) ((i * sampleRate / sample) * channels
+							+ j)];
 				}
 			}
 		}
@@ -208,7 +211,6 @@ public class PCM {
 		return pcm;
 	}
 
-	
 	public PCM changeFrequency(float rate) {
 		PCM pcm = changeSampleRate((int) (sampleRate / rate));
 		pcm.sampleRate = sampleRate;

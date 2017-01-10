@@ -190,6 +190,7 @@ public class MainController extends ApplicationAdapter {
 			try {
 				audio = new ASIODriver(config);
 			} catch(Throwable e) {
+				e.printStackTrace();
 				config.setAudioDriver(Config.AUDIODRIVER_SOUND);
 				audio = new GdxSoundDriver();
 			}

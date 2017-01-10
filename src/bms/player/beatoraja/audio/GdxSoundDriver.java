@@ -19,7 +19,7 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 
 	private SoundMixer mixer;
 
-	private final boolean soundthread = true;
+	private final boolean soundthread = false;
 
 	public GdxSoundDriver() {
 		if(soundthread) {
@@ -97,15 +97,19 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 		});
 	}
 
+	private Object lock = new Object();
+	
 	@Override
-	protected synchronized void play(Sound id, float volume, boolean loop) {
+	protected void play(Sound id, float volume, boolean loop) {
 		if(loop) {
 			id.loop(getVolume() * volume);
 		} else {
 			if(soundthread) {
 				mixer.put(id, getVolume() * volume);
 			} else {
-				id.play(getVolume() * volume);
+				synchronized (lock) {
+					id.play(getVolume() * volume);					
+				}
 			}
 		}
 	}
