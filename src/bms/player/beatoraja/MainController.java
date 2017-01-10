@@ -37,7 +37,7 @@ import static bms.player.beatoraja.Resolution.*;
 
 public class MainController extends ApplicationAdapter {
 
-	public static final String VERSION = "beatoraja 0.3.6";
+	public static final String VERSION = "beatoraja 0.3.7";
 
 	private BMSPlayer player;
 	private MusicDecide decide;
@@ -190,7 +190,13 @@ public class MainController extends ApplicationAdapter {
 			audio = new GdxAudioDeviceDriver();
 			break;
 		case Config.AUDIODRIVER_ASIO:
-			audio = new ASIODriver();
+			try {
+				audio = new ASIODriver(config);
+			} catch(Throwable e) {
+				e.printStackTrace();
+				config.setAudioDriver(Config.AUDIODRIVER_SOUND);
+				audio = new GdxSoundDriver();
+			}
 			break;
 		}
 

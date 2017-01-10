@@ -82,7 +82,7 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 						String foot = imagepath.substring(key.length());
 						imagefile = new File(imagepath.substring(0, imagepath.lastIndexOf('*'))
 								+ filemap.get(key) + foot);
-						System.out.println(imagefile.getPath());
+//						System.out.println(imagefile.getPath());
 						imagepath = "";
 						break;
 					}
@@ -125,7 +125,7 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 						String foot = imagepath.substring(key.length());
 						imagefile = new File(imagepath.substring(0, imagepath.lastIndexOf('*'))
 								+ filemap.get(key) + foot);
-						System.out.println(imagefile.getPath());
+//						System.out.println(imagefile.getPath());
 						imagepath = "";
 						break;
 					}
@@ -145,7 +145,7 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 						}
 					}
 				}
-				if (imagefile.exists()) {
+				if (imagefile.exists() && !imagefile.getName().endsWith(".mpg")) {
 					// TODO ムービー形式対応
 					boolean isMovie = false;
 					for (String mov : BGAProcessor.mov_extension) {
@@ -209,7 +209,7 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 					if (part != null) {
 						skin.add(part);
 					} else {
-						System.out.println("NO_DESTINATION : " + line);
+						System.out.println("Failed to load SRC_IMAGE : " + line);
 					}
 				} catch (Throwable e) {
 					e.printStackTrace();
@@ -236,7 +236,7 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 								values[9], values[10], values[11], values[12], values[13], values[14], values[15],
 								values[16], values[17], values[18], values[19], values[20]);
 						if(values[21] != 0) {
-							System.out.println("set scratch image : " + values[21]);
+//							System.out.println("set scratch image : " + values[21]);
 							part.setScratch(values[21]);
 						}
 					} catch (NumberFormatException e) {

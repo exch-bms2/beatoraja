@@ -144,11 +144,17 @@ public class BGAProcessor {
 
 		String stage = model.getStagefile();
 		if (stage != null && stage.length() > 0) {
-			stagefilep = this.loadPicture(dpath.resolve(stage));
+			Path p = dpath.resolve(stage);
+			if(Files.exists(p)) {
+				stagefilep = this.loadPicture(p);				
+			}
 		}
 		String back = model.getBackbmp();
 		if (back != null && back.length() > 0) {
-			backbmpp = this.loadPicture(dpath.resolve(back));
+			Path p = dpath.resolve(back);
+			if(Files.exists(p)) {
+				backbmpp = this.loadPicture(p);				
+			}
 		}
 
 		Pixmap[] bgamap = new Pixmap[model.getBgaList().length];

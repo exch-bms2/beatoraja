@@ -7,9 +7,20 @@ import com.badlogic.gdx.math.Rectangle;
 
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
+/**
+ * 選曲スキン
+ *
+ * @author exch
+ */
 public class MusicSelectSkin extends Skin {
 
+	/**
+	 * カーソルが合っているBarのindex
+	 */
 	private int centerBar;
+	/**
+	 * クリック可能なBarのindex
+	 */
 	private int[] clickableBar = new int[0];
 
 	private Rectangle search;
@@ -59,36 +70,36 @@ public class MusicSelectSkin extends Skin {
 		label[2] = new SkinImage(new TextureRegion(st, 0, 480, 16, 30));
 		setDestination(label[2], 0, -60, 5, 16, 30, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
-		SkinText dir = new SkinText("skin/default/VL-Gothic-Regular.ttf", 0, 24, 2);
+		SkinText dir = new SkinText("skin/default/VL-Gothic-Regular.ttf", 0, 24, (int) (2 * dw));
 		dir.setReferenceID(STRING_DIRECTORY);
 		setDestination(dir, 0, 40, 670, 18, 24, 0, 255, 255, 128, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		this.add(dir);
-		SkinText genre = new SkinText("skin/default/VL-Gothic-Regular.ttf", 0, 20, 2);
+		SkinText genre = new SkinText("skin/default/VL-Gothic-Regular.ttf", 0, 20, (int) (2 * dw));
 		genre.setReferenceID(STRING_GENRE);
 		setDestination(genre, 0, 100, 630, 18, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		this.add(genre);
-		SkinText title = new SkinText("skin/default/VL-Gothic-Regular.ttf", 0, 24, 2);
+		SkinText title = new SkinText("skin/default/VL-Gothic-Regular.ttf", 0, 24, (int) (2 * dw));
 		title.setReferenceID(STRING_FULLTITLE);
 		setDestination(title, 0, 100, 600, 18, 24, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		this.add(title);
-		SkinText artist = new SkinText("skin/default/VL-Gothic-Regular.ttf", 0, 20, 2);
+		SkinText artist = new SkinText("skin/default/VL-Gothic-Regular.ttf", 0, 20, (int) (2 * dw));
 		artist.setReferenceID(STRING_FULLARTIST);
 		setDestination(artist, 0, 100, 570, 18, 20, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		this.add(artist);
 
-		SkinText grade1 = new SkinText("skin/default/VL-Gothic-Regular.ttf", 0, 24, 2);
+		SkinText grade1 = new SkinText("skin/default/VL-Gothic-Regular.ttf", 0, 24, (int) (2 * dw));
 		grade1.setReferenceID(STRING_COURSE1_TITLE);
 		setDestination(grade1, 0, 80, 596, 18, 24, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		this.add(grade1);
-		SkinText grade2 = new SkinText("skin/default/VL-Gothic-Regular.ttf", 0, 24, 2);
+		SkinText grade2 = new SkinText("skin/default/VL-Gothic-Regular.ttf", 0, 24, (int) (2 * dw));
 		grade2.setReferenceID(STRING_COURSE2_TITLE);
 		setDestination(grade2, 0, 80, 568, 18, 24, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		this.add(grade2);
-		SkinText grade3 = new SkinText("skin/default/VL-Gothic-Regular.ttf", 0, 24, 2);
+		SkinText grade3 = new SkinText("skin/default/VL-Gothic-Regular.ttf", 0, 24, (int) (2 * dw));
 		grade3.setReferenceID(STRING_COURSE3_TITLE);
 		setDestination(grade3, 0, 80, 540, 18, 24, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		this.add(grade3);
-		SkinText grade4 = new SkinText("skin/default/VL-Gothic-Regular.ttf", 0, 24, 2);
+		SkinText grade4 = new SkinText("skin/default/VL-Gothic-Regular.ttf", 0, 24, (int) (2 * dw));
 		grade4.setReferenceID(STRING_COURSE4_TITLE);
 		setDestination(grade4, 0, 80, 512, 18, 24, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		this.add(grade4);
@@ -242,10 +253,10 @@ public class MusicSelectSkin extends Skin {
 		barobj.setLamp(lamp);
 		barobj.setTrophy(trophy);
 		barobj.setLabel(label);
-		SkinBar.SkinBarText bartext = new SkinBar.SkinBarText("skin/default/VL-Gothic-Regular.ttf", 0, 24, 2);
+		SkinBar.SkinBarText bartext = new SkinBar.SkinBarText("skin/default/VL-Gothic-Regular.ttf", 0, 24, (int) (2 * dw));
 		setDestination(bartext, 0, 80, 30, 18, 24, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		barobj.getBarText()[0] = bartext;
-		bartext = new SkinBar.SkinBarText("skin/default/VL-Gothic-Regular.ttf", 0, 24, 2);
+		bartext = new SkinBar.SkinBarText("skin/default/VL-Gothic-Regular.ttf", 0, 24, (int) (2 * dw));
 		setDestination(bartext, 0, 80, 30, 18, 24, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		barobj.getBarText()[1] = bartext;
 		for (int i = 0; i < 7; i++) {

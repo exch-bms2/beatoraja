@@ -30,6 +30,11 @@ public class GdxAudioDeviceDriver implements AudioDriver {
 	}
 
 	@Override
+	public void abort() {
+
+	}
+
+	@Override
 	public float getProgress() {
 		// TODO Auto-generated method stub
 		return 0;
