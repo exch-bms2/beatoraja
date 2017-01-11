@@ -5,7 +5,6 @@ import java.util.Map;
 import bms.player.beatoraja.input.BMControllerInputProcessor.BMKeys;
 import bms.player.beatoraja.play.JudgeManager;
 
-import bms.player.beatoraja.skin.Skin;
 import com.badlogic.gdx.Input.Keys;
 
 /**
@@ -197,9 +196,14 @@ public class Config {
 	private int musicselectinput = 0;
 	
 	public Config() {
-		tableURL = new String[]{"http://bmsnormal2.syuriken.jp/table.html"};
-		skin[6] = new SkinConfig("skin/config/decide.json");
-		skin[7] = new SkinConfig("skin/config/result.json");
+        tableURL = new String[]{"http://bmsnormal2.syuriken.jp/table.html",
+                "http://bmsnormal2.syuriken.jp/table_insane.html",
+                "http://dpbmsdelta.web.fc2.com/table/dpdelta.html",
+                "http://dpbmsdelta.web.fc2.com/table/insane.html",
+                "http://flowermaster.web.fc2.com/lrnanido/gla/LN.html",
+                "http://stellawingroad.web.fc2.com/new/pms.html"};
+        skin[6] = new SkinConfig("skin/config/decide.json");
+        skin[7] = new SkinConfig("skin/config/result.json");
 		judgedetail = 2;
 	}
 	
@@ -548,15 +552,7 @@ public class Config {
 	}
 
 	public static class SkinConfig {
-
-		public SkinConfig() {
-
-		}
-
-		public SkinConfig(String path) {
-			this.path = path;
-		}
-
+		
 		private String path;
 		
 		private Map property;

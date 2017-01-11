@@ -239,6 +239,10 @@ public class SkinProperty {
 	public static final int OPTION_BGAEXTEND = 31;
 	public static final int OPTION_AUTOPLAYOFF = 32;
 	public static final int OPTION_AUTOPLAYON = 33;
+	public static final int OPTION_GHOST_OFF = 34;
+	public static final int OPTION_GHOST_A = 35;
+	public static final int OPTION_GHOST_B = 36;
+	public static final int OPTION_GHOST_C = 37;
 	public static final int OPTION_SCOREGRAPHOFF = 38;
 	public static final int OPTION_SCOREGRAPHON = 39;
 
@@ -246,7 +250,12 @@ public class SkinProperty {
 	public static final int OPTION_BGAON = 41;
 	public static final int OPTION_GAUGE_GROOVE = 42;
 	public static final int OPTION_GAUGE_HARD = 43;
+	public static final int OPTION_GAUGE_GROOVE_2P = 44;
+	public static final int OPTION_GAUGE_HARD_2P = 45;
 
+	public static final int OPTION_OFFLINE = 50;
+	public static final int OPTION_ONLINE = 51;
+	
 	public static final int OPTION_DISABLE_SAVE_SCORE = 60;
 	public static final int OPTION_ENABLE_SAVE_SCORE = 61;
 	public static final int OPTION_NO_SAVE_CLEAR = 62;
@@ -366,6 +375,17 @@ public class SkinProperty {
 	public static final int OPTION_1P_BAD = 244;
 	public static final int OPTION_1P_POOR = 245;
 	public static final int OPTION_1P_MISS = 246;
+
+	public static final int OPTION_COURSE_STAGE1 = 280;
+	public static final int OPTION_COURSE_STAGE2 = 281;
+	public static final int OPTION_COURSE_STAGE3 = 282;
+	public static final int OPTION_COURSE_STAGE4 = 283;
+	public static final int OPTION_COURSE_STAGE_FINAL = 289;
+
+	public static final int OPTION_MODE_COURSE = 290;
+	public static final int OPTION_MODE_NONSTOP = 291;
+	public static final int OPTION_MODE_EXPERT = 292;
+	public static final int OPTION_MODE_GRADE = 293;
 
 	public static final int OPTION_RESULT_AAA_1P = 300;
 	public static final int OPTION_RESULT_AA_1P = 301;

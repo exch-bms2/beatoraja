@@ -8,7 +8,6 @@ import java.util.logging.Logger;
 import bms.model.*;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.Config.SkinConfig;
-import bms.player.beatoraja.audio.AudioDriver;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyInputLog;
 import bms.player.beatoraja.pattern.*;
@@ -18,11 +17,6 @@ import bms.player.beatoraja.play.gauge.*;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.song.SongData;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.g2d.*;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 
 import static bms.player.beatoraja.Resolution.*;
@@ -37,13 +31,10 @@ public class BMSPlayer extends MainState {
 
 	// TODO GLAssistから起動すると楽曲ロード中に止まる
 
-	private BitmapFont systemfont;
 	private BMSModel model;
 
-	private BMSPlayerInputProcessor input;
 	private LaneRenderer lanerender;
 	private JudgeManager judge;
-	private AudioDriver audio;
 
 	private BGAProcessor bga;
 
@@ -290,8 +281,6 @@ public class BMSPlayer extends MainState {
 	public void create() {
 		final MainController main = getMainController();
 		final PlayerResource resource = main.getPlayerResource();
-		final ShapeRenderer shape = main.getShapeRenderer();
-		final SpriteBatch sprite = main.getSpriteBatch();
 
 		if (resource.getConfig().getSoundpath().length() > 0) {
 			final File soundfolder = new File(resource.getConfig().getSoundpath());
@@ -304,24 +293,17 @@ public class BMSPlayer extends MainState {
 			}
 		}
 
-		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
-				Gdx.files.internal("skin/default/VL-Gothic-Regular.ttf"));
-		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
-		parameter.size = 18;
-		systemfont = generator.generateFont(parameter);
-		generator.dispose();
-
 		Config config = resource.getConfig();
 		Logger.getGlobal().info("create");
 
-		input = main.getInputProcessor();
+		final BMSPlayerInputProcessor input = main.getInputProcessor();
 		input.setMinimumInputDutration(config.getInputduration());
 		input.setDisableDevice(autoplay == 0 || autoplay == 2 ? (resource.getPlayDevice() == 0 ? new int[]{1,2} : new int[]{0}) : null);
 		PlayConfig pc = (model.getUseKeys() == 5 || model.getUseKeys() == 7 ? config.getMode7()
 				: (model.getUseKeys() == 10 || model.getUseKeys() == 14 ? config.getMode14() : config.getMode9()));
 		input.setKeyassign(pc.getKeyassign());
 		input.setControllerassign(pc.getControllerassign());
-		lanerender = new LaneRenderer(this, sprite, shape, systemfont, (PlaySkin) getSkin(), resource, model, resource.getConstraint());
+		lanerender = new LaneRenderer(this, model);
 		for (int i : resource.getConstraint()) {
 			if (i == TableData.NO_HISPEED) {
 				enableControl = false;
@@ -341,8 +323,6 @@ public class BMSPlayer extends MainState {
 		rivalscore = model.getTotalNotes() * 8 / 5;
 		resource.setRivalScoreData(rivalscore);
 		Logger.getGlobal().info("スコアグラフ描画クラス準備");
-
-		audio = getMainController().getAudioProcessor();
 
 		if (autoplay == 2) {
 			practice.create(model);
@@ -378,6 +358,7 @@ public class BMSPlayer extends MainState {
 		final PlaySkin skin = (PlaySkin) getSkin();
 		final MainController main = getMainController();
 		final PlayerResource resource = main.getPlayerResource();
+		final BMSPlayerInputProcessor input = main.getInputProcessor();
 
 		final long now = getNowTime();
 		final long nowtime = System.nanoTime() / 1000000;
@@ -446,16 +427,14 @@ public class BMSPlayer extends MainState {
 			break;
 		// GET READY
 			case STATE_PRACTICE_FINISHED:
-				long l3 = now - getTimer()[TIMER_FADEOUT];
-				if (l3 > skin.getFadeout()) {
+				if (now - getTimer()[TIMER_FADEOUT] > skin.getFadeout()) {
                     input.setDisableDevice(new int[0]);
                     getMainController().changeState(MainController.STATE_SELECTMUSIC);
 				}
 				break;
 
 			case STATE_READY:
-			final long rt = now - getTimer()[TIMER_READY];
-			if (rt > skin.getPlaystart()) {
+			if (now - getTimer()[TIMER_READY] > skin.getPlaystart()) {
 				state = STATE_PLAY;
 				getTimer()[TIMER_PLAY] = now - starttimeoffset;
 				getTimer()[TIMER_RHYTHM] = now - starttimeoffset;
@@ -576,8 +555,7 @@ public class BMSPlayer extends MainState {
 			if (keyinput != null) {
 				keyinput.stop = true;
 			}
-			long l2 = now - getTimer()[TIMER_FADEOUT];
-			if (l2 > skin.getFadeout()) {
+			if (now - getTimer()[TIMER_FADEOUT] > skin.getFadeout()) {
 				resource.getBGAManager().stop();
 				if (keyinput != null) {
 					Logger.getGlobal().info("入力パフォーマンス(max ms) : " + keyinput.frametimes);
@@ -618,6 +596,7 @@ public class BMSPlayer extends MainState {
 	private boolean enableControl = true;
 
 	public void input() {
+		final BMSPlayerInputProcessor input = getMainController().getInputProcessor();
 		// 各種コントロール入力判定
 		if (enableControl) {
 			if (input.getCursorState()[0]) {
@@ -772,7 +751,7 @@ public class BMSPlayer extends MainState {
 				+ (model.getUseKeys() == 10 || model.getUseKeys() == 14 ? (resource.getConfig().getRandom2() * 10 + resource
 						.getConfig().getDoubleoption() * 100) : 0));
 		// リプレイデータ保存。スコア保存されない場合はリプレイ保存しない
-		resource.getReplayData().keylog = input.getKeyInputLog().toArray(new KeyInputLog[0]);
+		resource.getReplayData().keylog = getMainController().getInputProcessor().getKeyInputLog().toArray(new KeyInputLog[0]);
 		resource.getReplayData().pattern = pattern.toArray(new PatternModifyLog[pattern.size()]);
 		resource.getReplayData().rand = model.getRandom();
 		resource.getReplayData().gauge = resource.getConfig().getGauge();
@@ -839,23 +818,16 @@ public class BMSPlayer extends MainState {
 	@Override
 	public void dispose() {
 		super.dispose();
-		if (systemfont != null) {
-			systemfont.dispose();
-			systemfont = null;
-		}
+		lanerender.dispose();
 		Logger.getGlobal().info("システム描画のリソース解放");
 	}
 
 	public void play(Note note, float volume) {
-		audio.play(note, volume);
+		getMainController().getAudioProcessor().play(note, volume);
 	}
 
 	public void stop(Note note) {
-		audio.stop(note);
-	}
-
-	public BMSPlayerInputProcessor getBMSPlayerInputProcessor() {
-		return input;
+		getMainController().getAudioProcessor().stop(note);
 	}
 
 	public PracticeConfiguration getPracticeConfiguration() {
@@ -907,10 +879,10 @@ public class BMSPlayer extends MainState {
 	class KeyInputThread extends Thread {
 		private boolean stop = false;
 		private long frametimes = 1;
-		private List<KeyInputLog> keylog;
+		private final KeyInputLog[] keylog;
 
 		public KeyInputThread(List<KeyInputLog> keylog) {
-			this.keylog = keylog;
+			this.keylog = keylog != null ? keylog.toArray(new KeyInputLog[keylog.size()]) : null;
 		}
 
 		@Override
@@ -919,7 +891,7 @@ public class BMSPlayer extends MainState {
 
 			long framet = 1;
 			final TimeLine[] timelines = model.getAllTimeLines();
-			final KeyInputLog[] keylog = this.keylog != null ? this.keylog.toArray(new KeyInputLog[this.keylog.size()]) : null;
+			final BMSPlayerInputProcessor input = getMainController().getInputProcessor();
 
 			final int lasttime = timelines[timelines.length - 1].getTime() + BMSPlayer.TIME_MARGIN;
 			
@@ -1029,7 +1001,7 @@ public class BMSPlayer extends MainState {
 			return ((playtime
 					- (int) (getTimer()[TIMER_PLAY] != Long.MIN_VALUE ? getNowTime() - getTimer()[TIMER_PLAY] : 0) + 1000) / 1000) % 60;
 		case NUMBER_LOADING_PROGRESS:
-			return (int) ((audio.getProgress() + bga.getProgress()) * 50);
+			return (int) ((getMainController().getAudioProcessor().getProgress() + bga.getProgress()) * 50);
 		case NUMBER_GROOVEGAUGE:
 			return (int) gauge.getValue();
 		case NUMBER_GROOVEGAUGE_AFTERDOT:
@@ -1108,7 +1080,7 @@ public class BMSPlayer extends MainState {
 			}
 			return 0;
 		case BARGRAPH_LOAD_PROGRESS:
-			float value = (audio.getProgress() + bga.getProgress()) / 2;
+			float value = (getMainController().getAudioProcessor().getProgress() + bga.getProgress()) / 2;
 			return value;
 		case BARGRAPH_SCORERATE:
 			return (float) (judge.getJudgeCount(0) * 2 + judge.getJudgeCount(1)) / (song.getNotes() * 2);
@@ -1185,7 +1157,7 @@ public class BMSPlayer extends MainState {
 		case OPTION_LOADED:
 			return state != STATE_PRELOAD;
 		case OPTION_LANECOVER1_CHANGING:
-			return input.startPressed();
+			return startpressed;
 		}
 		return super.getBooleanValue(id);
 	}

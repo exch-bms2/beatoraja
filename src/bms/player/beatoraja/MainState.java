@@ -171,6 +171,9 @@ public abstract class MainState {
 			return model != null && model.getMinbpm() == model.getMaxbpm();
 		case OPTION_BPMCHANGE:
 			return model != null && model.getMinbpm() < model.getMaxbpm();
+		case OPTION_GHOST_OFF:
+		case OPTION_OFFLINE:
+			return true;
 
 		}
 		return false;
