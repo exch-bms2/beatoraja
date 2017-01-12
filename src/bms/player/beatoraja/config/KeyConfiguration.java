@@ -172,13 +172,10 @@ public class KeyConfiguration extends MainState {
 
 	@Override
 	public void dispose() {
+		super.dispose();
 		if(titlefont != null) {
 			titlefont.dispose();
 			titlefont = null;
-		}
-		if(getSkin() != null) {
-			getSkin().dispose();
-			setSkin(null);
 		}
 	}
 }

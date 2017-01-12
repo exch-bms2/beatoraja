@@ -20,26 +20,21 @@ public abstract class MainState {
 
 	private long starttime;
 
-	private long[] timer = new long[256];
-
 	private Skin skin;
 
 	private Stage stage;
 
-
-	public MainState() {
-		this(null);
-	}
-
 	public MainState(MainController main) {
 		this.main = main;
-		Arrays.fill(timer, Long.MIN_VALUE);
+		Arrays.fill(main.getTimer(), Long.MIN_VALUE);
 		Pixmap bp = new Pixmap(1,1, Pixmap.Format.RGBA8888);
 		bp.drawPixel(0,0, Color.toIntBits(255,0,0,0));
 		black = new TextureRegion(new Texture(bp));
+		bp.dispose();
 		Pixmap hp = new Pixmap(1,1, Pixmap.Format.RGBA8888);
 		hp.drawPixel(0,0, Color.toIntBits(255,255,255,255));
 		white = new TextureRegion(new Texture(hp));
+		hp.dispose();
 	}
 
 	public MainController getMainController() {
@@ -71,6 +66,18 @@ public abstract class MainState {
 			skin.dispose();
 			skin = null;
 		}
+		if(black != null) {
+			black.getTexture().dispose();
+			black = null;
+		}
+		if(white != null) {
+			white.getTexture().dispose();
+			white = null;
+		}
+		if(stage != null) {
+			stage.dispose();
+			stage = null;
+		}
 	}
 
 	public long getStartTime() {
@@ -86,7 +93,7 @@ public abstract class MainState {
 	}
 
 	public long[] getTimer() {
-		return timer;
+		return main.getTimer();
 	}
 
 	public void executeClickEvent(int id) {

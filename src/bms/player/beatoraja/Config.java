@@ -31,11 +31,18 @@ public class Config {
 	 * フォルダランプの有効/無効
 	 */
 	private boolean folderlamp = true;
-	
+	/**
+	 * オーディオドライバー
+	 */
 	private int audioDriver = 0;
-	
+	/**
+	 * オーディオ:OpenAL (libGDX Sound)
+	 */
 	public static final int AUDIODRIVER_SOUND = 0;
 	public static final int AUDIODRIVER_AUDIODEVICE = 1;
+	/**
+	 * オーディオ:ASIO
+	 */
 	public static final int AUDIODRIVER_ASIO = 2;
 	/**
 	 * オーディオバッファサイズ。大きすぎると音声遅延が発生し、少なすぎるとノイズが発生する
@@ -196,12 +203,14 @@ public class Config {
 	private int musicselectinput = 0;
 	
 	public Config() {
-		tableURL = new String[]{"http://bmsnormal2.syuriken.jp/table.html",
-				"http://bmsnormal2.syuriken.jp/table_insane.html",
-				"http://dpbmsdelta.web.fc2.com/table/dpdelta.html",
-				"http://dpbmsdelta.web.fc2.com/table/insane.html",
-				"http://flowermaster.web.fc2.com/lrnanido/gla/LN.html",
-				"http://stellawingroad.web.fc2.com/new/pms.html"};
+        tableURL = new String[]{"http://bmsnormal2.syuriken.jp/table.html",
+                "http://bmsnormal2.syuriken.jp/table_insane.html",
+                "http://dpbmsdelta.web.fc2.com/table/dpdelta.html",
+                "http://dpbmsdelta.web.fc2.com/table/insane.html",
+                "http://flowermaster.web.fc2.com/lrnanido/gla/LN.html",
+                "http://stellawingroad.web.fc2.com/new/pms.html"};
+        skin[6] = new SkinConfig("skin/config/decide.json");
+        skin[7] = new SkinConfig("skin/config/result.json");
 		judgedetail = 2;
 	}
 	
@@ -554,6 +563,14 @@ public class Config {
 		private String path;
 		
 		private Map property;
+
+		public SkinConfig() {
+
+		}
+
+		public SkinConfig(String path) {
+			this.path = path;
+		}
 
 		public String getPath() {
 			return path;

@@ -81,6 +81,8 @@ public class MainController extends ApplicationAdapter {
 
 	private ScreenShotThread screenshot;
 
+	private long[] timer = new long[256];
+
 	public MainController(Path f, Config config, int auto) {
 		this.auto = auto;
 		this.config = config;
@@ -94,6 +96,10 @@ public class MainController extends ApplicationAdapter {
 		}
 
 		playdata = new PlayDataAccessor("playerscore");
+	}
+
+	public long[] getTimer() {
+		return timer;
 	}
 
 	public SongDatabaseAccessor getSongDatabase() {
@@ -154,7 +160,7 @@ public class MainController extends ApplicationAdapter {
 		}
 
 		if (newState != null && current != newState) {
-			Arrays.fill(newState.getTimer(), Long.MIN_VALUE);
+			Arrays.fill(timer, Long.MIN_VALUE);
 			if(current != null) {
 				current.setSkin(null);
 			}
@@ -238,6 +244,8 @@ public class MainController extends ApplicationAdapter {
 			}			
 		};
 		polling.start();
+		
+		Gdx.gl.glClearColor(0, 0, 0, 1);
 	}
 	
 	private long prevtime;
@@ -246,7 +254,6 @@ public class MainController extends ApplicationAdapter {
 	public void render() {
 //		input.poll();
 
-		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 		current.render();
@@ -381,11 +388,9 @@ public class MainController extends ApplicationAdapter {
 	public void exit() {
 		Json json = new Json();
 		json.setOutputType(OutputType.json);
-		try {
-			FileWriter fw = new FileWriter(configpath.toFile());
+		try (FileWriter fw = new FileWriter(configpath.toFile())) {
 			fw.write(json.prettyPrint(config));
 			fw.flush();
-			fw.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
