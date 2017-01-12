@@ -2,6 +2,7 @@ package bms.player.beatoraja.pattern;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import bms.model.BMSModel;
@@ -57,7 +58,7 @@ public abstract class PatternModifier {
 	}
 	
 	public static List<PatternModifyLog> merge(List<PatternModifyLog> log, List<PatternModifyLog> log2) {
-		List<PatternModifyLog> result = new ArrayList();
+		List<PatternModifyLog> result = new ArrayList(Math.max(log.size(), log2.size()));
 		for(PatternModifyLog pml : log) {
 			boolean b = true;
 			for(PatternModifyLog pml2 : log2) {
@@ -110,5 +111,59 @@ public abstract class PatternModifier {
 
 	public void setModifyTarget(int type) {
 		this.type = type;
+	}
+	
+	public static PatternModifier create(int id, int type) {
+		PatternModifier pm = null;
+		switch(id) {
+		case 0:
+			pm = new DummyModifier();
+			break;
+		case 1:
+			pm = new LaneShuffleModifier(LaneShuffleModifier.MIRROR);
+			break;
+		case 2:
+			pm = new LaneShuffleModifier(LaneShuffleModifier.RANDOM);
+			break;
+		case 3:
+			pm = new LaneShuffleModifier(LaneShuffleModifier.R_RANDOM);
+			break;
+		case 4:
+			pm = new NoteShuffleModifier(NoteShuffleModifier.S_RANDOM);
+			break;
+		case 5:
+			pm = new NoteShuffleModifier(NoteShuffleModifier.SPIRAL);
+			break;
+		case 6:
+			pm = new NoteShuffleModifier(NoteShuffleModifier.H_RANDOM);
+			break;
+		case 7:
+			pm = new NoteShuffleModifier(NoteShuffleModifier.ALL_SCR);
+			break;
+		case 8:
+			pm = new LaneShuffleModifier(LaneShuffleModifier.RANDOM_EX);
+			break;
+		case 9:
+			pm = new NoteShuffleModifier(NoteShuffleModifier.S_RANDOM_EX);	
+			break;
+		}
+		
+		if(pm != null) {
+			pm.setModifyTarget(type);
+		}
+ 		return pm;
+	}
+	
+	static class DummyModifier extends PatternModifier {
+
+		public DummyModifier() {
+			super(0);
+		}
+
+		@Override
+		public List<PatternModifyLog> modify(BMSModel model) {
+			return Collections.emptyList();
+		}
+		
 	}
 }

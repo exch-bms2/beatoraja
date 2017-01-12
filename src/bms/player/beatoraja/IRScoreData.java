@@ -7,7 +7,9 @@ package bms.player.beatoraja;
  * @author ununique
  */
 public class IRScoreData {
-
+	/**
+	 * 譜面のハッシュ値
+	 */
 	private String sha256 = "";
 	
 	private int mode = 0;
@@ -73,6 +75,18 @@ public class IRScoreData {
 	 * 更新時のオプション
 	 */
 	private int option;
+	/**
+	 * アシストオプション
+	 */
+	private int assist;
+	/**
+	 * プレイゲージ
+	 */
+	private int gauge;
+	/**
+	 * 入力デバイス
+	 */
+	private int device;
 	
 	private int state;
 	
@@ -237,5 +251,23 @@ public class IRScoreData {
 	}
 	public void setScorehash(String scorehash) {
 		this.scorehash = scorehash;
+	}
+	public int getAssist() {
+		return assist;
+	}
+	public void setAssist(int assist) {
+		this.assist = assist;
+	}
+	public int getGauge() {
+		return gauge;
+	}
+	public void setGauge(int gauge) {
+		this.gauge = gauge;
+	}
+	public int getDevice() {
+		return device;
+	}
+	public void setDevice(int device) {
+		this.device = device;
 	}
 }

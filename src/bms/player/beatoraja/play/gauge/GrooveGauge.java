@@ -33,6 +33,16 @@ public abstract class GrooveGauge {
 
 	private float[] gauge;
 
+	public static final int GAUGETYPE_ASSISTEASY = 0;
+	public static final int GAUGETYPE_EASY = 1;
+	public static final int GAUGETYPE_NORMAL = 2;
+	public static final int GAUGETYPE_HARD = 3;
+	public static final int GAUGETYPE_EXHARD = 4;
+	public static final int GAUGETYPE_HAZARD = 5;
+	public static final int GAUGETYPE_GRADE = 6;
+	public static final int GAUGETYPE_EXGRADE = 7;
+	public static final int GAUGETYPE_EXHARDGRADE = 8;
+
 	public static final int CLEARTYPE_NOPLAY = 0;
 	public static final int CLEARTYPE_FAILED = 1;
 	public static final int CLEARTYPE_ASSTST = 2;
@@ -123,35 +133,71 @@ public abstract class GrooveGauge {
 	}
 
 	public static GrooveGauge create(BMSModel model, int type, boolean grade) {
-		if (grade) {
+		int id = -1;
+		if (grade) {	
+			id = type <= 2 ? 6 : (type == 3 ? 7 : 8); 
 			// 段位ゲージ
-			switch (type) {
-			case 0:
-			case 1:
-			case 2:
-				return new GradeGrooveGauge(model);
-			case 3:
-				return new ExgradeGrooveGauge(model);
-			case 4:
-			case 5:
-				return new ExhardGradeGrooveGauge(model);
-			}
 		} else {
-			switch (type) {
-			case 0:
-				return new AssistEasyGrooveGauge(model);
-			case 1:
-				return new EasyGrooveGauge(model);
-			case 2:
-				return new NormalGrooveGauge(model);
-			case 3:
-				return new HardGrooveGauge(model);
-			case 4:
-				return new ExhardGrooveGauge(model);
-			case 5:
-				return new HazardGrooveGauge(model);
-			}
+			id = type;
+		}
+		if(id >= 0) {
+			return create(model, id);
 		}
 		return null;
+	}
+	
+	public static GrooveGauge create(BMSModel model, int type) {
+		switch (type) {
+		case GAUGETYPE_ASSISTEASY:
+			return new AssistEasyGrooveGauge(model);
+		case GAUGETYPE_EASY:
+			return new EasyGrooveGauge(model);
+		case GAUGETYPE_NORMAL:
+			return new NormalGrooveGauge(model);
+		case GAUGETYPE_HARD:
+			return new HardGrooveGauge(model);
+		case GAUGETYPE_EXHARD:
+			return new ExhardGrooveGauge(model);
+		case GAUGETYPE_HAZARD:
+			return new HazardGrooveGauge(model);
+		case GAUGETYPE_GRADE:
+			return new GradeGrooveGauge(model);
+		case GAUGETYPE_EXGRADE:
+			return new ExgradeGrooveGauge(model);
+		case GAUGETYPE_EXHARDGRADE:
+			return new ExhardGradeGrooveGauge(model);
+		}		
+		return null;
+	}
+	
+	public static int getGaugeID(GrooveGauge gauge) {
+		if(gauge instanceof AssistEasyGrooveGauge) {
+			return GAUGETYPE_ASSISTEASY;
+		}
+		if(gauge instanceof EasyGrooveGauge) {
+			return GAUGETYPE_EASY;
+		}
+		if(gauge instanceof NormalGrooveGauge) {
+			return GAUGETYPE_NORMAL;
+		}
+		if(gauge instanceof HardGrooveGauge) {
+			return GAUGETYPE_HARD;
+		}
+		if(gauge instanceof ExhardGrooveGauge) {
+			return GAUGETYPE_EXHARD;
+		}
+		if(gauge instanceof HazardGrooveGauge) {
+			return GAUGETYPE_HAZARD;
+		}
+		if(gauge instanceof GradeGrooveGauge) {
+			return GAUGETYPE_GRADE;
+		}
+		if(gauge instanceof ExgradeGrooveGauge) {
+			return GAUGETYPE_EXGRADE;
+		}
+		if(gauge instanceof ExhardGradeGrooveGauge) {
+			return GAUGETYPE_EXHARDGRADE;
+		}
+		return -1;
 	}
 }
