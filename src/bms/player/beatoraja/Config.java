@@ -31,11 +31,18 @@ public class Config {
 	 * フォルダランプの有効/無効
 	 */
 	private boolean folderlamp = true;
-	
+	/**
+	 * オーディオドライバー
+	 */
 	private int audioDriver = 0;
-	
+	/**
+	 * オーディオ:OpenAL (libGDX Sound)
+	 */
 	public static final int AUDIODRIVER_SOUND = 0;
 	public static final int AUDIODRIVER_AUDIODEVICE = 1;
+	/**
+	 * オーディオ:ASIO
+	 */
 	public static final int AUDIODRIVER_ASIO = 2;
 	/**
 	 * オーディオバッファサイズ。大きすぎると音声遅延が発生し、少なすぎるとノイズが発生する
@@ -556,6 +563,14 @@ public class Config {
 		private String path;
 		
 		private Map property;
+
+		public SkinConfig() {
+
+		}
+
+		public SkinConfig(String path) {
+			this.path = path;
+		}
 
 		public String getPath() {
 			return path;
