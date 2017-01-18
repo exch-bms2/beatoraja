@@ -13,6 +13,7 @@ import bms.player.beatoraja.audio.*;
 import bms.player.beatoraja.config.KeyConfiguration;
 import bms.player.beatoraja.decide.MusicDecide;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
+import bms.player.beatoraja.ir.IRConnection;
 import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.result.GradeResult;
 import bms.player.beatoraja.result.MusicResult;
@@ -59,6 +60,8 @@ public class MainController extends ApplicationAdapter {
 
 	private SongDatabaseAccessor songdb;
 
+	private IRConnection ir;
+	
 	private SpriteBatch sprite;
 	private ShapeRenderer shape;
 	/**
@@ -96,6 +99,11 @@ public class MainController extends ApplicationAdapter {
 		}
 
 		playdata = new PlayDataAccessor("playerscore");
+		
+		ir = IRConnection.getIRConnection(config.getIrname());
+		if(config.getUserid().length() > 0 && ir != null) {
+			ir.login(config.getUserid(), config.getPassword());
+		}
 	}
 
 	public long[] getTimer() {
@@ -404,6 +412,10 @@ public class MainController extends ApplicationAdapter {
 
 	public AudioDriver getAudioProcessor() {
 		return audio;
+	}
+
+	public IRConnection getIRConnection() {
+		return ir;
 	}
 
 	/**

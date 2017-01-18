@@ -202,6 +202,12 @@ public class Config {
 
 	private int musicselectinput = 0;
 	
+	private String irname = "";
+	
+	private String userid = "";
+	
+	private String password = "";
+	
 	public Config() {
         tableURL = new String[]{"http://bmsnormal2.syuriken.jp/table.html",
                 "http://bmsnormal2.syuriken.jp/table_insane.html",
@@ -556,6 +562,30 @@ public class Config {
 
 	public void setAudioDriver(int audioDriver) {
 		this.audioDriver = audioDriver;
+	}
+
+	public String getUserid() {
+		return userid;
+	}
+
+	public void setUserid(String userid) {
+		this.userid = userid;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public String getIrname() {
+		return irname;
+	}
+
+	public void setIrname(String irname) {
+		this.irname = irname;
 	}
 
 	public static class SkinConfig {

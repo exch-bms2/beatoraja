@@ -79,6 +79,7 @@ public class MainLoader extends Application {
 		if (Files.exists(MainController.configpath)) {
 			Json json = new Json();
 			try {
+				json.setIgnoreUnknownFields(true);
 				config = json.fromJson(Config.class, new FileReader(MainController.configpath.toFile()));
 			} catch (IOException e) {
 				e.printStackTrace();

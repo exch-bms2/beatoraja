@@ -14,6 +14,7 @@ import bms.player.beatoraja.select.MusicSelector;
 import bms.model.BMSModel;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.Config.SkinConfig;
+import bms.player.beatoraja.ir.IRConnection;
 import bms.player.beatoraja.skin.LR2ResultSkinLoader;
 import bms.player.beatoraja.skin.LR2SkinHeader;
 import bms.player.beatoraja.skin.LR2SkinHeaderLoader;
@@ -375,6 +376,11 @@ public class MusicResult extends MainState {
 		if (resource.getAutoplay() == 0) {
 			getMainController().getPlayDataAccessor().writeScoreDara(resource.getScoreData(), resource.getBMSModel(),
 					resource.getConfig().getLnmode(), resource.isUpdateScore());
+			IRConnection ir = getMainController().getIRConnection();
+			if(ir != null) {
+				ir.getPlayData(resource.getBMSModel());
+				ir.sendPlayData(resource.getBMSModel(), resource.getScoreData());
+			}
 		}
 
 		if (newscore.getClear() != GrooveGauge.CLEARTYPE_FAILED) {

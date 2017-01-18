@@ -762,6 +762,7 @@ public class BMSPlayer extends MainState {
 		score.setLms(judge.getJudgeCount(5, false));
 
 		score.setMinbp(bad + poor + miss + resource.getSongdata().getNotes() - notes);
+		score.setDevice(resource.getPlayDevice());
 		return score;
 	}
 

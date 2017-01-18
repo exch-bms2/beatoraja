@@ -14,6 +14,7 @@ import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 
 import bms.player.beatoraja.Config.SkinConfig;
+import bms.player.beatoraja.ir.IRConnection;
 import bms.player.beatoraja.skin.LR2SkinHeader;
 import bms.player.beatoraja.skin.LR2SkinHeader.CustomFile;
 import bms.player.beatoraja.skin.LR2SkinHeader.CustomOption;
@@ -145,6 +146,14 @@ public class PlayConfigurationView implements Initializable {
 	private ComboBox<LR2SkinHeader> skin;
 	@FXML
 	private ScrollPane skinconfig;
+	
+	@FXML
+	private ComboBox<String> irname;
+	@FXML
+	private TextField iruserid;
+	@FXML
+	private PasswordField irpassword;
+	
 
 	private MainLoader loader;
 
@@ -188,7 +197,8 @@ public class PlayConfigurationView implements Initializable {
 			}
 		});
 		skin.setButtonCell(new SkinListCell());
-
+		
+		irname.getItems().setAll(IRConnection.AVAILABLE);
 	}
 
 	public void setBMSInformationLoader(MainLoader loader) {
@@ -246,6 +256,10 @@ public class PlayConfigurationView implements Initializable {
 		updatePlayConfig();
 		skincategory.setValue(0);
 		updateSkinCategory();
+
+		irname.setValue(config.getIrname());
+		iruserid.setText(config.getUserid());
+		irpassword.setText(config.getPassword());
 	}
 
 	/**
@@ -290,6 +304,10 @@ public class PlayConfigurationView implements Initializable {
 		config.setJudgedetail(judgedetail.getValue());
 
 		config.setInputduration(getValue(inputduration));
+		
+		config.setIrname(irname.getValue());
+		config.setUserid(iruserid.getText());
+		config.setPassword(irpassword.getText());
 
 		updatePlayConfig();
 		updateSkinCategory();
