@@ -186,7 +186,7 @@ public class BMSPlayer extends MainState {
 							new LaneShuffleModifier(LaneShuffleModifier.FLIP).modify(model));
 				}
 				if (config.getRandom2() > 0) {
-					random[config.getRandom2()].setModifyTarget(PatternModifier.PLAYER2);
+					random[config.getRandom2()].setModifyTarget(model.getUseKeys() == 14 ? PatternModifier.PLAYER2_7KEYS : PatternModifier.PLAYER2_5KEYS);
 					pattern = PatternModifier.merge(pattern, random[config.getRandom2()].modify(model));
 				}
 				if (config.getRandom2() >= 6) {
@@ -197,7 +197,7 @@ public class BMSPlayer extends MainState {
 			case 5:
 			case 7:
 				if (config.getRandom() > 0) {
-					random[config.getRandom()].setModifyTarget(PatternModifier.PLAYER1);
+					random[config.getRandom()].setModifyTarget(model.getUseKeys() == 7 || model.getUseKeys() == 14 ? PatternModifier.PLAYER1_7KEYS : PatternModifier.PLAYER1_5KEYS);
 					pattern = PatternModifier.merge(pattern, random[config.getRandom()].modify(model));
 				}
 				if (config.getRandom() >= 6) {
@@ -404,12 +404,12 @@ public class BMSPlayer extends MainState {
 						new LaneShuffleModifier(LaneShuffleModifier.FLIP).modify(model);
 					}
 					if(random[property.random2] != null) {
-						random[property.random2].setModifyTarget(PatternModifier.PLAYER2);
+						random[property.random2].setModifyTarget(model.getUseKeys() == 14 ? PatternModifier.PLAYER2_7KEYS : PatternModifier.PLAYER2_5KEYS);
 						random[property.random2].modify(model);
 					}
 				}
 				if(random[property.random] != null) {
-					random[property.random].setModifyTarget(model.getUseKeys() == 9 ? PatternModifier.NINEKEYS: PatternModifier.PLAYER1);
+					random[property.random].setModifyTarget(model.getUseKeys() == 9 ? PatternModifier.NINEKEYS: (model.getUseKeys() == 7 || model.getUseKeys() == 14 ? PatternModifier.PLAYER1_7KEYS : PatternModifier.PLAYER1_5KEYS));
 					random[property.random].modify(model);
 				}
 				gauge = practice.getGauge(model);
