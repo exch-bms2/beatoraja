@@ -77,14 +77,13 @@ public class MusicSelector extends MainState {
 	private String sorts;
 
 	private BitmapFont titlefont;
-	private BitmapFont searchfont;
 
 	private TextureRegion banner;
 	private Bar bannerbar;
 
 	private BarRenderer bar;
-
-	private TextField search;
+	
+	private SearchTextField search;
 
 	/**
 	 * スコアデータのキャッシュ
@@ -232,85 +231,18 @@ public class MusicSelector extends MainState {
 				setSkin(new MusicSelectSkin(RESOLUTION[config.getResolution()]));
 			}
 		}
-		final Rectangle r = ((MusicSelectSkin) getSkin()).getSearchTextRegion();
-
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/default/VL-Gothic-Regular.ttf"));
 		FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-		parameter.size = (int) r.height;
+		parameter.size = 24;
 		titlefont = generator.generateFont(parameter);
-		searchfont = generator.generateFont(parameter);
 		generator.dispose();
 
 		getTimer()[TIMER_SONGBAR_CHANGE] = getNowTime();
 
 		// search text field
 		if (getStage() == null) {
-			final Stage stage = new Stage(new FitViewport(RESOLUTION[config.getResolution()].width,
-					RESOLUTION[config.getResolution()].height));
-			final TextField.TextFieldStyle textFieldStyle = new TextField.TextFieldStyle(searchfont, // BitmapFont
-					Color.WHITE, // font color
-					new TextureRegionDrawable(new TextureRegion(new Texture("skin/default/system.png"), 0, 8, 8, 8)), // cusor
-					new TextureRegionDrawable(new TextureRegion(new Texture("skin/default/system.png"), 0, 8, 2, 8)), // selectoin
-					new TextureRegionDrawable(new TextureRegion(new Texture("skin/default/system.png"), 0, 8, 1, 8))); // background
-			textFieldStyle.messageFont = searchfont;
-			textFieldStyle.messageFontColor = Color.GRAY;
-
-			search = new TextField("", textFieldStyle);
-			search.setMessageText("search song");
-			search.setTextFieldListener(new TextFieldListener() {
-				public void keyTyped(TextField textField, char key) {
-					if (key == '\n' || key == 13) {
-						// TODO 検索結果重複は除外
-						if (textField.getText().length() > 1) {
-							SearchWordBar swb = new SearchWordBar(MusicSelector.this, textField.getText());
-							int count = swb.getChildren().length;
-							if (count > 0) {
-								bar.addSearch(swb);
-								bar.updateBar(null);
-								textField.setText("");
-								textField.setMessageText(count + " song(s) found");
-								textFieldStyle.messageFontColor = Color.valueOf("00c0c0");
-							} else {
-								textField.setText("");
-								textField.setMessageText("no song found");
-								textFieldStyle.messageFontColor = Color.DARK_GRAY;
-							}
-						}
-						textField.getOnscreenKeyboard().show(false);
-						stage.setKeyboardFocus(null);
-					}
-					if (!searchfont.getData().hasGlyph(key)) {
-						FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-						parameter.size = (int) r.height;
-						parameter.characters += textField.getText() + key;
-						BitmapFont newsearchfont = generator.generateFont(parameter);
-						textFieldStyle.font = newsearchfont;
-						textFieldStyle.messageFont = newsearchfont;
-						searchfont.dispose();
-						searchfont = newsearchfont;
-						textField.appendText(String.valueOf(key));
-					}
-
-				}
-
-			});
-			search.setBounds(r.x, r.y, r.width, r.height);
-			search.setMaxLength(50);
-			search.setFocusTraversal(false);
-			stage.addActor(search);
-
-			search.setVisible(true);
-			search.addListener(new EventListener() {
-				@Override
-				public boolean handle(Event e) {
-					if (e.isHandled()) {
-						input.getKeyBoardInputProcesseor().setEnable(stage.getKeyboardFocus() == null);
-					}
-					return false;
-				}
-			});
-
-			setStage(stage);
+			search = new SearchTextField(this, RESOLUTION[config.getResolution()]);
+			setStage(search);
 		}
 	}
 
@@ -881,9 +813,9 @@ public class MusicSelector extends MainState {
 			titlefont.dispose();
 			titlefont = null;			
 		}
-		if(searchfont != null) {
-			searchfont.dispose();
-			searchfont = null;
+		if(search != null) {
+			search.dispose();
+			search = null;
 		}
 	}
 
