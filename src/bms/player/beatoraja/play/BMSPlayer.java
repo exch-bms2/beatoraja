@@ -185,8 +185,12 @@ public class BMSPlayer extends MainState {
 					pattern = PatternModifier.merge(pattern,
 							new LaneShuffleModifier(LaneShuffleModifier.FLIP).modify(model));
 				}
-				pattern = PatternModifier.merge(pattern,
-						PatternModifier.create(config.getRandom2(), PatternModifier.PLAYER2).modify(model));
+				pattern = PatternModifier
+						.merge(pattern,
+								PatternModifier
+										.create(config.getRandom2(), model.getUseKeys() == 14
+												? PatternModifier.PLAYER2_7KEYS : PatternModifier.PLAYER2_5KEYS)
+										.modify(model));
 				if (config.getRandom2() >= 6) {
 					assist = (assist == 0) ? 1 : assist;
 					score = false;
@@ -195,7 +199,11 @@ public class BMSPlayer extends MainState {
 			case 5:
 			case 7:
 				pattern = PatternModifier.merge(pattern,
-						PatternModifier.create(config.getRandom(), PatternModifier.PLAYER1).modify(model));
+						PatternModifier
+								.create(config.getRandom(),
+										model.getUseKeys() == 7 || model.getUseKeys() == 14
+												? PatternModifier.PLAYER1_7KEYS : PatternModifier.PLAYER1_5KEYS)
+								.modify(model));
 				if (config.getRandom() >= 6) {
 					assist = (assist == 0) ? 1 : assist;
 					score = false;
@@ -394,11 +402,15 @@ public class BMSPlayer extends MainState {
 						new LaneShuffleModifier(LaneShuffleModifier.FLIP).modify(model);
 					}
 
-					PatternModifier.create(property.random2, PatternModifier.PLAYER2).modify(model);
+					PatternModifier.create(property.random2,
+							model.getUseKeys() == 14 ? PatternModifier.PLAYER2_7KEYS : PatternModifier.PLAYER2_5KEYS)
+							.modify(model);
 				}
 				PatternModifier
 						.create(property.random,
-								model.getUseKeys() == 9 ? PatternModifier.NINEKEYS : PatternModifier.PLAYER1)
+								model.getUseKeys() == 9 ? PatternModifier.NINEKEYS
+										: (model.getUseKeys() == 7 || model.getUseKeys() == 14
+												? PatternModifier.PLAYER1_7KEYS : PatternModifier.PLAYER1_5KEYS))
 						.modify(model);
 
 				gauge = practice.getGauge(model);

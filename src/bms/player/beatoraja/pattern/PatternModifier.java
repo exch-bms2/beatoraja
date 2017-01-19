@@ -20,9 +20,11 @@ public abstract class PatternModifier {
 	
 	private int type;
 	
-	public static final int PLAYER1 = 0;
-	public static final int PLAYER2 = 1;
-	public static final int NINEKEYS = 2;
+	public static final int PLAYER1_5KEYS = 0;
+	public static final int PLAYER1_7KEYS = 1;
+	public static final int PLAYER2_5KEYS = 2;
+	public static final int PLAYER2_7KEYS = 3;
+	public static final int NINEKEYS = 4;
 	
 	public PatternModifier(int assist) {
 		this.assist = assist;

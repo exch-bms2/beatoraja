@@ -42,6 +42,10 @@ public class BarRenderer {
 	private BarContentsLoaderThread loader;
 
 	/**
+	 * 現在のフォルダ階層
+	 */
+	private List<DirectoryBar> dir = new ArrayList<DirectoryBar>();
+	/**
 	 * 現在表示中のバー一覧
 	 */
 	private Bar[] currentsongs;
@@ -294,15 +298,39 @@ public class BarRenderer {
 
 	private boolean bartextupdate = false;
 
+	public List<DirectoryBar> getDirectory() {
+		return dir;
+	}
+	
+	public boolean updateBar() {
+		if(dir.size() > 0) {
+			return updateBar(dir.get(dir.size() - 1));
+		}
+		return updateBar(null);
+	}
+
 	public boolean updateBar(Bar bar) {
-		final Bar prevbar = currentsongs != null ? currentsongs[selectedindex] : null;
+		Bar prevbar = currentsongs != null ? currentsongs[selectedindex] : null;
 		List<Bar> l = new ArrayList<Bar>();
 		if (bar == null) {
+			if(dir.size() > 0) {
+				prevbar = dir.get(0);
+			}
+			dir.clear();
 			l.addAll(Arrays.asList(new FolderBar(select, null, "e2977170").getChildren()));
 			l.addAll(Arrays.asList(tables));
 			l.addAll(Arrays.asList(commands));
 			l.addAll(search);
 		} else if (bar instanceof DirectoryBar) {
+			int index = dir.indexOf(bar);
+			if(index != -1) {
+				if(index < dir.size() - 1) {
+					prevbar = dir.get(index + 1);
+				}
+				for(int i = dir.size() - 1;i >= index;i--) {
+					dir.remove(i);
+				}
+			}
 			l.addAll(Arrays.asList(((DirectoryBar) bar).getChildren()));
 		}
 
@@ -317,6 +345,10 @@ public class BarRenderer {
 		l.removeAll(remove);
 
 		if (l.size() > 0) {
+			if(bar != null) {
+				dir.add((DirectoryBar) bar);				
+			}
+
 			// 変更前と同じバーがあればカーソル位置を保持する
 			currentsongs = l.toArray(new Bar[l.size()]);
 			bartextupdate = true;
@@ -331,7 +363,7 @@ public class BarRenderer {
 				}
 			}
 
-			Arrays.sort(currentsongs, MusicSelector.SORT[select.getSort()]);
+			Arrays.sort(currentsongs, BarSorter.getAllSorter()[select.getSort()]);
 
 			selectedindex = 0;
 
@@ -362,6 +394,12 @@ public class BarRenderer {
 			loader = new BarContentsLoaderThread(currentsongs);
 			loader.start();
 			return true;
+		}
+
+		if(dir.size() > 0) {
+			updateBar(dir.get(dir.size() - 1));
+		} else {
+			updateBar(null);
 		}
 		Logger.getGlobal().warning("楽曲がありません");
 		return false;

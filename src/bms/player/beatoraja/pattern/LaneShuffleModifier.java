@@ -49,8 +49,8 @@ public class LaneShuffleModifier extends PatternModifier {
 	 */
 	public static final int BATTLE = 5;
 	
-	private static final int[][] MIRROR_LANE = { { 6, 5, 4, 3, 2, 1, 0, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 },
-			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 15, 14, 13, 12, 11, 10, 9, 16, 17 },
+	private static final int[][] MIRROR_LANE = { { 4, 3, 2, 1, 0, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 },{ 6, 5, 4, 3, 2, 1, 0, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 },
+			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 13, 12, 11, 10, 9, 14, 15, 16, 17 }, { 0, 1, 2, 3, 4, 5, 6, 7, 8, 15, 14, 13, 12, 11, 10, 9, 16, 17 },
 			{ 13, 12, 11, 10, 4, 5, 6, 7, 8, 9, 3, 2, 1, 0, 14, 15, 16, 17 } };
 
 	public LaneShuffleModifier(int type) {
@@ -67,7 +67,15 @@ public class LaneShuffleModifier extends PatternModifier {
 			int i, j;
 			random = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 };
 			switch (getModifyTarget()) {
-			case PLAYER1:
+			case PLAYER1_5KEYS:
+				i = (int) (Math.random() * 4);
+				j = (int) (Math.random() * 2);
+				for (int lane = 0; lane < 5; lane++) {
+					i = (i + 1) % 5;
+					random[lane] = (j == 0 ? i : 4 - i);
+				}
+				break;
+			case PLAYER1_7KEYS:
 				i = (int) (Math.random() * 6);
 				j = (int) (Math.random() * 2);
 				for (int lane = 0; lane < 7; lane++) {
@@ -75,7 +83,15 @@ public class LaneShuffleModifier extends PatternModifier {
 					random[lane] = (j == 0 ? i : 6 - i);
 				}
 				break;
-			case PLAYER2:
+			case PLAYER2_5KEYS:
+				i = (int) (Math.random() * 4);
+				j = (int) (Math.random() * 2);
+				for (int lane = 9; lane < 14; lane++) {
+					i = (i + 1) % 5;
+					random[lane] = (j == 0 ? i + 9 : 13 - i);
+				}
+				break;
+			case PLAYER2_7KEYS:
 				i = (int) (Math.random() * 6);
 				j = (int) (Math.random() * 2);
 				for (int lane = 9; lane < 16; lane++) {
@@ -95,18 +111,36 @@ public class LaneShuffleModifier extends PatternModifier {
 			}
 			break;
 		case RANDOM:
-			List<Integer> l = new ArrayList<Integer>(Arrays.asList(0, 1, 2, 3, 4, 5, 6));
+			List<Integer> l;
 			random = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 };
 			random[7] = 7;
 			switch (getModifyTarget()) {
-			case PLAYER1:
+			case PLAYER1_5KEYS:
+				l = new ArrayList<Integer>(Arrays.asList(0, 1, 2, 3, 4));
+				for (int lane = 0; lane < 5; lane++) {
+					int r = (int) (Math.random() * l.size());
+					random[lane] = l.get(r);
+					l.remove(r);
+				}
+				break;
+			case PLAYER1_7KEYS:
+				l = new ArrayList<Integer>(Arrays.asList(0, 1, 2, 3, 4, 5, 6));
 				for (int lane = 0; lane < 7; lane++) {
 					int r = (int) (Math.random() * l.size());
 					random[lane] = l.get(r);
 					l.remove(r);
 				}
 				break;
-			case PLAYER2:
+			case PLAYER2_5KEYS:
+				l = new ArrayList<Integer>(Arrays.asList(0, 1, 2, 3, 4));
+				for (int lane = 0; lane < 5; lane++) {
+					int r = (int) (Math.random() * l.size());
+					random[lane + 9] = l.get(r) + 9;
+					l.remove(r);
+				}
+				break;
+			case PLAYER2_7KEYS:
+				l = new ArrayList<Integer>(Arrays.asList(0, 1, 2, 3, 4, 5, 6));
 				for (int lane = 0; lane < 7; lane++) {
 					int r = (int) (Math.random() * l.size());
 					random[lane + 9] = l.get(r) + 9;
@@ -127,14 +161,36 @@ public class LaneShuffleModifier extends PatternModifier {
 			List<Integer> le = new ArrayList<Integer>(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7));
 			random = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 };
 			switch (getModifyTarget()) {
-			case PLAYER1:
+			case PLAYER1_5KEYS:
+				le = new ArrayList<Integer>(Arrays.asList(0, 1, 2, 3, 4, 7));
+				for (int lane = 0; lane < 8; lane++) {
+					if(lane != 5 && lane != 6) {
+						int r = (int) (Math.random() * le.size());
+						random[lane] = le.get(r);
+						le.remove(r);
+					}
+				}
+				break;
+			case PLAYER1_7KEYS:
+				le = new ArrayList<Integer>(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7));
 				for (int lane = 0; lane < 8; lane++) {
 					int r = (int) (Math.random() * le.size());
 					random[lane] = le.get(r);
 					le.remove(r);
 				}
 				break;
-			case PLAYER2:
+			case PLAYER2_5KEYS:
+				le = new ArrayList<Integer>(Arrays.asList(0, 1, 2, 3, 4, 7));
+				for (int lane = 0; lane < 8; lane++) {
+					if(lane != 5 && lane != 6) {
+						int r = (int) (Math.random() * le.size());
+						random[lane + 9] = le.get(r) + 9;
+						le.remove(r);						
+					}
+				}
+				break;
+			case PLAYER2_7KEYS:
+				le = new ArrayList<Integer>(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7));
 				for (int lane = 0; lane < 8; lane++) {
 					int r = (int) (Math.random() * le.size());
 					random[lane + 9] = le.get(r) + 9;
