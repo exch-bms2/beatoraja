@@ -13,9 +13,19 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
+/**
+ * 楽曲検索用テキストフィールド
+ *
+ * @author exch
+ */
 public class SearchTextField extends Stage {
-
+	/**
+	 * フォント生成用クラス
+	 */
 	private FreeTypeFontGenerator generator;
+	/**
+	 * フォント
+	 */
 	private BitmapFont searchfont;
 
 	private TextField search;
@@ -44,8 +54,7 @@ public class SearchTextField extends Stage {
 
 			public void keyTyped(TextField textField, char key) {
 				if (key == '\n' || key == 13) {
-					// TODO 検索結果重複は除外
-					if (textField.getText().length() > 1) {
+					if (textField.getText().length() > 0) {
 						SearchWordBar swb = new SearchWordBar(selector, textField.getText());
 						int count = swb.getChildren().length;
 						if (count > 0) {
@@ -97,7 +106,7 @@ public class SearchTextField extends Stage {
 	}
 
 	public void dispose() {
-		super.dispose();
+//		super.dispose();
 		if(generator != null) {
 			generator.dispose();
 			generator = null;

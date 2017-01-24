@@ -63,6 +63,8 @@ public class BarRenderer {
 
 	private final String[] TROPHY = { "goldmedal", "silvermedal", "bronzemedal" };
 
+	private final int SEARCHBAR_MAXCOUNT = 10;
+
 	private Map<String, Pixmap> bannermap = new HashMap<String, Pixmap>();
 
 	public BarRenderer(MainController main, MusicSelector select, SongDatabaseAccessor songdb) {
@@ -142,6 +144,15 @@ public class BarRenderer {
 	}
 
 	public void addSearch(SearchWordBar bar) {
+		for(SearchWordBar s : search) {
+			if(s.getTitle().equals(bar.getTitle())) {
+				search.remove(s);
+				break;
+			}
+		}
+		if(search.size() >= SEARCHBAR_MAXCOUNT) {
+			search.remove(0);
+		}
 		search.add(bar);
 	}
 
