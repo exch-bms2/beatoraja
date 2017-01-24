@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="create_run_jar" name="Create Runnable Jar for Project beatoraja">
+
+	<property name="build.src" value="src" />
+	<property name="build.dest" value="bin" />
+
+	<path id="build.lib">
+	   <fileset dir="lib" includes="*.jar" />
+	</path>
+	
+	<target name="clean">
+	   <delete dir="${build.dest}" />
+	   <mkdir dir="${build.dest}" />
+	</target>
+	
+	<target name="compile" depends="clean">
+		<javac classpathref="build.lib" srcdir="${build.src}" debug="${debug}" destdir="${build.dest}" />
+	</target>
+
+	<target name="create_run_jar" depends="compile">
+		<jar destfile="./beatoraja.jar" filesetmanifest="mergewithoutmain">
+			<manifest>
+				<attribute name="Main-Class" value="bms.player.beatoraja.MainLoader" />
+				<attribute name="Bundle-NativeCode" value="jasiohost32.dll;jasiohost64.dll" />
+				<attribute name="Class-Path" value="." />
+			</manifest>
+			<fileset dir="./bin" />
+			<fileset dir="./src/natives" />
+			<zipfileset excludes="META-INF/*.SF" src="./lib/gdx-controllers-desktop-natives.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="./lib/gdx-controllers-desktop.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="./lib/gdx-freetype-natives.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="./lib/gdx-freetype.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="./lib/gdx-natives.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="./lib/gdx.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="./lib/jna-3.5.2.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="./lib/platform-3.5.2.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="./lib/slf4j-api-1.7.13.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="./lib/sqlite-jdbc-3.7.2.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="./lib/vlcj-3.8.0.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="./lib/jbms-parser.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="./lib/commons-dbutils.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="./lib/jbmstable-parser.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="./lib/javacpp.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="./lib/jasiohost.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="./lib/ffmpeg-linux-x86_64.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="./lib/ffmpeg-macosx-x86_64.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="./lib/ffmpeg-windows-x86_64.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="./lib/ffmpeg.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="./lib/javacv.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="./lib/gdx-controllers.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="./lib/gdx-backend-lwjgl.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="./lib/gdx-backend-lwjgl-natives.jar" />
+		</jar>
+	</target>
+</project>
