@@ -105,6 +105,9 @@ public class SkinLoader {
 										obj = new SkinImage(getSourceImage(texmap.get(src.id),  img.x, img.y, img.w,
 												img.h, img.divx, img.divy), img.timer, img.cycle);										
 									}
+									if(img.act > 0) {
+										obj.setClickevent(img.act);
+									}
 									
 									break;
 								}
@@ -295,6 +298,7 @@ public class SkinLoader {
 		public int cycle;
 		public int len;
 		public int ref;
+		public int act;
 	}
 
 	public static class Value {

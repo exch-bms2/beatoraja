@@ -15,19 +15,14 @@ import bms.model.BMSModel;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.Config.SkinConfig;
 import bms.player.beatoraja.ir.IRConnection;
-import bms.player.beatoraja.skin.LR2ResultSkinLoader;
-import bms.player.beatoraja.skin.LR2SkinHeader;
-import bms.player.beatoraja.skin.LR2SkinHeaderLoader;
-import bms.player.beatoraja.skin.SkinLoader;
+import bms.player.beatoraja.skin.*;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 
 import static bms.player.beatoraja.Resolution.*;
@@ -40,11 +35,10 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
  */
 public class MusicResult extends MainState {
 
+	// TODO リプレイセーブ状況の表示
+
 	public static final int NUMBER_AVERAGE_DURATION = 5555;
 	public static final int NUMBER_AVERAGE_DURATION_AFTERDOT = 5556;
-
-	private BitmapFont titlefont;
-	private String title;
 
 	private int oldclear;
 	private int oldexscore;
@@ -77,16 +71,9 @@ public class MusicResult extends MainState {
 			}
 		}
 
-		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/default/VL-Gothic-Regular.ttf"));
-		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
-		parameter.size = 30;
-		title = "result";
-		parameter.characters = title + resource.getBMSModel().getFullTitle() + parameter.characters;
-		titlefont = generator.generateFont(parameter);
 		updateScoreDatabase();
 		// 保存されているリプレイデータがない場合は、EASY以上で自動保存
-		if (resource.getAutoplay() == 0
-				&& resource.getScoreData() != null
+		if (resource.getAutoplay() == 0 && resource.getScoreData() != null
 				&& resource.getScoreData().getClear() >= GrooveGauge.CLEARTYPE_EASY
 				&& !getMainController().getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
 						resource.getConfig().getLnmode(), 0)) {
@@ -98,27 +85,22 @@ public class MusicResult extends MainState {
 			resource.addCourseGauge(resource.getGauge());
 		}
 
-		if (resource.getConfig().getSkin()[7] != null) {
-			try {
-				SkinConfig sc = resource.getConfig().getSkin()[7];
-				if(sc.getPath().endsWith(".json")) {
-					SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
-					setSkin(sl.loadResultSkin(Paths.get(sc.getPath())));
-				} else {
-					LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
-					LR2SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
-					Rectangle srcr = RESOLUTION[header.getResolution()];
-					Rectangle dstr = RESOLUTION[resource.getConfig().getResolution()];
-					LR2ResultSkinLoader dloader = new LR2ResultSkinLoader(srcr.width, srcr.height, dstr.width, dstr.height);
-					setSkin(dloader.loadResultSkin(Paths.get(sc.getPath()).toFile(), this, header, loader.getOption(),
-							sc.getProperty()));
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
+		try {
+			SkinConfig sc = resource.getConfig().getSkin()[7];
+			if (sc.getPath().endsWith(".json")) {
 				SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
-				setSkin(sl.loadResultSkin(Paths.get("skin/default/result.json")));
+				setSkin(sl.loadResultSkin(Paths.get(sc.getPath())));
+			} else {
+				LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
+				LR2SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
+				Rectangle srcr = RESOLUTION[header.getResolution()];
+				Rectangle dstr = RESOLUTION[resource.getConfig().getResolution()];
+				LR2ResultSkinLoader dloader = new LR2ResultSkinLoader(srcr.width, srcr.height, dstr.width, dstr.height);
+				setSkin(dloader.loadResultSkin(Paths.get(sc.getPath()).toFile(), this, header, loader.getOption(),
+						sc.getProperty()));
 			}
-		} else {
+		} catch (Throwable e) {
+			e.printStackTrace();
 			SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
 			setSkin(sl.loadResultSkin(Paths.get("skin/default/result.json")));
 		}
@@ -132,37 +114,13 @@ public class MusicResult extends MainState {
 		if (getTimer()[TIMER_RESULTGRAPH_END] == Long.MIN_VALUE) {
 			getTimer()[TIMER_RESULTGRAPH_END] = time;
 		}
-		if (getTimer()[TIMER_RESULT_UPDATESCORE] == Long.MIN_VALUE && ((MusicResultSkin) getSkin()).getRankTime() == 0) {
+		if (getTimer()[TIMER_RESULT_UPDATESCORE] == Long.MIN_VALUE
+				&& ((MusicResultSkin) getSkin()).getRankTime() == 0) {
 			getTimer()[TIMER_RESULT_UPDATESCORE] = time;
 		}
 		final MainController main = getMainController();
 
-		final SpriteBatch sprite = main.getSpriteBatch();
 		final PlayerResource resource = getMainController().getPlayerResource();
-
-		final float w = RESOLUTION[resource.getConfig().getResolution()].width;
-		final float h = RESOLUTION[resource.getConfig().getResolution()].height;
-
-		IRScoreData score = resource.getScoreData();
-		// ゲージグラフ描画
-
-		sprite.begin();
-		if (resource.getCourseBMSModels() != null) {
-			titlefont.setColor(Color.WHITE);
-			titlefont.draw(sprite, resource.getGauge().get(resource.getGauge().size() - 1) > 0 ? "Stage Passed"
-					: "Stage Failed", w * 3 / 4, h / 2);
-		} else {
-			if (score != null) {
-				titlefont.setColor(Color.WHITE);
-				titlefont.draw(sprite,
-						resource.getScoreData().getClear() > GrooveGauge.CLEARTYPE_FAILED ? "Stage Cleared"
-								: "Stage Failed", w * 3 / 4, h / 2);
-			}
-			if (saveReplay) {
-				titlefont.draw(sprite, "Replay Saved", w * 3 / 4, h / 4);
-			}
-		}
-		sprite.end();
 
 		if (getTimer()[TIMER_FADEOUT] != Long.MIN_VALUE) {
 			if (time > getTimer()[TIMER_FADEOUT] + getSkin().getFadeout()) {
@@ -185,9 +143,8 @@ public class MusicResult extends MainState {
 							final int cg = resource.getCourseBMSModels().length;
 							for (int i = 0; i < cg; i++) {
 								if (coursegauge.size() <= i) {
-									resource.getCourseScoreData().setMinbp(
-											resource.getCourseScoreData().getMinbp()
-													+ resource.getCourseBMSModels()[i].getTotalNotes());
+									resource.getCourseScoreData().setMinbp(resource.getCourseScoreData().getMinbp()
+											+ resource.getCourseBMSModels()[i].getTotalNotes());
 								}
 							}
 							// 不合格リザルト
@@ -238,9 +195,10 @@ public class MusicResult extends MainState {
 				long[] keytime = main.getInputProcessor().getTime();
 				if (resource.getScoreData() == null
 						|| ((keystate[0] && keytime[0] != 0) || (keystate[2] && keytime[2] != 0)
-						|| (keystate[4] && keytime[4] != 0) || (keystate[6] && keytime[6] != 0))) {
+								|| (keystate[4] && keytime[4] != 0) || (keystate[6] && keytime[6] != 0))) {
 					keytime[0] = keytime[2] = keytime[4] = keytime[6] = 0;
-					if (((MusicResultSkin) getSkin()).getRankTime() != 0 && getTimer()[TIMER_RESULT_UPDATESCORE] == Long.MIN_VALUE) {
+					if (((MusicResultSkin) getSkin()).getRankTime() != 0
+							&& getTimer()[TIMER_RESULT_UPDATESCORE] == Long.MIN_VALUE) {
 						getTimer()[TIMER_RESULT_UPDATESCORE] = time;
 					} else {
 						getTimer()[TIMER_FADEOUT] = time;
@@ -248,7 +206,7 @@ public class MusicResult extends MainState {
 				}
 
 				for (int i = 0; i < MusicSelector.REPLAY; i++) {
-					if (resource.getAutoplay() == 0 && main.getInputProcessor().getNumberState()[i + 1]) {
+					if (main.getInputProcessor().getNumberState()[i + 1]) {
 						saveReplayData(i);
 						break;
 					}
@@ -257,28 +215,28 @@ public class MusicResult extends MainState {
 		}
 	}
 
-	private boolean saveReplay = false;
+	private int saveReplay = -1;
 
 	private void saveReplayData(int index) {
 		final PlayerResource resource = getMainController().getPlayerResource();
-		if (resource.getCourseBMSModels() == null && resource.getScoreData() != null) {
-			if (!saveReplay && resource.isUpdateScore()) {
+		if (resource.getAutoplay() == 0 && resource.getCourseBMSModels() == null && resource.getScoreData() != null) {
+			if (saveReplay == -1 && resource.isUpdateScore()) {
 				ReplayData rd = resource.getReplayData();
 				getMainController().getPlayDataAccessor().wrireReplayData(rd, resource.getBMSModel(),
 						resource.getConfig().getLnmode(), index);
-				saveReplay = true;
+				saveReplay = index;
 			}
 		}
 	}
 
 	private void updateScoreDatabase() {
-		saveReplay = false;
+		saveReplay = -1;
 		final PlayerResource resource = getMainController().getPlayerResource();
 		IRScoreData newscore = resource.getScoreData();
 		if (newscore == null) {
 			if (resource.getCourseScoreData() != null) {
-				resource.getCourseScoreData().setMinbp(
-						resource.getCourseScoreData().getMinbp() + resource.getBMSModel().getTotalNotes());
+				resource.getCourseScoreData()
+						.setMinbp(resource.getCourseScoreData().getMinbp() + resource.getBMSModel().getTotalNotes());
 				resource.getCourseScoreData().setClear(GrooveGauge.CLEARTYPE_FAILED);
 			}
 			return;
@@ -307,9 +265,8 @@ public class MusicResult extends MainState {
 		for (TimeLine tl : resource.getBMSModel().getAllTimeLines()) {
 			for (int i = 0; i < 18; i++) {
 				Note n = tl.getNote(i);
-				if (n != null
-						&& !(resource.getBMSModel().getLntype() == BMSModel.LNTYPE_LONGNOTE && n instanceof LongNote && ((LongNote) n)
-								.getEndnote().getSection() == tl.getSection())) {
+				if (n != null && !(resource.getBMSModel().getLntype() == BMSModel.LNTYPE_LONGNOTE
+						&& n instanceof LongNote && ((LongNote) n).getEndnote().getSection() == tl.getSection())) {
 					int state = n.getState();
 					int time = n.getTime();
 					if (n instanceof LongNote && ((LongNote) n).getEndnote().getSection() == tl.getSection()) {
@@ -376,8 +333,9 @@ public class MusicResult extends MainState {
 		if (resource.getAutoplay() == 0) {
 			getMainController().getPlayDataAccessor().writeScoreDara(resource.getScoreData(), resource.getBMSModel(),
 					resource.getConfig().getLnmode(), resource.isUpdateScore());
+			// TODO スコアハッシュがあり、有効期限が切れていないものを送信する？
 			IRConnection ir = getMainController().getIRConnection();
-			if(ir != null) {
+			if (ir != null) {
 				ir.getPlayData(resource.getBMSModel());
 				ir.sendPlayData(resource.getBMSModel(), resource.getScoreData());
 			}
@@ -418,10 +376,6 @@ public class MusicResult extends MainState {
 	@Override
 	public void dispose() {
 		super.dispose();
-		if (titlefont != null) {
-			titlefont.dispose();
-			titlefont = null;
-		}
 	}
 
 	public int getTotalNotes() {
@@ -527,9 +481,11 @@ public class MusicResult extends MainState {
 		case OPTION_ENABLE_SAVE_SCORE:
 			return resource.isUpdateScore();
 		case OPTION_RESULT_CLEAR:
-			return score.getClear() != GrooveGauge.CLEARTYPE_FAILED && (cscore == null || cscore.getClear() != GrooveGauge.CLEARTYPE_FAILED);
+			return score.getClear() != GrooveGauge.CLEARTYPE_FAILED
+					&& (cscore == null || cscore.getClear() != GrooveGauge.CLEARTYPE_FAILED);
 		case OPTION_RESULT_FAIL:
-			return score.getClear() == GrooveGauge.CLEARTYPE_FAILED || (cscore != null && cscore.getClear() == GrooveGauge.CLEARTYPE_FAILED);
+			return score.getClear() == GrooveGauge.CLEARTYPE_FAILED
+					|| (cscore != null && cscore.getClear() == GrooveGauge.CLEARTYPE_FAILED);
 		case OPTION_RESULT_F_1P:
 		case OPTION_NOW_F_1P:
 			return rate <= 2222;
@@ -578,9 +534,57 @@ public class MusicResult extends MainState {
 			return score.getMinbp() < oldmisscount;
 		case OPTION_UPDATE_SCORERANK:
 			return rate / 1111 > oldrate / 1111;
-
+		case OPTION_NO_REPLAYDATA:
+			return !getMainController().getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
+					resource.getConfig().getLnmode(), 0);
+		case OPTION_NO_REPLAYDATA2:
+			return !getMainController().getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
+					resource.getConfig().getLnmode(), 1);
+		case OPTION_NO_REPLAYDATA3:
+			return !getMainController().getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
+					resource.getConfig().getLnmode(), 2);
+		case OPTION_NO_REPLAYDATA4:
+			return !getMainController().getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
+					resource.getConfig().getLnmode(), 3);
+		case OPTION_REPLAYDATA:
+			return getMainController().getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
+					resource.getConfig().getLnmode(), 0);
+		case OPTION_REPLAYDATA2:
+			return getMainController().getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
+					resource.getConfig().getLnmode(), 1);
+		case OPTION_REPLAYDATA3:
+			return getMainController().getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
+					resource.getConfig().getLnmode(), 2);
+		case OPTION_REPLAYDATA4:
+			return getMainController().getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
+					resource.getConfig().getLnmode(), 3);
+		case OPTION_REPLAYDATA_SAVED:
+			return saveReplay == 0;
+		case OPTION_REPLAYDATA2_SAVED:
+			return saveReplay == 1;
+		case OPTION_REPLAYDATA3_SAVED:
+			return saveReplay == 2;
+		case OPTION_REPLAYDATA4_SAVED:
+			return saveReplay == 3;
 		}
 		return super.getBooleanValue(id);
+	}
+
+	public void executeClickEvent(int id) {
+		switch (id) {
+		case BUTTON_REPLAY:
+			saveReplayData(0);
+			break;
+		case BUTTON_REPLAY2:
+			saveReplayData(1);
+			break;
+		case BUTTON_REPLAY3:
+			saveReplayData(2);
+			break;
+		case BUTTON_REPLAY4:
+			saveReplayData(3);
+			break;
+		}
 	}
 
 }
