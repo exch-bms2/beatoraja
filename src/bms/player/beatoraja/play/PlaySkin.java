@@ -27,10 +27,6 @@ public class PlaySkin extends Skin {
 	private SkinGraph[] graph;
 
 	private SkinImage[] line = new SkinImage[0];
-	/**
-	 * レーン描画エリア
-	 */
-	private Rectangle[] laneregion;
 
 	private Rectangle[] lanegroupregion;
 
@@ -254,7 +250,7 @@ public class PlaySkin extends Skin {
 			setDestination(number[i], 500, 200, 0, 40, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, -1, TIMER_JUDGE_1P, 0, 0, 0);
 		}
 
-		SkinBGA bga = new SkinBGA(this);
+		SkinBGA bga = new SkinBGA();
 		setDestination(bga, 0, 500, 50, 740, 650, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(bga);
 
@@ -269,7 +265,7 @@ public class PlaySkin extends Skin {
 		setDestination(title, 2000, 502, 698, 24, 24, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(title);
 
-		laneregion = new Rectangle[8];
+		Rectangle[] laneregion = new Rectangle[8];
 		laneregion[0] = rect(90, 140, 50, 580);
 		laneregion[1] = rect(140, 140, 40, 580);
 		laneregion[2] = rect(180, 140, 50, 580);
@@ -345,7 +341,10 @@ public class PlaySkin extends Skin {
 		line[0] = new SkinImage(new TextureRegion(st, 0, 0, 1, 1));
 		line[0].setOffsety(OFFSET_LIFT);
 		setDestination(line[0], 0, 20, 140, 390, 1, 0, 255, 128, 128, 128, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		add(new SkinNote(note, longnote, minenote, 12 / dh));
+
+		SkinNote notes = new SkinNote(note, longnote, minenote, 12 / dh);
+		notes.setLaneRegion(laneregion);
+		add(notes);
 		judgeregion = 1;
 		add(new SkinJudge(images, number, 0, true));
 		Texture lct = new Texture("skin/default/lanecover.png");
@@ -501,7 +500,7 @@ public class PlaySkin extends Skin {
 			setDestination(number[i], 500, 200, 0, 40, 40, 0, 255, 255, 255, 255, 0, 0, 0, 0, -1, TIMER_JUDGE_1P, 0, 0, 0);
 		}
 
-		SkinBGA bga = new SkinBGA(this);
+		SkinBGA bga = new SkinBGA();
 		setDestination(bga, 0, 40, 50, 740, 650, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(bga);
 
@@ -516,7 +515,7 @@ public class PlaySkin extends Skin {
 		setDestination(title, 2000, 42, 698, 24, 24, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(title);
 
-		laneregion = new Rectangle[8];
+		Rectangle[] laneregion = new Rectangle[8];
 		laneregion[0] = rect(870, 140, 50, 580);
 		laneregion[1] = rect(920, 140, 40, 580);
 		laneregion[2] = rect(960, 140, 50, 580);
@@ -592,7 +591,9 @@ public class PlaySkin extends Skin {
 		line[0] = new SkinImage(new TextureRegion(st, 0, 0, 1, 1));
 		line[0].setOffsety(OFFSET_LIFT);
 		setDestination(line[0], 0, 870, 140, 390, 1, 0, 255, 128, 128, 128, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-		add(new SkinNote(note, longnote, minenote, 12 / dh));
+		SkinNote notes = new SkinNote(note, longnote, minenote, 12 / dh);
+		notes.setLaneRegion(laneregion);
+		add(notes);
 		add(new SkinJudge(images, number, 0, true));
 		judgeregion = 1;
 
@@ -768,10 +769,10 @@ public class PlaySkin extends Skin {
 			}
 		}
 
-		SkinBGA bga = new SkinBGA(this);
+		SkinBGA bga = new SkinBGA();
 		setDestination(bga, 0, 10, 390, 330, 330, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(bga);
-		SkinBGA bga2 = new SkinBGA(this);
+		SkinBGA bga2 = new SkinBGA();
 		setDestination(bga2, 0, 10, 50, 330, 330, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(bga2);
 
@@ -786,7 +787,7 @@ public class PlaySkin extends Skin {
 		setDestination(title, 2000, 12, 720, 18, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(title);
 
-		laneregion = new Rectangle[9];
+		Rectangle[] laneregion = new Rectangle[9];
 		laneregion[0] = rect(345, 140, 70, 580);
 		laneregion[1] = rect(415, 140, 60, 580);
 		laneregion[2] = rect(475, 140, 70, 580);
@@ -849,7 +850,9 @@ public class PlaySkin extends Skin {
 		line.setOffsety(OFFSET_LIFT);
 		setDestination(line, 0, 345, 137, 590, 6, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(line);
-		add(new SkinNote(note, longnote, minenote, 18 / dh));
+		SkinNote notes = new SkinNote(note, longnote, minenote, 18 / dh);
+		notes.setLaneRegion(laneregion);
+		add(notes);
 		SkinImage[] images = new SkinImage[6];
 		SkinNumber[] number = new SkinNumber[6];
 		for (int i = 0; i < 6; i++) {
@@ -1045,13 +1048,13 @@ public class PlaySkin extends Skin {
 		keybeam[1] = keybeam[3] = keybeam[5] = keybeam[9] = keybeam[11] = keybeam[13] = new Sprite(kbt, 47, 0, 28, 255);
 		keybeam[7] = keybeam[15] = new Sprite(kbt, 0, 0, 47, 255);
 
-		SkinBGA bga = new SkinBGA(this);
+		SkinBGA bga = new SkinBGA();
 		setDestination(bga, 0, 10, 500, 180, 220, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(bga);
-		SkinBGA bga2 = new SkinBGA(this);
+		SkinBGA bga2 = new SkinBGA();
 		setDestination(bga2, 0, 10, 270, 180, 220, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(bga2);
-		SkinBGA bga3 = new SkinBGA(this);
+		SkinBGA bga3 = new SkinBGA();
 		setDestination(bga3, 0, 10, 40, 180, 220, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(bga3);
 
@@ -1066,7 +1069,7 @@ public class PlaySkin extends Skin {
 		setDestination(title, 2000, 12, 720, 18, 18, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		add(title);
 
-		laneregion = new Rectangle[16];
+		Rectangle[] laneregion = new Rectangle[16];
 		laneregion[0] = rect(280, 140, 50, 580);
 		laneregion[1] = rect(330, 140, 40, 580);
 		laneregion[2] = rect(370, 140, 50, 580);
@@ -1138,7 +1141,9 @@ public class PlaySkin extends Skin {
 		line[1] = new SkinImage(new TextureRegion(st, 0, 0, 1, 1));
 		setDestination(line[1], 0, 680, 140, 390, 1, 0, 255, 128, 128, 128, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		line[1].setOffsety(OFFSET_LIFT);
-		add(new SkinNote(note, longnote, minenote, 12 / dh));
+		SkinNote notes = new SkinNote(note, longnote, minenote, 12 / dh);
+		notes.setLaneRegion(laneregion);
+		add(notes);
 		SkinImage[] images = new SkinImage[6];
 		SkinNumber[] number = new SkinNumber[6];
 		for (int i = 0; i < 6; i++) {
@@ -1278,20 +1283,12 @@ public class PlaySkin extends Skin {
 
 	}
 
-	public Rectangle[] getLaneregion() {
-		return laneregion;
-	}
-
 	public Rectangle[] getLaneGroupRegion() {
 		return lanegroupregion;
 	}
 
 	public void setLaneGroupRegion(Rectangle[] r) {
 		lanegroupregion = r;
-	}
-
-	public void setLaneregion(Rectangle[] laneregion) {
-		this.laneregion = laneregion;
 	}
 
 	public void setJudgeregion(int jr) {

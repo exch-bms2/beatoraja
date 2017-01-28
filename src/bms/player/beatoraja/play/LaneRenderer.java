@@ -225,7 +225,7 @@ public class LaneRenderer {
 	private double nowbpm;
 
 	public void drawLane(long time, TextureRegion[] noteimage, TextureRegion[][] lnoteimage, TextureRegion[] mnoteimage,
-			TextureRegion[] pnoteimage, TextureRegion[] hnoteimage, float scale) {
+			TextureRegion[] pnoteimage, TextureRegion[] hnoteimage, Rectangle[] laneregion, float scale) {
 		sprite.end();
 		time = (main.getTimer()[TIMER_PLAY] != Long.MIN_VALUE ? (time - main.getTimer()[TIMER_PLAY])
 				: 0) + config.getJudgetiming();
@@ -237,7 +237,6 @@ public class LaneRenderer {
 
 		final float hispeed = main.getState() != BMSPlayer.STATE_PRACTICE ? this.hispeed : 1.0f;
 		JudgeManager judge = main.getJudgeManager();
-		final Rectangle[] laneregion = skin.getLaneregion();
 		final Rectangle[] playerr = skin.getLaneGroupRegion();
 		double bpm = model.getBpm();
 		double nbpm = bpm;
@@ -479,7 +478,7 @@ public class LaneRenderer {
 								}
 							}
 							if (dy > 0) {
-								this.drawLongNote(laneregion[lane].x, y + dy, laneregion[lane].width, dy, scale, lane,
+								this.drawLongNote(laneregion[lane].x, y + dy, laneregion[lane].width, y - dy < laneregion[lane].y ? y - laneregion[lane].y : dy, scale, lane,
 										ln, lnoteimage);
 							}
 							// System.out.println(dy);
@@ -518,9 +517,6 @@ public class LaneRenderer {
 		if ((model.getLntype() == BMSModel.LNTYPE_HELLCHARGENOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
 				|| ln.getType() == LongNote.TYPE_HELLCHARGENOTE) {
 			// HCN
-			if (y - height < skin.getLaneregion()[lane].y) {
-				height = y - skin.getLaneregion()[lane].y;
-			}
 			final JudgeManager judge = main.getJudgeManager();
 			TextureRegion le = longnote[5][lane];
 			if (main.getJudgeManager().getProcessingLongNotes()[lane] == ln) {
@@ -539,9 +535,6 @@ public class LaneRenderer {
 		} else if ((model.getLntype() == BMSModel.LNTYPE_CHARGENOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
 				|| ln.getType() == LongNote.TYPE_CHARGENOTE) {
 			// CN
-			if (y - height < skin.getLaneregion()[lane].y) {
-				height = y - skin.getLaneregion()[lane].y;
-			}
 			TextureRegion le = longnote[1][lane];
 			if (main.getJudgeManager().getProcessingLongNotes()[lane] == ln) {
 				sprite.draw(longnote[2][lane], x, y - height + le.getRegionHeight(), width,
@@ -556,9 +549,6 @@ public class LaneRenderer {
 		} else if ((model.getLntype() == BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
 				|| ln.getType() == LongNote.TYPE_LONGNOTE) {
 			// LN
-			if (y - height < skin.getLaneregion()[lane].y) {
-				height = y - skin.getLaneregion()[lane].y;
-			}
 			final TextureRegion le = longnote[1][lane];
 			if (main.getJudgeManager().getProcessingLongNotes()[lane] == ln) {
 				sprite.draw(longnote[2][lane], x, y - height + le.getRegionHeight(), width,
@@ -574,7 +564,7 @@ public class LaneRenderer {
 	private final int[] JUDGE_TIMER = { TIMER_JUDGE_1P, TIMER_JUDGE_2P, TIMER_JUDGE_3P };
 
 	public void update(int lane, int judge, int time, int fast) {
-		main.getTimer()[JUDGE_TIMER[lane / (skin.getLaneregion().length / judgenow.length)]] = main.getNowTime();
+		final int lanelength = (model.getUseKeys() == 9 ? 9 : model.getUseKeys() >= 10 ? 16 : 8);
 		if (judge < 2) {
 			if (model.getUseKeys() == 9) {
 				main.getTimer()[TIMER_BOMB_1P_KEY1 + lane] = main.getNowTime();
@@ -591,8 +581,9 @@ public class LaneRenderer {
 			this.judge[offset + 1] = judge == 0 ? 1 : judge * 2 + (fast > 0 ? 0 : 1);
 		}
 		if (judgenow.length > 0) {
-			judgenow[lane / (skin.getLaneregion().length / judgenow.length)] = judge + 1;
-			judgecombo[lane / (skin.getLaneregion().length / judgenow.length)] = main.getJudgeManager()
+			main.getTimer()[JUDGE_TIMER[lane / (lanelength / judgenow.length)]] = main.getNowTime();
+			judgenow[lane / (lanelength / judgenow.length)] = judge + 1;
+			judgecombo[lane / (lanelength / judgenow.length)] = main.getJudgeManager()
 					.getCourseCombo();
 		}
 	}

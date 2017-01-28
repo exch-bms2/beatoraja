@@ -145,8 +145,7 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 						}
 					}
 				}
-				if (imagefile.exists() && !imagefile.getName().endsWith(".mpg")) {
-					// TODO ムービー形式対応
+				if (imagefile.exists()) {
 					boolean isMovie = false;
 					for (String mov : BGAProcessor.mov_extension) {
 						if (imagefile.getName().toLowerCase().endsWith(mov)) {
@@ -155,11 +154,8 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 								imagelist.add(mm);
 								isMovie = true;
 								break;
-							} catch (Exception e) {
+							} catch (Throwable e) {
 								Logger.getGlobal().warning("BGAファイル読み込み失敗。" + e.getMessage());
-								e.printStackTrace();
-							} catch (Error e) {
-								Logger.getGlobal().severe("BGAファイル読み込み失敗。" + e.getMessage());
 								e.printStackTrace();
 							}
 						}
@@ -174,6 +170,7 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 						}						
 					}
 				} else {
+					Logger.getGlobal().warning("IMAGE " + imagelist.size() + " : ファイルが見つかりません : " + imagefile.getPath());
 					imagelist.add(null);
 				}
 				// System.out
@@ -208,8 +205,6 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 					}
 					if (part != null) {
 						skin.add(part);
-					} else {
-						System.out.println("Failed to load SRC_IMAGE : " + line);
 					}
 				} catch (Throwable e) {
 					e.printStackTrace();
@@ -566,7 +561,7 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 		for (SkinObject obj : skin.getAllSkinObjects()) {
 			if (obj instanceof SkinImage && obj.getAllDestination().length == 0) {
 				skin.removeSkinObject(obj);
-				System.out.println("NO_DESTINATION : " + obj);
+				Logger.getGlobal().warning("NO_DESTINATION : " + obj);
 			}
 		}
 	}
@@ -588,7 +583,7 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 			return getSourceImage((Texture) imagelist.get(values[2]), values[3], values[4], values[5], values[6], values[7],
 					values[8]);
 		}
-		System.out.println("failed to load image : " + line);
+		Logger.getGlobal().warning("IMAGEが定義されてないか、読み込みに失敗しています : " + line);
 		return null;
 	}
 

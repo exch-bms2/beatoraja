@@ -15,7 +15,7 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
  */
 public class SkinBGA extends SkinObject {
 
-	public SkinBGA(PlaySkin skin) {
+	public SkinBGA() {
 	}
 
 	@Override

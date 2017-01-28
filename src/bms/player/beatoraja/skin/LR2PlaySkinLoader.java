@@ -2,6 +2,7 @@ package bms.player.beatoraja.skin;
 
 import java.io.*;
 import java.util.*;
+import java.util.logging.Logger;
 
 import bms.player.beatoraja.play.*;
 
@@ -68,7 +69,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 		addCommandWord(new CommandWord("SRC_BGA") {
 			@Override
 			public void execute(String[] str) {
-				bga = new SkinBGA(skin);
+				bga = new SkinBGA();
 				skin.add(bga);
 			}
 		});
@@ -293,7 +294,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 		addCommandWord(new CommandWord("DST_NOWJUDGE_1P") {
 			@Override
 			public void execute(String[] str) {
-				if (judge[0].getJudge()[5 - Integer.parseInt(str[1])] != null) {
+				if (judge[0] != null && judge[0].getJudge()[5 - Integer.parseInt(str[1])] != null) {
 					try {
 						int[] values = parseInt(str);
 						if (values[5] < 0) {
@@ -340,7 +341,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 		addCommandWord(new CommandWord("DST_NOWJUDGE_2P") {
 			@Override
 			public void execute(String[] str) {
-				if (judge[1].getJudge()[5 - Integer.parseInt(str[1])] != null) {
+				if (judge[1] != null && judge[1].getJudge()[5 - Integer.parseInt(str[1])] != null) {
 					try {
 						int[] values = parseInt(str);
 						if (values[5] < 0) {
@@ -400,7 +401,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 		addCommandWord(new CommandWord("DST_NOWCOMBO_1P") {
 			@Override
 			public void execute(String[] str) {
-				if (judge[0].getJudgeCount()[5 - Integer.parseInt(str[1])] != null) {
+				if (judge[0] != null && judge[0].getJudgeCount()[5 - Integer.parseInt(str[1])] != null) {
 					try {
 						int[] values = parseInt(str);
 						judge[0].getJudgeCount()[5 - values[1]].setDestination(values[2], values[3] * dstw / srcw, -values[4] * dsth
@@ -451,7 +452,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 		addCommandWord(new CommandWord("DST_NOWCOMBO_2P") {
 			@Override
 			public void execute(String[] str) {
-				if (judge[1].getJudgeCount()[5 - Integer.parseInt(str[1])] != null) {
+				if (judge[1] != null && judge[1].getJudgeCount()[5 - Integer.parseInt(str[1])] != null) {
 					try {
 						int[] values = parseInt(str);
 						judge[1].getJudgeCount()[5 - values[1]].setDestination(values[2], values[3] * dstw / srcw, -values[4] * dsth
@@ -592,7 +593,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 		}
 		this.loadSkin(skin, f, player, header, option, property);
 
-		skin.setLaneregion(laner);
+		lanerender.setLaneRegion(laner);
 		skin.setLine(lines.toArray(new SkinImage[lines.size()]));
 
 		skin.setJudgeregion(judge[1] != null ? 2 : 1);

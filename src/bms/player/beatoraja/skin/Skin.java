@@ -10,6 +10,9 @@ import java.util.logging.Logger;
 
 public class Skin {
 
+	private float width;
+	private float height;
+
 	private float dw;
 	private float dh;
 
@@ -36,6 +39,8 @@ public class Skin {
 	}
 
 	public Skin(float orgw, float orgh, float dstw, float dsth, int[] fixopt) {
+		width = dstw;
+		height = dsth;
 		dw = dstw / orgw;
 		dh = dsth / orgh;
 		this.fixopt = fixopt;
@@ -223,6 +228,14 @@ public class Skin {
 
 	public void setOption(Map<Integer, Boolean> option) {
 		this.option = option;
+	}
+
+	public float getWidth() {
+		return width;
+	}
+
+	public float getHeight() {
+		return height;
 	}
 
 	public double getScaleX() {
