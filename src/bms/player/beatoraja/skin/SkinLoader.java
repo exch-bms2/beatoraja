@@ -25,7 +25,7 @@ public class SkinLoader {
 
 	private JsonSkin sk;
 
-	Map<Integer, Texture> texmap;
+	Map<String, Texture> texmap;
 
 	public SkinLoader() {
 		this(Resolution.RESOLUTION[1]);
@@ -94,11 +94,17 @@ public class SkinLoader {
 			
 			for (Destination dst : sk.destination) {
 				SkinObject obj = null;
-				if (dst.id < 0) {
-					obj = new SkinImage(-dst.id);
-				} else {
+				try {
+					int id = Integer.parseInt(dst.id);
+					if(id < 0) {
+						obj = new SkinImage(-id);						
+					}
+				} catch(Exception e) {
+					
+				}
+				if (obj == null) {
 					for (Image img : sk.image) {
-						if (dst.id == img.id) {
+						if (dst.id.equals(img.id)) {
 							Texture tex = getTexture(img.src, p);
 
 							if(img.len > 1) {
@@ -126,7 +132,7 @@ public class SkinLoader {
 						}
 					}
 					for (ImageSet imgs : sk.imageset) {
-						if (dst.id == imgs.id) {
+						if (dst.id.equals(imgs.id)) {
 							TextureRegion[][] tr = new TextureRegion[imgs.images.length][];
 							int timer = -1;
 							int cycle = -1;
@@ -154,7 +160,7 @@ public class SkinLoader {
 						}
 					}
 					for (Value value : sk.value) {
-						if (dst.id == value.id) {
+						if (dst.id.equals(value.id)) {
 							Texture tex = getTexture(value.src, p);
 							TextureRegion[] images = getSourceImage(tex,  value.x, value.y, value.w,
 									value.h, value.divx, value.divy);
@@ -193,9 +199,9 @@ public class SkinLoader {
 					}
 					// text
 					for (Text text : sk.text) {
-						if (dst.id == text.id) {
+						if (dst.id.equals(text.id)) {
 							for (Font font : sk.font) {
-								if (text.font == font.id) {
+								if (text.font.equals(font.id)) {
 									SkinText st = new SkinText(p.getParent().resolve(font.path).toString(), 0,
 											text.size);
 									st.setAlign(text.align);
@@ -209,7 +215,7 @@ public class SkinLoader {
 					}
 					// slider
 					for (Slider img : sk.slider) {
-						if (dst.id == img.id) {
+						if (dst.id.equals(img.id)) {
 							Texture tex = getTexture(img.src, p);
 
 							obj = new SkinSlider(getSourceImage(tex,  img.x, img.y, img.w,
@@ -220,7 +226,7 @@ public class SkinLoader {
 					}
 					// graph
 					for (Graph img : sk.graph) {
-						if (dst.id == img.id) {
+						if (dst.id.equals(img.id)) {
 							Texture tex = getTexture(img.src, p);
 							obj = new SkinGraph(getSourceImage(tex,  img.x, img.y, img.w,
 									img.h, img.divx, img.divy), img.timer, img.cycle);
@@ -231,21 +237,21 @@ public class SkinLoader {
 					}
 
 					for (GaugeGraph ggraph : sk.gaugegraph) {
-						if (dst.id == ggraph.id) {
+						if (dst.id.equals(ggraph.id)) {
 							SkinGaugeGraphObject st = new SkinGaugeGraphObject();
 							obj = st;
 							break;
 						}
 					}
 					for (JudgeGraph ggraph : sk.judgegraph) {
-						if (dst.id == ggraph.id) {
+						if (dst.id.equals(ggraph.id)) {
 							SkinNoteDistributionGraph st = new SkinNoteDistributionGraph(ggraph.type);
 							obj = st;
 							break;
 						}
 					}
 					// note
-					if(sk.note != null && dst.id == sk.note.id) {
+					if(sk.note != null && dst.id.equals(sk.note.id)) {
 						TextureRegion[][] notes = getNoteTexture(sk.note.note, p);
 						TextureRegion[][][] lns = new TextureRegion[10][][];
 						lns[0] = getNoteTexture(sk.note.lnstart, p);
@@ -285,7 +291,7 @@ public class SkinLoader {
 						obj = sn;
 					}
 					// gauge
-					if(sk.gauge != null && dst.id == sk.gauge.id) {
+					if(sk.gauge != null && dst.id.equals(sk.gauge.id)) {
 						TextureRegion[][] pgaugetex = new TextureRegion[8][];
 						for(int i = 0;i < 8;i++) {
 							Image img = sk.gauge.nodes[i];
@@ -304,7 +310,7 @@ public class SkinLoader {
 						obj = new SkinGauge(gaugetex, 0, 0);
 					}
 					// bga
-					if(sk.bga != null && dst.id == sk.bga.id) {
+					if(sk.bga != null && dst.id.equals(sk.bga.id)) {
 						obj = new SkinBGA();
 					}
 				}
@@ -356,9 +362,9 @@ public class SkinLoader {
 		obj.setOffsety(dst.offsety);
 	}
 
-	private Texture getTexture(int srcid, Path p) {
+	private Texture getTexture(String srcid, Path p) {
 		for (Source src : sk.source) {
-			if (srcid == src.id) {
+			if (srcid.equals(src.id)) {
 				if (texmap.get(src.id) == null) {
 					texmap.put(src.id, new Texture(p.getParent().resolve(src.path).toString()));
 				}
@@ -431,18 +437,18 @@ public class SkinLoader {
 	}
 
 	public static class Source {
-		public int id;
+		public String id;
 		public String path;
 	}
 
 	public static class Font {
-		public int id;
+		public String id;
 		public String path;
 	}
 
 	public static class Image {
-		public int id;
-		public int src;
+		public String id;
+		public String src;
 		public int x;
 		public int y;
 		public int w;
@@ -457,14 +463,14 @@ public class SkinLoader {
 	}
 
 	public static class ImageSet {
-		public int id;
+		public String id;
 		public int ref;
-		public int[] images = new int[0];
+		public String[] images = new String[0];
 	}
 
 	public static class Value {
-		public int id;
-		public int src;
+		public String id;
+		public String src;
 		public int x;
 		public int y;
 		public int w;
@@ -479,16 +485,16 @@ public class SkinLoader {
 	}
 
 	public static class Text {
-		public int id;
-		public int font;
+		public String id;
+		public String font;
 		public int size;
 		public int align;
 		public int ref;
 	}
 
 	public static class Slider {
-		public int id;
-		public int src;
+		public String id;
+		public String src;
 		public int x;
 		public int y;
 		public int w;
@@ -503,8 +509,8 @@ public class SkinLoader {
 	}
 
 	public static class Graph {
-		public int id;
-		public int src;
+		public String id;
+		public String src;
 		public int x;
 		public int y;
 		public int w;
@@ -518,16 +524,16 @@ public class SkinLoader {
 	}
 
 	public static class GaugeGraph {
-		public int id;
+		public String id;
 	}
 
 	public static class JudgeGraph {
-		public int id;
+		public String id;
 		public int type;
 	}
 
 	public static class NoteSet {
-		public int id;
+		public String id;
 		public Image[] note = new Image[0];
 		public Image[] lnstart = new Image[0];
 		public Image[] lnend = new Image[0];
@@ -548,16 +554,16 @@ public class SkinLoader {
 	}
 
 	public static class Gauge {
-		public int id;
+		public String id;
 		public Image[] nodes;
 	}
 
 	public static class BGA {
-		public int id;
+		public String id;
 	}
 
 	public static class Destination {
-		public int id;
+		public String id;
 		public int blend;
 		public int filter;
 		public int timer;
