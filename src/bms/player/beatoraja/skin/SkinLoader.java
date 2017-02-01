@@ -6,10 +6,7 @@ import java.nio.file.Path;
 import java.util.*;
 
 import bms.player.beatoraja.Resolution;
-import bms.player.beatoraja.play.PlaySkin;
-import bms.player.beatoraja.play.SkinBGA;
-import bms.player.beatoraja.play.SkinGauge;
-import bms.player.beatoraja.play.SkinNote;
+import bms.player.beatoraja.play.*;
 import com.badlogic.gdx.assets.loaders.resolvers.ResolutionFileResolver;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -248,12 +245,12 @@ public class SkinLoader {
 					if(sk.note != null && dst.id == sk.note.id) {
 						TextureRegion[][] notes = getNoteTexture(sk.note.note, p);
 						TextureRegion[][][] lns = new TextureRegion[10][][];
-						lns[0] = getNoteTexture(sk.note.lnstart, p);
-						lns[1] = getNoteTexture(sk.note.lnend, p);
+						lns[0] = getNoteTexture(sk.note.lnend, p);
+						lns[1] = getNoteTexture(sk.note.lnstart, p);
 						lns[2] = getNoteTexture(sk.note.lnbody, p);
 						lns[3] = getNoteTexture(sk.note.lnactive, p);
-						lns[4] = getNoteTexture(sk.note.hcnstart, p);
-						lns[5] = getNoteTexture(sk.note.hcnend, p);
+						lns[4] = getNoteTexture(sk.note.hcnend, p);
+						lns[5] = getNoteTexture(sk.note.hcnstart, p);
 						lns[6] = getNoteTexture(sk.note.hcnbody, p);
 						lns[7] = getNoteTexture(sk.note.hcnactive, p);
 						lns[8] = getNoteTexture(sk.note.hcndamage, p);
@@ -307,7 +304,44 @@ public class SkinLoader {
 					if(sk.bga != null && dst.id == sk.bga.id) {
 						obj = new SkinBGA();
 					}
-				}
+
+                    for (Judge judge : sk.judge) {
+                        if (dst.id == judge.id) {
+                            SkinImage[] images = new SkinImage[judge.img.length];
+                            SkinNumber[] numbers = new SkinNumber[judge.img.length];
+                            for(int i = 0;i < judge.img.length;i++) {
+                                Image img = judge.img[i];
+                                Texture tex = getTexture(img.src, p);
+                                images[i] = new SkinImage(getSourceImage(tex,  img.x, img.y, img.w,
+                                        img.h, img.divx, img.divy), img.timer, img.cycle);
+                                setDestination(skin, images[i], judge.imgdst[i]);
+
+                                Value value = judge.num[i];
+                                tex = getTexture(value.src, p);
+                                TextureRegion[] numimages = getSourceImage(tex,  value.x, value.y, value.w,
+                                        value.h, value.divx, value.divy);
+                                int d = numimages.length % 10 == 0 ? 10 :11;
+
+                                TextureRegion[][] nimages = new TextureRegion[value.divx * value.divy / d][d];
+                                for (int j = 0; j < d; j++) {
+                                    for (int k = 0; k < value.divx * value.divy / d; k++) {
+                                        nimages[k][j] = numimages[k * d + j];
+                                    }
+                                }
+                                numbers[i] = new SkinNumber(nimages, value.timer, value.cycle, value.digit, d > 10 ? 2 : 0, value.ref);
+                                numbers[i].setAlign(value.align);
+                                setDestination(skin, numbers[i], judge.numdst[i]);
+                            }
+                            obj = new SkinJudge(images, numbers, judge.index, judge.shift);
+
+                            int region = ((PlaySkin)skin).getJudgeregion();
+                            if(judge.index >= region) {
+                                ((PlaySkin)skin).setJudgeregion(judge.index + 1);
+                            }
+                            break;
+                        }
+                    }
+                }
 
 				if (obj != null) {
 					setDestination(skin, obj, dst);
@@ -352,6 +386,7 @@ public class SkinLoader {
 					dst.filter, a.angle, dst.center, dst.loop, dst.timer, dst.op);
 			prev = a;
 		}
+
 		obj.setOffsetx(dst.offsetx);
 		obj.setOffsety(dst.offsety);
 	}
@@ -426,6 +461,7 @@ public class SkinLoader {
 		public NoteSet note;
 		public Gauge gauge;
 		public BGA bga;
+        public Judge[] judge = new Judge[0];
 
 		public Destination[] destination;
 	}
@@ -555,6 +591,16 @@ public class SkinLoader {
 	public static class BGA {
 		public int id;
 	}
+
+	public static class Judge {
+        public int id;
+        public int index;
+        public Image[] img = new Image[0];
+        public Destination[] imgdst = new Destination[0];
+        private Value[] num = new Value[0];
+        public Destination[] numdst = new Destination[0];
+        public boolean shift;
+    }
 
 	public static class Destination {
 		public int id;

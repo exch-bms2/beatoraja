@@ -1090,7 +1090,7 @@ public class BMSPlayer extends MainState {
 			if (lanerender.isEnableLanecover()) {
 				final PlaySkin skin = (PlaySkin) getSkin();
 				if (lanerender.isEnableLift()) {
-					return -lanerender.getLiftRegion() * lanerender.getLanecover()
+					return -(1 - lanerender.getLiftRegion()) * lanerender.getLanecover()
 							* (skin.getHeight() - skin.getLaneGroupRegion()[0].y);
 				} else {
 					return -lanerender.getLanecover() * (skin.getHeight() - skin.getLaneGroupRegion()[0].y);
