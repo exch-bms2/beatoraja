@@ -478,7 +478,7 @@ public class LaneRenderer {
 								}
 							}
 							if (dy > 0) {
-								this.drawLongNote(laneregion[lane].x, y + dy, laneregion[lane].width, y - dy < laneregion[lane].y ? y - laneregion[lane].y : dy, scale, lane,
+								this.drawLongNote(laneregion[lane].x, y + dy, laneregion[lane].width, y < laneregion[lane].y ? y - laneregion[lane].y : dy, scale, lane,
 										ln, lnoteimage);
 							}
 							// System.out.println(dy);

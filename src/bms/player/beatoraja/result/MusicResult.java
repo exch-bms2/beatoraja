@@ -35,11 +35,6 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
  */
 public class MusicResult extends MainState {
 
-	// TODO リプレイセーブ状況の表示
-
-	public static final int NUMBER_AVERAGE_DURATION = 5555;
-	public static final int NUMBER_AVERAGE_DURATION_AFTERDOT = 5556;
-
 	private int oldclear;
 	private int oldexscore;
 	private int oldmisscount;

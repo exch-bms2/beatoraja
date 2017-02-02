@@ -54,27 +54,22 @@ public class MusicDecide extends MainState {
 			getMainController().getAudioProcessor().play(bgm, false);
 		}
 
-		if (resource.getConfig().getSkin()[6] != null) {
-			try {
-				SkinConfig sc = resource.getConfig().getSkin()[6];
-				if(sc.getPath().endsWith(".json")) {
-					SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
-					setSkin(sl.loadDecideSkin(Paths.get(sc.getPath())));
-				} else {
-					LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
-					LR2SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
-					Rectangle srcr = RESOLUTION[header.getResolution()];
-					Rectangle dstr = RESOLUTION[resource.getConfig().getResolution()];
-					LR2DecideSkinLoader dloader = new LR2DecideSkinLoader(srcr.width, srcr.height, dstr.width, dstr.height);
-					setSkin(dloader.loadMusicDecideSkin(Paths.get(sc.getPath()).toFile(), this, header, loader.getOption(),
-							sc.getProperty()));
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
+		try {
+			SkinConfig sc = resource.getConfig().getSkin()[6];
+			if (sc.getPath().endsWith(".json")) {
 				SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
-				setSkin(sl.loadDecideSkin(Paths.get("skin/default/decide.json")));
+				setSkin(sl.loadDecideSkin(Paths.get(sc.getPath())));
+			} else {
+				LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
+				LR2SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
+				Rectangle srcr = RESOLUTION[header.getResolution()];
+				Rectangle dstr = RESOLUTION[resource.getConfig().getResolution()];
+				LR2DecideSkinLoader dloader = new LR2DecideSkinLoader(srcr.width, srcr.height, dstr.width, dstr.height);
+				setSkin(dloader.loadMusicDecideSkin(Paths.get(sc.getPath()).toFile(), this, header, loader.getOption(),
+						sc.getProperty()));
 			}
-		} else {
+		} catch (Throwable e) {
+			e.printStackTrace();
 			SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
 			setSkin(sl.loadDecideSkin(Paths.get("skin/default/decide.json")));
 		}
@@ -85,8 +80,8 @@ public class MusicDecide extends MainState {
 
 		if (getTimer()[TIMER_FADEOUT] != Long.MIN_VALUE) {
 			if (nowtime > getTimer()[TIMER_FADEOUT] + getSkin().getFadeout()) {
-				getMainController().changeState(
-						cancel ? MainController.STATE_SELECTMUSIC : MainController.STATE_PLAYBMS);
+				getMainController()
+						.changeState(cancel ? MainController.STATE_SELECTMUSIC : MainController.STATE_PLAYBMS);
 			}
 		} else {
 			if (nowtime > getSkin().getScene()) {

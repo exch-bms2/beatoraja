@@ -6,10 +6,7 @@ import java.nio.file.Path;
 import java.util.*;
 
 import bms.player.beatoraja.Resolution;
-import bms.player.beatoraja.play.PlaySkin;
-import bms.player.beatoraja.play.SkinBGA;
-import bms.player.beatoraja.play.SkinGauge;
-import bms.player.beatoraja.play.SkinNote;
+import bms.player.beatoraja.play.*;
 import com.badlogic.gdx.assets.loaders.resolvers.ResolutionFileResolver;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -138,7 +135,7 @@ public class SkinLoader {
 							int cycle = -1;
 							for(int i = 0;i < imgs.images.length;i++) {
 								for(Image img : sk.image) {
-									if(img.id == imgs.images[i]) {
+									if(img.id.equals(imgs.images[i])) {
 										Texture tex = getTexture(img.src, p);
 										tr[i] = getSourceImage(tex,  img.x, img.y, img.w,
 												img.h, img.divx, img.divy);
@@ -190,7 +187,7 @@ public class SkinLoader {
 									}
 								}
 
-								SkinNumber num = new SkinNumber(nimages, value.timer, value.cycle, value.digit, d > 10 ? 2 : 0, value.ref);
+								SkinNumber num = new SkinNumber(nimages, value.timer, value.cycle, value.digit, d > 10 ? 2 : value.padding, value.ref);
 								num.setAlign(value.align);
 								obj = num;
 							}
@@ -254,12 +251,12 @@ public class SkinLoader {
 					if(sk.note != null && dst.id.equals(sk.note.id)) {
 						TextureRegion[][] notes = getNoteTexture(sk.note.note, p);
 						TextureRegion[][][] lns = new TextureRegion[10][][];
-						lns[0] = getNoteTexture(sk.note.lnstart, p);
-						lns[1] = getNoteTexture(sk.note.lnend, p);
+						lns[0] = getNoteTexture(sk.note.lnend, p);
+						lns[1] = getNoteTexture(sk.note.lnstart, p);
 						lns[2] = getNoteTexture(sk.note.lnbody, p);
 						lns[3] = getNoteTexture(sk.note.lnactive, p);
-						lns[4] = getNoteTexture(sk.note.hcnstart, p);
-						lns[5] = getNoteTexture(sk.note.hcnend, p);
+						lns[4] = getNoteTexture(sk.note.hcnend, p);
+						lns[5] = getNoteTexture(sk.note.hcnstart, p);
 						lns[6] = getNoteTexture(sk.note.hcnbody, p);
 						lns[7] = getNoteTexture(sk.note.hcnactive, p);
 						lns[8] = getNoteTexture(sk.note.hcndamage, p);
@@ -267,21 +264,28 @@ public class SkinLoader {
 						TextureRegion[][] mines = getNoteTexture(sk.note.mine, p);
 
 						Rectangle[] region = new Rectangle[sk.note.dst.length];
+						float dx = dstr.width / sk.w;
+						float dy = dstr.height / sk.h;
 						for(int i = 0;i < region.length;i++) {
 							Animation dest = sk.note.dst[i];
-							region[i] = new Rectangle(dest.x, dest.y, dest.w, dest.h);
+							region[i] = new Rectangle(dest.x * dx, dest.y * dy, dest.w * dx, dest.h * dy);
 						}
 						Rectangle[] gregion = new Rectangle[sk.note.group.length];
 						SkinImage[] lines = new SkinImage[gregion.length];
 						for(int i = 0;i < gregion.length;i++) {
 							Destination dest = sk.note.group[i];
-							gregion[i] = new Rectangle(dest.dst[0].x, dest.dst[0].y, dest.dst[0].w, dest.dst[0].h);
+							gregion[i] = new Rectangle(dest.dst[0].x * dx, dest.dst[0].y * dy, dest.dst[0].w * dx, dest.dst[0].h * dy);
 
-							Image img = sk.note.line[i];
-							Texture tex = getTexture(img.src, p);
-							lines[i] = new SkinImage(getSourceImage(tex,  img.x, img.y, img.w,
-									img.h, img.divx, img.divy), img.timer, img.cycle);
-							setDestination(skin, lines[i], dest);
+							for (Image img : sk.image) {
+								if (dest.id.equals(img.id)) {
+									Texture tex = getTexture(img.src, p);
+									lines[i] = new SkinImage(getSourceImage(tex,  img.x, img.y, img.w,
+											img.h, img.divx, img.divy), img.timer, img.cycle);
+									setDestination(skin, lines[i], dest);
+									break;
+								}
+							}
+
 						}
 						((PlaySkin)skin).setLine(lines);
 
@@ -294,10 +298,15 @@ public class SkinLoader {
 					if(sk.gauge != null && dst.id.equals(sk.gauge.id)) {
 						TextureRegion[][] pgaugetex = new TextureRegion[8][];
 						for(int i = 0;i < 8;i++) {
-							Image img = sk.gauge.nodes[i];
-							Texture tex = getTexture(img.src, p);
-							pgaugetex[i] = getSourceImage(tex,  img.x, img.y, img.w,
-									img.h, img.divx, img.divy);
+							for (Image img : sk.image) {
+								if (sk.gauge.nodes[i].equals(img.id)) {
+									Texture tex = getTexture(img.src, p);
+									pgaugetex[i] = getSourceImage(tex,  img.x, img.y, img.w,
+											img.h, img.divx, img.divy);
+									break;									
+								}
+							}
+
 						}
 
 						TextureRegion[][] gaugetex = new TextureRegion[pgaugetex[0].length][8];
@@ -313,7 +322,53 @@ public class SkinLoader {
 					if(sk.bga != null && dst.id.equals(sk.bga.id)) {
 						obj = new SkinBGA();
 					}
-				}
+
+                    for (Judge judge : sk.judge) {
+                        if (dst.id.equals(judge.id)) {
+                            SkinImage[] images = new SkinImage[judge.images.length];
+                            SkinNumber[] numbers = new SkinNumber[judge.images.length];
+                            for(int i = 0;i < judge.images.length;i++) {
+    							for (Image img : sk.image) {
+    								if (judge.images[i].id.equals(img.id)) {
+    	                                Texture tex = getTexture(img.src, p);
+    	                                images[i] = new SkinImage(getSourceImage(tex,  img.x, img.y, img.w,
+    	                                        img.h, img.divx, img.divy), img.timer, img.cycle);
+    	                                setDestination(skin, images[i], judge.images[i]);
+    									break;
+    								}
+    							}
+
+    							for (Value value : sk.value) {
+    								if (judge.numbers[i].id.equals(value.id)) {
+    	                                Texture tex = getTexture(value.src, p);
+    	                                TextureRegion[] numimages = getSourceImage(tex,  value.x, value.y, value.w,
+    	                                        value.h, value.divx, value.divy);
+    	                                int d = numimages.length % 10 == 0 ? 10 :11;
+
+    	                                TextureRegion[][] nimages = new TextureRegion[value.divx * value.divy / d][d];
+    	                                for (int j = 0; j < d; j++) {
+    	                                    for (int k = 0; k < value.divx * value.divy / d; k++) {
+    	                                        nimages[k][j] = numimages[k * d + j];
+    	                                    }
+    	                                }
+    	                                numbers[i] = new SkinNumber(nimages, value.timer, value.cycle, value.digit, d > 10 ? 2 : 0, value.ref);
+    	                                numbers[i].setAlign(value.align);
+    	                                setDestination(skin, numbers[i], judge.numbers[i]);
+    									break;
+    								}
+    							}
+
+                            }
+                            obj = new SkinJudge(images, numbers, judge.index, judge.shift);
+
+                            int region = ((PlaySkin)skin).getJudgeregion();
+                            if(judge.index >= region) {
+                                ((PlaySkin)skin).setJudgeregion(judge.index + 1);
+                            }
+                            break;
+                        }
+                    }
+                }
 
 				if (obj != null) {
 					setDestination(skin, obj, dst);
@@ -358,6 +413,7 @@ public class SkinLoader {
 					dst.filter, a.angle, dst.center, dst.loop, dst.timer, dst.op);
 			prev = a;
 		}
+
 		obj.setOffsetx(dst.offsetx);
 		obj.setOffsety(dst.offsety);
 	}
@@ -374,13 +430,19 @@ public class SkinLoader {
 		return null;
 	}
 
-	private TextureRegion[][] getNoteTexture(Image[] images, Path p) {
+	private TextureRegion[][] getNoteTexture(String[] images, Path p) {
 		TextureRegion[][] noteimages = new TextureRegion[images.length][];
 		for(int i = 0;i < images.length;i++) {
-			Image note = images[i];
-			Texture tex = getTexture(note.src, p);
-			noteimages[i] = getSourceImage(tex,  note.x, note.y, note.w,
-					note.h, note.divx, note.divy);
+			for (Image img : sk.image) {
+				if (images[i].equals(img.id)) {
+					Image note = img;
+					Texture tex = getTexture(note.src, p);
+					noteimages[i] = getSourceImage(tex,  note.x, note.y, note.w,
+							note.h, note.divx, note.divy);
+					break;
+				}
+			}
+
 		}
 		return noteimages;
 	}
@@ -432,6 +494,7 @@ public class SkinLoader {
 		public NoteSet note;
 		public Gauge gauge;
 		public BGA bga;
+        public Judge[] judge = new Judge[0];
 
 		public Destination[] destination;
 	}
@@ -481,6 +544,7 @@ public class SkinLoader {
 		public int cycle;
 		public int align;
 		public int digit;
+		public int padding;
 		public int ref;
 	}
 
@@ -534,33 +598,40 @@ public class SkinLoader {
 
 	public static class NoteSet {
 		public String id;
-		public Image[] note = new Image[0];
-		public Image[] lnstart = new Image[0];
-		public Image[] lnend = new Image[0];
-		public Image[] lnbody = new Image[0];
-		public Image[] lnactive = new Image[0];
-		public Image[] hcnstart = new Image[0];
-		public Image[] hcnend = new Image[0];
-		public Image[] hcnbody = new Image[0];
-		public Image[] hcnactive = new Image[0];
-		public Image[] hcndamage = new Image[0];
-		public Image[] hcnreactive = new Image[0];
-		public Image[] mine = new Image[0];
-		public Image[] hidden = new Image[0];
-		public Image[] processed = new Image[0];
+		public String[] note = new String[0];
+		public String[] lnstart = new String[0];
+		public String[] lnend = new String[0];
+		public String[] lnbody = new String[0];
+		public String[] lnactive = new String[0];
+		public String[] hcnstart = new String[0];
+		public String[] hcnend = new String[0];
+		public String[] hcnbody = new String[0];
+		public String[] hcnactive = new String[0];
+		public String[] hcndamage = new String[0];
+		public String[] hcnreactive = new String[0];
+		public String[] mine = new String[0];
+		public String[] hidden = new String[0];
+		public String[] processed = new String[0];
 		public Animation[] dst = new Animation[0];
-		public Image[] line = new Image[0];
 		public Destination[] group = new Destination[0];
 	}
 
 	public static class Gauge {
 		public String id;
-		public Image[] nodes;
+		public String[] nodes;
 	}
 
 	public static class BGA {
 		public String id;
 	}
+
+	public static class Judge {
+        public String id;
+        public int index;
+        public Destination[] images = new Destination[0];
+        public Destination[] numbers = new Destination[0];
+        public boolean shift;
+    }
 
 	public static class Destination {
 		public String id;

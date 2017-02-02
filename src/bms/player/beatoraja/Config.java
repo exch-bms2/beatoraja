@@ -1,5 +1,6 @@
 package bms.player.beatoraja;
 
+import java.util.Arrays;
 import java.util.Map;
 
 import bms.player.beatoraja.input.BMControllerInputProcessor.BMKeys;
@@ -13,7 +14,7 @@ import com.badlogic.gdx.Input.Keys;
  * @author exch
  */
 public class Config {
-	
+
 	/**
 	 * フルスクリーン
 	 */
@@ -26,7 +27,7 @@ public class Config {
 	 * 解像度
 	 */
 	private int resolution = 1;
-	
+
 	/**
 	 * フォルダランプの有効/無効
 	 */
@@ -81,12 +82,12 @@ public class Config {
 	 * DP用オプション
 	 */
 	private int doubleoption;
-	
+
 	/**
 	 * ハイスピード固定。固定する場合はデュレーションが有効となり、固定しない場合はハイスピードが有効になる
 	 */
 	private int fixhispeed = FIX_HISPEED_MAINBPM;
-	
+
 	public static final int FIX_HISPEED_OFF = 0;
 	public static final int FIX_HISPEED_STARTBPM = 1;
 	public static final int FIX_HISPEED_MAXBPM = 2;
@@ -95,7 +96,7 @@ public class Config {
 
 	/**
 	 * 最小入力感覚
-     */
+	 */
 	private int inputduration = 10;
 	/**
 	 * 判定タイミング
@@ -110,7 +111,6 @@ public class Config {
 	 */
 	private int judgeAlgorithm = JudgeManager.JUDGE_ALGORITHM_LR2;
 
-	private boolean use2pside = false;
 	/**
 	 * アシストオプション:コンスタント
 	 */
@@ -138,18 +138,18 @@ public class Config {
 	private boolean bpmguide = false;
 
 	private boolean showjudgearea = false;
-	
+
 	private boolean markprocessednote = false;
 
 	private boolean showhiddennote = false;
-	
+
 	private boolean showpastnote = false;
-	
+
 	private String bgmpath = "";
-	
+
 	private String soundpath = "";
-	
-	private SkinConfig[] skin = new SkinConfig[15];
+
+	private SkinConfig[] skin = new SkinConfig[16];
 	/**
 	 * BMSルートディレクトリパス
 	 */
@@ -161,65 +161,61 @@ public class Config {
 	/**
 	 * BGA表示
 	 */
-	private int bga = BGA_OFF;
+	private int bga = BGA_ON;
 	public static final int BGA_ON = 0;
 	public static final int BGA_AUTO = 1;
-	public static final int BGA_OFF = 2;	
-	
+	public static final int BGA_OFF = 2;
+
 	private int movieplayer = MOVIEPLAYER_FFMPEG;
 	public static final int MOVIEPLAYER_FFMPEG = 0;
 	public static final int MOVIEPLAYER_VLC = 1;
-	
+
 	private int frameskip = 1;
 	private String vlcpath = "";
-	
-	private PlayConfig mode7 = new PlayConfig(new int[]{
-		Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.F, Keys.V,
-		Keys.SHIFT_LEFT, Keys.CONTROL_LEFT, Keys.COMMA, Keys.L,
-		Keys.PERIOD, Keys.SEMICOLON, Keys.SLASH, Keys.APOSTROPHE,
-		Keys.UNKNOWN, Keys.SHIFT_RIGHT, Keys.CONTROL_RIGHT, Keys.Q,
-		Keys.W },  new int[] { BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8,
-			BMKeys.BUTTON_2, BMKeys.BUTTON_5, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN, BMKeys.BUTTON_9,
-			BMKeys.BUTTON_10 });
-	
-	private PlayConfig mode14 = new PlayConfig(new int[]{
-		Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.F, Keys.V,
-		Keys.SHIFT_LEFT, Keys.CONTROL_LEFT, Keys.COMMA, Keys.L,
-		Keys.PERIOD, Keys.SEMICOLON, Keys.SLASH, Keys.APOSTROPHE,
-		Keys.UNKNOWN, Keys.SHIFT_RIGHT, Keys.CONTROL_RIGHT, Keys.Q,
-		Keys.W },  new int[] { BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8,
-			BMKeys.BUTTON_2, BMKeys.BUTTON_5, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN, BMKeys.BUTTON_9,
-			BMKeys.BUTTON_10 });
-	
-	private PlayConfig mode9 = new PlayConfig(new int[]{
-		Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.F, Keys.V,
-		Keys.G, Keys.B, Keys.COMMA, Keys.L,
-		Keys.PERIOD, Keys.SEMICOLON, Keys.SLASH, Keys.APOSTROPHE,
-		Keys.UNKNOWN, Keys.SHIFT_RIGHT, Keys.CONTROL_RIGHT, Keys.Q,
-		Keys.W },  new int[] { BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8,
-			BMKeys.BUTTON_2, BMKeys.BUTTON_5, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN, BMKeys.BUTTON_9,
-			BMKeys.BUTTON_10 });
+
+	private PlayConfig mode7 = new PlayConfig(
+			new int[] { Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.F, Keys.V, Keys.SHIFT_LEFT, Keys.CONTROL_LEFT,
+					Keys.COMMA, Keys.L, Keys.PERIOD, Keys.SEMICOLON, Keys.SLASH, Keys.APOSTROPHE, Keys.UNKNOWN,
+					Keys.SHIFT_RIGHT, Keys.CONTROL_RIGHT, Keys.Q, Keys.W },
+			new int[] { BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8, BMKeys.BUTTON_2,
+					BMKeys.BUTTON_5, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN, BMKeys.BUTTON_9, BMKeys.BUTTON_10 });
+
+	private PlayConfig mode14 = new PlayConfig(
+			new int[] { Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.F, Keys.V, Keys.SHIFT_LEFT, Keys.CONTROL_LEFT,
+					Keys.COMMA, Keys.L, Keys.PERIOD, Keys.SEMICOLON, Keys.SLASH, Keys.APOSTROPHE, Keys.UNKNOWN,
+					Keys.SHIFT_RIGHT, Keys.CONTROL_RIGHT, Keys.Q, Keys.W },
+			new int[] { BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8, BMKeys.BUTTON_2,
+					BMKeys.BUTTON_5, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN, BMKeys.BUTTON_9, BMKeys.BUTTON_10 });
+
+	private PlayConfig mode9 = new PlayConfig(
+			new int[] { Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.F, Keys.V, Keys.G, Keys.B, Keys.COMMA, Keys.L,
+					Keys.PERIOD, Keys.SEMICOLON, Keys.SLASH, Keys.APOSTROPHE, Keys.UNKNOWN, Keys.SHIFT_RIGHT,
+					Keys.CONTROL_RIGHT, Keys.Q, Keys.W },
+			new int[] { BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8, BMKeys.BUTTON_2,
+					BMKeys.BUTTON_5, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN, BMKeys.BUTTON_9, BMKeys.BUTTON_10 });
 
 	private int musicselectinput = 0;
-	
+
 	private String irname = "";
-	
+
 	private String userid = "";
-	
+
 	private String password = "";
-	
+
 	public Config() {
-        tableURL = new String[]{"http://bmsnormal2.syuriken.jp/table.html",
-                "http://bmsnormal2.syuriken.jp/table_insane.html",
-                "http://dpbmsdelta.web.fc2.com/table/dpdelta.html",
-                "http://dpbmsdelta.web.fc2.com/table/insane.html",
-                "http://flowermaster.web.fc2.com/lrnanido/gla/LN.html",
-                "http://stellawingroad.web.fc2.com/new/pms.html"};
-        skin[6] = new SkinConfig("skin/config/decide.json");
-        skin[7] = new SkinConfig("skin/config/result.json");
+		tableURL = new String[] { "http://bmsnormal2.syuriken.jp/table.html",
+				"http://bmsnormal2.syuriken.jp/table_insane.html", "http://dpbmsdelta.web.fc2.com/table/dpdelta.html",
+				"http://dpbmsdelta.web.fc2.com/table/insane.html",
+				"http://flowermaster.web.fc2.com/lrnanido/gla/LN.html",
+				"http://stellawingroad.web.fc2.com/new/pms.html" };
+		skin[0] = new SkinConfig("skin/default/play7.json");
+		skin[1] = new SkinConfig("skin/default/play5.json");
+		skin[6] = new SkinConfig("skin/default/decide.json");
+		skin[7] = new SkinConfig("skin/default/result.json");
+		skin[15] = new SkinConfig("skin/default/graderesult.json");
 		judgedetail = 2;
 	}
-	
+
 	public boolean isFullscreen() {
 		return fullscreen;
 	}
@@ -275,7 +271,7 @@ public class Config {
 	public void setJudgetiming(int judgetiming) {
 		this.judgetiming = judgetiming;
 	}
-	
+
 	public boolean isConstant() {
 		return constant;
 	}
@@ -307,7 +303,7 @@ public class Config {
 	public void setVlcpath(String vlcpath) {
 		this.vlcpath = vlcpath;
 	}
-	
+
 	public int getAudioDeviceBufferSize() {
 		return audioDeviceBufferSize;
 	}
@@ -508,14 +504,6 @@ public class Config {
 		this.soundpath = soundpath;
 	}
 
-	public boolean isUse2pside() {
-		return use2pside;
-	}
-
-	public void setUse2pside(boolean use2pside) {
-		this.use2pside = use2pside;
-	}
-
 	public int getInputduration() {
 		return inputduration;
 	}
@@ -523,8 +511,11 @@ public class Config {
 	public void setInputduration(int inputduration) {
 		this.inputduration = inputduration;
 	}
-	
+
 	public SkinConfig[] getSkin() {
+		if(skin.length < 16) {
+			skin = Arrays.copyOf(skin, 16);
+		}
 		return skin;
 	}
 
@@ -589,9 +580,9 @@ public class Config {
 	}
 
 	public static class SkinConfig {
-		
+
 		private String path;
-		
+
 		private Map property;
 
 		public SkinConfig() {

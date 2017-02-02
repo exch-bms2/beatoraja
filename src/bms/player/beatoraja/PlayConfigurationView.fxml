@@ -104,9 +104,9 @@
                      <children>
                         <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                            <children>
-                              <HBox prefHeight="100.0" prefWidth="200.0">
+                              <HBox prefHeight="100.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
                                  <children>
-                                    <Label prefHeight="101.0" prefWidth="59.0" text="%BMS_Path" />
+                                    <Label prefHeight="101.0" prefWidth="100.0" text="%BMS_Path" HBox.hgrow="ALWAYS" />
                                     <ListView fx:id="bmsroot" onDragDropped="#songPathDragDropped" onDragOver="#onSongPathDragOver" prefHeight="100.0" prefWidth="508.0" />
                                     <VBox prefHeight="200.0" prefWidth="100.0">
                                        <children>
@@ -119,9 +119,9 @@
                                     <Insets bottom="30.0" />
                                  </VBox.margin>
                               </HBox>
-                              <HBox prefHeight="100.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                              <HBox prefHeight="100.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" VBox.vgrow="ALWAYS">
                                  <children>
-                                    <Label prefHeight="110.0" prefWidth="62.0" text="%Table_URL" />
+                                    <Label prefHeight="166.0" prefWidth="100.0" text="%Table_URL" HBox.hgrow="ALWAYS" />
                                     <VBox prefHeight="100.0" prefWidth="536.0">
                                        <children>
                                           <HBox>
@@ -130,9 +130,9 @@
                                                 <Button mnemonicParsing="false" onAction="#addTableURL" prefHeight="28.0" prefWidth="30.0" text="%+" />
                                              </children>
                                           </HBox>
-                                          <HBox>
+                                          <HBox VBox.vgrow="ALWAYS">
                                              <children>
-                                                <ListView fx:id="tableurl" prefHeight="100.0" prefWidth="508.0" />
+                                                <ListView fx:id="tableurl" prefHeight="167.0" prefWidth="507.0" HBox.hgrow="ALWAYS" />
                                                 <Button mnemonicParsing="false" onAction="#removeTableURL" prefHeight="28.0" prefWidth="30.0" text="%-" />
                                              </children>
                                           </HBox>
@@ -152,7 +152,7 @@
                   	<children>
                         <HBox prefHeight="18.0" prefWidth="703.0">
                            <children>
-                              <Label prefHeight="31.0" prefWidth="40.0" text="%MODE" />
+                              <Label prefHeight="24.0" prefWidth="75.0" text="%MODE" />
                               <ComboBox fx:id="playconfig" onAction="#updatePlayConfig" prefWidth="150.0" />
                            </children>
                            <VBox.margin>
@@ -242,9 +242,9 @@
                            <children>
                               <HBox prefHeight="23.0" prefWidth="723.0">
                                  <children>
-                                    <Label prefHeight="39.0" prefWidth="55.0" text="%Category" />
+                                    <Label prefHeight="24.0" prefWidth="100.0" text="%Category" />
                                     <ComboBox fx:id="skincategory" onAction="#updateSkinCategory" prefWidth="150.0" />
-                                    <Label prefHeight="42.0" prefWidth="26.0" text="%Skin">
+                                    <Label prefHeight="24.0" prefWidth="60.0" text="%Skin">
                                        <HBox.margin>
                                           <Insets left="20.0" />
                                        </HBox.margin></Label>
@@ -261,13 +261,13 @@
                               </ScrollPane>
                               <HBox prefHeight="30.0" prefWidth="723.0">
                                  <children>
-                                    <Label layoutX="10.0" layoutY="10.0" prefHeight="35.0" prefWidth="94.0" text="%BGM_Path(LR2)" />
+                                    <Label layoutX="10.0" layoutY="10.0" prefHeight="30.0" prefWidth="149.0" text="%BGM_Path(LR2)" />
                                     <TextField fx:id="bgmpath" prefHeight="28.0" prefWidth="278.0" />
                                  </children>
                               </HBox>
                               <HBox prefHeight="30.0" prefWidth="723.0">
                                  <children>
-                                    <Label layoutX="10.0" layoutY="10.0" prefHeight="36.0" prefWidth="103.0" text="%Sound_Path(LR2)" />
+                                    <Label layoutX="10.0" layoutY="10.0" prefHeight="30.0" prefWidth="150.0" text="%Sound_Path(LR2)" />
                                     <TextField fx:id="soundpath" prefHeight="28.0" prefWidth="278.0" />
                                  </children>
                               </HBox>
@@ -290,7 +290,6 @@
                                  </children>
                               </HBox>
                               <CheckBox fx:id="folderlamp" mnemonicParsing="false" prefHeight="25.0" prefWidth="133.0" text="%フォルダランプ" />
-                               <CheckBox fx:id="use2p" mnemonicParsing="false" prefHeight="25.0" prefWidth="133.0" text="%2P_side" />
                                <HBox prefHeight="37.0" prefWidth="723.0">
                                    <children>
                                        <Label prefHeight="24.0" prefWidth="127.0" text="%最小入力間隔(ms)" />

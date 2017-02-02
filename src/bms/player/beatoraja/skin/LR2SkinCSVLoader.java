@@ -398,13 +398,13 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 					int gr = values[2];
 					if (gr >= 100) {
 						bar = new SkinGraph(gr);
-						bar.setReferenceID(values[11] + 1000);
+						bar.setReferenceID(values[11] + 100);
 						bar.setDirection(values[12]);
 					} else {
 						TextureRegion[] images = getSourceImage(values);
 						if (images != null) {
 							bar = new SkinGraph(images, values[10], values[9]);
-							bar.setReferenceID(values[11] + 1000);
+							bar.setReferenceID(values[11] + 100);
 							bar.setDirection(values[12]);
 							// System.out.println("Object Added - " +
 							// (part.getTiming()));

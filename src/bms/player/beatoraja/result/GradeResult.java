@@ -1,28 +1,22 @@
 package bms.player.beatoraja.result;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.*;
 
 import bms.player.beatoraja.play.gauge.GrooveGauge;
 import bms.player.beatoraja.select.MusicSelector;
+import bms.player.beatoraja.skin.LR2ResultSkinLoader;
+import bms.player.beatoraja.skin.LR2SkinHeader;
+import bms.player.beatoraja.skin.LR2SkinHeaderLoader;
 import bms.player.beatoraja.skin.SkinLoader;
-import com.badlogic.gdx.graphics.glutils.FloatFrameBuffer;
 import com.badlogic.gdx.math.Rectangle;
 import java.util.logging.Logger;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.audio.Sound;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
-
 import bms.model.BMSModel;
 import bms.player.beatoraja.*;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import bms.player.beatoraja.Config.SkinConfig;
 
 import static bms.player.beatoraja.Resolution.*;
 import static bms.player.beatoraja.skin.SkinProperty.*;
@@ -34,7 +28,7 @@ public class GradeResult extends MainState {
 	private int oldmisscount;
 	private int oldcombo;
 
-	private boolean saveReplay = false;
+	private int saveReplay = -1;
 
 	private String clear;
 	private String fail;
@@ -60,9 +54,26 @@ public class GradeResult extends MainState {
 			}
 		}
 
-		SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
-		setSkin(sl.loadResultSkin(Paths.get("skin/default/graderesult.json")));
-
+		try {
+			SkinConfig sc = resource.getConfig().getSkin()[15];
+			if (sc.getPath().endsWith(".json")) {
+				SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
+				setSkin(sl.loadResultSkin(Paths.get(sc.getPath())));
+			} else {
+				LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
+				LR2SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
+				Rectangle srcr = RESOLUTION[header.getResolution()];
+				Rectangle dstr = RESOLUTION[resource.getConfig().getResolution()];
+				LR2ResultSkinLoader dloader = new LR2ResultSkinLoader(srcr.width, srcr.height, dstr.width, dstr.height);
+				setSkin(dloader.loadResultSkin(Paths.get(sc.getPath()).toFile(), this, header, loader.getOption(),
+						sc.getProperty()));
+			}
+		} catch (Throwable e) {
+			e.printStackTrace();
+			SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
+			setSkin(sl.loadResultSkin(Paths.get("skin/default/graderesult.json")));
+		}
+		
         for(int i = resource.getCourseGauge().size();i < resource.getCourseBMSModels().length;i++) {
             List<Float> list = new ArrayList<Float>();
             for(int l = 0;l < (resource.getCourseBMSModels()[i].getLastNoteTime() + 500) / 500;l++) {
@@ -133,7 +144,7 @@ public class GradeResult extends MainState {
             }
 
             for (int i = 0; i < MusicSelector.REPLAY; i++) {
-                if (resource.getAutoplay() == 0 && main.getInputProcessor().getNumberState()[i + 1]) {
+                if (main.getInputProcessor().getNumberState()[i + 1]) {
                     saveReplayData(i);
                     break;
                 }
@@ -144,7 +155,7 @@ public class GradeResult extends MainState {
 
 
     public void updateScoreDatabase() {
-		saveReplay = false;
+		saveReplay = -1;
 		final PlayerResource resource = getMainController().getPlayerResource();
 		BMSModel[] models = resource.getCourseBMSModels();
 		IRScoreData newscore = resource.getCourseScoreData();
@@ -307,13 +318,13 @@ public class GradeResult extends MainState {
 
 	private void saveReplayData(int index) {
 		final PlayerResource resource = getMainController().getPlayerResource();
-		if (resource.getCourseScoreData() != null) {
-			if (!saveReplay && resource.isUpdateScore()) {
+		if (resource.getAutoplay() == 0 && resource.getCourseScoreData() != null) {
+			if (saveReplay == -1 && resource.isUpdateScore()) {
 				// 保存されているリプレイデータがない場合は、EASY以上で自動保存
 				ReplayData[] rd = resource.getCourseReplay();
 				getMainController().getPlayDataAccessor().wrireReplayData(rd, resource.getCourseBMSModels(),
 						resource.getConfig().getLnmode(), index, resource.getConstraint());
-				saveReplay = true;
+				saveReplay = index;
 			}
 		}
 	}
@@ -377,9 +388,57 @@ public class GradeResult extends MainState {
 				return score.getMinbp() < oldmisscount;
 			case OPTION_UPDATE_SCORERANK:
 				return rate / 1111 > oldrate / 1111;
-
+			case OPTION_NO_REPLAYDATA:
+				return !getMainController().getPlayDataAccessor().existsReplayData(resource.getCourseBMSModels(),
+						resource.getConfig().getLnmode(), 0,resource.getConstraint());
+			case OPTION_NO_REPLAYDATA2:
+				return !getMainController().getPlayDataAccessor().existsReplayData(resource.getCourseBMSModels(),
+						resource.getConfig().getLnmode(), 1,resource.getConstraint());
+			case OPTION_NO_REPLAYDATA3:
+				return !getMainController().getPlayDataAccessor().existsReplayData(resource.getCourseBMSModels(),
+						resource.getConfig().getLnmode(), 2,resource.getConstraint());
+			case OPTION_NO_REPLAYDATA4:
+				return !getMainController().getPlayDataAccessor().existsReplayData(resource.getCourseBMSModels(),
+						resource.getConfig().getLnmode(), 3,resource.getConstraint());
+			case OPTION_REPLAYDATA:
+				return getMainController().getPlayDataAccessor().existsReplayData(resource.getCourseBMSModels(),
+						resource.getConfig().getLnmode(), 0,resource.getConstraint());
+			case OPTION_REPLAYDATA2:
+				return getMainController().getPlayDataAccessor().existsReplayData(resource.getCourseBMSModels(),
+						resource.getConfig().getLnmode(), 1,resource.getConstraint());
+			case OPTION_REPLAYDATA3:
+				return getMainController().getPlayDataAccessor().existsReplayData(resource.getCourseBMSModels(),
+						resource.getConfig().getLnmode(), 2,resource.getConstraint());
+			case OPTION_REPLAYDATA4:
+				return getMainController().getPlayDataAccessor().existsReplayData(resource.getCourseBMSModels(),
+						resource.getConfig().getLnmode(), 3,resource.getConstraint());
+			case OPTION_REPLAYDATA_SAVED:
+				return saveReplay == 0;
+			case OPTION_REPLAYDATA2_SAVED:
+				return saveReplay == 1;
+			case OPTION_REPLAYDATA3_SAVED:
+				return saveReplay == 2;
+			case OPTION_REPLAYDATA4_SAVED:
+				return saveReplay == 3;
 		}
 		return super.getBooleanValue(id);
 
+	}
+	
+	public void executeClickEvent(int id) {
+		switch (id) {
+		case BUTTON_REPLAY:
+			saveReplayData(0);
+			break;
+		case BUTTON_REPLAY2:
+			saveReplayData(1);
+			break;
+		case BUTTON_REPLAY3:
+			saveReplayData(2);
+			break;
+		case BUTTON_REPLAY4:
+			saveReplayData(3);
+			break;
+		}
 	}
 }

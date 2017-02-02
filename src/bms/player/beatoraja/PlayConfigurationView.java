@@ -42,9 +42,9 @@ import javafx.util.Callback;
  */
 public class PlayConfigurationView implements Initializable {
 
-        @FXML
-        private ResourceBundle resources;
-    
+	@FXML
+	private ResourceBundle resources;
+
 	@FXML
 	private ComboBox<Integer> resolution;
 
@@ -70,8 +70,6 @@ public class PlayConfigurationView implements Initializable {
 	private CheckBox vsync;
 	@FXML
 	private ComboBox<Integer> bgaop;
-	@FXML
-	private CheckBox use2p;
 
 	@FXML
 	private ListView<String> bmsroot;
@@ -146,14 +144,13 @@ public class PlayConfigurationView implements Initializable {
 	private ComboBox<LR2SkinHeader> skin;
 	@FXML
 	private ScrollPane skinconfig;
-	
+
 	@FXML
 	private ComboBox<String> irname;
 	@FXML
 	private TextField iruserid;
 	@FXML
 	private PasswordField irpassword;
-	
 
 	private MainLoader loader;
 
@@ -184,12 +181,13 @@ public class PlayConfigurationView implements Initializable {
 		initComboBox(lntype, new String[] { "LONG NOTE", "CHARGE NOTE", "HELL CHARGE NOTE" });
 		initComboBox(judgealgorithm, new String[] { "LR2風", "本家風", "最下ノーツ最優先" });
 		initComboBox(judgedetail, new String[] { "なし", "EARLY/LATE", "±ms" });
-		initComboBox(skincategory, new String[] { "7KEYS", "5KEYS", "14KEYS", "10KEYS", "9KEYS", "MUSIC SELECT",
-				"DECIDE", "RESULT", "KEY CONFIG", "SKIN SELECT", "SOUND SET", "THEME", "7KEYS BATTLE", "5KEYS BATTLE",
-				"9KEYS BATTLE", "COURSE RESULT" });
-		skincategory.getItems().setAll(0, 1, 2, 3, 4, 6, 7);
-		initComboBox(audio, new String[] { "OpenAL (LibGDX Sound)", "OpenAL (LibGDX AudioDevice)", "ASIO"});
-		audio.getItems().setAll(0,2);
+		initComboBox(skincategory,
+				new String[] { "7KEYS", "5KEYS", "14KEYS", "10KEYS", "9KEYS", "MUSIC SELECT", "DECIDE", "RESULT",
+						"KEY CONFIG", "SKIN SELECT", "SOUND SET", "THEME", "7KEYS BATTLE", "5KEYS BATTLE",
+						"9KEYS BATTLE", "COURSE RESULT" });
+		skincategory.getItems().setAll(0, 1, 2, 3, 4, 6, 7, 15);
+		initComboBox(audio, new String[] { "OpenAL (LibGDX Sound)", "OpenAL (LibGDX AudioDevice)", "ASIO" });
+		audio.getItems().setAll(0, 2);
 
 		skin.setCellFactory(new Callback<ListView<LR2SkinHeader>, ListCell<LR2SkinHeader>>() {
 			public ListCell<LR2SkinHeader> call(ListView<LR2SkinHeader> param) {
@@ -197,7 +195,7 @@ public class PlayConfigurationView implements Initializable {
 			}
 		});
 		skin.setButtonCell(new SkinListCell());
-		
+
 		irname.getItems().setAll(IRConnection.AVAILABLE);
 	}
 
@@ -213,7 +211,6 @@ public class PlayConfigurationView implements Initializable {
 		resolution.setValue(config.getResolution());
 		fullscreen.setSelected(config.isFullscreen());
 		vsync.setSelected(config.isVsync());
-		use2p.setSelected(config.isUse2pside());
 		bgaop.setValue(config.getBga());
 		scoreop.getSelectionModel().select(config.getRandom());
 		gaugeop.getSelectionModel().select(config.getGauge());
@@ -269,7 +266,6 @@ public class PlayConfigurationView implements Initializable {
 		config.setResolution(resolution.getValue());
 		config.setFullscreen(fullscreen.isSelected());
 		config.setVsync(vsync.isSelected());
-		config.setUse2pside(use2p.isSelected());
 		config.setBga(bgaop.getValue());
 		config.setRandom(scoreop.getValue());
 		config.setGauge(gaugeop.getValue());
@@ -304,7 +300,7 @@ public class PlayConfigurationView implements Initializable {
 		config.setJudgedetail(judgedetail.getValue());
 
 		config.setInputduration(getValue(inputduration));
-		
+
 		config.setIrname(irname.getValue());
 		config.setUserid(iruserid.getText());
 		config.setPassword(irpassword.getText());
@@ -404,12 +400,12 @@ public class PlayConfigurationView implements Initializable {
 		enableLanecover.setSelected(conf.isEnablelanecover());
 		lanecover.getValueFactory().setValue((int) (conf.getLanecover() * 1000));
 		enableLift.setSelected(conf.isEnablelift());
-		lift.getValueFactory().setValue((int) conf.getLift() * 1000);
+		lift.getValueFactory().setValue((int) (conf.getLift() * 1000));
 	}
 
 	private <T> T getValue(Spinner<T> spinner) {
-		spinner.getValueFactory().setValue(
-				spinner.getValueFactory().getConverter().fromString(spinner.getEditor().getText()));
+		spinner.getValueFactory()
+				.setValue(spinner.getValueFactory().getConverter().fromString(spinner.getEditor().getText()));
 		return spinner.getValue();
 	}
 
@@ -426,13 +422,13 @@ public class PlayConfigurationView implements Initializable {
 		skin.getItems().clear();
 		LR2SkinHeader[] headers = skinview.getSkinHeader(skincategory.getValue());
 		boolean containsDefault = false;
-		for(LR2SkinHeader h : headers) {
-			if(h.getName().equals("beatoraja default")) {
+		for (LR2SkinHeader h : headers) {
+			if (h.getName().equals("beatoraja default")) {
 				containsDefault = true;
 				break;
 			}
 		}
-		if(!containsDefault) {
+		if (!containsDefault) {
 			skin.getItems().add(null);
 		}
 		skin.getItems().addAll(headers);
@@ -622,17 +618,18 @@ class SkinConfigurationView {
 		List<Path> lr2skinpaths = new ArrayList<Path>();
 		scan(Paths.get("skin"), lr2skinpaths);
 		for (Path path : lr2skinpaths) {
-			if(path.toString().toLowerCase().endsWith(".json")) {
+			if (path.toString().toLowerCase().endsWith(".json")) {
 				SkinLoader loader = new SkinLoader();
 				LR2SkinHeader header = loader.loadHeader(path);
-				if(header != null) {
+				if (header != null) {
 					lr2skinheader.add(header);
 				}
 			} else {
 				LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
 				try {
 					LR2SkinHeader header = loader.loadSkin(path, null);
-					// System.out.println(path.toString() + " : " + header.getName()
+					// System.out.println(path.toString() + " : " +
+					// header.getName()
 					// + " - " + header.getMode());
 					lr2skinheader.add(header);
 				} catch (IOException e) {
@@ -704,8 +701,8 @@ class SkinConfigurationView {
 				});
 			} catch (IOException e) {
 			}
-		} else if (p.getFileName().toString().toLowerCase().endsWith(".lr2skin") ||
-				p.getFileName().toString().toLowerCase().endsWith(".json")) {
+		} else if (p.getFileName().toString().toLowerCase().endsWith(".lr2skin")
+				|| p.getFileName().toString().toLowerCase().endsWith(".json")) {
 			paths.add(p);
 		}
 	}

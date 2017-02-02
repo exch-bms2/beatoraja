@@ -251,29 +251,31 @@ public class BMSPlayer extends MainState {
 
 		int skinmode = (model.getUseKeys() == 7 ? 0
 				: (model.getUseKeys() == 5 ? 1 : (model.getUseKeys() == 14 ? 2 : (model.getUseKeys() == 10 ? 3 : 4))));
-		if (resource.getConfig().getSkin()[skinmode] != null) {
-			try {
-				SkinConfig sc = resource.getConfig().getSkin()[skinmode];
-				if(sc.getPath().endsWith(".json")) {
-					SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
-					setSkin(sl.loadPlaySkin(Paths.get(sc.getPath()), skinmode));
-				} else {
-					LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
-					LR2SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
-					Rectangle srcr = RESOLUTION[header.getResolution()];
-					Rectangle dstr = RESOLUTION[resource.getConfig().getResolution()];
-					LR2PlaySkinLoader dloader = new LR2PlaySkinLoader(srcr.width, srcr.height, dstr.width, dstr.height);
-					setSkin(dloader.loadPlaySkin(Paths.get(sc.getPath()).toFile(), this, header, loader.getOption(),
-							sc.getProperty()));
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-				setSkin(new PlaySkin(model.getUseKeys(), config.isUse2pside(),
-						RESOLUTION[resource.getConfig().getResolution()]));
+		try {
+			SkinConfig sc = resource.getConfig().getSkin()[skinmode];
+			if (sc.getPath().endsWith(".json")) {
+				SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
+				setSkin(sl.loadPlaySkin(Paths.get(sc.getPath()), skinmode));
+			} else {
+				LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
+				LR2SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
+				Rectangle srcr = RESOLUTION[header.getResolution()];
+				Rectangle dstr = RESOLUTION[resource.getConfig().getResolution()];
+				LR2PlaySkinLoader dloader = new LR2PlaySkinLoader(srcr.width, srcr.height, dstr.width, dstr.height);
+				setSkin(dloader.loadPlaySkin(Paths.get(sc.getPath()).toFile(), this, header, loader.getOption(),
+						sc.getProperty()));
 			}
-		} else {
-			setSkin(new PlaySkin(model.getUseKeys(), config.isUse2pside(),
-					RESOLUTION[resource.getConfig().getResolution()]));
+		} catch (Throwable e) {
+			e.printStackTrace();
+			if (skinmode == 0) {
+				SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
+				setSkin(sl.loadDecideSkin(Paths.get("skin/default/play7.json")));
+			} else if (skinmode == 1) {
+				SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
+				setSkin(sl.loadDecideSkin(Paths.get("skin/default/play5.json")));
+			} else {
+				setSkin(new PlaySkin(model.getUseKeys(), RESOLUTION[resource.getConfig().getResolution()]));
+			}
 		}
 	}
 
@@ -1090,7 +1092,7 @@ public class BMSPlayer extends MainState {
 			if (lanerender.isEnableLanecover()) {
 				final PlaySkin skin = (PlaySkin) getSkin();
 				if (lanerender.isEnableLift()) {
-					return -lanerender.getLiftRegion() * lanerender.getLanecover()
+					return -(1 - lanerender.getLiftRegion()) * lanerender.getLanecover()
 							* (skin.getHeight() - skin.getLaneGroupRegion()[0].y);
 				} else {
 					return -lanerender.getLanecover() * (skin.getHeight() - skin.getLaneGroupRegion()[0].y);
