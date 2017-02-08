@@ -208,11 +208,14 @@ public class Config {
 				"http://dpbmsdelta.web.fc2.com/table/insane.html",
 				"http://flowermaster.web.fc2.com/lrnanido/gla/LN.html",
 				"http://stellawingroad.web.fc2.com/new/pms.html" };
-		skin[0] = new SkinConfig("skin/default/play7.json");
-		skin[1] = new SkinConfig("skin/default/play5.json");
-		skin[6] = new SkinConfig("skin/default/decide.json");
-		skin[7] = new SkinConfig("skin/default/result.json");
-		skin[15] = new SkinConfig("skin/default/graderesult.json");
+		skin[0] = new SkinConfig(SkinConfig.DEFAULT_PLAY7);
+		skin[1] = new SkinConfig(SkinConfig.DEFAULT_PLAY5);
+		skin[2] = new SkinConfig(SkinConfig.DEFAULT_PLAY14);
+		skin[3] = new SkinConfig(SkinConfig.DEFAULT_PLAY10);
+		skin[4] = new SkinConfig(SkinConfig.DEFAULT_PLAY9);
+		skin[6] = new SkinConfig(SkinConfig.DEFAULT_DECIDE);
+		skin[7] = new SkinConfig(SkinConfig.DEFAULT_RESULT);
+		skin[15] = new SkinConfig(SkinConfig.DEFAULT_GRADERESULT);
 		judgedetail = 2;
 	}
 
@@ -580,6 +583,16 @@ public class Config {
 	}
 
 	public static class SkinConfig {
+
+		public static final String DEFAULT_PLAY7 = "skin/default/play7.json";
+		public static final String DEFAULT_PLAY5 = "skin/default/play5.json";
+		public static final String DEFAULT_PLAY14 = "skin/default/play14.json";
+		public static final String DEFAULT_PLAY10 = "skin/default/play10.json";
+		public static final String DEFAULT_PLAY9 = "skin/default/play9.json";
+		public static final String DEFAULT_SELECT = "skin/default/select.json";
+		public static final String DEFAULT_DECIDE = "skin/default/decide.json";
+		public static final String DEFAULT_RESULT = "skin/default/result.json";
+		public static final String DEFAULT_GRADERESULT = "skin/default/graderesult.json";
 
 		private String path;
 

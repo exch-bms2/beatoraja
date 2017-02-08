@@ -251,6 +251,7 @@ public class BMSPlayer extends MainState {
 
 		int skinmode = (model.getUseKeys() == 7 ? 0
 				: (model.getUseKeys() == 5 ? 1 : (model.getUseKeys() == 14 ? 2 : (model.getUseKeys() == 10 ? 3 : 4))));
+		final String[] defaultskins = {SkinConfig.DEFAULT_PLAY7, SkinConfig.DEFAULT_PLAY5, SkinConfig.DEFAULT_PLAY14, SkinConfig.DEFAULT_PLAY10, SkinConfig.DEFAULT_PLAY9};
 		try {
 			SkinConfig sc = resource.getConfig().getSkin()[skinmode];
 			if (sc.getPath().endsWith(".json")) {
@@ -267,15 +268,8 @@ public class BMSPlayer extends MainState {
 			}
 		} catch (Throwable e) {
 			e.printStackTrace();
-			if (skinmode == 0) {
-				SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
-				setSkin(sl.loadDecideSkin(Paths.get("skin/default/play7.json")));
-			} else if (skinmode == 1) {
-				SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
-				setSkin(sl.loadDecideSkin(Paths.get("skin/default/play5.json")));
-			} else {
-				setSkin(new PlaySkin(model.getUseKeys(), RESOLUTION[resource.getConfig().getResolution()]));
-			}
+			SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
+			setSkin(sl.loadPlaySkin(Paths.get(defaultskins[skinmode]), skinmode));
 		}
 	}
 
