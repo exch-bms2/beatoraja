@@ -269,7 +269,7 @@ public class SkinProperty {
 	public static final int NUMBER_MISSCOUNT2 = 177;
 	public static final int NUMBER_DIFF_MISSCOUNT = 178;
 
-	public static final int NUMBER_FOLDER_TOTALSONGS = 50000;
+	public static final int NUMBER_FOLDER_TOTALSONGS = 300;
 
 	public static final int OPTION_FOLDERBAR = 1;
 	public static final int OPTION_SONGBAR = 2;

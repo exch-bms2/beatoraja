@@ -15,6 +15,9 @@ import com.badlogic.gdx.utils.Json;
 
 import bms.player.beatoraja.decide.MusicDecideSkin;
 import bms.player.beatoraja.result.*;
+import bms.player.beatoraja.select.MusicSelectSkin;
+import bms.player.beatoraja.select.SkinBar;
+import bms.player.beatoraja.select.SkinDistributionGraph;
 
 public class SkinLoader {
 	
@@ -38,6 +41,10 @@ public class SkinLoader {
 
 	public MusicDecideSkin loadDecideSkin(Path p) {
 		return (MusicDecideSkin) load(p, 6);
+	}
+
+	public MusicSelectSkin loadSelectSkin(Path p) {
+		return (MusicSelectSkin) load(p, 5);
 	}
 
 	public PlaySkin loadPlaySkin(Path p, int skinmode) {
@@ -78,6 +85,9 @@ public class SkinLoader {
 				skin = new PlaySkin(sk.w, sk.h, dstr.width, dstr.height);
 				((PlaySkin)skin).setClose(sk.close);
 				((PlaySkin)skin).setPlaystart(sk.playstart);
+			}
+			if(type == 5) {
+				skin = new MusicSelectSkin(sk.w, sk.h, dstr.width, dstr.height);				
 			}
 			if(type == 6) {
 				skin = new MusicDecideSkin(sk.w, sk.h, dstr.width, dstr.height);				
@@ -199,12 +209,18 @@ public class SkinLoader {
 						if (dst.id.equals(text.id)) {
 							for (Font font : sk.font) {
 								if (text.font.equals(font.id)) {
-									SkinText st = new SkinText(p.getParent().resolve(font.path).toString(), 0,
-											text.size);
-									st.setAlign(text.align);
-									st.setReferenceID(text.ref);
-									obj = st;
-									break;
+									if(text.ref < 0) {
+										Animation a = dst.dst[0];
+										Rectangle r = new Rectangle(a.x * (dstr.width / sk.w), a.y * (dstr.height / sk.h), a.w * (dstr.width / sk.w), a.h * (dstr.height / sk.h));
+										((MusicSelectSkin)skin).setSearchTextRegion(r);
+									} else {
+										SkinText st = new SkinText(p.getParent().resolve(font.path).toString(), 0,
+												text.size);
+										st.setAlign(text.align);
+										st.setReferenceID(text.ref);
+										obj = st;
+										break;										
+									}
 								}
 							}
 							break;
@@ -224,12 +240,23 @@ public class SkinLoader {
 					// graph
 					for (Graph img : sk.graph) {
 						if (dst.id.equals(img.id)) {
-							Texture tex = getTexture(img.src, p);
-							obj = new SkinGraph(getSourceImage(tex,  img.x, img.y, img.w,
-									img.h, img.divx, img.divy), img.timer, img.cycle);
-							((SkinGraph)obj).setDirection(img.angle);
-							((SkinGraph)obj).setReferenceID(img.type);
-							break;
+							if(img.type < 0) {
+								switch(img.type) {
+								case -1:
+									obj = new SkinDistributionGraph(0);
+									break;
+								case -2:
+									obj = new SkinDistributionGraph(1);
+									break;
+								}
+							} else {
+								Texture tex = getTexture(img.src, p);
+								obj = new SkinGraph(getSourceImage(tex,  img.x, img.y, img.w,
+										img.h, img.divx, img.divy), img.timer, img.cycle);
+								((SkinGraph)obj).setDirection(img.angle);
+								((SkinGraph)obj).setReferenceID(img.type);
+								break;								
+							}
 						}
 					}
 
@@ -247,7 +274,7 @@ public class SkinLoader {
 							break;
 						}
 					}
-					// note
+					// note (playskin only)
 					if(sk.note != null && dst.id.equals(sk.note.id)) {
 						TextureRegion[][] notes = getNoteTexture(sk.note.note, p);
 						TextureRegion[][][] lns = new TextureRegion[10][][];
@@ -294,7 +321,7 @@ public class SkinLoader {
 						((PlaySkin)skin).setLaneGroupRegion(gregion);
 						obj = sn;
 					}
-					// gauge
+					// gauge (playskin only)
 					if(sk.gauge != null && dst.id.equals(sk.gauge.id)) {
 						TextureRegion[][] pgaugetex = new TextureRegion[8][];
 						for(int i = 0;i < 8;i++) {
@@ -318,11 +345,11 @@ public class SkinLoader {
 
 						obj = new SkinGauge(gaugetex, 0, 0);
 					}
-					// bga
+					// bga (playskin only)
 					if(sk.bga != null && dst.id.equals(sk.bga.id)) {
 						obj = new SkinBGA();
 					}
-
+					// judge (playskin only)
                     for (Judge judge : sk.judge) {
                         if (dst.id.equals(judge.id)) {
                             SkinImage[] images = new SkinImage[judge.images.length];
@@ -368,6 +395,138 @@ public class SkinLoader {
                             break;
                         }
                     }
+                    
+					if(sk.songlist != null && dst.id.equals(sk.songlist.id)) {
+						SkinBar barobj = new SkinBar(0);
+						
+						SkinImage[] onimage = new SkinImage[sk.songlist.liston.length];
+						SkinImage[] offimage = new SkinImage[sk.songlist.listoff.length];
+						
+ 						for (int i = 0;i < sk.songlist.liston.length;i++) {
+							for (ImageSet imgs : sk.imageset) {
+								if (sk.songlist.liston[i].id.equals(imgs.id)) {
+									TextureRegion[][] tr = new TextureRegion[imgs.images.length][];
+									int timer = -1;
+									int cycle = -1;
+									for(int j = 0;j < imgs.images.length;j++) {
+										for(Image img : sk.image) {
+											if(img.id.equals(imgs.images[j])) {
+												Texture tex = getTexture(img.src, p);
+												tr[j] = getSourceImage(tex,  img.x, img.y, img.w,
+														img.h, img.divx, img.divy);
+												if(timer == -1) {
+													timer = img.timer;
+												}
+												if(cycle == -1) {
+													cycle = img.cycle;
+												}
+												break;
+											}
+										}
+									}
+									
+									onimage[i] = new SkinImage(tr, timer, cycle);
+									offimage[i] = new SkinImage(tr, timer, cycle);
+	                                setDestination(skin, onimage[i],sk.songlist.liston[i]);
+	                                setDestination(skin, offimage[i],sk.songlist.listoff[i]);									
+									break;
+								}
+							}							
+						}
+ 						barobj.setBarImage(onimage, offimage);
+						
+						((MusicSelectSkin)skin).setCenterBar(sk.songlist.center);
+						((MusicSelectSkin)skin).setClickableBar(sk.songlist.clickable);
+						
+						SkinImage[] lamp = new SkinImage[sk.songlist.lamp.length];
+ 						for (int i = 0;i < sk.songlist.lamp.length;i++) {
+							for (Image img : sk.image) {
+								if (sk.songlist.lamp[i].id.equals(img.id)) {
+	                                Texture tex = getTexture(img.src, p);
+	                                lamp[i] = new SkinImage(getSourceImage(tex,  img.x, img.y, img.w,
+	                                        img.h, img.divx, img.divy), img.timer, img.cycle);
+	                                setDestination(skin, lamp[i],sk.songlist.lamp[i]);
+									break;
+								}
+							}							
+						}
+						barobj.setLamp(lamp);
+
+						SkinImage[] trophy = new SkinImage[sk.songlist.trophy.length];
+ 						for (int i = 0;i < sk.songlist.trophy.length;i++) {
+							for (Image img : sk.image) {
+								if (sk.songlist.trophy[i].id.equals(img.id)) {
+	                                Texture tex = getTexture(img.src, p);
+	                                trophy[i] = new SkinImage(getSourceImage(tex,  img.x, img.y, img.w,
+	                                        img.h, img.divx, img.divy), img.timer, img.cycle);
+	                                setDestination(skin, trophy[i],sk.songlist.trophy[i]);
+									break;
+								}
+							}							
+						}
+						barobj.setTrophy(trophy);
+						
+						SkinImage[] label = new SkinImage[sk.songlist.label.length];
+ 						for (int i = 0;i < sk.songlist.label.length;i++) {
+							for (Image img : sk.image) {
+								if (sk.songlist.label[i].id.equals(img.id)) {
+	                                Texture tex = getTexture(img.src, p);
+	                                label[i] = new SkinImage(getSourceImage(tex,  img.x, img.y, img.w,
+	                                        img.h, img.divx, img.divy), img.timer, img.cycle);
+	                                setDestination(skin, label[i],sk.songlist.label[i]);
+									break;
+								}
+							}							
+						}						
+						barobj.setLabel(label);
+						
+						SkinBar.SkinBarText[] text = new SkinBar.SkinBarText[sk.songlist.text.length];
+ 						for (int i = 0;i < sk.songlist.text.length;i++) {
+							for (Text img : sk.text) {
+								if (sk.songlist.text[i].id.equals(img.id)) {
+									for (Font font : sk.font) {
+										if (img.font.equals(font.id)) {
+											text[i] = new SkinBar.SkinBarText(p.getParent().resolve(font.path).toString(), 0,
+													img.size);
+											text[i].setAlign(img.align);
+			                                setDestination(skin, text[i],sk.songlist.text[i]);
+											break;											
+										}
+									}
+									break;
+								}
+							}							
+						}
+ 						barobj.getBarText()[0] = text[0];
+ 						barobj.getBarText()[1] = text[1];
+						
+						SkinNumber[] numbers = new SkinNumber[sk.songlist.level.length];
+						for (int i = 0;i < sk.songlist.level.length;i++) {
+							for (Value value : sk.value) {
+								if (sk.songlist.level[i].id.equals(value.id)) {
+	                                Texture tex = getTexture(value.src, p);
+	                                TextureRegion[] numimages = getSourceImage(tex,  value.x, value.y, value.w,
+	                                        value.h, value.divx, value.divy);
+	                                int d = numimages.length % 10 == 0 ? 10 :11;
+
+	                                TextureRegion[][] nimages = new TextureRegion[value.divx * value.divy / d][d];
+	                                for (int j = 0; j < d; j++) {
+	                                    for (int k = 0; k < value.divx * value.divy / d; k++) {
+	                                        nimages[k][j] = numimages[k * d + j];
+	                                    }
+	                                }
+	                                numbers[i] = new SkinNumber(nimages, value.timer, value.cycle, value.digit, d > 10 ? 2 : 0, value.ref);
+	                                numbers[i].setAlign(value.align);
+	                                setDestination(skin, numbers[i], sk.songlist.level[i]);
+									break;
+								}
+							}
+						}						
+						barobj.setBarlevel(numbers);
+
+						obj = barobj;
+
+					}
                 }
 
 				if (obj != null) {
@@ -495,6 +654,7 @@ public class SkinLoader {
 		public Gauge gauge;
 		public BGA bga;
         public Judge[] judge = new Judge[0];
+		public SongList songlist;
 
 		public Destination[] destination;
 	}
@@ -631,6 +791,19 @@ public class SkinLoader {
         public Destination[] images = new Destination[0];
         public Destination[] numbers = new Destination[0];
         public boolean shift;
+    }
+
+	public static class SongList {
+        public String id;
+        public int center;
+        public int[] clickable = new int[0];
+        public Destination[] listoff = new Destination[0];
+        public Destination[] liston = new Destination[0];
+        public Destination[] text = new Destination[0];
+        public Destination[] level = new Destination[0];
+        public Destination[] lamp = new Destination[0];
+        public Destination[] trophy = new Destination[0];
+        public Destination[] label = new Destination[0];
     }
 
 	public static class Destination {

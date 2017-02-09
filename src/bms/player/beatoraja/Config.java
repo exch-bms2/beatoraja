@@ -213,6 +213,7 @@ public class Config {
 		skin[2] = new SkinConfig(SkinConfig.DEFAULT_PLAY14);
 		skin[3] = new SkinConfig(SkinConfig.DEFAULT_PLAY10);
 		skin[4] = new SkinConfig(SkinConfig.DEFAULT_PLAY9);
+		skin[5] = new SkinConfig(SkinConfig.DEFAULT_SELECT);
 		skin[6] = new SkinConfig(SkinConfig.DEFAULT_DECIDE);
 		skin[7] = new SkinConfig(SkinConfig.DEFAULT_RESULT);
 		skin[15] = new SkinConfig(SkinConfig.DEFAULT_GRADERESULT);

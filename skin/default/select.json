@@ -1,0 +1,725 @@
+{
+	"type":5,
+	"name":"beatoraja default",
+	"w":1280,
+	"h":720,
+	"fadeout":500,
+	"scene":3000,
+	"input":500,
+	"source": [
+		{"id":0, "path":"system.png"},
+		{"id":1, "path":"select.png"},
+		{"id":2, "path":"songbar.png"},
+		{"id":3, "path":"lamp.png"},
+		{"id":4, "path":"trophy.png"},
+		{"id":5, "path":"clear.png"},
+		{"id":6, "path":"number.png"},
+		{"id":7, "path":"panel.png"},
+	],
+	"font": [
+		{"id":0, "path":"VL-Gothic-Regular.ttf"}
+	],
+	"image":[
+		{"id":"bg", "src":1, "x":0, "y":0, "w":1280, "h":720},
+		{"id":"songs_font", "src":0, "x":0, "y":816, "w":220, "h":24},
+		{"id":"7keys", "src":0, "x":240, "y":600, "w":144, "h":24},
+		{"id":"14keys", "src":0, "x":240, "y":624, "w":144, "h":24},
+		{"id":"9keys", "src":0, "x":240, "y":648, "w":144, "h":24},
+		{"id":"5keys", "src":0, "x":240, "y":672, "w":144, "h":24},
+		{"id":"10keys", "src":0, "x":240, "y":696, "w":144, "h":24},
+		{"id":"allkeys", "src":0, "x":240, "y":720, "w":144, "h":24},
+		{"id":"mode", "src":0, "x":240, "y":744, "w":144, "h":24},
+		
+		{"id":"bpm", "src":0, "x":0, "y":768, "w":72, "h":24},
+		{"id":"playlevel", "src":0, "x":0, "y":790, "w":120, "h":24},
+		{"id":"score", "src":0, "x":0, "y":600, "w":120, "h":24},
+
+		{"id":"rank", "src":0, "x":0, "y":672, "w":96, "h":24},
+		{"id":"rank_aaa", "src":0, "x":400, "y":100, "w":72, "h":24},
+		{"id":"rank_aa", "src":0, "x":400, "y":124, "w":72, "h":24},
+		{"id":"rank_a", "src":0, "x":400, "y":148, "w":72, "h":24},
+		{"id":"rank_b", "src":0, "x":400, "y":172, "w":72, "h":24},
+		{"id":"rank_c", "src":0, "x":400, "y":196, "w":72, "h":24},
+		{"id":"rank_d", "src":0, "x":400, "y":220, "w":72, "h":24},
+		{"id":"rank_e", "src":0, "x":400, "y":244, "w":72, "h":24},
+		{"id":"rank_f", "src":0, "x":400, "y":268, "w":72, "h":24},
+
+		{"id":"miss", "src":0, "x":0, "y":624, "w":220, "h":24},
+		{"id":"combo", "src":0, "x":0, "y":648, "w":192, "h":24},
+		{"id":"clear", "src":0, "x":0, "y":696, "w":120, "h":24},
+		{"id":"play", "src":0, "x":0, "y":720, "w":96, "h":24},		
+		
+		{"id":"button_play", "src":0, "x":0, "y":310, "w":15, "h":15, "act":1015},		
+		{"id":"button_autoplay", "src":0, "x":0, "y":325, "w":15, "h":15, "act":1016},		
+		{"id":"button_practice", "src":0, "x":0, "y":340, "w":15, "h":15, "act":2015},		
+		{"id":"button_replay", "src":0, "x":0, "y":355, "w":15, "h":15, "act":1019},		
+		{"id":"button_replay2", "src":0, "x":0, "y":370, "w":15, "h":15, "act":2019},		
+		{"id":"button_replay3", "src":0, "x":0, "y":385, "w":15, "h":15, "act":3019},		
+		{"id":"button_replay4", "src":0, "x":0, "y":400, "w":15, "h":15, "act":4019},		
+		
+		{"id":"totalplay", "src":0, "x":0, "y":720, "w":96, "h":24},
+		{"id":"totalnotes", "src":0, "x":0, "y":744, "w":120, "h":24},
+		
+		{"id":"bar-song", "src":2, "x":0, "y":0, "w":500, "h":30},
+		{"id":"bar-folder", "src":2, "x":0, "y":30, "w":500, "h":30},
+		{"id":"bar-table", "src":2, "x":0, "y":60, "w":500, "h":30},
+		{"id":"bar-grade", "src":2, "x":0, "y":90, "w":500, "h":30},
+		{"id":"bar-nograde", "src":2, "x":0, "y":120, "w":500, "h":30},
+		{"id":"bar-command", "src":2, "x":0, "y":150, "w":500, "h":30},
+		{"id":"bar-search", "src":2, "x":0, "y":180, "w":500, "h":30},
+		
+		{"id":"lamp-noplay", "src":3, "x":0, "y":0, "w":30, "h":30, "divx":2},
+		{"id":"lamp-failed", "src":3, "x":0, "y":30, "w":30, "h":30, "divx":2, "cycle":50},
+		{"id":"lamp-assist", "src":3, "x":0, "y":60, "w":30, "h":30, "divx":2},
+		{"id":"lamp-lassist", "src":3, "x":0, "y":90, "w":30, "h":30, "divx":2},
+		{"id":"lamp-easy", "src":3, "x":0, "y":120, "w":30, "h":30, "divx":2},
+		{"id":"lamp-normal", "src":3, "x":0, "y":150, "w":30, "h":30, "divx":2},
+		{"id":"lamp-hard", "src":3, "x":0, "y":180, "w":30, "h":30, "divx":2},
+		{"id":"lamp-exhard", "src":3, "x":0, "y":210, "w":30, "h":30, "divx":2, "cycle":100},
+		{"id":"lamp-fc", "src":3, "x":0, "y":240, "w":30, "h":30, "divx":2, "cycle":100},
+		{"id":"lamp-perfect", "src":3, "x":0, "y":270, "w":30, "h":30, "divx":2, "cycle":100},
+		{"id":"lamp-max", "src":3, "x":0, "y":300, "w":30, "h":30, "divx":2, "cycle":100},
+		
+		{"id":"trophy-bronze", "src":4, "x":320, "y":0, "w":32, "h":32},
+		{"id":"trophy-silver", "src":4, "x":352, "y":0, "w":32, "h":32},
+		{"id":"trophy-gold", "src":4, "x":384, "y":0, "w":32, "h":32},
+		
+		{"id":"label-ln", "src":0, "x":0, "y":420, "w":16, "h":30},
+		{"id":"label-random", "src":0, "x":0, "y":450, "w":16, "h":30},
+		{"id":"label-mine", "src":0, "x":0, "y":480, "w":16, "h":30},
+		
+		{"id":"sort", "src":0, "x":400, "y":720, "w":96, "h":24},
+		{"id":"sortset", "src":0, "x":400, "y":600, "w":120, "h":120, "divy":5, "len":5, "ref":1012},
+
+		{"id":"lnmode", "src":0, "x":550, "y":672, "w":144, "h":24},
+		{"id":"lnmodeset", "src":0, "x":550, "y":600, "w":72, "h":72, "divy":3, "len":3, "ref":1308},
+		
+		{"id":"state_clear", "src":5, "x":0, "y":0, "w":200, "h":220, "divy":11, "len":11, "ref":370},
+		
+		{"id":"lamp", "src":0, "x":400, "y":648, "w":96, "h":24},
+		
+		{"id":"blank", "src":0, "x":8, "y":0, "w":8, "h":8},
+
+		{"id":"option-panel1", "src":7, "x":0, "y":0, "w":290, "h":294},
+		{"id":"option-panel2", "src":7, "x":298, "y":0, "w":300, "h":159},
+		{"id":"option-panel3", "src":7, "x":598, "y":0, "w":300, "h":188},
+		
+		{"id":"option-selector101", "src":7, "x":3, "y":429, "w":67, "h":150},
+		{"id":"option-selector102", "src":7, "x":3, "y":414, "w":67, "h":150},
+		{"id":"option-selector103", "src":7, "x":3, "y":399, "w":67, "h":150},
+		{"id":"option-selector104", "src":7, "x":3, "y":384, "w":67, "h":150},
+		{"id":"option-selector105", "src":7, "x":3, "y":369, "w":67, "h":150},
+		{"id":"option-selector106", "src":7, "x":3, "y":354, "w":67, "h":150},
+		{"id":"option-selector107", "src":7, "x":3, "y":339, "w":67, "h":150},
+		{"id":"option-selector108", "src":7, "x":3, "y":324, "w":67, "h":150},
+		{"id":"option-selector109", "src":7, "x":3, "y":309, "w":67, "h":150},
+		{"id":"option-selector1010", "src":7, "x":3, "y":294, "w":67, "h":150},
+		{"id":"option-selector21", "src":7, "x":299, "y":175, "w":67, "h":15},
+		{"id":"option-selector22", "src":7, "x":299, "y":160, "w":67, "h":15},
+		{"id":"option-selector31", "src":7, "x":218, "y":324, "w":67, "h":45},
+		{"id":"option-selector32", "src":7, "x":218, "y":309, "w":67, "h":45},
+		{"id":"option-selector33", "src":7, "x":218, "y":294, "w":67, "h":45},
+		{"id":"option-selector51", "src":7, "x":146, "y":354, "w":67, "h":75},
+		{"id":"option-selector52", "src":7, "x":146, "y":339, "w":67, "h":75},
+		{"id":"option-selector53", "src":7, "x":146, "y":324, "w":67, "h":75},
+		{"id":"option-selector54", "src":7, "x":146, "y":309, "w":67, "h":75},
+		{"id":"option-selector55", "src":7, "x":146, "y":294, "w":67, "h":75},
+		{"id":"option-selector61", "src":7, "x":75, "y":369, "w":67, "h":90},
+		{"id":"option-selector62", "src":7, "x":75, "y":354, "w":67, "h":90},
+		{"id":"option-selector63", "src":7, "x":75, "y":339, "w":67, "h":90},
+		{"id":"option-selector64", "src":7, "x":75, "y":324, "w":67, "h":90},
+		{"id":"option-selector65", "src":7, "x":75, "y":309, "w":67, "h":90},
+		{"id":"option-selector66", "src":7, "x":75, "y":294, "w":67, "h":90},
+		
+	],
+	"imageset":[
+		{"id":"bar", "images":["bar-song","bar-folder","bar-table","bar-grade","bar-nograde","bar-command","bar-search"]},
+		{"id":"modeset", "ref":1011, "images":["allkeys","5keys","7keys","10keys","14keys","9keys"]},
+		{"id":"option-exjudge", "ref":1301, "images":["option-selector21","option-selector22"]},
+		{"id":"option-constant", "ref":1302, "images":["option-selector21","option-selector22"]},
+		{"id":"option-judgearea", "ref":1303, "images":["option-selector21","option-selector22"]},
+		{"id":"option-legacy", "ref":1304, "images":["option-selector21","option-selector22"]},
+		{"id":"option-marknote", "ref":1305, "images":["option-selector21","option-selector22"]},
+		{"id":"option-bpmguide", "ref":1306, "images":["option-selector21","option-selector22"]},
+		{"id":"option-nomine", "ref":1307, "images":["option-selector21","option-selector22"]},
+		{"id":"option-random", "ref":1042, "images":["option-selector101","option-selector102","option-selector103",
+		"option-selector104","option-selector105","option-selector106","option-selector107","option-selector108","option-selector109","option-selector1010"]},
+		{"id":"option-gauge", "ref":1040, "images":["option-selector61","option-selector62","option-selector63","option-selector64","option-selector65","option-selector66"]},
+		{"id":"option-hsfix", "ref":1055, "images":["option-selector51","option-selector52","option-selector53","option-selector54","option-selector55"]},
+		{"id":"option-random2", "ref":1043, "images":["option-selector101","option-selector102","option-selector103",
+		"option-selector104","option-selector105","option-selector106","option-selector107","option-selector108","option-selector109","option-selector1010"]},
+		{"id":"option-dp", "ref":1054, "images":["option-selector31","option-selector32","option-selector33"]},
+		{"id":"option-bga", "ref":1072, "images":["option-selector31","option-selector32","option-selector33"]},
+		{"id":"option-judgedetail", "ref":1078, "images":["option-selector31","option-selector32","option-selector33"]},
+	],
+	"value":[
+		{"id":"songs_count", "src":6, "x":0, "y":0, "w":240, "h":24, "divx":10, "digit":5, "ref":300},
+		{"id":"maxbpm", "src":6, "x":0, "y":0, "w":240, "h":24, "divx":10, "digit":4, "ref":90},
+		{"id":"minbpm", "src":6, "x":0, "y":0, "w":240, "h":24, "divx":10, "digit":4, "ref":91},
+		{"id":"playlevel_count", "src":6, "x":0, "y":0, "w":240, "h":24, "divx":10, "digit":3, "ref":96},
+		{"id":"score_count", "src":6, "x":0, "y":0, "w":240, "h":24, "divx":10, "digit":4, "ref":71},		
+		{"id":"scorerate_count", "src":6, "x":0, "y":0, "w":240, "h":24, "divx":10, "digit":3, "ref":102},		
+		{"id":"scorerate_dot_count", "src":6, "x":0, "y":0, "w":240, "h":24, "divx":10, "digit":1, "ref":103},
+		
+		{"id":"miss_count", "src":6, "x":0, "y":0, "w":240, "h":24, "divx":10, "digit":4, "ref":76},
+		{"id":"combo_count", "src":6, "x":0, "y":0, "w":240, "h":24, "divx":10, "digit":4, "ref":75},
+		{"id":"clear_count", "src":6, "x":0, "y":0, "w":240, "h":24, "divx":10, "digit":4, "ref":78},
+		{"id":"play_count", "src":6, "x":0, "y":0, "w":240, "h":24, "divx":10, "digit":4, "ref":77},
+		
+		{"id":"totalplay_count", "src":6, "x":0, "y":0, "w":240, "h":24, "divx":10, "digit":6, "ref":30},
+		{"id":"totalnotes_count", "src":6, "x":0, "y":0, "w":240, "h":24, "divx":10, "digit":10, "ref":333},
+		
+		{"id":"playlevel_bar", "src":6, "x":0, "y":0, "w":240, "h":24, "divx":10, "digit":2},
+		
+		{"id":"time_year", "src":6, "x":0, "y":0, "w":240, "h":24, "divx":10, "digit":4, "ref":21},
+		{"id":"time_month", "src":6, "x":0, "y":0, "w":240, "h":24, "divx":10, "digit":2, "padding":1, "ref":22},
+		{"id":"time_day", "src":6, "x":0, "y":0, "w":240, "h":24, "divx":10, "digit":2, "padding":1, "ref":23},
+		{"id":"time_hour", "src":6, "x":0, "y":0, "w":240, "h":24, "divx":10, "digit":2, "padding":1, "ref":24},
+		{"id":"time_minute", "src":6, "x":0, "y":0, "w":240, "h":24, "divx":10, "digit":2, "padding":1, "ref":25},
+		{"id":"time_second", "src":6, "x":0, "y":0, "w":240, "h":24, "divx":10, "digit":2, "padding":1, "ref":26},
+		
+		{"id":"duration", "src":6, "x":0, "y":0, "w":240, "h":24, "divx":10, "digit":4, "ref":312},
+		{"id":"judgetiming", "src":6, "x":0, "y":24, "w":288, "h":48, "divx":12, "divy":2, "digit":3, "ref":12},		
+	],
+	
+	"text":[
+		{"id":"dir", "font":0, "size":24, "ref":1000},
+		{"id":"genre", "font":0, "size":24, "ref":13},
+		{"id":"title", "font":0, "size":24, "ref":12},
+		{"id":"artist", "font":0, "size":24, "ref":16},
+		{"id":"course1", "font":0, "size":24, "ref":150},
+		{"id":"course2", "font":0, "size":24, "ref":151},
+		{"id":"course3", "font":0, "size":24, "ref":152},
+		{"id":"course4", "font":0, "size":24, "ref":153},
+		
+		{"id":"bartext", "font":0, "size":24}
+		{"id":"search", "font":0, "size":24, "ref":-1},
+	],
+	"graph":[
+		{"id":"graph-lamp", "type":-1},
+		{"id":"graph-rank", "type":-2},
+	
+	],
+	"songlist":{
+		"id":"songlist",
+		"center":10,
+		"clickable":[2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19],
+		"listoff":[
+			{"id":"bar", "dst":[
+			{"x":800, "y":720, "w":500, "h":36},
+			]},
+			{"id":"bar", "dst":[
+			{"x":800, "y":684, "w":500, "h":36},		
+			]},
+			{"id":"bar", "dst":[
+			{"x":800, "y":648, "w":500, "h":36},		
+			]},
+			{"id":"bar", "dst":[
+			{"x":800, "y":612, "w":500, "h":36},		
+			]},
+			{"id":"bar", "dst":[
+			{"x":800, "y":576, "w":500, "h":36},		
+			]},
+			{"id":"bar", "dst":[
+			{"x":800, "y":540, "w":500, "h":36},		
+			]},
+			{"id":"bar", "dst":[
+			{"x":800, "y":504, "w":500, "h":36},		
+			]},
+			{"id":"bar", "dst":[
+			{"x":800, "y":468, "w":500, "h":36},		
+			]},
+			{"id":"bar", "dst":[
+			{"x":800, "y":432, "w":500, "h":36},		
+			]},
+			{"id":"bar", "dst":[
+			{"x":800, "y":396, "w":500, "h":36},		
+			]},
+			{"id":"bar", "dst":[
+			{"x":800, "y":360, "w":500, "h":36},		
+			]},
+			{"id":"bar", "dst":[
+			{"x":800, "y":324, "w":500, "h":36},		
+			]},
+			{"id":"bar", "dst":[
+			{"x":800, "y":288, "w":500, "h":36},		
+			]},
+			{"id":"bar", "dst":[
+			{"x":800, "y":252, "w":500, "h":36},		
+			]},
+			{"id":"bar", "dst":[
+			{"x":800, "y":216, "w":500, "h":36},		
+			]},
+			{"id":"bar", "dst":[
+			{"x":800, "y":180, "w":500, "h":36},		
+			]},
+			{"id":"bar", "dst":[
+			{"x":800, "y":144, "w":500, "h":36},		
+			]},
+			{"id":"bar", "dst":[
+			{"x":800, "y":108, "w":500, "h":36},		
+			]},
+			{"id":"bar", "dst":[
+			{"x":800, "y":72, "w":500, "h":36},		
+			]},
+			{"id":"bar", "dst":[
+			{"x":800, "y":36, "w":500, "h":36},		
+			]},
+			{"id":"bar", "dst":[
+			{"x":800, "y":0, "w":500, "h":36},		
+			]},
+			{"id":"bar", "dst":[
+			{"x":800, "y":-36, "w":500, "h":36},		
+			]},
+		],
+		"liston":[
+			{"id":"bar", "dst":[
+			{"x":780, "y":720, "w":500, "h":36},
+			]},
+			{"id":"bar", "dst":[
+			{"x":780, "y":684, "w":500, "h":36},		
+			]},
+			{"id":"bar", "dst":[
+			{"x":780, "y":648, "w":500, "h":36},		
+			]},
+			{"id":"bar", "dst":[
+			{"x":780, "y":612, "w":500, "h":36},		
+			]},
+			{"id":"bar", "dst":[
+			{"x":780, "y":576, "w":500, "h":36},		
+			]},
+			{"id":"bar", "dst":[
+			{"x":780, "y":540, "w":500, "h":36},		
+			]},
+			{"id":"bar", "dst":[
+			{"x":780, "y":504, "w":500, "h":36},		
+			]},
+			{"id":"bar", "dst":[
+			{"x":780, "y":468, "w":500, "h":36},		
+			]},
+			{"id":"bar", "dst":[
+			{"x":780, "y":432, "w":500, "h":36},		
+			]},
+			{"id":"bar", "dst":[
+			{"x":780, "y":396, "w":500, "h":36},		
+			]},
+			{"id":"bar", "dst":[
+			{"x":780, "y":360, "w":500, "h":36},		
+			]},
+			{"id":"bar", "dst":[
+			{"x":780, "y":324, "w":500, "h":36},		
+			]},
+			{"id":"bar", "dst":[
+			{"x":780, "y":288, "w":500, "h":36},		
+			]},
+			{"id":"bar", "dst":[
+			{"x":780, "y":252, "w":500, "h":36},		
+			]},
+			{"id":"bar", "dst":[
+			{"x":780, "y":216, "w":500, "h":36},		
+			]},
+			{"id":"bar", "dst":[
+			{"x":780, "y":180, "w":500, "h":36},		
+			]},
+			{"id":"bar", "dst":[
+			{"x":780, "y":144, "w":500, "h":36},		
+			]},
+			{"id":"bar", "dst":[
+			{"x":780, "y":108, "w":500, "h":36},		
+			]},
+			{"id":"bar", "dst":[
+			{"x":780, "y":72, "w":500, "h":36},		
+			]},
+			{"id":"bar", "dst":[
+			{"x":780, "y":36, "w":500, "h":36},		
+			]},
+			{"id":"bar", "dst":[
+			{"x":780, "y":0, "w":500, "h":36},		
+			]},
+			{"id":"bar", "dst":[
+			{"x":780, "y":-36, "w":500, "h":36},		
+			]},
+		],
+		"text":[
+			{"id":"bartext", "dst":[
+				{"x":80, "y":30, "w":18, "h":24}
+			]},
+			{"id":"bartext", "dst":[
+				{"x":80, "y":30, "w":18, "h":24, "b":0}
+			]},
+		],
+		"level":[
+			{"id":"playlevel_bar", "dst":[
+				{"x":20, "y":8, "w":24, "h":24}
+			]},
+			{"id":"playlevel_bar", "dst":[
+				{"x":20, "y":8, "w":24, "h":24, "r":0, "b":0}
+			]},
+			{"id":"playlevel_bar", "dst":[
+				{"x":20, "y":8, "w":24, "h":24, "r":0, "g":0}
+			]},
+			{"id":"playlevel_bar", "dst":[
+				{"x":20, "y":8, "w":24, "h":24, "b":0}
+			]},
+			{"id":"playlevel_bar", "dst":[
+				{"x":20, "y":8, "w":24, "h":24, "g":0, "b":0}
+			]},
+			{"id":"playlevel_bar", "dst":[
+				{"x":20, "y":8, "w":24, "h":24, "g":0}
+			]},
+			{"id":"playlevel_bar", "dst":[
+				{"x":20, "y":8, "w":24, "h":24, "r":128, "g":128, "b":128}
+			]},
+		],
+		"lamp":[
+			{"id":"lamp-noplay", "dst":[
+				{"x":0, "y":2, "w":15, "h":34}
+			]},
+			{"id":"lamp-failed", "dst":[
+				{"x":0, "y":2, "w":15, "h":34}
+			]},
+			{"id":"lamp-assist", "dst":[
+				{"x":0, "y":2, "w":15, "h":34}
+			]},
+			{"id":"lamp-lassist", "dst":[
+				{"x":0, "y":2, "w":15, "h":34}
+			]},
+			{"id":"lamp-easy", "dst":[
+				{"x":0, "y":2, "w":15, "h":34}
+			]},
+			{"id":"lamp-normal", "dst":[
+				{"x":0, "y":2, "w":15, "h":34}
+			]},
+			{"id":"lamp-hard", "dst":[
+				{"x":0, "y":2, "w":15, "h":34}
+			]},
+			{"id":"lamp-exhard", "dst":[
+				{"x":0, "y":2, "w":15, "h":34}
+			]},
+			{"id":"lamp-fc", "dst":[
+				{"x":0, "y":2, "w":15, "h":34}
+			]},
+			{"id":"lamp-perfect", "dst":[
+				{"x":0, "y":2, "w":15, "h":34}
+			]},
+			{"id":"lamp-max", "dst":[
+				{"x":0, "y":2, "w":15, "h":34}
+			]},
+		],
+		"trophy":[
+			{"id":"trophy-bronze", "dst":[
+				{"x":20, "y":4, "w":32, "h":32}
+			]},
+			{"id":"trophy-silver", "dst":[
+				{"x":20, "y":4, "w":32, "h":32}
+			]},
+			{"id":"trophy-gold", "dst":[
+				{"x":20, "y":4, "w":32, "h":32}
+			]},
+		],
+		"label":[
+			{"id":"label-ln", "dst":[
+				{"x":-20, "y":5, "w":16, "h":30}
+			]},
+			{"id":"label-random", "dst":[
+				{"x":-40, "y":5, "w":16, "h":30}
+			]},
+			{"id":"label-mine", "dst":[
+				{"x":-60, "y":5, "w":16, "h":30}
+			]},
+		]
+	},
+	
+	"destination":[
+		{"id":"bg", "dst":[
+			{"x":0, "y":0, "w":1280, "h":720, "a":128}
+		]},
+		{"id":"songs_font", "op":[1], "dst":[
+			{"x":95, "y":482, "w":165, "h":18}
+		]},
+		{"id":"songs_count", "op":[1], "dst":[
+			{"x":260, "y":482, "w":18, "h":18}
+		]},
+		{"id":-102, "dst":[
+			{"x":400, "y":400, "w":300, "h":90}
+		]},
+		
+		{"id":"7keys", "op":[160], "dst":[
+			{"x":100, "y":512, "w":108, "h":18}
+		]},
+		{"id":"14keys", "op":[162], "dst":[
+			{"x":100, "y":512, "w":108, "h":18}
+		]},
+		{"id":"9keys", "op":[164], "dst":[
+			{"x":100, "y":512, "w":108, "h":18}
+		]},
+		{"id":"5keys", "op":[161], "dst":[
+			{"x":100, "y":512, "w":108, "h":18}
+		]},
+		{"id":"10keys", "op":[163], "dst":[
+			{"x":100, "y":512, "w":108, "h":18}
+		]},
+		{"id":"bpm", "op":[2], "dst":[
+			{"x":300, "y":512, "w":60, "h":18}
+		]},
+		{"id":"minbpm", "dst":[
+			{"x":370, "y":512, "w":18, "h":18}
+		]},
+		{"id":"maxbpm", "dst":[
+			{"x":442, "y":512, "w":18, "h":18}
+		]},
+		{"id":"playlevel", "op":[2], "dst":[
+			{"x":100, "y":482, "w":90, "h":18}
+		]},
+		{"id":"playlevel_count", "dst":[
+			{"x":200, "y":482, "w":18, "h":18}
+		]},
+		{"id":"score", "op":[2], "dst":[
+			{"x":80, "y":372, "w":100, "h":18}
+		]},
+		{"id":"score", "op":[3], "dst":[
+			{"x":80, "y":372, "w":100, "h":18}
+		]},
+		{"id":"score_count", "dst":[
+			{"x":200, "y":372, "w":18, "h":18}
+		]},
+		
+		{"id":"rank", "op":[2], "dst":[
+			{"x":330, "y":372, "w":100, "h":18}
+		]},
+		{"id":"rank", "op":[3], "dst":[
+			{"x":330, "y":372, "w":100, "h":18}
+		]},
+		
+		{"id":"rank_aaa", "op":[2,200], "dst":[
+			{"x":450, "y":372, "w":54, "h":18}
+		]},
+		{"id":"rank_aa", "op":[2,201], "dst":[
+			{"x":450, "y":372, "w":54, "h":18}
+		]},
+		{"id":"rank_a", "op":[2,202], "dst":[
+			{"x":450, "y":372, "w":54, "h":18}
+		]},
+		{"id":"rank_b", "op":[2,203], "dst":[
+			{"x":450, "y":372, "w":54, "h":18}
+		]},
+		{"id":"rank_c", "op":[2,204], "dst":[
+			{"x":450, "y":372, "w":54, "h":18}
+		]},
+		{"id":"rank_d", "op":[2,205], "dst":[
+			{"x":450, "y":372, "w":54, "h":18}
+		]},
+		{"id":"rank_e", "op":[2,206], "dst":[
+			{"x":450, "y":372, "w":54, "h":18}
+		]},
+		{"id":"rank_f", "op":[2,207], "dst":[
+			{"x":450, "y":372, "w":54, "h":18}
+		]},
+		{"id":"scorerate_count", "dst":[
+			{"x":528, "y":372, "w":18, "h":18}
+		]},
+		{"id":"scorerate_dot_count", "dst":[
+			{"x":582, "y":372, "w":12, "h":12}
+		]},
+		
+		{"id":"miss", "op":[2], "dst":[
+			{"x":80, "y":342, "w":100, "h":18}
+		]},
+		{"id":"miss", "op":[3], "dst":[
+			{"x":80, "y":342, "w":100, "h":18}
+		]},
+		{"id":"miss_count", "dst":[
+			{"x":200, "y":342, "w":18, "h":18}
+		]},
+		{"id":"combo", "op":[2], "dst":[
+			{"x":330, "y":342, "w":100, "h":18}
+		]},
+		{"id":"combo", "op":[3], "dst":[
+			{"x":330, "y":342, "w":100, "h":18}
+		]},
+		{"id":"combo_count", "dst":[
+			{"x":450, "y":342, "w":18, "h":18}
+		]},
+		{"id":"clear", "op":[2], "dst":[
+			{"x":80, "y":312, "w":100, "h":18}
+		]},
+		{"id":"clear", "op":[3], "dst":[
+			{"x":80, "y":312, "w":100, "h":18}
+		]},
+		{"id":"clear_count", "dst":[
+			{"x":320, "y":312, "w":18, "h":18}
+		]},
+		{"id":"play", "op":[2], "dst":[
+			{"x":200, "y":312, "w":100, "h":18}
+		]},
+		{"id":"play", "op":[3], "dst":[
+			{"x":200, "y":312, "w":100, "h":18}
+		]},
+		{"id":"play_count", "dst":[
+			{"x":400, "y":312, "w":18, "h":18}
+		]},
+		
+		{"id":"button_play", "op":[2], "dst":[
+			{"x":80, "y":450, "w":30, "h":30}
+		]},
+		{"id":"button_play", "op":[3], "dst":[
+			{"x":80, "y":450, "w":30, "h":30}
+		]},
+		{"id":"button_autoplay", "op":[2], "dst":[
+			{"x":130, "y":450, "w":30, "h":30}
+		]},
+		{"id":"button_autoplay", "op":[3], "dst":[
+			{"x":130, "y":450, "w":30, "h":30}
+		]},
+		{"id":"button_practice", "op":[2], "dst":[
+			{"x":180, "y":450, "w":30, "h":30}
+		]},
+		{"id":"button_replay", "op":[197], "dst":[
+			{"x":230, "y":450, "w":30, "h":30}
+		]},
+		{"id":"button_replay2", "op":[1197], "dst":[
+			{"x":280, "y":450, "w":30, "h":30}
+		]},
+		{"id":"button_replay3", "op":[2197], "dst":[
+			{"x":330, "y":450, "w":30, "h":30}
+		]},
+		{"id":"button_replay4", "op":[3197], "dst":[
+			{"x":380, "y":450, "w":30, "h":30}
+		]},
+
+		{"id":"lamp", "op":[1], "dst":[
+			{"x":36, "y":362, "w":48, "h":24}
+		]},
+		{"id":"rank", "op":[1], "dst":[
+			{"x":36, "y":322, "w":48, "h":24}
+		]},
+		{"id":"graph-lamp", "op":[1], "dst":[
+			{"x":90, "y":362, "w":300, "h":24}
+		]},
+		{"id":"graph-rank", "op":[1], "dst":[
+			{"x":90, "y":322, "w":300, "h":24}
+		]},
+
+		{"id":"totalplay", "dst":[
+			{"x":60, "y":102, "w":100, "h":18}
+		]},
+		{"id":"totalplay_count", "dst":[
+			{"x":160, "y":102, "w":18, "h":18}
+		]},
+		{"id":"totalnotes", "dst":[
+			{"x":330, "y":102, "w":100, "h":18}
+		]},
+		{"id":"totalnotes_count", "dst":[
+			{"x":430, "y":102, "w":18, "h":18}
+		]},
+	
+		{"id":"dir", "dst":[{"x":40, "y":670, "w":18, "h":24, "g":128}]},
+		{"id":"genre", "dst":[{"x":100, "y":630, "w":18, "h":20}]},
+		{"id":"title", "dst":[{"x":100, "y":600, "w":18, "h":24}]},
+		{"id":"artist", "dst":[{"x":100, "y":570, "w":18, "h":20}]},
+	
+		{"id":"course1", "dst":[{"x":80, "y":596, "w":18, "h":24, "b":0}]},
+		{"id":"course2", "dst":[{"x":80, "y":568, "w":18, "h":24, "b":0}]},
+		{"id":"course3", "dst":[{"x":80, "y":540, "w":18, "h":24, "b":0}]},
+		{"id":"course4", "dst":[{"x":80, "y":512, "w":18, "h":24, "b":0}]},
+
+		{"id":"state_clear", "dst":[{"x":100, "y":405, "w":200, "h":20}]},
+
+		{"id":"songlist"},
+		
+		{"id":"mode", "dst":[{"x":10, "y":10, "w":108, "h":18}]},
+		{"id":"modeset", "dst":[{"x":120, "y":10, "w":108, "h":18}]},
+		
+		{"id":"sort", "dst":[{"x":280, "y":10, "w":72, "h":18}]},
+		{"id":"sortset", "dst":[{"x":390, "y":10, "w":108, "h":18}]},
+		
+		{"id":"lnmode", "dst":[{"x":540, "y":10, "w":108, "h":18}]},
+		{"id":"lnmodeset", "dst":[{"x":700, "y":10, "w":54, "h":18}]},
+		
+		{"id":"blank", "loop":300, "op":[21], "timer":21, "dst":[
+			{"time":0, "x":0, "y":0, "w":1280, "h":720, "a":0},
+			{"time":300, "a":128},
+		]},
+		{"id":"option-panel1", "loop":300, "op":[21], "timer":21,  "dst":[
+			{"time":0, "x":50, "y":100, "w":580, "h":588, "a":0},
+			{"time":300, "a":255}
+		]},
+		{"id":"option-random", "op":[21], "dst":[
+			{"x":56, "y":100, "w":134, "h":300}
+		]},
+		{"id":"option-gauge", "op":[21], "dst":[
+			{"x":200, "y":220, "w":134, "h":180}
+		]},
+		{"id":"option-hsfix", "op":[21], "dst":[
+			{"x":342, "y":250, "w":134, "h":150}
+		]},
+		{"id":"option-random2", "op":[21], "dst":[
+			{"x":486, "y":100, "w":134, "h":300}
+		]},
+		{"id":"option-dp", "op":[21], "dst":[
+			{"x":270, "y":594, "w":134, "h":90}
+		]},
+		
+		{"id":"blank", "loop":300, "op":[22], "timer":22, "dst":[
+			{"time":0, "x":0, "y":0, "w":1280, "h":720, "a":0},
+			{"time":300, "a":128},
+		]},
+		{"id":"option-panel2", "loop":300, "op":[22], "timer":22, "dst":[
+			{"time":0, "x":50, "y":370, "w":600, "h":318, "a":0},
+			{"time":300, "a":255}
+		]},
+		{"id":"option-exjudge", "op":[22], "dst":[
+			{"x":52, "y":368, "w":134, "h":30}
+		]},
+		{"id":"option-constant", "op":[22], "dst":[
+			{"x":124, "y":596, "w":134, "h":30}
+		]},
+		{"id":"option-judgearea", "op":[22], "dst":[
+			{"x":192, "y":368, "w":134, "h":30}
+		]},
+		{"id":"option-legacy", "op":[22], "dst":[
+			{"x":264, "y":596, "w":134, "h":30}
+		]},
+		{"id":"option-marknote", "op":[22], "dst":[
+			{"x":332, "y":368, "w":134, "h":30}
+		]},
+		{"id":"option-bpmguide", "op":[22], "dst":[
+			{"x":404, "y":596, "w":134, "h":30}
+		]},
+		{"id":"option-nomine", "op":[22], "dst":[
+			{"x":472, "y":368, "w":134, "h":30}
+		]},
+		
+		{"id":"blank", "loop":300, "op":[23], "timer":23, "dst":[
+			{"time":0, "x":0, "y":0, "w":1280, "h":720, "a":0},
+			{"time":300, "a":128},
+		]},
+		{"id":"option-panel3", "loop":300, "op":[23], "timer":23, "dst":[
+			{"time":0, "x":50, "y":314, "w":600, "h":374, "a":0},
+			{"time":300, "a":255}
+		]},
+		{"id":"option-bga", "op":[23], "dst":[
+			{"x":52, "y":312, "w":134, "h":90}
+		]},
+		{"id":"option-judgedetail", "op":[23], "dst":[
+			{"x":120, "y":594, "w":134, "h":90}
+		]},
+		{"id":"duration", "op":[23], "dst":[
+			{"x":440, "y":598, "w":12, "h":24}
+		]},
+		{"id":"judgetiming", "op":[23], "dst":[
+			{"x":512, "y":376, "w":12, "h":24}
+		]},		
+		
+		{"id":"search", "dst":[
+			{"x":10, "y":60, "w":400, "h":24}
+		]},
+		
+		{"id":"time_year", "dst":[{"x":1028, "y":2, "w":12, "h":12}]},
+		{"id":"time_month", "dst":[{"x":1088, "y":2, "w":12, "h":12}]},
+		{"id":"time_day", "dst":[{"x":1130, "y":2, "w":12, "h":12}]},
+		{"id":"time_hour", "dst":[{"x":1178, "y":2, "w":12, "h":12}]},
+		{"id":"time_minute", "dst":[{"x":1214, "y":2, "w":12, "h":12}]},
+		{"id":"time_second", "dst":[{"x":1250, "y":2, "w":12, "h":12}]},		
+	]
+}

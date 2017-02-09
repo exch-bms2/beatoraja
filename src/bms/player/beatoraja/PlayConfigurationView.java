@@ -185,7 +185,7 @@ public class PlayConfigurationView implements Initializable {
 				new String[] { "7KEYS", "5KEYS", "14KEYS", "10KEYS", "9KEYS", "MUSIC SELECT", "DECIDE", "RESULT",
 						"KEY CONFIG", "SKIN SELECT", "SOUND SET", "THEME", "7KEYS BATTLE", "5KEYS BATTLE",
 						"9KEYS BATTLE", "COURSE RESULT" });
-		skincategory.getItems().setAll(0, 1, 2, 3, 4, 6, 7, 15);
+		skincategory.getItems().setAll(0, 1, 2, 3, 4, 5, 6, 7, 15);
 		initComboBox(audio, new String[] { "OpenAL (LibGDX Sound)", "OpenAL (LibGDX AudioDevice)", "ASIO" });
 		audio.getItems().setAll(0, 2);
 
@@ -421,16 +421,6 @@ public class PlayConfigurationView implements Initializable {
 
 		skin.getItems().clear();
 		LR2SkinHeader[] headers = skinview.getSkinHeader(skincategory.getValue());
-		boolean containsDefault = false;
-		for (LR2SkinHeader h : headers) {
-			if (h.getName().equals("beatoraja default")) {
-				containsDefault = true;
-				break;
-			}
-		}
-		if (!containsDefault) {
-			skin.getItems().add(null);
-		}
 		skin.getItems().addAll(headers);
 		mode = skincategory.getValue();
 		if (config.getSkin()[skincategory.getValue()] != null) {

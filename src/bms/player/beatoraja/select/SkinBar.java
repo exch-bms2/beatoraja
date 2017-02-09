@@ -59,6 +59,11 @@ public class SkinBar extends SkinObject {
         this.images = images;
         this.cycle = cycle;
     }
+    
+    public void setBarImage(SkinImage[] onimage, SkinImage[] offimage) {
+    	barimageon = onimage;
+    	barimageoff = offimage;
+    }
 
     public SkinImage makeBarImages(boolean on, int index) {
         if ((on ? barimageon[index] : barimageoff[index]) == null) {
@@ -72,7 +77,10 @@ public class SkinBar extends SkinObject {
     }
 
     public SkinImage getBarImages(boolean on, int index) {
-        return on ? barimageon[index] : barimageoff[index];
+    	if(index >= 0 && index < barimageoff.length) {
+            return on ? barimageon[index] : barimageoff[index];    		
+    	}
+    	return null;
     }
 
     public SkinImage[] getLamp() {

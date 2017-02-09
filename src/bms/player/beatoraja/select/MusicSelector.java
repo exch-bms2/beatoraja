@@ -82,7 +82,7 @@ public class MusicSelector extends MainState {
 	private Bar bannerbar;
 
 	private BarRenderer bar;
-	
+
 	private SearchTextField search;
 
 	/**
@@ -212,9 +212,13 @@ public class MusicSelector extends MainState {
 		}
 
 		if (getSkin() == null) {
-			if (config.getSkin()[5] != null) {
-				try {
-					SkinConfig sc = config.getSkin()[5];
+			try {
+				SkinConfig sc = config.getSkin()[5];
+				if (sc.getPath().endsWith(".json")) {
+					SkinLoader sl = new SkinLoader(
+							RESOLUTION[getMainController().getPlayerResource().getConfig().getResolution()]);
+					setSkin(sl.loadSelectSkin(Paths.get(sc.getPath())));
+				} else {
 					LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
 					LR2SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
 					Rectangle srcr = RESOLUTION[header.getResolution()];
@@ -223,15 +227,16 @@ public class MusicSelector extends MainState {
 							dstr.height);
 					setSkin(dloader.loadSelectSkin(Paths.get(sc.getPath()).toFile(), this, header, loader.getOption(),
 							sc.getProperty()));
-				} catch (IOException e) {
-					e.printStackTrace();
-					setSkin(new MusicSelectSkin(RESOLUTION[config.getResolution()]));
 				}
-			} else {
-				setSkin(new MusicSelectSkin(RESOLUTION[config.getResolution()]));
+			} catch (Throwable e) {
+				e.printStackTrace();
+				SkinLoader sl = new SkinLoader(
+						RESOLUTION[getMainController().getPlayerResource().getConfig().getResolution()]);
+				setSkin(sl.loadSelectSkin(Paths.get(SkinConfig.DEFAULT_SELECT)));
 			}
 		}
-		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/default/VL-Gothic-Regular.ttf"));
+		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
+				Gdx.files.internal("skin/default/VL-Gothic-Regular.ttf"));
 		FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
 		parameter.size = 24;
 		titlefont = generator.generateFont(parameter);
@@ -240,7 +245,7 @@ public class MusicSelector extends MainState {
 		getTimer()[TIMER_SONGBAR_CHANGE] = getNowTime();
 
 		// search text field
-		if (getStage() == null) {
+		if (getStage() == null && ((MusicSelectSkin) getSkin()).getSearchTextRegion() != null) {
 			search = new SearchTextField(this, RESOLUTION[config.getResolution()]);
 			setStage(search);
 		}
@@ -686,7 +691,7 @@ public class MusicSelector extends MainState {
 	}
 
 	public void close() {
-		if(bar.getDirectory().size() > 1) {
+		if (bar.getDirectory().size() > 1) {
 			bar.updateBar(bar.getDirectory().get(bar.getDirectory().size() - 2));
 			if (folderclose != null) {
 				getMainController().getAudioProcessor().play(folderclose, false);
@@ -809,11 +814,11 @@ public class MusicSelector extends MainState {
 	public void dispose() {
 		super.dispose();
 		bar.dispose();
-		if(titlefont != null) {
+		if (titlefont != null) {
 			titlefont.dispose();
-			titlefont = null;			
+			titlefont = null;
 		}
-		if(search != null) {
+		if (search != null) {
 			search.dispose();
 			search = null;
 		}
@@ -894,7 +899,7 @@ public class MusicSelector extends MainState {
 								: config.getMode9()));
 				return pc.getDuration();
 			}
-			return Integer.MIN_VALUE;
+			return config.getMode7().getDuration();
 		case NUMBER_JUDGETIMING:
 			return config.getJudgetiming();
 		case BUTTON_MODE:
