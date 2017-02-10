@@ -30,9 +30,8 @@ public class ASIODriver extends AbstractAudioDriver<PCM> implements AsioDriverLi
 	private AudioMixer mixer;
 
 	public ASIODriver(Config config) {
-		List<String> drivers = AsioDriver.getDriverNames();
 		// System.out.println(Arrays.toString(drivers.toArray()));
-		asioDriver = AsioDriver.getDriver(drivers.get(0));
+		asioDriver = AsioDriver.getDriver(config.getAudioDriverName());
 		asioDriver.addAsioDriverListener(this);
 		activeChannels.add(asioDriver.getChannelOutput(0));
 		activeChannels.add(asioDriver.getChannelOutput(1));

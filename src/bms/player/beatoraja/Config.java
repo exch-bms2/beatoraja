@@ -41,10 +41,13 @@ public class Config {
 	 */
 	public static final int AUDIODRIVER_SOUND = 0;
 	public static final int AUDIODRIVER_AUDIODEVICE = 1;
+	
 	/**
 	 * オーディオ:ASIO
 	 */
 	public static final int AUDIODRIVER_ASIO = 2;
+	
+	private String audioDriverName = null;
 	/**
 	 * オーディオバッファサイズ。大きすぎると音声遅延が発生し、少なすぎるとノイズが発生する
 	 */
@@ -581,6 +584,14 @@ public class Config {
 
 	public void setIrname(String irname) {
 		this.irname = irname;
+	}
+
+	public String getAudioDriverName() {
+		return audioDriverName;
+	}
+
+	public void setAudioDriverName(String audioDriverName) {
+		this.audioDriverName = audioDriverName;
 	}
 
 	public static class SkinConfig {

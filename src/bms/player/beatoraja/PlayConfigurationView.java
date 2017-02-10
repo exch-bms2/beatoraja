@@ -23,6 +23,7 @@ import bms.player.beatoraja.song.*;
 
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter.OutputType;
+import com.synthbot.jasiohost.AsioDriver;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -124,6 +125,8 @@ public class PlayConfigurationView implements Initializable {
 	private Spinner<Integer> maxfps;
 	@FXML
 	private ComboBox<Integer> audio;
+	@FXML
+	private ComboBox<String> audioname;
 	@FXML
 	private Spinner<Integer> audiobuffer;
 	@FXML
@@ -249,6 +252,7 @@ public class PlayConfigurationView implements Initializable {
 
 		skinview = new SkinConfigurationView();
 
+		updateAudioDriver();
 		playconfig.setValue(0);
 		updatePlayConfig();
 		skincategory.setValue(0);
@@ -290,6 +294,7 @@ public class PlayConfigurationView implements Initializable {
 		config.setMarkprocessednote(markprocessednote.isSelected());
 
 		config.setAudioDriver(audio.getValue());
+		config.setAudioDriverName(audioname.getValue());
 		config.setMaxFramePerSecond(getValue(maxfps));
 		config.setAudioDeviceBufferSize(getValue(audiobuffer));
 		config.setAudioDeviceSimultaneousSources(getValue(audiosim));
@@ -407,6 +412,37 @@ public class PlayConfigurationView implements Initializable {
 		spinner.getValueFactory()
 				.setValue(spinner.getValueFactory().getConverter().fromString(spinner.getEditor().getText()));
 		return spinner.getValue();
+	}
+	
+	public void updateAudioDriver() {
+		switch(audio.getValue()) {
+		case Config.AUDIODRIVER_SOUND:
+			audioname.getItems().clear();
+			audioname.setDisable(true);
+			audiobuffer.setDisable(false);
+			audiosim.setDisable(false);
+			break;
+		case Config.AUDIODRIVER_ASIO:
+			try {
+				List<String> drivers = AsioDriver.getDriverNames();
+				if(drivers.size() == 0) {
+					throw new RuntimeException("ドライバが見つかりません");
+				}
+				audioname.getItems().setAll(drivers);
+				if(drivers.contains(config.getAudioDriverName())) {
+					audioname.setValue(config.getAudioDriverName());
+				} else {
+					audioname.setValue(drivers.get(0));
+				}
+				audioname.setDisable(false);
+				audiobuffer.setDisable(true);
+				audiosim.setDisable(true);
+			} catch(Throwable e) {
+				Logger.getGlobal().severe("ASIOは選択できません : " + e.getMessage());
+				audio.setValue(Config.AUDIODRIVER_SOUND);
+			}
+			break;
+		}
 	}
 
 	public void updateSkinCategory() {

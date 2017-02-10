@@ -67,7 +67,16 @@
                               <HBox prefHeight="13.0" prefWidth="730.0">
                                  <children>
                                     <Label prefHeight="31.0" prefWidth="83.0" text="%Audio_Output" />
-                                    <ComboBox fx:id="audio" prefHeight="24.0" prefWidth="261.0" />
+                                    <ComboBox fx:id="audio" prefHeight="24.0" prefWidth="261.0" onAction="#updateAudioDriver" />
+                                 </children>
+                                 <VBox.margin>
+                                    <Insets bottom="10.0" top="10.0" />
+                                 </VBox.margin>
+                              </HBox>
+                              <HBox prefHeight="13.0" prefWidth="730.0">
+                                 <children>
+                                    <Label prefHeight="31.0" prefWidth="83.0" text="Audio Driver Name" />
+                                    <ComboBox fx:id="audioname" prefHeight="24.0" prefWidth="261.0" />
                                  </children>
                                  <VBox.margin>
                                     <Insets bottom="10.0" top="10.0" />
