@@ -75,21 +75,11 @@ public class BarRenderer {
 		FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
 		parameter.size = 24;
 		titlefont = generator.generateFont(parameter);
-		try {
-			Files.createDirectory(Paths.get("table"));
-		} catch (Exception e) {
-
-		}
-		try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get("table"))) {
-			List<TableBar> tables = new ArrayList<TableBar>();
-			for (Path p : paths) {
-				Json json = new Json();
-				TableData td = json.fromJson(TableData.class, new FileReader(p.toFile()));
-				tables.add(new TableBar(select, td));
-			}
-			this.tables = tables.toArray(new TableBar[0]);
-		} catch (IOException e) {
-
+		
+		TableData[] tds = new TableDataAccessor().readAll();
+		this.tables = new TableBar[tds.length];
+		for(int i = 0;i < tds.length;i++) {
+			this.tables[i] = new TableBar(select, tds[i]);
 		}
 
 		commands = new CommandBar[] {

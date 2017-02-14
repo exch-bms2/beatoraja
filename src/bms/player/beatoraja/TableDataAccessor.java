@@ -1,8 +1,6 @@
 package bms.player.beatoraja;
 
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -10,6 +8,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import bms.player.beatoraja.TableData.CourseData;
 import bms.player.beatoraja.TableData.TrophyData;
@@ -22,11 +22,27 @@ import bms.table.Course.Trophy;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter.OutputType;
 
+/**
+ * 難易度表データアクセス用クラス
+ * 
+ * @author exch
+ */
 public class TableDataAccessor {
 	
-	private static final String[] CONSTRAINT = { "null", "grade", "grade_mirror", "grade_random", "no_speed",
-		"no_good", "no_great" };
+	private String tabledir = "table";
 
+	private static final String[] CONSTRAINT = { "null", "grade", "grade_mirror", "grade_random", "no_speed", "no_good",
+			"no_great" };
+	
+	public TableDataAccessor() {
+		
+	}
+
+	public TableDataAccessor(String tabledir) {
+		this.tabledir = tabledir;
+	}
+
+	
 	public void updateTableData(String[] urls) {
 		for (String url : urls) {
 			DifficultyTableParser dtp = new DifficultyTableParser();
@@ -89,12 +105,17 @@ public class TableDataAccessor {
 					td.setCourse(gname.toArray(new CourseData[0]));
 				}
 				write(td);
-			} catch (IOException e) {
+			} catch (Throwable e) {
 				e.printStackTrace();
 			}
 		}
 	}
 
+	/**
+	 * 難易度表データをキャッシュする
+	 * 
+	 * @param td 難易度表データ
+	 */
 	public void write(TableData td) {
 		try {
 			Json json = new Json();
@@ -102,7 +123,8 @@ public class TableDataAccessor {
 			json.setElementType(TableData.class, "course", ArrayList.class);
 			json.setElementType(CourseData.class, "trophy", ArrayList.class);
 			json.setOutputType(OutputType.json);
-			FileWriter fw = new FileWriter("table/" + td.getName() + ".json");
+			OutputStreamWriter fw = new OutputStreamWriter(new BufferedOutputStream(
+					new GZIPOutputStream(new FileOutputStream(tabledir + "/" + td.getName() + ".bmt"))));
 			fw.write(json.prettyPrint(td));
 			fw.flush();
 			fw.close();
@@ -110,33 +132,59 @@ public class TableDataAccessor {
 			e.printStackTrace();
 		}
 	}
-	
+
+	/**
+	 * 全てのキャッシュされた難易度表データを読み込む
+	 * 
+	 * @return 全てのキャッシュされた難易度表データ
+	 */
 	public TableData[] readAll() {
 		List<TableData> result = new ArrayList<TableData>();
-		try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get("table"))) {
-			for(Path p : paths) {
-				Json json = new Json();
-				TableData td = json.fromJson(TableData.class, new FileReader(p.toFile()));
-				result.add(td);
+		try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get(tabledir))) {
+			for (Path p : paths) {
+				if (p.toString().endsWith(".json")) {
+					// TODO この分岐は後で削除
+					Json json = new Json();
+					TableData td = json.fromJson(TableData.class, new FileReader(p.toFile()));
+					result.add(td);
+				} else if (p.toString().endsWith(".bmt")) {
+					Json json = new Json();
+					TableData td = json.fromJson(TableData.class,
+							new BufferedInputStream(new GZIPInputStream(Files.newInputStream(p))));
+					result.add(td);
+				}
 			}
-		} catch(IOException e) {
-			
+		} catch (IOException e) {
+
 		}
 		return result.toArray(new TableData[result.size()]);
 	}
-	
+
+	/**
+	 * 指定のキャッシュされた難易度表データを読み込む
+	 * 
+	 * @param name 難易度表名
+	 * @return キャッシュされた難易度表データ。存在しない場合はnull
+	 */
 	public TableData read(String name) {
 		TableData td = null;
-		try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get("table"))) {
-			for(Path p : paths) {
-				if(p.getFileName().toString().equals(name + ".json")) {
+		try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get(tabledir))) {
+			for (Path p : paths) {
+				if (p.getFileName().toString().equals(name + ".json")) {
+					// TODO この分岐は後で削除
 					Json json = new Json();
 					td = json.fromJson(TableData.class, new FileReader(p.toFile()));
 					break;
+				} else if (p.getFileName().toString().equals(name + ".bmt")) {
+					Json json = new Json();
+					td = json.fromJson(TableData.class,
+							new BufferedInputStream(new GZIPInputStream(Files.newInputStream(p))));
+					break;
 				}
+
 			}
-		} catch(IOException e) {
-			
+		} catch (IOException e) {
+
 		}
 		return td;
 	}
