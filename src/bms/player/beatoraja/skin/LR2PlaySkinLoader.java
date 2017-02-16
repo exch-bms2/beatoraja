@@ -79,8 +79,8 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 				int[] values = parseInt(str);
 				if (bga != null) {
 					skin.setDestination(bga, 0, values[3], srch - values[4] - values[6], values[5], values[6],
-							values[7], values[8], values[9], values[10], values[11], values[12], values[13],
-							values[14], values[15], values[16], values[17], values[18], values[19], values[20]);
+							values[7], values[8], values[9], values[10], values[11], values[12], values[13], values[14],
+							values[15], values[16], values[17], values[18], values[19], values[20]);
 				}
 			}
 		});
@@ -116,12 +116,13 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 							values[4] += values[6];
 							values[6] = -values[6];
 						}
-						li.setDestination(values[2], values[3] * dstw / srcw, dsth - (values[4] + values[6]) * dsth
-								/ srch, values[5] * dstw / srcw, values[6] * dsth / srch, values[7], values[8],
-								values[9], values[10], values[11], values[12], values[13], values[14], values[15],
-								values[16], values[17], values[18], values[19], values[20]);
-						playerr[lines.size() == 1 ? 0 : 1] = new Rectangle(values[3] * dstw / srcw, dsth
-								- (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
+						li.setDestination(values[2], values[3] * dstw / srcw,
+								dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
+								values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
+								values[12], values[13], values[14], values[15], values[16], values[17], values[18],
+								values[19], values[20]);
+						playerr[lines.size() == 1 ? 0 : 1] = new Rectangle(values[3] * dstw / srcw,
+								dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
 								(values[4] + values[6]) * dsth / srch);
 					} catch (NumberFormatException e) {
 						e.printStackTrace();
@@ -263,8 +264,8 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 							values[5] * dstw / srcw, (values[4] + values[6]) * dsth / srch);
 				}
 				if (lanerender == null) {
-					lanerender = new SkinNote(note, new TextureRegion[][][] { lnend, lnstart, lnbodya, lnbody,
-							lnend, lnstart, lnbodya, lnbody, lnbodya, lnbody }, mine, notecycle, values[6] * dsth / srch);
+					lanerender = new SkinNote(note, new TextureRegion[][][] { lnend, lnstart, lnbodya, lnbody, lnend,
+							lnstart, lnbodya, lnbody, lnbodya, lnbody }, mine, notecycle, values[6] * dsth / srch);
 					skin.add(lanerender);
 				}
 			}
@@ -277,8 +278,8 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 					int[] values = parseInt(str);
 					TextureRegion[] images = getSourceImage(values);
 					if (images != null) {
-						if(judge[0] == null) {
-							judge[0] = new SkinJudge(0 , (values[11] != 1));
+						if (judge[0] == null) {
+							judge[0] = new SkinJudge(0, (values[11] != 1));
 							skin.add(judge[0]);
 						}
 						judge[0].getJudge()[5 - values[1]] = new SkinImage(images, values[10], values[9]);
@@ -292,6 +293,9 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 		});
 
 		addCommandWord(new CommandWord("DST_NOWJUDGE_1P") {
+
+			private boolean detail = false;
+
 			@Override
 			public void execute(String[] str) {
 				if (judge[0] != null && judge[0].getJudge()[5 - Integer.parseInt(str[1])] != null) {
@@ -305,11 +309,39 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 							values[4] += values[6];
 							values[6] = -values[6];
 						}
-						judge[0].getJudge()[5 - values[1]].setDestination(values[2], values[3] * dstw / srcw, dsth
-								- (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw, values[6] * dsth
-								/ srch, values[7], values[8], values[9], values[10], values[11], values[12],
-								values[13], values[14], values[15], values[16], values[17], values[18], values[19],
-								values[20]);
+						judge[0].getJudge()[5 - values[1]].setDestination(values[2], values[3] * dstw / srcw,
+								dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
+								values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
+								values[12], values[13], values[14], values[15], values[16], values[17], values[18],
+								values[19], values[20]);
+
+						if (!detail) {
+							detail = true;
+							TextureRegion[][] images = TextureRegion.split(new Texture("skin/default/judgedetail.png"),
+									10, 20);
+
+							SkinNumber num = new SkinNumber(new TextureRegion[][] { images[1] },
+									new TextureRegion[][] { images[2] }, 0, 0, 4, 0, 525);
+							num.setAlign(values[12]);
+							num.setDestination(0, (values[3] + values[5] / 2) * dstw / srcw,
+									dsth - (values[4] - 5) * dsth / srch, 7 * dstw / srcw, 14 * dsth / srch, 0, 255,
+									255, 255, 255, 0, 0, 0, 0, -1, 46, 0, 0, 241);
+							num.setDestination(500, (values[3] + values[5] / 2) * dstw / srcw,
+									dsth - (values[4] - 5) * dsth / srch, 7 * dstw / srcw, 14 * dsth / srch, 0, 255,
+									255, 255, 255, 0, 0, 0, 0, -1, 46, 0, 0, 241);
+							skin.add(num);
+							SkinNumber num2 = new SkinNumber(new TextureRegion[][] { images[3] },
+									new TextureRegion[][] { images[4] }, 0, 0, 4, 0, 525);
+							num2.setAlign(values[12]);
+							num2.setDestination(0, (values[3] + values[5] / 2) * dstw / srcw,
+									dsth - (values[4] - 5) * dsth / srch, 7 * dstw / srcw, 14 * dsth / srch, 0, 255,
+									255, 255, 255, 0, 0, 0, 0, -1, 46, 0, 0, -241);
+							num2.setDestination(500, (values[3] + values[5] / 2) * dstw / srcw,
+									dsth - (values[4] - 5) * dsth / srch, 7 * dstw / srcw, 14 * dsth / srch, 0, 255,
+									255, 255, 255, 0, 0, 0, 0, -1, 46, 0, 0, -241);
+							skin.add(num2);
+						}
+
 					} catch (NumberFormatException e) {
 						e.printStackTrace();
 					}
@@ -324,8 +356,8 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 					int[] values = parseInt(str);
 					TextureRegion[] images = getSourceImage(values);
 					if (images != null) {
-						if(judge[1] == null) {
-							judge[1] = new SkinJudge(1 , (values[11] != 1));
+						if (judge[1] == null) {
+							judge[1] = new SkinJudge(1, (values[11] != 1));
 							skin.add(judge[1]);
 						}
 						judge[1].getJudge()[5 - values[1]] = new SkinImage(images, values[10], values[9]);
@@ -339,6 +371,8 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 		});
 
 		addCommandWord(new CommandWord("DST_NOWJUDGE_2P") {
+			
+			private boolean detail = false;
 			@Override
 			public void execute(String[] str) {
 				if (judge[1] != null && judge[1].getJudge()[5 - Integer.parseInt(str[1])] != null) {
@@ -352,11 +386,39 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 							values[4] += values[6];
 							values[6] = -values[6];
 						}
-						judge[1].getJudge()[5 - values[1]].setDestination(values[2], values[3] * dstw / srcw, dsth
-								- (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw, values[6] * dsth
-								/ srch, values[7], values[8], values[9], values[10], values[11], values[12],
-								values[13], values[14], values[15], values[16], values[17], values[18], values[19],
-								values[20]);
+						judge[1].getJudge()[5 - values[1]].setDestination(values[2], values[3] * dstw / srcw,
+								dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
+								values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
+								values[12], values[13], values[14], values[15], values[16], values[17], values[18],
+								values[19], values[20]);
+						
+						if (!detail) {
+							detail = true;
+							TextureRegion[][] images = TextureRegion.split(new Texture("skin/default/judgedetail.png"),
+									10, 20);
+
+							SkinNumber num = new SkinNumber(new TextureRegion[][] { images[1] },
+									new TextureRegion[][] { images[2] }, 0, 0, 4, 0, 525);
+							num.setAlign(values[12]);
+							num.setDestination(0, (values[3] + values[5] / 2) * dstw / srcw,
+									dsth - (values[4] - 5) * dsth / srch, 7 * dstw / srcw, 14 * dsth / srch, 0, 255,
+									255, 255, 255, 0, 0, 0, 0, -1, 47, 0, 0, 261);
+							num.setDestination(500, (values[3] + values[5] / 2) * dstw / srcw,
+									dsth - (values[4] - 5) * dsth / srch, 7 * dstw / srcw, 14 * dsth / srch, 0, 255,
+									255, 255, 255, 0, 0, 0, 0, -1, 47, 0, 0, 261);
+							skin.add(num);
+							SkinNumber num2 = new SkinNumber(new TextureRegion[][] { images[3] },
+									new TextureRegion[][] { images[4] }, 0, 0, 4, 0, 525);
+							num2.setAlign(values[12]);
+							num2.setDestination(0, (values[3] + values[5] / 2) * dstw / srcw,
+									dsth - (values[4] - 5) * dsth / srch, 7 * dstw / srcw, 14 * dsth / srch, 0, 255,
+									255, 255, 255, 0, 0, 0, 0, -1, 47, 0, 0, -261);
+							num2.setDestination(500, (values[3] + values[5] / 2) * dstw / srcw,
+									dsth - (values[4] - 5) * dsth / srch, 7 * dstw / srcw, 14 * dsth / srch, 0, 255,
+									255, 255, 255, 0, 0, 0, 0, -1, 47, 0, 0, -261);
+							skin.add(num2);
+						}
+
 					} catch (NumberFormatException e) {
 						e.printStackTrace();
 					}
@@ -386,8 +448,8 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 							}
 						}
 
-						judge[0].getJudgeCount()[5 - values[1]] = new SkinNumber(images, values[10], values[9], values[13], images.length > 10 ? 2
-								: 0, values[11]);
+						judge[0].getJudgeCount()[5 - values[1]] = new SkinNumber(images, values[10], values[9],
+								values[13], images.length > 10 ? 2 : 0, values[11]);
 						judge[0].getJudgeCount()[5 - values[1]].setAlign(values[12]);
 						// System.out.println("Number Added - " +
 						// (num.getId()));
@@ -404,10 +466,10 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 				if (judge[0] != null && judge[0].getJudgeCount()[5 - Integer.parseInt(str[1])] != null) {
 					try {
 						int[] values = parseInt(str);
-						judge[0].getJudgeCount()[5 - values[1]].setDestination(values[2], values[3] * dstw / srcw, -values[4] * dsth
-								/ srch, values[5] * dstw / srcw, values[6] * dsth / srch, values[7], values[8],
-								values[9], values[10], values[11], values[12], values[13], values[14], values[15],
-								values[16], values[17], values[18], values[19], values[20]);
+						judge[0].getJudgeCount()[5 - values[1]].setDestination(values[2], values[3] * dstw / srcw,
+								-values[4] * dsth / srch, values[5] * dstw / srcw, values[6] * dsth / srch, values[7],
+								values[8], values[9], values[10], values[11], values[12], values[13], values[14],
+								values[15], values[16], values[17], values[18], values[19], values[20]);
 					} catch (NumberFormatException e) {
 						e.printStackTrace();
 					}
@@ -437,8 +499,8 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 							}
 						}
 
-						judge[1].getJudgeCount()[5 - values[1]] = new SkinNumber(images, values[10], values[9], values[13], images.length > 10 ? 2
-								: 0, values[11]);
+						judge[1].getJudgeCount()[5 - values[1]] = new SkinNumber(images, values[10], values[9],
+								values[13], images.length > 10 ? 2 : 0, values[11]);
 						judge[1].getJudgeCount()[5 - values[1]].setAlign(values[12]);
 						// System.out.println("Number Added - " +
 						// (num.getId()));
@@ -455,10 +517,10 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 				if (judge[1] != null && judge[1].getJudgeCount()[5 - Integer.parseInt(str[1])] != null) {
 					try {
 						int[] values = parseInt(str);
-						judge[1].getJudgeCount()[5 - values[1]].setDestination(values[2], values[3] * dstw / srcw, -values[4] * dsth
-								/ srch, values[5] * dstw / srcw, values[6] * dsth / srch, values[7], values[8],
-								values[9], values[10], values[11], values[12], values[13], values[14], values[15],
-								values[16], values[17], values[18], values[19], values[20]);
+						judge[1].getJudgeCount()[5 - values[1]].setDestination(values[2], values[3] * dstw / srcw,
+								-values[4] * dsth / srch, values[5] * dstw / srcw, values[6] * dsth / srch, values[7],
+								values[8], values[9], values[10], values[11], values[12], values[13], values[14],
+								values[15], values[16], values[17], values[18], values[19], values[20]);
 					} catch (NumberFormatException e) {
 						e.printStackTrace();
 					}
@@ -501,10 +563,11 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 							values[4] += values[6];
 							values[6] = -values[6];
 						}
-						line.setDestination(values[2], values[3] * dstw / srcw, dsth - (values[4] + values[6]) * dsth
-								/ srch, values[5] * dstw / srcw, values[6] * dsth / srch, values[7], values[8],
-								values[9], values[10], values[11], values[12], values[13], values[14], values[15],
-								values[16], values[17], values[18], values[19], values[20]);
+						line.setDestination(values[2], values[3] * dstw / srcw,
+								dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
+								values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
+								values[12], values[13], values[14], values[15], values[16], values[17], values[18],
+								values[19], values[20]);
 					} catch (NumberFormatException e) {
 						e.printStackTrace();
 					}
@@ -533,11 +596,11 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 						for (int y = 0; y < divy; y++) {
 							if ((y * divx + x) / 4 < gauge.length) {
 								gauge[(y * divx + x) / 4][(y * divx + x) % 4] = new TextureRegion(
-										(Texture) imagelist.get(values[2]), values[3] + w * x / divx, values[4] + h * y / divy, w
-												/ divx, h / divy);
+										(Texture) imagelist.get(values[2]), values[3] + w * x / divx,
+										values[4] + h * y / divy, w / divx, h / divy);
 								gauge[(y * divx + x) / 4][(y * divx + x) % 4 + 4] = new TextureRegion(
-										(Texture) imagelist.get(values[2]), values[3] + w * x / divx, values[4] + h * y / divy, w
-												/ divx, h / divy);
+										(Texture) imagelist.get(values[2]), values[3] + w * x / divx,
+										values[4] + h * y / divy, w / divx, h / divy);
 							}
 						}
 					}
@@ -554,21 +617,21 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 			@Override
 			public void execute(String[] str) {
 				if (gauger != null) {
-					float width = (Math.abs(groovex) >= 1) ? (groovex * 50 * dstw / srcw) : (Integer.parseInt(str[5])
-							* dstw / srcw);
-					float height = (Math.abs(groovey) >= 1) ? (groovey * 50 * dsth / srch) : (Integer.parseInt(str[6])
-							* dsth / srch);
+					float width = (Math.abs(groovex) >= 1) ? (groovex * 50 * dstw / srcw)
+							: (Integer.parseInt(str[5]) * dstw / srcw);
+					float height = (Math.abs(groovey) >= 1) ? (groovey * 50 * dsth / srch)
+							: (Integer.parseInt(str[6]) * dsth / srch);
 					float x = Integer.parseInt(str[3]) * dstw / srcw - (groovex < 0 ? groovex * dstw / srcw : 0);
 					float y = dsth - Integer.parseInt(str[4]) * dsth / srch - height;
-					gauger.setDestination(0, x,y,width,height,0,255,255,255,255,0,0,0,0,0,0,0,0,0);
+					gauger.setDestination(0, x, y, width, height, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 				}
 			}
 		});
 
 	}
 
-	public PlaySkin loadPlaySkin(File f, BMSPlayer player, LR2SkinHeader header, Map<Integer, Boolean> option, Map property)
-			throws IOException {
+	public PlaySkin loadPlaySkin(File f, BMSPlayer player, LR2SkinHeader header, Map<Integer, Boolean> option,
+			Map property) throws IOException {
 
 		skin = new PlaySkin(srcw, srch, dstw, dsth);
 		playerr = new Rectangle[] { new Rectangle() };
