@@ -146,9 +146,7 @@ public class SkinNote extends SkinObject {
 			for(int type = 0;type < 10;type++) {
 				this.longnote[type] = new SkinSourceImage(longnote[type], 0, cycle);
 			}
-			for(int i = 0;i < minenote.length;i++) {
-				this.minenote = new SkinSourceImage(minenote, 0, cycle);
-			}
+			this.minenote = new SkinSourceImage(minenote, 0, cycle);
 			cnote = new TextureRegion[note.length];
 			clongnote = new TextureRegion[10][note.length];
 			cminenote = new TextureRegion[note.length];

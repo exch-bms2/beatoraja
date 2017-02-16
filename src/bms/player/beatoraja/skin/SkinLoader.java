@@ -91,7 +91,7 @@ public class SkinLoader {
 				LR2SkinHeader.CustomFile[] files = new LR2SkinHeader.CustomFile[sk.filepath.length];
 				for(int i = 0;i < sk.filepath.length;i++) {
 					Filepath pr = sk.filepath[i];
-					files[i] = new LR2SkinHeader.CustomFile(pr.name, p.getParent().resolve(pr.path).toString());
+					files[i] = new LR2SkinHeader.CustomFile(pr.name, p.getParent().toString() + "/" + pr.path);
 				}
 				header.setCustomFiles(files);
 			}
@@ -632,7 +632,7 @@ public class SkinLoader {
 		for (Source src : sk.source) {
 			if (srcid.equals(src.id)) {
 				if (!texmap.containsKey(src.id)) {
-					String imagepath = p.getParent().resolve(src.path).toString();
+					String imagepath = p.getParent().toString() + "/" + src.path;
 					File imagefile = new File(imagepath);
 					for(String key : filemap.keySet()) {
 						if(src.path.equals(key)) {

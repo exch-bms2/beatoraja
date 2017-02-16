@@ -124,7 +124,7 @@ public class TableDataAccessor {
 			json.setElementType(CourseData.class, "trophy", ArrayList.class);
 			json.setOutputType(OutputType.json);
 			OutputStreamWriter fw = new OutputStreamWriter(new BufferedOutputStream(
-					new GZIPOutputStream(new FileOutputStream(tabledir + "/" + td.getName() + ".bmt"))));
+					new GZIPOutputStream(new FileOutputStream(tabledir + "/" + td.getName() + ".bmt"))), "UTF-8");
 			fw.write(json.prettyPrint(td));
 			fw.flush();
 			fw.close();

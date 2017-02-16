@@ -456,7 +456,7 @@ public class PlayDataAccessor {
 		try {
 			String path = this.getReplayDataFilePath(model, lnmode, index) + ".brd";
 			OutputStreamWriter fw = new OutputStreamWriter(new BufferedOutputStream(
-					new GZIPOutputStream(new FileOutputStream(path))));
+					new GZIPOutputStream(new FileOutputStream(path))), "UTF-8");
 			fw.write(json.prettyPrint(rd));
 			fw.flush();
 			fw.close();
@@ -538,7 +538,7 @@ public class PlayDataAccessor {
 		try {
 			String path = this.getReplayDataFilePath(hash, ln, lnmode, index, constraint) + ".brd";
 			OutputStreamWriter fw = new OutputStreamWriter(new BufferedOutputStream(
-					new GZIPOutputStream(new FileOutputStream(path))));
+					new GZIPOutputStream(new FileOutputStream(path))), "UTF-8");
 			fw.write(json.prettyPrint(rd));
 			fw.flush();
 			fw.close();
