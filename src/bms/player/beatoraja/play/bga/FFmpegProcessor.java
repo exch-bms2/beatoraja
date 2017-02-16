@@ -3,7 +3,6 @@ package bms.player.beatoraja.play.bga;
 import java.nio.ByteBuffer;
 import java.util.logging.Logger;
 
-import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.play.BMSPlayer;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
@@ -22,9 +21,7 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
  */
 public class FFmpegProcessor implements MovieProcessor {
 
-	// TODO リスタートでエラーが出る場合がある(Ex.KRAKEN)
 	// TODO フレームレートが違う場合がある
-	// TODO 再生速度との同期(スロー再生等)
 
 	/**
 	 * 現在表示中のフレームのTexture
@@ -40,6 +37,9 @@ public class FFmpegProcessor implements MovieProcessor {
 	private FFmpegFrameGrabber grabber;
 
 	private Pixmap pixmap;
+	/**
+	 * 現在表示中のPixmap
+	 */
 	private Pixmap showing;
 
 	private MovieSeekThread movieseek;
@@ -61,8 +61,7 @@ public class FFmpegProcessor implements MovieProcessor {
 		grabber = new FFmpegFrameGrabber(filepath);
 		try {
 			grabber.start();
-		} catch (org.bytedeco.javacv.FrameGrabber.Exception e) {
-			// TODO Auto-generated catch block
+		} catch (Throwable e) {
 			e.printStackTrace();
 		}
 	}
@@ -91,7 +90,6 @@ public class FFmpegProcessor implements MovieProcessor {
 
 		public void run() {
 			try {
-				grabber.restart();
 				Logger.getGlobal().info(
 						"decode開始 - fps : " + grabber.getFrameRate() + " format : " + grabber.getFormat() + " size : "
 								+ grabber.getImageWidth() + " x " + grabber.getImageHeight()
@@ -130,7 +128,7 @@ public class FFmpegProcessor implements MovieProcessor {
 								pixmap = new Pixmap(pixmapData);
 								// System.out.println("movie pixmap created : "
 								// + time);
-							} catch (Exception e) {
+							} catch (Throwable e) {
 								pixmap = null;
 								throw new GdxRuntimeException("Couldn't load pixmap from image data", e);
 							}
@@ -147,7 +145,8 @@ public class FFmpegProcessor implements MovieProcessor {
 					}
 					if (restart) {
 						restart = false;
-						grabber.restart();
+						grabber.start();
+//						grabber.restart();
 						start = player != null ? player.getNowTime() - player.getTimer()[TIMER_PLAY] : (System.nanoTime() / 1000000);
 						framecount = 0;
 //						System.out.println("movie restart - starttime : " + start);
@@ -156,13 +155,12 @@ public class FFmpegProcessor implements MovieProcessor {
 						break;
 					}
 				}
-			} catch (Exception e) {
+			} catch (Throwable e) {
 				e.printStackTrace();
 			} finally {
 				try {
 					grabber.stop();
-				} catch (org.bytedeco.javacv.FrameGrabber.Exception e) {
-					// TODO Auto-generated catch block
+				} catch (Throwable e) {
 					e.printStackTrace();
 				}
 			}
@@ -228,9 +226,11 @@ public class FFmpegProcessor implements MovieProcessor {
 
 	public void play(boolean loop) {
 		if (movieseek != null) {
-			movieseek.loop = loop;
-			movieseek.restart = true;
-			movieseek.interrupt();
+			synchronized (movieseek) {
+				movieseek.loop = loop;
+				movieseek.restart = true;
+				movieseek.interrupt();				
+			}
 		} else {
 			movieseek = new MovieSeekThread();
 			movieseek.loop = loop;
@@ -240,9 +240,11 @@ public class FFmpegProcessor implements MovieProcessor {
 
 	public void stop() {
 		if (movieseek != null) {
-			movieseek.stop = true;
-			movieseek.interrupt();
-			movieseek = null;
+			synchronized (movieseek) {
+				movieseek.stop = true;
+				movieseek.interrupt();				
+				movieseek = null;				
+			}
 		}
 	}
 
