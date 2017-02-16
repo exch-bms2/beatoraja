@@ -1,9 +1,13 @@
 package bms.player.beatoraja;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import bms.model.BMSModel;
 import bms.model.TimeLine;
@@ -376,11 +380,13 @@ public class PlayDataAccessor {
 
 	public boolean existsReplayData(BMSModel model, int lnmode, int index) {
 		boolean ln = model.containsUndefinedLongNote();
-		return new File(this.getReplayDataFilePath(model.getSHA256(), ln, lnmode, index)).exists();
+		return Files.exists(Paths.get(this.getReplayDataFilePath(model.getSHA256(), ln, lnmode, index) + ".brd")) || 
+				Files.exists(Paths.get(this.getReplayDataFilePath(model.getSHA256(), ln, lnmode, index) + ".json"));
 	}
 
 	public boolean existsReplayData(String hash, boolean ln, int lnmode, int index) {
-		return new File(this.getReplayDataFilePath(hash, ln, lnmode, index)).exists();
+		return Files.exists(Paths.get(this.getReplayDataFilePath(hash, ln, lnmode, index) + ".brd")) || 
+				Files.exists(Paths.get(this.getReplayDataFilePath(hash, ln, lnmode, index) + ".json"));
 	}
 
 	public boolean existsReplayData(BMSModel[] models, int lnmode, int index, int[] constraint) {
@@ -391,11 +397,13 @@ public class PlayDataAccessor {
 			hash[i] = model.getSHA256();
 			ln |= model.containsLongNote();
 		}
-		return new File(this.getReplayDataFilePath(hash, ln, lnmode, index, constraint)).exists();
+		return Files.exists(Paths.get(this.getReplayDataFilePath(hash, ln, lnmode, index, constraint) + ".brd")) || 
+				Files.exists(Paths.get(this.getReplayDataFilePath(hash, ln, lnmode, index, constraint) + ".json"));
 	}
 
 	public boolean existsReplayData(String[] hash, boolean ln, int lnmode, int index, int[] constraint) {
-		return new File(this.getReplayDataFilePath(hash, ln, lnmode, index, constraint)).exists();
+		return Files.exists(Paths.get(this.getReplayDataFilePath(hash, ln, lnmode, index, constraint) + ".brd")) || 
+				Files.exists(Paths.get(this.getReplayDataFilePath(hash, ln, lnmode, index, constraint) + ".json"));
 	}
 
 	/**
@@ -412,9 +420,16 @@ public class PlayDataAccessor {
 			Json json = new Json();
 			json.setIgnoreUnknownFields(true);
 			try {
-				return json
-						.fromJson(ReplayData.class, new FileReader(this.getReplayDataFilePath(model, lnmode, index)));
-			} catch (FileNotFoundException e) {
+				String path = this.getReplayDataFilePath(model, lnmode, index);
+				if(Files.exists(Paths.get(path + ".brd"))) {
+					return json.fromJson(ReplayData.class,
+							new BufferedInputStream(new GZIPInputStream(Files.newInputStream(Paths.get(path + ".brd")))));
+				}
+				if(Files.exists(Paths.get(path + ".json"))) {
+					return json.fromJson(ReplayData.class,
+							new FileReader(path + ".json"));					
+				}
+			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
@@ -439,7 +454,9 @@ public class PlayDataAccessor {
 		Json json = new Json();
 		json.setOutputType(OutputType.json);
 		try {
-			FileWriter fw = new FileWriter(this.getReplayDataFilePath(model, lnmode, index));
+			String path = this.getReplayDataFilePath(model, lnmode, index) + ".brd";
+			OutputStreamWriter fw = new OutputStreamWriter(new BufferedOutputStream(
+					new GZIPOutputStream(new FileOutputStream(path))));
 			fw.write(json.prettyPrint(rd));
 			fw.flush();
 			fw.close();
@@ -473,9 +490,16 @@ public class PlayDataAccessor {
 			Json json = new Json();
 			json.setIgnoreUnknownFields(true);
 			try {
-				return json.fromJson(ReplayData[].class,
-						new FileReader(this.getReplayDataFilePath(hash, ln, lnmode, index, constraint)));
-			} catch (FileNotFoundException e) {
+				String path = this.getReplayDataFilePath(hash, ln, lnmode, index, constraint);
+				if(Files.exists(Paths.get(path + ".brd"))) {
+					return json.fromJson(ReplayData[].class,
+							new BufferedInputStream(new GZIPInputStream(Files.newInputStream(Paths.get(path + ".brd")))));
+				}
+				if(Files.exists(Paths.get(path + ".json"))) {
+					return json.fromJson(ReplayData[].class,
+							new FileReader(path + ".json"));					
+				}
+			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
@@ -512,11 +536,13 @@ public class PlayDataAccessor {
 		Json json = new Json();
 		json.setOutputType(OutputType.json);
 		try {
-			String path = this.getReplayDataFilePath(hash, ln, lnmode, index, constraint);
-			FileWriter fw = new FileWriter(path);
+			String path = this.getReplayDataFilePath(hash, ln, lnmode, index, constraint) + ".brd";
+			OutputStreamWriter fw = new OutputStreamWriter(new BufferedOutputStream(
+					new GZIPOutputStream(new FileOutputStream(path))));
 			fw.write(json.prettyPrint(rd));
 			fw.flush();
 			fw.close();
+			Files.deleteIfExists(Paths.get(this.getReplayDataFilePath(hash, ln, lnmode, index, constraint) + ".json"));
 			Logger.getGlobal().info("コースリプレイを保存:" + path);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -530,8 +556,7 @@ public class PlayDataAccessor {
 	}
 
 	private String getReplayDataFilePath(String hash, boolean ln, int lnmode, int index) {
-		return "replay" + File.separatorChar + (ln ? replay[lnmode] : "") + hash + (index > 0 ? "_" + index : "")
-				+ ".json";
+		return "replay" + File.separatorChar + (ln ? replay[lnmode] : "") + hash + (index > 0 ? "_" + index : "");
 	}
 
 	private String getReplayDataFilePath(String[] hashes, boolean ln, int lnmode, int index, int[] constraint) {
@@ -546,7 +571,7 @@ public class PlayDataAccessor {
 			}
 		}
 		return "replay" + File.separatorChar + (ln ? replay[lnmode] : "") + hash
-				+ (sb.length() > 0 ? "_" + sb.toString() : "") + (index > 0 ? "_" + index : "") + ".json";
+				+ (sb.length() > 0 ? "_" + sb.toString() : "") + (index > 0 ? "_" + index : "");
 	}
 
 }
