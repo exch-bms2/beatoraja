@@ -94,10 +94,10 @@ public class LR2SkinHeader {
 
 	public static class CustomOption {
 		public final String name;
-		public final int option;
+		public final int[] option;
 		public final String[] contents;
 		
-		public CustomOption(String name, int option, String[] contents) {
+		public CustomOption(String name, int[] option, String[] contents) {
 			this.name = name;
 			this.option = option;
 			this.contents = contents;

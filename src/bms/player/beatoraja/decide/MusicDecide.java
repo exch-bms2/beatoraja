@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 
 import bms.player.beatoraja.Config.SkinConfig;
 import bms.player.beatoraja.MainController;
@@ -58,7 +59,7 @@ public class MusicDecide extends MainState {
 			SkinConfig sc = resource.getConfig().getSkin()[6];
 			if (sc.getPath().endsWith(".json")) {
 				SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
-				setSkin(sl.loadDecideSkin(Paths.get(sc.getPath())));
+				setSkin(sl.loadDecideSkin(Paths.get(sc.getPath()), sc.getProperty()));
 			} else {
 				LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
 				LR2SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
@@ -71,7 +72,7 @@ public class MusicDecide extends MainState {
 		} catch (Throwable e) {
 			e.printStackTrace();
 			SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
-			setSkin(sl.loadDecideSkin(Paths.get("skin/default/decide.json")));
+			setSkin(sl.loadDecideSkin(Paths.get("skin/default/decide.json"), new HashMap()));
 		}
 	}
 

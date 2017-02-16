@@ -40,7 +40,11 @@ public class LR2SkinHeaderLoader extends LR2SkinLoader {
 						contents.add(str[i]);
 					}
 				}
-				options.add(new CustomOption(str[1], Integer.parseInt(str[2]), contents.toArray(new String[contents.size()])));
+				int[] op = new int[contents.size()];
+				for(int i = 0;i < op.length;i++) {
+					op[i] = Integer.parseInt(str[2]) + i;
+				}
+				options.add(new CustomOption(str[1], op, contents.toArray(new String[contents.size()])));
 			}
 		});
 		addCommandWord(new CommandWord("CUSTOMFILE") {
@@ -91,8 +95,8 @@ public class LR2SkinHeaderLoader extends LR2SkinLoader {
 		
 		for(CustomOption co : options) {
 			for(int i = 0;i < co.contents.length;i++) {
-				if(!op.containsKey(co.option + i)) {
-					op.put(co.option + i, false);
+				if(!op.containsKey(co.option[i])) {
+					op.put(co.option[i], false);
 				}
 			}
 		}

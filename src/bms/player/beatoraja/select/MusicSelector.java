@@ -40,6 +40,7 @@ public class MusicSelector extends MainState {
 	// TODO テキスト表示
 	// TODO 譜面情報表示
 	// TODO オプション常時表示(スキン実装で実現？)
+	// TODO ターゲットスコア選択の実装
 
 	private int selectedreplay;
 
@@ -217,7 +218,7 @@ public class MusicSelector extends MainState {
 				if (sc.getPath().endsWith(".json")) {
 					SkinLoader sl = new SkinLoader(
 							RESOLUTION[getMainController().getPlayerResource().getConfig().getResolution()]);
-					setSkin(sl.loadSelectSkin(Paths.get(sc.getPath())));
+					setSkin(sl.loadSelectSkin(Paths.get(sc.getPath()), sc.getProperty()));
 				} else {
 					LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
 					LR2SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
@@ -232,7 +233,7 @@ public class MusicSelector extends MainState {
 				e.printStackTrace();
 				SkinLoader sl = new SkinLoader(
 						RESOLUTION[getMainController().getPlayerResource().getConfig().getResolution()]);
-				setSkin(sl.loadSelectSkin(Paths.get(SkinConfig.DEFAULT_SELECT)));
+				setSkin(sl.loadSelectSkin(Paths.get(SkinConfig.DEFAULT_SELECT), new HashMap()));
 			}
 		}
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
@@ -504,10 +505,6 @@ public class MusicSelector extends MainState {
 			if (keystate[0] && keytime[0] != 0) {
 				keytime[0] = 0;
 				config.setBga((config.getBga() + 1) % 3);
-			}
-			if (keystate[1] && keytime[1] != 0) {
-				keytime[1] = 0;
-				config.setJudgedetail((config.getJudgedetail() + 1) % 3);
 			}
 			if (keystate[3] && keytime[3] != 0) {
 				keytime[3] = 0;

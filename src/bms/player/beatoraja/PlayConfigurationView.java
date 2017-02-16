@@ -137,8 +137,6 @@ public class PlayConfigurationView implements Initializable {
 	private Config config;;
 	@FXML
 	private CheckBox folderlamp;
-	@FXML
-	private ComboBox<Integer> judgedetail;
 
 	private SkinConfigurationView skinview;
 	@FXML
@@ -183,7 +181,6 @@ public class PlayConfigurationView implements Initializable {
 		initComboBox(playconfig, new String[] { "5/7KEYS", "10/14KEYS", "9KEYS" });
 		initComboBox(lntype, new String[] { "LONG NOTE", "CHARGE NOTE", "HELL CHARGE NOTE" });
 		initComboBox(judgealgorithm, new String[] { "LR2風", "本家風", "最下ノーツ最優先" });
-		initComboBox(judgedetail, new String[] { "なし", "EARLY/LATE", "±ms" });
 		initComboBox(skincategory,
 				new String[] { "7KEYS", "5KEYS", "14KEYS", "10KEYS", "9KEYS", "MUSIC SELECT", "DECIDE", "RESULT",
 						"KEY CONFIG", "SKIN SELECT", "SOUND SET", "THEME", "7KEYS BATTLE", "5KEYS BATTLE",
@@ -246,7 +243,6 @@ public class PlayConfigurationView implements Initializable {
 		judgealgorithm.setValue(config.getJudgeAlgorithm());
 
 		folderlamp.setSelected(config.isFolderlamp());
-		judgedetail.setValue(config.getJudgedetail());
 
 		inputduration.getValueFactory().setValue(config.getInputduration());
 
@@ -302,7 +298,6 @@ public class PlayConfigurationView implements Initializable {
 		config.setJudgeAlgorithm(judgealgorithm.getValue());
 
 		config.setFolderlamp(folderlamp.isSelected());
-		config.setJudgedetail(judgedetail.getValue());
 
 		config.setInputduration(getValue(inputduration));
 
@@ -413,12 +408,12 @@ public class PlayConfigurationView implements Initializable {
 				.setValue(spinner.getValueFactory().getConverter().fromString(spinner.getEditor().getText()));
 		return spinner.getValue();
 	}
-	
+
 	public void updateAudioDriver() {
 		switch(audio.getValue()) {
 		case Config.AUDIODRIVER_SOUND:
-			audioname.getItems().clear();
 			audioname.setDisable(true);
+			audioname.getItems().clear();
 			audiobuffer.setDisable(false);
 			audiosim.setDisable(false);
 			break;
@@ -676,9 +671,14 @@ class SkinConfigurationView {
 			HBox hbox = new HBox();
 			ComboBox<String> combo = new ComboBox<String>();
 			combo.getItems().setAll(option.contents);
-			if (property != null) {
+			if (property != null && property.get(option.name) != null) {
 				int i = (int) property.get(option.name);
-				combo.getSelectionModel().select(i - option.option);
+				for(int index = 0;index < option.option.length;index++) {
+					if(option.option[index] == i) {
+						combo.getSelectionModel().select(index);
+						break;
+					}
+				}
 			} else {
 				combo.getSelectionModel().select(0);
 			}
@@ -742,7 +742,7 @@ class SkinConfigurationView {
 		for (CustomOption option : selected.getCustomOptions()) {
 			if (optionbox.get(option) != null) {
 				int index = optionbox.get(option).getSelectionModel().getSelectedIndex();
-				result.put(option.name, index + option.option);
+				result.put(option.name, option.option[index]);
 			}
 		}
 		for (CustomFile file : selected.getCustomFiles()) {

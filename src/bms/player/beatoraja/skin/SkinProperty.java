@@ -420,10 +420,24 @@ public class SkinProperty {
 
 	public static final int OPTION_1P_PERFECT = 241;
 	public static final int OPTION_1P_GREAT = 242;
+	public static final int OPTION_1P_EARLY = 1242;
 	public static final int OPTION_1P_GOOD = 243;
+	public static final int OPTION_1P_LATE = 1243;
 	public static final int OPTION_1P_BAD = 244;
 	public static final int OPTION_1P_POOR = 245;
 	public static final int OPTION_1P_MISS = 246;
+
+	public static final int OPTION_2P_PERFECT = 261;
+	public static final int OPTION_2P_GREAT = 262;
+	public static final int OPTION_2P_EARLY = 1262;
+	public static final int OPTION_2P_GOOD = 263;
+	public static final int OPTION_2P_LATE = 1263;
+
+	public static final int OPTION_3P_PERFECT = 361;
+	public static final int OPTION_3P_GREAT = 362;
+	public static final int OPTION_3P_EARLY = 1362;
+	public static final int OPTION_3P_GOOD = 363;
+	public static final int OPTION_3P_LATE = 1363;
 
 	public static final int OPTION_LANECOVER1_CHANGING = 270;
 
@@ -491,6 +505,12 @@ public class SkinProperty {
 
 	public static final int VALUE_JUDGE_1P_SCRATCH = 500;
 	public static final int VALUE_JUDGE_1P_KEY1 = 501;
+	public static final int VALUE_JUDGE_1P = 520;
+	public static final int VALUE_JUDGE_2P = 521;
+	public static final int VALUE_JUDGE_3P = 522;
+	public static final int VALUE_JUDGE_1P_DURATION = 525;
+	public static final int VALUE_JUDGE_2P_DURATION = 526;
+	public static final int VALUE_JUDGE_3P_DURATION = 527;
 
 	public static final int SLIDER_LANECOVER = 4;
 	public static final int SLIDER_LANECOVER2 = 5;
@@ -518,7 +538,6 @@ public class SkinProperty {
 	public static final int BUTTON_DPOPTION = 1054;
 	public static final int BUTTON_HSFIX = 1055;
 	public static final int BUTTON_BGA = 1072;
-	public static final int BUTTON_JUDGEDETAIL = 1078;
 	public static final int BUTTON_ASSIST_EXJUDGE = 1301;
 	public static final int BUTTON_ASSIST_CONSTANT = 1302;
 	public static final int BUTTON_ASSIST_JUDGEAREA = 1303;

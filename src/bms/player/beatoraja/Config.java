@@ -106,10 +106,6 @@ public class Config {
 	 */
 	private int judgetiming = 0;
 	/**
-	 * 判定表示方法
-	 */
-	private int judgedetail = 0;
-	/**
 	 * 判定アルゴリズム
 	 */
 	private int judgeAlgorithm = JudgeManager.JUDGE_ALGORITHM_LR2;
@@ -220,7 +216,6 @@ public class Config {
 		skin[6] = new SkinConfig(SkinConfig.DEFAULT_DECIDE);
 		skin[7] = new SkinConfig(SkinConfig.DEFAULT_RESULT);
 		skin[15] = new SkinConfig(SkinConfig.DEFAULT_GRADERESULT);
-		judgedetail = 2;
 	}
 
 	public boolean isFullscreen() {
@@ -349,14 +344,6 @@ public class Config {
 
 	public void setTableURL(String[] tableURL) {
 		this.tableURL = tableURL;
-	}
-
-	public int getJudgedetail() {
-		return judgedetail;
-	}
-
-	public void setJudgedetail(int judgedetail) {
-		this.judgedetail = judgedetail;
 	}
 
 	public int getJudgeAlgorithm() {

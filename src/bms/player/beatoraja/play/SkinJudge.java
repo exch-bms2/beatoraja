@@ -91,27 +91,6 @@ public class SkinJudge extends SkinObject {
             }
             judge[judgenow].draw(sprite, time, state, this.shift ? -shift : 0, 0);
 
-            final int judgedetail = ((BMSPlayer)state).getMainController().getPlayerResource().getConfig().getJudgedetail();
-            // FAST, SLOW描画
-            if (judgedetail == 1) {
-                if (judgenow > 0) {
-                    font.setColor(jm.getRecentJudgeTiming() >= 0 ? Color.BLUE : Color.RED);
-                    font.draw(sprite, jm.getRecentJudgeTiming() >= 0 ? "EARLY" : "LATE", r.x + r.width / 2,
-                            r.y + r.height + 20);
-                }
-
-            } else if (judgedetail == 2) {
-                if (judgenow >= 0) {
-                    if (judgenow == 0) {
-                        font.setColor(jm.getRecentJudgeTiming() >= 0 ? Color.SKY : Color.PINK);
-                    } else {
-                        font.setColor(jm.getRecentJudgeTiming() >= 0 ? Color.BLUE : Color.RED);
-                    }
-                    font.draw(sprite,
-                            (jm.getRecentJudgeTiming() >= 0 ? "+" : "") + jm.getRecentJudgeTiming()
-                                    + " ms", r.x + r.width / 2, r.y + r.height + 20);
-                }
-            }
         }
     }
 

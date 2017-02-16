@@ -315,19 +315,6 @@
                                     <ComboBox fx:id="judgealgorithm" prefWidth="150.0" />
                                  </children>
                               </HBox>
-                              <HBox prefHeight="23.0" prefWidth="740.0">
-                                 <children>
-                                    <Label prefHeight="28.0" prefWidth="78.0" text="%判定詳細表示">
-                                       <HBox.margin>
-                                          <Insets />
-                                       </HBox.margin>
-                                    </Label>
-                                    <ComboBox fx:id="judgedetail" prefWidth="150.0" />
-                                 </children>
-                                 <VBox.margin>
-                                    <Insets bottom="10.0" />
-                                 </VBox.margin>
-                              </HBox>
                               <Button mnemonicParsing="false" onAction="#importScoreDataFromLR2" text="%import_LR2_score" />
                            </children>
                         </VBox>

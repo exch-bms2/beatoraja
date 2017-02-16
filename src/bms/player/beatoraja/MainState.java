@@ -266,8 +266,6 @@ public abstract class MainState {
 			return getMainController().getPlayerResource().getConfig().getFixhispeed();
 		case BUTTON_BGA:
 			return getMainController().getPlayerResource().getConfig().getBga();
-		case BUTTON_JUDGEDETAIL:
-			return getMainController().getPlayerResource().getConfig().getJudgedetail();
 		case BUTTON_ASSIST_EXJUDGE:
 			return getMainController().getPlayerResource().getConfig().isExpandjudge() ? 1 : 0;
 		case BUTTON_ASSIST_CONSTANT:

@@ -8,6 +8,19 @@
 	"input":500,
 	"close":1500,
 	"fadeout":1000,
+
+	"property":[
+		{"name":"Judge Detail", "item":[
+			{"name":"Off", "op":910},
+			{"name":"EARLY/LATE", "op":911},
+			{"name":"+-ms", "op":912}
+		]},
+	],
+	"filepath":[
+		{"name":"Note", "path":"notes/*.png"},
+		{"name":"Laser", "path":"laser/*.png"}
+	],
+
 	"source": [
 		{"id":0, "path":"system.png"},
 		{"id":1, "path":"play.png"},
@@ -15,13 +28,14 @@
 		{"id":3, "path":"gauge.png"},
 		{"id":4, "path":"judge.png"},
 		{"id":5, "path":"number.png"},
-		{"id":6, "path":"keybeam.png"},
-		{"id":7, "path":"note.png"},
+		{"id":6, "path":"laser/*.png"},
+		{"id":7, "path":"notes/*.png"},
 		{"id":8, "path":"close.png"},
 		{"id":9, "path":"scoregraph.png"},
 		{"id":10, "path":"bomb.png"},
 		{"id":11, "path":"ready.png"},
-		{"id":12, "path":"lanecover.png"}
+		{"id":12, "path":"lanecover.png"},
+		{"id":13, "path":"judgedetail.png"}
 	],
 	"font": [
 		{"id":0, "path":"VL-Gothic-Regular.ttf"}
@@ -178,7 +192,10 @@
 		{"id":"judgef-gd", "src":4, "x":0, "y":200, "w":180, "h":50},
 		{"id":"judgef-bd", "src":4, "x":0, "y":250, "w":180, "h":50},
 		{"id":"judgef-pr", "src":4, "x":0, "y":300, "w":180, "h":50},
-		{"id":"judgef-ms", "src":4, "x":0, "y":300, "w":180, "h":50}	
+		{"id":"judgef-ms", "src":4, "x":0, "y":300, "w":180, "h":50},
+
+		{"id":"judge-early", "src":13, "x":0, "y":0, "w":50, "h":20},
+		{"id":"judge-late", "src":13, "x":50, "y":0, "w":50, "h":20}
 	],
 	"imageset":[
 		{"id":"keybeam1", "ref":501, "images":["keybeam-w","keybeam-w-pg"]},
@@ -258,7 +275,12 @@
 		{"id":"judgen-gd", "src":4, "x":200, "y":200, "w":300, "h":50, "divx":10, "digit":6, "ref":75},
 		{"id":"judgen-bd", "src":4, "x":200, "y":250, "w":300, "h":50, "divx":10, "digit":6, "ref":75},
 		{"id":"judgen-pr", "src":4, "x":200, "y":300, "w":300, "h":50, "divx":10, "digit":6, "ref":75},
-		{"id":"judgen-ms", "src":4, "x":200, "y":300, "w":300, "h":50, "divx":10, "digit":6, "ref":75}
+		{"id":"judgen-ms", "src":4, "x":200, "y":300, "w":300, "h":50, "divx":10, "digit":6, "ref":75},
+
+		{"id":"judgems-1pp", "src":13, "x":0, "y":20, "w":120, "h":40, "divx":12, "divy":2, "digit":4, "ref":525},
+		{"id":"judgems-1pg", "src":13, "x":0, "y":60, "w":120, "h":40, "divx":12, "divy":2, "digit":4, "ref":525},
+		{"id":"judgems-2pp", "src":13, "x":0, "y":20, "w":120, "h":40, "divx":12, "divy":2, "digit":4, "ref":526},
+		{"id":"judgems-2pg", "src":13, "x":0, "y":60, "w":120, "h":40, "divx":12, "divy":2, "digit":4, "ref":526}
 	],
 	"text":[
 		{"id":1000, "font":0, "size":24, "align":0, "ref":12}
@@ -713,7 +735,40 @@
 		]},
 
 		{"id":2010},
+		{"id":"judge-early", "loop":-1, "timer":46 ,"op":[911,1242],"offsety":50, "dst":[
+			{"time":0, "x":390, "y":290, "w":50, "h":20},
+			{"time":500}
+		]},
+		{"id":"judge-late", "loop":-1, "timer":46 ,"op":[911,1243],"offsety":50, "dst":[
+			{"time":0, "x":390, "y":290, "w":50, "h":20},
+			{"time":500}
+		]},
+		{"id":"judgems-1pp", "loop":-1, "timer":46 ,"op":[912,241],"offsety":50, "dst":[
+			{"time":0, "x":390, "y":290, "w":10, "h":20},
+			{"time":500}
+		]},
+		{"id":"judgems-1pg", "loop":-1, "timer":46 ,"op":[912,-241],"offsety":50, "dst":[
+			{"time":0, "x":390, "y":290, "w":10, "h":20},
+			{"time":500}
+		]},
+
 		{"id":2011},
+		{"id":"judge-early", "loop":-1, "timer":47 ,"op":[911,1262],"offsety":50, "dst":[
+			{"time":0, "x":860, "y":290, "w":50, "h":20},
+			{"time":500}
+		]},
+		{"id":"judge-late", "loop":-1, "timer":47 ,"op":[911,1263],"offsety":50, "dst":[
+			{"time":0, "x":860, "y":290, "w":50, "h":20},
+			{"time":500}
+		]},
+		{"id":"judgems-2pp", "loop":-1, "timer":47 ,"op":[912,261],"offsety":50, "dst":[
+			{"time":0, "x":860, "y":290, "w":10, "h":20},
+			{"time":500}
+		]},
+		{"id":"judgems-2pg", "loop":-1, "timer":47 ,"op":[912,-261],"offsety":50, "dst":[
+			{"time":0, "x":860, "y":290, "w":10, "h":20},
+			{"time":500}
+		]},
 
 		{"id":1060, "dst":[
 			{"x":210, "y":720, "w":390, "h":580}

@@ -3,6 +3,7 @@ package bms.player.beatoraja.result;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
 
 import bms.model.LongNote;
@@ -84,7 +85,7 @@ public class MusicResult extends MainState {
 			SkinConfig sc = resource.getConfig().getSkin()[7];
 			if (sc.getPath().endsWith(".json")) {
 				SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
-				setSkin(sl.loadResultSkin(Paths.get(sc.getPath())));
+				setSkin(sl.loadResultSkin(Paths.get(sc.getPath()), sc.getProperty()));
 			} else {
 				LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
 				LR2SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
@@ -97,7 +98,7 @@ public class MusicResult extends MainState {
 		} catch (Throwable e) {
 			e.printStackTrace();
 			SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
-			setSkin(sl.loadResultSkin(Paths.get("skin/default/result.json")));
+			setSkin(sl.loadResultSkin(Paths.get("skin/default/result.json"), new HashMap()));
 		}
 	}
 
