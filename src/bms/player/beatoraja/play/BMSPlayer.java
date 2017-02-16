@@ -256,7 +256,7 @@ public class BMSPlayer extends MainState {
 			SkinConfig sc = resource.getConfig().getSkin()[skinmode];
 			if (sc.getPath().endsWith(".json")) {
 				SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
-				setSkin(sl.loadPlaySkin(Paths.get(sc.getPath()), skinmode));
+				setSkin(sl.loadPlaySkin(Paths.get(sc.getPath()), skinmode, sc.getProperty()));
 			} else {
 				LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
 				LR2SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
@@ -269,7 +269,7 @@ public class BMSPlayer extends MainState {
 		} catch (Throwable e) {
 			e.printStackTrace();
 			SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
-			setSkin(sl.loadPlaySkin(Paths.get(defaultskins[skinmode]), skinmode));
+			setSkin(sl.loadPlaySkin(Paths.get(defaultskins[skinmode]), skinmode, new HashMap()));
 		}
 	}
 
@@ -1050,6 +1050,10 @@ public class BMSPlayer extends MainState {
 			return scratch1 / 6;
 		case NUMBER_SCRATCHANGLE_2P:
 			return scratch2 / 6;
+			case VALUE_JUDGE_1P_DURATION:
+			case VALUE_JUDGE_2P_DURATION:
+			case VALUE_JUDGE_3P_DURATION:
+				return judge.getRecentJudgeTiming();
 		}
 		if (id >= VALUE_JUDGE_1P_SCRATCH && id < VALUE_JUDGE_1P_SCRATCH + 20) {
 			return lanerender.getJudge()[id - VALUE_JUDGE_1P_SCRATCH];
@@ -1174,6 +1178,24 @@ public class BMSPlayer extends MainState {
 			return state != STATE_PRELOAD;
 		case OPTION_LANECOVER1_CHANGING:
 			return startpressed;
+			case OPTION_1P_PERFECT:
+				return lanerender.getNowJudge()[0] == 1;
+			case OPTION_1P_EARLY:
+				return lanerender.getNowJudge()[0] > 1 && judge.getRecentJudgeTiming() > 0;
+			case OPTION_1P_LATE:
+				return lanerender.getNowJudge()[0] > 1 && judge.getRecentJudgeTiming() < 0;
+			case OPTION_2P_PERFECT:
+				return lanerender.getNowJudge().length > 1 && lanerender.getNowJudge()[1] == 1;
+			case OPTION_2P_EARLY:
+				return lanerender.getNowJudge().length > 1 && lanerender.getNowJudge()[1] > 1 && judge.getRecentJudgeTiming() > 0;
+			case OPTION_2P_LATE:
+				return lanerender.getNowJudge().length > 1 && lanerender.getNowJudge()[1] > 1 && judge.getRecentJudgeTiming() < 0;
+			case OPTION_3P_PERFECT:
+				return lanerender.getNowJudge().length > 2 && lanerender.getNowJudge()[2] == 1;
+			case OPTION_3P_EARLY:
+				return lanerender.getNowJudge().length > 2 && lanerender.getNowJudge()[2] > 1 && judge.getRecentJudgeTiming() > 0;
+			case OPTION_3P_LATE:
+				return lanerender.getNowJudge().length > 2 && lanerender.getNowJudge()[2] > 1 && judge.getRecentJudgeTiming() < 0;
 		}
 		return super.getBooleanValue(id);
 	}

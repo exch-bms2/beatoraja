@@ -58,7 +58,7 @@ public class GradeResult extends MainState {
 			SkinConfig sc = resource.getConfig().getSkin()[15];
 			if (sc.getPath().endsWith(".json")) {
 				SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
-				setSkin(sl.loadResultSkin(Paths.get(sc.getPath())));
+				setSkin(sl.loadResultSkin(Paths.get(sc.getPath()), sc.getProperty()));
 			} else {
 				LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
 				LR2SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
@@ -71,7 +71,7 @@ public class GradeResult extends MainState {
 		} catch (Throwable e) {
 			e.printStackTrace();
 			SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
-			setSkin(sl.loadResultSkin(Paths.get("skin/default/graderesult.json")));
+			setSkin(sl.loadResultSkin(Paths.get("skin/default/graderesult.json"), new HashMap()));
 		}
 		
         for(int i = resource.getCourseGauge().size();i < resource.getCourseBMSModels().length;i++) {

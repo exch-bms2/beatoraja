@@ -413,12 +413,12 @@ public class PlayConfigurationView implements Initializable {
 				.setValue(spinner.getValueFactory().getConverter().fromString(spinner.getEditor().getText()));
 		return spinner.getValue();
 	}
-	
+
 	public void updateAudioDriver() {
 		switch(audio.getValue()) {
 		case Config.AUDIODRIVER_SOUND:
-			audioname.getItems().clear();
 			audioname.setDisable(true);
+			audioname.getItems().clear();
 			audiobuffer.setDisable(false);
 			audiosim.setDisable(false);
 			break;
@@ -676,9 +676,14 @@ class SkinConfigurationView {
 			HBox hbox = new HBox();
 			ComboBox<String> combo = new ComboBox<String>();
 			combo.getItems().setAll(option.contents);
-			if (property != null) {
+			if (property != null && property.get(option.name) != null) {
 				int i = (int) property.get(option.name);
-				combo.getSelectionModel().select(i - option.option);
+				for(int index = 0;index < option.option.length;index++) {
+					if(option.option[index] == i) {
+						combo.getSelectionModel().select(index);
+						break;
+					}
+				}
 			} else {
 				combo.getSelectionModel().select(0);
 			}
@@ -742,7 +747,7 @@ class SkinConfigurationView {
 		for (CustomOption option : selected.getCustomOptions()) {
 			if (optionbox.get(option) != null) {
 				int index = optionbox.get(option).getSelectionModel().getSelectedIndex();
-				result.put(option.name, index + option.option);
+				result.put(option.name, option.option[index]);
 			}
 		}
 		for (CustomFile file : selected.getCustomFiles()) {

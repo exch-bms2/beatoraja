@@ -1,16 +1,23 @@
 package bms.player.beatoraja.skin;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.logging.Logger;
 
 import bms.player.beatoraja.Resolution;
 import bms.player.beatoraja.play.*;
+import bms.player.beatoraja.play.bga.BGAProcessor;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
 import com.badlogic.gdx.assets.loaders.resolvers.ResolutionFileResolver;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.utils.BooleanArray;
+import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.Json;
 
 import bms.player.beatoraja.decide.MusicDecideSkin;
@@ -27,6 +34,8 @@ public class SkinLoader {
 
 	Map<String, Texture> texmap;
 
+	Map<String, String> filemap = new HashMap();
+
 	public SkinLoader() {
 		this(Resolution.RESOLUTION[1]);
 	}
@@ -35,20 +44,20 @@ public class SkinLoader {
 		dstr = r;
 	}
 
-	public MusicResultSkin loadResultSkin(Path p) {
-		return (MusicResultSkin) load(p, 7);		
+	public MusicResultSkin loadResultSkin(Path p, Map property) {
+		return (MusicResultSkin) load(p, 7, property);
 	}
 
-	public MusicDecideSkin loadDecideSkin(Path p) {
-		return (MusicDecideSkin) load(p, 6);
+	public MusicDecideSkin loadDecideSkin(Path p, Map property) {
+		return (MusicDecideSkin) load(p, 6, property);
 	}
 
-	public MusicSelectSkin loadSelectSkin(Path p) {
-		return (MusicSelectSkin) load(p, 5);
+	public MusicSelectSkin loadSelectSkin(Path p, Map property) {
+		return (MusicSelectSkin) load(p, 5, property);
 	}
 
-	public PlaySkin loadPlaySkin(Path p, int skinmode) {
-		return (PlaySkin) load(p, skinmode);
+	public PlaySkin loadPlaySkin(Path p, int skinmode, Map property) {
+		return (PlaySkin) load(p, skinmode, property);
 	}
 
 	public LR2SkinHeader loadHeader(Path p) {
@@ -64,6 +73,27 @@ public class SkinLoader {
 				header.setName(sk.name);
 				header.setPath(p);
 				header.setType(LR2SkinHeader.TYPE_BEATORJASKIN);
+
+				LR2SkinHeader.CustomOption[] options = new LR2SkinHeader.CustomOption[sk.property.length];
+				for(int i = 0;i < sk.property.length;i++) {
+					Property pr = sk.property[i];
+
+					int[] op = new int[pr.item.length];
+					String[] name = new String[pr.item.length];
+					for(int j = 0;j < pr.item.length;j++) {
+						op[j] = pr.item[j].op;
+						name[j] = pr.item[j].name;
+					}
+					options[i] = new LR2SkinHeader.CustomOption(pr.name, op, name);
+				}
+				header.setCustomOptions(options);
+
+				LR2SkinHeader.CustomFile[] files = new LR2SkinHeader.CustomFile[sk.filepath.length];
+				for(int i = 0;i < sk.filepath.length;i++) {
+					Filepath pr = sk.filepath[i];
+					files[i] = new LR2SkinHeader.CustomFile(pr.name, p.getParent().resolve(pr.path).toString());
+				}
+				header.setCustomFiles(files);
 			}
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -71,7 +101,7 @@ public class SkinLoader {
 		return header;
 	}
 
-	public Skin load(Path p, int type) {
+	public Skin load(Path p, int type, Map property) {
 		Skin skin = null;
 		try {
 			Json json = new Json();
@@ -95,6 +125,27 @@ public class SkinLoader {
 			if(type == 7) {
 				skin = new MusicResultSkin(sk.w, sk.h, dstr.width, dstr.height);				
 			}
+
+			Map<Integer, Boolean> op = new HashMap<>();
+			for(Property pr : sk.property) {
+				int pop = 0;
+				if(property.get(pr.name) instanceof Integer) {
+					pop = (int) property.get(pr.name);
+				}
+
+				for(int i = 0;i < pr.item.length;i++) {
+					op.put(pr.item[i].op, pr.item[i].op == pop);
+				}
+			}
+			skin.setOption(op);
+
+			filemap = new HashMap<>();
+			for(Filepath pr : sk.filepath) {
+				if(property.get(pr.name) != null) {
+					filemap.put(pr.path, property.get(pr.name).toString());
+				}
+			}
+
 			skin.setFadeout(sk.fadeout);
 			skin.setInput(sk.input);
 			skin.setScene(sk.scene);
@@ -580,8 +631,63 @@ public class SkinLoader {
 	private Texture getTexture(String srcid, Path p) {
 		for (Source src : sk.source) {
 			if (srcid.equals(src.id)) {
-				if (texmap.get(src.id) == null) {
-					texmap.put(src.id, new Texture(p.getParent().resolve(src.path).toString()));
+				if (!texmap.containsKey(src.id)) {
+					String imagepath = p.getParent().resolve(src.path).toString();
+					File imagefile = new File(imagepath);
+					for(String key : filemap.keySet()) {
+						if(src.path.equals(key)) {
+							String foot = imagepath.substring(imagepath.lastIndexOf('*'));
+							foot = foot.indexOf('/') == -1 ? "" : foot.substring(foot.indexOf('/'));
+							imagefile = new File(imagepath.substring(0, imagepath.lastIndexOf('*'))
+									+ filemap.get(key) + foot);
+//						System.out.println(key + " " + foot + " " + imagefile.getPath());
+							imagepath = "";
+							break;
+						}
+					}
+
+					if (imagepath.contains("*")) {
+						String ext = imagepath.substring(imagepath.lastIndexOf("*") + 1);
+						File imagedir = new File(imagepath.substring(0, imagepath.lastIndexOf('/')));
+						if (imagedir.exists() && imagedir.isDirectory()) {
+							List<File> l = new ArrayList();
+							for (File subfile : imagedir.listFiles()) {
+								if (subfile.getPath().toLowerCase().endsWith(ext)) {
+									l.add(subfile);
+								}
+							}
+							if (l.size() > 0) {
+								imagefile = l.get((int) (Math.random() * l.size()));
+							}
+						}
+					}
+					if (imagefile.exists()) {
+						boolean isMovie = false;
+//						for (String mov : BGAProcessor.mov_extension) {
+//							if (imagefile.getName().toLowerCase().endsWith(mov)) {
+//								try {
+//									SkinSourceMovie mm = new SkinSourceMovie(imagefile.getPath());
+//									imagelist.add(mm);
+//									isMovie = true;
+//									break;
+//								} catch (Throwable e) {
+//									Logger.getGlobal().warning("BGAファイル読み込み失敗。" + e.getMessage());
+//									e.printStackTrace();
+//								}
+//							}
+//						}
+
+						if(!isMovie) {
+							try {
+								texmap.put(src.id, new Texture(Gdx.files.internal(imagefile.getPath())));
+							} catch (GdxRuntimeException e) {
+								texmap.put(src.id, null);
+								e.printStackTrace();
+							}
+						}
+					} else {
+						texmap.put(src.id, null);
+					}
 				}
 				return texmap.get(src.id);
 			}
@@ -640,6 +746,8 @@ public class SkinLoader {
 		public int close;
 		public int playstart;
 
+		public Property[] property = new Property[0];
+		public Filepath[] filepath = new Filepath[0];
 		public Source[] source = new Source[0];
 		public Font[] font = new Font[0];
 		public Image[] image = new Image[0];
@@ -657,6 +765,21 @@ public class SkinLoader {
 		public SongList songlist;
 
 		public Destination[] destination;
+	}
+
+	public static class Property {
+		public String name;
+		public PropertyItem[] item = new PropertyItem[0];
+	}
+
+	public static class PropertyItem {
+		public String name;
+		public int op;
+	}
+
+	public static class Filepath {
+		public String name;
+		public String path;
 	}
 
 	public static class Source {
