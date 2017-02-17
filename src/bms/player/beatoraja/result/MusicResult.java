@@ -45,6 +45,16 @@ public class MusicResult extends MainState {
 
 	private String clear;
 	private String fail;
+	
+	private int state;
+	
+	public static final int STATE_OFFLINE = 0;
+	public static final int STATE_IR_PROCESSING = 1;
+	public static final int STATE_IR_FINISHED = 2;
+	
+	private int irrank;
+	private int irprevrank;
+	private int irtotal;
 
 	public MusicResult(MainController main) {
 		super(main);
@@ -196,7 +206,7 @@ public class MusicResult extends MainState {
 					if (((MusicResultSkin) getSkin()).getRankTime() != 0
 							&& getTimer()[TIMER_RESULT_UPDATESCORE] == Long.MIN_VALUE) {
 						getTimer()[TIMER_RESULT_UPDATESCORE] = time;
-					} else {
+					} else if(state == STATE_OFFLINE || state == STATE_IR_FINISHED){
 						getTimer()[TIMER_FADEOUT] = time;
 					}
 				}
@@ -227,6 +237,8 @@ public class MusicResult extends MainState {
 
 	private void updateScoreDatabase() {
 		saveReplay = -1;
+		state = STATE_OFFLINE;
+		irrank = irprevrank = irtotal = 0;
 		final PlayerResource resource = getMainController().getPlayerResource();
 		IRScoreData newscore = resource.getScoreData();
 		if (newscore == null) {
@@ -332,8 +344,29 @@ public class MusicResult extends MainState {
 			// TODO スコアハッシュがあり、有効期限が切れていないものを送信する？
 			IRConnection ir = getMainController().getIRConnection();
 			if (ir != null) {
-				ir.getPlayData(resource.getBMSModel());
-				ir.sendPlayData(resource.getBMSModel(), resource.getScoreData());
+				state = STATE_IR_PROCESSING;
+				final IRScoreData oldscore = score;
+				Thread irprocess = new Thread() {
+
+					@Override
+					public void run() {
+						ir.sendPlayData(resource.getBMSModel(), resource.getScoreData());
+						IRScoreData[] scores = ir.getPlayData(null, resource.getBMSModel());
+						irtotal = scores.length;
+						
+						for(int i = 0;i < scores.length;i++) {
+							if(irrank == 0 && scores[i].getExscore() <= resource.getScoreData().getExscore() ) {
+								irrank = i + 1;
+							}							
+							if(irprevrank == 0 && scores[i].getExscore() <= oldscore.getExscore() ) {
+								irprevrank = i + 1;
+							}							
+						}
+						
+						state = STATE_IR_FINISHED;
+					}
+				};
+				irprocess.start();
 			}
 		}
 
@@ -459,6 +492,21 @@ public class MusicResult extends MainState {
 			return (int) avgduration;
 		case NUMBER_AVERAGE_DURATION_AFTERDOT:
 			return ((int) (avgduration * 100)) % 100;
+		case NUMBER_IR_RANK:
+			if(state != STATE_OFFLINE) {
+				return irrank;				
+			}
+			return Integer.MIN_VALUE;
+		case NUMBER_IR_PREVRANK:
+			if(state != STATE_OFFLINE) {
+				return irprevrank;
+			}
+			return Integer.MIN_VALUE;
+		case NUMBER_IR_TOTALPLAYER:
+			if(state != STATE_OFFLINE) {
+				return irtotal;
+			}
+			return Integer.MIN_VALUE;
 		}
 		return super.getNumberValue(id);
 	}

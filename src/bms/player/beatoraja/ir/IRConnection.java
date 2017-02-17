@@ -23,10 +23,11 @@ public interface IRConnection {
 
 	/**
 	 * スコアデータを取得する
-	 * @param model
+	 * @param id ユーザーID。譜面に登録されているスコアデータを全取得する場合はnullを入れる
+	 * @param model スコアデータを取得する譜面。ユーザーIDのスコアデータを全取得する場合はnullを入れる
 	 * @return
 	 */
-	public IRScoreData getPlayData(BMSModel model);
+	public IRScoreData[] getPlayData(String id, BMSModel model);
 
 	/**
 	 * スコアデータを送信する

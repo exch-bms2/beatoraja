@@ -268,6 +268,10 @@ public class SkinProperty {
 	public static final int NUMBER_TARGET_MISSCOUNT = 176;
 	public static final int NUMBER_MISSCOUNT2 = 177;
 	public static final int NUMBER_DIFF_MISSCOUNT = 178;
+	public static final int NUMBER_IR_RANK = 179;
+	public static final int NUMBER_IR_TOTALPLAYER = 180;
+	public static final int NUMBER_IR_CLEARRATE = 181;
+	public static final int NUMBER_IR_PREVRANK = 182;
 
 	public static final int NUMBER_FOLDER_TOTALSONGS = 300;
 
