@@ -180,7 +180,7 @@ public class PlayConfigurationView implements Initializable {
 		initComboBox(fixhispeed, new String[] { "OFF", "START BPM", "MAX BPM", "MAIN BPM", "MIN BPM" });
 		initComboBox(playconfig, new String[] { "5/7KEYS", "10/14KEYS", "9KEYS" });
 		initComboBox(lntype, new String[] { "LONG NOTE", "CHARGE NOTE", "HELL CHARGE NOTE" });
-		initComboBox(judgealgorithm, new String[] { "LR2風", "本家風", "最下ノーツ最優先" });
+		initComboBox(judgealgorithm, new String[] { arg1.getString("JUDGEALG_LR2"), arg1.getString("JUDGEALG_AC"), arg1.getString("JUDGEALG_BOTTOM_PRIORITY") });
 		initComboBox(skincategory,
 				new String[] { "7KEYS", "5KEYS", "14KEYS", "10KEYS", "9KEYS", "MUSIC SELECT", "DECIDE", "RESULT",
 						"KEY CONFIG", "SKIN SELECT", "SOUND SET", "THEME", "7KEYS BATTLE", "5KEYS BATTLE",
