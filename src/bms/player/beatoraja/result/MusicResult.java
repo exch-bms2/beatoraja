@@ -41,20 +41,32 @@ public class MusicResult extends MainState {
 	private int oldmisscount;
 	private int oldcombo;
 
+	/**
+	 * 全ノーツの平均ズレ
+	 */
 	private float avgduration;
 
 	private String clear;
 	private String fail;
 	
+	/**
+	 * 状態
+	 */
 	private int state;
 	
 	public static final int STATE_OFFLINE = 0;
 	public static final int STATE_IR_PROCESSING = 1;
 	public static final int STATE_IR_FINISHED = 2;
-	
+
+	private int rate;
+	private int oldrate;
+	private int next;
+
 	private int irrank;
 	private int irprevrank;
 	private int irtotal;
+
+	private int saveReplay = -1;
 
 	public MusicResult(MainController main) {
 		super(main);
@@ -221,8 +233,6 @@ public class MusicResult extends MainState {
 		}
 	}
 
-	private int saveReplay = -1;
-
 	private void saveReplayData(int index) {
 		final PlayerResource resource = getMainController().getPlayerResource();
 		if (resource.getAutoplay() == 0 && resource.getCourseBMSModels() == null && resource.getScoreData() != null) {
@@ -360,6 +370,9 @@ public class MusicResult extends MainState {
 							}							
 							if(irprevrank == 0 && scores[i].getExscore() <= oldscore.getExscore() ) {
 								irprevrank = i + 1;
+								if(irrank == 0) {
+									irrank = irprevrank;
+								}
 							}							
 						}
 						
@@ -510,10 +523,6 @@ public class MusicResult extends MainState {
 		}
 		return super.getNumberValue(id);
 	}
-
-	private int rate;
-	private int oldrate;
-	private int next;
 
 	public boolean getBooleanValue(int id) {
 		final PlayerResource resource = getMainController().getPlayerResource();
