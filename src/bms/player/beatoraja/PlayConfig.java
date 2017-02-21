@@ -40,18 +40,19 @@ public class PlayConfig {
 	private int[] keyassign = { Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.F, Keys.V, Keys.SHIFT_LEFT,
 			Keys.CONTROL_LEFT, Keys.COMMA, Keys.L, Keys.PERIOD, Keys.SEMICOLON, Keys.SLASH, Keys.APOSTROPHE,
 			Keys.UNKNOWN, Keys.SHIFT_RIGHT, Keys.CONTROL_RIGHT, Keys.Q, Keys.W };
-
-	private int[] controllerassign = { BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8,
-			BMKeys.BUTTON_2, BMKeys.BUTTON_5, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN, BMKeys.BUTTON_9,
-			BMKeys.BUTTON_10 };
-
+	
+	private ControllerConfig[] controller = new ControllerConfig[1];
+	
 	public PlayConfig() {
-		
+		controller[0] = new ControllerConfig();
 	}
 	
-	public PlayConfig(int[] keyassign, int[] controllerassign) {
+	public PlayConfig(int[] keyassign, int[][] controller) {
 		this.keyassign = keyassign;
-		this.controllerassign = controllerassign;
+		this.controller = new ControllerConfig[controller.length];
+		for(int i = 0;i < controller.length;i++) {
+			this.controller[i] = new ControllerConfig(controller[i]);
+		}
 	}
 		
 	public int[] getKeyassign() {
@@ -62,12 +63,12 @@ public class PlayConfig {
 		this.keyassign = keyassign;
 	}
 
-	public int[] getControllerassign() {
-		return controllerassign;
+	public ControllerConfig[] getController() {
+		return controller;
 	}
 
-	public void setControllerassign(int[] controllerassign) {
-		this.controllerassign = controllerassign;
+	public void setController(ControllerConfig[] controllerassign) {
+		this.controller = controllerassign;
 	}
 
 	public float getHispeed() {
@@ -116,6 +117,41 @@ public class PlayConfig {
 
 	public void setEnablelift(boolean enablelift) {
 		this.enablelift = enablelift;
+	}
+
+	public static class ControllerConfig {
+
+		private String name = "";
+
+		private int[] assign = { BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8,
+				BMKeys.BUTTON_2, BMKeys.BUTTON_5, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN, BMKeys.BUTTON_9,
+				BMKeys.BUTTON_10 };
+
+		public ControllerConfig() {
+			
+		}
+		
+		public ControllerConfig(int[] assign) {
+			this.assign = assign;
+		}
+		
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public int[] getAssign() {
+			return assign;
+		}
+
+		public void setAssign(int[] assign) {
+			this.assign = assign;
+		}
+		
+		
 	}
 
 }

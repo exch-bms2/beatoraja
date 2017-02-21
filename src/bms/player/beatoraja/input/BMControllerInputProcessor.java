@@ -43,10 +43,9 @@ public class BMControllerInputProcessor implements ControllerListener {
 	private int lastPressedButton = -1;
 
 	public BMControllerInputProcessor(BMSPlayerInputProcessor bmsPlayerInputProcessor, Controller controller,
-			int player, int[] buttons) {
+			int[] buttons) {
 		this.bmsPlayerInputProcessor = bmsPlayerInputProcessor;
 		this.controller = controller;
-		this.player = player;
 		this.setControllerKeyAssign(buttons);
 	}
 
@@ -56,11 +55,22 @@ public class BMControllerInputProcessor implements ControllerListener {
 		this.start = buttons[9];
 		this.select = buttons[10];
 	}
+	
+	public Controller getController() {
+		return controller;
+	}
+
+	public int getPlayer() {
+		return player;
+	}
+
+	public void setPlayer(int player) {
+		this.player = player;
+	}
 
 	public boolean accelerometerMoved(Controller arg0, int arg1, Vector3 arg2) {
-		Logger.getGlobal().info(
-				"controller : " + player + " accelerometer moved :" + arg1 + " - " + arg2.x + " " + arg2.y + " "
-						+ arg2.z);
+		Logger.getGlobal().info("controller : " + controller.getName() + " accelerometer moved :" + arg1 + " - "
+				+ arg2.x + " " + arg2.y + " " + arg2.z);
 		return false;
 	}
 
@@ -83,17 +93,18 @@ public class BMControllerInputProcessor implements ControllerListener {
 	}
 
 	public boolean povMoved(Controller arg0, int arg1, PovDirection arg2) {
-		Logger.getGlobal().info("controller : " + player + "pov moved : " + arg1 + " - " + arg2.ordinal());
+		Logger.getGlobal()
+				.info("controller : " + controller.getName() + "pov moved : " + arg1 + " - " + arg2.ordinal());
 		return false;
 	}
 
 	public boolean xSliderMoved(Controller arg0, int arg1, boolean arg2) {
-		Logger.getGlobal().info("controller : " + player + "xslider moved : " + arg1 + " - " + arg2);
+		Logger.getGlobal().info("controller : " + controller.getName() + "xslider moved : " + arg1 + " - " + arg2);
 		return false;
 	}
 
 	public boolean ySliderMoved(Controller arg0, int arg1, boolean arg2) {
-		Logger.getGlobal().info("controller : " + player + "yslider moved : " + arg1 + " - " + arg2);
+		Logger.getGlobal().info("controller : " + controller.getName() + "yslider moved : " + arg1 + " - " + arg2);
 		return false;
 	}
 
@@ -104,34 +115,34 @@ public class BMControllerInputProcessor implements ControllerListener {
 	private int duration = 16;
 
 	public void clear() {
-//		Arrays.fill(buttonstate, false);
-//		Arrays.fill(axis, 0);
+		// Arrays.fill(buttonstate, false);
+		// Arrays.fill(axis, 0);
 		Arrays.fill(buttonchanged, false);
 		Arrays.fill(buttontime, Long.MIN_VALUE);
 		lastPressedButton = -1;
 	}
-	
+
 	public void poll(final long presstime) {
-		for(int i = 0;i < 4;i++) {
+		for (int i = 0; i < 4; i++) {
 			final float ax = controller.getAxis(i);
-			if(analogaxis[i]) {
-				if((axis[i] == 1.0 && ax == -1.0) || (axis[i] < 1.0 && ax > axis[i])) {
-					this.bmsPlayerInputProcessor.keyChanged(player + 1, (int)presstime, 8 + player * 9, false);
-					this.bmsPlayerInputProcessor.keyChanged(player + 1, (int)presstime, 7 + player * 9, true);
+			if (analogaxis[i]) {
+				if ((axis[i] == 1.0 && ax == -1.0) || (axis[i] < 1.0 && ax > axis[i])) {
+					this.bmsPlayerInputProcessor.keyChanged(player + 1, (int) presstime, 8 + player * 9, false);
+					this.bmsPlayerInputProcessor.keyChanged(player + 1, (int) presstime, 7 + player * 9, true);
 					this.axistime[i] = presstime;
-				} else if((axis[i] == -1.0 && ax == 1.0) || (axis[i] > -1.0 && ax > axis[i])) {
-					this.bmsPlayerInputProcessor.keyChanged(player + 1, (int)presstime, 8 + player * 9, true);
-					this.bmsPlayerInputProcessor.keyChanged(player + 1, (int)presstime, 7 + player * 9, false);
+				} else if ((axis[i] == -1.0 && ax == 1.0) || (axis[i] > -1.0 && ax > axis[i])) {
+					this.bmsPlayerInputProcessor.keyChanged(player + 1, (int) presstime, 8 + player * 9, true);
+					this.bmsPlayerInputProcessor.keyChanged(player + 1, (int) presstime, 7 + player * 9, false);
 					this.axistime[i] = presstime;
-				} else if(axistime[i] != -1 && presstime > axistime[i] + 50) {
-					this.bmsPlayerInputProcessor.keyChanged(player + 1, (int)presstime, 8 + player * 9, false);
-					this.bmsPlayerInputProcessor.keyChanged(player + 1, (int)presstime, 7 + player * 9, false);
+				} else if (axistime[i] != -1 && presstime > axistime[i] + 50) {
+					this.bmsPlayerInputProcessor.keyChanged(player + 1, (int) presstime, 8 + player * 9, false);
+					this.bmsPlayerInputProcessor.keyChanged(player + 1, (int) presstime, 7 + player * 9, false);
 					this.axistime[i] = -1;
 				}
 			} else {
-				if((ax > -0.9 && ax < -0.1) || (ax > 0.1 && ax < 0.9)) {
-					if(axistime[i] != -1) {
-						if(presstime > axistime[i] + 500) {
+				if ((ax > -0.9 && ax < -0.1) || (ax > 0.1 && ax < 0.9)) {
+					if (axistime[i] != -1) {
+						if (presstime > axistime[i] + 500) {
 							analogaxis[i] = true;
 						}
 					} else {
@@ -139,11 +150,11 @@ public class BMControllerInputProcessor implements ControllerListener {
 					}
 				} else {
 					axistime[i] = -1;
-				}				
+				}
 			}
 			axis[i] = ax;
 		}
-		
+
 		for (int button = 0; button < buttonstate.length; button++) {
 			if (presstime >= buttontime[button] + duration) {
 				final boolean prev = buttonstate[button];
@@ -158,10 +169,10 @@ public class BMControllerInputProcessor implements ControllerListener {
 				} else if (button == BMKeys.RIGHT) {
 					buttonstate[button] = (!analogaxis[0] && axis[0] > 0.9) || (!analogaxis[3] && axis[3] > 0.9);
 				}
-				if(buttonchanged[button] = (prev != buttonstate[button])) {
-					buttontime[button] = presstime;					
+				if (buttonchanged[button] = (prev != buttonstate[button])) {
+					buttontime[button] = presstime;
 				}
-				
+
 				if (!prev && buttonstate[button]) {
 					setLastPressedButton(button);
 				}
@@ -192,7 +203,7 @@ public class BMControllerInputProcessor implements ControllerListener {
 	public void setLastPressedButton(int lastPressedButton) {
 		this.lastPressedButton = lastPressedButton;
 	}
-	
+
 	public void setMinimumDuration(int duration) {
 		this.duration = duration;
 	}
@@ -223,9 +234,9 @@ public class BMControllerInputProcessor implements ControllerListener {
 		/**
 		 * 専コンのキーコードに対応したテキスト
 		 */
-		private static final String[] BMCODE = { "BUTTON 1", "BUTTON 2", "BUTTON 3", "BUTTON 4", "BUTTON 5",
-				"BUTTON 6", "BUTTON 7", "BUTTON 8", "BUTTON 9", "BUTTON 10", "BUTTON 11", "BUTTON 12", "BUTTON 13",
-				"BUTTON 14", "BUTTON 15", "BUTTON 16", "UP", "DOWN", "LEFT", "RIGHT" };
+		private static final String[] BMCODE = { "BUTTON 1", "BUTTON 2", "BUTTON 3", "BUTTON 4", "BUTTON 5", "BUTTON 6",
+				"BUTTON 7", "BUTTON 8", "BUTTON 9", "BUTTON 10", "BUTTON 11", "BUTTON 12", "BUTTON 13", "BUTTON 14",
+				"BUTTON 15", "BUTTON 16", "UP", "DOWN", "LEFT", "RIGHT" };
 
 		public static final String toString(int keycode) {
 			if (keycode >= 0 && keycode < BMCODE.length) {

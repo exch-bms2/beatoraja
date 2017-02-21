@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
+import bms.player.beatoraja.PlayConfig.ControllerConfig;
 import bms.player.beatoraja.input.BMControllerInputProcessor.BMKeys;
 
 import com.badlogic.gdx.Input.Keys;
@@ -28,19 +29,14 @@ public class BMSPlayerInputProcessor {
 				Keys.SHIFT_LEFT, Keys.CONTROL_LEFT, Keys.COMMA, Keys.L, Keys.PERIOD, Keys.SEMICOLON, Keys.SLASH,
 				Keys.APOSTROPHE, Keys.UNKNOWN, Keys.SHIFT_RIGHT, Keys.CONTROL_RIGHT, Keys.Q, Keys.W }, resolution);
 		// Gdx.input.setInputProcessor(kbinput);
-		int player = 0;
 		List<BMControllerInputProcessor> bminput = new ArrayList<BMControllerInputProcessor>();
 		for (Controller controller : Controllers.getControllers()) {
 			Logger.getGlobal().info("コントローラーを検出 : " + controller.getName());
-			BMControllerInputProcessor bm = new BMControllerInputProcessor(this, controller, player, new int[] {
+			BMControllerInputProcessor bm = new BMControllerInputProcessor(this, controller, new int[] {
 					BMKeys.BUTTON_3, BMKeys.BUTTON_6, BMKeys.BUTTON_2, BMKeys.BUTTON_7, BMKeys.BUTTON_1,
 					BMKeys.BUTTON_4, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN, BMKeys.BUTTON_8, BMKeys.BUTTON_9 });
 			// controller.addListener(bm);
 			bminput.add(bm);
-			player++;
-			if (player == 2) {
-				break;
-			}
 		}
 		this.bminput = bminput.toArray(new BMControllerInputProcessor[0]);
 	}
@@ -104,9 +100,30 @@ public class BMSPlayerInputProcessor {
 		kbinput.setKeyAssign(keyassign);
 	}
 
-	public void setControllerassign(int[] buttons) {
+	public void setControllerConfig(ControllerConfig[] configs) {
+		boolean[] b = new boolean[configs.length];
 		for (BMControllerInputProcessor controller : bminput) {
-			controller.setControllerKeyAssign(buttons);
+			int player = -1;
+			for(int i = 0;i < configs.length;i++) {
+				if(b[i]) {
+					continue;
+				}
+				if(configs[i].getName() == null || configs[i].getName().length() == 0) {
+					configs[i].setName(controller.getController().getName());
+				}
+				if(controller.getController().getName().equals(configs[i].getName())) {
+					player = i;
+					controller.setControllerKeyAssign(configs[i].getAssign());
+					b[i] = true;
+					break;
+				}
+			}
+			if(player != -1) {
+				controller.setPlayer(player);
+			} else {
+				controller.setPlayer(0);
+				
+			}
 		}
 	}
 
@@ -152,7 +169,7 @@ public class BMSPlayerInputProcessor {
 
 	public void setDisableDevice(int[] devices) {
 		if(devices == null) {
-			devices = new int[bminput.length + 1];
+			devices = new int[3];
 			for(int i = 0;i < devices.length;i++) {
 				devices[i] = i;
 			}
@@ -163,8 +180,12 @@ public class BMSPlayerInputProcessor {
 		for(int device : devices) {
 			if(device == 0) {
 				kbinput.clear();
-			} else if(device -1 < bminput.length){
-				bminput[device - 1].clear();
+			} else {
+				for(BMControllerInputProcessor controller : bminput) {
+					if(controller.getPlayer() == device - 1) {
+						controller.clear();
+					}
+				}
 			}
 		}
 

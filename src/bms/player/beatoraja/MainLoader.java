@@ -81,6 +81,7 @@ public class MainLoader extends Application {
 			try {
 				json.setIgnoreUnknownFields(true);
 				config = json.fromJson(Config.class, new FileReader(MainController.configpath.toFile()));
+				config.validate();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -169,6 +170,7 @@ public class MainLoader extends Application {
 			try {
 				json.setIgnoreUnknownFields(true);
 				config = json.fromJson(Config.class, new FileReader(MainController.configpath.toFile()));
+				config.validate();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

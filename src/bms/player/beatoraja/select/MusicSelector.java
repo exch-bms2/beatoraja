@@ -172,9 +172,9 @@ public class MusicSelector extends MainState {
 		}
 
 		final BMSPlayerInputProcessor input = main.getInputProcessor();
-		PlayConfig pc = (config.getMusicselectinput() == 0 ? config.getMode7() : config.getMode9());
+		PlayConfig pc = (config.getMusicselectinput() == 0 ? config.getMode7() : (config.getMusicselectinput() == 1 ? config.getMode9() : config.getMode14()));
 		input.setKeyassign(pc.getKeyassign());
-		input.setControllerassign(pc.getControllerassign());
+		input.setControllerConfig(pc.getController());
 
 		bar.updateBar();
 
