@@ -42,6 +42,9 @@ public class MusicSelector extends MainState {
 	// TODO オプション常時表示(スキン実装で実現？)
 	// TODO ターゲットスコア選択の実装
 
+	private final int durationlow = 300;
+	private final int durationhigh = 50;
+
 	private int selectedreplay;
 
 	/**
@@ -260,7 +263,6 @@ public class MusicSelector extends MainState {
 
 		// draw song information
 		sprite.begin();
-		titlefont.setColor(Color.WHITE);
 		if (current instanceof SongBar) {
 			resource.setSongdata(((SongBar) current).getSongData());
 		} else {
@@ -551,7 +553,7 @@ public class MusicSelector extends MainState {
 					play = 1;
 				} else if (isPressed(keystate, keytime, KEY_REPLAY, true)) {
 					// replay
-					play = 3 + selectedreplay;
+					play = (selectedreplay >= 0) ? 3 + selectedreplay : 0;
 				}
 			} else {
 				if (isPressed(keystate, keytime, KEY_FOLDER_OPEN, true) || (cursor[3] && cursortime[3] != 0)) {
@@ -593,16 +595,16 @@ public class MusicSelector extends MainState {
 				if (move != null) {
 					getMainController().getAudioProcessor().play(move, false);
 				}
-				duration = l + 300;
-				angle = 300;
+				duration = l + durationlow;
+				angle = durationlow;
 			}
 			if (l > duration) {
-				duration = l + 50;
+				duration = l + durationhigh;
 				bar.move(true);
 				if (move != null) {
 					getMainController().getAudioProcessor().play(move, false);
 				}
-				angle = 50;
+				angle = durationhigh;
 			}
 		} else if (panelstate == 0 && (isPressed(keystate, keytime, KEY_DOWN, false)) || cursor[0]) {
 			long l = System.currentTimeMillis();
@@ -611,16 +613,16 @@ public class MusicSelector extends MainState {
 				if (move != null) {
 					getMainController().getAudioProcessor().play(move, false);
 				}
-				duration = l + 300;
-				angle = -300;
+				duration = l + durationlow;
+				angle = -durationlow;
 			}
 			if (l > duration) {
-				duration = l + 50;
+				duration = l + durationhigh;
 				bar.move(false);
 				if (move != null) {
 					getMainController().getAudioProcessor().play(move, false);
 				}
-				angle = -50;
+				angle = -durationhigh;
 			}
 		} else {
 			long l = System.currentTimeMillis();
