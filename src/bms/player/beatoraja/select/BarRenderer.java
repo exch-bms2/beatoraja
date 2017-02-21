@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.logging.Logger;
 
+import bms.player.beatoraja.skin.SkinImage;
 import bms.player.beatoraja.skin.SkinNumber;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -55,7 +56,13 @@ public class BarRenderer {
 	private int selectedindex;
 
 	private CommandBar[] commands;
+	/**
+	 * 難易度表バー一覧
+	 */
 	private TableBar[] tables = new TableBar[0];
+	/**
+	 * 検索結果バー一覧
+	 */
 	private List<SearchWordBar> search = new ArrayList<SearchWordBar>();
 
 	private FreeTypeFontGenerator generator;
@@ -95,10 +102,6 @@ public class BarRenderer {
 						"(lpg * 2 + epg * 2 + lgr + egr) * 50 / notes >= 77.77 AND (lpg * 2 + epg * 2 + lgr + egr) * 50 / notes < 88.88"),
 				new CommandBar(main, select, "RANK A",
 						"(lpg * 2 + epg * 2 + lgr + egr) * 50 / notes >= 66.66 AND (lpg * 2 + epg * 2 + lgr + egr) * 50 / notes < 77.77"), };
-	}
-
-	public void updateTableBar(TableBar tb) {
-
 	}
 
 	public Bar getSelected() {
@@ -228,20 +231,33 @@ public class BarRenderer {
 				value = 5;
 			}
 
+			float dx = 0;
 			float dy = 0;
 			Rectangle r = baro.getBarImages(on, i).getDestination(time, select);
 			if (r != null) {
-
 				if (duration != 0) {
-					dy = r.height * (Math.abs(angle) - duration + System.currentTimeMillis()) / angle
-							+ (angle >= 0 ? -1 : 1) * r.height;
+					int nextindex = i + (angle >= 0 ? 1 : -1);
+					SkinImage si = nextindex >= 0 ? baro.getBarImages(nextindex == skin.getCenterBar(), nextindex) : null;
+					Rectangle r2 = si != null ? si.getDestination(time, select) : null;
+					if(r2 != null) {
+						final float a = angle < 0 ? ((float)(System.currentTimeMillis() - duration)) / angle :
+								((float)(duration - System.currentTimeMillis())) / angle;
+						dx = (r2.x - r.x) * a;
+						dy = (r2.y - r.y) * a;
+					}
 				}
+				final int x = (int) (r.x + dx);
 				final int y = (int) (r.y + dy + (baro.getPosition() == 1 ? r.height : 0));
 				sprite.begin();
 				if (value != -1) {
-					baro.getBarImages(on, i).draw(sprite, time, select, value, 0, (int) dy);
-					// TODO 新規追加曲はテキストを変える
-					baro.getBarText()[0].draw(sprite, time, select, sd.getTitle(), (int) r.x, y);
+					baro.getBarImages(on, i).draw(sprite, time, select, value, (int) dx, (int) dy);
+					// 新規追加曲はテキストを変える
+					int songstatus = 0;
+					if(sd instanceof SongBar) {
+						SongData song = ((SongBar) sd).getSongData();
+						songstatus = System.currentTimeMillis() / 1000 > song.getAdddate() + 3600 * 24 ? 0 : 1;
+					}
+					baro.getBarText()[songstatus].draw(sprite, time, select, sd.getTitle(), x, y);
 				}
 
 				int flag = 0;
@@ -258,7 +274,7 @@ public class BarRenderer {
 					if (trophy != null) {
 						for (int j = 0; j < TROPHY.length; j++) {
 							if (TROPHY[j].equals(trophy.getName()) && baro.getTrophy()[j] != null) {
-								baro.getTrophy()[j].draw(sprite, time, select, (int) r.x, y);
+								baro.getTrophy()[j].draw(sprite, time, select, x, y);
 								break;
 							}
 						}
@@ -266,7 +282,7 @@ public class BarRenderer {
 				}
 
 				if (baro.getLamp()[sd.getLamp()] != null) {
-					baro.getLamp()[sd.getLamp()].draw(sprite, time, select, (int) r.x, y);
+					baro.getLamp()[sd.getLamp()].draw(sprite, time, select, x, y);
 				}
 
 				if (sd instanceof SongBar) {
@@ -275,22 +291,22 @@ public class BarRenderer {
 					SkinNumber leveln = baro.getBarlevel()[song.getDifficulty() >= 0 && song.getDifficulty() < 7 ? song
 							.getDifficulty() : 0];
 					if (leveln != null) {
-						leveln.draw(sprite, time, song.getLevel(), select, (int) r.x, y);
+						leveln.draw(sprite, time, song.getLevel(), select, x, y);
 					}
 					flag |= song.getFeature();
 				}
 
 				// LN
 				if ((flag & 1) != 0 && baro.getLabel()[0] != null) {
-					baro.getLabel()[0].draw(sprite, time, select, (int) r.x, y);
+					baro.getLabel()[0].draw(sprite, time, select, x, y);
 				}
 				// MINE
 				if ((flag & 2) != 0 && baro.getLabel()[2] != null) {
-					baro.getLabel()[2].draw(sprite, time, select, (int) r.x, y);
+					baro.getLabel()[2].draw(sprite, time, select, x, y);
 				}
 				// RANDOM
 				if ((flag & 4) != 0 && baro.getLabel()[1] != null) {
-					baro.getLabel()[1].draw(sprite, time, select, (int) r.x, y);
+					baro.getLabel()[1].draw(sprite, time, select, x, y);
 				}
 				sprite.end();
 			}

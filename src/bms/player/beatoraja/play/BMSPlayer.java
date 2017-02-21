@@ -938,6 +938,11 @@ public class BMSPlayer extends MainState {
 					break;
 				}
 			}
+
+			if(keylog != null) {
+				Arrays.fill(input.getKeystate(), false);
+				Arrays.fill(input.getTime(), 0);
+			}
 			frametimes = framet;
 		}
 

@@ -3,8 +3,10 @@ package bms.player.beatoraja.result;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Logger;
 
 import bms.model.LongNote;
 import bms.model.Note;
@@ -150,6 +152,7 @@ public class MusicResult extends MainState {
 				}
 
 				boolean[] keystate = main.getInputProcessor().getKeystate();
+				System.out.println(Arrays.toString(keystate));
 				long[] keytime = main.getInputProcessor().getTime();
 				keytime[0] = keytime[2] = keytime[4] = keytime[6] = 0;
 
@@ -178,13 +181,15 @@ public class MusicResult extends MainState {
 						main.changeState(MainController.STATE_GRADE_RESULT);
 					}
 				} else {
-					if (keystate[4]) {
+					if (resource.getAutoplay() == 0 && keystate[4]) {
+						Logger.getGlobal().info("オプションを変更せずリプレイ");
 						// オプションを変更せず同じ譜面でリプレイ
 						resource.getReplayData().pattern = null;
 						resource.reloadBMSFile();
 						main.changeState(MainController.STATE_PLAYBMS);
-					} else if (keystate[6]) {
+					} else if (resource.getAutoplay() == 0 && keystate[6]) {
 						// 同じ譜面でリプレイ
+						Logger.getGlobal().info("同じ譜面でリプレイ");
 						resource.reloadBMSFile();
 						main.changeState(MainController.STATE_PLAYBMS);
 					} else {
