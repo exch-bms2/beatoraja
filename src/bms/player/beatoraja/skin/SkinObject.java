@@ -325,7 +325,10 @@ public abstract class SkinObject implements Disposable {
 		case 2:
 			sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
 			break;
-		case 9:
+			case 3:
+			sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
+				break;
+			case 9:
 			sprite.setBlendFunction(GL11.GL_ONE_MINUS_DST_COLOR, GL11.GL_ZERO);
 			break;
 		}

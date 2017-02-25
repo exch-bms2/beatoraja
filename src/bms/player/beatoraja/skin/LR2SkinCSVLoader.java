@@ -1,6 +1,7 @@
 package bms.player.beatoraja.skin;
 
 import java.io.*;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -25,6 +26,7 @@ import com.badlogic.gdx.utils.GdxRuntimeException;
 public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 
 	List<Object> imagelist = new ArrayList<Object>();
+	List<SkinTextImage.SkinTextImageSource> fontlist = new ArrayList<>();
 
 	/**
 	 * スキンの元サイズのwidth
@@ -179,6 +181,56 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 			}
 		});
 
+		addCommandWord(new CommandWord("LR2FONT") {
+			@Override
+			public void execute(String[] str) {
+				String imagepath = str[1].replace("LR2files\\Theme", "skin").replace("\\", "/");
+				File imagefile = new File(imagepath);
+				for(String key : filemap.keySet()) {
+					if(imagepath.startsWith(key)) {
+						String foot = imagepath.substring(key.length());
+						imagefile = new File(imagepath.substring(0, imagepath.lastIndexOf('*'))
+								+ filemap.get(key) + foot);
+//						System.out.println(imagefile.getPath());
+						imagepath = "";
+						break;
+					}
+				}
+				if (imagepath.contains("*")) {
+					String ext = imagepath.substring(imagepath.lastIndexOf("*") + 1);
+					File imagedir = new File(imagepath.substring(0, imagepath.lastIndexOf('/')));
+					if (imagedir.exists() && imagedir.isDirectory()) {
+						List<File> l = new ArrayList();
+						for (File subfile : imagedir.listFiles()) {
+							if (subfile.getPath().toLowerCase().endsWith(ext)) {
+								l.add(subfile);
+							}
+						}
+						if (l.size() > 0) {
+							imagefile = l.get((int) (Math.random() * l.size()));
+						}
+					}
+				}
+				if (imagefile.exists()) {
+					LR2FontLoader font = new LR2FontLoader();
+					try {
+						SkinTextImage.SkinTextImageSource source = font.loadFont(imagefile.toPath());
+						fontlist.add(source);
+					} catch (IOException e) {
+						e.printStackTrace();
+						fontlist.add(null);
+					}
+
+				} else {
+					Logger.getGlobal().warning("IMAGE " + imagelist.size() + " : ファイルが見つかりません : " + imagefile.getPath());
+					fontlist.add(null);
+				}
+				// System.out
+				// .println("Image Loaded - " + (imagelist.size() -
+				// 1) + " : " + imagefile.getPath());
+			}
+		});
+
 		addCommandWord(new CommandWord("SRC_IMAGE") {
 			@Override
 			public void execute(String[] str) {
@@ -320,8 +372,9 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 			public void execute(String[] str) {
 				text = null;
 				int gr = Integer.parseInt(str[2]);
+				if(fontlist.get(gr) != null)
 				try {
-					text = new SkinText("skin/default/VL-Gothic-Regular.ttf", 0, 40, 2);
+					text = new SkinTextImage(fontlist.get(gr));
 					int[] values = parseInt(str);
 					text.setReferenceID(values[3]);
 					text.setAlign(values[4]);
@@ -341,7 +394,7 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 				if (text != null) {
 					try {
 						int[] values = parseInt(str);
-						text.setDestination(values[2], values[3] * dstw / srcw, dsth - values[4] * dsth / srch,
+						text.setDestination(values[2], values[3] * dstw / srcw, dsth - (values[4] + values[6]) * dsth / srch,
 								values[5] * dstw / srcw, values[6] * dsth / srch, values[7], values[8], values[9],
 								values[10], values[11], values[12], values[13], values[14], values[15], values[16],
 								values[17], values[18], values[19], values[20]);
@@ -543,7 +596,7 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 	SkinGraph bar = null;
 	SkinSlider slider = null;
 	SkinNumber num = null;
-	SkinText text = null;
+	SkinTextImage text = null;
 	String line = null;
 
 	protected void loadSkin0(Skin skin, File f, MainState state, Map<Integer,Boolean> option, Map<String, String> filemap)
