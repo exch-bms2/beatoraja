@@ -61,7 +61,8 @@ public class SongData {
 	private int notes;
 	private String stagefile = "";
 	private String backbmp = "";
-	
+
+	private BMSModel model;
 	private TimeLine[] timelines;
 	
 	public SongData() {
@@ -69,6 +70,12 @@ public class SongData {
 	}
 	
 	public SongData(BMSModel model, boolean containstxt) {
+		content = containstxt ? CONTENT_TEXT : 0;
+		setBMSModel(model);
+	}
+
+	public void setBMSModel(BMSModel model) {
+		this.model = model;
 		title = model.getTitle();
 		subtitle = model.getSubTitle();
 		genre = model.getGenre();
@@ -78,13 +85,13 @@ public class SongData {
 		md5 = model.getMD5();
 		sha256 = model.getSHA256();
 		banner = model.getBanner();
-		
+
 		setStagefile(model.getStagefile());
 		setBackbmp(model.getBackbmp());
 		try {
-			level = Integer.parseInt(model.getPlaylevel());			
+			level = Integer.parseInt(model.getPlaylevel());
 		} catch(NumberFormatException e) {
-			
+
 		}
 		mode = model.getUseKeys();
 		difficulty = model.getDifficulty();
@@ -92,14 +99,17 @@ public class SongData {
 		minbpm = (int) model.getMinBPM();
 		maxbpm = (int) model.getMaxBPM();
 		notes = model.getTotalNotes();
-		
+
 		timelines = model.getAllTimeLines();
-		
+
 		feature = model.containsLongNote() ? FEATURE_LONGNOTE : 0;
-		feature += model.containsMineNote() ? FEATURE_MINENOTE : 0;
-		feature += model.getRandom() != null && model.getRandom().length > 0 ? FEATURE_RANDOM : 0;
-		content = containstxt ? CONTENT_TEXT : 0;
-		content += model.getBgaList().length > 0 ? CONTENT_BGA : 0;
+		feature |= model.containsMineNote() ? FEATURE_MINENOTE : 0;
+		feature |= model.getRandom() != null && model.getRandom().length > 0 ? FEATURE_RANDOM : 0;
+		content |= model.getBgaList().length > 0 ? CONTENT_BGA : 0;
+	}
+
+	public BMSModel getBMSModel() {
+		return model;
 	}
 
 	public int getFavorite() {

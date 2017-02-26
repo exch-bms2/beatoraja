@@ -122,7 +122,7 @@ public class PlayerResource {
 		this.auto = autoplay;
 		replay = new ReplayData();
 		String bmspath = model != null ? model.getPath() : null;
-		model = loadBMSModel(f);
+		model = loadBMSModel(f, config.getLnmode());
 		final BMSModel loadingModel = model;
 		if (model == null) {
 			Logger.getGlobal().warning("楽曲が存在しないか、解析時にエラーが発生しました:" + f.toString());
@@ -216,10 +216,10 @@ public class PlayerResource {
 		return true;
 	}
 
-	private BMSModel loadBMSModel(Path f) {
+	public BMSModel loadBMSModel(Path f, int lnmode) {
 		BMSModel model;
 		if (f.toString().toLowerCase().endsWith(".bmson")) {
-			BMSONDecoder decoder = new BMSONDecoder(config.getLnmode());
+			BMSONDecoder decoder = new BMSONDecoder(lnmode);
 			model = decoder.decode(f.toFile());
 			if (model == null) {
 				return null;
@@ -230,7 +230,7 @@ public class PlayerResource {
 			int totalnotes = model.getTotalNotes();
 			model.setTotal(model.getTotal() / 100.0 * 7.605 * totalnotes / (0.01 * totalnotes + 6.5));
 		} else {
-			BMSDecoder decoder = new BMSDecoder(config.getLnmode());
+			BMSDecoder decoder = new BMSDecoder(lnmode);
 			model = decoder.decode(f.toFile());
 			if (model == null) {
 				return null;
@@ -292,7 +292,7 @@ public class PlayerResource {
 	public boolean setCourseBMSFiles(Path[] files) {
 		List<BMSModel> models = new ArrayList();
 		for (Path f : files) {
-			BMSModel model = loadBMSModel(f);
+			BMSModel model = loadBMSModel(f, config.getLnmode());
 			if (model == null) {
 				return false;
 			}
@@ -318,7 +318,7 @@ public class PlayerResource {
 
 	public void reloadBMSFile() {
 		if (model != null) {
-			model = loadBMSModel(Paths.get(model.getPath()));
+			model = loadBMSModel(Paths.get(model.getPath()), config.getLnmode());
 		}
 		clear();
 	}

@@ -22,7 +22,8 @@ public class SkinNoteDistributionGraph extends SkinObject {
 	private TextureRegion startcursor;
 	private TextureRegion endcursor;
 
-	private int[][] data;
+	private BMSModel model;
+	private int[][] data = new int[0][0];
 
 	private static final Color[][] JGRAPH = {
 			{ Color.valueOf("cccccc"), Color.valueOf("4444ff"), Color.valueOf("ff4444"), Color.valueOf("44ff44"),
@@ -69,71 +70,79 @@ public class SkinNoteDistributionGraph extends SkinObject {
 	}
 
 	public void draw(SpriteBatch sprite, long time, MainState state, Rectangle r, int starttime, int endtime) {
-		if (data == null) {
-			BMSModel model = state.getMainController().getPlayerResource().getBMSModel();
-			data = new int[model.getLastTime() / 1000 + 1][graphcolor.length];
-			int pos = 0;
-			int count = 0;
-			max = 20;
-			for (TimeLine tl : model.getAllTimeLines()) {
-				if (tl.getTime() / 1000 != pos) {
-					if (max < count) {
-						max = (count / 10) * 10 + 10;
+		final BMSModel model = state.getMainController().getPlayerResource().getSongdata()!= null ?
+				state.getMainController().getPlayerResource().getSongdata().getBMSModel() : null;
+		final boolean reload = this.model != model;
+		if (reload) {
+			if(model == null) {
+				this.model = model;
+				data = new int[0][graphcolor.length];
+			} else {
+				this.model = model;
+				data = new int[model.getLastTime() / 1000 + 1][graphcolor.length];
+				int pos = 0;
+				int count = 0;
+				max = 20;
+				for (TimeLine tl : model.getAllTimeLines()) {
+					if (tl.getTime() / 1000 != pos) {
+						if (max < count) {
+							max = (count / 10) * 10 + 10;
+						}
+						pos = tl.getTime() / 1000;
+						count = 0;
 					}
-					pos = tl.getTime() / 1000;
-					count = 0;
-				}
-				for (int i = 0; i < 18; i++) {
-					Note n = tl.getNote(i);
-					if (n != null && !(model.getLntype() == BMSModel.LNTYPE_LONGNOTE && n instanceof LongNote
-							&& ((LongNote) n).getEndnote().getSection() == tl.getSection())) {
-						int st = n.getState();
-						int t = n.getTime();
-						switch (type) {
-						case TYPE_NORMAL:
-							if (n instanceof NormalNote) {
-								data[tl.getTime() / 1000][model.getUseKeys() != 9 && (i == 7 || i == 16) ? 2 : 0]++;
-							}
-							if (n instanceof LongNote) {
-								data[tl.getTime() / 1000][model.getUseKeys() != 9 && (i == 7 || i == 16) ? 3 : 1]++;
-							}
-							if (n instanceof MineNote) {
-								data[tl.getTime() / 1000][4]++;
-							}
-							count++;
-							break;
-						case TYPE_JUDGE:
-							if (n instanceof MineNote) {
-								break;
-							}
-							if (n instanceof LongNote && ((LongNote) n).getEndnote().getSection() == tl.getSection()) {
-								st = ((LongNote) n).getEndnote().getState();
-								// if(state == 0) {
-								// System.out.println("終端未処理:"+tl.getTime());
-								// }
-							}
-							data[tl.getTime() / 1000][st]++;
-							count++;
-							break;
-						case TYPE_EARLYLATE:
-							if (n instanceof MineNote) {
-								break;
-							}
-							if (n instanceof LongNote && ((LongNote) n).getEndnote().getSection() == tl.getSection()) {
-								st = ((LongNote) n).getEndnote().getState();
-								t = ((LongNote) n).getEndnote().getTime();
-								// if(state == 0) {
-								// System.out.println("終端未処理:"+tl.getTime());
-								// }
-							}
-							if (st <= 1) {
-								data[tl.getTime() / 1000][st]++;
-							} else {
-								data[tl.getTime() / 1000][t >= 0 ? st : st + 4]++;
-							}
-							count++;
-							break;
+					for (int i = 0; i < 18; i++) {
+						Note n = tl.getNote(i);
+						if (n != null && !(model.getLntype() == BMSModel.LNTYPE_LONGNOTE && n instanceof LongNote
+								&& ((LongNote) n).getEndnote().getSection() == tl.getSection())) {
+							int st = n.getState();
+							int t = n.getTime();
+							switch (type) {
+								case TYPE_NORMAL:
+									if (n instanceof NormalNote) {
+										data[tl.getTime() / 1000][model.getUseKeys() != 9 && (i == 7 || i == 16) ? 2 : 0]++;
+									}
+									if (n instanceof LongNote) {
+										data[tl.getTime() / 1000][model.getUseKeys() != 9 && (i == 7 || i == 16) ? 3 : 1]++;
+									}
+									if (n instanceof MineNote) {
+										data[tl.getTime() / 1000][4]++;
+									}
+									count++;
+									break;
+								case TYPE_JUDGE:
+									if (n instanceof MineNote) {
+										break;
+									}
+									if (n instanceof LongNote && ((LongNote) n).getEndnote().getSection() == tl.getSection()) {
+										st = ((LongNote) n).getEndnote().getState();
+										// if(state == 0) {
+										// System.out.println("終端未処理:"+tl.getTime());
+										// }
+									}
+									data[tl.getTime() / 1000][st]++;
+									count++;
+									break;
+								case TYPE_EARLYLATE:
+									if (n instanceof MineNote) {
+										break;
+									}
+									if (n instanceof LongNote && ((LongNote) n).getEndnote().getSection() == tl.getSection()) {
+										st = ((LongNote) n).getEndnote().getState();
+										t = ((LongNote) n).getEndnote().getTime();
+										// if(state == 0) {
+										// System.out.println("終端未処理:"+tl.getTime());
+										// }
+									}
+									if (st <= 1) {
+										data[tl.getTime() / 1000][st]++;
+									} else {
+										data[tl.getTime() / 1000][t >= 0 ? st : st + 4]++;
+									}
+									count++;
+									break;
 
+							}
 						}
 					}
 				}
@@ -145,13 +154,13 @@ public class SkinNoteDistributionGraph extends SkinObject {
 		}
 
 		if (shapetex != null) {
-			if (shapetex.getWidth() == (int) r.getWidth() && shapetex.getHeight() == (int) r.getHeight()) {
-				// shape.setColor(Color.BLACK);
-				// shape.fill();
-			} else {
+			if (shapetex.getWidth() != (int) r.getWidth() || shapetex.getHeight() != (int) r.getHeight() || reload) {
 				shapetex.dispose();
 				backtex.dispose();
 				shapetex = null;
+			} else {
+				// shape.setColor(Color.BLACK);
+				// shape.fill();
 			}
 		}
 

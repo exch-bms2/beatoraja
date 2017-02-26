@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.logging.Logger;
 
+import bms.model.BMSModel;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.Config.SkinConfig;
 import bms.player.beatoraja.config.KeyConfiguration;
@@ -88,6 +89,9 @@ public class MusicSelector extends MainState {
 	private BarRenderer bar;
 
 	private SearchTextField search;
+
+	private final int notesGraphDuration = 1000;
+	private boolean showNoteGraph = false;
 
 	/**
 	 * スコアデータのキャッシュ
@@ -360,6 +364,13 @@ public class MusicSelector extends MainState {
 			play = 0;
 		} else if (play == -255) {
 			getMainController().exit();
+		}
+
+		if(getNowTime() > getTimer()[TIMER_SONGBAR_CHANGE] + notesGraphDuration && !showNoteGraph) {
+			if(current instanceof SongBar) {
+				getResource().getSongdata().setBMSModel(resource.loadBMSModel(Paths.get(((SongBar) current).getSongData().getPath()), config.getLnmode()));
+			}
+			showNoteGraph = true;
 		}
 	}
 
@@ -649,6 +660,8 @@ public class MusicSelector extends MainState {
 		}
 		if (bar.getSelected() != current) {
 			getTimer()[TIMER_SONGBAR_CHANGE] = nowtime;
+			getResource().setSongdata((bar.getSelected() instanceof SongBar) ? ((SongBar) bar.getSelected()).getSongData() : null);
+			showNoteGraph = false;
 		}
 
 		if (input.getFunctionstate()[1] && input.getFunctiontime()[1] != 0) {
