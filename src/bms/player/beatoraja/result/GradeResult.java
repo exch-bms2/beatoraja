@@ -1,16 +1,14 @@
 package bms.player.beatoraja.result;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.*;
 
 import bms.player.beatoraja.play.gauge.GrooveGauge;
 import bms.player.beatoraja.select.MusicSelector;
-import bms.player.beatoraja.skin.LR2ResultSkinLoader;
-import bms.player.beatoraja.skin.LR2SkinHeader;
-import bms.player.beatoraja.skin.LR2SkinHeaderLoader;
-import bms.player.beatoraja.skin.SkinLoader;
+import bms.player.beatoraja.skin.*;
+import bms.player.beatoraja.skin.lr2.*;
+
 import com.badlogic.gdx.math.Rectangle;
 import java.util.logging.Logger;
 
@@ -61,7 +59,7 @@ public class GradeResult extends MainState {
 				setSkin(sl.loadResultSkin(Paths.get(sc.getPath()), sc.getProperty()));
 			} else {
 				LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
-				LR2SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
+				SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
 				Rectangle srcr = RESOLUTION[header.getResolution()];
 				Rectangle dstr = RESOLUTION[resource.getConfig().getResolution()];
 				LR2ResultSkinLoader dloader = new LR2ResultSkinLoader(srcr.width, srcr.height, dstr.width, dstr.height);

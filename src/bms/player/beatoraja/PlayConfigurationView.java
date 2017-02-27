@@ -15,10 +15,10 @@ import org.apache.commons.dbutils.handlers.MapListHandler;
 
 import bms.player.beatoraja.Config.SkinConfig;
 import bms.player.beatoraja.ir.IRConnection;
-import bms.player.beatoraja.skin.LR2SkinHeader;
-import bms.player.beatoraja.skin.LR2SkinHeader.CustomFile;
-import bms.player.beatoraja.skin.LR2SkinHeader.CustomOption;
-import bms.player.beatoraja.skin.LR2SkinHeaderLoader;
+import bms.player.beatoraja.skin.SkinHeader;
+import bms.player.beatoraja.skin.SkinHeader.CustomFile;
+import bms.player.beatoraja.skin.SkinHeader.CustomOption;
+import bms.player.beatoraja.skin.lr2.LR2SkinHeaderLoader;
 import bms.player.beatoraja.song.*;
 
 import com.badlogic.gdx.utils.Json;
@@ -142,7 +142,7 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private ComboBox<Integer> skincategory;
 	@FXML
-	private ComboBox<LR2SkinHeader> skin;
+	private ComboBox<SkinHeader> skin;
 	@FXML
 	private ScrollPane skinconfig;
 
@@ -189,8 +189,8 @@ public class PlayConfigurationView implements Initializable {
 		initComboBox(audio, new String[] { "OpenAL (LibGDX Sound)", "OpenAL (LibGDX AudioDevice)", "ASIO" });
 		audio.getItems().setAll(0, 2);
 
-		skin.setCellFactory(new Callback<ListView<LR2SkinHeader>, ListCell<LR2SkinHeader>>() {
-			public ListCell<LR2SkinHeader> call(ListView<LR2SkinHeader> param) {
+		skin.setCellFactory(new Callback<ListView<SkinHeader>, ListCell<SkinHeader>>() {
+			public ListCell<SkinHeader> call(ListView<SkinHeader> param) {
 				return new SkinListCell();
 			}
 		});
@@ -442,7 +442,7 @@ public class PlayConfigurationView implements Initializable {
 
 	public void updateSkinCategory() {
 		if (skinview.getSelectedHeader() != null) {
-			LR2SkinHeader header = skinview.getSelectedHeader();
+			SkinHeader header = skinview.getSelectedHeader();
 			SkinConfig skin = new SkinConfig(header.getPath().toString());
 			skin.setProperty(skinview.getProperty());
 			config.getSkin()[header.getMode()] = skin;
@@ -451,13 +451,13 @@ public class PlayConfigurationView implements Initializable {
 		}
 
 		skin.getItems().clear();
-		LR2SkinHeader[] headers = skinview.getSkinHeader(skincategory.getValue());
+		SkinHeader[] headers = skinview.getSkinHeader(skincategory.getValue());
 		skin.getItems().addAll(headers);
 		mode = skincategory.getValue();
 		if (config.getSkin()[skincategory.getValue()] != null) {
 			SkinConfig skinconf = config.getSkin()[skincategory.getValue()];
 			if (skinconf != null) {
-				for (LR2SkinHeader header : skin.getItems()) {
+				for (SkinHeader header : skin.getItems()) {
 					if (header != null && header.getPath().equals(Paths.get(skinconf.getPath()))) {
 						skin.setValue(header);
 						skinconfig.setContent(skinview.create(skin.getValue(), skinconf.getProperty()));
@@ -607,13 +607,13 @@ public class PlayConfigurationView implements Initializable {
 		}
 	}
 
-	class SkinListCell extends ListCell<LR2SkinHeader> {
+	class SkinListCell extends ListCell<SkinHeader> {
 
 		@Override
-		protected void updateItem(LR2SkinHeader arg0, boolean arg1) {
+		protected void updateItem(SkinHeader arg0, boolean arg1) {
 			super.updateItem(arg0, arg1);
 			if (arg0 != null) {
-				setText(arg0.getName() + (arg0.getType() == LR2SkinHeader.TYPE_BEATORJASKIN ? "" : " (LR2 Skin)"));
+				setText(arg0.getName() + (arg0.getType() == SkinHeader.TYPE_BEATORJASKIN ? "" : " (LR2 Skin)"));
 			} else {
 				setText("");
 			}
@@ -629,9 +629,9 @@ public class PlayConfigurationView implements Initializable {
  */
 class SkinConfigurationView {
 
-	private List<LR2SkinHeader> lr2skinheader = new ArrayList<LR2SkinHeader>();
+	private List<SkinHeader> lr2skinheader = new ArrayList<SkinHeader>();
 
-	private LR2SkinHeader selected = null;
+	private SkinHeader selected = null;
 	private Map<CustomOption, ComboBox<String>> optionbox = new HashMap<CustomOption, ComboBox<String>>();
 	private Map<CustomFile, ComboBox<String>> filebox = new HashMap<CustomFile, ComboBox<String>>();
 
@@ -641,14 +641,14 @@ class SkinConfigurationView {
 		for (Path path : lr2skinpaths) {
 			if (path.toString().toLowerCase().endsWith(".json")) {
 				SkinLoader loader = new SkinLoader();
-				LR2SkinHeader header = loader.loadHeader(path);
+				SkinHeader header = loader.loadHeader(path);
 				if (header != null) {
 					lr2skinheader.add(header);
 				}
 			} else {
 				LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
 				try {
-					LR2SkinHeader header = loader.loadSkin(path, null);
+					SkinHeader header = loader.loadSkin(path, null);
 					// System.out.println(path.toString() + " : " +
 					// header.getName()
 					// + " - " + header.getMode());
@@ -660,7 +660,7 @@ class SkinConfigurationView {
 		}
 	}
 
-	public VBox create(LR2SkinHeader header, Map<String, Object> property) {
+	public VBox create(SkinHeader header, Map<String, Object> property) {
 		selected = header;
 		if (header == null) {
 			return null;
@@ -733,7 +733,7 @@ class SkinConfigurationView {
 		}
 	}
 
-	public LR2SkinHeader getSelectedHeader() {
+	public SkinHeader getSelectedHeader() {
 		return selected;
 	}
 
@@ -753,13 +753,13 @@ class SkinConfigurationView {
 		return result;
 	}
 
-	public LR2SkinHeader[] getSkinHeader(int mode) {
-		List<LR2SkinHeader> result = new ArrayList<LR2SkinHeader>();
-		for (LR2SkinHeader header : lr2skinheader) {
+	public SkinHeader[] getSkinHeader(int mode) {
+		List<SkinHeader> result = new ArrayList<SkinHeader>();
+		for (SkinHeader header : lr2skinheader) {
 			if (header.getMode() == mode) {
 				result.add(header);
 			}
 		}
-		return result.toArray(new LR2SkinHeader[result.size()]);
+		return result.toArray(new SkinHeader[result.size()]);
 	}
 }

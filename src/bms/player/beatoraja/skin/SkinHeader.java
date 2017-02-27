@@ -2,7 +2,7 @@ package bms.player.beatoraja.skin;
 
 import java.nio.file.Path;
 
-public class LR2SkinHeader {
+public class SkinHeader {
 
 	private int type;
 

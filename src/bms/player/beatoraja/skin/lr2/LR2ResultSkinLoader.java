@@ -1,4 +1,4 @@
-package bms.player.beatoraja.skin;
+package bms.player.beatoraja.skin.lr2;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,6 +9,8 @@ import com.badlogic.gdx.math.Rectangle;
 
 import bms.player.beatoraja.result.MusicResultSkin;
 import bms.player.beatoraja.result.SkinGaugeGraphObject;
+import bms.player.beatoraja.skin.SkinHeader;
+import bms.player.beatoraja.skin.lr2.LR2SkinLoader.CommandWord;
 
 /**
  * LR2リザルトスキン読み込み用クラス
@@ -59,7 +61,7 @@ public class LR2ResultSkinLoader extends LR2SkinCSVLoader {
 		});
 	}
 	
-	public MusicResultSkin loadResultSkin(File f, MainState state, LR2SkinHeader header, Map<Integer, Boolean> option, Map property) throws IOException {
+	public MusicResultSkin loadResultSkin(File f, MainState state, SkinHeader header, Map<Integer, Boolean> option, Map property) throws IOException {
 
 		skin = new MusicResultSkin(srcw, srch, dstw, dsth);
 

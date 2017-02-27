@@ -1,4 +1,4 @@
-package bms.player.beatoraja.skin;
+package bms.player.beatoraja.skin.lr2;
 
 import java.io.*;
 import java.nio.file.Path;
@@ -10,6 +10,10 @@ import com.badlogic.gdx.graphics.PixmapIO;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.GdxRuntimeException;
+
+import bms.player.beatoraja.skin.SkinTextImage;
+import bms.player.beatoraja.skin.SkinTextImage.SkinTextImageSource;
+import bms.player.beatoraja.skin.lr2.LR2SkinLoader.CommandWord;
 
 /**
  * LR2のスキン定義用csvファイルのローダー

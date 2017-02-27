@@ -6,12 +6,12 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.logging.Logger;
 
-import bms.model.BMSModel;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.Config.SkinConfig;
 import bms.player.beatoraja.config.KeyConfiguration;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.skin.*;
+import bms.player.beatoraja.skin.lr2.*;
 import bms.player.beatoraja.song.SongData;
 import bms.player.beatoraja.song.SongDatabaseAccessor;
 
@@ -21,12 +21,6 @@ import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.scenes.scene2d.*;
-import com.badlogic.gdx.scenes.scene2d.EventListener;
-import com.badlogic.gdx.scenes.scene2d.ui.TextField;
-import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldListener;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-import com.badlogic.gdx.utils.viewport.FitViewport;
 
 import static bms.player.beatoraja.Resolution.*;
 import static bms.player.beatoraja.skin.SkinProperty.*;
@@ -228,7 +222,7 @@ public class MusicSelector extends MainState {
 					setSkin(sl.loadSelectSkin(Paths.get(sc.getPath()), sc.getProperty()));
 				} else {
 					LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
-					LR2SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
+					SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
 					Rectangle srcr = RESOLUTION[header.getResolution()];
 					Rectangle dstr = RESOLUTION[config.getResolution()];
 					LR2SelectSkinLoader dloader = new LR2SelectSkinLoader(srcr.width, srcr.height, dstr.width,

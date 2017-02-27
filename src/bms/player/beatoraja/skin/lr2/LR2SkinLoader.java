@@ -1,4 +1,4 @@
-package bms.player.beatoraja.skin;
+package bms.player.beatoraja.skin.lr2;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -11,8 +11,8 @@ import java.util.List;
 import java.util.Map;
 
 import bms.player.beatoraja.MainState;
-import bms.player.beatoraja.skin.LR2SkinHeader.CustomFile;
-import bms.player.beatoraja.skin.LR2SkinHeader.CustomOption;
+import bms.player.beatoraja.skin.SkinHeader.CustomFile;
+import bms.player.beatoraja.skin.SkinHeader.CustomOption;
 
 public class LR2SkinLoader {
 

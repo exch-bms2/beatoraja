@@ -1,4 +1,4 @@
-package bms.player.beatoraja.skin;
+package bms.player.beatoraja.skin.lr2;
 
 import java.io.File;
 import java.io.IOException;
@@ -6,6 +6,10 @@ import java.util.Map;
 
 import bms.player.beatoraja.select.MusicSelectSkin;
 import bms.player.beatoraja.select.SkinBar;
+import bms.player.beatoraja.skin.SkinHeader;
+import bms.player.beatoraja.skin.SkinImage;
+import bms.player.beatoraja.skin.SkinNumber;
+import bms.player.beatoraja.skin.lr2.LR2SkinLoader.CommandWord;
 import bms.player.beatoraja.select.MusicSelector;
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -294,7 +298,7 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader {
 
 	}
 
-	public MusicSelectSkin loadSelectSkin(File f, MusicSelector selector, LR2SkinHeader header, Map<Integer, Boolean> option,
+	public MusicSelectSkin loadSelectSkin(File f, MusicSelector selector, SkinHeader header, Map<Integer, Boolean> option,
 			Map property) throws IOException {
 		skin = new MusicSelectSkin(srcw, srch, dstw, dsth);
 

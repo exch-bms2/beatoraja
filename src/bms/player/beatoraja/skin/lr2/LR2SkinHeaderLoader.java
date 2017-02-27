@@ -1,4 +1,4 @@
-package bms.player.beatoraja.skin;
+package bms.player.beatoraja.skin.lr2;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -8,8 +8,10 @@ import java.nio.file.Path;
 import java.util.*;
 
 import bms.player.beatoraja.MainState;
-import bms.player.beatoraja.skin.LR2SkinHeader.CustomFile;
-import bms.player.beatoraja.skin.LR2SkinHeader.CustomOption;
+import bms.player.beatoraja.skin.SkinHeader;
+import bms.player.beatoraja.skin.SkinHeader.CustomFile;
+import bms.player.beatoraja.skin.SkinHeader.CustomOption;
+import bms.player.beatoraja.skin.lr2.LR2SkinLoader.CommandWord;
 
 /**
  * LR2スキンヘッダファイル(lr2skin)のローダー
@@ -18,7 +20,7 @@ import bms.player.beatoraja.skin.LR2SkinHeader.CustomOption;
  */
 public class LR2SkinHeaderLoader extends LR2SkinLoader {
 	
-	private LR2SkinHeader header = new LR2SkinHeader();
+	private SkinHeader header = new SkinHeader();
 	private List<CustomFile> files = new ArrayList();
 	private List<CustomOption> options = new ArrayList();
 
@@ -67,12 +69,12 @@ public class LR2SkinHeaderLoader extends LR2SkinLoader {
 
 	}
 	
-	public LR2SkinHeader loadSkin(Path f, MainState state) throws IOException {
+	public SkinHeader loadSkin(Path f, MainState state) throws IOException {
 		return this.loadSkin(f, state, new HashMap());
 	}
 	
-	public LR2SkinHeader loadSkin(Path f, MainState state, Map<String, Object> property) throws IOException {
-		header = new LR2SkinHeader();
+	public SkinHeader loadSkin(Path f, MainState state, Map<String, Object> property) throws IOException {
+		header = new SkinHeader();
 		files.clear();
 		options.clear();
 		

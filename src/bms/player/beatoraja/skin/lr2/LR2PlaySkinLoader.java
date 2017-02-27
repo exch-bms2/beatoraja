@@ -1,10 +1,14 @@
-package bms.player.beatoraja.skin;
+package bms.player.beatoraja.skin.lr2;
 
 import java.io.*;
 import java.util.*;
 import java.util.logging.Logger;
 
 import bms.player.beatoraja.play.*;
+import bms.player.beatoraja.skin.SkinHeader;
+import bms.player.beatoraja.skin.SkinImage;
+import bms.player.beatoraja.skin.SkinNumber;
+import bms.player.beatoraja.skin.lr2.LR2SkinLoader.CommandWord;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -630,7 +634,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 
 	}
 
-	public PlaySkin loadPlaySkin(File f, BMSPlayer player, LR2SkinHeader header, Map<Integer, Boolean> option,
+	public PlaySkin loadPlaySkin(File f, BMSPlayer player, SkinHeader header, Map<Integer, Boolean> option,
 			Map property) throws IOException {
 
 		skin = new PlaySkin(srcw, srch, dstw, dsth);

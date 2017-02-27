@@ -15,6 +15,7 @@ import bms.player.beatoraja.play.PracticeConfiguration.PracticeProperty;
 import bms.player.beatoraja.play.bga.BGAProcessor;
 import bms.player.beatoraja.play.gauge.*;
 import bms.player.beatoraja.skin.*;
+import bms.player.beatoraja.skin.lr2.*;
 import bms.player.beatoraja.song.SongData;
 
 import com.badlogic.gdx.math.Rectangle;
@@ -259,7 +260,7 @@ public class BMSPlayer extends MainState {
 				setSkin(sl.loadPlaySkin(Paths.get(sc.getPath()), skinmode, sc.getProperty()));
 			} else {
 				LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
-				LR2SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
+				SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
 				Rectangle srcr = RESOLUTION[header.getResolution()];
 				Rectangle dstr = RESOLUTION[resource.getConfig().getResolution()];
 				LR2PlaySkinLoader dloader = new LR2PlaySkinLoader(srcr.width, srcr.height, dstr.width, dstr.height);

@@ -1,7 +1,6 @@
 package bms.player.beatoraja.result;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -19,13 +18,8 @@ import bms.player.beatoraja.*;
 import bms.player.beatoraja.Config.SkinConfig;
 import bms.player.beatoraja.ir.IRConnection;
 import bms.player.beatoraja.skin.*;
+import bms.player.beatoraja.skin.lr2.*;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.math.Rectangle;
 
 import static bms.player.beatoraja.Resolution.*;
@@ -112,7 +106,7 @@ public class MusicResult extends MainState {
 				setSkin(sl.loadResultSkin(Paths.get(sc.getPath()), sc.getProperty()));
 			} else {
 				LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
-				LR2SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
+				SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
 				Rectangle srcr = RESOLUTION[header.getResolution()];
 				Rectangle dstr = RESOLUTION[resource.getConfig().getResolution()];
 				LR2ResultSkinLoader dloader = new LR2ResultSkinLoader(srcr.width, srcr.height, dstr.width, dstr.height);

@@ -1,4 +1,4 @@
-package bms.player.beatoraja.skin;
+package bms.player.beatoraja.skin.lr2;
 
 import java.io.File;
 import java.io.IOException;
@@ -6,6 +6,7 @@ import java.util.Map;
 
 import bms.player.beatoraja.decide.MusicDecide;
 import bms.player.beatoraja.decide.MusicDecideSkin;
+import bms.player.beatoraja.skin.SkinHeader;
 
 public class LR2DecideSkinLoader extends LR2PlaySkinLoader {
 
@@ -15,7 +16,7 @@ public class LR2DecideSkinLoader extends LR2PlaySkinLoader {
 
 	private MusicDecideSkin skin;
 	
-	public MusicDecideSkin loadMusicDecideSkin(File f, MusicDecide decide, LR2SkinHeader header, Map<Integer, Boolean> option, Map property) throws IOException {
+	public MusicDecideSkin loadMusicDecideSkin(File f, MusicDecide decide, SkinHeader header, Map<Integer, Boolean> option, Map property) throws IOException {
 
 		skin = new MusicDecideSkin(srcw, srch, dstw, dsth);
 

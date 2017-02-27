@@ -60,21 +60,21 @@ public class SkinLoader {
 		return (PlaySkin) load(p, skinmode, property);
 	}
 
-	public LR2SkinHeader loadHeader(Path p) {
-		LR2SkinHeader header = null;
+	public SkinHeader loadHeader(Path p) {
+		SkinHeader header = null;
 		try {
 			Json json = new Json();
 			json.setIgnoreUnknownFields(true);
 			sk = json.fromJson(JsonSkin.class, new FileReader(p.toFile()));
 
 			if(sk.type != -1) {
-				header = new LR2SkinHeader();
+				header = new SkinHeader();
 				header.setMode(sk.type);
 				header.setName(sk.name);
 				header.setPath(p);
-				header.setType(LR2SkinHeader.TYPE_BEATORJASKIN);
+				header.setType(SkinHeader.TYPE_BEATORJASKIN);
 
-				LR2SkinHeader.CustomOption[] options = new LR2SkinHeader.CustomOption[sk.property.length];
+				SkinHeader.CustomOption[] options = new SkinHeader.CustomOption[sk.property.length];
 				for(int i = 0;i < sk.property.length;i++) {
 					Property pr = sk.property[i];
 
@@ -84,14 +84,14 @@ public class SkinLoader {
 						op[j] = pr.item[j].op;
 						name[j] = pr.item[j].name;
 					}
-					options[i] = new LR2SkinHeader.CustomOption(pr.name, op, name);
+					options[i] = new SkinHeader.CustomOption(pr.name, op, name);
 				}
 				header.setCustomOptions(options);
 
-				LR2SkinHeader.CustomFile[] files = new LR2SkinHeader.CustomFile[sk.filepath.length];
+				SkinHeader.CustomFile[] files = new SkinHeader.CustomFile[sk.filepath.length];
 				for(int i = 0;i < sk.filepath.length;i++) {
 					Filepath pr = sk.filepath[i];
-					files[i] = new LR2SkinHeader.CustomFile(pr.name, p.getParent().toString() + "/" + pr.path);
+					files[i] = new SkinHeader.CustomFile(pr.name, p.getParent().toString() + "/" + pr.path);
 				}
 				header.setCustomFiles(files);
 			}

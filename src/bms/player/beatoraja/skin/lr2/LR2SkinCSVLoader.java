@@ -1,17 +1,23 @@
-package bms.player.beatoraja.skin;
+package bms.player.beatoraja.skin.lr2;
 
 import java.io.*;
-import java.nio.file.Path;
 import java.util.*;
 import java.util.logging.Logger;
 
-import bms.player.beatoraja.Config;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.play.bga.BGAProcessor;
-import bms.player.beatoraja.play.bga.FFmpegProcessor;
-import bms.player.beatoraja.play.bga.MovieProcessor;
-import bms.player.beatoraja.play.bga.VLCMovieProcessor;
-import bms.player.beatoraja.skin.LR2SkinHeader.CustomFile;
+import bms.player.beatoraja.skin.Skin;
+import bms.player.beatoraja.skin.SkinGraph;
+import bms.player.beatoraja.skin.SkinHeader;
+import bms.player.beatoraja.skin.SkinImage;
+import bms.player.beatoraja.skin.SkinNumber;
+import bms.player.beatoraja.skin.SkinObject;
+import bms.player.beatoraja.skin.SkinSlider;
+import bms.player.beatoraja.skin.SkinSourceMovie;
+import bms.player.beatoraja.skin.SkinTextImage;
+import bms.player.beatoraja.skin.SkinHeader.CustomFile;
+import bms.player.beatoraja.skin.SkinTextImage.SkinTextImageSource;
+import bms.player.beatoraja.skin.lr2.LR2SkinLoader.CommandWord;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
@@ -93,7 +99,7 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 					String ext = imagepath.substring(imagepath.lastIndexOf("*") + 1);
 					File imagedir = new File(imagepath.substring(0, imagepath.lastIndexOf('/')));
 					if (imagedir.exists() && imagedir.isDirectory()) {
-						List<File> l = new ArrayList();
+						List<File> l = new ArrayList<File>();
 						for (File subfile : imagedir.listFiles()) {
 							if (subfile.getPath().toLowerCase().endsWith(ext)) {
 								l.add(subfile);
@@ -136,7 +142,7 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 					String ext = imagepath.substring(imagepath.lastIndexOf("*") + 1);
 					File imagedir = new File(imagepath.substring(0, imagepath.lastIndexOf('/')));
 					if (imagedir.exists() && imagedir.isDirectory()) {
-						List<File> l = new ArrayList();
+						List<File> l = new ArrayList<File>();
 						for (File subfile : imagedir.listFiles()) {
 							if (subfile.getPath().toLowerCase().endsWith(ext)) {
 								l.add(subfile);
@@ -200,7 +206,7 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 					String ext = imagepath.substring(imagepath.lastIndexOf("*") + 1);
 					File imagedir = new File(imagepath.substring(0, imagepath.lastIndexOf('/')));
 					if (imagedir.exists() && imagedir.isDirectory()) {
-						List<File> l = new ArrayList();
+						List<File> l = new ArrayList<File>();
 						for (File subfile : imagedir.listFiles()) {
 							if (subfile.getPath().toLowerCase().endsWith(ext)) {
 								l.add(subfile);
@@ -286,7 +292,7 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 //							System.out.println("set scratch image : " + values[21]);
 							part.setScratch(values[21]);
 						}
-					} catch (NumberFormatException e) {
+					} catch (Throwable e) {
 						e.printStackTrace();
 					}
 				}
@@ -345,7 +351,7 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 							// (num.getId()));						
 						}						
 					}
-				} catch (NumberFormatException e) {
+				} catch (Throwable e) {
 					e.printStackTrace();
 				}
 			}
@@ -360,7 +366,7 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 								/ srch, values[5] * dstw / srcw, values[6] * dsth / srch, values[7], values[8],
 								values[9], values[10], values[11], values[12], values[13], values[14], values[15],
 								values[16], values[17], values[18], values[19], values[20]);
-					} catch (NumberFormatException e) {
+					} catch (Throwable e) {
 						e.printStackTrace();
 					}
 				}
@@ -372,19 +378,20 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 			public void execute(String[] str) {
 				text = null;
 				int gr = Integer.parseInt(str[2]);
-				if(fontlist.get(gr) != null)
-				try {
-					text = new SkinTextImage(fontlist.get(gr));
-					int[] values = parseInt(str);
-					text.setReferenceID(values[3]);
-					text.setAlign(values[4]);
-					int edit = values[5];
-					int panel = values[6];
-					skin.add(text);
-					// System.out.println("Text Added - " +
-					// (values[3]));
-				} catch (NumberFormatException e) {
-					e.printStackTrace();
+				if(gr < fontlist.size() && fontlist.get(gr) != null) {
+					try {
+						text = new SkinTextImage(fontlist.get(gr));
+						int[] values = parseInt(str);
+						text.setReferenceID(values[3]);
+						text.setAlign(values[4]);
+						int edit = values[5];
+						int panel = values[6];
+						skin.add(text);
+						// System.out.println("Text Added - " +
+						// (values[3]));
+					} catch (Throwable e) {
+						e.printStackTrace();
+					}					
 				}
 			}
 		});
@@ -398,7 +405,7 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 								values[5] * dstw / srcw, values[6] * dsth / srch, values[7], values[8], values[9],
 								values[10], values[11], values[12], values[13], values[14], values[15], values[16],
 								values[17], values[18], values[19], values[20]);
-					} catch (NumberFormatException e) {
+					} catch (Throwable e) {
 						e.printStackTrace();
 					}
 				}
@@ -420,7 +427,7 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 						// System.out.println("Object Added - " +
 						// (part.getTiming()));
 					}
-				} catch (NumberFormatException e) {
+				} catch (Throwable e) {
 					e.printStackTrace();
 				}
 			}
@@ -435,7 +442,7 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 								/ srch, values[5] * dstw / srcw, values[6] * dsth / srch, values[7], values[8],
 								values[9], values[10], values[11], values[12], values[13], values[14], values[15],
 								values[16], values[17], values[18], values[19], values[20]);
-					} catch (NumberFormatException e) {
+					} catch (Throwable e) {
 						e.printStackTrace();
 					}
 				}
@@ -463,7 +470,7 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 							// (part.getTiming()));
 						}
 					}
-				} catch (NumberFormatException e) {
+				} catch (Throwable e) {
 					e.printStackTrace();
 				}
 				if (bar != null) {
@@ -485,7 +492,7 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 								/ srch, values[5] * dstw / srcw, values[6] * dsth / srch, values[7], values[8],
 								values[9], values[10], values[11], values[12], values[13], values[14], values[15],
 								values[16], values[17], values[18], values[19], values[20]);
-					} catch (NumberFormatException e) {
+					} catch (Throwable e) {
 						e.printStackTrace();
 					}
 				}
@@ -532,7 +539,7 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 						skin.add(button);
 						// System.out.println("Object Added - " +
 						// (part.getTiming()));
-					} catch (NumberFormatException e) {
+					} catch (Throwable e) {
 						e.printStackTrace();
 					}
 				}
@@ -548,7 +555,7 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 								/ srch, values[5] * dstw / srcw, values[6] * dsth / srch, values[7], values[8],
 								values[9], values[10], values[11], values[12], values[13], values[14], values[15],
 								values[16], values[17], values[18], values[19], values[20]);
-					} catch (NumberFormatException e) {
+					} catch (Throwable e) {
 						e.printStackTrace();
 					}
 				}
@@ -567,7 +574,7 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 
 	private Map<String, String> filemap = new HashMap();
 
-	protected void loadSkin(Skin skin, File f, MainState state, LR2SkinHeader header, Map<Integer, Boolean> option,
+	protected void loadSkin(Skin skin, File f, MainState state, SkinHeader header, Map<Integer, Boolean> option,
 			Map<String, Object> property) throws IOException {
 		this.skin = skin;
 		this.state = state;

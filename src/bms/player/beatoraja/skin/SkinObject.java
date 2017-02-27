@@ -2,7 +2,6 @@ package bms.player.beatoraja.skin;
 
 import bms.player.beatoraja.MainState;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
@@ -326,7 +325,7 @@ public abstract class SkinObject implements Disposable {
 			sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
 			break;
 			case 3:
-			sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
+				sprite.setBlendFunction(GL11.GL_ONE_MINUS_DST_ALPHA, GL11.GL_ZERO);
 				break;
 			case 9:
 			sprite.setBlendFunction(GL11.GL_ONE_MINUS_DST_COLOR, GL11.GL_ZERO);

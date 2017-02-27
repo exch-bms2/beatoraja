@@ -3,7 +3,6 @@ package bms.player.beatoraja.skin;
 import bms.player.beatoraja.MainState;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.Rectangle;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -16,7 +15,13 @@ public class Skin {
 	private float dw;
 	private float dh;
 
+	/**
+	 * 登録されているスキンオブジェクト
+	 */
 	private List<SkinObject> objects = new ArrayList<SkinObject>();
+	/**
+	 * 除外されているスキンオブジェクト
+	 */
 	private List<SkinObject> removes = new ArrayList<SkinObject>();
 	/**
 	 * 入力受付開始時間(ms)
@@ -46,31 +51,31 @@ public class Skin {
 		this.fixopt = fixopt;
 	}
 
-	protected void add(SkinObject object) {
+	public void add(SkinObject object) {
 		objects.add(object);
 	}
 
-	protected void setDestination(SkinObject object, long time, float x, float y, float w, float h, int acc, int a,
+	public void setDestination(SkinObject object, long time, float x, float y, float w, float h, int acc, int a,
 			int r, int g, int b, int blend, int filter, int angle, int center, int loop, int timer, int op1, int op2,
 			int op3) {
 		object.setDestination(time, x * dw, y * dh, w * dw, h * dh, acc, a, r, g, b, blend, filter, angle, center,
 				loop, timer, op1, op2, op3);
 	}
 
-	protected void setDestination(SkinObject object, long time, float x, float y, float w, float h, int acc, int a,
+	public void setDestination(SkinObject object, long time, float x, float y, float w, float h, int acc, int a,
 			int r, int g, int b, int blend, int filter, int angle, int center, int loop, int timer, int[] op) {
 		object.setDestination(time, x * dw, y * dh, w * dw, h * dh, acc, a, r, g, b, blend, filter, angle, center,
 				loop, timer, op);
 	}
 
-	protected void addNumber(SkinNumber number, long time, float x, float y, float w, float h, int acc, int a, int r,
+	public void addNumber(SkinNumber number, long time, float x, float y, float w, float h, int acc, int a, int r,
 			int g, int b, int blend, int filter, int angle, int center, int loop, int timer, int op1, int op2, int op3) {
 		number.setDestination(time, x * dw, y * dh, w * dw, h * dh, acc, a, r, g, b, blend, filter, angle, center,
 				loop, timer, op1, op2, op3);
 		objects.add(number);
 	}
 
-	protected SkinImage addImage(TextureRegion tr, long time, float x, float y, float w, float h, int acc, int a,
+	public SkinImage addImage(TextureRegion tr, long time, float x, float y, float w, float h, int acc, int a,
 			int r, int g, int b, int blend, int filter, int angle, int center, int loop, int timer, int op1, int op2,
 			int op3) {
 		SkinImage si = new SkinImage(tr);

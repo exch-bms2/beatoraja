@@ -1,22 +1,15 @@
 package bms.player.beatoraja.decide;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 
 import bms.player.beatoraja.Config.SkinConfig;
-import bms.player.beatoraja.MainController;
-import bms.player.beatoraja.MainState;
-import bms.player.beatoraja.PlayerResource;
+import bms.player.beatoraja.*;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
-import bms.player.beatoraja.skin.LR2DecideSkinLoader;
-import bms.player.beatoraja.skin.LR2SkinHeader;
-import bms.player.beatoraja.skin.LR2SkinHeaderLoader;
-import bms.player.beatoraja.skin.SkinLoader;
+import bms.player.beatoraja.skin.*;
+import bms.player.beatoraja.skin.lr2.*;
 
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.math.Rectangle;
 
 import static bms.player.beatoraja.Resolution.*;
@@ -62,7 +55,7 @@ public class MusicDecide extends MainState {
 				setSkin(sl.loadDecideSkin(Paths.get(sc.getPath()), sc.getProperty()));
 			} else {
 				LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
-				LR2SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
+				SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
 				Rectangle srcr = RESOLUTION[header.getResolution()];
 				Rectangle dstr = RESOLUTION[resource.getConfig().getResolution()];
 				LR2DecideSkinLoader dloader = new LR2DecideSkinLoader(srcr.width, srcr.height, dstr.width, dstr.height);
