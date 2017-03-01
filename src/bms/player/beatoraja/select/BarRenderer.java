@@ -195,8 +195,8 @@ public class BarRenderer {
 			for (int i = 0; i < chars.length; i++) {
 				chars[i] = chars2[i];
 			}
-			baro.getBarText()[0].setText(String.valueOf(chars));
-			baro.getBarText()[1].setText(String.valueOf(chars));
+			baro.getText()[0].setText(String.valueOf(chars));
+			baro.getText()[1].setText(String.valueOf(chars));
 		}
 		// draw song bar
 		for (int i = 0; i < 60; i++) {
@@ -257,7 +257,8 @@ public class BarRenderer {
 						SongData song = ((SongBar) sd).getSongData();
 						songstatus = System.currentTimeMillis() / 1000 > song.getAdddate() + 3600 * 24 ? 0 : 1;
 					}
-					baro.getBarText()[songstatus].draw(sprite, time, select, sd.getTitle(), x, y);
+					baro.getText()[songstatus].setText(sd.getTitle());
+					baro.getText()[songstatus].draw(sprite, time, select, x, y);
 				}
 
 				int flag = 0;

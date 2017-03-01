@@ -10,7 +10,6 @@ import com.badlogic.gdx.math.Rectangle;
 import bms.player.beatoraja.result.MusicResultSkin;
 import bms.player.beatoraja.result.SkinGaugeGraphObject;
 import bms.player.beatoraja.skin.SkinHeader;
-import bms.player.beatoraja.skin.lr2.LR2SkinLoader.CommandWord;
 
 /**
  * LR2リザルトスキン読み込み用クラス
@@ -22,7 +21,7 @@ public class LR2ResultSkinLoader extends LR2SkinCSVLoader {
 	private MusicResultSkin skin;
 
 	private Rectangle gauge = new Rectangle();
-	
+
 	public LR2ResultSkinLoader(final float srcw, final float srch, final float dstw, final float dsth) {
 		super(srcw, srch, dstw, dsth);
 
@@ -36,32 +35,26 @@ public class LR2ResultSkinLoader extends LR2SkinCSVLoader {
 		addCommandWord(new CommandWord("SRC_GAUGECHART_1P") {
 			@Override
 			public void execute(String[] str) {
-					try {
-						int fieldw = Integer.parseInt(str[11]);
-						int fieldh = Integer.parseInt(str[12]);
-						gauge = new Rectangle(0, 0, fieldw, fieldh);
-					} catch (NumberFormatException e) {
-						e.printStackTrace();
-					}
+				int fieldw = Integer.parseInt(str[11]);
+				int fieldh = Integer.parseInt(str[12]);
+				gauge = new Rectangle(0, 0, fieldw, fieldh);
 			}
 		});
 		addCommandWord(new CommandWord("DST_GAUGECHART_1P") {
 			@Override
 			public void execute(String[] str) {
-					try {
-						gauge.x = Integer.parseInt(str[3]);
-						gauge.y = srch - Integer.parseInt(str[4]);
-						SkinGaugeGraphObject obj = new SkinGaugeGraphObject();
-						skin.setDestination(obj,0,gauge.x, gauge.y, gauge.width,gauge.height,0,255,255,255,255,0,0,0,0,0,0,0,0,0);
-						skin.add(obj);
-					} catch (NumberFormatException e) {
-						e.printStackTrace();
-					}
+				gauge.x = Integer.parseInt(str[3]);
+				gauge.y = srch - Integer.parseInt(str[4]);
+				SkinGaugeGraphObject obj = new SkinGaugeGraphObject();
+				skin.setDestination(obj, 0, gauge.x, gauge.y, gauge.width, gauge.height, 0, 255, 255, 255, 255, 0, 0, 0,
+						0, 0, 0, 0, 0, 0);
+				skin.add(obj);
 			}
 		});
 	}
-	
-	public MusicResultSkin loadResultSkin(File f, MainState state, SkinHeader header, Map<Integer, Boolean> option, Map property) throws IOException {
+
+	public MusicResultSkin loadResultSkin(File f, MainState state, SkinHeader header, Map<Integer, Boolean> option,
+			Map property) throws IOException {
 
 		skin = new MusicResultSkin(srcw, srch, dstw, dsth);
 

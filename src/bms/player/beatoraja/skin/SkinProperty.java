@@ -365,6 +365,7 @@ public class SkinProperty {
 	public static final int OPTION_JUDGE_HARD = 181;
 	public static final int OPTION_JUDGE_NORMAL = 182;
 	public static final int OPTION_JUDGE_EASY = 183;
+	public static final int OPTION_JUDGE_VERYEASY = 184;
 
 	public static final int OPTION_NO_STAGEFILE = 190;
 	public static final int OPTION_STAGEFILE = 191;

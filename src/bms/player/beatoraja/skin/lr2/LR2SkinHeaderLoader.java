@@ -11,7 +11,6 @@ import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.skin.SkinHeader;
 import bms.player.beatoraja.skin.SkinHeader.CustomFile;
 import bms.player.beatoraja.skin.SkinHeader.CustomOption;
-import bms.player.beatoraja.skin.lr2.LR2SkinLoader.CommandWord;
 
 /**
  * LR2スキンヘッダファイル(lr2skin)のローダー
@@ -21,8 +20,8 @@ import bms.player.beatoraja.skin.lr2.LR2SkinLoader.CommandWord;
 public class LR2SkinHeaderLoader extends LR2SkinLoader {
 	
 	private SkinHeader header = new SkinHeader();
-	private List<CustomFile> files = new ArrayList();
-	private List<CustomOption> options = new ArrayList();
+	private List<CustomFile> files = new ArrayList<CustomFile>();
+	private List<CustomOption> options = new ArrayList<CustomOption>();
 
 	public LR2SkinHeaderLoader() {
 		
@@ -36,7 +35,7 @@ public class LR2SkinHeaderLoader extends LR2SkinLoader {
 		addCommandWord(new CommandWord("CUSTOMOPTION") {
 			@Override
 			public void execute(String[] str) {
-				List<String> contents = new ArrayList();
+				List<String> contents = new ArrayList<String>();
 				for(int i = 3;i < str.length;i++) {
 					if(str[i] != null && str[i].length() > 0) {
 						contents.add(str[i]);
@@ -90,7 +89,11 @@ public class LR2SkinHeaderLoader extends LR2SkinLoader {
 		}
 
 		while ((line = br.readLine()) != null) {
-			processLine(line, state);
+			try {
+				processLine(line, state);				
+			} catch(Throwable e) {
+				e.printStackTrace();
+			}
 		}
 		header.setCustomOptions(options.toArray(new CustomOption[options.size()]));
 		header.setCustomFiles(files.toArray(new CustomFile[files.size()]));

@@ -265,7 +265,7 @@ public class SkinLoader {
 										Rectangle r = new Rectangle(a.x * (dstr.width / sk.w), a.y * (dstr.height / sk.h), a.w * (dstr.width / sk.w), a.h * (dstr.height / sk.h));
 										((MusicSelectSkin)skin).setSearchTextRegion(r);
 									} else {
-										SkinText st = new SkinText(p.getParent().resolve(font.path).toString(), 0,
+										SkinText st = new SkinTextFont(p.getParent().resolve(font.path).toString(), 0,
 												text.size);
 										st.setAlign(text.align);
 										st.setReferenceID(text.ref);
@@ -531,13 +531,13 @@ public class SkinLoader {
 						}						
 						barobj.setLabel(label);
 						
-						SkinBar.SkinBarText[] text = new SkinBar.SkinBarText[sk.songlist.text.length];
+						SkinText[] text = new SkinText[sk.songlist.text.length];
  						for (int i = 0;i < sk.songlist.text.length;i++) {
 							for (Text img : sk.text) {
 								if (sk.songlist.text[i].id.equals(img.id)) {
 									for (Font font : sk.font) {
 										if (img.font.equals(font.id)) {
-											text[i] = new SkinBar.SkinBarText(p.getParent().resolve(font.path).toString(), 0,
+											text[i] = new SkinTextFont(p.getParent().resolve(font.path).toString(), 0,
 													img.size);
 											text[i].setAlign(img.align);
 			                                setDestination(skin, text[i],sk.songlist.text[i]);
@@ -548,8 +548,8 @@ public class SkinLoader {
 								}
 							}							
 						}
- 						barobj.getBarText()[0] = text[0];
- 						barobj.getBarText()[1] = text[1];
+ 						barobj.getText()[0] = text[0];
+ 						barobj.getText()[1] = text[1];
 						
 						SkinNumber[] numbers = new SkinNumber[sk.songlist.level.length];
 						for (int i = 0;i < sk.songlist.level.length;i++) {

@@ -51,11 +51,11 @@
 		
 		{"id":"button_play", "src":0, "x":0, "y":310, "w":15, "h":15, "act":1015},		
 		{"id":"button_autoplay", "src":0, "x":0, "y":325, "w":15, "h":15, "act":1016},		
-		{"id":"button_practice", "src":0, "x":0, "y":340, "w":15, "h":15, "act":2015},		
+		{"id":"button_practice", "src":0, "x":0, "y":340, "w":15, "h":15, "act":1315},		
 		{"id":"button_replay", "src":0, "x":0, "y":355, "w":15, "h":15, "act":1019},		
-		{"id":"button_replay2", "src":0, "x":0, "y":370, "w":15, "h":15, "act":2019},		
-		{"id":"button_replay3", "src":0, "x":0, "y":385, "w":15, "h":15, "act":3019},		
-		{"id":"button_replay4", "src":0, "x":0, "y":400, "w":15, "h":15, "act":4019},		
+		{"id":"button_replay2", "src":0, "x":0, "y":370, "w":15, "h":15, "act":1316},		
+		{"id":"button_replay3", "src":0, "x":0, "y":385, "w":15, "h":15, "act":1317},		
+		{"id":"button_replay4", "src":0, "x":0, "y":400, "w":15, "h":15, "act":1318},		
 		
 		{"id":"totalplay", "src":0, "x":0, "y":720, "w":96, "h":24},
 		{"id":"totalnotes", "src":0, "x":0, "y":744, "w":120, "h":24},

@@ -19,15 +19,7 @@ import static bms.player.beatoraja.skin.SkinProperty.NUMBER_SCRATCHANGLE_2P;
  *
  * @author exch
  */
-public class SkinText extends SkinObject {
-    /**
-     * ビットマップフォント
-     */
-    private BitmapFont font;
-
-    private GlyphLayout layout;
-
-    private int shadow = 0;
+public abstract class SkinText extends SkinObject {
 
     private int align = ALIGN_LEFT;
 	public static final int ALIGN_LEFT = 0;
@@ -36,23 +28,10 @@ public class SkinText extends SkinObject {
     
     public static final int[] ALIGN = {Align.left, Align.center, Align.right};
 
-    private FreeTypeFontGenerator generator;
-    private FreeTypeFontGenerator.FreeTypeFontParameter parameter;
-
     private int id = -1;
     
-    public SkinText(String fontpath, int cycle, int size) {
-        this(fontpath, cycle, size, 0);
-    }
-
-    public SkinText(String fontpath, int cycle, int size, int shadow) {
-        generator = new FreeTypeFontGenerator(Gdx.files.internal(fontpath));
-        parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-//        this.setCycle(cycle);
-        parameter.size = size;
-        this.shadow = shadow;
-    }
-
+    private String text;
+    
     public int getAlign() {
 		return align;
 	}
@@ -60,19 +39,22 @@ public class SkinText extends SkinObject {
     public void setAlign(int align) {
         this.align = align;
     }
+    
+    public String getText() {
+    	return text;
+    }
 
     public void setText(String text) {
         if(text == null || text.length() == 0) {
             text = " ";
         }
-        parameter.characters = text;
-        font = generator.generateFont(parameter);
+    	this.text = text;
+        prepareText(text);
     }
+    
+    protected abstract void prepareText(String text);
 
     public void draw(SpriteBatch sprite, long time, MainState state) {
-    	if(generator == null) {
-    		return;
-    	}
         if(id == -1) {
         	return;
         }
@@ -82,68 +64,20 @@ public class SkinText extends SkinObject {
         }        	
         Rectangle r = this.getDestination(time,state);
         if(r != null) {
-            if(!value.equals(parameter.characters)) {
-                parameter.characters = value;
-                if(font != null) {
-                    font.dispose();                	
-                }
-                font = generator.generateFont(parameter);
-                layout = new GlyphLayout(font, value);
+            if(!value.equals(text)) {
+                setText(value);
             }
-            if(font != null) {
-                Color c = getColor(time,state);
-                font.getData().setScale(r.height / parameter.size);
-                final float x = (align == 2 ? r.x - r.width : (align == 1 ? r.x - r.width / 2 : r.x));
-                if(shadow > 0) {
-                    layout.setText(font, value, new Color(c.r / 2, c.g / 2, c.b / 2, c.a), r.getWidth(),ALIGN[align], false);
-                    font.draw(sprite, layout, x + shadow, r.y - shadow);
-                }
-                layout.setText(font, value, c, r.getWidth(),ALIGN[align], false);
-                font.draw(sprite, layout, x, r.y);
-            }
+            draw(sprite, time, state, 0,0);
         }
     }
 
-    public void draw(SpriteBatch sprite, long time, MainState state, String value, int offsetX, int offsetY) {
-        if(generator == null) {
-            return;
-        }
-        Rectangle r = this.getDestination(time,state);
-        if(r != null) {
-            if(!value.equals(parameter.characters)) {
-                parameter.characters = value;
-                if(font != null) {
-                    font.dispose();
-                }
-                font = generator.generateFont(parameter);
-                layout = new GlyphLayout(font, value);
-            }
-            if(font != null) {
-                Color c = getColor(time,state);
-                font.getData().setScale(r.height / parameter.size);
-                final float x = (align == 2 ? r.x - r.width : (align == 1 ? r.x - r.width / 2 : r.x));
-                if(shadow > 0) {
-                    layout.setText(font, value, new Color(c.r / 2, c.g / 2, c.b / 2, c.a), r.getWidth(),ALIGN[align], false);
-                    font.draw(sprite, layout, x + shadow + offsetX, r.y - shadow + offsetY);
-                }
-                layout.setText(font, value, c, r.getWidth(),ALIGN[align], false);
-                font.draw(sprite, layout, x + offsetX, r.y + offsetY);
-            }
-        }
-    }
-
-    public void dispose() {
-        if(generator != null) {
-        	generator.dispose();
-        	generator = null;
-        }
-        if(font != null) {
-            font.dispose();;
-            font = null;
-        }
-    }
-
+    public abstract void draw(SpriteBatch sprite, long time, MainState state, int offsetX, int offsetY);
+    
 	public void setReferenceID(int id) {
 		this.id = id;
+	}
+	
+	public int getReferenceID() {
+		return id;
 	}
 }
