@@ -7,12 +7,12 @@
 	<path id="build.lib">
 	   <fileset dir="lib" includes="*.jar" />
 	</path>
-	
+
 	<target name="clean">
 	   <delete dir="${build.dest}" />
 	   <mkdir dir="${build.dest}" />
 	</target>
-	
+
 	<target name="compile" depends="clean">
 		<javac classpathref="build.lib" srcdir="${build.src}" debug="${debug}" destdir="${build.dest}" />
 	</target>
@@ -24,8 +24,8 @@
 				<attribute name="Bundle-NativeCode" value="jasiohost32.dll;jasiohost64.dll" />
 				<attribute name="Class-Path" value="." />
 			</manifest>
-			<fileset dir="./bin" />
-			<fileset dir="./src/natives" />
+			<fileset dir="${build.dest}" />
+			<fileset excludes="*.java" dir="${build.src}" />
 			<zipfileset excludes="META-INF/*.SF" src="./lib/gdx-controllers-desktop-natives.jar" />
 			<zipfileset excludes="META-INF/*.SF" src="./lib/gdx-controllers-desktop.jar" />
 			<zipfileset excludes="META-INF/*.SF" src="./lib/gdx-freetype-natives.jar" />
