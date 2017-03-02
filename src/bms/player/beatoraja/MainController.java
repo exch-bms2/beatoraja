@@ -38,7 +38,7 @@ import static bms.player.beatoraja.Resolution.*;
 
 public class MainController extends ApplicationAdapter {
 
-	public static final String VERSION = "beatoraja 0.3.7";
+	public static final String VERSION = "beatoraja 0.4";
 
 	private BMSPlayer player;
 	private MusicDecide decide;
@@ -446,6 +446,10 @@ public class MainController extends ApplicationAdapter {
 
 		@Override
 		public void run() {
+			// 全ピクセルのアルファ値を255にする(=透明色を無くす)
+			for(int i = 3;i < pixels.length;i+=4) {
+				pixels[i] = (byte) 0xff;
+			}
 			Pixmap pixmap = new Pixmap(Gdx.graphics.getBackBufferWidth(), Gdx.graphics.getBackBufferHeight(),
 					Pixmap.Format.RGBA8888);
 			BufferUtils.copy(pixels, 0, pixmap.getPixels(), pixels.length);
