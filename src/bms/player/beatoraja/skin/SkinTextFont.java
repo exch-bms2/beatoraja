@@ -31,19 +31,26 @@ public class SkinTextFont extends SkinText {
     public SkinTextFont(String fontpath, int cycle, int size, int shadow) {
         generator = new FreeTypeFontGenerator(Gdx.files.internal(fontpath));
         parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        parameter.characters = "";
 //        this.setCycle(cycle);
         parameter.size = size;
         this.shadow = shadow;
     }
 
-	@Override
-	protected void prepareText(String text) {
-        parameter.characters = text;
+    public void prepareFont(String text) {
         if(font != null) {
             font.dispose();                	
         }
+        parameter.characters = text;        	
         font = generator.generateFont(parameter);
-        layout = new GlyphLayout(font, text);
+    }    
+
+	@Override
+	protected void prepareText(String text) {
+        if(parameter.characters.length() == 0) {
+        	prepareFont(text);
+        }
+        layout = new GlyphLayout(font, text);        	    	
 	}
 	
 	@Override

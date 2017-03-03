@@ -32,6 +32,10 @@ public class SkinTextImage extends SkinText {
 	public SkinTextImage(SkinTextImageSource source) {
 		this.source = source;
 	}
+	
+    public void prepareFont(String chars) {
+    	
+    }    
 
 	@Override
 	protected void prepareText(String text) {

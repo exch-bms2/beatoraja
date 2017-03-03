@@ -82,10 +82,10 @@ public class BarRenderer {
 		FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
 		parameter.size = 24;
 		titlefont = generator.generateFont(parameter);
-		
+
 		TableData[] tds = new TableDataAccessor().readAll();
 		this.tables = new TableBar[tds.length];
-		for(int i = 0;i < tds.length;i++) {
+		for (int i = 0; i < tds.length; i++) {
 			this.tables[i] = new TableBar(select, tds[i]);
 		}
 
@@ -137,13 +137,13 @@ public class BarRenderer {
 	}
 
 	public void addSearch(SearchWordBar bar) {
-		for(SearchWordBar s : search) {
-			if(s.getTitle().equals(bar.getTitle())) {
+		for (SearchWordBar s : search) {
+			if (s.getTitle().equals(bar.getTitle())) {
 				search.remove(s);
 				break;
 			}
 		}
-		if(search.size() >= SEARCHBAR_MAXCOUNT) {
+		if (search.size() >= SEARCHBAR_MAXCOUNT) {
 			search.remove(0);
 		}
 		search.add(bar);
@@ -155,14 +155,14 @@ public class BarRenderer {
 			if (baro.getBarImages(on, i) == null) {
 				continue;
 			}
-			int index = (int) (selectedindex + currentsongs.length * 100 + i -  ((MusicSelectSkin) select.getSkin()).getCenterBar())
-					% currentsongs.length;
+			int index = (int) (selectedindex + currentsongs.length * 100 + i
+					- ((MusicSelectSkin) select.getSkin()).getCenterBar()) % currentsongs.length;
 			Bar sd = currentsongs[index];
 
 			Rectangle r = baro.getBarImages(on, i).getDestination(select.getNowTime(), select);
 			if (r != null) {
 				if (r != null && r.x <= x && r.x + r.width >= x && r.y <= y && r.y + r.height >= y) {
-					if(button == 0) {
+					if (button == 0) {
 						select.select(sd);
 					} else {
 						select.close();
@@ -174,8 +174,7 @@ public class BarRenderer {
 		return false;
 	}
 
-	public void render(SpriteBatch sprite, MusicSelectSkin skin, SkinBar baro,
-			long duration, int angle, int time) {
+	public void render(SpriteBatch sprite, MusicSelectSkin skin, SkinBar baro, long duration, int angle, int time) {
 		if (skin == null) {
 			return;
 		}
@@ -191,12 +190,12 @@ public class BarRenderer {
 			}
 
 			char[] chars = new char[charset.size()];
-			Character[] chars2 = charset.toArray(new Character[0]);
-			for (int i = 0; i < chars.length; i++) {
-				chars[i] = chars2[i];
+			int i = 0;
+			for (char c : charset) {
+				chars[i++] = c;
 			}
-			baro.getText()[0].setText(String.valueOf(chars));
-			baro.getText()[1].setText(String.valueOf(chars));
+			baro.getText()[0].prepareFont(String.valueOf(chars));
+			baro.getText()[1].prepareFont(String.valueOf(chars));
 		}
 		// draw song bar
 		for (int i = 0; i < 60; i++) {
@@ -211,23 +210,17 @@ public class BarRenderer {
 			int value = -1;
 			if (sd instanceof TableBar) {
 				value = 2;
-			}
-			if (sd instanceof TableLevelBar) {
+			} else if (sd instanceof TableLevelBar) {
 				value = 2;
-			}
-			if (sd instanceof GradeBar) {
+			} else if (sd instanceof GradeBar) {
 				value = ((GradeBar) sd).existsAllSongs() ? 3 : 4;
-			}
-			if (sd instanceof FolderBar) {
+			} else if (sd instanceof FolderBar) {
 				value = 1;
-			}
-			if (sd instanceof SongBar) {
+			} else if (sd instanceof SongBar) {
 				value = 0;
-			}
-			if (sd instanceof SearchWordBar) {
+			} else if (sd instanceof SearchWordBar) {
 				value = 6;
-			}
-			if (sd instanceof CommandBar) {
+			} else if (sd instanceof CommandBar) {
 				value = 5;
 			}
 
@@ -237,11 +230,12 @@ public class BarRenderer {
 			if (r != null) {
 				if (duration != 0) {
 					int nextindex = i + (angle >= 0 ? 1 : -1);
-					SkinImage si = nextindex >= 0 ? baro.getBarImages(nextindex == skin.getCenterBar(), nextindex) : null;
+					SkinImage si = nextindex >= 0 ? baro.getBarImages(nextindex == skin.getCenterBar(), nextindex)
+							: null;
 					Rectangle r2 = si != null ? si.getDestination(time, select) : null;
-					if(r2 != null) {
-						final float a = angle < 0 ? ((float)(System.currentTimeMillis() - duration)) / angle :
-								((float)(duration - System.currentTimeMillis())) / angle;
+					if (r2 != null) {
+						final float a = angle < 0 ? ((float) (System.currentTimeMillis() - duration)) / angle
+								: ((float) (duration - System.currentTimeMillis())) / angle;
 						dx = (r2.x - r.x) * a;
 						dy = (r2.y - r.y) * a;
 					}
@@ -253,7 +247,7 @@ public class BarRenderer {
 					baro.getBarImages(on, i).draw(sprite, time, select, value, (int) dx, (int) dy);
 					// 新規追加曲はテキストを変える
 					int songstatus = 0;
-					if(sd instanceof SongBar) {
+					if (sd instanceof SongBar) {
 						SongData song = ((SongBar) sd).getSongData();
 						songstatus = System.currentTimeMillis() / 1000 > song.getAdddate() + 3600 * 24 ? 0 : 1;
 					}
@@ -289,8 +283,8 @@ public class BarRenderer {
 				if (sd instanceof SongBar) {
 					SongData song = ((SongBar) sd).getSongData();
 
-					SkinNumber leveln = baro.getBarlevel()[song.getDifficulty() >= 0 && song.getDifficulty() < 7 ? song
-							.getDifficulty() : 0];
+					SkinNumber leveln = baro.getBarlevel()[song.getDifficulty() >= 0 && song.getDifficulty() < 7
+							? song.getDifficulty() : 0];
 					if (leveln != null) {
 						leveln.draw(sprite, time, song.getLevel(), select, x, y);
 					}
@@ -319,9 +313,9 @@ public class BarRenderer {
 	public List<DirectoryBar> getDirectory() {
 		return dir;
 	}
-	
+
 	public boolean updateBar() {
-		if(dir.size() > 0) {
+		if (dir.size() > 0) {
 			return updateBar(dir.get(dir.size() - 1));
 		}
 		return updateBar(null);
@@ -331,7 +325,7 @@ public class BarRenderer {
 		Bar prevbar = currentsongs != null ? currentsongs[selectedindex] : null;
 		List<Bar> l = new ArrayList<Bar>();
 		if (bar == null) {
-			if(dir.size() > 0) {
+			if (dir.size() > 0) {
 				prevbar = dir.get(0);
 			}
 			dir.clear();
@@ -341,11 +335,11 @@ public class BarRenderer {
 			l.addAll(search);
 		} else if (bar instanceof DirectoryBar) {
 			int index = dir.indexOf(bar);
-			if(index != -1) {
-				if(index < dir.size() - 1) {
+			if (index != -1) {
+				if (index < dir.size() - 1) {
 					prevbar = dir.get(index + 1);
 				}
-				for(int i = dir.size() - 1;i >= index;i--) {
+				for (int i = dir.size() - 1; i >= index; i--) {
 					dir.remove(i);
 				}
 			}
@@ -363,8 +357,8 @@ public class BarRenderer {
 		l.removeAll(remove);
 
 		if (l.size() > 0) {
-			if(bar != null) {
-				dir.add((DirectoryBar) bar);				
+			if (bar != null) {
+				dir.add((DirectoryBar) bar);
 			}
 
 			// 変更前と同じバーがあればカーソル位置を保持する
@@ -389,9 +383,8 @@ public class BarRenderer {
 				if (prevbar instanceof SongBar) {
 					final SongBar prevsong = (SongBar) prevbar;
 					for (int i = 0; i < currentsongs.length; i++) {
-						if (currentsongs[i] instanceof SongBar
-								&& ((SongBar) currentsongs[i]).getSongData().getSha256()
-										.equals(prevsong.getSongData().getSha256())) {
+						if (currentsongs[i] instanceof SongBar && ((SongBar) currentsongs[i]).getSongData().getSha256()
+								.equals(prevsong.getSongData().getSha256())) {
 							selectedindex = i;
 							break;
 						}
@@ -414,7 +407,7 @@ public class BarRenderer {
 			return true;
 		}
 
-		if(dir.size() > 0) {
+		if (dir.size() > 0) {
 			updateBar(dir.get(dir.size() - 1));
 		} else {
 			updateBar(null);

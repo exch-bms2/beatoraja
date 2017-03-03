@@ -30,7 +30,7 @@ public abstract class SkinText extends SkinObject {
 
     private int id = -1;
     
-    private String text;
+    private String text = "";
     
     public int getAlign() {
 		return align;
@@ -45,12 +45,14 @@ public abstract class SkinText extends SkinObject {
     }
 
     public void setText(String text) {
-        if(text == null || text.length() == 0) {
+        if(text == null) {
             text = " ";
         }
     	this.text = text;
         prepareText(text);
     }
+    
+    public abstract void prepareFont(String chars);
     
     protected abstract void prepareText(String text);
 
