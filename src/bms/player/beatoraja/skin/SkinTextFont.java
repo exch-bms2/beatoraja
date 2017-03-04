@@ -23,6 +23,7 @@ public class SkinTextFont extends SkinText {
 
     private FreeTypeFontGenerator generator;
     private FreeTypeFontGenerator.FreeTypeFontParameter parameter;
+    private String preparedFonts;
 
     public SkinTextFont(String fontpath, int cycle, int size) {
         this(fontpath, cycle, size, 0);
@@ -41,14 +42,18 @@ public class SkinTextFont extends SkinText {
         if(font != null) {
             font.dispose();                	
         }
-        parameter.characters = text;        	
+        preparedFonts = parameter.characters = text;        	
         font = generator.generateFont(parameter);
     }    
 
 	@Override
 	protected void prepareText(String text) {
-        if(parameter.characters.length() == 0) {
-        	prepareFont(text);
+        if(preparedFonts == null) {
+            if(font != null) {
+                font.dispose();                	
+            }
+            parameter.characters = text;        	
+            font = generator.generateFont(parameter);
         }
         layout = new GlyphLayout(font, text);        	    	
 	}

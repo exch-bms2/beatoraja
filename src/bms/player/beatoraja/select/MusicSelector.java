@@ -356,7 +356,7 @@ public class MusicSelector extends MainState {
 				}
 				readCourse(play);
 			}
-			play = 0;
+			play = -1;
 		} else if (play == -255) {
 			getMainController().exit();
 		}

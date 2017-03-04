@@ -75,6 +75,9 @@ public class SongData {
 	}
 
 	public void setBMSModel(BMSModel model) {
+		if(model == null) {
+			return;
+		}
 		this.model = model;
 		title = model.getTitle();
 		subtitle = model.getSubTitle();

@@ -52,8 +52,6 @@ public abstract class SkinText extends SkinObject {
         prepareText(text);
     }
     
-    public abstract void prepareFont(String chars);
-    
     protected abstract void prepareText(String text);
 
     public void draw(SpriteBatch sprite, long time, MainState state) {

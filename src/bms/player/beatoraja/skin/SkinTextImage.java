@@ -33,10 +33,6 @@ public class SkinTextImage extends SkinText {
 		this.source = source;
 	}
 	
-    public void prepareFont(String chars) {
-    	
-    }    
-
 	@Override
 	protected void prepareText(String text) {
 		try {

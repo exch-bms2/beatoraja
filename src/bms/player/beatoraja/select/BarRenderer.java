@@ -11,6 +11,8 @@ import java.util.logging.Logger;
 
 import bms.player.beatoraja.skin.SkinImage;
 import bms.player.beatoraja.skin.SkinNumber;
+import bms.player.beatoraja.skin.SkinTextFont;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
@@ -179,7 +181,7 @@ public class BarRenderer {
 			return;
 		}
 
-		if (bartextupdate) {
+		if (bartextupdate && baro.getText()[0] instanceof SkinTextFont) {
 			bartextupdate = false;
 			Set<Character> charset = new HashSet<Character>();
 
@@ -194,8 +196,8 @@ public class BarRenderer {
 			for (char c : charset) {
 				chars[i++] = c;
 			}
-			baro.getText()[0].prepareFont(String.valueOf(chars));
-			baro.getText()[1].prepareFont(String.valueOf(chars));
+			((SkinTextFont) baro.getText()[0]).prepareFont(String.valueOf(chars));
+			((SkinTextFont) baro.getText()[1]).prepareFont(String.valueOf(chars));
 		}
 		// draw song bar
 		for (int i = 0; i < 60; i++) {
