@@ -35,7 +35,7 @@
 			<zipfileset excludes="META-INF/*.SF" src="./lib/jna-3.5.2.jar" />
 			<zipfileset excludes="META-INF/*.SF" src="./lib/platform-3.5.2.jar" />
 			<zipfileset excludes="META-INF/*.SF" src="./lib/slf4j-api-1.7.13.jar" />
-			<zipfileset excludes="META-INF/*.SF" src="./lib/sqlite-jdbc-3.7.2.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="./lib/sqlite-jdbc.jar" />
 			<zipfileset excludes="META-INF/*.SF" src="./lib/vlcj-3.8.0.jar" />
 			<zipfileset excludes="META-INF/*.SF" src="./lib/jbms-parser.jar" />
 			<zipfileset excludes="META-INF/*.SF" src="./lib/commons-dbutils.jar" />
@@ -46,7 +46,9 @@
 			<zipfileset excludes="META-INF/*.SF" src="./lib/ffmpeg-macosx-x86_64.jar" />
 			<zipfileset excludes="META-INF/*.SF" src="./lib/ffmpeg-windows-x86_64.jar" />
 			<zipfileset excludes="META-INF/*.SF" src="./lib/ffmpeg.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="./lib/ffmpeg-platform.jar" />
 			<zipfileset excludes="META-INF/*.SF" src="./lib/javacv.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="./lib/javacv-platform.jar" />
 			<zipfileset excludes="META-INF/*.SF" src="./lib/gdx-controllers.jar" />
 			<zipfileset excludes="META-INF/*.SF" src="./lib/gdx-backend-lwjgl.jar" />
 			<zipfileset excludes="META-INF/*.SF" src="./lib/gdx-backend-lwjgl-natives.jar" />
