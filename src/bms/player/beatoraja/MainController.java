@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.logging.Logger;
 
+import bms.player.beatoraja.play.TargetProperty;
 import com.badlogic.gdx.Graphics;
 
 import bms.player.beatoraja.audio.*;
@@ -252,7 +253,10 @@ public class MainController extends ApplicationAdapter {
 			}			
 		};
 		polling.start();
-		
+
+		if(config.getTarget() >= TargetProperty.getAllTargetProperties(this).length) {
+			config.setTarget(0);
+		}
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 	}
 	

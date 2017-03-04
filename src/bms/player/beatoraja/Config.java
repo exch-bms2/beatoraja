@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 import bms.player.beatoraja.input.BMControllerInputProcessor.BMKeys;
 import bms.player.beatoraja.play.JudgeManager;
 
+import bms.player.beatoraja.play.TargetProperty;
 import com.badlogic.gdx.Input.Keys;
 
 /**
@@ -98,6 +99,7 @@ public class Config {
 	public static final int FIX_HISPEED_MAINBPM = 3;
 	public static final int FIX_HISPEED_MINBPM = 4;
 
+	private int target;
 	/**
 	 * 最小入力感覚
 	 */
@@ -598,6 +600,14 @@ public class Config {
 								BMKeys.BUTTON_5, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN, BMKeys.BUTTON_9, BMKeys.BUTTON_10 }});
 			Logger.getGlobal().warning("mode14のPlayConfigを再構成");
 		}
+	}
+
+	public int getTarget() {
+		return target;
+	}
+
+	public void setTarget(int target) {
+		this.target = target;
 	}
 
 	public static class SkinConfig {

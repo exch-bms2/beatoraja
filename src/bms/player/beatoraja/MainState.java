@@ -3,6 +3,7 @@ package bms.player.beatoraja;
 import java.util.Arrays;
 import java.util.Calendar;
 
+import bms.player.beatoraja.play.TargetProperty;
 import bms.player.beatoraja.skin.Skin;
 import bms.player.beatoraja.song.SongData;
 
@@ -324,6 +325,10 @@ public abstract class MainState {
 		if (getMainController().getPlayerResource() != null) {
 			SongData song = getMainController().getPlayerResource().getSongdata();
 			switch (id) {
+				case STRING_RIVAL:
+					return TargetProperty.getAllTargetProperties(getMainController())[getMainController().getPlayerResource().getConfig().getTarget()].getName();
+				case STRING_PLAYER:
+					return "";
 			case STRING_TITLE:
 				return song != null ? song.getTitle() : "";
 			case STRING_SUBTITLE:

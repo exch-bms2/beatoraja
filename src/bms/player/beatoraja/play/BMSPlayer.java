@@ -317,7 +317,8 @@ public class BMSPlayer extends MainState {
 			score = new IRScoreData();
 		}
 		bestscore = score.getExscore();
-		rivalscore = model.getTotalNotes() * 8 / 5;
+		rivalscore = TargetProperty.getAllTargetProperties(getMainController())[config.getTarget()]
+				.getTarget(getMainController());
 		resource.setRivalScoreData(rivalscore);
 		Logger.getGlobal().info("スコアグラフ描画クラス準備");
 

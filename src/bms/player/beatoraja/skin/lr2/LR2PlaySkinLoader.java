@@ -2,13 +2,9 @@ package bms.player.beatoraja.skin.lr2;
 
 import java.io.*;
 import java.util.*;
-import java.util.logging.Logger;
 
 import bms.player.beatoraja.play.*;
-import bms.player.beatoraja.skin.SkinHeader;
-import bms.player.beatoraja.skin.SkinImage;
-import bms.player.beatoraja.skin.SkinNumber;
-import bms.player.beatoraja.skin.lr2.LR2SkinLoader.CommandWord;
+import bms.player.beatoraja.skin.*;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -290,48 +286,69 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 			@Override
 			public void execute(String[] str) {
 				if (judge[0] != null && judge[0].getJudge()[5 - Integer.parseInt(str[1])] != null) {
-					int[] values = parseInt(str);
-					if (values[5] < 0) {
-						values[3] += values[5];
-						values[5] = -values[5];
-					}
-					if (values[6] < 0) {
-						values[4] += values[6];
-						values[6] = -values[6];
-					}
-					judge[0].getJudge()[5 - values[1]].setDestination(values[2], values[3] * dstw / srcw,
-							dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
-							values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
-							values[12], values[13], values[14], values[15], values[16], values[17], values[18],
-							values[19], values[20]);
+					try {
+						int[] values = parseInt(str);
+						if (values[5] < 0) {
+							values[3] += values[5];
+							values[5] = -values[5];
+						}
+						if (values[6] < 0) {
+							values[4] += values[6];
+							values[6] = -values[6];
+						}
+						judge[0].getJudge()[5 - values[1]].setDestination(values[2], values[3] * dstw / srcw,
+								dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
+								values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
+								values[12], values[13], values[14], values[15], values[16], values[17], values[18],
+								values[19], values[20]);
 
-					if (!detail) {
-						detail = true;
-						TextureRegion[][] images = TextureRegion.split(new Texture("skin/default/judgedetail.png"), 10,
-								20);
+						if (!detail) {
+							detail = true;
+							Texture tex = new Texture("skin/default/judgedetail.png");
 
-						SkinNumber num = new SkinNumber(new TextureRegion[][] { images[1] },
-								new TextureRegion[][] { images[2] }, 0, 0, 4, 0, 525);
-						num.setAlign(values[12]);
-						num.setDestination(0, (values[3] + values[5] / 2) * dstw / srcw,
-								dsth - (values[4] - 5) * dsth / srch, 7 * dstw / srcw, 14 * dsth / srch, 0, 255, 255,
-								255, 255, 0, 0, 0, 0, -1, 46, 0, 0, 241);
-						num.setDestination(500, (values[3] + values[5] / 2) * dstw / srcw,
-								dsth - (values[4] - 5) * dsth / srch, 7 * dstw / srcw, 14 * dsth / srch, 0, 255, 255,
-								255, 255, 0, 0, 0, 0, -1, 46, 0, 0, 241);
-						skin.add(num);
-						SkinNumber num2 = new SkinNumber(new TextureRegion[][] { images[3] },
-								new TextureRegion[][] { images[4] }, 0, 0, 4, 0, 525);
-						num2.setAlign(values[12]);
-						num2.setDestination(0, (values[3] + values[5] / 2) * dstw / srcw,
-								dsth - (values[4] - 5) * dsth / srch, 7 * dstw / srcw, 14 * dsth / srch, 0, 255, 255,
-								255, 255, 0, 0, 0, 0, -1, 46, 0, 0, -241);
-						num2.setDestination(500, (values[3] + values[5] / 2) * dstw / srcw,
-								dsth - (values[4] - 5) * dsth / srch, 7 * dstw / srcw, 14 * dsth / srch, 0, 255, 255,
-								255, 255, 0, 0, 0, 0, -1, 46, 0, 0, -241);
-						skin.add(num2);
+							SkinImage early = new SkinImage(new TextureRegion(tex, 0, 0, 50,20));
+							early.setDestination(0, (values[3] + values[5] / 2) * dstw / srcw,
+									dsth - (values[4] - 5) * dsth / srch, 35 * dstw / srcw, 14 * dsth / srch, 0, 255,
+									255, 255, 255, 0, 0, 0, 0, -1, 46, 1998, 0, 1242);
+							early.setDestination(500, (values[3] + values[5] / 2) * dstw / srcw,
+									dsth - (values[4] - 5) * dsth / srch, 35 * dstw / srcw, 14 * dsth / srch, 0, 255,
+									255, 255, 255, 0, 0, 0, 0, -1, 46, 1998, 0, 1242);
+							skin.add(early);
+							SkinImage late = new SkinImage(new TextureRegion(tex, 50, 0, 50,20));
+							late.setDestination(0, (values[3] + values[5] / 2) * dstw / srcw,
+									dsth - (values[4] - 5) * dsth / srch, 35 * dstw / srcw, 14 * dsth / srch, 0, 255,
+									255, 255, 255, 0, 0, 0, 0, -1, 46, 1998, 0, 1243);
+							late.setDestination(500, (values[3] + values[5] / 2) * dstw / srcw,
+									dsth - (values[4] - 5) * dsth / srch, 35 * dstw / srcw, 14 * dsth / srch, 0, 255,
+									255, 255, 255, 0, 0, 0, 0, -1, 46, 1998, 0, 1243);
+							skin.add(late);
+
+							TextureRegion[][] images = TextureRegion.split(tex, 10, 20);
+							SkinNumber num = new SkinNumber(new TextureRegion[][] { images[1] },
+									new TextureRegion[][] { images[2] }, 0, 0, 4, 0, 525);
+							num.setAlign(values[12]);
+							num.setDestination(0, (values[3] + values[5] / 2) * dstw / srcw,
+									dsth - (values[4] - 5) * dsth / srch, 7 * dstw / srcw, 14 * dsth / srch, 0, 255,
+									255, 255, 255, 0, 0, 0, 0, -1, 46, 1999, 0, 241);
+							num.setDestination(500, (values[3] + values[5] / 2) * dstw / srcw,
+									dsth - (values[4] - 5) * dsth / srch, 7 * dstw / srcw, 14 * dsth / srch, 0, 255,
+									255, 255, 255, 0, 0, 0, 0, -1, 46, 1999, 0, 241);
+							skin.add(num);
+							SkinNumber num2 = new SkinNumber(new TextureRegion[][] { images[3] },
+									new TextureRegion[][] { images[4] }, 0, 0, 4, 0, 525);
+							num2.setAlign(values[12]);
+							num2.setDestination(0, (values[3] + values[5] / 2) * dstw / srcw,
+									dsth - (values[4] - 5) * dsth / srch, 7 * dstw / srcw, 14 * dsth / srch, 0, 255,
+									255, 255, 255, 0, 0, 0, 0, -1, 46, 1999, 0, -241);
+							num2.setDestination(500, (values[3] + values[5] / 2) * dstw / srcw,
+									dsth - (values[4] - 5) * dsth / srch, 7 * dstw / srcw, 14 * dsth / srch, 0, 255,
+									255, 255, 255, 0, 0, 0, 0, -1, 46, 1999, 0, -241);
+							skin.add(num2);
+						}
+
+					} catch (NumberFormatException e) {
+						e.printStackTrace();
 					}
-
 				}
 			}
 		});
@@ -360,46 +377,67 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 			@Override
 			public void execute(String[] str) {
 				if (judge[1] != null && judge[1].getJudge()[5 - Integer.parseInt(str[1])] != null) {
-					int[] values = parseInt(str);
-					if (values[5] < 0) {
-						values[3] += values[5];
-						values[5] = -values[5];
-					}
-					if (values[6] < 0) {
-						values[4] += values[6];
-						values[6] = -values[6];
-					}
-					judge[1].getJudge()[5 - values[1]].setDestination(values[2], values[3] * dstw / srcw,
-							dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
-							values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
-							values[12], values[13], values[14], values[15], values[16], values[17], values[18],
-							values[19], values[20]);
+					try {
+						int[] values = parseInt(str);
+						if (values[5] < 0) {
+							values[3] += values[5];
+							values[5] = -values[5];
+						}
+						if (values[6] < 0) {
+							values[4] += values[6];
+							values[6] = -values[6];
+						}
+						judge[1].getJudge()[5 - values[1]].setDestination(values[2], values[3] * dstw / srcw,
+								dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
+								values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
+								values[12], values[13], values[14], values[15], values[16], values[17], values[18],
+								values[19], values[20]);
+						
+						if (!detail) {
+							detail = true;
+							Texture tex = new Texture("skin/default/judgedetail.png");
 
-					if (!detail) {
-						detail = true;
-						TextureRegion[][] images = TextureRegion.split(new Texture("skin/default/judgedetail.png"), 10,
-								20);
+							SkinImage early = new SkinImage(new TextureRegion(tex, 0, 0, 50,20));
+							early.setDestination(0, (values[3] + values[5] / 2) * dstw / srcw,
+									dsth - (values[4] - 5) * dsth / srch, 35 * dstw / srcw, 14 * dsth / srch, 0, 255,
+									255, 255, 255, 0, 0, 0, 0, -1, 47, 1998, 0, 1262);
+							early.setDestination(500, (values[3] + values[5] / 2) * dstw / srcw,
+									dsth - (values[4] - 5) * dsth / srch, 35 * dstw / srcw, 14 * dsth / srch, 0, 255,
+									255, 255, 255, 0, 0, 0, 0, -1, 47, 1998, 0, 1262);
+							skin.add(early);
+							SkinImage late = new SkinImage(new TextureRegion(tex, 50, 0, 50,20));
+							late.setDestination(0, (values[3] + values[5] / 2) * dstw / srcw,
+									dsth - (values[4] - 5) * dsth / srch, 35 * dstw / srcw, 14 * dsth / srch, 0, 255,
+									255, 255, 255, 0, 0, 0, 0, -1, 47, 1998, 0, 1263);
+							late.setDestination(500, (values[3] + values[5] / 2) * dstw / srcw,
+									dsth - (values[4] - 5) * dsth / srch, 35 * dstw / srcw, 14 * dsth / srch, 0, 255,
+									255, 255, 255, 0, 0, 0, 0, -1, 47, 1998, 0, 1263);
+							skin.add(late);
 
-						SkinNumber num = new SkinNumber(new TextureRegion[][] { images[1] },
-								new TextureRegion[][] { images[2] }, 0, 0, 4, 0, 525);
-						num.setAlign(values[12]);
-						num.setDestination(0, (values[3] + values[5] / 2) * dstw / srcw,
-								dsth - (values[4] - 5) * dsth / srch, 7 * dstw / srcw, 14 * dsth / srch, 0, 255, 255,
-								255, 255, 0, 0, 0, 0, -1, 47, 0, 0, 261);
-						num.setDestination(500, (values[3] + values[5] / 2) * dstw / srcw,
-								dsth - (values[4] - 5) * dsth / srch, 7 * dstw / srcw, 14 * dsth / srch, 0, 255, 255,
-								255, 255, 0, 0, 0, 0, -1, 47, 0, 0, 261);
-						skin.add(num);
-						SkinNumber num2 = new SkinNumber(new TextureRegion[][] { images[3] },
-								new TextureRegion[][] { images[4] }, 0, 0, 4, 0, 525);
-						num2.setAlign(values[12]);
-						num2.setDestination(0, (values[3] + values[5] / 2) * dstw / srcw,
-								dsth - (values[4] - 5) * dsth / srch, 7 * dstw / srcw, 14 * dsth / srch, 0, 255, 255,
-								255, 255, 0, 0, 0, 0, -1, 47, 0, 0, -261);
-						num2.setDestination(500, (values[3] + values[5] / 2) * dstw / srcw,
-								dsth - (values[4] - 5) * dsth / srch, 7 * dstw / srcw, 14 * dsth / srch, 0, 255, 255,
-								255, 255, 0, 0, 0, 0, -1, 47, 0, 0, -261);
-						skin.add(num2);
+							TextureRegion[][] images = TextureRegion.split(tex, 10, 20);
+							SkinNumber num = new SkinNumber(new TextureRegion[][] { images[1] },
+									new TextureRegion[][] { images[2] }, 0, 0, 4, 0, 525);
+							num.setAlign(values[12]);
+							num.setDestination(0, (values[3] + values[5] / 2) * dstw / srcw,
+									dsth - (values[4] - 5) * dsth / srch, 7 * dstw / srcw, 14 * dsth / srch, 0, 255,
+									255, 255, 255, 0, 0, 0, 0, -1, 47, 1999, 0, 261);
+							num.setDestination(500, (values[3] + values[5] / 2) * dstw / srcw,
+									dsth - (values[4] - 5) * dsth / srch, 7 * dstw / srcw, 14 * dsth / srch, 0, 255,
+									255, 255, 255, 0, 0, 0, 0, -1, 47, 1999, 0, 261);
+							skin.add(num);
+							SkinNumber num2 = new SkinNumber(new TextureRegion[][] { images[3] },
+									new TextureRegion[][] { images[4] }, 0, 0, 4, 0, 525);
+							num2.setAlign(values[12]);
+							num2.setDestination(0, (values[3] + values[5] / 2) * dstw / srcw,
+									dsth - (values[4] - 5) * dsth / srch, 7 * dstw / srcw, 14 * dsth / srch, 0, 255,
+									255, 255, 255, 0, 0, 0, 0, -1, 47, 1999, 0, -261);
+							num2.setDestination(500, (values[3] + values[5] / 2) * dstw / srcw,
+									dsth - (values[4] - 5) * dsth / srch, 7 * dstw / srcw, 14 * dsth / srch, 0, 255,
+									255, 255, 255, 0, 0, 0, 0, -1, 47, 1999, 0, -261);
+							skin.add(num2);
+						}
+					} catch(Throwable e) {
+						e.printStackTrace();
 					}
 				}
 			}

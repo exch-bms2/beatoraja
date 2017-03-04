@@ -10,6 +10,7 @@ import bms.player.beatoraja.*;
 import bms.player.beatoraja.Config.SkinConfig;
 import bms.player.beatoraja.config.KeyConfiguration;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
+import bms.player.beatoraja.play.TargetProperty;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.lr2.*;
 import bms.player.beatoraja.song.SongData;
@@ -442,6 +443,41 @@ public class MusicSelector extends MainState {
 		boolean[] cursor = input.getCursorState();
 		long[] cursortime = input.getCursorTime();
 
+		// song bar scroll on mouse wheel
+		int mov = -input.getScroll();
+		input.resetScroll();
+		// song bar scroll
+		if (isPressed(keystate, keytime, KEY_UP, false) || cursor[1]) {
+			long l = System.currentTimeMillis();
+			if (duration == 0) {
+				mov = 1;
+				duration = l + durationlow;
+				angle = durationlow;
+			}
+			if (l > duration) {
+				duration = l + durationhigh;
+				mov = 1;
+				angle = durationhigh;
+			}
+		} else if (isPressed(keystate, keytime, KEY_DOWN, false) || cursor[0]) {
+			long l = System.currentTimeMillis();
+			if (duration == 0) {
+				mov = -1;
+				duration = l + durationlow;
+				angle = -durationlow;
+			}
+			if (l > duration) {
+				duration = l + durationhigh;
+				mov = -1;
+				angle = -durationhigh;
+			}
+		} else {
+			long l = System.currentTimeMillis();
+			if (l > duration) {
+				duration = 0;
+			}
+		}
+
 		final int prevpanelstate = panelstate;
 		panelstate = 0;
 
@@ -467,6 +503,22 @@ public class MusicSelector extends MainState {
 			if (keystate[4] && keytime[4] != 0) {
 				keytime[4] = 0;
 				config.setFixhispeed(config.getFixhispeed() + 1 < 5 ? config.getFixhispeed() + 1 : 0);
+			}
+
+			TargetProperty[] targets = TargetProperty.getAllTargetProperties(getMainController());
+			while(mov > 0) {
+				config.setTarget((config.getTarget() + 1) % targets.length);
+				if (move != null) {
+					getMainController().getAudioProcessor().play(move, false);
+				}
+				mov--;
+			}
+			while(mov < 0) {
+				config.setTarget((config.getTarget() + targets.length - 1) % targets.length);
+				if (move != null) {
+					getMainController().getAudioProcessor().play(move, false);
+				}
+				mov++;
 			}
 		} else if (input.isSelectPressed()) {
 			// show assist option
@@ -579,6 +631,21 @@ public class MusicSelector extends MainState {
 				cursortime[2] = 0;
 				close();
 			}
+
+			while(mov > 0) {
+				bar.move(true);
+				if (move != null) {
+					getMainController().getAudioProcessor().play(move, false);
+				}
+				mov--;
+			}
+			while(mov < 0) {
+				bar.move(false);
+				if (move != null) {
+					getMainController().getAudioProcessor().play(move, false);
+				}
+				mov++;
+			}
 		}
 
 		if (prevpanelstate != panelstate) {
@@ -590,63 +657,6 @@ public class MusicSelector extends MainState {
 				getTimer()[TIMER_PANEL1_ON + panelstate - 1] = nowtime;
 				getTimer()[TIMER_PANEL1_OFF + panelstate - 1] = Long.MIN_VALUE;
 			}
-		}
-
-		// song bar scroll
-		if (panelstate == 0 && (isPressed(keystate, keytime, KEY_UP, false)) || cursor[1]) {
-			long l = System.currentTimeMillis();
-			if (duration == 0) {
-				bar.move(true);
-				if (move != null) {
-					getMainController().getAudioProcessor().play(move, false);
-				}
-				duration = l + durationlow;
-				angle = durationlow;
-			}
-			if (l > duration) {
-				duration = l + durationhigh;
-				bar.move(true);
-				if (move != null) {
-					getMainController().getAudioProcessor().play(move, false);
-				}
-				angle = durationhigh;
-			}
-		} else if (panelstate == 0 && (isPressed(keystate, keytime, KEY_DOWN, false)) || cursor[0]) {
-			long l = System.currentTimeMillis();
-			if (duration == 0) {
-				bar.move(false);
-				if (move != null) {
-					getMainController().getAudioProcessor().play(move, false);
-				}
-				duration = l + durationlow;
-				angle = -durationlow;
-			}
-			if (l > duration) {
-				duration = l + durationhigh;
-				bar.move(false);
-				if (move != null) {
-					getMainController().getAudioProcessor().play(move, false);
-				}
-				angle = -durationhigh;
-			}
-		} else {
-			long l = System.currentTimeMillis();
-			if (l > duration) {
-				duration = 0;
-			}
-		}
-		// song bar scroll on mouse wheel
-		if (input.getScroll() > 0) {
-			for (int i = 0; i < input.getScroll(); i++) {
-				bar.move(false);
-			}
-			input.resetScroll();
-		}
-		if (input.getScroll() < 0) {
-			for (int i = 0; i < -input.getScroll(); i++) {
-				bar.move(true);
-			}
-			input.resetScroll();
 		}
 
 		if (bar.getSelected() != current || selectedreplay == -1) {
@@ -1179,7 +1189,7 @@ public class MusicSelector extends MainState {
 		final MainController main = getMainController();
 		final SpriteBatch sprite = main.getSpriteBatch();
 		sprite.end();
-		bar.render(sprite, (MusicSelectSkin) getSkin(), baro, duration, angle, time);
+		bar.render(sprite, (MusicSelectSkin) getSkin(), baro, panelstate == 0 ? duration : 0, panelstate == 0 ? angle : 0, time);
 		sprite.begin();
 	}
 
