@@ -652,6 +652,11 @@ class SkinConfigurationView {
 					// System.out.println(path.toString() + " : " +
 					// header.getName()
 					// + " - " + header.getMode());
+					if(header.getType() == SkinHeader.TYPE_LR2SKIN && header.getMode() <= 4) {
+						List<CustomOption> l = new ArrayList(Arrays.asList(header.getCustomOptions()));
+						l.add(new CustomOption("Judge Detail", new int[]{1997,1998,1999}, new String[]{"Off", "EARLY/LATE", "+-ms"}));
+						header.setCustomOptions(l.toArray(new CustomOption[l.size()]));
+					}
 					lr2skinheader.add(header);
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -667,10 +672,12 @@ class SkinConfigurationView {
 		}
 		VBox main = new VBox();
 		optionbox.clear();
-		for (CustomOption option : header.getCustomOptions()) {
+		List<CustomOption> options = new ArrayList<CustomOption>(Arrays.asList(header.getCustomOptions()));
+		for (CustomOption option : options) {
 			HBox hbox = new HBox();
 			ComboBox<String> combo = new ComboBox<String>();
 			combo.getItems().setAll(option.contents);
+			combo.getSelectionModel().select(0);
 			if (property != null && property.get(option.name) != null) {
 				int i = (int) property.get(option.name);
 				for(int index = 0;index < option.option.length;index++) {
@@ -679,8 +686,6 @@ class SkinConfigurationView {
 						break;
 					}
 				}
-			} else {
-				combo.getSelectionModel().select(0);
 			}
 			hbox.getChildren().addAll(new Label(option.name), combo);
 			optionbox.put(option, combo);
