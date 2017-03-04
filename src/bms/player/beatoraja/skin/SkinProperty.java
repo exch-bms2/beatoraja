@@ -301,10 +301,12 @@ public class SkinProperty {
 	public static final int OPTION_GAUGE_HARD = 43;
 	public static final int OPTION_GAUGE_GROOVE_2P = 44;
 	public static final int OPTION_GAUGE_HARD_2P = 45;
+	public static final int OPTION_GAUGE_EX = 1046;
+	public static final int OPTION_GAUGE_EX_2P = 1047;
 
 	public static final int OPTION_OFFLINE = 50;
 	public static final int OPTION_ONLINE = 51;
-	
+
 	public static final int OPTION_DISABLE_SAVE_SCORE = 60;
 	public static final int OPTION_ENABLE_SAVE_SCORE = 61;
 	public static final int OPTION_NO_SAVE_CLEAR = 62;

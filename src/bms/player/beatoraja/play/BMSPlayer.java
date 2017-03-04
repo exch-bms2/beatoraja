@@ -25,7 +25,7 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
 
 /**
  * BMSプレイヤー本体
- * 
+ *
  * @author exch
  */
 public class BMSPlayer extends MainState {
@@ -880,7 +880,7 @@ public class BMSPlayer extends MainState {
 
 	/**
 	 * キー入力処理用スレッド
-	 * 
+	 *
 	 * @author exch
 	 */
 	class KeyInputThread extends Thread {
@@ -951,7 +951,7 @@ public class BMSPlayer extends MainState {
 
 	/**
 	 * BGレーン再生用スレッド
-	 * 
+	 *
 	 * @author exch
 	 */
 	class AutoplayThread extends Thread {
@@ -1134,6 +1134,9 @@ public class BMSPlayer extends MainState {
 			return gauge instanceof HardGrooveGauge || gauge instanceof ExhardGrooveGauge
 					|| gauge instanceof HazardGrooveGauge || gauge instanceof GradeGrooveGauge
 					|| gauge instanceof ExgradeGrooveGauge || gauge instanceof ExhardGradeGrooveGauge;
+		case OPTION_GAUGE_EX:
+			return gauge instanceof AssistEasyGrooveGauge || gauge instanceof EasyGrooveGauge || gauge instanceof ExhardGrooveGauge
+    		|| gauge instanceof ExgradeGrooveGauge || gauge instanceof ExhardGradeGrooveGauge || gauge instanceof HazardGrooveGauge;
 		case OPTION_F:
 			return true;
 		case OPTION_E:
