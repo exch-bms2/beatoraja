@@ -70,11 +70,11 @@ public class SkinNoteDistributionGraph extends SkinObject {
 	}
 
 	public void draw(SpriteBatch sprite, long time, MainState state, Rectangle r, int starttime, int endtime) {
-		final BMSModel model = state.getMainController().getPlayerResource().getSongdata()!= null ?
-				state.getMainController().getPlayerResource().getSongdata().getBMSModel() : null;
+		final BMSModel model = state.getMainController().getPlayerResource().getSongdata() != null
+				? state.getMainController().getPlayerResource().getSongdata().getBMSModel() : null;
 		final boolean reload = this.model != model;
 		if (reload) {
-			if(model == null) {
+			if (model == null) {
 				this.model = model;
 				data = new int[0][graphcolor.length];
 			} else {
@@ -86,7 +86,7 @@ public class SkinNoteDistributionGraph extends SkinObject {
 				for (TimeLine tl : model.getAllTimeLines()) {
 					if (tl.getTime() / 1000 != pos) {
 						if (max < count) {
-							max = (count / 10) * 10 + 10;
+							max = Math.min((count / 10) * 10 + 10, 100);
 						}
 						pos = tl.getTime() / 1000;
 						count = 0;
@@ -98,49 +98,51 @@ public class SkinNoteDistributionGraph extends SkinObject {
 							int st = n.getState();
 							int t = n.getTime();
 							switch (type) {
-								case TYPE_NORMAL:
-									if (n instanceof NormalNote) {
-										data[tl.getTime() / 1000][model.getUseKeys() != 9 && (i == 7 || i == 16) ? 2 : 0]++;
-									}
-									if (n instanceof LongNote) {
-										data[tl.getTime() / 1000][model.getUseKeys() != 9 && (i == 7 || i == 16) ? 3 : 1]++;
-									}
-									if (n instanceof MineNote) {
-										data[tl.getTime() / 1000][4]++;
-									}
-									count++;
+							case TYPE_NORMAL:
+								if (n instanceof NormalNote) {
+									data[tl.getTime() / 1000][model.getUseKeys() != 9 && (i == 7 || i == 16) ? 2 : 0]++;
+								}
+								if (n instanceof LongNote) {
+									data[tl.getTime() / 1000][model.getUseKeys() != 9 && (i == 7 || i == 16) ? 3 : 1]++;
+								}
+								if (n instanceof MineNote) {
+									data[tl.getTime() / 1000][4]++;
+								}
+								count++;
+								break;
+							case TYPE_JUDGE:
+								if (n instanceof MineNote) {
 									break;
-								case TYPE_JUDGE:
-									if (n instanceof MineNote) {
-										break;
-									}
-									if (n instanceof LongNote && ((LongNote) n).getEndnote().getSection() == tl.getSection()) {
-										st = ((LongNote) n).getEndnote().getState();
-										// if(state == 0) {
-										// System.out.println("終端未処理:"+tl.getTime());
-										// }
-									}
+								}
+								if (n instanceof LongNote
+										&& ((LongNote) n).getEndnote().getSection() == tl.getSection()) {
+									st = ((LongNote) n).getEndnote().getState();
+									// if(state == 0) {
+									// System.out.println("終端未処理:"+tl.getTime());
+									// }
+								}
+								data[tl.getTime() / 1000][st]++;
+								count++;
+								break;
+							case TYPE_EARLYLATE:
+								if (n instanceof MineNote) {
+									break;
+								}
+								if (n instanceof LongNote
+										&& ((LongNote) n).getEndnote().getSection() == tl.getSection()) {
+									st = ((LongNote) n).getEndnote().getState();
+									t = ((LongNote) n).getEndnote().getTime();
+									// if(state == 0) {
+									// System.out.println("終端未処理:"+tl.getTime());
+									// }
+								}
+								if (st <= 1) {
 									data[tl.getTime() / 1000][st]++;
-									count++;
-									break;
-								case TYPE_EARLYLATE:
-									if (n instanceof MineNote) {
-										break;
-									}
-									if (n instanceof LongNote && ((LongNote) n).getEndnote().getSection() == tl.getSection()) {
-										st = ((LongNote) n).getEndnote().getState();
-										t = ((LongNote) n).getEndnote().getTime();
-										// if(state == 0) {
-										// System.out.println("終端未処理:"+tl.getTime());
-										// }
-									}
-									if (st <= 1) {
-										data[tl.getTime() / 1000][st]++;
-									} else {
-										data[tl.getTime() / 1000][t >= 0 ? st : st + 4]++;
-									}
-									count++;
-									break;
+								} else {
+									data[tl.getTime() / 1000][t >= 0 ? st : st + 4]++;
+								}
+								count++;
+								break;
 
 							}
 						}
@@ -165,40 +167,37 @@ public class SkinNoteDistributionGraph extends SkinObject {
 		}
 
 		if (shapetex == null) {
-			Pixmap shape = new Pixmap((int) r.width, (int) r.height, Pixmap.Format.RGBA8888);
+			Pixmap shape = new Pixmap(data.length * 5, max * 5, Pixmap.Format.RGBA8888);
 			shape.setColor(0, 0, 0, 0.8f);
 			shape.fill();
 
 			for (int i = 10; i < max; i += 10) {
-				shape.setColor(Color.valueOf("444444"));
-				shape.drawLine(0, (int) (r.height * i / max), (int) r.width, (int) (r.height * i / max));
+				shape.setColor(0.007f * i, 0.007f * i, 0, 1.0f);
+				shape.fillRectangle(0, i * 5, data.length * 5, 50);
 			}
 
-			final int dx = (int) (r.width / data.length) - 1;
 			for (int i = 0; i < data.length; i++) {
-				final int x = (int) (i * r.width / data.length);
 				// BPM変化地点描画
 				// x軸補助線描画
 				if (i % 60 == 0) {
 					shape.setColor(Color.valueOf("444444"));
-					shape.drawLine(x, 0, x, (int) r.height);
+					shape.drawLine(i * 5, 0, i * 5, max * 5);
 				} else if (i % 10 == 0) {
 					shape.setColor(Color.valueOf("222222"));
-					shape.drawLine(x, 0, x, (int) r.height);
+					shape.drawLine(i * 5, 0, i * 5, max * 5);
 				}
 			}
 			backtex = new Texture(shape);
 			shape.dispose();
 
-			shape = new Pixmap((int) r.width, (int) r.height, Pixmap.Format.RGBA8888);
+			shape = new Pixmap(data.length * 5, max * 5, Pixmap.Format.RGBA8888);
 			for (int i = 0; i < data.length; i++) {
-				final int x = (int) (i * r.width / data.length);
 				int[] n = data[i];
-				for (int j = 0, k = n[0], index = 0; index < graphcolor.length;) {
+				for (int j = 0, k = n[0], index = 0; j < max && index < graphcolor.length;) {
 					if (k > 0) {
 						k--;
 						shape.setColor(graphcolor[index]);
-						shape.fillRectangle(x, (int) (j * (r.height / max)), dx, (int) (r.height / max) - 1);
+						shape.fillRectangle(i * 5, j * 5, 4, 4);
 						j++;
 					} else {
 						index++;
@@ -215,8 +214,7 @@ public class SkinNoteDistributionGraph extends SkinObject {
 
 		sprite.draw(backtex, r.x, r.y + r.height, r.width, -r.height);
 		final float render = time >= delay ? 1.0f : (float) time / delay;
-		sprite.draw(new TextureRegion(shapetex, 0, 0, (int) (r.width * render), (int) r.height), r.x, r.y + r.height,
-				r.width * render, -r.height);
+		sprite.draw(shapetex, r.x, r.y + r.height, r.width * render, -r.height);
 
 		if (starttime != -1) {
 			int dx = (int) (starttime * r.width / (data.length * 1000));
