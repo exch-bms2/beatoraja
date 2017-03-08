@@ -17,7 +17,7 @@ import com.badlogic.gdx.math.Rectangle;
 public class SkinNoteDistributionGraph extends SkinObject {
 
 	private Texture backtex;
-	private Texture shapetex;
+	private TextureRegion shapetex;
 
 	private TextureRegion startcursor;
 	private TextureRegion endcursor;
@@ -26,7 +26,7 @@ public class SkinNoteDistributionGraph extends SkinObject {
 	private int[][] data = new int[0][0];
 
 	private static final Color[][] JGRAPH = {
-			{ Color.valueOf("cccccc"), Color.valueOf("4444ff"), Color.valueOf("ff4444"), Color.valueOf("44ff44"),
+			{ Color.valueOf("44ff44"), Color.valueOf("ff4444"), Color.valueOf("4444ff"), Color.valueOf("cccccc"),
 					Color.valueOf("880000") },
 			{ Color.valueOf("555555"), Color.valueOf("0088ff"), Color.valueOf("00ff88"), Color.valueOf("ffff00"),
 					Color.valueOf("ff8800"), Color.valueOf("ff0000") },
@@ -100,10 +100,10 @@ public class SkinNoteDistributionGraph extends SkinObject {
 							switch (type) {
 							case TYPE_NORMAL:
 								if (n instanceof NormalNote) {
-									data[tl.getTime() / 1000][model.getUseKeys() != 9 && (i == 7 || i == 16) ? 2 : 0]++;
+									data[tl.getTime() / 1000][model.getUseKeys() != 9 && (i == 7 || i == 16) ? 1 : 3]++;
 								}
 								if (n instanceof LongNote) {
-									data[tl.getTime() / 1000][model.getUseKeys() != 9 && (i == 7 || i == 16) ? 3 : 1]++;
+									data[tl.getTime() / 1000][model.getUseKeys() != 9 && (i == 7 || i == 16) ? 0 : 2]++;
 								}
 								if (n instanceof MineNote) {
 									data[tl.getTime() / 1000][4]++;
@@ -155,15 +155,10 @@ public class SkinNoteDistributionGraph extends SkinObject {
 			return;
 		}
 
-		if (shapetex != null) {
-			if (shapetex.getWidth() != (int) r.getWidth() || shapetex.getHeight() != (int) r.getHeight() || reload) {
-				shapetex.dispose();
-				backtex.dispose();
-				shapetex = null;
-			} else {
-				// shape.setColor(Color.BLACK);
-				// shape.fill();
-			}
+		if (shapetex != null && reload) {
+			shapetex.getTexture().dispose();
+			backtex.dispose();
+			shapetex = null;
 		}
 
 		if (shapetex == null) {
@@ -177,7 +172,6 @@ public class SkinNoteDistributionGraph extends SkinObject {
 			}
 
 			for (int i = 0; i < data.length; i++) {
-				// BPM変化地点描画
 				// x軸補助線描画
 				if (i % 60 == 0) {
 					shape.setColor(Color.valueOf("444444"));
@@ -208,12 +202,13 @@ public class SkinNoteDistributionGraph extends SkinObject {
 					}
 				}
 			}
-			shapetex = new Texture(shape);
+			shapetex = new TextureRegion(new Texture(shape));
 			shape.dispose();
 		}
 
 		sprite.draw(backtex, r.x, r.y + r.height, r.width, -r.height);
 		final float render = time >= delay ? 1.0f : (float) time / delay;
+		shapetex.setRegionWidth((int) (shapetex.getTexture().getWidth() * render));
 		sprite.draw(shapetex, r.x, r.y + r.height, r.width * render, -r.height);
 
 		if (starttime != -1) {
@@ -231,7 +226,7 @@ public class SkinNoteDistributionGraph extends SkinObject {
 	public void dispose() {
 		if (shapetex != null) {
 			backtex.dispose();
-			shapetex.dispose();
+			shapetex.getTexture().dispose();
 			startcursor.getTexture().dispose();
 			endcursor.getTexture().dispose();
 			shapetex = null;
