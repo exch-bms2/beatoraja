@@ -654,6 +654,9 @@ class SkinConfigurationView {
 					// + " - " + header.getMode());
 					if(header.getType() == SkinHeader.TYPE_LR2SKIN && header.getMode() <= 4) {
 						List<CustomOption> l = new ArrayList(Arrays.asList(header.getCustomOptions()));
+						l.add(new CustomOption("BGA Size", new int[]{30,31}, new String[]{"Normal", "Extend"}));
+						l.add(new CustomOption("Ghost", new int[]{34,35,36,37}, new String[]{"Off", "Type A", "Type B", "Type C"}));
+						l.add(new CustomOption("Score Graph", new int[]{38,39}, new String[]{"Off", "On"}));
 						l.add(new CustomOption("Judge Detail", new int[]{1997,1998,1999}, new String[]{"Off", "EARLY/LATE", "+-ms"}));
 						header.setCustomOptions(l.toArray(new CustomOption[l.size()]));
 					}
