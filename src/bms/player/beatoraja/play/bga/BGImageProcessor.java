@@ -42,8 +42,8 @@ public class BGImageProcessor {
 		int count = 0;
 		for (TimeLine tl : timelines) {
 			int bga = tl.getBGA();
-			if (bga >= 0 && bgacache[bga % bgacache.length] == null) {
-				int bgasize = bgamap[bga].getHeight() > bgamap[bga].getWidth() ? 
+			if (bga >= 0 && bgacache[bga % bgacache.length] == null && bgamap[bga] != null) {
+				int bgasize = bgamap[bga].getHeight() > bgamap[bga].getWidth() ?
 						bgamap[bga].getHeight() : bgamap[bga].getWidth();
 				Pixmap pix;
 				if ( bgasize <=256 ){
@@ -54,15 +54,13 @@ public class BGImageProcessor {
 				}
 				pix.drawPixmap(bgamap[bga], 0, 0, bgamap[bga].getWidth(), bgamap[bga].getHeight(),
 						0, 0, bgamap[bga].getWidth(), bgamap[bga].getHeight());
-				if (pix != null) {
-					bgacache[bga % bgacache.length] = new Texture(pix);
-					bgacacheid[bga % bgacache.length] = bga;
-					count++;
-				}
+				bgacache[bga % bgacache.length] = new Texture(pix);
+				bgacacheid[bga % bgacache.length] = bga;
+				count++;
 			}
 
 			bga = tl.getLayer();
-			if (bga >= 0 && bgacache[bga % bgacache.length] == null) {
+			if (bga >= 0 && bgacache[bga % bgacache.length] == null && bgamap[bga] != null) {
 				int bgasize = bgamap[bga].getHeight() > bgamap[bga].getWidth() ?
 						bgamap[bga].getHeight() : bgamap[bga].getWidth();
 				Pixmap pix;
@@ -73,11 +71,9 @@ public class BGImageProcessor {
 				}
 				pix.drawPixmap(bgamap[bga], 0, 0, bgamap[bga].getWidth(), bgamap[bga].getHeight(),
 						0, 0,bgamap[bga].getWidth(), bgamap[bga].getHeight());
-				if (pix != null) {
-					bgacache[bga % bgacache.length] = new Texture(pix);
-					bgacacheid[bga % bgacache.length] = bga;
-					count++;
-				}
+				bgacache[bga % bgacache.length] = new Texture(pix);
+				bgacacheid[bga % bgacache.length] = bga;
+				count++;
 			}
 		}
 		Logger.getGlobal().info(
