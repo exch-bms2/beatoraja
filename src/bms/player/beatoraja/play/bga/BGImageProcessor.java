@@ -43,35 +43,14 @@ public class BGImageProcessor {
 		for (TimeLine tl : timelines) {
 			int bga = tl.getBGA();
 			if (bga >= 0 && bgacache[bga % bgacache.length] == null && bgamap[bga] != null) {
-				int bgasize = bgamap[bga].getHeight() > bgamap[bga].getWidth() ?
-						bgamap[bga].getHeight() : bgamap[bga].getWidth();
-				Pixmap pix;
-				if ( bgasize <=256 ){
-					pix = new Pixmap(bgasize, bgasize, bgamap[bga].getFormat());
-				} else {
-					pix = new Pixmap(bgamap[bga].getWidth(), bgamap[bga].getHeight(),
-							bgamap[bga].getFormat());
-				}
-				pix.drawPixmap(bgamap[bga], 0, 0, bgamap[bga].getWidth(), bgamap[bga].getHeight(),
-						0, 0, bgamap[bga].getWidth(), bgamap[bga].getHeight());
-				bgacache[bga % bgacache.length] = new Texture(pix);
+				bgacache[bga % bgacache.length] = new Texture(createPixmap(bga));
 				bgacacheid[bga % bgacache.length] = bga;
 				count++;
 			}
 
 			bga = tl.getLayer();
 			if (bga >= 0 && bgacache[bga % bgacache.length] == null && bgamap[bga] != null) {
-				int bgasize = bgamap[bga].getHeight() > bgamap[bga].getWidth() ?
-						bgamap[bga].getHeight() : bgamap[bga].getWidth();
-				Pixmap pix;
-				if ( bgasize <=256 ){
-					pix = new Pixmap(bgasize, bgasize, bgamap[bga].getFormat());
-				} else {
-					pix = new Pixmap(bgamap[bga].getWidth(), bgamap[bga].getHeight(), bgamap[bga].getFormat());
-				}
-				pix.drawPixmap(bgamap[bga], 0, 0, bgamap[bga].getWidth(), bgamap[bga].getHeight(),
-						0, 0,bgamap[bga].getWidth(), bgamap[bga].getHeight());
-				bgacache[bga % bgacache.length] = new Texture(pix);
+				bgacache[bga % bgacache.length] = new Texture(createPixmap(bga));
 				bgacacheid[bga % bgacache.length] = bga;
 				count++;
 			}
@@ -90,6 +69,19 @@ public class BGImageProcessor {
 		if (bgacache[cid] != null) {
 			bgacache[cid].dispose();
 		}
+		if (bgamap[id] != null){
+			bgacache[cid] = new Texture(createPixmap(id));
+			bgacacheid[cid] = id;
+			return bgacache[cid];
+		}
+		return null;
+	}
+
+
+	/**
+	 * Create a pixmap that is compatible with legacy BMS
+	 */
+	private Pixmap createPixmap(int id){
 		int bgasize = bgamap[id].getHeight() > bgamap[id].getWidth() ?
 				bgamap[id].getHeight() : bgamap[id].getWidth();
 		Pixmap pix;
@@ -100,9 +92,7 @@ public class BGImageProcessor {
 		}
 		pix.drawPixmap(bgamap[id], 0, 0, bgamap[id].getWidth(), bgamap[id].getHeight(),
 				0, 0, bgamap[id].getWidth(), bgamap[id].getHeight());
-		bgacache[cid] = new Texture(pix);
-		bgacacheid[cid] = id;
-		return bgacache[cid];
+		return pix;
 	}
 
 	/**
