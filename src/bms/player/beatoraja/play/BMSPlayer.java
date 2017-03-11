@@ -1174,7 +1174,11 @@ public class BMSPlayer extends MainState {
 			return autoplay == 1;
 		case OPTION_AUTOPLAYOFF:
 			return autoplay != 1;
-		case OPTION_BGAON:
+			case OPTION_REPLAY_OFF:
+				return autoplay == 0 || autoplay == 2;
+			case OPTION_REPLAY_PLAYING:
+				return autoplay >= 3;
+			case OPTION_BGAON:
 			return getMainController().getPlayerResource().getConfig().getBga() == Config.BGA_ON
 					|| (getMainController().getPlayerResource().getConfig().getBga() == Config.BGA_AUTO
 							&& (autoplay == 1 || autoplay >= 3));

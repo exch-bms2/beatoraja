@@ -116,12 +116,6 @@ public abstract class MainState {
 			return model != null && model.getBanner().length() > 0;
 		case OPTION_NO_BANNER:
 			return model != null && model.getBanner().length() == 0;
-		case OPTION_BGAEXTEND:
-			return true;
-		case OPTION_SCOREGRAPHOFF:
-			return false;
-		case OPTION_SCOREGRAPHON:
-			return true;
 		case OPTION_DIFFICULTY0:
 			return model != null && (model.getDifficulty() <= 0 || model.getDifficulty() > 5);
 		case OPTION_DIFFICULTY1:
@@ -174,9 +168,10 @@ public abstract class MainState {
 			return model != null && model.getMinbpm() == model.getMaxbpm();
 		case OPTION_BPMCHANGE:
 			return model != null && model.getMinbpm() < model.getMaxbpm();
-		case OPTION_GHOST_OFF:
 		case OPTION_OFFLINE:
-			return true;
+			return getMainController().getIRConnection() == null;
+			case OPTION_ONLINE:
+				return getMainController().getIRConnection() != null;
 
 		}
 		return false;

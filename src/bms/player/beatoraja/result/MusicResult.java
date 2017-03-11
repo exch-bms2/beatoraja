@@ -500,7 +500,11 @@ public class MusicResult extends MainState {
 				count += getJudgeCount(i, false);
 			}
 			return count;
-		case NUMBER_AVERAGE_DURATION:
+			case NUMBER_SCORE_RATE:
+				return rate / 100;
+			case NUMBER_SCORE_RATE_AFTERDOT:
+				return (rate / 10) % 10;
+			case NUMBER_AVERAGE_DURATION:
 			return (int) avgduration;
 		case NUMBER_AVERAGE_DURATION_AFTERDOT:
 			return ((int) (avgduration * 100)) % 100;

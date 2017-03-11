@@ -1,7 +1,9 @@
 package bms.player.beatoraja.skin;
 
 import bms.player.beatoraja.MainState;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
@@ -45,6 +47,8 @@ public abstract class SkinObject implements Disposable {
 	 */
 	private int dstcenter;
 
+	private int acc;
+
 	private int clickevent = -1;
 
 	private int[] dstop = new int[0];
@@ -85,6 +89,9 @@ public abstract class SkinObject implements Disposable {
 			if (!(fixa == obj.angle)) {
 				fixa = Integer.MIN_VALUE;
 			}
+		}
+		if (this.acc == 0) {
+			this.acc = acc;
 		}
 		if (dstblend == 0) {
 			dstblend = blend;
@@ -184,7 +191,12 @@ public abstract class SkinObject implements Disposable {
 				if (obj1.time <= time && obj2.time >= time) {
 					final Rectangle r1 = obj1.region;
 					final Rectangle r2 = obj2.region;
-					final float rate = (float) (time - obj1.time) / (obj2.time - obj1.time);
+					float rate = (float) (time - obj1.time) / (obj2.time - obj1.time);
+					if(acc == 1) {
+						rate = rate * rate;
+					} else if(acc == 2) {
+						rate = 1 - (rate - 1) * (rate - 1);
+					}
 					r.x = r1.x + (r2.x - r1.x) * rate;
 					r.y = r1.y + (r2.y - r1.y) * rate;
 					r.width = r1.width + (r2.width - r1.width) * rate;
@@ -325,7 +337,13 @@ public abstract class SkinObject implements Disposable {
 			sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
 			break;
 			case 3:
-				sprite.setBlendFunction(GL11.GL_ONE_MINUS_DST_ALPHA, GL11.GL_ZERO);
+				// TODO 減算描画は難しいか？
+				Gdx.gl.glBlendEquation(GL20.GL_FUNC_SUBTRACT);
+				sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
+				Gdx.gl.glBlendEquation(GL20.GL_FUNC_ADD);
+				break;
+			case 4:
+				sprite.setBlendFunction(GL11.GL_ZERO, GL11.GL_SRC_COLOR);
 				break;
 			case 9:
 			sprite.setBlendFunction(GL11.GL_ONE_MINUS_DST_COLOR, GL11.GL_ZERO);

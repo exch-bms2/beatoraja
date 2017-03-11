@@ -318,6 +318,10 @@ public class SkinProperty {
 	public static final int OPTION_NOW_LOADING = 80;
 	public static final int OPTION_LOADED = 81;
 
+	public static final int OPTION_REPLAY_OFF = 82;
+	public static final int OPTION_REPLAY_RECORDING = 83;
+	public static final int OPTION_REPLAY_PLAYING = 84;
+
 	public static final int OPTION_RESULT_CLEAR = 90;
 	public static final int OPTION_RESULT_FAIL = 91;
 

@@ -305,6 +305,11 @@ public class GradeResult extends MainState {
 					count += getJudgeCount(i, false);
 				}
 				return count;
+			case NUMBER_SCORE_RATE:
+				return rate / 100;
+			case NUMBER_SCORE_RATE_AFTERDOT:
+				return (rate / 10) % 10;
+
 		}
 		return super.getNumberValue(id);
 	}
