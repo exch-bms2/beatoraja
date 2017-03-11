@@ -167,6 +167,13 @@ public class Config {
 	public static final int BGA_ON = 0;
 	public static final int BGA_AUTO = 1;
 	public static final int BGA_OFF = 2;
+	/**
+	 * BGA拡大
+	 */
+	private int bgaExpand = BGAEXPAND_FULL;
+	public static final int BGAEXPAND_FULL = 0;
+	public static final int BGAEXPAND_KEEP_ASPECT_RATIO = 1;
+	public static final int BGAEXPAND_OFF = 2;
 
 	private int movieplayer = MOVIEPLAYER_FFMPEG;
 	public static final int MOVIEPLAYER_FFMPEG = 0;
@@ -608,6 +615,14 @@ public class Config {
 
 	public void setTarget(int target) {
 		this.target = target;
+	}
+
+	public int getBgaExpand() {
+		return bgaExpand;
+	}
+
+	public void setBgaExpand(int bgaExpand) {
+		this.bgaExpand = bgaExpand;
 	}
 
 	public static class SkinConfig {

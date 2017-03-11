@@ -298,6 +298,12 @@
                                     <ComboBox fx:id="bgaop" prefWidth="150.0" />
                                  </children>
                               </HBox>
+                              <HBox alignment="CENTER_LEFT" prefHeight="30.0" prefWidth="552.0">
+                                 <children>
+                                    <Label text="%BGA_EXPAND" />
+                                    <ComboBox fx:id="bgaexpand" prefWidth="150.0" />
+                                 </children>
+                              </HBox>
                               <CheckBox fx:id="folderlamp" mnemonicParsing="false" prefHeight="25.0" prefWidth="133.0" text="%FOLDER_LAMP" />
                                <HBox prefHeight="37.0" prefWidth="723.0">
                                    <children>

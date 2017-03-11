@@ -8,7 +8,8 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
@@ -16,8 +17,8 @@ import javax.imageio.ImageIO;
 import bms.model.BMSModel;
 import bms.model.TimeLine;
 import bms.player.beatoraja.Config;
-
 import bms.player.beatoraja.play.BMSPlayer;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandleStream;
 import com.badlogic.gdx.graphics.Color;
@@ -31,7 +32,7 @@ import com.badlogic.gdx.math.Rectangle;
 
 /**
  * BGAのリソース管理、描画用クラス
- * 
+ *
  * @author exch
  */
 public class BGAProcessor {
@@ -146,14 +147,14 @@ public class BGAProcessor {
 		if (stage != null && stage.length() > 0) {
 			Path p = dpath.resolve(stage);
 			if(Files.exists(p)) {
-				stagefilep = this.loadPicture(p);				
+				stagefilep = this.loadPicture(p);
 			}
 		}
 		String back = model.getBackbmp();
 		if (back != null && back.length() > 0) {
 			Path p = dpath.resolve(back);
 			if(Files.exists(p)) {
-				backbmpp = this.loadPicture(p);				
+				backbmpp = this.loadPicture(p);
 			}
 		}
 
@@ -369,7 +370,7 @@ public class BGAProcessor {
 			// draw backbmp
 			sprite.begin();
 			if (getBackbmpData() != null) {
-				sprite.draw(getBackbmpData(), r.x, r.y, r.width, r.height);
+				drawBGAFixRatio(sprite, r, getBackbmpData().getTexture());
 			}
 			sprite.end();
 		} else if (misslayer != null && misslayertime != 0 && time >= misslayertime && time < misslayertime + 500) {
@@ -378,7 +379,7 @@ public class BGAProcessor {
 			if (miss != null) {
 				miss.setFilter(TextureFilter.Linear, TextureFilter.Linear);
 				sprite.begin();
-				sprite.draw(miss, r.x, r.y, r.width, r.height);
+				drawBGAFixRatio(sprite, r, miss);
 				sprite.end();
 			}
 		} else {
@@ -390,10 +391,10 @@ public class BGAProcessor {
 				if (mpgmap.containsKey(playingbgaid)) {
 					final ShaderProgram shader = mpgmap.get(playingbgaid).getShader();
 					sprite.setShader(shader);
-					sprite.draw(playingbgatex, r.x, r.y, r.width, r.height);
+					drawBGAFixRatio(sprite, r, playingbgatex);
 					sprite.setShader(null);
 				} else {
-					sprite.draw(playingbgatex, r.x, r.y, r.width, r.height);
+					drawBGAFixRatio(sprite, r, playingbgatex);
 				}
 			} else {
 				sprite.draw(blanktex, r.x, r.y, r.width, r.height);
@@ -408,14 +409,14 @@ public class BGAProcessor {
 				if (mpgmap.containsKey(playinglayerid)) {
 					final ShaderProgram shader = mpgmap.get(playinglayerid).getShader();
 					sprite.setShader(shader);
-					sprite.draw(playinglayertex, r.x, r.y, r.width, r.height);
+					drawBGAFixRatio(sprite, r, playinglayertex);
 					sprite.setShader(null);
 				} else if (layershader.isCompiled()) {
 					sprite.setShader(layershader);
-					sprite.draw(playinglayertex, r.x, r.y, r.width, r.height);
+					drawBGAFixRatio(sprite, r, playinglayertex);
 					sprite.setShader(null);
 				} else {
-					sprite.draw(playinglayertex, r.x, r.y, r.width, r.height);
+					drawBGAFixRatio(sprite, r, playinglayertex);
 				}
 				sprite.end();
 			}
@@ -426,8 +427,45 @@ public class BGAProcessor {
 	}
 
 	/**
+	 * Modify the aspect ratio and draw BGA
+	 */
+	private void drawBGAFixRatio(SpriteBatch sprite, Rectangle r, Texture bga){
+		switch(config.getBgaExpand()) {
+		case Config.BGAEXPAND_FULL:
+	        sprite.draw(bga, r.x, r.y, r.width, r.height);
+			break;
+		case Config.BGAEXPAND_KEEP_ASPECT_RATIO:
+			float fixx,fixy,fixheight,fixwidth;
+			float movieaspect = (float)bga.getWidth() / bga.getHeight();
+			float windowaspect = (float)r.width / r.height;
+			float scaleheight = (float)windowaspect / movieaspect;
+			float scalewidth  = (float)1.0f / scaleheight;
+	        if(1.0f > scaleheight){
+	        	fixx = r.x;
+	            fixy = r.y+ (r.height * (1.0f - scaleheight)) / 2.0f;
+	            fixheight = r.height * scaleheight;
+	            fixwidth = r.width;
+	        } else {
+	            fixx = r.x+(r.width * (1.0f - scalewidth)) / 2.0f;
+	            fixy = r.y;
+	            fixheight = r.height;
+	            fixwidth = r.width * scalewidth;
+	        }
+	        sprite.draw(bga, fixx, fixy, fixwidth, fixheight);
+			break;
+		case Config.BGAEXPAND_OFF:
+            float w = Math.min(r.width, bga.getWidth());
+            float h = Math.min(r.height, bga.getHeight());
+	       	float x = r.x + (r.width - w) / 2;
+            float y = r.y + (r.height - h) / 2;;
+	        sprite.draw(bga, x, y, w, h);
+			break;
+		}
+	}
+
+	/**
 	 * ミスレイヤー開始時間を設定する
-	 * 
+	 *
 	 * @param time
 	 *            ミスレイヤー開始時間(ms)
 	 */
@@ -464,11 +502,11 @@ public class BGAProcessor {
 			}
 		}
 		mpgmap.clear();
-		
+
 		try {
 			layershader.dispose();
 		} catch(Throwable e) {
-			
+
 		}
 	}
 
