@@ -1,11 +1,12 @@
 package bms.player.beatoraja.play.bga;
 
-import bms.model.TimeLine;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
-
 import java.util.Arrays;
 import java.util.logging.Logger;
+
+import bms.model.TimeLine;
+
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
 
 /**
  * BGIリソース管理用クラス
@@ -41,22 +42,17 @@ public class BGImageProcessor {
 		int count = 0;
 		for (TimeLine tl : timelines) {
 			int bga = tl.getBGA();
-			if (bga >= 0 && bgacache[bga % bgacache.length] == null) {
-				Pixmap pix = bgamap[bga];
-				if (pix != null) {
-					bgacache[bga % bgacache.length] = new Texture(pix);
-					bgacacheid[bga % bgacache.length] = bga;
-					count++;
-				}
+			if (bga >= 0 && bgacache[bga % bgacache.length] == null && bgamap[bga] != null) {
+				bgacache[bga % bgacache.length] = new Texture(createPixmap(bga));
+				bgacacheid[bga % bgacache.length] = bga;
+				count++;
 			}
+
 			bga = tl.getLayer();
-			if (bga >= 0 && bgacache[bga % bgacache.length] == null) {
-				Pixmap pix = bgamap[bga];
-				if (pix != null) {
-					bgacache[bga % bgacache.length] = new Texture(pix);
-					bgacacheid[bga % bgacache.length] = bga;
-					count++;
-				}
+			if (bga >= 0 && bgacache[bga % bgacache.length] == null && bgamap[bga] != null) {
+				bgacache[bga % bgacache.length] = new Texture(createPixmap(bga));
+				bgacacheid[bga % bgacache.length] = bga;
+				count++;
 			}
 		}
 		Logger.getGlobal().info(
@@ -73,14 +69,30 @@ public class BGImageProcessor {
 		if (bgacache[cid] != null) {
 			bgacache[cid].dispose();
 		}
-		Pixmap pix = bgamap[id];
-		if (pix != null) {
-			bgacache[cid] = new Texture(pix);
+		if (bgamap[id] != null){
+			bgacache[cid] = new Texture(createPixmap(id));
 			bgacacheid[cid] = id;
 			return bgacache[cid];
 		}
 		return null;
+	}
 
+
+	/**
+	 * Create a pixmap that is compatible with legacy BMS
+	 */
+	private Pixmap createPixmap(int id){
+		int bgasize = bgamap[id].getHeight() > bgamap[id].getWidth() ?
+				bgamap[id].getHeight() : bgamap[id].getWidth();
+		Pixmap pix;
+		if ( bgasize <=256 ){
+			pix = new Pixmap(bgasize, bgasize,bgamap[id].getFormat());
+		} else {
+			pix = new Pixmap(bgamap[id].getWidth(), bgamap[id].getHeight(), bgamap[id].getFormat());
+		}
+		pix.drawPixmap(bgamap[id], 0, 0, bgamap[id].getWidth(), bgamap[id].getHeight(),
+				0, 0, bgamap[id].getWidth(), bgamap[id].getHeight());
+		return pix;
 	}
 
 	/**
