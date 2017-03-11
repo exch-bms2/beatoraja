@@ -430,23 +430,37 @@ public class BGAProcessor {
 	 * Modify the aspect ratio and draw BGA
 	 */
 	private void drawBGAFixRatio(SpriteBatch sprite, Rectangle r, Texture bga){
-		float fixx,fixy,fixheight,fixwidth;
-		float movieaspect = (float)bga.getWidth() / bga.getHeight();
-		float windowaspect = (float)r.width / r.height;
-		float scaleheight = (float)windowaspect / movieaspect;
-		float scalewidth  = (float)1.0f / scaleheight;
-        if(1.0f > scaleheight){
-        	fixx = r.x;
-            fixy = r.y+ (r.height * (1.0f - scaleheight)) / 2.0f;
-            fixheight = r.height * scaleheight;
-            fixwidth = r.width;
-        } else {
-            fixx = r.x+(r.width * (1.0f - scalewidth)) / 2.0f;
-            fixy = r.y;
-            fixheight = r.height;
-            fixwidth = r.width * scalewidth;
-        }
-        sprite.draw(bga, fixx, fixy, fixwidth, fixheight);
+		switch(config.getBgaExpand()) {
+		case Config.BGAEXPAND_FULL:
+	        sprite.draw(bga, r.x, r.y, r.width, r.height);
+			break;
+		case Config.BGAEXPAND_KEEP_ASPECT_RATIO:
+			float fixx,fixy,fixheight,fixwidth;
+			float movieaspect = (float)bga.getWidth() / bga.getHeight();
+			float windowaspect = (float)r.width / r.height;
+			float scaleheight = (float)windowaspect / movieaspect;
+			float scalewidth  = (float)1.0f / scaleheight;
+	        if(1.0f > scaleheight){
+	        	fixx = r.x;
+	            fixy = r.y+ (r.height * (1.0f - scaleheight)) / 2.0f;
+	            fixheight = r.height * scaleheight;
+	            fixwidth = r.width;
+	        } else {
+	            fixx = r.x+(r.width * (1.0f - scalewidth)) / 2.0f;
+	            fixy = r.y;
+	            fixheight = r.height;
+	            fixwidth = r.width * scalewidth;
+	        }
+	        sprite.draw(bga, fixx, fixy, fixwidth, fixheight);
+			break;
+		case Config.BGAEXPAND_OFF:
+            float w = Math.min(r.width, bga.getWidth());
+            float h = Math.min(r.height, bga.getHeight());
+	       	float x = r.x + (r.width - w) / 2;
+            float y = r.y + (r.height - h) / 2;;
+	        sprite.draw(bga, x, y, w, h);
+			break;
+		}
 	}
 
 	/**

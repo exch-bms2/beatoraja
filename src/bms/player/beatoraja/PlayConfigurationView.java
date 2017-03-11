@@ -71,6 +71,8 @@ public class PlayConfigurationView implements Initializable {
 	private CheckBox vsync;
 	@FXML
 	private ComboBox<Integer> bgaop;
+	@FXML
+	private ComboBox<Integer> bgaexpand;
 
 	@FXML
 	private ListView<String> bmsroot;
@@ -177,6 +179,7 @@ public class PlayConfigurationView implements Initializable {
 				"ALL-SCR", "RANDOM-EX", "S-RANDOM-EX" });
 		initComboBox(gaugeop, new String[] { "ASSIST EASY", "EASY", "NORMAL", "HARD", "EX-HARD", "HAZARD" });
 		initComboBox(bgaop, new String[] { "ON", "AUTOPLAY ", "OFF" });
+		initComboBox(bgaexpand, new String[] { "Full", "Keep Aspect Ratio", "Off" });
 		initComboBox(fixhispeed, new String[] { "OFF", "START BPM", "MAX BPM", "MAIN BPM", "MIN BPM" });
 		initComboBox(playconfig, new String[] { "5/7KEYS", "10/14KEYS", "9KEYS" });
 		initComboBox(lntype, new String[] { "LONG NOTE", "CHARGE NOTE", "HELL CHARGE NOTE" });
@@ -212,6 +215,7 @@ public class PlayConfigurationView implements Initializable {
 		fullscreen.setSelected(config.isFullscreen());
 		vsync.setSelected(config.isVsync());
 		bgaop.setValue(config.getBga());
+		bgaexpand.setValue(config.getBgaExpand());
 		scoreop.getSelectionModel().select(config.getRandom());
 		gaugeop.getSelectionModel().select(config.getGauge());
 		lntype.getSelectionModel().select(config.getLnmode());
@@ -267,6 +271,7 @@ public class PlayConfigurationView implements Initializable {
 		config.setFullscreen(fullscreen.isSelected());
 		config.setVsync(vsync.isSelected());
 		config.setBga(bgaop.getValue());
+		config.setBgaExpand(bgaexpand.getValue());
 		config.setRandom(scoreop.getValue());
 		config.setGauge(gaugeop.getValue());
 		config.setLnmode(lntype.getValue());
