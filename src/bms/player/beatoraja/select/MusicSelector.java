@@ -75,6 +75,7 @@ public class MusicSelector extends MainState {
 	private String folderopen;
 	private String folderclose;
 	private String sorts;
+	private String preview;
 
 	private BitmapFont titlefont;
 
@@ -360,10 +361,17 @@ public class MusicSelector extends MainState {
 		} else if (play == -255) {
 			getMainController().exit();
 		}
-
+		// read bms information
 		if(getNowTime() > getTimer()[TIMER_SONGBAR_CHANGE] + notesGraphDuration && !showNoteGraph) {
 			if(current instanceof SongBar) {
-				getResource().getSongdata().setBMSModel(resource.loadBMSModel(Paths.get(((SongBar) current).getSongData().getPath()), config.getLnmode()));
+				SongData song = getResource().getSongdata();
+				song.setBMSModel(resource.loadBMSModel(Paths.get(((SongBar) current).getSongData().getPath()), config.getLnmode()));
+				preview = song.getPreview();
+				if(preview != null && preview.length() > 0) {
+					preview = Paths.get(song.getPath()).getParent().resolve(preview).toString();
+					getMainController().getAudioProcessor().stop(bgm);
+					getMainController().getAudioProcessor().play(preview, false);					
+				}
 			}
 			showNoteGraph = true;
 		}
@@ -665,6 +673,12 @@ public class MusicSelector extends MainState {
 		if (bar.getSelected() != current) {
 			getTimer()[TIMER_SONGBAR_CHANGE] = nowtime;
 			getResource().setSongdata((bar.getSelected() instanceof SongBar) ? ((SongBar) bar.getSelected()).getSongData() : null);
+			if(preview != null && preview.length() > 0) {
+				getMainController().getAudioProcessor().stop(preview);
+				getMainController().getAudioProcessor().dispose(preview);
+				getMainController().getAudioProcessor().play(bgm, true);
+				preview = null;
+			}
 			showNoteGraph = false;
 		}
 

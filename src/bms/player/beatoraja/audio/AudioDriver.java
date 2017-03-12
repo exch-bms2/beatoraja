@@ -13,6 +13,8 @@ public interface AudioDriver extends Disposable {
 	
 	public void stop(String path);	
 	
+	public void dispose(String path);	
+	
 	/**
 	 * BMSの音源データを読み込む
 	 * @param model

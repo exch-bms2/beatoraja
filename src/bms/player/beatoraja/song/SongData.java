@@ -61,6 +61,7 @@ public class SongData {
 	private int notes;
 	private String stagefile = "";
 	private String backbmp = "";
+	private String preview = "";
 
 	private BMSModel model;
 	private TimeLine[] timelines;
@@ -91,13 +92,16 @@ public class SongData {
 
 		setStagefile(model.getStagefile());
 		setBackbmp(model.getBackbmp());
+		setPreview(model.getPreview());
 		try {
 			level = Integer.parseInt(model.getPlaylevel());
 		} catch(NumberFormatException e) {
 
 		}
 		mode = model.getUseKeys();
-		difficulty = model.getDifficulty();
+		if(difficulty == 0) {
+			difficulty = model.getDifficulty();			
+		}
 		judge = model.getJudgerank();
 		minbpm = (int) model.getMinBPM();
 		maxbpm = (int) model.getMaxBPM();
@@ -327,5 +331,13 @@ public class SongData {
 
 	public void setBackbmp(String backbmp) {
 		this.backbmp = backbmp;
+	}
+
+	public String getPreview() {
+		return preview;
+	}
+
+	public void setPreview(String preview) {
+		this.preview = preview;
 	}
 }

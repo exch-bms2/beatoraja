@@ -1,53 +1,38 @@
 package bms.player.beatoraja.audio;
 
+import java.nio.file.Path;
+
 import bms.model.BMSModel;
 import bms.model.Note;
 
-public class GdxAudioDeviceDriver implements AudioDriver {
+public class GdxAudioDeviceDriver extends AbstractAudioDriver {
 
 	@Override
-	public void dispose() {
+	protected Object getKeySound(Path p) {
 		// TODO Auto-generated method stub
-
+		return null;
 	}
 
 	@Override
-	public void play(String path, boolean loop) {
+	protected Object getKeySound(PCM pcm) {
 		// TODO Auto-generated method stub
-
+		return null;
 	}
 
 	@Override
-	public void stop(String path) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void setModel(BMSModel model) {
+	protected void disposeKeySound(Object pcm) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void abort() {
-
-	}
-
-	@Override
-	public float getProgress() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public void play(Note n, float volume) {
+	protected void play(Object id, float volume, boolean loop) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void stop(Note n) {
+	protected void stop(Object id) {
 		// TODO Auto-generated method stub
 		
 	}

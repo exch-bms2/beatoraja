@@ -111,6 +111,14 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 		}
 	}
 
+	public void dispose(String p) {
+		T sound = soundmap.get(p);
+		if (sound != null) {
+			soundmap.remove(p);
+			disposeKeySound(sound);			
+		}
+	}
+	
 	/**
 	 * BMSの音源データを読み込む
 	 *
