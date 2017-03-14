@@ -341,6 +341,20 @@ public class MusicSelector extends MainState {
 			}
 		}
 		sprite.end();
+		// read bms information
+		if(getNowTime() > getTimer()[TIMER_SONGBAR_CHANGE] + notesGraphDuration && !showNoteGraph && play < 0) {
+			if(current instanceof SongBar) {
+				SongData song = getResource().getSongdata();
+				song.setBMSModel(resource.loadBMSModel(Paths.get(((SongBar) current).getSongData().getPath()), config.getLnmode()));
+				preview = song.getPreview();
+				if(preview != null && preview.length() > 0) {
+					preview = Paths.get(song.getPath()).getParent().resolve(preview).toString();
+					getMainController().getAudioProcessor().stop(bgm);
+					getMainController().getAudioProcessor().play(preview, false);					
+				}
+			}
+			showNoteGraph = true;
+		}
 
 		if (play >= 0) {
 			if (current instanceof SongBar) {
@@ -348,6 +362,11 @@ public class MusicSelector extends MainState {
 				if (resource.setBMSFile(Paths.get(((SongBar) current).getSongData().getPath()), config, play)) {
 					if (bgm != null) {
 						getMainController().getAudioProcessor().stop(bgm);
+					}
+					if(preview != null && preview.length() > 0) {
+						getMainController().getAudioProcessor().stop(preview);
+						getMainController().getAudioProcessor().dispose(preview);
+						preview = null;
 					}
 					getMainController().changeState(MainController.STATE_DECIDE);
 				}
@@ -360,20 +379,6 @@ public class MusicSelector extends MainState {
 			play = -1;
 		} else if (play == -255) {
 			getMainController().exit();
-		}
-		// read bms information
-		if(getNowTime() > getTimer()[TIMER_SONGBAR_CHANGE] + notesGraphDuration && !showNoteGraph) {
-			if(current instanceof SongBar) {
-				SongData song = getResource().getSongdata();
-				song.setBMSModel(resource.loadBMSModel(Paths.get(((SongBar) current).getSongData().getPath()), config.getLnmode()));
-				preview = song.getPreview();
-				if(preview != null && preview.length() > 0) {
-					preview = Paths.get(song.getPath()).getParent().resolve(preview).toString();
-					getMainController().getAudioProcessor().stop(bgm);
-					getMainController().getAudioProcessor().play(preview, false);					
-				}
-			}
-			showNoteGraph = true;
 		}
 	}
 
@@ -601,6 +606,11 @@ public class MusicSelector extends MainState {
 			if (bgm != null) {
 				getMainController().getAudioProcessor().stop(bgm);
 			}
+			if(preview != null && preview.length() > 0) {
+				getMainController().getAudioProcessor().stop(preview);
+				getMainController().getAudioProcessor().dispose(preview);
+				preview = null;
+			}
 			getMainController().changeState(MainController.STATE_CONFIG);
 		} else {
 			if (current instanceof SelectableBar) {
@@ -800,6 +810,11 @@ public class MusicSelector extends MainState {
 				}
 				if (bgm != null) {
 					getMainController().getAudioProcessor().stop(bgm);
+				}
+				if(preview != null && preview.length() > 0) {
+					getMainController().getAudioProcessor().stop(preview);
+					getMainController().getAudioProcessor().dispose(preview);
+					preview = null;
 				}
 				resource.setCoursetitle(((GradeBar) bar.getSelected()).getTitle());
 				resource.setBMSFile(files.get(0), config, autoplay);
