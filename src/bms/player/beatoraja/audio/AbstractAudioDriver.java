@@ -4,6 +4,7 @@ import bms.model.*;
 
 import java.nio.file.*;
 import java.util.*;
+import java.util.Map.Entry;
 import java.util.logging.Logger;
 
 import com.badlogic.gdx.utils.GdxRuntimeException;
@@ -38,6 +39,8 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	 * キー音ボリューム
 	 */
 	private float volume = 1.0f;
+	
+	private AudioCache cache = new AudioCache();
 
 	/**
 	 * パスで指定された効果音ファイルの音源データを取得する
@@ -126,17 +129,7 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	 */
 	public synchronized void setModel(BMSModel model) {
 		final int wavcount = model.getWavList().length;
-		for (Object id : wavmap) {
-			if (id != null) {
-				disposeKeySound((T) id);
-			}
-		}
 		wavmap = new Object[wavcount];
-		for (SliceWav[] slices : slicesound) {
-			for (SliceWav<T> slice : slices) {
-				disposeKeySound(slice.wav);
-			}
-		}
 		slicesound = new SliceWav[wavcount][];
 
 		progress = 0;
@@ -147,102 +140,119 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 			volume = model.getVolwav() / 100f;
 		}
 
-		final Map<Integer, PCM> orgwavmap = new HashMap<Integer, PCM>();
 		List<SliceWav>[] slicesound = new List[wavcount];
 
-		List<Note> notes = new ArrayList<Note>();
+		Map<Integer, List<Note>> notemap = new HashMap();
 		for (TimeLine tl : model.getAllTimeLines()) {
 			for (int i = 0; i < 18; i++) {
-				if (tl.getNote(i) != null) {
-					notes.add(tl.getNote(i));
-					notes.addAll(tl.getNote(i).getLayeredNotes());
+				final Note n = tl.getNote(i);
+				if (n != null) {
+					addNoteList(notemap, n);
+					for(Note ln : n.getLayeredNotes()) {
+						addNoteList(notemap, ln);
+					}
 				}
 				if (tl.getHiddenNote(i) != null) {
-					notes.add(tl.getHiddenNote(i));
+					addNoteList(notemap, tl.getHiddenNote(i));
 				}
 			}
-			notes.addAll(Arrays.asList(tl.getBackGroundNotes()));
+			for(Note n : tl.getBackGroundNotes()) {
+				addNoteList(notemap, n);
+			}
 		}
 
-		for (Note note : notes) {
+		for (Entry<Integer, List<Note>> waventry : notemap.entrySet()) {
+			final int wavid = waventry.getKey();
 			if (progress >= 1) {
 				break;
 			}
-			if (note.getWav() < 0) {
+			if (wavid < 0) {
 				continue;
 			}
-			String name = model.getWavList()[note.getWav()];
-			if (note.getStarttime() == 0 && note.getDuration() == 0) {
-				// 音切りなしのケース
-				if (note.getWav() >= 0 && wavmap[note.getWav()] == null) {
-					wavmap[note.getWav()] = getKeySound(dpath.resolve(name));
-				}
+			String name = model.getWavList()[wavid];
+			PCM wav = null;
 
-			} else {
-				// 音切りありのケース
-				boolean b = true;
-				if (slicesound[note.getWav()] == null) {
-					slicesound[note.getWav()] = new ArrayList<SliceWav>();
-				}
-				for (SliceWav slice : slicesound[note.getWav()]) {
-					if (slice.starttime == note.getStarttime() && slice.duration == note.getDuration()) {
-						b = false;
-						break;
-					}
-				}
-				if (b) {
-					// byte[] wav = null;
-					PCM wav = null;
-					if (orgwavmap.get(note.getWav()) != null) {
-						wav = orgwavmap.get(note.getWav());
-					} else {
-						name = name.substring(0, name.lastIndexOf('.'));
-						final Path wavfile = dpath.resolve(name + ".wav");
-						final Path oggfile = dpath.resolve(name + ".ogg");
-						final Path mp3file = dpath.resolve(name + ".mp3");
-						if (wav == null && Files.exists(wavfile)) {
-							try {
-								wav = new PCM(wavfile);
-								orgwavmap.put(note.getWav(), wav);
-							} catch (Throwable e) {
-								e.printStackTrace();
-							}
+			for(Note note : waventry.getValue()) {
+				if (note.getStarttime() == 0 && note.getDuration() == 0) {
+					// 音切りなしのケース
+					Path p = dpath.resolve(name);
+					wavmap[wavid] = cache.get(p.toString(), note);
+					if (wavmap[wavid] == null) {
+						wavmap[wavid] = getKeySound(p);
+						if(wavmap[wavid] == null) {
+							break;
 						}
-						if (wav == null && Files.exists(oggfile)) {
-							try {
-								wav = new PCM(oggfile);
-								orgwavmap.put(note.getWav(), wav);
-							} catch (Throwable e) {
-								e.printStackTrace();
-							}
-						}
-						if (wav == null && Files.exists(mp3file)) {
-							try {
-								wav = new PCM(mp3file);
-								orgwavmap.put(note.getWav(), wav);
-							} catch (Throwable e) {
-								e.printStackTrace();
-							}
-						}
+						cache.put(p.toString(), note, (T)wavmap[wavid]);
 					}
 
-					if (wav != null) {
-						try {
-							final PCM slicewav = wav.slice(note.getStarttime(), note.getDuration());
-							T sound = getKeySound(slicewav);
-							slicesound[note.getWav()].add(new SliceWav(note, sound));
-							// System.out.println("WAV slicing - Name:"
-							// + name + " ID:" + note.getWav() +
-							// " start:" + note.getStarttime() +
-							// " duration:" + note.getDuration());
-						} catch (Throwable e) {
-							Logger.getGlobal().warning("音源(wav)ファイルスライシング失敗。" + e.getMessage());
-							e.printStackTrace();
+				} else {
+					// 音切りありのケース
+					boolean b = true;
+					if (slicesound[note.getWav()] == null) {
+						slicesound[note.getWav()] = new ArrayList<SliceWav>();
+					}
+					for (SliceWav slice : slicesound[note.getWav()]) {
+						if (slice.starttime == note.getStarttime() && slice.duration == note.getDuration()) {
+							b = false;
+							break;
 						}
 					}
-				}
+					if (b) {
+						Path p = dpath.resolve(name);
+						T sliceaudio = cache.get(p.toString(), note);
+						if (sliceaudio != null) {
+							slicesound[note.getWav()].add(new SliceWav(note, sliceaudio));
+						} else {
+							if(wav == null) {
+								name = name.substring(0, name.lastIndexOf('.'));
+								final Path wavfile = dpath.resolve(name + ".wav");
+								final Path oggfile = dpath.resolve(name + ".ogg");
+								final Path mp3file = dpath.resolve(name + ".mp3");
+								if (wav == null && Files.exists(wavfile)) {
+									try {
+										wav = new PCM(wavfile);
+									} catch (Throwable e) {
+										e.printStackTrace();
+									}
+								}
+								if (wav == null && Files.exists(oggfile)) {
+									try {
+										wav = new PCM(oggfile);
+									} catch (Throwable e) {
+										e.printStackTrace();
+									}
+								}
+								if (wav == null && Files.exists(mp3file)) {
+									try {
+										wav = new PCM(mp3file);
+									} catch (Throwable e) {
+										e.printStackTrace();
+									}
+								}
+							}
+
+							if (wav != null) {
+								try {
+									final PCM slicewav = wav.slice(note.getStarttime(), note.getDuration());
+									T sound = getKeySound(slicewav);
+									cache.put(p.toString(), note, sound);
+									slicesound[note.getWav()].add(new SliceWav(note, sound));
+									// System.out.println("WAV slicing - Name:"
+									// + name + " ID:" + note.getWav() +
+									// " start:" + note.getStarttime() +
+									// " duration:" + note.getDuration());
+								} catch (Throwable e) {
+									Logger.getGlobal().warning("音源(wav)ファイルスライシング失敗。" + e.getMessage());
+									e.printStackTrace();
+								}
+							} else {
+								break;
+							}							
+						}
+					}
+				}				
 			}
-			progress += 1f / notes.size();
+			progress += 1f / notemap.keySet().size();
 		}
 
 		Logger.getGlobal().info("音源ファイル読み込み完了。音源数:" + wavmap.length);
@@ -253,8 +263,28 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 				this.slicesound[i] = new SliceWav[0];
 			}
 		}
+		
+		cache.disposeOld();
 
 		progress = 1;
+	}
+	
+	private void addNoteList(Map<Integer, List<Note>> notemap, Note n) {
+		if(n.getWav() < 0) {
+			return;
+		}
+		List<Note> notes = notemap.get(n.getWav());
+		if(notes == null) {
+			notes = new ArrayList<Note>();
+			notemap.put(n.getWav(), notes);
+		}
+		
+		for(Note note : notes) {
+			if(n.getStarttime() == note.getStarttime() && n.getDuration() == note.getDuration()) {
+				return;
+			}
+		}
+		notes.add(n);
 	}
 
 	public void abort() {
@@ -379,4 +409,61 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 			this.wav = wav;
 		}
 	}
+	
+	
+	public class AudioCache {
+		
+		private static final int MAX_GENERATION = 1;
+		
+		private Map<String, Set<SliceWav<T>>> audio = new HashMap<String, Set<SliceWav<T>>> ();
+
+		public T get(String s, Note n) {
+			if(!audio.containsKey(s)) {
+				return null;
+			}
+			for(SliceWav<T> entry : audio.get(s)) {
+				if(n.getStarttime() == entry.starttime && n.getDuration() == entry.duration) {
+//					System.out.println("AudioCache : リソース再利用 - " + s);
+					entry.playid = 0;
+					return entry.wav;
+				}
+			}
+			return null;
+		}
+		
+		public void put(String s, Note n, T sound) {
+			if(!audio.containsKey(s)) {
+				audio.put(s, new HashSet());
+			}
+			for(SliceWav<T> entry : audio.get(s)) {
+				if(n.getStarttime() == entry.starttime && n.getDuration() == entry.duration) {
+					entry.playid = 0;
+					return;
+				}
+			}
+			SliceWav<T> entry = new SliceWav(n, sound);
+			entry.playid = 0;
+			audio.get(s).add(entry);
+		}
+		
+		public void disposeOld() {
+			String[] keyset = audio.keySet().toArray(new String[audio.size()]);
+			for(String s : keyset) {
+				Set<SliceWav<T>> set = audio.get(s);
+				for(SliceWav<T> wav : set.toArray(new SliceWav[set.size()])) {
+					if(wav.playid == MAX_GENERATION) {
+						disposeKeySound(wav.wav);
+//						System.out.println("AudioCache : リソース開放 - " + s);
+						set.remove(wav);
+					} else {
+						wav.playid++;
+					}					
+				}
+				if(set.isEmpty()) {
+					audio.remove(s);
+				}
+			}
+			Logger.getGlobal().info("現在のAudioCache容量 : " + audio.size());
+		}
+	}	
 }
