@@ -36,18 +36,8 @@ public class PlayerResource {
 
 	private List<Integer> constraint = new ArrayList<Integer>();
 
-	private int bgashow;
-	/**
-	 * BMSの音源リソース
-	 */
-	private AudioDriver audio;
-	private boolean audioLoaded;
-	/**
-	 * BMSのBGAリソース
-	 */
-	private BGAProcessor bga;
-	private boolean bgaLoaded;
-
+	private BMSResource bmsresource;
+	
 	/**
 	 * スコア
 	 */
@@ -98,8 +88,8 @@ public class PlayerResource {
 	private int maxcombo;
 
 	public PlayerResource(AudioDriver audio, Config config) {
-		this.audio = audio;
 		this.config = config;
+		this.bmsresource = new BMSResource(audio);
 	}
 
 	public void clear() {
@@ -121,9 +111,7 @@ public class PlayerResource {
 		this.config = config;
 		this.auto = autoplay;
 		replay = new ReplayData();
-		String bmspath = model != null ? model.getPath() : null;
 		model = loadBMSModel(f, config.getLnmode());
-		final BMSModel loadingModel = model;
 		if (model == null) {
 			Logger.getGlobal().warning("楽曲が存在しないか、解析時にエラーが発生しました:" + f.toString());
 			return false;
@@ -131,88 +119,7 @@ public class PlayerResource {
 		if (model.getAllTimeLines().length == 0) {
 			return false;
 		}
-		if (bmspath == null || !f.toAbsolutePath().toString().equals(bmspath) || bgashow != config.getBga()
-				|| (model.getRandom() != null && model.getRandom().length > 0)) {
-			// 前回と違うbmsファイルを読み込んだ場合、BGAオプション変更時はリソースのロード
-			// 同フォルダの違うbmsファイルでも、WAV/,BMP定義が違う可能性があるのでロード
-			// RANDOM定義がある場合はリロード
-			this.bgashow = config.getBga();
-			
-			audioLoaded = false;
-			
-			if (bga != null) {
-				bga.dispose();
-			}
-			bga = new BGAProcessor(config);
-			bgaLoaded = false;
-			
-			if (config.getBga() == Config.BGA_ON || (config.getBga() == Config.BGA_AUTO && (auto == 1 || auto >= 3))) {
-				Thread bgaloader = new Thread() {
-					@Override
-					public void run() {
-						try {
-							bga.setModel(loadingModel);
-						} catch (Throwable e) {
-							Logger.getGlobal().severe(e.getClass().getName() + " : " + e.getMessage());
-							e.printStackTrace();
-						} finally {
-							if(loadingModel == model) {
-								bgaLoaded = true;
-							}
-						}
-					}
-				};
-				bgaloader.start();					
-			} else {
-				bgaLoaded = true;
-			}
-			Thread audioloader = new Thread() {
-				@Override
-				public void run() {
-					try {
-						audio.abort();
-						audio.setModel(loadingModel);
-					} catch (Throwable e) {
-						Logger.getGlobal().severe(e.getClass().getName() + " : " + e.getMessage());
-						e.printStackTrace();
-					} finally {
-						if(loadingModel == model) {
-							audioLoaded = true;
-						}
-					}
-				}
-			};
-			audioloader.start();
-		} else {
-			// windowsだけ動画を含むBGAがあれば読み直す(ffmpegがエラー終了する。今後のupdateで直れば外す)
-			if ("\\".equals(System.getProperty("file.separator"))) {
-				Logger.getGlobal().info("WindowsのためBGA再読み込み");
-				if (bga != null) {
-					bga.dispose();
-				}
-				bga = new BGAProcessor(config);
-				bgaLoaded = false;
-				
-				if (config.getBga() == Config.BGA_ON || (config.getBga() == Config.BGA_AUTO && (auto == 1 || auto >= 3))) {
-					Thread bgaloader = new Thread() {
-						@Override
-						public void run() {
-							try {
-								bga.setModel(model);
-							} catch (Throwable e) {
-								Logger.getGlobal().severe(e.getClass().getName() + " : " + e.getMessage());
-								e.printStackTrace();
-							} finally {
-								bgaLoaded = true;
-							}
-						}
-					};
-					bgaloader.start();					
-				} else {
-					bgaLoaded = true;
-				}
-			}
-		}
+		bmsresource.setBMSFile(model, f, config, autoplay);
 		return true;
 	}
 
@@ -266,11 +173,11 @@ public class PlayerResource {
 	}
 
 	public BGAProcessor getBGAManager() {
-		return bga;
+		return bmsresource.getBGAProcessor();
 	}
 
 	public boolean mediaLoadFinished() {
-		return audioLoaded && bgaLoaded;
+		return bmsresource.mediaLoadFinished();
 	}
 
 	public IRScoreData getScoreData() {
@@ -416,13 +323,9 @@ public class PlayerResource {
 	}
 
 	public void dispose() {
-		if (audio != null) {
-			audio.dispose();
-			audio = null;
-		}
-		if (bga != null) {
-			bga.dispose();
-			bga = null;
+		if(bmsresource != null) {
+			bmsresource.dispose();
+			bmsresource = null;
 		}
 	}
 

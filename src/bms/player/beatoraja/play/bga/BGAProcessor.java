@@ -159,6 +159,7 @@ public class BGAProcessor {
 		}
 
 		Pixmap[] bgamap = new Pixmap[model.getBgaList().length];
+		cache = new BGImageProcessor(bgamap, BGACACHE_SIZE);
 		int id = 0;
 		for (String name : model.getBgaList()) {
 			if (progress == 1) {
@@ -211,7 +212,6 @@ public class BGAProcessor {
 			progress += 1f / model.getBgaList().length;
 			id++;
 		}
-		cache = new BGImageProcessor(bgamap, BGACACHE_SIZE);
 		Logger.getGlobal().info("BGAファイル読み込み完了。BGA数:" + model.getBgaList().length);
 		progress = 1;
 	}
@@ -270,6 +270,10 @@ public class BGAProcessor {
 
 		return tex;
 	}
+	
+	public void abort() {
+		progress = 1;
+	}
 
 	/**
 	 * BGAの初期データをあらかじめキャッシュする
@@ -279,7 +283,9 @@ public class BGAProcessor {
 			return;
 		}
 		pos = 0;
-		cache.prepare(timelines);
+		if(cache != null) {
+			cache.prepare(timelines);			
+		}
 		for (MovieProcessor mp : mpgmap.values()) {
 			mp.stop();
 		}
@@ -325,7 +331,7 @@ public class BGAProcessor {
 			}
 			return mpg.getFrame();
 		}
-		return cache.getTexture(id);
+		return cache != null ? cache.getTexture(id) : null;
 	}
 
 	public void drawBGA(SpriteBatch sprite, Rectangle r, int time) {
