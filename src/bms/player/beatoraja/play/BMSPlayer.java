@@ -583,6 +583,9 @@ public class BMSPlayer extends MainState {
 				} else if (resource.getScoreData() != null) {
 					main.changeState(MainController.STATE_RESULT);
 				} else {
+					if (resource.mediaLoadFinished()) {
+						getMainController().getAudioProcessor().stop((Note) null);
+					}
 					if (resource.getCourseBMSModels() != null && resource.nextCourse()) {
 						main.changeState(MainController.STATE_PLAYBMS);
 					} else {
@@ -757,11 +760,16 @@ public class BMSPlayer extends MainState {
 		score.setOption(resource.getConfig().getRandom() + (model.getUseKeys() == 10 || model.getUseKeys() == 14
 				? (resource.getConfig().getRandom2() * 10 + resource.getConfig().getDoubleoption() * 100) : 0));
 		// リプレイデータ保存。スコア保存されない場合はリプレイ保存しない
-		resource.getReplayData().keylog = getMainController().getInputProcessor().getKeyInputLog()
+		final ReplayData replay = resource.getReplayData();
+//		replay.player = getMainController().getPlayerConfig().getName();
+//		replay.sha256 = model.getSHA256();
+//		replay.mode = resource.getConfig().getLnmode();
+//		replay.date = Calendar.getInstance().getTimeInMillis() / 1000;
+		replay.keylog = getMainController().getInputProcessor().getKeyInputLog()
 				.toArray(new KeyInputLog[0]);
-		resource.getReplayData().pattern = pattern.toArray(new PatternModifyLog[pattern.size()]);
-		resource.getReplayData().rand = model.getRandom();
-		resource.getReplayData().gauge = resource.getConfig().getGauge();
+		replay.pattern = pattern.toArray(new PatternModifyLog[pattern.size()]);
+		replay.rand = model.getRandom();
+		replay.gauge = resource.getConfig().getGauge();
 
 		score.setEpg(judge.getJudgeCount(0, true));
 		score.setLpg(judge.getJudgeCount(0, false));
@@ -1042,6 +1050,8 @@ public class BMSPlayer extends MainState {
 			return rivalscore;
 		case NUMBER_DIFF_HIGHSCORE:
 			return (judge.getJudgeCount(0) * 2 + judge.getJudgeCount(1)) - (bestscore * notes / song.getNotes());
+			case NUMBER_DIFF_EXSCORE:
+			case NUMBER_DIFF_EXSCORE2:
 		case NUMBER_DIFF_TARGETSCORE:
 			return (judge.getJudgeCount(0) * 2 + judge.getJudgeCount(1)) - (rivalscore * notes / song.getNotes());
 		case NUMBER_SCORE_RATE:
