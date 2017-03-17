@@ -248,6 +248,8 @@ public class SkinProperty {
 	public static final int NUMBER_TOTAL_RATE = 115;
 	public static final int NUMBER_TOTAL_RATE_AFTERDOT = 116;
 	public static final int NUMBER_TARGET_SCORE = 121;
+	public static final int NUMBER_DIFF_EXSCORE2 = 128;
+
 	public static final int NUMBER_HIGHSCORE = 150;
 	public static final int NUMBER_TARGET_SCORE2 = 151;
 	public static final int NUMBER_DIFF_HIGHSCORE = 152;

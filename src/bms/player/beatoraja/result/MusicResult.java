@@ -144,9 +144,10 @@ public class MusicResult extends MainState {
 				if (this.fail != null) {
 					getMainController().getAudioProcessor().stop(this.fail);
 				}
+				getMainController().getAudioProcessor().stop((Note) null);
 
 				boolean[] keystate = main.getInputProcessor().getKeystate();
-				System.out.println(Arrays.toString(keystate));
+//				System.out.println(Arrays.toString(keystate));
 				long[] keytime = main.getInputProcessor().getTime();
 				keytime[0] = keytime[2] = keytime[4] = keytime[6] = 0;
 
