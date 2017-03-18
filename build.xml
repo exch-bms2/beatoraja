@@ -14,7 +14,7 @@
 	</target>
 
 	<target name="compile" depends="clean">
-		<javac classpathref="build.lib" srcdir="${build.src}" debug="${debug}" destdir="${build.dest}" />
+		<javac classpathref="build.lib" srcdir="${build.src}" debug="${debug}" destdir="${build.dest}" encoding="UTF-8" />
 	</target>
 
 	<target name="create_run_jar" depends="compile">

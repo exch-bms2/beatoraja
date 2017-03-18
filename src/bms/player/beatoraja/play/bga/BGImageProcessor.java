@@ -85,13 +85,16 @@ public class BGImageProcessor {
 		int bgasize = bgamap[id].getHeight() > bgamap[id].getWidth() ?
 				bgamap[id].getHeight() : bgamap[id].getWidth();
 		Pixmap pix;
+		int fixx;
 		if ( bgasize <=256 ){
+			fixx = (bgasize -  bgamap[id].getWidth()) / 2;
 			pix = new Pixmap(bgasize, bgasize,bgamap[id].getFormat());
 		} else {
+			fixx = 0;
 			pix = new Pixmap(bgamap[id].getWidth(), bgamap[id].getHeight(), bgamap[id].getFormat());
 		}
 		pix.drawPixmap(bgamap[id], 0, 0, bgamap[id].getWidth(), bgamap[id].getHeight(),
-				0, 0, bgamap[id].getWidth(), bgamap[id].getHeight());
+				fixx, 0, bgamap[id].getWidth(), bgamap[id].getHeight());
 		return pix;
 	}
 
