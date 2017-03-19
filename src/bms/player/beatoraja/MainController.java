@@ -41,7 +41,7 @@ public class MainController extends ApplicationAdapter {
 
 	public static final String VERSION = "beatoraja 0.4";
 
-	private BMSPlayer player;
+	private BMSPlayer bmsplayer;
 	private MusicDecide decide;
 	private MusicSelector selector;
 	private MusicResult result;
@@ -57,6 +57,7 @@ public class MainController extends ApplicationAdapter {
 	private MainState current;
 
 	private Config config;
+	private PlayerConfig player;
 	private int auto;
 
 	private SongDatabaseAccessor songdb;
@@ -64,7 +65,6 @@ public class MainController extends ApplicationAdapter {
 	private IRConnection ir;
 	
 	private SpriteBatch sprite;
-	private ShapeRenderer shape;
 	/**
 	 * 1曲プレイで指定したBMSファイル
 	 */
@@ -90,6 +90,7 @@ public class MainController extends ApplicationAdapter {
 	public MainController(Path f, Config config, int auto) {
 		this.auto = auto;
 		this.config = config;
+		this.player = config.getPlayers()[config.getPlayer()];
 		this.bmsfile = f;
 
 		try {
@@ -99,7 +100,7 @@ public class MainController extends ApplicationAdapter {
 			e.printStackTrace();
 		}
 
-		playdata = new PlayDataAccessor("playerscore");
+		playdata = new PlayDataAccessor(player.getName());
 		
 		ir = IRConnection.getIRConnection(config.getIrname());
 		if(config.getUserid().length() > 0 && ir != null) {
@@ -123,12 +124,12 @@ public class MainController extends ApplicationAdapter {
 		return sprite;
 	}
 
-	public ShapeRenderer getShapeRenderer() {
-		return shape;
-	}
-
 	public PlayerResource getPlayerResource() {
 		return resource;
+	}
+
+	public PlayerConfig getPlayerConfig() {
+		return player;
 	}
 
 	public static final int STATE_SELECTMUSIC = 0;
@@ -151,11 +152,11 @@ public class MainController extends ApplicationAdapter {
 			newState = decide;
 			break;
 		case STATE_PLAYBMS:
-			if (player != null) {
-				player.dispose();
+			if (bmsplayer != null) {
+				bmsplayer.dispose();
 			}
-			player = new BMSPlayer(this, resource);
-			newState = player;
+			bmsplayer = new BMSPlayer(this, resource);
+			newState = bmsplayer;
 			break;
 		case STATE_RESULT:
 			newState = result;
@@ -194,7 +195,6 @@ public class MainController extends ApplicationAdapter {
 	public void create() {
 		final long t = System.currentTimeMillis();
 		sprite = new SpriteBatch();
-		shape = new ShapeRenderer();
 
 		input = new BMSPlayerInputProcessor(RESOLUTION[config.getResolution()]);
 		switch(config.getAudioDriver()) {
@@ -361,8 +361,8 @@ public class MainController extends ApplicationAdapter {
 	public void dispose() {
 		// shape.dispose();
 		// sprite.dispose();
-		if (player != null) {
-			player.dispose();
+		if (bmsplayer != null) {
+			bmsplayer.dispose();
 		}
 		if (selector != null) {
 			selector.dispose();

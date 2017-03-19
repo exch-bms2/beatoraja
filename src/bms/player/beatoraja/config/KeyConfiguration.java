@@ -72,6 +72,9 @@ public class KeyConfiguration extends MainState {
 
 	private int mode = 0;
 
+	private ShapeRenderer shape;
+
+
 	public KeyConfiguration(MainController main) {
 		super(main);
 		
@@ -84,12 +87,12 @@ public class KeyConfiguration extends MainState {
 		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
 		parameter.size = 20;
 		titlefont = generator.generateFont(parameter);
+		shape = new ShapeRenderer();
 	}
 
 	public void render() {
 		final MainController main = getMainController();
 		final SpriteBatch sprite = main.getSpriteBatch();
-		final ShapeRenderer shape = main.getShapeRenderer();
 		BMSPlayerInputProcessor input = main.getInputProcessor();
 		Config config = getMainController().getPlayerResource().getConfig();
 		BMControllerInputProcessor[] controllers = input.getBMInputProcessor();
@@ -225,6 +228,10 @@ public class KeyConfiguration extends MainState {
 		if(titlefont != null) {
 			titlefont.dispose();
 			titlefont = null;
+		}
+		if(shape != null) {
+			shape.dispose();
+			shape = null;
 		}
 	}
 }

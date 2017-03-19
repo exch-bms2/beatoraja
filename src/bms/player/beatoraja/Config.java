@@ -17,6 +17,11 @@ import com.badlogic.gdx.Input.Keys;
  */
 public class Config {
 
+	// TODO プレイヤー毎に異なる見込みの大きい要素をPlayerConfigに移動
+
+	private PlayerConfig[] players;
+
+	private int player;
 	/**
 	 * フルスクリーン
 	 */
@@ -66,7 +71,6 @@ public class Config {
 	 * BGノート音のボリューム
 	 */
 	private float bgvolume = 1.0f;
-
 	/**
 	 * 最大FPS。垂直同期OFFの時のみ有効
 	 */
@@ -214,6 +218,9 @@ public class Config {
 	private String password = "";
 
 	public Config() {
+		PlayerConfig sample = new PlayerConfig();
+		sample.setName("playerscore");
+		players = new PlayerConfig[]{sample};
 		tableURL = new String[] { "http://bmsnormal2.syuriken.jp/table.html",
 				"http://bmsnormal2.syuriken.jp/table_insane.html", "http://dpbmsdelta.web.fc2.com/table/dpdelta.html",
 				"http://dpbmsdelta.web.fc2.com/table/insane.html",
@@ -623,6 +630,22 @@ public class Config {
 
 	public void setBgaExpand(int bgaExpand) {
 		this.bgaExpand = bgaExpand;
+	}
+
+	public int getPlayer() {
+		return player;
+	}
+
+	public void setPlayer(int player) {
+		this.player = player;
+	}
+
+	public PlayerConfig[] getPlayers() {
+		return players;
+	}
+
+	public void setPlayers(PlayerConfig[] players) {
+		this.players = players;
 	}
 
 	public static class SkinConfig {

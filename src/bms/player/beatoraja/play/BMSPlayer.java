@@ -761,10 +761,10 @@ public class BMSPlayer extends MainState {
 				? (resource.getConfig().getRandom2() * 10 + resource.getConfig().getDoubleoption() * 100) : 0));
 		// リプレイデータ保存。スコア保存されない場合はリプレイ保存しない
 		final ReplayData replay = resource.getReplayData();
-//		replay.player = getMainController().getPlayerConfig().getName();
-//		replay.sha256 = model.getSHA256();
-//		replay.mode = resource.getConfig().getLnmode();
-//		replay.date = Calendar.getInstance().getTimeInMillis() / 1000;
+		replay.player = getMainController().getPlayerConfig().getName();
+		replay.sha256 = model.getSHA256();
+		replay.mode = resource.getConfig().getLnmode();
+		replay.date = Calendar.getInstance().getTimeInMillis() / 1000;
 		replay.keylog = getMainController().getInputProcessor().getKeyInputLog()
 				.toArray(new KeyInputLog[0]);
 		replay.pattern = pattern.toArray(new PatternModifyLog[pattern.size()]);

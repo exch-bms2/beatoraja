@@ -9,7 +9,19 @@ import bms.player.beatoraja.pattern.PatternModifyLog;
  * @author exch
  */
 public class ReplayData {
-	
+
+	/**
+	 * プレイヤー名
+	 */
+	public String player;
+	/**
+	 * 楽曲のSHA-256
+ 	 */
+	public String sha256;
+	/**
+	 * モード
+	 */
+	public int mode;
 	/**
 	 * キー入力ログ
 	 */
@@ -26,4 +38,8 @@ public class ReplayData {
 	 * ランダムシーケンスを含むbmsの場合、選択されたRANDOM番号
 	 */
 	public int[] rand = new int[0];
+	/**
+	 * プレイ日時(unixtime)
+	 */
+	public long date = 0;
 }
