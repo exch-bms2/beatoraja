@@ -1,9 +1,15 @@
 package bms.player.beatoraja;
 
-import static bms.player.beatoraja.Resolution.RESOLUTION;
+import static bms.player.beatoraja.Resolution.*;
 
-import java.io.*;
-import java.nio.file.*;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ResourceBundle;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
@@ -16,11 +22,10 @@ import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter.OutputType;
-import java.util.ResourceBundle;
 
 /**
  * 起動用クラス
- * 
+ *
  * @author exch
  */
 public class MainLoader extends Application {
@@ -100,7 +105,7 @@ public class MainLoader extends Application {
 
 		try {
 			MainController player = new MainController(f, config, auto);
-			
+
 			LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
 			cfg.width = (int) RESOLUTION[config.getResolution()].width;
 			cfg.height = (int) RESOLUTION[config.getResolution()].height;
@@ -112,6 +117,9 @@ public class MainLoader extends Application {
 			if (!config.isVsync()) {
 				cfg.backgroundFPS = config.getMaxFramePerSecond();
 				cfg.foregroundFPS = config.getMaxFramePerSecond();
+			} else {
+				cfg.backgroundFPS = 0;
+				cfg.foregroundFPS = 0;
 			}
 			cfg.title = MainController.VERSION;
 
@@ -121,7 +129,7 @@ public class MainLoader extends Application {
 			// System.setProperty("org.lwjgl.opengl.Display.allowSoftwareOpenGL",
 			// "true");
 			new LwjglApplication(player, cfg);
-			
+
 //			Lwjgl3ApplicationConfiguration cfg = new Lwjgl3ApplicationConfiguration();
 //
 //			final int w = (int) RESOLUTION[config.getResolution()].width;
