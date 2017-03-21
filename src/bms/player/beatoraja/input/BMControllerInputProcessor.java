@@ -1,8 +1,10 @@
 package bms.player.beatoraja.input;
 
+
 import java.util.Arrays;
 import java.util.logging.Logger;
 
+import bms.player.beatoraja.Config;
 import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.ControllerListener;
 import com.badlogic.gdx.controllers.PovDirection;
@@ -41,9 +43,15 @@ public class BMControllerInputProcessor implements ControllerListener {
 	private long[] axistime = new long[4];
 
 	private int lastPressedButton = -1;
-
+        
+        private boolean koc = false;
+        
+        private Config config;
+        
 	public BMControllerInputProcessor(BMSPlayerInputProcessor bmsPlayerInputProcessor, Controller controller,
 			int[] buttons) {
+                config = new Config();
+                koc = config.getJKOC();
 		this.bmsPlayerInputProcessor = bmsPlayerInputProcessor;
 		this.controller = controller;
 		this.setControllerKeyAssign(buttons);
@@ -125,7 +133,7 @@ public class BMControllerInputProcessor implements ControllerListener {
 	public void poll(final long presstime) {
 		for (int i = 0; i < 4; i++) {
 			final float ax = controller.getAxis(i);
-			if (analogaxis[i]) {
+			if (analogaxis[i] && !koc) {
 				if ((axis[i] == 1.0 && ax == -1.0) || (axis[i] < 1.0 && ax > axis[i])) {
 					this.bmsPlayerInputProcessor.keyChanged(player + 1, (int) presstime, 8 + player * 9, false);
 					this.bmsPlayerInputProcessor.keyChanged(player + 1, (int) presstime, 7 + player * 9, true);
@@ -142,7 +150,7 @@ public class BMControllerInputProcessor implements ControllerListener {
 			} else {
 				if ((ax > -0.9 && ax < -0.1) || (ax > 0.1 && ax < 0.9)) {
 					if (axistime[i] != -1) {
-						if (presstime > axistime[i] + 500) {
+						if (presstime > axistime[i] + 500  && !koc) {
 							analogaxis[i] = true;
 						}
 					} else {
@@ -160,9 +168,9 @@ public class BMControllerInputProcessor implements ControllerListener {
 				final boolean prev = buttonstate[button];
 				if (button <= BMKeys.BUTTON_16) {
 					buttonstate[button] = controller.getButton(button);
-				} else if (button == BMKeys.UP) {
+				} else if (button == BMKeys.UP && !koc) {
 					buttonstate[button] = (!analogaxis[1] && axis[1] < -0.9) || (!analogaxis[2] && axis[2] < -0.9);
-				} else if (button == BMKeys.DOWN) {
+				} else if (button == BMKeys.DOWN && !koc) {
 					buttonstate[button] = (!analogaxis[1] && axis[1] > 0.9) || (!analogaxis[2] && axis[2] > 0.9);
 				} else if (button == BMKeys.LEFT) {
 					buttonstate[button] = (!analogaxis[0] && axis[0] < -0.9) || (!analogaxis[3] && axis[3] < -0.9);

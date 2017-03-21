@@ -1,5 +1,6 @@
 package bms.player.beatoraja.input;
 
+import bms.player.beatoraja.Config;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -38,6 +39,7 @@ public class BMSPlayerInputProcessor {
 			// controller.addListener(bm);
 			bminput.add(bm);
 		}
+                
 		this.bminput = bminput.toArray(new BMControllerInputProcessor[0]);
 	}
 
@@ -85,7 +87,7 @@ public class BMSPlayerInputProcessor {
 	private boolean selectPressed;
 
 	private boolean exitPressed;
-
+        
 	boolean[] cursor = new boolean[4];
 	long[] cursortime = new long[4];
 
@@ -99,7 +101,7 @@ public class BMSPlayerInputProcessor {
 	public void setKeyassign(int[] keyassign) {
 		kbinput.setKeyAssign(keyassign);
 	}
-
+        
 	public void setControllerConfig(ControllerConfig[] configs) {
 		boolean[] b = new boolean[configs.length];
 		for (BMControllerInputProcessor controller : bminput) {
