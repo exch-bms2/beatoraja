@@ -116,7 +116,7 @@ public class Config {
         /**
          * JKOC Hack (boolean) private variable
          */
-        private boolean jkoc_hack = false;
+    private boolean jkoc_hack = false;
         
 	/**
 	 * アシストオプション:コンスタント
