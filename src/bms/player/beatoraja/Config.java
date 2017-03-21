@@ -113,6 +113,11 @@ public class Config {
 	 */
 	private int judgeAlgorithm = JudgeManager.JUDGE_ALGORITHM_LR2;
 
+        /**
+         * JKOC Hack (boolean) private variable
+         */
+        private boolean jkoc_hack = false;
+        
 	/**
 	 * アシストオプション:コンスタント
 	 */
@@ -286,6 +291,14 @@ public class Config {
 		this.judgetiming = judgetiming;
 	}
 
+        public boolean getJKOC()  {
+            return jkoc_hack;
+        }
+        
+        public void setJKOC(boolean jkoc)  {
+            this.jkoc_hack = jkoc;
+        }
+        
 	public boolean isConstant() {
 		return constant;
 	}

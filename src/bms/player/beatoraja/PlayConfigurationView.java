@@ -43,8 +43,6 @@ import javafx.util.Callback;
  */
 public class PlayConfigurationView implements Initializable {
 
-	@FXML
-	private ResourceBundle resources;
 
 	@FXML
 	private ComboBox<Integer> resolution;
@@ -87,8 +85,6 @@ public class PlayConfigurationView implements Initializable {
 	private ComboBox<Integer> gaugeop;
 	@FXML
 	private ComboBox<Integer> lntype;
-	@FXML
-	private ComboBox<String> configBox;
 	@FXML
 	private CheckBox enableLanecover;
 	@FXML
@@ -136,6 +132,9 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private ComboBox<Integer> judgealgorithm;
 
+        @FXML  
+        private ComboBox<Integer> jkoc_hack;
+        
 	private Config config;;
 	@FXML
 	private CheckBox folderlamp;
@@ -180,6 +179,7 @@ public class PlayConfigurationView implements Initializable {
 		initComboBox(gaugeop, new String[] { "ASSIST EASY", "EASY", "NORMAL", "HARD", "EX-HARD", "HAZARD" });
 		initComboBox(bgaop, new String[] { "ON", "AUTOPLAY ", "OFF" });
 		initComboBox(bgaexpand, new String[] { "Full", "Keep Aspect Ratio", "Off" });
+                initComboBox(jkoc_hack, new String[] {"False", "True"});
 		initComboBox(fixhispeed, new String[] { "OFF", "START BPM", "MAX BPM", "MAIN BPM", "MIN BPM" });
 		initComboBox(playconfig, new String[] { "5/7KEYS", "10/14KEYS", "9KEYS" });
 		initComboBox(lntype, new String[] { "LONG NOTE", "CHARGE NOTE", "HELL CHARGE NOTE" });
@@ -246,6 +246,9 @@ public class PlayConfigurationView implements Initializable {
 
 		judgealgorithm.setValue(config.getJudgeAlgorithm());
 
+                // int b = Boolean.valueOf(config.getJKOC()).compareTo(false);
+                
+                jkoc_hack.setValue(Boolean.valueOf(config.getJKOC()).compareTo(false));
 		folderlamp.setSelected(config.isFolderlamp());
 
 		inputduration.getValueFactory().setValue(config.getInputduration());
@@ -301,6 +304,13 @@ public class PlayConfigurationView implements Initializable {
 		config.setAudioDeviceSimultaneousSources(getValue(audiosim));
 
 		config.setJudgeAlgorithm(judgealgorithm.getValue());
+    
+                // jkoc_hack is integer but *.setJKOC needs boolean type  
+                if(jkoc_hack.getValue() > 0)
+                    config.setJKOC(true);
+                else
+                    config.setJKOC(false);
+                
 
 		config.setFolderlamp(folderlamp.isSelected());
 
@@ -323,6 +333,7 @@ public class PlayConfigurationView implements Initializable {
 		}
 	}
 
+    @FXML
 	public void addSongPath() {
 		DirectoryChooser chooser = new DirectoryChooser();
 		chooser.setTitle("楽曲のルートフォルダを選択してください");
@@ -341,6 +352,7 @@ public class PlayConfigurationView implements Initializable {
 		}
 	}
 
+    @FXML
 	public void onSongPathDragOver(DragEvent ev) {
 		Dragboard db = ev.getDragboard();
 		if (db.hasFiles()) {
@@ -349,6 +361,7 @@ public class PlayConfigurationView implements Initializable {
 		ev.consume();
 	}
 
+    @FXML
 	public void songPathDragDropped(final DragEvent ev) {
 		Dragboard db = ev.getDragboard();
 		if (db.hasFiles()) {
@@ -369,10 +382,12 @@ public class PlayConfigurationView implements Initializable {
 		}
 	}
 
+    @FXML
 	public void removeSongPath() {
 		bmsroot.getItems().removeAll(bmsroot.getSelectionModel().getSelectedItems());
 	}
 
+    @FXML
 	public void addTableURL() {
 		String s = url.getText();
 		if (s.startsWith("http") && !tableurl.getItems().contains(s)) {
@@ -380,6 +395,7 @@ public class PlayConfigurationView implements Initializable {
 		}
 	}
 
+    @FXML
 	public void removeTableURL() {
 		tableurl.getItems().removeAll(tableurl.getSelectionModel().getSelectedItems());
 	}
@@ -388,6 +404,7 @@ public class PlayConfigurationView implements Initializable {
 
 	private int pc = -1;
 
+    @FXML
 	public void updatePlayConfig() {
 		if (pc != -1) {
 			PlayConfig conf = (pc == 0 ? config.getMode7() : (pc == 1 ? config.getMode14() : config.getMode9()));
@@ -414,6 +431,7 @@ public class PlayConfigurationView implements Initializable {
 		return spinner.getValue();
 	}
 
+    @FXML
 	public void updateAudioDriver() {
 		switch(audio.getValue()) {
 		case Config.AUDIODRIVER_SOUND:
@@ -445,6 +463,7 @@ public class PlayConfigurationView implements Initializable {
 		}
 	}
 
+    @FXML
 	public void updateSkinCategory() {
 		if (skinview.getSelectedHeader() != null) {
 			SkinHeader header = skinview.getSelectedHeader();
@@ -475,20 +494,24 @@ public class PlayConfigurationView implements Initializable {
 		}
 	}
 
+    @FXML
 	public void updateSkin() {
 		skinconfig.setContent(skinview.create(skin.getValue(), null));
 	}
 
+    @FXML
 	public void start() {
 		commit();
 		loader.hide();
 		MainLoader.play(null, 0, true);
 	}
 
+    @FXML
 	public void loadAllBMS() {
 		loadBMS(true);
 	}
 
+    @FXML
 	public void loadDiffBMS() {
 		loadBMS(false);
 	}
@@ -513,6 +536,7 @@ public class PlayConfigurationView implements Initializable {
 		}
 	}
 
+    @FXML
 	public void loadTable() {
 		commit();
 		try {
@@ -532,6 +556,7 @@ public class PlayConfigurationView implements Initializable {
 		tda.updateTableData(config.getTableURL());
 	}
 
+    @FXML
 	public void importScoreDataFromLR2() {
 		FileChooser chooser = new FileChooser();
 		chooser.getExtensionFilters().setAll(new ExtensionFilter("Lunatic Rave 2 Score Database File", "*.db"));
@@ -589,6 +614,7 @@ public class PlayConfigurationView implements Initializable {
 
 	}
 
+    @FXML
 	public void exit() {
 		commit();
 		Platform.exit();
