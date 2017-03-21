@@ -141,7 +141,7 @@ public class LR2FontLoader extends LR2SkinLoader {
 		textimage = new SkinTextImage.SkinTextImageSource();
 		this.path = p;
 
-		long l = System.nanoTime();
+//		long l = System.nanoTime();
 		BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(p.toFile()), "MS932"));
 		String line;
 		while ((line = br.readLine()) != null) {
@@ -149,7 +149,7 @@ public class LR2FontLoader extends LR2SkinLoader {
 		}
 		br.close();
 
-		System.out.println(p.toString() + " -> " + (System.nanoTime() - l));
+//		System.out.println(p.toString() + " -> " + (System.nanoTime() - l));
 
 		return textimage;
 	}
