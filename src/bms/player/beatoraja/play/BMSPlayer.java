@@ -290,7 +290,6 @@ public class BMSPlayer extends MainState {
 		}
 
 		Config config = resource.getConfig();
-		Logger.getGlobal().info("create");
 
 		final BMSPlayerInputProcessor input = main.getInputProcessor();
 		input.setMinimumInputDutration(config.getInputduration());
@@ -320,7 +319,6 @@ public class BMSPlayer extends MainState {
 		rivalscore = TargetProperty.getAllTargetProperties(getMainController())[config.getTarget()]
 				.getTarget(getMainController());
 		resource.setRivalScoreData(rivalscore);
-		Logger.getGlobal().info("スコアグラフ描画クラス準備");
 
 		if (autoplay == 2) {
 			practice.create(model);

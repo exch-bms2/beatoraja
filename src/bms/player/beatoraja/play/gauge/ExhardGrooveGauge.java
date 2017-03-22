@@ -10,7 +10,7 @@ import bms.model.BMSModel;
 public class ExhardGrooveGauge extends GrooveGauge {
 
 	public ExhardGrooveGauge(BMSModel model) {
-		final float pg = (float) Math.max(Math.min(0.015, (2.5 * model.getTotal() - 250) / model.getTotalNotes()), 0);
+		final float pg = (float) Math.max(Math.min(0.15f, (2.5 * model.getTotal() - 250) / model.getTotalNotes()), 0);
 //		System.out.println("exhard回復量:" + pg);
 		if(model.getUseKeys() == 9) {
 			// TODO ポップンのHARDの仕様(閉店なし)に合わせるべきか
