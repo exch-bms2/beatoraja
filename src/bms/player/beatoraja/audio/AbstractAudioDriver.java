@@ -92,6 +92,9 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	}
 
 	public void play(String p, boolean loop) {
+		if(p == null || p.length() == 0) {
+			return;
+		}
 		T sound = soundmap.get(p);
 		if (!soundmap.containsKey(p)) {
 			try {
@@ -108,6 +111,9 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	}
 
 	public void stop(String p) {
+		if(p == null || p.length() == 0) {
+			return;
+		}
 		T sound = soundmap.get(p);
 		if (sound != null) {
 			stop(sound);
@@ -115,6 +121,9 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	}
 
 	public void dispose(String p) {
+		if(p == null || p.length() == 0) {
+			return;
+		}
 		T sound = soundmap.get(p);
 		if (sound != null) {
 			soundmap.remove(p);
