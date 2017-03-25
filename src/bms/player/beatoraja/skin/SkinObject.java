@@ -10,6 +10,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Disposable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.lwjgl.opengl.GL11;
@@ -53,7 +54,7 @@ public abstract class SkinObject implements Disposable {
 
 	private int[] dstop = new int[0];
 
-	private List<SkinObjectDestination> dst = new ArrayList<SkinObjectDestination>();
+	private SkinObjectDestination[] dst = new SkinObjectDestination[0];
 
 	private Rectangle r = new Rectangle();
 	private Color c = new Color();
@@ -63,7 +64,7 @@ public abstract class SkinObject implements Disposable {
 	private int fixa = Integer.MIN_VALUE;
 
 	public SkinObjectDestination[] getAllDestination() {
-		return dst.toArray(new SkinObjectDestination[dst.size()]);
+		return dst;
 	}
 
 	public void setDestination(long time, float x, float y, float w, float h, int acc, int a, int r, int g, int b,
@@ -75,7 +76,7 @@ public abstract class SkinObject implements Disposable {
 			int blend, int filter, int angle, int center, int loop, int timer, int[] op) {
 		SkinObjectDestination obj = new SkinObjectDestination(time, new Rectangle(x, y, w, h), new Color(r / 255.0f,
 				g / 255.0f, b / 255.0f, a / 255.0f), angle, acc);
-		if (dst.size() == 0) {
+		if (dst.length == 0) {
 			fixr = obj.region;
 			fixc = obj.color;
 			fixa = obj.angle;
@@ -123,13 +124,17 @@ public abstract class SkinObject implements Disposable {
 			}
 			dstop = op;
 		}
-		for (int i = 0; i < dst.size(); i++) {
-			if (dst.get(i).time > time) {
-				dst.add(i, obj);
+		for (int i = 0; i < dst.length; i++) {
+			if (dst[i].time > time) {
+				List<SkinObjectDestination> l = new ArrayList<SkinObjectDestination>(Arrays.asList(dst));
+				l.add(i, obj);
+				dst = l.toArray(new SkinObjectDestination[l.size()]);
 				return;
 			}
 		}
-		dst.add(obj);
+		List<SkinObjectDestination> l = new ArrayList<SkinObjectDestination>(Arrays.asList(dst));
+		l.add(obj);
+		dst = l.toArray(new SkinObjectDestination[l.size()]);
 	}
 
 	public int[] getOption() {
@@ -152,10 +157,6 @@ public abstract class SkinObject implements Disposable {
 	 * @return 描画領域
 	 */
 	public Rectangle getDestination(long time, MainState state) {
-		if (dst.size() == 0) {
-			// System.out.println("void image");
-			return new Rectangle(0, 0, 0, 0);
-		}
 		final int timer = dsttimer;
 
 		if (timer != 0 && timer < 256) {
@@ -169,7 +170,7 @@ public abstract class SkinObject implements Disposable {
 			return null;
 		}
 
-		final long lasttime = dst.get(dst.size() - 1).time;
+		final long lasttime = dst[dst.length - 1].time;
 		if (dstloop == -1) {
 			if (lasttime < time) {
 				return null;
@@ -181,13 +182,13 @@ public abstract class SkinObject implements Disposable {
 				time = (time - dstloop) % (lasttime - dstloop) + dstloop;
 			}
 		}
-		if (dst.get(0).time > time) {
+		if (dst[0].time > time) {
 			return null;
 		}
 		if (fixr == null) {
-			for (int i = 0; i < dst.size() - 1; i++) {
-				final SkinObjectDestination obj1 = dst.get(i);
-				final SkinObjectDestination obj2 = dst.get(i + 1);
+			for (int i = 0; i < dst.length - 1; i++) {
+				final SkinObjectDestination obj1 = dst[i];
+				final SkinObjectDestination obj2 = dst[i + 1];
 				if (obj1.time <= time && obj2.time >= time) {
 					final Rectangle r1 = obj1.region;
 					final Rectangle r2 = obj2.region;
@@ -224,7 +225,7 @@ public abstract class SkinObject implements Disposable {
 			return r;
 		}
 
-		r.set(dst.get(0).region);
+		r.set(dst[0].region);
 		if (state != null && offsetx != -1) {
 			r.x += state.getSliderValue(offsetx);
 		}
@@ -250,11 +251,7 @@ public abstract class SkinObject implements Disposable {
 			return null;
 		}
 
-		if (dst.size() == 0) {
-			// System.out.println("void color");
-			return new Color(0, 0, 0, 0);
-		}
-		long lasttime = dst.get(dst.size() - 1).time;
+		long lasttime = dst[dst.length - 1].time;
 		if (lasttime > 0 && time > dstloop) {
 			if (lasttime == dstloop) {
 				time = dstloop;
@@ -262,9 +259,9 @@ public abstract class SkinObject implements Disposable {
 				time = (time - dstloop) % (lasttime - dstloop) + dstloop;
 			}
 		}
-		for (int i = 0; i < dst.size() - 1; i++) {
-			final SkinObjectDestination obj1 = dst.get(i);
-			final SkinObjectDestination obj2 = dst.get(i + 1);
+		for (int i = 0; i < dst.length - 1; i++) {
+			final SkinObjectDestination obj1 = dst[i];
+			final SkinObjectDestination obj2 = dst[i + 1];
 			if (obj1.time <= time && obj2.time >= time) {
 				final Color r1 = obj1.color;
 				final Color r2 = obj2.color;
@@ -276,7 +273,7 @@ public abstract class SkinObject implements Disposable {
 				return c;
 			}
 		}
-		return dst.get(0).color;
+		return dst[0].color;
 	}
 
 	public int getAngle(long time, MainState state) {
@@ -295,10 +292,7 @@ public abstract class SkinObject implements Disposable {
 			return 0;
 		}
 
-		if (dst.size() == 0) {
-			return 0;
-		}
-		long lasttime = dst.get(dst.size() - 1).time;
+		long lasttime = dst[dst.length - 1].time;
 		if (lasttime > 0 && time > dstloop) {
 			if (lasttime == dstloop) {
 				time = dstloop;
@@ -306,16 +300,16 @@ public abstract class SkinObject implements Disposable {
 				time = (time - dstloop) % (lasttime - dstloop) + dstloop;
 			}
 		}
-		for (int i = 0; i < dst.size() - 1; i++) {
-			final SkinObjectDestination obj1 = dst.get(i);
-			final SkinObjectDestination obj2 = dst.get(i + 1);
+		for (int i = 0; i < dst.length - 1; i++) {
+			final SkinObjectDestination obj1 = dst[i];
+			final SkinObjectDestination obj2 = dst[i + 1];
 			if (obj1.time <= time && obj2.time >= time) {
 				final int r1 = obj1.angle;
 				final int r2 = obj2.angle;
 				return (int) (r1 + (r2 - r1) * (time - obj1.time) / (obj2.time - obj1.time));
 			}
 		}
-		return dst.get(0).angle;
+		return dst[0].angle;
 	}
 
 	public abstract void draw(SpriteBatch sprite, long time, MainState state);

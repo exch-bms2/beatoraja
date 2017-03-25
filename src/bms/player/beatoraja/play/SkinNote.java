@@ -17,8 +17,6 @@ import com.badlogic.gdx.math.Rectangle;
  */
 public class SkinNote extends SkinObject {
 
-	// TODO Lane毎にスキンオブジェクト化してLaneRegionをDestination化
-
 	private SkinLane[] lanes;
 
 	private float scale;
@@ -60,6 +58,8 @@ public class SkinNote extends SkinObject {
 		pn.setColor(Color.CYAN);
 		pn.drawRectangle(0, 0, hn.getWidth(), hn.getHeight());
 		pn.drawRectangle(1, 1, hn.getWidth() - 2, hn.getHeight() - 2);
+		
+        this.setDestination(0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, new int[0]);
 	}
 
 	public void setLaneRegion(Rectangle[] region) {
@@ -119,12 +119,6 @@ public class SkinNote extends SkinObject {
 		private SkinSource minenote;
 
 		private float scale;
-
-		private TextureRegion[] cnote;
-		private TextureRegion[][] clongnote;
-		private TextureRegion[] cminenote;
-		private TextureRegion[] chiddennote;
-		private TextureRegion[] cprocessednote;
 
 		/**
 		 * 不可視ノーツ画像

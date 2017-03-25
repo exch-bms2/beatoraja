@@ -2,12 +2,7 @@ package bms.player.beatoraja.select;
 
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.skin.*;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.*;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.utils.Align;
 
 /**
  * 楽曲バー描画用スキンオブジェクト
@@ -49,6 +44,7 @@ public class SkinBar extends SkinObject {
 
     public SkinBar(int position) {
         this.position = position;
+        this.setDestination(0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, new int[0]);
     }
 
     public SkinBar(int position, TextureRegion[][] images, int cycle) {

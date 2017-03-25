@@ -3,7 +3,6 @@ package bms.player.beatoraja.play;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.skin.*;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.Rectangle;
@@ -35,6 +34,8 @@ public class SkinJudge extends SkinObject {
         parameter.size = 18;
         font = generator.generateFont(parameter);
         generator.dispose();
+        
+        this.setDestination(0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, new int[0]);
     }
 
     public void setJudge(SkinImage[] judge) {
@@ -57,8 +58,6 @@ public class SkinJudge extends SkinObject {
     public void draw(SpriteBatch sprite, long time, MainState state) {
         final int judgenow = ((BMSPlayer)state).getLanerender().getNowJudge()[index] - 1;
         final int judgecombo = ((BMSPlayer)state).getLanerender().getNowCombo()[index];
-
-        final JudgeManager jm = ((BMSPlayer)state).getJudgeManager();
 
         if(judgenow < 0) {
             return;
