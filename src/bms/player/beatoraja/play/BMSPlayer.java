@@ -53,7 +53,8 @@ public class BMSPlayer extends MainState {
 	/**
 	 * キー入力用スレッド
 	 */
-	private KeyInputThread keyinput;
+	private KeyInputProccessor keyinput;
+	private ControlInputProcessor control;
 
 	private int assist = 0;
 
@@ -73,7 +74,7 @@ public class BMSPlayer extends MainState {
 	private int scratch1;
 	private int scratch2;
 
-	private static final int TIME_MARGIN = 5000;
+	static final int TIME_MARGIN = 5000;
 
 	public BMSPlayer(MainController main, PlayerResource resource) {
 		super(main);
@@ -277,6 +278,8 @@ public class BMSPlayer extends MainState {
 	public void create() {
 		final MainController main = getMainController();
 		final PlayerResource resource = main.getPlayerResource();
+		control = new ControlInputProcessor(this, autoplay);
+		keyinput = new KeyInputProccessor(this,model.getUseKeys());
 
 		if (resource.getConfig().getSoundpath().length() > 0) {
 			final File soundfolder = new File(resource.getConfig().getSoundpath());
@@ -302,7 +305,7 @@ public class BMSPlayer extends MainState {
 		lanerender = new LaneRenderer(this, model);
 		for (int i : resource.getConstraint()) {
 			if (i == TableData.NO_HISPEED) {
-				enableControl = false;
+				control.setEnableControl(false);
 				break;
 			}
 		}
@@ -385,13 +388,13 @@ public class BMSPlayer extends MainState {
 				getTimer()[TIMER_FADEOUT] = Long.MIN_VALUE;
 				getTimer()[TIMER_ENDOFNOTE_1P] = Long.MIN_VALUE;
 			}
-			enableControl = false;
+			control.setEnableControl(false);
 			practice.processInput(input);
 
 			if (input.getKeystate()[0] && resource.mediaLoadFinished() && now > skin.getLoadstart() + skin.getLoadend()
 					&& !input.startPressed()) {
 				PracticeProperty property = practice.getPracticeProperty();
-				enableControl = true;
+				control.setEnableControl(true);
 				if (property.freq != 100) {
 					model.setFrequency(property.freq / 100f);
 				}
@@ -446,11 +449,10 @@ public class BMSPlayer extends MainState {
 				if (autoplay >= 3) {
 					keylog = Arrays.asList(replay.keylog);
 				}
+				keyinput.startJudge(model, keylog);
 				autoThread = new AutoplayThread();
 				autoThread.starttime = starttimeoffset;
 				autoThread.start();
-				keyinput = new KeyInputThread(keylog);
-				keyinput.start();
 				Logger.getGlobal().info("STATE_PLAYに移行");
 			}
 			break;
@@ -518,16 +520,11 @@ public class BMSPlayer extends MainState {
 			if (autoThread != null) {
 				autoThread.stop = true;
 			}
-			if (keyinput != null) {
-				keyinput.stop = true;
-			}
+			keyinput.stopJudge();
 
 			if (now - getTimer()[TIMER_FAILED] > skin.getClose()) {
 				if (resource.mediaLoadFinished()) {
 					resource.getBGAManager().stop();
-				}
-				if (keyinput != null) {
-					Logger.getGlobal().info("入力パフォーマンス(max ms) : " + keyinput.frametimes);
 				}
 				if (autoplay != 1 && autoplay != 2) {
 					resource.setScoreData(createScoreData());
@@ -558,14 +555,9 @@ public class BMSPlayer extends MainState {
 			if (autoThread != null) {
 				autoThread.stop = true;
 			}
-			if (keyinput != null) {
-				keyinput.stop = true;
-			}
+			keyinput.stopJudge();
 			if (now - getTimer()[TIMER_FADEOUT] > skin.getFadeout()) {
 				resource.getBGAManager().stop();
-				if (keyinput != null) {
-					Logger.getGlobal().info("入力パフォーマンス(max ms) : " + keyinput.frametimes);
-				}
 				if (autoplay != 1 && autoplay != 2) {
 					resource.setScoreData(createScoreData());
 				}
@@ -594,99 +586,14 @@ public class BMSPlayer extends MainState {
 			break;
 		}
 	}
-
-	private boolean hschanged;
-	private long startpressedtime;
-	private boolean startpressed;
-	private boolean cursorpressed;
-	private long lanecovertiming;
-
-	private boolean enableControl = true;
-
+	
+	public void setPlaySpeed(int playspeed) {
+		this.playspeed = playspeed;
+	}
+	
 	public void input() {
-		final BMSPlayerInputProcessor input = getMainController().getInputProcessor();
-		// 各種コントロール入力判定
-		if (enableControl) {
-			if (input.getCursorState()[0]) {
-				if (!cursorpressed) {
-					lanerender.setLanecover(lanerender.getLanecover() - 0.01f);
-					cursorpressed = true;
-				}
-			} else if (input.getCursorState()[1]) {
-				if (!cursorpressed) {
-					lanerender.setLanecover(lanerender.getLanecover() + 0.01f);
-					cursorpressed = true;
-				}
-			} else {
-				cursorpressed = false;
-			}
-			// move lane cover by mouse wheel
-			if (input.getScroll() != 0) {
-				lanerender.setLanecover(lanerender.getLanecover() - input.getScroll() * 0.005f);
-				input.resetScroll();
-			}
-			if (input.startPressed()) {
-				if (autoplay == 0) {
-					// change hi speed by START + Keys
-					boolean[] key = input.getKeystate();
-					if (key[0] || key[2] || key[4] || key[6]) {
-						if (!hschanged) {
-							lanerender.changeHispeed(false);
-							hschanged = true;
-						}
-					} else if (key[1] || key[3] || key[5]) {
-						if (!hschanged) {
-							lanerender.changeHispeed(true);
-							hschanged = true;
-						}
-					} else {
-						hschanged = false;
-					}
-
-					// move lane cover by START + Scratch
-					if (key[7] | key[8]) {
-						long l = System.currentTimeMillis();
-						if (l - lanecovertiming > 50) {
-							lanerender.setLanecover(lanerender.getLanecover() + (key[7] ? 0.001f : -0.001f));
-							lanecovertiming = l;
-						}
-					}
-				}
-				// show-hide lane cover by double-press START
-				if (!startpressed) {
-					long stime = System.currentTimeMillis();
-					if (stime < startpressedtime + 500) {
-						lanerender.setEnableLanecover(!lanerender.isEnableLanecover());
-						startpressedtime = 0;
-					} else {
-						startpressedtime = stime;
-					}
-				}
-				startpressed = true;
-			} else {
-				startpressed = false;
-			}
-		}
-
-		// stop playing
-		if (input.isExitPressed()) {
-			input.setExitPressed(false);
-			stopPlay();
-		}
-		// play speed change (autoplay or replay only)
-		if (autoplay == 1 || autoplay >= 3) {
-			if (input.getNumberState()[1]) {
-				playspeed = 25;
-			} else if (input.getNumberState()[2]) {
-				playspeed = 50;
-			} else if (input.getNumberState()[3]) {
-				playspeed = 200;
-			} else if (input.getNumberState()[4]) {
-				playspeed = 300;
-			} else {
-				playspeed = 100;
-			}
-		}
+		control.input();
+		keyinput.input();
 	}
 
 	public int getState() {
@@ -883,77 +790,6 @@ public class BMSPlayer extends MainState {
 
 	public GrooveGauge getGauge() {
 		return gauge;
-	}
-
-	/**
-	 * キー入力処理用スレッド
-	 *
-	 * @author exch
-	 */
-	class KeyInputThread extends Thread {
-		private boolean stop = false;
-		private long frametimes = 1;
-		private final KeyInputLog[] keylog;
-
-		public KeyInputThread(List<KeyInputLog> keylog) {
-			this.keylog = keylog != null ? keylog.toArray(new KeyInputLog[keylog.size()]) : null;
-		}
-
-		@Override
-		public void run() {
-			int index = 0;
-
-			long framet = 1;
-			final TimeLine[] timelines = model.getAllTimeLines();
-			final BMSPlayerInputProcessor input = getMainController().getInputProcessor();
-
-			final int lasttime = timelines[timelines.length - 1].getTime() + BMSPlayer.TIME_MARGIN;
-
-			int prevtime = -1;
-			while (!stop) {
-				final int time = (int) (getNowTime() - getTimer()[TIMER_PLAY]);
-				// リプレイデータ再生
-				if (time != prevtime) {
-					if (keylog != null) {
-						while (index < keylog.length && keylog[index].time <= time) {
-							final KeyInputLog key = keylog[index];
-							// if(input.getKeystate()[key.keycode] ==
-							// key.pressed) {
-							// System.out.println("押し離しが行われていません : key - " +
-							// key.keycode + " pressed - " + key.pressed +
-							// " time - " + key.time);
-							// }
-							input.getKeystate()[key.keycode] = key.pressed;
-							input.getTime()[key.keycode] = key.time;
-							index++;
-						}
-					}
-					judge.update(time);
-
-					if (prevtime != -1) {
-						final long nowtime = time - prevtime;
-						framet = nowtime < framet ? framet : nowtime;
-					}
-					prevtime = time;
-				} else {
-					try {
-						sleep(0, 500000);
-					} catch (InterruptedException e) {
-					}
-				}
-
-				if (time >= lasttime) {
-					break;
-				}
-			}
-
-			if(keylog != null) {
-				Arrays.fill(input.getKeystate(), false);
-				Arrays.fill(input.getTime(), 0);
-			}
-			frametimes = framet;
-		}
-
 	}
 
 	/**
@@ -1199,7 +1035,7 @@ public class BMSPlayer extends MainState {
 		case OPTION_LOADED:
 			return state != STATE_PRELOAD;
 		case OPTION_LANECOVER1_CHANGING:
-			return startpressed;
+			return getMainController().getInputProcessor().startPressed();
 			case OPTION_1P_PERFECT:
 				return lanerender.getNowJudge()[0] == 1;
 			case OPTION_1P_EARLY:

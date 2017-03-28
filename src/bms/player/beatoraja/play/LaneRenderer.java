@@ -223,7 +223,7 @@ public class LaneRenderer {
 
 	private double basebpm;
 	private double nowbpm;
-
+	
 	public void drawLane(long time, TextureRegion[] noteimage, TextureRegion[][] lnoteimage, TextureRegion[] mnoteimage,
 			TextureRegion[] pnoteimage, TextureRegion[] hnoteimage, Rectangle[] laneregion, float scale) {
 		sprite.end();
@@ -236,7 +236,6 @@ public class LaneRenderer {
 		final boolean showTimeline = (main.getState() == BMSPlayer.STATE_PRACTICE);
 
 		final float hispeed = main.getState() != BMSPlayer.STATE_PRACTICE ? this.hispeed : 1.0f;
-		JudgeManager judge = main.getJudgeManager();
 		final Rectangle[] playerr = skin.getLaneGroupRegion();
 		double bpm = model.getBpm();
 		double nbpm = bpm;
@@ -259,52 +258,6 @@ public class LaneRenderer {
 
 		currentduration = Math.round(region * (1 - (enableLanecover ? lanecover : 0)));
 
-		final boolean[] keystate = main.getMainController().getInputProcessor().getKeystate();
-		for (int lane = 0; lane < laneregion.length; lane++) {
-			// キービームフラグON/OFF
-			if (model.getUseKeys() == 9) {
-				if (keystate[lane]) {
-					if (main.getTimer()[TIMER_KEYON_1P_KEY1 + lane] == Long.MIN_VALUE) {
-						main.getTimer()[TIMER_KEYON_1P_KEY1 + lane] = main.getNowTime();
-						main.getTimer()[TIMER_KEYOFF_1P_KEY1 + lane] = Long.MIN_VALUE;
-					}
-				} else {
-					if (main.getTimer()[TIMER_KEYOFF_1P_KEY1 + lane] == Long.MIN_VALUE) {
-						main.getTimer()[TIMER_KEYOFF_1P_KEY1 + lane] = main.getNowTime();
-						main.getTimer()[TIMER_KEYON_1P_KEY1 + lane] = Long.MIN_VALUE;
-					}
-				}
-				if (judge.getProcessingLongNotes()[lane] != null) {
-					if (main.getTimer()[TIMER_HOLD_1P_KEY1 + lane] == Long.MIN_VALUE) {
-						main.getTimer()[TIMER_HOLD_1P_KEY1 + lane] = main.getNowTime();
-					}
-				} else {
-					main.getTimer()[TIMER_HOLD_1P_KEY1 + lane] = Long.MIN_VALUE;
-				}
-			} else {
-				int key = (model.getUseKeys() > 9 && lane >= 8 ? lane + 1 : lane);
-				int offset = (lane % 8 == 7 ? -1 : (lane % 8)) + (lane >= 8 ? 10 : 0);
-				if (keystate[key] || (key == 7 && keystate[8]) || (key == 16 && keystate[17])) {
-					if (main.getTimer()[TIMER_KEYON_1P_KEY1 + offset] == Long.MIN_VALUE) {
-						main.getTimer()[TIMER_KEYON_1P_KEY1 + offset] = main.getNowTime();
-						main.getTimer()[TIMER_KEYOFF_1P_KEY1 + offset] = Long.MIN_VALUE;
-					}
-				} else {
-					if (main.getTimer()[TIMER_KEYOFF_1P_KEY1 + offset] == Long.MIN_VALUE) {
-						main.getTimer()[TIMER_KEYOFF_1P_KEY1 + offset] = main.getNowTime();
-						main.getTimer()[TIMER_KEYON_1P_KEY1 + offset] = Long.MIN_VALUE;
-					}
-				}
-				if (judge.getProcessingLongNotes()[lane] != null) {
-					if (main.getTimer()[TIMER_HOLD_1P_KEY1 + offset] == Long.MIN_VALUE) {
-						main.getTimer()[TIMER_HOLD_1P_KEY1 + offset] = main.getNowTime();
-					}
-				} else {
-					main.getTimer()[TIMER_HOLD_1P_KEY1 + offset] = Long.MIN_VALUE;
-				}
-			}
-		}
-
 		// 判定エリア表示
 		if (config.isShowjudgearea()) {
 			Gdx.gl.glEnable(GL11.GL_BLEND);
@@ -312,7 +265,7 @@ public class LaneRenderer {
 			shape.begin(ShapeType.Filled);
 			final Color[] color = { Color.valueOf("0000ff20"), Color.valueOf("00ff0020"), Color.valueOf("ffff0020"),
 					Color.valueOf("ff800020"), Color.valueOf("00000000"), Color.valueOf("ff000020") };
-			final int[] judgetime = judge.getJudgeTimeRegion();
+			final int[] judgetime = main.getJudgeManager().getJudgeTimeRegion();
 			for (int i = pos; i < timelines.length; i++) {
 				final TimeLine tl = timelines[i];
 				if (tl.getTime() >= time) {
