@@ -66,17 +66,6 @@ public class LaneRenderer {
 	private final Config config;
 	private PlayConfig playconfig;
 
-	/**
-	 * ボムの表示開始時間
-	 */
-	private int[] judge;
-	/**
-	 * 現在表示中の判定
-	 */
-	private int[] judgenow;
-
-	private int[] judgecombo;
-
 	private int[] laneassign;
 
 	private int currentduration;
@@ -117,10 +106,6 @@ public class LaneRenderer {
 
 	public void init(BMSModel model) {
 		pos = 0;
-		judge = new int[20];
-		judgenow = new int[skin.getJudgeregion()];
-		judgecombo = new int[skin.getJudgeregion()];
-
 		this.model = model;
 		this.timelines = model.getAllTimeLines();
 		if (model.getUseKeys() == 9) {
@@ -512,45 +497,6 @@ public class LaneRenderer {
 			}
 			sprite.draw(le, x, y - height, width, scale);
 		}
-	}
-
-	private final int[] JUDGE_TIMER = { TIMER_JUDGE_1P, TIMER_JUDGE_2P, TIMER_JUDGE_3P };
-
-	public void update(int lane, int judge, int time, int fast) {
-		final int lanelength = (model.getUseKeys() == 9 ? 9 : model.getUseKeys() >= 10 ? 16 : 8);
-		if (judge < 2) {
-			if (model.getUseKeys() == 9) {
-				main.getTimer()[TIMER_BOMB_1P_KEY1 + lane] = main.getNowTime();
-			} else {
-				int offset = (lane % 8 == 7 ? -1 : (lane % 8)) + (lane >= 8 ? 10 : 0);
-				main.getTimer()[TIMER_BOMB_1P_KEY1 + offset] = main.getNowTime();
-			}
-
-		}
-		if (model.getUseKeys() == 9) {
-			this.judge[lane + 1] = judge == 0 ? 1 : judge * 2 + (fast > 0 ? 0 : 1);
-		} else {
-			int offset = (lane % 8 == 7 ? -1 : (lane % 8)) + (lane >= 8 ? 10 : 0);
-			this.judge[offset + 1] = judge == 0 ? 1 : judge * 2 + (fast > 0 ? 0 : 1);
-		}
-		if (judgenow.length > 0) {
-			main.getTimer()[JUDGE_TIMER[lane / (lanelength / judgenow.length)]] = main.getNowTime();
-			judgenow[lane / (lanelength / judgenow.length)] = judge + 1;
-			judgecombo[lane / (lanelength / judgenow.length)] = main.getJudgeManager()
-					.getCourseCombo();
-		}
-	}
-
-	public int[] getJudge() {
-		return judge;
-	}
-
-	public int[] getNowJudge() {
-		return judgenow;
-	}
-
-	public int[] getNowCombo() {
-		return judgecombo;
 	}
 
 	public void dispose() {

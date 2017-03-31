@@ -26,6 +26,10 @@ class KeyInputProccessor {
 
 	private JudgeThread judge;
 
+	private int prevtime = -1;
+	private int scratch1;
+	private int scratch2;
+
 	public KeyInputProccessor(BMSPlayer player, int keys) {
 		this.player = player;
 		ispms = keys == 9;
@@ -88,7 +92,34 @@ class KeyInputProccessor {
 				}
 			}
 		}
-
+		
+		if(prevtime >= 0) {
+			final int deltatime = now - prevtime;
+			scratch1 += 2160 - deltatime;
+			scratch2 += deltatime;
+			if (!ispms) {
+				if (keystate[7]) {
+					scratch1 += deltatime * 2;
+				} else if (keystate[8]) {
+					scratch1 += 2160 - deltatime * 2;
+				}
+				if (keystate[16]) {
+					scratch2 += deltatime * 2;
+				} else if (keystate[17]) {
+					scratch2 += 2160 - deltatime * 2;
+				}
+			}
+			scratch1 %= 2160;
+			scratch2 %= 2160;			
+		}
+		prevtime = now;
+	}
+	
+	public int getScratchState(int i) {
+		if(i == 0) {
+			return scratch1 / 6;
+		}
+		return scratch2 / 6;
 	}
 
 	public void stopJudge() {

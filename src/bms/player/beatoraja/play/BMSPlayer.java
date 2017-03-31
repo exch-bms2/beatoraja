@@ -71,9 +71,6 @@ public class BMSPlayer extends MainState {
 	 */
 	private int notes;
 
-	private int scratch1;
-	private int scratch2;
-
 	static final int TIME_MARGIN = 5000;
 
 	public BMSPlayer(MainController main, PlayerResource resource) {
@@ -167,6 +164,30 @@ public class BMSPlayer extends MainState {
 				score = false;
 			}
 		}
+		
+		int skinmode = (model.getUseKeys() == 7 ? 0
+				: (model.getUseKeys() == 5 ? 1 : (model.getUseKeys() == 14 ? 2 : (model.getUseKeys() == 10 ? 3 : 4))));
+		final String[] defaultskins = { SkinConfig.DEFAULT_PLAY7, SkinConfig.DEFAULT_PLAY5, SkinConfig.DEFAULT_PLAY14,
+				SkinConfig.DEFAULT_PLAY10, SkinConfig.DEFAULT_PLAY9 };
+		try {
+			SkinConfig sc = resource.getConfig().getSkin()[skinmode];
+			if (sc.getPath().endsWith(".json")) {
+				SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
+				setSkin(sl.loadPlaySkin(Paths.get(sc.getPath()), skinmode, sc.getProperty()));
+			} else {
+				LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
+				SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
+				Rectangle srcr = RESOLUTION[header.getResolution()];
+				Rectangle dstr = RESOLUTION[resource.getConfig().getResolution()];
+				LR2PlaySkinLoader dloader = new LR2PlaySkinLoader(srcr.width, srcr.height, dstr.width, dstr.height);
+				setSkin(dloader.loadPlaySkin(Paths.get(sc.getPath()).toFile(), this, header, loader.getOption(),
+						sc.getProperty()));
+			}
+		} catch (Throwable e) {
+			e.printStackTrace();
+			SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
+			setSkin(sl.loadPlaySkin(Paths.get(defaultskins[skinmode]), skinmode, new HashMap()));
+		}
 
 		judge = new JudgeManager(this, model, autoplay == 1, resource.getConstraint());
 		if (exjudge) {
@@ -250,36 +271,13 @@ public class BMSPlayer extends MainState {
 			judge.setCourseMaxcombo(resource.getMaxcombo());
 		}
 		Logger.getGlobal().info("ゲージ設定完了");
-
-		int skinmode = (model.getUseKeys() == 7 ? 0
-				: (model.getUseKeys() == 5 ? 1 : (model.getUseKeys() == 14 ? 2 : (model.getUseKeys() == 10 ? 3 : 4))));
-		final String[] defaultskins = {SkinConfig.DEFAULT_PLAY7, SkinConfig.DEFAULT_PLAY5, SkinConfig.DEFAULT_PLAY14, SkinConfig.DEFAULT_PLAY10, SkinConfig.DEFAULT_PLAY9};
-		try {
-			SkinConfig sc = resource.getConfig().getSkin()[skinmode];
-			if (sc.getPath().endsWith(".json")) {
-				SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
-				setSkin(sl.loadPlaySkin(Paths.get(sc.getPath()), skinmode, sc.getProperty()));
-			} else {
-				LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
-				SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
-				Rectangle srcr = RESOLUTION[header.getResolution()];
-				Rectangle dstr = RESOLUTION[resource.getConfig().getResolution()];
-				LR2PlaySkinLoader dloader = new LR2PlaySkinLoader(srcr.width, srcr.height, dstr.width, dstr.height);
-				setSkin(dloader.loadPlaySkin(Paths.get(sc.getPath()).toFile(), this, header, loader.getOption(),
-						sc.getProperty()));
-			}
-		} catch (Throwable e) {
-			e.printStackTrace();
-			SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
-			setSkin(sl.loadPlaySkin(Paths.get(defaultskins[skinmode]), skinmode, new HashMap()));
-		}
 	}
 
 	public void create() {
 		final MainController main = getMainController();
 		final PlayerResource resource = main.getPlayerResource();
 		control = new ControlInputProcessor(this, autoplay);
-		keyinput = new KeyInputProccessor(this,model.getUseKeys());
+		keyinput = new KeyInputProccessor(this, model.getUseKeys());
 
 		if (resource.getConfig().getSoundpath().length() > 0) {
 			final File soundfolder = new File(resource.getConfig().getSoundpath());
@@ -310,7 +308,6 @@ public class BMSPlayer extends MainState {
 			}
 		}
 
-		((PlaySkin) getSkin()).setBMSPlayer(this);
 		bga = resource.getBGAManager();
 
 		IRScoreData score = main.getPlayDataAccessor().readScoreData(model, config.getLnmode());
@@ -331,11 +328,8 @@ public class BMSPlayer extends MainState {
 
 	private int bestscore;
 	private int rivalscore;
-
-	@Override
-	public void resize(int w, int h) {
-		System.out.println("resize" + w + "," + h);
-	}
+	private int rate;
+	private int drate;
 
 	protected static final int STATE_PRELOAD = 0;
 	protected static final int STATE_PRACTICE = 1;
@@ -430,14 +424,14 @@ public class BMSPlayer extends MainState {
 				Logger.getGlobal().info("STATE_READYに移行");
 			}
 			break;
-		// GET READY
+		// practice終了
 		case STATE_PRACTICE_FINISHED:
 			if (now - getTimer()[TIMER_FADEOUT] > skin.getFadeout()) {
 				input.setDisableDevice(new int[0]);
 				getMainController().changeState(MainController.STATE_SELECTMUSIC);
 			}
 			break;
-
+			// GET READY
 		case STATE_READY:
 			if (now - getTimer()[TIMER_READY] > skin.getPlaystart()) {
 				state = STATE_PLAY;
@@ -458,27 +452,10 @@ public class BMSPlayer extends MainState {
 			break;
 		// プレイ
 		case STATE_PLAY:
+			// TODO fpsが高い時にスローがかからなくなる
 			final long deltatime = now - prevtime;
-
 			getTimer()[TIMER_PLAY] += deltatime * (100 - playspeed) / 100;
 			getTimer()[TIMER_RHYTHM] += deltatime * (100 - lanerender.getNowBPM() * 100 / 60) / 100;
-			scratch1 += 2160 - deltatime;
-			scratch2 += deltatime;
-			if (model.getUseKeys() != 9) {
-				final boolean[] state = input.getKeystate();
-				if (state[7]) {
-					scratch1 += deltatime * 2;
-				} else if (state[8]) {
-					scratch1 += 2160 - deltatime * 2;
-				}
-				if (state[16]) {
-					scratch2 += deltatime * 2;
-				} else if (state[17]) {
-					scratch2 += 2160 - deltatime * 2;
-				}
-			}
-			scratch1 %= 2160;
-			scratch2 %= 2160;
 			final float g = gauge.getValue();
 			if (gaugelog.size() <= (now - getTimer()[TIMER_PLAY]) / 500) {
 				gaugelog.add(g);
@@ -487,11 +464,6 @@ public class BMSPlayer extends MainState {
 				getTimer()[TIMER_GAUGE_MAX_1P] = now;
 			} else if (g < gauge.getMaxValue() && getTimer()[TIMER_GAUGE_MAX_1P] != Long.MIN_VALUE) {
 				getTimer()[TIMER_GAUGE_MAX_1P] = Long.MIN_VALUE;
-			}
-			if (notes == getMainController().getPlayerResource().getSongdata().getNotes()
-					&& getTimer()[TIMER_ENDOFNOTE_1P] == Long.MIN_VALUE
-					&& playtime - TIME_MARGIN < (now - getTimer()[TIMER_PLAY])) {
-				getTimer()[TIMER_ENDOFNOTE_1P] = now;
 			}
 
 			// System.out.println("playing time : " + time);
@@ -513,7 +485,6 @@ public class BMSPlayer extends MainState {
 			}
 
 			prevtime = now;
-
 			break;
 		// 閉店処理
 		case STATE_FAILED:
@@ -586,11 +557,11 @@ public class BMSPlayer extends MainState {
 			break;
 		}
 	}
-	
+
 	public void setPlaySpeed(int playspeed) {
 		this.playspeed = playspeed;
 	}
-	
+
 	public void input() {
 		control.input();
 		keyinput.input();
@@ -670,8 +641,7 @@ public class BMSPlayer extends MainState {
 		replay.sha256 = model.getSHA256();
 		replay.mode = resource.getConfig().getLnmode();
 		replay.date = Calendar.getInstance().getTimeInMillis() / 1000;
-		replay.keylog = getMainController().getInputProcessor().getKeyInputLog()
-				.toArray(new KeyInputLog[0]);
+		replay.keylog = getMainController().getInputProcessor().getKeyInputLog().toArray(new KeyInputLog[0]);
 		replay.pattern = pattern.toArray(new PatternModifyLog[pattern.size()]);
 		replay.rand = model.getRandom();
 		replay.gauge = resource.getConfig().getGauge();
@@ -727,16 +697,6 @@ public class BMSPlayer extends MainState {
 	}
 
 	@Override
-	public void pause() {
-		System.out.println("pause");
-	}
-
-	@Override
-	public void resume() {
-		System.out.println("resume");
-	}
-
-	@Override
 	public void dispose() {
 		super.dispose();
 		lanerender.dispose();
@@ -774,18 +734,22 @@ public class BMSPlayer extends MainState {
 		gauge.update(judge);
 		// System.out.println(
 		// "Now count : " + notes + " - " + totalnotes);
-		lanerender.update(lane, judge, time, fast);
 
 		rate = (this.judge.getJudgeCount(0) * 2 + this.judge.getJudgeCount(1)) * 10000
 				/ getMainController().getPlayerResource().getSongdata().getNotes() / 2;
 		drate = notes == 0 ? 10000
 				: (this.judge.getJudgeCount(0) * 2 + this.judge.getJudgeCount(1)) * 10000 / notes / 2;
 
-		if (notes == getMainController().getPlayerResource().getSongdata().getNotes()
-				&& getTimer()[TIMER_FULLCOMBO_1P] == Long.MIN_VALUE && this.judge.getJudgeCount(3) == 0
+		if (notes == getMainController().getPlayerResource().getSongdata().getNotes()) {
+			//フルコン判定
+			if(getTimer()[TIMER_FULLCOMBO_1P] == Long.MIN_VALUE && this.judge.getJudgeCount(3) == 0
 				&& this.judge.getJudgeCount(4) == 0) {
-			getTimer()[TIMER_FULLCOMBO_1P] = getNowTime();
-		}
+				getTimer()[TIMER_FULLCOMBO_1P] = getNowTime();				
+			}
+			if(getTimer()[TIMER_ENDOFNOTE_1P] == Long.MIN_VALUE) {
+				getTimer()[TIMER_ENDOFNOTE_1P] = getNowTime();					
+			}
+		}				
 	}
 
 	public GrooveGauge getGauge() {
@@ -812,7 +776,7 @@ public class BMSPlayer extends MainState {
 			for (int time = starttime; p < timelines.length && timelines[p].getTime() < time; p++)
 				;
 
-			for (; !stop;) {
+			while (!stop) {
 				final int time = (int) (getNowTime() - getTimer()[TIMER_PLAY]);
 				// BGレーン再生
 				while (p < timelines.length && timelines[p].getTime() <= time) {
@@ -823,7 +787,7 @@ public class BMSPlayer extends MainState {
 				}
 				if (p < timelines.length) {
 					try {
-						final long sleeptime = timelines[p].getTime() - (getNowTime() - getTimer()[TIMER_PLAY]);
+						final long sleeptime = timelines[p].getTime() - time;
 						if (sleeptime > 0) {
 							sleep(sleeptime);
 						}
@@ -884,8 +848,8 @@ public class BMSPlayer extends MainState {
 			return rivalscore;
 		case NUMBER_DIFF_HIGHSCORE:
 			return (judge.getJudgeCount(0) * 2 + judge.getJudgeCount(1)) - (bestscore * notes / song.getNotes());
-			case NUMBER_DIFF_EXSCORE:
-			case NUMBER_DIFF_EXSCORE2:
+		case NUMBER_DIFF_EXSCORE:
+		case NUMBER_DIFF_EXSCORE2:
 		case NUMBER_DIFF_TARGETSCORE:
 			return (judge.getJudgeCount(0) * 2 + judge.getJudgeCount(1)) - (rivalscore * notes / song.getNotes());
 		case NUMBER_SCORE_RATE:
@@ -898,16 +862,16 @@ public class BMSPlayer extends MainState {
 		case NUMBER_MAXCOMBO2:
 			return judge.getMaxcombo();
 		case NUMBER_SCRATCHANGLE_1P:
-			return scratch1 / 6;
+			return keyinput.getScratchState(0);
 		case NUMBER_SCRATCHANGLE_2P:
-			return scratch2 / 6;
-			case VALUE_JUDGE_1P_DURATION:
-			case VALUE_JUDGE_2P_DURATION:
-			case VALUE_JUDGE_3P_DURATION:
-				return judge.getRecentJudgeTiming();
+			return keyinput.getScratchState(1);
+		case VALUE_JUDGE_1P_DURATION:
+		case VALUE_JUDGE_2P_DURATION:
+		case VALUE_JUDGE_3P_DURATION:
+			return judge.getRecentJudgeTiming();
 		}
 		if (id >= VALUE_JUDGE_1P_SCRATCH && id < VALUE_JUDGE_1P_SCRATCH + 20) {
-			return lanerender.getJudge()[id - VALUE_JUDGE_1P_SCRATCH];
+			return judge.getJudge()[id - VALUE_JUDGE_1P_SCRATCH];
 		}
 		return super.getNumberValue(id);
 	}
@@ -967,9 +931,6 @@ public class BMSPlayer extends MainState {
 		return 0;
 	}
 
-	private int rate;
-	private int drate;
-
 	public boolean getBooleanValue(int id) {
 		switch (id) {
 		case OPTION_GAUGE_GROOVE:
@@ -980,8 +941,9 @@ public class BMSPlayer extends MainState {
 					|| gauge instanceof HazardGrooveGauge || gauge instanceof GradeGrooveGauge
 					|| gauge instanceof ExgradeGrooveGauge || gauge instanceof ExhardGradeGrooveGauge;
 		case OPTION_GAUGE_EX:
-			return gauge instanceof AssistEasyGrooveGauge || gauge instanceof EasyGrooveGauge || gauge instanceof ExhardGrooveGauge
-    		|| gauge instanceof ExgradeGrooveGauge || gauge instanceof ExhardGradeGrooveGauge || gauge instanceof HazardGrooveGauge;
+			return gauge instanceof AssistEasyGrooveGauge || gauge instanceof EasyGrooveGauge
+					|| gauge instanceof ExhardGrooveGauge || gauge instanceof ExgradeGrooveGauge
+					|| gauge instanceof ExhardGradeGrooveGauge || gauge instanceof HazardGrooveGauge;
 		case OPTION_F:
 			return true;
 		case OPTION_E:
@@ -1018,11 +980,11 @@ public class BMSPlayer extends MainState {
 			return autoplay == 1;
 		case OPTION_AUTOPLAYOFF:
 			return autoplay != 1;
-			case OPTION_REPLAY_OFF:
-				return autoplay == 0 || autoplay == 2;
-			case OPTION_REPLAY_PLAYING:
-				return autoplay >= 3;
-			case OPTION_BGAON:
+		case OPTION_REPLAY_OFF:
+			return autoplay == 0 || autoplay == 2;
+		case OPTION_REPLAY_PLAYING:
+			return autoplay >= 3;
+		case OPTION_BGAON:
 			return getMainController().getPlayerResource().getConfig().getBga() == Config.BGA_ON
 					|| (getMainController().getPlayerResource().getConfig().getBga() == Config.BGA_AUTO
 							&& (autoplay == 1 || autoplay >= 3));
@@ -1036,24 +998,28 @@ public class BMSPlayer extends MainState {
 			return state != STATE_PRELOAD;
 		case OPTION_LANECOVER1_CHANGING:
 			return getMainController().getInputProcessor().startPressed();
-			case OPTION_1P_PERFECT:
-				return lanerender.getNowJudge()[0] == 1;
-			case OPTION_1P_EARLY:
-				return lanerender.getNowJudge()[0] > 1 && judge.getRecentJudgeTiming() > 0;
-			case OPTION_1P_LATE:
-				return lanerender.getNowJudge()[0] > 1 && judge.getRecentJudgeTiming() < 0;
-			case OPTION_2P_PERFECT:
-				return lanerender.getNowJudge().length > 1 && lanerender.getNowJudge()[1] == 1;
-			case OPTION_2P_EARLY:
-				return lanerender.getNowJudge().length > 1 && lanerender.getNowJudge()[1] > 1 && judge.getRecentJudgeTiming() > 0;
-			case OPTION_2P_LATE:
-				return lanerender.getNowJudge().length > 1 && lanerender.getNowJudge()[1] > 1 && judge.getRecentJudgeTiming() < 0;
-			case OPTION_3P_PERFECT:
-				return lanerender.getNowJudge().length > 2 && lanerender.getNowJudge()[2] == 1;
-			case OPTION_3P_EARLY:
-				return lanerender.getNowJudge().length > 2 && lanerender.getNowJudge()[2] > 1 && judge.getRecentJudgeTiming() > 0;
-			case OPTION_3P_LATE:
-				return lanerender.getNowJudge().length > 2 && lanerender.getNowJudge()[2] > 1 && judge.getRecentJudgeTiming() < 0;
+		case OPTION_1P_PERFECT:
+			return judge.getNowJudge()[0] == 1;
+		case OPTION_1P_EARLY:
+			return judge.getNowJudge()[0] > 1 && judge.getRecentJudgeTiming() > 0;
+		case OPTION_1P_LATE:
+			return judge.getNowJudge()[0] > 1 && judge.getRecentJudgeTiming() < 0;
+		case OPTION_2P_PERFECT:
+			return judge.getNowJudge().length > 1 && judge.getNowJudge()[1] == 1;
+		case OPTION_2P_EARLY:
+			return judge.getNowJudge().length > 1 && judge.getNowJudge()[1] > 1
+					&& judge.getRecentJudgeTiming() > 0;
+		case OPTION_2P_LATE:
+			return judge.getNowJudge().length > 1 && judge.getNowJudge()[1] > 1
+					&& judge.getRecentJudgeTiming() < 0;
+		case OPTION_3P_PERFECT:
+			return judge.getNowJudge().length > 2 && judge.getNowJudge()[2] == 1;
+		case OPTION_3P_EARLY:
+			return judge.getNowJudge().length > 2 && judge.getNowJudge()[2] > 1
+					&& judge.getRecentJudgeTiming() > 0;
+		case OPTION_3P_LATE:
+			return judge.getNowJudge().length > 2 && judge.getNowJudge()[2] > 1
+					&& judge.getRecentJudgeTiming() < 0;
 		}
 		return super.getBooleanValue(id);
 	}

@@ -56,8 +56,8 @@ public class SkinJudge extends SkinObject {
 
     @Override
     public void draw(SpriteBatch sprite, long time, MainState state) {
-        final int judgenow = ((BMSPlayer)state).getLanerender().getNowJudge()[index] - 1;
-        final int judgecombo = ((BMSPlayer)state).getLanerender().getNowCombo()[index];
+        final int judgenow = ((BMSPlayer)state).getJudgeManager().getNowJudge()[index] - 1;
+        final int judgecombo = ((BMSPlayer)state).getJudgeManager().getNowCombo()[index];
 
         if(judgenow < 0) {
             return;
