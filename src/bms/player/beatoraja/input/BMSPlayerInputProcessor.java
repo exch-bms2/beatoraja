@@ -25,6 +25,8 @@ public class BMSPlayerInputProcessor {
 
 	private BMControllerInputProcessor[] bminput;
 
+	private MidiInputProcessor midiinput;
+
 	public BMSPlayerInputProcessor(Rectangle resolution) {
 		kbinput = new KeyBoardInputProcesseor(this, new int[] { Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.F, Keys.V,
 				Keys.SHIFT_LEFT, Keys.CONTROL_LEFT, Keys.COMMA, Keys.L, Keys.PERIOD, Keys.SEMICOLON, Keys.SLASH,
@@ -41,6 +43,7 @@ public class BMSPlayerInputProcessor {
 		}
                 
 		this.bminput = bminput.toArray(new BMControllerInputProcessor[0]);
+		midiinput = new MidiInputProcessor();
 	}
 
 	/**
