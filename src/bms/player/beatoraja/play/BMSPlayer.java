@@ -299,6 +299,7 @@ public class BMSPlayer extends MainState {
 				: (model.getUseKeys() == 10 || model.getUseKeys() == 14 ? config.getMode14() : config.getMode9()));
 		input.setKeyassign(pc.getKeyassign());
 		input.setControllerConfig(pc.getController());
+		input.setMidiConfig(pc.getMidiConfig());
 		lanerender = new LaneRenderer(this, model);
 		for (int i : resource.getConstraint()) {
 			if (i == TableData.NO_HISPEED) {

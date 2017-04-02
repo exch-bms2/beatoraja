@@ -42,17 +42,20 @@ public class PlayConfig {
 			Keys.UNKNOWN, Keys.SHIFT_RIGHT, Keys.CONTROL_RIGHT, Keys.Q, Keys.W };
 	
 	private ControllerConfig[] controller = new ControllerConfig[1];
+
+	private MidiConfig midi = new MidiConfig();
 	
 	public PlayConfig() {
 		controller[0] = new ControllerConfig();
 	}
 	
-	public PlayConfig(int[] keyassign, int[][] controller) {
+	public PlayConfig(int[] keyassign, int[][] controller, MidiConfig midi) {
 		this.keyassign = keyassign;
 		this.controller = new ControllerConfig[controller.length];
 		for(int i = 0;i < controller.length;i++) {
 			this.controller[i] = new ControllerConfig(controller[i]);
 		}
+		this.midi = midi;
 	}
 		
 	public int[] getKeyassign() {
@@ -65,6 +68,10 @@ public class PlayConfig {
 
 	public ControllerConfig[] getController() {
 		return controller;
+	}
+
+	public MidiConfig getMidiConfig() {
+		return midi;
 	}
 
 	public void setController(ControllerConfig[] controllerassign) {
@@ -152,6 +159,74 @@ public class PlayConfig {
 		}
 		
 		
+	}
+
+	public static class MidiConfig {
+
+		public static class Assign {
+			public enum Type {
+				NOTE,
+				PITCH,
+				CONTROL_CHANGE,
+			}
+			public Type type;
+			public int value;
+			public Assign() {
+				this.type = Type.NOTE;
+				this.value = 0;
+			}
+			public Assign(Type type, int value) {
+				this.type = type;
+				this.value = value;
+			}
+		}
+
+		private Assign[] assigns;
+
+		public Assign[] getAssigns() { return assigns; }
+
+		public MidiConfig() {
+			// 7keys
+			assigns = new Assign[11];
+			for (int i=0; i<7; i++) {
+				assigns[i] = new Assign(Assign.Type.NOTE, 53 + i);
+			}
+			assigns[7] = new Assign(Assign.Type.NOTE, 51);
+			assigns[8] = new Assign(Assign.Type.NOTE, 49);
+			assigns[9] = new Assign(Assign.Type.NOTE, 48);
+			assigns[10] = new Assign(Assign.Type.NOTE, 49);
+		}
+
+		public static MidiConfig default7() {
+			MidiConfig config = new MidiConfig();
+			return config;
+		}
+
+		public static MidiConfig default14() {
+			MidiConfig config = new MidiConfig();
+			config.assigns = new Assign[20];
+			for (int i=0; i<7; i++) {
+				// 1P keys
+				config.assigns[i] = new Assign(Assign.Type.NOTE, 53 + i);
+				// 2P keys
+				config.assigns[9 + i] = new Assign(Assign.Type.NOTE, 65 + i);
+			}
+			// 1P turntables
+			config.assigns[7] = new Assign(Assign.Type.NOTE, 51);
+			config.assigns[8] = new Assign(Assign.Type.NOTE, 49);
+			// 2P turntables
+			config.assigns[16] = new Assign(Assign.Type.NOTE, 73);
+			config.assigns[17] = new Assign(Assign.Type.NOTE, 75);
+			// start/select
+			config.assigns[18] = new Assign(Assign.Type.NOTE, 48);
+			config.assigns[19] = new Assign(Assign.Type.NOTE, 49);
+			return config;
+		}
+
+		public static MidiConfig default9() {
+			MidiConfig config = new MidiConfig();
+			return config;
+		}
 	}
 
 }

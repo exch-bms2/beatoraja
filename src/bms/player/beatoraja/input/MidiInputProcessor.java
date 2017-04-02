@@ -1,30 +1,11 @@
 package bms.player.beatoraja.input;
 
-import sun.security.util.BitArray;
+import bms.player.beatoraja.PlayConfig.MidiConfig;
 
 import javax.sound.midi.*;
 import java.util.ArrayList;
 
 public class MidiInputProcessor implements AutoCloseable {
-
-	public static class MidiState {
-
-		public int MaxKeys = 128;
-
-		BitArray keys = new BitArray(MaxKeys);
-
-		public void noteOn(int number) {
-			if (number >= 0 && number < MaxKeys) {
-				keys.set(number, true);
-			}
-		}
-
-		public void noteOff(int number) {
-			if (number >= 0 && number < MaxKeys) {
-				keys.set(number, false);
-			}
-		}
-	}
 
 	class MidiReceiver implements Receiver {
 
@@ -33,13 +14,13 @@ public class MidiInputProcessor implements AutoCloseable {
 				ShortMessage sm = (ShortMessage)message;
 				switch (sm.getCommand()) {
 					case ShortMessage.NOTE_OFF:
-						state.noteOff(sm.getData1());
+						noteOff(sm.getData1(), timeStamp);
 						break;
 					case ShortMessage.NOTE_ON:
 						if (sm.getData2() == 0) {
-							state.noteOff(sm.getData1());
+							noteOff(sm.getData1(), timeStamp);
 						} else {
-							state.noteOn(sm.getData1());
+							noteOn(sm.getData1(), timeStamp);
 						}
 						break;
 				}
@@ -50,11 +31,19 @@ public class MidiInputProcessor implements AutoCloseable {
 		}
 	}
 
+	BMSPlayerInputProcessor bmsPlayerInputProcessor;
 	ArrayList<MidiDevice> devices = new ArrayList<>();
 	MidiReceiver receiver = new MidiReceiver();
-	MidiState state = new MidiState();
 
-	public MidiInputProcessor() {
+	// milliseconds
+	long opentime = 0;
+	long timeDiff = 0;
+
+	// MIDI note number -> game key number
+	int[] keyMap = new int[128];
+
+	public MidiInputProcessor(BMSPlayerInputProcessor inputProcessor) {
+		this.bmsPlayerInputProcessor = inputProcessor;
 		MidiDevice.Info[] infos = MidiSystem.getMidiDeviceInfo();
 		for (MidiDevice.Info info : infos) {
 			try {
@@ -75,11 +64,48 @@ public class MidiInputProcessor implements AutoCloseable {
 				e.printStackTrace();
 			}
 		}
+		opentime = System.nanoTime() / 1000000;
 	}
 
 	public void close() {
 		for (MidiDevice device : devices) {
 			device.close();
 		}
+	}
+
+	public void setConfig(MidiConfig config) {
+		MidiConfig.Assign[] assigns = config.getAssigns();
+		for (int i=0; i<assigns.length; i++) {
+			switch (assigns[i].type) {
+				case NOTE:
+					if (assigns[i].value >= 0 && assigns[i].value < 128) {
+						keyMap[assigns[i].value] = i;
+					}
+					break;
+				case PITCH:
+					// TODO: implement
+					break;
+				case CONTROL_CHANGE:
+					// TODO: implement
+					break;
+			}
+		}
+	}
+
+	public void setStartTime(long starttime) {
+		if (opentime != 0) {
+			timeDiff = starttime - opentime;
+		}
+	}
+
+	void noteOff(int num, long timeStamp) {
+		long time = timeStamp/1000 - timeDiff;
+		bmsPlayerInputProcessor.keyChanged(0, time, keyMap[num], false);
+	}
+
+	void noteOn(int num, long timeStamp) {
+		long time = timeStamp/1000 - timeDiff;
+		//time = (System.nanoTime() / 1000 - starttime) / 1000;
+		bmsPlayerInputProcessor.keyChanged(0, time, keyMap[num], true);
 	}
 }

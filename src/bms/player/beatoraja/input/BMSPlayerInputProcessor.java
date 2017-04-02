@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import bms.player.beatoraja.PlayConfig.ControllerConfig;
+import bms.player.beatoraja.PlayConfig.MidiConfig;
 import bms.player.beatoraja.input.BMControllerInputProcessor.BMKeys;
 
 import com.badlogic.gdx.Input.Keys;
@@ -43,7 +44,8 @@ public class BMSPlayerInputProcessor {
 		}
                 
 		this.bminput = bminput.toArray(new BMControllerInputProcessor[0]);
-		midiinput = new MidiInputProcessor();
+		midiinput = new MidiInputProcessor(this);
+		midiinput.open();
 	}
 
 	/**
@@ -132,6 +134,10 @@ public class BMSPlayerInputProcessor {
 		}
 	}
 
+	public void setMidiConfig(MidiConfig config) {
+		midiinput.setConfig(config);
+	}
+
 	public void setStartTime(long starttime) {
 		this.starttime = starttime;
 		if (starttime != 0) {
@@ -142,6 +148,7 @@ public class BMSPlayerInputProcessor {
 				bm.clear();
 			}
 		}
+		midiinput.setStartTime(starttime);
 	}
 
 	public long getStartTime() {
@@ -326,5 +333,9 @@ public class BMSPlayerInputProcessor {
 		for (BMControllerInputProcessor controller : bminput) {
 			controller.poll(now);
 		}		
-	}	
+	}
+
+	public void dispose() {
+		midiinput.close();
+	}
 }
