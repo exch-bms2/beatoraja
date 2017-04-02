@@ -17,7 +17,7 @@ import com.badlogic.gdx.math.Rectangle;
  */
 public class SkinNote extends SkinObject {
 
-	// TODO Lane毎にスキンオブジェクト化してLaneRegionをDestination化
+	// TODO Note毎に判定ライン上の描画位置をDestinationで指定する(Note毎のscaleを実現するため。判定ラインからの距離はoffsetYで表現)
 
 	private SkinLane[] lanes;
 
@@ -30,20 +30,11 @@ public class SkinNote extends SkinObject {
 	private TextureRegion[] cprocessednote;
 	private Rectangle[] claneregion;
 
-	public SkinNote(TextureRegion[][] note, TextureRegion[][][] longnote, TextureRegion[][] minenote, float scale) {
-		this(note, longnote, minenote, 0, scale);
-	}
-
-	public SkinNote(TextureRegion[][] note, TextureRegion[][][] longnote, TextureRegion[][] minenote,
-			int cycle, float scale) {
+	public SkinNote(SkinSource[] note, SkinSource[][] longnote, SkinSource[] minenote, float scale) {
 		this.scale = scale;
 		lanes = new SkinLane[note.length];
 		for(int i = 0;i < lanes.length;i++) {
-			TextureRegion[][] ln = new TextureRegion[10][];
-			for(int t = 0;t < 10;t++) {
-				ln[t] = longnote[t][i];
-			}
-			lanes[i] = new SkinLane(note[i],ln, minenote[i], cycle, scale);
+			lanes[i] = new SkinLane(note[i],longnote[i], minenote[i], scale);
 		}
 		cnote = new TextureRegion[note.length];
 		clongnote = new TextureRegion[10][note.length];
@@ -51,15 +42,6 @@ public class SkinNote extends SkinObject {
 		chiddennote = new TextureRegion[note.length];
 		cprocessednote = new TextureRegion[note.length];
 		claneregion = new Rectangle[note.length];
-
-		Pixmap hn = new Pixmap(note[0][0].getRegionWidth(), 8, Pixmap.Format.RGBA8888);
-		hn.setColor(Color.ORANGE);
-		hn.drawRectangle(0, 0, hn.getWidth(), hn.getHeight());
-		hn.drawRectangle(1, 1, hn.getWidth() - 2, hn.getHeight() - 2);
-		Pixmap pn = new Pixmap(note[0][0].getRegionWidth(), note[0][0].getRegionHeight(), Pixmap.Format.RGBA8888);
-		pn.setColor(Color.CYAN);
-		pn.drawRectangle(0, 0, hn.getWidth(), hn.getHeight());
-		pn.drawRectangle(1, 1, hn.getWidth() - 2, hn.getHeight() - 2);
 	}
 
 	public void setLaneRegion(Rectangle[] region) {
@@ -120,12 +102,6 @@ public class SkinNote extends SkinObject {
 
 		private float scale;
 
-		private TextureRegion[] cnote;
-		private TextureRegion[][] clongnote;
-		private TextureRegion[] cminenote;
-		private TextureRegion[] chiddennote;
-		private TextureRegion[] cprocessednote;
-
 		/**
 		 * 不可視ノーツ画像
 		 */
@@ -135,29 +111,17 @@ public class SkinNote extends SkinObject {
 		 */
 		private SkinSource processednote;
 
-		public SkinLane(TextureRegion[] note, TextureRegion[][] longnote, TextureRegion[] minenote, float scale) {
-			this(note, longnote, minenote, 0, scale);
-		}
-
-		public SkinLane(TextureRegion[] note, TextureRegion[][] longnote, TextureRegion[] minenote,
-						int cycle, float scale) {
+		public SkinLane(SkinSource note, SkinSource[] longnote, SkinSource minenote, float scale) {
 			this.scale = scale;
-			this.note = new SkinSourceImage(note, 0, cycle);
-			for(int type = 0;type < 10;type++) {
-				this.longnote[type] = new SkinSourceImage(longnote[type], 0, cycle);
-			}
-			this.minenote = new SkinSourceImage(minenote, 0, cycle);
-			cnote = new TextureRegion[note.length];
-			clongnote = new TextureRegion[10][note.length];
-			cminenote = new TextureRegion[note.length];
-			chiddennote = new TextureRegion[note.length];
-			cprocessednote = new TextureRegion[note.length];
+			this.note = note;
+			this.longnote = longnote;
+			this.minenote = minenote;
 
-			Pixmap hn = new Pixmap(note[0].getRegionWidth(), 8, Pixmap.Format.RGBA8888);
+			Pixmap hn = new Pixmap(32, 8, Pixmap.Format.RGBA8888);
 			hn.setColor(Color.ORANGE);
 			hn.drawRectangle(0, 0, hn.getWidth(), hn.getHeight());
 			hn.drawRectangle(1, 1, hn.getWidth() - 2, hn.getHeight() - 2);
-			Pixmap pn = new Pixmap(note[0].getRegionWidth(), note[0].getRegionHeight(), Pixmap.Format.RGBA8888);
+			Pixmap pn = new Pixmap(32, 8, Pixmap.Format.RGBA8888);
 			pn.setColor(Color.CYAN);
 			pn.drawRectangle(0, 0, hn.getWidth(), hn.getHeight());
 			pn.drawRectangle(1, 1, hn.getWidth() - 2, hn.getHeight() - 2);

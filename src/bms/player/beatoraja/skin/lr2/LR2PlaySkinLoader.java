@@ -21,13 +21,12 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 	private Rectangle[] playerr;
 
 	private PlaySkin skin;
-	private TextureRegion[][] note = new TextureRegion[8][];
-	private TextureRegion[][] lnstart = new TextureRegion[8][];
-	private TextureRegion[][] lnend = new TextureRegion[8][];
-	private TextureRegion[][] lnbody = new TextureRegion[8][];
-	private TextureRegion[][] lnbodya = new TextureRegion[8][];
-	private TextureRegion[][] mine = new TextureRegion[8][];
-	private int notecycle;
+	private SkinSource[] note = new SkinSource[8];
+	private SkinSource[] lnstart = new SkinSource[8];
+	private SkinSource[] lnend = new SkinSource[8];
+	private SkinSource[] lnbody = new SkinSource[8];
+	private SkinSource[] lnbodya = new SkinSource[8];
+	private SkinSource[] mine = new SkinSource[8];
 	private Rectangle[] laner = new Rectangle[8];
 	private SkinGauge gauger = null;
 	private SkinImage line;
@@ -138,8 +137,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 				if (lane < note.length && note[lane] == null) {
 					TextureRegion[] images = getSourceImage(values);
 					if (images != null) {
-						note[lane] = images;
-						notecycle = values[9];
+						note[lane] = new SkinSourceImage(images, values[10], values[9]);
 					}
 				}
 			}
@@ -161,7 +159,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 				if (lane < lnend.length && lnend[lane] == null) {
 					TextureRegion[] images = getSourceImage(values);
 					if (images != null) {
-						lnend[lane] = images;
+						lnend[lane] = new SkinSourceImage(images, values[10], values[9]);
 					}
 				}
 			}
@@ -183,7 +181,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 				if (lane < lnstart.length && lnstart[lane] == null) {
 					TextureRegion[] images = getSourceImage(values);
 					if (images != null) {
-						lnstart[lane] = images;
+						lnstart[lane] = new SkinSourceImage(images, values[10], values[9]);
 					}
 				}
 			}
@@ -206,8 +204,8 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 				if (lane < lnbody.length && lnbody[lane] == null) {
 					TextureRegion[] images = getSourceImage(values);
 					if (images != null) {
-						lnbody[lane] = images;
-						lnbodya[lane] = new TextureRegion[] { (images[images.length - 1]) };
+						lnbody[lane] = new SkinSourceImage(images, 0, 0);
+						lnbodya[lane] = new SkinSourceImage(images, values[10], values[9]);
 					}
 				}
 			}
@@ -230,7 +228,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 				if (lane < mine.length && mine[lane] == null) {
 					TextureRegion[] images = getSourceImage(values);
 					if (images != null) {
-						mine[lane] = images;
+						mine[lane] = new SkinSourceImage(images, values[10], values[9]);
 					}
 				}
 			}
@@ -255,8 +253,15 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 							values[5] * dstw / srcw, (values[4] + values[6]) * dsth / srch);
 				}
 				if (lanerender == null) {
-					lanerender = new SkinNote(note, new TextureRegion[][][] { lnend, lnstart, lnbodya, lnbody, lnend,
-							lnstart, lnbodya, lnbody, lnbodya, lnbody }, mine, notecycle, values[6] * dsth / srch);
+					final SkinSource[][] lns = new SkinSource[][]{ lnend, lnstart, lnbodya, lnbody, lnend,
+							lnstart, lnbodya, lnbody, lnbodya, lnbody };
+					final SkinSource[][] lnss = new SkinSource[lnstart.length][10];
+					for(int i = 0;i < 10;i++) {
+						for(int j = 0;j < lnstart.length;j++) {
+							lnss[j][i] = lns[i][j];
+						}
+					}
+					lanerender = new SkinNote(note, lnss, mine, values[6] * dsth / srch);
 					skin.add(lanerender);
 				}
 			}
@@ -629,22 +634,22 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 		skin = new PlaySkin(srcw, srch, dstw, dsth);
 		playerr = new Rectangle[] { new Rectangle() };
 		if (header.getMode() == 2 || header.getMode() == 3) {
-			note = new TextureRegion[16][];
-			lnstart = new TextureRegion[16][];
-			lnend = new TextureRegion[16][];
-			lnbody = new TextureRegion[16][];
-			lnbodya = new TextureRegion[16][];
-			mine = new TextureRegion[16][];
+			note = new SkinSource[16];
+			lnstart = new SkinSource[16];
+			lnend = new SkinSource[16];
+			lnbody = new SkinSource[16];
+			lnbodya = new SkinSource[16];
+			mine = new SkinSource[16];
 			laner = new Rectangle[16];
 			playerr = new Rectangle[] { new Rectangle(), new Rectangle() };
 		}
 		if (header.getMode() == 4) {
-			note = new TextureRegion[9][];
-			lnstart = new TextureRegion[9][];
-			lnend = new TextureRegion[9][];
-			lnbody = new TextureRegion[9][];
-			lnbodya = new TextureRegion[9][];
-			mine = new TextureRegion[9][];
+			note = new SkinSource[9];
+			lnstart = new SkinSource[9];
+			lnend = new SkinSource[9];
+			lnbody = new SkinSource[9];
+			lnbodya = new SkinSource[9];
+			mine = new SkinSource[9];
 			laner = new Rectangle[9];
 		}
 		this.loadSkin(skin, f, player, header, option, property);

@@ -327,8 +327,8 @@ public class SkinLoader {
 					}
 					// note (playskin only)
 					if(sk.note != null && dst.id.equals(sk.note.id)) {
-						TextureRegion[][] notes = getNoteTexture(sk.note.note, p);
-						TextureRegion[][][] lns = new TextureRegion[10][][];
+						SkinSource[] notes = getNoteTexture(sk.note.note, p);
+						SkinSource[][] lns = new SkinSource[10][];
 						lns[0] = getNoteTexture(sk.note.lnend, p);
 						lns[1] = getNoteTexture(sk.note.lnstart, p);
 						lns[2] = getNoteTexture(sk.note.lnbody, p);
@@ -339,7 +339,14 @@ public class SkinLoader {
 						lns[7] = getNoteTexture(sk.note.hcnactive, p);
 						lns[8] = getNoteTexture(sk.note.hcndamage, p);
 						lns[9] = getNoteTexture(sk.note.hcnreactive, p);
-						TextureRegion[][] mines = getNoteTexture(sk.note.mine, p);
+						final SkinSource[][] lnss = new SkinSource[lns[0].length][10];
+						for(int i = 0;i < 10;i++) {
+							for(int j = 0;j < lns[0].length;j++) {
+								lnss[j][i] = lns[i][j];
+							}
+						}
+
+						SkinSource[] mines = getNoteTexture(sk.note.mine, p);
 
 						Rectangle[] region = new Rectangle[sk.note.dst.length];
 						float dx = dstr.width / sk.w;
@@ -367,7 +374,7 @@ public class SkinLoader {
 						}
 						((PlaySkin)skin).setLine(lines);
 
-						SkinNote sn = new SkinNote(notes, lns, mines, 0, notes[0][0].getRegionHeight());
+						SkinNote sn = new SkinNote(notes, lnss, mines, ((SkinSourceImage)notes[0]).getImages()[0][0].getRegionHeight() * dy);
 						sn.setLaneRegion(region);
 						((PlaySkin)skin).setLaneGroupRegion(gregion);
 						obj = sn;
@@ -695,15 +702,15 @@ public class SkinLoader {
 		return null;
 	}
 
-	private TextureRegion[][] getNoteTexture(String[] images, Path p) {
-		TextureRegion[][] noteimages = new TextureRegion[images.length][];
+	private SkinSource[] getNoteTexture(String[] images, Path p) {
+		SkinSource[] noteimages = new SkinSource[images.length];
 		for(int i = 0;i < images.length;i++) {
 			for (Image img : sk.image) {
 				if (images[i].equals(img.id)) {
 					Image note = img;
 					Texture tex = getTexture(note.src, p);
-					noteimages[i] = getSourceImage(tex,  note.x, note.y, note.w,
-							note.h, note.divx, note.divy);
+					noteimages[i] = new SkinSourceImage(getSourceImage(tex,  note.x, note.y, note.w,
+							note.h, note.divx, note.divy), note.timer, note.cycle);
 					break;
 				}
 			}
