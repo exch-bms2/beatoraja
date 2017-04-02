@@ -4,6 +4,7 @@ import bms.player.beatoraja.PlayConfig.MidiConfig;
 
 import javax.sound.midi.*;
 import java.util.ArrayList;
+import java.util.logging.Logger;
 
 public class MidiInputProcessor implements AutoCloseable {
 
@@ -28,7 +29,7 @@ public class MidiInputProcessor implements AutoCloseable {
 				MidiDevice device = MidiSystem.getMidiDevice(info);
 				devices.add(device);
 			} catch (MidiUnavailableException e) {
-				e.printStackTrace();
+				Logger.getGlobal().warning("Cannot get MIDI device `" + info.getName() + "`: " + e.getMessage());
 			}
 		}
 
@@ -43,7 +44,7 @@ public class MidiInputProcessor implements AutoCloseable {
 				device.open();
 				device.getTransmitter().setReceiver(receiver);
 			} catch (MidiUnavailableException e) {
-				e.printStackTrace();
+				Logger.getGlobal().warning("Cannot open or receive events from MIDI device `" + device.getDeviceInfo().getName() + "`: " + e.getMessage());
 			}
 		}
 	}
