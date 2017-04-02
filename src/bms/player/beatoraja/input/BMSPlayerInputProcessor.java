@@ -46,6 +46,7 @@ public class BMSPlayerInputProcessor {
 		this.bminput = bminput.toArray(new BMControllerInputProcessor[0]);
 		midiinput = new MidiInputProcessor(this);
 		midiinput.open();
+		midiinput.setConfig(MidiConfig.default7());
 	}
 
 	/**

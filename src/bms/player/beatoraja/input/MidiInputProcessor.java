@@ -4,6 +4,7 @@ import bms.player.beatoraja.PlayConfig.MidiConfig;
 
 import javax.sound.midi.*;
 import java.util.ArrayList;
+import java.util.function.Consumer;
 import java.util.logging.Logger;
 
 public class MidiInputProcessor implements AutoCloseable {
@@ -19,7 +20,7 @@ public class MidiInputProcessor implements AutoCloseable {
 
 	// MIDI note number -> game key number
 	// NOTE: この方法だと1つのMIDIキーに複数キー割り当てが不可能
-	int[] keyMap = new int[MaxKeys];
+	Consumer<Boolean>[] keyMap = new Consumer[MaxKeys];
 
 	public MidiInputProcessor(BMSPlayerInputProcessor inputProcessor) {
 		this.bmsPlayerInputProcessor = inputProcessor;
@@ -34,7 +35,7 @@ public class MidiInputProcessor implements AutoCloseable {
 		}
 
 		for (int i=0; i<MaxKeys; i++) {
-			keyMap[i] = -1;
+			keyMap[i] = null;
 		}
 	}
 
@@ -57,43 +58,55 @@ public class MidiInputProcessor implements AutoCloseable {
 
 	public void setConfig(MidiConfig config) {
 		for (int i=0; i<MaxKeys; i++) {
-			keyMap[i] = -1;
+			keyMap[i] = null;
 		}
 
-		MidiConfig.Assign[] assigns = config.getAssigns();
-		for (int i=0; i<assigns.length; i++) {
-			switch (assigns[i].type) {
-				case NOTE:
-					if (assigns[i].value >= 0 && assigns[i].value < 128) {
-						keyMap[assigns[i].value] = i;
-					}
-					break;
-				case PITCH:
-					// TODO: implement
-					break;
-				case CONTROL_CHANGE:
-					// TODO: implement
-					break;
-			}
+		MidiConfig.Assign[] keys = config.getKeys();
+		for (int i=0; i<keys.length; i++) {
+			final int key = i;
+			setHandler(keys[i], (Boolean pressed) -> {
+				bmsPlayerInputProcessor.keyChanged(0, currentTime(), key, pressed);
+			});
 		}
+
+		setHandler(config.getStart(), (Boolean pressed) -> {
+			bmsPlayerInputProcessor.startChanged(pressed);
+		});
+		setHandler(config.getSelect(), (Boolean pressed) -> {
+			bmsPlayerInputProcessor.setSelectPressed(pressed);
+		});
 	}
 
 	public void setStartTime(long starttime) {
 		this.starttime = starttime;
 	}
 
-	void noteOff(int num) {
-		if (keyMap[num] < 0) {
+	void setHandler(MidiConfig.Assign control, Consumer<Boolean> handler) {
+		if (control == null)
 			return;
+		switch (control.type) {
+			case NOTE:
+				if (control.value >= 0 && control.value < MaxKeys) {
+					keyMap[control.value] = handler;
+				}
+				break;
+			case PITCH_BEND:
+				break;
+			case CONTROL_CHANGE:
+				break;
 		}
-		bmsPlayerInputProcessor.keyChanged(0, currentTime(), keyMap[num], false);
+	}
+
+	void noteOff(int num) {
+		if (keyMap[num] != null) {
+			keyMap[num].accept(false);
+		}
 	}
 
 	void noteOn(int num) {
-		if (keyMap[num] < 0) {
-			return;
+		if (keyMap[num] != null) {
+			keyMap[num].accept(true);
 		}
-		bmsPlayerInputProcessor.keyChanged(0, currentTime(), keyMap[num], true);
 	}
 
 	long currentTime() {
