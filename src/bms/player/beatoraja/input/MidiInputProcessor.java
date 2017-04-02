@@ -31,6 +31,8 @@ public class MidiInputProcessor implements AutoCloseable {
 		}
 	}
 
+	static final int MaxKeys = 128;
+
 	BMSPlayerInputProcessor bmsPlayerInputProcessor;
 	ArrayList<MidiDevice> devices = new ArrayList<>();
 	MidiReceiver receiver = new MidiReceiver();
@@ -41,7 +43,8 @@ public class MidiInputProcessor implements AutoCloseable {
 	long timeDiff = 0;
 
 	// MIDI note number -> game key number
-	int[] keyMap = new int[128];
+	// NOTE: この方法だと1つのMIDIキーに複数キー割り当てが不可能
+	int[] keyMap = new int[MaxKeys];
 
 	public MidiInputProcessor(BMSPlayerInputProcessor inputProcessor) {
 		this.bmsPlayerInputProcessor = inputProcessor;
@@ -53,6 +56,10 @@ public class MidiInputProcessor implements AutoCloseable {
 			} catch (MidiUnavailableException e) {
 				e.printStackTrace();
 			}
+		}
+
+		for (int i=0; i<MaxKeys; i++) {
+			keyMap[i] = -1;
 		}
 	}
 
@@ -75,6 +82,10 @@ public class MidiInputProcessor implements AutoCloseable {
 	}
 
 	public void setConfig(MidiConfig config) {
+		for (int i=0; i<MaxKeys; i++) {
+			keyMap[i] = -1;
+		}
+
 		MidiConfig.Assign[] assigns = config.getAssigns();
 		for (int i=0; i<assigns.length; i++) {
 			switch (assigns[i].type) {
@@ -99,11 +110,17 @@ public class MidiInputProcessor implements AutoCloseable {
 	}
 
 	void noteOff(int num, long timeStamp) {
+		if (keyMap[num] < 0) {
+			return;
+		}
 		long time = System.nanoTime() / 1000000 - starttime;
 		bmsPlayerInputProcessor.keyChanged(0, time, keyMap[num], false);
 	}
 
 	void noteOn(int num, long timeStamp) {
+		if (keyMap[num] < 0) {
+			return;
+		}
 		long time = System.nanoTime() / 1000000 - starttime;
 		bmsPlayerInputProcessor.keyChanged(0, time, keyMap[num], true);
 	}
