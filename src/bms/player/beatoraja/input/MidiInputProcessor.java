@@ -7,30 +7,6 @@ import java.util.ArrayList;
 
 public class MidiInputProcessor implements AutoCloseable {
 
-	class MidiReceiver implements Receiver {
-
-		public void send(MidiMessage message, long timeStamp) {
-			if (message instanceof ShortMessage) {
-				ShortMessage sm = (ShortMessage)message;
-				switch (sm.getCommand()) {
-					case ShortMessage.NOTE_OFF:
-						noteOff(sm.getData1(), timeStamp);
-						break;
-					case ShortMessage.NOTE_ON:
-						if (sm.getData2() == 0) {
-							noteOff(sm.getData1(), timeStamp);
-						} else {
-							noteOn(sm.getData1(), timeStamp);
-						}
-						break;
-				}
-			}
-		}
-
-		public void close(){
-		}
-	}
-
 	static final int MaxKeys = 128;
 
 	BMSPlayerInputProcessor bmsPlayerInputProcessor;
@@ -38,9 +14,7 @@ public class MidiInputProcessor implements AutoCloseable {
 	MidiReceiver receiver = new MidiReceiver();
 
 	// milliseconds
-	long opentime = 0;
 	long starttime = 0;
-	long timeDiff = 0;
 
 	// MIDI note number -> game key number
 	// NOTE: この方法だと1つのMIDIキーに複数キー割り当てが不可能
@@ -72,7 +46,6 @@ public class MidiInputProcessor implements AutoCloseable {
 				e.printStackTrace();
 			}
 		}
-		opentime = System.nanoTime() / 1000000;
 	}
 
 	public void close() {
@@ -106,22 +79,47 @@ public class MidiInputProcessor implements AutoCloseable {
 
 	public void setStartTime(long starttime) {
 		this.starttime = starttime;
-		timeDiff = starttime - opentime;
 	}
 
-	void noteOff(int num, long timeStamp) {
+	void noteOff(int num) {
 		if (keyMap[num] < 0) {
 			return;
 		}
-		long time = System.nanoTime() / 1000000 - starttime;
-		bmsPlayerInputProcessor.keyChanged(0, time, keyMap[num], false);
+		bmsPlayerInputProcessor.keyChanged(0, currentTime(), keyMap[num], false);
 	}
 
-	void noteOn(int num, long timeStamp) {
+	void noteOn(int num) {
 		if (keyMap[num] < 0) {
 			return;
 		}
-		long time = System.nanoTime() / 1000000 - starttime;
-		bmsPlayerInputProcessor.keyChanged(0, time, keyMap[num], true);
+		bmsPlayerInputProcessor.keyChanged(0, currentTime(), keyMap[num], true);
+	}
+
+	long currentTime() {
+		return System.nanoTime() / 1000000 - starttime;
+	}
+
+	class MidiReceiver implements Receiver {
+
+		public void send(MidiMessage message, long timeStamp) {
+			if (message instanceof ShortMessage) {
+				ShortMessage sm = (ShortMessage)message;
+				switch (sm.getCommand()) {
+					case ShortMessage.NOTE_OFF:
+						noteOff(sm.getData1());
+						break;
+					case ShortMessage.NOTE_ON:
+						if (sm.getData2() == 0) {
+							noteOff(sm.getData1());
+						} else {
+							noteOn(sm.getData1());
+						}
+						break;
+				}
+			}
+		}
+
+		public void close(){
+		}
 	}
 }
