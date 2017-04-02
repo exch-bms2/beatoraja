@@ -37,6 +37,7 @@ public class MidiInputProcessor implements AutoCloseable {
 
 	// milliseconds
 	long opentime = 0;
+	long starttime = 0;
 	long timeDiff = 0;
 
 	// MIDI note number -> game key number
@@ -93,19 +94,17 @@ public class MidiInputProcessor implements AutoCloseable {
 	}
 
 	public void setStartTime(long starttime) {
-		if (opentime != 0) {
-			timeDiff = starttime - opentime;
-		}
+		this.starttime = starttime;
+		timeDiff = starttime - opentime;
 	}
 
 	void noteOff(int num, long timeStamp) {
-		long time = timeStamp/1000 - timeDiff;
+		long time = System.nanoTime() / 1000000 - starttime;
 		bmsPlayerInputProcessor.keyChanged(0, time, keyMap[num], false);
 	}
 
 	void noteOn(int num, long timeStamp) {
-		long time = timeStamp/1000 - timeDiff;
-		//time = (System.nanoTime() / 1000 - starttime) / 1000;
+		long time = System.nanoTime() / 1000000 - starttime;
 		bmsPlayerInputProcessor.keyChanged(0, time, keyMap[num], true);
 	}
 }
