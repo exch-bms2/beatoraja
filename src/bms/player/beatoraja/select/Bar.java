@@ -284,7 +284,7 @@ class FolderBar extends DirectoryBar {
         int[] clears = new int[11];
         int[] ranks = new int[28];
         final SongData[] songdatas = songdb.getSongDatas("parent", ccrc);
-        final Map<String, IRScoreData> scores = selector.readScoreDatas(songdatas, selector.getResource().getConfig()
+        final Map<String, IRScoreData> scores = selector.getScoreDataCache().readScoreDatas(songdatas, selector.getMainController().getPlayerResource().getConfig()
                 .getLnmode());
         for (SongData sd : songdatas) {
             final IRScoreData score = scores.get(sd.getSha256());
@@ -429,8 +429,8 @@ class TableLevelBar extends DirectoryBar {
         int[] clears = new int[11];
         int[] ranks = new int[28];
         songs = selector.getSongDatabase().getSongDatas(getHashes());
-        final Map<String, IRScoreData> scores = selector
-                .readScoreDatas(songs, selector.getResource().getConfig().getLnmode());
+        final Map<String, IRScoreData> scores = selector.getScoreDataCache()
+                .readScoreDatas(songs, selector.getMainController().getPlayerResource().getConfig().getLnmode());
         for (SongData song : songs) {
             final IRScoreData score = scores.get(song.getSha256());
             if (score != null) {
@@ -491,7 +491,7 @@ class CommandBar extends DirectoryBar {
         List<Bar> l = new ArrayList<Bar>();
         for (IRScoreData score : scores) {
             SongData[] song = selector.getSongDatabase().getSongDatas("sha256", score.getSha256());
-            if (song.length > 0 && (!song[0].hasLongNote() || selector.getResource().getConfig().getLnmode() == score.getMode())) {
+            if (song.length > 0 && (!song[0].hasLongNote() || selector.getMainController().getPlayerResource().getConfig().getLnmode() == score.getMode())) {
                 l.add(new SongBar(song[0]));
             }
         }

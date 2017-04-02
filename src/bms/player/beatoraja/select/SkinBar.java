@@ -101,7 +101,7 @@ public class SkinBar extends SkinObject {
 
     @Override
     public void draw(SpriteBatch sprite, long time, MainState state) {
-        ((MusicSelector) state).renderBar(this, (int) time);
+        ((MusicSelector)state).getBarRender().render(sprite, (MusicSelectSkin) state.getSkin(), this, (int)time);
     }
 
     @Override
