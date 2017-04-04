@@ -2,9 +2,6 @@ package bms.player.beatoraja.play;
 
 import bms.player.beatoraja.skin.*;
 
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 
 import static bms.player.beatoraja.skin.SkinProperty.*;
@@ -18,35 +15,16 @@ public class PlaySkin extends Skin {
 
 	private int playstart;
 
-	private TextureRegion[][] gauge;
-
-	private TextureRegion[][] judge;
-
-	private TextureRegion[][][] judgenum;
-
-	private SkinGraph[] graph;
-
 	private SkinImage[] line = new SkinImage[0];
 
 	private Rectangle[] lanegroupregion;
 
 	private int judgeregion;
 
-	private float dw;
-	private float dh;
-
 	private int close;
 
 	private int loadstart;
 	private int loadend;
-
-	private final int[] judgecount = { NUMBER_EARLY_PERFECT, NUMBER_LATE_PERFECT,
-			NUMBER_EARLY_GREAT, NUMBER_LATE_GREAT, NUMBER_EARLY_GOOD,
-			NUMBER_LATE_GOOD, NUMBER_EARLY_BAD, NUMBER_LATE_BAD,
-			NUMBER_EARLY_POOR, NUMBER_LATE_POOR, NUMBER_EARLY_MISS,
-			NUMBER_LATE_MISS };
-
-	protected BMSPlayer player;
 
 	private static final int[] fixop = {OPTION_STAGEFILE, OPTION_NO_STAGEFILE, OPTION_BACKBMP, OPTION_NO_BACKBMP,
 		OPTION_AUTOPLAYON, OPTION_AUTOPLAYOFF, OPTION_BGAON, OPTION_BGAOFF,
@@ -79,10 +57,6 @@ public class PlaySkin extends Skin {
 		return judgeregion;
 	}
 
-	private Rectangle rect(float x, float y, float width, float height) {
-		return new Rectangle(x * dw, y * dh, width * dw, height * dh);
-	}
-
 	public int getClose() {
 		return close;
 	}
@@ -105,23 +79,6 @@ public class PlaySkin extends Skin {
 
 	public void setLine(SkinImage[] line) {
 		this.line = line;
-	}
-
-	public static class JudgeRegion {
-
-		public SkinImage[] judge;
-		public SkinNumber[] count;
-		public boolean shift;
-
-		public JudgeRegion(SkinImage[] judge, SkinNumber[] count, boolean shift) {
-			this.judge = judge;
-			this.count = count;
-			this.shift = shift;
-		}
-	}
-
-	public void setBMSPlayer(BMSPlayer player) {
-		this.player = player;
 	}
 
 	public int getLoadstart() {
