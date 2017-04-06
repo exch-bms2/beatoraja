@@ -7,7 +7,7 @@ import java.nio.file.Path;
 
 import javazoom.jl.decoder.*;
 
-import com.badlogic.gdx.backends.lwjgl.audio.OggInputStream;
+import com.badlogic.gdx.backends.lwjgl3.audio.OggInputStream;
 import com.badlogic.gdx.utils.StreamUtils;
 
 /**

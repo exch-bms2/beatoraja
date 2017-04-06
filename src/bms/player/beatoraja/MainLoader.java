@@ -18,8 +18,9 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.VBox;
 
-import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
+import com.badlogic.gdx.Graphics.DisplayMode;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter.OutputType;
 
@@ -106,61 +107,61 @@ public class MainLoader extends Application {
 		try {
 			MainController player = new MainController(f, config, auto);
 
-			LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
-			cfg.width = (int) RESOLUTION[config.getResolution()].width;
-			cfg.height = (int) RESOLUTION[config.getResolution()].height;
-
-			// fullscreen
-			cfg.fullscreen = config.isFullscreen();
-			// vSync
-			cfg.vSyncEnabled = config.isVsync();
-			if (!config.isVsync()) {
-				cfg.backgroundFPS = config.getMaxFramePerSecond();
-				cfg.foregroundFPS = config.getMaxFramePerSecond();
-			} else {
-				cfg.backgroundFPS = 0;
-				cfg.foregroundFPS = 0;
-			}
-			cfg.title = MainController.VERSION;
-
-			cfg.audioDeviceBufferSize = config.getAudioDeviceBufferSize();
-			cfg.audioDeviceSimultaneousSources = config.getAudioDeviceSimultaneousSources();
-			cfg.forceExit = forceExit;
-			// System.setProperty("org.lwjgl.opengl.Display.allowSoftwareOpenGL",
-			// "true");
-			new LwjglApplication(player, cfg);
-
-//			Lwjgl3ApplicationConfiguration cfg = new Lwjgl3ApplicationConfiguration();
+//			LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
+//			cfg.width = (int) RESOLUTION[config.getResolution()].width;
+//			cfg.height = (int) RESOLUTION[config.getResolution()].height;
 //
-//			final int w = (int) RESOLUTION[config.getResolution()].width;
-//			final int h = (int) RESOLUTION[config.getResolution()].height;
-//			if (config.isFullscreen()) {
-//				DisplayMode d = null;
-//				for (DisplayMode display : cfg.getDisplayModes()) {
-//					System.out.println("available DisplayMode : w - " + display.width + " h - " + display.height
-//							+ " refresh - " + display.refreshRate + " color bit - " + display.bitsPerPixel);
-//					if (display.width == w
-//							&& display.height == h
-//							&& (d == null || (d.refreshRate <= display.refreshRate && d.bitsPerPixel <= display.bitsPerPixel))) {
-//						d = display;
-//					}
-//				}
-//				if (d != null) {
-//					cfg.setFullscreenMode(d);
-//				} else {
-//					cfg.setWindowedMode(w, h);
-//				}
-//			} else {
-//				cfg.setWindowedMode(w, h);
-//			}
+//			// fullscreen
+//			cfg.fullscreen = config.isFullscreen();
 //			// vSync
-//			cfg.useVsync(config.isVsync());
-//			cfg.setIdleFPS(config.getMaxFramePerSecond());
-//			cfg.setTitle(VERSION);
+//			cfg.vSyncEnabled = config.isVsync();
+//			if (!config.isVsync()) {
+//				cfg.backgroundFPS = config.getMaxFramePerSecond();
+//				cfg.foregroundFPS = config.getMaxFramePerSecond();
+//			} else {
+//				cfg.backgroundFPS = 0;
+//				cfg.foregroundFPS = 0;
+//			}
+//			cfg.title = MainController.VERSION;
 //
-//			cfg.setAudioConfig(config.getAudioDeviceSimultaneousSources(), config.getAudioDeviceBufferSize(), 1);
-//
-//			new Lwjgl3Application(player, cfg);
+//			cfg.audioDeviceBufferSize = config.getAudioDeviceBufferSize();
+//			cfg.audioDeviceSimultaneousSources = config.getAudioDeviceSimultaneousSources();
+//			cfg.forceExit = forceExit;
+//			// System.setProperty("org.lwjgl.opengl.Display.allowSoftwareOpenGL",
+//			// "true");
+//			new LwjglApplication(player, cfg);
+
+			Lwjgl3ApplicationConfiguration cfg = new Lwjgl3ApplicationConfiguration();
+
+			final int w = (int) RESOLUTION[config.getResolution()].width;
+			final int h = (int) RESOLUTION[config.getResolution()].height;
+			if (config.isFullscreen()) {
+				DisplayMode d = null;
+				for (DisplayMode display : cfg.getDisplayModes()) {
+					System.out.println("available DisplayMode : w - " + display.width + " h - " + display.height
+							+ " refresh - " + display.refreshRate + " color bit - " + display.bitsPerPixel);
+					if (display.width == w
+							&& display.height == h
+							&& (d == null || (d.refreshRate <= display.refreshRate && d.bitsPerPixel <= display.bitsPerPixel))) {
+						d = display;
+					}
+				}
+				if (d != null) {
+					cfg.setFullscreenMode(d);
+				} else {
+					cfg.setWindowedMode(w, h);
+				}
+			} else {
+				cfg.setWindowedMode(w, h);
+			}
+			// vSync
+			cfg.useVsync(config.isVsync());
+			cfg.setIdleFPS(config.getMaxFramePerSecond());
+			cfg.setTitle(MainController.VERSION);
+
+			cfg.setAudioConfig(config.getAudioDeviceSimultaneousSources(), config.getAudioDeviceBufferSize(), 1);
+
+			new Lwjgl3Application(player, cfg);
 		} catch (Exception e) {
 			e.printStackTrace();
 			Logger.getGlobal().severe(e.getClass().getName() + " : " + e.getMessage());
