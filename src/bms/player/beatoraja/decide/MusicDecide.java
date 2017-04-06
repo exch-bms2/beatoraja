@@ -22,10 +22,10 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
  */
 public class MusicDecide extends MainState {
 
-	private String bgm;
-
 	private boolean cancel;
 
+	public static final int SOUND_DECIDE = 0;
+	
 	public MusicDecide(MainController main) {
 		super(main);
 	}
@@ -33,20 +33,9 @@ public class MusicDecide extends MainState {
 	public void create() {
 		cancel = false;
 		final PlayerResource resource = getMainController().getPlayerResource();
-		if (resource.getConfig().getBgmpath().length() > 0) {
-			final File bgmfolder = new File(resource.getConfig().getBgmpath());
-			if (bgmfolder.exists() && bgmfolder.isDirectory()) {
-				for (File f : bgmfolder.listFiles()) {
-					if (bgm == null && f.getName().startsWith("decide.")) {
-						bgm = f.getPath();
-						break;
-					}
-				}
-			}
-		}
-		if (bgm != null) {
-			getMainController().getAudioProcessor().play(bgm, false);
-		}
+		
+		setSound(SOUND_DECIDE, resource.getConfig().getBgmpath() + File.separatorChar + "decide.wav", false);
+		play(SOUND_DECIDE);
 
 		try {
 			SkinConfig sc = resource.getConfig().getSkin()[6];

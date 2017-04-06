@@ -28,8 +28,8 @@ public class GradeResult extends MainState {
 
 	private int saveReplay = -1;
 
-	private String clear;
-	private String fail;
+	public static final int SOUND_CLEAR = 0;
+	public static final int SOUND_FAIL = 1;
 
 	public GradeResult(MainController main) {
 		super(main);
@@ -38,19 +38,8 @@ public class GradeResult extends MainState {
 	public void create() {
 		final PlayerResource resource = getMainController().getPlayerResource();
 
-		if (resource.getConfig().getSoundpath().length() > 0) {
-			final File soundfolder = new File(resource.getConfig().getSoundpath());
-			if (soundfolder.exists() && soundfolder.isDirectory()) {
-				for (File f : soundfolder.listFiles()) {
-					if (clear == null && f.getName().startsWith("course_clear.")) {
-						clear = f.getPath();
-					}
-					if (fail == null && f.getName().startsWith("course_fail.")) {
-						fail = f.getPath();
-					}
-				}
-			}
-		}
+		setSound(SOUND_CLEAR, resource.getConfig().getSoundpath() + File.separatorChar + "course_clear.wav", false);
+		setSound(SOUND_FAIL, resource.getConfig().getSoundpath() + File.separatorChar + "course_fail.wav", false);
 
 		try {
 			SkinConfig sc = resource.getConfig().getSkin()[15];
@@ -108,12 +97,8 @@ public class GradeResult extends MainState {
 
 		if (getTimer()[TIMER_FADEOUT] != Long.MIN_VALUE) {
 			if (time > getTimer()[TIMER_FADEOUT] + getSkin().getFadeout()) {
-				if (clear != null) {
-					getMainController().getAudioProcessor().stop(clear);
-				}
-				if (fail != null) {
-					getMainController().getAudioProcessor().stop(fail);
-				}
+				stop(SOUND_CLEAR);
+				stop(SOUND_FAIL);
 				main.changeState(MainController.STATE_SELECTMUSIC);
 			}
 		} else if (time > getSkin().getScene()) {
@@ -194,13 +179,9 @@ public class GradeResult extends MainState {
 				random, resource.getConstraint(), resource.isUpdateScore());
 
 		if (newscore.getClear() != GrooveGauge.CLEARTYPE_FAILED) {
-			if (this.clear != null) {
-				getMainController().getAudioProcessor().play(clear, true);
-			}
+			play(SOUND_CLEAR);
 		} else {
-			if (fail != null) {
-				getMainController().getAudioProcessor().play(fail, true);
-			}
+			play(SOUND_FAIL);
 		}
 
 		Logger.getGlobal().info("スコアデータベース更新完了 ");

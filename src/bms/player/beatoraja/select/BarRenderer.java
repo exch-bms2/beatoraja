@@ -83,14 +83,9 @@ public class BarRenderer {
 	 */
 	private int angle;
 
-	private String move;
-	private String folderclose;
-
-	public BarRenderer(MusicSelector select, String move, String folderclose) {
+	public BarRenderer(MusicSelector select) {
 		final MainController main = select.getMainController();
 		this.select = select;
-		this.move = move;
-		this.folderclose = folderclose;
 
 		TableData[] tds = new TableDataAccessor().readAll();
 		this.tables = new TableBar[tds.length];
@@ -148,14 +143,10 @@ public class BarRenderer {
 	public void close() {
 		if (dir.size() > 1) {
 			updateBar(dir.get(getDirectory().size() - 2));
-			if (folderclose != null) {
-				select.getMainController().getAudioProcessor().play(folderclose, false);
-			}
+			select.play(MusicSelector.SOUND_FOLDERCLOSE);
 		} else {
 			updateBar(null);
-			if (folderclose != null) {
-				select.getMainController().getAudioProcessor().play(folderclose, false);
-			}
+			select.play(MusicSelector.SOUND_FOLDERCLOSE);
 		}
 	}
 
@@ -373,16 +364,12 @@ public class BarRenderer {
 
 		while(mov > 0) {
 			move(true);
-			if (move != null) {
-				select.getMainController().getAudioProcessor().play(move, false);
-			}
+			select.play(MusicSelector.SOUND_SCRATCH);
 			mov--;
 		}
 		while(mov < 0) {
 			move(false);
-			if (move != null) {
-				select.getMainController().getAudioProcessor().play(move, false);
-			}
+			select.play(MusicSelector.SOUND_SCRATCH);
 			mov++;
 		}
 	}

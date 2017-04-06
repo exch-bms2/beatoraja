@@ -42,9 +42,6 @@ public class MusicResult extends MainState {
 	 */
 	private float avgduration;
 
-	private String clear;
-	private String fail;
-	
 	/**
 	 * 状態
 	 */
@@ -63,6 +60,9 @@ public class MusicResult extends MainState {
 	private int irtotal;
 
 	private int saveReplay = -1;
+	
+	public static final int SOUND_CLEAR = 0;
+	public static final int SOUND_FAIL = 1;
 
 	public MusicResult(MainController main) {
 		super(main);
@@ -71,19 +71,8 @@ public class MusicResult extends MainState {
 	public void create() {
 		final PlayerResource resource = getMainController().getPlayerResource();
 
-		if (resource.getConfig().getSoundpath().length() > 0) {
-			final File soundfolder = new File(resource.getConfig().getSoundpath());
-			if (soundfolder.exists() && soundfolder.isDirectory()) {
-				for (File f : soundfolder.listFiles()) {
-					if (clear == null && f.getName().startsWith("clear.")) {
-						clear = f.getPath();
-					}
-					if (fail == null && f.getName().startsWith("fail.")) {
-						fail = f.getPath();
-					}
-				}
-			}
-		}
+		setSound(SOUND_CLEAR, resource.getConfig().getSoundpath() + File.separatorChar + "clear.wav", false);
+		setSound(SOUND_FAIL, resource.getConfig().getSoundpath() + File.separatorChar + "fail.wav", false);
 
 		updateScoreDatabase();
 		// 保存されているリプレイデータがない場合は、EASY以上で自動保存
@@ -138,12 +127,8 @@ public class MusicResult extends MainState {
 
 		if (getTimer()[TIMER_FADEOUT] != Long.MIN_VALUE) {
 			if (time > getTimer()[TIMER_FADEOUT] + getSkin().getFadeout()) {
-				if (this.clear != null) {
-					getMainController().getAudioProcessor().stop(this.clear);
-				}
-				if (this.fail != null) {
-					getMainController().getAudioProcessor().stop(this.fail);
-				}
+				stop(SOUND_CLEAR);
+				stop(SOUND_FAIL);
 				getMainController().getAudioProcessor().stop((Note) null);
 
 				boolean[] keystate = main.getInputProcessor().getKeystate();
@@ -384,13 +369,9 @@ public class MusicResult extends MainState {
 		}
 
 		if (newscore.getClear() != GrooveGauge.CLEARTYPE_FAILED) {
-			if (this.clear != null) {
-				getMainController().getAudioProcessor().play(this.clear, false);
-			}
+			play(SOUND_CLEAR);
 		} else {
-			if (fail != null) {
-				getMainController().getAudioProcessor().play(this.fail, false);
-			}
+			play(SOUND_FAIL);
 		}
 	}
 

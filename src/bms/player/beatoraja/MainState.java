@@ -1,7 +1,7 @@
 package bms.player.beatoraja;
 
-import java.util.Arrays;
-import java.util.Calendar;
+import java.io.File;
+import java.util.*;
 
 import bms.player.beatoraja.play.TargetProperty;
 import bms.player.beatoraja.skin.Skin;
@@ -15,15 +15,25 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
+/**
+ * プレイヤー内の各状態の抽象クラス
+ * 
+ * @author exch
+ */
 public abstract class MainState {
 
 	private final MainController main;
-
+	/**
+	 * 状態の開始時間
+	 */
 	private long starttime;
 
 	private Skin skin;
 
 	private Stage stage;
+	
+	private Map<Integer, String> soundmap = new HashMap<Integer, String>();
+	private Map<Integer, Boolean> soundloop = new HashMap<Integer, Boolean>();
 
 	public MainState(MainController main) {
 		this.main = main;
@@ -370,5 +380,30 @@ public abstract class MainState {
 
 	public void setStage(Stage stage) {
 		this.stage = stage;
+	}
+	
+	public void setSound(int id, String path, boolean loop) {
+		path = path.substring(0, path.lastIndexOf('.'));
+		for(File f : new File[]{new File(path + ".wav"), new File(path + ".ogg"), new File(path + ".mp3")}) {
+			if(f.exists()) {
+				soundmap.put(id, f.getPath());
+				soundloop.put(id, loop);
+				break;
+			}
+		}
+	}
+	
+	public void play(int id) {
+		final String path = soundmap.get(id);
+		if(path != null) {
+			main.getAudioProcessor().play(path, soundloop.get(id));
+		}
+	}
+	
+	public void stop(int id) {
+		final String path = soundmap.get(id);
+		if(path != null) {
+			main.getAudioProcessor().stop(path);
+		}		
 	}
 }

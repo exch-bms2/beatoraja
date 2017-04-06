@@ -39,8 +39,6 @@ public class BMSPlayer extends MainState {
 
 	private BGAProcessor bga;
 
-	private String playstop;
-
 	private GrooveGauge gauge;
 
 	private int playtime;
@@ -72,6 +70,8 @@ public class BMSPlayer extends MainState {
 	private int notes;
 
 	static final int TIME_MARGIN = 5000;
+	
+	public static final int SOUND_PLAYSTOP = 0;
 
 	public BMSPlayer(MainController main, PlayerResource resource) {
 		super(main);
@@ -278,19 +278,9 @@ public class BMSPlayer extends MainState {
 		final PlayerResource resource = main.getPlayerResource();
 		control = new ControlInputProcessor(this, autoplay);
 		keyinput = new KeyInputProccessor(this, model.getUseKeys());
-
-		if (resource.getConfig().getSoundpath().length() > 0) {
-			final File soundfolder = new File(resource.getConfig().getSoundpath());
-			if (soundfolder.exists() && soundfolder.isDirectory()) {
-				for (File f : soundfolder.listFiles()) {
-					if (playstop == null && f.getName().startsWith("playstop.")) {
-						playstop = f.getPath();
-					}
-				}
-			}
-		}
-
 		Config config = resource.getConfig();
+
+		setSound(SOUND_PLAYSTOP, config.getSoundpath() + File.separatorChar + "playstop.wav", false);
 
 		final BMSPlayerInputProcessor input = main.getInputProcessor();
 		input.setMinimumInputDutration(config.getInputduration());
@@ -478,9 +468,7 @@ public class BMSPlayer extends MainState {
 				if (resource.mediaLoadFinished()) {
 					getMainController().getAudioProcessor().stop((Note) null);
 				}
-				if (playstop != null) {
-					getMainController().getAudioProcessor().play(playstop, false);
-				}
+				play(SOUND_PLAYSTOP);
 				Logger.getGlobal().info("STATE_FAILEDに移行");
 			}
 
@@ -689,9 +677,7 @@ public class BMSPlayer extends MainState {
 			if (getMainController().getPlayerResource().mediaLoadFinished()) {
 				getMainController().getAudioProcessor().stop((Note) null);
 			}
-			if (playstop != null) {
-				getMainController().getAudioProcessor().play(playstop, false);
-			}
+			play(SOUND_PLAYSTOP);
 			Logger.getGlobal().info("STATE_FAILEDに移行");
 		}
 	}
