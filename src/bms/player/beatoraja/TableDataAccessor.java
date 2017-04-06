@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -42,75 +43,93 @@ public class TableDataAccessor {
 		this.tabledir = tabledir;
 	}
 
-	
 	public void updateTableData(String[] urls) {
-		for (String url : urls) {
-			DifficultyTableParser dtp = new DifficultyTableParser();
-			DifficultyTable dt = new DifficultyTable();
-			if (url.endsWith(".json")) {
-				dt.setHeadURL(url);
-			} else {
-				dt.setSourceURL(url);
-			}
-			try {
-				dtp.decode(true, dt);
-				TableData td = new TableData();
-				td.setUrl(url);
-				td.setName(dt.getName());
-				td.setLevel(dt.getLevelDescription());
-				HashMap<String, String[]> levels = new HashMap<String, String[]>();
-				for (String lv : dt.getLevelDescription()) {
-					List<String> hashes = new ArrayList<String>();
-					for (DifficultyTableElement dte : dt.getElements()) {
-						if (lv.equals(dte.getDifficultyID())) {
-							hashes.add(dte.getSHA256() != null ? dte.getSHA256() : dte.getMD5());
-						}
+		final ConcurrentLinkedDeque< Thread> tasks = new ConcurrentLinkedDeque<Thread>();
+		for (final String url : urls) {
+			Thread task = new Thread() {
+				public void run() {
+					DifficultyTableParser dtp = new DifficultyTableParser();
+					DifficultyTable dt = new DifficultyTable();
+					if (url.endsWith(".json")) {
+						dt.setHeadURL(url);
+					} else {
+						dt.setSourceURL(url);
 					}
-					levels.put(lv, hashes.toArray(new String[0]));
-				}
-				td.setHash(levels);
+					try {
+						dtp.decode(true, dt);
+						TableData td = new TableData();
+						td.setUrl(url);
+						td.setName(dt.getName());
+						td.setLevel(dt.getLevelDescription());
+						HashMap<String, String[]> levels = new HashMap<String, String[]>();
+						for (String lv : dt.getLevelDescription()) {
+							List<String> hashes = new ArrayList<String>();
+							for (DifficultyTableElement dte : dt.getElements()) {
+								if (lv.equals(dte.getDifficultyID())) {
+									hashes.add(dte.getSHA256() != null ? dte.getSHA256() : dte.getMD5());
+								}
+							}
+							levels.put(lv, hashes.toArray(new String[hashes.size()]));
+						}
+						td.setHash(levels);
 
-				if (dt.getCourse() != null && dt.getCourse().length > 0) {
-					List<CourseData> gname = new ArrayList<CourseData>();
-					for (Course[] course : dt.getCourse()) {
-						for (Course g : course) {
-							CourseData cd = new CourseData();
-							cd.setName(g.getName());
-							cd.setHash(g.getHash());
-							int[] con = new int[g.getConstraint().length];
-							for (int i = 0; i < con.length; i++) {
-								for (int index = 0; index < CONSTRAINT.length; index++) {
-									if (CONSTRAINT[index].equals(g.getConstraint()[i])) {
-										con[i] = index;
-										break;
+						if (dt.getCourse() != null && dt.getCourse().length > 0) {
+							List<CourseData> gname = new ArrayList<CourseData>();
+							for (Course[] course : dt.getCourse()) {
+								for (Course g : course) {
+									CourseData cd = new CourseData();
+									cd.setName(g.getName());
+									cd.setHash(g.getHash());
+									int[] con = new int[g.getConstraint().length];
+									for (int i = 0; i < con.length; i++) {
+										for (int index = 0; index < CONSTRAINT.length; index++) {
+											if (CONSTRAINT[index].equals(g.getConstraint()[i])) {
+												con[i] = index;
+												break;
+											}
+										}
 									}
+									cd.setConstraint(con);
+									if (g.getTrophy() != null) {
+										List<TrophyData> tr = new ArrayList<TrophyData>();
+										for (Trophy trophy : g.getTrophy()) {
+											TrophyData t = new TrophyData();
+											t.setName(trophy.getName());
+											t.setMissrate((float) trophy.getMissrate());
+											t.setScorerate((float) trophy.getScorerate());
+											tr.add(t);
+										}
+										cd.setTrophy(tr.toArray(new TrophyData[tr.size()]));
+									}
+									gname.add(cd);
 								}
 							}
-							cd.setConstraint(con);
-							if (g.getTrophy() != null) {
-								List<TrophyData> tr = new ArrayList<TrophyData>();
-								for (Trophy trophy : g.getTrophy()) {
-									TrophyData t = new TrophyData();
-									t.setName(trophy.getName());
-									t.setMissrate((float) trophy.getMissrate());
-									t.setScorerate((float) trophy.getScorerate());
-									tr.add(t);
-								}
-								cd.setTrophy(tr.toArray(new TrophyData[0]));
-							}
-							gname.add(cd);
-						}
-					}
 
-					td.setCourse(gname.toArray(new CourseData[0]));
+							td.setCourse(gname.toArray(new CourseData[gname.size()]));
+						}
+						write(td);
+					} catch (Throwable e) {
+						e.printStackTrace();
+					}
 				}
-				write(td);
-			} catch (Throwable e) {
-				e.printStackTrace();
+
+			};
+			tasks.add(task);
+			task.start();
+		}
+		
+		while(!tasks.isEmpty()) {
+			if(!tasks.getFirst().isAlive()) {
+				tasks.removeFirst();
+			} else {
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+				}
 			}
 		}
 	}
-
+	
 	/**
 	 * 難易度表データをキャッシュする
 	 * 
