@@ -1,7 +1,6 @@
 package bms.player.beatoraja.audio;
 
 import java.io.*;
-import java.nio.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -9,6 +8,7 @@ import javazoom.jl.decoder.*;
 
 import com.badlogic.gdx.backends.lwjgl.audio.OggInputStream;
 import com.badlogic.gdx.utils.StreamUtils;
+import com.badlogic.gdx.utils.StreamUtils.OptimizedByteArrayOutputStream;;
 
 /**
  * PCM音源処理用クラス
@@ -16,6 +16,8 @@ import com.badlogic.gdx.utils.StreamUtils;
  * @author exch
  */
 public class PCM {
+	
+	// TODO PCM実データのダイレクトバッファ化
 
 	/**
 	 * チャンネル数
@@ -45,43 +47,52 @@ public class PCM {
 	public PCM(Path p) throws IOException {
 		// final long time = System.nanoTime();
 		byte[] pcm = null;
+		int bytes = 0;
 		if (p.toString().toLowerCase().endsWith(".mp3")) {
 			try {
-				pcm = decodeMP3(new BufferedInputStream(new BufferedInputStream(Files.newInputStream(p))));
+				pcm = decodeMP3(new BufferedInputStream(Files.newInputStream(p)));
+				bytes = pcm.length;
 			} catch (Throwable ex) {
 			}
-		}
-		if (p.toString().toLowerCase().endsWith(".ogg")) {
+		} else if (p.toString().toLowerCase().endsWith(".ogg")) {
 			try (OggInputStream input = new OggInputStream(new BufferedInputStream(Files.newInputStream(p)))) {
-				ByteArrayOutputStream output = new ByteArrayOutputStream(4096);
-				byte[] buff = new byte[2048];
+//				final long time = System.nanoTime();
+//				OptimizedByteArrayOutputStream output = new OptimizedByteArrayOutputStream(4096);
+				OptimizedByteArrayOutputStream output = new OptimizedByteArrayOutputStream(input.getLength() * 16);
+				byte[] buff = new byte[4096];
 				while (!input.atEnd()) {
 					int length = input.read(buff);
 					if (length == -1)
 						break;
 					output.write(buff, 0, length);
 				}
-
+				
 				channels = input.getChannels();
 				sampleRate = input.getSampleRate();
 				bitsPerSample = 16;
-
-				pcm = output.toByteArray();
+				
+				pcm = output.getBuffer();
+				bytes = output.size();
+//				 System.out.println(p.toString() + " : " + (System.nanoTime() - time));
 			} catch (Throwable ex) {
 
 			}
-		}
-		if (p.toString().toLowerCase().endsWith(".wav")) {
+		} else if (p.toString().toLowerCase().endsWith(".wav")) {
 			try (WavInputStream input = new WavInputStream(new BufferedInputStream(Files.newInputStream(p)))) {
 				if (type == 85) {
 					try {
 						pcm = decodeMP3(new ByteArrayInputStream(
 								StreamUtils.copyStreamToByteArray(input, input.dataRemaining)));
+						bytes = pcm.length;
 					} catch (BitstreamException e) {
 						e.printStackTrace();
 					}
 				} else {
-					pcm = StreamUtils.copyStreamToByteArray(input, input.dataRemaining);
+					OptimizedByteArrayOutputStream output = new OptimizedByteArrayOutputStream(input.dataRemaining);
+					StreamUtils.copyStream(input, output);
+					pcm = output.getBuffer();
+					bytes = output.size();
+					 System.out.println(bytes + " -> " + pcm.length);
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -92,29 +103,32 @@ public class PCM {
 			// System.out.println(p.getFileName().toString() +
 			// " - PCM generated : " + bitsPerSample + "bit " + sampleRate
 			// + "Hz " + channels + "channel");
-			int bytes = pcm.length - (pcm.length % (channels > 1 ? bitsPerSample / 4 : bitsPerSample / 8));
+			bytes = bytes - (bytes % (channels > 1 ? bitsPerSample / 4 : bitsPerSample / 8));
 
 			if (bitsPerSample == 8) {
-				this.sample = new short[pcm.length];
+				this.sample = new short[bytes];
 				for (int i = 0; i < pcm.length; i++) {
 					this.sample[i] = (short) ((((short) pcm[i]) - 128) * 256);
 				}
-			}
-			if (bitsPerSample == 16) {
-				this.sample = new short[pcm.length / 2];
-				for (int i = 0; i < this.sample.length; i++) {
+			} else if (bitsPerSample == 16) {
+//				final long time = System.nanoTime();
+				this.sample = new short[bytes / 2];
+				for (int i = 0; i < sample.length; i++) {
 					this.sample[i] = (short) (pcm[i * 2] + (pcm[i * 2 + 1] << 8));
 				}
-			}
-			if (bitsPerSample == 24) {
-				this.sample = new short[pcm.length / 3];
+				
+//				 ShortBuffer shortbuf =
+//				 ByteBuffer.wrap(pcm).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer();
+//				 shortbuf.get(sample);
+//				 System.out.println(p.toString() + " : " + (System.nanoTime() - time));
+			} else if (bitsPerSample == 24) {
+				this.sample = new short[bytes / 3];
 				for (int i = 0; i < this.sample.length; i++) {
 					this.sample[i] = (short) (pcm[i * 3 + 1] + (pcm[i * 3 + 2] << 8));
 				}
-			}
-			if (bitsPerSample == 32) {
+			} else if (bitsPerSample == 32) {
 				int pos = 0;
-				this.sample = new short[pcm.length / 4];
+				this.sample = new short[bytes / 4];
 				for (int i = 0; i < this.sample.length; i++) {
 					this.sample[i] = (short) (Float.intBitsToFloat((pcm[pos] & 0xff) | ((pcm[pos + 1] & 0xff) << 8)
 							| ((pcm[pos + 2] & 0xff) << 16) | ((pcm[pos + 3] & 0xff) << 24)) * Short.MAX_VALUE);
