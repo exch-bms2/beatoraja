@@ -593,21 +593,7 @@ public class MusicSelector extends MainState {
 		// update folder
 		if (input.getFunctionstate()[1] && input.getFunctiontime()[1] != 0) {
 			input.getFunctiontime()[1] = 0;
-			if (bar.getSelected() instanceof FolderBar) {
-				FolderBar fb = (FolderBar) bar.getSelected();
-				songdb.updateSongDatas(fb.getFolderData().getPath(), false);
-			} else if (bar.getSelected() instanceof TableBar) {
-				TableBar tb = (TableBar) bar.getSelected();
-				if (tb.getUrl() != null && tb.getUrl().length() > 0) {
-					TableDataAccessor tda = new TableDataAccessor();
-					String[] url = new String[] { tb.getUrl() };
-					tda.updateTableData(url);
-					TableData td = tda.read(tb.getTitle());
-					if (td != null) {
-						tb.setTableData(td);
-					}
-				}
-			}
+			bar.updateFolder();
 		}
 
 		if (input.isExitPressed()) {
