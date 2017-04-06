@@ -50,19 +50,19 @@ public class SkinLoader {
 	}
 
 	public MusicResultSkin loadResultSkin(Path p, Map property) {
-		return (MusicResultSkin) load(p, 7, property);
+		return (MusicResultSkin) load(p, SkinType.RESULT, property);
 	}
 
 	public MusicDecideSkin loadDecideSkin(Path p, Map property) {
-		return (MusicDecideSkin) load(p, 6, property);
+		return (MusicDecideSkin) load(p, SkinType.DECIDE, property);
 	}
 
 	public MusicSelectSkin loadSelectSkin(Path p, Map property) {
-		return (MusicSelectSkin) load(p, 5, property);
+		return (MusicSelectSkin) load(p, SkinType.MUSIC_SELECT, property);
 	}
 
-	public PlaySkin loadPlaySkin(Path p, int skinmode, Map property) {
-		return (PlaySkin) load(p, skinmode, property);
+	public PlaySkin loadPlaySkin(Path p, SkinType type, Map property) {
+		return (PlaySkin) load(p, type, property);
 	}
 
 	public SkinHeader loadHeader(Path p) {
@@ -106,7 +106,7 @@ public class SkinLoader {
 		return header;
 	}
 
-	public Skin load(Path p, int type, Map property) {
+	public Skin load(Path p, SkinType type, Map property) {
 		Skin skin = null;
 		try {
 			Json json = new Json();
@@ -116,18 +116,18 @@ public class SkinLoader {
 
 			texmap = new HashMap();
 
-			if (type >= 0 && type < 5) {
+			if (type.isPlay()) {
 				skin = new PlaySkin(sk.w, sk.h, dstr.width, dstr.height);
 				((PlaySkin) skin).setClose(sk.close);
 				((PlaySkin) skin).setPlaystart(sk.playstart);
 			}
-			if (type == 5) {
+			if (type == SkinType.MUSIC_SELECT) {
 				skin = new MusicSelectSkin(sk.w, sk.h, dstr.width, dstr.height);
 			}
-			if (type == 6) {
+			if (type == SkinType.DECIDE) {
 				skin = new MusicDecideSkin(sk.w, sk.h, dstr.width, dstr.height);
 			}
-			if (type == 7) {
+			if (type == SkinType.RESULT) {
 				skin = new MusicResultSkin(sk.w, sk.h, dstr.width, dstr.height);
 			}
 

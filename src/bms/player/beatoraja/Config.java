@@ -1,6 +1,7 @@
 package bms.player.beatoraja;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -8,6 +9,7 @@ import bms.player.beatoraja.input.BMControllerInputProcessor.BMKeys;
 import bms.player.beatoraja.play.JudgeManager;
 
 import bms.player.beatoraja.play.TargetProperty;
+import bms.player.beatoraja.skin.SkinType;
 import com.badlogic.gdx.Input.Keys;
 
 /**
@@ -160,7 +162,7 @@ public class Config {
 
 	private String soundpath = "";
 
-	private SkinConfig[] skin = new SkinConfig[16];
+	private SkinConfig[] skin;
 	/**
 	 * BMSルートディレクトリパス
 	 */
@@ -231,15 +233,16 @@ public class Config {
 				"http://dpbmsdelta.web.fc2.com/table/insane.html",
 				"http://flowermaster.web.fc2.com/lrnanido/gla/LN.html",
 				"http://stellawingroad.web.fc2.com/new/pms.html" };
-		skin[0] = new SkinConfig(SkinConfig.DEFAULT_PLAY7);
-		skin[1] = new SkinConfig(SkinConfig.DEFAULT_PLAY5);
-		skin[2] = new SkinConfig(SkinConfig.DEFAULT_PLAY14);
-		skin[3] = new SkinConfig(SkinConfig.DEFAULT_PLAY10);
-		skin[4] = new SkinConfig(SkinConfig.DEFAULT_PLAY9);
-		skin[5] = new SkinConfig(SkinConfig.DEFAULT_SELECT);
-		skin[6] = new SkinConfig(SkinConfig.DEFAULT_DECIDE);
-		skin[7] = new SkinConfig(SkinConfig.DEFAULT_RESULT);
-		skin[15] = new SkinConfig(SkinConfig.DEFAULT_GRADERESULT);
+		int maxSkinType = 0;
+		for (SkinType type : SkinType.values()) {
+			if (type.getId() > maxSkinType) {
+				maxSkinType = type.getId();
+			}
+		}
+		skin = new SkinConfig[maxSkinType + 1];
+		for (Map.Entry<SkinType, String> entry : SkinConfig.defaultSkinPathMap.entrySet()) {
+			skin[entry.getKey().getId()] = new SkinConfig(entry.getValue());
+		}
 	}
 
 	public boolean isFullscreen() {
@@ -672,6 +675,20 @@ public class Config {
 		public static final String DEFAULT_DECIDE = "skin/default/decide.json";
 		public static final String DEFAULT_RESULT = "skin/default/result.json";
 		public static final String DEFAULT_GRADERESULT = "skin/default/graderesult.json";
+
+		public static final Map<SkinType, String> defaultSkinPathMap = new HashMap<SkinType, String>() {
+			{
+				put(SkinType.PLAY_7KEYS, DEFAULT_PLAY7);
+				put(SkinType.PLAY_5KEYS, DEFAULT_PLAY5);
+				put(SkinType.PLAY_14KEYS, DEFAULT_PLAY14);
+				put(SkinType.PLAY_10KEYS, DEFAULT_PLAY10);
+				put(SkinType.PLAY_9KEYS, DEFAULT_PLAY9);
+				put(SkinType.MUSIC_SELECT, DEFAULT_SELECT);
+				put(SkinType.DECIDE, DEFAULT_DECIDE);
+				put(SkinType.RESULT, DEFAULT_RESULT);
+				put(SkinType.COURSE_RESULT, DEFAULT_GRADERESULT);
+			}
+		};
 
 		private String path;
 
