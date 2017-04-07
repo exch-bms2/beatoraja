@@ -165,15 +165,14 @@ public class BMSPlayer extends MainState {
 			}
 		}
 		
-		int skinmode = (model.getUseKeys() == 7 ? 0
-				: (model.getUseKeys() == 5 ? 1 : (model.getUseKeys() == 14 ? 2 : (model.getUseKeys() == 10 ? 3 : 4))));
+		SkinType skinType = getSkinType();
 		final String[] defaultskins = { SkinConfig.DEFAULT_PLAY7, SkinConfig.DEFAULT_PLAY5, SkinConfig.DEFAULT_PLAY14,
 				SkinConfig.DEFAULT_PLAY10, SkinConfig.DEFAULT_PLAY9 };
 		try {
-			SkinConfig sc = resource.getConfig().getSkin()[skinmode];
+			SkinConfig sc = resource.getConfig().getSkin()[skinType.getId()];
 			if (sc.getPath().endsWith(".json")) {
 				SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
-				setSkin(sl.loadPlaySkin(Paths.get(sc.getPath()), skinmode, sc.getProperty()));
+				setSkin(sl.loadPlaySkin(Paths.get(sc.getPath()), skinType, sc.getProperty()));
 			} else {
 				LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
 				SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
@@ -186,7 +185,7 @@ public class BMSPlayer extends MainState {
 		} catch (Throwable e) {
 			e.printStackTrace();
 			SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
-			setSkin(sl.loadPlaySkin(Paths.get(defaultskins[skinmode]), skinmode, new HashMap()));
+			setSkin(sl.loadPlaySkin(Paths.get(SkinConfig.defaultSkinPathMap.get(skinType)), skinType, new HashMap()));
 		}
 
 		judge = new JudgeManager(this, model, autoplay == 1, resource.getConstraint());
@@ -272,6 +271,24 @@ public class BMSPlayer extends MainState {
 		}
 		Logger.getGlobal().info("ゲージ設定完了");
 	}
+
+	private SkinType getSkinType() {
+		switch (model.getUseKeys()) {
+		case 7:
+			return SkinType.PLAY_7KEYS;
+		case 5:
+			return SkinType.PLAY_5KEYS;
+		case 14:
+			return SkinType.PLAY_14KEYS;
+		case 10:
+			return SkinType.PLAY_10KEYS;
+		case 9:
+			return SkinType.PLAY_9KEYS;
+		default:
+			return null;
+		}
+	}
+
 
 	public void create() {
 		final MainController main = getMainController();
