@@ -10,6 +10,8 @@ import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.lr2.*;
 
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.utils.FloatArray;
+
 import java.util.logging.Logger;
 
 import bms.model.BMSModel;
@@ -62,7 +64,7 @@ public class GradeResult extends MainState {
 		}
 		
         for(int i = resource.getCourseGauge().size();i < resource.getCourseBMSModels().length;i++) {
-            List<Float> list = new ArrayList<Float>();
+        	FloatArray list = new FloatArray();
             for(int l = 0;l < (resource.getCourseBMSModels()[i].getLastNoteTime() + 500) / 500;l++) {
                 list.add(0f);
             }

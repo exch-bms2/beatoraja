@@ -21,6 +21,7 @@ import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.lr2.*;
 
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.utils.FloatArray;
 
 import static bms.player.beatoraja.Resolution.*;
 import static bms.player.beatoraja.skin.SkinProperty.*;
@@ -137,10 +138,10 @@ public class MusicResult extends MainState {
 				keytime[0] = keytime[2] = keytime[4] = keytime[6] = 0;
 
 				if (resource.getCourseBMSModels() != null) {
-					if (resource.getGauge().get(resource.getGauge().size() - 1) <= 0) {
+					if (resource.getGauge().get(resource.getGauge().size - 1) <= 0) {
 						if (resource.getCourseScoreData() != null) {
 							// 未達曲のノーツをPOORとして加算
-							final List<List<Float>> coursegauge = resource.getCourseGauge();
+							final List<FloatArray> coursegauge = resource.getCourseGauge();
 							final int cg = resource.getCourseBMSModels().length;
 							for (int i = 0; i < cg; i++) {
 								if (coursegauge.size() <= i) {
@@ -314,7 +315,7 @@ public class MusicResult extends MainState {
 			cscore.setEms(cscore.getEms() + newscore.getEms());
 			cscore.setLms(cscore.getLms() + newscore.getLms());
 			cscore.setMinbp(cscore.getMinbp() + newscore.getMinbp());
-			if (resource.getGauge().get(resource.getGauge().size() - 1) > 0) {
+			if (resource.getGauge().get(resource.getGauge().size - 1) > 0) {
 				cscore.setClear(resource.getGrooveGauge().getClearType());
 			} else {
 				cscore.setClear(GrooveGauge.CLEARTYPE_FAILED);
@@ -469,7 +470,7 @@ public class MusicResult extends MainState {
 			}
 			return resource.getScoreData().getCombo() - oldcombo;
 		case NUMBER_GROOVEGAUGE:
-			return resource.getGauge().get(resource.getGauge().size() - 1).intValue();
+			return (int) resource.getGauge().get(resource.getGauge().size - 1);
 		case NUMBER_TOTALEARLY:
 			int ecount = 0;
 			for (int i = 1; i < 6; i++) {

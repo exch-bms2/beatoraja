@@ -19,6 +19,7 @@ import bms.player.beatoraja.skin.lr2.*;
 import bms.player.beatoraja.song.SongData;
 
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.utils.FloatArray;
 
 import static bms.player.beatoraja.Resolution.*;
 import static bms.player.beatoraja.skin.SkinProperty.*;
@@ -60,7 +61,7 @@ public class BMSPlayer extends MainState {
 
 	private ReplayData replay = null;
 
-	private final List<Float> gaugelog;
+	private final FloatArray gaugelog;
 
 	private int playspeed = 100;
 
@@ -117,11 +118,11 @@ public class BMSPlayer extends MainState {
 		}
 		// 通常プレイの場合は最後のノーツ、オートプレイの場合はBG/BGAを含めた最後のノーツ
 		playtime = (autoplay == 1 ? model.getLastTime() : model.getLastNoteTime()) + TIME_MARGIN;
-		gaugelog = new ArrayList<Float>(playtime / 500 + 2);
+		gaugelog = new FloatArray(playtime / 500 + 2);
 
 		boolean score = true;
 
-		boolean exjudge = false;
+		Logger.getGlobal().info("アシストオプション設定");
 		if (resource.getCourseBMSModels() == null && autoplay < 2) {
 			if (config.isBpmguide() && (model.getMinBPM() < model.getMaxBPM())) {
 				// BPM変化がなければBPMガイドなし
@@ -142,7 +143,6 @@ public class BMSPlayer extends MainState {
 				score = false;
 			}
 			if (config.isExpandjudge()) {
-				exjudge = true;
 				assist = 2;
 				score = false;
 			}
@@ -165,36 +165,7 @@ public class BMSPlayer extends MainState {
 			}
 		}
 		
-		int skinmode = (model.getUseKeys() == 7 ? 0
-				: (model.getUseKeys() == 5 ? 1 : (model.getUseKeys() == 14 ? 2 : (model.getUseKeys() == 10 ? 3 : 4))));
-		final String[] defaultskins = { SkinConfig.DEFAULT_PLAY7, SkinConfig.DEFAULT_PLAY5, SkinConfig.DEFAULT_PLAY14,
-				SkinConfig.DEFAULT_PLAY10, SkinConfig.DEFAULT_PLAY9 };
-		try {
-			SkinConfig sc = resource.getConfig().getSkin()[skinmode];
-			if (sc.getPath().endsWith(".json")) {
-				SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
-				setSkin(sl.loadPlaySkin(Paths.get(sc.getPath()), skinmode, sc.getProperty()));
-			} else {
-				LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
-				SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
-				Rectangle srcr = RESOLUTION[header.getResolution()];
-				Rectangle dstr = RESOLUTION[resource.getConfig().getResolution()];
-				LR2PlaySkinLoader dloader = new LR2PlaySkinLoader(srcr.width, srcr.height, dstr.width, dstr.height);
-				setSkin(dloader.loadPlaySkin(Paths.get(sc.getPath()).toFile(), this, header, loader.getOption(),
-						sc.getProperty()));
-			}
-		} catch (Throwable e) {
-			e.printStackTrace();
-			SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
-			setSkin(sl.loadPlaySkin(Paths.get(defaultskins[skinmode]), skinmode, new HashMap()));
-		}
-
-		judge = new JudgeManager(this, model, autoplay == 1, resource.getConstraint());
-		if (exjudge) {
-			judge.setJudgeMode(JudgeManager.EXPAND_JUDGE);
-		}
-		Logger.getGlobal().info("アシストオプション設定完了");
-
+		Logger.getGlobal().info("譜面オプション設定");
 		if (replay != null) {
 			PatternModifier.modify(model, Arrays.asList(replay.pattern));
 		} else if (resource.getReplayData().pattern != null) {
@@ -236,11 +207,9 @@ public class BMSPlayer extends MainState {
 			case 9:
 				if (config.getRandom() == 7) {
 					config.setRandom(0);
-				}
-				if (config.getRandom() == 8) {
+				} else if (config.getRandom() == 8) {
 					config.setRandom(2);
-				}
-				if (config.getRandom() == 9) {
+				} else if (config.getRandom() == 9) {
 					config.setRandom(4);
 				}
 				pattern = PatternModifier.merge(pattern,
@@ -253,32 +222,50 @@ public class BMSPlayer extends MainState {
 			}
 		}
 
-		int g = config.getGauge();
-		if (replay != null) {
-			g = replay.gauge;
+		Logger.getGlobal().info("ゲージ設定");
+		gauge = GrooveGauge.create(model, replay != null ? replay.gauge : config.getGauge(), resource.getCourseBMSModels() != null);
+		FloatArray f = resource.getGauge();
+		if (f != null) {
+			gauge.setValue(f.get(f.size - 1));
 		}
-		gauge = GrooveGauge.create(model, g, resource.getCourseBMSModels() != null);
 
 		resource.setUpdateScore(score);
 		final int difficulty = resource.getSongdata() != null ? resource.getSongdata().getDifficulty() : 0;
 		resource.setSongdata(new SongData(model, false));
 		resource.getSongdata().setDifficulty(difficulty);
-
-		List<Float> f = resource.getGauge();
-		if (f != null) {
-			gauge.setValue(f.get(f.size() - 1));
-			judge.setCourseCombo(resource.getCombo());
-			judge.setCourseMaxcombo(resource.getMaxcombo());
-		}
-		Logger.getGlobal().info("ゲージ設定完了");
 	}
 
 	public void create() {
 		final MainController main = getMainController();
 		final PlayerResource resource = main.getPlayerResource();
+		judge = new JudgeManager(this);
 		control = new ControlInputProcessor(this, autoplay);
 		keyinput = new KeyInputProccessor(this, model.getUseKeys());
 		Config config = resource.getConfig();
+
+		int skinmode = (model.getUseKeys() == 7 ? 0
+				: (model.getUseKeys() == 5 ? 1 : (model.getUseKeys() == 14 ? 2 : (model.getUseKeys() == 10 ? 3 : 4))));
+		final String[] defaultskins = { SkinConfig.DEFAULT_PLAY7, SkinConfig.DEFAULT_PLAY5, SkinConfig.DEFAULT_PLAY14,
+				SkinConfig.DEFAULT_PLAY10, SkinConfig.DEFAULT_PLAY9 };
+		try {
+			SkinConfig sc = resource.getConfig().getSkin()[skinmode];
+			if (sc.getPath().endsWith(".json")) {
+				SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
+				setSkin(sl.loadPlaySkin(Paths.get(sc.getPath()), skinmode, sc.getProperty()));
+			} else {
+				LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
+				SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
+				Rectangle srcr = RESOLUTION[header.getResolution()];
+				Rectangle dstr = RESOLUTION[resource.getConfig().getResolution()];
+				LR2PlaySkinLoader dloader = new LR2PlaySkinLoader(srcr.width, srcr.height, dstr.width, dstr.height);
+				setSkin(dloader.loadPlaySkin(Paths.get(sc.getPath()).toFile(), this, header, loader.getOption(),
+						sc.getProperty()));
+			}
+		} catch (Throwable e) {
+			e.printStackTrace();
+			SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
+			setSkin(sl.loadPlaySkin(Paths.get(defaultskins[skinmode]), skinmode, new HashMap()));
+		}
 
 		setSound(SOUND_PLAYSTOP, config.getSoundpath() + File.separatorChar + "playstop.wav", false);
 
@@ -298,6 +285,7 @@ public class BMSPlayer extends MainState {
 			}
 		}
 
+		judge.init(model, resource);
 		bga = resource.getBGAManager();
 
 		IRScoreData score = main.getPlayDataAccessor().readScoreData(model, config.getLnmode());
@@ -404,7 +392,7 @@ public class BMSPlayer extends MainState {
 				gauge = practice.getGauge(model);
 				model.setJudgerank(property.judgerank);
 				lanerender.init(model);
-				judge.init(model);
+				judge.init(model, resource);
 				notes = 0;
 				starttimeoffset = (property.starttime > 1000 ? property.starttime - 1000 : 0) * 100 / property.freq;
 				playtime = (property.endtime + 1000) * 100 / property.freq;
@@ -443,11 +431,11 @@ public class BMSPlayer extends MainState {
 		// プレイ
 		case STATE_PLAY:
 			// TODO fpsが高い時にスローがかからなくなる
-			final long deltatime = now - prevtime;
+			final float deltatime = now - prevtime;
 			getTimer()[TIMER_PLAY] += deltatime * (100 - playspeed) / 100;
 			getTimer()[TIMER_RHYTHM] += deltatime * (100 - lanerender.getNowBPM() * 100 / 60) / 100;
 			final float g = gauge.getValue();
-			if (gaugelog.size() <= (now - getTimer()[TIMER_PLAY]) / 500) {
+			if (gaugelog.size <= (now - getTimer()[TIMER_PLAY]) / 500) {
 				gaugelog.add(g);
 			}
 			if (g == gauge.getMaxValue() && getTimer()[TIMER_GAUGE_MAX_1P] == Long.MIN_VALUE) {
@@ -471,8 +459,6 @@ public class BMSPlayer extends MainState {
 				play(SOUND_PLAYSTOP);
 				Logger.getGlobal().info("STATE_FAILEDに移行");
 			}
-
-			prevtime = now;
 			break;
 		// 閉店処理
 		case STATE_FAILED:
@@ -544,6 +530,8 @@ public class BMSPlayer extends MainState {
 			}
 			break;
 		}
+		
+		prevtime = now;
 	}
 
 	public void setPlaySpeed(int playspeed) {
@@ -718,8 +706,7 @@ public class BMSPlayer extends MainState {
 			bga.setMisslayerTme(time);
 		}
 		gauge.update(judge);
-		// System.out.println(
-		// "Now count : " + notes + " - " + totalnotes);
+		// System.out.println("Now count : " + notes + " - " + totalnotes);
 
 		rate = (this.judge.getJudgeCount(0) * 2 + this.judge.getJudgeCount(1)) * 10000
 				/ getMainController().getPlayerResource().getSongdata().getNotes() / 2;
@@ -785,10 +772,6 @@ public class BMSPlayer extends MainState {
 				}
 			}
 		}
-	}
-
-	public int getCombo() {
-		return judge.getCombo();
 	}
 
 	public int getNumberValue(int id) {
@@ -1009,5 +992,4 @@ public class BMSPlayer extends MainState {
 		}
 		return super.getBooleanValue(id);
 	}
-
 }
