@@ -652,6 +652,16 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 			mine = new SkinSource[9];
 			laner = new Rectangle[9];
 		}
+		if (header.getMode() == SkinType.PLAY_24KEYS.getId()) {
+			note = new SkinSource[26];
+			lnstart = new SkinSource[26];
+			lnend = new SkinSource[26];
+			lnbody = new SkinSource[26];
+			lnbodya = new SkinSource[26];
+			mine = new SkinSource[26];
+			laner = new Rectangle[26];
+			playerr = new Rectangle[] { new Rectangle(), new Rectangle() };
+		}
 		this.loadSkin(skin, f, player, header, option, property);
 
 		lanerender.setLaneRegion(laner);

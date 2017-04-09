@@ -16,7 +16,8 @@ public enum SkinType {
 	PLAY_7KEYS_BATTLE(12, "7KEYS BATTLE", 7, true),
 	PLAY_5KEYS_BATTLE(13, "5KEYS BATTLE", 5, true),
 	PLAY_9KEYS_BATTLE(14, "9KEYS BATTLE", 9, true),
-	COURSE_RESULT(15, "COURSE RESULT");
+	COURSE_RESULT(15, "COURSE RESULT"),
+	PLAY_24KEYS(16, "24KEYS", 24, false);
 
 	private final int id;
 	private final String name;
