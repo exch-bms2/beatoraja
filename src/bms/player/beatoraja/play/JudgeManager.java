@@ -88,6 +88,7 @@ public class JudgeManager {
 	private boolean[] next_inclease = new boolean[8];
 	private int[] passingcount;
 
+	private int keys;
 	private int[] keyassign;
 	private int[] noteassign;
 
@@ -164,9 +165,6 @@ public class JudgeManager {
 	public void init(BMSModel model) {
 		prevtime = 0;
 		pos = 0;
-		judge = new int[20];
-		judgenow = new int[((PlaySkin) main.getSkin()).getJudgeregion()];
-		judgecombo = new int[((PlaySkin) main.getSkin()).getJudgeregion()];
 		for (int i = 0; i < count.length; i++) {
 			Arrays.fill(count[i], 0);
 		}
@@ -206,25 +204,24 @@ public class JudgeManager {
 			keyassign = new int[26];
 			noteassign = new int[26];
 			sckeyassign = new int[26];
-			for (int i=0; i<24; i++) {
+			for (int i=0; i<26; i++) {
 				keyassign[i] = i;
 				noteassign[i] = i;
 				sckeyassign[i] = -1;
 			}
-			keyassign[24] = 24;
-			keyassign[25] = 25;
-			noteassign[24] = 24;
-			noteassign[25] = 25;
-			sckeyassign[24] = 0;
-			sckeyassign[25] = 1;
-			sckey = new int[2];
+			sckey = new int[0];
 			pmsjudge = false;
 			break;
 		}
+		this.keys = model.getUseKeys();
 		this.keyassign = keyassign;
 		this.noteassign = noteassign;
 		this.sckeyassign = sckeyassign;
 		this.sckey = sckey;
+
+		judge = new int[noteassign.length  < 20 ? 20 : noteassign.length + 1];
+		judgenow = new int[((PlaySkin) main.getSkin()).getJudgeregion()];
+		judgecombo = new int[((PlaySkin) main.getSkin()).getJudgeregion()];
 
 		processing = new LongNote[noteassign.length];
 		passing = new LongNote[noteassign.length];
@@ -594,10 +591,33 @@ public class JudgeManager {
 			coursecombo = 0;
 		}
 
-		final int offset = pmsjudge ? lane : (lane % 8 == 7 ? -1 : (lane % 8)) + (lane >= 8 ? 10 : 0);
+		int offset = 0;
+		int bomb_timer = -1;
+		switch (keys) {
+		case 7:
+		case 5:
+		case 14:
+		case 10: {
+			offset = (lane % 8 == 7 ? -1 : (lane % 8)) + (lane >= 8 ? 10 : 0);
+			bomb_timer = TIMER_BOMB_1P_KEY1 + offset;
+			break;
+		}
+		case 9:
+			offset = lane;
+			bomb_timer = TIMER_BOMB_1P_KEY1 + lane;
+			break;
+		case 24:
+			offset = lane;
+			if (lane < 9) {
+				bomb_timer = TIMER_BOMB_1P_KEY1 + lane;
+			} else {
+				bomb_timer = TIMER_BOMB_1P_KEY10 + lane - 9;
+			}
+			break;
+		}
 		this.judge[offset + 1] = j == 0 ? 1 : j * 2 + (fast > 0 ? 0 : 1);
-		if (j < 2) {
-			main.getTimer()[TIMER_BOMB_1P_KEY1 + offset] = main.getNowTime();				
+		if (j < 2 && bomb_timer >= 0) {
+			main.getTimer()[bomb_timer] = main.getNowTime();
 		}
 		
 		final int lanelength = noteassign.length;

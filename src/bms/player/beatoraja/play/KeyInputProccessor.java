@@ -19,7 +19,7 @@ import bms.player.beatoraja.input.KeyInputLog;
 class KeyInputProccessor {
 
 	private final BMSPlayer player;
-	private final boolean ispms;
+	private final int keys;
 	private final int lanes;
 
 	private final int[] key_offset = { 1, 2, 3, 4, 5, 6, 7, 0, 11, 12, 13, 14, 15, 16, 17, 10 };
@@ -32,8 +32,25 @@ class KeyInputProccessor {
 
 	public KeyInputProccessor(BMSPlayer player, int keys) {
 		this.player = player;
-		ispms = keys == 9;
-		lanes = keys <= 7 ? 8 : (ispms ? 9 : 16);
+		this.keys = keys;
+		switch (keys) {
+		case 7:
+		case 5:
+			lanes = 8;
+			break;
+		case 14:
+		case 10:
+			lanes = 16;
+			break;
+		case 9:
+			lanes = 9;
+			break;
+		case 24:
+			lanes = 26;
+			break;
+		default:
+			lanes = 16;
+		}
 	}
 
 	public void startJudge(BMSModel model, List<KeyInputLog> keylog) {
@@ -50,7 +67,8 @@ class KeyInputProccessor {
 
 		for (int lane = 0; lane < lanes; lane++) {
 			// キービームフラグON/OFF
-			if (ispms) {
+			switch (keys) {
+			case 9:
 				if (keystate[lane]) {
 					if (timer[TIMER_KEYON_1P_KEY1 + lane] == Long.MIN_VALUE) {
 						timer[TIMER_KEYON_1P_KEY1 + lane] = now;
@@ -69,7 +87,49 @@ class KeyInputProccessor {
 				} else {
 					timer[TIMER_HOLD_1P_KEY1 + lane] = Long.MIN_VALUE;
 				}
-			} else {
+				break;
+			case 24:
+				if (lane < 9) {
+					if (keystate[lane]) {
+						if (timer[TIMER_KEYON_1P_KEY1 + lane] == Long.MIN_VALUE) {
+							timer[TIMER_KEYON_1P_KEY1 + lane] = now;
+							timer[TIMER_KEYOFF_1P_KEY1 + lane] = Long.MIN_VALUE;
+						}
+					} else {
+						if (timer[TIMER_KEYOFF_1P_KEY1 + lane] == Long.MIN_VALUE) {
+							timer[TIMER_KEYOFF_1P_KEY1 + lane] = now;
+							timer[TIMER_KEYON_1P_KEY1 + lane] = Long.MIN_VALUE;
+						}
+					}
+					if (judge.getProcessingLongNotes()[lane] != null) {
+						if (timer[TIMER_HOLD_1P_KEY1 + lane] == Long.MIN_VALUE) {
+							timer[TIMER_HOLD_1P_KEY1 + lane] = now;
+						}
+					} else {
+						timer[TIMER_HOLD_1P_KEY1 + lane] = Long.MIN_VALUE;
+					}
+				} else {
+					if (keystate[lane]) {
+						if (timer[TIMER_KEYON_1P_KEY10 + lane - 9] == Long.MIN_VALUE) {
+							timer[TIMER_KEYON_1P_KEY10 + lane - 9] = now;
+							timer[TIMER_KEYOFF_1P_KEY10 + lane - 9] = Long.MIN_VALUE;
+						}
+					} else {
+						if (timer[TIMER_KEYOFF_1P_KEY10 + lane - 9] == Long.MIN_VALUE) {
+							timer[TIMER_KEYOFF_1P_KEY10 + lane - 9] = now;
+							timer[TIMER_KEYON_1P_KEY10 + lane - 9] = Long.MIN_VALUE;
+						}
+					}
+					if (judge.getProcessingLongNotes()[lane] != null) {
+						if (timer[TIMER_HOLD_1P_KEY10 + lane - 9] == Long.MIN_VALUE) {
+							timer[TIMER_HOLD_1P_KEY10 + lane - 9] = now;
+						}
+					} else {
+						timer[TIMER_HOLD_1P_KEY10 + lane - 9] = Long.MIN_VALUE;
+					}
+				}
+				break;
+			default: {
 				final int key = lane >= 8 ? lane + 1 : lane;
 				final int offset = key_offset[lane];
 				if (keystate[key] || (key == 7 && keystate[8]) || (key == 16 && keystate[17])) {
@@ -90,14 +150,14 @@ class KeyInputProccessor {
 				} else {
 					timer[TIMER_HOLD_1P_SCRATCH + offset] = Long.MIN_VALUE;
 				}
-			}
+			}}
 		}
 		
 		if(prevtime >= 0) {
 			final int deltatime = now - prevtime;
 			scratch1 += 2160 - deltatime;
 			scratch2 += deltatime;
-			if (!ispms) {
+			if (keys != 9 && keys != 24) {
 				if (keystate[7]) {
 					scratch1 += deltatime * 2;
 				} else if (keystate[8]) {
