@@ -250,6 +250,7 @@ public class BMSPlayer extends MainState {
 				}
 				break;
 			case 24:
+				// 譜面オプションの扱いは保留
 				break;
 			}
 		}
@@ -293,7 +294,7 @@ public class BMSPlayer extends MainState {
 		}
 	}
 
-	private PlayConfig getPlayConfig(Config config) {
+	public PlayConfig getPlayConfig(Config config) {
 		switch (model.getUseKeys()) {
 		case 7:
 		case 5:

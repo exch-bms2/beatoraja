@@ -85,8 +85,7 @@ public class LaneRenderer {
 
 		this.skin = (PlaySkin) main.getSkin();
 		this.config = main.getMainController().getPlayerResource().getConfig();
-		this.playconfig = (model.getUseKeys() == 5 || model.getUseKeys() == 7 ? config.getMode7()
-				: (model.getUseKeys() == 10 || model.getUseKeys() == 14 ? config.getMode14() : config.getMode9()));
+		this.playconfig = main.getPlayConfig(this.config);
 		this.enableLanecover = playconfig.isEnablelanecover();
 		this.enableLift = playconfig.isEnablelift();
 		this.lift = playconfig.getLift();
@@ -108,10 +107,19 @@ public class LaneRenderer {
 		pos = 0;
 		this.model = model;
 		this.timelines = model.getAllTimeLines();
-		if (model.getUseKeys() == 9) {
-			laneassign = new int[] { 0, 1, 2, 3, 4, 10, 11, 12, 13 };
-		} else {
+		switch (model.getUseKeys()) {
+		case 7:
+		case 5:
+		case 14:
+		case 10:
 			laneassign = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13, 14, 15, 16 };
+			break;
+		case 9:
+			laneassign = new int[] { 0, 1, 2, 3, 4, 10, 11, 12, 13 };
+			break;
+		case 24:
+			laneassign = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25 };
+			break;
 		}
 		switch (config.getFixhispeed()) {
 		case Config.FIX_HISPEED_OFF:

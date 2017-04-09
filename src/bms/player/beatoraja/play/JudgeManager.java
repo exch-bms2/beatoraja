@@ -202,6 +202,24 @@ public class JudgeManager {
 			sckey = new int[0];
 			pmsjudge = true;
 			break;
+		case 24:
+			keyassign = new int[26];
+			noteassign = new int[26];
+			sckeyassign = new int[26];
+			for (int i=0; i<24; i++) {
+				keyassign[i] = i;
+				noteassign[i] = i;
+				sckeyassign[i] = -1;
+			}
+			keyassign[24] = 24;
+			keyassign[25] = 25;
+			noteassign[24] = 24;
+			noteassign[25] = 25;
+			sckeyassign[24] = 0;
+			sckeyassign[25] = 1;
+			sckey = new int[2];
+			pmsjudge = false;
+			break;
 		}
 		this.keyassign = keyassign;
 		this.noteassign = noteassign;
