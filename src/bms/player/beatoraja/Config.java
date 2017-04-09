@@ -220,6 +220,10 @@ public class Config {
 					BMKeys.BUTTON_5, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN, BMKeys.BUTTON_9, BMKeys.BUTTON_10 }},
 			MidiConfig.default9());
 
+	private PlayConfig mode24 = new PlayConfig(
+			new int[] { }, new int[][] {},
+			MidiConfig.default24());
+
 	private int musicselectinput = 0;
 
 	private String irname = "";
@@ -481,6 +485,14 @@ public class Config {
 		this.mode9 = mode9;
 	}
 
+	public PlayConfig getMode24() {
+		return mode24;
+	}
+
+	public void setMode24(PlayConfig mode24) {
+		this.mode24 = mode24;
+	}
+
 	public int getResolution() {
 		return resolution;
 	}
@@ -676,6 +688,7 @@ public class Config {
 		public static final String DEFAULT_PLAY14 = "skin/default/play14.json";
 		public static final String DEFAULT_PLAY10 = "skin/default/play10.json";
 		public static final String DEFAULT_PLAY9 = "skin/default/play9.json";
+		public static final String DEFAULT_PLAY24 = "skin/default/play24.json";
 		public static final String DEFAULT_SELECT = "skin/default/select.json";
 		public static final String DEFAULT_DECIDE = "skin/default/decide.json";
 		public static final String DEFAULT_RESULT = "skin/default/result.json";
@@ -688,6 +701,7 @@ public class Config {
 				put(SkinType.PLAY_14KEYS, DEFAULT_PLAY14);
 				put(SkinType.PLAY_10KEYS, DEFAULT_PLAY10);
 				put(SkinType.PLAY_9KEYS, DEFAULT_PLAY9);
+				put(SkinType.PLAY_24KEYS, DEFAULT_PLAY24);
 				put(SkinType.MUSIC_SELECT, DEFAULT_SELECT);
 				put(SkinType.DECIDE, DEFAULT_DECIDE);
 				put(SkinType.RESULT, DEFAULT_RESULT);

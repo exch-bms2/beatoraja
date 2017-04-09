@@ -182,7 +182,7 @@ public class PlayConfigurationView implements Initializable {
 		initComboBox(bgaexpand, new String[] { "Full", "Keep Aspect Ratio", "Off" });
                 initComboBox(jkoc_hack, new String[] {"False", "True"});
 		initComboBox(fixhispeed, new String[] { "OFF", "START BPM", "MAX BPM", "MAIN BPM", "MIN BPM" });
-		initComboBox(playconfig, new String[] { "5/7KEYS", "10/14KEYS", "9KEYS" });
+		initComboBox(playconfig, new String[] { "5/7KEYS", "10/14KEYS", "9KEYS", "24KEYS" });
 		initComboBox(lntype, new String[] { "LONG NOTE", "CHARGE NOTE", "HELL CHARGE NOTE" });
 		initComboBox(judgealgorithm, new String[] { arg1.getString("JUDGEALG_LR2"), arg1.getString("JUDGEALG_AC"), arg1.getString("JUDGEALG_BOTTOM_PRIORITY") });
 
@@ -407,10 +407,25 @@ public class PlayConfigurationView implements Initializable {
 
 	private int pc = -1;
 
+	private PlayConfig getPlayConfig() {
+		switch (pc) {
+			case 0:
+				return config.getMode7();
+			case 1:
+				return config.getMode14();
+			case 2:
+				return config.getMode9();
+			case 3:
+				return config.getMode24();
+			default:
+				return config.getMode7();
+		}
+	}
+
     @FXML
 	public void updatePlayConfig() {
 		if (pc != -1) {
-			PlayConfig conf = (pc == 0 ? config.getMode7() : (pc == 1 ? config.getMode14() : config.getMode9()));
+			PlayConfig conf = getPlayConfig();
 			conf.setHispeed(getValue(hispeed).floatValue());
 			conf.setDuration(getValue(gvalue));
 			conf.setEnablelanecover(enableLanecover.isSelected());
@@ -419,7 +434,7 @@ public class PlayConfigurationView implements Initializable {
 			conf.setLift(getValue(lift) / 1000f);
 		}
 		pc = playconfig.getValue();
-		PlayConfig conf = (pc == 0 ? config.getMode7() : (pc == 1 ? config.getMode14() : config.getMode9()));
+		PlayConfig conf = getPlayConfig();
 		hispeed.getValueFactory().setValue((double) conf.getHispeed());
 		gvalue.getValueFactory().setValue(conf.getDuration());
 		enableLanecover.setSelected(conf.isEnablelanecover());

@@ -249,6 +249,8 @@ public class BMSPlayer extends MainState {
 					score = false;
 				}
 				break;
+			case 24:
+				break;
 			}
 		}
 
@@ -284,6 +286,25 @@ public class BMSPlayer extends MainState {
 			return SkinType.PLAY_10KEYS;
 		case 9:
 			return SkinType.PLAY_9KEYS;
+		case 24:
+			return SkinType.PLAY_24KEYS;
+		default:
+			return null;
+		}
+	}
+
+	private PlayConfig getPlayConfig(Config config) {
+		switch (model.getUseKeys()) {
+		case 7:
+		case 5:
+			return config.getMode7();
+		case 14:
+		case 10:
+			return config.getMode14();
+		case 9:
+			return config.getMode9();
+		case 24:
+			return config.getMode24();
 		default:
 			return null;
 		}
@@ -303,8 +324,7 @@ public class BMSPlayer extends MainState {
 		input.setMinimumInputDutration(config.getInputduration());
 		input.setDisableDevice(autoplay == 0 || autoplay == 2
 				? (resource.getPlayDevice() == 0 ? new int[] { 1, 2 } : new int[] { 0 }) : null);
-		PlayConfig pc = (model.getUseKeys() == 5 || model.getUseKeys() == 7 ? config.getMode7()
-				: (model.getUseKeys() == 10 || model.getUseKeys() == 14 ? config.getMode14() : config.getMode9()));
+		PlayConfig pc = getPlayConfig(config);
 		input.setKeyassign(pc.getKeyassign());
 		input.setControllerConfig(pc.getController());
 		input.setMidiConfig(pc.getMidiConfig());
