@@ -85,7 +85,8 @@ public class MainController extends ApplicationAdapter {
 
 	private ScreenShotThread screenshot;
 
-	private long[] timer = new long[256];
+	public static final int timerCount = 2048;
+	private long[] timer = new long[timerCount];
 
 	public MainController(Path f, Config config, int auto) {
 		this.auto = auto;

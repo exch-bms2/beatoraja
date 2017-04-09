@@ -66,6 +66,8 @@ public class SkinProperty {
 	public static final int TIMER_BOMB_2P_KEY9 = 69;
 	public static final int TIMER_HOLD_1P_SCRATCH = 70;
 	public static final int TIMER_HOLD_1P_KEY1 = 71;
+	public static final int TIMER_HOLD_2P_SCRATCH = 80;
+	public static final int TIMER_HOLD_2P_KEY1 = 81;
 	public static final int TIMER_KEYON_1P_SCRATCH = 100;
 	public static final int TIMER_KEYON_1P_KEY1 = 101;
 	public static final int TIMER_KEYON_1P_KEY2 = 102;
@@ -113,6 +115,24 @@ public class SkinProperty {
 	public static final int TIMER_RESULTGRAPH_BEGIN = 150;
 	public static final int TIMER_RESULTGRAPH_END = 151;
 	public static final int TIMER_RESULT_UPDATESCORE = 152;
+
+	// 拡張版TIMER
+	public static final int TIMER_BOMB_1P_SCRATCH2 = 1000;
+	public static final int TIMER_BOMB_1P_KEY10 = 1010;
+	public static final int TIMER_BOMB_2P_SCRATCH2 = 1100;
+	public static final int TIMER_BOMB_2P_KEY10 = 1110;
+	public static final int TIMER_HOLD_1P_SCRATCH2 = 1200;
+	public static final int TIMER_HOLD_1P_KEY10 = 1210;
+	public static final int TIMER_HOLD_2P_SCRATCH2 = 1300;
+	public static final int TIMER_HOLD_2P_KEY10 = 1310;
+	public static final int TIMER_KEYON_1P_SCRATCH2 = 1400;
+	public static final int TIMER_KEYON_1P_KEY10 = 1410;
+	public static final int TIMER_KEYON_2P_SCRATCH2 = 1500;
+	public static final int TIMER_KEYON_2P_KEY10 = 1510;
+	public static final int TIMER_KEYOFF_1P_SCRATCH2 = 1600;
+	public static final int TIMER_KEYOFF_1P_KEY10 = 1610;
+	public static final int TIMER_KEYOFF_2P_SCRATCH2 = 1700;
+	public static final int TIMER_KEYOFF_2P_KEY10 = 1710;
 
 	// 選曲専用
 	public static final int SLIDER_MUSICSELECT_POSITION = 1;
