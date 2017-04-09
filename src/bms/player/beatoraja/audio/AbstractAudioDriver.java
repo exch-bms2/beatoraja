@@ -153,7 +153,7 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 
 		Map<Integer, List<Note>> notemap = new HashMap();
 		for (TimeLine tl : model.getAllTimeLines()) {
-			for (int i = 0; i < 18; i++) {
+			for (int i = 0; i < tl.getLaneCount(); i++) {
 				final Note n = tl.getNote(i);
 				if (n != null) {
 					addNoteList(notemap, n);
