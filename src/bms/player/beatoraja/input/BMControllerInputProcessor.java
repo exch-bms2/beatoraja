@@ -58,6 +58,9 @@ public class BMControllerInputProcessor implements ControllerListener {
 	}
 
 	public void setControllerKeyAssign(int[] buttons) {
+		if (buttons.length < 11) {
+			return;
+		}
 		this.buttons = new int[] { buttons[0], buttons[1], buttons[2], buttons[3], buttons[4], buttons[5], buttons[6],
 				buttons[7], buttons[8] };
 		this.start = buttons[9];

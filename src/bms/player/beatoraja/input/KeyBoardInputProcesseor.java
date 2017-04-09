@@ -42,6 +42,9 @@ public class KeyBoardInputProcesseor implements InputProcessor {
 	}
 
 	public void setKeyAssign(int[] keys) {
+		if (keys.length < 20) {
+			return;
+		}
 		this.keys = new int[] { keys[0], keys[1], keys[2], keys[3], keys[4], keys[5], keys[6], keys[7], keys[8],
 				keys[9], keys[10], keys[11], keys[12], keys[13], keys[14], keys[15], keys[16], keys[17] };
 		this.control = new int[] { keys[18], keys[19] };
