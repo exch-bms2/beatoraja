@@ -322,21 +322,17 @@ public class BMSPlayer extends MainState {
 		if (score == null) {
 			score = new IRScoreData();
 		}
-		bestscore = score.getExscore();
-		rivalscore = TargetProperty.getAllTargetProperties(getMainController())[config.getTarget()]
+
+		int rivalscore = TargetProperty.getAllTargetProperties(getMainController())[config.getTarget()]
 				.getTarget(getMainController());
 		resource.setRivalScoreData(rivalscore);
+		getScoreDataProperty().setTargetScore(score.getExscore(), rivalscore, model.getTotalNotes());
 
 		if (autoplay == 2) {
 			practice.create(model);
 			state = STATE_PRACTICE;
 		}
 	}
-
-	private int bestscore;
-	private int rivalscore;
-	private int rate;
-	private int drate;
 
 	protected static final int STATE_PRELOAD = 0;
 	protected static final int STATE_PRACTICE = 1;
@@ -738,11 +734,6 @@ public class BMSPlayer extends MainState {
 		// System.out.println(
 		// "Now count : " + notes + " - " + totalnotes);
 
-		rate = (this.judge.getJudgeCount(0) * 2 + this.judge.getJudgeCount(1)) * 10000
-				/ getMainController().getPlayerResource().getSongdata().getNotes() / 2;
-		drate = notes == 0 ? 10000
-				: (this.judge.getJudgeCount(0) * 2 + this.judge.getJudgeCount(1)) * 10000 / notes / 2;
-
 		if (notes == getMainController().getPlayerResource().getSongdata().getNotes()) {
 			//フルコン判定
 			if(getTimer()[TIMER_FULLCOMBO_1P] == Long.MIN_VALUE && this.judge.getJudgeCount(3) == 0
@@ -752,7 +743,10 @@ public class BMSPlayer extends MainState {
 			if(getTimer()[TIMER_ENDOFNOTE_1P] == Long.MIN_VALUE) {
 				getTimer()[TIMER_ENDOFNOTE_1P] = getNowTime();					
 			}
-		}				
+		}
+
+		getScoreDataProperty().update(this.judge.getJudgeCount(0) * 2 + this.judge.getJudgeCount(1),
+				getMainController().getPlayerResource().getSongdata().getNotes(), notes);
 	}
 
 	public GrooveGauge getGauge() {
@@ -843,24 +837,6 @@ public class BMSPlayer extends MainState {
 			return lanerender.getCurrentDuration();
 		case NUMBER_NOWBPM:
 			return (int) lanerender.getNowBPM();
-		case NUMBER_SCORE:
-		case NUMBER_SCORE2:
-			return judge.getJudgeCount(0) * 2 + judge.getJudgeCount(1);
-		case NUMBER_TARGET_SCORE:
-		case NUMBER_TARGET_SCORE2:
-			return rivalscore;
-		case NUMBER_DIFF_HIGHSCORE:
-			return (judge.getJudgeCount(0) * 2 + judge.getJudgeCount(1)) - (bestscore * notes / song.getNotes());
-		case NUMBER_DIFF_EXSCORE:
-		case NUMBER_DIFF_EXSCORE2:
-		case NUMBER_DIFF_TARGETSCORE:
-			return (judge.getJudgeCount(0) * 2 + judge.getJudgeCount(1)) - (rivalscore * notes / song.getNotes());
-		case NUMBER_SCORE_RATE:
-			return notes == 0 ? 100 : (judge.getJudgeCount(0) * 2 + judge.getJudgeCount(1)) * 100 / (notes * 2);
-		case NUMBER_SCORE_RATE_AFTERDOT:
-			return notes == 0 ? 0 : ((judge.getJudgeCount(0) * 2 + judge.getJudgeCount(1)) * 1000 / (notes * 2)) % 10;
-		case NUMBER_HIGHSCORE:
-			return bestscore;
 		case NUMBER_MAXCOMBO:
 		case NUMBER_MAXCOMBO2:
 			return judge.getMaxcombo();
@@ -881,7 +857,6 @@ public class BMSPlayer extends MainState {
 
 	@Override
 	public float getSliderValue(int id) {
-		final SongData song = getMainController().getPlayerResource().getSongdata();
 		switch (id) {
 		case SLIDER_MUSIC_PROGRESS:
 			if (getTimer()[TIMER_PLAY] != Long.MIN_VALUE) {
@@ -918,20 +893,8 @@ public class BMSPlayer extends MainState {
 		case BARGRAPH_LOAD_PROGRESS:
 			float value = (getMainController().getAudioProcessor().getProgress() + bga.getProgress()) / 2;
 			return value;
-		case BARGRAPH_SCORERATE:
-			return (float) (judge.getJudgeCount(0) * 2 + judge.getJudgeCount(1)) / (song.getNotes() * 2);
-		case BARGRAPH_SCORERATE_FINAL:
-			return (float) (judge.getJudgeCount(0) * 2 + judge.getJudgeCount(1)) / (notes * 2);
-		case BARGRAPH_BESTSCORERATE_NOW:
-			return (float) (bestscore) * notes / (song.getNotes() * song.getNotes() * 2);
-		case BARGRAPH_BESTSCORERATE:
-			return (float) (bestscore) / (song.getNotes() * 2);
-		case BARGRAPH_TARGETSCORERATE_NOW:
-			return (float) (rivalscore) * notes / (song.getNotes() * song.getNotes() * 2);
-		case BARGRAPH_TARGETSCORERATE:
-			return (float) (rivalscore) / (song.getNotes() * 2);
 		}
-		return 0;
+		return super.getSliderValue(id);
 	}
 
 	public boolean getBooleanValue(int id) {
@@ -947,38 +910,6 @@ public class BMSPlayer extends MainState {
 			return gauge instanceof AssistEasyGrooveGauge || gauge instanceof EasyGrooveGauge
 					|| gauge instanceof ExhardGrooveGauge || gauge instanceof ExgradeGrooveGauge
 					|| gauge instanceof ExhardGradeGrooveGauge || gauge instanceof HazardGrooveGauge;
-		case OPTION_F:
-			return true;
-		case OPTION_E:
-			return rate > 2222;
-		case OPTION_D:
-			return rate > 3333;
-		case OPTION_C:
-			return rate > 4444;
-		case OPTION_B:
-			return rate > 5555;
-		case OPTION_A:
-			return rate > 6666;
-		case OPTION_AA:
-			return rate > 7777;
-		case OPTION_AAA:
-			return rate > 8888;
-		case OPTION_1P_F:
-			return drate <= 2222;
-		case OPTION_1P_E:
-			return drate > 2222 && drate <= 3333;
-		case OPTION_1P_D:
-			return drate > 3333 && drate <= 4444;
-		case OPTION_1P_C:
-			return drate > 4444 && drate <= 5555;
-		case OPTION_1P_B:
-			return drate > 5555 && drate <= 6666;
-		case OPTION_1P_A:
-			return drate > 6666 && drate <= 7777;
-		case OPTION_1P_AA:
-			return drate > 7777 && drate <= 8888;
-		case OPTION_1P_AAA:
-			return drate > 8888;
 		case OPTION_AUTOPLAYON:
 			return autoplay == 1;
 		case OPTION_AUTOPLAYOFF:

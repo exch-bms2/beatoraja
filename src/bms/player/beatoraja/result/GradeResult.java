@@ -135,8 +135,6 @@ public class GradeResult extends MainState {
         }
     }
 
-
-
     public void updateScoreDatabase() {
 		saveReplay = -1;
 		final PlayerResource resource = getMainController().getPlayerResource();
@@ -172,8 +170,9 @@ public class GradeResult extends MainState {
 		for (BMSModel model : resource.getCourseBMSModels()) {
 			notes += model.getTotalNotes();
 		}
-		rate = score.getExscore() * 10000 / (notes * 2);
-		oldrate = oldexscore * 10000 / (notes * 2);
+
+		getScoreDataProperty().setTargetScore(oldexscore, resource.getRivalScoreData(), resource.getBMSModel().getTotalNotes());
+		getScoreDataProperty().update(newscore);
 
 		getMainController().getPlayDataAccessor().writeScoreDara(newscore, models, resource.getConfig().getLnmode(),
 				random, resource.getConstraint(), resource.isUpdateScore());
@@ -286,11 +285,6 @@ public class GradeResult extends MainState {
 					count += getJudgeCount(i, false);
 				}
 				return count;
-			case NUMBER_SCORE_RATE:
-				return rate / 100;
-			case NUMBER_SCORE_RATE_AFTERDOT:
-				return (rate / 10) % 10;
-
 		}
 		return super.getNumberValue(id);
 	}
@@ -313,9 +307,6 @@ public class GradeResult extends MainState {
 		}
 	}
 
-	private int rate;
-	private int oldrate;
-
 	public boolean getBooleanValue(int id) {
 		final PlayerResource resource = getMainController().getPlayerResource();
 		final IRScoreData score = resource.getCourseScoreData();
@@ -324,46 +315,6 @@ public class GradeResult extends MainState {
 				return score.getClear() != GrooveGauge.CLEARTYPE_FAILED;
 			case OPTION_RESULT_FAIL:
 				return score.getClear() == GrooveGauge.CLEARTYPE_FAILED;
-			case OPTION_RESULT_F_1P:
-			case OPTION_NOW_F_1P:
-				return rate <= 2222;
-			case OPTION_RESULT_E_1P:
-			case OPTION_NOW_E_1P:
-				return rate > 2222 && rate <= 3333;
-			case OPTION_RESULT_D_1P:
-			case OPTION_NOW_D_1P:
-				return rate > 3333 && rate <= 4444;
-			case OPTION_RESULT_C_1P:
-			case OPTION_NOW_C_1P:
-				return rate > 4444 && rate <= 5555;
-			case OPTION_RESULT_B_1P:
-			case OPTION_NOW_B_1P:
-				return rate > 5555 && rate <= 6666;
-			case OPTION_RESULT_A_1P:
-			case OPTION_NOW_A_1P:
-				return rate > 6666 && rate <= 7777;
-			case OPTION_RESULT_AA_1P:
-			case OPTION_NOW_AA_1P:
-				return rate > 7777 && rate <= 8888;
-			case OPTION_RESULT_AAA_1P:
-			case OPTION_NOW_AAA_1P:
-				return rate > 8888;
-			case OPTION_BEST_F_1P:
-				return oldrate <= 2222;
-			case OPTION_BEST_E_1P:
-				return oldrate > 2222 && oldrate <= 3333;
-			case OPTION_BEST_D_1P:
-				return oldrate > 3333 && oldrate <= 4444;
-			case OPTION_BEST_C_1P:
-				return oldrate > 4444 && oldrate <= 5555;
-			case OPTION_BEST_B_1P:
-				return oldrate > 5555 && oldrate <= 6666;
-			case OPTION_BEST_A_1P:
-				return oldrate > 6666 && oldrate <= 7777;
-			case OPTION_BEST_AA_1P:
-				return oldrate > 7777 && oldrate <= 8888;
-			case OPTION_BEST_AAA_1P:
-				return oldrate > 8888;
 			case OPTION_UPDATE_SCORE:
 				return score.getExscore() > oldexscore;
 			case OPTION_UPDATE_MAXCOMBO:
@@ -371,7 +322,7 @@ public class GradeResult extends MainState {
 			case OPTION_UPDATE_MISSCOUNT:
 				return score.getMinbp() < oldmisscount;
 			case OPTION_UPDATE_SCORERANK:
-				return rate / 1111 > oldrate / 1111;
+				return getScoreDataProperty().getNowRate() > getScoreDataProperty().getBestScoreRate();
 			case OPTION_NO_REPLAYDATA:
 				return !getMainController().getPlayDataAccessor().existsReplayData(resource.getCourseBMSModels(),
 						resource.getConfig().getLnmode(), 0,resource.getConstraint());

@@ -809,17 +809,9 @@ public class MusicSelector extends MainState {
 		case BUTTON_LNMODE:
 			return config.getLnmode();
 		case NUMBER_SCORE_RATE:
-			if (bar.getSelected().getScore() != null) {
-				final IRScoreData score = bar.getSelected().getScore();
-				return score.getNotes() == 0 ? 0 : score.getExscore() * 100 / (score.getNotes() * 2);
-			}
-			return Integer.MIN_VALUE;
+			return bar.getSelected().getScore() != null ? getScoreDataProperty().getRateInt() : Integer.MIN_VALUE;
 		case NUMBER_SCORE_RATE_AFTERDOT:
-			if (bar.getSelected().getScore() != null) {
-				final IRScoreData score = bar.getSelected().getScore();
-				return score.getNotes() == 0 ? 0 : (score.getExscore() * 1000 / (score.getNotes() * 2)) % 10;
-			}
-			return Integer.MIN_VALUE;
+			return bar.getSelected().getScore() != null ? getScoreDataProperty().getNowRateAfterDot() : Integer.MIN_VALUE;
 		}
 		return super.getNumberValue(id);
 	}
@@ -1080,62 +1072,6 @@ public class MusicSelector extends MainState {
 		case OPTION_NO_REPLAYDATA4:
 			return (current instanceof SelectableBar) && ((SelectableBar) current).getExistsReplayData().length > 3
 					&& !((SelectableBar) current).getExistsReplayData()[3];
-		case OPTION_1P_F:
-			if (bar.getSelected().getScore() != null) {
-				final IRScoreData score = bar.getSelected().getScore();
-				final int drate = score.getNotes() == 0 ? 0 : score.getExscore() * 10000 / (score.getNotes() * 2);
-				return drate <= 2222;
-			}
-			return false;
-		case OPTION_1P_E:
-			if (bar.getSelected().getScore() != null) {
-				final IRScoreData score = bar.getSelected().getScore();
-				final int drate = score.getNotes() == 0 ? 0 : score.getExscore() * 10000 / (score.getNotes() * 2);
-				return drate > 2222 && drate <= 3333;
-			}
-			return false;
-		case OPTION_1P_D:
-			if (bar.getSelected().getScore() != null) {
-				final IRScoreData score = bar.getSelected().getScore();
-				final int drate = score.getNotes() == 0 ? 0 : score.getExscore() * 10000 / (score.getNotes() * 2);
-				return drate > 3333 && drate <= 4444;
-			}
-			return false;
-		case OPTION_1P_C:
-			if (bar.getSelected().getScore() != null) {
-				final IRScoreData score = bar.getSelected().getScore();
-				final int drate = score.getNotes() == 0 ? 0 : score.getExscore() * 10000 / (score.getNotes() * 2);
-				return drate > 4444 && drate <= 5555;
-			}
-			return false;
-		case OPTION_1P_B:
-			if (bar.getSelected().getScore() != null) {
-				final IRScoreData score = bar.getSelected().getScore();
-				final int drate = score.getNotes() == 0 ? 0 : score.getExscore() * 10000 / (score.getNotes() * 2);
-				return drate > 5555 && drate <= 6666;
-			}
-			return false;
-		case OPTION_1P_A:
-			if (bar.getSelected().getScore() != null) {
-				final IRScoreData score = bar.getSelected().getScore();
-				final int drate = score.getNotes() == 0 ? 0 : score.getExscore() * 10000 / (score.getNotes() * 2);
-				return drate > 6666 && drate <= 7777;
-			}
-			return false;
-		case OPTION_1P_AA:
-			if (bar.getSelected().getScore() != null) {
-				final IRScoreData score = bar.getSelected().getScore();
-				final int drate = score.getNotes() == 0 ? 0 : score.getExscore() * 10000 / (score.getNotes() * 2);
-				return drate > 7777 && drate <= 8888;
-			}
-			return false;
-		case OPTION_1P_AAA:
-			if (bar.getSelected().getScore() != null) {
-				final IRScoreData score = bar.getSelected().getScore();
-				final int drate = score.getNotes() == 0 ? 0 : score.getExscore() * 10000 / (score.getNotes() * 2);
-				return drate > 8888;
-			}
-			return false;
 		}
 		return super.getBooleanValue(id);
 	}

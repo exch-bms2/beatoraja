@@ -35,6 +35,8 @@ public abstract class MainState {
 	private Map<Integer, String> soundmap = new HashMap<Integer, String>();
 	private Map<Integer, Boolean> soundloop = new HashMap<Integer, Boolean>();
 
+	private ScoreDataProperty score = new ScoreDataProperty();
+
 	public MainState(MainController main) {
 		this.main = main;
 		Arrays.fill(main.getTimer(), Long.MIN_VALUE);
@@ -111,6 +113,10 @@ public abstract class MainState {
 
 	}
 
+	public ScoreDataProperty getScoreDataProperty() {
+		return score;
+	}
+
 	public boolean getBooleanValue(int id) {
 		final SongData model = getMainController().getPlayerResource().getSongdata();
 		switch (id) {
@@ -182,7 +188,70 @@ public abstract class MainState {
 			return getMainController().getIRConnection() == null;
 			case OPTION_ONLINE:
 				return getMainController().getIRConnection() != null;
-
+			case OPTION_F:
+				return score.qualifyRank(0);
+			case OPTION_E:
+				return score.qualifyRank(6);
+			case OPTION_D:
+				return score.qualifyRank(9);
+			case OPTION_C:
+				return score.qualifyRank(12);
+			case OPTION_B:
+				return score.qualifyRank(15);
+			case OPTION_A:
+				return score.qualifyRank(18);
+			case OPTION_AA:
+				return score.qualifyRank(21);
+			case OPTION_AAA:
+				return score.qualifyRank(24);
+			case OPTION_1P_F:
+			case OPTION_RESULT_F_1P:
+			case OPTION_NOW_F_1P:
+				return score.qualifyNowRank(0) && !score.qualifyNowRank(6);
+			case OPTION_1P_E:
+			case OPTION_RESULT_E_1P:
+			case OPTION_NOW_E_1P:
+				return score.qualifyNowRank(6) && !score.qualifyNowRank(9);
+			case OPTION_RESULT_D_1P:
+			case OPTION_NOW_D_1P:
+			case OPTION_1P_D:
+				return score.qualifyNowRank(9) && !score.qualifyNowRank(12);
+			case OPTION_RESULT_C_1P:
+			case OPTION_NOW_C_1P:
+			case OPTION_1P_C:
+				return score.qualifyNowRank(12) && !score.qualifyNowRank(15);
+			case OPTION_1P_B:
+			case OPTION_RESULT_B_1P:
+			case OPTION_NOW_B_1P:
+				return score.qualifyNowRank(15) && !score.qualifyNowRank(18);
+			case OPTION_1P_A:
+			case OPTION_RESULT_A_1P:
+			case OPTION_NOW_A_1P:
+				return score.qualifyNowRank(18) && !score.qualifyNowRank(21);
+			case OPTION_1P_AA:
+			case OPTION_RESULT_AA_1P:
+			case OPTION_NOW_AA_1P:
+				return score.qualifyNowRank(21) && !score.qualifyNowRank(24);
+			case OPTION_1P_AAA:
+			case OPTION_RESULT_AAA_1P:
+			case OPTION_NOW_AAA_1P:
+				return score.qualifyNowRank(24);
+			case OPTION_BEST_F_1P:
+				return score.qualifyBestRank(0) && !score.qualifyBestRank(6);
+			case OPTION_BEST_E_1P:
+				return score.qualifyBestRank(6) && !score.qualifyBestRank(9);
+			case OPTION_BEST_D_1P:
+				return score.qualifyBestRank(9) && !score.qualifyBestRank(12);
+			case OPTION_BEST_C_1P:
+				return score.qualifyBestRank(12) && !score.qualifyBestRank(15);
+			case OPTION_BEST_B_1P:
+				return score.qualifyBestRank(15) && !score.qualifyBestRank(18);
+			case OPTION_BEST_A_1P:
+				return score.qualifyBestRank(18) && !score.qualifyBestRank(21);
+			case OPTION_BEST_AA_1P:
+				return score.qualifyBestRank(21) && !score.qualifyBestRank(24);
+			case OPTION_BEST_AAA_1P:
+				return score.qualifyBestRank(24);
 		}
 		return false;
 	}
@@ -315,11 +384,43 @@ public abstract class MainState {
 			}
 			return Integer.MIN_VALUE;
 
+			case NUMBER_SCORE:
+			case NUMBER_SCORE2:
+				return score.getNowEXScore();
+			case NUMBER_SCORE_RATE:
+				return score.getNowRateInt();
+			case NUMBER_SCORE_RATE_AFTERDOT:
+				return score.getNowRateAfterDot();
+			case NUMBER_HIGHSCORE:
+				return score.getBestScore();
+			case NUMBER_TARGET_SCORE:
+			case NUMBER_TARGET_SCORE2:
+				return score.getRivalScore();
+			case NUMBER_DIFF_HIGHSCORE:
+				return score.getNowEXScore() - score.getNowBestScore();
+			case NUMBER_DIFF_EXSCORE:
+			case NUMBER_DIFF_EXSCORE2:
+			case NUMBER_DIFF_TARGETSCORE:
+				return score.getNowEXScore() - score.getNowRivalScore();
 		}
 		return 0;
 	}
 
 	public float getSliderValue(int id) {
+		switch (id) {
+			case BARGRAPH_SCORERATE:
+				return score.getRate();
+			case BARGRAPH_SCORERATE_FINAL:
+				return score.getNowRate();
+			case BARGRAPH_BESTSCORERATE_NOW:
+				return score.getNowBestScoreRate();
+			case BARGRAPH_BESTSCORERATE:
+				return score.getBestScoreRate();
+			case BARGRAPH_TARGETSCORERATE_NOW:
+				return score.getNowRivalScoreRate();
+			case BARGRAPH_TARGETSCORERATE:
+				return score.getRivalScoreRate();
+		}
 		return 0;
 	}
 
