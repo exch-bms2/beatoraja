@@ -5,15 +5,10 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Disposable;
 
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * テキストオブジェクト
@@ -62,7 +57,7 @@ public class SkinTextImage extends SkinText {
 	public void draw(SpriteBatch sprite, long time, MainState state, int offsetX, int offsetY) {
 		Rectangle r = this.getDestination(time, state);
 		if (r != null) {
-			Color c = getColor(time, state);
+			final Color c = getColor();
 			// System.out.println("SkinTextImage描画:" + text + " - " + x + " " +
 			// y +
 			// " " + w + " " + h);

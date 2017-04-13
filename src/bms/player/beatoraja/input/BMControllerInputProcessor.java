@@ -154,7 +154,10 @@ public class BMControllerInputProcessor implements ControllerListener {
 				if ((ax > -0.9 && ax < -0.1) || (ax > 0.1 && ax < 0.9)) {
 					if (axistime[i] != -1) {
 						if (presstime > axistime[i] + 500  && !koc) {
-							analogaxis[i] = true;
+							if(!koc)
+								analogaxis[i] = false;
+							else
+								analogaxis[i] = true;
 						}
 					} else {
 						axistime[i] = presstime;

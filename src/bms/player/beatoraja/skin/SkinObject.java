@@ -56,6 +56,8 @@ public abstract class SkinObject implements Disposable {
 	private int[] dstop = new int[0];
 
 	private SkinObjectDestination[] dst = new SkinObjectDestination[0];
+	private long starttime;
+	private long endtime;
 
 	private Rectangle r = new Rectangle();
 	private Color c = new Color();
@@ -130,12 +132,16 @@ public abstract class SkinObject implements Disposable {
 				List<SkinObjectDestination> l = new ArrayList<SkinObjectDestination>(Arrays.asList(dst));
 				l.add(i, obj);
 				dst = l.toArray(new SkinObjectDestination[l.size()]);
+				starttime = dst[0].time;
+				endtime = dst[dst.length - 1].time;
 				return;
 			}
 		}
 		List<SkinObjectDestination> l = new ArrayList<SkinObjectDestination>(Arrays.asList(dst));
 		l.add(obj);
 		dst = l.toArray(new SkinObjectDestination[l.size()]);
+		starttime = dst[0].time;
+		endtime = dst[dst.length - 1].time;
 	}
 
 	public int[] getOption() {
@@ -150,6 +156,10 @@ public abstract class SkinObject implements Disposable {
 		return this.getDestination(time, null);
 	}
 
+	private long nowtime = 0;
+	private float rate = 0;
+	private int index = 0;
+	
 	/**
 	 * 指定して時間に応じた描画領域を返す
 	 * 
@@ -167,14 +177,11 @@ public abstract class SkinObject implements Disposable {
 			}
 			time -= stime;
 		}
-		if (time < 0) {
-			return null;
-		}
 
-		final long lasttime = dst[dst.length - 1].time;
-		if (dstloop == -1) {
-			if (lasttime < time) {
-				return null;
+		final long lasttime = endtime;
+		if( dstloop == -1) {
+			if(time > endtime) {
+				time = -1;
 			}
 		} else if (lasttime > 0 && time > dstloop) {
 			if (lasttime == dstloop) {
@@ -183,21 +190,28 @@ public abstract class SkinObject implements Disposable {
 				time = (time - dstloop) % (lasttime - dstloop) + dstloop;
 			}
 		}
-		if (dst[0].time > time) {
+		if (starttime > time) {
 			return null;
 		}
+		nowtime = time;
+		rate = -1;
+		index = -1;
+		
 		if (fixr == null) {
-			for (int i = 0; i < dst.length - 1; i++) {
-				final SkinObjectDestination obj1 = dst[i];
-				final SkinObjectDestination obj2 = dst[i + 1];
+			SkinObjectDestination obj1 = dst[0];
+			for (int i = 1; i < dst.length; i++) {
+				final SkinObjectDestination obj2 = dst[i];
 				if (obj1.time <= time && obj2.time >= time) {
 					final Rectangle r1 = obj1.region;
 					final Rectangle r2 = obj2.region;
 					float rate = (float) (time - obj1.time) / (obj2.time - obj1.time);
-					if(acc == 1) {
+					switch(acc) {
+					case 1:
 						rate = rate * rate;
-					} else if(acc == 2) {
+						break;
+					case 2:
 						rate = 1 - (rate - 1) * (rate - 1);
+						break;
 					}
 					r.x = r1.x + (r2.x - r1.x) * rate;
 					r.y = r1.y + (r2.y - r1.y) * rate;
@@ -211,6 +225,7 @@ public abstract class SkinObject implements Disposable {
 					}
 					return r;
 				}
+				obj1 = obj2;
 			}
 		} else {
 			if (offsetx == -1 && offsety == -1) {
@@ -236,81 +251,57 @@ public abstract class SkinObject implements Disposable {
 		return r;
 	}
 
-	public Color getColor(long time, MainState state) {
+	public Color getColor() {
 		if (fixc != null) {
 			return fixc;
 		}
-		final int timer = dsttimer;
-
-		if (timer != 0 && timer < 256) {
-			if (state.getTimer()[timer] == Long.MIN_VALUE) {
-				return null;
-			}
-			time -= state.getTimer()[timer];
+		getRate();
+		if(index == 0 && rate == 0) {
+			return dst[0].color;			
+		} else {
+			final Color r1 = dst[index].color;
+			final Color r2 = dst[index + 1].color;
+			c.r = r1.r + (r2.r - r1.r) * rate;
+			c.g = r1.g + (r2.g - r1.g) * rate;
+			c.b = r1.b + (r2.b - r1.b) * rate;
+			c.a = r1.a + (r2.a - r1.a) * rate;
+			return c;			
 		}
-		if (time < 0) {
-			return null;
-		}
-
-		long lasttime = dst[dst.length - 1].time;
-		if (lasttime > 0 && time > dstloop) {
-			if (lasttime == dstloop) {
-				time = dstloop;
-			} else {
-				time = (time - dstloop) % (lasttime - dstloop) + dstloop;
-			}
-		}
-		for (int i = 0; i < dst.length - 1; i++) {
-			final SkinObjectDestination obj1 = dst[i];
-			final SkinObjectDestination obj2 = dst[i + 1];
-			if (obj1.time <= time && obj2.time >= time) {
-				final Color r1 = obj1.color;
-				final Color r2 = obj2.color;
-				final float rate = (float) (time - obj1.time) / (obj2.time - obj1.time);
-				c.r = r1.r + (r2.r - r1.r) * rate;
-				c.g = r1.g + (r2.g - r1.g) * rate;
-				c.b = r1.b + (r2.b - r1.b) * rate;
-				c.a = r1.a + (r2.a - r1.a) * rate;
-				return c;
-			}
-		}
-		return dst[0].color;
 	}
 
-	public int getAngle(long time, MainState state) {
+	public int getAngle() {
 		if (fixa != Integer.MIN_VALUE) {
 			return fixa;
 		}
-		final int timer = dsttimer;
-
-		if (timer != 0 && timer < 256) {
-			if (state.getTimer()[timer] == Long.MIN_VALUE) {
-				return 0;
+		getRate();
+		return index == 0 && rate == 0 ? dst[0].angle :  (int) (dst[index].angle + (dst[index + 1].angle - dst[index].angle) * rate);
+	}
+	
+	private void getRate() {
+		if(rate != -1) {
+			return;
+		}
+		SkinObjectDestination obj1 = dst[0];
+		for (int i = 1; i < dst.length; i++) {
+			final SkinObjectDestination obj2 = dst[i];
+			if (obj1.time <= nowtime && obj2.time >= nowtime) {
+				float rate = (float) (nowtime - obj1.time) / (obj2.time - obj1.time);
+				switch(acc) {
+				case 1:
+					rate = rate * rate;
+					break;
+				case 2:
+					rate = 1 - (rate - 1) * (rate - 1);
+					break;
+				}
+				this.rate = rate;
+				this.index = i - 1;
+				return;
 			}
-			time -= state.getTimer()[timer];
+			obj1 = obj2;
 		}
-		if (time < 0) {
-			return 0;
-		}
-
-		long lasttime = dst[dst.length - 1].time;
-		if (lasttime > 0 && time > dstloop) {
-			if (lasttime == dstloop) {
-				time = dstloop;
-			} else {
-				time = (time - dstloop) % (lasttime - dstloop) + dstloop;
-			}
-		}
-		for (int i = 0; i < dst.length - 1; i++) {
-			final SkinObjectDestination obj1 = dst[i];
-			final SkinObjectDestination obj2 = dst[i + 1];
-			if (obj1.time <= time && obj2.time >= time) {
-				final int r1 = obj1.angle;
-				final int r2 = obj2.angle;
-				return (int) (r1 + (r2 - r1) * (time - obj1.time) / (obj2.time - obj1.time));
-			}
-		}
-		return dst[0].angle;
+		this.rate = 0;
+		this.index = 0;
 	}
 
 	public abstract void draw(SpriteBatch sprite, long time, MainState state);
@@ -320,6 +311,10 @@ public abstract class SkinObject implements Disposable {
 
 	private float centerx;
 	private float centery;
+
+	protected void draw(SpriteBatch sprite, TextureRegion image, float x, float y, float width, float height) {
+		draw(sprite, image, x, y, width, height, getColor(), getAngle());
+	}
 
 	protected void draw(SpriteBatch sprite, TextureRegion image, float x, float y, float width, float height,
 			Color color, int angle) {
@@ -384,7 +379,7 @@ public abstract class SkinObject implements Disposable {
 		this.clickevent = clickevent;
 	}
 
-	public class SkinObjectDestination {
+	public static class SkinObjectDestination {
 
 		public final long time;
 		/**

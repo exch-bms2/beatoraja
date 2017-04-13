@@ -66,7 +66,7 @@ public class SkinTextFont extends SkinText {
         Rectangle r = this.getDestination(time,state);
         if(r != null) {
             if(font != null) {
-                Color c = getColor(time,state);
+                Color c = getColor();
                 font.getData().setScale(r.height / parameter.size);
                 final float x = (getAlign() == 2 ? r.x - r.width : (getAlign() == 1 ? r.x - r.width / 2 : r.x));
                 if(shadow > 0) {

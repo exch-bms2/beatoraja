@@ -131,8 +131,7 @@ public class SkinNumber extends SkinObject {
 			TextureRegion[] values = getValue(time, value, zeropadding, state);
 			for (int j = 0; j < values.length; j++) {
 				if (values[j] != null) {
-					draw(sprite, values[j], r.x + r.width * j + offsetX, r.y + offsetY, r.width, r.height, getColor(time, state),
-							getAngle(time, state));
+					draw(sprite, values[j], r.x + r.width * j + offsetX, r.y + offsetY, r.width, r.height);
 				}
 			}
 		}

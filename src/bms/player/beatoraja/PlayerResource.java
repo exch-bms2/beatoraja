@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import com.badlogic.gdx.utils.*;
+
 import bms.model.*;
 import bms.player.beatoraja.audio.AudioDriver;
 import bms.player.beatoraja.play.bga.BGAProcessor;
@@ -34,7 +36,7 @@ public class PlayerResource {
 
 	private int playDevice;
 
-	private List<Integer> constraint = new ArrayList<Integer>();
+	private IntArray constraint = new IntArray();
 
 	private BMSResource bmsresource;
 	
@@ -54,9 +56,9 @@ public class PlayerResource {
 	/**
 	 * ゲージの遷移ログ
 	 */
-	private List<Float> gauge;
+	private FloatArray gauge;
 
-	private List<List<Float>> coursegauge = new ArrayList<List<Float>>();
+	private List<FloatArray> coursegauge = new ArrayList<FloatArray>();
 
 	/**
 	 * コースタイトル
@@ -230,11 +232,11 @@ public class PlayerResource {
 		clear();
 	}
 
-	public List<Float> getGauge() {
+	public FloatArray getGauge() {
 		return gauge;
 	}
 
-	public void setGauge(List<Float> gauge) {
+	public void setGauge(FloatArray gauge) {
 		this.gauge = gauge;
 	}
 
@@ -286,12 +288,12 @@ public class PlayerResource {
 		courseReplay.add(rd);
 	}
 
-	public List<List<Float>> getCourseGauge() {
+	public List<FloatArray> getCourseGauge() {
 		return coursegauge;
 	}
 
-	public void addCourseGauge(List<Float> gauge) {
-		coursegauge.add(new ArrayList<Float>(gauge));
+	public void addCourseGauge(FloatArray gauge) {
+		coursegauge.add(gauge);
 	}
 
 	public int getCombo() {
@@ -311,11 +313,7 @@ public class PlayerResource {
 	}
 
 	public int[] getConstraint() {
-		int[] result = new int[constraint.size()];
-		for (int i = 0; i < result.length; i++) {
-			result[i] = constraint.get(i);
-		}
-		return result;
+		return constraint.toArray();
 	}
 
 	public void addConstraint(int constraint) {
