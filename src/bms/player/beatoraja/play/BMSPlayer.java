@@ -357,6 +357,7 @@ public class BMSPlayer extends MainState {
 		final BMSPlayerInputProcessor input = main.getInputProcessor();
 
 		final long now = getNowTime();
+        final long[] timer = getTimer();
 		switch (state) {
 		// 楽曲ロード
 		case STATE_PRELOAD:
@@ -369,7 +370,7 @@ public class BMSPlayer extends MainState {
 				Logger.getGlobal().info("current free memory : " + (cmem / (1024 * 1024)) + "MB , disposed : "
 						+ ((cmem - mem) / (1024 * 1024)) + "MB");
 				state = STATE_READY;
-				getTimer()[TIMER_READY] = now;
+				timer[TIMER_READY] = now;
 				Logger.getGlobal().info("STATE_READYに移行");
 			}
 			break;
@@ -379,11 +380,11 @@ public class BMSPlayer extends MainState {
 				resource.reloadBMSFile();
 				model = resource.getBMSModel();
 				lanerender.init(model);
-				getTimer()[TIMER_PLAY] = Long.MIN_VALUE;
-				getTimer()[TIMER_RHYTHM] = Long.MIN_VALUE;
-				getTimer()[TIMER_FAILED] = Long.MIN_VALUE;
-				getTimer()[TIMER_FADEOUT] = Long.MIN_VALUE;
-				getTimer()[TIMER_ENDOFNOTE_1P] = Long.MIN_VALUE;
+                timer[TIMER_PLAY] = Long.MIN_VALUE;
+                timer[TIMER_RHYTHM] = Long.MIN_VALUE;
+                timer[TIMER_FAILED] = Long.MIN_VALUE;
+                timer[TIMER_FADEOUT] = Long.MIN_VALUE;
+                timer[TIMER_ENDOFNOTE_1P] = Long.MIN_VALUE;
 			}
 			control.setEnableControl(false);
 			practice.processInput(input);
@@ -423,7 +424,7 @@ public class BMSPlayer extends MainState {
 				playtime = (property.endtime + 1000) * 100 / property.freq;
 				bga.prepare(this);
 				state = STATE_READY;
-				getTimer()[TIMER_READY] = now;
+                timer[TIMER_READY] = now;
 				Logger.getGlobal().info("STATE_READYに移行");
 			}
 			break;
@@ -438,8 +439,8 @@ public class BMSPlayer extends MainState {
 		case STATE_READY:
 			if (now - getTimer()[TIMER_READY] > skin.getPlaystart()) {
 				state = STATE_PLAY;
-				getTimer()[TIMER_PLAY] = now - starttimeoffset;
-				getTimer()[TIMER_RHYTHM] = now - starttimeoffset;
+                timer[TIMER_PLAY] = now - starttimeoffset;
+                timer[TIMER_RHYTHM] = now - starttimeoffset;
 
 				input.setStartTime(now + getStartTime() - starttimeoffset);
 				List<KeyInputLog> keylog = null;
@@ -457,27 +458,31 @@ public class BMSPlayer extends MainState {
 		case STATE_PLAY:
 			// TODO fpsが高い時にスローがかからなくなる
 			final long deltatime = now - prevtime;
-			getTimer()[TIMER_PLAY] += deltatime * (100 - playspeed) / 100;
-			getTimer()[TIMER_RHYTHM] += deltatime * (100 - lanerender.getNowBPM() * 100 / 60) / 100;
+            timer[TIMER_PLAY] += deltatime * (100 - playspeed) / 100;
+            timer[TIMER_RHYTHM] += deltatime * (100 - lanerender.getNowBPM() * 100 / 60) / 100;
+            final long ptime = now - timer[TIMER_PLAY];
 			final float g = gauge.getValue();
-			if (gaugelog.size() <= (now - getTimer()[TIMER_PLAY]) / 500) {
+			if (gaugelog.size() <= ptime / 500) {
 				gaugelog.add(g);
 			}
-			if (g == gauge.getMaxValue() && getTimer()[TIMER_GAUGE_MAX_1P] == Long.MIN_VALUE) {
-				getTimer()[TIMER_GAUGE_MAX_1P] = now;
-			} else if (g < gauge.getMaxValue() && getTimer()[TIMER_GAUGE_MAX_1P] != Long.MIN_VALUE) {
-				getTimer()[TIMER_GAUGE_MAX_1P] = Long.MIN_VALUE;
+			if (g == gauge.getMaxValue() && timer[TIMER_GAUGE_MAX_1P] == Long.MIN_VALUE) {
+                timer[TIMER_GAUGE_MAX_1P] = now;
+			} else if (g < gauge.getMaxValue() && timer[TIMER_GAUGE_MAX_1P] != Long.MIN_VALUE) {
+                timer[TIMER_GAUGE_MAX_1P] = Long.MIN_VALUE;
 			}
 
-			// System.out.println("playing time : " + time);
-			if (playtime < (now - getTimer()[TIMER_PLAY])) {
+            // System.out.println("playing time : " + time);
+			if (playtime < ptime) {
 				state = STATE_FINISHED;
-				getTimer()[TIMER_FADEOUT] = now;
+                timer[TIMER_FADEOUT] = now;
 				Logger.getGlobal().info("STATE_FINISHEDに移行");
-			}
+			} else if(playtime - TIME_MARGIN < ptime && timer[TIMER_ENDOFNOTE_1P] == Long.MIN_VALUE) {
+                timer[TIMER_ENDOFNOTE_1P] = now;
+            }
+			// stage failed判定
 			if (g == 0) {
 				state = STATE_FAILED;
-				getTimer()[TIMER_FAILED] = now;
+                timer[TIMER_FAILED] = now;
 				if (resource.mediaLoadFinished()) {
 					getMainController().getAudioProcessor().stop((Note) null);
 				}
@@ -494,7 +499,7 @@ public class BMSPlayer extends MainState {
 			}
 			keyinput.stopJudge();
 
-			if (now - getTimer()[TIMER_FAILED] > skin.getClose()) {
+			if (now - timer[TIMER_FAILED] > skin.getClose()) {
 				if (resource.mediaLoadFinished()) {
 					resource.getBGAManager().stop();
 				}
@@ -504,8 +509,8 @@ public class BMSPlayer extends MainState {
 				resource.setCombo(judge.getCourseCombo());
 				resource.setMaxcombo(judge.getCourseMaxcombo());
 				saveConfig();
-				if (getTimer()[TIMER_PLAY] != Long.MIN_VALUE) {
-					for (long l = getTimer()[TIMER_FAILED] - getTimer()[TIMER_PLAY]; l < playtime + 500; l += 500) {
+				if (timer[TIMER_PLAY] != Long.MIN_VALUE) {
+					for (long l = timer[TIMER_FAILED] - timer[TIMER_PLAY]; l < playtime + 500; l += 500) {
 						gaugelog.add(0f);
 					}
 				}
@@ -528,7 +533,7 @@ public class BMSPlayer extends MainState {
 				autoThread.stop = true;
 			}
 			keyinput.stopJudge();
-			if (now - getTimer()[TIMER_FADEOUT] > skin.getFadeout()) {
+			if (now - timer[TIMER_FADEOUT] > skin.getFadeout()) {
 				resource.getBGAManager().stop();
 				if (autoplay != 1 && autoplay != 2) {
 					resource.setScoreData(createScoreData());
@@ -739,9 +744,6 @@ public class BMSPlayer extends MainState {
 			if(getTimer()[TIMER_FULLCOMBO_1P] == Long.MIN_VALUE && this.judge.getJudgeCount(3) == 0
 				&& this.judge.getJudgeCount(4) == 0) {
 				getTimer()[TIMER_FULLCOMBO_1P] = getNowTime();				
-			}
-			if(getTimer()[TIMER_ENDOFNOTE_1P] == Long.MIN_VALUE) {
-				getTimer()[TIMER_ENDOFNOTE_1P] = getNowTime();					
 			}
 		}
 
