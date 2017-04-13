@@ -52,8 +52,6 @@ public class MusicResult extends MainState {
 	public static final int STATE_IR_PROCESSING = 1;
 	public static final int STATE_IR_FINISHED = 2;
 
-	private int rate;
-	private int oldrate;
 	private int next;
 
 	private int irrank;
@@ -254,7 +252,9 @@ public class MusicResult extends MainState {
 		oldexscore = score.getExscore();
 		oldmisscount = score.getMinbp();
 		oldcombo = score.getCombo();
-		rate = newscore.getExscore() * 10000 / (resource.getBMSModel().getTotalNotes() * 2);
+
+		getScoreDataProperty().setTargetScore(oldexscore, resource.getRivalScoreData(), resource.getBMSModel().getTotalNotes());
+		getScoreDataProperty().update(newscore);
 		next = 0;
 		for (int i = 2; i < 9; i++) {
 			if (newscore.getExscore() < i * 1111 * (resource.getBMSModel().getTotalNotes() * 2) / 10000) {
@@ -262,7 +262,6 @@ public class MusicResult extends MainState {
 				break;
 			}
 		}
-		oldrate = oldexscore * 10000 / (resource.getBMSModel().getTotalNotes() * 2);
 		// duration average
 		int count = 0;
 		avgduration = 0;
@@ -483,10 +482,6 @@ public class MusicResult extends MainState {
 				count += getJudgeCount(i, false);
 			}
 			return count;
-			case NUMBER_SCORE_RATE:
-				return rate / 100;
-			case NUMBER_SCORE_RATE_AFTERDOT:
-				return (rate / 10) % 10;
 			case NUMBER_AVERAGE_DURATION:
 			return (int) avgduration;
 		case NUMBER_AVERAGE_DURATION_AFTERDOT:
@@ -525,46 +520,6 @@ public class MusicResult extends MainState {
 		case OPTION_RESULT_FAIL:
 			return score.getClear() == GrooveGauge.CLEARTYPE_FAILED
 					|| (cscore != null && cscore.getClear() == GrooveGauge.CLEARTYPE_FAILED);
-		case OPTION_RESULT_F_1P:
-		case OPTION_NOW_F_1P:
-			return rate <= 2222;
-		case OPTION_RESULT_E_1P:
-		case OPTION_NOW_E_1P:
-			return rate > 2222 && rate <= 3333;
-		case OPTION_RESULT_D_1P:
-		case OPTION_NOW_D_1P:
-			return rate > 3333 && rate <= 4444;
-		case OPTION_RESULT_C_1P:
-		case OPTION_NOW_C_1P:
-			return rate > 4444 && rate <= 5555;
-		case OPTION_RESULT_B_1P:
-		case OPTION_NOW_B_1P:
-			return rate > 5555 && rate <= 6666;
-		case OPTION_RESULT_A_1P:
-		case OPTION_NOW_A_1P:
-			return rate > 6666 && rate <= 7777;
-		case OPTION_RESULT_AA_1P:
-		case OPTION_NOW_AA_1P:
-			return rate > 7777 && rate <= 8888;
-		case OPTION_RESULT_AAA_1P:
-		case OPTION_NOW_AAA_1P:
-			return rate > 8888;
-		case OPTION_BEST_F_1P:
-			return oldrate <= 2222;
-		case OPTION_BEST_E_1P:
-			return oldrate > 2222 && oldrate <= 3333;
-		case OPTION_BEST_D_1P:
-			return oldrate > 3333 && oldrate <= 4444;
-		case OPTION_BEST_C_1P:
-			return oldrate > 4444 && oldrate <= 5555;
-		case OPTION_BEST_B_1P:
-			return oldrate > 5555 && oldrate <= 6666;
-		case OPTION_BEST_A_1P:
-			return oldrate > 6666 && oldrate <= 7777;
-		case OPTION_BEST_AA_1P:
-			return oldrate > 7777 && oldrate <= 8888;
-		case OPTION_BEST_AAA_1P:
-			return oldrate > 8888;
 		case OPTION_UPDATE_SCORE:
 			return score.getExscore() > oldexscore;
 		case OPTION_UPDATE_MAXCOMBO:
@@ -572,7 +527,7 @@ public class MusicResult extends MainState {
 		case OPTION_UPDATE_MISSCOUNT:
 			return score.getMinbp() < oldmisscount;
 		case OPTION_UPDATE_SCORERANK:
-			return rate / 1111 > oldrate / 1111;
+			return getScoreDataProperty().getNowRate() > getScoreDataProperty().getBestScoreRate();
 		case OPTION_NO_REPLAYDATA:
 			return !getMainController().getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
 					resource.getConfig().getLnmode(), 0);

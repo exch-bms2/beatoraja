@@ -633,7 +633,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 
 		skin = new PlaySkin(srcw, srch, dstw, dsth);
 		playerr = new Rectangle[] { new Rectangle() };
-		if (header.getMode() == 2 || header.getMode() == 3) {
+		if (header.getMode() == SkinType.PLAY_14KEYS.getId() || header.getMode() == SkinType.PLAY_10KEYS.getId()) {
 			note = new SkinSource[16];
 			lnstart = new SkinSource[16];
 			lnend = new SkinSource[16];
@@ -643,7 +643,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 			laner = new Rectangle[16];
 			playerr = new Rectangle[] { new Rectangle(), new Rectangle() };
 		}
-		if (header.getMode() == 4) {
+		if (header.getMode() == SkinType.PLAY_9KEYS.getId()) {
 			note = new SkinSource[9];
 			lnstart = new SkinSource[9];
 			lnend = new SkinSource[9];
