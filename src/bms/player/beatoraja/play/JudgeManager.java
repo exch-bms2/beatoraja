@@ -612,7 +612,7 @@ public class JudgeManager {
 		}
 		this.judge[offset + 1] = j == 0 ? 1 : j * 2 + (fast > 0 ? 0 : 1);
 		if (j < 2) {
-			main.getTimer()[TIMER_BOMB_1P_KEY1 + offset] = main.getNowTime();
+			main.getTimer()[bomb_timer] = main.getNowTime();
 		}
 
 		final int lanelength = noteassign.length;
