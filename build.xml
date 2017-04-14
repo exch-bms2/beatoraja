@@ -18,7 +18,7 @@
 	</target>
 
 	<target name="create_run_jar" depends="compile">
-		<jar destfile="./beatoraja.jar" filesetmanifest="mergewithoutmain">
+		<jar destfile="./beatoraja.jar" filesetmanifest="mergewithoutmain" duplicate="fail">
 			<manifest>
 				<attribute name="Main-Class" value="bms.player.beatoraja.MainLoader" />
 				<attribute name="Bundle-NativeCode" value="jasiohost32.dll;jasiohost64.dll" />
