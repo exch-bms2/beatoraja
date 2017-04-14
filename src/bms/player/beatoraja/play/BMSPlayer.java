@@ -859,6 +859,9 @@ public class BMSPlayer extends MainState {
 		if (id >= VALUE_JUDGE_1P_SCRATCH && id < VALUE_JUDGE_1P_SCRATCH + 20) {
 			return judge.getJudge()[id - VALUE_JUDGE_1P_SCRATCH];
 		}
+		if (id >= VALUE_JUDGE_1P_KEY20 && id <= VALUE_JUDGE_1P_KEY_MAX) {
+			return judge.getJudge()[id - VALUE_JUDGE_1P_KEY20 + 20];
+		}
 		return super.getNumberValue(id);
 	}
 
