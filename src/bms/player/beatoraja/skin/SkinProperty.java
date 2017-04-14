@@ -582,6 +582,10 @@ public class SkinProperty {
 	public static final int VALUE_JUDGE_2P_DURATION = 526;
 	public static final int VALUE_JUDGE_3P_DURATION = 527;
 
+	// 拡張数値定義
+	public static final int VALUE_JUDGE_1P_KEY20 = 1520;
+	public static final int VALUE_JUDGE_1P_KEY_MAX = 1599;
+
 	public static final int SLIDER_LANECOVER = 4;
 	public static final int SLIDER_LANECOVER2 = 5;
 
