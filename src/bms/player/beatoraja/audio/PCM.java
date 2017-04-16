@@ -32,7 +32,7 @@ public class PCM {
 	 */
 	private int type;
 	/**
-	 * 
+	 * サンプル当たりのビット数
 	 */
 	private int bitsPerSample;
 	/**
@@ -124,7 +124,7 @@ public class PCM {
 			} else if (bitsPerSample == 24) {
 				this.sample = new short[bytes / 3];
 				for (int i = 0; i < this.sample.length; i++) {
-					this.sample[i] = (short) (pcm[i * 3 + 1] + (pcm[i * 3 + 2] << 8));
+					this.sample[i] = (short) ((pcm[i * 3 + 1] & 0xff) | (pcm[i * 3 + 2] << 8));
 				}
 			} else if (bitsPerSample == 32) {
 				int pos = 0;
