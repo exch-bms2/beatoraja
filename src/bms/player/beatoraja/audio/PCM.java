@@ -114,7 +114,7 @@ public class PCM {
 //				final long time = System.nanoTime();
 				this.sample = new short[bytes / 2];
 				for (int i = 0; i < sample.length; i++) {
-					this.sample[i] = (short) (pcm[i * 2] + (pcm[i * 2 + 1] << 8));
+					this.sample[i] = (short) ((pcm[i * 2] & 0xff) | (pcm[i * 2 + 1] << 8));
 				}
 				
 //				 ShortBuffer shortbuf =
