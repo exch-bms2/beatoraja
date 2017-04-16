@@ -107,8 +107,8 @@ public class MainLoader extends Application {
 			MainController player = new MainController(f, config, auto);
 
 			LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
-			cfg.width = (int) RESOLUTION[config.getResolution()].width;
-			cfg.height = (int) RESOLUTION[config.getResolution()].height;
+			cfg.width = config.getResolution().width;
+			cfg.height = config.getResolution().height;
 
 			// fullscreen
 			cfg.fullscreen = config.isFullscreen();

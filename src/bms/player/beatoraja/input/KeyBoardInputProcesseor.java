@@ -2,6 +2,7 @@ package bms.player.beatoraja.input;
 
 import java.util.Arrays;
 
+import bms.player.beatoraja.Resolution;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Input.Keys;
@@ -33,9 +34,9 @@ public class KeyBoardInputProcesseor implements InputProcessor {
 
 	private boolean enable = true;
 
-	private Rectangle resolution;
+	private Resolution resolution;
 
-	public KeyBoardInputProcesseor(BMSPlayerInputProcessor bmsPlayerInputProcessor, int[] keys, Rectangle resolution) {
+	public KeyBoardInputProcesseor(BMSPlayerInputProcessor bmsPlayerInputProcessor, int[] keys, Resolution resolution) {
 		this.bmsPlayerInputProcessor = bmsPlayerInputProcessor;
 		this.setKeyAssign(keys);
 		this.resolution = resolution;

@@ -46,7 +46,7 @@ public class PlayConfigurationView implements Initializable {
 
 
 	@FXML
-	private ComboBox<Integer> resolution;
+	private ComboBox<Resolution> resolution;
 
 	@FXML
 	private ComboBox<Integer> playconfig;
@@ -173,8 +173,13 @@ public class PlayConfigurationView implements Initializable {
 		lr2configuration.setHgap(25);
 		lr2configuration.setVgap(4);
 
-		initComboBox(resolution, new String[] { "SD (640 x 480)", "HD (1280 x 720)", "FULL HD (1920 x 1080)",
-				"ULTRA HD (3940 x 2160)" });
+		resolution.setCellFactory(new Callback<ListView<Resolution>, ListCell<Resolution>>() {
+			public ListCell<Resolution> call(ListView<Resolution> param) {
+				return new ResolutionListCell();
+			}
+		});
+		resolution.setButtonCell(new ResolutionListCell());
+		resolution.getItems().setAll(Resolution.values());
 		initComboBox(scoreop, new String[] { "OFF", "MIRROR", "RANDOM", "R-RANDOM", "S-RANDOM", "SPIRAL", "H-RANDOM",
 				"ALL-SCR", "RANDOM-EX", "S-RANDOM-EX" });
 		initComboBox(gaugeop, new String[] { "ASSIST EASY", "EASY", "NORMAL", "HARD", "EX-HARD", "HAZARD" });
@@ -622,6 +627,17 @@ public class PlayConfigurationView implements Initializable {
 		commit();
 		Platform.exit();
 		System.exit(0);
+	}
+
+	static class ResolutionListCell extends ListCell<Resolution> {
+
+		@Override
+		protected void updateItem(Resolution arg0, boolean arg1) {
+			super.updateItem(arg0, arg1);
+			if (arg0 != null) {
+				setText(arg0.name() + " (" + arg0.width + " x " + arg0.height + ")");
+			}
+		}
 	}
 
 	class OptionListCell extends ListCell<Integer> {

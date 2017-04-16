@@ -90,20 +90,18 @@ public class MusicResult extends MainState {
 		try {
 			SkinConfig sc = resource.getConfig().getSkin()[7];
 			if (sc.getPath().endsWith(".json")) {
-				SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
+				SkinLoader sl = new SkinLoader(resource.getConfig().getResolution());
 				setSkin(sl.loadResultSkin(Paths.get(sc.getPath()), sc.getProperty()));
 			} else {
 				LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
 				SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
-				Rectangle srcr = RESOLUTION[header.getResolution()];
-				Rectangle dstr = RESOLUTION[resource.getConfig().getResolution()];
-				LR2ResultSkinLoader dloader = new LR2ResultSkinLoader(srcr.width, srcr.height, dstr.width, dstr.height);
+				LR2ResultSkinLoader dloader = new LR2ResultSkinLoader(header.getResolution(), resource.getConfig().getResolution());
 				setSkin(dloader.loadResultSkin(Paths.get(sc.getPath()).toFile(), this, header, loader.getOption(),
 						sc.getProperty()));
 			}
 		} catch (Throwable e) {
 			e.printStackTrace();
-			SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
+			SkinLoader sl = new SkinLoader(resource.getConfig().getResolution());
 			setSkin(sl.loadResultSkin(Paths.get("skin/default/result.json"), new HashMap()));
 		}
 	}

@@ -5,6 +5,7 @@ import java.util.*;
 import java.util.logging.Logger;
 
 import bms.player.beatoraja.MainState;
+import bms.player.beatoraja.Resolution;
 import bms.player.beatoraja.play.bga.BGAProcessor;
 import bms.player.beatoraja.skin.Skin;
 import bms.player.beatoraja.skin.SkinGraph;
@@ -36,31 +37,26 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 	List<SkinTextImage.SkinTextImageSource> fontlist = new ArrayList<>();
 
 	/**
-	 * スキンの元サイズのwidth
+	 * スキンの元サイズ
 	 */
-	public final float srcw;
+	public final Resolution src;
 	/**
-	 * スキンの元サイズのheight
+	 * 描画サイズ
 	 */
-	public final float srch;
-	/**
-	 * 描画サイズのwidth
-	 */
-	public final float dstw;
-	/**
-	 * 描画サイズのheight
-	 */
-	public final float dsth;
+	public final Resolution dst;
 
 	private Skin skin;
 
 	private MainState state;
 
-	public LR2SkinCSVLoader(final float srcw, final float srch, final float dstw, final float dsth) {
-		this.srcw = srcw;
-		this.srch = srch;
-		this.dstw = dstw;
-		this.dsth = dsth;
+	public LR2SkinCSVLoader(Resolution src, Resolution dst) {
+		this.src = src;
+		this.dst = dst;
+
+		final float srcw = src.width;
+		final float srch = src.height;
+		final float dstw = dst.width;
+		final float dsth = dst.height;
 
 		addCommandWord(new CommandWord("STARTINPUT") {
 			@Override

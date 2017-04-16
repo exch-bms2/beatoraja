@@ -1,15 +1,16 @@
 package bms.player.beatoraja;
 
-import com.badlogic.gdx.math.Rectangle;
+public enum Resolution {
+	SD(640, 480),
+	HD(1280, 720),
+	FULLHD(1920, 1080),
+	ULTRAHD(3840, 2160);
 
-public class Resolution {
+	public final int width;
+	public final int height;
 
-	public static final int RESOLUTION_SD = 0;
-	public static final int RESOLUTION_HD = 1;
-	public static final int RESOLUTION_FULLHD = 2;
-	public static final int RESOLUTION_ULTRAHD = 3;
-	
-	public static final Rectangle[] RESOLUTION = { new Rectangle(0, 0, 640, 480), new Rectangle(0, 0, 1280, 720),
-		new Rectangle(0, 0, 1920, 1080), new Rectangle(0, 0, 3840, 2160) };
-
+	private Resolution(int width, int height) {
+		this.width = width;
+		this.height = height;
+	}
 }

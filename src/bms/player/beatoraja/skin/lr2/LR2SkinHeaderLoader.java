@@ -8,9 +8,12 @@ import java.nio.file.Path;
 import java.util.*;
 
 import bms.player.beatoraja.MainState;
+import bms.player.beatoraja.Resolution;
 import bms.player.beatoraja.skin.SkinHeader;
 import bms.player.beatoraja.skin.SkinHeader.CustomFile;
 import bms.player.beatoraja.skin.SkinHeader.CustomOption;
+
+import static bms.player.beatoraja.Resolution.*;
 
 /**
  * LR2スキンヘッダファイル(lr2skin)のローダー
@@ -55,9 +58,11 @@ public class LR2SkinHeaderLoader extends LR2SkinLoader {
 			}
 		});
 		addCommandWord(new CommandWord("RESOLUTION") {
+
+			final Resolution res[] = {SD, HD, FULLHD, ULTRAHD};
 			@Override
 			public void execute(String[] str) {
-				header.setResolution(Integer.parseInt(str[1]));
+				header.setResolution(res[Integer.parseInt(str[1])]);
 			}
 		});
 		addCommandWord(new CommandWord("INCLUDE") {
