@@ -187,7 +187,7 @@ public class PlayDataAccessor {
 			score.setClear(newscore.getClear());
 			score.setOption(newscore.getOption());
 		}
-		if (model.getUseKeys() < 10) {
+		if (model.getMode().player == 1) {
 			int history = score.getHistory();
 			for (int i = 0; i < newscore.getOption(); i++) {
 				history /= 10;
@@ -233,7 +233,7 @@ public class PlayDataAccessor {
 
 		int time = 0;
 		for (TimeLine tl : model.getAllTimeLines()) {
-			for (int i = 0; i < 18; i++) {
+			for (int i = 0; i < model.getMode().key; i++) {
 				if (tl.getNote(i) != null && tl.getNote(i).getState() != 0) {
 					time = tl.getTime() / 1000;
 				}

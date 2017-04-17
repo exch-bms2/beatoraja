@@ -42,7 +42,7 @@ public abstract class PatternModifier {
 				}
 			}
 			if(pm != null) {
-				int lanes = pm.modify.length;				
+				int lanes = model.getMode().key;				
 				Note[] notes = new Note[lanes];
 				Note[] hnotes = new Note[lanes];
 				for (int i = 0; i < lanes; i++) {
@@ -53,10 +53,8 @@ public abstract class PatternModifier {
 					tl.setNote(i, notes[i]);
 					tl.setHiddenNote(i, hnotes[i]);
 				}
-				
 			}
 		}
-
 	}
 	
 	public static List<PatternModifyLog> merge(List<PatternModifyLog> log, List<PatternModifyLog> log2) {

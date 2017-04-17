@@ -66,8 +66,6 @@ public class LaneRenderer {
 	private final Config config;
 	private PlayConfig playconfig;
 
-	private int[] laneassign;
-
 	private int currentduration;
 
 	public LaneRenderer(BMSPlayer main, BMSModel model) {
@@ -85,8 +83,10 @@ public class LaneRenderer {
 
 		this.skin = (PlaySkin) main.getSkin();
 		this.config = main.getMainController().getPlayerResource().getConfig();
-		this.playconfig = (model.getUseKeys() == 5 || model.getUseKeys() == 7 ? config.getMode7()
-				: (model.getUseKeys() == 10 || model.getUseKeys() == 14 ? config.getMode14() : config.getMode9()));
+		this.playconfig = (model.getMode() == Mode.BEAT_5K || model.getMode() == Mode.BEAT_7K ? config.getMode7()
+				: (model.getMode() == Mode.BEAT_10K || model.getMode() == Mode.BEAT_14K ? config.getMode14()
+						: config.getMode9()));
+
 		this.enableLanecover = playconfig.isEnablelanecover();
 		this.enableLift = playconfig.isEnablelift();
 		this.lift = playconfig.getLift();
@@ -108,11 +108,6 @@ public class LaneRenderer {
 		pos = 0;
 		this.model = model;
 		this.timelines = model.getAllTimeLines();
-		if (model.getUseKeys() == 9) {
-			laneassign = new int[] { 0, 1, 2, 3, 4, 10, 11, 12, 13 };
-		} else {
-			laneassign = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13, 14, 15, 16 };
-		}
 		switch (config.getFixhispeed()) {
 		case Config.FIX_HISPEED_OFF:
 			break;
@@ -348,7 +343,7 @@ public class LaneRenderer {
 			} else if (pos == i - 1) {
 				boolean b = true;
 				for (int lane = 0; lane < laneregion.length; lane++) {
-					final Note note = tl.getNote(laneassign[lane]);
+					final Note note = tl.getNote(lane);
 					if (note != null
 							&& ((note instanceof LongNote && ((LongNote) note).getEndnote().getSectiontime() >= time) || (config
 									.isShowpastnote() && note instanceof NormalNote && note.getState() == 0))) {
@@ -383,7 +378,7 @@ public class LaneRenderer {
 			}
 			// ノート描画
 			for (int lane = 0; lane < laneregion.length; lane++) {
-				final Note note = tl.getNote(laneassign[lane]);
+				final Note note = tl.getNote(lane);
 				if (note != null) {
 					if (note instanceof NormalNote) {
 						// draw normal note
@@ -431,7 +426,7 @@ public class LaneRenderer {
 				}
 				// hidden note
 				if (config.isShowhiddennote() && tl.getTime() >= time) {
-					final Note hnote = tl.getHiddenNote(laneassign[lane]);
+					final Note hnote = tl.getHiddenNote(lane);
 					if (hnote != null) {
 						sprite.draw(hnoteimage[lane], laneregion[lane].x, y, laneregion[lane].width, scale);
 					}

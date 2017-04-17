@@ -88,7 +88,7 @@ public class SkinNote extends SkinObject {
 		}
 	}
 
-	class SkinLane extends SkinObject {
+	static class SkinLane extends SkinObject {
 		/**
 		 * ノーツ画像
 		 */

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import bms.model.BMSModel;
+import bms.model.Mode;
 import bms.model.TimeLine;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyInputLog;
@@ -20,7 +21,6 @@ class KeyInputProccessor {
 
 	private final BMSPlayer player;
 	private final boolean ispms;
-	private final int lanes;
 
 	private final int[] key_offset = { 1, 2, 3, 4, 5, 6, 7, 0, 11, 12, 13, 14, 15, 16, 17, 10 };
 
@@ -30,10 +30,9 @@ class KeyInputProccessor {
 	private int scratch1;
 	private int scratch2;
 
-	public KeyInputProccessor(BMSPlayer player, int keys) {
+	public KeyInputProccessor(BMSPlayer player, Mode mode) {
 		this.player = player;
-		ispms = keys == 9;
-		lanes = keys <= 7 ? 8 : (ispms ? 9 : 16);
+		ispms = mode == Mode.POPN_5K || mode == Mode.POPN_9K;
 	}
 
 	public void startJudge(BMSModel model, List<KeyInputLog> keylog) {
@@ -48,7 +47,7 @@ class KeyInputProccessor {
 		final JudgeManager judge = player.getJudgeManager();
 		final boolean[] keystate = player.getMainController().getInputProcessor().getKeystate();
 
-		for (int lane = 0; lane < lanes; lane++) {
+		for (int lane = 0; lane < 16; lane++) {
 			// キービームフラグON/OFF
 			if (ispms) {
 				if (keystate[lane]) {
@@ -61,13 +60,6 @@ class KeyInputProccessor {
 						timer[TIMER_KEYOFF_1P_KEY1 + lane] = now;
 						timer[TIMER_KEYON_1P_KEY1 + lane] = Long.MIN_VALUE;
 					}
-				}
-				if (judge.getProcessingLongNotes()[lane] != null) {
-					if (timer[TIMER_HOLD_1P_KEY1 + lane] == Long.MIN_VALUE) {
-						timer[TIMER_HOLD_1P_KEY1 + lane] = now;
-					}
-				} else {
-					timer[TIMER_HOLD_1P_KEY1 + lane] = Long.MIN_VALUE;
 				}
 			} else {
 				final int key = lane >= 8 ? lane + 1 : lane;
@@ -82,13 +74,6 @@ class KeyInputProccessor {
 						timer[TIMER_KEYOFF_1P_SCRATCH + offset] = now;
 						timer[TIMER_KEYON_1P_SCRATCH + offset] = Long.MIN_VALUE;
 					}
-				}
-				if (judge.getProcessingLongNotes()[lane] != null) {
-					if (timer[TIMER_HOLD_1P_SCRATCH + offset] == Long.MIN_VALUE) {
-						timer[TIMER_HOLD_1P_SCRATCH + offset] = now;
-					}
-				} else {
-					timer[TIMER_HOLD_1P_SCRATCH + offset] = Long.MIN_VALUE;
 				}
 			}
 		}
