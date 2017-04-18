@@ -11,6 +11,7 @@ import java.util.stream.Stream;
 
 import bms.player.beatoraja.skin.SkinLoader;
 import bms.player.beatoraja.skin.SkinType;
+import com.badlogic.gdx.Graphics;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 
@@ -179,7 +180,16 @@ public class PlayConfigurationView implements Initializable {
 			}
 		});
 		resolution.setButtonCell(new ResolutionListCell());
-		resolution.getItems().setAll(Resolution.values());
+		resolution.getItems().clear();
+		Graphics.DisplayMode[] displays = MainLoader.getAvailableDisplayMode();
+		for(Resolution r : Resolution.values()) {
+			for(Graphics.DisplayMode display : displays) {
+				if(display.width == r.width && display.height == r.height) {
+					resolution.getItems().add(r);
+					break;
+				}
+			}
+		}
 		initComboBox(scoreop, new String[] { "OFF", "MIRROR", "RANDOM", "R-RANDOM", "S-RANDOM", "SPIRAL", "H-RANDOM",
 				"ALL-SCR", "RANDOM-EX", "S-RANDOM-EX" });
 		initComboBox(gaugeop, new String[] { "ASSIST EASY", "EASY", "NORMAL", "HARD", "EX-HARD", "HAZARD" });
