@@ -19,7 +19,7 @@ public class PracticeModifier extends PatternModifier {
 	public List<PatternModifyLog> modify(BMSModel model) {
 		int totalnotes = model.getTotalNotes();
 		for (TimeLine tl : model.getAllTimeLines()) {
-			for (int i = 0; i < 18; i++) {
+			for (int i = 0; i < model.getMode().key; i++) {
 				if (tl.getNote(i) != null) {
 					if (tl.getNote(i) instanceof LongNote) {
 						LongNote ln = (LongNote) tl.getNote(i);

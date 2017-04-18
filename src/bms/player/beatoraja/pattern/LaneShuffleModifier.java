@@ -1,7 +1,6 @@
 package bms.player.beatoraja.pattern;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import bms.model.BMSModel;
@@ -50,186 +49,55 @@ public class LaneShuffleModifier extends PatternModifier {
 	 */
 	public static final int BATTLE = 5;
 
-	private static final int[][] MIRROR_LANE = { { 4, 3, 2, 1, 0, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 },
-			{ 6, 5, 4, 3, 2, 1, 0, 7, 8, 9, 10, 11, 12, 13, 14, 15 },
-			{ 0, 1, 2, 3, 4, 5, 10, 9, 8, 7, 6, 11, 12, 13, 14, 15 },
-			{ 0, 1, 2, 3, 4, 5, 6, 7, 14, 13, 12, 11, 10, 9, 8, 15 },
-			{ 8, 7, 6, 5, 4, 3, 2, 1, 0, 9, 10, 11, 12, 13, 14, 15 } };
-
 	public LaneShuffleModifier(int type) {
 		super(type == RANDOM_EX ? 1 : 0);
 		this.type = type;
 	}
 
 	private void makeRandom(Mode mode) {
-		random = new int[mode.key];
-		for (int i = 0; i < random.length; i++) {
-			random[i] = i;
-		}
-
+		
+		int[] keys;
 		switch (type) {
 		case MIRROR:
-			random = MIRROR_LANE[getModifyTarget()];
+			keys = getKeys(mode, false);
+			random = keys.length > 0 ? rotate(keys, keys.length - 1, false) : keys;
 			break;
 		case R_RANDOM:
-			int i, j;
-			random = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
-			switch (getModifyTarget()) {
-			case PLAYER1_5KEYS:
-				i = (int) (Math.random() * 4);
-				j = (int) (Math.random() * 2);
-				for (int lane = 0; lane < 5; lane++) {
-					i = (i + 1) % 5;
-					random[lane] = (j == 0 ? i : 4 - i);
-				}
-				break;
-			case PLAYER1_7KEYS:
-				i = (int) (Math.random() * 6);
-				j = (int) (Math.random() * 2);
-				for (int lane = 0; lane < 7; lane++) {
-					i = (i + 1) % 7;
-					random[lane] = (j == 0 ? i : 6 - i);
-				}
-				break;
-			case PLAYER2_5KEYS:
-				i = (int) (Math.random() * 4);
-				j = (int) (Math.random() * 2);
-				for (int lane = 6; lane < 11; lane++) {
-					i = (i + 1) % 5;
-					random[lane] = (j == 0 ? i + 6 : 10 - i);
-				}
-				break;
-			case PLAYER2_7KEYS:
-				i = (int) (Math.random() * 6);
-				j = (int) (Math.random() * 2);
-				for (int lane = 8; lane < 15; lane++) {
-					i = (i + 1) % 7;
-					random[lane] = (j == 0 ? i + 8 : 14 - i);
-				}
-				break;
-			case NINEKEYS:
-				i = (int) (Math.random() * 8);
-				j = (int) (Math.random() * 2);
-				for (int lane = 0; lane < 9; lane++) {
-					i = (i + 1) % 9;
-					random[lane] = (j == 0 ? i : 8 - i);
-				}
-				break;
-			}
+			keys = getKeys(mode, false);
+			random = keys.length > 0 ? rotate(keys) : keys;
 			break;
 		case RANDOM:
-			List<Integer> l;
-			random = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
-			switch (getModifyTarget()) {
-			case PLAYER1_5KEYS:
-				l = new ArrayList<Integer>(Arrays.asList(0, 1, 2, 3, 4));
-				for (int lane = 0; lane < 5; lane++) {
-					int r = (int) (Math.random() * l.size());
-					random[lane] = l.get(r);
-					l.remove(r);
-				}
-				break;
-			case PLAYER1_7KEYS:
-				l = new ArrayList<Integer>(Arrays.asList(0, 1, 2, 3, 4, 5, 6));
-				for (int lane = 0; lane < 7; lane++) {
-					int r = (int) (Math.random() * l.size());
-					random[lane] = l.get(r);
-					l.remove(r);
-				}
-				break;
-			case PLAYER2_5KEYS:
-				l = new ArrayList<Integer>(Arrays.asList(0, 1, 2, 3, 4));
-				for (int lane = 0; lane < 5; lane++) {
-					int r = (int) (Math.random() * l.size());
-					random[lane + 6] = l.get(r) + 6;
-					l.remove(r);
-				}
-				break;
-			case PLAYER2_7KEYS:
-				l = new ArrayList<Integer>(Arrays.asList(0, 1, 2, 3, 4, 5, 6));
-				for (int lane = 0; lane < 7; lane++) {
-					int r = (int) (Math.random() * l.size());
-					random[lane + 8] = l.get(r) + 8;
-					l.remove(r);
-				}
-				break;
-			case NINEKEYS:
-				l = new ArrayList<Integer>(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8));
-				for (int lane = 0; lane < 9; lane++) {
-					int r = (int) (Math.random() * l.size());
-					random[lane] = l.get(r);
-					l.remove(r);
-				}
-				break;
-			}
+			keys = getKeys(mode, false);
+			random = keys.length > 0 ? shuffle(keys) : keys;
 			break;
 		case RANDOM_EX:
-			List<Integer> le = new ArrayList<Integer>(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7));
-			random = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
-			switch (getModifyTarget()) {
-			case PLAYER1_5KEYS:
-				le = new ArrayList<Integer>(Arrays.asList(0, 1, 2, 3, 4, 5));
-				for (int lane = 0; lane < 6; lane++) {
-					int r = (int) (Math.random() * le.size());
-					random[lane] = le.get(r);
-					le.remove(r);
-				}
-				break;
-			case PLAYER1_7KEYS:
-				le = new ArrayList<Integer>(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7));
-				for (int lane = 0; lane < 8; lane++) {
-					int r = (int) (Math.random() * le.size());
-					random[lane] = le.get(r);
-					le.remove(r);
-				}
-				break;
-			case PLAYER2_5KEYS:
-				le = new ArrayList<Integer>(Arrays.asList(0, 1, 2, 3, 4, 5));
-				for (int lane = 0; lane < 6; lane++) {
-					int r = (int) (Math.random() * le.size());
-					random[lane + 6] = le.get(r) + 6;
-					le.remove(r);
-				}
-				break;
-			case PLAYER2_7KEYS:
-				le = new ArrayList<Integer>(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7));
-				for (int lane = 0; lane < 8; lane++) {
-					int r = (int) (Math.random() * le.size());
-					random[lane + 8] = le.get(r) + 8;
-					le.remove(r);
-				}
-				break;
-			case NINEKEYS:
-				// 9keyにはSCがないため、EX-RANDOMがない。そもそもここには飛んでこない
-				break;
-			}
+			keys = getKeys(mode, true);
+			random = keys.length > 0 ? shuffle(keys) : keys;
 			break;
 		case FLIP:
-			switch (getModifyTarget()) {
-			case PLAYER1_5KEYS:
-			case PLAYER2_5KEYS:
-				random = new int[] { 6, 7, 8, 9, 10, 11, 0, 1, 2, 3, 4, 5, 12, 13, 14, 15};
-				break;
-			case PLAYER1_7KEYS:
-			case PLAYER2_7KEYS:
-				random = new int[] { 8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7};
-				break;
-			}
+			if(mode.player == 2) {
+				random = new int[mode.key];
+				for(int i = 0;i < random.length;i++) {
+					random[i] = (i + (mode.key / mode.player)) % mode.key;
+				}
+			} else {
+				random = new int[0];
+			}			
 			break;
 		case BATTLE:
-			switch (getModifyTarget()) {
-			case PLAYER1_5KEYS:
-				random = new int[] { 0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5, 12,13,14,15 };
-				break;
-			case PLAYER1_7KEYS:
-				random = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7};
-				break;
-			}
+			if(mode.player > 1) {
+				random = new int[0];
+			} else {
+				keys = getKeys(mode, true);
+				random = new int[keys.length * 2];
+				System.arraycopy(keys, 0, random, 0, keys.length);
+				System.arraycopy(keys, 0, random, keys.length, keys.length);
+			}			
 			break;
 
 		}
 	}
-
+	
 	@Override
 	public List<PatternModifyLog> modify(BMSModel model) {
 		List<PatternModifyLog> log = new ArrayList();
@@ -245,29 +113,29 @@ public class LaneShuffleModifier extends PatternModifier {
 				}
 				boolean[] clone = new boolean[lanes];
 				for (int i = 0; i < lanes; i++) {
-					if (clone[random[i]]) {
-						if (notes[random[i]] != null) {
-							if (notes[random[i]] instanceof LongNote
-									&& ((LongNote) notes[random[i]]).getEndnote().getSection() == tl.getSection()) {
+					final int mod = i < random.length ? random[i] : i;
+					if (clone[mod]) {
+						if (notes[mod] != null) {
+							if (notes[mod] instanceof LongNote
+									&& ((LongNote) notes[mod]).getEndnote().getSection() == tl.getSection()) {
 								LongNote ln = (LongNote) model
-										.getTimeLine(notes[random[i]].getSection(), notes[random[i]].getSectiontime())
-										.getNote(i);
+										.getTimeLine(notes[mod].getSection(), notes[mod].getSectiontime()).getNote(i);
 								tl.setNote(i, ln);
 							} else {
-								tl.setNote(i, (Note) notes[random[i]].clone());
+								tl.setNote(i, (Note) notes[mod].clone());
 							}
 						} else {
 							tl.setNote(i, null);
 						}
-						if (hnotes[random[i]] != null) {
-							tl.setHiddenNote(i, (Note) hnotes[random[i]].clone());
+						if (hnotes[mod] != null) {
+							tl.setHiddenNote(i, (Note) hnotes[mod].clone());
 						} else {
 							tl.setHiddenNote(i, null);
 						}
 					} else {
-						tl.setNote(i, notes[random[i]]);
-						tl.setHiddenNote(i, hnotes[random[i]]);
-						clone[random[i]] = true;
+						tl.setNote(i, notes[mod]);
+						tl.setHiddenNote(i, hnotes[mod]);
+						clone[mod] = true;
 					}
 				}
 				log.add(new PatternModifyLog(tl.getTime(), random));
