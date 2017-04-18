@@ -3,6 +3,8 @@ package bms.player.beatoraja.skin.lr2;
 import java.io.*;
 import java.util.*;
 
+import bms.model.Mode;
+import bms.player.beatoraja.Resolution;
 import bms.player.beatoraja.play.*;
 import bms.player.beatoraja.skin.*;
 
@@ -38,8 +40,13 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 	private int groovex = 0;
 	private int groovey = 0;
 
-	public LR2PlaySkinLoader(final float srcw, final float srch, final float dstw, final float dsth) {
-		super(srcw, srch, dstw, dsth);
+	public LR2PlaySkinLoader(final Resolution src, final Resolution dst) {
+		super(src, dst);
+
+		final float srcw = src.width;
+		final float srch = src.height;
+		final float dstw = dst.width;
+		final float dsth = dst.height;
 
 		addCommandWord(new CommandWord("CLOSE") {
 			@Override
@@ -126,13 +133,16 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 				int[] values = parseInt(str);
 				int lane = Integer.parseInt(str[1]);
 				if (lane == 10) {
-					lane = 15;
+					lane = laner.length / playerr.length * 2 - 1;
 				} else if (lane >= 10) {
-					lane -= 3;
+					lane = (lane - 11) + laner.length / playerr.length;
 				} else if (lane == 0) {
-					lane = 7;
+					lane = laner.length / playerr.length - 1;
 				} else {
 					lane -= 1;
+				}
+				if(lane < 0 || lane >= laner.length) {
+					return;
 				}
 				if (lane < note.length && note[lane] == null) {
 					TextureRegion[] images = getSourceImage(values);
@@ -148,13 +158,16 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 				int[] values = parseInt(str);
 				int lane = Integer.parseInt(str[1]);
 				if (lane == 10) {
-					lane = 15;
+					lane = laner.length / playerr.length * 2 - 1;
 				} else if (lane >= 10) {
-					lane -= 3;
+					lane = (lane - 11) + laner.length / playerr.length;
 				} else if (lane == 0) {
-					lane = 7;
+					lane = laner.length / playerr.length - 1;
 				} else {
 					lane -= 1;
+				}
+				if(lane < 0 || lane >= laner.length) {
+					return;
 				}
 				if (lane < lnend.length && lnend[lane] == null) {
 					TextureRegion[] images = getSourceImage(values);
@@ -170,13 +183,16 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 				int[] values = parseInt(str);
 				int lane = values[1];
 				if (lane == 10) {
-					lane = 15;
+					lane = laner.length / playerr.length * 2 - 1;
 				} else if (lane >= 10) {
-					lane -= 3;
+					lane = (lane - 11) + laner.length / playerr.length;
 				} else if (lane == 0) {
-					lane = 7;
+					lane = laner.length / playerr.length - 1;
 				} else {
 					lane -= 1;
+				}
+				if(lane < 0 || lane >= laner.length) {
+					return;
 				}
 				if (lane < lnstart.length && lnstart[lane] == null) {
 					TextureRegion[] images = getSourceImage(values);
@@ -193,13 +209,16 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 				int[] values = parseInt(str);
 				int lane = Integer.parseInt(str[1]);
 				if (lane == 10) {
-					lane = 15;
+					lane = laner.length / playerr.length * 2 - 1;
 				} else if (lane >= 10) {
-					lane -= 3;
+					lane = (lane - 11) + laner.length / playerr.length;
 				} else if (lane == 0) {
-					lane = 7;
+					lane = laner.length / playerr.length - 1;
 				} else {
 					lane -= 1;
+				}
+				if(lane < 0 || lane >= laner.length) {
+					return;
 				}
 				if (lane < lnbody.length && lnbody[lane] == null) {
 					TextureRegion[] images = getSourceImage(values);
@@ -217,13 +236,16 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 				int[] values = parseInt(str);
 				int lane = Integer.parseInt(str[1]);
 				if (lane == 10) {
-					lane = 15;
+					lane = laner.length / playerr.length * 2 - 1;
 				} else if (lane >= 10) {
-					lane -= 3;
+					lane = (lane - 11) + laner.length / playerr.length;
 				} else if (lane == 0) {
-					lane = 7;
+					lane = laner.length / playerr.length - 1;
 				} else {
 					lane -= 1;
+				}
+				if(lane < 0 || lane >= laner.length) {
+					return;
 				}
 				if (lane < mine.length && mine[lane] == null) {
 					TextureRegion[] images = getSourceImage(values);
@@ -240,13 +262,16 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 				int[] values = parseInt(str);
 				int lane = Integer.parseInt(str[1]);
 				if (lane == 10) {
-					lane = 15;
+					lane = laner.length / playerr.length * 2 - 1;
 				} else if (lane >= 10) {
-					lane -= 3;
+					lane = (lane - 11) + laner.length / playerr.length;
 				} else if (lane == 0) {
-					lane = 7;
+					lane = laner.length / playerr.length - 1;
 				} else {
 					lane -= 1;
+				}
+				if(lane < 0 || lane >= laner.length) {
+					return;
 				}
 				if (laner[lane] == null) {
 					laner[lane] = new Rectangle(values[3] * dstw / srcw, dsth - (values[4] + values[6]) * dsth / srch,
@@ -631,37 +656,21 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 	public PlaySkin loadPlaySkin(File f, BMSPlayer player, SkinHeader header, Map<Integer, Boolean> option,
 			Map property) throws IOException {
 
-		skin = new PlaySkin(srcw, srch, dstw, dsth);
-		playerr = new Rectangle[] { new Rectangle() };
-		if (header.getMode() == SkinType.PLAY_14KEYS.getId() || header.getMode() == SkinType.PLAY_10KEYS.getId()) {
-			note = new SkinSource[16];
-			lnstart = new SkinSource[16];
-			lnend = new SkinSource[16];
-			lnbody = new SkinSource[16];
-			lnbodya = new SkinSource[16];
-			mine = new SkinSource[16];
-			laner = new Rectangle[16];
-			playerr = new Rectangle[] { new Rectangle(), new Rectangle() };
+		skin = new PlaySkin(src, dst);
+		final Mode mode = SkinType.getSkinTypeById(header.getMode()).getMode();
+		note = new SkinSource[mode.key];
+		lnstart = new SkinSource[mode.key];
+		lnend = new SkinSource[mode.key];
+		lnbody = new SkinSource[mode.key];
+		lnbodya = new SkinSource[mode.key];
+		mine = new SkinSource[mode.key];
+		laner = new Rectangle[mode.key];
+		
+		playerr = new Rectangle[mode.player];
+		for(int i = 0;i < playerr.length;i++) {
+			playerr[i] = new Rectangle();
 		}
-		if (header.getMode() == SkinType.PLAY_9KEYS.getId()) {
-			note = new SkinSource[9];
-			lnstart = new SkinSource[9];
-			lnend = new SkinSource[9];
-			lnbody = new SkinSource[9];
-			lnbodya = new SkinSource[9];
-			mine = new SkinSource[9];
-			laner = new Rectangle[9];
-		}
-		if (header.getMode() == SkinType.PLAY_24KEYS.getId()) {
-			note = new SkinSource[26];
-			lnstart = new SkinSource[26];
-			lnend = new SkinSource[26];
-			lnbody = new SkinSource[26];
-			lnbodya = new SkinSource[26];
-			mine = new SkinSource[26];
-			laner = new Rectangle[26];
-			playerr = new Rectangle[] { new Rectangle(), new Rectangle() };
-		}
+
 		this.loadSkin(skin, f, player, header, option, property);
 
 		lanerender.setLaneRegion(laner);

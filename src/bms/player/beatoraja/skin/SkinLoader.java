@@ -31,9 +31,11 @@ import bms.player.beatoraja.select.MusicSelectSkin;
 import bms.player.beatoraja.select.SkinBar;
 import bms.player.beatoraja.select.SkinDistributionGraph;
 
+import static bms.player.beatoraja.Resolution.*;
+
 public class SkinLoader {
 
-	private Rectangle dstr;
+	private Resolution dstr;
 
 	private JsonSkin sk;
 
@@ -42,10 +44,10 @@ public class SkinLoader {
 	Map<String, String> filemap = new HashMap();
 
 	public SkinLoader() {
-		this(Resolution.RESOLUTION[1]);
+		this(HD);
 	}
 
-	public SkinLoader(Rectangle r) {
+	public SkinLoader(Resolution r) {
 		dstr = r;
 	}
 
@@ -113,22 +115,29 @@ public class SkinLoader {
 			json.setIgnoreUnknownFields(true);
 
 			sk = json.fromJson(JsonSkin.class, new FileReader(p.toFile()));
+			Resolution src = HD;
+			for(Resolution r : Resolution.values()) {
+				if(sk.w == r.width && sk.h == r.height) {
+					src = r;
+					break;
+				}
+			}
 
 			texmap = new HashMap();
 
 			if (type.isPlay()) {
-				skin = new PlaySkin(sk.w, sk.h, dstr.width, dstr.height);
+				skin = new PlaySkin(src, dstr);
 				((PlaySkin) skin).setClose(sk.close);
 				((PlaySkin) skin).setPlaystart(sk.playstart);
 			}
 			if (type == SkinType.MUSIC_SELECT) {
-				skin = new MusicSelectSkin(sk.w, sk.h, dstr.width, dstr.height);
+				skin = new MusicSelectSkin(src, dstr);
 			}
 			if (type == SkinType.DECIDE) {
-				skin = new MusicDecideSkin(sk.w, sk.h, dstr.width, dstr.height);
+				skin = new MusicDecideSkin(src, dstr);
 			}
 			if (type == SkinType.RESULT) {
-				skin = new MusicResultSkin(sk.w, sk.h, dstr.width, dstr.height);
+				skin = new MusicResultSkin(src, dstr);
 			}
 
 			Map<Integer, Boolean> op = new HashMap<>();

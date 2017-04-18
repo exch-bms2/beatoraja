@@ -82,7 +82,7 @@ public class KeyConfiguration extends MainState {
 	}
 
 	public void create() {
-		this.setSkin(new MusicDecideSkin(640,480,1280,720));
+		this.setSkin(new MusicDecideSkin(Resolution.SD,Resolution.HD));
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/default/VL-Gothic-Regular.ttf"));
 		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
 		parameter.size = 20;

@@ -1,6 +1,7 @@
 package bms.player.beatoraja.skin;
 
 import bms.player.beatoraja.MainState;
+import bms.player.beatoraja.Resolution;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
@@ -59,15 +60,15 @@ public class Skin {
 	 */
 	private int[] fixopt;
 
-	public Skin(float orgw, float orgh, float dstw, float dsth) {
-		this(orgw, orgh, dstw, dsth, new int[0]);
+	public Skin(Resolution org, Resolution dst) {
+		this(org, dst, new int[0]);
 	}
 
-	public Skin(float orgw, float orgh, float dstw, float dsth, int[] fixopt) {
-		width = dstw;
-		height = dsth;
-		dw = dstw / orgw;
-		dh = dsth / orgh;
+	public Skin(Resolution org, Resolution dst, int[] fixopt) {
+		width = dst.width;
+		height = dst.height;
+		dw = ((float)dst.width) / org.width;
+		dh = ((float)dst.height) / org.height;
 		this.fixopt = fixopt;
 	}
 

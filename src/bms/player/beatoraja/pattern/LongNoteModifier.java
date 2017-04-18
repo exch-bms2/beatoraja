@@ -13,7 +13,7 @@ public class LongNoteModifier extends PatternModifier {
 	@Override
 	public List<PatternModifyLog> modify(BMSModel model) {
 		for (TimeLine tl : model.getAllTimeLines()) {
-			for(int lane = 0;lane < 18;lane++) {
+			for(int lane = 0;lane < model.getMode().key;lane++) {
 				if(tl.getNote(lane) instanceof LongNote) {
 					LongNote ln = (LongNote) tl.getNote(lane);
 					if(ln.getSection() == tl.getSection()) {

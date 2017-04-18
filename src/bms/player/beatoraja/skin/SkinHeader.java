@@ -1,5 +1,7 @@
 package bms.player.beatoraja.skin;
 
+import bms.player.beatoraja.Resolution;
+
 import java.nio.file.Path;
 
 public class SkinHeader {
@@ -34,7 +36,7 @@ public class SkinHeader {
 	private CustomOption[] options = new CustomOption[0];
 	private CustomFile[] files = new CustomFile[0];
 	
-	private int resolution;
+	private Resolution resolution = Resolution.SD;
 
 	public int getMode() {
 		return mode;
@@ -76,11 +78,11 @@ public class SkinHeader {
 		this.path = path;
 	}
 
-	public int getResolution() {
+	public Resolution getResolution() {
 		return resolution;
 	}
 
-	public void setResolution(int resolution) {
+	public void setResolution(Resolution resolution) {
 		this.resolution = resolution;
 	}
 

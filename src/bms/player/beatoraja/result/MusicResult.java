@@ -90,20 +90,18 @@ public class MusicResult extends MainState {
 		try {
 			SkinConfig sc = resource.getConfig().getSkin()[7];
 			if (sc.getPath().endsWith(".json")) {
-				SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
+				SkinLoader sl = new SkinLoader(resource.getConfig().getResolution());
 				setSkin(sl.loadResultSkin(Paths.get(sc.getPath()), sc.getProperty()));
 			} else {
 				LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
 				SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
-				Rectangle srcr = RESOLUTION[header.getResolution()];
-				Rectangle dstr = RESOLUTION[resource.getConfig().getResolution()];
-				LR2ResultSkinLoader dloader = new LR2ResultSkinLoader(srcr.width, srcr.height, dstr.width, dstr.height);
+				LR2ResultSkinLoader dloader = new LR2ResultSkinLoader(header.getResolution(), resource.getConfig().getResolution());
 				setSkin(dloader.loadResultSkin(Paths.get(sc.getPath()).toFile(), this, header, loader.getOption(),
 						sc.getProperty()));
 			}
 		} catch (Throwable e) {
 			e.printStackTrace();
-			SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
+			SkinLoader sl = new SkinLoader(resource.getConfig().getResolution());
 			setSkin(sl.loadResultSkin(Paths.get("skin/default/result.json"), new HashMap()));
 		}
 	}
@@ -265,8 +263,9 @@ public class MusicResult extends MainState {
 		// duration average
 		int count = 0;
 		avgduration = 0;
+		final int lanes = resource.getBMSModel().getMode().key;
 		for (TimeLine tl : resource.getBMSModel().getAllTimeLines()) {
-			for (int i = 0; i < 18; i++) {
+			for (int i = 0; i < lanes; i++) {
 				Note n = tl.getNote(i);
 				if (n != null && !(resource.getBMSModel().getLntype() == BMSModel.LNTYPE_LONGNOTE
 						&& n instanceof LongNote && ((LongNote) n).getEndnote().getSection() == tl.getSection())) {

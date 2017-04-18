@@ -197,7 +197,7 @@ public class MainController extends ApplicationAdapter {
 		final long t = System.currentTimeMillis();
 		sprite = new SpriteBatch();
 
-		input = new BMSPlayerInputProcessor(RESOLUTION[config.getResolution()]);
+		input = new BMSPlayerInputProcessor(config.getResolution());
 		switch(config.getAudioDriver()) {
 		case Config.AUDIODRIVER_SOUND:
 			audio = new GdxSoundDriver();
@@ -285,7 +285,7 @@ public class MainController extends ApplicationAdapter {
 			sprite.begin();
 			systemfont.setColor(Color.PURPLE);
 			systemfont.draw(sprite, String.format("FPS %d", Gdx.graphics.getFramesPerSecond()), 10,
-					RESOLUTION[config.getResolution()].height - 2);
+					config.getResolution().height - 2);
 			sprite.end();
 		}
 		// show screenshot status
@@ -293,7 +293,7 @@ public class MainController extends ApplicationAdapter {
 			sprite.begin();
 			systemfont.setColor(Color.GOLD);
 			systemfont.draw(sprite, "Screen shot saved : " + screenshot.path, 100,
-					RESOLUTION[config.getResolution()].height - 2);
+					config.getResolution().height - 2);
 			sprite.end();
 		}		
 

@@ -8,6 +8,7 @@ import java.util.logging.Logger;
 
 import bms.player.beatoraja.PlayConfig.ControllerConfig;
 import bms.player.beatoraja.PlayConfig.MidiConfig;
+import bms.player.beatoraja.Resolution;
 import bms.player.beatoraja.input.BMControllerInputProcessor.BMKeys;
 
 import com.badlogic.gdx.Input.Keys;
@@ -28,7 +29,7 @@ public class BMSPlayerInputProcessor {
 
 	private MidiInputProcessor midiinput;
 
-	public BMSPlayerInputProcessor(Rectangle resolution) {
+	public BMSPlayerInputProcessor(Resolution resolution) {
 		kbinput = new KeyBoardInputProcesseor(this, new int[] { Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.F, Keys.V,
 				Keys.SHIFT_LEFT, Keys.CONTROL_LEFT, Keys.COMMA, Keys.L, Keys.PERIOD, Keys.SEMICOLON, Keys.SLASH,
 				Keys.APOSTROPHE, Keys.UNKNOWN, Keys.SHIFT_RIGHT, Keys.CONTROL_RIGHT, Keys.Q, Keys.W }, resolution);

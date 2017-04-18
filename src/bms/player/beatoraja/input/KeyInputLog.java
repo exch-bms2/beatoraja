@@ -1,6 +1,7 @@
 package bms.player.beatoraja.input;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import bms.model.BMSModel;
@@ -29,9 +30,9 @@ public class KeyInputLog {
 	 */
 	public boolean pressed;
 
-	public KeyInputLog() {	
+	public KeyInputLog() {
 	}
-	
+
 	public KeyInputLog(int time, int keycode, boolean pressed) {
 		this.time = time;
 		this.keycode = keycode;
@@ -46,38 +47,34 @@ public class KeyInputLog {
 	public static final List<KeyInputLog> createAutoplayLog(BMSModel model) {
 		// TODO 地雷を確実に回避するアルゴリズム
 		List<KeyInputLog> keylog = new ArrayList<KeyInputLog>();
-		int keys = (model.getUseKeys() == 5 || model.getUseKeys() == 7) ? 9 : ((model.getUseKeys() == 10 || model
-				.getUseKeys() == 14) ? 18 : 9);
-		boolean sc = (model.getUseKeys() == 5 || model.getUseKeys() == 7 || model.getUseKeys() == 10 || model
-				.getUseKeys() == 14);
+		int keys = model.getMode().key;
+		int[] sc = model.getMode().scratchKey;
 		Note[] ln = new Note[keys];
 		for (TimeLine tl : model.getAllTimeLines()) {
 			int i = tl.getTime();
 			for (int lane = 0; lane < keys; lane++) {
-				if (!sc || (lane != 8 && lane != 17)) {
-					Note note = tl.getNote(model.getUseKeys() == 9 && lane >= 5 ? lane + 5 : lane);
-					if (note != null) {
-						if (note instanceof LongNote) {
-							if (((LongNote) note).getEndnote().getSection() == tl.getSection()) {
-								keylog.add(new KeyInputLog(i, lane, false));
-								if (model.getLntype() != 0 && sc && (lane == 7 || lane == 16)) {
-									// BSS処理
-									keylog.add(new KeyInputLog(i, lane + 1, true));
-								}
-								ln[lane] = null;
-							} else {
-								keylog.add(new KeyInputLog(i, lane, true));
-								ln[lane] = note;
-							}
-						} else if (note instanceof NormalNote) {
-							keylog.add(new KeyInputLog(i, lane, true));
-						}
-					} else {
-						if (ln[lane] == null) {
+				Note note = tl.getNote(lane);
+				if (note != null) {
+					if (note instanceof LongNote) {
+						if (((LongNote) note).getEndnote().getSection() == tl.getSection()) {
 							keylog.add(new KeyInputLog(i, lane, false));
-							if (sc && (lane == 7 || lane == 16)) {
-								keylog.add(new KeyInputLog(i, lane + 1, false));
+							if (model.getLntype() != 0 && Arrays.asList(sc).contains(lane)) {
+								// BSS処理
+								keylog.add(new KeyInputLog(i, lane + 1, true));
 							}
+							ln[lane] = null;
+						} else {
+							keylog.add(new KeyInputLog(i, lane, true));
+							ln[lane] = note;
+						}
+					} else if (note instanceof NormalNote) {
+						keylog.add(new KeyInputLog(i, lane, true));
+					}
+				} else {
+					if (ln[lane] == null) {
+						keylog.add(new KeyInputLog(i, lane, false));
+						if (Arrays.asList(sc).contains(lane)) {
+							keylog.add(new KeyInputLog(i, lane + 1, false));
 						}
 					}
 				}

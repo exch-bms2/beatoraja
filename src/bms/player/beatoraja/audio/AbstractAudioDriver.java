@@ -152,8 +152,9 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 		List<SliceWav>[] slicesound = new List[wavcount];
 
 		Map<Integer, List<Note>> notemap = new HashMap();
+		final int lanes = model.getMode().key;
 		for (TimeLine tl : model.getAllTimeLines()) {
-			for (int i = 0; i < tl.getLaneCount(); i++) {
+			for (int i = 0; i < lanes; i++) {
 				final Note n = tl.getNote(i);
 				if (n != null) {
 					addNoteList(notemap, n);
