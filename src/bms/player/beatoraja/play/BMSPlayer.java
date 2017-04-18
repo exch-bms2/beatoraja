@@ -157,10 +157,10 @@ public class BMSPlayer extends MainState {
 			}
 			if (config.getDoubleoption() == 2 && (model.getMode() == Mode.BEAT_5K || model.getMode() == Mode.BEAT_7K)) {
 				// SPでなければBATTLEは未適用
+				model.setMode(model.getMode() == Mode.BEAT_5K ? Mode.BEAT_10K : Mode.BEAT_14K);
 				LaneShuffleModifier mod = new LaneShuffleModifier(LaneShuffleModifier.BATTLE);
 				mod.setModifyTarget(model.getMode() == Mode.BEAT_7K ? PatternModifier.PLAYER1_7KEYS : PatternModifier.PLAYER1_5KEYS);
 				mod.modify(model);
-				model.setMode(model.getMode() == Mode.BEAT_5K ? Mode.BEAT_10K : Mode.BEAT_14K);
 				assist = 1;
 				score = false;
 			}

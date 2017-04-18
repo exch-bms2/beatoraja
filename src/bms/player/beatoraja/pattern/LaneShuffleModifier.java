@@ -1,6 +1,7 @@
 package bms.player.beatoraja.pattern;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import bms.model.BMSModel;
@@ -85,14 +86,14 @@ public class LaneShuffleModifier extends PatternModifier {
 			}			
 			break;
 		case BATTLE:
-			if(mode.player > 1) {
+			if(mode.player == 1) {
 				random = new int[0];
 			} else {
 				keys = getKeys(mode, true);
 				random = new int[keys.length * 2];
 				System.arraycopy(keys, 0, random, 0, keys.length);
 				System.arraycopy(keys, 0, random, keys.length, keys.length);
-			}			
+			}
 			break;
 
 		}
