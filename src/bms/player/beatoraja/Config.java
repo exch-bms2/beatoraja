@@ -8,9 +8,10 @@ import java.util.logging.Logger;
 import bms.player.beatoraja.input.BMControllerInputProcessor.BMKeys;
 import bms.player.beatoraja.play.JudgeManager;
 
-import bms.player.beatoraja.play.TargetProperty;
 import bms.player.beatoraja.skin.SkinType;
 import com.badlogic.gdx.Input.Keys;
+
+import static bms.player.beatoraja.Resolution.*;
 
 /**
  * 各種設定項目。config.jsonで保持される
@@ -35,7 +36,7 @@ public class Config {
 	/**
 	 * 解像度
 	 */
-	private int resolution = 1;
+	private Resolution resolution = HD;
 
 	/**
 	 * フォルダランプの有効/無効
@@ -477,11 +478,11 @@ public class Config {
 		this.mode9 = mode9;
 	}
 
-	public int getResolution() {
+	public Resolution getResolution() {
 		return resolution;
 	}
 
-	public void setResolution(int resolution) {
+	public void setResolution(Resolution resolution) {
 		this.resolution = resolution;
 	}
 

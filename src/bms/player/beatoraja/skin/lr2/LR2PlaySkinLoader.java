@@ -4,6 +4,7 @@ import java.io.*;
 import java.util.*;
 
 import bms.model.Mode;
+import bms.player.beatoraja.Resolution;
 import bms.player.beatoraja.play.*;
 import bms.player.beatoraja.skin.*;
 
@@ -39,8 +40,13 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 	private int groovex = 0;
 	private int groovey = 0;
 
-	public LR2PlaySkinLoader(final float srcw, final float srch, final float dstw, final float dsth) {
-		super(srcw, srch, dstw, dsth);
+	public LR2PlaySkinLoader(final Resolution src, final Resolution dst) {
+		super(src, dst);
+
+		final float srcw = src.width;
+		final float srch = src.height;
+		final float dstw = dst.width;
+		final float dsth = dst.height;
 
 		addCommandWord(new CommandWord("CLOSE") {
 			@Override
@@ -650,8 +656,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 	public PlaySkin loadPlaySkin(File f, BMSPlayer player, SkinHeader header, Map<Integer, Boolean> option,
 			Map property) throws IOException {
 
-		skin = new PlaySkin(srcw, srch, dstw, dsth);
-		playerr = new Rectangle[] { new Rectangle() };		
+		skin = new PlaySkin(src, dst);
 		final Mode mode = SkinType.getSkinTypeById(header.getMode()).getMode();
 		note = new SkinSource[mode.key];
 		lnstart = new SkinSource[mode.key];

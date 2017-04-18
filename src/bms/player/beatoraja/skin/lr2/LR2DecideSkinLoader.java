@@ -4,21 +4,22 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
+import bms.player.beatoraja.Resolution;
 import bms.player.beatoraja.decide.MusicDecide;
 import bms.player.beatoraja.decide.MusicDecideSkin;
 import bms.player.beatoraja.skin.SkinHeader;
 
-public class LR2DecideSkinLoader extends LR2PlaySkinLoader {
+public class LR2DecideSkinLoader extends LR2SkinCSVLoader {
 
-	public LR2DecideSkinLoader(float srcw, float srch, float dstw, float dsth) {
-		super(srcw, srch, dstw, dsth);
+	public LR2DecideSkinLoader(Resolution src, Resolution dst) {
+		super(src, dst);
 	}
 
 	private MusicDecideSkin skin;
 	
 	public MusicDecideSkin loadMusicDecideSkin(File f, MusicDecide decide, SkinHeader header, Map<Integer, Boolean> option, Map property) throws IOException {
 
-		skin = new MusicDecideSkin(srcw, srch, dstw, dsth);
+		skin = new MusicDecideSkin(src, dst);
 
 		this.loadSkin(skin, f, decide, header, option, property);
 

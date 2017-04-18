@@ -1,5 +1,6 @@
 package bms.player.beatoraja.result;
 
+import bms.player.beatoraja.Resolution;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -12,8 +13,7 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
 
 public class GradeResultSkin extends Skin {
 
-	public GradeResultSkin() {
-		super(640, 480, 1280, 720);
+	public GradeResultSkin(Resolution src, Resolution dst) {
+		super(src, dst);
 	}
-	
 }

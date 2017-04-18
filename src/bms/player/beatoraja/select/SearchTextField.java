@@ -1,5 +1,6 @@
 package bms.player.beatoraja.select;
 
+import bms.player.beatoraja.Resolution;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
@@ -30,7 +31,7 @@ public class SearchTextField extends Stage {
 
 	private TextField search;
 
-	public SearchTextField(MusicSelector selector, Rectangle resolution) {
+	public SearchTextField(MusicSelector selector, Resolution resolution) {
 		super(new FitViewport(resolution.width, resolution.height));
 
 		final Rectangle r = ((MusicSelectSkin) selector.getSkin()).getSearchTextRegion();

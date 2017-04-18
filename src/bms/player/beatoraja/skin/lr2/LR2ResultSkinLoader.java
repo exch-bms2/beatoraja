@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import bms.player.beatoraja.MainState;
+import bms.player.beatoraja.Resolution;
 import com.badlogic.gdx.math.Rectangle;
 
 import bms.player.beatoraja.result.MusicResultSkin;
@@ -22,8 +23,8 @@ public class LR2ResultSkinLoader extends LR2SkinCSVLoader {
 
 	private Rectangle gauge = new Rectangle();
 
-	public LR2ResultSkinLoader(final float srcw, final float srch, final float dstw, final float dsth) {
-		super(srcw, srch, dstw, dsth);
+	public LR2ResultSkinLoader(final Resolution src, final Resolution dst) {
+		super(src, dst);
 
 		addCommandWord(new CommandWord("STARTINPUT") {
 			@Override
@@ -44,7 +45,7 @@ public class LR2ResultSkinLoader extends LR2SkinCSVLoader {
 			@Override
 			public void execute(String[] str) {
 				gauge.x = Integer.parseInt(str[3]);
-				gauge.y = srch - Integer.parseInt(str[4]);
+				gauge.y = src.height - Integer.parseInt(str[4]);
 				SkinGaugeGraphObject obj = new SkinGaugeGraphObject();
 				skin.setDestination(obj, 0, gauge.x, gauge.y, gauge.width, gauge.height, 0, 255, 255, 255, 255, 0, 0, 0,
 						0, 0, 0, 0, 0, 0);
@@ -56,7 +57,7 @@ public class LR2ResultSkinLoader extends LR2SkinCSVLoader {
 	public MusicResultSkin loadResultSkin(File f, MainState state, SkinHeader header, Map<Integer, Boolean> option,
 			Map property) throws IOException {
 
-		skin = new MusicResultSkin(srcw, srch, dstw, dsth);
+		skin = new MusicResultSkin(src, dst);
 
 		this.loadSkin(skin, f, state, header, option, property);
 
