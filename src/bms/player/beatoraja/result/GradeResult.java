@@ -147,7 +147,7 @@ public class GradeResult extends MainState {
 		}
 		boolean dp = false;
 		for (BMSModel model : models) {
-			dp |= (model.getUseKeys() == 10 || model.getUseKeys() == 14);
+			dp |= model.getMode().player == 2;
 		}
 		newscore.setCombo(resource.getMaxcombo());
 		int random = 0;
