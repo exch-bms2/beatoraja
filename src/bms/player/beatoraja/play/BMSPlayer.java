@@ -159,7 +159,7 @@ public class BMSPlayer extends MainState {
 				// SPでなければBATTLEは未適用
 				model.setMode(model.getMode() == Mode.BEAT_5K ? Mode.BEAT_10K : Mode.BEAT_14K);
 				LaneShuffleModifier mod = new LaneShuffleModifier(LaneShuffleModifier.BATTLE);
-				mod.setModifyTarget(model.getMode() == Mode.BEAT_7K ? PatternModifier.PLAYER1_7KEYS : PatternModifier.PLAYER1_5KEYS);
+				mod.setModifyTarget(PatternModifier.SIDE_1P);
 				mod.modify(model);
 				assist = 1;
 				score = false;
@@ -173,49 +173,39 @@ public class BMSPlayer extends MainState {
 			PatternModifier.modify(model, Arrays.asList(resource.getReplayData().pattern));
 			Logger.getGlobal().info("譜面オプション : 保存された譜面変更ログから譜面再現");
 		} else if (autoplay != 2) {
-			switch (model.getMode()) {
-			case BEAT_10K:
-			case BEAT_14K:
+			if(model.getMode().player == 2) {
 				if (config.getDoubleoption() == 1) {
 					LaneShuffleModifier mod = new LaneShuffleModifier(LaneShuffleModifier.FLIP);
-					mod.setModifyTarget(model.getMode() == Mode.BEAT_14K ? PatternModifier.PLAYER1_7KEYS : PatternModifier.PLAYER1_5KEYS);
 					pattern = PatternModifier.merge(pattern,mod.modify(model));
 				}
-				pattern = PatternModifier
-						.merge(pattern,
-								PatternModifier
-										.create(config.getRandom2(), model.getMode() == Mode.BEAT_14K
-												? PatternModifier.PLAYER2_7KEYS : PatternModifier.PLAYER2_5KEYS)
+				pattern = PatternModifier.merge(pattern,
+								PatternModifier.create(config.getRandom2(), PatternModifier.SIDE_2P)
 										.modify(model));
 				if (config.getRandom2() >= 6) {
 					assist = (assist == 0) ? 1 : assist;
 					score = false;
 				}
 				Logger.getGlobal().info("譜面オプション :  " + config.getRandom2());
-			case BEAT_5K:
-			case BEAT_7K:
-				pattern = PatternModifier.merge(pattern,
-						PatternModifier
-								.create(config.getRandom(),
-										model.getMode() == Mode.BEAT_7K || model.getMode() == Mode.BEAT_14K
-												? PatternModifier.PLAYER1_7KEYS : PatternModifier.PLAYER1_5KEYS)
-								.modify(model));
-				if (config.getRandom() >= 6) {
-					assist = (assist == 0) ? 1 : assist;
-					score = false;
+			}
+
+			if(model.getMode().scratchKey.length == 0) {
+				if (config.getRandom() == 7) {
+					config.setRandom(0);
+				} else if (config.getRandom() == 8) {
+					config.setRandom(2);
+				} else if (config.getRandom() == 9) {
+					config.setRandom(4);
 				}
-				Logger.getGlobal().info("譜面オプション :  " + config.getRandom());
-				break;
-			case POPN_5K:
-			case POPN_9K:
-				pattern = PatternModifier.merge(pattern,
-						PatternModifier.create(config.getRandom(), PatternModifier.NINEKEYS).modify(model));
-				if (config.getRandom() >= 6) {
-					assist = (assist == 0) ? 1 : assist;
-					score = false;
-				}
-				break;
-			}			
+			}
+			pattern = PatternModifier.merge(pattern,
+					PatternModifier
+							.create(config.getRandom(), PatternModifier.SIDE_1P)
+							.modify(model));
+			if (config.getRandom() >= 6) {
+				assist = (assist == 0) ? 1 : assist;
+				score = false;
+			}
+			Logger.getGlobal().info("譜面オプション :  " + config.getRandom());
 		}
 
 		Logger.getGlobal().info("ゲージ設定");
@@ -232,21 +222,12 @@ public class BMSPlayer extends MainState {
 	}
 
 	private SkinType getSkinType() {
-		switch (model.getMode()) {
-		case BEAT_7K:
-			return SkinType.PLAY_7KEYS;
-		case BEAT_5K:
-			return SkinType.PLAY_5KEYS;
-		case BEAT_14K:
-			return SkinType.PLAY_14KEYS;
-		case BEAT_10K:
-			return SkinType.PLAY_10KEYS;
-		case POPN_5K:
-		case POPN_9K:
-			return SkinType.PLAY_9KEYS;
-		default:
-			return null;
+		for(SkinType type : SkinType.values()) {
+			if(type.getMode() == model.getMode()) {
+				return type;
+			}
 		}
+		return null;
 	}
 
 
@@ -259,8 +240,6 @@ public class BMSPlayer extends MainState {
 		Config config = resource.getConfig();
 
 		SkinType skinType = getSkinType();
-		final String[] defaultskins = { SkinConfig.DEFAULT_PLAY7, SkinConfig.DEFAULT_PLAY5, SkinConfig.DEFAULT_PLAY14,
-				SkinConfig.DEFAULT_PLAY10, SkinConfig.DEFAULT_PLAY9 };
 		try {
 			SkinConfig sc = resource.getConfig().getSkin()[skinType.getId()];
 			if (sc.getPath().endsWith(".json")) {
@@ -387,17 +366,9 @@ public class BMSPlayer extends MainState {
 					if (property.doubleop == 1) {
 						new LaneShuffleModifier(LaneShuffleModifier.FLIP).modify(model);
 					}
-
-					PatternModifier.create(property.random2,
-							model.getMode() == Mode.BEAT_14K ? PatternModifier.PLAYER2_7KEYS : PatternModifier.PLAYER2_5KEYS)
-							.modify(model);
+					PatternModifier.create(property.random2, PatternModifier.SIDE_2P).modify(model);
 				}
-				PatternModifier
-						.create(property.random,
-								model.getMode() == Mode.POPN_5K || model.getMode() == Mode.POPN_9K ? PatternModifier.NINEKEYS
-										: (model.getMode() == Mode.BEAT_7K || model.getMode() == Mode.BEAT_14K
-												? PatternModifier.PLAYER1_7KEYS : PatternModifier.PLAYER1_5KEYS))
-						.modify(model);
+				PatternModifier.create(property.random, PatternModifier.SIDE_1P).modify(model);
 
 				gauge = practice.getGauge(model);
 				model.setJudgerank(property.judgerank);
