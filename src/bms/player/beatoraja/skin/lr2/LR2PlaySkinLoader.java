@@ -30,6 +30,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 	private SkinSource[] lnbodya = new SkinSource[8];
 	private SkinSource[] mine = new SkinSource[8];
 	private Rectangle[] laner = new Rectangle[8];
+	private float[] scale = new float[8];
 	private SkinGauge gauger = null;
 	private SkinImage line;
 	private List<SkinImage> lines = new ArrayList<SkinImage>();
@@ -276,6 +277,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 				if (laner[lane] == null) {
 					laner[lane] = new Rectangle(values[3] * dstw / srcw, dsth - (values[4] + values[6]) * dsth / srch,
 							values[5] * dstw / srcw, (values[4] + values[6]) * dsth / srch);
+					scale[lane] = values[6] * dsth / srch;
 				}
 				if (lanerender == null) {
 					final SkinSource[][] lns = new SkinSource[][]{ lnend, lnstart, lnbodya, lnbody, lnend,
@@ -286,7 +288,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 							lnss[j][i] = lns[i][j];
 						}
 					}
-					lanerender = new SkinNote(note, lnss, mine, values[6] * dsth / srch);
+					lanerender = new SkinNote(note, lnss, mine);
 					skin.add(lanerender);
 				}
 			}
@@ -665,6 +667,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 		lnbodya = new SkinSource[mode.key];
 		mine = new SkinSource[mode.key];
 		laner = new Rectangle[mode.key];
+		scale = new float[mode.key];
 		
 		playerr = new Rectangle[mode.player];
 		for(int i = 0;i < playerr.length;i++) {
@@ -673,7 +676,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 		
 		this.loadSkin(skin, f, player, header, option, property);
 
-		lanerender.setLaneRegion(laner);
+		lanerender.setLaneRegion(laner, scale);
 		skin.setLine(lines.toArray(new SkinImage[lines.size()]));
 
 		skin.setJudgeregion(judge[1] != null ? 2 : 1);
