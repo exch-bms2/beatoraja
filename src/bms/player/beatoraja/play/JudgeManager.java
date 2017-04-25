@@ -567,14 +567,14 @@ public class JudgeManager {
 			}
 			// LN処理タイマー
 			// TODO processing値の変化のときのみ実行したい
-			if (processing[lane] != null) {
+			// TODO HCNは別タイマーにするかも
+			if (processing[lane] != null || (passing[lane] != null && inclease[lane])) {
 				if (main.getTimer()[TIMER_HOLD_1P_SCRATCH + offset[lane]] == Long.MIN_VALUE) {
 					main.getTimer()[TIMER_HOLD_1P_SCRATCH + offset[lane]] = main.getNowTime();
 				}
 			} else {
 				main.getTimer()[TIMER_HOLD_1P_SCRATCH + offset[lane]] = Long.MIN_VALUE;
 			}
-
 		}
 	}
 

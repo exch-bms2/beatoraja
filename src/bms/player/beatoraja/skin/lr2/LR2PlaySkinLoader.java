@@ -28,6 +28,12 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 	private SkinSource[] lnend = new SkinSource[8];
 	private SkinSource[] lnbody = new SkinSource[8];
 	private SkinSource[] lnbodya = new SkinSource[8];
+	private SkinSource[] hcnstart = new SkinSource[8];
+	private SkinSource[] hcnend = new SkinSource[8];
+	private SkinSource[] hcnbody = new SkinSource[8];
+	private SkinSource[] hcnbodya = new SkinSource[8];
+	private SkinSource[] hcnbodyd = new SkinSource[8];
+	private SkinSource[] hcnbodyr = new SkinSource[8];
 	private SkinSource[] mine = new SkinSource[8];
 	private Rectangle[] laner = new Rectangle[8];
 	private float[] scale = new float[8];
@@ -146,12 +152,42 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 				addNote(str, lnstart, true);
 			}
 		});
-
 		addCommandWord(new CommandWord("SRC_LN_BODY") {
 			@Override
 			public void execute(String[] str) {
 				addNote(str, lnbody, false);
 				addNote(str, lnbodya, true);
+			}
+		});
+		addCommandWord(new CommandWord("SRC_HCN_END") {
+			@Override
+			public void execute(String[] str) {
+				addNote(str, hcnend, true);
+			}
+		});
+		addCommandWord(new CommandWord("SRC_HCN_START") {
+			@Override
+			public void execute(String[] str) {
+				addNote(str, hcnstart, true);
+			}
+		});
+		addCommandWord(new CommandWord("SRC_HCN_BODY") {
+			@Override
+			public void execute(String[] str) {
+				addNote(str, hcnbody, false);
+				addNote(str, hcnbodya, true);
+			}
+		});
+		addCommandWord(new CommandWord("SRC_HCN_DAMAGE") {
+			@Override
+			public void execute(String[] str) {
+				addNote(str, hcnbodyd, true);
+			}
+		});
+		addCommandWord(new CommandWord("SRC_HCN_REACTIVE") {
+			@Override
+			public void execute(String[] str) {
+				addNote(str, hcnbodyr, true);
 			}
 		});
 
@@ -185,8 +221,26 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 					scale[lane] = values[6] * dsth / srch;
 				}
 				if (lanerender == null) {
-					final SkinSource[][] lns = new SkinSource[][]{ lnend, lnstart, lnbodya, lnbody, lnend,
-							lnstart, lnbodya, lnbody, lnbodya, lnbody };
+					if(hcnend[0] == null) {
+						hcnend = lnend;
+					}
+					if(hcnstart[0] == null) {
+						hcnstart = lnstart;
+					}
+					if(hcnbody[0] == null) {
+						hcnbody = lnbody;
+					}
+					if(hcnbodya[0] == null) {
+						hcnbodya = lnbodya;
+					}
+					if(hcnbodyd[0] == null) {
+						hcnbodyd = hcnbody;
+					}
+					if(hcnbodyr[0] == null) {
+						hcnbodyr = hcnbodya;
+					}
+					final SkinSource[][] lns = new SkinSource[][]{ lnend, lnstart, lnbodya, lnbody, hcnend,
+							hcnstart, hcnbodya, hcnbody, hcnbodyr, hcnbodyd };
 					final SkinSource[][] lnss = new SkinSource[lnstart.length][10];
 					for(int i = 0;i < 10;i++) {
 						for(int j = 0;j < lnstart.length;j++) {
@@ -561,6 +615,12 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 		lnend = new SkinSource[mode.key];
 		lnbody = new SkinSource[mode.key];
 		lnbodya = new SkinSource[mode.key];
+		hcnstart = new SkinSource[mode.key];
+		hcnend = new SkinSource[mode.key];
+		hcnbody = new SkinSource[mode.key];
+		hcnbodya = new SkinSource[mode.key];
+		hcnbodyd = new SkinSource[mode.key];
+		hcnbodyr = new SkinSource[mode.key];
 		mine = new SkinSource[mode.key];
 		laner = new Rectangle[mode.key];
 		scale = new float[mode.key];
