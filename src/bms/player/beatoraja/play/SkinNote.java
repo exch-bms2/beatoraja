@@ -17,38 +17,21 @@ import com.badlogic.gdx.math.Rectangle;
  */
 public class SkinNote extends SkinObject {
 
-	// TODO Note毎に判定ライン上の描画位置をDestinationで指定する(Note毎のscaleを実現するため。判定ラインからの距離はoffsetYで表現)
-
 	private SkinLane[] lanes;
 
-	private float scale;
-	
-	private TextureRegion[] cnote;
-	private TextureRegion[][] clongnote;
-	private TextureRegion[] cminenote;
-	private TextureRegion[] chiddennote;
-	private TextureRegion[] cprocessednote;
-	private Rectangle[] claneregion;
-
-	public SkinNote(SkinSource[] note, SkinSource[][] longnote, SkinSource[] minenote, float scale) {
-		this.scale = scale;
+	public SkinNote(SkinSource[] note, SkinSource[][] longnote, SkinSource[] minenote) {
 		lanes = new SkinLane[note.length];
 		for(int i = 0;i < lanes.length;i++) {
-			lanes[i] = new SkinLane(note[i],longnote[i], minenote[i], scale);
+			lanes[i] = new SkinLane(note[i],longnote[i], minenote[i]);
 		}
-		cnote = new TextureRegion[note.length];
-		clongnote = new TextureRegion[10][note.length];
-		cminenote = new TextureRegion[note.length];
-		chiddennote = new TextureRegion[note.length];
-		cprocessednote = new TextureRegion[note.length];
-		claneregion = new Rectangle[note.length];
 		
         this.setDestination(0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, new int[0]);
 	}
 
-	public void setLaneRegion(Rectangle[] region) {
+	public void setLaneRegion(Rectangle[] region, float[] scale) {
 		for(int i = 0;i < lanes.length;i++) {
 			lanes[i].setDestination(0,region[i].x, region[i].y, region[i].width, region[i].height, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+			lanes[i].scale =  scale[i];
 		}
 	}
 
@@ -56,27 +39,7 @@ public class SkinNote extends SkinObject {
 	public void draw(SpriteBatch sprite, long time, MainState state) {
 		final BMSPlayer player = (BMSPlayer) state;
 		if (player.getLanerender() != null) {
-			for (int i = 0; i < lanes.length; i++) {
-				if (lanes[i].note != null) {
-					cnote[i] = lanes[i].note.getImage(time, state);
-				}
-				for (int type = 0; type < 10; type++) {
-					if (lanes[i].longnote[type] != null) {
-						clongnote[type][i] = lanes[i].longnote[type].getImage(time, state);
-					}
-				}
-				if (lanes[i].minenote != null) {
-					cminenote[i] = lanes[i].minenote.getImage(time, state);
-				}
-				if (lanes[i].hiddennote != null) {
-					chiddennote[i] = lanes[i].hiddennote.getImage(time, state);
-				}
-				if (lanes[i].processednote != null) {
-					cprocessednote[i] = lanes[i].processednote.getImage(time, state);
-				}
-				claneregion[i] = lanes[i].getDestination(time, state);
-			}
-			player.getLanerender().drawLane(time, cnote, clongnote, cminenote, cprocessednote, chiddennote, claneregion, scale);
+			player.getLanerender().drawLane(time, lanes);
 		}
 	}
 
@@ -92,29 +55,28 @@ public class SkinNote extends SkinObject {
 		/**
 		 * ノーツ画像
 		 */
-		private SkinSource note;
+		SkinSource note;
 		/**
 		 * ロングノーツ画像
 		 */
-		private SkinSource[] longnote = new SkinSource[10];
+		SkinSource[] longnote = new SkinSource[10];
 		/**
 		 * 地雷ノーツ画像
 		 */
-		private SkinSource minenote;
+		SkinSource minenote;
 
-		private float scale;
+		float scale;
 
 		/**
 		 * 不可視ノーツ画像
 		 */
-		private SkinSource hiddennote;
+		SkinSource hiddennote;
 		/**
 		 * 処理済ノーツ画像
 		 */
-		private SkinSource processednote;
+		SkinSource processednote;
 
-		public SkinLane(SkinSource note, SkinSource[] longnote, SkinSource minenote, float scale) {
-			this.scale = scale;
+		public SkinLane(SkinSource note, SkinSource[] longnote, SkinSource minenote) {
 			this.note = note;
 			this.longnote = longnote;
 			this.minenote = minenote;
@@ -134,7 +96,7 @@ public class SkinNote extends SkinObject {
 		@Override
 		public void draw(SpriteBatch sprite, long time, MainState state) {
 		}
-
+		
 		@Override
 		public void dispose() {
 			if (note != null) {

@@ -71,10 +71,10 @@ public class SkinTextFont extends SkinText {
                 final float x = (getAlign() == 2 ? r.x - r.width : (getAlign() == 1 ? r.x - r.width / 2 : r.x));
                 if(shadow > 0) {
                     layout.setText(font, getText(), new Color(c.r / 2, c.g / 2, c.b / 2, c.a), r.getWidth(),ALIGN[getAlign()], false);
-                    font.draw(sprite, layout, x + shadow + offsetX, r.y - shadow + offsetY);
+                    font.draw(sprite, layout, x + shadow + offsetX, r.y - shadow + offsetY + r.getHeight());
                 }
                 layout.setText(font, getText(), c, r.getWidth(),ALIGN[getAlign()], false);
-                font.draw(sprite, layout, x + offsetX, r.y + offsetY);
+                font.draw(sprite, layout, x + offsetX, r.y + offsetY + r.getHeight());
             }
         }
     }

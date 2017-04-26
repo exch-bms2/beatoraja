@@ -226,13 +226,16 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader {
 			@Override
 			public void execute(String[] str) {
 				int[] values = parseInt(str);
+				SkinText bartext = null;
 				if (values[2] < fontlist.size() && fontlist.get(values[2]) != null) {
-					SkinText text = new SkinTextImage(fontlist.get(values[2]));
-					text.setAlign(values[4]);
-					skinbar.getText()[values[1]] = text;
-					// System.out.println("Text Added - " +
-					// (values[3]));
+					bartext = new SkinTextImage(fontlist.get(values[2]));
+				} else {
+					bartext = new SkinTextFont("skin/default/VL-Gothic-Regular.ttf", 0, 48, 2);
 				}
+				bartext.setAlign(values[4]);
+				skinbar.getText()[values[1]] = bartext;
+				// System.out.println("Text Added - " +
+				// (values[3]));
 			}
 		});
 		addCommandWord(new CommandWord("DST_BAR_TITLE") {

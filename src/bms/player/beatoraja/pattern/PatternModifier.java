@@ -22,11 +22,8 @@ public abstract class PatternModifier {
 
 	private int type;
 
-	public static final int PLAYER1_5KEYS = 0;
-	public static final int PLAYER1_7KEYS = 1;
-	public static final int PLAYER2_5KEYS = 2;
-	public static final int PLAYER2_7KEYS = 3;
-	public static final int NINEKEYS = 4;
+	public static final int SIDE_1P = 0;
+	public static final int SIDE_2P = 1;
 
 	public PatternModifier(int assist) {
 		this.assist = assist;
@@ -172,7 +169,7 @@ public abstract class PatternModifier {
 	}
 	
 	protected int[] getKeys(Mode mode, boolean containsScratch) {
-		int key = (getModifyTarget() == PLAYER2_5KEYS || getModifyTarget() == PLAYER2_7KEYS)
+		int key = (getModifyTarget() == SIDE_2P)
 				? mode.key / mode.player : 0;
 		if(key == mode.key) {
 			return new int[0];				

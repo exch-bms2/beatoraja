@@ -367,11 +367,17 @@ public class SkinLoader {
 						SkinSource[] mines = getNoteTexture(sk.note.mine, p);
 
 						Rectangle[] region = new Rectangle[sk.note.dst.length];
+						float[] scale = new float[region.length];
 						float dx = dstr.width / sk.w;
 						float dy = dstr.height / sk.h;
 						for (int i = 0; i < region.length; i++) {
 							Animation dest = sk.note.dst[i];
 							region[i] = new Rectangle(dest.x * dx, dest.y * dy, dest.w * dx, dest.h * dy);
+							if(i < sk.note.size.length) {
+								scale[i] = sk.note.size[i] * dy;
+							} else {
+								scale[i] = ((SkinSourceImage)notes[i]).getImages()[0][0].getRegionHeight() * dy;
+							}
 						}
 						Rectangle[] gregion = new Rectangle[sk.note.group.length];
 						SkinImage[] lines = new SkinImage[gregion.length];
@@ -394,8 +400,8 @@ public class SkinLoader {
 						}
 						((PlaySkin) skin).setLine(lines);
 
-						SkinNote sn = new SkinNote(notes, lnss, mines, ((SkinSourceImage)notes[0]).getImages()[0][0].getRegionHeight() * dy);
-						sn.setLaneRegion(region);
+						SkinNote sn = new SkinNote(notes, lnss, mines);
+						sn.setLaneRegion(region, scale);
 						((PlaySkin) skin).setLaneGroupRegion(gregion);
 						obj = sn;
 					}
@@ -962,6 +968,7 @@ public class SkinLoader {
 		public String[] hidden = new String[0];
 		public String[] processed = new String[0];
 		public Animation[] dst = new Animation[0];
+		public float[] size = new float[0];
 		public Destination[] group = new Destination[0];
 	}
 
