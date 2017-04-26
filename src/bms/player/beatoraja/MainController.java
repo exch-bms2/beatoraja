@@ -39,7 +39,7 @@ import static bms.player.beatoraja.Resolution.*;
 
 public class MainController extends ApplicationAdapter {
 
-	public static final String VERSION = "beatoraja 0.4";
+	public static final String VERSION = "beatoraja 0.4.1";
 
 	private BMSPlayer bmsplayer;
 	private MusicDecide decide;
