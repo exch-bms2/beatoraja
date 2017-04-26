@@ -16,12 +16,17 @@ import java.util.*;
  * @author exch
  */
 public class SkinTextImage extends SkinText {
-
-	// TODO SkinTextと共通化して選曲で使用できるように
-
+	/**
+	 * テキストイメージ
+	 */
 	private SkinTextImageSource source;
-
+	/**
+	 * 現在のテキスト
+	 */
 	private TextureRegion[] texts;
+	/**
+	 * 現在のテキスト長
+	 */
 	private float textwidth;
 
 	public SkinTextImage(SkinTextImageSource source) {
@@ -64,7 +69,7 @@ public class SkinTextImage extends SkinText {
 			float width = textwidth * r.height / source.getSize() + source.getMargin() * texts.length;
 
 			final float scale = r.width < width ? r.width / width : 1;
-			final float x = (getAlign() == 2 ? r.x - (r.width - width * scale)
+			final float x = (getAlign() == 2 ? r.x - width * scale
 					: (getAlign() == 1 ? r.x - width * scale / 2 : r.x));
 			float dx = 0;
 			for (TextureRegion ch : texts) {
@@ -82,9 +87,19 @@ public class SkinTextImage extends SkinText {
 		source.dispose();
 	}
 
+	/**
+	 * テキストイメージ
+	 * 
+	 * @author exch
+	 */
 	public static class SkinTextImageSource implements Disposable {
-
+		/**
+		 * サイズ
+		 */
 		private int size = 0;
+		/**
+		 * 文字間のマージン
+		 */
 		private int margin = 0;
 		private Map<Integer, TextureRegion> images = new TreeMap<Integer, TextureRegion>();
 
