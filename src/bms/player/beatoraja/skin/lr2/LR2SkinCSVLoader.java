@@ -7,16 +7,7 @@ import java.util.logging.Logger;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.Resolution;
 import bms.player.beatoraja.play.bga.BGAProcessor;
-import bms.player.beatoraja.skin.Skin;
-import bms.player.beatoraja.skin.SkinGraph;
-import bms.player.beatoraja.skin.SkinHeader;
-import bms.player.beatoraja.skin.SkinImage;
-import bms.player.beatoraja.skin.SkinLoader;
-import bms.player.beatoraja.skin.SkinNumber;
-import bms.player.beatoraja.skin.SkinObject;
-import bms.player.beatoraja.skin.SkinSlider;
-import bms.player.beatoraja.skin.SkinSourceMovie;
-import bms.player.beatoraja.skin.SkinTextImage;
+import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.SkinHeader.CustomFile;
 import bms.player.beatoraja.skin.SkinTextImage.SkinTextImageSource;
 import bms.player.beatoraja.skin.lr2.LR2SkinLoader.CommandWord;
@@ -284,14 +275,16 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 				int[] values = parseInt(str);
 				if (values[2] < fontlist.size() && fontlist.get(values[2]) != null) {
 					text = new SkinTextImage(fontlist.get(values[2]));
-					text.setReferenceID(values[3]);
-					text.setAlign(values[4]);
-					int edit = values[5];
-					int panel = values[6];
-					skin.add(text);
-					// System.out.println("Text Added - " +
-					// (values[3]));
+				} else {
+					text = new SkinTextFont("skin/default/VL-Gothic-Regular.ttf", 0, 48, 2);
 				}
+				text.setReferenceID(values[3]);
+				text.setAlign(values[4]);
+				int edit = values[5];
+				int panel = values[6];
+				skin.add(text);
+				// System.out.println("Text Added - " +
+				// (values[3]));
 			}
 		});
 		addCommandWord(new CommandWord("DST_TEXT") {
@@ -478,7 +471,7 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 	SkinGraph bar = null;
 	SkinSlider slider = null;
 	SkinNumber num = null;
-	SkinTextImage text = null;
+	SkinText text = null;
 	String line = null;
 
 	protected void loadSkin0(Skin skin, File f, MainState state, Map<Integer, Boolean> option,
