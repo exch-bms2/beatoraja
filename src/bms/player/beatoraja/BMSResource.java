@@ -44,14 +44,13 @@ public class BMSResource {
 		this.audio = audio;
 	}
 	
-	public boolean setBMSFile(BMSModel model, final Path f, final Config config, int autoplay) {
+	public boolean setBMSFile(BMSModel model, final Path f, final Config config, int auto) {
 		String bmspath = this.model != null ? this.model.getPath() : null;
 		this.model = model;
-		int auto = autoplay;
-		while(!audioloaders.isEmpty() && audioloaders.getFirst().finished) {
+		while(!audioloaders.isEmpty() && !audioloaders.getFirst().isAlive()) {
 			audioloaders.removeFirst();
 		}
-		while(!bgaloaders.isEmpty() && bgaloaders.getFirst().finished) {
+		while(!bgaloaders.isEmpty() && !bgaloaders.getFirst().isAlive()) {
 			bgaloaders.removeFirst();
 		}
 		if (bmspath == null || !f.toAbsolutePath().toString().equals(bmspath) || bgashow != config.getBga()
@@ -72,7 +71,7 @@ public class BMSResource {
 				bgaloaders.addLast(bgaloader);
 				bgaloader.start();					
 			}
-			AudioLoaderThread audioloader = new AudioLoaderThread(model);
+			AudioLoaderThread audioloader = new AudioLoaderThread(model, audio);
 			audioloaders.addLast(audioloader);
 			audioloader.start();
 		} else {
@@ -99,10 +98,10 @@ public class BMSResource {
 	}
 	
 	public boolean mediaLoadFinished() {
-		if(audioloaders.size() > 0 && !audioloaders.getLast().finished) {
+		if(!audioloaders.isEmpty() && audioloaders.getLast().isAlive()) {
 			return false;
 		}
-		if(bgaloaders.size() > 0 && !bgaloaders.getLast().finished) {
+		if(!bgaloaders.isEmpty() && bgaloaders.getLast().isAlive()) {
 			return false;
 		}
 		return true;
@@ -119,11 +118,10 @@ public class BMSResource {
 		}
 	}
 
-	class BGALoaderThread extends Thread {
+	static class BGALoaderThread extends Thread {
 
 		private final BMSModel model;
-		private boolean finished = false;
-		private BGAProcessor bga;
+		private final BGAProcessor bga;
 		
 		public BGALoaderThread(BMSModel model, BGAProcessor bga) {
 			this.model = model;
@@ -137,19 +135,18 @@ public class BMSResource {
 			} catch (Throwable e) {
 				Logger.getGlobal().severe(e.getClass().getName() + " : " + e.getMessage());
 				e.printStackTrace();
-			} finally {
-				finished = true;
 			}
 		}
 	}
 	
-	class AudioLoaderThread extends Thread {
+	static class AudioLoaderThread extends Thread {
 
 		private final BMSModel model;
-		private boolean finished = false;
+		private final AudioDriver audio;
 		
-		public AudioLoaderThread(BMSModel model) {
+		public AudioLoaderThread(BMSModel model, AudioDriver audio) {
 			this.model = model;
+			this.audio = audio;
 		}
 		
 		@Override
@@ -160,8 +157,6 @@ public class BMSResource {
 			} catch (Throwable e) {
 				Logger.getGlobal().severe(e.getClass().getName() + " : " + e.getMessage());
 				e.printStackTrace();
-			} finally {
-				finished = true;
 			}
 		}		
 	}
