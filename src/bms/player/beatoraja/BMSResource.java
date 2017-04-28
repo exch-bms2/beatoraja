@@ -40,8 +40,9 @@ public class BMSResource {
 	 */
 	private ArrayDeque<BGALoaderThread> bgaloaders = new ArrayDeque<BGALoaderThread>();
 
-	public BMSResource(AudioDriver audio) {
+	public BMSResource(AudioDriver audio, Config config) {
 		this.audio = audio;
+		bga = new BGAProcessor(config);
 	}
 	
 	public boolean setBMSFile(BMSModel model, final Path f, final Config config, int auto) {
@@ -59,12 +60,6 @@ public class BMSResource {
 			// 同フォルダの違うbmsファイルでも、WAV/,BMP定義が違う可能性があるのでロード
 			// RANDOM定義がある場合はリロード
 			this.bgashow = config.getBga();			
-			if (bga != null) {
-				bga.abort();
-				bga.dispose();
-			}
-			bga = new BGAProcessor(config);
-			audio.abort();
 			
 			if (config.getBga() == Config.BGA_ON || (config.getBga() == Config.BGA_AUTO && (auto == 1 || auto >= 3))) {
 				BGALoaderThread bgaloader = new BGALoaderThread(model, bga);
@@ -76,19 +71,15 @@ public class BMSResource {
 			audioloader.start();
 		} else {
 			// windowsだけ動画を含むBGAがあれば読み直す(ffmpegがエラー終了する。今後のupdateで直れば外す)
-			if ("\\".equals(System.getProperty("file.separator"))) {
+//			if ("\\".equals(System.getProperty("file.separator"))) {
 				Logger.getGlobal().info("WindowsのためBGA再読み込み");
-				if (bga != null) {
-					bga.dispose();
-				}
-				bga = new BGAProcessor(config);
 				
 				if (config.getBga() == Config.BGA_ON || (config.getBga() == Config.BGA_AUTO && (auto == 1 || auto >= 3))) {
 					BGALoaderThread bgaloader = new BGALoaderThread(model, bga);
 					bgaloaders.addLast(bgaloader);
 					bgaloader.start();					
 				}
-			}
+//			}
 		}
 		return true;
 	}
@@ -131,6 +122,7 @@ public class BMSResource {
 		@Override
 		public void run() {
 			try {
+				bga.abort();
 				bga.setModel(model);
 			} catch (Throwable e) {
 				Logger.getGlobal().severe(e.getClass().getName() + " : " + e.getMessage());
