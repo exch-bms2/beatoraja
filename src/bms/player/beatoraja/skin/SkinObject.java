@@ -33,8 +33,13 @@ public abstract class SkinObject implements Disposable {
 	private int offsety = -1;
 
 	private int imageid = -1;
-
+	/**
+	 * 参照するタイマーID
+	 */
 	private int dsttimer = 0;
+	/**
+	 * ループ開始タイマー
+	 */
 	private int dstloop = 0;
 	/**
 	 * ブレンド(2:加算, 9:反転)
@@ -50,12 +55,24 @@ public abstract class SkinObject implements Disposable {
 	private int dstcenter;
 
 	private int acc;
-
+	/**
+	 * オブジェクトクリック時に実行するイベントの参照ID
+	 */
 	private int clickevent = -1;
-
+	/**
+	 * 描画条件となるオプション定義
+	 */
 	private int[] dstop = new int[0];
 
+	private final float[] CENTERX = { 0.5f, 0, 0.5f, 1, 0, 0.5f, 1, 0, 0.5f, 1, };
+	private final float[] CENTERY = { 0.5f, 0, 0, 0, 0.5f, 0.5f, 0.5f, 1, 1, 1 };
+
+	private float centerx;
+	private float centery;
+
 	private SkinObjectDestination[] dst = new SkinObjectDestination[0];
+	
+	// 以下、高速化用
 	private long starttime;
 	private long endtime;
 
@@ -66,6 +83,10 @@ public abstract class SkinObject implements Disposable {
 	private Color fixc = null;
 	private int fixa = Integer.MIN_VALUE;
 
+	private long nowtime = 0;
+	private float rate = 0;
+	private int index = 0;
+	
 	public SkinObjectDestination[] getAllDestination() {
 		return dst;
 	}
@@ -156,10 +177,6 @@ public abstract class SkinObject implements Disposable {
 		return this.getDestination(time, null);
 	}
 
-	private long nowtime = 0;
-	private float rate = 0;
-	private int index = 0;
-	
 	/**
 	 * 指定して時間に応じた描画領域を返す
 	 * 
@@ -198,35 +215,24 @@ public abstract class SkinObject implements Disposable {
 		index = -1;
 		
 		if (fixr == null) {
-			SkinObjectDestination obj1 = dst[0];
-			for (int i = 1; i < dst.length; i++) {
-				final SkinObjectDestination obj2 = dst[i];
-				if (obj1.time <= time && obj2.time >= time) {
-					final Rectangle r1 = obj1.region;
-					final Rectangle r2 = obj2.region;
-					float rate = (float) (time - obj1.time) / (obj2.time - obj1.time);
-					switch(acc) {
-					case 1:
-						rate = rate * rate;
-						break;
-					case 2:
-						rate = 1 - (rate - 1) * (rate - 1);
-						break;
-					}
-					r.x = r1.x + (r2.x - r1.x) * rate;
-					r.y = r1.y + (r2.y - r1.y) * rate;
-					r.width = r1.width + (r2.width - r1.width) * rate;
-					r.height = r1.height + (r2.height - r1.height) * rate;
-					if (state != null && offsetx != -1) {
-						r.x += state.getSliderValue(offsetx);
-					}
-					if (state != null && offsety != -1) {
-						r.y += state.getSliderValue(offsety);
-					}
-					return r;
-				}
-				obj1 = obj2;
+			getRate();
+			if(rate == 0) {
+				r.set(dst[index].region);
+			} else {
+				final Rectangle r1 = dst[index].region;
+				final Rectangle r2 = dst[index + 1].region;
+				r.x = r1.x + (r2.x - r1.x) * rate;
+				r.y = r1.y + (r2.y - r1.y) * rate;
+				r.width = r1.width + (r2.width - r1.width) * rate;
+				r.height = r1.height + (r2.height - r1.height) * rate;
 			}
+			if (state != null && offsetx != -1) {
+				r.x += state.getSliderValue(offsetx);
+			}
+			if (state != null && offsety != -1) {
+				r.y += state.getSliderValue(offsety);
+			}
+			return r;
 		} else {
 			if (offsetx == -1 && offsety == -1) {
 				return fixr;
@@ -240,15 +246,6 @@ public abstract class SkinObject implements Disposable {
 			}
 			return r;
 		}
-
-		r.set(dst[0].region);
-		if (state != null && offsetx != -1) {
-			r.x += state.getSliderValue(offsetx);
-		}
-		if (state != null && offsety != -1) {
-			r.y += state.getSliderValue(offsety);
-		}
-		return r;
 	}
 
 	public Color getColor() {
@@ -256,8 +253,8 @@ public abstract class SkinObject implements Disposable {
 			return fixc;
 		}
 		getRate();
-		if(index == 0 && rate == 0) {
-			return dst[0].color;			
+		if(rate == 0) {
+			return dst[index].color;			
 		} else {
 			final Color r1 = dst[index].color;
 			final Color r2 = dst[index + 1].color;
@@ -274,18 +271,23 @@ public abstract class SkinObject implements Disposable {
 			return fixa;
 		}
 		getRate();
-		return index == 0 && rate == 0 ? dst[0].angle :  (int) (dst[index].angle + (dst[index + 1].angle - dst[index].angle) * rate);
+		return rate == 0 ? dst[index].angle :  (int) (dst[index].angle + (dst[index + 1].angle - dst[index].angle) * rate);
 	}
 	
 	private void getRate() {
 		if(rate != -1) {
 			return;
 		}
-		SkinObjectDestination obj1 = dst[0];
-		for (int i = 1; i < dst.length; i++) {
-			final SkinObjectDestination obj2 = dst[i];
-			if (obj1.time <= nowtime && obj2.time >= nowtime) {
-				float rate = (float) (nowtime - obj1.time) / (obj2.time - obj1.time);
+		long time2 = dst[dst.length - 1].time;
+		if(nowtime == time2) {
+			this.rate = 0;
+			this.index = dst.length - 1;
+			return;
+		}
+		for (int i = dst.length - 2; i >= 0; i--) {
+			final long time1 = dst[i].time;
+			if (time1 <= nowtime && time2 > nowtime) {
+				float rate = (float) (nowtime - time1) / (time2 - time1);
 				switch(acc) {
 				case 1:
 					rate = rate * rate;
@@ -295,22 +297,16 @@ public abstract class SkinObject implements Disposable {
 					break;
 				}
 				this.rate = rate;
-				this.index = i - 1;
+				this.index = i;
 				return;
 			}
-			obj1 = obj2;
+			time2 = time1;
 		}
 		this.rate = 0;
 		this.index = 0;
 	}
 
 	public abstract void draw(SpriteBatch sprite, long time, MainState state);
-
-	private final float[] CENTERX = { 0.5f, 0, 0.5f, 1, 0, 0.5f, 1, 0, 0.5f, 1, };
-	private final float[] CENTERY = { 0.5f, 0, 0, 0, 0.5f, 0.5f, 0.5f, 1, 1, 1 };
-
-	private float centerx;
-	private float centery;
 
 	protected void draw(SpriteBatch sprite, TextureRegion image, float x, float y, float width, float height) {
 		draw(sprite, image, x, y, width, height, getColor(), getAngle());
