@@ -91,7 +91,7 @@ public class PlayerResource {
 
 	public PlayerResource(AudioDriver audio, Config config) {
 		this.config = config;
-		this.bmsresource = new BMSResource(audio);
+		this.bmsresource = new BMSResource(audio, config);
 	}
 
 	public void clear() {
