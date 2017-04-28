@@ -134,6 +134,7 @@ public class BGImageProcessor {
 			Pixmap fixpixmap = new Pixmap(bgasize, bgasize, pixmap.getFormat());
 			fixpixmap.drawPixmap(pixmap, 0, 0, pixmap.getWidth(), pixmap.getHeight(),
 					fixx, 0, pixmap.getWidth(), pixmap.getHeight());
+			pixmap.dispose();
 			return fixpixmap;
 		}
 		return pixmap;
