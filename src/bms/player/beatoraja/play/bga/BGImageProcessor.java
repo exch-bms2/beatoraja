@@ -49,17 +49,21 @@ public class BGImageProcessor {
 	}
 
 	public void put(int id, Path path) {
-		if(!image.containsKey(path.toString())) {
-			Pixmap pixmap = convertPixmap(loadPicture(path));
-			image.put(path.toString(), new ImageCacheElement(pixmap));
+		ImageCacheElement ie = image.get(path.toString());
+		if(ie == null) {
+			Pixmap pixmap = loadPicture(path);
+			if(pixmap != null) {
+				ie = new ImageCacheElement(convertPixmap(pixmap));
+				image.put(path.toString(), ie);
+			}
 		} else {
 			System.out.println("ImageCache : リソース再利用 - " + path.toString());
-			image.get(path.toString()).gen = 0;
+			ie.gen = 0;
 		}
 		if(id >= bgamap.length) {
 			bgamap = Arrays.copyOf(bgamap, id + 1);
 		}
-		bgamap[id] = image.get(path.toString()).image;
+		bgamap[id] = ie != null ? ie.image : null;
 	}
 	
 	public void clear() {
