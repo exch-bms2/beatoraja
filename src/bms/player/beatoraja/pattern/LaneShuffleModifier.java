@@ -38,17 +38,21 @@ public class LaneShuffleModifier extends PatternModifier {
 	 */
 	public static final int RANDOM = 2;
 	/**
+	 * クロス
+	 */
+	public static final int CROSS = 3;
+	/**
 	 * スクラッチレーンを含むランダム
 	 */
-	public static final int RANDOM_EX = 3;
+	public static final int RANDOM_EX = 4;
 	/**
 	 * 1P-2Pを入れ替える
 	 */
-	public static final int FLIP = 4;
+	public static final int FLIP = 5;
 	/**
 	 * 1Pの譜面を2Pにコピーする
 	 */
-	public static final int BATTLE = 5;
+	public static final int BATTLE = 6;
 
 	public LaneShuffleModifier(int type) {
 		super(type == RANDOM_EX ? 1 : 0);
@@ -71,6 +75,16 @@ public class LaneShuffleModifier extends PatternModifier {
 			keys = getKeys(mode, false);
 			random = keys.length > 0 ? shuffle(keys) : keys;
 			break;
+			case CROSS:
+				keys = getKeys(mode, false);
+				random = new int[keys.length];
+				for(int i = 0;i < keys.length / 2 - 1;i += 2) {
+					random[i] = keys[i + 1];
+					random[i + 1] = keys[i];
+					random[keys.length - i - 1] = keys[keys.length - i - 2];
+					random[keys.length - i - 2] = keys[keys.length - i - 1];
+				}
+				break;
 		case RANDOM_EX:
 			keys = getKeys(mode, true);
 			random = keys.length > 0 ? shuffle(keys) : keys;
@@ -104,7 +118,9 @@ public class LaneShuffleModifier extends PatternModifier {
 		List<PatternModifyLog> log = new ArrayList();
 		makeRandom(model.getMode());
 		int lanes = model.getMode().key;
-		for (TimeLine tl : model.getAllTimeLines()) {
+		TimeLine[] timelines = model.getAllTimeLines();
+		for (int index = 0;index < timelines.length;index++) {
+			final TimeLine tl = timelines[index];
 			if (tl.existNote() || tl.existHiddenNote()) {
 				Note[] notes = new Note[lanes];
 				Note[] hnotes = new Note[lanes];
@@ -119,9 +135,13 @@ public class LaneShuffleModifier extends PatternModifier {
 						if (notes[mod] != null) {
 							if (notes[mod] instanceof LongNote
 									&& ((LongNote) notes[mod]).getEndnote().getSection() == tl.getSection()) {
-								LongNote ln = (LongNote) model
-										.getTimeLine(notes[mod].getSection(), notes[mod].getSectiontime()).getNote(i);
-								tl.setNote(i, ln);
+								for(int j = index - 1;j >= 0;j--) {
+									if(notes[mod].getSection() == timelines[j].getSection()) {
+										LongNote ln = (LongNote) timelines[j].getNote(i);
+										tl.setNote(i, ln);
+										break;
+									}
+								}
 							} else {
 								tl.setNote(i, (Note) notes[mod].clone());
 							}
