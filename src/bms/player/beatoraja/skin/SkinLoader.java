@@ -277,9 +277,9 @@ public class SkinLoader {
 								if (text.font.equals(font.id)) {
 									if (text.ref < 0) {
 										Animation a = dst.dst[0];
-										Rectangle r = new Rectangle(a.x * (dstr.width / sk.w),
-												a.y * (dstr.height / sk.h), a.w * (dstr.width / sk.w),
-												a.h * (dstr.height / sk.h));
+										Rectangle r = new Rectangle(a.x * ((float)dstr.width / sk.w),
+												a.y * ((float)dstr.height / sk.h), a.w * ((float)dstr.width / sk.w),
+												a.h * ((float)dstr.height / sk.h));
 										((MusicSelectSkin) skin).setSearchTextRegion(r);
 									} else {
 										SkinText st = new SkinTextFont(p.getParent().resolve(font.path).toString(), 0,
@@ -301,7 +301,7 @@ public class SkinLoader {
 
 							obj = new SkinSlider(getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy),
 									img.timer, img.cycle, img.angle, (int) ((img.angle == 1 || img.angle == 3
-											? (dstr.width / sk.w) : (dstr.height / sk.h)) * img.range),
+											? ((float)dstr.width / sk.w) : ((float)dstr.height / sk.h)) * img.range),
 									img.type);
 							break;
 						}
@@ -368,8 +368,8 @@ public class SkinLoader {
 
 						Rectangle[] region = new Rectangle[sk.note.dst.length];
 						float[] scale = new float[region.length];
-						float dx = dstr.width / sk.w;
-						float dy = dstr.height / sk.h;
+						float dx = (float)dstr.width / sk.w;
+						float dy = (float)dstr.height / sk.h;
 						for (int i = 0; i < region.length; i++) {
 							Animation dest = sk.note.dst[i];
 							region[i] = new Rectangle(dest.x * dx, dest.y * dy, dest.w * dx, dest.h * dy);

@@ -70,6 +70,16 @@ public class LaneRenderer {
 
 	private int currentduration;
 
+	private double basebpm;
+	private double nowbpm;
+	
+	private TextureRegion[] noteimage;
+	private TextureRegion[][] longnote;
+	private TextureRegion[] mnoteimage;
+	private TextureRegion[] hnoteimage;
+	private TextureRegion[] pnoteimage;
+	private Rectangle[] laneregion;
+
 	public LaneRenderer(BMSPlayer main, BMSModel model) {
 
 		this.main = main;
@@ -210,16 +220,6 @@ public class LaneRenderer {
 		}
 	}
 
-	private double basebpm;
-	private double nowbpm;
-	
-	private TextureRegion[] noteimage;
-	private TextureRegion[][] longnote;
-	private TextureRegion[] mnoteimage;
-	private TextureRegion[] hnoteimage;
-	private TextureRegion[] pnoteimage;
-	private Rectangle[] laneregion;
-
 	public void drawLane(long time, SkinLane[] lanes) {
 		for (int i = 0; i < lanes.length; i++) {
 			if (lanes[i].note != null) {
@@ -242,7 +242,6 @@ public class LaneRenderer {
 			laneregion[i] = lanes[i].getDestination(time, main);
 		}
 		
-		sprite.end();
 		time = (main.getTimer()[TIMER_PLAY] != Long.MIN_VALUE ? (time - main.getTimer()[TIMER_PLAY])
 				: 0) + config.getJudgetiming();
 		if (main.getState() == BMSPlayer.STATE_PRACTICE) {
@@ -276,6 +275,7 @@ public class LaneRenderer {
 
 		// 判定エリア表示
 		if (config.isShowjudgearea()) {
+			sprite.end();
 			Gdx.gl.glEnable(GL11.GL_BLEND);
 			Gdx.gl.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 			shape.begin(ShapeType.Filled);
@@ -300,9 +300,9 @@ public class LaneRenderer {
 			}
 			shape.end();
 			Gdx.gl.glDisable(GL11.GL_BLEND);
+			sprite.begin();
 		}
 
-		sprite.begin();
 		final float orgy = y;
 		for (int i = pos; i < timelines.length && y <= hu; i++) {
 			final TimeLine tl = timelines[i];
@@ -435,17 +435,18 @@ public class LaneRenderer {
 							// .getTime());
 							// } else {
 							float dy = 0;
-							for (int j = 0; timelines[i + j].getSection() != ln.getEndnote().getSection(); j++) {
-								if (timelines[i + j + 1].getTime() >= time) {
-									if (timelines[i + j].getTime() + timelines[i + j].getStop() > time) {
-										dy += (float) (timelines[i + j + 1].getSection() - timelines[i + j]
-												.getSection()) * rxhs;
+							TimeLine prevtl = tl;
+							for (int j = i + 1; j < timelines.length && prevtl.getSection() != ln.getEndnote().getSection(); j++) {
+								final TimeLine nowtl = timelines[j];
+								if (nowtl.getTime() >= time) {
+									if (prevtl.getTime() + prevtl.getStop() > time) {
+										dy += (float) (nowtl.getSection() - prevtl.getSection()) * rxhs;
 									} else {
-										dy += (timelines[i + j + 1].getSection() - timelines[i + j].getSection())
-												* (timelines[i + j + 1].getTime() - time)
-												/ (timelines[i + j + 1].getTime() - timelines[i + j].getTime()) * rxhs;
+										dy += (nowtl.getSection() - prevtl.getSection()) * (nowtl.getTime() - time)
+												/ (nowtl.getTime() - prevtl.getTime()) * rxhs;
 									}
 								}
+								prevtl = nowtl;
 							}
 							if (dy > 0) {
 								this.drawLongNote(laneregion[lane].x, y + dy, laneregion[lane].width, y < laneregion[lane].y ? y - laneregion[lane].y : dy, 
@@ -470,12 +471,8 @@ public class LaneRenderer {
 				}
 			}
 		}
-		sprite.end();
-
 		// System.out.println("time :" + ltime + " y :" + yy + " real time : "
 		// + (ltime * (hu - hl) / yy));
-
-		sprite.begin();
 	}
 
 	public double getNowBPM() {
@@ -488,46 +485,24 @@ public class LaneRenderer {
 				|| ln.getType() == LongNote.TYPE_HELLCHARGENOTE) {
 			// HCN
 			final JudgeManager judge = main.getJudgeManager();
-			TextureRegion le = longnote[5];
-			if (main.getJudgeManager().getProcessingLongNotes()[lane] == ln) {
-				sprite.draw(longnote[6], x, y - height + le.getRegionHeight(), width,
-						height - le.getRegionHeight());
-			} else if (judge.getPassingLongNotes()[lane] == ln && ln.getState() != 0) {
-				sprite.draw(longnote[judge.getHellChargeJudges()[lane] ? 8 : 9], x,
-						y - height + le.getRegionHeight(), width, height - le.getRegionHeight());
-			} else {
-				sprite.draw(longnote[7], x, y - height + le.getRegionHeight(), width,
-						height - le.getRegionHeight());
-			}
-			TextureRegion ls = longnote[4];
-			sprite.draw(ls, x, y, width, scale);
-			sprite.draw(le, x, y - height, width, scale);
+			sprite.draw(longnote[judge.getProcessingLongNotes()[lane] == ln ? 6 : 
+				(judge.getPassingLongNotes()[lane] == ln && ln.getState() != 0 ? (judge.getHellChargeJudges()[lane] ? 8 : 9) : 7)], 
+					x, y - height + scale, width,height - scale);
+			sprite.draw(longnote[4], x, y, width, scale);
+			sprite.draw(longnote[5], x, y - height, width, scale);
 		} else if ((model.getLntype() == BMSModel.LNTYPE_CHARGENOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
 				|| ln.getType() == LongNote.TYPE_CHARGENOTE) {
 			// CN
-			TextureRegion le = longnote[1];
-			if (main.getJudgeManager().getProcessingLongNotes()[lane] == ln) {
-				sprite.draw(longnote[2], x, y - height + le.getRegionHeight(), width,
-						height - le.getRegionHeight());
-			} else {
-				sprite.draw(longnote[3], x, y - height + le.getRegionHeight(), width,
-						height - le.getRegionHeight());
-			}
-			TextureRegion ls = longnote[0];
-			sprite.draw(ls, x, y, width, scale);
-			sprite.draw(le, x, y - height, width, scale);
+			sprite.draw(longnote[main.getJudgeManager().getProcessingLongNotes()[lane] == ln ? 2 : 3], x, y - height + scale, width,
+					height - scale);
+			sprite.draw(longnote[0], x, y, width, scale);
+			sprite.draw(longnote[1], x, y - height, width, scale);
 		} else if ((model.getLntype() == BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
 				|| ln.getType() == LongNote.TYPE_LONGNOTE) {
 			// LN
-			final TextureRegion le = longnote[1];
-			if (main.getJudgeManager().getProcessingLongNotes()[lane] == ln) {
-				sprite.draw(longnote[2], x, y - height + le.getRegionHeight(), width,
-						height - le.getRegionHeight());
-			} else {
-				sprite.draw(longnote[3], x, y - height + le.getRegionHeight(), width,
-						height - le.getRegionHeight());
-			}
-			sprite.draw(le, x, y - height, width, scale);
+			sprite.draw(longnote[main.getJudgeManager().getProcessingLongNotes()[lane] == ln ? 2 : 3], x, y - height + scale, width,
+					height - scale);
+			sprite.draw(longnote[1], x, y - height, width, scale);
 		}
 	}
 
