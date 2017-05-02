@@ -165,8 +165,6 @@ public class MusicSelector extends MainState {
 		titlefont = generator.generateFont(parameter);
 		generator.dispose();
 
-		getTimer()[TIMER_SONGBAR_CHANGE] = getNowTime();
-
 		// search text field
 		if (getStage() == null && ((MusicSelectSkin) getSkin()).getSearchTextRegion() != null) {
 			search = new SearchTextField(this, config.getResolution());
@@ -577,7 +575,6 @@ public class MusicSelector extends MainState {
 		// song bar moved
 		if (bar.getSelected() != current) {
 			getTimer()[TIMER_SONGBAR_CHANGE] = nowtime;
-			getMainController().getPlayerResource().setSongdata((bar.getSelected() instanceof SongBar) ? ((SongBar) bar.getSelected()).getSongData() : null);
 			if(preview != null && preview.length() > 0) {
 				getMainController().getAudioProcessor().stop(preview);
 				getMainController().getAudioProcessor().dispose(preview);
@@ -585,6 +582,9 @@ public class MusicSelector extends MainState {
 				preview = null;
 			}
 			showNoteGraph = false;
+		}
+		if(getTimer()[TIMER_SONGBAR_CHANGE] == Long.MIN_VALUE) {
+			getTimer()[TIMER_SONGBAR_CHANGE] = nowtime;			
 		}
 		// update folder
 		if (input.getFunctionstate()[1] && input.getFunctiontime()[1] != 0) {
@@ -814,6 +814,7 @@ public class MusicSelector extends MainState {
 
 	public String getTextValue(int id) {
 		switch (id) {
+		case STRING_TITLE:
 		case STRING_FULLTITLE:
 			if (bar.getSelected() instanceof DirectoryBar) {
 				return bar.getSelected().getTitle();
