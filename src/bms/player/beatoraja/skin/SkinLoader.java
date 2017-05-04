@@ -10,6 +10,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.logging.Logger;
 
+import bms.player.beatoraja.Config;
 import bms.player.beatoraja.Resolution;
 import bms.player.beatoraja.play.*;
 import bms.player.beatoraja.play.bga.BGAProcessor;
@@ -36,6 +37,7 @@ import static bms.player.beatoraja.Resolution.*;
 public class SkinLoader {
 
 	private Resolution dstr;
+	private boolean usecim;
 
 	private JsonSkin sk;
 
@@ -44,11 +46,13 @@ public class SkinLoader {
 	Map<String, String> filemap = new HashMap();
 
 	public SkinLoader() {
-		this(HD);
+		dstr = HD;
+		usecim = false;
 	}
 
-	public SkinLoader(Resolution r) {
-		dstr = r;
+	public SkinLoader(Config c) {
+		dstr = c.getResolution();
+		usecim = false;
 	}
 
 	public MusicResultSkin loadResultSkin(Path p, Map property) {
@@ -771,16 +775,19 @@ public class SkinLoader {
 		}
 		return images;
 	}
+	
+	private Texture getTexture(String path) {
+		return getTexture(path, usecim);
+	}
 
-	public static Texture getTexture(String path) {
-		// TODO cim生成を選択式にするべきか？
+	public static Texture getTexture(String path, boolean usecim) {
 		try {
 			long modifiedtime = Files.getLastModifiedTime(Paths.get(path)).toMillis() / 1000;
 			
 			String cim = path.substring(0, path.lastIndexOf('.')) + "__" + modifiedtime + ".cim";
 			if (Files.exists(Paths.get(cim))) {
 				return new Texture(Gdx.files.internal(cim));
-			} else {
+			} else if(usecim){
 				Pixmap pixmap = new Pixmap(Gdx.files.internal(path));
 				
 				try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get(path).getParent())) {
@@ -799,6 +806,8 @@ public class SkinLoader {
 				Texture tex = new Texture(pixmap);
 				pixmap.dispose();
 				return tex;
+			} else {
+				return new Texture(Gdx.files.internal(path));
 			}
 		} catch (Throwable e) {
 			e.printStackTrace();

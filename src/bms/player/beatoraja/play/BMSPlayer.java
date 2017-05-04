@@ -243,18 +243,18 @@ public class BMSPlayer extends MainState {
 		try {
 			SkinConfig sc = resource.getConfig().getSkin()[skinType.getId()];
 			if (sc.getPath().endsWith(".json")) {
-				SkinLoader sl = new SkinLoader(resource.getConfig().getResolution());
+				SkinLoader sl = new SkinLoader(resource.getConfig());
 				setSkin(sl.loadPlaySkin(Paths.get(sc.getPath()), skinType, sc.getProperty()));
 			} else {
 				LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
 				SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
-				LR2PlaySkinLoader dloader = new LR2PlaySkinLoader(header.getResolution(), resource.getConfig().getResolution());
+				LR2PlaySkinLoader dloader = new LR2PlaySkinLoader(header.getResolution(), resource.getConfig());
 				setSkin(dloader.loadPlaySkin(Paths.get(sc.getPath()).toFile(), this, header, loader.getOption(),
 						sc.getProperty()));
 			}
 		} catch (Throwable e) {
 			e.printStackTrace();
-			SkinLoader sl = new SkinLoader(resource.getConfig().getResolution());
+			SkinLoader sl = new SkinLoader(resource.getConfig());
 			setSkin(sl.loadPlaySkin(Paths.get(SkinConfig.defaultSkinPathMap.get(skinType)), skinType, new HashMap()));
 		}
 

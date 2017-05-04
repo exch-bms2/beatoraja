@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
+import bms.player.beatoraja.Config;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.Resolution;
 import com.badlogic.gdx.math.Rectangle;
@@ -23,8 +24,8 @@ public class LR2ResultSkinLoader extends LR2SkinCSVLoader {
 
 	private Rectangle gauge = new Rectangle();
 
-	public LR2ResultSkinLoader(final Resolution src, final Resolution dst) {
-		super(src, dst);
+	public LR2ResultSkinLoader(final Resolution src, final Config c) {
+		super(src, c);
 
 		addCommandWord(new CommandWord("STARTINPUT") {
 			@Override

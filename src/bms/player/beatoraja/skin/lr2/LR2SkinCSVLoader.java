@@ -4,6 +4,7 @@ import java.io.*;
 import java.util.*;
 import java.util.logging.Logger;
 
+import bms.player.beatoraja.Config;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.Resolution;
 import bms.player.beatoraja.play.bga.BGAProcessor;
@@ -35,14 +36,16 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 	 * 描画サイズ
 	 */
 	public final Resolution dst;
+	private boolean usecim;
 
 	private Skin skin;
 
 	private MainState state;
 
-	public LR2SkinCSVLoader(Resolution src, Resolution dst) {
+	public LR2SkinCSVLoader(Resolution src, Config c) {
 		this.src = src;
-		this.dst = dst;
+		this.dst = c.getResolution();
+		usecim = c.isCacheSkinImage();
 
 		final float srcw = src.width;
 		final float srch = src.height;
@@ -106,7 +109,7 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 					}
 
 					if (!isMovie) {
-						imagelist.add(SkinLoader.getTexture(imagefile.getPath()));
+						imagelist.add(SkinLoader.getTexture(imagefile.getPath(), usecim));
 					}
 				} else {
 					Logger.getGlobal()
@@ -124,7 +127,7 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 			public void execute(String[] str) {
 				final File imagefile = SkinLoader.getPath(str[1].replace("LR2files\\Theme", "skin").replace("\\", "/"), filemap);
 				if (imagefile.exists()) {
-					LR2FontLoader font = new LR2FontLoader();
+					LR2FontLoader font = new LR2FontLoader(usecim);
 					try {
 						SkinTextImage.SkinTextImageSource source = font.loadFont(imagefile.toPath());
 						fontlist.add(source);

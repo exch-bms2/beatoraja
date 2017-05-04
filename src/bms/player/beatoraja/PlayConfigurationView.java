@@ -134,8 +134,10 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private ComboBox<Integer> judgealgorithm;
 
-        @FXML  
-        private ComboBox<Integer> jkoc_hack;
+    @FXML  
+    private ComboBox<Integer> jkoc_hack;
+    @FXML  
+    private CheckBox usecim;
         
 	private Config config;;
 	@FXML
@@ -264,9 +266,11 @@ public class PlayConfigurationView implements Initializable {
 
 		judgealgorithm.setValue(config.getJudgeAlgorithm());
 
-                // int b = Boolean.valueOf(config.getJKOC()).compareTo(false);
+        // int b = Boolean.valueOf(config.getJKOC()).compareTo(false);
+        
+        jkoc_hack.setValue(Boolean.valueOf(config.getJKOC()).compareTo(false));
+        usecim.setSelected(config.isCacheSkinImage());
                 
-                jkoc_hack.setValue(Boolean.valueOf(config.getJKOC()).compareTo(false));
 		folderlamp.setSelected(config.isFolderlamp());
 
 		inputduration.getValueFactory().setValue(config.getInputduration());
@@ -323,14 +327,14 @@ public class PlayConfigurationView implements Initializable {
 
 		config.setJudgeAlgorithm(judgealgorithm.getValue());
     
-                // jkoc_hack is integer but *.setJKOC needs boolean type  
-                if(jkoc_hack.getValue() > 0)
-                    config.setJKOC(true);
-                else
-                    config.setJKOC(false);
-                
+        // jkoc_hack is integer but *.setJKOC needs boolean type  
+        if(jkoc_hack.getValue() > 0)
+            config.setJKOC(true);
+        else
+            config.setJKOC(false);
 
-		config.setFolderlamp(folderlamp.isSelected());
+        config.setCacheSkinImage(usecim.isSelected());
+        config.setFolderlamp(folderlamp.isSelected());
 
 		config.setInputduration(getValue(inputduration));
 

@@ -46,18 +46,18 @@ public class GradeResult extends MainState {
 		try {
 			SkinConfig sc = resource.getConfig().getSkin()[15];
 			if (sc.getPath().endsWith(".json")) {
-				SkinLoader sl = new SkinLoader(resource.getConfig().getResolution());
+				SkinLoader sl = new SkinLoader(resource.getConfig());
 				setSkin(sl.loadResultSkin(Paths.get(sc.getPath()), sc.getProperty()));
 			} else {
 				LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
 				SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
-				LR2ResultSkinLoader dloader = new LR2ResultSkinLoader(header.getResolution(), resource.getConfig().getResolution());
+				LR2ResultSkinLoader dloader = new LR2ResultSkinLoader(header.getResolution(), resource.getConfig());
 				setSkin(dloader.loadResultSkin(Paths.get(sc.getPath()).toFile(), this, header, loader.getOption(),
 						sc.getProperty()));
 			}
 		} catch (Throwable e) {
 			e.printStackTrace();
-			SkinLoader sl = new SkinLoader(resource.getConfig().getResolution());
+			SkinLoader sl = new SkinLoader(resource.getConfig());
 			setSkin(sl.loadResultSkin(Paths.get("skin/default/graderesult.json"), new HashMap()));
 		}
 		

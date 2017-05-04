@@ -40,18 +40,18 @@ public class MusicDecide extends MainState {
 		try {
 			SkinConfig sc = resource.getConfig().getSkin()[6];
 			if (sc.getPath().endsWith(".json")) {
-				SkinLoader sl = new SkinLoader(resource.getConfig().getResolution());
+				SkinLoader sl = new SkinLoader(resource.getConfig());
 				setSkin(sl.loadDecideSkin(Paths.get(sc.getPath()), sc.getProperty()));
 			} else {
 				LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
 				SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
-				LR2DecideSkinLoader dloader = new LR2DecideSkinLoader(header.getResolution(), resource.getConfig().getResolution());
+				LR2DecideSkinLoader dloader = new LR2DecideSkinLoader(header.getResolution(), resource.getConfig());
 				setSkin(dloader.loadMusicDecideSkin(Paths.get(sc.getPath()).toFile(), this, header, loader.getOption(),
 						sc.getProperty()));
 			}
 		} catch (Throwable e) {
 			e.printStackTrace();
-			SkinLoader sl = new SkinLoader(resource.getConfig().getResolution());
+			SkinLoader sl = new SkinLoader(resource.getConfig());
 			setSkin(sl.loadDecideSkin(Paths.get("skin/default/decide.json"), new HashMap()));
 		}
 	}

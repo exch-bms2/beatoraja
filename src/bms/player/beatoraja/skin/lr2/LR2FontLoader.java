@@ -35,7 +35,7 @@ public class LR2FontLoader extends LR2SkinLoader {
 	 */
 	private Path path;
 
-	public LR2FontLoader() {
+	public LR2FontLoader(boolean usecim) {
 		// size
 		addCommandWord(new CommandWord("S") {
 			@Override
@@ -58,7 +58,7 @@ public class LR2FontLoader extends LR2SkinLoader {
 				// System.out.println("Font image loading : " +
 				// imagefile.getPath());
 				if (imagefile.exists()) {
-					imagelist.add(SkinLoader.getTexture(imagefile.getPath()));
+					imagelist.add(SkinLoader.getTexture(imagefile.getPath(), usecim));
 				}
 			}
 		});
