@@ -95,7 +95,9 @@ public class BarRenderer {
 			this.tables[i] = new TableBar(select, tds[i]);
 		}
 
-		commands = new CommandBar[] {
+		List<CommandBar> l = new ArrayList();
+				
+		l.addAll(Arrays.asList(new CommandBar[] {
 				new CommandBar(main, select, "MY BEST", "playcount > 0 ORDER BY playcount DESC LIMIT 10"),
 				new CommandBar(main, select, "FULL COMBO", "clear >= 8"),
 				new CommandBar(main, select, "EX HARD CLEAR", "clear = 7"),
@@ -107,7 +109,17 @@ public class BarRenderer {
 				new CommandBar(main, select, "RANK AA",
 						"(lpg * 2 + epg * 2 + lgr + egr) * 50 / notes >= 77.77 AND (lpg * 2 + epg * 2 + lgr + egr) * 50 / notes < 88.88"),
 				new CommandBar(main, select, "RANK A",
-						"(lpg * 2 + epg * 2 + lgr + egr) * 50 / notes >= 66.66 AND (lpg * 2 + epg * 2 + lgr + egr) * 50 / notes < 77.77"), };
+						"(lpg * 2 + epg * 2 + lgr + egr) * 50 / notes >= 66.66 AND (lpg * 2 + epg * 2 + lgr + egr) * 50 / notes < 77.77"),
+				}));
+		
+		int i = 1;
+		l.add(new CommandBar(main, select, "DENSITY < " + i, "density < 1", true));
+		for(;i < 50;i++) {
+			l.add(new CommandBar(main, select, "DENSITY " + i + " - " + (i + 1), "density >= " + i + " AND density < " + (i + 1), true));			
+		}
+		l.add(new CommandBar(main, select, "DENSITY >= " + i, "density >= " + i, true));
+		
+		commands = l.toArray(new CommandBar[l.size()]);
 	}
 
 	public Bar getSelected() {
