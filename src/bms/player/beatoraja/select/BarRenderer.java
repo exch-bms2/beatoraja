@@ -31,6 +31,8 @@ import com.badlogic.gdx.utils.Json;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.song.SongData;
 import bms.player.beatoraja.song.SongDatabaseAccessor;
+import bms.player.beatoraja.song.SongInformation;
+import bms.player.beatoraja.song.SongInformationAccessor;
 
 /**
  * 楽曲バー描画用クラス
@@ -498,7 +500,7 @@ public class BarRenderer {
 		final Bar selected = getSelected();
 		if (selected instanceof FolderBar) {
 			FolderBar fb = (FolderBar) selected;
-			select.getSongDatabase().updateSongDatas(fb.getFolderData().getPath(), false);
+			select.getSongDatabase().updateSongDatas(fb.getFolderData().getPath(), false, select.getMainController().getInfoDatabase());
 		} else if (selected instanceof TableBar) {
 			TableBar tb = (TableBar) selected;
 			if (tb.getUrl() != null && tb.getUrl().length() > 0) {
@@ -564,6 +566,7 @@ public class BarRenderer {
 		public void run() {
 			Config config = select.getMainController().getPlayerResource().getConfig();
 			final MainController main = select.getMainController();
+			final SongInformationAccessor info = select.getMainController().getInfoDatabase();
 			for (Bar bar : bars) {
 				if (bar instanceof SongBar) {
 					SongData sd = ((SongBar) bar).getSongData();
@@ -576,6 +579,9 @@ public class BarRenderer {
 								config.getLnmode(), i);
 					}
 					((SongBar) bar).setExistsReplayData(replay);
+					if(info != null) {
+						sd.setInformation(info.getInformation(sd.getSha256()));
+					}
 				}
 				if (bar instanceof GradeBar) {
 					GradeBar gb = (GradeBar) bar;

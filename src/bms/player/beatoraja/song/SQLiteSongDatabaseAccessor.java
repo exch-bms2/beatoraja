@@ -54,7 +54,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 		qr = new QueryRunner(ds);
 		root = Paths.get(".");
 		this.bmsroot = bmsroot;
-		createTable();
+		createTable();		
 	}
 
 	/**
@@ -301,8 +301,8 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 	 * @param path
 	 *            LR2のルートパス
 	 */
-	public void updateSongDatas(String path, boolean updateAll) {
-		SongDatabaseUpdater updater = new SongDatabaseUpdater(updateAll);
+	public void updateSongDatas(String path, boolean updateAll, SongInformationAccessor info) {
+		SongDatabaseUpdater updater = new SongDatabaseUpdater(updateAll, info);
 		Path[] paths = null;
 		if (path == null) {
 			paths = new Path[bmsroot.length];
@@ -329,9 +329,12 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 		private boolean updateAll;
 
 		private long updatetime;
+		
+		private SongInformationAccessor info;
 
-		public SongDatabaseUpdater(boolean updateAll) {
+		public SongDatabaseUpdater(boolean updateAll, SongInformationAccessor info) {
 			this.updateAll = updateAll;
+			this.info = info;
 		}
 
 		/**
@@ -344,6 +347,9 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 			long time = System.currentTimeMillis();
 			updatetime = Calendar.getInstance().getTimeInMillis() / 1000;
 			count = 0;
+			if(info != null) {
+				info.startUpdate();
+			}
 			try (Connection conn = ds.getConnection()) {
 				conn.setAutoCommit(false);
 				// ルートディレクトリに含まれないフォルダの削除
@@ -383,14 +389,15 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 				e.printStackTrace();
 			}
 
+			if(info != null) {
+				info.endUpdate();
+			}
 			long nowtime = System.currentTimeMillis();
 			Logger.getGlobal().info("楽曲更新完了 : Time - " + (nowtime - time) + " 1曲あたりの時間 - "
 					+ (count > 0 ? (nowtime - time) / count : "不明"));
 		}
 
 		private final ConcurrentLinkedDeque<BMSFolderThread> tasks = new ConcurrentLinkedDeque<BMSFolderThread>();
-
-		private final List<Path> bmsfiles = new ArrayList<Path>();
 
 		private void processDirectory(Connection conn, final Path dir, boolean updateFolder)
 				throws IOException, SQLException {
@@ -399,7 +406,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 			final List<FolderData> folders = qr.query(conn, "SELECT path,date FROM folder WHERE parent = ?",
 					folderhandler, SongUtils.crc32(dir.toString(), bmsroot, root.toString()));
 			boolean txt = false;
-			bmsfiles.clear();
+			final List<Path> bmsfiles = new ArrayList<Path>();
 			final List<Path> dirs = new ArrayList<Path>();
 			try (DirectoryStream<Path> paths = Files.newDirectoryStream(dir)) {
 				for (Path p : paths) {
@@ -418,21 +425,21 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 				e.printStackTrace();
 			}
 
-			if (bmsfiles.size() > 0) {
-				BMSFolderThread task = new BMSFolderThread(conn, bmsfiles.toArray(new Path[bmsfiles.size()]), records,
-						updateFolder, txt, updatetime, tags);
+			if (!bmsfiles.isEmpty()) {
+				BMSFolderThread task = new BMSFolderThread(conn, bmsfiles, records, updateFolder, txt, updatetime,
+						tags, info);
 				tasks.addLast(task);
 				task.start();
 			}
 
-			List<FolderData> fremoves = new ArrayList<FolderData>(folders);
 			for (Path f : dirs) {
 				boolean b = true;
-				for (FolderData record : folders) {
+				for (int i = folders.size() - 1;i >= 0;i--) {
+					final FolderData record = folders.get(i);
 					final String s = (f.startsWith(root) ? root.relativize(f).toString() : f.toString())
 							+ File.separatorChar;
 					if (record.getPath().equals(s)) {
-						fremoves.remove(record);
+						folders.remove(i);
 						if (!updateAll && record.getDate() == Files.getLastModifiedTime(f).toMillis() / 1000) {
 							b = false;
 						}
@@ -455,7 +462,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 						Calendar.getInstance().getTimeInMillis() / 1000);
 			}
 			// ディレクトリ内に存在しないフォルダレコードを削除
-			for (FolderData record : fremoves) {
+			for (FolderData record : folders) {
 				// System.out.println("Song Database : folder deleted - " +
 				// record.getPath());
 				qr.update(conn, "DELETE FROM folder WHERE path = ?", record.getPath());
@@ -466,7 +473,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 
 	class BMSFolderThread extends Thread {
 
-		private final Path[] bmsfiles;
+		private final List<Path> bmsfiles;
 		private final List<SongData> records;
 		private final boolean updateAll;
 		private final boolean txt;
@@ -474,9 +481,10 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 		private final long updatetime;
 		private final Map<String, String> tags;
 		private int count;
+		private final SongInformationAccessor info;
 
-		public BMSFolderThread(Connection conn, Path[] bmsfiles, List<SongData> records, boolean updateAll, boolean txt,
-				long updatetime, Map<String, String> tags) {
+		public BMSFolderThread(Connection conn, List<Path> bmsfiles, List<SongData> records, boolean updateAll,
+				boolean txt, long updatetime, Map<String, String> tags, SongInformationAccessor info) {
 			this.bmsfiles = bmsfiles;
 			this.records = records;
 			this.updateAll = updateAll;
@@ -484,19 +492,20 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 			this.conn = conn;
 			this.updatetime = updatetime;
 			this.tags = tags;
+			this.info = info;
 		}
 
 		public void run() {
 			BMSDecoder bmsdecoder = null;
 			BMSONDecoder bmsondecoder = null;
 			try {
-				List<SongData> removes = new ArrayList<SongData>(records);
 				for (Path f : bmsfiles) {
 					boolean b = true;
-					for (SongData record : records) {
+					for (int i = records.size() - 1;i >= 0;i--) {
+						final SongData record = records.get(i);
 						final String s = (f.startsWith(root) ? root.relativize(f).toString() : f.toString());
 						if (record.getPath().equals(s)) {
-							removes.remove(record);
+							records.remove(i);
 							if (!updateAll && record.getDate() == Files.getLastModifiedTime(f).toMillis() / 1000) {
 								b = false;
 							}
@@ -563,6 +572,9 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 										sd.getLevel(), sd.getDifficulty(), sd.getMaxbpm(), sd.getMinbpm(), sd.getMode(),
 										sd.getJudge(), sd.getFeature(), sd.getContent(),
 										Files.getLastModifiedTime(f).toMillis() / 1000, 0, sd.getNotes(), updatetime);
+								if(info != null) {
+									info.update(model);
+								}
 								count++;
 							} else {
 								qr.update(conn, "DELETE FROM song WHERE path = ?",
@@ -572,7 +584,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 					}
 				}
 				// ディレクトリ内のファイルに存在しないレコードを削除
-				for (SongData record : removes) {
+				for (SongData record : records) {
 					qr.update(conn, "DELETE FROM song WHERE path = ?", record.getPath());
 				}
 			} catch (Throwable e) {

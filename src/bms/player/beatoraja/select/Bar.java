@@ -467,12 +467,18 @@ class CommandBar extends DirectoryBar {
     private MusicSelector selector;
     private String title;
     private String sql;
+    private boolean info;
 
     public CommandBar(MainController main, MusicSelector selector, String title, String sql) {
+    	this(main, selector, title, sql, false);
+    }
+
+    public CommandBar(MainController main, MusicSelector selector, String title, String sql, boolean info) {
         this.main = main;
         this.selector = selector;
         this.title = title;
         this.sql = sql;
+        this.info = info;
     }
 
     @Override
@@ -487,15 +493,28 @@ class CommandBar extends DirectoryBar {
 
     @Override
     public Bar[] getChildren() {
-        List<IRScoreData> scores = main.getPlayDataAccessor().readScoreDatas(sql);
-        List<Bar> l = new ArrayList<Bar>();
-        for (IRScoreData score : scores) {
-            SongData[] song = selector.getSongDatabase().getSongDatas("sha256", score.getSha256());
-            if (song.length > 0 && (!song[0].hasLongNote() || selector.getMainController().getPlayerResource().getConfig().getLnmode() == score.getMode())) {
-                l.add(new SongBar(song[0]));
+    	if(info) {
+    		SongInformation[] infos = main.getInfoDatabase().getInformations(sql);
+            List<Bar> l = new ArrayList<Bar>();
+            for (SongInformation info : infos) {
+                SongData[] song = selector.getSongDatabase().getSongDatas("sha256", info.getSha256());
+                if(song.length > 0) {
+                    l.add(new SongBar(song[0]));                	
+                }
             }
-        }
-        return l.toArray(new Bar[0]);
+            return l.toArray(new Bar[l.size()]);    		    		
+    	} else {
+            List<IRScoreData> scores = main.getPlayDataAccessor().readScoreDatas(sql);
+            List<Bar> l = new ArrayList<Bar>();
+            for (IRScoreData score : scores) {
+                SongData[] song = selector.getSongDatabase().getSongDatas("sha256", score.getSha256());
+                if (song.length > 0 && (!song[0].hasLongNote() || selector.getMainController().getPlayerResource().getConfig().getLnmode() == score.getMode())) {
+                    l.add(new SongBar(song[0]));
+                }
+            }
+            return l.toArray(new Bar[l.size()]);    		
+    	}
+    	
     }
 
 }

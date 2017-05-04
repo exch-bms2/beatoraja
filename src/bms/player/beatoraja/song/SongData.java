@@ -65,6 +65,7 @@ public class SongData {
 
 	private BMSModel model;
 	private TimeLine[] timelines;
+	private SongInformation info;;
 	
 	public SongData() {
 		
@@ -339,5 +340,13 @@ public class SongData {
 
 	public void setPreview(String preview) {
 		this.preview = preview;
+	}
+
+	public SongInformation getInformation() {
+		return info;
+	}
+
+	public void setInformation(SongInformation info) {
+		this.info = info;
 	}
 }

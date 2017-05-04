@@ -44,6 +44,6 @@ public interface SongDatabaseAccessor {
 	 * @param updateAll
 	 *            更新の必要がないものも更新するかどうか
 	 */
-	public void updateSongDatas(String updatepath, boolean updateAll);
+	public void updateSongDatas(String updatepath, boolean updateAll, SongInformationAccessor info);
 
 }

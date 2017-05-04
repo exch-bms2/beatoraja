@@ -3,6 +3,7 @@ package bms.player.beatoraja.skin;
 import bms.model.*;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.play.BMSPlayer;
+import bms.player.beatoraja.song.SongData;
 
 import java.util.Arrays;
 
@@ -27,6 +28,7 @@ public class SkinNoteDistributionGraph extends SkinObject {
 	private TextureRegion endcursor;
 
 	private BMSModel model;
+	private SongData current;
 	private int[][] data = new int[0][0];
 
 	private static final Color[][] JGRAPH = {
@@ -81,11 +83,20 @@ public class SkinNoteDistributionGraph extends SkinObject {
 			return;
 		}
 		
-		final BMSModel model = state.getMainController().getPlayerResource().getSongdata() != null
-				? state.getMainController().getPlayerResource().getSongdata().getBMSModel() : null;
-		if (this.model != model || shapetex == null) {
-			updateGraph(model);
+		final SongData song = state.getMainController().getPlayerResource().getSongdata();
+		final BMSModel model = song != null ? song.getBMSModel() : null;
+		if(song != current || (this.model == null && model != null)) {
+			current = song;
+			this.model = model;
+			if(song != null && song.getInformation() != null) {
+				updateGraph(song.getInformation().getDistributionValues());				
+			} else {
+				updateGraph(model);
+			}
 		}
+		if (shapetex == null) {
+			updateGraph(model);
+		}			
 
 		sprite.draw(backtex, r.x, r.y + r.height, r.width, -r.height);
 		final float render = time >= delay ? 1.0f : (float) time / delay;
@@ -104,15 +115,28 @@ public class SkinNoteDistributionGraph extends SkinObject {
 
 	}
 	
+	private void updateGraph(int[][] distribution) {
+		data = distribution;
+		max = 20;
+		for(int i = 0;i < distribution.length;i++) {
+			int count = 0;
+			for(int j = 0;j < distribution[0].length;j++) {
+				count += distribution[i][j];
+			}
+			if (max < count) {
+				max = Math.min((count / 10) * 10 + 10, 100);
+			}
+		}
+
+		updateTexture();
+	}
+
+	
 	private void updateGraph(BMSModel model) {
 		if (model == null) {
-			this.model = model;
 			data = new int[0][graphcolor.length];
 		} else {
-			if(this.model != model) {
-				data = new int[model.getLastTime() / 1000 + 1][graphcolor.length];				
-			}
-			this.model = model;
+			data = new int[model.getLastTime() / 1000 + 1][graphcolor.length];				
 			int pos = 0;
 			int count = 0;
 			max = 20;
@@ -183,6 +207,10 @@ public class SkinNoteDistributionGraph extends SkinObject {
 			}
 		}
 		
+		updateTexture();
+	}
+	
+	private void updateTexture() {
 		if (shapetex != null) {
 			shapetex.getTexture().dispose();
 			backtex.dispose();
@@ -229,7 +257,7 @@ public class SkinNoteDistributionGraph extends SkinObject {
 			}
 		}
 		shapetex = new TextureRegion(new Texture(shape));
-		shape.dispose();		
+		shape.dispose();				
 	}
 
 	@Override

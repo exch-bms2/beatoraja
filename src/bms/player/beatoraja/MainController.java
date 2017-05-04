@@ -21,6 +21,7 @@ import bms.player.beatoraja.result.MusicResult;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.song.SQLiteSongDatabaseAccessor;
 import bms.player.beatoraja.song.SongDatabaseAccessor;
+import bms.player.beatoraja.song.SongInformationAccessor;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -61,6 +62,7 @@ public class MainController extends ApplicationAdapter {
 	private int auto;
 
 	private SongDatabaseAccessor songdb;
+	private SongInformationAccessor infodb;
 
 	private IRConnection ir;
 	
@@ -82,6 +84,7 @@ public class MainController extends ApplicationAdapter {
 
 	static final Path configpath = Paths.get("config.json");
 	private static final Path songdbpath = Paths.get("songdata.db");
+	private static final Path infodbpath = Paths.get("songinfo.db");
 
 	private ScreenShotThread screenshot;
 
@@ -96,6 +99,7 @@ public class MainController extends ApplicationAdapter {
 		try {
 			Class.forName("org.sqlite.JDBC");
 			songdb = new SQLiteSongDatabaseAccessor(songdbpath.toString(), config.getBmsroot());
+			infodb = new SongInformationAccessor(infodbpath.toString());
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -114,6 +118,10 @@ public class MainController extends ApplicationAdapter {
 
 	public SongDatabaseAccessor getSongDatabase() {
 		return songdb;
+	}
+
+	public SongInformationAccessor getInfoDatabase() {
+		return infodb;
 	}
 
 	public PlayDataAccessor getPlayDataAccessor() {
