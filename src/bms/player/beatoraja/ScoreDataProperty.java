@@ -22,19 +22,23 @@ public class ScoreDataProperty {
     private float rate;
     private int rateInt;
     private int rateAfterDot;
+    private int bestrateInt;
+    private int bestrateAfterDot;
+    private int rivalrateInt;
+    private int rivalrateAfterDot;
     private boolean[] rank = new boolean[27];
     private boolean[] nowrank = new boolean[27];
     private boolean[] bestrank = new boolean[27];
 
     public void update(IRScoreData score) {
-        if(score != null) {
-            this.update(score.getExscore(), score.getNotes(), score.getNotes());
-        } else {
-            this.update(0, 0, 0);
-        }
+        this.update(score, score != null ? score.getNotes() : 0);
     }
 
-    public void update(int exscore, int totalnotes, int notes) {
+    public void update(IRScoreData score, int notes) {
+        final int exscore = score != null ? score.getExscore() : 0;
+        final int totalnotes = score != null ? score.getNotes() : 0;
+        nowpoint = score != null ? (int)((long)150000 * score.getJudgeCount(0) + 100000 * score.getJudgeCount(1) + 20000 * score.getJudgeCount(2))
+        / score.getNotes() + (int)((long)50000 * score.getCombo() / score.getNotes()) : 0;
         nowscore = exscore;
         rate = totalnotes == 0 ? 1.0f : ((float)exscore) / (totalnotes * 2);
         rateInt = (int)(rate * 100);
@@ -59,10 +63,18 @@ public class ScoreDataProperty {
         this.bestscore = bestscore;
         this.rivalscore = rivalscore;
         bestscorerate= ((float)bestscore)  / (totalnotes * 2);
+        bestrateInt = (int)(bestscorerate * 100);
+        bestrateAfterDot = ((int)(bestscorerate * 10000)) % 100;
         rivalscorerate= ((float)rivalscore)  / (totalnotes * 2);
         for(int i = 0;i < bestrank.length;i++) {
             bestrank[i] = bestscorerate >= 1f * i / bestrank.length;
         }
+        rivalrateInt = (int)(rivalscorerate * 100);
+        rivalrateAfterDot = ((int)(rivalscorerate * 10000)) % 100;
+    }
+
+    public int getNowScore() {
+        return nowpoint;
     }
 
     public int getNowEXScore() {
@@ -88,6 +100,7 @@ public class ScoreDataProperty {
     public boolean qualifyBestRank(int index) {
         return bestrank[index];
     }
+
     public float getNowRate() {
         return nowrate;
     }
@@ -98,6 +111,14 @@ public class ScoreDataProperty {
 
     public int getNowRateAfterDot() {
         return nowrateAfterDot;
+    }
+
+    public int getRivalRateInt() {
+        return rivalrateInt;
+    }
+
+    public int getRivalRateAfterDot() {
+        return rivalrateAfterDot;
     }
 
     public float getRate() {
@@ -118,6 +139,14 @@ public class ScoreDataProperty {
 
     public float getBestScoreRate() {
         return bestscorerate;
+    }
+
+    public int getBestRateInt() {
+        return bestrateInt;
+    }
+
+    public int getBestRateAfterDot() {
+        return bestrateAfterDot;
     }
 
     public float getNowBestScoreRate() {

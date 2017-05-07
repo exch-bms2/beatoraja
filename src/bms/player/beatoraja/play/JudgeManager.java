@@ -4,6 +4,7 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
 
 import java.util.Arrays;
 
+import bms.player.beatoraja.IRScoreData;
 import com.badlogic.gdx.utils.FloatArray;
 
 import bms.model.*;
@@ -46,16 +47,12 @@ public class JudgeManager {
 	/**
 	 * 現在の判定カウント内訳
 	 */
-	private final int[][] count = new int[6][2];
+	private IRScoreData score = new IRScoreData();
 
 	/**
 	 * 現在のコンボ数
 	 */
 	private int combo;
-	/**
-	 * 最大コンボ数
-	 */
-	private int maxcombo;
 	/**
 	 * コース時の現在のコンボ数
 	 */
@@ -161,9 +158,9 @@ public class JudgeManager {
 		judge = new int[20];
 		judgenow = new int[((PlaySkin) main.getSkin()).getJudgeregion()];
 		judgecombo = new int[((PlaySkin) main.getSkin()).getJudgeregion()];
-		for (int i = 0; i < count.length; i++) {
-			Arrays.fill(count[i], 0);
-		}
+		score = new IRScoreData();
+		score.setNotes(model.getTotalNotes());
+		score.setSha256(model.getSHA256());
 
 		this.lntype = model.getLntype();
 		this.timelines = model.getAllTimeLines();
@@ -585,11 +582,55 @@ public class JudgeManager {
 			n.setState(j + 1);
 		}
 		n.setTime(fast);
-		count[j][fast >= 0 ? 0 : 1]++;
+
+		switch (j) {
+			case 0:
+				if(fast >= 0) {
+					score.setEpg(score.getEpg() + 1);
+				} else {
+					score.setLpg(score.getLpg() + 1);
+				}
+				break;
+			case 1:
+				if(fast >= 0) {
+					score.setEgr(score.getEgr() + 1);
+				} else {
+					score.setLgr(score.getLgr() + 1);
+				}
+				break;
+			case 2:
+				if(fast >= 0) {
+					score.setEgd(score.getEgd() + 1);
+				} else {
+					score.setLgd(score.getLgd() + 1);
+				}
+				break;
+			case 3:
+				if(fast >= 0) {
+					score.setEbd(score.getEbd() + 1);
+				} else {
+					score.setLbd(score.getLbd() + 1);
+				}
+				break;
+			case 4:
+				if(fast >= 0) {
+					score.setEpr(score.getEpr() + 1);
+				} else {
+					score.setLpr(score.getLpr() + 1);
+				}
+				break;
+			case 5:
+				if(fast >= 0) {
+					score.setEms(score.getEms() + 1);
+				} else {
+					score.setLms(score.getLms() + 1);
+				}
+				break;
+		}
 		judgefast = fast;
 		if (j < 3) {
 			combo++;
-			maxcombo = maxcombo > combo ? maxcombo : combo;
+			score.setCombo(Math.max(score.getCombo(), combo));
 			coursecombo++;
 			coursemaxcombo = coursemaxcombo > coursecombo ? coursemaxcombo : coursecombo;
 		} else if ((j >= 3 && j < 5) || (pmsjudge && j >= 3)) {
@@ -649,22 +690,12 @@ public class JudgeManager {
 		this.coursecombo = combo;
 	}
 
-	public int getMaxcombo() {
-		return maxcombo;
-	}
-
 	public int getCourseMaxcombo() {
 		return coursemaxcombo;
 	}
 
 	public void setCourseMaxcombo(int combo) {
 		this.coursemaxcombo = combo;
-	}
-
-	public int getJudgeCount() {
-		return count[0][0] + count[0][1] + count[1][0] + count[1][1] + count[2][0] + count[2][1] + count[3][0]
-				+ count[3][1] + count[4][0] + count[4][1] + count[5][0] + count[5][1];
-
 	}
 
 	public int[] getJudgeTimeRegion() {
@@ -675,20 +706,24 @@ public class JudgeManager {
 		return sjudge;
 	}
 
+	public IRScoreData getScoreData() {
+		return score;
+	}
+
 	/**
 	 * 指定の判定のカウント数を返す
-	 * 
+	 *
 	 * @param judge
 	 *            0:PG, 1:GR, 2:GD, 3:BD, 4:PR, 5:MS
 	 * @return 判定のカウント数
 	 */
 	public int getJudgeCount(int judge) {
-		return count[judge][0] + count[judge][1];
+		return score.getJudgeCount(judge);
 	}
 
 	/**
 	 * 指定の判定のカウント数を返す
-	 * 
+	 *
 	 * @param judge
 	 *            0:PG, 1:GR, 2:GD, 3:BD, 4:PR, 5:MS
 	 * @param fast
@@ -696,7 +731,7 @@ public class JudgeManager {
 	 * @return 判定のカウント数
 	 */
 	public int getJudgeCount(int judge, boolean fast) {
-		return fast ? count[judge][0] : count[judge][1];
+		return score.getJudgeCount(judge, fast);
 	}
 
 	public int[] getJudge() {

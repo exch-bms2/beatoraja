@@ -469,18 +469,6 @@ public class MusicResult extends MainState {
 			return resource.getScoreData().getCombo() - oldcombo;
 		case NUMBER_GROOVEGAUGE:
 			return (int) resource.getGauge().get(resource.getGauge().size - 1);
-		case NUMBER_TOTALEARLY:
-			int ecount = 0;
-			for (int i = 1; i < 6; i++) {
-				ecount += getJudgeCount(i, true);
-			}
-			return ecount;
-		case NUMBER_TOTALLATE:
-			int count = 0;
-			for (int i = 1; i < 6; i++) {
-				count += getJudgeCount(i, false);
-			}
-			return count;
 			case NUMBER_AVERAGE_DURATION:
 			return (int) avgduration;
 		case NUMBER_AVERAGE_DURATION_AFTERDOT:

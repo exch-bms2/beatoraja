@@ -331,7 +331,21 @@ public abstract class MainState {
 			return getJudgeCount(5, true);
 		case NUMBER_LATE_MISS:
 			return getJudgeCount(5, false);
-		case BUTTON_GAUGE_1P:
+			case NUMBER_TOTALEARLY:
+				int ecount = 0;
+				for (int i = 1; i < 6; i++) {
+					ecount += getJudgeCount(i, true);
+				}
+				return ecount;
+			case NUMBER_TOTALLATE:
+				int count = 0;
+				for (int i = 1; i < 6; i++) {
+					count += getJudgeCount(i, false);
+				}
+				return count;
+			case NUMBER_COMBOBREAK:
+				return getJudgeCount(3, true) + getJudgeCount(3, false) + getJudgeCount(4, true) + getJudgeCount(4, false);
+			case BUTTON_GAUGE_1P:
 			return getMainController().getPlayerResource().getConfig().getGauge();
 		case BUTTON_RANDOM_1P:
 			return getMainController().getPlayerResource().getConfig().getRandom();
@@ -383,7 +397,8 @@ public abstract class MainState {
 				return getMainController().getPlayerResource().getSongdata().getLevel();
 			}
 			return Integer.MIN_VALUE;
-
+			case NUMBER_POINT:
+				return score.getNowScore();
 			case NUMBER_SCORE:
 			case NUMBER_SCORE2:
 				return score.getNowEXScore();
@@ -391,11 +406,29 @@ public abstract class MainState {
 				return score.getNowRateInt();
 			case NUMBER_SCORE_RATE_AFTERDOT:
 				return score.getNowRateAfterDot();
+			case NUMBER_TOTAL_RATE:
+			case NUMBER_SCORE_RATE2:
+				return score.getRateInt();
+			case NUMBER_TOTAL_RATE_AFTERDOT:
+			case NUMBER_SCORE_RATE_AFTERDOT2:
+				return score.getRateAfterDot();
 			case NUMBER_HIGHSCORE:
 				return score.getBestScore();
+			case NUMBER_BEST_RATE:
+				return score.getBestRateInt();
+			case NUMBER_BEST_RATE_AFTERDOT:
+				return score.getBestRateAfterDot();
 			case NUMBER_TARGET_SCORE:
 			case NUMBER_TARGET_SCORE2:
 				return score.getRivalScore();
+			case NUMBER_TARGET_SCORE_RATE:
+			case NUMBER_TARGET_TOTAL_RATE:
+			case NUMBER_TARGET_SCORE_RATE2:
+				return score.getRivalRateInt();
+			case NUMBER_TARGET_SCORE_RATE_AFTERDOT:
+			case NUMBER_TARGET_TOTAL_RATE_AFTERDOT:
+			case NUMBER_TARGET_SCORE_RATE_AFTERDOT2:
+				return score.getRivalRateAfterDot();
 			case NUMBER_DIFF_HIGHSCORE:
 				return score.getNowEXScore() - score.getNowBestScore();
 			case NUMBER_DIFF_EXSCORE:
