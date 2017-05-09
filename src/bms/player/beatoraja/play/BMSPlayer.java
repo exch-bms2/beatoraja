@@ -376,7 +376,7 @@ public class BMSPlayer extends MainState {
 				judge.init(model, resource);
 				notes = 0;
 				starttimeoffset = (property.starttime > 1000 ? property.starttime - 1000 : 0) * 100 / property.freq;
-				playtime = (property.endtime + 1000) * 100 / property.freq;
+				playtime = (property.endtime + 1000) * 100 / property.freq + TIME_MARGIN;
 				bga.prepare(this);
 				state = STATE_READY;
                 timer[TIMER_READY] = now;
@@ -567,10 +567,7 @@ public class BMSPlayer extends MainState {
 			return null;
 		}
 
-		IRScoreData score = new IRScoreData();
-		score.setSha256(model.getSHA256());
-		score.setNotes(model.getTotalNotes());
-		score.setCombo(judge.getMaxcombo());
+		IRScoreData score = judge.getScoreData();
 		int clear = GrooveGauge.CLEARTYPE_FAILED;
 		if (state != STATE_FAILED && gauge.isQualified()) {
 			if (assist > 0) {
@@ -606,19 +603,6 @@ public class BMSPlayer extends MainState {
 		replay.pattern = pattern.toArray(new PatternModifyLog[pattern.size()]);
 		replay.rand = model.getRandom();
 		replay.gauge = resource.getConfig().getGauge();
-
-		score.setEpg(judge.getJudgeCount(0, true));
-		score.setLpg(judge.getJudgeCount(0, false));
-		score.setEgr(judge.getJudgeCount(1, true));
-		score.setLgr(judge.getJudgeCount(1, false));
-		score.setEgd(judge.getJudgeCount(2, true));
-		score.setLgd(judge.getJudgeCount(2, false));
-		score.setEbd(judge.getJudgeCount(3, true));
-		score.setLbd(judge.getJudgeCount(3, false));
-		score.setEpr(judge.getJudgeCount(4, true));
-		score.setLpr(judge.getJudgeCount(4, false));
-		score.setEms(judge.getJudgeCount(5, true));
-		score.setLms(judge.getJudgeCount(5, false));
 
 		score.setMinbp(bad + poor + miss + resource.getSongdata().getNotes() - notes);
 		score.setDevice(resource.getPlayDevice());
@@ -701,8 +685,7 @@ public class BMSPlayer extends MainState {
 			}
 		}
 
-		getScoreDataProperty().update(this.judge.getJudgeCount(0) * 2 + this.judge.getJudgeCount(1),
-				getMainController().getPlayerResource().getSongdata().getNotes(), notes);
+		getScoreDataProperty().update(this.judge.getScoreData(), notes);
 	}
 
 	public GrooveGauge getGauge() {
@@ -755,7 +738,6 @@ public class BMSPlayer extends MainState {
 	}
 
 	public int getNumberValue(int id) {
-		final SongData song = getMainController().getPlayerResource().getSongdata();
 		switch (id) {
 		case NUMBER_LANECOVER1:
 			return (int) (lanerender.getLanecover() * 1000);
@@ -791,7 +773,7 @@ public class BMSPlayer extends MainState {
 			return (int) lanerender.getNowBPM();
 		case NUMBER_MAXCOMBO:
 		case NUMBER_MAXCOMBO2:
-			return judge.getMaxcombo();
+			return judge.getScoreData().getCombo();
 		case NUMBER_SCRATCHANGLE_1P:
 			return keyinput.getScratchState(0);
 		case NUMBER_SCRATCHANGLE_2P:

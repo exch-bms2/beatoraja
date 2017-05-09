@@ -1,5 +1,7 @@
 package bms.player.beatoraja;
 
+import bms.model.Mode;
+
 /**
  * スコアデータ
  * LR2のスコアデータを元に拡張している
@@ -91,6 +93,16 @@ public class IRScoreData {
 	private int state;
 	
 	private String scorehash = "";
+
+	private final Mode playmode;
+
+	public IRScoreData() {
+		this(Mode.BEAT_7K);
+	}
+
+	public IRScoreData(Mode playmode) {
+		this.playmode = playmode;
+	}
 	
 	public long getDate() {
 		return date;
@@ -182,6 +194,38 @@ public class IRScoreData {
 	public void setLms(int lms) {
 		this.lms = lms;
 	}
+
+	public int getJudgeCount(int judge) {
+		return getJudgeCount(judge, true) + getJudgeCount(judge, false);
+	}
+
+	/**
+	 * 指定の判定のカウント数を返す
+	 *
+	 * @param judge
+	 *            0:PG, 1:GR, 2:GD, 3:BD, 4:PR, 5:MS
+	 * @param fast
+	 *            true:FAST, flase:SLOW
+	 * @return 判定のカウント数
+	 */
+	public int getJudgeCount(int judge, boolean fast) {
+		switch (judge) {
+			case 0:
+				return fast ? epg : lpg;
+			case 1:
+				return fast ? egr : lgr;
+			case 2:
+				return fast ? egd : lgd;
+			case 3:
+				return fast ? ebd : lbd;
+			case 4:
+				return fast ? epr : lpr;
+			case 5:
+				return fast ? ems : lms;
+		}
+		return 0;
+	}
+
 	public int getCombo() {
 		return maxcombo;
 	}
@@ -269,5 +313,9 @@ public class IRScoreData {
 	}
 	public void setDevice(int device) {
 		this.device = device;
+	}
+
+	public Mode getPlaymode() {
+		return playmode;
 	}
 }

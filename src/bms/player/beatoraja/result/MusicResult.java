@@ -469,18 +469,6 @@ public class MusicResult extends MainState {
 			return resource.getScoreData().getCombo() - oldcombo;
 		case NUMBER_GROOVEGAUGE:
 			return (int) resource.getGauge().get(resource.getGauge().size - 1);
-		case NUMBER_TOTALEARLY:
-			int ecount = 0;
-			for (int i = 1; i < 6; i++) {
-				ecount += getJudgeCount(i, true);
-			}
-			return ecount;
-		case NUMBER_TOTALLATE:
-			int count = 0;
-			for (int i = 1; i < 6; i++) {
-				count += getJudgeCount(i, false);
-			}
-			return count;
 			case NUMBER_AVERAGE_DURATION:
 			return (int) avgduration;
 		case NUMBER_AVERAGE_DURATION_AFTERDOT:
@@ -521,12 +509,20 @@ public class MusicResult extends MainState {
 					|| (cscore != null && cscore.getClear() == GrooveGauge.CLEARTYPE_FAILED);
 		case OPTION_UPDATE_SCORE:
 			return score.getExscore() > oldexscore;
+			case OPTION_DRAW_SCORE:
+				return score.getExscore() == oldexscore;
 		case OPTION_UPDATE_MAXCOMBO:
 			return score.getCombo() > oldcombo;
+			case OPTION_DRAW_MAXCOMBO:
+				return score.getCombo() == oldcombo;
 		case OPTION_UPDATE_MISSCOUNT:
 			return score.getMinbp() < oldmisscount;
+			case OPTION_DRAW_MISSCOUNT:
+				return score.getMinbp() == oldmisscount;
 		case OPTION_UPDATE_SCORERANK:
 			return getScoreDataProperty().getNowRate() > getScoreDataProperty().getBestScoreRate();
+			case OPTION_DRAW_SCORERANK:
+				return getScoreDataProperty().getNowRate() == getScoreDataProperty().getBestScoreRate();
 		case OPTION_NO_REPLAYDATA:
 			return !getMainController().getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
 					resource.getConfig().getLnmode(), 0);
