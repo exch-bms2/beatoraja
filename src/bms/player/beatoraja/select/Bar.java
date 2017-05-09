@@ -310,6 +310,27 @@ class FolderBar extends DirectoryBar {
     }
 }
 
+class ContainerBar extends DirectoryBar {
+
+	private String title;
+    private Bar[] childbar;
+
+    public ContainerBar(String title, Bar[] bar) {
+        this.title = title;
+        childbar = bar;
+    }
+
+    @Override
+    public String getTitle() {
+        return title;
+    }
+    
+    @Override
+    public Bar[] getChildren() {
+        return childbar;
+    }
+}
+
 class TableBar extends DirectoryBar {
 
 	private TableData td;

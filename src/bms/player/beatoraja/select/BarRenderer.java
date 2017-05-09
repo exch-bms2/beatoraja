@@ -58,7 +58,7 @@ public class BarRenderer {
 	 */
 	private int selectedindex;
 
-	private CommandBar[] commands;
+	private Bar[] commands;
 	/**
 	 * 難易度表バー一覧
 	 */
@@ -95,31 +95,46 @@ public class BarRenderer {
 			this.tables[i] = new TableBar(select, tds[i]);
 		}
 
-		List<CommandBar> l = new ArrayList();
-				
-		l.addAll(Arrays.asList(new CommandBar[] {
-				new CommandBar(main, select, "MY BEST", "playcount > 0 ORDER BY playcount DESC LIMIT 10"),
-				new CommandBar(main, select, "FULL COMBO", "clear >= 8"),
-				new CommandBar(main, select, "EX HARD CLEAR", "clear = 7"),
-				new CommandBar(main, select, "HARD CLEAR", "clear = 6"),
-				new CommandBar(main, select, "CLEAR", "clear = 5"),
-				new CommandBar(main, select, "EASY CLEAR", "clear = 4"),
-				new CommandBar(main, select, "ASSIST CLEAR", "clear IN (2, 3)"),
-				new CommandBar(main, select, "RANK AAA", "(lpg * 2 + epg * 2 + lgr + egr) * 50 / notes >= 88.88"),
-				new CommandBar(main, select, "RANK AA",
-						"(lpg * 2 + epg * 2 + lgr + egr) * 50 / notes >= 77.77 AND (lpg * 2 + epg * 2 + lgr + egr) * 50 / notes < 88.88"),
-				new CommandBar(main, select, "RANK A",
-						"(lpg * 2 + epg * 2 + lgr + egr) * 50 / notes >= 66.66 AND (lpg * 2 + epg * 2 + lgr + egr) * 50 / notes < 77.77"),
-				}));
-		
+		List<CommandBar> density = new ArrayList();
 		int i = 1;
-		l.add(new CommandBar(main, select, "DENSITY < " + i, "density < 1", true));
+		density.add(new CommandBar(main, select, "DENSITY < " + i, "density < 1", true));
 		for(;i < 50;i++) {
-			l.add(new CommandBar(main, select, "DENSITY " + i + " - " + (i + 1), "density >= " + i + " AND density < " + (i + 1), true));			
+			density.add(new CommandBar(main, select, "DENSITY " + i + " - " + (i + 1), "density >= " + i + " AND density < " + (i + 1), true));			
 		}
-		l.add(new CommandBar(main, select, "DENSITY >= " + i, "density >= " + i, true));
+		density.add(new CommandBar(main, select, "DENSITY >= " + i, "density >= " + i, true));
 		
-		commands = l.toArray(new CommandBar[l.size()]);
+		commands = new Bar[] {
+				new CommandBar(main, select, "MY BEST", "playcount > 0 ORDER BY playcount DESC LIMIT 10"),
+				new ContainerBar("CLEAR TYPE", new Bar[]{new CommandBar(main, select, "FULL COMBO", "clear >= 8"),
+						new CommandBar(main, select, "EX HARD CLEAR", "clear = 7"),
+						new CommandBar(main, select, "HARD CLEAR", "clear = 6"),
+						new CommandBar(main, select, "CLEAR", "clear = 5"),
+						new CommandBar(main, select, "EASY CLEAR", "clear = 4"),
+						new CommandBar(main, select, "ASSIST CLEAR", "clear IN (2, 3)"),
+						new CommandBar(main, select, "FAILED", "clear = 1")}),	
+				new ContainerBar("SCORE RANK", new Bar[]{new CommandBar(main, select, "RANK AAA", 
+								"(lpg * 2 + epg * 2 + lgr + egr) * 50 / notes >= 88.88"),
+						new CommandBar(main, select, "RANK AA",
+								"(lpg * 2 + epg * 2 + lgr + egr) * 50 / notes >= 77.77 AND (lpg * 2 + epg * 2 + lgr + egr) * 50 / notes < 88.88"),
+						new CommandBar(main, select, "RANK A",
+								"(lpg * 2 + epg * 2 + lgr + egr) * 50 / notes >= 66.66 AND (lpg * 2 + epg * 2 + lgr + egr) * 50 / notes < 77.77"),
+						new CommandBar(main, select, "RANK B",
+								"(lpg * 2 + epg * 2 + lgr + egr) * 50 / notes >= 55.55 AND (lpg * 2 + epg * 2 + lgr + egr) * 50 / notes < 66.66"),
+						new CommandBar(main, select, "RANK C",
+								"(lpg * 2 + epg * 2 + lgr + egr) * 50 / notes >= 44.44 AND (lpg * 2 + epg * 2 + lgr + egr) * 50 / notes < 55.55"),
+						new CommandBar(main, select, "RANK D",
+								"(lpg * 2 + epg * 2 + lgr + egr) * 50 / notes >= 33.33 AND (lpg * 2 + epg * 2 + lgr + egr) * 50 / notes < 44.44"),
+						new CommandBar(main, select, "RANK E",
+								"(lpg * 2 + epg * 2 + lgr + egr) * 50 / notes >= 22.22 AND (lpg * 2 + epg * 2 + lgr + egr) * 50 / notes < 33.33"),
+						}),
+				new ContainerBar("FEATURE", new Bar[]{
+						new CommandBar(main, select, "SCRATCH 10 - 20%", "(n + ln) <= (s + ls) * 9 AND (n + ln) > (s + ls) * 4 ", true),
+						new CommandBar(main, select, "SCRATCH > 20%", "(n + ln) <= (s + ls) * 4 ", true),
+						new CommandBar(main, select, "LONG NOTE 10 - 20%", "(n + s) <= (ln + ls) * 9 AND (n + s) > (ln + ls) * 4 ", true),
+						new CommandBar(main, select, "LONG NOTE > 20%", "(n + s) <= (ln + ls) * 4 ", true),
+						}),	
+				new ContainerBar("DENSITY", density.toArray(new Bar[density.size()]))
+				};
 	}
 
 	public Bar getSelected() {
@@ -251,7 +266,7 @@ public class BarRenderer {
 				value = 0;
 			} else if (sd instanceof SearchWordBar) {
 				value = 6;
-			} else if (sd instanceof CommandBar) {
+			} else if (sd instanceof CommandBar || sd instanceof ContainerBar) {
 				value = 5;
 			}
 
