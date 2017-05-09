@@ -1,5 +1,7 @@
 package bms.player.beatoraja;
 
+import bms.model.Mode;
+
 /**
  * スコアデータ
  * LR2のスコアデータを元に拡張している
@@ -91,6 +93,16 @@ public class IRScoreData {
 	private int state;
 	
 	private String scorehash = "";
+
+	private final Mode playmode;
+
+	public IRScoreData() {
+		this(Mode.BEAT_7K);
+	}
+
+	public IRScoreData(Mode playmode) {
+		this.playmode = playmode;
+	}
 	
 	public long getDate() {
 		return date;
@@ -301,5 +313,9 @@ public class IRScoreData {
 	}
 	public void setDevice(int device) {
 		this.device = device;
+	}
+
+	public Mode getPlaymode() {
+		return playmode;
 	}
 }

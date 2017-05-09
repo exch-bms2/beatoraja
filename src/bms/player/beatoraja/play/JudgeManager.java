@@ -158,7 +158,7 @@ public class JudgeManager {
 		judge = new int[20];
 		judgenow = new int[((PlaySkin) main.getSkin()).getJudgeregion()];
 		judgecombo = new int[((PlaySkin) main.getSkin()).getJudgeregion()];
-		score = new IRScoreData();
+		score = new IRScoreData(model.getMode());
 		score.setNotes(model.getTotalNotes());
 		score.setSha256(model.getSHA256());
 

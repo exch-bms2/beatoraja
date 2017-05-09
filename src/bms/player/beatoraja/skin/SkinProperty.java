@@ -507,11 +507,15 @@ public class SkinProperty {
 	public static final int OPTION_BEST_F_1P = 327;
 
 	public static final int OPTION_UPDATE_SCORE = 330;
+	public static final int OPTION_DRAW_SCORE = 1330;
 	public static final int OPTION_UPDATE_MAXCOMBO = 331;
+	public static final int OPTION_DRAW_MAXCOMBO = 1331;
 	public static final int OPTION_UPDATE_MISSCOUNT = 332;
+	public static final int OPTION_DRAW_MISSCOUNT = 1332;
 	public static final int OPTION_UPDATE_TRIAL = 333;
 	public static final int OPTION_UPDATE_IRRANK = 334;
 	public static final int OPTION_UPDATE_SCORERANK = 335;
+	public static final int OPTION_DRAW_SCORERANK = 1335;
 
 	public static final int OPTION_NOW_AAA_1P = 340;
 	public static final int OPTION_NOW_AA_1P = 341;

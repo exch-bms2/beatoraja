@@ -305,12 +305,20 @@ public class GradeResult extends MainState {
 				return score.getClear() == GrooveGauge.CLEARTYPE_FAILED;
 			case OPTION_UPDATE_SCORE:
 				return score.getExscore() > oldexscore;
+			case OPTION_DRAW_SCORE:
+				return score.getExscore() == oldexscore;
 			case OPTION_UPDATE_MAXCOMBO:
 				return score.getCombo() > oldcombo;
+			case OPTION_DRAW_MAXCOMBO:
+				return score.getCombo() == oldcombo;
 			case OPTION_UPDATE_MISSCOUNT:
 				return score.getMinbp() < oldmisscount;
+			case OPTION_DRAW_MISSCOUNT:
+				return score.getMinbp() == oldmisscount;
 			case OPTION_UPDATE_SCORERANK:
 				return getScoreDataProperty().getNowRate() > getScoreDataProperty().getBestScoreRate();
+			case OPTION_DRAW_SCORERANK:
+				return getScoreDataProperty().getNowRate() == getScoreDataProperty().getBestScoreRate();
 			case OPTION_NO_REPLAYDATA:
 				return !getMainController().getPlayDataAccessor().existsReplayData(resource.getCourseBMSModels(),
 						resource.getConfig().getLnmode(), 0,resource.getConstraint());

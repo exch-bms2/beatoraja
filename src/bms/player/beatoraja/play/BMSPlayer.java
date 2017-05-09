@@ -376,7 +376,7 @@ public class BMSPlayer extends MainState {
 				judge.init(model, resource);
 				notes = 0;
 				starttimeoffset = (property.starttime > 1000 ? property.starttime - 1000 : 0) * 100 / property.freq;
-				playtime = (property.endtime + 1000) * 100 / property.freq;
+				playtime = (property.endtime + 1000) * 100 / property.freq + TIME_MARGIN;
 				bga.prepare(this);
 				state = STATE_READY;
                 timer[TIMER_READY] = now;
