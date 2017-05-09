@@ -236,6 +236,7 @@ public class SkinProperty {
 	public static final int NUMBER_MAXBPM = 90;
 	public static final int NUMBER_MINBPM = 91;
 	public static final int NUMBER_PLAYLEVEL = 96;
+	public static final int NUMBER_POINT = 100;
 	public static final int NUMBER_SCORE2 = 101;
 	public static final int NUMBER_SCORE_RATE = 102;
 	public static final int NUMBER_SCORE_RATE_AFTERDOT = 103;
@@ -265,16 +266,25 @@ public class SkinProperty {
 	public static final int NUMBER_LATE_MISS = 422;
 	public static final int NUMBER_TOTALEARLY = 423;
 	public static final int NUMBER_TOTALLATE = 424;
+	public static final int NUMBER_COMBOBREAK = 425;
 	public static final int NUMBER_TOTAL_RATE = 115;
 	public static final int NUMBER_TOTAL_RATE_AFTERDOT = 116;
 	public static final int NUMBER_TARGET_SCORE = 121;
+	public static final int NUMBER_TARGET_SCORE_RATE = 122;
+	public static final int NUMBER_TARGET_SCORE_RATE_AFTERDOT = 123;
 	public static final int NUMBER_DIFF_EXSCORE2 = 128;
+	public static final int NUMBER_TARGET_TOTAL_RATE = 135;
+	public static final int NUMBER_TARGET_TOTAL_RATE_AFTERDOT = 136;
 
 	public static final int NUMBER_HIGHSCORE = 150;
 	public static final int NUMBER_TARGET_SCORE2 = 151;
 	public static final int NUMBER_DIFF_HIGHSCORE = 152;
 	public static final int NUMBER_DIFF_TARGETSCORE = 153;
 	public static final int NUMBER_DIFF_NEXTRANK = 154;
+	public static final int NUMBER_SCORE_RATE2 = 155;
+	public static final int NUMBER_SCORE_RATE_AFTERDOT2 = 156;
+	public static final int NUMBER_TARGET_SCORE_RATE2 = 157;
+	public static final int NUMBER_TARGET_SCORE_RATE_AFTERDOT2 = 158;
 	public static final int NUMBER_NOWBPM = 160;
 	public static final int NUMBER_PLAYTIME_MINUTE = 161;
 	public static final int NUMBER_PLAYTIME_SECOND = 162;
@@ -294,6 +304,8 @@ public class SkinProperty {
 	public static final int NUMBER_IR_TOTALPLAYER = 180;
 	public static final int NUMBER_IR_CLEARRATE = 181;
 	public static final int NUMBER_IR_PREVRANK = 182;
+	public static final int NUMBER_BEST_RATE = 183;
+	public static final int NUMBER_BEST_RATE_AFTERDOT = 184;
 
 	public static final int NUMBER_FOLDER_TOTALSONGS = 300;
 
@@ -515,11 +527,15 @@ public class SkinProperty {
 	public static final int OPTION_BEST_F_1P = 327;
 
 	public static final int OPTION_UPDATE_SCORE = 330;
+	public static final int OPTION_DRAW_SCORE = 1330;
 	public static final int OPTION_UPDATE_MAXCOMBO = 331;
+	public static final int OPTION_DRAW_MAXCOMBO = 1331;
 	public static final int OPTION_UPDATE_MISSCOUNT = 332;
+	public static final int OPTION_DRAW_MISSCOUNT = 1332;
 	public static final int OPTION_UPDATE_TRIAL = 333;
 	public static final int OPTION_UPDATE_IRRANK = 334;
 	public static final int OPTION_UPDATE_SCORERANK = 335;
+	public static final int OPTION_DRAW_SCORERANK = 1335;
 
 	public static final int OPTION_NOW_AAA_1P = 340;
 	public static final int OPTION_NOW_AA_1P = 341;
