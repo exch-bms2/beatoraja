@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
+import bms.player.beatoraja.Config;
 import bms.player.beatoraja.Resolution;
 import bms.player.beatoraja.select.*;
 import bms.player.beatoraja.skin.*;
@@ -21,8 +22,8 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader {
 
 	private final int[][] lampg = { { 0 }, { 1 }, { 2, 3, 4 }, { 5 }, { 6, 7 }, {}, { 8, 9, 10 }, {} };
 
-	public LR2SelectSkinLoader(final Resolution src, final Resolution dst) {
-		super(src, dst);
+	public LR2SelectSkinLoader(final Resolution src, final Config c) {
+		super(src, c);
 
 		final float srcw = src.width;
 		final float srch = src.height;

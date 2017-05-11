@@ -142,19 +142,19 @@ public class MusicSelector extends MainState {
 			try {
 				SkinConfig sc = config.getSkin()[5];
 				if (sc.getPath().endsWith(".json")) {
-					SkinLoader sl = new SkinLoader(getMainController().getPlayerResource().getConfig().getResolution());
+					SkinLoader sl = new SkinLoader(getMainController().getPlayerResource().getConfig());
 					setSkin(sl.loadSelectSkin(Paths.get(sc.getPath()), sc.getProperty()));
 				} else {
 					LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
 					SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
-					LR2SelectSkinLoader dloader = new LR2SelectSkinLoader(header.getResolution(), getMainController().getPlayerResource().getConfig().getResolution());
+					LR2SelectSkinLoader dloader = new LR2SelectSkinLoader(header.getResolution(), getMainController().getPlayerResource().getConfig());
 					setSkin(dloader.loadSelectSkin(Paths.get(sc.getPath()).toFile(), this, header, loader.getOption(),
 							sc.getProperty()));
 				}
 			} catch (Throwable e) {
 				e.printStackTrace();
 				SkinLoader sl = new SkinLoader(
-						getMainController().getPlayerResource().getConfig().getResolution());
+						getMainController().getPlayerResource().getConfig());
 				setSkin(sl.loadSelectSkin(Paths.get(SkinConfig.DEFAULT_SELECT), new HashMap()));
 			}
 		}
@@ -164,8 +164,6 @@ public class MusicSelector extends MainState {
 		parameter.size = 24;
 		titlefont = generator.generateFont(parameter);
 		generator.dispose();
-
-		getTimer()[TIMER_SONGBAR_CHANGE] = getNowTime();
 
 		// search text field
 		if (getStage() == null && ((MusicSelectSkin) getSkin()).getSearchTextRegion() != null) {
@@ -577,7 +575,6 @@ public class MusicSelector extends MainState {
 		// song bar moved
 		if (bar.getSelected() != current) {
 			getTimer()[TIMER_SONGBAR_CHANGE] = nowtime;
-			getMainController().getPlayerResource().setSongdata((bar.getSelected() instanceof SongBar) ? ((SongBar) bar.getSelected()).getSongData() : null);
 			if(preview != null && preview.length() > 0) {
 				getMainController().getAudioProcessor().stop(preview);
 				getMainController().getAudioProcessor().dispose(preview);
@@ -585,6 +582,9 @@ public class MusicSelector extends MainState {
 				preview = null;
 			}
 			showNoteGraph = false;
+		}
+		if(getTimer()[TIMER_SONGBAR_CHANGE] == Long.MIN_VALUE) {
+			getTimer()[TIMER_SONGBAR_CHANGE] = nowtime;			
 		}
 		// update folder
 		if (input.getFunctionstate()[1] && input.getFunctiontime()[1] != 0) {
@@ -814,6 +814,7 @@ public class MusicSelector extends MainState {
 
 	public String getTextValue(int id) {
 		switch (id) {
+		case STRING_TITLE:
 		case STRING_FULLTITLE:
 			if (bar.getSelected() instanceof DirectoryBar) {
 				return bar.getSelected().getTitle();

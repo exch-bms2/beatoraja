@@ -125,6 +125,7 @@ public class Config {
          */
     private boolean jkoc_hack = false;
         
+    private boolean cacheSkinImage = false;
 	/**
 	 * アシストオプション:コンスタント
 	 */
@@ -663,6 +664,14 @@ public class Config {
 
 	public void setPlayers(PlayerConfig[] players) {
 		this.players = players;
+	}
+
+	public boolean isCacheSkinImage() {
+		return cacheSkinImage;
+	}
+
+	public void setCacheSkinImage(boolean cacheSkinImage) {
+		this.cacheSkinImage = cacheSkinImage;
 	}
 
 	public static class SkinConfig {
