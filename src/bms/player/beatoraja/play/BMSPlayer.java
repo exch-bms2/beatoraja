@@ -771,6 +771,8 @@ public class BMSPlayer extends MainState {
 			return (int) (lanerender.getHispeed() * 100) % 100;
 		case NUMBER_DURATION:
 			return lanerender.getCurrentDuration();
+		case NUMBER_DURATION_GREEN:
+			return lanerender.getCurrentDuration() * 3 / 5;
 		case NUMBER_NOWBPM:
 			return (int) lanerender.getNowBPM();
 		case NUMBER_MAXCOMBO:

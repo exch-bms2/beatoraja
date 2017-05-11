@@ -12,6 +12,7 @@ import com.badlogic.gdx.math.Rectangle;
 import bms.player.beatoraja.result.MusicResultSkin;
 import bms.player.beatoraja.result.SkinGaugeGraphObject;
 import bms.player.beatoraja.skin.SkinHeader;
+import bms.player.beatoraja.skin.SkinNoteDistributionGraph;
 
 /**
  * LR2リザルトスキン読み込み用クラス
@@ -23,6 +24,8 @@ public class LR2ResultSkinLoader extends LR2SkinCSVLoader {
 	private MusicResultSkin skin;
 
 	private Rectangle gauge = new Rectangle();
+	private SkinGaugeGraphObject gaugeobj;
+	private SkinNoteDistributionGraph noteobj;
 
 	public LR2ResultSkinLoader(final Resolution src, final Config c) {
 		super(src, c);
@@ -37,9 +40,11 @@ public class LR2ResultSkinLoader extends LR2SkinCSVLoader {
 		addCommandWord(new CommandWord("SRC_GAUGECHART_1P") {
 			@Override
 			public void execute(String[] str) {
-				int fieldw = Integer.parseInt(str[11]);
-				int fieldh = Integer.parseInt(str[12]);
-				gauge = new Rectangle(0, 0, fieldw, fieldh);
+				int[] values = parseInt(str);
+				gaugeobj = new SkinGaugeGraphObject();
+				gaugeobj.setLineWidth(values[6]);
+				gaugeobj.setDelay(values[14] - values[13]);
+				gauge = new Rectangle(0, 0, values[11], values[12]);
 			}
 		});
 		addCommandWord(new CommandWord("DST_GAUGECHART_1P") {
@@ -47,10 +52,27 @@ public class LR2ResultSkinLoader extends LR2SkinCSVLoader {
 			public void execute(String[] str) {
 				gauge.x = Integer.parseInt(str[3]);
 				gauge.y = src.height - Integer.parseInt(str[4]);
-				SkinGaugeGraphObject obj = new SkinGaugeGraphObject();
-				skin.setDestination(obj, 0, gauge.x, gauge.y, gauge.width, gauge.height, 0, 255, 255, 255, 255, 0, 0, 0,
+				skin.setDestination(gaugeobj, 0, gauge.x, gauge.y, gauge.width, gauge.height, 0, 255, 255, 255, 255, 0, 0, 0,
 						0, 0, 0, 0, 0, 0);
-				skin.add(obj);
+				skin.add(gaugeobj);
+			}
+		});
+		addCommandWord(new CommandWord("SRC_NOTECHART_1P") {
+			@Override
+			public void execute(String[] str) {
+				int[] values = parseInt(str);
+				noteobj = new SkinNoteDistributionGraph(values[1]);
+				gauge = new Rectangle(0, 0, values[11], values[12]);
+			}
+		});
+		addCommandWord(new CommandWord("DST_NOTECHART_1P") {
+			@Override
+			public void execute(String[] str) {
+				gauge.x = Integer.parseInt(str[3]);
+				gauge.y = src.height - Integer.parseInt(str[4]);
+				skin.setDestination(noteobj, 0, gauge.x, gauge.y, gauge.width, gauge.height, 0, 255, 255, 255, 255, 0, 0, 0,
+						0, 0, 0, 0, 0, 0);
+				skin.add(noteobj);
 			}
 		});
 	}

@@ -168,8 +168,10 @@ public class SkinProperty {
 	public static final int NUMBER_HISPEED = 310;
 	public static final int NUMBER_HISPEED_AFTERDOT = 311;
 	public static final int NUMBER_DURATION = 312;
+	public static final int NUMBER_DURATION_GREEN = 313;
 	public static final int NUMBER_JUDGETIMING = 12;
     public static final int NUMBER_LANECOVER1 = 14;
+	public static final int NUMBER_LIFT1 = 314;
 	public static final int NUMBER_TIME_YEAR = 21;
 	public static final int NUMBER_TIME_MONTH = 22;
 	public static final int NUMBER_TIME_DAY = 23;
@@ -328,6 +330,17 @@ public class SkinProperty {
 	public static final int OPTION_NORMAL_SAVE_CLEAR = 64;
 	public static final int OPTION_HARD_SAVE_CLEAR = 65;
 	public static final int OPTION_FULLCOMBO_SAVE_CLEAR = 66;
+
+	public static final int OPTION_LEVEL_BEGINNER = 70;
+	public static final int OPTION_LEVEL_NORMAL = 71;
+	public static final int OPTION_LEVEL_HYPER = 72;
+	public static final int OPTION_LEVEL_ANOTHER = 73;
+	public static final int OPTION_LEVEL_INSANE = 74;
+	public static final int OPTION_LEVEL_BEGINNER_EXCEED = 75;
+	public static final int OPTION_LEVEL_NORMAL_EXCEED = 76;
+	public static final int OPTION_LEVEL_HYPER_EXCEED = 77;
+	public static final int OPTION_LEVEL_ANOTHER_EXCEED = 78;
+	public static final int OPTION_LEVEL_INSANE_EXCEED = 79;
 
 	public static final int OPTION_NOW_LOADING = 80;
 	public static final int OPTION_LOADED = 81;
