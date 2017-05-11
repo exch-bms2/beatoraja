@@ -289,11 +289,13 @@ public class BMSPlayer extends MainState {
 		int rivalscore = TargetProperty.getAllTargetProperties(getMainController())[config.getTarget()]
 				.getTarget(getMainController());
 		resource.setRivalScoreData(rivalscore);
-		getScoreDataProperty().setTargetScore(score.getExscore(), rivalscore, model.getTotalNotes());
 
 		if (autoplay == 2) {
+			getScoreDataProperty().setTargetScore(0, 0, model.getTotalNotes());
 			practice.create(model);
 			state = STATE_PRACTICE;
+		} else {
+			getScoreDataProperty().setTargetScore(score.getExscore(), rivalscore, model.getTotalNotes());
 		}
 	}
 

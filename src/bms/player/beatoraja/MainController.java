@@ -278,7 +278,7 @@ public class MainController extends ApplicationAdapter {
 			stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
 			stage.draw();
 		}
-		
+
 		// show fps
 		if (showfps) {
 			sprite.begin();
@@ -427,7 +427,7 @@ public class MainController extends ApplicationAdapter {
 	 * 
 	 * @author exch
 	 */
-	class ScreenShotThread extends Thread {
+	static class ScreenShotThread extends Thread {
 
 		/**
 		 * 処理が完了した時間
@@ -459,9 +459,8 @@ public class MainController extends ApplicationAdapter {
 			BufferUtils.copy(pixels, 0, pixmap.getPixels(), pixels.length);
 			PixmapIO.writePNG(new FileHandle(path), pixmap);
 			pixmap.dispose();
-			input.getFunctiontime()[5] = 0;
 			Logger.getGlobal().info("スクリーンショット保存:" + path);
-			screenshot.savetime = System.currentTimeMillis();
+			savetime = System.currentTimeMillis();
 		}
 	}
 }
