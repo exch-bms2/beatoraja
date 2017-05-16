@@ -567,28 +567,28 @@ public class BMSPlayer extends MainState {
 		}
 
 		IRScoreData score = judge.getScoreData();
-		int clear = GrooveGauge.CLEARTYPE_FAILED;
+		ClearType clear = ClearType.Failed;
 		if (state != STATE_FAILED && gauge.isQualified()) {
 			if (assist > 0) {
-				clear = assist == 1 ? GrooveGauge.CLEARTYPE_LIGHT_ASSTST : GrooveGauge.CLEARTYPE_ASSTST;
+				clear = assist == 1 ? ClearType.LightAssistEasy : ClearType.AssistEasy;
 			} else {
 				if (judge.getJudgeCount(3) + judge.getJudgeCount(4) == 0
 						&& (!(model.getMode() == Mode.POPN_5K || model.getMode() == Mode.POPN_9K) || judge.getJudgeCount(5) == 0)) {
 					if (judge.getJudgeCount(2) == 0) {
 						if (judge.getJudgeCount(1) == 0) {
-							clear = GrooveGauge.CLEARTYPE_MAX;
+							clear = ClearType.Max;
 						} else {
-							clear = GrooveGauge.CLEARTYPE_PERFECT;
+							clear = ClearType.Perfect;
 						}
 					} else {
-						clear = GrooveGauge.CLEARTYPE_FULLCOMBO;
+						clear = ClearType.FullCombo;
 					}
 				} else if (resource.getCourseBMSModels() == null) {
 					clear = gauge.getClearType();
 				}
 			}
 		}
-		score.setClear(clear);
+		score.setClear(clear.id);
 		score.setGauge(GrooveGauge.getGaugeID(gauge));
 		score.setOption(resource.getConfig().getRandom() + (model.getMode().player == 2
 				? (resource.getConfig().getRandom2() * 10 + resource.getConfig().getDoubleoption() * 100) : 0));

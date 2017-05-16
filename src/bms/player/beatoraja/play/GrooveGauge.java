@@ -2,7 +2,7 @@ package bms.player.beatoraja.play;
 
 import bms.model.Mode;
 import bms.player.beatoraja.ClearType;
-
+import bms.player.beatoraja.play.GaugeProperty.GaugeElementProperty;
 import bms.model.BMSModel;
 
 /**
@@ -11,30 +11,6 @@ import bms.model.BMSModel;
  * @author exch
  */
 public class GrooveGauge {
-
-	private int type = -1;
-	/**
-	 * ゲージ量
-	 */
-	private float value;
-	/**
-	 * ゲージ最小値
-	 */
-	private float minValue;
-	/**
-	 * ゲージ最大値
-	 */
-	private float maxValue;
-	/**
-	 * クリアノルマ
-	 */
-	private float norm;
-
-	private int cleartype;
-
-	private float[] gauge;
-
-	private float[][] guts = new float[0][2];
 
 	public static final int ASSISTEASY = 0;
 	public static final int EASY = 1;
@@ -46,34 +22,27 @@ public class GrooveGauge {
 	public static final int EXCLASS = 7;
 	public static final int EXHARDCLASS = 8;
 
-	public static final int CLEARTYPE_NOPLAY = 0;
-	public static final int CLEARTYPE_FAILED = 1;
-	public static final int CLEARTYPE_ASSTST = 2;
-	public static final int CLEARTYPE_LIGHT_ASSTST = 3;
-	public static final int CLEARTYPE_EASY = 4;
-	public static final int CLEARTYPE_NORMAL = 5;
-	public static final int CLEARTYPE_HARD = 6;
-	public static final int CLEARTYPE_EXHARD = 7;
-	public static final int CLEARTYPE_FULLCOMBO = 8;
-	public static final int CLEARTYPE_PERFECT = 9;
-	public static final int CLEARTYPE_MAX = 10;
+	private int type = -1;
+	/**
+	 * ゲージ量
+	 */
+	private float value;
+	/**
+	 * ゲージの仕様
+	 */
+	private GaugeElementProperty property;
+	/**
+	 * ゲージのクリアタイプ
+	 */
+	private ClearType cleartype;
 
-	public GrooveGauge() {
-		
-	}
-	
-	public GrooveGauge(float minValue, float maxValue, float startValue, float norm, int cleartype, float[] gauge) {
-		init(minValue, maxValue, startValue, norm, cleartype, gauge);
-	}
+	private float[] gauge;
 
 	public GrooveGauge(BMSModel model, int type, GaugeProperty propertyset) {
 		this.type = type;
-		GaugeProperty.GaugeElementProperty property = propertyset.values[type];
-		this.minValue = property.min;
-		this.maxValue = property.max;
+		property = propertyset.values[type];
 		this.value = property.init;
-		this.norm = property.border;
-		this.cleartype = ClearType.getClearTypeByGauge(type).id;
+		this.cleartype = ClearType.getClearTypeByGauge(type);
 		this.gauge = property.value.clone();
 		switch(property.type) {
 			case 0:
@@ -94,16 +63,6 @@ public class GrooveGauge {
 				}
 				break;
 		}
-		this.guts = property.guts;
-	}
-
-	protected void init(float minValue, float maxValue, float startValue, float norm, int cleartype, float[] gauge) {
-		this.minValue = minValue;
-		this.maxValue = maxValue;
-		this.value = startValue;
-		this.norm = norm;
-		this.cleartype = cleartype;
-		this.gauge = gauge;
 	}
 
 	/**
@@ -123,7 +82,7 @@ public class GrooveGauge {
 	public void update(int judge, float rate) {
 		float inc = this.getGaugeValue(judge) * rate;
 		if(inc < 0) {
-			for(float[] gut : guts) {
+			for(float[] gut : property.guts) {
 				if(value < gut[0]) {
 					inc *= gut[1];
 					break;
@@ -146,37 +105,37 @@ public class GrooveGauge {
 	}
 
 	public void setValue(float value) {
-		if (value > maxValue) {
-			this.value = maxValue;
-		} else if (value < minValue) {
-			this.value = minValue;
+		if (value > property.max) {
+			this.value = property.max;
+		} else if (value < property.min) {
+			this.value = property.min;
 		} else {
 			this.value = value;
 		}
 	}
 	
 	public boolean isQualified() {
-		return value >= norm;
+		return value >= property.border;
 	}
 
 	public int getType() {
 		return  type;
 	}
 
-	public int getClearType() {
+	public ClearType getClearType() {
 		return cleartype;
 	}
 
 	public float getMaxValue() {
-		return maxValue;
+		return property.max;
 	}
 
 	public float getMinValue() {
-		return minValue;
+		return property.min;
 	}
 
 	public float getBorder() {
-		return norm;
+		return property.border;
 	}
 
 	public static GrooveGauge create(BMSModel model, int type, boolean grade) {

@@ -1,7 +1,9 @@
 package bms.player.beatoraja;
 
 /**
- * Created by exch on 2017/05/14.
+ * クリアタイプ
+ * 
+ * @author exch
  */
 public enum ClearType {
 
@@ -17,7 +19,13 @@ public enum ClearType {
     Perfect(9, new int[]{}),
     Max(10, new int[]{});
 
+	/**
+	 * クリアタイプID
+	 */
     public final int id;
+    /**
+     * クリアタイプに対応したゲージタイプ
+     */
     public final int[] gaugetype;
 
     private ClearType(int id, int[] gaugetype) {
