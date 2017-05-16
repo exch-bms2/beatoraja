@@ -1,17 +1,18 @@
-package bms.player.beatoraja.play.gauge;
+package bms.player.beatoraja.play;
 
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import bms.model.Mode;
+import bms.player.beatoraja.ClearType;
 
 import bms.model.BMSModel;
-import bms.player.beatoraja.play.PlaySkin;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 /**
  * プレイゲージの抽象クラス
  * 
  * @author exch
  */
-public abstract class GrooveGauge {
+public class GrooveGauge {
+
+	private int type = -1;
 	/**
 	 * ゲージ量
 	 */
@@ -33,15 +34,17 @@ public abstract class GrooveGauge {
 
 	private float[] gauge;
 
-	public static final int GAUGETYPE_ASSISTEASY = 0;
-	public static final int GAUGETYPE_EASY = 1;
-	public static final int GAUGETYPE_NORMAL = 2;
-	public static final int GAUGETYPE_HARD = 3;
-	public static final int GAUGETYPE_EXHARD = 4;
-	public static final int GAUGETYPE_HAZARD = 5;
-	public static final int GAUGETYPE_GRADE = 6;
-	public static final int GAUGETYPE_EXGRADE = 7;
-	public static final int GAUGETYPE_EXHARDGRADE = 8;
+	private float[][] guts = new float[0][2];
+
+	public static final int ASSISTEASY = 0;
+	public static final int EASY = 1;
+	public static final int NORMAL = 2;
+	public static final int HARD = 3;
+	public static final int EXHARD = 4;
+	public static final int HAZARD = 5;
+	public static final int CLASS = 6;
+	public static final int EXCLASS = 7;
+	public static final int EXHARDCLASS = 8;
 
 	public static final int CLEARTYPE_NOPLAY = 0;
 	public static final int CLEARTYPE_FAILED = 1;
@@ -61,6 +64,37 @@ public abstract class GrooveGauge {
 	
 	public GrooveGauge(float minValue, float maxValue, float startValue, float norm, int cleartype, float[] gauge) {
 		init(minValue, maxValue, startValue, norm, cleartype, gauge);
+	}
+
+	public GrooveGauge(BMSModel model, int type, GaugeProperty propertyset) {
+		this.type = type;
+		GaugeProperty.GaugeElementProperty property = propertyset.values[type];
+		this.minValue = property.min;
+		this.maxValue = property.max;
+		this.value = property.init;
+		this.norm = property.border;
+		this.cleartype = ClearType.getClearTypeByGauge(type).id;
+		this.gauge = property.value.clone();
+		switch(property.type) {
+			case 0:
+				for(int i = 0;i < gauge.length;i++) {
+					if(gauge[i] > 0) {
+						gauge[i] *= (model.getTotal() / model.getTotalNotes());
+					}
+				}
+				break;
+			case 1:
+				break;
+			case 2:
+				final float pg = (float) Math.max(Math.min(0.15f, (2.5 * model.getTotal() - 250) / model.getTotalNotes()), 0);
+				for(int i = 0;i < gauge.length;i++) {
+					if(gauge[i] > 0) {
+						gauge[i] *= pg / 0.15f;
+					}
+				}
+				break;
+		}
+		this.guts = property.guts;
 	}
 
 	protected void init(float minValue, float maxValue, float startValue, float norm, int cleartype, float[] gauge) {
@@ -87,7 +121,16 @@ public abstract class GrooveGauge {
 	 * @param judge
 	 */
 	public void update(int judge, float rate) {
-		this.setValue(this.getValue() + this.getGaugeValue(judge) * rate);
+		float inc = this.getGaugeValue(judge) * rate;
+		if(inc < 0) {
+			for(float[] gut : guts) {
+				if(value < gut[0]) {
+					inc *= gut[1];
+					break;
+				}
+			}
+		}
+		this.setValue(value + inc);
 	}
 
 	public void addValue(float value) {
@@ -114,6 +157,10 @@ public abstract class GrooveGauge {
 	
 	public boolean isQualified() {
 		return value >= norm;
+	}
+
+	public int getType() {
+		return  type;
 	}
 
 	public int getClearType() {
@@ -147,57 +194,16 @@ public abstract class GrooveGauge {
 	}
 	
 	public static GrooveGauge create(BMSModel model, int type) {
-		switch (type) {
-		case GAUGETYPE_ASSISTEASY:
-			return new AssistEasyGrooveGauge(model);
-		case GAUGETYPE_EASY:
-			return new EasyGrooveGauge(model);
-		case GAUGETYPE_NORMAL:
-			return new NormalGrooveGauge(model);
-		case GAUGETYPE_HARD:
-			return new HardGrooveGauge(model);
-		case GAUGETYPE_EXHARD:
-			return new ExhardGrooveGauge(model);
-		case GAUGETYPE_HAZARD:
-			return new HazardGrooveGauge(model);
-		case GAUGETYPE_GRADE:
-			return new GradeGrooveGauge(model);
-		case GAUGETYPE_EXGRADE:
-			return new ExgradeGrooveGauge(model);
-		case GAUGETYPE_EXHARDGRADE:
-			return new ExhardGradeGrooveGauge(model);
-		}		
-		return null;
+		Mode mode = model.getMode();
+		for(BMSPlayerRule rule : BMSPlayerRule.values()) {
+			if(rule.name().equals(mode.name())) {
+				return new GrooveGauge(model, type, rule.gauge);
+			}
+		}
+		return new GrooveGauge(model, type, BMSPlayerRule.Default.gauge);
 	}
 	
 	public static int getGaugeID(GrooveGauge gauge) {
-		if(gauge instanceof AssistEasyGrooveGauge) {
-			return GAUGETYPE_ASSISTEASY;
-		}
-		if(gauge instanceof EasyGrooveGauge) {
-			return GAUGETYPE_EASY;
-		}
-		if(gauge instanceof NormalGrooveGauge) {
-			return GAUGETYPE_NORMAL;
-		}
-		if(gauge instanceof HardGrooveGauge) {
-			return GAUGETYPE_HARD;
-		}
-		if(gauge instanceof ExhardGrooveGauge) {
-			return GAUGETYPE_EXHARD;
-		}
-		if(gauge instanceof HazardGrooveGauge) {
-			return GAUGETYPE_HAZARD;
-		}
-		if(gauge instanceof GradeGrooveGauge) {
-			return GAUGETYPE_GRADE;
-		}
-		if(gauge instanceof ExgradeGrooveGauge) {
-			return GAUGETYPE_EXGRADE;
-		}
-		if(gauge instanceof ExhardGradeGrooveGauge) {
-			return GAUGETYPE_EXHARDGRADE;
-		}
-		return -1;
+		return gauge.type;
 	}
 }

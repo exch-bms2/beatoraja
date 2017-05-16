@@ -4,12 +4,11 @@ import java.io.File;
 import java.nio.file.Paths;
 import java.util.*;
 
-import bms.player.beatoraja.play.gauge.GrooveGauge;
+import bms.player.beatoraja.play.GrooveGauge;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.lr2.*;
 
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.FloatArray;
 
 import java.util.logging.Logger;
@@ -18,7 +17,6 @@ import bms.model.BMSModel;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.Config.SkinConfig;
 
-import static bms.player.beatoraja.Resolution.*;
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
 public class GradeResult extends MainState {

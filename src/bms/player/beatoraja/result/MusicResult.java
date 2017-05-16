@@ -2,7 +2,6 @@ package bms.player.beatoraja.result;
 
 import java.io.File;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Logger;
@@ -10,7 +9,7 @@ import java.util.logging.Logger;
 import bms.model.LongNote;
 import bms.model.Note;
 import bms.model.TimeLine;
-import bms.player.beatoraja.play.gauge.GrooveGauge;
+import bms.player.beatoraja.play.GrooveGauge;
 import bms.player.beatoraja.select.MusicSelector;
 
 import bms.model.BMSModel;
@@ -20,10 +19,8 @@ import bms.player.beatoraja.ir.IRConnection;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.lr2.*;
 
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.FloatArray;
 
-import static bms.player.beatoraja.Resolution.*;
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
 /**

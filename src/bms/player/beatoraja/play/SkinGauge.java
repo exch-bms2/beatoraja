@@ -1,7 +1,8 @@
 package bms.player.beatoraja.play;
 
 import bms.player.beatoraja.MainState;
-import bms.player.beatoraja.play.gauge.*;
+
+import static bms.player.beatoraja.play.GrooveGauge.*;
 import bms.player.beatoraja.skin.*;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -56,9 +57,8 @@ public class SkinGauge extends SkinObject {
 
 		int count = max > 100 ? 24 : 50;
 		int exgauge = 0;
-		if (gauge instanceof AssistEasyGrooveGauge || gauge instanceof EasyGrooveGauge
-				|| gauge instanceof ExhardGrooveGauge || gauge instanceof ExgradeGrooveGauge
-				|| gauge instanceof ExhardGradeGrooveGauge || gauge instanceof HazardGrooveGauge) {
+		final int type = gauge.getType();
+		if (type == ASSISTEASY || type == EASY || type == EXHARD || type == HAZARD || type == EXCLASS || type == EXHARDCLASS) {
 			exgauge = 4;
 		}
 

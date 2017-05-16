@@ -1,0 +1,38 @@
+package bms.player.beatoraja;
+
+/**
+ * Created by exch on 2017/05/14.
+ */
+public enum ClearType {
+
+    NoPlay(0, new int[]{}),
+    Failed(1, new int[]{}),
+    AssistEasy(2, new int[]{}),
+    LightAssistEasy(3, new int[]{0}),
+    Easy(4, new int[]{1}),
+    Normal(5, new int[]{2, 6}),
+    Hard(6, new int[]{3, 7}),
+    ExHard(7, new int[]{4, 8}),
+    FullCombo(8, new int[]{5}),
+    Perfect(9, new int[]{}),
+    Max(10, new int[]{});
+
+    public final int id;
+    public final int[] gaugetype;
+
+    private ClearType(int id, int[] gaugetype) {
+        this.id = id;
+        this.gaugetype = gaugetype;
+    }
+
+    public static ClearType getClearTypeByGauge(int gaugetype) {
+        for(ClearType clear : ClearType.values()) {
+            for(int type : clear.gaugetype) {
+                if(gaugetype == type) {
+                    return clear;
+                }
+            }
+        }
+        return null;
+    }
+}

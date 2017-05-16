@@ -13,15 +13,12 @@ import bms.player.beatoraja.input.KeyInputLog;
 import bms.player.beatoraja.pattern.*;
 import bms.player.beatoraja.play.PracticeConfiguration.PracticeProperty;
 import bms.player.beatoraja.play.bga.BGAProcessor;
-import bms.player.beatoraja.play.gauge.*;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.lr2.*;
 import bms.player.beatoraja.song.SongData;
 
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.FloatArray;
 
-import static bms.player.beatoraja.Resolution.*;
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
 /**
@@ -838,16 +835,12 @@ public class BMSPlayer extends MainState {
 	public boolean getBooleanValue(int id) {
 		switch (id) {
 		case OPTION_GAUGE_GROOVE:
-			return gauge instanceof AssistEasyGrooveGauge || gauge instanceof EasyGrooveGauge
-					|| gauge instanceof NormalGrooveGauge;
+			return gauge.getType() <= 2;
 		case OPTION_GAUGE_HARD:
-			return gauge instanceof HardGrooveGauge || gauge instanceof ExhardGrooveGauge
-					|| gauge instanceof HazardGrooveGauge || gauge instanceof GradeGrooveGauge
-					|| gauge instanceof ExgradeGrooveGauge || gauge instanceof ExhardGradeGrooveGauge;
+			return gauge.getType() >= 3;
 		case OPTION_GAUGE_EX:
-			return gauge instanceof AssistEasyGrooveGauge || gauge instanceof EasyGrooveGauge
-					|| gauge instanceof ExhardGrooveGauge || gauge instanceof ExgradeGrooveGauge
-					|| gauge instanceof ExhardGradeGrooveGauge || gauge instanceof HazardGrooveGauge;
+			final int type = gauge.getType();
+			return type == 0 || type == 1 || type == 4 || type == 5 || type == 7 || type == 8;
 		case OPTION_AUTOPLAYON:
 			return autoplay == 1;
 		case OPTION_AUTOPLAYOFF:

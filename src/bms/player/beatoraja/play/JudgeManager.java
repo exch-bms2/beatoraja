@@ -140,7 +140,8 @@ public class JudgeManager {
 		this.lntype = model.getLntype();
 		this.timelines = model.getAllTimeLines();
 
-		JudgeProperty rule = JudgeProperty.Default;
+		JudgeProperty rule = BMSPlayerRule.getBMSPlayerRule(model.getMode()).judge;
+
 		switch (model.getMode()) {
 		case BEAT_5K:
 			keyassign = new int[] { 0, 1, 2, 3, 4, -1, -1, 5, 5 };
