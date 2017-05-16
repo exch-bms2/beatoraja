@@ -2,20 +2,41 @@ package bms.player.beatoraja.song;
 
 import bms.model.*;
 
+/**
+ * 楽曲詳細情報
+ * 
+ * @author exch
+ */
 public class SongInformation {
-	
+	/**
+	 * 譜面のハッシュ値
+	 */
 	private String sha256;
-	
+	/**
+	 * 通常ノート総数
+	 */
 	private int n;
-	
+	/**
+	 * ロングノート総数
+	 */
 	private int ln;
-
+	/**
+	 * スクラッチノート総数
+	 */
 	private int s;
-	
+	/**
+	 * ロングスクラッチノート総数
+	 */
 	private int ls;
 	
 	private double density;
-
+	/**
+	 * TOTAL
+	 */
+	private double total;
+	/**
+	 * 分布
+	 */
 	private String distribution;
 	
 	private int[][] distributionValues = new int[0][5];
@@ -29,9 +50,12 @@ public class SongInformation {
 		ln = model.getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY);
 		s = model.getTotalNotes(BMSModel.TOTALNOTES_SCRATCH);
 		ls = model.getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH);
+		total = model.getTotal();
 		
 		int[][] data = new int[model.getLastTime() / 1000 + 2][5];
 		int pos = 0;
+		int border = (int) (model.getTotalNotes() * (1.0 - 100.0 / model.getTotal()));
+		int borderpos = 0;
 		for (TimeLine tl : model.getAllTimeLines()) {
 			if (tl.getTime() / 1000 != pos) {
 				pos = tl.getTime() / 1000;
@@ -49,13 +73,18 @@ public class SongInformation {
 					if (n instanceof MineNote) {
 						data[tl.getTime() / 1000][4]++;
 					}
+					
+					border--;
+					if(border == 0) {
+						borderpos = pos;
+					}
 				}
 			}
 		}
 		
-		final int d = 10;
+		final int d = Math.min(5, data.length - borderpos - 1);
 		density = 0;
-		for(int i = 0;i < data.length - d;i++) {
+		for(int i = borderpos;i < data.length - d;i++) {
 			int notes = 0;
 			for(int j = 0;j < d;j++) {
 				notes += data[i + j][0] + data[i + j][1] + data[i + j][2] + data[i + j][3];
@@ -172,5 +201,13 @@ public class SongInformation {
 
 	public void setSha256(String sha256) {
 		this.sha256 = sha256;
+	}
+
+	public double getTotal() {
+		return total;
+	}
+
+	public void setTotal(double total) {
+		this.total = total;
 	}
 }

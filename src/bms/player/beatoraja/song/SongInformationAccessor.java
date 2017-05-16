@@ -1,9 +1,7 @@
 package bms.player.beatoraja.song;
 
-import java.nio.file.Files;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Calendar;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -18,6 +16,11 @@ import bms.model.BMSModel;
 
 import org.sqlite.SQLiteConfig.SynchronousMode;
 
+/**
+ * 楽曲情報データベースへのアクセスクラス
+ * 
+ * @author exch
+ */
 public class SongInformationAccessor {
 
 	private SQLiteDataSource ds;
@@ -50,7 +53,7 @@ public class SongInformationAccessor {
 			if (qr.query("SELECT * FROM sqlite_master WHERE name = ? and type='table';", new MapListHandler(),
 					"information").size() == 0) {
 				qr.update("CREATE TABLE [information] (" + "[sha256] TEXT NOT NULL," + "[n] INTEGER," + "[ln] INTEGER,"
-						+ "[s] INTEGER," + "[ls] INTEGER," + "[density] REAL," + "[distribution] TEXT," + "PRIMARY KEY(sha256));");
+						+ "[s] INTEGER," + "[ls] INTEGER," + "[total] REAL," + "[density] REAL," + "[distribution] TEXT," + "PRIMARY KEY(sha256));");
 			}
 		} catch (SQLException e) {
 			Logger.getGlobal().severe("楽曲データベース初期化中の例外:" + e.getMessage());
@@ -99,9 +102,9 @@ public class SongInformationAccessor {
 		SongInformation info = new SongInformation(model);
 		try {
 			qr.update(conn,
-					"INSERT OR REPLACE INTO information (sha256, n, ln, s, ls, density, distribution)"
-							+ "VALUES(?,?,?,?,?,?,?);",
-					model.getSHA256(), info.getN(), info.getLn(), info.getS(), info.getLs(), info.getDensity(), info.getDistribution());
+					"INSERT OR REPLACE INTO information (sha256, n, ln, s, ls, total, density, distribution)"
+							+ "VALUES(?,?,?,?,?,?,?,?);",
+					model.getSHA256(), info.getN(), info.getLn(), info.getS(), info.getLs(), info.getTotal(), info.getDensity(), info.getDistribution());
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
