@@ -13,15 +13,12 @@ import bms.player.beatoraja.input.KeyInputLog;
 import bms.player.beatoraja.pattern.*;
 import bms.player.beatoraja.play.PracticeConfiguration.PracticeProperty;
 import bms.player.beatoraja.play.bga.BGAProcessor;
-import bms.player.beatoraja.play.gauge.*;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.lr2.*;
 import bms.player.beatoraja.song.SongData;
 
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.FloatArray;
 
-import static bms.player.beatoraja.Resolution.*;
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
 /**
@@ -570,28 +567,28 @@ public class BMSPlayer extends MainState {
 		}
 
 		IRScoreData score = judge.getScoreData();
-		int clear = GrooveGauge.CLEARTYPE_FAILED;
+		ClearType clear = ClearType.Failed;
 		if (state != STATE_FAILED && gauge.isQualified()) {
 			if (assist > 0) {
-				clear = assist == 1 ? GrooveGauge.CLEARTYPE_LIGHT_ASSTST : GrooveGauge.CLEARTYPE_ASSTST;
+				clear = assist == 1 ? ClearType.LightAssistEasy : ClearType.AssistEasy;
 			} else {
 				if (judge.getJudgeCount(3) + judge.getJudgeCount(4) == 0
 						&& (!(model.getMode() == Mode.POPN_5K || model.getMode() == Mode.POPN_9K) || judge.getJudgeCount(5) == 0)) {
 					if (judge.getJudgeCount(2) == 0) {
 						if (judge.getJudgeCount(1) == 0) {
-							clear = GrooveGauge.CLEARTYPE_MAX;
+							clear = ClearType.Max;
 						} else {
-							clear = GrooveGauge.CLEARTYPE_PERFECT;
+							clear = ClearType.Perfect;
 						}
 					} else {
-						clear = GrooveGauge.CLEARTYPE_FULLCOMBO;
+						clear = ClearType.FullCombo;
 					}
 				} else if (resource.getCourseBMSModels() == null) {
 					clear = gauge.getClearType();
 				}
 			}
 		}
-		score.setClear(clear);
+		score.setClear(clear.id);
 		score.setGauge(GrooveGauge.getGaugeID(gauge));
 		score.setOption(resource.getConfig().getRandom() + (model.getMode().player == 2
 				? (resource.getConfig().getRandom2() * 10 + resource.getConfig().getDoubleoption() * 100) : 0));
@@ -838,16 +835,12 @@ public class BMSPlayer extends MainState {
 	public boolean getBooleanValue(int id) {
 		switch (id) {
 		case OPTION_GAUGE_GROOVE:
-			return gauge instanceof AssistEasyGrooveGauge || gauge instanceof EasyGrooveGauge
-					|| gauge instanceof NormalGrooveGauge;
+			return gauge.getType() <= 2;
 		case OPTION_GAUGE_HARD:
-			return gauge instanceof HardGrooveGauge || gauge instanceof ExhardGrooveGauge
-					|| gauge instanceof HazardGrooveGauge || gauge instanceof GradeGrooveGauge
-					|| gauge instanceof ExgradeGrooveGauge || gauge instanceof ExhardGradeGrooveGauge;
+			return gauge.getType() >= 3;
 		case OPTION_GAUGE_EX:
-			return gauge instanceof AssistEasyGrooveGauge || gauge instanceof EasyGrooveGauge
-					|| gauge instanceof ExhardGrooveGauge || gauge instanceof ExgradeGrooveGauge
-					|| gauge instanceof ExhardGradeGrooveGauge || gauge instanceof HazardGrooveGauge;
+			final int type = gauge.getType();
+			return type == 0 || type == 1 || type == 4 || type == 5 || type == 7 || type == 8;
 		case OPTION_AUTOPLAYON:
 			return autoplay == 1;
 		case OPTION_AUTOPLAYOFF:

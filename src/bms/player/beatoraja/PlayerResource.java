@@ -11,7 +11,7 @@ import com.badlogic.gdx.utils.*;
 import bms.model.*;
 import bms.player.beatoraja.audio.AudioDriver;
 import bms.player.beatoraja.play.bga.BGAProcessor;
-import bms.player.beatoraja.play.gauge.GrooveGauge;
+import bms.player.beatoraja.play.GrooveGauge;
 import bms.player.beatoraja.song.SongData;
 
 /**

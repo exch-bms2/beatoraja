@@ -4,12 +4,11 @@ import java.io.File;
 import java.nio.file.Paths;
 import java.util.*;
 
-import bms.player.beatoraja.play.gauge.GrooveGauge;
+import static bms.player.beatoraja.ClearType.*;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.lr2.*;
 
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.FloatArray;
 
 import java.util.logging.Logger;
@@ -18,7 +17,6 @@ import bms.model.BMSModel;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.Config.SkinConfig;
 
-import static bms.player.beatoraja.Resolution.*;
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
 public class GradeResult extends MainState {
@@ -73,7 +71,7 @@ public class GradeResult extends MainState {
 
 		if (resource.getAutoplay() == 0
 				&& resource.getCourseScoreData() != null
-				&& resource.getCourseScoreData().getClear() >= GrooveGauge.CLEARTYPE_EASY
+				&& resource.getCourseScoreData().getClear() >= Easy.id
 				&& !getMainController().getPlayDataAccessor().existsReplayData(resource.getCourseBMSModels(),
 				resource.getConfig().getLnmode(), 0, resource.getConstraint())) {
 			saveReplayData(0);
@@ -93,7 +91,6 @@ public class GradeResult extends MainState {
 		}
 
 		final MainController main = getMainController();
-		final PlayerResource resource = getMainController().getPlayerResource();
 
 		if (getTimer()[TIMER_FADEOUT] != Long.MIN_VALUE) {
 			if (time > getTimer()[TIMER_FADEOUT] + getSkin().getFadeout()) {
@@ -166,10 +163,6 @@ public class GradeResult extends MainState {
 		oldexscore = score.getExscore();
 		oldmisscount = score.getMinbp();
 		oldcombo = score.getCombo();
-		int notes = 0;
-		for (BMSModel model : resource.getCourseBMSModels()) {
-			notes += model.getTotalNotes();
-		}
 
 		getScoreDataProperty().setTargetScore(oldexscore, resource.getRivalScoreData(), resource.getBMSModel().getTotalNotes());
 		getScoreDataProperty().update(newscore);
@@ -177,7 +170,7 @@ public class GradeResult extends MainState {
 		getMainController().getPlayDataAccessor().writeScoreDara(newscore, models, resource.getConfig().getLnmode(),
 				random, resource.getConstraint(), resource.isUpdateScore());
 
-		if (newscore.getClear() != GrooveGauge.CLEARTYPE_FAILED) {
+		if (newscore.getClear() != Failed.id) {
 			play(SOUND_CLEAR);
 		} else {
 			play(SOUND_FAIL);
@@ -300,9 +293,9 @@ public class GradeResult extends MainState {
 		final IRScoreData score = resource.getCourseScoreData();
 		switch (id) {
 			case OPTION_RESULT_CLEAR:
-				return score.getClear() != GrooveGauge.CLEARTYPE_FAILED;
+				return score.getClear() != Failed.id;
 			case OPTION_RESULT_FAIL:
-				return score.getClear() == GrooveGauge.CLEARTYPE_FAILED;
+				return score.getClear() == Failed.id;
 			case OPTION_UPDATE_SCORE:
 				return score.getExscore() > oldexscore;
 			case OPTION_DRAW_SCORE:
