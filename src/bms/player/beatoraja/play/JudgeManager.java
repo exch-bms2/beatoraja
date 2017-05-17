@@ -358,20 +358,18 @@ public class JudgeManager {
 							|| processing[lane].getType() == LongNote.TYPE_HELLCHARGENOTE) && sc >= 0
 							&& key != sckey[sc]) {
 						final int[][] judge = scnendjudge;
-						final int endtime = processing[lane].getEndnote().getSectiontime();
-						for (int j = 0; j < judge.length; j++) {
-							final int dtime = (int) (endtime - ptime);
-							if (j == 4 || (dtime >= judge[j][0] && dtime < judge[j][1])) {
-								this.update(lane, processing[lane].getEndnote(), time, j, dtime);
-								// System.out.println("BSS終端判定 - Time : " +
-								// ptime + " Judge : " + j + " LN : " +
-								// processing[lane].hashCode());
-								main.play(processing[lane].getEndnote(), config.getKeyvolume());
-								processing[lane] = null;
-								sckey[sc] = 0;
-								break;
-							}
-						}
+						final int dtime = (int) (processing[lane].getEndnote().getSectiontime() - ptime);						
+						int j = 0;
+						for (; j < judge.length && !(dtime >= judge[j][0] && dtime <= judge[j][1]); j++);
+
+						this.update(lane, processing[lane].getEndnote(), time, j, dtime);
+						// System.out.println("BSS終端判定 - Time : " +
+						// ptime + " Judge : " + j + " LN : " +
+						// processing[lane].hashCode());
+						main.play(processing[lane].getEndnote(), config.getKeyvolume());
+						processing[lane] = null;
+						sckey[sc] = 0;
+						break;
 					} else {
 						// ここに来るのはマルチキーアサイン以外ありえないはず
 					}
@@ -438,48 +436,46 @@ public class JudgeManager {
 				// キーが離されたときの処理
 				if (processing[lane] != null) {
 					final int[][] judge = sc >= 0 ? scnendjudge : cnendjudge;
-					final int endtime = processing[lane].getEndnote().getSectiontime();
-					for (int j = 0; j < judge.length; j++) {
-						int dtime = (int) (endtime - ptime);
-						if (j == 4 || (dtime >= judge[j][0] && dtime <= judge[j][1])) {
-							if ((lntype != BMSModel.LNTYPE_LONGNOTE
-									&& processing[lane].getType() == LongNote.TYPE_UNDEFINED)
-									|| processing[lane].getType() == LongNote.TYPE_CHARGENOTE
-									|| processing[lane].getType() == LongNote.TYPE_HELLCHARGENOTE) {
-								if (sc >= 0) {
-									if (j != 4 || key != sckey[sc]) {
-										break;
-									}
-									// System.out.println("BSS途中離し判定 - Time : "
-									// + ptime + " Judge : " + j + " LN : "
-									// + processing[lane]);
-									sckey[sc] = 0;
-								}
-								if (j >= 3) {
-									main.stop(processing[lane]);
-								}
-								this.update(lane, processing[lane].getEndnote(), time, j, dtime);
-								main.play(processing[lane].getEndnote(), config.getKeyvolume());
-								processing[lane] = null;
-							} else {
-								if (Math.abs(passingcount[lane]) > Math.abs(dtime)) {
-									dtime = passingcount[lane];
-									for (; j < 4; j++) {
-										if (passingcount[lane] >= judge[j][0] && passingcount[lane] <= judge[j][1]) {
-											break;
-										}
-									}
-								}
-								if (j >= 3) {
-									main.stop(processing[lane]);
-								}
-								this.update(lane, processing[lane], time, j, dtime);
-								main.play(processing[lane].getEndnote(), config.getKeyvolume());
-								processing[lane] = null;
+					int dtime = (int) (processing[lane].getEndnote().getSectiontime() - ptime);
+					int j = 0;
+					for (; j < judge.length && !(dtime >= judge[j][0] && dtime <= judge[j][1]); j++);
+					
+					if ((lntype != BMSModel.LNTYPE_LONGNOTE
+							&& processing[lane].getType() == LongNote.TYPE_UNDEFINED)
+							|| processing[lane].getType() == LongNote.TYPE_CHARGENOTE
+							|| processing[lane].getType() == LongNote.TYPE_HELLCHARGENOTE) {
+						// CN, HCN離し処理
+						if (sc >= 0) {
+							if (j != 4 || key != sckey[sc]) {
+								break;
 							}
-							j = judge.length;
-							break;
+							// System.out.println("BSS途中離し判定 - Time : "
+							// + ptime + " Judge : " + j + " LN : "
+							// + processing[lane]);
+							sckey[sc] = 0;
 						}
+						if (j >= 3) {
+							main.stop(processing[lane]);
+						}
+						this.update(lane, processing[lane].getEndnote(), time, j, dtime);
+						main.play(processing[lane].getEndnote(), config.getKeyvolume());
+						processing[lane] = null;
+					} else {
+						// LN離し処理
+						if (Math.abs(passingcount[lane]) > Math.abs(dtime)) {
+							dtime = passingcount[lane];
+							for (; j < 4; j++) {
+								if (passingcount[lane] >= judge[j][0] && passingcount[lane] <= judge[j][1]) {
+									break;
+								}
+							}
+						}
+						if (j >= 3) {
+							main.stop(processing[lane]);
+						}
+						this.update(lane, processing[lane], time, j, dtime);
+						main.play(processing[lane].getEndnote(), config.getKeyvolume());
+						processing[lane] = null;
 					}
 				}
 			}
