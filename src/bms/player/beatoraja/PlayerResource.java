@@ -1,11 +1,15 @@
 package bms.player.beatoraja;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.*;
 
 import bms.model.*;
@@ -39,7 +43,15 @@ public class PlayerResource {
 	private IntArray constraint = new IntArray();
 
 	private BMSResource bmsresource;
-	
+	/**
+	 * backbmp
+	 */
+	private TextureRegion backbmp;
+	/**
+	 * stagefile
+	 */
+	private TextureRegion stagefile;
+
 	/**
 	 * スコア
 	 */
@@ -120,6 +132,26 @@ public class PlayerResource {
 		}
 		if (model.getAllTimeLines().length == 0) {
 			return false;
+		}
+		
+		if(stagefile != null) {
+			stagefile.getTexture().dispose();
+			stagefile = null;
+		}
+		
+		Pixmap pix = PixmapResourcePool.loadPicture(f.getParent().resolve(model.getStagefile()).toString());
+		if(pix != null) {
+			stagefile = new TextureRegion(new Texture(pix));
+			pix.dispose();
+		}
+		if(backbmp != null) {
+			backbmp.getTexture().dispose();
+			backbmp = null;
+		}
+		pix = PixmapResourcePool.loadPicture(f.getParent().resolve(model.getBackbmp()).toString());
+		if(pix != null) {
+			backbmp = new TextureRegion(new Texture(pix));
+			pix.dispose();
 		}
 		bmsresource.setBMSFile(model, f, config, autoplay);
 		return true;
@@ -325,6 +357,14 @@ public class PlayerResource {
 			bmsresource.dispose();
 			bmsresource = null;
 		}
+		if(stagefile != null) {
+			stagefile.getTexture().dispose();
+			stagefile = null;
+		}
+		if(backbmp != null) {
+			backbmp.getTexture().dispose();
+			backbmp = null;
+		}
 	}
 
 	public SongData getSongdata() {
@@ -337,6 +377,14 @@ public class PlayerResource {
 
 	public BMSGenerator getGenerator() {
 		return generator;
+	}
+	
+	public TextureRegion getBackbmpData() {
+		return backbmp;
+	}
+
+	public TextureRegion getStagefileData() {
+		return stagefile;
 	}
 
 	public int getPlayDevice() {
