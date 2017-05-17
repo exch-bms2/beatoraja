@@ -1,36 +1,18 @@
 package bms.player.beatoraja.select;
 
-import java.io.FileReader;
-import java.io.IOException;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.*;
 import java.util.logging.Logger;
 
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
-import bms.player.beatoraja.skin.SkinImage;
-import bms.player.beatoraja.skin.SkinNumber;
-import bms.player.beatoraja.skin.SkinTextFont;
+import bms.player.beatoraja.skin.*;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.utils.GdxRuntimeException;
-import com.badlogic.gdx.utils.Json;
 
+import bms.model.Mode;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.song.SongData;
-import bms.player.beatoraja.song.SongDatabaseAccessor;
 
 /**
  * 楽曲バー描画用クラス
@@ -46,7 +28,7 @@ public class BarRenderer {
 	/**
 	 * 現在のフォルダ階層
 	 */
-	private List<DirectoryBar> dir = new ArrayList<DirectoryBar>();
+	private Deque<DirectoryBar> dir = new ArrayDeque<DirectoryBar>();
 	/**
 	 * 現在表示中のバー一覧
 	 */
@@ -70,7 +52,7 @@ public class BarRenderer {
 
 	private final int SEARCHBAR_MAXCOUNT = 10;
 
-	private Map<String, Pixmap> bannermap = new HashMap<String, Pixmap>();
+	private PixmapResourcePool banners = new PixmapResourcePool();
 
 	private final int durationlow = 300;
 	private final int durationhigh = 50;
@@ -144,13 +126,15 @@ public class BarRenderer {
 	}
 
 	public void close() {
-		if (dir.size() > 1) {
-			updateBar(dir.get(getDirectory().size() - 2));
-			select.play(MusicSelector.SOUND_FOLDERCLOSE);
-		} else {
-			updateBar(null);
-			select.play(MusicSelector.SOUND_FOLDERCLOSE);
+		if(dir.isEmpty()) {
+			return;
 		}
+		
+		final DirectoryBar current = dir.removeLast();
+		final DirectoryBar parent = !dir.isEmpty() ? dir.getLast() : null;
+		dir.addLast(current);
+		updateBar(parent);
+		select.play(MusicSelector.SOUND_FOLDERCLOSE);
 	}
 
 	public void addSearch(SearchWordBar bar) {
@@ -386,13 +370,13 @@ public class BarRenderer {
 
 	private boolean bartextupdate = false;
 
-	public List<DirectoryBar> getDirectory() {
+	public Deque<DirectoryBar> getDirectory() {
 		return dir;
 	}
 
 	public boolean updateBar() {
 		if (dir.size() > 0) {
-			return updateBar(dir.get(dir.size() - 1));
+			return updateBar(dir.getLast());
 		}
 		return updateBar(null);
 	}
@@ -401,8 +385,8 @@ public class BarRenderer {
 		Bar prevbar = currentsongs != null ? currentsongs[selectedindex] : null;
 		List<Bar> l = new ArrayList<Bar>();
 		if (bar == null) {
-			if (dir.size() > 0) {
-				prevbar = dir.get(0);
+			if (!dir.isEmpty()) {
+				prevbar = dir.getFirst();
 			}
 			dir.clear();
 			l.addAll(Arrays.asList(new FolderBar(select, null, "e2977170").getChildren()));
@@ -410,29 +394,26 @@ public class BarRenderer {
 			l.addAll(Arrays.asList(commands));
 			l.addAll(search);
 		} else if (bar instanceof DirectoryBar) {
-			int index = dir.indexOf(bar);
-			if (index != -1) {
-				if (index < dir.size() - 1) {
-					prevbar = dir.get(index + 1);
+			if(dir.contains(bar)) {
+				while(dir.getLast() != bar) {
+					prevbar = dir.pollLast();
 				}
-				for (int i = dir.size() - 1; i >= index; i--) {
-					dir.remove(i);
-				}
+				dir.pollLast();
 			}
 			l.addAll(Arrays.asList(((DirectoryBar) bar).getChildren()));
 		}
 
 		List<Bar> remove = new ArrayList<Bar>();
 		for (Bar b : l) {
-			final int[] modes = { 0, 7, 14, 9, 5, 10 };
-			if (modes[select.getMode()] != 0 && b instanceof SongBar
-					&& ((SongBar) b).getSongData().getMode() != modes[select.getMode()]) {
+			final Mode mode = select.getMode();
+			if (mode != null && b instanceof SongBar
+					&& ((SongBar) b).getSongData().getMode() != mode.id) {
 				remove.add(b);
 			}
 		}
 		l.removeAll(remove);
 
-		if (l.size() > 0) {
+		if (!l.isEmpty()) {
 			if (bar != null) {
 				dir.add((DirectoryBar) bar);
 			}
@@ -486,7 +467,7 @@ public class BarRenderer {
 		}
 
 		if (dir.size() > 0) {
-			updateBar(dir.get(dir.size() - 1));
+			updateBar(dir.getLast());
 		} else {
 			updateBar(null);
 		}
@@ -514,12 +495,7 @@ public class BarRenderer {
 	}
 
 	public void dispose() {
-		for (String path : bannermap.keySet()) {
-			if (bannermap.get(path) != null) {
-				bannermap.get(path).dispose();
-			}
-		}
-		bannermap.clear();
+		banners.dispose();
 	}
 
 	private void setBanner(SongBar songbar) {
@@ -527,18 +503,7 @@ public class BarRenderer {
 		Path bannerfile = Paths.get(song.getPath()).getParent().resolve(song.getBanner());
 		// System.out.println(bannerfile.getPath());
 		if (song.getBanner().length() > 0 && Files.exists(bannerfile)) {
-			try {
-				if (bannermap.containsKey(bannerfile.toString())) {
-					songbar.setBanner(bannermap.get(bannerfile.toString()));
-				} else {
-					Pixmap pixmap = new Pixmap(Gdx.files.internal(bannerfile.toString()));
-					songbar.setBanner(pixmap);
-					bannermap.put(bannerfile.toString(), pixmap);
-				}
-			} catch (GdxRuntimeException e) {
-				bannermap.put(bannerfile.toString(), null);
-				Logger.getGlobal().warning("banner読み込み失敗: " + e.getMessage());
-			}
+			songbar.setBanner(banners.get(bannerfile.toString()));
 		}
 	}
 
