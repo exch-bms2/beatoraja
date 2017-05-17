@@ -8,6 +8,7 @@ import java.util.logging.Logger;
 import bms.model.BMSModel;
 import bms.model.TimeLine;
 import bms.player.beatoraja.Config;
+import bms.player.beatoraja.PixmapResourcePool;
 import bms.player.beatoraja.play.BMSPlayer;
 
 import com.badlogic.gdx.Gdx;
@@ -147,7 +148,7 @@ public class BGAProcessor {
 				if (stage != null && stage.length() > 0) {
 					Path p = dpath.resolve(stage);
 					if(Files.exists(p)) {
-						Pixmap pix = BGImageProcessor.loadPicture(p);
+						Pixmap pix = PixmapResourcePool.loadPicture(p.toString());
 						if(pix != null) {
 							stagefile = new TextureRegion(new Texture(pix));
 							pix.dispose();
@@ -163,7 +164,7 @@ public class BGAProcessor {
 				if (back != null && back.length() > 0) {
 					Path p = dpath.resolve(back);
 					if(Files.exists(p)) {
-						Pixmap pix = BGImageProcessor.loadPicture(p);
+						Pixmap pix = PixmapResourcePool.loadPicture(p.toString());
 						if(pix != null) {
 							backbmp = new TextureRegion(new Texture(pix));
 							pix.dispose();
