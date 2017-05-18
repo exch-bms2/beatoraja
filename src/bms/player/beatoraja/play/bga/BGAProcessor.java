@@ -8,6 +8,7 @@ import java.util.logging.Logger;
 import bms.model.BMSModel;
 import bms.model.TimeLine;
 import bms.player.beatoraja.Config;
+import bms.player.beatoraja.PixmapResourcePool;
 import bms.player.beatoraja.play.BMSPlayer;
 
 import com.badlogic.gdx.Gdx;
@@ -31,15 +32,6 @@ public class BGAProcessor {
 
 	private int[] mpgid = new int[0];
 	private MovieProcessor[] mpgmap = new MovieProcessor[0];
-
-	/**
-	 * backbmp
-	 */
-	private TextureRegion backbmp;
-	/**
-	 * stagefile
-	 */
-	private TextureRegion stagefile;
 
 	public static final String[] mov_extension = { "mpg", "mpeg", "m1v", "m2v", "avi", "wmv", "mp4" };
 
@@ -137,37 +129,6 @@ public class BGAProcessor {
 				for (MovieProcessor mpg : oldmpgmap) {
 					if (mpg != null) {
 						mpg.dispose();
-					}
-				}
-				if(stagefile != null) {
-					stagefile.getTexture().dispose();
-					stagefile = null;
-				}
-				String stage = model.getStagefile();
-				if (stage != null && stage.length() > 0) {
-					Path p = dpath.resolve(stage);
-					if(Files.exists(p)) {
-						Pixmap pix = BGImageProcessor.loadPicture(p);
-						if(pix != null) {
-							stagefile = new TextureRegion(new Texture(pix));
-							pix.dispose();
-						}
-					}
-				}
-				
-				if(backbmp != null) {
-					backbmp.getTexture().dispose();
-					backbmp = null;
-				}
-				String back = model.getBackbmp();
-				if (back != null && back.length() > 0) {
-					Path p = dpath.resolve(back);
-					if(Files.exists(p)) {
-						Pixmap pix = BGImageProcessor.loadPicture(p);
-						if(pix != null) {
-							backbmp = new TextureRegion(new Texture(pix));
-							pix.dispose();
-						}
 					}
 				}
 			}			
@@ -288,14 +249,6 @@ public class BGAProcessor {
 		}
 	}
 
-	public TextureRegion getBackbmpData() {
-		return backbmp;
-	}
-
-	public TextureRegion getStagefileData() {
-		return stagefile;
-	}
-
 	private Texture getBGAData(int id, boolean cont) {
 		if (progress != 1 || id == -1) {
 			return null;
@@ -312,7 +265,8 @@ public class BGAProcessor {
 	}
 
 	public void drawBGA(SpriteBatch sprite, Rectangle r, int time) {
-		if (timelines == null) {
+		if (time < 0 || timelines == null) {
+			prevrendertime = -1;
 			sprite.draw(blanktex, r.x, r.y, r.width, r.height);
 			return;
 		}
@@ -348,12 +302,7 @@ public class BGAProcessor {
 			}
 		}
 
-		if (time < 0) {
-			// draw backbmp
-			if (getBackbmpData() != null) {
-				drawBGAFixRatio(sprite, r, getBackbmpData().getTexture());
-			}
-		} else if (misslayer != null && misslayertime != 0 && time >= misslayertime && time < misslayertime + 500) {
+		if (misslayer != null && misslayertime != 0 && time >= misslayertime && time < misslayertime + 500) {
 			// draw miss layer
 			Texture miss = getBGAData(misslayer[misslayer.length * (time - misslayertime) / 500], true);
 			if (miss != null) {
@@ -468,12 +417,6 @@ public class BGAProcessor {
 	 * リソースを開放する
 	 */
 	public void dispose() {
-		if (stagefile != null) {
-			stagefile.getTexture().dispose();
-		}
-		if (backbmp != null) {
-			backbmp.getTexture().dispose();
-		}
 		if (cache != null) {
 			cache.dispose();
 		}

@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.logging.Logger;
 
+import bms.model.Mode;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.Config.SkinConfig;
 import bms.player.beatoraja.config.KeyConfiguration;
@@ -58,6 +59,8 @@ public class MusicSelector extends MainState {
 	 * 選択中のモードフィルタ
 	 */
 	private int mode;
+	
+	public static final Mode[] MODE = {null, Mode.BEAT_7K, Mode.BEAT_14K, Mode.POPN_9K, Mode.BEAT_5K, Mode.BEAT_10K};
 	/**
 	 * 選択中のソート
 	 */
@@ -327,7 +330,7 @@ public class MusicSelector extends MainState {
 
 		if (numberstate[1] && numtime[1] != 0) {
 			// KEYフィルターの切り替え
-			mode = (mode + 1) % 6;
+			mode = (mode + 1) % MODE.length;
 			numtime[1] = 0;
 			bar.updateBar();
 			play(SOUND_CHANGEOPTION);
@@ -710,8 +713,8 @@ public class MusicSelector extends MainState {
 		return false;
 	}
 
-	public int getMode() {
-		return mode;
+	public Mode getMode() {
+		return MODE[mode];
 	}
 
 	public int getSort() {
@@ -799,7 +802,7 @@ public class MusicSelector extends MainState {
 			return config.getJudgetiming();
 		case BUTTON_MODE:
 			final int[] mode_lr2 = { 0, 2, 4, 5, 1, 3 };
-			return mode_lr2[mode];
+			return mode < mode_lr2.length ? mode_lr2[mode] : mode;
 		case BUTTON_SORT:
 			return sort;
 		case BUTTON_LNMODE:
