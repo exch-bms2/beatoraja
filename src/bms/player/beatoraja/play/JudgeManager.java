@@ -160,12 +160,9 @@ public class JudgeManager {
 			break;
 		case KEYBOARD_24K:
 			keyassign = new int[26];
-			sckeyassign = new int[26];
 			for (int i=0; i<26; i++) {
 				keyassign[i] = i;
-				sckeyassign[i] = -1;
 			}
-			sckey = new int[0];
 			pmsjudge = false;
 			break;
 		}
