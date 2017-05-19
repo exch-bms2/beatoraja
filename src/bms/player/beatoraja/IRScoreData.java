@@ -226,6 +226,53 @@ public class IRScoreData {
 		return 0;
 	}
 
+	public void addJudgeCount(int judge, boolean fast, int count) {
+		switch (judge) {
+		case 0:
+			if(fast) {
+				epg += count;
+			} else {
+				lpg += count;
+			}
+			break;
+		case 1:
+			if(fast) {
+				egr += count;
+			} else {
+				lgr += count;
+			}
+			break;
+		case 2:
+			if(fast) {
+				egd += count;
+			} else {
+				lgd += count;
+			}
+			break;
+		case 3:
+			if(fast) {
+				ebd += count;
+			} else {
+				lbd += count;
+			}
+			break;
+		case 4:
+			if(fast) {
+				epr += count;
+			} else {
+				lpr += count;
+			}
+			break;
+		case 5:
+			if(fast) {
+				ems += count;
+			} else {
+				lms += count;
+			}
+			break;
+		}
+	}
+
 	public int getCombo() {
 		return maxcombo;
 	}

@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.logging.Logger;
 
+import bms.model.Mode;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.Config.SkinConfig;
 import bms.player.beatoraja.config.KeyConfiguration;
@@ -58,6 +59,8 @@ public class MusicSelector extends MainState {
 	 * 選択中のモードフィルタ
 	 */
 	private int mode;
+	
+	public static final Mode[] MODE = {null, Mode.BEAT_7K, Mode.BEAT_14K, Mode.POPN_9K, Mode.BEAT_5K, Mode.BEAT_10K};
 	/**
 	 * 選択中のソート
 	 */
@@ -135,26 +138,25 @@ public class MusicSelector extends MainState {
 		PlayConfig pc = (config.getMusicselectinput() == 0 ? config.getMode7() : (config.getMusicselectinput() == 1 ? config.getMode9() : config.getMode14()));
 		input.setKeyassign(pc.getKeyassign());
 		input.setControllerConfig(pc.getController());
-
 		bar.updateBar();
 
 		if (getSkin() == null) {
 			try {
 				SkinConfig sc = config.getSkin()[5];
 				if (sc.getPath().endsWith(".json")) {
-					SkinLoader sl = new SkinLoader(getMainController().getPlayerResource().getConfig().getResolution());
+					SkinLoader sl = new SkinLoader(getMainController().getPlayerResource().getConfig());
 					setSkin(sl.loadSelectSkin(Paths.get(sc.getPath()), sc.getProperty()));
 				} else {
 					LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
 					SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
-					LR2SelectSkinLoader dloader = new LR2SelectSkinLoader(header.getResolution(), getMainController().getPlayerResource().getConfig().getResolution());
+					LR2SelectSkinLoader dloader = new LR2SelectSkinLoader(header.getResolution(), getMainController().getPlayerResource().getConfig());
 					setSkin(dloader.loadSelectSkin(Paths.get(sc.getPath()).toFile(), this, header, loader.getOption(),
 							sc.getProperty()));
 				}
 			} catch (Throwable e) {
 				e.printStackTrace();
 				SkinLoader sl = new SkinLoader(
-						getMainController().getPlayerResource().getConfig().getResolution());
+						getMainController().getPlayerResource().getConfig());
 				setSkin(sl.loadSelectSkin(Paths.get(SkinConfig.DEFAULT_SELECT), new HashMap()));
 			}
 		}
@@ -164,8 +166,6 @@ public class MusicSelector extends MainState {
 		parameter.size = 24;
 		titlefont = generator.generateFont(parameter);
 		generator.dispose();
-
-		getTimer()[TIMER_SONGBAR_CHANGE] = getNowTime();
 
 		// search text field
 		if (getStage() == null && ((MusicSelectSkin) getSkin()).getSearchTextRegion() != null) {
@@ -179,7 +179,7 @@ public class MusicSelector extends MainState {
 		final SpriteBatch sprite = main.getSpriteBatch();
 		final PlayerResource resource = main.getPlayerResource();
 		final Bar current = bar.getSelected();
-
+		
 		// draw song information
 		sprite.begin();
 		if (current instanceof SongBar) {
@@ -329,10 +329,12 @@ public class MusicSelector extends MainState {
 
 		if (numberstate[1] && numtime[1] != 0) {
 			// KEYフィルターの切り替え
-			mode = (mode + 1) % 6;
+			mode = (mode + 1) % MODE.length;
 			numtime[1] = 0;
 			bar.updateBar();
 			play(SOUND_CHANGEOPTION);
+			this.config.setModeSort(getMode());
+			
 		}
 		if (numberstate[2] && numtime[2] != 0) {
 			// ソートの切り替え
@@ -577,7 +579,6 @@ public class MusicSelector extends MainState {
 		// song bar moved
 		if (bar.getSelected() != current) {
 			getTimer()[TIMER_SONGBAR_CHANGE] = nowtime;
-			getMainController().getPlayerResource().setSongdata((bar.getSelected() instanceof SongBar) ? ((SongBar) bar.getSelected()).getSongData() : null);
 			if(preview != null && preview.length() > 0) {
 				getMainController().getAudioProcessor().stop(preview);
 				getMainController().getAudioProcessor().dispose(preview);
@@ -585,6 +586,9 @@ public class MusicSelector extends MainState {
 				preview = null;
 			}
 			showNoteGraph = false;
+		}
+		if(getTimer()[TIMER_SONGBAR_CHANGE] == Long.MIN_VALUE) {
+			getTimer()[TIMER_SONGBAR_CHANGE] = nowtime;			
 		}
 		// update folder
 		if (input.getFunctionstate()[1] && input.getFunctiontime()[1] != 0) {
@@ -710,8 +714,9 @@ public class MusicSelector extends MainState {
 		return false;
 	}
 
-	public int getMode() {
-		return mode;
+	public Mode getMode() {
+		return MODE[mode];
+
 	}
 
 	public int getSort() {
@@ -798,8 +803,9 @@ public class MusicSelector extends MainState {
 		case NUMBER_JUDGETIMING:
 			return config.getJudgetiming();
 		case BUTTON_MODE:
+		mode = config.getModeSort();
 			final int[] mode_lr2 = { 0, 2, 4, 5, 1, 3 };
-			return mode_lr2[mode];
+			return mode < mode_lr2.length ? mode_lr2[mode] : mode;
 		case BUTTON_SORT:
 			return sort;
 		case BUTTON_LNMODE:
@@ -814,6 +820,7 @@ public class MusicSelector extends MainState {
 
 	public String getTextValue(int id) {
 		switch (id) {
+		case STRING_TITLE:
 		case STRING_FULLTITLE:
 			if (bar.getSelected() instanceof DirectoryBar) {
 				return bar.getSelected().getTitle();

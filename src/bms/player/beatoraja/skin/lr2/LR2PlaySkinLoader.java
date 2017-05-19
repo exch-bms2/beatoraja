@@ -4,6 +4,7 @@ import java.io.*;
 import java.util.*;
 
 import bms.model.Mode;
+import bms.player.beatoraja.Config;
 import bms.player.beatoraja.Resolution;
 import bms.player.beatoraja.play.*;
 import bms.player.beatoraja.skin.*;
@@ -47,8 +48,8 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 	private int groovex = 0;
 	private int groovey = 0;
 
-	public LR2PlaySkinLoader(final Resolution src, final Resolution dst) {
-		super(src, dst);
+	public LR2PlaySkinLoader(final Resolution src, final Config c) {
+		super(src, c);
 
 		final float srcw = src.width;
 		final float srch = src.height;

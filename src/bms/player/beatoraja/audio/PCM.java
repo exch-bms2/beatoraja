@@ -92,7 +92,7 @@ public class PCM {
 					StreamUtils.copyStream(input, output);
 					pcm = output.getBuffer();
 					bytes = output.size();
-					 System.out.println(bytes + " -> " + pcm.length);
+//					 System.out.println(bytes + " -> " + pcm.length);
 				}
 			} catch (IOException e) {
 				e.printStackTrace();

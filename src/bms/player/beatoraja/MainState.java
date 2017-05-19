@@ -491,19 +491,15 @@ public abstract class MainState {
 	private TextureRegion white;
 
 	public TextureRegion getImage(int imageid) {
-		if (getMainController().getPlayerResource().getBGAManager() != null) {
-			if (imageid == IMAGE_BACKBMP) {
-				return getMainController().getPlayerResource().getBGAManager().getBackbmpData();
-			}
-			if (imageid == IMAGE_STAGEFILE) {
-				return getMainController().getPlayerResource().getBGAManager().getStagefileData();
-			}
-		}
-		if(imageid == IMAGE_BLACK) {
+		switch(imageid) {
+		case IMAGE_BACKBMP:
+			return getMainController().getPlayerResource().getBackbmpData();
+		case IMAGE_STAGEFILE:
+			return getMainController().getPlayerResource().getStagefileData();
+		case IMAGE_BLACK:
 			return black;
-		}
-		if(imageid == IMAGE_WHITE) {
-			return white;
+		case IMAGE_WHITE:
+			return white;			
 		}
 		return null;
 	}

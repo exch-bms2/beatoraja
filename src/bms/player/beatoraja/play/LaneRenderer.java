@@ -278,7 +278,7 @@ public class LaneRenderer {
 			shape.begin(ShapeType.Filled);
 			final Color[] color = { Color.valueOf("0000ff20"), Color.valueOf("00ff0020"), Color.valueOf("ffff0020"),
 					Color.valueOf("ff800020"), Color.valueOf("00000000"), Color.valueOf("ff000020") };
-			final int[] judgetime = main.getJudgeManager().getJudgeTimeRegion();
+			final int[][] judgetime = main.getJudgeManager().getJudgeTimeRegion();
 			for (int i = pos; i < timelines.length; i++) {
 				final TimeLine tl = timelines[i];
 				if (tl.getTime() >= time) {
@@ -287,9 +287,9 @@ public class LaneRenderer {
 							* rxhs;
 					for (int j = color.length - 1; j >= 0; j--) {
 						shape.setColor(color[j]);
-						int nj = j > 0 ? judgetime[j - 1] : 0;
+						int nj = j > 0 ? judgetime[j - 1][1] : 0;
 						for (int p = 0; p < playerr.length; p++) {
-							shape.rect(playerr[p].x, hl + nj * rate, playerr[p].width, (judgetime[j] - nj) * rate);
+							shape.rect(playerr[p].x, hl + nj * rate, playerr[p].width, (judgetime[j][1] - nj) * rate);
 						}
 					}
 					break;
@@ -446,7 +446,7 @@ public class LaneRenderer {
 								prevtl = nowtl;
 							}
 							if (dy > 0) {
-								this.drawLongNote(laneregion[lane].x, y + dy, laneregion[lane].width, y < laneregion[lane].y ? y - laneregion[lane].y : dy, 
+								this.drawLongNote(laneregion[lane].x, y + dy, laneregion[lane].width, y < laneregion[lane].y ? y - laneregion[lane].y : dy,
 										scale, lane, ln);
 							}
 							// System.out.println(dy);

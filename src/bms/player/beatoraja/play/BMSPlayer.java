@@ -13,15 +13,12 @@ import bms.player.beatoraja.input.KeyInputLog;
 import bms.player.beatoraja.pattern.*;
 import bms.player.beatoraja.play.PracticeConfiguration.PracticeProperty;
 import bms.player.beatoraja.play.bga.BGAProcessor;
-import bms.player.beatoraja.play.gauge.*;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.lr2.*;
 import bms.player.beatoraja.song.SongData;
 
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.FloatArray;
 
-import static bms.player.beatoraja.Resolution.*;
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
 /**
@@ -261,18 +258,18 @@ public class BMSPlayer extends MainState {
 		try {
 			SkinConfig sc = resource.getConfig().getSkin()[skinType.getId()];
 			if (sc.getPath().endsWith(".json")) {
-				SkinLoader sl = new SkinLoader(resource.getConfig().getResolution());
+				SkinLoader sl = new SkinLoader(resource.getConfig());
 				setSkin(sl.loadPlaySkin(Paths.get(sc.getPath()), skinType, sc.getProperty()));
 			} else {
 				LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
 				SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
-				LR2PlaySkinLoader dloader = new LR2PlaySkinLoader(header.getResolution(), resource.getConfig().getResolution());
+				LR2PlaySkinLoader dloader = new LR2PlaySkinLoader(header.getResolution(), resource.getConfig());
 				setSkin(dloader.loadPlaySkin(Paths.get(sc.getPath()).toFile(), this, header, loader.getOption(),
 						sc.getProperty()));
 			}
 		} catch (Throwable e) {
 			e.printStackTrace();
-			SkinLoader sl = new SkinLoader(resource.getConfig().getResolution());
+			SkinLoader sl = new SkinLoader(resource.getConfig());
 			setSkin(sl.loadPlaySkin(Paths.get(SkinConfig.defaultSkinPathMap.get(skinType)), skinType, new HashMap()));
 		}
 
@@ -306,11 +303,13 @@ public class BMSPlayer extends MainState {
 		int rivalscore = TargetProperty.getAllTargetProperties(getMainController())[config.getTarget()]
 				.getTarget(getMainController());
 		resource.setRivalScoreData(rivalscore);
-		getScoreDataProperty().setTargetScore(score.getExscore(), rivalscore, model.getTotalNotes());
 
 		if (autoplay == 2) {
+			getScoreDataProperty().setTargetScore(0, 0, model.getTotalNotes());
 			practice.create(model);
 			state = STATE_PRACTICE;
+		} else {
+			getScoreDataProperty().setTargetScore(score.getExscore(), rivalscore, model.getTotalNotes());
 		}
 	}
 
@@ -585,28 +584,28 @@ public class BMSPlayer extends MainState {
 		}
 
 		IRScoreData score = judge.getScoreData();
-		int clear = GrooveGauge.CLEARTYPE_FAILED;
+		ClearType clear = ClearType.Failed;
 		if (state != STATE_FAILED && gauge.isQualified()) {
 			if (assist > 0) {
-				clear = assist == 1 ? GrooveGauge.CLEARTYPE_LIGHT_ASSTST : GrooveGauge.CLEARTYPE_ASSTST;
+				clear = assist == 1 ? ClearType.LightAssistEasy : ClearType.AssistEasy;
 			} else {
 				if (judge.getJudgeCount(3) + judge.getJudgeCount(4) == 0
 						&& (!(model.getMode() == Mode.POPN_5K || model.getMode() == Mode.POPN_9K) || judge.getJudgeCount(5) == 0)) {
 					if (judge.getJudgeCount(2) == 0) {
 						if (judge.getJudgeCount(1) == 0) {
-							clear = GrooveGauge.CLEARTYPE_MAX;
+							clear = ClearType.Max;
 						} else {
-							clear = GrooveGauge.CLEARTYPE_PERFECT;
+							clear = ClearType.Perfect;
 						}
 					} else {
-						clear = GrooveGauge.CLEARTYPE_FULLCOMBO;
+						clear = ClearType.FullCombo;
 					}
 				} else if (resource.getCourseBMSModels() == null) {
 					clear = gauge.getClearType();
 				}
 			}
 		}
-		score.setClear(clear);
+		score.setClear(clear.id);
 		score.setGauge(GrooveGauge.getGaugeID(gauge));
 		score.setOption(resource.getConfig().getRandom() + (model.getMode().player == 2
 				? (resource.getConfig().getRandom2() * 10 + resource.getConfig().getDoubleoption() * 100) : 0));
@@ -786,6 +785,8 @@ public class BMSPlayer extends MainState {
 			return (int) (lanerender.getHispeed() * 100) % 100;
 		case NUMBER_DURATION:
 			return lanerender.getCurrentDuration();
+		case NUMBER_DURATION_GREEN:
+			return lanerender.getCurrentDuration() * 3 / 5;
 		case NUMBER_NOWBPM:
 			return (int) lanerender.getNowBPM();
 		case NUMBER_MAXCOMBO:
@@ -854,16 +855,12 @@ public class BMSPlayer extends MainState {
 	public boolean getBooleanValue(int id) {
 		switch (id) {
 		case OPTION_GAUGE_GROOVE:
-			return gauge instanceof AssistEasyGrooveGauge || gauge instanceof EasyGrooveGauge
-					|| gauge instanceof NormalGrooveGauge;
+			return gauge.getType() <= 2;
 		case OPTION_GAUGE_HARD:
-			return gauge instanceof HardGrooveGauge || gauge instanceof ExhardGrooveGauge
-					|| gauge instanceof HazardGrooveGauge || gauge instanceof GradeGrooveGauge
-					|| gauge instanceof ExgradeGrooveGauge || gauge instanceof ExhardGradeGrooveGauge;
+			return gauge.getType() >= 3;
 		case OPTION_GAUGE_EX:
-			return gauge instanceof AssistEasyGrooveGauge || gauge instanceof EasyGrooveGauge
-					|| gauge instanceof ExhardGrooveGauge || gauge instanceof ExgradeGrooveGauge
-					|| gauge instanceof ExhardGradeGrooveGauge || gauge instanceof HazardGrooveGauge;
+			final int type = gauge.getType();
+			return type == 0 || type == 1 || type == 4 || type == 5 || type == 7 || type == 8;
 		case OPTION_AUTOPLAYON:
 			return autoplay == 1;
 		case OPTION_AUTOPLAYOFF:

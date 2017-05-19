@@ -8,7 +8,6 @@ import bms.model.Mode;
 import bms.model.TimeLine;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
-import bms.player.beatoraja.play.gauge.*;
 
 import bms.player.beatoraja.skin.SkinNoteDistributionGraph;
 import com.badlogic.gdx.Gdx;
@@ -79,37 +78,7 @@ public class PracticeConfiguration {
 	}
 
 	public GrooveGauge getGauge(BMSModel model) {
-		GrooveGauge gauge = null;
-		switch (property.gaugetype) {
-		case 0:
-			gauge = new AssistEasyGrooveGauge(model);
-			break;
-		case 1:
-			gauge = new EasyGrooveGauge(model);
-			break;
-		case 2:
-			gauge = new NormalGrooveGauge(model);
-			break;
-		case 3:
-			gauge = new HardGrooveGauge(model);
-			break;
-		case 4:
-			gauge = new ExhardGrooveGauge(model);
-			break;
-		case 5:
-			gauge = new HazardGrooveGauge(model);
-			break;
-		case 6:
-			gauge = new GradeGrooveGauge(model);
-			break;
-		case 7:
-			gauge = new ExgradeGrooveGauge(model);
-			break;
-		case 8:
-			gauge = new ExhardGradeGrooveGauge(model);
-			break;
-		}
-
+		GrooveGauge gauge = GrooveGauge.create(model, property.gaugetype);
 		gauge.setValue(property.startgauge);
 		return gauge;
 	}

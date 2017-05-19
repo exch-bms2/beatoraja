@@ -11,7 +11,7 @@ import java.util.zip.GZIPOutputStream;
 
 import bms.model.BMSModel;
 import bms.model.TimeLine;
-import bms.player.beatoraja.play.gauge.GrooveGauge;
+import static bms.player.beatoraja.ClearType.*;
 import bms.player.beatoraja.song.SongData;
 
 import com.badlogic.gdx.utils.Json;
@@ -100,7 +100,7 @@ public class PlayDataAccessor {
 		pd.setLms(pd.getLms() + score.getLms());
 
 		pd.setPlaycount(pd.getPlaycount() + 1);
-		if (score.getClear() > GrooveGauge.CLEARTYPE_FAILED) {
+		if (score.getClear() > Failed.id) {
 			pd.setClear(pd.getClear() + 1);
 		}
 		pd.setPlaytime(pd.getPlaytime() + time);
@@ -180,7 +180,7 @@ public class PlayDataAccessor {
 		score.setSha256(hash);
 		score.setNotes(model.getTotalNotes());
 
-		if (newscore.getClear() > GrooveGauge.CLEARTYPE_FAILED) {
+		if (newscore.getClear() > Failed.id) {
 			score.setClearcount(score.getClearcount() + 1);
 		}
 		if (clear < newscore.getClear()) {
@@ -192,8 +192,8 @@ public class PlayDataAccessor {
 			for (int i = 0; i < newscore.getOption(); i++) {
 				history /= 10;
 			}
-			if (history % 10 < newscore.getClear() - GrooveGauge.CLEARTYPE_LIGHT_ASSTST) {
-				int add = newscore.getClear() - GrooveGauge.CLEARTYPE_LIGHT_ASSTST - (history % 10);
+			if (history % 10 < newscore.getClear() - LightAssistEasy.id) {
+				int add = newscore.getClear() - LightAssistEasy.id - (history % 10);
 				for (int i = 0; i < newscore.getOption(); i++) {
 					add *= 10;
 				}
@@ -315,7 +315,7 @@ public class PlayDataAccessor {
 		score.setSha256(hash);
 		score.setNotes(totalnotes);
 
-		if (newscore.getClear() != GrooveGauge.CLEARTYPE_FAILED) {
+		if (newscore.getClear() != Failed.id) {
 			score.setClearcount(score.getClearcount() + 1);
 		}
 		if (clear < newscore.getClear()) {

@@ -13,6 +13,8 @@ import bms.player.beatoraja.skin.SkinType;
 import com.badlogic.gdx.Input.Keys;
 
 import static bms.player.beatoraja.Resolution.*;
+import bms.player.beatoraja.select.*;
+import bms.model.Mode;
 
 /**
  * 各種設定項目。config.jsonで保持される
@@ -125,7 +127,10 @@ public class Config {
          * JKOC Hack (boolean) private variable
          */
     private boolean jkoc_hack = false;
-        
+    
+	private Mode mode_sort = null;
+	
+    private boolean cacheSkinImage = false;
 	/**
 	 * アシストオプション:コンスタント
 	 */
@@ -494,6 +499,19 @@ public class Config {
 		this.mode24 = mode24;
 	}
 
+	public void setModeSort(Mode m)  {
+		this.mode_sort = m;
+	}
+	
+	public int getModeSort()  {
+		for(int x = 0; x < MusicSelector.MODE.length; x++)  {
+		    if(mode_sort == MusicSelector.MODE[x])
+				return x;
+			else
+				continue;
+		}
+		return 0;
+	}
 	public Resolution getResolution() {
 		return resolution;
 	}
@@ -680,6 +698,14 @@ public class Config {
 
 	public void setPlayers(PlayerConfig[] players) {
 		this.players = players;
+	}
+
+	public boolean isCacheSkinImage() {
+		return cacheSkinImage;
+	}
+
+	public void setCacheSkinImage(boolean cacheSkinImage) {
+		this.cacheSkinImage = cacheSkinImage;
 	}
 
 	public static class SkinConfig {

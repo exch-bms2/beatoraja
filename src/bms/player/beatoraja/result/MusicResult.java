@@ -2,7 +2,6 @@ package bms.player.beatoraja.result;
 
 import java.io.File;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Logger;
@@ -10,7 +9,7 @@ import java.util.logging.Logger;
 import bms.model.LongNote;
 import bms.model.Note;
 import bms.model.TimeLine;
-import bms.player.beatoraja.play.gauge.GrooveGauge;
+import static bms.player.beatoraja.ClearType.*;
 import bms.player.beatoraja.select.MusicSelector;
 
 import bms.model.BMSModel;
@@ -20,10 +19,8 @@ import bms.player.beatoraja.ir.IRConnection;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.lr2.*;
 
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.FloatArray;
 
-import static bms.player.beatoraja.Resolution.*;
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
 /**
@@ -76,7 +73,7 @@ public class MusicResult extends MainState {
 		updateScoreDatabase();
 		// 保存されているリプレイデータがない場合は、EASY以上で自動保存
 		if (resource.getAutoplay() == 0 && resource.getScoreData() != null
-				&& resource.getScoreData().getClear() >= GrooveGauge.CLEARTYPE_EASY
+				&& resource.getScoreData().getClear() >= Easy.id
 				&& !getMainController().getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
 						resource.getConfig().getLnmode(), 0)) {
 			saveReplayData(0);
@@ -90,18 +87,18 @@ public class MusicResult extends MainState {
 		try {
 			SkinConfig sc = resource.getConfig().getSkin()[7];
 			if (sc.getPath().endsWith(".json")) {
-				SkinLoader sl = new SkinLoader(resource.getConfig().getResolution());
+				SkinLoader sl = new SkinLoader(resource.getConfig());
 				setSkin(sl.loadResultSkin(Paths.get(sc.getPath()), sc.getProperty()));
 			} else {
 				LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
 				SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
-				LR2ResultSkinLoader dloader = new LR2ResultSkinLoader(header.getResolution(), resource.getConfig().getResolution());
+				LR2ResultSkinLoader dloader = new LR2ResultSkinLoader(header.getResolution(), resource.getConfig());
 				setSkin(dloader.loadResultSkin(Paths.get(sc.getPath()).toFile(), this, header, loader.getOption(),
 						sc.getProperty()));
 			}
 		} catch (Throwable e) {
 			e.printStackTrace();
-			SkinLoader sl = new SkinLoader(resource.getConfig().getResolution());
+			SkinLoader sl = new SkinLoader(resource.getConfig());
 			setSkin(sl.loadResultSkin(Paths.get("skin/default/result.json"), new HashMap()));
 		}
 	}
@@ -237,7 +234,7 @@ public class MusicResult extends MainState {
 			if (resource.getCourseScoreData() != null) {
 				resource.getCourseScoreData()
 						.setMinbp(resource.getCourseScoreData().getMinbp() + resource.getBMSModel().getTotalNotes());
-				resource.getCourseScoreData().setClear(GrooveGauge.CLEARTYPE_FAILED);
+				resource.getCourseScoreData().setClear(Failed.id);
 			}
 			return;
 		}
@@ -286,8 +283,8 @@ public class MusicResult extends MainState {
 
 		// コースモードの場合はコーススコアに加算・累積する
 		if (resource.getCourseBMSModels() != null) {
-			if (resource.getScoreData().getClear() == GrooveGauge.CLEARTYPE_FAILED) {
-				resource.getScoreData().setClear(GrooveGauge.CLEARTYPE_NOPLAY);
+			if (resource.getScoreData().getClear() == Failed.id) {
+				resource.getScoreData().setClear(NoPlay.id);
 			}
 			IRScoreData cscore = resource.getCourseScoreData();
 			if (cscore == null) {
@@ -314,9 +311,9 @@ public class MusicResult extends MainState {
 			cscore.setLms(cscore.getLms() + newscore.getLms());
 			cscore.setMinbp(cscore.getMinbp() + newscore.getMinbp());
 			if (resource.getGauge().get(resource.getGauge().size - 1) > 0) {
-				cscore.setClear(resource.getGrooveGauge().getClearType());
+				cscore.setClear(resource.getGrooveGauge().getClearType().id);
 			} else {
-				cscore.setClear(GrooveGauge.CLEARTYPE_FAILED);
+				cscore.setClear(Failed.id);
 
 				boolean b = false;
 				// 残りの曲がある場合はtotalnotesをBPに加算する
@@ -367,7 +364,7 @@ public class MusicResult extends MainState {
 			}
 		}
 
-		if (newscore.getClear() != GrooveGauge.CLEARTYPE_FAILED) {
+		if (newscore.getClear() != Failed.id) {
 			play(SOUND_CLEAR);
 		} else {
 			play(SOUND_FAIL);
@@ -502,11 +499,11 @@ public class MusicResult extends MainState {
 		case OPTION_ENABLE_SAVE_SCORE:
 			return resource.isUpdateScore();
 		case OPTION_RESULT_CLEAR:
-			return score.getClear() != GrooveGauge.CLEARTYPE_FAILED
-					&& (cscore == null || cscore.getClear() != GrooveGauge.CLEARTYPE_FAILED);
+			return score.getClear() != Failed.id
+					&& (cscore == null || cscore.getClear() != Failed.id);
 		case OPTION_RESULT_FAIL:
-			return score.getClear() == GrooveGauge.CLEARTYPE_FAILED
-					|| (cscore != null && cscore.getClear() == GrooveGauge.CLEARTYPE_FAILED);
+			return score.getClear() == Failed.id
+					|| (cscore != null && cscore.getClear() == Failed.id);
 		case OPTION_UPDATE_SCORE:
 			return score.getExscore() > oldexscore;
 			case OPTION_DRAW_SCORE:
