@@ -1,7 +1,7 @@
 package bms.player.beatoraja;
 
-import java.util.Arrays;
-import java.util.Calendar;
+import java.io.File;
+import java.util.*;
 
 import bms.player.beatoraja.play.TargetProperty;
 import bms.player.beatoraja.skin.Skin;
@@ -15,15 +15,27 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
+/**
+ * プレイヤー内の各状態の抽象クラス
+ * 
+ * @author exch
+ */
 public abstract class MainState {
 
 	private final MainController main;
-
+	/**
+	 * 状態の開始時間
+	 */
 	private long starttime;
 
 	private Skin skin;
 
 	private Stage stage;
+	
+	private Map<Integer, String> soundmap = new HashMap<Integer, String>();
+	private Map<Integer, Boolean> soundloop = new HashMap<Integer, Boolean>();
+
+	private ScoreDataProperty score = new ScoreDataProperty();
 
 	public MainState(MainController main) {
 		this.main = main;
@@ -101,6 +113,10 @@ public abstract class MainState {
 
 	}
 
+	public ScoreDataProperty getScoreDataProperty() {
+		return score;
+	}
+
 	public boolean getBooleanValue(int id) {
 		final SongData model = getMainController().getPlayerResource().getSongdata();
 		switch (id) {
@@ -172,7 +188,70 @@ public abstract class MainState {
 			return getMainController().getIRConnection() == null;
 			case OPTION_ONLINE:
 				return getMainController().getIRConnection() != null;
-
+			case OPTION_F:
+				return score.qualifyRank(0);
+			case OPTION_E:
+				return score.qualifyRank(6);
+			case OPTION_D:
+				return score.qualifyRank(9);
+			case OPTION_C:
+				return score.qualifyRank(12);
+			case OPTION_B:
+				return score.qualifyRank(15);
+			case OPTION_A:
+				return score.qualifyRank(18);
+			case OPTION_AA:
+				return score.qualifyRank(21);
+			case OPTION_AAA:
+				return score.qualifyRank(24);
+			case OPTION_1P_F:
+			case OPTION_RESULT_F_1P:
+			case OPTION_NOW_F_1P:
+				return score.qualifyNowRank(0) && !score.qualifyNowRank(6);
+			case OPTION_1P_E:
+			case OPTION_RESULT_E_1P:
+			case OPTION_NOW_E_1P:
+				return score.qualifyNowRank(6) && !score.qualifyNowRank(9);
+			case OPTION_RESULT_D_1P:
+			case OPTION_NOW_D_1P:
+			case OPTION_1P_D:
+				return score.qualifyNowRank(9) && !score.qualifyNowRank(12);
+			case OPTION_RESULT_C_1P:
+			case OPTION_NOW_C_1P:
+			case OPTION_1P_C:
+				return score.qualifyNowRank(12) && !score.qualifyNowRank(15);
+			case OPTION_1P_B:
+			case OPTION_RESULT_B_1P:
+			case OPTION_NOW_B_1P:
+				return score.qualifyNowRank(15) && !score.qualifyNowRank(18);
+			case OPTION_1P_A:
+			case OPTION_RESULT_A_1P:
+			case OPTION_NOW_A_1P:
+				return score.qualifyNowRank(18) && !score.qualifyNowRank(21);
+			case OPTION_1P_AA:
+			case OPTION_RESULT_AA_1P:
+			case OPTION_NOW_AA_1P:
+				return score.qualifyNowRank(21) && !score.qualifyNowRank(24);
+			case OPTION_1P_AAA:
+			case OPTION_RESULT_AAA_1P:
+			case OPTION_NOW_AAA_1P:
+				return score.qualifyNowRank(24);
+			case OPTION_BEST_F_1P:
+				return score.qualifyBestRank(0) && !score.qualifyBestRank(6);
+			case OPTION_BEST_E_1P:
+				return score.qualifyBestRank(6) && !score.qualifyBestRank(9);
+			case OPTION_BEST_D_1P:
+				return score.qualifyBestRank(9) && !score.qualifyBestRank(12);
+			case OPTION_BEST_C_1P:
+				return score.qualifyBestRank(12) && !score.qualifyBestRank(15);
+			case OPTION_BEST_B_1P:
+				return score.qualifyBestRank(15) && !score.qualifyBestRank(18);
+			case OPTION_BEST_A_1P:
+				return score.qualifyBestRank(18) && !score.qualifyBestRank(21);
+			case OPTION_BEST_AA_1P:
+				return score.qualifyBestRank(21) && !score.qualifyBestRank(24);
+			case OPTION_BEST_AAA_1P:
+				return score.qualifyBestRank(24);
 		}
 		return false;
 	}
@@ -252,7 +331,21 @@ public abstract class MainState {
 			return getJudgeCount(5, true);
 		case NUMBER_LATE_MISS:
 			return getJudgeCount(5, false);
-		case BUTTON_GAUGE_1P:
+			case NUMBER_TOTALEARLY:
+				int ecount = 0;
+				for (int i = 1; i < 6; i++) {
+					ecount += getJudgeCount(i, true);
+				}
+				return ecount;
+			case NUMBER_TOTALLATE:
+				int count = 0;
+				for (int i = 1; i < 6; i++) {
+					count += getJudgeCount(i, false);
+				}
+				return count;
+			case NUMBER_COMBOBREAK:
+				return getJudgeCount(3, true) + getJudgeCount(3, false) + getJudgeCount(4, true) + getJudgeCount(4, false);
+			case BUTTON_GAUGE_1P:
 			return getMainController().getPlayerResource().getConfig().getGauge();
 		case BUTTON_RANDOM_1P:
 			return getMainController().getPlayerResource().getConfig().getRandom();
@@ -304,12 +397,63 @@ public abstract class MainState {
 				return getMainController().getPlayerResource().getSongdata().getLevel();
 			}
 			return Integer.MIN_VALUE;
-
+			case NUMBER_POINT:
+				return score.getNowScore();
+			case NUMBER_SCORE:
+			case NUMBER_SCORE2:
+				return score.getNowEXScore();
+			case NUMBER_SCORE_RATE:
+				return score.getNowRateInt();
+			case NUMBER_SCORE_RATE_AFTERDOT:
+				return score.getNowRateAfterDot();
+			case NUMBER_TOTAL_RATE:
+			case NUMBER_SCORE_RATE2:
+				return score.getRateInt();
+			case NUMBER_TOTAL_RATE_AFTERDOT:
+			case NUMBER_SCORE_RATE_AFTERDOT2:
+				return score.getRateAfterDot();
+			case NUMBER_HIGHSCORE:
+				return score.getBestScore();
+			case NUMBER_BEST_RATE:
+				return score.getBestRateInt();
+			case NUMBER_BEST_RATE_AFTERDOT:
+				return score.getBestRateAfterDot();
+			case NUMBER_TARGET_SCORE:
+			case NUMBER_TARGET_SCORE2:
+				return score.getRivalScore();
+			case NUMBER_TARGET_SCORE_RATE:
+			case NUMBER_TARGET_TOTAL_RATE:
+			case NUMBER_TARGET_SCORE_RATE2:
+				return score.getRivalRateInt();
+			case NUMBER_TARGET_SCORE_RATE_AFTERDOT:
+			case NUMBER_TARGET_TOTAL_RATE_AFTERDOT:
+			case NUMBER_TARGET_SCORE_RATE_AFTERDOT2:
+				return score.getRivalRateAfterDot();
+			case NUMBER_DIFF_HIGHSCORE:
+				return score.getNowEXScore() - score.getNowBestScore();
+			case NUMBER_DIFF_EXSCORE:
+			case NUMBER_DIFF_EXSCORE2:
+			case NUMBER_DIFF_TARGETSCORE:
+				return score.getNowEXScore() - score.getNowRivalScore();
 		}
 		return 0;
 	}
 
 	public float getSliderValue(int id) {
+		switch (id) {
+			case BARGRAPH_SCORERATE:
+				return score.getRate();
+			case BARGRAPH_SCORERATE_FINAL:
+				return score.getNowRate();
+			case BARGRAPH_BESTSCORERATE_NOW:
+				return score.getNowBestScoreRate();
+			case BARGRAPH_BESTSCORERATE:
+				return score.getBestScoreRate();
+			case BARGRAPH_TARGETSCORERATE_NOW:
+				return score.getNowRivalScoreRate();
+			case BARGRAPH_TARGETSCORERATE:
+				return score.getRivalScoreRate();
+		}
 		return 0;
 	}
 
@@ -347,19 +491,15 @@ public abstract class MainState {
 	private TextureRegion white;
 
 	public TextureRegion getImage(int imageid) {
-		if (getMainController().getPlayerResource().getBGAManager() != null) {
-			if (imageid == IMAGE_BACKBMP) {
-				return getMainController().getPlayerResource().getBGAManager().getBackbmpData();
-			}
-			if (imageid == IMAGE_STAGEFILE) {
-				return getMainController().getPlayerResource().getBGAManager().getStagefileData();
-			}
-		}
-		if(imageid == IMAGE_BLACK) {
+		switch(imageid) {
+		case IMAGE_BACKBMP:
+			return getMainController().getPlayerResource().getBackbmpData();
+		case IMAGE_STAGEFILE:
+			return getMainController().getPlayerResource().getStagefileData();
+		case IMAGE_BLACK:
 			return black;
-		}
-		if(imageid == IMAGE_WHITE) {
-			return white;
+		case IMAGE_WHITE:
+			return white;			
 		}
 		return null;
 	}
@@ -370,5 +510,30 @@ public abstract class MainState {
 
 	public void setStage(Stage stage) {
 		this.stage = stage;
+	}
+	
+	public void setSound(int id, String path, boolean loop) {
+		path = path.substring(0, path.lastIndexOf('.'));
+		for(File f : new File[]{new File(path + ".wav"), new File(path + ".ogg"), new File(path + ".mp3")}) {
+			if(f.exists()) {
+				soundmap.put(id, f.getPath());
+				soundloop.put(id, loop);
+				break;
+			}
+		}
+	}
+	
+	public void play(int id) {
+		final String path = soundmap.get(id);
+		if(path != null) {
+			main.getAudioProcessor().play(path, soundloop.get(id));
+		}
+	}
+	
+	public void stop(int id) {
+		final String path = soundmap.get(id);
+		if(path != null) {
+			main.getAudioProcessor().stop(path);
+		}		
 	}
 }

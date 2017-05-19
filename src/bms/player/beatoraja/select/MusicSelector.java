@@ -6,11 +6,11 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.logging.Logger;
 
+import bms.model.Mode;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.Config.SkinConfig;
 import bms.player.beatoraja.config.KeyConfiguration;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
-import bms.player.beatoraja.play.PlaySkin;
 import bms.player.beatoraja.play.TargetProperty;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.lr2.*;
@@ -59,6 +59,8 @@ public class MusicSelector extends MainState {
 	 * 選択中のモードフィルタ
 	 */
 	private int mode;
+	
+	public static final Mode[] MODE = {null, Mode.BEAT_7K, Mode.BEAT_14K, Mode.POPN_9K, Mode.BEAT_5K, Mode.BEAT_10K};
 	/**
 	 * 選択中のソート
 	 */
@@ -70,11 +72,6 @@ public class MusicSelector extends MainState {
 
 	private PlayerData playerdata;
 
-	private String bgm;
-	private String move;
-	private String folderopen;
-	private String folderclose;
-	private String sorts;
 	private String preview;
 
 	private BitmapFont titlefont;
@@ -104,6 +101,12 @@ public class MusicSelector extends MainState {
 
 	private int panelstate;
 
+	public static final int SOUND_BGM = 0;
+	public static final int SOUND_SCRATCH = 1;
+	public static final int SOUND_FOLDEROPEN = 2;
+	public static final int SOUND_FOLDERCLOSE = 3;
+	public static final int SOUND_CHANGEOPTION = 4;
+	
 	public MusicSelector(MainController main, Config config) {
 		super(main);
 		this.config = config;
@@ -111,41 +114,13 @@ public class MusicSelector extends MainState {
 
 		scorecache = new ScoreDataCache(getMainController().getPlayDataAccessor());
 
-		if (config.getBgmpath().length() > 0) {
-			final File bgmfolder = new File(config.getBgmpath());
-			if (bgmfolder.exists() && bgmfolder.isDirectory()) {
-				for (File f : bgmfolder.listFiles()) {
-					if (bgm == null && f.getName().startsWith("select.")) {
-						bgm = f.getPath();
-						break;
-					}
-				}
-			}
-		}
-		if (bgm != null) {
-			getMainController().getAudioProcessor().play(bgm, true);
-		}
-		if (config.getSoundpath().length() > 0) {
-			final File soundfolder = new File(config.getSoundpath());
-			if (soundfolder.exists() && soundfolder.isDirectory()) {
-				for (File f : soundfolder.listFiles()) {
-					if (move == null && f.getName().startsWith("scratch.")) {
-						move = f.getPath();
-					}
-					if (folderopen == null && f.getName().startsWith("f-open.")) {
-						folderopen = f.getPath();
-					}
-					if (folderclose == null && f.getName().startsWith("f-close.")) {
-						folderclose = f.getPath();
-					}
-					if (sorts == null && f.getName().startsWith("o-change.")) {
-						sorts = f.getPath();
-					}
-				}
-			}
-		}
+		setSound(SOUND_BGM, config.getBgmpath() + File.separatorChar + "select.wav", true);		
+		setSound(SOUND_SCRATCH, config.getSoundpath() + File.separatorChar + "scratch.wav", false);
+		setSound(SOUND_FOLDEROPEN, config.getSoundpath() + File.separatorChar + "f-open.wav", false);
+		setSound(SOUND_FOLDERCLOSE, config.getSoundpath() + File.separatorChar + "f-close.wav", false);
+		setSound(SOUND_CHANGEOPTION, config.getSoundpath() + File.separatorChar + "o-change.wav", false);
 
-		bar = new BarRenderer(this, move, folderclose);
+		bar = new BarRenderer(this);
 	}
 
 	public ScoreDataCache getScoreDataCache() {
@@ -157,35 +132,31 @@ public class MusicSelector extends MainState {
 		final MainController main = getMainController();
 		playerdata = main.getPlayDataAccessor().readPlayerData();
 		scorecache.clear();
+		play(SOUND_BGM);
 
 		final BMSPlayerInputProcessor input = main.getInputProcessor();
 		PlayConfig pc = (config.getMusicselectinput() == 0 ? config.getMode7() : (config.getMusicselectinput() == 1 ? config.getMode9() : config.getMode14()));
 		input.setKeyassign(pc.getKeyassign());
 		input.setControllerConfig(pc.getController());
-
 		bar.updateBar();
 
 		if (getSkin() == null) {
 			try {
 				SkinConfig sc = config.getSkin()[5];
 				if (sc.getPath().endsWith(".json")) {
-					SkinLoader sl = new SkinLoader(
-							RESOLUTION[getMainController().getPlayerResource().getConfig().getResolution()]);
+					SkinLoader sl = new SkinLoader(getMainController().getPlayerResource().getConfig());
 					setSkin(sl.loadSelectSkin(Paths.get(sc.getPath()), sc.getProperty()));
 				} else {
 					LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
 					SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
-					Rectangle srcr = RESOLUTION[header.getResolution()];
-					Rectangle dstr = RESOLUTION[config.getResolution()];
-					LR2SelectSkinLoader dloader = new LR2SelectSkinLoader(srcr.width, srcr.height, dstr.width,
-							dstr.height);
+					LR2SelectSkinLoader dloader = new LR2SelectSkinLoader(header.getResolution(), getMainController().getPlayerResource().getConfig());
 					setSkin(dloader.loadSelectSkin(Paths.get(sc.getPath()).toFile(), this, header, loader.getOption(),
 							sc.getProperty()));
 				}
 			} catch (Throwable e) {
 				e.printStackTrace();
 				SkinLoader sl = new SkinLoader(
-						RESOLUTION[getMainController().getPlayerResource().getConfig().getResolution()]);
+						getMainController().getPlayerResource().getConfig());
 				setSkin(sl.loadSelectSkin(Paths.get(SkinConfig.DEFAULT_SELECT), new HashMap()));
 			}
 		}
@@ -196,11 +167,9 @@ public class MusicSelector extends MainState {
 		titlefont = generator.generateFont(parameter);
 		generator.dispose();
 
-		getTimer()[TIMER_SONGBAR_CHANGE] = getNowTime();
-
 		// search text field
 		if (getStage() == null && ((MusicSelectSkin) getSkin()).getSearchTextRegion() != null) {
-			search = new SearchTextField(this, RESOLUTION[config.getResolution()]);
+			search = new SearchTextField(this, config.getResolution());
 			setStage(search);
 		}
 	}
@@ -210,7 +179,7 @@ public class MusicSelector extends MainState {
 		final SpriteBatch sprite = main.getSpriteBatch();
 		final PlayerResource resource = main.getPlayerResource();
 		final Bar current = bar.getSelected();
-
+		
 		// draw song information
 		sprite.begin();
 		if (current instanceof SongBar) {
@@ -299,7 +268,7 @@ public class MusicSelector extends MainState {
 				preview = song.getPreview();
 				if(preview != null && preview.length() > 0) {
 					preview = Paths.get(song.getPath()).getParent().resolve(preview).toString();
-					getMainController().getAudioProcessor().stop(bgm);
+					stop(SOUND_BGM);
 					getMainController().getAudioProcessor().play(preview, false);					
 				}
 			}
@@ -310,9 +279,7 @@ public class MusicSelector extends MainState {
 			if (current instanceof SongBar) {
 				resource.clear();
 				if (resource.setBMSFile(Paths.get(((SongBar) current).getSongData().getPath()), config, play)) {
-					if (bgm != null) {
-						getMainController().getAudioProcessor().stop(bgm);
-					}
+					stop(SOUND_BGM);
 					if(preview != null && preview.length() > 0) {
 						getMainController().getAudioProcessor().stop(preview);
 						getMainController().getAudioProcessor().dispose(preview);
@@ -362,30 +329,26 @@ public class MusicSelector extends MainState {
 
 		if (numberstate[1] && numtime[1] != 0) {
 			// KEYフィルターの切り替え
-			mode = (mode + 1) % 6;
+			mode = (mode + 1) % MODE.length;
 			numtime[1] = 0;
 			bar.updateBar();
-			if (sorts != null) {
-				getMainController().getAudioProcessor().play(sorts, false);
-			}
+			play(SOUND_CHANGEOPTION);
+			this.config.setModeSort(getMode());
+			
 		}
 		if (numberstate[2] && numtime[2] != 0) {
 			// ソートの切り替え
 			sort = (sort + 1) % BarSorter.getAllSorter().length;
 			numtime[2] = 0;
 			bar.updateBar();
-			if (sorts != null) {
-				getMainController().getAudioProcessor().play(sorts, false);
-			}
+			play(SOUND_CHANGEOPTION);
 		}
 		if (numberstate[3] && numtime[3] != 0) {
 			// LNモードの切り替え
 			config.setLnmode((config.getLnmode() + 1) % 3);
 			numtime[3] = 0;
 			bar.updateBar();
-			if (sorts != null) {
-				getMainController().getAudioProcessor().play(sorts, false);
-			}
+			play(SOUND_CHANGEOPTION);
 		}
 		if (numberstate[4] && numtime[4] != 0) {
 			// change replay
@@ -399,9 +362,7 @@ public class MusicSelector extends MainState {
 				}
 			}
 			numtime[4] = 0;
-			if (sorts != null) {
-				getMainController().getAudioProcessor().play(sorts, false);
-			}
+			play(SOUND_CHANGEOPTION);
 		}
 
 		boolean[] keystate = input.getKeystate();
@@ -475,16 +436,12 @@ public class MusicSelector extends MainState {
 			TargetProperty[] targets = TargetProperty.getAllTargetProperties(getMainController());
 			while(mov > 0) {
 				config.setTarget((config.getTarget() + 1) % targets.length);
-				if (move != null) {
-					getMainController().getAudioProcessor().play(move, false);
-				}
+				play(SOUND_SCRATCH);
 				mov--;
 			}
 			while(mov < 0) {
 				config.setTarget((config.getTarget() + targets.length - 1) % targets.length);
-				if (move != null) {
-					getMainController().getAudioProcessor().play(move, false);
-				}
+				play(SOUND_SCRATCH);
 				mov++;
 			}
 		} else if (input.isSelectPressed()) {
@@ -559,9 +516,7 @@ public class MusicSelector extends MainState {
 				}
 			}
 		} else if (input.getNumberState()[6]) {
-			if (bgm != null) {
-				getMainController().getAudioProcessor().stop(bgm);
-			}
+			stop(SOUND_BGM);
 			if(preview != null && preview.length() > 0) {
 				getMainController().getAudioProcessor().stop(preview);
 				getMainController().getAudioProcessor().dispose(preview);
@@ -593,9 +548,7 @@ public class MusicSelector extends MainState {
 					// open folder
 					cursortime[3] = 0;
 					if (bar.updateBar(current)) {
-						if (folderopen != null) {
-							getMainController().getAudioProcessor().play(folderopen, false);
-						}
+						play(SOUND_FOLDEROPEN);
 					}
 					resetReplayIndex();
 				}
@@ -626,33 +579,21 @@ public class MusicSelector extends MainState {
 		// song bar moved
 		if (bar.getSelected() != current) {
 			getTimer()[TIMER_SONGBAR_CHANGE] = nowtime;
-			getMainController().getPlayerResource().setSongdata((bar.getSelected() instanceof SongBar) ? ((SongBar) bar.getSelected()).getSongData() : null);
 			if(preview != null && preview.length() > 0) {
 				getMainController().getAudioProcessor().stop(preview);
 				getMainController().getAudioProcessor().dispose(preview);
-				getMainController().getAudioProcessor().play(bgm, true);
+				play(SOUND_BGM);
 				preview = null;
 			}
 			showNoteGraph = false;
 		}
+		if(getTimer()[TIMER_SONGBAR_CHANGE] == Long.MIN_VALUE) {
+			getTimer()[TIMER_SONGBAR_CHANGE] = nowtime;			
+		}
 		// update folder
 		if (input.getFunctionstate()[1] && input.getFunctiontime()[1] != 0) {
 			input.getFunctiontime()[1] = 0;
-			if (bar.getSelected() instanceof FolderBar) {
-				FolderBar fb = (FolderBar) bar.getSelected();
-				songdb.updateSongDatas(fb.getFolderData().getPath(), false);
-			} else if (bar.getSelected() instanceof TableBar) {
-				TableBar tb = (TableBar) bar.getSelected();
-				if (tb.getUrl() != null && tb.getUrl().length() > 0) {
-					TableDataAccessor tda = new TableDataAccessor();
-					String[] url = new String[] { tb.getUrl() };
-					tda.updateTableData(url);
-					TableData td = tda.read(tb.getTitle());
-					if (td != null) {
-						tb.setTableData(td);
-					}
-				}
-			}
+			bar.updateFolder();
 		}
 
 		if (input.isExitPressed()) {
@@ -663,9 +604,7 @@ public class MusicSelector extends MainState {
 	public void select(Bar current) {
 		if (current instanceof DirectoryBar) {
 			if (bar.updateBar(current)) {
-				if (folderopen != null) {
-					getMainController().getAudioProcessor().play(folderopen, false);
-				}
+				play(SOUND_FOLDEROPEN);
 			}
 			resetReplayIndex();
 		} else {
@@ -737,9 +676,7 @@ public class MusicSelector extends MainState {
 						break;
 					}
 				}
-				if (bgm != null) {
-					getMainController().getAudioProcessor().stop(bgm);
-				}
+				stop(SOUND_BGM);
 				if(preview != null && preview.length() > 0) {
 					getMainController().getAudioProcessor().stop(preview);
 					getMainController().getAudioProcessor().dispose(preview);
@@ -777,8 +714,9 @@ public class MusicSelector extends MainState {
 		return false;
 	}
 
-	public int getMode() {
-		return mode;
+	public Mode getMode() {
+		return MODE[mode];
+
 	}
 
 	public int getSort() {
@@ -865,30 +803,24 @@ public class MusicSelector extends MainState {
 		case NUMBER_JUDGETIMING:
 			return config.getJudgetiming();
 		case BUTTON_MODE:
+		mode = config.getModeSort();
 			final int[] mode_lr2 = { 0, 2, 4, 5, 1, 3 };
-			return mode_lr2[mode];
+			return mode < mode_lr2.length ? mode_lr2[mode] : mode;
 		case BUTTON_SORT:
 			return sort;
 		case BUTTON_LNMODE:
 			return config.getLnmode();
 		case NUMBER_SCORE_RATE:
-			if (bar.getSelected().getScore() != null) {
-				final IRScoreData score = bar.getSelected().getScore();
-				return score.getNotes() == 0 ? 0 : score.getExscore() * 100 / (score.getNotes() * 2);
-			}
-			return Integer.MIN_VALUE;
+			return bar.getSelected().getScore() != null ? getScoreDataProperty().getRateInt() : Integer.MIN_VALUE;
 		case NUMBER_SCORE_RATE_AFTERDOT:
-			if (bar.getSelected().getScore() != null) {
-				final IRScoreData score = bar.getSelected().getScore();
-				return score.getNotes() == 0 ? 0 : (score.getExscore() * 1000 / (score.getNotes() * 2)) % 10;
-			}
-			return Integer.MIN_VALUE;
+			return bar.getSelected().getScore() != null ? getScoreDataProperty().getNowRateAfterDot() : Integer.MIN_VALUE;
 		}
 		return super.getNumberValue(id);
 	}
 
 	public String getTextValue(int id) {
 		switch (id) {
+		case STRING_TITLE:
 		case STRING_FULLTITLE:
 			if (bar.getSelected() instanceof DirectoryBar) {
 				return bar.getSelected().getTitle();
@@ -1143,62 +1075,6 @@ public class MusicSelector extends MainState {
 		case OPTION_NO_REPLAYDATA4:
 			return (current instanceof SelectableBar) && ((SelectableBar) current).getExistsReplayData().length > 3
 					&& !((SelectableBar) current).getExistsReplayData()[3];
-		case OPTION_1P_F:
-			if (bar.getSelected().getScore() != null) {
-				final IRScoreData score = bar.getSelected().getScore();
-				final int drate = score.getNotes() == 0 ? 0 : score.getExscore() * 10000 / (score.getNotes() * 2);
-				return drate <= 2222;
-			}
-			return false;
-		case OPTION_1P_E:
-			if (bar.getSelected().getScore() != null) {
-				final IRScoreData score = bar.getSelected().getScore();
-				final int drate = score.getNotes() == 0 ? 0 : score.getExscore() * 10000 / (score.getNotes() * 2);
-				return drate > 2222 && drate <= 3333;
-			}
-			return false;
-		case OPTION_1P_D:
-			if (bar.getSelected().getScore() != null) {
-				final IRScoreData score = bar.getSelected().getScore();
-				final int drate = score.getNotes() == 0 ? 0 : score.getExscore() * 10000 / (score.getNotes() * 2);
-				return drate > 3333 && drate <= 4444;
-			}
-			return false;
-		case OPTION_1P_C:
-			if (bar.getSelected().getScore() != null) {
-				final IRScoreData score = bar.getSelected().getScore();
-				final int drate = score.getNotes() == 0 ? 0 : score.getExscore() * 10000 / (score.getNotes() * 2);
-				return drate > 4444 && drate <= 5555;
-			}
-			return false;
-		case OPTION_1P_B:
-			if (bar.getSelected().getScore() != null) {
-				final IRScoreData score = bar.getSelected().getScore();
-				final int drate = score.getNotes() == 0 ? 0 : score.getExscore() * 10000 / (score.getNotes() * 2);
-				return drate > 5555 && drate <= 6666;
-			}
-			return false;
-		case OPTION_1P_A:
-			if (bar.getSelected().getScore() != null) {
-				final IRScoreData score = bar.getSelected().getScore();
-				final int drate = score.getNotes() == 0 ? 0 : score.getExscore() * 10000 / (score.getNotes() * 2);
-				return drate > 6666 && drate <= 7777;
-			}
-			return false;
-		case OPTION_1P_AA:
-			if (bar.getSelected().getScore() != null) {
-				final IRScoreData score = bar.getSelected().getScore();
-				final int drate = score.getNotes() == 0 ? 0 : score.getExscore() * 10000 / (score.getNotes() * 2);
-				return drate > 7777 && drate <= 8888;
-			}
-			return false;
-		case OPTION_1P_AAA:
-			if (bar.getSelected().getScore() != null) {
-				final IRScoreData score = bar.getSelected().getScore();
-				final int drate = score.getNotes() == 0 ? 0 : score.getExscore() * 10000 / (score.getNotes() * 2);
-				return drate > 8888;
-			}
-			return false;
 		}
 		return super.getBooleanValue(id);
 	}

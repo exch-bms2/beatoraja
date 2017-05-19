@@ -4,19 +4,19 @@ import java.io.File;
 import java.nio.file.Paths;
 import java.util.*;
 
-import bms.player.beatoraja.play.gauge.GrooveGauge;
+import static bms.player.beatoraja.ClearType.*;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.lr2.*;
 
-import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.utils.FloatArray;
+
 import java.util.logging.Logger;
 
 import bms.model.BMSModel;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.Config.SkinConfig;
 
-import static bms.player.beatoraja.Resolution.*;
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
 public class GradeResult extends MainState {
@@ -28,8 +28,8 @@ public class GradeResult extends MainState {
 
 	private int saveReplay = -1;
 
-	private String clear;
-	private String fail;
+	public static final int SOUND_CLEAR = 0;
+	public static final int SOUND_FAIL = 1;
 
 	public GradeResult(MainController main) {
 		super(main);
@@ -38,42 +38,29 @@ public class GradeResult extends MainState {
 	public void create() {
 		final PlayerResource resource = getMainController().getPlayerResource();
 
-		if (resource.getConfig().getSoundpath().length() > 0) {
-			final File soundfolder = new File(resource.getConfig().getSoundpath());
-			if (soundfolder.exists() && soundfolder.isDirectory()) {
-				for (File f : soundfolder.listFiles()) {
-					if (clear == null && f.getName().startsWith("course_clear.")) {
-						clear = f.getPath();
-					}
-					if (fail == null && f.getName().startsWith("course_fail.")) {
-						fail = f.getPath();
-					}
-				}
-			}
-		}
+		setSound(SOUND_CLEAR, resource.getConfig().getSoundpath() + File.separatorChar + "course_clear.wav", false);
+		setSound(SOUND_FAIL, resource.getConfig().getSoundpath() + File.separatorChar + "course_fail.wav", false);
 
 		try {
 			SkinConfig sc = resource.getConfig().getSkin()[15];
 			if (sc.getPath().endsWith(".json")) {
-				SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
+				SkinLoader sl = new SkinLoader(resource.getConfig());
 				setSkin(sl.loadResultSkin(Paths.get(sc.getPath()), sc.getProperty()));
 			} else {
 				LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
 				SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
-				Rectangle srcr = RESOLUTION[header.getResolution()];
-				Rectangle dstr = RESOLUTION[resource.getConfig().getResolution()];
-				LR2ResultSkinLoader dloader = new LR2ResultSkinLoader(srcr.width, srcr.height, dstr.width, dstr.height);
+				LR2ResultSkinLoader dloader = new LR2ResultSkinLoader(header.getResolution(), resource.getConfig());
 				setSkin(dloader.loadResultSkin(Paths.get(sc.getPath()).toFile(), this, header, loader.getOption(),
 						sc.getProperty()));
 			}
 		} catch (Throwable e) {
 			e.printStackTrace();
-			SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
+			SkinLoader sl = new SkinLoader(resource.getConfig());
 			setSkin(sl.loadResultSkin(Paths.get("skin/default/graderesult.json"), new HashMap()));
 		}
 		
         for(int i = resource.getCourseGauge().size();i < resource.getCourseBMSModels().length;i++) {
-            List<Float> list = new ArrayList<Float>();
+        	FloatArray list = new FloatArray();
             for(int l = 0;l < (resource.getCourseBMSModels()[i].getLastNoteTime() + 500) / 500;l++) {
                 list.add(0f);
             }
@@ -84,7 +71,7 @@ public class GradeResult extends MainState {
 
 		if (resource.getAutoplay() == 0
 				&& resource.getCourseScoreData() != null
-				&& resource.getCourseScoreData().getClear() >= GrooveGauge.CLEARTYPE_EASY
+				&& resource.getCourseScoreData().getClear() >= Easy.id
 				&& !getMainController().getPlayDataAccessor().existsReplayData(resource.getCourseBMSModels(),
 				resource.getConfig().getLnmode(), 0, resource.getConstraint())) {
 			saveReplayData(0);
@@ -104,16 +91,11 @@ public class GradeResult extends MainState {
 		}
 
 		final MainController main = getMainController();
-		final PlayerResource resource = getMainController().getPlayerResource();
 
 		if (getTimer()[TIMER_FADEOUT] != Long.MIN_VALUE) {
 			if (time > getTimer()[TIMER_FADEOUT] + getSkin().getFadeout()) {
-				if (clear != null) {
-					getMainController().getAudioProcessor().stop(clear);
-				}
-				if (fail != null) {
-					getMainController().getAudioProcessor().stop(fail);
-				}
+				stop(SOUND_CLEAR);
+				stop(SOUND_FAIL);
 				main.changeState(MainController.STATE_SELECTMUSIC);
 			}
 		} else if (time > getSkin().getScene()) {
@@ -150,8 +132,6 @@ public class GradeResult extends MainState {
         }
     }
 
-
-
     public void updateScoreDatabase() {
 		saveReplay = -1;
 		final PlayerResource resource = getMainController().getPlayerResource();
@@ -162,7 +142,7 @@ public class GradeResult extends MainState {
 		}
 		boolean dp = false;
 		for (BMSModel model : models) {
-			dp |= (model.getUseKeys() == 10 || model.getUseKeys() == 14);
+			dp |= model.getMode().player == 2;
 		}
 		newscore.setCombo(resource.getMaxcombo());
 		int random = 0;
@@ -183,24 +163,17 @@ public class GradeResult extends MainState {
 		oldexscore = score.getExscore();
 		oldmisscount = score.getMinbp();
 		oldcombo = score.getCombo();
-		int notes = 0;
-		for (BMSModel model : resource.getCourseBMSModels()) {
-			notes += model.getTotalNotes();
-		}
-		rate = score.getExscore() * 10000 / (notes * 2);
-		oldrate = oldexscore * 10000 / (notes * 2);
+
+		getScoreDataProperty().setTargetScore(oldexscore, resource.getRivalScoreData(), resource.getBMSModel().getTotalNotes());
+		getScoreDataProperty().update(newscore);
 
 		getMainController().getPlayDataAccessor().writeScoreDara(newscore, models, resource.getConfig().getLnmode(),
 				random, resource.getConstraint(), resource.isUpdateScore());
 
-		if (newscore.getClear() != GrooveGauge.CLEARTYPE_FAILED) {
-			if (this.clear != null) {
-				getMainController().getAudioProcessor().play(clear, true);
-			}
+		if (newscore.getClear() != Failed.id) {
+			play(SOUND_CLEAR);
 		} else {
-			if (fail != null) {
-				getMainController().getAudioProcessor().play(fail, true);
-			}
+			play(SOUND_FAIL);
 		}
 
 		Logger.getGlobal().info("スコアデータベース更新完了 ");
@@ -293,23 +266,6 @@ public class GradeResult extends MainState {
 					notes += model.getTotalNotes();
 				}
 				return notes;
-			case NUMBER_TOTALEARLY:
-				int ecount = 0;
-				for (int i = 1; i < 6; i++) {
-					ecount += getJudgeCount(i, true);
-				}
-				return ecount;
-			case NUMBER_TOTALLATE:
-				int count = 0;
-				for (int i = 1; i < 6; i++) {
-					count += getJudgeCount(i, false);
-				}
-				return count;
-			case NUMBER_SCORE_RATE:
-				return rate / 100;
-			case NUMBER_SCORE_RATE_AFTERDOT:
-				return (rate / 10) % 10;
-
 		}
 		return super.getNumberValue(id);
 	}
@@ -332,65 +288,30 @@ public class GradeResult extends MainState {
 		}
 	}
 
-	private int rate;
-	private int oldrate;
-
 	public boolean getBooleanValue(int id) {
 		final PlayerResource resource = getMainController().getPlayerResource();
 		final IRScoreData score = resource.getCourseScoreData();
 		switch (id) {
 			case OPTION_RESULT_CLEAR:
-				return score.getClear() != GrooveGauge.CLEARTYPE_FAILED;
+				return score.getClear() != Failed.id;
 			case OPTION_RESULT_FAIL:
-				return score.getClear() == GrooveGauge.CLEARTYPE_FAILED;
-			case OPTION_RESULT_F_1P:
-			case OPTION_NOW_F_1P:
-				return rate <= 2222;
-			case OPTION_RESULT_E_1P:
-			case OPTION_NOW_E_1P:
-				return rate > 2222 && rate <= 3333;
-			case OPTION_RESULT_D_1P:
-			case OPTION_NOW_D_1P:
-				return rate > 3333 && rate <= 4444;
-			case OPTION_RESULT_C_1P:
-			case OPTION_NOW_C_1P:
-				return rate > 4444 && rate <= 5555;
-			case OPTION_RESULT_B_1P:
-			case OPTION_NOW_B_1P:
-				return rate > 5555 && rate <= 6666;
-			case OPTION_RESULT_A_1P:
-			case OPTION_NOW_A_1P:
-				return rate > 6666 && rate <= 7777;
-			case OPTION_RESULT_AA_1P:
-			case OPTION_NOW_AA_1P:
-				return rate > 7777 && rate <= 8888;
-			case OPTION_RESULT_AAA_1P:
-			case OPTION_NOW_AAA_1P:
-				return rate > 8888;
-			case OPTION_BEST_F_1P:
-				return oldrate <= 2222;
-			case OPTION_BEST_E_1P:
-				return oldrate > 2222 && oldrate <= 3333;
-			case OPTION_BEST_D_1P:
-				return oldrate > 3333 && oldrate <= 4444;
-			case OPTION_BEST_C_1P:
-				return oldrate > 4444 && oldrate <= 5555;
-			case OPTION_BEST_B_1P:
-				return oldrate > 5555 && oldrate <= 6666;
-			case OPTION_BEST_A_1P:
-				return oldrate > 6666 && oldrate <= 7777;
-			case OPTION_BEST_AA_1P:
-				return oldrate > 7777 && oldrate <= 8888;
-			case OPTION_BEST_AAA_1P:
-				return oldrate > 8888;
+				return score.getClear() == Failed.id;
 			case OPTION_UPDATE_SCORE:
 				return score.getExscore() > oldexscore;
+			case OPTION_DRAW_SCORE:
+				return score.getExscore() == oldexscore;
 			case OPTION_UPDATE_MAXCOMBO:
 				return score.getCombo() > oldcombo;
+			case OPTION_DRAW_MAXCOMBO:
+				return score.getCombo() == oldcombo;
 			case OPTION_UPDATE_MISSCOUNT:
 				return score.getMinbp() < oldmisscount;
+			case OPTION_DRAW_MISSCOUNT:
+				return score.getMinbp() == oldmisscount;
 			case OPTION_UPDATE_SCORERANK:
-				return rate / 1111 > oldrate / 1111;
+				return getScoreDataProperty().getNowRate() > getScoreDataProperty().getBestScoreRate();
+			case OPTION_DRAW_SCORERANK:
+				return getScoreDataProperty().getNowRate() == getScoreDataProperty().getBestScoreRate();
 			case OPTION_NO_REPLAYDATA:
 				return !getMainController().getPlayDataAccessor().existsReplayData(resource.getCourseBMSModels(),
 						resource.getConfig().getLnmode(), 0,resource.getConstraint());

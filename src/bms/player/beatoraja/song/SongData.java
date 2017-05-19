@@ -98,7 +98,7 @@ public class SongData {
 		} catch(NumberFormatException e) {
 
 		}
-		mode = model.getUseKeys();
+		mode = model.getMode().id;
 		if(difficulty == 0) {
 			difficulty = model.getDifficulty();			
 		}

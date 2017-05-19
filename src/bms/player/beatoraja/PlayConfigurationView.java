@@ -10,6 +10,8 @@ import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import bms.player.beatoraja.skin.SkinLoader;
+import bms.player.beatoraja.skin.SkinType;
+import com.badlogic.gdx.Graphics;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 
@@ -45,7 +47,7 @@ public class PlayConfigurationView implements Initializable {
 
 
 	@FXML
-	private ComboBox<Integer> resolution;
+	private ComboBox<Resolution> resolution;
 
 	@FXML
 	private ComboBox<Integer> playconfig;
@@ -132,8 +134,10 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private ComboBox<Integer> judgealgorithm;
 
-        @FXML  
-        private ComboBox<Integer> jkoc_hack;
+    @FXML  
+    private ComboBox<Integer> jkoc_hack;
+    @FXML  
+    private CheckBox usecim;
         
 	private Config config;;
 	@FXML
@@ -141,7 +145,7 @@ public class PlayConfigurationView implements Initializable {
 
 	private SkinConfigurationView skinview;
 	@FXML
-	private ComboBox<Integer> skincategory;
+	private ComboBox<SkinType> skincategory;
 	@FXML
 	private ComboBox<SkinHeader> skin;
 	@FXML
@@ -172,8 +176,22 @@ public class PlayConfigurationView implements Initializable {
 		lr2configuration.setHgap(25);
 		lr2configuration.setVgap(4);
 
-		initComboBox(resolution, new String[] { "SD (640 x 480)", "HD (1280 x 720)", "FULL HD (1920 x 1080)",
-				"ULTRA HD (3940 x 2160)" });
+		resolution.setCellFactory(new Callback<ListView<Resolution>, ListCell<Resolution>>() {
+			public ListCell<Resolution> call(ListView<Resolution> param) {
+				return new ResolutionListCell();
+			}
+		});
+		resolution.setButtonCell(new ResolutionListCell());
+		resolution.getItems().clear();
+		Graphics.DisplayMode[] displays = MainLoader.getAvailableDisplayMode();
+		for(Resolution r : Resolution.values()) {
+			for(Graphics.DisplayMode display : displays) {
+				if(display.width == r.width && display.height == r.height) {
+					resolution.getItems().add(r);
+					break;
+				}
+			}
+		}
 		initComboBox(scoreop, new String[] { "OFF", "MIRROR", "RANDOM", "R-RANDOM", "S-RANDOM", "SPIRAL", "H-RANDOM",
 				"ALL-SCR", "RANDOM-EX", "S-RANDOM-EX" });
 		initComboBox(gaugeop, new String[] { "ASSIST EASY", "EASY", "NORMAL", "HARD", "EX-HARD", "HAZARD" });
@@ -184,11 +202,13 @@ public class PlayConfigurationView implements Initializable {
 		initComboBox(playconfig, new String[] { "5/7KEYS", "10/14KEYS", "9KEYS" });
 		initComboBox(lntype, new String[] { "LONG NOTE", "CHARGE NOTE", "HELL CHARGE NOTE" });
 		initComboBox(judgealgorithm, new String[] { arg1.getString("JUDGEALG_LR2"), arg1.getString("JUDGEALG_AC"), arg1.getString("JUDGEALG_BOTTOM_PRIORITY") });
-		initComboBox(skincategory,
-				new String[] { "7KEYS", "5KEYS", "14KEYS", "10KEYS", "9KEYS", "MUSIC SELECT", "DECIDE", "RESULT",
-						"KEY CONFIG", "SKIN SELECT", "SOUND SET", "THEME", "7KEYS BATTLE", "5KEYS BATTLE",
-						"9KEYS BATTLE", "COURSE RESULT" });
-		skincategory.getItems().setAll(0, 1, 2, 3, 4, 5, 6, 7, 15);
+
+		skincategory.setCellFactory(new Callback<ListView<SkinType>, ListCell<SkinType>>() {
+			public ListCell<SkinType> call(ListView<SkinType> param) { return new SkinTypeCell(); }
+		});
+		skincategory.setButtonCell(new SkinTypeCell());
+		skincategory.getItems().addAll(SkinType.values());
+
 		initComboBox(audio, new String[] { "OpenAL (LibGDX Sound)", "OpenAL (LibGDX AudioDevice)", "ASIO" });
 		audio.getItems().setAll(0, 2);
 
@@ -246,9 +266,11 @@ public class PlayConfigurationView implements Initializable {
 
 		judgealgorithm.setValue(config.getJudgeAlgorithm());
 
-                // int b = Boolean.valueOf(config.getJKOC()).compareTo(false);
+        // int b = Boolean.valueOf(config.getJKOC()).compareTo(false);
+        
+        jkoc_hack.setValue(Boolean.valueOf(config.getJKOC()).compareTo(false));
+        usecim.setSelected(config.isCacheSkinImage());
                 
-                jkoc_hack.setValue(Boolean.valueOf(config.getJKOC()).compareTo(false));
 		folderlamp.setSelected(config.isFolderlamp());
 
 		inputduration.getValueFactory().setValue(config.getInputduration());
@@ -258,7 +280,7 @@ public class PlayConfigurationView implements Initializable {
 		updateAudioDriver();
 		playconfig.setValue(0);
 		updatePlayConfig();
-		skincategory.setValue(0);
+		skincategory.setValue(SkinType.PLAY_7KEYS);
 		updateSkinCategory();
 
 		irname.setValue(config.getIrname());
@@ -305,14 +327,14 @@ public class PlayConfigurationView implements Initializable {
 
 		config.setJudgeAlgorithm(judgealgorithm.getValue());
     
-                // jkoc_hack is integer but *.setJKOC needs boolean type  
-                if(jkoc_hack.getValue() > 0)
-                    config.setJKOC(true);
-                else
-                    config.setJKOC(false);
-                
+        // jkoc_hack is integer but *.setJKOC needs boolean type  
+        if(jkoc_hack.getValue() > 0)
+            config.setJKOC(true);
+        else
+            config.setJKOC(false);
 
-		config.setFolderlamp(folderlamp.isSelected());
+        config.setCacheSkinImage(usecim.isSelected());
+        config.setFolderlamp(folderlamp.isSelected());
 
 		config.setInputduration(getValue(inputduration));
 
@@ -475,11 +497,11 @@ public class PlayConfigurationView implements Initializable {
 		}
 
 		skin.getItems().clear();
-		SkinHeader[] headers = skinview.getSkinHeader(skincategory.getValue());
+		SkinHeader[] headers = skinview.getSkinHeader(skincategory.getValue().getId());
 		skin.getItems().addAll(headers);
-		mode = skincategory.getValue();
-		if (config.getSkin()[skincategory.getValue()] != null) {
-			SkinConfig skinconf = config.getSkin()[skincategory.getValue()];
+		mode = skincategory.getValue().getId();
+		if (config.getSkin()[skincategory.getValue().getId()] != null) {
+			SkinConfig skinconf = config.getSkin()[skincategory.getValue().getId()];
 			if (skinconf != null) {
 				for (SkinHeader header : skin.getItems()) {
 					if (header != null && header.getPath().equals(Paths.get(skinconf.getPath()))) {
@@ -621,6 +643,17 @@ public class PlayConfigurationView implements Initializable {
 		System.exit(0);
 	}
 
+	static class ResolutionListCell extends ListCell<Resolution> {
+
+		@Override
+		protected void updateItem(Resolution arg0, boolean arg1) {
+			super.updateItem(arg0, arg1);
+			if (arg0 != null) {
+				setText(arg0.name() + " (" + arg0.width + " x " + arg0.height + ")");
+			}
+		}
+	}
+
 	class OptionListCell extends ListCell<Integer> {
 
 		private final String[] strings;
@@ -647,6 +680,17 @@ public class PlayConfigurationView implements Initializable {
 				setText(arg0.getName() + (arg0.getType() == SkinHeader.TYPE_BEATORJASKIN ? "" : " (LR2 Skin)"));
 			} else {
 				setText("");
+			}
+		}
+	}
+
+	class SkinTypeCell extends ListCell<SkinType> {
+
+		@Override
+		protected void updateItem(SkinType arg0, boolean arg1) {
+			super.updateItem(arg0, arg1);
+			if (arg0 != null) {
+				setText(arg0.getName());
 			}
 		}
 	}

@@ -14,6 +14,7 @@
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
@@ -324,10 +325,14 @@
                               <Button mnemonicParsing="false" onAction="#importScoreDataFromLR2" text="%IMPORT_LR2_SCORE" />
                               <HBox prefHeight="37.0" prefWidth="723.0">
                                  <children>
-                                    <Label contentDisplay="CENTER" prefHeight="18.0" prefWidth="127.0" text="%JKOC_HACK" textAlignment="CENTER" />
+                                    <Label contentDisplay="CENTER" prefHeight="18.0" prefWidth="127.0" text="%JKOC_HACK" textAlignment="CENTER">
+                                       <tooltip>
+                                          <Tooltip text="Some USB adapters for JKOC/USKOC require this simple feature. It prevents axial movements upon pressing any key on controller." textAlignment="CENTER" />
+                                       </tooltip></Label>
                                     <ComboBox fx:id="jkoc_hack" prefWidth="150.0" />
                                  </children>
                               </HBox>
+                              <CheckBox fx:id="usecim" mnemonicParsing="false" prefHeight="25.0" prefWidth="133.0" text="%CACHE_SKIN_IMAGE" />
                            </children>
                         </VBox>
                      </children>

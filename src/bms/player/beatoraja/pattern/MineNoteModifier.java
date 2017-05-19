@@ -19,7 +19,7 @@ public class MineNoteModifier extends PatternModifier {
 	@Override
 	public List<PatternModifyLog> modify(BMSModel model) {
 		for (TimeLine tl : model.getAllTimeLines()) {
-			for(int lane = 0;lane < 18;lane++) {
+			for(int lane = 0;lane < model.getMode().key;lane++) {
 				if(tl.getNote(lane) instanceof MineNote) {
 					exists = true;
 					tl.setNote(lane, null);

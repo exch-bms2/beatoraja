@@ -10,6 +10,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.logging.Logger;
 
+import bms.player.beatoraja.Config;
 import bms.player.beatoraja.Resolution;
 import bms.player.beatoraja.play.*;
 import bms.player.beatoraja.play.bga.BGAProcessor;
@@ -31,9 +32,12 @@ import bms.player.beatoraja.select.MusicSelectSkin;
 import bms.player.beatoraja.select.SkinBar;
 import bms.player.beatoraja.select.SkinDistributionGraph;
 
+import static bms.player.beatoraja.Resolution.*;
+
 public class SkinLoader {
 
-	private Rectangle dstr;
+	private Resolution dstr;
+	private boolean usecim;
 
 	private JsonSkin sk;
 
@@ -42,27 +46,29 @@ public class SkinLoader {
 	Map<String, String> filemap = new HashMap();
 
 	public SkinLoader() {
-		this(Resolution.RESOLUTION[1]);
+		dstr = HD;
+		usecim = false;
 	}
 
-	public SkinLoader(Rectangle r) {
-		dstr = r;
+	public SkinLoader(Config c) {
+		dstr = c.getResolution();
+		usecim = false;
 	}
 
 	public MusicResultSkin loadResultSkin(Path p, Map property) {
-		return (MusicResultSkin) load(p, 7, property);
+		return (MusicResultSkin) load(p, SkinType.RESULT, property);
 	}
 
 	public MusicDecideSkin loadDecideSkin(Path p, Map property) {
-		return (MusicDecideSkin) load(p, 6, property);
+		return (MusicDecideSkin) load(p, SkinType.DECIDE, property);
 	}
 
 	public MusicSelectSkin loadSelectSkin(Path p, Map property) {
-		return (MusicSelectSkin) load(p, 5, property);
+		return (MusicSelectSkin) load(p, SkinType.MUSIC_SELECT, property);
 	}
 
-	public PlaySkin loadPlaySkin(Path p, int skinmode, Map property) {
-		return (PlaySkin) load(p, skinmode, property);
+	public PlaySkin loadPlaySkin(Path p, SkinType type, Map property) {
+		return (PlaySkin) load(p, type, property);
 	}
 
 	public SkinHeader loadHeader(Path p) {
@@ -106,29 +112,36 @@ public class SkinLoader {
 		return header;
 	}
 
-	public Skin load(Path p, int type, Map property) {
+	public Skin load(Path p, SkinType type, Map property) {
 		Skin skin = null;
 		try {
 			Json json = new Json();
 			json.setIgnoreUnknownFields(true);
 
 			sk = json.fromJson(JsonSkin.class, new FileReader(p.toFile()));
+			Resolution src = HD;
+			for(Resolution r : Resolution.values()) {
+				if(sk.w == r.width && sk.h == r.height) {
+					src = r;
+					break;
+				}
+			}
 
 			texmap = new HashMap();
 
-			if (type >= 0 && type < 5) {
-				skin = new PlaySkin(sk.w, sk.h, dstr.width, dstr.height);
+			if (type.isPlay()) {
+				skin = new PlaySkin(src, dstr);
 				((PlaySkin) skin).setClose(sk.close);
 				((PlaySkin) skin).setPlaystart(sk.playstart);
 			}
-			if (type == 5) {
-				skin = new MusicSelectSkin(sk.w, sk.h, dstr.width, dstr.height);
+			if (type == SkinType.MUSIC_SELECT) {
+				skin = new MusicSelectSkin(src, dstr);
 			}
-			if (type == 6) {
-				skin = new MusicDecideSkin(sk.w, sk.h, dstr.width, dstr.height);
+			if (type == SkinType.DECIDE) {
+				skin = new MusicDecideSkin(src, dstr);
 			}
-			if (type == 7) {
-				skin = new MusicResultSkin(sk.w, sk.h, dstr.width, dstr.height);
+			if (type == SkinType.RESULT) {
+				skin = new MusicResultSkin(src, dstr);
 			}
 
 			Map<Integer, Boolean> op = new HashMap<>();
@@ -268,9 +281,9 @@ public class SkinLoader {
 								if (text.font.equals(font.id)) {
 									if (text.ref < 0) {
 										Animation a = dst.dst[0];
-										Rectangle r = new Rectangle(a.x * (dstr.width / sk.w),
-												a.y * (dstr.height / sk.h), a.w * (dstr.width / sk.w),
-												a.h * (dstr.height / sk.h));
+										Rectangle r = new Rectangle(a.x * ((float)dstr.width / sk.w),
+												a.y * ((float)dstr.height / sk.h), a.w * ((float)dstr.width / sk.w),
+												a.h * ((float)dstr.height / sk.h));
 										((MusicSelectSkin) skin).setSearchTextRegion(r);
 									} else {
 										SkinText st = new SkinTextFont(p.getParent().resolve(font.path).toString(), 0,
@@ -292,7 +305,7 @@ public class SkinLoader {
 
 							obj = new SkinSlider(getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy),
 									img.timer, img.cycle, img.angle, (int) ((img.angle == 1 || img.angle == 3
-											? (dstr.width / sk.w) : (dstr.height / sk.h)) * img.range),
+											? ((float)dstr.width / sk.w) : ((float)dstr.height / sk.h)) * img.range),
 									img.type);
 							break;
 						}
@@ -358,11 +371,17 @@ public class SkinLoader {
 						SkinSource[] mines = getNoteTexture(sk.note.mine, p);
 
 						Rectangle[] region = new Rectangle[sk.note.dst.length];
-						float dx = dstr.width / sk.w;
-						float dy = dstr.height / sk.h;
+						float[] scale = new float[region.length];
+						float dx = (float)dstr.width / sk.w;
+						float dy = (float)dstr.height / sk.h;
 						for (int i = 0; i < region.length; i++) {
 							Animation dest = sk.note.dst[i];
 							region[i] = new Rectangle(dest.x * dx, dest.y * dy, dest.w * dx, dest.h * dy);
+							if(i < sk.note.size.length) {
+								scale[i] = sk.note.size[i] * dy;
+							} else {
+								scale[i] = ((SkinSourceImage)notes[i]).getImages()[0][0].getRegionHeight() * dy;
+							}
 						}
 						Rectangle[] gregion = new Rectangle[sk.note.group.length];
 						SkinImage[] lines = new SkinImage[gregion.length];
@@ -385,8 +404,8 @@ public class SkinLoader {
 						}
 						((PlaySkin) skin).setLine(lines);
 
-						SkinNote sn = new SkinNote(notes, lnss, mines, ((SkinSourceImage)notes[0]).getImages()[0][0].getRegionHeight() * dy);
-						sn.setLaneRegion(region);
+						SkinNote sn = new SkinNote(notes, lnss, mines);
+						sn.setLaneRegion(region, scale);
 						((PlaySkin) skin).setLaneGroupRegion(gregion);
 						obj = sn;
 					}
@@ -756,16 +775,19 @@ public class SkinLoader {
 		}
 		return images;
 	}
+	
+	private Texture getTexture(String path) {
+		return getTexture(path, usecim);
+	}
 
-	public static Texture getTexture(String path) {
-		// TODO cim生成を選択式にするべきか？
+	public static Texture getTexture(String path, boolean usecim) {
 		try {
 			long modifiedtime = Files.getLastModifiedTime(Paths.get(path)).toMillis() / 1000;
 			
 			String cim = path.substring(0, path.lastIndexOf('.')) + "__" + modifiedtime + ".cim";
 			if (Files.exists(Paths.get(cim))) {
 				return new Texture(Gdx.files.internal(cim));
-			} else {
+			} else if(usecim){
 				Pixmap pixmap = new Pixmap(Gdx.files.internal(path));
 				
 				try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get(path).getParent())) {
@@ -784,6 +806,8 @@ public class SkinLoader {
 				Texture tex = new Texture(pixmap);
 				pixmap.dispose();
 				return tex;
+			} else {
+				return new Texture(Gdx.files.internal(path));
 			}
 		} catch (Throwable e) {
 			e.printStackTrace();
@@ -953,6 +977,7 @@ public class SkinLoader {
 		public String[] hidden = new String[0];
 		public String[] processed = new String[0];
 		public Animation[] dst = new Animation[0];
+		public float[] size = new float[0];
 		public Destination[] group = new Destination[0];
 	}
 

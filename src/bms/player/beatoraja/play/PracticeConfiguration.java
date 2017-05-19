@@ -4,10 +4,10 @@ import java.io.*;
 import java.nio.file.*;
 
 import bms.model.BMSModel;
+import bms.model.Mode;
 import bms.model.TimeLine;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
-import bms.player.beatoraja.play.gauge.*;
 
 import bms.player.beatoraja.skin.SkinNoteDistributionGraph;
 import com.badlogic.gdx.Gdx;
@@ -30,8 +30,8 @@ public class PracticeConfiguration {
 
 	private static final String[] GAUGE = { "ASSIST EASY", "EASY", "NORMAL", "HARD", "EX-HARD", "HAZARD", "GRADE",
 			"EX GRADE", "EXHARD GRADE" };
-	private static final String[] RANDOM = { "NORMAL", "MIRROR", "RANDOM", "R-RANDOM", "S-RANDOM", "SPIRAL",
-			"H-RANDOM", "ALL-SCR", "RANDOM-EX", "S-RANDOM-EX" };
+	private static final String[] RANDOM = { "NORMAL", "MIRROR", "RANDOM", "R-RANDOM", "S-RANDOM", "SPIRAL", "H-RANDOM",
+			"ALL-SCR", "RANDOM-EX", "S-RANDOM-EX" };
 	private static final String[] DPRANDOM = { "NORMAL", "FLIP" };
 
 	private PracticeProperty property = new PracticeProperty();
@@ -78,51 +78,22 @@ public class PracticeConfiguration {
 	}
 
 	public GrooveGauge getGauge(BMSModel model) {
-		GrooveGauge gauge = null;
-		switch (property.gaugetype) {
-		case 0:
-			gauge = new AssistEasyGrooveGauge(model);
-			break;
-		case 1:
-			gauge = new EasyGrooveGauge(model);
-			break;
-		case 2:
-			gauge = new NormalGrooveGauge(model);
-			break;
-		case 3:
-			gauge = new HardGrooveGauge(model);
-			break;
-		case 4:
-			gauge = new ExhardGrooveGauge(model);
-			break;
-		case 5:
-			gauge = new HazardGrooveGauge(model);
-			break;
-		case 6:
-			gauge = new GradeGrooveGauge(model);
-			break;
-		case 7:
-			gauge = new ExgradeGrooveGauge(model);
-			break;
-		case 8:
-			gauge = new ExhardGradeGrooveGauge(model);
-			break;
-		}
-
+		GrooveGauge gauge = GrooveGauge.create(model, property.gaugetype);
 		gauge.setValue(property.startgauge);
 		return gauge;
 	}
 
 	public void processInput(BMSPlayerInputProcessor input) {
+		final int values = model.getMode().player == 2 ? 9 : 7;
 		boolean[] cursor = input.getCursorState();
 		long[] cursortime = input.getCursorTime();
 		if (cursor[0] && cursortime[0] != 0) {
 			cursortime[0] = 0;
-			cursorpos = (cursorpos + (model.getUseKeys() >= 10 ? 7 : 5)) % (model.getUseKeys() >= 10 ? 8 : 6);
+			cursorpos = (cursorpos + values - 1) % values;
 		}
 		if (cursor[1] && cursortime[1] != 0) {
 			cursortime[1] = 0;
-			cursorpos = (cursorpos + 1) % (model.getUseKeys() >= 10 ? 9 : 7);
+			cursorpos = (cursorpos + 1) % values;
 		}
 		if (cursor[2] && (presscount == 0 || presscount + 10 < System.currentTimeMillis())) {
 			if (presscount == 0) {
@@ -143,7 +114,8 @@ public class PracticeConfiguration {
 				break;
 			case 2:
 				property.gaugetype = (property.gaugetype + 8) % 9;
-				if (model.getUseKeys() == 9 && property.gaugetype >= 3 && property.startgauge > 100) {
+				if ((model.getMode() == Mode.POPN_5K || model.getMode() == Mode.POPN_9K) && property.gaugetype >= 3
+						&& property.startgauge > 100) {
 					property.startgauge = 100;
 				}
 				break;
@@ -163,8 +135,8 @@ public class PracticeConfiguration {
 				}
 				break;
 			case 6:
-				property.random = (property.random + (model.getUseKeys() == 9 ? 6 : 9))
-						% (model.getUseKeys() == 9 ? 7 : 10);
+				property.random = (property.random + (model.getMode() == Mode.POPN_5K || model.getMode() == Mode.POPN_9K ? 6 : 9))
+						% (model.getMode() == Mode.POPN_5K || model.getMode() == Mode.POPN_9K ? 7 : 10);
 				break;
 			case 7:
 				property.random2 = (property.random2 + 9) % 10;
@@ -196,13 +168,13 @@ public class PracticeConfiguration {
 				break;
 			case 2:
 				property.gaugetype = (property.gaugetype + 1) % 9;
-				if (model.getUseKeys() == 9 && property.gaugetype >= 3 && property.startgauge > 100) {
+				if ((model.getMode() == Mode.POPN_5K || model.getMode() == Mode.POPN_9K) && property.gaugetype >= 3 && property.startgauge > 100) {
 					property.startgauge = 100;
 				}
 				break;
 			case 3:
 				if (property.startgauge < 100
-						|| (model.getUseKeys() == 9 && property.gaugetype <= 2 && property.startgauge < 120)) {
+						|| ((model.getMode() == Mode.POPN_5K || model.getMode() == Mode.POPN_9K) && property.gaugetype <= 2 && property.startgauge < 120)) {
 					property.startgauge++;
 				}
 				break;
@@ -217,7 +189,7 @@ public class PracticeConfiguration {
 				}
 				break;
 			case 6:
-				property.random = (property.random + 1) % (model.getUseKeys() == 9 ? 7 : 10);
+				property.random = (property.random + 1) % (model.getMode() == Mode.POPN_5K || model.getMode() == Mode.POPN_9K ? 7 : 10);
 				break;
 			case 7:
 				property.random2 = (property.random2 + 1) % 10;
@@ -251,7 +223,7 @@ public class PracticeConfiguration {
 		titlefont.draw(sprite, "FREQENCY : " + property.freq, x, y - 110);
 		titlefont.setColor(cursorpos == 6 ? Color.YELLOW : Color.CYAN);
 		titlefont.draw(sprite, "OPTION-1P : " + RANDOM[property.random], x, y - 132);
-		if (model.getUseKeys() >= 10) {
+		if (model.getMode().player == 2) {
 			titlefont.setColor(cursorpos == 7 ? Color.YELLOW : Color.CYAN);
 			titlefont.draw(sprite, "OPTION-2P : " + RANDOM[property.random2], x, y - 154);
 			titlefont.setColor(cursorpos == 8 ? Color.YELLOW : Color.CYAN);

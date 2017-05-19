@@ -1,29 +1,18 @@
 package bms.player.beatoraja.play.bga;
 
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import javax.imageio.ImageIO;
-
 import bms.model.BMSModel;
 import bms.model.TimeLine;
 import bms.player.beatoraja.Config;
+import bms.player.beatoraja.PixmapResourcePool;
 import bms.player.beatoraja.play.BMSPlayer;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.files.FileHandleStream;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -41,21 +30,10 @@ public class BGAProcessor {
 	private Config config;
 	private float progress = 0;
 
-	private Map<Integer, MovieProcessor> mpgmap = new HashMap<Integer, MovieProcessor>();
-
-	/**
-	 * backbmp
-	 */
-	private Pixmap backbmpp;
-	private TextureRegion backbmp;
-	/**
-	 * stagefile
-	 */
-	private Pixmap stagefilep;
-	private TextureRegion stagefile;
+	private int[] mpgid = new int[0];
+	private MovieProcessor[] mpgmap = new MovieProcessor[0];
 
 	public static final String[] mov_extension = { "mpg", "mpeg", "m1v", "m2v", "avi", "wmv", "mp4" };
-	public static final String[] pic_extension = { "jpg", "jpeg", "gif", "bmp", "png" };
 
 	/**
 	 * BGAイメージのキャッシュ枚数
@@ -132,35 +110,36 @@ public class BGAProcessor {
 		blank.setColor(Color.BLACK);
 		blank.fill();
 		blanktex = new Texture(blank);
+		
+		cache = new BGImageProcessor(BGACACHE_SIZE);
 	}
 
-	public void setModel(BMSModel model) {
+	public synchronized void setModel(BMSModel model) {
 		this.model = model;
 		timelines = model.getAllTimeLines();
 		// BMS格納ディレクトリ
 		Path dpath = Paths.get(model.getPath()).getParent();
 
-		dispose();
 		progress = 0;
 
-		String stage = model.getStagefile();
-		if (stage != null && stage.length() > 0) {
-			Path p = dpath.resolve(stage);
-			if(Files.exists(p)) {
-				stagefilep = this.loadPicture(p);
-			}
-		}
-		String back = model.getBackbmp();
-		if (back != null && back.length() > 0) {
-			Path p = dpath.resolve(back);
-			if(Files.exists(p)) {
-				backbmpp = this.loadPicture(p);
-			}
-		}
+		final MovieProcessor[] oldmpgmap = mpgmap;
+		Gdx.app.postRunnable(new Runnable() {
+			@Override
+			public void run() {
+				for (MovieProcessor mpg : oldmpgmap) {
+					if (mpg != null) {
+						mpg.dispose();
+					}
+				}
+			}			
+		});
 
-		Pixmap[] bgamap = new Pixmap[model.getBgaList().length];
-		cache = new BGImageProcessor(bgamap, BGACACHE_SIZE);
+		mpgid = new int[0];
+		
+		Map<Integer, MovieProcessor> mpgmap = new HashMap<Integer, MovieProcessor>();
 		int id = 0;
+		cache.clear();
+
 		for (String name : model.getBgaList()) {
 			if (progress == 1) {
 				break;
@@ -181,7 +160,7 @@ public class BGAProcessor {
 						break;
 					}
 				}
-				for (String mov : pic_extension) {
+				for (String mov : BGImageProcessor.pic_extension) {
 					final Path picfile = dpath.resolve(name + "." + mov);
 					if (Files.exists(picfile)) {
 						f = picfile;
@@ -191,26 +170,38 @@ public class BGAProcessor {
 			}
 
 			if (f != null) {
+				boolean isMovie = false;
 				for (String mov : mov_extension) {
 					if (f.getFileName().toString().toLowerCase().endsWith(mov)) {
 						try {
 							MovieProcessor mm = this.loadMovie(id, f);
 							mpgmap.put(id, mm);
+							isMovie = true;
 							break;
-						} catch (Exception e) {
+						} catch (Throwable e) {
 							Logger.getGlobal().warning("BGAファイル読み込み失敗。" + e.getMessage());
 							e.printStackTrace();
-						} catch (Error e) {
-							Logger.getGlobal().severe("BGAファイル読み込み失敗。" + e.getMessage());
-							e.printStackTrace();
-						}
+						}					
 					}
 				}
-				bgamap[id] = this.loadPicture(f);
+				if(isMovie) {
+				} else {
+					cache.put(id, f);					
+				}
 			}
 
 			progress += 1f / model.getBgaList().length;
 			id++;
+		}
+		
+		cache.disposeOld();
+		mpgid = new int[mpgmap.size()];
+		this.mpgmap = new MovieProcessor[mpgmap.size()];
+		int i = 0;
+		for(Map.Entry<Integer, MovieProcessor> e : mpgmap.entrySet()) {
+			mpgid[i] = e.getKey();
+			this.mpgmap[i] = e.getValue();
+			i++;
 		}
 		Logger.getGlobal().info("BGAファイル読み込み完了。BGA数:" + model.getBgaList().length);
 		progress = 1;
@@ -230,47 +221,6 @@ public class BGAProcessor {
 		return null;
 	}
 
-	private Pixmap loadPicture(Path dir) {
-		Pixmap tex = null;
-		for (String mov : pic_extension) {
-			if (dir.toString().toLowerCase().endsWith(mov)) {
-				try {
-					tex = new Pixmap(Gdx.files.internal(dir.toString()));
-				} catch (Exception e) {
-					e.printStackTrace();
-				} catch (Error e) {
-				}
-				if (tex == null) {
-					Logger.getGlobal().warning("BGAファイル読み込み再試行:" + dir.toString());
-					try {
-						BufferedImage bi = ImageIO.read(dir.toFile());
-						final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-						ImageIO.write(bi, "gif", baos);
-						tex = new Pixmap((new FileHandleStream("tempwav.gif") {
-							@Override
-							public InputStream read() {
-								return new ByteArrayInputStream(baos.toByteArray());
-							}
-
-							@Override
-							public OutputStream write(boolean overwrite) {
-								return null;
-							}
-						}));
-					} catch (Exception e) {
-						Logger.getGlobal().warning("BGAファイル読み込み失敗。" + e.getMessage());
-						e.printStackTrace();
-					} catch (Error e) {
-						Logger.getGlobal().severe("BGAファイル読み込み失敗。" + e.getMessage());
-						e.printStackTrace();
-					}
-				}
-			}
-		}
-
-		return tex;
-	}
-	
 	public void abort() {
 		progress = 1;
 	}
@@ -286,37 +236,17 @@ public class BGAProcessor {
 		if(cache != null) {
 			cache.prepare(timelines);			
 		}
-		for (MovieProcessor mp : mpgmap.values()) {
-			mp.stop();
+		for (MovieProcessor mp : mpgmap) {
+			mp.stop();				
 		}
 		playingbgaid = -1;
 		playinglayerid = -1;
 
-		for (Integer id : mpgmap.keySet()) {
-			if (mpgmap.get(id) instanceof FFmpegProcessor) {
-				((FFmpegProcessor) mpgmap.get(id)).setBMSPlayer(player);
+		for(int i = 0;i < mpgid.length;i++) {
+			if (mpgmap[i] instanceof FFmpegProcessor) {
+				((FFmpegProcessor) mpgmap[i]).setBMSPlayer(player);
 			}
 		}
-	}
-
-	public TextureRegion getBackbmpData() {
-		if (backbmpp == null) {
-			return null;
-		}
-		if (backbmp == null) {
-			backbmp = new TextureRegion(new Texture(backbmpp));
-		}
-		return backbmp;
-	}
-
-	public TextureRegion getStagefileData() {
-		if (stagefilep == null) {
-			return null;
-		}
-		if (stagefile == null) {
-			stagefile = new TextureRegion(new Texture(stagefilep));
-		}
-		return stagefile;
 	}
 
 	private Texture getBGAData(int id, boolean cont) {
@@ -324,22 +254,22 @@ public class BGAProcessor {
 			return null;
 		}
 
-		final MovieProcessor mpg = mpgmap.get(id);
-		if (mpg != null) {
+		MovieProcessor mp = getMovieProcessor(id);
+		if(mp != null) {
 			if (!cont) {
-				mpg.play(false);
+				mp.play(false);
 			}
-			return mpg.getFrame();
+			return mp.getFrame();			
 		}
 		return cache != null ? cache.getTexture(id) : null;
 	}
 
 	public void drawBGA(SpriteBatch sprite, Rectangle r, int time) {
-		if (timelines == null) {
+		if (time < 0 || timelines == null) {
+			prevrendertime = -1;
 			sprite.draw(blanktex, r.x, r.y, r.width, r.height);
 			return;
 		}
-		sprite.end();
 		boolean rbga = true;
 		boolean rlayer = true;
 		for (int i = pos; i < timelines.length; i++) {
@@ -372,30 +302,21 @@ public class BGAProcessor {
 			}
 		}
 
-		if (time < 0) {
-			// draw backbmp
-			sprite.begin();
-			if (getBackbmpData() != null) {
-				drawBGAFixRatio(sprite, r, getBackbmpData().getTexture());
-			}
-			sprite.end();
-		} else if (misslayer != null && misslayertime != 0 && time >= misslayertime && time < misslayertime + 500) {
+		if (misslayer != null && misslayertime != 0 && time >= misslayertime && time < misslayertime + 500) {
 			// draw miss layer
 			Texture miss = getBGAData(misslayer[misslayer.length * (time - misslayertime) / 500], true);
 			if (miss != null) {
 				miss.setFilter(TextureFilter.Linear, TextureFilter.Linear);
-				sprite.begin();
 				drawBGAFixRatio(sprite, r, miss);
-				sprite.end();
 			}
 		} else {
 			// draw BGA
-			Texture playingbgatex = getBGAData(playingbgaid, rbga);
-			sprite.begin();
+			final Texture playingbgatex = getBGAData(playingbgaid, rbga);
 			if (playingbgatex != null) {
+				final MovieProcessor mp = getMovieProcessor(playingbgaid);
 				playingbgatex.setFilter(TextureFilter.Linear, TextureFilter.Linear);
-				if (mpgmap.containsKey(playingbgaid)) {
-					final ShaderProgram shader = mpgmap.get(playingbgaid).getShader();
+				if (mp != null) {
+					final ShaderProgram shader = mp.getShader();
 					sprite.setShader(shader);
 					drawBGAFixRatio(sprite, r, playingbgatex);
 					sprite.setShader(null);
@@ -405,15 +326,13 @@ public class BGAProcessor {
 			} else {
 				sprite.draw(blanktex, r.x, r.y, r.width, r.height);
 			}
-			sprite.end();
 			// draw layer
-			Texture playinglayertex = getBGAData(playinglayerid, rlayer);
+			final Texture playinglayertex = getBGAData(playinglayerid, rlayer);
 			if (playinglayertex != null) {
-				// playinglayertex.setFilter(TextureFilter.Linear,
-				// TextureFilter.Linear);
-				sprite.begin();
-				if (mpgmap.containsKey(playinglayerid)) {
-					final ShaderProgram shader = mpgmap.get(playinglayerid).getShader();
+				final MovieProcessor mp = getMovieProcessor(playinglayerid);
+				if (mp != null) {
+					playinglayertex.setFilter(TextureFilter.Linear, TextureFilter.Linear);
+					final ShaderProgram shader = mp.getShader();
 					sprite.setShader(shader);
 					drawBGAFixRatio(sprite, r, playinglayertex);
 					sprite.setShader(null);
@@ -424,12 +343,19 @@ public class BGAProcessor {
 				} else {
 					drawBGAFixRatio(sprite, r, playinglayertex);
 				}
-				sprite.end();
 			}
 		}
 
 		prevrendertime = time;
-		sprite.begin();
+	}
+	
+	private MovieProcessor getMovieProcessor(int id) {
+		for(int i = 0;i < mpgid.length;i++) {
+			if(mpgid[i] == id) {
+				return mpgmap[i];
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -480,9 +406,9 @@ public class BGAProcessor {
 	}
 
 	public void stop() {
-		for (int id : mpgmap.keySet()) {
-			if (mpgmap.get(id) != null) {
-				mpgmap.get(id).stop();
+		for (MovieProcessor mpg : mpgmap) {
+			if (mpg != null) {
+				mpg.stop();
 			}
 		}
 	}
@@ -491,23 +417,15 @@ public class BGAProcessor {
 	 * リソースを開放する
 	 */
 	public void dispose() {
-		if (stagefile != null) {
-			stagefile.getTexture().dispose();
-			stagefilep.dispose();
-		}
-		if (backbmp != null) {
-			backbmp.getTexture().dispose();
-			backbmpp.dispose();
-		}
 		if (cache != null) {
 			cache.dispose();
 		}
-		for (int id : mpgmap.keySet()) {
-			if (mpgmap.get(id) != null) {
-				mpgmap.get(id).dispose();
+		for (MovieProcessor mpg : mpgmap) {
+			if (mpg != null) {
+				mpg.dispose();
 			}
 		}
-		mpgmap.clear();
+		mpgid = new int[0];
 
 		try {
 			layershader.dispose();

@@ -51,11 +51,11 @@ public class SkinGraph extends SkinObject {
 							new TextureRegion(image, 0, image.getRegionY() + image.getRegionHeight()
 									- (int) (image.getRegionHeight() * value), image.getRegionWidth(),
 									(int) ((int) image.getRegionHeight() * value)), r.x, r.y, r.width,
-							r.height * value, getColor(time, state), getAngle(time, state));
+							r.height * value);
 				} else {
 					draw(sprite, new TextureRegion(image, 0, image.getRegionY(),
 							(int) (image.getRegionWidth() * value), image.getRegionHeight()), r.x, r.y,
-							r.width * value, r.height, getColor(time, state), getAngle(time, state));
+							r.width * value, r.height);
 				}
 			}
 		} else if(source != null){
@@ -74,12 +74,11 @@ public class SkinGraph extends SkinObject {
 							new TextureRegion(image, 0, image.getRegionHeight()
 									- (int) (image.getRegionHeight() * value), image.getRegionWidth(),
 									(int) ((int) image.getRegionHeight() * value)), r.x, r.y, r.width,
-							r.height * value, getColor(time, state), getAngle(time, state));
+							r.height * value);
 				} else {
 					draw(sprite,
 							new TextureRegion(image, 0, 0, (int) (image.getRegionWidth() * value), image
-									.getRegionHeight()), r.x, r.y, r.width * value, r.height, getColor(time, state),
-							getAngle(time, state));
+									.getRegionHeight()), r.x, r.y, r.width * value, r.height);
 				}
 			}
 		}

@@ -255,23 +255,21 @@
 	],
 	"note":{
 		"id":"notes",
-		"note":["note-w","note-b","note-w","note-b","note-w","note-b","note-w","note-s"],
-		"lnend":["lne-w","lne-b","lne-w","lne-b","lne-w","lne-b","lne-w","lne-s"],
-		"lnstart":["lns-w","lns-b","lns-w","lns-b","lns-w","lns-b","lns-w","lns-s"],
-		"lnbody":["lnb-w","lnb-b","lnb-w","lnb-b","lnb-w","lnb-b","lnb-w","lnb-s"],
-		"lnactive":["lna-w","lna-b","lna-w","lna-b","lna-w","lna-b","lna-w","lna-s"],
-		"hcnend":["hcne-w","hcne-b","hcne-w","hcne-b","hcne-w","hcne-b","hcne-w","hcne-s"],
-		"hcnstart":["hcns-w","hcns-b","hcns-w","hcns-b","hcns-w","hcns-b","hcns-w","hcns-s"],
-		"hcnbody":["hcnb-w","hcnb-b","hcnb-w","hcnb-b","hcnb-w","hcnb-b","hcnb-w","hcnb-s"],
-		"hcnactive":["hcna-w","hcna-b","hcna-w","hcna-b","hcna-w","hcna-b","hcna-w","hcna-s"],
-		"hcndamage":["hcnd-w","hcnd-b","hcnd-w","hcnd-b","hcnd-w","hcnd-b","hcnd-w","hcnd-s"],
-		"hcnreactive":["hcnr-w","hcnr-b","hcnr-w","hcnr-b","hcnr-w","hcnr-b","hcnr-w","hcnr-s"],
-		"mine":["mine-w","mine-b","mine-w","mine-b","mine-w","mine-b","mine-w","mine-s"],
+		"note":["note-w","note-b","note-w","note-b","note-w","note-s"],
+		"lnend":["lne-w","lne-b","lne-w","lne-b","lne-w","lne-s"],
+		"lnstart":["lns-w","lns-b","lns-w","lns-b","lns-w","lns-s"],
+		"lnbody":["lnb-w","lnb-b","lnb-w","lnb-b","lnb-w","lnb-s"],
+		"lnactive":["lna-w","lna-b","lna-w","lna-b","lna-w","lna-s"],
+		"hcnend":["hcne-w","hcne-b","hcne-w","hcne-b","hcne-w","hcne-s"],
+		"hcnstart":["hcns-w","hcns-b","hcns-w","hcns-b","hcns-w","hcns-s"],
+		"hcnbody":["hcnb-w","hcnb-b","hcnb-w","hcnb-b","hcnb-w","hcnb-s"],
+		"hcnactive":["hcna-w","hcna-b","hcna-w","hcna-b","hcna-w","hcna-s"],
+		"hcndamage":["hcnd-w","hcnd-b","hcnd-w","hcnd-b","hcnd-w","hcnd-s"],
+		"hcnreactive":["hcnr-w","hcnr-b","hcnr-w","hcnr-b","hcnr-w","hcnr-s"],
+		"mine":["mine-w","mine-b","mine-w","mine-b","mine-w","mine-s"],
 		"hidden":[],
 		"processed":[],
 		"dst":[
-			{"x":870, "y":140, "w":50, "h":580},
-			{"x":920, "y":140, "w":40, "h":580},
 			{"x":960, "y":140, "w":50, "h":580},
 			{"x":1010, "y":140, "w":40, "h":580},
 			{"x":1050, "y":140, "w":50, "h":580},
@@ -557,7 +555,7 @@
 			{"time":0, "x":40, "y":50, "w":800, "h":650}
 		]},
 		{"id":1000, "op":[900],"dst":[
-			{"time":0, "x":42, "y":698, "w":24, "h":24},
+			{"time":0, "x":42, "y":674, "w":24, "h":24},
 			{"time":1000, "a":0},
 			{"time":2000, "a":255}
 		]},
@@ -565,7 +563,7 @@
 			{"time":0, "x":40, "y":50, "w":740, "h":650}
 		]},
 		{"id":1000, "op":[901],"dst":[
-			{"time":0, "x":42, "y":698, "w":24, "h":24},
+			{"time":0, "x":42, "y":674, "w":24, "h":24},
 			{"time":1000, "a":0},
 			{"time":2000, "a":255}
 		]},
