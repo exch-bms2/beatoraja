@@ -18,9 +18,16 @@ public class MidiInputProcessor implements AutoCloseable {
 	// milliseconds
 	long starttime = 0;
 
+	int pitch = 0;
+
+	// pitch value: -8192 ~ 8191
+	final int pitchThreshold = 8192 / 32;
+
 	// MIDI note number -> game key number
 	// NOTE: この方法だと1つのMIDIキーに複数キー割り当てが不可能
 	Consumer<Boolean>[] keyMap = new Consumer[MaxKeys];
+
+	Consumer<Boolean> pitchBendUp, pitchBendDown;
 
 	public MidiInputProcessor(BMSPlayerInputProcessor inputProcessor) {
 		this.bmsPlayerInputProcessor = inputProcessor;
@@ -91,6 +98,11 @@ public class MidiInputProcessor implements AutoCloseable {
 				}
 				break;
 			case PITCH_BEND:
+				if (control.value > 0) {
+					pitchBendUp = handler;
+				} else if (control.value < 0) {
+					pitchBendDown = handler;
+				}
 				break;
 			case CONTROL_CHANGE:
 				break;
@@ -129,6 +141,33 @@ public class MidiInputProcessor implements AutoCloseable {
 							noteOn(sm.getData1());
 						}
 						break;
+					case ShortMessage.PITCH_BEND: {
+						int newPitch = (int)(short)((sm.getData1() & 0x7f) | ((sm.getData2() & 0x7f) << 7)) - 0x2000;
+						if (newPitch > pitchThreshold) {
+							if (pitch < -pitchThreshold && pitchBendDown != null) {
+								pitchBendDown.accept(false);
+							}
+							if (pitch <= pitchThreshold && pitchBendUp != null) {
+								pitchBendUp.accept(true);
+							}
+						} else if (newPitch < -pitchThreshold) {
+							if (pitch > pitchThreshold && pitchBendUp != null) {
+								pitchBendUp.accept(false);
+							}
+							if (pitch >= -pitchThreshold && pitchBendDown != null) {
+								pitchBendDown.accept(true);
+							}
+						} else {
+							if (pitch > pitchThreshold && pitchBendUp != null) {
+								pitchBendUp.accept(false);
+							}
+							if (pitch < -pitchThreshold && pitchBendDown != null) {
+								pitchBendDown.accept(false);
+							}
+						}
+						pitch = newPitch;
+						break;
+					}
 				}
 			}
 		}
