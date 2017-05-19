@@ -81,7 +81,7 @@ public class SkinImage extends SkinObject {
             final Rectangle r = this.getDestination(time, state);
             final TextureRegion tr = state.getImage(getImageID());
             if (r != null && tr != null) {
-                draw(sprite, tr, r.x + offsetX, r.y + offsetY, r.width, r.height, getColor(time,state),getAngle(time,state));
+                draw(sprite, tr, r.x + offsetX, r.y + offsetY, r.width, r.height);
             }
         } else {
             if(image == null) {
@@ -99,16 +99,16 @@ public class SkinImage extends SkinObject {
             if (r != null) {
                 if(value >= 0 && value < image.length) {
                 	if(scratch == 1) {
-						draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height, getColor(time,state),state.getNumberValue(NUMBER_SCRATCHANGLE_1P));
+						draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height, getColor(),state.getNumberValue(NUMBER_SCRATCHANGLE_1P));
 					} else if(scratch == 2) {
-						draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height, getColor(time,state),state.getNumberValue(NUMBER_SCRATCHANGLE_2P));
+						draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height, getColor(),state.getNumberValue(NUMBER_SCRATCHANGLE_2P));
 					} else {
                     	if(image[0] instanceof SkinSourceMovie) {
                     		sprite.setShader(((SkinSourceMovie) image[0]).getShader());
-                            draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height, getColor(time,state),getAngle(time,state));
+                            draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height);
                             sprite.setShader(null);
                     	} else {
-    						draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height, getColor(time,state),getAngle(time,state));
+    						draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height);
                     	}
 					}
                 }
@@ -121,7 +121,7 @@ public class SkinImage extends SkinObject {
             final Rectangle r = this.getDestination(time, state);
             final TextureRegion tr = state.getImage(getImageID());
             if (r != null && tr != null) {
-                draw(sprite, tr, r.x + offsetX, r.y + offsetY, r.width, r.height, getColor(time,state),getAngle(time,state));
+                draw(sprite, tr, r.x + offsetX, r.y + offsetY, r.width, r.height);
             }
         } else {
             if(image == null) {
@@ -131,11 +131,11 @@ public class SkinImage extends SkinObject {
             if (r != null) {
                 if(value >= 0 && value < image.length) {
                     if(scratch == 1) {
-                        draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height, getColor(time,state),state.getNumberValue(NUMBER_SCRATCHANGLE_1P));
+                        draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height, getColor(),state.getNumberValue(NUMBER_SCRATCHANGLE_1P));
                     } else if(scratch == 2) {
-                        draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height, getColor(time,state),state.getNumberValue(NUMBER_SCRATCHANGLE_2P));
+                        draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height, getColor(),state.getNumberValue(NUMBER_SCRATCHANGLE_2P));
                     } else {
-                        draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height, getColor(time,state),getAngle(time,state));                    		
+                        draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height);                    		
                     }
                 }
             }

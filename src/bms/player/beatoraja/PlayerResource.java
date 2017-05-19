@@ -1,15 +1,21 @@
 package bms.player.beatoraja;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.utils.*;
+
 import bms.model.*;
 import bms.player.beatoraja.audio.AudioDriver;
 import bms.player.beatoraja.play.bga.BGAProcessor;
-import bms.player.beatoraja.play.gauge.GrooveGauge;
+import bms.player.beatoraja.play.GrooveGauge;
 import bms.player.beatoraja.song.SongData;
 
 /**
@@ -34,10 +40,18 @@ public class PlayerResource {
 
 	private int playDevice;
 
-	private List<Integer> constraint = new ArrayList<Integer>();
+	private IntArray constraint = new IntArray();
 
 	private BMSResource bmsresource;
-	
+	/**
+	 * backbmp
+	 */
+	private TextureRegion backbmp;
+	/**
+	 * stagefile
+	 */
+	private TextureRegion stagefile;
+
 	/**
 	 * スコア
 	 */
@@ -54,9 +68,9 @@ public class PlayerResource {
 	/**
 	 * ゲージの遷移ログ
 	 */
-	private List<Float> gauge;
+	private FloatArray gauge;
 
-	private List<List<Float>> coursegauge = new ArrayList<List<Float>>();
+	private List<FloatArray> coursegauge = new ArrayList<FloatArray>();
 
 	/**
 	 * コースタイトル
@@ -89,7 +103,7 @@ public class PlayerResource {
 
 	public PlayerResource(AudioDriver audio, Config config) {
 		this.config = config;
-		this.bmsresource = new BMSResource(audio);
+		this.bmsresource = new BMSResource(audio, config);
 	}
 
 	public void clear() {
@@ -118,6 +132,26 @@ public class PlayerResource {
 		}
 		if (model.getAllTimeLines().length == 0) {
 			return false;
+		}
+		
+		if(stagefile != null) {
+			stagefile.getTexture().dispose();
+			stagefile = null;
+		}
+		
+		Pixmap pix = PixmapResourcePool.loadPicture(f.getParent().resolve(model.getStagefile()).toString());
+		if(pix != null) {
+			stagefile = new TextureRegion(new Texture(pix));
+			pix.dispose();
+		}
+		if(backbmp != null) {
+			backbmp.getTexture().dispose();
+			backbmp = null;
+		}
+		pix = PixmapResourcePool.loadPicture(f.getParent().resolve(model.getBackbmp()).toString());
+		if(pix != null) {
+			backbmp = new TextureRegion(new Texture(pix));
+			pix.dispose();
 		}
 		bmsresource.setBMSFile(model, f, config, autoplay);
 		return true;
@@ -230,11 +264,11 @@ public class PlayerResource {
 		clear();
 	}
 
-	public List<Float> getGauge() {
+	public FloatArray getGauge() {
 		return gauge;
 	}
 
-	public void setGauge(List<Float> gauge) {
+	public void setGauge(FloatArray gauge) {
 		this.gauge = gauge;
 	}
 
@@ -286,12 +320,12 @@ public class PlayerResource {
 		courseReplay.add(rd);
 	}
 
-	public List<List<Float>> getCourseGauge() {
+	public List<FloatArray> getCourseGauge() {
 		return coursegauge;
 	}
 
-	public void addCourseGauge(List<Float> gauge) {
-		coursegauge.add(new ArrayList<Float>(gauge));
+	public void addCourseGauge(FloatArray gauge) {
+		coursegauge.add(gauge);
 	}
 
 	public int getCombo() {
@@ -311,11 +345,7 @@ public class PlayerResource {
 	}
 
 	public int[] getConstraint() {
-		int[] result = new int[constraint.size()];
-		for (int i = 0; i < result.length; i++) {
-			result[i] = constraint.get(i);
-		}
-		return result;
+		return constraint.toArray();
 	}
 
 	public void addConstraint(int constraint) {
@@ -326,6 +356,14 @@ public class PlayerResource {
 		if(bmsresource != null) {
 			bmsresource.dispose();
 			bmsresource = null;
+		}
+		if(stagefile != null) {
+			stagefile.getTexture().dispose();
+			stagefile = null;
+		}
+		if(backbmp != null) {
+			backbmp.getTexture().dispose();
+			backbmp = null;
 		}
 	}
 
@@ -339,6 +377,14 @@ public class PlayerResource {
 
 	public BMSGenerator getGenerator() {
 		return generator;
+	}
+	
+	public TextureRegion getBackbmpData() {
+		return backbmp;
+	}
+
+	public TextureRegion getStagefileData() {
+		return stagefile;
 	}
 
 	public int getPlayDevice() {

@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 
+import bms.player.beatoraja.skin.SkinLoader;
 import bms.player.beatoraja.skin.SkinTextImage;
 import bms.player.beatoraja.skin.SkinTextImage.SkinTextImageSource;
 import bms.player.beatoraja.skin.lr2.LR2SkinLoader.CommandWord;
@@ -34,7 +35,7 @@ public class LR2FontLoader extends LR2SkinLoader {
 	 */
 	private Path path;
 
-	public LR2FontLoader() {
+	public LR2FontLoader(boolean usecim) {
 		// size
 		addCommandWord(new CommandWord("S") {
 			@Override
@@ -57,39 +58,7 @@ public class LR2FontLoader extends LR2SkinLoader {
 				// System.out.println("Font image loading : " +
 				// imagefile.getPath());
 				if (imagefile.exists()) {
-					try {
-						// File cim = new File(imagefile.getPath().substring(0,
-						// imagefile.getPath().lastIndexOf('.')) + ".cim");
-						// if(cim.exists()) {
-						// long l = System.nanoTime();
-						// imagefile = cim;
-						// Pixmap pixmap =
-						// PixmapIO.readCIM(Gdx.files.internal(imagefile.getPath()));
-						// imagelist.add(new Texture(pixmap));
-						// System.out.println(imagefile.getPath() + " -> " +
-						// (System.nanoTime() - l));
-						// pixmap.dispose();
-						// } else {
-						// Pixmap pixmap = new
-						// Pixmap(Gdx.files.internal(imagefile.getPath()));
-						// PixmapIO.writeCIM(Gdx.files.absolute(imagefile.getAbsolutePath().substring(0,
-						// imagefile.getPath().lastIndexOf('.')) + ".cim"),
-						// pixmap);
-						// long l = System.nanoTime();
-						// imagelist.add(new Texture(pixmap));
-						// System.out.println(imagefile.getPath() + " -> " +
-						// (System.nanoTime() - l));
-						// pixmap.dispose();
-						// }
-						// ファイル読み込みが最も処理時間が長い(80%)
-						Pixmap pixmap = new Pixmap(Gdx.files.internal(imagefile.getPath()));
-						imagelist.add(new Texture(pixmap));
-						pixmap.dispose();
-
-					} catch (GdxRuntimeException e) {
-						imagelist.add(null);
-						e.printStackTrace();
-					}
+					imagelist.add(SkinLoader.getTexture(imagefile.getPath(), usecim));
 				}
 			}
 		});
@@ -141,7 +110,7 @@ public class LR2FontLoader extends LR2SkinLoader {
 		textimage = new SkinTextImage.SkinTextImageSource();
 		this.path = p;
 
-		long l = System.nanoTime();
+//		long l = System.nanoTime();
 		BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(p.toFile()), "MS932"));
 		String line;
 		while ((line = br.readLine()) != null) {
@@ -149,7 +118,7 @@ public class LR2FontLoader extends LR2SkinLoader {
 		}
 		br.close();
 
-		System.out.println(p.toString() + " -> " + (System.nanoTime() - l));
+//		System.out.println(p.toString() + " -> " + (System.nanoTime() - l));
 
 		return textimage;
 	}

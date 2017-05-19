@@ -1,14 +1,19 @@
 package bms.player.beatoraja;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
 import bms.player.beatoraja.input.BMControllerInputProcessor.BMKeys;
 import bms.player.beatoraja.play.JudgeManager;
 
-import bms.player.beatoraja.play.TargetProperty;
+import bms.player.beatoraja.skin.SkinType;
 import com.badlogic.gdx.Input.Keys;
+
+import static bms.player.beatoraja.Resolution.*;
+import bms.player.beatoraja.select.*;
+import bms.model.Mode;
 
 /**
  * 各種設定項目。config.jsonで保持される
@@ -17,6 +22,11 @@ import com.badlogic.gdx.Input.Keys;
  */
 public class Config {
 
+	// TODO プレイヤー毎に異なる見込みの大きい要素をPlayerConfigに移動
+
+	private PlayerConfig[] players;
+
+	private int player;
 	/**
 	 * フルスクリーン
 	 */
@@ -28,7 +38,7 @@ public class Config {
 	/**
 	 * 解像度
 	 */
-	private int resolution = 1;
+	private Resolution resolution = HD;
 
 	/**
 	 * フォルダランプの有効/無効
@@ -66,7 +76,6 @@ public class Config {
 	 * BGノート音のボリューム
 	 */
 	private float bgvolume = 1.0f;
-
 	/**
 	 * 最大FPS。垂直同期OFFの時のみ有効
 	 */
@@ -117,7 +126,10 @@ public class Config {
          * JKOC Hack (boolean) private variable
          */
     private boolean jkoc_hack = false;
-        
+    
+	private Mode mode_sort = null;
+	
+    private boolean cacheSkinImage = false;
 	/**
 	 * アシストオプション:コンスタント
 	 */
@@ -156,7 +168,7 @@ public class Config {
 
 	private String soundpath = "";
 
-	private SkinConfig[] skin = new SkinConfig[16];
+	private SkinConfig[] skin;
 	/**
 	 * BMSルートディレクトリパス
 	 */
@@ -219,20 +231,24 @@ public class Config {
 	private String password = "";
 
 	public Config() {
+		PlayerConfig sample = new PlayerConfig();
+		sample.setName("playerscore");
+		players = new PlayerConfig[]{sample};
 		tableURL = new String[] { "http://bmsnormal2.syuriken.jp/table.html",
 				"http://bmsnormal2.syuriken.jp/table_insane.html", "http://dpbmsdelta.web.fc2.com/table/dpdelta.html",
 				"http://dpbmsdelta.web.fc2.com/table/insane.html",
 				"http://flowermaster.web.fc2.com/lrnanido/gla/LN.html",
 				"http://stellawingroad.web.fc2.com/new/pms.html" };
-		skin[0] = new SkinConfig(SkinConfig.DEFAULT_PLAY7);
-		skin[1] = new SkinConfig(SkinConfig.DEFAULT_PLAY5);
-		skin[2] = new SkinConfig(SkinConfig.DEFAULT_PLAY14);
-		skin[3] = new SkinConfig(SkinConfig.DEFAULT_PLAY10);
-		skin[4] = new SkinConfig(SkinConfig.DEFAULT_PLAY9);
-		skin[5] = new SkinConfig(SkinConfig.DEFAULT_SELECT);
-		skin[6] = new SkinConfig(SkinConfig.DEFAULT_DECIDE);
-		skin[7] = new SkinConfig(SkinConfig.DEFAULT_RESULT);
-		skin[15] = new SkinConfig(SkinConfig.DEFAULT_GRADERESULT);
+		int maxSkinType = 0;
+		for (SkinType type : SkinType.values()) {
+			if (type.getId() > maxSkinType) {
+				maxSkinType = type.getId();
+			}
+		}
+		skin = new SkinConfig[maxSkinType + 1];
+		for (Map.Entry<SkinType, String> entry : SkinConfig.defaultSkinPathMap.entrySet()) {
+			skin[entry.getKey().getId()] = new SkinConfig(entry.getValue());
+		}
 	}
 
 	public boolean isFullscreen() {
@@ -467,11 +483,24 @@ public class Config {
 		this.mode9 = mode9;
 	}
 
-	public int getResolution() {
+	public void setModeSort(Mode m)  {
+		this.mode_sort = m;
+	}
+	
+	public int getModeSort()  {
+		for(int x = 0; x < MusicSelector.MODE.length; x++)  {
+		    if(mode_sort == MusicSelector.MODE[x])
+				return x;
+			else
+				continue;
+		}
+		return 0;
+	}
+	public Resolution getResolution() {
 		return resolution;
 	}
 
-	public void setResolution(int resolution) {
+	public void setResolution(Resolution resolution) {
 		this.resolution = resolution;
 	}
 
@@ -638,6 +667,30 @@ public class Config {
 		this.bgaExpand = bgaExpand;
 	}
 
+	public int getPlayer() {
+		return player;
+	}
+
+	public void setPlayer(int player) {
+		this.player = player;
+	}
+
+	public PlayerConfig[] getPlayers() {
+		return players;
+	}
+
+	public void setPlayers(PlayerConfig[] players) {
+		this.players = players;
+	}
+
+	public boolean isCacheSkinImage() {
+		return cacheSkinImage;
+	}
+
+	public void setCacheSkinImage(boolean cacheSkinImage) {
+		this.cacheSkinImage = cacheSkinImage;
+	}
+
 	public static class SkinConfig {
 
 		public static final String DEFAULT_PLAY7 = "skin/default/play7.json";
@@ -649,6 +702,20 @@ public class Config {
 		public static final String DEFAULT_DECIDE = "skin/default/decide.json";
 		public static final String DEFAULT_RESULT = "skin/default/result.json";
 		public static final String DEFAULT_GRADERESULT = "skin/default/graderesult.json";
+
+		public static final Map<SkinType, String> defaultSkinPathMap = new HashMap<SkinType, String>() {
+			{
+				put(SkinType.PLAY_7KEYS, DEFAULT_PLAY7);
+				put(SkinType.PLAY_5KEYS, DEFAULT_PLAY5);
+				put(SkinType.PLAY_14KEYS, DEFAULT_PLAY14);
+				put(SkinType.PLAY_10KEYS, DEFAULT_PLAY10);
+				put(SkinType.PLAY_9KEYS, DEFAULT_PLAY9);
+				put(SkinType.MUSIC_SELECT, DEFAULT_SELECT);
+				put(SkinType.DECIDE, DEFAULT_DECIDE);
+				put(SkinType.RESULT, DEFAULT_RESULT);
+				put(SkinType.COURSE_RESULT, DEFAULT_GRADERESULT);
+			}
+		};
 
 		private String path;
 

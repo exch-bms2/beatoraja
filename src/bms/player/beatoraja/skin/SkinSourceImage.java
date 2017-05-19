@@ -42,6 +42,10 @@ public class SkinSourceImage implements SkinSource {
 		return null;
 	}
 
+	public TextureRegion[][] getImages() {
+		return image;
+	}
+
 	private int getImageIndex(int length, long time, MainState state) {
 		if (cycle == 0) {
 			return 0;

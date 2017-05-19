@@ -2,12 +2,13 @@ package bms.player.beatoraja.result;
 
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.PlayerResource;
-import bms.player.beatoraja.play.gauge.*;
+import bms.player.beatoraja.play.GrooveGauge;
 import bms.player.beatoraja.skin.SkinObject;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.utils.FloatArray;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,9 +52,10 @@ public class SkinGaugeGraphObject extends SkinObject {
 			Color.valueOf("ff0000"), Color.valueOf("ffff00"), Color.valueOf("cccccc") };
 	private final Color borderline = Color.valueOf("ff0000");
 	private final Color bordercolor = Color.valueOf("440000");
+	private final int[] typetable = {0,1,2,3,4,5,3,4,5};
 
 	private int color;
-	private List<Float> gauge;
+	private FloatArray gauge;
 	private List<Integer> section;
 
 	@Override
@@ -77,30 +79,14 @@ public class SkinGaugeGraphObject extends SkinObject {
 			PlayerResource resource = state.getMainController().getPlayerResource();
 			Pixmap shape = new Pixmap((int) graph.width, (int) graph.height, Pixmap.Format.RGBA8888);
 			// ゲージグラフ描画
-			if (resource.getGrooveGauge() instanceof AssistEasyGrooveGauge) {
-				color = 0;
-			}
-			if (resource.getGrooveGauge() instanceof EasyGrooveGauge) {
-				color = 1;
-			}
-			if (resource.getGrooveGauge() instanceof NormalGrooveGauge) {
-				color = 2;
-			}
-			if (resource.getGrooveGauge() instanceof HardGrooveGauge
-					|| resource.getGrooveGauge() instanceof GradeGrooveGauge) {
-				color = 3;
-			}
-			if (resource.getGrooveGauge() instanceof ExhardGrooveGauge
-					|| resource.getGrooveGauge() instanceof ExgradeGrooveGauge) {
-				color = 4;
-			}
+			color = typetable[resource.getGrooveGauge().getType()];
 			gauge = resource.getGauge();
 			section = new ArrayList<Integer>();
 			if (state instanceof GradeResult) {
-				gauge = new ArrayList<Float>();
-				for (List<Float> l : resource.getCourseGauge()) {
+				gauge = new FloatArray();
+				for (FloatArray l : resource.getCourseGauge()) {
 					gauge.addAll(l);
-					section.add((section.size() > 0 ? section.get(section.size() - 1) : 0) + l.size());
+					section.add((section.size() > 0 ? section.get(section.size() - 1) : 0) + l.size);
 				}
 			}
 			shape.setColor(graphcolor[color]);
@@ -121,17 +107,17 @@ public class SkinGaugeGraphObject extends SkinObject {
 			shape = new Pixmap((int) graph.width, (int) graph.height, Pixmap.Format.RGBA8888);
 			Float f1 = null;
 
-			for (int i = 0; i < gauge.size(); i++) {
+			for (int i = 0; i < gauge.size; i++) {
 				if (section.contains(i)) {
 					shape.setColor(Color.valueOf("ffffff"));
-					shape.drawLine((int) (graph.width * (i - 1) / gauge.size()), 0,
-							(int) (graph.width * (i - 1) / gauge.size()), (int) graph.height);
+					shape.drawLine((int) (graph.width * (i - 1) / gauge.size), 0,
+							(int) (graph.width * (i - 1) / gauge.size), (int) graph.height);
 				}
 				Float f2 = gauge.get(i);
 				if (f1 != null) {
-					final int x1 = (int) (graph.width * (i - 1) / gauge.size());
+					final int x1 = (int) (graph.width * (i - 1) / gauge.size);
 					final int y1 = (int) ((f1 / gg.getMaxValue()) * (graph.height - lineWidth));
-					final int x2 = (int) (graph.width * i / gauge.size());
+					final int x2 = (int) (graph.width * i / gauge.size);
 					final int y2 = (int) ((f2 / gg.getMaxValue()) * (graph.height - lineWidth));
 					final int yb = (int) ((border / gg.getMaxValue()) * (graph.height - lineWidth));
 					if (f1 < border) {

@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.logging.Logger;
 
+import bms.model.Mode;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.Config.SkinConfig;
 import bms.player.beatoraja.config.KeyConfiguration;
@@ -34,15 +35,14 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
 public class MusicSelector extends MainState {
 
 	// TODO テキスト表示
-	// TODO 譜面情報表示
+	// TODO 譜面情報表示(簡易/詳細表示の切り替え)
 	// TODO オプション常時表示(スキン実装で実現？)
 	// TODO ターゲットスコア選択の実装
 
-	private final int durationlow = 300;
-	private final int durationhigh = 50;
-
 	private int selectedreplay;
 
+	private final int durationlow = 300;
+	private final int durationhigh = 50;
 	/**
 	 * バー移動中のカウンタ
 	 */
@@ -59,6 +59,8 @@ public class MusicSelector extends MainState {
 	 * 選択中のモードフィルタ
 	 */
 	private int mode;
+	
+	public static final Mode[] MODE = {null, Mode.BEAT_7K, Mode.BEAT_14K, Mode.POPN_9K, Mode.BEAT_5K, Mode.BEAT_10K};
 	/**
 	 * 選択中のソート
 	 */
@@ -70,18 +72,15 @@ public class MusicSelector extends MainState {
 
 	private PlayerData playerdata;
 
-	private String bgm;
-	private String move;
-	private String folderopen;
-	private String folderclose;
-	private String sorts;
 	private String preview;
 
 	private BitmapFont titlefont;
 
 	private TextureRegion banner;
 	private Bar bannerbar;
-
+	/**
+	 * 楽曲バー描画用
+	 */
 	private BarRenderer bar;
 
 	private SearchTextField search;
@@ -89,10 +88,7 @@ public class MusicSelector extends MainState {
 	private final int notesGraphDuration = 1000;
 	private boolean showNoteGraph = false;
 
-	/**
-	 * スコアデータのキャッシュ
-	 */
-	private Map<String, IRScoreData>[] scorecache;
+	private ScoreDataCache scorecache;
 
 	public static final int KEY_PLAY = 1;
 	public static final int KEY_AUTO = 2;
@@ -105,137 +101,62 @@ public class MusicSelector extends MainState {
 
 	private int panelstate;
 
+	public static final int SOUND_BGM = 0;
+	public static final int SOUND_SCRATCH = 1;
+	public static final int SOUND_FOLDEROPEN = 2;
+	public static final int SOUND_FOLDERCLOSE = 3;
+	public static final int SOUND_CHANGEOPTION = 4;
+	
 	public MusicSelector(MainController main, Config config) {
 		super(main);
 		this.config = config;
-		try {
-			Class.forName("org.sqlite.JDBC");
-			songdb = main.getSongDatabase();
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		}
+		songdb = main.getSongDatabase();
 
-		scorecache = new Map[3];
-		for (int i = 0; i < scorecache.length; i++) {
-			scorecache[i] = new HashMap();
-		}
+		scorecache = new ScoreDataCache(getMainController().getPlayDataAccessor());
 
-		bar = new BarRenderer(main, this, songdb);
+		setSound(SOUND_BGM, config.getBgmpath() + File.separatorChar + "select.wav", true);		
+		setSound(SOUND_SCRATCH, config.getSoundpath() + File.separatorChar + "scratch.wav", false);
+		setSound(SOUND_FOLDEROPEN, config.getSoundpath() + File.separatorChar + "f-open.wav", false);
+		setSound(SOUND_FOLDERCLOSE, config.getSoundpath() + File.separatorChar + "f-close.wav", false);
+		setSound(SOUND_CHANGEOPTION, config.getSoundpath() + File.separatorChar + "o-change.wav", false);
+
+		bar = new BarRenderer(this);
 	}
 
-	boolean existsScoreDataCache(SongData song, int lnmode) {
-		return scorecache[lnmode].containsKey(song.getSha256());
-	}
-
-	IRScoreData readScoreData(SongData song, int lnmode) {
-		if (scorecache[lnmode].containsKey(song.getSha256())) {
-			return scorecache[lnmode].get(song.getSha256());
-		}
-		IRScoreData score = getMainController().getPlayDataAccessor().readScoreData(song.getSha256(),
-				song.hasLongNote(), lnmode);
-		for (int i = 0; i < scorecache.length; i++) {
-			if (!song.hasLongNote() || i == lnmode) {
-				scorecache[i].put(song.getSha256(), score);
-			}
-		}
-		return score;
-	}
-
-	Map<String, IRScoreData> readScoreDatas(SongData[] songs, int lnmode) {
-		Map<String, IRScoreData> result = new HashMap<String, IRScoreData>();
-		List<SongData> noscore = new ArrayList<SongData>();
-		for (SongData song : songs) {
-			if (scorecache[lnmode].containsKey(song.getSha256())) {
-				result.put(song.getSha256(), scorecache[lnmode].get(song.getSha256()));
-			} else {
-				noscore.add(song);
-			}
-		}
-
-		Map<String, IRScoreData> scores = getMainController().getPlayDataAccessor()
-				.readScoreDatas(noscore.toArray(new SongData[noscore.size()]), lnmode);
-		for (SongData song : noscore) {
-			IRScoreData score = scores.get(song.getSha256());
-			for (int i = 0; i < scorecache.length; i++) {
-				if (!song.hasLongNote() || i == lnmode) {
-					scorecache[i].put(song.getSha256(), score);
-				}
-			}
-			result.put(song.getSha256(), score);
-		}
-		return result;
+	public ScoreDataCache getScoreDataCache() {
+		return scorecache;
 	}
 
 	public void create() {
 		play = -1;
 		final MainController main = getMainController();
 		playerdata = main.getPlayDataAccessor().readPlayerData();
-		for (Map<?, ?> cache : scorecache) {
-			cache.clear();
-		}
+		scorecache.clear();
+		play(SOUND_BGM);
 
 		final BMSPlayerInputProcessor input = main.getInputProcessor();
 		PlayConfig pc = (config.getMusicselectinput() == 0 ? config.getMode7() : (config.getMusicselectinput() == 1 ? config.getMode9() : config.getMode14()));
 		input.setKeyassign(pc.getKeyassign());
 		input.setControllerConfig(pc.getController());
-
 		bar.updateBar();
-
-		if (config.getBgmpath().length() > 0) {
-			final File bgmfolder = new File(config.getBgmpath());
-			if (bgmfolder.exists() && bgmfolder.isDirectory()) {
-				for (File f : bgmfolder.listFiles()) {
-					if (bgm == null && f.getName().startsWith("select.")) {
-						bgm = f.getPath();
-						break;
-					}
-				}
-			}
-		}
-		if (bgm != null) {
-			getMainController().getAudioProcessor().play(bgm, true);
-		}
-		if (config.getSoundpath().length() > 0) {
-			final File soundfolder = new File(config.getSoundpath());
-			if (soundfolder.exists() && soundfolder.isDirectory()) {
-				for (File f : soundfolder.listFiles()) {
-					if (move == null && f.getName().startsWith("scratch.")) {
-						move = f.getPath();
-					}
-					if (folderopen == null && f.getName().startsWith("f-open.")) {
-						folderopen = f.getPath();
-					}
-					if (folderclose == null && f.getName().startsWith("f-close.")) {
-						folderclose = f.getPath();
-					}
-					if (sorts == null && f.getName().startsWith("o-change.")) {
-						sorts = f.getPath();
-					}
-				}
-			}
-		}
 
 		if (getSkin() == null) {
 			try {
 				SkinConfig sc = config.getSkin()[5];
 				if (sc.getPath().endsWith(".json")) {
-					SkinLoader sl = new SkinLoader(
-							RESOLUTION[getMainController().getPlayerResource().getConfig().getResolution()]);
+					SkinLoader sl = new SkinLoader(getMainController().getPlayerResource().getConfig());
 					setSkin(sl.loadSelectSkin(Paths.get(sc.getPath()), sc.getProperty()));
 				} else {
 					LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
 					SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
-					Rectangle srcr = RESOLUTION[header.getResolution()];
-					Rectangle dstr = RESOLUTION[config.getResolution()];
-					LR2SelectSkinLoader dloader = new LR2SelectSkinLoader(srcr.width, srcr.height, dstr.width,
-							dstr.height);
+					LR2SelectSkinLoader dloader = new LR2SelectSkinLoader(header.getResolution(), getMainController().getPlayerResource().getConfig());
 					setSkin(dloader.loadSelectSkin(Paths.get(sc.getPath()).toFile(), this, header, loader.getOption(),
 							sc.getProperty()));
 				}
 			} catch (Throwable e) {
 				e.printStackTrace();
 				SkinLoader sl = new SkinLoader(
-						RESOLUTION[getMainController().getPlayerResource().getConfig().getResolution()]);
+						getMainController().getPlayerResource().getConfig());
 				setSkin(sl.loadSelectSkin(Paths.get(SkinConfig.DEFAULT_SELECT), new HashMap()));
 			}
 		}
@@ -246,11 +167,9 @@ public class MusicSelector extends MainState {
 		titlefont = generator.generateFont(parameter);
 		generator.dispose();
 
-		getTimer()[TIMER_SONGBAR_CHANGE] = getNowTime();
-
 		// search text field
 		if (getStage() == null && ((MusicSelectSkin) getSkin()).getSearchTextRegion() != null) {
-			search = new SearchTextField(this, RESOLUTION[config.getResolution()]);
+			search = new SearchTextField(this, config.getResolution());
 			setStage(search);
 		}
 	}
@@ -260,7 +179,7 @@ public class MusicSelector extends MainState {
 		final SpriteBatch sprite = main.getSpriteBatch();
 		final PlayerResource resource = main.getPlayerResource();
 		final Bar current = bar.getSelected();
-
+		
 		// draw song information
 		sprite.begin();
 		if (current instanceof SongBar) {
@@ -344,12 +263,12 @@ public class MusicSelector extends MainState {
 		// read bms information
 		if(getNowTime() > getTimer()[TIMER_SONGBAR_CHANGE] + notesGraphDuration && !showNoteGraph && play < 0) {
 			if(current instanceof SongBar) {
-				SongData song = getResource().getSongdata();
+				SongData song = main.getPlayerResource().getSongdata();
 				song.setBMSModel(resource.loadBMSModel(Paths.get(((SongBar) current).getSongData().getPath()), config.getLnmode()));
 				preview = song.getPreview();
 				if(preview != null && preview.length() > 0) {
 					preview = Paths.get(song.getPath()).getParent().resolve(preview).toString();
-					getMainController().getAudioProcessor().stop(bgm);
+					stop(SOUND_BGM);
 					getMainController().getAudioProcessor().play(preview, false);					
 				}
 			}
@@ -360,9 +279,7 @@ public class MusicSelector extends MainState {
 			if (current instanceof SongBar) {
 				resource.clear();
 				if (resource.setBMSFile(Paths.get(((SongBar) current).getSongData().getPath()), config, play)) {
-					if (bgm != null) {
-						getMainController().getAudioProcessor().stop(bgm);
-					}
+					stop(SOUND_BGM);
 					if(preview != null && preview.length() > 0) {
 						getMainController().getAudioProcessor().stop(preview);
 						getMainController().getAudioProcessor().dispose(preview);
@@ -385,13 +302,15 @@ public class MusicSelector extends MainState {
 	private int play = -1;
 
 	public void input() {
-		BMSPlayerInputProcessor input = getMainController().getInputProcessor();
+		final BMSPlayerInputProcessor input = getMainController().getInputProcessor();
+		final PlayerResource resource = getMainController().getPlayerResource();
 		final Bar current = bar.getSelected();
 		final int nowtime = getNowTime();
 
 		boolean[] numberstate = input.getNumberState();
 		long[] numtime = input.getNumberTime();
 		if (numberstate[0] && numtime[0] != 0) {
+			// 検索用ポップアップ表示。これ必要？
 			numtime[0] = 0;
 			Gdx.input.getTextInput(new TextInputListener() {
 				@Override
@@ -410,32 +329,29 @@ public class MusicSelector extends MainState {
 
 		if (numberstate[1] && numtime[1] != 0) {
 			// KEYフィルターの切り替え
-			mode = (mode + 1) % 6;
+			mode = (mode + 1) % MODE.length;
 			numtime[1] = 0;
 			bar.updateBar();
-			if (sorts != null) {
-				getMainController().getAudioProcessor().play(sorts, false);
-			}
+			play(SOUND_CHANGEOPTION);
+			this.config.setModeSort(getMode());
+			
 		}
 		if (numberstate[2] && numtime[2] != 0) {
 			// ソートの切り替え
 			sort = (sort + 1) % BarSorter.getAllSorter().length;
 			numtime[2] = 0;
 			bar.updateBar();
-			if (sorts != null) {
-				getMainController().getAudioProcessor().play(sorts, false);
-			}
+			play(SOUND_CHANGEOPTION);
 		}
 		if (numberstate[3] && numtime[3] != 0) {
 			// LNモードの切り替え
 			config.setLnmode((config.getLnmode() + 1) % 3);
 			numtime[3] = 0;
 			bar.updateBar();
-			if (sorts != null) {
-				getMainController().getAudioProcessor().play(sorts, false);
-			}
+			play(SOUND_CHANGEOPTION);
 		}
 		if (numberstate[4] && numtime[4] != 0) {
+			// change replay
 			if (current != null && current instanceof SelectableBar) {
 				boolean[] replays = ((SelectableBar) current).getExistsReplayData();
 				for (int i = 1; i < replays.length; i++) {
@@ -446,9 +362,7 @@ public class MusicSelector extends MainState {
 				}
 			}
 			numtime[4] = 0;
-			if (sorts != null) {
-				getMainController().getAudioProcessor().play(sorts, false);
-			}
+			play(SOUND_CHANGEOPTION);
 		}
 
 		boolean[] keystate = input.getKeystate();
@@ -456,45 +370,11 @@ public class MusicSelector extends MainState {
 		boolean[] cursor = input.getCursorState();
 		long[] cursortime = input.getCursorTime();
 
-		// song bar scroll on mouse wheel
-		int mov = -input.getScroll();
-		input.resetScroll();
-		// song bar scroll
-		if (isPressed(keystate, keytime, KEY_UP, false) || cursor[1]) {
-			long l = System.currentTimeMillis();
-			if (duration == 0) {
-				mov = 1;
-				duration = l + durationlow;
-				angle = durationlow;
-			}
-			if (l > duration) {
-				duration = l + durationhigh;
-				mov = 1;
-				angle = durationhigh;
-			}
-		} else if (isPressed(keystate, keytime, KEY_DOWN, false) || cursor[0]) {
-			long l = System.currentTimeMillis();
-			if (duration == 0) {
-				mov = -1;
-				duration = l + durationlow;
-				angle = -durationlow;
-			}
-			if (l > duration) {
-				duration = l + durationhigh;
-				mov = -1;
-				angle = -durationhigh;
-			}
-		} else {
-			long l = System.currentTimeMillis();
-			if (l > duration) {
-				duration = 0;
-			}
-		}
-
 		final int prevpanelstate = panelstate;
 		panelstate = 0;
 
 		if (input.startPressed()) {
+			bar.resetInput();
 			// show play option
 			panelstate = 1;
 			if (keystate[0] && keytime[0] != 0) {
@@ -518,22 +398,54 @@ public class MusicSelector extends MainState {
 				config.setFixhispeed(config.getFixhispeed() + 1 < 5 ? config.getFixhispeed() + 1 : 0);
 			}
 
+			// song bar scroll on mouse wheel
+			int mov = -input.getScroll();
+			input.resetScroll();
+			// song bar scroll
+			if (isPressed(keystate, keytime, KEY_UP, false) || cursor[1]) {
+				long l = System.currentTimeMillis();
+				if (duration == 0) {
+					mov = 1;
+					duration = l + durationlow;
+					angle = durationlow;
+				}
+				if (l > duration) {
+					duration = l + durationhigh;
+					mov = 1;
+					angle = durationhigh;
+				}
+			} else if (isPressed(keystate, keytime, KEY_DOWN, false) || cursor[0]) {
+				long l = System.currentTimeMillis();
+				if (duration == 0) {
+					mov = -1;
+					duration = l + durationlow;
+					angle = -durationlow;
+				}
+				if (l > duration) {
+					duration = l + durationhigh;
+					mov = -1;
+					angle = -durationhigh;
+				}
+			} else {
+				long l = System.currentTimeMillis();
+				if (l > duration) {
+					duration = 0;
+				}
+			}
+
 			TargetProperty[] targets = TargetProperty.getAllTargetProperties(getMainController());
 			while(mov > 0) {
 				config.setTarget((config.getTarget() + 1) % targets.length);
-				if (move != null) {
-					getMainController().getAudioProcessor().play(move, false);
-				}
+				play(SOUND_SCRATCH);
 				mov--;
 			}
 			while(mov < 0) {
 				config.setTarget((config.getTarget() + targets.length - 1) % targets.length);
-				if (move != null) {
-					getMainController().getAudioProcessor().play(move, false);
-				}
+				play(SOUND_SCRATCH);
 				mov++;
 			}
 		} else if (input.isSelectPressed()) {
+			bar.resetInput();
 			// show assist option
 			panelstate = 2;
 			if (keystate[0] && keytime[0] != 0) {
@@ -565,6 +477,7 @@ public class MusicSelector extends MainState {
 				config.setNomine(!config.isNomine());
 			}
 		} else if (input.getNumberState()[5]) {
+			bar.resetInput();
 			// show detail option
 			panelstate = 3;
 			PlayConfig pc = null;
@@ -603,9 +516,7 @@ public class MusicSelector extends MainState {
 				}
 			}
 		} else if (input.getNumberState()[6]) {
-			if (bgm != null) {
-				getMainController().getAudioProcessor().stop(bgm);
-			}
+			stop(SOUND_BGM);
 			if(preview != null && preview.length() > 0) {
 				getMainController().getAudioProcessor().stop(preview);
 				getMainController().getAudioProcessor().dispose(preview);
@@ -613,15 +524,17 @@ public class MusicSelector extends MainState {
 			}
 			getMainController().changeState(MainController.STATE_CONFIG);
 		} else {
+			bar.input();
+
 			if (current instanceof SelectableBar) {
 				if (isPressed(keystate, keytime, KEY_PLAY, true) || (cursor[3] && cursortime[3] != 0)) {
 					// play
 					cursortime[3] = 0;
-					getResource().setPlayDevice(getMainController().getInputProcessor().getLastKeyChangedDevice());
+					resource.setPlayDevice(getMainController().getInputProcessor().getLastKeyChangedDevice());
 					play = 0;
 				} else if (isPressed(keystate, keytime, KEY_PRACTICE, true)) {
 					// practice mode
-					getResource().setPlayDevice(getMainController().getInputProcessor().getLastKeyChangedDevice());
+					resource.setPlayDevice(getMainController().getInputProcessor().getLastKeyChangedDevice());
 					play = 2;
 				} else if (isPressed(keystate, keytime, KEY_AUTO, true)) {
 					// auto play
@@ -635,9 +548,7 @@ public class MusicSelector extends MainState {
 					// open folder
 					cursortime[3] = 0;
 					if (bar.updateBar(current)) {
-						if (folderopen != null) {
-							getMainController().getAudioProcessor().play(folderopen, false);
-						}
+						play(SOUND_FOLDEROPEN);
 					}
 					resetReplayIndex();
 				}
@@ -647,25 +558,10 @@ public class MusicSelector extends MainState {
 			if (isPressed(keystate, keytime, KEY_FOLDER_CLOSE, true) || (cursor[2] && cursortime[2] != 0)) {
 				keytime[1] = 0;
 				cursortime[2] = 0;
-				close();
-			}
-
-			while(mov > 0) {
-				bar.move(true);
-				if (move != null) {
-					getMainController().getAudioProcessor().play(move, false);
-				}
-				mov--;
-			}
-			while(mov < 0) {
-				bar.move(false);
-				if (move != null) {
-					getMainController().getAudioProcessor().play(move, false);
-				}
-				mov++;
+				bar.close();
 			}
 		}
-
+		// panel state changed
 		if (prevpanelstate != panelstate) {
 			if (prevpanelstate != 0) {
 				getTimer()[TIMER_PANEL1_OFF + prevpanelstate - 1] = nowtime;
@@ -680,36 +576,24 @@ public class MusicSelector extends MainState {
 		if (bar.getSelected() != current || selectedreplay == -1) {
 			resetReplayIndex();
 		}
+		// song bar moved
 		if (bar.getSelected() != current) {
 			getTimer()[TIMER_SONGBAR_CHANGE] = nowtime;
-			getResource().setSongdata((bar.getSelected() instanceof SongBar) ? ((SongBar) bar.getSelected()).getSongData() : null);
 			if(preview != null && preview.length() > 0) {
 				getMainController().getAudioProcessor().stop(preview);
 				getMainController().getAudioProcessor().dispose(preview);
-				getMainController().getAudioProcessor().play(bgm, true);
+				play(SOUND_BGM);
 				preview = null;
 			}
 			showNoteGraph = false;
 		}
-
+		if(getTimer()[TIMER_SONGBAR_CHANGE] == Long.MIN_VALUE) {
+			getTimer()[TIMER_SONGBAR_CHANGE] = nowtime;			
+		}
+		// update folder
 		if (input.getFunctionstate()[1] && input.getFunctiontime()[1] != 0) {
 			input.getFunctiontime()[1] = 0;
-			if (bar.getSelected() instanceof FolderBar) {
-				FolderBar fb = (FolderBar) bar.getSelected();
-				songdb.updateSongDatas(fb.getFolderData().getPath(), false);
-			}
-			if (bar.getSelected() instanceof TableBar) {
-				TableBar tb = (TableBar) bar.getSelected();
-				if (tb.getUrl() != null && tb.getUrl().length() > 0) {
-					TableDataAccessor tda = new TableDataAccessor();
-					String[] url = new String[] { tb.getUrl() };
-					tda.updateTableData(url);
-					TableData td = tda.read(tb.getTitle());
-					if (td != null) {
-						tb.setTableData(td);
-					}
-				}
-			}
+			bar.updateFolder();
 		}
 
 		if (input.isExitPressed()) {
@@ -720,27 +604,11 @@ public class MusicSelector extends MainState {
 	public void select(Bar current) {
 		if (current instanceof DirectoryBar) {
 			if (bar.updateBar(current)) {
-				if (folderopen != null) {
-					getMainController().getAudioProcessor().play(folderopen, false);
-				}
+				play(SOUND_FOLDEROPEN);
 			}
 			resetReplayIndex();
 		} else {
 			play = 0;
-		}
-	}
-
-	public void close() {
-		if (bar.getDirectory().size() > 1) {
-			bar.updateBar(bar.getDirectory().get(bar.getDirectory().size() - 2));
-			if (folderclose != null) {
-				getMainController().getAudioProcessor().play(folderclose, false);
-			}
-		} else {
-			bar.updateBar(null);
-			if (folderclose != null) {
-				getMainController().getAudioProcessor().play(folderclose, false);
-			}
 		}
 	}
 
@@ -808,9 +676,7 @@ public class MusicSelector extends MainState {
 						break;
 					}
 				}
-				if (bgm != null) {
-					getMainController().getAudioProcessor().stop(bgm);
-				}
+				stop(SOUND_BGM);
 				if(preview != null && preview.length() > 0) {
 					getMainController().getAudioProcessor().stop(preview);
 					getMainController().getAudioProcessor().dispose(preview);
@@ -827,7 +693,7 @@ public class MusicSelector extends MainState {
 		}
 	}
 
-	private boolean isPressed(boolean[] keystate, long[] keytime, int code, boolean resetState) {
+	boolean isPressed(boolean[] keystate, long[] keytime, int code, boolean resetState) {
 		int[][] keyassign = KeyConfiguration.keyassign[config.getMusicselectinput()];
 		for (int i = 0; i < keyassign.length; i++) {
 			for (int index : keyassign[i]) {
@@ -848,8 +714,9 @@ public class MusicSelector extends MainState {
 		return false;
 	}
 
-	public int getMode() {
-		return mode;
+	public Mode getMode() {
+		return MODE[mode];
+
 	}
 
 	public int getSort() {
@@ -906,25 +773,13 @@ public class MusicSelector extends MainState {
 					? bar.getSelected().getScore().getPlaycount() - bar.getSelected().getScore().getClearcount()
 					: Integer.MIN_VALUE;
 		case NUMBER_CLEAR:
-			if (bar.getSelected().getScore() != null) {
-				return bar.getSelected().getScore().getClear();
-			}
-			return Integer.MIN_VALUE;
+			return bar.getSelected().getScore() != null ? bar.getSelected().getScore().getClear() : Integer.MIN_VALUE;
 		case NUMBER_SCORE:
-			if (bar.getSelected().getScore() != null) {
-				return bar.getSelected().getScore().getExscore();
-			}
-			return Integer.MIN_VALUE;
+			return bar.getSelected().getScore() != null ? bar.getSelected().getScore().getExscore() : Integer.MIN_VALUE;
 		case NUMBER_MISSCOUNT:
-			if (bar.getSelected().getScore() != null) {
-				return bar.getSelected().getScore().getMinbp();
-			}
-			return Integer.MIN_VALUE;
+			return bar.getSelected().getScore() != null ? bar.getSelected().getScore().getMinbp() : Integer.MIN_VALUE;
 		case NUMBER_MAXCOMBO:
-			if (bar.getSelected().getScore() != null) {
-				return bar.getSelected().getScore().getCombo();
-			}
-			return Integer.MIN_VALUE;
+			return bar.getSelected().getScore() != null ? bar.getSelected().getScore().getCombo() : Integer.MIN_VALUE;
 		case NUMBER_FOLDER_TOTALSONGS:
 			if (bar.getSelected() instanceof DirectoryBar) {
 				int[] lamps = ((DirectoryBar) bar.getSelected()).getLamps();
@@ -948,83 +803,41 @@ public class MusicSelector extends MainState {
 		case NUMBER_JUDGETIMING:
 			return config.getJudgetiming();
 		case BUTTON_MODE:
+		mode = config.getModeSort();
 			final int[] mode_lr2 = { 0, 2, 4, 5, 1, 3 };
-			return mode_lr2[mode];
+			return mode < mode_lr2.length ? mode_lr2[mode] : mode;
 		case BUTTON_SORT:
 			return sort;
 		case BUTTON_LNMODE:
 			return config.getLnmode();
 		case NUMBER_SCORE_RATE:
-			if (bar.getSelected().getScore() != null) {
-				final IRScoreData score = bar.getSelected().getScore();
-				return score.getNotes() == 0 ? 0 : score.getExscore() * 100 / (score.getNotes() * 2);
-			}
-			return Integer.MIN_VALUE;
+			return bar.getSelected().getScore() != null ? getScoreDataProperty().getRateInt() : Integer.MIN_VALUE;
 		case NUMBER_SCORE_RATE_AFTERDOT:
-			if (bar.getSelected().getScore() != null) {
-				final IRScoreData score = bar.getSelected().getScore();
-				return score.getNotes() == 0 ? 0 : (score.getExscore() * 1000 / (score.getNotes() * 2)) % 10;
-			}
-			return Integer.MIN_VALUE;
+			return bar.getSelected().getScore() != null ? getScoreDataProperty().getNowRateAfterDot() : Integer.MIN_VALUE;
 		}
 		return super.getNumberValue(id);
 	}
 
 	public String getTextValue(int id) {
 		switch (id) {
+		case STRING_TITLE:
 		case STRING_FULLTITLE:
 			if (bar.getSelected() instanceof DirectoryBar) {
 				return bar.getSelected().getTitle();
 			}
 			break;
 		case STRING_COURSE1_TITLE:
-			if (bar.getSelected() instanceof GradeBar) {
-				if (((GradeBar) bar.getSelected()).getSongDatas().length > 0) {
-					SongData song = ((GradeBar) bar.getSelected()).getSongDatas()[0];
-					return song != null ? song.getTitle() : "-----";
-				}
-			}
-			return "";
+			return getCourseTitle(0);
 		case STRING_COURSE2_TITLE:
-			if (bar.getSelected() instanceof GradeBar) {
-				if (((GradeBar) bar.getSelected()).getSongDatas().length > 1) {
-					SongData song = ((GradeBar) bar.getSelected()).getSongDatas()[1];
-					return song != null ? song.getTitle() : "-----";
-				}
-			}
-			return "";
+			return getCourseTitle(1);
 		case STRING_COURSE3_TITLE:
-			if (bar.getSelected() instanceof GradeBar) {
-				if (((GradeBar) bar.getSelected()).getSongDatas().length > 2) {
-					SongData song = ((GradeBar) bar.getSelected()).getSongDatas()[2];
-					return song != null ? song.getTitle() : "-----";
-				}
-			}
-			return "";
+			return getCourseTitle(2);
 		case STRING_COURSE4_TITLE:
-			if (bar.getSelected() instanceof GradeBar) {
-				if (((GradeBar) bar.getSelected()).getSongDatas().length > 3) {
-					SongData song = ((GradeBar) bar.getSelected()).getSongDatas()[3];
-					return song != null ? song.getTitle() : "-----";
-				}
-			}
-			return "";
+			return getCourseTitle(3);
 		case STRING_COURSE5_TITLE:
-			if (bar.getSelected() instanceof GradeBar) {
-				if (((GradeBar) bar.getSelected()).getSongDatas().length > 4) {
-					SongData song = ((GradeBar) bar.getSelected()).getSongDatas()[4];
-					return song != null ? song.getTitle() : "-----";
-				}
-			}
-			return "";
+			return getCourseTitle(4);
 		case STRING_COURSE6_TITLE:
-			if (bar.getSelected() instanceof GradeBar) {
-				if (((GradeBar) bar.getSelected()).getSongDatas().length > 5) {
-					SongData song = ((GradeBar) bar.getSelected()).getSongDatas()[5];
-					return song != null ? song.getTitle() : "-----";
-				}
-			}
-			return "";
+			return getCourseTitle(5);
 		case STRING_DIRECTORY:
 			StringBuffer str = new StringBuffer();
 			for (Bar b : bar.getDirectory()) {
@@ -1035,8 +848,14 @@ public class MusicSelector extends MainState {
 		return super.getTextValue(id);
 	}
 
-	PlayerResource getResource() {
-		return getMainController().getPlayerResource();
+	private String getCourseTitle(int index) {
+		if (bar.getSelected() instanceof GradeBar) {
+			if (((GradeBar) bar.getSelected()).getSongDatas().length > index) {
+				SongData song = ((GradeBar) bar.getSelected()).getSongDatas()[index];
+				return song != null ? song.getTitle() : "-----";
+			}
+		}
+		return "";
 	}
 
 	SongDatabaseAccessor getSongDatabase() {
@@ -1214,14 +1033,6 @@ public class MusicSelector extends MainState {
 		return super.getImage(imageid);
 	}
 
-	public void renderBar(SkinBar baro, int time) {
-		final MainController main = getMainController();
-		final SpriteBatch sprite = main.getSpriteBatch();
-		sprite.end();
-		bar.render(sprite, (MusicSelectSkin) getSkin(), baro, panelstate == 0 ? duration : 0, panelstate == 0 ? angle : 0, time);
-		sprite.begin();
-	}
-
 	public boolean getBooleanValue(int id) {
 		final Bar current = bar.getSelected();
 		switch (id) {
@@ -1264,62 +1075,6 @@ public class MusicSelector extends MainState {
 		case OPTION_NO_REPLAYDATA4:
 			return (current instanceof SelectableBar) && ((SelectableBar) current).getExistsReplayData().length > 3
 					&& !((SelectableBar) current).getExistsReplayData()[3];
-		case OPTION_1P_F:
-			if (bar.getSelected().getScore() != null) {
-				final IRScoreData score = bar.getSelected().getScore();
-				final int drate = score.getNotes() == 0 ? 0 : score.getExscore() * 10000 / (score.getNotes() * 2);
-				return drate <= 2222;
-			}
-			return false;
-		case OPTION_1P_E:
-			if (bar.getSelected().getScore() != null) {
-				final IRScoreData score = bar.getSelected().getScore();
-				final int drate = score.getNotes() == 0 ? 0 : score.getExscore() * 10000 / (score.getNotes() * 2);
-				return drate > 2222 && drate <= 3333;
-			}
-			return false;
-		case OPTION_1P_D:
-			if (bar.getSelected().getScore() != null) {
-				final IRScoreData score = bar.getSelected().getScore();
-				final int drate = score.getNotes() == 0 ? 0 : score.getExscore() * 10000 / (score.getNotes() * 2);
-				return drate > 3333 && drate <= 4444;
-			}
-			return false;
-		case OPTION_1P_C:
-			if (bar.getSelected().getScore() != null) {
-				final IRScoreData score = bar.getSelected().getScore();
-				final int drate = score.getNotes() == 0 ? 0 : score.getExscore() * 10000 / (score.getNotes() * 2);
-				return drate > 4444 && drate <= 5555;
-			}
-			return false;
-		case OPTION_1P_B:
-			if (bar.getSelected().getScore() != null) {
-				final IRScoreData score = bar.getSelected().getScore();
-				final int drate = score.getNotes() == 0 ? 0 : score.getExscore() * 10000 / (score.getNotes() * 2);
-				return drate > 5555 && drate <= 6666;
-			}
-			return false;
-		case OPTION_1P_A:
-			if (bar.getSelected().getScore() != null) {
-				final IRScoreData score = bar.getSelected().getScore();
-				final int drate = score.getNotes() == 0 ? 0 : score.getExscore() * 10000 / (score.getNotes() * 2);
-				return drate > 6666 && drate <= 7777;
-			}
-			return false;
-		case OPTION_1P_AA:
-			if (bar.getSelected().getScore() != null) {
-				final IRScoreData score = bar.getSelected().getScore();
-				final int drate = score.getNotes() == 0 ? 0 : score.getExscore() * 10000 / (score.getNotes() * 2);
-				return drate > 7777 && drate <= 8888;
-			}
-			return false;
-		case OPTION_1P_AAA:
-			if (bar.getSelected().getScore() != null) {
-				final IRScoreData score = bar.getSelected().getScore();
-				final int drate = score.getNotes() == 0 ? 0 : score.getExscore() * 10000 / (score.getNotes() * 2);
-				return drate > 8888;
-			}
-			return false;
 		}
 		return super.getBooleanValue(id);
 	}
@@ -1327,14 +1082,14 @@ public class MusicSelector extends MainState {
 	public void executeClickEvent(int id) {
 		switch (id) {
 		case BUTTON_PLAY:
-			getResource().setPlayDevice(getMainController().getInputProcessor().getLastKeyChangedDevice());
+			getMainController().getPlayerResource().setPlayDevice(getMainController().getInputProcessor().getLastKeyChangedDevice());
 			play = 0;
 			break;
 		case BUTTON_AUTOPLAY:
 			play = 1;
 			break;
 		case BUTTON_PRACTICE:
-			getResource().setPlayDevice(getMainController().getInputProcessor().getLastKeyChangedDevice());
+			getMainController().getPlayerResource().setPlayDevice(getMainController().getInputProcessor().getLastKeyChangedDevice());
 			play = 2;
 			break;
 		case BUTTON_REPLAY:

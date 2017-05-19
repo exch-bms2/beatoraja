@@ -72,24 +72,27 @@ public class KeyConfiguration extends MainState {
 
 	private int mode = 0;
 
+	private ShapeRenderer shape;
+
+
 	public KeyConfiguration(MainController main) {
 		super(main);
 		
-		this.setSkin(new MusicDecideSkin(640,480,1280,720));
 
 	}
 
 	public void create() {
+		this.setSkin(new MusicDecideSkin(Resolution.SD,Resolution.HD));
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/default/VL-Gothic-Regular.ttf"));
 		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
 		parameter.size = 20;
 		titlefont = generator.generateFont(parameter);
+		shape = new ShapeRenderer();
 	}
 
 	public void render() {
 		final MainController main = getMainController();
 		final SpriteBatch sprite = main.getSpriteBatch();
-		final ShapeRenderer shape = main.getShapeRenderer();
 		BMSPlayerInputProcessor input = main.getInputProcessor();
 		Config config = getMainController().getPlayerResource().getConfig();
 		BMControllerInputProcessor[] controllers = input.getBMInputProcessor();
@@ -139,6 +142,7 @@ public class KeyConfiguration extends MainState {
 					}
 				}
 				pc.getController()[0].setName(controllers[(index + 1) % controllers.length].getController().getName());
+				pc.setController(pc.getController());
 			}
 		}
 		if (number[3] && input.getNumberTime()[3] != 0) {
@@ -151,6 +155,7 @@ public class KeyConfiguration extends MainState {
 					}
 				}
 				pc.getController()[1].setName(controllers[(index + 1) % controllers.length].getController().getName());
+				pc.setController(pc.getController());
 			}
 		}
 
@@ -173,7 +178,7 @@ public class KeyConfiguration extends MainState {
 				if(bmc.getController().getName().equals(controller[index / 20].getName())) {
 					controller[index / 20].getAssign()[bmkeysa[cursorpos] % 20] = bmc.getLastPressedButton();					
 				}
-				// System.out.println(input.getKeyBoardInputProcesseor().getLastPressedKey());
+//				System.out.println(bmc.getLastPressedButton());
 				keyinput = false;
 				break;
 			}
@@ -225,6 +230,10 @@ public class KeyConfiguration extends MainState {
 		if(titlefont != null) {
 			titlefont.dispose();
 			titlefont = null;
+		}
+		if(shape != null) {
+			shape.dispose();
+			shape = null;
 		}
 	}
 }

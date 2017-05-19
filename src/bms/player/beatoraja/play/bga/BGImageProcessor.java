@@ -1,9 +1,11 @@
 package bms.player.beatoraja.play.bga;
 
-import java.util.Arrays;
+import java.nio.file.Path;
+import java.util.*;
 import java.util.logging.Logger;
 
 import bms.model.TimeLine;
+import bms.player.beatoraja.PixmapResourcePool;
 
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
@@ -14,10 +16,12 @@ import com.badlogic.gdx.graphics.Texture;
  * @author exch
  */
 public class BGImageProcessor {
+	
+	public static final String[] pic_extension = { "jpg", "jpeg", "gif", "bmp", "png" };
 	/**
 	 * BGイメージ
 	 */
-	private Pixmap[] bgamap;
+	private Pixmap[] bgamap = new Pixmap[1000];
 	/**
 	 * BGイメージのキャッシュ
 	 */
@@ -27,11 +31,41 @@ public class BGImageProcessor {
 	 */
 	private int[] bgacacheid;
 
-	public BGImageProcessor(Pixmap[] pixmap, int size) {
-		this.bgamap = pixmap;
+	private PixmapResourcePool cache = new PixmapResourcePool() {
+		
+		protected Pixmap convert(Pixmap pixmap) {
+			int bgasize = Math.max(pixmap.getHeight(), pixmap.getWidth());
+			if ( bgasize <=256 ){
+				final int fixx = (bgasize -  pixmap.getWidth()) / 2;
+				Pixmap fixpixmap = new Pixmap(bgasize, bgasize, pixmap.getFormat());
+				fixpixmap.drawPixmap(pixmap, 0, 0, pixmap.getWidth(), pixmap.getHeight(),
+						fixx, 0, pixmap.getWidth(), pixmap.getHeight());
+				pixmap.dispose();
+				return fixpixmap;
+			}
+			return pixmap;
+		}
+	};
+
+	public BGImageProcessor(int size) {
 		bgacache = new Texture[size];
 		bgacacheid = new int[size];
-		Arrays.fill(bgacacheid, -1);
+	}
+
+	public void put(int id, Path path) {
+		Pixmap pixmap = cache.get(path.toString());
+		if(id >= bgamap.length) {
+			bgamap = Arrays.copyOf(bgamap, id + 1);
+		}
+		bgamap[id] = pixmap;
+	}
+	
+	public void clear() {
+		Arrays.fill(bgamap,  null);
+	}
+	
+	public void disposeOld() {
+		cache.disposeOld();
 	}
 
 	/**
@@ -39,19 +73,18 @@ public class BGImageProcessor {
 	 */
 	public void prepare(TimeLine[] timelines) {
 		long l = System.currentTimeMillis();
+		Arrays.fill(bgacacheid, -1);
 		int count = 0;
 		for (TimeLine tl : timelines) {
 			int bga = tl.getBGA();
 			if (bga >= 0 && bgacache[bga % bgacache.length] == null && bgamap[bga] != null) {
-				bgacache[bga % bgacache.length] = new Texture(createPixmap(bga));
-				bgacacheid[bga % bgacache.length] = bga;
+				getTexture(bga);
 				count++;
 			}
 
 			bga = tl.getLayer();
 			if (bga >= 0 && bgacache[bga % bgacache.length] == null && bgamap[bga] != null) {
-				bgacache[bga % bgacache.length] = new Texture(createPixmap(bga));
-				bgacacheid[bga % bgacache.length] = bga;
+				getTexture(bga);
 				count++;
 			}
 		}
@@ -70,32 +103,11 @@ public class BGImageProcessor {
 			bgacache[cid].dispose();
 		}
 		if (bgamap[id] != null){
-			bgacache[cid] = new Texture(createPixmap(id));
+			bgacache[cid] = new Texture(bgamap[id]);
 			bgacacheid[cid] = id;
 			return bgacache[cid];
 		}
 		return null;
-	}
-
-
-	/**
-	 * Create a pixmap that is compatible with legacy BMS
-	 */
-	private Pixmap createPixmap(int id){
-		int bgasize = bgamap[id].getHeight() > bgamap[id].getWidth() ?
-				bgamap[id].getHeight() : bgamap[id].getWidth();
-		Pixmap pix;
-		int fixx;
-		if ( bgasize <=256 ){
-			fixx = (bgasize -  bgamap[id].getWidth()) / 2;
-			pix = new Pixmap(bgasize, bgasize,bgamap[id].getFormat());
-		} else {
-			fixx = 0;
-			pix = new Pixmap(bgamap[id].getWidth(), bgamap[id].getHeight(), bgamap[id].getFormat());
-		}
-		pix.drawPixmap(bgamap[id], 0, 0, bgamap[id].getWidth(), bgamap[id].getHeight(),
-				fixx, 0, bgamap[id].getWidth(), bgamap[id].getHeight());
-		return pix;
 	}
 
 	/**
@@ -108,11 +120,7 @@ public class BGImageProcessor {
 			}
 		}
 		bgacache = new Texture[0];
-		for (Pixmap id : bgamap) {
-			if (id != null) {
-				id.dispose();
-			}
-		}
-		bgamap = new Pixmap[0];
-	}
+
+		cache.dispose();
+	}	
 }

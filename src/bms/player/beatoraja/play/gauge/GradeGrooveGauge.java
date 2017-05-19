@@ -1,6 +1,7 @@
 package bms.player.beatoraja.play.gauge;
 
 import bms.model.BMSModel;
+import bms.model.Mode;
 
 /**
  * 段位ゲージ
@@ -10,7 +11,7 @@ import bms.model.BMSModel;
 public class GradeGrooveGauge extends GrooveGauge {
 
 	public GradeGrooveGauge(BMSModel model) {
-		if(model.getUseKeys() == 9) {
+        if (model.getMode() == Mode.POPN_5K || model.getMode() == Mode.POPN_9K) {
 			init(0, 100, 100, 0, CLEARTYPE_NORMAL, new float[] { 0.15f, 0.10f, 0.05f, -1.5f, -3f, -1.5f });
 		} else {
 			init(0, 100, 100, 0, CLEARTYPE_NORMAL, new float[] { 0.15f, 0.10f, 0.05f, -1.5f, -3f, -1.5f });

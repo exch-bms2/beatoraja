@@ -1,5 +1,6 @@
 package bms.player.beatoraja.result;
 
+import bms.player.beatoraja.Resolution;
 import bms.player.beatoraja.skin.*;
 
 /**
@@ -9,8 +10,8 @@ public class MusicResultSkin extends Skin {
 
 	private int ranktime;
 
-	public MusicResultSkin(float srcw, float srch, float dstw, float dsth) {
-		super(srcw, srch, dstw, dsth);
+	public MusicResultSkin(Resolution src, Resolution dst) {
+		super(src, dst);
 	}
 
 	public int getRankTime() {

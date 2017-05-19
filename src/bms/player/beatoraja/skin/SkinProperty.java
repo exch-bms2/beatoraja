@@ -64,7 +64,7 @@ public class SkinProperty {
 	public static final int TIMER_BOMB_2P_KEY7 = 67;
 	public static final int TIMER_BOMB_2P_KEY8 = 68;
 	public static final int TIMER_BOMB_2P_KEY9 = 69;
-	public static final int TIMER_HOLD = 70;
+	public static final int TIMER_HOLD_1P_SCRATCH = 70;
 	public static final int TIMER_HOLD_1P_KEY1 = 71;
 	public static final int TIMER_KEYON_1P_SCRATCH = 100;
 	public static final int TIMER_KEYON_1P_KEY1 = 101;
@@ -168,8 +168,10 @@ public class SkinProperty {
 	public static final int NUMBER_HISPEED = 310;
 	public static final int NUMBER_HISPEED_AFTERDOT = 311;
 	public static final int NUMBER_DURATION = 312;
+	public static final int NUMBER_DURATION_GREEN = 313;
 	public static final int NUMBER_JUDGETIMING = 12;
     public static final int NUMBER_LANECOVER1 = 14;
+	public static final int NUMBER_LIFT1 = 314;
 	public static final int NUMBER_TIME_YEAR = 21;
 	public static final int NUMBER_TIME_MONTH = 22;
 	public static final int NUMBER_TIME_DAY = 23;
@@ -216,6 +218,7 @@ public class SkinProperty {
 	public static final int NUMBER_MAXBPM = 90;
 	public static final int NUMBER_MINBPM = 91;
 	public static final int NUMBER_PLAYLEVEL = 96;
+	public static final int NUMBER_POINT = 100;
 	public static final int NUMBER_SCORE2 = 101;
 	public static final int NUMBER_SCORE_RATE = 102;
 	public static final int NUMBER_SCORE_RATE_AFTERDOT = 103;
@@ -245,16 +248,25 @@ public class SkinProperty {
 	public static final int NUMBER_LATE_MISS = 422;
 	public static final int NUMBER_TOTALEARLY = 423;
 	public static final int NUMBER_TOTALLATE = 424;
+	public static final int NUMBER_COMBOBREAK = 425;
 	public static final int NUMBER_TOTAL_RATE = 115;
 	public static final int NUMBER_TOTAL_RATE_AFTERDOT = 116;
 	public static final int NUMBER_TARGET_SCORE = 121;
+	public static final int NUMBER_TARGET_SCORE_RATE = 122;
+	public static final int NUMBER_TARGET_SCORE_RATE_AFTERDOT = 123;
 	public static final int NUMBER_DIFF_EXSCORE2 = 128;
+	public static final int NUMBER_TARGET_TOTAL_RATE = 135;
+	public static final int NUMBER_TARGET_TOTAL_RATE_AFTERDOT = 136;
 
 	public static final int NUMBER_HIGHSCORE = 150;
 	public static final int NUMBER_TARGET_SCORE2 = 151;
 	public static final int NUMBER_DIFF_HIGHSCORE = 152;
 	public static final int NUMBER_DIFF_TARGETSCORE = 153;
 	public static final int NUMBER_DIFF_NEXTRANK = 154;
+	public static final int NUMBER_SCORE_RATE2 = 155;
+	public static final int NUMBER_SCORE_RATE_AFTERDOT2 = 156;
+	public static final int NUMBER_TARGET_SCORE_RATE2 = 157;
+	public static final int NUMBER_TARGET_SCORE_RATE_AFTERDOT2 = 158;
 	public static final int NUMBER_NOWBPM = 160;
 	public static final int NUMBER_PLAYTIME_MINUTE = 161;
 	public static final int NUMBER_PLAYTIME_SECOND = 162;
@@ -274,6 +286,8 @@ public class SkinProperty {
 	public static final int NUMBER_IR_TOTALPLAYER = 180;
 	public static final int NUMBER_IR_CLEARRATE = 181;
 	public static final int NUMBER_IR_PREVRANK = 182;
+	public static final int NUMBER_BEST_RATE = 183;
+	public static final int NUMBER_BEST_RATE_AFTERDOT = 184;
 
 	public static final int NUMBER_FOLDER_TOTALSONGS = 300;
 
@@ -316,6 +330,17 @@ public class SkinProperty {
 	public static final int OPTION_NORMAL_SAVE_CLEAR = 64;
 	public static final int OPTION_HARD_SAVE_CLEAR = 65;
 	public static final int OPTION_FULLCOMBO_SAVE_CLEAR = 66;
+
+	public static final int OPTION_LEVEL_BEGINNER = 70;
+	public static final int OPTION_LEVEL_NORMAL = 71;
+	public static final int OPTION_LEVEL_HYPER = 72;
+	public static final int OPTION_LEVEL_ANOTHER = 73;
+	public static final int OPTION_LEVEL_INSANE = 74;
+	public static final int OPTION_LEVEL_BEGINNER_EXCEED = 75;
+	public static final int OPTION_LEVEL_NORMAL_EXCEED = 76;
+	public static final int OPTION_LEVEL_HYPER_EXCEED = 77;
+	public static final int OPTION_LEVEL_ANOTHER_EXCEED = 78;
+	public static final int OPTION_LEVEL_INSANE_EXCEED = 79;
 
 	public static final int OPTION_NOW_LOADING = 80;
 	public static final int OPTION_LOADED = 81;
@@ -495,11 +520,15 @@ public class SkinProperty {
 	public static final int OPTION_BEST_F_1P = 327;
 
 	public static final int OPTION_UPDATE_SCORE = 330;
+	public static final int OPTION_DRAW_SCORE = 1330;
 	public static final int OPTION_UPDATE_MAXCOMBO = 331;
+	public static final int OPTION_DRAW_MAXCOMBO = 1331;
 	public static final int OPTION_UPDATE_MISSCOUNT = 332;
+	public static final int OPTION_DRAW_MISSCOUNT = 1332;
 	public static final int OPTION_UPDATE_TRIAL = 333;
 	public static final int OPTION_UPDATE_IRRANK = 334;
 	public static final int OPTION_UPDATE_SCORERANK = 335;
+	public static final int OPTION_DRAW_SCORERANK = 1335;
 
 	public static final int OPTION_NOW_AAA_1P = 340;
 	public static final int OPTION_NOW_AA_1P = 341;

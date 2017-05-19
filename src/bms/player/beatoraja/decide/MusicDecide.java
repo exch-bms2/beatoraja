@@ -22,10 +22,10 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
  */
 public class MusicDecide extends MainState {
 
-	private String bgm;
-
 	private boolean cancel;
 
+	public static final int SOUND_DECIDE = 0;
+	
 	public MusicDecide(MainController main) {
 		super(main);
 	}
@@ -33,38 +33,25 @@ public class MusicDecide extends MainState {
 	public void create() {
 		cancel = false;
 		final PlayerResource resource = getMainController().getPlayerResource();
-		if (resource.getConfig().getBgmpath().length() > 0) {
-			final File bgmfolder = new File(resource.getConfig().getBgmpath());
-			if (bgmfolder.exists() && bgmfolder.isDirectory()) {
-				for (File f : bgmfolder.listFiles()) {
-					if (bgm == null && f.getName().startsWith("decide.")) {
-						bgm = f.getPath();
-						break;
-					}
-				}
-			}
-		}
-		if (bgm != null) {
-			getMainController().getAudioProcessor().play(bgm, false);
-		}
+		
+		setSound(SOUND_DECIDE, resource.getConfig().getBgmpath() + File.separatorChar + "decide.wav", false);
+		play(SOUND_DECIDE);
 
 		try {
 			SkinConfig sc = resource.getConfig().getSkin()[6];
 			if (sc.getPath().endsWith(".json")) {
-				SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
+				SkinLoader sl = new SkinLoader(resource.getConfig());
 				setSkin(sl.loadDecideSkin(Paths.get(sc.getPath()), sc.getProperty()));
 			} else {
 				LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
 				SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
-				Rectangle srcr = RESOLUTION[header.getResolution()];
-				Rectangle dstr = RESOLUTION[resource.getConfig().getResolution()];
-				LR2DecideSkinLoader dloader = new LR2DecideSkinLoader(srcr.width, srcr.height, dstr.width, dstr.height);
+				LR2DecideSkinLoader dloader = new LR2DecideSkinLoader(header.getResolution(), resource.getConfig());
 				setSkin(dloader.loadMusicDecideSkin(Paths.get(sc.getPath()).toFile(), this, header, loader.getOption(),
 						sc.getProperty()));
 			}
 		} catch (Throwable e) {
 			e.printStackTrace();
-			SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
+			SkinLoader sl = new SkinLoader(resource.getConfig());
 			setSkin(sl.loadDecideSkin(Paths.get("skin/default/decide.json"), new HashMap()));
 		}
 	}

@@ -5,15 +5,10 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Disposable;
 
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * テキストオブジェクト
@@ -21,12 +16,17 @@ import java.util.TreeMap;
  * @author exch
  */
 public class SkinTextImage extends SkinText {
-
-	// TODO SkinTextと共通化して選曲で使用できるように
-
+	/**
+	 * テキストイメージ
+	 */
 	private SkinTextImageSource source;
-
+	/**
+	 * 現在のテキスト
+	 */
 	private TextureRegion[] texts;
+	/**
+	 * 現在のテキスト長
+	 */
 	private float textwidth;
 
 	public SkinTextImage(SkinTextImageSource source) {
@@ -62,14 +62,14 @@ public class SkinTextImage extends SkinText {
 	public void draw(SpriteBatch sprite, long time, MainState state, int offsetX, int offsetY) {
 		Rectangle r = this.getDestination(time, state);
 		if (r != null) {
-			Color c = getColor(time, state);
+			final Color c = getColor();
 			// System.out.println("SkinTextImage描画:" + text + " - " + x + " " +
 			// y +
 			// " " + w + " " + h);
 			float width = textwidth * r.height / source.getSize() + source.getMargin() * texts.length;
 
 			final float scale = r.width < width ? r.width / width : 1;
-			final float x = (getAlign() == 2 ? r.x - (r.width - width * scale)
+			final float x = (getAlign() == 2 ? r.x - width * scale
 					: (getAlign() == 1 ? r.x - width * scale / 2 : r.x));
 			float dx = 0;
 			for (TextureRegion ch : texts) {
@@ -87,9 +87,19 @@ public class SkinTextImage extends SkinText {
 		source.dispose();
 	}
 
+	/**
+	 * テキストイメージ
+	 * 
+	 * @author exch
+	 */
 	public static class SkinTextImageSource implements Disposable {
-
+		/**
+		 * サイズ
+		 */
 		private int size = 0;
+		/**
+		 * 文字間のマージン
+		 */
 		private int margin = 0;
 		private Map<Integer, TextureRegion> images = new TreeMap<Integer, TextureRegion>();
 

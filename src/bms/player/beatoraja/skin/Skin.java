@@ -1,24 +1,42 @@
 package bms.player.beatoraja.skin;
 
 import bms.player.beatoraja.MainState;
+import bms.player.beatoraja.Resolution;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 import java.util.*;
 import java.util.logging.Logger;
 
+/**
+ * スキン
+ * 
+ * @author exch
+ */
 public class Skin {
 
-	private float width;
-	private float height;
-
-	private float dw;
-	private float dh;
+	/**
+	 * 幅
+	 */
+	private final float width;
+	/**
+	 * 高さ
+	 */
+	private final float height;
+	/**
+	 * 元データからの幅比率
+	 */
+	private final float dw;
+	/**
+	 * 元データからの高さ比率
+	 */
+	private final float dh;
 
 	/**
 	 * 登録されているスキンオブジェクト
 	 */
 	private List<SkinObject> objects = new ArrayList<SkinObject>();
+	private SkinObject[] objectarray = new SkinObject[0];
 	/**
 	 * 除外されているスキンオブジェクト
 	 */
@@ -37,17 +55,20 @@ public class Skin {
 	private int fadeout;
 
 	private Map<Integer, Boolean> option = new HashMap<Integer, Boolean>();
+	/**
+	 * 読み込み時から不変であることが確定しているop
+	 */
 	private int[] fixopt;
 
-	public Skin(float orgw, float orgh, float dstw, float dsth) {
-		this(orgw, orgh, dstw, dsth, new int[0]);
+	public Skin(Resolution org, Resolution dst) {
+		this(org, dst, new int[0]);
 	}
 
-	public Skin(float orgw, float orgh, float dstw, float dsth, int[] fixopt) {
-		width = dstw;
-		height = dsth;
-		dw = dstw / orgw;
-		dh = dsth / orgh;
+	public Skin(Resolution org, Resolution dst, int[] fixopt) {
+		width = dst.width;
+		height = dst.height;
+		dw = ((float)dst.width) / org.width;
+		dh = ((float)dst.height) / org.height;
 		this.fixopt = fixopt;
 	}
 
@@ -94,67 +115,71 @@ public class Skin {
 	}
 	
 	public void prepare(MainState state) {
-		
 		for(SkinObject obj : objects) {
-			List<Integer> l = new ArrayList();
-			for(int op : obj.getOption()) {
-				if(op > 0) {
-					if(option.containsKey(op)) {
-						if(!option.get(op)) {
-							removes.add(obj);						
-						}
+			if(obj.getAllDestination().length == 0) {
+				removes.add(obj);
+			} else {
+				List<Integer> l = new ArrayList();
+				for(int op : obj.getOption()) {
+					if(op > 0) {
+						if(option.containsKey(op)) {
+							if(!option.get(op)) {
+								removes.add(obj);						
+							}
+						} else {
+							boolean fix = false;
+							for(int fop : fixopt) {
+								if(op == fop) {
+									fix = true;
+									if(!state.getBooleanValue(op)) {
+										removes.add(obj);						
+									}							
+									break;
+								}
+							}
+							if(!fix) {
+								l.add(op);
+							}
+						}					
 					} else {
-						boolean fix = false;
-						for(int fop : fixopt) {
-							if(op == fop) {
-								fix = true;
-								if(!state.getBooleanValue(op)) {
-									removes.add(obj);						
-								}							
-								break;
+						if(option.containsKey(-op)) {
+							if(option.get(-op)) {
+								removes.add(obj);						
+							}
+						} else {
+							boolean fix = false;
+							for(int fop : fixopt) {
+								if(-op == fop) {
+									fix = true;
+									if(state.getBooleanValue(-op)) {
+										removes.add(obj);						
+									}							
+									break;
+								}
+							}
+							if(!fix) {
+								l.add(op);
 							}
 						}
-						if(!fix) {
-							l.add(op);
-						}
-					}					
-				} else {
-					if(option.containsKey(-op)) {
-						if(option.get(-op)) {
-							removes.add(obj);						
-						}
-					} else {
-						boolean fix = false;
-						for(int fop : fixopt) {
-							if(-op == fop) {
-								fix = true;
-								if(state.getBooleanValue(-op)) {
-									removes.add(obj);						
-								}							
-								break;
-							}
-						}
-						if(!fix) {
-							l.add(op);
-						}
-					}
-				}				
+					}				
+				}
+				int[] newop = new int[l.size()];
+				for(int i = 0;i < newop.length;i++) {
+					newop[i] = l.get(i);
+				}
+				obj.setOption(newop);
 			}
 			
-			int[] newop = new int[l.size()];
-			for(int i = 0;i < newop.length;i++) {
-				newop[i] = l.get(i);
-			}
-			obj.setOption(newop);
  		}
 		Logger.getGlobal().info("描画されないことが確定しているSkinObject削除 : " + removes.size() + " / " + objects.size());
 		objects.removeAll(removes);
+		objectarray = objects.toArray(new SkinObject[objects.size()]);
 		option.clear();
 	}
 
 	public void drawAllObjects(SpriteBatch sprite, MainState state) {
 		final long time = state.getNowTime();
-		for (SkinObject obj : objects) {
+		for (SkinObject obj : objectarray) {
 			if (isDraw(obj.getOption(), state)) {
 				obj.draw(sprite, time, state);
 			}
@@ -177,8 +202,8 @@ public class Skin {
 	}
 
 	public void mousePressed(MainState state, int button, int x, int y) {
-		for (int i = objects.size() - 1; i >= 0; i--) {
-			final SkinObject obj = objects.get(i);
+		for (int i = objectarray.length - 1; i >= 0; i--) {
+			final SkinObject obj = objectarray[i];
 			if (isDraw(obj.getOption(), state) && obj.mousePressed(state, button, x, y)) {
 				break;
 			}
@@ -186,8 +211,8 @@ public class Skin {
 	}
 
 	public void mouseDragged(MainState state, int button, int x, int y) {
-		for (int i = objects.size() - 1; i >= 0; i--) {
-			final SkinObject obj = objects.get(i);
+		for (int i = objectarray.length - 1; i >= 0; i--) {
+			final SkinObject obj = objectarray[i];
 			if (obj instanceof SkinSlider && isDraw(obj.getOption(), state) && obj.mousePressed(state, button, x, y)) {
 				break;
 			}

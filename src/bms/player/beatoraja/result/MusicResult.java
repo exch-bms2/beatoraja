@@ -2,7 +2,6 @@ package bms.player.beatoraja.result;
 
 import java.io.File;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Logger;
@@ -10,7 +9,7 @@ import java.util.logging.Logger;
 import bms.model.LongNote;
 import bms.model.Note;
 import bms.model.TimeLine;
-import bms.player.beatoraja.play.gauge.GrooveGauge;
+import static bms.player.beatoraja.ClearType.*;
 import bms.player.beatoraja.select.MusicSelector;
 
 import bms.model.BMSModel;
@@ -20,9 +19,8 @@ import bms.player.beatoraja.ir.IRConnection;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.lr2.*;
 
-import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.utils.FloatArray;
 
-import static bms.player.beatoraja.Resolution.*;
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
 /**
@@ -42,9 +40,6 @@ public class MusicResult extends MainState {
 	 */
 	private float avgduration;
 
-	private String clear;
-	private String fail;
-	
 	/**
 	 * 状態
 	 */
@@ -54,8 +49,6 @@ public class MusicResult extends MainState {
 	public static final int STATE_IR_PROCESSING = 1;
 	public static final int STATE_IR_FINISHED = 2;
 
-	private int rate;
-	private int oldrate;
 	private int next;
 
 	private int irrank;
@@ -63,6 +56,9 @@ public class MusicResult extends MainState {
 	private int irtotal;
 
 	private int saveReplay = -1;
+	
+	public static final int SOUND_CLEAR = 0;
+	public static final int SOUND_FAIL = 1;
 
 	public MusicResult(MainController main) {
 		super(main);
@@ -71,24 +67,13 @@ public class MusicResult extends MainState {
 	public void create() {
 		final PlayerResource resource = getMainController().getPlayerResource();
 
-		if (resource.getConfig().getSoundpath().length() > 0) {
-			final File soundfolder = new File(resource.getConfig().getSoundpath());
-			if (soundfolder.exists() && soundfolder.isDirectory()) {
-				for (File f : soundfolder.listFiles()) {
-					if (clear == null && f.getName().startsWith("clear.")) {
-						clear = f.getPath();
-					}
-					if (fail == null && f.getName().startsWith("fail.")) {
-						fail = f.getPath();
-					}
-				}
-			}
-		}
+		setSound(SOUND_CLEAR, resource.getConfig().getSoundpath() + File.separatorChar + "clear.wav", false);
+		setSound(SOUND_FAIL, resource.getConfig().getSoundpath() + File.separatorChar + "fail.wav", false);
 
 		updateScoreDatabase();
 		// 保存されているリプレイデータがない場合は、EASY以上で自動保存
 		if (resource.getAutoplay() == 0 && resource.getScoreData() != null
-				&& resource.getScoreData().getClear() >= GrooveGauge.CLEARTYPE_EASY
+				&& resource.getScoreData().getClear() >= Easy.id
 				&& !getMainController().getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
 						resource.getConfig().getLnmode(), 0)) {
 			saveReplayData(0);
@@ -102,20 +87,18 @@ public class MusicResult extends MainState {
 		try {
 			SkinConfig sc = resource.getConfig().getSkin()[7];
 			if (sc.getPath().endsWith(".json")) {
-				SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
+				SkinLoader sl = new SkinLoader(resource.getConfig());
 				setSkin(sl.loadResultSkin(Paths.get(sc.getPath()), sc.getProperty()));
 			} else {
 				LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
 				SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
-				Rectangle srcr = RESOLUTION[header.getResolution()];
-				Rectangle dstr = RESOLUTION[resource.getConfig().getResolution()];
-				LR2ResultSkinLoader dloader = new LR2ResultSkinLoader(srcr.width, srcr.height, dstr.width, dstr.height);
+				LR2ResultSkinLoader dloader = new LR2ResultSkinLoader(header.getResolution(), resource.getConfig());
 				setSkin(dloader.loadResultSkin(Paths.get(sc.getPath()).toFile(), this, header, loader.getOption(),
 						sc.getProperty()));
 			}
 		} catch (Throwable e) {
 			e.printStackTrace();
-			SkinLoader sl = new SkinLoader(RESOLUTION[resource.getConfig().getResolution()]);
+			SkinLoader sl = new SkinLoader(resource.getConfig());
 			setSkin(sl.loadResultSkin(Paths.get("skin/default/result.json"), new HashMap()));
 		}
 	}
@@ -138,12 +121,8 @@ public class MusicResult extends MainState {
 
 		if (getTimer()[TIMER_FADEOUT] != Long.MIN_VALUE) {
 			if (time > getTimer()[TIMER_FADEOUT] + getSkin().getFadeout()) {
-				if (this.clear != null) {
-					getMainController().getAudioProcessor().stop(this.clear);
-				}
-				if (this.fail != null) {
-					getMainController().getAudioProcessor().stop(this.fail);
-				}
+				stop(SOUND_CLEAR);
+				stop(SOUND_FAIL);
 				getMainController().getAudioProcessor().stop((Note) null);
 
 				boolean[] keystate = main.getInputProcessor().getKeystate();
@@ -152,10 +131,10 @@ public class MusicResult extends MainState {
 				keytime[0] = keytime[2] = keytime[4] = keytime[6] = 0;
 
 				if (resource.getCourseBMSModels() != null) {
-					if (resource.getGauge().get(resource.getGauge().size() - 1) <= 0) {
+					if (resource.getGauge().get(resource.getGauge().size - 1) <= 0) {
 						if (resource.getCourseScoreData() != null) {
 							// 未達曲のノーツをPOORとして加算
-							final List<List<Float>> coursegauge = resource.getCourseGauge();
+							final List<FloatArray> coursegauge = resource.getCourseGauge();
 							final int cg = resource.getCourseBMSModels().length;
 							for (int i = 0; i < cg; i++) {
 								if (coursegauge.size() <= i) {
@@ -255,7 +234,7 @@ public class MusicResult extends MainState {
 			if (resource.getCourseScoreData() != null) {
 				resource.getCourseScoreData()
 						.setMinbp(resource.getCourseScoreData().getMinbp() + resource.getBMSModel().getTotalNotes());
-				resource.getCourseScoreData().setClear(GrooveGauge.CLEARTYPE_FAILED);
+				resource.getCourseScoreData().setClear(Failed.id);
 			}
 			return;
 		}
@@ -268,7 +247,9 @@ public class MusicResult extends MainState {
 		oldexscore = score.getExscore();
 		oldmisscount = score.getMinbp();
 		oldcombo = score.getCombo();
-		rate = newscore.getExscore() * 10000 / (resource.getBMSModel().getTotalNotes() * 2);
+
+		getScoreDataProperty().setTargetScore(oldexscore, resource.getRivalScoreData(), resource.getBMSModel().getTotalNotes());
+		getScoreDataProperty().update(newscore);
 		next = 0;
 		for (int i = 2; i < 9; i++) {
 			if (newscore.getExscore() < i * 1111 * (resource.getBMSModel().getTotalNotes() * 2) / 10000) {
@@ -276,12 +257,12 @@ public class MusicResult extends MainState {
 				break;
 			}
 		}
-		oldrate = oldexscore * 10000 / (resource.getBMSModel().getTotalNotes() * 2);
 		// duration average
 		int count = 0;
 		avgduration = 0;
+		final int lanes = resource.getBMSModel().getMode().key;
 		for (TimeLine tl : resource.getBMSModel().getAllTimeLines()) {
-			for (int i = 0; i < 18; i++) {
+			for (int i = 0; i < lanes; i++) {
 				Note n = tl.getNote(i);
 				if (n != null && !(resource.getBMSModel().getLntype() == BMSModel.LNTYPE_LONGNOTE
 						&& n instanceof LongNote && ((LongNote) n).getEndnote().getSection() == tl.getSection())) {
@@ -302,8 +283,8 @@ public class MusicResult extends MainState {
 
 		// コースモードの場合はコーススコアに加算・累積する
 		if (resource.getCourseBMSModels() != null) {
-			if (resource.getScoreData().getClear() == GrooveGauge.CLEARTYPE_FAILED) {
-				resource.getScoreData().setClear(GrooveGauge.CLEARTYPE_NOPLAY);
+			if (resource.getScoreData().getClear() == Failed.id) {
+				resource.getScoreData().setClear(NoPlay.id);
 			}
 			IRScoreData cscore = resource.getCourseScoreData();
 			if (cscore == null) {
@@ -329,10 +310,10 @@ public class MusicResult extends MainState {
 			cscore.setEms(cscore.getEms() + newscore.getEms());
 			cscore.setLms(cscore.getLms() + newscore.getLms());
 			cscore.setMinbp(cscore.getMinbp() + newscore.getMinbp());
-			if (resource.getGauge().get(resource.getGauge().size() - 1) > 0) {
-				cscore.setClear(resource.getGrooveGauge().getClearType());
+			if (resource.getGauge().get(resource.getGauge().size - 1) > 0) {
+				cscore.setClear(resource.getGrooveGauge().getClearType().id);
 			} else {
-				cscore.setClear(GrooveGauge.CLEARTYPE_FAILED);
+				cscore.setClear(Failed.id);
 
 				boolean b = false;
 				// 残りの曲がある場合はtotalnotesをBPに加算する
@@ -383,14 +364,10 @@ public class MusicResult extends MainState {
 			}
 		}
 
-		if (newscore.getClear() != GrooveGauge.CLEARTYPE_FAILED) {
-			if (this.clear != null) {
-				getMainController().getAudioProcessor().play(this.clear, false);
-			}
+		if (newscore.getClear() != Failed.id) {
+			play(SOUND_CLEAR);
 		} else {
-			if (fail != null) {
-				getMainController().getAudioProcessor().play(this.fail, false);
-			}
+			play(SOUND_FAIL);
 		}
 	}
 
@@ -488,23 +465,7 @@ public class MusicResult extends MainState {
 			}
 			return resource.getScoreData().getCombo() - oldcombo;
 		case NUMBER_GROOVEGAUGE:
-			return resource.getGauge().get(resource.getGauge().size() - 1).intValue();
-		case NUMBER_TOTALEARLY:
-			int ecount = 0;
-			for (int i = 1; i < 6; i++) {
-				ecount += getJudgeCount(i, true);
-			}
-			return ecount;
-		case NUMBER_TOTALLATE:
-			int count = 0;
-			for (int i = 1; i < 6; i++) {
-				count += getJudgeCount(i, false);
-			}
-			return count;
-			case NUMBER_SCORE_RATE:
-				return rate / 100;
-			case NUMBER_SCORE_RATE_AFTERDOT:
-				return (rate / 10) % 10;
+			return (int) resource.getGauge().get(resource.getGauge().size - 1);
 			case NUMBER_AVERAGE_DURATION:
 			return (int) avgduration;
 		case NUMBER_AVERAGE_DURATION_AFTERDOT:
@@ -538,59 +499,27 @@ public class MusicResult extends MainState {
 		case OPTION_ENABLE_SAVE_SCORE:
 			return resource.isUpdateScore();
 		case OPTION_RESULT_CLEAR:
-			return score.getClear() != GrooveGauge.CLEARTYPE_FAILED
-					&& (cscore == null || cscore.getClear() != GrooveGauge.CLEARTYPE_FAILED);
+			return score.getClear() != Failed.id
+					&& (cscore == null || cscore.getClear() != Failed.id);
 		case OPTION_RESULT_FAIL:
-			return score.getClear() == GrooveGauge.CLEARTYPE_FAILED
-					|| (cscore != null && cscore.getClear() == GrooveGauge.CLEARTYPE_FAILED);
-		case OPTION_RESULT_F_1P:
-		case OPTION_NOW_F_1P:
-			return rate <= 2222;
-		case OPTION_RESULT_E_1P:
-		case OPTION_NOW_E_1P:
-			return rate > 2222 && rate <= 3333;
-		case OPTION_RESULT_D_1P:
-		case OPTION_NOW_D_1P:
-			return rate > 3333 && rate <= 4444;
-		case OPTION_RESULT_C_1P:
-		case OPTION_NOW_C_1P:
-			return rate > 4444 && rate <= 5555;
-		case OPTION_RESULT_B_1P:
-		case OPTION_NOW_B_1P:
-			return rate > 5555 && rate <= 6666;
-		case OPTION_RESULT_A_1P:
-		case OPTION_NOW_A_1P:
-			return rate > 6666 && rate <= 7777;
-		case OPTION_RESULT_AA_1P:
-		case OPTION_NOW_AA_1P:
-			return rate > 7777 && rate <= 8888;
-		case OPTION_RESULT_AAA_1P:
-		case OPTION_NOW_AAA_1P:
-			return rate > 8888;
-		case OPTION_BEST_F_1P:
-			return oldrate <= 2222;
-		case OPTION_BEST_E_1P:
-			return oldrate > 2222 && oldrate <= 3333;
-		case OPTION_BEST_D_1P:
-			return oldrate > 3333 && oldrate <= 4444;
-		case OPTION_BEST_C_1P:
-			return oldrate > 4444 && oldrate <= 5555;
-		case OPTION_BEST_B_1P:
-			return oldrate > 5555 && oldrate <= 6666;
-		case OPTION_BEST_A_1P:
-			return oldrate > 6666 && oldrate <= 7777;
-		case OPTION_BEST_AA_1P:
-			return oldrate > 7777 && oldrate <= 8888;
-		case OPTION_BEST_AAA_1P:
-			return oldrate > 8888;
+			return score.getClear() == Failed.id
+					|| (cscore != null && cscore.getClear() == Failed.id);
 		case OPTION_UPDATE_SCORE:
 			return score.getExscore() > oldexscore;
+			case OPTION_DRAW_SCORE:
+				return score.getExscore() == oldexscore;
 		case OPTION_UPDATE_MAXCOMBO:
 			return score.getCombo() > oldcombo;
+			case OPTION_DRAW_MAXCOMBO:
+				return score.getCombo() == oldcombo;
 		case OPTION_UPDATE_MISSCOUNT:
 			return score.getMinbp() < oldmisscount;
+			case OPTION_DRAW_MISSCOUNT:
+				return score.getMinbp() == oldmisscount;
 		case OPTION_UPDATE_SCORERANK:
-			return rate / 1111 > oldrate / 1111;
+			return getScoreDataProperty().getNowRate() > getScoreDataProperty().getBestScoreRate();
+			case OPTION_DRAW_SCORERANK:
+				return getScoreDataProperty().getNowRate() == getScoreDataProperty().getBestScoreRate();
 		case OPTION_NO_REPLAYDATA:
 			return !getMainController().getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
 					resource.getConfig().getLnmode(), 0);

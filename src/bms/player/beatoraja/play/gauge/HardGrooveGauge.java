@@ -1,6 +1,7 @@
 package bms.player.beatoraja.play.gauge;
 
 import bms.model.BMSModel;
+import bms.model.Mode;
 
 /**
  * ハードゲージ
@@ -10,7 +11,7 @@ import bms.model.BMSModel;
 public class HardGrooveGauge extends GrooveGauge {
 
 	public HardGrooveGauge(BMSModel model) {
-		if(model.getUseKeys() == 9) {
+        if (model.getMode() == Mode.POPN_5K || model.getMode() == Mode.POPN_9K) {
 			// TODO ポップンのHARDの仕様(閉店なし)に合わせるべきか
 			init(0, 100, 100, 0, CLEARTYPE_HARD, new float[] { 0.15f, 0.10f, 0.05f, -5.0f, -10.0f, -10.0f });
 //			init(2,100, 25, 66.7f, CLEARTYPE_HARD,new float[] { (float) (model.getTotal() / model.getTotalNotes()),

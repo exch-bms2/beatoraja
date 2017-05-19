@@ -13,6 +13,7 @@ import java.util.ResourceBundle;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
+import com.badlogic.gdx.Graphics;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -107,8 +108,8 @@ public class MainLoader extends Application {
 			MainController player = new MainController(f, config, auto);
 
 			LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
-			cfg.width = (int) RESOLUTION[config.getResolution()].width;
-			cfg.height = (int) RESOLUTION[config.getResolution()].height;
+			cfg.width = config.getResolution().width;
+			cfg.height = config.getResolution().height;
 
 			// fullscreen
 			cfg.fullscreen = config.isFullscreen();
@@ -170,6 +171,10 @@ public class MainLoader extends Application {
 		}
 	}
 
+	public static Graphics.DisplayMode[] getAvailableDisplayMode() {
+		return LwjglApplicationConfiguration.getDisplayModes();
+	}
+
 	@Override
 	public void start(javafx.stage.Stage primaryStage) throws Exception {
 		Config config = new Config();
@@ -196,7 +201,7 @@ public class MainLoader extends Application {
 		}
 
 		try {
-                        ResourceBundle bundle = ResourceBundle.getBundle("resources.UIResources");
+			ResourceBundle bundle = ResourceBundle.getBundle("resources.UIResources");
 			FXMLLoader loader = new FXMLLoader(
 					MainLoader.class.getResource("/bms/player/beatoraja/PlayConfigurationView.fxml"), bundle);
 			stackPane = (VBox) loader.load();

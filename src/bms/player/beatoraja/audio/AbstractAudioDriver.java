@@ -1,6 +1,7 @@
 package bms.player.beatoraja.audio;
 
 import bms.model.*;
+import bms.player.beatoraja.ResourcePool;
 
 import java.nio.file.*;
 import java.util.*;
@@ -26,7 +27,7 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	/**
 	 * キー音マップ(音切りなし)
 	 */
-	private Object[] wavmap = new Object[0];
+	private T[] wavmap = (T[]) new Object[0];
 	/**
 	 * キー音マップ(音切りあり)
 	 */
@@ -39,7 +40,9 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	 * キー音ボリューム
 	 */
 	private float volume = 1.0f;
-	
+	/**
+	 * 
+	 */
 	private AudioCache cache = new AudioCache();
 
 	/**
@@ -92,6 +95,9 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	}
 
 	public void play(String p, boolean loop) {
+		if (p == null || p.length() == 0) {
+			return;
+		}
 		T sound = soundmap.get(p);
 		if (!soundmap.containsKey(p)) {
 			try {
@@ -108,6 +114,9 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	}
 
 	public void stop(String p) {
+		if (p == null || p.length() == 0) {
+			return;
+		}
 		T sound = soundmap.get(p);
 		if (sound != null) {
 			stop(sound);
@@ -115,13 +124,16 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	}
 
 	public void dispose(String p) {
+		if (p == null || p.length() == 0) {
+			return;
+		}
 		T sound = soundmap.get(p);
 		if (sound != null) {
 			soundmap.remove(p);
-			disposeKeySound(sound);			
+			disposeKeySound(sound);
 		}
 	}
-	
+
 	/**
 	 * BMSの音源データを読み込む
 	 *
@@ -129,7 +141,7 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	 */
 	public synchronized void setModel(BMSModel model) {
 		final int wavcount = model.getWavList().length;
-		wavmap = new Object[wavcount];
+		wavmap = (T[]) new Object[wavcount];
 		slicesound = new SliceWav[wavcount][];
 
 		progress = 0;
@@ -140,15 +152,16 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 			volume = model.getVolwav() / 100f;
 		}
 
-		List<SliceWav>[] slicesound = new List[wavcount];
+		List<SliceWav<T>>[] slicesound = new List[wavcount];
 
-		Map<Integer, List<Note>> notemap = new HashMap();
+		Map<Integer, List<Note>> notemap = new HashMap<Integer, List<Note>>();
+		final int lanes = model.getMode().key;
 		for (TimeLine tl : model.getAllTimeLines()) {
-			for (int i = 0; i < 18; i++) {
+			for (int i = 0; i < lanes; i++) {
 				final Note n = tl.getNote(i);
 				if (n != null) {
 					addNoteList(notemap, n);
-					for(Note ln : n.getLayeredNotes()) {
+					for (Note ln : n.getLayeredNotes()) {
 						addNoteList(notemap, ln);
 					}
 				}
@@ -156,7 +169,7 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 					addNoteList(notemap, tl.getHiddenNote(i));
 				}
 			}
-			for(Note n : tl.getBackGroundNotes()) {
+			for (Note n : tl.getBackGroundNotes()) {
 				addNoteList(notemap, n);
 			}
 		}
@@ -170,28 +183,21 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 				continue;
 			}
 			String name = model.getWavList()[wavid];
-			PCM wav = null;
-
-			for(Note note : waventry.getValue()) {
+			for (Note note : waventry.getValue()) {
 				if (note.getStarttime() == 0 && note.getDuration() == 0) {
 					// 音切りなしのケース
 					Path p = dpath.resolve(name);
-					wavmap[wavid] = cache.get(p.toString(), note);
+					wavmap[wavid] = cache.get(new AudioKey(p.toString(), note));
 					if (wavmap[wavid] == null) {
-						wavmap[wavid] = getKeySound(p);
-						if(wavmap[wavid] == null) {
-							break;
-						}
-						cache.put(p.toString(), note, (T)wavmap[wavid]);
+						break;
 					}
-
 				} else {
 					// 音切りありのケース
 					boolean b = true;
 					if (slicesound[note.getWav()] == null) {
-						slicesound[note.getWav()] = new ArrayList<SliceWav>();
+						slicesound[note.getWav()] = new ArrayList<SliceWav<T>>();
 					}
-					for (SliceWav slice : slicesound[note.getWav()]) {
+					for (SliceWav<T> slice : slicesound[note.getWav()]) {
 						if (slice.starttime == note.getStarttime() && slice.duration == note.getDuration()) {
 							b = false;
 							break;
@@ -199,58 +205,14 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 					}
 					if (b) {
 						Path p = dpath.resolve(name);
-						T sliceaudio = cache.get(p.toString(), note);
+						T sliceaudio = cache.get(new AudioKey(p.toString(), note));
 						if (sliceaudio != null) {
-							slicesound[note.getWav()].add(new SliceWav(note, sliceaudio));
+							slicesound[note.getWav()].add(new SliceWav<T>(note, sliceaudio));
 						} else {
-							if(wav == null) {
-								name = name.substring(0, name.lastIndexOf('.'));
-								final Path wavfile = dpath.resolve(name + ".wav");
-								final Path oggfile = dpath.resolve(name + ".ogg");
-								final Path mp3file = dpath.resolve(name + ".mp3");
-								if (wav == null && Files.exists(wavfile)) {
-									try {
-										wav = new PCM(wavfile);
-									} catch (Throwable e) {
-										e.printStackTrace();
-									}
-								}
-								if (wav == null && Files.exists(oggfile)) {
-									try {
-										wav = new PCM(oggfile);
-									} catch (Throwable e) {
-										e.printStackTrace();
-									}
-								}
-								if (wav == null && Files.exists(mp3file)) {
-									try {
-										wav = new PCM(mp3file);
-									} catch (Throwable e) {
-										e.printStackTrace();
-									}
-								}
-							}
-
-							if (wav != null) {
-								try {
-									final PCM slicewav = wav.slice(note.getStarttime(), note.getDuration());
-									T sound = getKeySound(slicewav);
-									cache.put(p.toString(), note, sound);
-									slicesound[note.getWav()].add(new SliceWav(note, sound));
-									// System.out.println("WAV slicing - Name:"
-									// + name + " ID:" + note.getWav() +
-									// " start:" + note.getStarttime() +
-									// " duration:" + note.getDuration());
-								} catch (Throwable e) {
-									Logger.getGlobal().warning("音源(wav)ファイルスライシング失敗。" + e.getMessage());
-									e.printStackTrace();
-								}
-							} else {
-								break;
-							}							
+							break;
 						}
 					}
-				}				
+				}
 			}
 			progress += 1f / notemap.keySet().size();
 		}
@@ -263,24 +225,26 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 				this.slicesound[i] = new SliceWav[0];
 			}
 		}
-		
+
+		final int prevsize = cache.size();
 		cache.disposeOld();
+		Logger.getGlobal().info("AudioCache容量 : " + cache.size() + " 開放 : " + (prevsize - cache.size()));
 
 		progress = 1;
 	}
-	
+
 	private void addNoteList(Map<Integer, List<Note>> notemap, Note n) {
-		if(n.getWav() < 0) {
+		if (n.getWav() < 0) {
 			return;
 		}
 		List<Note> notes = notemap.get(n.getWav());
-		if(notes == null) {
+		if (notes == null) {
 			notes = new ArrayList<Note>();
 			notemap.put(n.getWav(), notes);
 		}
-		
-		for(Note note : notes) {
-			if(n.getStarttime() == note.getStarttime() && n.getDuration() == note.getDuration()) {
+
+		for (Note note : notes) {
+			if (n.getStarttime() == note.getStarttime() && n.getDuration() == note.getDuration()) {
 				return;
 			}
 		}
@@ -313,9 +277,9 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 					play(wav, volume, false);
 				}
 			} else {
-				for (SliceWav slice : slicesound[id]) {
+				for (SliceWav<T> slice : slicesound[id]) {
 					if (slice.starttime == starttime && slice.duration == duration) {
-						play((T) slice.wav, volume, false);
+						play(slice.wav, volume, false);
 						// System.out.println("slice WAV play - ID:" + id +
 						// " start:" + starttime + " duration:" + duration);
 						break;
@@ -330,12 +294,12 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	public void stop(Note n) {
 		try {
 			if (n == null) {
-				for (Object s : wavmap) {
+				for (T s : wavmap) {
 					if (s != null) {
-						stop((T) s);
+						stop(s);
 					}
 				}
-				for (SliceWav[] slices : slicesound) {
+				for (SliceWav<T>[] slices : slicesound) {
 					for (SliceWav<T> slice : slices) {
 						stop(slice.wav);
 					}
@@ -364,7 +328,7 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 				stop(sound);
 			}
 		} else {
-			for (SliceWav slice : slicesound[id]) {
+			for (SliceWav<T> slice : slicesound[id]) {
 				if (slice.starttime == starttime && slice.duration == duration) {
 					stop((T) slice.wav);
 					break;
@@ -396,7 +360,7 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	 *
 	 * @param <T>
 	 */
-	class SliceWav<T> {
+	static class SliceWav<T> {
 		public final int starttime;
 		public final int duration;
 		public final T wav;
@@ -409,61 +373,99 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 			this.wav = wav;
 		}
 	}
-	
-	
-	public class AudioCache {
-		
-		private static final int MAX_GENERATION = 1;
-		
-		private Map<String, Set<SliceWav<T>>> audio = new HashMap<String, Set<SliceWav<T>>> ();
 
-		public T get(String s, Note n) {
-			if(!audio.containsKey(s)) {
-				return null;
+	class AudioCache extends ResourcePool<AudioKey, T> {
+
+		public AudioCache() {
+			super(1);
+		}
+
+		private String path;
+		private PCM wav;
+
+		@Override
+		protected T load(AudioKey key) {
+			if (!key.path.equals(path)) {
+				wav = null;
 			}
-			for(SliceWav<T> entry : audio.get(s)) {
-				if(n.getStarttime() == entry.starttime && n.getDuration() == entry.duration) {
-//					System.out.println("AudioCache : リソース再利用 - " + s);
-					entry.playid = 0;
-					return entry.wav;
+			if (key.start == 0 && key.duration == 0) {
+				// 音切りなしのケース
+				return getKeySound(Paths.get(key.path));
+			} else {
+				if (wav == null) {
+					String name = key.path.substring(0, key.path.lastIndexOf('.'));
+					final Path wavfile = Paths.get(name + ".wav");
+					final Path oggfile = Paths.get(name + ".ogg");
+					final Path mp3file = Paths.get(name + ".mp3");
+					if (wav == null && Files.exists(wavfile)) {
+						try {
+							wav = new PCM(wavfile);
+						} catch (Throwable e) {
+							e.printStackTrace();
+						}
+					}
+					if (wav == null && Files.exists(oggfile)) {
+						try {
+							wav = new PCM(oggfile);
+						} catch (Throwable e) {
+							e.printStackTrace();
+						}
+					}
+					if (wav == null && Files.exists(mp3file)) {
+						try {
+							wav = new PCM(mp3file);
+						} catch (Throwable e) {
+							e.printStackTrace();
+						}
+					}
+				}
+
+				if (wav != null) {
+					path = key.path;
+					try {
+						final PCM slicewav = wav.slice(key.start, key.duration);
+						return getKeySound(slicewav);
+						// System.out.println("WAV slicing - Name:"
+						// + name + " ID:" + note.getWav() +
+						// " start:" + note.getStarttime() +
+						// " duration:" + note.getDuration());
+					} catch (Throwable e) {
+						Logger.getGlobal().warning("音源(wav)ファイルスライシング失敗。" + e.getMessage());
+						e.printStackTrace();
+					}
 				}
 			}
 			return null;
 		}
-		
-		public void put(String s, Note n, T sound) {
-			if(!audio.containsKey(s)) {
-				audio.put(s, new HashSet());
+
+		@Override
+		protected void dispose(T resource) {
+			disposeKeySound(resource);
+		}
+	}
+
+	private static class AudioKey {
+
+		public final String path;
+		public final int start;
+		public final int duration;
+
+		public AudioKey(String path, Note n) {
+			this.path = path;
+			this.start = n.getStarttime();
+			this.duration = n.getDuration();
+		}
+
+		public boolean equals(Object o) {
+			if (o instanceof AudioKey) {
+				final AudioKey key = (AudioKey) o;
+				return path.equals(key.path) && start == key.start && duration == key.duration;
 			}
-			for(SliceWav<T> entry : audio.get(s)) {
-				if(n.getStarttime() == entry.starttime && n.getDuration() == entry.duration) {
-					entry.playid = 0;
-					return;
-				}
-			}
-			SliceWav<T> entry = new SliceWav(n, sound);
-			entry.playid = 0;
-			audio.get(s).add(entry);
+			return false;
 		}
 		
-		public void disposeOld() {
-			String[] keyset = audio.keySet().toArray(new String[audio.size()]);
-			for(String s : keyset) {
-				Set<SliceWav<T>> set = audio.get(s);
-				for(SliceWav<T> wav : set.toArray(new SliceWav[set.size()])) {
-					if(wav.playid == MAX_GENERATION) {
-						disposeKeySound(wav.wav);
-//						System.out.println("AudioCache : リソース開放 - " + s);
-						set.remove(wav);
-					} else {
-						wav.playid++;
-					}					
-				}
-				if(set.isEmpty()) {
-					audio.remove(s);
-				}
-			}
-			Logger.getGlobal().info("現在のAudioCache容量 : " + audio.size());
+		public int hashCode() {
+			return Objects.hash(path, start, duration);
 		}
-	}	
+	}
 }

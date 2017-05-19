@@ -1,35 +1,18 @@
 package bms.player.beatoraja.select;
 
-import java.io.FileReader;
-import java.io.IOException;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.*;
 import java.util.logging.Logger;
 
-import bms.player.beatoraja.skin.SkinImage;
-import bms.player.beatoraja.skin.SkinNumber;
-import bms.player.beatoraja.skin.SkinTextFont;
+import bms.player.beatoraja.input.BMSPlayerInputProcessor;
+import bms.player.beatoraja.skin.*;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.utils.GdxRuntimeException;
-import com.badlogic.gdx.utils.Json;
 
+import bms.model.Mode;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.song.SongData;
-import bms.player.beatoraja.song.SongDatabaseAccessor;
 
 /**
  * 楽曲バー描画用クラス
@@ -38,8 +21,6 @@ import bms.player.beatoraja.song.SongDatabaseAccessor;
  */
 public class BarRenderer {
 
-	private MainController main;
-
 	private MusicSelector select;
 
 	private BarContentsLoaderThread loader;
@@ -47,7 +28,7 @@ public class BarRenderer {
 	/**
 	 * 現在のフォルダ階層
 	 */
-	private List<DirectoryBar> dir = new ArrayList<DirectoryBar>();
+	private Deque<DirectoryBar> dir = new ArrayDeque<DirectoryBar>();
 	/**
 	 * 現在表示中のバー一覧
 	 */
@@ -67,23 +48,26 @@ public class BarRenderer {
 	 */
 	private List<SearchWordBar> search = new ArrayList<SearchWordBar>();
 
-	private FreeTypeFontGenerator generator;
-	private BitmapFont titlefont;
-
 	private final String[] TROPHY = { "goldmedal", "silvermedal", "bronzemedal" };
 
 	private final int SEARCHBAR_MAXCOUNT = 10;
 
-	private Map<String, Pixmap> bannermap = new HashMap<String, Pixmap>();
+	private PixmapResourcePool banners = new PixmapResourcePool();
 
-	public BarRenderer(MainController main, MusicSelector select, SongDatabaseAccessor songdb) {
-		this.main = main;
+	private final int durationlow = 300;
+	private final int durationhigh = 50;
+	/**
+	 * バー移動中のカウンタ
+	 */
+	private long duration;
+	/**
+	 * バーの移動方向
+	 */
+	private int angle;
+
+	public BarRenderer(MusicSelector select) {
+		final MainController main = select.getMainController();
 		this.select = select;
-
-		generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/default/VL-Gothic-Regular.ttf"));
-		FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-		parameter.size = 24;
-		titlefont = generator.generateFont(parameter);
 
 		TableData[] tds = new TableDataAccessor().readAll();
 		this.tables = new TableBar[tds.length];
@@ -114,6 +98,7 @@ public class BarRenderer {
 		for (int i = 0; i < currentsongs.length; i++) {
 			if (currentsongs[i].getTitle().equals(bar.getTitle())) {
 				selectedindex = i;
+				select.getScoreDataProperty().update(currentsongs[selectedindex].getScore());
 				break;
 			}
 		}
@@ -127,6 +112,7 @@ public class BarRenderer {
 		if (value >= 0 && value < 1) {
 			selectedindex = (int) (currentsongs.length * value);
 		}
+		select.getScoreDataProperty().update(currentsongs[selectedindex].getScore());
 	}
 
 	public void move(boolean inclease) {
@@ -136,6 +122,19 @@ public class BarRenderer {
 			selectedindex += currentsongs.length - 1;
 		}
 		selectedindex = selectedindex % currentsongs.length;
+		select.getScoreDataProperty().update(currentsongs[selectedindex].getScore());
+	}
+
+	public void close() {
+		if(dir.isEmpty()) {
+			return;
+		}
+		
+		final DirectoryBar current = dir.removeLast();
+		final DirectoryBar parent = !dir.isEmpty() ? dir.getLast() : null;
+		dir.addLast(current);
+		updateBar(parent);
+		select.play(MusicSelector.SOUND_FOLDERCLOSE);
 	}
 
 	public void addSearch(SearchWordBar bar) {
@@ -167,7 +166,7 @@ public class BarRenderer {
 					if (button == 0) {
 						select.select(sd);
 					} else {
-						select.close();
+						close();
 					}
 					return true;
 				}
@@ -176,7 +175,7 @@ public class BarRenderer {
 		return false;
 	}
 
-	public void render(SpriteBatch sprite, MusicSelectSkin skin, SkinBar baro, long duration, int angle, int time) {
+	public void render(SpriteBatch sprite, MusicSelectSkin skin, SkinBar baro, int time) {
 		if (skin == null) {
 			return;
 		}
@@ -205,7 +204,7 @@ public class BarRenderer {
 			if (baro.getBarImages(on, i) == null) {
 				continue;
 			}
-			int index = (int) (selectedindex + currentsongs.length * 100 + i - skin.getCenterBar())
+			int index = (selectedindex + currentsongs.length * 100 + i - skin.getCenterBar())
 					% currentsongs.length;
 			Bar sd = currentsongs[index];
 
@@ -244,7 +243,6 @@ public class BarRenderer {
 				}
 				final int x = (int) (r.x + dx);
 				final int y = (int) (r.y + dy + (baro.getPosition() == 1 ? r.height : 0));
-				sprite.begin();
 				if (value != -1) {
 					baro.getBarImages(on, i).draw(sprite, time, select, value, (int) dx, (int) dy);
 					// 新規追加曲はテキストを変える
@@ -305,20 +303,80 @@ public class BarRenderer {
 				if ((flag & 4) != 0 && baro.getLabel()[1] != null) {
 					baro.getLabel()[1].draw(sprite, time, select, x, y);
 				}
-				sprite.end();
 			}
+		}
+
+	}
+
+	public void input() {
+		BMSPlayerInputProcessor input = select.getMainController().getInputProcessor();
+		boolean[] keystate = input.getKeystate();
+		long[] keytime = input.getTime();
+		boolean[] cursor = input.getCursorState();
+
+		// song bar scroll on mouse wheel
+		int mov = -input.getScroll();
+		input.resetScroll();
+		// song bar scroll
+		if (select.isPressed(keystate, keytime, MusicSelector.KEY_UP, false) || cursor[1]) {
+			long l = System.currentTimeMillis();
+			if (duration == 0) {
+				mov = 1;
+				duration = l + durationlow;
+				angle = durationlow;
+			}
+			if (l > duration) {
+				duration = l + durationhigh;
+				mov = 1;
+				angle = durationhigh;
+			}
+		} else if (select.isPressed(keystate, keytime, MusicSelector.KEY_DOWN, false) || cursor[0]) {
+			long l = System.currentTimeMillis();
+			if (duration == 0) {
+				mov = -1;
+				duration = l + durationlow;
+				angle = -durationlow;
+			}
+			if (l > duration) {
+				duration = l + durationhigh;
+				mov = -1;
+				angle = -durationhigh;
+			}
+		} else {
+			long l = System.currentTimeMillis();
+			if (l > duration) {
+				duration = 0;
+			}
+		}
+
+		while(mov > 0) {
+			move(true);
+			select.play(MusicSelector.SOUND_SCRATCH);
+			mov--;
+		}
+		while(mov < 0) {
+			move(false);
+			select.play(MusicSelector.SOUND_SCRATCH);
+			mov++;
+		}
+	}
+
+	public void resetInput() {
+		long l = System.currentTimeMillis();
+		if (l > duration) {
+			duration = 0;
 		}
 	}
 
 	private boolean bartextupdate = false;
 
-	public List<DirectoryBar> getDirectory() {
+	public Deque<DirectoryBar> getDirectory() {
 		return dir;
 	}
 
 	public boolean updateBar() {
 		if (dir.size() > 0) {
-			return updateBar(dir.get(dir.size() - 1));
+			return updateBar(dir.getLast());
 		}
 		return updateBar(null);
 	}
@@ -327,8 +385,8 @@ public class BarRenderer {
 		Bar prevbar = currentsongs != null ? currentsongs[selectedindex] : null;
 		List<Bar> l = new ArrayList<Bar>();
 		if (bar == null) {
-			if (dir.size() > 0) {
-				prevbar = dir.get(0);
+			if (!dir.isEmpty()) {
+				prevbar = dir.getFirst();
 			}
 			dir.clear();
 			l.addAll(Arrays.asList(new FolderBar(select, null, "e2977170").getChildren()));
@@ -336,29 +394,26 @@ public class BarRenderer {
 			l.addAll(Arrays.asList(commands));
 			l.addAll(search);
 		} else if (bar instanceof DirectoryBar) {
-			int index = dir.indexOf(bar);
-			if (index != -1) {
-				if (index < dir.size() - 1) {
-					prevbar = dir.get(index + 1);
+			if(dir.contains(bar)) {
+				while(dir.getLast() != bar) {
+					prevbar = dir.pollLast();
 				}
-				for (int i = dir.size() - 1; i >= index; i--) {
-					dir.remove(i);
-				}
+				dir.pollLast();
 			}
 			l.addAll(Arrays.asList(((DirectoryBar) bar).getChildren()));
 		}
 
 		List<Bar> remove = new ArrayList<Bar>();
 		for (Bar b : l) {
-			final int[] modes = { 0, 7, 14, 9, 5, 10 };
-			if (modes[select.getMode()] != 0 && b instanceof SongBar
-					&& ((SongBar) b).getSongData().getMode() != modes[select.getMode()]) {
+			final Mode mode = select.getMode();
+			if (mode != null && b instanceof SongBar
+					&& ((SongBar) b).getSongData().getMode() != mode.id) {
 				remove.add(b);
 			}
 		}
 		l.removeAll(remove);
 
-		if (l.size() > 0) {
+		if (!l.isEmpty()) {
 			if (bar != null) {
 				dir.add((DirectoryBar) bar);
 			}
@@ -367,12 +422,12 @@ public class BarRenderer {
 			currentsongs = l.toArray(new Bar[l.size()]);
 			bartextupdate = true;
 
-			final Config config = select.getResource().getConfig();
+			final Config config = select.getMainController().getPlayerResource().getConfig();
 			for (Bar b : currentsongs) {
 				if (b instanceof SongBar) {
 					SongData sd = ((SongBar) b).getSongData();
-					if (select.existsScoreDataCache(sd, config.getLnmode())) {
-						b.setScore(select.readScoreData(sd, config.getLnmode()));
+					if (select.getScoreDataCache().existsScoreDataCache(sd, config.getLnmode())) {
+						b.setScore(select.getScoreDataCache().readScoreData(sd, config.getLnmode()));
 					}
 				}
 			}
@@ -401,35 +456,46 @@ public class BarRenderer {
 
 				}
 			}
+
 			if (loader != null) {
 				loader.stopRunning();
 			}
 			loader = new BarContentsLoaderThread(currentsongs);
 			loader.start();
+			select.getScoreDataProperty().update(currentsongs[selectedindex].getScore());
 			return true;
 		}
 
 		if (dir.size() > 0) {
-			updateBar(dir.get(dir.size() - 1));
+			updateBar(dir.getLast());
 		} else {
 			updateBar(null);
 		}
 		Logger.getGlobal().warning("楽曲がありません");
 		return false;
+	}
 
+	public void updateFolder() {
+		final Bar selected = getSelected();
+		if (selected instanceof FolderBar) {
+			FolderBar fb = (FolderBar) selected;
+			select.getSongDatabase().updateSongDatas(fb.getFolderData().getPath(), false);
+		} else if (selected instanceof TableBar) {
+			TableBar tb = (TableBar) selected;
+			if (tb.getUrl() != null && tb.getUrl().length() > 0) {
+				TableDataAccessor tda = new TableDataAccessor();
+				String[] url = new String[] { tb.getUrl() };
+				tda.updateTableData(url);
+				TableData td = tda.read(tb.getTitle());
+				if (td != null) {
+					tb.setTableData(td);
+				}
+			}
+		}
 	}
 
 	public void dispose() {
-		if (titlefont != null) {
-			titlefont.dispose();
-			titlefont = null;
-		}
-		for (String path : bannermap.keySet()) {
-			if (bannermap.get(path) != null) {
-				bannermap.get(path).dispose();
-			}
-		}
-		bannermap.clear();
+		banners.dispose();
 	}
 
 	private void setBanner(SongBar songbar) {
@@ -437,18 +503,7 @@ public class BarRenderer {
 		Path bannerfile = Paths.get(song.getPath()).getParent().resolve(song.getBanner());
 		// System.out.println(bannerfile.getPath());
 		if (song.getBanner().length() > 0 && Files.exists(bannerfile)) {
-			try {
-				if (bannermap.containsKey(bannerfile.toString())) {
-					songbar.setBanner(bannermap.get(bannerfile.toString()));
-				} else {
-					Pixmap pixmap = new Pixmap(Gdx.files.internal(bannerfile.toString()));
-					songbar.setBanner(pixmap);
-					bannermap.put(bannerfile.toString(), pixmap);
-				}
-			} catch (GdxRuntimeException e) {
-				bannermap.put(bannerfile.toString(), null);
-				Logger.getGlobal().warning("banner読み込み失敗: " + e.getMessage());
-			}
+			songbar.setBanner(banners.get(bannerfile.toString()));
 		}
 	}
 
@@ -472,12 +527,13 @@ public class BarRenderer {
 
 		@Override
 		public void run() {
-			Config config = select.getResource().getConfig();
+			Config config = select.getMainController().getPlayerResource().getConfig();
+			final MainController main = select.getMainController();
 			for (Bar bar : bars) {
 				if (bar instanceof SongBar) {
 					SongData sd = ((SongBar) bar).getSongData();
 					if (bar.getScore() == null) {
-						bar.setScore(select.readScoreData(sd, config.getLnmode()));
+						bar.setScore(select.getScoreDataCache().readScoreData(sd, config.getLnmode()));
 					}
 					boolean[] replay = new boolean[MusicSelector.REPLAY];
 					for (int i = 0; i < MusicSelector.REPLAY; i++) {

@@ -3,6 +3,7 @@ package bms.player.beatoraja.play.gauge;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 import bms.model.BMSModel;
+import bms.model.Mode;
 import bms.player.beatoraja.play.PlaySkin;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
@@ -14,7 +15,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 public class EasyGrooveGauge extends GrooveGauge {
 
     public EasyGrooveGauge(BMSModel model) {
-        if (model.getUseKeys() == 9) {
+        if (model.getMode() == Mode.POPN_5K || model.getMode() == Mode.POPN_9K) {
             init(2, 120, 30, 85, CLEARTYPE_EASY, new float[]{(float) (model.getTotal() / model.getTotalNotes()),
                     (float) (model.getTotal() / model.getTotalNotes()), (float) (model.getTotal() / model.getTotalNotes()) / 2,
                     -1.0f, -3.0f, -3.0f});

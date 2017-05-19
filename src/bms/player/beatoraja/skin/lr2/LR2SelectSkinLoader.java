@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
+import bms.player.beatoraja.Config;
+import bms.player.beatoraja.Resolution;
 import bms.player.beatoraja.select.*;
 import bms.player.beatoraja.skin.*;
 
@@ -20,8 +22,14 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader {
 
 	private final int[][] lampg = { { 0 }, { 1 }, { 2, 3, 4 }, { 5 }, { 6, 7 }, {}, { 8, 9, 10 }, {} };
 
-	public LR2SelectSkinLoader(final float srcw, final float srch, final float dstw, final float dsth) {
-		super(srcw, srch, dstw, dsth);
+	public LR2SelectSkinLoader(final Resolution src, final Config c) {
+		super(src, c);
+
+		final float srcw = src.width;
+		final float srch = src.height;
+		final float dstw = dst.width;
+		final float dsth = dst.height;
+
 		addCommandWord(new CommandWord("SRC_BAR_BODY") {
 			@Override
 			public void execute(String[] str) {
@@ -219,13 +227,16 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader {
 			@Override
 			public void execute(String[] str) {
 				int[] values = parseInt(str);
+				SkinText bartext = null;
 				if (values[2] < fontlist.size() && fontlist.get(values[2]) != null) {
-					SkinText text = new SkinTextImage(fontlist.get(values[2]));
-					text.setAlign(values[4]);
-					skinbar.getText()[values[1]] = text;
-					// System.out.println("Text Added - " +
-					// (values[3]));
+					bartext = new SkinTextImage(fontlist.get(values[2]));
+				} else {
+					bartext = new SkinTextFont("skin/default/VL-Gothic-Regular.ttf", 0, 48, 2);
 				}
+				bartext.setAlign(values[4]);
+				skinbar.getText()[values[1]] = bartext;
+				// System.out.println("Text Added - " +
+				// (values[3]));
 			}
 		});
 		addCommandWord(new CommandWord("DST_BAR_TITLE") {
@@ -263,7 +274,7 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader {
 
 	public MusicSelectSkin loadSelectSkin(File f, MusicSelector selector, SkinHeader header,
 			Map<Integer, Boolean> option, Map property) throws IOException {
-		skin = new MusicSelectSkin(srcw, srch, dstw, dsth);
+		skin = new MusicSelectSkin(src, dst);
 
 		this.loadSkin(skin, f, selector, header, option, property);
 
