@@ -138,7 +138,6 @@ public class MusicSelector extends MainState {
 		PlayConfig pc = (config.getMusicselectinput() == 0 ? config.getMode7() : (config.getMusicselectinput() == 1 ? config.getMode9() : config.getMode14()));
 		input.setKeyassign(pc.getKeyassign());
 		input.setControllerConfig(pc.getController());
-
 		bar.updateBar();
 
 		if (getSkin() == null) {
@@ -180,7 +179,7 @@ public class MusicSelector extends MainState {
 		final SpriteBatch sprite = main.getSpriteBatch();
 		final PlayerResource resource = main.getPlayerResource();
 		final Bar current = bar.getSelected();
-
+		
 		// draw song information
 		sprite.begin();
 		if (current instanceof SongBar) {
@@ -334,6 +333,8 @@ public class MusicSelector extends MainState {
 			numtime[1] = 0;
 			bar.updateBar();
 			play(SOUND_CHANGEOPTION);
+			this.config.setModeSort(getMode());
+			
 		}
 		if (numberstate[2] && numtime[2] != 0) {
 			// ソートの切り替え
@@ -715,6 +716,7 @@ public class MusicSelector extends MainState {
 
 	public Mode getMode() {
 		return MODE[mode];
+
 	}
 
 	public int getSort() {
@@ -801,6 +803,7 @@ public class MusicSelector extends MainState {
 		case NUMBER_JUDGETIMING:
 			return config.getJudgetiming();
 		case BUTTON_MODE:
+		mode = config.getModeSort();
 			final int[] mode_lr2 = { 0, 2, 4, 5, 1, 3 };
 			return mode < mode_lr2.length ? mode_lr2[mode] : mode;
 		case BUTTON_SORT:
