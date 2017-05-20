@@ -86,6 +86,7 @@ public class MusicSelector extends MainState {
 	private SearchTextField search;
 
 	private final int notesGraphDuration = 1000;
+	private final int previewDuration = 400;
 	private boolean showNoteGraph = false;
 
 	private ScoreDataCache scorecache;
@@ -260,17 +261,29 @@ public class MusicSelector extends MainState {
 			}
 		}
 		sprite.end();
-		// read bms information
-		if(getNowTime() > getTimer()[TIMER_SONGBAR_CHANGE] + notesGraphDuration && !showNoteGraph && play < 0) {
+		// preview misic
+		if(getNowTime() > getTimer()[TIMER_SONGBAR_CHANGE] + previewDuration && (preview == null || preview.length() == 0 )&& play < 0) {
 			if(current instanceof SongBar) {
 				SongData song = main.getPlayerResource().getSongdata();
-				song.setBMSModel(resource.loadBMSModel(Paths.get(((SongBar) current).getSongData().getPath()), config.getLnmode()));
 				preview = song.getPreview();
 				if(preview != null && preview.length() > 0) {
 					preview = Paths.get(song.getPath()).getParent().resolve(preview).toString();
 					stop(SOUND_BGM);
-					getMainController().getAudioProcessor().play(preview, false);					
+					getMainController().getAudioProcessor().play(preview, false);
 				}
+			}
+		}
+
+		// read bms information
+		if(getNowTime() > getTimer()[TIMER_SONGBAR_CHANGE] + notesGraphDuration && !showNoteGraph && play < 0) {
+			if(current instanceof SongBar) {
+				SongData song = main.getPlayerResource().getSongdata();
+				Thread thread = new Thread() {
+					public void run() {
+						song.setBMSModel(resource.loadBMSModel(Paths.get(((SongBar) current).getSongData().getPath()), config.getLnmode()));
+					}
+				};
+				thread.start();
 			}
 			showNoteGraph = true;
 		}

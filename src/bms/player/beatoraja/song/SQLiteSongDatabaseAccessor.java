@@ -68,10 +68,14 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 				qr.update("CREATE TABLE [song] ([md5] TEXT NOT NULL," + "[sha256] TEXT NOT NULL," + "[title] TEXT,"
 						+ "[subtitle] TEXT," + "[genre] TEXT," + "[artist] TEXT," + "[subartist] TEXT," + "[tag] TEXT,"
 						+ "[path] TEXT," + "[folder] TEXT," + "[stagefile] TEXT," + "[banner] TEXT," + "[backbmp] TEXT,"
-						+ "[parent] TEXT," + "[level] INTEGER," + "[difficulty] INTEGER," + "[maxbpm] INTEGER,"
+						+ "[preview] TEXT," + "[parent] TEXT," + "[level] INTEGER," + "[difficulty] INTEGER," + "[maxbpm] INTEGER,"
 						+ "[minbpm] INTEGER," + "[mode] INTEGER," + "[judge] INTEGER," + "[feature] INTEGER,"
 						+ "[content] INTEGER," + "[date] INTEGER," + "[favorite] INTEGER," + "[notes] INTEGER,"
 						+ "[adddate] INTEGER," + "PRIMARY KEY(sha256, path));");
+			}
+
+			if(qr.query("SELECT * FROM sqlite_master WHERE name = 'song' AND sql LIKE '%preview%'", new MapListHandler()).size() == 0) {
+				qr.update("ALTER TABLE song ADD COLUMN preview [TEXT]");
 			}
 
 			if (qr.query("SELECT * FROM sqlite_master WHERE name = ? and type='table';", new MapListHandler(), "folder")
@@ -204,8 +208,6 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 	 *            属性
 	 * @param value
 	 *            属性値
-	 * @param lr2path
-	 *            LR2ルートパス
 	 * @return 検索結果
 	 */
 	public FolderData[] getFolderDatas(String key, String value) {
@@ -294,10 +296,6 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 	/**
 	 * データベースを更新する
 	 * 
-	 * @param files
-	 *            更新するディレクトリ(ルートディレクトリでなくても可)
-	 * @param rootdirs
-	 *            楽曲のルートパス
 	 * @param path
 	 *            LR2のルートパス
 	 */
@@ -337,7 +335,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 		/**
 		 * データベースを更新する
 		 * 
-		 * @param files
+		 * @param paths
 		 *            更新するディレクトリ(ルートディレクトリでなくても可)
 		 */
 		public void updateSongDatas(Path[] paths) {
@@ -550,15 +548,15 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 								qr.update(conn,
 										"INSERT OR REPLACE INTO song "
 												+ "(md5, sha256, title, subtitle, genre, artist, subartist, tag, path,"
-												+ "folder, stagefile, banner, backbmp, parent, level, difficulty, "
+												+ "folder, stagefile, banner, backbmp, preview, parent, level, difficulty, "
 												+ "maxbpm, minbpm, mode, judge, feature, content, "
 												+ "date, favorite, notes, adddate)"
-												+ "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);",
+												+ "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);",
 										sd.getMd5(), sd.getSha256(), sd.getTitle(), sd.getSubtitle(), sd.getGenre(),
 										sd.getArtist(), sd.getSubartist(), tag != null ? tag : "",
 										f.startsWith(root) ? root.relativize(f).toString() : f.toString(),
 										SongUtils.crc32(f.getParent().toString(), bmsroot, root.toString()),
-										sd.getStagefile(), sd.getBanner(), sd.getBackbmp(),
+										sd.getStagefile(), sd.getBanner(), sd.getBackbmp(), sd.getPreview(),
 										SongUtils.crc32(f.getParent().getParent().toString(), bmsroot, root.toString()),
 										sd.getLevel(), sd.getDifficulty(), sd.getMaxbpm(), sd.getMinbpm(), sd.getMode(),
 										sd.getJudge(), sd.getFeature(), sd.getContent(),
