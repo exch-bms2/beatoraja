@@ -399,11 +399,18 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 			boolean txt = false;
 			bmsfiles.clear();
 			final List<Path> dirs = new ArrayList<Path>();
+			String previewpath = null;
 			try (DirectoryStream<Path> paths = Files.newDirectoryStream(dir)) {
 				for (Path p : paths) {
 					final String s = p.toString().toLowerCase();
 					if (!txt && s.endsWith(".txt")) {
 						txt = true;
+					}
+					if (previewpath == null) {
+						String name = p.getFileName().toString().toLowerCase();
+						if(name.startsWith("preview") && (name.endsWith(".wav") || name.endsWith(".ogg") || name.endsWith(".mp3"))) {
+							previewpath = p.getFileName().toString();
+						}
 					}
 					if (s.endsWith(".bms") || s.endsWith(".bme") || s.endsWith(".bml") || s.endsWith(".pms")
 							|| s.endsWith(".bmson")) {
@@ -418,7 +425,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 
 			if (bmsfiles.size() > 0) {
 				BMSFolderThread task = new BMSFolderThread(conn, bmsfiles.toArray(new Path[bmsfiles.size()]), records,
-						updateFolder, txt, updatetime, tags);
+						updateFolder, txt, updatetime, previewpath, tags);
 				tasks.addLast(task);
 				task.start();
 			}
@@ -470,17 +477,19 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 		private final boolean txt;
 		private final Connection conn;
 		private final long updatetime;
+		private final String preview;
 		private final Map<String, String> tags;
 		private int count;
 
 		public BMSFolderThread(Connection conn, Path[] bmsfiles, List<SongData> records, boolean updateAll, boolean txt,
-				long updatetime, Map<String, String> tags) {
+				long updatetime, String preview, Map<String, String> tags) {
 			this.bmsfiles = bmsfiles;
 			this.records = records;
 			this.updateAll = updateAll;
 			this.txt = txt;
 			this.conn = conn;
 			this.updatetime = updatetime;
+			this.preview = preview;
 			this.tags = tags;
 		}
 
@@ -543,6 +552,9 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 											sd.setDifficulty(5);
 										}
 									}
+								}
+								if((sd.getPreview() == null || sd.getPreview().length() == 0) && preview != null) {
+									sd.setPreview(preview);
 								}
 								final String tag = tags.get(sd.getMd5());
 								qr.update(conn,
