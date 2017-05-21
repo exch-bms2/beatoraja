@@ -567,6 +567,14 @@ public class MusicSelector extends MainState {
 				}
 			}
 
+            if (numberstate[8] && numtime[8] != 0) {
+                numtime[8] = 0;
+                if (current instanceof SongBar &&
+                        (bar.getDirectory().isEmpty() || !(bar.getDirectory().getLast() instanceof SameFolderBar))) {
+                    SongData sd = ((SongBar) current).getSongData();
+                    bar.updateBar(new SameFolderBar(this, sd.getTitle(), sd.getFolder()));
+                }
+            }
 			// close folder
 			if (isPressed(keystate, keytime, KEY_FOLDER_CLOSE, true) || (cursor[2] && cursortime[2] != 0)) {
 				keytime[1] = 0;

@@ -63,6 +63,9 @@ public class SongData {
 	private String backbmp = "";
 	private String preview = "";
 
+	private String folder;
+	private String parent;
+
 	private BMSModel model;
 	private TimeLine[] timelines;
 	
@@ -339,5 +342,21 @@ public class SongData {
 
 	public void setPreview(String preview) {
 		this.preview = preview;
+	}
+
+	public String getFolder() {
+		return folder;
+	}
+
+	public void setFolder(String folder) {
+		this.folder = folder;
+	}
+
+	public String getParent() {
+		return parent;
+	}
+
+	public void setParent(String parent) {
+		this.parent = parent;
 	}
 }
