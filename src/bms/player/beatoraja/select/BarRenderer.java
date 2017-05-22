@@ -432,7 +432,7 @@ public class BarRenderer {
 				}
 			}
 
-			Arrays.sort(currentsongs, BarSorter.getAllSorter()[select.getSort()]);
+			Arrays.sort(currentsongs, BarSorter.values()[select.getSort()]);
 
 			selectedindex = 0;
 

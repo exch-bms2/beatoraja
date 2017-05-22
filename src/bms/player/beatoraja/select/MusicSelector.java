@@ -22,9 +22,6 @@ import com.badlogic.gdx.Input.TextInputListener;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
-import com.badlogic.gdx.math.Rectangle;
-
-import static bms.player.beatoraja.Resolution.*;
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
 /**
@@ -351,7 +348,7 @@ public class MusicSelector extends MainState {
 		}
 		if (numberstate[2] && numtime[2] != 0) {
 			// ソートの切り替え
-			sort = (sort + 1) % BarSorter.getAllSorter().length;
+			sort = (sort + 1) % BarSorter.values().length;
 			numtime[2] = 0;
 			bar.updateBar();
 			play(SOUND_CHANGEOPTION);
