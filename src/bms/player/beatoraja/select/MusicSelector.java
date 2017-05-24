@@ -22,7 +22,9 @@ import com.badlogic.gdx.Input.TextInputListener;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+
 import static bms.player.beatoraja.skin.SkinProperty.*;
+import java.awt.Desktop;
 
 /**
  * 選曲部分。 楽曲一覧とカーソルが指す楽曲のステータスを表示し、選択した楽曲を 曲決定部分に渡す。
@@ -612,6 +614,20 @@ public class MusicSelector extends MainState {
 		if (input.getFunctionstate()[1] && input.getFunctiontime()[1] != 0) {
 			input.getFunctiontime()[1] = 0;
 			bar.updateFolder();
+		}
+		if (input.getFunctionstate()[2] && input.getFunctiontime()[2] != 0) {
+			input.getFunctiontime()[2] = 0;
+			try {
+				if (Desktop.isDesktopSupported()) {
+					if(current instanceof SongBar) {
+						Desktop.getDesktop().open(Paths.get(((SongBar) current).getSongData().getPath()).getParent().toFile());
+					} else if(current instanceof FolderBar) {
+						Desktop.getDesktop().open(Paths.get(((FolderBar) current).getFolderData().getPath()).toFile());
+					}
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 
 		if (input.isExitPressed()) {
