@@ -11,10 +11,25 @@ It works on Windows, Mac OS, and Linux.
 - Various assist options : legacy note, expand judge, bpm guide, and no mine
 - pms judge (nax 1 miss / 1 notes, combo is reset when miss)
 - support bmson 0.2.1, 1.0.0
-- import difficulty table and create table folder, create course with various constraint (mirror/random OK, no hispeed, and so on)
+- practice mode
+- import difficulty table folder, create course with various constraint (mirror/random OK, no hispeed, and so on)
 - import LunaticRave2 skin (now working in progress. not supporting DirectXArchive(.dxa) and DirectDrawSurface(.dds) file)
 - import LunaticRave2 scores (clear lamp, score. not including score verifier like scorehash)
 
 # System Requirement
 - Java Runtime Environment 1.8.0 64bit (32bit is not recomended)
 - OpenGL 3.1- (may not work under Windows 10 + Intel HD Graphics 2000/3000. See also https://github.com/LWJGL/lwjgl/issues/119)
+
+# How To Use
+> java -jar beatoraja.jar -(a|p|r1|r2|r3|r4|c) [BMS path]
+- options
+-- a : autoplay
+-- p : practice
+-- r1-r4 : start replay data 1-4
+-- c : configuration
+
+beatoraja uses a large amount of heap memory. So it is recommended that you use options of extending heap memory : e.g. -Xms1g -Xmx4g.
+On JRE 32bit, maximum heap memory size is limited to 1.4G-1.6G. See http://www.oracle.com/technetwork/java/hotspotfaq-138619.html#gc_heap_32bit
+
+# License
+- GNU General Public License v3
