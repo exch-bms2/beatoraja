@@ -418,31 +418,33 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 				e.printStackTrace();
 			}
 
-			List<FolderData> fremoves = new ArrayList<FolderData>(folders);
-
-			if (bmsfiles.size() > 0) {
+			final boolean containsBMS = bmsfiles.size() > 0;
+			if (containsBMS) {
 				BMSFolderThread task = new BMSFolderThread(conn, bmsfiles.toArray(new Path[bmsfiles.size()]), records,
 						updateFolder, txt, updatetime, previewpath, tags);
 				tasks.addLast(task);
 				task.start();
-			} else {
-				for (Path f : dirs) {
-					boolean b = true;
-					for (FolderData record : folders) {
-						final String s = (f.startsWith(root) ? root.relativize(f).toString() : f.toString())
-								+ File.separatorChar;
-						if (record.getPath().equals(s)) {
-							fremoves.remove(record);
-							if (!updateAll && record.getDate() == Files.getLastModifiedTime(f).toMillis() / 1000) {
-								b = false;
-							}
-							break;
-						}
-					}
-					this.processDirectory(conn, f, b);
-				}
 			}
 
+			List<FolderData> fremoves = new ArrayList<FolderData>(folders);
+			for (Path f : dirs) {
+				boolean b = true;
+				for (FolderData record : folders) {
+					final String s = (f.startsWith(root) ? root.relativize(f).toString() : f.toString())
+							+ File.separatorChar;
+					if (record.getPath().equals(s)) {
+						fremoves.remove(record);
+						if (!updateAll && record.getDate() == Files.getLastModifiedTime(f).toMillis() / 1000) {
+							b = false;
+						}
+						break;
+					}
+				}
+				
+				if(!containsBMS) {
+					this.processDirectory(conn, f, b);					
+				}
+			}
 			// folderテーブルの更新
 			if (updateFolder) {
 				final String s = (dir.startsWith(root) ? root.relativize(dir).toString() : dir.toString())
