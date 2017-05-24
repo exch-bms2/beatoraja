@@ -22,10 +22,9 @@ import com.badlogic.gdx.Input.TextInputListener;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
-import com.badlogic.gdx.math.Rectangle;
 
-import static bms.player.beatoraja.Resolution.*;
 import static bms.player.beatoraja.skin.SkinProperty.*;
+import java.awt.Desktop;
 
 /**
  * 選曲部分。 楽曲一覧とカーソルが指す楽曲のステータスを表示し、選択した楽曲を 曲決定部分に渡す。
@@ -86,6 +85,7 @@ public class MusicSelector extends MainState {
 	private SearchTextField search;
 
 	private final int notesGraphDuration = 1000;
+	private final int previewDuration = 400;
 	private boolean showNoteGraph = false;
 
 	private ScoreDataCache scorecache;
@@ -138,7 +138,6 @@ public class MusicSelector extends MainState {
 		PlayConfig pc = (config.getMusicselectinput() == 0 ? config.getMode7() : (config.getMusicselectinput() == 1 ? config.getMode9() : config.getMode14()));
 		input.setKeyassign(pc.getKeyassign());
 		input.setControllerConfig(pc.getController());
-
 		bar.updateBar();
 
 		if (getSkin() == null) {
@@ -180,7 +179,7 @@ public class MusicSelector extends MainState {
 		final SpriteBatch sprite = main.getSpriteBatch();
 		final PlayerResource resource = main.getPlayerResource();
 		final Bar current = bar.getSelected();
-
+		
 		// draw song information
 		sprite.begin();
 		if (current instanceof SongBar) {
@@ -261,17 +260,29 @@ public class MusicSelector extends MainState {
 			}
 		}
 		sprite.end();
-		// read bms information
-		if(getNowTime() > getTimer()[TIMER_SONGBAR_CHANGE] + notesGraphDuration && !showNoteGraph && play < 0) {
+		// preview misic
+		if(getNowTime() > getTimer()[TIMER_SONGBAR_CHANGE] + previewDuration && (preview == null || preview.length() == 0 )&& play < 0) {
 			if(current instanceof SongBar) {
 				SongData song = main.getPlayerResource().getSongdata();
-				song.setBMSModel(resource.loadBMSModel(Paths.get(((SongBar) current).getSongData().getPath()), config.getLnmode()));
 				preview = song.getPreview();
 				if(preview != null && preview.length() > 0) {
 					preview = Paths.get(song.getPath()).getParent().resolve(preview).toString();
 					stop(SOUND_BGM);
-					getMainController().getAudioProcessor().play(preview, false);					
+					getMainController().getAudioProcessor().play(preview, false);
 				}
+			}
+		}
+
+		// read bms information
+		if(getNowTime() > getTimer()[TIMER_SONGBAR_CHANGE] + notesGraphDuration && !showNoteGraph && play < 0) {
+			if(current instanceof SongBar) {
+				SongData song = main.getPlayerResource().getSongdata();
+				Thread thread = new Thread() {
+					public void run() {
+						song.setBMSModel(resource.loadBMSModel(Paths.get(((SongBar) current).getSongData().getPath()), config.getLnmode()));
+					}
+				};
+				thread.start();
 			}
 			showNoteGraph = true;
 		}
@@ -334,10 +345,12 @@ public class MusicSelector extends MainState {
 			numtime[1] = 0;
 			bar.updateBar();
 			play(SOUND_CHANGEOPTION);
+			this.config.setModeSort(getMode());
+			
 		}
 		if (numberstate[2] && numtime[2] != 0) {
 			// ソートの切り替え
-			sort = (sort + 1) % BarSorter.getAllSorter().length;
+			sort = (sort + 1) % BarSorter.values().length;
 			numtime[2] = 0;
 			bar.updateBar();
 			play(SOUND_CHANGEOPTION);
@@ -553,6 +566,14 @@ public class MusicSelector extends MainState {
 				}
 			}
 
+            if (numberstate[8] && numtime[8] != 0) {
+                numtime[8] = 0;
+                if (current instanceof SongBar &&
+                        (bar.getDirectory().isEmpty() || !(bar.getDirectory().getLast() instanceof SameFolderBar))) {
+                    SongData sd = ((SongBar) current).getSongData();
+                    bar.updateBar(new SameFolderBar(this, sd.getTitle(), sd.getFolder()));
+                }
+            }
 			// close folder
 			if (isPressed(keystate, keytime, KEY_FOLDER_CLOSE, true) || (cursor[2] && cursortime[2] != 0)) {
 				keytime[1] = 0;
@@ -593,6 +614,20 @@ public class MusicSelector extends MainState {
 		if (input.getFunctionstate()[1] && input.getFunctiontime()[1] != 0) {
 			input.getFunctiontime()[1] = 0;
 			bar.updateFolder();
+		}
+		if (input.getFunctionstate()[2] && input.getFunctiontime()[2] != 0) {
+			input.getFunctiontime()[2] = 0;
+			try {
+				if (Desktop.isDesktopSupported()) {
+					if(current instanceof SongBar) {
+						Desktop.getDesktop().open(Paths.get(((SongBar) current).getSongData().getPath()).getParent().toFile());
+					} else if(current instanceof FolderBar) {
+						Desktop.getDesktop().open(Paths.get(((FolderBar) current).getFolderData().getPath()).toFile());
+					}
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 
 		if (input.isExitPressed()) {
@@ -715,6 +750,7 @@ public class MusicSelector extends MainState {
 
 	public Mode getMode() {
 		return MODE[mode];
+
 	}
 
 	public int getSort() {
@@ -801,6 +837,7 @@ public class MusicSelector extends MainState {
 		case NUMBER_JUDGETIMING:
 			return config.getJudgetiming();
 		case BUTTON_MODE:
+		mode = config.getModeSort();
 			final int[] mode_lr2 = { 0, 2, 4, 5, 1, 3 };
 			return mode < mode_lr2.length ? mode_lr2[mode] : mode;
 		case BUTTON_SORT:

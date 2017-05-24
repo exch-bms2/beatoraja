@@ -331,6 +331,38 @@ class ContainerBar extends DirectoryBar {
     }
 }
 
+class SameFolderBar extends DirectoryBar {
+
+    private MusicSelector selector;
+    private String crc;
+    private String title;
+
+    public SameFolderBar(MusicSelector selector, String title, String crc) {
+        this.selector = selector;
+        this.crc = crc;
+        this.title = title;
+    }
+
+    @Override
+    public String getTitle() {
+        return title;
+    }
+
+    @Override
+    public Bar[] getChildren() {
+        List<Bar> l = new ArrayList<Bar>();
+        SongData[] songs = selector.getSongDatabase().getSongDatas("folder", crc);
+        List<String> sha = new ArrayList<String>();
+        for (SongData song : songs) {
+            if(!sha.contains(song.getSha256())) {
+                l.add(new SongBar(song));
+                sha.add(song.getSha256());
+            }
+        }
+        return l.toArray(new Bar[0]);
+    }
+}
+
 class TableBar extends DirectoryBar {
 
 	private TableData td;

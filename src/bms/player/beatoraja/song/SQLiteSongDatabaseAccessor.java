@@ -28,11 +28,6 @@ import bms.model.*;
  */
 public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 
-	public static final String HASH = "hash";
-	public static final String TITLE = "title";
-	public static final String SUBTITLE = "subtitle";
-	public static final String TAG = "tag";
-
 	private SQLiteDataSource ds;
 
 	private Path root;
@@ -68,10 +63,17 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 				qr.update("CREATE TABLE [song] ([md5] TEXT NOT NULL," + "[sha256] TEXT NOT NULL," + "[title] TEXT,"
 						+ "[subtitle] TEXT," + "[genre] TEXT," + "[artist] TEXT," + "[subartist] TEXT," + "[tag] TEXT,"
 						+ "[path] TEXT," + "[folder] TEXT," + "[stagefile] TEXT," + "[banner] TEXT," + "[backbmp] TEXT,"
-						+ "[parent] TEXT," + "[level] INTEGER," + "[difficulty] INTEGER," + "[maxbpm] INTEGER,"
+						+ "[preview] TEXT," + "[parent] TEXT," + "[level] INTEGER," + "[difficulty] INTEGER," + "[maxbpm] INTEGER,"
 						+ "[minbpm] INTEGER," + "[mode] INTEGER," + "[judge] INTEGER," + "[feature] INTEGER,"
 						+ "[content] INTEGER," + "[date] INTEGER," + "[favorite] INTEGER," + "[notes] INTEGER,"
 						+ "[adddate] INTEGER," + "PRIMARY KEY(sha256, path));");
+			}
+
+			if(qr.query("SELECT * FROM sqlite_master WHERE name = 'song' AND sql LIKE '%preview%'", new MapListHandler()).size() == 0) {
+				qr.update("ALTER TABLE song ADD COLUMN preview [TEXT]");
+			}
+			if(qr.query("SELECT * FROM sqlite_master WHERE name = 'song' AND sql LIKE '%length%'", new MapListHandler()).size() == 0) {
+				qr.update("ALTER TABLE song ADD COLUMN length [INTEGER]");
 			}
 
 			if (qr.query("SELECT * FROM sqlite_master WHERE name = ? and type='table';", new MapListHandler(), "folder")
@@ -96,13 +98,11 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 	 */
 	public SongData[] getSongDatas(String key, String value) {
 		try {
-			List<SongData> m = qr.query("SELECT * FROM song WHERE " + key + " = ?", songhandler, value);
-
+			final List<SongData> m = qr.query("SELECT * FROM song WHERE " + key + " = ?", songhandler, value);
 			return m.toArray(new SongData[m.size()]);
 		} catch (Exception e) {
 			Logger.getGlobal().severe("song.db更新時の例外:" + e.getMessage());
 		}
-
 		return new SongData[0];
 	}
 
@@ -204,14 +204,11 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 	 *            属性
 	 * @param value
 	 *            属性値
-	 * @param lr2path
-	 *            LR2ルートパス
 	 * @return 検索結果
 	 */
 	public FolderData[] getFolderDatas(String key, String value) {
 		try {
-			List<FolderData> m = qr.query("SELECT * FROM folder WHERE " + key + " = ?", folderhandler, value);
-
+			final List<FolderData> m = qr.query("SELECT * FROM folder WHERE " + key + " = ?", folderhandler, value);
 			return m.toArray(new FolderData[m.size()]);
 		} catch (Exception e) {
 			Logger.getGlobal().severe("song.db更新時の例外:" + e.getMessage());
@@ -294,10 +291,6 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 	/**
 	 * データベースを更新する
 	 * 
-	 * @param files
-	 *            更新するディレクトリ(ルートディレクトリでなくても可)
-	 * @param rootdirs
-	 *            楽曲のルートパス
 	 * @param path
 	 *            LR2のルートパス
 	 */
@@ -340,7 +333,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 		/**
 		 * データベースを更新する
 		 * 
-		 * @param files
+		 * @param paths
 		 *            更新するディレクトリ(ルートディレクトリでなくても可)
 		 */
 		public void updateSongDatas(Path[] paths) {
@@ -408,11 +401,18 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 			boolean txt = false;
 			final List<Path> bmsfiles = new ArrayList<Path>();
 			final List<Path> dirs = new ArrayList<Path>();
+			String previewpath = null;
 			try (DirectoryStream<Path> paths = Files.newDirectoryStream(dir)) {
 				for (Path p : paths) {
 					final String s = p.toString().toLowerCase();
 					if (!txt && s.endsWith(".txt")) {
 						txt = true;
+					}
+					if (previewpath == null) {
+						String name = p.getFileName().toString().toLowerCase();
+						if(name.startsWith("preview") && (name.endsWith(".wav") || name.endsWith(".ogg") || name.endsWith(".mp3"))) {
+							previewpath = p.getFileName().toString();
+						}
 					}
 					if (s.endsWith(".bms") || s.endsWith(".bme") || s.endsWith(".bml") || s.endsWith(".pms")
 							|| s.endsWith(".bmson")) {
@@ -425,9 +425,10 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 				e.printStackTrace();
 			}
 
-			if (!bmsfiles.isEmpty()) {
-				BMSFolderThread task = new BMSFolderThread(conn, bmsfiles, records, updateFolder, txt, updatetime,
-						tags, info);
+			final boolean containsBMS = bmsfiles.size() > 0;
+			if (containsBMS) {
+				BMSFolderThread task = new BMSFolderThread(conn, bmsfiles.toArray(new Path[bmsfiles.size()]), records,
+						updateFolder, txt, updatetime, previewpath, tags, info);
 				tasks.addLast(task);
 				task.start();
 			}
@@ -446,7 +447,10 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 						break;
 					}
 				}
-				this.processDirectory(conn, f, b);
+				
+				if(!containsBMS) {
+					this.processDirectory(conn, f, b);					
+				}
 			}
 			// folderテーブルの更新
 			if (updateFolder) {
@@ -473,24 +477,26 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 
 	class BMSFolderThread extends Thread {
 
-		private final List<Path> bmsfiles;
+		private final Path[] bmsfiles;
 		private final List<SongData> records;
 		private final boolean updateAll;
 		private final boolean txt;
 		private final Connection conn;
 		private final long updatetime;
+		private final String preview;
 		private final Map<String, String> tags;
 		private int count;
 		private final SongInformationAccessor info;
 
-		public BMSFolderThread(Connection conn, List<Path> bmsfiles, List<SongData> records, boolean updateAll,
-				boolean txt, long updatetime, Map<String, String> tags, SongInformationAccessor info) {
+		public BMSFolderThread(Connection conn, Path[] bmsfiles, List<SongData> records, boolean updateAll, boolean txt,
+				long updatetime, String preview, Map<String, String> tags, SongInformationAccessor info) {
 			this.bmsfiles = bmsfiles;
 			this.records = records;
 			this.updateAll = updateAll;
 			this.txt = txt;
 			this.conn = conn;
 			this.updatetime = updatetime;
+			this.preview = preview;
 			this.tags = tags;
 			this.info = info;
 		}
@@ -555,22 +561,25 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 										}
 									}
 								}
+								if((sd.getPreview() == null || sd.getPreview().length() == 0) && preview != null) {
+									sd.setPreview(preview);
+								}
 								final String tag = tags.get(sd.getMd5());
 								qr.update(conn,
 										"INSERT OR REPLACE INTO song "
 												+ "(md5, sha256, title, subtitle, genre, artist, subartist, tag, path,"
-												+ "folder, stagefile, banner, backbmp, parent, level, difficulty, "
-												+ "maxbpm, minbpm, mode, judge, feature, content, "
+												+ "folder, stagefile, banner, backbmp, preview, parent, level, difficulty, "
+												+ "maxbpm, minbpm, length, mode, judge, feature, content, "
 												+ "date, favorite, notes, adddate)"
-												+ "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);",
+												+ "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);",
 										sd.getMd5(), sd.getSha256(), sd.getTitle(), sd.getSubtitle(), sd.getGenre(),
 										sd.getArtist(), sd.getSubartist(), tag != null ? tag : "",
 										f.startsWith(root) ? root.relativize(f).toString() : f.toString(),
 										SongUtils.crc32(f.getParent().toString(), bmsroot, root.toString()),
-										sd.getStagefile(), sd.getBanner(), sd.getBackbmp(),
+										sd.getStagefile(), sd.getBanner(), sd.getBackbmp(), sd.getPreview(),
 										SongUtils.crc32(f.getParent().getParent().toString(), bmsroot, root.toString()),
-										sd.getLevel(), sd.getDifficulty(), sd.getMaxbpm(), sd.getMinbpm(), sd.getMode(),
-										sd.getJudge(), sd.getFeature(), sd.getContent(),
+										sd.getLevel(), sd.getDifficulty(), sd.getMaxbpm(), sd.getMinbpm(), sd.getLength(),
+										sd.getMode(), sd.getJudge(), sd.getFeature(), sd.getContent(),
 										Files.getLastModifiedTime(f).toMillis() / 1000, 0, sd.getNotes(), updatetime);
 								if(info != null) {
 									info.update(model);

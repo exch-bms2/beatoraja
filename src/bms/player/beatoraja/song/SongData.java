@@ -57,11 +57,15 @@ public class SongData {
 	private int judge;
 	private int minbpm;
 	private int maxbpm;
+	private int length;
 	private int content;
 	private int notes;
 	private String stagefile = "";
 	private String backbmp = "";
 	private String preview = "";
+
+	private String folder;
+	private String parent;
 
 	private BMSModel model;
 	private TimeLine[] timelines;
@@ -106,6 +110,7 @@ public class SongData {
 		judge = model.getJudgerank();
 		minbpm = (int) model.getMinBPM();
 		maxbpm = (int) model.getMaxBPM();
+		length = model.getLastTime();
 		notes = model.getTotalNotes();
 
 		timelines = model.getAllTimeLines();
@@ -348,5 +353,29 @@ public class SongData {
 
 	public void setInformation(SongInformation info) {
 		this.info = info;
+	}
+	
+	public String getFolder() {
+		return folder;
+	}
+
+	public void setFolder(String folder) {
+		this.folder = folder;
+	}
+
+	public String getParent() {
+		return parent;
+	}
+
+	public void setParent(String parent) {
+		this.parent = parent;
+	}
+
+	public int getLength() {
+		return length;
+	}
+
+	public void setLength(int length) {
+		this.length = length;
 	}
 }
