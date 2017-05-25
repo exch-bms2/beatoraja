@@ -29,8 +29,6 @@ public class JudgeManager {
 	private int lntype;
 	private TimeLine[] timelines;
 
-	private final JudgeAlgorithm[] judgeAlgorithms = { new JudgeAlgorithmLR2(), new JudgeAlgorithm2DX(),
-			new JudgeAlgorithmLowestNote() };
 	/**
 	 * 判定アルゴリズム:LR2風
 	 */
@@ -116,14 +114,16 @@ public class JudgeManager {
 	private boolean pmsjudge = false;
 
 	private int pos = 0;
-	private int judgetype = 0;
 
 	private int prevtime;
 
 	private boolean autoplay = false;
 
+	private final JudgeAlgorithm algorithm;
+
 	public JudgeManager(BMSPlayer main) {
 		this.main = main;
+		algorithm = JudgeAlgorithm.values()[main.getMainController().getPlayerResource().getConfig().getJudgeAlgorithm()];
 	}
 
 	public void init(BMSModel model, PlayerResource resource) {
@@ -348,9 +348,9 @@ public class JudgeManager {
 				} else {
 					final int[][] judge = sc >= 0 ? sjudge : njudge;
 					// 対象ノーツの抽出
-					final Note tnote = judgeAlgorithms[judgetype].getNote(pos, timelines, ptime, judge,
+					final Note tnote = algorithm.getNote(pos, timelines, ptime, judge,
 							lane, pmsjudge);
-					final int j = judgeAlgorithms[judgetype].getJudge();
+					final int j = algorithm.getJudge();
 
 					if (tnote != null) {
 						// TODO この時点で空POOR処理を分岐させるべきか
@@ -659,7 +659,36 @@ public class JudgeManager {
  * 
  * @author exch
  */
-abstract class JudgeAlgorithm {
+enum JudgeAlgorithm {
+
+	/**
+	 * 判定アルゴリズム:LR2
+	 */
+	LR2 {
+		@Override
+		public boolean compare(Note t1, Note t2, long ptime, int[][] judgetable) {
+			return t2.getState() == 0 && t2.getSectiontime() <= ptime && t2.getSectiontime() >= ptime + judgetable[2][0];
+		}
+	},
+	/**
+	 * 判定アルゴリズム:2DX
+	 */
+	IIDX {
+		@Override
+		public boolean compare(Note t1, Note t2, long ptime, int[][] judgetable) {
+			return Math.abs(t1.getSectiontime() - ptime) < Math.abs(t2.getSectiontime() - ptime) && t2.getState() == 0;
+		}
+	},
+	/**
+	 * 判定アルゴリズム:最下ノーツ優先
+	 */
+	Lowest {
+		@Override
+		public boolean compare(Note t1, Note t2, long ptime, int[][] judgetable) {
+			return false;
+		}
+	}
+	;
 
 	private int judge;
 
@@ -675,18 +704,7 @@ abstract class JudgeAlgorithm {
 				final Note judgenote = timelines[i].getNote(lane);
 				if (judgenote != null && !(judgenote instanceof MineNote) && !(judgenote instanceof LongNote
 						&& ((LongNote) judgenote).getEndnote().getSection() == timelines[i].getSection())) {
-					if (note == null) {
-						if (!(pmsjudge && (judgenote.getState() != 0
-								|| (judgenote.getState() == 0 && judgenote.getTime() != 0 && dtime >= judgetable[2][1])))) {
-							note = judgenote;
-							if (judgenote.getState() != 0) {
-								judge = 5;
-							} else {
-								for (judge = 0; judge < judgetable.length && !(dtime >= judgetable[judge][0] && dtime <= judgetable[judge][1]); judge++) {
-								}
-							}
-						}
-					} else if (compare(note, judgenote, ptime) == judgenote) {
+					if (note == null || note.getState() != 0 || compare(note, judgenote, ptime, judgetable)) {
 						if (!(pmsjudge && (judgenote.getState() != 0
 								|| (judgenote.getState() == 0 && judgenote.getTime() != 0 && dtime >= judgetable[2][1])))) {
 							note = judgenote;
@@ -709,59 +727,5 @@ abstract class JudgeAlgorithm {
 		return judge;
 	}
 
-	public abstract Note compare(Note t1, Note t2, long ptime);
-}
-
-/**
- * 判定アルゴリズム:LR2
- * 
- * @author exch
- */
-class JudgeAlgorithmLR2 extends JudgeAlgorithm {
-
-	@Override
-	public Note compare(Note t1, Note t2, long ptime) {
-		if (t1.getState() != 0) {
-			return t2;
-		}
-		if (t1.getSectiontime() < t2.getSectiontime() && t2.getState() == 0 && t2.getSectiontime() <= ptime) {
-			return t2;
-		}
-		return t1;
-	}
-}
-
-/**
- * 判定アルゴリズム:2DX
- * 
- * @author exch
- */
-class JudgeAlgorithm2DX extends JudgeAlgorithm {
-
-	@Override
-	public Note compare(Note t1, Note t2, long ptime) {
-		if (t1.getState() != 0) {
-			return t2;
-		}
-		if (Math.abs(t1.getSectiontime() - ptime) < Math.abs(t2.getSectiontime() - ptime) && t2.getState() == 0) {
-			return t2;
-		}
-		return t1;
-	}
-}
-
-/**
- * 判定アルゴリズム:最下ノーツ優先
- * 
- * @author exch
- */
-class JudgeAlgorithmLowestNote extends JudgeAlgorithm {
-
-	@Override
-	public Note compare(Note t1, Note t2, long ptime) {
-		if (t1.getState() != 0) {
-			return t2;
-		}
-		return t1;
-	}
+	public abstract boolean compare(Note t1, Note t2, long ptime, int[][] judgetable);
 }
