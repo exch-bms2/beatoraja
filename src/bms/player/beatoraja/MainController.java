@@ -30,13 +30,15 @@ import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.*;
 import com.badlogic.gdx.utils.JsonWriter.OutputType;
 
-import static bms.player.beatoraja.Resolution.*;
-
+/**
+ * アプリケーションのルートクラス
+ * 
+ * @author exch
+ */
 public class MainController extends ApplicationAdapter {
 
 	public static final String VERSION = "beatoraja 0.4.1";
@@ -222,8 +224,13 @@ public class MainController extends ApplicationAdapter {
 		keyconfig = new KeyConfiguration(this);
 		resource = new PlayerResource(audio, config);
 		if (bmsfile != null) {
-			resource.setBMSFile(bmsfile, config, auto);
-			changeState(STATE_PLAYBMS);
+			if(resource.setBMSFile(bmsfile, config, auto)) {
+				changeState(STATE_PLAYBMS);				
+			} else {
+				// ダミーステートに移行してすぐexitする
+				changeState(STATE_CONFIG);
+				exit();
+			}
 		} else {
 			changeState(STATE_SELECTMUSIC);
 		}
@@ -359,8 +366,6 @@ public class MainController extends ApplicationAdapter {
 
 	@Override
 	public void dispose() {
-		// shape.dispose();
-		// sprite.dispose();
 		if (bmsplayer != null) {
 			bmsplayer.dispose();
 		}
