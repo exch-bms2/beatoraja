@@ -9,6 +9,8 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 
 /**
  * プレビュー再生管理用クラス
+ * 
+ * @author exch
  */
 public class PreviewMusicProcessor {
     /**
@@ -66,12 +68,10 @@ public class PreviewMusicProcessor {
                     }
                     if(!path.equals(playing)) {
                         stopPreview(true);
-                        if(path.length() > 0) {
+                        if(path != defaultMusic) {
                             audio.play(path, false);
                         } else {
-                            // TODO 選曲BGMは再開
-                            audio.play(defaultMusic, true);
-                            path = defaultMusic;
+                            audio.setVolume(defaultMusic, 1.0f);
                         }
                         playing = path;
                     }
@@ -91,8 +91,14 @@ public class PreviewMusicProcessor {
                     audio.stop(playing);
                     audio.dispose(playing);
                 } else if(pause) {
-                    // TODO 選曲BGMの場合は一時停止
-                    audio.stop(playing);
+                	for(int i = 10;i >= 0;i--) {
+                        audio.setVolume(playing, i * 0.1f);
+                        // TODO フェードアウトはAudioDriver側で実装したい
+                        try {
+							sleep(15);
+						} catch (InterruptedException e) {
+						}
+                	}
                 } else {
                     audio.stop(playing);
                 }
