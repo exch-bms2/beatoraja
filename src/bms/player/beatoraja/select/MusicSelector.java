@@ -71,7 +71,7 @@ public class MusicSelector extends MainState {
 
 	private PlayerData playerdata;
 
-	private String preview;
+	private PreviewMusicProcessor preview;
 
 	private BitmapFont titlefont;
 
@@ -84,7 +84,13 @@ public class MusicSelector extends MainState {
 
 	private SearchTextField search;
 
+	/**
+	 * 楽曲が選択されてからbmsを読み込むまでの時間(ms)
+	 */
 	private final int notesGraphDuration = 1000;
+	/**
+	 * 楽曲が選択されてからプレビュー曲を再生するまでの時間(ms)
+	 */
 	private final int previewDuration = 400;
 	private boolean showNoteGraph = false;
 
@@ -132,7 +138,10 @@ public class MusicSelector extends MainState {
 		final MainController main = getMainController();
 		playerdata = main.getPlayDataAccessor().readPlayerData();
 		scorecache.clear();
-		play(SOUND_BGM);
+
+        preview = new PreviewMusicProcessor(main.getAudioProcessor());
+        preview.setDefault(getSound(SOUND_BGM));
+        preview.start(null);
 
 		final BMSPlayerInputProcessor input = main.getInputProcessor();
 		PlayConfig pc = (config.getMusicselectinput() == 0 ? config.getMode7() : (config.getMusicselectinput() == 1 ? config.getMode9() : config.getMode14()));
@@ -260,16 +269,11 @@ public class MusicSelector extends MainState {
 			}
 		}
 		sprite.end();
-		// preview misic
-		if(getNowTime() > getTimer()[TIMER_SONGBAR_CHANGE] + previewDuration && (preview == null || preview.length() == 0 )&& play < 0) {
-			if(current instanceof SongBar) {
-				SongData song = main.getPlayerResource().getSongdata();
-				preview = song.getPreview();
-				if(preview != null && preview.length() > 0) {
-					preview = Paths.get(song.getPath()).getParent().resolve(preview).toString();
-					stop(SOUND_BGM);
-					getMainController().getAudioProcessor().play(preview, false);
-				}
+		// preview music
+		if(current instanceof SongBar) {
+			final SongData song = main.getPlayerResource().getSongdata();
+			if(song != preview.getSongData() && getNowTime() > getTimer()[TIMER_SONGBAR_CHANGE] + previewDuration && play < 0) {
+				this.preview.start(song);
 			}
 		}
 
@@ -291,12 +295,7 @@ public class MusicSelector extends MainState {
 			if (current instanceof SongBar) {
 				resource.clear();
 				if (resource.setBMSFile(Paths.get(((SongBar) current).getSongData().getPath()), config, play)) {
-					stop(SOUND_BGM);
-					if(preview != null && preview.length() > 0) {
-						getMainController().getAudioProcessor().stop(preview);
-						getMainController().getAudioProcessor().dispose(preview);
-						preview = null;
-					}
+				    preview.stop();
 					getMainController().changeState(MainController.STATE_DECIDE);
 				}
 			} else if (current instanceof GradeBar) {
@@ -528,12 +527,7 @@ public class MusicSelector extends MainState {
 				}
 			}
 		} else if (input.getNumberState()[6]) {
-			stop(SOUND_BGM);
-			if(preview != null && preview.length() > 0) {
-				getMainController().getAudioProcessor().stop(preview);
-				getMainController().getAudioProcessor().dispose(preview);
-				preview = null;
-			}
+		    preview.stop();
 			getMainController().changeState(MainController.STATE_CONFIG);
 		} else {
 			bar.input();
@@ -599,12 +593,7 @@ public class MusicSelector extends MainState {
 		// song bar moved
 		if (bar.getSelected() != current) {
 			getTimer()[TIMER_SONGBAR_CHANGE] = nowtime;
-			if(preview != null && preview.length() > 0) {
-				getMainController().getAudioProcessor().stop(preview);
-				getMainController().getAudioProcessor().dispose(preview);
-				play(SOUND_BGM);
-				preview = null;
-			}
+            preview.start(null);
 			showNoteGraph = false;
 		}
 		if(getTimer()[TIMER_SONGBAR_CHANGE] == Long.MIN_VALUE) {
@@ -710,12 +699,7 @@ public class MusicSelector extends MainState {
 						break;
 					}
 				}
-				stop(SOUND_BGM);
-				if(preview != null && preview.length() > 0) {
-					getMainController().getAudioProcessor().stop(preview);
-					getMainController().getAudioProcessor().dispose(preview);
-					preview = null;
-				}
+				preview.stop();
 				resource.setCoursetitle(((GradeBar) bar.getSelected()).getTitle());
 				resource.setBMSFile(files.get(0), config, autoplay);
 				getMainController().changeState(MainController.STATE_DECIDE);
