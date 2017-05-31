@@ -40,7 +40,7 @@ public class PlayerResource {
 
 	private int playDevice;
 
-	private IntArray constraint = new IntArray();
+	private List<CourseData.CourseDataConstraint> constraint = new ArrayList();
 
 	private BMSResource bmsresource;
 	/**
@@ -344,11 +344,11 @@ public class PlayerResource {
 		this.maxcombo = maxcombo;
 	}
 
-	public int[] getConstraint() {
-		return constraint.toArray();
+	public CourseData.CourseDataConstraint[] getConstraint() {
+		return constraint.toArray(new CourseData.CourseDataConstraint[constraint.size()]);
 	}
 
-	public void addConstraint(int constraint) {
+	public void addConstraint(CourseData.CourseDataConstraint constraint) {
 		this.constraint.add(constraint);
 	}
 

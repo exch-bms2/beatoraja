@@ -202,27 +202,27 @@ public class MusicSelector extends MainState {
 
 			float dw = (float) getSkin().getScaleX();
 			float dh = (float) getSkin().getScaleY();
-			for (int con : gb.getConstraint()) {
+			for (CourseData.CourseDataConstraint con : gb.getConstraint()) {
 				switch (con) {
-				case TableData.GRADE_NORMAL:
+                    case CLASS:
 					break;
-				case TableData.GRADE_MIRROR:
+                    case MIRROR:
 					titlefont.setColor(Color.CYAN);
 					titlefont.draw(sprite, "MIRROR OK", 150 * dw, 620 * dh);
 					break;
-				case TableData.GRADE_RANDOM:
+                    case RANDOM:
 					titlefont.setColor(Color.CORAL);
 					titlefont.draw(sprite, "RANDOM OK", 150 * dw, 620 * dh);
 					break;
-				case TableData.NO_HISPEED:
+                    case NO_SPEED:
 					titlefont.setColor(Color.RED);
 					titlefont.draw(sprite, "x1.0 HI SPEED", 300 * dw, 620 * dh);
 					break;
-				case TableData.NO_GOOD:
+				    case NO_GOOD:
 					titlefont.setColor(Color.PURPLE);
 					titlefont.draw(sprite, "NO GOOD", 450 * dw, 620 * dh);
 					break;
-				case TableData.NO_GREAT:
+				    case NO_GREAT:
 					titlefont.setColor(Color.PURPLE);
 					titlefont.draw(sprite, "NO GREAT", 450 * dw, 620 * dh);
 					break;
@@ -657,16 +657,16 @@ public class MusicSelector extends MainState {
 				files.add(Paths.get(song.getPath()));
 			}
 			if (resource.setCourseBMSFiles(files.toArray(new Path[files.size()]))) {
-				for (int constraint : ((GradeBar) bar.getSelected()).getConstraint()) {
+				for (CourseData.CourseDataConstraint constraint : ((GradeBar) bar.getSelected()).getConstraint()) {
 					switch (constraint) {
-					case TableData.GRADE_NORMAL:
+                        case CLASS:
 						if (autoplay < 2) {
 							config.setRandom(0);
 							config.setRandom2(0);
 							config.setDoubleoption(0);
 						}
 						break;
-					case TableData.GRADE_MIRROR:
+                        case MIRROR:
 						if (autoplay < 2) {
 							if (config.getRandom() == 1) {
 								config.setRandom2(1);
@@ -678,7 +678,7 @@ public class MusicSelector extends MainState {
 							}
 						}
 						break;
-					case TableData.GRADE_RANDOM:
+                        case RANDOM:
 						if (autoplay < 2) {
 							if (config.getRandom() > 5) {
 								config.setRandom(0);
@@ -688,14 +688,14 @@ public class MusicSelector extends MainState {
 							}
 						}
 						break;
-					case TableData.NO_HISPEED:
-						resource.addConstraint(TableData.NO_HISPEED);
+                        case NO_SPEED:
+						resource.addConstraint(constraint);
 						break;
-					case TableData.NO_GOOD:
-						resource.addConstraint(TableData.NO_GOOD);
+                        case NO_GOOD:
+						resource.addConstraint(constraint);
 						break;
-					case TableData.NO_GREAT:
-						resource.addConstraint(TableData.NO_GREAT);
+					    case NO_GREAT:
+						resource.addConstraint(constraint);
 						break;
 					}
 				}

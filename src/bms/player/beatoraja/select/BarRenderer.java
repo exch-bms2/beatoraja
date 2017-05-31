@@ -12,6 +12,7 @@ import com.badlogic.gdx.math.Rectangle;
 
 import bms.model.Mode;
 import bms.player.beatoraja.*;
+import bms.player.beatoraja.CourseData.TrophyData;
 import bms.player.beatoraja.song.SongData;
 
 /**
@@ -265,7 +266,7 @@ public class BarRenderer {
 						}
 					}
 					// trophy
-					TableData.TrophyData trophy = gb.getTrophy();
+					TrophyData trophy = gb.getTrophy();
 					if (trophy != null) {
 						for (int j = 0; j < TROPHY.length; j++) {
 							if (TROPHY[j].equals(trophy.getName()) && baro.getTrophy()[j] != null) {
@@ -551,16 +552,12 @@ public class BarRenderer {
 							hash[j] = gb.getSongDatas()[j].getSha256();
 							ln |= gb.getSongDatas()[j].hasLongNote();
 						}
-						gb.setScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 0,
-								gb.getConstraint()));
-						gb.setMirrorScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 1,
-								gb.getConstraint()));
-						gb.setRandomScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 2,
-								gb.getConstraint()));
+						gb.setScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 0, gb.getConstraint()));
+						gb.setMirrorScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 1, gb.getConstraint()));
+						gb.setRandomScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 2, gb.getConstraint()));
 						boolean[] replay = new boolean[MusicSelector.REPLAY];
 						for (int i = 0; i < MusicSelector.REPLAY; i++) {
-							replay[i] = main.getPlayDataAccessor().existsReplayData(hash, ln, config.getLnmode(), i,
-									gb.getConstraint());
+							replay[i] = main.getPlayDataAccessor().existsReplayData(hash, ln, config.getLnmode(), i, gb.getConstraint());
 						}
 						gb.setExistsReplayData(replay);
 					}

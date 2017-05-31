@@ -12,8 +12,6 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import bms.player.beatoraja.TableData.CourseData;
-import bms.player.beatoraja.TableData.TrophyData;
 import bms.table.Course;
 import bms.table.DifficultyTable;
 import bms.table.DifficultyTableElement;
@@ -22,6 +20,8 @@ import bms.table.Course.Trophy;
 
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter.OutputType;
+
+import bms.player.beatoraja.CourseData.TrophyData;
 
 /**
  * 難易度表データアクセス用クラス
@@ -32,9 +32,6 @@ public class TableDataAccessor {
 	
 	private String tabledir = "table";
 
-	private static final String[] CONSTRAINT = { "null", "grade", "grade_mirror", "grade_random", "no_speed", "no_good",
-			"no_great" };
-	
 	public TableDataAccessor() {
 		
 	}
@@ -60,18 +57,21 @@ public class TableDataAccessor {
 						TableData td = new TableData();
 						td.setUrl(url);
 						td.setName(dt.getName());
-						td.setLevel(dt.getLevelDescription());
-						HashMap<String, String[]> levels = new HashMap<String, String[]>();
-						for (String lv : dt.getLevelDescription()) {
+						String[] levels = dt.getLevelDescription();
+						List<TableData.TableDataELement> tdes = new ArrayList<>(levels.length);
+						for (String lv : levels) {
+							TableData.TableDataELement tde = new TableData.TableDataELement();
+							tde.setLevel(lv);
 							List<String> hashes = new ArrayList<String>();
 							for (DifficultyTableElement dte : dt.getElements()) {
 								if (lv.equals(dte.getDifficultyID())) {
 									hashes.add(dte.getSHA256() != null ? dte.getSHA256() : dte.getMD5());
 								}
 							}
-							levels.put(lv, hashes.toArray(new String[hashes.size()]));
+							tde.setHash(hashes.toArray(new String[hashes.size()]));
+							tdes.add(tde);
 						}
-						td.setHash(levels);
+						td.setFolder(tdes.toArray(new TableData.TableDataELement[tdes.size()]));
 
 						if (dt.getCourse() != null && dt.getCourse().length > 0) {
 							List<CourseData> gname = new ArrayList<CourseData>();
@@ -80,16 +80,16 @@ public class TableDataAccessor {
 									CourseData cd = new CourseData();
 									cd.setName(g.getName());
 									cd.setHash(g.getHash());
-									int[] con = new int[g.getConstraint().length];
-									for (int i = 0; i < con.length; i++) {
-										for (int index = 0; index < CONSTRAINT.length; index++) {
-											if (CONSTRAINT[index].equals(g.getConstraint()[i])) {
-												con[i] = index;
+									List<CourseData.CourseDataConstraint> l = new ArrayList<>();
+									for(int i = 0;i < g.getConstraint().length;i++) {
+										for (CourseData.CourseDataConstraint constraint : CourseData.CourseDataConstraint.values()) {
+											if (constraint.name.equals(g.getConstraint()[i])) {
+												l.add(constraint);
 												break;
 											}
 										}
 									}
-									cd.setConstraint(con);
+									cd.setConstraint(l.toArray(new CourseData.CourseDataConstraint[l.size()]));
 									if (g.getTrophy() != null) {
 										List<TrophyData> tr = new ArrayList<TrophyData>();
 										for (Trophy trophy : g.getTrophy()) {
@@ -138,7 +138,8 @@ public class TableDataAccessor {
 	public void write(TableData td) {
 		try {
 			Json json = new Json();
-			json.setElementType(TableData.class, "hash", HashMap.class);
+			json.setElementType(TableData.class, "folder", ArrayList.class);
+			json.setElementType(TableData.TableDataELement.class, "hash", ArrayList.class);
 			json.setElementType(TableData.class, "course", ArrayList.class);
 			json.setElementType(CourseData.class, "trophy", ArrayList.class);
 			json.setOutputType(OutputType.json);
@@ -161,20 +162,19 @@ public class TableDataAccessor {
 		List<TableData> result = new ArrayList<TableData>();
 		try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get(tabledir))) {
 			for (Path p : paths) {
-				if (p.toString().endsWith(".json")) {
-					// TODO この分岐は後で削除
-					Json json = new Json();
-					TableData td = json.fromJson(TableData.class, new FileReader(p.toFile()));
-					result.add(td);
-				} else if (p.toString().endsWith(".bmt")) {
-					Json json = new Json();
-					TableData td = json.fromJson(TableData.class,
-							new BufferedInputStream(new GZIPInputStream(Files.newInputStream(p))));
-					result.add(td);
+				if (p.toString().endsWith(".bmt")) {
+					try {
+						Json json = new Json();
+						TableData td = json.fromJson(TableData.class,
+								new BufferedInputStream(new GZIPInputStream(Files.newInputStream(p))));
+						result.add(td);
+					} catch(Throwable e) {
+
+					}
 				}
 			}
 		} catch (IOException e) {
-
+			e.printStackTrace();
 		}
 		return result.toArray(new TableData[result.size()]);
 	}
@@ -189,18 +189,16 @@ public class TableDataAccessor {
 		TableData td = null;
 		try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get(tabledir))) {
 			for (Path p : paths) {
-				if (p.getFileName().toString().equals(name + ".json")) {
-					// TODO この分岐は後で削除
-					Json json = new Json();
-					td = json.fromJson(TableData.class, new FileReader(p.toFile()));
-					break;
-				} else if (p.getFileName().toString().equals(name + ".bmt")) {
-					Json json = new Json();
-					td = json.fromJson(TableData.class,
-							new BufferedInputStream(new GZIPInputStream(Files.newInputStream(p))));
-					break;
-				}
+				if (p.getFileName().toString().equals(name + ".bmt")) {
+					try {
+						Json json = new Json();
+						td = json.fromJson(TableData.class,
+								new BufferedInputStream(new GZIPInputStream(Files.newInputStream(p))));
+						break;
+					} catch(Throwable e) {
 
+					}
+				}
 			}
 		} catch (IOException e) {
 

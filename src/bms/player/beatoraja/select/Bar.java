@@ -1,7 +1,7 @@
 package bms.player.beatoraja.select;
 
 import bms.player.beatoraja.*;
-import bms.player.beatoraja.TableData.CourseData;
+import bms.player.beatoraja.CourseData.TrophyData;
 import bms.player.beatoraja.song.FolderData;
 import bms.player.beatoraja.song.*;
 
@@ -93,11 +93,11 @@ class GradeBar extends SelectableBar {
     private SongData[] songs;
     private String name;
 
-    private TableData.CourseData course;
+    private CourseData course;
     private IRScoreData mscore;
     private IRScoreData rscore;
 
-    public GradeBar(String name, SongData[] songs, TableData.CourseData course) {
+    public GradeBar(String name, SongData[] songs, CourseData course) {
         this.songs = songs;
         this.name = name;
         this.course = course;
@@ -137,19 +137,19 @@ class GradeBar extends SelectableBar {
         this.rscore = score;
     }
 
-    public int[] getConstraint() {
+    public CourseData.CourseDataConstraint[] getConstraint() {
         if (course.getConstraint() != null) {
             return course.getConstraint();
         }
-        return new int[0];
+        return new CourseData.CourseDataConstraint[0];
     }
 
-    public TableData.TrophyData[] getAllTrophy() {
+    public TrophyData[] getAllTrophy() {
         return course.getTrophy();
     }
 
-    public TableData.TrophyData getTrophy() {
-        for (TableData.TrophyData trophy : course.getTrophy()) {
+    public TrophyData getTrophy() {
+        for (TrophyData trophy : course.getTrophy()) {
             if (qualified(this.getScore(), trophy)) {
                 return trophy;
             }
@@ -163,7 +163,7 @@ class GradeBar extends SelectableBar {
         return null;
     }
 
-    private boolean qualified(IRScoreData score, TableData.TrophyData trophy) {
+    private boolean qualified(IRScoreData score, TrophyData trophy) {
         return score != null && score.getNotes() != 0
                 && trophy.getMissrate() >= score.getMinbp() * 100.0 / score.getNotes()
                 && trophy.getScorerate() <= score.getExscore() * 100.0 / (score.getNotes() * 2);
@@ -368,8 +368,8 @@ class TableBar extends DirectoryBar {
 
     	final long t = System.currentTimeMillis();
 		List<TableLevelBar> levels = new ArrayList<TableLevelBar>();
-		for (String lv : td.getLevel()) {
-			levels.add(new TableLevelBar(selector, lv, td.getHash().get(lv)));
+		for (TableData.TableDataELement lv : td.getFolder()) {
+			levels.add(new TableLevelBar(selector, lv.getLevel(), lv.getHash()));
 		}
 
 		this.levels = levels.toArray(new TableLevelBar[levels.size()]);

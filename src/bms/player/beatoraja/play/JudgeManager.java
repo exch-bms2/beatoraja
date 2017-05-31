@@ -4,13 +4,10 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
 
 import java.util.Arrays;
 
-import bms.player.beatoraja.IRScoreData;
+import bms.player.beatoraja.*;
 import com.badlogic.gdx.utils.FloatArray;
 
 import bms.model.*;
-import bms.player.beatoraja.Config;
-import bms.player.beatoraja.PlayerResource;
-import bms.player.beatoraja.TableData;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 
 /**
@@ -181,10 +178,10 @@ public class JudgeManager {
 
 		final int judgerank = resource.getConfig().isExpandjudge() ? model.getJudgerank() * 4 : model.getJudgerank();
 		int constraint = 2;
-		for (int mode : resource.getConstraint()) {
-			if (mode == TableData.NO_GREAT) {
+		for (CourseData.CourseDataConstraint mode : resource.getConstraint()) {
+			if (mode == CourseData.CourseDataConstraint.NO_GREAT) {
 				constraint = 0;
-			} else if (mode == TableData.NO_GOOD) {
+			} else if (mode == CourseData.CourseDataConstraint.NO_GOOD) {
 				constraint = 1;
 			}
 		}

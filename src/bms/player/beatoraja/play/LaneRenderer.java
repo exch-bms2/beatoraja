@@ -20,6 +20,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Rectangle;
 
+import static bms.player.beatoraja.CourseData.CourseDataConstraint.*;
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
 /**
@@ -107,8 +108,8 @@ public class LaneRenderer {
 		hispeed = playconfig.getHispeed();
 		init(model);
 
-		for (int i : main.getMainController().getPlayerResource().getConstraint()) {
-			if (i == TableData.NO_HISPEED) {
+		for (CourseData.CourseDataConstraint i : main.getMainController().getPlayerResource().getConstraint()) {
+			if (i == NO_SPEED) {
 				hispeed = 1.0f;
 				lanecover = 0;
 				lift = 0;
