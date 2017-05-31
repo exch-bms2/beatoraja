@@ -176,19 +176,20 @@ public class PlayerResource {
 			}
 			int totalnotes = model.getTotalNotes();
 			model.setTotal(model.getTotal() / 100.0 * 7.605 * totalnotes / (0.01 * totalnotes + 6.5));
+			// SongData上でDBから読んだpreviewをpreview未定義BMSModelで上書きしなくなったためいらなくなるはず
 			//PREVIEW未定義の場合
-			if(model.getPreview() == null || model.getPreview().length() == 0){
-				try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get(model.getPath()).getParent())) {
-					for (Path p : paths) {
-						String name = p.getFileName().toString().toLowerCase();
-						if(name.startsWith("preview") && (name.endsWith(".wav") || name.endsWith(".ogg") || name.endsWith(".mp3"))) {
-							model.setPreview(p.getFileName().toString());
-						}
-					}
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
+//			if(model.getPreview() == null || model.getPreview().length() == 0){
+//				try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get(model.getPath()).getParent())) {
+//					for (Path p : paths) {
+//						String name = p.getFileName().toString().toLowerCase();
+//						if(name.startsWith("preview") && (name.endsWith(".wav") || name.endsWith(".ogg") || name.endsWith(".mp3"))) {
+//							model.setPreview(p.getFileName().toString());
+//						}
+//					}
+//				} catch (IOException e) {
+//					e.printStackTrace();
+//				}
+//			}
 		} else {
 			BMSDecoder decoder = new BMSDecoder(lnmode);
 			model = decoder.decode(f.toFile());
@@ -208,19 +209,20 @@ public class PlayerResource {
 				int totalnotes = model.getTotalNotes();
 				model.setTotal(7.605 * totalnotes / (0.01 * totalnotes + 6.5));
 			}
+			// SongData上でDBから読んだpreviewをpreview未定義BMSModelで上書きしなくなったためいらなくなるはず
 			//PREVIEW未定義の場合
-			if(model.getPreview() == null || model.getPreview().length() == 0){
-				try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get(model.getPath()).getParent())) {
-					for (Path p : paths) {
-						String name = p.getFileName().toString().toLowerCase();
-						if(name.startsWith("preview") && (name.endsWith(".wav") || name.endsWith(".ogg") || name.endsWith(".mp3"))) {
-							model.setPreview(p.getFileName().toString());
-						}
-					}
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
+//			if(model.getPreview() == null || model.getPreview().length() == 0){
+//				try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get(model.getPath()).getParent())) {
+//					for (Path p : paths) {
+//						String name = p.getFileName().toString().toLowerCase();
+//						if(name.startsWith("preview") && (name.endsWith(".wav") || name.endsWith(".ogg") || name.endsWith(".mp3"))) {
+//							model.setPreview(p.getFileName().toString());
+//						}
+//					}
+//				} catch (IOException e) {
+//					e.printStackTrace();
+//				}
+//			}
 		}
 
 		return model;
