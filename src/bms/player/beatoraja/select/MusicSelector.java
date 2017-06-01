@@ -84,6 +84,8 @@ public class MusicSelector extends MainState {
 
 	private SearchTextField search;
 
+	private Thread updateSong;
+
 	/**
 	 * 楽曲が選択されてからbmsを読み込むまでの時間(ms)
 	 */
@@ -602,8 +604,14 @@ public class MusicSelector extends MainState {
 		// update folder
 		if (input.getFunctionstate()[1] && input.getFunctiontime()[1] != 0) {
 			input.getFunctiontime()[1] = 0;
-			bar.updateFolder();
+			if(updateSong == null || !updateSong.isAlive()) {
+				updateSong = new SongUpdateThread(current);
+				updateSong.start();
+			} else {
+				Logger.getGlobal().warning("楽曲更新中のため、更新要求は取り消されました");
+			}
 		}
+		// open explorer with selected song
 		if (input.getFunctionstate()[2] && input.getFunctiontime()[2] != 0) {
 			input.getFunctiontime()[2] = 0;
 			try {
@@ -1131,5 +1139,34 @@ public class MusicSelector extends MainState {
 
 	public BarRenderer getBarRender() {
 		return bar;
+	}
+
+	class SongUpdateThread extends Thread {
+
+		private final Bar selected;
+
+		public SongUpdateThread(Bar bar) {
+			selected = bar;
+		}
+
+		public void run() {
+			if (selected == null) {
+				getSongDatabase().updateSongDatas(null, false);
+			} else if (selected instanceof FolderBar) {
+				FolderBar fb = (FolderBar) selected;
+				getSongDatabase().updateSongDatas(fb.getFolderData().getPath(), false);
+			} else if (selected instanceof TableBar) {
+				TableBar tb = (TableBar) selected;
+				if (tb.getUrl() != null && tb.getUrl().length() > 0) {
+					TableDataAccessor tda = new TableDataAccessor();
+					String[] url = new String[] { tb.getUrl() };
+					tda.updateTableData(url);
+					TableData td = tda.read(tb.getTitle());
+					if (td != null) {
+						tb.setTableData(td);
+					}
+				}
+			}
+		}
 	}
 }
