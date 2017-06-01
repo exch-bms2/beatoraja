@@ -63,7 +63,7 @@ public class SongInformation {
 			for (int i = 0; i < model.getMode().key; i++) {
 				Note n = tl.getNote(i);
 				if (n != null && !(model.getLntype() == BMSModel.LNTYPE_LONGNOTE && n instanceof LongNote
-						&& ((LongNote) n).getEndnote().getSection() == tl.getSection())) {
+						&& ((LongNote) n).isEnd())) {
 					if (n instanceof NormalNote) {
 						data[tl.getTime() / 1000][model.getMode().isScratchKey(i) ? 1 : 3]++;
 					}
