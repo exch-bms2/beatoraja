@@ -570,7 +570,7 @@ public class PlayDataAccessor {
 		StringBuilder sb = new StringBuilder();
 		for (CourseData.CourseDataConstraint c : constraint) {
 			if (c != CLASS && c != MIRROR && c != RANDOM) {
-				sb.append(String.format("%02d", c));
+				sb.append(String.format("%02d", c.id));
 			}
 		}
 		return "replay" + File.separatorChar + (ln ? replay[lnmode] : "") + hash
