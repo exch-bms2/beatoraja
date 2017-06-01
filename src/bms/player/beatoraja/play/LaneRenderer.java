@@ -20,6 +20,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Rectangle;
 
+import static bms.player.beatoraja.CourseData.CourseDataConstraint.*;
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
 /**
@@ -72,7 +73,7 @@ public class LaneRenderer {
 
 	private double basebpm;
 	private double nowbpm;
-	
+
 	private TextureRegion[] noteimage;
 	private TextureRegion[][] longnote;
 	private TextureRegion[] mnoteimage;
@@ -107,14 +108,14 @@ public class LaneRenderer {
 		hispeed = playconfig.getHispeed();
 		init(model);
 
-		for (int i : main.getMainController().getPlayerResource().getConstraint()) {
-			if (i == TableData.NO_HISPEED) {
+		for (CourseData.CourseDataConstraint i : main.getMainController().getPlayerResource().getConstraint()) {
+			if (i == NO_SPEED) {
 				hispeed = 1.0f;
 				lanecover = 0;
 				lift = 0;
 			}
 		}
-		
+
 		noteimage = new TextureRegion[model.getMode().key];
 		longnote = new TextureRegion[model.getMode().key][10];
 		mnoteimage = new TextureRegion[model.getMode().key];
@@ -241,9 +242,9 @@ public class LaneRenderer {
 			}
 			laneregion[i] = lanes[i].getDestination(time, main);
 		}
-		
-		time = (main.getTimer()[TIMER_PLAY] != Long.MIN_VALUE ? (time - main.getTimer()[TIMER_PLAY])
-				: 0) + config.getJudgetiming();
+
+		time = (main.getTimer()[TIMER_PLAY] != Long.MIN_VALUE ? (time - main.getTimer()[TIMER_PLAY]) : 0)
+				+ config.getJudgetiming();
 		if (main.getState() == BMSPlayer.STATE_PRACTICE) {
 			time = main.getPracticeConfiguration().getPracticeProperty().starttime;
 			pos = 0;
@@ -331,10 +332,8 @@ public class LaneRenderer {
 							shape.end();
 							sprite.begin();
 							font.setColor(Color.valueOf("40c0c0"));
-							font.draw(
-									sprite,
-									String.format("%2d:%02d.%1d", tl.getTime() / 60000, (tl.getTime() / 1000) % 60,
-											(tl.getTime() / 100) % 10), r.x + 4, y + 20);
+							font.draw(sprite, String.format("%2d:%02d.%1d", tl.getTime() / 60000,
+									(tl.getTime() / 1000) % 60, (tl.getTime() / 100) % 10), r.x + 4, y + 20);
 						}
 					}
 				}
@@ -380,9 +379,10 @@ public class LaneRenderer {
 				boolean b = true;
 				for (int lane = 0; lane < laneregion.length; lane++) {
 					final Note note = tl.getNote(lane);
-					if (note != null
-							&& ((note instanceof LongNote && ((LongNote) note).getEndnote().getSectiontime() >= time) || (config
-									.isShowpastnote() && note instanceof NormalNote && note.getState() == 0))) {
+					if (note != null && ((note instanceof LongNote
+							&& (((LongNote) note).isEnd() ? (LongNote) note : ((LongNote) note).getPair())
+									.getSectiontime() >= time)
+							|| (config.isShowpastnote() && note instanceof NormalNote && note.getState() == 0))) {
 						b = false;
 						break;
 					}
@@ -420,13 +420,13 @@ public class LaneRenderer {
 					if (note instanceof NormalNote) {
 						// draw normal note
 						if (tl.getTime() >= time || (config.isShowpastnote() && note.getState() == 0)) {
-							final TextureRegion s = config.isMarkprocessednote() && note.getState() != 0 ? pnoteimage[lane]
-									: noteimage[lane];
+							final TextureRegion s = config.isMarkprocessednote() && note.getState() != 0
+									? pnoteimage[lane] : noteimage[lane];
 							sprite.draw(s, laneregion[lane].x, y, laneregion[lane].width, scale);
 						}
 					} else if (note instanceof LongNote) {
 						final LongNote ln = (LongNote) note;
-						if (ln.getSection() == tl.getSection() && ln.getEndnote().getSectiontime() >= time) {
+						if (!ln.isEnd() && ln.getPair().getSectiontime() >= time) {
 							// if (((LongNote) note).getEnd() == null) {
 							// Logger.getGlobal().warning(
 							// "LN終端がなく、モデルが正常に表示されません。LN開始時間:"
@@ -436,7 +436,8 @@ public class LaneRenderer {
 							// } else {
 							float dy = 0;
 							TimeLine prevtl = tl;
-							for (int j = i + 1; j < timelines.length && prevtl.getSection() != ln.getEndnote().getSection(); j++) {
+							for (int j = i + 1; j < timelines.length
+									&& prevtl.getSection() != ln.getPair().getSection(); j++) {
 								final TimeLine nowtl = timelines[j];
 								if (nowtl.getTime() >= time) {
 									if (prevtl.getTime() + prevtl.getStop() > time) {
@@ -449,8 +450,8 @@ public class LaneRenderer {
 								prevtl = nowtl;
 							}
 							if (dy > 0) {
-								this.drawLongNote(laneregion[lane].x, y + dy, laneregion[lane].width, y < laneregion[lane].y ? y - laneregion[lane].y : dy,
-										scale, lane, ln);
+								this.drawLongNote(laneregion[lane].x, y + dy, laneregion[lane].width,
+										y < laneregion[lane].y ? y - laneregion[lane].y : dy, scale, lane, ln);
 							}
 							// System.out.println(dy);
 						}
@@ -485,23 +486,25 @@ public class LaneRenderer {
 				|| ln.getType() == LongNote.TYPE_HELLCHARGENOTE) {
 			// HCN
 			final JudgeManager judge = main.getJudgeManager();
-			sprite.draw(longnote[judge.getProcessingLongNotes()[lane] == ln ? 6 : 
-				(judge.getPassingLongNotes()[lane] == ln && ln.getState() != 0 ? (judge.getHellChargeJudges()[lane] ? 8 : 9) : 7)], 
-					x, y - height + scale, width,height - scale);
+			sprite.draw(
+					longnote[judge.getProcessingLongNotes()[lane] == ln.getPair() ? 6
+							: (judge.getPassingLongNotes()[lane] == ln && ln.getState() != 0
+									? (judge.getHellChargeJudges()[lane] ? 8 : 9) : 7)],
+					x, y - height + scale, width, height - scale);
 			sprite.draw(longnote[4], x, y, width, scale);
 			sprite.draw(longnote[5], x, y - height, width, scale);
 		} else if ((model.getLntype() == BMSModel.LNTYPE_CHARGENOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
 				|| ln.getType() == LongNote.TYPE_CHARGENOTE) {
 			// CN
-			sprite.draw(longnote[main.getJudgeManager().getProcessingLongNotes()[lane] == ln ? 2 : 3], x, y - height + scale, width,
-					height - scale);
+			sprite.draw(longnote[main.getJudgeManager().getProcessingLongNotes()[lane] == ln.getPair() ? 2 : 3], x,
+					y - height + scale, width, height - scale);
 			sprite.draw(longnote[0], x, y, width, scale);
 			sprite.draw(longnote[1], x, y - height, width, scale);
 		} else if ((model.getLntype() == BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
 				|| ln.getType() == LongNote.TYPE_LONGNOTE) {
 			// LN
-			sprite.draw(longnote[main.getJudgeManager().getProcessingLongNotes()[lane] == ln ? 2 : 3], x, y - height + scale, width,
-					height - scale);
+			sprite.draw(longnote[main.getJudgeManager().getProcessingLongNotes()[lane] == ln.getPair() ? 2 : 3], x,
+					y - height + scale, width, height - scale);
 			sprite.draw(longnote[1], x, y - height, width, scale);
 		}
 	}

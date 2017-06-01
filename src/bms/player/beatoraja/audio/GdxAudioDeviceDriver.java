@@ -2,9 +2,6 @@ package bms.player.beatoraja.audio;
 
 import java.nio.file.Path;
 
-import bms.model.BMSModel;
-import bms.model.Note;
-
 public class GdxAudioDeviceDriver extends AbstractAudioDriver {
 
 	@Override
@@ -26,7 +23,19 @@ public class GdxAudioDeviceDriver extends AbstractAudioDriver {
 	}
 
 	@Override
-	protected void play(Object id, float volume, boolean loop) {
+	protected void play(Object id, float volume) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void play(AudioElement id, float volume, boolean loop) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void setVolume(AudioElement id, float volume) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -36,5 +45,4 @@ public class GdxAudioDeviceDriver extends AbstractAudioDriver {
 		// TODO Auto-generated method stub
 		
 	}
-
 }

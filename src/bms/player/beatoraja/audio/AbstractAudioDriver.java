@@ -23,7 +23,7 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	/**
 	 * 効果音マップ
 	 */
-	private Map<String, T> soundmap = new HashMap<String, T>();
+	private Map<String, AudioElement<T>> soundmap = new HashMap<String, AudioElement<T>>();
 	/**
 	 * キー音マップ(音切りなし)
 	 */
@@ -80,7 +80,10 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	 * @param loop
 	 *            ループ再生するかどうか
 	 */
-	protected abstract void play(T id, float volume, boolean loop);
+	protected abstract void play(T id, float volume);
+
+	protected abstract void play(AudioElement<T> id, float volume, boolean loop);
+	protected abstract void setVolume(AudioElement<T> id, float volume);
 
 	/**
 	 * 音源データが再生されていれば停止する
@@ -98,10 +101,10 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 		if (p == null || p.length() == 0) {
 			return;
 		}
-		T sound = soundmap.get(p);
+		AudioElement<T> sound = soundmap.get(p);
 		if (!soundmap.containsKey(p)) {
 			try {
-				sound = getKeySound(Paths.get(p));
+				sound = new AudioElement(getKeySound(Paths.get(p)));
 				soundmap.put(p, sound);
 			} catch (GdxRuntimeException e) {
 				Logger.getGlobal().warning("音源読み込み失敗。" + e.getMessage());
@@ -113,13 +116,23 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 		}
 	}
 
+	public void setVolume(String p, float volume) {
+		if (p == null || p.length() == 0) {
+			return;
+		}
+		AudioElement<T> sound = soundmap.get(p);
+		if (sound != null) {
+			setVolume(sound, volume);
+		}
+	}
+	
 	public void stop(String p) {
 		if (p == null || p.length() == 0) {
 			return;
 		}
-		T sound = soundmap.get(p);
+		AudioElement<T> sound = soundmap.get(p);
 		if (sound != null) {
-			stop(sound);
+			stop(sound.audio);
 		}
 	}
 
@@ -127,10 +140,10 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 		if (p == null || p.length() == 0) {
 			return;
 		}
-		T sound = soundmap.get(p);
+		AudioElement<T> sound = soundmap.get(p);
 		if (sound != null) {
 			soundmap.remove(p);
-			disposeKeySound(sound);
+			disposeKeySound(sound.audio);
 		}
 	}
 
@@ -274,12 +287,12 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 				final T wav = (T) wavmap[id];
 				if (wav != null) {
 					stop(wav);
-					play(wav, volume, false);
+					play(wav, volume);
 				}
 			} else {
 				for (SliceWav<T> slice : slicesound[id]) {
 					if (slice.starttime == starttime && slice.duration == duration) {
-						play(slice.wav, volume, false);
+						play(slice.wav, volume);
 						// System.out.println("slice WAV play - ID:" + id +
 						// " start:" + starttime + " duration:" + duration);
 						break;
@@ -345,9 +358,9 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	 * リソースを開放する
 	 */
 	public void dispose() {
-		for (T sound : soundmap.values()) {
+		for (AudioElement<T> sound : soundmap.values()) {
 			if (sound != null) {
-				disposeKeySound(sound);
+				disposeKeySound(sound.audio);
 			}
 		}
 		soundmap.clear();
@@ -443,7 +456,16 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 			disposeKeySound(resource);
 		}
 	}
-
+	
+	static class AudioElement<T> {
+		public long id;
+		public final T audio;
+		
+		public AudioElement(T audio) {
+			this.audio = audio;
+		}		
+	}
+	
 	private static class AudioKey {
 
 		public final String path;

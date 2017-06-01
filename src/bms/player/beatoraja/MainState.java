@@ -522,6 +522,10 @@ public abstract class MainState {
 			}
 		}
 	}
+
+	public String getSound(int id) {
+		return soundmap.get(id);
+	}
 	
 	public void play(int id) {
 		final String path = soundmap.get(id);

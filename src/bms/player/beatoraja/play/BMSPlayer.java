@@ -19,6 +19,7 @@ import bms.player.beatoraja.song.SongData;
 
 import com.badlogic.gdx.utils.FloatArray;
 
+import static bms.player.beatoraja.CourseData.CourseDataConstraint.NO_SPEED;
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
 /**
@@ -267,8 +268,8 @@ public class BMSPlayer extends MainState {
 		input.setKeyassign(pc.getKeyassign());
 		input.setControllerConfig(pc.getController());
 		lanerender = new LaneRenderer(this, model);
-		for (int i : resource.getConstraint()) {
-			if (i == TableData.NO_HISPEED) {
+		for (CourseData.CourseDataConstraint i : resource.getConstraint()) {
+			if (i == NO_SPEED) {
 				control.setEnableControl(false);
 				break;
 			}
@@ -537,8 +538,8 @@ public class BMSPlayer extends MainState {
 
 	private void saveConfig() {
 		final PlayerResource resource = getMainController().getPlayerResource();
-		for (int c : resource.getConstraint()) {
-			if (c == TableData.NO_HISPEED) {
+		for (CourseData.CourseDataConstraint c : resource.getConstraint()) {
+			if (c == NO_SPEED) {
 				return;
 			}
 		}

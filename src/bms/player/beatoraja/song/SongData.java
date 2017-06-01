@@ -97,7 +97,9 @@ public class SongData {
 
 		setStagefile(model.getStagefile());
 		setBackbmp(model.getBackbmp());
-		setPreview(model.getPreview());
+        if(preview == null || preview.length() == 0) {
+            setPreview(model.getPreview());
+        }
 		try {
 			level = Integer.parseInt(model.getPlaylevel());
 		} catch(NumberFormatException e) {
