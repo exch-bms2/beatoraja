@@ -195,12 +195,12 @@ public class NoteShuffleModifier extends PatternModifier {
 					Note hn = hnotes[mod];
 					if (n instanceof LongNote) {
 						LongNote ln2 = (LongNote) n;
-						if (ln2.getSection() == tl.getSection()) {
-							tl.setNote(i, n);
-							ln[i] = mod;
-						} else {
+						if (ln2.isEnd()) {
 							tl.setNote(i, n);
 							ln[i] = -1;
+						} else {
+							tl.setNote(i, n);
+							ln[i] = mod;
 						}
 					} else {
 						tl.setNote(i, n);

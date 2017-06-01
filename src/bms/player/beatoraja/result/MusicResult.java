@@ -265,13 +265,9 @@ public class MusicResult extends MainState {
 			for (int i = 0; i < lanes; i++) {
 				Note n = tl.getNote(i);
 				if (n != null && !(resource.getBMSModel().getLntype() == BMSModel.LNTYPE_LONGNOTE
-						&& n instanceof LongNote && ((LongNote) n).getEndnote().getSection() == tl.getSection())) {
+						&& n instanceof LongNote && ((LongNote) n).isEnd())) {
 					int state = n.getState();
 					int time = n.getTime();
-					if (n instanceof LongNote && ((LongNote) n).getEndnote().getSection() == tl.getSection()) {
-						state = ((LongNote) n).getEndnote().getState();
-						time = ((LongNote) n).getEndnote().getTime();
-					}
 					if (state >= 1) {
 						count++;
 						avgduration += Math.abs(time);

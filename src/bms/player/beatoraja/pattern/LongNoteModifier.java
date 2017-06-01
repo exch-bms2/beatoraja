@@ -16,10 +16,10 @@ public class LongNoteModifier extends PatternModifier {
 			for(int lane = 0;lane < model.getMode().key;lane++) {
 				if(tl.getNote(lane) instanceof LongNote) {
 					LongNote ln = (LongNote) tl.getNote(lane);
-					if(ln.getSection() == tl.getSection()) {
-						tl.setNote(lane, new NormalNote(ln.getWav()));						
-					} else {
+					if(ln.isEnd()) {
 						tl.setNote(lane, null);
+					} else {
+						tl.setNote(lane, new NormalNote(ln.getWav()));						
 					}
 				}
 			}

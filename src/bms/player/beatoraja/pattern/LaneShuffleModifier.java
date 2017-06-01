@@ -133,12 +133,12 @@ public class LaneShuffleModifier extends PatternModifier {
 					final int mod = i < random.length ? random[i] : i;
 					if (clone[mod]) {
 						if (notes[mod] != null) {
-							if (notes[mod] instanceof LongNote
-									&& ((LongNote) notes[mod]).getEndnote().getSection() == tl.getSection()) {
+							if (notes[mod] instanceof LongNote && ((LongNote) notes[mod]).isEnd()) {
 								for(int j = index - 1;j >= 0;j--) {
-									if(notes[mod].getSection() == timelines[j].getSection()) {
+									if(((LongNote) notes[mod]).getPair().getSection() == timelines[j].getSection()) {
 										LongNote ln = (LongNote) timelines[j].getNote(i);
-										tl.setNote(i, ln);
+										tl.setNote(i, ln.getPair());
+										System.out.println(ln.toString() + " : " + ln.getPair().toString() + " == " + ((LongNote) notes[mod]).getPair().toString() + " : " + notes[mod].toString());
 										break;
 									}
 								}

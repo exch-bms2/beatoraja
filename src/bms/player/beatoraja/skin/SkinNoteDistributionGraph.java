@@ -127,7 +127,7 @@ public class SkinNoteDistributionGraph extends SkinObject {
 				for (int i = 0; i < model.getMode().key; i++) {
 					Note n = tl.getNote(i);
 					if (n != null && !(model.getLntype() == BMSModel.LNTYPE_LONGNOTE && n instanceof LongNote
-							&& ((LongNote) n).getEndnote().getSection() == tl.getSection())) {
+							&& ((LongNote) n).isEnd())) {
 						int st = n.getState();
 						int t = n.getTime();
 						switch (type) {
@@ -147,27 +147,12 @@ public class SkinNoteDistributionGraph extends SkinObject {
 							if (n instanceof MineNote) {
 								break;
 							}
-							if (n instanceof LongNote
-									&& ((LongNote) n).getEndnote().getSection() == tl.getSection()) {
-								st = ((LongNote) n).getEndnote().getState();
-								// if(state == 0) {
-								// System.out.println("終端未処理:"+tl.getTime());
-								// }
-							}
 							data[tl.getTime() / 1000][st]++;
 							count++;
 							break;
 						case TYPE_EARLYLATE:
 							if (n instanceof MineNote) {
 								break;
-							}
-							if (n instanceof LongNote
-									&& ((LongNote) n).getEndnote().getSection() == tl.getSection()) {
-								st = ((LongNote) n).getEndnote().getState();
-								t = ((LongNote) n).getEndnote().getTime();
-								// if(state == 0) {
-								// System.out.println("終端未処理:"+tl.getTime());
-								// }
 							}
 							if (st <= 1) {
 								data[tl.getTime() / 1000][st]++;
