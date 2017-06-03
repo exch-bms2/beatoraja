@@ -84,6 +84,7 @@ public class MusicSelector extends MainState {
 
 	private SearchTextField search;
 
+	private boolean songUpdated = false;
 	private Thread updateSong;
 
 	/**
@@ -115,9 +116,11 @@ public class MusicSelector extends MainState {
 	public static final int SOUND_FOLDERCLOSE = 3;
 	public static final int SOUND_CHANGEOPTION = 4;
 	
-	public MusicSelector(MainController main, Config config) {
+	public MusicSelector(MainController main, Config config, boolean songUpdated) {
 		super(main);
 		this.config = config;
+		this.songUpdated = songUpdated;
+
 		songdb = main.getSongDatabase();
 
 		scorecache = new ScoreDataCache(getMainController().getPlayDataAccessor());
@@ -182,6 +185,11 @@ public class MusicSelector extends MainState {
 		if (getStage() == null && ((MusicSelectSkin) getSkin()).getSearchTextRegion() != null) {
 			search = new SearchTextField(this, config.getResolution());
 			setStage(search);
+		}
+
+		if(!songUpdated && config.isUpdatesong()) {
+			updateSong = new SongUpdateThread(null);
+			updateSong.start();
 		}
 	}
 

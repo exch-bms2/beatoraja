@@ -160,6 +160,8 @@ public class PlayConfigurationView implements Initializable {
 
 	private MainLoader loader;
 
+	private boolean songUpdated = false;
+
 	private void initComboBox(ComboBox<Integer> combo, final String[] values) {
 		combo.setCellFactory(new Callback<ListView<Integer>, ListCell<Integer>>() {
 			public ListCell<Integer> call(ListView<Integer> param) {
@@ -525,7 +527,7 @@ public class PlayConfigurationView implements Initializable {
 	public void start() {
 		commit();
 		loader.hide();
-		MainLoader.play(null, 0, true);
+		MainLoader.play(null, 0, true, songUpdated);
 	}
 
     @FXML
@@ -553,6 +555,7 @@ public class PlayConfigurationView implements Initializable {
 			Logger.getGlobal().info("song.db更新開始");
 			songdb.updateSongDatas(null, updateAll);
 			Logger.getGlobal().info("song.db更新完了");
+			songUpdated = true;
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}

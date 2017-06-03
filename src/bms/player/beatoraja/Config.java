@@ -224,6 +224,8 @@ public class Config {
 
 	private int musicselectinput = 0;
 
+	private boolean updatesong = false;
+
 	private String irname = "";
 
 	private String userid = "";
@@ -689,6 +691,14 @@ public class Config {
 
 	public void setCacheSkinImage(boolean cacheSkinImage) {
 		this.cacheSkinImage = cacheSkinImage;
+	}
+
+	public boolean isUpdatesong() {
+		return updatesong;
+	}
+
+	public void setUpdatesong(boolean updatesong) {
+		this.updatesong = updatesong;
 	}
 
 	public static class SkinConfig {
