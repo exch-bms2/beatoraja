@@ -101,14 +101,14 @@
                               </HBox>
                                 <HBox prefHeight="45.0" prefWidth="723.0">
                                  <children>
-                            				<Label prefHeight="25.0" prefWidth="125.0" text="%KEY_VOLUME" />
-                  				    <Spinner fx:id="keyvolume" editable="true" prefWidth="150.0">
+                                    <Label prefHeight="25.0" prefWidth="125.0" text="%KEY_VOLUME" />
+                                    <Spinner fx:id="keyvolume" editable="true" prefWidth="150.0">
             <valueFactory>
               <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.01" initialValue="1.00" max="1.00" min="0.00" />
             </valueFactory>
           </Spinner>
-                            				<Label prefHeight="23.0" prefWidth="65.0" text="%BG_VOLUME" />
-                  				    <Spinner fx:id="bgvolume" editable="true" prefWidth="150.0">
+                                    <Label prefHeight="23.0" prefWidth="65.0" text="%BG_VOLUME" />
+                                    <Spinner fx:id="bgvolume" editable="true" prefWidth="150.0">
             <valueFactory>
               <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.01" initialValue="1.00" max="1.00" min="0.00" />
             </valueFactory>
