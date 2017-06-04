@@ -1,7 +1,7 @@
 package bms.player.beatoraja.play;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.logging.Logger;
 
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.play.SkinNote.SkinLane;
@@ -127,7 +127,19 @@ public class LaneRenderer {
 	public void init(BMSModel model) {
 		pos = 0;
 		this.model = model;
-		this.timelines = model.getAllTimeLines();
+		List<TimeLine> tls = new ArrayList<TimeLine>();
+		double cbpm = model.getBpm();
+		for(TimeLine tl : model.getAllTimeLines()) {
+			if(cbpm != tl.getBPM() || tl.getStop() > 0 || tl.getSectionLine()) {
+				tls.add(tl);
+			} else if(tl.existNote() || tl.existHiddenNote()){
+				tls.add(tl);
+			}
+			cbpm = tl.getBPM();			
+		}
+		this.timelines = tls.toArray(new TimeLine[tls.size()]);
+//		Logger.getGlobal().info("省略したTimeLine数:" + (model.getAllTimeLines().length - timelines.length) + " / " + model.getAllTimeLines().length);
+		
 		switch (config.getFixhispeed()) {
 		case Config.FIX_HISPEED_OFF:
 			break;
@@ -255,13 +267,7 @@ public class LaneRenderer {
 		final Rectangle[] playerr = skin.getLaneGroupRegion();
 		double bpm = model.getBpm();
 		double nbpm = bpm;
-		for (int i = (pos > 5 ? pos - 5 : 0); i < timelines.length; i++) {
-			if (timelines[i].getTime() > time) {
-				break;
-			}
-			if (timelines[i].getBPM() > 0) {
-				bpm = timelines[i].getBPM();
-			}
+		for (int i = (pos > 5 ? pos - 5 : 0); i < timelines.length && timelines[i].getTime() <= time; i++) {
 			nbpm = timelines[i].getBPM();
 		}
 		nowbpm = nbpm;
@@ -397,19 +403,16 @@ public class LaneRenderer {
 		for (int i = pos; i < timelines.length && y <= hu; i++) {
 			final TimeLine tl = timelines[i];
 			if (tl.getTime() >= time) {
-				if (nbpm > 0) {
-					if (i > 0) {
-						final TimeLine prevtl = timelines[i - 1];
-						if (prevtl.getTime() + prevtl.getStop() > time) {
-							y += (tl.getSection() - prevtl.getSection()) * rxhs;
-						} else {
-							y += (tl.getSection() - prevtl.getSection()) * (tl.getTime() - time)
-									/ (tl.getTime() - prevtl.getTime() - prevtl.getStop()) * rxhs;
-						}
+				if (i > 0) {
+					final TimeLine prevtl = timelines[i - 1];
+					if (prevtl.getTime() + prevtl.getStop() > time) {
+						y += (tl.getSection() - prevtl.getSection()) * rxhs;
 					} else {
-						y += tl.getSection() * (tl.getTime() - time) / tl.getTime() * rxhs;
+						y += (tl.getSection() - prevtl.getSection()) * (tl.getTime() - time)
+								/ (tl.getTime() - prevtl.getTime() - prevtl.getStop()) * rxhs;
 					}
-
+				} else {
+					y += tl.getSection() * (tl.getTime() - time) / tl.getTime() * rxhs;
 				}
 			}
 			// ノート描画
