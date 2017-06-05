@@ -1,16 +1,16 @@
 package bms.player.beatoraja.select;
 
+import java.nio.file.Paths;
+import java.util.Deque;
+import java.util.concurrent.ConcurrentLinkedDeque;
+
 import bms.player.beatoraja.Config;
 import bms.player.beatoraja.audio.AudioDriver;
 import bms.player.beatoraja.song.SongData;
 
-import java.nio.file.Paths;
-import java.util.*;
-import java.util.concurrent.ConcurrentLinkedDeque;
-
 /**
  * プレビュー再生管理用クラス
- * 
+ *
  * @author exch
  */
 public class PreviewMusicProcessor {
@@ -26,7 +26,7 @@ public class PreviewMusicProcessor {
     private SongData current;
 
     private final AudioDriver audio;
-    
+
     private final Config config;
 
     public PreviewMusicProcessor(AudioDriver audio, Config config) {
@@ -96,7 +96,8 @@ public class PreviewMusicProcessor {
                     audio.dispose(playing);
                 } else if(pause) {
                 	for(int i = 10;i >= 0;i--) {
-                        audio.setVolume(playing, i * 0.1f);
+                		float vol = i * 0.1f * config.getSystemvolume();
+                        audio.setVolume(playing, vol);
                         // TODO フェードアウトはAudioDriver側で実装したい
                         try {
 							sleep(15);
