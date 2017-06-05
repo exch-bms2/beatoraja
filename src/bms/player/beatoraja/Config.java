@@ -226,6 +226,8 @@ public class Config {
 
 	private int musicselectinput = 0;
 
+	private boolean updatesong = false;
+
 	private String irname = "";
 
 	private String userid = "";
@@ -699,6 +701,14 @@ public class Config {
 
 	public void setSystemvolume(float systemvolume) {
 		this.systemvolume = systemvolume;
+	}
+	
+	public boolean isUpdatesong() {
+		return updatesong;
+	}
+
+	public void setUpdatesong(boolean updatesong) {
+		this.updatesong = updatesong;
 	}
 
 	public static class SkinConfig {

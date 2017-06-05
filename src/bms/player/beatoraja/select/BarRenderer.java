@@ -476,25 +476,6 @@ public class BarRenderer {
 		return false;
 	}
 
-	public void updateFolder() {
-		final Bar selected = getSelected();
-		if (selected instanceof FolderBar) {
-			FolderBar fb = (FolderBar) selected;
-			select.getSongDatabase().updateSongDatas(fb.getFolderData().getPath(), false);
-		} else if (selected instanceof TableBar) {
-			TableBar tb = (TableBar) selected;
-			if (tb.getUrl() != null && tb.getUrl().length() > 0) {
-				TableDataAccessor tda = new TableDataAccessor();
-				String[] url = new String[] { tb.getUrl() };
-				tda.updateTableData(url);
-				TableData td = tda.read(tb.getTitle());
-				if (td != null) {
-					tb.setTableData(td);
-				}
-			}
-		}
-	}
-
 	public void dispose() {
 		banners.dispose();
 	}

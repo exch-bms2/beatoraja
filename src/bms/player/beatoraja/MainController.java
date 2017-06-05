@@ -61,6 +61,7 @@ public class MainController extends ApplicationAdapter {
 	private Config config;
 	private PlayerConfig player;
 	private int auto;
+	private boolean songUpdated;
 
 	private SongDatabaseAccessor songdb;
 
@@ -89,9 +90,10 @@ public class MainController extends ApplicationAdapter {
 
 	private long[] timer = new long[256];
 
-	public MainController(Path f, Config config, int auto) {
+	public MainController(Path f, Config config, int auto, boolean songUpdated) {
 		this.auto = auto;
 		this.config = config;
+		this.songUpdated = songUpdated;
 		this.player = config.getPlayers()[config.getPlayer()];
 		this.bmsfile = f;
 
@@ -217,7 +219,7 @@ public class MainController extends ApplicationAdapter {
 			break;
 		}
 
-		selector = new MusicSelector(this, config);
+		selector = new MusicSelector(this, config, songUpdated);
 		decide = new MusicDecide(this);
 		result = new MusicResult(this);
 		gresult = new GradeResult(this);
