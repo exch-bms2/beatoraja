@@ -1,17 +1,48 @@
 package bms.player.beatoraja;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.URL;
-import java.nio.file.*;
-import java.sql.*;
-import java.util.*;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
-import bms.player.beatoraja.skin.SkinLoader;
-import bms.player.beatoraja.skin.SkinType;
-import com.badlogic.gdx.Graphics;
+import javafx.application.Platform;
+import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.TextField;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
+import javafx.util.Callback;
+
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 
@@ -20,27 +51,21 @@ import bms.player.beatoraja.ir.IRConnection;
 import bms.player.beatoraja.skin.SkinHeader;
 import bms.player.beatoraja.skin.SkinHeader.CustomFile;
 import bms.player.beatoraja.skin.SkinHeader.CustomOption;
+import bms.player.beatoraja.skin.SkinLoader;
+import bms.player.beatoraja.skin.SkinType;
 import bms.player.beatoraja.skin.lr2.LR2SkinHeaderLoader;
-import bms.player.beatoraja.song.*;
+import bms.player.beatoraja.song.SQLiteSongDatabaseAccessor;
+import bms.player.beatoraja.song.SongData;
+import bms.player.beatoraja.song.SongDatabaseAccessor;
 
+import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter.OutputType;
 import com.synthbot.jasiohost.AsioDriver;
 
-import javafx.application.Platform;
-import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
-import javafx.scene.control.*;
-import javafx.scene.input.*;
-import javafx.scene.layout.*;
-import javafx.stage.DirectoryChooser;
-import javafx.stage.FileChooser;
-import javafx.stage.FileChooser.ExtensionFilter;
-import javafx.util.Callback;
-
 /**
  * Beatorajaの設定ダイアログ
- * 
+ *
  * @author exch
  */
 public class PlayConfigurationView implements Initializable {
@@ -132,13 +157,17 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private Spinner<Integer> audiosim;
 	@FXML
+	private Spinner<Double> keyvolume;
+	@FXML
+	private Spinner<Double> bgvolume;
+	@FXML
 	private ComboBox<Integer> judgealgorithm;
 
-    @FXML  
+    @FXML
     private ComboBox<Integer> jkoc_hack;
-    @FXML  
+    @FXML
     private CheckBox usecim;
-        
+
 	private Config config;;
 	@FXML
 	private CheckBox folderlamp;
@@ -244,6 +273,8 @@ public class PlayConfigurationView implements Initializable {
 
 		fixhispeed.setValue(config.getFixhispeed());
 		judgetiming.getValueFactory().setValue(config.getJudgetiming());
+		keyvolume.getValueFactory().setValue((double)config.getKeyvolume());
+		bgvolume.getValueFactory().setValue((double)config.getBgvolume());
 
 		bgmpath.setText(config.getBgmpath());
 		soundpath.setText(config.getSoundpath());
@@ -269,10 +300,10 @@ public class PlayConfigurationView implements Initializable {
 		judgealgorithm.setValue(config.getJudgeAlgorithm());
 
         // int b = Boolean.valueOf(config.getJKOC()).compareTo(false);
-        
+
         jkoc_hack.setValue(Boolean.valueOf(config.getJKOC()).compareTo(false));
         usecim.setSelected(config.isCacheSkinImage());
-                
+
 		folderlamp.setSelected(config.isFolderlamp());
 
 		inputduration.getValueFactory().setValue(config.getInputduration());
@@ -307,6 +338,8 @@ public class PlayConfigurationView implements Initializable {
 
 		config.setBgmpath(bgmpath.getText());
 		config.setSoundpath(soundpath.getText());
+		config.setKeyvolume(keyvolume.getValue().floatValue());
+		config.setBgvolume(keyvolume.getValue().floatValue());
 
 		config.setBmsroot(bmsroot.getItems().toArray(new String[0]));
 		config.setTableURL(tableurl.getItems().toArray(new String[0]));
@@ -328,8 +361,8 @@ public class PlayConfigurationView implements Initializable {
 		config.setAudioDeviceSimultaneousSources(getValue(audiosim));
 
 		config.setJudgeAlgorithm(judgealgorithm.getValue());
-    
-        // jkoc_hack is integer but *.setJKOC needs boolean type  
+
+        // jkoc_hack is integer but *.setJKOC needs boolean type
         if(jkoc_hack.getValue() > 0)
             config.setJKOC(true);
         else
@@ -542,7 +575,7 @@ public class PlayConfigurationView implements Initializable {
 
 	/**
 	 * BMSを読み込み、楽曲データベースを更新する
-	 * 
+	 *
 	 * @param updateAll
 	 *            falseの場合は追加削除分のみを更新する
 	 */
@@ -702,7 +735,7 @@ public class PlayConfigurationView implements Initializable {
 
 /**
  * スキンコンフィグ
- * 
+ *
  * @author exch
  */
 class SkinConfigurationView {
