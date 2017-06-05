@@ -8,6 +8,7 @@
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Slider?>
 <?import javafx.scene.control.Spinner?>
 <?import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory?>
 <?import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory?>
@@ -22,7 +23,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="bms.player.beatoraja.PlayConfigurationView">
+<VBox xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="bms.player.beatoraja.PlayConfigurationView">
    <children>
       <TabPane prefHeight="390.0" prefWidth="740.0" VBox.vgrow="ALWAYS">
          <tabs>
@@ -83,7 +84,7 @@
                                     <Insets bottom="10.0" top="10.0" />
                                  </VBox.margin>
                               </HBox>
-                              <HBox prefHeight="30.0" prefWidth="723.0">
+                              <HBox prefHeight="40.0" prefWidth="730.0">
                                  <children>
                                     <Label prefHeight="25.0" prefWidth="125.0" text="%AUDIO_BUF_SIZE" />
                   				    <Spinner fx:id="audiobuffer" editable="true" prefWidth="150.0">
@@ -99,20 +100,22 @@
           </Spinner>
                                  </children>
                               </HBox>
-                                <HBox prefHeight="45.0" prefWidth="723.0">
+                                <HBox prefHeight="30.0" prefWidth="730.0">
+                                 <children>
+                                    <Label prefHeight="25.0" prefWidth="125.0" text="%SYSTEM_VOLUME" />
+                                    <Slider fx:id="systemvolume" blockIncrement="0.1" majorTickUnit="0.1" max="1.0" minorTickCount="5" prefHeight="30.0" prefWidth="200.0" value="1.0" />
+                                 </children>
+                              </HBox>
+                              <HBox prefHeight="30.0" prefWidth="730.0">
                                  <children>
                                     <Label prefHeight="25.0" prefWidth="125.0" text="%KEY_VOLUME" />
-                                    <Spinner fx:id="keyvolume" editable="true" prefWidth="150.0">
-            <valueFactory>
-              <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.01" initialValue="1.00" max="1.00" min="0.00" />
-            </valueFactory>
-          </Spinner>
-                                    <Label prefHeight="23.0" prefWidth="65.0" text="%BG_VOLUME" />
-                                    <Spinner fx:id="bgvolume" editable="true" prefWidth="150.0">
-            <valueFactory>
-              <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.01" initialValue="1.00" max="1.00" min="0.00" />
-            </valueFactory>
-          </Spinner>
+                                    <Slider fx:id="keyvolume" blockIncrement="0.1" majorTickUnit="0.1" max="1.0" minorTickCount="5" prefHeight="30.0" prefWidth="200.0" value="1.0" />
+                                 </children>
+                              </HBox>
+                              <HBox prefHeight="30.0" prefWidth="730.0">
+                                 <children>
+                                    <Label prefHeight="30.0" prefWidth="125.0" text="%BG_VOLUME" />
+                                    <Slider fx:id="bgvolume" blockIncrement="0.1" majorTickUnit="0.1" max="1.0" minorTickCount="5" prefHeight="30.0" prefWidth="200.0" value="1.0" />
                                  </children>
                               </HBox>
                            </children>

@@ -103,7 +103,6 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 	
 	@Override
 	protected void play(Sound id, float volume) {
-		System.out.println(volume);;
 		if(soundthread) {
 			mixer.put(id, volume);
 		} else {

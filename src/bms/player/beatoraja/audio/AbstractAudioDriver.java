@@ -108,7 +108,6 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 		}
 
 		if (sound != null) {
-			System.out.println(p + " : vol - " + volume);
 			play(sound, volume, loop);
 		}
 	}

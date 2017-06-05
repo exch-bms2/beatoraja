@@ -30,6 +30,7 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Slider;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.TextField;
 import javafx.scene.input.DragEvent;
@@ -157,9 +158,11 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private Spinner<Integer> audiosim;
 	@FXML
-	private Spinner<Double> keyvolume;
+	private Slider systemvolume;
 	@FXML
-	private Spinner<Double> bgvolume;
+	private Slider keyvolume;
+	@FXML
+	private Slider bgvolume;
 	@FXML
 	private ComboBox<Integer> judgealgorithm;
 
@@ -271,8 +274,9 @@ public class PlayConfigurationView implements Initializable {
 
 		fixhispeed.setValue(config.getFixhispeed());
 		judgetiming.getValueFactory().setValue(config.getJudgetiming());
-		keyvolume.getValueFactory().setValue((double)config.getKeyvolume());
-		bgvolume.getValueFactory().setValue((double)config.getBgvolume());
+		systemvolume.setValue((double)config.getSystemvolume());
+		keyvolume.setValue((double)config.getKeyvolume());
+		bgvolume.setValue((double)config.getBgvolume());
 
 		bgmpath.setText(config.getBgmpath());
 		soundpath.setText(config.getSoundpath());
@@ -336,8 +340,9 @@ public class PlayConfigurationView implements Initializable {
 
 		config.setBgmpath(bgmpath.getText());
 		config.setSoundpath(soundpath.getText());
-		config.setKeyvolume(keyvolume.getValue().floatValue());
-		config.setBgvolume(keyvolume.getValue().floatValue());
+		config.setSystemvolume((float) systemvolume.getValue());
+		config.setKeyvolume((float) keyvolume.getValue());
+		config.setBgvolume((float) bgvolume.getValue());
 
 		config.setBmsroot(bmsroot.getItems().toArray(new String[0]));
 		config.setTableURL(tableurl.getItems().toArray(new String[0]));
