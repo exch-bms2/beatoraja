@@ -68,6 +68,8 @@ public class Config {
 	 * オーディオ同時発音数
 	 */
 	private int audioDeviceSimultaneousSources = 64;
+	
+	private float systemvolume = 1.0f;
 	/**
 	 * キー音のボリューム
 	 */
@@ -689,6 +691,14 @@ public class Config {
 
 	public void setCacheSkinImage(boolean cacheSkinImage) {
 		this.cacheSkinImage = cacheSkinImage;
+	}
+
+	public float getSystemvolume() {
+		return systemvolume;
+	}
+
+	public void setSystemvolume(float systemvolume) {
+		this.systemvolume = systemvolume;
 	}
 
 	public static class SkinConfig {

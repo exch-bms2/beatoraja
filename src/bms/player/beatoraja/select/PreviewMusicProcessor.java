@@ -1,5 +1,6 @@
 package bms.player.beatoraja.select;
 
+import bms.player.beatoraja.Config;
 import bms.player.beatoraja.audio.AudioDriver;
 import bms.player.beatoraja.song.SongData;
 
@@ -25,9 +26,12 @@ public class PreviewMusicProcessor {
     private SongData current;
 
     private final AudioDriver audio;
+    
+    private final Config config;
 
-    public PreviewMusicProcessor(AudioDriver audio) {
+    public PreviewMusicProcessor(AudioDriver audio, Config config) {
         this.audio = audio;
+        this.config = config;
     }
 
     public void setDefault(String path) {
@@ -59,7 +63,7 @@ public class PreviewMusicProcessor {
         private String playing;
 
         public void run() {
-            audio.play(defaultMusic, true);
+            audio.play(defaultMusic, config.getSystemvolume(), true);
             while(!stop) {
                 if(!commands.isEmpty()) {
                     String path = commands.removeFirst();
@@ -69,9 +73,9 @@ public class PreviewMusicProcessor {
                     if(!path.equals(playing)) {
                         stopPreview(true);
                         if(path != defaultMusic) {
-                            audio.play(path, false);
+                            audio.play(path, config.getSystemvolume(), false);
                         } else {
-                            audio.setVolume(defaultMusic, 1.0f);
+                            audio.setVolume(defaultMusic, config.getSystemvolume());
                         }
                         playing = path;
                     }

@@ -93,11 +93,7 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	 */
 	protected abstract void stop(T id);
 
-	protected float getVolume() {
-		return volume;
-	}
-
-	public void play(String p, boolean loop) {
+	public void play(String p, float volume, boolean loop) {
 		if (p == null || p.length() == 0) {
 			return;
 		}
@@ -112,7 +108,8 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 		}
 
 		if (sound != null) {
-			play(sound, 1.0f, loop);
+			System.out.println(p + " : vol - " + volume);
+			play(sound, volume, loop);
 		}
 	}
 
@@ -269,9 +266,9 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	}
 
 	public void play(Note n, float volume) {
-		play0(n, volume);
+		play0(n, this.volume * volume);
 		for (Note ln : n.getLayeredNotes()) {
-			play0(ln, volume);
+			play0(ln, this.volume * volume);
 		}
 	}
 

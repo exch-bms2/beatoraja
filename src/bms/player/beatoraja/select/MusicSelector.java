@@ -139,7 +139,7 @@ public class MusicSelector extends MainState {
 		playerdata = main.getPlayDataAccessor().readPlayerData();
 		scorecache.clear();
 
-        preview = new PreviewMusicProcessor(main.getAudioProcessor());
+        preview = new PreviewMusicProcessor(main.getAudioProcessor(), config);
         preview.setDefault(getSound(SOUND_BGM));
         preview.start(null);
 
