@@ -4,11 +4,7 @@ import bms.model.*;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.play.BMSPlayer;
 
-import java.util.Arrays;
-
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
@@ -129,7 +125,7 @@ public class SkinNoteDistributionGraph extends SkinObject {
 					if (n != null && !(model.getLntype() == BMSModel.LNTYPE_LONGNOTE && n instanceof LongNote
 							&& ((LongNote) n).isEnd())) {
 						int st = n.getState();
-						int t = n.getTime();
+						int t = n.getPlayTime();
 						switch (type) {
 						case TYPE_NORMAL:
 							if (n instanceof NormalNote) {

@@ -387,7 +387,7 @@ public class LaneRenderer {
 					final Note note = tl.getNote(lane);
 					if (note != null && ((note instanceof LongNote
 							&& (((LongNote) note).isEnd() ? (LongNote) note : ((LongNote) note).getPair())
-									.getSectiontime() >= time)
+									.getTime() >= time)
 							|| (config.isShowpastnote() && note instanceof NormalNote && note.getState() == 0))) {
 						b = false;
 						break;
@@ -429,7 +429,7 @@ public class LaneRenderer {
 						}
 					} else if (note instanceof LongNote) {
 						final LongNote ln = (LongNote) note;
-						if (!ln.isEnd() && ln.getPair().getSectiontime() >= time) {
+						if (!ln.isEnd() && ln.getPair().getTime() >= time) {
 							// if (((LongNote) note).getEnd() == null) {
 							// Logger.getGlobal().warning(
 							// "LN終端がなく、モデルが正常に表示されません。LN開始時間:"

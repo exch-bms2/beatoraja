@@ -23,9 +23,9 @@ public class PracticeModifier extends PatternModifier {
 				if (tl.getNote(i) != null) {
 					if (tl.getNote(i) instanceof LongNote) {
 						LongNote ln = (LongNote) tl.getNote(i);
-						if ((!ln.isEnd() && ln.getSectiontime() < start) || (ln.isEnd() && ln.getSectiontime() >= end)
-								|| (!ln.isEnd() && ln.getPair().getSectiontime() >= end)
-								|| (ln.isEnd() && ln.getPair().getSectiontime() < start)) {
+						if ((!ln.isEnd() && ln.getTime() < start) || (ln.isEnd() && ln.getTime() >= end)
+								|| (!ln.isEnd() && ln.getPair().getTime() >= end)
+								|| (ln.isEnd() && ln.getPair().getTime() < start)) {
 							tl.addBackGroundNote(tl.getNote(i));
 							tl.setNote(i, null);
 						}
