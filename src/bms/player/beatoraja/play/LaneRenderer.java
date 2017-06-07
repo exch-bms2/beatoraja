@@ -273,10 +273,10 @@ public class LaneRenderer {
 		nowbpm = nbpm;
 		final int region = (int) (240000 / nbpm / hispeed);
 		// double sect = (bpm / 60) * 4 * 1000;
-		final float hu = laneregion[0].y + laneregion[0].height;
-		final float hl = enableLift ? laneregion[0].y + laneregion[0].height * lift : laneregion[0].y;
-		final float rxhs = (hu - hl) * hispeed;
-		float y = hl;
+		final double hu = laneregion[0].y + laneregion[0].height;
+		final double hl = enableLift ? laneregion[0].y + laneregion[0].height * lift : laneregion[0].y;
+		final double rxhs = (hu - hl) * hispeed;
+		double y = hl;
 
 		currentduration = Math.round(region * (1 - (enableLanecover ? lanecover : 0)));
 
@@ -292,14 +292,14 @@ public class LaneRenderer {
 			for (int i = pos; i < timelines.length; i++) {
 				final TimeLine tl = timelines[i];
 				if (tl.getTime() >= time) {
-					float rate = (tl.getSection() - (i > 0 ? timelines[i - 1].getSection() : 0))
+					double rate = (tl.getSection() - (i > 0 ? timelines[i - 1].getSection() : 0))
 							/ (tl.getTime() - (i > 0 ? timelines[i - 1].getTime() + timelines[i - 1].getStop() : 0))
 							* rxhs;
 					for (int j = color.length - 1; j >= 0; j--) {
 						shape.setColor(color[j]);
 						int nj = j > 0 ? judgetime[j - 1][1] : 0;
 						for (int p = 0; p < playerr.length; p++) {
-							shape.rect(playerr[p].x, hl + nj * rate, playerr[p].width, (judgetime[j][1] - nj) * rate);
+							shape.rect(playerr[p].x, (float)(hl + nj * rate), playerr[p].width, (float)((judgetime[j][1] - nj) * rate));
 						}
 					}
 					break;
@@ -310,7 +310,7 @@ public class LaneRenderer {
 			sprite.begin();
 		}
 
-		final float orgy = y;
+		final double orgy = y;
 		for (int i = pos; i < timelines.length && y <= hu; i++) {
 			final TimeLine tl = timelines[i];
 			if (tl.getTime() >= time) {
@@ -334,12 +334,11 @@ public class LaneRenderer {
 							sprite.end();
 							shape.begin(ShapeType.Line);
 							shape.setColor(Color.valueOf("40c0c0"));
-							shape.line(r.x, y, r.x + r.width, y);
-							shape.end();
+							shape.line(r.x, (float)y, r.x + r.width, (float)y);
 							sprite.begin();
 							font.setColor(Color.valueOf("40c0c0"));
 							font.draw(sprite, String.format("%2d:%02d.%1d", tl.getTime() / 60000,
-									(tl.getTime() / 1000) % 60, (tl.getTime() / 100) % 10), r.x + 4, y + 20);
+									(tl.getTime() / 1000) % 60, (tl.getTime() / 100) % 10), r.x + 4, (float) (y + 20));
 						}
 					}
 				}
@@ -351,26 +350,26 @@ public class LaneRenderer {
 							sprite.end();
 							shape.begin(ShapeType.Line);
 							shape.setColor(Color.valueOf("00c000"));
-							shape.line(r.x, y + 2, r.x + r.width, y + 2);
-							shape.line(r.x, y, r.x + r.width, y);
-							shape.line(r.x, y - 2, r.x + r.width, y - 2);
+							shape.line(r.x, (float)(y + 2), r.x + r.width, (float)(y + 2));
+							shape.line(r.x, (float)y, r.x + r.width, (float)y);
+							shape.line(r.x, (float)(y - 2), r.x + r.width, (float)(y - 2));
 							shape.end();
 							sprite.begin();
 							font.setColor(Color.valueOf("00c000"));
-							font.draw(sprite, "BPM" + ((int) tl.getBPM()), r.x + r.width / 2, y + 20);
+							font.draw(sprite, "BPM" + ((int) tl.getBPM()), r.x + r.width / 2, (float) (y + 20));
 						}
 						if (tl.getStop() > 0) {
 							// STOPガイド描画
 							sprite.end();
 							shape.begin(ShapeType.Line);
 							shape.setColor(Color.valueOf("c0c000"));
-							shape.line(r.x, y + 2, r.x + r.width, y + 2);
-							shape.line(r.x, y, r.x + r.width, y);
-							shape.line(r.x, y - 2, r.x + r.width, y - 2);
+							shape.line(r.x, (float)(y + 2), r.x + r.width, (float)(y + 2));
+							shape.line(r.x, (float)y, r.x + r.width, (float)y);
+							shape.line(r.x, (float)(y - 2), r.x + r.width, (float)(y - 2));
 							shape.end();
 							sprite.begin();
 							font.setColor(Color.valueOf("c0c000"));
-							font.draw(sprite, "STOP " + ((int) tl.getStop()) + "ms", r.x + r.width / 2, y + 20);
+							font.draw(sprite, "STOP " + ((int) tl.getStop()) + "ms", r.x + r.width / 2, (float) (y + 20));
 						}
 					}
 				}
@@ -425,7 +424,7 @@ public class LaneRenderer {
 						if (tl.getTime() >= time || (config.isShowpastnote() && note.getState() == 0)) {
 							final TextureRegion s = config.isMarkprocessednote() && note.getState() != 0
 									? pnoteimage[lane] : noteimage[lane];
-							sprite.draw(s, laneregion[lane].x, y, laneregion[lane].width, scale);
+							sprite.draw(s, laneregion[lane].x, (float) y, laneregion[lane].width, scale);
 						}
 					} else if (note instanceof LongNote) {
 						final LongNote ln = (LongNote) note;
@@ -437,7 +436,7 @@ public class LaneRenderer {
 							// .getStart()
 							// .getTime());
 							// } else {
-							float dy = 0;
+							double dy = 0;
 							TimeLine prevtl = tl;
 							for (int j = i + 1; j < timelines.length
 									&& prevtl.getSection() != ln.getPair().getSection(); j++) {
@@ -453,8 +452,8 @@ public class LaneRenderer {
 								prevtl = nowtl;
 							}
 							if (dy > 0) {
-								this.drawLongNote(laneregion[lane].x, y + dy, laneregion[lane].width,
-										y < laneregion[lane].y ? y - laneregion[lane].y : dy, scale, lane, ln);
+								this.drawLongNote(laneregion[lane].x, (float)(y + dy), laneregion[lane].width,
+										(float)(y < laneregion[lane].y ? y - laneregion[lane].y : dy), scale, lane, ln);
 							}
 							// System.out.println(dy);
 						}
@@ -462,7 +461,7 @@ public class LaneRenderer {
 						// draw mine note
 						if (tl.getTime() >= time) {
 							final TextureRegion s = mnoteimage[lane];
-							sprite.draw(s, laneregion[lane].x, y, laneregion[lane].width, scale);
+							sprite.draw(s, laneregion[lane].x, (float) y, laneregion[lane].width, scale);
 						}
 					}
 				}
@@ -470,7 +469,7 @@ public class LaneRenderer {
 				if (config.isShowhiddennote() && tl.getTime() >= time) {
 					final Note hnote = tl.getHiddenNote(lane);
 					if (hnote != null) {
-						sprite.draw(hnoteimage[lane], laneregion[lane].x, y, laneregion[lane].width, scale);
+						sprite.draw(hnoteimage[lane], laneregion[lane].x, (float) y, laneregion[lane].width, scale);
 					}
 				}
 			}
