@@ -351,7 +351,8 @@
                                     <ComboBox fx:id="jkoc_hack" prefWidth="150.0" />
                                  </children>
                               </HBox>
-                              <CheckBox fx:id="usecim" mnemonicParsing="false" prefHeight="25.0" prefWidth="133.0" text="%CACHE_SKIN_IMAGE" />
+                              <CheckBox fx:id="usecim" mnemonicParsing="false" prefHeight="25.0" prefWidth="275.0" text="%CACHE_SKIN_IMAGE" />
+                              <CheckBox fx:id="useSongInfo" mnemonicParsing="false" prefHeight="18.0" prefWidth="275.0" text="%USE_SONGINFO" />
                            </children>
                         </VBox>
                      </children>

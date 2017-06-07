@@ -547,6 +547,9 @@ class CommandBar extends DirectoryBar {
     @Override
     public Bar[] getChildren() {
     	if(info) {
+    		if(main.getInfoDatabase() == null) {
+    			return new Bar[0];
+    		}
     		SongInformation[] infos = main.getInfoDatabase().getInformations(sql);
             List<Bar> l = new ArrayList<Bar>();
             for (SongInformation info : infos) {

@@ -132,6 +132,8 @@ public class Config {
 	private Mode mode_sort = null;
 	
     private boolean cacheSkinImage = false;
+    
+    private boolean useSongInfo = true;
 	/**
 	 * アシストオプション:コンスタント
 	 */
@@ -709,6 +711,14 @@ public class Config {
 
 	public void setUpdatesong(boolean updatesong) {
 		this.updatesong = updatesong;
+	}
+
+	public boolean isUseSongInfo() {
+		return useSongInfo;
+	}
+
+	public void setUseSongInfo(boolean useSongInfo) {
+		this.useSongInfo = useSongInfo;
 	}
 
 	public static class SkinConfig {

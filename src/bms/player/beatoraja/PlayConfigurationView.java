@@ -143,6 +143,8 @@ public class PlayConfigurationView implements Initializable {
     private ComboBox<Integer> jkoc_hack;
     @FXML
     private CheckBox usecim;
+    @FXML
+    private CheckBox useSongInfo;
 
 	private Config config;;
 	@FXML
@@ -280,6 +282,7 @@ public class PlayConfigurationView implements Initializable {
 
         jkoc_hack.setValue(Boolean.valueOf(config.getJKOC()).compareTo(false));
         usecim.setSelected(config.isCacheSkinImage());
+        useSongInfo.setSelected(config.isUseSongInfo());
 
 		folderlamp.setSelected(config.isFolderlamp());
 
@@ -347,6 +350,7 @@ public class PlayConfigurationView implements Initializable {
             config.setJKOC(false);
 
         config.setCacheSkinImage(usecim.isSelected());
+        config.setUseSongInfo(useSongInfo.isSelected());
         config.setFolderlamp(folderlamp.isSelected());
 
 		config.setInputduration(getValue(inputduration));
@@ -563,7 +567,8 @@ public class PlayConfigurationView implements Initializable {
 			Class.forName("org.sqlite.JDBC");
 			SongDatabaseAccessor songdb = new SQLiteSongDatabaseAccessor(Paths.get("songdata.db").toString(),
 					config.getBmsroot());
-			SongInformationAccessor infodb = new SongInformationAccessor(Paths.get("songinfo.db").toString());
+			SongInformationAccessor infodb = useSongInfo.isSelected() ? 
+					new SongInformationAccessor(Paths.get("songinfo.db").toString()) : null;
 			Logger.getGlobal().info("song.db更新開始");
 			songdb.updateSongDatas(null, updateAll, infodb);
 			Logger.getGlobal().info("song.db更新完了");

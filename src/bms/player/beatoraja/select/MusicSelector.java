@@ -1159,10 +1159,10 @@ public class MusicSelector extends MainState {
 
 		public void run() {
 			if (selected == null) {
-				getSongDatabase().updateSongDatas(null, false);
+				getSongDatabase().updateSongDatas(null, false, getMainController().getInfoDatabase());
 			} else if (selected instanceof FolderBar) {
 				FolderBar fb = (FolderBar) selected;
-				getSongDatabase().updateSongDatas(fb.getFolderData().getPath(), false);
+				getSongDatabase().updateSongDatas(fb.getFolderData().getPath(), false, getMainController().getInfoDatabase());
 			} else if (selected instanceof TableBar) {
 				TableBar tb = (TableBar) selected;
 				if (tb.getUrl() != null && tb.getUrl().length() > 0) {
