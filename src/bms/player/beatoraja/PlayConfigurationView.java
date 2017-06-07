@@ -79,6 +79,8 @@ public class PlayConfigurationView implements Initializable {
 	private TextField url;
 	@FXML
 	private ListView<String> tableurl;
+	@FXML
+	private CheckBox updatesong;
 
 	@FXML
 	private ComboBox<Integer> scoreop;
@@ -259,6 +261,7 @@ public class PlayConfigurationView implements Initializable {
 		soundpath.setText(config.getSoundpath());
 
 		bmsroot.getItems().setAll(config.getBmsroot());
+		updatesong.setSelected(config.isUpdatesong());
 		tableurl.getItems().setAll(config.getTableURL());
 
 		constant.setSelected(config.isConstant());
@@ -323,6 +326,7 @@ public class PlayConfigurationView implements Initializable {
 		config.setBgvolume((float) bgvolume.getValue());
 
 		config.setBmsroot(bmsroot.getItems().toArray(new String[0]));
+		config.setUpdatesong(updatesong.isSelected());
 		config.setTableURL(tableurl.getItems().toArray(new String[0]));
 
 		config.setConstant(constant.isSelected());

@@ -23,6 +23,8 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
  */
 public class KeyConfiguration extends MainState {
 
+	// TODO スキンベースへ移行
+
 	private BitmapFont titlefont;
 
 	private static final String[] MODE = { "7 KEYS", "9 KEYS", "14 KEYS" };
@@ -39,33 +41,7 @@ public class KeyConfiguration extends MainState {
 	private static final int[][] BMKEYSA = { { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 },
 			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }, { 0, 1, 2, 3, 4, 5, 6, 7, 8, 20, 21, 22, 23, 24, 25, 26, 27, 28, 9, 10 } };
 
-	public static final int KEY_PLAY = 1;
-	public static final int KEY_AUTO = 2;
-	public static final int KEY_REPLAY = 3;
-	public static final int KEY_UP = 4;
-	public static final int KEY_DOWN = 5;
-	public static final int KEY_FOLDER_OPEN = 6;
-	public static final int KEY_FOLDER_CLOSE = 7;
-	public static final int KEY_PRACTICE = 8;
-
 	private static final String[] SELECTKEY = {"2dx sp", "popn", "2dx dp"};
-
-	public static final int[][][] keyassign = {
-			{
-				{KEY_PLAY, KEY_FOLDER_OPEN}, {KEY_FOLDER_CLOSE}, {KEY_PRACTICE, KEY_FOLDER_OPEN}, {KEY_FOLDER_CLOSE}
-			, {KEY_FOLDER_OPEN, KEY_AUTO}, {KEY_FOLDER_CLOSE},{KEY_FOLDER_OPEN, KEY_REPLAY}, {KEY_UP}, {KEY_DOWN}
-			},
-			{
-				{KEY_AUTO}, {}, {KEY_FOLDER_CLOSE}, {KEY_DOWN}
-					, {KEY_PLAY}, {KEY_UP},{KEY_PRACTICE, KEY_FOLDER_OPEN}, {}, {KEY_REPLAY}
-			},
-			{
-				{KEY_PLAY, KEY_FOLDER_OPEN}, {KEY_FOLDER_CLOSE}, {KEY_PRACTICE, KEY_FOLDER_OPEN}, {KEY_FOLDER_CLOSE}
-			, {KEY_FOLDER_OPEN, KEY_AUTO}, {KEY_FOLDER_CLOSE},{KEY_FOLDER_OPEN, KEY_REPLAY}, {KEY_UP}, {KEY_DOWN},
-			{KEY_PLAY, KEY_FOLDER_OPEN}, {KEY_FOLDER_CLOSE}, {KEY_PRACTICE, KEY_FOLDER_OPEN}, {KEY_FOLDER_CLOSE}
-		, {KEY_FOLDER_OPEN, KEY_AUTO}, {KEY_FOLDER_CLOSE},{KEY_FOLDER_OPEN, KEY_REPLAY}, {KEY_UP}, {KEY_DOWN},
-			}
-	};
 
 	private int cursorpos = 0;
 	private boolean keyinput = false;
