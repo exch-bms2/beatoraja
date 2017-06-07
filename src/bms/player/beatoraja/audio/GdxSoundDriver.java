@@ -104,10 +104,10 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 	@Override
 	protected void play(Sound id, float volume) {
 		if(soundthread) {
-			mixer.put(id, getVolume() * volume);
+			mixer.put(id, volume);
 		} else {
 			synchronized (lock) {
-				id.play(getVolume() * volume);
+				id.play(volume);
 			}
 		}
 	}
@@ -115,9 +115,9 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 	@Override
 	protected void play(AudioElement<Sound> id, float volume, boolean loop) {
 		if(loop) {
-			id.id = id.audio.loop(getVolume() * volume);
+			id.id = id.audio.loop(volume);
 		} else {
-			id.id = id.audio.play(getVolume() * volume);
+			id.id = id.audio.play(volume);
 		}		
 	}
 	
@@ -152,7 +152,7 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 		public void run() {
 			for(;;) {
 				if(pos != cpos) {
-					sound[pos].play(getVolume() * this.volume[pos]);
+					sound[pos].play(this.volume[pos]);
 					pos = (pos + 1) % this.sound.length;
 				} else {
 					try {

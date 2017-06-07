@@ -7,6 +7,7 @@ import bms.player.beatoraja.play.TargetProperty;
 import bms.player.beatoraja.skin.Skin;
 import bms.player.beatoraja.song.SongData;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
@@ -268,7 +269,8 @@ public abstract class MainState {
 	}
 
 	public int getJudgeCount(int judge, boolean fast) {
-		return 0;
+		IRScoreData sd = score.getScoreData();
+		return sd != null ? sd.getJudgeCount(judge, fast) : 0;
 	}
 	
 	private Calendar cl = Calendar.getInstance();
@@ -277,6 +279,8 @@ public abstract class MainState {
 		switch (id) {
 		case NUMBER_JUDGETIMING:
 			return getMainController().getPlayerResource().getConfig().getJudgetiming();
+			case NUMBER_CURRENT_FPS:
+				return Gdx.graphics.getFramesPerSecond();
 		case NUMBER_TIME_YEAR:
 			cl.setTimeInMillis(System.currentTimeMillis());
 			return cl.get(Calendar.YEAR);
@@ -402,6 +406,8 @@ public abstract class MainState {
 			case NUMBER_SCORE:
 			case NUMBER_SCORE2:
 				return score.getNowEXScore();
+			case NUMBER_MAXSCORE:
+				return score.getScoreData() != null ? score.getScoreData().getNotes() : 0;
 			case NUMBER_SCORE_RATE:
 				return score.getNowRateInt();
 			case NUMBER_SCORE_RATE_AFTERDOT:
@@ -530,7 +536,7 @@ public abstract class MainState {
 	public void play(int id) {
 		final String path = soundmap.get(id);
 		if(path != null) {
-			main.getAudioProcessor().play(path, soundloop.get(id));
+			main.getAudioProcessor().play(path, main.getPlayerResource().getConfig().getSystemvolume(), soundloop.get(id));
 		}
 	}
 	

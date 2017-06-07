@@ -8,6 +8,7 @@
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Slider?>
 <?import javafx.scene.control.Spinner?>
 <?import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory?>
 <?import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory?>
@@ -22,7 +23,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="bms.player.beatoraja.PlayConfigurationView">
+<VBox xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="bms.player.beatoraja.PlayConfigurationView">
    <children>
       <TabPane prefHeight="390.0" prefWidth="740.0" VBox.vgrow="ALWAYS">
          <tabs>
@@ -83,7 +84,7 @@
                                     <Insets bottom="10.0" top="10.0" />
                                  </VBox.margin>
                               </HBox>
-                              <HBox prefHeight="30.0" prefWidth="723.0">
+                              <HBox prefHeight="40.0" prefWidth="730.0">
                                  <children>
                                     <Label prefHeight="25.0" prefWidth="125.0" text="%AUDIO_BUF_SIZE" />
                   				    <Spinner fx:id="audiobuffer" editable="true" prefWidth="150.0">
@@ -97,6 +98,24 @@
               <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="64" max="1024" min="8" />
             </valueFactory>
           </Spinner>
+                                 </children>
+                              </HBox>
+                                <HBox prefHeight="30.0" prefWidth="730.0">
+                                 <children>
+                                    <Label prefHeight="25.0" prefWidth="125.0" text="%SYSTEM_VOLUME" />
+                                    <Slider fx:id="systemvolume" blockIncrement="0.1" majorTickUnit="0.1" max="1.0" minorTickCount="5" prefHeight="30.0" prefWidth="200.0" value="1.0" />
+                                 </children>
+                              </HBox>
+                              <HBox prefHeight="30.0" prefWidth="730.0">
+                                 <children>
+                                    <Label prefHeight="25.0" prefWidth="125.0" text="%KEY_VOLUME" />
+                                    <Slider fx:id="keyvolume" blockIncrement="0.1" majorTickUnit="0.1" max="1.0" minorTickCount="5" prefHeight="30.0" prefWidth="200.0" value="1.0" />
+                                 </children>
+                              </HBox>
+                              <HBox prefHeight="30.0" prefWidth="730.0">
+                                 <children>
+                                    <Label prefHeight="30.0" prefWidth="125.0" text="%BG_VOLUME" />
+                                    <Slider fx:id="bgvolume" blockIncrement="0.1" majorTickUnit="0.1" max="1.0" minorTickCount="5" prefHeight="30.0" prefWidth="200.0" value="1.0" />
                                  </children>
                               </HBox>
                            </children>
@@ -194,7 +213,7 @@
             </valueFactory>
           </Spinner>
                               <Label text="%HISPEED_FIX" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-                  	    <ComboBox fx:id="fixhispeed" prefWidth="150.0" GridPane.columnIndex="3" GridPane.rowIndex="2" />                  	
+                  	    <ComboBox fx:id="fixhispeed" prefWidth="150.0" GridPane.columnIndex="3" GridPane.rowIndex="2" />
                               <Label text="%NOTE_MODIFIER" GridPane.rowIndex="3" />
                               <ComboBox fx:id="scoreop" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                               <Label text="%GAUGE_TYPE" GridPane.columnIndex="2" GridPane.rowIndex="3" />

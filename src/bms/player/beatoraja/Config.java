@@ -68,6 +68,8 @@ public class Config {
 	 * オーディオ同時発音数
 	 */
 	private int audioDeviceSimultaneousSources = 64;
+	
+	private float systemvolume = 1.0f;
 	/**
 	 * キー音のボリューム
 	 */
@@ -223,6 +225,8 @@ public class Config {
 					BMKeys.BUTTON_5, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN, BMKeys.BUTTON_9, BMKeys.BUTTON_10 }});
 
 	private int musicselectinput = 0;
+
+	private boolean updatesong = false;
 
 	private String irname = "";
 
@@ -689,6 +693,22 @@ public class Config {
 
 	public void setCacheSkinImage(boolean cacheSkinImage) {
 		this.cacheSkinImage = cacheSkinImage;
+	}
+
+	public float getSystemvolume() {
+		return systemvolume;
+	}
+
+	public void setSystemvolume(float systemvolume) {
+		this.systemvolume = systemvolume;
+	}
+	
+	public boolean isUpdatesong() {
+		return updatesong;
+	}
+
+	public void setUpdatesong(boolean updatesong) {
+		this.updatesong = updatesong;
 	}
 
 	public static class SkinConfig {

@@ -76,11 +76,11 @@ public class MainLoader extends Application {
 		if (config) {
 			launch(args);
 		} else {
-			play(f, auto, true);
+			play(f, auto, true, f != null);
 		}
 	}
 
-	public static void play(Path f, int auto, boolean forceExit) {
+	public static void play(Path f, int auto, boolean forceExit, boolean songUpdated) {
 		Config config = new Config();
 		if (Files.exists(MainController.configpath)) {
 			Json json = new Json();
@@ -105,7 +105,7 @@ public class MainLoader extends Application {
 		}
 
 		try {
-			MainController player = new MainController(f, config, auto);
+			MainController player = new MainController(f, config, auto, songUpdated);
 
 			LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
 			cfg.width = config.getResolution().width;

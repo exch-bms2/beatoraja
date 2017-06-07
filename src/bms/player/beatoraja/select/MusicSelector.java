@@ -84,6 +84,9 @@ public class MusicSelector extends MainState {
 
 	private SearchTextField search;
 
+	private boolean songUpdated = false;
+	private Thread updateSong;
+
 	/**
 	 * 楽曲が選択されてからbmsを読み込むまでの時間(ms)
 	 */
@@ -113,9 +116,11 @@ public class MusicSelector extends MainState {
 	public static final int SOUND_FOLDERCLOSE = 3;
 	public static final int SOUND_CHANGEOPTION = 4;
 	
-	public MusicSelector(MainController main, Config config) {
+	public MusicSelector(MainController main, Config config, boolean songUpdated) {
 		super(main);
 		this.config = config;
+		this.songUpdated = songUpdated;
+
 		songdb = main.getSongDatabase();
 
 		scorecache = new ScoreDataCache(getMainController().getPlayDataAccessor());
@@ -139,7 +144,7 @@ public class MusicSelector extends MainState {
 		playerdata = main.getPlayDataAccessor().readPlayerData();
 		scorecache.clear();
 
-        preview = new PreviewMusicProcessor(main.getAudioProcessor());
+        preview = new PreviewMusicProcessor(main.getAudioProcessor(), config);
         preview.setDefault(getSound(SOUND_BGM));
         preview.start(null);
 
@@ -180,6 +185,11 @@ public class MusicSelector extends MainState {
 		if (getStage() == null && ((MusicSelectSkin) getSkin()).getSearchTextRegion() != null) {
 			search = new SearchTextField(this, config.getResolution());
 			setStage(search);
+		}
+
+		if(!songUpdated && config.isUpdatesong()) {
+			updateSong = new SongUpdateThread(null);
+			updateSong.start();
 		}
 	}
 
@@ -602,8 +612,14 @@ public class MusicSelector extends MainState {
 		// update folder
 		if (input.getFunctionstate()[1] && input.getFunctiontime()[1] != 0) {
 			input.getFunctiontime()[1] = 0;
-			bar.updateFolder();
+			if(updateSong == null || !updateSong.isAlive()) {
+				updateSong = new SongUpdateThread(current);
+				updateSong.start();
+			} else {
+				Logger.getGlobal().warning("楽曲更新中のため、更新要求は取り消されました");
+			}
 		}
+		// open explorer with selected song
 		if (input.getFunctionstate()[2] && input.getFunctiontime()[2] != 0) {
 			input.getFunctiontime()[2] = 0;
 			try {
@@ -1131,5 +1147,34 @@ public class MusicSelector extends MainState {
 
 	public BarRenderer getBarRender() {
 		return bar;
+	}
+
+	class SongUpdateThread extends Thread {
+
+		private final Bar selected;
+
+		public SongUpdateThread(Bar bar) {
+			selected = bar;
+		}
+
+		public void run() {
+			if (selected == null) {
+				getSongDatabase().updateSongDatas(null, false);
+			} else if (selected instanceof FolderBar) {
+				FolderBar fb = (FolderBar) selected;
+				getSongDatabase().updateSongDatas(fb.getFolderData().getPath(), false);
+			} else if (selected instanceof TableBar) {
+				TableBar tb = (TableBar) selected;
+				if (tb.getUrl() != null && tb.getUrl().length() > 0) {
+					TableDataAccessor tda = new TableDataAccessor();
+					String[] url = new String[] { tb.getUrl() };
+					tda.updateTableData(url);
+					TableData td = tda.read(tb.getTitle());
+					if (td != null) {
+						tb.setTableData(td);
+					}
+				}
+			}
+		}
 	}
 }

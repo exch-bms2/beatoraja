@@ -267,7 +267,7 @@ public class MusicResult extends MainState {
 				if (n != null && !(resource.getBMSModel().getLntype() == BMSModel.LNTYPE_LONGNOTE
 						&& n instanceof LongNote && ((LongNote) n).isEnd())) {
 					int state = n.getState();
-					int time = n.getTime();
+					int time = n.getPlayTime();
 					if (state >= 1) {
 						count++;
 						avgduration += Math.abs(time);
