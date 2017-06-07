@@ -169,6 +169,7 @@
                                     </VBox>
                                  </children>
                               </HBox>
+                               <CheckBox fx:id="updatesong" mnemonicParsing="false" prefHeight="25.0" prefWidth="300.0" text="%UPDATE_SONG" />
                            </children>
                         </VBox>
                      </children>
