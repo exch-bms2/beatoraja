@@ -17,7 +17,7 @@ import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.lr2.*;
 import bms.player.beatoraja.song.SongData;
 
-import com.badlogic.gdx.utils.FloatArray;
+import com.badlogic.gdx.utils.*;
 
 import static bms.player.beatoraja.CourseData.CourseDataConstraint.NO_SPEED;
 import static bms.player.beatoraja.skin.SkinProperty.*;
@@ -308,6 +308,7 @@ public class BMSPlayer extends MainState {
 	private int state = STATE_PRELOAD;
 
 	private long prevtime;
+	private long deltaplaymicro;
 
 	private PracticeConfiguration practice = new PracticeConfiguration();
 	private int starttimeoffset;
@@ -320,6 +321,7 @@ public class BMSPlayer extends MainState {
 		final BMSPlayerInputProcessor input = main.getInputProcessor();
 
 		final long now = getNowTime();
+		final long micronow = getNowMicroTime();
         final long[] timer = getTimer();
 		switch (state) {
 		// 楽曲ロード
@@ -403,18 +405,25 @@ public class BMSPlayer extends MainState {
 					keylog = Arrays.asList(replay.keylog);
 				}
 				keyinput.startJudge(model, keylog);
-				autoThread = new AutoplayThread();
-				autoThread.starttime = starttimeoffset;
+				autoThread = new AutoplayThread(starttimeoffset * 1000);
 				autoThread.start();
 				Logger.getGlobal().info("STATE_PLAYに移行");
 			}
 			break;
 		// プレイ
 		case STATE_PLAY:
-			// TODO fpsが高い時にスローがかからなくなる
-			final long deltatime = now - prevtime;
-            timer[TIMER_PLAY] += deltatime * (100 - playspeed) / 100;
-            timer[TIMER_RHYTHM] += deltatime * (100 - lanerender.getNowBPM() * 100 / 60) / 100;
+			final long deltatime = micronow - prevtime;			
+			final long deltaplay = deltatime * (100 - playspeed) / 100;
+			deltaplaymicro += deltaplay % 1000;
+            timer[TIMER_PLAY] += deltaplay / 1000;
+            if(deltaplaymicro >= 1000) {
+                timer[TIMER_PLAY]++;;
+            	deltaplaymicro -= 1000;
+            } else if(deltaplaymicro <= -1000) {
+                timer[TIMER_PLAY]--;;
+            	deltaplaymicro += 1000;            	
+            }
+            timer[TIMER_RHYTHM] += deltatime * (100 - lanerender.getNowBPM() * 100 / 60) / 100000;
             final long ptime = now - timer[TIMER_PLAY];
 			final float g = gauge.getValue();
 			if (gaugelog.size <= ptime / 500) {
@@ -516,7 +525,7 @@ public class BMSPlayer extends MainState {
 			break;
 		}
 		
-		prevtime = now;
+		prevtime = micronow;
 	}
 
 	public void setPlaySpeed(int playspeed) {
@@ -701,21 +710,31 @@ public class BMSPlayer extends MainState {
 
 		private boolean stop = false;
 
-		private int starttime;
+		private final long starttime;
+		
+		public AutoplayThread(long starttime) {
+			this.starttime = starttime;
+		}
 
 		@Override
 		public void run() {
-			final TimeLine[] timelines = model.getAllTimeLines();
-			final int lasttime = timelines[timelines.length - 1].getTime() + BMSPlayer.TIME_MARGIN;
+			Array<TimeLine> tls = new Array<TimeLine>();
+			for(TimeLine tl : model.getAllTimeLines()) {
+				if(tl.getBackGroundNotes().length > 0) {
+					tls.add(tl);
+				}
+			}
+			final TimeLine[] timelines = tls.toArray(TimeLine.class);
+			final long lasttime = timelines[timelines.length - 1].getMicroTime() + BMSPlayer.TIME_MARGIN * 1000;
 			final Config config = getMainController().getPlayerResource().getConfig();
 			int p = 0;
-			for (int time = starttime; p < timelines.length && timelines[p].getTime() < time; p++)
+			for (long time = starttime; p < timelines.length && timelines[p].getMicroTime() < time; p++)
 				;
 
 			while (!stop) {
-				final int time = (int) (getNowTime() - getTimer()[TIMER_PLAY]);
+				final long time = getNowMicroTime() - getTimer()[TIMER_PLAY] * 1000;
 				// BGレーン再生
-				while (p < timelines.length && timelines[p].getTime() <= time) {
+				while (p < timelines.length && timelines[p].getMicroTime() <= time) {
 					for (Note n : timelines[p].getBackGroundNotes()) {
 						play(n, config.getBgvolume());
 					}
@@ -723,9 +742,9 @@ public class BMSPlayer extends MainState {
 				}
 				if (p < timelines.length) {
 					try {
-						final long sleeptime = timelines[p].getTime() - time;
+						final long sleeptime = timelines[p].getMicroTime() - time;
 						if (sleeptime > 0) {
-							sleep(sleeptime);
+							sleep(sleeptime / 1000);
 						}
 					} catch (InterruptedException e) {
 					}

@@ -95,15 +95,23 @@ public abstract class MainState {
 	}
 
 	public long getStartTime() {
-		return starttime;
+		return starttime / 1000000;
 	}
 
-	public void setStartTime(long starttime) {
-		this.starttime = starttime;
+	public long getStartMicroTime() {
+		return starttime / 1000;
+	}
+
+	public void setStartTime() {
+		this.starttime = System.nanoTime();
 	}
 
 	public int getNowTime() {
-		return (int) (System.nanoTime() / 1000000 - starttime);
+		return (int) ((System.nanoTime() - starttime) / 1000000);
+	}
+
+	public long getNowMicroTime() {
+		return (System.nanoTime() - starttime) / 1000;
 	}
 
 	public long[] getTimer() {
