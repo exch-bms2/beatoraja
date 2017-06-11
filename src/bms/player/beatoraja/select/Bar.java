@@ -564,7 +564,7 @@ class CommandBar extends DirectoryBar {
             List<Bar> l = new ArrayList<Bar>();
             for (IRScoreData score : scores) {
                 SongData[] song = selector.getSongDatabase().getSongDatas("sha256", score.getSha256());
-                if (song.length > 0 && (!song[0].hasLongNote() || selector.getMainController().getPlayerResource().getConfig().getLnmode() == score.getMode())) {
+                if (song.length > 0 && (!song[0].hasUndefinedLongNote() || selector.getMainController().getPlayerResource().getConfig().getLnmode() == score.getMode())) {
                     l.add(new SongBar(song[0]));
                 }
             }

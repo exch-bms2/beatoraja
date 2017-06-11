@@ -88,15 +88,6 @@ public class MusicSelector extends MainState {
 
 	private ScoreDataCache scorecache;
 
-	public static final int KEY_PLAY = 1;
-	public static final int KEY_AUTO = 2;
-	public static final int KEY_REPLAY = 3;
-	public static final int KEY_UP = 4;
-	public static final int KEY_DOWN = 5;
-	public static final int KEY_FOLDER_OPEN = 6;
-	public static final int KEY_FOLDER_CLOSE = 7;
-	public static final int KEY_PRACTICE = 8;
-
 	private int panelstate;
 
 	public static final int SOUND_BGM = 0;

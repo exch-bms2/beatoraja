@@ -321,15 +321,15 @@ public class BarRenderer {
 				}
 
 				// LN
-				if ((flag & 1) != 0 && baro.getLabel()[0] != null) {
+				if ((flag & SongData.FEATURE_LONGNOTE) != 0 && baro.getLabel()[0] != null) {
 					baro.getLabel()[0].draw(sprite, time, select, x, y);
 				}
 				// MINE
-				if ((flag & 2) != 0 && baro.getLabel()[2] != null) {
+				if ((flag & SongData.FEATURE_MINENOTE) != 0 && baro.getLabel()[2] != null) {
 					baro.getLabel()[2].draw(sprite, time, select, x, y);
 				}
 				// RANDOM
-				if ((flag & 4) != 0 && baro.getLabel()[1] != null) {
+				if ((flag & SongData.FEATURE_RANDOM) != 0 && baro.getLabel()[1] != null) {
 					baro.getLabel()[1].draw(sprite, time, select, x, y);
 				}
 			}
@@ -347,7 +347,7 @@ public class BarRenderer {
 		int mov = -input.getScroll();
 		input.resetScroll();
 		// song bar scroll
-		if (select.isPressed(keystate, keytime, MusicSelector.KEY_UP, false) || cursor[1]) {
+		if (select.isPressed(keystate, keytime, MusicSelectInputProcessor.KEY_UP, false) || cursor[1]) {
 			long l = System.currentTimeMillis();
 			if (duration == 0) {
 				mov = 1;
@@ -359,7 +359,7 @@ public class BarRenderer {
 				mov = 1;
 				angle = durationhigh;
 			}
-		} else if (select.isPressed(keystate, keytime, MusicSelector.KEY_DOWN, false) || cursor[0]) {
+		} else if (select.isPressed(keystate, keytime, MusicSelectInputProcessor.KEY_DOWN, false) || cursor[0]) {
 			long l = System.currentTimeMillis();
 			if (duration == 0) {
 				mov = -1;
@@ -567,7 +567,7 @@ public class BarRenderer {
 					}
 					boolean[] replay = new boolean[MusicSelector.REPLAY];
 					for (int i = 0; i < MusicSelector.REPLAY; i++) {
-						replay[i] = main.getPlayDataAccessor().existsReplayData(sd.getSha256(), sd.hasLongNote(),
+						replay[i] = main.getPlayDataAccessor().existsReplayData(sd.getSha256(), sd.hasUndefinedLongNote(),
 								config.getLnmode(), i);
 					}
 					((SongBar) bar).setExistsReplayData(replay);
@@ -582,7 +582,7 @@ public class BarRenderer {
 						boolean ln = false;
 						for (int j = 0; j < gb.getSongDatas().length; j++) {
 							hash[j] = gb.getSongDatas()[j].getSha256();
-							ln |= gb.getSongDatas()[j].hasLongNote();
+							ln |= gb.getSongDatas()[j].hasUndefinedLongNote();
 						}
 						gb.setScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 0, gb.getConstraint()));
 						gb.setMirrorScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 1, gb.getConstraint()));
