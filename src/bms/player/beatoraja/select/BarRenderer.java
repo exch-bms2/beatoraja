@@ -434,7 +434,7 @@ public class BarRenderer {
 
 		List<Bar> remove = new ArrayList<Bar>();
 		for (Bar b : l) {
-			final Mode mode = select.getMode();
+			final Mode mode = select.getMainController().getPlayerResource().getConfig().getMode();
 			if (mode != null && b instanceof SongBar
 					&& ((SongBar) b).getSongData().getMode() != mode.id) {
 				remove.add(b);

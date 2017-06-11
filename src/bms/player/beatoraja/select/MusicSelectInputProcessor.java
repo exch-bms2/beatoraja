@@ -96,12 +96,11 @@ public class MusicSelectInputProcessor {
         if (numberstate[1] && numtime[1] != 0) {
             // KEYフィルターの切り替え
             int mode = 0;
-            for(;mode < MODE.length && MODE[mode] != select.getMode();mode++);
+            for(;mode < MODE.length && MODE[mode] != config.getMode();mode++);
             numtime[1] = 0;
+            config.setMode(MODE[(mode + 1) % MODE.length]);
             bar.updateBar();
             select.play(SOUND_CHANGEOPTION);
-            select.setMode(MODE[(mode + 1) % MODE.length]);
-            config.setModeSort(select.getMode());
         }
         if (numberstate[2] && numtime[2] != 0) {
             // ソートの切り替え

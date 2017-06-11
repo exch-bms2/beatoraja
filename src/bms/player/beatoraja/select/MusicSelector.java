@@ -40,10 +40,6 @@ public class MusicSelector extends MainState {
 	 * 楽曲DBアクセサ
 	 */
 	private SongDatabaseAccessor songdb;
-	/**
-	 * 選択中のモードフィルタ
-	 */
-	private int mode;
 	
 	public static final Mode[] MODE = {null, Mode.BEAT_7K, Mode.BEAT_14K, Mode.POPN_9K, Mode.BEAT_5K, Mode.BEAT_10K};
 	/**
@@ -450,19 +446,6 @@ public class MusicSelector extends MainState {
 		return false;
 	}
 
-	public Mode getMode() {
-		return MODE[mode];
-	}
-
-	public void setMode(Mode mode) {
-		for(int i = 0;i < MODE.length;i++) {
-			if(mode == MODE[i]) {
-				this.mode = i;
-				break;
-			}
-		}
-	}
-
 	public int getSort() {
 		return sort;
 	}
@@ -565,7 +548,12 @@ public class MusicSelector extends MainState {
 		case NUMBER_JUDGETIMING:
 			return config.getJudgetiming();
 		case BUTTON_MODE:
-		mode = config.getModeSort();
+			int mode = 0;
+			for(;mode < MODE.length;mode++) {
+				if(MODE[mode] == config.getMode()) {
+					break;
+				}
+			}
 			final int[] mode_lr2 = { 0, 2, 4, 5, 1, 3 };
 			return mode < mode_lr2.length ? mode_lr2[mode] : mode;
 		case BUTTON_SORT:
