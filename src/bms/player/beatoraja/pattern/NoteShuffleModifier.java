@@ -207,7 +207,7 @@ public class NoteShuffleModifier extends PatternModifier {
 					}
 					tl.setHiddenNote(i, hn);
 				}
-				log.add(new PatternModifyLog(tl.getTime(), random));
+				log.add(new PatternModifyLog(tl.getSection(), random));
 			}
 		}
 		return log;

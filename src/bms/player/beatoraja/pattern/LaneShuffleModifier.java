@@ -159,7 +159,7 @@ public class LaneShuffleModifier extends PatternModifier {
 						clone[mod] = true;
 					}
 				}
-				log.add(new PatternModifyLog(tl.getTime(), random));
+				log.add(new PatternModifyLog(tl.getSection(), random));
 			}
 		}
 		return log;
