@@ -41,6 +41,8 @@ public class BarRenderer {
 	private int selectedindex;
 
 	private Bar[] commands;
+
+	private GradeBar[] courses = new GradeBar[0];
 	/**
 	 * 難易度表バー一覧
 	 */
@@ -75,6 +77,27 @@ public class BarRenderer {
 		this.tables = new TableBar[tds.length];
 		for (int i = 0; i < tds.length; i++) {
 			this.tables[i] = new TableBar(select, tds[i]);
+		}
+		CourseData[] cds = new CourseDataAccessor().readAll();
+		courses = new GradeBar[cds.length];
+		for (int i = 0; i < cds.length; i++) {
+			Set<String> hashset = new HashSet<String>();
+			for (String hash : cds[i].getHash()) {
+				hashset.add(hash);
+			}
+			SongData[] songs = select.getSongDatabase().getSongDatas(hashset.toArray(new String[hashset.size()]));
+
+			SongData[] songdatas = new SongData[cds[i].getHash().length];
+			for (int j = 0;j < songdatas.length;j++) {
+				String hash = cds[i].getHash()[j];
+				for(SongData sd : songs) {
+					if(hash.equals(sd.getMd5()) || hash.equals(sd.getSha256())) {
+						songdatas[j] = sd;
+						break;
+					}
+				}
+			}
+			this.courses[i] = new GradeBar(cds[i].getName(), songdatas, cds[i]);
 		}
 
 		List<CommandBar> density = new ArrayList<CommandBar>();
@@ -419,6 +442,7 @@ public class BarRenderer {
 			}
 			dir.clear();
 			l.addAll(Arrays.asList(new FolderBar(select, null, "e2977170").getChildren()));
+			l.add(new ContainerBar("COURSE", courses));
 			l.addAll(Arrays.asList(tables));
 			l.addAll(Arrays.asList(commands));
 			l.addAll(search);

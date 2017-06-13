@@ -109,7 +109,7 @@ class GradeBar extends SelectableBar {
 
     @Override
     public String getTitle() {
-        return "段位認定 " + name;
+        return (course.isClassCourse() ? "段位認定 " : "") + name;
     }
 
     public boolean existsAllSongs() {
