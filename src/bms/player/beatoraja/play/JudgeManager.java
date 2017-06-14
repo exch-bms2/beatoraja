@@ -657,21 +657,21 @@ public class JudgeManager {
 enum JudgeAlgorithm {
 
 	/**
-	 * 判定アルゴリズム:LR2
+	 * 判定アルゴリズム:コンボ最優先
 	 */
-	LR2 {
+	Combo {
 		@Override
 		public boolean compare(Note t1, Note t2, long ptime, int[][] judgetable) {
-			return t2.getState() == 0 && t2.getTime() <= ptime && t2.getTime() >= ptime + judgetable[2][0];
+			return t2.getState() == 0 && t1.getTime() < ptime + judgetable[2][0] && t2.getTime() <= ptime + judgetable[2][1];
 		}
 	},
 	/**
-	 * 判定アルゴリズム:2DX
+	 * 判定アルゴリズム:判定時間差最優先
 	 */
-	IIDX {
+	Duration {
 		@Override
 		public boolean compare(Note t1, Note t2, long ptime, int[][] judgetable) {
-			return Math.abs(t1.getTime() - ptime) < Math.abs(t2.getTime() - ptime) && t2.getState() == 0;
+			return Math.abs(t1.getTime() - ptime) > Math.abs(t2.getTime() - ptime) && t2.getState() == 0;
 		}
 	},
 	/**
@@ -681,6 +681,15 @@ enum JudgeAlgorithm {
 		@Override
 		public boolean compare(Note t1, Note t2, long ptime, int[][] judgetable) {
 			return false;
+		}
+	},
+	/**
+	 * 判定アルゴリズム:スコア最優先
+	 */
+	Score {
+		@Override
+		public boolean compare(Note t1, Note t2, long ptime, int[][] judgetable) {
+			return t2.getState() == 0 && t1.getTime() < ptime + judgetable[1][0] && t2.getTime() <= ptime + judgetable[1][1];
 		}
 	}
 	;
