@@ -5,6 +5,8 @@ package bms.player.beatoraja;
  */
 public class ScoreDataProperty {
 
+    private IRScoreData score;
+
     private int nowpoint;
     private int nowscore;
     private int bestscore;
@@ -35,6 +37,7 @@ public class ScoreDataProperty {
     }
 
     public void update(IRScoreData score, int notes) {
+        this.score = score;
         final int exscore = score != null ? score.getExscore() : 0;
         final int totalnotes = score != null ? score.getNotes() : 0;
         if(score != null) {
@@ -186,5 +189,9 @@ public class ScoreDataProperty {
 
     public float getNowRivalScoreRate() {
         return nowrivalscorerate;
+    }
+
+    public IRScoreData getScoreData() {
+        return score;
     }
 }

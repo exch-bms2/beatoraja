@@ -43,7 +43,7 @@ public abstract class PatternModifier {
 		for (TimeLine tl : model.getAllTimeLines()) {
 			PatternModifyLog pm = null;
 			for (PatternModifyLog pms : log) {
-				if (pms.time == tl.getTime()) {
+				if (pms.section == tl.getSection() || pms.time == tl.getTime()) {
 					pm = pms;
 					break;
 				}
@@ -70,7 +70,7 @@ public abstract class PatternModifier {
 		for (PatternModifyLog pml : log) {
 			boolean b = true;
 			for (PatternModifyLog pml2 : log2) {
-				if (pml.time == pml2.time) {
+				if (pml.section == pml2.section) {
 					int[] newmod = new int[Math.max(pml.modify.length, pml2.modify.length)];
 					for (int i = 0; i < newmod.length; i++) {
 						if(i >= pml.modify.length) {
@@ -81,7 +81,7 @@ public abstract class PatternModifier {
 							newmod[i] = pml.modify[pml2.modify[i]];							
 						}
 					}
-					result.add(new PatternModifyLog(pml.time, newmod));
+					result.add(new PatternModifyLog(pml.section, newmod));
 					b = true;
 					break;
 				}
@@ -94,14 +94,14 @@ public abstract class PatternModifier {
 		for (PatternModifyLog pml2 : log2) {
 			boolean b = true;
 			for (PatternModifyLog pml : log) {
-				if (pml2.time == pml.time) {
+				if (pml2.section == pml.section) {
 					b = false;
 					break;
 				}
 			}
 			if (b) {
 				for (int index = 0; index < result.size(); index++) {
-					if (pml2.time < result.get(index).time) {
+					if (pml2.section < result.get(index).section) {
 						result.add(index, pml2);
 						b = false;
 						break;

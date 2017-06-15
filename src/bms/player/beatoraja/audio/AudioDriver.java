@@ -20,8 +20,10 @@ public interface AudioDriver extends Disposable {
 	 * @param loop
 	 *            ループ再生するかどうか
 	 */
-	public void play(String path, boolean loop);
-
+	public void play(String path, float volume, boolean loop);
+	
+	public void setVolume(String path, float volume);
+	
 	/**
 	 * 指定したパスの音源がなっている場合は止める
 	 * 

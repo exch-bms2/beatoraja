@@ -1,9 +1,14 @@
 package bms.player.beatoraja.play.bga;
 
+import java.io.File;
+import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel.MapMode;
 import java.util.logging.Logger;
 
 import bms.player.beatoraja.play.BMSPlayer;
+
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Gdx2DPixmap;
@@ -36,12 +41,6 @@ public class FFmpegProcessor implements MovieProcessor {
 
 	private FFmpegFrameGrabber grabber;
 
-	private Pixmap pixmap;
-	/**
-	 * 現在表示中のPixmap
-	 */
-	private Pixmap showing;
-
 	private MovieSeekThread movieseek;
 
 	private BMSPlayer player;
@@ -58,9 +57,18 @@ public class FFmpegProcessor implements MovieProcessor {
 
 	@Override
 	public void create(String filepath) {
-		grabber = new FFmpegFrameGrabber(filepath);
 		try {
+			RandomAccessFile file = new RandomAccessFile(filepath, "r");
+			file.getChannel().map(MapMode.READ_ONLY, 0, file.length()).load();
+			file.close();
+			
+			grabber = new FFmpegFrameGrabber(filepath);
 			grabber.start();
+			Logger.getGlobal().info(
+					"movie decode - fps : " + grabber.getFrameRate() + " format : " + grabber.getFormat() + " size : "
+							+ grabber.getImageWidth() + " x " + grabber.getImageHeight()
+							+ " length (frame / time) : " + grabber.getLengthInFrames() + " / "
+							+ grabber.getLengthInTime());
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
@@ -68,17 +76,6 @@ public class FFmpegProcessor implements MovieProcessor {
 
 	@Override
 	public Texture getFrame() {
-		if (showing != pixmap) {
-			showing = pixmap;
-			if (showingtex != null) {
-				showingtex.dispose();
-			}
-			if (pixmap != null) {
-				showingtex = new Texture(pixmap);
-			} else {
-				showingtex = null;
-			}
-		}
 		return showingtex;
 	}
 
@@ -88,20 +85,29 @@ public class FFmpegProcessor implements MovieProcessor {
 		public boolean restart = false;
 		public boolean loop = false;
 
+		private Pixmap pixmap;
+		
+		private final long[] nativeData = {0, grabber.getImageWidth(), grabber.getImageHeight(),
+				Gdx2DPixmap.GDX2D_FORMAT_RGB888 };
+		
+		private final Runnable updateTexture = new Runnable() {			
+			@Override
+			public void run() {
+				if (showingtex != null) {
+					showingtex.draw(pixmap, 0, 0);
+				} else {
+					showingtex = new Texture(pixmap);
+				}
+			}
+		};
+
 		public void run() {
 			try {
-				Logger.getGlobal().info(
-						"decode開始 - fps : " + grabber.getFrameRate() + " format : " + grabber.getFormat() + " size : "
-								+ grabber.getImageWidth() + " x " + grabber.getImageHeight()
-								+ " length (frame / time) : " + grabber.getLengthInFrames() + " / "
-								+ grabber.getLengthInTime());
 				fps = grabber.getFrameRate();
 				if (fps > 240) {
 					// フレームレートが大きすぎる場合は手動で修正(暫定処置)
 					fps = 30;
 				}
-				final long[] nativeData = new long[] { 0, grabber.getImageWidth(), grabber.getImageHeight(),
-						Gdx2DPixmap.GDX2D_FORMAT_RGB888 };
 				long start = player != null ? player.getNowTime() - player.getTimer()[TIMER_PLAY] : (System.nanoTime() / 1000000);
 				int framecount = 0;
 				Frame frame = null;
@@ -125,7 +131,10 @@ public class FFmpegProcessor implements MovieProcessor {
 						} else if (frame.image != null && frame.image[0] != null) {
 							try {
 								Gdx2DPixmap pixmapData = new Gdx2DPixmap((ByteBuffer) frame.image[0], nativeData);
-								pixmap = new Pixmap(pixmapData);
+								if(pixmap == null) {
+									pixmap = new Pixmap(pixmapData);									
+								}								
+								Gdx.app.postRunnable(updateTexture);
 								// System.out.println("movie pixmap created : "
 								// + time);
 							} catch (Throwable e) {
@@ -145,6 +154,7 @@ public class FFmpegProcessor implements MovieProcessor {
 					}
 					if (restart) {
 						restart = false;
+						pixmap = null;
 						grabber.start();
 //						grabber.restart();
 						start = player != null ? player.getNowTime() - player.getTimer()[TIMER_PLAY] : (System.nanoTime() / 1000000);

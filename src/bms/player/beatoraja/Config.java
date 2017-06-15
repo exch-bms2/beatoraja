@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 
 import bms.player.beatoraja.input.BMControllerInputProcessor.BMKeys;
 import bms.player.beatoraja.PlayConfig.MidiConfig;
+import bms.player.beatoraja.play.JudgeAlgorithm;
 import bms.player.beatoraja.play.JudgeManager;
 
 import bms.player.beatoraja.skin.SkinType;
@@ -69,6 +70,8 @@ public class Config {
 	 * オーディオ同時発音数
 	 */
 	private int audioDeviceSimultaneousSources = 64;
+	
+	private float systemvolume = 1.0f;
 	/**
 	 * キー音のボリューム
 	 */
@@ -121,16 +124,21 @@ public class Config {
 	/**
 	 * 判定アルゴリズム
 	 */
-	private int judgeAlgorithm = JudgeManager.JUDGE_ALGORITHM_LR2;
+	private JudgeAlgorithm judgealgorithm = JudgeAlgorithm.Combo;
 
-        /**
-         * JKOC Hack (boolean) private variable
-         */
+    /**
+     * JKOC Hack (boolean) private variable
+     */
     private boolean jkoc_hack = false;
-    
-	private Mode mode_sort = null;
+
+    /**
+     * 選曲時のモードフィルター
+     */
+	private Mode mode = null;
 	
     private boolean cacheSkinImage = false;
+    
+    private boolean useSongInfo = true;
 	/**
 	 * アシストオプション:コンスタント
 	 */
@@ -227,6 +235,8 @@ public class Config {
 			MidiConfig.default9());
 
 	private int musicselectinput = 0;
+
+	private boolean updatesong = false;
 
 	private String irname = "";
 
@@ -391,12 +401,12 @@ public class Config {
 		this.tableURL = tableURL;
 	}
 
-	public int getJudgeAlgorithm() {
-		return judgeAlgorithm;
+	public JudgeAlgorithm getJudgealgorithm() {
+		return judgealgorithm;
 	}
 
-	public void setJudgeAlgorithm(int judgeAlgorithm) {
-		this.judgeAlgorithm = judgeAlgorithm;
+	public void setJudgealgorithm(JudgeAlgorithm judgeAlgorithm) {
+		this.judgealgorithm = judgeAlgorithm;
 	}
 
 	public boolean isExpandjudge() {
@@ -487,19 +497,14 @@ public class Config {
 		this.mode9 = mode9;
 	}
 
-	public void setModeSort(Mode m)  {
-		this.mode_sort = m;
+	public void setMode(Mode m)  {
+		this.mode = m;
 	}
 	
-	public int getModeSort()  {
-		for(int x = 0; x < MusicSelector.MODE.length; x++)  {
-		    if(mode_sort == MusicSelector.MODE[x])
-				return x;
-			else
-				continue;
-		}
-		return 0;
+	public Mode getMode()  {
+		return mode;
 	}
+	
 	public Resolution getResolution() {
 		return resolution;
 	}
@@ -694,6 +699,30 @@ public class Config {
 
 	public void setCacheSkinImage(boolean cacheSkinImage) {
 		this.cacheSkinImage = cacheSkinImage;
+	}
+
+	public float getSystemvolume() {
+		return systemvolume;
+	}
+
+	public void setSystemvolume(float systemvolume) {
+		this.systemvolume = systemvolume;
+	}
+	
+	public boolean isUpdatesong() {
+		return updatesong;
+	}
+
+	public void setUpdatesong(boolean updatesong) {
+		this.updatesong = updatesong;
+	}
+
+	public boolean isUseSongInfo() {
+		return useSongInfo;
+	}
+
+	public void setUseSongInfo(boolean useSongInfo) {
+		this.useSongInfo = useSongInfo;
 	}
 
 	public static class SkinConfig {

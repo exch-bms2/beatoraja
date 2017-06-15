@@ -12,7 +12,9 @@ import com.badlogic.gdx.math.Rectangle;
 
 import bms.model.Mode;
 import bms.player.beatoraja.*;
+import bms.player.beatoraja.CourseData.TrophyData;
 import bms.player.beatoraja.song.SongData;
+import bms.player.beatoraja.song.SongInformationAccessor;
 
 /**
  * 楽曲バー描画用クラス
@@ -38,7 +40,9 @@ public class BarRenderer {
 	 */
 	private int selectedindex;
 
-	private CommandBar[] commands;
+	private Bar[] commands;
+
+	private GradeBar[] courses = new GradeBar[0];
 	/**
 	 * 難易度表バー一覧
 	 */
@@ -74,20 +78,68 @@ public class BarRenderer {
 		for (int i = 0; i < tds.length; i++) {
 			this.tables[i] = new TableBar(select, tds[i]);
 		}
+		CourseData[] cds = new CourseDataAccessor().readAll();
+		courses = new GradeBar[cds.length];
+		for (int i = 0; i < cds.length; i++) {
+			Set<String> hashset = new HashSet<String>();
+			for (String hash : cds[i].getHash()) {
+				hashset.add(hash);
+			}
+			SongData[] songs = select.getSongDatabase().getSongDatas(hashset.toArray(new String[hashset.size()]));
 
-		commands = new CommandBar[] {
+			SongData[] songdatas = new SongData[cds[i].getHash().length];
+			for (int j = 0;j < songdatas.length;j++) {
+				String hash = cds[i].getHash()[j];
+				for(SongData sd : songs) {
+					if(hash.equals(sd.getMd5()) || hash.equals(sd.getSha256())) {
+						songdatas[j] = sd;
+						break;
+					}
+				}
+			}
+			this.courses[i] = new GradeBar(cds[i].getName(), songdatas, cds[i]);
+		}
+
+		List<CommandBar> density = new ArrayList<CommandBar>();
+		int i = 1;
+		density.add(new CommandBar(main, select, "DENSITY < " + i, "density < 1", true));
+		for(;i < 50;i++) {
+			density.add(new CommandBar(main, select, "DENSITY " + i + " - " + (i + 1), "density >= " + i + " AND density < " + (i + 1), true));			
+		}
+		density.add(new CommandBar(main, select, "DENSITY >= " + i, "density >= " + i, true));
+		
+		commands = new Bar[] {
 				new CommandBar(main, select, "MY BEST", "playcount > 0 ORDER BY playcount DESC LIMIT 10"),
-				new CommandBar(main, select, "FULL COMBO", "clear >= 8"),
-				new CommandBar(main, select, "EX HARD CLEAR", "clear = 7"),
-				new CommandBar(main, select, "HARD CLEAR", "clear = 6"),
-				new CommandBar(main, select, "CLEAR", "clear = 5"),
-				new CommandBar(main, select, "EASY CLEAR", "clear = 4"),
-				new CommandBar(main, select, "ASSIST CLEAR", "clear IN (2, 3)"),
-				new CommandBar(main, select, "RANK AAA", "(lpg * 2 + epg * 2 + lgr + egr) * 50 / notes >= 88.88"),
-				new CommandBar(main, select, "RANK AA",
-						"(lpg * 2 + epg * 2 + lgr + egr) * 50 / notes >= 77.77 AND (lpg * 2 + epg * 2 + lgr + egr) * 50 / notes < 88.88"),
-				new CommandBar(main, select, "RANK A",
-						"(lpg * 2 + epg * 2 + lgr + egr) * 50 / notes >= 66.66 AND (lpg * 2 + epg * 2 + lgr + egr) * 50 / notes < 77.77"), };
+				new ContainerBar("CLEAR TYPE", new Bar[]{new CommandBar(main, select, "FULL COMBO", "clear >= 8"),
+						new CommandBar(main, select, "EX HARD CLEAR", "clear = 7"),
+						new CommandBar(main, select, "HARD CLEAR", "clear = 6"),
+						new CommandBar(main, select, "CLEAR", "clear = 5"),
+						new CommandBar(main, select, "EASY CLEAR", "clear = 4"),
+						new CommandBar(main, select, "ASSIST CLEAR", "clear IN (2, 3)"),
+						new CommandBar(main, select, "FAILED", "clear = 1")}),	
+				new ContainerBar("SCORE RANK", new Bar[]{new CommandBar(main, select, "RANK AAA", 
+								"(lpg * 2 + epg * 2 + lgr + egr) * 50 / notes >= 88.88"),
+						new CommandBar(main, select, "RANK AA",
+								"(lpg * 2 + epg * 2 + lgr + egr) * 50 / notes >= 77.77 AND (lpg * 2 + epg * 2 + lgr + egr) * 50 / notes < 88.88"),
+						new CommandBar(main, select, "RANK A",
+								"(lpg * 2 + epg * 2 + lgr + egr) * 50 / notes >= 66.66 AND (lpg * 2 + epg * 2 + lgr + egr) * 50 / notes < 77.77"),
+						new CommandBar(main, select, "RANK B",
+								"(lpg * 2 + epg * 2 + lgr + egr) * 50 / notes >= 55.55 AND (lpg * 2 + epg * 2 + lgr + egr) * 50 / notes < 66.66"),
+						new CommandBar(main, select, "RANK C",
+								"(lpg * 2 + epg * 2 + lgr + egr) * 50 / notes >= 44.44 AND (lpg * 2 + epg * 2 + lgr + egr) * 50 / notes < 55.55"),
+						new CommandBar(main, select, "RANK D",
+								"(lpg * 2 + epg * 2 + lgr + egr) * 50 / notes >= 33.33 AND (lpg * 2 + epg * 2 + lgr + egr) * 50 / notes < 44.44"),
+						new CommandBar(main, select, "RANK E",
+								"(lpg * 2 + epg * 2 + lgr + egr) * 50 / notes >= 22.22 AND (lpg * 2 + epg * 2 + lgr + egr) * 50 / notes < 33.33"),
+						}),
+				new ContainerBar("FEATURE", new Bar[]{
+						new CommandBar(main, select, "SCRATCH 10 - 20%", "(n + ln) <= (s + ls) * 9 AND (n + ln) > (s + ls) * 4 ", true),
+						new CommandBar(main, select, "SCRATCH > 20%", "(n + ln) <= (s + ls) * 4 ", true),
+						new CommandBar(main, select, "LONG NOTE 10 - 20%", "(n + s) <= (ln + ls) * 9 AND (n + s) > (ln + ls) * 4 ", true),
+						new CommandBar(main, select, "LONG NOTE > 20%", "(n + s) <= (ln + ls) * 4 ", true),
+						}),	
+				new ContainerBar("DENSITY", density.toArray(new Bar[density.size()]))
+				};
 	}
 
 	public Bar getSelected() {
@@ -221,7 +273,7 @@ public class BarRenderer {
 				value = 0;
 			} else if (sd instanceof SearchWordBar) {
 				value = 6;
-			} else if (sd instanceof CommandBar) {
+			} else if (sd instanceof CommandBar || sd instanceof ContainerBar) {
 				value = 5;
 			}
 
@@ -265,7 +317,7 @@ public class BarRenderer {
 						}
 					}
 					// trophy
-					TableData.TrophyData trophy = gb.getTrophy();
+					TrophyData trophy = gb.getTrophy();
 					if (trophy != null) {
 						for (int j = 0; j < TROPHY.length; j++) {
 							if (TROPHY[j].equals(trophy.getName()) && baro.getTrophy()[j] != null) {
@@ -292,15 +344,15 @@ public class BarRenderer {
 				}
 
 				// LN
-				if ((flag & 1) != 0 && baro.getLabel()[0] != null) {
+				if ((flag & SongData.FEATURE_LONGNOTE) != 0 && baro.getLabel()[0] != null) {
 					baro.getLabel()[0].draw(sprite, time, select, x, y);
 				}
 				// MINE
-				if ((flag & 2) != 0 && baro.getLabel()[2] != null) {
+				if ((flag & SongData.FEATURE_MINENOTE) != 0 && baro.getLabel()[2] != null) {
 					baro.getLabel()[2].draw(sprite, time, select, x, y);
 				}
 				// RANDOM
-				if ((flag & 4) != 0 && baro.getLabel()[1] != null) {
+				if ((flag & SongData.FEATURE_RANDOM) != 0 && baro.getLabel()[1] != null) {
 					baro.getLabel()[1].draw(sprite, time, select, x, y);
 				}
 			}
@@ -318,7 +370,7 @@ public class BarRenderer {
 		int mov = -input.getScroll();
 		input.resetScroll();
 		// song bar scroll
-		if (select.isPressed(keystate, keytime, MusicSelector.KEY_UP, false) || cursor[1]) {
+		if (select.isPressed(keystate, keytime, MusicSelectInputProcessor.KEY_UP, false) || cursor[1]) {
 			long l = System.currentTimeMillis();
 			if (duration == 0) {
 				mov = 1;
@@ -330,7 +382,7 @@ public class BarRenderer {
 				mov = 1;
 				angle = durationhigh;
 			}
-		} else if (select.isPressed(keystate, keytime, MusicSelector.KEY_DOWN, false) || cursor[0]) {
+		} else if (select.isPressed(keystate, keytime, MusicSelectInputProcessor.KEY_DOWN, false) || cursor[0]) {
 			long l = System.currentTimeMillis();
 			if (duration == 0) {
 				mov = -1;
@@ -390,6 +442,7 @@ public class BarRenderer {
 			}
 			dir.clear();
 			l.addAll(Arrays.asList(new FolderBar(select, null, "e2977170").getChildren()));
+			l.add(new ContainerBar("COURSE", courses));
 			l.addAll(Arrays.asList(tables));
 			l.addAll(Arrays.asList(commands));
 			l.addAll(search);
@@ -405,7 +458,7 @@ public class BarRenderer {
 
 		List<Bar> remove = new ArrayList<Bar>();
 		for (Bar b : l) {
-			final Mode mode = select.getMode();
+			final Mode mode = select.getMainController().getPlayerResource().getConfig().getMode();
 			if (mode != null && b instanceof SongBar
 					&& ((SongBar) b).getSongData().getMode() != mode.id) {
 				remove.add(b);
@@ -432,7 +485,7 @@ public class BarRenderer {
 				}
 			}
 
-			Arrays.sort(currentsongs, BarSorter.getAllSorter()[select.getSort()]);
+			Arrays.sort(currentsongs, BarSorter.values()[select.getSort()]);
 
 			selectedindex = 0;
 
@@ -479,7 +532,7 @@ public class BarRenderer {
 		final Bar selected = getSelected();
 		if (selected instanceof FolderBar) {
 			FolderBar fb = (FolderBar) selected;
-			select.getSongDatabase().updateSongDatas(fb.getFolderData().getPath(), false);
+			select.getSongDatabase().updateSongDatas(fb.getFolderData().getPath(), false, select.getMainController().getInfoDatabase());
 		} else if (selected instanceof TableBar) {
 			TableBar tb = (TableBar) selected;
 			if (tb.getUrl() != null && tb.getUrl().length() > 0) {
@@ -529,6 +582,7 @@ public class BarRenderer {
 		public void run() {
 			Config config = select.getMainController().getPlayerResource().getConfig();
 			final MainController main = select.getMainController();
+			final SongInformationAccessor info = select.getMainController().getInfoDatabase();
 			for (Bar bar : bars) {
 				if (bar instanceof SongBar) {
 					SongData sd = ((SongBar) bar).getSongData();
@@ -537,10 +591,13 @@ public class BarRenderer {
 					}
 					boolean[] replay = new boolean[MusicSelector.REPLAY];
 					for (int i = 0; i < MusicSelector.REPLAY; i++) {
-						replay[i] = main.getPlayDataAccessor().existsReplayData(sd.getSha256(), sd.hasLongNote(),
+						replay[i] = main.getPlayDataAccessor().existsReplayData(sd.getSha256(), sd.hasUndefinedLongNote(),
 								config.getLnmode(), i);
 					}
 					((SongBar) bar).setExistsReplayData(replay);
+					if(info != null) {
+						sd.setInformation(info.getInformation(sd.getSha256()));
+					}
 				}
 				if (bar instanceof GradeBar) {
 					GradeBar gb = (GradeBar) bar;
@@ -549,18 +606,14 @@ public class BarRenderer {
 						boolean ln = false;
 						for (int j = 0; j < gb.getSongDatas().length; j++) {
 							hash[j] = gb.getSongDatas()[j].getSha256();
-							ln |= gb.getSongDatas()[j].hasLongNote();
+							ln |= gb.getSongDatas()[j].hasUndefinedLongNote();
 						}
-						gb.setScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 0,
-								gb.getConstraint()));
-						gb.setMirrorScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 1,
-								gb.getConstraint()));
-						gb.setRandomScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 2,
-								gb.getConstraint()));
+						gb.setScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 0, gb.getConstraint()));
+						gb.setMirrorScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 1, gb.getConstraint()));
+						gb.setRandomScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 2, gb.getConstraint()));
 						boolean[] replay = new boolean[MusicSelector.REPLAY];
 						for (int i = 0; i < MusicSelector.REPLAY; i++) {
-							replay[i] = main.getPlayDataAccessor().existsReplayData(hash, ln, config.getLnmode(), i,
-									gb.getConstraint());
+							replay[i] = main.getPlayDataAccessor().existsReplayData(hash, ln, config.getLnmode(), i, gb.getConstraint());
 						}
 						gb.setExistsReplayData(replay);
 					}

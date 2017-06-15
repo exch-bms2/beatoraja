@@ -1,7 +1,7 @@
 package bms.player.beatoraja.select;
 
 import bms.player.beatoraja.*;
-import bms.player.beatoraja.TableData.CourseData;
+import bms.player.beatoraja.CourseData.TrophyData;
 import bms.player.beatoraja.song.FolderData;
 import bms.player.beatoraja.song.*;
 
@@ -93,11 +93,11 @@ class GradeBar extends SelectableBar {
     private SongData[] songs;
     private String name;
 
-    private TableData.CourseData course;
+    private CourseData course;
     private IRScoreData mscore;
     private IRScoreData rscore;
 
-    public GradeBar(String name, SongData[] songs, TableData.CourseData course) {
+    public GradeBar(String name, SongData[] songs, CourseData course) {
         this.songs = songs;
         this.name = name;
         this.course = course;
@@ -109,7 +109,7 @@ class GradeBar extends SelectableBar {
 
     @Override
     public String getTitle() {
-        return "段位認定 " + name;
+        return (course.isClassCourse() ? "段位認定 " : "") + name;
     }
 
     public boolean existsAllSongs() {
@@ -137,19 +137,19 @@ class GradeBar extends SelectableBar {
         this.rscore = score;
     }
 
-    public int[] getConstraint() {
+    public CourseData.CourseDataConstraint[] getConstraint() {
         if (course.getConstraint() != null) {
             return course.getConstraint();
         }
-        return new int[0];
+        return new CourseData.CourseDataConstraint[0];
     }
 
-    public TableData.TrophyData[] getAllTrophy() {
+    public TrophyData[] getAllTrophy() {
         return course.getTrophy();
     }
 
-    public TableData.TrophyData getTrophy() {
-        for (TableData.TrophyData trophy : course.getTrophy()) {
+    public TrophyData getTrophy() {
+        for (TrophyData trophy : course.getTrophy()) {
             if (qualified(this.getScore(), trophy)) {
                 return trophy;
             }
@@ -163,7 +163,7 @@ class GradeBar extends SelectableBar {
         return null;
     }
 
-    private boolean qualified(IRScoreData score, TableData.TrophyData trophy) {
+    private boolean qualified(IRScoreData score, TrophyData trophy) {
         return score != null && score.getNotes() != 0
                 && trophy.getMissrate() >= score.getMinbp() * 100.0 / score.getNotes()
                 && trophy.getScorerate() <= score.getExscore() * 100.0 / (score.getNotes() * 2);
@@ -310,6 +310,59 @@ class FolderBar extends DirectoryBar {
     }
 }
 
+class ContainerBar extends DirectoryBar {
+
+	private String title;
+    private Bar[] childbar;
+
+    public ContainerBar(String title, Bar[] bar) {
+        this.title = title;
+        childbar = bar;
+    }
+
+    @Override
+    public String getTitle() {
+        return title;
+    }
+    
+    @Override
+    public Bar[] getChildren() {
+        return childbar;
+    }
+}
+
+class SameFolderBar extends DirectoryBar {
+
+    private MusicSelector selector;
+    private String crc;
+    private String title;
+
+    public SameFolderBar(MusicSelector selector, String title, String crc) {
+        this.selector = selector;
+        this.crc = crc;
+        this.title = title;
+    }
+
+    @Override
+    public String getTitle() {
+        return title;
+    }
+
+    @Override
+    public Bar[] getChildren() {
+        List<Bar> l = new ArrayList<Bar>();
+        SongData[] songs = selector.getSongDatabase().getSongDatas("folder", crc);
+        List<String> sha = new ArrayList<String>();
+        for (SongData song : songs) {
+            if(!sha.contains(song.getSha256())) {
+                l.add(new SongBar(song));
+                sha.add(song.getSha256());
+            }
+        }
+        return l.toArray(new Bar[0]);
+    }
+}
+
 class TableBar extends DirectoryBar {
 
 	private TableData td;
@@ -336,8 +389,8 @@ class TableBar extends DirectoryBar {
 
     	final long t = System.currentTimeMillis();
 		List<TableLevelBar> levels = new ArrayList<TableLevelBar>();
-		for (String lv : td.getLevel()) {
-			levels.add(new TableLevelBar(selector, lv, td.getHash().get(lv)));
+		for (TableData.TableDataELement lv : td.getFolder()) {
+			levels.add(new TableLevelBar(selector, lv.getLevel(), lv.getHash()));
 		}
 
 		this.levels = levels.toArray(new TableLevelBar[levels.size()]);
@@ -467,12 +520,18 @@ class CommandBar extends DirectoryBar {
     private MusicSelector selector;
     private String title;
     private String sql;
+    private boolean info;
 
     public CommandBar(MainController main, MusicSelector selector, String title, String sql) {
+    	this(main, selector, title, sql, false);
+    }
+
+    public CommandBar(MainController main, MusicSelector selector, String title, String sql, boolean info) {
         this.main = main;
         this.selector = selector;
         this.title = title;
         this.sql = sql;
+        this.info = info;
     }
 
     @Override
@@ -487,15 +546,31 @@ class CommandBar extends DirectoryBar {
 
     @Override
     public Bar[] getChildren() {
-        List<IRScoreData> scores = main.getPlayDataAccessor().readScoreDatas(sql);
-        List<Bar> l = new ArrayList<Bar>();
-        for (IRScoreData score : scores) {
-            SongData[] song = selector.getSongDatabase().getSongDatas("sha256", score.getSha256());
-            if (song.length > 0 && (!song[0].hasLongNote() || selector.getMainController().getPlayerResource().getConfig().getLnmode() == score.getMode())) {
-                l.add(new SongBar(song[0]));
+    	if(info) {
+    		if(main.getInfoDatabase() == null) {
+    			return new Bar[0];
+    		}
+    		SongInformation[] infos = main.getInfoDatabase().getInformations(sql);
+            List<Bar> l = new ArrayList<Bar>();
+            for (SongInformation info : infos) {
+                SongData[] song = selector.getSongDatabase().getSongDatas("sha256", info.getSha256());
+                if(song.length > 0) {
+                    l.add(new SongBar(song[0]));                	
+                }
             }
-        }
-        return l.toArray(new Bar[0]);
+            return l.toArray(new Bar[l.size()]);    		    		
+    	} else {
+            List<IRScoreData> scores = main.getPlayDataAccessor().readScoreDatas(sql);
+            List<Bar> l = new ArrayList<Bar>();
+            for (IRScoreData score : scores) {
+                SongData[] song = selector.getSongDatabase().getSongDatas("sha256", score.getSha256());
+                if (song.length > 0 && (!song[0].hasUndefinedLongNote() || selector.getMainController().getPlayerResource().getConfig().getLnmode() == score.getMode())) {
+                    l.add(new SongBar(song[0]));
+                }
+            }
+            return l.toArray(new Bar[l.size()]);    		
+    	}
+    	
     }
 
 }

@@ -3,29 +3,12 @@ package bms.player.beatoraja;
 import java.io.*;
 import java.net.URL;
 import java.nio.file.*;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
-
-import bms.player.beatoraja.skin.SkinLoader;
-import bms.player.beatoraja.skin.SkinType;
-import com.badlogic.gdx.Graphics;
-import org.apache.commons.dbutils.QueryRunner;
-import org.apache.commons.dbutils.handlers.MapListHandler;
-
-import bms.player.beatoraja.Config.SkinConfig;
-import bms.player.beatoraja.ir.IRConnection;
-import bms.player.beatoraja.skin.SkinHeader;
-import bms.player.beatoraja.skin.SkinHeader.CustomFile;
-import bms.player.beatoraja.skin.SkinHeader.CustomOption;
-import bms.player.beatoraja.skin.lr2.LR2SkinHeaderLoader;
-import bms.player.beatoraja.song.*;
-
-import com.badlogic.gdx.utils.Json;
-import com.badlogic.gdx.utils.JsonWriter.OutputType;
-import com.synthbot.jasiohost.AsioDriver;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -38,9 +21,26 @@ import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.util.Callback;
 
+import org.apache.commons.dbutils.QueryRunner;
+import org.apache.commons.dbutils.handlers.MapListHandler;
+
+import bms.player.beatoraja.Config.SkinConfig;
+import bms.player.beatoraja.ir.IRConnection;
+import bms.player.beatoraja.play.JudgeAlgorithm;
+import bms.player.beatoraja.skin.SkinHeader.CustomFile;
+import bms.player.beatoraja.skin.SkinHeader.CustomOption;
+import bms.player.beatoraja.skin.*;
+import bms.player.beatoraja.skin.lr2.LR2SkinHeaderLoader;
+import bms.player.beatoraja.song.*;
+
+import com.badlogic.gdx.Graphics;
+import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.JsonWriter.OutputType;
+import com.synthbot.jasiohost.AsioDriver;
+
 /**
  * Beatorajaの設定ダイアログ
- * 
+ *
  * @author exch
  */
 public class PlayConfigurationView implements Initializable {
@@ -80,6 +80,8 @@ public class PlayConfigurationView implements Initializable {
 	private TextField url;
 	@FXML
 	private ListView<String> tableurl;
+	@FXML
+	private CheckBox updatesong;
 
 	@FXML
 	private ComboBox<Integer> scoreop;
@@ -132,13 +134,21 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private Spinner<Integer> audiosim;
 	@FXML
+	private Slider systemvolume;
+	@FXML
+	private Slider keyvolume;
+	@FXML
+	private Slider bgvolume;
+	@FXML
 	private ComboBox<Integer> judgealgorithm;
 
-    @FXML  
+    @FXML
     private ComboBox<Integer> jkoc_hack;
-    @FXML  
+    @FXML
     private CheckBox usecim;
-        
+    @FXML
+    private CheckBox useSongInfo;
+
 	private Config config;;
 	@FXML
 	private CheckBox folderlamp;
@@ -159,6 +169,8 @@ public class PlayConfigurationView implements Initializable {
 	private PasswordField irpassword;
 
 	private MainLoader loader;
+
+	private boolean songUpdated = false;
 
 	private void initComboBox(ComboBox<Integer> combo, final String[] values) {
 		combo.setCellFactory(new Callback<ListView<Integer>, ListCell<Integer>>() {
@@ -242,11 +254,15 @@ public class PlayConfigurationView implements Initializable {
 
 		fixhispeed.setValue(config.getFixhispeed());
 		judgetiming.getValueFactory().setValue(config.getJudgetiming());
+		systemvolume.setValue((double)config.getSystemvolume());
+		keyvolume.setValue((double)config.getKeyvolume());
+		bgvolume.setValue((double)config.getBgvolume());
 
 		bgmpath.setText(config.getBgmpath());
 		soundpath.setText(config.getSoundpath());
 
 		bmsroot.getItems().setAll(config.getBmsroot());
+		updatesong.setSelected(config.isUpdatesong());
 		tableurl.getItems().setAll(config.getTableURL());
 
 		constant.setSelected(config.isConstant());
@@ -264,13 +280,14 @@ public class PlayConfigurationView implements Initializable {
 		audiobuffer.getValueFactory().setValue(config.getAudioDeviceBufferSize());
 		audiosim.getValueFactory().setValue(config.getAudioDeviceSimultaneousSources());
 
-		judgealgorithm.setValue(config.getJudgeAlgorithm());
+		judgealgorithm.setValue(JudgeAlgorithm.getIndex(config.getJudgealgorithm()));
 
         // int b = Boolean.valueOf(config.getJKOC()).compareTo(false);
-        
+
         jkoc_hack.setValue(Boolean.valueOf(config.getJKOC()).compareTo(false));
         usecim.setSelected(config.isCacheSkinImage());
-                
+        useSongInfo.setSelected(config.isUseSongInfo());
+
 		folderlamp.setSelected(config.isFolderlamp());
 
 		inputduration.getValueFactory().setValue(config.getInputduration());
@@ -305,8 +322,12 @@ public class PlayConfigurationView implements Initializable {
 
 		config.setBgmpath(bgmpath.getText());
 		config.setSoundpath(soundpath.getText());
+		config.setSystemvolume((float) systemvolume.getValue());
+		config.setKeyvolume((float) keyvolume.getValue());
+		config.setBgvolume((float) bgvolume.getValue());
 
 		config.setBmsroot(bmsroot.getItems().toArray(new String[0]));
+		config.setUpdatesong(updatesong.isSelected());
 		config.setTableURL(tableurl.getItems().toArray(new String[0]));
 
 		config.setConstant(constant.isSelected());
@@ -325,15 +346,16 @@ public class PlayConfigurationView implements Initializable {
 		config.setAudioDeviceBufferSize(getValue(audiobuffer));
 		config.setAudioDeviceSimultaneousSources(getValue(audiosim));
 
-		config.setJudgeAlgorithm(judgealgorithm.getValue());
-    
-        // jkoc_hack is integer but *.setJKOC needs boolean type  
+		config.setJudgealgorithm(JudgeAlgorithm.values()[judgealgorithm.getValue()]);
+
+        // jkoc_hack is integer but *.setJKOC needs boolean type
         if(jkoc_hack.getValue() > 0)
             config.setJKOC(true);
         else
             config.setJKOC(false);
 
         config.setCacheSkinImage(usecim.isSelected());
+        config.setUseSongInfo(useSongInfo.isSelected());
         config.setFolderlamp(folderlamp.isSelected());
 
 		config.setInputduration(getValue(inputduration));
@@ -525,7 +547,7 @@ public class PlayConfigurationView implements Initializable {
 	public void start() {
 		commit();
 		loader.hide();
-		MainLoader.play(null, 0, true);
+		MainLoader.play(null, 0, true, songUpdated);
 	}
 
     @FXML
@@ -540,7 +562,7 @@ public class PlayConfigurationView implements Initializable {
 
 	/**
 	 * BMSを読み込み、楽曲データベースを更新する
-	 * 
+	 *
 	 * @param updateAll
 	 *            falseの場合は追加削除分のみを更新する
 	 */
@@ -550,9 +572,12 @@ public class PlayConfigurationView implements Initializable {
 			Class.forName("org.sqlite.JDBC");
 			SongDatabaseAccessor songdb = new SQLiteSongDatabaseAccessor(Paths.get("songdata.db").toString(),
 					config.getBmsroot());
+			SongInformationAccessor infodb = useSongInfo.isSelected() ? 
+					new SongInformationAccessor(Paths.get("songinfo.db").toString()) : null;
 			Logger.getGlobal().info("song.db更新開始");
-			songdb.updateSongDatas(null, updateAll);
+			songdb.updateSongDatas(null, updateAll, infodb);
 			Logger.getGlobal().info("song.db更新完了");
+			songUpdated = true;
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -699,7 +724,7 @@ public class PlayConfigurationView implements Initializable {
 
 /**
  * スキンコンフィグ
- * 
+ *
  * @author exch
  */
 class SkinConfigurationView {

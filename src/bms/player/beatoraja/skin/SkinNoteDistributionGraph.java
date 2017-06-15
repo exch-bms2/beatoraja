@@ -3,12 +3,9 @@ package bms.player.beatoraja.skin;
 import bms.model.*;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.play.BMSPlayer;
+import bms.player.beatoraja.song.SongData;
 
-import java.util.Arrays;
-
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
@@ -27,6 +24,7 @@ public class SkinNoteDistributionGraph extends SkinObject {
 	private TextureRegion endcursor;
 
 	private BMSModel model;
+	private SongData current;
 	private int[][] data = new int[0][0];
 
 	private static final Color[][] JGRAPH = {
@@ -81,11 +79,20 @@ public class SkinNoteDistributionGraph extends SkinObject {
 			return;
 		}
 		
-		final BMSModel model = state.getMainController().getPlayerResource().getSongdata() != null
-				? state.getMainController().getPlayerResource().getSongdata().getBMSModel() : null;
-		if (this.model != model || shapetex == null) {
-			updateGraph(model);
+		final SongData song = state.getMainController().getPlayerResource().getSongdata();
+		final BMSModel model = song != null ? song.getBMSModel() : null;
+		if(song != current || (this.model == null && model != null)) {
+			current = song;
+			this.model = model;
+			if(song != null && song.getInformation() != null) {
+				updateGraph(song.getInformation().getDistributionValues());				
+			} else {
+				updateGraph(model);
+			}
 		}
+		if (shapetex == null) {
+			updateGraph(model);
+		}			
 
 		sprite.draw(backtex, r.x, r.y + r.height, r.width, -r.height);
 		final float render = time >= delay ? 1.0f : (float) time / delay;
@@ -104,15 +111,28 @@ public class SkinNoteDistributionGraph extends SkinObject {
 
 	}
 	
+	private void updateGraph(int[][] distribution) {
+		data = distribution;
+		max = 20;
+		for(int i = 0;i < distribution.length;i++) {
+			int count = 0;
+			for(int j = 0;j < distribution[0].length;j++) {
+				count += distribution[i][j];
+			}
+			if (max < count) {
+				max = Math.min((count / 10) * 10 + 10, 100);
+			}
+		}
+
+		updateTexture();
+	}
+
+	
 	private void updateGraph(BMSModel model) {
 		if (model == null) {
-			this.model = model;
 			data = new int[0][graphcolor.length];
 		} else {
-			if(this.model != model) {
-				data = new int[model.getLastTime() / 1000 + 1][graphcolor.length];				
-			}
-			this.model = model;
+			data = new int[model.getLastTime() / 1000 + 1][graphcolor.length];				
 			int pos = 0;
 			int count = 0;
 			max = 20;
@@ -127,9 +147,9 @@ public class SkinNoteDistributionGraph extends SkinObject {
 				for (int i = 0; i < model.getMode().key; i++) {
 					Note n = tl.getNote(i);
 					if (n != null && !(model.getLntype() == BMSModel.LNTYPE_LONGNOTE && n instanceof LongNote
-							&& ((LongNote) n).getEndnote().getSection() == tl.getSection())) {
+							&& ((LongNote) n).isEnd())) {
 						int st = n.getState();
-						int t = n.getTime();
+						int t = n.getPlayTime();
 						switch (type) {
 						case TYPE_NORMAL:
 							if (n instanceof NormalNote) {
@@ -147,27 +167,12 @@ public class SkinNoteDistributionGraph extends SkinObject {
 							if (n instanceof MineNote) {
 								break;
 							}
-							if (n instanceof LongNote
-									&& ((LongNote) n).getEndnote().getSection() == tl.getSection()) {
-								st = ((LongNote) n).getEndnote().getState();
-								// if(state == 0) {
-								// System.out.println("終端未処理:"+tl.getTime());
-								// }
-							}
 							data[tl.getTime() / 1000][st]++;
 							count++;
 							break;
 						case TYPE_EARLYLATE:
 							if (n instanceof MineNote) {
 								break;
-							}
-							if (n instanceof LongNote
-									&& ((LongNote) n).getEndnote().getSection() == tl.getSection()) {
-								st = ((LongNote) n).getEndnote().getState();
-								t = ((LongNote) n).getEndnote().getTime();
-								// if(state == 0) {
-								// System.out.println("終端未処理:"+tl.getTime());
-								// }
 							}
 							if (st <= 1) {
 								data[tl.getTime() / 1000][st]++;
@@ -183,6 +188,10 @@ public class SkinNoteDistributionGraph extends SkinObject {
 			}
 		}
 		
+		updateTexture();
+	}
+	
+	private void updateTexture() {
 		if (shapetex != null) {
 			shapetex.getTexture().dispose();
 			backtex.dispose();
@@ -229,7 +238,7 @@ public class SkinNoteDistributionGraph extends SkinObject {
 			}
 		}
 		shapetex = new TextureRegion(new Texture(shape));
-		shape.dispose();		
+		shape.dispose();				
 	}
 
 	@Override

@@ -18,6 +18,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.utils.Array;
 
 /**
  * BGAのリソース管理、描画用クラス
@@ -116,7 +117,14 @@ public class BGAProcessor {
 
 	public synchronized void setModel(BMSModel model) {
 		this.model = model;
-		timelines = model.getAllTimeLines();
+		Array<TimeLine> tls = new Array<TimeLine>();
+		for(TimeLine tl : model.getAllTimeLines()) {
+			if(tl.getBGA() != -1 || tl.getLayer() != -1 || (tl.getPoor() != null && tl.getPoor().length > 0)) {
+				tls.add(tl);
+			}
+		}
+		timelines = tls.toArray(TimeLine.class);
+
 		// BMS格納ディレクトリ
 		Path dpath = Paths.get(model.getPath()).getParent();
 

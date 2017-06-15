@@ -56,7 +56,7 @@ public class KeyInputLog {
 				Note note = tl.getNote(lane);
 				if (note != null) {
 					if (note instanceof LongNote) {
-						if (((LongNote) note).getEndnote().getSection() == tl.getSection()) {
+						if (((LongNote) note).isEnd()) {
 							keylog.add(new KeyInputLog(i, lane, false));
 							if (model.getLntype() != 0 && Arrays.asList(sc).contains(lane)) {
 								// BSS処理
