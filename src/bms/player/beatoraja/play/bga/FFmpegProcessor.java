@@ -1,6 +1,9 @@
 package bms.player.beatoraja.play.bga;
 
+import java.io.File;
+import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel.MapMode;
 import java.util.logging.Logger;
 
 import bms.player.beatoraja.play.BMSPlayer;
@@ -54,8 +57,12 @@ public class FFmpegProcessor implements MovieProcessor {
 
 	@Override
 	public void create(String filepath) {
-		grabber = new FFmpegFrameGrabber(filepath);
 		try {
+			RandomAccessFile file = new RandomAccessFile(filepath, "r");
+			file.getChannel().map(MapMode.READ_ONLY, 0, file.length()).load();
+			file.close();
+			
+			grabber = new FFmpegFrameGrabber(filepath);
 			grabber.start();
 			Logger.getGlobal().info(
 					"movie decode - fps : " + grabber.getFrameRate() + " format : " + grabber.getFormat() + " size : "
