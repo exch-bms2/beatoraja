@@ -311,7 +311,7 @@ public class BMSPlayer extends MainState {
 	private long deltaplaymicro;
 
 	private PracticeConfiguration practice = new PracticeConfiguration();
-	private int starttimeoffset;
+	private long starttimeoffset;
 
 	@Override
 	public void render() {
