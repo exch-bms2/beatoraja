@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import bms.player.beatoraja.input.BMControllerInputProcessor.BMKeys;
+import bms.player.beatoraja.play.JudgeAlgorithm;
 import bms.player.beatoraja.play.JudgeManager;
 
 import bms.player.beatoraja.skin.SkinType;
@@ -122,7 +123,7 @@ public class Config {
 	/**
 	 * 判定アルゴリズム
 	 */
-	private int judgeAlgorithm = JudgeManager.JUDGE_ALGORITHM_LR2;
+	private JudgeAlgorithm judgealgorithm = JudgeAlgorithm.Combo;
 
     /**
      * JKOC Hack (boolean) private variable
@@ -396,12 +397,12 @@ public class Config {
 		this.tableURL = tableURL;
 	}
 
-	public int getJudgeAlgorithm() {
-		return judgeAlgorithm;
+	public JudgeAlgorithm getJudgealgorithm() {
+		return judgealgorithm;
 	}
 
-	public void setJudgeAlgorithm(int judgeAlgorithm) {
-		this.judgeAlgorithm = judgeAlgorithm;
+	public void setJudgealgorithm(JudgeAlgorithm judgeAlgorithm) {
+		this.judgealgorithm = judgeAlgorithm;
 	}
 
 	public boolean isExpandjudge() {

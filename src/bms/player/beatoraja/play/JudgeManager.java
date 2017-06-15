@@ -27,18 +27,6 @@ public class JudgeManager {
 	private Lane[] lanes;
 
 	/**
-	 * 判定アルゴリズム:LR2風
-	 */
-	public static final int JUDGE_ALGORITHM_LR2 = 0;
-	/**
-	 * 判定アルゴリズム:本家風
-	 */
-	public static final int JUDGE_ALGORITHM_IIDX = 1;
-	/**
-	 * 判定アルゴリズム:最下ノーツ優先判定
-	 */
-	public static final int JUDGE_ALGORITHM_LOWEST_NOTE = 2;
-	/**
 	 * 現在の判定カウント内訳
 	 */
 	private IRScoreData score = new IRScoreData();
@@ -110,8 +98,6 @@ public class JudgeManager {
 	 */
 	private boolean pmsjudge = false;
 
-	private int pos = 0;
-
 	private int prevtime;
 
 	private boolean autoplay = false;
@@ -120,12 +106,11 @@ public class JudgeManager {
 
 	public JudgeManager(BMSPlayer main) {
 		this.main = main;
-		algorithm = JudgeAlgorithm.values()[main.getMainController().getPlayerResource().getConfig().getJudgeAlgorithm()];
+		algorithm = main.getMainController().getPlayerResource().getConfig().getJudgealgorithm();
 	}
 
 	public void init(BMSModel model, PlayerResource resource) {
 		prevtime = 0;
-		pos = 0;
 		judge = new int[20];
 		judgenow = new int[((PlaySkin) main.getSkin()).getJudgeregion()];
 		judgecombo = new int[((PlaySkin) main.getSkin()).getJudgeregion()];
@@ -647,88 +632,4 @@ public class JudgeManager {
 	public int[] getNowCombo() {
 		return judgecombo;
 	}
-}
-
-/**
- * 判定アルゴリズム
- * 
- * @author exch
- */
-enum JudgeAlgorithm {
-
-	/**
-	 * 判定アルゴリズム:コンボ最優先
-	 */
-	Combo {
-		@Override
-		public boolean compare(Note t1, Note t2, long ptime, int[][] judgetable) {
-			return t2.getState() == 0 && t1.getTime() < ptime + judgetable[2][0] && t2.getTime() <= ptime + judgetable[2][1];
-		}
-	},
-	/**
-	 * 判定アルゴリズム:判定時間差最優先
-	 */
-	Duration {
-		@Override
-		public boolean compare(Note t1, Note t2, long ptime, int[][] judgetable) {
-			return Math.abs(t1.getTime() - ptime) > Math.abs(t2.getTime() - ptime) && t2.getState() == 0;
-		}
-	},
-	/**
-	 * 判定アルゴリズム:最下ノーツ優先
-	 */
-	Lowest {
-		@Override
-		public boolean compare(Note t1, Note t2, long ptime, int[][] judgetable) {
-			return false;
-		}
-	},
-	/**
-	 * 判定アルゴリズム:スコア最優先
-	 */
-	Score {
-		@Override
-		public boolean compare(Note t1, Note t2, long ptime, int[][] judgetable) {
-			return t2.getState() == 0 && t1.getTime() < ptime + judgetable[1][0] && t2.getTime() <= ptime + judgetable[1][1];
-		}
-	}
-	;
-
-	private int judge;
-
-	public Note getNote(Lane lanemodel, long ptime, int[][] judgetable, int lane, boolean pmsjudge) {
-		Note note = null;
-		int judge = 0;
-		for (Note judgenote = lanemodel.getNote();judgenote != null;judgenote = lanemodel.getNote()) {
-			final int dtime = (int) (judgenote.getTime() - ptime);
-			if (dtime >= judgetable[4][1]) {
-				break;
-			}
-			if (dtime >= judgetable[4][0]) {
-				if (!(judgenote instanceof MineNote) && !(judgenote instanceof LongNote
-						&& ((LongNote) judgenote).isEnd())) {
-					if (note == null || note.getState() != 0 || compare(note, judgenote, ptime, judgetable)) {
-						if (!(pmsjudge && (judgenote.getState() != 0
-								|| (judgenote.getState() == 0 && judgenote.getPlayTime() != 0 && dtime >= judgetable[2][1])))) {
-							note = judgenote;
-							if (judgenote.getState() != 0) {
-								judge = 5;
-							} else {
-								for (judge = 0; judge < judgetable.length && !(dtime >= judgetable[judge][0] && dtime <= judgetable[judge][1]); judge++) {
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-		this.judge = judge == 4 ? 5 : judge;
-		return note;
-	}
-
-	public int getJudge() {
-		return judge;
-	}
-
-	public abstract boolean compare(Note t1, Note t2, long ptime, int[][] judgetable);
 }
