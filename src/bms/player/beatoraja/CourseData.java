@@ -2,16 +2,26 @@ package bms.player.beatoraja;
 
 /**
  * コースデータ
+ *
+ * @author exch
  */
 public class CourseData {
-
+    /**
+     * コース名
+     */
     private String name;
-
-    private String[] hash;
-
-    private CourseDataConstraint[] constraint;
-
-    private TrophyData[] trophy;
+    /**
+     * 楽曲のハッシュ
+     */
+    private String[] hash = new String[0];
+    /**
+     * コースの制限
+     */
+    private CourseDataConstraint[] constraint = new CourseDataConstraint[0];
+    /**
+     * トロフィー条件
+     */
+    private TrophyData[] trophy = new TrophyData[0];
 
     public String getName() {
         return name;
@@ -45,6 +55,20 @@ public class CourseData {
         this.trophy = trophy;
     }
 
+    public boolean isClassCourse() {
+        for(CourseDataConstraint con : constraint) {
+            if(con == CourseDataConstraint.CLASS || con == CourseDataConstraint.MIRROR || con == CourseDataConstraint.RANDOM) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * コースの制約
+     *
+     * @author exch
+     */
     public enum CourseDataConstraint {
         CLASS(1,"grade"),
         MIRROR(2,"grade_mirror"),
@@ -63,6 +87,8 @@ public class CourseData {
     }
     /**
      * コースデータのトロフィー条件
+     *
+     * @author exch
      */
     public static class TrophyData {
 

@@ -16,7 +16,6 @@ import static bms.player.beatoraja.CourseData.CourseDataConstraint.*;
 
 import bms.player.beatoraja.song.SongData;
 
-import bms.table.Course;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter.OutputType;
 import com.badlogic.gdx.utils.StringBuilder;
@@ -142,7 +141,7 @@ public class PlayDataAccessor {
 		List<String> noln = new ArrayList<String>();
 		List<String> ln = new ArrayList<String>();
 		for (SongData song : songs) {
-			if (song.hasLongNote()) {
+			if (song.hasUndefinedLongNote()) {
 				ln.add(song.getSha256());
 			} else {
 				noln.add(song.getSha256());
@@ -174,10 +173,10 @@ public class PlayDataAccessor {
 		if (newscore == null) {
 			return;
 		}
-		IRScoreData score = scoredb.getScoreData(player, hash, model.containsLongNote() ? lnmode : 0);
+		IRScoreData score = scoredb.getScoreData(player, hash, model.containsUndefinedLongNote() ? lnmode : 0);
 		if (score == null) {
 			score = new IRScoreData();
-			score.setMode(model.containsLongNote() ? lnmode : 0);
+			score.setMode(model.containsUndefinedLongNote() ? lnmode : 0);
 		}
 		int clear = score.getClear();
 		score.setSha256(hash);
@@ -398,7 +397,7 @@ public class PlayDataAccessor {
 		for (int i = 0; i < models.length; i++) {
 			BMSModel model = models[i];
 			hash[i] = model.getSHA256();
-			ln |= model.containsLongNote();
+			ln |= model.containsUndefinedLongNote();
 		}
 		return Files.exists(Paths.get(this.getReplayDataFilePath(hash, ln, lnmode, index, constraint) + ".brd")) || 
 				Files.exists(Paths.get(this.getReplayDataFilePath(hash, ln, lnmode, index, constraint) + ".json"));
@@ -553,9 +552,7 @@ public class PlayDataAccessor {
 	}
 
 	private String getReplayDataFilePath(BMSModel model, int lnmode, int index) {
-		boolean ln = model.getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
-				+ model.getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH) > 0;
-		return getReplayDataFilePath(model.getSHA256(), ln, lnmode, index);
+		return getReplayDataFilePath(model.getSHA256(), model.containsUndefinedLongNote(), lnmode, index);
 	}
 
 	private String getReplayDataFilePath(String hash, boolean ln, int lnmode, int index) {

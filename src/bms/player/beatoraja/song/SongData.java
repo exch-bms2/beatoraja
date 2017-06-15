@@ -13,9 +13,10 @@ import bms.model.TimeLine;
  */
 public class SongData {
 	
-	public static final int FEATURE_LONGNOTE = 1;
+	public static final int FEATURE_UNDEFINEDLN = 1;
 	public static final int FEATURE_MINENOTE = 2;
 	public static final int FEATURE_RANDOM = 4;
+	public static final int FEATURE_LONGNOTE = 8;
 
 	public static final int CONTENT_TEXT = 1;
 	public static final int CONTENT_BGA = 2;
@@ -117,9 +118,10 @@ public class SongData {
 
 		timelines = model.getAllTimeLines();
 
-		feature = model.containsLongNote() ? FEATURE_LONGNOTE : 0;
+		feature = model.containsUndefinedLongNote() ? FEATURE_UNDEFINEDLN : 0;
 		feature |= model.containsMineNote() ? FEATURE_MINENOTE : 0;
 		feature |= model.getRandom() != null && model.getRandom().length > 0 ? FEATURE_RANDOM : 0;
+		feature |= model.containsLongNote() ? FEATURE_LONGNOTE : 0;
 		content |= model.getBgaList().length > 0 ? CONTENT_BGA : 0;
 	}
 
@@ -270,15 +272,19 @@ public class SongData {
 	}
 	
 	public boolean hasRandomSequence() {
-		return (feature & 4) != 0;
+		return (feature & FEATURE_RANDOM) != 0;
 	}
 
 	public boolean hasMineNote() {
-		return (feature & 2) != 0;
+		return (feature & FEATURE_MINENOTE) != 0;
+	}
+
+	public boolean hasUndefinedLongNote() {
+		return (feature & FEATURE_UNDEFINEDLN) != 0;
 	}
 
 	public boolean hasLongNote() {
-		return (feature & 1) != 0;
+		return (feature & FEATURE_LONGNOTE) != 0;
 	}
 	public String getMd5() {
 		return md5;

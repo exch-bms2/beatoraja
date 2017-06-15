@@ -69,8 +69,9 @@ public class BMSPlayer extends MainState {
 	private int notes;
 
 	static final int TIME_MARGIN = 5000;
-	
-	public static final int SOUND_PLAYSTOP = 0;
+
+	public static final int SOUND_READY = 0;
+	public static final int SOUND_PLAYSTOP = 1;
 
 	public BMSPlayer(MainController main, PlayerResource resource) {
 		super(main);
@@ -256,6 +257,7 @@ public class BMSPlayer extends MainState {
 			setSkin(sl.loadPlaySkin(Paths.get(SkinConfig.defaultSkinPathMap.get(skinType)), skinType, new HashMap()));
 		}
 
+		setSound(SOUND_READY, config.getSoundpath() + File.separatorChar + "playready.wav", false);
 		setSound(SOUND_PLAYSTOP, config.getSoundpath() + File.separatorChar + "playstop.wav", false);
 
 		final BMSPlayerInputProcessor input = main.getInputProcessor();
@@ -336,6 +338,7 @@ public class BMSPlayer extends MainState {
 						+ ((cmem - mem) / (1024 * 1024)) + "MB");
 				state = STATE_READY;
 				timer[TIMER_READY] = now;
+				play(SOUND_READY);
 				Logger.getGlobal().info("STATE_READYに移行");
 			}
 			break;
@@ -382,6 +385,7 @@ public class BMSPlayer extends MainState {
 				bga.prepare(this);
 				state = STATE_READY;
                 timer[TIMER_READY] = now;
+				play(SOUND_READY);
 				Logger.getGlobal().info("STATE_READYに移行");
 			}
 			break;

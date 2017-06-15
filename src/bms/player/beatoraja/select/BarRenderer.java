@@ -41,6 +41,8 @@ public class BarRenderer {
 	private int selectedindex;
 
 	private Bar[] commands;
+
+	private GradeBar[] courses = new GradeBar[0];
 	/**
 	 * 難易度表バー一覧
 	 */
@@ -75,6 +77,27 @@ public class BarRenderer {
 		this.tables = new TableBar[tds.length];
 		for (int i = 0; i < tds.length; i++) {
 			this.tables[i] = new TableBar(select, tds[i]);
+		}
+		CourseData[] cds = new CourseDataAccessor().readAll();
+		courses = new GradeBar[cds.length];
+		for (int i = 0; i < cds.length; i++) {
+			Set<String> hashset = new HashSet<String>();
+			for (String hash : cds[i].getHash()) {
+				hashset.add(hash);
+			}
+			SongData[] songs = select.getSongDatabase().getSongDatas(hashset.toArray(new String[hashset.size()]));
+
+			SongData[] songdatas = new SongData[cds[i].getHash().length];
+			for (int j = 0;j < songdatas.length;j++) {
+				String hash = cds[i].getHash()[j];
+				for(SongData sd : songs) {
+					if(hash.equals(sd.getMd5()) || hash.equals(sd.getSha256())) {
+						songdatas[j] = sd;
+						break;
+					}
+				}
+			}
+			this.courses[i] = new GradeBar(cds[i].getName(), songdatas, cds[i]);
 		}
 
 		List<CommandBar> density = new ArrayList<CommandBar>();
@@ -321,15 +344,15 @@ public class BarRenderer {
 				}
 
 				// LN
-				if ((flag & 1) != 0 && baro.getLabel()[0] != null) {
+				if ((flag & SongData.FEATURE_LONGNOTE) != 0 && baro.getLabel()[0] != null) {
 					baro.getLabel()[0].draw(sprite, time, select, x, y);
 				}
 				// MINE
-				if ((flag & 2) != 0 && baro.getLabel()[2] != null) {
+				if ((flag & SongData.FEATURE_MINENOTE) != 0 && baro.getLabel()[2] != null) {
 					baro.getLabel()[2].draw(sprite, time, select, x, y);
 				}
 				// RANDOM
-				if ((flag & 4) != 0 && baro.getLabel()[1] != null) {
+				if ((flag & SongData.FEATURE_RANDOM) != 0 && baro.getLabel()[1] != null) {
 					baro.getLabel()[1].draw(sprite, time, select, x, y);
 				}
 			}
@@ -347,7 +370,7 @@ public class BarRenderer {
 		int mov = -input.getScroll();
 		input.resetScroll();
 		// song bar scroll
-		if (select.isPressed(keystate, keytime, MusicSelector.KEY_UP, false) || cursor[1]) {
+		if (select.isPressed(keystate, keytime, MusicSelectInputProcessor.KEY_UP, false) || cursor[1]) {
 			long l = System.currentTimeMillis();
 			if (duration == 0) {
 				mov = 1;
@@ -359,7 +382,7 @@ public class BarRenderer {
 				mov = 1;
 				angle = durationhigh;
 			}
-		} else if (select.isPressed(keystate, keytime, MusicSelector.KEY_DOWN, false) || cursor[0]) {
+		} else if (select.isPressed(keystate, keytime, MusicSelectInputProcessor.KEY_DOWN, false) || cursor[0]) {
 			long l = System.currentTimeMillis();
 			if (duration == 0) {
 				mov = -1;
@@ -419,6 +442,7 @@ public class BarRenderer {
 			}
 			dir.clear();
 			l.addAll(Arrays.asList(new FolderBar(select, null, "e2977170").getChildren()));
+			l.add(new ContainerBar("COURSE", courses));
 			l.addAll(Arrays.asList(tables));
 			l.addAll(Arrays.asList(commands));
 			l.addAll(search);
@@ -567,7 +591,7 @@ public class BarRenderer {
 					}
 					boolean[] replay = new boolean[MusicSelector.REPLAY];
 					for (int i = 0; i < MusicSelector.REPLAY; i++) {
-						replay[i] = main.getPlayDataAccessor().existsReplayData(sd.getSha256(), sd.hasLongNote(),
+						replay[i] = main.getPlayDataAccessor().existsReplayData(sd.getSha256(), sd.hasUndefinedLongNote(),
 								config.getLnmode(), i);
 					}
 					((SongBar) bar).setExistsReplayData(replay);
@@ -582,7 +606,7 @@ public class BarRenderer {
 						boolean ln = false;
 						for (int j = 0; j < gb.getSongDatas().length; j++) {
 							hash[j] = gb.getSongDatas()[j].getSha256();
-							ln |= gb.getSongDatas()[j].hasLongNote();
+							ln |= gb.getSongDatas()[j].hasUndefinedLongNote();
 						}
 						gb.setScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 0, gb.getConstraint()));
 						gb.setMirrorScore(main.getPlayDataAccessor().readScoreData(hash, ln, config.getLnmode(), 1, gb.getConstraint()));
