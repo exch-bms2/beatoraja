@@ -42,7 +42,7 @@ import com.badlogic.gdx.utils.JsonWriter.OutputType;
  */
 public class MainController extends ApplicationAdapter {
 
-	public static final String VERSION = "beatoraja 0.4.1";
+	public static final String VERSION = "beatoraja 0.4.2";
 
 	private BMSPlayer bmsplayer;
 	private MusicDecide decide;

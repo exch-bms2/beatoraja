@@ -26,6 +26,7 @@ import org.apache.commons.dbutils.handlers.MapListHandler;
 
 import bms.player.beatoraja.Config.SkinConfig;
 import bms.player.beatoraja.ir.IRConnection;
+import bms.player.beatoraja.play.JudgeAlgorithm;
 import bms.player.beatoraja.skin.SkinHeader.CustomFile;
 import bms.player.beatoraja.skin.SkinHeader.CustomOption;
 import bms.player.beatoraja.skin.*;
@@ -279,7 +280,7 @@ public class PlayConfigurationView implements Initializable {
 		audiobuffer.getValueFactory().setValue(config.getAudioDeviceBufferSize());
 		audiosim.getValueFactory().setValue(config.getAudioDeviceSimultaneousSources());
 
-		judgealgorithm.setValue(config.getJudgeAlgorithm());
+		judgealgorithm.setValue(JudgeAlgorithm.getIndex(config.getJudgealgorithm()));
 
         // int b = Boolean.valueOf(config.getJKOC()).compareTo(false);
 
@@ -345,7 +346,7 @@ public class PlayConfigurationView implements Initializable {
 		config.setAudioDeviceBufferSize(getValue(audiobuffer));
 		config.setAudioDeviceSimultaneousSources(getValue(audiosim));
 
-		config.setJudgeAlgorithm(judgealgorithm.getValue());
+		config.setJudgealgorithm(JudgeAlgorithm.values()[judgealgorithm.getValue()]);
 
         // jkoc_hack is integer but *.setJKOC needs boolean type
         if(jkoc_hack.getValue() > 0)
