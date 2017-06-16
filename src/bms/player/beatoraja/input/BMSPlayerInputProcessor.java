@@ -59,8 +59,8 @@ public class BMSPlayerInputProcessor {
 	 */
 	private long[] time = new long[18];
 
-	private int lastKeyDevice;
-	private int[] disableDevice = new int[0];
+	private BMSPlayerInputDevice lastKeyDevice;
+	private BMSPlayerInputDevice[] disableDevice = new BMSPlayerInputDevice[0];
 	/**
 	 * 0-9キーのON/OFF状態
 	 */
@@ -173,7 +173,7 @@ public class BMSPlayerInputProcessor {
 		keystate = b;
 	}
 
-	public int getLastKeyChangedDevice() {
+	public BMSPlayerInputDevice getLastKeyChangedDevice() {
 		return lastKeyDevice;
 	}
 
@@ -181,25 +181,46 @@ public class BMSPlayerInputProcessor {
 		return bminput.length + 1;
 	}
 
-	public void setDisableDevice(int[] devices) {
+	public void setExclusiveDeviceType(BMSPlayerInputDevice.Type type) {
+		switch (type) {
+		case KEYBOARD:
+			setDisableDevice(new BMSPlayerInputDevice[] { BMSPlayerInputDevice.BMController(0), BMSPlayerInputDevice.BMController(1), BMSPlayerInputDevice.Midi(0) });
+			break;
+		case BM_CONTROLLER:
+			setDisableDevice(new BMSPlayerInputDevice[] { BMSPlayerInputDevice.Keyboard, BMSPlayerInputDevice.Midi(0) });
+			break;
+		case MIDI:
+			setDisableDevice(new BMSPlayerInputDevice[] { BMSPlayerInputDevice.Keyboard, BMSPlayerInputDevice.BMController(0), BMSPlayerInputDevice.BMController(1) });
+			break;
+		}
+	}
+
+	public void setDisableDevice(BMSPlayerInputDevice[] devices) {
 		if(devices == null) {
-			devices = new int[3];
-			for(int i = 0;i < devices.length;i++) {
-				devices[i] = i;
-			}
+			devices = new BMSPlayerInputDevice[4];
+			devices[0] = BMSPlayerInputDevice.Keyboard;
+			devices[1] = BMSPlayerInputDevice.BMController(0);
+			devices[2] = BMSPlayerInputDevice.BMController(1);
+			devices[3] = BMSPlayerInputDevice.Midi(0);
 			Arrays.fill(keystate, false);
 			Arrays.fill(time, 0);
 		}
 		this.disableDevice = devices;
-		for(int device : devices) {
-			if(device == 0) {
+		for(BMSPlayerInputDevice device : devices) {
+			switch (device.getType()) {
+			case KEYBOARD:
 				kbinput.clear();
-			} else {
+				break;
+			case BM_CONTROLLER:
 				for(BMControllerInputProcessor controller : bminput) {
-					if(controller.getPlayer() == device - 1) {
+					if(controller.getPlayer() == device.getIndex()) {
 						controller.clear();
 					}
 				}
+				break;
+			case MIDI:
+				midiinput.clear();
+				break;
 			}
 		}
 
@@ -213,9 +234,9 @@ public class BMSPlayerInputProcessor {
 		return numtime;
 	}
 
-	public void keyChanged(int device, long presstime, int i, boolean pressed) {
-		for(int disable : disableDevice) {
-			if(device == disable) {
+	public void keyChanged(BMSPlayerInputDevice device, long presstime, int i, boolean pressed) {
+		for(BMSPlayerInputDevice disable : disableDevice) {
+			if(device.equals(disable)) {
 				return;
 			}
 		}

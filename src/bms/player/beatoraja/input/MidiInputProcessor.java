@@ -72,7 +72,7 @@ public class MidiInputProcessor implements AutoCloseable {
 		for (int i=0; i<keys.length; i++) {
 			final int key = i;
 			setHandler(keys[i], (Boolean pressed) -> {
-				bmsPlayerInputProcessor.keyChanged(0, currentTime(), key, pressed);
+				bmsPlayerInputProcessor.keyChanged(BMSPlayerInputDevice.Midi(0), currentTime(), key, pressed);
 			});
 		}
 
@@ -86,6 +86,10 @@ public class MidiInputProcessor implements AutoCloseable {
 
 	public void setStartTime(long starttime) {
 		this.starttime = starttime;
+	}
+
+	public void clear() {
+
 	}
 
 	void setHandler(MidiConfig.Assign control, Consumer<Boolean> handler) {

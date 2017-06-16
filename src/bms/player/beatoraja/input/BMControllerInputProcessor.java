@@ -135,16 +135,16 @@ public class BMControllerInputProcessor implements ControllerListener {
 			final float ax = controller.getAxis(i);
 			if (analogaxis[i] && !koc) {
 				if ((axis[i] == 1.0 && ax == -1.0) || (axis[i] < 1.0 && ax > axis[i])) {
-					this.bmsPlayerInputProcessor.keyChanged(player + 1, (int) presstime, 8 + player * 9, false);
-					this.bmsPlayerInputProcessor.keyChanged(player + 1, (int) presstime, 7 + player * 9, true);
+					this.bmsPlayerInputProcessor.keyChanged(BMSPlayerInputDevice.BMController(player), (int) presstime, 8 + player * 9, false);
+					this.bmsPlayerInputProcessor.keyChanged(BMSPlayerInputDevice.BMController(player), (int) presstime, 7 + player * 9, true);
 					this.axistime[i] = presstime;
 				} else if ((axis[i] == -1.0 && ax == 1.0) || (axis[i] > -1.0 && ax > axis[i])) {
-					this.bmsPlayerInputProcessor.keyChanged(player + 1, (int) presstime, 8 + player * 9, true);
-					this.bmsPlayerInputProcessor.keyChanged(player + 1, (int) presstime, 7 + player * 9, false);
+					this.bmsPlayerInputProcessor.keyChanged(BMSPlayerInputDevice.BMController(player), (int) presstime, 8 + player * 9, true);
+					this.bmsPlayerInputProcessor.keyChanged(BMSPlayerInputDevice.BMController(player), (int) presstime, 7 + player * 9, false);
 					this.axistime[i] = presstime;
 				} else if (axistime[i] != -1 && presstime > axistime[i] + 50) {
-					this.bmsPlayerInputProcessor.keyChanged(player + 1, (int) presstime, 8 + player * 9, false);
-					this.bmsPlayerInputProcessor.keyChanged(player + 1, (int) presstime, 7 + player * 9, false);
+					this.bmsPlayerInputProcessor.keyChanged(BMSPlayerInputDevice.BMController(player), (int) presstime, 8 + player * 9, false);
+					this.bmsPlayerInputProcessor.keyChanged(BMSPlayerInputDevice.BMController(player), (int) presstime, 7 + player * 9, false);
 					this.axistime[i] = -1;
 				}
 			} else {
@@ -192,7 +192,7 @@ public class BMControllerInputProcessor implements ControllerListener {
 
 		for (int i = 0; i < buttons.length; i++) {
 			if (buttonchanged[buttons[i]]) {
-				this.bmsPlayerInputProcessor.keyChanged(player + 1, presstime, i + player * 9, buttonstate[buttons[i]]);
+				this.bmsPlayerInputProcessor.keyChanged(BMSPlayerInputDevice.BMController(player), presstime, i + player * 9, buttonstate[buttons[i]]);
 				buttonchanged[buttons[i]] = false;
 			}
 		}

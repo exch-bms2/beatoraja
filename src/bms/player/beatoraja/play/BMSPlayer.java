@@ -10,6 +10,7 @@ import bms.player.beatoraja.*;
 import bms.player.beatoraja.Config.SkinConfig;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyInputLog;
+import bms.player.beatoraja.input.BMSPlayerInputDevice;
 import bms.player.beatoraja.pattern.*;
 import bms.player.beatoraja.play.PracticeConfiguration.PracticeProperty;
 import bms.player.beatoraja.play.bga.BGAProcessor;
@@ -262,8 +263,11 @@ public class BMSPlayer extends MainState {
 
 		final BMSPlayerInputProcessor input = main.getInputProcessor();
 		input.setMinimumInputDutration(config.getInputduration());
-		input.setDisableDevice(autoplay == 0 || autoplay == 2
-				? (resource.getPlayDevice() == 0 ? new int[] { 1, 2 } : new int[] { 0 }) : null);
+		if (autoplay == 0 || autoplay == 0) {
+			input.setExclusiveDeviceType(resource.getPlayDevice().getType());
+		} else {
+			input.setDisableDevice(null);
+		}
 		PlayConfig pc = (model.getMode() == Mode.BEAT_5K || model.getMode() == Mode.BEAT_7K ? config.getMode7()
 				: (model.getMode() == Mode.BEAT_10K || model.getMode() == Mode.BEAT_14K ? config.getMode14()
 						: config.getMode9()));
@@ -393,7 +397,7 @@ public class BMSPlayer extends MainState {
 		// practice終了
 		case STATE_PRACTICE_FINISHED:
 			if (now - getTimer()[TIMER_FADEOUT] > skin.getFadeout()) {
-				input.setDisableDevice(new int[0]);
+				input.setDisableDevice(new BMSPlayerInputDevice[0]);
 				getMainController().changeState(MainController.STATE_SELECTMUSIC);
 			}
 			break;
@@ -483,7 +487,7 @@ public class BMSPlayer extends MainState {
 				}
 				resource.setGauge(gaugelog);
 				resource.setGrooveGauge(gauge);
-				input.setDisableDevice(new int[0]);
+				input.setDisableDevice(new BMSPlayerInputDevice[0]);
 				input.setStartTime(0);
 				if (autoplay == 2) {
 					state = STATE_PRACTICE;
@@ -510,7 +514,7 @@ public class BMSPlayer extends MainState {
 				saveConfig();
 				resource.setGauge(gaugelog);
 				resource.setGrooveGauge(gauge);
-				input.setDisableDevice(new int[0]);
+				input.setDisableDevice(new BMSPlayerInputDevice[0]);
 				input.setStartTime(0);
 				if (autoplay == 2) {
 					state = STATE_PRACTICE;
