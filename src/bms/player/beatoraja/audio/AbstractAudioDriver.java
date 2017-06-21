@@ -71,7 +71,17 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	protected abstract void disposeKeySound(T pcm);
 
 	/**
-	 * 音源データを再生する
+	 * キー音を再生する
+	 * 
+	 * @param id
+	 *            音源データ
+	 * @param volume
+	 *            ボリューム(0.0-1.0)
+	 */
+	protected abstract void play(T id, float volume);
+
+	/**
+	 * 効果音を再生する
 	 * 
 	 * @param id
 	 *            音源データ
@@ -80,9 +90,16 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	 * @param loop
 	 *            ループ再生するかどうか
 	 */
-	protected abstract void play(T id, float volume);
-
 	protected abstract void play(AudioElement<T> id, float volume, boolean loop);
+	
+	/**
+	 * 効果音のボリュームを設定する。再生中も可能
+	 * 
+	 * @param id
+	 *            音源データ
+	 * @param volume
+	 *            ボリューム(0.0-1.0)
+	 */
 	protected abstract void setVolume(AudioElement<T> id, float volume);
 
 	/**
@@ -101,7 +118,7 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 		if (!soundmap.containsKey(p)) {
 			try {
 				sound = new AudioElement(getKeySound(Paths.get(p)));
-				soundmap.put(p, sound);
+				soundmap.put(p, sound.audio != null ? sound : null);
 			} catch (GdxRuntimeException e) {
 				Logger.getGlobal().warning("音源読み込み失敗。" + e.getMessage());
 			}
@@ -193,7 +210,7 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 			}
 			String name = model.getWavList()[wavid];
 			for (Note note : waventry.getValue()) {
-				if (note.getStarttime() == 0 && note.getDuration() == 0) {
+				if (note.getMicroStarttime() == 0 && note.getMicroDuration() == 0) {
 					// 音切りなしのケース
 					Path p = dpath.resolve(name);
 					wavmap[wavid] = cache.get(new AudioKey(p.toString(), note));
@@ -207,7 +224,7 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 						slicesound[note.getWav()] = new ArrayList<SliceWav<T>>();
 					}
 					for (SliceWav<T> slice : slicesound[note.getWav()]) {
-						if (slice.starttime == note.getStarttime() && slice.duration == note.getDuration()) {
+						if (slice.starttime == note.getMicroStarttime() && slice.duration == note.getMicroDuration()) {
 							b = false;
 							break;
 						}
@@ -253,7 +270,7 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 		}
 
 		for (Note note : notes) {
-			if (n.getStarttime() == note.getStarttime() && n.getDuration() == note.getDuration()) {
+			if (n.getMicroStarttime() == note.getMicroStarttime() && n.getMicroDuration() == note.getMicroDuration()) {
 				return;
 			}
 		}
@@ -277,8 +294,8 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 			if (id < 0) {
 				return;
 			}
-			final int starttime = n.getStarttime();
-			final int duration = n.getDuration();
+			final long starttime = n.getMicroStarttime();
+			final long duration = n.getMicroDuration();
 			if (starttime == 0 && duration == 0) {
 				final T wav = (T) wavmap[id];
 				if (wav != null) {
@@ -329,8 +346,8 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 		if (id < 0) {
 			return;
 		}
-		final int starttime = n.getStarttime();
-		final int duration = n.getDuration();
+		final long starttime = n.getMicroStarttime();
+		final long duration = n.getMicroDuration();
 		if (starttime == 0 && duration == 0) {
 			final T sound = (T) wavmap[id];
 			if (sound != null) {
@@ -370,15 +387,15 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	 * @param <T>
 	 */
 	static class SliceWav<T> {
-		public final int starttime;
-		public final int duration;
+		public final long starttime;
+		public final long duration;
 		public final T wav;
 
 		public long playid = -1;
 
 		public SliceWav(Note note, T wav) {
-			this.starttime = note.getStarttime();
-			this.duration = note.getDuration();
+			this.starttime = note.getMicroStarttime();
+			this.duration = note.getMicroDuration();
 			this.wav = wav;
 		}
 	}
@@ -462,16 +479,29 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 		}		
 	}
 	
+	/**
+	 * AudioCache Key
+	 * 
+	 * @author exch
+	 */
 	private static class AudioKey {
-
+		/**
+		 * Audio File path
+		 */
 		public final String path;
-		public final int start;
-		public final int duration;
+		/**
+		 * Audio start time(us)
+		 */
+		public final long start;
+		/**
+		 * Audio duration(us)
+		 */
+		public final long duration;
 
 		public AudioKey(String path, Note n) {
 			this.path = path;
-			this.start = n.getStarttime();
-			this.duration = n.getDuration();
+			this.start = n.getMicroStarttime();
+			this.duration = n.getMicroDuration();
 		}
 
 		public boolean equals(Object o) {
