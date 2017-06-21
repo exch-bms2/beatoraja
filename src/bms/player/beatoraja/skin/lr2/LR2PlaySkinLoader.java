@@ -5,6 +5,7 @@ import java.util.*;
 
 import bms.model.Mode;
 import bms.player.beatoraja.Config;
+import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.Resolution;
 import bms.player.beatoraja.play.*;
 import bms.player.beatoraja.skin.*;
@@ -606,7 +607,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 		skin.add(num2);
 	}
 
-	public PlaySkin loadPlaySkin(File f, BMSPlayer player, SkinHeader header, Map<Integer, Boolean> option,
+	public Skin loadSkin(File f, MainState player, SkinHeader header, Map<Integer, Boolean> option,
 			Map property) throws IOException {
 
 		skin = new PlaySkin(src, dst);

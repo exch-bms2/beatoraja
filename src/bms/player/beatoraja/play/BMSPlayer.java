@@ -1,20 +1,17 @@
 package bms.player.beatoraja.play;
 
 import java.io.*;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.logging.Logger;
 
 import bms.model.*;
 import bms.player.beatoraja.*;
-import bms.player.beatoraja.Config.SkinConfig;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyInputLog;
 import bms.player.beatoraja.pattern.*;
 import bms.player.beatoraja.play.PracticeConfiguration.PracticeProperty;
 import bms.player.beatoraja.play.bga.BGAProcessor;
 import bms.player.beatoraja.skin.*;
-import bms.player.beatoraja.skin.lr2.*;
 import bms.player.beatoraja.song.SongData;
 
 import com.badlogic.gdx.utils.*;
@@ -238,24 +235,7 @@ public class BMSPlayer extends MainState {
 		keyinput = new KeyInputProccessor(this, model.getMode());
 		Config config = resource.getConfig();
 
-		SkinType skinType = getSkinType();
-		try {
-			SkinConfig sc = resource.getConfig().getSkin()[skinType.getId()];
-			if (sc.getPath().endsWith(".json")) {
-				SkinLoader sl = new SkinLoader(resource.getConfig());
-				setSkin(sl.loadPlaySkin(Paths.get(sc.getPath()), skinType, sc.getProperty()));
-			} else {
-				LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
-				SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
-				LR2PlaySkinLoader dloader = new LR2PlaySkinLoader(header.getResolution(), resource.getConfig());
-				setSkin(dloader.loadPlaySkin(Paths.get(sc.getPath()).toFile(), this, header, loader.getOption(),
-						sc.getProperty()));
-			}
-		} catch (Throwable e) {
-			e.printStackTrace();
-			SkinLoader sl = new SkinLoader(resource.getConfig());
-			setSkin(sl.loadPlaySkin(Paths.get(SkinConfig.defaultSkinPathMap.get(skinType)), skinType, new HashMap()));
-		}
+		loadSkin(getSkinType());
 
 		setSound(SOUND_READY, config.getSoundpath() + File.separatorChar + "playready.wav", false);
 		setSound(SOUND_PLAYSTOP, config.getSoundpath() + File.separatorChar + "playstop.wav", false);

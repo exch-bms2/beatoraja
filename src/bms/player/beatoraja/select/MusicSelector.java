@@ -8,10 +8,8 @@ import java.util.logging.Logger;
 
 import bms.model.Mode;
 import bms.player.beatoraja.*;
-import bms.player.beatoraja.Config.SkinConfig;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.skin.*;
-import bms.player.beatoraja.skin.lr2.*;
 import bms.player.beatoraja.song.SongData;
 import bms.player.beatoraja.song.SongDatabaseAccessor;
 
@@ -131,26 +129,8 @@ public class MusicSelector extends MainState {
 		input.setControllerConfig(pc.getController());
 		bar.updateBar();
 
-		if (getSkin() == null) {
-			try {
-				SkinConfig sc = config.getSkin()[5];
-				if (sc.getPath().endsWith(".json")) {
-					SkinLoader sl = new SkinLoader(getMainController().getPlayerResource().getConfig());
-					setSkin(sl.loadSelectSkin(Paths.get(sc.getPath()), sc.getProperty()));
-				} else {
-					LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
-					SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
-					LR2SelectSkinLoader dloader = new LR2SelectSkinLoader(header.getResolution(), getMainController().getPlayerResource().getConfig());
-					setSkin(dloader.loadSelectSkin(Paths.get(sc.getPath()).toFile(), this, header, loader.getOption(),
-							sc.getProperty()));
-				}
-			} catch (Throwable e) {
-				e.printStackTrace();
-				SkinLoader sl = new SkinLoader(
-						getMainController().getPlayerResource().getConfig());
-				setSkin(sl.loadSelectSkin(Paths.get(SkinConfig.DEFAULT_SELECT), new HashMap()));
-			}
-		}
+		loadSkin(SkinType.MUSIC_SELECT);
+		
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
 				Gdx.files.internal("skin/default/VL-Gothic-Regular.ttf"));
 		FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();

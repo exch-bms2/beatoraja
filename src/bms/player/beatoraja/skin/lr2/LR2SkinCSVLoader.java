@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 import bms.player.beatoraja.Config;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.Resolution;
+import bms.player.beatoraja.decide.MusicDecide;
 import bms.player.beatoraja.play.bga.BGAProcessor;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.SkinHeader.CustomFile;
@@ -543,5 +544,28 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 			}
 		}
 		return images;
+	}
+	
+	public abstract Skin loadSkin(File f, MainState decide, SkinHeader header, Map<Integer, Boolean> option, Map property) throws IOException;
+	
+	public static LR2SkinCSVLoader getSkinLoader(SkinType type, Resolution src, Config c) {
+		switch(type) {
+		case MUSIC_SELECT:
+			return new LR2SelectSkinLoader(src, c);
+		case DECIDE:
+			return new LR2DecideSkinLoader(src, c);
+		case PLAY_5KEYS:
+		case PLAY_7KEYS:
+		case PLAY_9KEYS:
+		case PLAY_10KEYS:
+		case PLAY_14KEYS:
+			return new LR2PlaySkinLoader(src, c);
+		case RESULT:
+			return new LR2ResultSkinLoader(src, c);
+		case COURSE_RESULT:
+			return new LR2ResultSkinLoader(src, c);
+		case KEY_CONFIG:
+		}
+		return null;
 	}
 }

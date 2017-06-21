@@ -11,6 +11,7 @@ import com.badlogic.gdx.math.Rectangle;
 
 import bms.player.beatoraja.result.MusicResultSkin;
 import bms.player.beatoraja.result.SkinGaugeGraphObject;
+import bms.player.beatoraja.skin.Skin;
 import bms.player.beatoraja.skin.SkinHeader;
 import bms.player.beatoraja.skin.SkinNoteDistributionGraph;
 
@@ -77,7 +78,7 @@ public class LR2ResultSkinLoader extends LR2SkinCSVLoader {
 		});
 	}
 
-	public MusicResultSkin loadResultSkin(File f, MainState state, SkinHeader header, Map<Integer, Boolean> option,
+	public Skin loadSkin(File f, MainState state, SkinHeader header, Map<Integer, Boolean> option,
 			Map property) throws IOException {
 
 		skin = new MusicResultSkin(src, dst);

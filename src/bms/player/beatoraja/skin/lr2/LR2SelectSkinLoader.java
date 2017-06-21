@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import bms.player.beatoraja.Config;
+import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.Resolution;
 import bms.player.beatoraja.select.*;
 import bms.player.beatoraja.skin.*;
@@ -281,7 +282,7 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader {
 
 	}
 
-	public MusicSelectSkin loadSelectSkin(File f, MusicSelector selector, SkinHeader header,
+	public Skin loadSkin(File f, MainState selector, SkinHeader header,
 			Map<Integer, Boolean> option, Map property) throws IOException {
 		skin = new MusicSelectSkin(src, dst);
 

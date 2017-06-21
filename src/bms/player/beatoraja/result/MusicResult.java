@@ -1,8 +1,6 @@
 package bms.player.beatoraja.result;
 
 import java.io.File;
-import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -14,10 +12,8 @@ import bms.player.beatoraja.select.MusicSelector;
 
 import bms.model.BMSModel;
 import bms.player.beatoraja.*;
-import bms.player.beatoraja.Config.SkinConfig;
 import bms.player.beatoraja.ir.IRConnection;
 import bms.player.beatoraja.skin.*;
-import bms.player.beatoraja.skin.lr2.*;
 
 import com.badlogic.gdx.utils.FloatArray;
 
@@ -84,23 +80,7 @@ public class MusicResult extends MainState {
 			resource.addCourseGauge(resource.getGauge());
 		}
 
-		try {
-			SkinConfig sc = resource.getConfig().getSkin()[7];
-			if (sc.getPath().endsWith(".json")) {
-				SkinLoader sl = new SkinLoader(resource.getConfig());
-				setSkin(sl.loadResultSkin(Paths.get(sc.getPath()), sc.getProperty()));
-			} else {
-				LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
-				SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
-				LR2ResultSkinLoader dloader = new LR2ResultSkinLoader(header.getResolution(), resource.getConfig());
-				setSkin(dloader.loadResultSkin(Paths.get(sc.getPath()).toFile(), this, header, loader.getOption(),
-						sc.getProperty()));
-			}
-		} catch (Throwable e) {
-			e.printStackTrace();
-			SkinLoader sl = new SkinLoader(resource.getConfig());
-			setSkin(sl.loadResultSkin(Paths.get("skin/default/result.json"), new HashMap()));
-		}
+		loadSkin(SkinType.RESULT);
 	}
 
 	public void render() {

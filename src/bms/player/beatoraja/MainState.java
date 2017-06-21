@@ -1,16 +1,18 @@
 package bms.player.beatoraja;
 
 import java.io.File;
+import java.nio.file.Paths;
 import java.util.*;
 
+import bms.player.beatoraja.Config.SkinConfig;
 import bms.player.beatoraja.play.TargetProperty;
-import bms.player.beatoraja.skin.Skin;
+import bms.player.beatoraja.skin.*;
+import bms.player.beatoraja.skin.lr2.LR2SkinCSVLoader;
+import bms.player.beatoraja.skin.lr2.LR2SkinHeaderLoader;
 import bms.player.beatoraja.song.SongData;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 
@@ -274,6 +276,27 @@ public abstract class MainState {
 			this.skin.dispose();
 		}
 		this.skin = skin;
+	}
+	
+	public void loadSkin(SkinType skinType) {
+		final PlayerResource resource = main.getPlayerResource();
+		try {
+			SkinConfig sc = resource.getConfig().getSkin()[skinType.getId()];
+			if (sc.getPath().endsWith(".json")) {
+				SkinLoader sl = new SkinLoader(resource.getConfig());
+				setSkin(sl.loadSkin(Paths.get(sc.getPath()), skinType, sc.getProperty()));
+			} else {
+				LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
+				SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
+				LR2SkinCSVLoader dloader = LR2SkinCSVLoader.getSkinLoader(skinType,  header.getResolution(), resource.getConfig());
+				setSkin(dloader.loadSkin(Paths.get(sc.getPath()).toFile(), this, header, loader.getOption(),
+						sc.getProperty()));
+			}
+		} catch (Throwable e) {
+			e.printStackTrace();
+			SkinLoader sl = new SkinLoader(resource.getConfig());
+			setSkin(sl.loadSkin(Paths.get(SkinConfig.defaultSkinPathMap.get(skinType)), skinType, new HashMap()));
+		}
 	}
 
 	public int getJudgeCount(int judge, boolean fast) {
