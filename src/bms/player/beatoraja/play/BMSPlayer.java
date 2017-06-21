@@ -344,6 +344,7 @@ public class BMSPlayer extends MainState {
 				if (property.freq != 100) {
 					model.setFrequency(property.freq / 100f);
 				}
+				model.setTotal(property.total);
 				PracticeModifier pm = new PracticeModifier(property.starttime * 100 / property.freq,
 						property.endtime * 100 / property.freq);
 				pm.modify(model);
@@ -550,17 +551,11 @@ public class BMSPlayer extends MainState {
 
 	public IRScoreData createScoreData() {
 		final PlayerResource resource = getMainController().getPlayerResource();
-		final int pgreat = judge.getJudgeCount(0);
-		final int great = judge.getJudgeCount(1);
-		final int good = judge.getJudgeCount(2);
-		final int bad = judge.getJudgeCount(3);
-		final int poor = judge.getJudgeCount(4);
-		final int miss = judge.getJudgeCount(5);
-		if (pgreat + great + good + bad == 0) {
+		IRScoreData score = judge.getScoreData();
+		if (score.getEpg() + score.getLpg() + score.getEgr() + score.getLgr() + score.getEgd() + score.getLgd() + score.getEbd() + score.getLbd() == 0) {
 			return null;
 		}
 
-		IRScoreData score = judge.getScoreData();
 		ClearType clear = ClearType.Failed;
 		if (state != STATE_FAILED && gauge.isQualified()) {
 			if (assist > 0) {
@@ -597,7 +592,7 @@ public class BMSPlayer extends MainState {
 		replay.rand = model.getRandom();
 		replay.gauge = resource.getConfig().getGauge();
 
-		score.setMinbp(bad + poor + miss + resource.getSongdata().getNotes() - notes);
+		score.setMinbp(score.getEbd() + score.getLbd() + score.getEpr() + score.getLpr() + score.getEms() + score.getLms() + resource.getSongdata().getNotes() - notes);
 		score.setDevice(resource.getPlayDevice());
 		return score;
 	}

@@ -9,9 +9,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.FloatArray;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.badlogic.gdx.utils.IntArray;
 
 /**
  * ゲージ遷移描画オブジェクト
@@ -20,11 +18,21 @@ import java.util.List;
  */
 public class SkinGaugeGraphObject extends SkinObject {
 
+	/**
+	 * 背景テクスチャ
+	 */
 	private Texture backtex;
-	private Texture shapetex;
-
+	/**
+	 * グラフテクスチャ
+	 */
+	private TextureRegion shapetex;
+	/**
+	 * ゲージ描画を完了するまでの時間(ms)
+	 */
 	private int delay = 1500;
-
+	/**
+	 * グラフ線の太さ
+	 */
 	private int lineWidth = 2;
 
 	public int getDelay() {
@@ -43,9 +51,6 @@ public class SkinGaugeGraphObject extends SkinObject {
 		this.lineWidth = lineWidth;
 	}
 
-	private int count;
-	private long timecount;
-
 	private final Color[] graphcolor = { Color.valueOf("440044"), Color.valueOf("004444"), Color.valueOf("004400"),
 			Color.valueOf("440000"), Color.valueOf("444400"), Color.valueOf("444444") };
 	private final Color[] graphline = { Color.valueOf("ff00ff"), Color.valueOf("00ffff"), Color.valueOf("00ff00"),
@@ -56,7 +61,6 @@ public class SkinGaugeGraphObject extends SkinObject {
 
 	private int color;
 	private FloatArray gauge;
-	private List<Integer> section;
 
 	@Override
 	public void draw(SpriteBatch sprite, long time, MainState state) {
@@ -66,12 +70,12 @@ public class SkinGaugeGraphObject extends SkinObject {
 		}
 
 		if (shapetex != null) {
-			if (shapetex.getWidth() == (int) graph.getWidth() && shapetex.getHeight() == (int) graph.getHeight()) {
+			if (shapetex.getTexture().getWidth() == (int) graph.getWidth() && shapetex.getTexture().getHeight() == (int) graph.getHeight()) {
 				// shape.setColor(Color.BLACK);
 				// shape.fill();
 			} else {
 				backtex.dispose();
-				shapetex.dispose();
+				shapetex.getTexture().dispose();
 				shapetex = null;
 			}
 		}
@@ -81,12 +85,12 @@ public class SkinGaugeGraphObject extends SkinObject {
 			// ゲージグラフ描画
 			color = typetable[resource.getGrooveGauge().getType()];
 			gauge = resource.getGauge();
-			section = new ArrayList<Integer>();
+			IntArray section = new IntArray();
 			if (state instanceof GradeResult) {
 				gauge = new FloatArray();
 				for (FloatArray l : resource.getCourseGauge()) {
 					gauge.addAll(l);
-					section.add((section.size() > 0 ? section.get(section.size() - 1) : 0) + l.size);
+					section.add((section.size > 0 ? section.get(section.size - 1) : 0) + l.size);
 				}
 			}
 			shape.setColor(graphcolor[color]);
@@ -148,20 +152,21 @@ public class SkinGaugeGraphObject extends SkinObject {
 				}
 				f1 = f2;
 			}
-			shapetex = new Texture(shape);
+			shapetex = new TextureRegion(new Texture(shape));
 			shape.dispose();
 		}
 
 		sprite.draw(backtex, graph.x, graph.y + graph.height, graph.width, -graph.height);
 		final float render = time >= delay ? 1.0f : (float) time / delay;
-		sprite.draw(new TextureRegion(shapetex, 0, 0, (int) (graph.width * render), (int) graph.height), graph.x,
-				graph.y + graph.height, graph.width * render, -graph.height);
+		// setRegionにfloatを渡すと表示がおかしくなる
+		shapetex.setRegion(0, 0, (int)(graph.width * render), (int)graph.height);
+		sprite.draw(shapetex, graph.x, graph.y + graph.height, (int)(graph.width * render), -graph.height);
 	}
 
 	@Override
 	public void dispose() {
 		if (shapetex != null) {
-			shapetex.dispose();
+			shapetex.getTexture().dispose();
 			shapetex = null;
 		}
 	}
