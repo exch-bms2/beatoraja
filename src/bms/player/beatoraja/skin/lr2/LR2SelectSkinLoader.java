@@ -17,9 +17,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
  *
  * @author exch
  */
-public class LR2SelectSkinLoader extends LR2SkinCSVLoader {
-
-	private MusicSelectSkin skin;
+public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 
 	private SkinBar skinbar = new SkinBar(1);
 
@@ -282,12 +280,8 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader {
 
 	}
 
-	public Skin loadSkin(File f, MainState selector, SkinHeader header,
+	public MusicSelectSkin loadSkin(File f, MainState selector, SkinHeader header,
 			Map<Integer, Boolean> option, Map property) throws IOException {
-		skin = new MusicSelectSkin(src, dst);
-
-		this.loadSkin(skin, f, selector, header, option, property);
-
-		return skin;
+		return this.loadSkin(new MusicSelectSkin(src, dst), f, selector, header, option, property);
 	}
 }
