@@ -49,7 +49,7 @@ public class MusicSelector extends MainState {
 	 */
 	public static final int REPLAY = 4;
 
-	private Config config;
+	private PlayerConfig config;
 
 	private PlayerData playerdata;
 
@@ -90,20 +90,21 @@ public class MusicSelector extends MainState {
 	public static final int SOUND_FOLDERCLOSE = 3;
 	public static final int SOUND_CHANGEOPTION = 4;
 	
-	public MusicSelector(MainController main, Config config, boolean songUpdated) {
+	public MusicSelector(MainController main, boolean songUpdated) {
 		super(main);
-		this.config = config;
+		this.config = main.getPlayerResource().getPlayerConfig();
+		final Config conf = main.getPlayerResource().getConfig();
 		this.songUpdated = songUpdated;
 
 		songdb = main.getSongDatabase();
 
 		scorecache = new ScoreDataCache(getMainController().getPlayDataAccessor());
 
-		setSound(SOUND_BGM, config.getBgmpath() + File.separatorChar + "select.wav", true);		
-		setSound(SOUND_SCRATCH, config.getSoundpath() + File.separatorChar + "scratch.wav", false);
-		setSound(SOUND_FOLDEROPEN, config.getSoundpath() + File.separatorChar + "f-open.wav", false);
-		setSound(SOUND_FOLDERCLOSE, config.getSoundpath() + File.separatorChar + "f-close.wav", false);
-		setSound(SOUND_CHANGEOPTION, config.getSoundpath() + File.separatorChar + "o-change.wav", false);
+		setSound(SOUND_BGM, conf.getBgmpath() + File.separatorChar + "select.wav", true);		
+		setSound(SOUND_SCRATCH, conf.getSoundpath() + File.separatorChar + "scratch.wav", false);
+		setSound(SOUND_FOLDEROPEN, conf.getSoundpath() + File.separatorChar + "f-open.wav", false);
+		setSound(SOUND_FOLDERCLOSE, conf.getSoundpath() + File.separatorChar + "f-close.wav", false);
+		setSound(SOUND_CHANGEOPTION, conf.getSoundpath() + File.separatorChar + "o-change.wav", false);
 
 		bar = new BarRenderer(this);
 		musicinput = new MusicSelectInputProcessor(this);
@@ -119,7 +120,7 @@ public class MusicSelector extends MainState {
 		playerdata = main.getPlayDataAccessor().readPlayerData();
 		scorecache.clear();
 
-        preview = new PreviewMusicProcessor(main.getAudioProcessor(), config);
+        preview = new PreviewMusicProcessor(main.getAudioProcessor(), main.getPlayerResource().getConfig());
         preview.setDefault(getSound(SOUND_BGM));
         preview.start(null);
 
@@ -140,11 +141,11 @@ public class MusicSelector extends MainState {
 
 		// search text field
 		if (getStage() == null && ((MusicSelectSkin) getSkin()).getSearchTextRegion() != null) {
-			search = new SearchTextField(this, config.getResolution());
+			search = new SearchTextField(this, main.getPlayerResource().getConfig().getResolution());
 			setStage(search);
 		}
 
-		if(!songUpdated && config.isUpdatesong()) {
+		if(!songUpdated && main.getPlayerResource().getConfig().isUpdatesong()) {
 			updateSong = new SongUpdateThread(null);
 			updateSong.start();
 		}
@@ -261,7 +262,7 @@ public class MusicSelector extends MainState {
 		if (play >= 0) {
 			if (current instanceof SongBar) {
 				resource.clear();
-				if (resource.setBMSFile(Paths.get(((SongBar) current).getSongData().getPath()), config, play)) {
+				if (resource.setBMSFile(Paths.get(((SongBar) current).getSongData().getPath()), play)) {
 				    preview.stop();
 					getMainController().changeState(MainController.STATE_DECIDE);
 				}
@@ -386,7 +387,7 @@ public class MusicSelector extends MainState {
 				}
 				preview.stop();
 				resource.setCoursetitle(((GradeBar) bar.getSelected()).getTitle());
-				resource.setBMSFile(files.get(0), config, autoplay);
+				resource.setBMSFile(files.get(0), autoplay);
 				getMainController().changeState(MainController.STATE_DECIDE);
 			} else {
 				Logger.getGlobal().info("段位の楽曲が揃っていません");

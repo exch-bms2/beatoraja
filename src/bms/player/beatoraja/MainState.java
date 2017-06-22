@@ -4,7 +4,6 @@ import java.io.File;
 import java.nio.file.Paths;
 import java.util.*;
 
-import bms.player.beatoraja.Config.SkinConfig;
 import bms.player.beatoraja.play.TargetProperty;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.lr2.LR2SkinCSVLoader;
@@ -281,7 +280,7 @@ public abstract class MainState {
 	public void loadSkin(SkinType skinType) {
 		final PlayerResource resource = main.getPlayerResource();
 		try {
-			SkinConfig sc = resource.getConfig().getSkin()[skinType.getId()];
+			SkinConfig sc = resource.getPlayerConfig().getSkin()[skinType.getId()];
 			if (sc.getPath().endsWith(".json")) {
 				SkinLoader sl = new SkinLoader(resource.getConfig());
 				setSkin(sl.loadSkin(Paths.get(sc.getPath()), skinType, sc.getProperty()));
@@ -309,7 +308,7 @@ public abstract class MainState {
 	public int getNumberValue(int id) {
 		switch (id) {
 		case NUMBER_JUDGETIMING:
-			return getMainController().getPlayerResource().getConfig().getJudgetiming();
+			return getMainController().getPlayerResource().getPlayerConfig().getJudgetiming();
 			case NUMBER_CURRENT_FPS:
 				return Gdx.graphics.getFramesPerSecond();
 		case NUMBER_TIME_YEAR:
@@ -381,31 +380,31 @@ public abstract class MainState {
 			case NUMBER_COMBOBREAK:
 				return getJudgeCount(3, true) + getJudgeCount(3, false) + getJudgeCount(4, true) + getJudgeCount(4, false);
 			case BUTTON_GAUGE_1P:
-			return getMainController().getPlayerResource().getConfig().getGauge();
+			return getMainController().getPlayerResource().getPlayerConfig().getGauge();
 		case BUTTON_RANDOM_1P:
-			return getMainController().getPlayerResource().getConfig().getRandom();
+			return getMainController().getPlayerResource().getPlayerConfig().getRandom();
 		case BUTTON_RANDOM_2P:
-			return getMainController().getPlayerResource().getConfig().getRandom2();
+			return getMainController().getPlayerResource().getPlayerConfig().getRandom2();
 		case BUTTON_DPOPTION:
-			return getMainController().getPlayerResource().getConfig().getDoubleoption();
+			return getMainController().getPlayerResource().getPlayerConfig().getDoubleoption();
 		case BUTTON_HSFIX:
-			return getMainController().getPlayerResource().getConfig().getFixhispeed();
+			return getMainController().getPlayerResource().getPlayerConfig().getFixhispeed();
 		case BUTTON_BGA:
 			return getMainController().getPlayerResource().getConfig().getBga();
 		case BUTTON_ASSIST_EXJUDGE:
-			return getMainController().getPlayerResource().getConfig().isExpandjudge() ? 1 : 0;
+			return getMainController().getPlayerResource().getPlayerConfig().isExpandjudge() ? 1 : 0;
 		case BUTTON_ASSIST_CONSTANT:
-			return getMainController().getPlayerResource().getConfig().isConstant() ? 1 : 0;
+			return getMainController().getPlayerResource().getPlayerConfig().isConstant() ? 1 : 0;
 		case BUTTON_ASSIST_JUDGEAREA:
-			return getMainController().getPlayerResource().getConfig().isShowjudgearea() ? 1 : 0;
+			return getMainController().getPlayerResource().getPlayerConfig().isShowjudgearea() ? 1 : 0;
 		case BUTTON_ASSIST_LEGACY:
-			return getMainController().getPlayerResource().getConfig().isLegacynote() ? 1 : 0;
+			return getMainController().getPlayerResource().getPlayerConfig().isLegacynote() ? 1 : 0;
 		case BUTTON_ASSIST_MARKNOTE:
-			return getMainController().getPlayerResource().getConfig().isMarkprocessednote() ? 1 : 0;
+			return getMainController().getPlayerResource().getPlayerConfig().isMarkprocessednote() ? 1 : 0;
 		case BUTTON_ASSIST_BPMGUIDE:
-			return getMainController().getPlayerResource().getConfig().isBpmguide() ? 1 : 0;
+			return getMainController().getPlayerResource().getPlayerConfig().isBpmguide() ? 1 : 0;
 		case BUTTON_ASSIST_NOMINE:
-			return getMainController().getPlayerResource().getConfig().isNomine() ? 1 : 0;
+			return getMainController().getPlayerResource().getPlayerConfig().isNomine() ? 1 : 0;
 		case NUMBER_TOTALNOTES:
 		case NUMBER_TOTALNOTES2:
 			if (getMainController().getPlayerResource().getSongdata() != null) {
@@ -502,7 +501,7 @@ public abstract class MainState {
 			SongData song = getMainController().getPlayerResource().getSongdata();
 			switch (id) {
 				case STRING_RIVAL:
-					return TargetProperty.getAllTargetProperties(getMainController())[getMainController().getPlayerResource().getConfig().getTarget()].getName();
+					return TargetProperty.getAllTargetProperties(getMainController())[getMainController().getPlayerResource().getPlayerConfig().getTarget()].getName();
 				case STRING_PLAYER:
 					return "";
 			case STRING_TITLE:

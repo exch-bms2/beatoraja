@@ -74,7 +74,7 @@ public class BMSPlayer extends MainState {
 		super(main);
 		this.model = resource.getBMSModel();
 		this.autoplay = resource.getAutoplay();
-		Config config = resource.getConfig();
+		PlayerConfig config = resource.getPlayerConfig();
 
 		if (autoplay >= 3) {
 			if (resource.getCourseBMSModels() != null) {
@@ -233,15 +233,16 @@ public class BMSPlayer extends MainState {
 		judge = new JudgeManager(this);
 		control = new ControlInputProcessor(this, autoplay);
 		keyinput = new KeyInputProccessor(this, model.getMode());
-		Config config = resource.getConfig();
+		Config conf = resource.getConfig();
+		PlayerConfig config = resource.getPlayerConfig();
 
 		loadSkin(getSkinType());
 
-		setSound(SOUND_READY, config.getSoundpath() + File.separatorChar + "playready.wav", false);
-		setSound(SOUND_PLAYSTOP, config.getSoundpath() + File.separatorChar + "playstop.wav", false);
+		setSound(SOUND_READY, conf.getSoundpath() + File.separatorChar + "playready.wav", false);
+		setSound(SOUND_PLAYSTOP, conf.getSoundpath() + File.separatorChar + "playstop.wav", false);
 
 		final BMSPlayerInputProcessor input = main.getInputProcessor();
-		input.setMinimumInputDutration(config.getInputduration());
+		input.setMinimumInputDutration(conf.getInputduration());
 		input.setDisableDevice(autoplay == 0 || autoplay == 2
 				? (resource.getPlayDevice() == 0 ? new int[] { 1, 2 } : new int[] { 0 }) : null);
 		PlayConfig pc = (model.getMode() == Mode.BEAT_5K || model.getMode() == Mode.BEAT_7K ? config.getMode7()
@@ -537,9 +538,9 @@ public class BMSPlayer extends MainState {
 				return;
 			}
 		}
-		PlayConfig pc = (model.getMode() == Mode.BEAT_5K || model.getMode() == Mode.BEAT_7K ? resource.getConfig().getMode7()
-				: (model.getMode() == Mode.BEAT_10K || model.getMode() == Mode.BEAT_14K ? resource.getConfig().getMode14()
-						: resource.getConfig().getMode9()));
+		PlayConfig pc = (model.getMode() == Mode.BEAT_5K || model.getMode() == Mode.BEAT_7K ? resource.getPlayerConfig().getMode7()
+				: (model.getMode() == Mode.BEAT_10K || model.getMode() == Mode.BEAT_14K ? resource.getPlayerConfig().getMode14()
+						: resource.getPlayerConfig().getMode9()));
 		if (lanerender.getFixHispeed() != Config.FIX_HISPEED_OFF) {
 			pc.setDuration(lanerender.getGreenValue());
 		} else {
@@ -551,6 +552,7 @@ public class BMSPlayer extends MainState {
 
 	public IRScoreData createScoreData() {
 		final PlayerResource resource = getMainController().getPlayerResource();
+		final PlayerConfig config = resource.getPlayerConfig();
 		IRScoreData score = judge.getScoreData();
 		if (score.getEpg() + score.getLpg() + score.getEgr() + score.getLgr() + score.getEgd() + score.getLgd() + score.getEbd() + score.getLbd() == 0) {
 			return null;
@@ -579,18 +581,18 @@ public class BMSPlayer extends MainState {
 		}
 		score.setClear(clear.id);
 		score.setGauge(GrooveGauge.getGaugeID(gauge));
-		score.setOption(resource.getConfig().getRandom() + (model.getMode().player == 2
-				? (resource.getConfig().getRandom2() * 10 + resource.getConfig().getDoubleoption() * 100) : 0));
+		score.setOption(config.getRandom() + (model.getMode().player == 2
+				? (config.getRandom2() * 10 + config.getDoubleoption() * 100) : 0));
 		// リプレイデータ保存。スコア保存されない場合はリプレイ保存しない
 		final ReplayData replay = resource.getReplayData();
 		replay.player = getMainController().getPlayerConfig().getName();
 		replay.sha256 = model.getSHA256();
-		replay.mode = resource.getConfig().getLnmode();
+		replay.mode = config.getLnmode();
 		replay.date = Calendar.getInstance().getTimeInMillis() / 1000;
 		replay.keylog = getMainController().getInputProcessor().getKeyInputLog().toArray(new KeyInputLog[0]);
 		replay.pattern = pattern.toArray(new PatternModifyLog[pattern.size()]);
 		replay.rand = model.getRandom();
-		replay.gauge = resource.getConfig().getGauge();
+		replay.gauge = config.getGauge();
 
 		score.setMinbp(score.getEbd() + score.getLbd() + score.getEpr() + score.getLpr() + score.getEms() + score.getLms() + resource.getSongdata().getNotes() - notes);
 		score.setDevice(resource.getPlayDevice());

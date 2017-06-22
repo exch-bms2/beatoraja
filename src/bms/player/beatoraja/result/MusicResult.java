@@ -71,7 +71,7 @@ public class MusicResult extends MainState {
 		if (resource.getAutoplay() == 0 && resource.getScoreData() != null
 				&& resource.getScoreData().getClear() >= Easy.id
 				&& !getMainController().getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
-						resource.getConfig().getLnmode(), 0)) {
+						resource.getPlayerConfig().getLnmode(), 0)) {
 			saveReplayData(0);
 		}
 		// コースモードの場合はリプレイデータをストックする
@@ -198,7 +198,7 @@ public class MusicResult extends MainState {
 			if (saveReplay == -1 && resource.isUpdateScore()) {
 				ReplayData rd = resource.getReplayData();
 				getMainController().getPlayDataAccessor().wrireReplayData(rd, resource.getBMSModel(),
-						resource.getConfig().getLnmode(), index);
+						resource.getPlayerConfig().getLnmode(), index);
 				saveReplay = index;
 			}
 		}
@@ -219,7 +219,7 @@ public class MusicResult extends MainState {
 			return;
 		}
 		IRScoreData score = getMainController().getPlayDataAccessor().readScoreData(resource.getBMSModel(),
-				resource.getConfig().getLnmode());
+				resource.getPlayerConfig().getLnmode());
 		if (score == null) {
 			score = new IRScoreData();
 		}
@@ -307,7 +307,7 @@ public class MusicResult extends MainState {
 
 		if (resource.getAutoplay() == 0) {
 			getMainController().getPlayDataAccessor().writeScoreDara(resource.getScoreData(), resource.getBMSModel(),
-					resource.getConfig().getLnmode(), resource.isUpdateScore());
+					resource.getPlayerConfig().getLnmode(), resource.isUpdateScore());
 			// TODO スコアハッシュがあり、有効期限が切れていないものを送信する？
 			IRConnection ir = getMainController().getIRConnection();
 			if (ir != null) {
@@ -498,28 +498,28 @@ public class MusicResult extends MainState {
 				return getScoreDataProperty().getNowRate() == getScoreDataProperty().getBestScoreRate();
 		case OPTION_NO_REPLAYDATA:
 			return !getMainController().getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
-					resource.getConfig().getLnmode(), 0);
+					resource.getPlayerConfig().getLnmode(), 0);
 		case OPTION_NO_REPLAYDATA2:
 			return !getMainController().getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
-					resource.getConfig().getLnmode(), 1);
+					resource.getPlayerConfig().getLnmode(), 1);
 		case OPTION_NO_REPLAYDATA3:
 			return !getMainController().getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
-					resource.getConfig().getLnmode(), 2);
+					resource.getPlayerConfig().getLnmode(), 2);
 		case OPTION_NO_REPLAYDATA4:
 			return !getMainController().getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
-					resource.getConfig().getLnmode(), 3);
+					resource.getPlayerConfig().getLnmode(), 3);
 		case OPTION_REPLAYDATA:
 			return getMainController().getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
-					resource.getConfig().getLnmode(), 0);
+					resource.getPlayerConfig().getLnmode(), 0);
 		case OPTION_REPLAYDATA2:
 			return getMainController().getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
-					resource.getConfig().getLnmode(), 1);
+					resource.getPlayerConfig().getLnmode(), 1);
 		case OPTION_REPLAYDATA3:
 			return getMainController().getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
-					resource.getConfig().getLnmode(), 2);
+					resource.getPlayerConfig().getLnmode(), 2);
 		case OPTION_REPLAYDATA4:
 			return getMainController().getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
-					resource.getConfig().getLnmode(), 3);
+					resource.getPlayerConfig().getLnmode(), 3);
 		case OPTION_REPLAYDATA_SAVED:
 			return saveReplay == 0;
 		case OPTION_REPLAYDATA2_SAVED:

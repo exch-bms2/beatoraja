@@ -112,9 +112,9 @@ public class MainController extends ApplicationAdapter {
 
 		playdata = new PlayDataAccessor(player.getName());
 		
-		ir = IRConnection.getIRConnection(config.getIrname());
-		if(config.getUserid().length() > 0 && ir != null) {
-			ir.login(config.getUserid(), config.getPassword());
+		ir = IRConnection.getIRConnection(player.getIrname());
+		if(player.getUserid().length() > 0 && ir != null) {
+			ir.login(player.getUserid(), player.getPassword());
 		}
 	}
 
@@ -229,14 +229,15 @@ public class MainController extends ApplicationAdapter {
 			break;
 		}
 
-		selector = new MusicSelector(this, config, songUpdated);
+		PlayerConfig pconfig = new PlayerConfig(config);
+		resource = new PlayerResource(audio, config, pconfig);
+		selector = new MusicSelector(this, songUpdated);
 		decide = new MusicDecide(this);
 		result = new MusicResult(this);
 		gresult = new GradeResult(this);
 		keyconfig = new KeyConfiguration(this);
-		resource = new PlayerResource(audio, config);
 		if (bmsfile != null) {
-			if(resource.setBMSFile(bmsfile, config, auto)) {
+			if(resource.setBMSFile(bmsfile, auto)) {
 				changeState(STATE_PLAYBMS);				
 			} else {
 				// ダミーステートに移行してすぐexitする
@@ -273,8 +274,8 @@ public class MainController extends ApplicationAdapter {
 		};
 		polling.start();
 
-		if(config.getTarget() >= TargetProperty.getAllTargetProperties(this).length) {
-			config.setTarget(0);
+		if(pconfig.getTarget() >= TargetProperty.getAllTargetProperties(this).length) {
+			pconfig.setTarget(0);
 		}
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 	}

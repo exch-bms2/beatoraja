@@ -458,7 +458,7 @@ public class BarRenderer {
 
 		List<Bar> remove = new ArrayList<Bar>();
 		for (Bar b : l) {
-			final Mode mode = select.getMainController().getPlayerResource().getConfig().getMode();
+			final Mode mode = select.getMainController().getPlayerResource().getPlayerConfig().getMode();
 			if (mode != null && b instanceof SongBar
 					&& ((SongBar) b).getSongData().getMode() != mode.id) {
 				remove.add(b);
@@ -475,7 +475,7 @@ public class BarRenderer {
 			currentsongs = l.toArray(new Bar[l.size()]);
 			bartextupdate = true;
 
-			final Config config = select.getMainController().getPlayerResource().getConfig();
+			final PlayerConfig config = select.getMainController().getPlayerResource().getPlayerConfig();
 			for (Bar b : currentsongs) {
 				if (b instanceof SongBar) {
 					SongData sd = ((SongBar) b).getSongData();
@@ -580,7 +580,7 @@ public class BarRenderer {
 
 		@Override
 		public void run() {
-			Config config = select.getMainController().getPlayerResource().getConfig();
+			PlayerConfig config = select.getMainController().getPlayerResource().getPlayerConfig();
 			final MainController main = select.getMainController();
 			final SongInformationAccessor info = select.getMainController().getInfoDatabase();
 			for (Bar bar : bars) {
@@ -619,7 +619,7 @@ public class BarRenderer {
 					}
 				}
 
-				if (config.isFolderlamp()) {
+				if (select.getMainController().getPlayerResource().getConfig().isFolderlamp()) {
 					if (bar instanceof FolderBar) {
 						((FolderBar) bar).updateFolderStatus();
 					}

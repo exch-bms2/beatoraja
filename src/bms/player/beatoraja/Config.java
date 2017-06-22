@@ -1,19 +1,16 @@
 package bms.player.beatoraja;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
 import bms.player.beatoraja.input.BMControllerInputProcessor.BMKeys;
 import bms.player.beatoraja.play.JudgeAlgorithm;
-import bms.player.beatoraja.play.JudgeManager;
 
 import bms.player.beatoraja.skin.SkinType;
 import com.badlogic.gdx.Input.Keys;
 
 import static bms.player.beatoraja.Resolution.*;
-import bms.player.beatoraja.select.*;
 import bms.model.Mode;
 
 /**
@@ -69,7 +66,10 @@ public class Config {
 	 * オーディオ同時発音数
 	 */
 	private int audioDeviceSimultaneousSources = 64;
-	
+
+	/**
+	 * システム音ボリューム
+	 */
 	private float systemvolume = 1.0f;
 	/**
 	 * キー音のボリューム
@@ -277,30 +277,6 @@ public class Config {
 		this.vsync = vsync;
 	}
 
-	public int getGauge() {
-		return gauge;
-	}
-
-	public void setGauge(int gauge) {
-		this.gauge = gauge;
-	}
-
-	public int getRandom() {
-		return random;
-	}
-
-	public void setRandom(int random) {
-		this.random = random;
-	}
-
-	public int getFixhispeed() {
-		return fixhispeed;
-	}
-
-	public void setFixhispeed(int fixhispeed) {
-		this.fixhispeed = fixhispeed;
-	}
-
 	public int getBga() {
 		return bga;
 	}
@@ -309,46 +285,14 @@ public class Config {
 		this.bga = bga;
 	}
 
-	public int getJudgetiming() {
-		return judgetiming;
-	}
-
-	public void setJudgetiming(int judgetiming) {
-		this.judgetiming = judgetiming;
-	}
-
-        public boolean getJKOC()  {
-            return jkoc_hack;
-        }
-        
-        public void setJKOC(boolean jkoc)  {
-            this.jkoc_hack = jkoc;
-        }
-        
-	public boolean isConstant() {
-		return constant;
-	}
-
-	public void setConstant(boolean constant) {
-		this.constant = constant;
-	}
-
-	public boolean isBpmguide() {
-		return bpmguide;
-	}
-
-	public void setBpmguide(boolean bpmguide) {
-		this.bpmguide = bpmguide;
-	}
-
-	public int getLnmode() {
-		return lnmode;
-	}
-
-	public void setLnmode(int lnmode) {
-		this.lnmode = lnmode;
-	}
-
+    public boolean getJKOC()  {
+        return jkoc_hack;
+    }
+    
+    public void setJKOC(boolean jkoc)  {
+        this.jkoc_hack = jkoc;
+    }
+    
 	public String getVlcpath() {
 		return vlcpath;
 	}
@@ -405,62 +349,6 @@ public class Config {
 		this.judgealgorithm = judgeAlgorithm;
 	}
 
-	public boolean isExpandjudge() {
-		return expandjudge;
-	}
-
-	public void setExpandjudge(boolean expandjudge) {
-		this.expandjudge = expandjudge;
-	}
-
-	public int getRandom2() {
-		return random2;
-	}
-
-	public void setRandom2(int random2) {
-		this.random2 = random2;
-	}
-
-	public int getDoubleoption() {
-		return doubleoption;
-	}
-
-	public void setDoubleoption(int doubleoption) {
-		this.doubleoption = doubleoption;
-	}
-
-	public boolean isNomine() {
-		return nomine;
-	}
-
-	public void setNomine(boolean nomine) {
-		this.nomine = nomine;
-	}
-
-	public boolean isLegacynote() {
-		return legacynote;
-	}
-
-	public void setLegacynote(boolean legacynote) {
-		this.legacynote = legacynote;
-	}
-
-	public boolean isShowjudgearea() {
-		return showjudgearea;
-	}
-
-	public void setShowjudgearea(boolean showjudgearea) {
-		this.showjudgearea = showjudgearea;
-	}
-
-	public boolean isMarkprocessednote() {
-		return markprocessednote;
-	}
-
-	public void setMarkprocessednote(boolean markprocessednote) {
-		this.markprocessednote = markprocessednote;
-	}
-
 	public boolean isFolderlamp() {
 		return folderlamp;
 	}
@@ -469,52 +357,12 @@ public class Config {
 		this.folderlamp = folderlamp;
 	}
 
-	public PlayConfig getMode7() {
-		return mode7;
-	}
-
-	public void setMode7(PlayConfig mode7) {
-		this.mode7 = mode7;
-	}
-
-	public PlayConfig getMode14() {
-		return mode14;
-	}
-
-	public void setMode14(PlayConfig mode14) {
-		this.mode14 = mode14;
-	}
-
-	public PlayConfig getMode9() {
-		return mode9;
-	}
-
-	public void setMode9(PlayConfig mode9) {
-		this.mode9 = mode9;
-	}
-
-	public void setMode(Mode m)  {
-		this.mode = m;
-	}
-	
-	public Mode getMode()  {
-		return mode;
-	}
-	
 	public Resolution getResolution() {
 		return resolution;
 	}
 
 	public void setResolution(Resolution resolution) {
 		this.resolution = resolution;
-	}
-
-	public int getMusicselectinput() {
-		return musicselectinput;
-	}
-
-	public void setMusicselectinput(int musicselectinput) {
-		this.musicselectinput = musicselectinput;
 	}
 
 	public boolean isShowhiddennote() {
@@ -565,14 +413,6 @@ public class Config {
 		this.inputduration = inputduration;
 	}
 
-	public SkinConfig[] getSkin() {
-		return skin;
-	}
-
-	public void setSkin(SkinConfig[] skin) {
-		this.skin = skin;
-	}
-
 	public float getKeyvolume() {
 		return keyvolume;
 	}
@@ -605,30 +445,6 @@ public class Config {
 		this.audioDriver = audioDriver;
 	}
 
-	public String getUserid() {
-		return userid;
-	}
-
-	public void setUserid(String userid) {
-		this.userid = userid;
-	}
-
-	public String getPassword() {
-		return password;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
-	}
-
-	public String getIrname() {
-		return irname;
-	}
-
-	public void setIrname(String irname) {
-		this.irname = irname;
-	}
-
 	public String getAudioDriverName() {
 		return audioDriverName;
 	}
@@ -654,14 +470,6 @@ public class Config {
 								BMKeys.BUTTON_5, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN, BMKeys.BUTTON_9, BMKeys.BUTTON_10 }});
 			Logger.getGlobal().warning("mode14のPlayConfigを再構成");
 		}
-	}
-
-	public int getTarget() {
-		return target;
-	}
-
-	public void setTarget(int target) {
-		this.target = target;
 	}
 
 	public int getBgaExpand() {
@@ -719,59 +527,198 @@ public class Config {
 	public void setUseSongInfo(boolean useSongInfo) {
 		this.useSongInfo = useSongInfo;
 	}
+	
+	// TODO これ以降の値はPlayerConfigに移行する
+	
+	public SkinConfig[] getSkin() {
+		return skin;
+	}
 
-	public static class SkinConfig {
+	public void setSkin(SkinConfig[] skin) {
+		this.skin = skin;
+	}
 
-		public static final String DEFAULT_PLAY7 = "skin/default/play7.json";
-		public static final String DEFAULT_PLAY5 = "skin/default/play5.json";
-		public static final String DEFAULT_PLAY14 = "skin/default/play14.json";
-		public static final String DEFAULT_PLAY10 = "skin/default/play10.json";
-		public static final String DEFAULT_PLAY9 = "skin/default/play9.json";
-		public static final String DEFAULT_SELECT = "skin/default/select.json";
-		public static final String DEFAULT_DECIDE = "skin/default/decide.json";
-		public static final String DEFAULT_RESULT = "skin/default/result.json";
-		public static final String DEFAULT_GRADERESULT = "skin/default/graderesult.json";
+	public int getGauge() {
+		return gauge;
+	}
 
-		public static final Map<SkinType, String> defaultSkinPathMap = new HashMap<SkinType, String>() {
-			{
-				put(SkinType.PLAY_7KEYS, DEFAULT_PLAY7);
-				put(SkinType.PLAY_5KEYS, DEFAULT_PLAY5);
-				put(SkinType.PLAY_14KEYS, DEFAULT_PLAY14);
-				put(SkinType.PLAY_10KEYS, DEFAULT_PLAY10);
-				put(SkinType.PLAY_9KEYS, DEFAULT_PLAY9);
-				put(SkinType.MUSIC_SELECT, DEFAULT_SELECT);
-				put(SkinType.DECIDE, DEFAULT_DECIDE);
-				put(SkinType.RESULT, DEFAULT_RESULT);
-				put(SkinType.COURSE_RESULT, DEFAULT_GRADERESULT);
-			}
-		};
+	public void setGauge(int gauge) {
+		this.gauge = gauge;
+	}
 
-		private String path;
+	public int getRandom() {
+		return random;
+	}
 
-		private Map property;
+	public void setRandom(int random) {
+		this.random = random;
+	}
 
-		public SkinConfig() {
+	public int getFixhispeed() {
+		return fixhispeed;
+	}
 
-		}
+	public void setFixhispeed(int fixhispeed) {
+		this.fixhispeed = fixhispeed;
+	}
 
-		public SkinConfig(String path) {
-			this.path = path;
-		}
+	public int getTarget() {
+		return target;
+	}
 
-		public String getPath() {
-			return path;
-		}
+	public void setTarget(int target) {
+		this.target = target;
+	}
+	
+	public int getJudgetiming() {
+		return judgetiming;
+	}
 
-		public void setPath(String path) {
-			this.path = path;
-		}
+	public void setJudgetiming(int judgetiming) {
+		this.judgetiming = judgetiming;
+	}
 
-		public Map getProperty() {
-			return property;
-		}
+	public PlayConfig getMode7() {
+		return mode7;
+	}
 
-		public void setProperty(Map property) {
-			this.property = property;
-		}
+	public void setMode7(PlayConfig mode7) {
+		this.mode7 = mode7;
+	}
+
+	public PlayConfig getMode14() {
+		return mode14;
+	}
+
+	public void setMode14(PlayConfig mode14) {
+		this.mode14 = mode14;
+	}
+
+	public PlayConfig getMode9() {
+		return mode9;
+	}
+
+	public void setMode9(PlayConfig mode9) {
+		this.mode9 = mode9;
+	}
+
+	public void setMode(Mode m)  {
+		this.mode = m;
+	}
+	
+	public Mode getMode()  {
+		return mode;
+	}
+	
+	public boolean isConstant() {
+		return constant;
+	}
+
+	public void setConstant(boolean constant) {
+		this.constant = constant;
+	}
+
+	public boolean isBpmguide() {
+		return bpmguide;
+	}
+
+	public void setBpmguide(boolean bpmguide) {
+		this.bpmguide = bpmguide;
+	}
+	
+	public boolean isExpandjudge() {
+		return expandjudge;
+	}
+
+	public void setExpandjudge(boolean expandjudge) {
+		this.expandjudge = expandjudge;
+	}
+
+	public int getRandom2() {
+		return random2;
+	}
+
+	public void setRandom2(int random2) {
+		this.random2 = random2;
+	}
+
+	public int getDoubleoption() {
+		return doubleoption;
+	}
+
+	public void setDoubleoption(int doubleoption) {
+		this.doubleoption = doubleoption;
+	}
+
+	public boolean isNomine() {
+		return nomine;
+	}
+
+	public void setNomine(boolean nomine) {
+		this.nomine = nomine;
+	}
+
+	public boolean isLegacynote() {
+		return legacynote;
+	}
+
+	public void setLegacynote(boolean legacynote) {
+		this.legacynote = legacynote;
+	}
+
+	public boolean isShowjudgearea() {
+		return showjudgearea;
+	}
+
+	public void setShowjudgearea(boolean showjudgearea) {
+		this.showjudgearea = showjudgearea;
+	}
+
+	public boolean isMarkprocessednote() {
+		return markprocessednote;
+	}
+
+	public void setMarkprocessednote(boolean markprocessednote) {
+		this.markprocessednote = markprocessednote;
+	}
+
+	public int getLnmode() {
+		return lnmode;
+	}
+
+	public void setLnmode(int lnmode) {
+		this.lnmode = lnmode;
+	}
+
+	public int getMusicselectinput() {
+		return musicselectinput;
+	}
+
+	public void setMusicselectinput(int musicselectinput) {
+		this.musicselectinput = musicselectinput;
+	}
+
+	public String getUserid() {
+		return userid;
+	}
+
+	public void setUserid(String userid) {
+		this.userid = userid;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public String getIrname() {
+		return irname;
+	}
+
+	public void setIrname(String irname) {
+		this.irname = irname;
 	}
 }

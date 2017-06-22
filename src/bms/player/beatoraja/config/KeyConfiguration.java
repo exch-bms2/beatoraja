@@ -70,7 +70,7 @@ public class KeyConfiguration extends MainState {
 		final MainController main = getMainController();
 		final SpriteBatch sprite = main.getSpriteBatch();
 		BMSPlayerInputProcessor input = main.getInputProcessor();
-		Config config = getMainController().getPlayerResource().getConfig();
+		PlayerConfig config = getMainController().getPlayerResource().getPlayerConfig();
 		BMControllerInputProcessor[] controllers = input.getBMInputProcessor();
 
 		String[] keys = KEYS[mode];

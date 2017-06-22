@@ -164,7 +164,7 @@ public class JudgeManager {
 		inclease = new boolean[sckeyassign.length];
 		next_inclease = new boolean[sckeyassign.length];
 
-		final int judgerank = resource.getConfig().isExpandjudge() ? model.getJudgerank() * 4 : model.getJudgerank();
+		final int judgerank = resource.getPlayerConfig().isExpandjudge() ? model.getJudgerank() * 4 : model.getJudgerank();
 		int constraint = 2;
 		for (CourseData.CourseDataConstraint mode : resource.getConstraint()) {
 			if (mode == CourseData.CourseDataConstraint.NO_GREAT) {

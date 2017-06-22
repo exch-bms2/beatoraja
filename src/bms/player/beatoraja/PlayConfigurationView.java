@@ -24,7 +24,6 @@ import javafx.util.Callback;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 
-import bms.player.beatoraja.Config.SkinConfig;
 import bms.player.beatoraja.ir.IRConnection;
 import bms.player.beatoraja.play.JudgeAlgorithm;
 import bms.player.beatoraja.skin.SkinHeader.CustomFile;

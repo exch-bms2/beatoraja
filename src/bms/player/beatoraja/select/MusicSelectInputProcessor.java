@@ -68,7 +68,7 @@ public class MusicSelectInputProcessor {
     public void input() {
         final BMSPlayerInputProcessor input = select.getMainController().getInputProcessor();
         final PlayerResource resource = select.getMainController().getPlayerResource();
-        final Config config = resource.getConfig();
+        final PlayerConfig config = resource.getPlayerConfig();
         final BarRenderer bar = select.getBarRender();
         final Bar current = bar.getSelected();
         final int nowtime = select.getNowTime();
@@ -244,7 +244,7 @@ public class MusicSelectInputProcessor {
             }
             if (keystate[0] && keytime[0] != 0) {
                 keytime[0] = 0;
-                config.setBga((config.getBga() + 1) % 3);
+                resource.getConfig().setBga((resource.getConfig().getBga() + 1) % 3);
             }
             if (keystate[3] && keytime[3] != 0) {
                 keytime[3] = 0;
