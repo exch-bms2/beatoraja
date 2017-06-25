@@ -366,7 +366,7 @@ class SameFolderBar extends DirectoryBar {
 class TableBar extends DirectoryBar {
 
 	private TableData td;
-    private TableLevelBar[] levels;
+    private HashBar[] levels;
     private GradeBar[] grades;
     private MusicSelector selector;
 
@@ -388,12 +388,12 @@ class TableBar extends DirectoryBar {
     	this.td = td;
 
     	final long t = System.currentTimeMillis();
-		List<TableLevelBar> levels = new ArrayList<TableLevelBar>();
+		List<HashBar> levels = new ArrayList<HashBar>();
 		for (TableData.TableDataELement lv : td.getFolder()) {
-			levels.add(new TableLevelBar(selector, lv.getLevel(), lv.getHash()));
+			levels.add(new HashBar(selector, "LEVEL " + lv.getLevel(), lv.getHash()));
 		}
 
-		this.levels = levels.toArray(new TableLevelBar[levels.size()]);
+		this.levels = levels.toArray(new HashBar[levels.size()]);
 		List<GradeBar> l = new ArrayList<GradeBar>();
 		
 		Set<String> hashset = new HashSet<String>();
@@ -422,7 +422,7 @@ class TableBar extends DirectoryBar {
 		grades = l.toArray(new GradeBar[l.size()]);
     }
 
-    public TableLevelBar[] getLevels() {
+    public HashBar[] getLevels() {
         return levels;
     }
 
@@ -440,21 +440,26 @@ class TableBar extends DirectoryBar {
 
 }
 
-class TableLevelBar extends DirectoryBar {
-    private String level;
+/**
+ * ハッシュ集合を持ち、各ハッシュ値に該当する楽曲を含むフォルダバー
+ *
+ * @author exch
+ */
+class HashBar extends DirectoryBar {
+    private String title;
     private String[] hashes;
     private MusicSelector selector;
     private SongData[] songs;
 
-    public TableLevelBar(MusicSelector selector, String level, String[] hashes) {
+    public HashBar(MusicSelector selector, String title, String[] hashes) {
         this.selector = selector;
-        this.level = level;
+        this.title = title;
         this.hashes = hashes;
     }
 
     @Override
     public String getTitle() {
-        return "LEVEL " + level;
+        return title;
     }
 
     public String[] getHashes() {

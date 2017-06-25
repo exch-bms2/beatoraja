@@ -43,6 +43,8 @@ public class BarRenderer {
 	private Bar[] commands;
 
 	private GradeBar[] courses = new GradeBar[0];
+
+	private HashBar[] favorites = new HashBar[0];
 	/**
 	 * 難易度表バー一覧
 	 */
@@ -78,7 +80,7 @@ public class BarRenderer {
 		for (int i = 0; i < tds.length; i++) {
 			this.tables[i] = new TableBar(select, tds[i]);
 		}
-		CourseData[] cds = new CourseDataAccessor().readAll();
+		CourseData[] cds = new CourseDataAccessor("course").readAll();
 		courses = new GradeBar[cds.length];
 		for (int i = 0; i < cds.length; i++) {
 			Set<String> hashset = new HashSet<String>();
@@ -98,6 +100,11 @@ public class BarRenderer {
 				}
 			}
 			this.courses[i] = new GradeBar(cds[i].getName(), songdatas, cds[i]);
+		}
+		cds = new CourseDataAccessor("favorite").readAll();
+		favorites = new HashBar[cds.length];
+		for (int i = 0; i < cds.length; i++) {
+			favorites[i] = new HashBar(select, cds[i].getName(), cds[i].getHash());
 		}
 
 		List<CommandBar> density = new ArrayList<CommandBar>();
@@ -263,7 +270,7 @@ public class BarRenderer {
 			int value = -1;
 			if (sd instanceof TableBar) {
 				value = 2;
-			} else if (sd instanceof TableLevelBar) {
+			} else if (sd instanceof HashBar) {
 				value = 2;
 			} else if (sd instanceof GradeBar) {
 				value = ((GradeBar) sd).existsAllSongs() ? 3 : 4;
@@ -443,6 +450,7 @@ public class BarRenderer {
 			dir.clear();
 			l.addAll(Arrays.asList(new FolderBar(select, null, "e2977170").getChildren()));
 			l.add(new ContainerBar("COURSE", courses));
+			l.addAll(Arrays.asList(favorites));
 			l.addAll(Arrays.asList(tables));
 			l.addAll(Arrays.asList(commands));
 			l.addAll(search);
@@ -623,8 +631,8 @@ public class BarRenderer {
 					if (bar instanceof FolderBar) {
 						((FolderBar) bar).updateFolderStatus();
 					}
-					if (bar instanceof TableLevelBar) {
-						((TableLevelBar) bar).updateFolderStatus();
+					if (bar instanceof HashBar) {
+						((HashBar) bar).updateFolderStatus();
 					}
 				}
 				if (stop) {
