@@ -48,7 +48,7 @@ public class PlayDataAccessor {
 
 		try {
 			Class.forName("org.sqlite.JDBC");
-			scoredb = new ScoreDatabaseAccessor(new File(".").getAbsoluteFile().getParent(), "/", "/");
+			scoredb = new ScoreDatabaseAccessor(new File(".").getAbsoluteFile().getParent(), "/player/", "/");
 			scoredb.createTable(player);
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
@@ -169,6 +169,7 @@ public class PlayDataAccessor {
 	 *            プレイ回数のみ反映する場合はfalse
 	 */
 	public void writeScoreDara(IRScoreData newscore, BMSModel model, int lnmode, boolean updateScore) {
+		// TODO 更新ログデータベースへのアクセス
 		String hash = model.getSHA256();
 		if (newscore == null) {
 			return;
@@ -283,6 +284,7 @@ public class PlayDataAccessor {
 
 	public void writeScoreDara(IRScoreData newscore, BMSModel[] models, int lnmode, int option, CourseData.CourseDataConstraint[] constraint,
 			boolean updateScore) {
+		// TODO 更新ログデータベースへのアクセス
 		String hash = "";
 		int totalnotes = 0;
 		boolean ln = false;
@@ -531,10 +533,6 @@ public class PlayDataAccessor {
 	 *            LNモード
 	 */
 	public void wrireReplayData(ReplayData[] rd, String[] hash, boolean ln, int lnmode, int index, CourseData.CourseDataConstraint[] constraint) {
-		File replaydir = new File("replay");
-		if (!replaydir.exists()) {
-			replaydir.mkdirs();
-		}
 		Json json = new Json();
 		json.setOutputType(OutputType.json);
 		try {
@@ -556,7 +554,7 @@ public class PlayDataAccessor {
 	}
 
 	private String getReplayDataFilePath(String hash, boolean ln, int lnmode, int index) {
-		return "replay" + File.separatorChar + (ln ? replay[lnmode] : "") + hash + (index > 0 ? "_" + index : "");
+		return "player" + File.separatorChar + player + File.separatorChar + "replay" + File.separatorChar + (ln ? replay[lnmode] : "") + hash + (index > 0 ? "_" + index : "");
 	}
 
 	private String getReplayDataFilePath(String[] hashes, boolean ln, int lnmode, int index, CourseData.CourseDataConstraint[] constraint) {
@@ -570,7 +568,7 @@ public class PlayDataAccessor {
 				sb.append(String.format("%02d", c.id));
 			}
 		}
-		return "replay" + File.separatorChar + (ln ? replay[lnmode] : "") + hash
+		return "player" + File.separatorChar + player + File.separatorChar + "replay" + File.separatorChar + (ln ? replay[lnmode] : "") + hash
 				+ (sb.length() > 0 ? "_" + sb.toString() : "") + (index > 0 ? "_" + index : "");
 	}
 

@@ -148,7 +148,8 @@ public class PlayConfigurationView implements Initializable {
     @FXML
     private CheckBox useSongInfo;
 
-	private Config config;;
+	private Config config;
+	private PlayerConfig player;
 	@FXML
 	private CheckBox folderlamp;
 
@@ -247,12 +248,6 @@ public class PlayConfigurationView implements Initializable {
 		vsync.setSelected(config.isVsync());
 		bgaop.setValue(config.getBga());
 		bgaexpand.setValue(config.getBgaExpand());
-		scoreop.getSelectionModel().select(config.getRandom());
-		gaugeop.getSelectionModel().select(config.getGauge());
-		lntype.getSelectionModel().select(config.getLnmode());
-
-		fixhispeed.setValue(config.getFixhispeed());
-		judgetiming.getValueFactory().setValue(config.getJudgetiming());
 		systemvolume.setValue((double)config.getSystemvolume());
 		keyvolume.setValue((double)config.getKeyvolume());
 		bgvolume.setValue((double)config.getBgvolume());
@@ -264,20 +259,11 @@ public class PlayConfigurationView implements Initializable {
 		updatesong.setSelected(config.isUpdatesong());
 		tableurl.getItems().setAll(config.getTableURL());
 
-		constant.setSelected(config.isConstant());
-		bpmguide.setSelected(config.isBpmguide());
-		legacy.setSelected(config.isLegacynote());
-		exjudge.setSelected(config.isExpandjudge());
-		nomine.setSelected(config.isNomine());
-
-		judgeregion.setSelected(config.isShowjudgearea());
-		showhiddennote.setSelected(config.isShowhiddennote());
-		markprocessednote.setSelected(config.isMarkprocessednote());
-
 		audio.setValue(config.getAudioDriver());
 		maxfps.getValueFactory().setValue(config.getMaxFramePerSecond());
 		audiobuffer.getValueFactory().setValue(config.getAudioDeviceBufferSize());
 		audiosim.getValueFactory().setValue(config.getAudioDeviceSimultaneousSources());
+		showhiddennote.setSelected(config.isShowhiddennote());
 
 		judgealgorithm.setValue(JudgeAlgorithm.getIndex(config.getJudgealgorithm()));
 
@@ -294,14 +280,44 @@ public class PlayConfigurationView implements Initializable {
 		skinview = new SkinConfigurationView();
 
 		updateAudioDriver();
-		playconfig.setValue(0);
-		updatePlayConfig();
-		skincategory.setValue(SkinType.PLAY_7KEYS);
-		updateSkinCategory();
+		updatePlayer();
+	}
+	
+	public void updatePlayer() {
+		Path p = Paths.get("player/" + config.getPlayername() + "/config.json");
+		
+		Json json = new Json();
+		try {
+			json.setIgnoreUnknownFields(true);
+			player = json.fromJson(PlayerConfig.class, new FileReader(p.toFile()));
+			
+			scoreop.getSelectionModel().select(player.getRandom());
+			gaugeop.getSelectionModel().select(player.getGauge());
+			lntype.getSelectionModel().select(player.getLnmode());
 
-		irname.setValue(config.getIrname());
-		iruserid.setText(config.getUserid());
-		irpassword.setText(config.getPassword());
+			fixhispeed.setValue(player.getFixhispeed());
+			judgetiming.getValueFactory().setValue(player.getJudgetiming());
+
+			constant.setSelected(player.isConstant());
+			bpmguide.setSelected(player.isBpmguide());
+			legacy.setSelected(player.isLegacynote());
+			exjudge.setSelected(player.isExpandjudge());
+			nomine.setSelected(player.isNomine());
+			judgeregion.setSelected(player.isShowjudgearea());
+			markprocessednote.setSelected(player.isMarkprocessednote());
+
+			irname.setValue(player.getIrname());
+			iruserid.setText(player.getUserid());
+			irpassword.setText(player.getPassword());
+			
+			playconfig.setValue(0);
+			updatePlayConfig();
+			skincategory.setValue(SkinType.PLAY_7KEYS);
+			updateSkinCategory();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -313,11 +329,6 @@ public class PlayConfigurationView implements Initializable {
 		config.setVsync(vsync.isSelected());
 		config.setBga(bgaop.getValue());
 		config.setBgaExpand(bgaexpand.getValue());
-		config.setRandom(scoreop.getValue());
-		config.setGauge(gaugeop.getValue());
-		config.setLnmode(lntype.getValue());
-		config.setFixhispeed(fixhispeed.getValue());
-		config.setJudgetiming(getValue(judgetiming));
 
 		config.setBgmpath(bgmpath.getText());
 		config.setSoundpath(soundpath.getText());
@@ -329,15 +340,7 @@ public class PlayConfigurationView implements Initializable {
 		config.setUpdatesong(updatesong.isSelected());
 		config.setTableURL(tableurl.getItems().toArray(new String[0]));
 
-		config.setConstant(constant.isSelected());
-		config.setBpmguide(bpmguide.isSelected());
-		config.setLegacynote(legacy.isSelected());
-		config.setExpandjudge(exjudge.isSelected());
-		config.setNomine(nomine.isSelected());
-
-		config.setShowjudgearea(judgeregion.isSelected());
 		config.setShowhiddennote(showhiddennote.isSelected());
-		config.setMarkprocessednote(markprocessednote.isSelected());
 
 		config.setAudioDriver(audio.getValue());
 		config.setAudioDriverName(audioname.getValue());
@@ -359,17 +362,46 @@ public class PlayConfigurationView implements Initializable {
 
 		config.setInputduration(getValue(inputduration));
 
-		config.setIrname(irname.getValue());
-		config.setUserid(iruserid.getText());
-		config.setPassword(irpassword.getText());
-
-		updatePlayConfig();
-		updateSkinCategory();
+		commitPlayer();
 
 		Json json = new Json();
 		json.setOutputType(OutputType.json);
 		try (FileWriter fw = new FileWriter("config.json")) {
 			fw.write(json.prettyPrint(config));
+			fw.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void commitPlayer() {
+		Path p = Paths.get("player/" + config.getPlayername() + "/config.json");
+		
+		player.setRandom(scoreop.getValue());
+		player.setGauge(gaugeop.getValue());
+		player.setLnmode(lntype.getValue());
+		player.setFixhispeed(fixhispeed.getValue());
+		player.setJudgetiming(getValue(judgetiming));
+		
+		player.setConstant(constant.isSelected());
+		player.setBpmguide(bpmguide.isSelected());
+		player.setLegacynote(legacy.isSelected());
+		player.setExpandjudge(exjudge.isSelected());
+		player.setNomine(nomine.isSelected());
+		player.setMarkprocessednote(markprocessednote.isSelected());
+
+		player.setShowjudgearea(judgeregion.isSelected());
+		player.setIrname(irname.getValue());
+		player.setUserid(iruserid.getText());
+		player.setPassword(irpassword.getText());
+
+		updatePlayConfig();
+		updateSkinCategory();
+		
+		Json json = new Json();
+		json.setOutputType(OutputType.json);
+		try (FileWriter fw = new FileWriter(p.toFile())) {
+			fw.write(json.prettyPrint(player));
 			fw.flush();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -450,7 +482,7 @@ public class PlayConfigurationView implements Initializable {
     @FXML
 	public void updatePlayConfig() {
 		if (pc != -1) {
-			PlayConfig conf = (pc == 0 ? config.getMode7() : (pc == 1 ? config.getMode14() : config.getMode9()));
+			PlayConfig conf = (pc == 0 ? player.getMode7() : (pc == 1 ? player.getMode14() : player.getMode9()));
 			conf.setHispeed(getValue(hispeed).floatValue());
 			conf.setDuration(getValue(gvalue));
 			conf.setEnablelanecover(enableLanecover.isSelected());
@@ -459,7 +491,7 @@ public class PlayConfigurationView implements Initializable {
 			conf.setLift(getValue(lift) / 1000f);
 		}
 		pc = playconfig.getValue();
-		PlayConfig conf = (pc == 0 ? config.getMode7() : (pc == 1 ? config.getMode14() : config.getMode9()));
+		PlayConfig conf = (pc == 0 ? player.getMode7() : (pc == 1 ? player.getMode14() : player.getMode9()));
 		hispeed.getValueFactory().setValue((double) conf.getHispeed());
 		gvalue.getValueFactory().setValue(conf.getDuration());
 		enableLanecover.setSelected(conf.isEnablelanecover());
@@ -512,17 +544,17 @@ public class PlayConfigurationView implements Initializable {
 			SkinHeader header = skinview.getSelectedHeader();
 			SkinConfig skin = new SkinConfig(header.getPath().toString());
 			skin.setProperty(skinview.getProperty());
-			config.getSkin()[header.getMode()] = skin;
+			player.getSkin()[header.getMode()] = skin;
 		} else if (mode != -1) {
-			config.getSkin()[mode] = null;
+			player.getSkin()[mode] = null;
 		}
 
 		skin.getItems().clear();
 		SkinHeader[] headers = skinview.getSkinHeader(skincategory.getValue().getId());
 		skin.getItems().addAll(headers);
 		mode = skincategory.getValue().getId();
-		if (config.getSkin()[skincategory.getValue().getId()] != null) {
-			SkinConfig skinconf = config.getSkin()[skincategory.getValue().getId()];
+		if (player.getSkin()[skincategory.getValue().getId()] != null) {
+			SkinConfig skinconf = player.getSkin()[skincategory.getValue().getId()];
 			if (skinconf != null) {
 				for (SkinHeader header : skin.getItems()) {
 					if (header != null && header.getPath().equals(Paths.get(skinconf.getPath()))) {

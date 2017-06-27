@@ -1,14 +1,7 @@
 package bms.player.beatoraja;
 
-import static bms.player.beatoraja.Resolution.*;
-
-import java.io.BufferedWriter;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.*;
+import java.nio.file.*;
 import java.util.ResourceBundle;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
@@ -81,28 +74,7 @@ public class MainLoader extends Application {
 	}
 
 	public static void play(Path f, int auto, boolean forceExit, boolean songUpdated) {
-		Config config = new Config();
-		if (Files.exists(MainController.configpath)) {
-			Json json = new Json();
-			try {
-				json.setIgnoreUnknownFields(true);
-				config = json.fromJson(Config.class, new FileReader(MainController.configpath.toFile()));
-				config.validate();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		} else {
-			Json json = new Json();
-			json.setOutputType(OutputType.json);
-			try {
-				BufferedWriter fw = Files.newBufferedWriter(MainController.configpath);
-				fw.write(json.prettyPrint(config));
-				fw.flush();
-				fw.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
+		Config config = readConfig();
 
 		try {
 			MainController player = new MainController(f, config, auto, songUpdated);
@@ -177,28 +149,7 @@ public class MainLoader extends Application {
 
 	@Override
 	public void start(javafx.stage.Stage primaryStage) throws Exception {
-		Config config = new Config();
-		if (Files.exists(MainController.configpath)) {
-			Json json = new Json();
-			try {
-				json.setIgnoreUnknownFields(true);
-				config = json.fromJson(Config.class, new FileReader(MainController.configpath.toFile()));
-				config.validate();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		} else {
-			Json json = new Json();
-			json.setOutputType(OutputType.json);
-			try {
-				FileWriter fw = new FileWriter(MainController.configpath.toFile());
-				fw.write(json.prettyPrint(config));
-				fw.flush();
-				fw.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
+		Config config = readConfig();
 
 		try {
 			ResourceBundle bundle = ResourceBundle.getBundle("resources.UIResources");
@@ -221,5 +172,66 @@ public class MainLoader extends Application {
 
 	public void hide() {
 		stackPane.setDisable(true);
+	}
+	
+	private static Config readConfig() {
+		Config config = new Config();
+		if (Files.exists(MainController.configpath)) {
+			Json json = new Json();
+			try {
+				json.setIgnoreUnknownFields(true);
+				config = json.fromJson(Config.class, new FileReader(MainController.configpath.toFile()));
+				config.validate();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		} else {
+			Json json = new Json();
+			json.setOutputType(OutputType.json);
+			try {
+				FileWriter fw = new FileWriter(MainController.configpath.toFile());
+				fw.write(json.prettyPrint(config));
+				fw.flush();
+				fw.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		// TODO プレイヤーアカウント検証
+		if(!Files.exists(Paths.get("player"))) {
+			try {
+				Files.createDirectory(Paths.get("player"));
+				PlayerConfig pc = new PlayerConfig(config);
+				Files.createDirectory(Paths.get("player/player1"));
+				Json json = new Json();
+				json.setOutputType(OutputType.json);
+				FileWriter fw = new FileWriter(Paths.get("player/player1/config.json").toFile());
+				if(Files.exists(Paths.get("playerscore.db"))) {
+					Files.copy(Paths.get("playerscore.db"), Paths.get("player/player1/score.db"));
+				}
+				fw.write(json.prettyPrint(pc));
+				fw.flush();
+				fw.close();
+				// リプレイデータコピー
+				Files.createDirectory(Paths.get("player/player1/replay"));
+				if(Files.exists(Paths.get("replay"))) {
+					try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get("replay"))) {
+						for (Path p : paths) {
+							Files.copy(p, Paths.get("player/player1/replay").resolve(p.getFileName()));
+						}
+					} catch(Throwable e) {
+						e.printStackTrace();
+					}					
+				}
+				
+				config.setPlayername("player1");
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	
+		return config;
 	}
 }

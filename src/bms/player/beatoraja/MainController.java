@@ -97,7 +97,17 @@ public class MainController extends ApplicationAdapter {
 		this.auto = auto;
 		this.config = config;
 		this.songUpdated = songUpdated;
-		this.player = config.getPlayers()[config.getPlayer()];
+		
+		Path p = Paths.get("player/" + config.getPlayername() + "/config.json");
+		
+		try {
+			Json json = new Json();
+			json.setIgnoreUnknownFields(true);
+			player = json.fromJson(PlayerConfig.class, new FileReader(p.toFile()));
+		} catch(Throwable e) {
+			
+		}
+
 		this.bmsfile = f;
 
 		try {
@@ -110,7 +120,7 @@ public class MainController extends ApplicationAdapter {
 			e.printStackTrace();
 		}
 
-		playdata = new PlayDataAccessor(player.getName());
+		playdata = new PlayDataAccessor(config.getPlayername());
 		
 		ir = IRConnection.getIRConnection(player.getIrname());
 		if(player.getUserid().length() > 0 && ir != null) {
@@ -424,6 +434,15 @@ public class MainController extends ApplicationAdapter {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
+		Path p = Paths.get("player/" + config.getPlayername() + "/config.json");
+		try (FileWriter fw = new FileWriter(p.toFile())) {
+			fw.write(json.prettyPrint(player));
+			fw.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
 		dispose();
 		Gdx.app.exit();
 	}
