@@ -14,6 +14,7 @@ import bms.model.TimeLine;
 import static bms.player.beatoraja.ClearType.*;
 import static bms.player.beatoraja.CourseData.CourseDataConstraint.*;
 
+import bms.player.beatoraja.ScoreLogDatabaseAccessor.ScoreLog;
 import bms.player.beatoraja.song.SongData;
 
 import com.badlogic.gdx.utils.Json;
@@ -40,7 +41,8 @@ public class PlayDataAccessor {
 	 * スコアデータベースアクセサ
 	 */
 	private ScoreDatabaseAccessor scoredb;
-
+	private ScoreLogDatabaseAccessor scorelogdb;
+	
 	private static final String[] replay = { "", "C", "H" };
 
 	public PlayDataAccessor(String player) {
@@ -50,6 +52,7 @@ public class PlayDataAccessor {
 			Class.forName("org.sqlite.JDBC");
 			scoredb = new ScoreDatabaseAccessor(new File(".").getAbsoluteFile().getParent(), "/player/", "/");
 			scoredb.createTable(player);
+			scorelogdb = new ScoreLogDatabaseAccessor("player/" + player + "/scorelog.db");
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -175,6 +178,8 @@ public class PlayDataAccessor {
 			return;
 		}
 		IRScoreData score = scoredb.getScoreData(player, hash, model.containsUndefinedLongNote() ? lnmode : 0);
+		ScoreLog log = new ScoreLog();
+		
 		if (score == null) {
 			score = new IRScoreData();
 			score.setMode(model.containsUndefinedLongNote() ? lnmode : 0);
@@ -186,9 +191,14 @@ public class PlayDataAccessor {
 		if (newscore.getClear() > Failed.id) {
 			score.setClearcount(score.getClearcount() + 1);
 		}
+		
+		log.setOldclear(clear);
+		log.setClear(clear);
 		if (clear < newscore.getClear()) {
 			score.setClear(newscore.getClear());
 			score.setOption(newscore.getOption());
+			log.setSha256(hash);
+			log.setClear(newscore.getClear());
 		}
 		if (model.getMode().player == 1) {
 			int history = score.getHistory();
@@ -206,6 +216,8 @@ public class PlayDataAccessor {
 			// TODO DPのhistoryはどうする？
 		}
 
+		log.setOldscore(score.getExscore());
+		log.setScore(score.getExscore());
 		if (score.getExscore() < newscore.getExscore() && updateScore) {
 			score.setEpg(newscore.getEpg());
 			score.setLpg(newscore.getLpg());
@@ -220,19 +232,34 @@ public class PlayDataAccessor {
 			score.setEms(newscore.getEms());
 			score.setLms(newscore.getLms());
 			score.setOption(newscore.getOption());
+			log.setSha256(hash);
+			log.setScore(newscore.getExscore());
 		}
+		log.setOldminbp(score.getMinbp());
+		log.setMinbp(score.getMinbp());
 		if (score.getMinbp() > newscore.getMinbp() && updateScore) {
 			score.setMinbp(newscore.getMinbp());
 			score.setOption(newscore.getOption());
+			log.setSha256(hash);
+			log.setMinbp(newscore.getMinbp());
 		}
+		log.setOldcombo(score.getCombo());
+		log.setCombo(score.getCombo());
 		if (score.getCombo() < newscore.getCombo() && updateScore) {
 			score.setCombo(newscore.getCombo());
 			score.setOption(newscore.getOption());
+			log.setSha256(hash);
+			log.setCombo(newscore.getCombo());
 		}
 		score.setPlaycount(score.getPlaycount() + 1);
 		score.setDate(Calendar.getInstance(TimeZone.getDefault()).getTimeInMillis() / 1000L);
 		score.setScorehash(getScoreHash(score));
 		scoredb.setScoreData(player, score);
+		if(log.getSha256() != null && scorelogdb != null) {
+			log.setMode(score.getMode());
+			log.setDate(score.getDate());
+			scorelogdb.setScoreLog(log);
+		}
 
 		int time = 0;
 		for (TimeLine tl : model.getAllTimeLines()) {
@@ -311,6 +338,8 @@ public class PlayDataAccessor {
 		}
 		IRScoreData score = scoredb.getScoreData(player, hash, (ln ? lnmode : 0) + option * 10 + hispeed * 100 + judge
 				* 1000);
+		ScoreLog log = new ScoreLog();
+
 		if (score == null) {
 			score = new IRScoreData();
 			score.setMode((ln ? lnmode : 0) + option * 10 + hispeed * 100 + judge * 1000);
@@ -322,11 +351,17 @@ public class PlayDataAccessor {
 		if (newscore.getClear() != Failed.id) {
 			score.setClearcount(score.getClearcount() + 1);
 		}
+		log.setOldclear(clear);
+		log.setClear(clear);
 		if (clear < newscore.getClear()) {
 			score.setClear(newscore.getClear());
 			score.setOption(newscore.getOption());
+			log.setSha256(hash);
+			log.setClear(newscore.getClear());
 		}
 
+		log.setOldscore(score.getExscore());
+		log.setScore(score.getExscore());
 		if (score.getExscore() < newscore.getExscore() && updateScore) {
 			score.setEpg(newscore.getEpg());
 			score.setLpg(newscore.getLpg());
@@ -341,19 +376,34 @@ public class PlayDataAccessor {
 			score.setEms(newscore.getEms());
 			score.setLms(newscore.getLms());
 			score.setOption(newscore.getOption());
+			log.setSha256(hash);
+			log.setScore(newscore.getExscore());
 		}
+		log.setOldminbp(score.getMinbp());
+		log.setMinbp(score.getMinbp());
 		if (score.getMinbp() > newscore.getMinbp() && updateScore) {
 			score.setMinbp(newscore.getMinbp());
 			score.setOption(newscore.getOption());
+			log.setSha256(hash);
+			log.setMinbp(newscore.getMinbp());
 		}
+		log.setOldcombo(score.getCombo());
+		log.setCombo(score.getCombo());
 		if (score.getCombo() < newscore.getCombo() && updateScore) {
 			score.setCombo(newscore.getCombo());
 			score.setOption(newscore.getOption());
+			log.setSha256(hash);
+			log.setCombo(newscore.getCombo());
 		}
 		score.setPlaycount(score.getPlaycount() + 1);
 		score.setDate(Calendar.getInstance(TimeZone.getDefault()).getTimeInMillis() / 1000L);
 		score.setScorehash(getScoreHash(score));
 		scoredb.setScoreData(player, score);
+		if(log.getSha256() != null && scorelogdb != null) {
+			log.setMode(score.getMode());
+			log.setDate(score.getDate());
+			scorelogdb.setScoreLog(log);
+		}
 
 		Logger.getGlobal().info("スコアデータベース更新完了 ");
 
