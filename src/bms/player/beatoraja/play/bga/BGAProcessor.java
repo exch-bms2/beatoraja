@@ -249,6 +249,9 @@ public class BGAProcessor {
 		}
 		playingbgaid = -1;
 		playinglayerid = -1;
+		misslayertime = 0;
+		misslayer = null;
+		prevrendertime = 0;
 
 		for(int i = 0;i < mpgid.length;i++) {
 			if (mpgmap[i] instanceof FFmpegProcessor) {
