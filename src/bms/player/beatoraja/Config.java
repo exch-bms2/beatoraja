@@ -234,6 +234,8 @@ public class Config {
 
 	private boolean updatesong = false;
 
+	private int autosavereplay[] = {0,0,0,0};
+
 	private String irname = "";
 
 	private String userid = "";
@@ -718,6 +720,14 @@ public class Config {
 
 	public void setUseSongInfo(boolean useSongInfo) {
 		this.useSongInfo = useSongInfo;
+	}
+
+	public void setAutoSaveReplay(int autoSaveReplay[]){
+		this.autosavereplay = autoSaveReplay;
+	}
+
+	public int[] getAutoSaveReplay(){
+		return autosavereplay;
 	}
 
 	public static class SkinConfig {
