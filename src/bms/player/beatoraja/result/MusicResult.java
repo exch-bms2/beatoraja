@@ -1,27 +1,31 @@
 package bms.player.beatoraja.result;
 
+import static bms.player.beatoraja.ClearType.*;
+import static bms.player.beatoraja.skin.SkinProperty.*;
+
 import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
+import com.badlogic.gdx.utils.FloatArray;
+
+import bms.model.BMSModel;
 import bms.model.LongNote;
 import bms.model.Note;
 import bms.model.TimeLine;
-import static bms.player.beatoraja.ClearType.*;
-import bms.player.beatoraja.select.MusicSelector;
-
-import bms.model.BMSModel;
-import bms.player.beatoraja.*;
+import bms.player.beatoraja.IRScoreData;
+import bms.player.beatoraja.MainController;
+import bms.player.beatoraja.MainState;
+import bms.player.beatoraja.PlayerResource;
+import bms.player.beatoraja.ReplayData;
 import bms.player.beatoraja.ir.IRConnection;
-import bms.player.beatoraja.skin.*;
-
-import com.badlogic.gdx.utils.FloatArray;
-
-import static bms.player.beatoraja.skin.SkinProperty.*;
+import bms.player.beatoraja.select.MusicSelector;
+import bms.player.beatoraja.skin.SkinType;
 
 /**
  * リザルト
- * 
+ *
  * @author exch
  */
 public class MusicResult extends MainState {
@@ -40,7 +44,7 @@ public class MusicResult extends MainState {
 	 * 状態
 	 */
 	private int state;
-	
+
 	public static final int STATE_OFFLINE = 0;
 	public static final int STATE_IR_PROCESSING = 1;
 	public static final int STATE_IR_FINISHED = 2;
@@ -51,8 +55,9 @@ public class MusicResult extends MainState {
 	private int irprevrank;
 	private int irtotal;
 
-	private int saveReplay = -1;
-	
+	private int saveReplay[] = new int[4];
+	private static final int replay= 4;
+
 	public static final int SOUND_CLEAR = 0;
 	public static final int SOUND_FAIL = 1;
 
@@ -67,12 +72,53 @@ public class MusicResult extends MainState {
 		setSound(SOUND_FAIL, resource.getConfig().getSoundpath() + File.separatorChar + "fail.wav", false);
 
 		updateScoreDatabase();
-		// 保存されているリプレイデータがない場合は、EASY以上で自動保存
-		if (resource.getAutoplay() == 0 && resource.getScoreData() != null
-				&& resource.getScoreData().getClear() >= Easy.id
-				&& !getMainController().getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
-						resource.getPlayerConfig().getLnmode(), 0)) {
-			saveReplayData(0);
+		// リプレイの自動保存
+		if(resource.getAutoplay() == 0){
+			for(int i=0;i<replay;i++){
+				/*
+				 * コンフィグ値:0=保存しない 1=スコア更新時 2=スコアが自己ベスト以上 3=BP更新時 4=BPが自己ベスト以下
+				 * 5=COMBO更新時 6=COMBOが自己ベスト以上 7=ランプ更新時 8=ランプが自己ベスト以上 9=毎回
+				 */
+				switch(resource.getConfig().getAutoSaveReplay()[i]){
+				case 0:
+					break;
+				case 1:
+					if(resource.getScoreData().getExscore() > oldexscore)
+						saveReplayData(i);
+					break;
+				case 2:
+					if(resource.getScoreData().getExscore() >= oldexscore)
+						saveReplayData(i);
+					break;
+				case 3:
+					if(resource.getScoreData().getMinbp() > oldmisscount || oldclear == NoPlay.id)
+						saveReplayData(i);
+					break;
+				case 4:
+					if(resource.getScoreData().getMinbp() >= oldmisscount || oldclear == NoPlay.id)
+						saveReplayData(i);
+					break;
+				case 5:
+					if(resource.getScoreData().getCombo() > oldcombo)
+						saveReplayData(i);
+					break;
+				case 6:
+					if(resource.getScoreData().getCombo() >= oldcombo)
+						saveReplayData(i);
+					break;
+				case 7:
+					if(resource.getScoreData().getClear() > oldclear)
+						saveReplayData(i);
+					break;
+				case 8:
+					if(resource.getScoreData().getClear() >= oldclear)
+						saveReplayData(i);
+					break;
+				case 9:
+						saveReplayData(i);
+					break;
+				}
+			}
 		}
 		// コースモードの場合はリプレイデータをストックする
 		if (resource.getCourseBMSModels() != null) {
@@ -195,17 +241,17 @@ public class MusicResult extends MainState {
 	private void saveReplayData(int index) {
 		final PlayerResource resource = getMainController().getPlayerResource();
 		if (resource.getAutoplay() == 0 && resource.getCourseBMSModels() == null && resource.getScoreData() != null) {
-			if (saveReplay == -1 && resource.isUpdateScore()) {
+			if (saveReplay[index] == -1 && resource.isUpdateScore()) {
 				ReplayData rd = resource.getReplayData();
 				getMainController().getPlayDataAccessor().wrireReplayData(rd, resource.getBMSModel(),
 						resource.getPlayerConfig().getLnmode(), index);
-				saveReplay = index;
+				saveReplay[index] = 1;
 			}
 		}
 	}
 
 	private void updateScoreDatabase() {
-		saveReplay = -1;
+		Arrays.fill(saveReplay, -1);
 		state = STATE_OFFLINE;
 		irrank = irprevrank = irtotal = 0;
 		final PlayerResource resource = getMainController().getPlayerResource();
@@ -320,19 +366,19 @@ public class MusicResult extends MainState {
 						ir.sendPlayData(resource.getBMSModel(), resource.getScoreData());
 						IRScoreData[] scores = ir.getPlayData(null, resource.getBMSModel());
 						irtotal = scores.length;
-						
+
 						for(int i = 0;i < scores.length;i++) {
 							if(irrank == 0 && scores[i].getExscore() <= resource.getScoreData().getExscore() ) {
 								irrank = i + 1;
-							}							
+							}
 							if(irprevrank == 0 && scores[i].getExscore() <= oldscore.getExscore() ) {
 								irprevrank = i + 1;
 								if(irrank == 0) {
 									irrank = irprevrank;
 								}
-							}							
+							}
 						}
-						
+
 						state = STATE_IR_FINISHED;
 					}
 				};
@@ -448,7 +494,7 @@ public class MusicResult extends MainState {
 			return ((int) (avgduration * 100)) % 100;
 		case NUMBER_IR_RANK:
 			if(state != STATE_OFFLINE) {
-				return irrank;				
+				return irrank;
 			}
 			return Integer.MIN_VALUE;
 		case NUMBER_IR_PREVRANK:
@@ -521,13 +567,13 @@ public class MusicResult extends MainState {
 			return getMainController().getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
 					resource.getPlayerConfig().getLnmode(), 3);
 		case OPTION_REPLAYDATA_SAVED:
-			return saveReplay == 0;
+			return saveReplay[0] == 1;
 		case OPTION_REPLAYDATA2_SAVED:
-			return saveReplay == 1;
+			return saveReplay[1] == 1;
 		case OPTION_REPLAYDATA3_SAVED:
-			return saveReplay == 2;
+			return saveReplay[2] == 1;
 		case OPTION_REPLAYDATA4_SAVED:
-			return saveReplay == 3;
+			return saveReplay[3] == 1;
 		}
 		return super.getBooleanValue(id);
 	}

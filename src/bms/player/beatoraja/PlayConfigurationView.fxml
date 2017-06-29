@@ -354,6 +354,26 @@
                               </HBox>
                               <CheckBox fx:id="usecim" mnemonicParsing="false" prefHeight="25.0" prefWidth="275.0" text="%CACHE_SKIN_IMAGE" />
                               <CheckBox fx:id="useSongInfo" mnemonicParsing="false" prefHeight="18.0" prefWidth="275.0" text="%USE_SONGINFO" />
+                              <HBox prefHeight="37.0" prefWidth="723.0">
+                                 <children>
+                                    <Label prefHeight="18.0" prefWidth="127.0" text="%AUTO_SAVE_REPLAY1" />
+                                    <ComboBox fx:id="autosavereplay1" prefWidth="150.0" />
+                                 </children>
+                                 <children>
+                                    <Label prefHeight="18.0" prefWidth="127.0" text="%AUTO_SAVE_REPLAY2" />
+                                    <ComboBox fx:id="autosavereplay2" prefWidth="150.0" />
+                                 </children>
+                              </HBox>
+                              <HBox prefHeight="37.0" prefWidth="723.0">
+                                 <children>
+                                    <Label prefHeight="18.0" prefWidth="127.0" text="%AUTO_SAVE_REPLAY3" />
+                                    <ComboBox fx:id="autosavereplay3" prefWidth="150.0" />
+                                 </children>
+                                 <children>
+                                    <Label prefHeight="18.0" prefWidth="127.0" text="%AUTO_SAVE_REPLAY4" />
+                                    <ComboBox fx:id="autosavereplay4" prefWidth="150.0" />
+                                 </children>
+                              </HBox>
                            </children>
                         </VBox>
                      </children>

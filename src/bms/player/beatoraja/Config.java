@@ -232,6 +232,8 @@ public class Config {
 
 	private boolean updatesong = false;
 
+	private int autosavereplay[] = {0,0,0,0};
+
 	private String irname = "";
 
 	private String userid = "";
@@ -448,31 +450,20 @@ public class Config {
 		this.audioDriver = audioDriver;
 	}
 
-	public String getAudioDriverName() {
-		return audioDriverName;
+	public void setAutoSaveReplay(int autoSaveReplay[]){
+		this.autosavereplay = autoSaveReplay;
 	}
 
-	public void setAudioDriverName(String audioDriverName) {
-		this.audioDriverName = audioDriverName;
+	public int[] getAutoSaveReplay(){
+		return autosavereplay;
 	}
 	
-	public void validate() {
-		if(skin.length < 16) {
-			skin = Arrays.copyOf(skin, 16);
-			Logger.getGlobal().warning("skinを再構成");
-		}
+	public boolean isUseSongInfo() {
+		return useSongInfo;
+	}
 
-		if(mode14 == null || mode14.getController().length < 2) {
-			mode14 = new PlayConfig(
-					new int[] { Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.F, Keys.V, Keys.SHIFT_LEFT, Keys.CONTROL_LEFT,
-							Keys.COMMA, Keys.L, Keys.PERIOD, Keys.SEMICOLON, Keys.SLASH, Keys.APOSTROPHE, Keys.UNKNOWN,
-							Keys.SHIFT_RIGHT, Keys.CONTROL_RIGHT, Keys.Q, Keys.W },
-					new int[][] {{ BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8, BMKeys.BUTTON_2,
-							BMKeys.BUTTON_5, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN, BMKeys.BUTTON_9, BMKeys.BUTTON_10 },
-						{ BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8, BMKeys.BUTTON_2,
-								BMKeys.BUTTON_5, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN, BMKeys.BUTTON_9, BMKeys.BUTTON_10 }});
-			Logger.getGlobal().warning("mode14のPlayConfigを再構成");
-		}
+	public void setUseSongInfo(boolean useSongInfo) {
+		this.useSongInfo = useSongInfo;
 	}
 
 	public int getBgaExpand() {
@@ -507,14 +498,6 @@ public class Config {
 		this.updatesong = updatesong;
 	}
 
-	public boolean isUseSongInfo() {
-		return useSongInfo;
-	}
-
-	public void setUseSongInfo(boolean useSongInfo) {
-		this.useSongInfo = useSongInfo;
-	}
-	
 	// TODO これ以降の値はPlayerConfigに移行する
 	
 	public SkinConfig[] getSkin() {
@@ -549,14 +532,6 @@ public class Config {
 		this.fixhispeed = fixhispeed;
 	}
 
-	public int getTarget() {
-		return target;
-	}
-
-	public void setTarget(int target) {
-		this.target = target;
-	}
-	
 	public int getJudgetiming() {
 		return judgetiming;
 	}
@@ -707,5 +682,40 @@ public class Config {
 
 	public void setIrname(String irname) {
 		this.irname = irname;
+	}
+
+	public String getAudioDriverName() {
+		return audioDriverName;
+	}
+
+	public void setAudioDriverName(String audioDriverName) {
+		this.audioDriverName = audioDriverName;
+	}
+	
+	public void validate() {
+		if(skin.length < 16) {
+			skin = Arrays.copyOf(skin, 16);
+			Logger.getGlobal().warning("skinを再構成");
+		}
+
+		if(mode14 == null || mode14.getController().length < 2) {
+			mode14 = new PlayConfig(
+					new int[] { Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.F, Keys.V, Keys.SHIFT_LEFT, Keys.CONTROL_LEFT,
+							Keys.COMMA, Keys.L, Keys.PERIOD, Keys.SEMICOLON, Keys.SLASH, Keys.APOSTROPHE, Keys.UNKNOWN,
+							Keys.SHIFT_RIGHT, Keys.CONTROL_RIGHT, Keys.Q, Keys.W },
+					new int[][] {{ BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8, BMKeys.BUTTON_2,
+							BMKeys.BUTTON_5, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN, BMKeys.BUTTON_9, BMKeys.BUTTON_10 },
+						{ BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8, BMKeys.BUTTON_2,
+								BMKeys.BUTTON_5, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN, BMKeys.BUTTON_9, BMKeys.BUTTON_10 }});
+			Logger.getGlobal().warning("mode14のPlayConfigを再構成");
+		}
+	}
+
+	public int getTarget() {
+		return target;
+	}
+
+	public void setTarget(int target) {
+		this.target = target;
 	}
 }

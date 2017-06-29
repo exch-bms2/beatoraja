@@ -142,6 +142,15 @@ public class PlayConfigurationView implements Initializable {
 	private ComboBox<Integer> judgealgorithm;
 
     @FXML
+	private ComboBox<Integer> autosavereplay1;
+	@FXML
+	private ComboBox<Integer> autosavereplay2;
+	@FXML
+	private ComboBox<Integer> autosavereplay3;
+	@FXML
+	private ComboBox<Integer> autosavereplay4;
+
+    @FXML
     private ComboBox<Integer> jkoc_hack;
     @FXML
     private CheckBox usecim;
@@ -214,7 +223,14 @@ public class PlayConfigurationView implements Initializable {
 		initComboBox(playconfig, new String[] { "5/7KEYS", "10/14KEYS", "9KEYS" });
 		initComboBox(lntype, new String[] { "LONG NOTE", "CHARGE NOTE", "HELL CHARGE NOTE" });
 		initComboBox(judgealgorithm, new String[] { arg1.getString("JUDGEALG_LR2"), arg1.getString("JUDGEALG_AC"), arg1.getString("JUDGEALG_BOTTOM_PRIORITY") });
-
+		initComboBox(autosavereplay1, new String[] { "OFF", "Greater Score", "Greater or equal Score", "Less BP", "Less or equal BP", "Greater Combo", "Greater or equal Combo",
+				"Greater Lamp", "Greater or equal Lamp", "Everytime"});
+		initComboBox(autosavereplay2, new String[] { "OFF", "Greater Score", "Greater or equal Score", "Less BP", "Less or equal BP", "Greater Combo", "Greater or equal Combo",
+				"Greater Lamp", "Greater or equal Lamp", "Everytime"});
+		initComboBox(autosavereplay3, new String[] { "OFF", "Greater Score", "Greater or equal Score", "Less BP", "Less or equal BP", "Greater Combo", "Greater or equal Combo",
+				"Greater Lamp", "Greater or equal Lamp", "Everytime"});
+		initComboBox(autosavereplay4, new String[] { "OFF", "Greater Score", "Greater or equal Score", "Less BP", "Less or equal BP", "Greater Combo", "Greater or equal Combo",
+				"Greater Lamp", "Greater or equal Lamp", "Everytime"});
 		skincategory.setCellFactory(new Callback<ListView<SkinType>, ListCell<SkinType>>() {
 			public ListCell<SkinType> call(ListView<SkinType> param) { return new SkinTypeCell(); }
 		});
@@ -266,6 +282,11 @@ public class PlayConfigurationView implements Initializable {
 		showhiddennote.setSelected(config.isShowhiddennote());
 
 		judgealgorithm.setValue(JudgeAlgorithm.getIndex(config.getJudgealgorithm()));
+
+		autosavereplay1.getSelectionModel().select(config.getAutoSaveReplay()[0]);
+		autosavereplay2.getSelectionModel().select(config.getAutoSaveReplay()[1]);
+		autosavereplay3.getSelectionModel().select(config.getAutoSaveReplay()[2]);
+		autosavereplay4.getSelectionModel().select(config.getAutoSaveReplay()[3]);
 
         // int b = Boolean.valueOf(config.getJKOC()).compareTo(false);
 
@@ -349,6 +370,8 @@ public class PlayConfigurationView implements Initializable {
 		config.setAudioDeviceSimultaneousSources(getValue(audiosim));
 
 		config.setJudgealgorithm(JudgeAlgorithm.values()[judgealgorithm.getValue()]);
+		config.setAutoSaveReplay( new int[]{autosavereplay1.getValue(),autosavereplay2.getValue(),
+				autosavereplay3.getValue(),autosavereplay4.getValue()});
 
         // jkoc_hack is integer but *.setJKOC needs boolean type
         if(jkoc_hack.getValue() > 0)
