@@ -62,13 +62,15 @@ public class TableDataAccessor {
 						for (String lv : levels) {
 							TableData.TableDataELement tde = new TableData.TableDataELement();
 							tde.setLevel(lv);
-							List<String> hashes = new ArrayList<String>();
+							List<TableData.TableSongData> hashes = new ArrayList<TableData.TableSongData>();
 							for (DifficultyTableElement dte : dt.getElements()) {
 								if (lv.equals(dte.getDifficultyID())) {
-									hashes.add(dte.getSHA256() != null ? dte.getSHA256() : dte.getMD5());
+									hashes.add(new TableData.TableSongData(
+													dte.getSHA256() != null ? dte.getSHA256() : dte.getMD5(),
+											dte.getTitle(), dte.getURL1(), dte.getURL2()));
 								}
 							}
-							tde.setHash(hashes.toArray(new String[hashes.size()]));
+							tde.setSongs(hashes.toArray(new TableData.TableSongData[hashes.size()]));
 							tdes.add(tde);
 						}
 						td.setFolder(tdes.toArray(new TableData.TableDataELement[tdes.size()]));
@@ -139,7 +141,7 @@ public class TableDataAccessor {
 		try {
 			Json json = new Json();
 			json.setElementType(TableData.class, "folder", ArrayList.class);
-			json.setElementType(TableData.TableDataELement.class, "hash", ArrayList.class);
+			json.setElementType(TableData.TableDataELement.class, "songs", ArrayList.class);
 			json.setElementType(TableData.class, "course", ArrayList.class);
 			json.setElementType(CourseData.class, "trophy", ArrayList.class);
 			json.setOutputType(OutputType.json);
@@ -169,7 +171,7 @@ public class TableDataAccessor {
 								new BufferedInputStream(new GZIPInputStream(Files.newInputStream(p))));
 						result.add(td);
 					} catch(Throwable e) {
-
+						e.printStackTrace();
 					}
 				}
 			}

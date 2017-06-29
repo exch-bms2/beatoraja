@@ -1,9 +1,13 @@
 package bms.player.beatoraja.select;
 
+import java.awt.*;
 import java.io.*;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.List;
 import java.util.logging.Logger;
 
 import bms.model.Mode;
@@ -15,6 +19,7 @@ import bms.player.beatoraja.song.SongDatabaseAccessor;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 
@@ -247,7 +252,7 @@ public class MusicSelector extends MainState {
 
 		// read bms information
 		if(getNowTime() > getTimer()[TIMER_SONGBAR_CHANGE] + notesGraphDuration && !showNoteGraph && play < 0) {
-			if(current instanceof SongBar) {
+			if(current instanceof SongBar && ((SongBar) current).getSongData() != null) {
 				SongData song = main.getPlayerResource().getSongdata();
 				Thread thread = new Thread() {
 					public void run() {
@@ -261,11 +266,22 @@ public class MusicSelector extends MainState {
 
 		if (play >= 0) {
 			if (current instanceof SongBar) {
-				resource.clear();
-				if (resource.setBMSFile(Paths.get(((SongBar) current).getSongData().getPath()), play)) {
-				    preview.stop();
-					getMainController().changeState(MainController.STATE_DECIDE);
-				}
+			    if(((SongBar) current).getSongData() != null) {
+                    resource.clear();
+                    if (resource.setBMSFile(Paths.get(((SongBar) current).getSongData().getPath()), play)) {
+                        preview.stop();
+                        getMainController().changeState(MainController.STATE_DECIDE);
+                    }
+                } else if(((SongBar) current).getSongInformation() != null){
+                    try {
+                        URI uri = new URI(((SongBar) current).getSongInformation().getUrl());
+                        Desktop.getDesktop().browse(uri);
+                        URI uri2 = new URI(((SongBar) current).getSongInformation().getAppendurl());
+                        Desktop.getDesktop().browse(uri2);
+                    } catch (Throwable e) {
+                        e.printStackTrace();
+                    }
+                }
 			} else if (current instanceof GradeBar) {
 				if (play == 2) {
 					play = 0;
@@ -282,12 +298,6 @@ public class MusicSelector extends MainState {
 
 	public void input() {
 		final BMSPlayerInputProcessor input = getMainController().getInputProcessor();
-		final PlayerResource resource = getMainController().getPlayerResource();
-		final Bar current = bar.getSelected();
-		final int nowtime = getNowTime();
-
-		boolean[] numberstate = input.getNumberState();
-		long[] numtime = input.getNumberTime();
 
 		if (input.getNumberState()[6]) {
 			preview.stop();
@@ -386,7 +396,7 @@ public class MusicSelector extends MainState {
 					}
 				}
 				preview.stop();
-				resource.setCoursetitle(((GradeBar) bar.getSelected()).getTitle());
+				resource.setCoursetitle(bar.getSelected().getTitle());
 				resource.setBMSFile(files.get(0), autoplay);
 				getMainController().changeState(MainController.STATE_DECIDE);
 			} else {

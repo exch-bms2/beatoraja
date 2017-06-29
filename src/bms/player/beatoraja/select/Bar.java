@@ -59,12 +59,23 @@ class SongBar extends SelectableBar {
 
     private Pixmap banner;
 
+    private TableData.TableSongData info;
+
     public SongBar(SongData song) {
         this.song = song;
     }
 
+    public SongBar(SongData song, TableData.TableSongData info) {
+        this.song = song;
+        this.info = info;
+    }
+
     public SongData getSongData() {
         return song;
+    }
+
+    public TableData.TableSongData getSongInformation() {
+        return info;
     }
 
     public Pixmap getBanner() {
@@ -77,7 +88,7 @@ class SongBar extends SelectableBar {
 
     @Override
     public String getTitle() {
-        return song.getTitle() + " " + song.getSubtitle();
+        return song != null ? (song.getTitle() + " " + song.getSubtitle()) : info.getTitle();
     }
 
     public int getLamp() {
@@ -366,7 +377,7 @@ class SameFolderBar extends DirectoryBar {
 class TableBar extends DirectoryBar {
 
 	private TableData td;
-    private TableLevelBar[] levels;
+    private HashBar[] levels;
     private GradeBar[] grades;
     private MusicSelector selector;
 
@@ -388,12 +399,12 @@ class TableBar extends DirectoryBar {
     	this.td = td;
 
     	final long t = System.currentTimeMillis();
-		List<TableLevelBar> levels = new ArrayList<TableLevelBar>();
+		List<HashBar> levels = new ArrayList<HashBar>();
 		for (TableData.TableDataELement lv : td.getFolder()) {
-			levels.add(new TableLevelBar(selector, lv.getLevel(), lv.getHash()));
+			levels.add(new HashBar(selector, "LEVEL " + lv.getLevel(), lv.getSongs()));
 		}
 
-		this.levels = levels.toArray(new TableLevelBar[levels.size()]);
+		this.levels = levels.toArray(new HashBar[levels.size()]);
 		List<GradeBar> l = new ArrayList<GradeBar>();
 		
 		Set<String> hashset = new HashSet<String>();
@@ -422,7 +433,7 @@ class TableBar extends DirectoryBar {
 		grades = l.toArray(new GradeBar[l.size()]);
     }
 
-    public TableLevelBar[] getLevels() {
+    public HashBar[] getLevels() {
         return levels;
     }
 
@@ -437,43 +448,60 @@ class TableBar extends DirectoryBar {
         l.addAll(Arrays.asList(getGrades()));
         return l.toArray(new Bar[0]);
     }
-
 }
 
-class TableLevelBar extends DirectoryBar {
-    private String level;
-    private String[] hashes;
+
+
+/**
+ * ハッシュ集合を持ち、各ハッシュ値に該当する楽曲を含むフォルダバー
+ *
+ * @author exch
+ */
+class HashBar extends DirectoryBar {
+    private String title;
+    private TableData.TableSongData[] elements;
     private MusicSelector selector;
     private SongData[] songs;
 
-    public TableLevelBar(MusicSelector selector, String level, String[] hashes) {
+    public HashBar(MusicSelector selector, String title, TableData.TableSongData[] elements) {
         this.selector = selector;
-        this.level = level;
-        this.hashes = hashes;
+        this.title = title;
+        this.elements = elements;
     }
 
     @Override
     public String getTitle() {
-        return "LEVEL " + level;
+        return title;
     }
 
-    public String[] getHashes() {
-        return hashes;
+    public TableData.TableSongData[] getElements() {
+        return elements;
     }
 
     @Override
     public Bar[] getChildren() {
         List<SongBar> songbars = new ArrayList<SongBar>();
+        String[] hashes = new String[elements.length];
+        for(int i = 0;i < hashes.length;i++) {
+            hashes[i] = elements[i].getHash();
+        }
         if(songs == null) {
-            songs = selector.getSongDatabase().getSongDatas(getHashes());
+            songs = selector.getSongDatabase().getSongDatas(hashes);
         }
-    	List<String> sha = new ArrayList<String>();
-        for (SongData song : songs) {
-        	if(!sha.contains(song.getSha256())) {
-        		songbars.add(new SongBar(song));
-                sha.add(song.getSha256());
-        	}
+        for(TableData.TableSongData element : elements) {
+            boolean exist = false;
+            for (SongData song : songs) {
+                if(element.getHash().equals(song.getMd5()) || element.getHash().equals(song.getSha256())) {
+                    songbars.add(new SongBar(song, element));
+                    exist = true;
+                    break;
+                }
+            }
+            if(!exist && element.getTitle() != null) {
+                songbars.add(new SongBar(null, element));
+            }
         }
+
         return songbars.toArray(new Bar[0]);
     }
 
@@ -481,7 +509,11 @@ class TableLevelBar extends DirectoryBar {
         int clear = 255;
         int[] clears = new int[11];
         int[] ranks = new int[28];
-        songs = selector.getSongDatabase().getSongDatas(getHashes());
+        String[] hashes = new String[elements.length];
+        for(int i = 0;i < hashes.length;i++) {
+            hashes[i] = elements[i].getHash();
+        }
+        songs = selector.getSongDatabase().getSongDatas(hashes);
         final Map<String, IRScoreData> scores = selector.getScoreDataCache()
                 .readScoreDatas(songs, selector.getMainController().getPlayerResource().getPlayerConfig().getLnmode());
         for (SongData song : songs) {

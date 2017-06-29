@@ -43,6 +43,8 @@ public class BarRenderer {
 	private Bar[] commands;
 
 	private GradeBar[] courses = new GradeBar[0];
+
+	private HashBar[] favorites = new HashBar[0];
 	/**
 	 * 難易度表バー一覧
 	 */
@@ -78,7 +80,7 @@ public class BarRenderer {
 		for (int i = 0; i < tds.length; i++) {
 			this.tables[i] = new TableBar(select, tds[i]);
 		}
-		CourseData[] cds = new CourseDataAccessor().readAll();
+		CourseData[] cds = new CourseDataAccessor("course").readAll();
 		courses = new GradeBar[cds.length];
 		for (int i = 0; i < cds.length; i++) {
 			Set<String> hashset = new HashSet<String>();
@@ -98,6 +100,15 @@ public class BarRenderer {
 				}
 			}
 			this.courses[i] = new GradeBar(cds[i].getName(), songdatas, cds[i]);
+		}
+		cds = new CourseDataAccessor("favorite").readAll();
+		favorites = new HashBar[cds.length];
+		for (int i = 0; i < cds.length; i++) {
+			TableData.TableSongData[] songs = new TableData.TableSongData[cds[i].getHash().length];
+			for(int j = 0;j < songs.length;j++) {
+				songs[j] = new TableData.TableSongData(cds[i].getHash()[j]);
+			}
+			favorites[i] = new HashBar(select, cds[i].getName(), songs);
 		}
 
 		List<CommandBar> density = new ArrayList<CommandBar>();
@@ -263,14 +274,14 @@ public class BarRenderer {
 			int value = -1;
 			if (sd instanceof TableBar) {
 				value = 2;
-			} else if (sd instanceof TableLevelBar) {
+			} else if (sd instanceof HashBar) {
 				value = 2;
 			} else if (sd instanceof GradeBar) {
 				value = ((GradeBar) sd).existsAllSongs() ? 3 : 4;
 			} else if (sd instanceof FolderBar) {
 				value = 1;
 			} else if (sd instanceof SongBar) {
-				value = 0;
+				value = ((SongBar) sd).getSongData() != null ? 0 : 4;
 			} else if (sd instanceof SearchWordBar) {
 				value = 6;
 			} else if (sd instanceof CommandBar || sd instanceof ContainerBar) {
@@ -301,7 +312,7 @@ public class BarRenderer {
 					int songstatus = 0;
 					if (sd instanceof SongBar) {
 						SongData song = ((SongBar) sd).getSongData();
-						songstatus = System.currentTimeMillis() / 1000 > song.getAdddate() + 3600 * 24 ? 0 : 1;
+						songstatus = song == null || System.currentTimeMillis() / 1000 > song.getAdddate() + 3600 * 24 ? 0 : 1;
 					}
 					baro.getText()[songstatus].setText(sd.getTitle());
 					baro.getText()[songstatus].draw(sprite, time, select, x, y);
@@ -332,7 +343,7 @@ public class BarRenderer {
 					baro.getLamp()[sd.getLamp()].draw(sprite, time, select, x, y);
 				}
 
-				if (sd instanceof SongBar) {
+				if (sd instanceof SongBar && ((SongBar) sd).getSongData() != null) {
 					SongData song = ((SongBar) sd).getSongData();
 
 					SkinNumber leveln = baro.getBarlevel()[song.getDifficulty() >= 0 && song.getDifficulty() < 7
@@ -443,6 +454,7 @@ public class BarRenderer {
 			dir.clear();
 			l.addAll(Arrays.asList(new FolderBar(select, null, "e2977170").getChildren()));
 			l.add(new ContainerBar("COURSE", courses));
+			l.addAll(Arrays.asList(favorites));
 			l.addAll(Arrays.asList(tables));
 			l.addAll(Arrays.asList(commands));
 			l.addAll(search);
@@ -479,7 +491,7 @@ public class BarRenderer {
 			for (Bar b : currentsongs) {
 				if (b instanceof SongBar) {
 					SongData sd = ((SongBar) b).getSongData();
-					if (select.getScoreDataCache().existsScoreDataCache(sd, config.getLnmode())) {
+					if (sd != null && select.getScoreDataCache().existsScoreDataCache(sd, config.getLnmode())) {
 						b.setScore(select.getScoreDataCache().readScoreData(sd, config.getLnmode()));
 					}
 				}
@@ -493,7 +505,8 @@ public class BarRenderer {
 				if (prevbar instanceof SongBar) {
 					final SongBar prevsong = (SongBar) prevbar;
 					for (int i = 0; i < currentsongs.length; i++) {
-						if (currentsongs[i] instanceof SongBar && ((SongBar) currentsongs[i]).getSongData().getSha256()
+						if (currentsongs[i] instanceof SongBar && ((SongBar) currentsongs[i]).getSongData() != null &&
+								((SongBar) currentsongs[i]).getSongData().getSha256()
 								.equals(prevsong.getSongData().getSha256())) {
 							selectedindex = i;
 							break;
@@ -584,7 +597,7 @@ public class BarRenderer {
 			final MainController main = select.getMainController();
 			final SongInformationAccessor info = select.getMainController().getInfoDatabase();
 			for (Bar bar : bars) {
-				if (bar instanceof SongBar) {
+				if (bar instanceof SongBar && ((SongBar) bar).getSongData() != null) {
 					SongData sd = ((SongBar) bar).getSongData();
 					if (bar.getScore() == null) {
 						bar.setScore(select.getScoreDataCache().readScoreData(sd, config.getLnmode()));
@@ -623,8 +636,8 @@ public class BarRenderer {
 					if (bar instanceof FolderBar) {
 						((FolderBar) bar).updateFolderStatus();
 					}
-					if (bar instanceof TableLevelBar) {
-						((TableLevelBar) bar).updateFolderStatus();
+					if (bar instanceof HashBar) {
+						((HashBar) bar).updateFolderStatus();
 					}
 				}
 				if (stop) {
@@ -632,7 +645,7 @@ public class BarRenderer {
 				}
 			}
 			for (Bar bar : bars) {
-				if (bar instanceof SongBar) {
+				if (bar instanceof SongBar && ((SongBar) bar).getSongData() != null) {
 					setBanner((SongBar) bar);
 				}
 				if (stop) {

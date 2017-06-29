@@ -44,8 +44,8 @@ public enum GaugeProperty {
      */
     public enum GaugeElementProperty {
 
-        ASSIST_EASY(0 ,2 ,100 ,20, 60, new float[]{1.0f, 1.0f, 0.5f, -1.5f, -3.0f, 0}, new float[][]{}),
-        EASY(0 ,2 ,100 ,20, 80, new float[]{1.0f, 1.0f, 0.5f, -1.5f, -4.5f, -0.5f}, new float[][]{}),
+        ASSIST_EASY(0 ,2 ,100 ,20, 60, new float[]{1.0f, 1.0f, 0.5f, -1.5f, -3.0f, -0.5f}, new float[][]{}),
+        EASY(0 ,2 ,100 ,20, 80, new float[]{1.0f, 1.0f, 0.5f, -1.5f, -4.5f, -1.0f}, new float[][]{}),
         NORMAL(0 ,2 ,100 ,20, 80, new float[]{1.0f, 1.0f, 0.5f, -3.0f, -6.0f, -2.0f}, new float[][]{}),
         HARD(1 ,0 ,100 ,100, 0, new float[]{0.15f, 0.12f, 0.03f, -5.0f, -10.0f, -5.0f}, new float[][]{{10, 0.4f},{20, 0.5f},{30, 0.6f},{40, 0.7f},{50, 0.8f}}),
         EXHARD(2 ,0 ,100 ,100, 0, new float[]{0.15f, 0.06f, 0, -8.0f, -16.0f, -8.0f}, new float[][]{}),
@@ -54,7 +54,7 @@ public enum GaugeProperty {
         EXCLASS(1 ,0 ,100 ,100, 0, new float[]{0.15f, 0.12f, 0.03f, -3.0f, -6.0f, -3.0f}, new float[][]{}),
         EXHARDCLASS(1 ,0 ,100 ,100, 0, new float[]{0.15f, 0.06f, 0, -5.0f, -10.0f, -5.0f}, new float[][]{}),
         
-        ASSIST_EASY_PMS(0 ,2, 120, 30, 65, new float[]{1.0f, 1.0f, 0.5f, -1.0f, -3.0f, -1.0f}, new float[][]{}),
+        ASSIST_EASY_PMS(0 ,2, 120, 30, 65, new float[]{1.0f, 1.0f, 0.5f, -1.0f, -2.0f, -2.0f}, new float[][]{}),
         EASY_PMS(0 ,2, 120, 30, 85, new float[]{1.0f, 1.0f, 0.5f, -1.0f, -3.0f, -3.0f}, new float[][]{}),
         NORMAL_PMS(0 ,2, 120, 30, 85, new float[]{1.0f, 1.0f, 0.5f, -2.0f, -6.0f, -6.0f}, new float[][]{}),
         HARD_PMS(1 ,0 ,100 ,100, 0, new float[]{0.15f, 0.12f, 0.03f, -5.0f, -10.0f, -10.0f}, new float[][]{{10, 0.4f},{20, 0.5f},{30, 0.6f},{40, 0.7f},{50, 0.8f}}),
