@@ -502,7 +502,7 @@ public class BarRenderer {
 			selectedindex = 0;
 
 			if (prevbar != null) {
-				if (prevbar instanceof SongBar) {
+				if (prevbar instanceof SongBar && ((SongBar) prevbar).getSongData() != null) {
 					final SongBar prevsong = (SongBar) prevbar;
 					for (int i = 0; i < currentsongs.length; i++) {
 						if (currentsongs[i] instanceof SongBar && ((SongBar) currentsongs[i]).getSongData() != null &&
