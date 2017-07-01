@@ -59,7 +59,7 @@ public class GradeResult extends MainState {
 			for(int i=0;i<replay;i++){
 				/*
 				 * コンフィグ値:0=保存しない 1=スコア更新時 2=スコアが自己ベスト以上 3=BP更新時 4=BPが自己ベスト以下
-				 * 5=COMBO更新時 6=COMBOが自己ベスト以上 7=ランプ更新時 8=ランプが自己ベスト以上 9=毎回
+				 * 5=COMBO更新時 6=COMBOが自己ベスト以上 7=ランプ更新時 8=ランプが自己ベスト以上 9=何か更新した時 10=毎回
 				 */
 				switch(resource.getConfig().getAutoSaveReplay()[i]){
 				case 0:
@@ -73,11 +73,11 @@ public class GradeResult extends MainState {
 						saveReplayData(i);
 					break;
 				case 3:
-					if(resource.getScoreData().getMinbp() > oldmisscount || oldclear == NoPlay.id)
+					if(resource.getScoreData().getMinbp() < oldmisscount || oldclear == NoPlay.id)
 						saveReplayData(i);
 					break;
 				case 4:
-					if(resource.getScoreData().getMinbp() >= oldmisscount || oldclear == NoPlay.id)
+					if(resource.getScoreData().getMinbp() <= oldmisscount || oldclear == NoPlay.id)
 						saveReplayData(i);
 					break;
 				case 5:
@@ -97,6 +97,11 @@ public class GradeResult extends MainState {
 						saveReplayData(i);
 					break;
 				case 9:
+					if(resource.getScoreData().getClear() > oldclear || resource.getScoreData().getCombo() > oldcombo||
+						resource.getScoreData().getMinbp() < oldmisscount || resource.getScoreData().getExscore() > oldexscore)
+						saveReplayData(i);
+					break;
+				case 10:
 						saveReplayData(i);
 					break;
 				}
