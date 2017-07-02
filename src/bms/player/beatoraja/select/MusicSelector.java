@@ -57,7 +57,9 @@ public class MusicSelector extends MainState {
 	private PlayerConfig config;
 
 	private PlayerData playerdata;
-
+	/**
+	 * 楽曲プレビュー処理
+	 */
 	private PreviewMusicProcessor preview;
 
 	private BitmapFont titlefont;
@@ -518,7 +520,7 @@ public class MusicSelector extends MainState {
 			}
 			return Integer.MIN_VALUE;
 		case NUMBER_DURATION:
-			if (bar.getSelected() instanceof SongBar) {
+			if (bar.getSelected() instanceof SongBar && ((SongBar) bar.getSelected()).getSongData() != null) {
 				SongBar song = (SongBar) bar.getSelected();
 				PlayConfig pc = (song.getSongData().getMode() == 5 || song.getSongData().getMode() == 7
 						? config.getMode7()

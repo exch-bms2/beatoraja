@@ -239,8 +239,7 @@ public class MainController extends ApplicationAdapter {
 			break;
 		}
 
-		PlayerConfig pconfig = new PlayerConfig(config);
-		resource = new PlayerResource(audio, config, pconfig);
+		resource = new PlayerResource(audio, config, player);
 		selector = new MusicSelector(this, songUpdated);
 		decide = new MusicDecide(this);
 		result = new MusicResult(this);
@@ -284,8 +283,8 @@ public class MainController extends ApplicationAdapter {
 		};
 		polling.start();
 
-		if(pconfig.getTarget() >= TargetProperty.getAllTargetProperties(this).length) {
-			pconfig.setTarget(0);
+		if(player.getTarget() >= TargetProperty.getAllTargetProperties(this).length) {
+			player.setTarget(0);
 		}
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 	}
