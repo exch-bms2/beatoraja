@@ -1,41 +1,69 @@
 package bms.player.beatoraja;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.URL;
-import java.nio.file.*;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
-import javafx.application.Platform;
-import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
-import javafx.scene.control.*;
-import javafx.scene.input.*;
-import javafx.scene.layout.*;
-import javafx.stage.DirectoryChooser;
-import javafx.stage.FileChooser;
-import javafx.stage.FileChooser.ExtensionFilter;
-import javafx.util.Callback;
-
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.MapListHandler;
-
-import bms.player.beatoraja.ir.IRConnection;
-import bms.player.beatoraja.play.JudgeAlgorithm;
-import bms.player.beatoraja.skin.SkinHeader.CustomFile;
-import bms.player.beatoraja.skin.SkinHeader.CustomOption;
-import bms.player.beatoraja.skin.*;
-import bms.player.beatoraja.skin.lr2.LR2SkinHeaderLoader;
-import bms.player.beatoraja.song.*;
 
 import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter.OutputType;
 import com.synthbot.jasiohost.AsioDriver;
+
+import bms.player.beatoraja.ir.IRConnection;
+import bms.player.beatoraja.play.JudgeAlgorithm;
+import bms.player.beatoraja.skin.SkinHeader;
+import bms.player.beatoraja.skin.SkinHeader.CustomFile;
+import bms.player.beatoraja.skin.SkinHeader.CustomOption;
+import bms.player.beatoraja.skin.SkinLoader;
+import bms.player.beatoraja.skin.SkinType;
+import bms.player.beatoraja.skin.lr2.LR2SkinHeaderLoader;
+import bms.player.beatoraja.song.SQLiteSongDatabaseAccessor;
+import bms.player.beatoraja.song.SongData;
+import bms.player.beatoraja.song.SongDatabaseAccessor;
+import bms.player.beatoraja.song.SongInformationAccessor;
+import javafx.application.Platform;
+import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Slider;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.TextField;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
+import javafx.util.Callback;
 
 /**
  * Beatorajaの設定ダイアログ
@@ -223,14 +251,14 @@ public class PlayConfigurationView implements Initializable {
 		initComboBox(playconfig, new String[] { "5/7KEYS", "10/14KEYS", "9KEYS" });
 		initComboBox(lntype, new String[] { "LONG NOTE", "CHARGE NOTE", "HELL CHARGE NOTE" });
 		initComboBox(judgealgorithm, new String[] { arg1.getString("JUDGEALG_LR2"), arg1.getString("JUDGEALG_AC"), arg1.getString("JUDGEALG_BOTTOM_PRIORITY") });
-		initComboBox(autosavereplay1, new String[] { "OFF", "Greater Score", "Greater or equal Score", "Less BP", "Less or equal BP", "Greater Combo", "Greater or equal Combo",
-				"Greater Lamp", "Greater or equal Lamp", "Everytime"});
-		initComboBox(autosavereplay2, new String[] { "OFF", "Greater Score", "Greater or equal Score", "Less BP", "Less or equal BP", "Greater Combo", "Greater or equal Combo",
-				"Greater Lamp", "Greater or equal Lamp", "Everytime"});
-		initComboBox(autosavereplay3, new String[] { "OFF", "Greater Score", "Greater or equal Score", "Less BP", "Less or equal BP", "Greater Combo", "Greater or equal Combo",
-				"Greater Lamp", "Greater or equal Lamp", "Everytime"});
-		initComboBox(autosavereplay4, new String[] { "OFF", "Greater Score", "Greater or equal Score", "Less BP", "Less or equal BP", "Greater Combo", "Greater or equal Combo",
-				"Greater Lamp", "Greater or equal Lamp", "Everytime"});
+		initComboBox(autosavereplay1, new String[] { "OFF", "Better Score", "Better or same Score", "Better BP", "Better or same BP", "Better Combo", "Better or same Combo",
+				"Better Lamp", "Better or same Lamp", "Better BP/Combo/Lamp","Always"});
+		initComboBox(autosavereplay2, new String[] { "OFF", "Better Score", "Better or same Score", "Better BP", "Better or same BP", "Better Combo", "Better or same Combo",
+				"Better Lamp", "Better or same Lamp", "Better BP/Combo/Lamp","Always"});
+		initComboBox(autosavereplay3, new String[] { "OFF", "Better Score", "Better or same Score", "Better BP", "Better or same BP", "Better Combo", "Better or same Combo",
+				"Better Lamp", "Better or same Lamp", "Better BP/Combo/Lamp","Always"});
+		initComboBox(autosavereplay4, new String[] { "OFF", "Better Score", "Better or same Score", "Better BP", "Better or same BP", "Better Combo", "Better or same Combo",
+				"Better Lamp", "Better or same Lamp", "Better BP/Combo/Lamp", "Always"});
 		skincategory.setCellFactory(new Callback<ListView<SkinType>, ListCell<SkinType>>() {
 			public ListCell<SkinType> call(ListView<SkinType> param) { return new SkinTypeCell(); }
 		});
@@ -303,15 +331,15 @@ public class PlayConfigurationView implements Initializable {
 		updateAudioDriver();
 		updatePlayer();
 	}
-	
+
 	public void updatePlayer() {
 		Path p = Paths.get("player/" + config.getPlayername() + "/config.json");
-		
+
 		Json json = new Json();
 		try {
 			json.setIgnoreUnknownFields(true);
 			player = json.fromJson(PlayerConfig.class, new FileReader(p.toFile()));
-			
+
 			scoreop.getSelectionModel().select(player.getRandom());
 			gaugeop.getSelectionModel().select(player.getGauge());
 			lntype.getSelectionModel().select(player.getLnmode());
@@ -330,7 +358,7 @@ public class PlayConfigurationView implements Initializable {
 			irname.setValue(player.getIrname());
 			iruserid.setText(player.getUserid());
 			irpassword.setText(player.getPassword());
-			
+
 			playconfig.setValue(0);
 			updatePlayConfig();
 			skincategory.setValue(SkinType.PLAY_7KEYS);
@@ -396,16 +424,16 @@ public class PlayConfigurationView implements Initializable {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void commitPlayer() {
 		Path p = Paths.get("player/" + config.getPlayername() + "/config.json");
-		
+
 		player.setRandom(scoreop.getValue());
 		player.setGauge(gaugeop.getValue());
 		player.setLnmode(lntype.getValue());
 		player.setFixhispeed(fixhispeed.getValue());
 		player.setJudgetiming(getValue(judgetiming));
-		
+
 		player.setConstant(constant.isSelected());
 		player.setBpmguide(bpmguide.isSelected());
 		player.setLegacynote(legacy.isSelected());
@@ -420,7 +448,7 @@ public class PlayConfigurationView implements Initializable {
 
 		updatePlayConfig();
 		updateSkinCategory();
-		
+
 		Json json = new Json();
 		json.setOutputType(OutputType.json);
 		try (FileWriter fw = new FileWriter(p.toFile())) {
@@ -626,7 +654,7 @@ public class PlayConfigurationView implements Initializable {
 			Class.forName("org.sqlite.JDBC");
 			SongDatabaseAccessor songdb = new SQLiteSongDatabaseAccessor(Paths.get("songdata.db").toString(),
 					config.getBmsroot());
-			SongInformationAccessor infodb = useSongInfo.isSelected() ? 
+			SongInformationAccessor infodb = useSongInfo.isSelected() ?
 					new SongInformationAccessor(Paths.get("songinfo.db").toString()) : null;
 			Logger.getGlobal().info("song.db更新開始");
 			songdb.updateSongDatas(null, updateAll, infodb);
