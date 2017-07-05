@@ -74,7 +74,6 @@ public class MusicSelector extends MainState {
 
 	private SearchTextField search;
 
-	private boolean songUpdated = false;
 	private Thread updateSong;
 
 	/**
@@ -101,7 +100,6 @@ public class MusicSelector extends MainState {
 		super(main);
 		this.config = main.getPlayerResource().getPlayerConfig();
 		final Config conf = main.getPlayerResource().getConfig();
-		this.songUpdated = songUpdated;
 
 		songdb = main.getSongDatabase();
 
@@ -115,7 +113,12 @@ public class MusicSelector extends MainState {
 
 		bar = new BarRenderer(this);
 		musicinput = new MusicSelectInputProcessor(this);
-	}
+
+        if(!songUpdated && main.getPlayerResource().getConfig().isUpdatesong()) {
+            updateSong = new SongUpdateThread(null);
+            updateSong.start();
+        }
+    }
 
 	public ScoreDataCache getScoreDataCache() {
 		return scorecache;
@@ -125,7 +128,9 @@ public class MusicSelector extends MainState {
 		play = -1;
 		final MainController main = getMainController();
 		playerdata = main.getPlayDataAccessor().readPlayerData();
-		scorecache.clear();
+        if(bar.getSelected() != null && bar.getSelected() instanceof SongBar) {
+            scorecache.update(((SongBar) bar.getSelected()).getSongData(), config.getLnmode());
+        }
 
         preview = new PreviewMusicProcessor(main.getAudioProcessor(), main.getPlayerResource().getConfig());
         preview.setDefault(getSound(SOUND_BGM));
@@ -150,11 +155,6 @@ public class MusicSelector extends MainState {
 		if (getStage() == null && ((MusicSelectSkin) getSkin()).getSearchTextRegion() != null) {
 			search = new SearchTextField(this, main.getPlayerResource().getConfig().getResolution());
 			setStage(search);
-		}
-
-		if(!songUpdated && main.getPlayerResource().getConfig().isUpdatesong()) {
-			updateSong = new SongUpdateThread(null);
-			updateSong.start();
 		}
 	}
 
@@ -471,6 +471,12 @@ public class MusicSelector extends MainState {
 
 	public int getNumberValue(int id) {
 		switch (id) {
+			case NUMBER_TOTALPLAYTIME_HOUR:
+				return (int) playerdata.getPlaytime() / 3600;
+			case NUMBER_TOTALPLAYTIME_MINUTE:
+				return (int) (playerdata.getPlaytime() / 60) % 60;
+			case NUMBER_TOTALPLAYTIME_SECOND:
+				return (int) (playerdata.getPlaytime() % 60);
 		case NUMBER_TOTALPLAYCOUNT:
 			return (int) playerdata.getPlaycount();
 		case NUMBER_TOTALCLEARCOUNT:

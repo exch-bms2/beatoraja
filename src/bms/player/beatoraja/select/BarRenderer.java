@@ -154,7 +154,7 @@ public class BarRenderer {
 	}
 
 	public Bar getSelected() {
-		return currentsongs[selectedindex];
+		return currentsongs != null ? currentsongs[selectedindex] : null;
 	}
 
 	public void setSelected(Bar bar) {

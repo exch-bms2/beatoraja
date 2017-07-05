@@ -172,6 +172,10 @@ public class SkinProperty {
 	public static final int NUMBER_JUDGETIMING = 12;
     public static final int NUMBER_LANECOVER1 = 14;
 	public static final int NUMBER_LIFT1 = 314;
+
+	public static final int NUMBER_TOTALPLAYTIME_HOUR = 17;
+	public static final int NUMBER_TOTALPLAYTIME_MINUTE = 18;
+	public static final int NUMBER_TOTALPLAYTIME_SECOND = 19;
 	public static final int NUMBER_CURRENT_FPS = 20;
 	public static final int NUMBER_TIME_YEAR = 21;
 	public static final int NUMBER_TIME_MONTH = 22;
@@ -179,6 +183,9 @@ public class SkinProperty {
 	public static final int NUMBER_TIME_HOUR = 24;
 	public static final int NUMBER_TIME_MINUTE = 25;
 	public static final int NUMBER_TIME_SECOND = 26;
+	public static final int NUMBER_OPERATING_TIME_HOUR = 27;
+	public static final int NUMBER_OPERATING_TIME_MINUTE = 28;
+	public static final int NUMBER_OPERATING_TIME_SECOND = 29;
 
 	public static final int NUMBER_TOTALPLAYCOUNT = 30;
 	public static final int NUMBER_TOTALCLEARCOUNT = 31;
