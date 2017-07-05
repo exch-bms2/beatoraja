@@ -97,7 +97,17 @@ public class MainController extends ApplicationAdapter {
 		this.auto = auto;
 		this.config = config;
 		this.songUpdated = songUpdated;
-		this.player = config.getPlayers()[config.getPlayer()];
+		
+		Path p = Paths.get("player/" + config.getPlayername() + "/config.json");
+		
+		try {
+			Json json = new Json();
+			json.setIgnoreUnknownFields(true);
+			player = json.fromJson(PlayerConfig.class, new FileReader(p.toFile()));
+		} catch(Throwable e) {
+			
+		}
+
 		this.bmsfile = f;
 
 		try {
@@ -110,11 +120,11 @@ public class MainController extends ApplicationAdapter {
 			e.printStackTrace();
 		}
 
-		playdata = new PlayDataAccessor(player.getName());
+		playdata = new PlayDataAccessor(config.getPlayername());
 		
-		ir = IRConnection.getIRConnection(config.getIrname());
-		if(config.getUserid().length() > 0 && ir != null) {
-			ir.login(config.getUserid(), config.getPassword());
+		ir = IRConnection.getIRConnection(player.getIrname());
+		if(player.getUserid().length() > 0 && ir != null) {
+			ir.login(player.getUserid(), player.getPassword());
 		}
 	}
 
@@ -229,14 +239,14 @@ public class MainController extends ApplicationAdapter {
 			break;
 		}
 
-		selector = new MusicSelector(this, config, songUpdated);
+		resource = new PlayerResource(audio, config, player);
+		selector = new MusicSelector(this, songUpdated);
 		decide = new MusicDecide(this);
 		result = new MusicResult(this);
 		gresult = new GradeResult(this);
 		keyconfig = new KeyConfiguration(this);
-		resource = new PlayerResource(audio, config);
 		if (bmsfile != null) {
-			if(resource.setBMSFile(bmsfile, config, auto)) {
+			if(resource.setBMSFile(bmsfile, auto)) {
 				changeState(STATE_PLAYBMS);				
 			} else {
 				// ダミーステートに移行してすぐexitする
@@ -273,8 +283,8 @@ public class MainController extends ApplicationAdapter {
 		};
 		polling.start();
 
-		if(config.getTarget() >= TargetProperty.getAllTargetProperties(this).length) {
-			config.setTarget(0);
+		if(player.getTarget() >= TargetProperty.getAllTargetProperties(this).length) {
+			player.setTarget(0);
 		}
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 	}
@@ -424,6 +434,15 @@ public class MainController extends ApplicationAdapter {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
+		Path p = Paths.get("player/" + config.getPlayername() + "/config.json");
+		try (FileWriter fw = new FileWriter(p.toFile())) {
+			fw.write(json.prettyPrint(player));
+			fw.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
 		dispose();
 		Gdx.app.exit();
 	}

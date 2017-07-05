@@ -16,8 +16,11 @@ import java.util.List;
  */
 public class CourseDataAccessor {
 
-    private final String coursedir = "course";
+    private final String coursedir;
 
+    public CourseDataAccessor(String path) {
+        coursedir = path;
+    }
     /**
      * 全てのキャッシュされた難易度表データを読み込む
      *

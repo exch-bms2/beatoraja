@@ -1,18 +1,11 @@
 package bms.player.beatoraja.decide;
 
 import java.io.File;
-import java.nio.file.Paths;
-import java.util.HashMap;
 
-import bms.player.beatoraja.Config.SkinConfig;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.skin.*;
-import bms.player.beatoraja.skin.lr2.*;
 
-import com.badlogic.gdx.math.Rectangle;
-
-import static bms.player.beatoraja.Resolution.*;
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
 /**
@@ -37,23 +30,7 @@ public class MusicDecide extends MainState {
 		setSound(SOUND_DECIDE, resource.getConfig().getBgmpath() + File.separatorChar + "decide.wav", false);
 		play(SOUND_DECIDE);
 
-		try {
-			SkinConfig sc = resource.getConfig().getSkin()[6];
-			if (sc.getPath().endsWith(".json")) {
-				SkinLoader sl = new SkinLoader(resource.getConfig());
-				setSkin(sl.loadDecideSkin(Paths.get(sc.getPath()), sc.getProperty()));
-			} else {
-				LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
-				SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
-				LR2DecideSkinLoader dloader = new LR2DecideSkinLoader(header.getResolution(), resource.getConfig());
-				setSkin(dloader.loadMusicDecideSkin(Paths.get(sc.getPath()).toFile(), this, header, loader.getOption(),
-						sc.getProperty()));
-			}
-		} catch (Throwable e) {
-			e.printStackTrace();
-			SkinLoader sl = new SkinLoader(resource.getConfig());
-			setSkin(sl.loadDecideSkin(Paths.get("skin/default/decide.json"), new HashMap()));
-		}
+		loadSkin(SkinType.DECIDE);
 	}
 
 	public void render() {

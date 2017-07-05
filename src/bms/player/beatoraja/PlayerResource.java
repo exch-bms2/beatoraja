@@ -43,6 +43,8 @@ public class PlayerResource {
 	private SongData songdata;
 
 	private Config config;
+	private PlayerConfig pconfig;
+	
 	private int auto;
 
 	private BMSPlayerInputDevice playDevice;
@@ -108,8 +110,9 @@ public class PlayerResource {
 	 */
 	private int maxcombo;
 
-	public PlayerResource(AudioDriver audio, Config config) {
+	public PlayerResource(AudioDriver audio, Config config, PlayerConfig pconfig) {
 		this.config = config;
+		this.pconfig = pconfig;
 		this.bmsresource = new BMSResource(audio, config);
 	}
 
@@ -128,11 +131,10 @@ public class PlayerResource {
 		constraint.clear();
 	}
 
-	public boolean setBMSFile(final Path f, final Config config, int autoplay) {
-		this.config = config;
+	public boolean setBMSFile(final Path f, int autoplay) {
 		this.auto = autoplay;
 		replay = new ReplayData();
-		model = loadBMSModel(f, config.getLnmode());
+		model = loadBMSModel(f, pconfig.getLnmode());
 		if (model == null) {
 			Logger.getGlobal().warning("楽曲が存在しないか、解析時にエラーが発生しました:" + f.toString());
 			return false;
@@ -240,6 +242,10 @@ public class PlayerResource {
 	public Config getConfig() {
 		return config;
 	}
+	
+	public PlayerConfig getPlayerConfig() {
+		return pconfig;
+	}
 
 	public BGAProcessor getBGAManager() {
 		return bmsresource.getBGAProcessor();
@@ -268,7 +274,7 @@ public class PlayerResource {
 	public boolean setCourseBMSFiles(Path[] files) {
 		List<BMSModel> models = new ArrayList();
 		for (Path f : files) {
-			BMSModel model = loadBMSModel(f, config.getLnmode());
+			BMSModel model = loadBMSModel(f, pconfig.getLnmode());
 			if (model == null) {
 				return false;
 			}
@@ -287,14 +293,14 @@ public class PlayerResource {
 		if (courseindex == course.length) {
 			return false;
 		} else {
-			setBMSFile(Paths.get(course[courseindex].getPath()), config, auto);
+			setBMSFile(Paths.get(course[courseindex].getPath()), auto);
 			return true;
 		}
 	}
 
 	public void reloadBMSFile() {
 		if (model != null) {
-			model = loadBMSModel(Paths.get(model.getPath()), config.getLnmode());
+			model = loadBMSModel(Paths.get(model.getPath()), pconfig.getLnmode());
 		}
 		clear();
 	}

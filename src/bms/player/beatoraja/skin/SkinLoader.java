@@ -55,20 +55,8 @@ public class SkinLoader {
 		usecim = false;
 	}
 
-	public MusicResultSkin loadResultSkin(Path p, Map property) {
-		return (MusicResultSkin) load(p, SkinType.RESULT, property);
-	}
-
-	public MusicDecideSkin loadDecideSkin(Path p, Map property) {
-		return (MusicDecideSkin) load(p, SkinType.DECIDE, property);
-	}
-
-	public MusicSelectSkin loadSelectSkin(Path p, Map property) {
-		return (MusicSelectSkin) load(p, SkinType.MUSIC_SELECT, property);
-	}
-
-	public PlaySkin loadPlaySkin(Path p, SkinType type, Map property) {
-		return (PlaySkin) load(p, type, property);
+	public Skin loadSkin(Path p, SkinType type, Map property) {
+		return load(p, type, property);
 	}
 
 	public SkinHeader loadHeader(Path p) {

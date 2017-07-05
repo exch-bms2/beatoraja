@@ -4,26 +4,20 @@ import java.io.*;
 import java.util.*;
 import java.util.logging.Logger;
 
-import bms.player.beatoraja.Config;
-import bms.player.beatoraja.MainState;
-import bms.player.beatoraja.Resolution;
+import bms.player.beatoraja.*;
 import bms.player.beatoraja.play.bga.BGAProcessor;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.SkinHeader.CustomFile;
-import bms.player.beatoraja.skin.SkinTextImage.SkinTextImageSource;
-import bms.player.beatoraja.skin.lr2.LR2SkinLoader.CommandWord;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.utils.GdxRuntimeException;
 
 /**
  * LR2のスキン定義用csvファイルのローダー
  * 
  * @author exch
  */
-public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
+public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 
 	List<Object> imagelist = new ArrayList<Object>();
 	List<SkinTextImage.SkinTextImageSource> fontlist = new ArrayList<>();
@@ -38,7 +32,7 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 	public final Resolution dst;
 	private boolean usecim;
 
-	private Skin skin;
+	protected S skin;
 
 	private MainState state;
 
@@ -445,7 +439,7 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 
 	private Map<String, String> filemap = new HashMap();
 
-	protected void loadSkin(Skin skin, File f, MainState state, SkinHeader header, Map<Integer, Boolean> option,
+	protected S loadSkin(S skin, File f, MainState state, SkinHeader header, Map<Integer, Boolean> option,
 			Map<String, Object> property) throws IOException {
 		this.skin = skin;
 		this.state = state;
@@ -467,6 +461,8 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 
 		op.putAll(option);
 		this.loadSkin0(skin, f, state, op, filemap);
+		
+		return skin;
 	}
 
 	SkinImage part = null;
@@ -543,5 +539,28 @@ public abstract class LR2SkinCSVLoader extends LR2SkinLoader {
 			}
 		}
 		return images;
+	}
+	
+	public abstract S loadSkin(File f, MainState decide, SkinHeader header, Map<Integer, Boolean> option, Map property) throws IOException;
+	
+	public static LR2SkinCSVLoader getSkinLoader(SkinType type, Resolution src, Config c) {
+		switch(type) {
+		case MUSIC_SELECT:
+			return new LR2SelectSkinLoader(src, c);
+		case DECIDE:
+			return new LR2DecideSkinLoader(src, c);
+		case PLAY_5KEYS:
+		case PLAY_7KEYS:
+		case PLAY_9KEYS:
+		case PLAY_10KEYS:
+		case PLAY_14KEYS:
+			return new LR2PlaySkinLoader(src, c);
+		case RESULT:
+			return new LR2ResultSkinLoader(src, c);
+		case COURSE_RESULT:
+			return new LR2ResultSkinLoader(src, c);
+		case KEY_CONFIG:
+		}
+		return null;
 	}
 }

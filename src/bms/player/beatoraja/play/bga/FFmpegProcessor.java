@@ -1,6 +1,5 @@
 package bms.player.beatoraja.play.bga;
 
-import java.io.File;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel.MapMode;
@@ -33,18 +32,22 @@ public class FFmpegProcessor implements MovieProcessor {
 	 */
 	private Texture showingtex;
 	/**
-	 * 動画のfps
+	 * 動画のフレーム表示率(1/n)
 	 */
-	private double fps;
-
 	private int fpsd = 1;
-
+	/**
+	 * ffmpegアクセサ
+	 */
 	private FFmpegFrameGrabber grabber;
-
+	/**
+	 * 動画再生用スレッド
+	 */
 	private MovieSeekThread movieseek;
 
 	private BMSPlayer player;
-	
+	/**
+	 * 動画色補正用シェーダ
+	 */
 	private ShaderProgram shader;
 
 	public FFmpegProcessor(int fpsd) {
@@ -79,6 +82,11 @@ public class FFmpegProcessor implements MovieProcessor {
 		return showingtex;
 	}
 
+	/**
+	 * 動画再生用スレッド
+	 * 
+	 * @author exch
+	 */
 	class MovieSeekThread extends Thread {
 
 		public boolean stop = false;
@@ -103,7 +111,7 @@ public class FFmpegProcessor implements MovieProcessor {
 
 		public void run() {
 			try {
-				fps = grabber.getFrameRate();
+				double fps = grabber.getFrameRate();
 				if (fps > 240) {
 					// フレームレートが大きすぎる場合は手動で修正(暫定処置)
 					fps = 30;
@@ -138,7 +146,6 @@ public class FFmpegProcessor implements MovieProcessor {
 								// System.out.println("movie pixmap created : "
 								// + time);
 							} catch (Throwable e) {
-								pixmap = null;
 								throw new GdxRuntimeException("Couldn't load pixmap from image data", e);
 							}
 						}
@@ -154,7 +161,6 @@ public class FFmpegProcessor implements MovieProcessor {
 					}
 					if (restart) {
 						restart = false;
-						pixmap = null;
 						grabber.start();
 //						grabber.restart();
 						start = player != null ? player.getNowTime() - player.getTimer()[TIMER_PLAY] : (System.nanoTime() / 1000000);

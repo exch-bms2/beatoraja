@@ -74,6 +74,13 @@ public class BGImageProcessor {
 	public void prepare(TimeLine[] timelines) {
 		long l = System.currentTimeMillis();
 		Arrays.fill(bgacacheid, -1);
+		for (Texture bga : bgacache) {
+			if (bga != null) {
+				bga.dispose();
+			}
+		}
+		Arrays.fill(bgacache, null);
+
 		int count = 0;
 		for (TimeLine tl : timelines) {
 			int bga = tl.getBGA();

@@ -66,7 +66,8 @@ public class LaneRenderer {
 	private BitmapFont font;
 	private final PlaySkin skin;
 
-	private final Config config;
+	private final Config conf;
+	private final PlayerConfig config;
 	private PlayConfig playconfig;
 
 	private int currentduration;
@@ -95,7 +96,8 @@ public class LaneRenderer {
 		generator.dispose();
 
 		this.skin = (PlaySkin) main.getSkin();
-		this.config = main.getMainController().getPlayerResource().getConfig();
+		this.conf = main.getMainController().getPlayerResource().getConfig();
+		this.config = main.getMainController().getPlayerResource().getPlayerConfig();
 		this.playconfig = (model.getMode() == Mode.BEAT_5K || model.getMode() == Mode.BEAT_7K ? config.getMode7()
 				: (model.getMode() == Mode.BEAT_10K || model.getMode() == Mode.BEAT_14K ? config.getMode14()
 						: config.getMode9()));
@@ -385,7 +387,7 @@ public class LaneRenderer {
 					if (note != null && ((note instanceof LongNote
 							&& (((LongNote) note).isEnd() ? (LongNote) note : ((LongNote) note).getPair())
 									.getMicroTime() >= microtime)
-							|| (config.isShowpastnote() && note instanceof NormalNote && note.getState() == 0))) {
+							|| (conf.isShowpastnote() && note instanceof NormalNote && note.getState() == 0))) {
 						b = false;
 						break;
 					}
@@ -419,7 +421,7 @@ public class LaneRenderer {
 				if (note != null) {
 					if (note instanceof NormalNote) {
 						// draw normal note
-						if (tl.getMicroTime() >= microtime || (config.isShowpastnote() && note.getState() == 0)) {
+						if (tl.getMicroTime() >= microtime || (conf.isShowpastnote() && note.getState() == 0)) {
 							final TextureRegion s = config.isMarkprocessednote() && note.getState() != 0
 									? pnoteimage[lane] : noteimage[lane];
 							sprite.draw(s, laneregion[lane].x, (float) y, laneregion[lane].width, scale);
@@ -464,7 +466,7 @@ public class LaneRenderer {
 					}
 				}
 				// hidden note
-				if (config.isShowhiddennote() && tl.getMicroTime() >= microtime) {
+				if (conf.isShowhiddennote() && tl.getMicroTime() >= microtime) {
 					final Note hnote = tl.getHiddenNote(lane);
 					if (hnote != null) {
 						sprite.draw(hnoteimage[lane], laneregion[lane].x, (float) y, laneregion[lane].width, scale);

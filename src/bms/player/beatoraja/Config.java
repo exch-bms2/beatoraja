@@ -1,20 +1,17 @@
 package bms.player.beatoraja;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
 import bms.player.beatoraja.input.BMControllerInputProcessor.BMKeys;
 import bms.player.beatoraja.PlayConfig.MidiConfig;
 import bms.player.beatoraja.play.JudgeAlgorithm;
-import bms.player.beatoraja.play.JudgeManager;
 
 import bms.player.beatoraja.skin.SkinType;
 import com.badlogic.gdx.Input.Keys;
 
 import static bms.player.beatoraja.Resolution.*;
-import bms.player.beatoraja.select.*;
 import bms.model.Mode;
 
 /**
@@ -26,9 +23,7 @@ public class Config {
 
 	// TODO プレイヤー毎に異なる見込みの大きい要素をPlayerConfigに移動
 
-	private PlayerConfig[] players;
-
-	private int player;
+	private String playername;
 	/**
 	 * フルスクリーン
 	 */
@@ -70,7 +65,10 @@ public class Config {
 	 * オーディオ同時発音数
 	 */
 	private int audioDeviceSimultaneousSources = 64;
-	
+
+	/**
+	 * システム音ボリューム
+	 */
 	private float systemvolume = 1.0f;
 	/**
 	 * キー音のボリューム
@@ -238,6 +236,8 @@ public class Config {
 
 	private boolean updatesong = false;
 
+	private int autosavereplay[] = {0,0,0,0};
+
 	private String irname = "";
 
 	private String userid = "";
@@ -245,9 +245,6 @@ public class Config {
 	private String password = "";
 
 	public Config() {
-		PlayerConfig sample = new PlayerConfig();
-		sample.setName("playerscore");
-		players = new PlayerConfig[]{sample};
 		tableURL = new String[] { "http://bmsnormal2.syuriken.jp/table.html",
 				"http://bmsnormal2.syuriken.jp/table_insane.html", "http://dpbmsdelta.web.fc2.com/table/dpdelta.html",
 				"http://dpbmsdelta.web.fc2.com/table/insane.html",
@@ -263,6 +260,14 @@ public class Config {
 		for (Map.Entry<SkinType, String> entry : SkinConfig.defaultSkinPathMap.entrySet()) {
 			skin[entry.getKey().getId()] = new SkinConfig(entry.getValue());
 		}
+	}
+
+	public String getPlayername() {
+		return playername;
+	}
+
+	public void setPlayername(String playername) {
+		this.playername = playername;
 	}
 
 	public boolean isFullscreen() {
@@ -281,30 +286,6 @@ public class Config {
 		this.vsync = vsync;
 	}
 
-	public int getGauge() {
-		return gauge;
-	}
-
-	public void setGauge(int gauge) {
-		this.gauge = gauge;
-	}
-
-	public int getRandom() {
-		return random;
-	}
-
-	public void setRandom(int random) {
-		this.random = random;
-	}
-
-	public int getFixhispeed() {
-		return fixhispeed;
-	}
-
-	public void setFixhispeed(int fixhispeed) {
-		this.fixhispeed = fixhispeed;
-	}
-
 	public int getBga() {
 		return bga;
 	}
@@ -313,46 +294,14 @@ public class Config {
 		this.bga = bga;
 	}
 
-	public int getJudgetiming() {
-		return judgetiming;
-	}
-
-	public void setJudgetiming(int judgetiming) {
-		this.judgetiming = judgetiming;
-	}
-
-        public boolean getJKOC()  {
-            return jkoc_hack;
-        }
-        
-        public void setJKOC(boolean jkoc)  {
-            this.jkoc_hack = jkoc;
-        }
-        
-	public boolean isConstant() {
-		return constant;
-	}
-
-	public void setConstant(boolean constant) {
-		this.constant = constant;
-	}
-
-	public boolean isBpmguide() {
-		return bpmguide;
-	}
-
-	public void setBpmguide(boolean bpmguide) {
-		this.bpmguide = bpmguide;
-	}
-
-	public int getLnmode() {
-		return lnmode;
-	}
-
-	public void setLnmode(int lnmode) {
-		this.lnmode = lnmode;
-	}
-
+    public boolean getJKOC()  {
+        return jkoc_hack;
+    }
+    
+    public void setJKOC(boolean jkoc)  {
+        this.jkoc_hack = jkoc;
+    }
+    
 	public String getVlcpath() {
 		return vlcpath;
 	}
@@ -409,6 +358,240 @@ public class Config {
 		this.judgealgorithm = judgeAlgorithm;
 	}
 
+	public boolean isFolderlamp() {
+		return folderlamp;
+	}
+
+	public void setFolderlamp(boolean folderlamp) {
+		this.folderlamp = folderlamp;
+	}
+
+	public Resolution getResolution() {
+		return resolution;
+	}
+
+	public void setResolution(Resolution resolution) {
+		this.resolution = resolution;
+	}
+
+	public boolean isShowhiddennote() {
+		return showhiddennote;
+	}
+
+	public void setShowhiddennote(boolean showhiddennote) {
+		this.showhiddennote = showhiddennote;
+	}
+
+	public int getMovieplayer() {
+		return movieplayer;
+	}
+
+	public void setMovieplayer(int movieplayer) {
+		this.movieplayer = movieplayer;
+	}
+
+	public int getFrameskip() {
+		return frameskip;
+	}
+
+	public void setFrameskip(int frameskip) {
+		this.frameskip = frameskip;
+	}
+
+	public String getBgmpath() {
+		return bgmpath;
+	}
+
+	public void setBgmpath(String bgmpath) {
+		this.bgmpath = bgmpath;
+	}
+
+	public String getSoundpath() {
+		return soundpath;
+	}
+
+	public void setSoundpath(String soundpath) {
+		this.soundpath = soundpath;
+	}
+
+	public int getInputduration() {
+		return inputduration;
+	}
+
+	public void setInputduration(int inputduration) {
+		this.inputduration = inputduration;
+	}
+
+	public float getKeyvolume() {
+		return keyvolume;
+	}
+
+	public void setKeyvolume(float keyvolume) {
+		this.keyvolume = keyvolume;
+	}
+
+	public float getBgvolume() {
+		return bgvolume;
+	}
+
+	public void setBgvolume(float bgvolume) {
+		this.bgvolume = bgvolume;
+	}
+
+	public boolean isShowpastnote() {
+		return showpastnote;
+	}
+
+	public void setShowpastnote(boolean showpastnote) {
+		this.showpastnote = showpastnote;
+	}
+
+	public int getAudioDriver() {
+		return audioDriver;
+	}
+
+	public void setAudioDriver(int audioDriver) {
+		this.audioDriver = audioDriver;
+	}
+
+	public void setAutoSaveReplay(int autoSaveReplay[]){
+		this.autosavereplay = autoSaveReplay;
+	}
+
+	public int[] getAutoSaveReplay(){
+		return autosavereplay;
+	}
+	
+	public boolean isUseSongInfo() {
+		return useSongInfo;
+	}
+
+	public void setUseSongInfo(boolean useSongInfo) {
+		this.useSongInfo = useSongInfo;
+	}
+
+	public int getBgaExpand() {
+		return bgaExpand;
+	}
+
+	public void setBgaExpand(int bgaExpand) {
+		this.bgaExpand = bgaExpand;
+	}
+
+	public boolean isCacheSkinImage() {
+		return cacheSkinImage;
+	}
+
+	public void setCacheSkinImage(boolean cacheSkinImage) {
+		this.cacheSkinImage = cacheSkinImage;
+	}
+
+	public float getSystemvolume() {
+		return systemvolume;
+	}
+
+	public void setSystemvolume(float systemvolume) {
+		this.systemvolume = systemvolume;
+	}
+	
+	public boolean isUpdatesong() {
+		return updatesong;
+	}
+
+	public void setUpdatesong(boolean updatesong) {
+		this.updatesong = updatesong;
+	}
+
+	// TODO これ以降の値はPlayerConfigに移行する
+	
+	public SkinConfig[] getSkin() {
+		return skin;
+	}
+
+	public void setSkin(SkinConfig[] skin) {
+		this.skin = skin;
+	}
+
+	public int getGauge() {
+		return gauge;
+	}
+
+	public void setGauge(int gauge) {
+		this.gauge = gauge;
+	}
+
+	public int getRandom() {
+		return random;
+	}
+
+	public void setRandom(int random) {
+		this.random = random;
+	}
+
+	public int getFixhispeed() {
+		return fixhispeed;
+	}
+
+	public void setFixhispeed(int fixhispeed) {
+		this.fixhispeed = fixhispeed;
+	}
+
+	public int getJudgetiming() {
+		return judgetiming;
+	}
+
+	public void setJudgetiming(int judgetiming) {
+		this.judgetiming = judgetiming;
+	}
+
+	public PlayConfig getMode7() {
+		return mode7;
+	}
+
+	public void setMode7(PlayConfig mode7) {
+		this.mode7 = mode7;
+	}
+
+	public PlayConfig getMode14() {
+		return mode14;
+	}
+
+	public void setMode14(PlayConfig mode14) {
+		this.mode14 = mode14;
+	}
+
+	public PlayConfig getMode9() {
+		return mode9;
+	}
+
+	public void setMode9(PlayConfig mode9) {
+		this.mode9 = mode9;
+	}
+
+	public void setMode(Mode m)  {
+		this.mode = m;
+	}
+	
+	public Mode getMode()  {
+		return mode;
+	}
+	
+	public boolean isConstant() {
+		return constant;
+	}
+
+	public void setConstant(boolean constant) {
+		this.constant = constant;
+	}
+
+	public boolean isBpmguide() {
+		return bpmguide;
+	}
+
+	public void setBpmguide(boolean bpmguide) {
+		this.bpmguide = bpmguide;
+	}
+	
 	public boolean isExpandjudge() {
 		return expandjudge;
 	}
@@ -465,52 +648,12 @@ public class Config {
 		this.markprocessednote = markprocessednote;
 	}
 
-	public boolean isFolderlamp() {
-		return folderlamp;
+	public int getLnmode() {
+		return lnmode;
 	}
 
-	public void setFolderlamp(boolean folderlamp) {
-		this.folderlamp = folderlamp;
-	}
-
-	public PlayConfig getMode7() {
-		return mode7;
-	}
-
-	public void setMode7(PlayConfig mode7) {
-		this.mode7 = mode7;
-	}
-
-	public PlayConfig getMode14() {
-		return mode14;
-	}
-
-	public void setMode14(PlayConfig mode14) {
-		this.mode14 = mode14;
-	}
-
-	public PlayConfig getMode9() {
-		return mode9;
-	}
-
-	public void setMode9(PlayConfig mode9) {
-		this.mode9 = mode9;
-	}
-
-	public void setMode(Mode m)  {
-		this.mode = m;
-	}
-	
-	public Mode getMode()  {
-		return mode;
-	}
-	
-	public Resolution getResolution() {
-		return resolution;
-	}
-
-	public void setResolution(Resolution resolution) {
-		this.resolution = resolution;
+	public void setLnmode(int lnmode) {
+		this.lnmode = lnmode;
 	}
 
 	public int getMusicselectinput() {
@@ -519,94 +662,6 @@ public class Config {
 
 	public void setMusicselectinput(int musicselectinput) {
 		this.musicselectinput = musicselectinput;
-	}
-
-	public boolean isShowhiddennote() {
-		return showhiddennote;
-	}
-
-	public void setShowhiddennote(boolean showhiddennote) {
-		this.showhiddennote = showhiddennote;
-	}
-
-	public int getMovieplayer() {
-		return movieplayer;
-	}
-
-	public void setMovieplayer(int movieplayer) {
-		this.movieplayer = movieplayer;
-	}
-
-	public int getFrameskip() {
-		return frameskip;
-	}
-
-	public void setFrameskip(int frameskip) {
-		this.frameskip = frameskip;
-	}
-
-	public String getBgmpath() {
-		return bgmpath;
-	}
-
-	public void setBgmpath(String bgmpath) {
-		this.bgmpath = bgmpath;
-	}
-
-	public String getSoundpath() {
-		return soundpath;
-	}
-
-	public void setSoundpath(String soundpath) {
-		this.soundpath = soundpath;
-	}
-
-	public int getInputduration() {
-		return inputduration;
-	}
-
-	public void setInputduration(int inputduration) {
-		this.inputduration = inputduration;
-	}
-
-	public SkinConfig[] getSkin() {
-		return skin;
-	}
-
-	public void setSkin(SkinConfig[] skin) {
-		this.skin = skin;
-	}
-
-	public float getKeyvolume() {
-		return keyvolume;
-	}
-
-	public void setKeyvolume(float keyvolume) {
-		this.keyvolume = keyvolume;
-	}
-
-	public float getBgvolume() {
-		return bgvolume;
-	}
-
-	public void setBgvolume(float bgvolume) {
-		this.bgvolume = bgvolume;
-	}
-
-	public boolean isShowpastnote() {
-		return showpastnote;
-	}
-
-	public void setShowpastnote(boolean showpastnote) {
-		this.showpastnote = showpastnote;
-	}
-
-	public int getAudioDriver() {
-		return audioDriver;
-	}
-
-	public void setAudioDriver(int audioDriver) {
-		this.audioDriver = audioDriver;
 	}
 
 	public String getUserid() {
@@ -667,116 +722,5 @@ public class Config {
 
 	public void setTarget(int target) {
 		this.target = target;
-	}
-
-	public int getBgaExpand() {
-		return bgaExpand;
-	}
-
-	public void setBgaExpand(int bgaExpand) {
-		this.bgaExpand = bgaExpand;
-	}
-
-	public int getPlayer() {
-		return player;
-	}
-
-	public void setPlayer(int player) {
-		this.player = player;
-	}
-
-	public PlayerConfig[] getPlayers() {
-		return players;
-	}
-
-	public void setPlayers(PlayerConfig[] players) {
-		this.players = players;
-	}
-
-	public boolean isCacheSkinImage() {
-		return cacheSkinImage;
-	}
-
-	public void setCacheSkinImage(boolean cacheSkinImage) {
-		this.cacheSkinImage = cacheSkinImage;
-	}
-
-	public float getSystemvolume() {
-		return systemvolume;
-	}
-
-	public void setSystemvolume(float systemvolume) {
-		this.systemvolume = systemvolume;
-	}
-	
-	public boolean isUpdatesong() {
-		return updatesong;
-	}
-
-	public void setUpdatesong(boolean updatesong) {
-		this.updatesong = updatesong;
-	}
-
-	public boolean isUseSongInfo() {
-		return useSongInfo;
-	}
-
-	public void setUseSongInfo(boolean useSongInfo) {
-		this.useSongInfo = useSongInfo;
-	}
-
-	public static class SkinConfig {
-
-		public static final String DEFAULT_PLAY7 = "skin/default/play7.json";
-		public static final String DEFAULT_PLAY5 = "skin/default/play5.json";
-		public static final String DEFAULT_PLAY14 = "skin/default/play14.json";
-		public static final String DEFAULT_PLAY10 = "skin/default/play10.json";
-		public static final String DEFAULT_PLAY9 = "skin/default/play9.json";
-		public static final String DEFAULT_SELECT = "skin/default/select.json";
-		public static final String DEFAULT_DECIDE = "skin/default/decide.json";
-		public static final String DEFAULT_RESULT = "skin/default/result.json";
-		public static final String DEFAULT_GRADERESULT = "skin/default/graderesult.json";
-
-		public static final Map<SkinType, String> defaultSkinPathMap = new HashMap<SkinType, String>() {
-			{
-				put(SkinType.PLAY_7KEYS, DEFAULT_PLAY7);
-				put(SkinType.PLAY_5KEYS, DEFAULT_PLAY5);
-				put(SkinType.PLAY_14KEYS, DEFAULT_PLAY14);
-				put(SkinType.PLAY_10KEYS, DEFAULT_PLAY10);
-				put(SkinType.PLAY_9KEYS, DEFAULT_PLAY9);
-				put(SkinType.MUSIC_SELECT, DEFAULT_SELECT);
-				put(SkinType.DECIDE, DEFAULT_DECIDE);
-				put(SkinType.RESULT, DEFAULT_RESULT);
-				put(SkinType.COURSE_RESULT, DEFAULT_GRADERESULT);
-			}
-		};
-
-		private String path;
-
-		private Map property;
-
-		public SkinConfig() {
-
-		}
-
-		public SkinConfig(String path) {
-			this.path = path;
-		}
-
-		public String getPath() {
-			return path;
-		}
-
-		public void setPath(String path) {
-			this.path = path;
-		}
-
-		public Map getProperty() {
-			return property;
-		}
-
-		public void setProperty(Map property) {
-			this.property = property;
-		}
 	}
 }

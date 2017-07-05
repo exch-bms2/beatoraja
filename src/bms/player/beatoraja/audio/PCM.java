@@ -268,24 +268,23 @@ public class PCM {
 	 * トリミングしたPCMを返す
 	 * 
 	 * @param starttime
-	 *            開始時間(ms)
+	 *            開始時間(us)
 	 * @param duration
-	 *            再生時間(ms)
+	 *            再生時間(us)
 	 * @return トリミングしたPCM
 	 */
 	public PCM slice(long starttime, long duration) {
-		// TODO us単位に変更するかも
 		PCM pcm = new PCM();
 		pcm.channels = channels;
 		pcm.bitsPerSample = bitsPerSample;
 		pcm.sampleRate = sampleRate;
 
-		if (duration == 0 || starttime + duration > ((long) this.sample.length) * 1000 / (sampleRate * channels)) {
-			duration = Math.max(((long) this.sample.length) * 1000 / (sampleRate * channels) - starttime, 0);
+		if (duration == 0 || starttime + duration > ((long) this.sample.length) * 1000000 / (sampleRate * channels)) {
+			duration = Math.max(((long) this.sample.length) * 1000000 / (sampleRate * channels) - starttime, 0);
 		}
 
-		pcm.sample = new short[(int) ((duration * sampleRate / 1000) * channels)];
-		System.arraycopy(this.sample, (int) ((starttime * sampleRate / 1000) * channels), pcm.sample, 0,
+		pcm.sample = new short[(int) ((duration * sampleRate / 1000000) * channels)];
+		System.arraycopy(this.sample, (int) ((starttime * sampleRate / 1000000) * channels), pcm.sample, 0,
 				pcm.sample.length);
 		return pcm;
 	}

@@ -33,16 +33,36 @@ public enum BarSorter implements Comparator<Bar> {
 	LEVEL_SORTER("LEVEL") {
 		@Override
 		public int compare(Bar o1, Bar o2) {
-			if (!(o1 instanceof SongBar) && !(o2 instanceof SongBar)) {
+			if (!(o1 instanceof SongBar && ((SongBar)o1).getSongData() != null)
+					&& !(o2 instanceof SongBar && ((SongBar)o2).getSongData() != null)) {
 				return 0;
 			}
-			if (!(o1 instanceof SongBar)) {
+			if (!(o1 instanceof SongBar && ((SongBar)o1).getSongData() != null)) {
 				return 1;
 			}
-			if (!(o2 instanceof SongBar)) {
+			if (!(o2 instanceof SongBar && ((SongBar)o2).getSongData() != null)) {
 				return -1;
 			}
 			return ((SongBar) o1).getSongData().getLevel() - ((SongBar) o2).getSongData().getLevel();
+		}
+	},
+	/**
+	 * クリアランプソート
+	 */
+	LAMP_SORTER("CLEAR LAMP") {
+		@Override
+		public int compare(Bar o1, Bar o2) {
+			if ((!(o1 instanceof SongBar) && !(o2 instanceof SongBar))
+					|| (o1.getScore() == null && o2.getScore() == null)) {
+				return 0;
+			}
+			if (!(o1 instanceof SongBar) || o1.getScore() == null) {
+				return 1;
+			}
+			if (!(o2 instanceof SongBar) || o2.getScore() == null) {
+				return -1;
+			}
+			return o1.getScore().getClear() - o2.getScore().getClear();
 		}
 	},
 	/**
@@ -63,25 +83,6 @@ public enum BarSorter implements Comparator<Bar> {
 			}
 			return o1.getScore().getExscore() * 1000 / o1.getScore().getNotes()
 					- o2.getScore().getExscore() * 1000 / o2.getScore().getNotes();
-		}
-	},
-	/**
-	 * クリアランプソート
-	 */
-	LAMP_SORTER("CLEAR LAMP") {
-		@Override
-		public int compare(Bar o1, Bar o2) {
-			if ((!(o1 instanceof SongBar) && !(o2 instanceof SongBar))
-					|| (o1.getScore() == null && o2.getScore() == null)) {
-				return 0;
-			}
-			if (!(o1 instanceof SongBar) || o1.getScore() == null) {
-				return 1;
-			}
-			if (!(o2 instanceof SongBar) || o2.getScore() == null) {
-				return -1;
-			}
-			return o1.getScore().getClear() - o2.getScore().getClear();
 		}
 	},
 	/**
