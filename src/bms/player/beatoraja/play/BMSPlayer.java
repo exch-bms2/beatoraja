@@ -8,7 +8,6 @@ import bms.model.*;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyInputLog;
-import bms.player.beatoraja.input.BMSPlayerInputDevice;
 import bms.player.beatoraja.pattern.*;
 import bms.player.beatoraja.play.PracticeConfiguration.PracticeProperty;
 import bms.player.beatoraja.play.bga.BGAProcessor;
@@ -600,7 +599,7 @@ public class BMSPlayer extends MainState {
 		replay.gauge = config.getGauge();
 
 		score.setMinbp(score.getEbd() + score.getLbd() + score.getEpr() + score.getLpr() + score.getEms() + score.getLms() + resource.getSongdata().getNotes() - notes);
-		score.setDevice(resource.getPlayDevice());
+		score.setDeviceType(resource.getPlayDevice().getType());
 		return score;
 	}
 

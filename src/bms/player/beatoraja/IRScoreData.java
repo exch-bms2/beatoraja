@@ -89,7 +89,7 @@ public class IRScoreData {
 	/**
 	 * 入力デバイス
 	 */
-	private BMSPlayerInputDevice device;
+	private BMSPlayerInputDevice.Type deviceType;
 	
 	private int state;
 	
@@ -356,11 +356,11 @@ public class IRScoreData {
 	public void setGauge(int gauge) {
 		this.gauge = gauge;
 	}
-	public BMSPlayerInputDevice getDevice() {
-		return device;
+	public BMSPlayerInputDevice.Type getDeviceType() {
+		return deviceType;
 	}
-	public void setDevice(BMSPlayerInputDevice device) {
-		this.device = device;
+	public void setDeviceType(BMSPlayerInputDevice.Type deviceType) {
+		this.deviceType = deviceType;
 	}
 
 	public Mode getPlaymode() {

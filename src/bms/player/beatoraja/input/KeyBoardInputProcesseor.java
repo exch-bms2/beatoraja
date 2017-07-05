@@ -13,7 +13,7 @@ import com.badlogic.gdx.math.Rectangle;
  * 
  * @author exch
  */
-public class KeyBoardInputProcesseor implements InputProcessor {
+public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements InputProcessor {
 
 	/**
 	 * 
@@ -37,6 +37,7 @@ public class KeyBoardInputProcesseor implements InputProcessor {
 	private Resolution resolution;
 
 	public KeyBoardInputProcesseor(BMSPlayerInputProcessor bmsPlayerInputProcessor, int[] keys, Resolution resolution) {
+		super(Type.KEYBOARD);
 		this.bmsPlayerInputProcessor = bmsPlayerInputProcessor;
 		this.setKeyAssign(keys);
 		this.resolution = resolution;
@@ -78,7 +79,7 @@ public class KeyBoardInputProcesseor implements InputProcessor {
 				if (pressed != keystate[keys[i]] && presstime >= keytime[keys[i]] + duration) {
 					keystate[keys[i]] = pressed;
 					keytime[keys[i]] = presstime;
-					this.bmsPlayerInputProcessor.keyChanged(BMSPlayerInputDevice.Keyboard, presstime, i, pressed);
+					this.bmsPlayerInputProcessor.keyChanged(this, presstime, i, pressed);
 				}
 			}
 

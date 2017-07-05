@@ -1,16 +1,6 @@
 package bms.player.beatoraja.input;
 
-public final class BMSPlayerInputDevice {
-
-	public static final BMSPlayerInputDevice Keyboard = new BMSPlayerInputDevice(Type.KEYBOARD, 0);
-
-	public static BMSPlayerInputDevice BMController(int index) {
-		return new BMSPlayerInputDevice(Type.BM_CONTROLLER, index);
-	}
-
-	public static BMSPlayerInputDevice Midi(int index) {
-		return new BMSPlayerInputDevice(Type.MIDI, index);
-	}
+public class BMSPlayerInputDevice {
 
 	public enum Type {
 		KEYBOARD,
@@ -22,8 +12,12 @@ public final class BMSPlayerInputDevice {
 		return type;
 	}
 
-	public int getIndex() {
-		return index;
+	public int getPlayer() {
+		return player;
+	}
+
+	public void setPlayer(int player) {
+		this.player = player;
 	}
 
 	public boolean equals(Object other) {
@@ -31,22 +25,26 @@ public final class BMSPlayerInputDevice {
 			return false;
 
 		BMSPlayerInputDevice device = (BMSPlayerInputDevice)other;
-		return this.type == device.type && this.index == device.index;
+		return this.type == device.type && this.player == device.player;
 	}
 
 	public int hashCode() {
-		return (type.ordinal() << 16) | index;
+		return (type.ordinal() << 16) | player;
 	}
 
 	public String toString() {
-		return String.format("%s-%d", type.toString(), index);
+		return String.format("%s-%d", type.toString(), player);
 	}
 
-	private BMSPlayerInputDevice(Type type, int index) {
+	protected BMSPlayerInputDevice(Type type, int player) {
 		this.type = type;
-		this.index = index;
+		this.player = player;
 	}
 
-	private final Type type;
-	private final int index;
+	protected BMSPlayerInputDevice(Type type) {
+		this.player = 0;
+	}
+
+	protected Type type;
+	protected int player;
 }

@@ -15,7 +15,7 @@ import com.badlogic.gdx.math.Vector3;
  * 
  * @author exch
  */
-public class BMControllerInputProcessor implements ControllerListener {
+public class BMControllerInputProcessor extends BMSPlayerInputDevice implements ControllerListener {
 
 	// TODO アナログ皿対応
 
@@ -23,7 +23,6 @@ public class BMControllerInputProcessor implements ControllerListener {
 
 	private Controller controller;
 
-	private int player = 0;
 	/**
 	 * ボタンキーアサイン
 	 */
@@ -50,8 +49,9 @@ public class BMControllerInputProcessor implements ControllerListener {
         
 	public BMControllerInputProcessor(BMSPlayerInputProcessor bmsPlayerInputProcessor, Controller controller,
 			int[] buttons) {
-                config = new Config();
-                koc = config.getJKOC();
+		super(Type.BM_CONTROLLER);
+		config = new Config();
+		koc = config.getJKOC();
 		this.bmsPlayerInputProcessor = bmsPlayerInputProcessor;
 		this.controller = controller;
 		this.setControllerKeyAssign(buttons);
@@ -66,14 +66,6 @@ public class BMControllerInputProcessor implements ControllerListener {
 	
 	public Controller getController() {
 		return controller;
-	}
-
-	public int getPlayer() {
-		return player;
-	}
-
-	public void setPlayer(int player) {
-		this.player = player;
 	}
 
 	public boolean accelerometerMoved(Controller arg0, int arg1, Vector3 arg2) {
@@ -135,16 +127,16 @@ public class BMControllerInputProcessor implements ControllerListener {
 			final float ax = controller.getAxis(i);
 			if (analogaxis[i] && !koc) {
 				if ((axis[i] == 1.0 && ax == -1.0) || (axis[i] < 1.0 && ax > axis[i])) {
-					this.bmsPlayerInputProcessor.keyChanged(BMSPlayerInputDevice.BMController(player), (int) presstime, 8 + player * 9, false);
-					this.bmsPlayerInputProcessor.keyChanged(BMSPlayerInputDevice.BMController(player), (int) presstime, 7 + player * 9, true);
+					this.bmsPlayerInputProcessor.keyChanged(this, (int) presstime, 8 + player * 9, false);
+					this.bmsPlayerInputProcessor.keyChanged(this, (int) presstime, 7 + player * 9, true);
 					this.axistime[i] = presstime;
 				} else if ((axis[i] == -1.0 && ax == 1.0) || (axis[i] > -1.0 && ax > axis[i])) {
-					this.bmsPlayerInputProcessor.keyChanged(BMSPlayerInputDevice.BMController(player), (int) presstime, 8 + player * 9, true);
-					this.bmsPlayerInputProcessor.keyChanged(BMSPlayerInputDevice.BMController(player), (int) presstime, 7 + player * 9, false);
+					this.bmsPlayerInputProcessor.keyChanged(this, (int) presstime, 8 + player * 9, true);
+					this.bmsPlayerInputProcessor.keyChanged(this, (int) presstime, 7 + player * 9, false);
 					this.axistime[i] = presstime;
 				} else if (axistime[i] != -1 && presstime > axistime[i] + 50) {
-					this.bmsPlayerInputProcessor.keyChanged(BMSPlayerInputDevice.BMController(player), (int) presstime, 8 + player * 9, false);
-					this.bmsPlayerInputProcessor.keyChanged(BMSPlayerInputDevice.BMController(player), (int) presstime, 7 + player * 9, false);
+					this.bmsPlayerInputProcessor.keyChanged(this, (int) presstime, 8 + player * 9, false);
+					this.bmsPlayerInputProcessor.keyChanged(this, (int) presstime, 7 + player * 9, false);
 					this.axistime[i] = -1;
 				}
 			} else {
@@ -192,7 +184,7 @@ public class BMControllerInputProcessor implements ControllerListener {
 
 		for (int i = 0; i < buttons.length; i++) {
 			if (buttonchanged[buttons[i]]) {
-				this.bmsPlayerInputProcessor.keyChanged(BMSPlayerInputDevice.BMController(player), presstime, i + player * 9, buttonstate[buttons[i]]);
+				this.bmsPlayerInputProcessor.keyChanged(this, presstime, i + player * 9, buttonstate[buttons[i]]);
 				buttonchanged[buttons[i]] = false;
 			}
 		}

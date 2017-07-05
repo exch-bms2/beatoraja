@@ -51,10 +51,11 @@ public class BMSPlayerInputProcessor {
 		midiinput.setConfig(MidiConfig.default7());
 
 		devices = new HashSet<>();
-		devices.add(BMSPlayerInputDevice.Keyboard);
-		devices.add(BMSPlayerInputDevice.BMController(0));
-		devices.add(BMSPlayerInputDevice.BMController(1));
-		devices.add(BMSPlayerInputDevice.Midi(0));
+		devices.add(kbinput);
+		for (BMControllerInputProcessor bm : bminput) {
+			devices.add(bm);
+		}
+		devices.add(midiinput);
 		disabledDevices = new HashSet<>();
 	}
 
