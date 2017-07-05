@@ -247,7 +247,7 @@ public class BMSPlayer extends MainState {
 		if (autoplay == 0 || autoplay == 0) {
 			input.setExclusiveDeviceType(resource.getPlayDevice().getType());
 		} else {
-			input.setDisableDevice(null);
+			input.disableAllDevices();
 		}
 		PlayConfig pc = (model.getMode() == Mode.BEAT_5K || model.getMode() == Mode.BEAT_7K ? config.getMode7()
 				: (model.getMode() == Mode.BEAT_10K || model.getMode() == Mode.BEAT_14K ? config.getMode14()
@@ -379,7 +379,7 @@ public class BMSPlayer extends MainState {
 		// practice終了
 		case STATE_PRACTICE_FINISHED:
 			if (now - getTimer()[TIMER_FADEOUT] > skin.getFadeout()) {
-				input.setDisableDevice(new BMSPlayerInputDevice[0]);
+				input.enableAllDevices();
 				getMainController().changeState(MainController.STATE_SELECTMUSIC);
 			}
 			break;
@@ -469,7 +469,7 @@ public class BMSPlayer extends MainState {
 				}
 				resource.setGauge(gaugelog);
 				resource.setGrooveGauge(gauge);
-				input.setDisableDevice(new BMSPlayerInputDevice[0]);
+				input.enableAllDevices();
 				input.setStartTime(0);
 				if (autoplay == 2) {
 					state = STATE_PRACTICE;
@@ -496,7 +496,7 @@ public class BMSPlayer extends MainState {
 				saveConfig();
 				resource.setGauge(gaugelog);
 				resource.setGrooveGauge(gauge);
-				input.setDisableDevice(new BMSPlayerInputDevice[0]);
+				input.enableAllDevices();
 				input.setStartTime(0);
 				if (autoplay == 2) {
 					state = STATE_PRACTICE;
