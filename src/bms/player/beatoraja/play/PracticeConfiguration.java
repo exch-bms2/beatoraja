@@ -19,6 +19,11 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFont
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Json;
 
+/**
+ * プラクティスモードの設定表示/編集用クラス
+ *
+ * @author exch
+ */
 public class PracticeConfiguration {
 
 	private BitmapFont titlefont;
@@ -52,6 +57,9 @@ public class PracticeConfiguration {
 		}
 
 		this.model = model;
+		if(property.total == 0) {
+			property.total = model.getTotal();
+		}
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
 				Gdx.files.internal("skin/default/VL-Gothic-Regular.ttf"));
 		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
@@ -84,7 +92,7 @@ public class PracticeConfiguration {
 	}
 
 	public void processInput(BMSPlayerInputProcessor input) {
-		final int values = model.getMode().player == 2 ? 9 : 7;
+		final int values = model.getMode().player == 2 ? 10 : 8;
 		boolean[] cursor = input.getCursorState();
 		long[] cursortime = input.getCursorTime();
 		if (cursor[0] && cursortime[0] != 0) {
@@ -129,19 +137,24 @@ public class PracticeConfiguration {
 					property.judgerank -= 10;
 				}
 				break;
-			case 5:
+				case 5:
+					if (property.total > 20) {
+						property.total -= 10;
+					}
+					break;
+			case 6:
 				if (property.freq > 50) {
 					property.freq -= 5;
 				}
 				break;
-			case 6:
+			case 7:
 				property.random = (property.random + (model.getMode() == Mode.POPN_5K || model.getMode() == Mode.POPN_9K ? 6 : 9))
 						% (model.getMode() == Mode.POPN_5K || model.getMode() == Mode.POPN_9K ? 7 : 10);
 				break;
-			case 7:
+			case 8:
 				property.random2 = (property.random2 + 9) % 10;
 				break;
-			case 8:
+			case 9:
 				property.doubleop = (property.doubleop + 1) % 2;
 				break;
 			}
@@ -183,18 +196,23 @@ public class PracticeConfiguration {
 					property.judgerank += 10;
 				}
 				break;
-			case 5:
+				case 5:
+					if (property.total < 5000) {
+						property.total += 10;
+					}
+					break;
+			case 6:
 				if (property.freq < 200) {
 					property.freq += 5;
 				}
 				break;
-			case 6:
+			case 7:
 				property.random = (property.random + 1) % (model.getMode() == Mode.POPN_5K || model.getMode() == Mode.POPN_9K ? 7 : 10);
 				break;
-			case 7:
+			case 8:
 				property.random2 = (property.random2 + 1) % 10;
 				break;
-			case 8:
+			case 9:
 				property.doubleop = (property.doubleop + 1) % 2;
 				break;
 
@@ -220,25 +238,32 @@ public class PracticeConfiguration {
 		titlefont.setColor(cursorpos == 4 ? Color.YELLOW : Color.CYAN);
 		titlefont.draw(sprite, "JUDGERANK : " + property.judgerank, x, y - 88);
 		titlefont.setColor(cursorpos == 5 ? Color.YELLOW : Color.CYAN);
-		titlefont.draw(sprite, "FREQENCY : " + property.freq, x, y - 110);
+		titlefont.draw(sprite, "TOTAL : " + (int)property.total, x, y - 110);
 		titlefont.setColor(cursorpos == 6 ? Color.YELLOW : Color.CYAN);
-		titlefont.draw(sprite, "OPTION-1P : " + RANDOM[property.random], x, y - 132);
+		titlefont.draw(sprite, "FREQENCY : " + property.freq, x, y - 132);
+		titlefont.setColor(cursorpos == 7 ? Color.YELLOW : Color.CYAN);
+		titlefont.draw(sprite, "OPTION-1P : " + RANDOM[property.random], x, y - 154);
 		if (model.getMode().player == 2) {
-			titlefont.setColor(cursorpos == 7 ? Color.YELLOW : Color.CYAN);
-			titlefont.draw(sprite, "OPTION-2P : " + RANDOM[property.random2], x, y - 154);
 			titlefont.setColor(cursorpos == 8 ? Color.YELLOW : Color.CYAN);
-			titlefont.draw(sprite, "OPTION-DP : " + DPRANDOM[property.doubleop], x, y - 176);
+			titlefont.draw(sprite, "OPTION-2P : " + RANDOM[property.random2], x, y - 176);
+			titlefont.setColor(cursorpos == 9 ? Color.YELLOW : Color.CYAN);
+			titlefont.draw(sprite, "OPTION-DP : " + DPRANDOM[property.doubleop], x, y - 198);
 		}
 
 		if (state.getMainController().getPlayerResource().mediaLoadFinished()) {
 			titlefont.setColor(Color.ORANGE);
-			titlefont.draw(sprite, "PRESS 1KEY TO PLAY", x, y - 220);
+			titlefont.draw(sprite, "PRESS 1KEY TO PLAY", x, y - 232);
 		}
 
 		graph.draw(sprite, time, state, new Rectangle(r.x, r.y, r.width, r.height / 4), property.starttime,
 				property.endtime);
 	}
 
+	/**
+	 * プラクティスの各種設定値
+	 *
+	 * @author exch
+	 */
 	public static class PracticeProperty {
 		public int starttime = 0;
 		public int endtime = 10000;
@@ -249,5 +274,6 @@ public class PracticeConfiguration {
 		public int doubleop = 0;
 		public int judgerank = 100;
 		public int freq = 100;
+		public double total = 0;
 	}
 }

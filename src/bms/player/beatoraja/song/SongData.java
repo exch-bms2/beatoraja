@@ -13,9 +13,10 @@ import bms.model.TimeLine;
  */
 public class SongData {
 	
-	public static final int FEATURE_LONGNOTE = 1;
+	public static final int FEATURE_UNDEFINEDLN = 1;
 	public static final int FEATURE_MINENOTE = 2;
 	public static final int FEATURE_RANDOM = 4;
+	public static final int FEATURE_LONGNOTE = 8;
 
 	public static final int CONTENT_TEXT = 1;
 	public static final int CONTENT_BGA = 2;
@@ -57,14 +58,19 @@ public class SongData {
 	private int judge;
 	private int minbpm;
 	private int maxbpm;
+	private int length;
 	private int content;
 	private int notes;
 	private String stagefile = "";
 	private String backbmp = "";
 	private String preview = "";
 
+	private String folder;
+	private String parent;
+
 	private BMSModel model;
 	private TimeLine[] timelines;
+	private SongInformation info;;
 	
 	public SongData() {
 		
@@ -92,7 +98,9 @@ public class SongData {
 
 		setStagefile(model.getStagefile());
 		setBackbmp(model.getBackbmp());
-		setPreview(model.getPreview());
+        if(preview == null || preview.length() == 0) {
+            setPreview(model.getPreview());
+        }
 		try {
 			level = Integer.parseInt(model.getPlaylevel());
 		} catch(NumberFormatException e) {
@@ -105,13 +113,15 @@ public class SongData {
 		judge = model.getJudgerank();
 		minbpm = (int) model.getMinBPM();
 		maxbpm = (int) model.getMaxBPM();
+		length = model.getLastTime();
 		notes = model.getTotalNotes();
 
 		timelines = model.getAllTimeLines();
 
-		feature = model.containsLongNote() ? FEATURE_LONGNOTE : 0;
+		feature = model.containsUndefinedLongNote() ? FEATURE_UNDEFINEDLN : 0;
 		feature |= model.containsMineNote() ? FEATURE_MINENOTE : 0;
 		feature |= model.getRandom() != null && model.getRandom().length > 0 ? FEATURE_RANDOM : 0;
+		feature |= model.containsLongNote() ? FEATURE_LONGNOTE : 0;
 		content |= model.getBgaList().length > 0 ? CONTENT_BGA : 0;
 	}
 
@@ -262,15 +272,19 @@ public class SongData {
 	}
 	
 	public boolean hasRandomSequence() {
-		return (feature & 4) != 0;
+		return (feature & FEATURE_RANDOM) != 0;
 	}
 
 	public boolean hasMineNote() {
-		return (feature & 2) != 0;
+		return (feature & FEATURE_MINENOTE) != 0;
+	}
+
+	public boolean hasUndefinedLongNote() {
+		return (feature & FEATURE_UNDEFINEDLN) != 0;
 	}
 
 	public boolean hasLongNote() {
-		return (feature & 1) != 0;
+		return (feature & FEATURE_LONGNOTE) != 0;
 	}
 	public String getMd5() {
 		return md5;
@@ -339,5 +353,37 @@ public class SongData {
 
 	public void setPreview(String preview) {
 		this.preview = preview;
+	}
+
+	public SongInformation getInformation() {
+		return info;
+	}
+
+	public void setInformation(SongInformation info) {
+		this.info = info;
+	}
+	
+	public String getFolder() {
+		return folder;
+	}
+
+	public void setFolder(String folder) {
+		this.folder = folder;
+	}
+
+	public String getParent() {
+		return parent;
+	}
+
+	public void setParent(String parent) {
+		this.parent = parent;
+	}
+
+	public int getLength() {
+		return length;
+	}
+
+	public void setLength(int length) {
+		this.length = length;
 	}
 }

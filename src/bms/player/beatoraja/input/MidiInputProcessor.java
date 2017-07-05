@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
-public class MidiInputProcessor implements AutoCloseable {
+public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoCloseable {
 
 	static final int MaxKeys = 128;
 
@@ -30,6 +30,7 @@ public class MidiInputProcessor implements AutoCloseable {
 	Consumer<Boolean> pitchBendUp, pitchBendDown;
 
 	public MidiInputProcessor(BMSPlayerInputProcessor inputProcessor) {
+		super(Type.MIDI);
 		this.bmsPlayerInputProcessor = inputProcessor;
 		MidiDevice.Info[] infos = MidiSystem.getMidiDeviceInfo();
 		for (MidiDevice.Info info : infos) {
@@ -72,7 +73,7 @@ public class MidiInputProcessor implements AutoCloseable {
 		for (int i=0; i<keys.length; i++) {
 			final int key = i;
 			setHandler(keys[i], (Boolean pressed) -> {
-				bmsPlayerInputProcessor.keyChanged(0, currentTime(), key, pressed);
+				bmsPlayerInputProcessor.keyChanged(this, currentTime(), key, pressed);
 			});
 		}
 
@@ -86,6 +87,10 @@ public class MidiInputProcessor implements AutoCloseable {
 
 	public void setStartTime(long starttime) {
 		this.starttime = starttime;
+	}
+
+	public void clear() {
+		pitch = 0;
 	}
 
 	void setHandler(MidiConfig.Assign control, Consumer<Boolean> handler) {

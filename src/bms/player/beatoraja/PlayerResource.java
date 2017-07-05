@@ -1,26 +1,33 @@
 package bms.player.beatoraja;
 
-import java.io.File;
+import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import bms.model.BMSDecoder;
+import bms.model.BMSGenerator;
+import bms.model.BMSModel;
+import bms.model.BMSONDecoder;
+import bms.player.beatoraja.audio.AudioDriver;
+import bms.player.beatoraja.input.BMSPlayerInputDevice;
+import bms.player.beatoraja.play.GrooveGauge;
+import bms.player.beatoraja.play.bga.BGAProcessor;
+import bms.player.beatoraja.song.SongData;
+
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.utils.*;
-
-import bms.model.*;
-import bms.player.beatoraja.audio.AudioDriver;
-import bms.player.beatoraja.play.bga.BGAProcessor;
-import bms.player.beatoraja.play.GrooveGauge;
-import bms.player.beatoraja.song.SongData;
+import com.badlogic.gdx.utils.FloatArray;
+import com.badlogic.gdx.utils.IntArray;
 
 /**
  * プレイヤーのコンポーネント間でデータをやり取りするためのクラス
- * 
+ *
  * @author exch
  */
 public class PlayerResource {
@@ -36,11 +43,13 @@ public class PlayerResource {
 	private SongData songdata;
 
 	private Config config;
+	private PlayerConfig pconfig;
+	
 	private int auto;
 
-	private int playDevice;
+	private BMSPlayerInputDevice playDevice;
 
-	private IntArray constraint = new IntArray();
+	private List<CourseData.CourseDataConstraint> constraint = new ArrayList();
 
 	private BMSResource bmsresource;
 	/**
@@ -101,8 +110,9 @@ public class PlayerResource {
 	 */
 	private int maxcombo;
 
-	public PlayerResource(AudioDriver audio, Config config) {
+	public PlayerResource(AudioDriver audio, Config config, PlayerConfig pconfig) {
 		this.config = config;
+		this.pconfig = pconfig;
 		this.bmsresource = new BMSResource(audio, config);
 	}
 
@@ -121,11 +131,10 @@ public class PlayerResource {
 		constraint.clear();
 	}
 
-	public boolean setBMSFile(final Path f, final Config config, int autoplay) {
-		this.config = config;
+	public boolean setBMSFile(final Path f, int autoplay) {
 		this.auto = autoplay;
 		replay = new ReplayData();
-		model = loadBMSModel(f, config.getLnmode());
+		model = loadBMSModel(f, pconfig.getLnmode());
 		if (model == null) {
 			Logger.getGlobal().warning("楽曲が存在しないか、解析時にエラーが発生しました:" + f.toString());
 			return false;
@@ -133,12 +142,12 @@ public class PlayerResource {
 		if (model.getAllTimeLines().length == 0) {
 			return false;
 		}
-		
+
 		if(stagefile != null) {
 			stagefile.getTexture().dispose();
 			stagefile = null;
 		}
-		
+
 		Pixmap pix = PixmapResourcePool.loadPicture(f.getParent().resolve(model.getStagefile()).toString());
 		if(pix != null) {
 			stagefile = new TextureRegion(new Texture(pix));
@@ -170,6 +179,20 @@ public class PlayerResource {
 			}
 			int totalnotes = model.getTotalNotes();
 			model.setTotal(model.getTotal() / 100.0 * 7.605 * totalnotes / (0.01 * totalnotes + 6.5));
+			// SongData上でDBから読んだpreviewをpreview未定義BMSModelで上書きしなくなったためいらなくなるはず
+			//PREVIEW未定義の場合
+//			if(model.getPreview() == null || model.getPreview().length() == 0){
+//				try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get(model.getPath()).getParent())) {
+//					for (Path p : paths) {
+//						String name = p.getFileName().toString().toLowerCase();
+//						if(name.startsWith("preview") && (name.endsWith(".wav") || name.endsWith(".ogg") || name.endsWith(".mp3"))) {
+//							model.setPreview(p.getFileName().toString());
+//						}
+//					}
+//				} catch (IOException e) {
+//					e.printStackTrace();
+//				}
+//			}
 		} else {
 			BMSDecoder decoder = new BMSDecoder(lnmode);
 			model = decoder.decode(f.toFile());
@@ -189,6 +212,20 @@ public class PlayerResource {
 				int totalnotes = model.getTotalNotes();
 				model.setTotal(7.605 * totalnotes / (0.01 * totalnotes + 6.5));
 			}
+			// SongData上でDBから読んだpreviewをpreview未定義BMSModelで上書きしなくなったためいらなくなるはず
+			//PREVIEW未定義の場合
+//			if(model.getPreview() == null || model.getPreview().length() == 0){
+//				try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get(model.getPath()).getParent())) {
+//					for (Path p : paths) {
+//						String name = p.getFileName().toString().toLowerCase();
+//						if(name.startsWith("preview") && (name.endsWith(".wav") || name.endsWith(".ogg") || name.endsWith(".mp3"))) {
+//							model.setPreview(p.getFileName().toString());
+//						}
+//					}
+//				} catch (IOException e) {
+//					e.printStackTrace();
+//				}
+//			}
 		}
 
 		return model;
@@ -204,6 +241,10 @@ public class PlayerResource {
 
 	public Config getConfig() {
 		return config;
+	}
+	
+	public PlayerConfig getPlayerConfig() {
+		return pconfig;
 	}
 
 	public BGAProcessor getBGAManager() {
@@ -233,7 +274,7 @@ public class PlayerResource {
 	public boolean setCourseBMSFiles(Path[] files) {
 		List<BMSModel> models = new ArrayList();
 		for (Path f : files) {
-			BMSModel model = loadBMSModel(f, config.getLnmode());
+			BMSModel model = loadBMSModel(f, pconfig.getLnmode());
 			if (model == null) {
 				return false;
 			}
@@ -252,14 +293,14 @@ public class PlayerResource {
 		if (courseindex == course.length) {
 			return false;
 		} else {
-			setBMSFile(Paths.get(course[courseindex].getPath()), config, auto);
+			setBMSFile(Paths.get(course[courseindex].getPath()), auto);
 			return true;
 		}
 	}
 
 	public void reloadBMSFile() {
 		if (model != null) {
-			model = loadBMSModel(Paths.get(model.getPath()), config.getLnmode());
+			model = loadBMSModel(Paths.get(model.getPath()), pconfig.getLnmode());
 		}
 		clear();
 	}
@@ -344,11 +385,11 @@ public class PlayerResource {
 		this.maxcombo = maxcombo;
 	}
 
-	public int[] getConstraint() {
-		return constraint.toArray();
+	public CourseData.CourseDataConstraint[] getConstraint() {
+		return constraint.toArray(new CourseData.CourseDataConstraint[constraint.size()]);
 	}
 
-	public void addConstraint(int constraint) {
+	public void addConstraint(CourseData.CourseDataConstraint constraint) {
 		this.constraint.add(constraint);
 	}
 
@@ -378,7 +419,7 @@ public class PlayerResource {
 	public BMSGenerator getGenerator() {
 		return generator;
 	}
-	
+
 	public TextureRegion getBackbmpData() {
 		return backbmp;
 	}
@@ -387,11 +428,11 @@ public class PlayerResource {
 		return stagefile;
 	}
 
-	public int getPlayDevice() {
+	public BMSPlayerInputDevice getPlayDevice() {
 		return playDevice;
 	}
 
-	public void setPlayDevice(int playDevice) {
+	public void setPlayDevice(BMSPlayerInputDevice playDevice) {
 		this.playDevice = playDevice;
 	}
 }

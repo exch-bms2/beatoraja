@@ -1,15 +1,17 @@
 package bms.player.beatoraja;
 
 import java.io.File;
+import java.nio.file.Paths;
 import java.util.*;
 
 import bms.player.beatoraja.play.TargetProperty;
-import bms.player.beatoraja.skin.Skin;
+import bms.player.beatoraja.skin.*;
+import bms.player.beatoraja.skin.lr2.LR2SkinCSVLoader;
+import bms.player.beatoraja.skin.lr2.LR2SkinHeaderLoader;
 import bms.player.beatoraja.song.SongData;
 
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 
@@ -94,15 +96,23 @@ public abstract class MainState {
 	}
 
 	public long getStartTime() {
-		return starttime;
+		return starttime / 1000000;
 	}
 
-	public void setStartTime(long starttime) {
-		this.starttime = starttime;
+	public long getStartMicroTime() {
+		return starttime / 1000;
+	}
+
+	public void setStartTime() {
+		this.starttime = System.nanoTime();
 	}
 
 	public int getNowTime() {
-		return (int) (System.nanoTime() / 1000000 - starttime);
+		return (int) ((System.nanoTime() - starttime) / 1000000);
+	}
+
+	public long getNowMicroTime() {
+		return (System.nanoTime() - starttime) / 1000;
 	}
 
 	public long[] getTimer() {
@@ -266,9 +276,31 @@ public abstract class MainState {
 		}
 		this.skin = skin;
 	}
+	
+	public void loadSkin(SkinType skinType) {
+		final PlayerResource resource = main.getPlayerResource();
+		try {
+			SkinConfig sc = resource.getPlayerConfig().getSkin()[skinType.getId()];
+			if (sc.getPath().endsWith(".json")) {
+				SkinLoader sl = new SkinLoader(resource.getConfig());
+				setSkin(sl.loadSkin(Paths.get(sc.getPath()), skinType, sc.getProperty()));
+			} else {
+				LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
+				SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
+				LR2SkinCSVLoader dloader = LR2SkinCSVLoader.getSkinLoader(skinType,  header.getResolution(), resource.getConfig());
+				setSkin(dloader.loadSkin(Paths.get(sc.getPath()).toFile(), this, header, loader.getOption(),
+						sc.getProperty()));
+			}
+		} catch (Throwable e) {
+			e.printStackTrace();
+			SkinLoader sl = new SkinLoader(resource.getConfig());
+			setSkin(sl.loadSkin(Paths.get(SkinConfig.defaultSkinPathMap.get(skinType)), skinType, new HashMap()));
+		}
+	}
 
 	public int getJudgeCount(int judge, boolean fast) {
-		return 0;
+		IRScoreData sd = score.getScoreData();
+		return sd != null ? sd.getJudgeCount(judge, fast) : 0;
 	}
 	
 	private Calendar cl = Calendar.getInstance();
@@ -276,7 +308,9 @@ public abstract class MainState {
 	public int getNumberValue(int id) {
 		switch (id) {
 		case NUMBER_JUDGETIMING:
-			return getMainController().getPlayerResource().getConfig().getJudgetiming();
+			return getMainController().getPlayerResource().getPlayerConfig().getJudgetiming();
+			case NUMBER_CURRENT_FPS:
+				return Gdx.graphics.getFramesPerSecond();
 		case NUMBER_TIME_YEAR:
 			cl.setTimeInMillis(System.currentTimeMillis());
 			return cl.get(Calendar.YEAR);
@@ -346,31 +380,31 @@ public abstract class MainState {
 			case NUMBER_COMBOBREAK:
 				return getJudgeCount(3, true) + getJudgeCount(3, false) + getJudgeCount(4, true) + getJudgeCount(4, false);
 			case BUTTON_GAUGE_1P:
-			return getMainController().getPlayerResource().getConfig().getGauge();
+			return getMainController().getPlayerResource().getPlayerConfig().getGauge();
 		case BUTTON_RANDOM_1P:
-			return getMainController().getPlayerResource().getConfig().getRandom();
+			return getMainController().getPlayerResource().getPlayerConfig().getRandom();
 		case BUTTON_RANDOM_2P:
-			return getMainController().getPlayerResource().getConfig().getRandom2();
+			return getMainController().getPlayerResource().getPlayerConfig().getRandom2();
 		case BUTTON_DPOPTION:
-			return getMainController().getPlayerResource().getConfig().getDoubleoption();
+			return getMainController().getPlayerResource().getPlayerConfig().getDoubleoption();
 		case BUTTON_HSFIX:
-			return getMainController().getPlayerResource().getConfig().getFixhispeed();
+			return getMainController().getPlayerResource().getPlayerConfig().getFixhispeed();
 		case BUTTON_BGA:
 			return getMainController().getPlayerResource().getConfig().getBga();
 		case BUTTON_ASSIST_EXJUDGE:
-			return getMainController().getPlayerResource().getConfig().isExpandjudge() ? 1 : 0;
+			return getMainController().getPlayerResource().getPlayerConfig().isExpandjudge() ? 1 : 0;
 		case BUTTON_ASSIST_CONSTANT:
-			return getMainController().getPlayerResource().getConfig().isConstant() ? 1 : 0;
+			return getMainController().getPlayerResource().getPlayerConfig().isConstant() ? 1 : 0;
 		case BUTTON_ASSIST_JUDGEAREA:
-			return getMainController().getPlayerResource().getConfig().isShowjudgearea() ? 1 : 0;
+			return getMainController().getPlayerResource().getPlayerConfig().isShowjudgearea() ? 1 : 0;
 		case BUTTON_ASSIST_LEGACY:
-			return getMainController().getPlayerResource().getConfig().isLegacynote() ? 1 : 0;
+			return getMainController().getPlayerResource().getPlayerConfig().isLegacynote() ? 1 : 0;
 		case BUTTON_ASSIST_MARKNOTE:
-			return getMainController().getPlayerResource().getConfig().isMarkprocessednote() ? 1 : 0;
+			return getMainController().getPlayerResource().getPlayerConfig().isMarkprocessednote() ? 1 : 0;
 		case BUTTON_ASSIST_BPMGUIDE:
-			return getMainController().getPlayerResource().getConfig().isBpmguide() ? 1 : 0;
+			return getMainController().getPlayerResource().getPlayerConfig().isBpmguide() ? 1 : 0;
 		case BUTTON_ASSIST_NOMINE:
-			return getMainController().getPlayerResource().getConfig().isNomine() ? 1 : 0;
+			return getMainController().getPlayerResource().getPlayerConfig().isNomine() ? 1 : 0;
 		case NUMBER_TOTALNOTES:
 		case NUMBER_TOTALNOTES2:
 			if (getMainController().getPlayerResource().getSongdata() != null) {
@@ -402,6 +436,8 @@ public abstract class MainState {
 			case NUMBER_SCORE:
 			case NUMBER_SCORE2:
 				return score.getNowEXScore();
+			case NUMBER_MAXSCORE:
+				return score.getScoreData() != null ? score.getScoreData().getNotes() : 0;
 			case NUMBER_SCORE_RATE:
 				return score.getNowRateInt();
 			case NUMBER_SCORE_RATE_AFTERDOT:
@@ -465,7 +501,7 @@ public abstract class MainState {
 			SongData song = getMainController().getPlayerResource().getSongdata();
 			switch (id) {
 				case STRING_RIVAL:
-					return TargetProperty.getAllTargetProperties(getMainController())[getMainController().getPlayerResource().getConfig().getTarget()].getName();
+					return TargetProperty.getAllTargetProperties(getMainController())[getMainController().getPlayerResource().getPlayerConfig().getTarget()].getName();
 				case STRING_PLAYER:
 					return "";
 			case STRING_TITLE:
@@ -522,11 +558,15 @@ public abstract class MainState {
 			}
 		}
 	}
+
+	public String getSound(int id) {
+		return soundmap.get(id);
+	}
 	
 	public void play(int id) {
 		final String path = soundmap.get(id);
 		if(path != null) {
-			main.getAudioProcessor().play(path, soundloop.get(id));
+			main.getAudioProcessor().play(path, main.getPlayerResource().getConfig().getSystemvolume(), soundloop.get(id));
 		}
 	}
 	

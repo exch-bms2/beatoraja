@@ -19,9 +19,7 @@ import bms.player.beatoraja.skin.SkinNoteDistributionGraph;
  * 
  * @author exch
  */
-public class LR2ResultSkinLoader extends LR2SkinCSVLoader {
-
-	private MusicResultSkin skin;
+public class LR2ResultSkinLoader extends LR2SkinCSVLoader<MusicResultSkin> {
 
 	private Rectangle gauge = new Rectangle();
 	private SkinGaugeGraphObject gaugeobj;
@@ -77,14 +75,9 @@ public class LR2ResultSkinLoader extends LR2SkinCSVLoader {
 		});
 	}
 
-	public MusicResultSkin loadResultSkin(File f, MainState state, SkinHeader header, Map<Integer, Boolean> option,
+	public MusicResultSkin loadSkin(File f, MainState state, SkinHeader header, Map<Integer, Boolean> option,
 			Map property) throws IOException {
-
-		skin = new MusicResultSkin(src, dst);
-
-		this.loadSkin(skin, f, state, header, option, property);
-
-		return skin;
+		return this.loadSkin(new MusicResultSkin(src, dst), f, state, header, option, property);
 	}
 
 }

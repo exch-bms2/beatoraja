@@ -5,22 +5,30 @@ import java.io.IOException;
 import java.util.Map;
 
 import bms.player.beatoraja.Config;
+import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.Resolution;
 import bms.player.beatoraja.select.*;
 import bms.player.beatoraja.skin.*;
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
-public class LR2SelectSkinLoader extends LR2SkinCSVLoader {
-
-	private MusicSelectSkin skin;
+/**
+ * LR2セレクトスキンローダー
+ *
+ * @author exch
+ */
+public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 
 	private SkinBar skinbar = new SkinBar(1);
 
 	private TextureRegion[][] barimage = new TextureRegion[10][];
 	private int barcycle;
 
-	private final int[][] lampg = { { 0 }, { 1 }, { 2, 3, 4 }, { 5 }, { 6, 7 }, {}, { 8, 9, 10 }, {} };
+	/**
+	 * LR2のLAMP IDとの対応
+	 * 0:NO PLAY, 1:FAILED, 2:EASY, 3:NORMAL, 4:HARD, 5:EXH, 6:FC, 7:PERFECT, 8:MAX, 9:ASSIST, 10:L-ASSIST
+	 */
+	private final int[][] lampg = { { 0 }, { 1 }, { 4, 2, 3}, { 5 }, { 6, 7 }, {7}, { 8, 9, 10 }, {9}, {10}, {2}, {3} };
 
 	public LR2SelectSkinLoader(final Resolution src, final Config c) {
 		super(src, c);
@@ -191,9 +199,7 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader {
 				TextureRegion[] images = getSourceImage(values);
 				if (images != null) {
 					int[] lamps = lampg[values[1]];
-					for (int i = 0; i < lamps.length; i++) {
-						skinbar.getLamp()[lamps[i]] = new SkinImage(images, values[10], values[9]);
-					}
+					skinbar.getLamp()[lamps[0]] = new SkinImage(images, values[10], values[9]);
 					// System.out.println("Nowjudge Added - " + (5 -
 					// values[1]));
 				}
@@ -219,6 +225,8 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader {
 								values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
 								values[12], values[13], values[14], values[15], values[16], values[17], values[18],
 								values[19], values[20]);
+					} else {
+						skinbar.getLamp()[lamps[i]] = skinbar.getLamp()[lamps[0]];
 					}
 				}
 			}
@@ -272,12 +280,8 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader {
 
 	}
 
-	public MusicSelectSkin loadSelectSkin(File f, MusicSelector selector, SkinHeader header,
+	public MusicSelectSkin loadSkin(File f, MainState selector, SkinHeader header,
 			Map<Integer, Boolean> option, Map property) throws IOException {
-		skin = new MusicSelectSkin(src, dst);
-
-		this.loadSkin(skin, f, selector, header, option, property);
-
-		return skin;
+		return this.loadSkin(new MusicSelectSkin(src, dst), f, selector, header, option, property);
 	}
 }

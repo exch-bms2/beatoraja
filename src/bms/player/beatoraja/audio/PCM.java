@@ -16,7 +16,7 @@ import com.badlogic.gdx.utils.StreamUtils.OptimizedByteArrayOutputStream;;
  * @author exch
  */
 public class PCM {
-	
+
 	// TODO PCM実データのダイレクトバッファ化
 
 	/**
@@ -56,8 +56,9 @@ public class PCM {
 			}
 		} else if (p.toString().toLowerCase().endsWith(".ogg")) {
 			try (OggInputStream input = new OggInputStream(new BufferedInputStream(Files.newInputStream(p)))) {
-//				final long time = System.nanoTime();
-//				OptimizedByteArrayOutputStream output = new OptimizedByteArrayOutputStream(4096);
+				// final long time = System.nanoTime();
+				// OptimizedByteArrayOutputStream output = new
+				// OptimizedByteArrayOutputStream(4096);
 				OptimizedByteArrayOutputStream output = new OptimizedByteArrayOutputStream(input.getLength() * 16);
 				byte[] buff = new byte[4096];
 				while (!input.atEnd()) {
@@ -66,14 +67,15 @@ public class PCM {
 						break;
 					output.write(buff, 0, length);
 				}
-				
+
 				channels = input.getChannels();
 				sampleRate = input.getSampleRate();
 				bitsPerSample = 16;
-				
+
 				pcm = output.getBuffer();
 				bytes = output.size();
-//				 System.out.println(p.toString() + " : " + (System.nanoTime() - time));
+				// System.out.println(p.toString() + " : " + (System.nanoTime()
+				// - time));
 			} catch (Throwable ex) {
 
 			}
@@ -92,7 +94,7 @@ public class PCM {
 					StreamUtils.copyStream(input, output);
 					pcm = output.getBuffer();
 					bytes = output.size();
-//					 System.out.println(bytes + " -> " + pcm.length);
+					// System.out.println(bytes + " -> " + pcm.length);
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -107,20 +109,21 @@ public class PCM {
 
 			if (bitsPerSample == 8) {
 				this.sample = new short[bytes];
-				for (int i = 0; i < pcm.length; i++) {
+				for (int i = 0; i < sample.length; i++) {
 					this.sample[i] = (short) ((((short) pcm[i]) - 128) * 256);
 				}
 			} else if (bitsPerSample == 16) {
-//				final long time = System.nanoTime();
+				// final long time = System.nanoTime();
 				this.sample = new short[bytes / 2];
 				for (int i = 0; i < sample.length; i++) {
 					this.sample[i] = (short) ((pcm[i * 2] & 0xff) | (pcm[i * 2 + 1] << 8));
 				}
-				
-//				 ShortBuffer shortbuf =
-//				 ByteBuffer.wrap(pcm).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer();
-//				 shortbuf.get(sample);
-//				 System.out.println(p.toString() + " : " + (System.nanoTime() - time));
+
+				// ShortBuffer shortbuf =
+				// ByteBuffer.wrap(pcm).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer();
+				// shortbuf.get(sample);
+				// System.out.println(p.toString() + " : " + (System.nanoTime()
+				// - time));
 			} else if (bitsPerSample == 24) {
 				this.sample = new short[bytes / 3];
 				for (int i = 0; i < this.sample.length; i++) {
@@ -225,12 +228,26 @@ public class PCM {
 		return pcm;
 	}
 
+	/**
+	 * 再生速度を変更したPCMを返す
+	 * 
+	 * @param rate
+	 *            再生速度。基準は1.0
+	 * @return 再生速度を変更したPCM
+	 */
 	public PCM changeFrequency(float rate) {
 		PCM pcm = changeSampleRate((int) (sampleRate / rate));
 		pcm.sampleRate = sampleRate;
 		return pcm;
 	}
 
+	/**
+	 * チャンネル数を変更したPCMを返す
+	 * 
+	 * @param channels
+	 *            チャンネル数
+	 * @return チャンネル数を変更したPCM
+	 */
 	public PCM changeChannels(int channels) {
 		PCM pcm = new PCM();
 		pcm.channels = channels;
@@ -244,22 +261,30 @@ public class PCM {
 				pcm.sample[(int) (i * channels + j)] = this.sample[(int) (i * this.channels)];
 			}
 		}
-
 		return pcm;
 	}
 
+	/**
+	 * トリミングしたPCMを返す
+	 * 
+	 * @param starttime
+	 *            開始時間(us)
+	 * @param duration
+	 *            再生時間(us)
+	 * @return トリミングしたPCM
+	 */
 	public PCM slice(long starttime, long duration) {
 		PCM pcm = new PCM();
 		pcm.channels = channels;
 		pcm.bitsPerSample = bitsPerSample;
 		pcm.sampleRate = sampleRate;
 
-		if (duration == 0 || starttime + duration > ((long) this.sample.length) * 1000 / (sampleRate * channels)) {
-			duration = Math.max(((long) this.sample.length) * 1000 / (sampleRate * channels) - starttime, 0);
+		if (duration == 0 || starttime + duration > ((long) this.sample.length) * 1000000 / (sampleRate * channels)) {
+			duration = Math.max(((long) this.sample.length) * 1000000 / (sampleRate * channels) - starttime, 0);
 		}
 
-		pcm.sample = new short[(int) ((duration * sampleRate / 1000) * channels)];
-		System.arraycopy(this.sample, (int) ((starttime * sampleRate / 1000) * channels), pcm.sample, 0,
+		pcm.sample = new short[(int) ((duration * sampleRate / 1000000) * channels)];
+		System.arraycopy(this.sample, (int) ((starttime * sampleRate / 1000000) * channels), pcm.sample, 0,
 				pcm.sample.length);
 		return pcm;
 	}

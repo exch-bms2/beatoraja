@@ -1,17 +1,12 @@
 package bms.player.beatoraja;
 
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.files.FileHandleStream;
 import com.badlogic.gdx.graphics.Pixmap;
 
 /**
@@ -21,7 +16,7 @@ import com.badlogic.gdx.graphics.Pixmap;
  */
 public class PixmapResourcePool extends ResourcePool<String, Pixmap> {
 
-	public static final String[] pic_extension = { "jpg", "jpeg", "gif", "bmp", "png" };
+	public static final String[] pic_extension = { "jpg", "jpeg", "gif", "bmp", "png", "tga" };
 
 	public PixmapResourcePool() {
 		super(1);
@@ -33,7 +28,8 @@ public class PixmapResourcePool extends ResourcePool<String, Pixmap> {
 	
 	@Override
 	protected Pixmap load(String path) {
-		return convert(loadPicture(path));
+		final Pixmap pixmap = loadPicture(path);
+		return pixmap != null ? convert(pixmap) : null;
 	}
 	
 	protected Pixmap convert(Pixmap pixmap) {
@@ -56,27 +52,21 @@ public class PixmapResourcePool extends ResourcePool<String, Pixmap> {
 			if (path.toLowerCase().endsWith(mov)) {
 				try {
 					tex = new Pixmap(Gdx.files.internal(path));
-				} catch (Exception e) {
-					e.printStackTrace();
-				} catch (Error e) {
+				} catch (Throwable e) {
+					Logger.getGlobal().warning("BGAファイル読み込み失敗。" + e.getMessage());
 				}
 				if (tex == null) {
 					Logger.getGlobal().warning("BGAファイル読み込み再試行:" + path);
 					try {
+						// TODO 一部のbmsはImageIO.readで失敗する(e.g. past glow)。別の画像デコーダーが必要
 						BufferedImage bi = ImageIO.read(new File(path));
-						final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-						ImageIO.write(bi, "gif", baos);
-						tex = new Pixmap((new FileHandleStream("tempwav.gif") {
-							@Override
-							public InputStream read() {
-								return new ByteArrayInputStream(baos.toByteArray());
-							}
-
-							@Override
-							public OutputStream write(boolean overwrite) {
-								return null;
-							}
-						}));
+//						System.out.println("width : " + bi.getWidth() + " height : " + bi.getHeight() + " type : " + bi.getType());
+						tex = new Pixmap(bi.getWidth(), bi.getHeight(), Pixmap.Format.RGBA8888);
+						for(int x = 0;x < bi.getWidth();x++) {
+							for(int y = 0;y < bi.getHeight();y++) {
+								tex.drawPixel(x, y, (bi.getRGB(x, y) << 8 | 0x000000ff));
+							}							
+						}						
 					} catch (Throwable e) {
 						Logger.getGlobal().warning("BGAファイル読み込み失敗。" + e.getMessage());
 						e.printStackTrace();

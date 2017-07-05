@@ -314,7 +314,7 @@ public abstract class SkinObject implements Disposable {
 
 	protected void draw(SpriteBatch sprite, TextureRegion image, float x, float y, float width, float height,
 			Color color, int angle) {
-		if (color == null || image == null) {
+		if (color == null || color.a == 0f || image == null) {
 			return;
 		}
 		final Color c = sprite.getColor();
@@ -375,6 +375,11 @@ public abstract class SkinObject implements Disposable {
 		this.clickevent = clickevent;
 	}
 
+	/**
+	 * スキンオブジェクトの描画先を表現するクラス
+	 * 
+	 * @author exch
+	 */
 	public static class SkinObjectDestination {
 
 		public final long time;

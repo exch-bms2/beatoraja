@@ -4,8 +4,7 @@ import java.io.*;
 import java.util.*;
 
 import bms.model.Mode;
-import bms.player.beatoraja.Config;
-import bms.player.beatoraja.Resolution;
+import bms.player.beatoraja.*;
 import bms.player.beatoraja.play.*;
 import bms.player.beatoraja.skin.*;
 
@@ -15,7 +14,12 @@ import com.badlogic.gdx.math.Rectangle;
 
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
-public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
+/**
+ * LR2プレイスキンローダー
+ * 
+ * @author exch
+ */
+public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 
 	private SkinBGA bga;
 
@@ -23,7 +27,6 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 
 	private Rectangle[] playerr;
 
-	private PlaySkin skin;
 	private SkinSource[] note = new SkinSource[8];
 	private SkinSource[] lnstart = new SkinSource[8];
 	private SkinSource[] lnend = new SkinSource[8];
@@ -606,10 +609,9 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 		skin.add(num2);
 	}
 
-	public PlaySkin loadPlaySkin(File f, BMSPlayer player, SkinHeader header, Map<Integer, Boolean> option,
+	public PlaySkin loadSkin(File f, MainState player, SkinHeader header, Map<Integer, Boolean> option,
 			Map property) throws IOException {
 
-		skin = new PlaySkin(src, dst);
 		final Mode mode = SkinType.getSkinTypeById(header.getMode()).getMode();
 		note = new SkinSource[mode.key];
 		lnstart = new SkinSource[mode.key];
@@ -630,14 +632,12 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader {
 		for(int i = 0;i < playerr.length;i++) {
 			playerr[i] = new Rectangle();
 		}
-
-		this.loadSkin(skin, f, player, header, option, property);
+		
+		this.loadSkin(new PlaySkin(src, dst), f, player, header, option, property);
 
 		lanerender.setLaneRegion(laner, scale);
 		skin.setLine(lines.toArray(new SkinImage[lines.size()]));
-
 		skin.setJudgeregion(judge[1] != null ? 2 : 1);
-
 		skin.setLaneGroupRegion(playerr);
 
 		return skin;

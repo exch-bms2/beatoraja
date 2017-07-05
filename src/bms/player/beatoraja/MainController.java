@@ -21,6 +21,7 @@ import bms.player.beatoraja.result.MusicResult;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.song.SQLiteSongDatabaseAccessor;
 import bms.player.beatoraja.song.SongDatabaseAccessor;
+import bms.player.beatoraja.song.SongInformationAccessor;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -30,16 +31,18 @@ import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.*;
 import com.badlogic.gdx.utils.JsonWriter.OutputType;
 
-import static bms.player.beatoraja.Resolution.*;
-
+/**
+ * アプリケーションのルートクラス
+ * 
+ * @author exch
+ */
 public class MainController extends ApplicationAdapter {
 
-	public static final String VERSION = "beatoraja 0.4.1";
+	public static final String VERSION = "beatoraja 0.4.2";
 
 	private BMSPlayer bmsplayer;
 	private MusicDecide decide;
@@ -59,8 +62,10 @@ public class MainController extends ApplicationAdapter {
 	private Config config;
 	private PlayerConfig player;
 	private int auto;
+	private boolean songUpdated;
 
 	private SongDatabaseAccessor songdb;
+	private SongInformationAccessor infodb;
 
 	private IRConnection ir;
 	
@@ -82,30 +87,45 @@ public class MainController extends ApplicationAdapter {
 
 	static final Path configpath = Paths.get("config.json");
 	private static final Path songdbpath = Paths.get("songdata.db");
+	private static final Path infodbpath = Paths.get("songinfo.db");
 
 	private ScreenShotThread screenshot;
 
 	public static final int timerCount = 2048;
 	private long[] timer = new long[timerCount];
 
-	public MainController(Path f, Config config, int auto) {
+	public MainController(Path f, Config config, int auto, boolean songUpdated) {
 		this.auto = auto;
 		this.config = config;
-		this.player = config.getPlayers()[config.getPlayer()];
+		this.songUpdated = songUpdated;
+		
+		Path p = Paths.get("player/" + config.getPlayername() + "/config.json");
+		
+		try {
+			Json json = new Json();
+			json.setIgnoreUnknownFields(true);
+			player = json.fromJson(PlayerConfig.class, new FileReader(p.toFile()));
+		} catch(Throwable e) {
+			
+		}
+
 		this.bmsfile = f;
 
 		try {
 			Class.forName("org.sqlite.JDBC");
 			songdb = new SQLiteSongDatabaseAccessor(songdbpath.toString(), config.getBmsroot());
+			if(config.isUseSongInfo()) {
+				infodb = new SongInformationAccessor(infodbpath.toString());				
+			}
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
 
-		playdata = new PlayDataAccessor(player.getName());
+		playdata = new PlayDataAccessor(config.getPlayername());
 		
-		ir = IRConnection.getIRConnection(config.getIrname());
-		if(config.getUserid().length() > 0 && ir != null) {
-			ir.login(config.getUserid(), config.getPassword());
+		ir = IRConnection.getIRConnection(player.getIrname());
+		if(player.getUserid().length() > 0 && ir != null) {
+			ir.login(player.getUserid(), player.getPassword());
 		}
 	}
 
@@ -115,6 +135,10 @@ public class MainController extends ApplicationAdapter {
 
 	public SongDatabaseAccessor getSongDatabase() {
 		return songdb;
+	}
+
+	public SongInformationAccessor getInfoDatabase() {
+		return infodb;
 	}
 
 	public PlayDataAccessor getPlayDataAccessor() {
@@ -178,7 +202,7 @@ public class MainController extends ApplicationAdapter {
 			newState.create();
 			newState.getSkin().prepare(newState);
 			current = newState;
-			current.setStartTime(System.nanoTime() / 1000000);
+			current.setStartTime();
 		}
 		if (current.getStage() != null) {
 			Gdx.input.setInputProcessor(new InputMultiplexer(current.getStage(), input.getKeyBoardInputProcesseor()));
@@ -216,15 +240,20 @@ public class MainController extends ApplicationAdapter {
 			break;
 		}
 
-		selector = new MusicSelector(this, config);
+		resource = new PlayerResource(audio, config, player);
+		selector = new MusicSelector(this, songUpdated);
 		decide = new MusicDecide(this);
 		result = new MusicResult(this);
 		gresult = new GradeResult(this);
 		keyconfig = new KeyConfiguration(this);
-		resource = new PlayerResource(audio, config);
 		if (bmsfile != null) {
-			resource.setBMSFile(bmsfile, config, auto);
-			changeState(STATE_PLAYBMS);
+			if(resource.setBMSFile(bmsfile, auto)) {
+				changeState(STATE_PLAYBMS);				
+			} else {
+				// ダミーステートに移行してすぐexitする
+				changeState(STATE_CONFIG);
+				exit();
+			}
 		} else {
 			changeState(STATE_SELECTMUSIC);
 		}
@@ -255,8 +284,8 @@ public class MainController extends ApplicationAdapter {
 		};
 		polling.start();
 
-		if(config.getTarget() >= TargetProperty.getAllTargetProperties(this).length) {
-			config.setTarget(0);
+		if(player.getTarget() >= TargetProperty.getAllTargetProperties(this).length) {
+			player.setTarget(0);
 		}
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 	}
@@ -360,8 +389,6 @@ public class MainController extends ApplicationAdapter {
 
 	@Override
 	public void dispose() {
-		// shape.dispose();
-		// sprite.dispose();
 		if (bmsplayer != null) {
 			bmsplayer.dispose();
 		}
@@ -408,6 +435,15 @@ public class MainController extends ApplicationAdapter {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
+		Path p = Paths.get("player/" + config.getPlayername() + "/config.json");
+		try (FileWriter fw = new FileWriter(p.toFile())) {
+			fw.write(json.prettyPrint(player));
+			fw.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
 		dispose();
 		Gdx.app.exit();
 	}

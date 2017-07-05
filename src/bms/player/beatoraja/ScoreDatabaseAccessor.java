@@ -8,6 +8,9 @@ import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
+import org.sqlite.SQLiteConfig;
+import org.sqlite.SQLiteDataSource;
+import org.sqlite.SQLiteConfig.SynchronousMode;
 
 public class ScoreDatabaseAccessor {
 
@@ -16,6 +19,8 @@ public class ScoreDatabaseAccessor {
 	private String playerpath = "/LR2files/Database/Score/";
 
 	private String rivalpath = "/LR2files/Rival/";
+
+	private SQLiteDataSource ds;
 
 	private final QueryRunner qr = new QueryRunner();
 
@@ -27,13 +32,19 @@ public class ScoreDatabaseAccessor {
 		rootpath = path;
 		this.playerpath = player;
 		this.rivalpath = rival;
+		
+//		Class.forName("org.sqlite.JDBC");
+//		SQLiteConfig conf = new SQLiteConfig();
+//		conf.setSharedCache(true);
+//		conf.setSynchronous(SynchronousMode.OFF);
+//		// conf.setJournalMode(JournalMode.MEMORY);
+//		ds = new SQLiteDataSource(conf);
+//		ds.setUrl("jdbc:sqlite:" + rootpath + playerpath + playername + ".db");
+//		qr = new QueryRunner(ds);
 	}
 
 	public void createTable(String playername) {
-		Connection conn = null;
-		try {
-			conn = DriverManager.getConnection("jdbc:sqlite:" + rootpath + playerpath + playername + ".db");
-
+		try (Connection conn = DriverManager.getConnection(getPath(playername))) {
 			String sql = "SELECT * FROM sqlite_master WHERE name = ? and type='table';";
 			// playerテーブル作成(存在しない場合)
 			if (qr.query(conn, sql, new MapListHandler(), "player").size() == 0) {
@@ -62,16 +73,6 @@ public class ScoreDatabaseAccessor {
 			}
 		} catch (SQLException e) {
 			Logger.getGlobal().severe("スコアデータベース初期化中の例外:" + e.getMessage());
-		} finally {
-			try {
-				if (conn != null && !conn.isClosed()) {
-					// conn.rollback();
-					conn.close();
-				}
-			} catch (SQLException e) {
-				// どうしようもない
-				Logger.getGlobal().severe("スコアデータベース初期化中の例外:" + e.getMessage());
-			}
 		}
 	}
 
@@ -150,10 +151,8 @@ public class ScoreDatabaseAccessor {
 	// }
 
 	public IRScoreData getScoreData(String playername, String hash, int mode) {
-		Connection con = null;
 		IRScoreData result = null;
-		try {
-			con = DriverManager.getConnection("jdbc:sqlite:" + rootpath + playerpath + playername + ".db");
+		try (Connection con = DriverManager.getConnection(getPath(playername))){
 			ResultSetHandler<List<IRScoreData>> rh = new BeanListHandler<IRScoreData>(IRScoreData.class);
 			List<IRScoreData> score;
 			score = qr.query(con, "SELECT * FROM score WHERE sha256 = '" + hash + "' AND mode = " + mode, rh);
@@ -166,16 +165,8 @@ public class ScoreDatabaseAccessor {
 				}
 				result = sc;
 			}
-			con.close();
 		} catch (Exception e) {
 			Logger.getGlobal().severe("スコア" + playername + "取得時の例外:" + e.getMessage());
-		} finally {
-			if (con != null) {
-				try {
-					con.close();
-				} catch (SQLException e) {
-				}
-			}
 		}
 		return result;
 	}
@@ -189,9 +180,7 @@ public class ScoreDatabaseAccessor {
 	 */
 	public Map<String, IRScoreData> getScoreDatas(String playername, String[] hashes, int mode) {
 		Map<String, IRScoreData> result = new HashMap<String, IRScoreData>();
-		Connection con = null;
-		try {
-			con = DriverManager.getConnection("jdbc:sqlite:" + rootpath + playerpath + playername + ".db");
+		try (Connection con = DriverManager.getConnection(getPath(playername))) {
 			ResultSetHandler<List<IRScoreData>> rh = new BeanListHandler<IRScoreData>(IRScoreData.class);
 			StringBuilder str = new StringBuilder();
 			for (String hash : hashes) {
@@ -206,40 +195,22 @@ public class ScoreDatabaseAccessor {
 			for (IRScoreData score : scores) {
 				result.put(score.getSha256(), score);
 			}
-			con.close();
 		} catch (Exception e) {
 			Logger.getGlobal().severe("スコア" + playername + "取得時の例外:" + e.getMessage());
-		} finally {
-			if (con != null) {
-				try {
-					con.close();
-				} catch (SQLException e) {
-				}
-			}
 		}
 		return result;
 	}
 
 	public List<IRScoreData> getScoreDatas(String playername, String sql) {
-		Connection con = null;
 		List<IRScoreData> score = null;
-		try {
-			con = DriverManager.getConnection("jdbc:sqlite:" + rootpath + playerpath + playername + ".db");
+		try (Connection con = DriverManager.getConnection(getPath(playername))) {
 			ResultSetHandler<List<IRScoreData>> rh = new BeanListHandler<IRScoreData>(IRScoreData.class);
 			score = qr
 					.query(con,
 							"SELECT * FROM score WHERE " + sql
 							, rh);
-			con.close();
 		} catch (Exception e) {
 			Logger.getGlobal().severe("スコア" + playername + "取得時の例外:" + e.getMessage());
-		} finally {
-			if (con != null) {
-				try {
-					con.close();
-				} catch (SQLException e) {
-				}
-			}
 		}
 		return score;
 
@@ -250,7 +221,7 @@ public class ScoreDatabaseAccessor {
 	}
 
 	public void setScoreData(String playername, IRScoreData[] scores) {
-		try (Connection con = DriverManager.getConnection("jdbc:sqlite:" + rootpath + playerpath + playername + ".db")){
+		try (Connection con = DriverManager.getConnection(getPath(playername))){
 			con.setAutoCommit(false);
 			String sql = "INSERT OR REPLACE INTO score "
 					+ "(sha256, mode, clear, epg, lpg, egr, lgr, egd, lgd, ebd, lbd, epr, lpr, ems, lms, notes, combo, "
@@ -270,9 +241,7 @@ public class ScoreDatabaseAccessor {
 	}
 
 	public void setScoreData(String playername, Map<String, Map<String, Object>> map) {
-		Connection con = null;
-		try {
-			con = DriverManager.getConnection("jdbc:sqlite:" + rootpath + playerpath + playername + ".db");
+		try (Connection con = DriverManager.getConnection(getPath(playername))) {
 			con.setAutoCommit(false);
 			for (String hash : map.keySet()) {
 				Map<String, Object> values = map.get(hash);
@@ -286,16 +255,8 @@ public class ScoreDatabaseAccessor {
 				}
 			}
 			con.commit();
-			con.close();
 		} catch (Exception e) {
 			Logger.getGlobal().severe("スコア" + playername + "更新時の例外:" + e.getMessage());
-		} finally {
-			if (con != null) {
-				try {
-					con.close();
-				} catch (SQLException e) {
-				}
-			}
 		}
 	}
 
@@ -351,9 +312,7 @@ public class ScoreDatabaseAccessor {
 	}
 
 	public PlayerData[] getPlayerDatas(String playername, int count) {
-		Connection conn = null;
-		try {
-			conn = DriverManager.getConnection("jdbc:sqlite:" + rootpath + playerpath + playername + ".db");
+		try (Connection conn = DriverManager.getConnection(getPath(playername))) {
 			ResultSetHandler<List<PlayerData>> rh = new BeanListHandler<PlayerData>(PlayerData.class);
 			List<PlayerData> pd = qr.query(conn, "SELECT * FROM player ORDER BY date DESC"
 					+ (count > 0 ? " limit " + count : ""), rh);
@@ -361,22 +320,12 @@ public class ScoreDatabaseAccessor {
 			return pd.toArray(new PlayerData[0]);
 		} catch (Exception e) {
 			Logger.getGlobal().severe("プレイヤーデータ" + playername + "取得時の例外:" + e.getMessage());
-		} finally {
-			if (conn != null) {
-				try {
-					conn.close();
-				} catch (SQLException e) {
-				}
-			}
 		}
 		return new PlayerData[0];
 	}
 
 	public void setPlayerData(String playername, PlayerData pd) {
-		Connection con = null;
-		PlayerData lpd = getPlayerData(playername);
-		try {
-			con = DriverManager.getConnection("jdbc:sqlite:" + rootpath + playerpath + playername + ".db");
+		try (Connection con = DriverManager.getConnection(getPath(playername))) {
 			con.setAutoCommit(false);
 			Calendar cal = Calendar.getInstance(TimeZone.getDefault());
 			cal.set(Calendar.HOUR_OF_DAY, 0);
@@ -394,17 +343,12 @@ public class ScoreDatabaseAccessor {
 					pd.getEgd(), pd.getLgd(), pd.getEbd(), pd.getLbd(), pd.getEpr(), pd.getLpr(), pd.getEms(),
 					pd.getLms(), pd.getPlaytime(), 0, 0, "");
 			con.commit();
-			con.close();
 		} catch (Exception e) {
 			Logger.getGlobal().severe("スコア" + playername + "更新時の例外:" + e.getMessage());
-		} finally {
-			if (con != null) {
-				try {
-					con.close();
-				} catch (SQLException e) {
-				}
-			}
 		}
 	}
 
+	private String getPath(String playername) {
+		return "jdbc:sqlite:" + rootpath + playerpath + playername + "/score.db";
+	}
 }

@@ -97,8 +97,19 @@ public class ASIODriver extends AbstractAudioDriver<PCM> implements AsioDriverLi
 	}
 
 	@Override
-	protected synchronized void play(PCM id, float volume, boolean loop) {
-		mixer.put(id, volume, loop);
+	protected synchronized void play(PCM id, float volume) {
+		mixer.put(id, volume, false);
+	}
+	
+	@Override
+	protected void play(AudioElement<PCM> id, float volume, boolean loop) {
+		id.id = mixer.put(id.audio, volume, loop);
+	}
+
+	@Override
+	protected void setVolume(AudioElement<PCM> id, float volume) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	@Override
@@ -168,6 +179,8 @@ public class ASIODriver extends AbstractAudioDriver<PCM> implements AsioDriverLi
 		 * ミキサー入力
 		 */
 		private MixerInput[] inputs;
+		
+		private long idcount;
 
 		public AudioMixer(int channels) {
 			inputs = new MixerInput[channels];
@@ -176,7 +189,7 @@ public class ASIODriver extends AbstractAudioDriver<PCM> implements AsioDriverLi
 			}
 		}
 
-		public void put(PCM pcm, float volume, boolean loop) {
+		public long put(PCM pcm, float volume, boolean loop) {
 			for (int i = 0; i < inputs.length; i++) {
 				if (inputs[i].pos == -1) {
 					inputs[i].pcm = pcm;
@@ -184,9 +197,20 @@ public class ASIODriver extends AbstractAudioDriver<PCM> implements AsioDriverLi
 					inputs[i].volume = volume;
 					inputs[i].pos = 0;
 					inputs[i].loop = loop;
-					break;
+					inputs[i].id = idcount++;
+					return inputs[i].id;
 				}
 			}
+			return -1;
+		}
+		
+		public void setVolume(long id, float volume) {
+			for (int i = 0; i < inputs.length; i++) {
+				if (inputs[i].id == id) {
+					inputs[i].volume = volume;
+					break;
+				}
+			}			
 		}
 
 		public void stop(PCM id) {
@@ -225,5 +249,6 @@ public class ASIODriver extends AbstractAudioDriver<PCM> implements AsioDriverLi
 		public float volume;
 		public int pos = -1;
 		public boolean loop;
+		public long id;
 	}
 }

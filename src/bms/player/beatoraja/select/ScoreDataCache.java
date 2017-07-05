@@ -38,9 +38,9 @@ public class ScoreDataCache {
             return scorecache[lnmode].get(song.getSha256());
         }
         IRScoreData score = playerdata.readScoreData(song.getSha256(),
-                song.hasLongNote(), lnmode);
+                song.hasUndefinedLongNote(), lnmode);
         for (int i = 0; i < scorecache.length; i++) {
-            if (!song.hasLongNote() || i == lnmode) {
+            if (!song.hasUndefinedLongNote() || i == lnmode) {
                 scorecache[i].put(song.getSha256(), score);
             }
         }
@@ -63,7 +63,7 @@ public class ScoreDataCache {
         for (SongData song : noscore) {
             IRScoreData score = scores.get(song.getSha256());
             for (int i = 0; i < scorecache.length; i++) {
-                if (!song.hasLongNote() || i == lnmode) {
+                if (!song.hasUndefinedLongNote() || i == lnmode) {
                     scorecache[i].put(song.getSha256(), score);
                 }
             }

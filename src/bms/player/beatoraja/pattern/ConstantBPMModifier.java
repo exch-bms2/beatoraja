@@ -5,6 +5,11 @@ import java.util.List;
 import bms.model.BMSModel;
 import bms.model.TimeLine;
 
+/**
+ * BPMを一定化し、ストップシーケンスを無効化するオプション
+ *
+ * @author exch
+ */
 public class ConstantBPMModifier extends PatternModifier {
 	
 	public ConstantBPMModifier() {
@@ -14,7 +19,7 @@ public class ConstantBPMModifier extends PatternModifier {
 	@Override
 	public List<PatternModifyLog> modify(BMSModel model) {
 		for (TimeLine tl : model.getAllTimeLines()) {
-			tl.setSection((float) (model.getBpm() * tl.getTime() / 240000));
+			tl.setSection(model.getBpm() * tl.getMicroTime() / 240000000);
 			tl.setStop(0);
 			tl.setBPM(model.getBpm());
 		}
