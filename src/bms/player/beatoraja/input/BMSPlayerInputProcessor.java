@@ -3,7 +3,6 @@ package bms.player.beatoraja.input;
 import bms.player.beatoraja.Config;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -50,13 +49,12 @@ public class BMSPlayerInputProcessor {
 		midiinput.open();
 		midiinput.setConfig(MidiConfig.default7());
 
-		devices = new HashSet<>();
+		devices = new ArrayList<BMSPlayerInputDevice>();
 		devices.add(kbinput);
 		for (BMControllerInputProcessor bm : bminput) {
 			devices.add(bm);
 		}
 		devices.add(midiinput);
-		disabledDevices = new HashSet<>();
 	}
 
 	/**
@@ -69,8 +67,7 @@ public class BMSPlayerInputProcessor {
 	private long[] time = new long[18];
 
 	private BMSPlayerInputDevice lastKeyDevice;
-	private HashSet<BMSPlayerInputDevice> devices;
-	private HashSet<BMSPlayerInputDevice> disabledDevices;
+	private ArrayList<BMSPlayerInputDevice> devices;
 	/**
 	 * 0-9キーのON/OFF状態
 	 */
@@ -192,34 +189,27 @@ public class BMSPlayerInputProcessor {
 	}
 
 	public void setExclusiveDeviceType(BMSPlayerInputDevice.Type type) {
-		disabledDevices = new HashSet<>();
 		for (BMSPlayerInputDevice device : devices) {
-			if (device.getType() != type) {
-				disabledDevices.add(device);
-				switch (device.getType()) {
-				case KEYBOARD:
-					kbinput.clear();
-					break;
-				case BM_CONTROLLER:
-					break;
-				case MIDI:
-					midiinput.clear();
-				}
+			if (device.getType() == type) {
+				device.setEnabled(true);
+			} else {
+				device.setEnabled(false);
+				device.clear();
 			}
 		}
 	}
 
 	public void enableAllDevices() {
-		disabledDevices = new HashSet<>();
+		for (BMSPlayerInputDevice device : devices) {
+			device.setEnabled(true);
+		}
 	}
 
 	public void disableAllDevices() {
-		disabledDevices = new HashSet<>(devices);
-		kbinput.clear();
-		for (BMControllerInputProcessor controller : bminput) {
-			controller.clear();
+		for (BMSPlayerInputDevice device : devices) {
+			device.setEnabled(false);
+			device.clear();
 		}
-		midiinput.clear();
 	}
 
 	public boolean[] getNumberState() {
@@ -231,7 +221,7 @@ public class BMSPlayerInputProcessor {
 	}
 
 	public void keyChanged(BMSPlayerInputDevice device, long presstime, int i, boolean pressed) {
-		if (disabledDevices.contains(device)) {
+		if (!device.isEnabled()) {
 			return;
 		}
 		if (keystate[i] != pressed) {

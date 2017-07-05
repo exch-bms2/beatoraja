@@ -8,6 +8,10 @@ public class BMSPlayerInputDevice {
 		MIDI
 	}
 
+	protected Type type;
+	protected int player = 0;
+	protected boolean enabled = true;
+
 	public Type getType() {
 		return type;
 	}
@@ -20,20 +24,15 @@ public class BMSPlayerInputDevice {
 		this.player = player;
 	}
 
-	public boolean equals(Object other) {
-		if (!(other instanceof BMSPlayerInputDevice))
-			return false;
-
-		BMSPlayerInputDevice device = (BMSPlayerInputDevice)other;
-		return this.type == device.type && this.player == device.player;
+	public boolean isEnabled() {
+		return enabled;
 	}
 
-	public int hashCode() {
-		return (type.ordinal() << 16) | player;
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
 	}
 
-	public String toString() {
-		return String.format("%s-%d", type.toString(), player);
+	public void clear() {
 	}
 
 	protected BMSPlayerInputDevice(Type type, int player) {
@@ -42,9 +41,6 @@ public class BMSPlayerInputDevice {
 	}
 
 	protected BMSPlayerInputDevice(Type type) {
-		this.player = 0;
+		this.type = type;
 	}
-
-	protected Type type;
-	protected int player;
 }
