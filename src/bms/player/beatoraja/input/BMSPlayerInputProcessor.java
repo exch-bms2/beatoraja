@@ -189,6 +189,8 @@ public class BMSPlayerInputProcessor {
 	}
 
 	public void setExclusiveDeviceType(BMSPlayerInputDevice.Type type) {
+		Arrays.fill(keystate, false);
+		Arrays.fill(time, 0);
 		for (BMSPlayerInputDevice device : devices) {
 			if (device.getType() == type) {
 				device.setEnabled(true);
@@ -206,6 +208,8 @@ public class BMSPlayerInputProcessor {
 	}
 
 	public void disableAllDevices() {
+		Arrays.fill(keystate, false);
+		Arrays.fill(time, 0);
 		for (BMSPlayerInputDevice device : devices) {
 			device.setEnabled(false);
 			device.clear();
