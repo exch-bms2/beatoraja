@@ -58,7 +58,7 @@ public class LR2FontLoader extends LR2SkinLoader {
 				// System.out.println("Font image loading : " +
 				// imagefile.getPath());
 				if (imagefile.exists()) {
-					imagelist.add(SkinLoader.getTexture(imagefile.getPath(), usecim));
+					imagelist.add(getTexture(imagefile.getPath(), usecim));
 				}
 			}
 		});

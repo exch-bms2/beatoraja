@@ -29,7 +29,9 @@ public abstract class MainState {
 	 * 状態の開始時間
 	 */
 	private long starttime;
-
+	/**
+	 * スキン
+	 */
 	private Skin skin;
 
 	private Stage stage;
@@ -282,7 +284,7 @@ public abstract class MainState {
 		try {
 			SkinConfig sc = resource.getPlayerConfig().getSkin()[skinType.getId()];
 			if (sc.getPath().endsWith(".json")) {
-				SkinLoader sl = new SkinLoader(resource.getConfig());
+				JSONSkinLoader sl = new JSONSkinLoader(resource.getConfig());
 				setSkin(sl.loadSkin(Paths.get(sc.getPath()), skinType, sc.getProperty()));
 			} else {
 				LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
@@ -293,7 +295,7 @@ public abstract class MainState {
 			}
 		} catch (Throwable e) {
 			e.printStackTrace();
-			SkinLoader sl = new SkinLoader(resource.getConfig());
+			JSONSkinLoader sl = new JSONSkinLoader(resource.getConfig());
 			setSkin(sl.loadSkin(Paths.get(SkinConfig.defaultSkinPathMap.get(skinType)), skinType, new HashMap()));
 		}
 	}
@@ -302,8 +304,6 @@ public abstract class MainState {
 		IRScoreData sd = score.getScoreData();
 		return sd != null ? sd.getJudgeCount(judge, fast) : 0;
 	}
-	
-	private Calendar cl = Calendar.getInstance();
 
 	public int getNumberValue(int id) {
 		switch (id) {
@@ -311,24 +311,24 @@ public abstract class MainState {
 			return getMainController().getPlayerResource().getPlayerConfig().getJudgetiming();
 			case NUMBER_CURRENT_FPS:
 				return Gdx.graphics.getFramesPerSecond();
-		case NUMBER_TIME_YEAR:
-			cl.setTimeInMillis(System.currentTimeMillis());
-			return cl.get(Calendar.YEAR);
+			case NUMBER_TIME_YEAR:
+				return main.getCurrnetTime().get(Calendar.YEAR);
 		case NUMBER_TIME_MONTH:
-			cl.setTimeInMillis(System.currentTimeMillis());
-			return cl.get(Calendar.MONTH) + 1;
+			return main.getCurrnetTime().get(Calendar.MONTH) + 1;
 		case NUMBER_TIME_DAY:
-			cl.setTimeInMillis(System.currentTimeMillis());
-			return cl.get(Calendar.DATE);
+			return main.getCurrnetTime().get(Calendar.DATE);
 		case NUMBER_TIME_HOUR:
-			cl.setTimeInMillis(System.currentTimeMillis());
-			return cl.get(Calendar.HOUR_OF_DAY);
+			return main.getCurrnetTime().get(Calendar.HOUR_OF_DAY);
 		case NUMBER_TIME_MINUTE:
-			cl.setTimeInMillis(System.currentTimeMillis());
-			return cl.get(Calendar.MINUTE);
+			return main.getCurrnetTime().get(Calendar.MINUTE);
 		case NUMBER_TIME_SECOND:
-			cl.setTimeInMillis(System.currentTimeMillis());
-			return cl.get(Calendar.SECOND);
+			return main.getCurrnetTime().get(Calendar.SECOND);
+			case NUMBER_OPERATING_TIME_HOUR:
+				return (int) (main.getPlayTime() / 3600000);
+			case NUMBER_OPERATING_TIME_MINUTE:
+				return (int) (main.getPlayTime() / 60000) % 60;
+			case NUMBER_OPERATING_TIME_SECOND:
+				return (int) (main.getPlayTime() / 1000) % 60;
 		case NUMBER_PERFECT:
 			return getJudgeCount(0, true) + getJudgeCount(0, false);
 		case NUMBER_EARLY_PERFECT:
@@ -438,6 +438,8 @@ public abstract class MainState {
 				return score.getNowEXScore();
 			case NUMBER_MAXSCORE:
 				return score.getScoreData() != null ? score.getScoreData().getNotes() : 0;
+			case NUMBER_DIFF_NEXTRANK:
+				return score.getNextRank();
 			case NUMBER_SCORE_RATE:
 				return score.getNowRateInt();
 			case NUMBER_SCORE_RATE_AFTERDOT:
