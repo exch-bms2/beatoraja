@@ -7,7 +7,8 @@ import java.util.Map.Entry;
 import com.badlogic.gdx.utils.Disposable;
 
 /**
- * リソースプール
+ * リソースプール。イメージデータやオーディオデータ等の読み込みコストが大きく、
+ * なおかつ明示的な解放が必要なリソースをプールする仕組みを提供する。
  * 
  * @author exch
  *
@@ -19,20 +20,39 @@ public abstract class ResourcePool<K, V> implements Disposable {
 	 * リソースの最大世代数
 	 */
 	private final int maxgen;
-	
+	/**
+	 * リソース
+	 */
 	private Map<K, ResourceCacheElement<V>> image = new HashMap<K, ResourceCacheElement<V>> ();
 
 	public ResourcePool(int maxgen) {
 		this.maxgen = maxgen;
 	}
-	
- 	public V get(K path) {
-		ResourceCacheElement<V> ie = image.get(path);
+
+	/**
+	 * 指定するキーの要素が存在する場合はtrueを返す
+	 *
+	 * @param key リソースのキー
+	 * @return キーに対応するリソースが存在する場合はtrue
+	 */
+	public boolean exists(K key) {
+		return image.get(key) != null;
+	}
+
+	/**
+	 * 指定したキーに対応するリソースを取得する。リソースがプールにない場合はloadを呼び出して
+	 * リソースを取得し、プールに登録した上でリソースを返す。
+	 *
+	 * @param key リソースのキー
+	 * @return リソース。読めなかった場合はnullを返す
+	 */
+ 	public V get(K key) {
+		ResourceCacheElement<V> ie = image.get(key);
 		if(ie == null) {
-			V resource = load(path);
+			V resource = load(key);
 			if(resource != null) {
 				ie = new ResourceCacheElement<V>(resource);
-				image.put(path, ie);
+				image.put(key, ie);
 			}
 		} else {
 			ie.gen = 0;
@@ -55,7 +75,11 @@ public abstract class ResourcePool<K, V> implements Disposable {
 			}
 		}
 	}
-	
+
+	/**
+	 * 現在のリソースの要素数を返す。
+	 * @return リソースの
+	 */
 	public int size() {
 		return image.size();
 	}
@@ -69,10 +93,10 @@ public abstract class ResourcePool<K, V> implements Disposable {
 	
 	/**
 	 * リソースを読み込む
-	 * @param path リソースのキー
+	 * @param key リソースのキー
 	 * @return リソース。読めなかった場合はnullを返す
 	 */
-	protected abstract V load(K path);
+	protected abstract V load(K key);
 
 	/**
 	 * リソースを開放する
@@ -80,8 +104,19 @@ public abstract class ResourcePool<K, V> implements Disposable {
 	 */
 	protected abstract void dispose(V resource);
 
+	/**
+	 * リソース
+	 *
+	 * @param <R>
+	 */
 	private static class ResourceCacheElement<R> {
+		/**
+		 * リソース
+		 */
 		public R image;
+		/**
+		 * 世代
+		 */
 		public int gen;
 		
 		public ResourceCacheElement(R image) {

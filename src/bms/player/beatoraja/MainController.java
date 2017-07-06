@@ -8,6 +8,7 @@ import java.util.Calendar;
 import java.util.logging.Logger;
 
 import bms.player.beatoraja.play.TargetProperty;
+import bms.player.beatoraja.skin.SkinLoader;
 import com.badlogic.gdx.Graphics;
 
 import bms.player.beatoraja.audio.*;
@@ -43,6 +44,12 @@ import com.badlogic.gdx.utils.JsonWriter.OutputType;
 public class MainController extends ApplicationAdapter {
 
 	public static final String VERSION = "beatoraja 0.4.2";
+
+	/**
+	 *
+	 */
+	private final long boottime = System.currentTimeMillis();
+	private final Calendar cl = Calendar.getInstance();
 
 	private BMSPlayer bmsplayer;
 	private MusicDecide decide;
@@ -407,6 +414,7 @@ public class MainController extends ApplicationAdapter {
 			keyconfig.dispose();
 		}
 		resource.dispose();
+		SkinLoader.getResource().dispose();
 	}
 
 	@Override
@@ -458,6 +466,14 @@ public class MainController extends ApplicationAdapter {
 		return ir;
 	}
 
+	public long getPlayTime() {
+		return System.currentTimeMillis() - boottime;
+	}
+
+	public Calendar getCurrnetTime() {
+		cl.setTimeInMillis(System.currentTimeMillis());
+		return cl;
+	}
 	/**
 	 * スクリーンショット処理用スレッド
 	 * 

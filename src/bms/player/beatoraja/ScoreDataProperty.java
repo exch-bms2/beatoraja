@@ -29,6 +29,7 @@ public class ScoreDataProperty {
     private int rivalrateInt;
     private int rivalrateAfterDot;
     private boolean[] rank = new boolean[27];
+    private int nextrank;
     private boolean[] nowrank = new boolean[27];
     private boolean[] bestrank = new boolean[27];
 
@@ -72,8 +73,15 @@ public class ScoreDataProperty {
         nowrate = notes == 0 ? 1.0f : ((float)exscore) / (notes * 2);
         nowrateInt = (int)(nowrate * 100);
         nowrateAfterDot = ((int)(nowrate * 10000)) % 100;
+        nextrank = Integer.MIN_VALUE;
         for(int i = 0;i < rank.length;i++) {
             rank[i] = totalnotes != 0 && rate >= 1f * i / rank.length;
+            if(i % 3 == 0 && !rank[i] && nextrank == Integer.MIN_VALUE) {
+                nextrank = Math.round((i * (notes * 2) / rank.length) - rate * (notes * 2));
+            }
+        }
+        if(nextrank == Integer.MIN_VALUE) {
+            nextrank = Math.round((notes * 2) - rate * (notes * 2));
         }
         for(int i = 0;i < nowrank.length;i++) {
             nowrank[i] = totalnotes != 0 && nowrate >= 1f * i / nowrank.length;
@@ -149,6 +157,10 @@ public class ScoreDataProperty {
 
     public float getRate() {
         return rate;
+    }
+
+    public int getNextRank() {
+        return nextrank;
     }
 
     public int getRateInt() {

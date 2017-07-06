@@ -16,6 +16,8 @@ import java.util.Map;
  */
 public class ScoreDataCache {
 
+    // TODO ResourcePoolベースに移行する
+
     /**
      * スコアデータのキャッシュ
      */
@@ -79,6 +81,16 @@ public class ScoreDataCache {
     public void clear() {
         for (Map<?, ?> cache : scorecache) {
             cache.clear();
+        }
+    }
+
+    public void update(SongData song, int lnmode) {
+        IRScoreData score = playerdata.readScoreData(song.getSha256(),
+                song.hasUndefinedLongNote(), lnmode);
+        for (int i = 0; i < scorecache.length; i++) {
+            if (!song.hasUndefinedLongNote() || i == lnmode) {
+                scorecache[i].put(song.getSha256(), score);
+            }
         }
     }
 }

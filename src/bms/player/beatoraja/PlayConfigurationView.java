@@ -34,7 +34,7 @@ import bms.player.beatoraja.play.JudgeAlgorithm;
 import bms.player.beatoraja.skin.SkinHeader;
 import bms.player.beatoraja.skin.SkinHeader.CustomFile;
 import bms.player.beatoraja.skin.SkinHeader.CustomOption;
-import bms.player.beatoraja.skin.SkinLoader;
+import bms.player.beatoraja.skin.JSONSkinLoader;
 import bms.player.beatoraja.skin.SkinType;
 import bms.player.beatoraja.skin.lr2.LR2SkinHeaderLoader;
 import bms.player.beatoraja.song.SQLiteSongDatabaseAccessor;
@@ -821,7 +821,7 @@ class SkinConfigurationView {
 		scan(Paths.get("skin"), lr2skinpaths);
 		for (Path path : lr2skinpaths) {
 			if (path.toString().toLowerCase().endsWith(".json")) {
-				SkinLoader loader = new SkinLoader();
+				JSONSkinLoader loader = new JSONSkinLoader();
 				SkinHeader header = loader.loadHeader(path);
 				if (header != null) {
 					lr2skinheader.add(header);

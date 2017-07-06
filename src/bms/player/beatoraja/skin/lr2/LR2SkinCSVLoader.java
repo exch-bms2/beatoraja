@@ -103,7 +103,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 					}
 
 					if (!isMovie) {
-						imagelist.add(SkinLoader.getTexture(imagefile.getPath(), usecim));
+						imagelist.add(getTexture(imagefile.getPath(), usecim));
 					}
 				} else {
 					Logger.getGlobal()

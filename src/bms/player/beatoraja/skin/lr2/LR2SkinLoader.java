@@ -13,8 +13,9 @@ import java.util.Map;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.skin.SkinHeader.CustomFile;
 import bms.player.beatoraja.skin.SkinHeader.CustomOption;
+import bms.player.beatoraja.skin.SkinLoader;
 
-public class LR2SkinLoader {
+public class LR2SkinLoader extends SkinLoader {
 
 	private List<CommandWord> commands = new ArrayList<CommandWord>();
 
