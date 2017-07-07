@@ -1,13 +1,15 @@
 package bms.player.beatoraja;
 
-import java.io.IOException;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.utils.FloatArray;
 
 import bms.model.BMSDecoder;
 import bms.model.BMSGenerator;
@@ -17,12 +19,6 @@ import bms.player.beatoraja.audio.AudioDriver;
 import bms.player.beatoraja.play.GrooveGauge;
 import bms.player.beatoraja.play.bga.BGAProcessor;
 import bms.player.beatoraja.song.SongData;
-
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.utils.FloatArray;
-import com.badlogic.gdx.utils.IntArray;
 
 /**
  * プレイヤーのコンポーネント間でデータをやり取りするためのクラス
@@ -43,7 +39,7 @@ public class PlayerResource {
 
 	private Config config;
 	private PlayerConfig pconfig;
-	
+
 	private int auto;
 
 	private int playDevice;
@@ -178,20 +174,6 @@ public class PlayerResource {
 			}
 			int totalnotes = model.getTotalNotes();
 			model.setTotal(model.getTotal() / 100.0 * 7.605 * totalnotes / (0.01 * totalnotes + 6.5));
-			// SongData上でDBから読んだpreviewをpreview未定義BMSModelで上書きしなくなったためいらなくなるはず
-			//PREVIEW未定義の場合
-//			if(model.getPreview() == null || model.getPreview().length() == 0){
-//				try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get(model.getPath()).getParent())) {
-//					for (Path p : paths) {
-//						String name = p.getFileName().toString().toLowerCase();
-//						if(name.startsWith("preview") && (name.endsWith(".wav") || name.endsWith(".ogg") || name.endsWith(".mp3"))) {
-//							model.setPreview(p.getFileName().toString());
-//						}
-//					}
-//				} catch (IOException e) {
-//					e.printStackTrace();
-//				}
-//			}
 		} else {
 			BMSDecoder decoder = new BMSDecoder(lnmode);
 			model = decoder.decode(f.toFile());
@@ -211,20 +193,6 @@ public class PlayerResource {
 				int totalnotes = model.getTotalNotes();
 				model.setTotal(7.605 * totalnotes / (0.01 * totalnotes + 6.5));
 			}
-			// SongData上でDBから読んだpreviewをpreview未定義BMSModelで上書きしなくなったためいらなくなるはず
-			//PREVIEW未定義の場合
-//			if(model.getPreview() == null || model.getPreview().length() == 0){
-//				try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get(model.getPath()).getParent())) {
-//					for (Path p : paths) {
-//						String name = p.getFileName().toString().toLowerCase();
-//						if(name.startsWith("preview") && (name.endsWith(".wav") || name.endsWith(".ogg") || name.endsWith(".mp3"))) {
-//							model.setPreview(p.getFileName().toString());
-//						}
-//					}
-//				} catch (IOException e) {
-//					e.printStackTrace();
-//				}
-//			}
 		}
 
 		return model;
@@ -241,7 +209,7 @@ public class PlayerResource {
 	public Config getConfig() {
 		return config;
 	}
-	
+
 	public PlayerConfig getPlayerConfig() {
 		return pconfig;
 	}
