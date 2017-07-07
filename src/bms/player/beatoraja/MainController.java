@@ -17,7 +17,7 @@ import bms.player.beatoraja.decide.MusicDecide;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.ir.IRConnection;
 import bms.player.beatoraja.play.BMSPlayer;
-import bms.player.beatoraja.result.GradeResult;
+import bms.player.beatoraja.result.CourseResult;
 import bms.player.beatoraja.result.MusicResult;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.song.SQLiteSongDatabaseAccessor;
@@ -55,7 +55,7 @@ public class MainController extends ApplicationAdapter {
 	private MusicDecide decide;
 	private MusicSelector selector;
 	private MusicResult result;
-	private GradeResult gresult;
+	private CourseResult gresult;
 	private KeyConfiguration keyconfig;
 
 	private AudioDriver audio;
@@ -250,7 +250,7 @@ public class MainController extends ApplicationAdapter {
 		selector = new MusicSelector(this, songUpdated);
 		decide = new MusicDecide(this);
 		result = new MusicResult(this);
-		gresult = new GradeResult(this);
+		gresult = new CourseResult(this);
 		keyconfig = new KeyConfiguration(this);
 		if (bmsfile != null) {
 			if(resource.setBMSFile(bmsfile, auto)) {

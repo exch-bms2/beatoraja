@@ -3,27 +3,15 @@ package bms.player.beatoraja.skin;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
-import java.util.logging.Logger;
 
 import bms.player.beatoraja.Config;
 import bms.player.beatoraja.Resolution;
 import bms.player.beatoraja.play.*;
-import bms.player.beatoraja.play.bga.BGAProcessor;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
-import com.badlogic.gdx.assets.loaders.resolvers.ResolutionFileResolver;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.PixmapIO;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.utils.BooleanArray;
-import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.Json;
 
 import bms.player.beatoraja.decide.MusicDecideSkin;
@@ -130,6 +118,9 @@ public class JSONSkinLoader extends SkinLoader{
 			}
 			if (type == SkinType.RESULT) {
 				skin = new MusicResultSkin(src, dstr);
+			}
+			if (type == SkinType.COURSE_RESULT) {
+				skin = new CourseResultSkin(src, dstr);
 			}
 
 			Map<Integer, Boolean> op = new HashMap<>();

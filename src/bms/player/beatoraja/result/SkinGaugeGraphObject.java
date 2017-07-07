@@ -86,7 +86,7 @@ public class SkinGaugeGraphObject extends SkinObject {
 			color = typetable[resource.getGrooveGauge().getType()];
 			gauge = resource.getGauge();
 			IntArray section = new IntArray();
-			if (state instanceof GradeResult) {
+			if (state instanceof CourseResult) {
 				gauge = new FloatArray();
 				for (FloatArray l : resource.getCourseGauge()) {
 					gauge.addAll(l);

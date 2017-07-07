@@ -558,7 +558,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 		case RESULT:
 			return new LR2ResultSkinLoader(src, c);
 		case COURSE_RESULT:
-			return new LR2ResultSkinLoader(src, c);
+			return new LR2CourseResultSkinLoader(src, c);
 		case KEY_CONFIG:
 		}
 		return null;

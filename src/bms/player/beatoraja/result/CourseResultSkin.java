@@ -11,9 +11,20 @@ import bms.player.beatoraja.skin.*;
 
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
-public class GradeResultSkin extends Skin {
+public class CourseResultSkin extends Skin {
 
-	public GradeResultSkin(Resolution src, Resolution dst) {
+	private int ranktime;
+
+	public CourseResultSkin(Resolution src, Resolution dst) {
 		super(src, dst);
 	}
+
+	public int getRankTime() {
+		return ranktime;
+	}
+
+	public void setRankTime(int ranktime) {
+		this.ranktime = ranktime;
+	}
+
 }
