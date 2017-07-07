@@ -1,33 +1,25 @@
 package bms.player.beatoraja;
 
-import static bms.player.beatoraja.skin.SkinProperty.*;
-
 import java.io.File;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Map;
-
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.scenes.scene2d.Stage;
+import java.util.*;
 
 import bms.player.beatoraja.play.TargetProperty;
-import bms.player.beatoraja.skin.JSONSkinLoader;
-import bms.player.beatoraja.skin.Skin;
-import bms.player.beatoraja.skin.SkinHeader;
-import bms.player.beatoraja.skin.SkinType;
+import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.lr2.LR2SkinCSVLoader;
 import bms.player.beatoraja.skin.lr2.LR2SkinHeaderLoader;
 import bms.player.beatoraja.song.SongData;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+
+import static bms.player.beatoraja.skin.SkinProperty.*;
+
 /**
  * プレイヤー内の各状態の抽象クラス
- *
+ * 
  * @author exch
  */
 public abstract class MainState {
@@ -43,7 +35,7 @@ public abstract class MainState {
 	private Skin skin;
 
 	private Stage stage;
-
+	
 	private Map<Integer, String> soundmap = new HashMap<Integer, String>();
 	private Map<Integer, Boolean> soundloop = new HashMap<Integer, Boolean>();
 
@@ -71,9 +63,9 @@ public abstract class MainState {
 	public abstract void render();
 
 	public void input() {
-
+		
 	}
-
+	
 	public void pause() {
 
 	}
@@ -286,15 +278,14 @@ public abstract class MainState {
 		}
 		this.skin = skin;
 	}
-
+	
 	public void loadSkin(SkinType skinType) {
 		final PlayerResource resource = main.getPlayerResource();
 		try {
 			SkinConfig sc = resource.getPlayerConfig().getSkin()[skinType.getId()];
 			if (sc.getPath().endsWith(".json")) {
 				JSONSkinLoader sl = new JSONSkinLoader(resource.getConfig());
-				setSkin(sl.loadSkin(Paths.get(sc.getPath()),
-						skinType == skinType.COURSE_RESULT ? skinType.RESULT : skinType, sc.getProperty()));
+				setSkin(sl.loadSkin(Paths.get(sc.getPath()), skinType, sc.getProperty()));
 			} else {
 				LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
 				SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), this, sc.getProperty());
@@ -546,7 +537,7 @@ public abstract class MainState {
 		case IMAGE_BLACK:
 			return black;
 		case IMAGE_WHITE:
-			return white;
+			return white;			
 		}
 		return null;
 	}
@@ -558,7 +549,7 @@ public abstract class MainState {
 	public void setStage(Stage stage) {
 		this.stage = stage;
 	}
-
+	
 	public void setSound(int id, String path, boolean loop) {
 		path = path.substring(0, path.lastIndexOf('.'));
 		for(File f : new File[]{new File(path + ".wav"), new File(path + ".ogg"), new File(path + ".mp3")}) {
@@ -573,18 +564,18 @@ public abstract class MainState {
 	public String getSound(int id) {
 		return soundmap.get(id);
 	}
-
+	
 	public void play(int id) {
 		final String path = soundmap.get(id);
 		if(path != null) {
 			main.getAudioProcessor().play(path, main.getPlayerResource().getConfig().getSystemvolume(), soundloop.get(id));
 		}
 	}
-
+	
 	public void stop(int id) {
 		final String path = soundmap.get(id);
 		if(path != null) {
 			main.getAudioProcessor().stop(path);
-		}
+		}		
 	}
 }
