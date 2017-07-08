@@ -20,7 +20,8 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 
 	int pitch = 0;
 
-	MidiConfig.Input lastPressedKey = null;
+	boolean hasLastPressedKey = false;
+	MidiConfig.Input lastPressedKey = new MidiConfig.Input();
 
 	// pitch value: -8192 ~ 8191
 	final int pitchThreshold = 8192 / 32;
@@ -96,7 +97,7 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 
 	public void clear() {
 		pitch = 0;
-		lastPressedKey = null;
+		hasLastPressedKey = false;
 	}
 
 	void setHandler(MidiConfig.Input input, Consumer<Boolean> handler) {
@@ -127,7 +128,9 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 	}
 
 	void noteOn(int num) {
-		lastPressedKey = new MidiConfig.Input(MidiConfig.Input.Type.NOTE, num);
+		hasLastPressedKey = true;
+		lastPressedKey.type = MidiConfig.Input.Type.NOTE;
+		lastPressedKey.value = num;
 		if (keyMap[num] != null) {
 			keyMap[num].accept(true);
 		}
@@ -135,7 +138,9 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 
 	void onPitchBendUp(boolean pressed) {
 		if (pressed) {
-			lastPressedKey = new MidiConfig.Input(MidiConfig.Input.Type.PITCH_BEND, 1);
+			hasLastPressedKey = true;
+			lastPressedKey.type = MidiConfig.Input.Type.PITCH_BEND;
+			lastPressedKey.value = 1;
 		}
 		if (pitchBendUp != null) {
 			pitchBendUp.accept(pressed);
@@ -144,7 +149,9 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 
 	void onPitchBendDown(boolean pressed) {
 		if (pressed) {
-			lastPressedKey = new MidiConfig.Input(MidiConfig.Input.Type.PITCH_BEND, -1);
+			hasLastPressedKey = true;
+			lastPressedKey.type = MidiConfig.Input.Type.PITCH_BEND;
+			lastPressedKey.value = -1;
 		}
 		if (pitchBendDown != null) {
 			pitchBendDown.accept(pressed);
@@ -156,11 +163,11 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 	}
 
 	public MidiConfig.Input getLastPressedKey() {
-		return lastPressedKey;
+		return hasLastPressedKey ? lastPressedKey : null;
 	}
 
-	public void setLastPressedKey(MidiConfig.Input key) {
-		lastPressedKey = key;
+	public void clearLastPressedKey() {
+		hasLastPressedKey = false;
 	}
 
 	class MidiReceiver implements Receiver {

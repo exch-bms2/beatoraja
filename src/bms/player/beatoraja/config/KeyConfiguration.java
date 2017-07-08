@@ -146,7 +146,7 @@ public class KeyConfiguration extends MainState {
 			for (BMControllerInputProcessor bmc : controllers) {
 				bmc.setLastPressedButton(-1);
 			}
-			midiinput.setLastPressedKey(null);
+			midiinput.clearLastPressedKey();
 			keyinput = true;
 		}
 
