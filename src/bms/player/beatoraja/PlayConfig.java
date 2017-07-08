@@ -179,6 +179,18 @@ public class PlayConfig {
 				this.type = type;
 				this.value = value;
 			}
+			public String toString() {
+				switch (type) {
+				case NOTE:
+					return "NOTE " + value;
+				case PITCH_BEND:
+					return "PITCH " + (value > 0 ? "+" : "-");
+				case CONTROL_CHANGE:
+					return "CC " + value;
+				default:
+					return null;
+				}
+			}
 		}
 
 		private Assign[] keys;
@@ -188,6 +200,8 @@ public class PlayConfig {
 		public Assign[] getKeys() { return keys; }
 		public Assign getStart() { return start; }
 		public Assign getSelect() { return select; }
+		public void setStart(Assign assign) { start = assign; }
+		public void setSelect(Assign assign) { select = assign; }
 
 		public MidiConfig() {
 			// 7keys
@@ -199,6 +213,28 @@ public class PlayConfig {
 			keys[8] = new Assign(Assign.Type.NOTE, 51);
 			start = new Assign(Assign.Type.NOTE, 47);
 			select = new Assign(Assign.Type.NOTE, 48);
+		}
+
+		public Assign getAssign(int index) {
+			if (index < keys.length) {
+				return keys[index];
+			} else if (index == 18) {
+				return start;
+			} else if (index == 19) {
+				return select;
+			} else {
+				return null;
+			}
+		}
+
+		public void setAssign(int index, Assign input) {
+			if (index < keys.length) {
+				keys[index] = input;
+			} else if (index == 18) {
+				start = input;
+			} else if (index == 19) {
+				select = input;
+			}
 		}
 
 		public static MidiConfig default7() {

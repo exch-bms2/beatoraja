@@ -20,6 +20,8 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 
 	int pitch = 0;
 
+	MidiConfig.Assign lastPressedKey = null;
+
 	// pitch value: -8192 ~ 8191
 	final int pitchThreshold = 8192 / 32;
 
@@ -65,9 +67,12 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 	}
 
 	public void setConfig(MidiConfig config) {
+		clear();
 		for (int i=0; i<MaxKeys; i++) {
 			keyMap[i] = null;
 		}
+		pitchBendUp = null;
+		pitchBendDown = null;
 
 		MidiConfig.Assign[] keys = config.getKeys();
 		for (int i=0; i<keys.length; i++) {
@@ -91,6 +96,7 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 
 	public void clear() {
 		pitch = 0;
+		lastPressedKey = null;
 	}
 
 	void setHandler(MidiConfig.Assign control, Consumer<Boolean> handler) {
@@ -121,13 +127,40 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 	}
 
 	void noteOn(int num) {
+		lastPressedKey = new MidiConfig.Assign(MidiConfig.Assign.Type.NOTE, num);
 		if (keyMap[num] != null) {
 			keyMap[num].accept(true);
 		}
 	}
 
+	void onPitchBendUp(boolean pressed) {
+		if (pressed) {
+			lastPressedKey = new MidiConfig.Assign(MidiConfig.Assign.Type.PITCH_BEND, 1);
+		}
+		if (pitchBendUp != null) {
+			pitchBendUp.accept(pressed);
+		}
+	}
+
+	void onPitchBendDown(boolean pressed) {
+		if (pressed) {
+			lastPressedKey = new MidiConfig.Assign(MidiConfig.Assign.Type.PITCH_BEND, -1);
+		}
+		if (pitchBendDown != null) {
+			pitchBendDown.accept(pressed);
+		}
+	}
+
 	long currentTime() {
 		return System.nanoTime() / 1000000 - starttime;
+	}
+
+	public MidiConfig.Assign getLastPressedKey() {
+		return lastPressedKey;
+	}
+
+	public void setLastPressedKey(MidiConfig.Assign key) {
+		lastPressedKey = key;
 	}
 
 	class MidiReceiver implements Receiver {
@@ -149,25 +182,25 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 					case ShortMessage.PITCH_BEND: {
 						int newPitch = (int)(short)((sm.getData1() & 0x7f) | ((sm.getData2() & 0x7f) << 7)) - 0x2000;
 						if (newPitch > pitchThreshold) {
-							if (pitch < -pitchThreshold && pitchBendDown != null) {
-								pitchBendDown.accept(false);
+							if (pitch < -pitchThreshold) {
+								onPitchBendDown(false);
 							}
-							if (pitch <= pitchThreshold && pitchBendUp != null) {
-								pitchBendUp.accept(true);
+							if (pitch <= pitchThreshold) {
+								onPitchBendUp(true);
 							}
 						} else if (newPitch < -pitchThreshold) {
-							if (pitch > pitchThreshold && pitchBendUp != null) {
-								pitchBendUp.accept(false);
+							if (pitch > pitchThreshold) {
+								onPitchBendUp(false);
 							}
-							if (pitch >= -pitchThreshold && pitchBendDown != null) {
-								pitchBendDown.accept(true);
+							if (pitch >= -pitchThreshold) {
+								onPitchBendDown(true);
 							}
 						} else {
-							if (pitch > pitchThreshold && pitchBendUp != null) {
-								pitchBendUp.accept(false);
+							if (pitch > pitchThreshold) {
+								onPitchBendUp(false);
 							}
-							if (pitch < -pitchThreshold && pitchBendDown != null) {
-								pitchBendDown.accept(false);
+							if (pitch < -pitchThreshold) {
+								onPitchBendDown(false);
 							}
 						}
 						pitch = newPitch;
