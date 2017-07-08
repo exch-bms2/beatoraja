@@ -167,7 +167,7 @@ public class KeyConfiguration extends MainState {
 			}
 		}
 		if (keyinput && midiinput.getLastPressedKey() != null) {
-			midiconfig.setAssign(midikeysa[cursorpos], midiinput.getLastPressedKey());
+			midiconfig.setAssignment(midikeysa[cursorpos], midiinput.getLastPressedKey());
 			keyinput = false;
 		}
 
@@ -205,7 +205,7 @@ public class KeyConfiguration extends MainState {
 			
 			titlefont.draw(sprite, BMControllerInputProcessor.BMKeys.toString(controller[index / 20].getAssign()[index % 20]), 352, 598 - i * 24);
 
-			titlefont.draw(sprite, midiconfig.getAssign(midikeysa[i]).toString(), 502, 598 - i * 24);
+			titlefont.draw(sprite, midiconfig.getAssignment(midikeysa[i]).toString(), 502, 598 - i * 24);
 			sprite.end();
 		}
 

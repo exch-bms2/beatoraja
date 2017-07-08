@@ -20,7 +20,7 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 
 	int pitch = 0;
 
-	MidiConfig.Assign lastPressedKey = null;
+	MidiConfig.Input lastPressedKey = null;
 
 	// pitch value: -8192 ~ 8191
 	final int pitchThreshold = 8192 / 32;
@@ -74,7 +74,7 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 		pitchBendUp = null;
 		pitchBendDown = null;
 
-		MidiConfig.Assign[] keys = config.getKeys();
+		MidiConfig.Input[] keys = config.getKeys();
 		for (int i=0; i<keys.length; i++) {
 			final int key = i;
 			setHandler(keys[i], (Boolean pressed) -> {
@@ -99,19 +99,19 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 		lastPressedKey = null;
 	}
 
-	void setHandler(MidiConfig.Assign control, Consumer<Boolean> handler) {
-		if (control == null)
+	void setHandler(MidiConfig.Input input, Consumer<Boolean> handler) {
+		if (input == null)
 			return;
-		switch (control.type) {
+		switch (input.type) {
 			case NOTE:
-				if (control.value >= 0 && control.value < MaxKeys) {
-					keyMap[control.value] = handler;
+				if (input.value >= 0 && input.value < MaxKeys) {
+					keyMap[input.value] = handler;
 				}
 				break;
 			case PITCH_BEND:
-				if (control.value > 0) {
+				if (input.value > 0) {
 					pitchBendUp = handler;
-				} else if (control.value < 0) {
+				} else if (input.value < 0) {
 					pitchBendDown = handler;
 				}
 				break;
@@ -127,7 +127,7 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 	}
 
 	void noteOn(int num) {
-		lastPressedKey = new MidiConfig.Assign(MidiConfig.Assign.Type.NOTE, num);
+		lastPressedKey = new MidiConfig.Input(MidiConfig.Input.Type.NOTE, num);
 		if (keyMap[num] != null) {
 			keyMap[num].accept(true);
 		}
@@ -135,7 +135,7 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 
 	void onPitchBendUp(boolean pressed) {
 		if (pressed) {
-			lastPressedKey = new MidiConfig.Assign(MidiConfig.Assign.Type.PITCH_BEND, 1);
+			lastPressedKey = new MidiConfig.Input(MidiConfig.Input.Type.PITCH_BEND, 1);
 		}
 		if (pitchBendUp != null) {
 			pitchBendUp.accept(pressed);
@@ -144,7 +144,7 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 
 	void onPitchBendDown(boolean pressed) {
 		if (pressed) {
-			lastPressedKey = new MidiConfig.Assign(MidiConfig.Assign.Type.PITCH_BEND, -1);
+			lastPressedKey = new MidiConfig.Input(MidiConfig.Input.Type.PITCH_BEND, -1);
 		}
 		if (pitchBendDown != null) {
 			pitchBendDown.accept(pressed);
@@ -155,11 +155,11 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 		return System.nanoTime() / 1000000 - starttime;
 	}
 
-	public MidiConfig.Assign getLastPressedKey() {
+	public MidiConfig.Input getLastPressedKey() {
 		return lastPressedKey;
 	}
 
-	public void setLastPressedKey(MidiConfig.Assign key) {
+	public void setLastPressedKey(MidiConfig.Input key) {
 		lastPressedKey = key;
 	}
 
