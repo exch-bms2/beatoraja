@@ -40,6 +40,9 @@ public class KeyConfiguration extends MainState {
 			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 } };
 	private static final int[][] BMKEYSA = { { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 },
 			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }, { 0, 1, 2, 3, 4, 5, 6, 7, 8, 20, 21, 22, 23, 24, 25, 26, 27, 28, 9, 10 } };
+	private static final int[][] MIDIKEYSA = { { 0, 1, 2, 3, 4, 5, 6, 7, 8, 18, 19 },
+			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 18, 19 },
+			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 } };
 
 	private static final String[] SELECTKEY = {"2dx sp", "popn", "2dx dp"};
 
@@ -72,14 +75,17 @@ public class KeyConfiguration extends MainState {
 		BMSPlayerInputProcessor input = main.getInputProcessor();
 		PlayerConfig config = getMainController().getPlayerResource().getPlayerConfig();
 		BMControllerInputProcessor[] controllers = input.getBMInputProcessor();
+		MidiInputProcessor midiinput = input.getMidiInputProcessor();
 
 		String[] keys = KEYS[mode];
 		int[] keysa = KEYSA[mode];
 		int[] bmkeysa = BMKEYSA[mode];
+		int[] midikeysa = MIDIKEYSA[mode];
 		final PlayConfig pc = (mode == 0 ? config.getMode7() : (mode == 1 ? config.getMode9() : config
 				.getMode14()));
 		int[] keyassign = pc.getKeyassign();
 		ControllerConfig[] controller = pc.getController();
+		PlayConfig.MidiConfig midiconfig = pc.getMidiConfig();
 
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -140,6 +146,7 @@ public class KeyConfiguration extends MainState {
 			for (BMControllerInputProcessor bmc : controllers) {
 				bmc.setLastPressedButton(-1);
 			}
+			midiinput.clearLastPressedKey();
 			keyinput = true;
 		}
 
@@ -159,6 +166,10 @@ public class KeyConfiguration extends MainState {
 				break;
 			}
 		}
+		if (keyinput && midiinput.hasLastPressedKey()) {
+			midiconfig.setAssignment(midikeysa[cursorpos], midiinput.getLastPressedKey());
+			keyinput = false;
+		}
 
 		sprite.begin();
 		titlefont.setColor(Color.CYAN);
@@ -166,12 +177,13 @@ public class KeyConfiguration extends MainState {
 		titlefont.setColor(Color.YELLOW);
 		titlefont.draw(sprite, "Key Board", 180, 620);
 		titlefont.draw(sprite, "Controller", 330, 620);
+		titlefont.draw(sprite, "MIDI", 480, 620);
 		titlefont.setColor(Color.ORANGE);
 		titlefont.draw(sprite, "Music Select (press [1] to change) :   " + SELECTKEY[config.getMusicselectinput()], 600, 620);
 		
-		titlefont.draw(sprite, "Contoller Device 1 (press [2] to change) :   " + pc.getController()[0].getName(), 500, 500);
+		titlefont.draw(sprite, "Controller Device 1 (press [2] to change) :   " + pc.getController()[0].getName(), 600, 500);
 		if(pc.getController().length > 1) {
-			titlefont.draw(sprite, "Contoller Device 2 (press [3] to change) :   " + pc.getController()[1].getName(), 500, 300);			
+			titlefont.draw(sprite, "Controller Device 2 (press [3] to change) :   " + pc.getController()[1].getName(), 600, 300);
 		}
 
 		sprite.end();
@@ -181,6 +193,7 @@ public class KeyConfiguration extends MainState {
 				shape.setColor(keyinput ? Color.RED : Color.BLUE);
 				shape.rect(200, 576 - i * 24, 80, 24);
 				shape.rect(350, 576 - i * 24, 80, 24);
+				shape.rect(500, 576 - i * 24, 80, 24);
 				shape.end();
 			}
 			sprite.begin();
@@ -191,6 +204,8 @@ public class KeyConfiguration extends MainState {
 			int index = bmkeysa[i];
 			
 			titlefont.draw(sprite, BMControllerInputProcessor.BMKeys.toString(controller[index / 20].getAssign()[index % 20]), 352, 598 - i * 24);
+
+			titlefont.draw(sprite, midiconfig.getAssignment(midikeysa[i]).toString(), 502, 598 - i * 24);
 			sprite.end();
 		}
 

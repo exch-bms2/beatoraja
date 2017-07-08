@@ -166,7 +166,8 @@ public class BMSPlayer extends MainState {
 		if (replay != null) {
 			PatternModifier.modify(model, Arrays.asList(replay.pattern));
 		} else if (resource.getReplayData().pattern != null) {
-			PatternModifier.modify(model, Arrays.asList(resource.getReplayData().pattern));
+			pattern = Arrays.asList(resource.getReplayData().pattern);
+			PatternModifier.modify(model, pattern);
 			Logger.getGlobal().info("譜面オプション : 保存された譜面変更ログから譜面再現");
 		} else if (autoplay != 2) {
 			if(model.getMode().player == 2) {

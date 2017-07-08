@@ -11,6 +11,7 @@ import bms.player.beatoraja.select.*;
 import bms.player.beatoraja.skin.*;
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Rectangle;
 
 /**
  * LR2セレクトスキンローダー
@@ -19,10 +20,15 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
  */
 public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 
+	// TODO コピペのリファクタリング
+
 	private SkinBar skinbar = new SkinBar(1);
 
 	private TextureRegion[][] barimage = new TextureRegion[10][];
 	private int barcycle;
+
+	private Rectangle gauge = new Rectangle();
+	private SkinNoteDistributionGraph noteobj;
 
 	/**
 	 * LR2のLAMP IDとの対応
@@ -231,6 +237,96 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 				}
 			}
 		});
+		// 拡張定義。段位のトロフィー画像を定義する。0:銅、1:銀、2:金
+		addCommandWord(new CommandWord("SRC_BAR_TROPHY") {
+
+			@Override
+			public void execute(String[] str) {
+				int[] values = parseInt(str);
+				TextureRegion[] images = getSourceImage(values);
+				if (images != null) {
+					skinbar.getTrophy()[values[1]] = new SkinImage(images, values[10], values[9]);
+					// System.out.println("Nowjudge Added - " + (5 -
+					// values[1]));
+				}
+			}
+		});
+		addCommandWord(new CommandWord("DST_BAR_TROPHY") {
+			@Override
+			public void execute(String[] str) {
+				int[] values = parseInt(str);
+				if (skinbar.getTrophy()[values[1]] != null) {
+					if (values[5] < 0) {
+						values[3] += values[5];
+						values[5] = -values[5];
+					}
+					if (values[6] < 0) {
+						values[4] += values[6];
+						values[6] = -values[6];
+					}
+					skinbar.getTrophy()[values[1]].setDestination(values[2], values[3] * dstw / srcw,
+							-(values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
+							values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
+							values[12], values[13], values[14], values[15], values[16], values[17], values[18],
+							values[19], values[20]);
+				}
+			}
+		});
+
+		// 拡張定義。楽曲バーのラベルを定義する。0:LNあり, 1:ランダム分岐あり、2:地雷あり
+		addCommandWord(new CommandWord("SRC_BAR_LABEL") {
+
+			@Override
+			public void execute(String[] str) {
+				int[] values = parseInt(str);
+				TextureRegion[] images = getSourceImage(values);
+				if (images != null) {
+					skinbar.getLabel()[values[1]] = new SkinImage(images, values[10], values[9]);
+					// System.out.println("Nowjudge Added - " + (5 -
+					// values[1]));
+				}
+			}
+		});
+		addCommandWord(new CommandWord("DST_BAR_LABEL") {
+			@Override
+			public void execute(String[] str) {
+				int[] values = parseInt(str);
+				if (skinbar.getLabel()[values[1]] != null) {
+					if (values[5] < 0) {
+						values[3] += values[5];
+						values[5] = -values[5];
+					}
+					if (values[6] < 0) {
+						values[4] += values[6];
+						values[6] = -values[6];
+					}
+					skinbar.getLabel()[values[1]].setDestination(values[2], values[3] * dstw / srcw,
+							-(values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
+							values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
+							values[12], values[13], values[14], values[15], values[16], values[17], values[18],
+							values[19], values[20]);
+				}
+			}
+		});
+		addCommandWord(new CommandWord("SRC_NOTECHART") {
+			@Override
+			public void execute(String[] str) {
+				int[] values = parseInt(str);
+				noteobj = new SkinNoteDistributionGraph(values[1]);
+				gauge = new Rectangle(0, 0, values[11], values[12]);
+			}
+		});
+		addCommandWord(new CommandWord("DST_NOTECHART") {
+			@Override
+			public void execute(String[] str) {
+				gauge.x = Integer.parseInt(str[3]);
+				gauge.y = src.height - Integer.parseInt(str[4]);
+				skin.setDestination(noteobj, 0, gauge.x, gauge.y, gauge.width, gauge.height, 0, 255, 255, 255, 255, 0, 0, 0,
+						0, 0, 0, 0, 0, 0);
+				skin.add(noteobj);
+			}
+		});
+
 		addCommandWord(new CommandWord("SRC_BAR_TITLE") {
 			@Override
 			public void execute(String[] str) {

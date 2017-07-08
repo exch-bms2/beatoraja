@@ -19,7 +19,7 @@ import bms.player.beatoraja.ReplayData;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.skin.SkinType;
 
-public class GradeResult extends MainState {
+public class CourseResult extends MainState {
 
 	private int oldclear;
 	private int oldexscore;
@@ -32,7 +32,7 @@ public class GradeResult extends MainState {
 	public static final int SOUND_CLEAR = 0;
 	public static final int SOUND_FAIL = 1;
 
-	public GradeResult(MainController main) {
+	public CourseResult(MainController main) {
 		super(main);
 	}
 
@@ -147,7 +147,7 @@ public class GradeResult extends MainState {
                     || ((keystate[0] && keytime[0] != 0) || (keystate[2] && keytime[2] != 0)
                     || (keystate[4] && keytime[4] != 0) || (keystate[6] && keytime[6] != 0))) {
                 keytime[0] = keytime[2] = keytime[4] = keytime[6] = 0;
-                if (((MusicResultSkin) getSkin()).getRankTime() != 0 && getTimer()[TIMER_RESULT_UPDATESCORE] == Long.MIN_VALUE) {
+                if (((CourseResultSkin) getSkin()).getRankTime() != 0 && getTimer()[TIMER_RESULT_UPDATESCORE] == Long.MIN_VALUE) {
                     getTimer()[TIMER_RESULT_UPDATESCORE] = time;
                 } else {
                     getTimer()[TIMER_FADEOUT] = time;

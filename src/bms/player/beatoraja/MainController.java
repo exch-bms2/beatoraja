@@ -8,6 +8,7 @@ import java.util.Calendar;
 import java.util.logging.Logger;
 
 import bms.player.beatoraja.play.TargetProperty;
+import bms.player.beatoraja.skin.SkinLoader;
 import com.badlogic.gdx.Graphics;
 
 import bms.player.beatoraja.audio.*;
@@ -16,7 +17,7 @@ import bms.player.beatoraja.decide.MusicDecide;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.ir.IRConnection;
 import bms.player.beatoraja.play.BMSPlayer;
-import bms.player.beatoraja.result.GradeResult;
+import bms.player.beatoraja.result.CourseResult;
 import bms.player.beatoraja.result.MusicResult;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.song.SQLiteSongDatabaseAccessor;
@@ -44,11 +45,17 @@ public class MainController extends ApplicationAdapter {
 
 	public static final String VERSION = "beatoraja 0.4.2";
 
+	/**
+	 *
+	 */
+	private final long boottime = System.currentTimeMillis();
+	private final Calendar cl = Calendar.getInstance();
+
 	private BMSPlayer bmsplayer;
 	private MusicDecide decide;
 	private MusicSelector selector;
 	private MusicResult result;
-	private GradeResult gresult;
+	private CourseResult gresult;
 	private KeyConfiguration keyconfig;
 
 	private AudioDriver audio;
@@ -244,7 +251,7 @@ public class MainController extends ApplicationAdapter {
 		selector = new MusicSelector(this, songUpdated);
 		decide = new MusicDecide(this);
 		result = new MusicResult(this);
-		gresult = new GradeResult(this);
+		gresult = new CourseResult(this);
 		keyconfig = new KeyConfiguration(this);
 		if (bmsfile != null) {
 			if(resource.setBMSFile(bmsfile, auto)) {
@@ -409,6 +416,7 @@ public class MainController extends ApplicationAdapter {
 		}
 		resource.dispose();
 		input.dispose();
+		SkinLoader.getResource().dispose();
 	}
 
 	@Override
@@ -460,6 +468,14 @@ public class MainController extends ApplicationAdapter {
 		return ir;
 	}
 
+	public long getPlayTime() {
+		return System.currentTimeMillis() - boottime;
+	}
+
+	public Calendar getCurrnetTime() {
+		cl.setTimeInMillis(System.currentTimeMillis());
+		return cl;
+	}
 	/**
 	 * スクリーンショット処理用スレッド
 	 * 

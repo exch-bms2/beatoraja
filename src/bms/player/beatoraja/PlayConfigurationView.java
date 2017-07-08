@@ -34,7 +34,7 @@ import bms.player.beatoraja.play.JudgeAlgorithm;
 import bms.player.beatoraja.skin.SkinHeader;
 import bms.player.beatoraja.skin.SkinHeader.CustomFile;
 import bms.player.beatoraja.skin.SkinHeader.CustomOption;
-import bms.player.beatoraja.skin.SkinLoader;
+import bms.player.beatoraja.skin.JSONSkinLoader;
 import bms.player.beatoraja.skin.SkinType;
 import bms.player.beatoraja.skin.lr2.LR2SkinHeaderLoader;
 import bms.player.beatoraja.song.SQLiteSongDatabaseAccessor;
@@ -716,9 +716,8 @@ public class PlayConfigurationView implements Initializable {
 			SongDatabaseAccessor songdb = new SQLiteSongDatabaseAccessor(Paths.get("songdata.db").toString(),
 					config.getBmsroot());
 			String player = "playerscore";
-			ScoreDatabaseAccessor scoredb = new ScoreDatabaseAccessor(new File(".").getAbsoluteFile().getParent(), "/",
-					"/");
-			scoredb.createTable(player);
+			ScoreDatabaseAccessor scoredb = new ScoreDatabaseAccessor(player);
+			scoredb.createTable();
 
 			try (Connection con = DriverManager.getConnection("jdbc:sqlite:" + dir.getPath())) {
 				QueryRunner qr = new QueryRunner();
@@ -742,14 +741,14 @@ public class PlayConfigurationView implements Initializable {
 						sd.setClearcount((int) score.get("clearcount"));
 						sd.setNotes(song[0].getNotes());
 						sd.setSha256(song[0].getSha256());
-						IRScoreData oldsd = scoredb.getScoreData(player, sd.getSha256(), 0);
+						IRScoreData oldsd = scoredb.getScoreData(sd.getSha256(), 0);
 						sd.setScorehash("LR2");
 						if (oldsd == null || oldsd.getClear() <= sd.getClear()) {
 							result.add(sd);
 						}
 					}
 				}
-				scoredb.setScoreData(player, result.toArray(new IRScoreData[result.size()]));
+				scoredb.setScoreData(result.toArray(new IRScoreData[result.size()]));
 			} catch (Exception e) {
 				Logger.getGlobal().severe("スコア移行時の例外:" + e.getMessage());
 			}
@@ -837,7 +836,7 @@ class SkinConfigurationView {
 		scan(Paths.get("skin"), lr2skinpaths);
 		for (Path path : lr2skinpaths) {
 			if (path.toString().toLowerCase().endsWith(".json")) {
-				SkinLoader loader = new SkinLoader();
+				JSONSkinLoader loader = new JSONSkinLoader();
 				SkinHeader header = loader.loadHeader(path);
 				if (header != null) {
 					lr2skinheader.add(header);

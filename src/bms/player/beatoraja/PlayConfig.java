@@ -163,7 +163,7 @@ public class PlayConfig {
 
 	public static class MidiConfig {
 
-		public static class Assign {
+		public static class Input {
 			public enum Type {
 				NOTE,
 				PITCH_BEND,
@@ -171,34 +171,74 @@ public class PlayConfig {
 			}
 			public Type type;
 			public int value;
-			public Assign() {
+			public Input() {
 				this.type = Type.NOTE;
 				this.value = 0;
 			}
-			public Assign(Type type, int value) {
+			public Input(Input input) {
+				this.type = input.type;
+				this.value = input.value;
+			}
+			public Input(Type type, int value) {
 				this.type = type;
 				this.value = value;
 			}
+			public String toString() {
+				switch (type) {
+				case NOTE:
+					return "NOTE " + value;
+				case PITCH_BEND:
+					return "PITCH " + (value > 0 ? "+" : "-");
+				case CONTROL_CHANGE:
+					return "CC " + value;
+				default:
+					return null;
+				}
+			}
 		}
 
-		private Assign[] keys;
-		private Assign start;
-		private Assign select;
+		private Input[] keys;
+		private Input start;
+		private Input select;
 
-		public Assign[] getKeys() { return keys; }
-		public Assign getStart() { return start; }
-		public Assign getSelect() { return select; }
+		public Input[] getKeys() { return keys; }
+		public Input getStart() { return start; }
+		public Input getSelect() { return select; }
+		public void setStart(Input input) { start = input; }
+		public void setSelect(Input input) { select = input; }
 
 		public MidiConfig() {
 			// 7keys
-			keys = new Assign[9];
+			keys = new Input[9];
 			for (int i=0; i<7; i++) {
-				keys[i] = new Assign(Assign.Type.NOTE, 53 + i);
+				keys[i] = new Input(Input.Type.NOTE, 53 + i);
 			}
-			keys[7] = new Assign(Assign.Type.NOTE, 49);
-			keys[8] = new Assign(Assign.Type.NOTE, 51);
-			start = new Assign(Assign.Type.NOTE, 47);
-			select = new Assign(Assign.Type.NOTE, 48);
+			keys[7] = new Input(Input.Type.NOTE, 49);
+			keys[8] = new Input(Input.Type.NOTE, 51);
+			start = new Input(Input.Type.NOTE, 47);
+			select = new Input(Input.Type.NOTE, 48);
+		}
+
+		public Input getAssignment(int index) {
+			if (index < keys.length) {
+				return keys[index];
+			} else if (index == 18) {
+				return start;
+			} else if (index == 19) {
+				return select;
+			} else {
+				return null;
+			}
+		}
+
+		public void setAssignment(int index, Input input) {
+			if (index < keys.length) {
+				keys[index] = input;
+			} else if (index == 18) {
+				start = input;
+			} else if (index == 19) {
+				select = input;
+			}
 		}
 
 		public static MidiConfig default7() {
@@ -207,33 +247,33 @@ public class PlayConfig {
 
 		public static MidiConfig default14() {
 			MidiConfig config = new MidiConfig();
-			config.keys = new Assign[18];
+			config.keys = new Input[18];
 			for (int i=0; i<7; i++) {
 				// 1P keys
-				config.keys[i] = new Assign(Assign.Type.NOTE, 53 + i);
+				config.keys[i] = new Input(Input.Type.NOTE, 53 + i);
 				// 2P keys
-				config.keys[9 + i] = new Assign(Assign.Type.NOTE, 65 + i);
+				config.keys[9 + i] = new Input(Input.Type.NOTE, 65 + i);
 			}
 			// 1P turntables
-			config.keys[7] = new Assign(Assign.Type.NOTE, 49);
-			config.keys[8] = new Assign(Assign.Type.NOTE, 51);
+			config.keys[7] = new Input(Input.Type.NOTE, 49);
+			config.keys[8] = new Input(Input.Type.NOTE, 51);
 			// 2P turntables
-			config.keys[16] = new Assign(Assign.Type.NOTE, 73);
-			config.keys[17] = new Assign(Assign.Type.NOTE, 75);
+			config.keys[16] = new Input(Input.Type.NOTE, 73);
+			config.keys[17] = new Input(Input.Type.NOTE, 75);
 			// start/select
-			config.start = new Assign(Assign.Type.NOTE, 47);
-			config.select = new Assign(Assign.Type.NOTE, 48);
+			config.start = new Input(Input.Type.NOTE, 47);
+			config.select = new Input(Input.Type.NOTE, 48);
 			return config;
 		}
 
 		public static MidiConfig default9() {
 			MidiConfig config = new MidiConfig();
-			config.keys = new Assign[9];
+			config.keys = new Input[9];
 			for (int i=0; i<9; i++) {
-				config.keys[i] = new Assign(Assign.Type.NOTE, 52 + i);
+				config.keys[i] = new Input(Input.Type.NOTE, 52 + i);
 			}
-			config.start = new Assign(Assign.Type.NOTE, 47);
-			config.select = new Assign(Assign.Type.NOTE, 48);
+			config.start = new Input(Input.Type.NOTE, 47);
+			config.select = new Input(Input.Type.NOTE, 48);
 			return config;
 		}
 

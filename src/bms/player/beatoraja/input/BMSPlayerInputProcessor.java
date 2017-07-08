@@ -303,6 +303,10 @@ public class BMSPlayerInputProcessor {
 		return bminput;
 	}
 
+	public MidiInputProcessor getMidiInputProcessor() {
+		return midiinput;
+	}
+
 	public int getMouseX() {
 		return mousex;
 	}

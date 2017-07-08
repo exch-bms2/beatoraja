@@ -20,6 +20,9 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 
 	int pitch = 0;
 
+	boolean lastPressedKeyAvailable = false;
+	MidiConfig.Input lastPressedKey = new MidiConfig.Input();
+
 	// pitch value: -8192 ~ 8191
 	final int pitchThreshold = 8192 / 32;
 
@@ -42,9 +45,7 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 			}
 		}
 
-		for (int i=0; i<MaxKeys; i++) {
-			keyMap[i] = null;
-		}
+		clearHandlers();
 	}
 
 	public void open() {
@@ -65,11 +66,10 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 	}
 
 	public void setConfig(MidiConfig config) {
-		for (int i=0; i<MaxKeys; i++) {
-			keyMap[i] = null;
-		}
+		clear();
+		clearHandlers();
 
-		MidiConfig.Assign[] keys = config.getKeys();
+		MidiConfig.Input[] keys = config.getKeys();
 		for (int i=0; i<keys.length; i++) {
 			final int key = i;
 			setHandler(keys[i], (Boolean pressed) -> {
@@ -91,21 +91,30 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 
 	public void clear() {
 		pitch = 0;
+		lastPressedKeyAvailable = false;
 	}
 
-	void setHandler(MidiConfig.Assign control, Consumer<Boolean> handler) {
-		if (control == null)
+	public void clearHandlers() {
+		for (int i=0; i<MaxKeys; i++) {
+			keyMap[i] = null;
+		}
+		pitchBendUp = null;
+		pitchBendDown = null;
+	}
+
+	void setHandler(MidiConfig.Input input, Consumer<Boolean> handler) {
+		if (input == null)
 			return;
-		switch (control.type) {
+		switch (input.type) {
 			case NOTE:
-				if (control.value >= 0 && control.value < MaxKeys) {
-					keyMap[control.value] = handler;
+				if (input.value >= 0 && input.value < MaxKeys && keyMap[input.value] == null) {
+					keyMap[input.value] = handler;
 				}
 				break;
 			case PITCH_BEND:
-				if (control.value > 0) {
+				if (input.value > 0 && pitchBendUp == null) {
 					pitchBendUp = handler;
-				} else if (control.value < 0) {
+				} else if (input.value < 0 && pitchBendDown == null) {
 					pitchBendDown = handler;
 				}
 				break;
@@ -121,13 +130,50 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 	}
 
 	void noteOn(int num) {
+		lastPressedKeyAvailable = true;
+		lastPressedKey.type = MidiConfig.Input.Type.NOTE;
+		lastPressedKey.value = num;
 		if (keyMap[num] != null) {
 			keyMap[num].accept(true);
 		}
 	}
 
+	void onPitchBendUp(boolean pressed) {
+		if (pressed) {
+			lastPressedKeyAvailable = true;
+			lastPressedKey.type = MidiConfig.Input.Type.PITCH_BEND;
+			lastPressedKey.value = 1;
+		}
+		if (pitchBendUp != null) {
+			pitchBendUp.accept(pressed);
+		}
+	}
+
+	void onPitchBendDown(boolean pressed) {
+		if (pressed) {
+			lastPressedKeyAvailable = true;
+			lastPressedKey.type = MidiConfig.Input.Type.PITCH_BEND;
+			lastPressedKey.value = -1;
+		}
+		if (pitchBendDown != null) {
+			pitchBendDown.accept(pressed);
+		}
+	}
+
 	long currentTime() {
 		return System.nanoTime() / 1000000 - starttime;
+	}
+
+	public boolean hasLastPressedKey() {
+		return lastPressedKeyAvailable;
+	}
+
+	public MidiConfig.Input getLastPressedKey() {
+		return lastPressedKeyAvailable ? new MidiConfig.Input(lastPressedKey) : null;
+	}
+
+	public void clearLastPressedKey() {
+		lastPressedKeyAvailable = false;
 	}
 
 	class MidiReceiver implements Receiver {
@@ -149,25 +195,25 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 					case ShortMessage.PITCH_BEND: {
 						int newPitch = (int)(short)((sm.getData1() & 0x7f) | ((sm.getData2() & 0x7f) << 7)) - 0x2000;
 						if (newPitch > pitchThreshold) {
-							if (pitch < -pitchThreshold && pitchBendDown != null) {
-								pitchBendDown.accept(false);
+							if (pitch < -pitchThreshold) {
+								onPitchBendDown(false);
 							}
-							if (pitch <= pitchThreshold && pitchBendUp != null) {
-								pitchBendUp.accept(true);
+							if (pitch <= pitchThreshold) {
+								onPitchBendUp(true);
 							}
 						} else if (newPitch < -pitchThreshold) {
-							if (pitch > pitchThreshold && pitchBendUp != null) {
-								pitchBendUp.accept(false);
+							if (pitch > pitchThreshold) {
+								onPitchBendUp(false);
 							}
-							if (pitch >= -pitchThreshold && pitchBendDown != null) {
-								pitchBendDown.accept(true);
+							if (pitch >= -pitchThreshold) {
+								onPitchBendDown(true);
 							}
 						} else {
-							if (pitch > pitchThreshold && pitchBendUp != null) {
-								pitchBendUp.accept(false);
+							if (pitch > pitchThreshold) {
+								onPitchBendUp(false);
 							}
-							if (pitch < -pitchThreshold && pitchBendDown != null) {
-								pitchBendDown.accept(false);
+							if (pitch < -pitchThreshold) {
+								onPitchBendDown(false);
 							}
 						}
 						pitch = newPitch;
