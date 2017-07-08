@@ -8,6 +8,7 @@ import javax.imageio.ImageIO;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.PixmapIO;
 
 /**
  * Pixmapリソースプール
@@ -15,8 +16,6 @@ import com.badlogic.gdx.graphics.Pixmap;
  * @author exch
  */
 public class PixmapResourcePool extends ResourcePool<String, Pixmap> {
-
-	public static final String[] pic_extension = { "jpg", "jpeg", "gif", "bmp", "png", "tga" };
 
 	public PixmapResourcePool() {
 		super(1);
@@ -31,7 +30,13 @@ public class PixmapResourcePool extends ResourcePool<String, Pixmap> {
 		final Pixmap pixmap = loadPicture(path);
 		return pixmap != null ? convert(pixmap) : null;
 	}
-	
+
+	/**
+	 * Pixmapをload時に変換する。
+	 *
+	 * @param pixmap
+	 * @return
+	 */
 	protected Pixmap convert(Pixmap pixmap) {
 		return pixmap;
 	}
@@ -48,30 +53,30 @@ public class PixmapResourcePool extends ResourcePool<String, Pixmap> {
 	 */
 	public static Pixmap loadPicture(String path) {
 		Pixmap tex = null;
-		for (String mov : pic_extension) {
-			if (path.toLowerCase().endsWith(mov)) {
-				try {
-					tex = new Pixmap(Gdx.files.internal(path));
-				} catch (Throwable e) {
-					Logger.getGlobal().warning("BGAファイル読み込み失敗。" + e.getMessage());
-				}
-				if (tex == null) {
-					Logger.getGlobal().warning("BGAファイル読み込み再試行:" + path);
-					try {
-						// TODO 一部のbmsはImageIO.readで失敗する(e.g. past glow)。別の画像デコーダーが必要
-						BufferedImage bi = ImageIO.read(new File(path));
+		try {
+			if(path.endsWith(".cim")) {
+				tex = PixmapIO.readCIM(Gdx.files.internal(path));
+			} else {
+				tex = new Pixmap(Gdx.files.internal(path));				
+			}
+		} catch (Throwable e) {
+			Logger.getGlobal().warning("BGAファイル読み込み失敗。" + e.getMessage());
+		}
+		if (tex == null) {
+			Logger.getGlobal().warning("BGAファイル読み込み再試行:" + path);
+			try {
+				// TODO 一部のbmsはImageIO.readで失敗する(e.g. past glow)。別の画像デコーダーが必要
+				BufferedImage bi = ImageIO.read(new File(path));
 //						System.out.println("width : " + bi.getWidth() + " height : " + bi.getHeight() + " type : " + bi.getType());
-						tex = new Pixmap(bi.getWidth(), bi.getHeight(), Pixmap.Format.RGBA8888);
-						for(int x = 0;x < bi.getWidth();x++) {
-							for(int y = 0;y < bi.getHeight();y++) {
-								tex.drawPixel(x, y, (bi.getRGB(x, y) << 8 | 0x000000ff));
-							}							
-						}						
-					} catch (Throwable e) {
-						Logger.getGlobal().warning("BGAファイル読み込み失敗。" + e.getMessage());
-						e.printStackTrace();
+				tex = new Pixmap(bi.getWidth(), bi.getHeight(), Pixmap.Format.RGBA8888);
+				for(int x = 0;x < bi.getWidth();x++) {
+					for(int y = 0;y < bi.getHeight();y++) {
+						tex.drawPixel(x, y, (bi.getRGB(x, y) << 8 | 0x000000ff));
 					}
 				}
+			} catch (Throwable e) {
+				Logger.getGlobal().warning("BGAファイル読み込み失敗。" + e.getMessage());
+				e.printStackTrace();
 			}
 		}
 
