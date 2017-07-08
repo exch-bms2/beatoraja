@@ -1,10 +1,16 @@
 package bms.player.beatoraja.audio;
 
 import java.io.IOException;
-import java.nio.file.*;
-import java.util.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.HashSet;
+import java.util.Set;
 
-import com.synthbot.jasiohost.*;
+import com.synthbot.jasiohost.AsioChannel;
+import com.synthbot.jasiohost.AsioDriver;
+import com.synthbot.jasiohost.AsioDriverListener;
+import com.synthbot.jasiohost.AsioDriverState;
 
 import bms.player.beatoraja.Config;
 
@@ -100,7 +106,7 @@ public class ASIODriver extends AbstractAudioDriver<PCM> implements AsioDriverLi
 	protected synchronized void play(PCM id, float volume) {
 		mixer.put(id, volume, false);
 	}
-	
+
 	@Override
 	protected void play(AudioElement<PCM> id, float volume, boolean loop) {
 		id.id = mixer.put(id.audio, volume, loop);
@@ -108,8 +114,7 @@ public class ASIODriver extends AbstractAudioDriver<PCM> implements AsioDriverLi
 
 	@Override
 	protected void setVolume(AudioElement<PCM> id, float volume) {
-		// TODO Auto-generated method stub
-		
+		mixer.setVolume(id.id, volume);
 	}
 
 	@Override
@@ -179,7 +184,7 @@ public class ASIODriver extends AbstractAudioDriver<PCM> implements AsioDriverLi
 		 * ミキサー入力
 		 */
 		private MixerInput[] inputs;
-		
+
 		private long idcount;
 
 		public AudioMixer(int channels) {
@@ -203,14 +208,14 @@ public class ASIODriver extends AbstractAudioDriver<PCM> implements AsioDriverLi
 			}
 			return -1;
 		}
-		
+
 		public void setVolume(long id, float volume) {
 			for (int i = 0; i < inputs.length; i++) {
 				if (inputs[i].id == id) {
 					inputs[i].volume = volume;
 					break;
 				}
-			}			
+			}
 		}
 
 		public void stop(PCM id) {
