@@ -16,6 +16,7 @@ import bms.model.BMSGenerator;
 import bms.model.BMSModel;
 import bms.model.BMSONDecoder;
 import bms.player.beatoraja.audio.AudioDriver;
+import bms.player.beatoraja.input.BMSPlayerInputDevice;
 import bms.player.beatoraja.play.GrooveGauge;
 import bms.player.beatoraja.play.bga.BGAProcessor;
 import bms.player.beatoraja.song.SongData;
@@ -42,7 +43,7 @@ public class PlayerResource {
 
 	private int auto;
 
-	private int playDevice;
+	private BMSPlayerInputDevice playDevice;
 
 	private List<CourseData.CourseDataConstraint> constraint = new ArrayList();
 
@@ -395,11 +396,11 @@ public class PlayerResource {
 		return stagefile;
 	}
 
-	public int getPlayDevice() {
+	public BMSPlayerInputDevice getPlayDevice() {
 		return playDevice;
 	}
 
-	public void setPlayDevice(int playDevice) {
+	public void setPlayDevice(BMSPlayerInputDevice playDevice) {
 		this.playDevice = playDevice;
 	}
 }

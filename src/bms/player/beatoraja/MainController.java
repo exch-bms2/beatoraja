@@ -414,6 +414,7 @@ public class MainController extends ApplicationAdapter {
 			keyconfig.dispose();
 		}
 		resource.dispose();
+		input.dispose();
 		SkinLoader.getResource().dispose();
 	}
 

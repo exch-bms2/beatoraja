@@ -1,6 +1,7 @@
 package bms.player.beatoraja;
 
 import bms.model.Mode;
+import bms.player.beatoraja.input.BMSPlayerInputDevice;
 
 /**
  * スコアデータ
@@ -88,7 +89,7 @@ public class IRScoreData {
 	/**
 	 * 入力デバイス
 	 */
-	private int device;
+	private BMSPlayerInputDevice.Type deviceType;
 	
 	private int state;
 	
@@ -355,11 +356,11 @@ public class IRScoreData {
 	public void setGauge(int gauge) {
 		this.gauge = gauge;
 	}
-	public int getDevice() {
-		return device;
+	public BMSPlayerInputDevice.Type getDeviceType() {
+		return deviceType;
 	}
-	public void setDevice(int device) {
-		this.device = device;
+	public void setDeviceType(BMSPlayerInputDevice.Type deviceType) {
+		this.deviceType = deviceType;
 	}
 
 	public Mode getPlaymode() {

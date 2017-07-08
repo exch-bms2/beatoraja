@@ -244,13 +244,17 @@ public class BMSPlayer extends MainState {
 
 		final BMSPlayerInputProcessor input = main.getInputProcessor();
 		input.setMinimumInputDutration(conf.getInputduration());
-		input.setDisableDevice(autoplay == 0 || autoplay == 2
-				? (resource.getPlayDevice() == 0 ? new int[] { 1, 2 } : new int[] { 0 }) : null);
+		if (autoplay == 0 || autoplay == 0) {
+			input.setExclusiveDeviceType(resource.getPlayDevice().getType());
+		} else {
+			input.disableAllDevices();
+		}
 		PlayConfig pc = (model.getMode() == Mode.BEAT_5K || model.getMode() == Mode.BEAT_7K ? config.getMode7()
 				: (model.getMode() == Mode.BEAT_10K || model.getMode() == Mode.BEAT_14K ? config.getMode14()
 						: config.getMode9()));
 		input.setKeyassign(pc.getKeyassign());
 		input.setControllerConfig(pc.getController());
+		input.setMidiConfig(pc.getMidiConfig());
 		lanerender = new LaneRenderer(this, model);
 		for (CourseData.CourseDataConstraint i : resource.getConstraint()) {
 			if (i == NO_SPEED) {
@@ -375,7 +379,7 @@ public class BMSPlayer extends MainState {
 		// practice終了
 		case STATE_PRACTICE_FINISHED:
 			if (now - getTimer()[TIMER_FADEOUT] > skin.getFadeout()) {
-				input.setDisableDevice(new int[0]);
+				input.enableAllDevices();
 				getMainController().changeState(MainController.STATE_SELECTMUSIC);
 			}
 			break;
@@ -465,7 +469,7 @@ public class BMSPlayer extends MainState {
 				}
 				resource.setGauge(gaugelog);
 				resource.setGrooveGauge(gauge);
-				input.setDisableDevice(new int[0]);
+				input.enableAllDevices();
 				input.setStartTime(0);
 				if (autoplay == 2) {
 					state = STATE_PRACTICE;
@@ -492,7 +496,7 @@ public class BMSPlayer extends MainState {
 				saveConfig();
 				resource.setGauge(gaugelog);
 				resource.setGrooveGauge(gauge);
-				input.setDisableDevice(new int[0]);
+				input.enableAllDevices();
 				input.setStartTime(0);
 				if (autoplay == 2) {
 					state = STATE_PRACTICE;
@@ -596,7 +600,7 @@ public class BMSPlayer extends MainState {
 		replay.gauge = config.getGauge();
 
 		score.setMinbp(score.getEbd() + score.getLbd() + score.getEpr() + score.getLpr() + score.getEms() + score.getLms() + resource.getSongdata().getNotes() - notes);
-		score.setDevice(resource.getPlayDevice());
+		score.setDeviceType(resource.getPlayDevice().getType());
 		return score;
 	}
 

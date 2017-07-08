@@ -140,6 +140,7 @@ public class MusicSelector extends MainState {
 		PlayConfig pc = (config.getMusicselectinput() == 0 ? config.getMode7() : (config.getMusicselectinput() == 1 ? config.getMode9() : config.getMode14()));
 		input.setKeyassign(pc.getKeyassign());
 		input.setControllerConfig(pc.getController());
+		input.setMidiConfig(pc.getMidiConfig());
 		bar.updateBar();
 
 		loadSkin(SkinType.MUSIC_SELECT);
