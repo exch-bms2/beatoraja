@@ -166,7 +166,7 @@ public class KeyConfiguration extends MainState {
 				break;
 			}
 		}
-		if (keyinput && midiinput.getLastPressedKey() != null) {
+		if (keyinput && midiinput.hasLastPressedKey()) {
 			midiconfig.setAssignment(midikeysa[cursorpos], midiinput.getLastPressedKey());
 			keyinput = false;
 		}
@@ -181,9 +181,9 @@ public class KeyConfiguration extends MainState {
 		titlefont.setColor(Color.ORANGE);
 		titlefont.draw(sprite, "Music Select (press [1] to change) :   " + SELECTKEY[config.getMusicselectinput()], 600, 620);
 		
-		titlefont.draw(sprite, "Contoller Device 1 (press [2] to change) :   " + pc.getController()[0].getName(), 500, 500);
+		titlefont.draw(sprite, "Controller Device 1 (press [2] to change) :   " + pc.getController()[0].getName(), 600, 500);
 		if(pc.getController().length > 1) {
-			titlefont.draw(sprite, "Contoller Device 2 (press [3] to change) :   " + pc.getController()[1].getName(), 500, 300);			
+			titlefont.draw(sprite, "Controller Device 2 (press [3] to change) :   " + pc.getController()[1].getName(), 600, 300);
 		}
 
 		sprite.end();

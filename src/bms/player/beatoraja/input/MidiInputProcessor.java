@@ -20,7 +20,7 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 
 	int pitch = 0;
 
-	boolean hasLastPressedKey = false;
+	boolean lastPressedKeyAvailable = false;
 	MidiConfig.Input lastPressedKey = new MidiConfig.Input();
 
 	// pitch value: -8192 ~ 8191
@@ -91,7 +91,7 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 
 	public void clear() {
 		pitch = 0;
-		hasLastPressedKey = false;
+		lastPressedKeyAvailable = false;
 	}
 
 	public void clearHandlers() {
@@ -107,14 +107,14 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 			return;
 		switch (input.type) {
 			case NOTE:
-				if (input.value >= 0 && input.value < MaxKeys) {
+				if (input.value >= 0 && input.value < MaxKeys && keyMap[input.value] == null) {
 					keyMap[input.value] = handler;
 				}
 				break;
 			case PITCH_BEND:
-				if (input.value > 0) {
+				if (input.value > 0 && pitchBendUp == null) {
 					pitchBendUp = handler;
-				} else if (input.value < 0) {
+				} else if (input.value < 0 && pitchBendDown == null) {
 					pitchBendDown = handler;
 				}
 				break;
@@ -130,7 +130,7 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 	}
 
 	void noteOn(int num) {
-		hasLastPressedKey = true;
+		lastPressedKeyAvailable = true;
 		lastPressedKey.type = MidiConfig.Input.Type.NOTE;
 		lastPressedKey.value = num;
 		if (keyMap[num] != null) {
@@ -140,7 +140,7 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 
 	void onPitchBendUp(boolean pressed) {
 		if (pressed) {
-			hasLastPressedKey = true;
+			lastPressedKeyAvailable = true;
 			lastPressedKey.type = MidiConfig.Input.Type.PITCH_BEND;
 			lastPressedKey.value = 1;
 		}
@@ -151,7 +151,7 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 
 	void onPitchBendDown(boolean pressed) {
 		if (pressed) {
-			hasLastPressedKey = true;
+			lastPressedKeyAvailable = true;
 			lastPressedKey.type = MidiConfig.Input.Type.PITCH_BEND;
 			lastPressedKey.value = -1;
 		}
@@ -164,12 +164,16 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 		return System.nanoTime() / 1000000 - starttime;
 	}
 
+	public boolean hasLastPressedKey() {
+		return lastPressedKeyAvailable;
+	}
+
 	public MidiConfig.Input getLastPressedKey() {
-		return hasLastPressedKey ? lastPressedKey : null;
+		return lastPressedKeyAvailable ? new MidiConfig.Input(lastPressedKey) : null;
 	}
 
 	public void clearLastPressedKey() {
-		hasLastPressedKey = false;
+		lastPressedKeyAvailable = false;
 	}
 
 	class MidiReceiver implements Receiver {

@@ -175,6 +175,10 @@ public class PlayConfig {
 				this.type = Type.NOTE;
 				this.value = 0;
 			}
+			public Input(Input input) {
+				this.type = input.type;
+				this.value = input.value;
+			}
 			public Input(Type type, int value) {
 				this.type = type;
 				this.value = value;
