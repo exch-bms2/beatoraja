@@ -45,9 +45,7 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 			}
 		}
 
-		for (int i=0; i<MaxKeys; i++) {
-			keyMap[i] = null;
-		}
+		clearHandlers();
 	}
 
 	public void open() {
@@ -69,11 +67,7 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 
 	public void setConfig(MidiConfig config) {
 		clear();
-		for (int i=0; i<MaxKeys; i++) {
-			keyMap[i] = null;
-		}
-		pitchBendUp = null;
-		pitchBendDown = null;
+		clearHandlers();
 
 		MidiConfig.Input[] keys = config.getKeys();
 		for (int i=0; i<keys.length; i++) {
@@ -98,6 +92,14 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 	public void clear() {
 		pitch = 0;
 		hasLastPressedKey = false;
+	}
+
+	public void clearHandlers() {
+		for (int i=0; i<MaxKeys; i++) {
+			keyMap[i] = null;
+		}
+		pitchBendUp = null;
+		pitchBendDown = null;
 	}
 
 	void setHandler(MidiConfig.Input input, Consumer<Boolean> handler) {
