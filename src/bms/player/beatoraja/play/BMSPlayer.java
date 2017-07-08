@@ -245,6 +245,23 @@ public class BMSPlayer extends MainState {
 		}
 	}
 
+	public PlayConfig getPlayConfig(PlayerConfig config) {
+		switch (model.getMode()) {
+		case BEAT_7K:
+		case BEAT_5K:
+			return config.getMode7();
+		case BEAT_14K:
+		case BEAT_10K:
+			return config.getMode14();
+		case POPN_5K:
+		case POPN_9K:
+			return config.getMode9();
+		case KEYBOARD_24K:
+			return config.getMode24();
+		default:
+			return null;
+		}
+	}
 
 	public void create() {
 		final MainController main = getMainController();
@@ -559,9 +576,7 @@ public class BMSPlayer extends MainState {
 				return;
 			}
 		}
-		PlayConfig pc = (model.getMode() == Mode.BEAT_5K || model.getMode() == Mode.BEAT_7K ? resource.getPlayerConfig().getMode7()
-				: (model.getMode() == Mode.BEAT_10K || model.getMode() == Mode.BEAT_14K ? resource.getPlayerConfig().getMode14()
-						: resource.getPlayerConfig().getMode9()));
+		PlayConfig pc = getPlayConfig(resource.getPlayerConfig());
 		if (lanerender.getFixHispeed() != Config.FIX_HISPEED_OFF) {
 			pc.setDuration(lanerender.getGreenValue());
 		} else {

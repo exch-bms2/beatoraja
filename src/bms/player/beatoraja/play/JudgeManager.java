@@ -112,7 +112,6 @@ public class JudgeManager {
 
 	public void init(BMSModel model, PlayerResource resource) {
 		prevtime = 0;
-		judge = new int[20];
 		judgenow = new int[((PlaySkin) main.getSkin()).getJudgeregion()];
 		judgecombo = new int[((PlaySkin) main.getSkin()).getJudgeregion()];
 		score = new IRScoreData(model.getMode());
@@ -147,6 +146,7 @@ public class JudgeManager {
 				keyassign[i] = i;
 			}
 			pmsjudge = false;
+			break;
 		default:
 			keyassign = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 7 };
 			break;

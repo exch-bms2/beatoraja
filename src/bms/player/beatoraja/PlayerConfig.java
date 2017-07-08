@@ -7,6 +7,7 @@ import com.badlogic.gdx.Input.Keys;
 
 import bms.model.Mode;
 import bms.player.beatoraja.input.BMControllerInputProcessor.BMKeys;
+import bms.player.beatoraja.PlayConfig.MidiConfig;
 
 /**
  * プレイヤー毎の設定項目
@@ -116,6 +117,10 @@ public class PlayerConfig {
 			new int[][] {{ BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8, BMKeys.BUTTON_2,
 					BMKeys.BUTTON_5, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN, BMKeys.BUTTON_9, BMKeys.BUTTON_10 }},
 			PlayConfig.MidiConfig.default9());
+
+	private PlayConfig mode24 = new PlayConfig(
+			new int[] { }, new int[][] {},
+			MidiConfig.default24());
 
 	private int musicselectinput = 0;
 
@@ -297,6 +302,14 @@ public class PlayerConfig {
 
 	public void setMode9(PlayConfig mode9) {
 		this.mode9 = mode9;
+	}
+
+	public PlayConfig getMode24() {
+		return mode24;
+	}
+
+	public void setMode24(PlayConfig mode24) {
+		this.mode24 = mode24;
 	}
 
 	public void setMode(Mode m)  {
