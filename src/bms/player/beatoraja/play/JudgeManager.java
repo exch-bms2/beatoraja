@@ -230,7 +230,7 @@ public class JudgeManager {
 					}
 					if (note instanceof LongNote) {
 						final LongNote ln = (LongNote) note;
-						if (!ln.isEnd() && ln.getState() == 0) {
+						if (!ln.isEnd() && ln.getState() == 0 && processing[lane] == null) {
 							main.play(note, config.getKeyvolume());
 							if ((lntype == BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
 									|| ln.getType() == LongNote.TYPE_LONGNOTE) {
