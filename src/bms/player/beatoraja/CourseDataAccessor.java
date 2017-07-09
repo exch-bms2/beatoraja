@@ -1,13 +1,14 @@
 package bms.player.beatoraja;
 
 import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.JsonWriter;
 
-import java.io.BufferedInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * コースデータへのアクセス
@@ -57,6 +58,25 @@ public class CourseDataAccessor {
             e.printStackTrace();
         }
         return result.toArray(new CourseData[result.size()]) ;
+    }
+
+    /**
+     * コースデータを保存する
+     *
+     * @param cd コースデータ
+     */
+    public void write(String name, CourseData cd) {
+        try {
+            Json json = new Json();
+            json.setOutputType(JsonWriter.OutputType.json);
+            OutputStreamWriter fw = new OutputStreamWriter(new BufferedOutputStream(
+                    new FileOutputStream(coursedir + "/" + name + ".json")), "UTF-8");
+            fw.write(json.prettyPrint(cd));
+            fw.flush();
+            fw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 

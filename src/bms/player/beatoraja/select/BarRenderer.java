@@ -1,5 +1,6 @@
 package bms.player.beatoraja.select;
 
+import java.io.IOException;
 import java.nio.file.*;
 import java.util.*;
 import java.util.logging.Logger;
@@ -102,6 +103,11 @@ public class BarRenderer {
 			this.courses[i] = new GradeBar(cds[i].getName(), songdatas, cds[i]);
 		}
 		cds = new CourseDataAccessor("favorite").readAll();
+		if(cds.length == 0) {
+			cds = new CourseData[1];
+			cds[0] = new CourseData();
+			cds[0].setName("FAVORITE");
+		}
 		favorites = new HashBar[cds.length];
 		for (int i = 0; i < cds.length; i++) {
 			TableData.TableSongData[] songs = new TableData.TableSongData[cds[i].getHash().length];
@@ -422,6 +428,28 @@ public class BarRenderer {
 			select.play(MusicSelector.SOUND_SCRATCH);
 			mov++;
 		}
+
+		if(input.getFunctionstate()[7] && input.getFunctiontime()[7] != 0) {
+			input.getFunctiontime()[7] = 0;
+			if(getSelected() instanceof SongBar) {
+				SongData sd = ((SongBar) getSelected()).getSongData();
+				if(sd != null) {
+					boolean exist = false;
+					for(TableData.TableSongData element : favorites[0].getElements()) {
+						if(element.getHash().equals(sd.getSha256())) {
+							exist = true;
+							break;
+						}
+					}
+					if(!exist) {
+						List<TableData.TableSongData> l = new ArrayList(Arrays.asList(favorites[0].getElements()));
+						l.add(new TableData.TableSongData(sd.getSha256()));
+						favorites[0].setElements(l.toArray(new TableData.TableSongData[l.size()]));
+						Logger.getGlobal().info("favorite追加 : " + sd.getTitle());
+					}
+				}
+			}
+		}
 	}
 
 	public void resetInput() {
@@ -561,6 +589,24 @@ public class BarRenderer {
 	}
 
 	public void dispose() {
+		// favorite書き込み
+		CourseData course = new CourseData();
+		course.setName(favorites[0].getTitle());
+		List<String> l = new ArrayList<>();
+		for(TableData.TableSongData element : favorites[0].getElements()) {
+			l.add(element.getHash());
+		}
+		course.setHash(l.toArray(new String[l.size()]));
+		CourseDataAccessor cda = new CourseDataAccessor("favorite");
+		if(!Files.exists(Paths.get("favorite"))) {
+			try {
+				Files.createDirectory(Paths.get("favorite"));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		cda.write("default", course);
+
 		banners.dispose();
 	}
 

@@ -478,6 +478,11 @@ class HashBar extends DirectoryBar {
         return elements;
     }
 
+    public void setElements(TableData.TableSongData[] elements) {
+        this.elements = elements;
+        songs = null;
+    }
+
     @Override
     public Bar[] getChildren() {
         List<SongBar> songbars = new ArrayList<SongBar>();
