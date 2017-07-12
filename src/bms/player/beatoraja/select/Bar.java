@@ -557,18 +557,18 @@ class CommandBar extends DirectoryBar {
     private MusicSelector selector;
     private String title;
     private String sql;
-    private boolean info;
+    private int type;
 
     public CommandBar(MainController main, MusicSelector selector, String title, String sql) {
-    	this(main, selector, title, sql, false);
+    	this(main, selector, title, sql, 0);
     }
 
-    public CommandBar(MainController main, MusicSelector selector, String title, String sql, boolean info) {
+    public CommandBar(MainController main, MusicSelector selector, String title, String sql, int type) {
         this.main = main;
         this.selector = selector;
         this.title = title;
         this.sql = sql;
-        this.info = info;
+        this.type = type;
     }
 
     @Override
@@ -583,7 +583,7 @@ class CommandBar extends DirectoryBar {
 
     @Override
     public Bar[] getChildren() {
-    	if(info) {
+    	if(type == 2) {
     		if(main.getInfoDatabase() == null) {
     			return new Bar[0];
     		}
@@ -596,7 +596,17 @@ class CommandBar extends DirectoryBar {
                 }
             }
             return l.toArray(new Bar[l.size()]);    		    		
-    	} else {
+    	} else if(type == 1) {
+            SongData[] infos = main.getSongDatabase().getSongDatas(sql);
+            List<Bar> l = new ArrayList<Bar>();
+            for (SongData info : infos) {
+                SongData[] song = selector.getSongDatabase().getSongDatas("sha256", info.getSha256());
+                if(song.length > 0) {
+                    l.add(new SongBar(song[0]));
+                }
+            }
+            return l.toArray(new Bar[l.size()]);
+        } else{
             List<IRScoreData> scores = main.getPlayDataAccessor().readScoreDatas(sql);
             List<Bar> l = new ArrayList<Bar>();
             for (IRScoreData score : scores) {
@@ -605,9 +615,8 @@ class CommandBar extends DirectoryBar {
                     l.add(new SongBar(song[0]));
                 }
             }
-            return l.toArray(new Bar[l.size()]);    		
-    	}
-    	
+            return l.toArray(new Bar[l.size()]);
+        }
     }
 
 }

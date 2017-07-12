@@ -176,6 +176,17 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 		return new SongData[0];
 	}
 
+	public SongData[] getSongDatas(String sql) {
+		try {
+			List<SongData> m = qr.query("SELECT * FROM song WHERE " + sql, songhandler);
+			return m.toArray(new SongData[m.size()]);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return new SongData[0];
+
+	}
+
 	public SongData[] getSongDatasByText(String text, String lr2path) {
 		SongData[] result = new SongData[0];
 		try {
@@ -255,36 +266,32 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 	/**
 	 * 楽曲を更新する
 	 * 
-	 * @param datas
-	 *            <楽曲のmd5, <属性, 属性値>>のマップ
+	 * @param songs 更新する楽曲
 	 */
-	public void setSongDatas(Map<String, Map<String, String>> datas) {
-		Connection conn = null;
-		try {
-			conn = qr.getDataSource().getConnection();
+	public void setSongDatas(SongData[] songs) {
+		try (Connection conn = qr.getDataSource().getConnection()){
 			conn.setAutoCommit(false);
 
-			for (String te : datas.keySet()) {
-				Map<String, String> data = datas.get(te);
-				String values = "";
-				for (String key : data.keySet()) {
-					values += key + " = " + data.get(key) + " ,";
-				}
+			for (SongData sd : songs) {
+				// TODO このメソッドは共通化させたい
 				qr.update(conn,
-						"UPDATE song SET " + values.substring(0, values.length() - 1) + "WHERE hash = '" + te + "'");
+						"INSERT OR REPLACE INTO song "
+								+ "(md5, sha256, title, subtitle, genre, artist, subartist, tag, path,"
+								+ "folder, stagefile, banner, backbmp, preview, parent, level, difficulty, "
+								+ "maxbpm, minbpm, length, mode, judge, feature, content, "
+								+ "date, favorite, notes, adddate)"
+								+ "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);",
+						sd.getMd5(), sd.getSha256(), sd.getTitle(), sd.getSubtitle(), sd.getGenre(),
+						sd.getArtist(), sd.getSubartist(), sd.getTag(), sd.getPath(), sd.getFolder(),
+						sd.getStagefile(), sd.getBanner(), sd.getBackbmp(), sd.getPreview(),sd.getParent(),
+						sd.getLevel(), sd.getDifficulty(), sd.getMaxbpm(), sd.getMinbpm(), sd.getLength(),
+						sd.getMode(), sd.getJudge(), sd.getFeature(), sd.getContent(),
+						sd.getDate(), sd.getFavorite(), sd.getNotes(), sd.getAdddate());
 			}
 			conn.commit();
 			conn.close();
 		} catch (Exception e) {
 			Logger.getGlobal().severe("song.db更新時の例外:" + e.getMessage());
-		} finally {
-			if (conn != null) {
-				try {
-					conn.close();
-				} catch (SQLException e) {
-					Logger.getGlobal().severe("song.db更新時の例外:" + e.getMessage());
-				}
-			}
 		}
 	}
 

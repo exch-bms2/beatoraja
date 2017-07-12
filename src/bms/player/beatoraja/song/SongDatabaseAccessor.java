@@ -21,6 +21,10 @@ public interface SongDatabaseAccessor {
 	 */
 	public SongData[] getSongDatas(String[] hashes);
 
+	public SongData[] getSongDatas(String sql);
+
+	public void setSongDatas(SongData[] songs);
+
 	public SongData[] getSongDatasByText(String text, String lr2path);
 
 	/**

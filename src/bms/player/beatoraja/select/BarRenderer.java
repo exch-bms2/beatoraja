@@ -103,11 +103,11 @@ public class BarRenderer {
 			this.courses[i] = new GradeBar(cds[i].getName(), songdatas, cds[i]);
 		}
 		cds = new CourseDataAccessor("favorite").readAll();
-		if(cds.length == 0) {
-			cds = new CourseData[1];
-			cds[0] = new CourseData();
-			cds[0].setName("FAVORITE");
-		}
+//		if(cds.length == 0) {
+//			cds = new CourseData[1];
+//			cds[0] = new CourseData();
+//			cds[0].setName("FAVORITE");
+//		}
 		favorites = new HashBar[cds.length];
 		for (int i = 0; i < cds.length; i++) {
 			TableData.TableSongData[] songs = new TableData.TableSongData[cds[i].getHash().length];
@@ -119,11 +119,11 @@ public class BarRenderer {
 
 		List<CommandBar> density = new ArrayList<CommandBar>();
 		int i = 1;
-		density.add(new CommandBar(main, select, "DENSITY < " + i, "density < 1", true));
+		density.add(new CommandBar(main, select, "DENSITY < " + i, "density < 1", 2));
 		for(;i < 50;i++) {
-			density.add(new CommandBar(main, select, "DENSITY " + i + " - " + (i + 1), "density >= " + i + " AND density < " + (i + 1), true));			
+			density.add(new CommandBar(main, select, "DENSITY " + i + " - " + (i + 1), "density >= " + i + " AND density < " + (i + 1), 2));
 		}
-		density.add(new CommandBar(main, select, "DENSITY >= " + i, "density >= " + i, true));
+		density.add(new CommandBar(main, select, "DENSITY >= " + i, "density >= " + i, 2));
 		
 		commands = new Bar[] {
 				new CommandBar(main, select, "MY BEST", "playcount > 0 ORDER BY playcount DESC LIMIT 10"),
@@ -150,12 +150,14 @@ public class BarRenderer {
 								"(lpg * 2 + epg * 2 + lgr + egr) * 50 / notes >= 22.22 AND (lpg * 2 + epg * 2 + lgr + egr) * 50 / notes < 33.33"),
 						}),
 				new ContainerBar("FEATURE", new Bar[]{
-						new CommandBar(main, select, "SCRATCH 10 - 20%", "(n + ln) <= (s + ls) * 9 AND (n + ln) > (s + ls) * 4 ", true),
-						new CommandBar(main, select, "SCRATCH > 20%", "(n + ln) <= (s + ls) * 4 ", true),
-						new CommandBar(main, select, "LONG NOTE 10 - 20%", "(n + s) <= (ln + ls) * 9 AND (n + s) > (ln + ls) * 4 ", true),
-						new CommandBar(main, select, "LONG NOTE > 20%", "(n + s) <= (ln + ls) * 4 ", true),
+						new CommandBar(main, select, "SCRATCH 10 - 20%", "(n + ln) <= (s + ls) * 9 AND (n + ln) > (s + ls) * 4 ", 2),
+						new CommandBar(main, select, "SCRATCH > 20%", "(n + ln) <= (s + ls) * 4 ", 2),
+						new CommandBar(main, select, "LONG NOTE 10 - 20%", "(n + s) <= (ln + ls) * 9 AND (n + s) > (ln + ls) * 4 ", 2),
+						new CommandBar(main, select, "LONG NOTE > 20%", "(n + s) <= (ln + ls) * 4 ", 2),
 						}),	
-				new ContainerBar("DENSITY", density.toArray(new Bar[density.size()]))
+				new ContainerBar("DENSITY", density.toArray(new Bar[density.size()])),
+				new CommandBar(main, select, "FAVORITE SONG", "favorite & 1 != 0", 1),
+				new CommandBar(main, select, "FAVORITE CHART", "favorite & 2 != 0", 1),
 				};
 	}
 
@@ -433,20 +435,38 @@ public class BarRenderer {
 			input.getFunctiontime()[7] = 0;
 			if(getSelected() instanceof SongBar) {
 				SongData sd = ((SongBar) getSelected()).getSongData();
+
 				if(sd != null) {
-					boolean exist = false;
-					for(TableData.TableSongData element : favorites[0].getElements()) {
-						if(element.getHash().equals(sd.getSha256())) {
-							exist = true;
-							break;
-						}
+					boolean enable = ((sd.getFavorite() & 1) == 0);
+					SongData[] songs = select.getSongDatabase().getSongDatas("folder", sd.getFolder());
+					for(SongData song : songs) {
+						song.setFavorite(enable ? song.getFavorite() | 1 : song.getFavorite() & 0xfffffffe);
 					}
-					if(!exist) {
-						List<TableData.TableSongData> l = new ArrayList(Arrays.asList(favorites[0].getElements()));
-						l.add(new TableData.TableSongData(sd.getSha256()));
-						favorites[0].setElements(l.toArray(new TableData.TableSongData[l.size()]));
-						Logger.getGlobal().info("favorite追加 : " + sd.getTitle());
-					}
+					select.getSongDatabase().setSongDatas(songs);
+				}
+			}
+		}
+		if(input.getFunctionstate()[8] && input.getFunctiontime()[8] != 0) {
+			input.getFunctiontime()[8] = 0;
+			if(getSelected() instanceof SongBar) {
+				SongData sd = ((SongBar) getSelected()).getSongData();
+
+				if(sd != null) {
+					sd.setFavorite(sd.getFavorite() ^ 2);
+					select.getSongDatabase().setSongDatas(new SongData[]{sd});
+//					boolean exist = false;
+//					for(TableData.TableSongData element : favorites[0].getElements()) {
+//						if(element.getHash().equals(sd.getSha256())) {
+//							exist = true;
+//							break;
+//						}
+//					}
+//					if(!exist) {
+//						List<TableData.TableSongData> l = new ArrayList(Arrays.asList(favorites[0].getElements()));
+//						l.add(new TableData.TableSongData(sd.getSha256()));
+//						favorites[0].setElements(l.toArray(new TableData.TableSongData[l.size()]));
+//						Logger.getGlobal().info("favorite追加 : " + sd.getTitle());
+//					}
 				}
 			}
 		}
@@ -590,22 +610,22 @@ public class BarRenderer {
 
 	public void dispose() {
 		// favorite書き込み
-		CourseData course = new CourseData();
-		course.setName(favorites[0].getTitle());
-		List<String> l = new ArrayList<>();
-		for(TableData.TableSongData element : favorites[0].getElements()) {
-			l.add(element.getHash());
-		}
-		course.setHash(l.toArray(new String[l.size()]));
-		CourseDataAccessor cda = new CourseDataAccessor("favorite");
-		if(!Files.exists(Paths.get("favorite"))) {
-			try {
-				Files.createDirectory(Paths.get("favorite"));
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		cda.write("default", course);
+//		CourseData course = new CourseData();
+//		course.setName(favorites[0].getTitle());
+//		List<String> l = new ArrayList<>();
+//		for(TableData.TableSongData element : favorites[0].getElements()) {
+//			l.add(element.getHash());
+//		}
+//		course.setHash(l.toArray(new String[l.size()]));
+//		CourseDataAccessor cda = new CourseDataAccessor("favorite");
+//		if(!Files.exists(Paths.get("favorite"))) {
+//			try {
+//				Files.createDirectory(Paths.get("favorite"));
+//			} catch (IOException e) {
+//				e.printStackTrace();
+//			}
+//		}
+//		cda.write("default", course);
 
 		banners.dispose();
 	}
