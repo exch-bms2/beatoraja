@@ -244,6 +244,15 @@ public class MainController extends ApplicationAdapter {
 				audio = new GdxSoundDriver();
 			}
 			break;
+		case Config.AUDIODRIVER_PORTAUDIO:
+			try {
+				audio = new PortAudioDriver(config);
+			} catch(Throwable e) {
+				e.printStackTrace();
+				config.setAudioDriver(Config.AUDIODRIVER_SOUND);
+				audio = new GdxSoundDriver();
+			}
+			break;
 		}
 
 		resource = new PlayerResource(audio, config, player);
