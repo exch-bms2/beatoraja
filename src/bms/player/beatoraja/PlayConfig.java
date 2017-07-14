@@ -281,12 +281,12 @@ public class PlayConfig {
 			MidiConfig config = new MidiConfig();
 			config.keys = new Input[26];
 			for (int i=0; i<24; i++) {
-				config.keys[i] = new Input(Input.Type.NOTE, 60 + i);
+				config.keys[i] = new Input(Input.Type.NOTE, 48 + i);
 			}
 			config.keys[24] = new Input(Input.Type.PITCH_BEND, 1);
 			config.keys[25] = new Input(Input.Type.PITCH_BEND, -1);
-			config.start = new Input(Input.Type.NOTE, 56);
-			config.select = new Input(Input.Type.NOTE, 58);
+			config.start = new Input(Input.Type.NOTE, 44);
+			config.select = new Input(Input.Type.NOTE, 46);
 			return config;
 		}
 
@@ -294,15 +294,15 @@ public class PlayConfig {
 			MidiConfig config = new MidiConfig();
 			config.keys = new Input[52];
 			for (int i=0; i<24; i++) {
-				config.keys[i] = new Input(Input.Type.NOTE, 36 + i);
-				config.keys[i + 26] = new Input(Input.Type.NOTE, 60 + i);
+				config.keys[i] = new Input(Input.Type.NOTE, 48 + i);
+				config.keys[i + 26] = new Input(Input.Type.NOTE, 72 + i);
 			}
 			config.keys[24] = new Input(Input.Type.PITCH_BEND, 1);
 			config.keys[25] = new Input(Input.Type.PITCH_BEND, -1);
 			config.keys[50] = new Input(Input.Type.CONTROL_CHANGE, 1);
 			config.keys[51] = new Input(Input.Type.CONTROL_CHANGE, -1);
-			config.start = new Input(Input.Type.NOTE, 32);
-			config.select = new Input(Input.Type.NOTE, 34);
+			config.start = new Input(Input.Type.NOTE, 44);
+			config.select = new Input(Input.Type.NOTE, 46);
 			return config;
 		}
 	}
