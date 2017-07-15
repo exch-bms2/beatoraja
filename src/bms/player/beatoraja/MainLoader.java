@@ -99,6 +99,9 @@ public class MainLoader extends Application {
 			cfg.audioDeviceBufferSize = config.getAudioDeviceBufferSize();
 			cfg.audioDeviceSimultaneousSources = config.getAudioDeviceSimultaneousSources();
 			cfg.forceExit = forceExit;
+			if(config.getAudioDriver() != Config.AUDIODRIVER_SOUND && config.getAudioDriver() != Config.AUDIODRIVER_AUDIODEVICE) {
+				LwjglApplicationConfiguration.disableAudio = true;				
+			}
 			// System.setProperty("org.lwjgl.opengl.Display.allowSoftwareOpenGL",
 			// "true");
 			new LwjglApplication(player, cfg);

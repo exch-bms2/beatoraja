@@ -10,6 +10,8 @@ import bms.player.beatoraja.Config;
 
 public class PortAudioDriver extends AbstractAudioDriver<PCM> {
 
+	private static DeviceInfo[] devices;
+	
 	private BlockingStream stream;
 	private float[] buffer;
 	private int sampleRate;
@@ -17,13 +19,25 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> {
 	 * オーディオミキサー
 	 */
 	private AudioMixer mixer;
+	
+	public static DeviceInfo[] getDevices() {
+		if(devices == null) {
+			PortAudio.initialize();
+			
+			devices = new DeviceInfo[PortAudio.getDeviceCount()];
+			for(int i = 0;i < devices.length;i++) {
+				devices[i] = PortAudio.getDeviceInfo(i);
+			}
+		}
+		return devices;
+	}
 
 	public PortAudioDriver(Config config) {
-		PortAudio.initialize();
 
+		DeviceInfo[] devices = getDevices();
 		// Get the default device and setup the stream parameters.
 		int deviceId = PortAudio.getDefaultOutputDevice();
-		DeviceInfo deviceInfo = PortAudio.getDeviceInfo( deviceId );
+		DeviceInfo deviceInfo = devices[ deviceId ];
 		sampleRate = (int)deviceInfo.defaultSampleRate;
 		System.out.println( "  deviceId    = " + deviceId );
 		System.out.println( "  sampleRate  = " + sampleRate );
@@ -128,12 +142,18 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> {
 
 	public void dispose() {
 		super.dispose();
-		mixer.stop = true;
-		stream.stop();
-		stream.close();
+		if(stream != null) {
+			mixer.stop = true;
+			long l = System.currentTimeMillis();
+			while(mixer.isAlive() && System.currentTimeMillis() - l < 1000);
+			stream.stop();
+			stream.close();
+			
+			stream = null;
 
-		PortAudio.terminate();
-		System.out.println( "JPortAudio test complete." );
+			PortAudio.terminate();
+			System.out.println( "JPortAudio test complete." );			
+		}
 	}
 	
 	/**

@@ -133,6 +133,28 @@ public class MainController extends ApplicationAdapter {
 		if(player.getUserid().length() > 0 && ir != null) {
 			ir.login(player.getUserid(), player.getPassword());
 		}
+		
+		switch(config.getAudioDriver()) {
+		case Config.AUDIODRIVER_ASIO:
+			try {
+				audio = new ASIODriver(config);
+			} catch(Throwable e) {
+				e.printStackTrace();
+				config.setAudioDriver(Config.AUDIODRIVER_SOUND);
+				audio = new GdxSoundDriver();
+			}
+			break;
+		case Config.AUDIODRIVER_PORTAUDIO:
+			try {
+				audio = new PortAudioDriver(config);
+			} catch(Throwable e) {
+				e.printStackTrace();
+				config.setAudioDriver(Config.AUDIODRIVER_SOUND);
+				audio = new GdxSoundDriver();
+			}
+			break;
+		}
+
 	}
 
 	public long[] getTimer() {
@@ -234,24 +256,6 @@ public class MainController extends ApplicationAdapter {
 			break;
 		case Config.AUDIODRIVER_AUDIODEVICE:
 			audio = new GdxAudioDeviceDriver();
-			break;
-		case Config.AUDIODRIVER_ASIO:
-			try {
-				audio = new ASIODriver(config);
-			} catch(Throwable e) {
-				e.printStackTrace();
-				config.setAudioDriver(Config.AUDIODRIVER_SOUND);
-				audio = new GdxSoundDriver();
-			}
-			break;
-		case Config.AUDIODRIVER_PORTAUDIO:
-			try {
-				audio = new PortAudioDriver(config);
-			} catch(Throwable e) {
-				e.printStackTrace();
-				config.setAudioDriver(Config.AUDIODRIVER_SOUND);
-				audio = new GdxSoundDriver();
-			}
 			break;
 		}
 
@@ -423,7 +427,7 @@ public class MainController extends ApplicationAdapter {
 			keyconfig.dispose();
 		}
 		resource.dispose();
-		input.dispose();
+//		input.dispose();
 		SkinLoader.getResource().dispose();
 	}
 
@@ -451,6 +455,7 @@ public class MainController extends ApplicationAdapter {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		Logger.getGlobal().info("設定情報をconfig.jsonに保存");
 		
 		Path p = Paths.get("player/" + config.getPlayername() + "/config.json");
 		try (FileWriter fw = new FileWriter(p.toFile())) {
@@ -459,6 +464,7 @@ public class MainController extends ApplicationAdapter {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		Logger.getGlobal().info("設定情報を" + p.toString() + "に保存");
 
 		dispose();
 		Gdx.app.exit();

@@ -27,9 +27,11 @@ import org.apache.commons.dbutils.handlers.MapListHandler;
 import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter.OutputType;
+import com.portaudio.DeviceInfo;
 import com.portaudio.PortAudio;
 import com.synthbot.jasiohost.AsioDriver;
 
+import bms.player.beatoraja.audio.PortAudioDriver;
 import bms.player.beatoraja.ir.IRConnection;
 import bms.player.beatoraja.play.JudgeAlgorithm;
 import bms.player.beatoraja.skin.SkinHeader;
@@ -589,23 +591,21 @@ public class PlayConfigurationView implements Initializable {
 			break;
 		case Config.AUDIODRIVER_PORTAUDIO:
 			try {
-//				PortAudio.initialize();
-//				int count = PortAudio.getDeviceCount();
-//				List<String> drivers = new ArrayList<String>(count);
-//				for(int i = 0;i < count;i++) {
-//					drivers.add(PortAudio.getDeviceInfo(i).name);
-//				}
-//				if(drivers.size() == 0) {
-//					throw new RuntimeException("ドライバが見つかりません");
-//				}
-//				audioname.getItems().setAll(drivers);
-//				if(drivers.contains(config.getAudioDriverName())) {
-//					audioname.setValue(config.getAudioDriverName());
-//				} else {
-//					audioname.setValue(drivers.get(0));
-//				}
-				audioname.setDisable(true);
-//				audioname.setDisable(false);
+				DeviceInfo[] devices = PortAudioDriver.getDevices();
+				List<String> drivers = new ArrayList<String>(devices.length);
+				for(int i = 0;i < devices.length;i++) {
+					drivers.add(devices[i].name);
+				}
+				if(drivers.size() == 0) {
+					throw new RuntimeException("ドライバが見つかりません");
+				}
+				audioname.getItems().setAll(drivers);
+				if(drivers.contains(config.getAudioDriverName())) {
+					audioname.setValue(config.getAudioDriverName());
+				} else {
+					audioname.setValue(drivers.get(0));
+				}
+				audioname.setDisable(false);
 				audiobuffer.setDisable(true);
 				audiosim.setDisable(true);
 //				PortAudio.terminate();
