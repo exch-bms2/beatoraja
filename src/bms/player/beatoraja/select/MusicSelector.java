@@ -549,8 +549,6 @@ public class MusicSelector extends MainState {
 			return mode < mode_lr2.length ? mode_lr2[mode] : mode;
 		case BUTTON_SORT:
 			return sort;
-		case BUTTON_LNMODE:
-			return config.getLnmode();
 		case NUMBER_SCORE_RATE:
 			return bar.getSelected().getScore() != null ? getScoreDataProperty().getRateInt() : Integer.MIN_VALUE;
 		case NUMBER_SCORE_RATE_AFTERDOT:
