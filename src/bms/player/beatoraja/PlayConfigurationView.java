@@ -583,7 +583,7 @@ public class PlayConfigurationView implements Initializable {
 				}
 				audioname.setDisable(false);
 				audiobuffer.setDisable(true);
-				audiosim.setDisable(true);
+				audiosim.setDisable(false);
 			} catch(Throwable e) {
 				Logger.getGlobal().severe("ASIOは選択できません : " + e.getMessage());
 				audio.setValue(Config.AUDIODRIVER_SOUND);
@@ -606,8 +606,8 @@ public class PlayConfigurationView implements Initializable {
 					audioname.setValue(drivers.get(0));
 				}
 				audioname.setDisable(false);
-				audiobuffer.setDisable(true);
-				audiosim.setDisable(true);
+				audiobuffer.setDisable(false);
+				audiosim.setDisable(false);
 //				PortAudio.terminate();
 			} catch(Throwable e) {
 				Logger.getGlobal().severe("PortAudioは選択できません : " + e.getMessage());

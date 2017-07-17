@@ -13,7 +13,7 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> {
 	private static DeviceInfo[] devices;
 	
 	private BlockingStream stream;
-	private float[] buffer;
+	private final float[] buffer;
 	private int sampleRate;
 	/**
 	 * オーディオミキサー
@@ -36,7 +36,13 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> {
 
 		DeviceInfo[] devices = getDevices();
 		// Get the default device and setup the stream parameters.
-		int deviceId = PortAudio.getDefaultOutputDevice();
+		int deviceId = 0;
+		for(int i = 0;i < devices.length;i++) {
+			if(devices[i].name.equals(config.getAudioDriverName())) {
+				deviceId = i;
+				break;
+			}
+		}
 		DeviceInfo deviceInfo = devices[ deviceId ];
 		sampleRate = (int)deviceInfo.defaultSampleRate;
 		System.out.println( "  deviceId    = " + deviceId );
@@ -46,11 +52,11 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> {
 		StreamParameters streamParameters = new StreamParameters();
 		streamParameters.channelCount = 2;
 		streamParameters.device = deviceId;
-		streamParameters.suggestedLatency = deviceInfo.defaultLowOutputLatency;
+		int framesPerBuffer = config.getAudioDeviceBufferSize();
+		streamParameters.suggestedLatency = ((double)framesPerBuffer) / sampleRate;
 		System.out.println( "  suggestedLatency = "
 				+ streamParameters.suggestedLatency );
 
-		int framesPerBuffer = 512;
 		int flags = 0;
 		
 		// Open a stream for output.
@@ -94,7 +100,7 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> {
 				e.printStackTrace();
 			}
 		}
-
+		
 		if (wav != null && wav.getSampleRate() != sampleRate) {
 			wav = wav.changeSampleRate(sampleRate);
 		}
@@ -226,6 +232,7 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> {
 					}
 					buffer[i] = wav;
 				}
+				
 				stream.write( buffer, buffer.length / 2);
 			}
 		}		
