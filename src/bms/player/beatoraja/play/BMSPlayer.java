@@ -600,7 +600,7 @@ public class BMSPlayer extends MainState {
 		replay.gauge = config.getGauge();
 
 		score.setMinbp(score.getEbd() + score.getLbd() + score.getEpr() + score.getLpr() + score.getEms() + score.getLms() + resource.getSongdata().getNotes() - notes);
-		score.setDeviceType(resource.getPlayDevice().getType());
+		score.setDeviceType(resource.getPlayDevice() != null ? resource.getPlayDevice().getType() : null);
 		return score;
 	}
 
