@@ -580,7 +580,7 @@ public class PlayConfigurationView implements Initializable {
 				}
 				audioname.setDisable(false);
 				audiobuffer.setDisable(true);
-				audiosim.setDisable(true);
+				audiosim.setDisable(false);
 			} catch(Throwable e) {
 				Logger.getGlobal().severe("ASIOは選択できません : " + e.getMessage());
 				audio.setValue(Config.AUDIODRIVER_SOUND);
