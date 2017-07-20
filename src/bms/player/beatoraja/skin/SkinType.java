@@ -2,7 +2,13 @@ package bms.player.beatoraja.skin;
 
 import bms.model.Mode;
 
+/**
+ * スキンタイプ
+ * 
+ * @author exch
+ */
 public enum SkinType {
+	
 	PLAY_7KEYS(0, "7KEYS", Mode.BEAT_7K, false),
 	PLAY_5KEYS(1, "5KEYS", Mode.BEAT_5K, false),
 	PLAY_14KEYS(2, "14KEYS", Mode.BEAT_14K, false),
@@ -20,10 +26,25 @@ public enum SkinType {
 	PLAY_9KEYS_BATTLE(14, "9KEYS BATTLE", Mode.POPN_9K, true),
 	COURSE_RESULT(15, "COURSE RESULT");
 
+	/**
+	 * スキンタイプのID
+	 */
 	private final int id;
+	/**
+	 * 名称
+	 */
 	private final String name;
+	/**
+	 * プレイ可能なスキンかどうか
+	 */
 	private final boolean play;
+	/**
+	 * プレイモード
+	 */
 	private final Mode mode;
+	/**
+	 * バトルモードかどうか
+	 */
 	private final boolean battle;
 
 	private SkinType(int id, String name) {

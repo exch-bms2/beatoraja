@@ -10,6 +10,7 @@ import java.util.*;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.Resolution;
 import bms.player.beatoraja.skin.SkinHeader;
+import bms.player.beatoraja.skin.SkinType;
 import bms.player.beatoraja.skin.SkinHeader.CustomFile;
 import bms.player.beatoraja.skin.SkinHeader.CustomOption;
 
@@ -31,7 +32,7 @@ public class LR2SkinHeaderLoader extends LR2SkinLoader {
 		addCommandWord(new CommandWord("INFORMATION") {
 			@Override
 			public void execute(String[] str) {
-				header.setMode(Integer.parseInt(str[1]));
+				header.setSkinType(SkinType.getSkinTypeById(Integer.parseInt(str[1])));
 				header.setName(str[2]);
 			}
 		});
