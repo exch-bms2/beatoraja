@@ -33,14 +33,14 @@ public enum BarSorter implements Comparator<Bar> {
 	LEVEL_SORTER("LEVEL") {
 		@Override
 		public int compare(Bar o1, Bar o2) {
-			if (!(o1 instanceof SongBar && ((SongBar)o1).getSongData() != null)
-					&& !(o2 instanceof SongBar && ((SongBar)o2).getSongData() != null)) {
+			if (!(o1 instanceof SongBar && ((SongBar)o1).existsSong())
+					&& !(o2 instanceof SongBar && ((SongBar)o2).existsSong())) {
 				return 0;
 			}
-			if (!(o1 instanceof SongBar && ((SongBar)o1).getSongData() != null)) {
+			if (!(o1 instanceof SongBar && ((SongBar)o1).existsSong())) {
 				return 1;
 			}
-			if (!(o2 instanceof SongBar && ((SongBar)o2).getSongData() != null)) {
+			if (!(o2 instanceof SongBar && ((SongBar)o2).existsSong())) {
 				return -1;
 			}
 			return ((SongBar) o1).getSongData().getLevel() - ((SongBar) o2).getSongData().getLevel();

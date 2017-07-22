@@ -1,8 +1,5 @@
 package bms.player.beatoraja;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * 難易度表データ
  *
@@ -18,7 +15,7 @@ public class TableData {
 	 */
 	private String name = "";
 	
-	private TableDataELement[] folder = new TableDataELement[0];
+	private TableFolder[] folder = new TableFolder[0];
 	
 	private CourseData[] course = new CourseData[0];
 	
@@ -30,11 +27,11 @@ public class TableData {
 		this.name = name;
 	}
 
-	public TableDataELement[] getFolder() {
+	public TableFolder[] getFolder() {
 		return folder;
 	}
 
-	public void setFolder(TableDataELement[] folder) {
+	public void setFolder(TableFolder[] folder) {
 		this.folder = folder;
 	}
 
@@ -54,46 +51,50 @@ public class TableData {
 		this.url = url;
 	}
 
-	public static class TableDataELement {
+	public static class TableFolder {
 
-		private String level;
-		private TableSongData[] songs = new TableSongData[0];
+		private String name;
+		private TableSong[] songs = new TableSong[0];
 
-		public String getLevel() {
-			return level;
+		public String getName() {
+			return name;
 		}
 
-		public void setLevel(String level) {
-			this.level = level;
+		public void setName(String name) {
+			this.name = name;
 		}
 
-		public TableSongData[] getSongs() {
+		public TableSong[] getSong() {
 			return songs;
 		}
 
-		public void setSongs(TableSongData[] songs) {
+		public void setSong(TableSong[] songs) {
 			this.songs = songs;
 		}
 	}
 
-	public static class TableSongData {
+	public static class TableSong {
 
 		private String hash;
 		private String title;
+		private String artist;
+		private String genre;
 		private String url;
 		private String appendurl;
 
-		public TableSongData() {
+		public TableSong() {
 
 		}
 
-		public TableSongData(String hash) {
-			this(hash,null,null,null);
+		public TableSong(String hash) {
+			this(hash,null,null, null, null,null);
 		}
 
-		public TableSongData(String hash, String title, String url, String appendurl) {
+		public TableSong(String hash, String title, String artist, String genre, String url, String appendurl) {
 			this.hash = hash;
 			this.title = title;
+			this.artist = artist;
+			this.genre = genre;
 			this.url = url;
 			this.appendurl = appendurl;
 		}
@@ -128,6 +129,22 @@ public class TableData {
 
 		public void setAppendurl(String appendurl) {
 			this.appendurl = appendurl;
+		}
+
+		public String getArtist() {
+			return artist;
+		}
+
+		public void setArtist(String artist) {
+			this.artist = artist;
+		}
+
+		public String getGenre() {
+			return genre;
+		}
+
+		public void setGenre(String genre) {
+			this.genre = genre;
 		}
 	}
 

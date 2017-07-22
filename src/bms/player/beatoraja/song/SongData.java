@@ -193,7 +193,7 @@ public class SongData {
 	}
 	public String getFullTitle() {
 		if(fulltitle == null) {
-			fulltitle = title + " " + subtitle;
+			fulltitle = subtitle != null ? title + " " + subtitle : title;
 		}
 		return fulltitle;
 	}
@@ -211,7 +211,7 @@ public class SongData {
 	}
 	public String getFullArtist() {
 		if(fullartist == null) {
-			fullartist = artist + " " + subartist;
+			fullartist = subartist != null ? artist + " " + subartist : artist;
 		}
 		return fullartist;
 	}
