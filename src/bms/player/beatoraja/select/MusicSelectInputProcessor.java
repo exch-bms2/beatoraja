@@ -236,7 +236,7 @@ public class MusicSelectInputProcessor {
             // show detail option
             select.setPanelState(3);
             PlayConfig pc = null;
-            if (current instanceof SongBar) {
+            if (current instanceof SongBar && ((SongBar) current).getSongData() != null) {
                 SongBar song = (SongBar) current;
                 pc = (song.getSongData().getMode() == 5 || song.getSongData().getMode() == 7 ? config.getMode7()
                         : (song.getSongData().getMode() == 10 || song.getSongData().getMode() == 14 ? config.getMode14()
@@ -303,7 +303,7 @@ public class MusicSelectInputProcessor {
 
             if (numberstate[8] && numtime[8] != 0) {
                 numtime[8] = 0;
-                if (current instanceof SongBar &&
+                if (current instanceof SongBar && ((SongBar) current).getSongData() != null &&
                         (bar.getDirectory().isEmpty() || !(bar.getDirectory().getLast() instanceof SameFolderBar))) {
                     SongData sd = ((SongBar) current).getSongData();
                     bar.updateBar(new SameFolderBar(select, sd.getTitle(), sd.getFolder()));
