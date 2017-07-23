@@ -43,7 +43,7 @@ public class SkinTextImage extends SkinText {
 				int code = 0;
 				code |= (b[i++] & 0xff);
 				code |= (b[i++] & 0xff) << 8;
-				if (code >= 0xdc00 && i < b.length) {
+				if (code >= 0xdc00 && code < 0xff00 && i < b.length) {
 					code |= (b[i++] & 0xff) << 16;
 					code |= (b[i++] & 0xff) << 24;
 				}
@@ -51,6 +51,8 @@ public class SkinTextImage extends SkinText {
 				if (ch != null) {
 					l.add(ch);
 					textwidth += ch.getRegionWidth();
+				} else {
+//					System.out.println(text + " -> " + Arrays.toString(b) + "code not found : " + Integer.toHexString(code));
 				}
 			}
 			texts = l.toArray(new TextureRegion[l.size()]);
