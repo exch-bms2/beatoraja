@@ -529,7 +529,8 @@ public class JudgeManager {
 
 		this.judge[offset[lane]] = judge == 0 ? 1 : judge * 2 + (fast > 0 ? 0 : 1);
 		if (judge < 2) {
-			main.getTimer()[TIMER_BOMB_1P_SCRATCH + offset[lane]] = main.getNowTime();
+			int bombTimer = offset[lane] < 10 ? TIMER_BOMB_1P_SCRATCH + offset[lane] : TIMER_BOMB_1P_KEY10 + offset[lane] - 10;
+			main.getTimer()[bombTimer] = main.getNowTime();
 		}
 
 		final int lanelength = sckeyassign.length;
