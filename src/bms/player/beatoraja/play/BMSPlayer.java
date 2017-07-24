@@ -821,11 +821,14 @@ public class BMSPlayer extends MainState {
 		case VALUE_JUDGE_3P_DURATION:
 			return judge.getRecentJudgeTiming();
 		}
-		if (id >= VALUE_JUDGE_1P_SCRATCH && id < VALUE_JUDGE_1P_SCRATCH + 20) {
-			return judge.getJudge()[id - VALUE_JUDGE_1P_SCRATCH];
-		}
-		if (id >= VALUE_JUDGE_1P_KEY20 && id <= VALUE_JUDGE_1P_KEY_MAX) {
-			return judge.getJudge()[id - VALUE_JUDGE_1P_KEY20 + 20];
+		if (id >= VALUE_JUDGE_1P_SCRATCH && id < VALUE_JUDGE_1P_SCRATCH + 10) {
+			return judge.getJudge(0, id - VALUE_JUDGE_1P_SCRATCH);
+		} else if (id >= VALUE_JUDGE_1P_SCRATCH + 10 && id < VALUE_JUDGE_1P_SCRATCH + 20) {
+			return judge.getJudge(1, id - VALUE_JUDGE_1P_SCRATCH - 10);
+		} else if (id >= VALUE_JUDGE_1P_KEY10 && id <= VALUE_JUDGE_1P_KEY_MAX) {
+			return judge.getJudge(0, id - VALUE_JUDGE_1P_KEY10 + 10);
+		} else if (id >= VALUE_JUDGE_2P_KEY10 && id <= VALUE_JUDGE_2P_KEY_MAX) {
+			return judge.getJudge(1, id - VALUE_JUDGE_2P_KEY10 + 10);
 		}
 		return super.getNumberValue(id);
 	}

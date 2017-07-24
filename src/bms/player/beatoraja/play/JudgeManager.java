@@ -46,7 +46,7 @@ public class JudgeManager {
 	/**
 	 * ボムの表示開始時間
 	 */
-	private int[] judge;
+	private int[][] judge;
 	/**
 	 * 現在表示中の判定
 	 */
@@ -77,6 +77,8 @@ public class JudgeManager {
 	private int[] sckeyassign;
 	private int[] sckey;
 	private int[] offset;
+	private int offsetPerPlayer;
+	private int scratchOffset;
 	/**
 	 * HCNの増減間隔(ms)
 	 */
@@ -145,27 +147,34 @@ public class JudgeManager {
 			for (int i=0; i<26; i++) {
 				keyassign[i] = i;
 			}
-			pmsjudge = false;
 			break;
 		default:
 			keyassign = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 7 };
 			break;
 		}
+		offsetPerPlayer = 120;
+		scratchOffset = 100;
 		offset = new int[model.getMode().key];
 		sckeyassign = new int[model.getMode().key];
 		sckey = new int[model.getMode().scratchKey.length];
-		for(int i = 0, sc = 0;i < offset.length;i++) {
+		for(int i = 0, sc = 0, key = 0; i < offset.length;i++) {
+			int player = i / (model.getMode().key / model.getMode().player);
+			if (i % (model.getMode().key / model.getMode().player) == 0) {
+				sc = 0;
+				key = 0;
+			}
 			if(model.getMode().isScratchKey(i)) {
 				sckeyassign[i] = sc;
-				offset[i] = sc * 10;
+				offset[i] = player * offsetPerPlayer + scratchOffset + sc;
 				sc++;
 			} else {
 				sckeyassign[i] = -1;
-				offset[i] = (i / (model.getMode().key / model.getMode().player)) * 10 + i % (model.getMode().key / model.getMode().player) + 1;	
+				offset[i] = player * offsetPerPlayer + key;
+				key++;
 			}
 		}
 
-		judge = new int[keyassign.length < 20 ? 20 : keyassign.length + 1];
+		judge = new int[model.getMode().player][offsetPerPlayer];
 
 		processing = new LongNote[sckeyassign.length];
 		passing = new LongNote[sckeyassign.length];
@@ -496,7 +505,9 @@ public class JudgeManager {
 			// LN処理タイマー
 			// TODO processing値の変化のときのみ実行したい
 			// TODO HCNは別タイマーにするかも
-			int lnTimer = offset[lane] < 10 ? TIMER_HOLD_1P_SCRATCH + offset[lane] : TIMER_HOLD_1P_KEY10 + offset[lane] - 10;
+			int player = offset[lane] / offsetPerPlayer;
+			int ofs = offset[lane] % offsetPerPlayer >= scratchOffset ? 0 : offset[lane] % offsetPerPlayer + 1;
+			int lnTimer = ofs < 10 ? TIMER_HOLD_1P_SCRATCH + player*10 + ofs : TIMER_HOLD_1P_KEY10 + player*100 + ofs - 10;
 			if (processing[lane] != null || (passing[lane] != null && inclease[lane])) {
 				if (main.getTimer()[lnTimer] == Long.MIN_VALUE) {
 					main.getTimer()[lnTimer] = main.getNowTime();
@@ -527,9 +538,11 @@ public class JudgeManager {
 			coursecombo = 0;
 		}
 
-		this.judge[offset[lane]] = judge == 0 ? 1 : judge * 2 + (fast > 0 ? 0 : 1);
+		int player = offset[lane] / offsetPerPlayer;
+		int ofs = offset[lane] % offsetPerPlayer >= scratchOffset ? 0 : offset[lane] % offsetPerPlayer + 1;
+		this.judge[player][ofs] = judge == 0 ? 1 : judge * 2 + (fast > 0 ? 0 : 1);
 		if (judge < 2) {
-			int bombTimer = offset[lane] < 10 ? TIMER_BOMB_1P_SCRATCH + offset[lane] : TIMER_BOMB_1P_KEY10 + offset[lane] - 10;
+			int bombTimer = ofs < 10 ? TIMER_BOMB_1P_SCRATCH + player*10 + ofs : TIMER_BOMB_1P_KEY10 + player*100 + ofs - 10;
 			main.getTimer()[bombTimer] = main.getNowTime();
 		}
 
@@ -624,8 +637,12 @@ public class JudgeManager {
 		return score.getJudgeCount(judge, fast);
 	}
 
-	public int[] getJudge() {
-		return judge;
+	public int getJudge(int player, int offset) {
+		if (player < 0 || player >= judge.length)
+			return 0;
+		if (offset < 0 || offset >= judge[player].length)
+			return 0;
+		return judge[player][offset];
 	}
 
 	public int[] getNowJudge() {
