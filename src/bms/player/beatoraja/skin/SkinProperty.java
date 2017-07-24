@@ -117,22 +117,22 @@ public class SkinProperty {
 	public static final int TIMER_RESULT_UPDATESCORE = 152;
 
 	// 拡張版TIMER
-	public static final int TIMER_BOMB_1P_SCRATCH2 = 1000;
 	public static final int TIMER_BOMB_1P_KEY10 = 1010;
-	public static final int TIMER_BOMB_2P_SCRATCH2 = 1100;
+	public static final int TIMER_BOMB_1P_KEY99 = 1099;
 	public static final int TIMER_BOMB_2P_KEY10 = 1110;
-	public static final int TIMER_HOLD_1P_SCRATCH2 = 1200;
+	public static final int TIMER_BOMB_2P_KEY99 = 1199;
 	public static final int TIMER_HOLD_1P_KEY10 = 1210;
-	public static final int TIMER_HOLD_2P_SCRATCH2 = 1300;
+	public static final int TIMER_HOLD_1P_KEY99 = 1299;
 	public static final int TIMER_HOLD_2P_KEY10 = 1310;
-	public static final int TIMER_KEYON_1P_SCRATCH2 = 1400;
+	public static final int TIMER_HOLD_2P_KEY99 = 1399;
 	public static final int TIMER_KEYON_1P_KEY10 = 1410;
-	public static final int TIMER_KEYON_2P_SCRATCH2 = 1500;
+	public static final int TIMER_KEYON_1P_KEY99 = 1499;
 	public static final int TIMER_KEYON_2P_KEY10 = 1510;
-	public static final int TIMER_KEYOFF_1P_SCRATCH2 = 1600;
+	public static final int TIMER_KEYON_2P_KEY99 = 1599;
 	public static final int TIMER_KEYOFF_1P_KEY10 = 1610;
-	public static final int TIMER_KEYOFF_2P_SCRATCH2 = 1700;
+	public static final int TIMER_KEYOFF_1P_KEY99 = 1699;
 	public static final int TIMER_KEYOFF_2P_KEY10 = 1710;
+	public static final int TIMER_KEYOFF_2P_KEY99 = 1799;
 
 	// 選曲専用
 	public static final int SLIDER_MUSICSELECT_POSITION = 1;
@@ -587,12 +587,10 @@ public class SkinProperty {
 	public static final int VALUE_JUDGE_3P_DURATION = 527;
 
 	// 拡張数値定義
-	public static final int VALUE_JUDGE_1P_SCRATCH2 = 1500;
 	public static final int VALUE_JUDGE_1P_KEY10 = 1510;
-	public static final int VALUE_JUDGE_1P_KEY_MAX = 1599;
-	public static final int VALUE_JUDGE_2P_SCRATCH2 = 1600;
+	public static final int VALUE_JUDGE_1P_KEY99 = 1599;
 	public static final int VALUE_JUDGE_2P_KEY10 = 1610;
-	public static final int VALUE_JUDGE_2P_KEY_MAX = 1699;
+	public static final int VALUE_JUDGE_2P_KEY99 = 1699;
 
 	public static final int SLIDER_LANECOVER = 4;
 	public static final int SLIDER_LANECOVER2 = 5;
