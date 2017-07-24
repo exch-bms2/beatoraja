@@ -20,7 +20,10 @@ public class SongData {
 
 	public static final int CONTENT_TEXT = 1;
 	public static final int CONTENT_BGA = 2;
-	
+
+	public static final int FAVORITE_SONG = 1;
+	public static final int FAVORITE_CHART = 2;
+
 	/**
 	 * 楽曲タイトル
 	 */
@@ -190,7 +193,7 @@ public class SongData {
 	}
 	public String getFullTitle() {
 		if(fulltitle == null) {
-			fulltitle = title + " " + subtitle;
+			fulltitle = subtitle != null ? title + " " + subtitle : title;
 		}
 		return fulltitle;
 	}
@@ -208,7 +211,7 @@ public class SongData {
 	}
 	public String getFullArtist() {
 		if(fullartist == null) {
-			fullartist = artist + " " + subartist;
+			fullartist = subartist != null ? artist + " " + subartist : artist;
 		}
 		return fullartist;
 	}
@@ -286,6 +289,7 @@ public class SongData {
 	public boolean hasLongNote() {
 		return (feature & FEATURE_LONGNOTE) != 0;
 	}
+
 	public String getMd5() {
 		return md5;
 	}

@@ -59,13 +59,19 @@ class SongBar extends SelectableBar {
 
     private Pixmap banner;
 
-    private TableData.TableSongData info;
+    private TableData.TableSong info;
 
     public SongBar(SongData song) {
         this.song = song;
     }
 
-    public SongBar(SongData song, TableData.TableSongData info) {
+    public SongBar(SongData song, TableData.TableSong info) {
+    	if(song == null) {
+    		song = new SongData();
+    		song.setTitle(info.getTitle());
+    		song.setArtist(info.getArtist());
+    		song.setGenre(info.getGenre());
+    	}
         this.song = song;
         this.info = info;
     }
@@ -73,8 +79,12 @@ class SongBar extends SelectableBar {
     public SongData getSongData() {
         return song;
     }
+    
+    public boolean existsSong() {
+    	return song.getSha256() != null;
+    }
 
-    public TableData.TableSongData getSongInformation() {
+    public TableData.TableSong getSongInformation() {
         return info;
     }
 
@@ -88,7 +98,7 @@ class SongBar extends SelectableBar {
 
     @Override
     public String getTitle() {
-        return song != null ? (song.getTitle() + " " + song.getSubtitle()) : info.getTitle();
+        return song.getFullTitle();
     }
 
     public int getLamp() {
@@ -400,8 +410,8 @@ class TableBar extends DirectoryBar {
 
     	final long t = System.currentTimeMillis();
 		List<HashBar> levels = new ArrayList<HashBar>();
-		for (TableData.TableDataELement lv : td.getFolder()) {
-			levels.add(new HashBar(selector, "LEVEL " + lv.getLevel(), lv.getSongs()));
+		for (TableData.TableFolder lv : td.getFolder()) {
+			levels.add(new HashBar(selector, lv.getName(), lv.getSong()));
 		}
 
 		this.levels = levels.toArray(new HashBar[levels.size()]);
@@ -459,11 +469,11 @@ class TableBar extends DirectoryBar {
  */
 class HashBar extends DirectoryBar {
     private String title;
-    private TableData.TableSongData[] elements;
+    private TableData.TableSong[] elements;
     private MusicSelector selector;
     private SongData[] songs;
 
-    public HashBar(MusicSelector selector, String title, TableData.TableSongData[] elements) {
+    public HashBar(MusicSelector selector, String title, TableData.TableSong[] elements) {
         this.selector = selector;
         this.title = title;
         this.elements = elements;
@@ -474,8 +484,13 @@ class HashBar extends DirectoryBar {
         return title;
     }
 
-    public TableData.TableSongData[] getElements() {
+    public TableData.TableSong[] getElements() {
         return elements;
+    }
+
+    public void setElements(TableData.TableSong[] elements) {
+        this.elements = elements;
+        songs = null;
     }
 
     @Override
@@ -488,7 +503,7 @@ class HashBar extends DirectoryBar {
         if(songs == null) {
             songs = selector.getSongDatabase().getSongDatas(hashes);
         }
-        for(TableData.TableSongData element : elements) {
+        for(TableData.TableSong element : elements) {
             boolean exist = false;
             for (SongData song : songs) {
                 if(element.getHash().equals(song.getMd5()) || element.getHash().equals(song.getSha256())) {
@@ -552,18 +567,18 @@ class CommandBar extends DirectoryBar {
     private MusicSelector selector;
     private String title;
     private String sql;
-    private boolean info;
+    private int type;
 
     public CommandBar(MainController main, MusicSelector selector, String title, String sql) {
-    	this(main, selector, title, sql, false);
+    	this(main, selector, title, sql, 0);
     }
 
-    public CommandBar(MainController main, MusicSelector selector, String title, String sql, boolean info) {
+    public CommandBar(MainController main, MusicSelector selector, String title, String sql, int type) {
         this.main = main;
         this.selector = selector;
         this.title = title;
         this.sql = sql;
-        this.info = info;
+        this.type = type;
     }
 
     @Override
@@ -578,7 +593,7 @@ class CommandBar extends DirectoryBar {
 
     @Override
     public Bar[] getChildren() {
-    	if(info) {
+    	if(type == 2) {
     		if(main.getInfoDatabase() == null) {
     			return new Bar[0];
     		}
@@ -591,7 +606,17 @@ class CommandBar extends DirectoryBar {
                 }
             }
             return l.toArray(new Bar[l.size()]);    		    		
-    	} else {
+    	} else if(type == 1) {
+            SongData[] infos = main.getSongDatabase().getSongDatas(sql);
+            List<Bar> l = new ArrayList<Bar>();
+            for (SongData info : infos) {
+                SongData[] song = selector.getSongDatabase().getSongDatas("sha256", info.getSha256());
+                if(song.length > 0) {
+                    l.add(new SongBar(song[0]));
+                }
+            }
+            return l.toArray(new Bar[l.size()]);
+        } else{
             List<IRScoreData> scores = main.getPlayDataAccessor().readScoreDatas(sql);
             List<Bar> l = new ArrayList<Bar>();
             for (IRScoreData score : scores) {
@@ -600,9 +625,8 @@ class CommandBar extends DirectoryBar {
                     l.add(new SongBar(song[0]));
                 }
             }
-            return l.toArray(new Bar[l.size()]);    		
-    	}
-    	
+            return l.toArray(new Bar[l.size()]);
+        }
     }
 
 }

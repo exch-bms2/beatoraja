@@ -58,22 +58,22 @@ public class TableDataAccessor {
 						td.setUrl(url);
 						td.setName(dt.getName());
 						String[] levels = dt.getLevelDescription();
-						List<TableData.TableDataELement> tdes = new ArrayList<>(levels.length);
+						List<TableData.TableFolder> tdes = new ArrayList<>(levels.length);
 						for (String lv : levels) {
-							TableData.TableDataELement tde = new TableData.TableDataELement();
-							tde.setLevel(lv);
-							List<TableData.TableSongData> hashes = new ArrayList<TableData.TableSongData>();
+							TableData.TableFolder tde = new TableData.TableFolder();
+							tde.setName("LEVEL " + lv);
+							List<TableData.TableSong> hashes = new ArrayList<TableData.TableSong>();
 							for (DifficultyTableElement dte : dt.getElements()) {
 								if (lv.equals(dte.getDifficultyID())) {
-									hashes.add(new TableData.TableSongData(
+									hashes.add(new TableData.TableSong(
 													dte.getSHA256() != null ? dte.getSHA256() : dte.getMD5(),
-											dte.getTitle(), dte.getURL1(), dte.getURL2()));
+											dte.getTitle(), dte.getURL1name(), null, dte.getURL1(), dte.getURL2()));
 								}
 							}
-							tde.setSongs(hashes.toArray(new TableData.TableSongData[hashes.size()]));
+							tde.setSong(hashes.toArray(new TableData.TableSong[hashes.size()]));
 							tdes.add(tde);
 						}
-						td.setFolder(tdes.toArray(new TableData.TableDataELement[tdes.size()]));
+						td.setFolder(tdes.toArray(new TableData.TableFolder[tdes.size()]));
 
 						if (dt.getCourse() != null && dt.getCourse().length > 0) {
 							List<CourseData> gname = new ArrayList<CourseData>();
@@ -141,7 +141,7 @@ public class TableDataAccessor {
 		try {
 			Json json = new Json();
 			json.setElementType(TableData.class, "folder", ArrayList.class);
-			json.setElementType(TableData.TableDataELement.class, "songs", ArrayList.class);
+			json.setElementType(TableData.TableFolder.class, "songs", ArrayList.class);
 			json.setElementType(TableData.class, "course", ArrayList.class);
 			json.setElementType(CourseData.class, "trophy", ArrayList.class);
 			json.setOutputType(OutputType.json);

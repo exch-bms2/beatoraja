@@ -612,7 +612,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 	public PlaySkin loadSkin(File f, MainState player, SkinHeader header, Map<Integer, Boolean> option,
 			Map property) throws IOException {
 
-		final Mode mode = SkinType.getSkinTypeById(header.getMode()).getMode();
+		final Mode mode = header.getSkinType().getMode();
 		note = new SkinSource[mode.key];
 		lnstart = new SkinSource[mode.key];
 		lnend = new SkinSource[mode.key];

@@ -236,7 +236,7 @@ public class MusicSelectInputProcessor {
             // show detail option
             select.setPanelState(3);
             PlayConfig pc = null;
-            if (current instanceof SongBar) {
+            if (current instanceof SongBar && ((SongBar)current).existsSong()) {
                 SongBar song = (SongBar) current;
                 pc = (song.getSongData().getMode() == 5 || song.getSongData().getMode() == 7 ? config.getMode7()
                         : (song.getSongData().getMode() == 10 || song.getSongData().getMode() == 14 ? config.getMode14()
@@ -303,7 +303,7 @@ public class MusicSelectInputProcessor {
 
             if (numberstate[8] && numtime[8] != 0) {
                 numtime[8] = 0;
-                if (current instanceof SongBar &&
+                if (current instanceof SongBar && ((SongBar) current).existsSong() && 
                         (bar.getDirectory().isEmpty() || !(bar.getDirectory().getLast() instanceof SameFolderBar))) {
                     SongData sd = ((SongBar) current).getSongData();
                     bar.updateBar(new SameFolderBar(select, sd.getTitle(), sd.getFolder()));
@@ -334,7 +334,7 @@ public class MusicSelectInputProcessor {
             input.getFunctiontime()[2] = 0;
             try {
                 if (Desktop.isDesktopSupported()) {
-                    if(current instanceof SongBar) {
+                    if(current instanceof SongBar && ((SongBar) current).existsSong()) {
                         Desktop.getDesktop().open(Paths.get(((SongBar) current).getSongData().getPath()).getParent().toFile());
                     } else if(current instanceof FolderBar) {
                         Desktop.getDesktop().open(Paths.get(((FolderBar) current).getFolderData().getPath()).toFile());

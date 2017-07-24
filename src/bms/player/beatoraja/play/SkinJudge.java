@@ -2,22 +2,26 @@ package bms.player.beatoraja.play;
 
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.skin.*;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.*;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.Rectangle;
 
 /**
- * Created by exch on 2016/12/11.
+ * 判定オブジェクト
+ * 
+ * @author exch
  */
 public class SkinJudge extends SkinObject {
 
+	/**
+	 * 文字イメージ
+	 */
     private SkinImage[] judge;
+    /**
+     * 数字イメージ
+     */
     private SkinNumber[] count;
     private int index;
     private boolean shift;
-
-    private BitmapFont font;
 
     public SkinJudge(int index, boolean shift) {
         this(new SkinImage[6], new SkinNumber[6], index, shift);
@@ -28,12 +32,6 @@ public class SkinJudge extends SkinObject {
         this.count = count;
         this.index = index;
         this.shift = shift;
-        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
-                Gdx.files.internal("skin/default/VL-Gothic-Regular.ttf"));
-        FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-        parameter.size = 18;
-        font = generator.generateFont(parameter);
-        generator.dispose();
         
         this.setDestination(0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, new int[0]);
     }
@@ -97,6 +95,5 @@ public class SkinJudge extends SkinObject {
     public void dispose() {
     	disposeAll(judge);
     	disposeAll(count);
-        font.dispose();
     }
 }
