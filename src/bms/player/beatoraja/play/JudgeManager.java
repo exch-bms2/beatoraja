@@ -5,6 +5,7 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
 import java.util.Arrays;
 
 import bms.player.beatoraja.*;
+import bms.player.beatoraja.skin.SkinPropertyMapper;
 import com.badlogic.gdx.utils.FloatArray;
 
 import bms.model.*;
@@ -46,7 +47,7 @@ public class JudgeManager {
 	/**
 	 * ボムの表示開始時間
 	 */
-	private int[] judge;
+	private int[][] judge;
 	/**
 	 * 現在表示中の判定
 	 */
@@ -76,6 +77,7 @@ public class JudgeManager {
 	private int[] sckeyassign;
 	private int[] sckey;
 	private int[] offset;
+	private int[] player;
 	/**
 	 * HCNの増減間隔(ms)
 	 */
@@ -111,7 +113,6 @@ public class JudgeManager {
 
 	public void init(BMSModel model, PlayerResource resource) {
 		prevtime = 0;
-		judge = new int[20];
 		judgenow = new int[((PlaySkin) main.getSkin()).getJudgeregion()];
 		judgecombo = new int[((PlaySkin) main.getSkin()).getJudgeregion()];
 		score = new IRScoreData(model.getMode());
@@ -145,19 +146,22 @@ public class JudgeManager {
 			break;
 		}
 		offset = new int[model.getMode().key];
+		player = new int[model.getMode().key];
 		sckeyassign = new int[model.getMode().key];
 		sckey = new int[model.getMode().scratchKey.length];
 		for(int i = 0, sc = 0;i < offset.length;i++) {
+			player[i] = i / (model.getMode().key / model.getMode().player);
 			if(model.getMode().isScratchKey(i)) {
 				sckeyassign[i] = sc;
-				offset[i] = sc * 10;
+				offset[i] = 0;
 				sc++;
 			} else {
 				sckeyassign[i] = -1;
-				offset[i] = (i / (model.getMode().key / model.getMode().player)) * 10 + i % (model.getMode().key / model.getMode().player) + 1;	
+				offset[i] = i % (model.getMode().key / model.getMode().player) + 1;
 			}
 		}
 
+		judge = new int[model.getMode().player][model.getMode().key / model.getMode().player + 1];
 		processing = new LongNote[sckeyassign.length];
 		passing = new LongNote[sckeyassign.length];
 		passingcount = new int[sckeyassign.length];
@@ -487,12 +491,13 @@ public class JudgeManager {
 			// LN処理タイマー
 			// TODO processing値の変化のときのみ実行したい
 			// TODO HCNは別タイマーにするかも
+			int timerId = SkinPropertyMapper.holdTimerId(player[lane], offset[lane]);
 			if (processing[lane] != null || (passing[lane] != null && inclease[lane])) {
-				if (main.getTimer()[TIMER_HOLD_1P_SCRATCH + offset[lane]] == Long.MIN_VALUE) {
-					main.getTimer()[TIMER_HOLD_1P_SCRATCH + offset[lane]] = main.getNowTime();
+				if (main.getTimer()[timerId] == Long.MIN_VALUE) {
+					main.getTimer()[timerId] = main.getNowTime();
 				}
 			} else {
-				main.getTimer()[TIMER_HOLD_1P_SCRATCH + offset[lane]] = Long.MIN_VALUE;
+				main.getTimer()[timerId] = Long.MIN_VALUE;
 			}
 		}
 	}
@@ -517,9 +522,9 @@ public class JudgeManager {
 			coursecombo = 0;
 		}
 
-		this.judge[offset[lane]] = judge == 0 ? 1 : judge * 2 + (fast > 0 ? 0 : 1);
+		this.judge[player[lane]][offset[lane]] = judge == 0 ? 1 : judge * 2 + (fast > 0 ? 0 : 1);
 		if (judge < 2) {
-			main.getTimer()[TIMER_BOMB_1P_SCRATCH + offset[lane]] = main.getNowTime();
+			main.getTimer()[SkinPropertyMapper.bombTimerId(player[lane], offset[lane])] = main.getNowTime();
 		}
 
 		final int lanelength = sckeyassign.length;
@@ -613,8 +618,12 @@ public class JudgeManager {
 		return score.getJudgeCount(judge, fast);
 	}
 
-	public int[] getJudge() {
-		return judge;
+	public int getJudge(int timerId) {
+		int player = SkinPropertyMapper.getKeyJudgeValuePlayer(timerId);
+		int offset = SkinPropertyMapper.getKeyJudgeValueOffset(timerId);
+		if (player >= judge.length || offset >= judge[player].length)
+			return -1;
+		return judge[player][offset];
 	}
 
 	public int[] getNowJudge() {
