@@ -1,5 +1,6 @@
 package bms.player.beatoraja.skin;
 
+import bms.player.beatoraja.MainController;
 import bms.player.beatoraja.MainState;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -186,7 +187,7 @@ public abstract class SkinObject implements Disposable {
 	public Rectangle getDestination(long time, MainState state) {
 		final int timer = dsttimer;
 
-		if (timer != 0 && timer < 256) {
+		if (timer != 0 && timer < MainController.timerCount) {
 			final long stime = state.getTimer()[timer];
 			if (stime == Long.MIN_VALUE) {
 				return null;
