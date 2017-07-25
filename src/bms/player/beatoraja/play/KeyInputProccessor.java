@@ -21,7 +21,6 @@ import bms.player.beatoraja.skin.SkinPropertyMapper;
 class KeyInputProccessor {
 
 	private final BMSPlayer player;
-	private final boolean ispms;
 
 	private JudgeThread judge;
 
@@ -30,7 +29,6 @@ class KeyInputProccessor {
 
 	public KeyInputProccessor(BMSPlayer player, Mode mode) {
 		this.player = player;
-		ispms = mode == Mode.POPN_5K || mode == Mode.POPN_9K;
 		this.scratch = new int[2];
 	}
 
@@ -46,19 +44,19 @@ class KeyInputProccessor {
 		final JudgeManager judge = player.getJudgeManager();
 		final boolean[] keystate = player.getMainController().getInputProcessor().getKeystate();
 
-		for (int lane = 0; lane < player.getLaneProperty().getSkinOffset().length; lane++) {
+		for (int lane = 0; lane < player.getLaneProperty().getLaneSkinOffset().length; lane++) {
 			// キービームフラグON/OFF
-			final int offset = player.getLaneProperty().getSkinOffset()[lane];
+			final int offset = player.getLaneProperty().getLaneSkinOffset()[lane];
 			boolean pressed = false;
-			for (int i = 0; i < player.getLaneProperty().getLaneAssign()[lane].length; i++) {
-				int key = player.getLaneProperty().getLaneAssign()[lane][i];
+			for (int i = 0; i < player.getLaneProperty().getLaneKeyAssign()[lane].length; i++) {
+				int key = player.getLaneProperty().getLaneKeyAssign()[lane][i];
 				if (key >= 0 && keystate[key]) {
 					pressed = true;
 					break;
 				}
 			}
-			final int timerOn = SkinPropertyMapper.keyOnTimerId(player.getLaneProperty().getPlayer()[lane], offset);
-			final int timerOff = SkinPropertyMapper.keyOffTimerId(player.getLaneProperty().getPlayer()[lane], offset);
+			final int timerOn = SkinPropertyMapper.keyOnTimerId(player.getLaneProperty().getLanePlayer()[lane], offset);
+			final int timerOff = SkinPropertyMapper.keyOffTimerId(player.getLaneProperty().getLanePlayer()[lane], offset);
 			if (pressed) {
 				if (timer[timerOn] == Long.MIN_VALUE) {
 					timer[timerOn] = now;
@@ -76,10 +74,10 @@ class KeyInputProccessor {
 			final int deltatime = now - prevtime;
 			for (int s = 0; s < scratch.length; s++) {
 				scratch[s] += s % 2 == 0 ? 2160 - deltatime : deltatime;
-				if (s < player.getLaneProperty().getScratchToKey().length) {
-					if (keystate[player.getLaneProperty().getScratchToKey()[s][0]]) {
+				if (s < player.getLaneProperty().getScratchKeyAssign().length) {
+					if (keystate[player.getLaneProperty().getScratchKeyAssign()[s][0]]) {
 						scratch[s] += deltatime * 2;
-					} else if (keystate[player.getLaneProperty().getScratchToKey()[s][1]]) {
+					} else if (keystate[player.getLaneProperty().getScratchKeyAssign()[s][1]]) {
 						scratch[s] += 2160 - deltatime * 2;
 					}
 				}

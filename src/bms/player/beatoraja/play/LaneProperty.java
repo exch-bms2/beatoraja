@@ -2,15 +2,36 @@ package bms.player.beatoraja.play;
 
 import bms.model.Mode;
 
-import java.util.List;
-
 public class LaneProperty {
 
+	/**
+	 * 入力キーからレーンへの対応
+	 */
 	private final int[] keyToLane;
+
+	/**
+	 * レーンから入力キー（複数）への対応
+	 */
 	private final int[][] laneToKey;
+
+	/**
+	 * レーンが何個目のスクラッチか
+	 */
 	private final int[] laneToScratch;
+
+	/**
+	 * レーンからスキンに使用する番号への対応
+	 */
 	private final int[] laneToSkinOffset;
+
+	/**
+	 * レーンからプレイヤー番号への対応
+	 */
 	private final int[] laneToPlayer;
+
+	/**
+	 * 各スクラッチを処理する入力キー（2個ずつ）
+	 */
 	private final int[][] scratchToKey;
 
 	public LaneProperty(Mode mode) {
@@ -62,27 +83,27 @@ public class LaneProperty {
 		}
 	}
 
-	public int[] getKeyAssign() {
+	public int[] getKeyLaneAssign() {
 		return keyToLane;
 	}
 
-	public int[][] getLaneAssign() {
+	public int[][] getLaneKeyAssign() {
 		return laneToKey;
 	}
 
-	public int[] getScratchAssign() {
+	public int[] getLaneScratchAssign() {
 		return laneToScratch;
 	}
 
-	public int[] getSkinOffset() {
+	public int[] getLaneSkinOffset() {
 		return laneToSkinOffset;
 	}
 
-	public int[] getPlayer() {
+	public int[] getLanePlayer() {
 		return laneToPlayer;
 	}
 
-	public int[][] getScratchToKey() {
+	public int[][] getScratchKeyAssign() {
 		return scratchToKey;
 	}
 }

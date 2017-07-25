@@ -125,10 +125,10 @@ public class JudgeManager {
 		JudgeProperty rule = BMSPlayerRule.getBMSPlayerRule(model.getMode()).judge;
 		pmsjudge = rule.pms;
 
-		keyassign = main.getLaneProperty().getKeyAssign();
-		offset = main.getLaneProperty().getSkinOffset();
-		player = main.getLaneProperty().getPlayer();
-		sckeyassign = main.getLaneProperty().getScratchAssign();
+		keyassign = main.getLaneProperty().getKeyLaneAssign();
+		offset = main.getLaneProperty().getLaneSkinOffset();
+		player = main.getLaneProperty().getLanePlayer();
+		sckeyassign = main.getLaneProperty().getLaneScratchAssign();
 		sckey = new int[model.getMode().scratchKey.length];
 
 		judge = new int[model.getMode().player][model.getMode().key / model.getMode().player + 1];
