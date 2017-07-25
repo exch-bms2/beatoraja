@@ -61,6 +61,15 @@ public class LaneProperty {
 			laneToKey = new int[][] { {0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8} };
 			scratchToKey = new int[][] { };
 			break;
+		case KEYBOARD_24K:
+			keyToLane = new int[26];
+			laneToKey = new int[26][1];
+			for (int i=0; i<26; i++) {
+				keyToLane[i] = i;
+				laneToKey[i][0] = i;
+			}
+			scratchToKey = new int[][] { };
+			break;
 		default:
 			keyToLane = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 7 };
 			laneToKey = new int[][] { {0}, {1}, {2}, {3}, {4}, {5}, {6}, {7,8} };
