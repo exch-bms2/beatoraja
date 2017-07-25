@@ -31,6 +31,7 @@ public class BMSPlayer extends MainState {
 	private BMSModel model;
 
 	private LaneRenderer lanerender;
+	private LaneProperty laneProperty;
 	private JudgeManager judge;
 
 	private BGAProcessor bga;
@@ -231,6 +232,7 @@ public class BMSPlayer extends MainState {
 	public void create() {
 		final MainController main = getMainController();
 		final PlayerResource resource = main.getPlayerResource();
+		laneProperty = new LaneProperty(model.getMode());
 		judge = new JudgeManager(this);
 		control = new ControlInputProcessor(this, autoplay);
 		keyinput = new KeyInputProccessor(this, model.getMode());
@@ -534,6 +536,10 @@ public class BMSPlayer extends MainState {
 
 	public LaneRenderer getLanerender() {
 		return lanerender;
+	}
+
+	public LaneProperty getLaneProperty() {
+		return laneProperty;
 	}
 
 	private void saveConfig() {

@@ -125,41 +125,11 @@ public class JudgeManager {
 		JudgeProperty rule = BMSPlayerRule.getBMSPlayerRule(model.getMode()).judge;
 		pmsjudge = rule.pms;
 
-		switch (model.getMode()) {
-		case BEAT_5K:
-			keyassign = new int[] { 0, 1, 2, 3, 4, -1, -1, 5, 5 };
-			break;
-		case BEAT_7K:
-			keyassign = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 7 };
-			break;
-		case BEAT_10K:
-			keyassign = new int[] { 0, 1, 2, 3, 4, -1, -1, 5, 5, 6, 7, 8, 9, 10, -1, -1, 11, 11 };
-			break;
-		case BEAT_14K:
-			keyassign = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 7, 8, 9, 10, 11, 12, 13, 14, 15, 15 };
-			break;
-		case POPN_9K:
-			keyassign = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8 };
-			break;
-		default:
-			keyassign = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 7 };
-			break;
-		}
-		offset = new int[model.getMode().key];
-		player = new int[model.getMode().key];
-		sckeyassign = new int[model.getMode().key];
+		keyassign = main.getLaneProperty().getKeyAssign();
+		offset = main.getLaneProperty().getSkinOffset();
+		player = main.getLaneProperty().getPlayer();
+		sckeyassign = main.getLaneProperty().getScratchAssign();
 		sckey = new int[model.getMode().scratchKey.length];
-		for(int i = 0, sc = 0;i < offset.length;i++) {
-			player[i] = i / (model.getMode().key / model.getMode().player);
-			if(model.getMode().isScratchKey(i)) {
-				sckeyassign[i] = sc;
-				offset[i] = 0;
-				sc++;
-			} else {
-				sckeyassign[i] = -1;
-				offset[i] = i % (model.getMode().key / model.getMode().player) + 1;
-			}
-		}
 
 		judge = new int[model.getMode().player][model.getMode().key / model.getMode().player + 1];
 		processing = new LongNote[sckeyassign.length];
