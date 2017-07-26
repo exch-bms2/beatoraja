@@ -562,8 +562,6 @@ public class MusicSelector extends MainState {
 			return mode < mode_lr2.length ? mode_lr2[mode] : mode;
 		case BUTTON_SORT:
 			return sort;
-		case BUTTON_LNMODE:
-			return config.getLnmode();
 		case NUMBER_SCORE_RATE:
 			return bar.getSelected().getScore() != null ? getScoreDataProperty().getRateInt() : Integer.MIN_VALUE;
 		case NUMBER_SCORE_RATE_AFTERDOT:
@@ -630,7 +628,7 @@ public class MusicSelector extends MainState {
 			}
 			return 0;
 		case BARGRAPH_LEVEL:
-			if (bar.getSelected() instanceof SongBar) {
+			if (bar.getSelected() instanceof SongBar && ((SongBar) bar.getSelected()).getSongData() != null) {
 				SongData sd = ((SongBar) bar.getSelected()).getSongData();
 				if (sd.getMode() == 5 || sd.getMode() == 10) {
 					return sd.getLevel() / 9.0f;
@@ -644,7 +642,7 @@ public class MusicSelector extends MainState {
 			}
 			return 0;
 		case BARGRAPH_LEVEL_BEGINNER:
-			if (bar.getSelected() instanceof SongBar) {
+			if (bar.getSelected() instanceof SongBar && ((SongBar) bar.getSelected()).getSongData() != null) {
 				SongData sd = ((SongBar) bar.getSelected()).getSongData();
 				if (sd.getDifficulty() != 1) {
 					return 0;
@@ -661,7 +659,7 @@ public class MusicSelector extends MainState {
 			}
 			return 0;
 		case BARGRAPH_LEVEL_NORMAL:
-			if (bar.getSelected() instanceof SongBar) {
+			if (bar.getSelected() instanceof SongBar && ((SongBar) bar.getSelected()).getSongData() != null) {
 				SongData sd = ((SongBar) bar.getSelected()).getSongData();
 				if (sd.getDifficulty() != 2) {
 					return 0;
@@ -678,7 +676,7 @@ public class MusicSelector extends MainState {
 			}
 			return 0;
 		case BARGRAPH_LEVEL_HYPER:
-			if (bar.getSelected() instanceof SongBar) {
+			if (bar.getSelected() instanceof SongBar && ((SongBar) bar.getSelected()).getSongData() != null) {
 				SongData sd = ((SongBar) bar.getSelected()).getSongData();
 				if (sd.getDifficulty() != 3) {
 					return 0;
@@ -695,7 +693,7 @@ public class MusicSelector extends MainState {
 			}
 			return 0;
 		case BARGRAPH_LEVEL_ANOTHER:
-			if (bar.getSelected() instanceof SongBar) {
+			if (bar.getSelected() instanceof SongBar && ((SongBar) bar.getSelected()).getSongData() != null) {
 				SongData sd = ((SongBar) bar.getSelected()).getSongData();
 				if (sd.getDifficulty() != 4) {
 					return 0;
@@ -712,7 +710,7 @@ public class MusicSelector extends MainState {
 			}
 			return 0;
 		case BARGRAPH_LEVEL_INSANE:
-			if (bar.getSelected() instanceof SongBar) {
+			if (bar.getSelected() instanceof SongBar && ((SongBar) bar.getSelected()).getSongData() != null) {
 				SongData sd = ((SongBar) bar.getSelected()).getSongData();
 				if (sd.getDifficulty() != 5) {
 					return 0;

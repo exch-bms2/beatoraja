@@ -51,9 +51,12 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 	private int groovex = 0;
 	private int groovey = 0;
 
-	public LR2PlaySkinLoader(final Resolution src, final Config c) {
+	private SkinType type;
+
+	public LR2PlaySkinLoader(final SkinType type, final Resolution src, final Config c) {
 		super(src, c);
 
+		this.type = type;
 		final float srcw = src.width;
 		final float srch = src.height;
 		final float dstw = dst.width;
@@ -213,6 +216,8 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 					lane = (lane - 11) + laner.length / playerr.length;
 				} else if (lane == 0) {
 					lane = laner.length / playerr.length - 1;
+				} else if (lane >= laner.length / playerr.length) {
+					lane = -1;
 				} else {
 					lane -= 1;
 				}
@@ -549,6 +554,8 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 			lane = (lane - 11) + laner.length / playerr.length;
 		} else if (lane == 0) {
 			lane = laner.length / playerr.length - 1;
+		} else if (lane >= laner.length / playerr.length) {
+			lane = -1;
 		} else {
 			lane -= 1;
 		}
@@ -611,8 +618,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 
 	public PlaySkin loadSkin(File f, MainState player, SkinHeader header, Map<Integer, Boolean> option,
 			Map property) throws IOException {
-
-		final Mode mode = header.getSkinType().getMode();
+		final Mode mode = type.getMode();
 		note = new SkinSource[mode.key];
 		lnstart = new SkinSource[mode.key];
 		lnend = new SkinSource[mode.key];
