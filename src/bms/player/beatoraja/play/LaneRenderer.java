@@ -98,7 +98,7 @@ public class LaneRenderer {
 		this.skin = (PlaySkin) main.getSkin();
 		this.conf = main.getMainController().getPlayerResource().getConfig();
 		this.config = main.getMainController().getPlayerResource().getPlayerConfig();
-		this.playconfig = main.getPlayConfig(this.conf);
+		this.playconfig = main.getPlayConfig(this.config);
 
 		this.enableLanecover = playconfig.isEnablelanecover();
 		this.enableLift = playconfig.isEnablelift();

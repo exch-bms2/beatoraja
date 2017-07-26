@@ -228,24 +228,6 @@ public class BMSPlayer extends MainState {
 		return null;
 	}
 
-	public PlayConfig getPlayConfig(Config config) {
-		switch (model.getMode()) {
-		case BEAT_7K:
-		case BEAT_5K:
-			return config.getMode7();
-		case BEAT_14K:
-		case BEAT_10K:
-			return config.getMode14();
-		case POPN_5K:
-		case POPN_9K:
-			return config.getMode9();
-		case KEYBOARD_24K:
-			return config.getMode24();
-		default:
-			return null;
-		}
-	}
-
 	public PlayConfig getPlayConfig(PlayerConfig config) {
 		switch (model.getMode()) {
 		case BEAT_7K:
@@ -286,7 +268,7 @@ public class BMSPlayer extends MainState {
 		} else {
 			input.disableAllDevices();
 		}
-		PlayConfig pc = getPlayConfig(conf);
+		PlayConfig pc = getPlayConfig(config);
 		input.setKeyassign(pc.getKeyassign());
 		input.setControllerConfig(pc.getController());
 		input.setMidiConfig(pc.getMidiConfig());
