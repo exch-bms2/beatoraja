@@ -22,7 +22,7 @@
 			{"name":"Off", "op":910},
 			{"name":"EARLY/LATE", "op":911},
 			{"name":"+-ms", "op":912}
-		]},
+		]}
 	],
 	"filepath":[
 		{"name":"Note", "path":"notes/*.png"},
@@ -354,7 +354,7 @@
 		{"id":"judgen-ms", "src":4, "x":200, "y":300, "w":300, "h":50, "divx":10, "digit":6, "ref":75},
 
 		{"id":"judgems-1pp", "src":13, "x":0, "y":20, "w":120, "h":40, "divx":12, "divy":2, "digit":4, "ref":525},
-		{"id":"judgems-1pg", "src":13, "x":0, "y":60, "w":120, "h":40, "divx":12, "divy":2, "digit":4, "ref":525},
+		{"id":"judgems-1pg", "src":13, "x":0, "y":60, "w":120, "h":40, "divx":12, "divy":2, "digit":4, "ref":525}
 	],
 	"text":[
 		{"id":1000, "font":0, "size":24, "align":1, "ref":12}
