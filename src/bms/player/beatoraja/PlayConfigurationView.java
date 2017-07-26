@@ -783,7 +783,9 @@ public class PlayConfigurationView implements Initializable {
 		protected void updateItem(SkinHeader arg0, boolean arg1) {
 			super.updateItem(arg0, arg1);
 			if (arg0 != null) {
-				setText(arg0.getName() + (arg0.getType() == SkinHeader.TYPE_BEATORJASKIN ? "" : " (LR2 Skin)"));
+				setText(arg0.getName() +
+						(skincategory.getValue().getId() != arg0.getMode() ? " - Other mode" : "")
+						+ (arg0.getType() == SkinHeader.TYPE_BEATORJASKIN ? "" : " (LR2 Skin)"));
 			} else {
 				setText("");
 			}
@@ -840,8 +842,24 @@ class SkinConfigurationView {
 						l.add(new CustomOption("Score Graph", new int[]{38,39}, new String[]{"Off", "On"}));
 						l.add(new CustomOption("Judge Detail", new int[]{1997,1998,1999}, new String[]{"Off", "EARLY/LATE", "+-ms"}));
 						header.setCustomOptions(l.toArray(new CustomOption[l.size()]));
+
 					}
 					lr2skinheader.add(header);
+					// 7/14key skinは5/10keyにも加える
+					if(header.getType() == SkinHeader.TYPE_LR2SKIN &&
+							(header.getMode() == SkinHeader.MODE_7KEYS || header.getMode() == SkinHeader.MODE_14KEYS)) {
+						header = loader.loadSkin(path, null);
+						List<CustomOption> l = new ArrayList(Arrays.asList(header.getCustomOptions()));
+						l.add(new CustomOption("BGA Size", new int[]{30,31}, new String[]{"Normal", "Extend"}));
+						l.add(new CustomOption("Ghost", new int[]{34,35,36,37}, new String[]{"Off", "Type A", "Type B", "Type C"}));
+						l.add(new CustomOption("Score Graph", new int[]{38,39}, new String[]{"Off", "On"}));
+						l.add(new CustomOption("Judge Detail", new int[]{1997,1998,1999}, new String[]{"Off", "EARLY/LATE", "+-ms"}));
+						header.setCustomOptions(l.toArray(new CustomOption[l.size()]));
+						header.setName(header.getName() + (header.getMode() == SkinHeader.MODE_7KEYS ? " (7KEYS) " : " (14KEYS)"));
+						header.setMode(header.getMode() + 1);
+						lr2skinheader.add(header);
+					}
+
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
