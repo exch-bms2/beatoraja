@@ -39,56 +39,62 @@ public class LaneProperty {
 		case BEAT_5K:
 			keyToLane = new int[] { 0, 1, 2, 3, 4, -1, -1, 5, 5 };
 			laneToKey = new int[][] { {0}, {1}, {2}, {3}, {4}, {7,8} };
+			laneToScratch = new int[] { -1, -1, -1, -1, -1, 0 };
+			laneToSkinOffset = new int[] { 1, 2, 3, 4, 5, 0 };
 			scratchToKey = new int[][] { {7,8} };
 			break;
 		case BEAT_7K:
 			keyToLane = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 7 };
 			laneToKey = new int[][] { {0}, {1}, {2}, {3}, {4}, {5}, {6}, {7,8} };
+			laneToScratch = new int[] { -1, -1, -1, -1, -1, -1, -1, 0 };
+			laneToSkinOffset = new int[] { 1, 2, 3, 4, 5, 6, 7, 0 };
 			scratchToKey = new int[][] { {7,8} };
 			break;
 		case BEAT_10K:
 			keyToLane = new int[] { 0, 1, 2, 3, 4, -1, -1, 5, 5, 6, 7, 8, 9, 10, -1, -1, 11, 11 };
 			laneToKey = new int[][] { {0}, {1}, {2}, {3}, {4}, {7,8}, {9}, {10}, {11}, {12}, {13}, {16,17} };
+			laneToScratch = new int[] { -1, -1, -1, -1, -1, 0, -1, -1, -1, -1, -1, 1 };
+			laneToSkinOffset = new int[] { 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5, 0 };
 			scratchToKey = new int[][] { {7,8}, {16,17} };
 			break;
 		case BEAT_14K:
 			keyToLane = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 7, 8, 9, 10, 11, 12, 13, 14, 15, 15 };
 			laneToKey = new int[][] { {0}, {1}, {2}, {3}, {4}, {5}, {6}, {7,8}, {9}, {10}, {11}, {12}, {13}, {14}, {15}, {16,17} };
+			laneToScratch = new int[] { -1, -1, -1, -1, -1, -1, -1, 0, -1, -1, -1, -1, -1, -1, -1, 1 };
+			laneToSkinOffset = new int[] { 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7, 0 };
 			scratchToKey = new int[][] { {7,8}, {16,17} };
 			break;
 		case POPN_9K:
 			keyToLane = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8 };
 			laneToKey = new int[][] { {0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8} };
+			laneToScratch = new int[] { -1, -1, -1, -1, -1, -1, -1, -1, -1 };
+			laneToSkinOffset = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 			scratchToKey = new int[][] { };
 			break;
 		case KEYBOARD_24K:
 			keyToLane = new int[26];
 			laneToKey = new int[26][1];
+			laneToScratch = new int[26];
+			laneToSkinOffset = new int[26];
 			for (int i=0; i<26; i++) {
 				keyToLane[i] = i;
 				laneToKey[i][0] = i;
+				laneToScratch[i] = -1;
+				laneToSkinOffset[i] = i + 1;
 			}
 			scratchToKey = new int[][] { };
 			break;
 		default:
 			keyToLane = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 7 };
 			laneToKey = new int[][] { {0}, {1}, {2}, {3}, {4}, {5}, {6}, {7,8} };
+			laneToScratch = new int[] { -1, -1, -1, -1, -1, -1, -1, 0 };
+			laneToSkinOffset = new int[] { 1, 2, 3, 4, 5, 6, 7, 0 };
 			scratchToKey = new int[][] { {7,8} };
 			break;
 		}
-		laneToScratch = new int[mode.key];
-		laneToSkinOffset = new int[mode.key];
 		laneToPlayer = new int[mode.key];
-		for(int i = 0, sc = 0; i < laneToSkinOffset.length; i++) {
+		for(int i = 0; i < mode.key; i++) {
 			laneToPlayer[i] = i / (mode.key / mode.player);
-			if(mode.isScratchKey(i)) {
-				laneToSkinOffset[i] = 0;
-				laneToScratch[i] = sc;
-				sc++;
-			} else {
-				laneToSkinOffset[i] = i % (mode.key / mode.player) + 1;
-				laneToScratch[i] = -1;
-			}
 		}
 	}
 
