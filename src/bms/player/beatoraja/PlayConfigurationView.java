@@ -855,7 +855,11 @@ class SkinConfigurationView {
 						l.add(new CustomOption("Score Graph", new int[]{38,39}, new String[]{"Off", "On"}));
 						l.add(new CustomOption("Judge Detail", new int[]{1997,1998,1999}, new String[]{"Off", "EARLY/LATE", "+-ms"}));
 						header.setCustomOptions(l.toArray(new CustomOption[l.size()]));
-						header.setName(header.getName() + (header.getMode() == SkinHeader.MODE_7KEYS ? " (7KEYS) " : " (14KEYS)"));
+						if(header.getMode() == SkinHeader.MODE_7KEYS && !header.getName().toLowerCase().contains("7key")) {
+							header.setName(header.getName() + " (7KEYS) ");
+						} else if(header.getMode() == SkinHeader.MODE_14KEYS && !header.getName().toLowerCase().contains("14key")) {
+							header.setName(header.getName() + " (14KEYS) ");
+						}
 						header.setMode(header.getMode() + 1);
 						lr2skinheader.add(header);
 					}
