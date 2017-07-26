@@ -554,7 +554,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 		case PLAY_9KEYS:
 		case PLAY_10KEYS:
 		case PLAY_14KEYS:
-			return new LR2PlaySkinLoader(src, c);
+			return new LR2PlaySkinLoader(type, src, c);
 		case RESULT:
 			return new LR2ResultSkinLoader(src, c);
 		case COURSE_RESULT:

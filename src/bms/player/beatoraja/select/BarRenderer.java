@@ -10,10 +10,14 @@ import bms.player.beatoraja.skin.*;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.utils.Array;
 
 import bms.model.Mode;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.CourseData.TrophyData;
+import bms.player.beatoraja.TableData.TableFolder;
+import bms.player.beatoraja.TableData.TableSong;
+import bms.player.beatoraja.external.BMSSearchAccessor;
 import bms.player.beatoraja.song.SongData;
 import bms.player.beatoraja.song.SongInformationAccessor;
 
@@ -77,10 +81,16 @@ public class BarRenderer {
 		this.select = select;
 
 		TableData[] tds = new TableDataAccessor().readAll();
-		this.tables = new TableBar[tds.length];
+		
+		Array<TableBar> table = new Array<TableBar>();
 		for (int i = 0; i < tds.length; i++) {
-			this.tables[i] = new TableBar(select, tds[i]);
+			table.add(new TableBar(select, tds[i]));
 		}
+		BMSSearchAccessor bmssearcha = new BMSSearchAccessor();
+		table.add(new TableBar(select, bmssearcha.getTableData()));
+		
+		this.tables = table.toArray(TableBar.class);
+		
 		CourseData[] cds = new CourseDataAccessor("course").readAll();
 		courses = new GradeBar[cds.length];
 		for (int i = 0; i < cds.length; i++) {
@@ -110,13 +120,13 @@ public class BarRenderer {
 //		}
 		favorites = new HashBar[cds.length];
 		for (int i = 0; i < cds.length; i++) {
-			TableData.TableSongData[] songs = new TableData.TableSongData[cds[i].getHash().length];
+			TableData.TableSong[] songs = new TableData.TableSong[cds[i].getHash().length];
 			for(int j = 0;j < songs.length;j++) {
-				songs[j] = new TableData.TableSongData(cds[i].getHash()[j]);
+				songs[j] = new TableData.TableSong(cds[i].getHash()[j]);
 			}
 			favorites[i] = new HashBar(select, cds[i].getName(), songs);
 		}
-
+		
 		List<CommandBar> density = new ArrayList<CommandBar>();
 		int i = 1;
 		density.add(new CommandBar(main, select, "DENSITY < " + i, "density < 1", 2));
@@ -156,8 +166,9 @@ public class BarRenderer {
 						new CommandBar(main, select, "LONG NOTE > 20%", "(n + s) <= (ln + ls) * 4 ", 2),
 						}),	
 				new ContainerBar("DENSITY", density.toArray(new Bar[density.size()])),
-				new CommandBar(main, select, "FAVORITE SONG", "favorite & 1 != 0", 1),
-				new CommandBar(main, select, "FAVORITE CHART", "favorite & 2 != 0", 1),
+				// TODO favoriteは0.4..3では提供しない(要テスト、UI見直し)
+//				new CommandBar(main, select, "FAVORITE SONG", "favorite & 1 != 0", 1),
+//				new CommandBar(main, select, "FAVORITE CHART", "favorite & 2 != 0", 1),
 				};
 	}
 
@@ -289,7 +300,7 @@ public class BarRenderer {
 			} else if (sd instanceof FolderBar) {
 				value = 1;
 			} else if (sd instanceof SongBar) {
-				value = ((SongBar) sd).getSongData() != null ? 0 : 4;
+				value = ((SongBar) sd).existsSong() ? 0 : 4;
 			} else if (sd instanceof SearchWordBar) {
 				value = 6;
 			} else if (sd instanceof CommandBar || sd instanceof ContainerBar) {
@@ -351,7 +362,7 @@ public class BarRenderer {
 					baro.getLamp()[sd.getLamp()].draw(sprite, time, select, x, y);
 				}
 
-				if (sd instanceof SongBar && ((SongBar) sd).getSongData() != null) {
+				if (sd instanceof SongBar && ((SongBar) sd).existsSong()) {
 					SongData song = ((SongBar) sd).getSongData();
 
 					SkinNumber leveln = baro.getBarlevel()[song.getDifficulty() >= 0 && song.getDifficulty() < 7
@@ -519,7 +530,7 @@ public class BarRenderer {
 		List<Bar> remove = new ArrayList<Bar>();
 		for (Bar b : l) {
 			final Mode mode = select.getMainController().getPlayerResource().getPlayerConfig().getMode();
-			if (mode != null && b instanceof SongBar && ((SongBar) b).getSongData() != null
+			if (mode != null && b instanceof SongBar && ((SongBar) b).existsSong()
 					&& ((SongBar) b).getSongData().getMode() != mode.id) {
 				remove.add(b);
 			}
@@ -550,10 +561,10 @@ public class BarRenderer {
 			selectedindex = 0;
 
 			if (prevbar != null) {
-				if (prevbar instanceof SongBar && ((SongBar) prevbar).getSongData() != null) {
+				if (prevbar instanceof SongBar && ((SongBar) prevbar).existsSong()) {
 					final SongBar prevsong = (SongBar) prevbar;
 					for (int i = 0; i < currentsongs.length; i++) {
-						if (currentsongs[i] instanceof SongBar && ((SongBar) currentsongs[i]).getSongData() != null &&
+						if (currentsongs[i] instanceof SongBar && ((SongBar) currentsongs[i]).existsSong() &&
 								((SongBar) currentsongs[i]).getSongData().getSha256()
 								.equals(prevsong.getSongData().getSha256())) {
 							selectedindex = i;
@@ -663,7 +674,7 @@ public class BarRenderer {
 			final MainController main = select.getMainController();
 			final SongInformationAccessor info = select.getMainController().getInfoDatabase();
 			for (Bar bar : bars) {
-				if (bar instanceof SongBar && ((SongBar) bar).getSongData() != null) {
+				if (bar instanceof SongBar && ((SongBar) bar).existsSong()) {
 					SongData sd = ((SongBar) bar).getSongData();
 					if (bar.getScore() == null) {
 						bar.setScore(select.getScoreDataCache().readScoreData(sd, config.getLnmode()));
@@ -711,7 +722,7 @@ public class BarRenderer {
 				}
 			}
 			for (Bar bar : bars) {
-				if (bar instanceof SongBar && ((SongBar) bar).getSongData() != null) {
+				if (bar instanceof SongBar && ((SongBar) bar).existsSong()) {
 					setBanner((SongBar) bar);
 				}
 				if (stop) {

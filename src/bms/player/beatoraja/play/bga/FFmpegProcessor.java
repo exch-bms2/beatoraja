@@ -119,7 +119,7 @@ public class FFmpegProcessor implements MovieProcessor {
 				long start = player != null ? player.getNowTime() - player.getTimer()[TIMER_PLAY] : (System.nanoTime() / 1000000);
 				int framecount = 0;
 				Frame frame = null;
-				for (;;) {
+				while (!stop) {
 					final long time = (player != null ? player.getNowTime() - player.getTimer()[TIMER_PLAY] : (System.nanoTime() / 1000000)) - start;
 					if (time >= framecount * 1000 / fps) {
 						while (time >= framecount * 1000 / fps || framecount % fpsd != 0) {
@@ -166,9 +166,6 @@ public class FFmpegProcessor implements MovieProcessor {
 						start = player != null ? player.getNowTime() - player.getTimer()[TIMER_PLAY] : (System.nanoTime() / 1000000);
 						framecount = 0;
 //						System.out.println("movie restart - starttime : " + start);
-					}
-					if (stop) {
-						break;
 					}
 				}
 			} catch (Throwable e) {
@@ -222,6 +219,8 @@ public class FFmpegProcessor implements MovieProcessor {
 	public void dispose() {
 		stop();
 		try {
+			long l = System.currentTimeMillis();
+			while(movieseek.isAlive() && System.currentTimeMillis() - l < 2000);
 			grabber.release();
 		} catch (Throwable e) {
 
@@ -241,7 +240,7 @@ public class FFmpegProcessor implements MovieProcessor {
 	}
 
 	public void play(boolean loop) {
-		if (movieseek != null) {
+		if (movieseek != null && movieseek.isAlive()) {
 			synchronized (movieseek) {
 				movieseek.loop = loop;
 				movieseek.restart = true;
@@ -255,11 +254,10 @@ public class FFmpegProcessor implements MovieProcessor {
 	}
 
 	public void stop() {
-		if (movieseek != null) {
+		if (movieseek != null && movieseek.isAlive()) {
 			synchronized (movieseek) {
 				movieseek.stop = true;
 				movieseek.interrupt();				
-				movieseek = null;				
 			}
 		}
 	}

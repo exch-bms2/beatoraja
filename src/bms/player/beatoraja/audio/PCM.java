@@ -77,7 +77,6 @@ public class PCM {
 				// System.out.println(p.toString() + " : " + (System.nanoTime()
 				// - time));
 			} catch (Throwable ex) {
-
 			}
 		} else if (p.toString().toLowerCase().endsWith(".wav")) {
 			try (WavInputStream input = new WavInputStream(new BufferedInputStream(Files.newInputStream(p)))) {
@@ -97,49 +96,51 @@ public class PCM {
 					// System.out.println(bytes + " -> " + pcm.length);
 				}
 			} catch (IOException e) {
-				e.printStackTrace();
 			}
 		}
 
-		if (pcm != null) {
-			// System.out.println(p.getFileName().toString() +
-			// " - PCM generated : " + bitsPerSample + "bit " + sampleRate
-			// + "Hz " + channels + "channel");
-			bytes = bytes - (bytes % (channels > 1 ? bitsPerSample / 4 : bitsPerSample / 8));
+		if(pcm == null) {
+			throw new IOException(p.toString() + " : can't convert to PCM");			
+		}		
+		bytes = bytes - (bytes % (channels > 1 ? bitsPerSample / 4 : bitsPerSample / 8));
+		if(bytes < channels * bitsPerSample / 8) {
+			throw new IOException(p.toString() + " : 0 samples");			
+		}
+		
+		// System.out.println(p.getFileName().toString() +
+		// " - PCM generated : " + bitsPerSample + "bit " + sampleRate
+		// + "Hz " + channels + "channel");
 
-			if (bitsPerSample == 8) {
-				this.sample = new short[bytes];
-				for (int i = 0; i < sample.length; i++) {
-					this.sample[i] = (short) ((((short) pcm[i]) - 128) * 256);
-				}
-			} else if (bitsPerSample == 16) {
-				// final long time = System.nanoTime();
-				this.sample = new short[bytes / 2];
-				for (int i = 0; i < sample.length; i++) {
-					this.sample[i] = (short) ((pcm[i * 2] & 0xff) | (pcm[i * 2 + 1] << 8));
-				}
-
-				// ShortBuffer shortbuf =
-				// ByteBuffer.wrap(pcm).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer();
-				// shortbuf.get(sample);
-				// System.out.println(p.toString() + " : " + (System.nanoTime()
-				// - time));
-			} else if (bitsPerSample == 24) {
-				this.sample = new short[bytes / 3];
-				for (int i = 0; i < this.sample.length; i++) {
-					this.sample[i] = (short) ((pcm[i * 3 + 1] & 0xff) | (pcm[i * 3 + 2] << 8));
-				}
-			} else if (bitsPerSample == 32) {
-				int pos = 0;
-				this.sample = new short[bytes / 4];
-				for (int i = 0; i < this.sample.length; i++) {
-					this.sample[i] = (short) (Float.intBitsToFloat((pcm[pos] & 0xff) | ((pcm[pos + 1] & 0xff) << 8)
-							| ((pcm[pos + 2] & 0xff) << 16) | ((pcm[pos + 3] & 0xff) << 24)) * Short.MAX_VALUE);
-					pos += 4;
-				}
+		if (bitsPerSample == 8) {
+			this.sample = new short[bytes];
+			for (int i = 0; i < sample.length; i++) {
+				this.sample[i] = (short) ((((short) pcm[i]) - 128) * 256);
 			}
-		} else if (sample == null) {
-			throw new IOException("can't convert to PCM");
+		} else if (bitsPerSample == 16) {
+			// final long time = System.nanoTime();
+			this.sample = new short[bytes / 2];
+			for (int i = 0; i < sample.length; i++) {
+				this.sample[i] = (short) ((pcm[i * 2] & 0xff) | (pcm[i * 2 + 1] << 8));
+			}
+
+			// ShortBuffer shortbuf =
+			// ByteBuffer.wrap(pcm).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer();
+			// shortbuf.get(sample);
+			// System.out.println(p.toString() + " : " + (System.nanoTime()
+			// - time));
+		} else if (bitsPerSample == 24) {
+			this.sample = new short[bytes / 3];
+			for (int i = 0; i < this.sample.length; i++) {
+				this.sample[i] = (short) ((pcm[i * 3 + 1] & 0xff) | (pcm[i * 3 + 2] << 8));
+			}
+		} else if (bitsPerSample == 32) {
+			int pos = 0;
+			this.sample = new short[bytes / 4];
+			for (int i = 0; i < this.sample.length; i++) {
+				this.sample[i] = (short) (Float.intBitsToFloat((pcm[pos] & 0xff) | ((pcm[pos + 1] & 0xff) << 8)
+						| ((pcm[pos + 2] & 0xff) << 16) | ((pcm[pos + 3] & 0xff) << 24)) * Short.MAX_VALUE);
+				pos += 4;
+			}
 		}
 		// System.out.println(p.toString() + " : " + (System.nanoTime() -
 		// time));

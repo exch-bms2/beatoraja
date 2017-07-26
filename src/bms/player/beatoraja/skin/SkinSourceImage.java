@@ -1,5 +1,6 @@
 package bms.player.beatoraja.skin;
 
+import bms.player.beatoraja.MainController;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 import bms.player.beatoraja.MainState;
@@ -51,7 +52,7 @@ public class SkinSourceImage implements SkinSource {
 			return 0;
 		}
 
-		if (timer != 0 && timer < 256) {
+		if (timer != 0 && timer < MainController.timerCount) {
 			if (state.getTimer()[timer] == Long.MIN_VALUE) {
 				return 0;
 			}

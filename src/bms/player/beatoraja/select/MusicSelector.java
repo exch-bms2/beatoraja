@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 
 import bms.model.Mode;
 import bms.player.beatoraja.*;
+import bms.player.beatoraja.TableData.TableSong;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.song.SongData;
@@ -43,8 +44,8 @@ public class MusicSelector extends MainState {
 	 * 楽曲DBアクセサ
 	 */
 	private SongDatabaseAccessor songdb;
-	
-	public static final Mode[] MODE = {null, Mode.BEAT_7K, Mode.BEAT_14K, Mode.POPN_9K, Mode.BEAT_5K, Mode.BEAT_10K};
+
+	public static final Mode[] MODE = { null, Mode.BEAT_7K, Mode.BEAT_14K, Mode.POPN_9K, Mode.BEAT_5K, Mode.BEAT_10K };
 	/**
 	 * 選択中のソート
 	 */
@@ -95,7 +96,7 @@ public class MusicSelector extends MainState {
 	public static final int SOUND_FOLDEROPEN = 2;
 	public static final int SOUND_FOLDERCLOSE = 3;
 	public static final int SOUND_CHANGEOPTION = 4;
-	
+
 	public MusicSelector(MainController main, boolean songUpdated) {
 		super(main);
 		this.config = main.getPlayerResource().getPlayerConfig();
@@ -105,7 +106,7 @@ public class MusicSelector extends MainState {
 
 		scorecache = new ScoreDataCache(getMainController().getPlayDataAccessor());
 
-		setSound(SOUND_BGM, conf.getBgmpath() + File.separatorChar + "select.wav", true);		
+		setSound(SOUND_BGM, conf.getBgmpath() + File.separatorChar + "select.wav", true);
 		setSound(SOUND_SCRATCH, conf.getSoundpath() + File.separatorChar + "scratch.wav", false);
 		setSound(SOUND_FOLDEROPEN, conf.getSoundpath() + File.separatorChar + "f-open.wav", false);
 		setSound(SOUND_FOLDERCLOSE, conf.getSoundpath() + File.separatorChar + "f-close.wav", false);
@@ -114,11 +115,11 @@ public class MusicSelector extends MainState {
 		bar = new BarRenderer(this);
 		musicinput = new MusicSelectInputProcessor(this);
 
-        if(!songUpdated && main.getPlayerResource().getConfig().isUpdatesong()) {
-            updateSong = new SongUpdateThread(null);
-            updateSong.start();
-        }
-    }
+		if (!songUpdated && main.getPlayerResource().getConfig().isUpdatesong()) {
+			updateSong = new SongUpdateThread(null);
+			updateSong.start();
+		}
+	}
 
 	public ScoreDataCache getScoreDataCache() {
 		return scorecache;
@@ -128,23 +129,24 @@ public class MusicSelector extends MainState {
 		play = -1;
 		final MainController main = getMainController();
 		playerdata = main.getPlayDataAccessor().readPlayerData();
-        if(bar.getSelected() != null && bar.getSelected() instanceof SongBar) {
-            scorecache.update(((SongBar) bar.getSelected()).getSongData(), config.getLnmode());
-        }
+		if (bar.getSelected() != null && bar.getSelected() instanceof SongBar) {
+			scorecache.update(((SongBar) bar.getSelected()).getSongData(), config.getLnmode());
+		}
 
-        preview = new PreviewMusicProcessor(main.getAudioProcessor(), main.getPlayerResource().getConfig());
-        preview.setDefault(getSound(SOUND_BGM));
-        preview.start(null);
+		preview = new PreviewMusicProcessor(main.getAudioProcessor(), main.getPlayerResource().getConfig());
+		preview.setDefault(getSound(SOUND_BGM));
+		preview.start(null);
 
 		final BMSPlayerInputProcessor input = main.getInputProcessor();
-		PlayConfig pc = (config.getMusicselectinput() == 0 ? config.getMode7() : (config.getMusicselectinput() == 1 ? config.getMode9() : config.getMode14()));
+		PlayConfig pc = (config.getMusicselectinput() == 0 ? config.getMode7()
+				: (config.getMusicselectinput() == 1 ? config.getMode9() : config.getMode14()));
 		input.setKeyassign(pc.getKeyassign());
 		input.setControllerConfig(pc.getController());
 		input.setMidiConfig(pc.getMidiConfig());
 		bar.updateBar();
 
 		loadSkin(SkinType.MUSIC_SELECT);
-		
+
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
 				Gdx.files.internal("skin/default/VL-Gothic-Regular.ttf"));
 		FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
@@ -164,7 +166,7 @@ public class MusicSelector extends MainState {
 		final SpriteBatch sprite = main.getSpriteBatch();
 		final PlayerResource resource = main.getPlayerResource();
 		final Bar current = bar.getSelected();
-		
+
 		// draw song information
 		sprite.begin();
 		if (current instanceof SongBar) {
@@ -180,25 +182,25 @@ public class MusicSelector extends MainState {
 			float dh = (float) getSkin().getScaleY();
 			for (CourseData.CourseDataConstraint con : gb.getConstraint()) {
 				switch (con) {
-                    case CLASS:
+				case CLASS:
 					break;
-                    case MIRROR:
+				case MIRROR:
 					titlefont.setColor(Color.CYAN);
 					titlefont.draw(sprite, "MIRROR OK", 150 * dw, 620 * dh);
 					break;
-                    case RANDOM:
+				case RANDOM:
 					titlefont.setColor(Color.CORAL);
 					titlefont.draw(sprite, "RANDOM OK", 150 * dw, 620 * dh);
 					break;
-                    case NO_SPEED:
+				case NO_SPEED:
 					titlefont.setColor(Color.RED);
 					titlefont.draw(sprite, "x1.0 HI SPEED", 300 * dw, 620 * dh);
 					break;
-				    case NO_GOOD:
+				case NO_GOOD:
 					titlefont.setColor(Color.PURPLE);
 					titlefont.draw(sprite, "NO GOOD", 450 * dw, 620 * dh);
 					break;
-				    case NO_GREAT:
+				case NO_GREAT:
 					titlefont.setColor(Color.PURPLE);
 					titlefont.draw(sprite, "NO GREAT", 450 * dw, 620 * dh);
 					break;
@@ -246,20 +248,22 @@ public class MusicSelector extends MainState {
 		}
 		sprite.end();
 		// preview music
-		if(current instanceof SongBar) {
+		if (current instanceof SongBar) {
 			final SongData song = main.getPlayerResource().getSongdata();
-			if(song != preview.getSongData() && getNowTime() > getTimer()[TIMER_SONGBAR_CHANGE] + previewDuration && play < 0) {
+			if (song != preview.getSongData() && getNowTime() > getTimer()[TIMER_SONGBAR_CHANGE] + previewDuration
+					&& play < 0) {
 				this.preview.start(song);
 			}
 		}
 
 		// read bms information
-		if(getNowTime() > getTimer()[TIMER_SONGBAR_CHANGE] + notesGraphDuration && !showNoteGraph && play < 0) {
-			if(current instanceof SongBar && ((SongBar) current).getSongData() != null) {
+		if (getNowTime() > getTimer()[TIMER_SONGBAR_CHANGE] + notesGraphDuration && !showNoteGraph && play < 0) {
+			if (current instanceof SongBar && ((SongBar) current).existsSong()) {
 				SongData song = main.getPlayerResource().getSongdata();
 				Thread thread = new Thread() {
 					public void run() {
-						song.setBMSModel(resource.loadBMSModel(Paths.get(((SongBar) current).getSongData().getPath()), config.getLnmode()));
+						song.setBMSModel(resource.loadBMSModel(Paths.get(((SongBar) current).getSongData().getPath()),
+								config.getLnmode()));
 					}
 				};
 				thread.start();
@@ -269,22 +273,31 @@ public class MusicSelector extends MainState {
 
 		if (play >= 0) {
 			if (current instanceof SongBar) {
-			    if(((SongBar) current).getSongData() != null) {
-                    resource.clear();
-                    if (resource.setBMSFile(Paths.get(((SongBar) current).getSongData().getPath()), play)) {
-                        preview.stop();
-                        getMainController().changeState(MainController.STATE_DECIDE);
-                    }
-                } else if(((SongBar) current).getSongInformation() != null){
-                    try {
-                        URI uri = new URI(((SongBar) current).getSongInformation().getUrl());
-                        Desktop.getDesktop().browse(uri);
-                        URI uri2 = new URI(((SongBar) current).getSongInformation().getAppendurl());
-                        Desktop.getDesktop().browse(uri2);
-                    } catch (Throwable e) {
-                        e.printStackTrace();
-                    }
-                }
+				if (((SongBar) current).existsSong()) {
+					resource.clear();
+					if (resource.setBMSFile(Paths.get(((SongBar) current).getSongData().getPath()), play)) {
+						preview.stop();
+						getMainController().changeState(MainController.STATE_DECIDE);
+					}
+				} else if (((SongBar) current).getSongInformation() != null) {
+					TableSong info = ((SongBar) current).getSongInformation();
+					if (info.getUrl() != null) {
+						try {
+							URI uri = new URI(info.getUrl());
+							Desktop.getDesktop().browse(uri);
+						} catch (Throwable e) {
+							e.printStackTrace();
+						}
+					}
+					if (info.getAppendurl() != null) {
+						try {
+							URI uri = new URI(info.getAppendurl());
+							Desktop.getDesktop().browse(uri);
+						} catch (Throwable e) {
+							e.printStackTrace();
+						}
+					}
+				}
 			} else if (current instanceof GradeBar) {
 				if (play == 2) {
 					play = 0;
@@ -358,14 +371,14 @@ public class MusicSelector extends MainState {
 			if (resource.setCourseBMSFiles(files.toArray(new Path[files.size()]))) {
 				for (CourseData.CourseDataConstraint constraint : ((GradeBar) bar.getSelected()).getConstraint()) {
 					switch (constraint) {
-                        case CLASS:
+					case CLASS:
 						if (autoplay < 2) {
 							config.setRandom(0);
 							config.setRandom2(0);
 							config.setDoubleoption(0);
 						}
 						break;
-                        case MIRROR:
+					case MIRROR:
 						if (autoplay < 2) {
 							if (config.getRandom() == 1) {
 								config.setRandom2(1);
@@ -377,7 +390,7 @@ public class MusicSelector extends MainState {
 							}
 						}
 						break;
-                        case RANDOM:
+					case RANDOM:
 						if (autoplay < 2) {
 							if (config.getRandom() > 5) {
 								config.setRandom(0);
@@ -387,13 +400,13 @@ public class MusicSelector extends MainState {
 							}
 						}
 						break;
-                        case NO_SPEED:
+					case NO_SPEED:
 						resource.addConstraint(constraint);
 						break;
-                        case NO_GOOD:
+					case NO_GOOD:
 						resource.addConstraint(constraint);
 						break;
-					    case NO_GREAT:
+					case NO_GREAT:
 						resource.addConstraint(constraint);
 						break;
 					}
@@ -457,7 +470,7 @@ public class MusicSelector extends MainState {
 	}
 
 	public void setPanelState(int panelstate) {
-		if( this.panelstate != panelstate) {
+		if (this.panelstate != panelstate) {
 			if (this.panelstate != 0) {
 				getTimer()[TIMER_PANEL1_OFF + this.panelstate - 1] = getNowTime();
 				getTimer()[TIMER_PANEL1_ON + this.panelstate - 1] = Long.MIN_VALUE;
@@ -472,12 +485,12 @@ public class MusicSelector extends MainState {
 
 	public int getNumberValue(int id) {
 		switch (id) {
-			case NUMBER_TOTALPLAYTIME_HOUR:
-				return (int) playerdata.getPlaytime() / 3600;
-			case NUMBER_TOTALPLAYTIME_MINUTE:
-				return (int) (playerdata.getPlaytime() / 60) % 60;
-			case NUMBER_TOTALPLAYTIME_SECOND:
-				return (int) (playerdata.getPlaytime() % 60);
+		case NUMBER_TOTALPLAYTIME_HOUR:
+			return (int) playerdata.getPlaytime() / 3600;
+		case NUMBER_TOTALPLAYTIME_MINUTE:
+			return (int) (playerdata.getPlaytime() / 60) % 60;
+		case NUMBER_TOTALPLAYTIME_SECOND:
+			return (int) (playerdata.getPlaytime() % 60);
 		case NUMBER_TOTALPLAYCOUNT:
 			return (int) playerdata.getPlaycount();
 		case NUMBER_TOTALCLEARCOUNT:
@@ -527,7 +540,7 @@ public class MusicSelector extends MainState {
 			}
 			return Integer.MIN_VALUE;
 		case NUMBER_DURATION:
-			if (bar.getSelected() instanceof SongBar && ((SongBar) bar.getSelected()).getSongData() != null) {
+			if (bar.getSelected() instanceof SongBar && ((SongBar) bar.getSelected()).existsSong()) {
 				SongBar song = (SongBar) bar.getSelected();
 				PlayConfig pc = (song.getSongData().getMode() == 5 || song.getSongData().getMode() == 7
 						? config.getMode7()
@@ -540,8 +553,8 @@ public class MusicSelector extends MainState {
 			return config.getJudgetiming();
 		case BUTTON_MODE:
 			int mode = 0;
-			for(;mode < MODE.length;mode++) {
-				if(MODE[mode] == config.getMode()) {
+			for (; mode < MODE.length; mode++) {
+				if (MODE[mode] == config.getMode()) {
 					break;
 				}
 			}
@@ -549,12 +562,11 @@ public class MusicSelector extends MainState {
 			return mode < mode_lr2.length ? mode_lr2[mode] : mode;
 		case BUTTON_SORT:
 			return sort;
-		case BUTTON_LNMODE:
-			return config.getLnmode();
 		case NUMBER_SCORE_RATE:
 			return bar.getSelected().getScore() != null ? getScoreDataProperty().getRateInt() : Integer.MIN_VALUE;
 		case NUMBER_SCORE_RATE_AFTERDOT:
-			return bar.getSelected().getScore() != null ? getScoreDataProperty().getNowRateAfterDot() : Integer.MIN_VALUE;
+			return bar.getSelected().getScore() != null ? getScoreDataProperty().getNowRateAfterDot()
+					: Integer.MIN_VALUE;
 		}
 		return super.getNumberValue(id);
 	}
@@ -616,7 +628,7 @@ public class MusicSelector extends MainState {
 			}
 			return 0;
 		case BARGRAPH_LEVEL:
-			if (bar.getSelected() instanceof SongBar) {
+			if (bar.getSelected() instanceof SongBar && ((SongBar) bar.getSelected()).getSongData() != null) {
 				SongData sd = ((SongBar) bar.getSelected()).getSongData();
 				if (sd.getMode() == 5 || sd.getMode() == 10) {
 					return sd.getLevel() / 9.0f;
@@ -630,7 +642,7 @@ public class MusicSelector extends MainState {
 			}
 			return 0;
 		case BARGRAPH_LEVEL_BEGINNER:
-			if (bar.getSelected() instanceof SongBar) {
+			if (bar.getSelected() instanceof SongBar && ((SongBar) bar.getSelected()).getSongData() != null) {
 				SongData sd = ((SongBar) bar.getSelected()).getSongData();
 				if (sd.getDifficulty() != 1) {
 					return 0;
@@ -647,7 +659,7 @@ public class MusicSelector extends MainState {
 			}
 			return 0;
 		case BARGRAPH_LEVEL_NORMAL:
-			if (bar.getSelected() instanceof SongBar) {
+			if (bar.getSelected() instanceof SongBar && ((SongBar) bar.getSelected()).getSongData() != null) {
 				SongData sd = ((SongBar) bar.getSelected()).getSongData();
 				if (sd.getDifficulty() != 2) {
 					return 0;
@@ -664,7 +676,7 @@ public class MusicSelector extends MainState {
 			}
 			return 0;
 		case BARGRAPH_LEVEL_HYPER:
-			if (bar.getSelected() instanceof SongBar) {
+			if (bar.getSelected() instanceof SongBar && ((SongBar) bar.getSelected()).getSongData() != null) {
 				SongData sd = ((SongBar) bar.getSelected()).getSongData();
 				if (sd.getDifficulty() != 3) {
 					return 0;
@@ -681,7 +693,7 @@ public class MusicSelector extends MainState {
 			}
 			return 0;
 		case BARGRAPH_LEVEL_ANOTHER:
-			if (bar.getSelected() instanceof SongBar) {
+			if (bar.getSelected() instanceof SongBar && ((SongBar) bar.getSelected()).getSongData() != null) {
 				SongData sd = ((SongBar) bar.getSelected()).getSongData();
 				if (sd.getDifficulty() != 4) {
 					return 0;
@@ -698,7 +710,7 @@ public class MusicSelector extends MainState {
 			}
 			return 0;
 		case BARGRAPH_LEVEL_INSANE:
-			if (bar.getSelected() instanceof SongBar) {
+			if (bar.getSelected() instanceof SongBar && ((SongBar) bar.getSelected()).getSongData() != null) {
 				SongData sd = ((SongBar) bar.getSelected()).getSongData();
 				if (sd.getDifficulty() != 5) {
 					return 0;
@@ -823,14 +835,16 @@ public class MusicSelector extends MainState {
 	public void executeClickEvent(int id) {
 		switch (id) {
 		case BUTTON_PLAY:
-			getMainController().getPlayerResource().setPlayDevice(getMainController().getInputProcessor().getLastKeyChangedDevice());
+			getMainController().getPlayerResource()
+					.setPlayDevice(getMainController().getInputProcessor().getLastKeyChangedDevice());
 			play = 0;
 			break;
 		case BUTTON_AUTOPLAY:
 			play = 1;
 			break;
 		case BUTTON_PRACTICE:
-			getMainController().getPlayerResource().setPlayDevice(getMainController().getInputProcessor().getLastKeyChangedDevice());
+			getMainController().getPlayerResource()
+					.setPlayDevice(getMainController().getInputProcessor().getLastKeyChangedDevice());
 			play = 2;
 			break;
 		case BUTTON_REPLAY:
@@ -857,7 +871,7 @@ public class MusicSelector extends MainState {
 	}
 
 	public void updateSong(Bar selected) {
-		if(updateSong == null || !updateSong.isAlive()) {
+		if (updateSong == null || !updateSong.isAlive()) {
 			updateSong = new MusicSelector.SongUpdateThread(selected);
 			updateSong.start();
 		} else {
@@ -873,7 +887,7 @@ public class MusicSelector extends MainState {
 	}
 
 	public void selectSong(int mode) {
-		if(mode < 3) {
+		if (mode < 3) {
 			play = mode;
 		} else {
 			play = (selectedreplay >= 0) ? 3 + selectedreplay : 0;
@@ -898,7 +912,8 @@ public class MusicSelector extends MainState {
 				getSongDatabase().updateSongDatas(null, false, getMainController().getInfoDatabase());
 			} else if (selected instanceof FolderBar) {
 				FolderBar fb = (FolderBar) selected;
-				getSongDatabase().updateSongDatas(fb.getFolderData().getPath(), false, getMainController().getInfoDatabase());
+				getSongDatabase().updateSongDatas(fb.getFolderData().getPath(), false,
+						getMainController().getInfoDatabase());
 			} else if (selected instanceof TableBar) {
 				TableBar tb = (TableBar) selected;
 				if (tb.getUrl() != null && tb.getUrl().length() > 0) {

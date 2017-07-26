@@ -11,6 +11,7 @@ import bms.model.Mode;
 import bms.model.TimeLine;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyInputLog;
+import bms.player.beatoraja.skin.SkinPropertyMapper;
 
 /**
  * キー入力処理用スレッド
@@ -20,19 +21,15 @@ import bms.player.beatoraja.input.KeyInputLog;
 class KeyInputProccessor {
 
 	private final BMSPlayer player;
-	private final boolean ispms;
-
-	private final int[] key_offset = { 1, 2, 3, 4, 5, 6, 7, 0, 11, 12, 13, 14, 15, 16, 17, 10 };
 
 	private JudgeThread judge;
 
 	private int prevtime = -1;
-	private int scratch1;
-	private int scratch2;
+	private int[] scratch;
 
 	public KeyInputProccessor(BMSPlayer player, Mode mode) {
 		this.player = player;
-		ispms = mode == Mode.POPN_5K || mode == Mode.POPN_9K;
+		this.scratch = new int[2];
 	}
 
 	public void startJudge(BMSModel model, List<KeyInputLog> keylog) {
@@ -47,64 +44,51 @@ class KeyInputProccessor {
 		final JudgeManager judge = player.getJudgeManager();
 		final boolean[] keystate = player.getMainController().getInputProcessor().getKeystate();
 
-		for (int lane = 0; lane < 16; lane++) {
+		for (int lane = 0; lane < player.getLaneProperty().getLaneSkinOffset().length; lane++) {
 			// キービームフラグON/OFF
-			if (ispms) {
-				if (keystate[lane]) {
-					if (timer[TIMER_KEYON_1P_KEY1 + lane] == Long.MIN_VALUE) {
-						timer[TIMER_KEYON_1P_KEY1 + lane] = now;
-						timer[TIMER_KEYOFF_1P_KEY1 + lane] = Long.MIN_VALUE;
-					}
-				} else {
-					if (timer[TIMER_KEYOFF_1P_KEY1 + lane] == Long.MIN_VALUE) {
-						timer[TIMER_KEYOFF_1P_KEY1 + lane] = now;
-						timer[TIMER_KEYON_1P_KEY1 + lane] = Long.MIN_VALUE;
-					}
+			final int offset = player.getLaneProperty().getLaneSkinOffset()[lane];
+			boolean pressed = false;
+			for (int i = 0; i < player.getLaneProperty().getLaneKeyAssign()[lane].length; i++) {
+				int key = player.getLaneProperty().getLaneKeyAssign()[lane][i];
+				if (key >= 0 && keystate[key]) {
+					pressed = true;
+					break;
+				}
+			}
+			final int timerOn = SkinPropertyMapper.keyOnTimerId(player.getLaneProperty().getLanePlayer()[lane], offset);
+			final int timerOff = SkinPropertyMapper.keyOffTimerId(player.getLaneProperty().getLanePlayer()[lane], offset);
+			if (pressed) {
+				if (timer[timerOn] == Long.MIN_VALUE) {
+					timer[timerOn] = now;
+					timer[timerOff] = Long.MIN_VALUE;
 				}
 			} else {
-				final int key = lane >= 8 ? lane + 1 : lane;
-				final int offset = key_offset[lane];
-				if (keystate[key] || (key == 7 && keystate[8]) || (key == 16 && keystate[17])) {
-					if (timer[TIMER_KEYON_1P_SCRATCH + offset] == Long.MIN_VALUE) {
-						timer[TIMER_KEYON_1P_SCRATCH + offset] = now;
-						timer[TIMER_KEYOFF_1P_SCRATCH + offset] = Long.MIN_VALUE;
-					}
-				} else {
-					if (timer[TIMER_KEYOFF_1P_SCRATCH + offset] == Long.MIN_VALUE) {
-						timer[TIMER_KEYOFF_1P_SCRATCH + offset] = now;
-						timer[TIMER_KEYON_1P_SCRATCH + offset] = Long.MIN_VALUE;
-					}
+				if (timer[timerOff] == Long.MIN_VALUE) {
+					timer[timerOff] = now;
+					timer[timerOn] = Long.MIN_VALUE;
 				}
 			}
 		}
 		
 		if(prevtime >= 0) {
 			final int deltatime = now - prevtime;
-			scratch1 += 2160 - deltatime;
-			scratch2 += deltatime;
-			if (!ispms) {
-				if (keystate[7]) {
-					scratch1 += deltatime * 2;
-				} else if (keystate[8]) {
-					scratch1 += 2160 - deltatime * 2;
+			for (int s = 0; s < scratch.length; s++) {
+				scratch[s] += s % 2 == 0 ? 2160 - deltatime : deltatime;
+				if (s < player.getLaneProperty().getScratchKeyAssign().length) {
+					if (keystate[player.getLaneProperty().getScratchKeyAssign()[s][0]]) {
+						scratch[s] += deltatime * 2;
+					} else if (keystate[player.getLaneProperty().getScratchKeyAssign()[s][1]]) {
+						scratch[s] += 2160 - deltatime * 2;
+					}
 				}
-				if (keystate[16]) {
-					scratch2 += deltatime * 2;
-				} else if (keystate[17]) {
-					scratch2 += 2160 - deltatime * 2;
-				}
+				scratch[s] %= 2160;
 			}
-			scratch1 %= 2160;
-			scratch2 %= 2160;			
 		}
 		prevtime = now;
 	}
 	
 	public int getScratchState(int i) {
-		if(i == 0) {
-			return scratch1 / 6;
-		}
-		return scratch2 / 6;
+		return scratch[i] / 6;
 	}
 
 	public void stopJudge() {

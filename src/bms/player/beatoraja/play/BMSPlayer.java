@@ -31,6 +31,7 @@ public class BMSPlayer extends MainState {
 	private BMSModel model;
 
 	private LaneRenderer lanerender;
+	private LaneProperty laneProperty;
 	private JudgeManager judge;
 
 	private BGAProcessor bga;
@@ -231,6 +232,7 @@ public class BMSPlayer extends MainState {
 	public void create() {
 		final MainController main = getMainController();
 		final PlayerResource resource = main.getPlayerResource();
+		laneProperty = new LaneProperty(model.getMode());
 		judge = new JudgeManager(this);
 		control = new ControlInputProcessor(this, autoplay);
 		keyinput = new KeyInputProccessor(this, model.getMode());
@@ -244,7 +246,7 @@ public class BMSPlayer extends MainState {
 
 		final BMSPlayerInputProcessor input = main.getInputProcessor();
 		input.setMinimumInputDutration(conf.getInputduration());
-		if (autoplay == 0 || autoplay == 0) {
+		if (autoplay == 0 || autoplay == 2) {
 			input.setExclusiveDeviceType(resource.getPlayDevice().getType());
 		} else {
 			input.disableAllDevices();
@@ -536,6 +538,10 @@ public class BMSPlayer extends MainState {
 		return lanerender;
 	}
 
+	public LaneProperty getLaneProperty() {
+		return laneProperty;
+	}
+
 	private void saveConfig() {
 		final PlayerResource resource = getMainController().getPlayerResource();
 		for (CourseData.CourseDataConstraint c : resource.getConstraint()) {
@@ -600,7 +606,7 @@ public class BMSPlayer extends MainState {
 		replay.gauge = config.getGauge();
 
 		score.setMinbp(score.getEbd() + score.getLbd() + score.getEpr() + score.getLpr() + score.getEms() + score.getLms() + resource.getSongdata().getNotes() - notes);
-		score.setDeviceType(resource.getPlayDevice().getType());
+		score.setDeviceType(resource.getPlayDevice() != null ? resource.getPlayDevice().getType() : null);
 		return score;
 	}
 
@@ -790,8 +796,8 @@ public class BMSPlayer extends MainState {
 		case VALUE_JUDGE_3P_DURATION:
 			return judge.getRecentJudgeTiming();
 		}
-		if (id >= VALUE_JUDGE_1P_SCRATCH && id < VALUE_JUDGE_1P_SCRATCH + 20) {
-			return judge.getJudge()[id - VALUE_JUDGE_1P_SCRATCH];
+		if (SkinPropertyMapper.isKeyJudgeValueId(id)) {
+			return judge.getJudge(id);
 		}
 		return super.getNumberValue(id);
 	}

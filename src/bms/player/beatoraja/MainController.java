@@ -43,7 +43,7 @@ import com.badlogic.gdx.utils.JsonWriter.OutputType;
  */
 public class MainController extends ApplicationAdapter {
 
-	public static final String VERSION = "beatoraja 0.4.2";
+	public static final String VERSION = "beatoraja 0.4.3";
 
 	/**
 	 *
@@ -98,7 +98,8 @@ public class MainController extends ApplicationAdapter {
 
 	private ScreenShotThread screenshot;
 
-	private long[] timer = new long[256];
+	public static final int timerCount = 2048;
+	private long[] timer = new long[timerCount];
 
 	public MainController(Path f, Config config, int auto, boolean songUpdated) {
 		this.auto = auto;
@@ -141,7 +142,6 @@ public class MainController extends ApplicationAdapter {
 			} catch(Throwable e) {
 				e.printStackTrace();
 				config.setAudioDriver(Config.AUDIODRIVER_SOUND);
-				audio = new GdxSoundDriver();
 			}
 			break;
 		case Config.AUDIODRIVER_PORTAUDIO:
@@ -150,7 +150,6 @@ public class MainController extends ApplicationAdapter {
 			} catch(Throwable e) {
 				e.printStackTrace();
 				config.setAudioDriver(Config.AUDIODRIVER_SOUND);
-				audio = new GdxSoundDriver();
 			}
 			break;
 		}
