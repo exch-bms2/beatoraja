@@ -166,9 +166,8 @@ public class BarRenderer {
 						new CommandBar(main, select, "LONG NOTE > 20%", "(n + s) <= (ln + ls) * 4 ", 2),
 						}),	
 				new ContainerBar("DENSITY", density.toArray(new Bar[density.size()])),
-				// TODO favoriteは0.4..3では提供しない(要テスト、UI見直し)
-//				new CommandBar(main, select, "FAVORITE SONG", "favorite & 1 != 0", 1),
-//				new CommandBar(main, select, "FAVORITE CHART", "favorite & 2 != 0", 1),
+				new CommandBar(main, select, "FAVORITE SONG", "favorite & 1 != 0", 1),
+				new CommandBar(main, select, "FAVORITE CHART", "favorite & 2 != 0", 1),
 				};
 	}
 
