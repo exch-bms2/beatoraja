@@ -70,8 +70,11 @@ public class LR2FontLoader extends LR2SkinLoader {
 					int[] values = parseInt(str);
 					if (values[2] < imagelist.size() && imagelist.get(values[2]) != null) {
 						// System.out.println("Font loaded : " + values[1]);
-						textimage.setImage(mapCode(values[1]), new TextureRegion(imagelist.get(values[2]), values[3],
-								values[4], values[5], values[6]));
+
+                        for(int code : mapCode(values[1])) {
+                            textimage.setImage(code, new TextureRegion(imagelist.get(values[2]), values[3],
+                                    values[4], values[5], values[6]));
+                        }
 					}
 				} catch (Throwable e) {
 					e.printStackTrace();
@@ -81,15 +84,24 @@ public class LR2FontLoader extends LR2SkinLoader {
 
 	}
 
-	private int mapCode(int code) {
+	private int[] mapCode(int code) {
 		int sjiscode = code;
 		byte[] sjisbyte;
-		if (code >= 128) {
-			sjiscode = (char) (code + 32832);
-			sjisbyte = new byte[2];
-			sjisbyte[1] = (byte) (sjiscode & 0xff);
-			sjisbyte[0] = (byte) ((sjiscode & 0xff00) >> 8);
-		} else {
+        if (code == 288) {
+            return new int[]{0x0000301c, 0x0000ff5e};
+//        } else if(code == 25318) {
+//            return new int[]{0x0000e326, 0x00007dba};
+        } else if (code >= 8127) {
+            sjiscode = (char) (code + 49281);
+            sjisbyte = new byte[2];
+            sjisbyte[1] = (byte) (sjiscode & 0xff);
+            sjisbyte[0] = (byte) ((sjiscode & 0xff00) >> 8);
+        } else if (code >= 256) {
+            sjiscode = (char) (code + 32832);
+            sjisbyte = new byte[2];
+            sjisbyte[1] = (byte) (sjiscode & 0xff);
+            sjisbyte[0] = (byte) ((sjiscode & 0xff00) >> 8);
+        } else {
 			sjisbyte = new byte[1];
 			sjisbyte[0] = (byte) (sjiscode & 0xff);
 		}
@@ -100,10 +112,10 @@ public class LR2FontLoader extends LR2SkinLoader {
 			for (int i = 0; i < b.length; i++) {
 				utfcode |= (b[i] & 0xff) << (8 * i);
 			}
-			return utfcode;
+			return new int[]{utfcode};
 		} catch (UnsupportedEncodingException e) {
 		}
-		return 0;
+		return new int[0];
 	}
 
 	protected SkinTextImage.SkinTextImageSource loadFont(Path p) throws IOException {

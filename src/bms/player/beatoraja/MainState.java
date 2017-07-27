@@ -405,7 +405,9 @@ public abstract class MainState {
 			return getMainController().getPlayerResource().getPlayerConfig().isBpmguide() ? 1 : 0;
 		case BUTTON_ASSIST_NOMINE:
 			return getMainController().getPlayerResource().getPlayerConfig().isNomine() ? 1 : 0;
-		case NUMBER_TOTALNOTES:
+			case BUTTON_LNMODE:
+				return getMainController().getPlayerResource().getPlayerConfig().getLnmode();
+			case NUMBER_TOTALNOTES:
 		case NUMBER_TOTALNOTES2:
 			if (getMainController().getPlayerResource().getSongdata() != null) {
 				return getMainController().getPlayerResource().getSongdata().getNotes();
@@ -421,7 +423,57 @@ public abstract class MainState {
 				return getMainController().getPlayerResource().getSongdata().getMaxbpm();
 			}
 			return Integer.MIN_VALUE;
-		case NUMBER_PLAYLEVEL:
+			case NUMBER_HISPEED_LR2:
+				if (getMainController().getPlayerResource().getSongdata() != null) {
+					SongData song = getMainController().getPlayerResource().getSongdata();
+					PlayConfig pc = (song.getMode() == 5 || song.getMode() == 7
+							? getMainController().getPlayerResource().getConfig().getMode7()
+							: (song.getMode() == 10 || song.getMode() == 14 ? getMainController().getPlayerResource().getConfig().getMode14()
+							: getMainController().getPlayerResource().getConfig().getMode9()));
+					return (int) (pc.getHispeed() * 100);
+				}
+				return Integer.MIN_VALUE;
+			case NUMBER_HISPEED:
+				if (getMainController().getPlayerResource().getSongdata() != null) {
+					SongData song = getMainController().getPlayerResource().getSongdata();
+					PlayConfig pc = (song.getMode() == 5 || song.getMode() == 7
+							? getMainController().getPlayerResource().getConfig().getMode7()
+							: (song.getMode() == 10 || song.getMode() == 14 ? getMainController().getPlayerResource().getConfig().getMode14()
+							: getMainController().getPlayerResource().getConfig().getMode9()));
+					return (int) pc.getHispeed();
+				}
+				return Integer.MIN_VALUE;
+			case NUMBER_HISPEED_AFTERDOT:
+				if (getMainController().getPlayerResource().getSongdata() != null) {
+					SongData song = getMainController().getPlayerResource().getSongdata();
+					PlayConfig pc = (song.getMode() == 5 || song.getMode() == 7
+							? getMainController().getPlayerResource().getConfig().getMode7()
+							: (song.getMode() == 10 || song.getMode() == 14 ? getMainController().getPlayerResource().getConfig().getMode14()
+							: getMainController().getPlayerResource().getConfig().getMode9()));
+					return (int) (pc.getHispeed() * 100) % 100;
+				}
+				return Integer.MIN_VALUE;
+			case NUMBER_DURATION:
+				if (getMainController().getPlayerResource().getSongdata() != null) {
+					SongData song = getMainController().getPlayerResource().getSongdata();
+					PlayConfig pc = (song.getMode() == 5 || song.getMode() == 7
+							? getMainController().getPlayerResource().getConfig().getMode7()
+							: (song.getMode() == 10 || song.getMode() == 14 ? getMainController().getPlayerResource().getConfig().getMode14()
+							: getMainController().getPlayerResource().getConfig().getMode9()));
+					return pc.getDuration();
+				}
+				return Integer.MIN_VALUE;
+			case NUMBER_DURATION_GREEN:
+				if (getMainController().getPlayerResource().getSongdata() != null) {
+					SongData song = getMainController().getPlayerResource().getSongdata();
+					PlayConfig pc = (song.getMode() == 5 || song.getMode() == 7
+							? getMainController().getPlayerResource().getConfig().getMode7()
+							: (song.getMode() == 10 || song.getMode() == 14 ? getMainController().getPlayerResource().getConfig().getMode14()
+							: getMainController().getPlayerResource().getConfig().getMode9()));
+					return pc.getDuration() * 3 / 5;
+				}
+				return Integer.MIN_VALUE;
+			case NUMBER_PLAYLEVEL:
 		case NUMBER_FOLDER_BEGINNER:
 		case NUMBER_FOLDER_NORMAL:
 		case NUMBER_FOLDER_HYPER:

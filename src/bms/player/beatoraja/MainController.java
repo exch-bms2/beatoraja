@@ -43,7 +43,7 @@ import com.badlogic.gdx.utils.JsonWriter.OutputType;
  */
 public class MainController extends ApplicationAdapter {
 
-	public static final String VERSION = "beatoraja 0.4.2";
+	public static final String VERSION = "beatoraja 0.4.3";
 
 	/**
 	 *
@@ -134,6 +134,18 @@ public class MainController extends ApplicationAdapter {
 		if(player.getUserid().length() > 0 && ir != null) {
 			ir.login(player.getUserid(), player.getPassword());
 		}
+		switch(config.getAudioDriver()) {
+		case Config.AUDIODRIVER_ASIO:
+			try {
+				audio = new ASIODriver(config);
+			} catch(Throwable e) {
+				e.printStackTrace();
+				config.setAudioDriver(Config.AUDIODRIVER_SOUND);
+				audio = new GdxSoundDriver();
+			}
+			break;
+		}
+
 	}
 
 	public long[] getTimer() {
@@ -235,15 +247,6 @@ public class MainController extends ApplicationAdapter {
 			break;
 		case Config.AUDIODRIVER_AUDIODEVICE:
 			audio = new GdxAudioDeviceDriver();
-			break;
-		case Config.AUDIODRIVER_ASIO:
-			try {
-				audio = new ASIODriver(config);
-			} catch(Throwable e) {
-				e.printStackTrace();
-				config.setAudioDriver(Config.AUDIODRIVER_SOUND);
-				audio = new GdxSoundDriver();
-			}
 			break;
 		}
 
@@ -415,7 +418,7 @@ public class MainController extends ApplicationAdapter {
 			keyconfig.dispose();
 		}
 		resource.dispose();
-		input.dispose();
+//		input.dispose();
 		SkinLoader.getResource().dispose();
 	}
 

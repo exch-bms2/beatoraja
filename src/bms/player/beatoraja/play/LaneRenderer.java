@@ -235,6 +235,9 @@ public class LaneRenderer {
 
 	public void drawLane(long time, SkinLane[] lanes) {
 		for (int i = 0; i < lanes.length; i++) {
+			if(i >= noteimage.length) {
+				break;
+			}
 			if (lanes[i].note != null) {
 				noteimage[i] = lanes[i].note.getImage(time, main);
 			}

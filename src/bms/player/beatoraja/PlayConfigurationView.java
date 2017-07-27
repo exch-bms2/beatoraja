@@ -595,7 +595,7 @@ public class PlayConfigurationView implements Initializable {
 				}
 				audioname.setDisable(false);
 				audiobuffer.setDisable(true);
-				audiosim.setDisable(true);
+				audiosim.setDisable(false);
 			} catch(Throwable e) {
 				Logger.getGlobal().severe("ASIOは選択できません : " + e.getMessage());
 				audio.setValue(Config.AUDIODRIVER_SOUND);
@@ -855,8 +855,28 @@ class SkinConfigurationView {
 						l.add(new CustomOption("Score Graph", new int[]{38,39}, new String[]{"Off", "On"}));
 						l.add(new CustomOption("Judge Detail", new int[]{1997,1998,1999}, new String[]{"Off", "EARLY/LATE", "+-ms"}));
 						header.setCustomOptions(l.toArray(new CustomOption[l.size()]));
+
 					}
 					lr2skinheader.add(header);
+					// 7/14key skinは5/10keyにも加える
+					if(header.getType() == SkinHeader.TYPE_LR2SKIN &&
+							(header.getSkinType() == SkinType.PLAY_7KEYS || header.getSkinType() == SkinType.PLAY_14KEYS)) {
+						header = loader.loadSkin(path, null);
+						List<CustomOption> l = new ArrayList(Arrays.asList(header.getCustomOptions()));
+						l.add(new CustomOption("BGA Size", new int[]{30,31}, new String[]{"Normal", "Extend"}));
+						l.add(new CustomOption("Ghost", new int[]{34,35,36,37}, new String[]{"Off", "Type A", "Type B", "Type C"}));
+						l.add(new CustomOption("Score Graph", new int[]{38,39}, new String[]{"Off", "On"}));
+						l.add(new CustomOption("Judge Detail", new int[]{1997,1998,1999}, new String[]{"Off", "EARLY/LATE", "+-ms"}));
+						header.setCustomOptions(l.toArray(new CustomOption[l.size()]));
+						if(header.getSkinType() == SkinType.PLAY_7KEYS && !header.getName().toLowerCase().contains("7key")) {
+							header.setName(header.getName() + " (7KEYS) ");
+						} else if(header.getSkinType() == SkinType.PLAY_14KEYS && !header.getName().toLowerCase().contains("14key")) {
+							header.setName(header.getName() + " (14KEYS) ");
+						}
+						header.setSkinType(header.getSkinType() == SkinType.PLAY_7KEYS ? SkinType.PLAY_5KEYS : SkinType.PLAY_10KEYS);
+						lr2skinheader.add(header);
+					}
+
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
