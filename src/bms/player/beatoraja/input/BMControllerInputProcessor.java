@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.logging.Logger;
 
 import bms.player.beatoraja.Config;
+import bms.player.beatoraja.PlayConfig.ControllerConfig;
 import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.ControllerListener;
 import com.badlogic.gdx.controllers.PovDirection;
@@ -48,20 +49,19 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice implements 
         private Config config;
         
 	public BMControllerInputProcessor(BMSPlayerInputProcessor bmsPlayerInputProcessor, Controller controller,
-			int[] buttons) {
+	                                  ControllerConfig controllerConfig) {
 		super(Type.BM_CONTROLLER);
 		config = new Config();
 		koc = config.getJKOC();
 		this.bmsPlayerInputProcessor = bmsPlayerInputProcessor;
 		this.controller = controller;
-		this.setControllerKeyAssign(buttons);
+		this.setConfig(controllerConfig);
 	}
 
-	public void setControllerKeyAssign(int[] buttons) {
-		this.buttons = new int[] { buttons[0], buttons[1], buttons[2], buttons[3], buttons[4], buttons[5], buttons[6],
-				buttons[7], buttons[8] };
-		this.start = buttons[9];
-		this.select = buttons[10];
+	public void setConfig(ControllerConfig controllerConfig) {
+		this.buttons = controllerConfig.getKeyAssign().clone();
+		this.start = controllerConfig.getStart();
+		this.select = controllerConfig.getSelect();
 	}
 	
 	public Controller getController() {

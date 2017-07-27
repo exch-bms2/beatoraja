@@ -1,7 +1,9 @@
 package bms.player.beatoraja.config;
 
 import bms.player.beatoraja.*;
+import bms.player.beatoraja.PlayConfig.KeyboardConfig;
 import bms.player.beatoraja.PlayConfig.ControllerConfig;
+import bms.player.beatoraja.PlayConfig.MidiConfig;
 import bms.player.beatoraja.decide.MusicDecideSkin;
 import bms.player.beatoraja.input.*;
 
@@ -30,19 +32,20 @@ public class KeyConfiguration extends MainState {
 	private static final String[] MODE = { "7 KEYS", "9 KEYS", "14 KEYS" };
 
 	private static final String[][] KEYS = {
-			{ "1 KEY", "2 KEY", "3 KEY", "4 KEY", "5 KEY", "6 KEY", "7 KEY", "F-SCR", "R-SCR", "START", "SELECT" },
-			{ "1 KEY", "2 KEY", "3 KEY", "4 KEY", "5 KEY", "6 KEY", "7 KEY", "8 KEY", "9 KEY", "START", "SELECT" },
+			{ "1 KEY", "2 KEY", "3 KEY", "4 KEY", "5 KEY", "6 KEY", "7 KEY", "F-SCR", "R-SCR" },
+			{ "1 KEY", "2 KEY", "3 KEY", "4 KEY", "5 KEY", "6 KEY", "7 KEY", "8 KEY", "9 KEY" },
 			{ "1P-1 KEY", "1P-2 KEY", "1P-3 KEY", "1P-4 KEY", "1P-5 KEY", "1P-6 KEY", "1P-7 KEY", "1P-F-SCR",
 					"1P-R-SCR", "2P-1 KEY", "2P-2 KEY", "2P-3 KEY", "2P-4 KEY", "2P-5 KEY", "2P-6 KEY", "2P-7 KEY",
-					"2P-F-SCR", "2P-R-SCR", "START", "SELECT" } };
-	private static final int[][] KEYSA = { { 0, 1, 2, 3, 4, 5, 6, 7, 8, 18, 19 },
-			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 18, 19 },
-			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 } };
-	private static final int[][] BMKEYSA = { { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 },
-			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }, { 0, 1, 2, 3, 4, 5, 6, 7, 8, 20, 21, 22, 23, 24, 25, 26, 27, 28, 9, 10 } };
-	private static final int[][] MIDIKEYSA = { { 0, 1, 2, 3, 4, 5, 6, 7, 8, 18, 19 },
-			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 18, 19 },
-			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 } };
+					"2P-F-SCR", "2P-R-SCR" } };
+	private static final String[] CONTROLKEYS = { "START", "SELECT" };
+	private static final int[][] KEYSA = { { 0, 1, 2, 3, 4, 5, 6, 7, 8 },
+			{ 0, 1, 2, 3, 4, 5, 6, 7, 8 },
+			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 } };
+	private static final int[][] BMKEYSA = { { 0, 1, 2, 3, 4, 5, 6, 7, 8 },
+			{ 0, 1, 2, 3, 4, 5, 6, 7, 8 }, { 0, 1, 2, 3, 4, 5, 6, 7, 8, 20, 21, 22, 23, 24, 25, 26, 27, 28 } };
+	private static final int[][] MIDIKEYSA = { { 0, 1, 2, 3, 4, 5, 6, 7, 8 },
+			{ 0, 1, 2, 3, 4, 5, 6, 7, 8 },
+			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 } };
 
 	private static final String[] SELECTKEY = {"2dx sp", "popn", "2dx dp"};
 
@@ -83,9 +86,9 @@ public class KeyConfiguration extends MainState {
 		int[] midikeysa = MIDIKEYSA[mode];
 		final PlayConfig pc = (mode == 0 ? config.getMode7() : (mode == 1 ? config.getMode9() : config
 				.getMode14()));
-		int[] keyassign = pc.getKeyassign();
+		KeyboardConfig keyboardConfig = pc.getKeyboardConfig();
 		ControllerConfig[] controller = pc.getController();
-		PlayConfig.MidiConfig midiconfig = pc.getMidiConfig();
+		MidiConfig midiconfig = pc.getMidiConfig();
 
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -151,7 +154,7 @@ public class KeyConfiguration extends MainState {
 		}
 
 		if (keyinput && input.getKeyBoardInputProcesseor().getLastPressedKey() != -1) {
-			keyassign[keysa[cursorpos]] = input.getKeyBoardInputProcesseor().getLastPressedKey();
+			keyboardConfig.getKeyAssign()[keysa[cursorpos]] = input.getKeyBoardInputProcesseor().getLastPressedKey();
 			// System.out.println(input.getKeyBoardInputProcesseor().getLastPressedKey());
 			keyinput = false;
 		}
@@ -159,7 +162,7 @@ public class KeyConfiguration extends MainState {
 			if (keyinput && bmc.getLastPressedButton() != -1) {
 				int index = bmkeysa[cursorpos];
 				if(bmc.getController().getName().equals(controller[index / 20].getName())) {
-					controller[index / 20].getAssign()[bmkeysa[cursorpos] % 20] = bmc.getLastPressedButton();					
+					controller[index / 20].getKeyAssign()[bmkeysa[cursorpos] % 20] = bmc.getLastPressedButton();
 				}
 //				System.out.println(bmc.getLastPressedButton());
 				keyinput = false;
@@ -199,11 +202,11 @@ public class KeyConfiguration extends MainState {
 			sprite.begin();
 			titlefont.setColor(Color.WHITE);
 			titlefont.draw(sprite, keys[i], 50, 598 - i * 24);
-			titlefont.draw(sprite, Keys.toString(keyassign[keysa[i]]), 202, 598 - i * 24);
+			titlefont.draw(sprite, Keys.toString(keyboardConfig.getKeyAssign()[keysa[i]]), 202, 598 - i * 24);
 			
 			int index = bmkeysa[i];
 			
-			titlefont.draw(sprite, BMControllerInputProcessor.BMKeys.toString(controller[index / 20].getAssign()[index % 20]), 352, 598 - i * 24);
+			titlefont.draw(sprite, BMControllerInputProcessor.BMKeys.toString(controller[index / 20].getKeyAssign()[index % 20]), 352, 598 - i * 24);
 
 			titlefont.draw(sprite, midiconfig.getAssignment(midikeysa[i]).toString(), 502, 598 - i * 24);
 			sprite.end();

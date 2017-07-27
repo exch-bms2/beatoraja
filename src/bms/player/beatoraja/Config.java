@@ -207,30 +207,19 @@ public class Config {
 	private String vlcpath = "";
 
 	private PlayConfig mode7 = new PlayConfig(
-			new int[] { Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.F, Keys.V, Keys.SHIFT_LEFT, Keys.CONTROL_LEFT,
-					Keys.COMMA, Keys.L, Keys.PERIOD, Keys.SEMICOLON, Keys.SLASH, Keys.APOSTROPHE, Keys.UNKNOWN,
-					Keys.SHIFT_RIGHT, Keys.CONTROL_RIGHT, Keys.Q, Keys.W },
-			new int[][] {{ BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8, BMKeys.BUTTON_2,
-					BMKeys.BUTTON_5, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN, BMKeys.BUTTON_9, BMKeys.BUTTON_10 }},
-			MidiConfig.default7());
+			PlayConfig.KeyboardConfig.default14(),
+			new PlayConfig.ControllerConfig[1],
+			PlayConfig.MidiConfig.default7());
 
 	private PlayConfig mode14 = new PlayConfig(
-			new int[] { Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.F, Keys.V, Keys.SHIFT_LEFT, Keys.CONTROL_LEFT,
-					Keys.COMMA, Keys.L, Keys.PERIOD, Keys.SEMICOLON, Keys.SLASH, Keys.APOSTROPHE, Keys.UNKNOWN,
-					Keys.SHIFT_RIGHT, Keys.CONTROL_RIGHT, Keys.Q, Keys.W },
-			new int[][] {{ BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8, BMKeys.BUTTON_2,
-					BMKeys.BUTTON_5, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN, BMKeys.BUTTON_9, BMKeys.BUTTON_10 },
-				{ BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8, BMKeys.BUTTON_2,
-						BMKeys.BUTTON_5, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN, BMKeys.BUTTON_9, BMKeys.BUTTON_10 }},
-			MidiConfig.default14());
+			PlayConfig.KeyboardConfig.default14(),
+			new PlayConfig.ControllerConfig[2],
+			PlayConfig.MidiConfig.default14());
 
 	private PlayConfig mode9 = new PlayConfig(
-			new int[] { Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.F, Keys.V, Keys.G, Keys.B, Keys.COMMA, Keys.L,
-					Keys.PERIOD, Keys.SEMICOLON, Keys.SLASH, Keys.APOSTROPHE, Keys.UNKNOWN, Keys.SHIFT_RIGHT,
-					Keys.CONTROL_RIGHT, Keys.Q, Keys.W },
-			new int[][] {{ BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8, BMKeys.BUTTON_2,
-					BMKeys.BUTTON_5, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN, BMKeys.BUTTON_9, BMKeys.BUTTON_10 }},
-			MidiConfig.default9());
+			PlayConfig.KeyboardConfig.default9(),
+			new PlayConfig.ControllerConfig[1],
+			PlayConfig.MidiConfig.default9());
 
 	private int musicselectinput = 0;
 
@@ -704,13 +693,8 @@ public class Config {
 
 		if(mode14 == null || mode14.getController().length < 2) {
 			mode14 = new PlayConfig(
-					new int[] { Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.F, Keys.V, Keys.SHIFT_LEFT, Keys.CONTROL_LEFT,
-							Keys.COMMA, Keys.L, Keys.PERIOD, Keys.SEMICOLON, Keys.SLASH, Keys.APOSTROPHE, Keys.UNKNOWN,
-							Keys.SHIFT_RIGHT, Keys.CONTROL_RIGHT, Keys.Q, Keys.W },
-					new int[][] {{ BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8, BMKeys.BUTTON_2,
-							BMKeys.BUTTON_5, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN, BMKeys.BUTTON_9, BMKeys.BUTTON_10 },
-						{ BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8, BMKeys.BUTTON_2,
-								BMKeys.BUTTON_5, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN, BMKeys.BUTTON_9, BMKeys.BUTTON_10 }},
+					PlayConfig.KeyboardConfig.default14(),
+					new PlayConfig.ControllerConfig[2],
 					MidiConfig.default14());
 			Logger.getGlobal().warning("mode14のPlayConfigを再構成");
 		}
