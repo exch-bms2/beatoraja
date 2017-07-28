@@ -108,7 +108,8 @@ public class PlayerConfig {
 			PlayConfig.MidiConfig.default9());
 
 	private PlayConfig mode24 = new PlayConfig(
-			new int[] { }, new int[][] {},
+			new PlayConfig.KeyboardConfig(),
+			new PlayConfig.ControllerConfig[] { new PlayConfig.ControllerConfig() },
 			MidiConfig.default24());
 
 	private int musicselectinput = 0;
