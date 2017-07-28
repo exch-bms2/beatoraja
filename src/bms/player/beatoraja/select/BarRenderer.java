@@ -447,10 +447,10 @@ public class BarRenderer {
 				SongData sd = ((SongBar) getSelected()).getSongData();
 
 				if(sd != null) {
-					boolean enable = ((sd.getFavorite() & 1) == 0);
+					boolean enable = ((sd.getFavorite() & SongData.FAVORITE_SONG) == 0);
 					SongData[] songs = select.getSongDatabase().getSongDatas("folder", sd.getFolder());
 					for(SongData song : songs) {
-						song.setFavorite(enable ? song.getFavorite() | 1 : song.getFavorite() & 0xfffffffe);
+						song.setFavorite(enable ? song.getFavorite() | SongData.FAVORITE_SONG : song.getFavorite() & (0xffffffff ^ SongData.FAVORITE_SONG));
 					}
 					select.getSongDatabase().setSongDatas(songs);
 				}
@@ -462,7 +462,7 @@ public class BarRenderer {
 				SongData sd = ((SongBar) getSelected()).getSongData();
 
 				if(sd != null) {
-					sd.setFavorite(sd.getFavorite() ^ 2);
+					sd.setFavorite(sd.getFavorite() ^ SongData.FAVORITE_CHART);
 					select.getSongDatabase().setSongDatas(new SongData[]{sd});
 //					boolean exist = false;
 //					for(TableData.TableSongData element : favorites[0].getElements()) {
