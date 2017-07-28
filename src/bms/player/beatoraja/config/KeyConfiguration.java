@@ -63,7 +63,7 @@ public class KeyConfiguration extends MainState {
 	private PlayerConfig config;
 	private PlayConfig pc;
 	private KeyboardConfig keyboardConfig;
-	private ControllerConfig[] controller;
+	private ControllerConfig[] controllerConfigs;
 	private MidiConfig midiconfig;
 
 	public KeyConfiguration(MainController main) {
@@ -235,8 +235,17 @@ public class KeyConfiguration extends MainState {
 			pc = config.getMode7();
 		}
 		keyboardConfig = pc.getKeyboardConfig();
-		controller = pc.getController();
+		controllerConfigs = pc.getController();
 		midiconfig = pc.getMidiConfig();
+
+		// 各configのキーサイズ等が足りない場合は補充する
+		validateKeyboardLength();
+		validateControllerLength();
+		validateMidiLength();
+
+		if (cursorpos >= KEYS[mode].length) {
+			cursorpos = 0;
+		}
 	}
 
 	private int getKeyboardKeyAssign(int index) {
@@ -262,22 +271,22 @@ public class KeyConfiguration extends MainState {
 
 	private int getControllerKeyAssign(int index) {
 		if (index >= 0) {
-			return controller[index / 20].getKeyAssign()[index % 20];
+			return controllerConfigs[index / 20].getKeyAssign()[index % 20];
 		} else if (index == -1) {
-			return controller[0].getStart();
+			return controllerConfigs[0].getStart();
 		} else if (index == -2) {
-			return controller[0].getSelect();
+			return controllerConfigs[0].getSelect();
 		}
 		return 0;
 	}
 
 	private void setControllerKeyAssign(int index, BMControllerInputProcessor bmc) {
-		if (index >= 0 && bmc.getController().getName().equals(controller[index / 20].getName())) {
-			controller[index / 20].getKeyAssign()[index % 20] = bmc.getLastPressedButton();
-		} else if (index == -1 && bmc.getController().getName().equals(controller[0].getName())) {
-			controller[0].setStart(bmc.getLastPressedButton());
-		} else if (index == -2 && bmc.getController().getName().equals(controller[0].getName())) {
-			controller[0].setSelect(bmc.getLastPressedButton());
+		if (index >= 0 && bmc.getController().getName().equals(controllerConfigs[index / 20].getName())) {
+			controllerConfigs[index / 20].getKeyAssign()[index % 20] = bmc.getLastPressedButton();
+		} else if (index == -1 && bmc.getController().getName().equals(controllerConfigs[0].getName())) {
+			controllerConfigs[0].setStart(bmc.getLastPressedButton());
+		} else if (index == -2 && bmc.getController().getName().equals(controllerConfigs[0].getName())) {
+			controllerConfigs[0].setSelect(bmc.getLastPressedButton());
 		}
 	}
 
@@ -299,6 +308,68 @@ public class KeyConfiguration extends MainState {
 			midiconfig.setStart(midiinput.getLastPressedKey());
 		} else if (index == -2) {
 			midiconfig.setSelect(midiinput.getLastPressedKey());
+		}
+	}
+
+	private void validateKeyboardLength() {
+		int maxKey = 0;
+		for (int key : KEYSA[mode]) {
+			if (key > maxKey) {
+				maxKey = key;
+			}
+		}
+		if (keyboardConfig.getKeyAssign().length <= maxKey) {
+			int[] keys = new int[maxKey + 1];
+			for (int i = 0; i < keyboardConfig.getKeyAssign().length; i++) {
+				keys[i] = keyboardConfig.getKeyAssign()[i];
+			}
+			keyboardConfig.setKeyAssign(keys);
+		}
+	}
+
+	private void validateControllerLength() {
+		int maxPlayer = 0;
+		int maxKey = 0;
+		for (int key : BMKEYSA[mode]) {
+			if (key / 20 > maxPlayer) {
+				maxPlayer = key / 20;
+			}
+			if (key % 20 > maxKey) {
+				maxKey = key % 20;
+			}
+		}
+		if (controllerConfigs.length <= maxPlayer) {
+			ControllerConfig[] configs = new ControllerConfig[maxPlayer + 1];
+			for (int i = 0; i < configs.length; i++) {
+				configs[i] = i < controllerConfigs.length ? controllerConfigs[i] : new ControllerConfig();
+			}
+			pc.setController(configs);
+			controllerConfigs = configs;
+		}
+		for (ControllerConfig controllerConfig : controllerConfigs) {
+			if (controllerConfig.getKeyAssign().length <= maxKey) {
+				int[] keys = new int[maxKey + 1];
+				for (int i = 0; i < controllerConfig.getKeyAssign().length; i++) {
+					keys[i] = controllerConfig.getKeyAssign()[i];
+				}
+				controllerConfig.setKeyAssign(keys);
+			}
+		}
+	}
+
+	private void validateMidiLength() {
+		int maxKey = 0;
+		for (int key : MIDIKEYSA[mode]) {
+			if (key > maxKey) {
+				maxKey = key;
+			}
+		}
+		if (midiconfig.getKeys().length <= maxKey) {
+			MidiConfig.Input[] keys = new MidiConfig.Input[maxKey + 1];
+			for (int i = 0; i < keys.length; i++) {
+				keys[i] = i < midiconfig.getKeys().length ? midiconfig.getKeys()[i] : new MidiConfig.Input();
+			}
+			midiconfig.setKeys(keys);
 		}
 	}
 

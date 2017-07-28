@@ -279,6 +279,7 @@ public class PlayConfig {
 		private Input select;
 
 		public Input[] getKeys() { return keys; }
+		public void setKeys(Input[] keys) { this.keys = keys; }
 		public Input getStart() { return start; }
 		public Input getSelect() { return select; }
 		public void setStart(Input input) { start = input; }
