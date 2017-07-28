@@ -56,6 +56,7 @@ public class KeyConfiguration extends MainState {
 	private static final String[] SELECTKEY = {"2dx sp", "popn", "2dx dp"};
 
 	private int cursorpos = 0;
+	private int scrollpos = 0;
 	private boolean keyinput = false;
 
 	private int mode = 0;
@@ -201,21 +202,27 @@ public class KeyConfiguration extends MainState {
 		}
 
 		sprite.end();
-		for (int i = 0; i < keys.length; i++) {
+		if (cursorpos < scrollpos) {
+			scrollpos = cursorpos;
+		} else if (cursorpos - scrollpos > 24) {
+			scrollpos = cursorpos - 24;
+		}
+		for (int i = scrollpos; i < keys.length; i++) {
+			int y = 576 - (i - scrollpos) * 24;
 			if (i == cursorpos) {
 				shape.begin(ShapeType.Filled);
 				shape.setColor(keyinput ? Color.RED : Color.BLUE);
-				shape.rect(200, 576 - i * 24, 80, 24);
-				shape.rect(350, 576 - i * 24, 80, 24);
-				shape.rect(500, 576 - i * 24, 80, 24);
+				shape.rect(200, y, 80, 24);
+				shape.rect(350, y, 80, 24);
+				shape.rect(500, y, 80, 24);
 				shape.end();
 			}
 			sprite.begin();
 			titlefont.setColor(Color.WHITE);
-			titlefont.draw(sprite, keys[i], 50, 598 - i * 24);
-			titlefont.draw(sprite, Keys.toString(getKeyboardKeyAssign(keysa[i])), 202, 598 - i * 24);
-			titlefont.draw(sprite, BMControllerInputProcessor.BMKeys.toString(getControllerKeyAssign(bmkeysa[i])), 352, 598 - i * 24);
-			titlefont.draw(sprite, getMidiKeyAssign(midikeysa[i]).toString(), 502, 598 - i * 24);
+			titlefont.draw(sprite, keys[i], 50, y + 22);
+			titlefont.draw(sprite, Keys.toString(getKeyboardKeyAssign(keysa[i])), 202, y + 22);
+			titlefont.draw(sprite, BMControllerInputProcessor.BMKeys.toString(getControllerKeyAssign(bmkeysa[i])), 352, y + 22);
+			titlefont.draw(sprite, getMidiKeyAssign(midikeysa[i]).toString(), 502, y + 22);
 			sprite.end();
 		}
 
