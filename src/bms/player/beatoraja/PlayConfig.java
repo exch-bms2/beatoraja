@@ -37,9 +37,9 @@ public class PlayConfig {
 	 */
 	private boolean enablelift = false;
 
-	private KeyboardConfig keyboard;
+	private KeyboardConfig keyboard = new KeyboardConfig();
 	
-	private ControllerConfig[] controller = new ControllerConfig[1];
+	private ControllerConfig[] controller = new ControllerConfig[] { ControllerConfig.default7() };
 
 	private MidiConfig midi = new MidiConfig();
 	

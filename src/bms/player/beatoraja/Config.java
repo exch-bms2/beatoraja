@@ -208,17 +208,17 @@ public class Config {
 
 	private PlayConfig mode7 = new PlayConfig(
 			PlayConfig.KeyboardConfig.default14(),
-			new PlayConfig.ControllerConfig[1],
+			new PlayConfig.ControllerConfig[] { PlayConfig.ControllerConfig.default7() },
 			PlayConfig.MidiConfig.default7());
 
 	private PlayConfig mode14 = new PlayConfig(
 			PlayConfig.KeyboardConfig.default14(),
-			new PlayConfig.ControllerConfig[2],
+			new PlayConfig.ControllerConfig[] { PlayConfig.ControllerConfig.default7(), PlayConfig.ControllerConfig.default7() },
 			PlayConfig.MidiConfig.default14());
 
 	private PlayConfig mode9 = new PlayConfig(
 			PlayConfig.KeyboardConfig.default9(),
-			new PlayConfig.ControllerConfig[1],
+			new PlayConfig.ControllerConfig[] { PlayConfig.ControllerConfig.default9() },
 			PlayConfig.MidiConfig.default9());
 
 	private int musicselectinput = 0;
