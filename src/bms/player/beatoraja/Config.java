@@ -694,7 +694,7 @@ public class Config {
 		if(mode14 == null || mode14.getController().length < 2) {
 			mode14 = new PlayConfig(
 					PlayConfig.KeyboardConfig.default14(),
-					new PlayConfig.ControllerConfig[2],
+					new PlayConfig.ControllerConfig[] { PlayConfig.ControllerConfig.default7(), PlayConfig.ControllerConfig.default7() },
 					MidiConfig.default14());
 			Logger.getGlobal().warning("mode14のPlayConfigを再構成");
 		}
