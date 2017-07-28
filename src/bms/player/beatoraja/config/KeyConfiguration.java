@@ -41,10 +41,11 @@ public class KeyConfiguration extends MainState {
 			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, -1, -2 },
 			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, -1, -2 } };
 	private static final int[][] BMKEYSA = { { 0, 1, 2, 3, 4, 5, 6, 7, 8, -1, -2 },
-			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, -1, -2 }, { 0, 1, 2, 3, 4, 5, 6, 7, 8, 20, 21, 22, 23, 24, 25, 26, 27, 28, -1, -2 } };
+			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, -1, -2 }, { 0, 1, 2, 3, 4, 5, 6, 7, 8, 100, 101, 102, 103, 104, 105, 106, 107, 108, -1, -2 },
 	private static final int[][] MIDIKEYSA = { { 0, 1, 2, 3, 4, 5, 6, 7, 8, -1, -2 },
 			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, -1, -2 },
 			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, -1, -2 } };
+	private static final int playerOffset = 100;
 
 	private static final String[] SELECTKEY = {"2dx sp", "popn", "2dx dp"};
 
@@ -271,7 +272,7 @@ public class KeyConfiguration extends MainState {
 
 	private int getControllerKeyAssign(int index) {
 		if (index >= 0) {
-			return controllerConfigs[index / 20].getKeyAssign()[index % 20];
+			return controllerConfigs[index / playerOffset].getKeyAssign()[index % playerOffset];
 		} else if (index == -1) {
 			return controllerConfigs[0].getStart();
 		} else if (index == -2) {
@@ -281,8 +282,8 @@ public class KeyConfiguration extends MainState {
 	}
 
 	private void setControllerKeyAssign(int index, BMControllerInputProcessor bmc) {
-		if (index >= 0 && bmc.getController().getName().equals(controllerConfigs[index / 20].getName())) {
-			controllerConfigs[index / 20].getKeyAssign()[index % 20] = bmc.getLastPressedButton();
+		if (index >= 0 && bmc.getController().getName().equals(controllerConfigs[index / playerOffset].getName())) {
+			controllerConfigs[index / playerOffset].getKeyAssign()[index % playerOffset] = bmc.getLastPressedButton();
 		} else if (index == -1 && bmc.getController().getName().equals(controllerConfigs[0].getName())) {
 			controllerConfigs[0].setStart(bmc.getLastPressedButton());
 		} else if (index == -2 && bmc.getController().getName().equals(controllerConfigs[0].getName())) {
@@ -331,11 +332,11 @@ public class KeyConfiguration extends MainState {
 		int maxPlayer = 0;
 		int maxKey = 0;
 		for (int key : BMKEYSA[mode]) {
-			if (key / 20 > maxPlayer) {
-				maxPlayer = key / 20;
+			if (key / playerOffset > maxPlayer) {
+				maxPlayer = key / playerOffset;
 			}
-			if (key % 20 > maxKey) {
-				maxKey = key % 20;
+			if (key % playerOffset > maxKey) {
+				maxKey = key % playerOffset;
 			}
 		}
 		if (controllerConfigs.length <= maxPlayer) {
