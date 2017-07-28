@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
+import bms.player.beatoraja.PlayConfig.KeyboardConfig;
 import bms.player.beatoraja.PlayConfig.ControllerConfig;
 import bms.player.beatoraja.PlayConfig.MidiConfig;
 import bms.player.beatoraja.Resolution;
@@ -30,16 +31,12 @@ public class BMSPlayerInputProcessor {
 	private MidiInputProcessor midiinput;
 
 	public BMSPlayerInputProcessor(Resolution resolution) {
-		kbinput = new KeyBoardInputProcesseor(this, new int[] { Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.F, Keys.V,
-				Keys.SHIFT_LEFT, Keys.CONTROL_LEFT, Keys.COMMA, Keys.L, Keys.PERIOD, Keys.SEMICOLON, Keys.SLASH,
-				Keys.APOSTROPHE, Keys.UNKNOWN, Keys.SHIFT_RIGHT, Keys.CONTROL_RIGHT, Keys.Q, Keys.W }, resolution);
+		kbinput = new KeyBoardInputProcesseor(this, KeyboardConfig.default14(), resolution);
 		// Gdx.input.setInputProcessor(kbinput);
 		List<BMControllerInputProcessor> bminput = new ArrayList<BMControllerInputProcessor>();
 		for (Controller controller : Controllers.getControllers()) {
 			Logger.getGlobal().info("コントローラーを検出 : " + controller.getName());
-			BMControllerInputProcessor bm = new BMControllerInputProcessor(this, controller, new int[] {
-					BMKeys.BUTTON_3, BMKeys.BUTTON_6, BMKeys.BUTTON_2, BMKeys.BUTTON_7, BMKeys.BUTTON_1,
-					BMKeys.BUTTON_4, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN, BMKeys.BUTTON_8, BMKeys.BUTTON_9 });
+			BMControllerInputProcessor bm = new BMControllerInputProcessor(this, controller, new ControllerConfig());
 			// controller.addListener(bm);
 			bminput.add(bm);
 		}
@@ -113,8 +110,8 @@ public class BMSPlayerInputProcessor {
 		}
 	}
 
-	public void setKeyassign(int[] keyassign) {
-		kbinput.setKeyAssign(keyassign);
+	public void setKeyboardConfig(KeyboardConfig config) {
+		kbinput.setConfig(config);
 	}
         
 	public void setControllerConfig(ControllerConfig[] configs) {
@@ -130,7 +127,7 @@ public class BMSPlayerInputProcessor {
 				}
 				if(controller.getController().getName().equals(configs[i].getName())) {
 					player = i;
-					controller.setControllerKeyAssign(configs[i].getAssign());
+					controller.setConfig(configs[i]);
 					b[i] = true;
 					break;
 				}

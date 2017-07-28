@@ -269,7 +269,7 @@ public class BMSPlayer extends MainState {
 			input.disableAllDevices();
 		}
 		PlayConfig pc = getPlayConfig(config);
-		input.setKeyassign(pc.getKeyassign());
+		input.setKeyboardConfig(pc.getKeyboardConfig());
 		input.setControllerConfig(pc.getController());
 		input.setMidiConfig(pc.getMidiConfig());
 		lanerender = new LaneRenderer(this, model);
