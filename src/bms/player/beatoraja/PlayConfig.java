@@ -153,9 +153,15 @@ public class PlayConfig {
 			return select;
 		}
 
-		public void setAssign(int[] keys, int start, int select) {
+		public void setKeyAssign(int[] keys) {
 			this.keys = keys;
+		}
+
+		public void setStart(int start) {
 			this.start = start;
+		}
+
+		public void setSelect(int select) {
 			this.select = select;
 		}
 
@@ -211,9 +217,15 @@ public class PlayConfig {
 
 		public int getSelect() { return select; }
 
-		public void setAssign(int[] keys, int start, int select) {
+		public void setKeyAssign(int[] keys) {
 			this.keys = keys;
+		}
+
+		public void setStart(int start) {
 			this.start = start;
+		}
+
+		public void setSelect(int select) {
 			this.select = select;
 		}
 		
@@ -284,26 +296,12 @@ public class PlayConfig {
 			select = new Input(Input.Type.NOTE, 48);
 		}
 
-		public Input getAssignment(int index) {
-			if (index < keys.length) {
-				return keys[index];
-			} else if (index == 18) {
-				return start;
-			} else if (index == 19) {
-				return select;
-			} else {
-				return null;
-			}
+		public Input getKeyAssign(int index) {
+			return keys[index];
 		}
 
-		public void setAssignment(int index, Input input) {
-			if (index < keys.length) {
-				keys[index] = input;
-			} else if (index == 18) {
-				start = input;
-			} else if (index == 19) {
-				select = input;
-			}
+		public void setKeyAssign(int index, Input input) {
+			keys[index] = input;
 		}
 
 		public static MidiConfig default7() {
