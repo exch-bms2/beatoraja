@@ -27,31 +27,31 @@ public class SongData {
 	/**
 	 * 楽曲タイトル
 	 */
-	private String title;
+	private String title = "";
 	/**
 	 * 楽曲サブタイトル
 	 */
-	private String subtitle;
+	private String subtitle = "";
 	private String fulltitle;
 	/**
 	 * 楽曲ジャンル
 	 */
-	private String genre;
+	private String genre = "";
 	/**
 	 * 楽曲アーティスト名
 	 */
-	private String artist;
+	private String artist = "";
 	/**
 	 * 楽曲サブアーティスト名
 	 */
-	private String subartist;
+	private String subartist = "";
 	private String fullartist;
 	private int favorite;
 	private List<String> path = new ArrayList<String>();
-	private String tag;	
-	private String md5;
-	private String sha256;
-	private String banner;
+	private String tag = "";
+	private String md5 = "";
+	private String sha256 = "";
+	private String banner = "";
 	private int date;
 	private int adddate;
 	private int level;
@@ -68,12 +68,12 @@ public class SongData {
 	private String backbmp = "";
 	private String preview = "";
 
-	private String folder;
-	private String parent;
+	private String folder = "";
+	private String parent = "";
 
 	private BMSModel model;
 	private TimeLine[] timelines;
-	private SongInformation info;;
+	private SongInformation info;
 	
 	public SongData() {
 		
@@ -193,7 +193,7 @@ public class SongData {
 	}
 	public String getFullTitle() {
 		if(fulltitle == null) {
-			fulltitle = subtitle != null ? title + " " + subtitle : title;
+			fulltitle = subtitle.length() > 0 ? title + " " + subtitle : title;
 		}
 		return fulltitle;
 	}
@@ -211,7 +211,7 @@ public class SongData {
 	}
 	public String getFullArtist() {
 		if(fullartist == null) {
-			fullartist = subartist != null ? artist + " " + subartist : artist;
+			fullartist = subartist.length() > 0 ? artist + " " + subartist : artist;
 		}
 		return fullartist;
 	}

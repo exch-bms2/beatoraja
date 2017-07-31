@@ -81,7 +81,7 @@ class SongBar extends SelectableBar {
     }
     
     public boolean existsSong() {
-    	return song.getSha256() != null;
+    	return song.getPath() != null;
     }
 
     public TableData.TableSong getSongInformation() {
