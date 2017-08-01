@@ -43,7 +43,7 @@ public class PlayerResource {
 
 	private int auto;
 
-	private BMSPlayerInputDevice playDevice;
+	private BMSPlayerInputDevice.Type playDeviceType;
 
 	private List<CourseData.CourseDataConstraint> constraint = new ArrayList();
 
@@ -110,6 +110,7 @@ public class PlayerResource {
 		this.config = config;
 		this.pconfig = pconfig;
 		this.bmsresource = new BMSResource(audio, config);
+		this.playDeviceType = BMSPlayerInputDevice.Type.KEYBOARD;
 	}
 
 	public void clear() {
@@ -396,11 +397,11 @@ public class PlayerResource {
 		return stagefile;
 	}
 
-	public BMSPlayerInputDevice getPlayDevice() {
-		return playDevice;
+	public BMSPlayerInputDevice.Type getPlayDeviceType() {
+		return playDeviceType;
 	}
 
-	public void setPlayDevice(BMSPlayerInputDevice playDevice) {
-		this.playDevice = playDevice;
+	public void setPlayDeviceType(BMSPlayerInputDevice.Type playDeviceType) {
+		this.playDeviceType = playDeviceType;
 	}
 }

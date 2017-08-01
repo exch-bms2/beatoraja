@@ -835,16 +835,18 @@ public class MusicSelector extends MainState {
 	public void executeClickEvent(int id) {
 		switch (id) {
 		case BUTTON_PLAY:
-			getMainController().getPlayerResource()
-					.setPlayDevice(getMainController().getInputProcessor().getLastKeyChangedDevice());
+			if (getMainController().getInputProcessor().getLastKeyChangedDevice() != null) {
+				getMainController().getPlayerResource().setPlayDeviceType(getMainController().getInputProcessor().getLastKeyChangedDevice().getType());
+			}
 			play = 0;
 			break;
 		case BUTTON_AUTOPLAY:
 			play = 1;
 			break;
 		case BUTTON_PRACTICE:
-			getMainController().getPlayerResource()
-					.setPlayDevice(getMainController().getInputProcessor().getLastKeyChangedDevice());
+			if (getMainController().getInputProcessor().getLastKeyChangedDevice() != null) {
+				getMainController().getPlayerResource().setPlayDeviceType(getMainController().getInputProcessor().getLastKeyChangedDevice().getType());
+			}
 			play = 2;
 			break;
 		case BUTTON_REPLAY:

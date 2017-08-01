@@ -278,11 +278,15 @@ public class MusicSelectInputProcessor {
                 if (select.isPressed(keystate, keytime, KEY_PLAY, true) || (cursor[3] && cursortime[3] != 0)) {
                     // play
                     cursortime[3] = 0;
-                    resource.setPlayDevice(input.getLastKeyChangedDevice());
+                    if (input.getLastKeyChangedDevice() != null) {
+                        resource.setPlayDeviceType(input.getLastKeyChangedDevice().getType());
+                    }
                     select.selectSong(0);
                 } else if (select.isPressed(keystate, keytime, KEY_PRACTICE, true)) {
                     // practice mode
-                    resource.setPlayDevice(input.getLastKeyChangedDevice());
+                    if (input.getLastKeyChangedDevice() != null) {
+                        resource.setPlayDeviceType(input.getLastKeyChangedDevice().getType());
+                    }
                     select.selectSong(2);
                 } else if (select.isPressed(keystate, keytime, KEY_AUTO, true)) {
                     // auto play
