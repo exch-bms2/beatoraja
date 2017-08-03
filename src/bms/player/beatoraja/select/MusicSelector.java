@@ -3,7 +3,6 @@ package bms.player.beatoraja.select;
 import java.awt.*;
 import java.io.*;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -12,7 +11,6 @@ import java.util.logging.Logger;
 
 import bms.model.Mode;
 import bms.player.beatoraja.*;
-import bms.player.beatoraja.TableData.TableSong;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.song.SongData;
@@ -273,25 +271,25 @@ public class MusicSelector extends MainState {
 
 		if (play >= 0) {
 			if (current instanceof SongBar) {
+				SongData song = ((SongBar) current).getSongData();
 				if (((SongBar) current).existsSong()) {
 					resource.clear();
-					if (resource.setBMSFile(Paths.get(((SongBar) current).getSongData().getPath()), play)) {
+					if (resource.setBMSFile(Paths.get(song.getPath()), play)) {
 						preview.stop();
 						getMainController().changeState(MainController.STATE_DECIDE);
 					}
-				} else if (((SongBar) current).getSongInformation() != null) {
-					TableSong info = ((SongBar) current).getSongInformation();
-					if (info.getUrl() != null) {
+				} else {
+					if (song.getUrl() != null) {
 						try {
-							URI uri = new URI(info.getUrl());
+							URI uri = new URI(song.getUrl());
 							Desktop.getDesktop().browse(uri);
 						} catch (Throwable e) {
 							e.printStackTrace();
 						}
 					}
-					if (info.getAppendurl() != null) {
+					if (song.getAppendurl() != null) {
 						try {
-							URI uri = new URI(info.getAppendurl());
+							URI uri = new URI(song.getAppendurl());
 							Desktop.getDesktop().browse(uri);
 						} catch (Throwable e) {
 							e.printStackTrace();
@@ -917,6 +915,7 @@ public class MusicSelector extends MainState {
 				getSongDatabase().updateSongDatas(fb.getFolderData().getPath(), false,
 						getMainController().getInfoDatabase());
 			} else if (selected instanceof TableBar) {
+				// TODO BMSSearchも表扱いする必要あり
 				TableBar tb = (TableBar) selected;
 				if (tb.getUrl() != null && tb.getUrl().length() > 0) {
 					TableDataAccessor tda = new TableDataAccessor();

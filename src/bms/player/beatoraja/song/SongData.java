@@ -52,6 +52,8 @@ public class SongData {
 	private String md5 = "";
 	private String sha256 = "";
 	private String banner = "";
+	private String url;
+	private String appendurl;
 	private int date;
 	private int adddate;
 	private int level;
@@ -389,5 +391,21 @@ public class SongData {
 
 	public void setLength(int length) {
 		this.length = length;
+	}
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
+	public String getAppendurl() {
+		return appendurl;
+	}
+
+	public void setAppendurl(String appendurl) {
+		this.appendurl = appendurl;
 	}
 }

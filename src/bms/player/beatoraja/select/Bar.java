@@ -59,21 +59,8 @@ class SongBar extends SelectableBar {
 
     private Pixmap banner;
 
-    private TableData.TableSong info;
-
     public SongBar(SongData song) {
         this.song = song;
-    }
-
-    public SongBar(SongData song, TableData.TableSong info) {
-    	if(song == null) {
-    		song = new SongData();
-    		song.setTitle(info.getTitle());
-    		song.setArtist(info.getArtist());
-    		song.setGenre(info.getGenre());
-    	}
-        this.song = song;
-        this.info = info;
     }
 
     public SongData getSongData() {
@@ -82,10 +69,6 @@ class SongBar extends SelectableBar {
     
     public boolean existsSong() {
     	return song.getPath() != null;
-    }
-
-    public TableData.TableSong getSongInformation() {
-        return info;
     }
 
     public Pixmap getBanner() {
@@ -419,18 +402,18 @@ class TableBar extends DirectoryBar {
 		
 		Set<String> hashset = new HashSet<String>();
 		for (CourseData course : td.getCourse()) {
-			for (String hash : course.getHash()) {
-				hashset.add(hash);
+			for (SongData hash : course.getSong()) {
+				hashset.add(hash.getSha256().length() > 0 ? hash.getSha256() : hash.getMd5());
 			}
 		}
 		SongData[] songs = selector.getSongDatabase().getSongDatas(hashset.toArray(new String[hashset.size()]));
 		
 		for (CourseData course : td.getCourse()) {
 			List<SongData> songlist = new ArrayList<SongData>();
-			for (String hash : course.getHash()) {
+			for (SongData hash : course.getSong()) {
 				SongData song = null;
 				for(SongData sd :songs) {
-					if(hash.equals(sd.getMd5())) {
+					if(hash.getMd5().equals(sd.getMd5()) || hash.getSha256().equals(sd.getSha256())) {
 						song = sd;
 						break;
 					}
@@ -469,11 +452,11 @@ class TableBar extends DirectoryBar {
  */
 class HashBar extends DirectoryBar {
     private String title;
-    private TableData.TableSong[] elements;
+    private SongData[] elements;
     private MusicSelector selector;
     private SongData[] songs;
 
-    public HashBar(MusicSelector selector, String title, TableData.TableSong[] elements) {
+    public HashBar(MusicSelector selector, String title, SongData[] elements) {
         this.selector = selector;
         this.title = title;
         this.elements = elements;
@@ -484,11 +467,11 @@ class HashBar extends DirectoryBar {
         return title;
     }
 
-    public TableData.TableSong[] getElements() {
+    public SongData[] getElements() {
         return elements;
     }
 
-    public void setElements(TableData.TableSong[] elements) {
+    public void setElements(SongData[] elements) {
         this.elements = elements;
         songs = null;
     }
@@ -498,22 +481,22 @@ class HashBar extends DirectoryBar {
         List<SongBar> songbars = new ArrayList<SongBar>();
         String[] hashes = new String[elements.length];
         for(int i = 0;i < hashes.length;i++) {
-            hashes[i] = elements[i].getHash();
+            hashes[i] = elements[i].getSha256().length() > 0 ? elements[i].getSha256() : elements[i].getMd5();
         }
         if(songs == null) {
             songs = selector.getSongDatabase().getSongDatas(hashes);
         }
-        for(TableData.TableSong element : elements) {
+        for(SongData element : elements) {
             boolean exist = false;
             for (SongData song : songs) {
-                if(element.getHash().equals(song.getMd5()) || element.getHash().equals(song.getSha256())) {
-                    songbars.add(new SongBar(song, element));
+                if(element.getMd5().equals(song.getMd5()) || element.getSha256().equals(song.getSha256())) {
+                    songbars.add(new SongBar(song));
                     exist = true;
                     break;
                 }
             }
             if(!exist && element.getTitle() != null) {
-                songbars.add(new SongBar(null, element));
+                songbars.add(new SongBar(element));
             }
         }
 
@@ -526,7 +509,7 @@ class HashBar extends DirectoryBar {
         int[] ranks = new int[28];
         String[] hashes = new String[elements.length];
         for(int i = 0;i < hashes.length;i++) {
-            hashes[i] = elements[i].getHash();
+            hashes[i] = elements[i].getSha256().length() > 0 ? elements[i].getSha256() : elements[i].getMd5();
         }
         songs = selector.getSongDatabase().getSongDatas(hashes);
         final Map<String, IRScoreData> scores = selector.getScoreDataCache()

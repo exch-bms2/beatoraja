@@ -12,6 +12,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import bms.player.beatoraja.song.SongData;
 import bms.table.Course;
 import bms.table.DifficultyTable;
 import bms.table.DifficultyTableElement;
@@ -62,15 +63,23 @@ public class TableDataAccessor {
 						for (String lv : levels) {
 							TableData.TableFolder tde = new TableData.TableFolder();
 							tde.setName("LEVEL " + lv);
-							List<TableData.TableSong> hashes = new ArrayList<TableData.TableSong>();
+							List<SongData> hashes = new ArrayList<SongData>();
 							for (DifficultyTableElement dte : dt.getElements()) {
 								if (lv.equals(dte.getDifficultyID())) {
-									hashes.add(new TableData.TableSong(
-													dte.getSHA256() != null ? dte.getSHA256() : dte.getMD5(),
-											dte.getTitle(), dte.getURL1name(), null, dte.getURL1(), dte.getURL2()));
+									SongData sd = new SongData();
+									if(dte.getSHA256() != null) {
+										sd.setSha256(dte.getSHA256());
+									} else {
+										sd.setMd5(dte.getMD5());
+									}
+									sd.setTitle(dte.getTitle());
+									sd.setArtist(dte.getURL1name());
+									sd.setUrl(dte.getURL1());
+									sd.setAppendurl(dte.getURL2());
+									hashes.add(sd);
 								}
 							}
-							tde.setSong(hashes.toArray(new TableData.TableSong[hashes.size()]));
+							tde.setSong(hashes.toArray(new SongData[hashes.size()]));
 							tdes.add(tde);
 						}
 						td.setFolder(tdes.toArray(new TableData.TableFolder[tdes.size()]));
@@ -81,7 +90,13 @@ public class TableDataAccessor {
 								for (Course g : course) {
 									CourseData cd = new CourseData();
 									cd.setName(g.getName());
-									cd.setHash(g.getHash());
+									// TODO 難易度表パーサーの仕様を変えたらここも変更
+									SongData[] songs = new SongData[g.getHash().length];
+									for(int i = 0;i < songs.length;i++) {
+										songs[i] = new SongData();
+										songs[i].setMd5(g.getHash()[i]);
+									}
+									cd.setSong(songs);
 									List<CourseData.CourseDataConstraint> l = new ArrayList<>();
 									for(int i = 0;i < g.getConstraint().length;i++) {
 										for (CourseData.CourseDataConstraint constraint : CourseData.CourseDataConstraint.values()) {

@@ -1,5 +1,7 @@
 package bms.player.beatoraja;
 
+import bms.player.beatoraja.song.SongData;
+
 /**
  * 難易度表データ
  *
@@ -54,7 +56,7 @@ public class TableData {
 	public static class TableFolder {
 
 		private String name;
-		private TableSong[] songs = new TableSong[0];
+		private SongData[] songs = new SongData[0];
 
 		public String getName() {
 			return name;
@@ -64,87 +66,12 @@ public class TableData {
 			this.name = name;
 		}
 
-		public TableSong[] getSong() {
+		public SongData[] getSong() {
 			return songs;
 		}
 
-		public void setSong(TableSong[] songs) {
+		public void setSong(SongData[] songs) {
 			this.songs = songs;
-		}
-	}
-
-	public static class TableSong {
-
-		private String hash;
-		private String title;
-		private String artist;
-		private String genre;
-		private String url;
-		private String appendurl;
-
-		public TableSong() {
-
-		}
-
-		public TableSong(String hash) {
-			this(hash,null,null, null, null,null);
-		}
-
-		public TableSong(String hash, String title, String artist, String genre, String url, String appendurl) {
-			this.hash = hash;
-			this.title = title;
-			this.artist = artist;
-			this.genre = genre;
-			this.url = url;
-			this.appendurl = appendurl;
-		}
-
-		public String getHash() {
-			return hash;
-		}
-
-		public void setHash(String hash) {
-			this.hash = hash;
-		}
-
-		public String getTitle() {
-			return title;
-		}
-
-		public void setTitle(String title) {
-			this.title = title;
-		}
-
-		public String getUrl() {
-			return url;
-		}
-
-		public void setUrl(String url) {
-			this.url = url;
-		}
-
-		public String getAppendurl() {
-			return appendurl;
-		}
-
-		public void setAppendurl(String appendurl) {
-			this.appendurl = appendurl;
-		}
-
-		public String getArtist() {
-			return artist;
-		}
-
-		public void setArtist(String artist) {
-			this.artist = artist;
-		}
-
-		public String getGenre() {
-			return genre;
-		}
-
-		public void setGenre(String genre) {
-			this.genre = genre;
 		}
 	}
 

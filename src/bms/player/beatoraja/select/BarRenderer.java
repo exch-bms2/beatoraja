@@ -1,6 +1,5 @@
 package bms.player.beatoraja.select;
 
-import java.io.IOException;
 import java.nio.file.*;
 import java.util.*;
 import java.util.logging.Logger;
@@ -15,8 +14,6 @@ import com.badlogic.gdx.utils.Array;
 import bms.model.Mode;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.CourseData.TrophyData;
-import bms.player.beatoraja.TableData.TableFolder;
-import bms.player.beatoraja.TableData.TableSong;
 import bms.player.beatoraja.external.BMSSearchAccessor;
 import bms.player.beatoraja.song.SongData;
 import bms.player.beatoraja.song.SongInformationAccessor;
@@ -95,16 +92,15 @@ public class BarRenderer {
 		courses = new GradeBar[cds.length];
 		for (int i = 0; i < cds.length; i++) {
 			Set<String> hashset = new HashSet<String>();
-			for (String hash : cds[i].getHash()) {
-				hashset.add(hash);
+			for (SongData hash : cds[i].getSong()) {
+				hashset.add(hash.getSha256().length() > 0 ? hash.getSha256() : hash.getMd5());
 			}
 			SongData[] songs = select.getSongDatabase().getSongDatas(hashset.toArray(new String[hashset.size()]));
 
-			SongData[] songdatas = new SongData[cds[i].getHash().length];
+			SongData[] songdatas = new SongData[cds[i].getSong().length];
 			for (int j = 0;j < songdatas.length;j++) {
-				String hash = cds[i].getHash()[j];
 				for(SongData sd : songs) {
-					if(hash.equals(sd.getMd5()) || hash.equals(sd.getSha256())) {
+					if(cds[i].getSong()[j].getMd5().equals(sd.getMd5()) || cds[i].getSong()[j].getSha256().equals(sd.getSha256())) {
 						songdatas[j] = sd;
 						break;
 					}
@@ -120,11 +116,7 @@ public class BarRenderer {
 //		}
 		favorites = new HashBar[cds.length];
 		for (int i = 0; i < cds.length; i++) {
-			TableData.TableSong[] songs = new TableData.TableSong[cds[i].getHash().length];
-			for(int j = 0;j < songs.length;j++) {
-				songs[j] = new TableData.TableSong(cds[i].getHash()[j]);
-			}
-			favorites[i] = new HashBar(select, cds[i].getName(), songs);
+			favorites[i] = new HashBar(select, cds[i].getName(), cds[i].getSong());
 		}
 		
 		List<CommandBar> density = new ArrayList<CommandBar>();
@@ -597,25 +589,6 @@ public class BarRenderer {
 		}
 		Logger.getGlobal().warning("楽曲がありません");
 		return false;
-	}
-
-	public void updateFolder() {
-		final Bar selected = getSelected();
-		if (selected instanceof FolderBar) {
-			FolderBar fb = (FolderBar) selected;
-			select.getSongDatabase().updateSongDatas(fb.getFolderData().getPath(), false, select.getMainController().getInfoDatabase());
-		} else if (selected instanceof TableBar) {
-			TableBar tb = (TableBar) selected;
-			if (tb.getUrl() != null && tb.getUrl().length() > 0) {
-				TableDataAccessor tda = new TableDataAccessor();
-				String[] url = new String[] { tb.getUrl() };
-				tda.updateTableData(url);
-				TableData td = tda.read(tb.getTitle());
-				if (td != null) {
-					tb.setTableData(td);
-				}
-			}
-		}
 	}
 
 	public void dispose() {

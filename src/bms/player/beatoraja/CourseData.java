@@ -1,5 +1,7 @@
 package bms.player.beatoraja;
 
+import bms.player.beatoraja.song.SongData;
+
 /**
  * コースデータ
  *
@@ -13,7 +15,7 @@ public class CourseData {
     /**
      * 楽曲のハッシュ
      */
-    private String[] hash = new String[0];
+    private SongData[] hash = new SongData[0];
     /**
      * コースの制限
      */
@@ -31,11 +33,11 @@ public class CourseData {
         this.name = name;
     }
 
-    public String[] getHash() {
+    public SongData[] getSong() {
         return hash;
     }
 
-    public void setHash(String[] hash) {
+    public void setSong(SongData[] hash) {
         this.hash = hash;
     }
 
