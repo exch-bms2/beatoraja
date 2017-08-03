@@ -219,21 +219,25 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> {
 
 		public void run() {
 			while(!stop) {
-				for (int i = 0; i < buffer.length; i++) {
-					float wav = 0;
-					for (MixerInput input : inputs) {
-						if (input.pos != -1) {
-							wav += ((float) input.sample[input.pos]) * input.volume / Short.MAX_VALUE;
-							input.pos++;
-							if (input.pos == input.sample.length) {
-								input.pos = input.loop ? 0 : -1;
+				try {
+					for (int i = 0; i < buffer.length; i++) {
+						float wav = 0;
+						for (MixerInput input : inputs) {
+							if (input.pos != -1) {
+								wav += ((float) input.sample[input.pos]) * input.volume / Short.MAX_VALUE;
+								input.pos++;
+								if (input.pos == input.sample.length) {
+									input.pos = input.loop ? 0 : -1;
+								}
 							}
 						}
+						buffer[i] = wav;
 					}
-					buffer[i] = wav;
+					
+					stream.write( buffer, buffer.length / 2);					
+				} catch(Throwable e) {
+					e.printStackTrace();
 				}
-				
-				stream.write( buffer, buffer.length / 2);
 			}
 		}		
 	}
