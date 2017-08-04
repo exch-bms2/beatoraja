@@ -238,9 +238,7 @@ public class MusicSelectInputProcessor {
             PlayConfig pc = null;
             if (current instanceof SongBar && ((SongBar)current).existsSong()) {
                 SongBar song = (SongBar) current;
-                pc = (song.getSongData().getMode() == 5 || song.getSongData().getMode() == 7 ? config.getMode7()
-                        : (song.getSongData().getMode() == 10 || song.getSongData().getMode() == 14 ? config.getMode14()
-                        : config.getMode9()));
+                pc = config.getPlayConfig(song.getSongData().getMode());
             }
             if (keystate[0] && keytime[0] != 0) {
                 keytime[0] = 0;

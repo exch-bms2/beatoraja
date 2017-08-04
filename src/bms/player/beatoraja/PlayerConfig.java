@@ -271,6 +271,23 @@ public class PlayerConfig {
 		this.markprocessednote = markprocessednote;
 	}
 
+	public PlayConfig getPlayConfig(int modeId) {
+		switch (modeId) {
+		case 7:
+		case 5:
+			return getMode7();
+		case 14:
+		case 10:
+			return getMode14();
+		case 9:
+			return getMode9();
+		case 24:
+			return getMode24();
+		default:
+			return getMode7();
+		}
+	}
+
 	public PlayConfig getMode7() {
 		return mode7;
 	}

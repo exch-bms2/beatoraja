@@ -542,10 +542,7 @@ public class MusicSelector extends MainState {
 		case NUMBER_DURATION:
 			if (bar.getSelected() instanceof SongBar && ((SongBar) bar.getSelected()).existsSong()) {
 				SongBar song = (SongBar) bar.getSelected();
-				PlayConfig pc = (song.getSongData().getMode() == 5 || song.getSongData().getMode() == 7
-						? config.getMode7()
-						: (song.getSongData().getMode() == 10 || song.getSongData().getMode() == 14 ? config.getMode14()
-								: config.getMode9()));
+				PlayConfig pc = config.getPlayConfig(song.getSongData().getMode());
 				return pc.getDuration();
 			}
 			return config.getMode7().getDuration();
