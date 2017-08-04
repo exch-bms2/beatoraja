@@ -144,6 +144,7 @@ public class PlayerConfig {
 		this.mode7 = c.getMode7();
 		this.mode14 = c.getMode14();
 		this.mode9 = c.getMode9();
+		this.mode24 = c.getMode24();
 		this.musicselectinput = c.getMusicselectinput();
 		this.irname = c.getIrname();
 		this.userid = c.getUserid();
