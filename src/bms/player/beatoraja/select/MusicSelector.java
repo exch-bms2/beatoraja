@@ -627,14 +627,9 @@ public class MusicSelector extends MainState {
 		case BARGRAPH_LEVEL:
 			if (bar.getSelected() instanceof SongBar && ((SongBar) bar.getSelected()).getSongData() != null) {
 				SongData sd = ((SongBar) bar.getSelected()).getSongData();
-				if (sd.getMode() == 5 || sd.getMode() == 10) {
-					return sd.getLevel() / 9.0f;
-				}
-				if (sd.getMode() == 7 || sd.getMode() == 14) {
-					return sd.getLevel() / 12.0f;
-				}
-				if (sd.getMode() == 9) {
-					return sd.getLevel() / 50.0f;
+				int maxLevel = getMaxLevel(sd.getMode());
+				if (maxLevel > 0) {
+					return (float)sd.getLevel() / maxLevel;
 				}
 			}
 			return 0;
@@ -644,14 +639,9 @@ public class MusicSelector extends MainState {
 				if (sd.getDifficulty() != 1) {
 					return 0;
 				}
-				if (sd.getMode() == 5 || sd.getMode() == 10) {
-					return sd.getLevel() / 9.0f;
-				}
-				if (sd.getMode() == 7 || sd.getMode() == 14) {
-					return sd.getLevel() / 12.0f;
-				}
-				if (sd.getMode() == 9) {
-					return sd.getLevel() / 50.0f;
+				int maxLevel = getMaxLevel(sd.getMode());
+				if (maxLevel > 0) {
+					return (float)sd.getLevel() / maxLevel;
 				}
 			}
 			return 0;
@@ -661,14 +651,9 @@ public class MusicSelector extends MainState {
 				if (sd.getDifficulty() != 2) {
 					return 0;
 				}
-				if (sd.getMode() == 5 || sd.getMode() == 10) {
-					return sd.getLevel() / 9.0f;
-				}
-				if (sd.getMode() == 7 || sd.getMode() == 14) {
-					return sd.getLevel() / 12.0f;
-				}
-				if (sd.getMode() == 9) {
-					return sd.getLevel() / 50.0f;
+				int maxLevel = getMaxLevel(sd.getMode());
+				if (maxLevel > 0) {
+					return (float)sd.getLevel() / maxLevel;
 				}
 			}
 			return 0;
@@ -678,14 +663,9 @@ public class MusicSelector extends MainState {
 				if (sd.getDifficulty() != 3) {
 					return 0;
 				}
-				if (sd.getMode() == 5 || sd.getMode() == 10) {
-					return sd.getLevel() / 9.0f;
-				}
-				if (sd.getMode() == 7 || sd.getMode() == 14) {
-					return sd.getLevel() / 12.0f;
-				}
-				if (sd.getMode() == 9) {
-					return sd.getLevel() / 50.0f;
+				int maxLevel = getMaxLevel(sd.getMode());
+				if (maxLevel > 0) {
+					return (float)sd.getLevel() / maxLevel;
 				}
 			}
 			return 0;
@@ -695,14 +675,9 @@ public class MusicSelector extends MainState {
 				if (sd.getDifficulty() != 4) {
 					return 0;
 				}
-				if (sd.getMode() == 5 || sd.getMode() == 10) {
-					return sd.getLevel() / 9.0f;
-				}
-				if (sd.getMode() == 7 || sd.getMode() == 14) {
-					return sd.getLevel() / 12.0f;
-				}
-				if (sd.getMode() == 9) {
-					return sd.getLevel() / 50.0f;
+				int maxLevel = getMaxLevel(sd.getMode());
+				if (maxLevel > 0) {
+					return (float)sd.getLevel() / maxLevel;
 				}
 			}
 			return 0;
@@ -712,14 +687,9 @@ public class MusicSelector extends MainState {
 				if (sd.getDifficulty() != 5) {
 					return 0;
 				}
-				if (sd.getMode() == 5 || sd.getMode() == 10) {
-					return sd.getLevel() / 9.0f;
-				}
-				if (sd.getMode() == 7 || sd.getMode() == 14) {
-					return sd.getLevel() / 12.0f;
-				}
-				if (sd.getMode() == 9) {
-					return sd.getLevel() / 50.0f;
+				int maxLevel = getMaxLevel(sd.getMode());
+				if (maxLevel > 0) {
+					return (float)sd.getLevel() / maxLevel;
 				}
 			}
 			return 0;
@@ -767,6 +737,23 @@ public class MusicSelector extends MainState {
 			return 0;
 		}
 		return 0;
+	}
+
+	private int getMaxLevel(int modeId) {
+		switch (modeId) {
+		case 5:
+		case 10:
+			return 9;
+		case 7:
+		case 14:
+			return 12;
+		case 9:
+			return 50;
+		case 24:
+			return 6;
+		default:
+			return 0;
+		}
 	}
 
 	public void setSliderValue(int id, float value) {
