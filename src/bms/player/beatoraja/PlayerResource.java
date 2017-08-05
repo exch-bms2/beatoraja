@@ -174,7 +174,22 @@ public class PlayerResource {
 				model.setTotal(100.0);
 			}
 			int totalnotes = model.getTotalNotes();
-			model.setTotal(model.getTotal() / 100.0 * 7.605 * totalnotes / (0.01 * totalnotes + 6.5));
+			switch (model.getMode()) {
+			case BEAT_7K:
+			case BEAT_5K:
+			case BEAT_14K:
+			case BEAT_10K:
+			case POPN_9K:
+			case POPN_5K:
+				model.setTotal(model.getTotal() / 100.0 * 7.605 * totalnotes / (0.01 * totalnotes + 6.5));
+				break;
+			case KEYBOARD_24K:
+			case KEYBOARD_48K:
+				model.setTotal(model.getTotal() / 100.0 * 7.605 * totalnotes / (0.015 * totalnotes + 2.5));
+				break;
+			default:
+				model.setTotal(model.getTotal() / 100.0 * 7.605 * totalnotes / (0.01 * totalnotes + 6.5));
+			}
 		} else {
 			BMSDecoder decoder = new BMSDecoder(lnmode);
 			model = decoder.decode(f.toFile());
