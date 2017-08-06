@@ -76,16 +76,39 @@ public class BarRenderer {
 	public BarRenderer(MusicSelector select) {
 		final MainController main = select.getMainController();
 		this.select = select;
+		TableDataAccessor tdaccessor = new TableDataAccessor();
 
-		TableData[] tds = new TableDataAccessor().readAll();
-		
-		Array<TableBar> table = new Array<TableBar>();
-		for (int i = 0; i < tds.length; i++) {
-			table.add(new TableBar(select, tds[i]));
-		}
+		TableData[] tds = tdaccessor.readAll();
+
 		BMSSearchAccessor bmssearcha = new BMSSearchAccessor();
-		table.add(new TableBar(select, bmssearcha.getTableData()));
-		
+
+		Array<TableBar> table = new Array<TableBar>();
+		TableBar bmssearch = null;
+
+		for (int i = 0; i < tds.length; i++) {
+			if(tds[i].getName().equals("BMS Search")) {
+				bmssearch = new TableBar(select, tds[i], bmssearcha);
+				table.add(bmssearch);
+			} else {
+				table.add(new TableBar(select, tds[i], new TableDataAccessor.DifficultyTableReader(tds[i].getUrl())));
+			}
+		}
+
+		if(bmssearch == null) {
+			bmssearch = new TableBar(select, bmssearcha.read(), bmssearcha);
+			table.add(bmssearch);
+		} else {
+			Thread bst = new Thread() {
+				public void run() {
+					TableData td = bmssearcha.read();
+					if(td != null) {
+						tdaccessor.write(td);
+					}
+				}
+			};
+			bst.start();
+		}
+
 		this.tables = table.toArray(TableBar.class);
 		
 		CourseData[] cds = new CourseDataAccessor("course").readAll();

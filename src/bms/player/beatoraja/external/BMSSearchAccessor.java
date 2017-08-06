@@ -12,9 +12,9 @@ import com.badlogic.gdx.utils.Json;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.TableData.TableFolder;
 
-public class BMSSearchAccessor {
+public class BMSSearchAccessor implements TableDataAccessor.TableReader {
 	
-	public TableData getTableData() {
+	public TableData read() {
 		TableData td = null;
 		try (InputStream input = new URL("http://qstol.info/bmssearch/api/services/?method=bms.new").openStream()) {
 			Json json = new Json();
@@ -38,15 +38,15 @@ public class BMSSearchAccessor {
 						songs.add(song);
 					}
 				} else {
-					
+					// 譜面が存在しない場合の処理はここに書く
 				}
 			}
 			tdenew.setSong(songs.toArray(new SongData[songs.size()]));
 			td.setFolder(new TableFolder[]{tdenew});
 			td.setName("BMS Search");
-			
+            Logger.getGlobal().info("BMS Search取得完了");
 		} catch (Throwable e) {
-			Logger.getGlobal().severe("難易度表サイト解析中の例外:" + e.getMessage());
+			Logger.getGlobal().severe("BMS Search更新中の例外:" + e.getMessage());
 		}
 		return td;
 	}

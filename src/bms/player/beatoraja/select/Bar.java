@@ -373,9 +373,11 @@ class TableBar extends DirectoryBar {
     private HashBar[] levels;
     private GradeBar[] grades;
     private MusicSelector selector;
+    private TableDataAccessor.TableReader tr;
 
-    public TableBar(MusicSelector selector, TableData td) {
+    public TableBar(MusicSelector selector, TableData td, TableDataAccessor.TableReader tr) {
         this.selector = selector;
+        this.tr = tr;
         setTableData(td);
     }
 
@@ -384,8 +386,8 @@ class TableBar extends DirectoryBar {
         return td.getName();
     }
     
-    public String getUrl() {
-    	return td.getUrl();
+    public TableDataAccessor.TableReader getReader() {
+    	return tr;
     }
     
     public void setTableData(TableData td) {

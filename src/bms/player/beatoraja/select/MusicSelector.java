@@ -915,16 +915,11 @@ public class MusicSelector extends MainState {
 				getSongDatabase().updateSongDatas(fb.getFolderData().getPath(), false,
 						getMainController().getInfoDatabase());
 			} else if (selected instanceof TableBar) {
-				// TODO BMSSearchも表扱いする必要あり
 				TableBar tb = (TableBar) selected;
-				if (tb.getUrl() != null && tb.getUrl().length() > 0) {
-					TableDataAccessor tda = new TableDataAccessor();
-					String[] url = new String[] { tb.getUrl() };
-					tda.updateTableData(url);
-					TableData td = tda.read(tb.getTitle());
-					if (td != null) {
-						tb.setTableData(td);
-					}
+				TableData td = tb.getReader().read();
+				if (td != null) {
+					new TableDataAccessor().write(td);
+					tb.setTableData(td);
 				}
 			}
 		}
