@@ -379,7 +379,7 @@ public class JudgeManager {
 						}
 						if(release) {
 							if (j >= 3) {
-								main.stop(processing[lane]);
+								main.stop(processing[lane].getPair());
 							}
 							this.update(lane, processing[lane], time, j, dtime);
 							main.play(processing[lane], config.getKeyvolume());
@@ -392,7 +392,7 @@ public class JudgeManager {
 							for (; j < judge.length && !(dtime >= judge[j][0] && dtime <= judge[j][1]); j++);
 						}
 						if (j >= 3) {
-							main.stop(processing[lane]);
+							main.stop(processing[lane].getPair());
 						}
 						this.update(lane, processing[lane].getPair(), time, j, dtime);
 						main.play(processing[lane], config.getKeyvolume());
