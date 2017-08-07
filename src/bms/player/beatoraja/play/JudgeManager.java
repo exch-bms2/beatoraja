@@ -305,8 +305,9 @@ public class JudgeManager {
 							// ロングノート処理
 							final LongNote ln = (LongNote) tnote;
 							main.play(tnote, config.getKeyvolume());
-							if ((lntype == BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
-									|| ln.getType() == LongNote.TYPE_LONGNOTE) {
+							if (((lntype == BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
+									|| ln.getType() == LongNote.TYPE_LONGNOTE)
+									&& j < 4) {
 								passingcount[lane] = (int) (tnote.getTime() - ptime);
 							} else {
 								final int dtime = (int) (tnote.getTime() - ptime);
