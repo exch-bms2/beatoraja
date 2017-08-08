@@ -44,7 +44,6 @@ public class PlayConfig {
 	private MidiConfig midi = new MidiConfig();
 	
 	public PlayConfig() {
-		controller[0] = new ControllerConfig();
 	}
 	
 	public PlayConfig(KeyboardConfig keyboard, ControllerConfig[] controllers, MidiConfig midi) {
