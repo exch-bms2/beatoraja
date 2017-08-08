@@ -247,7 +247,7 @@ public class BMSPlayer extends MainState {
 		final BMSPlayerInputProcessor input = main.getInputProcessor();
 		input.setMinimumInputDutration(conf.getInputduration());
 		if (autoplay == 0 || autoplay == 2) {
-			input.setExclusiveDeviceType(resource.getPlayDevice().getType());
+			input.setExclusiveDeviceType(resource.getPlayDeviceType());
 		} else {
 			input.disableAllDevices();
 		}
@@ -606,7 +606,7 @@ public class BMSPlayer extends MainState {
 		replay.gauge = config.getGauge();
 
 		score.setMinbp(score.getEbd() + score.getLbd() + score.getEpr() + score.getLpr() + score.getEms() + score.getLms() + resource.getSongdata().getNotes() - notes);
-		score.setDeviceType(resource.getPlayDevice() != null ? resource.getPlayDevice().getType() : null);
+		score.setDeviceType(resource.getPlayDeviceType());
 		return score;
 	}
 
