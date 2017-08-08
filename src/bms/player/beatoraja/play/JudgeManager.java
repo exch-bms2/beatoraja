@@ -305,8 +305,9 @@ public class JudgeManager {
 							// ロングノート処理
 							final LongNote ln = (LongNote) tnote;
 							main.play(tnote, config.getKeyvolume());
-							if ((lntype == BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
-									|| ln.getType() == LongNote.TYPE_LONGNOTE) {
+							if (((lntype == BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
+									|| ln.getType() == LongNote.TYPE_LONGNOTE)
+									&& j < 4) {
 								passingcount[lane] = (int) (tnote.getTime() - ptime);
 							} else {
 								final int dtime = (int) (tnote.getTime() - ptime);
@@ -379,7 +380,7 @@ public class JudgeManager {
 						}
 						if(release) {
 							if (j >= 3) {
-								main.stop(processing[lane]);
+								main.stop(processing[lane].getPair());
 							}
 							this.update(lane, processing[lane], time, j, dtime);
 							main.play(processing[lane], config.getKeyvolume());
@@ -392,7 +393,7 @@ public class JudgeManager {
 							for (; j < judge.length && !(dtime >= judge[j][0] && dtime <= judge[j][1]); j++);
 						}
 						if (j >= 3) {
-							main.stop(processing[lane]);
+							main.stop(processing[lane].getPair());
 						}
 						this.update(lane, processing[lane].getPair(), time, j, dtime);
 						main.play(processing[lane], config.getKeyvolume());
