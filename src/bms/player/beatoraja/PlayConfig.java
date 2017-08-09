@@ -37,33 +37,27 @@ public class PlayConfig {
 	 */
 	private boolean enablelift = false;
 
-	private int[] keyassign = { Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.F, Keys.V, Keys.SHIFT_LEFT,
-			Keys.CONTROL_LEFT, Keys.COMMA, Keys.L, Keys.PERIOD, Keys.SEMICOLON, Keys.SLASH, Keys.APOSTROPHE,
-			Keys.UNKNOWN, Keys.SHIFT_RIGHT, Keys.CONTROL_RIGHT, Keys.Q, Keys.W };
+	private KeyboardConfig keyboard = new KeyboardConfig();
 	
-	private ControllerConfig[] controller = new ControllerConfig[1];
+	private ControllerConfig[] controller = new ControllerConfig[] { ControllerConfig.default7() };
 
 	private MidiConfig midi = new MidiConfig();
 	
 	public PlayConfig() {
-		controller[0] = new ControllerConfig();
 	}
 	
-	public PlayConfig(int[] keyassign, int[][] controller, MidiConfig midi) {
-		this.keyassign = keyassign;
-		this.controller = new ControllerConfig[controller.length];
-		for(int i = 0;i < controller.length;i++) {
-			this.controller[i] = new ControllerConfig(controller[i]);
-		}
+	public PlayConfig(KeyboardConfig keyboard, ControllerConfig[] controllers, MidiConfig midi) {
+		this.keyboard = keyboard;
+		this.controller = controllers.clone();
 		this.midi = midi;
 	}
 		
-	public int[] getKeyassign() {
-		return keyassign;
+	public KeyboardConfig getKeyboardConfig() {
+		return keyboard;
 	}
 
-	public void setKeyassign(int[] keyassign) {
-		this.keyassign = keyassign;
+	public void setKeyboardConfig(KeyboardConfig keyboard) {
+		this.keyboard = keyboard;
 	}
 
 	public ControllerConfig[] getController() {
@@ -126,20 +120,84 @@ public class PlayConfig {
 		this.enablelift = enablelift;
 	}
 
+	public static class KeyboardConfig {
+
+		private int[] keys = { Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.F, Keys.V, Keys.SHIFT_LEFT,
+				Keys.CONTROL_LEFT, Keys.COMMA, Keys.L, Keys.PERIOD, Keys.SEMICOLON, Keys.SLASH, Keys.APOSTROPHE,
+				Keys.UNKNOWN, Keys.SHIFT_RIGHT, Keys.CONTROL_RIGHT };
+
+		private int start = Keys.Q;
+
+		private int select = Keys.W;
+
+		public KeyboardConfig() {
+
+		}
+
+		public KeyboardConfig(int[] keys, int start, int select) {
+			this.keys = keys;
+			this.start = start;
+			this.select = select;
+		}
+
+		public int[] getKeyAssign() {
+			return keys;
+		}
+
+		public int getStart() {
+			return start;
+		}
+
+		public int getSelect() {
+			return select;
+		}
+
+		public void setKeyAssign(int[] keys) {
+			this.keys = keys;
+		}
+
+		public void setStart(int start) {
+			this.start = start;
+		}
+
+		public void setSelect(int select) {
+			this.select = select;
+		}
+
+		public static KeyboardConfig default14() {
+			return new KeyboardConfig();
+		}
+
+		public static KeyboardConfig default9() {
+			KeyboardConfig config = new KeyboardConfig();
+			config.keys = new int [] { Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.F, Keys.V, Keys.G, Keys.B, Keys.COMMA, Keys.L,
+					Keys.PERIOD, Keys.SEMICOLON, Keys.SLASH, Keys.APOSTROPHE, Keys.UNKNOWN, Keys.SHIFT_RIGHT,
+					Keys.CONTROL_RIGHT };
+			config.start = Keys.Q;
+			config.select = Keys.W;
+			return config;
+		}
+	}
+
 	public static class ControllerConfig {
 
 		private String name = "";
 
-		private int[] assign = { BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8,
-				BMKeys.BUTTON_2, BMKeys.BUTTON_5, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN, BMKeys.BUTTON_9,
-				BMKeys.BUTTON_10 };
+		private int[] keys = { BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8,
+				BMKeys.BUTTON_2, BMKeys.BUTTON_5, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN };
+
+		private int start = BMKeys.BUTTON_9;
+
+		private int select = BMKeys.BUTTON_10;
 
 		public ControllerConfig() {
 			
 		}
 		
-		public ControllerConfig(int[] assign) {
-			this.assign = assign;
+		public ControllerConfig(int[] keys, int start, int select) {
+			this.keys = keys;
+			this.start = start;
+			this.select = select;
 		}
 		
 		public String getName() {
@@ -150,15 +208,33 @@ public class PlayConfig {
 			this.name = name;
 		}
 
-		public int[] getAssign() {
-			return assign;
+		public int[] getKeyAssign() {
+			return keys;
 		}
 
-		public void setAssign(int[] assign) {
-			this.assign = assign;
+		public int getStart() { return start; }
+
+		public int getSelect() { return select; }
+
+		public void setKeyAssign(int[] keys) {
+			this.keys = keys;
+		}
+
+		public void setStart(int start) {
+			this.start = start;
+		}
+
+		public void setSelect(int select) {
+			this.select = select;
 		}
 		
-		
+		public static ControllerConfig default7() {
+			return new ControllerConfig();
+		}
+
+		public static ControllerConfig default9() {
+			return new ControllerConfig();
+		}
 	}
 
 	public static class MidiConfig {
@@ -202,6 +278,7 @@ public class PlayConfig {
 		private Input select;
 
 		public Input[] getKeys() { return keys; }
+		public void setKeys(Input[] keys) { this.keys = keys; }
 		public Input getStart() { return start; }
 		public Input getSelect() { return select; }
 		public void setStart(Input input) { start = input; }
@@ -219,26 +296,12 @@ public class PlayConfig {
 			select = new Input(Input.Type.NOTE, 48);
 		}
 
-		public Input getAssignment(int index) {
-			if (index < keys.length) {
-				return keys[index];
-			} else if (index == 18) {
-				return start;
-			} else if (index == 19) {
-				return select;
-			} else {
-				return null;
-			}
+		public Input getKeyAssign(int index) {
+			return keys[index];
 		}
 
-		public void setAssignment(int index, Input input) {
-			if (index < keys.length) {
-				keys[index] = input;
-			} else if (index == 18) {
-				start = input;
-			} else if (index == 19) {
-				select = input;
-			}
+		public void setKeyAssign(int index, Input input) {
+			keys[index] = input;
 		}
 
 		public static MidiConfig default7() {

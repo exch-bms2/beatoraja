@@ -254,7 +254,7 @@ public class BMSPlayer extends MainState {
 		PlayConfig pc = (model.getMode() == Mode.BEAT_5K || model.getMode() == Mode.BEAT_7K ? config.getMode7()
 				: (model.getMode() == Mode.BEAT_10K || model.getMode() == Mode.BEAT_14K ? config.getMode14()
 						: config.getMode9()));
-		input.setKeyassign(pc.getKeyassign());
+		input.setKeyboardConfig(pc.getKeyboardConfig());
 		input.setControllerConfig(pc.getController());
 		input.setMidiConfig(pc.getMidiConfig());
 		lanerender = new LaneRenderer(this, model);

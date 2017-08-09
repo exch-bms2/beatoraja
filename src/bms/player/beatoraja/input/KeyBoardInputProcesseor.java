@@ -2,6 +2,7 @@ package bms.player.beatoraja.input;
 
 import java.util.Arrays;
 
+import bms.player.beatoraja.PlayConfig.KeyboardConfig;
 import bms.player.beatoraja.Resolution;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
@@ -36,17 +37,16 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 
 	private Resolution resolution;
 
-	public KeyBoardInputProcesseor(BMSPlayerInputProcessor bmsPlayerInputProcessor, int[] keys, Resolution resolution) {
+	public KeyBoardInputProcesseor(BMSPlayerInputProcessor bmsPlayerInputProcessor, KeyboardConfig config, Resolution resolution) {
 		super(Type.KEYBOARD);
 		this.bmsPlayerInputProcessor = bmsPlayerInputProcessor;
-		this.setKeyAssign(keys);
+		this.setConfig(config);
 		this.resolution = resolution;
 	}
 
-	public void setKeyAssign(int[] keys) {
-		this.keys = new int[] { keys[0], keys[1], keys[2], keys[3], keys[4], keys[5], keys[6], keys[7], keys[8],
-				keys[9], keys[10], keys[11], keys[12], keys[13], keys[14], keys[15], keys[16], keys[17] };
-		this.control = new int[] { keys[18], keys[19] };
+	public void setConfig(KeyboardConfig config) {
+		this.keys = config.getKeyAssign().clone();
+		this.control = new int[] { config.getStart(), config.getSelect() };
 	}
 
 	public boolean keyDown(int keycode) {
