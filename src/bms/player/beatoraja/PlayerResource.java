@@ -174,6 +174,7 @@ public class PlayerResource {
 				model.setTotal(100.0);
 			}
 			int totalnotes = model.getTotalNotes();
+			double defaultTotal;
 			switch (model.getMode()) {
 			case BEAT_7K:
 			case BEAT_5K:
@@ -181,15 +182,16 @@ public class PlayerResource {
 			case BEAT_10K:
 			case POPN_9K:
 			case POPN_5K:
-				model.setTotal(model.getTotal() / 100.0 * 7.605 * totalnotes / (0.01 * totalnotes + 6.5));
+				defaultTotal = Math.max(260.0, 7.605 * totalnotes / (0.01 * totalnotes + 6.5));
 				break;
 			case KEYBOARD_24K:
 			case KEYBOARD_48K:
-				model.setTotal(model.getTotal() / 100.0 * 7.605 * totalnotes / (0.015 * totalnotes + 2.5));
+				defaultTotal = Math.max(300.0, 8.0 * (totalnotes+100) / (0.01 * totalnotes + 6.5));
 				break;
 			default:
-				model.setTotal(model.getTotal() / 100.0 * 7.605 * totalnotes / (0.01 * totalnotes + 6.5));
+				defaultTotal = Math.max(260.0, 7.605 * totalnotes / (0.01 * totalnotes + 6.5));
 			}
+			model.setTotal(model.getTotal() / 100.0 * defaultTotal);
 		} else {
 			BMSDecoder decoder = new BMSDecoder(lnmode);
 			model = decoder.decode(f.toFile());
