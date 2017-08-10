@@ -17,6 +17,7 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.math.Matrix4;
 
 /**
  * キーコンフィグ画面
@@ -81,12 +82,13 @@ public class KeyConfiguration extends MainState {
 	}
 
 	public void create() {
-		this.setSkin(new MusicDecideSkin(Resolution.SD,Resolution.HD));
+		this.setSkin(new MusicDecideSkin(Resolution.HD, getMainController().getConfig().getResolution()));
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/default/VL-Gothic-Regular.ttf"));
 		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
 		parameter.size = 20;
 		titlefont = generator.generateFont(parameter);
 		shape = new ShapeRenderer();
+		shape.setTransformMatrix(shape.getTransformMatrix().scale((float)getSkin().getScaleX(), (float)getSkin().getScaleY(), 1f));
 
 		input = getMainController().getInputProcessor();
 		keyboard = input.getKeyBoardInputProcesseor();
@@ -98,6 +100,8 @@ public class KeyConfiguration extends MainState {
 	public void render() {
 		final MainController main = getMainController();
 		final SpriteBatch sprite = main.getSpriteBatch();
+		Matrix4 spriteOriginalTransform = sprite.getTransformMatrix().cpy();
+		sprite.setTransformMatrix(sprite.getTransformMatrix().scale((float)getSkin().getScaleX(), (float)getSkin().getScaleY(), 1f));
 
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -225,6 +229,8 @@ public class KeyConfiguration extends MainState {
 			titlefont.draw(sprite, getMidiKeyAssign(midikeysa[i]).toString(), 502, y + 22);
 			sprite.end();
 		}
+
+		sprite.setTransformMatrix(spriteOriginalTransform);
 
 		if (input.isExitPressed()) {
 			input.setExitPressed(false);

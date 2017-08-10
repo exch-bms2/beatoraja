@@ -172,6 +172,10 @@ public class MainController extends ApplicationAdapter {
 		return resource;
 	}
 
+	public Config getConfig() {
+		return config;
+	}
+
 	public PlayerConfig getPlayerConfig() {
 		return player;
 	}
