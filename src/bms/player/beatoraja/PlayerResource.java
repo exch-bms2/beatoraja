@@ -186,7 +186,7 @@ public class PlayerResource {
 				break;
 			case KEYBOARD_24K:
 			case KEYBOARD_48K:
-				defaultTotal = Math.max(300.0, 8.0 * (totalnotes+100) / (0.01 * totalnotes + 6.5));
+				defaultTotal = Math.max(300.0, 7.605 * (totalnotes+100) / (0.01 * totalnotes + 6.5));
 				break;
 			default:
 				defaultTotal = Math.max(260.0, 7.605 * totalnotes / (0.01 * totalnotes + 6.5));
