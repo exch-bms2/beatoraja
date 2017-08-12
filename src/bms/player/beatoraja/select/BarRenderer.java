@@ -166,9 +166,8 @@ public class BarRenderer {
 						new CommandBar(main, select, "LONG NOTE > 20%", "(n + s) <= (ln + ls) * 4 ", 2),
 						}),	
 				new ContainerBar("DENSITY", density.toArray(new Bar[density.size()])),
-				// TODO favoriteは0.4..3では提供しない(要テスト、UI見直し)
-//				new CommandBar(main, select, "FAVORITE SONG", "favorite & 1 != 0", 1),
-//				new CommandBar(main, select, "FAVORITE CHART", "favorite & 2 != 0", 1),
+				new CommandBar(main, select, "FAVORITE SONG", "favorite & 1 != 0", 1),
+				new CommandBar(main, select, "FAVORITE CHART", "favorite & 2 != 0", 1),
 				};
 	}
 
@@ -448,10 +447,10 @@ public class BarRenderer {
 				SongData sd = ((SongBar) getSelected()).getSongData();
 
 				if(sd != null) {
-					boolean enable = ((sd.getFavorite() & 1) == 0);
+					boolean enable = ((sd.getFavorite() & SongData.FAVORITE_SONG) == 0);
 					SongData[] songs = select.getSongDatabase().getSongDatas("folder", sd.getFolder());
 					for(SongData song : songs) {
-						song.setFavorite(enable ? song.getFavorite() | 1 : song.getFavorite() & 0xfffffffe);
+						song.setFavorite(enable ? song.getFavorite() | SongData.FAVORITE_SONG : song.getFavorite() & (0xffffffff ^ SongData.FAVORITE_SONG));
 					}
 					select.getSongDatabase().setSongDatas(songs);
 				}
@@ -463,7 +462,7 @@ public class BarRenderer {
 				SongData sd = ((SongBar) getSelected()).getSongData();
 
 				if(sd != null) {
-					sd.setFavorite(sd.getFavorite() ^ 2);
+					sd.setFavorite(sd.getFavorite() ^ SongData.FAVORITE_CHART);
 					select.getSongDatabase().setSongDatas(new SongData[]{sd});
 //					boolean exist = false;
 //					for(TableData.TableSongData element : favorites[0].getElements()) {
