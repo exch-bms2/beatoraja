@@ -236,10 +236,19 @@ public class JudgeManager {
 		inclease = next_inclease;
 		next_inclease = b;
 
+		final long[] timer = main.getTimer();
 		for (int lane = 0; lane < passing.length; lane++) {
+			final int offset = main.getLaneProperty().getLaneSkinOffset()[lane];
+			final int timerActive = SkinPropertyMapper.hcnActiveTimerId(main.getLaneProperty().getLanePlayer()[lane], offset);
+			final int timerDamage = SkinPropertyMapper.hcnDamageTimerId(main.getLaneProperty().getLanePlayer()[lane], offset);
+
+
 			if (passing[lane] == null || passing[lane].getState() == 0) {
+				timer[timerActive] = Long.MIN_VALUE;
+				timer[timerDamage] = Long.MIN_VALUE;
 				continue;
 			}
+
 			if (inclease[lane]) {
 				passingcount[lane] += (time - prevtime);
 				if (passingcount[lane] > hcnduration) {
@@ -247,6 +256,10 @@ public class JudgeManager {
 					// System.out.println("HCN : Gauge increase");
 					passingcount[lane] -= hcnduration;
 				}
+				if(timer[timerActive] == Long.MIN_VALUE) {
+					timer[timerActive] = main.getNowTime();
+				}
+				timer[timerDamage] = Long.MIN_VALUE;
 			} else {
 				passingcount[lane] -= (time - prevtime);
 				if (passingcount[lane] < -hcnduration) {
@@ -254,6 +267,10 @@ public class JudgeManager {
 					// System.out.println("HCN : Gauge decrease");
 					passingcount[lane] += hcnduration;
 				}
+				if(timer[timerDamage] == Long.MIN_VALUE) {
+					timer[timerDamage] = main.getNowTime();
+				}
+				timer[timerActive] = Long.MIN_VALUE;
 			}
 		}
 		prevtime = time;

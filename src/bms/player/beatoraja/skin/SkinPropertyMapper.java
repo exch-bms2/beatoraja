@@ -26,6 +26,28 @@ public class SkinPropertyMapper {
 		return -1;
 	}
 
+	public static int hcnActiveTimerId(int player, int key) {
+		if (player < 2) {
+			if (key < 10) {
+				return TIMER_HCN_ACTIVE_1P_SCRATCH + key + player * 10;
+			} else if (key < 100) {
+				return TIMER_HCN_ACTIVE_1P_KEY10 + key - 10 + player * 100;
+			}
+		}
+		return -1;
+	}
+
+	public static int hcnDamageTimerId(int player, int key) {
+		if (player < 2) {
+			if (key < 10) {
+				return TIMER_HCN_DAMAGE_1P_SCRATCH + key + player * 10;
+			} else if (key < 100) {
+				return TIMER_HCN_DAMAGE_1P_KEY10 + key - 10 + player * 100;
+			}
+		}
+		return -1;
+	}
+
 	public static int keyOnTimerId(int player, int key) {
 		if (player < 2) {
 			if (key < 10) {
