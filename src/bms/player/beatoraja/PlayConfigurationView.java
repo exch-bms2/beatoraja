@@ -533,15 +533,15 @@ public class PlayConfigurationView implements Initializable {
 	private PlayConfig getPlayConfig() {
 		switch (pc) {
 			case 0:
-				return config.getMode7();
+				return player.getMode7();
 			case 1:
-				return config.getMode14();
+				return player.getMode14();
 			case 2:
-				return config.getMode9();
+				return player.getMode9();
 			case 3:
-				return config.getMode24();
+				return player.getMode24();
 			default:
-				return config.getMode7();
+				return player.getMode7();
 		}
 	}
 
