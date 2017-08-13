@@ -14,6 +14,7 @@ public enum BMSPlayerRule {
     BEAT_14K(GaugeProperty.Default, JudgeProperty.Default),
     POPN_5K(GaugeProperty.PMS, JudgeProperty.PMS),
     POPN_9K(GaugeProperty.PMS, JudgeProperty.PMS),
+    KEYBOARD_24K(GaugeProperty.KEYBOARD, JudgeProperty.KEYBOARD),
     Default(GaugeProperty.Default, JudgeProperty.Default),
     ;
 

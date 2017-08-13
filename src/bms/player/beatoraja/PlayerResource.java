@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.FloatArray;
 
+import bms.model.Mode;
 import bms.model.BMSDecoder;
 import bms.model.BMSGenerator;
 import bms.model.BMSModel;
@@ -174,8 +175,7 @@ public class PlayerResource {
 			if (model.getTotal() <= 0.0) {
 				model.setTotal(100.0);
 			}
-			int totalnotes = model.getTotalNotes();
-			model.setTotal(model.getTotal() / 100.0 * 7.605 * totalnotes / (0.01 * totalnotes + 6.5));
+			model.setTotal(model.getTotal() / 100.0 * calculateDefaultTotal(model.getMode(), model.getTotalNotes()));
 		} else {
 			BMSDecoder decoder = new BMSDecoder(lnmode);
 			model = decoder.decode(f.toFile());
@@ -192,12 +192,28 @@ public class PlayerResource {
 			}
 			// TOTAL未定義の場合
 			if (model.getTotal() <= 0.0) {
-				int totalnotes = model.getTotalNotes();
-				model.setTotal(7.605 * totalnotes / (0.01 * totalnotes + 6.5));
+				model.setTotal(calculateDefaultTotal(model.getMode(), model.getTotalNotes()));
 			}
 		}
 
 		return model;
+	}
+
+	double calculateDefaultTotal(Mode mode, int totalnotes) {
+		switch (mode) {
+		case BEAT_7K:
+		case BEAT_5K:
+		case BEAT_14K:
+		case BEAT_10K:
+		case POPN_9K:
+		case POPN_5K:
+			return Math.max(260.0, 7.605 * totalnotes / (0.01 * totalnotes + 6.5));
+		case KEYBOARD_24K:
+		case KEYBOARD_48K:
+			return Math.max(300.0, 7.605 * (totalnotes + 100) / (0.01 * totalnotes + 6.5));
+		default:
+			return Math.max(260.0, 7.605 * totalnotes / (0.01 * totalnotes + 6.5));
+		}
 	}
 
 	public BMSModel getBMSModel() {
