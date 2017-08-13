@@ -56,12 +56,13 @@ public class BMSPlayerInputProcessor {
 
 	/**
 	 * 各キーのON/OFF状態
+	 * 全モードの入力が収まる大きさにしておく
 	 */
-	private boolean[] keystate = new boolean[18];
+	private boolean[] keystate = new boolean[256];
 	/**
 	 * 各キーの最終更新時間 TODO これを他クラスから編集させない方がいいかも
 	 */
-	private long[] time = new long[18];
+	private long[] time = new long[256];
 
 	private BMSPlayerInputDevice lastKeyDevice;
 	private ArrayList<BMSPlayerInputDevice> devices;

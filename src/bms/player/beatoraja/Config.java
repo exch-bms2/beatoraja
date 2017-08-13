@@ -221,6 +221,11 @@ public class Config {
 			new PlayConfig.ControllerConfig[] { PlayConfig.ControllerConfig.default9() },
 			PlayConfig.MidiConfig.default9());
 
+	private PlayConfig mode24 = new PlayConfig(
+			new PlayConfig.KeyboardConfig(),
+			new PlayConfig.ControllerConfig[] { new PlayConfig.ControllerConfig() },
+			MidiConfig.default24());
+
 	private int musicselectinput = 0;
 
 	private boolean updatesong = false;
@@ -533,6 +538,23 @@ public class Config {
 		this.judgetiming = judgetiming;
 	}
 
+	public PlayConfig getPlayConfig(int modeId) {
+		switch (modeId) {
+		case 7:
+		case 5:
+			return getMode7();
+		case 14:
+		case 10:
+			return getMode14();
+		case 9:
+			return getMode9();
+		case 24:
+			return getMode24();
+		default:
+			return getMode7();
+		}
+	}
+
 	public PlayConfig getMode7() {
 		return mode7;
 	}
@@ -555,6 +577,14 @@ public class Config {
 
 	public void setMode9(PlayConfig mode9) {
 		this.mode9 = mode9;
+	}
+
+	public PlayConfig getMode24() {
+		return mode24;
+	}
+
+	public void setMode24(PlayConfig mode24) {
+		this.mode24 = mode24;
 	}
 
 	public void setMode(Mode m)  {
