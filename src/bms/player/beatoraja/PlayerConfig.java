@@ -3,6 +3,7 @@ package bms.player.beatoraja;
 import java.util.Arrays;
 import java.util.logging.Logger;
 
+import bms.player.beatoraja.skin.SkinType;
 import com.badlogic.gdx.Input.Keys;
 
 import bms.model.Mode;
@@ -176,6 +177,9 @@ public class PlayerConfig {
 	}
 
 	public int getFixhispeed() {
+		if(fixhispeed < 0 || fixhispeed > FIX_HISPEED_MINBPM) {
+			fixhispeed = FIX_HISPEED_OFF;
+		}
 		return fixhispeed;
 	}
 
@@ -297,6 +301,13 @@ public class PlayerConfig {
 	}
 
 	public PlayConfig getMode14() {
+		if(mode14 == null || mode14.getController().length < 2) {
+			mode14 = new PlayConfig(
+					PlayConfig.KeyboardConfig.default14(),
+					new PlayConfig.ControllerConfig[2],
+					PlayConfig.MidiConfig.default14());
+			Logger.getGlobal().warning("mode14のPlayConfigを再構成");
+		}
 		return mode14;
 	}
 
@@ -337,6 +348,10 @@ public class PlayerConfig {
 	}
 
 	public SkinConfig[] getSkin() {
+		if(skin.length <= SkinType.getMaxSkinTypeID()) {
+			skin = Arrays.copyOf(skin, SkinType.getMaxSkinTypeID() + 1);
+			Logger.getGlobal().warning("skinを再構成");
+		}
 		return skin;
 	}
 
@@ -366,21 +381,6 @@ public class PlayerConfig {
 
 	public void setIrname(String irname) {
 		this.irname = irname;
-	}
-
-	public void validate() {
-		if(skin.length < 16) {
-			skin = Arrays.copyOf(skin, 16);
-			Logger.getGlobal().warning("skinを再構成");
-		}
-
-		if(mode14 == null || mode14.getController().length < 2) {
-			mode14 = new PlayConfig(
-					PlayConfig.KeyboardConfig.default14(),
-					new PlayConfig.ControllerConfig[2],
-					PlayConfig.MidiConfig.default14());
-			Logger.getGlobal().warning("mode14のPlayConfigを再構成");
-		}
 	}
 
 	public int getTarget() {
