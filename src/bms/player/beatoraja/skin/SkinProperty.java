@@ -46,6 +46,8 @@ public class SkinProperty {
 	public static final int TIMER_FULLCOMBO_2P = 49;
 	public static final int TIMER_BOMB_1P_SCRATCH = 50;
 	public static final int TIMER_BOMB_1P_KEY1 = 51;
+	public static final int TIMER_HCN_ACTIVE_1P_SCRATCH = 250;
+	public static final int TIMER_HCN_ACTIVE_1P_KEY1 = 251;
 	public static final int TIMER_BOMB_1P_KEY2 = 52;
 	public static final int TIMER_BOMB_1P_KEY3 = 53;
 	public static final int TIMER_BOMB_1P_KEY4 = 54;
@@ -66,6 +68,8 @@ public class SkinProperty {
 	public static final int TIMER_BOMB_2P_KEY9 = 69;
 	public static final int TIMER_HOLD_1P_SCRATCH = 70;
 	public static final int TIMER_HOLD_1P_KEY1 = 71;
+	public static final int TIMER_HCN_DAMAGE_1P_SCRATCH = 270;
+	public static final int TIMER_HCN_DAMAGE_1P_KEY1 = 271;
 	public static final int TIMER_HOLD_2P_SCRATCH = 80;
 	public static final int TIMER_HOLD_2P_KEY1 = 81;
 	public static final int TIMER_KEYON_1P_SCRATCH = 100;
@@ -133,6 +137,10 @@ public class SkinProperty {
 	public static final int TIMER_KEYOFF_1P_KEY99 = 1699;
 	public static final int TIMER_KEYOFF_2P_KEY10 = 1710;
 	public static final int TIMER_KEYOFF_2P_KEY99 = 1799;
+	public static final int TIMER_HCN_ACTIVE_1P_KEY10 = 1810;
+	public static final int TIMER_HCN_ACTIVE_2P_KEY10 = 1910;
+	public static final int TIMER_HCN_DAMAGE_1P_KEY10 = 2010;
+	public static final int TIMER_HCN_DAMAGE_2P_KEY10 = 2110;
 
 	// 選曲専用
 	public static final int SLIDER_MUSICSELECT_POSITION = 1;

@@ -12,6 +12,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import bms.player.beatoraja.song.SongData;
 import bms.table.Course;
 import bms.table.DifficultyTable;
 import bms.table.DifficultyTableElement;
@@ -32,6 +33,8 @@ public class TableDataAccessor {
 	
 	private String tabledir = "table";
 
+	private String url;
+
 	public TableDataAccessor() {
 		
 	}
@@ -45,76 +48,12 @@ public class TableDataAccessor {
 		for (final String url : urls) {
 			Thread task = new Thread() {
 				public void run() {
-					DifficultyTableParser dtp = new DifficultyTableParser();
-					DifficultyTable dt = new DifficultyTable();
-					if (url.endsWith(".json")) {
-						dt.setHeadURL(url);
-					} else {
-						dt.setSourceURL(url);
-					}
-					try {
-						dtp.decode(true, dt);
-						TableData td = new TableData();
-						td.setUrl(url);
-						td.setName(dt.getName());
-						String[] levels = dt.getLevelDescription();
-						List<TableData.TableFolder> tdes = new ArrayList<>(levels.length);
-						for (String lv : levels) {
-							TableData.TableFolder tde = new TableData.TableFolder();
-							tde.setName("LEVEL " + lv);
-							List<TableData.TableSong> hashes = new ArrayList<TableData.TableSong>();
-							for (DifficultyTableElement dte : dt.getElements()) {
-								if (lv.equals(dte.getDifficultyID())) {
-									hashes.add(new TableData.TableSong(
-													dte.getSHA256() != null ? dte.getSHA256() : dte.getMD5(),
-											dte.getTitle(), dte.getURL1name(), null, dte.getURL1(), dte.getURL2()));
-								}
-							}
-							tde.setSong(hashes.toArray(new TableData.TableSong[hashes.size()]));
-							tdes.add(tde);
-						}
-						td.setFolder(tdes.toArray(new TableData.TableFolder[tdes.size()]));
-
-						if (dt.getCourse() != null && dt.getCourse().length > 0) {
-							List<CourseData> gname = new ArrayList<CourseData>();
-							for (Course[] course : dt.getCourse()) {
-								for (Course g : course) {
-									CourseData cd = new CourseData();
-									cd.setName(g.getName());
-									cd.setHash(g.getHash());
-									List<CourseData.CourseDataConstraint> l = new ArrayList<>();
-									for(int i = 0;i < g.getConstraint().length;i++) {
-										for (CourseData.CourseDataConstraint constraint : CourseData.CourseDataConstraint.values()) {
-											if (constraint.name.equals(g.getConstraint()[i])) {
-												l.add(constraint);
-												break;
-											}
-										}
-									}
-									cd.setConstraint(l.toArray(new CourseData.CourseDataConstraint[l.size()]));
-									if (g.getTrophy() != null) {
-										List<TrophyData> tr = new ArrayList<TrophyData>();
-										for (Trophy trophy : g.getTrophy()) {
-											TrophyData t = new TrophyData();
-											t.setName(trophy.getName());
-											t.setMissrate((float) trophy.getMissrate());
-											t.setScorerate((float) trophy.getScorerate());
-											tr.add(t);
-										}
-										cd.setTrophy(tr.toArray(new TrophyData[tr.size()]));
-									}
-									gname.add(cd);
-								}
-							}
-
-							td.setCourse(gname.toArray(new CourseData[gname.size()]));
-						}
+					TableReader tr = new DifficultyTableReader(url);
+					TableData td = tr.read();
+					if(td != null) {
 						write(td);
-					} catch (Throwable e) {
-						e.printStackTrace();
 					}
 				}
-
 			};
 			tasks.add(task);
 			task.start();
@@ -206,6 +145,107 @@ public class TableDataAccessor {
 
 		}
 		return td;
+	}
+
+	public interface TableReader {
+
+		public TableData read();
+	}
+
+	public static class DifficultyTableReader implements TableReader {
+
+		private final String url;
+
+		public DifficultyTableReader(String url) {
+			this.url = url;
+		}
+
+		@Override
+		public TableData read() {
+			DifficultyTableParser dtp = new DifficultyTableParser();
+			DifficultyTable dt = new DifficultyTable();
+			if (url.endsWith(".json")) {
+				dt.setHeadURL(url);
+			} else {
+				dt.setSourceURL(url);
+			}
+			try {
+				dtp.decode(true, dt);
+				TableData td = new TableData();
+				td.setUrl(url);
+				td.setName(dt.getName());
+				String[] levels = dt.getLevelDescription();
+				List<TableData.TableFolder> tdes = new ArrayList<>(levels.length);
+				for (String lv : levels) {
+					TableData.TableFolder tde = new TableData.TableFolder();
+					tde.setName("LEVEL " + lv);
+					List<SongData> hashes = new ArrayList<SongData>();
+					for (DifficultyTableElement dte : dt.getElements()) {
+						if (lv.equals(dte.getDifficultyID())) {
+							SongData sd = new SongData();
+							if(dte.getSHA256() != null) {
+								sd.setSha256(dte.getSHA256());
+							} else {
+								sd.setMd5(dte.getMD5());
+							}
+							sd.setTitle(dte.getTitle());
+							sd.setArtist(dte.getURL1name());
+							sd.setUrl(dte.getURL1());
+							sd.setAppendurl(dte.getURL2());
+							hashes.add(sd);
+						}
+					}
+					tde.setSong(hashes.toArray(new SongData[hashes.size()]));
+					tdes.add(tde);
+				}
+				td.setFolder(tdes.toArray(new TableData.TableFolder[tdes.size()]));
+
+				if (dt.getCourse() != null && dt.getCourse().length > 0) {
+					List<CourseData> gname = new ArrayList<CourseData>();
+					for (Course[] course : dt.getCourse()) {
+						for (Course g : course) {
+							CourseData cd = new CourseData();
+							cd.setName(g.getName());
+							// TODO 難易度表パーサーの仕様を変えたらここも変更
+							SongData[] songs = new SongData[g.getHash().length];
+							for(int i = 0;i < songs.length;i++) {
+								songs[i] = new SongData();
+								songs[i].setMd5(g.getHash()[i]);
+							}
+							cd.setSong(songs);
+							List<CourseData.CourseDataConstraint> l = new ArrayList<>();
+							for(int i = 0;i < g.getConstraint().length;i++) {
+								for (CourseData.CourseDataConstraint constraint : CourseData.CourseDataConstraint.values()) {
+									if (constraint.name.equals(g.getConstraint()[i])) {
+										l.add(constraint);
+										break;
+									}
+								}
+							}
+							cd.setConstraint(l.toArray(new CourseData.CourseDataConstraint[l.size()]));
+							if (g.getTrophy() != null) {
+								List<TrophyData> tr = new ArrayList<TrophyData>();
+								for (Trophy trophy : g.getTrophy()) {
+									TrophyData t = new TrophyData();
+									t.setName(trophy.getName());
+									t.setMissrate((float) trophy.getMissrate());
+									t.setScorerate((float) trophy.getScorerate());
+									tr.add(t);
+								}
+								cd.setTrophy(tr.toArray(new TrophyData[tr.size()]));
+							}
+							gname.add(cd);
+						}
+					}
+
+					td.setCourse(gname.toArray(new CourseData[gname.size()]));
+				}
+				return td;
+			} catch (Throwable e) {
+				e.printStackTrace();
+			}
+			return null;
+		}
 	}
 
 }

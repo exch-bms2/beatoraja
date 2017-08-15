@@ -93,4 +93,12 @@ public enum SkinType {
 		}
 		return null;
 	}
+
+	public static int getMaxSkinTypeID() {
+		int max = -1;
+		for(SkinType type : values()) {
+			max = Math.max(max, type.id);
+		}
+		return max;
+	}
 }
