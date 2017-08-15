@@ -748,6 +748,9 @@ public class MusicSelector extends MainState {
 		case 9:
 			return 50;
 		case 24:
+		case 25:
+		case 48:
+		case 50:
 			return 10;
 		default:
 			return 0;

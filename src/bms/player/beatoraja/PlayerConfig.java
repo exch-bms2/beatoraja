@@ -286,7 +286,10 @@ public class PlayerConfig {
 		case 9:
 			return getMode9();
 		case 24:
+		case 25:
 			return getMode24();
+		case 50:
+			return getMode24double();
 		default:
 			return getMode7();
 		}
@@ -324,6 +327,10 @@ public class PlayerConfig {
 	}
 
 	public PlayConfig getMode24() {
+		return mode24;
+	}
+
+	public PlayConfig getMode24double() {
 		return mode24;
 	}
 
