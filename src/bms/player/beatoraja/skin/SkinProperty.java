@@ -142,6 +142,8 @@ public class SkinProperty {
 	public static final int TIMER_HCN_DAMAGE_1P_KEY10 = 2010;
 	public static final int TIMER_HCN_DAMAGE_2P_KEY10 = 2110;
 
+	public static final int TIMER_MAX = 2999;
+
 	// 選曲専用
 	public static final int SLIDER_MUSICSELECT_POSITION = 1;
 	// プレイ専用

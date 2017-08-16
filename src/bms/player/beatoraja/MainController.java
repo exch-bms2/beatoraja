@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 
 import bms.player.beatoraja.play.TargetProperty;
 import bms.player.beatoraja.skin.SkinLoader;
+import bms.player.beatoraja.skin.SkinProperty;
 import com.badlogic.gdx.Graphics;
 
 import bms.player.beatoraja.audio.*;
@@ -98,7 +99,7 @@ public class MainController extends ApplicationAdapter {
 
 	private ScreenShotThread screenshot;
 
-	public static final int timerCount = 2048;
+	public static final int timerCount = SkinProperty.TIMER_MAX + 1;
 	private long[] timer = new long[timerCount];
 
 	public MainController(Path f, Config config, int auto, boolean songUpdated) {
