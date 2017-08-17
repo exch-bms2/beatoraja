@@ -134,6 +134,7 @@ public class MainController extends ApplicationAdapter {
 		if(player.getUserid().length() > 0 && ir != null) {
 			ir.login(player.getUserid(), player.getPassword());
 		}
+		
 		switch(config.getAudioDriver()) {
 		case Config.AUDIODRIVER_ASIO:
 			try {
@@ -141,7 +142,14 @@ public class MainController extends ApplicationAdapter {
 			} catch(Throwable e) {
 				e.printStackTrace();
 				config.setAudioDriver(Config.AUDIODRIVER_SOUND);
-				audio = new GdxSoundDriver();
+			}
+			break;
+		case Config.AUDIODRIVER_PORTAUDIO:
+			try {
+				audio = new PortAudioDriver(config);
+			} catch(Throwable e) {
+				e.printStackTrace();
+				config.setAudioDriver(Config.AUDIODRIVER_SOUND);
 			}
 			break;
 		}
@@ -450,6 +458,7 @@ public class MainController extends ApplicationAdapter {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		Logger.getGlobal().info("設定情報をconfig.jsonに保存");
 		
 		Path p = Paths.get("player/" + config.getPlayername() + "/config.json");
 		try (FileWriter fw = new FileWriter(p.toFile())) {
@@ -458,6 +467,7 @@ public class MainController extends ApplicationAdapter {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		Logger.getGlobal().info("設定情報を" + p.toString() + "に保存");
 
 		dispose();
 		Gdx.app.exit();
