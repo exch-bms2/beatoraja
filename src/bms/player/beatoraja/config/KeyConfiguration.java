@@ -1,12 +1,5 @@
 package bms.player.beatoraja.config;
 
-import bms.player.beatoraja.*;
-import bms.player.beatoraja.PlayConfig.KeyboardConfig;
-import bms.player.beatoraja.PlayConfig.ControllerConfig;
-import bms.player.beatoraja.PlayConfig.MidiConfig;
-import bms.player.beatoraja.decide.MusicDecideSkin;
-import bms.player.beatoraja.input.*;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
@@ -18,9 +11,23 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFont
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 
+import bms.player.beatoraja.MainController;
+import bms.player.beatoraja.MainState;
+import bms.player.beatoraja.PlayConfig;
+import bms.player.beatoraja.PlayConfig.ControllerConfig;
+import bms.player.beatoraja.PlayConfig.KeyboardConfig;
+import bms.player.beatoraja.PlayConfig.MidiConfig;
+import bms.player.beatoraja.PlayerConfig;
+import bms.player.beatoraja.Resolution;
+import bms.player.beatoraja.decide.MusicDecideSkin;
+import bms.player.beatoraja.input.BMControllerInputProcessor;
+import bms.player.beatoraja.input.BMSPlayerInputProcessor;
+import bms.player.beatoraja.input.KeyBoardInputProcesseor;
+import bms.player.beatoraja.input.MidiInputProcessor;
+
 /**
  * キーコンフィグ画面
- * 
+ *
  * @author exch
  */
 public class KeyConfiguration extends MainState {
@@ -76,7 +83,7 @@ public class KeyConfiguration extends MainState {
 
 	public KeyConfiguration(MainController main) {
 		super(main);
-		
+
 
 	}
 
@@ -197,7 +204,7 @@ public class KeyConfiguration extends MainState {
 		titlefont.draw(sprite, "MIDI", 480 * scaleX, 620 * scaleY);
 		titlefont.setColor(Color.ORANGE);
 		titlefont.draw(sprite, "Music Select (press [1] to change) :   " + SELECTKEY[config.getMusicselectinput()], 600 * scaleX, 620 * scaleY);
-		
+
 		titlefont.draw(sprite, "Controller Device 1 (press [2] to change) :   " + pc.getController()[0].getName(), 600 * scaleX, 500 * scaleY);
 		if(pc.getController().length > 1) {
 			titlefont.draw(sprite, "Controller Device 2 (press [3] to change) :   " + pc.getController()[1].getName(), 600 * scaleX, 300 * scaleY);
@@ -230,6 +237,7 @@ public class KeyConfiguration extends MainState {
 
 		if (input.isExitPressed()) {
 			input.setExitPressed(false);
+			main.saveConfig();
 			main.changeState(MainController.STATE_SELECTMUSIC);
 		}
 	}
