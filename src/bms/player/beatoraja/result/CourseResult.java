@@ -31,6 +31,7 @@ public class CourseResult extends MainState {
 
 	public static final int SOUND_CLEAR = 0;
 	public static final int SOUND_FAIL = 1;
+	public static final int SOUND_CLOSE = 2;
 
 	private IRScoreData newscore;
 
@@ -43,6 +44,7 @@ public class CourseResult extends MainState {
 
 		setSound(SOUND_CLEAR, resource.getConfig().getSoundpath() + File.separatorChar + "course_clear.wav", false);
 		setSound(SOUND_FAIL, resource.getConfig().getSoundpath() + File.separatorChar + "course_fail.wav", false);
+		setSound(SOUND_CLOSE, resource.getConfig().getSoundpath() + File.separatorChar + "course_close.wav", false);
 
 		loadSkin(SkinType.COURSE_RESULT);
 
@@ -129,10 +131,16 @@ public class CourseResult extends MainState {
 			if (time > getTimer()[TIMER_FADEOUT] + getSkin().getFadeout()) {
 				stop(SOUND_CLEAR);
 				stop(SOUND_FAIL);
+				stop(SOUND_CLOSE);
 				main.changeState(MainController.STATE_SELECTMUSIC);
 			}
 		} else if (time > getSkin().getScene()) {
             getTimer()[TIMER_FADEOUT] = time;
+			if(getSound(SOUND_CLOSE) != null) {
+				stop(SOUND_CLEAR);
+				stop(SOUND_FAIL);
+				play(SOUND_CLOSE);
+			}
 		}
 
 	}
@@ -153,6 +161,11 @@ public class CourseResult extends MainState {
                     getTimer()[TIMER_RESULT_UPDATESCORE] = time;
                 } else {
                     getTimer()[TIMER_FADEOUT] = time;
+					if(getSound(SOUND_CLOSE) != null) {
+						stop(SOUND_CLEAR);
+						stop(SOUND_FAIL);
+						play(SOUND_CLOSE);
+					}
                 }
             }
 
