@@ -226,6 +226,11 @@ public class Config {
 			new PlayConfig.ControllerConfig[] { new PlayConfig.ControllerConfig() },
 			MidiConfig.default24());
 
+	private PlayConfig mode24double = new PlayConfig(
+			new PlayConfig.KeyboardConfig(),
+			new PlayConfig.ControllerConfig[] { new PlayConfig.ControllerConfig(), new PlayConfig.ControllerConfig() },
+			MidiConfig.default24double());
+
 	private int musicselectinput = 0;
 
 	private boolean updatesong = false;
@@ -587,7 +592,7 @@ public class Config {
 	}
 
 	public PlayConfig getMode24double() {
-		return mode24;
+		return mode24double;
 	}
 
 	public void setMode24(PlayConfig mode24) {
@@ -723,8 +728,8 @@ public class Config {
 	}
 	
 	public void validate() {
-		if(skin.length < 16) {
-			skin = Arrays.copyOf(skin, 16);
+		if(skin.length <= SkinType.getMaxSkinTypeID()) {
+			skin = Arrays.copyOf(skin, SkinType.getMaxSkinTypeID() + 1);
 			Logger.getGlobal().warning("skinを再構成");
 		}
 
@@ -734,6 +739,13 @@ public class Config {
 					new PlayConfig.ControllerConfig[] { PlayConfig.ControllerConfig.default7(), PlayConfig.ControllerConfig.default7() },
 					MidiConfig.default14());
 			Logger.getGlobal().warning("mode14のPlayConfigを再構成");
+		}
+		if (mode24double == null || mode24double.getController().length < 2) {
+			mode24double = new PlayConfig(
+					new PlayConfig.KeyboardConfig(),
+					new PlayConfig.ControllerConfig[] { new PlayConfig.ControllerConfig(), new PlayConfig.ControllerConfig() },
+					MidiConfig.default24double());
+			Logger.getGlobal().warning("mode24doubleのPlayConfigを再構成");
 		}
 	}
 

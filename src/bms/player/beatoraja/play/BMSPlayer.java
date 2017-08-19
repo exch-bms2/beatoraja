@@ -241,6 +241,8 @@ public class BMSPlayer extends MainState {
 			return config.getMode9();
 		case KEYBOARD_24K:
 			return config.getMode24();
+		case KEYBOARD_24K_DOUBLE:
+			return config.getMode24double();
 		default:
 			return null;
 		}

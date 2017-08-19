@@ -362,8 +362,8 @@ public class PlayConfig {
 			}
 			config.keys[24] = new Input(Input.Type.PITCH_BEND, 1);
 			config.keys[25] = new Input(Input.Type.PITCH_BEND, -1);
-			config.keys[50] = new Input(Input.Type.CONTROL_CHANGE, 1);
-			config.keys[51] = new Input(Input.Type.CONTROL_CHANGE, -1);
+			config.keys[50] = new Input(Input.Type.NOTE, 99);
+			config.keys[51] = new Input(Input.Type.NOTE, 97);
 			config.start = new Input(Input.Type.NOTE, 44);
 			config.select = new Input(Input.Type.NOTE, 46);
 			return config;

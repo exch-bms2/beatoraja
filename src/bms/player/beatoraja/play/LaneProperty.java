@@ -84,6 +84,19 @@ public class LaneProperty {
 			}
 			scratchToKey = new int[][] { };
 			break;
+		case KEYBOARD_24K_DOUBLE:
+			keyToLane = new int[52];
+			laneToKey = new int[52][1];
+			laneToScratch = new int[52];
+			laneToSkinOffset = new int[52];
+			for (int i=0; i<52; i++) {
+				keyToLane[i] = i;
+				laneToKey[i][0] = i;
+				laneToScratch[i] = -1;
+				laneToSkinOffset[i] = i % 26 + 1;
+			}
+			scratchToKey = new int[][] { };
+			break;
 		default:
 			keyToLane = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 7 };
 			laneToKey = new int[][] { {0}, {1}, {2}, {3}, {4}, {5}, {6}, {7,8} };
