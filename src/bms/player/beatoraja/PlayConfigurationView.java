@@ -27,8 +27,11 @@ import org.apache.commons.dbutils.handlers.MapListHandler;
 import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter.OutputType;
+import com.portaudio.DeviceInfo;
+import com.portaudio.PortAudio;
 import com.synthbot.jasiohost.AsioDriver;
 
+import bms.player.beatoraja.audio.PortAudioDriver;
 import bms.player.beatoraja.ir.IRConnection;
 import bms.player.beatoraja.play.JudgeAlgorithm;
 import bms.player.beatoraja.skin.SkinHeader;
@@ -265,8 +268,8 @@ public class PlayConfigurationView implements Initializable {
 		skincategory.setButtonCell(new SkinTypeCell());
 		skincategory.getItems().addAll(SkinType.values());
 
-		initComboBox(audio, new String[] { "OpenAL (LibGDX Sound)", "OpenAL (LibGDX AudioDevice)", "ASIO" });
-		audio.getItems().setAll(0, 2);
+		initComboBox(audio, new String[] { "OpenAL (LibGDX Sound)", "OpenAL (LibGDX AudioDevice)", "ASIO", "PortAudio" });
+		audio.getItems().setAll(0, 2, 3);
 
 		skin.setCellFactory(new Callback<ListView<SkinHeader>, ListCell<SkinHeader>>() {
 			public ListCell<SkinHeader> call(ListView<SkinHeader> param) {
@@ -600,6 +603,31 @@ public class PlayConfigurationView implements Initializable {
 				audiosim.setDisable(false);
 			} catch(Throwable e) {
 				Logger.getGlobal().severe("ASIOは選択できません : " + e.getMessage());
+				audio.setValue(Config.AUDIODRIVER_SOUND);
+			}
+			break;
+		case Config.AUDIODRIVER_PORTAUDIO:
+			try {
+				DeviceInfo[] devices = PortAudioDriver.getDevices();
+				List<String> drivers = new ArrayList<String>(devices.length);
+				for(int i = 0;i < devices.length;i++) {
+					drivers.add(devices[i].name);
+				}
+				if(drivers.size() == 0) {
+					throw new RuntimeException("ドライバが見つかりません");
+				}
+				audioname.getItems().setAll(drivers);
+				if(drivers.contains(config.getAudioDriverName())) {
+					audioname.setValue(config.getAudioDriverName());
+				} else {
+					audioname.setValue(drivers.get(0));
+				}
+				audioname.setDisable(false);
+				audiobuffer.setDisable(false);
+				audiosim.setDisable(false);
+//				PortAudio.terminate();
+			} catch(Throwable e) {
+				Logger.getGlobal().severe("PortAudioは選択できません : " + e.getMessage());
 				audio.setValue(Config.AUDIODRIVER_SOUND);
 			}
 			break;

@@ -55,6 +55,7 @@ public class Config {
 	 * オーディオ:ASIO
 	 */
 	public static final int AUDIODRIVER_ASIO = 2;
+	public static final int AUDIODRIVER_PORTAUDIO = 3;
 	
 	private String audioDriverName = null;
 	/**

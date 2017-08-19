@@ -42,6 +42,7 @@
 			<zipfileset excludes="META-INF/*.SF" src="./lib/jbmstable-parser.jar" />
 			<zipfileset excludes="META-INF/*.SF" src="./lib/javacpp.jar" />
 			<zipfileset excludes="META-INF/*.SF" src="./lib/jasiohost.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="./lib/jportaudio.jar" />
 			<zipfileset excludes="META-INF/*.SF" src="./lib/ffmpeg-linux-x86_64.jar" />
 			<zipfileset excludes="META-INF/*.SF" src="./lib/ffmpeg-macosx-x86_64.jar" />
 			<zipfileset excludes="META-INF/*.SF" src="./lib/ffmpeg-windows-x86_64.jar" />

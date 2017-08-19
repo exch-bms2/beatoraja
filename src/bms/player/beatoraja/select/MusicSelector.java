@@ -1,32 +1,44 @@
 package bms.player.beatoraja.select;
 
-import java.awt.*;
-import java.io.*;
+import static bms.player.beatoraja.skin.SkinProperty.*;
+
+import java.awt.Desktop;
+import java.io.File;
 import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+
 import bms.model.Mode;
-import bms.player.beatoraja.*;
+import bms.player.beatoraja.Config;
+import bms.player.beatoraja.CourseData;
+import bms.player.beatoraja.IRScoreData;
+import bms.player.beatoraja.MainController;
+import bms.player.beatoraja.MainState;
+import bms.player.beatoraja.PlayConfig;
+import bms.player.beatoraja.PlayerConfig;
+import bms.player.beatoraja.PlayerData;
+import bms.player.beatoraja.PlayerResource;
+import bms.player.beatoraja.TableData;
+import bms.player.beatoraja.TableDataAccessor;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
-import bms.player.beatoraja.skin.*;
+import bms.player.beatoraja.skin.SkinType;
 import bms.player.beatoraja.song.SongData;
 import bms.player.beatoraja.song.SongDatabaseAccessor;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.*;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.*;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
-
-import static bms.player.beatoraja.skin.SkinProperty.*;
-
 /**
  * 選曲部分。 楽曲一覧とカーソルが指す楽曲のステータスを表示し、選択した楽曲を 曲決定部分に渡す。
- * 
+ *
  * @author exch
  */
 public class MusicSelector extends MainState {
@@ -813,6 +825,14 @@ public class MusicSelector extends MainState {
 		case OPTION_NO_REPLAYDATA4:
 			return (current instanceof SelectableBar) && ((SelectableBar) current).getExistsReplayData().length > 3
 					&& !((SelectableBar) current).getExistsReplayData()[3];
+		case OPTION_SELECT_REPLAYDATA:
+			return selectedreplay == 0;
+		case OPTION_SELECT_REPLAYDATA2:
+			return selectedreplay == 1;
+		case OPTION_SELECT_REPLAYDATA3:
+			return selectedreplay == 2;
+		case OPTION_SELECT_REPLAYDATA4:
+			return selectedreplay == 3;
 		}
 		return super.getBooleanValue(id);
 	}
@@ -869,6 +889,8 @@ public class MusicSelector extends MainState {
 	public void selectedBarMoved() {
 		resetReplayIndex();
 		getTimer()[TIMER_SONGBAR_CHANGE] = getNowTime();
+		if(preview.getSongData() != null && (!(bar.getSelected() instanceof SongBar) ||
+				!((SongBar)bar.getSelected()).getSongData().getParent().equals(preview.getSongData().getParent())))
 		preview.start(null);
 		showNoteGraph = false;
 	}

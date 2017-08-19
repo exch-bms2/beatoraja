@@ -103,7 +103,7 @@ public class PCM {
 			throw new IOException(p.toString() + " : can't convert to PCM");			
 		}		
 		bytes = bytes - (bytes % (channels > 1 ? bitsPerSample / 4 : bitsPerSample / 8));
-		if(bytes < channels * bitsPerSample / 8) {
+		if(bytes <= channels * bitsPerSample / 8) {
 			throw new IOException(p.toString() + " : 0 samples");			
 		}
 		
