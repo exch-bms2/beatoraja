@@ -32,6 +32,8 @@ public class CourseResult extends MainState {
 	public static final int SOUND_CLEAR = 0;
 	public static final int SOUND_FAIL = 1;
 
+	private IRScoreData newscore;
+
 	public CourseResult(MainController main) {
 		super(main);
 	}
@@ -65,40 +67,40 @@ public class CourseResult extends MainState {
 				case 0:
 					break;
 				case 1:
-					if(resource.getScoreData().getExscore() > oldexscore)
+					if(newscore.getExscore() > oldexscore)
 						saveReplayData(i);
 					break;
 				case 2:
-					if(resource.getScoreData().getExscore() >= oldexscore)
+					if(newscore.getExscore() >= oldexscore)
 						saveReplayData(i);
 					break;
 				case 3:
-					if(resource.getScoreData().getMinbp() < oldmisscount || oldclear == NoPlay.id)
+					if(newscore.getMinbp() < oldmisscount || oldclear == NoPlay.id)
 						saveReplayData(i);
 					break;
 				case 4:
-					if(resource.getScoreData().getMinbp() <= oldmisscount || oldclear == NoPlay.id)
+					if(newscore.getMinbp() <= oldmisscount || oldclear == NoPlay.id)
 						saveReplayData(i);
 					break;
 				case 5:
-					if(resource.getScoreData().getCombo() > oldcombo)
+					if(newscore.getCombo() > oldcombo)
 						saveReplayData(i);
 					break;
 				case 6:
-					if(resource.getScoreData().getCombo() >= oldcombo)
+					if(newscore.getCombo() >= oldcombo)
 						saveReplayData(i);
 					break;
 				case 7:
-					if(resource.getScoreData().getClear() > oldclear)
+					if(newscore.getClear() > oldclear)
 						saveReplayData(i);
 					break;
 				case 8:
-					if(resource.getScoreData().getClear() >= oldclear)
+					if(newscore.getClear() >= oldclear)
 						saveReplayData(i);
 					break;
 				case 9:
-					if(resource.getScoreData().getClear() > oldclear || resource.getScoreData().getCombo() > oldcombo||
-						resource.getScoreData().getMinbp() < oldmisscount || resource.getScoreData().getExscore() > oldexscore)
+					if(newscore.getClear() > oldclear || newscore.getCombo() > oldcombo||
+						newscore.getMinbp() < oldmisscount || newscore.getExscore() > oldexscore)
 						saveReplayData(i);
 					break;
 				case 10:
@@ -168,7 +170,7 @@ public class CourseResult extends MainState {
 		final PlayerResource resource = getMainController().getPlayerResource();
 		final PlayerConfig config = resource.getPlayerConfig();
 		BMSModel[] models = resource.getCourseBMSModels();
-		IRScoreData newscore = resource.getCourseScoreData();
+		newscore = resource.getCourseScoreData();
 		if (newscore == null) {
 			return;
 		}
