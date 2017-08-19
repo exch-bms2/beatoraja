@@ -10,22 +10,10 @@
 	"fadeout":1000,
 
 	"property":[
-		{"name":"Score Graph", "item":[
-			{"name":"Off", "op":900},
-			{"name":"On", "op":901}
-		]},
-		{"name":"Judge Count", "item":[
-			{"name":"Off", "op":905},
-			{"name":"On", "op":906}
-		]},
 		{"name":"Judge Detail", "item":[
 			{"name":"Off", "op":910},
 			{"name":"EARLY/LATE", "op":911},
 			{"name":"+-ms", "op":912}
-		]},
-		{"name":"Show BGA", "item":[
-			{"name":"On", "op":915},
-			{"name":"Off", "op":916}
 		]}
 	],
 	"filepath":[
