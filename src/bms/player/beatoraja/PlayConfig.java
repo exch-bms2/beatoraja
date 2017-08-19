@@ -11,6 +11,8 @@ import com.badlogic.gdx.Input.Keys;
  */
 public class PlayConfig {
 
+	// TODO 複数デバイスの混合キー設定(ex.鍵盤キーボード、皿を専コン等)
+
 	/**
 	 * ハイスピード。1.0で等速
 	 */
@@ -36,11 +38,17 @@ public class PlayConfig {
 	 * リフト使用
 	 */
 	private boolean enablelift = false;
-
+	/**
+	 * キーボード設定
+	 */
 	private KeyboardConfig keyboard = new KeyboardConfig();
-	
+	/**
+	 * コントローラー設定
+ 	 */
 	private ControllerConfig[] controller = new ControllerConfig[] { ControllerConfig.default7() };
-
+	/**
+	 * MIDI設定
+	 */
 	private MidiConfig midi = new MidiConfig();
 	
 	public PlayConfig() {
@@ -73,6 +81,9 @@ public class PlayConfig {
 	}
 
 	public float getHispeed() {
+		if(hispeed < 0.01) {
+			hispeed = 0.01f;
+		}
 		return hispeed;
 	}
 
@@ -81,6 +92,9 @@ public class PlayConfig {
 	}
 
 	public int getDuration() {
+		if(duration < 1) {
+			duration = 1;
+		}
 		return duration;
 	}
 
@@ -89,6 +103,9 @@ public class PlayConfig {
 	}
 
 	public float getLanecover() {
+		if(lanecover < 0 || lanecover > 1) {
+			lanecover = 0;
+		}
 		return lanecover;
 	}
 
@@ -105,6 +122,9 @@ public class PlayConfig {
 	}
 
 	public float getLift() {
+		if(lift < 0 || lift > 1) {
+			lift = 0;
+		}
 		return lift;
 	}
 
@@ -120,6 +140,11 @@ public class PlayConfig {
 		this.enablelift = enablelift;
 	}
 
+	/**
+	 * キーボード設定定義用クラス
+	 *
+	 * @author exch
+	 */
 	public static class KeyboardConfig {
 
 		private int[] keys = { Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.F, Keys.V, Keys.SHIFT_LEFT,
@@ -179,6 +204,11 @@ public class PlayConfig {
 		}
 	}
 
+	/**
+	 * コントローラー設定定義用クラス
+	 *
+	 * @author exch
+	 */
 	public static class ControllerConfig {
 
 		private String name = "";
