@@ -1,56 +1,44 @@
 package bms.player.beatoraja;
 
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.*;
+import java.nio.file.*;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.logging.Logger;
 
-import com.badlogic.gdx.ApplicationAdapter;
-import com.badlogic.gdx.Gdx;
+import bms.player.beatoraja.play.TargetProperty;
+import bms.player.beatoraja.skin.SkinLoader;
 import com.badlogic.gdx.Graphics;
-import com.badlogic.gdx.InputMultiplexer;
-import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.PixmapIO;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
-import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.utils.BufferUtils;
-import com.badlogic.gdx.utils.Json;
-import com.badlogic.gdx.utils.JsonWriter.OutputType;
-import com.badlogic.gdx.utils.ScreenUtils;
 
-import bms.player.beatoraja.audio.ASIODriver;
-import bms.player.beatoraja.audio.AudioDriver;
-import bms.player.beatoraja.audio.GdxAudioDeviceDriver;
-import bms.player.beatoraja.audio.GdxSoundDriver;
-import bms.player.beatoraja.audio.PortAudioDriver;
+import bms.player.beatoraja.audio.*;
 import bms.player.beatoraja.config.KeyConfiguration;
 import bms.player.beatoraja.decide.MusicDecide;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.ir.IRConnection;
 import bms.player.beatoraja.play.BMSPlayer;
-import bms.player.beatoraja.play.TargetProperty;
 import bms.player.beatoraja.result.CourseResult;
 import bms.player.beatoraja.result.MusicResult;
 import bms.player.beatoraja.select.MusicSelector;
-import bms.player.beatoraja.skin.SkinLoader;
 import bms.player.beatoraja.song.SQLiteSongDatabaseAccessor;
 import bms.player.beatoraja.song.SongDatabaseAccessor;
 import bms.player.beatoraja.song.SongInformationAccessor;
 
+import com.badlogic.gdx.ApplicationAdapter;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.g2d.*;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.utils.*;
+import com.badlogic.gdx.utils.JsonWriter.OutputType;
+
 /**
  * アプリケーションのルートクラス
- *
+ * 
  * @author exch
  */
 public class MainController extends ApplicationAdapter {
@@ -71,7 +59,7 @@ public class MainController extends ApplicationAdapter {
 	private KeyConfiguration keyconfig;
 
 	private AudioDriver audio;
-
+	
 	private PlayerResource resource;
 
 	private BitmapFont systemfont;
@@ -87,7 +75,7 @@ public class MainController extends ApplicationAdapter {
 	private SongInformationAccessor infodb;
 
 	private IRConnection ir;
-
+	
 	private SpriteBatch sprite;
 	/**
 	 * 1曲プレイで指定したBMSファイル
@@ -117,36 +105,27 @@ public class MainController extends ApplicationAdapter {
 		this.auto = auto;
 		this.config = config;
 		this.songUpdated = songUpdated;
-
-		Path p = Paths.get("player/" + config.getPlayername() + "/config.json");
-
-		try {
-			Json json = new Json();
-			json.setIgnoreUnknownFields(true);
-			player = json.fromJson(PlayerConfig.class, new FileReader(p.toFile()));
-		} catch(Throwable e) {
-
-		}
-
+		
+		player = MainLoader.readPlayerConfig(config.getPlayername());
 		this.bmsfile = f;
 
 		try {
 			Class.forName("org.sqlite.JDBC");
 			songdb = new SQLiteSongDatabaseAccessor(songdbpath.toString(), config.getBmsroot());
 			if(config.isUseSongInfo()) {
-				infodb = new SongInformationAccessor(infodbpath.toString());
+				infodb = new SongInformationAccessor(infodbpath.toString());				
 			}
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
 
 		playdata = new PlayDataAccessor(config.getPlayername());
-
+		
 		ir = IRConnection.getIRConnection(player.getIrname());
 		if(player.getUserid().length() > 0 && ir != null) {
 			ir.login(player.getUserid(), player.getPassword());
 		}
-
+		
 		switch(config.getAudioDriver()) {
 		case Config.AUDIODRIVER_ASIO:
 			try {
@@ -282,7 +261,7 @@ public class MainController extends ApplicationAdapter {
 		keyconfig = new KeyConfiguration(this);
 		if (bmsfile != null) {
 			if(resource.setBMSFile(bmsfile, auto)) {
-				changeState(STATE_PLAYBMS);
+				changeState(STATE_PLAYBMS);				
 			} else {
 				// ダミーステートに移行してすぐexitする
 				changeState(STATE_CONFIG);
@@ -298,7 +277,7 @@ public class MainController extends ApplicationAdapter {
 		systemfont = generator.generateFont(parameter);
 		generator.dispose();
 		Logger.getGlobal().info("初期化時間(ms) : " + (System.currentTimeMillis() - t));
-
+		
 		Thread polling = new Thread() {
 			public void run() {
 				long time = 0;
@@ -314,7 +293,7 @@ public class MainController extends ApplicationAdapter {
 						}
 					}
 				}
-			}
+			}			
 		};
 		polling.start();
 
@@ -323,7 +302,7 @@ public class MainController extends ApplicationAdapter {
 		}
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 	}
-
+	
 	private long prevtime;
 
 	@Override
@@ -358,7 +337,7 @@ public class MainController extends ApplicationAdapter {
 			systemfont.draw(sprite, "Screen shot saved : " + screenshot.path, 100,
 					config.getResolution().height - 2);
 			sprite.end();
-		}
+		}		
 
 		final long time = System.currentTimeMillis();
 		if(time > prevtime) {
@@ -511,7 +490,7 @@ public class MainController extends ApplicationAdapter {
 	}
 	/**
 	 * スクリーンショット処理用スレッド
-	 *
+	 * 
 	 * @author exch
 	 */
 	static class ScreenShotThread extends Thread {
@@ -528,7 +507,7 @@ public class MainController extends ApplicationAdapter {
 		 * スクリーンショットのpixelデータ
 		 */
 		private final byte[] pixels;
-
+		
 		public ScreenShotThread(byte[] pixels) {
 			this.pixels = pixels;
 			final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
