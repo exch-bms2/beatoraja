@@ -952,9 +952,23 @@ class SkinConfigurationView {
 				for (Path p : paths) {
 					combo.getItems().add(p.getFileName().toString());
 				}
-				if (property != null) {
-					String s = (String) property.get(file.name);
-					combo.setValue(s);
+				String selection = property != null ? (String) property.get(file.name) : null;
+				if (selection == null && file.def != null) {
+					// デフォルト値のファイル名またはそれに拡張子を付けたものが存在すれば使用する
+					for (String item : combo.getItems()) {
+						if (item.equalsIgnoreCase(file.def)) {
+							selection = item;
+							break;
+						}
+						int point = item.lastIndexOf('.');
+						if (point != -1 && item.substring(0, point).equalsIgnoreCase(file.def)) {
+							selection = item;
+							break;
+						}
+					}
+				}
+				if (selection != null) {
+					combo.setValue(selection);
 				} else {
 					combo.getSelectionModel().select(0);
 				}

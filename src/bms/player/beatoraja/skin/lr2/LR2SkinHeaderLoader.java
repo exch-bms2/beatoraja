@@ -55,7 +55,7 @@ public class LR2SkinHeaderLoader extends LR2SkinLoader {
 		addCommandWord(new CommandWord("CUSTOMFILE") {
 			@Override
 			public void execute(String[] str) {
-				files.add(new CustomFile(str[1], str[2].replace("LR2files\\Theme", "skin").replace("\\", "/")));
+				files.add(new CustomFile(str[1], str[2].replace("LR2files\\Theme", "skin").replace("\\", "/"), str[3]));
 			}
 		});
 		addCommandWord(new CommandWord("RESOLUTION") {

@@ -109,10 +109,12 @@ public class SkinHeader {
 	public static class CustomFile {
 		public final String name;
 		public final String path;
+		public final String def;
 		
-		public CustomFile(String name, String path) {
+		public CustomFile(String name, String path, String def) {
 			this.name = name;
 			this.path = path;
+			this.def = def;
 		}
 	}
 }
