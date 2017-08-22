@@ -15,6 +15,7 @@
 		{"id":5, "path":"clear.png"},
 		{"id":6, "path":"number.png"},
 		{"id":7, "path":"panel.png"},
+		{"id":8, "path":"constraint.png"},
 	],
 	"font": [
 		{"id":0, "path":"VL-Gothic-Regular.ttf"}
@@ -61,6 +62,7 @@
 		{"id":"totalnotes", "src":0, "x":0, "y":744, "w":120, "h":24},
 
 		{"id":"bar-song", "src":2, "x":0, "y":0, "w":500, "h":30},
+		{"id":"bar-nosong", "src":2, "x":0, "y":210, "w":500, "h":30},
 		{"id":"bar-folder", "src":2, "x":0, "y":30, "w":500, "h":30},
 		{"id":"bar-table", "src":2, "x":0, "y":60, "w":500, "h":30},
 		{"id":"bar-grade", "src":2, "x":0, "y":90, "w":500, "h":30},
@@ -131,9 +133,14 @@
 		{"id":"option-selector65", "src":7, "x":75, "y":309, "w":67, "h":90},
 		{"id":"option-selector66", "src":7, "x":75, "y":294, "w":67, "h":90},
 
+		{"id":"const-random", "src":8, "x":0, "y":0, "w":200, "h":24},
+		{"id":"const-mirror", "src":8, "x":0, "y":24, "w":200, "h":24},
+		{"id":"const-nospeed", "src":8, "x":0, "y":48, "w":200, "h":24},
+		{"id":"const-nogood", "src":8, "x":0, "y":72, "w":200, "h":24},
+		{"id":"const-nogreat", "src":8, "x":0, "y":96, "w":200, "h":24},
 	],
 	"imageset":[
-		{"id":"bar", "images":["bar-song","bar-folder","bar-table","bar-grade","bar-nograde","bar-command","bar-search"]},
+		{"id":"bar", "images":["bar-song","bar-folder","bar-table","bar-grade","bar-nograde","bar-command","bar-search","bar-nosong"]},
 		{"id":"modeset", "ref":1011, "images":["allkeys","5keys","7keys","10keys","14keys","9keys"]},
 		{"id":"option-exjudge", "ref":1301, "images":["option-selector21","option-selector22"]},
 		{"id":"option-constant", "ref":1302, "images":["option-selector21","option-selector22"]},
@@ -644,6 +651,12 @@
 		{"id":"course2", "dst":[{"x":80, "y":544, "w":18, "h":24, "b":0}]},
 		{"id":"course3", "dst":[{"x":80, "y":516, "w":18, "h":24, "b":0}]},
 		{"id":"course4", "dst":[{"x":80, "y":488, "w":18, "h":24, "b":0}]},
+
+		{"id":"const-random", "op":[1004], "dst":[{"x":180, "y":602, "w":150, "h":18, "b":0}]},
+		{"id":"const-mirror", "op":[1003], "dst":[{"x":180, "y":602, "w":150, "h":18, "b":0}]},
+		{"id":"const-nospeed", "op":[1005], "dst":[{"x":330, "y":602, "w":150, "h":18, "b":0}]},
+		{"id":"const-nogood", "op":[1006], "dst":[{"x":480, "y":602, "w":150, "h":18, "b":0}]},
+		{"id":"const-nogreat", "op":[1007], "dst":[{"x":480, "y":602, "w":150, "h":18, "b":0}]},
 
 		{"id":"state_clear", "dst":[{"x":100, "y":405, "w":200, "h":20}]},
 
