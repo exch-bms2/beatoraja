@@ -145,6 +145,10 @@ public class MainLoader extends Application {
 		return LwjglApplicationConfiguration.getDisplayModes();
 	}
 
+	public static Graphics.DisplayMode getDesktopDisplayMode() {
+		return LwjglApplicationConfiguration.getDesktopDisplayMode();
+	}
+
 	@Override
 	public void start(javafx.stage.Stage primaryStage) throws Exception {
 		Config config = readConfig();
