@@ -123,7 +123,8 @@ public class BarRenderer {
 			SongData[] songdatas = new SongData[cds[i].getSong().length];
 			for (int j = 0;j < songdatas.length;j++) {
 				for(SongData sd : songs) {
-					if(cds[i].getSong()[j].getMd5().equals(sd.getMd5()) || cds[i].getSong()[j].getSha256().equals(sd.getSha256())) {
+					if((sd.getMd5().length() > 0 && cds[i].getSong()[j].getMd5().equals(sd.getMd5()))
+							|| (sd.getSha256().length() > 0 && cds[i].getSong()[j].getSha256().equals(sd.getSha256()))) {
 						songdatas[j] = sd;
 						break;
 					}
