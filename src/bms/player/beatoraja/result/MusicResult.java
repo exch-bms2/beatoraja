@@ -60,6 +60,7 @@ public class MusicResult extends MainState {
 
 	public static final int SOUND_CLEAR = 0;
 	public static final int SOUND_FAIL = 1;
+	public static final int SOUND_CLOSE = 2;
 
 	public MusicResult(MainController main) {
 		super(main);
@@ -70,6 +71,7 @@ public class MusicResult extends MainState {
 
 		setSound(SOUND_CLEAR, resource.getConfig().getSoundpath() + File.separatorChar + "clear.wav", false);
 		setSound(SOUND_FAIL, resource.getConfig().getSoundpath() + File.separatorChar + "fail.wav", false);
+		setSound(SOUND_CLOSE, resource.getConfig().getSoundpath() + File.separatorChar + "resultclose.wav", false);
 
 		updateScoreDatabase();
 		// リプレイの自動保存
@@ -154,6 +156,7 @@ public class MusicResult extends MainState {
 			if (time > getTimer()[TIMER_FADEOUT] + getSkin().getFadeout()) {
 				stop(SOUND_CLEAR);
 				stop(SOUND_FAIL);
+				stop(SOUND_CLOSE);
 				getMainController().getAudioProcessor().stop((Note) null);
 
 				boolean[] keystate = main.getInputProcessor().getKeystate();
@@ -205,6 +208,11 @@ public class MusicResult extends MainState {
 		} else {
 			if (time > getSkin().getScene()) {
 				getTimer()[TIMER_FADEOUT] = time;
+				if(getSound(SOUND_CLOSE) != null) {
+					stop(SOUND_CLEAR);
+					stop(SOUND_FAIL);
+					play(SOUND_CLOSE);
+				}
 			}
 		}
 
@@ -230,6 +238,11 @@ public class MusicResult extends MainState {
 						getTimer()[TIMER_RESULT_UPDATESCORE] = time;
 					} else if(state == STATE_OFFLINE || state == STATE_IR_FINISHED){
 						getTimer()[TIMER_FADEOUT] = time;
+						if(getSound(SOUND_CLOSE) != null) {
+							stop(SOUND_CLEAR);
+							stop(SOUND_FAIL);
+							play(SOUND_CLOSE);
+						}
 					}
 				}
 

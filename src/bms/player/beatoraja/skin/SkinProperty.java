@@ -330,6 +330,12 @@ public class SkinProperty {
 	public static final int OPTION_FOLDERBAR = 1;
 	public static final int OPTION_SONGBAR = 2;
 	public static final int OPTION_GRADEBAR = 3;
+	public static final int OPTION_GRADEBAR_MIRROR = 1003;
+	public static final int OPTION_GRADEBAR_RANDOM = 1004;
+	public static final int OPTION_GRADEBAR_NOSPEED = 1005;
+	public static final int OPTION_GRADEBAR_NOGOOD = 1006;
+	public static final int OPTION_GRADEBAR_NOGREAT = 1007;
+
 	public static final int OPTION_PLAYABLEBAR = 5;
 
 	public static final int OPTION_PANEL1 = 21;

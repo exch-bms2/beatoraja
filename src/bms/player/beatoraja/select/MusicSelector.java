@@ -1,44 +1,32 @@
 package bms.player.beatoraja.select;
 
-import static bms.player.beatoraja.skin.SkinProperty.*;
-
-import java.awt.Desktop;
-import java.io.File;
+import java.awt.*;
+import java.io.*;
 import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
 import java.util.logging.Logger;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
-
 import bms.model.Mode;
-import bms.player.beatoraja.Config;
-import bms.player.beatoraja.CourseData;
-import bms.player.beatoraja.IRScoreData;
-import bms.player.beatoraja.MainController;
-import bms.player.beatoraja.MainState;
-import bms.player.beatoraja.PlayConfig;
-import bms.player.beatoraja.PlayerConfig;
-import bms.player.beatoraja.PlayerData;
-import bms.player.beatoraja.PlayerResource;
-import bms.player.beatoraja.TableData;
-import bms.player.beatoraja.TableDataAccessor;
+import bms.player.beatoraja.*;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
-import bms.player.beatoraja.skin.SkinType;
+import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.song.SongData;
 import bms.player.beatoraja.song.SongDatabaseAccessor;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.*;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+
+import static bms.player.beatoraja.skin.SkinProperty.*;
+
 /**
  * 選曲部分。 楽曲一覧とカーソルが指す楽曲のステータスを表示し、選択した楽曲を 曲決定部分に渡す。
- *
+ * 
  * @author exch
  */
 public class MusicSelector extends MainState {
@@ -47,6 +35,8 @@ public class MusicSelector extends MainState {
 	// TODO 譜面情報表示(簡易/詳細表示の切り替え)
 	// TODO オプション常時表示(スキン実装で実現？)
 	// TODO ターゲットスコア選択の実装
+
+	// TODO　ミラーランダム段位のスコア表示
 
 	private int selectedreplay;
 
@@ -183,66 +173,6 @@ public class MusicSelector extends MainState {
 			resource.setSongdata(((SongBar) current).getSongData());
 		} else {
 			resource.setSongdata(null);
-		}
-		// 段位用の表示(ミラー段位、EX段位)
-		if (current instanceof GradeBar) {
-			GradeBar gb = (GradeBar) current;
-
-			float dw = (float) getSkin().getScaleX();
-			float dh = (float) getSkin().getScaleY();
-			for (CourseData.CourseDataConstraint con : gb.getConstraint()) {
-				switch (con) {
-				case CLASS:
-					break;
-				case MIRROR:
-					titlefont.setColor(Color.CYAN);
-					titlefont.draw(sprite, "MIRROR OK", 150 * dw, 620 * dh);
-					break;
-				case RANDOM:
-					titlefont.setColor(Color.CORAL);
-					titlefont.draw(sprite, "RANDOM OK", 150 * dw, 620 * dh);
-					break;
-				case NO_SPEED:
-					titlefont.setColor(Color.RED);
-					titlefont.draw(sprite, "x1.0 HI SPEED", 300 * dw, 620 * dh);
-					break;
-				case NO_GOOD:
-					titlefont.setColor(Color.PURPLE);
-					titlefont.draw(sprite, "NO GOOD", 450 * dw, 620 * dh);
-					break;
-				case NO_GREAT:
-					titlefont.setColor(Color.PURPLE);
-					titlefont.draw(sprite, "NO GREAT", 450 * dw, 620 * dh);
-					break;
-				}
-			}
-
-			if (gb.getMirrorScore() != null) {
-				IRScoreData score = gb.getMirrorScore();
-				// titlefont.setColor(Color.valueOf(LAMP[score.getClear()]));
-				// titlefont.draw(sprite, CLEAR[score.getClear()], 100, 270);
-				// titlefont.setColor(Color.WHITE);
-				// titlefont.draw(sprite, "EX-SCORE : " + score.getExscore() + "
-				// / " + (score.getNotes() * 2), 100, 240);
-				// titlefont.draw(sprite, "MISS COUNT: " + score.getMinbp(),
-				// 100, 210);
-				// titlefont.draw(sprite, "CLEAR / PLAY : " +
-				// score.getClearcount() + " / " + score.getPlaycount(), 100,
-				// 180);
-			}
-			if (gb.getRandomScore() != null) {
-				IRScoreData score = gb.getRandomScore();
-				// titlefont.setColor(Color.valueOf(LAMP[score.getClear()]));
-				// titlefont.draw(sprite, CLEAR[score.getClear()], 100, 130);
-				// titlefont.setColor(Color.WHITE);
-				// titlefont.draw(sprite, "EX-SCORE : " + score.getExscore() +
-				// " / " + (score.getNotes() * 2), 100, 240);
-				// titlefont.draw(sprite, "MISS COUNT: " + score.getMinbp(),
-				// 100, 210);
-				// titlefont.draw(sprite, "CLEAR / PLAY : " +
-				// score.getClearcount() + " / " + score.getPlaycount(), 100,
-				// 180);
-			}
 		}
 
 		// banner
@@ -830,8 +760,32 @@ public class MusicSelector extends MainState {
 			return selectedreplay == 2;
 		case OPTION_SELECT_REPLAYDATA4:
 			return selectedreplay == 3;
+			case OPTION_GRADEBAR_MIRROR:
+				return existsConstant(CourseData.CourseDataConstraint.MIRROR);
+			case OPTION_GRADEBAR_RANDOM:
+				return existsConstant(CourseData.CourseDataConstraint.RANDOM);
+			case OPTION_GRADEBAR_NOSPEED:
+				return existsConstant(CourseData.CourseDataConstraint.NO_SPEED);
+			case OPTION_GRADEBAR_NOGOOD:
+				return existsConstant(CourseData.CourseDataConstraint.NO_GOOD);
+			case OPTION_GRADEBAR_NOGREAT:
+				return existsConstant(CourseData.CourseDataConstraint.NO_GREAT);
 		}
 		return super.getBooleanValue(id);
+	}
+
+	private boolean existsConstant(CourseData.CourseDataConstraint constraint) {
+		if (!(bar.getSelected() instanceof GradeBar)) {
+			return false;
+		}
+
+		GradeBar gb = (GradeBar) bar.getSelected();
+		for (CourseData.CourseDataConstraint con : gb.getConstraint()) {
+			if(con == constraint) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public void executeClickEvent(int id) {

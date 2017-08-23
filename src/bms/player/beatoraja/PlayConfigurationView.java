@@ -75,6 +75,7 @@ import javafx.util.Callback;
  */
 public class PlayConfigurationView implements Initializable {
 
+	// TODO スキンプレビュー機能
 
 	@FXML
 	private ComboBox<Resolution> resolution;
@@ -268,7 +269,7 @@ public class PlayConfigurationView implements Initializable {
 		skincategory.setButtonCell(new SkinTypeCell());
 		skincategory.getItems().addAll(SkinType.values());
 
-		initComboBox(audio, new String[] { "OpenAL (LibGDX Sound)", "OpenAL (LibGDX AudioDevice)", "ASIO", "PortAudio" });
+		initComboBox(audio, new String[] { "OpenAL (LibGDX Sound)", "OpenAL (LibGDX AudioDevice)", "PortAudio", "Java ASIO Host" });
 		audio.getItems().setAll(0, 2, 3);
 
 		skin.setCellFactory(new Callback<ListView<SkinHeader>, ListCell<SkinHeader>>() {
@@ -336,40 +337,31 @@ public class PlayConfigurationView implements Initializable {
 	}
 
 	public void updatePlayer() {
-		Path p = Paths.get("player/" + config.getPlayername() + "/config.json");
+		player = MainLoader.readPlayerConfig(config.getPlayername());
 
-		Json json = new Json();
-		try {
-			json.setIgnoreUnknownFields(true);
-			player = json.fromJson(PlayerConfig.class, new FileReader(p.toFile()));
+		scoreop.getSelectionModel().select(player.getRandom());
+		gaugeop.getSelectionModel().select(player.getGauge());
+		lntype.getSelectionModel().select(player.getLnmode());
 
-			scoreop.getSelectionModel().select(player.getRandom());
-			gaugeop.getSelectionModel().select(player.getGauge());
-			lntype.getSelectionModel().select(player.getLnmode());
+		fixhispeed.setValue(player.getFixhispeed());
+		judgetiming.getValueFactory().setValue(player.getJudgetiming());
 
-			fixhispeed.setValue(player.getFixhispeed());
-			judgetiming.getValueFactory().setValue(player.getJudgetiming());
+		constant.setSelected(player.isConstant());
+		bpmguide.setSelected(player.isBpmguide());
+		legacy.setSelected(player.isLegacynote());
+		exjudge.setSelected(player.isExpandjudge());
+		nomine.setSelected(player.isNomine());
+		judgeregion.setSelected(player.isShowjudgearea());
+		markprocessednote.setSelected(player.isMarkprocessednote());
 
-			constant.setSelected(player.isConstant());
-			bpmguide.setSelected(player.isBpmguide());
-			legacy.setSelected(player.isLegacynote());
-			exjudge.setSelected(player.isExpandjudge());
-			nomine.setSelected(player.isNomine());
-			judgeregion.setSelected(player.isShowjudgearea());
-			markprocessednote.setSelected(player.isMarkprocessednote());
+		irname.setValue(player.getIrname());
+		iruserid.setText(player.getUserid());
+		irpassword.setText(player.getPassword());
 
-			irname.setValue(player.getIrname());
-			iruserid.setText(player.getUserid());
-			irpassword.setText(player.getPassword());
-
-			playconfig.setValue(0);
-			updatePlayConfig();
-			skincategory.setValue(SkinType.PLAY_7KEYS);
-			updateSkinCategory();
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		playconfig.setValue(0);
+		updatePlayConfig();
+		skincategory.setValue(SkinType.PLAY_7KEYS);
+		updateSkinCategory();
 	}
 
 	/**
@@ -743,7 +735,7 @@ public class PlayConfigurationView implements Initializable {
 			Class.forName("org.sqlite.JDBC");
 			SongDatabaseAccessor songdb = new SQLiteSongDatabaseAccessor(Paths.get("songdata.db").toString(),
 					config.getBmsroot());
-			String player = "playerscore";
+			String player = "player1";
 			ScoreDatabaseAccessor scoredb = new ScoreDatabaseAccessor(player);
 			scoredb.createTable();
 
@@ -934,7 +926,9 @@ class SkinConfigurationView {
 					}
 				}
 			}
-			hbox.getChildren().addAll(new Label(option.name), combo);
+			Label label = new Label(option.name);
+			label.setMinWidth(250.0);
+			hbox.getChildren().addAll(label, combo);
 			optionbox.put(option, combo);
 			main.getChildren().add(hbox);
 		}
@@ -972,7 +966,10 @@ class SkinConfigurationView {
 				} else {
 					combo.getSelectionModel().select(0);
 				}
-				hbox.getChildren().addAll(new Label(file.name), combo);
+
+				Label label = new Label(file.name);
+				label.setMinWidth(250.0);
+				hbox.getChildren().addAll(label, combo);
 				filebox.put(file, combo);
 				main.getChildren().add(hbox);
 			} catch (IOException e) {
