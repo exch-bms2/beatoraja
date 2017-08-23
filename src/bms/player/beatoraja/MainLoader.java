@@ -30,9 +30,7 @@ public class MainLoader extends Application {
 		Logger logger = Logger.getGlobal();
 		try {
 			logger.addHandler(new FileHandler("beatoraja_log.xml"));
-		} catch (SecurityException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
+		} catch (Throwable e) {
 			e.printStackTrace();
 		}
 
@@ -137,10 +135,7 @@ public class MainLoader extends Application {
 //			cfg.setAudioConfig(config.getAudioDeviceSimultaneousSources(), config.getAudioDeviceBufferSize(), 1);
 //
 //			new Lwjgl3Application(player, cfg);
-		} catch (Exception e) {
-			e.printStackTrace();
-			Logger.getGlobal().severe(e.getClass().getName() + " : " + e.getMessage());
-		} catch (Error e) {
+		} catch (Throwable e) {
 			e.printStackTrace();
 			Logger.getGlobal().severe(e.getClass().getName() + " : " + e.getMessage());
 		}
@@ -184,7 +179,6 @@ public class MainLoader extends Application {
 			try {
 				json.setIgnoreUnknownFields(true);
 				config = json.fromJson(Config.class, new FileReader(MainController.configpath.toFile()));
-				config.validate();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -236,5 +230,18 @@ public class MainLoader extends Application {
 		}
 	
 		return config;
+	}
+
+	public static PlayerConfig readPlayerConfig(String playername) {
+		PlayerConfig player = new PlayerConfig();
+		Path p = Paths.get("player/" + playername + "/config.json");
+		Json json = new Json();
+		try {
+			json.setIgnoreUnknownFields(true);
+			player = json.fromJson(PlayerConfig.class, new FileReader(p.toFile()));
+		} catch(Throwable e) {
+			e.printStackTrace();
+		}
+		return player;
 	}
 }

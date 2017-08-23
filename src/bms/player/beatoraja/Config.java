@@ -52,11 +52,14 @@ public class Config {
 	public static final int AUDIODRIVER_AUDIODEVICE = 1;
 	
 	/**
-	 * オーディオ:ASIO
+	 * オーディオ:PortAudio
 	 */
-	public static final int AUDIODRIVER_ASIO = 2;
-	public static final int AUDIODRIVER_PORTAUDIO = 3;
-	
+	public static final int AUDIODRIVER_PORTAUDIO = 2;
+	/**
+	 * オーディオ:JASIOHost
+	 */
+	public static final int AUDIODRIVER_ASIO = 3;
+
 	private String audioDriverName = null;
 	/**
 	 * オーディオバッファサイズ。大きすぎると音声遅延が発生し、少なすぎるとノイズが発生する
@@ -423,6 +426,9 @@ public class Config {
 	}
 
 	public float getKeyvolume() {
+		if(keyvolume < 0 || keyvolume > 1) {
+			keyvolume = 1;
+		}
 		return keyvolume;
 	}
 
@@ -431,6 +437,9 @@ public class Config {
 	}
 
 	public float getBgvolume() {
+		if(bgvolume < 0 || bgvolume > 1) {
+			bgvolume = 1;
+		}
 		return bgvolume;
 	}
 
@@ -452,6 +461,14 @@ public class Config {
 
 	public void setAudioDriver(int audioDriver) {
 		this.audioDriver = audioDriver;
+	}
+
+	public String getAudioDriverName() {
+		return audioDriverName;
+	}
+
+	public void setAudioDriverName(String audioDriverName) {
+		this.audioDriverName = audioDriverName;
 	}
 
 	public void setAutoSaveReplay(int autoSaveReplay[]){
@@ -487,6 +504,9 @@ public class Config {
 	}
 
 	public float getSystemvolume() {
+		if(systemvolume < 0 || systemvolume > 1) {
+			systemvolume = 1;
+		}
 		return systemvolume;
 	}
 
@@ -718,36 +738,6 @@ public class Config {
 
 	public void setIrname(String irname) {
 		this.irname = irname;
-	}
-
-	public String getAudioDriverName() {
-		return audioDriverName;
-	}
-
-	public void setAudioDriverName(String audioDriverName) {
-		this.audioDriverName = audioDriverName;
-	}
-	
-	public void validate() {
-		if(skin.length <= SkinType.getMaxSkinTypeID()) {
-			skin = Arrays.copyOf(skin, SkinType.getMaxSkinTypeID() + 1);
-			Logger.getGlobal().warning("skinを再構成");
-		}
-
-		if(mode14 == null || mode14.getController().length < 2) {
-			mode14 = new PlayConfig(
-					PlayConfig.KeyboardConfig.default14(),
-					new PlayConfig.ControllerConfig[] { PlayConfig.ControllerConfig.default7(), PlayConfig.ControllerConfig.default7() },
-					MidiConfig.default14());
-			Logger.getGlobal().warning("mode14のPlayConfigを再構成");
-		}
-		if (mode24double == null || mode24double.getController().length < 2) {
-			mode24double = new PlayConfig(
-					new PlayConfig.KeyboardConfig(),
-					new PlayConfig.ControllerConfig[] { new PlayConfig.ControllerConfig(), new PlayConfig.ControllerConfig() },
-					MidiConfig.default24double());
-			Logger.getGlobal().warning("mode24doubleのPlayConfigを再構成");
-		}
 	}
 
 	public int getTarget() {
