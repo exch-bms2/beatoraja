@@ -78,7 +78,7 @@ public class JSONSkinLoader extends SkinLoader{
 				SkinHeader.CustomFile[] files = new SkinHeader.CustomFile[sk.filepath.length];
 				for (int i = 0; i < sk.filepath.length; i++) {
 					Filepath pr = sk.filepath[i];
-					files[i] = new SkinHeader.CustomFile(pr.name, p.getParent().toString() + "/" + pr.path);
+					files[i] = new SkinHeader.CustomFile(pr.name, p.getParent().toString() + "/" + pr.path, pr.def);
 				}
 				header.setCustomFiles(files);
 			}
@@ -775,6 +775,7 @@ public class JSONSkinLoader extends SkinLoader{
 	public static class Filepath {
 		public String name;
 		public String path;
+		public String def;
 	}
 
 	public static class Source {

@@ -235,16 +235,6 @@ public class PlayConfigurationView implements Initializable {
 			}
 		});
 		resolution.setButtonCell(new ResolutionListCell());
-		resolution.getItems().clear();
-		Graphics.DisplayMode[] displays = MainLoader.getAvailableDisplayMode();
-		for(Resolution r : Resolution.values()) {
-			for(Graphics.DisplayMode display : displays) {
-				if(display.width == r.width && display.height == r.height) {
-					resolution.getItems().add(r);
-					break;
-				}
-			}
-		}
 		initComboBox(scoreop, new String[] { "OFF", "MIRROR", "RANDOM", "R-RANDOM", "S-RANDOM", "SPIRAL", "H-RANDOM",
 				"ALL-SCR", "RANDOM-EX", "S-RANDOM-EX" });
 		initComboBox(gaugeop, new String[] { "ASSIST EASY", "EASY", "NORMAL", "HARD", "EX-HARD", "HAZARD" });
@@ -291,8 +281,9 @@ public class PlayConfigurationView implements Initializable {
 	 */
 	public void update(Config config) {
 		this.config = config;
-		resolution.setValue(config.getResolution());
 		fullscreen.setSelected(config.isFullscreen());
+		updateResolutions();
+		resolution.setValue(config.getResolution());
 		vsync.setSelected(config.isVsync());
 		bgaop.setValue(config.getBga());
 		bgaexpand.setValue(config.getBgaExpand());
@@ -334,6 +325,32 @@ public class PlayConfigurationView implements Initializable {
 
 		updateAudioDriver();
 		updatePlayer();
+	}
+
+	@FXML
+	public void updateResolutions() {
+		Resolution oldValue = resolution.getValue();
+		resolution.getItems().clear();
+		if (fullscreen.isSelected()) {
+			Graphics.DisplayMode[] displays = MainLoader.getAvailableDisplayMode();
+			for(Resolution r : Resolution.values()) {
+				for(Graphics.DisplayMode display : displays) {
+					if(display.width == r.width && display.height == r.height) {
+						resolution.getItems().add(r);
+						break;
+					}
+				}
+			}
+		} else {
+			Graphics.DisplayMode display = MainLoader.getDesktopDisplayMode();
+			for(Resolution r : Resolution.values()) {
+				if (r.width <= display.width && r.height <= display.height) {
+					resolution.getItems().add(r);
+				}
+			}
+		}
+		resolution.setValue(resolution.getItems().contains(oldValue)
+				? oldValue : resolution.getItems().get(resolution.getItems().size() - 1));
 	}
 
 	public void updatePlayer() {
@@ -948,9 +965,23 @@ class SkinConfigurationView {
 				for (Path p : paths) {
 					combo.getItems().add(p.getFileName().toString());
 				}
-				if (property != null) {
-					String s = (String) property.get(file.name);
-					combo.setValue(s);
+				String selection = property != null ? (String) property.get(file.name) : null;
+				if (selection == null && file.def != null) {
+					// デフォルト値のファイル名またはそれに拡張子を付けたものが存在すれば使用する
+					for (String item : combo.getItems()) {
+						if (item.equalsIgnoreCase(file.def)) {
+							selection = item;
+							break;
+						}
+						int point = item.lastIndexOf('.');
+						if (point != -1 && item.substring(0, point).equalsIgnoreCase(file.def)) {
+							selection = item;
+							break;
+						}
+					}
+				}
+				if (selection != null) {
+					combo.setValue(selection);
 				} else {
 					combo.getSelectionModel().select(0);
 				}

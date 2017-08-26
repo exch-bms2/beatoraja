@@ -33,7 +33,7 @@
                      <children>
                         <VBox prefHeight="200.0" prefWidth="552.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                            <children>
-                              <CheckBox fx:id="fullscreen" mnemonicParsing="false" prefHeight="25.0" prefWidth="133.0" text="%FULLSCREEN" />
+                              <CheckBox fx:id="fullscreen" onAction="#updateResolutions" mnemonicParsing="false" prefHeight="25.0" prefWidth="133.0" text="%FULLSCREEN" />
                               <HBox alignment="CENTER_LEFT" prefHeight="30.0" prefWidth="552.0">
                                  <children>
                                     <Label text="%RESOLUTION" />

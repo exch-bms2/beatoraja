@@ -265,8 +265,10 @@ public class BMSPlayer extends MainState {
 
 		final BMSPlayerInputProcessor input = main.getInputProcessor();
 		input.setMinimumInputDutration(conf.getInputduration());
-		if (autoplay == 0 || autoplay == 2) {
+		if (autoplay == 0) {
 			input.setExclusiveDeviceType(resource.getPlayDeviceType());
+		} else if (autoplay == 2) {
+			input.enableAllDevices();
 		} else {
 			input.disableAllDevices();
 		}
