@@ -108,7 +108,7 @@ public class JudgeManager {
 	/**
 	 * オートプレイでキーを押下する最小時間(ms)
 	 */
-	private final int auto_minduration = 100;
+	private final int auto_minduration = 80;
 
 	private final JudgeAlgorithm algorithm;
 
