@@ -237,6 +237,10 @@ public class JudgeManager {
 							if ((lntype != BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
 									|| ln.getType() == LongNote.TYPE_CHARGENOTE
 									|| ln.getType() == LongNote.TYPE_HELLCHARGENOTE) {
+								if (sckeyassign[lane] >= 0 && laneassign[lane].length >= 2) {
+									auto_presstime[laneassign[lane][0]] = Long.MIN_VALUE;
+									auto_presstime[laneassign[lane][1]] = now;
+								}
 								this.update(lane, ln, time, 0, 0);
 								main.play(processing[lane], config.getKeyvolume());
 								processing[lane] = null;
@@ -251,9 +255,10 @@ public class JudgeManager {
 			}
 
 			if (autoplay) {
-				// TODO: BSS終端で逆方向に回す
-				if (auto_presstime[laneassign[lane][0]] != Long.MIN_VALUE && now - auto_presstime[laneassign[lane][0]] > auto_minduration && processing[lane] == null) {
-					auto_presstime[laneassign[lane][0]] = Long.MIN_VALUE;
+				for (int key : laneassign[lane]) {
+					if (auto_presstime[key] != Long.MIN_VALUE && now - auto_presstime[key] > auto_minduration && processing[lane] == null) {
+						auto_presstime[key] = Long.MIN_VALUE;
+					}
 				}
 			}
 		}
