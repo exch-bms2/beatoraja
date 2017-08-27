@@ -17,7 +17,7 @@ import com.badlogic.gdx.math.Rectangle;
  */
 public class SkinNoteDistributionGraph extends SkinObject {
 
-	private Texture backtex;
+	private TextureRegion backtex;
 	private TextureRegion shapetex;
 
 	private TextureRegion startcursor;
@@ -94,10 +94,10 @@ public class SkinNoteDistributionGraph extends SkinObject {
 			updateGraph(model);
 		}			
 
-		sprite.draw(backtex, r.x, r.y + r.height, r.width, -r.height);
+		draw(sprite, backtex, r.x, r.y + r.height, r.width, -r.height);
 		final float render = time >= delay ? 1.0f : (float) time / delay;
 		shapetex.setRegionWidth((int) (shapetex.getTexture().getWidth() * render));
-		sprite.draw(shapetex, r.x, r.y + r.height, r.width * render, -r.height);
+		draw(sprite, shapetex, r.x, r.y + r.height, r.width * render, -r.height);
 		// スタートカーソル描画
 		if (starttime >= 0) {
 			int dx = (int) (starttime * r.width / (data.length * 1000));
@@ -194,7 +194,7 @@ public class SkinNoteDistributionGraph extends SkinObject {
 	private void updateTexture() {
 		if (shapetex != null) {
 			shapetex.getTexture().dispose();
-			backtex.dispose();
+			backtex.getTexture().dispose();
 		}
 		
 		Pixmap shape = new Pixmap(data.length * 5, max * 5, Pixmap.Format.RGBA8888);
@@ -216,7 +216,7 @@ public class SkinNoteDistributionGraph extends SkinObject {
 				shape.drawLine(i * 5, 0, i * 5, max * 5);
 			}
 		}
-		backtex = new Texture(shape);
+		backtex = new TextureRegion(new Texture(shape));
 		shape.dispose();
 
 		shape = new Pixmap(data.length * 5, max * 5, Pixmap.Format.RGBA8888);
@@ -244,7 +244,7 @@ public class SkinNoteDistributionGraph extends SkinObject {
 	@Override
 	public void dispose() {
 		if (shapetex != null) {
-			backtex.dispose();
+			backtex.getTexture().dispose();
 			shapetex.getTexture().dispose();
 			startcursor.getTexture().dispose();
 			endcursor.getTexture().dispose();
