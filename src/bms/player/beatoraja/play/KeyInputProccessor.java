@@ -43,14 +43,14 @@ class KeyInputProccessor {
 		final long[] timer = player.getTimer();
 		final JudgeManager judge = player.getJudgeManager();
 		final boolean[] keystate = player.getMainController().getInputProcessor().getKeystate();
+		final long[] auto_presstime = judge.getAutoPresstime();
 
 		for (int lane = 0; lane < player.getLaneProperty().getLaneSkinOffset().length; lane++) {
 			// キービームフラグON/OFF
 			final int offset = player.getLaneProperty().getLaneSkinOffset()[lane];
 			boolean pressed = false;
-			for (int i = 0; i < player.getLaneProperty().getLaneKeyAssign()[lane].length; i++) {
-				int key = player.getLaneProperty().getLaneKeyAssign()[lane][i];
-				if (key >= 0 && keystate[key]) {
+			for (int key : player.getLaneProperty().getLaneKeyAssign()[lane]) {
+				if (keystate[key] || auto_presstime[key] != Long.MIN_VALUE) {
 					pressed = true;
 					break;
 				}
@@ -75,9 +75,11 @@ class KeyInputProccessor {
 			for (int s = 0; s < scratch.length; s++) {
 				scratch[s] += s % 2 == 0 ? 2160 - deltatime : deltatime;
 				if (s < player.getLaneProperty().getScratchKeyAssign().length) {
-					if (keystate[player.getLaneProperty().getScratchKeyAssign()[s][0]]) {
+					int key0 = player.getLaneProperty().getScratchKeyAssign()[s][0];
+					int key1 = player.getLaneProperty().getScratchKeyAssign()[s][1];
+					if (keystate[key0] || auto_presstime[key0] != Long.MIN_VALUE) {
 						scratch[s] += deltatime * 2;
-					} else if (keystate[player.getLaneProperty().getScratchKeyAssign()[s][1]]) {
+					} else if (keystate[key1] || auto_presstime[key1] != Long.MIN_VALUE) {
 						scratch[s] += 2160 - deltatime * 2;
 					}
 				}
