@@ -380,27 +380,27 @@
 			]}
 		],
 		"numbers":[
-			{"id":"judgen-pg", "loop":-1, "timer":46 ,"offsety":50, "dst":[
+			{"id":"judgen-pg", "loop":-1, "timer":46, "dst":[
 				{"time":0, "x":70, "y":-30, "w":20, "h":20},
 				{"time":500}
 			]},
-			{"id":"judgen-gr", "loop":-1, "timer":46 ,"offsety":50, "dst":[
+			{"id":"judgen-gr", "loop":-1, "timer":46, "dst":[
 				{"time":0, "x":70, "y":-30, "w":20, "h":20},
 				{"time":500}
 			]},
-			{"id":"judgen-gd", "loop":-1, "timer":46 ,"offsety":50, "dst":[
+			{"id":"judgen-gd", "loop":-1, "timer":46, "dst":[
 				{"time":0, "x":70, "y":-30, "w":20, "h":20},
 				{"time":500}
 			]},
-			{"id":"judgen-bd", "loop":-1, "timer":46 ,"offsety":50, "dst":[
+			{"id":"judgen-bd", "loop":-1, "timer":46, "dst":[
 				{"time":0, "x":70, "y":-30, "w":20, "h":20},
 				{"time":500}
 			]},
-			{"id":"judgen-pr", "loop":-1, "timer":46 ,"offsety":50, "dst":[
+			{"id":"judgen-pr", "loop":-1, "timer":46, "dst":[
 				{"time":0, "x":70, "y":-30, "w":20, "h":20},
 				{"time":500}
 			]},
-			{"id":"judgen-ms", "loop":-1, "timer":46 ,"offsety":50, "dst":[
+			{"id":"judgen-ms", "loop":-1, "timer":46, "dst":[
 				{"time":0, "x":70, "y":-30, "w":20, "h":20},
 				{"time":500}
 			]}
@@ -437,27 +437,27 @@
 				]}
 			],
 			"numbers":[
-				{"id":"judgen-pg", "loop":-1, "timer":47 ,"offsety":50, "dst":[
+				{"id":"judgen-pg", "loop":-1, "timer":47, "dst":[
 					{"time":0, "x":70, "y":-30, "w":20, "h":20},
 					{"time":500}
 				]},
-				{"id":"judgen-gr", "loop":-1, "timer":47 ,"offsety":50, "dst":[
+				{"id":"judgen-gr", "loop":-1, "timer":47, "dst":[
 					{"time":0, "x":70, "y":-30, "w":20, "h":20},
 					{"time":500}
 				]},
-				{"id":"judgen-gd", "loop":-1, "timer":47 ,"offsety":50, "dst":[
+				{"id":"judgen-gd", "loop":-1, "timer":47, "dst":[
 					{"time":0, "x":70, "y":-30, "w":20, "h":20},
 					{"time":500}
 				]},
-				{"id":"judgen-bd", "loop":-1, "timer":47 ,"offsety":50, "dst":[
+				{"id":"judgen-bd", "loop":-1, "timer":47, "dst":[
 					{"time":0, "x":70, "y":-30, "w":20, "h":20},
 					{"time":500}
 				]},
-				{"id":"judgen-pr", "loop":-1, "timer":47 ,"offsety":50, "dst":[
+				{"id":"judgen-pr", "loop":-1, "timer":47, "dst":[
 					{"time":0, "x":70, "y":-30, "w":20, "h":20},
 					{"time":500}
 				]},
-				{"id":"judgen-ms", "loop":-1, "timer":47 ,"offsety":50, "dst":[
+				{"id":"judgen-ms", "loop":-1, "timer":47, "dst":[
 					{"time":0, "x":70, "y":-30, "w":20, "h":20},
 					{"time":500}
 				]}
@@ -494,27 +494,27 @@
 				]}
 			],
 			"numbers":[
-				{"id":"judgen-pg", "loop":-1, "timer":247 ,"offsety":50, "dst":[
+				{"id":"judgen-pg", "loop":-1, "timer":247, "dst":[
 					{"time":0, "x":70, "y":-30, "w":20, "h":20},
 					{"time":500}
 				]},
-				{"id":"judgen-gr", "loop":-1, "timer":247 ,"offsety":50, "dst":[
+				{"id":"judgen-gr", "loop":-1, "timer":247, "dst":[
 					{"time":0, "x":70, "y":-30, "w":20, "h":20},
 					{"time":500}
 				]},
-				{"id":"judgen-gd", "loop":-1, "timer":247 ,"offsety":50, "dst":[
+				{"id":"judgen-gd", "loop":-1, "timer":247, "dst":[
 					{"time":0, "x":70, "y":-30, "w":20, "h":20},
 					{"time":500}
 				]},
-				{"id":"judgen-bd", "loop":-1, "timer":247 ,"offsety":50, "dst":[
+				{"id":"judgen-bd", "loop":-1, "timer":247, "dst":[
 					{"time":0, "x":70, "y":-30, "w":20, "h":20},
 					{"time":500}
 				]},
-				{"id":"judgen-pr", "loop":-1, "timer":247 ,"offsety":50, "dst":[
+				{"id":"judgen-pr", "loop":-1, "timer":247, "dst":[
 					{"time":0, "x":70, "y":-30, "w":20, "h":20},
 					{"time":500}
 				]},
-				{"id":"judgen-ms", "loop":-1, "timer":247 ,"offsety":50, "dst":[
+				{"id":"judgen-ms", "loop":-1, "timer":247, "dst":[
 					{"time":0, "x":70, "y":-30, "w":20, "h":20},
 					{"time":500}
 				]}
