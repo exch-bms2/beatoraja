@@ -1,9 +1,6 @@
 package bms.player.beatoraja.play;
 
-import bms.model.Lane;
-import bms.model.LongNote;
-import bms.model.MineNote;
-import bms.model.Note;
+import bms.model.*;
 
 /**
  * 判定アルゴリズム
@@ -52,7 +49,16 @@ public enum JudgeAlgorithm {
 
 	private int judge;
 
-	public Note getNote(Lane lanemodel, long ptime, int[][] judgetable, int lane, boolean pmsjudge) {
+	/**
+	 * 判定対象ノーツを取得する
+	 *
+	 * @param lanemodel レーン
+	 * @param ptime 時間
+	 * @param judgetable 判定時間テーブル
+	 * @param pmsjudge PMS判定
+	 * @return 判定対象ノーツ
+	 */
+	public Note getNote(Lane lanemodel, long ptime, int[][] judgetable, boolean pmsjudge) {
 		Note note = null;
 		int judge = 0;
 		for (Note judgenote = lanemodel.getNote();judgenote != null;judgenote = lanemodel.getNote()) {

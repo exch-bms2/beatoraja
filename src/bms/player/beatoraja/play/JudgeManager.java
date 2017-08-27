@@ -312,8 +312,7 @@ public class JudgeManager {
 					final int[][] judge = sc >= 0 ? sjudge : njudge;
 					// 対象ノーツの抽出
 					lanemodel.reset();
-					final Note tnote = algorithm.getNote(lanemodel, ptime, judge,
-							lane, pmsjudge);
+					final Note tnote = algorithm.getNote(lanemodel, ptime, judge, pmsjudge);
 					final int j = algorithm.getJudge();
 
 					if (tnote != null) {
@@ -495,6 +494,9 @@ public class JudgeManager {
 	private void update(int lane, Note n, int time, int judge, int fast) {
 		if (judge < 5) {
 			n.setState(judge + 1);
+		}
+		if(pmsjudge && judge == 4 && n.getPlayTime() != 0) {
+			return;
 		}
 		n.setPlayTime(fast);
 		score.addJudgeCount(judge, fast >= 0, 1);
