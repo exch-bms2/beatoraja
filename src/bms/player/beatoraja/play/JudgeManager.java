@@ -169,13 +169,16 @@ public class JudgeManager {
 		// 通過系の判定
 		Arrays.fill(next_inclease, false);
 		
-		for (int key = 0; key < keyassign.length; key++) {
-			final int lane = keyassign[key];
-			if(lane == -1) {
-				continue;
-			}
+		for (int lane = 0; lane < laneassign.length; lane++) {
 			final Lane lanemodel = lanes[lane];
 			lanemodel.mark(prevtime + njudge[4][0]);
+			boolean pressed = false;
+			for (int key : laneassign[lane]) {
+				if (keystate[key]) {
+					pressed = true;
+					break;
+				}
+			}
 			for(Note note = lanemodel.getNote();note != null && note.getTime() <= time;note = lanemodel.getNote()) {
 				if (note instanceof LongNote) {
 					// HCN判定
@@ -189,7 +192,7 @@ public class JudgeManager {
 							passing[lane] = lnote;								
 						}
 					}
-				} else if (note instanceof MineNote && keystate[key]) {
+				} else if (note instanceof MineNote && pressed) {
 					final MineNote mnote = (MineNote) note;
 					// 地雷ノート判定
 					main.getGauge().addValue(-mnote.getDamage());
@@ -227,7 +230,7 @@ public class JudgeManager {
 				}
 			}
 			// HCNゲージ増減判定
-			if (passing[lane] != null && (keystate[key] || (passing[lane].getPair().getState() > 0 && passing[lane].getPair().getState() <= 3) || autoplay)) {
+			if (passing[lane] != null && (pressed || (passing[lane].getPair().getState() > 0 && passing[lane].getPair().getState() <= 3) || autoplay)) {
 				next_inclease[lane] = true;
 			}
 		}
