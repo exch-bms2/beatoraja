@@ -63,7 +63,7 @@ class KeyInputProccessor {
 					timer[timerOff] = Long.MIN_VALUE;
 				}
 			} else {
-				if (timer[timerOff] == Long.MIN_VALUE) {
+				if (timer[timerOn] != Long.MIN_VALUE) {
 					timer[timerOff] = now;
 					timer[timerOn] = Long.MIN_VALUE;
 				}
