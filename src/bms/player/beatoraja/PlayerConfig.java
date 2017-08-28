@@ -291,7 +291,6 @@ public class PlayerConfig {
 			return getMode14();
 		case 9:
 			return getMode9();
-		case 24:
 		case 25:
 			return getMode24();
 		case 50:
