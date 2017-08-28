@@ -78,6 +78,7 @@ public class JudgeManager {
 	private int[] sckey;
 	private int[] offset;
 	private int[] player;
+	private int[][] laneassign;
 	/**
 	 * HCNの増減間隔(ms)
 	 */
@@ -103,6 +104,11 @@ public class JudgeManager {
 	private int prevtime;
 
 	private boolean autoplay = false;
+	private long[] auto_presstime;
+	/**
+	 * オートプレイでキーを押下する最小時間(ms)
+	 */
+	private final int auto_minduration = 80;
 
 	private final JudgeAlgorithm algorithm;
 
@@ -129,6 +135,7 @@ public class JudgeManager {
 		offset = main.getLaneProperty().getLaneSkinOffset();
 		player = main.getLaneProperty().getLanePlayer();
 		sckeyassign = main.getLaneProperty().getLaneScratchAssign();
+		laneassign = main.getLaneProperty().getLaneKeyAssign();
 		sckey = new int[model.getMode().scratchKey.length];
 
 		judge = new int[model.getMode().player][model.getMode().key / model.getMode().player + 1];
@@ -137,6 +144,11 @@ public class JudgeManager {
 		passingcount = new int[sckeyassign.length];
 		inclease = new boolean[sckeyassign.length];
 		next_inclease = new boolean[sckeyassign.length];
+		auto_presstime = new long[keyassign.length];
+
+		for (int key = 0; key < keyassign.length; key++) {
+			auto_presstime[key] = Long.MIN_VALUE;
+		}
 
 		final int judgerank = resource.getPlayerConfig().isExpandjudge() ? model.getJudgerank() * 4 : model.getJudgerank();
 		int constraint = 2;
@@ -166,16 +178,21 @@ public class JudgeManager {
 		final Config config = main.getMainController().getPlayerResource().getConfig();
 		final long[] keytime = input.getTime();
 		final boolean[] keystate = input.getKeystate();
+		final long[] timer = main.getTimer();
+		final int now = main.getNowTime();
 		// 通過系の判定
 		Arrays.fill(next_inclease, false);
 		
-		for (int key = 0; key < keyassign.length; key++) {
-			final int lane = keyassign[key];
-			if(lane == -1) {
-				continue;
-			}
+		for (int lane = 0; lane < laneassign.length; lane++) {
 			final Lane lanemodel = lanes[lane];
 			lanemodel.mark(prevtime + njudge[4][0]);
+			boolean pressed = false;
+			for (int key : laneassign[lane]) {
+				if (keystate[key]) {
+					pressed = true;
+					break;
+				}
+			}
 			for(Note note = lanemodel.getNote();note != null && note.getTime() <= time;note = lanemodel.getNote()) {
 				if (note instanceof LongNote) {
 					// HCN判定
@@ -189,7 +206,7 @@ public class JudgeManager {
 							passing[lane] = lnote;								
 						}
 					}
-				} else if (note instanceof MineNote && keystate[key]) {
+				} else if (note instanceof MineNote && pressed) {
 					final MineNote mnote = (MineNote) note;
 					// 地雷ノート判定
 					main.getGauge().addValue(-mnote.getDamage());
@@ -199,12 +216,14 @@ public class JudgeManager {
 				if (autoplay) {
 					// ここにオートプレイ処理を入れる
 					if (note instanceof NormalNote && note.getState() == 0) {
+						auto_presstime[laneassign[lane][0]] = now;
 						main.play(note, config.getKeyvolume());
 						this.update(lane, note, time, 0, 0);
 					}
 					if (note instanceof LongNote) {
 						final LongNote ln = (LongNote) note;
 						if (!ln.isEnd() && ln.getState() == 0 && processing[lane] == null) {
+							auto_presstime[laneassign[lane][0]] = now;
 							main.play(note, config.getKeyvolume());
 							if ((lntype == BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
 									|| ln.getType() == LongNote.TYPE_LONGNOTE) {
@@ -218,6 +237,10 @@ public class JudgeManager {
 							if ((lntype != BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
 									|| ln.getType() == LongNote.TYPE_CHARGENOTE
 									|| ln.getType() == LongNote.TYPE_HELLCHARGENOTE) {
+								if (sckeyassign[lane] >= 0 && laneassign[lane].length >= 2) {
+									auto_presstime[laneassign[lane][0]] = Long.MIN_VALUE;
+									auto_presstime[laneassign[lane][1]] = now;
+								}
 								this.update(lane, ln, time, 0, 0);
 								main.play(processing[lane], config.getKeyvolume());
 								processing[lane] = null;
@@ -227,8 +250,16 @@ public class JudgeManager {
 				}
 			}
 			// HCNゲージ増減判定
-			if (passing[lane] != null && (keystate[key] || (passing[lane].getPair().getState() > 0 && passing[lane].getPair().getState() <= 3) || autoplay)) {
+			if (passing[lane] != null && (pressed || (passing[lane].getPair().getState() > 0 && passing[lane].getPair().getState() <= 3) || autoplay)) {
 				next_inclease[lane] = true;
+			}
+
+			if (autoplay) {
+				for (int key : laneassign[lane]) {
+					if (auto_presstime[key] != Long.MIN_VALUE && now - auto_presstime[key] > auto_minduration && processing[lane] == null) {
+						auto_presstime[key] = Long.MIN_VALUE;
+					}
+				}
 			}
 		}
 		
@@ -236,7 +267,6 @@ public class JudgeManager {
 		inclease = next_inclease;
 		next_inclease = b;
 
-		final long[] timer = main.getTimer();
 		for (int lane = 0; lane < passing.length; lane++) {
 			final int offset = main.getLaneProperty().getLaneSkinOffset()[lane];
 			final int timerActive = SkinPropertyMapper.hcnActiveTimerId(main.getLaneProperty().getLanePlayer()[lane], offset);
@@ -257,7 +287,7 @@ public class JudgeManager {
 					passingcount[lane] -= hcnduration;
 				}
 				if(timer[timerActive] == Long.MIN_VALUE) {
-					timer[timerActive] = main.getNowTime();
+					timer[timerActive] = now;
 				}
 				timer[timerDamage] = Long.MIN_VALUE;
 			} else {
@@ -268,7 +298,7 @@ public class JudgeManager {
 					passingcount[lane] += hcnduration;
 				}
 				if(timer[timerDamage] == Long.MIN_VALUE) {
-					timer[timerDamage] = main.getNowTime();
+					timer[timerDamage] = now;
 				}
 				timer[timerActive] = Long.MIN_VALUE;
 			}
@@ -481,7 +511,7 @@ public class JudgeManager {
 			int timerId = SkinPropertyMapper.holdTimerId(player[lane], offset[lane]);
 			if (processing[lane] != null || (passing[lane] != null && inclease[lane])) {
 				if (main.getTimer()[timerId] == Long.MIN_VALUE) {
-					main.getTimer()[timerId] = main.getNowTime();
+					main.getTimer()[timerId] = now;
 				}
 			} else {
 				main.getTimer()[timerId] = Long.MIN_VALUE;
@@ -540,6 +570,10 @@ public class JudgeManager {
 
 	public boolean[] getHellChargeJudges() {
 		return inclease;
+	}
+
+	public long[] getAutoPresstime() {
+		return auto_presstime;
 	}
 
 	/**
