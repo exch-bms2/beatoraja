@@ -45,7 +45,7 @@ public class MusicSelector extends MainState {
 	 */
 	private SongDatabaseAccessor songdb;
 
-	public static final Mode[] MODE = { null, Mode.BEAT_7K, Mode.BEAT_14K, Mode.POPN_9K, Mode.BEAT_5K, Mode.BEAT_10K };
+	public static final Mode[] MODE = { null, Mode.BEAT_7K, Mode.BEAT_14K, Mode.POPN_9K, Mode.BEAT_5K, Mode.BEAT_10K, Mode.KEYBOARD_24K, Mode.KEYBOARD_24K_DOUBLE };
 	/**
 	 * 選択中のソート
 	 */
@@ -689,7 +689,8 @@ public class MusicSelector extends MainState {
 			return 12;
 		case 9:
 			return 50;
-		case 24:
+		case 25:
+		case 50:
 			return 10;
 		default:
 			return 0;

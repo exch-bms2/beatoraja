@@ -230,6 +230,11 @@ public class Config {
 			new PlayConfig.ControllerConfig[] { new PlayConfig.ControllerConfig() },
 			MidiConfig.default24());
 
+	private PlayConfig mode24double = new PlayConfig(
+			new PlayConfig.KeyboardConfig(),
+			new PlayConfig.ControllerConfig[] { new PlayConfig.ControllerConfig(), new PlayConfig.ControllerConfig() },
+			MidiConfig.default24double());
+
 	private int musicselectinput = 0;
 
 	private boolean updatesong = false;
@@ -569,8 +574,10 @@ public class Config {
 			return getMode14();
 		case 9:
 			return getMode9();
-		case 24:
+		case 25:
 			return getMode24();
+		case 50:
+			return getMode24double();
 		default:
 			return getMode7();
 		}
@@ -602,6 +609,10 @@ public class Config {
 
 	public PlayConfig getMode24() {
 		return mode24;
+	}
+
+	public PlayConfig getMode24double() {
+		return mode24double;
 	}
 
 	public void setMode24(PlayConfig mode24) {

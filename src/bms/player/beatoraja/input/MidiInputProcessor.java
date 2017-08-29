@@ -90,7 +90,6 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 	}
 
 	public void clear() {
-		pitch = 0;
 		lastPressedKeyAvailable = false;
 	}
 
