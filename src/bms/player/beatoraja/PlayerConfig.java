@@ -113,6 +113,11 @@ public class PlayerConfig {
 			new PlayConfig.ControllerConfig[] { new PlayConfig.ControllerConfig() },
 			MidiConfig.default24());
 
+	private PlayConfig mode24double = new PlayConfig(
+			new PlayConfig.KeyboardConfig(),
+			new PlayConfig.ControllerConfig[] { new PlayConfig.ControllerConfig(), new PlayConfig.ControllerConfig() },
+			MidiConfig.default24double());
+
 	private int musicselectinput = 0;
 
 	private String irname = "";
@@ -146,6 +151,7 @@ public class PlayerConfig {
 		this.mode14 = c.getMode14();
 		this.mode9 = c.getMode9();
 		this.mode24 = c.getMode24();
+		this.mode24double = c.getMode24double();
 		this.musicselectinput = c.getMusicselectinput();
 		this.irname = c.getIrname();
 		this.userid = c.getUserid();
@@ -285,8 +291,10 @@ public class PlayerConfig {
 			return getMode14();
 		case 9:
 			return getMode9();
-		case 24:
+		case 25:
 			return getMode24();
+		case 50:
+			return getMode24double();
 		default:
 			return getMode7();
 		}
@@ -329,6 +337,21 @@ public class PlayerConfig {
 
 	public void setMode24(PlayConfig mode24) {
 		this.mode24 = mode24;
+	}
+
+	public PlayConfig getMode24double() {
+		if(mode24double == null || mode24double.getController().length < 2) {
+			mode24double = new PlayConfig(
+					new PlayConfig.KeyboardConfig(),
+					new PlayConfig.ControllerConfig[] { new PlayConfig.ControllerConfig(), new PlayConfig.ControllerConfig() },
+					MidiConfig.default24double());
+			Logger.getGlobal().warning("mode24doubleのPlayConfigを再構成");
+		}
+		return mode24double;
+	}
+
+	public void setMode24double(PlayConfig mode24double) {
+		this.mode24double = mode24double;
 	}
 
 	public void setMode(Mode m)  {

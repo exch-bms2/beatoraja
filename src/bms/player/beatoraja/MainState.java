@@ -4,6 +4,7 @@ import java.io.File;
 import java.nio.file.Paths;
 import java.util.*;
 
+import bms.model.Mode;
 import bms.player.beatoraja.play.TargetProperty;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.lr2.LR2SkinCSVLoader;
@@ -167,15 +168,19 @@ public abstract class MainState {
 		case OPTION_JUDGE_VERYHARD:
 			return model != null && (model.getJudge() == 0 || (model.getJudge() >= 10 && model.getJudge() < 50));
 		case OPTION_5KEYSONG:
-			return model != null && model.getMode() == 5;
+			return model != null && model.getMode() == Mode.BEAT_5K.id;
 		case OPTION_7KEYSONG:
-			return model != null && model.getMode() == 7;
+			return model != null && model.getMode() == Mode.BEAT_7K.id;
 		case OPTION_9KEYSONG:
-			return model != null && model.getMode() == 9;
+			return model != null && model.getMode() == Mode.POPN_9K.id;
 		case OPTION_10KEYSONG:
-			return model != null && model.getMode() == 10;
+			return model != null && model.getMode() == Mode.BEAT_10K.id;
 		case OPTION_14KEYSONG:
-			return model != null && model.getMode() == 14;
+			return model != null && model.getMode() == Mode.BEAT_14K.id;
+		case OPTION_24KEYSONG:
+			return model != null && model.getMode() == Mode.KEYBOARD_24K.id;
+		case OPTION_24KEYDPSONG:
+			return model != null && model.getMode() == Mode.KEYBOARD_24K_DOUBLE.id;
 		case OPTION_NO_TEXT:
 			return model != null && !model.hasDocument();
 		case OPTION_TEXT:

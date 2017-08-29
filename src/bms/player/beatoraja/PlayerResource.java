@@ -209,7 +209,7 @@ public class PlayerResource {
 		case POPN_5K:
 			return Math.max(260.0, 7.605 * totalnotes / (0.01 * totalnotes + 6.5));
 		case KEYBOARD_24K:
-		case KEYBOARD_48K:
+		case KEYBOARD_24K_DOUBLE:
 			return Math.max(300.0, 7.605 * (totalnotes + 100) / (0.01 * totalnotes + 6.5));
 		default:
 			return Math.max(260.0, 7.605 * totalnotes / (0.01 * totalnotes + 6.5));

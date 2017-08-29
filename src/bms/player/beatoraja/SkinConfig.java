@@ -21,6 +21,8 @@ public class SkinConfig {
 	public static final String DEFAULT_DECIDE = "skin/default/decide.json";
 	public static final String DEFAULT_RESULT = "skin/default/result.json";
 	public static final String DEFAULT_GRADERESULT = "skin/default/graderesult.json";
+	public static final String DEFAULT_PLAY24 = "skin/default/play24.json";
+	public static final String DEFAULT_PLAY24DOUBLE = "skin/default/play24double.json";
 
 	public static final Map<SkinType, String> defaultSkinPathMap = new HashMap<SkinType, String>() {
 		{
@@ -33,6 +35,8 @@ public class SkinConfig {
 			put(SkinType.DECIDE, DEFAULT_DECIDE);
 			put(SkinType.RESULT, DEFAULT_RESULT);
 			put(SkinType.COURSE_RESULT, DEFAULT_GRADERESULT);
+			put(SkinType.PLAY_24KEYS, DEFAULT_PLAY24);
+			put(SkinType.PLAY_24KEYS_DOUBLE, DEFAULT_PLAY24DOUBLE);
 		}
 	};
 
