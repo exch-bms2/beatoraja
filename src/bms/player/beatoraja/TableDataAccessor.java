@@ -210,7 +210,12 @@ public class TableDataAccessor {
 							SongData[] songs = new SongData[g.getHash().length];
 							for(int i = 0;i < songs.length;i++) {
 								songs[i] = new SongData();
-								songs[i].setMd5(g.getHash()[i]);
+								final String hash = g.getHash()[i];
+								if (hash.length() == 32) {
+									songs[i].setMd5(hash);
+								} else if (hash.length() == 64) {
+									songs[i].setSha256(hash);
+								}
 							}
 							cd.setSong(songs);
 							List<CourseData.CourseDataConstraint> l = new ArrayList<>();
