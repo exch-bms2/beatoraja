@@ -452,27 +452,27 @@
 			]}
 		],
 		"numbers":[
-			{"id":"judgen-pg", "loop":-1, "timer":46 ,"offsety":50, "dst":[
+			{"id":"judgen-pg", "loop":-1, "timer":46, "dst":[
 				{"time":0, "x":200, "y":0, "w":40, "h":40},
 				{"time":500}
 			]},
-			{"id":"judgen-gr", "loop":-1, "timer":46 ,"offsety":50, "dst":[
+			{"id":"judgen-gr", "loop":-1, "timer":46, "dst":[
 				{"time":0, "x":200, "y":0, "w":40, "h":40},
 				{"time":500}
 			]},
-			{"id":"judgen-gd", "loop":-1, "timer":46 ,"offsety":50, "dst":[
+			{"id":"judgen-gd", "loop":-1, "timer":46, "dst":[
 				{"time":0, "x":200, "y":0, "w":40, "h":40},
 				{"time":500}
 			]},
-			{"id":"judgen-bd", "loop":-1, "timer":46 ,"offsety":50, "dst":[
+			{"id":"judgen-bd", "loop":-1, "timer":46, "dst":[
 				{"time":0, "x":200, "y":0, "w":40, "h":40},
 				{"time":500}
 			]},
-			{"id":"judgen-pr", "loop":-1, "timer":46 ,"offsety":50, "dst":[
+			{"id":"judgen-pr", "loop":-1, "timer":46, "dst":[
 				{"time":0, "x":200, "y":0, "w":40, "h":40},
 				{"time":500}
 			]},
-			{"id":"judgen-ms", "loop":-1, "timer":46 ,"offsety":50, "dst":[
+			{"id":"judgen-ms", "loop":-1, "timer":46, "dst":[
 				{"time":0, "x":200, "y":0, "w":40, "h":40},
 				{"time":500}
 			]}
