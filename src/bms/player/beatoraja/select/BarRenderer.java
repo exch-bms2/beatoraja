@@ -94,20 +94,15 @@ public class BarRenderer {
 			}
 		}
 
-		if(bmssearch == null) {
-			bmssearch = new TableBar(select, bmssearcha.read(), bmssearcha);
-			table.add(bmssearch);
-		} else {
-			Thread bst = new Thread() {
-				public void run() {
-					TableData td = bmssearcha.read();
-					if(td != null) {
-						tdaccessor.write(td);
-					}
+		Thread bst = new Thread() {
+			public void run() {
+				TableData td = bmssearcha.read();
+				if(td != null) {
+					tdaccessor.write(td);
 				}
-			};
-			bst.start();
-		}
+			}
+		};
+		bst.start();
 
 		this.tables = table.toArray(TableBar.class);
 		
