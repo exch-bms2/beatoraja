@@ -9,6 +9,7 @@ import bms.model.BMSModel;
 import bms.model.TimeLine;
 import bms.player.beatoraja.Config;
 import bms.player.beatoraja.PixmapResourcePool;
+import bms.player.beatoraja.PlayerConfig;
 import bms.player.beatoraja.play.BMSPlayer;
 
 import com.badlogic.gdx.Gdx;
@@ -29,6 +30,7 @@ public class BGAProcessor {
 
 	private BMSModel model;
 	private Config config;
+	private PlayerConfig player;
 	private float progress = 0;
 
 	private int[] mpgid = new int[0];
@@ -53,6 +55,8 @@ public class BGAProcessor {
 	 * ミスレイヤー表示開始時間
 	 */
 	private int misslayertime;
+
+	private int getMisslayerduration;
 	/**
 	 * 現在のミスレイヤーシーケンス
 	 */
@@ -71,8 +75,9 @@ public class BGAProcessor {
 	private TimeLine[] timelines;
 	private int pos;
 
-	public BGAProcessor(Config config) {
+	public BGAProcessor(Config config, PlayerConfig player) {
 		this.config = config;
+		this.player = player;
 
 		String vertex = "attribute vec4 " + ShaderProgram.POSITION_ATTRIBUTE + ";\n" //
 				+ "attribute vec4 " + ShaderProgram.COLOR_ATTRIBUTE + ";\n" //
@@ -313,9 +318,9 @@ public class BGAProcessor {
 			}
 		}
 
-		if (misslayer != null && misslayertime != 0 && time >= misslayertime && time < misslayertime + 500) {
+		if (misslayer != null && misslayertime != 0 && time >= misslayertime && time < misslayertime + getMisslayerduration) {
 			// draw miss layer
-			Texture miss = getBGAData(misslayer[misslayer.length * (time - misslayertime) / 500], true);
+			Texture miss = getBGAData(misslayer[misslayer.length * (time - misslayertime) / getMisslayerduration], true);
 			if (miss != null) {
 				miss.setFilter(TextureFilter.Linear, TextureFilter.Linear);
 				drawBGAFixRatio(sprite, r, miss);
@@ -414,6 +419,7 @@ public class BGAProcessor {
 	 */
 	public void setMisslayerTme(int time) {
 		misslayertime = time;
+		getMisslayerduration = player.getMisslayerDuration();
 	}
 
 	public void stop() {

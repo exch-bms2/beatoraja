@@ -40,9 +40,9 @@ public class BMSResource {
 	 */
 	private ArrayDeque<BGALoaderThread> bgaloaders = new ArrayDeque<BGALoaderThread>();
 
-	public BMSResource(AudioDriver audio, Config config) {
+	public BMSResource(AudioDriver audio, Config config, PlayerConfig player) {
 		this.audio = audio;
-		bga = new BGAProcessor(config);
+		bga = new BGAProcessor(config, player);
 	}
 	
 	public boolean setBMSFile(BMSModel model, final Path f, final Config config, int auto) {

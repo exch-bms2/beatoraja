@@ -110,7 +110,7 @@ public class PlayerResource {
 	public PlayerResource(AudioDriver audio, Config config, PlayerConfig pconfig) {
 		this.config = config;
 		this.pconfig = pconfig;
-		this.bmsresource = new BMSResource(audio, config);
+		this.bmsresource = new BMSResource(audio, config, pconfig);
 		this.playDeviceType = BMSPlayerInputDevice.Type.KEYBOARD;
 	}
 

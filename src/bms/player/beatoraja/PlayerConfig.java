@@ -60,6 +60,8 @@ public class PlayerConfig {
      * 選曲時のモードフィルター
      */
 	private Mode mode = null;
+
+	private int misslayerDuration = 0;
 	
 	/**
 	 * アシストオプション:コンスタント
@@ -412,5 +414,16 @@ public class PlayerConfig {
 
 	public void setTarget(int target) {
 		this.target = target;
+	}
+
+	public int getMisslayerDuration() {
+		if(misslayerDuration < 0) {
+			misslayerDuration = 0;
+		}
+		return misslayerDuration;
+	}
+
+	public void setMisslayerDuration(int misslayerTime) {
+		this.misslayerDuration = misslayerTime;
 	}
 }
