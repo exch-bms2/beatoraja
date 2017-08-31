@@ -415,7 +415,7 @@ class TableBar extends DirectoryBar {
 			for (SongData hash : course.getSong()) {
 				SongData song = null;
 				for(SongData sd :songs) {
-					if(hash.getMd5().equals(sd.getMd5()) || hash.getSha256().equals(sd.getSha256())) {
+					if((hash.getMd5().length() > 0 && hash.getMd5().equals(sd.getMd5())) || (hash.getSha256().length() > 0 && hash.getSha256().equals(sd.getSha256()))) {
 						song = sd;
 						break;
 					}
@@ -491,7 +491,8 @@ class HashBar extends DirectoryBar {
         for(SongData element : elements) {
             boolean exist = false;
             for (SongData song : songs) {
-                if(element.getMd5().equals(song.getMd5()) || element.getSha256().equals(song.getSha256())) {
+                if((element.getMd5().length() > 0 && element.getMd5().equals(song.getMd5()))
+                        || (element.getSha256().length() > 0 && element.getSha256().equals(song.getSha256()))) {
                     songbars.add(new SongBar(song));
                     exist = true;
                     break;
