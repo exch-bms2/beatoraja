@@ -194,6 +194,9 @@ public class JudgeManager {
 				}
 			}
 			for(Note note = lanemodel.getNote();note != null && note.getTime() <= time;note = lanemodel.getNote()) {
+				if(note.getTime() <= prevtime) {
+					continue;
+				}
 				if (note instanceof LongNote) {
 					// HCN判定
 					final LongNote lnote = (LongNote) note;
@@ -203,7 +206,7 @@ public class JudgeManager {
 							passing[lane] = null;
 							passingcount[lane] = 0;
 						} else {
-							passing[lane] = lnote;								
+							passing[lane] = lnote;
 						}
 					}
 				} else if (note instanceof MineNote && pressed) {
