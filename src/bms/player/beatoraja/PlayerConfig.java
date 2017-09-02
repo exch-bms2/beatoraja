@@ -60,8 +60,10 @@ public class PlayerConfig {
      * 選曲時のモードフィルター
      */
 	private Mode mode = null;
-
-	private int misslayerDuration = 0;
+	/**
+	 * 指定がない場合のミスレイヤー表示時間(ms)
+	 */
+	private int misslayerDuration = 500;
 	
 	/**
 	 * アシストオプション:コンスタント

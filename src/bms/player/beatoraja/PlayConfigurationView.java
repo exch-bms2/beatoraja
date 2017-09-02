@@ -172,6 +172,8 @@ public class PlayConfigurationView implements Initializable {
 	private Slider bgvolume;
 	@FXML
 	private ComboBox<Integer> judgealgorithm;
+	@FXML
+	private Spinner<Integer> misslayertime;
 
     @FXML
 	private ComboBox<Integer> autosavereplay1;
@@ -371,6 +373,8 @@ public class PlayConfigurationView implements Initializable {
 		judgeregion.setSelected(player.isShowjudgearea());
 		markprocessednote.setSelected(player.isMarkprocessednote());
 
+		misslayertime.getValueFactory().setValue(player.getMisslayerDuration());
+
 		irname.setValue(player.getIrname());
 		iruserid.setText(player.getUserid());
 		irpassword.setText(player.getPassword());
@@ -454,6 +458,9 @@ public class PlayConfigurationView implements Initializable {
 		player.setMarkprocessednote(markprocessednote.isSelected());
 
 		player.setShowjudgearea(judgeregion.isSelected());
+
+		player.setMisslayerDuration(getValue(misslayertime));
+
 		player.setIrname(irname.getValue());
 		player.setUserid(iruserid.getText());
 		player.setPassword(irpassword.getText());
