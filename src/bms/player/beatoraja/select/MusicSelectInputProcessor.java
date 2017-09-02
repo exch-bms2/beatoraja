@@ -3,6 +3,7 @@ package bms.player.beatoraja.select;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.play.TargetProperty;
+import bms.player.beatoraja.select.bar.*;
 import bms.player.beatoraja.song.SongData;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;

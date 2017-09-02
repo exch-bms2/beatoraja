@@ -147,16 +147,23 @@ public class TableDataAccessor {
 		return td;
 	}
 
-	public interface TableReader {
+	public static abstract class TableReader {
 
-		public TableData read();
+		public final String name;
+
+		public TableReader(String name) {
+			this.name = name;
+		}
+
+		public abstract TableData read();
 	}
 
-	public static class DifficultyTableReader implements TableReader {
+	public static class DifficultyTableReader extends TableReader {
 
-		private final String url;
+		private String url;
 
 		public DifficultyTableReader(String url) {
+			super(url);
 			this.url = url;
 		}
 
