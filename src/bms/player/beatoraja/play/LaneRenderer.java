@@ -328,51 +328,41 @@ public class LaneRenderer {
 				} else {
 					y += tl.getSection() * (tl.getMicroTime() - microtime) / tl.getMicroTime() * rxhs;
 				}
-				if (showTimeline) {
+				if (showTimeline && (i > 0 && (tl.getTime() / 1000) > (timelines[i - 1].getTime() / 1000))) {
+					for (SkinImage line : skin.getTimeLine()) {
+						line.draw(sprite, time, main, 0, (int) (y - hl));
+					}
 					for (Rectangle r : playerr) {
-						if (i > 0 && (tl.getTime() / 1000) > (timelines[i - 1].getTime() / 1000)) {
-							sprite.end();
-							shape.begin(ShapeType.Line);
-							shape.setColor(Color.valueOf("40c0c0"));
-							shape.line(r.x, (float)y, r.x + r.width, (float)y);
-							shape.end();
-							sprite.begin();
-							font.setColor(Color.valueOf("40c0c0"));
-							font.draw(sprite, String.format("%2d:%02d.%1d", tl.getTime() / 60000,
-									(tl.getTime() / 1000) % 60, (tl.getTime() / 100) % 10), r.x + 4, (float) (y + 20));
-						}
+						// TODO 数値もスキンベースへ移行
+						font.setColor(Color.valueOf("40c0c0"));
+						font.draw(sprite, String.format("%2d:%02d.%1d", tl.getTime() / 60000,
+								(tl.getTime() / 1000) % 60, (tl.getTime() / 100) % 10), r.x + 4, (float) (y + 20));
 					}
 				}
 
 				if (config.isBpmguide() || showTimeline) {
-					for (Rectangle r : playerr) {
-						if (tl.getBPM() != nbpm) {
-							// BPMガイド描画
-							sprite.end();
-							shape.begin(ShapeType.Line);
-							shape.setColor(Color.valueOf("00c000"));
-							shape.line(r.x, (float)(y + 2), r.x + r.width, (float)(y + 2));
-							shape.line(r.x, (float)y, r.x + r.width, (float)y);
-							shape.line(r.x, (float)(y - 2), r.x + r.width, (float)(y - 2));
-							shape.end();
-							sprite.begin();
-							font.setColor(Color.valueOf("00c000"));
-							font.draw(sprite, "BPM" + ((int) tl.getBPM()), r.x + r.width / 2, (float) (y + 20));
+					if(tl.getBPM() != nbpm) {
+						for (SkinImage line : skin.getBPMLine()) {
+							line.draw(sprite, time, main, 0, (int) (y - hl));
 						}
-						if (tl.getStop() > 0) {
-							// STOPガイド描画
-							sprite.end();
-							shape.begin(ShapeType.Line);
-							shape.setColor(Color.valueOf("c0c000"));
-							shape.line(r.x, (float)(y + 2), r.x + r.width, (float)(y + 2));
-							shape.line(r.x, (float)y, r.x + r.width, (float)y);
-							shape.line(r.x, (float)(y - 2), r.x + r.width, (float)(y - 2));
-							shape.end();
-							sprite.begin();
+						for (Rectangle r : playerr) {
+							// TODO 数値もスキンベースへ移行
+							font.setColor(Color.valueOf("00c000"));
+							font.draw(sprite, "BPM" + ((int) tl.getBPM()), r.x + r.width / 2, (float) (y + 20));							
+						}
+
+					}
+					if(tl.getStop() > 0) {
+						for (SkinImage line : skin.getStopLine()) {
+							line.draw(sprite, time, main, 0, (int) (y - hl));
+						}
+						for (Rectangle r : playerr) {
+							// TODO 数値もスキンベースへ移行
 							font.setColor(Color.valueOf("c0c000"));
-							font.draw(sprite, "STOP " + ((int) tl.getStop()) + "ms", r.x + r.width / 2, (float) (y + 20));
+							font.draw(sprite, "STOP " + ((int) tl.getStop()) + "ms", r.x + r.width / 2, (float) (y + 20));							
 						}
 					}
+					
 				}
 				// 小節線描画
 				if (tl.getSectionLine()) {

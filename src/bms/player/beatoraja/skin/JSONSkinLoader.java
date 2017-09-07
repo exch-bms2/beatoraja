@@ -383,6 +383,63 @@ public class JSONSkinLoader extends SkinLoader{
 						}
 						((PlaySkin) skin).setLine(lines);
 
+						if(sk.note.bpm != null) {
+							SkinImage[] bpm = new SkinImage[gregion.length];
+							for (int i = 0; i < gregion.length; i++) {
+								Destination dest = sk.note.bpm[i];
+
+								for (Image img : sk.image) {
+									if (dest.id.equals(img.id)) {
+										Texture tex = getTexture(img.src, p);
+										bpm[i] = new SkinImage(
+												getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy),
+												img.timer, img.cycle);
+										setDestination(skin, bpm[i], dest);
+										break;
+									}
+								}
+							}
+							((PlaySkin) skin).setBPMLine(bpm);							
+						}
+						
+						if(sk.note.stop != null) {
+							SkinImage[] stop = new SkinImage[gregion.length];
+							for (int i = 0; i < gregion.length; i++) {
+								Destination dest = sk.note.stop[i];
+
+								for (Image img : sk.image) {
+									if (dest.id.equals(img.id)) {
+										Texture tex = getTexture(img.src, p);
+										stop[i] = new SkinImage(
+												getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy),
+												img.timer, img.cycle);
+										setDestination(skin, stop[i], dest);
+										break;
+									}
+								}
+							}
+							((PlaySkin) skin).setStopLine(stop);							
+						}
+
+						if(sk.note.time != null) {
+							SkinImage[] time = new SkinImage[gregion.length];
+							for (int i = 0; i < gregion.length; i++) {
+								Destination dest = sk.note.time[i];
+
+								for (Image img : sk.image) {
+									if (dest.id.equals(img.id)) {
+										Texture tex = getTexture(img.src, p);
+										time[i] = new SkinImage(
+												getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy),
+												img.timer, img.cycle);
+										setDestination(skin, time[i], dest);
+										break;
+									}
+								}
+							}
+							((PlaySkin) skin).setTimeLine(time);							
+						}
+
 						SkinNote sn = new SkinNote(notes, lnss, mines);
 						sn.setLaneRegion(region, scale);
 						((PlaySkin) skin).setLaneGroupRegion(gregion);
@@ -894,6 +951,9 @@ public class JSONSkinLoader extends SkinLoader{
 		public Animation[] dst = new Animation[0];
 		public float[] size = new float[0];
 		public Destination[] group = new Destination[0];
+		public Destination[] bpm = new Destination[0];
+		public Destination[] stop = new Destination[0];
+		public Destination[] time = new Destination[0];
 	}
 
 	public static class Gauge {

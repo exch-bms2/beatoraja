@@ -17,6 +17,9 @@ public class PlaySkin extends Skin {
 	private int playstart;
 
 	private SkinImage[] line = new SkinImage[0];
+	private SkinImage[] time = new SkinImage[0];
+	private SkinImage[] bpm = new SkinImage[0];
+	private SkinImage[] stop = new SkinImage[0];
 
 	private Rectangle[] lanegroupregion;
 
@@ -77,8 +80,32 @@ public class PlaySkin extends Skin {
 		return line;
 	}
 
+	public SkinImage[] getBPMLine() {
+		return bpm;
+	}
+
+	public SkinImage[] getStopLine() {
+		return stop;
+	}
+
 	public void setLine(SkinImage[] line) {
 		this.line = line;
+	}
+
+	public void setBPMLine(SkinImage[] bpm) {
+		this.bpm = bpm;
+	}
+
+	public void setStopLine(SkinImage[] stop) {
+		this.stop = stop;
+	}
+
+	public SkinImage[] getTimeLine() {
+		return time;
+	}
+	
+	public void setTimeLine(SkinImage[] time) {
+		this.time = time;
 	}
 
 	public int getLoadstart() {

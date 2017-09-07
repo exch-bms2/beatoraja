@@ -43,8 +43,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 	private float[] scale = new float[8];
 	private SkinGauge gauger = null;
 	private SkinImage line;
-	private List<SkinImage> lines = new ArrayList<SkinImage>();
-	private SkinImage li;
+	private SkinImage[] lines = new SkinImage[8];
 
 	private SkinJudge[] judge = new SkinJudge[2];
 
@@ -110,9 +109,9 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 				int[] values = parseInt(str);
 				TextureRegion[] images = getSourceImage(values);
 				if (images != null) {
-					li = new SkinImage(images, values[10], values[9]);
+					SkinImage li = new SkinImage(images, values[10], values[9]);
 					li.setOffsety(OFFSET_LIFT);
-					lines.add(li);
+					lines[values[1]] = li;
 					// System.out.println("Object Added - " +
 					// (part.getTiming()));
 				}
@@ -121,8 +120,8 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 		addCommandWord(new CommandWord("DST_LINE") {
 			@Override
 			public void execute(String[] str) {
-				if (li != null) {
-					int[] values = parseInt(str);
+				int[] values = parseInt(str);
+				if (lines[values[1]] != null) {
 					if (values[5] < 0) {
 						values[3] += values[5];
 						values[5] = -values[5];
@@ -131,13 +130,15 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 						values[4] += values[6];
 						values[6] = -values[6];
 					}
-					li.setDestination(values[2], values[3] * dstw / srcw, dsth - (values[4] + values[6]) * dsth / srch,
+					lines[values[1]].setDestination(values[2], values[3] * dstw / srcw, dsth - (values[4] + values[6]) * dsth / srch,
 							values[5] * dstw / srcw, values[6] * dsth / srch, values[7], values[8], values[9],
 							values[10], values[11], values[12], values[13], values[14], values[15], values[16],
 							values[17], values[18], values[19], values[20]);
-					playerr[lines.size() == 1 ? 0 : 1] = new Rectangle(values[3] * dstw / srcw,
-							dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
-							(values[4] + values[6]) * dsth / srch);
+					if(playerr[values[1] % 2] != null) {
+						playerr[values[1] % 2] = new Rectangle(values[3] * dstw / srcw,
+								dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
+								(values[4] + values[6]) * dsth / srch);						
+					}
 				}
 			}
 		});
@@ -642,7 +643,30 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 		this.loadSkin(new PlaySkin(src, dst), f, player, header, option, property);
 
 		lanerender.setLaneRegion(laner, scale);
-		skin.setLine(lines.toArray(new SkinImage[lines.size()]));
+		
+		SkinImage[] skinline = new SkinImage[lines[0] != null ? (lines[1] != null ? 2 : 1) : 0];
+		for(int i = 0;i < skinline.length;i++) {
+			skinline[i] = lines[i];
+		}
+		skin.setLine(skinline);
+		SkinImage[] skintime = new SkinImage[skinline.length];
+		for(int i = 0;i < skintime.length;i++) {
+			if(lines[i + 6] == null) {
+				
+			}
+		}
+		SkinImage[] skinbpm = new SkinImage[skinline.length];
+		for(int i = 0;i < skinbpm.length;i++) {
+			if(lines[i + 2] == null) {
+				
+			}
+		}
+		SkinImage[] skinstop = new SkinImage[skinline.length];
+		for(int i = 0;i < skinstop.length;i++) {
+			if(lines[i + 4] == null) {
+				
+			}
+		}
 		skin.setJudgeregion(judge[1] != null ? 2 : 1);
 		skin.setLaneGroupRegion(playerr);
 
