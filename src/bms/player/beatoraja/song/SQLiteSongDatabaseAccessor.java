@@ -176,13 +176,34 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 		return new SongData[0];
 	}
 
-	public SongData[] getSongDatas(String sql) {
-		try {
-			List<SongData> m = qr.query("SELECT * FROM song WHERE " + sql, songhandler);
+	public SongData[] getSongDatas(String sql, String score, String info) {
+		try (Statement stmt = qr.getDataSource().getConnection().createStatement()) {
+			stmt.execute("ATTACH DATABASE '" + score + "' as scoredb");
+			List<SongData> m;
+			sql = sql.replace(" sha256 ", " song.sha256 ").replace(" notes ", " song.notes ").replace(" mode ", " song.mode ").replace(" date ", " song.date ");
+			if(info != null) {
+				stmt.execute("ATTACH DATABASE '" + info + "' as infodb");
+				String s = "SELECT song.sha256 AS sha256, title, subtitle, genre, artist, subartist,path,folder,stagefile,banner,backbmp,parent,level,difficulty,"
+						+ "maxbpm,minbpm,song.mode AS mode, judge, feature, content, song.date AS date, favorite, song.notes AS notes, adddate, preview, length"
+						+ " FROM song INNER JOIN (information LEFT OUTER JOIN score ON information.sha256 = score.sha256) "
+						+ "ON song.sha256 = information.sha256 WHERE " + sql;
+				ResultSet rs = stmt.executeQuery(s);
+				m = songhandler.handle(rs);
+				System.out.println(s + " -> result : " + m.size());
+				stmt.execute("DETACH DATABASE infodb");
+			} else {
+				String s = "SELECT song.sha256 AS sha256, title, subtitle, genre, artist, subartist,path,folder,stagefile,banner,backbmp,parent,level,difficulty,"
+						+ "maxbpm,minbpm,song.mode AS mode, judge, feature, content, song.date AS date, favorite, song.notes AS notes, adddate, preview, length"
+						+ " FROM song LEFT OUTER JOIN score ON song.sha256 = score.sha256 WHERE " + sql;
+				ResultSet rs = stmt.executeQuery(s);
+				m = songhandler.handle(rs);
+			}
+			stmt.execute("DETACH DATABASE scoredb");				
 			return m.toArray(new SongData[m.size()]);
-		} catch (SQLException e) {
-			e.printStackTrace();
+		} catch(Throwable e) {
+			e.printStackTrace();			
 		}
+
 		return new SongData[0];
 
 	}

@@ -19,21 +19,13 @@ public class CommandBar extends DirectoryBar {
     // TODO song.dbへの問い合わせの追加
 
     private MainController main;
-    private MusicSelector selector;
     private String title;
     private String sql;
-    private int type;
 
-    public CommandBar(MainController main, MusicSelector selector, String title, String sql) {
-    	this(main, selector, title, sql, 0);
-    }
-
-    public CommandBar(MainController main, MusicSelector selector, String title, String sql, int type) {
+    public CommandBar(MainController main, String title, String sql) {
         this.main = main;
-        this.selector = selector;
         this.title = title;
         this.sql = sql;
-        this.type = type;
     }
 
     @Override
@@ -48,40 +40,14 @@ public class CommandBar extends DirectoryBar {
 
     @Override
     public Bar[] getChildren() {
-    	if(type == 2) {
-    		if(main.getInfoDatabase() == null) {
-    			return new Bar[0];
-    		}
-    		SongInformation[] infos = main.getInfoDatabase().getInformations(sql);
-            List<Bar> l = new ArrayList<Bar>();
-            for (SongInformation info : infos) {
-                SongData[] song = selector.getSongDatabase().getSongDatas("sha256", info.getSha256());
-                if(song.length > 0) {
-                    l.add(new SongBar(song[0]));
-                }
-            }
-            return l.toArray(new Bar[l.size()]);
-    	} else if(type == 1) {
-            SongData[] infos = main.getSongDatabase().getSongDatas(sql);
-            List<Bar> l = new ArrayList<Bar>();
-            for (SongData info : infos) {
-                SongData[] song = selector.getSongDatabase().getSongDatas("sha256", info.getSha256());
-                if(song.length > 0) {
-                    l.add(new SongBar(song[0]));
-                }
-            }
-            return l.toArray(new Bar[l.size()]);
-        } else{
-            List<IRScoreData> scores = main.getPlayDataAccessor().readScoreDatas(sql);
-            List<Bar> l = new ArrayList<Bar>();
-            for (IRScoreData score : scores) {
-                SongData[] song = selector.getSongDatabase().getSongDatas("sha256", score.getSha256());
-                if (song.length > 0 && (!song[0].hasUndefinedLongNote() || selector.getMainController().getPlayerResource().getPlayerConfig().getLnmode() == score.getMode())) {
-                    l.add(new SongBar(song[0]));
-                }
-            }
-            return l.toArray(new Bar[l.size()]);
+        SongData[] infos = main.getSongDatabase().getSongDatas(sql,"player/" + main.getConfig().getPlayername() + "/score.db",main.getInfoDatabase() != null ? 
+        		"songinfo.db" : null);
+        List<Bar> l = new ArrayList<Bar>();
+        for (SongData info : infos) {
+            l.add(new SongBar(info));
+//            System.out.println(info.getSha256() + " " + info.getFullTitle());
         }
+        return l.toArray(new Bar[l.size()]);
     }
 
 }
