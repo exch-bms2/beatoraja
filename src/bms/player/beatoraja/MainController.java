@@ -8,6 +8,7 @@ import java.util.Calendar;
 import java.util.logging.Logger;
 
 import bms.player.beatoraja.play.TargetProperty;
+import bms.player.beatoraja.select.bar.TableBar;
 import bms.player.beatoraja.skin.SkinLoader;
 import bms.player.beatoraja.skin.SkinProperty;
 import com.badlogic.gdx.Graphics;
@@ -338,7 +339,12 @@ public class MainController extends ApplicationAdapter {
 			systemfont.draw(sprite, "Screen shot saved : " + screenshot.path, 100,
 					config.getResolution().height - 2);
 			sprite.end();
-		}		
+		} else if(updateSong != null && updateSong.isAlive()) {
+			sprite.begin();
+			systemfont.setColor(0,1,1,0.5f + (System.currentTimeMillis() % 500) / 1000.0f);
+			systemfont.draw(sprite, updateSong.message, 100, config.getResolution().height - 2);
+			sprite.end();
+		}
 
 		final long time = System.currentTimeMillis();
 		if(time > prevtime) {
@@ -530,4 +536,76 @@ public class MainController extends ApplicationAdapter {
 			savetime = System.currentTimeMillis();
 		}
 	}
+
+	private UpdateThread updateSong;
+
+	public void updateSong(String path) {
+		if (updateSong == null || !updateSong.isAlive()) {
+			updateSong = new SongUpdateThread(path);
+			updateSong.start();
+		} else {
+			Logger.getGlobal().warning("楽曲更新中のため、更新要求は取り消されました");
+		}
+	}
+
+	public void updateTable(TableBar reader) {
+		if (updateSong == null || !updateSong.isAlive()) {
+			updateSong = new TableUpdateThread(reader);
+			updateSong.start();
+		} else {
+			Logger.getGlobal().warning("楽曲更新中のため、更新要求は取り消されました");
+		}
+	}
+
+	abstract class UpdateThread extends Thread {
+
+		private String message;
+
+		public UpdateThread(String message) {
+			this.message = message;
+		}
+	}
+
+	/**
+	 * 楽曲データベース更新用スレッド
+	 *
+	 * @author exch
+	 */
+	class SongUpdateThread extends UpdateThread {
+
+		private final String path;
+
+		public SongUpdateThread(String path) {
+			super("updating folder : " + (path == null ? "ALL" : path));
+			this.path = path;
+		}
+
+		public void run() {
+			getSongDatabase().updateSongDatas(path, false, getInfoDatabase());
+		}
+	}
+
+	/**
+	 * 難易度表更新用スレッド
+	 *
+	 * @author exch
+	 */
+	class TableUpdateThread extends UpdateThread {
+
+		private final TableBar accessor;
+
+		public TableUpdateThread(TableBar bar) {
+			super("updating table : " + bar.getReader().name);
+			accessor = bar;
+		}
+
+		public void run() {
+			TableData td = accessor.getReader().read();
+			if (td != null) {
+				new TableDataAccessor().write(td);
+				accessor.setTableData(td);
+			}
+		}
+	}
+
 }

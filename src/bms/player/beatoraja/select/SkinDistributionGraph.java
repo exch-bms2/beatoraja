@@ -1,19 +1,21 @@
 package bms.player.beatoraja.select;
 
 import bms.player.beatoraja.MainState;
+import bms.player.beatoraja.select.bar.DirectoryBar;
 import bms.player.beatoraja.skin.*;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 
 /**
- * Created by exch on 2016/11/03.
+ * フォルダのランプ分布、ランク分布に使用される棒グラフ
  */
 public class SkinDistributionGraph extends SkinObject {
+
+    // TODO 分布計算はフォルダ選択時にのみ行う
 
     private SkinSource[] lampimage;
 
@@ -51,11 +53,6 @@ public class SkinDistributionGraph extends SkinObject {
                 lampimage[i] = new SkinSourceImage(new TextureRegion[]{new TextureRegion(rankt,i,0,1,1)},0,0);
             }
         }
-    }
-
-    public SkinDistributionGraph(int tupe, SkinSource[] lampimage) {
-        this.type = type;
-        this.lampimage = lampimage;
     }
 
     @Override

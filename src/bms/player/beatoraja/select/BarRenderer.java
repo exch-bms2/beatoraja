@@ -5,6 +5,7 @@ import java.util.*;
 import java.util.logging.Logger;
 
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
+import bms.player.beatoraja.select.bar.*;
 import bms.player.beatoraja.skin.*;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;

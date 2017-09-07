@@ -12,13 +12,13 @@ import java.util.logging.Logger;
 import bms.model.Mode;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
+import bms.player.beatoraja.select.bar.*;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.song.SongData;
 import bms.player.beatoraja.song.SongDatabaseAccessor;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.*;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 
@@ -75,8 +75,6 @@ public class MusicSelector extends MainState {
 
 	private SearchTextField search;
 
-	private Thread updateSong;
-
 	/**
 	 * 楽曲が選択されてからbmsを読み込むまでの時間(ms)
 	 */
@@ -116,8 +114,7 @@ public class MusicSelector extends MainState {
 		musicinput = new MusicSelectInputProcessor(this);
 
 		if (!songUpdated && main.getPlayerResource().getConfig().isUpdatesong()) {
-			updateSong = new SongUpdateThread(null);
-			updateSong.start();
+			main.updateSong(null);
 		}
 	}
 
@@ -548,7 +545,7 @@ public class MusicSelector extends MainState {
 		return "";
 	}
 
-	SongDatabaseAccessor getSongDatabase() {
+	public SongDatabaseAccessor getSongDatabase() {
 		return songdb;
 	}
 
@@ -830,11 +827,10 @@ public class MusicSelector extends MainState {
 	}
 
 	public void updateSong(Bar selected) {
-		if (updateSong == null || !updateSong.isAlive()) {
-			updateSong = new MusicSelector.SongUpdateThread(selected);
-			updateSong.start();
-		} else {
-			Logger.getGlobal().warning("楽曲更新中のため、更新要求は取り消されました");
+		if(selected instanceof FolderBar) {
+			getMainController().updateSong(((FolderBar) selected).getFolderData().getPath());
+		} else if(selected instanceof TableBar) {
+			getMainController().updateTable((TableBar) selected);
 		}
 	}
 
@@ -855,34 +851,7 @@ public class MusicSelector extends MainState {
 		}
 	}
 
-	/**
-	 * 楽曲データベース更新用スレッド
-	 *
-	 * @author exch
-	 */
-	class SongUpdateThread extends Thread {
+	public void updateTable(TableDataAccessor.TableReader reader) {
 
-		private final Bar selected;
-
-		public SongUpdateThread(Bar bar) {
-			selected = bar;
-		}
-
-		public void run() {
-			if (selected == null) {
-				getSongDatabase().updateSongDatas(null, false, getMainController().getInfoDatabase());
-			} else if (selected instanceof FolderBar) {
-				FolderBar fb = (FolderBar) selected;
-				getSongDatabase().updateSongDatas(fb.getFolderData().getPath(), false,
-						getMainController().getInfoDatabase());
-			} else if (selected instanceof TableBar) {
-				TableBar tb = (TableBar) selected;
-				TableData td = tb.getReader().read();
-				if (td != null) {
-					new TableDataAccessor().write(td);
-					tb.setTableData(td);
-				}
-			}
-		}
 	}
 }

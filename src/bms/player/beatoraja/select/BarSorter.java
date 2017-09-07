@@ -1,5 +1,8 @@
 package bms.player.beatoraja.select;
 
+import bms.player.beatoraja.select.bar.Bar;
+import bms.player.beatoraja.select.bar.SongBar;
+
 import java.util.Comparator;
 
 /**

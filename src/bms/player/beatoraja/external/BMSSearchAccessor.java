@@ -12,8 +12,12 @@ import com.badlogic.gdx.utils.Json;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.TableData.TableFolder;
 
-public class BMSSearchAccessor implements TableDataAccessor.TableReader {
-	
+public class BMSSearchAccessor extends TableDataAccessor.TableReader {
+
+	public BMSSearchAccessor() {
+		super("BMS Search");
+	}
+
 	public TableData read() {
 		TableData td = null;
 		try (InputStream input = new URL("http://qstol.info/bmssearch/api/services/?method=bms.new").openStream()) {
