@@ -72,26 +72,41 @@ public enum JudgeAlgorithm {
 					if (note == null || note.getState() != 0 || compare(note, judgenote, ptime, judgetable)) {
 						if (!(pmsjudge && (judgenote.getState() != 0
 								|| (judgenote.getState() == 0 && judgenote.getPlayTime() != 0 && dtime >= judgetable[2][1])))) {
-							note = judgenote;
 							if (judgenote.getState() != 0) {
 								judge = 5;
 							} else {
 								for (judge = 0; judge < judgetable.length && !(dtime >= judgetable[judge][0] && dtime <= judgetable[judge][1]); judge++) {
 								}
+								judge = (judge == 4 ? 5 : judge);
+							}
+							if(judge != 5 || note == null || Math.abs(note.getTime() - ptime) > Math.abs(judgenote.getTime() - ptime)) {
+								note = judgenote;
 							}
 						}
 					}
 				}
 			}
 		}
-		this.judge = judge == 4 ? 5 : judge;
+		this.judge = judge;
 		return note;
 	}
 
+	/**
+	 * 判定対象ノーツの判定を取得する
+	 * @return 判定
+	 */
 	public int getJudge() {
 		return judge;
 	}
 
+	/**
+	 * ２つのノーツを比較する
+	 * @param t1 ノーツ1
+	 * @param t2 ノーツ2
+	 * @param ptime キー操作の時間
+	 * @param judgetable 判定テーブル
+	 * @return ノーツ2が選ばれた場合はtrue, ノーツ1が選ばれた場合はfalse
+	 */
 	public abstract boolean compare(Note t1, Note t2, long ptime, int[][] judgetable);
 	
 	public static int getIndex(JudgeAlgorithm algorithm) {
