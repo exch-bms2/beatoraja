@@ -176,28 +176,29 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 		return new SongData[0];
 	}
 
-	public SongData[] getSongDatas(String sql, String score, String info) {
+	public SongData[] getSongDatas(String sql, String score, String scorelog, String info) {
 		try (Statement stmt = qr.getDataSource().getConnection().createStatement()) {
 			stmt.execute("ATTACH DATABASE '" + score + "' as scoredb");
+			stmt.execute("ATTACH DATABASE '" + scorelog + "' as scorelogdb");
 			List<SongData> m;
-			sql = sql.replace(" sha256 ", " song.sha256 ").replace(" notes ", " song.notes ").replace(" mode ", " song.mode ").replace(" date ", " song.date ");
 			if(info != null) {
 				stmt.execute("ATTACH DATABASE '" + info + "' as infodb");
-				String s = "SELECT song.sha256 AS sha256, title, subtitle, genre, artist, subartist,path,folder,stagefile,banner,backbmp,parent,level,difficulty,"
+				String s = "SELECT DISTINCT song.sha256 AS sha256, title, subtitle, genre, artist, subartist,path,folder,stagefile,banner,backbmp,parent,level,difficulty,"
 						+ "maxbpm,minbpm,song.mode AS mode, judge, feature, content, song.date AS date, favorite, song.notes AS notes, adddate, preview, length"
-						+ " FROM song INNER JOIN (information LEFT OUTER JOIN score ON information.sha256 = score.sha256) "
+						+ " FROM song INNER JOIN (information LEFT OUTER JOIN (score LEFT OUTER JOIN scorelog ON score.sha256 = scorelog.sha256) ON information.sha256 = score.sha256) "
 						+ "ON song.sha256 = information.sha256 WHERE " + sql;
 				ResultSet rs = stmt.executeQuery(s);
 				m = songhandler.handle(rs);
 				System.out.println(s + " -> result : " + m.size());
 				stmt.execute("DETACH DATABASE infodb");
 			} else {
-				String s = "SELECT song.sha256 AS sha256, title, subtitle, genre, artist, subartist,path,folder,stagefile,banner,backbmp,parent,level,difficulty,"
+				String s = "SELECT DISTINCT song.sha256 AS sha256, title, subtitle, genre, artist, subartist,path,folder,stagefile,banner,backbmp,parent,level,difficulty,"
 						+ "maxbpm,minbpm,song.mode AS mode, judge, feature, content, song.date AS date, favorite, song.notes AS notes, adddate, preview, length"
-						+ " FROM song LEFT OUTER JOIN score ON song.sha256 = score.sha256 WHERE " + sql;
+						+ " FROM song LEFT OUTER JOIN (score LEFT OUTER JOIN scorelog ON score.sha256 = scorelog.sha256) ON song.sha256 = score.sha256 WHERE " + sql;
 				ResultSet rs = stmt.executeQuery(s);
 				m = songhandler.handle(rs);
 			}
+			stmt.execute("DETACH DATABASE scorelogdb");				
 			stmt.execute("DETACH DATABASE scoredb");				
 			return m.toArray(new SongData[m.size()]);
 		} catch(Throwable e) {
