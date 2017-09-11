@@ -207,6 +207,11 @@ public class BMSPlayer extends MainState {
 		}
 
 		Logger.getGlobal().info("ゲージ設定");
+		if(replay != null && main.getInputProcessor().getKeystate()[5]) {
+			if (replay.gauge != GrooveGauge.HAZARD || replay.gauge != GrooveGauge.EXHARDCLASS) {
+				replay.gauge++;
+			}
+		}
 		gauge = GrooveGauge.create(model, replay != null ? replay.gauge : config.getGauge(), resource.getCourseBMSModels() != null);
 		FloatArray f = resource.getGauge();
 		if (f != null) {
