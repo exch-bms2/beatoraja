@@ -44,6 +44,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 	private SkinGauge gauger = null;
 	private SkinImage line;
 	private SkinImage[] lines = new SkinImage[8];
+	private int[][] linevalues = new int[2][];
 
 	private SkinJudge[] judge = new SkinJudge[2];
 
@@ -51,15 +52,20 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 	private int groovey = 0;
 
 	private SkinType type;
+	
+	final float srcw;
+	final float srch;
+	final float dstw;
+	final float dsth;
 
 	public LR2PlaySkinLoader(final SkinType type, final Resolution src, final Config c) {
 		super(src, c);
 
 		this.type = type;
-		final float srcw = src.width;
-		final float srch = src.height;
-		final float dstw = dst.width;
-		final float dsth = dst.height;
+		srcw = src.width;
+		srch = src.height;
+		dstw = dst.width;
+		dsth = dst.height;
 
 		addCommandWord(new CommandWord("CLOSE") {
 			@Override
@@ -139,6 +145,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 								dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
 								(values[4] + values[6]) * dsth / srch);						
 					}
+					linevalues[values[1] % 2] = values;
 				}
 			}
 		});
@@ -651,25 +658,46 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 		skin.setLine(skinline);
 		SkinImage[] skintime = new SkinImage[skinline.length];
 		for(int i = 0;i < skintime.length;i++) {
-			if(lines[i + 6] == null) {
-				
+			if(lines[i + 6] == null && lines[i] != null) {
+				makeDefaultLines(i + 6, 1, 64, 192, 192);				
 			}
+			skintime[i] = lines[i + 6];
 		}
+		skin.setTimeLine(skintime);
+		
 		SkinImage[] skinbpm = new SkinImage[skinline.length];
 		for(int i = 0;i < skinbpm.length;i++) {
-			if(lines[i + 2] == null) {
-				
+			if(lines[i + 2] == null && lines[i] != null) {
+				makeDefaultLines(i + 2, 2, 0, 192, 0);
 			}
+			skinbpm[i] = lines[i + 2];
 		}
+		skin.setBPMLine(skinbpm);		
+		
 		SkinImage[] skinstop = new SkinImage[skinline.length];
 		for(int i = 0;i < skinstop.length;i++) {
-			if(lines[i + 4] == null) {
-				
+			if(lines[i + 4] == null && lines[i] != null) {
+				makeDefaultLines(i + 4, 2, 192, 192, 0);
 			}
+			skinstop[i] = lines[i + 4];
 		}
+		skin.setStopLine(skinstop);
+		
 		skin.setJudgeregion(judge[1] != null ? 2 : 1);
 		skin.setLaneGroupRegion(playerr);
 
 		return skin;
+	}
+	
+	private void makeDefaultLines(int index, int h, int r, int g, int b) {
+		Texture tex = new Texture("skin/default/system.png");
+		int[] values = linevalues[index % 2];
+		SkinImage li = new SkinImage(new TextureRegion(tex, 0, 0, 1,1));
+		li.setOffsety(OFFSET_LIFT);
+		lines[index] = li;
+		lines[index].setDestination(values[2], values[3] * dstw / srcw, dsth - (values[4] + values[6]) * dsth / srch,
+				values[5] * dstw / srcw, values[6] * dsth / srch * h, values[7], 255, r, g,
+				b, values[12], values[13], values[14], values[15], values[16],
+				values[17], values[18], values[19], values[20]);
 	}
 }
