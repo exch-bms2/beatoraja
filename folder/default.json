@@ -1,0 +1,299 @@
+[
+{
+	"name":"MY BEST",
+	"sql":"playcount > 0 ORDER BY playcount DESC LIMIT 10"
+},
+
+{
+	"name":"FAVORITE SONG",
+	"sql":"favorite & 1 != 0"
+},
+{
+	"name":"FAVORITE CHART",
+	"sql":"favorite & 2 != 0"
+},
+
+{
+	"name":"CLEAR TYPE",
+	"folder":[
+		{
+			"name":"FULL COMBO",
+			"sql":"score.clear >= 8"
+		},
+		{
+			"name":"EX HARD CLEAR",
+			"sql":"score.clear = 7"
+		},
+		{
+			"name":"HARD CLEAR",
+			"sql":"score.clear = 6"
+		},
+		{
+			"name":"CLEAR",
+			"sql":"score.clear = 5"
+		},
+		{
+			"name":"EASY CLEAR",
+			"sql":"score.clear = 4"
+		},
+		{
+			"name":"ASSIST CLEAR",
+			"sql":"score.clear IN (2,3)"
+		},
+		{
+			"name":"FAILED",
+			"sql":"score.clear = 1"
+		}
+	]
+},
+
+{
+	"name":"SCORE RANK",
+	"folder":[
+		{
+			"name":"RANK AAA",
+			"sql":"(lpg * 2 + epg * 2 + lgr + egr) * 50 / score.notes >= 88.88"
+		},
+		{
+			"name":"RANK AA",
+			"sql":"(lpg * 2 + epg * 2 + lgr + egr) * 50 / score.notes >= 77.77 AND (lpg * 2 + epg * 2 + lgr + egr) * 50 / score.notes < 88.88"
+		},
+		{
+			"name":"RANK A",
+			"sql":"(lpg * 2 + epg * 2 + lgr + egr) * 50 / score.notes >= 66.66 AND (lpg * 2 + epg * 2 + lgr + egr) * 50 / score.notes < 77.77"
+		},
+		{
+			"name":"RANK B",
+			"sql":"(lpg * 2 + epg * 2 + lgr + egr) * 50 / score.notes >= 55.55 AND (lpg * 2 + epg * 2 + lgr + egr) * 50 / score.notes < 66.66"
+		},
+		{
+			"name":"RANK C",
+			"sql":"(lpg * 2 + epg * 2 + lgr + egr) * 50 / score.notes >= 44.44 AND (lpg * 2 + epg * 2 + lgr + egr) * 50 / score.notes < 55.55"
+		},
+		{
+			"name":"RANK D",
+			"sql":"(lpg * 2 + epg * 2 + lgr + egr) * 50 / score.notes >= 33.33 AND (lpg * 2 + epg * 2 + lgr + egr) * 50 / score.notes < 44.44"
+		},
+		{
+			"name":"RANK E",
+			"sql":"(lpg * 2 + epg * 2 + lgr + egr) * 50 / score.notes >= 22.22 AND (lpg * 2 + epg * 2 + lgr + egr) * 50 / score.notes < 33.33"
+		}
+	]
+},
+
+{
+	"name":"DENSITY",
+	"folder":[
+		{
+			"name": "DENSITY 〜3",
+			"sql": "density < 3"
+		},
+		{
+			"name": "DENSITY 3〜5",
+			"sql": "density >= 3 AND density < 5"
+		},
+		{
+			"name": "DENSITY 5〜7",
+			"sql": "density >= 5 AND density < 7"
+		},
+		{
+			"name": "DENSITY 7〜9",
+			"sql": "density >= 7 AND density < 9"
+		},
+		{
+			"name": "DENSITY 9〜10",
+			"sql": "density >= 9 AND density < 10"
+		},
+		{
+			"name": "DENSITY 10〜11",
+			"sql": "density >= 10 AND density < 11"
+		},
+		{
+			"name": "DENSITY 11〜12",
+			"sql": "density >= 11 AND density < 12"
+		},
+		{
+			"name": "DENSITY 12〜13",
+			"sql": "density >= 12 AND density < 13"
+		},
+		{
+			"name": "DENSITY 13〜14",
+			"sql": "density >= 13 AND density < 14"
+		},
+		{
+			"name": "DENSITY 14〜15",
+			"sql": "density >= 14 AND density < 15"
+		},
+		{
+			"name": "DENSITY 15〜16",
+			"sql": "density >= 15 AND density < 16"
+		},
+		{
+			"name": "DENSITY 16〜17",
+			"sql": "density >= 16 AND density < 17"
+		},
+		{
+			"name": "DENSITY 17〜18",
+			"sql": "density >= 17 AND density < 18"
+		},
+		{
+			"name": "DENSITY 18〜19",
+			"sql": "density >= 18 AND density < 19"
+		},
+		{
+			"name": "DENSITY 19〜20",
+			"sql": "density >= 19 AND density < 20"
+		},
+		{
+			"name": "DENSITY 20〜21",
+			"sql": "density >= 20 AND density < 21"
+		},
+		{
+			"name": "DENSITY 21〜22",
+			"sql": "density >= 21 AND density < 22"
+		},
+		{
+			"name": "DENSITY 22〜23",
+			"sql": "density >= 22 AND density < 23"
+		},
+		{
+			"name": "DENSITY 23〜24",
+			"sql": "density >= 23 AND density < 24"
+		},
+		{
+			"name": "DENSITY 24〜25",
+			"sql": "density >= 24 AND density < 25"
+		},
+		{
+			"name": "DENSITY 25〜26",
+			"sql": "density >= 25 AND density < 26"
+		},
+		{
+			"name": "DENSITY 26〜27",
+			"sql": "density >= 26 AND density < 27"
+		},
+		{
+			"name": "DENSITY 27〜28",
+			"sql": "density >= 27 AND density < 28"
+		},
+		{
+			"name": "DENSITY 28〜29",
+			"sql": "density >= 28 AND density < 29"
+		},
+		{
+			"name": "DENSITY 29〜30",
+			"sql": "density >= 29 AND density < 30"
+		},
+		
+		{
+			"name": "DENSITY 30〜31",
+			"sql": "density >= 30 AND density < 31"
+		},
+		{
+			"name": "DENSITY 31〜32",
+			"sql": "density >= 31 AND density < 32"
+		},
+		{
+			"name": "DENSITY 32〜33",
+			"sql": "density >= 32 AND density < 33"
+		},
+		{
+			"name": "DENSITY 33〜34",
+			"sql": "density >= 33 AND density < 34"
+		},
+		{
+			"name": "DENSITY 34〜35",
+			"sql": "density >= 34 AND density < 35"
+		},
+		{
+			"name": "DENSITY 35〜36",
+			"sql": "density >= 35 AND density < 36"
+		},
+		{
+			"name": "DENSITY 36〜37",
+			"sql": "density >= 36 AND density < 37"
+		},
+		{
+			"name": "DENSITY 37〜38",
+			"sql": "density >= 37 AND density < 38"
+		},
+		{
+			"name": "DENSITY 38〜39",
+			"sql": "density >= 38 AND density < 39"
+		},
+		{
+			"name": "DENSITY 39〜40",
+			"sql": "density >= 39 AND density < 40"
+		},
+
+		{
+			"name": "DENSITY 40〜41",
+			"sql": "density >= 40 AND density < 41"
+		},
+		{
+			"name": "DENSITY 41〜42",
+			"sql": "density >= 41 AND density < 42"
+		},
+		{
+			"name": "DENSITY 42〜43",
+			"sql": "density >= 42 AND density < 43"
+		},
+		{
+			"name": "DENSITY 43〜44",
+			"sql": "density >= 43 AND density < 44"
+		},
+		{
+			"name": "DENSITY 44〜45",
+			"sql": "density >= 44 AND density < 45"
+		},
+		{
+			"name": "DENSITY 45〜46",
+			"sql": "density >= 45 AND density < 46"
+		},
+		{
+			"name": "DENSITY 46〜47",
+			"sql": "density >= 46 AND density < 47"
+		},
+		{
+			"name": "DENSITY 47〜48",
+			"sql": "density >= 47 AND density < 48"
+		},
+		{
+			"name": "DENSITY 48〜49",
+			"sql": "density >= 48 AND density < 49"
+		},
+		{
+			"name": "DENSITY 49〜50",
+			"sql": "density >= 49 AND density < 50"
+		},
+		{
+			"name": "DENSITY 50〜",
+			"sql": "density >= 50"
+		}
+
+	]
+},
+
+{
+	"name":"FEATURE",
+	"folder":[
+		{
+			"name": "SCRATCH 10 - 20%",
+			"sql":"(n + ln) <= (s + ls) * 9 AND (n + ln) > (s + ls) * 4"
+		},
+		{
+			"name":"SCRATCH > 20%", 
+			"sql":"(n + ln) <= (s + ls) * 4"
+		},
+		{
+			"name":"LONG NOTE 10 - 20%", 
+			"sql":"(n + s) <= (ln + ls) * 9 AND (n + s) > (ln + ls) * 4"
+		},
+		{
+			"name":"LONG NOTE > 20%", 
+			"sql":"(n + s) <= (ln + ls) * 4"
+		}
+	]
+}
+
+]

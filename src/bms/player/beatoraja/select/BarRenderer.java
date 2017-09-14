@@ -1,5 +1,6 @@
 package bms.player.beatoraja.select;
 
+import java.io.BufferedInputStream;
 import java.nio.file.*;
 import java.util.*;
 import java.util.logging.Logger;
@@ -11,6 +12,7 @@ import bms.player.beatoraja.skin.*;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Json;
 
 import bms.model.Mode;
 import bms.player.beatoraja.*;
@@ -138,51 +140,65 @@ public class BarRenderer {
 		for (int i = 0; i < cds.length; i++) {
 			favorites[i] = new HashBar(select, cds[i].getName(), cds[i].getSong());
 		}
-		
-		List<CommandBar> density = new ArrayList<CommandBar>();
-		int i = 1;
-		density.add(new CommandBar(main, "DENSITY < " + i, "density < 1"));
-		for(;i < 50;i++) {
-			density.add(new CommandBar(main, "DENSITY " + i + " - " + (i + 1), "density >= " + i + " AND density < " + (i + 1)));
+				
+		List<Bar> l = new ArrayList<Bar>();
+		l.add(new CommandBar(main,  "TODAY'S LAMP UPDATE", "scorelog.clear > scorelog.oldclear AND scorelog.date + 86400 > " + (System.currentTimeMillis() / 1000)));
+		l.add(new CommandBar(main,  "TODAY'S SCORE UPDATE", "scorelog.score > scorelog.oldscore AND scorelog.date + 86400 > " + (System.currentTimeMillis() / 1000)));
+		try {
+			Json json = new Json();
+			CommandFolder[] cf = json.fromJson(CommandFolder[].class,
+					new BufferedInputStream(Files.newInputStream(Paths.get("folder/default.json"))));
+			for(CommandFolder folder : cf) {
+				l.add(createCommandBar(main, folder));
+			}
+		} catch (Throwable e) {
+			e.printStackTrace();
 		}
-		density.add(new CommandBar(main, "DENSITY >= " + i, "density >= " + i));
 		
-		commands = new Bar[] {
-				new CommandBar(main,  "TODAY'S LAMP UPDATE", "scorelog.clear > scorelog.oldclear AND scorelog.date + 86400 > " + (System.currentTimeMillis() / 1000)),
-				new CommandBar(main,  "TODAY'S SCORE UPDATE", "scorelog.score > scorelog.oldscore AND scorelog.date + 86400 > " + (System.currentTimeMillis() / 1000)),
-				new CommandBar(main,  "MY BEST", "playcount > 0 ORDER BY playcount DESC LIMIT 10"),
-				new ContainerBar("CLEAR TYPE", new Bar[]{new CommandBar(main, "FULL COMBO", "score.clear >= 8"),
-						new CommandBar(main, "EX HARD CLEAR", "score.clear = 7"),
-						new CommandBar(main, "HARD CLEAR", "score.clear = 6"),
-						new CommandBar(main, "CLEAR", "score.clear = 5"),
-						new CommandBar(main, "EASY CLEAR", "score.clear = 4"),
-						new CommandBar(main, "ASSIST CLEAR", "score.clear IN (2, 3)"),
-						new CommandBar(main, "FAILED", "score.clear = 1")}),	
-				new ContainerBar("SCORE RANK", new Bar[]{new CommandBar(main, "RANK AAA", 
-								"(lpg * 2 + epg * 2 + lgr + egr) * 50 / score.notes >= 88.88"),
-						new CommandBar(main, "RANK AA",
-								"(lpg * 2 + epg * 2 + lgr + egr) * 50 / score.notes >= 77.77 AND (lpg * 2 + epg * 2 + lgr + egr) * 50 / score.notes < 88.88"),
-						new CommandBar(main,  "RANK A",
-								"(lpg * 2 + epg * 2 + lgr + egr) * 50 / score.notes >= 66.66 AND (lpg * 2 + epg * 2 + lgr + egr) * 50 / score.notes < 77.77"),
-						new CommandBar(main, "RANK B",
-								"(lpg * 2 + epg * 2 + lgr + egr) * 50 / score.notes >= 55.55 AND (lpg * 2 + epg * 2 + lgr + egr) * 50 / score.notes < 66.66"),
-						new CommandBar(main, "RANK C",
-								"(lpg * 2 + epg * 2 + lgr + egr) * 50 / score.notes >= 44.44 AND (lpg * 2 + epg * 2 + lgr + egr) * 50 / score.notes < 55.55"),
-						new CommandBar(main, "RANK D",
-								"(lpg * 2 + epg * 2 + lgr + egr) * 50 / score.notes >= 33.33 AND (lpg * 2 + epg * 2 + lgr + egr) * 50 / score.notes < 44.44"),
-						new CommandBar(main, "RANK E",
-								"(lpg * 2 + epg * 2 + lgr + egr) * 50 / score.notes >= 22.22 AND (lpg * 2 + epg * 2 + lgr + egr) * 50 / score.notes < 33.33"),
-						}),
-				new ContainerBar("FEATURE", new Bar[]{
-						new CommandBar(main, "SCRATCH 10 - 20%", "(n + ln) <= (s + ls) * 9 AND (n + ln) > (s + ls) * 4 "),
-						new CommandBar(main, "SCRATCH > 20%", "(n + ln) <= (s + ls) * 4 "),
-						new CommandBar(main, "LONG NOTE 10 - 20%", "(n + s) <= (ln + ls) * 9 AND (n + s) > (ln + ls) * 4 "),
-						new CommandBar(main, "LONG NOTE > 20%", "(n + s) <= (ln + ls) * 4 "),
-						}),	
-				new ContainerBar("DENSITY", density.toArray(new Bar[density.size()])),
-				new CommandBar(main, "FAVORITE SONG", "favorite & 1 != 0"),
-				new CommandBar(main, "FAVORITE CHART", "favorite & 2 != 0"),
-				};
+		commands = l.toArray(new Bar[l.size()]);
+	}
+	
+	private Bar createCommandBar(MainController main, CommandFolder folder) {
+		if(folder.getFolder() != null && folder.getFolder().length > 0) {
+			List<Bar> l = new ArrayList<Bar>();
+			for(CommandFolder child : folder.getFolder()) {
+				l.add(createCommandBar(main, child));
+			}
+			return new ContainerBar(folder.getName(), l.toArray(new Bar[l.size()]));
+		} else {
+			return new CommandBar(main, folder.getName(), folder.getSql());
+		}
+	}
+	
+	public static class CommandFolder {
+
+		private String name;
+		private CommandFolder[] folder = new CommandFolder[0];
+		private String sql;
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public CommandFolder[] getFolder() {
+			return folder;
+		}
+
+		public void setFolder(CommandFolder[] songs) {
+			this.folder = songs;
+		}
+
+		public String getSql() {
+			return sql;
+		}
+
+		public void setSql(String sql) {
+			this.sql = sql;
+		}
 	}
 
 	public Bar getSelected() {
