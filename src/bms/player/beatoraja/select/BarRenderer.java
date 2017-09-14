@@ -140,10 +140,19 @@ public class BarRenderer {
 		for (int i = 0; i < cds.length; i++) {
 			favorites[i] = new HashBar(select, cds[i].getName(), cds[i].getSong());
 		}
+		
+		List<Bar> l = new ArrayList<Bar>();		
 				
-		List<Bar> l = new ArrayList<Bar>();
-		l.add(new CommandBar(main,  "TODAY'S LAMP UPDATE", "scorelog.clear > scorelog.oldclear AND scorelog.date + 86400 > " + (System.currentTimeMillis() / 1000)));
-		l.add(new CommandBar(main,  "TODAY'S SCORE UPDATE", "scorelog.score > scorelog.oldscore AND scorelog.date + 86400 > " + (System.currentTimeMillis() / 1000)));
+		List<Bar> lampupdate = new ArrayList<Bar>();
+		List<Bar> scoreupdate = new ArrayList<Bar>();
+		for(int i = 0;i < 30;i++) {
+			String s = i == 0 ? "TODAY" : i + "DAYS AGO";
+			long t = ((System.currentTimeMillis() / 86400000) - i) * 86400;
+			lampupdate.add(new CommandBar(main,  s, "scorelog.clear > scorelog.oldclear AND scorelog.date >= "  + t + " AND scorelog.date < " + (t + 86400)));
+			scoreupdate.add(new CommandBar(main,  s,  "scorelog.score > scorelog.oldscore AND scorelog.date >= "  + t + " AND scorelog.date < " + (t + 86400)));
+		}
+		l.add(new ContainerBar("LAMP UPDATE", lampupdate.toArray(new Bar[lampupdate.size()])));
+		l.add(new ContainerBar("SCORE UPDATE", scoreupdate.toArray(new Bar[scoreupdate.size()])));
 		try {
 			Json json = new Json();
 			CommandFolder[] cf = json.fromJson(CommandFolder[].class,
