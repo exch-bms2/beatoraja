@@ -189,7 +189,7 @@ public class MusicSelectInputProcessor {
                 }
             }
 
-            TargetProperty[] targets = TargetProperty.getAllTargetProperties(select.getMainController());
+            TargetProperty[] targets = TargetProperty.getAllTargetProperties();
             while(mov > 0) {
                 config.setTarget((config.getTarget() + 1) % targets.length);
                 select.play(SOUND_SCRATCH);

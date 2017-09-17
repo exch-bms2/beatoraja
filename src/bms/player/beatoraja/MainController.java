@@ -299,7 +299,7 @@ public class MainController extends ApplicationAdapter {
 		};
 		polling.start();
 
-		if(player.getTarget() >= TargetProperty.getAllTargetProperties(this).length) {
+		if(player.getTarget() >= TargetProperty.getAllTargetProperties().length) {
 			player.setTarget(0);
 		}
 		Gdx.gl.glClearColor(0, 0, 0, 1);

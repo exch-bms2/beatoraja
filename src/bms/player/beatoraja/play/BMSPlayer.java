@@ -298,7 +298,7 @@ public class BMSPlayer extends MainState {
 			score = new IRScoreData();
 		}
 
-		int rivalscore = TargetProperty.getAllTargetProperties(getMainController())[config.getTarget()]
+		int rivalscore = TargetProperty.getAllTargetProperties()[config.getTarget()]
 				.getTarget(getMainController());
 		resource.setRivalScoreData(rivalscore);
 

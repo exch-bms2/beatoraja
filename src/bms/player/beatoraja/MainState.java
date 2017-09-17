@@ -545,7 +545,7 @@ public abstract class MainState {
 			SongData song = getMainController().getPlayerResource().getSongdata();
 			switch (id) {
 				case STRING_RIVAL:
-					return TargetProperty.getAllTargetProperties(getMainController())[getMainController().getPlayerResource().getPlayerConfig().getTarget()].getName();
+					return TargetProperty.getAllTargetProperties()[getMainController().getPlayerResource().getPlayerConfig().getTarget()].getName();
 				case STRING_PLAYER:
 					return "";
 			case STRING_TITLE:

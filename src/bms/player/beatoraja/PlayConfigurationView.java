@@ -34,6 +34,7 @@ import com.synthbot.jasiohost.AsioDriver;
 import bms.player.beatoraja.audio.PortAudioDriver;
 import bms.player.beatoraja.ir.IRConnection;
 import bms.player.beatoraja.play.JudgeAlgorithm;
+import bms.player.beatoraja.play.TargetProperty;
 import bms.player.beatoraja.skin.SkinHeader;
 import bms.player.beatoraja.skin.SkinHeader.CustomFile;
 import bms.player.beatoraja.skin.SkinHeader.CustomOption;
@@ -153,6 +154,8 @@ public class PlayConfigurationView implements Initializable {
 	private CheckBox markprocessednote;
 	@FXML
 	private CheckBox showhiddennote;
+	@FXML
+	private ComboBox<Integer> target;
 
 	@FXML
 	private Spinner<Integer> maxfps;
@@ -246,6 +249,13 @@ public class PlayConfigurationView implements Initializable {
 		initComboBox(fixhispeed, new String[] { "OFF", "START BPM", "MAX BPM", "MAIN BPM", "MIN BPM" });
 		initComboBox(playconfig, new String[] { "5/7KEYS", "10/14KEYS", "9KEYS", "24KEYS", "24KEYS DOUBLE" });
 		initComboBox(lntype, new String[] { "LONG NOTE", "CHARGE NOTE", "HELL CHARGE NOTE" });
+		
+		TargetProperty[] targets = TargetProperty.getAllTargetProperties();
+		String[] targetString = new String[targets.length];
+		for(int i  =0;i < targets.length;i++) {
+			targetString[i] = targets[i].getName();
+		}
+		initComboBox(target, targetString);
 		initComboBox(judgealgorithm, new String[] { arg1.getString("JUDGEALG_LR2"), arg1.getString("JUDGEALG_AC"), arg1.getString("JUDGEALG_BOTTOM_PRIORITY") });
 		initComboBox(autosavereplay1, new String[] { "OFF", "Better Score", "Better or same Score", "Better BP", "Better or same BP", "Better Combo", "Better or same Combo",
 				"Better Lamp", "Better or same Lamp", "Better BP/Combo/Lamp","Always"});
@@ -372,6 +382,7 @@ public class PlayConfigurationView implements Initializable {
 		nomine.setSelected(player.isNomine());
 		judgeregion.setSelected(player.isShowjudgearea());
 		markprocessednote.setSelected(player.isMarkprocessednote());
+		target.setValue(player.getTarget());
 
 		misslayertime.getValueFactory().setValue(player.getMisslayerDuration());
 
@@ -458,6 +469,7 @@ public class PlayConfigurationView implements Initializable {
 		player.setMarkprocessednote(markprocessednote.isSelected());
 
 		player.setShowjudgearea(judgeregion.isSelected());
+		player.setTarget(target.getValue());
 
 		player.setMisslayerDuration(getValue(misslayertime));
 

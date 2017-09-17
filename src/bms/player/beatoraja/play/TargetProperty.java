@@ -14,7 +14,7 @@ public abstract class TargetProperty {
 
     private static TargetProperty[] available;
 
-    public static TargetProperty[] getAllTargetProperties(MainController main) {
+    public static TargetProperty[] getAllTargetProperties() {
         if(available == null) {
             List<TargetProperty> targets = new ArrayList<TargetProperty>();
             targets.add(new StaticTargetProperty("RANK A-", 66.6f));
