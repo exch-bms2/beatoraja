@@ -25,7 +25,7 @@
 
 <VBox xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="bms.player.beatoraja.PlayConfigurationView">
    <children>
-      <TabPane prefHeight="390.0" prefWidth="740.0" VBox.vgrow="ALWAYS">
+      <TabPane prefHeight="400.0" prefWidth="740.0" VBox.vgrow="ALWAYS">
          <tabs>
             <Tab closable="false" text="%TAB_VIDEO">
               <content>
@@ -269,6 +269,30 @@
                               <Insets top="10.0" />
                            </VBox.margin>
                         </HBox>
+
+                         <HBox prefHeight="37.0" prefWidth="723.0">
+                           <children>
+                              <Label prefHeight="18.0" prefWidth="127.0" text="%AUTO_SAVE_REPLAY1" />
+                              <ComboBox fx:id="autosavereplay1" prefWidth="150.0" />
+                           </children>
+                           <children>
+                              <Label prefHeight="18.0" prefWidth="127.0" text="%AUTO_SAVE_REPLAY2" />
+                              <ComboBox fx:id="autosavereplay2" prefWidth="150.0" />
+                           </children>
+                           <VBox.margin>
+                              <Insets top="15.0" />
+                           </VBox.margin>
+                        </HBox>
+                        <HBox prefHeight="37.0" prefWidth="723.0">
+                           <children>
+                              <Label prefHeight="18.0" prefWidth="127.0" text="%AUTO_SAVE_REPLAY3" />
+                              <ComboBox fx:id="autosavereplay3" prefWidth="150.0" />
+                           </children>
+                           <children>
+                              <Label prefHeight="18.0" prefWidth="127.0" text="%AUTO_SAVE_REPLAY4" />
+                              <ComboBox fx:id="autosavereplay4" prefWidth="150.0" />
+                           </children>
+                        </HBox>
                   	</children>
                   	<padding>
                   		<Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
@@ -380,27 +404,6 @@
                                        </Spinner>
                                    </children>
                                </HBox>
-
-                               <HBox prefHeight="37.0" prefWidth="723.0">
-                                 <children>
-                                    <Label prefHeight="18.0" prefWidth="127.0" text="%AUTO_SAVE_REPLAY1" />
-                                    <ComboBox fx:id="autosavereplay1" prefWidth="150.0" />
-                                 </children>
-                                 <children>
-                                    <Label prefHeight="18.0" prefWidth="127.0" text="%AUTO_SAVE_REPLAY2" />
-                                    <ComboBox fx:id="autosavereplay2" prefWidth="150.0" />
-                                 </children>
-                              </HBox>
-                              <HBox prefHeight="37.0" prefWidth="723.0">
-                                 <children>
-                                    <Label prefHeight="18.0" prefWidth="127.0" text="%AUTO_SAVE_REPLAY3" />
-                                    <ComboBox fx:id="autosavereplay3" prefWidth="150.0" />
-                                 </children>
-                                 <children>
-                                    <Label prefHeight="18.0" prefWidth="127.0" text="%AUTO_SAVE_REPLAY4" />
-                                    <ComboBox fx:id="autosavereplay4" prefWidth="150.0" />
-                                 </children>
-                              </HBox>
                            </children>
                         </VBox>
                      </children>

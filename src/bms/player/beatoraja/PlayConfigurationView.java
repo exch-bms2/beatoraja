@@ -257,14 +257,13 @@ public class PlayConfigurationView implements Initializable {
 		}
 		initComboBox(target, targetString);
 		initComboBox(judgealgorithm, new String[] { arg1.getString("JUDGEALG_LR2"), arg1.getString("JUDGEALG_AC"), arg1.getString("JUDGEALG_BOTTOM_PRIORITY") });
-		initComboBox(autosavereplay1, new String[] { "OFF", "Better Score", "Better or same Score", "Better BP", "Better or same BP", "Better Combo", "Better or same Combo",
-				"Better Lamp", "Better or same Lamp", "Better BP/Combo/Lamp","Always"});
-		initComboBox(autosavereplay2, new String[] { "OFF", "Better Score", "Better or same Score", "Better BP", "Better or same BP", "Better Combo", "Better or same Combo",
-				"Better Lamp", "Better or same Lamp", "Better BP/Combo/Lamp","Always"});
-		initComboBox(autosavereplay3, new String[] { "OFF", "Better Score", "Better or same Score", "Better BP", "Better or same BP", "Better Combo", "Better or same Combo",
-				"Better Lamp", "Better or same Lamp", "Better BP/Combo/Lamp","Always"});
-		initComboBox(autosavereplay4, new String[] { "OFF", "Better Score", "Better or same Score", "Better BP", "Better or same BP", "Better Combo", "Better or same Combo",
-				"Better Lamp", "Better or same Lamp", "Better BP/Combo/Lamp", "Always"});
+		String[] autosaves = new String[]{arg1.getString("NONE"),arg1.getString("BETTER_SCORE"),arg1.getString("BETTER_OR_SAME_SCORE"),arg1.getString("BETTER_MISSCOUNT")
+				,arg1.getString("BETTER_OR_SAME_MISSCOUNT"),arg1.getString("BETTER_COMBO"),arg1.getString("BETTER_OR_SAME_COMBO"),
+				arg1.getString("BETTER_LAMP"),arg1.getString("BETTER_OR_SAME_LAMP"),arg1.getString("BETTER_ALL"),arg1.getString("ALWAYS")};
+		initComboBox(autosavereplay1, autosaves);
+		initComboBox(autosavereplay2, autosaves);
+		initComboBox(autosavereplay3, autosaves);
+		initComboBox(autosavereplay4, autosaves);
 		skincategory.setCellFactory(new Callback<ListView<SkinType>, ListCell<SkinType>>() {
 			public ListCell<SkinType> call(ListView<SkinType> param) { return new SkinTypeCell(); }
 		});
