@@ -702,7 +702,7 @@ public class JSONSkinLoader extends SkinLoader{
 			prev = a;
 		}
 
-		obj.setOffsetID(dst.offsety);
+		obj.setOffsetID(dst.offset);
 	}
 
 	private Texture getTexture(String srcid, Path p) {
@@ -992,8 +992,7 @@ public class JSONSkinLoader extends SkinLoader{
 		public int timer;
 		public int loop;
 		public int center;
-		public int offsetx = -1;
-		public int offsety = -1;
+		public int offset = -1;
 		public int[] op = new int[0];
 		public Animation[] dst = new Animation[0];
 	}
