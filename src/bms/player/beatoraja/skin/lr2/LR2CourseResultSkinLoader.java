@@ -51,7 +51,7 @@ public class LR2CourseResultSkinLoader extends LR2SkinCSVLoader<CourseResultSkin
                 gauge.x = Integer.parseInt(str[3]);
                 gauge.y = src.height - Integer.parseInt(str[4]);
                 skin.setDestination(gaugeobj, 0, gauge.x, gauge.y, gauge.width, gauge.height, 0, 255, 255, 255, 255, 0, 0, 0,
-                        0, 0, 0, 0, 0, 0);
+                        0, 0, 0, 0, 0, 0, 0);
                 skin.add(gaugeobj);
             }
         });
@@ -69,7 +69,7 @@ public class LR2CourseResultSkinLoader extends LR2SkinCSVLoader<CourseResultSkin
                 gauge.x = Integer.parseInt(str[3]);
                 gauge.y = src.height - Integer.parseInt(str[4]);
                 skin.setDestination(noteobj, 0, gauge.x, gauge.y, gauge.width, gauge.height, 0, 255, 255, 255, 255, 0, 0, 0,
-                        0, 0, 0, 0, 0, 0);
+                        0, 0, 0, 0, 0, 0, 0);
                 skin.add(noteobj);
             }
         });

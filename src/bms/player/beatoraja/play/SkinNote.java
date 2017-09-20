@@ -30,7 +30,7 @@ public class SkinNote extends SkinObject {
 
 	public void setLaneRegion(Rectangle[] region, float[] scale) {
 		for(int i = 0;i < lanes.length;i++) {
-			lanes[i].setDestination(0,region[i].x, region[i].y, region[i].width, region[i].height, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+			lanes[i].setDestination(0,region[i].x, region[i].y, region[i].width, region[i].height, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 			lanes[i].scale =  scale[i];
 		}
 	}

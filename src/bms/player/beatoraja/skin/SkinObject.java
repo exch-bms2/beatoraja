@@ -26,7 +26,7 @@ public abstract class SkinObject implements Disposable {
 	/**
 	 * X座標オフセットの参照ID
 	 */
-	private int offset = -1;
+	private int offset = 0;
 
 	private int imageid = -1;
 	/**
@@ -88,8 +88,11 @@ public abstract class SkinObject implements Disposable {
 	}
 
 	public void setDestination(long time, float x, float y, float w, float h, int acc, int a, int r, int g, int b,
-			int blend, int filter, int angle, int center, int loop, int timer, int op1, int op2, int op3) {
+			int blend, int filter, int angle, int center, int loop, int timer, int op1, int op2, int op3, int offset) {
 		setDestination(time, x, y, w, h, acc, a, r, g, b, blend, filter, angle, center, loop, timer, new int[]{op1,op2,op3});
+		if(offset != 0) {
+			this.offset = offset;			
+		}
 	}
 
 	public void setDestination(long time, float x, float y, float w, float h, int acc, int a, int r, int g, int b,
@@ -222,18 +225,18 @@ public abstract class SkinObject implements Disposable {
 				r.width = r1.width + (r2.width - r1.width) * rate;
 				r.height = r1.height + (r2.height - r1.height) * rate;
 			}
-			if (state != null && offset != -1) {
+			if (state != null && offset != 0) {
 				Rectangle offsetvalue = state.getOffsetValue(offset);
 				r.x += offsetvalue.x;
 				r.y += offsetvalue.y;
 			}
 			return r;
 		} else {
-			if (offset == -1) {
+			if (offset == 0) {
 				return fixr;
 			}
 			r.set(fixr);
-			if (state != null && offset != -1) {
+			if (state != null && offset != 0) {
 				Rectangle offsetvalue = state.getOffsetValue(offset);
 				r.x += offsetvalue.x;
 				r.y += offsetvalue.y;

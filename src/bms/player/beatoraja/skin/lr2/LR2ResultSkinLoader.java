@@ -54,7 +54,7 @@ public class LR2ResultSkinLoader extends LR2SkinCSVLoader<MusicResultSkin> {
 				gauge.y = src.height - values[4];
 				skin.setDestination(gaugeobj, values[2], gauge.x, gauge.y, gauge.width, gauge.height, values[7],
 						values[8], values[9], values[10], values[11], values[12], values[13], values[14],
-						values[15], values[16], values[17], values[18], values[19], values[20]);
+						values[15], values[16], values[17], values[18], values[19], values[20], values[21]);
 			}
 		});
 		addCommandWord(new CommandWord("SRC_NOTECHART_1P") {
@@ -74,7 +74,7 @@ public class LR2ResultSkinLoader extends LR2SkinCSVLoader<MusicResultSkin> {
 				gauge.y = src.height - values[4];
 				skin.setDestination(noteobj, values[2], gauge.x, gauge.y, gauge.width, gauge.height, values[7], values[8],
 						values[9], values[10], values[11], values[12], values[13], values[14], values[15],
-						values[16], values[17], values[18], values[19], values[20]);
+						values[16], values[17], values[18], values[19], values[20], values[21]);
 			}
 		});
 	}

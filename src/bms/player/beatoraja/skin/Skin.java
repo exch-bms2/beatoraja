@@ -78,9 +78,9 @@ public class Skin {
 
 	public void setDestination(SkinObject object, long time, float x, float y, float w, float h, int acc, int a,
 			int r, int g, int b, int blend, int filter, int angle, int center, int loop, int timer, int op1, int op2,
-			int op3) {
+			int op3, int offset) {
 		object.setDestination(time, x * dw, y * dh, w * dw, h * dh, acc, a, r, g, b, blend, filter, angle, center,
-				loop, timer, op1, op2, op3);
+				loop, timer, op1, op2, op3, offset);
 	}
 
 	public void setDestination(SkinObject object, long time, float x, float y, float w, float h, int acc, int a,
@@ -90,18 +90,18 @@ public class Skin {
 	}
 
 	public void addNumber(SkinNumber number, long time, float x, float y, float w, float h, int acc, int a, int r,
-			int g, int b, int blend, int filter, int angle, int center, int loop, int timer, int op1, int op2, int op3) {
+			int g, int b, int blend, int filter, int angle, int center, int loop, int timer, int op1, int op2, int op3, int offset) {
 		number.setDestination(time, x * dw, y * dh, w * dw, h * dh, acc, a, r, g, b, blend, filter, angle, center,
-				loop, timer, op1, op2, op3);
+				loop, timer, op1, op2, op3, offset);
 		objects.add(number);
 	}
 
 	public SkinImage addImage(TextureRegion tr, long time, float x, float y, float w, float h, int acc, int a,
 			int r, int g, int b, int blend, int filter, int angle, int center, int loop, int timer, int op1, int op2,
-			int op3) {
+			int op3, int offset) {
 		SkinImage si = new SkinImage(tr);
 		si.setDestination(time, x * dw, y * dh, w * dw, h * dh, acc, a, r, g, b, blend, filter, angle, center, loop,
-				timer, op1, op2, op3);
+				timer, op1, op2, op3, offset);
 		objects.add(si);
 		return si;
 	}
