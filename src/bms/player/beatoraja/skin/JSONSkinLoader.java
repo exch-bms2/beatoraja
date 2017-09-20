@@ -702,8 +702,7 @@ public class JSONSkinLoader extends SkinLoader{
 			prev = a;
 		}
 
-		obj.setOffsetx(dst.offsetx);
-		obj.setOffsety(dst.offsety);
+		obj.setOffsetID(dst.offsety);
 	}
 
 	private Texture getTexture(String srcid, Path p) {

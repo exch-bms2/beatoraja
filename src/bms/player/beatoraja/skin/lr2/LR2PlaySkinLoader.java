@@ -116,7 +116,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 				TextureRegion[] images = getSourceImage(values);
 				if (images != null) {
 					SkinImage li = new SkinImage(images, values[10], values[9]);
-					li.setOffsety(OFFSET_LIFT);
+					li.setOffsetID(OFFSET_LIFT);
 					lines[values[1]] = li;
 					// System.out.println("Object Added - " +
 					// (part.getTiming()));
@@ -466,7 +466,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 				TextureRegion[] images = getSourceImage(values);
 				if (images != null) {
 					line = new SkinImage(images, values[10], values[9]);
-					line.setOffsety(OFFSET_LIFT);
+					line.setOffsetID(OFFSET_LIFT);
 					// System.out.println("Object Added - " +
 					// (part.getTiming()));
 				}
@@ -693,7 +693,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 		Texture tex = new Texture("skin/default/system.png");
 		int[] values = linevalues[index % 2];
 		SkinImage li = new SkinImage(new TextureRegion(tex, 0, 0, 1,1));
-		li.setOffsety(OFFSET_LIFT);
+		li.setOffsetID(OFFSET_LIFT);
 		lines[index] = li;
 		lines[index].setDestination(values[2], values[3] * dstw / srcw, dsth - (values[4] + values[6]) * dsth / srch,
 				values[5] * dstw / srcw, values[6] * dsth / srch * h, values[7], 255, r, g,

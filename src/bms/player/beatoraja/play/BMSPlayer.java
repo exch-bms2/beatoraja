@@ -14,6 +14,7 @@ import bms.player.beatoraja.play.bga.BGAProcessor;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.song.SongData;
 
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.*;
 
 import static bms.player.beatoraja.CourseData.CourseDataConstraint.NO_SPEED;
@@ -866,7 +867,36 @@ public class BMSPlayer extends MainState {
 		return super.getSliderValue(id);
 	}
 
-	public boolean getBooleanValue(int id) {
+    public Rectangle getOffsetValue(int id) {
+        switch (id) {
+            case OFFSET_LIFT:
+                if (lanerender.isEnableLift()) {
+                    final PlaySkin skin = (PlaySkin) getSkin();
+                    offset.x = 0;
+                    offset.y = lanerender.getLiftRegion() * (skin.getHeight() - skin.getLaneGroupRegion()[0].y);
+                    offset.width = 0;
+                    offset.height = 0;
+                }
+                return offset;
+            case OFFSET_LANECOVER:
+                if (lanerender.isEnableLanecover()) {
+                    final PlaySkin skin = (PlaySkin) getSkin();
+                    offset.x = 0;
+                    offset.width = 0;
+                    offset.height = 0;
+                    if (lanerender.isEnableLift()) {
+                        offset.y =  -(1 - lanerender.getLiftRegion()) * lanerender.getLanecover()
+                                * (skin.getHeight() - skin.getLaneGroupRegion()[0].y);
+                    } else {
+                        offset.y =  -lanerender.getLanecover() * (skin.getHeight() - skin.getLaneGroupRegion()[0].y);
+                    }
+                }
+                return offset;
+        }
+        return super.getOffsetValue(id);
+    }
+
+    public boolean getBooleanValue(int id) {
 		switch (id) {
 		case OPTION_GAUGE_GROOVE:
 			return gauge.getType() <= 2;

@@ -26,11 +26,7 @@ public abstract class SkinObject implements Disposable {
 	/**
 	 * X座標オフセットの参照ID
 	 */
-	private int offsetx = -1;
-	/**
-	 * Y座標オフセットの参照ID
-	 */
-	private int offsety = -1;
+	private int offset = -1;
 
 	private int imageid = -1;
 	/**
@@ -226,23 +222,21 @@ public abstract class SkinObject implements Disposable {
 				r.width = r1.width + (r2.width - r1.width) * rate;
 				r.height = r1.height + (r2.height - r1.height) * rate;
 			}
-			if (state != null && offsetx != -1) {
-				r.x += state.getSliderValue(offsetx);
-			}
-			if (state != null && offsety != -1) {
-				r.y += state.getSliderValue(offsety);
+			if (state != null && offset != -1) {
+				Rectangle offsetvalue = state.getOffsetValue(offset);
+				r.x += offsetvalue.x;
+				r.y += offsetvalue.y;
 			}
 			return r;
 		} else {
-			if (offsetx == -1 && offsety == -1) {
+			if (offset == -1) {
 				return fixr;
 			}
 			r.set(fixr);
-			if (state != null && offsetx != -1) {
-				r.x += state.getSliderValue(offsetx);
-			}
-			if (state != null && offsety != -1) {
-				r.y += state.getSliderValue(offsety);
+			if (state != null && offset != -1) {
+				Rectangle offsetvalue = state.getOffsetValue(offset);
+				r.x += offsetvalue.x;
+				r.y += offsetvalue.y;
 			}
 			return r;
 		}
@@ -402,20 +396,12 @@ public abstract class SkinObject implements Disposable {
 
 	public abstract void dispose();
 
-	public int getOffsetx() {
-		return offsetx;
+	public int getOffsetID() {
+		return offset;
 	}
 
-	public void setOffsetx(int offsetX) {
-		this.offsetx = offsetX;
-	}
-
-	public int getOffsety() {
-		return offsety;
-	}
-
-	public void setOffsety(int offsetY) {
-		this.offsety = offsetY;
+	public void setOffsetID(int offset) {
+		this.offset = offset;
 	}
 
 	public int getImageID() {

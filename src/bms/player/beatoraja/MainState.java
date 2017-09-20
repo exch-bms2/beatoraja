@@ -14,6 +14,7 @@ import bms.player.beatoraja.song.SongData;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 
 import static bms.player.beatoraja.skin.SkinProperty.*;
@@ -538,6 +539,12 @@ public abstract class MainState {
 	}
 
 	public void setSliderValue(int id, float value) {
+	}
+
+	protected final Rectangle offset = new Rectangle();
+
+	public Rectangle getOffsetValue(int id) {
+		return offset;
 	}
 
 	public String getTextValue(int id) {
