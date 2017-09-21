@@ -99,15 +99,6 @@ public class SkinNumber extends SkinObject {
 			}
 			value /= 10;
 		}
-		if (align == 1) {
-			int shift = 0;
-			while (values[shift] == null) {
-				shift++;
-			}
-			for (int i = 0; i < values.length; i++) {
-				values[i] = i + shift < values.length ? values[i + shift] : null;
-			}
-		}
 		return values;
 	}
 
@@ -129,9 +120,19 @@ public class SkinNumber extends SkinObject {
 		Rectangle r = this.getDestination(time, state);
 		if (r != null) {
 			TextureRegion[] values = getValue(time, value, zeropadding, state);
+			int shift = 0;
+			if (align == 1) {
+				for (int j = 0; j < values.length && values[j] == null; j++) {
+					shift += r.width;
+				}
+			} else if (align == 2) {
+				for (int j = 0; j < values.length && values[j] == null; j++) {
+					shift += r.width * 0.5f;
+				}
+			}
 			for (int j = 0; j < values.length; j++) {
 				if (values[j] != null) {
-					draw(sprite, values[j], r.x + r.width * j + offsetX, r.y + offsetY, r.width, r.height);
+					draw(sprite, values[j], r.x + r.width * j + offsetX - shift, r.y + offsetY, r.width, r.height);
 				}
 			}
 		}
