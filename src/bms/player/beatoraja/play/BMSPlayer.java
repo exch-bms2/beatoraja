@@ -843,23 +843,6 @@ public class BMSPlayer extends MainState {
 				return lane;
 			}
 			return 0;
-		case OFFSET_LIFT:
-			if (lanerender.isEnableLift()) {
-				final PlaySkin skin = (PlaySkin) getSkin();
-				return lanerender.getLiftRegion() * (skin.getHeight() - skin.getLaneGroupRegion()[0].y);
-			}
-			return 0;
-		case OFFSET_LANECOVER:
-			if (lanerender.isEnableLanecover()) {
-				final PlaySkin skin = (PlaySkin) getSkin();
-				if (lanerender.isEnableLift()) {
-					return -(1 - lanerender.getLiftRegion()) * lanerender.getLanecover()
-							* (skin.getHeight() - skin.getLaneGroupRegion()[0].y);
-				} else {
-					return -lanerender.getLanecover() * (skin.getHeight() - skin.getLaneGroupRegion()[0].y);
-				}
-			}
-			return 0;
 		case BARGRAPH_LOAD_PROGRESS:
 			float value = (getMainController().getAudioProcessor().getProgress() + bga.getProgress()) / 2;
 			return value;
@@ -870,26 +853,30 @@ public class BMSPlayer extends MainState {
     public Rectangle getOffsetValue(int id) {
         switch (id) {
             case OFFSET_LIFT:
+                offset.x = 0;
+                offset.width = 0;
+                offset.height = 0;
                 if (lanerender.isEnableLift()) {
                     final PlaySkin skin = (PlaySkin) getSkin();
-                    offset.x = 0;
                     offset.y = lanerender.getLiftRegion() * (skin.getHeight() - skin.getLaneGroupRegion()[0].y);
-                    offset.width = 0;
-                    offset.height = 0;
+                } else {
+                	offset.y = 0;
                 }
                 return offset;
             case OFFSET_LANECOVER:
+                offset.x = 0;
+                offset.width = 0;
+                offset.height = 0;
                 if (lanerender.isEnableLanecover()) {
                     final PlaySkin skin = (PlaySkin) getSkin();
-                    offset.x = 0;
-                    offset.width = 0;
-                    offset.height = 0;
                     if (lanerender.isEnableLift()) {
                         offset.y =  -(1 - lanerender.getLiftRegion()) * lanerender.getLanecover()
                                 * (skin.getHeight() - skin.getLaneGroupRegion()[0].y);
                     } else {
                         offset.y =  -lanerender.getLanecover() * (skin.getHeight() - skin.getLaneGroupRegion()[0].y);
                     }
+                } else {
+                	offset.y = 0;
                 }
                 return offset;
         }

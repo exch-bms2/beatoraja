@@ -385,7 +385,7 @@ public class JSONSkinLoader extends SkinLoader{
 
 						if(sk.note.bpm != null) {
 							SkinImage[] bpm = new SkinImage[gregion.length];
-							for (int i = 0; i < gregion.length; i++) {
+							for (int i = 0; i < gregion.length && i < sk.note.bpm.length; i++) {
 								Destination dest = sk.note.bpm[i];
 
 								for (Image img : sk.image) {
@@ -404,7 +404,7 @@ public class JSONSkinLoader extends SkinLoader{
 						
 						if(sk.note.stop != null) {
 							SkinImage[] stop = new SkinImage[gregion.length];
-							for (int i = 0; i < gregion.length; i++) {
+							for (int i = 0; i < gregion.length && i < sk.note.stop.length; i++) {
 								Destination dest = sk.note.stop[i];
 
 								for (Image img : sk.image) {
@@ -423,7 +423,7 @@ public class JSONSkinLoader extends SkinLoader{
 
 						if(sk.note.time != null) {
 							SkinImage[] time = new SkinImage[gregion.length];
-							for (int i = 0; i < gregion.length; i++) {
+							for (int i = 0; i < gregion.length && i < sk.note.time.length; i++) {
 								Destination dest = sk.note.time[i];
 
 								for (Image img : sk.image) {
@@ -992,7 +992,7 @@ public class JSONSkinLoader extends SkinLoader{
 		public int timer;
 		public int loop;
 		public int center;
-		public int offset = -1;
+		public int offset;
 		public int[] op = new int[0];
 		public Animation[] dst = new Animation[0];
 	}
