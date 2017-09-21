@@ -189,12 +189,6 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 							values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
 							values[12], values[13], values[14], values[15], values[16], values[17], values[18],
 							values[19], values[20], values[21]);
-					// TODO スクラッチ回転量をOffsetに移行したらこれを消す
-					if (values[21] == 1 || values[21] == 2) {
-						// System.out.println("set scratch image : " +
-						// values[21]);
-						part.setScratch(values[21]);
-					}
 				}
 			}
 		});

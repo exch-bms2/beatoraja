@@ -810,10 +810,6 @@ public class BMSPlayer extends MainState {
 		case NUMBER_MAXCOMBO:
 		case NUMBER_MAXCOMBO2:
 			return judge.getScoreData().getCombo();
-		case NUMBER_SCRATCHANGLE_1P:
-			return keyinput.getScratchState(0);
-		case NUMBER_SCRATCHANGLE_2P:
-			return keyinput.getScratchState(1);
 		case VALUE_JUDGE_1P_DURATION:
 		case VALUE_JUDGE_2P_DURATION:
 		case VALUE_JUDGE_3P_DURATION:
@@ -850,35 +846,51 @@ public class BMSPlayer extends MainState {
 		return super.getSliderValue(id);
 	}
 
-    public Rectangle getOffsetValue(int id) {
+    public SkinOffset getOffsetValue(int id) {
         switch (id) {
-            case OFFSET_LIFT:
-                offset.x = 0;
-                offset.width = 0;
-                offset.height = 0;
+		case OFFSET_SCRATCHANGLE_1P:
+            offset.x = 0;
+            offset.y = 0;
+            offset.w = 0;
+            offset.h = 0;
+            offset.r = keyinput.getScratchState(0);
+            return offset;
+		case OFFSET_SCRATCHANGLE_2P:
+            offset.x = 0;
+            offset.y = 0;
+            offset.w = 0;
+            offset.h = 0;
+            offset.r = keyinput.getScratchState(1);
+            return offset;
+        case OFFSET_LIFT:
+            offset.x = 0;
+            offset.w = 0;
+            offset.h = 0;
+            offset.r = 0;
+            if (lanerender.isEnableLift()) {
+                final PlaySkin skin = (PlaySkin) getSkin();
+                offset.y = lanerender.getLiftRegion() * (skin.getHeight() - skin.getLaneGroupRegion()[0].y);
+            } else {
+            	offset.y = 0;
+            }
+            return offset;
+        case OFFSET_LANECOVER:
+            offset.x = 0;
+            offset.w = 0;
+            offset.h = 0;
+            offset.r = 0;
+            if (lanerender.isEnableLanecover()) {
+                final PlaySkin skin = (PlaySkin) getSkin();
                 if (lanerender.isEnableLift()) {
-                    final PlaySkin skin = (PlaySkin) getSkin();
-                    offset.y = lanerender.getLiftRegion() * (skin.getHeight() - skin.getLaneGroupRegion()[0].y);
+                    offset.y =  -(1 - lanerender.getLiftRegion()) * lanerender.getLanecover()
+                            * (skin.getHeight() - skin.getLaneGroupRegion()[0].y);
                 } else {
-                	offset.y = 0;
+                    offset.y =  -lanerender.getLanecover() * (skin.getHeight() - skin.getLaneGroupRegion()[0].y);
                 }
-                return offset;
-            case OFFSET_LANECOVER:
-                offset.x = 0;
-                offset.width = 0;
-                offset.height = 0;
-                if (lanerender.isEnableLanecover()) {
-                    final PlaySkin skin = (PlaySkin) getSkin();
-                    if (lanerender.isEnableLift()) {
-                        offset.y =  -(1 - lanerender.getLiftRegion()) * lanerender.getLanecover()
-                                * (skin.getHeight() - skin.getLaneGroupRegion()[0].y);
-                    } else {
-                        offset.y =  -lanerender.getLanecover() * (skin.getHeight() - skin.getLaneGroupRegion()[0].y);
-                    }
-                } else {
-                	offset.y = 0;
-                }
-                return offset;
+            } else {
+            	offset.y = 0;
+            }
+            return offset;
         }
         return super.getOffsetValue(id);
     }

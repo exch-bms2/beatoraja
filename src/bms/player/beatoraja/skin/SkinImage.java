@@ -22,8 +22,6 @@ public class SkinImage extends SkinObject {
 
 	private int id = -1;
 
-	private int scratch = 0;
-
 	public SkinImage() {
 		
 	}
@@ -98,19 +96,13 @@ public class SkinImage extends SkinObject {
             final Rectangle r = this.getDestination(time, state);
             if (r != null) {
                 if(value >= 0 && value < image.length) {
-                	if(scratch == 1) {
-						draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height, getColor(),state.getNumberValue(NUMBER_SCRATCHANGLE_1P));
-					} else if(scratch == 2) {
-						draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height, getColor(),state.getNumberValue(NUMBER_SCRATCHANGLE_2P));
-					} else {
-                    	if(image[0] instanceof SkinSourceMovie) {
-                    		sprite.setShader(((SkinSourceMovie) image[0]).getShader());
-                            draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height);
-                            sprite.setShader(null);
-                    	} else {
-    						draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height);
-                    	}
-					}
+                	if(image[0] instanceof SkinSourceMovie) {
+                		sprite.setShader(((SkinSourceMovie) image[0]).getShader());
+                        draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height);
+                        sprite.setShader(null);
+                	} else {
+						draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height);
+                	}
                 }
             }
         }
@@ -130,13 +122,7 @@ public class SkinImage extends SkinObject {
             final Rectangle r = this.getDestination(time, state);
             if (r != null) {
                 if(value >= 0 && value < image.length) {
-                    if(scratch == 1) {
-                        draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height, getColor(),state.getNumberValue(NUMBER_SCRATCHANGLE_1P));
-                    } else if(scratch == 2) {
-                        draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height, getColor(),state.getNumberValue(NUMBER_SCRATCHANGLE_2P));
-                    } else {
-                        draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height);                    		
-                    }
+                    draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height);                    		
                 }
             }
         }
@@ -153,13 +139,5 @@ public class SkinImage extends SkinObject {
 
 	public void setReferenceID(int id) {
 		this.id = id;
-	}
-
-	public int getScratch() {
-		return scratch;
-	}
-
-	public void setScratch(int scratch) {
-		this.scratch = scratch;
 	}
 }

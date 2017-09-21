@@ -2,6 +2,8 @@ package bms.player.beatoraja.skin;
 
 import bms.player.beatoraja.MainController;
 import bms.player.beatoraja.MainState;
+import bms.player.beatoraja.MainState.SkinOffset;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -74,6 +76,7 @@ public abstract class SkinObject implements Disposable {
 
 	private Rectangle r = new Rectangle();
 	private Color c = new Color();
+	private SkinOffset off;
 
 	private Rectangle fixr = null;
 	private Color fixc = null;
@@ -212,6 +215,7 @@ public abstract class SkinObject implements Disposable {
 		nowtime = time;
 		rate = -1;
 		index = -1;
+		off = state != null && offset != 0 ? state.getOffsetValue(offset) : null;
 		
 		if (fixr == null) {
 			getRate();
@@ -225,10 +229,11 @@ public abstract class SkinObject implements Disposable {
 				r.width = r1.width + (r2.width - r1.width) * rate;
 				r.height = r1.height + (r2.height - r1.height) * rate;
 			}
-			if (state != null && offset != 0) {
-				Rectangle offsetvalue = state.getOffsetValue(offset);
-				r.x += offsetvalue.x;
-				r.y += offsetvalue.y;
+			if (off != null) {
+				r.x += off.x;
+				r.y += off.y;
+				r.width += off.w;
+				r.height += off.h;
 			}
 			return r;
 		} else {
@@ -236,10 +241,11 @@ public abstract class SkinObject implements Disposable {
 				return fixr;
 			}
 			r.set(fixr);
-			if (state != null && offset != 0) {
-				Rectangle offsetvalue = state.getOffsetValue(offset);
-				r.x += offsetvalue.x;
-				r.y += offsetvalue.y;
+			if (off != null) {
+				r.x += off.x;
+				r.y += off.y;
+				r.width += off.w;
+				r.height += off.h;
 			}
 			return r;
 		}
@@ -265,10 +271,19 @@ public abstract class SkinObject implements Disposable {
 
 	public int getAngle() {
 		if (fixa != Integer.MIN_VALUE) {
-			return fixa;
+			if(off == null) {
+				return fixa;				
+			}
+			int a = fixa;
+			a += off.r;
+			return a;
 		}
 		getRate();
-		return rate == 0 ? dst[index].angle :  (int) (dst[index].angle + (dst[index + 1].angle - dst[index].angle) * rate);
+		int a = (rate == 0 ? dst[index].angle :  (int) (dst[index].angle + (dst[index + 1].angle - dst[index].angle) * rate));
+		if (off != null) {
+			a += off.r;
+		}
+		return a;
 	}
 	
 	private void getRate() {

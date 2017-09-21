@@ -617,11 +617,11 @@ public class SkinProperty {
 	public static final int SLIDER_LANECOVER = 4;
 	public static final int SLIDER_LANECOVER2 = 5;
 
+	public static final int OFFSET_SCRATCHANGLE_1P = 1;
+	public static final int OFFSET_SCRATCHANGLE_2P = 2;
+	
 	public static final int OFFSET_LIFT = 50;
 	public static final int OFFSET_LANECOVER = 51;
-
-	public static final int NUMBER_SCRATCHANGLE_1P = 60000;
-	public static final int NUMBER_SCRATCHANGLE_2P = 60001;
 
 	public static final int BUTTON_MODE = 1011;
 	public static final int BUTTON_SORT = 1012;

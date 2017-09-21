@@ -11,9 +11,6 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Align;
 
-import static bms.player.beatoraja.skin.SkinProperty.NUMBER_SCRATCHANGLE_1P;
-import static bms.player.beatoraja.skin.SkinProperty.NUMBER_SCRATCHANGLE_2P;
-
 /**
  * テキストオブジェクト
  *

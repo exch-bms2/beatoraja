@@ -7,6 +7,7 @@ import java.util.*;
 import bms.model.Mode;
 import bms.player.beatoraja.play.TargetProperty;
 import bms.player.beatoraja.skin.*;
+import bms.player.beatoraja.skin.SkinObject.SkinObjectDestination;
 import bms.player.beatoraja.skin.lr2.LR2SkinCSVLoader;
 import bms.player.beatoraja.skin.lr2.LR2SkinHeaderLoader;
 import bms.player.beatoraja.song.SongData;
@@ -541,9 +542,17 @@ public abstract class MainState {
 	public void setSliderValue(int id, float value) {
 	}
 
-	protected final Rectangle offset = new Rectangle();
+	protected final SkinOffset offset = new SkinOffset();
+	
+	public static class SkinOffset {
+		public float x;
+		public float y;
+		public float w;
+		public float h;
+		public float r;
+	}
 
-	public Rectangle getOffsetValue(int id) {
+	public SkinOffset getOffsetValue(int id) {
 		return offset;
 	}
 
