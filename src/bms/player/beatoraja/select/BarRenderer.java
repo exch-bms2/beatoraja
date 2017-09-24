@@ -96,6 +96,12 @@ public class BarRenderer {
 				table.add(new TableBar(select, tds[i], new TableDataAccessor.DifficultyTableReader(tds[i].getUrl())));
 			}
 		}
+		
+		if(main.getIRConnection() != null) {
+			for(TableData td : main.getIRConnection().getTableDatas()) {
+				table.add(new TableBar(select, td, new TableDataAccessor.DifficultyTableReader(td.getUrl())));				
+			}
+		}
 
 		Thread bst = new Thread() {
 			public void run() {

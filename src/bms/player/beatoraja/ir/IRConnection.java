@@ -2,6 +2,7 @@ package bms.player.beatoraja.ir;
 
 import bms.model.BMSModel;
 import bms.player.beatoraja.IRScoreData;
+import bms.player.beatoraja.TableData;
 
 /**
  * IR接続用インターフェイス
@@ -20,6 +21,12 @@ public interface IRConnection {
 	 * @param pass パスワード
 	 */
 	public void login(String id, String pass);
+
+	/**
+	 * IRに設定されている表データを収録する
+	 * @return IRで取得可能な表データ
+	 */
+	public TableData[] getTableDatas();
 
 	/**
 	 * スコアデータを取得する
