@@ -7,7 +7,7 @@ import java.util.logging.Logger;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.play.bga.BGAProcessor;
 import bms.player.beatoraja.skin.*;
-import bms.player.beatoraja.skin.SkinHeader.CustomFile;
+import bms.player.beatoraja.skin.SkinHeader.*;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -453,6 +453,13 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 				}
 			}
 		}
+		Map<Integer, int[]> offset = new HashMap<>();
+		for (CustomOffset of : header.getCustomOffsets()) {
+			if(property.get(of.name) instanceof int[]) {					
+				offset.put(of.id, (int[]) property.get(of.name));
+			}
+		}
+		skin.setOffset(offset);
 
 		op.putAll(option);
 		this.loadSkin0(skin, f, state, op, filemap);

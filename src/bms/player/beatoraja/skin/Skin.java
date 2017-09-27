@@ -55,6 +55,9 @@ public class Skin {
 	private int fadeout;
 
 	private Map<Integer, Boolean> option = new HashMap<Integer, Boolean>();
+	
+	private Map<Integer, int[]> offset = new HashMap<Integer, int[]>();
+
 	/**
 	 * 読み込み時から不変であることが確定しているop
 	 */
@@ -258,6 +261,14 @@ public class Skin {
 
 	public void setOption(Map<Integer, Boolean> option) {
 		this.option = option;
+	}
+
+	public Map<Integer, int[]> getOffset() {
+		return offset;
+	}
+
+	public void setOffset(Map<Integer, int[]> offset) {
+		this.offset = offset;
 	}
 
 	public float getWidth() {

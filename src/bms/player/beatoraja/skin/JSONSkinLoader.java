@@ -81,6 +81,14 @@ public class JSONSkinLoader extends SkinLoader{
 					files[i] = new SkinHeader.CustomFile(pr.name, p.getParent().toString() + "/" + pr.path, pr.def);
 				}
 				header.setCustomFiles(files);
+				
+				SkinHeader.CustomOffset[] offsets = new SkinHeader.CustomOffset[sk.offset.length];
+				for (int i = 0; i < sk.offset.length; i++) {
+					Offset pr = sk.offset[i];
+					offsets[i] = new SkinHeader.CustomOffset(pr.name, pr.id);
+				}
+				header.setCustomOffsets(offsets);
+
 			}
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -142,6 +150,14 @@ public class JSONSkinLoader extends SkinLoader{
 					filemap.put(p.getParent().toString() + "/" + pr.path, property.get(pr.name).toString());
 				}
 			}
+			
+			Map<Integer, int[]> offset = new HashMap<>();
+			for (Offset of : sk.offset) {
+				if(property.get(of.name) instanceof int[]) {					
+					offset.put(of.id, (int[]) property.get(of.name));
+				}
+			}
+			skin.setOffset(offset);
 
 			skin.setFadeout(sk.fadeout);
 			skin.setInput(sk.input);
@@ -799,6 +815,7 @@ public class JSONSkinLoader extends SkinLoader{
 
 		public Property[] property = new Property[0];
 		public Filepath[] filepath = new Filepath[0];
+		public Offset[] offset = new Offset[0];		
 		public Source[] source = new Source[0];
 		public Font[] font = new Font[0];
 		public Image[] image = new Image[0];
@@ -832,6 +849,11 @@ public class JSONSkinLoader extends SkinLoader{
 		public String name;
 		public String path;
 		public String def;
+	}
+
+	public static class Offset {
+		public String name;
+		public int id;
 	}
 
 	public static class Source {

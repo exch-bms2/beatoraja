@@ -1,22 +1,11 @@
 package bms.player.beatoraja;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
@@ -28,7 +17,6 @@ import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter.OutputType;
 import com.portaudio.DeviceInfo;
-import com.portaudio.PortAudio;
 import com.synthbot.jasiohost.AsioDriver;
 
 import bms.player.beatoraja.audio.PortAudioDriver;
@@ -36,8 +24,7 @@ import bms.player.beatoraja.ir.IRConnection;
 import bms.player.beatoraja.play.JudgeAlgorithm;
 import bms.player.beatoraja.play.TargetProperty;
 import bms.player.beatoraja.skin.SkinHeader;
-import bms.player.beatoraja.skin.SkinHeader.CustomFile;
-import bms.player.beatoraja.skin.SkinHeader.CustomOption;
+import bms.player.beatoraja.skin.SkinHeader.*;
 import bms.player.beatoraja.skin.JSONSkinLoader;
 import bms.player.beatoraja.skin.SkinType;
 import bms.player.beatoraja.skin.lr2.LR2SkinHeaderLoader;
@@ -887,6 +874,7 @@ class SkinConfigurationView {
 	private SkinHeader selected = null;
 	private Map<CustomOption, ComboBox<String>> optionbox = new HashMap<CustomOption, ComboBox<String>>();
 	private Map<CustomFile, ComboBox<String>> filebox = new HashMap<CustomFile, ComboBox<String>>();
+	private Map<CustomOffset, Spinner<Integer>[]> offsetbox = new HashMap<CustomOffset, Spinner<Integer>[]>();
 
 	public SkinConfigurationView() {
 		List<Path> lr2skinpaths = new ArrayList<Path>();
@@ -948,8 +936,7 @@ class SkinConfigurationView {
 		}
 		VBox main = new VBox();
 		optionbox.clear();
-		List<CustomOption> options = new ArrayList<CustomOption>(Arrays.asList(header.getCustomOptions()));
-		for (CustomOption option : options) {
+		for (CustomOption option : header.getCustomOptions()) {
 			HBox hbox = new HBox();
 			ComboBox<String> combo = new ComboBox<String>();
 			combo.getItems().setAll(option.contents);
@@ -1013,6 +1000,23 @@ class SkinConfigurationView {
 				e.printStackTrace();
 			}
 		}
+		offsetbox.clear();
+		for (CustomOffset option : header.getCustomOffsets()) {
+			final String[] values = {"x","y","w","h","r"};
+			HBox hbox = new HBox();
+			Label label = new Label(option.name);
+			label.setMinWidth(250.0);
+			hbox.getChildren().add(label);
+			
+			Spinner<Integer>[] spinner = new Spinner[values.length];
+			for(int i = 0;i < spinner.length;i++) {
+				spinner[i] = new Spinner(-9999,9999,0,1);
+				hbox.getChildren().addAll(new Label(values[i]), spinner[i]);
+			}
+			offsetbox.put(option, spinner);
+			main.getChildren().add(hbox);
+		}
+
 		return main;
 	}
 
@@ -1048,6 +1052,18 @@ class SkinConfigurationView {
 		for (CustomFile file : selected.getCustomFiles()) {
 			if (filebox.get(file) != null) {
 				result.put(file.name, filebox.get(file).getValue());
+			}
+		}
+		for (CustomOffset offset : selected.getCustomOffsets()) {
+			if (offsetbox.get(offset) != null) {
+				Spinner<Integer>[] spinner = offsetbox.get(offset);
+				int[] values = new int[spinner.length];
+				for(int i = 0;i < values.length;i++) {
+					spinner[i].getValueFactory()
+					.setValue(spinner[i].getValueFactory().getConverter().fromString(spinner[i].getEditor().getText()));
+					values[i] = spinner[i].getValue();
+				}
+				result.put(offset.name, values);
 			}
 		}
 		return result;

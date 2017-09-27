@@ -11,8 +11,7 @@ import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.Resolution;
 import bms.player.beatoraja.skin.SkinHeader;
 import bms.player.beatoraja.skin.SkinType;
-import bms.player.beatoraja.skin.SkinHeader.CustomFile;
-import bms.player.beatoraja.skin.SkinHeader.CustomOption;
+import bms.player.beatoraja.skin.SkinHeader.*;
 
 import static bms.player.beatoraja.Resolution.*;
 
@@ -26,6 +25,7 @@ public class LR2SkinHeaderLoader extends LR2SkinLoader {
 	private SkinHeader header = new SkinHeader();
 	private List<CustomFile> files = new ArrayList<CustomFile>();
 	private List<CustomOption> options = new ArrayList<CustomOption>();
+	private List<CustomOffset> offsets = new ArrayList<CustomOffset>();
 
 	public LR2SkinHeaderLoader() {
 		
@@ -56,6 +56,22 @@ public class LR2SkinHeaderLoader extends LR2SkinLoader {
 			@Override
 			public void execute(String[] str) {
 				files.add(new CustomFile(str[1], str[2].replace("LR2files\\Theme", "skin").replace("\\", "/"), str.length >= 4 ? str[3] : null));
+			}
+		});
+		addCommandWord(new CommandWord("CUSTOMOFFSET") {
+			@Override
+			public void execute(String[] str) {
+				List<String> contents = new ArrayList<String>();
+				for(int i = 3;i < str.length;i++) {
+					if(str[i] != null && str[i].length() > 0) {
+						contents.add(str[i]);
+					}
+				}
+				int[] op = new int[contents.size()];
+				for(int i = 0;i < op.length;i++) {
+					op[i] = Integer.parseInt(str[2]) + i;
+				}
+				offsets.add(new CustomOffset(str[1], Integer.parseInt(str[2])));
 			}
 		});
 		addCommandWord(new CommandWord("RESOLUTION") {

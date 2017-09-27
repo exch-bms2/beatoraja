@@ -553,6 +553,16 @@ public abstract class MainState {
 	}
 
 	public SkinOffset getOffsetValue(int id) {
+		if(skin.getOffset().get(id) != null) {
+			int[] values = skin.getOffset().get(id);
+			offset.x = values[0];
+			offset.y = values[1];
+			offset.w = values[2];
+			offset.h = values[3];
+			offset.r = values[4];
+		} else {
+			offset.x = offset.y = offset.w = offset.h = offset.r = 0;
+		}
 		return offset;
 	}
 
