@@ -131,7 +131,7 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private CheckBox legacy;
 	@FXML
-	private CheckBox exjudge;
+	private Spinner<Integer> exjudge;
 	@FXML
 	private CheckBox nomine;
 
@@ -364,7 +364,7 @@ public class PlayConfigurationView implements Initializable {
 		constant.setSelected(player.isConstant());
 		bpmguide.setSelected(player.isBpmguide());
 		legacy.setSelected(player.isLegacynote());
-		exjudge.setSelected(player.isExpandjudge());
+		exjudge.getValueFactory().setValue(player.getJudgewindowrate());
 		nomine.setSelected(player.isNomine());
 		judgeregion.setSelected(player.isShowjudgearea());
 		markprocessednote.setSelected(player.isMarkprocessednote());
@@ -450,7 +450,7 @@ public class PlayConfigurationView implements Initializable {
 		player.setConstant(constant.isSelected());
 		player.setBpmguide(bpmguide.isSelected());
 		player.setLegacynote(legacy.isSelected());
-		player.setExpandjudge(exjudge.isSelected());
+		player.setJudgewindowrate(getValue(exjudge));
 		player.setNomine(nomine.isSelected());
 		player.setMarkprocessednote(markprocessednote.isSelected());
 

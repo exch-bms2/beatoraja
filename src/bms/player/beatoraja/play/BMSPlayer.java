@@ -106,6 +106,12 @@ public class BMSPlayer extends MainState {
 			}
 		}
 
+		if(replay != null && main.getInputProcessor().getKeystate()[1]) {
+			resource.setReplayData(replay);
+			replay = null;
+			autoplay = 0;
+		}
+
 		if (model.getRandom() != null && model.getRandom().length > 0) {
 			if (autoplay >= 3) {
 				model = resource.getGenerator().generate(replay.rand);
@@ -140,7 +146,7 @@ public class BMSPlayer extends MainState {
 				assist = 2;
 				score = false;
 			}
-			if (config.isExpandjudge()) {
+			if (config.getJudgewindowrate() > 100) {
 				assist = 2;
 				score = false;
 			}
@@ -208,10 +214,15 @@ public class BMSPlayer extends MainState {
 		}
 
 		Logger.getGlobal().info("ゲージ設定");
-		if(replay != null && main.getInputProcessor().getKeystate()[5]) {
-			if (replay.gauge != GrooveGauge.HAZARD || replay.gauge != GrooveGauge.EXHARDCLASS) {
-				replay.gauge++;
+		if(replay != null) {
+			boolean[] keystate = main.getInputProcessor().getKeystate();
+			for(int count = (keystate[5] ? 1 : 0) + (keystate[3] ? 2 : 0);count > 0; count--) {
+				if (replay.gauge != GrooveGauge.HAZARD || replay.gauge != GrooveGauge.EXHARDCLASS) {
+					replay.gauge++;
+				}
 			}
+		}
+		if(replay != null && main.getInputProcessor().getKeystate()[5]) {
 		}
 		gauge = GrooveGauge.create(model, replay != null ? replay.gauge : config.getGauge(), resource.getCourseBMSModels() != null);
 		FloatArray f = resource.getGauge();

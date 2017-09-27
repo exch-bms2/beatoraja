@@ -399,7 +399,7 @@ public abstract class MainState {
 		case BUTTON_BGA:
 			return getMainController().getPlayerResource().getConfig().getBga();
 		case BUTTON_ASSIST_EXJUDGE:
-			return getMainController().getPlayerResource().getPlayerConfig().isExpandjudge() ? 1 : 0;
+			return getMainController().getPlayerResource().getPlayerConfig().getJudgewindowrate() > 100 ? 1 : 0;
 		case BUTTON_ASSIST_CONSTANT:
 			return getMainController().getPlayerResource().getPlayerConfig().isConstant() ? 1 : 0;
 		case BUTTON_ASSIST_JUDGEAREA:
