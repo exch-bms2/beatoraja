@@ -80,7 +80,7 @@ public class PlayerConfig {
 	/**
 	 * アシストオプション:判定拡大
 	 */
-	private boolean expandjudge = false;
+	private int judgewindowrate = 100;
 	/**
 	 * アシストオプション:地雷除去
 	 */
@@ -145,7 +145,6 @@ public class PlayerConfig {
 		this.constant = c.isConstant();
 		this.legacynote = c.isLegacynote();
 		this.lnmode = c.getLnmode();
-		this.expandjudge = c.isExpandjudge();
 		this.nomine = c.isNomine();
 		this.bpmguide = c.isBpmguide();
 		this.showjudgearea = c.isShowjudgearea();
@@ -227,14 +226,6 @@ public class PlayerConfig {
 
 	public void setLnmode(int lnmode) {
 		this.lnmode = lnmode;
-	}
-
-	public boolean isExpandjudge() {
-		return expandjudge;
-	}
-
-	public void setExpandjudge(boolean expandjudge) {
-		this.expandjudge = expandjudge;
 	}
 
 	public int getRandom2() {
@@ -427,5 +418,16 @@ public class PlayerConfig {
 
 	public void setMisslayerDuration(int misslayerTime) {
 		this.misslayerDuration = misslayerTime;
+	}
+
+	public int getJudgewindowrate() {
+		if(judgewindowrate < 25 || judgewindowrate > 400) {
+			judgewindowrate = 100;
+		}
+		return judgewindowrate;
+	}
+
+	public void setJudgewindowrate(int judgewindowrate) {
+		this.judgewindowrate = judgewindowrate;
 	}
 }

@@ -206,7 +206,7 @@ public class MusicSelectInputProcessor {
             select.setPanelState(2);
             if (keystate[0] && keytime[0] != 0) {
                 keytime[0] = 0;
-                config.setExpandjudge(!config.isExpandjudge());
+                config.setJudgewindowrate(config.getJudgewindowrate() == 100 ? 400 : 100);
             }
             if (keystate[1] && keytime[1] != 0) {
                 keytime[1] = 0;

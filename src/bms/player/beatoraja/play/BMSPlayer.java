@@ -146,7 +146,7 @@ public class BMSPlayer extends MainState {
 				assist = 2;
 				score = false;
 			}
-			if (config.isExpandjudge()) {
+			if (config.getJudgewindowrate() > 100) {
 				assist = 2;
 				score = false;
 			}

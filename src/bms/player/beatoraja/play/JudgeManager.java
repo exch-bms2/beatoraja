@@ -150,7 +150,7 @@ public class JudgeManager {
 			auto_presstime[key] = Long.MIN_VALUE;
 		}
 
-		final int judgerank = resource.getPlayerConfig().isExpandjudge() ? model.getJudgerank() * 4 : model.getJudgerank();
+		final int judgerank = model.getJudgerank() * resource.getPlayerConfig().getJudgewindowrate() / 100;
 		int constraint = 2;
 		for (CourseData.CourseDataConstraint mode : resource.getConstraint()) {
 			if (mode == CourseData.CourseDataConstraint.NO_GREAT) {

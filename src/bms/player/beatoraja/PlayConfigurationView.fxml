@@ -288,6 +288,12 @@
                               <ComboBox fx:id="gaugeop" prefWidth="150.0" GridPane.columnIndex="3" GridPane.rowIndex="3" />
                               <Label text="%LNTYPE" GridPane.rowIndex="4" />
                               <ComboBox fx:id="lntype" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                               <Label text="%EXPAND_JUDGE" GridPane.columnIndex="2"  GridPane.rowIndex="4" />
+                               <Spinner fx:id="exjudge" editable="true" GridPane.columnIndex="3"  GridPane.rowIndex="4" >
+                                   <valueFactory>
+                                       <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="25" initialValue="100" max="400" min="25" />
+                                   </valueFactory>
+                               </Spinner>
                               <Label text="%GVALUE" GridPane.columnIndex="2" />
                   				    <Spinner fx:id="gvalue" editable="true" GridPane.columnIndex="3">
             <valueFactory>
@@ -316,7 +322,6 @@
               <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="0" max="99" min="-99" />
             </valueFactory>
           </Spinner>
-                              <CheckBox fx:id="exjudge" mnemonicParsing="false" text="%EXPAND_JUDGE" GridPane.columnIndex="1" GridPane.rowIndex="6" />
                               <CheckBox fx:id="nomine" mnemonicParsing="false" text="%NO_MINE" GridPane.columnIndex="2" GridPane.rowIndex="6" />
                               <Label text="%OPTIONS_MISC" GridPane.rowIndex="7" />
                               <CheckBox fx:id="showhiddennote" mnemonicParsing="false" text="%SHOW_HIDDEN_NOTE" GridPane.columnIndex="2" GridPane.rowIndex="7" />
