@@ -13,6 +13,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import bms.player.beatoraja.song.SongData;
+import bms.table.BMSTableElement;
 import bms.table.Course;
 import bms.table.DifficultyTable;
 import bms.table.DifficultyTableElement;
@@ -21,6 +22,7 @@ import bms.table.Course.Trophy;
 
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter.OutputType;
+import com.sun.scenario.effect.Blend.Mode;
 
 import bms.player.beatoraja.CourseData.TrophyData;
 
@@ -188,7 +190,7 @@ public class TableDataAccessor {
 					tde.setName("LEVEL " + lv);
 					List<SongData> hashes = new ArrayList<SongData>();
 					for (DifficultyTableElement dte : dt.getElements()) {
-						if (lv.equals(dte.getDifficultyID())) {
+						if (lv.equals(dte.getLevel())) {
 							SongData sd = new SongData();
 							if(dte.getSHA256() != null) {
 								sd.setSha256(dte.getSHA256());
@@ -196,9 +198,9 @@ public class TableDataAccessor {
 								sd.setMd5(dte.getMD5());
 							}
 							sd.setTitle(dte.getTitle());
-							sd.setArtist(dte.getURL1name());
-							sd.setUrl(dte.getURL1());
-							sd.setAppendurl(dte.getURL2());
+							sd.setArtist(dte.getArtist());
+							sd.setUrl(dte.getURL());
+							sd.setAppendurl(dte.getAppendURL());
 							hashes.add(sd);
 						}
 					}
@@ -213,16 +215,9 @@ public class TableDataAccessor {
 						for (Course g : course) {
 							CourseData cd = new CourseData();
 							cd.setName(g.getName());
-							// TODO 難易度表パーサーの仕様を変えたらここも変更
-							SongData[] songs = new SongData[g.getHash().length];
+							SongData[] songs = new SongData[g.getCharts().length];
 							for(int i = 0;i < songs.length;i++) {
-								songs[i] = new SongData();
-								final String hash = g.getHash()[i];
-								if (hash.length() == 32) {
-									songs[i].setMd5(hash);
-								} else if (hash.length() == 64) {
-									songs[i].setSha256(hash);
-								}
+								songs[i] = toSongData(g.getCharts()[i]);
 							}
 							cd.setSong(songs);
 							List<CourseData.CourseDataConstraint> l = new ArrayList<>();
@@ -260,4 +255,25 @@ public class TableDataAccessor {
 		}
 	}
 
+	private static SongData toSongData(BMSTableElement te) {
+		SongData song = new SongData();
+		song.setMd5(te.getMD5());
+		song.setSha256(te.getSHA256());
+		song.setTitle(te.getTitle());
+		song.setArtist(te.getArtist());
+		for(bms.model.Mode mode : bms.model.Mode.values()) {
+			if(mode.hint.equals(te.getMode())) {
+				song.setMode(mode.id);
+				break;
+			}
+		}
+		song.setUrl(te.getURL());
+		
+		if(te instanceof DifficultyTableElement) {
+			DifficultyTableElement dte = (DifficultyTableElement) te;
+			song.setAppendurl(dte.getAppendURL());
+		}
+		
+		return song;
+	}
 }

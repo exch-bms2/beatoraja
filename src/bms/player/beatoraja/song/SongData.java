@@ -293,12 +293,18 @@ public class SongData {
 	}
 
 	public String getMd5() {
+		if(md5 == null) {
+			md5 = "";
+		}
 		return md5;
 	}
 	public void setMd5(String md5) {
 		this.md5 = md5;
 	}
 	public String getSha256() {
+		if(sha256 == null) {
+			sha256 = "";
+		}
 		return sha256;
 	}
 	public void setSha256(String sha256) {

@@ -539,7 +539,8 @@ public class MusicSelector extends MainState {
 		if (bar.getSelected() instanceof GradeBar) {
 			if (((GradeBar) bar.getSelected()).getSongDatas().length > index) {
 				SongData song = ((GradeBar) bar.getSelected()).getSongDatas()[index];
-				return song != null ? song.getTitle() : "-----";
+				final String songname = song != null && song.getTitle() != null ? song.getTitle() : "----";
+				return song != null && song.getPath() != null ? songname : "(no song) " + songname;
 			}
 		}
 		return "";
