@@ -3,6 +3,7 @@ package bms.player.beatoraja.select;
 import java.awt.*;
 import java.io.*;
 import java.net.URI;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -86,6 +87,7 @@ public class MusicSelector extends MainState {
 	private boolean showNoteGraph = false;
 
 	private ScoreDataCache scorecache;
+	private ScoreDataCache rivalcache;
 
 	private int panelstate;
 
@@ -102,7 +104,60 @@ public class MusicSelector extends MainState {
 
 		songdb = main.getSongDatabase();
 
-		scorecache = new ScoreDataCache(getMainController().getPlayDataAccessor());
+		final PlayDataAccessor pda = getMainController().getPlayDataAccessor();
+		
+		scorecache = new ScoreDataCache() {
+			@Override
+			protected Map<String, IRScoreData> readScoreDatasFromSource(SongData[] songs, int lnmode) {
+				return pda.readScoreDatas(songs, lnmode);
+			}
+		};
+
+		PlayerInformation rivalinfo = null;
+		try {
+			// ライバルスコアデータベース作成
+			// TODO 別のクラスに移動
+			if(!Files.exists(Paths.get("rival"))) {
+				Files.createDirectory(Paths.get("rival"));
+			}
+			if(main.getIRConnection() != null) {
+				PlayerInformation[] rivals = main.getIRConnection().getRivals();
+				for(PlayerInformation rival : rivals) {
+					try {
+						final ScoreDatabaseAccessor scoredb = new ScoreDatabaseAccessor("rival/" + rival.getId() + ".db");
+						scoredb.createTable();
+						IRScoreData[] scores = main.getIRConnection().getPlayData(rival.getId(), null);
+						scoredb.setScoreData(scores);
+						rivalinfo = rival;
+					} catch (ClassNotFoundException e) {
+						e.printStackTrace();
+					}				
+				}
+			}
+			// ライバルキャッシュ作成
+			if(rivalinfo != null) {
+				final ScoreDatabaseAccessor scoredb = new ScoreDatabaseAccessor("rival/" + rivalinfo.getId() + ".db");
+				rivalcache = new ScoreDataCache() {
+					
+					protected Map<String, IRScoreData> readScoreDatasFromSource(SongData[] songs, int lnmode) {
+						List<String> noln = new ArrayList<String>();
+						List<String> ln = new ArrayList<String>();
+						for (SongData song : songs) {
+							if (song.hasUndefinedLongNote()) {
+								ln.add(song.getSha256());
+							} else {
+								noln.add(song.getSha256());
+							}
+						}
+						Map<String, IRScoreData> result = scoredb.getScoreDatas(noln.toArray(new String[0]), 0);
+						result.putAll(scoredb.getScoreDatas(ln.toArray(new String[0]), lnmode));
+						return result;
+					}
+				};				
+			}
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
 
 		setSound(SOUND_BGM, conf.getBgmpath() + File.separatorChar + "select.wav", true);
 		setSound(SOUND_SCRATCH, conf.getSoundpath() + File.separatorChar + "scratch.wav", false);

@@ -1,7 +1,6 @@
 package bms.player.beatoraja.select;
 
 import bms.player.beatoraja.IRScoreData;
-import bms.player.beatoraja.PlayDataAccessor;
 import bms.player.beatoraja.song.SongData;
 
 import java.util.ArrayList;
@@ -14,7 +13,7 @@ import java.util.Map;
  *
  * @author exch
  */
-public class ScoreDataCache {
+public abstract class ScoreDataCache {
 
     // TODO ResourcePoolベースに移行する
 
@@ -22,13 +21,8 @@ public class ScoreDataCache {
      * スコアデータのキャッシュ
      */
     private Map<String, IRScoreData>[] scorecache;
-    /**
-     * スコアデータ取得用
-     */
-    private final PlayDataAccessor playerdata;
 
-    public ScoreDataCache(PlayDataAccessor playerdata) {
-        this.playerdata = playerdata;
+    public ScoreDataCache() {
         scorecache = new Map[3];
         for (int i = 0; i < scorecache.length; i++) {
             scorecache[i] = new HashMap();
@@ -39,8 +33,7 @@ public class ScoreDataCache {
         if (scorecache[lnmode].containsKey(song.getSha256())) {
             return scorecache[lnmode].get(song.getSha256());
         }
-        IRScoreData score = playerdata.readScoreData(song.getSha256(),
-                song.hasUndefinedLongNote(), lnmode);
+        IRScoreData score = readScoreDatasFromSource(new SongData[]{song}, lnmode).get(song.getSha256());
         for (int i = 0; i < scorecache.length; i++) {
             if (!song.hasUndefinedLongNote() || i == lnmode) {
                 scorecache[i].put(song.getSha256(), score);
@@ -60,8 +53,7 @@ public class ScoreDataCache {
             }
         }
 
-        Map<String, IRScoreData> scores = playerdata
-                .readScoreDatas(noscore.toArray(new SongData[noscore.size()]), lnmode);
+        Map<String, IRScoreData> scores = readScoreDatasFromSource(noscore.toArray(new SongData[noscore.size()]), lnmode);
         for (SongData song : noscore) {
             IRScoreData score = scores.get(song.getSha256());
             for (int i = 0; i < scorecache.length; i++) {
@@ -85,12 +77,13 @@ public class ScoreDataCache {
     }
 
     public void update(SongData song, int lnmode) {
-        IRScoreData score = playerdata.readScoreData(song.getSha256(),
-                song.hasUndefinedLongNote(), lnmode);
+        IRScoreData score = readScoreDatasFromSource(new SongData[]{song}, lnmode).get(song.getSha256());
         for (int i = 0; i < scorecache.length; i++) {
             if (!song.hasUndefinedLongNote() || i == lnmode) {
                 scorecache[i].put(song.getSha256(), score);
             }
         }
     }
+    
+    protected abstract Map<String, IRScoreData> readScoreDatasFromSource(SongData[] songs, int lnmode);
 }
