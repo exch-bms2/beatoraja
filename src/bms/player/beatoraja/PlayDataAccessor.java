@@ -53,7 +53,7 @@ public class PlayDataAccessor {
 
 		try {
 			Class.forName("org.sqlite.JDBC");
-			scoredb = new ScoreDatabaseAccessor(player);
+			scoredb = new ScoreDatabaseAccessor("player/" + player + "/score.db");
 			scoredb.createTable();
 			scorelogdb = new ScoreLogDatabaseAccessor("player/" + player + "/scorelog.db");
 		} catch (ClassNotFoundException e) {

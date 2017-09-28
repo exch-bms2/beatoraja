@@ -21,14 +21,14 @@ public class ScoreDatabaseAccessor {
 
 	private final QueryRunner qr;
 
-	public ScoreDatabaseAccessor(String player) throws ClassNotFoundException {
+	public ScoreDatabaseAccessor(String path) throws ClassNotFoundException {
 		Class.forName("org.sqlite.JDBC");
 		SQLiteConfig conf = new SQLiteConfig();
 		conf.setSharedCache(true);
 		conf.setSynchronous(SynchronousMode.OFF);
 		// conf.setJournalMode(JournalMode.MEMORY);
 		SQLiteDataSource ds = new SQLiteDataSource(conf);
-		ds.setUrl("jdbc:sqlite:player/" + player + "/score.db");
+		ds.setUrl("jdbc:sqlite:" + path);
 		qr = new QueryRunner(ds);
 	}
 
