@@ -15,6 +15,7 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 
 import org.bytedeco.javacv.*;
+import org.bytedeco.javacv.FrameGrabber.Exception;
 
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
@@ -161,6 +162,7 @@ public class FFmpegProcessor implements MovieProcessor {
 					}
 					if (restart) {
 						restart = false;
+						pixmap = null;
 						grabber.start();
 //						grabber.restart();
 						start = player != null ? player.getNowTime() - player.getTimer()[TIMER_PLAY] : (System.nanoTime() / 1000000);
@@ -240,13 +242,27 @@ public class FFmpegProcessor implements MovieProcessor {
 	}
 
 	public void play(boolean loop) {
-		if (movieseek != null && movieseek.isAlive()) {
+		if (movieseek != null) {
 			synchronized (movieseek) {
-				movieseek.loop = loop;
-				movieseek.restart = true;
-				movieseek.interrupt();				
+				// 再生中
+				if(movieseek.isAlive()) {
+					movieseek.loop = loop;
+					movieseek.restart = true;
+					movieseek.interrupt();				
+				} else {
+					// 再生停止時
+					try {
+						grabber.start();
+						movieseek = new MovieSeekThread();
+						movieseek.loop = loop;
+						movieseek.start();
+					} catch (Throwable e) {
+						e.printStackTrace();
+					}
+				}
 			}
 		} else {
+			// 新規再生
 			movieseek = new MovieSeekThread();
 			movieseek.loop = loop;
 			movieseek.start();
