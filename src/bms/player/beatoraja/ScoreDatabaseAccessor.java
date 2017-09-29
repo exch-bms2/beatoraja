@@ -36,6 +36,11 @@ public class ScoreDatabaseAccessor {
 		try {
 			String sql = "SELECT * FROM sqlite_master WHERE name = ? and type='table';";
 			// playerテーブル作成(存在しない場合)
+			if (qr.query(sql, new MapListHandler(), "info").size() == 0) {
+				qr.update("CREATE TABLE [info] ([id] TEXT NOT NULL,[name] TEXT NOT NULL," + "[rank] TEXT, "
+						+ "PRIMARY KEY(id));");
+			}
+			// playerテーブル作成(存在しない場合)
 			if (qr.query(sql, new MapListHandler(), "player").size() == 0) {
 				qr.update("CREATE TABLE [player] ([date] INTEGER,[playcount] INTEGER," + "[clear] INTEGER,"
 						+ "[epg] INTEGER," + "[lpg] INTEGER," + "[egr] INTEGER," + "[lgr] INTEGER," + "[egd] INTEGER,"
@@ -61,6 +66,28 @@ public class ScoreDatabaseAccessor {
 			}
 		} catch (SQLException e) {
 			Logger.getGlobal().severe("スコアデータベース初期化中の例外:" + e.getMessage());
+		}
+	}
+	
+	public PlayerInformation getInformation() {
+		try {
+			ResultSetHandler<List<PlayerInformation>> rh = new BeanListHandler<PlayerInformation>(PlayerInformation.class);
+			List<PlayerInformation> info =  qr.query("SELECT * FROM info", rh);
+			if (info.size() > 0) {
+				return info.get(0);
+			}
+		} catch (Exception e) {
+			Logger.getGlobal().severe("スコア取得時の例外:" + e.getMessage());
+		}
+		return null;
+	}
+	
+	public void setInformation(PlayerInformation info) {
+		try {
+			qr.update("DELETE FROM info");
+			qr.update("insert into info " + "(id, name, rank) " + "values(?,?,?);", info.getId(), info.getName(), info.getRank());
+		} catch (Exception e) {
+			Logger.getGlobal().severe("スコア取得時の例外:" + e.getMessage());
 		}
 	}
 
