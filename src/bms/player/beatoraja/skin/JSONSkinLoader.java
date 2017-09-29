@@ -593,6 +593,34 @@ public class JSONSkinLoader extends SkinLoader{
 							}
 						}
 						barobj.setLamp(lamp);
+						SkinImage[] playerlamp = new SkinImage[sk.songlist.playerlamp.length];
+						for (int i = 0; i < sk.songlist.playerlamp.length; i++) {
+							for (Image img : sk.image) {
+								if (sk.songlist.playerlamp[i].id.equals(img.id)) {
+									Texture tex = getTexture(img.src, p);
+									playerlamp[i] = new SkinImage(
+											getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy),
+											img.timer, img.cycle);
+									setDestination(skin, playerlamp[i], sk.songlist.playerlamp[i]);
+									break;
+								}
+							}
+						}
+						barobj.setPlayerLamp(playerlamp);
+						SkinImage[] rivallamp = new SkinImage[sk.songlist.rivallamp.length];
+						for (int i = 0; i < sk.songlist.rivallamp.length; i++) {
+							for (Image img : sk.image) {
+								if (sk.songlist.rivallamp[i].id.equals(img.id)) {
+									Texture tex = getTexture(img.src, p);
+									rivallamp[i] = new SkinImage(
+											getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy),
+											img.timer, img.cycle);
+									setDestination(skin, rivallamp[i], sk.songlist.rivallamp[i]);
+									break;
+								}
+							}
+						}
+						barobj.setRivalLamp(rivallamp);
 
 						SkinImage[] trophy = new SkinImage[sk.songlist.trophy.length];
 						for (int i = 0; i < sk.songlist.trophy.length; i++) {
@@ -1003,6 +1031,8 @@ public class JSONSkinLoader extends SkinLoader{
 		public Destination[] text = new Destination[0];
 		public Destination[] level = new Destination[0];
 		public Destination[] lamp = new Destination[0];
+		public Destination[] playerlamp = new Destination[0];
+		public Destination[] rivallamp = new Destination[0];
 		public Destination[] trophy = new Destination[0];
 		public Destination[] label = new Destination[0];
 	}

@@ -414,6 +414,76 @@
 				{"x":0, "y":2, "w":15, "h":34}
 			]},
 		],
+		"playerlamp":[
+			{"id":"lamp-noplay", "dst":[
+				{"x":0, "y":19, "w":15, "h":17}
+			]},
+			{"id":"lamp-failed", "dst":[
+				{"x":0, "y":19, "w":15, "h":17}
+			]},
+			{"id":"lamp-assist", "dst":[
+				{"x":0, "y":19, "w":15, "h":17}
+			]},
+			{"id":"lamp-lassist", "dst":[
+				{"x":0, "y":19, "w":15, "h":17}
+			]},
+			{"id":"lamp-easy", "dst":[
+				{"x":0, "y":19, "w":15, "h":17}
+			]},
+			{"id":"lamp-normal", "dst":[
+				{"x":0, "y":19, "w":15, "h":17}
+			]},
+			{"id":"lamp-hard", "dst":[
+				{"x":0, "y":19, "w":15, "h":17}
+			]},
+			{"id":"lamp-exhard", "dst":[
+				{"x":0, "y":19, "w":15, "h":17}
+			]},
+			{"id":"lamp-fc", "dst":[
+				{"x":0, "y":19, "w":15, "h":17}
+			]},
+			{"id":"lamp-perfect", "dst":[
+				{"x":0, "y":19, "w":15, "h":17}
+			]},
+			{"id":"lamp-max", "dst":[
+				{"x":0, "y":19, "w":15, "h":17}
+			]},
+		],
+		"rivallamp":[
+			{"id":"lamp-noplay", "dst":[
+				{"x":0, "y":2, "w":15, "h":17}
+			]},
+			{"id":"lamp-failed", "dst":[
+				{"x":0, "y":2, "w":15, "h":17}
+			]},
+			{"id":"lamp-assist", "dst":[
+				{"x":0, "y":2, "w":15, "h":17}
+			]},
+			{"id":"lamp-lassist", "dst":[
+				{"x":0, "y":2, "w":15, "h":17}
+			]},
+			{"id":"lamp-easy", "dst":[
+				{"x":0, "y":2, "w":15, "h":17}
+			]},
+			{"id":"lamp-normal", "dst":[
+				{"x":0, "y":2, "w":15, "h":17}
+			]},
+			{"id":"lamp-hard", "dst":[
+				{"x":0, "y":2, "w":15, "h":17}
+			]},
+			{"id":"lamp-exhard", "dst":[
+				{"x":0, "y":2, "w":15, "h":17}
+			]},
+			{"id":"lamp-fc", "dst":[
+				{"x":0, "y":2, "w":15, "h":17}
+			]},
+			{"id":"lamp-perfect", "dst":[
+				{"x":0, "y":2, "w":15, "h":17}
+			]},
+			{"id":"lamp-max", "dst":[
+				{"x":0, "y":2, "w":15, "h":17}
+			]},
+		],
 		"trophy":[
 			{"id":"trophy-bronze", "dst":[
 				{"x":20, "y":4, "w":32, "h":32}

@@ -41,6 +41,14 @@ public class SkinBar extends SkinObject {
      * ランプ画像
      */
     private SkinImage[] lamp = new SkinImage[11];
+    /**
+     * ライバルランプ表示時のプレイヤーランプ画像
+     */
+    private SkinImage[] mylamp = new SkinImage[11];
+    /**
+     * ライバルランプ表示時のライバルランプ画像
+     */
+    private SkinImage[] rivallamp = new SkinImage[11];
 
     public SkinBar(int position) {
         this.position = position;
@@ -83,6 +91,14 @@ public class SkinBar extends SkinObject {
         return lamp;
     }
 
+    public SkinImage[] getPlayerLamp() {
+        return mylamp;
+    }
+
+    public SkinImage[] getRivalLamp() {
+        return rivallamp;
+    }
+
     public SkinImage[] getTrophy() {
         return trophy;
     }
@@ -99,6 +115,14 @@ public class SkinBar extends SkinObject {
         this.lamp = lamp;
     }
 
+    public void setPlayerLamp(SkinImage[] lamp) {
+        this.mylamp = lamp;
+    }
+
+    public void setRivalLamp(SkinImage[] lamp) {
+        this.rivallamp = lamp;
+    }
+
     @Override
     public void draw(SpriteBatch sprite, long time, MainState state) {
         ((MusicSelector)state).getBarRender().render(sprite, (MusicSelectSkin) state.getSkin(), this, (int)time);
@@ -112,6 +136,9 @@ public class SkinBar extends SkinObject {
     	disposeAll(text);
     	disposeAll(barlevel);
     	disposeAll(label);
+        disposeAll(lamp);
+        disposeAll(mylamp);
+        disposeAll(rivallamp);
     }
 
     public SkinNumber[] getBarlevel() {

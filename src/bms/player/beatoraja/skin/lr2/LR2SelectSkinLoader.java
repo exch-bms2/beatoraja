@@ -237,6 +237,84 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 				}
 			}
 		});
+		addCommandWord(new CommandWord("SRC_BAR_MY_LAMP") {
+			@Override
+			public void execute(String[] str) {
+				int[] values = parseInt(str);
+				TextureRegion[] images = getSourceImage(values);
+				if (images != null) {
+					int[] lamps = lampg[values[1]];
+					skinbar.getPlayerLamp()[lamps[0]] = new SkinImage(images, values[10], values[9]);
+					// System.out.println("Nowjudge Added - " + (5 -
+					// values[1]));
+				}
+			}
+		});
+		addCommandWord(new CommandWord("DST_BAR_MY_LAMP") {
+			@Override
+			public void execute(String[] str) {
+				int[] values = parseInt(str);
+				int[] lamps = lampg[values[1]];
+				for (int i = 0; i < lamps.length; i++) {
+					if (skinbar.getPlayerLamp()[lamps[i]] != null) {
+						if (values[5] < 0) {
+							values[3] += values[5];
+							values[5] = -values[5];
+						}
+						if (values[6] < 0) {
+							values[4] += values[6];
+							values[6] = -values[6];
+						}
+						skinbar.getPlayerLamp()[lamps[i]].setDestination(values[2], values[3] * dstw / srcw,
+								-(values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
+								values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
+								values[12], values[13], values[14], values[15], values[16], values[17], values[18],
+								values[19], values[20], values[21]);
+					} else {
+						skinbar.getPlayerLamp()[lamps[i]] = skinbar.getPlayerLamp()[lamps[0]];
+					}
+				}
+			}
+		});
+		addCommandWord(new CommandWord("SRC_BAR_RIAVL_LAMP") {
+			@Override
+			public void execute(String[] str) {
+				int[] values = parseInt(str);
+				TextureRegion[] images = getSourceImage(values);
+				if (images != null) {
+					int[] lamps = lampg[values[1]];
+					skinbar.getRivalLamp()[lamps[0]] = new SkinImage(images, values[10], values[9]);
+					// System.out.println("Nowjudge Added - " + (5 -
+					// values[1]));
+				}
+			}
+		});
+		addCommandWord(new CommandWord("DST_BAR_RIVAL_LAMP") {
+			@Override
+			public void execute(String[] str) {
+				int[] values = parseInt(str);
+				int[] lamps = lampg[values[1]];
+				for (int i = 0; i < lamps.length; i++) {
+					if (skinbar.getRivalLamp()[lamps[i]] != null) {
+						if (values[5] < 0) {
+							values[3] += values[5];
+							values[5] = -values[5];
+						}
+						if (values[6] < 0) {
+							values[4] += values[6];
+							values[6] = -values[6];
+						}
+						skinbar.getRivalLamp()[lamps[i]].setDestination(values[2], values[3] * dstw / srcw,
+								-(values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
+								values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
+								values[12], values[13], values[14], values[15], values[16], values[17], values[18],
+								values[19], values[20], values[21]);
+					} else {
+						skinbar.getRivalLamp()[lamps[i]] = skinbar.getRivalLamp()[lamps[0]];
+					}
+				}
+			}
+		});
 		// 拡張定義。段位のトロフィー画像を定義する。0:銅、1:銀、2:金
 		addCommandWord(new CommandWord("SRC_BAR_TROPHY") {
 
