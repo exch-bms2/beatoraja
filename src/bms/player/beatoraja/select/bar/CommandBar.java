@@ -34,11 +34,6 @@ public class CommandBar extends DirectoryBar {
     }
 
     @Override
-    public int getLamp() {
-        return 0;
-    }
-
-    @Override
     public Bar[] getChildren() {
         SongData[] infos = main.getSongDatabase().getSongDatas(sql,"player/" + main.getConfig().getPlayername() + "/score.db"
         		,"player/" + main.getConfig().getPlayername() + "/scorelog.db",main.getInfoDatabase() != null ? "songinfo.db" : null);

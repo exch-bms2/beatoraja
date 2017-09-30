@@ -402,8 +402,17 @@ public class BarRenderer {
 					}
 				}
 
-				if (baro.getLamp()[sd.getLamp()] != null) {
-					baro.getLamp()[sd.getLamp()].draw(sprite, time, select, x, y);
+				if(select.getRival() != null) {
+					if (baro.getPlayerLamp()[sd.getLamp(true)] != null) {
+						baro.getPlayerLamp()[sd.getLamp(true)].draw(sprite, time, select, x, y);
+					}					
+					if (baro.getRivalLamp()[sd.getLamp(false)] != null) {
+						baro.getRivalLamp()[sd.getLamp(false)].draw(sprite, time, select, x, y);
+					}					
+				} else {
+					if (baro.getLamp()[sd.getLamp(true)] != null) {
+						baro.getLamp()[sd.getLamp(true)].draw(sprite, time, select, x, y);
+					}
 				}
 
 				if (sd instanceof SongBar && ((SongBar) sd).existsSong()) {
@@ -698,11 +707,15 @@ public class BarRenderer {
 			PlayerConfig config = select.getMainController().getPlayerResource().getPlayerConfig();
 			final MainController main = select.getMainController();
 			final SongInformationAccessor info = select.getMainController().getInfoDatabase();
+			final ScoreDataCache rival = select.getRivalScoreDataCache();
 			for (Bar bar : bars) {
 				if (bar instanceof SongBar && ((SongBar) bar).existsSong()) {
 					SongData sd = ((SongBar) bar).getSongData();
 					if (bar.getScore() == null) {
 						bar.setScore(select.getScoreDataCache().readScoreData(sd, config.getLnmode()));
+					}
+					if (rival != null && bar.getRivalScore() == null) {
+						bar.setRivalScore(rival.readScoreData(sd, config.getLnmode()));
 					}
 					boolean[] replay = new boolean[MusicSelector.REPLAY];
 					for (int i = 0; i < MusicSelector.REPLAY; i++) {

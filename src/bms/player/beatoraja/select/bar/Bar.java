@@ -1,15 +1,6 @@
 package bms.player.beatoraja.select.bar;
 
 import bms.player.beatoraja.IRScoreData;
-import bms.player.beatoraja.MainController;
-import bms.player.beatoraja.select.MusicSelector;
-import bms.player.beatoraja.song.*;
-
-import java.io.File;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Created by exch on 2017/09/03.
@@ -17,6 +8,7 @@ import java.util.Map;
 public abstract class Bar {
 
     private IRScoreData score;
+    private IRScoreData rscore;
 
     public abstract String getTitle();
 
@@ -28,6 +20,14 @@ public abstract class Bar {
         this.score = score;
     }
 
-    public abstract int getLamp();
+    public IRScoreData getRivalScore() {
+        return rscore;
+    }
+
+    public void setRivalScore(IRScoreData score) {
+        this.rscore = score;
+    }
+
+    public abstract int getLamp(boolean isPlayer);    
 }
 

@@ -1,5 +1,6 @@
 package bms.player.beatoraja.select.bar;
 
+import bms.player.beatoraja.IRScoreData;
 import bms.player.beatoraja.song.SongData;
 import com.badlogic.gdx.graphics.Pixmap;
 
@@ -37,9 +38,10 @@ public class SongBar extends SelectableBar {
         return song.getFullTitle();
     }
 
-    public int getLamp() {
-        if (getScore() != null) {
-            return getScore().getClear();
+    public int getLamp(boolean isPlayer) {
+    	final IRScoreData score = isPlayer ? getScore() : getRivalScore();
+        if (score != null) {
+            return score.getClear();
         }
         return 0;
     }

@@ -88,7 +88,8 @@ public class GradeBar extends SelectableBar {
                 && trophy.getScorerate() <= score.getExscore() * 100.0 / (score.getNotes() * 2);
     }
 
-    public int getLamp() {
+    public int getLamp(boolean isPlayer) {
+    	// TODO ライバルスコア
         int result = 0;
         if (getScore() != null && getScore().getClear() > result) {
             result = getScore().getClear();

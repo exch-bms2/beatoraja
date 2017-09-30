@@ -6,6 +6,7 @@ package bms.player.beatoraja.select.bar;
 public abstract class DirectoryBar extends Bar {
 
     private int[] lamps = new int[11];
+    private int[] rlamps = new int[11];
     private int[] ranks = new int[0];
 
     public int[] getLamps() {
@@ -24,7 +25,8 @@ public abstract class DirectoryBar extends Bar {
         this.ranks = ranks;
     }
 
-    public int getLamp() {
+    public int getLamp(boolean isPlayer) {
+    	final int[] lamps = isPlayer ? this.lamps : rlamps;
         for (int i = 0; i < lamps.length; i++) {
             if (lamps[i] > 0) {
                 return i;
