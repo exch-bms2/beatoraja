@@ -304,6 +304,10 @@ public class MusicSelectInputProcessor {
                 }
             }
 
+            if (numberstate[7] && numtime[7] != 0) {
+                numtime[7] = 0;
+                select.nextRival();
+            }
             if (numberstate[8] && numtime[8] != 0) {
                 numtime[8] = 0;
                 if (current instanceof SongBar && ((SongBar) current).existsSong() && 

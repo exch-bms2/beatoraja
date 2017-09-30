@@ -3,6 +3,7 @@ package bms.player.beatoraja.select;
 import java.awt.*;
 import java.io.*;
 import java.net.URI;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -89,6 +90,9 @@ public class MusicSelector extends MainState {
 	private ScoreDataCache scorecache;
 	private ScoreDataCache rivalcache;
 
+	private Map<PlayerInformation, ScoreDatabaseAccessor> rivals = new HashMap();
+	private PlayerInformation rival;
+	
 	private int panelstate;
 
 	public static final int SOUND_BGM = 0;
@@ -126,6 +130,7 @@ public class MusicSelector extends MainState {
 					try {
 						final ScoreDatabaseAccessor scoredb = new ScoreDatabaseAccessor("rival/" + rival.getId() + ".db");
 						scoredb.createTable();
+						scoredb.setInformation(rival);
 						IRScoreData[] scores = main.getIRConnection().getPlayData(rival.getId(), null);
 						scoredb.setScoreData(scores);
 						rivalinfo = rival;
@@ -134,26 +139,21 @@ public class MusicSelector extends MainState {
 					}				
 				}
 			}
-			// ライバルキャッシュ作成
-			if(rivalinfo != null) {
-				final ScoreDatabaseAccessor scoredb = new ScoreDatabaseAccessor("rival/" + rivalinfo.getId() + ".db");
-				rivalcache = new ScoreDataCache() {
-					
-					protected Map<String, IRScoreData> readScoreDatasFromSource(SongData[] songs, int lnmode) {
-						List<String> noln = new ArrayList<String>();
-						List<String> ln = new ArrayList<String>();
-						for (SongData song : songs) {
-							if (song.hasUndefinedLongNote()) {
-								ln.add(song.getSha256());
-							} else {
-								noln.add(song.getSha256());
-							}
-						}
-						Map<String, IRScoreData> result = scoredb.getScoreDatas(noln.toArray(new String[0]), 0);
-						result.putAll(scoredb.getScoreDatas(ln.toArray(new String[0]), lnmode));
-						return result;
-					}
-				};				
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
+		
+		// ライバルキャッシュ作成
+		// TODO ライバル選択機能
+		try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get("rival"))) {
+			for (Path p : paths) {
+				if(p.toString().endsWith(".db")) {
+					final ScoreDatabaseAccessor scoredb = new ScoreDatabaseAccessor(p.toString());
+					PlayerInformation info = scoredb.getInformation();
+					if(info != null) {
+						rivals.put(info, scoredb);
+					}						
+				}
 			}
 		} catch (Throwable e) {
 			e.printStackTrace();
@@ -172,9 +172,62 @@ public class MusicSelector extends MainState {
 			main.updateSong(null);
 		}
 	}
+	
+	public void setRival(PlayerInformation rival) {
+		this.rival = rival;
+		final ScoreDatabaseAccessor scoredb = rivals.get(rival);
+		
+		if(scoredb != null) {
+			rivalcache = new ScoreDataCache() {
+				
+				protected Map<String, IRScoreData> readScoreDatasFromSource(SongData[] songs, int lnmode) {
+					List<String> noln = new ArrayList<String>();
+					List<String> ln = new ArrayList<String>();
+					for (SongData song : songs) {
+						if (song.hasUndefinedLongNote()) {
+							ln.add(song.getSha256());
+						} else {
+							noln.add(song.getSha256());
+						}
+					}
+					Map<String, IRScoreData> result = scoredb.getScoreDatas(noln.toArray(new String[0]), 0);
+					result.putAll(scoredb.getScoreDatas(ln.toArray(new String[0]), lnmode));
+					return result;
+				}
+			};			
+		} else {
+			rivalcache = null;
+		}
+		
+		Logger.getGlobal().info("Rival変更:" + (rival != null ? rival.getName() : "なし"));
+	}
+	
+	public PlayerInformation getRival() {
+		return rival;
+	}
 
+	public void nextRival() {
+		boolean match = (rival == null);
+		for(PlayerInformation rival : rivals.keySet()) {
+			if(match) {
+				this.rival = rival;
+				match = false;
+				break;
+			}
+			match = (this.rival == rival);
+		}
+		if(match) {
+			rival = null;
+		}
+		setRival(rival);
+	}
+	
 	public ScoreDataCache getScoreDataCache() {
 		return scorecache;
+	}
+
+	public ScoreDataCache getRivalScoreDataCache() {
+		return rivalcache;
 	}
 
 	public void create() {
