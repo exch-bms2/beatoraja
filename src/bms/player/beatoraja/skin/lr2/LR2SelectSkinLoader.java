@@ -276,7 +276,7 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 				}
 			}
 		});
-		addCommandWord(new CommandWord("SRC_BAR_RIAVL_LAMP") {
+		addCommandWord(new CommandWord("SRC_BAR_RIVAL_LAMP") {
 			@Override
 			public void execute(String[] str) {
 				int[] values = parseInt(str);
