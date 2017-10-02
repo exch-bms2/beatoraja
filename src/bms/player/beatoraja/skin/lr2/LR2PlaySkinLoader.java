@@ -265,6 +265,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 						}
 					}
 					lanerender = new SkinNote(note, lnss, mine);
+					lanerender.setOffsetID(OFFSET_NOTES_1P);
 					skin.add(lanerender);
 				}
 			}
@@ -308,7 +309,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 								dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
 								values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
 								values[12], values[13], values[14], values[15], values[16], values[17], values[18],
-								values[19], values[20], values[21]);
+								values[19], values[20], OFFSET_JUDGE_1P);
 
 						if (!detail) {
 							detail = true;
@@ -360,7 +361,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 								dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
 								values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
 								values[12], values[13], values[14], values[15], values[16], values[17], values[18],
-								values[19], values[20], values[21]);
+								values[19], values[20], OFFSET_JUDGE_2P);
 						
 						if (!detail) {
 							detail = true;
@@ -408,10 +409,11 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 			public void execute(String[] str) {
 				if (judge[0] != null && judge[0].getJudgeCount()[5 - Integer.parseInt(str[1])] != null) {
 					int[] values = parseInt(str);
+					judge[0].getJudgeCount()[5 - values[1]].setRelative(true);
 					judge[0].getJudgeCount()[5 - values[1]].setDestination(values[2], values[3] * dstw / srcw,
 							-values[4] * dsth / srch, values[5] * dstw / srcw, values[6] * dsth / srch, values[7],
 							values[8], values[9], values[10], values[11], values[12], values[13], values[14],
-							values[15], values[16], values[17], values[18], values[19], values[20], values[21]);
+							values[15], values[16], values[17], values[18], values[19], values[20], OFFSET_JUDGE_1P);
 				}
 			}
 		});
@@ -451,10 +453,11 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 			public void execute(String[] str) {
 				if (judge[1] != null && judge[1].getJudgeCount()[5 - Integer.parseInt(str[1])] != null) {
 					int[] values = parseInt(str);
+					judge[1].getJudgeCount()[5 - values[1]].setRelative(true);
 					judge[1].getJudgeCount()[5 - values[1]].setDestination(values[2], values[3] * dstw / srcw,
 							-values[4] * dsth / srch, values[5] * dstw / srcw, values[6] * dsth / srch, values[7],
 							values[8], values[9], values[10], values[11], values[12], values[13], values[14],
-							values[15], values[16], values[17], values[18], values[19], values[20], values[21]);
+							values[15], values[16], values[17], values[18], values[19], values[20], OFFSET_JUDGE_2P);
 				}
 			}
 		});

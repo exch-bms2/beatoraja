@@ -10,7 +10,11 @@ import java.util.function.Consumer;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
+import bms.player.beatoraja.skin.SkinProperty;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.IntArray;
 import org.apache.commons.dbutils.QueryRunner;
+import org.apache.commons.dbutils.handlers.ArrayHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 
 import com.badlogic.gdx.Graphics;
@@ -893,26 +897,12 @@ class SkinConfigurationView {
 					// System.out.println(path.toString() + " : " +
 					// header.getName()
 					// + " - " + header.getMode());
-					if(header.getType() == SkinHeader.TYPE_LR2SKIN && header.getSkinType().isPlay()) {
-						List<CustomOption> l = new ArrayList(Arrays.asList(header.getCustomOptions()));
-						l.add(new CustomOption("BGA Size", new int[]{30,31}, new String[]{"Normal", "Extend"}));
-						l.add(new CustomOption("Ghost", new int[]{34,35,36,37}, new String[]{"Off", "Type A", "Type B", "Type C"}));
-						l.add(new CustomOption("Score Graph", new int[]{38,39}, new String[]{"Off", "On"}));
-						l.add(new CustomOption("Judge Detail", new int[]{1997,1998,1999}, new String[]{"Off", "EARLY/LATE", "+-ms"}));
-						header.setCustomOptions(l.toArray(new CustomOption[l.size()]));
-
-					}
 					lr2skinheader.add(header);
 					// 7/14key skinは5/10keyにも加える
 					if(header.getType() == SkinHeader.TYPE_LR2SKIN &&
 							(header.getSkinType() == SkinType.PLAY_7KEYS || header.getSkinType() == SkinType.PLAY_14KEYS)) {
 						header = loader.loadSkin(path, null);
-						List<CustomOption> l = new ArrayList(Arrays.asList(header.getCustomOptions()));
-						l.add(new CustomOption("BGA Size", new int[]{30,31}, new String[]{"Normal", "Extend"}));
-						l.add(new CustomOption("Ghost", new int[]{34,35,36,37}, new String[]{"Off", "Type A", "Type B", "Type C"}));
-						l.add(new CustomOption("Score Graph", new int[]{38,39}, new String[]{"Off", "On"}));
-						l.add(new CustomOption("Judge Detail", new int[]{1997,1998,1999}, new String[]{"Off", "EARLY/LATE", "+-ms"}));
-						header.setCustomOptions(l.toArray(new CustomOption[l.size()]));
+
 						if(header.getSkinType() == SkinType.PLAY_7KEYS && !header.getName().toLowerCase().contains("7key")) {
 							header.setName(header.getName() + " (7KEYS) ");
 						} else if(header.getSkinType() == SkinType.PLAY_14KEYS && !header.getName().toLowerCase().contains("14key")) {
@@ -1007,10 +997,23 @@ class SkinConfigurationView {
 			Label label = new Label(option.name);
 			label.setMinWidth(250.0);
 			hbox.getChildren().add(label);
-			
+
+			int[] v = new int[values.length];
+			if(property != null && property.get(option.name) != null) {
+				if(property.get(option.name) instanceof Array) {
+					Iterator iterator = ((Array) property.get(option.name)).iterator();
+					for(int i = 0;i < v.length && iterator.hasNext();i++) {
+						v[i] = (int) ((float) iterator.next());
+					}
+				} else {
+					v = (int[])property.get(option.name);
+				}
+			}
 			Spinner<Integer>[] spinner = new Spinner[values.length];
 			for(int i = 0;i < spinner.length;i++) {
 				spinner[i] = new Spinner(-9999,9999,0,1);
+				spinner[i].setPrefWidth(80);
+				spinner[i].getValueFactory().setValue(v[i]);
 				hbox.getChildren().addAll(new Label(values[i]), spinner[i]);
 			}
 			offsetbox.put(option, spinner);

@@ -30,6 +30,8 @@ public abstract class SkinObject implements Disposable {
 	 */
 	private int offset = 0;
 
+	private boolean relative;
+
 	private int imageid = -1;
 	/**
 	 * 参照するタイマーID
@@ -230,8 +232,10 @@ public abstract class SkinObject implements Disposable {
 				r.height = r1.height + (r2.height - r1.height) * rate;
 			}
 			if (off != null) {
-				r.x += off.x;
-				r.y += off.y;
+				if(!relative) {
+					r.x += off.x;
+					r.y += off.y;
+				}
 				r.width += off.w;
 				r.height += off.h;
 			}
@@ -242,8 +246,10 @@ public abstract class SkinObject implements Disposable {
 			}
 			r.set(fixr);
 			if (off != null) {
-				r.x += off.x;
-				r.y += off.y;
+				if(!relative) {
+					r.x += off.x;
+					r.y += off.y;
+				}
 				r.width += off.w;
 				r.height += off.h;
 			}
@@ -385,6 +391,14 @@ public abstract class SkinObject implements Disposable {
 
 	public void setClickevent(int clickevent) {
 		this.clickevent = clickevent;
+	}
+
+	public boolean isRelative() {
+		return relative;
+	}
+
+	public void setRelative(boolean relative) {
+		this.relative = relative;
 	}
 
 	/**

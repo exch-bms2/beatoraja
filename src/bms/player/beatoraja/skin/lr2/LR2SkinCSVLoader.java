@@ -11,6 +11,7 @@ import bms.player.beatoraja.skin.SkinHeader.*;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.utils.Array;
 
 /**
  * LR2のスキン定義用csvファイルのローダー
@@ -453,10 +454,18 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 				}
 			}
 		}
+
 		Map<Integer, int[]> offset = new HashMap<>();
-		for (CustomOffset of : header.getCustomOffsets()) {
-			if(property.get(of.name) instanceof int[]) {					
+		for (CustomOffset of : Arrays.asList(header.getCustomOffsets())) {
+			if (property.get(of.name) instanceof int[]) {
 				offset.put(of.id, (int[]) property.get(of.name));
+			} else if (property.get(of.name) instanceof Array) {
+				int[] v = new int[5];
+				Iterator iterator = ((Array) property.get(of.name)).iterator();
+				for (int i = 0; i < v.length && iterator.hasNext(); i++) {
+					v[i] = (int) ((float) iterator.next());
+				}
+				offset.put(of.id, v);
 			}
 		}
 		skin.setOffset(offset);

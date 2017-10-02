@@ -10,6 +10,7 @@ import java.util.*;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.Resolution;
 import bms.player.beatoraja.skin.SkinHeader;
+import bms.player.beatoraja.skin.SkinProperty;
 import bms.player.beatoraja.skin.SkinType;
 import bms.player.beatoraja.skin.SkinHeader.*;
 
@@ -34,6 +35,22 @@ public class LR2SkinHeaderLoader extends LR2SkinLoader {
 			public void execute(String[] str) {
 				header.setSkinType(SkinType.getSkinTypeById(Integer.parseInt(str[1])));
 				header.setName(str[2]);
+				switch (header.getSkinType()) {
+					case PLAY_5KEYS:
+					case PLAY_7KEYS:
+					case PLAY_9KEYS:
+					case PLAY_10KEYS:
+					case PLAY_14KEYS:
+					case PLAY_24KEYS:
+					case PLAY_24KEYS_DOUBLE:
+						options.add(new CustomOption("BGA Size", new int[]{30,31}, new String[]{"Normal", "Extend"}));
+						options.add(new CustomOption("Ghost", new int[]{34,35,36,37}, new String[]{"Off", "Type A", "Type B", "Type C"}));
+						options.add(new CustomOption("Score Graph", new int[]{38,39}, new String[]{"Off", "On"}));
+						options.add(new CustomOption("Judge Detail", new int[]{1997,1998,1999}, new String[]{"Off", "EARLY/LATE", "+-ms"}));
+
+						offsets.add(new CustomOffset("Notes offset", SkinProperty.OFFSET_NOTES_1P));
+						offsets.add(new CustomOffset("Judge offset", SkinProperty.OFFSET_JUDGE_1P));
+				}
 			}
 		});
 		addCommandWord(new CommandWord("CUSTOMOPTION") {
@@ -98,7 +115,8 @@ public class LR2SkinHeaderLoader extends LR2SkinLoader {
 		header = new SkinHeader();
 		files.clear();
 		options.clear();
-		
+		offsets.clear();
+
 		header.setPath(f);
 
 		BufferedReader br = Files.newBufferedReader(f, Charset.forName("MS932"));
@@ -119,7 +137,8 @@ public class LR2SkinHeaderLoader extends LR2SkinLoader {
 		}
 		header.setCustomOptions(options.toArray(new CustomOption[options.size()]));
 		header.setCustomFiles(files.toArray(new CustomFile[files.size()]));
-		
+		header.setCustomOffsets(offsets.toArray(new CustomOffset[offsets.size()]));
+
 		for(CustomOption co : options) {
 			for(int i = 0;i < co.contents.length;i++) {
 				if(!op.containsKey(co.option[i])) {
@@ -129,5 +148,5 @@ public class LR2SkinHeaderLoader extends LR2SkinLoader {
 		}
 
 		return header;
-	}	
+	}
 }
