@@ -8,6 +8,7 @@ import java.util.*;
 
 import bms.player.beatoraja.Config;
 import bms.player.beatoraja.Resolution;
+import bms.player.beatoraja.SkinConfig;
 import bms.player.beatoraja.play.*;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -44,7 +45,7 @@ public class JSONSkinLoader extends SkinLoader{
 		usecim = false;
 	}
 
-	public Skin loadSkin(Path p, SkinType type, Map property) {
+	public Skin loadSkin(Path p, SkinType type, SkinConfig.Property property) {
 		return load(p, type, property);
 	}
 
@@ -97,7 +98,7 @@ public class JSONSkinLoader extends SkinLoader{
 		return header;
 	}
 
-	public Skin load(Path p, SkinType type, Map property) {
+	public Skin load(Path p, SkinType type, SkinConfig.Property property) {
 		Skin skin = null;
 		try {
 			Json json = new Json();
@@ -135,10 +136,12 @@ public class JSONSkinLoader extends SkinLoader{
 			Map<Integer, Boolean> op = new HashMap<>();
 			for (Property pr : sk.property) {
 				int pop = 0;
-				if (property.get(pr.name) instanceof Integer) {
-					pop = (int) property.get(pr.name);
+				for(SkinConfig.Option opt : property.getOption()) {
+					if(opt.name.equals(pr.name)) {
+						pop = opt.value;
+						break;
+					}
 				}
-
 				for (int i = 0; i < pr.item.length; i++) {
 					op.put(pr.item[i].op, pr.item[i].op == pop);
 				}
@@ -147,22 +150,28 @@ public class JSONSkinLoader extends SkinLoader{
 
 			filemap = new HashMap<>();
 			for (Filepath pr : sk.filepath) {
-				if (property.get(pr.name) != null) {
-					filemap.put(p.getParent().toString() + "/" + pr.path, property.get(pr.name).toString());
+
+				for(SkinConfig.FilePath file : property.getFile()) {
+					if (file.name.equals(pr.name)) {
+						filemap.put(p.getParent().toString() + "/" + pr.path, file.path);
+						break;
+					}
 				}
 			}
 			
 			Map<Integer, int[]> offset = new HashMap<>();
 			for (Offset of : sk.offset) {
-				if(property.get(of.name) instanceof int[]) {					
-					offset.put(of.id, (int[]) property.get(of.name));
-				} else if (property.get(of.name) instanceof Array) {
-					int[] v = new int[5];
-					Iterator iterator = ((Array) property.get(of.name)).iterator();
-					for (int i = 0; i < v.length && iterator.hasNext(); i++) {
-						v[i] = (int) ((float) iterator.next());
+				for(SkinConfig.Offset off : property.getOffset()) {
+					if (off.name.equals(of.name)) {
+						int[] v = new int[5];
+						v[0] = off.x;
+						v[1] = off.y;
+						v[2] = off.w;
+						v[3] = off.h;
+						v[4] = off.r;
+						offset.put(of.id, v);
+						break;
 					}
-					offset.put(of.id, v);
 				}
 			}
 			skin.setOffset(offset);

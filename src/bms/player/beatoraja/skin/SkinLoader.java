@@ -12,7 +12,6 @@ import com.badlogic.gdx.graphics.*;
 import java.io.File;
 import java.nio.file.*;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -40,19 +39,19 @@ public abstract class SkinLoader {
             SkinConfig sc = resource.getPlayerConfig().getSkin()[skinType.getId()];
             if (sc.getPath().endsWith(".json")) {
                 JSONSkinLoader sl = new JSONSkinLoader(resource.getConfig());
-                return sl.loadSkin(Paths.get(sc.getPath()), skinType, sc.getProperty());
+                return sl.loadSkin(Paths.get(sc.getPath()), skinType, sc.getProperties());
             } else {
                 LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
-                SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), state, sc.getProperty());
+                SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), state, sc.getProperties());
                 LR2SkinCSVLoader dloader = LR2SkinCSVLoader.getSkinLoader(skinType,  header.getResolution(), resource.getConfig());
                 return dloader.loadSkin(Paths.get(sc.getPath()).toFile(), state, header, loader.getOption(),
-                        sc.getProperty());
+                        sc.getProperties());
             }
         } catch (Throwable e) {
             e.printStackTrace();
         }
         JSONSkinLoader sl = new JSONSkinLoader(resource.getConfig());
-        return sl.loadSkin(Paths.get(SkinConfig.defaultSkinPathMap.get(skinType)), skinType, new HashMap());
+        return sl.loadSkin(Paths.get(SkinConfig.defaultSkinPathMap.get(skinType)), skinType, new SkinConfig.Property());
     }
 
     public static PixmapResourcePool getResource() {

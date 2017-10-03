@@ -42,7 +42,7 @@ public class SkinConfig {
 
 	private String path;
 
-	private Map property;
+	private Property properties;
 
 	public SkinConfig() {
 
@@ -60,11 +60,70 @@ public class SkinConfig {
 		this.path = path;
 	}
 
-	public Map getProperty() {
-		return property;
+	public Property getProperties() {
+		return properties;
 	}
 
-	public void setProperty(Map property) {
-		this.property = property;
+	public void setProperties(Property property) {
+		this.properties = property;
 	}
+
+	public static class Property {
+		private Option[] option = new Option[0];
+		private FilePath[] file = new FilePath[0];
+		private Offset[] offset = new Offset[0];
+
+		public Option[] getOption() {
+			if(option == null) {
+				option = new Option[0];
+			}
+			return option;
+		}
+
+		public void setOption(Option[] option) {
+			this.option = option;
+		}
+
+		public FilePath[] getFile() {
+			if(file == null) {
+				file = new FilePath[0];
+			}
+			return file;
+		}
+
+		public void setFile(FilePath[] file) {
+			this.file = file;
+		}
+
+		public Offset[] getOffset() {
+			if(offset == null) {
+				offset = new Offset[0];
+			}
+			return offset;
+		}
+
+		public void setOffset(Offset[] offset) {
+			this.offset = offset;
+		}
+	}
+
+	public static class Option {
+		public String name;
+		public int value;
+	}
+
+	public static class FilePath {
+		public String name;
+		public String path;
+	}
+
+	public static class Offset {
+		public String name;
+		public int x;
+		public int y;
+		public int w;
+		public int h;
+		public int r;
+	}
+
 }

@@ -426,11 +426,11 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 	}
 
 	protected void loadSkin(Skin skin, File f, MainState state) throws IOException {
-		this.loadSkin(skin, f, state, new HashMap());
+		this.loadSkin(skin, f, state, new HashMap<Integer, Boolean>());
 	}
 
 	protected void loadSkin(Skin skin, File f, MainState state, Map<Integer, Boolean> option) throws IOException {
-		this.loadSkin0(skin, f, state, option, new HashMap());
+		this.loadSkin0(skin, f, state, option);
 	}
 
 	private Map<String, String> filemap = new HashMap();
@@ -471,7 +471,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 		skin.setOffset(offset);
 
 		op.putAll(option);
-		this.loadSkin0(skin, f, state, op, filemap);
+		this.loadSkin0(skin, f, state, op);
 		
 		return skin;
 	}
@@ -484,8 +484,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 	SkinText text = null;
 	String line = null;
 
-	protected void loadSkin0(Skin skin, File f, MainState state, Map<Integer, Boolean> option,
-			Map<String, String> filemap) throws IOException {
+	protected void loadSkin0(Skin skin, File f, MainState state, Map<Integer, Boolean> option) throws IOException {
 
 		BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(f), "MS932"));
 
@@ -551,7 +550,27 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 		}
 		return images;
 	}
-	
+
+	public S loadSkin(File f, MainState decide, SkinHeader header, Map<Integer, Boolean> option, SkinConfig.Property property) throws IOException {
+		Map m = new HashMap();
+		for(SkinConfig.Option op : property.getOption()) {
+			m.put(op.name, op.value);
+		}
+		for(SkinConfig.FilePath file : property.getFile()) {
+			m.put(file.name, file.path);
+		}
+		for(SkinConfig.Offset offset : property.getOffset()) {
+			int[] v = new int[5];
+			v[0] = offset.x;
+			v[1] = offset.y;
+			v[2] = offset.w;
+			v[3] = offset.h;
+			v[4] = offset.r;
+			m.put(offset.name, v);
+		}
+		return loadSkin(f, decide, header, option, m);
+	}
+
 	public abstract S loadSkin(File f, MainState decide, SkinHeader header, Map<Integer, Boolean> option, Map property) throws IOException;
 	
 	public static LR2SkinCSVLoader getSkinLoader(SkinType type, Resolution src, Config c) {

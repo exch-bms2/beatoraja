@@ -10,11 +10,7 @@ import java.util.function.Consumer;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
-import bms.player.beatoraja.skin.SkinProperty;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.IntArray;
 import org.apache.commons.dbutils.QueryRunner;
-import org.apache.commons.dbutils.handlers.ArrayHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 
 import com.badlogic.gdx.Graphics;
@@ -657,7 +653,7 @@ public class PlayConfigurationView implements Initializable {
 		if (skinview.getSelectedHeader() != null) {
 			SkinHeader header = skinview.getSelectedHeader();
 			SkinConfig skin = new SkinConfig(header.getPath().toString());
-			skin.setProperty(skinview.getProperty());
+			skin.setProperties(skinview.getProperty());
 			player.getSkin()[header.getSkinType().getId()] = skin;
 		} else if (mode != -1) {
 			player.getSkin()[mode] = null;
@@ -673,7 +669,7 @@ public class PlayConfigurationView implements Initializable {
 				for (SkinHeader header : skin.getItems()) {
 					if (header != null && header.getPath().equals(Paths.get(skinconf.getPath()))) {
 						skin.setValue(header);
-						skinconfig.setContent(skinview.create(skin.getValue(), skinconf.getProperty()));
+						skinconfig.setContent(skinview.create(skin.getValue(), skinconf.getProperties()));
 						break;
 					}
 				}
@@ -919,10 +915,13 @@ class SkinConfigurationView {
 		}
 	}
 
-	public VBox create(SkinHeader header, Map<String, Object> property) {
+	public VBox create(SkinHeader header, SkinConfig.Property property) {
 		selected = header;
 		if (header == null) {
 			return null;
+		}
+		if(property == null) {
+			property = new SkinConfig.Property();
 		}
 		VBox main = new VBox();
 		optionbox.clear();
@@ -931,15 +930,19 @@ class SkinConfigurationView {
 			ComboBox<String> combo = new ComboBox<String>();
 			combo.getItems().setAll(option.contents);
 			combo.getSelectionModel().select(0);
-			if (property != null && property.get(option.name) != null) {
-				int i = (int) property.get(option.name);
-				for(int index = 0;index < option.option.length;index++) {
-					if(option.option[index] == i) {
-						combo.getSelectionModel().select(index);
-						break;
+			for(SkinConfig.Option o : property.getOption()) {
+				if (o.name.equals(option.name)) {
+					int i = o.value;
+					for(int index = 0;index < option.option.length;index++) {
+						if(option.option[index] == i) {
+							combo.getSelectionModel().select(index);
+							break;
+						}
 					}
+					break;
 				}
 			}
+
 			Label label = new Label(option.name);
 			label.setMinWidth(250.0);
 			hbox.getChildren().addAll(label, combo);
@@ -960,7 +963,14 @@ class SkinConfigurationView {
 				for (Path p : paths) {
 					combo.getItems().add(p.getFileName().toString());
 				}
-				String selection = property != null ? (String) property.get(file.name) : null;
+
+				String selection = null;
+				for(SkinConfig.FilePath f : property.getFile()) {
+					if(f.name.equals(file.name)) {
+						selection = f.path;
+						break;
+					}
+				}
 				if (selection == null && file.def != null) {
 					// デフォルト値のファイル名またはそれに拡張子を付けたものが存在すれば使用する
 					for (String item : combo.getItems()) {
@@ -999,16 +1009,17 @@ class SkinConfigurationView {
 			hbox.getChildren().add(label);
 
 			int[] v = new int[values.length];
-			if(property != null && property.get(option.name) != null) {
-				if(property.get(option.name) instanceof Array) {
-					Iterator iterator = ((Array) property.get(option.name)).iterator();
-					for(int i = 0;i < v.length && iterator.hasNext();i++) {
-						v[i] = (int) ((float) iterator.next());
-					}
-				} else {
-					v = (int[])property.get(option.name);
+			for(SkinConfig.Offset o : property.getOffset()) {
+				if(o.name.equals(option.name)) {
+					v[0] = o.x;
+					v[1] = o.y;
+					v[2] = o.w;
+					v[3] = o.h;
+					v[4] = o.r;
+					break;
 				}
 			}
+
 			Spinner<Integer>[] spinner = new Spinner[values.length];
 			for(int i = 0;i < spinner.length;i++) {
 				spinner[i] = new Spinner(-9999,9999,0,1);
@@ -1044,21 +1055,36 @@ class SkinConfigurationView {
 		return selected;
 	}
 
-	public Map<String, Object> getProperty() {
-		Map<String, Object> result = new HashMap<String, Object>();
+	public SkinConfig.Property getProperty() {
+		SkinConfig.Property property = new SkinConfig.Property();
+
+		List<SkinConfig.Option> options = new ArrayList<>();
 		for (CustomOption option : selected.getCustomOptions()) {
 			if (optionbox.get(option) != null) {
 				int index = optionbox.get(option).getSelectionModel().getSelectedIndex();
-				result.put(option.name, option.option[index]);
+				SkinConfig.Option o = new SkinConfig.Option();
+				o.name = option.name;
+				o.value = option.option[index];
+				options.add(o);
 			}
 		}
+		property.setOption(options.toArray(new SkinConfig.Option[options.size()]));
+
+		List<SkinConfig.FilePath> files = new ArrayList<>();
 		for (CustomFile file : selected.getCustomFiles()) {
 			if (filebox.get(file) != null) {
-				result.put(file.name, filebox.get(file).getValue());
+				SkinConfig.FilePath o = new SkinConfig.FilePath();
+				o.name = file.name;
+				o.path = filebox.get(file).getValue();
+				files.add(o);
 			}
 		}
+		property.setFile(files.toArray(new SkinConfig.FilePath[files.size()]));
+
+		List<SkinConfig.Offset> offsets = new ArrayList<>();
 		for (CustomOffset offset : selected.getCustomOffsets()) {
 			if (offsetbox.get(offset) != null) {
+				SkinConfig.Offset o = new SkinConfig.Offset();
 				Spinner<Integer>[] spinner = offsetbox.get(offset);
 				int[] values = new int[spinner.length];
 				for(int i = 0;i < values.length;i++) {
@@ -1066,10 +1092,18 @@ class SkinConfigurationView {
 					.setValue(spinner[i].getValueFactory().getConverter().fromString(spinner[i].getEditor().getText()));
 					values[i] = spinner[i].getValue();
 				}
-				result.put(offset.name, values);
+				o.name = offset.name;
+				o.x = spinner[0].getValue();
+				o.y = spinner[1].getValue();
+				o.w = spinner[2].getValue();
+				o.h = spinner[3].getValue();
+				o.r = spinner[4].getValue();
+				offsets.add(o);
 			}
 		}
-		return result;
+		property.setOffset(offsets.toArray(new SkinConfig.Offset[offsets.size()]));
+
+		return property;
 	}
 
 	public SkinHeader[] getSkinHeader(SkinType mode) {

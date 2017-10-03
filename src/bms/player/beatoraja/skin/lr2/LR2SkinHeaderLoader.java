@@ -9,6 +9,7 @@ import java.util.*;
 
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.Resolution;
+import bms.player.beatoraja.SkinConfig;
 import bms.player.beatoraja.skin.SkinHeader;
 import bms.player.beatoraja.skin.SkinProperty;
 import bms.player.beatoraja.skin.SkinType;
@@ -108,10 +109,10 @@ public class LR2SkinHeaderLoader extends LR2SkinLoader {
 	}
 	
 	public SkinHeader loadSkin(Path f, MainState state) throws IOException {
-		return this.loadSkin(f, state, new HashMap());
+		return this.loadSkin(f, state, new SkinConfig.Property());
 	}
 	
-	public SkinHeader loadSkin(Path f, MainState state, Map<String, Object> property) throws IOException {
+	public SkinHeader loadSkin(Path f, MainState state, SkinConfig.Property property) throws IOException {
 		header = new SkinHeader();
 		files.clear();
 		options.clear();
@@ -122,10 +123,8 @@ public class LR2SkinHeaderLoader extends LR2SkinLoader {
 		BufferedReader br = Files.newBufferedReader(f, Charset.forName("MS932"));
 		String line = null;
 
-		for(String key : property.keySet()) {
-			if(property.get(key) != null && property.get(key) instanceof Integer) {
-				op.put((Integer) property.get(key), true);
-			}
+		for(SkinConfig.Option opt : property.getOption()) {
+			op.put(opt.value, true);
 		}
 
 		while ((line = br.readLine()) != null) {
