@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.badlogic.gdx.utils.IntArray;
+import com.badlogic.gdx.utils.IntSet;
 import org.lwjgl.opengl.GL11;
 
 /**
@@ -26,9 +28,9 @@ import org.lwjgl.opengl.GL11;
 public abstract class SkinObject implements Disposable {
 
 	/**
-	 * X座標オフセットの参照ID
+	 * オフセットの参照ID
 	 */
-	private int offset = 0;
+	private int[] offset = new int[0];
 
 	private boolean relative;
 
@@ -78,7 +80,7 @@ public abstract class SkinObject implements Disposable {
 
 	private Rectangle r = new Rectangle();
 	private Color c = new Color();
-	private SkinOffset off;
+	private SkinOffset[] off = new SkinOffset[0];
 
 	private Rectangle fixr = null;
 	private Color fixc = null;
@@ -95,9 +97,13 @@ public abstract class SkinObject implements Disposable {
 	public void setDestination(long time, float x, float y, float w, float h, int acc, int a, int r, int g, int b,
 			int blend, int filter, int angle, int center, int loop, int timer, int op1, int op2, int op3, int offset) {
 		setDestination(time, x, y, w, h, acc, a, r, g, b, blend, filter, angle, center, loop, timer, new int[]{op1,op2,op3});
-		if(offset != 0) {
-			this.offset = offset;			
-		}
+		setOffsetID(offset);
+	}
+
+	public void setDestination(long time, float x, float y, float w, float h, int acc, int a, int r, int g, int b,
+							   int blend, int filter, int angle, int center, int loop, int timer, int op1, int op2, int op3, int[] offset) {
+		setDestination(time, x, y, w, h, acc, a, r, g, b, blend, filter, angle, center, loop, timer, new int[]{op1,op2,op3});
+		setOffsetID(offset);
 	}
 
 	public void setDestination(long time, float x, float y, float w, float h, int acc, int a, int r, int g, int b,
@@ -217,8 +223,10 @@ public abstract class SkinObject implements Disposable {
 		nowtime = time;
 		rate = -1;
 		index = -1;
-		off = state != null && offset != 0 ? state.getOffsetValue(offset) : null;
-		
+		for(int i = 0;i < off.length;i++) {
+			off[i] = state != null ? state.getOffsetValue(offset[i]) : null;
+		}
+
 		if (fixr == null) {
 			getRate();
 			if(rate == 0) {
@@ -231,27 +239,32 @@ public abstract class SkinObject implements Disposable {
 				r.width = r1.width + (r2.width - r1.width) * rate;
 				r.height = r1.height + (r2.height - r1.height) * rate;
 			}
-			if (off != null) {
-				if(!relative) {
-					r.x += off.x;
-					r.y += off.y;
+
+			for(SkinOffset off : this.off) {
+				if (off != null) {
+					if(!relative) {
+						r.x += off.x;
+						r.y += off.y;
+					}
+					r.width += off.w;
+					r.height += off.h;
 				}
-				r.width += off.w;
-				r.height += off.h;
 			}
 			return r;
 		} else {
-			if (offset == 0) {
+			if (offset.length == 0) {
 				return fixr;
 			}
 			r.set(fixr);
-			if (off != null) {
-				if(!relative) {
-					r.x += off.x;
-					r.y += off.y;
+			for(SkinOffset off : this.off) {
+				if (off != null) {
+					if(!relative) {
+						r.x += off.x;
+						r.y += off.y;
+					}
+					r.width += off.w;
+					r.height += off.h;
 				}
-				r.width += off.w;
-				r.height += off.h;
 			}
 			return r;
 		}
@@ -277,17 +290,20 @@ public abstract class SkinObject implements Disposable {
 
 	public int getAngle() {
 		if (fixa != Integer.MIN_VALUE) {
-			if(off == null) {
-				return fixa;				
-			}
 			int a = fixa;
-			a += off.r;
+			for(SkinOffset off :this.off) {
+				if(off != null) {
+					a += off.r;
+				}
+			}
 			return a;
 		}
 		getRate();
 		int a = (rate == 0 ? dst[index].angle :  (int) (dst[index].angle + (dst[index + 1].angle - dst[index].angle) * rate));
-		if (off != null) {
-			a += off.r;
+		for(SkinOffset off :this.off) {
+			if(off != null) {
+				a += off.r;
+			}
 		}
 		return a;
 	}
@@ -428,12 +444,25 @@ public abstract class SkinObject implements Disposable {
 
 	public abstract void dispose();
 
-	public int getOffsetID() {
+	public int[] getOffsetID() {
 		return offset;
 	}
 
 	public void setOffsetID(int offset) {
-		this.offset = offset;
+		setOffsetID(new int[]{offset});
+	}
+
+	public void setOffsetID(int[] offset) {
+		IntSet a = new IntSet(offset.length);
+		for(int o : offset) {
+			if(o != 0) {
+				a.add(o);
+			}
+		}
+		if(a.size > 0) {
+			this.offset = a.iterator().toArray().toArray();
+			this.off = new SkinOffset[this.offset.length];
+		}
 	}
 
 	public int getImageID() {

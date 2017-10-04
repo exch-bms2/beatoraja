@@ -116,7 +116,6 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 				TextureRegion[] images = getSourceImage(values);
 				if (images != null) {
 					SkinImage li = new SkinImage(images, values[10], values[9]);
-					li.setOffsetID(OFFSET_LIFT);
 					lines[values[1]] = li;
 					// System.out.println("Object Added - " +
 					// (part.getTiming()));
@@ -139,7 +138,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 					lines[values[1]].setDestination(values[2], values[3] * dstw / srcw, dsth - (values[4] + values[6]) * dsth / srch,
 							values[5] * dstw / srcw, values[6] * dsth / srch, values[7], values[8], values[9],
 							values[10], values[11], values[12], values[13], values[14], values[15], values[16],
-							values[17], values[18], values[19], values[20], values[21]);
+							values[17], values[18], values[19], values[20], new int[]{OFFSET_LIFT, values[21]});
 					if(playerr[values[1] % 2] != null) {
 						playerr[values[1] % 2] = new Rectangle(values[3] * dstw / srcw,
 								dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
@@ -309,7 +308,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 								dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
 								values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
 								values[12], values[13], values[14], values[15], values[16], values[17], values[18],
-								values[19], values[20], OFFSET_JUDGE_1P);
+								values[19], values[20], new int[]{OFFSET_JUDGE_1P, values[21]});
 
 						if (!detail) {
 							detail = true;
@@ -361,7 +360,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 								dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
 								values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
 								values[12], values[13], values[14], values[15], values[16], values[17], values[18],
-								values[19], values[20], OFFSET_JUDGE_2P);
+								values[19], values[20], new int[]{OFFSET_JUDGE_2P, values[21]});
 						
 						if (!detail) {
 							detail = true;
@@ -413,7 +412,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 					judge[0].getJudgeCount()[5 - values[1]].setDestination(values[2], values[3] * dstw / srcw,
 							-values[4] * dsth / srch, values[5] * dstw / srcw, values[6] * dsth / srch, values[7],
 							values[8], values[9], values[10], values[11], values[12], values[13], values[14],
-							values[15], values[16], values[17], values[18], values[19], values[20], OFFSET_JUDGE_1P);
+							values[15], values[16], values[17], values[18], values[19], values[20], new int[]{OFFSET_JUDGE_1P, values[21]});
 				}
 			}
 		});
@@ -457,7 +456,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 					judge[1].getJudgeCount()[5 - values[1]].setDestination(values[2], values[3] * dstw / srcw,
 							-values[4] * dsth / srch, values[5] * dstw / srcw, values[6] * dsth / srch, values[7],
 							values[8], values[9], values[10], values[11], values[12], values[13], values[14],
-							values[15], values[16], values[17], values[18], values[19], values[20], OFFSET_JUDGE_2P);
+							values[15], values[16], values[17], values[18], values[19], values[20], new int[]{OFFSET_JUDGE_2P, values[21]});
 				}
 			}
 		});
@@ -469,7 +468,6 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 				TextureRegion[] images = getSourceImage(values);
 				if (images != null) {
 					line = new SkinImage(images, values[10], values[9]);
-					line.setOffsetID(OFFSET_LIFT);
 					// System.out.println("Object Added - " +
 					// (part.getTiming()));
 				}
@@ -496,8 +494,8 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 							dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
 							values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
 							values[12], values[13], values[14], values[15], values[16], values[17], values[18],
-							values[19], values[20], values[21]);
-				}
+							values[19], values[20], new int[]{values[21], OFFSET_LIFT});
+                }
 			}
 		});
 
