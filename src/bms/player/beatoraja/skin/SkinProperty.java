@@ -619,13 +619,18 @@ public class SkinProperty {
 
 	public static final int OFFSET_SCRATCHANGLE_1P = 1;
 	public static final int OFFSET_SCRATCHANGLE_2P = 2;
+	public static final int OFFSET_LIFT = 3;
+	public static final int OFFSET_LANECOVER = 4;
 
-	public static final int OFFSET_NOTES_1P = 3;
-	public static final int OFFSET_JUDGE_1P = 5;
-	public static final int OFFSET_JUDGE_2P = 5;
+	public static final int OFFSET_NOTES_1P = 30;
+	public static final int OFFSET_JUDGE_1P = 32;
+	public static final int OFFSET_JUDGE_2P = 32;
 
-	public static final int OFFSET_LIFT = 50;
-	public static final int OFFSET_LANECOVER = 51;
+	// オフセットのユーザー定義は40番以降を使用して下さい
+
+	// 廃止予定
+	public static final int OFFSET_LIFT_OBSOLETE = 50;
+	public static final int OFFSET_LANECOVER_OBSOLETE = 51;
 
 	public static final int BUTTON_MODE = 1011;
 	public static final int BUTTON_SORT = 1012;

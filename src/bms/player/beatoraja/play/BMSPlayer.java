@@ -874,6 +874,7 @@ public class BMSPlayer extends MainState {
             offset.r = keyinput.getScratchState(1);
             return offset;
         case OFFSET_LIFT:
+        case OFFSET_LIFT_OBSOLETE:
             offset.x = 0;
             offset.w = 0;
             offset.h = 0;
@@ -886,6 +887,7 @@ public class BMSPlayer extends MainState {
             }
             return offset;
         case OFFSET_LANECOVER:
+        case OFFSET_LANECOVER_OBSOLETE:
             offset.x = 0;
             offset.w = 0;
             offset.h = 0;
