@@ -650,7 +650,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 		
 		this.loadSkin(new PlaySkin(src, dst), f, player, header, option, property);
 
-		lanerender.setLaneRegion(laner, scale);
+		lanerender.setLaneRegion(laner, scale, skin);
 		
 		SkinImage[] skinline = new SkinImage[lines[0] != null ? (lines[1] != null ? 2 : 1) : 0];
 		for(int i = 0;i < skinline.length;i++) {

@@ -474,7 +474,7 @@ public class JSONSkinLoader extends SkinLoader{
 						}
 
 						SkinNote sn = new SkinNote(notes, lnss, mines);
-						sn.setLaneRegion(region, scale);
+						sn.setLaneRegion(region, scale, skin);
 						((PlaySkin) skin).setLaneGroupRegion(gregion);
 						obj = sn;
 					}

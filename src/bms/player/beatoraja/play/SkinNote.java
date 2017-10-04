@@ -28,8 +28,18 @@ public class SkinNote extends SkinObject {
         this.setDestination(0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, new int[0]);
 	}
 
-	public void setLaneRegion(Rectangle[] region, float[] scale) {
+	public void setLaneRegion(Rectangle[] region, float[] scale, Skin skin) {
 		for(int i = 0;i < lanes.length;i++) {
+			for(int oid : this.getOffsetID()) {
+				int[] offset = skin.getOffset().get(oid);
+				if(offset != null) {
+					region[i].x += offset[0] - offset[2] / 2;
+					region[i].y += offset[1] - offset[3] / 2;
+					region[i].width += offset[2];
+					scale[i] += offset[3];
+//					region[i].r += offset[4];
+				}
+			}
 			lanes[i].setDestination(0,region[i].x, region[i].y, region[i].width, region[i].height, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 			lanes[i].scale =  scale[i];
 		}

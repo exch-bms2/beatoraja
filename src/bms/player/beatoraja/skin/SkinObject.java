@@ -243,8 +243,8 @@ public abstract class SkinObject implements Disposable {
 			for(SkinOffset off : this.off) {
 				if (off != null) {
 					if(!relative) {
-						r.x += off.x;
-						r.y += off.y;
+						r.x += off.x - off.w / 2;
+						r.y += off.y - off.h / 2;
 					}
 					r.width += off.w;
 					r.height += off.h;
@@ -259,8 +259,8 @@ public abstract class SkinObject implements Disposable {
 			for(SkinOffset off : this.off) {
 				if (off != null) {
 					if(!relative) {
-						r.x += off.x;
-						r.y += off.y;
+						r.x += off.x - off.w / 2;
+						r.y += off.y - off.h / 2;
 					}
 					r.width += off.w;
 					r.height += off.h;
