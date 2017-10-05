@@ -396,7 +396,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 
 					judge[0].getJudgeCount()[5 - values[1]] = new SkinNumber(images, values[10], values[9], values[13],
 							images.length > 10 ? 2 : 0, values[11]);
-					judge[0].getJudgeCount()[5 - values[1]].setAlign(values[12]);
+					judge[0].getJudgeCount()[5 - values[1]].setAlign(judge[0].isSheft() && values[12] == 1 ?  2 : values[12]);
 					// System.out.println("Number Added - " +
 					// (num.getId()));
 				}
@@ -406,14 +406,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 		addCommandWord(new CommandWord("DST_NOWCOMBO_1P") {
 			@Override
 			public void execute(String[] str) {
-				if (judge[0] != null && judge[0].getJudgeCount()[5 - Integer.parseInt(str[1])] != null) {
-					int[] values = parseInt(str);
-					judge[0].getJudgeCount()[5 - values[1]].setRelative(true);
-					judge[0].getJudgeCount()[5 - values[1]].setDestination(values[2], values[3] * dstw / srcw,
-							-values[4] * dsth / srch, values[5] * dstw / srcw, values[6] * dsth / srch, values[7],
-							values[8], values[9], values[10], values[11], values[12], values[13], values[14],
-							values[15], values[16], values[17], values[18], values[19], values[20], new int[]{OFFSET_JUDGE_1P, values[21]});
-				}
+				setDstNowCombo(0, str, OFFSET_JUDGE_1P);
 			}
 		});
 
@@ -440,7 +433,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 
 					judge[1].getJudgeCount()[5 - values[1]] = new SkinNumber(images, values[10], values[9], values[13],
 							images.length > 10 ? 2 : 0, values[11]);
-					judge[1].getJudgeCount()[5 - values[1]].setAlign(values[12]);
+					judge[1].getJudgeCount()[5 - values[1]].setAlign(judge[1].isSheft() && values[12] == 1 ?  2 : values[12]);
 					// System.out.println("Number Added - " +
 					// (num.getId()));
 				}
@@ -450,14 +443,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 		addCommandWord(new CommandWord("DST_NOWCOMBO_2P") {
 			@Override
 			public void execute(String[] str) {
-				if (judge[1] != null && judge[1].getJudgeCount()[5 - Integer.parseInt(str[1])] != null) {
-					int[] values = parseInt(str);
-					judge[1].getJudgeCount()[5 - values[1]].setRelative(true);
-					judge[1].getJudgeCount()[5 - values[1]].setDestination(values[2], values[3] * dstw / srcw,
-							-values[4] * dsth / srch, values[5] * dstw / srcw, values[6] * dsth / srch, values[7],
-							values[8], values[9], values[10], values[11], values[12], values[13], values[14],
-							values[15], values[16], values[17], values[18], values[19], values[20], new int[]{OFFSET_JUDGE_2P, values[21]});
-				}
+				setDstNowCombo(1, str, OFFSET_JUDGE_2P);
 			}
 		});
 
@@ -552,6 +538,22 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 			}
 		});
 
+	}
+	
+	private void setDstNowCombo(int index, String[] str, int offsetid) {
+		final SkinJudge sj = judge[index];
+		if (sj != null && sj.getJudgeCount()[5 - Integer.parseInt(str[1])] != null) {
+			int[] values = parseInt(str);
+			sj.getJudgeCount()[5 - values[1]].setRelative(true);
+			float x = values[3];
+			if(sj.isSheft() && sj.getJudgeCount()[5 - values[1]].getAlign() == 2) {
+				x -= sj.getJudgeCount()[5 - values[1]].getKeta() * values[5] / 2;
+			}
+			sj.getJudgeCount()[5 - values[1]].setDestination(values[2], x * dstw / srcw,
+					-values[4] * dsth / srch, values[5] * dstw / srcw, values[6] * dsth / srch, values[7],
+					values[8], values[9], values[10], values[11], values[12], values[13], values[14],
+					values[15], values[16], values[17], values[18], values[19], values[20], new int[]{OFFSET_JUDGE_1P, values[21]});
+		}
 	}
 
 	private void addNote(String[] str, SkinSource[] note, boolean animation) {

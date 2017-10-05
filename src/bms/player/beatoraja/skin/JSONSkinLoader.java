@@ -538,7 +538,10 @@ public class JSONSkinLoader extends SkinLoader{
 										}
 										numbers[i] = new SkinNumber(nimages, value.timer, value.cycle, value.digit,
 												d > 10 ? 2 : 0, value.ref);
-										numbers[i].setAlign(value.align);
+										numbers[i].setAlign(2);
+										for(Animation ani : judge.numbers[i].dst) {
+											ani.x -= ani.w * value.digit / 2;
+										}
 										setDestination(skin, numbers[i], judge.numbers[i]);
 										break;
 									}

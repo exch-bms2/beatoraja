@@ -33,6 +33,8 @@ public class SkinNumber extends SkinObject {
 	private int align;
 
 	private TextureRegion[] values;
+	
+	private int length;
 
 	public SkinNumber(TextureRegion[] image, int keta, int zeropadding) {
 		this(image, keta, zeropadding, -1);
@@ -116,8 +118,9 @@ public class SkinNumber extends SkinObject {
 		draw(sprite, time, value, state, 0,0);
 	}
 
-	public void draw(SpriteBatch sprite, long time, int value, MainState state, int offsetX, int offsetY) {
+	public void draw(SpriteBatch sprite, long time, int value, MainState state, float offsetX, float offsetY) {
 		Rectangle r = this.getDestination(time, state);
+		length = 0;
 		if (r != null) {
 			TextureRegion[] values = getValue(time, value, zeropadding, state);
 			int shift = 0;
@@ -133,9 +136,14 @@ public class SkinNumber extends SkinObject {
 			for (int j = 0; j < values.length; j++) {
 				if (values[j] != null) {
 					draw(sprite, values[j], r.x + r.width * j + offsetX - shift, r.y + offsetY, r.width, r.height);
+					length += r.width;
 				}
 			}
 		}
+	}
+	
+	public int getLength() {
+		return length;
 	}
 
 	public void dispose() {
