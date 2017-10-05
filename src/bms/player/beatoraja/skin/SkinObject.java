@@ -2,7 +2,6 @@ package bms.player.beatoraja.skin;
 
 import bms.player.beatoraja.MainController;
 import bms.player.beatoraja.MainState;
-import bms.player.beatoraja.MainState.SkinOffset;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -456,6 +455,15 @@ public abstract class SkinObject implements Disposable {
 			this.angle = angle;
 			this.acc = acc;
 		}
+	}
+	
+	public static class SkinOffset {
+		public float x;
+		public float y;
+		public float w;
+		public float h;
+		public float r;
+		public float a;
 	}
 
 	public abstract void dispose();

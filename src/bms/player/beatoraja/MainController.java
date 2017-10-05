@@ -13,6 +13,7 @@ import bms.player.beatoraja.skin.SkinLoader;
 import bms.player.beatoraja.skin.SkinProperty;
 import com.badlogic.gdx.Graphics;
 
+import bms.player.beatoraja.skin.SkinObject.SkinOffset;
 import bms.player.beatoraja.audio.*;
 import bms.player.beatoraja.config.KeyConfiguration;
 import bms.player.beatoraja.decide.MusicDecide;
@@ -102,11 +103,17 @@ public class MainController extends ApplicationAdapter {
 
 	public static final int timerCount = SkinProperty.TIMER_MAX + 1;
 	private long[] timer = new long[timerCount];
+	public static final int offsetCount = SkinProperty.OFFSET_MAX + 1;
+	private SkinOffset[] offset = new SkinOffset[offsetCount];
 
 	public MainController(Path f, Config config, int auto, boolean songUpdated) {
 		this.auto = auto;
 		this.config = config;
 		this.songUpdated = songUpdated;
+		
+		for(int i = 0;i < offset.length;i++) {
+			offset[i] = new SkinOffset();
+		}
 		
 		player = MainLoader.readPlayerConfig(config.getPlayername());
 		this.bmsfile = f;
@@ -151,6 +158,10 @@ public class MainController extends ApplicationAdapter {
 
 	public long[] getTimer() {
 		return timer;
+	}
+
+	public SkinOffset getOffset(int index) {
+		return offset[index];
 	}
 
 	public SongDatabaseAccessor getSongDatabase() {

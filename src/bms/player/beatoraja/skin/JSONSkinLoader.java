@@ -159,18 +159,11 @@ public class JSONSkinLoader extends SkinLoader{
 				}
 			}
 			
-			Map<Integer, int[]> offset = new HashMap<>();
+			Map<Integer, SkinConfig.Offset> offset = new HashMap<>();
 			for (Offset of : sk.offset) {
 				for(SkinConfig.Offset off : property.getOffset()) {
 					if (off.name.equals(of.name)) {
-						int[] v = new int[6];
-						v[0] = off.x;
-						v[1] = off.y;
-						v[2] = off.w;
-						v[3] = off.h;
-						v[4] = off.r;
-						v[5] = off.a;
-						offset.put(of.id, v);
+						offset.put(of.id, off);
 						break;
 					}
 				}

@@ -5,6 +5,7 @@ import java.util.*;
 import java.util.logging.Logger;
 
 import bms.player.beatoraja.*;
+import bms.player.beatoraja.SkinConfig.Offset;
 import bms.player.beatoraja.play.bga.BGAProcessor;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.SkinHeader.*;
@@ -455,18 +456,9 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 			}
 		}
 
-		Map<Integer, int[]> offset = new HashMap<>();
+		Map<Integer, SkinConfig.Offset> offset = new HashMap<>();
 		for (CustomOffset of : Arrays.asList(header.getCustomOffsets())) {
-			if (property.get(of.name) instanceof int[]) {
-				offset.put(of.id, (int[]) property.get(of.name));
-			} else if (property.get(of.name) instanceof Array) {
-				int[] v = new int[5];
-				Iterator iterator = ((Array) property.get(of.name)).iterator();
-				for (int i = 0; i < v.length && iterator.hasNext(); i++) {
-					v[i] = (int) ((float) iterator.next());
-				}
-				offset.put(of.id, v);
-			}
+			offset.put(of.id, (Offset) property.get(of.name));
 		}
 		skin.setOffset(offset);
 
@@ -560,14 +552,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 			m.put(file.name, file.path);
 		}
 		for(SkinConfig.Offset offset : property.getOffset()) {
-			int[] v = new int[6];
-			v[0] = offset.x;
-			v[1] = offset.y;
-			v[2] = offset.w;
-			v[3] = offset.h;
-			v[4] = offset.r;
-			v[5] = offset.a;
-			m.put(offset.name, v);
+			m.put(offset.name, offset);
 		}
 		return loadSkin(f, decide, header, option, m);
 	}

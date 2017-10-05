@@ -631,6 +631,8 @@ public class SkinProperty {
 	// 廃止予定
 	public static final int OFFSET_LIFT_OBSOLETE = 50;
 	public static final int OFFSET_LANECOVER_OBSOLETE = 51;
+	
+	public static final int OFFSET_MAX = 199;
 
 	public static final int BUTTON_MODE = 1011;
 	public static final int BUTTON_SORT = 1012;

@@ -3,10 +3,13 @@ package bms.player.beatoraja;
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.Map.Entry;
 
 import bms.model.Mode;
+import bms.player.beatoraja.SkinConfig.Offset;
 import bms.player.beatoraja.play.TargetProperty;
 import bms.player.beatoraja.skin.*;
+import bms.player.beatoraja.skin.SkinObject.SkinOffset;
 import bms.player.beatoraja.skin.lr2.LR2SkinCSVLoader;
 import bms.player.beatoraja.skin.lr2.LR2SkinHeaderLoader;
 import bms.player.beatoraja.song.SongData;
@@ -282,6 +285,17 @@ public abstract class MainState {
 			this.skin.dispose();
 		}
 		this.skin = skin;
+		if(skin != null) {
+			for(Entry<Integer, Offset> e : skin.getOffset().entrySet()) {
+				SkinOffset offset = main.getOffset(e.getKey());
+				offset.x = e.getValue().x;
+				offset.y = e.getValue().y;
+				offset.w = e.getValue().w;
+				offset.h = e.getValue().h;
+				offset.r = e.getValue().r;
+				offset.a = e.getValue().a;
+			}			
+		}
 	}
 	
 	public void loadSkin(SkinType skinType) {
@@ -540,30 +554,8 @@ public abstract class MainState {
 	public void setSliderValue(int id, float value) {
 	}
 
-	protected final SkinOffset offset = new SkinOffset();
-	
-	public static class SkinOffset {
-		public float x;
-		public float y;
-		public float w;
-		public float h;
-		public float r;
-		public float a;
-	}
-
 	public SkinOffset getOffsetValue(int id) {
-		if(skin.getOffset().get(id) != null) {
-			int[] values = skin.getOffset().get(id);
-			offset.x = values[0];
-			offset.y = values[1];
-			offset.w = values[2];
-			offset.h = values[3];
-			offset.r = values[4];
-			offset.a = values[5];
-		} else {
-			offset.x = offset.y = offset.w = offset.h = offset.r = offset.a = 0;
-		}
-		return offset;
+		return main.getOffset(id);
 	}
 
 	public String getTextValue(int id) {

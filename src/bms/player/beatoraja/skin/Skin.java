@@ -2,6 +2,8 @@ package bms.player.beatoraja.skin;
 
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.Resolution;
+import bms.player.beatoraja.SkinConfig.Offset;
+
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
@@ -56,7 +58,7 @@ public class Skin {
 
 	private Map<Integer, Boolean> option = new HashMap<Integer, Boolean>();
 	
-	private Map<Integer, int[]> offset = new HashMap<Integer, int[]>();
+	private Map<Integer, Offset> offset = new HashMap<Integer, Offset>();
 
 	/**
 	 * 読み込み時から不変であることが確定しているop
@@ -263,11 +265,11 @@ public class Skin {
 		this.option = option;
 	}
 
-	public Map<Integer, int[]> getOffset() {
+	public Map<Integer, Offset> getOffset() {
 		return offset;
 	}
 
-	public void setOffset(Map<Integer, int[]> offset) {
+	public void setOffset(Map<Integer, Offset> offset) {
 		this.offset = offset;
 	}
 

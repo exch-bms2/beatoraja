@@ -12,6 +12,7 @@ import bms.player.beatoraja.pattern.*;
 import bms.player.beatoraja.play.PracticeConfiguration.PracticeProperty;
 import bms.player.beatoraja.play.bga.BGAProcessor;
 import bms.player.beatoraja.skin.*;
+import bms.player.beatoraja.skin.SkinObject.SkinOffset;
 import bms.player.beatoraja.song.SongData;
 
 import com.badlogic.gdx.math.Rectangle;
@@ -858,44 +859,26 @@ public class BMSPlayer extends MainState {
 	}
 
     public SkinOffset getOffsetValue(int id) {
+    	// TODO 各クラスでoffsetを算出してこのメソッドは廃止したい
+    	SkinOffset offset = getMainController().getOffset(id);
         switch (id) {
 		case OFFSET_SCRATCHANGLE_1P:
-            offset.x = 0;
-            offset.y = 0;
-            offset.w = 0;
-            offset.h = 0;
-            offset.a = 0;
-            offset.r = keyinput.getScratchState(0);
-            return offset;
+			offset.r = keyinput.getScratchState(0);
+			break;
 		case OFFSET_SCRATCHANGLE_2P:
-            offset.x = 0;
-            offset.y = 0;
-            offset.w = 0;
-            offset.h = 0;
-            offset.a = 0;
-            offset.r = keyinput.getScratchState(1);
-            return offset;
+			offset.r = keyinput.getScratchState(1);
+			break;
         case OFFSET_LIFT:
         case OFFSET_LIFT_OBSOLETE:
-            offset.x = 0;
-            offset.w = 0;
-            offset.h = 0;
-            offset.a = 0;
-            offset.r = 0;
             if (lanerender.isEnableLift()) {
                 final PlaySkin skin = (PlaySkin) getSkin();
                 offset.y = lanerender.getLiftRegion() * (skin.getHeight() - skin.getLaneGroupRegion()[0].y);
             } else {
             	offset.y = 0;
             }
-            return offset;
+			break;
         case OFFSET_LANECOVER:
         case OFFSET_LANECOVER_OBSOLETE:
-            offset.x = 0;
-            offset.w = 0;
-            offset.h = 0;
-            offset.a = 0;
-            offset.r = 0;
             if (lanerender.isEnableLanecover()) {
                 final PlaySkin skin = (PlaySkin) getSkin();
                 if (lanerender.isEnableLift()) {
@@ -907,9 +890,9 @@ public class BMSPlayer extends MainState {
             } else {
             	offset.y = 0;
             }
-            return offset;
+			break;
         }
-        return super.getOffsetValue(id);
+        return offset;
     }
 
     public boolean getBooleanValue(int id) {
