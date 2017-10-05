@@ -864,6 +864,7 @@ public class BMSPlayer extends MainState {
             offset.y = 0;
             offset.w = 0;
             offset.h = 0;
+            offset.a = 0;
             offset.r = keyinput.getScratchState(0);
             return offset;
 		case OFFSET_SCRATCHANGLE_2P:
@@ -871,6 +872,7 @@ public class BMSPlayer extends MainState {
             offset.y = 0;
             offset.w = 0;
             offset.h = 0;
+            offset.a = 0;
             offset.r = keyinput.getScratchState(1);
             return offset;
         case OFFSET_LIFT:
@@ -878,6 +880,7 @@ public class BMSPlayer extends MainState {
             offset.x = 0;
             offset.w = 0;
             offset.h = 0;
+            offset.a = 0;
             offset.r = 0;
             if (lanerender.isEnableLift()) {
                 final PlaySkin skin = (PlaySkin) getSkin();
@@ -891,6 +894,7 @@ public class BMSPlayer extends MainState {
             offset.x = 0;
             offset.w = 0;
             offset.h = 0;
+            offset.a = 0;
             offset.r = 0;
             if (lanerender.isEnableLanecover()) {
                 final PlaySkin skin = (PlaySkin) getSkin();

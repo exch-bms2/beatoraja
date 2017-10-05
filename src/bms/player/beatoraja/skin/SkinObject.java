@@ -272,11 +272,19 @@ public abstract class SkinObject implements Disposable {
 
 	public Color getColor() {
 		if (fixc != null) {
-			return fixc;
+			c.set(fixc);
+			for(SkinOffset off :this.off) {
+				if(off != null) {
+					float a = c.a + (off.a / 255.0f);
+					a = a > 1 ? 1 : (a < 0 ? 0 : a);
+					c.a = a;
+				}
+			}
+			return c;
 		}
 		getRate();
 		if(rate == 0) {
-			return dst[index].color;			
+			c.set(dst[index].color);			
 		} else {
 			final Color r1 = dst[index].color;
 			final Color r2 = dst[index + 1].color;
@@ -286,6 +294,14 @@ public abstract class SkinObject implements Disposable {
 			c.a = r1.a + (r2.a - r1.a) * rate;
 			return c;			
 		}
+		for(SkinOffset off :this.off) {
+			if(off != null) {
+				float a = c.a + (off.a / 255.0f);
+				a = a > 1 ? 1 : (a < 0 ? 0 : a);
+				c.a = a;
+			}
+		}
+		return c;
 	}
 
 	public int getAngle() {

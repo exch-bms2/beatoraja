@@ -124,6 +124,7 @@ public class SkinConfig {
 		public int w;
 		public int h;
 		public int r;
+		public int a;
 	}
 
 }

@@ -560,12 +560,13 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 			m.put(file.name, file.path);
 		}
 		for(SkinConfig.Offset offset : property.getOffset()) {
-			int[] v = new int[5];
+			int[] v = new int[6];
 			v[0] = offset.x;
 			v[1] = offset.y;
 			v[2] = offset.w;
 			v[3] = offset.h;
 			v[4] = offset.r;
+			v[5] = offset.a;
 			m.put(offset.name, v);
 		}
 		return loadSkin(f, decide, header, option, m);

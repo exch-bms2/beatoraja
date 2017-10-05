@@ -130,10 +130,22 @@ public class SkinHeader {
 	public static class CustomOffset {
 		public final String name;
 		public final int id;
+		public final boolean x;
+		public final boolean y;
+		public final boolean w;
+		public final boolean h;
+		public final boolean r;
+		public final boolean a;
 		
-		public CustomOffset(String name, int id) {
+		public CustomOffset(String name, int id, boolean x, boolean y, boolean w, boolean h,boolean r,boolean a) {
 			this.name = name;
 			this.id = id;
+			this.x = x;
+			this.y = y;
+			this.w = w;
+			this.h = h;
+			this.r = r;
+			this.a = a;
 		}
 	}
 }

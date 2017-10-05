@@ -548,6 +548,7 @@ public abstract class MainState {
 		public float w;
 		public float h;
 		public float r;
+		public float a;
 	}
 
 	public SkinOffset getOffsetValue(int id) {
@@ -558,8 +559,9 @@ public abstract class MainState {
 			offset.w = values[2];
 			offset.h = values[3];
 			offset.r = values[4];
+			offset.a = values[5];
 		} else {
-			offset.x = offset.y = offset.w = offset.h = offset.r = 0;
+			offset.x = offset.y = offset.w = offset.h = offset.r = offset.a = 0;
 		}
 		return offset;
 	}

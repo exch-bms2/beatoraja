@@ -49,8 +49,8 @@ public class LR2SkinHeaderLoader extends LR2SkinLoader {
 						options.add(new CustomOption("Score Graph", new int[]{38,39}, new String[]{"Off", "On"}));
 						options.add(new CustomOption("Judge Detail", new int[]{1997,1998,1999}, new String[]{"Off", "EARLY/LATE", "+-ms"}));
 
-						offsets.add(new CustomOffset("Notes offset", SkinProperty.OFFSET_NOTES_1P));
-						offsets.add(new CustomOffset("Judge offset", SkinProperty.OFFSET_JUDGE_1P));
+						offsets.add(new CustomOffset("Notes offset", SkinProperty.OFFSET_NOTES_1P, false, false, false, true, false, false));
+						offsets.add(new CustomOffset("Judge offset", SkinProperty.OFFSET_JUDGE_1P, true, true, true, true, false, true));
 				}
 			}
 		});
@@ -85,11 +85,12 @@ public class LR2SkinHeaderLoader extends LR2SkinLoader {
 						contents.add(str[i]);
 					}
 				}
-				int[] op = new int[contents.size()];
-				for(int i = 0;i < op.length;i++) {
-					op[i] = Integer.parseInt(str[2]) + i;
+				boolean[] op = new boolean[6];
+				Arrays.fill(op, true);
+				for(int i = 0;i < op.length && i + 3 < str.length;i++) {
+					op[i] = Integer.parseInt(str[i + 3]) > 0;
 				}
-				offsets.add(new CustomOffset(str[1], Integer.parseInt(str[2])));
+				offsets.add(new CustomOffset(str[1], Integer.parseInt(str[2]), op[0], op[1], op[2], op[3], op[4], op[5]));
 			}
 		});
 		addCommandWord(new CommandWord("RESOLUTION") {

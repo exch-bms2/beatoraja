@@ -1002,13 +1002,14 @@ class SkinConfigurationView {
 		}
 		offsetbox.clear();
 		for (CustomOffset option : header.getCustomOffsets()) {
-			final String[] values = {"x","y","w","h","r"};
+			final String[] values = {"x","y","w","h","r","a"};
 			HBox hbox = new HBox();
 			Label label = new Label(option.name);
 			label.setMinWidth(250.0);
 			hbox.getChildren().add(label);
 
 			int[] v = new int[values.length];
+			boolean[] b = new boolean[values.length];
 			for(SkinConfig.Offset o : property.getOffset()) {
 				if(o.name.equals(option.name)) {
 					v[0] = o.x;
@@ -1016,6 +1017,13 @@ class SkinConfigurationView {
 					v[2] = o.w;
 					v[3] = o.h;
 					v[4] = o.r;
+					v[5] = o.a;
+					b[0] = option.x;
+					b[1] = option.y;
+					b[2] = option.w;
+					b[3] = option.h;
+					b[4] = option.r;
+					b[5] = option.a;
 					break;
 				}
 			}
@@ -1025,7 +1033,9 @@ class SkinConfigurationView {
 				spinner[i] = new Spinner(-9999,9999,0,1);
 				spinner[i].setPrefWidth(80);
 				spinner[i].getValueFactory().setValue(v[i]);
-				hbox.getChildren().addAll(new Label(values[i]), spinner[i]);
+				if(b[i]) {
+					hbox.getChildren().addAll(new Label(values[i]), spinner[i]);					
+				}
 			}
 			offsetbox.put(option, spinner);
 			main.getChildren().add(hbox);
@@ -1098,6 +1108,7 @@ class SkinConfigurationView {
 				o.w = spinner[2].getValue();
 				o.h = spinner[3].getValue();
 				o.r = spinner[4].getValue();
+				o.a = spinner[5].getValue();
 				offsets.add(o);
 			}
 		}

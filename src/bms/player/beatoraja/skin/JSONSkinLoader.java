@@ -87,7 +87,7 @@ public class JSONSkinLoader extends SkinLoader{
 				SkinHeader.CustomOffset[] offsets = new SkinHeader.CustomOffset[sk.offset.length];
 				for (int i = 0; i < sk.offset.length; i++) {
 					Offset pr = sk.offset[i];
-					offsets[i] = new SkinHeader.CustomOffset(pr.name, pr.id);
+					offsets[i] = new SkinHeader.CustomOffset(pr.name, pr.id, pr.x, pr.y, pr.w, pr.h, pr.r, pr.a);
 				}
 				header.setCustomOffsets(offsets);
 
@@ -163,12 +163,13 @@ public class JSONSkinLoader extends SkinLoader{
 			for (Offset of : sk.offset) {
 				for(SkinConfig.Offset off : property.getOffset()) {
 					if (off.name.equals(of.name)) {
-						int[] v = new int[5];
+						int[] v = new int[6];
 						v[0] = off.x;
 						v[1] = off.y;
 						v[2] = off.w;
 						v[3] = off.h;
 						v[4] = off.r;
+						v[5] = off.a;
 						offset.put(of.id, v);
 						break;
 					}
@@ -899,6 +900,12 @@ public class JSONSkinLoader extends SkinLoader{
 	public static class Offset {
 		public String name;
 		public int id;
+		public boolean x;
+		public boolean y;
+		public boolean w;
+		public boolean h;
+		public boolean r;
+		public boolean a;
 	}
 
 	public static class Source {
