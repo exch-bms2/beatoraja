@@ -36,8 +36,8 @@ public class BGImageProcessor {
 		protected Pixmap convert(Pixmap pixmap) {
 			int bgasize = Math.max(pixmap.getHeight(), pixmap.getWidth());
 			if ( bgasize <=256 ){
-				final int fixx = (bgasize -  pixmap.getWidth()) / 2;
-				Pixmap fixpixmap = new Pixmap(bgasize, bgasize, pixmap.getFormat());
+				final int fixx = (256 - pixmap.getWidth()) / 2;
+				Pixmap fixpixmap = new Pixmap(256, 256, pixmap.getFormat());
 				fixpixmap.drawPixmap(pixmap, 0, 0, pixmap.getWidth(), pixmap.getHeight(),
 						fixx, 0, pixmap.getWidth(), pixmap.getHeight());
 				pixmap.dispose();
