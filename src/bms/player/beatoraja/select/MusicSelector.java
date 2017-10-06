@@ -806,6 +806,7 @@ public class MusicSelector extends MainState {
 	public void setSliderValue(int id, float value) {
 		switch (id) {
 		case SLIDER_MUSICSELECT_POSITION:
+			selectedBarMoved();
 			bar.setSelectedPosition(value);
 		}
 	}
@@ -947,8 +948,10 @@ public class MusicSelector extends MainState {
 		resetReplayIndex();
 		getTimer()[TIMER_SONGBAR_CHANGE] = getNowTime();
 		if(preview.getSongData() != null && (!(bar.getSelected() instanceof SongBar) ||
-				!((SongBar)bar.getSelected()).getSongData().getParent().equals(preview.getSongData().getParent())))
+				((SongBar) bar.getSelected()).getSongData().getFolder().equals(preview.getSongData().getFolder()) == false)){
+			Logger.getGlobal().info("デフォルトBGM再生");
 		preview.start(null);
+		}
 		showNoteGraph = false;
 	}
 
