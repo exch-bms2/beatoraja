@@ -1,11 +1,14 @@
 package bms.player.beatoraja.play.bga;
 
+import static bms.player.beatoraja.skin.SkinProperty.*;
+
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel.MapMode;
 import java.util.logging.Logger;
 
-import bms.player.beatoraja.play.BMSPlayer;
+import org.bytedeco.javacv.FFmpegFrameGrabber;
+import org.bytedeco.javacv.Frame;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Pixmap;
@@ -14,14 +17,11 @@ import com.badlogic.gdx.graphics.g2d.Gdx2DPixmap;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 
-import org.bytedeco.javacv.*;
-import org.bytedeco.javacv.FrameGrabber.Exception;
-
-import static bms.player.beatoraja.skin.SkinProperty.*;
+import bms.player.beatoraja.play.BMSPlayer;
 
 /**
  * ffmpegを使用した動画表示用クラス
- * 
+ *
  * @author exch
  */
 public class FFmpegProcessor implements MovieProcessor {
@@ -65,7 +65,7 @@ public class FFmpegProcessor implements MovieProcessor {
 			RandomAccessFile file = new RandomAccessFile(filepath, "r");
 			file.getChannel().map(MapMode.READ_ONLY, 0, file.length()).load();
 			file.close();
-			
+
 			grabber = new FFmpegFrameGrabber(filepath);
 			grabber.start();
 			Logger.getGlobal().info(
@@ -85,7 +85,7 @@ public class FFmpegProcessor implements MovieProcessor {
 
 	/**
 	 * 動画再生用スレッド
-	 * 
+	 *
 	 * @author exch
 	 */
 	class MovieSeekThread extends Thread {
@@ -95,17 +95,19 @@ public class FFmpegProcessor implements MovieProcessor {
 		public boolean loop = false;
 
 		private Pixmap pixmap;
-		
+
 		private final long[] nativeData = {0, grabber.getImageWidth(), grabber.getImageHeight(),
 				Gdx2DPixmap.GDX2D_FORMAT_RGB888 };
-		
-		private final Runnable updateTexture = new Runnable() {			
+
+		private final Runnable updateTexture = new Runnable() {
 			@Override
 			public void run() {
-				if (showingtex != null) {
-					showingtex.draw(pixmap, 0, 0);
-				} else {
-					showingtex = new Texture(pixmap);
+				if(!stop){
+					if (showingtex != null) {
+						showingtex.draw(pixmap, 0, 0);
+					} else {
+						showingtex = new Texture(pixmap);
+					}
 				}
 			}
 		};
@@ -135,14 +137,14 @@ public class FFmpegProcessor implements MovieProcessor {
 									sleep(3600000);
 								} catch (InterruptedException e) {
 
-								}								
+								}
 							}
 						} else if (frame.image != null && frame.image[0] != null) {
 							try {
 								Gdx2DPixmap pixmapData = new Gdx2DPixmap((ByteBuffer) frame.image[0], nativeData);
 								if(pixmap == null) {
-									pixmap = new Pixmap(pixmapData);									
-								}								
+									pixmap = new Pixmap(pixmapData);
+								}
 								Gdx.app.postRunnable(updateTexture);
 								// System.out.println("movie pixmap created : "
 								// + time);
@@ -182,7 +184,7 @@ public class FFmpegProcessor implements MovieProcessor {
 
 		}
 	}
-	
+
 	public ShaderProgram getShader() {
 		if(shader == null) {
 			String vertex = "attribute vec4 " + ShaderProgram.POSITION_ATTRIBUTE + ";\n" //
@@ -212,7 +214,7 @@ public class FFmpegProcessor implements MovieProcessor {
 					+ "{\n" //
 					+ "    vec4 c4 = texture2D(u_texture, v_texCoords);\n"
 					+ "gl_FragColor = v_color * vec4(c4.b, c4.g, c4.r, c4.a);\n" + "}";
-			shader = new ShaderProgram(vertex, fragment);			
+			shader = new ShaderProgram(vertex, fragment);
 		}
 		return shader;
 	}
@@ -230,12 +232,12 @@ public class FFmpegProcessor implements MovieProcessor {
 		if (showingtex != null) {
 			showingtex.dispose();
 		}
-		
+
 		if(shader != null) {
 			try {
-				shader.dispose();				
+				shader.dispose();
 			} catch(Throwable e) {
-				
+
 			}
 			shader = null;
 		}
@@ -248,7 +250,7 @@ public class FFmpegProcessor implements MovieProcessor {
 				if(movieseek.isAlive()) {
 					movieseek.loop = loop;
 					movieseek.restart = true;
-					movieseek.interrupt();				
+					movieseek.interrupt();
 				} else {
 					// 再生停止時
 					try {
@@ -273,7 +275,7 @@ public class FFmpegProcessor implements MovieProcessor {
 		if (movieseek != null && movieseek.isAlive()) {
 			synchronized (movieseek) {
 				movieseek.stop = true;
-				movieseek.interrupt();				
+				movieseek.interrupt();
 			}
 		}
 	}
