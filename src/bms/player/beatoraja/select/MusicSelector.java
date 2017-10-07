@@ -1,34 +1,56 @@
 package bms.player.beatoraja.select;
 
-import java.awt.*;
-import java.io.*;
+import static bms.player.beatoraja.skin.SkinProperty.*;
+
+import java.awt.Desktop;
+import java.io.File;
 import java.net.URI;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+
 import bms.model.Mode;
-import bms.player.beatoraja.*;
+import bms.player.beatoraja.Config;
+import bms.player.beatoraja.CourseData;
+import bms.player.beatoraja.IRScoreData;
+import bms.player.beatoraja.MainController;
+import bms.player.beatoraja.MainState;
+import bms.player.beatoraja.PlayConfig;
+import bms.player.beatoraja.PlayDataAccessor;
+import bms.player.beatoraja.PlayerConfig;
+import bms.player.beatoraja.PlayerData;
+import bms.player.beatoraja.PlayerInformation;
+import bms.player.beatoraja.PlayerResource;
+import bms.player.beatoraja.ScoreDatabaseAccessor;
+import bms.player.beatoraja.TableDataAccessor;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
-import bms.player.beatoraja.select.bar.*;
-import bms.player.beatoraja.skin.*;
+import bms.player.beatoraja.select.bar.Bar;
+import bms.player.beatoraja.select.bar.DirectoryBar;
+import bms.player.beatoraja.select.bar.FolderBar;
+import bms.player.beatoraja.select.bar.GradeBar;
+import bms.player.beatoraja.select.bar.SelectableBar;
+import bms.player.beatoraja.select.bar.SongBar;
+import bms.player.beatoraja.select.bar.TableBar;
+import bms.player.beatoraja.skin.SkinType;
 import bms.player.beatoraja.song.SongData;
 import bms.player.beatoraja.song.SongDatabaseAccessor;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.*;
-import com.badlogic.gdx.graphics.g2d.*;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
-
-import static bms.player.beatoraja.skin.SkinProperty.*;
-
 /**
  * 選曲部分。 楽曲一覧とカーソルが指す楽曲のステータスを表示し、選択した楽曲を 曲決定部分に渡す。
- * 
+ *
  * @author exch
  */
 public class MusicSelector extends MainState {
@@ -92,7 +114,7 @@ public class MusicSelector extends MainState {
 
 	private Map<PlayerInformation, ScoreDatabaseAccessor> rivals = new HashMap();
 	private PlayerInformation rival;
-	
+
 	private int panelstate;
 
 	public static final int SOUND_BGM = 0;
@@ -109,7 +131,7 @@ public class MusicSelector extends MainState {
 		songdb = main.getSongDatabase();
 
 		final PlayDataAccessor pda = getMainController().getPlayDataAccessor();
-		
+
 		scorecache = new ScoreDataCache() {
 			@Override
 			protected Map<String, IRScoreData> readScoreDatasFromSource(SongData[] songs, int lnmode) {
@@ -136,13 +158,13 @@ public class MusicSelector extends MainState {
 						rivalinfo = rival;
 					} catch (ClassNotFoundException e) {
 						e.printStackTrace();
-					}				
+					}
 				}
 			}
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
-		
+
 		// ライバルキャッシュ作成
 		// TODO ライバル選択機能
 		try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get("rival"))) {
@@ -152,7 +174,7 @@ public class MusicSelector extends MainState {
 					PlayerInformation info = scoredb.getInformation();
 					if(info != null) {
 						rivals.put(info, scoredb);
-					}						
+					}
 				}
 			}
 		} catch (Throwable e) {
@@ -172,14 +194,14 @@ public class MusicSelector extends MainState {
 			main.updateSong(null);
 		}
 	}
-	
+
 	public void setRival(PlayerInformation rival) {
 		this.rival = rival;
 		final ScoreDatabaseAccessor scoredb = rivals.get(rival);
-		
+
 		if(scoredb != null) {
 			rivalcache = new ScoreDataCache() {
-				
+
 				protected Map<String, IRScoreData> readScoreDatasFromSource(SongData[] songs, int lnmode) {
 					List<String> noln = new ArrayList<String>();
 					List<String> ln = new ArrayList<String>();
@@ -194,14 +216,14 @@ public class MusicSelector extends MainState {
 					result.putAll(scoredb.getScoreDatas(ln.toArray(new String[0]), lnmode));
 					return result;
 				}
-			};			
+			};
 		} else {
 			rivalcache = null;
 		}
-		
+
 		Logger.getGlobal().info("Rival変更:" + (rival != null ? rival.getName() : "なし"));
 	}
-	
+
 	public PlayerInformation getRival() {
 		return rival;
 	}
@@ -221,7 +243,7 @@ public class MusicSelector extends MainState {
 		}
 		setRival(rival);
 	}
-	
+
 	public ScoreDataCache getScoreDataCache() {
 		return scorecache;
 	}
@@ -806,6 +828,7 @@ public class MusicSelector extends MainState {
 	public void setSliderValue(int id, float value) {
 		switch (id) {
 		case SLIDER_MUSICSELECT_POSITION:
+			selectedBarMoved();
 			bar.setSelectedPosition(value);
 		}
 	}
@@ -947,7 +970,7 @@ public class MusicSelector extends MainState {
 		resetReplayIndex();
 		getTimer()[TIMER_SONGBAR_CHANGE] = getNowTime();
 		if(preview.getSongData() != null && (!(bar.getSelected() instanceof SongBar) ||
-				!((SongBar)bar.getSelected()).getSongData().getParent().equals(preview.getSongData().getParent())))
+				((SongBar) bar.getSelected()).getSongData().getFolder().equals(preview.getSongData().getFolder()) == false))
 		preview.start(null);
 		showNoteGraph = false;
 	}
