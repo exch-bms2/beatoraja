@@ -145,20 +145,28 @@ public class PlayerResource {
 			stagefile.getTexture().dispose();
 			stagefile = null;
 		}
-
-		Pixmap pix = PixmapResourcePool.loadPicture(f.getParent().resolve(model.getStagefile()).toString());
-		if(pix != null) {
-			stagefile = new TextureRegion(new Texture(pix));
-			pix.dispose();
+		try {
+			Pixmap pix = PixmapResourcePool.loadPicture(f.getParent().resolve(model.getStagefile()).toString());
+			if(pix != null) {
+				stagefile = new TextureRegion(new Texture(pix));
+				pix.dispose();
+			}			
+		} catch(Throwable e) {
+			Logger.getGlobal().warning(e.getMessage());
 		}
+		
 		if(backbmp != null) {
 			backbmp.getTexture().dispose();
 			backbmp = null;
 		}
-		pix = PixmapResourcePool.loadPicture(f.getParent().resolve(model.getBackbmp()).toString());
-		if(pix != null) {
-			backbmp = new TextureRegion(new Texture(pix));
-			pix.dispose();
+		try {
+			Pixmap pix = PixmapResourcePool.loadPicture(f.getParent().resolve(model.getBackbmp()).toString());
+			if(pix != null) {
+				backbmp = new TextureRegion(new Texture(pix));
+				pix.dispose();
+			}
+		} catch(Throwable e) {
+			Logger.getGlobal().warning(e.getMessage());
 		}
 		bmsresource.setBMSFile(model, f, config, autoplay);
 		return true;
