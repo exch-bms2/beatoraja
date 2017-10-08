@@ -25,7 +25,17 @@
 
 <VBox xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="bms.player.beatoraja.PlayConfigurationView">
    <children>
-      <TabPane prefHeight="400.0" prefWidth="740.0" VBox.vgrow="ALWAYS">
+       <HBox alignment="CENTER_LEFT" prefHeight="10.0" prefWidth="730.0">
+           <children>
+               <Label minWidth="100.0" text="%PLAYER_ID" />
+               <ComboBox fx:id="players" prefWidth="150.0" onAction="#changePlayer" />
+               <Label fx:id="playername" minWidth="100.0" />
+           </children>
+           <VBox.margin>
+               <Insets top="5.0" bottom="5.0"/>
+           </VBox.margin>
+       </HBox>
+       <TabPane prefHeight="400.0" prefWidth="740.0" VBox.vgrow="ALWAYS">
          <tabs>
             <Tab closable="false" text="%TAB_VIDEO">
               <content>

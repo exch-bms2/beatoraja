@@ -1,14 +1,15 @@
 package bms.player.beatoraja;
 
-import java.util.Arrays;
+import java.io.FileReader;
+import java.nio.file.*;
+import java.util.*;
 import java.util.logging.Logger;
 
 import bms.player.beatoraja.skin.SkinType;
-import com.badlogic.gdx.Input.Keys;
 
 import bms.model.Mode;
-import bms.player.beatoraja.input.BMControllerInputProcessor.BMKeys;
 import bms.player.beatoraja.PlayConfig.MidiConfig;
+import com.badlogic.gdx.utils.Json;
 
 /**
  * プレイヤー毎の設定項目
@@ -17,10 +18,11 @@ import bms.player.beatoraja.PlayConfig.MidiConfig;
  */
 public class PlayerConfig {
 
+	private String id;
     /**
      * プレイヤーネーム
      */
-    private String name;
+    private String name = "NO NAME";
     
 	/**
 	 * ゲージの種類
@@ -429,5 +431,42 @@ public class PlayerConfig {
 
 	public void setJudgewindowrate(int judgewindowrate) {
 		this.judgewindowrate = judgewindowrate;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public static String[] readAllPlayerID() {
+		List<String> l = new ArrayList<>();
+		if(Files.exists(Paths.get("player"))) {
+			try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get("player"))) {
+				for (Path p : paths) {
+					if(Files.isDirectory(p)) {
+						l.add(p.getFileName().toString());
+					}
+				}
+			} catch(Throwable e) {
+				e.printStackTrace();
+			}
+		}
+		return l.toArray(new String[l.size()]);
+	}
+
+	public static PlayerConfig readPlayerConfig(String playerid) {
+		PlayerConfig player = new PlayerConfig();
+		Path p = Paths.get("player/" + playerid + "/config.json");
+		Json json = new Json();
+		try {
+			json.setIgnoreUnknownFields(true);
+			player = json.fromJson(PlayerConfig.class, new FileReader(p.toFile()));
+		} catch(Throwable e) {
+			e.printStackTrace();
+		}
+		return player;
 	}
 }

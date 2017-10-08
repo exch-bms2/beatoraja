@@ -2,7 +2,7 @@ package bms.player.beatoraja;
 
 import java.io.*;
 import java.nio.file.*;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
@@ -234,18 +234,5 @@ public class MainLoader extends Application {
 		}
 	
 		return config;
-	}
-
-	public static PlayerConfig readPlayerConfig(String playername) {
-		PlayerConfig player = new PlayerConfig();
-		Path p = Paths.get("player/" + playername + "/config.json");
-		Json json = new Json();
-		try {
-			json.setIgnoreUnknownFields(true);
-			player = json.fromJson(PlayerConfig.class, new FileReader(p.toFile()));
-		} catch(Throwable e) {
-			e.printStackTrace();
-		}
-		return player;
 	}
 }

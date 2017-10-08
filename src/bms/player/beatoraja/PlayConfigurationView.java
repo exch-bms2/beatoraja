@@ -66,6 +66,11 @@ public class PlayConfigurationView implements Initializable {
 	// TODO スキンプレビュー機能
 
 	@FXML
+	private ComboBox<String> players;
+	@FXML
+	private Label playername;
+
+	@FXML
 	private ComboBox<Resolution> resolution;
 
 	@FXML
@@ -268,6 +273,8 @@ public class PlayConfigurationView implements Initializable {
 		skin.setButtonCell(new SkinListCell());
 
 		irname.getItems().setAll(IRConnection.AVAILABLE);
+
+		players.getItems().setAll(PlayerConfig.readAllPlayerID());
 	}
 
 	public void setBMSInformationLoader(MainLoader loader) {
@@ -322,6 +329,12 @@ public class PlayConfigurationView implements Initializable {
 		skinview = new SkinConfigurationView();
 
 		updateAudioDriver();
+
+		if(players.getItems().contains(config.getPlayername())) {
+			players.setValue(config.getPlayername());
+		} else {
+			players.getSelectionModel().select(0);
+		}
 		updatePlayer();
 	}
 
@@ -351,8 +364,15 @@ public class PlayConfigurationView implements Initializable {
 				? oldValue : resolution.getItems().get(resolution.getItems().size() - 1));
 	}
 
+	public void changePlayer() {
+		commitPlayer();
+		updatePlayer();
+	}
+
 	public void updatePlayer() {
-		player = MainLoader.readPlayerConfig(config.getPlayername());
+		player = PlayerConfig.readPlayerConfig(players.getValue());
+		player.setId(players.getValue());
+		playername.setText(player.getName());
 
 		scoreop.getSelectionModel().select(player.getRandom());
 		gaugeop.getSelectionModel().select(player.getGauge());
@@ -439,7 +459,10 @@ public class PlayConfigurationView implements Initializable {
 	}
 
 	public void commitPlayer() {
-		Path p = Paths.get("player/" + config.getPlayername() + "/config.json");
+		if(player == null) {
+			return;
+		}
+		Path p = Paths.get("player/" + player.getId() + "/config.json");
 
 		player.setRandom(scoreop.getValue());
 		player.setGauge(gaugeop.getValue());

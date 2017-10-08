@@ -115,7 +115,7 @@ public class MainController extends ApplicationAdapter {
 			offset[i] = new SkinOffset();
 		}
 		
-		player = MainLoader.readPlayerConfig(config.getPlayername());
+		player = PlayerConfig.readPlayerConfig(config.getPlayername());
 		this.bmsfile = f;
 
 		try {
