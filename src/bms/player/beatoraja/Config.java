@@ -68,7 +68,7 @@ public class Config {
 	/**
 	 * オーディオ同時発音数
 	 */
-	private int audioDeviceSimultaneousSources = 64;
+	private int audioDeviceSimultaneousSources = 96;
 
 	/**
 	 * システム音ボリューム
