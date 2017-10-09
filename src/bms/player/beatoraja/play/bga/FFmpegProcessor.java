@@ -5,6 +5,7 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel.MapMode;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.logging.Logger;
 
 import org.bytedeco.javacv.FFmpegFrameGrabber;
@@ -37,10 +38,6 @@ public class FFmpegProcessor implements MovieProcessor {
 	 */
 	private int fpsd = 1;
 	/**
-	 * ffmpegアクセサ
-	 */
-	private FFmpegFrameGrabber grabber;
-	/**
 	 * 動画再生用スレッド
 	 */
 	private MovieSeekThread movieseek;
@@ -50,7 +47,7 @@ public class FFmpegProcessor implements MovieProcessor {
 	 * 動画色補正用シェーダ
 	 */
 	private ShaderProgram shader;
-
+	
 	public FFmpegProcessor(int fpsd) {
 		this.fpsd = fpsd;
 	}
@@ -61,21 +58,8 @@ public class FFmpegProcessor implements MovieProcessor {
 
 	@Override
 	public void create(String filepath) {
-		try {
-			RandomAccessFile file = new RandomAccessFile(filepath, "r");
-			file.getChannel().map(MapMode.READ_ONLY, 0, file.length()).load();
-			file.close();
-
-			grabber = new FFmpegFrameGrabber(filepath);
-			grabber.start();
-			Logger.getGlobal().info(
-					"movie decode - fps : " + grabber.getFrameRate() + " format : " + grabber.getFormat() + " size : "
-							+ grabber.getImageWidth() + " x " + grabber.getImageHeight()
-							+ " length (frame / time) : " + grabber.getLengthInFrames() + " / "
-							+ grabber.getLengthInTime());
-		} catch (Throwable e) {
-			e.printStackTrace();
-		}
+		movieseek = new MovieSeekThread(filepath);
+		movieseek.start();
 	}
 
 	@Override
@@ -89,55 +73,87 @@ public class FFmpegProcessor implements MovieProcessor {
 	 * @author exch
 	 */
 	class MovieSeekThread extends Thread {
-
-		public boolean stop = false;
-		public boolean restart = false;
-		public boolean loop = false;
+		/**
+		 * ffmpegアクセサ
+		 */
+		private FFmpegFrameGrabber grabber;
+		/**
+		 * コマンドキュー
+		 */
+		private LinkedBlockingDeque<Command> commands = new LinkedBlockingDeque<>(4);
+		
+		private boolean eof = true;
 
 		private Pixmap pixmap;
 
-		private final long[] nativeData = {0, grabber.getImageWidth(), grabber.getImageHeight(),
-				Gdx2DPixmap.GDX2D_FORMAT_RGB888 };
+		private String filepath;
 
 		private final Runnable updateTexture = new Runnable() {
 			@Override
 			public void run() {
-				if(!stop){
-					if (showingtex != null) {
-						showingtex.draw(pixmap, 0, 0);
-					} else {
-						showingtex = new Texture(pixmap);
-					}
+				final Pixmap p = pixmap;
+				if(p == null) {
+					return;
+				}
+				if (showingtex != null) {
+					showingtex.draw(p, 0, 0);
+				} else {
+					showingtex = new Texture(p);
 				}
 			}
 		};
+		
+		public MovieSeekThread(String filepath) {
+			this.filepath = filepath;
+			try {
+				RandomAccessFile file = new RandomAccessFile(filepath, "r");
+				file.getChannel().map(MapMode.READ_ONLY, 0, file.length()).load();
+				file.close();
+			} catch (Throwable e) {
+				e.printStackTrace();
+			}
+		}
 
 		public void run() {
 			try {
+				grabber = new FFmpegFrameGrabber(filepath);
+				grabber.start();
+				Logger.getGlobal().info(
+						"movie decode - fps : " + grabber.getFrameRate() + " format : " + grabber.getFormat() + " size : "
+								+ grabber.getImageWidth() + " x " + grabber.getImageHeight()
+								+ " length (frame / time) : " + grabber.getLengthInFrames() + " / "
+								+ grabber.getLengthInTime());
+
 				double fps = grabber.getFrameRate();
+				long[] nativeData = {0, grabber.getImageWidth(), grabber.getImageHeight(),
+						Gdx2DPixmap.GDX2D_FORMAT_RGB888 };
+
 				if (fps > 240) {
 					// フレームレートが大きすぎる場合は手動で修正(暫定処置)
 					fps = 30;
 				}
-				long start = player != null ? player.getNowTime() - player.getTimer()[TIMER_PLAY] : (System.nanoTime() / 1000000);
+				long start = 0;
 				int framecount = 0;
 				Frame frame = null;
-				while (!stop) {
+				boolean halt = false;
+				boolean loop = false;
+				while (!halt) {
 					final long time = (player != null ? player.getNowTime() - player.getTimer()[TIMER_PLAY] : (System.nanoTime() / 1000000)) - start;
-					if (time >= framecount * 1000 / fps) {
+					if(eof) {
+						try {
+							sleep(3600000);
+						} catch (InterruptedException e) {
+
+						}						
+					} else if (time >= framecount * 1000 / fps) {
 						while (time >= framecount * 1000 / fps || framecount % fpsd != 0) {
 							frame = grabber.grabImage();
 							framecount++;
 						}
 						if (frame == null) {
+							eof = true;
 							if(loop) {
-								restart = true;
-							} else {
-								try {
-									sleep(3600000);
-								} catch (InterruptedException e) {
-
-								}
+								commands.addLast(Command.PLAY);
 							}
 						} else if (frame.image != null && frame.image[0] != null) {
 							try {
@@ -162,14 +178,35 @@ public class FFmpegProcessor implements MovieProcessor {
 							}
 						}
 					}
-					if (restart) {
-						restart = false;
-						pixmap = null;
-						grabber.start();
-//						grabber.restart();
-						start = player != null ? player.getNowTime() - player.getTimer()[TIMER_PLAY] : (System.nanoTime() / 1000000);
-						framecount = 0;
-//						System.out.println("movie restart - starttime : " + start);
+					
+					if(!commands.isEmpty()) {
+						switch(commands.pollFirst()) {
+						case PLAY:
+							loop = false;
+							pixmap = null;
+//							grabber.start();
+							grabber.restart();
+							eof = false;
+							start = player != null ? player.getNowTime() - player.getTimer()[TIMER_PLAY] : (System.nanoTime() / 1000000);
+							framecount = 0;
+//							System.out.println("movie restart - starttime : " + start);
+							break;
+						case LOOP:
+							loop = true;
+							pixmap = null;
+//							grabber.start();
+							grabber.restart();
+							eof = false;
+							start = player != null ? player.getNowTime() - player.getTimer()[TIMER_PLAY] : (System.nanoTime() / 1000000);
+							framecount = 0;
+//							System.out.println("movie restart - starttime : " + start);
+							break;
+						case STOP:
+							eof = true;
+							break;
+						case HALT:
+							halt = true;
+						}						
 					}
 				}
 			} catch (Throwable e) {
@@ -177,12 +214,23 @@ public class FFmpegProcessor implements MovieProcessor {
 			} finally {
 				try {
 					grabber.stop();
+					grabber.release();
+					Logger.getGlobal().info("動画リソースの開放 : " + filepath);
 				} catch (Throwable e) {
 					e.printStackTrace();
 				}
 			}
 
 		}
+		
+		public void exec(Command com) {
+			commands.addLast(com);
+			interrupt();
+		}
+	}
+	
+	enum Command {
+		PLAY,LOOP,STOP,HALT;
 	}
 
 	public ShaderProgram getShader() {
@@ -221,14 +269,11 @@ public class FFmpegProcessor implements MovieProcessor {
 
 	@Override
 	public void dispose() {
-		stop();
-		try {
-			long l = System.currentTimeMillis();
-			while(movieseek.isAlive() && System.currentTimeMillis() - l < 2000);
-			grabber.release();
-		} catch (Throwable e) {
-
+		if(movieseek != null) {
+			movieseek.exec(Command.HALT);
+			movieseek = null;
 		}
+		
 		if (showingtex != null) {
 			showingtex.dispose();
 		}
@@ -244,40 +289,11 @@ public class FFmpegProcessor implements MovieProcessor {
 	}
 
 	public void play(boolean loop) {
-		if (movieseek != null) {
-			synchronized (movieseek) {
-				// 再生中
-				if(movieseek.isAlive()) {
-					movieseek.loop = loop;
-					movieseek.restart = true;
-					movieseek.interrupt();
-				} else {
-					// 再生停止時
-					try {
-						grabber.start();
-						movieseek = new MovieSeekThread();
-						movieseek.loop = loop;
-						movieseek.start();
-					} catch (Throwable e) {
-						e.printStackTrace();
-					}
-				}
-			}
-		} else {
-			// 新規再生
-			movieseek = new MovieSeekThread();
-			movieseek.loop = loop;
-			movieseek.start();
-		}
+		movieseek.exec(loop ? Command.LOOP : Command.PLAY);		
 	}
 
 	public void stop() {
-		if (movieseek != null && movieseek.isAlive()) {
-			synchronized (movieseek) {
-				movieseek.stop = true;
-				movieseek.interrupt();
-			}
-		}
+		movieseek.exec(Command.STOP);
 	}
 
 }
