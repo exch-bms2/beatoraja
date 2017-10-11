@@ -1,14 +1,18 @@
 package bms.player.beatoraja;
 
-import java.util.Arrays;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.*;
+import java.util.*;
 import java.util.logging.Logger;
 
 import bms.player.beatoraja.skin.SkinType;
-import com.badlogic.gdx.Input.Keys;
 
 import bms.model.Mode;
-import bms.player.beatoraja.input.BMControllerInputProcessor.BMKeys;
 import bms.player.beatoraja.PlayConfig.MidiConfig;
+import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.JsonWriter;
 
 /**
  * プレイヤー毎の設定項目
@@ -17,10 +21,11 @@ import bms.player.beatoraja.PlayConfig.MidiConfig;
  */
 public class PlayerConfig {
 
+	private String id;
     /**
      * プレイヤーネーム
      */
-    private String name;
+    private String name = "NO NAME";
     
 	/**
 	 * ゲージの種類
@@ -429,5 +434,102 @@ public class PlayerConfig {
 
 	public void setJudgewindowrate(int judgewindowrate) {
 		this.judgewindowrate = judgewindowrate;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public static void init(Config config) {
+		// TODO プレイヤーアカウント検証
+		try {
+			if(!Files.exists(Paths.get("player"))) {
+				Files.createDirectory(Paths.get("player"));
+			}
+			if(readAllPlayerID().length == 0) {
+				PlayerConfig pc = new PlayerConfig(config);
+				create("player1");
+				// スコアデータコピー
+				if(Files.exists(Paths.get("playerscore.db"))) {
+					Files.copy(Paths.get("playerscore.db"), Paths.get("player/player1/score.db"));
+				}
+				// リプレイデータコピー
+				Files.createDirectory(Paths.get("player/player1/replay"));
+				if(Files.exists(Paths.get("replay"))) {
+					try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get("replay"))) {
+						for (Path p : paths) {
+							Files.copy(p, Paths.get("player/player1/replay").resolve(p.getFileName()));
+						}
+					} catch(Throwable e) {
+						e.printStackTrace();
+					}
+				}
+
+				config.setPlayername("player1");
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public static void create(String playerid) {
+		try {
+			Path p = Paths.get("player/" + playerid);
+			if(Files.exists(p)) {
+				return;
+			}
+			Files.createDirectory(p);
+			PlayerConfig player = new PlayerConfig();
+			player.setId(playerid);
+			write(player);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	public static String[] readAllPlayerID() {
+		List<String> l = new ArrayList<>();
+		try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get("player"))) {
+			for (Path p : paths) {
+				if(Files.isDirectory(p)) {
+					l.add(p.getFileName().toString());
+				}
+			}
+		} catch(Throwable e) {
+			e.printStackTrace();
+		}
+		return l.toArray(new String[l.size()]);
+	}
+
+	public static PlayerConfig readPlayerConfig(String playerid) {
+		PlayerConfig player = new PlayerConfig();
+		Path p = Paths.get("player/" + playerid + "/config.json");
+		Json json = new Json();
+		try {
+			json.setIgnoreUnknownFields(true);
+			player = json.fromJson(PlayerConfig.class, new FileReader(p.toFile()));
+			player.setId(playerid);
+		} catch(Throwable e) {
+			e.printStackTrace();
+		}
+		return player;
+	}
+
+	public static void write(PlayerConfig player) {
+		Json json = new Json();
+		json.setOutputType(JsonWriter.OutputType.json);
+		Path p = Paths.get("player/" + player.getId() + "/config.json");
+		try (FileWriter fw = new FileWriter(p.toFile())) {
+			fw.write(json.prettyPrint(player));
+			fw.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }

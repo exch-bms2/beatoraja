@@ -2,7 +2,7 @@ package bms.player.beatoraja;
 
 import java.io.*;
 import java.nio.file.*;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
@@ -198,54 +198,9 @@ public class MainLoader extends Application {
 				e.printStackTrace();
 			}
 		}
-		
-		// TODO プレイヤーアカウント検証
-		if(!Files.exists(Paths.get("player"))) {
-			try {
-				Files.createDirectory(Paths.get("player"));
-				PlayerConfig pc = new PlayerConfig(config);
-				Files.createDirectory(Paths.get("player/player1"));
-				Json json = new Json();
-				json.setOutputType(OutputType.json);
-				FileWriter fw = new FileWriter(Paths.get("player/player1/config.json").toFile());
-				if(Files.exists(Paths.get("playerscore.db"))) {
-					Files.copy(Paths.get("playerscore.db"), Paths.get("player/player1/score.db"));
-				}
-				fw.write(json.prettyPrint(pc));
-				fw.flush();
-				fw.close();
-				// リプレイデータコピー
-				Files.createDirectory(Paths.get("player/player1/replay"));
-				if(Files.exists(Paths.get("replay"))) {
-					try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get("replay"))) {
-						for (Path p : paths) {
-							Files.copy(p, Paths.get("player/player1/replay").resolve(p.getFileName()));
-						}
-					} catch(Throwable e) {
-						e.printStackTrace();
-					}					
-				}
-				
-				config.setPlayername("player1");
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-	
-		return config;
-	}
 
-	public static PlayerConfig readPlayerConfig(String playername) {
-		PlayerConfig player = new PlayerConfig();
-		Path p = Paths.get("player/" + playername + "/config.json");
-		Json json = new Json();
-		try {
-			json.setIgnoreUnknownFields(true);
-			player = json.fromJson(PlayerConfig.class, new FileReader(p.toFile()));
-		} catch(Throwable e) {
-			e.printStackTrace();
-		}
-		return player;
+		PlayerConfig.init(config);
+
+		return config;
 	}
 }
