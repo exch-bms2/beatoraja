@@ -73,7 +73,7 @@ public class PreviewMusicProcessor {
                     if(!path.equals(playing)) {
                         stopPreview(true);
                         if(path != defaultMusic) {
-                            audio.play(path, config.getSystemvolume(), false);
+                            audio.play(path, config.getSystemvolume(), true);
                         } else {
                             audio.setVolume(defaultMusic, config.getSystemvolume());
                         }
