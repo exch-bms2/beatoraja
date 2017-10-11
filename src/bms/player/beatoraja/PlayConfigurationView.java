@@ -371,7 +371,6 @@ public class PlayConfigurationView implements Initializable {
 
 	public void updatePlayer() {
 		player = PlayerConfig.readPlayerConfig(players.getValue());
-		player.setId(players.getValue());
 		playername.setText(player.getName());
 
 		scoreop.getSelectionModel().select(player.getRandom());
@@ -406,6 +405,8 @@ public class PlayConfigurationView implements Initializable {
 	 * ダイアログの項目をconfig.xmlに反映する
 	 */
 	public void commit() {
+		config.setPlayername(players.getValue());
+
 		config.setResolution(resolution.getValue());
 		config.setFullscreen(fullscreen.isSelected());
 		config.setVsync(vsync.isSelected());
