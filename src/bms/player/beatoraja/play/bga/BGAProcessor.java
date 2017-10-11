@@ -1,25 +1,23 @@
 package bms.player.beatoraja.play.bga;
 
 import java.nio.file.*;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Logger;
 
 import bms.model.BMSModel;
 import bms.model.TimeLine;
 import bms.player.beatoraja.Config;
-import bms.player.beatoraja.PixmapResourcePool;
 import bms.player.beatoraja.PlayerConfig;
+import bms.player.beatoraja.ResourcePool;
 import bms.player.beatoraja.play.BMSPlayer;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.IntMap;
 
 /**
  * BGAのリソース管理、描画用クラス
@@ -33,8 +31,31 @@ public class BGAProcessor {
 	private PlayerConfig player;
 	private float progress = 0;
 
-	private int[] mpgid = new int[0];
-	private MovieProcessor[] mpgmap = new MovieProcessor[0];
+	private IntMap<MovieProcessor> mpgmap = new IntMap<MovieProcessor>();
+	
+	private ResourcePool<String, MovieProcessor> mpgresource = new ResourcePool<String, MovieProcessor>(1) {
+
+		@Override
+		protected MovieProcessor load(String key) {
+			if (config.getMovieplayer() == Config.MOVIEPLAYER_FFMPEG) {
+				MovieProcessor mm = new FFmpegProcessor(config.getFrameskip());
+				mm.create(key);
+				return mm;
+			}
+			if (config.getMovieplayer() == Config.MOVIEPLAYER_VLC && config.getVlcpath().length() > 0) {
+				MovieProcessor mm = new VLCMovieProcessor(config.getVlcpath());
+				mm.create(key);
+				return mm;
+			}
+			return null;
+		}
+
+		@Override
+		protected void dispose(MovieProcessor resource) {
+			resource.dispose();
+		}
+
+	};
 
 	public static final String[] mov_extension = { "mpg", "mpeg", "m1v", "m2v", "avi", "wmv", "mp4" };
 
@@ -135,21 +156,7 @@ public class BGAProcessor {
 
 		progress = 0;
 
-		final MovieProcessor[] oldmpgmap = mpgmap;
-		Gdx.app.postRunnable(new Runnable() {
-			@Override
-			public void run() {
-				for (MovieProcessor mpg : oldmpgmap) {
-					if (mpg != null) {
-						mpg.dispose();
-					}
-				}
-			}			
-		});
-
-		mpgid = new int[0];
-		
-		Map<Integer, MovieProcessor> mpgmap = new HashMap<Integer, MovieProcessor>();
+		mpgmap.clear();
 		int id = 0;
 		cache.clear();
 
@@ -187,7 +194,7 @@ public class BGAProcessor {
 				for (String mov : mov_extension) {
 					if (f.getFileName().toString().toLowerCase().endsWith(mov)) {
 						try {
-							MovieProcessor mm = this.loadMovie(id, f);
+							MovieProcessor mm = mpgresource.get(f.toString());
 							mpgmap.put(id, mm);
 							isMovie = true;
 							break;
@@ -208,30 +215,15 @@ public class BGAProcessor {
 		}
 		
 		cache.disposeOld();
-		mpgid = new int[mpgmap.size()];
-		this.mpgmap = new MovieProcessor[mpgmap.size()];
-		int i = 0;
-		for(Map.Entry<Integer, MovieProcessor> e : mpgmap.entrySet()) {
-			mpgid[i] = e.getKey();
-			this.mpgmap[i] = e.getValue();
-			i++;
-		}
+		Gdx.app.postRunnable(new Runnable() {
+			@Override
+			public void run() {
+				mpgresource.disposeOld();
+			}			
+		});
+
 		Logger.getGlobal().info("BGAファイル読み込み完了。BGA数:" + model.getBgaList().length);
 		progress = 1;
-	}
-
-	private MovieProcessor loadMovie(int id, Path p) throws Exception {
-		if (config.getMovieplayer() == Config.MOVIEPLAYER_FFMPEG) {
-			MovieProcessor mm = new FFmpegProcessor(config.getFrameskip());
-			mm.create(p.toString());
-			return mm;
-		}
-		if (config.getMovieplayer() == Config.MOVIEPLAYER_VLC && config.getVlcpath().length() > 0) {
-			MovieProcessor mm = new VLCMovieProcessor(config.getVlcpath());
-			mm.create(p.toString());
-			return mm;
-		}
-		return null;
 	}
 
 	public void abort() {
@@ -249,20 +241,17 @@ public class BGAProcessor {
 		if(cache != null) {
 			cache.prepare(timelines);			
 		}
-		for (MovieProcessor mp : mpgmap) {
+		for (MovieProcessor mp : mpgmap.values()) {
 			mp.stop();				
+			if (mp instanceof FFmpegProcessor) {
+				((FFmpegProcessor) mp).setBMSPlayer(player);
+			}
 		}
 		playingbgaid = -1;
 		playinglayerid = -1;
 		misslayertime = 0;
 		misslayer = null;
-		prevrendertime = 0;
-
-		for(int i = 0;i < mpgid.length;i++) {
-			if (mpgmap[i] instanceof FFmpegProcessor) {
-				((FFmpegProcessor) mpgmap[i]).setBMSPlayer(player);
-			}
-		}
+		prevrendertime = 0;		
 	}
 
 	private Texture getBGAData(int id, boolean cont) {
@@ -366,12 +355,7 @@ public class BGAProcessor {
 	}
 	
 	private MovieProcessor getMovieProcessor(int id) {
-		for(int i = 0;i < mpgid.length;i++) {
-			if(mpgid[i] == id) {
-				return mpgmap[i];
-			}
-		}
-		return null;
+		return mpgmap.get(id);
 	}
 
 	/**
@@ -423,7 +407,7 @@ public class BGAProcessor {
 	}
 
 	public void stop() {
-		for (MovieProcessor mpg : mpgmap) {
+		for (MovieProcessor mpg : mpgmap.values()) {
 			if (mpg != null) {
 				mpg.stop();
 			}
@@ -437,13 +421,7 @@ public class BGAProcessor {
 		if (cache != null) {
 			cache.dispose();
 		}
-		for (MovieProcessor mpg : mpgmap) {
-			if (mpg != null) {
-				mpg.dispose();
-			}
-		}
-		mpgid = new int[0];
-
+		mpgresource.dispose();
 		try {
 			layershader.dispose();
 		} catch(Throwable e) {
