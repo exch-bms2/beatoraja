@@ -28,11 +28,12 @@
        <HBox alignment="CENTER_LEFT" prefHeight="10.0" prefWidth="730.0">
            <children>
                <Label minWidth="100.0" text="%PLAYER_ID" />
-               <ComboBox fx:id="players" prefWidth="150.0" onAction="#changePlayer" />
-               <Label fx:id="playername" minWidth="100.0" />
+               <ComboBox fx:id="players" onAction="#changePlayer" prefWidth="150.0" />
+            <TextField fx:id="playername" prefHeight="24.0" prefWidth="243.0" />
+            <Button mnemonicParsing="false" onAction="#addPlayer" text="+" />
            </children>
            <VBox.margin>
-               <Insets top="5.0" bottom="5.0"/>
+               <Insets bottom="5.0" top="5.0" />
            </VBox.margin>
        </HBox>
        <TabPane prefHeight="400.0" prefWidth="740.0" VBox.vgrow="ALWAYS">
@@ -298,8 +299,8 @@
                               <ComboBox fx:id="gaugeop" prefWidth="150.0" GridPane.columnIndex="3" GridPane.rowIndex="3" />
                               <Label text="%LNTYPE" GridPane.rowIndex="4" />
                               <ComboBox fx:id="lntype" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                               <Label text="%EXPAND_JUDGE" GridPane.columnIndex="2"  GridPane.rowIndex="4" />
-                               <Spinner fx:id="exjudge" editable="true" GridPane.columnIndex="3"  GridPane.rowIndex="4" >
+                               <Label text="%EXPAND_JUDGE" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+                               <Spinner fx:id="exjudge" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="4">
                                    <valueFactory>
                                        <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="25" initialValue="100" max="400" min="25" />
                                    </valueFactory>

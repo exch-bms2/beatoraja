@@ -68,7 +68,7 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private ComboBox<String> players;
 	@FXML
-	private Label playername;
+	private TextField playername;
 
 	@FXML
 	private ComboBox<Resolution> resolution;
@@ -368,6 +368,25 @@ public class PlayConfigurationView implements Initializable {
 		commitPlayer();
 		updatePlayer();
 	}
+	
+	public void addPlayer() {
+		String[] ids = PlayerConfig.readAllPlayerID();
+		for(int i = 1;i < 1000;i++) {
+			String playerid = "player" + i;
+			boolean b = true;
+			for(String id : ids) {
+				if(playerid.equals(id)) {
+					b =false;
+					break;
+				}
+			}
+			if(b) {
+				PlayerConfig.create(playerid);				
+				players.getItems().add(playerid);
+				break;
+			}
+		}
+	}
 
 	public void updatePlayer() {
 		player = PlayerConfig.readPlayerConfig(players.getValue());
@@ -464,6 +483,9 @@ public class PlayConfigurationView implements Initializable {
 			return;
 		}
 		Path p = Paths.get("player/" + player.getId() + "/config.json");
+		if(playername.getText().length() > 0) {
+			player.setName(playername.getText());			
+		}
 
 		player.setRandom(scoreop.getValue());
 		player.setGauge(gaugeop.getValue());

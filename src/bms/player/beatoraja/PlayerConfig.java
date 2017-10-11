@@ -100,7 +100,7 @@ public class PlayerConfig {
 
 	private boolean markprocessednote = false;
 
-	private SkinConfig[] skin;
+	private SkinConfig[] skin = new SkinConfig[SkinType.getMaxSkinTypeID() + 1];
 
 	private PlayConfig mode7 = new PlayConfig(
 			PlayConfig.KeyboardConfig.default14(),
