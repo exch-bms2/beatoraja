@@ -6,6 +6,7 @@ import bms.player.beatoraja.SkinConfig.Offset;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.utils.IntArray;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -124,7 +125,7 @@ public class Skin {
 			if(obj.getAllDestination().length == 0) {
 				removes.add(obj);
 			} else {
-				List<Integer> l = new ArrayList();
+				IntArray l = new IntArray();
 				for(int op : obj.getOption()) {
 					if(op > 0) {
 						if(option.containsKey(op)) {
@@ -168,11 +169,15 @@ public class Skin {
 						}
 					}				
 				}
-				int[] newop = new int[l.size()];
-				for(int i = 0;i < newop.length;i++) {
-					newop[i] = l.get(i);
+				obj.setOption(l.toArray());
+				
+				IntArray off = new IntArray();
+				for(int offset : obj.getOffsetID()) {
+					if(offset > 0 && offset < SkinProperty.OFFSET_MAX + 1) {
+						off.add(offset);
+					}
 				}
-				obj.setOption(newop);
+				obj.setOffsetID(off.toArray());				
 			}
 			
  		}
