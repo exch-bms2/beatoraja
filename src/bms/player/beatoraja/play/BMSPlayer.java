@@ -230,7 +230,6 @@ public class BMSPlayer extends MainState {
 		if(resource.getCourseBMSModels() != null){
 			coursetype = 1;
 			for (CourseData.CourseDataConstraint i : resource.getConstraint()) {
-				Logger.getGlobal().info(i.name);
 				if (i == LR2GRADE) {
 					coursetype = 2;
 					break;
