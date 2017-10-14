@@ -57,7 +57,7 @@ public class SkinGaugeGraphObject extends SkinObject {
 			Color.valueOf("ff0000"), Color.valueOf("ffff00"), Color.valueOf("cccccc") };
 	private final Color borderline = Color.valueOf("ff0000");
 	private final Color bordercolor = Color.valueOf("440000");
-	private final int[] typetable = {0,1,2,3,4,5,3,4,5};
+	private final int[] typetable = {0,1,2,3,4,5,3,4,5,3};
 
 	private int color;
 	private FloatArray gauge;

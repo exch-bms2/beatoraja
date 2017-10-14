@@ -21,6 +21,7 @@ public class GrooveGauge {
 	public static final int CLASS = 6;
 	public static final int EXCLASS = 7;
 	public static final int EXHARDCLASS = 8;
+	public static final int LR2CLASS = 9;
 
 	private int type = -1;
 	/**
@@ -138,10 +139,12 @@ public class GrooveGauge {
 		return property.border;
 	}
 
-	public static GrooveGauge create(BMSModel model, int type, boolean grade) {
+	public static GrooveGauge create(BMSModel model, int type, int grade) {
 		int id = -1;
-		if (grade) {	
+		if (grade > 0) {
 			id = type <= 2 ? 6 : (type == 3 ? 7 : 8); 
+			if(grade == 2)
+				id = id == 6 ? 9 : id;
 			// 段位ゲージ
 		} else {
 			id = type;

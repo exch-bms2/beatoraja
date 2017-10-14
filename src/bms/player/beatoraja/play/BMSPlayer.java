@@ -19,6 +19,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.*;
 
 import static bms.player.beatoraja.CourseData.CourseDataConstraint.NO_SPEED;
+import static bms.player.beatoraja.CourseData.CourseDataConstraint.LR2GRADE;
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
 /**
@@ -170,7 +171,7 @@ public class BMSPlayer extends MainState {
 				score = false;
 			}
 		}
-		
+
 		Logger.getGlobal().info("譜面オプション設定");
 		if (replay != null) {
 			PatternModifier.modify(model, Arrays.asList(replay.pattern));
@@ -225,7 +226,17 @@ public class BMSPlayer extends MainState {
 		}
 		if(replay != null && main.getInputProcessor().getKeystate()[5]) {
 		}
-		gauge = GrooveGauge.create(model, replay != null ? replay.gauge : config.getGauge(), resource.getCourseBMSModels() != null);
+		int coursetype = 0;
+		if(resource.getCourseBMSModels() != null){
+			coursetype = 1;
+			for (CourseData.CourseDataConstraint i : resource.getConstraint()) {
+				if (i == LR2GRADE) {
+					coursetype = 2;
+					break;
+				}
+			}
+		}
+		gauge = GrooveGauge.create(model, replay != null ? replay.gauge : config.getGauge(), coursetype);
 		FloatArray f = resource.getGauge();
 		if (f != null) {
 			gauge.setValue(f.get(f.size - 1));
@@ -442,7 +453,7 @@ public class BMSPlayer extends MainState {
 			break;
 		// プレイ
 		case STATE_PLAY:
-			final long deltatime = micronow - prevtime;			
+			final long deltatime = micronow - prevtime;
 			final long deltaplay = deltatime * (100 - playspeed) / 100;
 			deltaplaymicro += deltaplay % 1000;
             timer[TIMER_PLAY] += deltaplay / 1000;
@@ -451,7 +462,7 @@ public class BMSPlayer extends MainState {
             	deltaplaymicro -= 1000;
             } else if(deltaplaymicro <= -1000) {
                 timer[TIMER_PLAY]--;;
-            	deltaplaymicro += 1000;            	
+            	deltaplaymicro += 1000;
             }
             timer[TIMER_RHYTHM] += deltatime * (100 - lanerender.getNowBPM() * 100 / 60) / 100000;
             final long ptime = now - timer[TIMER_PLAY];
@@ -554,7 +565,7 @@ public class BMSPlayer extends MainState {
 			}
 			break;
 		}
-		
+
 		prevtime = micronow;
 	}
 
@@ -717,7 +728,7 @@ public class BMSPlayer extends MainState {
 			//フルコン判定
 			if(getTimer()[TIMER_FULLCOMBO_1P] == Long.MIN_VALUE && this.judge.getJudgeCount(3) == 0
 				&& this.judge.getJudgeCount(4) == 0) {
-				getTimer()[TIMER_FULLCOMBO_1P] = getNowTime();				
+				getTimer()[TIMER_FULLCOMBO_1P] = getNowTime();
 			}
 		}
 
@@ -738,7 +749,7 @@ public class BMSPlayer extends MainState {
 		private boolean stop = false;
 
 		private final long starttime;
-		
+
 		public AutoplayThread(long starttime) {
 			this.starttime = starttime;
 		}
