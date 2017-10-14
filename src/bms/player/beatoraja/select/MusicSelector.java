@@ -476,6 +476,9 @@ public class MusicSelector extends MainState {
 					case NO_GREAT:
 						resource.addConstraint(constraint);
 						break;
+					case LR2GRADE:
+						resource.addConstraint(constraint);
+						break;
 					}
 				}
 				preview.stop();

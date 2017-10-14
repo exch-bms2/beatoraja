@@ -59,7 +59,8 @@ public class CourseData {
 
     public boolean isClassCourse() {
         for(CourseDataConstraint con : constraint) {
-            if(con == CourseDataConstraint.CLASS || con == CourseDataConstraint.MIRROR || con == CourseDataConstraint.RANDOM) {
+            if(con == CourseDataConstraint.CLASS || con == CourseDataConstraint.MIRROR || con == CourseDataConstraint.RANDOM
+            		|| con == CourseDataConstraint.LR2GRADE) {
                 return true;
             }
         }
@@ -77,7 +78,8 @@ public class CourseData {
         RANDOM(3,"grade_random"),
         NO_SPEED(4,"no_speed"),
         NO_GOOD(5,"no_good"),
-        NO_GREAT(6,"no_great");
+        NO_GREAT(6,"no_great"),
+    	LR2GRADE(7,"lr2grade");
 
         public final int id;
         public final String name;

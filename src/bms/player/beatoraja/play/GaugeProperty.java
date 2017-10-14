@@ -17,6 +17,7 @@ public enum GaugeProperty {
             GaugeElementProperty.CLASS,
             GaugeElementProperty.EXCLASS,
             GaugeElementProperty.EXHARDCLASS,
+            GaugeElementProperty.LR2CLASS,
     }),
     PMS(new GaugeElementProperty[]{
             GaugeElementProperty.ASSIST_EASY_PMS,
@@ -28,6 +29,7 @@ public enum GaugeProperty {
             GaugeElementProperty.CLASS_PMS,
             GaugeElementProperty.EXCLASS_PMS,
             GaugeElementProperty.EXHARDCLASS_PMS,
+            GaugeElementProperty.LR2CLASS_PMS,
     }),
     KEYBOARD(new GaugeElementProperty[]{
             GaugeElementProperty.ASSIST_EASY_KB,
@@ -39,6 +41,7 @@ public enum GaugeProperty {
             GaugeElementProperty.CLASS_KB,
             GaugeElementProperty.EXCLASS_KB,
             GaugeElementProperty.EXHARDCLASS_KB,
+            GaugeElementProperty.LR2CLASS_KB,
     }),
     ;
 
@@ -64,6 +67,7 @@ public enum GaugeProperty {
         CLASS(1 ,0 ,100 ,100, 0, new float[]{0.15f, 0.12f, 0.06f, -1.5f, -3f, -1.5f}, new float[][]{{5, 0.4f},{10, 0.5f},{15, 0.6f},{20, 0.7f},{25, 0.8f}}),
         EXCLASS(1 ,0 ,100 ,100, 0, new float[]{0.15f, 0.12f, 0.03f, -3.0f, -6.0f, -3.0f}, new float[][]{}),
         EXHARDCLASS(1 ,0 ,100 ,100, 0, new float[]{0.15f, 0.06f, 0, -5.0f, -10.0f, -5.0f}, new float[][]{}),
+        LR2CLASS(1 ,0 ,100 ,100, 0, new float[]{0.10f, 0.10f, 0.05f, -2f, -3f, -2f}, new float[][]{{30, 0.6f}}),
         
         ASSIST_EASY_PMS(0 ,2, 120, 30, 65, new float[]{1.0f, 1.0f, 0.5f, -1.0f, -2.0f, -2.0f}, new float[][]{}),
         EASY_PMS(0 ,2, 120, 30, 85, new float[]{1.0f, 1.0f, 0.5f, -1.0f, -3.0f, -3.0f}, new float[][]{}),
@@ -74,6 +78,7 @@ public enum GaugeProperty {
         CLASS_PMS(1 ,0 ,100 ,100, 0, new float[]{0.15f, 0.12f, 0.06f, -1.5f, -3f, -3f}, new float[][]{{5, 0.4f},{10, 0.5f},{15, 0.6f},{20, 0.7f},{25, 0.8f}}),
         EXCLASS_PMS(1 ,0 ,100 ,100, 0, new float[]{0.15f, 0.12f, 0.03f, -3.0f, -6.0f, -6.0f}, new float[][]{}),
         EXHARDCLASS_PMS(1 ,0 ,100 ,100, 0, new float[]{0.15f, 0.06f, 0, -5.0f, -10.0f, -10.0f}, new float[][]{}),
+        LR2CLASS_PMS(1 ,0 ,100 ,100, 0, new float[]{0.10f, 0.10f, 0.05f, -2f, -3f, -2f}, new float[][]{{30, 0.6f}}),
 
         ASSIST_EASY_KB(0 ,2, 100, 30, 50, new float[]{1.0f, 1.0f, 0.5f, -1.0f, -2.0f, -1.0f}, new float[][]{}),
         EASY_KB(0 ,2, 100, 20, 70, new float[]{1.0f, 1.0f, 0.5f, -1.0f, -3.0f, -1.0f}, new float[][]{}),
@@ -84,6 +89,7 @@ public enum GaugeProperty {
         CLASS_KB(1 ,0 ,100 ,100, 0, new float[]{0.2f, 0.2f, 0.1f, -1.5f, -3f, -1.5f}, new float[][]{{5, 0.4f},{10, 0.5f},{15, 0.6f},{20, 0.7f},{25, 0.8f}}),
         EXCLASS_KB(1 ,0 ,100 ,100, 0, new float[]{0.2f, 0.2f, 0.1f, -3.0f, -6.0f, -3.0f}, new float[][]{}),
         EXHARDCLASS_KB(1 ,0 ,100 ,100, 0, new float[]{0.2f, 0.1f, 0, -5.0f, -10.0f, -5.0f}, new float[][]{}),
+        LR2CLASS_KB(1 ,0 ,100 ,100, 0, new float[]{0.10f, 0.10f, 0.05f, -2f, -3f, -2f}, new float[][]{{30, 0.6f}}),
         ;
 
         /**
