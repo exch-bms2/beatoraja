@@ -479,7 +479,7 @@ public abstract class SkinObject implements Disposable {
 	public void setOffsetID(int[] offset) {
 		IntSet a = new IntSet(offset.length);
 		for(int o : offset) {
-			if(o != 0) {
+			if(o > 0 && o < SkinProperty.OFFSET_MAX + 1) {
 				a.add(o);
 			}
 		}

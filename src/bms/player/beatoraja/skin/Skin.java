@@ -170,14 +170,6 @@ public class Skin {
 					}				
 				}
 				obj.setOption(l.toArray());
-				
-				IntArray off = new IntArray();
-				for(int offset : obj.getOffsetID()) {
-					if(offset > 0 && offset < SkinProperty.OFFSET_MAX + 1) {
-						off.add(offset);
-					}
-				}
-				obj.setOffsetID(off.toArray());				
 			}
 			
  		}
