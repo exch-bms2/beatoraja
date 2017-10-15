@@ -15,7 +15,7 @@ public enum JudgeAlgorithm {
 	Combo {
 		@Override
 		public boolean compare(Note t1, Note t2, long ptime, int[][] judgetable) {
-			return t2.getState() == 0 && t1.getTime() < ptime + judgetable[2][0] && t2.getTime() <= ptime + judgetable[0][1];
+			return t2.getState() == 0 && t1.getTime() < ptime + judgetable[2][0] && t2.getTime() <= ptime + judgetable[0][2];
 		}
 	},
 	/**
