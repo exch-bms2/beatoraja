@@ -1,6 +1,7 @@
 package bms.player.beatoraja;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.Map.Entry;
@@ -609,12 +610,35 @@ public abstract class MainState {
 	public void setStage(Stage stage) {
 		this.stage = stage;
 	}
-	
-	public void setSound(int id, String path, boolean loop) {
+
+	public enum SoundType {
+		BGM, SOUND
+	}
+
+	public void setSound(int id, String path, SoundType type, boolean loop) {
+		Path p = null;
+		switch(type) {
+			case BGM:
+				p = main.getSoundManager().getBGMPath();
+				break;
+			case SOUND:
+				p = main.getSoundManager().getSoundPath();
+				break;
+		}
+		path = p.resolve(path).toString();
 		path = path.substring(0, path.lastIndexOf('.'));
+
 		for(File f : new File[]{new File(path + ".wav"), new File(path + ".ogg"), new File(path + ".mp3")}) {
 			if(f.exists()) {
-				soundmap.put(id, f.getPath());
+				String newpath = f.getPath();
+				String oldpath = soundmap.get(id);
+				if(newpath.equals(oldpath)) {
+					return;
+				}
+				if(oldpath != null) {
+					main.getAudioProcessor().dispose(oldpath);
+				}
+				soundmap.put(id, newpath);
 				soundloop.put(id, loop);
 				break;
 			}

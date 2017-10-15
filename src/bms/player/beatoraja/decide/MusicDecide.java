@@ -27,7 +27,7 @@ public class MusicDecide extends MainState {
 		cancel = false;
 		final PlayerResource resource = getMainController().getPlayerResource();
 		
-		setSound(SOUND_DECIDE, resource.getConfig().getBgmpath() + File.separatorChar + "decide.wav", false);
+		setSound(SOUND_DECIDE, "decide.wav", SoundType.BGM, false);
 		play(SOUND_DECIDE);
 
 		loadSkin(SkinType.DECIDE);

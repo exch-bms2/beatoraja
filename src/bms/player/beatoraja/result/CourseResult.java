@@ -42,9 +42,9 @@ public class CourseResult extends MainState {
 	public void create() {
 		final PlayerResource resource = getMainController().getPlayerResource();
 
-		setSound(SOUND_CLEAR, resource.getConfig().getSoundpath() + File.separatorChar + "course_clear.wav", false);
-		setSound(SOUND_FAIL, resource.getConfig().getSoundpath() + File.separatorChar + "course_fail.wav", false);
-		setSound(SOUND_CLOSE, resource.getConfig().getSoundpath() + File.separatorChar + "course_close.wav", false);
+		setSound(SOUND_CLEAR, "course_clear.wav", SoundType.SOUND,false);
+		setSound(SOUND_FAIL, "course_fail.wav", SoundType.SOUND, false);
+		setSound(SOUND_CLOSE, "course_close.wav", SoundType.SOUND, false);
 
 		loadSkin(SkinType.COURSE_RESULT);
 

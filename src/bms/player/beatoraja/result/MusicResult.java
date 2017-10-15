@@ -69,9 +69,9 @@ public class MusicResult extends MainState {
 	public void create() {
 		final PlayerResource resource = getMainController().getPlayerResource();
 
-		setSound(SOUND_CLEAR, resource.getConfig().getSoundpath() + File.separatorChar + "clear.wav", false);
-		setSound(SOUND_FAIL, resource.getConfig().getSoundpath() + File.separatorChar + "fail.wav", false);
-		setSound(SOUND_CLOSE, resource.getConfig().getSoundpath() + File.separatorChar + "resultclose.wav", false);
+		setSound(SOUND_CLEAR, "clear.wav", SoundType.SOUND,false);
+		setSound(SOUND_FAIL, "fail.wav", SoundType.SOUND,false);
+		setSound(SOUND_CLOSE, "resultclose.wav", SoundType.SOUND,false);
 
 		updateScoreDatabase();
 		// リプレイの自動保存

@@ -289,8 +289,8 @@ public class BMSPlayer extends MainState {
 
 		loadSkin(getSkinType());
 
-		setSound(SOUND_READY, conf.getSoundpath() + File.separatorChar + "playready.wav", false);
-		setSound(SOUND_PLAYSTOP, conf.getSoundpath() + File.separatorChar + "playstop.wav", false);
+		setSound(SOUND_READY, "playready.wav", SoundType.SOUND, false);
+		setSound(SOUND_PLAYSTOP, "playstop.wav", SoundType.SOUND, false);
 
 		final BMSPlayerInputProcessor input = main.getInputProcessor();
 		input.setMinimumInputDutration(conf.getInputduration());

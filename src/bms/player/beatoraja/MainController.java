@@ -5,7 +5,9 @@ import java.nio.file.*;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.function.Consumer;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 import bms.player.beatoraja.play.TargetProperty;
 import bms.player.beatoraja.select.bar.TableBar;
@@ -99,6 +101,8 @@ public class MainController extends ApplicationAdapter {
 	private static final Path songdbpath = Paths.get("songdata.db");
 	private static final Path infodbpath = Paths.get("songinfo.db");
 
+	private SystemSoundManager sound;
+
 	private ScreenShotThread screenshot;
 
 	public static final int timerCount = SkinProperty.TIMER_MAX + 1;
@@ -154,6 +158,7 @@ public class MainController extends ApplicationAdapter {
 			break;
 		}
 
+		sound = new SystemSoundManager(config);
 	}
 
 	public long[] getTimer() {
@@ -498,6 +503,10 @@ public class MainController extends ApplicationAdapter {
 		return ir;
 	}
 
+	public SystemSoundManager getSoundManager() {
+		return sound;
+	}
+
 	public long getPlayTime() {
 		return System.currentTimeMillis() - boottime;
 	}
@@ -619,4 +628,52 @@ public class MainController extends ApplicationAdapter {
 		}
 	}
 
+	public static class SystemSoundManager {
+		private Array<Path> bgms = new Array();
+		private Path currentBGMPath;
+		private Array<Path> sounds = new Array();
+		private Path currentSoundPath;
+
+		public SystemSoundManager(Config config) {
+			scan(Paths.get(config.getBgmpath()), bgms, "select.");
+			scan(Paths.get(config.getSoundpath()), sounds, "clear.");
+			Logger.getGlobal().info("検出されたBGM Set : " + bgms.size + " Sound Set : " + sounds.size);
+		}
+
+		public void shuffle() {
+			if(bgms.size > 0) {
+				currentBGMPath = bgms.get((int) (Math.random() * bgms.size));
+			}
+			if(sounds.size > 0) {
+				currentSoundPath = sounds.get((int) (Math.random() * sounds.size));
+			}
+			Logger.getGlobal().info("BGM Set : " + currentBGMPath.toString() + " Sound Set : " + currentSoundPath.toString());
+		}
+
+		public Path getBGMPath() {
+			return currentBGMPath;
+		}
+
+		public Path getSoundPath() {
+			return currentSoundPath;
+		}
+
+		private void scan(Path p, Array<Path> paths, String name) {
+			if (Files.isDirectory(p)) {
+				try (Stream<Path> sub = Files.list(p)) {
+					sub.forEach(new Consumer<Path>() {
+						@Override
+						public void accept(Path t) {
+							scan(t, paths, name);
+						}
+					});
+				} catch (IOException e) {
+				}
+			} else if (p.getFileName().toString().toLowerCase().equals(name + "wav") ||
+					p.getFileName().toString().toLowerCase().equals(name + "ogg")) {
+				paths.add(p.getParent());
+			}
+
+		}
+	}
 }

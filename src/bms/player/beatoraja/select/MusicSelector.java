@@ -181,12 +181,6 @@ public class MusicSelector extends MainState {
 			e.printStackTrace();
 		}
 
-		setSound(SOUND_BGM, conf.getBgmpath() + File.separatorChar + "select.wav", true);
-		setSound(SOUND_SCRATCH, conf.getSoundpath() + File.separatorChar + "scratch.wav", false);
-		setSound(SOUND_FOLDEROPEN, conf.getSoundpath() + File.separatorChar + "f-open.wav", false);
-		setSound(SOUND_FOLDERCLOSE, conf.getSoundpath() + File.separatorChar + "f-close.wav", false);
-		setSound(SOUND_CHANGEOPTION, conf.getSoundpath() + File.separatorChar + "o-change.wav", false);
-
 		bar = new BarRenderer(this);
 		musicinput = new MusicSelectInputProcessor(this);
 
@@ -253,6 +247,13 @@ public class MusicSelector extends MainState {
 	}
 
 	public void create() {
+		getMainController().getSoundManager().shuffle();
+		setSound(SOUND_BGM, "select.wav", SoundType.BGM, true);
+		setSound(SOUND_SCRATCH, "scratch.wav", SoundType.SOUND, false);
+		setSound(SOUND_FOLDEROPEN, "f-open.wav", SoundType.SOUND,false);
+		setSound(SOUND_FOLDERCLOSE, "f-close.wav", SoundType.SOUND,false);
+		setSound(SOUND_CHANGEOPTION, "o-change.wav", SoundType.SOUND,false);
+
 		play = -1;
 		final MainController main = getMainController();
 		playerdata = main.getPlayDataAccessor().readPlayerData();
