@@ -21,7 +21,6 @@ public class GrooveGauge {
 	public static final int CLASS = 6;
 	public static final int EXCLASS = 7;
 	public static final int EXHARDCLASS = 8;
-	public static final int LR2CLASS = 9;
 
 	private int type = -1;
 	/**
@@ -139,32 +138,35 @@ public class GrooveGauge {
 		return property.border;
 	}
 
-	public static GrooveGauge create(BMSModel model, int type, int grade) {
+	public static GrooveGauge create(BMSModel model, int type, int grade, GaugeProperty gauge) {
 		int id = -1;
 		if (grade > 0) {
-			id = type <= 2 ? 6 : (type == 3 ? 7 : 8); 
-			if(grade == 2)
-				id = id == 6 ? 9 : id;
 			// 段位ゲージ
+			id = type <= 2 ? 6 : (type == 3 ? 7 : 8);
 		} else {
 			id = type;
 		}
 		if(id >= 0) {
-			return create(model, id);
+			if(gauge == null) {
+				Mode mode = model.getMode();
+				for(BMSPlayerRule rule : BMSPlayerRule.values()) {
+					if(rule.name().equals(mode.name())) {
+						gauge = rule.gauge;
+						break;
+					}
+				}
+			}
+			if(gauge != null) {
+				return create(model, id, gauge);
+			}
 		}
 		return null;
 	}
-	
-	public static GrooveGauge create(BMSModel model, int type) {
-		Mode mode = model.getMode();
-		for(BMSPlayerRule rule : BMSPlayerRule.values()) {
-			if(rule.name().equals(mode.name())) {
-				return new GrooveGauge(model, type, rule.gauge);
-			}
-		}
-		return new GrooveGauge(model, type, BMSPlayerRule.Default.gauge);
+
+	public static GrooveGauge create(BMSModel model, int id, GaugeProperty gauge) {
+		return new GrooveGauge(model, id, gauge);
 	}
-	
+
 	public static int getGaugeID(GrooveGauge gauge) {
 		return gauge.type;
 	}

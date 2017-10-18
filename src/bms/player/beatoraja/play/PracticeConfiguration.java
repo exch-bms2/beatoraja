@@ -34,7 +34,7 @@ public class PracticeConfiguration {
 	private BMSModel model;
 
 	private static final String[] GAUGE = { "ASSIST EASY", "EASY", "NORMAL", "HARD", "EX-HARD", "HAZARD", "GRADE",
-			"EX GRADE", "EXHARD GRADE", "LR2 GRADE" };
+			"EX GRADE", "EXHARD GRADE"};
 	private static final String[] RANDOM = { "NORMAL", "MIRROR", "RANDOM", "R-RANDOM", "S-RANDOM", "SPIRAL", "H-RANDOM",
 			"ALL-SCR", "RANDOM-EX", "S-RANDOM-EX" };
 	private static final String[] DPRANDOM = { "NORMAL", "FLIP" };
@@ -56,6 +56,9 @@ public class PracticeConfiguration {
 			}
 		}
 
+		if(property.gaugecategory == null) {
+			property.gaugecategory = BMSPlayerRule.getBMSPlayerRule(model.getMode()).gauge;
+		}
 		this.model = model;
 		if(property.total == 0) {
 			property.total = model.getTotal();
@@ -87,13 +90,13 @@ public class PracticeConfiguration {
 	}
 
 	public GrooveGauge getGauge(BMSModel model) {
-		GrooveGauge gauge = GrooveGauge.create(model, property.gaugetype);
+		GrooveGauge gauge = GrooveGauge.create(model, property.gaugetype, property.gaugecategory);
 		gauge.setValue(property.startgauge);
 		return gauge;
 	}
 
 	public void processInput(BMSPlayerInputProcessor input) {
-		final int values = model.getMode().player == 2 ? 10 : 8;
+		final int values = model.getMode().player == 2 ? 11 : 9;
 		boolean[] cursor = input.getCursorState();
 		long[] cursortime = input.getCursorTime();
 		if (cursor[0] && cursortime[0] != 0) {
@@ -128,34 +131,44 @@ public class PracticeConfiguration {
 					property.startgauge = 100;
 				}
 				break;
-			case 3:
+				case 3:
+					GaugeProperty[] cateories = GaugeProperty.values();
+					for(int i = 0;i < cateories.length;i++) {
+						if(property.gaugecategory == cateories[i]) {
+							property.gaugecategory = cateories[(i + cateories.length - 1) % cateories.length];
+							break;
+						}
+					}
+					property.startgauge = (int) property.gaugecategory.values[property.gaugetype].init;
+					break;
+			case 4:
 				if (property.startgauge > 1) {
 					property.startgauge--;
 				}
 				break;
-			case 4:
+			case 5:
 				if (property.judgerank > 10) {
 					property.judgerank -= 10;
 				}
 				break;
-				case 5:
+				case 6:
 					if (property.total > 20) {
 						property.total -= 10;
 					}
 					break;
-			case 6:
+			case 7:
 				if (property.freq > 50) {
 					property.freq -= 5;
 				}
 				break;
-			case 7:
+			case 8:
 				property.random = (property.random + (model.getMode() == Mode.POPN_5K || model.getMode() == Mode.POPN_9K ? 6 : 9))
 						% (model.getMode() == Mode.POPN_5K || model.getMode() == Mode.POPN_9K ? 7 : 10);
 				break;
-			case 8:
+			case 9:
 				property.random2 = (property.random2 + 9) % 10;
 				break;
-			case 9:
+			case 10:
 				property.doubleop = (property.doubleop + 1) % 2;
 				break;
 			}
@@ -186,34 +199,43 @@ public class PracticeConfiguration {
 					property.startgauge = 100;
 				}
 				break;
-			case 3:
-				if (property.startgauge < 100
-						|| ((model.getMode() == Mode.POPN_5K || model.getMode() == Mode.POPN_9K) && property.gaugetype <= 2 && property.startgauge < 120)) {
+				case 3:
+					GaugeProperty[] cateories = GaugeProperty.values();
+					for(int i = 0;i < cateories.length;i++) {
+						if(property.gaugecategory == cateories[i]) {
+							property.gaugecategory = cateories[(i + 1) % cateories.length];
+							break;
+						}
+					}
+					property.startgauge = (int) property.gaugecategory.values[property.gaugetype].init;
+					break;
+				case 4:
+				if (property.startgauge < property.gaugecategory.values[property.gaugetype].max) {
 					property.startgauge++;
 				}
 				break;
-			case 4:
+			case 5:
 				if (property.judgerank < 400) {
 					property.judgerank += 10;
 				}
 				break;
-				case 5:
+				case 6:
 					if (property.total < 5000) {
 						property.total += 10;
 					}
 					break;
-			case 6:
+			case 7:
 				if (property.freq < 200) {
 					property.freq += 5;
 				}
 				break;
-			case 7:
+			case 8:
 				property.random = (property.random + 1) % (model.getMode() == Mode.POPN_5K || model.getMode() == Mode.POPN_9K ? 7 : 10);
 				break;
-			case 8:
+			case 9:
 				property.random2 = (property.random2 + 1) % 10;
 				break;
-			case 9:
+			case 10:
 				property.doubleop = (property.doubleop + 1) % 2;
 				break;
 
@@ -235,25 +257,27 @@ public class PracticeConfiguration {
 		titlefont.setColor(cursorpos == 2 ? Color.YELLOW : Color.CYAN);
 		titlefont.draw(sprite, "GAUGE TYPE : " + GAUGE[property.gaugetype], x, y - 44);
 		titlefont.setColor(cursorpos == 3 ? Color.YELLOW : Color.CYAN);
-		titlefont.draw(sprite, "GAUGE VALUE : " + property.startgauge, x, y - 66);
+		titlefont.draw(sprite, "GAUGE CATEGORY : " + property.gaugecategory.name(), x, y - 66);
 		titlefont.setColor(cursorpos == 4 ? Color.YELLOW : Color.CYAN);
-		titlefont.draw(sprite, "JUDGERANK : " + property.judgerank, x, y - 88);
+		titlefont.draw(sprite, "GAUGE VALUE : " + property.startgauge, x, y - 88);
 		titlefont.setColor(cursorpos == 5 ? Color.YELLOW : Color.CYAN);
-		titlefont.draw(sprite, "TOTAL : " + (int)property.total, x, y - 110);
+		titlefont.draw(sprite, "JUDGERANK : " + property.judgerank, x, y - 110);
 		titlefont.setColor(cursorpos == 6 ? Color.YELLOW : Color.CYAN);
-		titlefont.draw(sprite, "FREQENCY : " + property.freq, x, y - 132);
+		titlefont.draw(sprite, "TOTAL : " + (int)property.total, x, y - 132);
 		titlefont.setColor(cursorpos == 7 ? Color.YELLOW : Color.CYAN);
-		titlefont.draw(sprite, "OPTION-1P : " + RANDOM[property.random], x, y - 154);
+		titlefont.draw(sprite, "FREQENCY : " + property.freq, x, y - 154);
+		titlefont.setColor(cursorpos == 8 ? Color.YELLOW : Color.CYAN);
+		titlefont.draw(sprite, "OPTION-1P : " + RANDOM[property.random], x, y - 176);
 		if (model.getMode().player == 2) {
-			titlefont.setColor(cursorpos == 8 ? Color.YELLOW : Color.CYAN);
-			titlefont.draw(sprite, "OPTION-2P : " + RANDOM[property.random2], x, y - 176);
 			titlefont.setColor(cursorpos == 9 ? Color.YELLOW : Color.CYAN);
-			titlefont.draw(sprite, "OPTION-DP : " + DPRANDOM[property.doubleop], x, y - 198);
+			titlefont.draw(sprite, "OPTION-2P : " + RANDOM[property.random2], x, y - 198);
+			titlefont.setColor(cursorpos == 10 ? Color.YELLOW : Color.CYAN);
+			titlefont.draw(sprite, "OPTION-DP : " + DPRANDOM[property.doubleop], x, y - 220);
 		}
 
 		if (state.getMainController().getPlayerResource().mediaLoadFinished()) {
 			titlefont.setColor(Color.ORANGE);
-			titlefont.draw(sprite, "PRESS 1KEY TO PLAY", x, y - 232);
+			titlefont.draw(sprite, "PRESS 1KEY TO PLAY", x, y - 254);
 		}
 
 		graph.draw(sprite, time, state, new Rectangle(r.x, r.y, r.width, r.height / 4), property.starttime,
@@ -268,6 +292,7 @@ public class PracticeConfiguration {
 	public static class PracticeProperty {
 		public int starttime = 0;
 		public int endtime = 10000;
+		public GaugeProperty gaugecategory;
 		public int gaugetype = 2;
 		public int startgauge = 20;
 		public int random = 0;

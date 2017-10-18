@@ -12,7 +12,7 @@ public enum ClearType {
     AssistEasy(2, new int[]{}),
     LightAssistEasy(3, new int[]{0}),
     Easy(4, new int[]{1}),
-    Normal(5, new int[]{2, 6, 9}),
+    Normal(5, new int[]{2, 6}),
     Hard(6, new int[]{3, 7}),
     ExHard(7, new int[]{4, 8}),
     FullCombo(8, new int[]{5}),

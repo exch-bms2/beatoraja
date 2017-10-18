@@ -227,16 +227,17 @@ public class BMSPlayer extends MainState {
 		if(replay != null && main.getInputProcessor().getKeystate()[5]) {
 		}
 		int coursetype = 0;
+		GaugeProperty gauges = null;
 		if(resource.getCourseBMSModels() != null){
 			coursetype = 1;
 			for (CourseData.CourseDataConstraint i : resource.getConstraint()) {
 				if (i == LR2GRADE) {
-					coursetype = 2;
+					gauges = GaugeProperty.LR2;
 					break;
 				}
 			}
 		}
-		gauge = GrooveGauge.create(model, replay != null ? replay.gauge : config.getGauge(), coursetype);
+		gauge = GrooveGauge.create(model, replay != null ? replay.gauge : config.getGauge(), coursetype, gauges);
 		FloatArray f = resource.getGauge();
 		if (f != null) {
 			gauge.setValue(f.get(f.size - 1));
