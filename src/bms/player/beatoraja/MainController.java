@@ -647,7 +647,7 @@ public class MainController extends ApplicationAdapter {
 			if(sounds.size > 0) {
 				currentSoundPath = sounds.get((int) (Math.random() * sounds.size));
 			}
-			Logger.getGlobal().info("BGM Set : " + currentBGMPath.toString() + " Sound Set : " + currentSoundPath.toString());
+			Logger.getGlobal().info("BGM Set : " + currentBGMPath + " Sound Set : " + currentSoundPath);
 		}
 
 		public Path getBGMPath() {

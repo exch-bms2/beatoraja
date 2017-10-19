@@ -625,6 +625,9 @@ public abstract class MainState {
 				p = main.getSoundManager().getSoundPath();
 				break;
 		}
+		if(p == null) {
+			return;
+		}
 		path = p.resolve(path).toString();
 		path = path.substring(0, path.lastIndexOf('.'));
 
