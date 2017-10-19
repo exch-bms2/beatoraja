@@ -412,12 +412,14 @@
                                  <children>
                                     <Label layoutX="10.0" layoutY="10.0" prefHeight="30.0" prefWidth="149.0" text="%BGM_Path(LR2)" />
                                     <TextField fx:id="bgmpath" prefHeight="28.0" prefWidth="278.0" />
+                                    <Button mnemonicParsing="false" onAction="#addBGMPath" prefHeight="28.0" prefWidth="29.0" text="..." />
                                  </children>
                               </HBox>
                               <HBox prefHeight="30.0" prefWidth="723.0">
                                  <children>
                                     <Label layoutX="10.0" layoutY="10.0" prefHeight="30.0" prefWidth="150.0" text="%Sound_Path(LR2)" />
                                     <TextField fx:id="soundpath" prefHeight="28.0" prefWidth="278.0" />
+                                    <Button mnemonicParsing="false" onAction="#addSoundPath" prefHeight="28.0" prefWidth="29.0" text="..." />
                                  </children>
                               </HBox>
                            </children>

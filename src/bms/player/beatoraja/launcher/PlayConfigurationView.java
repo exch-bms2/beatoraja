@@ -576,6 +576,29 @@ public class PlayConfigurationView implements Initializable {
 			}
 		}
 	}
+    
+    @FXML
+	public void addBGMPath() {
+    	String s = showDirectoryChooser("BGMのルートフォルダを選択してください");
+    	if(s != null) {
+        	bgmpath.setText(s);
+    	}
+	}
+
+    @FXML
+	public void addSoundPath() {
+    	String s = showDirectoryChooser("効果音のルートフォルダを選択してください");
+    	if(s != null) {
+    		soundpath.setText(s);    		
+    	}
+	}
+    
+    private String showDirectoryChooser(String title) {
+		DirectoryChooser chooser = new DirectoryChooser();
+		chooser.setTitle(title);
+		File f = chooser.showDialog(null);
+		return f != null ? f.getPath() : null;
+    }
 
     @FXML
 	public void removeSongPath() {
@@ -594,7 +617,7 @@ public class PlayConfigurationView implements Initializable {
 	public void removeTableURL() {
 		tableurl.getItems().removeAll(tableurl.getSelectionModel().getSelectedItems());
 	}
-
+    
 	private int mode = -1;
 
 	private int pc = -1;
