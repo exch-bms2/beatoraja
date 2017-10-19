@@ -69,8 +69,15 @@ public class FFmpegProcessor implements MovieProcessor {
 			grabber = new FFmpegFrameGrabber(filepath);
 			grabber.start();
 			while(grabber.getVideoBitrate() < 10) {
-				grabber.setVideoStream(grabber.getVideoStream() + 1);
-				grabber.restart();
+				final int videoStream = grabber.getVideoStream();
+				if(videoStream < 5) {
+					grabber.setVideoStream(videoStream + 1);
+					grabber.restart();						
+				} else {
+					grabber.setVideoStream(-1);
+					grabber.restart();
+					break;
+				}
 			}
 			Logger.getGlobal().info(
 					"movie decode - fps : " + grabber.getFrameRate() + " format : " + grabber.getFormat() + " size : "
