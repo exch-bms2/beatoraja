@@ -3,6 +3,7 @@ package bms.player.beatoraja.audio;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.logging.Logger;
 
 import javazoom.jl.decoder.*;
 
@@ -95,7 +96,8 @@ public class PCM {
 					bytes = output.size();
 					// System.out.println(bytes + " -> " + pcm.length);
 				}
-			} catch (IOException e) {
+			} catch (Throwable e) {
+				Logger.getGlobal().warning("WAV処理中の例外 - file : " + p + " error : "+ e.getMessage());
 			}
 		}
 
