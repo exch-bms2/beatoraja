@@ -69,14 +69,18 @@ public class FFmpegProcessor implements MovieProcessor {
 			grabber = new FFmpegFrameGrabber(filepath);
 			grabber.start();
 			while(grabber.getVideoBitrate() < 10) {
-				final int videoStream = grabber.getVideoStream();
-				if(videoStream < 5) {
-					grabber.setVideoStream(videoStream + 1);
-					grabber.restart();						
-				} else {
-					grabber.setVideoStream(-1);
-					grabber.restart();
-					break;
+				try {
+					final int videoStream = grabber.getVideoStream();
+					if(videoStream < 5) {
+						grabber.setVideoStream(videoStream + 1);
+						grabber.restart();						
+					} else {
+						grabber.setVideoStream(-1);
+						grabber.restart();
+						break;
+					}					
+				} catch(Throwable e) {
+					e.printStackTrace();
 				}
 			}
 			Logger.getGlobal().info(
