@@ -3,7 +3,6 @@ package bms.player.beatoraja.select;
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
 import java.awt.Desktop;
-import java.io.File;
 import java.net.URI;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -35,7 +34,6 @@ import bms.player.beatoraja.PlayerData;
 import bms.player.beatoraja.PlayerInformation;
 import bms.player.beatoraja.PlayerResource;
 import bms.player.beatoraja.ScoreDatabaseAccessor;
-import bms.player.beatoraja.TableDataAccessor;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.select.bar.Bar;
 import bms.player.beatoraja.select.bar.DirectoryBar;
@@ -469,15 +467,9 @@ public class MusicSelector extends MainState {
 						}
 						break;
 					case NO_SPEED:
-						resource.addConstraint(constraint);
-						break;
-					case NO_GOOD:
-						resource.addConstraint(constraint);
-						break;
-					case NO_GREAT:
-						resource.addConstraint(constraint);
-						break;
-					case LR2GRADE:
+						case NO_GOOD:
+						case NO_GREAT:
+						case GAUGE_LR2:
 						resource.addConstraint(constraint);
 						break;
 					}
@@ -985,9 +977,5 @@ public class MusicSelector extends MainState {
 		} else {
 			play = (selectedreplay >= 0) ? 3 + selectedreplay : 0;
 		}
-	}
-
-	public void updateTable(TableDataAccessor.TableReader reader) {
-
 	}
 }

@@ -1,6 +1,5 @@
 package bms.player.beatoraja.play;
 
-import java.io.*;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -15,11 +14,9 @@ import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.SkinObject.SkinOffset;
 import bms.player.beatoraja.song.SongData;
 
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.*;
 
-import static bms.player.beatoraja.CourseData.CourseDataConstraint.NO_SPEED;
-import static bms.player.beatoraja.CourseData.CourseDataConstraint.LR2GRADE;
+import static bms.player.beatoraja.CourseData.CourseDataConstraint.*;
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
 /**
@@ -231,7 +228,7 @@ public class BMSPlayer extends MainState {
 		if(resource.getCourseBMSModels() != null){
 			coursetype = 1;
 			for (CourseData.CourseDataConstraint i : resource.getConstraint()) {
-				if (i == LR2GRADE) {
+				if (i == GAUGE_LR2) {
 					gauges = GaugeProperty.LR2;
 					break;
 				}
