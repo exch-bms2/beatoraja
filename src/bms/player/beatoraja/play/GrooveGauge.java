@@ -44,24 +44,10 @@ public class GrooveGauge {
 		this.value = property.init;
 		this.cleartype = ClearType.getClearTypeByGauge(type);
 		this.gauge = property.value.clone();
-		switch(property.type) {
-			case 0:
-				for(int i = 0;i < gauge.length;i++) {
-					if(gauge[i] > 0) {
-						gauge[i] *= (model.getTotal() / model.getTotalNotes());
-					}
-				}
-				break;
-			case 1:
-				break;
-			case 2:
-				final float pg = (float) Math.max(Math.min(0.15f, (2.5 * model.getTotal() - 250) / model.getTotalNotes()), 0);
-				for(int i = 0;i < gauge.length;i++) {
-					if(gauge[i] > 0) {
-						gauge[i] *= pg / 0.15f;
-					}
-				}
-				break;
+		if(property.type != null) {
+			for(int i = 0;i < gauge.length;i++) {
+				gauge[i] = property.type.modify(gauge[i], model);
+			}
 		}
 	}
 
@@ -169,5 +155,79 @@ public class GrooveGauge {
 
 	public static int getGaugeID(GrooveGauge gauge) {
 		return gauge.type;
+	}
+
+	public enum GaugeType {
+		/**
+		 * 回復量にTOTALを使用
+		 */
+		TOTAL {
+			@Override
+			public float modify(float f, BMSModel model) {
+				if(f > 0) {
+					return (float) (f * model.getTotal() / model.getTotalNotes());
+				}
+				return f;
+			}
+		},
+		/**
+		 * TOTAL値によって回復量に制限をかける
+		 */
+		LIMIT_INCREMENT {
+			@Override
+			public float modify(float f, BMSModel model) {
+				// TODO EXHARD依存の計算式なので後で汎用化する
+				final float pg = (float) Math.max(Math.min(0.15f, (2.5 * model.getTotal() - 250) / model.getTotalNotes()), 0);
+				if(f > 0) {
+					f *= pg / 0.15f;
+				}
+				return f;
+			}
+		},
+		/**
+		 * TOTAL値、総ノート数によってダメージ量を増加させる
+		 */
+		MODIFY_DAMAGE {
+			@Override
+			public float modify(float f, BMSModel model) {
+				float fix1=1.0f;
+				float fix2=1.0f;
+				if(f < 0) {
+					if(model.getTotal()>=240.0){
+						fix1=1.0f;
+					}else if(model.getTotal()>=230.0){
+						fix1=1.11f;
+					}else if(model.getTotal()>=210.0){
+						fix1=1.25f;
+					}else if(model.getTotal()>=200.0){
+						fix1=1.5f;
+					}else if(model.getTotal()>=180.0){
+						fix1=1.666f;
+					}else if(model.getTotal()>=160.0){
+						fix1=2.0f;
+					}else if(model.getTotal()>=150.0){
+						fix1=2.5f;
+					}else if(model.getTotal()>=130.0){
+						fix1=33.33f;
+					}else if(model.getTotal()>=120.0){
+						fix1=5.0f;
+					}else{
+						fix1=10.0f;
+					}
+					int note=1000;
+					float mod=0.002f;
+					while(note>model.getTotalNotes()||note>1){
+						fix2 += mod * (float)(note - Math.max(model.getTotalNotes(), note/2));
+						note/=2;
+						mod*=2.0f;
+					}
+					f *= Math.max(fix1, fix2);
+				}
+				return f;
+			}
+		},
+		;
+
+		public abstract float modify(float f, BMSModel model);
 	}
 }

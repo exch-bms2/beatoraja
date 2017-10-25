@@ -1,5 +1,7 @@
 package bms.player.beatoraja.play;
 
+import static bms.player.beatoraja.play.GrooveGauge.GaugeType.*;
+
 /**
  * ゲージの仕様
  * 
@@ -47,7 +49,7 @@ public enum GaugeProperty {
             GaugeElementProperty.HARD_LR2,
             GaugeElementProperty.EXHARD_LR2,
             GaugeElementProperty.HAZARD_LR2,
-            GaugeElementProperty.LR2CLASS,
+            GaugeElementProperty.CLASS_LR2,
             GaugeElementProperty.EXCLASS_LR2,
             GaugeElementProperty.EXHARDCLASS_LR2,
     }),
@@ -66,54 +68,51 @@ public enum GaugeProperty {
      */
     public enum GaugeElementProperty {
 
-        ASSIST_EASY(0 ,2 ,100 ,20, 60, new float[]{1.0f, 1.0f, 0.5f, -1.5f, -3.0f, -0.5f}, new float[][]{}),
-        EASY(0 ,2 ,100 ,20, 80, new float[]{1.0f, 1.0f, 0.5f, -1.5f, -4.5f, -1.0f}, new float[][]{}),
-        NORMAL(0 ,2 ,100 ,20, 80, new float[]{1.0f, 1.0f, 0.5f, -3.0f, -6.0f, -2.0f}, new float[][]{}),
-        HARD(1 ,0 ,100 ,100, 0, new float[]{0.15f, 0.12f, 0.03f, -5.0f, -10.0f, -5.0f}, new float[][]{{10, 0.4f},{20, 0.5f},{30, 0.6f},{40, 0.7f},{50, 0.8f}}),
-        EXHARD(2 ,0 ,100 ,100, 0, new float[]{0.15f, 0.06f, 0, -8.0f, -16.0f, -8.0f}, new float[][]{}),
-        HAZARD(1 ,0 ,100 ,100, 0, new float[]{0.15f, 0.06f, 0, -100.0f, -100.0f, -10.0f}, new float[][]{}),
-        CLASS(1 ,0 ,100 ,100, 0, new float[]{0.15f, 0.12f, 0.06f, -1.5f, -3f, -1.5f}, new float[][]{{5, 0.4f},{10, 0.5f},{15, 0.6f},{20, 0.7f},{25, 0.8f}}),
-        EXCLASS(1 ,0 ,100 ,100, 0, new float[]{0.15f, 0.12f, 0.03f, -3.0f, -6.0f, -3.0f}, new float[][]{}),
-        EXHARDCLASS(1 ,0 ,100 ,100, 0, new float[]{0.15f, 0.06f, 0, -5.0f, -10.0f, -5.0f}, new float[][]{}),
+        ASSIST_EASY(TOTAL ,2 ,100 ,20, 60, new float[]{1.0f, 1.0f, 0.5f, -1.5f, -3.0f, -0.5f}, new float[][]{}),
+        EASY(TOTAL ,2 ,100 ,20, 80, new float[]{1.0f, 1.0f, 0.5f, -1.5f, -4.5f, -1.0f}, new float[][]{}),
+        NORMAL(TOTAL ,2 ,100 ,20, 80, new float[]{1.0f, 1.0f, 0.5f, -3.0f, -6.0f, -2.0f}, new float[][]{}),
+        HARD(null ,0 ,100 ,100, 0, new float[]{0.15f, 0.12f, 0.03f, -5.0f, -10.0f, -5.0f}, new float[][]{{10, 0.4f},{20, 0.5f},{30, 0.6f},{40, 0.7f},{50, 0.8f}}),
+        EXHARD(LIMIT_INCREMENT ,0 ,100 ,100, 0, new float[]{0.15f, 0.06f, 0, -8.0f, -16.0f, -8.0f}, new float[][]{}),
+        HAZARD(null ,0 ,100 ,100, 0, new float[]{0.15f, 0.06f, 0, -100.0f, -100.0f, -10.0f}, new float[][]{}),
+        CLASS(null ,0 ,100 ,100, 0, new float[]{0.15f, 0.12f, 0.06f, -1.5f, -3f, -1.5f}, new float[][]{{5, 0.4f},{10, 0.5f},{15, 0.6f},{20, 0.7f},{25, 0.8f}}),
+        EXCLASS(null ,0 ,100 ,100, 0, new float[]{0.15f, 0.12f, 0.03f, -3.0f, -6.0f, -3.0f}, new float[][]{}),
+        EXHARDCLASS(null ,0 ,100 ,100, 0, new float[]{0.15f, 0.06f, 0, -5.0f, -10.0f, -5.0f}, new float[][]{}),
 
-        ASSIST_EASY_PMS(0 ,2, 120, 30, 65, new float[]{1.0f, 1.0f, 0.5f, -1.0f, -2.0f, -2.0f}, new float[][]{}),
-        EASY_PMS(0 ,2, 120, 30, 85, new float[]{1.0f, 1.0f, 0.5f, -1.0f, -3.0f, -3.0f}, new float[][]{}),
-        NORMAL_PMS(0 ,2, 120, 30, 85, new float[]{1.0f, 1.0f, 0.5f, -2.0f, -6.0f, -6.0f}, new float[][]{}),
-        HARD_PMS(1 ,0 ,100 ,100, 0, new float[]{0.15f, 0.12f, 0.03f, -5.0f, -10.0f, -10.0f}, new float[][]{{10, 0.4f},{20, 0.5f},{30, 0.6f},{40, 0.7f},{50, 0.8f}}),
-        EXHARD_PMS(2 ,0 ,100 ,100, 0, new float[]{0.15f, 0.06f, 0, -10.0f, -15.0f, -15.0f}, new float[][]{}),
-        HAZARD_PMS(1 ,0 ,100 ,100, 0, new float[]{0.15f, 0.06f, 0, -100.0f, -100.0f, -100.0f}, new float[][]{}),
-        CLASS_PMS(1 ,0 ,100 ,100, 0, new float[]{0.15f, 0.12f, 0.06f, -1.5f, -3f, -3f}, new float[][]{{5, 0.4f},{10, 0.5f},{15, 0.6f},{20, 0.7f},{25, 0.8f}}),
-        EXCLASS_PMS(1 ,0 ,100 ,100, 0, new float[]{0.15f, 0.12f, 0.03f, -3.0f, -6.0f, -6.0f}, new float[][]{}),
-        EXHARDCLASS_PMS(1 ,0 ,100 ,100, 0, new float[]{0.15f, 0.06f, 0, -5.0f, -10.0f, -10.0f}, new float[][]{}),
+        ASSIST_EASY_PMS(TOTAL ,2, 120, 30, 65, new float[]{1.0f, 1.0f, 0.5f, -1.0f, -2.0f, -2.0f}, new float[][]{}),
+        EASY_PMS(TOTAL ,2, 120, 30, 85, new float[]{1.0f, 1.0f, 0.5f, -1.0f, -3.0f, -3.0f}, new float[][]{}),
+        NORMAL_PMS(TOTAL ,2, 120, 30, 85, new float[]{1.0f, 1.0f, 0.5f, -2.0f, -6.0f, -6.0f}, new float[][]{}),
+        HARD_PMS(null ,0 ,100 ,100, 0, new float[]{0.15f, 0.12f, 0.03f, -5.0f, -10.0f, -10.0f}, new float[][]{{10, 0.4f},{20, 0.5f},{30, 0.6f},{40, 0.7f},{50, 0.8f}}),
+        EXHARD_PMS(LIMIT_INCREMENT ,0 ,100 ,100, 0, new float[]{0.15f, 0.06f, 0, -10.0f, -15.0f, -15.0f}, new float[][]{}),
+        HAZARD_PMS(null ,0 ,100 ,100, 0, new float[]{0.15f, 0.06f, 0, -100.0f, -100.0f, -100.0f}, new float[][]{}),
+        CLASS_PMS(null ,0 ,100 ,100, 0, new float[]{0.15f, 0.12f, 0.06f, -1.5f, -3f, -3f}, new float[][]{{5, 0.4f},{10, 0.5f},{15, 0.6f},{20, 0.7f},{25, 0.8f}}),
+        EXCLASS_PMS(null ,0 ,100 ,100, 0, new float[]{0.15f, 0.12f, 0.03f, -3.0f, -6.0f, -6.0f}, new float[][]{}),
+        EXHARDCLASS_PMS(null ,0 ,100 ,100, 0, new float[]{0.15f, 0.06f, 0, -5.0f, -10.0f, -10.0f}, new float[][]{}),
 
-        ASSIST_EASY_KB(0 ,2, 100, 30, 50, new float[]{1.0f, 1.0f, 0.5f, -1.0f, -2.0f, -1.0f}, new float[][]{}),
-        EASY_KB(0 ,2, 100, 20, 70, new float[]{1.0f, 1.0f, 0.5f, -1.0f, -3.0f, -1.0f}, new float[][]{}),
-        NORMAL_KB(0 ,2, 100, 20, 70, new float[]{1.0f, 1.0f, 0.5f, -2.0f, -4.0f, -2.0f}, new float[][]{}),
-        HARD_KB(1 ,0 ,100 ,100, 0, new float[]{0.2f, 0.2f, 0.1f, -4.0f, -8.0f, -4.0f}, new float[][]{{10, 0.4f},{20, 0.5f},{30, 0.6f},{40, 0.7f},{50, 0.8f}}),
-        EXHARD_KB(2 ,0 ,100 ,100, 0, new float[]{0.2f, 0.1f, 0, -6.0f, -12.0f, -6.0f}, new float[][]{}),
-        HAZARD_KB(1 ,0 ,100 ,100, 0, new float[]{0.2f, 0.1f, 0, -100.0f, -100.0f, -100.0f}, new float[][]{}),
-        CLASS_KB(1 ,0 ,100 ,100, 0, new float[]{0.2f, 0.2f, 0.1f, -1.5f, -3f, -1.5f}, new float[][]{{5, 0.4f},{10, 0.5f},{15, 0.6f},{20, 0.7f},{25, 0.8f}}),
-        EXCLASS_KB(1 ,0 ,100 ,100, 0, new float[]{0.2f, 0.2f, 0.1f, -3.0f, -6.0f, -3.0f}, new float[][]{}),
-        EXHARDCLASS_KB(1 ,0 ,100 ,100, 0, new float[]{0.2f, 0.1f, 0, -5.0f, -10.0f, -5.0f}, new float[][]{}),
+        ASSIST_EASY_KB(TOTAL ,2, 100, 30, 50, new float[]{1.0f, 1.0f, 0.5f, -1.0f, -2.0f, -1.0f}, new float[][]{}),
+        EASY_KB(TOTAL ,2, 100, 20, 70, new float[]{1.0f, 1.0f, 0.5f, -1.0f, -3.0f, -1.0f}, new float[][]{}),
+        NORMAL_KB(TOTAL ,2, 100, 20, 70, new float[]{1.0f, 1.0f, 0.5f, -2.0f, -4.0f, -2.0f}, new float[][]{}),
+        HARD_KB(null ,0 ,100 ,100, 0, new float[]{0.2f, 0.2f, 0.1f, -4.0f, -8.0f, -4.0f}, new float[][]{{10, 0.4f},{20, 0.5f},{30, 0.6f},{40, 0.7f},{50, 0.8f}}),
+        EXHARD_KB(LIMIT_INCREMENT ,0 ,100 ,100, 0, new float[]{0.2f, 0.1f, 0, -6.0f, -12.0f, -6.0f}, new float[][]{}),
+        HAZARD_KB(null ,0 ,100 ,100, 0, new float[]{0.2f, 0.1f, 0, -100.0f, -100.0f, -100.0f}, new float[][]{}),
+        CLASS_KB(null ,0 ,100 ,100, 0, new float[]{0.2f, 0.2f, 0.1f, -1.5f, -3f, -1.5f}, new float[][]{{5, 0.4f},{10, 0.5f},{15, 0.6f},{20, 0.7f},{25, 0.8f}}),
+        EXCLASS_KB(null ,0 ,100 ,100, 0, new float[]{0.2f, 0.2f, 0.1f, -3.0f, -6.0f, -3.0f}, new float[][]{}),
+        EXHARDCLASS_KB(null ,0 ,100 ,100, 0, new float[]{0.2f, 0.1f, 0, -5.0f, -10.0f, -5.0f}, new float[][]{}),
 
-        ASSIST_EASY_LR2(0 ,2 ,100 ,20, 60, new float[]{1.2f, 1.2f, 0.6f, -3.2f, -4.8f, -1.6f}, new float[][]{}),
-        EASY_LR2(0 ,2 ,100 ,20, 80, new float[]{1.2f, 1.2f, 0.6f, -3.2f, -4.8f, -1.6f}, new float[][]{}),
-        NORMAL_LR2(0 ,2 ,100 ,20, 80, new float[]{1.0f, 1.0f, 0.5f, -4.0f, -6.0f, -2.0f}, new float[][]{}),
-        HARD_LR2(2 ,0 ,100 ,100, 0, new float[]{0.1f, 0.1f, 0.05f, -6.0f, -10.0f, -2.0f}, new float[][]{{30, 0.6f}}),
-        EXHARD_LR2(2 ,0 ,100 ,100, 0, new float[]{0.15f, 0.06f, 0, -8.0f, -16.0f, -8.0f}, new float[][]{}),
-        HAZARD_LR2(1 ,0 ,100 ,100, 0, new float[]{0.15f, 0.06f, 0, -100.0f, -100.0f, -10.0f}, new float[][]{}),
-        LR2CLASS(1 ,0 ,100 ,100, 0, new float[]{0.10f, 0.10f, 0.05f, -2f, -3f, -2f}, new float[][]{{30, 0.6f}}),
-        EXCLASS_LR2(1 ,0 ,100 ,100, 0, new float[]{0.15f, 0.12f, 0.03f, -3.0f, -6.0f, -3.0f}, new float[][]{}),
-        EXHARDCLASS_LR2(1 ,0 ,100 ,100, 0, new float[]{0.15f, 0.06f, 0, -5.0f, -10.0f, -5.0f}, new float[][]{}),
-
+        ASSIST_EASY_LR2(TOTAL ,2 ,100 ,20, 60, new float[]{1.2f, 1.2f, 0.6f, -3.2f, -4.8f, -1.6f}, new float[][]{}),
+        EASY_LR2(TOTAL ,2 ,100 ,20, 80, new float[]{1.2f, 1.2f, 0.6f, -3.2f, -4.8f, -1.6f}, new float[][]{}),
+        NORMAL_LR2(TOTAL ,2 ,100 ,20, 80, new float[]{1.0f, 1.0f, 0.5f, -4.0f, -6.0f, -2.0f}, new float[][]{}),
+        HARD_LR2(MODIFY_DAMAGE ,0 ,100 ,100, 0, new float[]{0.1f, 0.1f, 0.05f, -6.0f, -10.0f, -2.0f}, new float[][]{{30, 0.6f}}),
+        EXHARD_LR2(MODIFY_DAMAGE ,0 ,100 ,100, 0, new float[]{0.1f, 0.1f, 0.05f, -12.0f, -20.0f, -2.0f}, new float[][]{}),
+        HAZARD_LR2(null ,0 ,100 ,100, 0, new float[]{0.15f, 0.06f, 0, -100.0f, -100.0f, -10.0f}, new float[][]{}),
+        CLASS_LR2(null ,0 ,100 ,100, 0, new float[]{0.10f, 0.10f, 0.05f, -2f, -3f, -2f}, new float[][]{{30, 0.6f}}),
+        EXCLASS_LR2(null ,0 ,100 ,100, 0, new float[]{0.10f, 0.10f, 0.05f, -6.0f, -10.0f, -2.0f}, new float[][]{{30, 0.6f}}),
+        EXHARDCLASS_LR2(null ,0 ,100 ,100, 0, new float[]{0.10f, 0.10f, 0.05f, -12.0f, -20.0f, -2.0f}, new float[][]{}),
         ;
 
         /**
-         * 0:回復量としてTOTALを使用する。trueの場合はTOTAL/notesに対する倍率で指定する
-         * 1:回復量としてTOTALを使用しない。
-         * 2:回復量としてTOTALを使用しないが、低TOTALに対して減少補正をかける
+         * ゲージタイプ
          */
-        public final int type;
+        public final GrooveGauge.GaugeType type;
         /**
          * 格判定のゲージ変化量。PG, GR, GD, BD, PR, MSの順
          */
@@ -139,7 +138,7 @@ public enum GaugeProperty {
          */
         public final float[][] guts;
 
-        private GaugeElementProperty(int type, float min, float max, float init, float border, float[] value, float[][] guts) {
+        private GaugeElementProperty(GrooveGauge.GaugeType type, float min, float max, float init, float border, float[] value, float[][] guts) {
             this.type = type;
             this.min = min;
             this.max = max;
