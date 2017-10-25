@@ -242,6 +242,7 @@ public class PlayDataAccessor {
 			CourseData.CourseDataConstraint[] constraint) {
 		int hispeed = 0;
 		int judge = 0;
+		int gauge = 0;
 		for (CourseData.CourseDataConstraint c : constraint) {
 			if (c == NO_SPEED) {
 				hispeed = 1;
@@ -252,8 +253,11 @@ public class PlayDataAccessor {
 			if (c == NO_GREAT) {
 				judge = 2;
 			}
+			if (c == GAUGE_LR2) {
+				gauge = 1;
+			}
 		}
-		return scoredb.getScoreData(hash, (ln ? lnmode : 0) + option * 10 + hispeed * 100 + judge * 1000);
+		return scoredb.getScoreData(hash, (ln ? lnmode : 0) + option * 10 + hispeed * 100 + judge * 1000 + gauge * 10000);
 	}
 
 	public IRScoreData readScoreData(BMSModel[] models, int lnmode, int option,
@@ -291,6 +295,7 @@ public class PlayDataAccessor {
 		}
 		int hispeed = 0;
 		int judge = 0;
+		int gauge = 0;
 		for (CourseData.CourseDataConstraint c : constraint) {
 			if (c == NO_SPEED) {
 				hispeed = 1;
@@ -301,12 +306,15 @@ public class PlayDataAccessor {
 			if (c == NO_GREAT) {
 				judge = 2;
 			}
+			if (c == GAUGE_LR2) {
+				gauge = 1;
+			}
 		}
-		IRScoreData score = scoredb.getScoreData(hash, (ln ? lnmode : 0) + option * 10 + hispeed * 100 + judge * 1000);
+		IRScoreData score = scoredb.getScoreData(hash, (ln ? lnmode : 0) + option * 10 + hispeed * 100 + judge * 1000 + gauge * 10000);
 
 		if (score == null) {
 			score = new IRScoreData();
-			score.setMode((ln ? lnmode : 0) + option * 10 + hispeed * 100 + judge * 1000);
+			score.setMode((ln ? lnmode : 0) + option * 10 + hispeed * 100 + judge * 1000 + gauge * 10000);
 		}
 		score.setSha256(hash);
 		score.setNotes(totalnotes);
