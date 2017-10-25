@@ -87,6 +87,8 @@ public class JudgeManager {
 	 * ノーツ判定テーブル
 	 */
 	private int[][] njudge;
+	private int judgestart;
+	private int judgeend;
 	/**
 	 * CN終端判定テーブル
 	 */
@@ -163,6 +165,15 @@ public class JudgeManager {
 		cnendjudge = rule.getLongNoteEndJudge(judgerank, constraint);
 		sjudge = rule.getScratchJudge(judgerank, constraint);
 		scnendjudge = rule.getLongScratchEndJudge(judgerank, constraint);
+		judgestart = judgeend = 0;
+		for(int[] i : njudge) {
+			judgestart = Math.min(judgestart, i[0]);
+			judgeend = Math.max(judgeend, i[1]);
+		}
+		for(int[] i : sjudge) {
+			judgestart = Math.min(judgestart, i[0]);
+			judgeend = Math.max(judgeend, i[1]);
+		}
 
 		this.autoplay = resource.getAutoplay() == 1;
 		
@@ -185,7 +196,7 @@ public class JudgeManager {
 		
 		for (int lane = 0; lane < laneassign.length; lane++) {
 			final Lane lanemodel = lanes[lane];
-			lanemodel.mark(prevtime + njudge[4][0]);
+			lanemodel.mark(prevtime + judgestart - 100);
 			boolean pressed = false;
 			for (int key : laneassign[lane]) {
 				if (keystate[key]) {
@@ -345,7 +356,7 @@ public class JudgeManager {
 					final int[][] judge = sc >= 0 ? sjudge : njudge;
 					// 対象ノーツの抽出
 					lanemodel.reset();
-					final Note tnote = algorithm.getNote(lanemodel, ptime, judge, pmsjudge);
+					final Note tnote = algorithm.getNote(lanemodel, ptime, judge, judgestart, judgeend, pmsjudge);
 					final int j = algorithm.getJudge();
 
 					if (tnote != null) {

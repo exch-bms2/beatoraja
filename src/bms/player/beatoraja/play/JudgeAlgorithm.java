@@ -58,28 +58,28 @@ public enum JudgeAlgorithm {
 	 * @param pmsjudge PMS判定
 	 * @return 判定対象ノーツ
 	 */
-	public Note getNote(Lane lanemodel, long ptime, int[][] judgetable, boolean pmsjudge) {
+	public Note getNote(Lane lanemodel, long ptime, int[][] judgetable, int judgestart, int judgeend, boolean pmsjudge) {
 		Note note = null;
 		int judge = 0;
 		for (Note judgenote = lanemodel.getNote();judgenote != null;judgenote = lanemodel.getNote()) {
 			final int dtime = (int) (judgenote.getTime() - ptime);
-			if (dtime >= judgetable[4][1]) {
+			if (dtime >= judgeend) {
 				break;
 			}
-			if (dtime >= judgetable[4][0]) {
+			if (dtime >= judgestart) {
 				if (!(judgenote instanceof MineNote) && !(judgenote instanceof LongNote
 						&& ((LongNote) judgenote).isEnd())) {
 					if (note == null || note.getState() != 0 || compare(note, judgenote, ptime, judgetable)) {
 						if (!(pmsjudge && (judgenote.getState() != 0
 								|| (judgenote.getState() == 0 && judgenote.getPlayTime() != 0 && dtime >= judgetable[2][1])))) {
 							if (judgenote.getState() != 0) {
-								judge = 5;
+								judge = (dtime >= judgetable[4][0] && dtime <= judgetable[4][1]) ? 5 : 6;
 							} else {
 								for (judge = 0; judge < judgetable.length && !(dtime >= judgetable[judge][0] && dtime <= judgetable[judge][1]); judge++) {
 								}
-								judge = (judge == 4 ? 5 : judge);
+								judge = (judge >= 4 ? judge + 1 : judge);
 							}
-							if(judge != 5 || note == null || Math.abs(note.getTime() - ptime) > Math.abs(judgenote.getTime() - ptime)) {
+							if(judge < 6 && (judge < 4 || note == null || Math.abs(note.getTime() - ptime) > Math.abs(judgenote.getTime() - ptime))) {
 								note = judgenote;
 							}
 						}
