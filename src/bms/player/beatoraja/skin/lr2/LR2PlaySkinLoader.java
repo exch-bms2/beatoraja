@@ -27,6 +27,8 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 
 	private Rectangle[] playerr;
 
+	private Mode mode;
+	
 	private SkinSource[] note = new SkinSource[8];
 	private SkinSource[] lnstart = new SkinSource[8];
 	private SkinSource[] lnend = new SkinSource[8];
@@ -217,18 +219,15 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 			public void execute(String[] str) {
 				int[] values = parseInt(str);
 				int lane = Integer.parseInt(str[1]);
-				if (lane == 10) {
-					lane = laner.length / playerr.length * 2 - 1;
-				} else if (lane >= 10) {
-					lane = (lane - 11) + laner.length / playerr.length;
-				} else if (lane == 0) {
-					lane = laner.length / playerr.length - 1;
-				} else if (lane >= laner.length / playerr.length) {
-					lane = -1;
+				if (lane % 10 == 0) {
+					lane = mode.scratchKey.length > (lane / 10) ? mode.scratchKey[(lane / 10)] : -1;
 				} else {
-					lane -= 1;
+					lane = (lane > 10) ? lane - 11 : lane - 1;
+					if (lane >= (laner.length - mode.scratchKey.length) / playerr.length) {
+						lane = -1;
+					}
 				}
-				if(lane < 0 || lane >= laner.length) {
+				if(lane < 0) {
 					return;
 				}
 				if (laner[lane] == null) {
@@ -396,7 +395,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 
 					judge[0].getJudgeCount()[5 - values[1]] = new SkinNumber(images, values[10], values[9], values[13],
 							images.length > 10 ? 2 : 0, values[11]);
-					judge[0].getJudgeCount()[5 - values[1]].setAlign(judge[0].isSheft() && values[12] == 1 ?  2 : values[12]);
+					judge[0].getJudgeCount()[5 - values[1]].setAlign(values[12] == 1 ?  2 : values[12]);
 					// System.out.println("Number Added - " +
 					// (num.getId()));
 				}
@@ -433,7 +432,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 
 					judge[1].getJudgeCount()[5 - values[1]] = new SkinNumber(images, values[10], values[9], values[13],
 							images.length > 10 ? 2 : 0, values[11]);
-					judge[1].getJudgeCount()[5 - values[1]].setAlign(judge[1].isSheft() && values[12] == 1 ?  2 : values[12]);
+					judge[1].getJudgeCount()[5 - values[1]].setAlign(values[12] == 1 ?  2 : values[12]);
 					// System.out.println("Number Added - " +
 					// (num.getId()));
 				}
@@ -546,7 +545,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 			int[] values = parseInt(str);
 			sj.getJudgeCount()[5 - values[1]].setRelative(true);
 			float x = values[3];
-			if(sj.isSheft() && sj.getJudgeCount()[5 - values[1]].getAlign() == 2) {
+			if(sj.getJudgeCount()[5 - values[1]].getAlign() == 2) {
 				x -= sj.getJudgeCount()[5 - values[1]].getKeta() * values[5] / 2;
 			}
 			sj.getJudgeCount()[5 - values[1]].setDestination(values[2], x * dstw / srcw,
@@ -559,18 +558,15 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 	private void addNote(String[] str, SkinSource[] note, boolean animation) {
 		int[] values = parseInt(str);
 		int lane = values[1];
-		if (lane == 10) {
-			lane = laner.length / playerr.length * 2 - 1;
-		} else if (lane >= 10) {
-			lane = (lane - 11) + laner.length / playerr.length;
-		} else if (lane == 0) {
-			lane = laner.length / playerr.length - 1;
-		} else if (lane >= laner.length / playerr.length) {
-			lane = -1;
+		if (lane % 10 == 0) {
+			lane = mode.scratchKey.length > (lane / 10) ? mode.scratchKey[(lane / 10)] : -1;
 		} else {
-			lane -= 1;
+			lane = (lane > 10) ? lane - 11 : lane - 1;
+			if (lane >= (laner.length - mode.scratchKey.length) / playerr.length) {
+				lane = -1;
+			}
 		}
-		if(lane < 0 || lane >= laner.length) {
+		if(lane < 0) {
 			return;
 		}
 		if (lane < note.length && note[lane] == null) {
@@ -629,7 +625,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 
 	public PlaySkin loadSkin(File f, MainState player, SkinHeader header, Map<Integer, Boolean> option,
 			Map property) throws IOException {
-		final Mode mode = type.getMode();
+		mode = type.getMode();
 		note = new SkinSource[mode.key];
 		lnstart = new SkinSource[mode.key];
 		lnend = new SkinSource[mode.key];
