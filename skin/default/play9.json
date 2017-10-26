@@ -359,7 +359,9 @@
 	},
 	"gauge":{
 		"id":2001,
-		"nodes":["gauge-n1","gauge-n2","gauge-n3","gauge-n4","gauge-e1","gauge-e2","gauge-e3","gauge-e4"]
+		"nodes":["gauge-n1","gauge-n2","gauge-n3","gauge-n4","gauge-e1","gauge-e2","gauge-e3","gauge-e4"],
+		"parts":24,
+		"range":0
 	},
 	"judge":[
 	{
