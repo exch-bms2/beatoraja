@@ -493,7 +493,7 @@ public class JSONSkinLoader extends SkinLoader{
 							}
 						}
 
-						obj = new SkinGauge(gaugetex, 0, 0);
+						obj = new SkinGauge(gaugetex, 0, 0, sk.gauge.parts, sk.gauge.type, sk.gauge.range, sk.gauge.cycle);
 					}
 					// bga (playskin only)
 					if (sk.bga != null && dst.id.equals(sk.bga.id)) {
@@ -1028,6 +1028,10 @@ public class JSONSkinLoader extends SkinLoader{
 	public static class Gauge {
 		public String id;
 		public String[] nodes;
+		public int parts = 50;
+		public int type;
+		public int range = 3;
+		public int cycle = 33;;
 	}
 
 	public static class BGA {

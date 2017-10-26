@@ -516,7 +516,12 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 					groovex = values[11];
 					groovey = values[12];
 					if (gauger == null) {
-						gauger = new SkinGauge(gauge, values[10], values[9]);
+						if(values[13] == 0) {
+							gauger = new SkinGauge(gauge, values[10], values[9], mode == Mode.POPN_9K ? 24 : 50, 0, mode == Mode.POPN_9K ? 0 : 3, 33);
+						} else {
+							gauger = new SkinGauge(gauge, values[10], values[9], values[13], values[14], values[15], values[16]);							
+						}
+						
 						skin.add(gauger);
 					}
 				}
