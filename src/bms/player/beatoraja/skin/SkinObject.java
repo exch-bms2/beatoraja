@@ -370,22 +370,30 @@ public abstract class SkinObject implements Disposable {
 		}
 		final Color c = sprite.getColor();
 		switch (dstblend) {
+		case 0:
+			//PMA blending
+			sprite.setBlendFunction(GL11.GL_ONE, GL11.GL_ONE_MINUS_SRC_ALPHA);
+			break;
 		case 2:
 			sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
 			break;
-			case 3:
-				// TODO 減算描画は難しいか？
-				Gdx.gl.glBlendEquation(GL20.GL_FUNC_SUBTRACT);
-				sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
-				Gdx.gl.glBlendEquation(GL20.GL_FUNC_ADD);
-				break;
-			case 4:
-				sprite.setBlendFunction(GL11.GL_ZERO, GL11.GL_SRC_COLOR);
-				break;
-			case 9:
+		case 3:
+			// TODO 減算描画は難しいか？
+			Gdx.gl.glBlendEquation(GL20.GL_FUNC_SUBTRACT);
+			sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
+			Gdx.gl.glBlendEquation(GL20.GL_FUNC_ADD);
+			break;
+		case 4:
+			sprite.setBlendFunction(GL11.GL_ZERO, GL11.GL_SRC_COLOR);
+			break;
+		case 9:
 			sprite.setBlendFunction(GL11.GL_ONE_MINUS_DST_COLOR, GL11.GL_ZERO);
 			break;
 		}
+
+		color.r = color.r * color.a;
+		color.g = color.g * color.a;
+		color.b = color.b * color.a;
 		sprite.setColor(color);
 		
 		if(dstfilter == 1) {
