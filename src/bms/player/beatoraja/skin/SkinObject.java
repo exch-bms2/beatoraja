@@ -6,6 +6,8 @@ import bms.player.beatoraja.MainState;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture.TextureFilter;
+
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
@@ -386,11 +388,12 @@ public abstract class SkinObject implements Disposable {
 		}
 		sprite.setColor(color);
 		
-//		if(dstfilter == 1) {
-//			image.getTexture().setFilter(TextureFilter.Linear, TextureFilter.Linear);
-//		} else {
-//			image.getTexture().setFilter(TextureFilter.Nearest, TextureFilter.Nearest);			
-//		}
+		if(dstfilter == 1) {
+			image.getTexture().setFilter(TextureFilter.Linear, TextureFilter.Linear);
+		} else {
+			image.getTexture().setFilter(TextureFilter.Nearest, TextureFilter.Nearest);			
+		}
+
 		if (angle != 0) {
 			sprite.draw(image, x, y, centerx * width, centery * height, width, height, 1, 1, angle);
 		} else {
