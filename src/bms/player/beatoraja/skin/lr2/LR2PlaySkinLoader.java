@@ -222,9 +222,12 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 				if (lane % 10 == 0) {
 					lane = mode.scratchKey.length > (lane / 10) ? mode.scratchKey[(lane / 10)] : -1;
 				} else {
+					final int offset = (lane / 10) * (laner.length / playerr.length);
 					lane = (lane > 10) ? lane - 11 : lane - 1;
 					if (lane >= (laner.length - mode.scratchKey.length) / playerr.length) {
 						lane = -1;
+					} else {
+						lane += offset;
 					}
 				}
 				if(lane < 0) {
@@ -541,7 +544,6 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 				}
 			}
 		});
-
 	}
 	
 	private void setDstNowCombo(int index, String[] str, int offsetid) {
@@ -566,9 +568,12 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 		if (lane % 10 == 0) {
 			lane = mode.scratchKey.length > (lane / 10) ? mode.scratchKey[(lane / 10)] : -1;
 		} else {
+			final int offset = (lane / 10) * (laner.length / playerr.length);
 			lane = (lane > 10) ? lane - 11 : lane - 1;
 			if (lane >= (laner.length - mode.scratchKey.length) / playerr.length) {
 				lane = -1;
+			} else {
+				lane += offset;
 			}
 		}
 		if(lane < 0) {
