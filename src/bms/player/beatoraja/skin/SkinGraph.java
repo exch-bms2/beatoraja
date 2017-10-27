@@ -24,12 +24,14 @@ public class SkinGraph extends SkinObject {
 	 */
 	private int direction = 1;
 
+	private final TextureRegion current = new TextureRegion();
+
 	public SkinGraph(int imageid) {
 		setImageID(imageid);
 	}
 
 	public SkinGraph(TextureRegion image) {
-		source = new SkinSourceImage(new TextureRegion[]{image}, 0, 0);
+		source = new SkinSourceImage(new TextureRegion[] { image }, 0, 0);
 	}
 
 	public SkinGraph(TextureRegion[] image, int timer, int cycle) {
@@ -41,44 +43,30 @@ public class SkinGraph extends SkinObject {
 			Rectangle r = this.getDestination(time, state);
 			TextureRegion image = state.getImage(getImageID());
 			if (r != null && image != null) {
-				float value = 0;
-				if (id != -1) {
-					value = state.getSliderValue(id);
-				}
-				// sprite.draw(image, r.x, r.y, r.width, r.height);
+				final float value = id != -1 ? state.getSliderValue(id) : 0;
 				if (direction == 1) {
-					draw(sprite,
-							new TextureRegion(image, 0, image.getRegionY() + image.getRegionHeight()
-									- (int) (image.getRegionHeight() * value), image.getRegionWidth(),
-									(int) ((int) image.getRegionHeight() * value)), r.x, r.y, r.width,
-							r.height * value);
+					current.setRegion(image, 0,
+							image.getRegionY() + image.getRegionHeight() - (int) (image.getRegionHeight() * value),
+							image.getRegionWidth(), (int) (image.getRegionHeight() * value));
+					draw(sprite, current, r.x, r.y, r.width, r.height * value);
 				} else {
-					draw(sprite, new TextureRegion(image, 0, image.getRegionY(),
-							(int) (image.getRegionWidth() * value), image.getRegionHeight()), r.x, r.y,
-							r.width * value, r.height);
+					current.setRegion(image, 0, image.getRegionY(), (int) (image.getRegionWidth() * value),
+							image.getRegionHeight());
+					draw(sprite, current, r.x, r.y, r.width * value, r.height);
 				}
 			}
-		} else if(source != null){
+		} else if (source != null) {
 			Rectangle r = this.getDestination(time, state);
 			if (r != null) {
-				float value = 0;
-				if (id != -1) {
-					value = state.getSliderValue(id);
-					// System.out.println("bargraph id : " + id + " value : " +
-					// value);
-				}
+				final float value = id != -1 ? state.getSliderValue(id) : 0;
 				TextureRegion image = source.getImage(time, state);
-				// sprite.draw(image, r.x, r.y, r.width, r.height);
 				if (direction == 1) {
-					draw(sprite,
-							new TextureRegion(image, 0, image.getRegionHeight()
-									- (int) (image.getRegionHeight() * value), image.getRegionWidth(),
-									(int) ((int) image.getRegionHeight() * value)), r.x, r.y, r.width,
-							r.height * value);
+					current.setRegion(image, 0, image.getRegionHeight() - (int) (image.getRegionHeight() * value),
+							image.getRegionWidth(), (int) (image.getRegionHeight() * value));
+					draw(sprite, current, r.x, r.y, r.width, r.height * value);
 				} else {
-					draw(sprite,
-							new TextureRegion(image, 0, 0, (int) (image.getRegionWidth() * value), image
-									.getRegionHeight()), r.x, r.y, r.width * value, r.height);
+					current.setRegion(image, 0, 0, (int) (image.getRegionWidth() * value), image.getRegionHeight());
+					draw(sprite, current, r.x, r.y, r.width * value, r.height);
 				}
 			}
 		}
