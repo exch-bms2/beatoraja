@@ -1,0 +1,10 @@
+/build/*
+/player/*
+/skin/*
+!/skin/default/*
+/practice/*
+songdata.db
+songinfo.db
+config.json
+beatoraja.jar
+beatoraja_log.xml
