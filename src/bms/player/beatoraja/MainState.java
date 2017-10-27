@@ -399,34 +399,6 @@ public abstract class MainState {
 				return count;
 			case NUMBER_COMBOBREAK:
 				return getJudgeCount(3, true) + getJudgeCount(3, false) + getJudgeCount(4, true) + getJudgeCount(4, false);
-			case BUTTON_GAUGE_1P:
-			return getMainController().getPlayerResource().getPlayerConfig().getGauge();
-		case BUTTON_RANDOM_1P:
-			return getMainController().getPlayerResource().getPlayerConfig().getRandom();
-		case BUTTON_RANDOM_2P:
-			return getMainController().getPlayerResource().getPlayerConfig().getRandom2();
-		case BUTTON_DPOPTION:
-			return getMainController().getPlayerResource().getPlayerConfig().getDoubleoption();
-		case BUTTON_HSFIX:
-			return getMainController().getPlayerResource().getPlayerConfig().getFixhispeed();
-		case BUTTON_BGA:
-			return getMainController().getPlayerResource().getConfig().getBga();
-		case BUTTON_ASSIST_EXJUDGE:
-			return getMainController().getPlayerResource().getPlayerConfig().getJudgewindowrate() > 100 ? 1 : 0;
-		case BUTTON_ASSIST_CONSTANT:
-			return getMainController().getPlayerResource().getPlayerConfig().isConstant() ? 1 : 0;
-		case BUTTON_ASSIST_JUDGEAREA:
-			return getMainController().getPlayerResource().getPlayerConfig().isShowjudgearea() ? 1 : 0;
-		case BUTTON_ASSIST_LEGACY:
-			return getMainController().getPlayerResource().getPlayerConfig().isLegacynote() ? 1 : 0;
-		case BUTTON_ASSIST_MARKNOTE:
-			return getMainController().getPlayerResource().getPlayerConfig().isMarkprocessednote() ? 1 : 0;
-		case BUTTON_ASSIST_BPMGUIDE:
-			return getMainController().getPlayerResource().getPlayerConfig().isBpmguide() ? 1 : 0;
-		case BUTTON_ASSIST_NOMINE:
-			return getMainController().getPlayerResource().getPlayerConfig().isNomine() ? 1 : 0;
-			case BUTTON_LNMODE:
-				return getMainController().getPlayerResource().getPlayerConfig().getLnmode();
 			case NUMBER_TOTALNOTES:
 		case NUMBER_TOTALNOTES2:
 			if (getMainController().getPlayerResource().getSongdata() != null) {
@@ -601,6 +573,40 @@ public abstract class MainState {
 			return white;			
 		}
 		return null;
+	}
+
+	public int getImageIndex(int id) {
+		switch(id) {
+			case BUTTON_GAUGE_1P:
+				return getMainController().getPlayerResource().getPlayerConfig().getGauge();
+			case BUTTON_RANDOM_1P:
+				return getMainController().getPlayerResource().getPlayerConfig().getRandom();
+			case BUTTON_RANDOM_2P:
+				return getMainController().getPlayerResource().getPlayerConfig().getRandom2();
+			case BUTTON_DPOPTION:
+				return getMainController().getPlayerResource().getPlayerConfig().getDoubleoption();
+			case BUTTON_HSFIX:
+				return getMainController().getPlayerResource().getPlayerConfig().getFixhispeed();
+			case BUTTON_BGA:
+				return getMainController().getPlayerResource().getConfig().getBga();
+			case BUTTON_ASSIST_EXJUDGE:
+				return getMainController().getPlayerResource().getPlayerConfig().getJudgewindowrate() > 100 ? 1 : 0;
+			case BUTTON_ASSIST_CONSTANT:
+				return getMainController().getPlayerResource().getPlayerConfig().isConstant() ? 1 : 0;
+			case BUTTON_ASSIST_JUDGEAREA:
+				return getMainController().getPlayerResource().getPlayerConfig().isShowjudgearea() ? 1 : 0;
+			case BUTTON_ASSIST_LEGACY:
+				return getMainController().getPlayerResource().getPlayerConfig().isLegacynote() ? 1 : 0;
+			case BUTTON_ASSIST_MARKNOTE:
+				return getMainController().getPlayerResource().getPlayerConfig().isMarkprocessednote() ? 1 : 0;
+			case BUTTON_ASSIST_BPMGUIDE:
+				return getMainController().getPlayerResource().getPlayerConfig().isBpmguide() ? 1 : 0;
+			case BUTTON_ASSIST_NOMINE:
+				return getMainController().getPlayerResource().getPlayerConfig().isNomine() ? 1 : 0;
+			case BUTTON_LNMODE:
+				return getMainController().getPlayerResource().getPlayerConfig().getLnmode();
+		}
+		return Integer.MIN_VALUE;
 	}
 
 	public Stage getStage() {

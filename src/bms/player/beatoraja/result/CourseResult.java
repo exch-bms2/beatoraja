@@ -396,6 +396,20 @@ public class CourseResult extends MainState {
 
 	}
 
+	public int getImageIndex(int id) {
+		switch (id) {
+			case NUMBER_CLEAR:
+				final PlayerResource resource = getMainController().getPlayerResource();
+				if (resource.getScoreData() != null) {
+					return resource.getScoreData().getClear();
+				}
+				return Integer.MIN_VALUE;
+			case NUMBER_TARGET_CLEAR:
+				return oldclear;
+		}
+		return super.getImageIndex(id);
+	}
+
 	public void executeClickEvent(int id) {
 		switch (id) {
 		case BUTTON_REPLAY:

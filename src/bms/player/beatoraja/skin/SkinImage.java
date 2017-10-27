@@ -87,7 +87,7 @@ public class SkinImage extends SkinObject {
             }
             int value = 0;
             if(id != -1) {
-                value = state.getNumberValue(id);
+                value = state.getImageIndex(id);
             }
             if(value >= image.length) {
                 value = 0;

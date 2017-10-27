@@ -611,17 +611,6 @@ public class MusicSelector extends MainState {
 			return config.getMode7().getDuration();
 		case NUMBER_JUDGETIMING:
 			return config.getJudgetiming();
-		case BUTTON_MODE:
-			int mode = 0;
-			for (; mode < MODE.length; mode++) {
-				if (MODE[mode] == config.getMode()) {
-					break;
-				}
-			}
-			final int[] mode_lr2 = { 0, 2, 4, 5, 1, 3 };
-			return mode < mode_lr2.length ? mode_lr2[mode] : mode;
-		case BUTTON_SORT:
-			return sort;
 		case NUMBER_SCORE_RATE:
 			return bar.getSelected().getScore() != null ? getScoreDataProperty().getRateInt() : Integer.MIN_VALUE;
 		case NUMBER_SCORE_RATE_AFTERDOT:
@@ -912,6 +901,23 @@ public class MusicSelector extends MainState {
 			}
 		}
 		return false;
+	}
+
+	public int getImageIndex(int id) {
+		switch(id) {
+			case BUTTON_MODE:
+				int mode = 0;
+				for (; mode < MODE.length; mode++) {
+					if (MODE[mode] == config.getMode()) {
+						break;
+					}
+				}
+				final int[] mode_lr2 = { 0, 2, 4, 5, 1, 3 };
+				return mode < mode_lr2.length ? mode_lr2[mode] : mode;
+			case BUTTON_SORT:
+				return sort;
+		}
+		return super.getImageIndex(id);
 	}
 
 	public void executeClickEvent(int id) {

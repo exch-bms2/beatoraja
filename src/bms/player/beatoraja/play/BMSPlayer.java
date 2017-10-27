@@ -836,9 +836,6 @@ public class BMSPlayer extends MainState {
 		case VALUE_JUDGE_3P_DURATION:
 			return judge.getRecentJudgeTiming();
 		}
-		if (SkinPropertyMapper.isKeyJudgeValueId(id)) {
-			return judge.getJudge(id);
-		}
 		return super.getNumberValue(id);
 	}
 
@@ -959,5 +956,12 @@ public class BMSPlayer extends MainState {
 					&& judge.getRecentJudgeTiming() < 0;
 		}
 		return super.getBooleanValue(id);
+	}
+
+	public int getImageIndex(int id) {
+		if (SkinPropertyMapper.isKeyJudgeValueId(id)) {
+			return judge.getJudge(id);
+		}
+		return super.getImageIndex(id);
 	}
 }
