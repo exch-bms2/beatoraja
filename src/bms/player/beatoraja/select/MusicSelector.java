@@ -303,15 +303,25 @@ public class MusicSelector extends MainState {
 
 		// banner
 		if (current != bannerbar) {
-			bannerbar = current;
-			if (banner != null) {
-				banner.getTexture().dispose();
-				banner = null;
-			}
-			if (bannerbar instanceof SongBar && ((SongBar) bannerbar).getBanner() != null) {
-				banner = new TextureRegion(new Texture(((SongBar) bannerbar).getBanner()));
+			if (current instanceof SongBar == false) {
+				if (banner != null) {
+					banner.getTexture().dispose();
+					banner = null;
+				}
+				bannerbar = current;
+			} else {
+				if (((SongBar) current).getBanner() != null) {
+					banner = new TextureRegion(new Texture(((SongBar) current).getBanner()));
+					bannerbar = current;
+				} else {
+					if (banner != null) {
+						banner.getTexture().dispose();
+						banner = null;
+					}
+				}
 			}
 		}
+
 		sprite.end();
 		// preview music
 		if (current instanceof SongBar) {
