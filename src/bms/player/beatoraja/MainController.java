@@ -446,6 +446,7 @@ public class MainController extends ApplicationAdapter {
 		resource.dispose();
 //		input.dispose();
 		SkinLoader.getResource().dispose();
+		ShaderManager.dispose();
 	}
 
 	@Override

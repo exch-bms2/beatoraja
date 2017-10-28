@@ -18,6 +18,7 @@ import com.badlogic.gdx.graphics.g2d.Gdx2DPixmap;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 
+import bms.player.beatoraja.ShaderManager;
 import bms.player.beatoraja.play.BMSPlayer;
 
 /**
@@ -49,7 +50,7 @@ public class FFmpegProcessor implements MovieProcessor {
 	private ShaderProgram shader;
 	
 	public FFmpegProcessor(int fpsd) {
-		this.fpsd = fpsd;
+		this.fpsd = fpsd;		
 	}
 
 	public void setBMSPlayer(BMSPlayer player) {
@@ -250,34 +251,7 @@ public class FFmpegProcessor implements MovieProcessor {
 
 	public ShaderProgram getShader() {
 		if(shader == null) {
-			String vertex = "attribute vec4 " + ShaderProgram.POSITION_ATTRIBUTE + ";\n" //
-					+ "attribute vec4 " + ShaderProgram.COLOR_ATTRIBUTE + ";\n" //
-					+ "attribute vec2 " + ShaderProgram.TEXCOORD_ATTRIBUTE + "0;\n" //
-					+ "uniform mat4 u_projTrans;\n" //
-					+ "varying vec4 v_color;\n" //
-					+ "varying vec2 v_texCoords;\n" //
-					+ "\n" //
-					+ "void main()\n" //
-					+ "{\n" //
-					+ "   v_color = " + ShaderProgram.COLOR_ATTRIBUTE + ";\n" //
-					+ "   v_texCoords = " + ShaderProgram.TEXCOORD_ATTRIBUTE + "0;\n" //
-					+ "   gl_Position =  u_projTrans * " + ShaderProgram.POSITION_ATTRIBUTE + ";\n" //
-					+ "}\n";
-
-			String fragment = "#ifdef GL_ES\n" //
-					+ "#define LOWP lowp\n" //
-					+ "precision mediump float;\n" //
-					+ "#else\n" //
-					+ "#define LOWP \n" //
-					+ "#endif\n" //
-					+ "varying LOWP vec4 v_color;\n" //
-					+ "varying vec2 v_texCoords;\n" //
-					+ "uniform sampler2D u_texture;\n" //
-					+ "void main()\n"//
-					+ "{\n" //
-					+ "    vec4 c4 = texture2D(u_texture, v_texCoords);\n"
-					+ "gl_FragColor = v_color * vec4(c4.b, c4.g, c4.r, c4.a);\n" + "}";
-			shader = new ShaderProgram(vertex, fragment);
+			shader = ShaderManager.getShader("ffmpeg");
 		}
 		return shader;
 	}
@@ -291,15 +265,6 @@ public class FFmpegProcessor implements MovieProcessor {
 		
 		if (showingtex != null) {
 			showingtex.dispose();
-		}
-
-		if(shader != null) {
-			try {
-				shader.dispose();
-			} catch(Throwable e) {
-
-			}
-			shader = null;
 		}
 	}
 
