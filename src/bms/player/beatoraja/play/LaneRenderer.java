@@ -56,6 +56,7 @@ public class LaneRenderer {
 
 	private BMSModel model;
 	private TimeLine[] timelines;
+	private List<Long> sectiontimes = new ArrayList<Long>();
 
 	private int pos;
 
@@ -135,6 +136,9 @@ public class LaneRenderer {
 			} else if(tl.existNote() || tl.existHiddenNote()){
 				tls.add(tl);
 			}
+			if(tl.getSectionLine()) {
+				sectiontimes.add(tl.getMicroTime());
+			}
 			cbpm = tl.getBPM();			
 		}
 		this.timelines = tls.toArray(new TimeLine[tls.size()]);
@@ -203,6 +207,10 @@ public class LaneRenderer {
 
 	public float getLanecover() {
 		return lanecover;
+	}
+	
+	public List<Long> getSectiontimes() {
+		return sectiontimes;
 	}
 
 	public void setLanecover(float lanecover) {

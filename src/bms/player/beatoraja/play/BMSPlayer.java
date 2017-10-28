@@ -348,7 +348,9 @@ public class BMSPlayer extends MainState {
 
 	private PracticeConfiguration practice = new PracticeConfiguration();
 	private long starttimeoffset;
-
+	private int sections = 0;
+	private long rhythmtimer;
+	
 	@Override
 	public void render() {
 		final PlaySkin skin = (PlaySkin) getSkin();
@@ -453,6 +455,7 @@ public class BMSPlayer extends MainState {
 		case STATE_PLAY:
 			final long deltatime = micronow - prevtime;
 			final long deltaplay = deltatime * (100 - playspeed) / 100;
+			PracticeProperty property = practice.getPracticeProperty();
 			deltaplaymicro += deltaplay % 1000;
             timer[TIMER_PLAY] += deltaplay / 1000;
             if(deltaplaymicro >= 1000) {
@@ -462,7 +465,17 @@ public class BMSPlayer extends MainState {
                 timer[TIMER_PLAY]--;;
             	deltaplaymicro += 1000;
             }
-            timer[TIMER_RHYTHM] += deltatime * (100 - lanerender.getNowBPM() * 100 / 60) / 100000;
+            rhythmtimer += deltatime * (100 - lanerender.getNowBPM() * playspeed / 60) / 100;
+            timer[TIMER_RHYTHM] = rhythmtimer / 1000;
+            
+            try {
+            	if((lanerender.getSectiontimes().get(sections) * (100 / property.freq)) <= (micronow - timer[TIMER_PLAY] * 1000)) {
+            		sections++;;
+            		timer[TIMER_RHYTHM] = now;
+            		rhythmtimer = micronow;
+            	}
+            }catch(IndexOutOfBoundsException e) {
+            }
             final long ptime = now - timer[TIMER_PLAY];
 			final float g = gauge.getValue();
 			if (gaugelog.size <= ptime / 500) {
