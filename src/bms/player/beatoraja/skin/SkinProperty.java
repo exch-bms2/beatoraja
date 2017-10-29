@@ -329,6 +329,10 @@ public class SkinProperty {
 
 	public static final int NUMBER_FOLDER_TOTALSONGS = 300;
 
+	public static final int VALUE_JUDGE_1P_DURATION = 525;
+	public static final int VALUE_JUDGE_2P_DURATION = 526;
+	public static final int VALUE_JUDGE_3P_DURATION = 527;
+
 	public static final int OPTION_FOLDERBAR = 1;
 	public static final int OPTION_SONGBAR = 2;
 	public static final int OPTION_GRADEBAR = 3;
@@ -595,25 +599,6 @@ public class SkinProperty {
 	public static final int OPTION_2PWIN = 353;
 	public static final int OPTION_DRAW = 354;
 
-	public static final int VALUE_JUDGE_1P_SCRATCH = 500;
-	public static final int VALUE_JUDGE_1P_KEY1 = 501;
-	public static final int VALUE_JUDGE_1P_KEY9 = 509;
-	public static final int VALUE_JUDGE_2P_SCRATCH = 510;
-	public static final int VALUE_JUDGE_2P_KEY1 = 511;
-	public static final int VALUE_JUDGE_2P_KEY9 = 519;
-	public static final int VALUE_JUDGE_1P = 520;
-	public static final int VALUE_JUDGE_2P = 521;
-	public static final int VALUE_JUDGE_3P = 522;
-	public static final int VALUE_JUDGE_1P_DURATION = 525;
-	public static final int VALUE_JUDGE_2P_DURATION = 526;
-	public static final int VALUE_JUDGE_3P_DURATION = 527;
-
-	// 拡張数値定義
-	public static final int VALUE_JUDGE_1P_KEY10 = 1510;
-	public static final int VALUE_JUDGE_1P_KEY99 = 1599;
-	public static final int VALUE_JUDGE_2P_KEY10 = 1610;
-	public static final int VALUE_JUDGE_2P_KEY99 = 1699;
-
 	public static final int SLIDER_LANECOVER = 4;
 	public static final int SLIDER_LANECOVER2 = 5;
 
@@ -634,31 +619,44 @@ public class SkinProperty {
 	
 	public static final int OFFSET_MAX = 199;
 
-	public static final int BUTTON_MODE = 1011;
-	public static final int BUTTON_SORT = 1012;
-	public static final int BUTTON_PLAY = 1015;
-	public static final int BUTTON_AUTOPLAY = 1016;
-	public static final int BUTTON_PRACTICE = 1315;
-	public static final int BUTTON_READTEXT = 1017;
-	public static final int BUTTON_REPLAY = 1019;
-	public static final int BUTTON_REPLAY2 = 1316;
-	public static final int BUTTON_REPLAY3 = 1317;
-	public static final int BUTTON_REPLAY4 = 1318;
-	public static final int BUTTON_GAUGE_1P = 1040;
-	public static final int BUTTON_GAUGE_2P = 1041;
-	public static final int BUTTON_RANDOM_1P = 1042;
-	public static final int BUTTON_RANDOM_2P = 1043;
-	public static final int BUTTON_DPOPTION = 1054;
-	public static final int BUTTON_HSFIX = 1055;
-	public static final int BUTTON_BGA = 1072;
-	public static final int BUTTON_ASSIST_EXJUDGE = 1301;
-	public static final int BUTTON_ASSIST_CONSTANT = 1302;
-	public static final int BUTTON_ASSIST_JUDGEAREA = 1303;
-	public static final int BUTTON_ASSIST_LEGACY = 1304;
-	public static final int BUTTON_ASSIST_MARKNOTE = 1305;
-	public static final int BUTTON_ASSIST_BPMGUIDE = 1306;
-	public static final int BUTTON_ASSIST_NOMINE = 1307;
-	public static final int BUTTON_LNMODE = 1308;
+	public static final int BUTTON_MODE = 11;
+	public static final int BUTTON_SORT = 12;
+	public static final int BUTTON_PLAY = 15;
+	public static final int BUTTON_AUTOPLAY = 16;
+	public static final int BUTTON_PRACTICE = 315;
+	public static final int BUTTON_READTEXT = 17;
+	public static final int BUTTON_REPLAY = 19;
+	public static final int BUTTON_REPLAY2 = 316;
+	public static final int BUTTON_REPLAY3 = 317;
+	public static final int BUTTON_REPLAY4 = 318;
+	public static final int BUTTON_GAUGE_1P = 40;
+	public static final int BUTTON_GAUGE_2P = 41;
+	public static final int BUTTON_RANDOM_1P = 42;
+	public static final int BUTTON_RANDOM_2P = 43;
+	public static final int BUTTON_DPOPTION = 54;
+	public static final int BUTTON_HSFIX = 55;
+	public static final int BUTTON_BGA = 72;
+	public static final int BUTTON_ASSIST_EXJUDGE = 301;
+	public static final int BUTTON_ASSIST_CONSTANT = 302;
+	public static final int BUTTON_ASSIST_JUDGEAREA = 303;
+	public static final int BUTTON_ASSIST_LEGACY = 304;
+	public static final int BUTTON_ASSIST_MARKNOTE = 305;
+	public static final int BUTTON_ASSIST_BPMGUIDE = 306;
+	public static final int BUTTON_ASSIST_NOMINE = 307;
+	public static final int BUTTON_LNMODE = 308;
 
-
+	public static final int VALUE_JUDGE_1P_SCRATCH = 500;
+	public static final int VALUE_JUDGE_1P_KEY1 = 501;
+	public static final int VALUE_JUDGE_1P_KEY9 = 509;
+	public static final int VALUE_JUDGE_2P_SCRATCH = 510;
+	public static final int VALUE_JUDGE_2P_KEY1 = 511;
+	public static final int VALUE_JUDGE_2P_KEY9 = 519;
+	public static final int VALUE_JUDGE_1P = 520;
+	public static final int VALUE_JUDGE_2P = 521;
+	public static final int VALUE_JUDGE_3P = 522;
+	// 拡張数値定義
+	public static final int VALUE_JUDGE_1P_KEY10 = 1510;
+	public static final int VALUE_JUDGE_1P_KEY99 = 1599;
+	public static final int VALUE_JUDGE_2P_KEY10 = 1610;
+	public static final int VALUE_JUDGE_2P_KEY99 = 1699;
 }
