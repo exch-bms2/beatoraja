@@ -90,20 +90,20 @@ public abstract class SkinLoader {
 
     protected static Texture getTexture(String path, boolean usecim) {
         if(resource.exists(path)) {
-            return new Texture(getPmaPixmap(path));
+            return new Texture(resource.get(path));
         }
         try {
             long modifiedtime = Files.getLastModifiedTime(Paths.get(path)).toMillis() / 1000;
             String cim = path.substring(0, path.lastIndexOf('.')) + "__" + modifiedtime + ".cim";
             if(resource.exists(cim)) {
-                return new Texture(getPmaPixmap(cim));
+                return new Texture(resource.get(cim));
             }
 
             if (Files.exists(Paths.get(cim))) {
-                Pixmap pixmap = getPmaPixmap(cim);
+                Pixmap pixmap = resource.get(cim);
                 return new Texture(pixmap);
             } else if(usecim){
-                Pixmap pixmap = getPmaPixmap(path);
+                Pixmap pixmap = resource.get(path);
 
                 try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get(path).getParent())) {
                     for (Path p : paths) {
@@ -121,7 +121,7 @@ public abstract class SkinLoader {
                 Texture tex = new Texture(pixmap);
                 return tex;
             } else {
-                Pixmap pixmap = getPmaPixmap(path);
+                Pixmap pixmap = resource.get(path);
                 return new Texture(pixmap);
             }
         } catch (Throwable e) {
@@ -129,33 +129,4 @@ public abstract class SkinLoader {
         }
         return null;
     }
-
-	private static Pixmap getPmaPixmap(String path)
-	{
-        Pixmap pixmap = resource.get(path);
-
-        //Convert all straight alpha skin images into premultiplied alpha
-
-        for (int y = 0; y < pixmap.getHeight(); y++) {
-            for (int x = 0; x < pixmap.getWidth(); x++) {
-
-                Color color = new Color();
-                Color.rgba8888ToColor(color, pixmap.getPixel(x, y));
-
-                color.r = color.r * color.a;
-                color.g = color.g * color.a;
-                color.b = color.b * color.a;
-
-                pixmap.setBlending(Pixmap.Blending.None);
-                pixmap.setColor(color);
-                pixmap.fillRectangle(x, y, 1, 1);
-
-            }
-        }
-
-        return pixmap;
-
-	}
-
-
 }

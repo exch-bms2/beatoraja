@@ -2,6 +2,7 @@ package bms.player.beatoraja.skin;
 
 import bms.player.beatoraja.MainController;
 import bms.player.beatoraja.MainState;
+import bms.player.beatoraja.ShaderManager;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -10,6 +11,7 @@ import com.badlogic.gdx.graphics.Texture.TextureFilter;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Disposable;
 
@@ -52,6 +54,8 @@ public abstract class SkinObject implements Disposable {
 	 * フィルター
 	 */
 	private int dstfilter;
+	
+	private ShaderProgram filter;
 	/**
 	 * 画像回転の中心
 	 */
@@ -132,9 +136,12 @@ public abstract class SkinObject implements Disposable {
 		if (dstblend == 0) {
 			dstblend = blend;
 		}
+		
+		this.filter = ShaderManager.getShader("bilinear");
 		if (dstfilter == 0) {
 			dstfilter = filter;
 		}
+		
 		if (dstcenter == 0 && center < 10) {
 			dstcenter = center;
 			centerx = CENTERX[center];
@@ -370,10 +377,6 @@ public abstract class SkinObject implements Disposable {
 		}
 		final Color c = sprite.getColor();
 		switch (dstblend) {
-		case 0:
-			//PMA blending
-			sprite.setBlendFunction(GL11.GL_ONE, GL11.GL_ONE_MINUS_SRC_ALPHA);
-			break;
 		case 2:
 			sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
 			break;
@@ -391,23 +394,16 @@ public abstract class SkinObject implements Disposable {
 			break;
 		}
 
-		color.r = color.r * color.a;
-		color.g = color.g * color.a;
-		color.b = color.b * color.a;
-		sprite.setColor(color);
-		
-		if(dstfilter == 1) {
-			image.getTexture().setFilter(TextureFilter.Linear, TextureFilter.Linear);
-		} else {
-			image.getTexture().setFilter(TextureFilter.Nearest, TextureFilter.Nearest);			
-		}
-
+		sprite.setShader(filter);
+		filter.setUniformf("dst_color", color.r, color.g, color.b, color.a);
+		filter.setUniformi("filter_type", dstfilter);
 		if (angle != 0) {
 			sprite.draw(image, x, y, centerx * width, centery * height, width, height, 1, 1, angle);
 		} else {
 			sprite.draw(image, x, y, width, height);
 		}
-		sprite.setColor(c);
+		sprite.setShader(null);
+		
 		if (dstblend >= 2) {
 			sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		}
