@@ -220,6 +220,9 @@ public class PlayConfig {
 
 		private int select = BMKeys.BUTTON_10;
 
+		// TODO:コントローラー毎に利用できるようにする
+		private boolean analogScratch = false;
+
 		public ControllerConfig() {
 			
 		}
@@ -236,6 +239,14 @@ public class PlayConfig {
 
 		public void setName(String name) {
 			this.name = name;
+		}
+		
+		public boolean isAnalogScratch() {
+			return analogScratch;
+		}
+
+		public void setAnalogScratch(boolean analog) {
+			this.analogScratch = analog;
 		}
 
 		public int[] getKeyAssign() {

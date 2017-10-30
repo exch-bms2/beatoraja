@@ -132,6 +132,11 @@ public class Config {
      * JKOC Hack (boolean) private variable
      */
     private boolean jkoc_hack = false;
+    
+    /**
+     * アナログスクラッチを利用するか(INFINITASコントローラの場合true)
+     */
+    private boolean analogScratch = false;
 
     /**
      * 選曲時のモードフィルター
@@ -305,6 +310,13 @@ public class Config {
         this.jkoc_hack = jkoc;
     }
     
+	public boolean isAnalogScratch() {
+	    return analogScratch;
+	}
+	public void setAnalogScratch(boolean analog) {
+	    this.analogScratch = analog;
+	}
+
 	public String getVlcpath() {
 		return vlcpath;
 	}

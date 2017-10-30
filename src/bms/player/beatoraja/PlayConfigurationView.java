@@ -177,6 +177,8 @@ public class PlayConfigurationView implements Initializable {
     @FXML
     private ComboBox<Integer> jkoc_hack;
     @FXML
+    private ComboBox<Integer> analogScratch;
+    @FXML
     private CheckBox usecim;
     @FXML
     private CheckBox useSongInfo;
@@ -233,6 +235,7 @@ public class PlayConfigurationView implements Initializable {
 		initComboBox(bgaop, new String[] { "ON", "AUTOPLAY ", "OFF" });
 		initComboBox(bgaexpand, new String[] { "Full", "Keep Aspect Ratio", "Off" });
                 initComboBox(jkoc_hack, new String[] {"False", "True"});
+                initComboBox(analogScratch, new String[] {"False", "True"});
 		initComboBox(fixhispeed, new String[] { "OFF", "START BPM", "MAX BPM", "MAIN BPM", "MIN BPM" });
 		initComboBox(playconfig, new String[] { "5/7KEYS", "10/14KEYS", "9KEYS", "24KEYS", "24KEYS DOUBLE" });
 		initComboBox(lntype, new String[] { "LONG NOTE", "CHARGE NOTE", "HELL CHARGE NOTE" });
@@ -312,6 +315,7 @@ public class PlayConfigurationView implements Initializable {
         // int b = Boolean.valueOf(config.getJKOC()).compareTo(false);
 
         jkoc_hack.setValue(Boolean.valueOf(config.getJKOC()).compareTo(false));
+        analogScratch.setValue(Boolean.valueOf(config.isAnalogScratch()).compareTo(false));
         usecim.setSelected(config.isCacheSkinImage());
         useSongInfo.setSelected(config.isUseSongInfo());
 
@@ -419,6 +423,11 @@ public class PlayConfigurationView implements Initializable {
             config.setJKOC(true);
         else
             config.setJKOC(false);
+        
+        if(analogScratch.getValue() > 0)
+            config.setAnalogScratch(true);
+        else
+            config.setAnalogScratch(false);
 
         config.setCacheSkinImage(usecim.isSelected());
         config.setUseSongInfo(useSongInfo.isSelected());

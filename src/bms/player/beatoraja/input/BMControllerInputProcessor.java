@@ -1,19 +1,19 @@
 package bms.player.beatoraja.input;
 
+
 import java.util.Arrays;
 import java.util.logging.Logger;
 
+import bms.player.beatoraja.Config;
+import bms.player.beatoraja.PlayConfig.ControllerConfig;
 import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.ControllerListener;
 import com.badlogic.gdx.controllers.PovDirection;
 import com.badlogic.gdx.math.Vector3;
 
-import bms.player.beatoraja.Config;
-import bms.player.beatoraja.PlayConfig.ControllerConfig;
-
 /**
  * 専用コントローラー入力処理用クラス
- *
+ * 
  * @author exch
  */
 public class BMControllerInputProcessor extends BMSPlayerInputDevice implements ControllerListener {
@@ -43,11 +43,11 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice implements 
 	private long[] axistime = new long[4];
 
 	private int lastPressedButton = -1;
-
+	
         private boolean koc = false;
-
+	
         private Config config;
-
+	
 	public BMControllerInputProcessor(BMSPlayerInputProcessor bmsPlayerInputProcessor, Controller controller,
 	                                  ControllerConfig controllerConfig) {
 		super(Type.BM_CONTROLLER);
@@ -63,7 +63,7 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice implements 
 		this.start = controllerConfig.getStart();
 		this.select = controllerConfig.getSelect();
 	}
-
+	
 	public Controller getController() {
 		return controller;
 	}
@@ -122,10 +122,22 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice implements 
 		lastPressedButton = -1;
 	}
 
-	private int counter = 1;
-	private float x = -999;
-	private boolean isActive = false;
-	private boolean isRight = false;
+	/**
+	 * スクラッチ停止カウンタ
+	 */
+	private long counter = 1;
+	/**
+	 * アナログスクラッチ位置(-1<->0<->1)
+	 */
+	private float oldAnalogScratchX = 10;
+	/**
+	 * アナログスクラッチ 入力フラグ
+	 */
+	private boolean activeAnalogScratch = false;
+	/**
+	 * アナログスクラッチ 右回転フラグ
+	 */
+	private boolean rightMoveScratching = false;
 
 	public void poll(final long presstime) {
 		for (int i = 0; i < 4; i++) {
@@ -169,11 +181,11 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice implements 
 				if (button <= BMKeys.BUTTON_16) {
 					buttonstate[button] = controller.getButton(button);
 				} else if (button == BMKeys.UP && !koc) {
-					checkScr(axis[1]);
-					buttonstate[button] = isActive && isRight;
+					buttonstate[button] = scratchInput(BMKeys.UP);
+					buttonstate[button] = activeAnalogScratch && rightMoveScratching;
 				} else if (button == BMKeys.DOWN && !koc) {
-					checkScr(axis[1]);
-					buttonstate[button] = isActive && !isRight;
+					buttonstate[button] = scratchInput(BMKeys.DOWN);
+					buttonstate[button] = activeAnalogScratch && !rightMoveScratching;
 				} else if (button == BMKeys.LEFT) {
 					buttonstate[button] = (!analogaxis[0] && axis[0] < -0.9) || (!analogaxis[3] && axis[3] < -0.9);
 				} else if (button == BMKeys.RIGHT) {
@@ -206,52 +218,67 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice implements 
 		}
 	}
 
-	private void checkScr(float stateX) {
-		if (x == -999) {
-			x = stateX;
-			counter = 100;
-			return;
+	private boolean scratchInput(int button) {
+		if(!config.isAnalogScratch()) {
+			if(button == BMKeys.UP) {
+				return (!analogaxis[1] && axis[1] < -0.9) || (!analogaxis[2] && axis[2] < -0.9);
+			} else if(button == BMKeys.DOWN){
+				return (!analogaxis[1] && axis[1] > 0.9) || (!analogaxis[2] && axis[2] > 0.9);
+			}
+		}
+		
+		float analogScratchX = axis[1];
+		if (oldAnalogScratchX > 1) {
+			oldAnalogScratchX = analogScratchX;
+			activeAnalogScratch = false;
+			return false;
 		}
 
-		// Get imput.
-		if (x != stateX) {
+		if (oldAnalogScratchX != analogScratchX) {
 			boolean nowRight = false;
-			if (x < stateX) {
+			if (oldAnalogScratchX < analogScratchX) {
 				nowRight = true;
-				if ((stateX - x) > (1 - stateX + x)) {
+				if ((analogScratchX - oldAnalogScratchX) > (1 - analogScratchX + oldAnalogScratchX)) {
 					nowRight = false;
 				}
-			} else if (x > stateX) {
+			} else if (oldAnalogScratchX > analogScratchX) {
 				nowRight = false;
-				if ((x - stateX) > ((stateX + 1) - x)) {
+				if ((oldAnalogScratchX - analogScratchX) > ((analogScratchX + 1) - oldAnalogScratchX)) {
 					nowRight = true;
 				}
 			}
 
-			if (isActive && !(isRight == nowRight)) {
-				isRight = nowRight;
+			if (activeAnalogScratch && !(rightMoveScratching == nowRight)) {
+				rightMoveScratching = nowRight;
 
-			} else if (!isActive) {
-				isActive = true;
-
-				isRight = nowRight;
+			} else if (!activeAnalogScratch) {
+				activeAnalogScratch = true;
+				rightMoveScratching = nowRight;
 			}
 
 			counter = 0;
-			x = stateX;
+			oldAnalogScratchX = analogScratchX;
 		}
 
 		// counter > 100 ... Stop Scratching.
-		if (counter > 100 && isActive) {
-			isActive = false;
+		if (counter > 100 && activeAnalogScratch) {
+			activeAnalogScratch = false;
 			counter = 0;
 		}
 
-		if (counter == 65535) {
+		if (counter == Long.MAX_VALUE) {
 			counter = 0;
 		}
 
 		counter++;
+		
+		if(button == BMKeys.UP) {
+			return activeAnalogScratch && rightMoveScratching;
+		} else if(button == BMKeys.DOWN){
+			return activeAnalogScratch && !rightMoveScratching;
+		} else {
+		    return false;
+		}
 	}
 
 	public int getLastPressedButton() {
