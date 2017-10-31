@@ -188,6 +188,16 @@
                                     <ComboBox fx:id="jkoc_hack" prefWidth="150.0" />
                                  </children>
                               </HBox>
+                              <HBox prefHeight="37.0" prefWidth="723.0">
+                                 <children>
+                                    <Label contentDisplay="CENTER" prefHeight="18.0" prefWidth="127.0" text="%ANALOG_SCRATCH" textAlignment="CENTER">
+                                       <tooltip>
+                                          <Tooltip text="Use INF controller, is True." textAlignment="CENTER" />
+                                       </tooltip>
+                                    </Label>
+                                    <ComboBox fx:id="analogScratch" prefWidth="150.0" />
+                                 </children>
+                              </HBox>
                            </children>
                         </VBox>
                      </children>
