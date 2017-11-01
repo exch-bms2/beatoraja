@@ -621,17 +621,6 @@ public class MusicSelector extends MainState {
 			return config.getMode7().getDuration();
 		case NUMBER_JUDGETIMING:
 			return config.getJudgetiming();
-		case BUTTON_MODE:
-			int mode = 0;
-			for (; mode < MODE.length; mode++) {
-				if (MODE[mode] == config.getMode()) {
-					break;
-				}
-			}
-			final int[] mode_lr2 = { 0, 2, 4, 5, 1, 3 };
-			return mode < mode_lr2.length ? mode_lr2[mode] : mode;
-		case BUTTON_SORT:
-			return sort;
 		case NUMBER_SCORE_RATE:
 			return bar.getSelected().getScore() != null ? getScoreDataProperty().getRateInt() : Integer.MIN_VALUE;
 		case NUMBER_SCORE_RATE_AFTERDOT:
@@ -643,6 +632,11 @@ public class MusicSelector extends MainState {
 
 	public String getTextValue(int id) {
 		switch (id) {
+			case STRING_RIVAL:
+				if(rival != null) {
+					return rival.getName();
+				}
+				break;
 		case STRING_TITLE:
 		case STRING_FULLTITLE:
 			if (bar.getSelected() instanceof DirectoryBar) {
@@ -691,7 +685,13 @@ public class MusicSelector extends MainState {
 		switch (id) {
 		case SLIDER_MUSICSELECT_POSITION:
 			return bar.getSelectedPosition();
-		case BARGRAPH_RATE_PGREAT:
+			case SLIDER_MASTER_VOLUME:
+				return getMainController().getConfig().getSystemvolume();
+			case SLIDER_KEY_VOLUME:
+				return getMainController().getConfig().getKeyvolume();
+			case SLIDER_BGM_VOLUME:
+				return getMainController().getConfig().getBgvolume();
+			case BARGRAPH_RATE_PGREAT:
 			if (bar.getSelected() instanceof SongBar) {
 				IRScoreData score = bar.getSelected().getScore();
 				return score != null ? ((float) (score.getEpg() + score.getLpg()))
@@ -810,7 +810,7 @@ public class MusicSelector extends MainState {
 			}
 			return 0;
 		}
-		return 0;
+		return super.getSliderValue(id);
 	}
 
 	private int getMaxLevel(int modeId) {
@@ -836,7 +836,18 @@ public class MusicSelector extends MainState {
 		case SLIDER_MUSICSELECT_POSITION:
 			selectedBarMoved();
 			bar.setSelectedPosition(value);
+			return;
+			case SLIDER_MASTER_VOLUME:
+				getMainController().getConfig().setSystemvolume(value);
+				return;
+			case SLIDER_KEY_VOLUME:
+				getMainController().getConfig().setKeyvolume(value);
+				return;
+			case SLIDER_BGM_VOLUME:
+				getMainController().getConfig().setBgvolume(value);
+				return;
 		}
+		super.setSliderValue(id, value);
 	}
 
 	public TextureRegion getImage(int imageid) {
@@ -922,6 +933,23 @@ public class MusicSelector extends MainState {
 			}
 		}
 		return false;
+	}
+
+	public int getImageIndex(int id) {
+		switch(id) {
+			case BUTTON_MODE:
+				int mode = 0;
+				for (; mode < MODE.length; mode++) {
+					if (MODE[mode] == config.getMode()) {
+						break;
+					}
+				}
+				final int[] mode_lr2 = { 0, 2, 4, 5, 1, 3 };
+				return mode < mode_lr2.length ? mode_lr2[mode] : mode;
+			case BUTTON_SORT:
+				return sort;
+		}
+		return super.getImageIndex(id);
 	}
 
 	public void executeClickEvent(int id) {

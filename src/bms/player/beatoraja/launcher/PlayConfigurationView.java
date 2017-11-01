@@ -187,6 +187,8 @@ public class PlayConfigurationView implements Initializable {
 
     @FXML
     private ComboBox<Integer> jkoc_hack;
+	@FXML
+	private CheckBox analogScratch;
     @FXML
     private CheckBox usecim;
     @FXML
@@ -325,6 +327,7 @@ public class PlayConfigurationView implements Initializable {
         // int b = Boolean.valueOf(config.getJKOC()).compareTo(false);
 
         jkoc_hack.setValue(Boolean.valueOf(config.getJKOC()).compareTo(false));
+        analogScratch.setSelected(config.isAnalogScratch());
         usecim.setSelected(config.isCacheSkinImage());
         useSongInfo.setSelected(config.isUseSongInfo());
 
@@ -465,6 +468,7 @@ public class PlayConfigurationView implements Initializable {
             config.setJKOC(true);
         else
             config.setJKOC(false);
+        config.setAnalogScratch(analogScratch.isSelected());
 
         config.setCacheSkinImage(usecim.isSelected());
         config.setUseSongInfo(useSongInfo.isSelected());
