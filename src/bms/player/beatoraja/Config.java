@@ -129,11 +129,6 @@ public class Config {
 	private JudgeAlgorithm judgealgorithm = JudgeAlgorithm.Combo;
 
     /**
-     * JKOC Hack (boolean) private variable
-     */
-    private boolean jkoc_hack = false;
-
-    /**
      * 選曲時のモードフィルター
      */
 	private Mode mode = null;
@@ -297,14 +292,6 @@ public class Config {
 		this.bga = bga;
 	}
 
-    public boolean getJKOC()  {
-        return jkoc_hack;
-    }
-    
-    public void setJKOC(boolean jkoc)  {
-        this.jkoc_hack = jkoc;
-    }
-    
 	public String getVlcpath() {
 		return vlcpath;
 	}
@@ -745,5 +732,33 @@ public class Config {
 
 	public void setTarget(int target) {
 		this.target = target;
+	}
+
+	// TODO これ以下の値はコントローラー依存のため、ControllerConfigに持っていく予定
+
+	/**
+	 * JKOC Hack (boolean) private variable
+	 */
+	private boolean jkoc_hack = false;
+
+	/**
+	 * アナログスクラッチを利用するか(INFINITASコントローラの場合true)
+	 */
+	private boolean analogScratch = false;
+
+	public boolean getJKOC()  {
+		return jkoc_hack;
+	}
+
+	public void setJKOC(boolean jkoc)  {
+		this.jkoc_hack = jkoc;
+	}
+
+	public boolean isAnalogScratch() {
+		return analogScratch;
+	}
+
+	public void setAnalogScratch(boolean analogScratch) {
+		this.analogScratch = analogScratch;
 	}
 }

@@ -19,7 +19,7 @@ import com.badlogic.gdx.math.Rectangle;
 
 /**
  * キーボードやコントローラからの入力を管理するクラス
- * 
+ *
  * @author exch
  */
 public class BMSPlayerInputProcessor {
@@ -30,17 +30,18 @@ public class BMSPlayerInputProcessor {
 
 	private MidiInputProcessor midiinput;
 
-	public BMSPlayerInputProcessor(Resolution resolution) {
+	public BMSPlayerInputProcessor(Config config) {
+		Resolution resolution = config.getResolution();
 		kbinput = new KeyBoardInputProcesseor(this, KeyboardConfig.default14(), resolution);
 		// Gdx.input.setInputProcessor(kbinput);
 		List<BMControllerInputProcessor> bminput = new ArrayList<BMControllerInputProcessor>();
 		for (Controller controller : Controllers.getControllers()) {
 			Logger.getGlobal().info("コントローラーを検出 : " + controller.getName());
-			BMControllerInputProcessor bm = new BMControllerInputProcessor(this, controller, new ControllerConfig());
+			BMControllerInputProcessor bm = new BMControllerInputProcessor(this, controller, new ControllerConfig(), config);
 			// controller.addListener(bm);
 			bminput.add(bm);
 		}
-                
+
 		this.bminput = bminput.toArray(new BMControllerInputProcessor[0]);
 		midiinput = new MidiInputProcessor(this);
 		midiinput.open();
@@ -99,7 +100,7 @@ public class BMSPlayerInputProcessor {
 	private boolean selectPressed;
 
 	private boolean exitPressed;
-        
+
 	boolean[] cursor = new boolean[4];
 	long[] cursortime = new long[4];
 
@@ -113,7 +114,7 @@ public class BMSPlayerInputProcessor {
 	public void setKeyboardConfig(KeyboardConfig config) {
 		kbinput.setConfig(config);
 	}
-        
+
 	public void setControllerConfig(ControllerConfig[] configs) {
 		boolean[] b = new boolean[configs.length];
 		for (BMControllerInputProcessor controller : bminput) {
@@ -136,7 +137,7 @@ public class BMSPlayerInputProcessor {
 				controller.setPlayer(player);
 			} else {
 				controller.setPlayer(0);
-				
+
 			}
 		}
 	}
@@ -345,7 +346,7 @@ public class BMSPlayerInputProcessor {
 		kbinput.poll(now);
 		for (BMControllerInputProcessor controller : bminput) {
 			controller.poll(now);
-		}		
+		}
 	}
 
 	public void dispose() {
