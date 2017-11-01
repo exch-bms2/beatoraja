@@ -18,8 +18,6 @@ import com.badlogic.gdx.math.Vector3;
  */
 public class BMControllerInputProcessor extends BMSPlayerInputDevice implements ControllerListener {
 
-	// TODO アナログ皿対応
-
 	private final BMSPlayerInputProcessor bmsPlayerInputProcessor;
 
 	private Controller controller;
@@ -39,8 +37,6 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice implements 
 	private int select = BMKeys.BUTTON_10;
 
 	private float[] axis = new float[4];
-	private boolean[] analogaxis = new boolean[4];
-	private long[] axistime = new long[4];
 
 	private int lastPressedButton = -1;
 	private final Config config;
@@ -137,38 +133,7 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice implements 
 
 	public void poll(final long presstime) {
 		for (int i = 0; i < 4; i++) {
-			final float ax = controller.getAxis(i);
-			if (analogaxis[i] && !config.getJKOC()) {
-				if ((axis[i] == 1.0 && ax == -1.0) || (axis[i] < 1.0 && ax > axis[i])) {
-					this.bmsPlayerInputProcessor.keyChanged(this, (int) presstime, 8 + player * 9, false);
-					this.bmsPlayerInputProcessor.keyChanged(this, (int) presstime, 7 + player * 9, true);
-					this.axistime[i] = presstime;
-				} else if ((axis[i] == -1.0 && ax == 1.0) || (axis[i] > -1.0 && ax > axis[i])) {
-					this.bmsPlayerInputProcessor.keyChanged(this, (int) presstime, 8 + player * 9, true);
-					this.bmsPlayerInputProcessor.keyChanged(this, (int) presstime, 7 + player * 9, false);
-					this.axistime[i] = presstime;
-				} else if (axistime[i] != -1 && presstime > axistime[i] + 50) {
-					this.bmsPlayerInputProcessor.keyChanged(this, (int) presstime, 8 + player * 9, false);
-					this.bmsPlayerInputProcessor.keyChanged(this, (int) presstime, 7 + player * 9, false);
-					this.axistime[i] = -1;
-				}
-			} else {
-				if ((ax > -0.9 && ax < -0.1) || (ax > 0.1 && ax < 0.9)) {
-					if (axistime[i] != -1) {
-						if (presstime > axistime[i] + 500  && !config.getJKOC()) {
-							if(!config.getJKOC())
-								analogaxis[i] = false;
-							else
-								analogaxis[i] = true;
-						}
-					} else {
-						axistime[i] = presstime;
-					}
-				} else {
-					axistime[i] = -1;
-				}
-			}
-			axis[i] = ax;
+			axis[i] = controller.getAxis(i);
 		}
 
 		for (int button = 0; button < buttonstate.length; button++) {
@@ -177,15 +142,15 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice implements 
 				if (button <= BMKeys.BUTTON_16) {
 					buttonstate[button] = controller.getButton(button);
 				} else if (button == BMKeys.UP && !config.getJKOC()) {
+					// アナログ右回転をUPに割り当てる
 					buttonstate[button] = scratchInput(BMKeys.UP);
-					buttonstate[button] = activeAnalogScratch && rightMoveScratching;
 				} else if (button == BMKeys.DOWN && !config.getJKOC()) {
+					// アナログ左回転をDOWNに割り当てる
 					buttonstate[button] = scratchInput(BMKeys.DOWN);
-					buttonstate[button] = activeAnalogScratch && !rightMoveScratching;
 				} else if (button == BMKeys.LEFT) {
-					buttonstate[button] = (!analogaxis[0] && axis[0] < -0.9) || (!analogaxis[3] && axis[3] < -0.9);
+					buttonstate[button] = (axis[0] < -0.9) || (axis[3] < -0.9);
 				} else if (button == BMKeys.RIGHT) {
-					buttonstate[button] = (!analogaxis[0] && axis[0] > 0.9) || (!analogaxis[3] && axis[3] > 0.9);
+					buttonstate[button] = (axis[0] > 0.9) || (axis[3] > 0.9);
 				}
 				if (buttonchanged[button] = (prev != buttonstate[button])) {
 					buttontime[button] = presstime;
@@ -217,9 +182,9 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice implements 
 	private boolean scratchInput(int button) {
 		if(!config.isAnalogScratch()) {
 			if(button == BMKeys.UP) {
-				return (!analogaxis[1] && axis[1] < -0.9) || (!analogaxis[2] && axis[2] < -0.9);
+				return (axis[1] < -0.9) || (axis[2] < -0.9);
 			} else if(button == BMKeys.DOWN){
-				return (!analogaxis[1] && axis[1] > 0.9) || (!analogaxis[2] && axis[2] > 0.9);
+				return (axis[1] > 0.9) || (axis[2] > 0.9);
 			}
 		}
 
@@ -231,6 +196,7 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice implements 
 		}
 
 		if (oldAnalogScratchX != analogScratchX) {
+			// アナログスクラッチ位置の移動が発生した場合
 			boolean nowRight = false;
 			if (oldAnalogScratchX < analogScratchX) {
 				nowRight = true;
@@ -245,9 +211,10 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice implements 
 			}
 
 			if (activeAnalogScratch && !(rightMoveScratching == nowRight)) {
+				// 左回転→右回転の場合(右回転→左回転は値の変更がない)
 				rightMoveScratching = nowRight;
-
 			} else if (!activeAnalogScratch) {
+				// 移動無し→回転の場合
 				activeAnalogScratch = true;
 				rightMoveScratching = nowRight;
 			}
