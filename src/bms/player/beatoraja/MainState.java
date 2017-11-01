@@ -538,7 +538,7 @@ public abstract class MainState {
 				case STRING_RIVAL:
 					return TargetProperty.getAllTargetProperties()[getMainController().getPlayerResource().getPlayerConfig().getTarget()].getName();
 				case STRING_PLAYER:
-					return "";
+					return getMainController().getPlayerConfig().getName();
 			case STRING_TITLE:
 				return song != null ? song.getTitle() : "";
 			case STRING_SUBTITLE:
