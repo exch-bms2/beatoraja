@@ -620,12 +620,8 @@ public class JudgeManager {
 		this.coursemaxcombo = combo;
 	}
 
-	public int[][] getJudgeTimeRegion() {
-		return njudge;
-	}
-
-	public int[][] getScratchJudgeTimeRegion() {
-		return sjudge;
+	public int[][] getJudgeTimeRegion(int lane) {
+		return sckeyassign[lane] >= 0 ? sjudge : njudge;
 	}
 
 	public IRScoreData getScoreData() {

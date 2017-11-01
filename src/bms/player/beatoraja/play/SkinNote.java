@@ -51,7 +51,6 @@ public class SkinNote extends SkinObject {
 	public void draw(SkinObjectRenderer sprite, long time, MainState state) {
 		final BMSPlayer player = (BMSPlayer) state;
 		if (player.getLanerender() != null) {
-			sprite.setColor(Color.WHITE);
 			player.getLanerender().drawLane(sprite, time, lanes);
 		}
 	}

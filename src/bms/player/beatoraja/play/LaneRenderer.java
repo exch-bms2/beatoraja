@@ -14,6 +14,8 @@ import bms.player.beatoraja.skin.SkinImage;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
@@ -62,8 +64,6 @@ public class LaneRenderer {
 
 	private final BMSPlayer main;
 
-	private final SpriteBatch sprite;
-	private ShapeRenderer shape;
 	private BitmapFont font;
 	private final PlaySkin skin;
 
@@ -83,11 +83,15 @@ public class LaneRenderer {
 	private TextureRegion[] pnoteimage;
 	private Rectangle[] laneregion;
 
+	private TextureRegion blank;
+
 	public LaneRenderer(BMSPlayer main, BMSModel model) {
 
 		this.main = main;
-		this.sprite = main.getMainController().getSpriteBatch();
-		this.shape = new ShapeRenderer();
+		Pixmap hp = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+		hp.drawPixel(0, 0, Color.toIntBits(255, 255, 255, 255));
+		blank = new TextureRegion(new Texture(hp));
+		hp.dispose();
 
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
 				Gdx.files.internal("skin/default/VL-Gothic-Regular.ttf"));
@@ -130,17 +134,19 @@ public class LaneRenderer {
 		this.model = model;
 		List<TimeLine> tls = new ArrayList<TimeLine>();
 		double cbpm = model.getBpm();
-		for(TimeLine tl : model.getAllTimeLines()) {
-			if(cbpm != tl.getBPM() || tl.getStop() > 0 || tl.getSectionLine()) {
+		for (TimeLine tl : model.getAllTimeLines()) {
+			if (cbpm != tl.getBPM() || tl.getStop() > 0 || tl.getSectionLine()) {
 				tls.add(tl);
-			} else if(tl.existNote() || tl.existHiddenNote()){
+			} else if (tl.existNote() || tl.existHiddenNote()) {
 				tls.add(tl);
 			}
-			cbpm = tl.getBPM();			
+			cbpm = tl.getBPM();
 		}
 		this.timelines = tls.toArray(new TimeLine[tls.size()]);
-//		Logger.getGlobal().info("省略したTimeLine数:" + (model.getAllTimeLines().length - timelines.length) + " / " + model.getAllTimeLines().length);
-		
+		// Logger.getGlobal().info("省略したTimeLine数:" +
+		// (model.getAllTimeLines().length - timelines.length) + " / " +
+		// model.getAllTimeLines().length);
+
 		switch (config.getFixhispeed()) {
 		case Config.FIX_HISPEED_OFF:
 			break;
@@ -236,7 +242,7 @@ public class LaneRenderer {
 
 	public void drawLane(SkinObjectRenderer sprite, long time, SkinLane[] lanes) {
 		for (int i = 0; i < lanes.length; i++) {
-			if(i >= noteimage.length) {
+			if (i >= noteimage.length) {
 				break;
 			}
 			if (lanes[i].note != null) {
@@ -288,31 +294,26 @@ public class LaneRenderer {
 		// 判定エリア表示
 		// TODO 実装が古いため、書き直す
 		if (config.isShowjudgearea()) {
-//			sprite.end();
-//			Gdx.gl.glEnable(GL11.GL_BLEND);
-//			Gdx.gl.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-//			shape.begin(ShapeType.Filled);
-//			final Color[] color = { Color.valueOf("0000ff20"), Color.valueOf("00ff0020"), Color.valueOf("ffff0020"),
-//					Color.valueOf("ff800020"), Color.valueOf("ff000020") };
-//			final int[][] judgetime = main.getJudgeManager().getJudgeTimeRegion();
-//			for (int i = pos; i < timelines.length; i++) {
-//				final TimeLine tl = timelines[i];
-//				if (tl.getMicroTime() >= microtime) {
-//					double rate = (tl.getSection() - (i > 0 ? timelines[i - 1].getSection() : 0)) * rxhs * 1000
-//							/ (tl.getMicroTime() - (i > 0 ? timelines[i - 1].getMicroTime() + timelines[i - 1].getMicroStop() : 0));
-//					for (int j = color.length - 1; j >= 0; j--) {
-//						shape.setColor(color[j]);
-//						int nj = j > 0 ? judgetime[j - 1][1] : 0;
-//						for (int p = 0; p < playerr.length; p++) {
-//							shape.rect(playerr[p].x, (float)(hl + nj * rate), playerr[p].width, (float)((judgetime[j][1] - nj) * rate));
-//						}
-//					}
-//					break;
-//				}
-//			}
-//			shape.end();
-//			Gdx.gl.glDisable(GL11.GL_BLEND);
-//			sprite.begin();
+			final Color[] color = { Color.valueOf("0000ff20"), Color.valueOf("00ff0020"), Color.valueOf("ffff0020"),
+					Color.valueOf("ff800020"), Color.valueOf("ff000020") };
+			for (int lane = 0; lane < laneregion.length; lane++) {
+				final int[][] judgetime = main.getJudgeManager().getJudgeTimeRegion(lane);
+				for (int i = pos; i < timelines.length; i++) {
+					final TimeLine tl = timelines[i];
+					if (tl.getMicroTime() >= microtime) {
+						double rate = (tl.getSection() - (i > 0 ? timelines[i - 1].getSection() : 0)) * rxhs * 1000
+								/ (tl.getMicroTime() - (i > 0
+										? timelines[i - 1].getMicroTime() + timelines[i - 1].getMicroStop() : 0));
+						for (int j = color.length - 1; j >= 0; j--) {
+							sprite.setColor(color[j]);
+							int nj = j > 0 ? judgetime[j - 1][1] : 0;
+							sprite.draw(blank, laneregion[lane].x, (float) (hl + nj * rate), laneregion[lane].width,
+									(float) ((judgetime[j][1] - nj) * rate));
+						}
+						break;
+					}
+				}
+			}
 		}
 
 		final double orgy = y;
@@ -324,7 +325,7 @@ public class LaneRenderer {
 					if (prevtl.getMicroTime() + prevtl.getMicroStop() > microtime) {
 						y += (tl.getSection() - prevtl.getSection()) * rxhs;
 					} else {
-						y += (tl.getSection() - prevtl.getSection()) * (tl.getMicroTime() -microtime)
+						y += (tl.getSection() - prevtl.getSection()) * (tl.getMicroTime() - microtime)
 								/ (tl.getMicroTime() - prevtl.getMicroTime() - prevtl.getMicroStop()) * rxhs;
 					}
 				} else {
@@ -337,31 +338,34 @@ public class LaneRenderer {
 					for (Rectangle r : playerr) {
 						// TODO 数値もスキンベースへ移行
 						sprite.draw(font, String.format("%2d:%02d.%1d", tl.getTime() / 60000,
-								(tl.getTime() / 1000) % 60, (tl.getTime() / 100) % 10), r.x + 4, (float) (y + 20), Color.valueOf("40c0c0"));
+								(tl.getTime() / 1000) % 60, (tl.getTime() / 100) % 10), r.x + 4, (float) (y + 20),
+								Color.valueOf("40c0c0"));
 					}
 				}
 
 				if (config.isBpmguide() || showTimeline) {
-					if(tl.getBPM() != nbpm) {
+					if (tl.getBPM() != nbpm) {
 						for (SkinImage line : skin.getBPMLine()) {
 							line.draw(sprite, time, main, 0, (int) (y - hl));
 						}
 						for (Rectangle r : playerr) {
 							// TODO 数値もスキンベースへ移行
-							sprite.draw(font, "BPM" + ((int) tl.getBPM()), r.x + r.width / 2, (float) (y + 20), Color.valueOf("00c000"));							
+							sprite.draw(font, "BPM" + ((int) tl.getBPM()), r.x + r.width / 2, (float) (y + 20),
+									Color.valueOf("00c000"));
 						}
 
 					}
-					if(tl.getStop() > 0) {
+					if (tl.getStop() > 0) {
 						for (SkinImage line : skin.getStopLine()) {
 							line.draw(sprite, time, main, 0, (int) (y - hl));
 						}
 						for (Rectangle r : playerr) {
 							// TODO 数値もスキンベースへ移行
-							sprite.draw(font, "STOP " + ((int) tl.getStop()) + "ms", r.x + r.width / 2, (float) (y + 20), Color.valueOf("c0c000"));							
+							sprite.draw(font, "STOP " + ((int) tl.getStop()) + "ms", r.x + r.width / 2,
+									(float) (y + 20), Color.valueOf("c0c000"));
 						}
 					}
-					
+
 				}
 				// 小節線描画
 				if (tl.getSectionLine()) {
@@ -388,6 +392,7 @@ public class LaneRenderer {
 			}
 		}
 
+		sprite.setColor(Color.WHITE);
 		y = orgy;
 		for (int i = pos; i < timelines.length && y <= hu; i++) {
 			final TimeLine tl = timelines[i];
@@ -397,7 +402,7 @@ public class LaneRenderer {
 					if (prevtl.getMicroTime() + prevtl.getMicroStop() > microtime) {
 						y += (tl.getSection() - prevtl.getSection()) * rxhs;
 					} else {
-						y += (tl.getSection() - prevtl.getSection()) * (tl.getMicroTime() -microtime)
+						y += (tl.getSection() - prevtl.getSection()) * (tl.getMicroTime() - microtime)
 								/ (tl.getMicroTime() - prevtl.getMicroTime() - prevtl.getMicroStop()) * rxhs;
 					}
 				} else {
@@ -435,15 +440,18 @@ public class LaneRenderer {
 									if (prevtl.getMicroTime() + prevtl.getMicroStop() > microtime) {
 										dy += (nowtl.getSection() - prevtl.getSection()) * rxhs;
 									} else {
-										dy += (nowtl.getSection() - prevtl.getSection()) * (nowtl.getMicroTime() - microtime)
-												/ (nowtl.getMicroTime() - prevtl.getMicroTime() - prevtl.getMicroStop()) * rxhs;
+										dy += (nowtl.getSection() - prevtl.getSection())
+												* (nowtl.getMicroTime() - microtime)
+												/ (nowtl.getMicroTime() - prevtl.getMicroTime() - prevtl.getMicroStop())
+												* rxhs;
 									}
 								}
 								prevtl = nowtl;
 							}
 							if (dy > 0) {
-								this.drawLongNote(laneregion[lane].x, (float)(y + dy), laneregion[lane].width,
-										(float)(y < laneregion[lane].y ? y - laneregion[lane].y : dy), scale, lane, ln);
+								this.drawLongNote(sprite, laneregion[lane].x, (float) (y + dy), laneregion[lane].width,
+										(float) (y < laneregion[lane].y ? y - laneregion[lane].y : dy), scale, lane,
+										ln);
 							}
 							// System.out.println(dy);
 						}
@@ -472,7 +480,8 @@ public class LaneRenderer {
 		return nowbpm;
 	}
 
-	final private void drawLongNote(float x, float y, float width, float height, float scale, int lane, LongNote ln) {
+	final private void drawLongNote(SkinObjectRenderer sprite, float x, float y, float width, float height, float scale,
+			int lane, LongNote ln) {
 		final TextureRegion[] longnote = this.longnote[lane];
 		if ((model.getLntype() == BMSModel.LNTYPE_HELLCHARGENOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
 				|| ln.getType() == LongNote.TYPE_HELLCHARGENOTE) {
@@ -506,9 +515,9 @@ public class LaneRenderer {
 			font.dispose();
 			font = null;
 		}
-		if (shape != null) {
-			shape.dispose();
-			shape = null;
+		if (blank != null) {
+			blank.getTexture().dispose();
+			blank = null;
 		}
 	}
 }
