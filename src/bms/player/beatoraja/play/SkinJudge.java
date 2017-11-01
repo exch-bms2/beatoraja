@@ -2,6 +2,8 @@ package bms.player.beatoraja.play;
 
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.skin.*;
+import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
+
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.math.Rectangle;
 
@@ -52,12 +54,12 @@ public class SkinJudge extends SkinObject {
         return count;
     }
     
-    public boolean isSheft() {
+    public boolean isShift() {
     	return shift;
     }
 
     @Override
-    public void draw(SpriteBatch sprite, long time, MainState state) {
+    public void draw(SkinObjectRenderer sprite, long time, MainState state) {
         final int judgenow = ((BMSPlayer)state).getJudgeManager().getNowJudge()[index] - 1;
         final int judgecombo = ((BMSPlayer)state).getJudgeManager().getNowCombo()[index];
 
@@ -70,27 +72,6 @@ public class SkinJudge extends SkinObject {
             if (judgenow < 3) {
             	count[judgenow].draw(sprite, time, judgecombo, state, r.x, r.y);
             	shift = count[judgenow].getLength() / 2;
-//                final Rectangle nr = count[judgenow].getDestination(time, state);
-//                if (nr != null) {
-//                    TextureRegion[] ntr = count[judgenow].getValue(time, judgecombo, 0, state);
-//                    int index = 0;
-//                    int length = 0;
-//                    for (; index < ntr.length && ntr[index] == null; index++)
-//                        ;
-//                    for (int i = 0; i < ntr.length; i++) {
-//                        if (ntr[i] != null) {
-//                            length++;
-//                        }
-//                    }
-//                    shift = (int) (length * nr.width / 2);
-//                    // コンボカウント描画
-//                    for (int i = index; i < index + length; i++) {
-//                        if (ntr[i] != null) {
-//                            sprite.draw(ntr[i], r.x + nr.x + (i - index) * nr.width - shift, r.y + nr.y,
-//                                    nr.width, nr.height);
-//                        }
-//                    }
-//                }
             }
             judge[judgenow].draw(sprite, time, state, this.shift ? -shift : 0, 0);
 

@@ -10,6 +10,8 @@ import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 
 import bms.player.beatoraja.skin.SkinNoteDistributionGraph;
+import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -245,39 +247,27 @@ public class PracticeConfiguration {
 		}
 	}
 
-	public void draw(Rectangle r, SpriteBatch sprite, long time, MainState state) {
+	public void draw(Rectangle r, SkinObjectRenderer sprite, long time, MainState state) {
 		float x = r.x + r.width / 8;
 		float y = r.y + r.height * 7 / 8;
-		titlefont.setColor(cursorpos == 0 ? Color.YELLOW : Color.CYAN);
-		titlefont.draw(sprite, String.format("START TIME : %2d:%02d.%1d", property.starttime / 60000,
-				(property.starttime / 1000) % 60, (property.starttime / 100) % 10), x, y);
-		titlefont.setColor(cursorpos == 1 ? Color.YELLOW : Color.CYAN);
-		titlefont.draw(sprite, String.format("END TIME : %2d:%02d.%1d", property.endtime / 60000,
-				(property.endtime / 1000) % 60, (property.endtime / 100) % 10), x, y - 22);
-		titlefont.setColor(cursorpos == 2 ? Color.YELLOW : Color.CYAN);
-		titlefont.draw(sprite, "GAUGE TYPE : " + GAUGE[property.gaugetype], x, y - 44);
-		titlefont.setColor(cursorpos == 3 ? Color.YELLOW : Color.CYAN);
-		titlefont.draw(sprite, "GAUGE CATEGORY : " + property.gaugecategory.name(), x, y - 66);
-		titlefont.setColor(cursorpos == 4 ? Color.YELLOW : Color.CYAN);
-		titlefont.draw(sprite, "GAUGE VALUE : " + property.startgauge, x, y - 88);
-		titlefont.setColor(cursorpos == 5 ? Color.YELLOW : Color.CYAN);
-		titlefont.draw(sprite, "JUDGERANK : " + property.judgerank, x, y - 110);
-		titlefont.setColor(cursorpos == 6 ? Color.YELLOW : Color.CYAN);
-		titlefont.draw(sprite, "TOTAL : " + (int)property.total, x, y - 132);
-		titlefont.setColor(cursorpos == 7 ? Color.YELLOW : Color.CYAN);
-		titlefont.draw(sprite, "FREQENCY : " + property.freq, x, y - 154);
-		titlefont.setColor(cursorpos == 8 ? Color.YELLOW : Color.CYAN);
-		titlefont.draw(sprite, "OPTION-1P : " + RANDOM[property.random], x, y - 176);
+		sprite.draw(titlefont, String.format("START TIME : %2d:%02d.%1d", property.starttime / 60000,
+				(property.starttime / 1000) % 60, (property.starttime / 100) % 10), x, y, cursorpos == 0 ? Color.YELLOW : Color.CYAN);
+		sprite.draw(titlefont, String.format("END TIME : %2d:%02d.%1d", property.endtime / 60000,
+				(property.endtime / 1000) % 60, (property.endtime / 100) % 10), x, y - 22,cursorpos == 1 ? Color.YELLOW : Color.CYAN);
+		sprite.draw(titlefont, "GAUGE TYPE : " + GAUGE[property.gaugetype], x, y - 44,cursorpos == 2 ? Color.YELLOW : Color.CYAN);
+		sprite.draw(titlefont, "GAUGE CATEGORY : " + property.gaugecategory.name(), x, y - 66,cursorpos == 3 ? Color.YELLOW : Color.CYAN);
+		sprite.draw(titlefont, "GAUGE VALUE : " + property.startgauge, x, y - 88, cursorpos == 4 ? Color.YELLOW : Color.CYAN);
+		sprite.draw(titlefont, "JUDGERANK : " + property.judgerank, x, y - 110, cursorpos == 5 ? Color.YELLOW : Color.CYAN);
+		sprite.draw(titlefont, "TOTAL : " + (int)property.total, x, y - 132, cursorpos == 6 ? Color.YELLOW : Color.CYAN);
+		sprite.draw(titlefont, "FREQENCY : " + property.freq, x, y - 154, cursorpos == 7 ? Color.YELLOW : Color.CYAN);
+		sprite.draw(titlefont, "OPTION-1P : " + RANDOM[property.random], x, y - 176, cursorpos == 8 ? Color.YELLOW : Color.CYAN);
 		if (model.getMode().player == 2) {
-			titlefont.setColor(cursorpos == 9 ? Color.YELLOW : Color.CYAN);
-			titlefont.draw(sprite, "OPTION-2P : " + RANDOM[property.random2], x, y - 198);
-			titlefont.setColor(cursorpos == 10 ? Color.YELLOW : Color.CYAN);
-			titlefont.draw(sprite, "OPTION-DP : " + DPRANDOM[property.doubleop], x, y - 220);
+			sprite.draw(titlefont, "OPTION-2P : " + RANDOM[property.random2], x, y - 198, cursorpos == 9 ? Color.YELLOW : Color.CYAN);
+			sprite.draw(titlefont, "OPTION-DP : " + DPRANDOM[property.doubleop], x, y - 220, cursorpos == 10 ? Color.YELLOW : Color.CYAN);
 		}
 
 		if (state.getMainController().getPlayerResource().mediaLoadFinished()) {
-			titlefont.setColor(Color.ORANGE);
-			titlefont.draw(sprite, "PRESS 1KEY TO PLAY", x, y - 254);
+			sprite.draw(titlefont, "PRESS 1KEY TO PLAY", x, y - 254, Color.ORANGE);
 		}
 
 		graph.draw(sprite, time, state, new Rectangle(r.x, r.y, r.width, r.height / 4), property.starttime,

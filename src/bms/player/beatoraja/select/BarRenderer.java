@@ -8,6 +8,7 @@ import java.util.logging.Logger;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.select.bar.*;
 import bms.player.beatoraja.skin.*;
+import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
@@ -301,7 +302,7 @@ public class BarRenderer {
 		return false;
 	}
 
-	public void render(SpriteBatch sprite, MusicSelectSkin skin, SkinBar baro, int time) {
+	public void render(SkinObjectRenderer sprite, MusicSelectSkin skin, SkinBar baro, int time) {
 		if (skin == null) {
 			return;
 		}

@@ -2,14 +2,25 @@ package bms.player.beatoraja.skin;
 
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.Resolution;
+import bms.player.beatoraja.ShaderManager;
 import bms.player.beatoraja.SkinConfig.Offset;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.Texture.TextureFilter;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.IntArray;
 
 import java.util.*;
 import java.util.logging.Logger;
+
+import org.lwjgl.opengl.GL11;
 
 /**
  * スキン
@@ -178,12 +189,17 @@ public class Skin {
 		objectarray = objects.toArray(new SkinObject[objects.size()]);
 		option.clear();
 	}
+	
+	private SkinObjectRenderer renderer;
 
 	public void drawAllObjects(SpriteBatch sprite, MainState state) {
 		final long time = state.getNowTime();
+		if(renderer == null) {
+			renderer = new SkinObjectRenderer(sprite);
+		}
 		for (SkinObject obj : objectarray) {
 			if (isDraw(obj.getOption(), state)) {
-				obj.draw(sprite, time, state);
+				obj.draw(renderer, time, state);
 			}
 		}
 	}
@@ -284,5 +300,140 @@ public class Skin {
 
 	public double getScaleY() {
 		return dh;
+	}
+	
+	public static class SkinObjectRenderer {
+		
+		private final SpriteBatch sprite;
+		
+		private ShaderProgram[] shaders = new ShaderProgram[5];
+		
+		private int current;
+		
+		private int blend;
+		
+		private int type;
+		
+		public static final int TYPE_NORMAL = 0;
+		public static final int TYPE_LINEAR = 1;
+		public static final int TYPE_BILINEAR = 2;
+		public static final int TYPE_FFMPEG = 3;
+		public static final int TYPE_LAYER = 4;
+		
+		private Color color;
+		
+		private Color orgcolor;
+		
+		public SkinObjectRenderer(SpriteBatch sprite) {
+			this.sprite = sprite;
+			shaders[TYPE_BILINEAR] = ShaderManager.getShader("bilinear");
+			shaders[TYPE_FFMPEG] = ShaderManager.getShader("ffmpeg");
+			shaders[TYPE_LAYER] = ShaderManager.getShader("layer");			
+		}
+
+		public void draw(BitmapFont font, String s, float x, float y, Color c) {
+			preDraw(font.getRegion());
+			font.setColor(c);
+			font.draw(sprite, s, x, y);
+			postDraw();
+		}
+
+		public void draw(BitmapFont font, GlyphLayout layout, float x, float y) {
+			preDraw(font.getRegion());
+			font.draw(sprite, layout, x, y);
+			postDraw();
+		}
+
+		public void draw(Texture image, float x, float y, float w, float h) {
+			preDraw(image);
+			sprite.draw(image, x, y, w, h);
+			postDraw();
+		}
+
+		public void draw(TextureRegion image, float x, float y, float w, float h) {
+			preDraw(image);
+			sprite.draw(image, x, y, w, h);
+			postDraw();
+		}
+
+		public void draw(TextureRegion image, float x, float y, float w, float h, float cx, float cy, float angle) {
+			preDraw(image);
+			sprite.draw(image, x, y, cx * w, cy * h, w, h, 1, 1, angle);
+			postDraw();
+		}
+
+		private void preDraw(TextureRegion image) {
+			preDraw(image.getTexture());
+		}
+		
+		private void preDraw(Texture image) {
+			if(shaders[current] != shaders[type]) {
+				sprite.setShader(shaders[type]);
+				current = type;
+			}
+			
+			switch (blend) {
+			case 2:
+				sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
+				break;
+			case 3:
+				// TODO 減算描画は難しいか？
+				Gdx.gl.glBlendEquation(GL20.GL_FUNC_SUBTRACT);
+				sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
+				Gdx.gl.glBlendEquation(GL20.GL_FUNC_ADD);
+				break;
+			case 4:
+				sprite.setBlendFunction(GL11.GL_ZERO, GL11.GL_SRC_COLOR);
+				break;
+			case 9:
+				sprite.setBlendFunction(GL11.GL_ONE_MINUS_DST_COLOR, GL11.GL_ZERO);
+				break;
+			}
+			
+			if(type == TYPE_LINEAR || type == TYPE_FFMPEG) {
+				image.setFilter(TextureFilter.Linear, TextureFilter.Linear);				
+			}
+
+			if(color != null) {
+				orgcolor = sprite.getColor();
+				sprite.setColor(color);				
+			} else {
+				orgcolor = null;
+			}
+		}
+		
+		private void postDraw() {
+			if(orgcolor != null) {
+				sprite.setColor(orgcolor);				
+			}
+
+			if (blend >= 2) {
+				sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+			}
+		}
+
+		public int getType() {
+			return type;
+		}
+
+		public void setType(int type) {
+			this.type = type;
+		}
+
+		public int getBlend() {
+			return blend;
+		}
+
+		public void setBlend(int blend) {
+			this.blend = blend;
+		}
+		
+		public Color getColor() {
+			return color;
+		}
+
+		public void setColor(Color color) {
+			this.color = color;
+		}
 	}
 }

@@ -1,6 +1,7 @@
 package bms.player.beatoraja.skin;
 
 import bms.player.beatoraja.MainState;
+import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -38,7 +39,7 @@ public class SkinGraph extends SkinObject {
 		source = new SkinSourceImage(image, timer, cycle);
 	}
 
-	public void draw(SpriteBatch sprite, long time, MainState state) {
+	public void draw(SkinObjectRenderer sprite, long time, MainState state) {
 		if (getImageID() != -1) {
 			Rectangle r = this.getDestination(time, state);
 			TextureRegion image = state.getImage(getImageID());

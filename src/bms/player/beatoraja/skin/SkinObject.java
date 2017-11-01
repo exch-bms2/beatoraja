@@ -3,6 +3,7 @@ package bms.player.beatoraja.skin;
 import bms.player.beatoraja.MainController;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.ShaderManager;
+import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -55,7 +56,8 @@ public abstract class SkinObject implements Disposable {
 	 */
 	private int dstfilter;
 	
-	private ShaderProgram filter;
+	private int imageType;
+	
 	/**
 	 * 画像回転の中心
 	 */
@@ -137,7 +139,6 @@ public abstract class SkinObject implements Disposable {
 			dstblend = blend;
 		}
 		
-		this.filter = ShaderManager.getShader("bilinear");
 		if (dstfilter == 0) {
 			dstfilter = filter;
 		}
@@ -364,48 +365,25 @@ public abstract class SkinObject implements Disposable {
 		this.index = 0;
 	}
 
-	public abstract void draw(SpriteBatch sprite, long time, MainState state);
+	public abstract void draw(SkinObjectRenderer sprite, long time, MainState state);
 
-	protected void draw(SpriteBatch sprite, TextureRegion image, float x, float y, float width, float height) {
+	protected void draw(SkinObjectRenderer sprite, TextureRegion image, float x, float y, float width, float height) {
 		draw(sprite, image, x, y, width, height, getColor(), getAngle());
 	}
 
-	protected void draw(SpriteBatch sprite, TextureRegion image, float x, float y, float width, float height,
+	protected void draw(SkinObjectRenderer sprite, TextureRegion image, float x, float y, float width, float height,
 			Color color, int angle) {
 		if (color == null || color.a == 0f || image == null) {
 			return;
 		}
-		final Color c = sprite.getColor();
-		switch (dstblend) {
-		case 2:
-			sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
-			break;
-		case 3:
-			// TODO 減算描画は難しいか？
-			Gdx.gl.glBlendEquation(GL20.GL_FUNC_SUBTRACT);
-			sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
-			Gdx.gl.glBlendEquation(GL20.GL_FUNC_ADD);
-			break;
-		case 4:
-			sprite.setBlendFunction(GL11.GL_ZERO, GL11.GL_SRC_COLOR);
-			break;
-		case 9:
-			sprite.setBlendFunction(GL11.GL_ONE_MINUS_DST_COLOR, GL11.GL_ZERO);
-			break;
-		}
-
-		sprite.setShader(filter);
-		filter.setUniformf("dst_color", color.r, color.g, color.b, color.a);
-		filter.setUniformi("filter_type", dstfilter);
+		sprite.setColor(color);
+		sprite.setBlend(dstblend);
+		sprite.setType(dstfilter != 0 && imageType == SkinObjectRenderer.TYPE_NORMAL ? SkinObjectRenderer.TYPE_BILINEAR : imageType);
+		
 		if (angle != 0) {
-			sprite.draw(image, x, y, centerx * width, centery * height, width, height, 1, 1, angle);
+			sprite.draw(image, x, y, width, height, centerx , centery, angle);
 		} else {
 			sprite.draw(image, x, y, width, height);
-		}
-		sprite.setShader(null);
-		
-		if (dstblend >= 2) {
-			sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		}
 	}
 	
@@ -515,6 +493,14 @@ public abstract class SkinObject implements Disposable {
 				obj[i] = null;
 			}
 		}
+	}
+
+	public int getImageType() {
+		return imageType;
+	}
+
+	public void setImageType(int imageType) {
+		this.imageType = imageType;
 	}
 
 }

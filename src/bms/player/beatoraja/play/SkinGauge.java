@@ -4,6 +4,8 @@ import bms.player.beatoraja.MainState;
 
 import static bms.player.beatoraja.play.GrooveGauge.*;
 import bms.player.beatoraja.skin.*;
+import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
+
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
@@ -52,7 +54,7 @@ public class SkinGauge extends SkinObject {
 	}
 
 	@Override
-	public void draw(SpriteBatch sprite, long time, MainState state) {
+	public void draw(SkinObjectRenderer sprite, long time, MainState state) {
 		final Rectangle gr = getDestination(time, state);
 		final GrooveGauge gauge = ((BMSPlayer) state).getGauge();
 		if (gauge == null || gr == null) {

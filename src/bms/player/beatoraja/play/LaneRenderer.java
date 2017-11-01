@@ -9,6 +9,7 @@ import bms.player.beatoraja.play.SkinNote.SkinLane;
 import org.lwjgl.opengl.GL11;
 
 import bms.model.*;
+import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 import bms.player.beatoraja.skin.SkinImage;
 
 import com.badlogic.gdx.Gdx;
@@ -233,7 +234,7 @@ public class LaneRenderer {
 		}
 	}
 
-	public void drawLane(long time, SkinLane[] lanes) {
+	public void drawLane(SkinObjectRenderer sprite, long time, SkinLane[] lanes) {
 		for (int i = 0; i < lanes.length; i++) {
 			if(i >= noteimage.length) {
 				break;
@@ -285,32 +286,33 @@ public class LaneRenderer {
 		currentduration = Math.round(region * (1 - (enableLanecover ? lanecover : 0)));
 
 		// 判定エリア表示
+		// TODO 実装が古いため、書き直す
 		if (config.isShowjudgearea()) {
-			sprite.end();
-			Gdx.gl.glEnable(GL11.GL_BLEND);
-			Gdx.gl.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-			shape.begin(ShapeType.Filled);
-			final Color[] color = { Color.valueOf("0000ff20"), Color.valueOf("00ff0020"), Color.valueOf("ffff0020"),
-					Color.valueOf("ff800020"), Color.valueOf("ff000020") };
-			final int[][] judgetime = main.getJudgeManager().getJudgeTimeRegion();
-			for (int i = pos; i < timelines.length; i++) {
-				final TimeLine tl = timelines[i];
-				if (tl.getMicroTime() >= microtime) {
-					double rate = (tl.getSection() - (i > 0 ? timelines[i - 1].getSection() : 0)) * rxhs * 1000
-							/ (tl.getMicroTime() - (i > 0 ? timelines[i - 1].getMicroTime() + timelines[i - 1].getMicroStop() : 0));
-					for (int j = color.length - 1; j >= 0; j--) {
-						shape.setColor(color[j]);
-						int nj = j > 0 ? judgetime[j - 1][1] : 0;
-						for (int p = 0; p < playerr.length; p++) {
-							shape.rect(playerr[p].x, (float)(hl + nj * rate), playerr[p].width, (float)((judgetime[j][1] - nj) * rate));
-						}
-					}
-					break;
-				}
-			}
-			shape.end();
-			Gdx.gl.glDisable(GL11.GL_BLEND);
-			sprite.begin();
+//			sprite.end();
+//			Gdx.gl.glEnable(GL11.GL_BLEND);
+//			Gdx.gl.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+//			shape.begin(ShapeType.Filled);
+//			final Color[] color = { Color.valueOf("0000ff20"), Color.valueOf("00ff0020"), Color.valueOf("ffff0020"),
+//					Color.valueOf("ff800020"), Color.valueOf("ff000020") };
+//			final int[][] judgetime = main.getJudgeManager().getJudgeTimeRegion();
+//			for (int i = pos; i < timelines.length; i++) {
+//				final TimeLine tl = timelines[i];
+//				if (tl.getMicroTime() >= microtime) {
+//					double rate = (tl.getSection() - (i > 0 ? timelines[i - 1].getSection() : 0)) * rxhs * 1000
+//							/ (tl.getMicroTime() - (i > 0 ? timelines[i - 1].getMicroTime() + timelines[i - 1].getMicroStop() : 0));
+//					for (int j = color.length - 1; j >= 0; j--) {
+//						shape.setColor(color[j]);
+//						int nj = j > 0 ? judgetime[j - 1][1] : 0;
+//						for (int p = 0; p < playerr.length; p++) {
+//							shape.rect(playerr[p].x, (float)(hl + nj * rate), playerr[p].width, (float)((judgetime[j][1] - nj) * rate));
+//						}
+//					}
+//					break;
+//				}
+//			}
+//			shape.end();
+//			Gdx.gl.glDisable(GL11.GL_BLEND);
+//			sprite.begin();
 		}
 
 		final double orgy = y;
@@ -334,9 +336,8 @@ public class LaneRenderer {
 					}
 					for (Rectangle r : playerr) {
 						// TODO 数値もスキンベースへ移行
-						font.setColor(Color.valueOf("40c0c0"));
-						font.draw(sprite, String.format("%2d:%02d.%1d", tl.getTime() / 60000,
-								(tl.getTime() / 1000) % 60, (tl.getTime() / 100) % 10), r.x + 4, (float) (y + 20));
+						sprite.draw(font, String.format("%2d:%02d.%1d", tl.getTime() / 60000,
+								(tl.getTime() / 1000) % 60, (tl.getTime() / 100) % 10), r.x + 4, (float) (y + 20), Color.valueOf("40c0c0"));
 					}
 				}
 
@@ -347,8 +348,7 @@ public class LaneRenderer {
 						}
 						for (Rectangle r : playerr) {
 							// TODO 数値もスキンベースへ移行
-							font.setColor(Color.valueOf("00c000"));
-							font.draw(sprite, "BPM" + ((int) tl.getBPM()), r.x + r.width / 2, (float) (y + 20));							
+							sprite.draw(font, "BPM" + ((int) tl.getBPM()), r.x + r.width / 2, (float) (y + 20), Color.valueOf("00c000"));							
 						}
 
 					}
@@ -358,8 +358,7 @@ public class LaneRenderer {
 						}
 						for (Rectangle r : playerr) {
 							// TODO 数値もスキンベースへ移行
-							font.setColor(Color.valueOf("c0c000"));
-							font.draw(sprite, "STOP " + ((int) tl.getStop()) + "ms", r.x + r.width / 2, (float) (y + 20));							
+							sprite.draw(font, "STOP " + ((int) tl.getStop()) + "ms", r.x + r.width / 2, (float) (y + 20), Color.valueOf("c0c000"));							
 						}
 					}
 					

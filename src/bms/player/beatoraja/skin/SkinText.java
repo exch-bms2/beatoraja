@@ -1,13 +1,8 @@
 package bms.player.beatoraja.skin;
 
 import bms.player.beatoraja.MainState;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.GlyphLayout;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
+
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Align;
 
@@ -58,7 +53,7 @@ public abstract class SkinText extends SkinObject {
     
     protected abstract void prepareText(String text);
 
-    public void draw(SpriteBatch sprite, long time, MainState state) {
+    public void draw(SkinObjectRenderer sprite, long time, MainState state) {
         if(id == -1) {
         	return;
         }
@@ -75,7 +70,7 @@ public abstract class SkinText extends SkinObject {
         }
     }
 
-    public abstract void draw(SpriteBatch sprite, long time, MainState state, int offsetX, int offsetY);
+    public abstract void draw(SkinObjectRenderer sprite, long time, MainState state, int offsetX, int offsetY);
     
 	public void setReferenceID(int id) {
 		this.id = id;

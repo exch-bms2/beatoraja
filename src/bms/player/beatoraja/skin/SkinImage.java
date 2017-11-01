@@ -2,6 +2,8 @@ package bms.player.beatoraja.skin;
 
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.play.BMSPlayer;
+import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
+
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
@@ -70,11 +72,11 @@ public class SkinImage extends SkinObject {
 		}		
 	}
 
-	public void draw(SpriteBatch sprite, long time, MainState state) {
+	public void draw(SkinObjectRenderer sprite, long time, MainState state) {
 		draw(sprite, time, state, 0,0);
 	}
 
-	public void draw(SpriteBatch sprite, long time, MainState state, int offsetX, int offsetY) {
+	public void draw(SkinObjectRenderer sprite, long time, MainState state, int offsetX, int offsetY) {
 	    if(getImageID() != -1) {
             final Rectangle r = this.getDestination(time, state);
             final TextureRegion tr = state.getImage(getImageID());
@@ -97,9 +99,9 @@ public class SkinImage extends SkinObject {
             if (r != null) {
                 if(value >= 0 && value < image.length) {
                 	if(image[0] instanceof SkinSourceMovie) {
-                		sprite.setShader(((SkinSourceMovie) image[0]).getShader());
+                		setImageType(3);
                         draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height);
-                        sprite.setShader(null);
+                		setImageType(0);
                 	} else {
 						draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height);
                 	}
@@ -108,7 +110,7 @@ public class SkinImage extends SkinObject {
         }
 	}
 
-    public void draw(SpriteBatch sprite, long time, MainState state, int value, int offsetX, int offsetY) {
+    public void draw(SkinObjectRenderer sprite, long time, MainState state, int value, int offsetX, int offsetY) {
         if(getImageID() != -1) {
             final Rectangle r = this.getDestination(time, state);
             final TextureRegion tr = state.getImage(getImageID());

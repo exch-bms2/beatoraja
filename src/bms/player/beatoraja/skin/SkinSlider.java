@@ -1,6 +1,7 @@
 package bms.player.beatoraja.skin;
 
 import bms.player.beatoraja.MainState;
+import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -37,7 +38,7 @@ public class SkinSlider extends SkinObject {
 		this.type = type;
 	}
 
-	public void draw(SpriteBatch sprite, long time, MainState state) {
+	public void draw(SkinObjectRenderer sprite, long time, MainState state) {
 		if(source == null) {
 			return;
 		}

@@ -3,6 +3,7 @@ package bms.player.beatoraja.result;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.PlayerResource;
 import bms.player.beatoraja.play.GrooveGauge;
+import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 import bms.player.beatoraja.skin.SkinObject;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -63,7 +64,7 @@ public class SkinGaugeGraphObject extends SkinObject {
 	private FloatArray gauge;
 
 	@Override
-	public void draw(SpriteBatch sprite, long time, MainState state) {
+	public void draw(SkinObjectRenderer sprite, long time, MainState state) {
 		Rectangle graph = getDestination(time, state);
 		if (graph == null) {
 			return;

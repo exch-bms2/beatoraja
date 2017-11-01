@@ -10,6 +10,7 @@ import bms.player.beatoraja.PlayerConfig;
 import bms.player.beatoraja.ResourcePool;
 import bms.player.beatoraja.ShaderManager;
 import bms.player.beatoraja.play.BMSPlayer;
+import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.*;
@@ -85,10 +86,6 @@ public class BGAProcessor {
 	private int[] misslayer = null;
 
 	private int prevrendertime;
-	/**
-	 * レイヤー描画用シェーダ
-	 */
-	private final ShaderProgram layershader;
 
 	private BGImageProcessor cache;
 
@@ -100,8 +97,6 @@ public class BGAProcessor {
 	public BGAProcessor(Config config, PlayerConfig player) {
 		this.config = config;
 		this.player = player;
-
-		layershader = ShaderManager.getShader("layer");
 
 		Pixmap blank = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
 		blank.setColor(Color.BLACK);
@@ -239,7 +234,7 @@ public class BGAProcessor {
 		return cache != null ? cache.getTexture(id) : null;
 	}
 
-	public void drawBGA(SpriteBatch sprite, Rectangle r, int time) {
+	public void drawBGA(SkinObjectRenderer sprite, Rectangle r, int time) {
 		if (time < 0 || timelines == null) {
 			prevrendertime = -1;
 			sprite.draw(blanktex, r.x, r.y, r.width, r.height);
@@ -281,7 +276,7 @@ public class BGAProcessor {
 			// draw miss layer
 			Texture miss = getBGAData(misslayer[misslayer.length * (time - misslayertime) / getMisslayerduration], true);
 			if (miss != null) {
-				miss.setFilter(TextureFilter.Linear, TextureFilter.Linear);
+				sprite.setType(SkinObjectRenderer.TYPE_LINEAR);
 				drawBGAFixRatio(sprite, r, miss);
 			}
 		} else {
@@ -289,13 +284,11 @@ public class BGAProcessor {
 			final Texture playingbgatex = getBGAData(playingbgaid, rbga);
 			if (playingbgatex != null) {
 				final MovieProcessor mp = getMovieProcessor(playingbgaid);
-				playingbgatex.setFilter(TextureFilter.Linear, TextureFilter.Linear);
 				if (mp != null) {
-					final ShaderProgram shader = mp.getShader();
-					sprite.setShader(shader);
+					sprite.setType(SkinObjectRenderer.TYPE_FFMPEG);
 					drawBGAFixRatio(sprite, r, playingbgatex);
-					sprite.setShader(null);
 				} else {
+					sprite.setType(SkinObjectRenderer.TYPE_LINEAR);
 					drawBGAFixRatio(sprite, r, playingbgatex);
 				}
 			} else {
@@ -306,15 +299,11 @@ public class BGAProcessor {
 			if (playinglayertex != null) {
 				final MovieProcessor mp = getMovieProcessor(playinglayerid);
 				if (mp != null) {
-					playinglayertex.setFilter(TextureFilter.Linear, TextureFilter.Linear);
-					final ShaderProgram shader = mp.getShader();
-					sprite.setShader(shader);
+					sprite.setType(SkinObjectRenderer.TYPE_FFMPEG);
 					drawBGAFixRatio(sprite, r, playinglayertex);
-					sprite.setShader(null);
 				} else {
-					sprite.setShader(layershader);
+					sprite.setType(SkinObjectRenderer.TYPE_LAYER);
 					drawBGAFixRatio(sprite, r, playinglayertex);
-					sprite.setShader(null);
 				}
 			}
 		}
@@ -329,7 +318,7 @@ public class BGAProcessor {
 	/**
 	 * Modify the aspect ratio and draw BGA
 	 */
-	private void drawBGAFixRatio(SpriteBatch sprite, Rectangle r, Texture bga){
+	private void drawBGAFixRatio(SkinObjectRenderer sprite, Rectangle r, Texture bga){
 		switch(config.getBgaExpand()) {
 		case Config.BGAEXPAND_FULL:
 	        sprite.draw(bga, r.x, r.y, r.width, r.height);

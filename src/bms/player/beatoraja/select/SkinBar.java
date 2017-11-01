@@ -2,6 +2,8 @@ package bms.player.beatoraja.select;
 
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.skin.*;
+import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
+
 import com.badlogic.gdx.graphics.g2d.*;
 
 /**
@@ -124,7 +126,7 @@ public class SkinBar extends SkinObject {
     }
 
     @Override
-    public void draw(SpriteBatch sprite, long time, MainState state) {
+    public void draw(SkinObjectRenderer sprite, long time, MainState state) {
         ((MusicSelector)state).getBarRender().render(sprite, (MusicSelectSkin) state.getSkin(), this, (int)time);
     }
 

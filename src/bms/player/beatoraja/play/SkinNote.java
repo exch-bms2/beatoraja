@@ -3,6 +3,7 @@ package bms.player.beatoraja.play;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.SkinConfig;
 import bms.player.beatoraja.skin.*;
+import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
@@ -47,10 +48,11 @@ public class SkinNote extends SkinObject {
 	}
 
 	@Override
-	public void draw(SpriteBatch sprite, long time, MainState state) {
+	public void draw(SkinObjectRenderer sprite, long time, MainState state) {
 		final BMSPlayer player = (BMSPlayer) state;
 		if (player.getLanerender() != null) {
-			player.getLanerender().drawLane(time, lanes);
+			sprite.setColor(Color.WHITE);
+			player.getLanerender().drawLane(sprite, time, lanes);
 		}
 	}
 
@@ -105,7 +107,7 @@ public class SkinNote extends SkinObject {
 		}
 
 		@Override
-		public void draw(SpriteBatch sprite, long time, MainState state) {
+		public void draw(SkinObjectRenderer sprite, long time, MainState state) {
 		}
 		
 		@Override

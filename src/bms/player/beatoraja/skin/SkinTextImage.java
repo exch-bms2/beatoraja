@@ -1,8 +1,9 @@
 package bms.player.beatoraja.skin;
 
 import bms.player.beatoraja.MainState;
+import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
+
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Disposable;
@@ -61,7 +62,7 @@ public class SkinTextImage extends SkinText {
 		}
 	}
 
-	public void draw(SpriteBatch sprite, long time, MainState state, int offsetX, int offsetY) {
+	public void draw(SkinObjectRenderer sprite, long time, MainState state, int offsetX, int offsetY) {
 		Rectangle r = this.getDestination(time, state);
 		if (r != null) {
 			final Color c = getColor();

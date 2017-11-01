@@ -12,6 +12,7 @@ import com.badlogic.gdx.math.Rectangle;
 import org.lwjgl.opengl.GL11;
 
 import bms.player.beatoraja.MainState;
+import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 
 public class SkinTextFont extends SkinText {
 
@@ -62,7 +63,7 @@ public class SkinTextFont extends SkinText {
 	}
 	
 	@Override
-    public void draw(SpriteBatch sprite, long time, MainState state, int offsetX, int offsetY) {
+    public void draw(SkinObjectRenderer sprite, long time, MainState state, int offsetX, int offsetY) {
         if(generator == null) {
             return;
         }
@@ -72,21 +73,16 @@ public class SkinTextFont extends SkinText {
                 Color c = getColor();
                 font.getData().setScale(r.height / parameter.size);
                 
-                TextureFilter filter = (textfilter == 1) ? TextureFilter.Linear : TextureFilter.Nearest;
-                font.getRegion().getTexture().setFilter(filter, filter);
-
-                //Need to cancel out the PMA blend and use straight alpha
-                sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+                sprite.setType(textfilter != 0 ? SkinObjectRenderer.TYPE_LINEAR : SkinObjectRenderer.TYPE_NORMAL);
 
                 final float x = (getAlign() == 2 ? r.x - r.width : (getAlign() == 1 ? r.x - r.width / 2 : r.x));
                 if(shadow > 0) {
                     layout.setText(font, getText(), new Color(c.r / 2, c.g / 2, c.b / 2, c.a), r.getWidth(),ALIGN[getAlign()], false);
-                    font.draw(sprite, layout, x + shadow + offsetX, r.y - shadow + offsetY + r.getHeight());
+                    sprite.draw(font, layout, x + shadow + offsetX, r.y - shadow + offsetY + r.getHeight());
                 }
                 layout.setText(font, getText(), c, r.getWidth(),ALIGN[getAlign()], false);
 
-
-                font.draw(sprite, layout, x + offsetX, r.y + offsetY + r.getHeight());
+                sprite.draw(font, layout, x + offsetX, r.y + offsetY + r.getHeight());
             }
         }
     }

@@ -1,8 +1,8 @@
 package bms.player.beatoraja.skin;
 
 import bms.player.beatoraja.MainState;
+import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 
@@ -104,7 +104,7 @@ public class SkinNumber extends SkinObject {
 		return values;
 	}
 
-	public void draw(SpriteBatch sprite, long time, MainState state) {
+	public void draw(SkinObjectRenderer sprite, long time, MainState state) {
 		int value = Integer.MIN_VALUE;
 		if (id != -1) {
 			value = state.getNumberValue(id);
@@ -114,11 +114,11 @@ public class SkinNumber extends SkinObject {
 		}
 	}
 
-	public void draw(SpriteBatch sprite, long time, int value, MainState state) {
+	public void draw(SkinObjectRenderer sprite, long time, int value, MainState state) {
 		draw(sprite, time, value, state, 0,0);
 	}
 
-	public void draw(SpriteBatch sprite, long time, int value, MainState state, float offsetX, float offsetY) {
+	public void draw(SkinObjectRenderer sprite, long time, int value, MainState state, float offsetX, float offsetY) {
 		Rectangle r = this.getDestination(time, state);
 		length = 0;
 		if (r != null) {

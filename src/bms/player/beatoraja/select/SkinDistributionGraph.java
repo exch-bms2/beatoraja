@@ -3,6 +3,8 @@ package bms.player.beatoraja.select;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.select.bar.DirectoryBar;
 import bms.player.beatoraja.skin.*;
+import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
+
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
@@ -56,7 +58,7 @@ public class SkinDistributionGraph extends SkinObject {
     }
 
     @Override
-    public void draw(SpriteBatch sprite, long time, MainState state) {
+    public void draw(SkinObjectRenderer sprite, long time, MainState state) {
         final Rectangle r = getDestination(time, state);
         if (r != null && state.getMainController().getPlayerResource().getConfig().isFolderlamp() && ((MusicSelector)state).getSelectedBar() instanceof DirectoryBar) {
             DirectoryBar current = (DirectoryBar)((MusicSelector)state).getSelectedBar();

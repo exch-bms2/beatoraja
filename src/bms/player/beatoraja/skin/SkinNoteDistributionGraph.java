@@ -3,6 +3,7 @@ package bms.player.beatoraja.skin;
 import bms.model.*;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.play.BMSPlayer;
+import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 import bms.player.beatoraja.song.SongData;
 
 import com.badlogic.gdx.graphics.*;
@@ -67,14 +68,14 @@ public class SkinNoteDistributionGraph extends SkinObject {
 
 	}
 
-	public void draw(SpriteBatch sprite, long time, MainState state) {
+	public void draw(SkinObjectRenderer sprite, long time, MainState state) {
 		if(state instanceof BMSPlayer) {
 			
 		}
 		draw(sprite, time, state, getDestination(time, state), -1, -1);
 	}
 
-	public void draw(SpriteBatch sprite, long time, MainState state, Rectangle r, int starttime, int endtime) {
+	public void draw(SkinObjectRenderer sprite, long time, MainState state, Rectangle r, int starttime, int endtime) {
 		if (r == null) {
 			return;
 		}
