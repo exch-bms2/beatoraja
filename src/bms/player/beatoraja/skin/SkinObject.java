@@ -6,6 +6,8 @@ import bms.player.beatoraja.MainState;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture.TextureFilter;
+
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
@@ -368,29 +370,38 @@ public abstract class SkinObject implements Disposable {
 		}
 		final Color c = sprite.getColor();
 		switch (dstblend) {
+		case 0:
+			//PMA blending
+			sprite.setBlendFunction(GL11.GL_ONE, GL11.GL_ONE_MINUS_SRC_ALPHA);
+			break;
 		case 2:
 			sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
 			break;
-			case 3:
-				// TODO 減算描画は難しいか？
-				Gdx.gl.glBlendEquation(GL20.GL_FUNC_SUBTRACT);
-				sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
-				Gdx.gl.glBlendEquation(GL20.GL_FUNC_ADD);
-				break;
-			case 4:
-				sprite.setBlendFunction(GL11.GL_ZERO, GL11.GL_SRC_COLOR);
-				break;
-			case 9:
+		case 3:
+			// TODO 減算描画は難しいか？
+			Gdx.gl.glBlendEquation(GL20.GL_FUNC_SUBTRACT);
+			sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
+			Gdx.gl.glBlendEquation(GL20.GL_FUNC_ADD);
+			break;
+		case 4:
+			sprite.setBlendFunction(GL11.GL_ZERO, GL11.GL_SRC_COLOR);
+			break;
+		case 9:
 			sprite.setBlendFunction(GL11.GL_ONE_MINUS_DST_COLOR, GL11.GL_ZERO);
 			break;
 		}
+
+		color.r = color.r * color.a;
+		color.g = color.g * color.a;
+		color.b = color.b * color.a;
 		sprite.setColor(color);
 		
-//		if(dstfilter == 1) {
-//			image.getTexture().setFilter(TextureFilter.Linear, TextureFilter.Linear);
-//		} else {
-//			image.getTexture().setFilter(TextureFilter.Nearest, TextureFilter.Nearest);			
-//		}
+		if(dstfilter == 1) {
+			image.getTexture().setFilter(TextureFilter.Linear, TextureFilter.Linear);
+		} else {
+			image.getTexture().setFilter(TextureFilter.Nearest, TextureFilter.Nearest);			
+		}
+
 		if (angle != 0) {
 			sprite.draw(image, x, y, centerx * width, centery * height, width, height, 1, 1, angle);
 		} else {

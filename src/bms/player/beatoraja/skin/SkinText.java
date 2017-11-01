@@ -28,6 +28,13 @@ public abstract class SkinText extends SkinObject {
     private int id = -1;
     
     private String text = "";
+
+    /**
+     * 0 : Nearest neighbor
+     * 1 : Linear filtering
+     * SkinObject の dstfilter は private のでテキスト用の filter 変数です
+     */
+	protected int textfilter;
     
     public int getAlign() {
 		return align;
@@ -76,5 +83,12 @@ public abstract class SkinText extends SkinObject {
 	
 	public int getReferenceID() {
 		return id;
-	}
+    }
+
+    @Override
+	public void setDestination(long time, float x, float y, float w, float h, int acc, int a, int r, int g, int b,
+			int blend, int filter, int angle, int center, int loop, int timer, int[] op) {
+        textfilter = filter;
+        super.setDestination(time, x, y, w, h, acc, a, r, g, b, blend, filter, angle, center, loop, timer, op);
+    }
 }
