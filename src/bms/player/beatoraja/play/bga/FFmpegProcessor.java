@@ -15,10 +15,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Gdx2DPixmap;
-import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 
-import bms.player.beatoraja.ShaderManager;
 import bms.player.beatoraja.play.BMSPlayer;
 
 /**
@@ -44,10 +42,6 @@ public class FFmpegProcessor implements MovieProcessor {
 	private MovieSeekThread movieseek;
 
 	private BMSPlayer player;
-	/**
-	 * 動画色補正用シェーダ
-	 */
-	private ShaderProgram shader;
 	
 	public FFmpegProcessor(int fpsd) {
 		this.fpsd = fpsd;		
@@ -247,13 +241,6 @@ public class FFmpegProcessor implements MovieProcessor {
 	
 	enum Command {
 		PLAY,LOOP,STOP,HALT;
-	}
-
-	public ShaderProgram getShader() {
-		if(shader == null) {
-			shader = ShaderManager.getShader("ffmpeg");
-		}
-		return shader;
 	}
 
 	@Override

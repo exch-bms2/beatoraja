@@ -2,27 +2,17 @@ package bms.player.beatoraja.skin;
 
 import bms.player.beatoraja.MainController;
 import bms.player.beatoraja.MainState;
-import bms.player.beatoraja.ShaderManager;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture.TextureFilter;
 
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Disposable;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
-import com.badlogic.gdx.utils.IntArray;
 import com.badlogic.gdx.utils.IntSet;
-import org.lwjgl.opengl.GL11;
 
 /**
  * スキンオブジェクト
@@ -51,9 +41,10 @@ public abstract class SkinObject implements Disposable {
 	 * ブレンド(2:加算, 9:反転)
 	 */
 	private int dstblend = 0;
-	/**
-	 * フィルター
-	 */
+    /**
+     * 0 : Nearest neighbor
+     * 1 : Linear filtering
+     */
 	private int dstfilter;
 	
 	private int imageType;
@@ -501,6 +492,14 @@ public abstract class SkinObject implements Disposable {
 
 	public void setImageType(int imageType) {
 		this.imageType = imageType;
+	}
+	
+	public int getFilter() {
+		return dstfilter;
+	}
+
+	public void setFilter(int filter) {
+		dstfilter = filter;
 	}
 
 }
