@@ -261,7 +261,7 @@ public class MainController extends ApplicationAdapter {
 		final long t = System.currentTimeMillis();
 		sprite = new SpriteBatch();
 
-		input = new BMSPlayerInputProcessor(config);
+		input = new BMSPlayerInputProcessor(config, player);
 		switch(config.getAudioDriver()) {
 		case Config.AUDIODRIVER_SOUND:
 			audio = new GdxSoundDriver();
