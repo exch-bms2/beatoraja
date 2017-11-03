@@ -280,7 +280,7 @@ public class PlayConfigurationView implements Initializable {
 		});
 		skin.setButtonCell(new SkinListCell());
 
-		irname.getItems().setAll(IRConnection.AVAILABLE);
+		irname.getItems().setAll(IRConnection.getAllAvailableIRConnectionName());
 
 		players.getItems().setAll(PlayerConfig.readAllPlayerID());
 	}
