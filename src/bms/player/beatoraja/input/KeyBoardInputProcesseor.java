@@ -7,7 +7,6 @@ import bms.player.beatoraja.Resolution;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Input.Keys;
-import com.badlogic.gdx.math.Rectangle;
 
 /**
  * キーボード入力処理用クラス
@@ -75,6 +74,9 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 	public void poll(final long presstime) {
 		if (enable) {
 			for (int i = 0; i < keys.length; i++) {
+				if(keys[i] < 0) {
+					continue;
+				}
 				final boolean pressed = Gdx.input.isKeyPressed(keys[i]);
 				if (pressed != keystate[keys[i]] && presstime >= keytime[keys[i]] + duration) {
 					keystate[keys[i]] = pressed;

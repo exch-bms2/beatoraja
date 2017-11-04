@@ -163,8 +163,8 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice implements 
 		}
 
 		for (int i = 0; i < buttons.length; i++) {
-			if (buttonchanged[buttons[i]]) {
-				this.bmsPlayerInputProcessor.keyChanged(this, presstime, i + player * 9, buttonstate[buttons[i]]);
+			if (buttons[i] >= 0 && buttonchanged[buttons[i]]) {
+				this.bmsPlayerInputProcessor.keyChanged(this, presstime, i, buttonstate[buttons[i]]);
 				buttonchanged[buttons[i]] = false;
 			}
 		}

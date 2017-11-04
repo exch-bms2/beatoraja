@@ -2,6 +2,8 @@ package bms.player.beatoraja;
 
 import bms.player.beatoraja.input.BMControllerInputProcessor.BMKeys;
 
+import java.util.Arrays;
+
 import com.badlogic.gdx.Input.Keys;
 
 /**
@@ -139,6 +141,32 @@ public class PlayConfig {
 	public void setEnablelift(boolean enablelift) {
 		this.enablelift = enablelift;
 	}
+	
+	public void validate(int keys) {
+		if(keyboard.keys == null) {
+			keyboard.keys = new int[]{ Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.F, Keys.V, Keys.SHIFT_LEFT, Keys.CONTROL_LEFT};
+		}
+		if(keyboard.keys.length != keys) {
+			keyboard.keys = Arrays.copyOf(keyboard.keys, keys);
+		}
+		
+		for(ControllerConfig c : controller) {
+			if(c.keys == null) {
+				c.keys = new int[] { BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8,
+						BMKeys.BUTTON_2, BMKeys.BUTTON_5, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN };
+			}
+			if(c.keys.length != keys) {
+				c.keys = Arrays.copyOf(c.keys, keys);
+			}			
+		}
+		
+		if(midi.keys == null) {
+			midi.keys = MidiConfig.default24().keys;
+		}
+		if(midi.keys.length != keys) {
+			midi.keys = Arrays.copyOf(midi.keys, keys);
+		}
+	}
 
 	/**
 	 * キーボード設定定義用クラス
@@ -189,15 +217,21 @@ public class PlayConfig {
 			this.select = select;
 		}
 
+		public static KeyboardConfig default7() {
+			KeyboardConfig config = new KeyboardConfig();
+			config.keys = new int []  { Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.F, Keys.V, Keys.SHIFT_LEFT, Keys.CONTROL_LEFT};
+			config.start = Keys.Q;
+			config.select = Keys.W;
+			return config;
+		}
+		
 		public static KeyboardConfig default14() {
 			return new KeyboardConfig();
 		}
 
 		public static KeyboardConfig default9() {
 			KeyboardConfig config = new KeyboardConfig();
-			config.keys = new int [] { Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.F, Keys.V, Keys.G, Keys.B, Keys.COMMA, Keys.L,
-					Keys.PERIOD, Keys.SEMICOLON, Keys.SLASH, Keys.APOSTROPHE, Keys.UNKNOWN, Keys.SHIFT_RIGHT,
-					Keys.CONTROL_RIGHT };
+			config.keys = new int [] { Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.F, Keys.V, Keys.G, Keys.B};
 			config.start = Keys.Q;
 			config.select = Keys.W;
 			return config;
@@ -264,6 +298,17 @@ public class PlayConfig {
 
 		public static ControllerConfig default9() {
 			return new ControllerConfig();
+		}
+		
+		public static ControllerConfig default14(int player) {
+			ControllerConfig result = new ControllerConfig();
+			int[] keys = new int[18];
+			Arrays.fill(keys, -1);
+			for(int i = 0;i < 9;i++) {
+				keys[i + player * 9] = result.keys[i];
+			}
+			result.keys = keys;
+			return result;
 		}
 	}
 

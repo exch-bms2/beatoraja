@@ -44,8 +44,6 @@ public class PlayerResource {
 
 	private int auto;
 
-	private BMSPlayerInputDevice.Type playDeviceType;
-
 	private List<CourseData.CourseDataConstraint> constraint = new ArrayList();
 
 	private BMSResource bmsresource;
@@ -111,7 +109,6 @@ public class PlayerResource {
 		this.config = config;
 		this.pconfig = pconfig;
 		this.bmsresource = new BMSResource(audio, config, pconfig);
-		this.playDeviceType = BMSPlayerInputDevice.Type.KEYBOARD;
 	}
 
 	public void clear() {
@@ -419,13 +416,5 @@ public class PlayerResource {
 
 	public TextureRegion getStagefileData() {
 		return stagefile;
-	}
-
-	public BMSPlayerInputDevice.Type getPlayDeviceType() {
-		return playDeviceType;
-	}
-
-	public void setPlayDeviceType(BMSPlayerInputDevice.Type playDeviceType) {
-		this.playDeviceType = playDeviceType;
 	}
 }

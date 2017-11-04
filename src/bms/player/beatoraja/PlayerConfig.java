@@ -103,13 +103,13 @@ public class PlayerConfig {
 	private SkinConfig[] skin = new SkinConfig[SkinType.getMaxSkinTypeID() + 1];
 
 	private PlayConfig mode7 = new PlayConfig(
-			PlayConfig.KeyboardConfig.default14(),
+			PlayConfig.KeyboardConfig.default7(),
 			new PlayConfig.ControllerConfig[] { PlayConfig.ControllerConfig.default7() },
 			PlayConfig.MidiConfig.default7());
 
 	private PlayConfig mode14 = new PlayConfig(
 			PlayConfig.KeyboardConfig.default14(),
-			new PlayConfig.ControllerConfig[] { PlayConfig.ControllerConfig.default7(), PlayConfig.ControllerConfig.default7() },
+			new PlayConfig.ControllerConfig[] { PlayConfig.ControllerConfig.default14(0), PlayConfig.ControllerConfig.default14(1) },
 			PlayConfig.MidiConfig.default14());
 
 	private PlayConfig mode9 = new PlayConfig(
@@ -443,6 +443,14 @@ public class PlayerConfig {
 	public void setId(String id) {
 		this.id = id;
 	}
+	
+	public void validate() {
+		mode7.validate(9);
+		mode14.validate(18);
+		mode9.validate(9);
+		mode24.validate(26);
+		mode24.validate(52);
+	}
 
 	public static void init(Config config) {
 		// TODO プレイヤーアカウント検証
@@ -490,7 +498,6 @@ public class PlayerConfig {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
 	}
 
 	public static String[] readAllPlayerID() {
@@ -515,6 +522,7 @@ public class PlayerConfig {
 			json.setIgnoreUnknownFields(true);
 			player = json.fromJson(PlayerConfig.class, new FileReader(p.toFile()));
 			player.setId(playerid);
+			player.validate();
 		} catch(Throwable e) {
 			e.printStackTrace();
 		}
