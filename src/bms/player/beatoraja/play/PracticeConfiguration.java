@@ -127,7 +127,7 @@ public class PracticeConfiguration {
 				}
 				break;
 			case 2:
-				property.gaugetype = (property.gaugetype + 9) % 10;
+				property.gaugetype = (property.gaugetype + 8) % 9;
 				if ((model.getMode() == Mode.POPN_5K || model.getMode() == Mode.POPN_9K) && property.gaugetype >= 3
 						&& property.startgauge > 100) {
 					property.startgauge = 100;
@@ -196,7 +196,7 @@ public class PracticeConfiguration {
 				}
 				break;
 			case 2:
-				property.gaugetype = (property.gaugetype + 1) % 10;
+				property.gaugetype = (property.gaugetype + 1) % 9;
 				if ((model.getMode() == Mode.POPN_5K || model.getMode() == Mode.POPN_9K) && property.gaugetype >= 3 && property.startgauge > 100) {
 					property.startgauge = 100;
 				}
