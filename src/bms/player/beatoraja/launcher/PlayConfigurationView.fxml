@@ -208,6 +208,24 @@
                                        </CheckBox>
                                    </children>
                                </HBox>
+                               <HBox prefHeight="37.0" prefWidth="723.0">
+                                   <children>
+                                       <Label prefHeight="24.0" prefWidth="150.0" text="%SCROLL_DURATION_LOW" />
+                                       <Spinner fx:id="scrolldurationlow" editable="true" prefWidth="150.0">
+                                           <valueFactory>
+                                               <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="300" max="1000" min="1" />
+                                           </valueFactory>
+                                       </Spinner>
+                                   </children>
+                                   <children>
+                                       <Label prefHeight="24.0" prefWidth="100.0" text="%SCROLL_DURATION_HIGH" />
+                                       <Spinner fx:id="scrolldurationhigh" editable="true" prefWidth="150.0">
+                                           <valueFactory>
+                                               <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="50" max="1000" min="1" />
+                                           </valueFactory>
+                                       </Spinner>
+                                   </children>
+                               </HBox>
                            </children>
                         </VBox>
                      </children>
