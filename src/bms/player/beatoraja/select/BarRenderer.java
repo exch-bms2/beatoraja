@@ -66,8 +66,8 @@ public class BarRenderer {
 
 	private PixmapResourcePool banners = new PixmapResourcePool();
 
-	private final int durationlow = 300;
-	private final int durationhigh = 50;
+	private int durationlow = 300;
+	private int durationhigh = 50;
 	/**
 	 * バー移動中のカウンタ
 	 */
@@ -89,6 +89,9 @@ public class BarRenderer {
 
 		Array<TableBar> table = new Array<TableBar>();
 		TableBar bmssearch = null;
+
+		durationlow = main.getConfig().getScrollDurationLow();
+		durationhigh = main.getConfig().getScrollDurationHigh();
 
 		for (int i = 0; i < tds.length; i++) {
 			if(tds[i].getName().equals("BMS Search")) {
