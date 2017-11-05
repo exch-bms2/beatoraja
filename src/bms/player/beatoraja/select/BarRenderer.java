@@ -76,6 +76,7 @@ public class BarRenderer {
 	 * バーの移動方向
 	 */
 	private int angle;
+	private boolean keyinput;
 
 	public BarRenderer(MusicSelector select) {
 		final MainController main = select.getMainController();
@@ -457,11 +458,12 @@ public class BarRenderer {
 		if (select.isPressed(keystate, keytime, MusicSelectInputProcessor.KEY_UP, false) || cursor[1]) {
 			long l = System.currentTimeMillis();
 			if (duration == 0) {
+				keyinput = true;
 				mov = 1;
 				duration = l + durationlow;
 				angle = durationlow;
 			}
-			if (l > duration) {
+			if (l > duration && keyinput == true) {
 				duration = l + durationhigh;
 				mov = 1;
 				angle = durationhigh;
@@ -469,22 +471,23 @@ public class BarRenderer {
 		} else if (select.isPressed(keystate, keytime, MusicSelectInputProcessor.KEY_DOWN, false) || cursor[0]) {
 			long l = System.currentTimeMillis();
 			if (duration == 0) {
+				keyinput = true;
 				mov = -1;
 				duration = l + durationlow;
 				angle = -durationlow;
 			}
-			if (l > duration) {
+			if (l > duration && keyinput == true) {
 				duration = l + durationhigh;
 				mov = -1;
 				angle = -durationhigh;
 			}
 		} else {
+			keyinput = false;
+		}
 			long l = System.currentTimeMillis();
-			if (l > duration) {
+		if (l > duration && keyinput == false) {
 				duration = 0;
 			}
-		}
-
 		while(mov > 0) {
 			move(true);
 			select.play(MusicSelector.SOUND_SCRATCH);
