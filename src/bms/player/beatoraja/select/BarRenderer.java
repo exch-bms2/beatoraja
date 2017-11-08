@@ -66,8 +66,8 @@ public class BarRenderer {
 
 	private PixmapResourcePool banners = new PixmapResourcePool();
 
-	private final int durationlow = 300;
-	private final int durationhigh = 50;
+	private int durationlow = 300;
+	private int durationhigh = 50;
 	/**
 	 * バー移動中のカウンタ
 	 */
@@ -76,6 +76,7 @@ public class BarRenderer {
 	 * バーの移動方向
 	 */
 	private int angle;
+	private boolean keyinput;
 
 	public BarRenderer(MusicSelector select) {
 		final MainController main = select.getMainController();
@@ -88,6 +89,9 @@ public class BarRenderer {
 
 		Array<TableBar> table = new Array<TableBar>();
 		TableBar bmssearch = null;
+
+		durationlow = main.getConfig().getScrollDurationLow();
+		durationhigh = main.getConfig().getScrollDurationHigh();
 
 		for (int i = 0; i < tds.length; i++) {
 			if(tds[i].getName().equals("BMS Search")) {
@@ -225,7 +229,8 @@ public class BarRenderer {
 		for (int i = 0; i < currentsongs.length; i++) {
 			if (currentsongs[i].getTitle().equals(bar.getTitle())) {
 				selectedindex = i;
-				select.getScoreDataProperty().update(currentsongs[selectedindex].getScore());
+				select.getScoreDataProperty().update(currentsongs[selectedindex].getScore(),
+						currentsongs[selectedindex].getRivalScore());
 				break;
 			}
 		}
@@ -239,7 +244,8 @@ public class BarRenderer {
 		if (value >= 0 && value < 1) {
 			selectedindex = (int) (currentsongs.length * value);
 		}
-		select.getScoreDataProperty().update(currentsongs[selectedindex].getScore());
+		select.getScoreDataProperty().update(currentsongs[selectedindex].getScore(),
+				currentsongs[selectedindex].getRivalScore());
 	}
 
 	public void move(boolean inclease) {
@@ -249,7 +255,8 @@ public class BarRenderer {
 			selectedindex += currentsongs.length - 1;
 		}
 		selectedindex = selectedindex % currentsongs.length;
-		select.getScoreDataProperty().update(currentsongs[selectedindex].getScore());
+		select.getScoreDataProperty().update(currentsongs[selectedindex].getScore(),
+				currentsongs[selectedindex].getRivalScore());
 	}
 
 	public void close() {
@@ -457,11 +464,12 @@ public class BarRenderer {
 		if (select.isPressed(keystate, keytime, MusicSelectInputProcessor.KEY_UP, false) || cursor[1]) {
 			long l = System.currentTimeMillis();
 			if (duration == 0) {
+				keyinput = true;
 				mov = 1;
 				duration = l + durationlow;
 				angle = durationlow;
 			}
-			if (l > duration) {
+			if (l > duration && keyinput == true) {
 				duration = l + durationhigh;
 				mov = 1;
 				angle = durationhigh;
@@ -469,22 +477,23 @@ public class BarRenderer {
 		} else if (select.isPressed(keystate, keytime, MusicSelectInputProcessor.KEY_DOWN, false) || cursor[0]) {
 			long l = System.currentTimeMillis();
 			if (duration == 0) {
+				keyinput = true;
 				mov = -1;
 				duration = l + durationlow;
 				angle = -durationlow;
 			}
-			if (l > duration) {
+			if (l > duration && keyinput == true) {
 				duration = l + durationhigh;
 				mov = -1;
 				angle = -durationhigh;
 			}
 		} else {
+			keyinput = false;
+		}
 			long l = System.currentTimeMillis();
-			if (l > duration) {
+		if (l > duration && keyinput == false) {
 				duration = 0;
 			}
-		}
-
 		while(mov > 0) {
 			move(true);
 			select.play(MusicSelector.SOUND_SCRATCH);
@@ -641,7 +650,8 @@ public class BarRenderer {
 			}
 			loader = new BarContentsLoaderThread(currentsongs);
 			loader.start();
-			select.getScoreDataProperty().update(currentsongs[selectedindex].getScore());
+			select.getScoreDataProperty().update(currentsongs[selectedindex].getScore(),
+					currentsongs[selectedindex].getRivalScore());
 			return true;
 		}
 

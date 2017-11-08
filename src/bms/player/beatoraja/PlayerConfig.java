@@ -450,7 +450,7 @@ public class PlayerConfig {
 			if(!Files.exists(Paths.get("player"))) {
 				Files.createDirectory(Paths.get("player"));
 			}
-			if(readAllPlayerID().length == 0) {
+			if(readAllPlayerID().length == 0 || readPlayerConfig(config.getPlayername()) == null) {
 				PlayerConfig pc = new PlayerConfig(config);
 				create("player1");
 				// スコアデータコピー

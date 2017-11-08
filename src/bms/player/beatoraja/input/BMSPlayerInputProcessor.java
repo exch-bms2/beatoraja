@@ -1,14 +1,18 @@
 package bms.player.beatoraja.input;
 
 import bms.player.beatoraja.Config;
+
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 import bms.player.beatoraja.PlayConfig.KeyboardConfig;
 import bms.player.beatoraja.PlayConfig.ControllerConfig;
 import bms.player.beatoraja.PlayConfig.MidiConfig;
+import bms.player.beatoraja.PlayerConfig;
 import bms.player.beatoraja.Resolution;
 import bms.player.beatoraja.input.BMControllerInputProcessor.BMKeys;
 
@@ -30,14 +34,24 @@ public class BMSPlayerInputProcessor {
 
 	private MidiInputProcessor midiinput;
 
-	public BMSPlayerInputProcessor(Config config) {
+	public BMSPlayerInputProcessor(Config config, PlayerConfig player) {
 		Resolution resolution = config.getResolution();
-		kbinput = new KeyBoardInputProcesseor(this, KeyboardConfig.default14(), resolution);
+		kbinput = new KeyBoardInputProcesseor(this, player.getMode14().getKeyboardConfig(), resolution);
 		// Gdx.input.setInputProcessor(kbinput);
 		List<BMControllerInputProcessor> bminput = new ArrayList<BMControllerInputProcessor>();
 		for (Controller controller : Controllers.getControllers()) {
 			Logger.getGlobal().info("コントローラーを検出 : " + controller.getName());
-			BMControllerInputProcessor bm = new BMControllerInputProcessor(this, controller, new ControllerConfig(), config);
+			// FIXME:前回終了時のModeからコントローラ設定を復元
+			ControllerConfig controllerConfig = Stream.of(player.getMode7().getController())
+				.filter(m -> {
+				    try {
+					return m.getName().equals(new String(controller.getName().getBytes("EUC_JP"), "UTF-8"));
+				    } catch (UnsupportedEncodingException e) {
+					return false;
+				    }
+				}).findFirst()
+				.orElse(new ControllerConfig());
+			BMControllerInputProcessor bm = new BMControllerInputProcessor(this, controller, controllerConfig, config);
 			// controller.addListener(bm);
 			bminput.add(bm);
 		}
