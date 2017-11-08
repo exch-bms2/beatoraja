@@ -12,6 +12,7 @@ import bms.player.beatoraja.PlayConfig.KeyboardConfig;
 import bms.player.beatoraja.PlayConfig.ControllerConfig;
 import bms.player.beatoraja.PlayConfig.MidiConfig;
 import bms.player.beatoraja.Resolution;
+import bms.player.beatoraja.input.BMSPlayerInputDevice.Type;
 
 import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.Controllers;
@@ -105,6 +106,8 @@ public class BMSPlayerInputProcessor {
 	boolean[] cursor = new boolean[4];
 	long[] cursortime = new long[4];
 
+	private Type type = Type.KEYBOARD;
+	
 	public void setMinimumInputDutration(int minduration) {
 		kbinput.setMinimumDuration(minduration);
 		for (BMControllerInputProcessor bm : bminput) {
@@ -119,7 +122,6 @@ public class BMSPlayerInputProcessor {
 	public void setControllerConfig(ControllerConfig[] configs) {
 		boolean[] b = new boolean[configs.length];
 		for (BMControllerInputProcessor controller : bminput) {
-			int player = -1;
 			for(int i = 0;i < configs.length;i++) {
 				if(b[i]) {
 					continue;
@@ -128,7 +130,6 @@ public class BMSPlayerInputProcessor {
 					configs[i].setName(controller.getController().getName());
 				}
 				if(controller.getController().getName().equals(configs[i].getName())) {
-					player = i;
 					controller.setConfig(configs[i]);
 					b[i] = true;
 					break;
@@ -191,19 +192,23 @@ public class BMSPlayerInputProcessor {
 			time[i] = 0;
 		}
 		
-		setPlayConfig0(kbkeys,  exclusive);
+		int kbcount = setPlayConfig0(kbkeys,  exclusive);
+		
 		int[][] cokeys = new int[playconfig.getController().length][];
+		int cocount = 0;
 		for(int i = 0;i < cokeys.length;i++) {
 			cokeys[i] = playconfig.getController()[i].getKeyAssign();
-			setPlayConfig0(cokeys[i],  exclusive);
+			cocount += setPlayConfig0(cokeys[i],  exclusive);
 		}
 				
 		MidiConfig.Input[] mikeys  = playconfig.getMidiConfig().getKeys();
+		int micount = 0;
 		for(int i = 0;i < mikeys.length;i++) {
 			if(exclusive[i]) {
 				mikeys[i] = null;
 			} else {
 				exclusive[i] = true;
+				micount++;
 			}
 		}
 		
@@ -218,21 +223,31 @@ public class BMSPlayerInputProcessor {
 			}
 		}
 		midiinput.setConfig(playconfig.getMidiConfig());
+		
+		if(kbcount >= cocount && kbcount >= micount) {
+			type = Type.KEYBOARD;
+		} else if(cocount >= kbcount && cocount >= micount) {
+			type = Type.BM_CONTROLLER;
+		} else {
+			type = Type.MIDI;			
+		}
 	}
 	
 	public BMSPlayerInputDevice.Type getDeviceType() {
-		// TODO 最もキーを使用しているデバイスを返す
-		return BMSPlayerInputDevice.Type.KEYBOARD;
+		return type;
 	}
 	
-	private void setPlayConfig0(int[] keys, boolean[] exclusive) {
+	private int setPlayConfig0(int[] keys, boolean[] exclusive) {
+		int count = 0;
 		for(int i = 0;i < keys.length;i++) {
 			if(exclusive[i]) {
 				keys[i] = -1;
 			} else {
 				exclusive[i] = true;
+				count++;
 			}
 		}
+		return count;
 	}
 	
 	public void setEnable(boolean enable) {
