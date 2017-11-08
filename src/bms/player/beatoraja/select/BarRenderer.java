@@ -229,7 +229,8 @@ public class BarRenderer {
 		for (int i = 0; i < currentsongs.length; i++) {
 			if (currentsongs[i].getTitle().equals(bar.getTitle())) {
 				selectedindex = i;
-				select.getScoreDataProperty().update(currentsongs[selectedindex].getScore());
+				select.getScoreDataProperty().update(currentsongs[selectedindex].getScore(),
+						currentsongs[selectedindex].getRivalScore());
 				break;
 			}
 		}
@@ -243,7 +244,8 @@ public class BarRenderer {
 		if (value >= 0 && value < 1) {
 			selectedindex = (int) (currentsongs.length * value);
 		}
-		select.getScoreDataProperty().update(currentsongs[selectedindex].getScore());
+		select.getScoreDataProperty().update(currentsongs[selectedindex].getScore(),
+				currentsongs[selectedindex].getRivalScore());
 	}
 
 	public void move(boolean inclease) {
@@ -253,7 +255,8 @@ public class BarRenderer {
 			selectedindex += currentsongs.length - 1;
 		}
 		selectedindex = selectedindex % currentsongs.length;
-		select.getScoreDataProperty().update(currentsongs[selectedindex].getScore());
+		select.getScoreDataProperty().update(currentsongs[selectedindex].getScore(),
+				currentsongs[selectedindex].getRivalScore());
 	}
 
 	public void close() {
@@ -647,7 +650,8 @@ public class BarRenderer {
 			}
 			loader = new BarContentsLoaderThread(currentsongs);
 			loader.start();
-			select.getScoreDataProperty().update(currentsongs[selectedindex].getScore());
+			select.getScoreDataProperty().update(currentsongs[selectedindex].getScore(),
+					currentsongs[selectedindex].getRivalScore());
 			return true;
 		}
 
