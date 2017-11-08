@@ -205,31 +205,6 @@ public class Config {
 	private int frameskip = 1;
 	private String vlcpath = "";
 
-	private PlayConfig mode7 = new PlayConfig(
-			PlayConfig.KeyboardConfig.default14(),
-			new PlayConfig.ControllerConfig[] { PlayConfig.ControllerConfig.default7() },
-			PlayConfig.MidiConfig.default7());
-
-	private PlayConfig mode14 = new PlayConfig(
-			PlayConfig.KeyboardConfig.default14(),
-			new PlayConfig.ControllerConfig[] { PlayConfig.ControllerConfig.default7(), PlayConfig.ControllerConfig.default7() },
-			PlayConfig.MidiConfig.default14());
-
-	private PlayConfig mode9 = new PlayConfig(
-			PlayConfig.KeyboardConfig.default9(),
-			new PlayConfig.ControllerConfig[] { PlayConfig.ControllerConfig.default9() },
-			PlayConfig.MidiConfig.default9());
-
-	private PlayConfig mode24 = new PlayConfig(
-			new PlayConfig.KeyboardConfig(),
-			new PlayConfig.ControllerConfig[] { new PlayConfig.ControllerConfig() },
-			MidiConfig.default24());
-
-	private PlayConfig mode24double = new PlayConfig(
-			new PlayConfig.KeyboardConfig(),
-			new PlayConfig.ControllerConfig[] { new PlayConfig.ControllerConfig(), new PlayConfig.ControllerConfig() },
-			MidiConfig.default24double());
-
 	private int musicselectinput = 0;
 
 	private boolean updatesong = false;
@@ -549,61 +524,6 @@ public class Config {
 
 	public void setJudgetiming(int judgetiming) {
 		this.judgetiming = judgetiming;
-	}
-
-	public PlayConfig getPlayConfig(int modeId) {
-		switch (modeId) {
-		case 7:
-		case 5:
-			return getMode7();
-		case 14:
-		case 10:
-			return getMode14();
-		case 9:
-			return getMode9();
-		case 25:
-			return getMode24();
-		case 50:
-			return getMode24double();
-		default:
-			return getMode7();
-		}
-	}
-
-	public PlayConfig getMode7() {
-		return mode7;
-	}
-
-	public void setMode7(PlayConfig mode7) {
-		this.mode7 = mode7;
-	}
-
-	public PlayConfig getMode14() {
-		return mode14;
-	}
-
-	public void setMode14(PlayConfig mode14) {
-		this.mode14 = mode14;
-	}
-
-	public PlayConfig getMode9() {
-		return mode9;
-	}
-
-	public void setMode9(PlayConfig mode9) {
-		this.mode9 = mode9;
-	}
-
-	public PlayConfig getMode24() {
-		return mode24;
-	}
-
-	public PlayConfig getMode24double() {
-		return mode24double;
-	}
-
-	public void setMode24(PlayConfig mode24) {
-		this.mode24 = mode24;
 	}
 
 	public void setMode(Mode m)  {

@@ -418,35 +418,35 @@ public abstract class MainState {
 			case NUMBER_HISPEED_LR2:
 				if (getMainController().getPlayerResource().getSongdata() != null) {
 					SongData song = getMainController().getPlayerResource().getSongdata();
-					PlayConfig pc = getMainController().getPlayerResource().getConfig().getPlayConfig(song.getMode());
+					PlayConfig pc = getMainController().getPlayerResource().getPlayerConfig().getPlayConfig(song.getMode());
 					return (int) (pc.getHispeed() * 100);
 				}
 				return Integer.MIN_VALUE;
 			case NUMBER_HISPEED:
 				if (getMainController().getPlayerResource().getSongdata() != null) {
 					SongData song = getMainController().getPlayerResource().getSongdata();
-					PlayConfig pc = getMainController().getPlayerResource().getConfig().getPlayConfig(song.getMode());
+					PlayConfig pc = getMainController().getPlayerResource().getPlayerConfig().getPlayConfig(song.getMode());
 					return (int) pc.getHispeed();
 				}
 				return Integer.MIN_VALUE;
 			case NUMBER_HISPEED_AFTERDOT:
 				if (getMainController().getPlayerResource().getSongdata() != null) {
 					SongData song = getMainController().getPlayerResource().getSongdata();
-					PlayConfig pc = getMainController().getPlayerResource().getConfig().getPlayConfig(song.getMode());
+					PlayConfig pc = getMainController().getPlayerResource().getPlayerConfig().getPlayConfig(song.getMode());
 					return (int) (pc.getHispeed() * 100) % 100;
 				}
 				return Integer.MIN_VALUE;
 			case NUMBER_DURATION:
 				if (getMainController().getPlayerResource().getSongdata() != null) {
 					SongData song = getMainController().getPlayerResource().getSongdata();
-					PlayConfig pc = getMainController().getPlayerResource().getConfig().getPlayConfig(song.getMode());
+					PlayConfig pc = getMainController().getPlayerResource().getPlayerConfig().getPlayConfig(song.getMode());
 					return pc.getDuration();
 				}
 				return Integer.MIN_VALUE;
 			case NUMBER_DURATION_GREEN:
 				if (getMainController().getPlayerResource().getSongdata() != null) {
 					SongData song = getMainController().getPlayerResource().getSongdata();
-					PlayConfig pc = getMainController().getPlayerResource().getConfig().getPlayConfig(song.getMode());
+					PlayConfig pc = getMainController().getPlayerResource().getPlayerConfig().getPlayConfig(song.getMode());
 					return pc.getDuration() * 3 / 5;
 				}
 				return Integer.MIN_VALUE;

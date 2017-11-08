@@ -34,7 +34,7 @@ public class BMSPlayerInputProcessor {
 
 	public BMSPlayerInputProcessor(Config config) {
 		Resolution resolution = config.getResolution();
-		kbinput = new KeyBoardInputProcesseor(this, KeyboardConfig.default14(), resolution);
+		kbinput = new KeyBoardInputProcesseor(this, new KeyboardConfig(), resolution);
 		// Gdx.input.setInputProcessor(kbinput);
 		List<BMControllerInputProcessor> bminput = new ArrayList<BMControllerInputProcessor>();
 		for (Controller controller : Controllers.getControllers()) {
@@ -47,7 +47,7 @@ public class BMSPlayerInputProcessor {
 		this.bminput = bminput.toArray(new BMControllerInputProcessor[0]);
 		midiinput = new MidiInputProcessor(this);
 		midiinput.open();
-		midiinput.setConfig(MidiConfig.default7());
+		midiinput.setConfig(new MidiConfig());
 
 		devices = new ArrayList<BMSPlayerInputDevice>();
 		devices.add(kbinput);
@@ -242,7 +242,7 @@ public class BMSPlayerInputProcessor {
 		for(int i = 0;i < keys.length;i++) {
 			if(exclusive[i]) {
 				keys[i] = -1;
-			} else {
+			} else if(keys[i] != -1){
 				exclusive[i] = true;
 				count++;
 			}

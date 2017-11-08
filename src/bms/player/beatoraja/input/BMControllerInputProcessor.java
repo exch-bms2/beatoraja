@@ -100,9 +100,9 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice implements 
 		return false;
 	}
 
-	private final boolean[] buttonstate = new boolean[20];
-	private final boolean[] buttonchanged = new boolean[20];
-	private final long[] buttontime = new long[20];
+	private final boolean[] buttonstate = new boolean[BMKeys.MAXID];
+	private final boolean[] buttonchanged = new boolean[BMKeys.MAXID];
+	private final long[] buttontime = new long[BMKeys.MAXID];
 
 	private int duration = 16;
 
@@ -163,17 +163,18 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice implements 
 		}
 
 		for (int i = 0; i < buttons.length; i++) {
-			if (buttons[i] >= 0 && buttonchanged[buttons[i]]) {
-				this.bmsPlayerInputProcessor.keyChanged(this, presstime, i, buttonstate[buttons[i]]);
-				buttonchanged[buttons[i]] = false;
+			final int button = buttons[i];
+			if (button >= 0 && button < BMKeys.MAXID && buttonchanged[button]) {
+				this.bmsPlayerInputProcessor.keyChanged(this, presstime, i, buttonstate[button]);
+				buttonchanged[button] = false;
 			}
 		}
 
-		if (buttonchanged[start]) {
+		if (start >= 0 && start < BMKeys.MAXID && buttonchanged[start]) {
 			this.bmsPlayerInputProcessor.startChanged(buttonstate[start]);
 			buttonchanged[start] = false;
 		}
-		if (buttonchanged[select]) {
+		if (select >= 0 && select < BMKeys.MAXID && buttonchanged[select]) {
 			this.bmsPlayerInputProcessor.setSelectPressed(buttonstate[select]);
 			buttonchanged[select] = false;
 		}
@@ -278,6 +279,8 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice implements 
 		public static final int DOWN = 17;
 		public static final int LEFT = 18;
 		public static final int RIGHT = 19;
+		
+		public static final int MAXID = 20;
 
 		/**
 		 * 専コンのキーコードに対応したテキスト

@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 import bms.player.beatoraja.skin.SkinType;
 
 import bms.model.Mode;
+import bms.player.beatoraja.PlayConfig.KeyboardConfig;
 import bms.player.beatoraja.PlayConfig.MidiConfig;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter;
@@ -102,30 +103,15 @@ public class PlayerConfig {
 
 	private SkinConfig[] skin = new SkinConfig[SkinType.getMaxSkinTypeID() + 1];
 
-	private PlayConfig mode7 = new PlayConfig(
-			PlayConfig.KeyboardConfig.default7(),
-			new PlayConfig.ControllerConfig[] { PlayConfig.ControllerConfig.default7() },
-			PlayConfig.MidiConfig.default7());
+	private PlayConfig mode7 = new PlayConfig(Mode.BEAT_7K);
 
-	private PlayConfig mode14 = new PlayConfig(
-			PlayConfig.KeyboardConfig.default14(),
-			new PlayConfig.ControllerConfig[] { PlayConfig.ControllerConfig.default14(0), PlayConfig.ControllerConfig.default14(1) },
-			PlayConfig.MidiConfig.default14());
+	private PlayConfig mode14 = new PlayConfig(Mode.BEAT_14K);
 
-	private PlayConfig mode9 = new PlayConfig(
-			PlayConfig.KeyboardConfig.default9(),
-			new PlayConfig.ControllerConfig[] { PlayConfig.ControllerConfig.default9() },
-			PlayConfig.MidiConfig.default9());
+	private PlayConfig mode9 = new PlayConfig(Mode.POPN_9K);
 
-	private PlayConfig mode24 = new PlayConfig(
-			new PlayConfig.KeyboardConfig(),
-			new PlayConfig.ControllerConfig[] { new PlayConfig.ControllerConfig() },
-			MidiConfig.default24());
+	private PlayConfig mode24 = new PlayConfig(Mode.KEYBOARD_24K);
 
-	private PlayConfig mode24double = new PlayConfig(
-			new PlayConfig.KeyboardConfig(),
-			new PlayConfig.ControllerConfig[] { new PlayConfig.ControllerConfig(), new PlayConfig.ControllerConfig() },
-			MidiConfig.default24double());
+	private PlayConfig mode24double = new PlayConfig(Mode.KEYBOARD_24K_DOUBLE);
 
 	private int musicselectinput = 0;
 
@@ -155,11 +141,6 @@ public class PlayerConfig {
 		this.showjudgearea = c.isShowjudgearea();
 		this.markprocessednote = c.isMarkprocessednote();
 		this.skin = c.getSkin();
-		this.mode7 = c.getMode7();
-		this.mode14 = c.getMode14();
-		this.mode9 = c.getMode9();
-		this.mode24 = c.getMode24();
-		this.mode24double = c.getMode24double();
 		this.musicselectinput = c.getMusicselectinput();
 		this.irname = c.getIrname();
 		this.userid = c.getUserid();
@@ -281,6 +262,25 @@ public class PlayerConfig {
 		this.markprocessednote = markprocessednote;
 	}
 
+	public PlayConfig getPlayConfig(Mode modeId) {
+		switch (modeId) {
+		case BEAT_5K:
+		case BEAT_7K:
+			return getMode7();
+		case BEAT_10K:
+		case BEAT_14K:
+			return getMode14();
+		case POPN_9K:
+			return getMode9();
+		case KEYBOARD_24K:
+			return getMode24();
+		case KEYBOARD_24K_DOUBLE:
+			return getMode24double();
+		default:
+			return getMode7();
+		}
+	}
+
 	public PlayConfig getPlayConfig(int modeId) {
 		switch (modeId) {
 		case 7:
@@ -310,10 +310,7 @@ public class PlayerConfig {
 
 	public PlayConfig getMode14() {
 		if(mode14 == null || mode14.getController().length < 2) {
-			mode14 = new PlayConfig(
-					PlayConfig.KeyboardConfig.default14(),
-					new PlayConfig.ControllerConfig[2],
-					PlayConfig.MidiConfig.default14());
+			mode14 = new PlayConfig(Mode.BEAT_14K);
 			Logger.getGlobal().warning("mode14のPlayConfigを再構成");
 		}
 		return mode14;
@@ -341,10 +338,7 @@ public class PlayerConfig {
 
 	public PlayConfig getMode24double() {
 		if(mode24double == null || mode24double.getController().length < 2) {
-			mode24double = new PlayConfig(
-					new PlayConfig.KeyboardConfig(),
-					new PlayConfig.ControllerConfig[] { new PlayConfig.ControllerConfig(), new PlayConfig.ControllerConfig() },
-					MidiConfig.default24double());
+			mode24double = new PlayConfig(Mode.KEYBOARD_24K_DOUBLE);
 			Logger.getGlobal().warning("mode24doubleのPlayConfigを再構成");
 		}
 		return mode24double;
@@ -449,7 +443,7 @@ public class PlayerConfig {
 		mode14.validate(18);
 		mode9.validate(9);
 		mode24.validate(26);
-		mode24.validate(52);
+		mode24double.validate(52);
 	}
 
 	public static void init(Config config) {
