@@ -6,6 +6,7 @@ import java.util.*;
 import java.util.logging.Logger;
 
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
+import bms.player.beatoraja.ir.IRResponse;
 import bms.player.beatoraja.select.bar.*;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
@@ -103,8 +104,13 @@ public class BarRenderer {
 		}
 		
 		if(main.getIRConnection() != null) {
-			for(TableData td : main.getIRConnection().getTableDatas()) {
-				table.add(new TableBar(select, td, new TableDataAccessor.DifficultyTableReader(td.getUrl())));				
+			IRResponse<TableData[]> response = main.getIRConnection().getTableDatas();
+			if(response.isSuccessed()) {
+				for(TableData td : response.getData()) {
+					table.add(new TableBar(select, td, new TableDataAccessor.DifficultyTableReader(td.getUrl())));				
+				}				
+			} else {
+				Logger.getGlobal().warning("IRからのテーブル取得失敗 : " + response.getMessage());
 			}
 		}
 

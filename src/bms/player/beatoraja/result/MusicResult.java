@@ -20,6 +20,7 @@ import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.PlayerResource;
 import bms.player.beatoraja.ReplayData;
 import bms.player.beatoraja.ir.IRConnection;
+import bms.player.beatoraja.ir.IRResponse;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.skin.SkinType;
 
@@ -382,19 +383,24 @@ public class MusicResult extends MainState {
 					@Override
 					public void run() {
 						ir.sendPlayData(resource.getBMSModel(), resource.getScoreData());
-						IRScoreData[] scores = ir.getPlayData(null, resource.getBMSModel());
-						irtotal = scores.length;
+						IRResponse<IRScoreData[]> response = ir.getPlayData(null, resource.getBMSModel());
+						if(response.isSuccessed()) {
+							IRScoreData[] scores = response.getData();
+							irtotal = scores.length;
 
-						for(int i = 0;i < scores.length;i++) {
-							if(irrank == 0 && scores[i].getExscore() <= resource.getScoreData().getExscore() ) {
-								irrank = i + 1;
-							}
-							if(irprevrank == 0 && scores[i].getExscore() <= oldscore.getExscore() ) {
-								irprevrank = i + 1;
-								if(irrank == 0) {
-									irrank = irprevrank;
+							for(int i = 0;i < scores.length;i++) {
+								if(irrank == 0 && scores[i].getExscore() <= resource.getScoreData().getExscore() ) {
+									irrank = i + 1;
 								}
-							}
+								if(irprevrank == 0 && scores[i].getExscore() <= oldscore.getExscore() ) {
+									irprevrank = i + 1;
+									if(irrank == 0) {
+										irrank = irprevrank;
+									}
+								}
+							}							
+						} else {
+							Logger.getGlobal().warning("IRからのスコア取得失敗 : " + response.getMessage());
 						}
 
 						state = STATE_IR_FINISHED;
