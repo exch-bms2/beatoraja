@@ -173,6 +173,40 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 			}
 		});
 
+				addCommandWord(new CommandWord("SET_IMAGESET") {
+			@Override
+			public void execute(String[] str) {
+				imagesetarray.clear();
+				part = null;
+				cycle = Integer.parseInt(str[1]);
+				timer = Integer.parseInt(str[2]);
+				ref = Integer.parseInt(str[3]);
+			}
+		});
+
+		addCommandWord(new CommandWord("SRC_IMAGESET") {
+			@Override
+			public void execute(String[] str) {
+				int gr = Integer.parseInt(str[2]);
+				if (gr < imagelist.size() && imagelist.get(gr) != null) {
+					int[] values = parseInt(str);
+					imagesetarray.add(getSourceImage(values));
+				}
+			}
+		});
+
+		addCommandWord(new CommandWord("END_IMAGESET") {
+			@Override
+			public void execute(String[] str) {
+				TextureRegion[][] tr = imagesetarray.toArray(new TextureRegion[imagesetarray.size()][]);
+				part = new SkinImage(tr, timer, cycle);
+				part.setReferenceID(ref);
+				if (part != null) {
+					skin.add(part);
+				}
+			}
+		});
+
 		addCommandWord(new CommandWord("DST_IMAGE") {
 			@Override
 			public void execute(String[] str) {
@@ -392,14 +426,27 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 					if (divy <= 0) {
 						divy = 1;
 					}
-					TextureRegion[][] images = new TextureRegion[divx * divy][];
-					for (int i = 0; i < divx; i++) {
-						for (int j = 0; j < divy; j++) {
-							images[divx * j + i] = new TextureRegion[] { new TextureRegion((Texture) imagelist.get(gr),
-									x + w / divx * i, y + h / divy * j, w / divx, h / divy) };
+					TextureRegion[][] tr;
+					int length = values[15];
+					if (length <= 0) {
+						tr = new TextureRegion[divx * divy][];
+						for (int i = 0; i < divx; i++) {
+							for (int j = 0; j < divy; j++) {
+								tr[divx * j + i] = new TextureRegion[] { new TextureRegion((Texture) imagelist.get(gr),
+										x + w / divx * i, y + h / divy * j, w / divx, h / divy) };
+							}
+						}
+					}else {
+						tr = new TextureRegion[length][];
+						TextureRegion[] srcimg = getSourceImage(values);
+						for (int i = 0; i < tr.length; i++) {
+							tr[i] = new TextureRegion[srcimg.length / length];
+							for (int j = 0; j < tr[i].length; j++) {
+								tr[i][j] = srcimg[i * tr[i].length + j];
+							}
 						}
 					}
-					button = new SkinImage(images, values[10], values[9]);
+					button = new SkinImage(tr, values[10], values[9]);
 					button.setReferenceID(values[11]);
 					if (values[12] == 1) {
 						button.setClickevent(values[11]);
@@ -475,6 +522,11 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 	SkinNumber num = null;
 	SkinText text = null;
 	String line = null;
+
+	int timer;
+	int cycle;
+	int ref;
+	List <Object> imagesetarray = new ArrayList<Object>();
 
 	protected void loadSkin0(Skin skin, File f, MainState state, Map<Integer, Boolean> option) throws IOException {
 
