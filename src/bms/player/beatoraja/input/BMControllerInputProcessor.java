@@ -39,12 +39,13 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice implements 
 	private float[] axis = new float[4];
 
 	private int lastPressedButton = -1;
-	private final Config config;
+	
+	private boolean jkoc;
+	private boolean analogScratch;
 
 	public BMControllerInputProcessor(BMSPlayerInputProcessor bmsPlayerInputProcessor, Controller controller,
-									  ControllerConfig controllerConfig, Config config) {
+									  ControllerConfig controllerConfig) {
 		super(Type.BM_CONTROLLER);
-		this.config = config;
 		this.bmsPlayerInputProcessor = bmsPlayerInputProcessor;
 		this.controller = controller;
 		this.setConfig(controllerConfig);
@@ -54,6 +55,8 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice implements 
 		this.buttons = controllerConfig.getKeyAssign().clone();
 		this.start = controllerConfig.getStart();
 		this.select = controllerConfig.getSelect();
+		this.jkoc = controllerConfig.getJKOC();
+		this.analogScratch = controllerConfig.isAnalogScratch();
 	}
 
 	public Controller getController() {
@@ -141,10 +144,10 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice implements 
 				final boolean prev = buttonstate[button];
 				if (button <= BMKeys.BUTTON_16) {
 					buttonstate[button] = controller.getButton(button);
-				} else if (button == BMKeys.UP && !config.getJKOC()) {
+				} else if (button == BMKeys.UP && !jkoc) {
 					// アナログ右回転をUPに割り当てる
 					buttonstate[button] = scratchInput(BMKeys.UP);
-				} else if (button == BMKeys.DOWN && !config.getJKOC()) {
+				} else if (button == BMKeys.DOWN && !jkoc) {
 					// アナログ左回転をDOWNに割り当てる
 					buttonstate[button] = scratchInput(BMKeys.DOWN);
 				} else if (button == BMKeys.LEFT) {
@@ -181,7 +184,7 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice implements 
 	}
 
 	private boolean scratchInput(int button) {
-		if(!config.isAnalogScratch()) {
+		if(!analogScratch) {
 			if(button == BMKeys.UP) {
 				return (axis[1] < -0.9) || (axis[2] < -0.9);
 			} else if(button == BMKeys.DOWN){

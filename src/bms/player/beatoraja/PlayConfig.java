@@ -316,6 +316,16 @@ public class PlayConfig {
 		private int start;
 
 		private int select;
+		
+		/**
+		 * JKOC Hack (boolean) private variable
+		 */
+		private boolean jkoc_hack = false;
+
+		/**
+		 * アナログスクラッチを利用するか(INFINITASコントローラの場合true)
+		 */
+		private boolean analogScratch = false;
 
 		public ControllerConfig() {
 			this(Mode.BEAT_7K, 0, true);
@@ -422,6 +432,22 @@ public class PlayConfig {
 
 		public void setSelect(int select) {
 			this.select = select;
+		}
+		
+		public boolean getJKOC()  {
+			return jkoc_hack;
+		}
+
+		public void setJKOC(boolean jkoc)  {
+			this.jkoc_hack = jkoc;
+		}
+
+		public boolean isAnalogScratch() {
+			return analogScratch;
+		}
+
+		public void setAnalogScratch(boolean analogScratch) {
+			this.analogScratch = analogScratch;
 		}
 	}
 

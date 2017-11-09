@@ -21,6 +21,7 @@ import bms.player.beatoraja.Config;
 import bms.player.beatoraja.IRScoreData;
 import bms.player.beatoraja.MainLoader;
 import bms.player.beatoraja.PlayConfig;
+import bms.player.beatoraja.PlayConfig.ControllerConfig;
 import bms.player.beatoraja.PlayerConfig;
 import bms.player.beatoraja.Resolution;
 import bms.player.beatoraja.ScoreDatabaseAccessor;
@@ -326,8 +327,6 @@ public class PlayConfigurationView implements Initializable {
 
         // int b = Boolean.valueOf(config.getJKOC()).compareTo(false);
 
-        jkoc_hack.setValue(Boolean.valueOf(config.getJKOC()).compareTo(false));
-        analogScratch.setSelected(config.isAnalogScratch());
         usecim.setSelected(config.isCacheSkinImage());
         useSongInfo.setSelected(config.isUseSongInfo());
 
@@ -464,11 +463,6 @@ public class PlayConfigurationView implements Initializable {
 				autosavereplay3.getValue(),autosavereplay4.getValue()});
 
         // jkoc_hack is integer but *.setJKOC needs boolean type
-        if(jkoc_hack.getValue() > 0)
-            config.setJKOC(true);
-        else
-            config.setJKOC(false);
-        config.setAnalogScratch(analogScratch.isSelected());
 
         config.setCacheSkinImage(usecim.isSelected());
         config.setUseSongInfo(useSongInfo.isSelected());
@@ -653,6 +647,14 @@ public class PlayConfigurationView implements Initializable {
 			conf.setLanecover(getValue(lanecover) / 1000f);
 			conf.setEnablelift(enableLift.isSelected());
 			conf.setLift(getValue(lift) / 1000f);
+
+			for(ControllerConfig controller : conf.getController()) {
+		        if(jkoc_hack.getValue() > 0)
+		            controller.setJKOC(true);
+		        else
+		            controller.setJKOC(false);
+		        controller.setAnalogScratch(analogScratch.isSelected());
+			}
 		}
 		pc = playconfig.getValue();
 		PlayConfig conf = getPlayConfig();
@@ -662,6 +664,11 @@ public class PlayConfigurationView implements Initializable {
 		lanecover.getValueFactory().setValue((int) (conf.getLanecover() * 1000));
 		enableLift.setSelected(conf.isEnablelift());
 		lift.getValueFactory().setValue((int) (conf.getLift() * 1000));
+
+		for(ControllerConfig controller : conf.getController()) {
+	        jkoc_hack.setValue(Boolean.valueOf(controller.getJKOC()).compareTo(false));
+	        analogScratch.setSelected(controller.isAnalogScratch());
+		}
 	}
 
 	private <T> T getValue(Spinner<T> spinner) {

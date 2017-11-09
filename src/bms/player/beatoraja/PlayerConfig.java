@@ -10,8 +10,6 @@ import java.util.logging.Logger;
 import bms.player.beatoraja.skin.SkinType;
 
 import bms.model.Mode;
-import bms.player.beatoraja.PlayConfig.KeyboardConfig;
-import bms.player.beatoraja.PlayConfig.MidiConfig;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter;
 
@@ -126,9 +124,6 @@ public class PlayerConfig {
 	
 	public PlayerConfig(Config c) {
 		this.gauge = c.getGauge();
-		this.random = c.getRandom();
-		this.random2 = c.getRandom2();
-		this.doubleoption = c.getDoubleoption();
 		this.fixhispeed = c.getFixhispeed();
 		this.target = c.getTarget();
 		this.judgetiming = c.getJudgetiming();
@@ -142,9 +137,6 @@ public class PlayerConfig {
 		this.markprocessednote = c.isMarkprocessednote();
 		this.skin = c.getSkin();
 		this.musicselectinput = c.getMusicselectinput();
-		this.irname = c.getIrname();
-		this.userid = c.getUserid();
-		this.password = c.getPassword();		
 	}
 	
     public String getName() {

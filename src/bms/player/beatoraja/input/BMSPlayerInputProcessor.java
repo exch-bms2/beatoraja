@@ -39,7 +39,7 @@ public class BMSPlayerInputProcessor {
 		List<BMControllerInputProcessor> bminput = new ArrayList<BMControllerInputProcessor>();
 		for (Controller controller : Controllers.getControllers()) {
 			Logger.getGlobal().info("コントローラーを検出 : " + controller.getName());
-			BMControllerInputProcessor bm = new BMControllerInputProcessor(this, controller, new ControllerConfig(), config);
+			BMControllerInputProcessor bm = new BMControllerInputProcessor(this, controller, new ControllerConfig());
 			// controller.addListener(bm);
 			bminput.add(bm);
 		}

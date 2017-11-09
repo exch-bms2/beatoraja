@@ -90,18 +90,6 @@ public class Config {
 	 * ゲージの種類
 	 */
 	private int gauge = 0;
-	/**
-	 * 譜面オプション
-	 */
-	private int random;
-	/**
-	 * 譜面オプション(2P)
-	 */
-	private int random2;
-	/**
-	 * DP用オプション
-	 */
-	private int doubleoption;
 
 	/**
 	 * ハイスピード固定。固定する場合はデュレーションが有効となり、固定しない場合はハイスピードが有効になる
@@ -148,10 +136,6 @@ public class Config {
 	 * LNモード
 	 */
 	private int lnmode = 0;
-	/**
-	 * アシストオプション:判定拡大
-	 */
-	private boolean expandjudge = false;
 	/**
 	 * アシストオプション:地雷除去
 	 */
@@ -210,12 +194,6 @@ public class Config {
 	private boolean updatesong = false;
 
 	private int autosavereplay[] = {0,0,0,0};
-
-	private String irname = "";
-
-	private String userid = "";
-
-	private String password = "";
 
 	public Config() {
 		tableURL = new String[] { "http://bmsnormal2.syuriken.jp/table.html",
@@ -502,14 +480,6 @@ public class Config {
 		this.gauge = gauge;
 	}
 
-	public int getRandom() {
-		return random;
-	}
-
-	public void setRandom(int random) {
-		this.random = random;
-	}
-
 	public int getFixhispeed() {
 		return fixhispeed;
 	}
@@ -550,30 +520,6 @@ public class Config {
 		this.bpmguide = bpmguide;
 	}
 	
-	public boolean isExpandjudge() {
-		return expandjudge;
-	}
-
-	public void setExpandjudge(boolean expandjudge) {
-		this.expandjudge = expandjudge;
-	}
-
-	public int getRandom2() {
-		return random2;
-	}
-
-	public void setRandom2(int random2) {
-		this.random2 = random2;
-	}
-
-	public int getDoubleoption() {
-		return doubleoption;
-	}
-
-	public void setDoubleoption(int doubleoption) {
-		this.doubleoption = doubleoption;
-	}
-
 	public boolean isNomine() {
 		return nomine;
 	}
@@ -622,63 +568,11 @@ public class Config {
 		this.musicselectinput = musicselectinput;
 	}
 
-	public String getUserid() {
-		return userid;
-	}
-
-	public void setUserid(String userid) {
-		this.userid = userid;
-	}
-
-	public String getPassword() {
-		return password;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
-	}
-
-	public String getIrname() {
-		return irname;
-	}
-
-	public void setIrname(String irname) {
-		this.irname = irname;
-	}
-
 	public int getTarget() {
 		return target;
 	}
 
 	public void setTarget(int target) {
 		this.target = target;
-	}
-
-	// TODO これ以下の値はコントローラー依存のため、ControllerConfigに持っていく予定
-
-	/**
-	 * JKOC Hack (boolean) private variable
-	 */
-	private boolean jkoc_hack = false;
-
-	/**
-	 * アナログスクラッチを利用するか(INFINITASコントローラの場合true)
-	 */
-	private boolean analogScratch = false;
-
-	public boolean getJKOC()  {
-		return jkoc_hack;
-	}
-
-	public void setJKOC(boolean jkoc)  {
-		this.jkoc_hack = jkoc;
-	}
-
-	public boolean isAnalogScratch() {
-		return analogScratch;
-	}
-
-	public void setAnalogScratch(boolean analogScratch) {
-		this.analogScratch = analogScratch;
 	}
 }
