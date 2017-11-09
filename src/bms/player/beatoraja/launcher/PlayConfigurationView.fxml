@@ -181,35 +181,6 @@
                            <children>
                                <HBox prefHeight="37.0" prefWidth="723.0">
                                    <children>
-                                       <Label prefHeight="24.0" prefWidth="127.0" text="%MINIMUM_INPUT_DURATION" />
-                                       <Spinner fx:id="inputduration" editable="true" prefWidth="150.0">
-                                           <valueFactory>
-                                               <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="10" max="100" min="1" />
-                                           </valueFactory>
-                                       </Spinner>
-                                   </children>
-                               </HBox>
-                              <HBox prefHeight="37.0" prefWidth="723.0">
-                                 <children>
-                                    <Label contentDisplay="CENTER" prefHeight="18.0" prefWidth="127.0" text="%JKOC_HACK" textAlignment="CENTER">
-                                       <tooltip>
-                                          <Tooltip text="Some USB adapters for JKOC/USKOC require this simple feature. It prevents axial movements upon pressing any key on controller." textAlignment="CENTER" />
-                                       </tooltip>
-                                    </Label>
-                                    <ComboBox fx:id="jkoc_hack" prefWidth="150.0" />
-                                 </children>
-                              </HBox>
-                               <HBox prefHeight="37.0" prefWidth="723.0">
-                                   <children>
-                                       <CheckBox fx:id="analogScratch" contentDisplay="CENTER" prefHeight="18.0" prefWidth="250.0" text="%ANALOG_SCRATCH" textAlignment="CENTER">
-                                           <tooltip>
-                                               <Tooltip text="Use INF controller, is True." textAlignment="CENTER" />
-                                           </tooltip>
-                                       </CheckBox>
-                                   </children>
-                               </HBox>
-                               <HBox prefHeight="37.0" prefWidth="723.0">
-                                   <children>
                                        <Label prefHeight="24.0" prefWidth="150.0" text="%SCROLL_DURATION_LOW" />
                                        <Spinner fx:id="scrolldurationlow" editable="true" prefWidth="150.0">
                                            <valueFactory>
@@ -225,7 +196,55 @@
                                            </valueFactory>
                                        </Spinner>
                                    </children>
+                                 <opaqueInsets>
+                                    <Insets />
+                                 </opaqueInsets>
+                                 <VBox.margin>
+                                    <Insets left="10.0" />
+                                 </VBox.margin>
                                </HBox>
+                               <HBox prefHeight="22.0" prefWidth="740.0">
+                                   <children>
+                                       <Label prefHeight="24.0" prefWidth="127.0" text="%MINIMUM_INPUT_DURATION" />
+                                       <Spinner fx:id="inputduration" editable="true" prefWidth="150.0">
+                                           <valueFactory>
+                                               <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="10" max="100" min="1" />
+                                           </valueFactory>
+                                       </Spinner>
+                                   </children>
+                                 <VBox.margin>
+                                    <Insets left="10.0" />
+                                 </VBox.margin>
+                               </HBox>
+                              <HBox prefHeight="23.0" prefWidth="740.0">
+                                 <children>
+                                    <Label prefHeight="24.0" prefWidth="68.0" text="\%MODE" />
+                                    <ComboBox fx:id="inputconfig" onAction="#updateInputConfig" prefWidth="150.0" />
+                                 </children>
+                                 <VBox.margin>
+                                    <Insets left="10.0" top="30.0" />
+                                 </VBox.margin>
+                              </HBox>
+                              <HBox prefHeight="37.0" prefWidth="723.0">
+                                 <children>
+                                    <CheckBox fx:id="jkoc_hack" mnemonicParsing="false" prefHeight="18.0" prefWidth="200.0" text="\%JKOC_HACK">
+                                       <HBox.margin>
+                                          <Insets right="20.0" />
+                                       </HBox.margin>
+                                    </CheckBox>
+                                       <CheckBox fx:id="analogScratch" contentDisplay="CENTER" prefHeight="18.0" prefWidth="250.0" text="%ANALOG_SCRATCH" textAlignment="CENTER">
+                                           <tooltip>
+                                               <Tooltip text="Use INF controller, is True." textAlignment="CENTER" />
+                                           </tooltip>
+                                       <HBox.margin>
+                                          <Insets />
+                                       </HBox.margin>
+                                       </CheckBox>
+                                 </children>
+                                 <VBox.margin>
+                                    <Insets left="10.0" top="10.0" />
+                                 </VBox.margin>
+                              </HBox>
                            </children>
                         </VBox>
                      </children>
