@@ -108,6 +108,14 @@ public class Config {
 	 */
 	private int inputduration = 10;
 	/**
+	 * 選曲バー移動速度の最初
+	 */
+	private int scrolldurationlow = 300;
+	/**
+	 * 選曲バー移動速度の2つ目以降
+	 */
+	private int scrolldurationhigh = 50;
+	/**
 	 * 判定タイミング
 	 */
 	private int judgetiming = 0;
@@ -363,6 +371,19 @@ public class Config {
 
 	public void setInputduration(int inputduration) {
 		this.inputduration = inputduration;
+	}
+
+	public int getScrollDurationLow(){
+		return scrolldurationlow;
+	}
+	public void setScrollDutationLow(int scrolldurationlow){
+		this.scrolldurationlow = scrolldurationlow;
+	}
+	public int getScrollDurationHigh(){
+		return scrolldurationhigh;
+	}
+	public void setScrollDutationHigh(int scrolldurationhigh){
+		this.scrolldurationhigh = scrolldurationhigh;
 	}
 
 	public float getKeyvolume() {

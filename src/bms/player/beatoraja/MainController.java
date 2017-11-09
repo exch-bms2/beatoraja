@@ -21,6 +21,7 @@ import bms.player.beatoraja.config.KeyConfiguration;
 import bms.player.beatoraja.decide.MusicDecide;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.ir.IRConnection;
+import bms.player.beatoraja.ir.IRResponse;
 import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.result.CourseResult;
 import bms.player.beatoraja.result.MusicResult;
@@ -136,7 +137,11 @@ public class MainController extends ApplicationAdapter {
 		
 		ir = IRConnection.getIRConnection(player.getIrname());
 		if(player.getUserid().length() > 0 && ir != null) {
-			ir.login(player.getUserid(), player.getPassword());
+			IRResponse response = ir.login(player.getUserid(), player.getPassword());
+			if(!response.isSuccessed()) {
+				Logger.getGlobal().warning("IRへのログイン失敗 : " + response.getMessage());
+				ir = null;
+			}
 		}
 		
 		switch(config.getAudioDriver()) {
@@ -261,7 +266,7 @@ public class MainController extends ApplicationAdapter {
 		final long t = System.currentTimeMillis();
 		sprite = new SpriteBatch();
 
-		input = new BMSPlayerInputProcessor(config);
+		input = new BMSPlayerInputProcessor(config, player);
 		switch(config.getAudioDriver()) {
 		case Config.AUDIODRIVER_SOUND:
 			audio = new GdxSoundDriver();

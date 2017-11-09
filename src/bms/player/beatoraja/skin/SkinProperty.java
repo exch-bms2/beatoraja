@@ -331,6 +331,25 @@ public class SkinProperty {
 	public static final int NUMBER_BEST_RATE = 183;
 	public static final int NUMBER_BEST_RATE_AFTERDOT = 184;
 
+	public static final int NUMBER_RIVAL_SCORE = 271;
+	public static final int NUMBER_RIVAL_MAXSCORE = 272;
+	public static final int NUMBER_RIVAL_TOTALNOTES = 274;
+	public static final int NUMBER_RIVAL_MAXCOMBO = 275;
+	public static final int NUMBER_RIVAL_MISSCOUNT = 276;
+	public static final int NUMBER_RIVAL_PLAYCOUNT = 277;
+	public static final int NUMBER_RIVAL_CLEARCOUNT = 278;
+	public static final int NUMBER_RIVAL_FAILCOUNT = 279;
+	public static final int NUMBER_RIVAL_PERFECT = 280;
+	public static final int NUMBER_RIVAL_GREAT = 281;
+	public static final int NUMBER_RIVAL_GOOD = 282;
+	public static final int NUMBER_RIVAL_BAD = 283;
+	public static final int NUMBER_RIVAL_POOR = 284;
+	public static final int NUMBER_RIVAL_PERFECT_RATE = 285;
+	public static final int NUMBER_RIVAL_GREAT_RATE = 286;
+	public static final int NUMBER_RIVAL_GOOD_RATE = 287;
+	public static final int NUMBER_RIVAL_BAD_RATE = 288;
+	public static final int NUMBER_RIVAL_POOR_RATE = 289;
+
 	public static final int NUMBER_FOLDER_TOTALSONGS = 300;
 
 	public static final int VALUE_JUDGE_1P_DURATION = 525;

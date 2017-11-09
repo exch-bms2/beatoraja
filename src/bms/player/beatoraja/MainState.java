@@ -487,6 +487,7 @@ public abstract class MainState {
 				return score.getBestRateAfterDot();
 			case NUMBER_TARGET_SCORE:
 			case NUMBER_TARGET_SCORE2:
+			case NUMBER_RIVAL_SCORE:
 				return score.getRivalScore();
 			case NUMBER_TARGET_SCORE_RATE:
 			case NUMBER_TARGET_TOTAL_RATE:

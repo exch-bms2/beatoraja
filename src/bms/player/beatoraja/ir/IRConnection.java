@@ -1,7 +1,6 @@
 package bms.player.beatoraja.ir;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.JarURLConnection;
 import java.net.URL;
@@ -21,26 +20,26 @@ import bms.player.beatoraja.TableData;
  */
 public interface IRConnection {
 	
-	public void register(String id, String pass, String name);
+	public IRResponse<Object> register(String id, String pass, String name);
 
 	/**
 	 * IRにログインする。起動時に呼び出される
 	 * @param id ユーザーID
 	 * @param pass パスワード
 	 */
-	public void login(String id, String pass);
+	public IRResponse<Object> login(String id, String pass);
 
 	/**
 	 * ライバルデータを収録する
 	 * @return ライバルデータ
 	 */
-	public PlayerInformation[] getRivals();
+	public IRResponse<PlayerInformation[]> getRivals();
 
 	/**
 	 * IRに設定されている表データを収録する
 	 * @return IRで取得可能な表データ
 	 */
-	public TableData[] getTableDatas();
+	public IRResponse<TableData[]> getTableDatas();
 
 	/**
 	 * スコアデータを取得する
@@ -48,14 +47,14 @@ public interface IRConnection {
 	 * @param model スコアデータを取得する譜面。ユーザーIDのスコアデータを全取得する場合はnullを入れる
 	 * @return
 	 */
-	public IRScoreData[] getPlayData(String id, BMSModel model);
+	public IRResponse<IRScoreData[]> getPlayData(String id, BMSModel model);
 
 	/**
 	 * スコアデータを送信する
 	 * @param model
 	 * @param score
 	 */
-	public void sendPlayData(BMSModel model, IRScoreData score);
+	public IRResponse<Object> sendPlayData(BMSModel model, IRScoreData score);
 	
 	public static String[] getAllAvailableIRConnectionName() {
 		Class[] irclass = getAllAvailableIRConnection();

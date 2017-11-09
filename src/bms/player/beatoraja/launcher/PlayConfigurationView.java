@@ -97,6 +97,10 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private Spinner<Integer> inputduration;
 	@FXML
+	private Spinner<Integer> scrolldurationlow;
+	@FXML
+	private Spinner<Integer> scrolldurationhigh;
+	@FXML
 	private CheckBox fullscreen;
 	@FXML
 	private CheckBox vsync;
@@ -334,6 +338,9 @@ public class PlayConfigurationView implements Initializable {
 
 		inputduration.getValueFactory().setValue(config.getInputduration());
 
+		scrolldurationlow.getValueFactory().setValue(config.getScrollDurationLow());
+		scrolldurationhigh.getValueFactory().setValue(config.getScrollDurationHigh());
+
 		skinview = new SkinConfigurationView();
 
 		updateAudioDriver();
@@ -469,6 +476,9 @@ public class PlayConfigurationView implements Initializable {
         config.setFolderlamp(folderlamp.isSelected());
 
 		config.setInputduration(getValue(inputduration));
+
+		config.setScrollDutationLow(getValue(scrolldurationlow));
+		config.setScrollDutationHigh(getValue(scrolldurationhigh));
 
 		commitPlayer();
 

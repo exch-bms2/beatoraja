@@ -35,6 +35,7 @@ import bms.player.beatoraja.PlayerInformation;
 import bms.player.beatoraja.PlayerResource;
 import bms.player.beatoraja.ScoreDatabaseAccessor;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
+import bms.player.beatoraja.ir.IRResponse;
 import bms.player.beatoraja.select.bar.Bar;
 import bms.player.beatoraja.select.bar.DirectoryBar;
 import bms.player.beatoraja.select.bar.FolderBar;
@@ -145,18 +146,26 @@ public class MusicSelector extends MainState {
 				Files.createDirectory(Paths.get("rival"));
 			}
 			if(main.getIRConnection() != null) {
-				PlayerInformation[] rivals = main.getIRConnection().getRivals();
-				for(PlayerInformation rival : rivals) {
-					try {
-						final ScoreDatabaseAccessor scoredb = new ScoreDatabaseAccessor("rival/" + rival.getId() + ".db");
-						scoredb.createTable();
-						scoredb.setInformation(rival);
-						IRScoreData[] scores = main.getIRConnection().getPlayData(rival.getId(), null);
-						scoredb.setScoreData(scores);
-						rivalinfo = rival;
-					} catch (ClassNotFoundException e) {
-						e.printStackTrace();
-					}
+				IRResponse<PlayerInformation[]> response = main.getIRConnection().getRivals();
+				if(response.isSuccessed()) {
+					for(PlayerInformation rival : response.getData()) {
+						try {
+							final ScoreDatabaseAccessor scoredb = new ScoreDatabaseAccessor("rival/" + rival.getId() + ".db");
+							scoredb.createTable();
+							scoredb.setInformation(rival);
+							IRResponse<IRScoreData[]> scores = main.getIRConnection().getPlayData(rival.getId(), null);
+							if(scores.isSuccessed()) {
+								scoredb.setScoreData(scores.getData());								
+							} else {
+								Logger.getGlobal().warning("IRからのスコア取得失敗 : " + scores.getMessage());								
+							}
+							rivalinfo = rival;
+						} catch (ClassNotFoundException e) {
+							e.printStackTrace();
+						}
+					}					
+				} else {
+					Logger.getGlobal().warning("IRからのライバル取得失敗 : " + response.getMessage());
 				}
 			}
 		} catch (Throwable e) {
