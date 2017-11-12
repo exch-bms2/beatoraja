@@ -13,7 +13,7 @@ import bms.model.TimeLine;
 
 /**
  * 譜面オプションの抽象クラス
- * 
+ *
  * @author exch
  */
 public abstract class PatternModifier {
@@ -33,7 +33,7 @@ public abstract class PatternModifier {
 
 	/**
 	 * 譜面変更ログの通りに譜面オプションをかける
-	 * 
+	 *
 	 * @param model
 	 *            譜面オプションをかける対象のBMSModel
 	 * @param log
@@ -73,12 +73,12 @@ public abstract class PatternModifier {
 				if (pml.section == pml2.section) {
 					int[] newmod = new int[Math.max(pml.modify.length, pml2.modify.length)];
 					for (int i = 0; i < newmod.length; i++) {
-						if(i >= pml.modify.length) {
+						if (i >= pml.modify.length) {
 							newmod[i] = pml2.modify[i];
-						} else if(i >= pml2.modify.length) {
-							newmod[i] = pml.modify[i];							
+						} else if (i >= pml2.modify.length) {
+							newmod[i] = pml.modify[i];
 						} else {
-							newmod[i] = pml.modify[pml2.modify[i]];							
+							newmod[i] = pml.modify[pml2.modify[i]];
 						}
 					}
 					result.add(new PatternModifyLog(pml.section, newmod));
@@ -167,12 +167,13 @@ public abstract class PatternModifier {
 		}
 		return pm;
 	}
-	
+
 	protected int[] getKeys(Mode mode, boolean containsScratch) {
 		int key = (getModifyTarget() == SIDE_2P)
-				? mode.key / mode.player : 0;
-		if(key == mode.key) {
-			return new int[0];				
+				? mode.key / mode.player
+				: 0;
+		if (key == mode.key) {
+			return new int[0];
 		} else {
 			IntArray keys = new IntArray();
 			for (int i = 0; i < mode.key / mode.player; i++) {
@@ -185,10 +186,10 @@ public abstract class PatternModifier {
 	}
 
 	protected static int[] shuffle(int[] keys) {
-		return shuffle(keys, null);
+		return timeBasedShuffle(keys, null, null, null, 100);
 	}
-	
-	protected static int[] shuffle(int[] keys, int[] activeln) {
+
+	protected static int[] timeBasedShuffle(int[] keys, int[] activeln, Note[] notes, int[] lastNoteTime, int duration) {
 		List<Integer> l = new ArrayList<Integer>(keys.length);
 		for (int key : keys) {
 			l.add(key);
@@ -202,16 +203,27 @@ public abstract class PatternModifier {
 			result[i] = i;
 		}
 		for (int lane = 0; lane < keys.length; lane++) {
-			if(activeln != null && activeln[keys[lane]] != -1) {
+			if (activeln != null && activeln[keys[lane]] != -1) {
 				result[keys[lane]] = activeln[keys[lane]];
-				l.remove((Integer)activeln[keys[lane]]);	
-			}			
+				l.remove((Integer) activeln[keys[lane]]);
+			}
 		}
 		for (int lane = 0; lane < keys.length; lane++) {
-			if(activeln == null || activeln[keys[lane]] == -1) {
-				int r = (int) (Math.random() * l.size());
-				result[keys[lane]] = l.get(r);
-				l.remove(r);				
+			if (activeln == null || activeln[keys[lane]] == -1) {
+				if (notes[keys[lane]] != null) {
+					int r = (int) (Math.random() * l.size());
+					result[keys[lane]] = l.get(r);
+					l.remove(r);
+				}
+			}
+		}
+		for (int lane = 0; lane < keys.length; lane++) {
+			if (activeln == null || activeln[keys[lane]] == -1) {
+				if (notes[keys[lane]] == null) {
+					int r = (int) (Math.random() * l.size());
+					result[keys[lane]] = l.get(r);
+					l.remove(r);
+				}
 			}
 		}
 

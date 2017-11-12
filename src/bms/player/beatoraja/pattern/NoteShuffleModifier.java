@@ -62,7 +62,9 @@ public class NoteShuffleModifier extends PatternModifier {
 		int lanes = mode.key;
 		int[] random = new int[0];
 		int[] ln = new int[lanes];
+		int[] lastNoteTime = new int[lanes];
 		Arrays.fill(ln, -1);
+		Arrays.fill(lastNoteTime, -100);
 		for (TimeLine tl : model.getAllTimeLines()) {
 			if (tl.existNote() || tl.existHiddenNote()) {
 				Note[] notes = new Note[lanes];
@@ -76,7 +78,7 @@ public class NoteShuffleModifier extends PatternModifier {
 				switch (type) {
 				case S_RANDOM:
 					keys = getKeys(mode, false);
-					random = keys.length > 0 ? shuffle(keys, ln) : keys;
+					random = keys.length > 0 ? timeBasedShuffle(keys, ln, notes, lastNoteTime, 100) : keys;
 					break;
 				case SPIRAL:
 					keys = getKeys(mode, false);
@@ -135,7 +137,7 @@ public class NoteShuffleModifier extends PatternModifier {
 									break;
 								}
 							}
-						}						
+						}
 					}
 					break;
 				case H_RANDOM:
@@ -184,7 +186,7 @@ public class NoteShuffleModifier extends PatternModifier {
 					break;
 				case S_RANDOM_EX:
 					keys = getKeys(mode, true);
-					random = keys.length > 0 ? shuffle(keys, ln) : keys;
+					random = keys.length > 0 ? timeBasedShuffle(keys, ln, notes, lastNoteTime, 100) : keys;
 					break;
 
 				}
@@ -201,9 +203,13 @@ public class NoteShuffleModifier extends PatternModifier {
 						} else {
 							tl.setNote(i, n);
 							ln[i] = mod;
+							lastNoteTime[i] = tl.getTime();
 						}
 					} else {
 						tl.setNote(i, n);
+						if (n != null) {
+							lastNoteTime[i] = tl.getTime();
+						}
 					}
 					tl.setHiddenNote(i, hn);
 				}
