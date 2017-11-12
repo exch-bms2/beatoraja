@@ -218,4 +218,47 @@ public class NoteShuffleModifier extends PatternModifier {
 		}
 		return log;
 	}
+
+
+	private static int[] timeBasedShuffle(int[] keys, int[] activeln, Note[] notes, int[] lastNoteTime, int duration) {
+		List<Integer> l = new ArrayList<Integer>(keys.length);
+		for (int key : keys) {
+			l.add(key);
+		}
+		int max = 0;
+		for (int key : keys) {
+			max = Math.max(max, key);
+		}
+		int[] result = new int[max + 1];
+		for (int i = 0; i < result.length; i++) {
+			result[i] = i;
+		}
+		for (int lane = 0; lane < keys.length; lane++) {
+			if (activeln != null && activeln[keys[lane]] != -1) {
+				result[keys[lane]] = activeln[keys[lane]];
+				l.remove((Integer) activeln[keys[lane]]);
+			}
+		}
+		for (int lane = 0; lane < keys.length; lane++) {
+			if (activeln == null || activeln[keys[lane]] == -1) {
+				if (notes[keys[lane]] != null) {
+					int r = (int) (Math.random() * l.size());
+					result[keys[lane]] = l.get(r);
+					l.remove(r);
+				}
+			}
+		}
+		for (int lane = 0; lane < keys.length; lane++) {
+			if (activeln == null || activeln[keys[lane]] == -1) {
+				if (notes[keys[lane]] == null) {
+					int r = (int) (Math.random() * l.size());
+					result[keys[lane]] = l.get(r);
+					l.remove(r);
+				}
+			}
+		}
+
+		return result;
+	}
+
 }
