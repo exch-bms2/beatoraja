@@ -3,6 +3,10 @@
 /skin/*
 !/skin/default/*
 /practice/*
+/screenshot/*
+/table/*
+/course/*
+/favorite/*
 songdata.db
 songinfo.db
 config.json
