@@ -21,6 +21,10 @@ import bms.player.beatoraja.result.*;
 import bms.player.beatoraja.select.MusicSelectSkin;
 import bms.player.beatoraja.select.SkinBar;
 import bms.player.beatoraja.select.SkinDistributionGraph;
+import com.badlogic.gdx.utils.JsonValue;
+import com.badlogic.gdx.utils.reflect.ClassReflection;
+import com.badlogic.gdx.utils.reflect.Field;
+import com.badlogic.gdx.utils.reflect.ReflectionException;
 
 import static bms.player.beatoraja.Resolution.*;
 
@@ -54,6 +58,7 @@ public class JSONSkinLoader extends SkinLoader{
 		try {
 			Json json = new Json();
 			json.setIgnoreUnknownFields(true);
+			setSerializers(json, null);
 			sk = json.fromJson(JsonSkin.class, new FileReader(p.toFile()));
 
 			if (sk.type != -1) {
@@ -103,6 +108,14 @@ public class JSONSkinLoader extends SkinLoader{
 		try {
 			Json json = new Json();
 			json.setIgnoreUnknownFields(true);
+
+			HashSet<Integer> enabledOptions = new HashSet<>();
+			if (property != null) {
+				for (SkinConfig.Option op : property.getOption()) {
+					enabledOptions.add(op.value);
+				}
+			}
+			setSerializers(json, enabledOptions);
 
 			sk = json.fromJson(JsonSkin.class, new FileReader(p.toFile()));
 			Resolution src = HD;
@@ -1090,5 +1103,116 @@ public class JSONSkinLoader extends SkinLoader{
 
 		public int angle = Integer.MIN_VALUE;
 
+	}
+
+	private void setSerializers(Json json, HashSet<Integer> enabledOptions) {
+		Class[] classes = {
+				// edit here to support branch in new classes
+				Image.class,
+				ImageSet.class,
+				Value.class,
+				Text.class,
+				Slider.class,
+				Graph.class,
+				GaugeGraph.class,
+				JudgeGraph.class,
+				NoteSet.class,
+				Gauge.class,
+				BGA.class,
+				Judge.class,
+				SongList.class,
+		};
+		for (Class c : classes) {
+			json.setSerializer(c, new Serializer<>(enabledOptions));
+		}
+	}
+
+	private static class Serializer<T> extends Json.ReadOnlySerializer<T> {
+
+		HashSet<Integer> options;
+
+		public Serializer(HashSet<Integer> op) {
+			options = op != null ? op : new HashSet<>();
+		}
+
+		public T read(Json json, JsonValue jsonValue, Class cls) {
+			T instance = null;
+			try {
+				instance = (T)ClassReflection.newInstance(cls);
+			} catch (ReflectionException e) {
+				e.printStackTrace();
+				return null;
+			}
+			try {
+				JsonValue val = null;
+				if (jsonValue.isArray()) {
+					// conditional branch
+					for (int i = 0; i < jsonValue.size; i++) {
+						JsonValue branch = jsonValue.get(i);
+						// if "value" is not given, regard whole "branch" as data
+						if (!branch.has("value")) {
+							val = branch;
+							break;
+						}
+						if (testOption(branch.get("op"))) {
+							val = branch.get("value");
+							break;
+						}
+					}
+				} else {
+					// no branch
+					val = jsonValue;
+				}
+				Field[] fields = ClassReflection.getFields(cls);
+				for (JsonValue child = val.child; child != null; child = child.next) {
+					for (Field field : fields) {
+						if (field.getName().equals(child.name)) {
+							field.set(instance, json.readValue(field.getType(), child));
+							break;
+						}
+					}
+				}
+			} catch (ReflectionException e) {
+			} catch (NullPointerException e) {
+			}
+			return instance;
+		}
+
+		// test "op" as follows:
+		// 901 -> 901 enabled
+		// [901, 911] -> 901 enabled && 911 enabled
+		// [[901, 902], 911] -> (901 || 902) && 911
+		private boolean testOption(JsonValue ops) {
+			if (ops == null) {
+				return true;
+			} else if (ops.isNumber()) {
+				return options.contains(ops.asInt());
+			} else if (ops.isArray()) {
+				boolean enabled = true;
+				for (int j = 0; j < ops.size; j++) {
+					JsonValue ops2 = ops.get(j);
+					if (ops2.isNumber()) {
+						enabled = options.contains(ops2.asInt());
+					} else if (ops2.isArray()) {
+						boolean enabled_sub = false;
+						for (int k = 0; k < ops2.size; k++) {
+							JsonValue ops3 = ops2.get(k);
+							if (ops3.isNumber() && options.contains(ops3.asInt())) {
+								enabled_sub = true;
+								break;
+							}
+						}
+						enabled = enabled_sub;
+					} else {
+						enabled = false;
+					}
+					if (!enabled)
+						break;
+				}
+				return enabled;
+			} else {
+				return false;
+			}
+		}
 	}
 }
