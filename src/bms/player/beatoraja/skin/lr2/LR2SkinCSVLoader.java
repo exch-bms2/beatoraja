@@ -173,7 +173,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 			}
 		});
 
-				addCommandWord(new CommandWord("IMAGESET") {
+		addCommandWord(new CommandWord("IMAGESET") {
 			@Override
 			public void execute(String[] str) {
 				int gr = Integer.parseInt(str[2]);
