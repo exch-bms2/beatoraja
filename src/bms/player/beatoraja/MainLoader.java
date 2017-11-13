@@ -8,9 +8,11 @@ import java.util.logging.Logger;
 
 import com.badlogic.gdx.Graphics;
 import javafx.application.Application;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.VBox;
+import javafx.stage.WindowEvent;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
@@ -66,7 +68,7 @@ public class MainLoader extends Application {
 				f = Paths.get(s);
 			}
 		}
-		if (config) {
+		if (config || !Files.exists(MainController.configpath)) {
 			launch(args);
 		} else {
 			play(f, auto, true, f != null);
@@ -166,6 +168,12 @@ public class MainLoader extends Application {
 			Scene scene = new Scene(stackPane, stackPane.getPrefWidth(), stackPane.getPrefHeight());
 			primaryStage.setScene(scene);
 			primaryStage.setTitle(MainController.VERSION + " configuration");
+			primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {				
+				@Override
+				public void handle(WindowEvent event) {
+					bmsinfo.exit();
+				}
+			});
 			primaryStage.show();
 
 		} catch (IOException e) {
