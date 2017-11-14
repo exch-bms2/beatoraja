@@ -285,7 +285,7 @@ public class JSONSkinLoader extends SkinLoader{
 						if (dst.id.equals(text.id)) {
 							for (Font font : sk.font) {
 								if (text.font.equals(font.id)) {
-									if (text.ref < 0) {
+									if (text.ref == SkinProperty.STRING_SEARCHWORD) {
 										Animation a = dst.dst[0];
 										Rectangle r = new Rectangle(a.x * ((float)dstr.width / sk.w),
 												a.y * ((float)dstr.height / sk.h), a.w * ((float)dstr.width / sk.w),

@@ -1,7 +1,6 @@
 package bms.player.beatoraja.pattern;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import bms.model.BMSModel;
@@ -12,7 +11,7 @@ import bms.model.TimeLine;
 
 /**
  * レーン単位でノーツを入れ替えるオプション MIRROR、RANDOM、R-RANDOMが該当する
- * 
+ *
  * @author exch
  */
 public class LaneShuffleModifier extends PatternModifier {
@@ -60,7 +59,7 @@ public class LaneShuffleModifier extends PatternModifier {
 	}
 
 	private void makeRandom(Mode mode) {
-		
+
 		int[] keys;
 		switch (type) {
 		case MIRROR:
@@ -75,32 +74,32 @@ public class LaneShuffleModifier extends PatternModifier {
 			keys = getKeys(mode, false);
 			random = keys.length > 0 ? shuffle(keys) : keys;
 			break;
-			case CROSS:
-				keys = getKeys(mode, false);
-				random = new int[keys.length];
-				for(int i = 0;i < keys.length / 2 - 1;i += 2) {
-					random[i] = keys[i + 1];
-					random[i + 1] = keys[i];
-					random[keys.length - i - 1] = keys[keys.length - i - 2];
-					random[keys.length - i - 2] = keys[keys.length - i - 1];
-				}
-				break;
+		case CROSS:
+			keys = getKeys(mode, false);
+			random = new int[keys.length];
+			for (int i = 0; i < keys.length / 2 - 1; i += 2) {
+				random[i] = keys[i + 1];
+				random[i + 1] = keys[i];
+				random[keys.length - i - 1] = keys[keys.length - i - 2];
+				random[keys.length - i - 2] = keys[keys.length - i - 1];
+			}
+			break;
 		case RANDOM_EX:
 			keys = getKeys(mode, true);
 			random = keys.length > 0 ? shuffle(keys) : keys;
 			break;
 		case FLIP:
-			if(mode.player == 2) {
+			if (mode.player == 2) {
 				random = new int[mode.key];
-				for(int i = 0;i < random.length;i++) {
+				for (int i = 0; i < random.length; i++) {
 					random[i] = (i + (mode.key / mode.player)) % mode.key;
 				}
 			} else {
 				random = new int[0];
-			}			
+			}
 			break;
 		case BATTLE:
-			if(mode.player == 1) {
+			if (mode.player == 1) {
 				random = new int[0];
 			} else {
 				keys = getKeys(mode, true);
@@ -112,14 +111,14 @@ public class LaneShuffleModifier extends PatternModifier {
 
 		}
 	}
-	
+
 	@Override
 	public List<PatternModifyLog> modify(BMSModel model) {
 		List<PatternModifyLog> log = new ArrayList();
 		makeRandom(model.getMode());
 		int lanes = model.getMode().key;
 		TimeLine[] timelines = model.getAllTimeLines();
-		for (int index = 0;index < timelines.length;index++) {
+		for (int index = 0; index < timelines.length; index++) {
 			final TimeLine tl = timelines[index];
 			if (tl.existNote() || tl.existHiddenNote()) {
 				Note[] notes = new Note[lanes];
@@ -134,11 +133,13 @@ public class LaneShuffleModifier extends PatternModifier {
 					if (clone[mod]) {
 						if (notes[mod] != null) {
 							if (notes[mod] instanceof LongNote && ((LongNote) notes[mod]).isEnd()) {
-								for(int j = index - 1;j >= 0;j--) {
-									if(((LongNote) notes[mod]).getPair().getSection() == timelines[j].getSection()) {
+								for (int j = index - 1; j >= 0; j--) {
+									if (((LongNote) notes[mod]).getPair().getSection() == timelines[j].getSection()) {
 										LongNote ln = (LongNote) timelines[j].getNote(i);
 										tl.setNote(i, ln.getPair());
-										System.out.println(ln.toString() + " : " + ln.getPair().toString() + " == " + ((LongNote) notes[mod]).getPair().toString() + " : " + notes[mod].toString());
+										System.out.println(ln.toString() + " : " + ln.getPair().toString() + " == "
+												+ ((LongNote) notes[mod]).getPair().toString() + " : "
+												+ notes[mod].toString());
 										break;
 									}
 								}

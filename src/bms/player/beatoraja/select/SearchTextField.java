@@ -42,11 +42,11 @@ public class SearchTextField extends Stage {
 		parameter.size = (int) r.height;
 		searchfont = generator.generateFont(parameter);
 
-		final TextField.TextFieldStyle textFieldStyle = new TextField.TextFieldStyle(searchfont, // BitmapFont
-				Color.WHITE, // font color
-				new TextureRegionDrawable(new TextureRegion(new Texture("skin/default/system.png"), 0, 8, 8, 8)), // cusor
-				new TextureRegionDrawable(new TextureRegion(new Texture("skin/default/system.png"), 0, 8, 2, 8)), // selectoin
-				new TextureRegionDrawable(new TextureRegion(new Texture("skin/default/system.png"), 0, 8, 1, 8))); // background
+		final TextField.TextFieldStyle textFieldStyle = new TextField.TextFieldStyle(); // background
+		textFieldStyle.font = searchfont;
+		textFieldStyle.fontColor = Color.WHITE;
+		textFieldStyle.cursor = new TextureRegionDrawable(new TextureRegion(new Texture("skin/default/system.png"), 0, 8, 8, 8));
+		textFieldStyle.selection = new TextureRegionDrawable(new TextureRegion(new Texture("skin/default/system.png"), 0, 8, 2, 8));
 		textFieldStyle.messageFont = searchfont;
 		textFieldStyle.messageFontColor = Color.GRAY;
 
