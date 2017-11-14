@@ -3,6 +3,8 @@
 
 	<property name="build.src" value="src" />
 	<property name="build.dest" value="build" />
+	<property name="debug" value="true"/>
+
 
 	<path id="build.lib">
 	   <fileset dir="lib" includes="*.jar" />

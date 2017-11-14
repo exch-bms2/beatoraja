@@ -175,18 +175,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 			}
 		});
 
-				addCommandWord(new CommandWord("SET_IMAGESET") {
-			@Override
-			public void execute(String[] str) {
-				imagesetarray.clear();
-				part = null;
-				cycle = Integer.parseInt(str[1]);
-				timer = Integer.parseInt(str[2]);
-				ref = Integer.parseInt(str[3]);
-			}
-		});
-
-		addCommandWord(new CommandWord("SRC_IMAGESET") {
+		addCommandWord(new CommandWord("IMAGESET") {
 			@Override
 			public void execute(String[] str) {
 				int gr = Integer.parseInt(str[2]);
@@ -197,12 +186,16 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 			}
 		});
 
-		addCommandWord(new CommandWord("END_IMAGESET") {
+		addCommandWord(new CommandWord("SRC_IMAGESET") {
 			@Override
 			public void execute(String[] str) {
-				TextureRegion[][] tr = imagesetarray.toArray(new TextureRegion[imagesetarray.size()][]);
-				part = new SkinImage(tr, timer, cycle);
-				part.setReferenceID(ref);
+				int[] values = parseInt(str);
+				TextureRegion[][] tr = new TextureRegion[values[4]][];
+				for (int i = 0; i < values[4]; i++) {
+					tr[i] = (TextureRegion[]) imagesetarray.get(values[5+i]);
+				}
+				part = new SkinImage(tr, values[2], values[1]);
+				part.setReferenceID(values[3]);
 				if (part != null) {
 					skin.add(part);
 				}
@@ -531,9 +524,6 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 	SkinText text = null;
 	String line = null;
 
-	int timer;
-	int cycle;
-	int ref;
 	List <Object> imagesetarray = new ArrayList<Object>();
 
 	protected void loadSkin0(Skin skin, File f, MainState state, Map<Integer, Boolean> option) throws IOException {
