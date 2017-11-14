@@ -3,6 +3,7 @@ package bms.player.beatoraja.skin;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.lang.reflect.Array;
 import java.nio.file.Path;
 import java.util.*;
 
@@ -13,7 +14,6 @@ import bms.player.beatoraja.play.*;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Json;
 
 import bms.player.beatoraja.decide.MusicDecideSkin;
@@ -1107,7 +1107,6 @@ public class JSONSkinLoader extends SkinLoader{
 
 	private void setSerializers(Json json, HashSet<Integer> enabledOptions) {
 		Class[] classes = {
-				// edit here to support branch in new classes
 				Image.class,
 				ImageSet.class,
 				Value.class,
@@ -1123,16 +1122,83 @@ public class JSONSkinLoader extends SkinLoader{
 				SongList.class,
 		};
 		for (Class c : classes) {
-			json.setSerializer(c, new Serializer<>(enabledOptions));
+			json.setSerializer(c, new ObjectSerializer<>(enabledOptions));
+		}
+
+		Class[] array_classes = {
+				Image[].class,
+				ImageSet[].class,
+				Value[].class,
+				Text[].class,
+				Slider[].class,
+				Graph[].class,
+				GaugeGraph[].class,
+				JudgeGraph[].class,
+				Judge[].class,
+
+				Destination[].class,
+				Animation[].class,
+		};
+		for (Class c : array_classes) {
+			json.setSerializer(c, new ArraySerializer<>(enabledOptions));
 		}
 	}
 
-	private static class Serializer<T> extends Json.ReadOnlySerializer<T> {
+	private static abstract class Serializer<T> extends Json.ReadOnlySerializer<T> {
 
 		HashSet<Integer> options;
 
 		public Serializer(HashSet<Integer> op) {
 			options = op != null ? op : new HashSet<>();
+		}
+
+		// test "if" as follows:
+		// 901 -> 901 enabled
+		// [901, 911] -> 901 enabled && 911 enabled
+		// [[901, 902], 911] -> (901 || 902) && 911
+		// -901 -> 901 disabled
+		protected boolean testOption(JsonValue ops) {
+			if (ops == null) {
+				return true;
+			} else if (ops.isNumber()) {
+				return testNumber(ops.asInt());
+			} else if (ops.isArray()) {
+				boolean enabled = true;
+				for (int j = 0; j < ops.size; j++) {
+					JsonValue ops2 = ops.get(j);
+					if (ops2.isNumber()) {
+						enabled = testNumber(ops2.asInt());
+					} else if (ops2.isArray()) {
+						boolean enabled_sub = false;
+						for (int k = 0; k < ops2.size; k++) {
+							JsonValue ops3 = ops2.get(k);
+							if (ops3.isNumber() && testNumber(ops3.asInt())) {
+								enabled_sub = true;
+								break;
+							}
+						}
+						enabled = enabled_sub;
+					} else {
+						enabled = false;
+					}
+					if (!enabled)
+						break;
+				}
+				return enabled;
+			} else {
+				return false;
+			}
+		}
+
+		private boolean testNumber(int op) {
+			return op >= 0 ? options.contains(op) : !options.contains(-op);
+		}
+	}
+
+	private static class ObjectSerializer<T> extends Serializer<T> {
+
+		public ObjectSerializer(HashSet<Integer> op) {
+			super(op);
 		}
 
 		public T read(Json json, JsonValue jsonValue, Class cls) {
@@ -1147,14 +1213,15 @@ public class JSONSkinLoader extends SkinLoader{
 				JsonValue val = null;
 				if (jsonValue.isArray()) {
 					// conditional branch
+					// take first clause satisfying its conditions
 					for (int i = 0; i < jsonValue.size; i++) {
 						JsonValue branch = jsonValue.get(i);
-						// if "value" is not given, regard whole "branch" as data
+						// if "value" is not given, regard whole "branch" as data without conditions
 						if (!branch.has("value")) {
 							val = branch;
 							break;
 						}
-						if (testOption(branch.get("op"))) {
+						if (testOption(branch.get("if"))) {
 							val = branch.get("value");
 							break;
 						}
@@ -1177,42 +1244,51 @@ public class JSONSkinLoader extends SkinLoader{
 			}
 			return instance;
 		}
+	}
 
-		// test "op" as follows:
-		// 901 -> 901 enabled
-		// [901, 911] -> 901 enabled && 911 enabled
-		// [[901, 902], 911] -> (901 || 902) && 911
-		private boolean testOption(JsonValue ops) {
-			if (ops == null) {
-				return true;
-			} else if (ops.isNumber()) {
-				return options.contains(ops.asInt());
-			} else if (ops.isArray()) {
-				boolean enabled = true;
-				for (int j = 0; j < ops.size; j++) {
-					JsonValue ops2 = ops.get(j);
-					if (ops2.isNumber()) {
-						enabled = options.contains(ops2.asInt());
-					} else if (ops2.isArray()) {
-						boolean enabled_sub = false;
-						for (int k = 0; k < ops2.size; k++) {
-							JsonValue ops3 = ops2.get(k);
-							if (ops3.isNumber() && options.contains(ops3.asInt())) {
-								enabled_sub = true;
-								break;
+	private static class ArraySerializer<T> extends Serializer<T[]> {
+
+		public ArraySerializer(HashSet<Integer> op) {
+			super(op);
+		}
+
+		public T[] read(Json json, JsonValue jsonValue, Class cls) {
+			Class componentClass = cls.getComponentType();
+			ArrayList<T> items = new ArrayList<T>();
+			try {
+				for (int i = 0; i < jsonValue.size; i++) {
+					JsonValue item = jsonValue.get(i);
+					JsonValue op = item.get("if");
+					JsonValue value = item.get("value");
+					JsonValue values = item.get("values");
+					if (op != null && (value != null || values != null)) {
+						// conditional item(s)
+						// add item(s) to array if conditions are satisfied
+						if (testOption(op)) {
+							if (value != null) {
+								T obj = (T)json.readValue(componentClass, value);
+								items.add(obj);
+							}
+							if (values != null) {
+								T[] objs = (T[])json.readValue(cls, values);
+								for (T obj : objs) {
+									items.add(obj);
+								}
 							}
 						}
-						enabled = enabled_sub;
 					} else {
-						enabled = false;
+						// single item
+						T obj = (T)json.readValue(componentClass, item);
+						items.add(obj);
 					}
-					if (!enabled)
-						break;
 				}
-				return enabled;
-			} else {
-				return false;
+			} catch (NullPointerException e) {
 			}
+			Object array = Array.newInstance(componentClass, items.size());
+			for (int i=0; i<items.size(); i++) {
+				Array.set(array, i, items.get(i));
+			}
+			return (T[])array;
 		}
 	}
 }
