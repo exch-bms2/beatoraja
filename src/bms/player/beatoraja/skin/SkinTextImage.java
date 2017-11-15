@@ -4,12 +4,14 @@ import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
+import com.badlogic.gdx.utils.IntMap;
 
 import java.io.UnsupportedEncodingException;
-import java.util.*;
 
 /**
  * テキストオブジェクト
@@ -24,7 +26,7 @@ public class SkinTextImage extends SkinText {
 	/**
 	 * 現在のテキスト
 	 */
-	private TextureRegion[] texts;
+	private Array<TextureRegion> texts = new Array<TextureRegion>(256);
 	/**
 	 * 現在のテキスト長
 	 */
@@ -33,13 +35,32 @@ public class SkinTextImage extends SkinText {
 	public SkinTextImage(SkinTextImageSource source) {
 		this.source = source;
 	}
-	
+
+	@Override
+	public void prepareFont(String text) {
+		try {
+			byte[] b = getText().getBytes("utf-16le");
+			for (int i = 0; i < b.length;) {
+				int code = 0;
+				code |= (b[i++] & 0xff);
+				code |= (b[i++] & 0xff) << 8;
+				if (code >= 0xdc00 && code < 0xff00 && i < b.length) {
+					code |= (b[i++] & 0xff) << 16;
+					code |= (b[i++] & 0xff) << 24;
+				}
+				source.getImage(code);
+			}
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+	}
+
 	@Override
 	protected void prepareText(String text) {
 		try {
 			byte[] b = getText().getBytes("utf-16le");
 			textwidth = 0;
-			List<TextureRegion> l = new ArrayList<TextureRegion>(b.length / 2);
+			texts.clear();
 			for (int i = 0; i < b.length;) {
 				int code = 0;
 				code |= (b[i++] & 0xff);
@@ -50,13 +71,13 @@ public class SkinTextImage extends SkinText {
 				}
 				final TextureRegion ch = source.getImage(code);
 				if (ch != null) {
-					l.add(ch);
+					texts.add(ch);
 					textwidth += ch.getRegionWidth();
 				} else {
-//					System.out.println(text + " -> " + Arrays.toString(b) + "code not found : " + Integer.toHexString(code));
+					// System.out.println(text + " -> " + Arrays.toString(b) +
+					// "code not found : " + Integer.toHexString(code));
 				}
 			}
-			texts = l.toArray(new TextureRegion[l.size()]);
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
@@ -69,11 +90,10 @@ public class SkinTextImage extends SkinText {
 			// System.out.println("SkinTextImage描画:" + text + " - " + x + " " +
 			// y +
 			// " " + w + " " + h);
-			float width = textwidth * r.height / source.getSize() + source.getMargin() * texts.length;
+			float width = textwidth * r.height / source.getSize() + source.getMargin() * texts.size;
 
 			final float scale = r.width < width ? r.width / width : 1;
-			final float x = (getAlign() == 2 ? r.x - width * scale
-					: (getAlign() == 1 ? r.x - width * scale / 2 : r.x));
+			final float x = (getAlign() == 2 ? r.x - width * scale : (getAlign() == 1 ? r.x - width * scale / 2 : r.x));
 			float dx = 0;
 			for (TextureRegion ch : texts) {
 				final float tw = ch.getRegionWidth() * scale * r.height / source.getSize();
@@ -104,7 +124,13 @@ public class SkinTextImage extends SkinText {
 		 * 文字間のマージン
 		 */
 		private int margin = 0;
-		private Map<Integer, TextureRegion> images = new TreeMap<Integer, TextureRegion>();
+		private IntMap<SkinTextImageSourceElement> elements = new IntMap<SkinTextImageSourceElement>();
+		private final boolean usecim;
+		private IntMap<SkinTextImageSourceRegion> regions = new IntMap<SkinTextImageSourceRegion>();
+
+		public SkinTextImageSource(boolean usecim) {
+			this.usecim = usecim;
+		}
 
 		public int getMargin() {
 			return margin;
@@ -123,18 +149,75 @@ public class SkinTextImage extends SkinText {
 		}
 
 		public TextureRegion getImage(int index) {
-			return images.get(index);
+			SkinTextImageSourceRegion region = regions.get(index);
+			if (region == null) {
+				return null;
+			}
+			if (region.image == null) {
+				SkinTextImageSourceElement element = elements.get(region.id);
+				if (element == null) {
+					return null;
+				}
+				if (element.texture == null) {
+					element.texture = SkinLoader.getTexture(element.path, usecim);
+					if (element.texture == null) {
+						return null;
+					}
+				}
+				region.image = new TextureRegion(element.texture, region.x, region.y, region.w, region.h);
+			}
+			return region.image;
 		}
 
-		public void setImage(int index, TextureRegion tex) {
-			images.put(index, tex);
+		public void setImage(int index, int id, int x, int y, int w, int h) {
+			regions.put(index, new SkinTextImageSourceRegion(id, x, y, w, h));
+		}
+
+		public String getPath(int index) {
+			SkinTextImageSourceElement element = elements.get(index);
+			if (element != null) {
+				return element.path;
+			}
+			return null;
+		}
+
+		public void setPath(int index, String p) {
+			SkinTextImageSourceElement element = new SkinTextImageSourceElement();
+			element.path = p;
+			elements.put(index, element);
 		}
 
 		@Override
 		public void dispose() {
-			for (TextureRegion tr : images.values()) {
-				tr.getTexture().dispose();
+			for (SkinTextImageSourceElement tr : elements.values()) {
+				if (tr.texture != null) {
+					tr.texture.dispose();
+				}
 			}
+		}
+	}
+
+	private static class SkinTextImageSourceElement {
+
+		private String path;
+		private Texture texture;
+	}
+
+	private static class SkinTextImageSourceRegion {
+
+		private final int id;
+		private final int x;
+		private final int y;
+		private final int w;
+		private final int h;
+		private TextureRegion image;
+
+		public SkinTextImageSourceRegion(int id, int x, int y, int w, int h) {
+			this.id = id;
+			this.x = x;
+			this.y = y;
+			this.w = w;
+			this.h = h;
 		}
 	}
 }

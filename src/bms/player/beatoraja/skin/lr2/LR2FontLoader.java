@@ -23,10 +23,6 @@ import bms.player.beatoraja.skin.lr2.LR2SkinLoader.CommandWord;
  */
 public class LR2FontLoader extends LR2SkinLoader {
 	/**
-	 * 読み込んだTextureリスト
-	 */
-	private List<Texture> imagelist = new ArrayList<Texture>();
-	/**
 	 * 生成するテキストイメージソース
 	 */
 	private SkinTextImage.SkinTextImageSource textimage;
@@ -35,7 +31,10 @@ public class LR2FontLoader extends LR2SkinLoader {
 	 */
 	private Path path;
 
+	private final boolean usecim;
+	
 	public LR2FontLoader(boolean usecim) {
+		this.usecim = usecim;
 		// size
 		addCommandWord(new CommandWord("S") {
 			@Override
@@ -58,7 +57,7 @@ public class LR2FontLoader extends LR2SkinLoader {
 				// System.out.println("Font image loading : " +
 				// imagefile.getPath());
 				if (imagefile.exists()) {
-					imagelist.add(getTexture(imagefile.getPath(), usecim));
+					textimage.setPath(Integer.parseInt(str[1]),imagefile.getPath());
 				}
 			}
 		});
@@ -68,12 +67,10 @@ public class LR2FontLoader extends LR2SkinLoader {
 			public void execute(String[] str) {
 				try {
 					int[] values = parseInt(str);
-					if (values[2] < imagelist.size() && imagelist.get(values[2]) != null) {
+					if (textimage.getPath(values[2]) != null) {
 						// System.out.println("Font loaded : " + values[1]);
-
                         for(int code : mapCode(values[1])) {
-                            textimage.setImage(code, new TextureRegion(imagelist.get(values[2]), values[3],
-                                    values[4], values[5], values[6]));
+                            textimage.setImage(code, values[2], values[3], values[4], values[5], values[6]);
                         }
 					}
 				} catch (Throwable e) {
@@ -119,7 +116,7 @@ public class LR2FontLoader extends LR2SkinLoader {
 	}
 
 	protected SkinTextImage.SkinTextImageSource loadFont(Path p) throws IOException {
-		textimage = new SkinTextImage.SkinTextImageSource();
+		textimage = new SkinTextImage.SkinTextImageSource(usecim);
 		this.path = p;
 
 //		long l = System.nanoTime();
