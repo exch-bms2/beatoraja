@@ -37,6 +37,7 @@ public class BarRenderer {
 	 * 現在のフォルダ階層
 	 */
 	private Deque<DirectoryBar> dir = new ArrayDeque<DirectoryBar>();
+	private String dirString = "";
 	/**
 	 * 現在表示中のバー一覧
 	 */
@@ -619,6 +620,10 @@ public class BarRenderer {
 	public Deque<DirectoryBar> getDirectory() {
 		return dir;
 	}
+	
+	public String getDirectoryString() {
+		return dirString;
+	}
 
 	public boolean updateBar() {
 		if (dir.size() > 0) {
@@ -713,6 +718,13 @@ public class BarRenderer {
 			loader.start();
 			select.getScoreDataProperty().update(currentsongs[selectedindex].getScore(),
 					currentsongs[selectedindex].getRivalScore());
+			
+			StringBuilder str = new StringBuilder();
+			for (Bar b : dir) {
+				str.append(b.getTitle()).append(" > ");
+			}
+			dirString = str.toString();
+
 			return true;
 		}
 

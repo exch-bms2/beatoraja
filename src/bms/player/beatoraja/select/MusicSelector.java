@@ -665,11 +665,7 @@ public class MusicSelector extends MainState {
 		case STRING_COURSE6_TITLE:
 			return getCourseTitle(5);
 		case STRING_DIRECTORY:
-			StringBuffer str = new StringBuffer();
-			for (Bar b : bar.getDirectory()) {
-				str.append(b.getTitle() + " > ");
-			}
-			return str.toString();
+			return bar.getDirectoryString();
 		}
 		return super.getTextValue(id);
 	}
