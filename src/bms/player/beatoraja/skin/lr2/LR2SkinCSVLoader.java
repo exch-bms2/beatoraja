@@ -7,11 +7,13 @@ import java.util.logging.Logger;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.SkinConfig.Offset;
 import bms.player.beatoraja.play.bga.BGAProcessor;
+import bms.player.beatoraja.select.MusicSelectSkin;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.SkinHeader.*;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 
 /**
@@ -173,6 +175,33 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 			}
 		});
 
+		addCommandWord(new CommandWord("IMAGESET") {
+			@Override
+			public void execute(String[] str) {
+				int gr = Integer.parseInt(str[2]);
+				if (gr < imagelist.size() && imagelist.get(gr) != null) {
+					int[] values = parseInt(str);
+					imagesetarray.add(getSourceImage(values));
+				}
+			}
+		});
+
+		addCommandWord(new CommandWord("SRC_IMAGESET") {
+			@Override
+			public void execute(String[] str) {
+				int[] values = parseInt(str);
+				TextureRegion[][] tr = new TextureRegion[values[4]][];
+				for (int i = 0; i < values[4]; i++) {
+					tr[i] = (TextureRegion[]) imagesetarray.get(values[5+i]);
+				}
+				part = new SkinImage(tr, values[2], values[1]);
+				part.setReferenceID(values[3]);
+				if (part != null) {
+					skin.add(part);
+				}
+			}
+		});
+
 		addCommandWord(new CommandWord("DST_IMAGE") {
 			@Override
 			public void execute(String[] str) {
@@ -274,7 +303,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 				}
 				text.setReferenceID(values[3]);
 				text.setAlign(values[4]);
-				int edit = values[5];
+				text.setEditable(values[5] != 0);
 				int panel = values[6];
 				skin.add(text);
 				// System.out.println("Text Added - " +
@@ -291,6 +320,12 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 							values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
 							values[12], values[13], values[14], values[15], values[16], values[17], values[18],
 							values[19], values[20], values[21]);
+					if(text.isEditable() && text.getReferenceID() == SkinProperty.STRING_SEARCHWORD && skin instanceof MusicSelectSkin) {
+						Rectangle r = new Rectangle(values[3] * dstw / srcw,
+								dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
+								values[6] * dsth / srch);
+						((MusicSelectSkin) skin).setSearchTextRegion(r);
+					}
 				}
 			}
 		});
@@ -392,14 +427,27 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 					if (divy <= 0) {
 						divy = 1;
 					}
-					TextureRegion[][] images = new TextureRegion[divx * divy][];
-					for (int i = 0; i < divx; i++) {
-						for (int j = 0; j < divy; j++) {
-							images[divx * j + i] = new TextureRegion[] { new TextureRegion((Texture) imagelist.get(gr),
-									x + w / divx * i, y + h / divy * j, w / divx, h / divy) };
+					TextureRegion[][] tr;
+					int length = values[15];
+					if (length <= 0) {
+						tr = new TextureRegion[divx * divy][];
+						for (int i = 0; i < divx; i++) {
+							for (int j = 0; j < divy; j++) {
+								tr[divx * j + i] = new TextureRegion[] { new TextureRegion((Texture) imagelist.get(gr),
+										x + w / divx * i, y + h / divy * j, w / divx, h / divy) };
+							}
+						}
+					}else {
+						tr = new TextureRegion[length][];
+						TextureRegion[] srcimg = getSourceImage(values);
+						for (int i = 0; i < tr.length; i++) {
+							tr[i] = new TextureRegion[srcimg.length / length];
+							for (int j = 0; j < tr[i].length; j++) {
+								tr[i][j] = srcimg[i * tr[i].length + j];
+							}
 						}
 					}
-					button = new SkinImage(images, values[10], values[9]);
+					button = new SkinImage(tr, values[10], values[9]);
 					button.setReferenceID(values[11]);
 					if (values[12] == 1) {
 						button.setClickevent(values[11]);
@@ -475,6 +523,8 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 	SkinNumber num = null;
 	SkinText text = null;
 	String line = null;
+
+	List <Object> imagesetarray = new ArrayList<Object>();
 
 	protected void loadSkin0(Skin skin, File f, MainState state, Map<Integer, Boolean> option) throws IOException {
 

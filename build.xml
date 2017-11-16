@@ -4,6 +4,7 @@
 	<property name="build.src" value="src" />
 	<property name="build.dest" value="build" />
 
+
 	<path id="build.lib">
 	   <fileset dir="lib" includes="*.jar" />
 	</path>
