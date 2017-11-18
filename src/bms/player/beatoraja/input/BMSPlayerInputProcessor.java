@@ -1,6 +1,7 @@
 package bms.player.beatoraja.input;
 
 import bms.player.beatoraja.Config;
+import bms.player.beatoraja.PlayConfig;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -14,12 +15,10 @@ import bms.player.beatoraja.PlayConfig.ControllerConfig;
 import bms.player.beatoraja.PlayConfig.MidiConfig;
 import bms.player.beatoraja.PlayerConfig;
 import bms.player.beatoraja.Resolution;
-import bms.player.beatoraja.input.BMControllerInputProcessor.BMKeys;
+import bms.player.beatoraja.input.BMSPlayerInputDevice.Type;
 
-import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.Controllers;
-import com.badlogic.gdx.math.Rectangle;
 
 /**
  * キーボードやコントローラからの入力を管理するクラス
@@ -27,6 +26,8 @@ import com.badlogic.gdx.math.Rectangle;
  * @author exch
  */
 public class BMSPlayerInputProcessor {
+	
+	private boolean enable = true;
 
 	private KeyBoardInputProcesseor kbinput;
 
@@ -51,7 +52,7 @@ public class BMSPlayerInputProcessor {
 				    }
 				}).findFirst()
 				.orElse(new ControllerConfig());
-			BMControllerInputProcessor bm = new BMControllerInputProcessor(this, controller, controllerConfig, config);
+			BMControllerInputProcessor bm = new BMControllerInputProcessor(this, controller, controllerConfig);
 			// controller.addListener(bm);
 			bminput.add(bm);
 		}
@@ -59,7 +60,7 @@ public class BMSPlayerInputProcessor {
 		this.bminput = bminput.toArray(new BMControllerInputProcessor[0]);
 		midiinput = new MidiInputProcessor(this);
 		midiinput.open();
-		midiinput.setConfig(MidiConfig.default7());
+		midiinput.setConfig(new MidiConfig());
 
 		devices = new ArrayList<BMSPlayerInputDevice>();
 		devices.add(kbinput);
@@ -118,6 +119,8 @@ public class BMSPlayerInputProcessor {
 	boolean[] cursor = new boolean[4];
 	long[] cursortime = new long[4];
 
+	private Type type = Type.KEYBOARD;
+	
 	public void setMinimumInputDutration(int minduration) {
 		kbinput.setMinimumDuration(minduration);
 		for (BMControllerInputProcessor bm : bminput) {
@@ -132,7 +135,6 @@ public class BMSPlayerInputProcessor {
 	public void setControllerConfig(ControllerConfig[] configs) {
 		boolean[] b = new boolean[configs.length];
 		for (BMControllerInputProcessor controller : bminput) {
-			int player = -1;
 			for(int i = 0;i < configs.length;i++) {
 				if(b[i]) {
 					continue;
@@ -141,17 +143,10 @@ public class BMSPlayerInputProcessor {
 					configs[i].setName(controller.getController().getName());
 				}
 				if(controller.getController().getName().equals(configs[i].getName())) {
-					player = i;
 					controller.setConfig(configs[i]);
 					b[i] = true;
 					break;
 				}
-			}
-			if(player != -1) {
-				controller.setPlayer(player);
-			} else {
-				controller.setPlayer(0);
-
 			}
 		}
 	}
@@ -201,34 +196,84 @@ public class BMSPlayerInputProcessor {
 		return bminput.length + 1;
 	}
 
-	public void setExclusiveDeviceType(BMSPlayerInputDevice.Type type) {
-		Arrays.fill(keystate, false);
-		Arrays.fill(time, 0);
-		for (BMSPlayerInputDevice device : devices) {
-			if (device.getType() == type) {
-				device.setEnabled(true);
+	public void setPlayConfig(PlayConfig playconfig) {
+		// KB, コントローラー, Midiの各ボタンについて排他的処理を実施
+		int[] kbkeys = playconfig.getKeyboardConfig().getKeyAssign();
+		boolean[] exclusive = new boolean[kbkeys.length];
+		for(int i = kbkeys.length;i < keystate.length;i++) {
+			keystate[i] = false;
+			time[i] = 0;
+		}
+		
+		int kbcount = setPlayConfig0(kbkeys,  exclusive);
+		
+		int[][] cokeys = new int[playconfig.getController().length][];
+		int cocount = 0;
+		for(int i = 0;i < cokeys.length;i++) {
+			cokeys[i] = playconfig.getController()[i].getKeyAssign();
+			cocount += setPlayConfig0(cokeys[i],  exclusive);
+		}
+				
+		MidiConfig.Input[] mikeys  = playconfig.getMidiConfig().getKeys();
+		int micount = 0;
+		for(int i = 0;i < mikeys.length;i++) {
+			if(exclusive[i]) {
+				mikeys[i] = null;
 			} else {
-				device.setEnabled(false);
+				exclusive[i] = true;
+				micount++;
+			}
+		}
+		
+		// 各デバイスにキーコンフィグをセット
+		kbinput.setConfig(playconfig.getKeyboardConfig());
+		for(int i = 0;i < bminput.length;i++) {
+			for(ControllerConfig controller : playconfig.getController()) {
+				if(bminput[i].getController().getName().equals(controller.getName())) {
+					bminput[i].setConfig(controller);
+					break;
+				}
+			}
+		}
+		midiinput.setConfig(playconfig.getMidiConfig());
+		
+		if(kbcount >= cocount && kbcount >= micount) {
+			type = Type.KEYBOARD;
+		} else if(cocount >= kbcount && cocount >= micount) {
+			type = Type.BM_CONTROLLER;
+		} else {
+			type = Type.MIDI;			
+		}
+	}
+	
+	public BMSPlayerInputDevice.Type getDeviceType() {
+		return type;
+	}
+	
+	private int setPlayConfig0(int[] keys, boolean[] exclusive) {
+		int count = 0;
+		for(int i = 0;i < keys.length;i++) {
+			if(exclusive[i]) {
+				keys[i] = -1;
+			} else if(keys[i] != -1){
+				exclusive[i] = true;
+				count++;
+			}
+		}
+		return count;
+	}
+	
+	public void setEnable(boolean enable) {
+		this.enable = enable;
+		if(!enable) {
+			Arrays.fill(keystate, false);
+			Arrays.fill(time, 0);
+			for (BMSPlayerInputDevice device : devices) {
 				device.clear();
 			}
 		}
 	}
-
-	public void enableAllDevices() {
-		for (BMSPlayerInputDevice device : devices) {
-			device.setEnabled(true);
-		}
-	}
-
-	public void disableAllDevices() {
-		Arrays.fill(keystate, false);
-		Arrays.fill(time, 0);
-		for (BMSPlayerInputDevice device : devices) {
-			device.setEnabled(false);
-			device.clear();
-		}
-	}
-
+	
 	public boolean[] getNumberState() {
 		return numberstate;
 	}
@@ -238,7 +283,7 @@ public class BMSPlayerInputProcessor {
 	}
 
 	public void keyChanged(BMSPlayerInputDevice device, long presstime, int i, boolean pressed) {
-		if (!device.isEnabled()) {
+		if (!enable) {
 			return;
 		}
 		if (keystate[i] != pressed) {

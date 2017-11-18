@@ -39,12 +39,13 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice implements 
 	private float[] axis = new float[4];
 
 	private int lastPressedButton = -1;
-	private final Config config;
+	
+	private boolean jkoc;
+	private boolean analogScratch;
 
 	public BMControllerInputProcessor(BMSPlayerInputProcessor bmsPlayerInputProcessor, Controller controller,
-									  ControllerConfig controllerConfig, Config config) {
+									  ControllerConfig controllerConfig) {
 		super(Type.BM_CONTROLLER);
-		this.config = config;
 		this.bmsPlayerInputProcessor = bmsPlayerInputProcessor;
 		this.controller = controller;
 		this.setConfig(controllerConfig);
@@ -54,6 +55,8 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice implements 
 		this.buttons = controllerConfig.getKeyAssign().clone();
 		this.start = controllerConfig.getStart();
 		this.select = controllerConfig.getSelect();
+		this.jkoc = controllerConfig.getJKOC();
+		this.analogScratch = controllerConfig.isAnalogScratch();
 	}
 
 	public Controller getController() {
@@ -100,9 +103,9 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice implements 
 		return false;
 	}
 
-	private final boolean[] buttonstate = new boolean[20];
-	private final boolean[] buttonchanged = new boolean[20];
-	private final long[] buttontime = new long[20];
+	private final boolean[] buttonstate = new boolean[BMKeys.MAXID];
+	private final boolean[] buttonchanged = new boolean[BMKeys.MAXID];
+	private final long[] buttontime = new long[BMKeys.MAXID];
 
 	private int duration = 16;
 
@@ -141,10 +144,10 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice implements 
 				final boolean prev = buttonstate[button];
 				if (button <= BMKeys.BUTTON_16) {
 					buttonstate[button] = controller.getButton(button);
-				} else if (button == BMKeys.UP && !config.getJKOC()) {
+				} else if (button == BMKeys.UP && !jkoc) {
 					// アナログ右回転をUPに割り当てる
 					buttonstate[button] = scratchInput(BMKeys.UP);
-				} else if (button == BMKeys.DOWN && !config.getJKOC()) {
+				} else if (button == BMKeys.DOWN && !jkoc) {
 					// アナログ左回転をDOWNに割り当てる
 					buttonstate[button] = scratchInput(BMKeys.DOWN);
 				} else if (button == BMKeys.LEFT) {
@@ -163,24 +166,25 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice implements 
 		}
 
 		for (int i = 0; i < buttons.length; i++) {
-			if (buttonchanged[buttons[i]]) {
-				this.bmsPlayerInputProcessor.keyChanged(this, presstime, i + player * 9, buttonstate[buttons[i]]);
-				buttonchanged[buttons[i]] = false;
+			final int button = buttons[i];
+			if (button >= 0 && button < BMKeys.MAXID && buttonchanged[button]) {
+				this.bmsPlayerInputProcessor.keyChanged(this, presstime, i, buttonstate[button]);
+				buttonchanged[button] = false;
 			}
 		}
 
-		if (buttonchanged[start]) {
+		if (start >= 0 && start < BMKeys.MAXID && buttonchanged[start]) {
 			this.bmsPlayerInputProcessor.startChanged(buttonstate[start]);
 			buttonchanged[start] = false;
 		}
-		if (buttonchanged[select]) {
+		if (select >= 0 && select < BMKeys.MAXID && buttonchanged[select]) {
 			this.bmsPlayerInputProcessor.setSelectPressed(buttonstate[select]);
 			buttonchanged[select] = false;
 		}
 	}
 
 	private boolean scratchInput(int button) {
-		if(!config.isAnalogScratch()) {
+		if(!analogScratch) {
 			if(button == BMKeys.UP) {
 				return (axis[1] < -0.9) || (axis[2] < -0.9);
 			} else if(button == BMKeys.DOWN){
@@ -278,6 +282,8 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice implements 
 		public static final int DOWN = 17;
 		public static final int LEFT = 18;
 		public static final int RIGHT = 19;
+		
+		public static final int MAXID = 20;
 
 		/**
 		 * 専コンのキーコードに対応したテキスト

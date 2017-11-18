@@ -292,14 +292,13 @@ public class BMSPlayer extends MainState {
 
 		final BMSPlayerInputProcessor input = main.getInputProcessor();
 		input.setMinimumInputDutration(conf.getInputduration());
-		if (autoplay == 0) {
-			input.setExclusiveDeviceType(resource.getPlayDeviceType());
-		} else if (autoplay == 2) {
-			input.enableAllDevices();
-		} else {
-			input.disableAllDevices();
-		}
 		PlayConfig pc = getPlayConfig(config);
+		if(autoplay == 0 || autoplay == 2) {
+			input.setPlayConfig(pc);
+		}
+		if (autoplay == 1 || autoplay >= 3) {
+			input.setEnable(false);
+		}
 		input.setKeyboardConfig(pc.getKeyboardConfig());
 		input.setControllerConfig(pc.getController());
 		input.setMidiConfig(pc.getMidiConfig());
@@ -429,7 +428,6 @@ public class BMSPlayer extends MainState {
 		// practice終了
 		case STATE_PRACTICE_FINISHED:
 			if (now - getTimer()[TIMER_FADEOUT] > skin.getFadeout()) {
-				input.enableAllDevices();
 				getMainController().changeState(MainController.STATE_SELECTMUSIC);
 			}
 			break;
@@ -530,7 +528,7 @@ public class BMSPlayer extends MainState {
 				}
 				resource.setGauge(gaugelog);
 				resource.setGrooveGauge(gauge);
-				input.enableAllDevices();
+				input.setEnable(true);
 				input.setStartTime(0);
 				if (autoplay == 2) {
 					state = STATE_PRACTICE;
@@ -557,7 +555,7 @@ public class BMSPlayer extends MainState {
 				saveConfig();
 				resource.setGauge(gaugelog);
 				resource.setGrooveGauge(gauge);
-				input.enableAllDevices();
+				input.setEnable(true);
 				input.setStartTime(0);
 				if (autoplay == 2) {
 					state = STATE_PRACTICE;
@@ -663,7 +661,7 @@ public class BMSPlayer extends MainState {
 		replay.gauge = config.getGauge();
 
 		score.setMinbp(score.getEbd() + score.getLbd() + score.getEpr() + score.getLpr() + score.getEms() + score.getLms() + resource.getSongdata().getNotes() - notes);
-		score.setDeviceType(resource.getPlayDeviceType());
+		score.setDeviceType(getMainController().getInputProcessor().getDeviceType());
 		return score;
 	}
 

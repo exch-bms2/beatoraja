@@ -11,7 +11,6 @@ import bms.player.beatoraja.select.bar.*;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Json;
@@ -38,6 +37,7 @@ public class BarRenderer {
 	 * 現在のフォルダ階層
 	 */
 	private Deque<DirectoryBar> dir = new ArrayDeque<DirectoryBar>();
+	private String dirString = "";
 	/**
 	 * 現在表示中のバー一覧
 	 */
@@ -334,7 +334,7 @@ public class BarRenderer {
 			return;
 		}
 
-		if (bartextupdate && baro.getText()[0] instanceof SkinTextFont) {
+		if (bartextupdate) {
 			bartextupdate = false;
 			Set<Character> charset = new HashSet<Character>();
 
@@ -349,8 +349,8 @@ public class BarRenderer {
 			for (char c : charset) {
 				chars[i++] = c;
 			}
-			((SkinTextFont) baro.getText()[0]).prepareFont(String.valueOf(chars));
-			((SkinTextFont) baro.getText()[1]).prepareFont(String.valueOf(chars));
+			baro.getText()[0].prepareFont(String.valueOf(chars));
+			baro.getText()[1].prepareFont(String.valueOf(chars));
 		}
 		// draw song bar
 		for (int i = 0; i < barlength; i++) {
@@ -620,6 +620,10 @@ public class BarRenderer {
 	public Deque<DirectoryBar> getDirectory() {
 		return dir;
 	}
+	
+	public String getDirectoryString() {
+		return dirString;
+	}
 
 	public boolean updateBar() {
 		if (dir.size() > 0) {
@@ -714,6 +718,13 @@ public class BarRenderer {
 			loader.start();
 			select.getScoreDataProperty().update(currentsongs[selectedindex].getScore(),
 					currentsongs[selectedindex].getRivalScore());
+			
+			StringBuilder str = new StringBuilder();
+			for (Bar b : dir) {
+				str.append(b.getTitle()).append(" > ");
+			}
+			dirString = str.toString();
+
 			return true;
 		}
 

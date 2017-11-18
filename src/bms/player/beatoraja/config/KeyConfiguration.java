@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFont
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 
+import bms.model.Mode;
 import bms.player.beatoraja.MainController;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.PlayConfig;
@@ -37,6 +38,8 @@ public class KeyConfiguration extends MainState {
 	private BitmapFont titlefont;
 
 	private static final String[] MODE = { "7 KEYS", "9 KEYS", "14 KEYS", "24 KEYS", "24 KEYS DOUBLE" };
+	private static final Mode[] MODE_HINT = { Mode.BEAT_7K, Mode.POPN_9K, Mode.BEAT_14K, Mode.KEYBOARD_24K,
+			Mode.KEYBOARD_24K_DOUBLE };
 
 	private static final String[][] KEYS = {
 			{ "1 KEY", "2 KEY", "3 KEY", "4 KEY", "5 KEY", "6 KEY", "7 KEY", "F-SCR", "R-SCR", "START", "SELECT" },
@@ -44,36 +47,37 @@ public class KeyConfiguration extends MainState {
 			{ "1P-1 KEY", "1P-2 KEY", "1P-3 KEY", "1P-4 KEY", "1P-5 KEY", "1P-6 KEY", "1P-7 KEY", "1P-F-SCR",
 					"1P-R-SCR", "2P-1 KEY", "2P-2 KEY", "2P-3 KEY", "2P-4 KEY", "2P-5 KEY", "2P-6 KEY", "2P-7 KEY",
 					"2P-F-SCR", "2P-R-SCR", "START", "SELECT" },
-			{ "C1", "C#1", "D1", "D#1", "E1", "F1", "F#1", "G1", "G#1", "A1", "A#1", "B1",
-					"C2", "C#2", "D2", "D#2", "E2", "F2", "F#2", "G2", "G#2", "A2", "A#2", "B2",
-					"WHEEL-UP", "WHEEL-DOWN", "START", "SELECT" },
-			{ "1P-C1", "1P-C#1", "1P-D1", "1P-D#1", "1P-E1", "1P-F1", "1P-F#1", "1P-G1", "1P-G#1", "1P-A1", "1P-A#1", "1P-B1",
-					"1P-C2", "1P-C#2", "1P-D2", "1P-D#2", "1P-E2", "1P-F2", "1P-F#2", "1P-G2", "1P-G#2", "1P-A2", "1P-A#2", "1P-B2",
-					"1P-WHEEL-UP", "1P-WHEEL-DOWN",
-					"2P-C1", "2P-C#1", "2P-D1", "2P-D#1", "2P-E1", "2P-F1", "2P-F#1", "2P-G1", "2P-G#1", "2P-A1", "2P-A#1", "2P-B1",
-					"2P-C2", "2P-C#2", "2P-D2", "2P-D#2", "2P-E2", "2P-F2", "2P-F#2", "2P-G2", "2P-G#2", "2P-A2", "2P-A#2", "2P-B2",
+			{ "C1", "C#1", "D1", "D#1", "E1", "F1", "F#1", "G1", "G#1", "A1", "A#1", "B1", "C2", "C#2", "D2", "D#2",
+					"E2", "F2", "F#2", "G2", "G#2", "A2", "A#2", "B2", "WHEEL-UP", "WHEEL-DOWN", "START", "SELECT" },
+			{ "1P-C1", "1P-C#1", "1P-D1", "1P-D#1", "1P-E1", "1P-F1", "1P-F#1", "1P-G1", "1P-G#1", "1P-A1", "1P-A#1",
+					"1P-B1", "1P-C2", "1P-C#2", "1P-D2", "1P-D#2", "1P-E2", "1P-F2", "1P-F#2", "1P-G2", "1P-G#2",
+					"1P-A2", "1P-A#2", "1P-B2", "1P-WHEEL-UP", "1P-WHEEL-DOWN", "2P-C1", "2P-C#1", "2P-D1", "2P-D#1",
+					"2P-E1", "2P-F1", "2P-F#1", "2P-G1", "2P-G#1", "2P-A1", "2P-A#1", "2P-B1", "2P-C2", "2P-C#2",
+					"2P-D2", "2P-D#2", "2P-E2", "2P-F2", "2P-F#2", "2P-G2", "2P-G#2", "2P-A2", "2P-A#2", "2P-B2",
 					"2P-WHEEL-UP", "2P-WHEEL-DOWN", "START", "SELECT" } };;
-	private static final int[][] KEYSA = { { 0, 1, 2, 3, 4, 5, 6, 7, 8, -1, -2 },
+	private static final int[][] KEYSA = { { 0, 1, 2, 3, 4, 5, 6, 7, 8, -1, -2 }, { 0, 1, 2, 3, 4, 5, 6, 7, 8, -1, -2 },
+			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, -1, -2 },
+			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, -1, -2 },
+			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28,
+					29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, -1,
+					-2 } };
+	private static final int[][] BMKEYSA = { { 0, 1, 2, 3, 4, 5, 6, 7, 8, -1, -2 },
 			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, -1, -2 },
 			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, -1, -2 },
 			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, -1, -2 },
-			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25,
-					26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, -1, -2} };
-	private static final int[][] BMKEYSA = { { 0, 1, 2, 3, 4, 5, 6, 7, 8, -1, -2 },
-			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, -1, -2 }, { 0, 1, 2, 3, 4, 5, 6, 7, 8, 100, 101, 102, 103, 104, 105, 106, 107, 108, -1, -2 },
-			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, -1, -2 },
-			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25,
-					100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111,
-					112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, -1, -2} };
+			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28,
+					29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, -1,
+					-2 } };
 	private static final int[][] MIDIKEYSA = { { 0, 1, 2, 3, 4, 5, 6, 7, 8, -1, -2 },
 			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, -1, -2 },
 			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, -1, -2 },
 			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, -1, -2 },
-			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25,
-					26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, -1, -2} };
+			{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28,
+					29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, -1,
+					-2 } };
 	private static final int playerOffset = 100;
 
-	private static final String[] SELECTKEY = {"2dx sp", "popn", "2dx dp"};
+	private static final String[] SELECTKEY = { "2dx sp", "popn", "2dx dp" };
 
 	private int cursorpos = 0;
 	private int scrollpos = 0;
@@ -97,14 +101,14 @@ public class KeyConfiguration extends MainState {
 	public KeyConfiguration(MainController main) {
 		super(main);
 
-
 	}
 
 	public void create() {
 		this.setSkin(new MusicDecideSkin(Resolution.HD, getMainController().getConfig().getResolution()));
-		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/default/VL-Gothic-Regular.ttf"));
+		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
+				Gdx.files.internal("skin/default/VL-Gothic-Regular.ttf"));
 		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
-		parameter.size = (int)(20 * getSkin().getScaleY());
+		parameter.size = (int) (20 * getSkin().getScaleY());
 		titlefont = generator.generateFont(parameter);
 		shape = new ShapeRenderer();
 
@@ -118,8 +122,8 @@ public class KeyConfiguration extends MainState {
 	public void render() {
 		final MainController main = getMainController();
 		final SpriteBatch sprite = main.getSpriteBatch();
-		final float scaleX = (float)getSkin().getScaleX();
-		final float scaleY = (float)getSkin().getScaleY();
+		final float scaleX = (float) getSkin().getScaleX();
+		final float scaleY = (float) getSkin().getScaleY();
 
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -141,71 +145,108 @@ public class KeyConfiguration extends MainState {
 		int[] bmkeysa = BMKEYSA[mode];
 		int[] midikeysa = MIDIKEYSA[mode];
 
-		if (cursor[0] && cursortime[0] != 0) {
-			cursortime[0] = 0;
-			cursorpos = (cursorpos + keys.length - 1) % keys.length;
-		}
-		if (cursor[1] && cursortime[1] != 0) {
-			cursortime[1] = 0;
-			cursorpos = (cursorpos + 1) % keys.length;
-		}
-
-		if (number[1] && input.getNumberTime()[1] != 0) {
-			input.getNumberTime()[1] = 0;
-			config.setMusicselectinput((config.getMusicselectinput() + 1) % 3);
-		}
-		if (number[2] && input.getNumberTime()[2] != 0) {
-			input.getNumberTime()[2] = 0;
-			if(controllers.length > 0) {
-				int index = 0;
-				for(;index < controllers.length;index++) {
-					if(controllers[index].getController().getName().equals(pc.getController()[0].getName())) {
-						break;
-					}
-				}
-				pc.getController()[0].setName(controllers[(index + 1) % controllers.length].getController().getName());
-				pc.setController(pc.getController());
-			}
-		}
-		if (number[3] && input.getNumberTime()[3] != 0) {
-			input.getNumberTime()[3] = 0;
-			if(controllers.length > 0 && pc.getController().length > 1) {
-				int index = 0;
-				for(;index < controllers.length;index++) {
-					if(controllers[index].getController().getName().equals(pc.getController()[1].getName())) {
-						break;
-					}
-				}
-				pc.getController()[1].setName(controllers[(index + 1) % controllers.length].getController().getName());
-				pc.setController(pc.getController());
-			}
-		}
-
-		if (input.getKeyBoardInputProcesseor().getLastPressedKey() == Keys.ENTER) {
-			input.getKeyBoardInputProcesseor().setLastPressedKey(-1);
-			for (BMControllerInputProcessor bmc : controllers) {
-				bmc.setLastPressedButton(-1);
-			}
-			midiinput.clearLastPressedKey();
-			keyinput = true;
-		}
-
-		if (keyinput && input.getKeyBoardInputProcesseor().getLastPressedKey() != -1) {
-			setKeyboardKeyAssign(keysa[cursorpos]);
-			// System.out.println(input.getKeyBoardInputProcesseor().getLastPressedKey());
-			keyinput = false;
-		}
-		for (BMControllerInputProcessor bmc : controllers) {
-			if (keyinput && bmc.getLastPressedButton() != -1) {
-				setControllerKeyAssign(bmkeysa[cursorpos], bmc);
-//				System.out.println(bmc.getLastPressedButton());
+		if (keyinput) {
+			if (keyinput && input.getKeyBoardInputProcesseor().getLastPressedKey() != -1) {
+				setKeyboardKeyAssign(keysa[cursorpos]);
+				// System.out.println(input.getKeyBoardInputProcesseor().getLastPressedKey());
 				keyinput = false;
-				break;
 			}
-		}
-		if (keyinput && midiinput.hasLastPressedKey()) {
-			setMidiKeyAssign(midikeysa[cursorpos]);
-			keyinput = false;
+			for (BMControllerInputProcessor bmc : controllers) {
+				if (keyinput && bmc.getLastPressedButton() != -1) {
+					setControllerKeyAssign(bmkeysa[cursorpos], bmc);
+					// System.out.println(bmc.getLastPressedButton());
+					keyinput = false;
+					break;
+				}
+			}
+			if (keyinput && midiinput.hasLastPressedKey()) {
+				setMidiKeyAssign(midikeysa[cursorpos]);
+				keyinput = false;
+			}
+		} else {
+			if (cursor[0] && cursortime[0] != 0) {
+				cursortime[0] = 0;
+				cursorpos = (cursorpos + keys.length - 1) % keys.length;
+			}
+			if (cursor[1] && cursortime[1] != 0) {
+				cursortime[1] = 0;
+				cursorpos = (cursorpos + 1) % keys.length;
+			}
+
+			if (number[1] && input.getNumberTime()[1] != 0) {
+				input.getNumberTime()[1] = 0;
+				config.setMusicselectinput((config.getMusicselectinput() + 1) % 3);
+			}
+			// change contronnler device 1
+			if (number[2] && input.getNumberTime()[2] != 0) {
+				input.getNumberTime()[2] = 0;
+				if (controllers.length > 0) {
+					int index = 0;
+					for (; index < controllers.length; index++) {
+						if (controllers[index].getController().getName().equals(pc.getController()[0].getName())) {
+							break;
+						}
+					}
+					pc.getController()[0]
+							.setName(controllers[(index + 1) % controllers.length].getController().getName());
+					pc.setController(pc.getController());
+				}
+			}
+			// change contronnler device 2
+			if (number[3] && input.getNumberTime()[3] != 0) {
+				input.getNumberTime()[3] = 0;
+				if (controllers.length > 0 && pc.getController().length > 1) {
+					int index = 0;
+					for (; index < controllers.length; index++) {
+						if (controllers[index].getController().getName().equals(pc.getController()[1].getName())) {
+							break;
+						}
+					}
+					pc.getController()[1]
+							.setName(controllers[(index + 1) % controllers.length].getController().getName());
+					pc.setController(pc.getController());
+				}
+			}
+
+			if (number[7] && input.getNumberTime()[7] != 0) {
+				input.getNumberTime()[7] = 0;
+				keyboardConfig.setKeyAssign(MODE_HINT[mode], true);
+				for (int i = 0; i < controllerConfigs.length; i++) {
+					controllerConfigs[i].setKeyAssign(MODE_HINT[mode], i, false);
+				}
+				midiconfig.setKeyAssign(MODE_HINT[mode], false);
+			}
+			if (number[8] && input.getNumberTime()[8] != 0) {
+				input.getNumberTime()[8] = 0;
+				keyboardConfig.setKeyAssign(MODE_HINT[mode], false);
+				for (int i = 0; i < controllerConfigs.length; i++) {
+					controllerConfigs[i].setKeyAssign(MODE_HINT[mode], i, true);
+				}
+				midiconfig.setKeyAssign(MODE_HINT[mode], false);
+			}
+			if (number[9] && input.getNumberTime()[9] != 0) {
+				input.getNumberTime()[9] = 0;
+				keyboardConfig.setKeyAssign(MODE_HINT[mode], false);
+				for (int i = 0; i < controllerConfigs.length; i++) {
+					controllerConfigs[i].setKeyAssign(MODE_HINT[mode], i, false);
+				}
+				midiconfig.setKeyAssign(MODE_HINT[mode], true);
+			}
+
+			if (input.getKeyBoardInputProcesseor().getLastPressedKey() == Keys.ENTER) {
+				input.getKeyBoardInputProcesseor().setLastPressedKey(-1);
+				for (BMControllerInputProcessor bmc : controllers) {
+					bmc.setLastPressedButton(-1);
+				}
+				midiinput.clearLastPressedKey();
+				keyinput = true;
+			}
+
+			if (input.isExitPressed()) {
+				input.setExitPressed(false);
+				main.saveConfig();
+				main.changeState(MainController.STATE_SELECTMUSIC);
+			}
 		}
 
 		sprite.begin();
@@ -213,15 +254,25 @@ public class KeyConfiguration extends MainState {
 		titlefont.draw(sprite, "<-- " + MODE[mode] + " -->", 80 * scaleX, 650 * scaleY);
 		titlefont.setColor(Color.YELLOW);
 		titlefont.draw(sprite, "Key Board", 180 * scaleX, 620 * scaleY);
-		titlefont.draw(sprite, "Controller", 330 * scaleX, 620 * scaleY);
-		titlefont.draw(sprite, "MIDI", 480 * scaleX, 620 * scaleY);
+		titlefont.draw(sprite, "Controller1", 330 * scaleX, 620 * scaleY);
+		titlefont.draw(sprite, "MIDI", 630 * scaleX, 620 * scaleY);
 		titlefont.setColor(Color.ORANGE);
-		titlefont.draw(sprite, "Music Select (press [1] to change) :   " + SELECTKEY[config.getMusicselectinput()], 600 * scaleX, 620 * scaleY);
+		titlefont.draw(sprite, "Music Select (press [1] to change) :   ", 750 * scaleX, 620 * scaleY);
+		titlefont.draw(sprite, SELECTKEY[config.getMusicselectinput()], 780 * scaleX, 590 * scaleY);
 
-		titlefont.draw(sprite, "Controller Device 1 (press [2] to change) :   " + pc.getController()[0].getName(), 600 * scaleX, 500 * scaleY);
-		if(pc.getController().length > 1) {
-			titlefont.draw(sprite, "Controller Device 2 (press [3] to change) :   " + pc.getController()[1].getName(), 600 * scaleX, 300 * scaleY);
+		titlefont.draw(sprite, "Controller Device 1 (press [2] to change) :   ", 750 * scaleX, 500 * scaleY);
+		titlefont.draw(sprite, pc.getController()[0].getName(), 780 * scaleX, 470 * scaleY);
+		if (pc.getController().length > 1) {
+			titlefont.setColor(Color.YELLOW);
+			titlefont.draw(sprite, "Controller2", 480 * scaleX, 620 * scaleY);
+			titlefont.setColor(Color.ORANGE);
+			titlefont.draw(sprite, "Controller Device 2 (press [3] to change) :   ", 750 * scaleX, 300 * scaleY);
+			titlefont.draw(sprite, pc.getController()[1].getName(), 780 * scaleX, 270 * scaleY);
 		}
+		
+		titlefont.draw(sprite, "[7] Restore to Default (Keyboard)", 750 * scaleX, 150 * scaleY);
+		titlefont.draw(sprite, "[8] Restore to Default (Controller)", 750 * scaleX, 120 * scaleY);
+		titlefont.draw(sprite, "[9] Restore to Default (MIDI)", 750 * scaleX, 90 * scaleY);
 
 		sprite.end();
 		if (cursorpos < scrollpos) {
@@ -236,47 +287,33 @@ public class KeyConfiguration extends MainState {
 				shape.setColor(keyinput ? Color.RED : Color.BLUE);
 				shape.rect(200 * scaleX, y * scaleY, 80 * scaleX, 24 * scaleY);
 				shape.rect(350 * scaleX, y * scaleY, 80 * scaleX, 24 * scaleY);
-				shape.rect(500 * scaleX, y * scaleY, 80 * scaleX, 24 * scaleY);
+				shape.rect(650 * scaleX, y * scaleY, 80 * scaleX, 24 * scaleY);
 				shape.end();
 			}
 			sprite.begin();
 			titlefont.setColor(Color.WHITE);
 			titlefont.draw(sprite, keys[i], 50 * scaleX, (y + 22) * scaleY);
-			titlefont.draw(sprite, Keys.toString(getKeyboardKeyAssign(keysa[i])), 202 * scaleX, (y + 22) * scaleY);
-			titlefont.draw(sprite, BMControllerInputProcessor.BMKeys.toString(getControllerKeyAssign(bmkeysa[i])), 352 * scaleX, (y + 22) * scaleY);
-			titlefont.draw(sprite, getMidiKeyAssign(midikeysa[i]).toString(), 502 * scaleX, (y + 22) * scaleY);
+			titlefont.draw(sprite, getKeyboardKeyAssign(keysa[i]) != -1 ? Keys.toString(getKeyboardKeyAssign(keysa[i])) : "----",
+					202 * scaleX, (y + 22) * scaleY);
+			titlefont.draw(sprite, getControllerKeyAssign(0, bmkeysa[i]) != -1
+					? BMControllerInputProcessor.BMKeys.toString(getControllerKeyAssign(0, bmkeysa[i])) : "----",
+					352 * scaleX, (y + 22) * scaleY);
+			if (pc.getController().length > 1) {
+				titlefont.draw(sprite, getControllerKeyAssign(1, bmkeysa[i]) != -1 ? 
+						BMControllerInputProcessor.BMKeys.toString(getControllerKeyAssign(1, bmkeysa[i])) : "----", 502 * scaleX,
+						(y + 22) * scaleY);
+			}
+			titlefont.draw(sprite,
+					getMidiKeyAssign(midikeysa[i]) != null ? getMidiKeyAssign(midikeysa[i]).toString() : "----",
+					652 * scaleX, (y + 22) * scaleY);
 			sprite.end();
-		}
-
-		if (input.isExitPressed()) {
-			input.setExitPressed(false);
-			main.saveConfig();
-			main.changeState(MainController.STATE_SELECTMUSIC);
 		}
 	}
 
 	private void setMode(int mode) {
 		this.mode = mode;
 		config = getMainController().getPlayerResource().getPlayerConfig();
-		switch (mode) {
-		case 0:
-			pc = config.getMode7();
-			break;
-		case 1:
-			pc = config.getMode9();
-			break;
-		case 2:
-			pc = config.getMode14();
-			break;
-		case 3:
-			pc = config.getMode24();
-			break;
-		case 4:
-			pc = config.getMode24double();
-			break;
-		default:
-			pc = config.getMode7();
-		}
+		pc = config.getPlayConfig(MODE_HINT[mode]);
 		keyboardConfig = pc.getKeyboardConfig();
 		controllerConfigs = pc.getController();
 		midiconfig = pc.getMidiConfig();
@@ -303,6 +340,10 @@ public class KeyConfiguration extends MainState {
 	}
 
 	private void setKeyboardKeyAssign(int index) {
+		if (keyboard.isReservedKey(keyboard.getLastPressedKey())) {
+			return;
+		}
+		resetKeyAssign(index);
 		if (index >= 0) {
 			keyboardConfig.getKeyAssign()[index] = keyboard.getLastPressedKey();
 		} else if (index == -1) {
@@ -312,24 +353,36 @@ public class KeyConfiguration extends MainState {
 		}
 	}
 
-	private int getControllerKeyAssign(int index) {
+	private int getControllerKeyAssign(int device, int index) {
 		if (index >= 0) {
-			return controllerConfigs[index / playerOffset].getKeyAssign()[index % playerOffset];
+			return controllerConfigs[device].getKeyAssign()[index];
 		} else if (index == -1) {
-			return controllerConfigs[0].getStart();
+			return controllerConfigs[device].getStart();
 		} else if (index == -2) {
-			return controllerConfigs[0].getSelect();
+			return controllerConfigs[device].getSelect();
 		}
 		return 0;
 	}
 
 	private void setControllerKeyAssign(int index, BMControllerInputProcessor bmc) {
-		if (index >= 0 && bmc.getController().getName().equals(controllerConfigs[index / playerOffset].getName())) {
-			controllerConfigs[index / playerOffset].getKeyAssign()[index % playerOffset] = bmc.getLastPressedButton();
-		} else if (index == -1 && bmc.getController().getName().equals(controllerConfigs[0].getName())) {
-			controllerConfigs[0].setStart(bmc.getLastPressedButton());
-		} else if (index == -2 && bmc.getController().getName().equals(controllerConfigs[0].getName())) {
-			controllerConfigs[0].setSelect(bmc.getLastPressedButton());
+		int cindex = -1;
+		for (int i = 0; i < controllerConfigs.length; i++) {
+			if (bmc.getController().getName().equals(controllerConfigs[i].getName())) {
+				cindex = i;
+				break;
+			}
+		}
+		if (cindex < 0) {
+			return;
+		}
+
+		resetKeyAssign(index);
+		if (index >= 0) {
+			controllerConfigs[cindex].getKeyAssign()[index] = bmc.getLastPressedButton();
+		} else if (index == -1) {
+			controllerConfigs[cindex].setStart(bmc.getLastPressedButton());
+		} else if (index == -2) {
+			controllerConfigs[cindex].setSelect(bmc.getLastPressedButton());
 		}
 	}
 
@@ -344,7 +397,18 @@ public class KeyConfiguration extends MainState {
 		return new MidiConfig.Input();
 	}
 
+	private void resetKeyAssign(int index) {
+		if (index >= 0) {
+			keyboardConfig.getKeyAssign()[index] = -1;
+			for (ControllerConfig cc : controllerConfigs) {
+				cc.getKeyAssign()[index] = -1;
+			}
+			midiconfig.setKeyAssign(index, null);
+		}
+	}
+
 	private void setMidiKeyAssign(int index) {
+		resetKeyAssign(index);
 		if (index >= 0) {
 			midiconfig.setKeyAssign(index, midiinput.getLastPressedKey());
 		} else if (index == -1) {
@@ -419,11 +483,11 @@ public class KeyConfiguration extends MainState {
 	@Override
 	public void dispose() {
 		super.dispose();
-		if(titlefont != null) {
+		if (titlefont != null) {
 			titlefont.dispose();
 			titlefont = null;
 		}
-		if(shape != null) {
+		if (shape != null) {
 			shape.dispose();
 			shape = null;
 		}

@@ -13,3 +13,5 @@ config.json
 beatoraja.jar
 beatoraja_log.xml
 /bin/
+b.bat
+/*.dll

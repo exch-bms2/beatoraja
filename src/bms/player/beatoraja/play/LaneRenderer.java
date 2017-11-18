@@ -401,6 +401,8 @@ public class LaneRenderer {
 		}
 
 		sprite.setColor(Color.WHITE);
+		sprite.setBlend(0);
+		sprite.setType(SkinObjectRenderer.TYPE_NORMAL);
 		y = orgy;
 		for (int i = pos; i < timelines.length && y <= hu; i++) {
 			final TimeLine tl = timelines[i];

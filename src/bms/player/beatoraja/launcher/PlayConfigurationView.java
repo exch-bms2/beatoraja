@@ -17,25 +17,14 @@ import com.badlogic.gdx.utils.JsonWriter.OutputType;
 import com.portaudio.DeviceInfo;
 import com.synthbot.jasiohost.AsioDriver;
 
-import bms.player.beatoraja.Config;
-import bms.player.beatoraja.IRScoreData;
-import bms.player.beatoraja.MainLoader;
-import bms.player.beatoraja.PlayConfig;
-import bms.player.beatoraja.PlayerConfig;
-import bms.player.beatoraja.Resolution;
-import bms.player.beatoraja.ScoreDatabaseAccessor;
-import bms.player.beatoraja.SkinConfig;
-import bms.player.beatoraja.TableDataAccessor;
-import bms.player.beatoraja.SkinConfig.FilePath;
-import bms.player.beatoraja.SkinConfig.Offset;
-import bms.player.beatoraja.SkinConfig.Option;
-import bms.player.beatoraja.SkinConfig.Property;
+import bms.model.Mode;
+import bms.player.beatoraja.*;
+import bms.player.beatoraja.PlayConfig.ControllerConfig;
 import bms.player.beatoraja.audio.PortAudioDriver;
 import bms.player.beatoraja.ir.IRConnection;
 import bms.player.beatoraja.play.JudgeAlgorithm;
 import bms.player.beatoraja.play.TargetProperty;
 import bms.player.beatoraja.skin.SkinHeader;
-import bms.player.beatoraja.skin.SkinHeader.*;
 import bms.player.beatoraja.skin.SkinType;
 import bms.player.beatoraja.song.SQLiteSongDatabaseAccessor;
 import bms.player.beatoraja.song.SongData;
@@ -44,15 +33,7 @@ import bms.player.beatoraja.song.SongInformationAccessor;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.Slider;
-import javafx.scene.control.Spinner;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
@@ -80,7 +61,9 @@ public class PlayConfigurationView implements Initializable {
 	private ComboBox<Resolution> resolution;
 
 	@FXML
-	private ComboBox<Integer> playconfig;
+	private ComboBox<PlayMode> inputconfig;
+	@FXML
+	private ComboBox<PlayMode> playconfig;
 	/**
 	 * ハイスピード
 	 */
@@ -190,7 +173,7 @@ public class PlayConfigurationView implements Initializable {
 	private ComboBox<Integer> autosavereplay4;
 
     @FXML
-    private ComboBox<Integer> jkoc_hack;
+    private CheckBox jkoc_hack;
 	@FXML
 	private CheckBox analogScratch;
     @FXML
@@ -249,9 +232,9 @@ public class PlayConfigurationView implements Initializable {
 		initComboBox(gaugeop, new String[] { "ASSIST EASY", "EASY", "NORMAL", "HARD", "EX-HARD", "HAZARD" });
 		initComboBox(bgaop, new String[] { "ON", "AUTOPLAY ", "OFF" });
 		initComboBox(bgaexpand, new String[] { "Full", "Keep Aspect Ratio", "Off" });
-                initComboBox(jkoc_hack, new String[] {"False", "True"});
 		initComboBox(fixhispeed, new String[] { "OFF", "START BPM", "MAX BPM", "MAIN BPM", "MIN BPM" });
-		initComboBox(playconfig, new String[] { "5/7KEYS", "10/14KEYS", "9KEYS", "24KEYS", "24KEYS DOUBLE" });
+		playconfig.getItems().setAll(PlayMode.values());
+		inputconfig.getItems().setAll(PlayMode.values());
 		initComboBox(lntype, new String[] { "LONG NOTE", "CHARGE NOTE", "HELL CHARGE NOTE" });
 		
 		TargetProperty[] targets = TargetProperty.getAllTargetProperties();
@@ -330,8 +313,6 @@ public class PlayConfigurationView implements Initializable {
 
         // int b = Boolean.valueOf(config.getJKOC()).compareTo(false);
 
-        jkoc_hack.setValue(Boolean.valueOf(config.getJKOC()).compareTo(false));
-        analogScratch.setSelected(config.isAnalogScratch());
         usecim.setSelected(config.isCacheSkinImage());
         useSongInfo.setSelected(config.isUseSongInfo());
 
@@ -430,8 +411,10 @@ public class PlayConfigurationView implements Initializable {
 		iruserid.setText(player.getUserid());
 		irpassword.setText(player.getPassword());
 
-		playconfig.setValue(0);
+		playconfig.setValue(PlayMode.BEAT_7K);
 		updatePlayConfig();
+		inputconfig.setValue(PlayMode.BEAT_7K);
+		updateInputConfig();
 		skincategory.setValue(SkinType.PLAY_7KEYS);
 		updateSkinCategory();
 	}
@@ -471,11 +454,6 @@ public class PlayConfigurationView implements Initializable {
 				autosavereplay3.getValue(),autosavereplay4.getValue()});
 
         // jkoc_hack is integer but *.setJKOC needs boolean type
-        if(jkoc_hack.getValue() > 0)
-            config.setJKOC(true);
-        else
-            config.setJKOC(false);
-        config.setAnalogScratch(analogScratch.isSelected());
 
         config.setCacheSkinImage(usecim.isSelected());
         config.setUseSongInfo(useSongInfo.isSelected());
@@ -529,6 +507,7 @@ public class PlayConfigurationView implements Initializable {
 		player.setUserid(iruserid.getText());
 		player.setPassword(irpassword.getText());
 
+		updateInputConfig();
 		updatePlayConfig();
 		updateSkinCategory();
 
@@ -634,29 +613,12 @@ public class PlayConfigurationView implements Initializable {
     
 	private int mode = -1;
 
-	private int pc = -1;
-
-	private PlayConfig getPlayConfig() {
-		switch (pc) {
-			case 0:
-				return player.getMode7();
-			case 1:
-				return player.getMode14();
-			case 2:
-				return player.getMode9();
-			case 3:
-				return player.getMode24();
-			case 4:
-				return player.getMode24double();
-			default:
-				return player.getMode7();
-		}
-	}
+	private PlayMode pc = null;
 
     @FXML
 	public void updatePlayConfig() {
-		if (pc != -1) {
-			PlayConfig conf = getPlayConfig();
+		if (pc != null) {
+			PlayConfig conf = player.getPlayConfig(Mode.valueOf(pc.name()));
 			conf.setHispeed(getValue(hispeed).floatValue());
 			conf.setDuration(getValue(gvalue));
 			conf.setEnablelanecover(enableLanecover.isSelected());
@@ -665,13 +627,32 @@ public class PlayConfigurationView implements Initializable {
 			conf.setLift(getValue(lift) / 1000f);
 		}
 		pc = playconfig.getValue();
-		PlayConfig conf = getPlayConfig();
+		PlayConfig conf = player.getPlayConfig(Mode.valueOf(pc.name()));
 		hispeed.getValueFactory().setValue((double) conf.getHispeed());
 		gvalue.getValueFactory().setValue(conf.getDuration());
 		enableLanecover.setSelected(conf.isEnablelanecover());
 		lanecover.getValueFactory().setValue((int) (conf.getLanecover() * 1000));
 		enableLift.setSelected(conf.isEnablelift());
 		lift.getValueFactory().setValue((int) (conf.getLift() * 1000));
+	}
+
+	private PlayMode ic = null;
+
+    @FXML
+	public void updateInputConfig() {
+		if (ic != null) {
+			PlayConfig conf = player.getPlayConfig(Mode.valueOf(ic.name()));
+			for(ControllerConfig controller : conf.getController()) {
+				controller.setJKOC(jkoc_hack.isSelected());
+		        controller.setAnalogScratch(analogScratch.isSelected());
+			}
+		}
+		ic = inputconfig.getValue();
+		PlayConfig conf = player.getPlayConfig(Mode.valueOf(ic.name()));
+		for(ControllerConfig controller : conf.getController()) {
+	        jkoc_hack.setSelected(controller.getJKOC());
+	        analogScratch.setSelected(controller.isAnalogScratch());
+		}
 	}
 
 	private <T> T getValue(Spinner<T> spinner) {
@@ -949,4 +930,22 @@ public class PlayConfigurationView implements Initializable {
 		}
 	}
 
+	enum PlayMode {
+		BEAT_7K("5/7KEYS"),
+		BEAT_14K("10/14KEYS"),
+		POPN_9K("9KEYS"),
+		KEYBOARD_24K("24KEYS"),
+		KEYBOARD_24K_DOUBLE("24KEYS DOUBLE");
+		
+		public final String name;
+		
+		private PlayMode(String name) {
+			this.name = name;
+		}
+		
+		public String toString() {
+			return name;
+		}
+	}
 }
+

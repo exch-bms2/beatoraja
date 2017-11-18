@@ -6,8 +6,8 @@ import bms.player.beatoraja.PlayConfig.KeyboardConfig;
 import bms.player.beatoraja.Resolution;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.utils.IntArray;
 import com.badlogic.gdx.Input.Keys;
-import com.badlogic.gdx.math.Rectangle;
 
 /**
  * キーボード入力処理用クラス
@@ -20,17 +20,34 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 	 * 
 	 */
 	private final BMSPlayerInputProcessor bmsPlayerInputProcessor;
+	
 	private int[] keys = new int[] { Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.F, Keys.V, Keys.SHIFT_LEFT,
 			Keys.CONTROL_LEFT, Keys.COMMA, Keys.L, Keys.PERIOD, Keys.SEMICOLON, Keys.SLASH, Keys.APOSTROPHE,
 			Keys.BACKSLASH, Keys.SHIFT_RIGHT, Keys.CONTROL_RIGHT };
+	private int[] control = new int[] { Keys.Q, Keys.W };
+	/**
+	 * 数字
+	 */
 	private int[] numbers = new int[] { Keys.NUM_0, Keys.NUM_1, Keys.NUM_2, Keys.NUM_3, Keys.NUM_4, Keys.NUM_5,
 			Keys.NUM_6, Keys.NUM_7, Keys.NUM_8, Keys.NUM_9 };
+	/**
+	 * カーソル
+	 */
 	private int[] cover = new int[] { Keys.UP, Keys.DOWN, Keys.LEFT, Keys.RIGHT };
+	/**
+	 * 機能
+	 */
 	private int[] function = new int[] { Keys.F1, Keys.F2, Keys.F3, Keys.F4, Keys.F5, Keys.F6, Keys.F7, Keys.F8,
 			Keys.F9, Keys.F10, Keys.F11, Keys.F12 };
-	private int[] control = new int[] { Keys.Q, Keys.W };
+	/**
+	 * 終了キー
+	 */
 	private int exit = Keys.ESCAPE;
-
+	
+	private final IntArray reserved;
+	/**
+	 * 最後に押されたキー
+	 */
 	private int lastPressedKey = -1;
 
 	private boolean enable = true;
@@ -42,6 +59,12 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 		this.bmsPlayerInputProcessor = bmsPlayerInputProcessor;
 		this.setConfig(config);
 		this.resolution = resolution;
+		
+		reserved = new IntArray();
+		reserved.addAll(cover);
+		reserved.addAll(function);
+		reserved.addAll(numbers);
+		reserved.addAll(exit);
 	}
 
 	public void setConfig(KeyboardConfig config) {
@@ -75,6 +98,9 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 	public void poll(final long presstime) {
 		if (enable) {
 			for (int i = 0; i < keys.length; i++) {
+				if(keys[i] < 0) {
+					continue;
+				}
 				final boolean pressed = Gdx.input.isKeyPressed(keys[i]);
 				if (pressed != keystate[keys[i]] && presstime >= keytime[keys[i]] + duration) {
 					keystate[keys[i]] = pressed;
@@ -172,5 +198,9 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 
 	public void setEnable(boolean enable) {
 		this.enable = enable;
+	}
+	
+	public boolean isReservedKey(int key) {
+		return reserved.contains(key);
 	}
 }

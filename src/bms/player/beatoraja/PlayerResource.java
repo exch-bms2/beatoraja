@@ -44,19 +44,9 @@ public class PlayerResource {
 
 	private int auto;
 
-	private BMSPlayerInputDevice.Type playDeviceType;
-
 	private List<CourseData.CourseDataConstraint> constraint = new ArrayList();
 
 	private BMSResource bmsresource;
-	/**
-	 * backbmp
-	 */
-	private TextureRegion backbmp;
-	/**
-	 * stagefile
-	 */
-	private TextureRegion stagefile;
 
 	/**
 	 * スコア
@@ -111,7 +101,6 @@ public class PlayerResource {
 		this.config = config;
 		this.pconfig = pconfig;
 		this.bmsresource = new BMSResource(audio, config, pconfig);
-		this.playDeviceType = BMSPlayerInputDevice.Type.KEYBOARD;
 	}
 
 	public void clear() {
@@ -141,33 +130,6 @@ public class PlayerResource {
 			return false;
 		}
 
-		if(stagefile != null) {
-			stagefile.getTexture().dispose();
-			stagefile = null;
-		}
-		try {
-			Pixmap pix = PixmapResourcePool.loadPicture(f.getParent().resolve(model.getStagefile()).toString());
-			if(pix != null) {
-				stagefile = new TextureRegion(new Texture(pix));
-				pix.dispose();
-			}			
-		} catch(Throwable e) {
-			Logger.getGlobal().warning(e.getMessage());
-		}
-		
-		if(backbmp != null) {
-			backbmp.getTexture().dispose();
-			backbmp = null;
-		}
-		try {
-			Pixmap pix = PixmapResourcePool.loadPicture(f.getParent().resolve(model.getBackbmp()).toString());
-			if(pix != null) {
-				backbmp = new TextureRegion(new Texture(pix));
-				pix.dispose();
-			}
-		} catch(Throwable e) {
-			Logger.getGlobal().warning(e.getMessage());
-		}
 		bmsresource.setBMSFile(model, f, config, autoplay);
 		return true;
 	}
@@ -391,14 +353,6 @@ public class PlayerResource {
 			bmsresource.dispose();
 			bmsresource = null;
 		}
-		if(stagefile != null) {
-			stagefile.getTexture().dispose();
-			stagefile = null;
-		}
-		if(backbmp != null) {
-			backbmp.getTexture().dispose();
-			backbmp = null;
-		}
 	}
 
 	public SongData getSongdata() {
@@ -413,19 +367,7 @@ public class PlayerResource {
 		return generator;
 	}
 
-	public TextureRegion getBackbmpData() {
-		return backbmp;
-	}
-
-	public TextureRegion getStagefileData() {
-		return stagefile;
-	}
-
-	public BMSPlayerInputDevice.Type getPlayDeviceType() {
-		return playDeviceType;
-	}
-
-	public void setPlayDeviceType(BMSPlayerInputDevice.Type playDeviceType) {
-		this.playDeviceType = playDeviceType;
+	public BMSResource getBMSResource() {
+		return bmsresource;
 	}
 }
