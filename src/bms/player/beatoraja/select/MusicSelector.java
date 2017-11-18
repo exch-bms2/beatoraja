@@ -88,8 +88,6 @@ public class MusicSelector extends MainState {
 
 	private BitmapFont titlefont;
 
-	private TextureRegion banner;
-	private Bar bannerbar;
 	/**
 	 * 楽曲バー描画用
 	 */
@@ -125,7 +123,6 @@ public class MusicSelector extends MainState {
 	public MusicSelector(MainController main, boolean songUpdated) {
 		super(main);
 		this.config = main.getPlayerResource().getPlayerConfig();
-		final Config conf = main.getPlayerResource().getConfig();
 
 		songdb = main.getSongDatabase();
 
@@ -138,7 +135,6 @@ public class MusicSelector extends MainState {
 			}
 		};
 
-		PlayerInformation rivalinfo = null;
 		try {
 			// ライバルスコアデータベース作成
 			// TODO 別のクラスに移動
@@ -155,15 +151,14 @@ public class MusicSelector extends MainState {
 							scoredb.setInformation(rival);
 							IRResponse<IRScoreData[]> scores = main.getIRConnection().getPlayData(rival.getId(), null);
 							if(scores.isSuccessed()) {
-								scoredb.setScoreData(scores.getData());								
+								scoredb.setScoreData(scores.getData());
 							} else {
-								Logger.getGlobal().warning("IRからのスコア取得失敗 : " + scores.getMessage());								
+								Logger.getGlobal().warning("IRからのスコア取得失敗 : " + scores.getMessage());
 							}
-							rivalinfo = rival;
 						} catch (ClassNotFoundException e) {
 							e.printStackTrace();
 						}
-					}					
+					}
 				} else {
 					Logger.getGlobal().warning("IRからのライバル取得失敗 : " + response.getMessage());
 				}
@@ -173,7 +168,6 @@ public class MusicSelector extends MainState {
 		}
 
 		// ライバルキャッシュ作成
-		// TODO ライバル選択機能
 		try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get("rival"))) {
 			for (Path p : paths) {
 				if(p.toString().endsWith(".db")) {
@@ -298,40 +292,16 @@ public class MusicSelector extends MainState {
 
 	public void render() {
 		final MainController main = getMainController();
-		final SpriteBatch sprite = main.getSpriteBatch();
 		final PlayerResource resource = main.getPlayerResource();
 		final Bar current = bar.getSelected();
 
 		// draw song information
-		sprite.begin();
 		if (current instanceof SongBar) {
 			resource.setSongdata(((SongBar) current).getSongData());
 		} else {
 			resource.setSongdata(null);
 		}
 
-		// banner
-		if (current != bannerbar) {
-			if (current instanceof SongBar == false) {
-				if (banner != null) {
-					banner.getTexture().dispose();
-					banner = null;
-				}
-				bannerbar = current;
-			} else {
-				if (((SongBar) current).getBanner() != null) {
-					banner = new TextureRegion(new Texture(((SongBar) current).getBanner()));
-					bannerbar = current;
-				} else {
-					if (banner != null) {
-						banner.getTexture().dispose();
-						banner = null;
-					}
-				}
-			}
-		}
-
-		sprite.end();
 		// preview music
 		if (current instanceof SongBar) {
 			final SongData song = main.getPlayerResource().getSongdata();
@@ -642,10 +612,7 @@ public class MusicSelector extends MainState {
 	public String getTextValue(int id) {
 		switch (id) {
 			case STRING_RIVAL:
-				if(rival != null) {
-					return rival.getName();
-				}
-				break;
+				return rival != null ? rival.getName() : "";
 		case STRING_TITLE:
 		case STRING_FULLTITLE:
 			if (bar.getSelected() instanceof DirectoryBar) {
@@ -855,13 +822,6 @@ public class MusicSelector extends MainState {
 		super.setSliderValue(id, value);
 	}
 
-	public TextureRegion getImage(int imageid) {
-		if (imageid == IMAGE_BANNER) {
-			return banner;
-		}
-		return super.getImage(imageid);
-	}
-
 	public boolean getBooleanValue(int id) {
 		final Bar current = bar.getSelected();
 		switch (id) {
@@ -1007,6 +967,11 @@ public class MusicSelector extends MainState {
 
 	public void selectedBarMoved() {
 		resetReplayIndex();
+		// banner
+		final Bar current = bar.getSelected();
+		getMainController().getPlayerResource().getBMSResource().setBanner(
+				current instanceof SongBar ? ((SongBar) current).getBanner() : null);
+
 		getTimer()[TIMER_SONGBAR_CHANGE] = getNowTime();
 		if(preview.getSongData() != null && (!(bar.getSelected() instanceof SongBar) ||
 				((SongBar) bar.getSelected()).getSongData().getFolder().equals(preview.getSongData().getFolder()) == false))
