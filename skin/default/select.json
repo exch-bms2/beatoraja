@@ -201,7 +201,7 @@
 		{"id":"course4", "font":0, "size":24, "ref":153},
 
 		{"id":"bartext", "font":0, "size":24}
-		{"id":"search", "font":0, "size":24, "ref":-1},
+		{"id":"search", "font":0, "size":24, "ref":30},
 	],
 	"graph":[
 		{"id":"graph-lamp", "type":-1},

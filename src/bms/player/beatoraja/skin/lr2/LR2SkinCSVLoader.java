@@ -7,11 +7,13 @@ import java.util.logging.Logger;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.SkinConfig.Offset;
 import bms.player.beatoraja.play.bga.BGAProcessor;
+import bms.player.beatoraja.select.MusicSelectSkin;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.SkinHeader.*;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 
 /**
@@ -301,7 +303,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 				}
 				text.setReferenceID(values[3]);
 				text.setAlign(values[4]);
-				int edit = values[5];
+				text.setEditable(values[5] != 0);
 				int panel = values[6];
 				skin.add(text);
 				// System.out.println("Text Added - " +
@@ -318,6 +320,12 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 							values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
 							values[12], values[13], values[14], values[15], values[16], values[17], values[18],
 							values[19], values[20], values[21]);
+					if(text.isEditable() && text.getReferenceID() == SkinProperty.STRING_SEARCHWORD && skin instanceof MusicSelectSkin) {
+						Rectangle r = new Rectangle(values[3] * dstw / srcw,
+								dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
+								values[6] * dsth / srch);
+						((MusicSelectSkin) skin).setSearchTextRegion(r);
+					}
 				}
 			}
 		});

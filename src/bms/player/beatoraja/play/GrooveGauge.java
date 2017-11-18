@@ -135,12 +135,7 @@ public class GrooveGauge {
 		if(id >= 0) {
 			if(gauge == null) {
 				Mode mode = model.getMode();
-				for(BMSPlayerRule rule : BMSPlayerRule.values()) {
-					if(rule.name().equals(mode.name())) {
-						gauge = rule.gauge;
-						break;
-					}
-				}
+				gauge = BMSPlayerRule.getBMSPlayerRule(mode).gauge;
 			}
 			if(gauge != null) {
 				return create(model, id, gauge);
