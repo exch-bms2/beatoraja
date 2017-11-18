@@ -45,10 +45,6 @@ public class NoteShuffleModifier extends PatternModifier {
 	 * 次のTimeLine増加分(SPIRAL用)
 	 */
 	private int inc;
-	/**
-	 * ノーツが存在する直前のTimeLine(H-RANDOM用)
-	 */
-	private TimeLine prev;
 
 	public NoteShuffleModifier(int type) {
 		super(type >= ALL_SCR ? 1 : 0);
@@ -63,6 +59,7 @@ public class NoteShuffleModifier extends PatternModifier {
 		int[] random = new int[0];
 		int[] ln = new int[lanes];
 		int[] lastNoteTime = new int[lanes];
+		int scratchIndex = 0;
 		Arrays.fill(ln, -1);
 		Arrays.fill(lastNoteTime, -100);
 		for (TimeLine tl : model.getAllTimeLines()) {
@@ -73,7 +70,6 @@ public class NoteShuffleModifier extends PatternModifier {
 					notes[i] = tl.getNote(i);
 					hnotes[i] = tl.getHiddenNote(i);
 				}
-				List<Integer> l;
 				int[] keys;
 				switch (type) {
 				case S_RANDOM:
@@ -122,28 +118,153 @@ public class NoteShuffleModifier extends PatternModifier {
 
 					break;
 				case ALL_SCR:
+					// スクラッチレーンが無いなら何もしない
+					if (mode.scratchKey.length == 0) {
+						break;
+					}
+
 					random = new int[mode.key];
 					for (int i = 0; i < random.length; i++) {
 						random[i] = i;
 					}
-					boolean rightside = (getModifyTarget() == SIDE_2P);
-					if (!rightside || mode.player == 2) {
-						int sckey = rightside ? mode.scratchKey[1] : mode.scratchKey[0];
-						if (ln[sckey] == -1 && notes[sckey] == null) {
-							for (int i = 0; i < mode.key / mode.player; i++) {
-								int lane = i + (rightside ? mode.key / mode.player : 0);
-								if (lane != sckey && notes[lane] != null && notes[lane] instanceof NormalNote) {
-									random[sckey] = lane;
-									random[lane] = sckey;
-									break;
+
+					/*
+					 * 連皿しきい値
+					 */
+					int scratchInterval = 40;
+
+
+					// Scratchレーンが複数ある場合は順繰りに配置されるように (24key対応)
+					if (mode.player == 1) {
+						// シングルプレー時
+						int[] sckey = mode.scratchKey;
+						boolean existsScratch = false;
+						boolean sclnisactive = false;
+						int lastScNoteTime = Integer.MIN_VALUE;
+						for (int sc : sckey) {
+							existsScratch = existsScratch || (notes[sc] != null);
+							sclnisactive = sclnisactive || (ln[sc] != -1);
+							lastScNoteTime = lastScNoteTime > lastNoteTime[sc] ? lastScNoteTime : lastNoteTime[sc];
+						}
+						// sckeyがln activeでなく、sckeyにノーツがなく、最後にスクラッチを置いてから十分時間が経っていれば
+						if (!(sclnisactive || existsScratch)
+								&& tl.getTime() - lastScNoteTime > scratchInterval) {
+							// normalnoteをリストアップしてそこからランダムに入れ替える
+							ArrayList<Integer> l = new ArrayList<Integer>(mode.key);
+							for (int i = 0; i < mode.key; i++) {
+								if (notes[i] != null && notes[i] instanceof NormalNote) {
+									l.add(i);
 								}
 							}
+							if (!l.isEmpty()) {
+								int r = (int) (Math.random() * l.size());
+								random[sckey[scratchIndex]] = l.get(r);
+								random[l.get(r)] = sckey[scratchIndex];
+								scratchIndex = ++scratchIndex == sckey.length ? 0 : scratchIndex;
+							}
+
 						}
+					} else if (mode.player == 2) {
+						if (mode == Mode.KEYBOARD_24K_DOUBLE) {
+							// TODO 24k-DPに対応
+							break;
+						}
+						// ダブルプレー時
+						// スクラッチ側の鍵盤に優先的にアサインされるようにする
+						// 連打は出来ないように sc:40ms key:110ms
+						keys = getKeys(mode, true);
+						int keyInterval = 110;
+						boolean isRightSide = ( getModifyTarget() == SIDE_2P);
+						int scLane = isRightSide ? mode.scratchKey[1] : mode.scratchKey[0];
+						ArrayList<Integer> original, assign, note, other, primary, tate;
+						original = new ArrayList<Integer>(keys.length);
+						assign = new ArrayList<Integer>(keys.length);
+						note = new ArrayList<Integer>(keys.length);
+						other = new ArrayList<Integer>(keys.length);
+						primary = new ArrayList<Integer>(keys.length);
+						tate = new ArrayList<Integer>(keys.length);
+
+						for (int lane = 0; lane < keys.length; lane++) {
+							original.add(keys[lane]);
+							if (isRightSide) {
+								assign.add(keys[keys.length - lane - 1]);
+							} else {
+								assign.add(keys[lane]);
+							}
+						}
+
+						// scLaneを先頭に
+						if (!isRightSide) {
+							assign.remove((Integer) scLane);
+							assign.add(0, scLane);
+						}
+
+						// LNがアクティブなレーンをアサインしてから除外
+						for (int lane = 0; lane < keys.length; lane++) {
+							if ( ln[keys[lane]] != -1) {
+								random[keys[lane]] = ln[keys[lane]];
+								assign.remove((Integer) keys[lane]);
+								original.remove((Integer) ln[keys[lane]]);
+							}
+						}
+
+						// 元のレーンをノーツの存在で分類
+						while (!original.isEmpty()) {
+							if (notes[original.get(0)] != null) {
+								note.add(original.get(0));
+							} else {
+								other.add(original.get(0));
+							}
+							original.remove(0);
+						}
+
+						// 未アサインレーンを縦連発生かどうかで分類
+						while (!assign.isEmpty()) {
+							if (tl.getTime() - lastNoteTime[assign.get(0)] < (assign.get(0) == scLane ? scratchInterval : keyInterval)) {
+								tate.add(assign.get(0));
+							} else {
+								primary.add(assign.get(0));
+							}
+							assign.remove(0);
+						}
+
+						// ノーツがあるレーンを縦連が発生しないレーンに配置
+						while (!(note.isEmpty() || primary.isEmpty())) {
+							random[primary.get(0)] = note.get(0);
+							primary.remove(0);
+							note.remove(0);
+						}
+
+						// noteLaneが空でなかったら
+						// lastNoteTimeが小さいレーンから順番に置いていく
+						while (!note.isEmpty()) {
+							int min = Integer.MAX_VALUE;
+							int minLane = tate.get(0);
+							for (int i = 0; i < tate.size(); i++) {
+								if (min > lastNoteTime[tate.get(i)]) {
+									min = lastNoteTime[tate.get(i)];
+									minLane = tate.get(i);
+								}
+							}
+							random[minLane] = note.get(0);
+							tate.remove((Integer) minLane);
+							note.remove(0);
+						}
+
+						primary.addAll(tate);
+						// 残りを置いていく
+						while (!other.isEmpty()) {
+							random[primary.get(0)] = other.get(0);
+							primary.remove(0);
+							other.remove(0);
+						}
+
 					}
 					break;
+
 				case H_RANDOM:
 					keys = getKeys(mode, false);
-					random = keys.length > 0 ?timeBasedShuffle(keys, ln,
+					random = keys.length > 0 ? timeBasedShuffle(keys, ln,
 							notes, lastNoteTime, tl.getTime(), 110)
 							: keys;
 					break;
@@ -239,7 +360,7 @@ public class NoteShuffleModifier extends PatternModifier {
 
 		// ノーツがあるレーンを縦連が発生しないレーンに配置
 		while (!(noteLane.isEmpty() || primaryLane.isEmpty())) {
-			int r = (int)(Math.random() * primaryLane.size());
+			int r = (int) (Math.random() * primaryLane.size());
 			result[primaryLane.get(r)] = noteLane.get(0);
 			primaryLane.remove(r);
 			noteLane.remove(0);
@@ -250,32 +371,31 @@ public class NoteShuffleModifier extends PatternModifier {
 		while (!noteLane.isEmpty()) {
 			int min = Integer.MAX_VALUE;
 			int r = rendaLane.get(0);
-			for ( int i = 0; i < rendaLane.size(); i++) {
+			for (int i = 0; i < rendaLane.size(); i++) {
 				if (min > lastNoteTime[rendaLane.get(i)]) {
 					min = lastNoteTime[rendaLane.get(i)];
 				}
 			}
 			ArrayList<Integer> minLane = new ArrayList<Integer>(rendaLane.size());
-			for ( int i = 0; i < rendaLane.size(); i++) {
-				if ( min == lastNoteTime[rendaLane.get(i)]) {
+			for (int i = 0; i < rendaLane.size(); i++) {
+				if (min == lastNoteTime[rendaLane.get(i)]) {
 					minLane.add(rendaLane.get(i));
 				}
 			}
-			r = (int)(Math.random() * minLane.size());
+			r = (int) (Math.random() * minLane.size());
 			result[minLane.get(r)] = noteLane.get(0);
-			rendaLane.remove((Integer)minLane.get(r));
+			rendaLane.remove((Integer) minLane.get(r));
 			noteLane.remove(0);
 		}
 
 		primaryLane.addAll(rendaLane);
 		// 残りをランダムに置いていく
 		while (!otherLane.isEmpty()) {
-			int r = (int)(Math.random() * primaryLane.size());
+			int r = (int) (Math.random() * primaryLane.size());
 			result[primaryLane.get(r)] = otherLane.get(0);
 			primaryLane.remove(r);
 			otherLane.remove(0);
 		}
-
 
 		return result;
 	}
