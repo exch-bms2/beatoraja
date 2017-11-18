@@ -134,6 +134,12 @@ public class PlayerConfig {
 	private String userid = "";
 
 	private String password = "";
+	
+	private int irsend = 0;;
+	
+	public static final int IR_SEND_ALWAYS = 0;
+	public static final int IR_SEND_COMPLETE_SONG = 1;
+	public static final int IR_SEND_UPDATE_SCORE = 2;
 
 	public PlayerConfig() {
 	}
@@ -404,6 +410,14 @@ public class PlayerConfig {
 
 	public void setIrname(String irname) {
 		this.irname = irname;
+	}
+
+	public int getIrsend() {
+		return irsend;
+	}
+
+	public void setIrsend(int irsend) {
+		this.irsend = irsend;
 	}
 
 	public int getTarget() {

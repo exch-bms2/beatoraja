@@ -14,9 +14,11 @@ import bms.model.BMSModel;
 import bms.model.LongNote;
 import bms.model.Note;
 import bms.model.TimeLine;
+import bms.player.beatoraja.Config;
 import bms.player.beatoraja.IRScoreData;
 import bms.player.beatoraja.MainController;
 import bms.player.beatoraja.MainState;
+import bms.player.beatoraja.PlayerConfig;
 import bms.player.beatoraja.PlayerResource;
 import bms.player.beatoraja.ReplayData;
 import bms.player.beatoraja.ir.IRConnection;
@@ -376,37 +378,56 @@ public class MusicResult extends MainState {
 			// TODO スコアハッシュがあり、有効期限が切れていないものを送信する？
 			IRConnection ir = getMainController().getIRConnection();
 			if (ir != null) {
-				state = STATE_IR_PROCESSING;
-				final IRScoreData oldscore = score;
-				Thread irprocess = new Thread() {
+				boolean send = true;
+				switch(getMainController().getPlayerConfig().getIrsend()) {
+				case PlayerConfig.IR_SEND_ALWAYS:
+					break;
+				case PlayerConfig.IR_SEND_COMPLETE_SONG:
+					FloatArray gauge = resource.getGauge();
+					send = gauge.get(gauge.size - 1) > 0.0;
+					break;
+				case PlayerConfig.IR_SEND_UPDATE_SCORE:
+					IRScoreData current = resource.getScoreData();
+					send = (current.getExscore() > oldexscore || current.getClear() > oldclear
+							|| current.getCombo() > oldcombo || current.getMinbp() < oldmisscount);
+					break;
+				}
+				
+				if(send) {
+					Logger.getGlobal().info("IRへスコア送信中");
+					state = STATE_IR_PROCESSING;
+					final IRScoreData oldscore = score;
+					Thread irprocess = new Thread() {
 
-					@Override
-					public void run() {
-						ir.sendPlayData(resource.getBMSModel(), resource.getScoreData());
-						IRResponse<IRScoreData[]> response = ir.getPlayData(null, resource.getBMSModel());
-						if(response.isSuccessed()) {
-							IRScoreData[] scores = response.getData();
-							irtotal = scores.length;
+						@Override
+						public void run() {
+							ir.sendPlayData(resource.getBMSModel(), resource.getScoreData());
+							IRResponse<IRScoreData[]> response = ir.getPlayData(null, resource.getBMSModel());
+							if(response.isSuccessed()) {
+								IRScoreData[] scores = response.getData();
+								irtotal = scores.length;
 
-							for(int i = 0;i < scores.length;i++) {
-								if(irrank == 0 && scores[i].getExscore() <= resource.getScoreData().getExscore() ) {
-									irrank = i + 1;
-								}
-								if(irprevrank == 0 && scores[i].getExscore() <= oldscore.getExscore() ) {
-									irprevrank = i + 1;
-									if(irrank == 0) {
-										irrank = irprevrank;
+								for(int i = 0;i < scores.length;i++) {
+									if(irrank == 0 && scores[i].getExscore() <= resource.getScoreData().getExscore() ) {
+										irrank = i + 1;
+									}
+									if(irprevrank == 0 && scores[i].getExscore() <= oldscore.getExscore() ) {
+										irprevrank = i + 1;
+										if(irrank == 0) {
+											irrank = irprevrank;
+										}
 									}
 								}
-							}							
-						} else {
-							Logger.getGlobal().warning("IRからのスコア取得失敗 : " + response.getMessage());
-						}
+								Logger.getGlobal().info("IRへスコア送信完了");
+							} else {
+								Logger.getGlobal().warning("IRからのスコア取得失敗 : " + response.getMessage());
+							}
 
-						state = STATE_IR_FINISHED;
-					}
-				};
-				irprocess.start();
+							state = STATE_IR_FINISHED;
+						}
+					};
+					irprocess.start();					
+				}
 			}
 		}
 
