@@ -1108,6 +1108,11 @@ public class JSONSkinLoader extends SkinLoader{
 
 	private static void setSerializers(Json json, HashSet<Integer> enabledOptions, Path path) {
 		Class[] classes = {
+				Property.class,
+				Filepath.class,
+				Offset.class,
+				Source.class,
+				Font.class,
 				Image.class,
 				ImageSet.class,
 				Value.class,
@@ -1121,12 +1126,19 @@ public class JSONSkinLoader extends SkinLoader{
 				BGA.class,
 				Judge.class,
 				SongList.class,
+				Destination.class,
+				Animation.class,
 		};
 		for (Class c : classes) {
 			json.setSerializer(c, new ObjectSerializer<>(enabledOptions, path));
 		}
 
 		Class[] array_classes = {
+				Property[].class,
+				Filepath[].class,
+				Offset[].class,
+				Source[].class,
+				Font[].class,
 				Image[].class,
 				ImageSet[].class,
 				Value[].class,
@@ -1136,7 +1148,6 @@ public class JSONSkinLoader extends SkinLoader{
 				GaugeGraph[].class,
 				JudgeGraph[].class,
 				Judge[].class,
-
 				Destination[].class,
 				Animation[].class,
 		};
