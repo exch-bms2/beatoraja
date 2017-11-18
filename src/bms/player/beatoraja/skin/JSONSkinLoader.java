@@ -1202,47 +1202,42 @@ public class JSONSkinLoader extends SkinLoader{
 		}
 
 		public T read(Json json, JsonValue jsonValue, Class cls) {
-			T instance = null;
-			try {
-				instance = (T)ClassReflection.newInstance(cls);
-			} catch (ReflectionException e) {
-				e.printStackTrace();
-				return null;
-			}
-			try {
+			if (jsonValue.isArray()) {
+				// conditional branch
+				// take first clause satisfying its conditions
 				JsonValue val = null;
-				if (jsonValue.isArray()) {
-					// conditional branch
-					// take first clause satisfying its conditions
-					for (int i = 0; i < jsonValue.size; i++) {
-						JsonValue branch = jsonValue.get(i);
-						// if "value" is not given, regard whole "branch" as data without conditions
-						if (!branch.has("value")) {
-							val = branch;
-							break;
-						}
-						if (testOption(branch.get("if"))) {
-							val = branch.get("value");
-							break;
-						}
-					}
-				} else {
-					// no branch
-					val = jsonValue;
-				}
-				Field[] fields = ClassReflection.getFields(cls);
-				for (JsonValue child = val.child; child != null; child = child.next) {
-					for (Field field : fields) {
-						if (field.getName().equals(child.name)) {
-							field.set(instance, json.readValue(field.getType(), child));
-							break;
-						}
+				for (int i = 0; i < jsonValue.size; i++) {
+					JsonValue branch = jsonValue.get(i);
+					if (testOption(branch.get("if"))) {
+						val = branch.get("value");
+						break;
 					}
 				}
-			} catch (ReflectionException e) {
-			} catch (NullPointerException e) {
+				return (T)json.readValue(cls, val);
+			} else {
+				// literal
+				T instance = null;
+				try {
+					instance = (T)ClassReflection.newInstance(cls);
+				} catch (ReflectionException e) {
+					e.printStackTrace();
+					return null;
+				}
+				try {
+					Field[] fields = ClassReflection.getFields(cls);
+					for (JsonValue child = jsonValue.child; child != null; child = child.next) {
+						for (Field field : fields) {
+							if (field.getName().equals(child.name)) {
+								field.set(instance, json.readValue(field.getType(), child));
+								break;
+							}
+						}
+					}
+				} catch (ReflectionException e) {
+				} catch (NullPointerException e) {
+				}
+				return instance;
 			}
-			return instance;
 		}
 	}
 
@@ -1258,13 +1253,12 @@ public class JSONSkinLoader extends SkinLoader{
 			try {
 				for (int i = 0; i < jsonValue.size; i++) {
 					JsonValue item = jsonValue.get(i);
-					JsonValue op = item.get("if");
-					JsonValue value = item.get("value");
-					JsonValue values = item.get("values");
-					if (op != null && (value != null || values != null)) {
+					if (item.isObject() && item.has("if") && (item.has("value") || item.has("values"))) {
 						// conditional item(s)
 						// add item(s) to array if conditions are satisfied
-						if (testOption(op)) {
+						JsonValue value = item.get("value");
+						JsonValue values = item.get("values");
+						if (testOption(item.get("if"))) {
 							if (value != null) {
 								T obj = (T)json.readValue(componentClass, value);
 								items.add(obj);
