@@ -41,6 +41,7 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFont
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.*;
 import com.badlogic.gdx.utils.JsonWriter.OutputType;
+import com.badlogic.gdx.utils.StringBuilder;
 
 /**
  * アプリケーションのルートクラス
@@ -49,7 +50,9 @@ import com.badlogic.gdx.utils.JsonWriter.OutputType;
  */
 public class MainController extends ApplicationAdapter {
 
-	public static final String VERSION = "beatoraja 0.5";
+	public static final String VERSION = "beatoraja 0.5.2";
+	
+	private static final boolean debug = false;
 
 	/**
 	 *
@@ -107,9 +110,9 @@ public class MainController extends ApplicationAdapter {
 	private ScreenShotThread screenshot;
 
 	public static final int timerCount = SkinProperty.TIMER_MAX + 1;
-	private long[] timer = new long[timerCount];
+	private final long[] timer = new long[timerCount];
 	public static final int offsetCount = SkinProperty.OFFSET_MAX + 1;
-	private SkinOffset[] offset = new SkinOffset[offsetCount];
+	private final SkinOffset[] offset = new SkinOffset[offsetCount];
 
 	public MainController(Path f, Config config, int auto, boolean songUpdated) {
 		this.auto = auto;
@@ -328,6 +331,8 @@ public class MainController extends ApplicationAdapter {
 	
 	private long prevtime;
 
+	private final StringBuilder message = new StringBuilder();
+	
 	@Override
 	public void render() {
 //		input.poll();
@@ -349,8 +354,24 @@ public class MainController extends ApplicationAdapter {
 		if (showfps) {
 			sprite.begin();
 			systemfont.setColor(Color.PURPLE);
-			systemfont.draw(sprite, String.format("FPS %d", Gdx.graphics.getFramesPerSecond()), 10,
+			message.setLength(0);
+			systemfont.draw(sprite, message.append("FPS ").append(Gdx.graphics.getFramesPerSecond()), 10,
 					config.getResolution().height - 2);
+			if(debug) {
+				message.setLength(0);
+				systemfont.draw(sprite, message.append("Skin Pixmap Images ").append(SkinLoader.getResource().size()), 10,
+						config.getResolution().height - 26);
+				message.setLength(0);
+				systemfont.draw(sprite, message.append("Total Memory Used(MB) ").append(Runtime.getRuntime().totalMemory() / (1024 * 1024)), 10,
+						config.getResolution().height - 50);
+				message.setLength(0);
+				systemfont.draw(sprite, message.append("Total Free Memory(MB) ").append(Runtime.getRuntime().freeMemory() / (1024 * 1024)), 10,
+						config.getResolution().height - 74);
+				message.setLength(0);
+				systemfont.draw(sprite, message.append("Max Sprite In Batch ").append(sprite.maxSpritesInBatch), 10,
+						config.getResolution().height - 98);
+			}
+			
 			sprite.end();
 		}
 		// show screenshot status

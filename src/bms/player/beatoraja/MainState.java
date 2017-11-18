@@ -565,9 +565,11 @@ public abstract class MainState {
 	public TextureRegion getImage(int imageid) {
 		switch(imageid) {
 		case IMAGE_BACKBMP:
-			return getMainController().getPlayerResource().getBackbmpData();
+			return getMainController().getPlayerResource().getBMSResource().getBackbmp();
 		case IMAGE_STAGEFILE:
-			return getMainController().getPlayerResource().getStagefileData();
+			return getMainController().getPlayerResource().getBMSResource().getStagefile();
+			case IMAGE_BANNER:
+				return getMainController().getPlayerResource().getBMSResource().getBanner();
 		case IMAGE_BLACK:
 			return black;
 		case IMAGE_WHITE:

@@ -7,6 +7,10 @@ import java.util.logging.Logger;
 import bms.model.BMSModel;
 import bms.player.beatoraja.audio.AudioDriver;
 import bms.player.beatoraja.play.bga.BGAProcessor;
+import bms.player.beatoraja.select.bar.SongBar;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 /**
  * BMSの音源、BGAリソースを管理するクラス
@@ -39,6 +43,21 @@ public class BMSResource {
 	 * BGA読み込みタスク
 	 */
 	private ArrayDeque<BGALoaderThread> bgaloaders = new ArrayDeque<BGALoaderThread>();
+	/**
+	 * backbmp
+	 */
+	private TextureRegion backbmp;
+	/**
+	 * stagefile
+	 */
+	private TextureRegion stagefile;
+
+	/**
+	 * stagefile
+	 */
+	private TextureRegion banner;
+
+	private Pixmap bannerPix;
 
 	public BMSResource(AudioDriver audio, Config config, PlayerConfig player) {
 		this.audio = audio;
@@ -47,6 +66,35 @@ public class BMSResource {
 	
 	public boolean setBMSFile(BMSModel model, final Path f, final Config config, int auto) {
 		String bmspath = this.model != null ? this.model.getPath() : null;
+
+		if(stagefile != null) {
+			stagefile.getTexture().dispose();
+			stagefile = null;
+		}
+		try {
+			Pixmap pix = PixmapResourcePool.loadPicture(f.getParent().resolve(model.getStagefile()).toString());
+			if(pix != null) {
+				stagefile = new TextureRegion(new Texture(pix));
+				pix.dispose();
+			}
+		} catch(Throwable e) {
+			Logger.getGlobal().warning(e.getMessage());
+		}
+
+		if(backbmp != null) {
+			backbmp.getTexture().dispose();
+			backbmp = null;
+		}
+		try {
+			Pixmap pix = PixmapResourcePool.loadPicture(f.getParent().resolve(model.getBackbmp()).toString());
+			if(pix != null) {
+				backbmp = new TextureRegion(new Texture(pix));
+				pix.dispose();
+			}
+		} catch(Throwable e) {
+			Logger.getGlobal().warning(e.getMessage());
+		}
+
 		this.model = model;
 		while(!audioloaders.isEmpty() && !audioloaders.getFirst().isAlive()) {
 			audioloaders.removeFirst();
@@ -97,7 +145,35 @@ public class BMSResource {
 		}
 		return true;
 	}
-	
+
+	public TextureRegion getBackbmp() {
+		return backbmp;
+	}
+
+	public TextureRegion getStagefile() {
+		return stagefile;
+	}
+
+	public TextureRegion getBanner() {
+		return banner;
+	}
+
+	public void setBanner(Pixmap pixmap) {
+		final TextureRegion oldbanner = banner;
+		if (pixmap != null) {
+			if(bannerPix != pixmap) {
+				banner = new TextureRegion(new Texture(pixmap));
+				bannerPix = pixmap;
+			}
+		} else {
+			banner = null;
+			bannerPix = null;
+		}
+		if (oldbanner != banner && oldbanner != null) {
+			oldbanner.getTexture().dispose();
+		}
+	}
+
 	public void dispose() {
 		if (audio != null) {
 			audio.dispose();
@@ -106,6 +182,14 @@ public class BMSResource {
 		if (bga != null) {
 			bga.dispose();
 			bga = null;
+		}
+		if(stagefile != null) {
+			stagefile.getTexture().dispose();
+			stagefile = null;
+		}
+		if(backbmp != null) {
+			backbmp.getTexture().dispose();
+			backbmp = null;
 		}
 	}
 
