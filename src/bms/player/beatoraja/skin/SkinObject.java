@@ -369,7 +369,9 @@ public abstract class SkinObject implements Disposable {
 		}
 		sprite.setColor(color);
 		sprite.setBlend(dstblend);
-		sprite.setType(dstfilter != 0 && imageType == SkinObjectRenderer.TYPE_NORMAL ? SkinObjectRenderer.TYPE_BILINEAR : imageType);
+		sprite.setType(width == image.getRegionWidth() && height == image.getRegionHeight() ?
+				SkinObjectRenderer.TYPE_NORMAL:
+			dstfilter != 0 && imageType == SkinObjectRenderer.TYPE_NORMAL ? SkinObjectRenderer.TYPE_BILINEAR : imageType);
 		
 		if (angle != 0) {
 			sprite.draw(image, x, y, width, height, centerx , centery, angle);
