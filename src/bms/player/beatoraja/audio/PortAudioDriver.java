@@ -191,9 +191,9 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> {
 					inputs[i].pcm = pcm;
 					inputs[i].sample = pcm.getSample();
 					inputs[i].volume = volume;
-					inputs[i].pos = 0;
 					inputs[i].loop = loop;
 					inputs[i].id = idcount++;
+					inputs[i].pos = 0;
 					return inputs[i].id;
 				}
 			}
@@ -220,18 +220,22 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> {
 		public void run() {
 			while(!stop) {
 				try {
-					for (int i = 0; i < buffer.length; i++) {
-						float wav = 0;
+					for (int i = 0; i < buffer.length; i+=2) {
+						float wav_l = 0;
+						float wav_r = 0;
 						for (MixerInput input : inputs) {
 							if (input.pos != -1) {
-								wav += ((float) input.sample[input.pos]) * input.volume / Short.MAX_VALUE;
+								wav_l += ((float) input.sample[input.pos]) * input.volume / Short.MAX_VALUE;
+								input.pos++;
+								wav_r += ((float) input.sample[input.pos]) * input.volume / Short.MAX_VALUE;
 								input.pos++;
 								if (input.pos == input.sample.length) {
 									input.pos = input.loop ? 0 : -1;
 								}
 							}
 						}
-						buffer[i] = wav;
+						buffer[i] = wav_l;
+						buffer[i+1] = wav_r;
 					}
 					
 					stream.write( buffer, buffer.length / 2);					
