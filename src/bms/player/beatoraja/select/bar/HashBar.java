@@ -21,7 +21,7 @@ public class HashBar extends DirectoryBar {
     public HashBar(MusicSelector selector, String title, SongData[] elements) {
         this.selector = selector;
         this.title = title;
-        this.elements = elements;
+        setElements(elements);;
     }
 
     @Override
