@@ -151,6 +151,10 @@ public class MusicResult extends MainState {
 				&& ((MusicResultSkin) getSkin()).getRankTime() == 0) {
 			getTimer()[TIMER_RESULT_UPDATESCORE] = time;
 		}
+	    if(getTimer()[TIMER_STARTINPUT] == Long.MIN_VALUE && time > getSkin().getInput()){
+	    		getTimer()[TIMER_STARTINPUT] =  time;
+	    }
+
 		final MainController main = getMainController();
 
 		final PlayerResource resource = getMainController().getPlayerResource();
@@ -226,7 +230,7 @@ public class MusicResult extends MainState {
 		final MainController main = getMainController();
 		final PlayerResource resource = getMainController().getPlayerResource();
 
-		if (getTimer()[TIMER_FADEOUT] != Long.MIN_VALUE) {
+		if (getTimer()[TIMER_FADEOUT] != Long.MIN_VALUE || getTimer()[TIMER_STARTINPUT] == Long.MIN_VALUE) {
 
 		} else {
 			if (time > getSkin().getInput()) {

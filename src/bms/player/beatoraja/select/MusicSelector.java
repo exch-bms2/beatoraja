@@ -294,7 +294,9 @@ public class MusicSelector extends MainState {
 		final MainController main = getMainController();
 		final PlayerResource resource = main.getPlayerResource();
 		final Bar current = bar.getSelected();
-
+        if(getTimer()[TIMER_STARTINPUT] == Long.MIN_VALUE && getNowTime() > getSkin().getInput()){
+        	getTimer()[TIMER_STARTINPUT] =  getNowTime();
+        }
 		// draw song information
 		if (current instanceof SongBar) {
 			resource.setSongdata(((SongBar) current).getSongData());
