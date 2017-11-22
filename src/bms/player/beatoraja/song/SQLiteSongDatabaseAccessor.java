@@ -37,6 +37,9 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 	private final ResultSetHandler<List<FolderData>> folderhandler = new BeanListHandler<FolderData>(FolderData.class);
 
 	private final QueryRunner qr;
+	
+	private static final SongData[] EMPTYSONG = new SongData[0];
+	private static final FolderData[] EMPTYFOLDER = new FolderData[0];
 
 	public SQLiteSongDatabaseAccessor(String filepath, String[] bmsroot) throws ClassNotFoundException {
 		Class.forName("org.sqlite.JDBC");
@@ -103,42 +106,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 		} catch (Exception e) {
 			Logger.getGlobal().severe("song.db更新時の例外:" + e.getMessage());
 		}
-		return new SongData[0];
-	}
-
-	/**
-	 * 楽曲を取得する
-	 * 
-	 * @param values
-	 *            検索条件とする<属性, 属性値>のマップ
-	 * @param lr2path
-	 *            LR2ルートパス
-	 * @return 検索結果
-	 */
-	public SongData[] getSongDatas(Map<String, String> values, String lr2path) {
-		SongData[] result = new SongData[0];
-		try {
-			String str = "";
-			for (String key : values.keySet()) {
-				String value = values.get(key);
-				if (value != null && value.length() > 0) {
-					str += (str.length() > 0 ? "," : "") + key + " = '" + value + "'";
-				}
-			}
-			List<SongData> m = qr.query("SELECT * FROM song WHERE " + str,
-					new BeanListHandler<SongData>(SongData.class));
-
-			for (SongData song : m) {
-				if (!song.getPath().startsWith("/") && !song.getPath().contains(":\\")) {
-					song.setPath(lr2path + "\\" + song.getPath());
-				}
-			}
-			result = m.toArray(new SongData[0]);
-		} catch (Exception e) {
-			Logger.getGlobal().severe("song.db更新時の例外:" + e.getMessage());
-		}
-
-		return result;
+		return EMPTYSONG;
 	}
 
 	/**
@@ -173,7 +141,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 			Logger.getGlobal().severe("song.db更新時の例外:" + e.getMessage());
 		}
 
-		return new SongData[0];
+		return EMPTYSONG;
 	}
 
 	public SongData[] getSongDatas(String sql, String score, String scorelog, String info) {
@@ -189,7 +157,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 						+ "ON song.sha256 = information.sha256 WHERE " + sql;
 				ResultSet rs = stmt.executeQuery(s);
 				m = songhandler.handle(rs);
-				System.out.println(s + " -> result : " + m.size());
+//				System.out.println(s + " -> result : " + m.size());
 				stmt.execute("DETACH DATABASE infodb");
 			} else {
 				String s = "SELECT DISTINCT song.sha256 AS sha256, title, subtitle, genre, artist, subartist,path,folder,stagefile,banner,backbmp,parent,level,difficulty,"
@@ -205,31 +173,23 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 			e.printStackTrace();			
 		}
 
-		return new SongData[0];
+		return EMPTYSONG;
 
 	}
 
-	public SongData[] getSongDatasByText(String text, String lr2path) {
-		SongData[] result = new SongData[0];
+	public SongData[] getSongDatasByText(String text) {
 		try {
 			List<SongData> m = qr.query(
 					"SELECT * FROM song WHERE rtrim(title||' '||subtitle||' '||artist||' '||subartist||' '||genre) LIKE ?"
-							+ " GROUP BY sha256",
-					new BeanListHandler<SongData>(SongData.class), "%" + text.replaceAll("'", "''") + "%");
-
-			for (SongData song : m) {
-				if (!song.getPath().startsWith("/") && !song.getPath().contains(":\\")) {
-					song.setPath(lr2path + "\\" + song.getPath());
-				}
-			}
-			result = m.toArray(new SongData[0]);
+							+ " GROUP BY sha256",songhandler, "%" + text.replaceAll("'", "''") + "%");
+			return m.toArray(new SongData[m.size()]);
 		} catch (Exception e) {
 			Logger.getGlobal().severe("song.db更新時の例外:" + e.getMessage());
 		}
 
-		return result;
+		return EMPTYSONG;
 	}
-
+	
 	/**
 	 * 楽曲を取得する
 	 * 
@@ -247,42 +207,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 			Logger.getGlobal().severe("song.db更新時の例外:" + e.getMessage());
 		}
 
-		return new FolderData[0];
-	}
-
-	/**
-	 * 楽曲を取得する
-	 * 
-	 * @param values
-	 *            検索条件とする<属性, 属性値>のマップ
-	 * @param lr2path
-	 *            LR2ルートパス
-	 * @return 検索結果
-	 */
-	public FolderData[] getFolderDatas(Map<String, String> values, String lr2path) {
-		FolderData[] result = new FolderData[0];
-		try {
-			String str = "";
-			for (String key : values.keySet()) {
-				String value = values.get(key);
-				if (value != null && value.length() > 0) {
-					str += (str.length() > 0 ? "," : "") + key + " = '" + value + "'";
-				}
-			}
-			List<FolderData> m = qr.query("SELECT * FROM folder WHERE " + str,
-					new BeanListHandler<FolderData>(FolderData.class));
-
-			for (FolderData song : m) {
-				if (!song.getPath().startsWith("/") && !song.getPath().contains(":\\")) {
-					song.setPath(lr2path + "\\" + song.getPath());
-				}
-			}
-			result = m.toArray(new FolderData[0]);
-		} catch (Exception e) {
-			Logger.getGlobal().severe("song.db更新時の例外:" + e.getMessage());
-		}
-
-		return result;
+		return EMPTYFOLDER;
 	}
 
 	/**
