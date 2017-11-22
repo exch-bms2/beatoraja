@@ -1,13 +1,15 @@
 package bms.player.beatoraja.select.bar;
 
 /**
- * Created by exch on 2017/09/02.
+ * ディレクトリの抽象バー。
+ * 
+ * @author exch
  */
 public abstract class DirectoryBar extends Bar {
 
     private int[] lamps = new int[11];
     private int[] rlamps = new int[11];
-    private int[] ranks = new int[0];
+    private int[] ranks = new int[28];
 
     public int[] getLamps() {
         return lamps;
@@ -35,6 +37,10 @@ public abstract class DirectoryBar extends Bar {
         return 0;
     }
 
+    /**
+     * ディレクトリ内のバーを返す
+     * 
+     * @return ディレクトリ内のバー
+     */
     public abstract Bar[] getChildren();
-
 }

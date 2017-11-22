@@ -125,6 +125,10 @@ public class CourseResult extends MainState {
 			getTimer()[TIMER_RESULT_UPDATESCORE] = time;
 		}
 
+        if(getTimer()[TIMER_STARTINPUT] == Long.MIN_VALUE && time > getSkin().getInput()){
+        	getTimer()[TIMER_STARTINPUT] =  time;
+        }
+
 		final MainController main = getMainController();
 
 		if (getTimer()[TIMER_FADEOUT] != Long.MIN_VALUE) {
@@ -150,7 +154,7 @@ public class CourseResult extends MainState {
         final MainController main = getMainController();
         final PlayerResource resource = getMainController().getPlayerResource();
 
-        if (getTimer()[TIMER_FADEOUT] == Long.MIN_VALUE && time > getSkin().getInput()) {
+        if (getTimer()[TIMER_FADEOUT] == Long.MIN_VALUE && getTimer()[TIMER_STARTINPUT] != Long.MIN_VALUE) {
             boolean[] keystate = main.getInputProcessor().getKeystate();
             long[] keytime = main.getInputProcessor().getTime();
             if (resource.getScoreData() == null

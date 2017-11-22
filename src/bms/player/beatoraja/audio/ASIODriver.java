@@ -200,9 +200,9 @@ public class ASIODriver extends AbstractAudioDriver<PCM> implements AsioDriverLi
 					inputs[i].pcm = pcm;
 					inputs[i].sample = pcm.getSample();
 					inputs[i].volume = volume;
-					inputs[i].pos = 0;
 					inputs[i].loop = loop;
 					inputs[i].id = idcount++;
+					inputs[i].pos = 0;
 					return inputs[i].id;
 				}
 			}
@@ -231,19 +231,21 @@ public class ASIODriver extends AbstractAudioDriver<PCM> implements AsioDriverLi
 			final int channel = buffer.length;
 
 			for (int i = 0; i < size; i++) {
-				for (int j = 0; j < channel; j++) {
-					float wav = 0;
-					for (MixerInput input : inputs) {
-						if (input.pos != -1) {
-							wav += ((float) input.sample[input.pos]) * input.volume / Short.MAX_VALUE;
-							input.pos++;
-							if (input.pos == input.sample.length) {
-								input.pos = input.loop ? 0 : -1;
-							}
+				float wav_l = 0;
+				float wav_r = 0;
+				for (MixerInput input : inputs) {
+					if (input.pos != -1) {
+						wav_l += ((float) input.sample[input.pos]) * input.volume / Short.MAX_VALUE;
+						input.pos++;
+						wav_r += ((float) input.sample[input.pos]) * input.volume / Short.MAX_VALUE;
+						input.pos++;
+						if (input.pos == input.sample.length) {
+							input.pos = input.loop ? 0 : -1;
 						}
 					}
-					buffer[j][i] = wav;
 				}
+				buffer[0][i] = wav_l;
+				buffer[1][i] = wav_r;
 			}
 		}
 	}
