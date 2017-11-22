@@ -360,6 +360,10 @@ public class BMSPlayer extends MainState {
 		final long now = getNowTime();
 		final long micronow = getNowMicroTime();
         final long[] timer = getTimer();
+
+        if(timer[TIMER_STARTINPUT] == Long.MIN_VALUE && now >skin.getInput()){
+            timer[TIMER_STARTINPUT] = now;
+        }
 		switch (state) {
 		// 楽曲ロード
 		case STATE_PRELOAD:
