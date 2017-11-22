@@ -102,12 +102,12 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 	
 	
 	@Override
-	protected void play(Sound id, float volume) {
+	protected void play(Sound pcm, int channel, float volume) {
 		if(soundthread) {
-			mixer.put(id, volume);
+			mixer.put(pcm, channel, volume);
 		} else {
 			synchronized (lock) {
-				id.play(volume);
+				pcm.play(volume);
 			}
 		}
 	}
@@ -132,6 +132,10 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 	}
 
 	@Override
+	protected void stop(int channel) {
+	}
+
+	@Override
 	protected void disposeKeySound(Sound pcm) {
 		pcm.dispose();
 	}
@@ -143,7 +147,7 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 		private int cpos;
 		private int pos;
 
-		public synchronized void put(Sound sound, float volume) {
+		public synchronized void put(Sound sound, int channel, float volume) {
 			this.sound[cpos] = sound;
 			this.volume[cpos] = volume;
 			cpos = (cpos + 1) % this.sound.length;
