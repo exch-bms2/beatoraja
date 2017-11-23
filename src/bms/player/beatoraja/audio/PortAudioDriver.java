@@ -124,12 +124,12 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> {
 
 	@Override
 	protected synchronized void play(PCM pcm, int channel, float volume, float pitch) {
-		mixer.put(pcm, channel, volume, false);
+		mixer.put(pcm, channel, volume, pitch, false);
 	}
 
 	@Override
 	protected void play(AudioElement<PCM> id, float volume, boolean loop) {
-		id.id = mixer.put(id.audio, -1, volume, loop);
+		id.id = mixer.put(id.audio, -1, volume, 1.0f, loop);
 	}
 
 	@Override
@@ -190,12 +190,13 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> {
 			}
 		}
 
-		public long put(PCM pcm, int channel, float volume, boolean loop) {
+		public long put(PCM pcm, int channel, float volume, float pitch, boolean loop) {
 			for (int i = 0; i < inputs.length; i++) {
 				if (inputs[i].pos == -1) {
 					inputs[i].pcm = pcm;
 					inputs[i].sample = pcm.getSample();
 					inputs[i].volume = volume;
+					inputs[i].pitch = pitch;
 					inputs[i].loop = loop;
 					inputs[i].id = idcount++;
 					inputs[i].channel = channel;
@@ -240,10 +241,14 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> {
 						for (MixerInput input : inputs) {
 							if (input.pos != -1) {
 								wav_l += ((float) input.sample[input.pos]) * input.volume / Short.MAX_VALUE;
-								input.pos++;
-								wav_r += ((float) input.sample[input.pos]) * input.volume / Short.MAX_VALUE;
-								input.pos++;
-								if (input.pos == input.sample.length) {
+								wav_r += ((float) input.sample[input.pos+1]) * input.volume / Short.MAX_VALUE;
+								input.posf += input.pitch;
+								int inc = (int)input.posf;
+								if (inc > 0) {
+									input.pos += 2 * inc;
+									input.posf -= (float)inc;
+								}
+								if (input.pos >= input.sample.length) {
 									input.pos = input.loop ? 0 : -1;
 								}
 							}
@@ -264,7 +269,9 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> {
 		public PCM pcm;
 		public short[] sample = new short[0];
 		public float volume;
+		public float pitch;
 		public int pos = -1;
+		public float posf = 0.0f;
 		public boolean loop;
 		public long id;
 		public int channel = -1;
