@@ -123,7 +123,7 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> {
 	}
 
 	@Override
-	protected synchronized void play(PCM pcm, int channel, float volume) {
+	protected synchronized void play(PCM pcm, int channel, float volume, float pitch) {
 		mixer.put(pcm, channel, volume, false);
 	}
 

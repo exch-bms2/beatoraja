@@ -103,7 +103,7 @@ public class ASIODriver extends AbstractAudioDriver<PCM> implements AsioDriverLi
 	}
 
 	@Override
-	protected synchronized void play(PCM pcm, int channel, float volume) {
+	protected synchronized void play(PCM pcm, int channel, float volume, float pitch) {
 		mixer.put(pcm, channel, volume, false);
 	}
 

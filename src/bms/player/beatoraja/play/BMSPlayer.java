@@ -706,8 +706,9 @@ public class BMSPlayer extends MainState {
 		Logger.getGlobal().info("システム描画のリソース解放");
 	}
 
-	public void play(Note note, float volume) {
-		getMainController().getAudioProcessor().play(note, volume);
+	public void play(Note note, float volume, int pitchShift) {
+		float pitch = pitchShift != 0 ? (float)Math.pow(2.0, pitchShift / 12.0) : 1.0f;
+		getMainController().getAudioProcessor().play(note, volume, pitch * practice.getPracticeProperty().freq / 100.0f);
 	}
 
 	public void stop(Note note) {
@@ -787,7 +788,7 @@ public class BMSPlayer extends MainState {
 				// BGレーン再生
 				while (p < timelines.length && timelines[p].getMicroTime() <= time) {
 					for (Note n : timelines[p].getBackGroundNotes()) {
-						play(n, config.getBgvolume());
+						play(n, config.getBgvolume(), 0);
 					}
 					p++;
 				}
