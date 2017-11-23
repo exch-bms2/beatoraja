@@ -123,13 +123,13 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> {
 	}
 
 	@Override
-	protected synchronized void play(PCM id, float volume) {
-		mixer.put(id, volume, false);
+	protected synchronized void play(PCM pcm, int channel, float volume) {
+		mixer.put(pcm, channel, volume, false);
 	}
 
 	@Override
 	protected void play(AudioElement<PCM> id, float volume, boolean loop) {
-		id.id = mixer.put(id.audio, volume, loop);
+		id.id = mixer.put(id.audio, -1, volume, loop);
 	}
 
 	@Override
@@ -140,6 +140,11 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> {
 	@Override
 	protected void stop(PCM id) {
 		mixer.stop(id);
+	}
+
+	@Override
+	protected void stop(PCM id, int channel) {
+		mixer.stop(id, channel);
 	}
 
 	@Override
@@ -185,7 +190,7 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> {
 			}
 		}
 
-		public long put(PCM pcm, float volume, boolean loop) {
+		public long put(PCM pcm, int channel, float volume, boolean loop) {
 			for (int i = 0; i < inputs.length; i++) {
 				if (inputs[i].pos == -1) {
 					inputs[i].pcm = pcm;
@@ -193,6 +198,7 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> {
 					inputs[i].volume = volume;
 					inputs[i].loop = loop;
 					inputs[i].id = idcount++;
+					inputs[i].channel = channel;
 					inputs[i].pos = 0;
 					return inputs[i].id;
 				}
@@ -212,6 +218,14 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> {
 		public void stop(PCM id) {
 			for (int i = 0; i < inputs.length; i++) {
 				if (inputs[i].pcm == id) {
+					inputs[i].pos = -1;
+				}
+			}
+		}
+
+		public void stop(PCM id, int channel) {
+			for (int i = 0; i < inputs.length; i++) {
+				if (inputs[i].pcm == id && inputs[i].channel == channel) {
 					inputs[i].pos = -1;
 				}
 			}
@@ -253,5 +267,6 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> {
 		public int pos = -1;
 		public boolean loop;
 		public long id;
+		public int channel = -1;
 	}
 }
