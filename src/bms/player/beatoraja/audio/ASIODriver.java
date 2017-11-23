@@ -123,8 +123,8 @@ public class ASIODriver extends AbstractAudioDriver<PCM> implements AsioDriverLi
 	}
 
 	@Override
-	protected void stop(int channel) {
-		mixer.stop(channel);
+	protected void stop(PCM id, int channel) {
+		mixer.stop(id, channel);
 	}
 
 	@Override
@@ -232,9 +232,9 @@ public class ASIODriver extends AbstractAudioDriver<PCM> implements AsioDriverLi
 			}
 		}
 
-		public void stop(int channel) {
+		public void stop(PCM id, int channel) {
 			for (int i = 0; i < inputs.length; i++) {
-				if (inputs[i].channel == channel) {
+				if (inputs[i].pcm == id && inputs[i].channel == channel) {
 					inputs[i].pos = -1;
 				}
 			}

@@ -143,8 +143,8 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> {
 	}
 
 	@Override
-	protected void stop(int channel) {
-		mixer.stop(channel);
+	protected void stop(PCM id, int channel) {
+		mixer.stop(id, channel);
 	}
 
 	@Override
@@ -223,9 +223,9 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> {
 			}
 		}
 
-		public void stop(int channel) {
+		public void stop(PCM id, int channel) {
 			for (int i = 0; i < inputs.length; i++) {
-				if (inputs[i].channel == channel) {
+				if (inputs[i].pcm == id && inputs[i].channel == channel) {
 					inputs[i].pos = -1;
 				}
 			}

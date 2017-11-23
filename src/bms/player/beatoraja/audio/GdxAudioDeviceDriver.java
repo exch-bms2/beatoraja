@@ -47,7 +47,7 @@ public class GdxAudioDeviceDriver extends AbstractAudioDriver {
 	}
 
 	@Override
-	protected void stop(int channel) {
+	protected void stop(Object id, int channel) {
 		// TODO Auto-generated method stub
 
 	}

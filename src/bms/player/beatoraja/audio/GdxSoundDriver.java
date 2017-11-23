@@ -142,12 +142,12 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 	}
 
 	@Override
-	protected void stop(int channel) {
+	protected void stop(Sound id, int channel) {
 		if (soundthread) {
-			mixer.stop(channel);
+			mixer.stop(id, channel);
 		} else {
 			for (int i = 0; i < sounds.length; i++) {
-				if (sounds[i].sound != null && sounds[i].channel == channel) {
+				if (sounds[i].sound == id && sounds[i].channel == channel) {
 					sounds[i].sound.stop(sounds[i].id);
 					sounds[i].sound = null;
 				}
@@ -176,9 +176,9 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 			cpos = (cpos + 1) % this.sound.length;
 		}
 
-		public synchronized void stop(int channel) {
+		public synchronized void stop(Sound snd, int channel) {
 			for (int i = 0; i < sound.length; i++) {
-				if (sound[i] != null && this.channels[i] == channel) {
+				if (sound[i] == snd && this.channels[i] == channel) {
 					sound[i].stop(ids[i]);
 					sound[i] = null;
 				}

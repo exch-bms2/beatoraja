@@ -115,10 +115,12 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	/**
 	 * 音源データが再生されていれば停止する
 	 *
+	 * @param id
+	 *            音源データ
 	 * @param channel
 	 *            定義番号/音声チャンネル番号
 	 */
-	protected abstract void stop(int channel);
+	protected abstract void stop(T id, int channel);
 
 	public void play(String p, float volume, boolean loop) {
 		if (p == null || p.length() == 0) {
@@ -306,15 +308,16 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 			}
 			final long starttime = n.getMicroStarttime();
 			final long duration = n.getMicroDuration();
-			stop(id);
 			if (starttime == 0 && duration == 0) {
 				final T wav = (T) wavmap[id];
 				if (wav != null) {
+					stop(wav, id);
 					play(wav, id, volume);
 				}
 			} else {
 				for (SliceWav<T> slice : slicesound[id]) {
 					if (slice.starttime == starttime && slice.duration == duration) {
+						stop(slice.wav, id);
 						play(slice.wav, id, volume);
 						// System.out.println("slice WAV play - ID:" + id +
 						// " start:" + starttime + " duration:" + duration);
@@ -356,7 +359,21 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 		if (id < 0) {
 			return;
 		}
-		stop(id);
+		final long starttime = n.getMicroStarttime();
+		final long duration = n.getMicroDuration();
+		if (starttime == 0 && duration == 0) {
+			final T sound = (T) wavmap[id];
+			if (sound != null) {
+				stop(sound, id);
+			}
+		} else {
+			for (SliceWav<T> slice : slicesound[id]) {
+				if (slice.starttime == starttime && slice.duration == duration) {
+					stop((T) slice.wav, id);
+					break;
+				}
+			}
+		}
 	}
 
 	public float getProgress() {
