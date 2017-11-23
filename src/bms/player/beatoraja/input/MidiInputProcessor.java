@@ -41,7 +41,6 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 				MidiDevice device = MidiSystem.getMidiDevice(info);
 				devices.add(device);
 			} catch (MidiUnavailableException e) {
-				Logger.getGlobal().warning("Cannot get MIDI device `" + info.getName() + "`: " + e.getMessage());
 			}
 		}
 
@@ -54,7 +53,6 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 				device.open();
 				device.getTransmitter().setReceiver(receiver);
 			} catch (MidiUnavailableException e) {
-				Logger.getGlobal().warning("Cannot open or receive events from MIDI device `" + device.getDeviceInfo().getName() + "`: " + e.getMessage());
 			}
 		}
 	}
