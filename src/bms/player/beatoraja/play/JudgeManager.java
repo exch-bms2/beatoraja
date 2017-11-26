@@ -388,6 +388,9 @@ public class JudgeManager {
 							this.update(lane, tnote, time, j, dtime);
 						}
 					} else {
+						// 空POOR判定がないときのレーザー色変更処理
+						this.judge[player[lane]][offset[lane]] = 0;
+						
 						// 空POOR判定がないときのキー音処理
 						Note n = null;
 						boolean sound = false;
