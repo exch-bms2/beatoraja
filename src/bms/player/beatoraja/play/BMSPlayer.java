@@ -281,7 +281,7 @@ public class BMSPlayer extends MainState {
 		laneProperty = new LaneProperty(model.getMode());
 		judge = new JudgeManager(this);
 		control = new ControlInputProcessor(this, autoplay);
-		keyinput = new KeyInputProccessor(this, model.getMode());
+		keyinput = new KeyInputProccessor(this, laneProperty);
 		Config conf = resource.getConfig();
 		PlayerConfig config = resource.getPlayerConfig();
 

@@ -4,7 +4,6 @@ package bms.player.beatoraja.input;
 import java.util.Arrays;
 import java.util.logging.Logger;
 
-import bms.player.beatoraja.Config;
 import bms.player.beatoraja.PlayConfig.ControllerConfig;
 import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.ControllerListener;
@@ -20,8 +19,11 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice implements 
 
 	private final BMSPlayerInputProcessor bmsPlayerInputProcessor;
 
-	private Controller controller;
-
+	private final Controller controller;
+	/**
+	 * デバイス名称
+	 */
+	private final String name;
 	/**
 	 * ボタンキーアサイン
 	 */
@@ -43,10 +45,11 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice implements 
 	private boolean jkoc;
 	private boolean analogScratch;
 
-	public BMControllerInputProcessor(BMSPlayerInputProcessor bmsPlayerInputProcessor, Controller controller,
+	public BMControllerInputProcessor(BMSPlayerInputProcessor bmsPlayerInputProcessor, String name, Controller controller,
 									  ControllerConfig controllerConfig) {
 		super(Type.BM_CONTROLLER);
 		this.bmsPlayerInputProcessor = bmsPlayerInputProcessor;
+		this.name = name;
 		this.controller = controller;
 		this.setConfig(controllerConfig);
 	}
@@ -59,8 +62,8 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice implements 
 		this.analogScratch = controllerConfig.isAnalogScratch();
 	}
 
-	public Controller getController() {
-		return controller;
+	public String getName() {
+		return name;
 	}
 
 	public boolean accelerometerMoved(Controller arg0, int arg1, Vector3 arg2) {

@@ -59,9 +59,11 @@ public class NoteShuffleModifier extends PatternModifier {
 		int[] random = new int[0];
 		int[] ln = new int[lanes];
 		int[] lastNoteTime = new int[lanes];
+		int[] endLnNoteTime = new int[lanes];
 		int scratchIndex = 0;
 		Arrays.fill(ln, -1);
 		Arrays.fill(lastNoteTime, -100);
+		Arrays.fill(endLnNoteTime, -1);
 		for (TimeLine tl : model.getAllTimeLines()) {
 			if (tl.existNote() || tl.existHiddenNote()) {
 				Note[] notes = new Note[lanes];
@@ -133,7 +135,6 @@ public class NoteShuffleModifier extends PatternModifier {
 					 */
 					int scratchInterval = 40;
 
-
 					// Scratchレーンが複数ある場合は順繰りに配置されるように (24key対応)
 					if (mode.player == 1) {
 						// シングルプレー時
@@ -174,7 +175,7 @@ public class NoteShuffleModifier extends PatternModifier {
 						// 連打は出来ないように sc:40ms key:110ms
 						keys = getKeys(mode, true);
 						int keyInterval = 110;
-						boolean isRightSide = ( getModifyTarget() == SIDE_2P);
+						boolean isRightSide = (getModifyTarget() == SIDE_2P);
 						int scLane = isRightSide ? mode.scratchKey[1] : mode.scratchKey[0];
 						ArrayList<Integer> original, assign, note, other, primary, tate;
 						original = new ArrayList<Integer>(keys.length);
@@ -201,7 +202,7 @@ public class NoteShuffleModifier extends PatternModifier {
 
 						// LNがアクティブなレーンをアサインしてから除外
 						for (int lane = 0; lane < keys.length; lane++) {
-							if ( ln[keys[lane]] != -1) {
+							if (ln[keys[lane]] != -1) {
 								random[keys[lane]] = ln[keys[lane]];
 								assign.remove((Integer) keys[lane]);
 								original.remove((Integer) ln[keys[lane]]);
@@ -220,7 +221,8 @@ public class NoteShuffleModifier extends PatternModifier {
 
 						// 未アサインレーンを縦連発生かどうかで分類
 						while (!assign.isEmpty()) {
-							if (tl.getTime() - lastNoteTime[assign.get(0)] < (assign.get(0) == scLane ? scratchInterval : keyInterval)) {
+							if (tl.getTime() - lastNoteTime[assign.get(0)] < (assign.get(0) == scLane ? scratchInterval
+									: keyInterval)) {
 								tate.add(assign.get(0));
 							} else {
 								primary.add(assign.get(0));
@@ -283,12 +285,16 @@ public class NoteShuffleModifier extends PatternModifier {
 					Note hn = hnotes[mod];
 					if (n instanceof LongNote) {
 						LongNote ln2 = (LongNote) n;
-						if (ln2.isEnd()) {
+						if (ln2.isEnd() && tl.getTime() == endLnNoteTime[i]) {
 							tl.setNote(i, n);
 							ln[i] = -1;
+							endLnNoteTime[i] = -1;
 						} else {
 							tl.setNote(i, n);
 							ln[i] = mod;
+							if (!ln2.isEnd()) {
+								endLnNoteTime[i] = ln2.getPair().getTime();
+							}
 							lastNoteTime[i] = tl.getTime();
 						}
 					} else {

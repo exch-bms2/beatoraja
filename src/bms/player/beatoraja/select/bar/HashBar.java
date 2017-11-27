@@ -14,13 +14,14 @@ import java.util.*;
 public class HashBar extends DirectoryBar {
     private String title;
     private SongData[] elements;
+    private String[] elementsHash;
     private MusicSelector selector;
     private SongData[] songs;
 
     public HashBar(MusicSelector selector, String title, SongData[] elements) {
         this.selector = selector;
         this.title = title;
-        this.elements = elements;
+        setElements(elements);;
     }
 
     @Override
@@ -34,12 +35,16 @@ public class HashBar extends DirectoryBar {
 
     public void setElements(SongData[] elements) {
         this.elements = elements;
+        elementsHash = new String[elements.length];
+        for(int i = 0;i < elementsHash.length;i++) {
+        	elementsHash[i] = elements[i].getSha256().length() > 0 ? elements[i].getSha256() : elements[i].getMd5();
+        }
         songs = null;
     }
 
     @Override
     public Bar[] getChildren() {
-        List<SongBar> songbars = new ArrayList<SongBar>();
+        List<SongBar> songbars = new ArrayList<SongBar>(elements.length);
         String[] hashes = new String[elements.length];
         for(int i = 0;i < hashes.length;i++) {
             hashes[i] = elements[i].getSha256().length() > 0 ? elements[i].getSha256() : elements[i].getMd5();
@@ -62,18 +67,14 @@ public class HashBar extends DirectoryBar {
             }
         }
 
-        return songbars.toArray(new Bar[0]);
+        return songbars.toArray(new Bar[songbars.size()]);
     }
 
     public void updateFolderStatus() {
         int clear = 255;
-        int[] clears = new int[11];
-        int[] ranks = new int[28];
-        String[] hashes = new String[elements.length];
-        for(int i = 0;i < hashes.length;i++) {
-            hashes[i] = elements[i].getSha256().length() > 0 ? elements[i].getSha256() : elements[i].getMd5();
-        }
-        songs = selector.getSongDatabase().getSongDatas(hashes);
+        int[] clears = getLamps();
+        int[] ranks = getRanks();
+        songs = selector.getSongDatabase().getSongDatas(elementsHash);
         final Map<String, IRScoreData> scores = selector.getScoreDataCache()
                 .readScoreDatas(songs, selector.getMainController().getPlayerResource().getPlayerConfig().getLnmode());
         for (SongData song : songs) {

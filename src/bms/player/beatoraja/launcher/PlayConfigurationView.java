@@ -204,6 +204,8 @@ public class PlayConfigurationView implements Initializable {
 	private TextField iruserid;
 	@FXML
 	private PasswordField irpassword;
+	@FXML
+	private ComboBox<Integer> irsend;
 
 	private MainLoader loader;
 
@@ -255,6 +257,7 @@ public class PlayConfigurationView implements Initializable {
 		initComboBox(autosavereplay2, autosaves);
 		initComboBox(autosavereplay3, autosaves);
 		initComboBox(autosavereplay4, autosaves);
+		initComboBox(irsend, new String[] { arg1.getString("IR_SEND_ALWAYS"), arg1.getString("IR_SEND_FINISH"), arg1.getString("IR_SEND_UPDATE")});
 		skincategory.setCellFactory(new Callback<ListView<SkinType>, ListCell<SkinType>>() {
 			public ListCell<SkinType> call(ListView<SkinType> param) { return new SkinTypeCell(); }
 		});
@@ -420,6 +423,7 @@ public class PlayConfigurationView implements Initializable {
 		irname.setValue(player.getIrname());
 		iruserid.setText(player.getUserid());
 		irpassword.setText(player.getPassword());
+		irsend.setValue(player.getIrsend());
 
 		playconfig.setValue(PlayMode.BEAT_7K);
 		updatePlayConfig();
@@ -518,6 +522,7 @@ public class PlayConfigurationView implements Initializable {
 		player.setIrname(irname.getValue());
 		player.setUserid(iruserid.getText());
 		player.setPassword(irpassword.getText());
+		player.setIrsend(irsend.getValue());
 
 		updateInputConfig();
 		updatePlayConfig();

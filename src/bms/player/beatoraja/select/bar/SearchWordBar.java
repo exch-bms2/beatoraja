@@ -3,10 +3,6 @@ package bms.player.beatoraja.select.bar;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.song.SongData;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * 検索用バー
  *
@@ -16,25 +12,27 @@ public class SearchWordBar extends DirectoryBar {
 
     private String text;
     private MusicSelector selector;
+    private String title;
 
     public SearchWordBar(MusicSelector selector, String text) {
         this.selector = selector;
         this.text = text;
+        title = "Search : '" + text + "'";
     }
 
     @Override
     public Bar[] getChildren() {
-        List<SongBar> songbars = new ArrayList<SongBar>();
-        SongData[] songs = selector.getSongDatabase().getSongDatasByText(text, new File(".").getAbsolutePath());
-        for (SongData song : songs) {
-            songbars.add(new SongBar(song));
+        SongData[] songs = selector.getSongDatabase().getSongDatasByText(text);
+        Bar[] bar = new Bar[songs.length];
+        for (int i = 0;i < bar.length;i++) {
+            bar[i] = new SongBar(songs[i]);
         }
-        return songbars.toArray(new Bar[0]);
+        return bar;
     }
 
     @Override
     public String getTitle() {
-        return "Search : '" + text + "'";
+        return title;
     }
 
 }

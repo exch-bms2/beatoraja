@@ -183,12 +183,12 @@ public class KeyConfiguration extends MainState {
 				if (controllers.length > 0) {
 					int index = 0;
 					for (; index < controllers.length; index++) {
-						if (controllers[index].getController().getName().equals(pc.getController()[0].getName())) {
+						if (controllers[index].getName().equals(pc.getController()[0].getName())) {
 							break;
 						}
 					}
 					pc.getController()[0]
-							.setName(controllers[(index + 1) % controllers.length].getController().getName());
+							.setName(controllers[(index + 1) % controllers.length].getName());
 					pc.setController(pc.getController());
 				}
 			}
@@ -198,12 +198,12 @@ public class KeyConfiguration extends MainState {
 				if (controllers.length > 0 && pc.getController().length > 1) {
 					int index = 0;
 					for (; index < controllers.length; index++) {
-						if (controllers[index].getController().getName().equals(pc.getController()[1].getName())) {
+						if (controllers[index].getName().equals(pc.getController()[1].getName())) {
 							break;
 						}
 					}
 					pc.getController()[1]
-							.setName(controllers[(index + 1) % controllers.length].getController().getName());
+							.setName(controllers[(index + 1) % controllers.length].getName());
 					pc.setController(pc.getController());
 				}
 			}
@@ -367,7 +367,7 @@ public class KeyConfiguration extends MainState {
 	private void setControllerKeyAssign(int index, BMControllerInputProcessor bmc) {
 		int cindex = -1;
 		for (int i = 0; i < controllerConfigs.length; i++) {
-			if (bmc.getController().getName().equals(controllerConfigs[i].getName())) {
+			if (bmc.getName().equals(controllerConfigs[i].getName())) {
 				cindex = i;
 				break;
 			}
