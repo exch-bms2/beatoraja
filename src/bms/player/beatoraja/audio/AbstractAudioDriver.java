@@ -41,6 +41,10 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	 */
 	private float volume = 1.0f;
 	/**
+	 *
+	 */
+	private float gloablPitch = 1.0f;
+	/**
 	 * 
 	 */
 	private AudioCache cache = new AudioCache();
@@ -76,7 +80,7 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	 * @param wav
 	 *            音源データ
 	 * @param channel
-	 *            定義番号/音声チャンネル番号
+	 *            チャンネル番号(0-)
 	 * @param volume
 	 *            ボリューム(0.0-1.0)
 	 * @param pitch
@@ -120,7 +124,7 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	 * @param id
 	 *            音源データ
 	 * @param channel
-	 *            定義番号/音声チャンネル番号
+	 *            チャンネル番号(0-)
 	 */
 	protected abstract void stop(T id, int channel);
 
@@ -295,32 +299,38 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 		progress = 1;
 	}
 
-	public void play(Note n, float volume, float pitch) {
+	public void play(Note n, float volume, int pitch) {
 		play0(n, this.volume * volume, pitch);
 		for (Note ln : n.getLayeredNotes()) {
 			play0(ln, this.volume * volume, pitch);
 		}
 	}
 
-	private final void play0(Note n, float volume, float pitch) {
+	private int channel(int id, int pitch) {
+		return id * 256 + pitch + 128;
+	}
+
+	private final void play0(Note n, float volume, int pitchShift) {
 		try {
 			final int id = n.getWav();
 			if (id < 0) {
 				return;
 			}
+			final int channel = channel(id, pitchShift);
+			final float pitch = pitchShift != 0 ? (float)Math.pow(2.0, pitchShift / 12.0) : 1.0f;
 			final long starttime = n.getMicroStarttime();
 			final long duration = n.getMicroDuration();
 			if (starttime == 0 && duration == 0) {
 				final T wav = (T) wavmap[id];
 				if (wav != null) {
-					stop(wav, id);
-					play(wav, id, volume, pitch);
+					stop(wav, channel);
+					play(wav, channel, volume, pitch);
 				}
 			} else {
 				for (SliceWav<T> slice : slicesound[id]) {
 					if (slice.starttime == starttime && slice.duration == duration) {
-						stop(slice.wav, id);
-						play(slice.wav, id, volume, pitch);
+						stop(slice.wav, channel);
+						play(slice.wav, channel, volume, pitch);
 						// System.out.println("slice WAV play - ID:" + id +
 						// " start:" + starttime + " duration:" + duration);
 						break;
@@ -358,6 +368,7 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 
 	private final void stop0(Note n) {
 		final int id = n.getWav();
+		final int channel = channel(id, 0);
 		if (id < 0) {
 			return;
 		}
@@ -366,16 +377,24 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 		if (starttime == 0 && duration == 0) {
 			final T sound = (T) wavmap[id];
 			if (sound != null) {
-				stop(sound, id);
+				stop(sound, channel);
 			}
 		} else {
 			for (SliceWav<T> slice : slicesound[id]) {
 				if (slice.starttime == starttime && slice.duration == duration) {
-					stop((T) slice.wav, id);
+					stop((T) slice.wav, channel);
 					break;
 				}
 			}
 		}
+	}
+
+	public void setGlobalPitch(float pitch) {
+		this.gloablPitch = pitch;
+	}
+
+	public float getGlobalPitch() {
+		return this.gloablPitch;
 	}
 
 	public float getProgress() {

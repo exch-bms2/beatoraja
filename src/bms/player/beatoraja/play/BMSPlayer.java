@@ -402,6 +402,7 @@ public class BMSPlayer extends MainState {
 				control.setEnableControl(true);
 				if (property.freq != 100) {
 					model.setFrequency(property.freq / 100f);
+					getMainController().getAudioProcessor().setGlobalPitch(property.freq / 100f);
 				}
 				model.setTotal(property.total);
 				PracticeModifier pm = new PracticeModifier(property.starttime * 100 / property.freq,
@@ -516,6 +517,7 @@ public class BMSPlayer extends MainState {
 			keyinput.stopJudge();
 
 			if (now - timer[TIMER_FAILED] > skin.getClose()) {
+				getMainController().getAudioProcessor().setGlobalPitch(1f);
 				if (resource.mediaLoadFinished()) {
 					resource.getBGAManager().stop();
 				}
@@ -550,6 +552,7 @@ public class BMSPlayer extends MainState {
 			}
 			keyinput.stopJudge();
 			if (now - timer[TIMER_FADEOUT] > skin.getFadeout()) {
+				getMainController().getAudioProcessor().setGlobalPitch(1f);
 				resource.getBGAManager().stop();
 				if (autoplay != 1 && autoplay != 2) {
 					resource.setScoreData(createScoreData());
@@ -584,6 +587,7 @@ public class BMSPlayer extends MainState {
 
 	public void setPlaySpeed(int playspeed) {
 		this.playspeed = playspeed;
+		getMainController().getAudioProcessor().setGlobalPitch(playspeed / 100f);
 	}
 
 	public void input() {
@@ -707,8 +711,7 @@ public class BMSPlayer extends MainState {
 	}
 
 	public void play(Note note, float volume, int pitchShift) {
-		float pitch = pitchShift != 0 ? (float)Math.pow(2.0, pitchShift / 12.0) : 1.0f;
-		getMainController().getAudioProcessor().play(note, volume, pitch * practice.getPracticeProperty().freq / 100.0f);
+		getMainController().getAudioProcessor().play(note, volume, pitchShift);
 	}
 
 	public void stop(Note note) {

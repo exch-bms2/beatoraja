@@ -252,7 +252,7 @@ public class ASIODriver extends AbstractAudioDriver<PCM> implements AsioDriverLi
 					if (input.pos != -1) {
 						wav_l += ((float) input.sample[input.pos]) * input.volume / Short.MAX_VALUE;
 						wav_r += ((float) input.sample[input.pos+1]) * input.volume / Short.MAX_VALUE;
-						input.posf += input.pitch;
+						input.posf += getGlobalPitch() * input.pitch;
 						int inc = (int)input.posf;
 						if (inc > 0) {
 							input.pos += 2 * inc;
