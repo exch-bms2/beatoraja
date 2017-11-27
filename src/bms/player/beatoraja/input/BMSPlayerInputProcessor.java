@@ -52,7 +52,16 @@ public class BMSPlayerInputProcessor {
 				    }
 				}).findFirst()
 				.orElse(new ControllerConfig());
-			BMControllerInputProcessor bm = new BMControllerInputProcessor(this, controller, controllerConfig);
+			// デバイス名のユニーク化
+			int index = 1;
+			String name = controller.getName();
+			for(BMControllerInputProcessor bm : bminput) {
+				if(bm.getName().equals(name)) {
+					index++;
+					name = controller.getName() + "-" + index;
+				}
+			}
+			BMControllerInputProcessor bm = new BMControllerInputProcessor(this, name, controller, controllerConfig);
 			// controller.addListener(bm);
 			bminput.add(bm);
 		}
@@ -140,9 +149,9 @@ public class BMSPlayerInputProcessor {
 					continue;
 				}
 				if(configs[i].getName() == null || configs[i].getName().length() == 0) {
-					configs[i].setName(controller.getController().getName());
+					configs[i].setName(controller.getName());
 				}
-				if(controller.getController().getName().equals(configs[i].getName())) {
+				if(controller.getName().equals(configs[i].getName())) {
 					controller.setConfig(configs[i]);
 					b[i] = true;
 					break;
@@ -229,7 +238,7 @@ public class BMSPlayerInputProcessor {
 		kbinput.setConfig(playconfig.getKeyboardConfig());
 		for(int i = 0;i < bminput.length;i++) {
 			for(ControllerConfig controller : playconfig.getController()) {
-				if(bminput[i].getController().getName().equals(controller.getName())) {
+				if(bminput[i].getName().equals(controller.getName())) {
 					bminput[i].setConfig(controller);
 					break;
 				}

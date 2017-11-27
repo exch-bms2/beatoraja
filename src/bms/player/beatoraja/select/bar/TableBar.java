@@ -9,13 +9,27 @@ import bms.player.beatoraja.song.SongData;
 import java.util.*;
 
 /**
- * Created by exch on 2017/09/02.
+ * 難易度表バー
+ * 
+ * @author exch
  */
 public class TableBar extends DirectoryBar {
-
+	/**
+	 * 難易度表データ
+	 */
 	private TableData td;
+	/**
+	 * 難易度表レベルバー
+	 */
     private HashBar[] levels;
+    /**
+     * 難易度表コースバー
+     */
     private GradeBar[] grades;
+    /**
+     * レベルバー+コースバー
+     */
+    private Bar[] children;
     private MusicSelector selector;
     private TableDataAccessor.TableReader tr;
 
@@ -37,26 +51,25 @@ public class TableBar extends DirectoryBar {
     public void setTableData(TableData td) {
     	this.td = td;
 
-    	final long t = System.currentTimeMillis();
-		List<HashBar> levels = new ArrayList<HashBar>();
-		for (TableData.TableFolder lv : td.getFolder()) {
-			levels.add(new HashBar(selector, lv.getName(), lv.getSong()));
-		}
-
-		this.levels = levels.toArray(new HashBar[levels.size()]);
-		List<GradeBar> l = new ArrayList<GradeBar>();
-
-		Set<String> hashset = new HashSet<String>();
-		for (CourseData course : td.getCourse()) {
+    	final TableData.TableFolder[] folder = td.getFolder();
+    	levels = new HashBar[folder.length];
+    	for(int i = 0;i < folder.length;i++) {
+    		levels[i] = new HashBar(selector, folder[i].getName(), folder[i].getSong());
+    	}
+    	
+		final CourseData[] courses = td.getCourse();
+		Set<String> hashset = new HashSet<String>(courses.length * 4);
+		for (CourseData course : courses) {
 			for (SongData hash : course.getSong()) {
 				hashset.add(hash.getSha256().length() > 0 ? hash.getSha256() : hash.getMd5());
 			}
 		}
 		SongData[] songs = selector.getSongDatabase().getSongDatas(hashset.toArray(new String[hashset.size()]));
 
-		for (CourseData course : td.getCourse()) {
-			List<SongData> songlist = new ArrayList<SongData>();
-			for (SongData hash : course.getSong()) {
+		grades = new GradeBar[courses.length];
+		List<SongData> songlist = new ArrayList<SongData>();
+		for (int i = 0;i < courses.length;i++) {
+			for (SongData hash : courses[i].getSong()) {
 				SongData song = null;
 				for(SongData sd :songs) {
 					if((hash.getMd5().length() > 0 && hash.getMd5().equals(sd.getMd5())) || (hash.getSha256().length() > 0 && hash.getSha256().equals(sd.getSha256()))) {
@@ -66,10 +79,18 @@ public class TableBar extends DirectoryBar {
 				}
 				songlist.add(song);
 			}
-
-			l.add(new GradeBar(course.getName(), songlist.toArray(new SongData[0]), course));
+			grades[i] = new GradeBar(courses[i].getName(), songlist.toArray(new SongData[songlist.size()]), courses[i]);
+			songlist.clear();
 		}
-		grades = l.toArray(new GradeBar[l.size()]);
+		
+		children = new Bar[levels.length + grades.length];
+		int index = 0;
+		for (int i = 0;i < levels.length;i++, index++) {
+			children[index] = levels[i];
+		}
+		for (int i = 0;i < grades.length;i++, index++) {
+			children[index] = grades[i];
+		}
     }
 
     public HashBar[] getLevels() {
@@ -82,9 +103,6 @@ public class TableBar extends DirectoryBar {
 
     @Override
     public Bar[] getChildren() {
-        List<Bar> l = new ArrayList<Bar>();
-        l.addAll(Arrays.asList(getLevels()));
-        l.addAll(Arrays.asList(getGrades()));
-        return l.toArray(new Bar[0]);
+    	return children;
     }
 }

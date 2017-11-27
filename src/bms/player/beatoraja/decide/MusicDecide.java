@@ -35,7 +35,9 @@ public class MusicDecide extends MainState {
 
 	public void render() {
 		long nowtime = getNowTime();
-
+        if(getTimer()[TIMER_STARTINPUT] == Long.MIN_VALUE && nowtime >getSkin().getInput()){
+        	getTimer()[TIMER_STARTINPUT] = nowtime;
+        }
 		if (getTimer()[TIMER_FADEOUT] != Long.MIN_VALUE) {
 			if (nowtime > getTimer()[TIMER_FADEOUT] + getSkin().getFadeout()) {
 				getMainController()
@@ -51,7 +53,7 @@ public class MusicDecide extends MainState {
 	public void input() {
 		long nowtime = getNowTime();
 
-		if (getTimer()[TIMER_FADEOUT] == Long.MIN_VALUE && nowtime > getSkin().getInput()) {
+		if (getTimer()[TIMER_FADEOUT] == Long.MIN_VALUE && getTimer()[TIMER_STARTINPUT] != Long.MIN_VALUE) {
 			BMSPlayerInputProcessor input = getMainController().getInputProcessor();
 			if (input.getKeystate()[0] || input.getKeystate()[2] || input.getKeystate()[4] || input.getKeystate()[6]) {
 				getTimer()[TIMER_FADEOUT] = nowtime;

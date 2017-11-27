@@ -73,12 +73,14 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	/**
 	 * キー音を再生する
 	 * 
-	 * @param id
+	 * @param wav
 	 *            音源データ
+	 * @param channel
+	 *            定義番号/音声チャンネル番号
 	 * @param volume
 	 *            ボリューム(0.0-1.0)
 	 */
-	protected abstract void play(T id, float volume);
+	protected abstract void play(T wav, int channel, float volume);
 
 	/**
 	 * 効果音を再生する
@@ -109,6 +111,16 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	 *            音源データ
 	 */
 	protected abstract void stop(T id);
+
+	/**
+	 * 音源データが再生されていれば停止する
+	 *
+	 * @param id
+	 *            音源データ
+	 * @param channel
+	 *            定義番号/音声チャンネル番号
+	 */
+	protected abstract void stop(T id, int channel);
 
 	public void play(String p, float volume, boolean loop) {
 		if (p == null || p.length() == 0) {
@@ -299,13 +311,14 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 			if (starttime == 0 && duration == 0) {
 				final T wav = (T) wavmap[id];
 				if (wav != null) {
-					stop(wav);
-					play(wav, volume);
+					stop(wav, id);
+					play(wav, id, volume);
 				}
 			} else {
 				for (SliceWav<T> slice : slicesound[id]) {
 					if (slice.starttime == starttime && slice.duration == duration) {
-						play(slice.wav, volume);
+						stop(slice.wav, id);
+						play(slice.wav, id, volume);
 						// System.out.println("slice WAV play - ID:" + id +
 						// " start:" + starttime + " duration:" + duration);
 						break;
@@ -351,12 +364,12 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 		if (starttime == 0 && duration == 0) {
 			final T sound = (T) wavmap[id];
 			if (sound != null) {
-				stop(sound);
+				stop(sound, id);
 			}
 		} else {
 			for (SliceWav<T> slice : slicesound[id]) {
 				if (slice.starttime == starttime && slice.duration == duration) {
-					stop((T) slice.wav);
+					stop((T) slice.wav, id);
 					break;
 				}
 			}

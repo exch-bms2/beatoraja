@@ -281,7 +281,7 @@ public class BMSPlayer extends MainState {
 		laneProperty = new LaneProperty(model.getMode());
 		judge = new JudgeManager(this);
 		control = new ControlInputProcessor(this, autoplay);
-		keyinput = new KeyInputProccessor(this, model.getMode());
+		keyinput = new KeyInputProccessor(this, laneProperty);
 		Config conf = resource.getConfig();
 		PlayerConfig config = resource.getPlayerConfig();
 
@@ -360,6 +360,10 @@ public class BMSPlayer extends MainState {
 		final long now = getNowTime();
 		final long micronow = getNowMicroTime();
         final long[] timer = getTimer();
+
+        if(timer[TIMER_STARTINPUT] == Long.MIN_VALUE && now >skin.getInput()){
+            timer[TIMER_STARTINPUT] = now;
+        }
 		switch (state) {
 		// 楽曲ロード
 		case STATE_PRELOAD:

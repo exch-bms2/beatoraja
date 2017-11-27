@@ -537,6 +537,19 @@
                                     <Insets top="10.0" />
                                  </VBox.margin>
                               </HBox>
+                              <HBox prefHeight="15.0" prefWidth="740.0">
+                                 <VBox.margin>
+                                    <Insets top="30.0" />
+                                 </VBox.margin>
+                                 <children>
+                                    <Label prefHeight="35.0" prefWidth="100.0" text="%IR_SEND">
+                                       <HBox.margin>
+                                          <Insets left="10.0" />
+                                       </HBox.margin>
+                                    </Label>
+                                    <ComboBox fx:id="irsend" prefHeight="24.0" prefWidth="200.0" />
+                                 </children>
+                              </HBox>
                            </children>
                         </VBox>
                      </children>
