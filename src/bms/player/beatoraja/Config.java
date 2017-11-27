@@ -71,6 +71,27 @@ public class Config {
 	private int audioDeviceSimultaneousSources = 64;
 
 	/**
+	 * オーディオ再生速度変化の処理:なし
+	 */
+	public static final int AUDIO_PLAY_UNPROCESSED = 0;
+	/**
+	 * オーディオ再生速度変化の処理:周波数を合わせる(速度に応じてピッチも変化)
+	 */
+	public static final int AUDIO_PLAY_FREQ = 1;
+	/**
+	 * オーディオ再生速度変化の処理:ピッチ変化なしに速度を変更(未実装)
+	 */
+	public static final int AUDIO_PLAY_SPEED = 1;
+	/**
+	 * PracticeモードのFREQUENCYオプションに対する音声処理方法
+	 */
+	private int audioFreqOption = AUDIO_PLAY_FREQ;
+	/**
+	 * 早送り再生に対する音声処理方法
+	 */
+	private int audioFastForward = AUDIO_PLAY_FREQ;
+
+	/**
 	 * システム音ボリューム
 	 */
 	private float systemvolume = 1.0f;
@@ -430,6 +451,22 @@ public class Config {
 
 	public void setAudioDriverName(String audioDriverName) {
 		this.audioDriverName = audioDriverName;
+	}
+
+	public int getAudioFreqOption() {
+		return audioFreqOption;
+	}
+
+	public void setAudioFreqOption(int audioFreqOption) {
+		this.audioFreqOption = audioFreqOption;
+	}
+
+	public int getAudioFastForward() {
+		return audioFastForward;
+	}
+
+	public void setAudioFastForward(int audioFastForward) {
+		this.audioFastForward = audioFastForward;
 	}
 
 	public void setAutoSaveReplay(int autoSaveReplay[]){

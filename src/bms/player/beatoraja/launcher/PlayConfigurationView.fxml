@@ -164,6 +164,18 @@
                                     <Slider fx:id="bgvolume" blockIncrement="0.1" majorTickUnit="0.1" max="1.0" minorTickCount="5" prefHeight="30.0" prefWidth="200.0" value="1.0" />
                                  </children>
                               </HBox>
+                              <HBox prefHeight="30.0" prefWidth="200.0">
+                                 <children>
+                                    <Label prefHeight="30.0" text="%AUDIO_FREQ_OPTION" />
+                                    <ComboBox fx:id="audioFreqOption" prefWidth="150.0" />
+                                 </children>
+                              </HBox>
+                              <HBox prefHeight="30.0" prefWidth="200.0">
+                                 <children>
+                                    <Label prefHeight="30.0" text="%AUDIO_FAST_FORWARD" />
+                                    <ComboBox fx:id="audioFastForward" prefWidth="150.0" />
+                                 </children>
+                              </HBox>
                            </children>
                            <padding>
                               <Insets left="10.0" top="10.0" />

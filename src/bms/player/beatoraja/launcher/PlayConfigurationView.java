@@ -159,6 +159,10 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private Slider bgvolume;
 	@FXML
+	private ComboBox<Integer> audioFreqOption;
+	@FXML
+	private ComboBox<Integer> audioFastForward;
+	@FXML
 	private ComboBox<Integer> judgealgorithm;
 	@FXML
 	private Spinner<Integer> misslayertime;
@@ -260,6 +264,10 @@ public class PlayConfigurationView implements Initializable {
 		initComboBox(audio, new String[] { "OpenAL (LibGDX Sound)", "OpenAL (LibGDX AudioDevice)", "PortAudio", "Java ASIO Host" });
 		audio.getItems().setAll(0, 2, 3);
 
+		String[] audioPlaySpeedControls = new String[] { "UNPROCESSED", "FREQUENCY" };
+		initComboBox(audioFreqOption, audioPlaySpeedControls);
+		initComboBox(audioFastForward, audioPlaySpeedControls);
+
 		skin.setCellFactory(new Callback<ListView<SkinHeader>, ListCell<SkinHeader>>() {
 			public ListCell<SkinHeader> call(ListView<SkinHeader> param) {
 				return new SkinListCell();
@@ -302,6 +310,8 @@ public class PlayConfigurationView implements Initializable {
 		maxfps.getValueFactory().setValue(config.getMaxFramePerSecond());
 		audiobuffer.getValueFactory().setValue(config.getAudioDeviceBufferSize());
 		audiosim.getValueFactory().setValue(config.getAudioDeviceSimultaneousSources());
+		audioFreqOption.setValue(config.getAudioFreqOption());
+		audioFastForward.setValue(config.getAudioFastForward());
 		showhiddennote.setSelected(config.isShowhiddennote());
 
 		judgealgorithm.setValue(JudgeAlgorithm.getIndex(config.getJudgealgorithm()));
@@ -448,6 +458,8 @@ public class PlayConfigurationView implements Initializable {
 		config.setMaxFramePerSecond(getValue(maxfps));
 		config.setAudioDeviceBufferSize(getValue(audiobuffer));
 		config.setAudioDeviceSimultaneousSources(getValue(audiosim));
+		config.setAudioFreqOption(audioFreqOption.getValue());
+		config.setAudioFastForward(audioFastForward.getValue());
 
 		config.setJudgealgorithm(JudgeAlgorithm.values()[judgealgorithm.getValue()]);
 		config.setAutoSaveReplay( new int[]{autosavereplay1.getValue(),autosavereplay2.getValue(),

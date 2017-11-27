@@ -402,7 +402,9 @@ public class BMSPlayer extends MainState {
 				control.setEnableControl(true);
 				if (property.freq != 100) {
 					model.setFrequency(property.freq / 100f);
-					getMainController().getAudioProcessor().setGlobalPitch(property.freq / 100f);
+					if (getMainController().getConfig().getAudioFreqOption() == Config.AUDIO_PLAY_FREQ) {
+						getMainController().getAudioProcessor().setGlobalPitch(property.freq / 100f);
+					}
 				}
 				model.setTotal(property.total);
 				PracticeModifier pm = new PracticeModifier(property.starttime * 100 / property.freq,
@@ -587,7 +589,9 @@ public class BMSPlayer extends MainState {
 
 	public void setPlaySpeed(int playspeed) {
 		this.playspeed = playspeed;
-		getMainController().getAudioProcessor().setGlobalPitch(playspeed / 100f);
+		if (getMainController().getConfig().getAudioFastForward() == Config.AUDIO_PLAY_FREQ) {
+			getMainController().getAudioProcessor().setGlobalPitch(playspeed / 100f);
+		}
 	}
 
 	public void input() {
