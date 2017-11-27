@@ -15,34 +15,14 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 
 import bms.model.Mode;
-import bms.player.beatoraja.Config;
-import bms.player.beatoraja.CourseData;
-import bms.player.beatoraja.IRScoreData;
-import bms.player.beatoraja.MainController;
-import bms.player.beatoraja.MainState;
-import bms.player.beatoraja.PlayConfig;
-import bms.player.beatoraja.PlayDataAccessor;
-import bms.player.beatoraja.PlayerConfig;
-import bms.player.beatoraja.PlayerData;
-import bms.player.beatoraja.PlayerInformation;
-import bms.player.beatoraja.PlayerResource;
-import bms.player.beatoraja.ScoreDatabaseAccessor;
+import bms.player.beatoraja.*;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.ir.IRResponse;
-import bms.player.beatoraja.select.bar.Bar;
-import bms.player.beatoraja.select.bar.DirectoryBar;
-import bms.player.beatoraja.select.bar.FolderBar;
-import bms.player.beatoraja.select.bar.GradeBar;
-import bms.player.beatoraja.select.bar.SelectableBar;
-import bms.player.beatoraja.select.bar.SongBar;
-import bms.player.beatoraja.select.bar.TableBar;
+import bms.player.beatoraja.select.bar.*;
 import bms.player.beatoraja.skin.SkinType;
 import bms.player.beatoraja.song.SongData;
 import bms.player.beatoraja.song.SongDatabaseAccessor;
@@ -475,27 +455,6 @@ public class MusicSelector extends MainState {
 		} else {
 			Logger.getGlobal().info("段位の楽曲が揃っていません");
 		}
-	}
-
-	boolean isPressed(boolean[] keystate, long[] keytime, int code, boolean resetState) {
-		int[][] keyassign = MusicSelectInputProcessor.keyassign[config.getMusicselectinput()];
-		for (int i = 0; i < keyassign.length; i++) {
-			for (int index : keyassign[i]) {
-				if (code == index && keystate[i]) {
-					if (resetState) {
-						if (keytime[i] != 0) {
-							keytime[i] = 0;
-							return true;
-						}
-						return false;
-					} else {
-						return true;
-					}
-
-				}
-			}
-		}
-		return false;
 	}
 
 	public int getSort() {

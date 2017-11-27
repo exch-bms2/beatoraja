@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.ir.IRResponse;
+import bms.player.beatoraja.select.MusicSelectKeyProperty.MusicSelectKey;
 import bms.player.beatoraja.select.bar.*;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
@@ -519,11 +520,13 @@ public class BarRenderer {
 		long[] keytime = input.getTime();
 		boolean[] cursor = input.getCursorState();
 
+        final MusicSelectKeyProperty property = MusicSelectKeyProperty.values()[select.getMainController().getPlayerResource().getPlayerConfig().getMusicselectinput()];
+
 		// song bar scroll on mouse wheel
 		int mov = -input.getScroll();
 		input.resetScroll();
 		// song bar scroll
-		if (select.isPressed(keystate, keytime, MusicSelectInputProcessor.KEY_UP, false) || cursor[1]) {
+		if (property.isPressed(keystate, keytime, MusicSelectKey.UP, false) || cursor[1]) {
 			long l = System.currentTimeMillis();
 			if (duration == 0) {
 				keyinput = true;
@@ -536,7 +539,7 @@ public class BarRenderer {
 				mov = 1;
 				angle = durationhigh;
 			}
-		} else if (select.isPressed(keystate, keytime, MusicSelectInputProcessor.KEY_DOWN, false) || cursor[0]) {
+		} else if (property.isPressed(keystate, keytime, MusicSelectKey.DOWN, false) || cursor[0]) {
 			long l = System.currentTimeMillis();
 			if (duration == 0) {
 				keyinput = true;
