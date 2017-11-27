@@ -325,6 +325,7 @@
                   				<RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
                               <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
                               <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
+                              <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="30.0" />
                               <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
                               <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
                               <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
@@ -341,12 +342,16 @@
                   	    <ComboBox fx:id="fixhispeed" prefWidth="150.0" GridPane.columnIndex="3" GridPane.rowIndex="2" />
                               <Label text="%NOTE_MODIFIER" GridPane.rowIndex="3" />
                               <ComboBox fx:id="scoreop" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                              <Label text="%GAUGE_TYPE" GridPane.columnIndex="2" GridPane.rowIndex="3" />
-                              <ComboBox fx:id="gaugeop" prefWidth="150.0" GridPane.columnIndex="3" GridPane.rowIndex="3" />
-                              <Label text="%LNTYPE" GridPane.rowIndex="4" />
-                              <ComboBox fx:id="lntype" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                               <Label text="%EXPAND_JUDGE" GridPane.columnIndex="2" GridPane.rowIndex="4" />
-                               <Spinner fx:id="exjudge" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="4">
+                              <Label layoutX="10.0" layoutY="84.0" text="%NOTE_MODIFIER2" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                              <ComboBox fx:id="scoreop2" prefWidth="150.0" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+                              <Label layoutX="10.0" layoutY="84.0" text="%DOUBLE_OPTION" GridPane.rowIndex="4" />
+                              <ComboBox fx:id="doubleop" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                              <Label text="%GAUGE_TYPE" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+                              <ComboBox fx:id="gaugeop" prefWidth="150.0" GridPane.columnIndex="3" GridPane.rowIndex="4" />
+                              <Label text="%LNTYPE" GridPane.rowIndex="5" />
+                              <ComboBox fx:id="lntype" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                               <Label text="%EXPAND_JUDGE" GridPane.columnIndex="2" GridPane.rowIndex="5" />
+                               <Spinner fx:id="exjudge" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="5">
                                    <valueFactory>
                                        <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="25" initialValue="100" max="400" min="25" />
                                    </valueFactory>
@@ -369,21 +374,21 @@
               <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="100" max="1000" min="0" />
             </valueFactory>
           </Spinner>
-                              <CheckBox fx:id="constant" mnemonicParsing="false" text="%CONSTANT" GridPane.columnIndex="1" GridPane.rowIndex="5" />
-                              <CheckBox fx:id="bpmguide" mnemonicParsing="false" text="%BPM_GUIDE" GridPane.columnIndex="2" GridPane.rowIndex="5" />
-                              <CheckBox fx:id="legacy" mnemonicParsing="false" text="%LEGACY_NOTE" GridPane.columnIndex="3" GridPane.rowIndex="5" />
-                              <Label text="%ASSIST_OPTION" GridPane.rowIndex="5" />
+                              <CheckBox fx:id="constant" mnemonicParsing="false" text="%CONSTANT" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                              <CheckBox fx:id="bpmguide" mnemonicParsing="false" text="%BPM_GUIDE" GridPane.columnIndex="2" GridPane.rowIndex="6" />
+                              <CheckBox fx:id="legacy" mnemonicParsing="false" text="%LEGACY_NOTE" GridPane.columnIndex="3" GridPane.rowIndex="6" />
+                              <Label text="%ASSIST_OPTION" GridPane.rowIndex="6" />
                               <Label text="%JUDGETIMING" GridPane.rowIndex="2" />
                   				    <Spinner fx:id="judgetiming" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="2">
             <valueFactory>
               <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="0" max="99" min="-99" />
             </valueFactory>
           </Spinner>
-                              <CheckBox fx:id="nomine" mnemonicParsing="false" text="%NO_MINE" GridPane.columnIndex="2" GridPane.rowIndex="6" />
-                              <Label text="%OPTIONS_MISC" GridPane.rowIndex="7" />
-                              <CheckBox fx:id="showhiddennote" mnemonicParsing="false" text="%SHOW_HIDDEN_NOTE" GridPane.columnIndex="2" GridPane.rowIndex="7" />
-                              <CheckBox fx:id="judgeregion" mnemonicParsing="false" text="%JUDGE_REGION" GridPane.columnIndex="1" GridPane.rowIndex="7" />
-                              <CheckBox fx:id="markprocessednote" mnemonicParsing="false" text="%MARK_PROCESSED_NOTE" GridPane.columnIndex="3" GridPane.rowIndex="7" />
+                              <CheckBox fx:id="nomine" mnemonicParsing="false" text="%NO_MINE" GridPane.columnIndex="2" GridPane.rowIndex="7" />
+                              <Label text="%OPTIONS_MISC" GridPane.rowIndex="8" />
+                              <CheckBox fx:id="showhiddennote" mnemonicParsing="false" text="%SHOW_HIDDEN_NOTE" GridPane.columnIndex="2" GridPane.rowIndex="8" />
+                              <CheckBox fx:id="judgeregion" mnemonicParsing="false" text="%JUDGE_REGION" GridPane.columnIndex="1" GridPane.rowIndex="8" />
+                              <CheckBox fx:id="markprocessednote" mnemonicParsing="false" text="%MARK_PROCESSED_NOTE" GridPane.columnIndex="3" GridPane.rowIndex="8" />
                            </children>
                         </GridPane>
                         <HBox prefHeight="9.0" prefWidth="720.0">
