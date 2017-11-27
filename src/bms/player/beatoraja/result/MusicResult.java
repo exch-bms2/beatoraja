@@ -3,24 +3,14 @@ package bms.player.beatoraja.result;
 import static bms.player.beatoraja.ClearType.*;
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
 import com.badlogic.gdx.utils.FloatArray;
 
-import bms.model.BMSModel;
-import bms.model.LongNote;
-import bms.model.Note;
-import bms.model.TimeLine;
-import bms.player.beatoraja.Config;
-import bms.player.beatoraja.IRScoreData;
-import bms.player.beatoraja.MainController;
-import bms.player.beatoraja.MainState;
-import bms.player.beatoraja.PlayerConfig;
-import bms.player.beatoraja.PlayerResource;
-import bms.player.beatoraja.ReplayData;
+import bms.model.*;
+import bms.player.beatoraja.*;
 import bms.player.beatoraja.ir.IRConnection;
 import bms.player.beatoraja.ir.IRResponse;
 import bms.player.beatoraja.select.MusicSelector;
@@ -65,6 +55,8 @@ public class MusicResult extends MainState {
 	public static final int SOUND_FAIL = 1;
 	public static final int SOUND_CLOSE = 2;
 
+	private ResultKeyProperty property;
+
 	public MusicResult(MainController main) {
 		super(main);
 	}
@@ -75,6 +67,11 @@ public class MusicResult extends MainState {
 		setSound(SOUND_CLEAR, "clear.wav", SoundType.SOUND,false);
 		setSound(SOUND_FAIL, "fail.wav", SoundType.SOUND,false);
 		setSound(SOUND_CLOSE, "resultclose.wav", SoundType.SOUND,false);
+
+		property = ResultKeyProperty.valueOf(resource.getBMSModel().getMode().name());
+		if(property == null) {
+			property = ResultKeyProperty.BEAT_7K;
+		}
 
 		updateScoreDatabase();
 		// リプレイの自動保存
@@ -169,7 +166,7 @@ public class MusicResult extends MainState {
 				boolean[] keystate = main.getInputProcessor().getKeystate();
 //				System.out.println(Arrays.toString(keystate));
 				long[] keytime = main.getInputProcessor().getTime();
-				keytime[0] = keytime[2] = keytime[4] = keytime[6] = 0;
+				Arrays.fill(keytime, 0);
 
 				if (resource.getCourseBMSModels() != null) {
 					if (resource.getGauge().get(resource.getGauge().size - 1) <= 0) {
@@ -196,13 +193,24 @@ public class MusicResult extends MainState {
 						main.changeState(MainController.STATE_GRADE_RESULT);
 					}
 				} else {
-					if (resource.getAutoplay() == 0 && keystate[4]) {
+					ResultKeyProperty.ResultKey key = null;
+					for(int i = 0; i < property.getAssignLength(); i++) {
+						if(property.getAssign(i) == ResultKeyProperty.ResultKey.REPLAY_DIFFERENT && keystate[i]) {
+							key = ResultKeyProperty.ResultKey.REPLAY_DIFFERENT;
+							break;
+						}
+						if(property.getAssign(i) == ResultKeyProperty.ResultKey.REPLAY_SAME && keystate[i]) {
+							key = ResultKeyProperty.ResultKey.REPLAY_SAME;
+							break;
+						}
+					}
+					if (resource.getAutoplay() == 0 && key == ResultKeyProperty.ResultKey.REPLAY_DIFFERENT) {
 						Logger.getGlobal().info("オプションを変更せずリプレイ");
 						// オプションを変更せず同じ譜面でリプレイ
 						resource.getReplayData().pattern = null;
 						resource.reloadBMSFile();
 						main.changeState(MainController.STATE_PLAYBMS);
-					} else if (resource.getAutoplay() == 0 && keystate[6]) {
+					} else if (resource.getAutoplay() == 0 && key == ResultKeyProperty.ResultKey.REPLAY_SAME) {
 						// 同じ譜面でリプレイ
 						Logger.getGlobal().info("同じ譜面でリプレイ");
 						resource.reloadBMSFile();
@@ -236,10 +244,15 @@ public class MusicResult extends MainState {
 			if (time > getSkin().getInput()) {
 				boolean[] keystate = main.getInputProcessor().getKeystate();
 				long[] keytime = main.getInputProcessor().getTime();
-				if (resource.getScoreData() == null
-						|| ((keystate[0] && keytime[0] != 0) || (keystate[2] && keytime[2] != 0)
-								|| (keystate[4] && keytime[4] != 0) || (keystate[6] && keytime[6] != 0))) {
-					keytime[0] = keytime[2] = keytime[4] = keytime[6] = 0;
+				boolean ok = false;
+				for(int i = 0; i < property.getAssignLength(); i++) {
+					if(property.getAssign(i) != null && keystate[i] && keytime[i] != 0) {
+						keytime[i] = 0;
+						ok = true;
+					}
+				}
+
+				if (resource.getScoreData() == null || ok) {
 					if (((MusicResultSkin) getSkin()).getRankTime() != 0
 							&& getTimer()[TIMER_RESULT_UPDATESCORE] == Long.MIN_VALUE) {
 						getTimer()[TIMER_RESULT_UPDATESCORE] = time;
