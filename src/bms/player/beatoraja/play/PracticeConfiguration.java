@@ -259,7 +259,7 @@ public class PracticeConfiguration {
 		sprite.draw(titlefont, "GAUGE VALUE : " + property.startgauge, x, y - 88, cursorpos == 4 ? Color.YELLOW : Color.CYAN);
 		sprite.draw(titlefont, "JUDGERANK : " + property.judgerank, x, y - 110, cursorpos == 5 ? Color.YELLOW : Color.CYAN);
 		sprite.draw(titlefont, "TOTAL : " + (int)property.total, x, y - 132, cursorpos == 6 ? Color.YELLOW : Color.CYAN);
-		sprite.draw(titlefont, "FREQENCY : " + property.freq, x, y - 154, cursorpos == 7 ? Color.YELLOW : Color.CYAN);
+		sprite.draw(titlefont, "FREQUENCY : " + property.freq, x, y - 154, cursorpos == 7 ? Color.YELLOW : Color.CYAN);
 		sprite.draw(titlefont, "OPTION-1P : " + RANDOM[property.random], x, y - 176, cursorpos == 8 ? Color.YELLOW : Color.CYAN);
 		if (model.getMode().player == 2) {
 			sprite.draw(titlefont, "OPTION-2P : " + RANDOM[property.random2], x, y - 198, cursorpos == 9 ? Color.YELLOW : Color.CYAN);

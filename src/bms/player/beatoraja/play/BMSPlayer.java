@@ -402,6 +402,9 @@ public class BMSPlayer extends MainState {
 				control.setEnableControl(true);
 				if (property.freq != 100) {
 					model.setFrequency(property.freq / 100f);
+					if (getMainController().getConfig().getAudioFreqOption() == Config.AUDIO_PLAY_FREQ) {
+						getMainController().getAudioProcessor().setGlobalPitch(property.freq / 100f);
+					}
 				}
 				model.setTotal(property.total);
 				PracticeModifier pm = new PracticeModifier(property.starttime * 100 / property.freq,
@@ -516,6 +519,7 @@ public class BMSPlayer extends MainState {
 			keyinput.stopJudge();
 
 			if (now - timer[TIMER_FAILED] > skin.getClose()) {
+				getMainController().getAudioProcessor().setGlobalPitch(1f);
 				if (resource.mediaLoadFinished()) {
 					resource.getBGAManager().stop();
 				}
@@ -550,6 +554,7 @@ public class BMSPlayer extends MainState {
 			}
 			keyinput.stopJudge();
 			if (now - timer[TIMER_FADEOUT] > skin.getFadeout()) {
+				getMainController().getAudioProcessor().setGlobalPitch(1f);
 				resource.getBGAManager().stop();
 				if (autoplay != 1 && autoplay != 2) {
 					resource.setScoreData(createScoreData());
@@ -584,6 +589,9 @@ public class BMSPlayer extends MainState {
 
 	public void setPlaySpeed(int playspeed) {
 		this.playspeed = playspeed;
+		if (getMainController().getConfig().getAudioFastForward() == Config.AUDIO_PLAY_FREQ) {
+			getMainController().getAudioProcessor().setGlobalPitch(playspeed / 100f);
+		}
 	}
 
 	public void input() {
@@ -706,8 +714,8 @@ public class BMSPlayer extends MainState {
 		Logger.getGlobal().info("システム描画のリソース解放");
 	}
 
-	public void play(Note note, float volume) {
-		getMainController().getAudioProcessor().play(note, volume);
+	public void play(Note note, float volume, int pitchShift) {
+		getMainController().getAudioProcessor().play(note, volume, pitchShift);
 	}
 
 	public void stop(Note note) {
@@ -787,7 +795,7 @@ public class BMSPlayer extends MainState {
 				// BGレーン再生
 				while (p < timelines.length && timelines[p].getMicroTime() <= time) {
 					for (Note n : timelines[p].getBackGroundNotes()) {
-						play(n, config.getBgvolume());
+						play(n, config.getBgvolume(), 0);
 					}
 					p++;
 				}

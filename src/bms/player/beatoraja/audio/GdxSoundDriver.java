@@ -109,13 +109,13 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 	
 	
 	@Override
-	protected void play(Sound pcm, int channel, float volume) {
+	protected void play(Sound pcm, int channel, float volume, float pitch) {
 		if(soundthread) {
-			mixer.put(pcm, channel, volume);
+			mixer.put(pcm, channel, volume, getGlobalPitch() * pitch);
 		} else {
 			synchronized (lock) {
 				sounds[soundPos].sound = pcm;
-				sounds[soundPos].id = pcm.play(volume);
+				sounds[soundPos].id = pcm.play(volume, getGlobalPitch() * pitch, 0);
 				sounds[soundPos].channel = channel;
 				soundPos = (soundPos + 1) % sounds.length;
 			}
@@ -164,14 +164,16 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 
 		private Sound[] sound = new Sound[256];
 		private float[] volume = new float[256];
+		private float[] pitch = new float[256];
 		private int[] channels = new int[256];
 		private long[] ids = new long[256];
 		private int cpos;
 		private int pos;
 
-		public synchronized void put(Sound sound, int channel, float volume) {
+		public synchronized void put(Sound sound, int channel, float volume, float pitch) {
 			this.sound[cpos] = sound;
 			this.volume[cpos] = volume;
+			this.pitch[cpos] = pitch;
 			this.channels[cpos] = channel;
 			cpos = (cpos + 1) % this.sound.length;
 		}
@@ -188,7 +190,7 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 		public void run() {
 			for(;;) {
 				if(pos != cpos) {
-					ids[pos] = sound[pos].play(this.volume[pos]);
+					ids[pos] = sound[pos].play(this.volume[pos], getGlobalPitch() * this.pitch[pos], 0);
 					pos = (pos + 1) % this.sound.length;
 				} else {
 					try {
