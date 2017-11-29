@@ -103,6 +103,10 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private ComboBox<Integer> scoreop;
 	@FXML
+	private ComboBox<Integer> scoreop2;
+	@FXML
+	private ComboBox<Integer> doubleop;
+	@FXML
 	private ComboBox<Integer> gaugeop;
 	@FXML
 	private ComboBox<Integer> lntype;
@@ -233,8 +237,11 @@ public class PlayConfigurationView implements Initializable {
 			}
 		});
 		resolution.setButtonCell(new ResolutionListCell());
-		initComboBox(scoreop, new String[] { "OFF", "MIRROR", "RANDOM", "R-RANDOM", "S-RANDOM", "SPIRAL", "H-RANDOM",
-				"ALL-SCR", "RANDOM-EX", "S-RANDOM-EX" });
+		String[] scoreOptions = new String[] { "OFF", "MIRROR", "RANDOM", "R-RANDOM", "S-RANDOM", "SPIRAL", "H-RANDOM",
+				"ALL-SCR", "RANDOM-EX", "S-RANDOM-EX" };
+		initComboBox(scoreop, scoreOptions);
+		initComboBox(scoreop2, scoreOptions);
+		initComboBox(doubleop, new String[] { "OFF", "FLIP", "BATTLE" });
 		initComboBox(gaugeop, new String[] { "ASSIST EASY", "EASY", "NORMAL", "HARD", "EX-HARD", "HAZARD" });
 		initComboBox(bgaop, new String[] { "ON", "AUTOPLAY ", "OFF" });
 		initComboBox(bgaexpand, new String[] { "Full", "Keep Aspect Ratio", "Off" });
@@ -403,6 +410,8 @@ public class PlayConfigurationView implements Initializable {
 		playername.setText(player.getName());
 
 		scoreop.getSelectionModel().select(player.getRandom());
+		scoreop2.getSelectionModel().select(player.getRandom2());
+		doubleop.getSelectionModel().select(player.getDoubleoption());
 		gaugeop.getSelectionModel().select(player.getGauge());
 		lntype.getSelectionModel().select(player.getLnmode());
 
@@ -502,6 +511,8 @@ public class PlayConfigurationView implements Initializable {
 		}
 
 		player.setRandom(scoreop.getValue());
+		player.setRandom2(scoreop2.getValue());
+		player.setDoubleoption(doubleop.getValue());
 		player.setGauge(gaugeop.getValue());
 		player.setLnmode(lntype.getValue());
 		player.setFixhispeed(fixhispeed.getValue());
