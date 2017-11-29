@@ -3,6 +3,7 @@ package bms.player.beatoraja.select;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.play.TargetProperty;
+import bms.player.beatoraja.select.MusicSelectKeyProperty.MusicSelectKey;
 import bms.player.beatoraja.select.bar.*;
 import bms.player.beatoraja.song.SongData;
 import com.badlogic.gdx.Gdx;
@@ -14,6 +15,8 @@ import java.nio.file.Paths;
 
 import static bms.player.beatoraja.select.MusicSelector.*;
 import static bms.player.beatoraja.skin.SkinProperty.*;
+
+import static bms.player.beatoraja.select.MusicSelectKeyProperty.MusicSelectKey.*;
 
 /**
  * 選曲の入力処理用クラス
@@ -35,32 +38,6 @@ public class MusicSelectInputProcessor {
     private final int durationhigh = 50;
 
     private final MusicSelector select;
-
-    public static final int KEY_PLAY = 1;
-    public static final int KEY_AUTO = 2;
-    public static final int KEY_REPLAY = 3;
-    public static final int KEY_UP = 4;
-    public static final int KEY_DOWN = 5;
-    public static final int KEY_FOLDER_OPEN = 6;
-    public static final int KEY_FOLDER_CLOSE = 7;
-    public static final int KEY_PRACTICE = 8;
-
-    public static final int[][][] keyassign = {
-            {
-                    {KEY_PLAY, KEY_FOLDER_OPEN}, {KEY_FOLDER_CLOSE}, {KEY_PRACTICE, KEY_FOLDER_OPEN}, {KEY_FOLDER_CLOSE}
-                    , {KEY_FOLDER_OPEN, KEY_AUTO}, {KEY_FOLDER_CLOSE},{KEY_FOLDER_OPEN, KEY_REPLAY}, {KEY_UP}, {KEY_DOWN}
-            },
-            {
-                    {KEY_AUTO}, {}, {KEY_FOLDER_CLOSE}, {KEY_DOWN}
-                    , {KEY_PLAY}, {KEY_UP},{KEY_PRACTICE, KEY_FOLDER_OPEN}, {}, {KEY_REPLAY}
-            },
-            {
-                    {KEY_PLAY, KEY_FOLDER_OPEN}, {KEY_FOLDER_CLOSE}, {KEY_PRACTICE, KEY_FOLDER_OPEN}, {KEY_FOLDER_CLOSE}
-                    , {KEY_FOLDER_OPEN, KEY_AUTO}, {KEY_FOLDER_CLOSE},{KEY_FOLDER_OPEN, KEY_REPLAY}, {KEY_UP}, {KEY_DOWN},
-                    {KEY_PLAY, KEY_FOLDER_OPEN}, {KEY_FOLDER_CLOSE}, {KEY_PRACTICE, KEY_FOLDER_OPEN}, {KEY_FOLDER_CLOSE}
-                    , {KEY_FOLDER_OPEN, KEY_AUTO}, {KEY_FOLDER_CLOSE},{KEY_FOLDER_OPEN, KEY_REPLAY}, {KEY_UP}, {KEY_DOWN},
-            }
-    };
 
     public MusicSelectInputProcessor(MusicSelector select) {
         this.select = select;
@@ -128,6 +105,8 @@ public class MusicSelectInputProcessor {
         long[] keytime = input.getTime();
         boolean[] cursor = input.getCursorState();
         long[] cursortime = input.getCursorTime();
+        
+        final MusicSelectKeyProperty property = MusicSelectKeyProperty.values()[config.getMusicselectinput()];
 
         if (input.startPressed()) {
             bar.resetInput();
@@ -158,7 +137,7 @@ public class MusicSelectInputProcessor {
             int mov = -input.getScroll();
             input.resetScroll();
             // song bar scroll
-            if (select.isPressed(keystate, keytime, KEY_UP, false) || cursor[1]) {
+            if (property.isPressed(keystate, keytime, UP, false) || cursor[1]) {
                 long l = System.currentTimeMillis();
                 if (duration == 0) {
                     mov = 1;
@@ -170,7 +149,7 @@ public class MusicSelectInputProcessor {
                     mov = 1;
                     angle = durationhigh;
                 }
-            } else if (select.isPressed(keystate, keytime, KEY_DOWN, false) || cursor[0]) {
+            } else if (property.isPressed(keystate, keytime, DOWN, false) || cursor[0]) {
                 long l = System.currentTimeMillis();
                 if (duration == 0) {
                     mov = -1;
@@ -274,22 +253,22 @@ public class MusicSelectInputProcessor {
             select.setPanelState(0);
 
             if (current instanceof SelectableBar) {
-                if (select.isPressed(keystate, keytime, KEY_PLAY, true) || (cursor[3] && cursortime[3] != 0)) {
+                if (property.isPressed(keystate, keytime, PLAY, true) || (cursor[3] && cursortime[3] != 0)) {
                     // play
                     cursortime[3] = 0;
                     select.selectSong(0);
-                } else if (select.isPressed(keystate, keytime, KEY_PRACTICE, true)) {
+                } else if (property.isPressed(keystate, keytime, PRACTICE, true)) {
                     // practice mode
                     select.selectSong(2);
-                } else if (select.isPressed(keystate, keytime, KEY_AUTO, true)) {
+                } else if (property.isPressed(keystate, keytime, AUTO, true)) {
                     // auto play
                     select.selectSong(1);
-                } else if (select.isPressed(keystate, keytime, KEY_REPLAY, true)) {
+                } else if (property.isPressed(keystate, keytime, MusicSelectKey.REPLAY, true)) {
                     // replay
                     select.selectSong(3);
                 }
             } else {
-                if (select.isPressed(keystate, keytime, KEY_FOLDER_OPEN, true) || (cursor[3] && cursortime[3] != 0)) {
+                if (property.isPressed(keystate, keytime, FOLDER_OPEN, true) || (cursor[3] && cursortime[3] != 0)) {
                     // open folder
                     cursortime[3] = 0;
                     if (bar.updateBar(current)) {
@@ -311,7 +290,7 @@ public class MusicSelectInputProcessor {
                 }
             }
             // close folder
-            if (select.isPressed(keystate, keytime, KEY_FOLDER_CLOSE, true) || (cursor[2] && cursortime[2] != 0)) {
+            if (property.isPressed(keystate, keytime, FOLDER_CLOSE, true) || (cursor[2] && cursortime[2] != 0)) {
                 keytime[1] = 0;
                 cursortime[2] = 0;
                 bar.close();

@@ -231,14 +231,14 @@ public class JudgeManager {
 					// ここにオートプレイ処理を入れる
 					if (note instanceof NormalNote && note.getState() == 0) {
 						auto_presstime[laneassign[lane][0]] = now;
-						main.play(note, config.getKeyvolume());
+						main.play(note, config.getKeyvolume(), 0);
 						this.update(lane, note, time, 0, 0);
 					}
 					if (note instanceof LongNote) {
 						final LongNote ln = (LongNote) note;
 						if (!ln.isEnd() && ln.getState() == 0 && processing[lane] == null) {
 							auto_presstime[laneassign[lane][0]] = now;
-							main.play(note, config.getKeyvolume());
+							main.play(note, config.getKeyvolume(), 0);
 							if ((lntype == BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
 									|| ln.getType() == LongNote.TYPE_LONGNOTE) {
 								passingcount[lane] = 0;
@@ -256,7 +256,7 @@ public class JudgeManager {
 									auto_presstime[laneassign[lane][1]] = now;
 								}
 								this.update(lane, ln, time, 0, 0);
-								main.play(processing[lane], config.getKeyvolume());
+								main.play(processing[lane], config.getKeyvolume(), 0);
 								processing[lane] = null;
 							}
 						}
@@ -346,7 +346,7 @@ public class JudgeManager {
 
 						this.update(lane, processing[lane], time, j, dtime);
 //						 System.out.println("BSS終端判定 - Time : " + ptime + " Judge : " + j + " LN : " + processing[lane].hashCode());
-						main.play(processing[lane], config.getKeyvolume());
+						main.play(processing[lane], config.getKeyvolume(), 0);
 						processing[lane] = null;
 						sckey[sc] = 0;
 					} else {
@@ -364,7 +364,7 @@ public class JudgeManager {
 						if (tnote instanceof LongNote) {
 							// ロングノート処理
 							final LongNote ln = (LongNote) tnote;
-							main.play(tnote, config.getKeyvolume());
+							main.play(tnote, config.getKeyvolume(), 0);
 							if (((lntype == BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
 									|| ln.getType() == LongNote.TYPE_LONGNOTE)
 									&& j < 4) {
@@ -382,12 +382,15 @@ public class JudgeManager {
 								}
 							}
 						} else {
-							main.play(tnote, config.getKeyvolume());
+							main.play(tnote, config.getKeyvolume(), 0);
 							// 通常ノート処理
 							final int dtime = (int) (tnote.getTime() - ptime);
 							this.update(lane, tnote, time, j, dtime);
 						}
 					} else {
+						// 空POOR判定がないときのレーザー色変更処理
+						this.judge[player[lane]][offset[lane]] = 0;
+						
 						// 空POOR判定がないときのキー音処理
 						Note n = null;
 						boolean sound = false;
@@ -405,14 +408,14 @@ public class JudgeManager {
 								n = note;
 							}
 							if (n != null && note.getTime() >= ptime) {
-								main.play(n, config.getKeyvolume());
+								main.play(n, config.getKeyvolume(), 0);
 								sound = true;
 								break;
 							}							
 						}
 						
 						if (!sound && n != null) {
-							main.play(n, config.getKeyvolume());
+							main.play(n, config.getKeyvolume(), 0);
 						}
 					}
 				}
@@ -443,7 +446,7 @@ public class JudgeManager {
 								main.stop(processing[lane].getPair());
 							}
 							this.update(lane, processing[lane], time, j, dtime);
-							main.play(processing[lane], config.getKeyvolume());
+							main.play(processing[lane], config.getKeyvolume(), 0);
 							processing[lane] = null;							
 						}
 					} else {
@@ -456,7 +459,7 @@ public class JudgeManager {
 							main.stop(processing[lane].getPair());
 						}
 						this.update(lane, processing[lane].getPair(), time, j, dtime);
-						main.play(processing[lane], config.getKeyvolume());
+						main.play(processing[lane], config.getKeyvolume(), 0);
 						processing[lane] = null;
 					}
 				}
@@ -480,7 +483,7 @@ public class JudgeManager {
 					}
 				}
 				this.update(lane, processing[lane].getPair(), time, j, passingcount[lane]);
-				main.play(processing[lane], config.getKeyvolume());
+				main.play(processing[lane], config.getKeyvolume(), 0);
 				processing[lane] = null;
 			}
 			// 見逃しPOOR判定

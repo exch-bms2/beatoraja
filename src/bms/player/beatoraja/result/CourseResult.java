@@ -3,19 +3,13 @@ package bms.player.beatoraja.result;
 import static bms.player.beatoraja.ClearType.*;
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.logging.Logger;
 
 import com.badlogic.gdx.utils.FloatArray;
 
 import bms.model.BMSModel;
-import bms.player.beatoraja.IRScoreData;
-import bms.player.beatoraja.MainController;
-import bms.player.beatoraja.MainState;
-import bms.player.beatoraja.PlayerConfig;
-import bms.player.beatoraja.PlayerResource;
-import bms.player.beatoraja.ReplayData;
+import bms.player.beatoraja.*;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.skin.SkinType;
 
@@ -34,6 +28,8 @@ public class CourseResult extends MainState {
 	public static final int SOUND_CLOSE = 2;
 
 	private IRScoreData newscore;
+
+	private ResultKeyProperty property;
 
 	public CourseResult(MainController main) {
 		super(main);
@@ -55,6 +51,11 @@ public class CourseResult extends MainState {
             }
             resource.getCourseGauge().add(list);
         }
+
+		property = ResultKeyProperty.valueOf(resource.getBMSModel().getMode().name());
+		if(property == null) {
+			property = ResultKeyProperty.BEAT_7K;
+		}
 
 		updateScoreDatabase();
 
@@ -157,10 +158,16 @@ public class CourseResult extends MainState {
         if (getTimer()[TIMER_FADEOUT] == Long.MIN_VALUE && getTimer()[TIMER_STARTINPUT] != Long.MIN_VALUE) {
             boolean[] keystate = main.getInputProcessor().getKeystate();
             long[] keytime = main.getInputProcessor().getTime();
-            if (resource.getScoreData() == null
-                    || ((keystate[0] && keytime[0] != 0) || (keystate[2] && keytime[2] != 0)
-                    || (keystate[4] && keytime[4] != 0) || (keystate[6] && keytime[6] != 0))) {
-                keytime[0] = keytime[2] = keytime[4] = keytime[6] = 0;
+
+			boolean ok = false;
+			for(int i = 0; i < property.getAssignLength(); i++) {
+				if(property.getAssign(i) != null && keystate[i] && keytime[i] != 0) {
+					keytime[i] = 0;
+					ok = true;
+				}
+			}
+
+			if (resource.getScoreData() == null || ok) {
                 if (((CourseResultSkin) getSkin()).getRankTime() != 0 && getTimer()[TIMER_RESULT_UPDATESCORE] == Long.MIN_VALUE) {
                     getTimer()[TIMER_RESULT_UPDATESCORE] = time;
                 } else {

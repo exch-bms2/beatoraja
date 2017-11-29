@@ -23,7 +23,7 @@ public class GdxAudioDeviceDriver extends AbstractAudioDriver {
 	}
 
 	@Override
-	protected void play(Object wav, int channel, float volume) {
+	protected void play(Object wav, int channel, float volume, float pitch) {
 		// TODO Auto-generated method stub
 		
 	}

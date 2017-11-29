@@ -67,8 +67,10 @@ public interface AudioDriver extends Disposable {
 	 *            Note
 	 * @param volume
 	 *            ボリューム(0.0 - 1.0)
+	 * @param pitch
+	 *            ピッチ変化(-12 - 12)
 	 */
-	public void play(Note n, float volume);
+	public void play(Note n, float volume, int pitch);
 
 	/**
 	 * 指定したNoteの音を止める。nullの場合は再生されている音を全て止める
@@ -77,4 +79,17 @@ public interface AudioDriver extends Disposable {
 	 *            Note
 	 */
 	public void stop(Note n);
+
+	/**
+	 * 全体のピッチを変更する。可能な場合は再生中の音のピッチも変更する
+	 *
+	 * @param pitch ピッチ(0.5 - 2.0)
+	 */
+	public void setGlobalPitch(float pitch);
+
+	/**
+	 * 全体のピッチを取得する
+	 * @return ピッチ(0.5 - 2.0)
+	 */
+	public float getGlobalPitch();
 }
