@@ -112,32 +112,42 @@ public class MusicSelectInputProcessor {
             bar.resetInput();
             // show play option
             select.setPanelState(1);
-            if (keystate[0] && keytime[0] != 0) {
-                keytime[0] = 0;
-                config.setRandom(config.getRandom() + 1 < 10 ? config.getRandom() + 1 : 0);
+            if (property.isPressed(keystate, keytime, OPTION1_DOWN, true)) {
+                config.setRandom((config.getRandom() + 1) % 10);
             }
-            if (keystate[2] && keytime[2] != 0) {
-                keytime[2] = 0;
-                config.setGauge(config.getGauge() + 1 < 6 ? config.getGauge() + 1 : 0);
+            if (property.isPressed(keystate, keytime, OPTION1_UP, true)) {
+                config.setRandom((config.getRandom() + 9) % 10);
             }
-            if (keystate[3] && keytime[3] != 0) {
-                keytime[3] = 0;
-                config.setDoubleoption(config.getDoubleoption() + 1 < 3 ? config.getDoubleoption() + 1 : 0);
+            if (property.isPressed(keystate, keytime, GAUGE_DOWN, true)) {
+                config.setGauge((config.getGauge() + 1) % 6);
             }
-            if (keystate[6] && keytime[6] != 0) {
-                keytime[6] = 0;
-                config.setRandom2(config.getRandom2() + 1 < 10 ? config.getRandom2() + 1 : 0);
+            if (property.isPressed(keystate, keytime, GAUGE_UP, true)) {
+                config.setGauge((config.getGauge() + 5) % 6);
             }
-            if (keystate[4] && keytime[4] != 0) {
-                keytime[4] = 0;
-                config.setFixhispeed(config.getFixhispeed() + 1 < 5 ? config.getFixhispeed() + 1 : 0);
+            if (property.isPressed(keystate, keytime, OPTIONDP_DOWN, true)) {
+                config.setDoubleoption((config.getDoubleoption() + 1) % 3);
+            }
+            if (property.isPressed(keystate, keytime, OPTIONDP_UP, true)) {
+                config.setDoubleoption((config.getDoubleoption() + 2) % 3);
+            }
+            if (property.isPressed(keystate, keytime, OPTION2_DOWN, true)) {
+                config.setRandom2((config.getRandom2() + 1) % 10);
+            }
+            if (property.isPressed(keystate, keytime, OPTION2_UP, true)) {
+                config.setRandom2((config.getRandom2() + 9) % 10);
+            }
+            if (property.isPressed(keystate, keytime, HSFIX_DOWN, true)) {
+                config.setFixhispeed((config.getFixhispeed() + 1) % 5);
+            }
+            if (property.isPressed(keystate, keytime, HSFIX_UP, true)) {
+                config.setFixhispeed((config.getFixhispeed() + 4) % 5);
             }
 
             // song bar scroll on mouse wheel
             int mov = -input.getScroll();
             input.resetScroll();
             // song bar scroll
-            if (property.isPressed(keystate, keytime, UP, false) || cursor[1]) {
+            if (property.isPressed(keystate, keytime, TARGET_UP, false) || cursor[1]) {
                 long l = System.currentTimeMillis();
                 if (duration == 0) {
                     mov = 1;
@@ -149,7 +159,7 @@ public class MusicSelectInputProcessor {
                     mov = 1;
                     angle = durationhigh;
                 }
-            } else if (property.isPressed(keystate, keytime, DOWN, false) || cursor[0]) {
+            } else if (property.isPressed(keystate, keytime, TARGET_DOWN, false) || cursor[0]) {
                 long l = System.currentTimeMillis();
                 if (duration == 0) {
                     mov = -1;
@@ -183,32 +193,25 @@ public class MusicSelectInputProcessor {
             bar.resetInput();
             // show assist option
             select.setPanelState(2);
-            if (keystate[0] && keytime[0] != 0) {
-                keytime[0] = 0;
+            if (property.isPressed(keystate, keytime, JUDGEWINDOW_UP, true)) {
                 config.setJudgewindowrate(config.getJudgewindowrate() == 100 ? 400 : 100);
             }
-            if (keystate[1] && keytime[1] != 0) {
-                keytime[1] = 0;
+            if (property.isPressed(keystate, keytime, CONSTANT, true)) {
                 config.setConstant(!config.isConstant());
             }
-            if (keystate[2] && keytime[2] != 0) {
-                keytime[2] = 0;
+            if (property.isPressed(keystate, keytime, JUDGEAREA, true)) {
                 config.setShowjudgearea(!config.isShowjudgearea());
             }
-            if (keystate[3] && keytime[3] != 0) {
-                keytime[3] = 0;
+            if (property.isPressed(keystate, keytime, LEGACYNOTE, true)) {
                 config.setLegacynote(!config.isLegacynote());
             }
-            if (keystate[4] && keytime[4] != 0) {
-                keytime[4] = 0;
+            if (property.isPressed(keystate, keytime, MARKNOTE, true)) {
                 config.setMarkprocessednote(!config.isMarkprocessednote());
             }
-            if (keystate[5] && keytime[5] != 0) {
-                keytime[5] = 0;
+            if (property.isPressed(keystate, keytime, BPMGUIDE, true)) {
                 config.setBpmguide(!config.isBpmguide());
             }
-            if (keystate[6] && keytime[6] != 0) {
-                keytime[6] = 0;
+            if (property.isPressed(keystate, keytime, NOMINE, true)) {
                 config.setNomine(!config.isNomine());
             }
         } else if (input.getNumberState()[5]) {
@@ -220,30 +223,25 @@ public class MusicSelectInputProcessor {
                 SongBar song = (SongBar) current;
                 pc = config.getPlayConfig(song.getSongData().getMode());
             }
-            if (keystate[0] && keytime[0] != 0) {
-                keytime[0] = 0;
+            if (property.isPressed(keystate, keytime, BGA_DOWN, true)) {
                 resource.getConfig().setBga((resource.getConfig().getBga() + 1) % 3);
             }
-            if (keystate[3] && keytime[3] != 0) {
-                keytime[3] = 0;
+            if (property.isPressed(keystate, keytime, DURATION_DOWN, true)) {
                 if (pc != null && pc.getDuration() > 1) {
                     pc.setDuration(pc.getDuration() - 1);
                 }
             }
-            if (keystate[4] && keytime[4] != 0) {
-                keytime[4] = 0;
+            if (property.isPressed(keystate, keytime, JUDGETIMING_DOWN, true)) {
                 if (config.getJudgetiming() > -99) {
                     config.setJudgetiming(config.getJudgetiming() - 1);
                 }
             }
-            if (keystate[5] && keytime[5] != 0) {
-                keytime[5] = 0;
+            if (property.isPressed(keystate, keytime, DURATION_UP, true)) {
                 if (pc != null && pc.getDuration() < 2000) {
                     pc.setDuration(pc.getDuration() + 1);
                 }
             }
-            if (keystate[6] && keytime[6] != 0) {
-                keytime[6] = 0;
+            if (property.isPressed(keystate, keytime, JUDGETIMING_UP, true)) {
                 if (config.getJudgetiming() < 99) {
                     config.setJudgetiming(config.getJudgetiming() + 1);
                 }
