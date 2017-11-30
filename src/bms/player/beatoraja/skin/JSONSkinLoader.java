@@ -79,7 +79,7 @@ public class JSONSkinLoader extends SkinLoader{
 						op[j] = pr.item[j].op;
 						name[j] = pr.item[j].name;
 					}
-					options[i] = new SkinHeader.CustomOption(pr.name, op, name);
+					options[i] = new SkinHeader.CustomOption(pr.name, op, name, pr.def);
 				}
 				header.setCustomOptions(options);
 
@@ -894,6 +894,7 @@ public class JSONSkinLoader extends SkinLoader{
 	public static class Property {
 		public String name;
 		public PropertyItem[] item = new PropertyItem[0];
+		public String def;
 	}
 
 	public static class PropertyItem {

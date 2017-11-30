@@ -86,17 +86,28 @@ public class SkinConfigurationView {
 			ComboBox<String> combo = new ComboBox<String>();
 			combo.getItems().setAll(option.contents);
 			combo.getSelectionModel().select(0);
+			int selection = -1;
 			for(SkinConfig.Option o : property.getOption()) {
 				if (o.name.equals(option.name)) {
 					int i = o.value;
 					for(int index = 0;index < option.option.length;index++) {
 						if(option.option[index] == i) {
-							combo.getSelectionModel().select(index);
+							selection = index;
 							break;
 						}
 					}
 					break;
 				}
+			}
+			if (selection < 0 && option.def != null) {
+				for (int index = 0; index < option.option.length; index++) {
+					if (option.contents[index].equals(option.def)) {
+						selection = index;
+					}
+				}
+			}
+			if (selection >= 0) {
+				combo.getSelectionModel().select(selection);
 			}
 
 			Label label = new Label(option.name);
