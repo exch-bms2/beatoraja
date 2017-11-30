@@ -22,8 +22,8 @@ import bms.table.Course.Trophy;
 
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter.OutputType;
-import com.sun.scenario.effect.Blend.Mode;
 
+import bms.model.Mode;
 import bms.player.beatoraja.CourseData.TrophyData;
 
 /**
@@ -183,6 +183,7 @@ public class TableDataAccessor {
 				TableData td = new TableData();
 				td.setUrl(url);
 				td.setName(dt.getName());
+				Mode defaultMode = dt.getMode() != null ? Mode.getMode(dt.getMode()) : null;
 				String[] levels = dt.getLevelDescription();
 				List<TableData.TableFolder> tdes = new ArrayList<>(levels.length);
 				for (String lv : levels) {
@@ -191,16 +192,7 @@ public class TableDataAccessor {
 					List<SongData> hashes = new ArrayList<SongData>();
 					for (DifficultyTableElement dte : dt.getElements()) {
 						if (lv.equals(dte.getLevel())) {
-							SongData sd = new SongData();
-							if(dte.getSHA256() != null) {
-								sd.setSha256(dte.getSHA256());
-							} else {
-								sd.setMd5(dte.getMD5());
-							}
-							sd.setTitle(dte.getTitle());
-							sd.setArtist(dte.getArtist());
-							sd.setUrl(dte.getURL());
-							sd.setAppendurl(dte.getAppendURL());
+							SongData sd = toSongData(dte, defaultMode);
 							hashes.add(sd);
 						}
 					}
@@ -217,7 +209,7 @@ public class TableDataAccessor {
 							cd.setName(g.getName());
 							SongData[] songs = new SongData[g.getCharts().length];
 							for(int i = 0;i < songs.length;i++) {
-								songs[i] = toSongData(g.getCharts()[i]);
+								songs[i] = toSongData(g.getCharts()[i], defaultMode);
 							}
 							cd.setSong(songs);
 							List<CourseData.CourseDataConstraint> l = new ArrayList<>();
@@ -255,18 +247,14 @@ public class TableDataAccessor {
 		}
 	}
 
-	private static SongData toSongData(BMSTableElement te) {
+	private static SongData toSongData(BMSTableElement te, Mode defaultMode) {
 		SongData song = new SongData();
 		song.setMd5(te.getMD5());
 		song.setSha256(te.getSHA256());
 		song.setTitle(te.getTitle());
 		song.setArtist(te.getArtist());
-		for(bms.model.Mode mode : bms.model.Mode.values()) {
-			if(mode.hint.equals(te.getMode())) {
-				song.setMode(mode.id);
-				break;
-			}
-		}
+		Mode mode = te.getMode() != null ? Mode.getMode(te.getMode()) : null;
+		song.setMode(mode != null ? mode.id : (defaultMode != null ? defaultMode.id : 0));
 		song.setUrl(te.getURL());
 		
 		if(te instanceof DifficultyTableElement) {
