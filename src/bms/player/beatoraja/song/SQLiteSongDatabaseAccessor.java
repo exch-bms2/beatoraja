@@ -368,8 +368,8 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 							previewpath = p.getFileName().toString();
 						}
 					}
-					if (s.endsWith(".bms") || s.endsWith(".bme") || s.endsWith(".bml") || s.endsWith(".pms")
-							|| s.endsWith(".bmson")) {
+					if ((s.endsWith(".bms") || s.endsWith(".bme") || s.endsWith(".bml") || s.endsWith(".pms")
+							|| s.endsWith(".bmson")) && !(Files.isDirectory(p))) {
 						bmsfiles.add(p);
 					} else if (Files.isDirectory(p)) {
 						dirs.add(p);
