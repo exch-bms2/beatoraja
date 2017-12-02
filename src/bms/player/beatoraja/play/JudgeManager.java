@@ -537,6 +537,7 @@ public class JudgeManager {
 	}
 
 	private final int[] JUDGE_TIMER = { TIMER_JUDGE_1P, TIMER_JUDGE_2P, TIMER_JUDGE_3P };
+	private final int[] COMBO_TIMER = { TIMER_COMBO_1P, TIMER_COMBO_2P, TIMER_COMBO_3P };
 
 	private void update(int lane, Note n, int time, int judge, int fast) {
 		if (judge < 5) {
@@ -567,6 +568,12 @@ public class JudgeManager {
 		final int lanelength = sckeyassign.length;
 		if (judgenow.length > 0) {
 			main.getTimer()[JUDGE_TIMER[lane / (lanelength / judgenow.length)]] = main.getNowTime();
+			if(judgenow.length >= 3) {
+				for(int i = 0 ; i < COMBO_TIMER.length ; i++) {
+					if(i != lane / (lanelength / judgenow.length)) main.getTimer()[COMBO_TIMER[i]] = Long.MIN_VALUE;
+				}
+			}
+			main.getTimer()[COMBO_TIMER[lane / (lanelength / judgenow.length)]] = main.getNowTime();
 			judgenow[lane / (lanelength / judgenow.length)] = judge + 1;
 			judgecombo[lane / (lanelength / judgenow.length)] = main.getJudgeManager().getCourseCombo();
 		}
