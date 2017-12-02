@@ -3,7 +3,9 @@ package bms.player.beatoraja.skin;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.lang.reflect.Array;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 import bms.player.beatoraja.Config;
@@ -13,7 +15,6 @@ import bms.player.beatoraja.play.*;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Json;
 
 import bms.player.beatoraja.decide.MusicDecideSkin;
@@ -21,6 +22,10 @@ import bms.player.beatoraja.result.*;
 import bms.player.beatoraja.select.MusicSelectSkin;
 import bms.player.beatoraja.select.SkinBar;
 import bms.player.beatoraja.select.SkinDistributionGraph;
+import com.badlogic.gdx.utils.JsonValue;
+import com.badlogic.gdx.utils.reflect.ClassReflection;
+import com.badlogic.gdx.utils.reflect.Field;
+import com.badlogic.gdx.utils.reflect.ReflectionException;
 
 import static bms.player.beatoraja.Resolution.*;
 
@@ -54,6 +59,7 @@ public class JSONSkinLoader extends SkinLoader{
 		try {
 			Json json = new Json();
 			json.setIgnoreUnknownFields(true);
+			setSerializers(json, null, p);
 			sk = json.fromJson(JsonSkin.class, new FileReader(p.toFile()));
 
 			if (sk.type != -1) {
@@ -103,6 +109,14 @@ public class JSONSkinLoader extends SkinLoader{
 		try {
 			Json json = new Json();
 			json.setIgnoreUnknownFields(true);
+
+			HashSet<Integer> enabledOptions = new HashSet<>();
+			if (property != null) {
+				for (SkinConfig.Option op : property.getOption()) {
+					enabledOptions.add(op.value);
+				}
+			}
+			setSerializers(json, enabledOptions, p);
 
 			sk = json.fromJson(JsonSkin.class, new FileReader(p.toFile()));
 			Resolution src = HD;
@@ -1090,5 +1104,231 @@ public class JSONSkinLoader extends SkinLoader{
 
 		public int angle = Integer.MIN_VALUE;
 
+	}
+
+	private static void setSerializers(Json json, HashSet<Integer> enabledOptions, Path path) {
+		Class[] classes = {
+				Property.class,
+				Filepath.class,
+				Offset.class,
+				Source.class,
+				Font.class,
+				Image.class,
+				ImageSet.class,
+				Value.class,
+				Text.class,
+				Slider.class,
+				Graph.class,
+				GaugeGraph.class,
+				JudgeGraph.class,
+				NoteSet.class,
+				Gauge.class,
+				BGA.class,
+				Judge.class,
+				SongList.class,
+				Destination.class,
+				Animation.class,
+		};
+		for (Class c : classes) {
+			json.setSerializer(c, new ObjectSerializer<>(enabledOptions, path));
+		}
+
+		Class[] array_classes = {
+				Property[].class,
+				Filepath[].class,
+				Offset[].class,
+				Source[].class,
+				Font[].class,
+				Image[].class,
+				ImageSet[].class,
+				Value[].class,
+				Text[].class,
+				Slider[].class,
+				Graph[].class,
+				GaugeGraph[].class,
+				JudgeGraph[].class,
+				Judge[].class,
+				Destination[].class,
+				Animation[].class,
+		};
+		for (Class c : array_classes) {
+			json.setSerializer(c, new ArraySerializer<>(enabledOptions, path));
+		}
+	}
+
+	private static abstract class Serializer<T> extends Json.ReadOnlySerializer<T> {
+
+		HashSet<Integer> options;
+		Path path;
+
+		public Serializer(HashSet<Integer> op, Path path) {
+			this.options = op != null ? op : new HashSet<>();
+			this.path = path;
+		}
+
+		// test "if" as follows:
+		// 901 -> 901 enabled
+		// [901, 911] -> 901 enabled && 911 enabled
+		// [[901, 902], 911] -> (901 || 902) && 911
+		// -901 -> 901 disabled
+		protected boolean testOption(JsonValue ops) {
+			if (ops == null) {
+				return true;
+			} else if (ops.isNumber()) {
+				return testNumber(ops.asInt());
+			} else if (ops.isArray()) {
+				boolean enabled = true;
+				for (int j = 0; j < ops.size; j++) {
+					JsonValue ops2 = ops.get(j);
+					if (ops2.isNumber()) {
+						enabled = testNumber(ops2.asInt());
+					} else if (ops2.isArray()) {
+						boolean enabled_sub = false;
+						for (int k = 0; k < ops2.size; k++) {
+							JsonValue ops3 = ops2.get(k);
+							if (ops3.isNumber() && testNumber(ops3.asInt())) {
+								enabled_sub = true;
+								break;
+							}
+						}
+						enabled = enabled_sub;
+					} else {
+						enabled = false;
+					}
+					if (!enabled)
+						break;
+				}
+				return enabled;
+			} else {
+				return false;
+			}
+		}
+
+		private boolean testNumber(int op) {
+			return op >= 0 ? options.contains(op) : !options.contains(-op);
+		}
+	}
+
+	private static class ObjectSerializer<T> extends Serializer<T> {
+
+		public ObjectSerializer(HashSet<Integer> op, Path path) {
+			super(op, path);
+		}
+
+		public T read(Json json, JsonValue jsonValue, Class cls) {
+			if (jsonValue.isArray()) {
+				// conditional branch
+				// take first clause satisfying its conditions
+				JsonValue val = null;
+				for (int i = 0; i < jsonValue.size; i++) {
+					JsonValue branch = jsonValue.get(i);
+					if (testOption(branch.get("if"))) {
+						val = branch.get("value");
+						break;
+					}
+				}
+				return (T)json.readValue(cls, val);
+			} else if (jsonValue.isObject() && jsonValue.has("include")) {
+				Json subJson = new Json();
+				subJson.setIgnoreUnknownFields(true);
+				Path subPath = path.resolveSibling(Paths.get(jsonValue.get("include").asString()));
+				setSerializers(subJson, this.options, subPath);
+				try {
+					return (T)subJson.fromJson(cls, new FileReader(subPath.toFile()));
+				} catch (FileNotFoundException e) {
+					return null;
+				}
+			} else {
+				// literal
+				T instance = null;
+				try {
+					instance = (T)ClassReflection.newInstance(cls);
+				} catch (ReflectionException e) {
+					e.printStackTrace();
+					return null;
+				}
+				try {
+					Field[] fields = ClassReflection.getFields(cls);
+					for (JsonValue child = jsonValue.child; child != null; child = child.next) {
+						for (Field field : fields) {
+							if (field.getName().equals(child.name)) {
+								field.set(instance, json.readValue(field.getType(), child));
+								break;
+							}
+						}
+					}
+				} catch (ReflectionException e) {
+				} catch (NullPointerException e) {
+				}
+				return instance;
+			}
+		}
+	}
+
+	private static class ArraySerializer<T> extends Serializer<T[]> {
+
+		public ArraySerializer(HashSet<Integer> op, Path path) {
+			super(op, path);
+		}
+
+		public T[] read(Json json, JsonValue jsonValue, Class cls) {
+			Class componentClass = cls.getComponentType();
+			ArrayList<T> items = new ArrayList<T>();
+			try {
+				if (jsonValue.isArray()) {
+					for (int i = 0; i < jsonValue.size; i++) {
+						JsonValue item = jsonValue.get(i);
+						if (item.isObject() && item.has("if") && (item.has("value") || item.has("values"))) {
+							// conditional item(s)
+							// add item(s) to array if conditions are satisfied
+							JsonValue value = item.get("value");
+							JsonValue values = item.get("values");
+							if (testOption(item.get("if"))) {
+								if (value != null) {
+									T obj = (T) json.readValue(componentClass, value);
+									items.add(obj);
+								}
+								if (values != null) {
+									T[] objs = (T[]) json.readValue(cls, values);
+									Collections.addAll(items, objs);
+								}
+							}
+						} else if (item.isObject() && item.has("include")) {
+							// array include (inside)
+							includeArray(json, item, cls, items);
+						} else {
+							// single item
+							T obj = (T)json.readValue(componentClass, item);
+							items.add(obj);
+						}
+					}
+				} else if (jsonValue.isObject() && jsonValue.has("include")) {
+					// array include (outside)
+					includeArray(json, jsonValue, cls, items);
+				} else if (jsonValue.isObject()) {
+					// regard as a single item
+					T obj = (T)json.readValue(componentClass, jsonValue);
+					items.add(obj);
+				}
+			} catch (NullPointerException e) {
+			}
+			Object array = Array.newInstance(componentClass, items.size());
+			for (int i=0; i<items.size(); i++) {
+				Array.set(array, i, items.get(i));
+			}
+			return (T[])array;
+		}
+
+		private void includeArray(Json json, JsonValue jsonValue, Class cls, ArrayList<T> items) {
+			Json subJson = new Json();
+			subJson.setIgnoreUnknownFields(true);
+			Path subPath = path.resolveSibling(Paths.get(jsonValue.get("include").asString()));
+			setSerializers(subJson, this.options, subPath);
+			try {
+				T[] array = (T[])subJson.fromJson(cls, new FileReader(subPath.toFile()));
+				Collections.addAll(items, array);
+			} catch (FileNotFoundException e) {
+			}
+		}
 	}
 }
