@@ -60,8 +60,9 @@ public class SkinJudge extends SkinObject {
 
     @Override
     public void draw(SkinObjectRenderer sprite, long time, MainState state) {
-        final int judgenow = ((BMSPlayer)state).getJudgeManager().getNowJudge()[index] - 1;
+        int judgenow = ((BMSPlayer)state).getJudgeManager().getNowJudge()[index] - 1;
         final int judgecombo = ((BMSPlayer)state).getJudgeManager().getNowCombo()[index];
+	final GrooveGauge gauge = ((BMSPlayer)state).getGauge();
 
         if(judgenow < 0) {
             return;
@@ -70,6 +71,9 @@ public class SkinJudge extends SkinObject {
         if (r != null) {
             int shift = 0;
             if (judgenow < 3) {
+		if(judgenow == 0 && judge.length >= 7 && gauge.getValue() == gauge.getMaxValue()) {
+                    judgenow = 6;
+            	}
             	count[judgenow].draw(sprite, time, judgecombo, state, r.x, r.y);
             	shift = count[judgenow].getLength() / 2;
             }
