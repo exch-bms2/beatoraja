@@ -2,12 +2,16 @@ package bms.player.beatoraja.audio;
 
 import java.io.IOException;
 import java.nio.file.*;
-import java.util.logging.Logger;
 
 import com.portaudio.*;
 
 import bms.player.beatoraja.Config;
 
+/**
+ * 
+ * 
+ * @author exch
+ */
 public class PortAudioDriver extends AbstractAudioDriver<PCM> {
 
 	private static DeviceInfo[] devices;
@@ -123,7 +127,7 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> {
 	}
 
 	@Override
-	protected synchronized void play(PCM pcm, int channel, float volume, float pitch) {
+	protected void play(PCM pcm, int channel, float volume, float pitch) {
 		mixer.put(pcm, channel, volume, pitch, false);
 	}
 
@@ -191,43 +195,49 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> {
 		}
 
 		public long put(PCM pcm, int channel, float volume, float pitch, boolean loop) {
-			for (int i = 0; i < inputs.length; i++) {
-				if (inputs[i].pos == -1) {
-					inputs[i].pcm = pcm;
-					inputs[i].sample = pcm.getSample();
-					inputs[i].volume = volume;
-					inputs[i].pitch = pitch;
-					inputs[i].loop = loop;
-					inputs[i].id = idcount++;
-					inputs[i].channel = channel;
-					inputs[i].pos = 0;
-					return inputs[i].id;
+			synchronized (inputs) {
+				for (MixerInput input : inputs) {
+					if (input.pos == -1) {
+						input.pcm = pcm;
+						input.sample = pcm.getSample();
+						input.volume = volume;
+						input.pitch = pitch;
+						input.loop = loop;
+						input.id = idcount++;
+						input.channel = channel;
+						input.pos = 0;
+						return input.id;
+					}
 				}
 			}
 			return -1;
 		}
 
 		public void setVolume(long id, float volume) {
-			for (int i = 0; i < inputs.length; i++) {
-				if (inputs[i].id == id) {
-					inputs[i].volume = volume;
+			for (MixerInput input : inputs) {
+				if (input.id == id) {
+					input.volume = volume;
 					break;
 				}
 			}
 		}
 
 		public void stop(PCM id) {
-			for (int i = 0; i < inputs.length; i++) {
-				if (inputs[i].pcm == id) {
-					inputs[i].pos = -1;
-				}
+			synchronized (inputs) {
+				for (MixerInput input : inputs) {
+					if (input.pcm == id) {
+						input.pos = -1;
+					}
+				}				
 			}
 		}
 
 		public void stop(PCM id, int channel) {
-			for (int i = 0; i < inputs.length; i++) {
-				if (inputs[i].pcm == id && inputs[i].channel == channel) {
-					inputs[i].pos = -1;
+			synchronized (inputs) {
+				for (MixerInput input : inputs) {
+					if (input.pcm == id && input.channel == channel) {
+						input.pos = -1;
+					}
 				}
 			}
 		}
@@ -235,26 +245,28 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> {
 		public void run() {
 			while(!stop) {
 				try {
-					for (int i = 0; i < buffer.length; i+=2) {
-						float wav_l = 0;
-						float wav_r = 0;
-						for (MixerInput input : inputs) {
-							if (input.pos != -1) {
-								wav_l += ((float) input.sample[input.pos]) * input.volume / Short.MAX_VALUE;
-								wav_r += ((float) input.sample[input.pos+1]) * input.volume / Short.MAX_VALUE;
-								input.posf += getGlobalPitch() * input.pitch;
-								int inc = (int)input.posf;
-								if (inc > 0) {
-									input.pos += 2 * inc;
-									input.posf -= (float)inc;
-								}
-								if (input.pos >= input.sample.length) {
-									input.pos = input.loop ? 0 : -1;
+					synchronized (inputs) {
+						for (int i = 0; i < buffer.length; i+=2) {
+							float wav_l = 0;
+							float wav_r = 0;
+							for (MixerInput input : inputs) {
+								if (input.pos != -1) {
+									wav_l += ((float) input.sample[input.pos]) * input.volume / Short.MAX_VALUE;
+									wav_r += ((float) input.sample[input.pos+1]) * input.volume / Short.MAX_VALUE;
+									input.posf += getGlobalPitch() * input.pitch;
+									int inc = (int)input.posf;
+									if (inc > 0) {
+										input.pos += 2 * inc;
+										input.posf -= (float)inc;
+									}
+									if (input.pos >= input.sample.length) {
+										input.pos = input.loop ? 0 : -1;
+									}
 								}
 							}
-						}
-						buffer[i] = wav_l;
-						buffer[i+1] = wav_r;
+							buffer[i] = wav_l;
+							buffer[i+1] = wav_r;
+						}						
 					}
 					
 					stream.write( buffer, buffer.length / 2);					
