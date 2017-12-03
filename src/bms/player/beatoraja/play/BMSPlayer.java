@@ -368,7 +368,7 @@ public class BMSPlayer extends MainState {
 		// 楽曲ロード
 		case STATE_PRELOAD:
 			if (resource.mediaLoadFinished() && now > skin.getLoadstart() + skin.getLoadend()
-					&& !input.startPressed()) {
+					&& !input.startPressed() && !input.isSelectPressed()) {
 				bga.prepare(this);
 				final long mem = Runtime.getRuntime().freeMemory();
 				System.gc();

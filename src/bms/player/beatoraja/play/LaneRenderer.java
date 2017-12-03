@@ -200,6 +200,11 @@ public class LaneRenderer {
 		return gvalue;
 	}
 
+	public void setGreenValue(int gvalue) {
+		this.gvalue = gvalue < 1 ? 1 : gvalue;
+		setLanecover(lanecover);
+	}
+
 	public int getCurrentDuration() {
 		return currentduration;
 	}
