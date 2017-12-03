@@ -52,7 +52,7 @@ public class CourseResult extends MainState {
             resource.getCourseGauge().add(list);
         }
 
-		property = ResultKeyProperty.valueOf(resource.getBMSModel().getMode().name());
+		property = ResultKeyProperty.get(resource.getBMSModel().getMode());
 		if(property == null) {
 			property = ResultKeyProperty.BEAT_7K;
 		}
