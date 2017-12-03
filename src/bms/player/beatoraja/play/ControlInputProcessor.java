@@ -48,7 +48,7 @@ public class ControlInputProcessor {
 				lanerender.setLanecover(lanerender.getLanecover() - input.getScroll() * 0.005f);
 				input.resetScroll();
 			}
-			if (input.startPressed()) {
+			if (input.startPressed() && !input.isSelectPressed()) {
 				if (autoplay == 0) {
 					// change hi speed by START + Keys
 					boolean[] key = input.getKeystate();
@@ -88,6 +88,33 @@ public class ControlInputProcessor {
 				startpressed = true;
 			} else {
 				startpressed = false;
+			}
+			if(input.isSelectPressed() && !input.startPressed()){
+				if (autoplay == 0) {
+					boolean[] key = input.getKeystate();
+					// change duration by SELECT + Scratch
+					if (key[7] | key[8]) {
+						long l = System.currentTimeMillis();
+						if (l - lanecovertiming > 50) {
+							lanerender.setGreenValue(lanerender.getGreenValue() + (key[7] ? 1 : -1));
+							lanecovertiming = l;
+						}
+					}
+					// change duration by SELECT + Keys
+					if (key[0] || key[2] || key[4] || key[6]) {
+						if (!hschanged) {
+							lanerender.setGreenValue(lanerender.getGreenValue() -1);
+							hschanged = true;
+						}
+					} else if (key[1] || key[3] || key[5]) {
+						if (!hschanged) {
+							lanerender.setGreenValue(lanerender.getGreenValue() +1);
+							hschanged = true;
+						}
+					} else {
+						hschanged = false;
+					}
+				}
 			}
 		}
 

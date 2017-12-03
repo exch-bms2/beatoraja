@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import bms.model.BMSModel;
-import bms.model.LongNote;
-import bms.model.Mode;
 import bms.model.TimeLine;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyInputLog;
@@ -80,7 +78,7 @@ class KeyInputProccessor {
 				}
 			}
 		}
-		
+
 		if(prevtime >= 0) {
 			final int deltatime = now - prevtime;
 			for (int s = 0; s < scratch.length; s++) {
@@ -97,7 +95,7 @@ class KeyInputProccessor {
 		}
 		prevtime = now;
 	}
-	
+
 	public int getScratchState(int i) {
 		return scratch[i] / 6;
 	}

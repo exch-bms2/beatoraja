@@ -349,6 +349,7 @@ public class BMSPlayer extends MainState {
 	private long starttimeoffset;
 	private int sections = 0;
 	private long rhythmtimer;
+	private long startpressedtime;
 	
 	@Override
 	public void render() {
@@ -364,11 +365,14 @@ public class BMSPlayer extends MainState {
         if(timer[TIMER_STARTINPUT] == Long.MIN_VALUE && now >skin.getInput()){
             timer[TIMER_STARTINPUT] = now;
         }
+        if(input.startPressed() || input.isSelectPressed()){
+        	startpressedtime = now;
+        }
 		switch (state) {
 		// 楽曲ロード
 		case STATE_PRELOAD:
 			if (resource.mediaLoadFinished() && now > skin.getLoadstart() + skin.getLoadend()
-					&& !input.startPressed()) {
+					&& now - startpressedtime > 1000) {
 				bga.prepare(this);
 				final long mem = Runtime.getRuntime().freeMemory();
 				System.gc();
@@ -397,7 +401,7 @@ public class BMSPlayer extends MainState {
 			practice.processInput(input);
 
 			if (input.getKeystate()[0] && resource.mediaLoadFinished() && now > skin.getLoadstart() + skin.getLoadend()
-					&& !input.startPressed()) {
+					&& now - startpressedtime > 1000) {
 				PracticeProperty property = practice.getPracticeProperty();
 				control.setEnableControl(true);
 				if (property.freq != 100) {
@@ -954,7 +958,8 @@ public class BMSPlayer extends MainState {
 		case OPTION_LOADED:
 			return state != STATE_PRELOAD;
 		case OPTION_LANECOVER1_CHANGING:
-			return getMainController().getInputProcessor().startPressed();
+			return getMainController().getInputProcessor().startPressed() ||
+					getMainController().getInputProcessor().isSelectPressed();
 		case OPTION_1P_PERFECT:
 			return judge.getNowJudge()[0] == 1;
 		case OPTION_1P_EARLY:
