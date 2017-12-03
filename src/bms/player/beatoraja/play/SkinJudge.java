@@ -26,7 +26,7 @@ public class SkinJudge extends SkinObject {
     private boolean shift;
 
     public SkinJudge(int index, boolean shift) {
-        this(new SkinImage[6], new SkinNumber[6], index, shift);
+        this(new SkinImage[7], new SkinNumber[7], index, shift);
     }
 
     public SkinJudge(SkinImage[] judge, SkinNumber[] count, int index, boolean shift) {
@@ -62,7 +62,7 @@ public class SkinJudge extends SkinObject {
     public void draw(SkinObjectRenderer sprite, long time, MainState state) {
         int judgenow = ((BMSPlayer)state).getJudgeManager().getNowJudge()[index] - 1;
         final int judgecombo = ((BMSPlayer)state).getJudgeManager().getNowCombo()[index];
-	final GrooveGauge gauge = ((BMSPlayer)state).getGauge();
+        final GrooveGauge gauge = ((BMSPlayer)state).getGauge();
 
         if(judgenow < 0) {
             return;
@@ -71,13 +71,18 @@ public class SkinJudge extends SkinObject {
         if (r != null) {
             int shift = 0;
             if (judgenow < 3) {
-		if(judgenow == 0 && judge.length >= 7 && gauge.getValue() == gauge.getMaxValue()) {
-                    judgenow = 6;
-            	}
-            	count[judgenow].draw(sprite, time, judgecombo, state, r.x, r.y);
+                if(judgenow == 0 && count.length > 6 && count[6] != null && gauge.getValue() == gauge.getMaxValue()) {
+                    count[6].draw(sprite, time, judgecombo, state, r.x, r.y);
+                } else {
+                    count[judgenow].draw(sprite, time, judgecombo, state, r.x, r.y);
+                }
             	shift = count[judgenow].getLength() / 2;
             }
-            judge[judgenow].draw(sprite, time, state, this.shift ? -shift : 0, 0);
+            if(judgenow == 0 && judge.length > 6 && judge[6] != null && gauge.getValue() == gauge.getMaxValue()) {    
+                judge[6].draw(sprite, time, state, this.shift ? -shift : 0, 0);
+            } else {
+                judge[judgenow].draw(sprite, time, state, this.shift ? -shift : 0, 0);
+            }
 
         }
     }
