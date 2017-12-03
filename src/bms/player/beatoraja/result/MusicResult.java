@@ -68,7 +68,7 @@ public class MusicResult extends MainState {
 		setSound(SOUND_FAIL, "fail.wav", SoundType.SOUND,false);
 		setSound(SOUND_CLOSE, "resultclose.wav", SoundType.SOUND,false);
 
-		property = ResultKeyProperty.valueOf(resource.getBMSModel().getMode().name());
+		property = ResultKeyProperty.get(resource.getBMSModel().getMode());
 		if(property == null) {
 			property = ResultKeyProperty.BEAT_7K;
 		}
