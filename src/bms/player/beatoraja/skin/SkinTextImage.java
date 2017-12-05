@@ -39,7 +39,7 @@ public class SkinTextImage extends SkinText {
 	@Override
 	public void prepareFont(String text) {
 		try {
-			byte[] b = getText().getBytes("utf-16le");
+			byte[] b = text.getBytes("utf-16le");
 			for (int i = 0; i < b.length;) {
 				int code = 0;
 				code |= (b[i++] & 0xff);
@@ -58,7 +58,7 @@ public class SkinTextImage extends SkinText {
 	@Override
 	protected void prepareText(String text) {
 		try {
-			byte[] b = getText().getBytes("utf-16le");
+			byte[] b = text.getBytes("utf-16le");
 			textwidth = 0;
 			texts.clear();
 			for (int i = 0; i < b.length;) {
@@ -95,7 +95,8 @@ public class SkinTextImage extends SkinText {
 			final float scale = r.width < width ? r.width / width : 1;
 			final float x = (getAlign() == 2 ? r.x - width * scale : (getAlign() == 1 ? r.x - width * scale / 2 : r.x));
 			float dx = 0;
-			for (TextureRegion ch : texts) {
+			for (int i = 0;i < texts.size;i++) {
+				final TextureRegion ch = texts.get(i);
 				final float tw = ch.getRegionWidth() * scale * r.height / source.getSize();
 				// System.out.println("SkinTextImage描画:" + text.charAt(i) +
 				// " -
@@ -124,9 +125,9 @@ public class SkinTextImage extends SkinText {
 		 * 文字間のマージン
 		 */
 		private int margin = 0;
-		private IntMap<SkinTextImageSourceElement> elements = new IntMap<SkinTextImageSourceElement>();
+		private IntMap<SkinTextImageSourceElement> elements = new IntMap<SkinTextImageSourceElement>(400);
 		private final boolean usecim;
-		private IntMap<SkinTextImageSourceRegion> regions = new IntMap<SkinTextImageSourceRegion>();
+		private IntMap<SkinTextImageSourceRegion> regions = new IntMap<SkinTextImageSourceRegion>(10000);
 
 		public SkinTextImageSource(boolean usecim) {
 			this.usecim = usecim;
