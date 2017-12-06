@@ -358,21 +358,23 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 			String previewpath = null;
 			try (DirectoryStream<Path> paths = Files.newDirectoryStream(dir)) {
 				for (Path p : paths) {
-					final String s = p.toString().toLowerCase();
-					if (!txt && s.endsWith(".txt")) {
-						txt = true;
-					}
-					if (previewpath == null) {
-						String name = p.getFileName().toString().toLowerCase();
-						if(name.startsWith("preview") && (name.endsWith(".wav") || name.endsWith(".ogg") || name.endsWith(".mp3"))) {
-							previewpath = p.getFileName().toString();
-						}
-					}
-					if ((s.endsWith(".bms") || s.endsWith(".bme") || s.endsWith(".bml") || s.endsWith(".pms")
-							|| s.endsWith(".bmson")) && !(Files.isDirectory(p))) {
-						bmsfiles.add(p);
-					} else if (Files.isDirectory(p)) {
+					if(Files.isDirectory(p)) {
 						dirs.add(p);
+					} else {
+						final String s = p.toString().toLowerCase();
+						if (!txt && s.endsWith(".txt")) {
+							txt = true;
+						}
+						if (previewpath == null) {
+							String name = p.getFileName().toString().toLowerCase();
+							if(name.startsWith("preview") && (name.endsWith(".wav") || name.endsWith(".ogg") || name.endsWith(".mp3"))) {
+								previewpath = p.getFileName().toString();
+							}
+						}
+						if (s.endsWith(".bms") || s.endsWith(".bme") || s.endsWith(".bml") || s.endsWith(".pms")
+								|| s.endsWith(".bmson")) {
+							bmsfiles.add(p);
+						}
 					}
 				}
 			} catch (IOException e) {
@@ -423,7 +425,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 			for (FolderData record : folders) {
 				// System.out.println("Song Database : folder deleted - " +
 				// record.getPath());
-				qr.update(conn, "DELETE FROM folder WHERE path = ?", record.getPath());
+				qr.update(conn, "DELETE FROM folder WHERE path LIKE ?", record.getPath() + "%");
 				qr.update(conn, "DELETE FROM song WHERE path LIKE ?", record.getPath() + "%");
 			}
 		}
@@ -459,14 +461,14 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 			BMSDecoder bmsdecoder = null;
 			BMSONDecoder bmsondecoder = null;
 			try {
-				for (Path f : bmsfiles) {
+				for (Path path : bmsfiles) {
 					boolean b = true;
+					final String pathname = (path.startsWith(root) ? root.relativize(path).toString() : path.toString());
 					for (int i = records.size() - 1;i >= 0;i--) {
 						final SongData record = records.get(i);
-						final String s = (f.startsWith(root) ? root.relativize(f).toString() : f.toString());
-						if (record.getPath().equals(s)) {
+						if (record.getPath().equals(pathname)) {
 							records.remove(i);
-							if (!updateAll && record.getDate() == Files.getLastModifiedTime(f).toMillis() / 1000) {
+							if (!updateAll && record.getDate() == Files.getLastModifiedTime(path).toMillis() / 1000) {
 								b = false;
 							}
 							break;
@@ -474,16 +476,16 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 					}
 					if (b) {
 						BMSModel model = null;
-						if (f.toString().toLowerCase().endsWith(".bmson")) {
+						if (pathname.toLowerCase().endsWith(".bmson")) {
 							if (bmsondecoder == null) {
 								bmsondecoder = new BMSONDecoder(BMSModel.LNTYPE_LONGNOTE);
 							}
-							model = bmsondecoder.decode(f.toFile());
+							model = bmsondecoder.decode(path.toFile());
 						} else {
 							if (bmsdecoder == null) {
 								bmsdecoder = new BMSDecoder(BMSModel.LNTYPE_LONGNOTE);
 							}
-							model = bmsdecoder.decode(f.toFile());
+							model = bmsdecoder.decode(path.toFile());
 						}
 
 						if (model != null) {
@@ -528,20 +530,18 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 												+ "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);",
 										sd.getMd5(), sd.getSha256(), sd.getTitle(), sd.getSubtitle(), sd.getGenre(),
 										sd.getArtist(), sd.getSubartist(), tag != null ? tag : "",
-										f.startsWith(root) ? root.relativize(f).toString() : f.toString(),
-										SongUtils.crc32(f.getParent().toString(), bmsroot, root.toString()),
+										pathname, SongUtils.crc32(path.getParent().toString(), bmsroot, root.toString()),
 										sd.getStagefile(), sd.getBanner(), sd.getBackbmp(), sd.getPreview(),
-										SongUtils.crc32(f.getParent().getParent().toString(), bmsroot, root.toString()),
+										SongUtils.crc32(path.getParent().getParent().toString(), bmsroot, root.toString()),
 										sd.getLevel(), sd.getDifficulty(), sd.getMaxbpm(), sd.getMinbpm(), sd.getLength(),
 										sd.getMode(), sd.getJudge(), sd.getFeature(), sd.getContent(),
-										Files.getLastModifiedTime(f).toMillis() / 1000, 0, sd.getNotes(), updatetime);
+										Files.getLastModifiedTime(path).toMillis() / 1000, 0, sd.getNotes(), updatetime);
 								if(info != null) {
 									info.update(model);
 								}
 								count++;
 							} else {
-								qr.update(conn, "DELETE FROM song WHERE path = ?",
-										f.startsWith(root) ? root.relativize(f).toString() : f.toString());
+								qr.update(conn, "DELETE FROM song WHERE path = ?", pathname);
 							}
 						}
 					}
