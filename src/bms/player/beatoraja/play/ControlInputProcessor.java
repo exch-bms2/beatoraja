@@ -1,5 +1,7 @@
 package bms.player.beatoraja.play;
 
+import static bms.player.beatoraja.skin.SkinProperty.*;
+
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 
 public class ControlInputProcessor {
@@ -119,7 +121,11 @@ public class ControlInputProcessor {
 			}
 		}
 		long now = System.currentTimeMillis();
-		if(input.startPressed() && input.isSelectPressed() && now - exitpressedtime > 1000){
+		if((input.startPressed() && input.isSelectPressed() && now - exitpressedtime > 1000 )||
+				(player.getTimer()[TIMER_ENDOFNOTE_1P] != Long.MIN_VALUE &&
+				now > player.getTimer()[TIMER_ENDOFNOTE_1P] && (input.startPressed() || input.isSelectPressed()))){
+			input.startChanged(false);
+			input.setSelectPressed(false);
 			player.stopPlay();
 		}else if(!(input.startPressed() && input.isSelectPressed())){
 			exitpressedtime = now;
