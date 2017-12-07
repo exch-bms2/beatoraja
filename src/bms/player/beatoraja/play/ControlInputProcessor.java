@@ -11,6 +11,7 @@ public class ControlInputProcessor {
 	private boolean startpressed;
 	private boolean cursorpressed;
 	private long lanecovertiming;
+	private long exitpressedtime;
 
 	private boolean enableControl = true;
 	
@@ -117,7 +118,12 @@ public class ControlInputProcessor {
 				}
 			}
 		}
-
+		long now = System.currentTimeMillis();
+		if(input.startPressed() && input.isSelectPressed() && now - exitpressedtime > 1000){
+			player.stopPlay();
+		}else if(!(input.startPressed() && input.isSelectPressed())){
+			exitpressedtime = now;
+		}
 		// stop playing
 		if (input.isExitPressed()) {
 			input.setExitPressed(false);
