@@ -58,7 +58,7 @@ public class MusicDecide extends MainState {
 			if (input.getKeystate()[0] || input.getKeystate()[2] || input.getKeystate()[4] || input.getKeystate()[6]) {
 				getTimer()[TIMER_FADEOUT] = nowtime;
 			}
-			if (input.isExitPressed()) {
+			if (input.isExitPressed() || (input.startPressed() && input.isSelectPressed())) {
 				cancel = true;
 				getTimer()[TIMER_FADEOUT] = nowtime;
 			}
