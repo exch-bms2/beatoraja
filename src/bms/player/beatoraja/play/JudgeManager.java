@@ -563,6 +563,8 @@ public class JudgeManager {
 		this.judge[player[lane]][offset[lane]] = judge == 0 ? 1 : judge * 2 + (fast > 0 ? 0 : 1);
 		if (judge < 2) {
 			main.getTimer()[SkinPropertyMapper.bombTimerId(player[lane], offset[lane])] = main.getNowTime();
+		} else if (judge == 2) {
+			main.getTimer()[SkinPropertyMapper.goodBombTimerId(player[lane], offset[lane])] = main.getNowTime();
 		}
 
 		final int lanelength = sckeyassign.length;
