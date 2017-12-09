@@ -412,6 +412,7 @@ public class MusicResult extends MainState {
 				
 				if(send) {
 					Logger.getGlobal().info("IRへスコア送信中");
+					setTimer(TIMER_IR_CONNECT_BEGIN, true);
 					state = STATE_IR_PROCESSING;
 					final IRScoreData oldscore = score;
 					Thread irprocess = new Thread() {
@@ -435,8 +436,10 @@ public class MusicResult extends MainState {
 										}
 									}
 								}
+								setTimer(TIMER_IR_CONNECT_SUCCESS, true);
 								Logger.getGlobal().info("IRへスコア送信完了");
 							} else {
+								setTimer(TIMER_IR_CONNECT_FAIL, true);
 								Logger.getGlobal().warning("IRからのスコア取得失敗 : " + response.getMessage());
 							}
 

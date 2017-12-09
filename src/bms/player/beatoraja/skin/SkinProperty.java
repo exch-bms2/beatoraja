@@ -127,6 +127,11 @@ public class SkinProperty {
 	public static final int TIMER_RESULTGRAPH_BEGIN = 150;
 	public static final int TIMER_RESULTGRAPH_END = 151;
 	public static final int TIMER_RESULT_UPDATESCORE = 152;
+	
+	public static final int TIMER_IR_CONNECT_BEGIN = 172;
+	public static final int TIMER_IR_CONNECT_SUCCESS = 173;
+	public static final int TIMER_IR_CONNECT_FAIL = 174;
+
 
 	// 拡張版TIMER
 	public static final int TIMER_BOMB_1P_KEY10 = 1010;
