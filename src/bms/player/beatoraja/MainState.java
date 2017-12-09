@@ -126,6 +126,16 @@ public abstract class MainState {
 		return main.getTimer();
 	}
 
+	public void setTimer(int id, boolean on) {
+		if(on) {
+			if(main.getTimer()[id] == Long.MIN_VALUE) {
+				main.getTimer()[id] = getNowTime();
+			}
+		} else {
+			main.getTimer()[id] = Long.MIN_VALUE;
+		}
+	}
+
 	public void executeClickEvent(int id) {
 
 	}

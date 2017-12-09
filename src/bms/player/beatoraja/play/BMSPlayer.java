@@ -749,15 +749,17 @@ public class BMSPlayer extends MainState {
 		gauge.update(judge);
 		// System.out.println("Now count : " + notes + " - " + totalnotes);
 
-		if (notes == getMainController().getPlayerResource().getSongdata().getNotes()) {
-			//フルコン判定
-			if(getTimer()[TIMER_FULLCOMBO_1P] == Long.MIN_VALUE && this.judge.getJudgeCount(3) == 0
-				&& this.judge.getJudgeCount(4) == 0) {
-				getTimer()[TIMER_FULLCOMBO_1P] = getNowTime();
-			}
-		}
-
+		//フルコン判定
+		setTimer(TIMER_FULLCOMBO_1P, notes == getMainController().getPlayerResource().getSongdata().getNotes()
+				&& this.judge.getJudgeCount(3) == 0 && this.judge.getJudgeCount(4) == 0);
+		
 		getScoreDataProperty().update(this.judge.getScoreData(), notes);
+
+		setTimer(TIMER_SCORE_A, getScoreDataProperty().qualifyRank(18));
+		setTimer(TIMER_SCORE_AA, getScoreDataProperty().qualifyRank(21));
+		setTimer(TIMER_SCORE_AAA, getScoreDataProperty().qualifyRank(24));
+		setTimer(TIMER_SCORE_BEST, this.judge.getScoreData().getExscore() >= getScoreDataProperty().getBestScore());
+		setTimer(TIMER_SCORE_TARGET, this.judge.getScoreData().getExscore() >= getScoreDataProperty().getRivalScore());
 	}
 
 	public GrooveGauge getGauge() {
