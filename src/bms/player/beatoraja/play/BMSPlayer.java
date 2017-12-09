@@ -962,6 +962,8 @@ public class BMSPlayer extends MainState {
 		case OPTION_LANECOVER1_CHANGING:
 			return getMainController().getInputProcessor().startPressed() ||
 					getMainController().getInputProcessor().isSelectPressed();
+		case OPTION_1P_BORDER_OR_MORE:
+			return gauge.getValue() >= gauge.getBorder();
 		case OPTION_1P_PERFECT:
 			return judge.getNowJudge()[0] == 1;
 		case OPTION_1P_EARLY:
@@ -984,6 +986,18 @@ public class BMSPlayer extends MainState {
 		case OPTION_3P_LATE:
 			return judge.getNowJudge().length > 2 && judge.getNowJudge()[2] > 1
 					&& judge.getRecentJudgeTiming() < 0;
+		case OPTION_PERFECT_EXIST:
+			return judge.getJudgeCount(0) > 0;
+		case OPTION_GREAT_EXIST:
+			return judge.getJudgeCount(1) > 0;
+		case OPTION_GOOD_EXIST:
+			return judge.getJudgeCount(2) > 0;
+		case OPTION_BAD_EXIST:
+			return judge.getJudgeCount(3) > 0;
+		case OPTION_POOR_EXIST:
+			return judge.getJudgeCount(4) > 0;
+		case OPTION_MISS_EXIST:
+			return judge.getJudgeCount(5) > 0;
 		}
 		return super.getBooleanValue(id);
 	}
