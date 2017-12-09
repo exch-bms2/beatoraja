@@ -56,13 +56,11 @@ public class PCM {
 				switch(type) {
 				case 1:
 				case 3:
-				{
 					OptimizedByteArrayOutputStream output = new OptimizedByteArrayOutputStream(input.dataRemaining);
 					StreamUtils.copyStream(input, output);
 					pcm = output.getBuffer();
 					bytes = output.size();
 					break;
-				}
 				case 85:
 					try {
 						pcm = decodeMP3(new ByteArrayInputStream(
