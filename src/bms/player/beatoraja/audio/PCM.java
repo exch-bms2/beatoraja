@@ -49,13 +49,36 @@ public class PCM {
 		// final long time = System.nanoTime();
 		byte[] pcm = null;
 		int bytes = 0;
-		if (p.toString().toLowerCase().endsWith(".mp3")) {
-			try {
-				pcm = decodeMP3(new BufferedInputStream(Files.newInputStream(p)));
-				bytes = pcm.length;
-			} catch (Throwable ex) {
+		
+		final String name = p.toString().toLowerCase();
+		if (name.endsWith(".wav")) {
+			try (WavInputStream input = new WavInputStream(new BufferedInputStream(Files.newInputStream(p)))) {
+				switch(type) {
+				case 1:
+				case 3:
+				{
+					OptimizedByteArrayOutputStream output = new OptimizedByteArrayOutputStream(input.dataRemaining);
+					StreamUtils.copyStream(input, output);
+					pcm = output.getBuffer();
+					bytes = output.size();
+					break;
+				}
+				case 85:
+					try {
+						pcm = decodeMP3(new ByteArrayInputStream(
+								StreamUtils.copyStreamToByteArray(input, input.dataRemaining)));
+						bytes = pcm.length;
+					} catch (BitstreamException e) {
+						e.printStackTrace();
+					}
+					break;
+				default:
+					throw new IOException(p.toString() + " unsupported WAV format ID : " + type);					
+				}
+			} catch (Throwable e) {
+				Logger.getGlobal().warning("WAV処理中の例外 - file : " + p + " error : "+ e.getMessage());
 			}
-		} else if (p.toString().toLowerCase().endsWith(".ogg")) {
+		} else if (name.endsWith(".ogg")) {
 			try (OggInputStream input = new OggInputStream(new BufferedInputStream(Files.newInputStream(p)))) {
 				// final long time = System.nanoTime();
 				// OptimizedByteArrayOutputStream output = new
@@ -79,25 +102,11 @@ public class PCM {
 				// - time));
 			} catch (Throwable ex) {
 			}
-		} else if (p.toString().toLowerCase().endsWith(".wav")) {
-			try (WavInputStream input = new WavInputStream(new BufferedInputStream(Files.newInputStream(p)))) {
-				if (type == 85) {
-					try {
-						pcm = decodeMP3(new ByteArrayInputStream(
-								StreamUtils.copyStreamToByteArray(input, input.dataRemaining)));
-						bytes = pcm.length;
-					} catch (BitstreamException e) {
-						e.printStackTrace();
-					}
-				} else {
-					OptimizedByteArrayOutputStream output = new OptimizedByteArrayOutputStream(input.dataRemaining);
-					StreamUtils.copyStream(input, output);
-					pcm = output.getBuffer();
-					bytes = output.size();
-					// System.out.println(bytes + " -> " + pcm.length);
-				}
-			} catch (Throwable e) {
-				Logger.getGlobal().warning("WAV処理中の例外 - file : " + p + " error : "+ e.getMessage());
+		} else if (name.endsWith(".mp3")) {
+			try {
+				pcm = decodeMP3(new BufferedInputStream(Files.newInputStream(p)));
+				bytes = pcm.length;
+			} catch (Throwable ex) {
 			}
 		}
 
@@ -109,16 +118,18 @@ public class PCM {
 			throw new IOException(p.toString() + " : 0 samples");			
 		}
 		
-		// System.out.println(p.getFileName().toString() +
-		// " - PCM generated : " + bitsPerSample + "bit " + sampleRate
-		// + "Hz " + channels + "channel");
+//		 System.out.println(p.getFileName().toString() +
+//		 " - PCM generated : " + bitsPerSample + "bit " + sampleRate
+//		 + "Hz " + channels + "channel PCM type : " + type);
 
-		if (bitsPerSample == 8) {
+		switch(bitsPerSample) {
+		case 8:
 			this.sample = new short[bytes];
 			for (int i = 0; i < sample.length; i++) {
 				this.sample[i] = (short) ((((short) pcm[i]) - 128) * 256);
 			}
-		} else if (bitsPerSample == 16) {
+			break;
+		case 16:
 			// final long time = System.nanoTime();
 			this.sample = new short[bytes / 2];
 			for (int i = 0; i < sample.length; i++) {
@@ -130,12 +141,14 @@ public class PCM {
 			// shortbuf.get(sample);
 			// System.out.println(p.toString() + " : " + (System.nanoTime()
 			// - time));
-		} else if (bitsPerSample == 24) {
+			break;
+		case 24:
 			this.sample = new short[bytes / 3];
 			for (int i = 0; i < this.sample.length; i++) {
 				this.sample[i] = (short) ((pcm[i * 3 + 1] & 0xff) | (pcm[i * 3 + 2] << 8));
 			}
-		} else if (bitsPerSample == 32) {
+			break;
+		case 32:
 			int pos = 0;
 			this.sample = new short[bytes / 4];
 			for (int i = 0; i < this.sample.length; i++) {
@@ -143,6 +156,9 @@ public class PCM {
 						| ((pcm[pos + 2] & 0xff) << 16) | ((pcm[pos + 3] & 0xff) << 24)) * Short.MAX_VALUE);
 				pos += 4;
 			}
+			break;
+		default:
+			throw new IOException(p.toString() + " : " + bitsPerSample + " bits per samples isn't supported");			
 		}
 		// System.out.println(p.toString() + " : " + (System.nanoTime() -
 		// time));
