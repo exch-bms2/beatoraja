@@ -42,9 +42,9 @@ public class SkinProperty {
 	public static final int TIMER_JUDGE_1P = 46;
 	public static final int TIMER_JUDGE_2P = 47;
 	public static final int TIMER_JUDGE_3P = 247;
-	public static final int TIMER_COMBO_1P = 346;
-	public static final int TIMER_COMBO_2P = 347;
-	public static final int TIMER_COMBO_3P = 348;
+	public static final int TIMER_COMBO_1P = 446;
+	public static final int TIMER_COMBO_2P = 447;
+	public static final int TIMER_COMBO_3P = 448;
 	public static final int TIMER_FULLCOMBO_1P = 48;
 	public static final int TIMER_SCORE_A = 348;
 	public static final int TIMER_SCORE_AA = 349;
@@ -56,6 +56,8 @@ public class SkinProperty {
 	public static final int TIMER_BOMB_1P_KEY1 = 51;
 	public static final int TIMER_HCN_ACTIVE_1P_SCRATCH = 250;
 	public static final int TIMER_HCN_ACTIVE_1P_KEY1 = 251;
+	public static final int TIMER_GOOD_BOMB_1P_SCRATCH = 450;
+	public static final int TIMER_GOOD_BOMB_1P_KEY1 = 451;
 	public static final int TIMER_BOMB_1P_KEY2 = 52;
 	public static final int TIMER_BOMB_1P_KEY3 = 53;
 	public static final int TIMER_BOMB_1P_KEY4 = 54;
@@ -149,6 +151,8 @@ public class SkinProperty {
 	public static final int TIMER_HCN_ACTIVE_2P_KEY10 = 1910;
 	public static final int TIMER_HCN_DAMAGE_1P_KEY10 = 2010;
 	public static final int TIMER_HCN_DAMAGE_2P_KEY10 = 2110;
+	public static final int TIMER_GOOD_BOMB_1P_KEY10 = 2210;
+	public static final int TIMER_GOOD_BOMB_2P_KEY10 = 2310;
 
 	public static final int TIMER_MAX = 2999;
 
@@ -542,6 +546,8 @@ public class SkinProperty {
 	public static final int OPTION_1P_90_99 = 239;
 	public static final int OPTION_1P_100 = 240;
 
+	public static final int OPTION_1P_BORDER_OR_MORE = 1240;
+
 	public static final int OPTION_1P_PERFECT = 241;
 	public static final int OPTION_1P_GREAT = 242;
 	public static final int OPTION_1P_EARLY = 1242;
@@ -562,6 +568,13 @@ public class SkinProperty {
 	public static final int OPTION_3P_EARLY = 1362;
 	public static final int OPTION_3P_GOOD = 363;
 	public static final int OPTION_3P_LATE = 1363;
+
+	public static final int OPTION_PERFECT_EXIST = 2241;
+	public static final int OPTION_GREAT_EXIST = 2242;
+	public static final int OPTION_GOOD_EXIST = 2243;
+	public static final int OPTION_BAD_EXIST = 2244;
+	public static final int OPTION_POOR_EXIST = 2245;
+	public static final int OPTION_MISS_EXIST = 2246;
 
 	public static final int OPTION_LANECOVER1_CHANGING = 270;
 
