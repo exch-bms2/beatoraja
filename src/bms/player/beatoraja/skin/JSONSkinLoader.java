@@ -483,6 +483,7 @@ public class JSONSkinLoader extends SkinLoader{
 
 						SkinNote sn = new SkinNote(notes, lnss, mines);
 						sn.setLaneRegion(region, scale, skin);
+						sn.setDstNote2(sk.note.dst2);
 						((PlaySkin) skin).setLaneGroupRegion(gregion);
 						obj = sn;
 					}
@@ -1032,6 +1033,7 @@ public class JSONSkinLoader extends SkinLoader{
 		public String[] hidden = new String[0];
 		public String[] processed = new String[0];
 		public Animation[] dst = new Animation[0];
+		public int dst2 = Integer.MIN_VALUE;
 		public float[] size = new float[0];
 		public Destination[] group = new Destination[0];
 		public Destination[] bpm = new Destination[0];
