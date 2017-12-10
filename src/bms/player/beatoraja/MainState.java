@@ -34,6 +34,9 @@ public abstract class MainState {
 	 * 状態の開始時間
 	 */
 	private long starttime;
+	
+	private long nowtime;
+	private long nowmicrotime;
 	/**
 	 * スキン
 	 */
@@ -113,13 +116,18 @@ public abstract class MainState {
 	public void setStartTime() {
 		this.starttime = System.nanoTime();
 	}
+	
+	public void updateNowTime() {
+		nowmicrotime = ((System.nanoTime() - starttime) / 1000);
+		nowtime = nowmicrotime / 1000;
+	}
 
-	public int getNowTime() {
-		return (int) ((System.nanoTime() - starttime) / 1000000);
+	public long getNowTime() {
+		return nowtime;
 	}
 
 	public long getNowMicroTime() {
-		return (System.nanoTime() - starttime) / 1000;
+		return nowmicrotime;
 	}
 
 	public long[] getTimer() {
@@ -129,7 +137,7 @@ public abstract class MainState {
 	public void setTimer(int id, boolean on) {
 		if(on) {
 			if(main.getTimer()[id] == Long.MIN_VALUE) {
-				main.getTimer()[id] = getNowTime();
+				main.getTimer()[id] = nowtime;
 			}
 		} else {
 			main.getTimer()[id] = Long.MIN_VALUE;

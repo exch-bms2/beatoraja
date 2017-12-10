@@ -190,7 +190,7 @@ public class JudgeManager {
 		final long[] keytime = input.getTime();
 		final boolean[] keystate = input.getKeystate();
 		final long[] timer = main.getTimer();
-		final int now = main.getNowTime();
+		final long now = main.getNowTime();
 		// 通過系の判定
 		Arrays.fill(next_inclease, false);
 		

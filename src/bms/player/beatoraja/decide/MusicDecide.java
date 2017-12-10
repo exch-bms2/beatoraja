@@ -25,7 +25,6 @@ public class MusicDecide extends MainState {
 
 	public void create() {
 		cancel = false;
-		final PlayerResource resource = getMainController().getPlayerResource();
 		
 		setSound(SOUND_DECIDE, "decide.wav", SoundType.BGM, false);
 		play(SOUND_DECIDE);
@@ -35,8 +34,8 @@ public class MusicDecide extends MainState {
 
 	public void render() {
 		long nowtime = getNowTime();
-        if(getTimer()[TIMER_STARTINPUT] == Long.MIN_VALUE && nowtime >getSkin().getInput()){
-        	getTimer()[TIMER_STARTINPUT] = nowtime;
+        if(nowtime >getSkin().getInput()){
+			setTimer(TIMER_STARTINPUT, true);
         }
 		if (getTimer()[TIMER_FADEOUT] != Long.MIN_VALUE) {
 			if (nowtime > getTimer()[TIMER_FADEOUT] + getSkin().getFadeout()) {
@@ -45,7 +44,7 @@ public class MusicDecide extends MainState {
 			}
 		} else {
 			if (nowtime > getSkin().getScene()) {
-				getTimer()[TIMER_FADEOUT] = nowtime;
+				setTimer(TIMER_FADEOUT, true);
 			}
 		}
 	}
@@ -56,11 +55,11 @@ public class MusicDecide extends MainState {
 		if (getTimer()[TIMER_FADEOUT] == Long.MIN_VALUE && getTimer()[TIMER_STARTINPUT] != Long.MIN_VALUE) {
 			BMSPlayerInputProcessor input = getMainController().getInputProcessor();
 			if (input.getKeystate()[0] || input.getKeystate()[2] || input.getKeystate()[4] || input.getKeystate()[6]) {
-				getTimer()[TIMER_FADEOUT] = nowtime;
+				setTimer(TIMER_FADEOUT, true);
 			}
 			if (input.isExitPressed() || (input.startPressed() && input.isSelectPressed())) {
 				cancel = true;
-				getTimer()[TIMER_FADEOUT] = nowtime;
+				setTimer(TIMER_FADEOUT, true);
 			}
 		}
 	}

@@ -10,6 +10,8 @@ import com.badlogic.gdx.utils.FloatArray;
 
 import bms.model.BMSModel;
 import bms.player.beatoraja.*;
+import bms.player.beatoraja.ir.IRConnection;
+import bms.player.beatoraja.ir.IRResponse;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.skin.SkinType;
 
@@ -19,6 +21,21 @@ public class CourseResult extends MainState {
 	private int oldexscore;
 	private int oldmisscount;
 	private int oldcombo;
+
+	/**
+	 * 状態
+	 */
+	private int state;
+
+	public static final int STATE_OFFLINE = 0;
+	public static final int STATE_IR_PROCESSING = 1;
+	public static final int STATE_IR_FINISHED = 2;
+
+	private int next;
+
+	private int irrank;
+	private int irprevrank;
+	private int irtotal;
 
 	private int saveReplay[] = new int[4];
 	private static final int replay= 4;
@@ -115,19 +132,13 @@ public class CourseResult extends MainState {
 	}
 
 	public void render() {
-		int time = getNowTime();
-		if (getTimer()[TIMER_RESULTGRAPH_BEGIN] == Long.MIN_VALUE) {
-			getTimer()[TIMER_RESULTGRAPH_BEGIN] = time;
-		}
-		if (getTimer()[TIMER_RESULTGRAPH_END] == Long.MIN_VALUE) {
-			getTimer()[TIMER_RESULTGRAPH_END] = time;
-		}
-		if (getTimer()[TIMER_RESULT_UPDATESCORE] == Long.MIN_VALUE) {
-			getTimer()[TIMER_RESULT_UPDATESCORE] = time;
-		}
+		long time = getNowTime();
+		setTimer(TIMER_RESULTGRAPH_BEGIN, true);
+		setTimer(TIMER_RESULTGRAPH_END, true);
+		setTimer(TIMER_RESULT_UPDATESCORE, true);
 
-        if(getTimer()[TIMER_STARTINPUT] == Long.MIN_VALUE && time > getSkin().getInput()){
-        	getTimer()[TIMER_STARTINPUT] =  time;
+        if(time > getSkin().getInput()){
+    		setTimer(TIMER_STARTINPUT, true);
         }
 
 		final MainController main = getMainController();
@@ -151,7 +162,7 @@ public class CourseResult extends MainState {
 	}
 
     public void input() {
-        int time = getNowTime();
+        long time = getNowTime();
         final MainController main = getMainController();
         final PlayerResource resource = getMainController().getPlayerResource();
 
@@ -170,7 +181,7 @@ public class CourseResult extends MainState {
 			if (resource.getScoreData() == null || ok) {
                 if (((CourseResultSkin) getSkin()).getRankTime() != 0 && getTimer()[TIMER_RESULT_UPDATESCORE] == Long.MIN_VALUE) {
                     getTimer()[TIMER_RESULT_UPDATESCORE] = time;
-                } else {
+				} else if (state == STATE_OFFLINE || state == STATE_IR_FINISHED){
                     getTimer()[TIMER_FADEOUT] = time;
 					if(getSound(SOUND_CLOSE) != null) {
 						stop(SOUND_CLEAR);
@@ -191,6 +202,7 @@ public class CourseResult extends MainState {
 
     public void updateScoreDatabase() {
     	Arrays.fill(saveReplay, -1);
+		state = STATE_OFFLINE;
 		final PlayerResource resource = getMainController().getPlayerResource();
 		final PlayerConfig config = resource.getPlayerConfig();
 		BMSModel[] models = resource.getCourseBMSModels();
@@ -228,6 +240,65 @@ public class CourseResult extends MainState {
 		getMainController().getPlayDataAccessor().writeScoreDara(newscore, models, config.getLnmode(),
 				random, resource.getConstraint(), resource.isUpdateScore());
 
+		IRConnection ir = getMainController().getIRConnection();
+		if (ir != null) {
+			boolean send = true;
+			switch(getMainController().getPlayerConfig().getIrsend()) {
+			case PlayerConfig.IR_SEND_ALWAYS:
+				break;
+			case PlayerConfig.IR_SEND_COMPLETE_SONG:
+//				FloatArray gauge = resource.getGauge();
+//				send = gauge.get(gauge.size - 1) > 0.0;
+				break;
+			case PlayerConfig.IR_SEND_UPDATE_SCORE:
+//				IRScoreData current = resource.getScoreData();
+//				send = (current.getExscore() > oldexscore || current.getClear() > oldclear
+//						|| current.getCombo() > oldcombo || current.getMinbp() < oldmisscount);
+				break;
+			}
+			
+			if(send) {
+				Logger.getGlobal().info("IRへスコア送信中(未実装)");
+				setTimer(TIMER_IR_CONNECT_BEGIN, true);
+				state = STATE_IR_PROCESSING;
+				final IRScoreData oldscore = score;
+				Thread irprocess = new Thread() {
+
+					@Override
+					public void run() {
+						setTimer(TIMER_IR_CONNECT_SUCCESS, true);
+						Logger.getGlobal().info("IRへスコア送信完了(未実装)");
+//						ir.sendPlayData(resource.getBMSModel(), resource.getScoreData());
+//						IRResponse<IRScoreData[]> response = ir.getPlayData(null, resource.getBMSModel());
+//						if(response.isSuccessed()) {
+//							IRScoreData[] scores = response.getData();
+//							irtotal = scores.length;
+//
+//							for(int i = 0;i < scores.length;i++) {
+//								if(irrank == 0 && scores[i].getExscore() <= resource.getScoreData().getExscore() ) {
+//									irrank = i + 1;
+//								}
+//								if(irprevrank == 0 && scores[i].getExscore() <= oldscore.getExscore() ) {
+//									irprevrank = i + 1;
+//									if(irrank == 0) {
+//										irrank = irprevrank;
+//									}
+//								}
+//							}
+//							setTimer(TIMER_IR_CONNECT_SUCCESS, true);
+//							Logger.getGlobal().info("IRへスコア送信完了");
+//						} else {
+//							setTimer(TIMER_IR_CONNECT_FAIL, true);
+//							Logger.getGlobal().warning("IRからのスコア取得失敗 : " + response.getMessage());
+//						}
+
+						state = STATE_IR_FINISHED;
+					}
+				};
+				irprocess.start();					
+			}
+		}
+		
 		if (newscore.getClear() != Failed.id) {
 			play(SOUND_CLEAR);
 		} else {

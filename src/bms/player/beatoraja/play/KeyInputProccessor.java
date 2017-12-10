@@ -23,7 +23,7 @@ class KeyInputProccessor {
 
 	private JudgeThread judge;
 
-	private int prevtime = -1;
+	private long prevtime = -1;
 	private int[] scratch;
 	private int[] scratchKey;
 
@@ -43,7 +43,7 @@ class KeyInputProccessor {
 	}
 
 	public void input() {
-		final int now = player.getNowTime();
+		final long now = player.getNowTime();
 		final long[] timer = player.getTimer();
 		final boolean[] keystate = player.getMainController().getInputProcessor().getKeystate();
 		final long[] auto_presstime = player.getJudgeManager().getAutoPresstime();
@@ -80,7 +80,7 @@ class KeyInputProccessor {
 		}
 
 		if(prevtime >= 0) {
-			final int deltatime = now - prevtime;
+			final long deltatime = now - prevtime;
 			for (int s = 0; s < scratch.length; s++) {
 				scratch[s] += s % 2 == 0 ? 2160 - deltatime : deltatime;
 				final int key0 = laneProperty.getScratchKeyAssign()[s][0];

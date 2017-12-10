@@ -49,7 +49,7 @@ public class MusicSelectInputProcessor {
         final PlayerConfig config = resource.getPlayerConfig();
         final BarRenderer bar = select.getBarRender();
         final Bar current = bar.getSelected();
-        final int nowtime = select.getNowTime();
+        final long nowtime = select.getNowTime();
 
         boolean[] numberstate = input.getNumberState();
         long[] numtime = input.getNumberTime();

@@ -137,19 +137,15 @@ public class MusicResult extends MainState {
 	}
 
 	public void render() {
-		int time = getNowTime();
-		if (getTimer()[TIMER_RESULTGRAPH_BEGIN] == Long.MIN_VALUE) {
-			getTimer()[TIMER_RESULTGRAPH_BEGIN] = time;
+		long time = getNowTime();
+		setTimer(TIMER_RESULTGRAPH_BEGIN, true);
+		setTimer(TIMER_RESULTGRAPH_END, true);
+
+		if (((MusicResultSkin) getSkin()).getRankTime() == 0) {
+			setTimer(TIMER_RESULT_UPDATESCORE, true);
 		}
-		if (getTimer()[TIMER_RESULTGRAPH_END] == Long.MIN_VALUE) {
-			getTimer()[TIMER_RESULTGRAPH_END] = time;
-		}
-		if (getTimer()[TIMER_RESULT_UPDATESCORE] == Long.MIN_VALUE
-				&& ((MusicResultSkin) getSkin()).getRankTime() == 0) {
-			getTimer()[TIMER_RESULT_UPDATESCORE] = time;
-		}
-	    if(getTimer()[TIMER_STARTINPUT] == Long.MIN_VALUE && time > getSkin().getInput()){
-	    		getTimer()[TIMER_STARTINPUT] =  time;
+	    if(time > getSkin().getInput()){
+    		setTimer(TIMER_STARTINPUT, true);
 	    }
 
 		final MainController main = getMainController();
@@ -234,7 +230,7 @@ public class MusicResult extends MainState {
 	}
 
 	public void input() {
-		int time = getNowTime();
+		long time = getNowTime();
 		final MainController main = getMainController();
 		final PlayerResource resource = getMainController().getPlayerResource();
 

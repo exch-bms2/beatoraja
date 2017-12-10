@@ -336,6 +336,7 @@ public class MainController extends ApplicationAdapter {
 	@Override
 	public void render() {
 //		input.poll();
+		current.updateNowTime();
 
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
