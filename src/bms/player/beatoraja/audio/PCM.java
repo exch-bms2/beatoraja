@@ -55,6 +55,7 @@ public class PCM {
 			try (WavInputStream input = new WavInputStream(new BufferedInputStream(Files.newInputStream(p)))) {
 				switch(type) {
 				case 1:
+				case 3:
 					OptimizedByteArrayOutputStream output = new OptimizedByteArrayOutputStream(input.dataRemaining);
 					StreamUtils.copyStream(input, output);
 					pcm = output.getBuffer();
