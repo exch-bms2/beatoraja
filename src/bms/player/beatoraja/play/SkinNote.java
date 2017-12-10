@@ -20,6 +20,7 @@ import com.badlogic.gdx.math.Rectangle;
 public class SkinNote extends SkinObject {
 
 	private SkinLane[] lanes;
+	private int dstNote2 = Integer.MIN_VALUE;
 
 	public SkinNote(SkinSource[] note, SkinSource[][] longnote, SkinSource[] minenote) {
 		lanes = new SkinLane[note.length];
@@ -47,11 +48,15 @@ public class SkinNote extends SkinObject {
 		}
 	}
 
+	public void setDstNote2(int dstNote2) {
+		this.dstNote2 = dstNote2;
+	}
+
 	@Override
 	public void draw(SkinObjectRenderer sprite, long time, MainState state) {
 		final BMSPlayer player = (BMSPlayer) state;
 		if (player.getLanerender() != null) {
-			player.getLanerender().drawLane(sprite, time, lanes);
+			player.getLanerender().drawLane(sprite, time, lanes, dstNote2);
 		}
 	}
 

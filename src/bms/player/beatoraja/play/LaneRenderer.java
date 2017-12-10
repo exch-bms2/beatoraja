@@ -253,7 +253,7 @@ public class LaneRenderer {
 		}
 	}
 
-	public void drawLane(SkinObjectRenderer sprite, long time, SkinLane[] lanes) {
+	public void drawLane(SkinObjectRenderer sprite, long time, SkinLane[] lanes, int dstNote2) {
 		for (int i = 0; i < lanes.length; i++) {
 			if (i >= noteimage.length) {
 				break;
@@ -431,7 +431,13 @@ public class LaneRenderer {
 				if (note != null) {
 					if (note instanceof NormalNote) {
 						// draw normal note
-						if (tl.getMicroTime() >= microtime || (conf.isShowpastnote() && note.getState() == 0)) {
+						if (dstNote2 != Integer.MIN_VALUE) {
+							if (tl.getMicroTime() >= microtime && (note.getState() == 0 || note.getState() >= 4)) {
+								final TextureRegion s = config.isMarkprocessednote() && note.getState() != 0
+								? pnoteimage[lane] : noteimage[lane];
+								sprite.draw(s, laneregion[lane].x, (float) y, laneregion[lane].width, scale);
+							}
+						} else if (tl.getMicroTime() >= microtime || (conf.isShowpastnote() && note.getState() == 0)) {
 							final TextureRegion s = config.isMarkprocessednote() && note.getState() != 0
 									? pnoteimage[lane] : noteimage[lane];
 							sprite.draw(s, laneregion[lane].x, (float) y, laneregion[lane].width, scale);
@@ -489,6 +495,76 @@ public class LaneRenderer {
 		}
 		// System.out.println("time :" + ltime + " y :" + yy + " real time : "
 		// + (ltime * (hu - hl) / yy));
+		
+		//PMS見逃しPOOR描画
+		if (dstNote2 != Integer.MIN_VALUE) {
+			//遅BADから落下開始
+			final long badTime = Math.abs( main.getJudgeManager().getJudgeTable(false)[2][0] ) * 1000;
+			int nowPos = timelines.length - 1;
+			for (int i = pos; i < timelines.length; i++) {
+				final TimeLine tl = timelines[i];
+				if (tl.getMicroTime() >= microtime) {
+					nowPos = i;
+					break;
+				}
+			}
+			double orgy2 = dstNote2;
+			if(orgy2 < -laneregion[0].height) orgy2 = -laneregion[0].height;
+			if(orgy2 > orgy) orgy2 = orgy;
+			final double rxhs2 = (hu - hl);
+			y = orgy;
+			for (int i = nowPos; i >= 0 && y >= orgy2; i--) {
+				final TimeLine tl = timelines[i];
+				if (tl.getMicroTime() + tl.getMicroStop() < (microtime - badTime)) {
+					if (i + 1 < timelines.length) {
+						final TimeLine nexttl = timelines[i + 1];
+						//次のタイムラインが判定ラインより下
+						if (nexttl.getMicroTime() + nexttl.getMicroStop() < (microtime - badTime)) {
+							y -= (nexttl.getSection() - tl.getSection()) * rxhs2;
+						//次のタイムラインが判定ラインより上
+						} else if (nexttl.getMicroTime() > microtime) {
+							y -= (nexttl.getSection() - tl.getSection()) * ((microtime - badTime) - tl.getMicroTime() - tl.getMicroStop())
+									/ (nexttl.getMicroTime() - tl.getMicroTime() - tl.getMicroStop()) * rxhs2;
+						//次のタイムラインが判定ラインに重なっている
+						} else {
+							long totalStop = 0;
+							for(int j = i+1 ; j < timelines.length && timelines[j].getMicroTime() <= microtime && timelines[j].getMicroTime() + timelines[j].getMicroStop() >= (microtime - badTime) ; j++) {
+								if (timelines[j].getMicroTime() <= microtime && timelines[j].getMicroTime() + timelines[j].getMicroStop() >= microtime) {
+									totalStop += microtime - timelines[j].getMicroTime();
+								} else if (timelines[j].getMicroTime() + timelines[j].getMicroStop() < microtime && timelines[j].getMicroTime() + timelines[j].getMicroStop() >= (microtime - badTime)) {
+									totalStop += timelines[j].getMicroStop();
+								}
+							}
+							y -= (nexttl.getSection() - tl.getSection()) * ((microtime - badTime) - totalStop - tl.getMicroTime() - tl.getMicroStop())
+									/ (nexttl.getMicroTime() - tl.getMicroTime() - tl.getMicroStop()) * rxhs2;
+						}
+					} else {
+						if (i > 0) {
+							final TimeLine prevtl = timelines[i - 1];
+							y -= (tl.getSection() - prevtl.getSection()) * ((microtime - badTime) - tl.getMicroTime() - tl.getMicroStop())
+									/ (tl.getMicroTime() - prevtl.getMicroTime() - prevtl.getMicroStop()) * rxhs2;
+						} else {
+							y -= tl.getSection() * ((microtime - badTime) - tl.getMicroTime() - tl.getMicroStop()) / tl.getMicroTime() * rxhs2;
+						}
+					}
+				}
+				// ノート描画
+				for (int lane = 0; lane < laneregion.length; lane++) {
+					final float scale = lanes[lane].scale;
+					final Note note = tl.getNote(lane);
+					if (note != null) {
+						if (note instanceof NormalNote) {
+							// draw normal note
+							if ( ((note.getState() == 0 || note.getState() >= 4) && tl.getMicroTime() <= microtime) && y >= orgy2) {
+								final TextureRegion s = noteimage[lane];
+								if(y > orgy) sprite.draw(s, laneregion[lane].x, (float) orgy, laneregion[lane].width, scale);
+								else sprite.draw(s, laneregion[lane].x, (float) y, laneregion[lane].width, scale);
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 
 	public double getNowBPM() {

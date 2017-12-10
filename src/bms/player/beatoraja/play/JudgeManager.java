@@ -679,4 +679,8 @@ public class JudgeManager {
 	public int[] getNowCombo() {
 		return judgecombo;
 	}	
+
+	public int[][] getJudgeTable(boolean sc) {
+		return sc ? sjudge : njudge;
+	}
 }
