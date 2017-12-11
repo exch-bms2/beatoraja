@@ -843,6 +843,10 @@ public class MusicSelector extends MainState {
 				return existsConstant(CourseData.CourseDataConstraint.NO_GOOD);
 			case OPTION_GRADEBAR_NOGREAT:
 				return existsConstant(CourseData.CourseDataConstraint.NO_GREAT);
+			case OPTION_NOT_COMPARE_RIVAL:
+				return rival == null;
+			case OPTION_COMPARE_RIVAL:
+				return rival != null;
 		}
 		return super.getBooleanValue(id);
 	}

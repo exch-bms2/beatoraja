@@ -649,6 +649,9 @@ public class SkinProperty {
 	public static final int OPTION_2PWIN = 353;
 	public static final int OPTION_DRAW = 354;
 
+	public static final int OPTION_NOT_COMPARE_RIVAL = 624;
+	public static final int OPTION_COMPARE_RIVAL = 625;
+
 	public static final int SLIDER_LANECOVER = 4;
 	public static final int SLIDER_LANECOVER2 = 5;
 
