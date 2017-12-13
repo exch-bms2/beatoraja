@@ -17,7 +17,7 @@ import com.badlogic.gdx.graphics.Texture;
  */
 public class BGImageProcessor {
 	
-	public static final String[] pic_extension = { "jpg", "jpeg", "gif", "bmp", "png" };
+	public static final String[] pic_extension = { "jpg", "jpeg", "gif", "bmp", "png", "tga" };
 	/**
 	 * BGイメージ
 	 */
@@ -106,11 +106,15 @@ public class BGImageProcessor {
 			return bgacache[cid];
 		}
 		// BGイメージキャッシュにTextureがない場合
-		if (bgacache[cid] != null) {
-			bgacache[cid].dispose();
-		}
 		if (bgamap[id] != null){
-			bgacache[cid] = new Texture(bgamap[id]);
+			if(bgacache[cid] == null) {
+				bgacache[cid] = new Texture(bgamap[id]);				
+			} else if(bgacache[cid].getWidth() != bgamap[id].getWidth() || bgacache[cid].getHeight() != bgamap[id].getHeight()){
+				bgacache[cid].dispose();
+				bgacache[cid] = new Texture(bgamap[id]);				
+			} else {
+				bgacache[cid].draw(bgamap[id], 0, 0);
+			}
 			bgacacheid[cid] = id;
 			return bgacache[cid];
 		}
