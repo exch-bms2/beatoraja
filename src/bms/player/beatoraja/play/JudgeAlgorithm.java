@@ -1,6 +1,7 @@
 package bms.player.beatoraja.play;
 
 import bms.model.*;
+import bms.player.beatoraja.play.JudgeProperty.MissCondition;
 
 /**
  * 判定アルゴリズム
@@ -58,7 +59,7 @@ public enum JudgeAlgorithm {
 	 * @param pmsjudge PMS判定
 	 * @return 判定対象ノーツ
 	 */
-	public Note getNote(Lane lanemodel, long ptime, int[][] judgetable, int judgestart, int judgeend, boolean pmsjudge) {
+	public Note getNote(Lane lanemodel, long ptime, int[][] judgetable, int judgestart, int judgeend, MissCondition miss) {
 		Note note = null;
 		int judge = 0;
 		for (Note judgenote = lanemodel.getNote();judgenote != null;judgenote = lanemodel.getNote()) {
@@ -70,7 +71,7 @@ public enum JudgeAlgorithm {
 				if (!(judgenote instanceof MineNote) && !(judgenote instanceof LongNote
 						&& ((LongNote) judgenote).isEnd())) {
 					if (note == null || note.getState() != 0 || compare(note, judgenote, ptime, judgetable)) {
-						if (!(pmsjudge && (judgenote.getState() != 0
+						if (!(miss == MissCondition.ONE && (judgenote.getState() != 0
 								|| (judgenote.getState() == 0 && judgenote.getPlayTime() != 0 && dtime >= judgetable[2][1])))) {
 							if (judgenote.getState() != 0) {
 								judge = (dtime >= judgetable[4][0] && dtime <= judgetable[4][1]) ? 5 : 6;

@@ -11,19 +11,22 @@ public enum JudgeProperty {
             new int[][]{ {-30, 30}, {-70, 70}, {-160, 160}, {-290, 230}, {-160, 500}},
             new int[][]{ {-120, 120}, {-160, 160}, {-200, 200}, {-280, 220}},
             new int[][]{ {-130, 130}, {-170, 170}, {-210, 210}, {-290, 230}},
-            false
+            new boolean[]{true, true, true, false, false, true },
+            MissCondition.ALWAYS
             ),
     PMS(new int[][]{ {-25, 25}, {-75, 75}, {-175, 175}, {-200, 200}, {-175, 500} },
             new int[][]{},
             new int[][]{ {-125, 125}, {-175, 175}, {-225, 225}, {-250, 250}},
             new int[][]{},
-            true
+            new boolean[]{true, true, true, false, false, false },
+            MissCondition.ONE
             ),
 	KEYBOARD(new int[][]{ {-30, 30}, {-90, 90}, {-200, 200}, {-320, 240}, {-200, 650} },
 			new int[][]{},
 			new int[][]{ {-160, 25}, {-200, 75}, {-260, 140}, {-320, 240}},
 			new int[][]{},
-			false
+            new boolean[]{true, true, true, false, false, true },
+            MissCondition.ALWAYS
 			),
 	;
 
@@ -44,16 +47,21 @@ public enum JudgeProperty {
      */
     private final int[][] longscratch;
     /**
-     * PMSシステムを使用するかどうか(1note当たりmissは最大1回まで、missでコンボが切れる)
+     * 各判定毎のコンボ継続
      */
-    public final boolean pms;
+    public final boolean[] combo;
+    /**
+     * MISSの発生回数
+     */
+    public final MissCondition miss;
 
-    private JudgeProperty(int[][] note, int[][] scratch, int[][] longnote, int[][] longscratch, boolean pms) {
+    private JudgeProperty(int[][] note, int[][] scratch, int[][] longnote, int[][] longscratch, boolean[] combo, MissCondition miss) {
         this.note = note;
         this.scratch = scratch;
         this.longnote = longnote;
         this.longscratch = longscratch;
-        this.pms = pms;
+        this.combo = combo;
+        this.miss = miss;
     }
     
     public int[][] getNoteJudge(int judgerank, int constraint) {
@@ -91,5 +99,9 @@ public enum JudgeProperty {
 			}
 		}
 		return judge;
+    }
+    
+    public enum MissCondition {
+    	ONE, ALWAYS
     }
 }

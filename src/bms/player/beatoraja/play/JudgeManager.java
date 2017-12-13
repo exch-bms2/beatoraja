@@ -10,6 +10,7 @@ import com.badlogic.gdx.utils.FloatArray;
 
 import bms.model.*;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
+import bms.player.beatoraja.play.JudgeProperty.MissCondition;
 
 /**
  * ノーツ判定管理用クラス
@@ -101,7 +102,9 @@ public class JudgeManager {
 	/**
 	 * PMS用判定システム(空POORでコンボカット、1ノーツにつき1空POORまで)の有効/無効
 	 */
-	private boolean pmsjudge = false;
+	private boolean[] combocond;
+	
+	private MissCondition miss;
 
 	private int prevtime;
 
@@ -131,7 +134,8 @@ public class JudgeManager {
 		lanes = model.getLanes();
 
 		JudgeProperty rule = BMSPlayerRule.getBMSPlayerRule(model.getMode()).judge;
-		pmsjudge = rule.pms;
+		combocond = rule.combo;
+		miss = rule.miss;
 
 		keyassign = main.getLaneProperty().getKeyLaneAssign();
 		offset = main.getLaneProperty().getLaneSkinOffset();
@@ -356,7 +360,7 @@ public class JudgeManager {
 					final int[][] judge = sc >= 0 ? sjudge : njudge;
 					// 対象ノーツの抽出
 					lanemodel.reset();
-					final Note tnote = algorithm.getNote(lanemodel, ptime, judge, judgestart, judgeend, pmsjudge);
+					final Note tnote = algorithm.getNote(lanemodel, ptime, judge, judgestart, judgeend, miss);
 					final int j = algorithm.getJudge();
 
 					if (tnote != null) {
@@ -543,19 +547,21 @@ public class JudgeManager {
 		if (judge < 5) {
 			n.setState(judge + 1);
 		}
-		if(pmsjudge && judge == 4 && n.getPlayTime() != 0) {
+		if(miss == MissCondition.ONE && judge == 4 && n.getPlayTime() != 0) {
 			return;
 		}
 		n.setPlayTime(fast);
 		score.addJudgeCount(judge, fast >= 0, 1);
 		
 		judgefast = fast;
-		if (judge < 3) {
+		
+		if (combocond[judge] && judge < 5) {
 			combo++;
 			score.setCombo(Math.max(score.getCombo(), combo));
 			coursecombo++;
 			coursemaxcombo = coursemaxcombo > coursecombo ? coursemaxcombo : coursecombo;
-		} else if ((judge >= 3 && judge < 5) || (pmsjudge && judge >= 3)) {
+		}
+		if (!combocond[judge]) {
 			combo = 0;
 			coursecombo = 0;
 		}
