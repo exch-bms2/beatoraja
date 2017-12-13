@@ -645,8 +645,7 @@ public class BMSPlayer extends MainState {
 			if (assist > 0) {
 				clear = assist == 1 ? ClearType.LightAssistEasy : ClearType.AssistEasy;
 			} else {
-				if (judge.getJudgeCount(3) + judge.getJudgeCount(4) == 0
-						&& (!(model.getMode() == Mode.POPN_5K || model.getMode() == Mode.POPN_9K) || judge.getJudgeCount(5) == 0)) {
+				if (notes == this.judge.getCombo()) {
 					if (judge.getJudgeCount(2) == 0) {
 						if (judge.getJudgeCount(1) == 0) {
 							clear = ClearType.Max;
@@ -743,7 +742,7 @@ public class BMSPlayer extends MainState {
 			notes++;
 		}
 
-		if (judge == 3 || judge == 4) {
+		if (this.judge.getCombo() == 0) {
 			bga.setMisslayerTme(time);
 		}
 		gauge.update(judge);
@@ -751,7 +750,7 @@ public class BMSPlayer extends MainState {
 
 		//フルコン判定
 		setTimer(TIMER_FULLCOMBO_1P, notes == getMainController().getPlayerResource().getSongdata().getNotes()
-				&& this.judge.getJudgeCount(3) == 0 && this.judge.getJudgeCount(4) == 0);
+				&& notes == this.judge.getCombo());
 		
 		getScoreDataProperty().update(this.judge.getScoreData(), notes);
 
