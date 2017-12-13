@@ -93,6 +93,12 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 				skin.setLoadend(Integer.parseInt(str[1]));
 			}
 		});
+		addCommandWord(new CommandWord("JUDGETIMER") {
+			@Override
+			public void execute(String[] str) {
+				skin.setJudgetimer(Integer.parseInt(str[1]));
+			}
+		});
 		addCommandWord(new CommandWord("SRC_BGA") {
 			@Override
 			public void execute(String[] str) {
@@ -809,5 +815,5 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 				values[5] * dstw / srcw, values[6] * dsth / srch * h, values[7], 255, r, g,
 				b, values[12], values[13], values[14], values[15], values[16],
 				values[17], values[18], values[19], values[20], values[21]);
-	}
+	}	
 }

@@ -56,8 +56,6 @@ public class SkinProperty {
 	public static final int TIMER_BOMB_1P_KEY1 = 51;
 	public static final int TIMER_HCN_ACTIVE_1P_SCRATCH = 250;
 	public static final int TIMER_HCN_ACTIVE_1P_KEY1 = 251;
-	public static final int TIMER_GOOD_BOMB_1P_SCRATCH = 450;
-	public static final int TIMER_GOOD_BOMB_1P_KEY1 = 451;
 	public static final int TIMER_BOMB_1P_KEY2 = 52;
 	public static final int TIMER_BOMB_1P_KEY3 = 53;
 	public static final int TIMER_BOMB_1P_KEY4 = 54;
