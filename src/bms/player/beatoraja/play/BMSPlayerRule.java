@@ -1,23 +1,24 @@
 package bms.player.beatoraja.play;
 
-import bms.model.BMSModel;
 import bms.model.Mode;
 
 /**
- * Created by exch on 2017/05/12.
+ * プレイヤールール
+ * 
+ * @author exch
  */
 public enum BMSPlayerRule {
 
-    BEAT_5K(GaugeProperty.Default, JudgeProperty.Default),
-    BEAT_7K(GaugeProperty.Default, JudgeProperty.Default),
-    BEAT_10K(GaugeProperty.Default, JudgeProperty.Default),
-    BEAT_14K(GaugeProperty.Default, JudgeProperty.Default),
+    BEAT_5K(GaugeProperty.FIVEKEYS, JudgeProperty.FIVEKEYS),
+    BEAT_7K(GaugeProperty.SEVENKEYS, JudgeProperty.SEVENKEYS),
+    BEAT_10K(GaugeProperty.FIVEKEYS, JudgeProperty.FIVEKEYS),
+    BEAT_14K(GaugeProperty.SEVENKEYS, JudgeProperty.SEVENKEYS),
     POPN_5K(GaugeProperty.PMS, JudgeProperty.PMS),
     POPN_9K(GaugeProperty.PMS, JudgeProperty.PMS),
     KEYBOARD_24K(GaugeProperty.KEYBOARD, JudgeProperty.KEYBOARD),
     KEYBOARD_24K_DOUBLE(GaugeProperty.KEYBOARD, JudgeProperty.KEYBOARD),
-    LR2(GaugeProperty.LR2, JudgeProperty.Default),
-    Default(GaugeProperty.Default, JudgeProperty.Default),
+    LR2(GaugeProperty.LR2, JudgeProperty.SEVENKEYS),
+    Default(GaugeProperty.SEVENKEYS, JudgeProperty.SEVENKEYS),
     ;
 
     public final GaugeProperty gauge;

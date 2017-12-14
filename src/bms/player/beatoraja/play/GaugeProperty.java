@@ -9,7 +9,18 @@ import static bms.player.beatoraja.play.GrooveGauge.GaugeType.*;
  */
 public enum GaugeProperty {
 
-    Default(new GaugeElementProperty[]{
+    FIVEKEYS(new GaugeElementProperty[]{
+            GaugeElementProperty.ASSIST_EASY_5,
+                GaugeElementProperty.EASY_5,
+                GaugeElementProperty.NORMAL_5,
+                GaugeElementProperty.HARD_5,
+                GaugeElementProperty.EXHARD_5,
+                GaugeElementProperty.HAZARD_5,
+                GaugeElementProperty.CLASS_5,
+                GaugeElementProperty.EXCLASS_5,
+                GaugeElementProperty.EXHARDCLASS_5,
+        }),
+    SEVENKEYS(new GaugeElementProperty[]{
         GaugeElementProperty.ASSIST_EASY,
             GaugeElementProperty.EASY,
             GaugeElementProperty.NORMAL,
@@ -67,6 +78,16 @@ public enum GaugeProperty {
      * @author exch
      */
     public enum GaugeElementProperty {
+
+        ASSIST_EASY_5(TOTAL ,2 ,100 ,20, 50, new float[]{1.0f, 1.0f, 0.5f, -1.5f, -3.0f, -0.5f}, new float[][]{}),
+        EASY_5(TOTAL ,2 ,100 ,20, 75, new float[]{1.0f, 1.0f, 0.5f, -1.5f, -4.5f, -1.0f}, new float[][]{}),
+        NORMAL_5(TOTAL ,2 ,100 ,20, 75, new float[]{1.0f, 1.0f, 0.5f, -3.0f, -6.0f, -2.0f}, new float[][]{}),
+        HARD_5(null ,0 ,100 ,100, 0, new float[]{0f, 0f, 0f, -5.0f, -10.0f, -5.0f}, new float[][]{}),
+        EXHARD_5(LIMIT_INCREMENT ,0 ,100 ,100, 0, new float[]{0f, 0f, 0f, -10.0f, -20.0f, -10.0f}, new float[][]{}),
+        HAZARD_5(null ,0 ,100 ,100, 0, new float[]{0f, 0f, 0f, -100.0f, -100.0f, -100.0f}, new float[][]{}),
+        CLASS_5(null ,0 ,100 ,100, 0, new float[]{0f, 0f, 0f, -1.0f, -2.0f, -1.0f}, new float[][]{}),
+        EXCLASS_5(null ,0 ,100 ,100, 0, new float[]{0f, 0f, 0f, -2.0f, -4.0f, -2.0f}, new float[][]{}),
+        EXHARDCLASS_5(null ,0 ,100 ,100, 0, new float[]{0f, 0f, 0f, -5.0f, -10.0f, -5.0f}, new float[][]{}),
 
         ASSIST_EASY(TOTAL ,2 ,100 ,20, 60, new float[]{1.0f, 1.0f, 0.5f, -1.5f, -3.0f, -0.5f}, new float[][]{}),
         EASY(TOTAL ,2 ,100 ,20, 80, new float[]{1.0f, 1.0f, 0.5f, -1.5f, -4.5f, -1.0f}, new float[][]{}),
