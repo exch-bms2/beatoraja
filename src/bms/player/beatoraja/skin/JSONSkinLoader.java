@@ -79,7 +79,7 @@ public class JSONSkinLoader extends SkinLoader{
 						op[j] = pr.item[j].op;
 						name[j] = pr.item[j].name;
 					}
-					options[i] = new SkinHeader.CustomOption(pr.name, op, name);
+					options[i] = new SkinHeader.CustomOption(pr.name, op, name, pr.def);
 				}
 				header.setCustomOptions(options);
 
@@ -106,6 +106,7 @@ public class JSONSkinLoader extends SkinLoader{
 
 	public Skin load(Path p, SkinType type, SkinConfig.Property property) {
 		Skin skin = null;
+		SkinHeader header = loadHeader(p);
 		try {
 			Json json = new Json();
 			json.setIgnoreUnknownFields(true);
@@ -117,6 +118,15 @@ public class JSONSkinLoader extends SkinLoader{
 				}
 			}
 			setSerializers(json, enabledOptions, p);
+
+			filemap = new HashMap<>();
+			for (SkinHeader.CustomFile customFile : header.getCustomFiles()) {
+				for(SkinConfig.FilePath file : property.getFile()) {
+					if (customFile.name.equals(file.name)) {
+						filemap.put(customFile.path, file.path);
+					}
+				}
+			}
 
 			sk = json.fromJson(JsonSkin.class, new FileReader(p.toFile()));
 			Resolution src = HD;
@@ -163,17 +173,6 @@ public class JSONSkinLoader extends SkinLoader{
 			}
 			skin.setOption(op);
 
-			filemap = new HashMap<>();
-			for (Filepath pr : sk.filepath) {
-
-				for(SkinConfig.FilePath file : property.getFile()) {
-					if (file.name.equals(pr.name)) {
-						filemap.put(p.getParent().toString() + "/" + pr.path, file.path);
-						break;
-					}
-				}
-			}
-			
 			Map<Integer, SkinConfig.Offset> offset = new HashMap<>();
 			for (Offset of : sk.offset) {
 				for(SkinConfig.Offset off : property.getOffset()) {
@@ -897,6 +896,7 @@ public class JSONSkinLoader extends SkinLoader{
 	public static class Property {
 		public String name;
 		public PropertyItem[] item = new PropertyItem[0];
+		public String def;
 	}
 
 	public static class PropertyItem {
@@ -1110,7 +1110,7 @@ public class JSONSkinLoader extends SkinLoader{
 
 	}
 
-	private static void setSerializers(Json json, HashSet<Integer> enabledOptions, Path path) {
+	private void setSerializers(Json json, HashSet<Integer> enabledOptions, Path path) {
 		Class[] classes = {
 				Property.class,
 				Filepath.class,
@@ -1160,7 +1160,7 @@ public class JSONSkinLoader extends SkinLoader{
 		}
 	}
 
-	private static abstract class Serializer<T> extends Json.ReadOnlySerializer<T> {
+	private abstract class Serializer<T> extends Json.ReadOnlySerializer<T> {
 
 		HashSet<Integer> options;
 		Path path;
@@ -1213,7 +1213,7 @@ public class JSONSkinLoader extends SkinLoader{
 		}
 	}
 
-	private static class ObjectSerializer<T> extends Serializer<T> {
+	private class ObjectSerializer<T> extends Serializer<T> {
 
 		public ObjectSerializer(HashSet<Integer> op, Path path) {
 			super(op, path);
@@ -1235,13 +1235,15 @@ public class JSONSkinLoader extends SkinLoader{
 			} else if (jsonValue.isObject() && jsonValue.has("include")) {
 				Json subJson = new Json();
 				subJson.setIgnoreUnknownFields(true);
-				Path subPath = path.resolveSibling(Paths.get(jsonValue.get("include").asString()));
-				setSerializers(subJson, this.options, subPath);
-				try {
-					return (T)subJson.fromJson(cls, new FileReader(subPath.toFile()));
-				} catch (FileNotFoundException e) {
-					return null;
+				File file = getPath(path.getParent().toString() + "/" + jsonValue.get("include").asString(), filemap);
+				if (file.exists()) {
+					setSerializers(subJson, this.options, file.toPath());
+					try {
+						return (T)subJson.fromJson(cls, new FileReader(file));
+					} catch (FileNotFoundException e) {
+					}
 				}
+				return null;
 			} else {
 				// literal
 				T instance = null;
@@ -1269,7 +1271,7 @@ public class JSONSkinLoader extends SkinLoader{
 		}
 	}
 
-	private static class ArraySerializer<T> extends Serializer<T[]> {
+	private class ArraySerializer<T> extends Serializer<T[]> {
 
 		public ArraySerializer(HashSet<Integer> op, Path path) {
 			super(op, path);
@@ -1326,12 +1328,14 @@ public class JSONSkinLoader extends SkinLoader{
 		private void includeArray(Json json, JsonValue jsonValue, Class cls, ArrayList<T> items) {
 			Json subJson = new Json();
 			subJson.setIgnoreUnknownFields(true);
-			Path subPath = path.resolveSibling(Paths.get(jsonValue.get("include").asString()));
-			setSerializers(subJson, this.options, subPath);
-			try {
-				T[] array = (T[])subJson.fromJson(cls, new FileReader(subPath.toFile()));
-				Collections.addAll(items, array);
-			} catch (FileNotFoundException e) {
+			File file = getPath(path.getParent().toString() + "/" + jsonValue.get("include").asString(), filemap);
+			if (file.exists()) {
+				setSerializers(subJson, this.options, file.toPath());
+				try {
+					T[] array = (T[])subJson.fromJson(cls, new FileReader(file));
+					Collections.addAll(items, array);
+				} catch (FileNotFoundException e) {
+				}
 			}
 		}
 	}

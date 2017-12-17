@@ -107,11 +107,20 @@ public class SkinHeader {
 		public final String name;
 		public final int[] option;
 		public final String[] contents;
-		
+		public final String def;
+
 		public CustomOption(String name, int[] option, String[] contents) {
 			this.name = name;
 			this.option = option;
 			this.contents = contents;
+			this.def = null;
+		}
+
+		public CustomOption(String name, int[] option, String[] contents, String def) {
+			this.name = name;
+			this.option = option;
+			this.contents = contents;
+			this.def = def;
 		}
 	}
 
