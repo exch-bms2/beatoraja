@@ -9,6 +9,8 @@ import java.util.function.Consumer;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
+import org.lwjgl.input.Mouse;
+
 import bms.player.beatoraja.play.TargetProperty;
 import bms.player.beatoraja.select.bar.TableBar;
 import bms.player.beatoraja.skin.SkinLoader;
@@ -240,6 +242,12 @@ public class MainController extends ApplicationAdapter {
 		case STATE_CONFIG:
 			newState = keyconfig;
 			break;
+		}
+		
+		if(state == STATE_PLAYBMS) {
+		    Mouse.setGrabbed(true);
+		} else {
+		    Mouse.setGrabbed(false);
 		}
 
 		if (newState != null && current != newState) {
