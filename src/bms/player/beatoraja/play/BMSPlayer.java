@@ -490,11 +490,7 @@ public class BMSPlayer extends MainState {
 			if (gaugelog.size <= ptime / 500) {
 				gaugelog.add(g);
 			}
-			if (g == gauge.getMaxValue() && timer[TIMER_GAUGE_MAX_1P] == Long.MIN_VALUE) {
-                timer[TIMER_GAUGE_MAX_1P] = now;
-			} else if (g < gauge.getMaxValue() && timer[TIMER_GAUGE_MAX_1P] != Long.MIN_VALUE) {
-                timer[TIMER_GAUGE_MAX_1P] = Long.MIN_VALUE;
-			}
+			setTimer(TIMER_GAUGE_MAX_1P, g == gauge.getMaxValue());
 
             // System.out.println("playing time : " + time);
 			if (playtime < ptime) {
@@ -670,7 +666,7 @@ public class BMSPlayer extends MainState {
 		replay.sha256 = model.getSHA256();
 		replay.mode = config.getLnmode();
 		replay.date = Calendar.getInstance().getTimeInMillis() / 1000;
-		replay.keylog = getMainController().getInputProcessor().getKeyInputLog().toArray(new KeyInputLog[0]);
+		replay.keylog = getMainController().getInputProcessor().getKeyInputLog();
 		replay.pattern = pattern.toArray(new PatternModifyLog[pattern.size()]);
 		replay.rand = model.getRandom();
 		replay.gauge = config.getGauge();

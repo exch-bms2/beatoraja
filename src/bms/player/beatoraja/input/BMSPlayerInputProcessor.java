@@ -19,6 +19,7 @@ import bms.player.beatoraja.input.BMSPlayerInputDevice.Type;
 
 import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.Controllers;
+import com.badlogic.gdx.utils.Array;
 
 /**
  * キーボードやコントローラからの入力を管理するクラス
@@ -34,6 +35,8 @@ public class BMSPlayerInputProcessor {
 	private BMControllerInputProcessor[] bminput;
 
 	private MidiInputProcessor midiinput;
+	
+	private KeyLogger keylog = new KeyLogger();
 
 	public BMSPlayerInputProcessor(Config config, PlayerConfig player) {
 		Resolution resolution = config.getResolution();
@@ -117,8 +120,6 @@ public class BMSPlayerInputProcessor {
 	boolean mousedragged;
 
 	int scroll;
-
-	private List<KeyInputLog> keylog = new ArrayList<KeyInputLog>(10000);
 
 	private boolean startPressed;
 	private boolean selectPressed;
@@ -300,13 +301,13 @@ public class BMSPlayerInputProcessor {
 			time[i] = presstime;
 			lastKeyDevice = device;
 			if (this.getStartTime() != 0) {
-				keylog.add(new KeyInputLog((int) presstime, i, pressed));
+				keylog.add((int) presstime, i, pressed);
 			}
 		}
 	}
 
-	public List<KeyInputLog> getKeyInputLog() {
-		return keylog;
+	public KeyInputLog[] getKeyInputLog() {
+		return keylog.toArray();
 	}
 
 	public void startChanged(boolean pressed) {
@@ -419,5 +420,41 @@ public class BMSPlayerInputProcessor {
 
 	public void dispose() {
 		midiinput.close();
+	}
+	
+	static class KeyLogger {
+		
+		public static final int INITIAL_LOG_COUNT = 10000;
+		
+		public final Array<KeyInputLog> keylog;
+		
+		public final KeyInputLog[] logpool;
+		private int poolindex;
+
+		public KeyLogger() {
+			keylog = new Array<KeyInputLog>(INITIAL_LOG_COUNT);
+			logpool = new KeyInputLog[INITIAL_LOG_COUNT];
+			clear();
+		}
+		
+		public void add(int time, int keycode, boolean pressed) {
+			final KeyInputLog log = poolindex < logpool.length ? logpool[poolindex] : new KeyInputLog();
+			poolindex++;
+			log.time = time;
+			log.keycode = keycode;
+			log.pressed = pressed;
+			keylog.add(log);
+		}
+		
+		public void clear() {
+			keylog.clear();
+			for(int i = 0;i < logpool.length;i++) {
+				logpool[i] = new KeyInputLog();
+			}
+		}
+		
+		public KeyInputLog[] toArray() {
+			return keylog.toArray(KeyInputLog.class);
+		}
 	}
 }
