@@ -8,22 +8,30 @@ import com.portaudio.*;
 import bms.player.beatoraja.Config;
 
 /**
- * 
+ * PortAudioドライバ
  * 
  * @author exch
  */
-public class PortAudioDriver extends AbstractAudioDriver<PCM> {
+public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnable {
 
 	private static DeviceInfo[] devices;
 	
 	private BlockingStream stream;
-	private final float[] buffer;
 	private int sampleRate;
-	/**
-	 * オーディオミキサー
-	 */
-	private AudioMixer mixer;
 	
+	/**
+	 * ミキサー入力
+	 */
+	private final MixerInput[] inputs;
+
+	private long idcount;
+	
+	private boolean stop = false;
+	
+	private final float[] buffer;
+	
+	private final Thread mixer;
+
 	public static DeviceInfo[] getDevices() {
 		if(devices == null) {
 			PortAudio.initialize();
@@ -49,28 +57,31 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> {
 		}
 		DeviceInfo deviceInfo = devices[ deviceId ];
 		sampleRate = (int)deviceInfo.defaultSampleRate;
-		System.out.println( "  deviceId    = " + deviceId );
-		System.out.println( "  sampleRate  = " + sampleRate );
-		System.out.println( "  device name = " + deviceInfo.name );
+//		System.out.println( "  deviceId    = " + deviceId );
+//		System.out.println( "  sampleRate  = " + sampleRate );
+//		System.out.println( "  device name = " + deviceInfo.name );
 
 		StreamParameters streamParameters = new StreamParameters();
 		streamParameters.channelCount = 2;
 		streamParameters.device = deviceId;
 		int framesPerBuffer = config.getAudioDeviceBufferSize();
 		streamParameters.suggestedLatency = ((double)framesPerBuffer) / sampleRate;
-		System.out.println( "  suggestedLatency = "
-				+ streamParameters.suggestedLatency );
+//		System.out.println( "  suggestedLatency = " + streamParameters.suggestedLatency );
 
 		int flags = 0;
 		
 		// Open a stream for output.
 		stream = PortAudio.openStream( null, streamParameters,
 				(int) sampleRate, framesPerBuffer, flags );
-		buffer = new float[framesPerBuffer * 2];
 
 		stream.start();
 
-		mixer = new AudioMixer(config.getAudioDeviceSimultaneousSources());
+		mixer = new Thread(this);
+		buffer = new float[framesPerBuffer * 2];
+		inputs = new MixerInput[config.getAudioDeviceSimultaneousSources()];
+		for (int i = 0; i < inputs.length; i++) {
+			inputs[i] = new MixerInput();
+		}
 		mixer.start();
 	}
 
@@ -128,37 +139,108 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> {
 
 	@Override
 	protected void play(PCM pcm, int channel, float volume, float pitch) {
-		mixer.put(pcm, channel, volume, pitch, false);
+		put(pcm, channel, volume, pitch, false);
 	}
 
 	@Override
 	protected void play(AudioElement<PCM> id, float volume, boolean loop) {
-		id.id = mixer.put(id.audio, -1, volume, 1.0f, loop);
+		id.id = put(id.audio, -1, volume, 1.0f, loop);
 	}
 
 	@Override
 	protected void setVolume(AudioElement<PCM> id, float volume) {
-		mixer.setVolume(id.id, volume);
-	}
-
-	@Override
-	protected void stop(PCM id) {
-		mixer.stop(id);
-	}
-
-	@Override
-	protected void stop(PCM id, int channel) {
-		mixer.stop(id, channel);
+		for (MixerInput input : inputs) {
+			if (input.id == id.id) {
+				input.volume = volume;
+				break;
+			}
+		}
 	}
 
 	@Override
 	protected void disposeKeySound(PCM pcm) {
 	}
 
+	private long put(PCM pcm, int channel, float volume, float pitch, boolean loop) {
+		synchronized (inputs) {
+			for (MixerInput input : inputs) {
+				if (input.pos == -1) {
+					input.pcm = pcm;
+					input.sample = pcm.getSample();
+					input.volume = volume;
+					input.pitch = pitch;
+					input.loop = loop;
+					input.id = idcount++;
+					input.channel = channel;
+					input.pos = 0;
+					return input.id;
+				}
+			}
+		}
+		return -1;
+	}
+
+	@Override
+	protected void stop(PCM id) {
+		synchronized (inputs) {
+			for (MixerInput input : inputs) {
+				if (input.pcm == id) {
+					input.pos = -1;
+				}
+			}				
+		}
+	}
+
+	@Override
+	protected void stop(PCM id, int channel) {
+		synchronized (inputs) {
+			for (MixerInput input : inputs) {
+				if (input.pcm == id && input.channel == channel) {
+					input.pos = -1;
+				}
+			}
+		}
+	}
+
+	public void run() {
+		while(!stop) {
+			try {
+				synchronized (inputs) {
+					final float gpitch = getGlobalPitch();
+					for (int i = 0; i < buffer.length; i+=2) {
+						float wav_l = 0;
+						float wav_r = 0;
+						for (MixerInput input : inputs) {
+							if (input.pos != -1) {
+								wav_l += ((float) input.sample[input.pos]) * input.volume / Short.MAX_VALUE;
+								wav_r += ((float) input.sample[input.pos+1]) * input.volume / Short.MAX_VALUE;
+								input.posf += gpitch * input.pitch;
+								int inc = (int)input.posf;
+								if (inc > 0) {
+									input.pos += 2 * inc;
+									input.posf -= (float)inc;
+								}
+								if (input.pos >= input.sample.length) {
+									input.pos = input.loop ? 0 : -1;
+								}
+							}
+						}
+						buffer[i] = wav_l;
+						buffer[i+1] = wav_r;
+					}						
+				}
+				
+				stream.write( buffer, buffer.length / 2);					
+			} catch(Throwable e) {
+				e.printStackTrace();
+			}
+		}
+	}		
+
 	public void dispose() {
 		super.dispose();
 		if(stream != null) {
-			mixer.stop = true;
+			stop = true;
 			long l = System.currentTimeMillis();
 			while(mixer.isAlive() && System.currentTimeMillis() - l < 1000);
 			stream.stop();
@@ -167,117 +249,11 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> {
 			stream = null;
 
 			PortAudio.terminate();
-			System.out.println( "JPortAudio test complete." );			
+//			System.out.println( "JPortAudio test complete." );			
 		}
 	}
-	
-	/**
-	 * オーディオミキサー
-	 *
-	 * @author exch
-	 */
-	class AudioMixer extends Thread {
 
-		/**
-		 * ミキサー入力
-		 */
-		private MixerInput[] inputs;
-
-		private long idcount;
-		
-		private boolean stop = false;
-
-		public AudioMixer(int channels) {
-			inputs = new MixerInput[channels];
-			for (int i = 0; i < inputs.length; i++) {
-				inputs[i] = new MixerInput();
-			}
-		}
-
-		public long put(PCM pcm, int channel, float volume, float pitch, boolean loop) {
-			synchronized (inputs) {
-				for (MixerInput input : inputs) {
-					if (input.pos == -1) {
-						input.pcm = pcm;
-						input.sample = pcm.getSample();
-						input.volume = volume;
-						input.pitch = pitch;
-						input.loop = loop;
-						input.id = idcount++;
-						input.channel = channel;
-						input.pos = 0;
-						return input.id;
-					}
-				}
-			}
-			return -1;
-		}
-
-		public void setVolume(long id, float volume) {
-			for (MixerInput input : inputs) {
-				if (input.id == id) {
-					input.volume = volume;
-					break;
-				}
-			}
-		}
-
-		public void stop(PCM id) {
-			synchronized (inputs) {
-				for (MixerInput input : inputs) {
-					if (input.pcm == id) {
-						input.pos = -1;
-					}
-				}				
-			}
-		}
-
-		public void stop(PCM id, int channel) {
-			synchronized (inputs) {
-				for (MixerInput input : inputs) {
-					if (input.pcm == id && input.channel == channel) {
-						input.pos = -1;
-					}
-				}
-			}
-		}
-
-		public void run() {
-			while(!stop) {
-				try {
-					synchronized (inputs) {
-						for (int i = 0; i < buffer.length; i+=2) {
-							float wav_l = 0;
-							float wav_r = 0;
-							for (MixerInput input : inputs) {
-								if (input.pos != -1) {
-									wav_l += ((float) input.sample[input.pos]) * input.volume / Short.MAX_VALUE;
-									wav_r += ((float) input.sample[input.pos+1]) * input.volume / Short.MAX_VALUE;
-									input.posf += getGlobalPitch() * input.pitch;
-									int inc = (int)input.posf;
-									if (inc > 0) {
-										input.pos += 2 * inc;
-										input.posf -= (float)inc;
-									}
-									if (input.pos >= input.sample.length) {
-										input.pos = input.loop ? 0 : -1;
-									}
-								}
-							}
-							buffer[i] = wav_l;
-							buffer[i+1] = wav_r;
-						}						
-					}
-					
-					stream.write( buffer, buffer.length / 2);					
-				} catch(Throwable e) {
-					e.printStackTrace();
-				}
-			}
-		}		
-	}
-
-	class MixerInput {
+	static class MixerInput {
 		public PCM pcm;
 		public short[] sample = new short[0];
 		public float volume;
