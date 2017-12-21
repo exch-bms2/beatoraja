@@ -83,7 +83,7 @@ public class FolderBar extends DirectoryBar {
             path = path.substring(0, path.length() - 1);
         }
         final String ccrc = SongUtils.crc32(path, new String[0], new File(".").getAbsolutePath());
-        int clear = 255;
+        clear();
         int[] clears = getLamps();
         int[] ranks = getRanks();
         final SongData[] songdatas = songdb.getSongDatas("parent", ccrc);
@@ -98,13 +98,9 @@ public class FolderBar extends DirectoryBar {
                 } else {
                     ranks[0]++;
                 }
-                if (score.getClear() < clear) {
-                    clear = score.getClear();
-                }
             } else {
                 ranks[0]++;
                 clears[0]++;
-                clear = 0;
             }
         }
         setLamps(clears);

@@ -1,5 +1,7 @@
 package bms.player.beatoraja.select.bar;
 
+import java.util.Arrays;
+
 /**
  * ディレクトリの抽象バー。
  * 
@@ -19,6 +21,14 @@ public abstract class DirectoryBar extends Bar {
         this.lamps = lamps;
     }
 
+    public int[] getRivalLamps() {
+        return rlamps;
+    }
+
+    public void setRivalLamps(int[] lamps) {
+        this.rlamps = lamps;
+    }
+
     public int[] getRanks() {
         return ranks;
     }
@@ -35,6 +45,12 @@ public abstract class DirectoryBar extends Bar {
             }
         }
         return 0;
+    }
+    
+    public void clear() {
+    	Arrays.fill(lamps, 0);
+    	Arrays.fill(rlamps, 0);
+    	Arrays.fill(ranks, 0);
     }
 
     /**

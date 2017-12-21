@@ -71,7 +71,7 @@ public class HashBar extends DirectoryBar {
     }
 
     public void updateFolderStatus() {
-        int clear = 255;
+        clear();
         int[] clears = getLamps();
         int[] ranks = getRanks();
         songs = selector.getSongDatabase().getSongDatas(elementsHash);
@@ -86,13 +86,9 @@ public class HashBar extends DirectoryBar {
                 } else {
                     ranks[0]++;
                 }
-                if (score.getClear() < clear) {
-                    clear = score.getClear();
-                }
             } else {
                 ranks[0]++;
                 clears[0]++;
-                clear = 0;
             }
         }
         setLamps(clears);
