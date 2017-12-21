@@ -89,7 +89,7 @@ public class MusicSelector extends MainState {
 	private ScoreDataCache scorecache;
 	private ScoreDataCache rivalcache;
 
-	private Map<PlayerInformation, ScoreDatabaseAccessor> rivals = new HashMap();
+	private Map<PlayerInformation, ScoreDataCache> rivalcaches = new HashMap();
 	private PlayerInformation rival;
 
 	private int panelstate;
@@ -154,7 +154,23 @@ public class MusicSelector extends MainState {
 					final ScoreDatabaseAccessor scoredb = new ScoreDatabaseAccessor(p.toString());
 					PlayerInformation info = scoredb.getInformation();
 					if(info != null) {
-						rivals.put(info, scoredb);
+						rivalcaches.put(info,  new ScoreDataCache() {
+
+							protected Map<String, IRScoreData> readScoreDatasFromSource(SongData[] songs, int lnmode) {
+								List<String> noln = new ArrayList<String>();
+								List<String> ln = new ArrayList<String>();
+								for (SongData song : songs) {
+									if (song.hasUndefinedLongNote()) {
+										ln.add(song.getSha256());
+									} else {
+										noln.add(song.getSha256());
+									}
+								}
+								Map<String, IRScoreData> result = scoredb.getScoreDatas(noln.toArray(new String[0]), 0);
+								result.putAll(scoredb.getScoreDatas(ln.toArray(new String[0]), lnmode));
+								return result;
+							}
+						});
 					}
 				}
 			}
@@ -172,29 +188,8 @@ public class MusicSelector extends MainState {
 
 	public void setRival(PlayerInformation rival) {
 		this.rival = rival;
-		final ScoreDatabaseAccessor scoredb = rivals.get(rival);
-
-		if(scoredb != null) {
-			rivalcache = new ScoreDataCache() {
-
-				protected Map<String, IRScoreData> readScoreDatasFromSource(SongData[] songs, int lnmode) {
-					List<String> noln = new ArrayList<String>();
-					List<String> ln = new ArrayList<String>();
-					for (SongData song : songs) {
-						if (song.hasUndefinedLongNote()) {
-							ln.add(song.getSha256());
-						} else {
-							noln.add(song.getSha256());
-						}
-					}
-					Map<String, IRScoreData> result = scoredb.getScoreDatas(noln.toArray(new String[0]), 0);
-					result.putAll(scoredb.getScoreDatas(ln.toArray(new String[0]), lnmode));
-					return result;
-				}
-			};
-		} else {
-			rivalcache = null;
-		}
+		rivalcache = rivalcaches.get(rival);
+		bar.updateBar();
 
 		Logger.getGlobal().info("Rival変更:" + (rival != null ? rival.getName() : "なし"));
 	}
@@ -205,7 +200,7 @@ public class MusicSelector extends MainState {
 
 	public void nextRival() {
 		boolean match = (rival == null);
-		for(PlayerInformation rival : rivals.keySet()) {
+		for(PlayerInformation rival : rivalcaches.keySet()) {
 			if(match) {
 				this.rival = rival;
 				match = false;
