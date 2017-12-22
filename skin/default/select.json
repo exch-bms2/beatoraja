@@ -93,10 +93,10 @@
 		{"id":"label-mine", "src":0, "x":0, "y":480, "w":16, "h":30},
 
 		{"id":"sort", "src":0, "x":400, "y":720, "w":96, "h":24},
-		{"id":"sortset", "src":0, "x":400, "y":600, "w":120, "h":120, "divy":5, "len":5, "ref":1012},
+		{"id":"sortset", "src":0, "x":400, "y":600, "w":120, "h":120, "divy":5, "len":5, "ref":12},
 
 		{"id":"lnmode", "src":0, "x":550, "y":672, "w":144, "h":24},
-		{"id":"lnmodeset", "src":0, "x":550, "y":600, "w":72, "h":72, "divy":3, "len":3, "ref":1308},
+		{"id":"lnmodeset", "src":0, "x":550, "y":600, "w":72, "h":72, "divy":3, "len":3, "ref":308},
 
 		{"id":"state_clear", "src":5, "x":0, "y":0, "w":200, "h":220, "divy":11, "len":11, "ref":370},
 

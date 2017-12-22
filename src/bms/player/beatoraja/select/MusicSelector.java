@@ -529,8 +529,6 @@ public class MusicSelector extends MainState {
 			return bar.getSelected().getScore() != null
 					? bar.getSelected().getScore().getPlaycount() - bar.getSelected().getScore().getClearcount()
 					: Integer.MIN_VALUE;
-		case NUMBER_CLEAR:
-			return bar.getSelected().getScore() != null ? bar.getSelected().getScore().getClear() : Integer.MIN_VALUE;
 		case NUMBER_SCORE:
 			return bar.getSelected().getScore() != null ? bar.getSelected().getScore().getExscore() : Integer.MIN_VALUE;
 		case NUMBER_MISSCOUNT:
@@ -873,6 +871,10 @@ public class MusicSelector extends MainState {
 				return mode < mode_lr2.length ? mode_lr2[mode] : mode;
 			case BUTTON_SORT:
 				return sort;
+			case NUMBER_CLEAR:
+				return bar.getSelected().getScore() != null ? bar.getSelected().getScore().getClear() : Integer.MIN_VALUE;
+			case NUMBER_TARGET_CLEAR:
+				return bar.getSelected().getRivalScore() != null ? bar.getSelected().getRivalScore().getClear() : Integer.MIN_VALUE;
 		}
 		return super.getImageIndex(id);
 	}
