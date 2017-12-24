@@ -251,6 +251,9 @@ public class JSONSkinLoader extends SkinLoader{
 							SkinImage si = new SkinImage(tr, timer, cycle);
 							si.setReferenceID(imgs.ref);
 							obj = si;
+							if (imgs.act > 0) {
+								obj.setClickevent(imgs.act);
+							}
 							break;
 						}
 					}
@@ -951,6 +954,7 @@ public class JSONSkinLoader extends SkinLoader{
 		public String id;
 		public int ref;
 		public String[] images = new String[0];
+		public int act;
 	}
 
 	public static class Value {
