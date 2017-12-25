@@ -902,7 +902,36 @@ public class MusicSelector extends MainState {
 		case BUTTON_REPLAY4:
 			play = 6;
 			break;
+			case BUTTON_MODE:
+				nextMode();
+				break;
+			case BUTTON_SORT:
+				nextSort();
+				break;
+			case BUTTON_LNMODE:
+				nextLNMode();
+				break;
 		}
+	}
+
+	public void nextMode() {
+		int mode = 0;
+		for(;mode < MODE.length && MODE[mode] != config.getMode();mode++);
+		config.setMode(MODE[(mode + 1) % MODE.length]);
+		bar.updateBar();
+		play(SOUND_CHANGEOPTION);
+	}
+
+	public void nextSort() {
+		sort = (sort + 1) % BarSorter.values().length;
+		bar.updateBar();
+		play(SOUND_CHANGEOPTION);
+	}
+
+	public void nextLNMode() {
+		config.setLnmode((config.getLnmode() + 1) % 3);
+		bar.updateBar();
+		play(SOUND_CHANGEOPTION);
 	}
 
 	public Bar getSelectedBar() {

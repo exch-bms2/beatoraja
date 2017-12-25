@@ -73,26 +73,18 @@ public class MusicSelectInputProcessor {
 
         if (numberstate[1] && numtime[1] != 0) {
             // KEYフィルターの切り替え
-            int mode = 0;
-            for(;mode < MODE.length && MODE[mode] != config.getMode();mode++);
             numtime[1] = 0;
-            config.setMode(MODE[(mode + 1) % MODE.length]);
-            bar.updateBar();
-            select.play(SOUND_CHANGEOPTION);
+            select.nextMode();
         }
         if (numberstate[2] && numtime[2] != 0) {
             // ソートの切り替え
-            select.setSort((select.getSort() + 1) % BarSorter.values().length);
             numtime[2] = 0;
-            bar.updateBar();
-            select.play(SOUND_CHANGEOPTION);
+            select.nextSort();
         }
         if (numberstate[3] && numtime[3] != 0) {
             // LNモードの切り替え
-            config.setLnmode((config.getLnmode() + 1) % 3);
             numtime[3] = 0;
-            bar.updateBar();
-            select.play(SOUND_CHANGEOPTION);
+            select.nextLNMode();
         }
         if (numberstate[4] && numtime[4] != 0) {
             // change replay

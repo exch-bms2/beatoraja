@@ -93,10 +93,10 @@
 		{"id":"label-mine", "src":0, "x":0, "y":480, "w":16, "h":30},
 
 		{"id":"sort", "src":0, "x":400, "y":720, "w":96, "h":24},
-		{"id":"sortset", "src":0, "x":400, "y":600, "w":120, "h":120, "divy":5, "len":5, "ref":12},
+		{"id":"sortset", "src":0, "x":400, "y":600, "w":120, "h":120, "divy":5, "len":5, "ref":12, "act":12},
 
 		{"id":"lnmode", "src":0, "x":550, "y":672, "w":144, "h":24},
-		{"id":"lnmodeset", "src":0, "x":550, "y":600, "w":72, "h":72, "divy":3, "len":3, "ref":308},
+		{"id":"lnmodeset", "src":0, "x":550, "y":600, "w":72, "h":72, "divy":3, "len":3, "ref":308, "act":308},
 
 		{"id":"state_clear", "src":5, "x":0, "y":0, "w":200, "h":220, "divy":11, "len":11, "ref":370},
 
@@ -143,7 +143,7 @@
 	],
 	"imageset":[
 		{"id":"bar", "images":["bar-song","bar-folder","bar-table","bar-grade","bar-nograde","bar-command","bar-search","bar-nosong"]},
-		{"id":"modeset", "ref":11, "images":["allkeys","5keys","7keys","10keys","14keys","9keys","24keys","24keysDP"]},
+		{"id":"modeset", "ref":11, "images":["allkeys","5keys","7keys","10keys","14keys","9keys","24keys","24keysDP"], "act":11},
 		{"id":"option-exjudge", "ref":301, "images":["option-selector21","option-selector22"]},
 		{"id":"option-constant", "ref":302, "images":["option-selector21","option-selector22"]},
 		{"id":"option-judgearea", "ref":303, "images":["option-selector21","option-selector22"]},
