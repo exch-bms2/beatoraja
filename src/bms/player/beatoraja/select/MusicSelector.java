@@ -8,10 +8,7 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 
 import com.badlogic.gdx.Gdx;
@@ -198,20 +195,8 @@ public class MusicSelector extends MainState {
 		return rival;
 	}
 
-	public void nextRival() {
-		boolean match = (rival == null);
-		for(PlayerInformation rival : rivalcaches.keySet()) {
-			if(match) {
-				this.rival = rival;
-				match = false;
-				break;
-			}
-			match = (this.rival == rival);
-		}
-		if(match) {
-			rival = null;
-		}
-		setRival(rival);
+	public Set<PlayerInformation> getRivals() {
+		return rivalcaches.keySet();
 	}
 
 	public ScoreDataCache getScoreDataCache() {
@@ -360,36 +345,22 @@ public class MusicSelector extends MainState {
 			if (bar.updateBar(current)) {
 				play(SOUND_FOLDEROPEN);
 			}
-			resetReplayIndex();
+			execute(MusicSelectCommand.RESET_REPLAY);
 		} else {
 			play = 0;
 		}
 	}
 
-	public void resetReplayIndex() {
-		if (bar.getSelected() instanceof SelectableBar) {
-			boolean[] replays = ((SelectableBar) bar.getSelected()).getExistsReplayData();
-			for (int i = 0; i < replays.length; i++) {
-				if (replays[i]) {
-					selectedreplay = i;
-					return;
-				}
-			}
-		}
-		selectedreplay = -1;
+	public int getSelectedReplay() {
+		return  selectedreplay;
 	}
 
-	public void changeReplayIndex() {
-		Bar current = bar.getSelected();
-		if (current != null && current instanceof SelectableBar) {
-			boolean[] replays = ((SelectableBar) current).getExistsReplayData();
-			for (int i = 1; i < replays.length; i++) {
-				if (replays[(i + selectedreplay) % replays.length]) {
-					selectedreplay = (i + selectedreplay) % replays.length;
-					break;
-				}
-			}
-		}
+	public void setSelectedReplay(int index) {
+		selectedreplay = index;
+	}
+
+	public void execute(MusicSelectCommand command) {
+		command.execute(this);
 	}
 
 	private void readCourse(int autoplay) {
@@ -903,35 +874,15 @@ public class MusicSelector extends MainState {
 			play = 6;
 			break;
 			case BUTTON_MODE:
-				nextMode();
+				execute(MusicSelectCommand.NEXT_MODE);
 				break;
 			case BUTTON_SORT:
-				nextSort();
+				execute(MusicSelectCommand.NEXT_SORT);
 				break;
 			case BUTTON_LNMODE:
-				nextLNMode();
+				execute(MusicSelectCommand.NEXT_LNMODE);
 				break;
 		}
-	}
-
-	public void nextMode() {
-		int mode = 0;
-		for(;mode < MODE.length && MODE[mode] != config.getMode();mode++);
-		config.setMode(MODE[(mode + 1) % MODE.length]);
-		bar.updateBar();
-		play(SOUND_CHANGEOPTION);
-	}
-
-	public void nextSort() {
-		sort = (sort + 1) % BarSorter.values().length;
-		bar.updateBar();
-		play(SOUND_CHANGEOPTION);
-	}
-
-	public void nextLNMode() {
-		config.setLnmode((config.getLnmode() + 1) % 3);
-		bar.updateBar();
-		play(SOUND_CHANGEOPTION);
 	}
 
 	public Bar getSelectedBar() {
@@ -951,7 +902,7 @@ public class MusicSelector extends MainState {
 	}
 
 	public void selectedBarMoved() {
-		resetReplayIndex();
+		execute(MusicSelectCommand.RESET_REPLAY);
 		// banner
 		final Bar current = bar.getSelected();
 		getMainController().getPlayerResource().getBMSResource().setBanner(

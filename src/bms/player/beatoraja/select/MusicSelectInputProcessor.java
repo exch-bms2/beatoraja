@@ -74,23 +74,22 @@ public class MusicSelectInputProcessor {
         if (numberstate[1] && numtime[1] != 0) {
             // KEYフィルターの切り替え
             numtime[1] = 0;
-            select.nextMode();
+            select.execute(MusicSelectCommand.NEXT_MODE);
         }
         if (numberstate[2] && numtime[2] != 0) {
             // ソートの切り替え
             numtime[2] = 0;
-            select.nextSort();
+            select.execute(MusicSelectCommand.NEXT_SORT);
         }
         if (numberstate[3] && numtime[3] != 0) {
             // LNモードの切り替え
             numtime[3] = 0;
-            select.nextLNMode();
+            select.execute(MusicSelectCommand.NEXT_LNMODE);
         }
         if (numberstate[4] && numtime[4] != 0) {
             // change replay
-            select.changeReplayIndex();
             numtime[4] = 0;
-            select.play(SOUND_CHANGEOPTION);
+            select.execute(MusicSelectCommand.NEXT_REPLAY);
         }
 
         boolean[] keystate = input.getKeystate();
@@ -269,7 +268,7 @@ public class MusicSelectInputProcessor {
 
             if (numberstate[7] && numtime[7] != 0) {
                 numtime[7] = 0;
-                select.nextRival();
+                select.execute(MusicSelectCommand.NEXT_RIVAL);
             }
             if (numberstate[8] && numtime[8] != 0) {
                 numtime[8] = 0;
@@ -302,17 +301,7 @@ public class MusicSelectInputProcessor {
         // open explorer with selected song
         if (input.getFunctionstate()[2] && input.getFunctiontime()[2] != 0) {
             input.getFunctiontime()[2] = 0;
-            try {
-                if (Desktop.isDesktopSupported()) {
-                    if(current instanceof SongBar && ((SongBar) current).existsSong()) {
-                        Desktop.getDesktop().open(Paths.get(((SongBar) current).getSongData().getPath()).getParent().toFile());
-                    } else if(current instanceof FolderBar) {
-                        Desktop.getDesktop().open(Paths.get(((FolderBar) current).getFolderData().getPath()).toFile());
-                    }
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            select.execute(MusicSelectCommand.OPEN_WITH_EXPLORER);
         }
 
         if (input.isExitPressed()) {
