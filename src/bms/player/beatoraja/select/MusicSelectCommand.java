@@ -134,7 +134,7 @@ public enum MusicSelectCommand {
         @Override
         public void execute(MusicSelector selector) {
             PlayerConfig config = selector.getMainController().getPlayerConfig();
-            config.setDoubleoption((config.getDoubleoption() + 1) % 3);
+            config.setDoubleoption((config.getDoubleoption() + 1) % 4);
             selector.play(SOUND_CHANGEOPTION);
         }
     },

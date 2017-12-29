@@ -241,7 +241,7 @@ public class PlayConfigurationView implements Initializable {
 				"ALL-SCR", "RANDOM-EX", "S-RANDOM-EX" };
 		initComboBox(scoreop, scoreOptions);
 		initComboBox(scoreop2, scoreOptions);
-		initComboBox(doubleop, new String[] { "OFF", "FLIP", "BATTLE" });
+		initComboBox(doubleop, new String[] { "OFF", "FLIP", "BATTLE", "BATTLE AS" });
 		initComboBox(gaugeop, new String[] { "ASSIST EASY", "EASY", "NORMAL", "HARD", "EX-HARD", "HAZARD" });
 		initComboBox(bgaop, new String[] { "ON", "AUTOPLAY ", "OFF" });
 		initComboBox(bgaexpand, new String[] { "Full", "Keep Aspect Ratio", "Off" });
