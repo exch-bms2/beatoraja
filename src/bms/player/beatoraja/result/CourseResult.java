@@ -242,17 +242,17 @@ public class CourseResult extends MainState {
 
 		IRConnection ir = getMainController().getIRConnection();
 		if (ir != null) {
-			boolean send = true;
+			boolean send = resource.isUpdateScore();
 			switch(getMainController().getPlayerConfig().getIrsend()) {
 			case PlayerConfig.IR_SEND_ALWAYS:
 				break;
 			case PlayerConfig.IR_SEND_COMPLETE_SONG:
 //				FloatArray gauge = resource.getGauge();
-//				send = gauge.get(gauge.size - 1) > 0.0;
+//				send &= gauge.get(gauge.size - 1) > 0.0;
 				break;
 			case PlayerConfig.IR_SEND_UPDATE_SCORE:
 //				IRScoreData current = resource.getScoreData();
-//				send = (current.getExscore() > oldexscore || current.getClear() > oldclear
+//				send &= (current.getExscore() > oldexscore || current.getClear() > oldclear
 //						|| current.getCombo() > oldcombo || current.getMinbp() < oldmisscount);
 				break;
 			}
