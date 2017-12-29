@@ -104,31 +104,31 @@ public class MusicSelectInputProcessor {
             // show play option
             select.setPanelState(1);
             if (property.isPressed(keystate, keytime, OPTION1_DOWN, true)) {
-                config.setRandom((config.getRandom() + 1) % 10);
+                select.execute(MusicSelectCommand.NEXT_OPTION_1P);
             }
             if (property.isPressed(keystate, keytime, OPTION1_UP, true)) {
                 config.setRandom((config.getRandom() + 9) % 10);
             }
             if (property.isPressed(keystate, keytime, GAUGE_DOWN, true)) {
-                config.setGauge((config.getGauge() + 1) % 6);
+                select.execute(MusicSelectCommand.NEXT_GAUGE_1P);
             }
             if (property.isPressed(keystate, keytime, GAUGE_UP, true)) {
                 config.setGauge((config.getGauge() + 5) % 6);
             }
             if (property.isPressed(keystate, keytime, OPTIONDP_DOWN, true)) {
-                config.setDoubleoption((config.getDoubleoption() + 1) % 3);
+                select.execute(MusicSelectCommand.NEXT_OPTION_DP);
             }
             if (property.isPressed(keystate, keytime, OPTIONDP_UP, true)) {
                 config.setDoubleoption((config.getDoubleoption() + 2) % 3);
             }
             if (property.isPressed(keystate, keytime, OPTION2_DOWN, true)) {
-                config.setRandom2((config.getRandom2() + 1) % 10);
+                select.execute(MusicSelectCommand.NEXT_OPTION_2P);
             }
             if (property.isPressed(keystate, keytime, OPTION2_UP, true)) {
                 config.setRandom2((config.getRandom2() + 9) % 10);
             }
             if (property.isPressed(keystate, keytime, HSFIX_DOWN, true)) {
-                config.setFixhispeed((config.getFixhispeed() + 1) % 5);
+                select.execute(MusicSelectCommand.NEXT_HSFIX);
             }
             if (property.isPressed(keystate, keytime, HSFIX_UP, true)) {
                 config.setFixhispeed((config.getFixhispeed() + 4) % 5);
@@ -277,6 +277,10 @@ public class MusicSelectInputProcessor {
                     SongData sd = ((SongBar) current).getSongData();
                     bar.updateBar(new SameFolderBar(select, sd.getTitle(), sd.getFolder()));
                 }
+            }
+            if (numberstate[9] && numtime[9] != 0) {
+                numtime[9] = 0;
+                select.execute(MusicSelectCommand.OPEN_DOCUMENT);
             }
             // close folder
             if (property.isPressed(keystate, keytime, FOLDER_CLOSE, true) || (cursor[2] && cursortime[2] != 0)) {

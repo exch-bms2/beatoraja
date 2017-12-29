@@ -1,15 +1,13 @@
 package bms.player.beatoraja.select;
 
-import bms.player.beatoraja.PlayConfig;
-import bms.player.beatoraja.PlayerConfig;
-import bms.player.beatoraja.PlayerInformation;
-import bms.player.beatoraja.select.bar.Bar;
-import bms.player.beatoraja.select.bar.FolderBar;
-import bms.player.beatoraja.select.bar.SelectableBar;
-import bms.player.beatoraja.select.bar.SongBar;
+import bms.player.beatoraja.*;
+import bms.player.beatoraja.select.bar.*;
 
 import java.awt.*;
 import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static bms.player.beatoraja.select.MusicSelector.SOUND_CHANGEOPTION;
@@ -96,6 +94,66 @@ public enum MusicSelectCommand {
             selector.play(SOUND_CHANGEOPTION);
         }
     },
+    NEXT_TARGET {
+        @Override
+        public void execute(MusicSelector selector) {
+            PlayerInformation nowrival = selector.getRival();
+            boolean match = (nowrival == null);
+            for(PlayerInformation rival : selector.getRivals()) {
+                if(match) {
+                    nowrival = rival;
+                    match = false;
+                    break;
+                }
+                match = (nowrival == rival);
+            }
+            if(match) {
+                nowrival = null;
+            }
+            selector.setRival(nowrival);
+            selector.play(SOUND_CHANGEOPTION);
+        }
+    },
+    NEXT_OPTION_1P {
+        @Override
+        public void execute(MusicSelector selector) {
+            PlayerConfig config = selector.getMainController().getPlayerConfig();
+            config.setRandom((config.getRandom() + 1) % 10);
+            selector.play(SOUND_CHANGEOPTION);
+        }
+    },
+    NEXT_OPTION_2P {
+        @Override
+        public void execute(MusicSelector selector) {
+            PlayerConfig config = selector.getMainController().getPlayerConfig();
+            config.setRandom2((config.getRandom2() + 1) % 10);
+            selector.play(SOUND_CHANGEOPTION);
+        }
+    },
+    NEXT_OPTION_DP {
+        @Override
+        public void execute(MusicSelector selector) {
+            PlayerConfig config = selector.getMainController().getPlayerConfig();
+            config.setDoubleoption((config.getDoubleoption() + 1) % 3);
+            selector.play(SOUND_CHANGEOPTION);
+        }
+    },
+    NEXT_GAUGE_1P {
+        @Override
+        public void execute(MusicSelector selector) {
+            PlayerConfig config = selector.getMainController().getPlayerConfig();
+            config.setGauge((config.getGauge() + 1) % 6);
+            selector.play(SOUND_CHANGEOPTION);
+        }
+    },
+    NEXT_HSFIX {
+        @Override
+        public void execute(MusicSelector selector) {
+            PlayerConfig config = selector.getMainController().getPlayerConfig();
+            config.setFixhispeed((config.getFixhispeed() + 1) % 5);
+            selector.play(SOUND_CHANGEOPTION);
+        }
+    },
     OPEN_WITH_EXPLORER {
         @Override
         public void execute(MusicSelector selector) {
@@ -112,7 +170,31 @@ public enum MusicSelectCommand {
                 e.printStackTrace();
             }
         }
-    }
+    },
+    OPEN_DOCUMENT {
+        @Override
+        public void execute(MusicSelector selector) {
+            if (!Desktop.isDesktopSupported()) {
+            	return;
+            }
+            Bar current = selector.getBarRender().getSelected();
+            if(current instanceof SongBar && ((SongBar) current).existsSong()) {
+    			try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get(((SongBar) current).getSongData().getPath()).getParent())) {
+    				paths.forEach(p -> {
+    					if(!Files.isDirectory(p) && p.toString().toLowerCase().endsWith(".txt")) {
+                            try {
+								Desktop.getDesktop().open(p.toFile());
+							} catch (IOException e) {
+								e.printStackTrace();
+							}
+    					}
+    				});
+    			} catch (Throwable e) {
+    				e.printStackTrace();
+    			}
+            }
+        }
+    },
     ;
 
     public abstract void execute(MusicSelector selector);

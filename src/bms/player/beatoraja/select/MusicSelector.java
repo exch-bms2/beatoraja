@@ -873,15 +873,33 @@ public class MusicSelector extends MainState {
 		case BUTTON_REPLAY4:
 			play = 6;
 			break;
-			case BUTTON_MODE:
-				execute(MusicSelectCommand.NEXT_MODE);
-				break;
-			case BUTTON_SORT:
-				execute(MusicSelectCommand.NEXT_SORT);
-				break;
-			case BUTTON_LNMODE:
-				execute(MusicSelectCommand.NEXT_LNMODE);
-				break;
+		case BUTTON_READTEXT:
+			execute(MusicSelectCommand.OPEN_DOCUMENT);
+			break;
+		case BUTTON_MODE:
+			execute(MusicSelectCommand.NEXT_MODE);
+			break;
+		case BUTTON_SORT:
+			execute(MusicSelectCommand.NEXT_SORT);
+			break;
+		case BUTTON_LNMODE:
+			execute(MusicSelectCommand.NEXT_LNMODE);
+			break;
+		case BUTTON_RANDOM_1P:
+			execute(MusicSelectCommand.NEXT_OPTION_1P);
+			break;
+		case BUTTON_RANDOM_2P:
+			execute(MusicSelectCommand.NEXT_OPTION_2P);
+			break;
+		case BUTTON_DPOPTION:
+			execute(MusicSelectCommand.NEXT_OPTION_DP);
+			break;
+		case BUTTON_GAUGE_1P:
+			execute(MusicSelectCommand.NEXT_GAUGE_1P);
+			break;
+		case BUTTON_HSFIX:
+			execute(MusicSelectCommand.NEXT_HSFIX);
+			break;
 		}
 	}
 
