@@ -189,18 +189,13 @@ public class PlayConfigurationView implements Initializable {
     @FXML
     private CheckBox useSongInfo;
 
+	@FXML
+	private SkinConfigurationView skinController;
+
 	private Config config;
 	private PlayerConfig player;
 	@FXML
 	private CheckBox folderlamp;
-
-	private SkinConfigurationView skinview;
-	@FXML
-	private ComboBox<SkinType> skincategory;
-	@FXML
-	private ComboBox<SkinHeader> skin;
-	@FXML
-	private ScrollPane skinconfig;
 
 	@FXML
 	private ComboBox<String> irname;
@@ -265,25 +260,12 @@ public class PlayConfigurationView implements Initializable {
 		initComboBox(autosavereplay3, autosaves);
 		initComboBox(autosavereplay4, autosaves);
 		initComboBox(irsend, new String[] { arg1.getString("IR_SEND_ALWAYS"), arg1.getString("IR_SEND_FINISH"), arg1.getString("IR_SEND_UPDATE")});
-		skincategory.setCellFactory(new Callback<ListView<SkinType>, ListCell<SkinType>>() {
-			public ListCell<SkinType> call(ListView<SkinType> param) { return new SkinTypeCell(); }
-		});
-		skincategory.setButtonCell(new SkinTypeCell());
-		skincategory.getItems().addAll(SkinType.values());
-
 		initComboBox(audio, new String[] { "OpenAL (LibGDX Sound)", "OpenAL (LibGDX AudioDevice)", "PortAudio", "Java ASIO Host" });
 		audio.getItems().setAll(0, 2, 3);
 
 		String[] audioPlaySpeedControls = new String[] { "UNPROCESSED", "FREQUENCY" };
 		initComboBox(audioFreqOption, audioPlaySpeedControls);
 		initComboBox(audioFastForward, audioPlaySpeedControls);
-
-		skin.setCellFactory(new Callback<ListView<SkinHeader>, ListCell<SkinHeader>>() {
-			public ListCell<SkinHeader> call(ListView<SkinHeader> param) {
-				return new SkinListCell();
-			}
-		});
-		skin.setButtonCell(new SkinListCell());
 
 		irname.getItems().setAll(IRConnection.getAllAvailableIRConnectionName());
 
@@ -342,8 +324,6 @@ public class PlayConfigurationView implements Initializable {
 
 		scrolldurationlow.getValueFactory().setValue(config.getScrollDurationLow());
 		scrolldurationhigh.getValueFactory().setValue(config.getScrollDurationHigh());
-
-		skinview = new SkinConfigurationView();
 
 		updateAudioDriver();
 
@@ -438,8 +418,7 @@ public class PlayConfigurationView implements Initializable {
 		updatePlayConfig();
 		inputconfig.setValue(PlayMode.BEAT_7K);
 		updateInputConfig();
-		skincategory.setValue(SkinType.PLAY_7KEYS);
-		updateSkinCategory();
+		skinController.update(player);
 	}
 
 	/**
@@ -537,7 +516,7 @@ public class PlayConfigurationView implements Initializable {
 
 		updateInputConfig();
 		updatePlayConfig();
-		updateSkinCategory();
+		skinController.update(player);
 
 		Json json = new Json();
 		json.setOutputType(OutputType.json);
@@ -639,8 +618,6 @@ public class PlayConfigurationView implements Initializable {
 		tableurl.getItems().removeAll(tableurl.getSelectionModel().getSelectedItems());
 	}
     
-	private int mode = -1;
-
 	private PlayMode pc = null;
 
     @FXML
@@ -744,42 +721,6 @@ public class PlayConfigurationView implements Initializable {
 			}
 			break;
 		}
-	}
-
-    @FXML
-	public void updateSkinCategory() {
-		if (skinview.getSelectedHeader() != null) {
-			SkinHeader header = skinview.getSelectedHeader();
-			SkinConfig skin = new SkinConfig(header.getPath().toString());
-			skin.setProperties(skinview.getProperty());
-			player.getSkin()[header.getSkinType().getId()] = skin;
-		} else if (mode != -1) {
-			player.getSkin()[mode] = null;
-		}
-
-		skin.getItems().clear();
-		SkinHeader[] headers = skinview.getSkinHeader(skincategory.getValue());
-		skin.getItems().addAll(headers);
-		mode = skincategory.getValue().getId();
-		if (player.getSkin()[skincategory.getValue().getId()] != null) {
-			SkinConfig skinconf = player.getSkin()[skincategory.getValue().getId()];
-			if (skinconf != null) {
-				for (SkinHeader header : skin.getItems()) {
-					if (header != null && header.getPath().equals(Paths.get(skinconf.getPath()))) {
-						skin.setValue(header);
-						skinconfig.setContent(skinview.create(skin.getValue(), skinconf.getProperties()));
-						break;
-					}
-				}
-			} else {
-				skin.getSelectionModel().select(0);
-			}
-		}
-	}
-
-    @FXML
-	public void updateSkin() {
-		skinconfig.setContent(skinview.create(skin.getValue(), null));
 	}
 
     @FXML
@@ -934,7 +875,7 @@ public class PlayConfigurationView implements Initializable {
 		}
 	}
 
-	class SkinListCell extends ListCell<SkinHeader> {
+	static class SkinListCell extends ListCell<SkinHeader> {
 
 		@Override
 		protected void updateItem(SkinHeader arg0, boolean arg1) {
@@ -947,7 +888,7 @@ public class PlayConfigurationView implements Initializable {
 		}
 	}
 
-	class SkinTypeCell extends ListCell<SkinType> {
+	static class SkinTypeCell extends ListCell<SkinType> {
 
 		@Override
 		protected void updateItem(SkinType arg0, boolean arg1) {

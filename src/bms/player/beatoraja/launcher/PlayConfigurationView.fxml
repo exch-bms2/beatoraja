@@ -450,27 +450,9 @@
               <content>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
-                        <VBox layoutX="262.0" layoutY="27.0" prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <VBox prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                            <children>
-                              <HBox prefHeight="23.0" prefWidth="723.0">
-                                 <children>
-                                    <Label prefHeight="24.0" prefWidth="100.0" text="%Category" />
-                                    <ComboBox fx:id="skincategory" onAction="#updateSkinCategory" prefWidth="150.0" />
-                                    <Label prefHeight="24.0" prefWidth="60.0" text="%Skin">
-                                       <HBox.margin>
-                                          <Insets left="20.0" />
-                                       </HBox.margin></Label>
-                                    <ComboBox fx:id="skin" onAction="#updateSkin" prefHeight="24.0" prefWidth="294.0" />
-                                 </children>
-                                 <VBox.margin>
-                                    <Insets bottom="10.0" left="10.0" top="10.0" />
-                                 </VBox.margin>
-                              </HBox>
-                              <ScrollPane fx:id="skinconfig" prefHeight="239.0" prefWidth="723.0" VBox.vgrow="ALWAYS">
-                                <content>
-                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="200.0" prefWidth="200.0" />
-                                </content>
-                              </ScrollPane>
+                              <fx:include fx:id="skin" source="SkinConfigurationView.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                               <HBox prefHeight="30.0" prefWidth="723.0">
                                  <children>
                                     <Label layoutX="10.0" layoutY="10.0" prefHeight="30.0" prefWidth="149.0" text="%BGM_Path(LR2)" />
@@ -486,7 +468,7 @@
                                  </children>
                               </HBox>
                            </children>
-                        </VBox>
+                         </VBox>
                      </children>
                   </AnchorPane>
               </content>

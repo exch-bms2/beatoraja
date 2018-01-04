@@ -1,29 +1,49 @@
 package bms.player.beatoraja.launcher;
 
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.*;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import bms.player.beatoraja.PlayerConfig;
 import bms.player.beatoraja.SkinConfig;
+import bms.player.beatoraja.launcher.PlayConfigurationView.SkinListCell;
+import bms.player.beatoraja.launcher.PlayConfigurationView.SkinTypeCell;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.SkinHeader.CustomFile;
 import bms.player.beatoraja.skin.SkinHeader.CustomOffset;
 import bms.player.beatoraja.skin.SkinHeader.CustomOption;
 import bms.player.beatoraja.skin.lr2.LR2SkinHeaderLoader;
+import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Spinner;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.util.Callback;
 
 /**
  * スキンコンフィグ
  *
  * @author exch
  */
-public class SkinConfigurationView {
+public class SkinConfigurationView implements Initializable {
+
+	@FXML
+	private ComboBox<SkinType> skincategory;
+	@FXML
+	private ComboBox<SkinHeader> skinheader;
+	@FXML
+	private ScrollPane skinconfig;
+
+	private PlayerConfig player;
+	private int mode = -1;
 
 	private List<SkinHeader> lr2skinheader = new ArrayList<SkinHeader>();
 
@@ -32,7 +52,21 @@ public class SkinConfigurationView {
 	private Map<CustomFile, ComboBox<String>> filebox = new HashMap<CustomFile, ComboBox<String>>();
 	private Map<CustomOffset, Spinner<Integer>[]> offsetbox = new HashMap<CustomOffset, Spinner<Integer>[]>();
 
-	public SkinConfigurationView() {
+	@Override
+	public void initialize(URL location, ResourceBundle resources) {
+		skincategory.setCellFactory(new Callback<ListView<SkinType>, ListCell<SkinType>>() {
+			public ListCell<SkinType> call(ListView<SkinType> param) { return new SkinTypeCell(); }
+		});
+		skincategory.setButtonCell(new SkinTypeCell());
+		skincategory.getItems().addAll(SkinType.values());
+
+		skinheader.setCellFactory(new Callback<ListView<SkinHeader>, ListCell<SkinHeader>>() {
+			public ListCell<SkinHeader> call(ListView<SkinHeader> param) {
+				return new SkinListCell();
+			}
+		});
+		skinheader.setButtonCell(new SkinListCell());
+
 		List<Path> lr2skinpaths = new ArrayList<Path>();
 		scan(Paths.get("skin"), lr2skinpaths);
 		for (Path path : lr2skinpaths) {
@@ -292,5 +326,47 @@ public class SkinConfigurationView {
 			}
 		}
 		return result.toArray(new SkinHeader[result.size()]);
+	}
+	
+    @FXML
+	public void updateSkinCategory() {
+		if (getSelectedHeader() != null) {
+			SkinHeader header = getSelectedHeader();
+			SkinConfig skin = new SkinConfig(header.getPath().toString());
+			skin.setProperties(getProperty());
+			player.getSkin()[header.getSkinType().getId()] = skin;
+		} else if (mode != -1) {
+			player.getSkin()[mode] = null;
+		}
+
+		skinheader.getItems().clear();
+		SkinHeader[] headers = getSkinHeader(skincategory.getValue());
+		skinheader.getItems().addAll(headers);
+		mode = skincategory.getValue().getId();
+		if (player.getSkin()[skincategory.getValue().getId()] != null) {
+			SkinConfig skinconf = player.getSkin()[skincategory.getValue().getId()];
+			if (skinconf != null) {
+				for (SkinHeader header : skinheader.getItems()) {
+					if (header != null && header.getPath().equals(Paths.get(skinconf.getPath()))) {
+						skinheader.setValue(header);
+						skinconfig.setContent(create(skinheader.getValue(), skinconf.getProperties()));
+						break;
+					}
+				}
+			} else {
+				skinheader.getSelectionModel().select(0);
+			}
+		}
+	}
+    
+    public void update(PlayerConfig player) {
+    	this.player = player;
+		skincategory.setValue(SkinType.PLAY_7KEYS);
+    	updateSkinCategory();
+    }
+
+    @FXML
+	public void updateSkin() {
+		skinconfig.setContent(create(skinheader.getValue(), null));
 	}
 }
