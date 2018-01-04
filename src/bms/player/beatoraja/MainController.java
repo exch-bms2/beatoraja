@@ -5,6 +5,7 @@ import java.nio.file.*;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.ResourceBundle;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
@@ -24,6 +25,7 @@ import bms.player.beatoraja.decide.MusicDecide;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.ir.IRConnection;
 import bms.player.beatoraja.ir.IRResponse;
+import bms.player.beatoraja.launcher.SkinConfigurationView;
 import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.result.CourseResult;
 import bms.player.beatoraja.result.MusicResult;
@@ -31,6 +33,10 @@ import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.song.SQLiteSongDatabaseAccessor;
 import bms.player.beatoraja.song.SongDatabaseAccessor;
 import bms.player.beatoraja.song.SongInformationAccessor;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
+import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -116,7 +122,7 @@ public class MainController extends ApplicationAdapter {
 	public static final int offsetCount = SkinProperty.OFFSET_MAX + 1;
 	private final SkinOffset[] offset = new SkinOffset[offsetCount];
 
-	public MainController(Path f, Config config, int auto, boolean songUpdated) {
+	public MainController(Path f, Config config, PlayerConfig player, int auto, boolean songUpdated) {
 		this.auto = auto;
 		this.config = config;
 		this.songUpdated = songUpdated;
@@ -125,7 +131,11 @@ public class MainController extends ApplicationAdapter {
 			offset[i] = new SkinOffset();
 		}
 		
-		player = PlayerConfig.readPlayerConfig(config.getPlayername());
+		if(player == null) {
+			player = PlayerConfig.readPlayerConfig(config.getPlayername());			
+		}
+		this.player = player;
+		
 		this.bmsfile = f;
 
 		try {
@@ -454,7 +464,7 @@ public class MainController extends ApplicationAdapter {
                     screenshot.start();
                 }
                 input.getFunctiontime()[5] = 0;
-            }
+            }            
         }
 	}
 

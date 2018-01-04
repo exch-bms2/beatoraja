@@ -27,9 +27,7 @@ import bms.player.beatoraja.launcher.PlayConfigurationView;
  * @author exch
  */
 public class MainLoader extends Application {
-
-	private VBox stackPane;
-
+	
 	public static void main(String[] args) {
 		Logger logger = Logger.getGlobal();
 		try {
@@ -71,15 +69,17 @@ public class MainLoader extends Application {
 		if (config || !Files.exists(MainController.configpath)) {
 			launch(args);
 		} else {
-			play(f, auto, true, f != null);
+			play(f, auto, false, null, null, f != null);
 		}
 	}
 
-	public static void play(Path f, int auto, boolean forceExit, boolean songUpdated) {
-		Config config = readConfig();
+	public static void play(Path f, int auto, boolean forceExit, Config config, PlayerConfig player, boolean songUpdated) {
+		if(config == null) {
+			config = readConfig();			
+		}
 
 		try {
-			MainController player = new MainController(f, config, auto, songUpdated);
+			MainController main = new MainController(f, config, player, auto, songUpdated);
 
 			LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
 			cfg.width = config.getResolution().width;
@@ -89,15 +89,11 @@ public class MainLoader extends Application {
 			cfg.fullscreen = config.isFullscreen();
 			// vSync
 			cfg.vSyncEnabled = config.isVsync();
-			if (!config.isVsync()) {
-				cfg.backgroundFPS = config.getMaxFramePerSecond();
-				cfg.foregroundFPS = config.getMaxFramePerSecond();
-			} else {
-				cfg.backgroundFPS = 0;
-				cfg.foregroundFPS = 0;
-			}
+			cfg.backgroundFPS = config.getMaxFramePerSecond();
+			cfg.foregroundFPS = config.getMaxFramePerSecond();
 			cfg.title = MainController.VERSION;
 
+			
 			cfg.audioDeviceBufferSize = config.getAudioDeviceBufferSize();
 			cfg.audioDeviceSimultaneousSources = config.getAudioDeviceSimultaneousSources();
 			cfg.forceExit = forceExit;
@@ -106,7 +102,7 @@ public class MainLoader extends Application {
 			}
 			// System.setProperty("org.lwjgl.opengl.Display.allowSoftwareOpenGL",
 			// "true");
-			new LwjglApplication(player, cfg);
+			new LwjglApplication(main, cfg);
 
 //			Lwjgl3ApplicationConfiguration cfg = new Lwjgl3ApplicationConfiguration();
 //
@@ -138,7 +134,7 @@ public class MainLoader extends Application {
 //
 //			cfg.setAudioConfig(config.getAudioDeviceSimultaneousSources(), config.getAudioDeviceBufferSize(), 1);
 //
-//			new Lwjgl3Application(player, cfg);
+//			new Lwjgl3Application(main, cfg);
 		} catch (Throwable e) {
 			e.printStackTrace();
 			Logger.getGlobal().severe(e.getClass().getName() + " : " + e.getMessage());
@@ -161,7 +157,7 @@ public class MainLoader extends Application {
 			ResourceBundle bundle = ResourceBundle.getBundle("resources.UIResources");
 			FXMLLoader loader = new FXMLLoader(
 					MainLoader.class.getResource("/bms/player/beatoraja/launcher/PlayConfigurationView.fxml"), bundle);
-			stackPane = (VBox) loader.load();
+			VBox stackPane = (VBox) loader.load();
 			PlayConfigurationView bmsinfo = (PlayConfigurationView) loader.getController();
 			bmsinfo.setBMSInformationLoader(this);
 			bmsinfo.update(config);
@@ -182,10 +178,6 @@ public class MainLoader extends Application {
 		}
 	}
 
-	public void hide() {
-		stackPane.setDisable(true);
-	}
-	
 	private static Config readConfig() {
 		Config config = new Config();
 		if (Files.exists(MainController.configpath)) {

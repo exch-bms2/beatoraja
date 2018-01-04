@@ -31,16 +31,22 @@ import bms.player.beatoraja.song.SongData;
 import bms.player.beatoraja.song.SongDatabaseAccessor;
 import bms.player.beatoraja.song.SongInformationAccessor;
 import javafx.application.Platform;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
-import javafx.scene.layout.GridPane;
+import javafx.scene.layout.*;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
+import javafx.stage.WindowEvent;
 import javafx.stage.FileChooser.ExtensionFilter;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import javafx.util.Callback;
 
 /**
@@ -51,6 +57,9 @@ import javafx.util.Callback;
 public class PlayConfigurationView implements Initializable {
 
 	// TODO スキンプレビュー機能
+
+	@FXML
+	private VBox root;
 
 	@FXML
 	private ComboBox<String> players;
@@ -189,6 +198,8 @@ public class PlayConfigurationView implements Initializable {
     @FXML
     private CheckBox useSongInfo;
 
+	@FXML
+	private VBox skin;
 	@FXML
 	private SkinConfigurationView skinController;
 
@@ -726,8 +737,26 @@ public class PlayConfigurationView implements Initializable {
     @FXML
 	public void start() {
 		commit();
-		loader.hide();
-		MainLoader.play(null, 0, true, songUpdated);
+		root.setDisable(true);
+		
+		try {
+			Stage primaryStage = new Stage();
+			ResourceBundle bundle = ResourceBundle.getBundle("resources.UIResources");
+			FXMLLoader loader = new FXMLLoader(
+					MainLoader.class.getResource("/bms/player/beatoraja/launcher/SkinConfigurationView.fxml"), bundle);
+			VBox stackPane = (VBox) loader.load();
+			SkinConfigurationView bmsinfo = (SkinConfigurationView) loader.getController();
+			bmsinfo.update(player);
+			primaryStage.initModality(Modality.APPLICATION_MODAL);
+			Scene scene = new Scene(stackPane, stackPane.getPrefWidth(), stackPane.getPrefHeight());
+			primaryStage.setScene(scene);
+			primaryStage.setTitle(MainController.VERSION + " skin configuration");
+			primaryStage.show();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		MainLoader.play(null, 0, true, config, player, songUpdated);
 	}
 
     @FXML
