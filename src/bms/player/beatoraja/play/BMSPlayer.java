@@ -201,7 +201,7 @@ public class BMSPlayer extends MainState {
 					config.setRandom(0);
 				} else if (config.getRandom() == 8) {
 					config.setRandom(2);
-				} else if (config.getRandom() == 9) {
+				} else if (config.getRandom() == 9 && model.getMode() != Mode.POPN_9K) {
 					config.setRandom(4);
 				}
 			}
