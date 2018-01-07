@@ -273,7 +273,8 @@ public class NoteShuffleModifier extends PatternModifier {
 				case S_RANDOM_EX:
 					keys = getKeys(mode, true);
 					if(mode == Mode.POPN_9K) {
-						random = keys.length > 0 ? noMurioshiShuffle(keys, ln, notes)
+						random = keys.length > 0 ? noMurioshiShuffle(keys, ln,
+								notes, lastNoteTime, tl.getTime(), 125)
 								: keys;
 					} else {
 						random = keys.length > 0 ? timeBasedShuffle(keys, ln,
@@ -411,8 +412,9 @@ public class NoteShuffleModifier extends PatternModifier {
 		return result;
 	}
 	
-	// 無理押しがなるべく来ないようにshuffleをかける
-	private static int[] noMurioshiShuffle(int[] keys, int[] activeln, Note[] notes) {
+	// 無理押しとduration[ms]時間未満の縦連打がなるべく来ないようにshuffleをかける
+	private static int[] noMurioshiShuffle(int[] keys, int[] activeln,
+		Note[] notes, int[] lastNoteTime, int now, int duration) {
 		List<Integer> assignedLane = new ArrayList<Integer>(keys.length);
 		List<Integer> noAssignedLane = new ArrayList<Integer>(keys.length);
 		List<Integer> originalLane = new ArrayList<Integer>(keys.length);
@@ -498,6 +500,12 @@ public class NoteShuffleModifier extends PatternModifier {
 						if(noAssignedLane.indexOf(referencePoint[1] + 1) != -1 && noAssignedLane.indexOf(referencePoint[1] - 2) != -1) kouhoLane.add(referencePoint[1] + 1);
 						if(noAssignedLane.indexOf(referencePoint[1] - 1) != -1) kouhoLane.add(referencePoint[1] - 1);
 						if(noAssignedLane.indexOf(referencePoint[1] - 2) != -1) kouhoLane.add(referencePoint[1] - 2);
+					}
+				}
+				for(int i = 0; i < kouhoLane.size(); i++){
+					if (now - lastNoteTime[kouhoLane.get(i)] < duration) {
+						kouhoLane.remove(i);
+						i--;
 					}
 				}
 				if(kouhoLane.isEmpty()) break;
