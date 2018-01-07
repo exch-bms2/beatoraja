@@ -7,7 +7,6 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.PasswordField?>
-<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Slider?>
 <?import javafx.scene.control.Spinner?>
 <?import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory?>
@@ -25,7 +24,7 @@
 
 <VBox fx:id="root" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="bms.player.beatoraja.launcher.PlayConfigurationView">
    <children>
-       <HBox alignment="CENTER_LEFT" prefHeight="10.0" prefWidth="730.0">
+       <HBox fx:id="playerPanel" alignment="CENTER_LEFT" prefHeight="10.0" prefWidth="730.0">
            <children>
                <Label minWidth="100.0" text="%PLAYER_ID" />
                <ComboBox fx:id="players" onAction="#changePlayer" prefWidth="150.0" />
@@ -38,7 +37,7 @@
        </HBox>
        <TabPane prefHeight="400.0" prefWidth="740.0" VBox.vgrow="ALWAYS">
          <tabs>
-            <Tab closable="false" text="%TAB_VIDEO">
+            <Tab fx:id="videoTab" closable="false" text="%TAB_VIDEO">
               <content>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
@@ -106,7 +105,7 @@
                   </AnchorPane>
               </content>
             </Tab>
-            <Tab closable="false" text="%TAB_AUDIO">
+            <Tab fx:id="audioTab" closable="false" text="%TAB_AUDIO">
               <content>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
@@ -185,7 +184,7 @@
                   </AnchorPane>
               </content>
             </Tab>
-            <Tab closable="false" text="%TAB_INPUT">
+            <Tab fx:id="inputTab" closable="false" text="%TAB_INPUT">
               <content>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
@@ -263,7 +262,7 @@
                   </AnchorPane>
               </content>
             </Tab>
-            <Tab closable="false" text="%Resource">
+            <Tab fx:id="resourceTab" closable="false" text="%Resource">
               <content>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
@@ -312,7 +311,7 @@
                   </AnchorPane>
               </content>
             </Tab>
-            <Tab closable="false" text="%Play_Option">
+            <Tab fx:id="optionTab" closable="false" text="%Play_Option">
                <content>
                   <VBox prefHeight="241.0" prefWidth="723.0">
                   	<children>
@@ -446,7 +445,7 @@
                   </VBox>
                </content>
             </Tab>
-            <Tab closable="false" text="%Skin">
+            <Tab fx:id="skinTab" closable="false" text="%Skin">
               <content>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
@@ -473,7 +472,7 @@
                   </AnchorPane>
               </content>
             </Tab>
-            <Tab closable="false" text="%Other">
+            <Tab fx:id="otherTab" closable="false" text="%Other">
               <content>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
@@ -495,7 +494,7 @@
                   </AnchorPane>
               </content>
             </Tab>
-            <Tab closable="false" text="IR">
+            <Tab fx:id="irTab" closable="false" text="IR">
               <content>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
@@ -557,7 +556,7 @@
             </Tab>
          </tabs>
       </TabPane>
-      <HBox prefHeight="38.0" prefWidth="552.0">
+      <HBox fx:id="controlPanel" prefHeight="38.0" prefWidth="552.0">
          <children>
             <Button mnemonicParsing="false" onAction="#start" text="%START" />
             <Button mnemonicParsing="false" onAction="#loadDiffBMS" text="%UPDATE_DATABASE">

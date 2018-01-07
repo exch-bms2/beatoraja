@@ -60,6 +60,26 @@ public class PlayConfigurationView implements Initializable {
 
 	@FXML
 	private VBox root;
+	@FXML
+	private HBox playerPanel;
+	@FXML
+	private Tab videoTab;
+	@FXML
+	private Tab audioTab;
+	@FXML
+	private Tab resourceTab;
+	@FXML
+	private Tab inputTab;
+	@FXML
+	private Tab skinTab;
+	@FXML
+	private Tab optionTab;
+	@FXML
+	private Tab otherTab;
+	@FXML
+	private Tab irTab;
+	@FXML
+	private HBox controlPanel;
 
 	@FXML
 	private ComboBox<String> players;
@@ -737,25 +757,16 @@ public class PlayConfigurationView implements Initializable {
     @FXML
 	public void start() {
 		commit();
-		root.setDisable(true);
+		playerPanel.setDisable(true);
+		videoTab.setDisable(true);
+		audioTab.setDisable(true);
+		inputTab.setDisable(true);
+		resourceTab.setDisable(true);
+		optionTab.setDisable(true);
+		otherTab.setDisable(true);
+		irTab.setDisable(true);
+		controlPanel.setDisable(true);
 		
-		try {
-			Stage primaryStage = new Stage();
-			ResourceBundle bundle = ResourceBundle.getBundle("resources.UIResources");
-			FXMLLoader loader = new FXMLLoader(
-					MainLoader.class.getResource("/bms/player/beatoraja/launcher/SkinConfigurationView.fxml"), bundle);
-			VBox stackPane = (VBox) loader.load();
-			SkinConfigurationView bmsinfo = (SkinConfigurationView) loader.getController();
-			bmsinfo.update(player);
-			primaryStage.initModality(Modality.APPLICATION_MODAL);
-			Scene scene = new Scene(stackPane, stackPane.getPrefWidth(), stackPane.getPrefHeight());
-			primaryStage.setScene(scene);
-			primaryStage.setTitle(MainController.VERSION + " skin configuration");
-			primaryStage.show();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
 		MainLoader.play(null, 0, true, config, player, songUpdated);
 	}
 
