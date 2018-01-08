@@ -459,8 +459,10 @@ public class NoteShuffleModifier extends PatternModifier {
 		//7個押し以上では無理押ししか存在しないので除外
 		if(assignedLane.size() + noteLane.size() <= 6) {
 			List<Integer> kouhoLane = new ArrayList<Integer>(keys.length); //置ける候補
+			List<Integer> rendaLane = new ArrayList<Integer>(keys.length); //置くと縦連打になるレーン
 			while (!(noteLane.isEmpty() || noAssignedLane.isEmpty())) {
 				kouhoLane.clear();
+				rendaLane.clear();
 				if(assignedLane.size() <= 1) {
 					kouhoLane.addAll(noAssignedLane); //既にノートが置かれているレーンが1個以下であれば全部が候補
 				} else {
@@ -468,9 +470,9 @@ public class NoteShuffleModifier extends PatternModifier {
 					referencePoint[0] = max;
 					referencePoint[1] = 0;
 					for(int i = 0; i < assignedLane.size(); i++){
-			            referencePoint[0] = Math.min(referencePoint[0] , assignedLane.get(i));
-			            referencePoint[1] = Math.max(referencePoint[1] , assignedLane.get(i));
-			        }
+						referencePoint[0] = Math.min(referencePoint[0] , assignedLane.get(i));
+						referencePoint[1] = Math.max(referencePoint[1] , assignedLane.get(i));
+					}
 					if(referencePoint[1] - referencePoint[0] <= 2) {
 						kouhoLane.addAll(noAssignedLane); //既にノートが置かれているレーンが片手で押せる範囲であれば全部が候補
 					} else if(referencePoint[1] - referencePoint[0] == 3) {
@@ -504,10 +506,10 @@ public class NoteShuffleModifier extends PatternModifier {
 				}
 				for(int i = 0; i < kouhoLane.size(); i++){
 					if (now - lastNoteTime[kouhoLane.get(i)] < duration) {
-						kouhoLane.remove(i);
-						i--;
+						rendaLane.add(kouhoLane.get(i));
 					}
 				}
+				if(kouhoLane.size() > rendaLane.size()) kouhoLane.removeAll(rendaLane); //縦連打になるレーンを除外。ただし候補全部が縦連打になる場合無理押しでないことの方を優先
 				if(kouhoLane.isEmpty()) break;
 				int r = (int) (Math.random() * kouhoLane.size());
 				result[kouhoLane.get(r)] = noteLane.get(0);
