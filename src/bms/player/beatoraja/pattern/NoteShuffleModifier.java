@@ -272,9 +272,15 @@ public class NoteShuffleModifier extends PatternModifier {
 					break;
 				case S_RANDOM_EX:
 					keys = getKeys(mode, true);
-					random = keys.length > 0 ? timeBasedShuffle(keys, ln,
-							notes, lastNoteTime, tl.getTime(), 40)
-							: keys;
+					if(mode == Mode.POPN_9K) {
+						random = keys.length > 0 ? noMurioshiShuffle(keys, ln,
+								notes, lastNoteTime, tl.getTime(), 125)
+								: keys;
+					} else {
+						random = keys.length > 0 ? timeBasedShuffle(keys, ln,
+								notes, lastNoteTime, tl.getTime(), 40)
+								: keys;
+					}
 					break;
 
 				}
@@ -400,6 +406,132 @@ public class NoteShuffleModifier extends PatternModifier {
 			int r = (int) (Math.random() * primaryLane.size());
 			result[primaryLane.get(r)] = otherLane.get(0);
 			primaryLane.remove(r);
+			otherLane.remove(0);
+		}
+
+		return result;
+	}
+	
+	// 無理押しとduration[ms]時間未満の縦連打がなるべく来ないようにshuffleをかける
+	private static int[] noMurioshiShuffle(int[] keys, int[] activeln,
+		Note[] notes, int[] lastNoteTime, int now, int duration) {
+		List<Integer> assignedLane = new ArrayList<Integer>(keys.length);
+		List<Integer> noAssignedLane = new ArrayList<Integer>(keys.length);
+		List<Integer> originalLane = new ArrayList<Integer>(keys.length);
+
+		for (int key : keys) {
+			noAssignedLane.add(key);
+			originalLane.add(key);
+		}
+		int max = 0;
+		for (int key : keys) {
+			max = Math.max(max, key);
+		}
+		int[] result = new int[max + 1];
+		for (int i = 0; i < result.length; i++) {
+			result[i] = i;
+		}
+
+		// LNがアクティブなレーンをアサインしてから除外
+		for (int lane = 0; lane < keys.length; lane++) {
+			if (activeln != null && activeln[keys[lane]] != -1) {
+				result[keys[lane]] = activeln[keys[lane]];
+				assignedLane.add((Integer) keys[lane]);
+				noAssignedLane.remove((Integer) keys[lane]);
+				originalLane.remove((Integer) activeln[keys[lane]]);
+			}
+		}
+		List<Integer> noteLane, otherLane;
+		noteLane = new ArrayList<Integer>(keys.length);
+		otherLane = new ArrayList<Integer>(keys.length);
+
+		// 元のレーンをノーツの存在で分類
+		while (!originalLane.isEmpty()) {
+			if (notes[originalLane.get(0)] != null) {
+				noteLane.add(originalLane.get(0));
+			} else {
+				otherLane.add(originalLane.get(0));
+			}
+			originalLane.remove(0);
+		}
+
+		//無理押しにならないようにランダムに置いていく
+		//7個押し以上では無理押ししか存在しないので除外
+		if(assignedLane.size() + noteLane.size() <= 6) {
+			List<Integer> kouhoLane = new ArrayList<Integer>(keys.length); //置ける候補
+			List<Integer> rendaLane = new ArrayList<Integer>(keys.length); //置くと縦連打になるレーン
+			while (!(noteLane.isEmpty() || noAssignedLane.isEmpty())) {
+				kouhoLane.clear();
+				rendaLane.clear();
+				if(assignedLane.size() <= 1) {
+					kouhoLane.addAll(noAssignedLane); //既にノートが置かれているレーンが1個以下であれば全部が候補
+				} else {
+					int[] referencePoint = new int[2]; //既にノートが置かれているレーンの中で左端のレーンと右端のレーン
+					referencePoint[0] = max;
+					referencePoint[1] = 0;
+					for(int i = 0; i < assignedLane.size(); i++){
+						referencePoint[0] = Math.min(referencePoint[0] , assignedLane.get(i));
+						referencePoint[1] = Math.max(referencePoint[1] , assignedLane.get(i));
+					}
+					if(referencePoint[1] - referencePoint[0] <= 2) {
+						kouhoLane.addAll(noAssignedLane); //既にノートが置かれているレーンが片手で押せる範囲であれば全部が候補
+					} else if(referencePoint[1] - referencePoint[0] == 3) {
+						if(noAssignedLane.indexOf(referencePoint[0] - 2) != -1) kouhoLane.add(referencePoint[0] - 2);
+						if(noAssignedLane.indexOf(referencePoint[0] - 1) != -1) kouhoLane.add(referencePoint[0] - 1);
+						if(noAssignedLane.indexOf(referencePoint[0] + 1) != -1) kouhoLane.add(referencePoint[0] + 1);
+						if(noAssignedLane.indexOf(referencePoint[0] + 2) != -1) kouhoLane.add(referencePoint[0] + 2);
+						if(noAssignedLane.indexOf(referencePoint[1] + 2) != -1) kouhoLane.add(referencePoint[1] + 2);
+						if(noAssignedLane.indexOf(referencePoint[1] + 1) != -1) kouhoLane.add(referencePoint[1] + 1);
+						if(noAssignedLane.indexOf(referencePoint[1] - 1) != -1) kouhoLane.add(referencePoint[1] - 1);
+						if(noAssignedLane.indexOf(referencePoint[1] - 2) != -1) kouhoLane.add(referencePoint[1] - 2);
+					} else if(referencePoint[1] - referencePoint[0] == 4) {
+						if(noAssignedLane.indexOf(referencePoint[0] - 2) != -1 && noAssignedLane.indexOf(referencePoint[0] + 1) != -1) kouhoLane.add(referencePoint[0] - 2);
+						if(noAssignedLane.indexOf(referencePoint[0] - 1) != -1) kouhoLane.add(referencePoint[0] - 1);
+						if(noAssignedLane.indexOf(referencePoint[0] + 1) != -1) kouhoLane.add(referencePoint[0] + 1);
+						if(noAssignedLane.indexOf(referencePoint[0] + 2) != -1) kouhoLane.add(referencePoint[0] + 2);
+						if(noAssignedLane.indexOf(referencePoint[1] + 2) != -1 && noAssignedLane.indexOf(referencePoint[1] - 1) != -1) kouhoLane.add(referencePoint[1] + 2);
+						if(noAssignedLane.indexOf(referencePoint[1] + 1) != -1) kouhoLane.add(referencePoint[1] + 1);
+						if(noAssignedLane.indexOf(referencePoint[1] - 1) != -1) kouhoLane.add(referencePoint[1] - 1);
+						if(noAssignedLane.indexOf(referencePoint[1] - 2) != -1) kouhoLane.add(referencePoint[1] - 2);
+					} else if(referencePoint[1] - referencePoint[0] >= 5) {
+						if(noAssignedLane.indexOf(referencePoint[0] - 2) != -1 && noAssignedLane.indexOf(referencePoint[0] + 1) != -1 && noAssignedLane.indexOf(referencePoint[0] + 2) != -1) kouhoLane.add(referencePoint[0] - 2);
+						if(noAssignedLane.indexOf(referencePoint[0] - 1) != -1 && noAssignedLane.indexOf(referencePoint[0] + 2) != -1) kouhoLane.add(referencePoint[0] - 1);
+						if(noAssignedLane.indexOf(referencePoint[0] + 1) != -1) kouhoLane.add(referencePoint[0] + 1);
+						if(noAssignedLane.indexOf(referencePoint[0] + 2) != -1) kouhoLane.add(referencePoint[0] + 2);
+						if(noAssignedLane.indexOf(referencePoint[1] + 2) != -1 && noAssignedLane.indexOf(referencePoint[1] - 1) != -1 && noAssignedLane.indexOf(referencePoint[1] - 2) != -1) kouhoLane.add(referencePoint[1] + 2);
+						if(noAssignedLane.indexOf(referencePoint[1] + 1) != -1 && noAssignedLane.indexOf(referencePoint[1] - 2) != -1) kouhoLane.add(referencePoint[1] + 1);
+						if(noAssignedLane.indexOf(referencePoint[1] - 1) != -1) kouhoLane.add(referencePoint[1] - 1);
+						if(noAssignedLane.indexOf(referencePoint[1] - 2) != -1) kouhoLane.add(referencePoint[1] - 2);
+					}
+				}
+				for(int i = 0; i < kouhoLane.size(); i++){
+					if (now - lastNoteTime[kouhoLane.get(i)] < duration) {
+						rendaLane.add(kouhoLane.get(i));
+					}
+				}
+				if(kouhoLane.size() > rendaLane.size()) kouhoLane.removeAll(rendaLane); //縦連打になるレーンを除外。ただし候補全部が縦連打になる場合無理押しでないことの方を優先
+				if(kouhoLane.isEmpty()) break;
+				int r = (int) (Math.random() * kouhoLane.size());
+				result[kouhoLane.get(r)] = noteLane.get(0);
+				assignedLane.add(kouhoLane.get(r));
+				noAssignedLane.remove(kouhoLane.get(r));
+				noteLane.remove(0);
+			}
+		}
+
+		// noteLaneが空でなかったら残りのノートをランダムに置いていく
+		while (!noteLane.isEmpty()) {
+			int r = (int) (Math.random() * noAssignedLane.size());
+			result[noAssignedLane.get(r)] = noteLane.get(0);
+			noAssignedLane.remove(r);
+			noteLane.remove(0);
+		}
+
+		// 残りをランダムに置いていく
+		while (!otherLane.isEmpty()) {
+			int r = (int) (Math.random() * noAssignedLane.size());
+			result[noAssignedLane.get(r)] = otherLane.get(0);
+			noAssignedLane.remove(r);
 			otherLane.remove(0);
 		}
 
