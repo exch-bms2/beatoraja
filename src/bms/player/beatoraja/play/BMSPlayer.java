@@ -199,7 +199,7 @@ public class BMSPlayer extends MainState {
 			if(model.getMode().scratchKey.length == 0) {
 				if (config.getRandom() == 7) {
 					config.setRandom(0);
-				} else if (config.getRandom() == 8) {
+				} else if (config.getRandom() == 8 && model.getMode() != Mode.POPN_9K) {
 					config.setRandom(2);
 				} else if (config.getRandom() == 9 && model.getMode() != Mode.POPN_9K) {
 					config.setRandom(4);
@@ -209,7 +209,7 @@ public class BMSPlayer extends MainState {
 					PatternModifier
 							.create(config.getRandom(), PatternModifier.SIDE_1P)
 							.modify(model));
-			if (config.getRandom() >= 6) {
+			if (config.getRandom() >= 6 && !(config.getRandom() == 8 && model.getMode() == Mode.POPN_9K)) {
 				assist = (assist == 0) ? 1 : assist;
 				score = false;
 			}
