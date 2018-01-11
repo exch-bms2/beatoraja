@@ -58,7 +58,7 @@ import com.badlogic.gdx.utils.StringBuilder;
  */
 public class MainController extends ApplicationAdapter {
 
-	public static final String VERSION = "beatoraja 0.5.2";
+	public static final String VERSION = "beatoraja 0.5.3";
 	
 	private static final boolean debug = false;
 
