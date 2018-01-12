@@ -188,9 +188,8 @@ public class LaneShuffleModifier extends PatternModifier {
 			int[] searchLane = new int[9];
 			boolean[] searchLaneFlag = new boolean[9];
 			Arrays.fill(searchLaneFlag, false);
-			int patternCount = 0;
 			List<Integer> tempPattern = new ArrayList<Integer>(keys.length);
-			murioshiSearch: for(searchLane[0]=0;searchLane[0]<9;searchLane[0]++) {
+			for(searchLane[0]=0;searchLane[0]<9;searchLane[0]++) {
 				searchLaneFlag[searchLane[0]] = true;
 				for(searchLane[1]=0;searchLane[1]<9;searchLane[1]++) {
 					if(searchLaneFlag[searchLane[1]]) continue;
@@ -214,8 +213,8 @@ public class LaneShuffleModifier extends PatternModifier {
 											if(searchLaneFlag[searchLane[7]]) continue;
 											searchLaneFlag[searchLane[7]] = true;
 											for(searchLane[8]=0;searchLane[8]<9;searchLane[8]++) {
-												if(searchLaneFlag[searchLane[8]] || (searchLane[0]==0&&searchLane[1]==1&&searchLane[2]==2&&searchLane[3]==3&&searchLane[4]==4&&searchLane[5]==5&&searchLane[6]==6&&searchLane[7]==7&&searchLane[8]==8)) continue; //正規は除外
-												patternCount++;
+												if(searchLaneFlag[searchLane[8]] || (searchLane[0]==0&&searchLane[1]==1&&searchLane[2]==2&&searchLane[3]==3&&searchLane[4]==4&&searchLane[5]==5&&searchLane[6]==6&&searchLane[7]==7&&searchLane[8]==8)
+																				 || (searchLane[0]==8&&searchLane[1]==7&&searchLane[2]==6&&searchLane[3]==5&&searchLane[4]==4&&searchLane[5]==3&&searchLane[6]==2&&searchLane[7]==1&&searchLane[8]==0)) continue; //正規鏡は除外
 												boolean murioshiFlag = false;
 												for(int i=0;i<originalPatternList.size();i++) {
 													tempPattern.clear();
@@ -244,7 +243,6 @@ public class LaneShuffleModifier extends PatternModifier {
 														kouhoPatternList.get(kouhoPatternList.size()-1).add(searchLane[i]);
 													}
 												}
-												if(patternCount >= 181439) break murioshiSearch; //(9!-2)/2=181439パターン調べたら終了
 											}
 											searchLaneFlag[searchLane[7]] = false;
 										}
@@ -264,18 +262,17 @@ public class LaneShuffleModifier extends PatternModifier {
 			}
 		}
 		
-		Logger.getGlobal().info("無理押し無し譜面数 : "+(kouhoPatternList.size()*2));
+		Logger.getGlobal().info("無理押し無し譜面数 : "+(kouhoPatternList.size()));
 		
 		int[] result = new int[9];
-		int mirror = (int) (Math.random() * 2);
 		if(kouhoPatternList.size() > 0) {
 			int r = (int) (Math.random() * kouhoPatternList.size());
 			for (int i = 0; i < 9; i++) {
-				int j =(int) (kouhoPatternList.get(r)).get(i);
-				result[mirror == 0 ? j : 8 - j] = i;
+				result[(int) (kouhoPatternList.get(r)).get(i)] = i;
 			}
 		//無理押しが来ない譜面が存在しない場合は正規か鏡でランダム
 		} else {
+			int mirror = (int) (Math.random() * 2);
 			for (int i = 0; i < 9; i++) {
 				result[i] = mirror == 0 ? i : 8 - i;
 			}
