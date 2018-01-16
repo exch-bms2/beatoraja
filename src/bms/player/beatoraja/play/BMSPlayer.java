@@ -315,6 +315,14 @@ public class BMSPlayer extends MainState {
 		}
 
 		judge.init(model, resource);
+		LongArray sectiontimes = new LongArray();
+		for (TimeLine tl : model.getAllTimeLines()) {
+			if(tl.getSectionLine()) {
+				sectiontimes.add(tl.getMicroTime());
+			}
+		}
+		this.sectiontimes = sectiontimes.toArray();
+
 		bga = resource.getBGAManager();
 
 		IRScoreData score = main.getPlayDataAccessor().readScoreData(model, config.getLnmode());
@@ -351,6 +359,8 @@ public class BMSPlayer extends MainState {
 
 	private PracticeConfiguration practice = new PracticeConfiguration();
 	private long starttimeoffset;
+
+	private long[] sectiontimes;
 	private int sections = 0;
 	private long rhythmtimer;
 	private long startpressedtime;
@@ -480,15 +490,12 @@ public class BMSPlayer extends MainState {
             }
             rhythmtimer += deltatime * (100 - lanerender.getNowBPM() * playspeed / 60) / 100;
             timer[TIMER_RHYTHM] = rhythmtimer / 1000;
-            
-            try {
-            	if((lanerender.getSectiontimes().get(sections) * (100 / property.freq)) <= (micronow - timer[TIMER_PLAY] * 1000)) {
-            		sections++;;
-            		timer[TIMER_RHYTHM] = now;
-            		rhythmtimer = micronow;
-            	}
-            }catch(IndexOutOfBoundsException e) {
-            }
+
+            if(sections < sectiontimes.length && (sectiontimes[sections] * (100 / property.freq)) <= (micronow - timer[TIMER_PLAY] * 1000)) {
+				sections++;;
+				timer[TIMER_RHYTHM] = now;
+				rhythmtimer = micronow;
+			}
             final long ptime = now - timer[TIMER_PLAY];
 			final float g = gauge.getValue();
 			if (gaugelog.size <= ptime / 500) {

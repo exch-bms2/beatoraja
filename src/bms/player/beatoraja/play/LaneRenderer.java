@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.play.SkinNote.SkinLane;
 
+import com.badlogic.gdx.utils.LongArray;
 import org.lwjgl.opengl.GL11;
 
 import bms.model.*;
@@ -59,7 +60,6 @@ public class LaneRenderer {
 
 	private BMSModel model;
 	private TimeLine[] timelines;
-	private List<Long> sectiontimes = new ArrayList<Long>();
 
 	private int pos;
 
@@ -141,10 +141,7 @@ public class LaneRenderer {
 			} else if (tl.existNote() || tl.existHiddenNote()) {
 				tls.add(tl);
 			}
-			if(tl.getSectionLine()) {
-				sectiontimes.add(tl.getMicroTime());
-			}
-			cbpm = tl.getBPM();			
+			cbpm = tl.getBPM();
 		}
 		this.timelines = tls.toArray(new TimeLine[tls.size()]);
 		// Logger.getGlobal().info("省略したTimeLine数:" +
@@ -221,10 +218,6 @@ public class LaneRenderer {
 		return lanecover;
 	}
 	
-	public List<Long> getSectiontimes() {
-		return sectiontimes;
-	}
-
 	public void setLanecover(float lanecover) {
 		lanecover = (lanecover < 0 ? 0 : (lanecover > 1 ? 1 : lanecover));
 		this.lanecover = lanecover;
