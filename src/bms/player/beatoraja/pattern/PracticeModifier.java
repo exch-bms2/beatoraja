@@ -4,12 +4,23 @@ import java.util.List;
 
 import bms.model.*;
 
+/**
+ * プラクティス時に選択範囲以外の可視ノーツをBGノーツに移動するクラス
+ *
+ * @author exch
+ */
 public class PracticeModifier extends PatternModifier {
 
-	private int start;
-	private int end;
+	/**
+	 * 開始時間(ms)
+	 */
+	private long start;
+	/**
+	 * 終了時間(ms)
+	 */
+	private long end;
 
-	public PracticeModifier(int start, int end) {
+	public PracticeModifier(long start, long end) {
 		super(2);
 		this.start = start;
 		this.end = end;
@@ -18,23 +29,11 @@ public class PracticeModifier extends PatternModifier {
 	@Override
 	public List<PatternModifyLog> modify(BMSModel model) {
 		int totalnotes = model.getTotalNotes();
-		for (TimeLine tl : model.getAllTimeLines()) {
+		final TimeLine[] tls = model.getAllTimeLines();
+		for (TimeLine tl : tls) {
 			for (int i = 0; i < model.getMode().key; i++) {
-				if (tl.getNote(i) != null) {
-					if (tl.getNote(i) instanceof LongNote) {
-						LongNote ln = (LongNote) tl.getNote(i);
-						if ((!ln.isEnd() && ln.getTime() < start) || (ln.isEnd() && ln.getTime() >= end)
-								|| (!ln.isEnd() && ln.getPair().getTime() >= end)
-								|| (ln.isEnd() && ln.getPair().getTime() < start)) {
-							tl.addBackGroundNote(tl.getNote(i));
-							tl.setNote(i, null);
-						}
-					} else {
-						if (tl.getTime() < start || tl.getTime() >= end) {
-							tl.addBackGroundNote(tl.getNote(i));
-							tl.setNote(i, null);
-						}
-					}
+				if(tl.getTime() < start || tl.getTime() >= end) {
+					moveToBackground(tls, tl, i);
 				}
 			}
 		}

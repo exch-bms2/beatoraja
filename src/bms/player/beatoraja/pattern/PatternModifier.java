@@ -4,12 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import bms.model.*;
 import com.badlogic.gdx.utils.IntArray;
-
-import bms.model.BMSModel;
-import bms.model.Mode;
-import bms.model.Note;
-import bms.model.TimeLine;
 
 /**
  * 譜面オプションの抽象クラス
@@ -227,6 +223,29 @@ public abstract class PatternModifier {
 			rlane = inc ? (rlane + 1) % keys.length : (rlane + keys.length - 1) % keys.length;
 		}
 		return result;
+	}
+
+	protected static void moveToBackground(TimeLine[] tls, TimeLine tl, int lane) {
+		Note n = tl.getNote(lane);
+		if(n == null) {
+			return;
+		}
+		if(n instanceof LongNote) {
+			LongNote pln = ((LongNote) tl.getNote(lane)).getPair();
+			for(TimeLine tl2 : tls) {
+				if(tl2.getNote(lane) == pln) {
+					tl2.addBackGroundNote(pln);
+					tl2.setNote(lane, null);
+					break;
+				}
+			}
+		}
+
+		if(!(n instanceof MineNote)) {
+			tl.addBackGroundNote(tl.getNote(lane));
+		}
+		tl.setNote(lane, null);
+
 	}
 
 	static class DummyModifier extends PatternModifier {
