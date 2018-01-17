@@ -430,7 +430,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 
 						if (!detail) {
 							detail = true;
-							addJudgeDetail(skin, values, srcw, dstw, srch, dsth, 0);
+							addJudgeDetail(skin, values, srcw, dstw, srch, dsth, 2);
 						}
 
 					} catch (NumberFormatException e) {
@@ -695,43 +695,49 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 		final float dw = dstw / 1280f;
 		final float dh = dsth / 720f;
 
+		final int[] JUDGE_TIMER = { TIMER_JUDGE_1P, TIMER_JUDGE_2P, TIMER_JUDGE_3P };
+		final int[] OPTION_EARLY = { OPTION_1P_EARLY, OPTION_2P_EARLY, OPTION_3P_EARLY };
+		final int[] OPTION_LATE = { OPTION_1P_LATE, OPTION_2P_LATE, OPTION_3P_LATE };
+		final int[] VALUE_JUDGE_DURATION = { VALUE_JUDGE_1P_DURATION, VALUE_JUDGE_2P_DURATION, VALUE_JUDGE_3P_DURATION };
+		final int[] OPTION_PERFECT = { OPTION_1P_PERFECT, OPTION_2P_PERFECT, OPTION_3P_PERFECT };
+
 		SkinImage early = new SkinImage(new TextureRegion(tex, 0, 0, 50,20));
 		early.setDestination(0, (values[3] + values[5] / 2) * dstw / srcw,
 				dsth - (values[4] - 5) * dsth / srch, 40 * dw, 16 * dh, 0, 255,
-				255, 255, 255, 0, 0, 0, 0, -1, 46 + side, 1998, 0, 1242 + side * 20, 0);
+				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1998, 0, OPTION_EARLY[side], 0);
 		early.setDestination(500, (values[3] + values[5] / 2) * dstw / srcw,
 				dsth - (values[4] - 5) * dsth / srch, 40 * dw, 16 * dh, 0, 255,
-				255, 255, 255, 0, 0, 0, 0, -1, 46 + side, 1998, 0, 1242 + side * 20, 0);
+				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1998, 0, OPTION_EARLY[side], 0);
 		skin.add(early);
 		SkinImage late = new SkinImage(new TextureRegion(tex, 50, 0, 50,20));
 		late.setDestination(0, (values[3] + values[5] / 2) * dstw / srcw,
 				dsth - (values[4] - 5) * dsth / srch, 40 * dw, 16 * dh, 0, 255,
-				255, 255, 255, 0, 0, 0, 0, -1, 46 + side, 1998, 0, 1243 + side * 20, 0);
+				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1998, 0, OPTION_LATE[side], 0);
 		late.setDestination(500, (values[3] + values[5] / 2) * dstw / srcw,
 				dsth - (values[4] - 5) * dsth / srch, 40 * dw, 16 * dh, 0, 255,
-				255, 255, 255, 0, 0, 0, 0, -1, 46 + side, 1998, 0, 1243 + side * 20, 0);
+				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1998, 0, OPTION_LATE[side], 0);
 		skin.add(late);
 
 		TextureRegion[][] images = TextureRegion.split(tex, 10, 20);
 		SkinNumber num = new SkinNumber(new TextureRegion[][] { images[1] },
-				new TextureRegion[][] { images[2] }, 0, 0, 4, 0, 525);
+				new TextureRegion[][] { images[2] }, 0, 0, 4, 0, VALUE_JUDGE_DURATION[side]);
 		num.setAlign(values[12]);
 		num.setDestination(0, (values[3] + values[5] / 2) * dstw / srcw,
 				dsth - (values[4] - 5) * dsth / srch, 8 * dw, 16 * dh, 0, 255,
-				255, 255, 255, 0, 0, 0, 0, -1, 46 + side, 1999, 0, 241 + side * 20, 0);
+				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1999, 0, OPTION_PERFECT[side], 0);
 		num.setDestination(500, (values[3] + values[5] / 2) * dstw / srcw,
 				dsth - (values[4] - 5) * dsth / srch, 8 * dw, 16 * dh, 0, 255,
-				255, 255, 255, 0, 0, 0, 0, -1, 46 + side, 1999, 0, 241 + side * 20, 0);
+				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1999, 0, OPTION_PERFECT[side], 0);
 		skin.add(num);
 		SkinNumber num2 = new SkinNumber(new TextureRegion[][] { images[3] },
-				new TextureRegion[][] { images[4] }, 0, 0, 4, 0, 525);
+				new TextureRegion[][] { images[4] }, 0, 0, 4, 0, VALUE_JUDGE_DURATION[side]);
 		num2.setAlign(values[12]);
 		num2.setDestination(0, (values[3] + values[5] / 2) * dstw / srcw,
 				dsth - (values[4] - 5) * dsth / srch, 8 * dw, 16 * dh, 0, 255,
-				255, 255, 255, 0, 0, 0, 0, -1, 46 + side, 1999, 0, -(241 + side * 20), 0);
+				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1999, 0, -(OPTION_PERFECT[side]), 0);
 		num2.setDestination(500, (values[3] + values[5] / 2) * dstw / srcw,
 				dsth - (values[4] - 5) * dsth / srch, 8 * dw, 16 * dh, 0, 255,
-				255, 255, 255, 0, 0, 0, 0, -1, 46 + side, 1999, 0, -(241 + side * 20), 0);
+				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1999, 0, -(OPTION_PERFECT[side]), 0);
 		skin.add(num2);
 	}
 

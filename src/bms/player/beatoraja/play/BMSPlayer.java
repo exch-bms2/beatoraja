@@ -867,9 +867,11 @@ public class BMSPlayer extends MainState {
 		case NUMBER_MAXCOMBO2:
 			return judge.getScoreData().getCombo();
 		case VALUE_JUDGE_1P_DURATION:
+			return judge.getRecentJudgeTiming()[0];
 		case VALUE_JUDGE_2P_DURATION:
+			return judge.getRecentJudgeTiming().length > 1 ? judge.getRecentJudgeTiming()[1] : judge.getRecentJudgeTiming()[0];
 		case VALUE_JUDGE_3P_DURATION:
-			return judge.getRecentJudgeTiming();
+			return judge.getRecentJudgeTiming().length > 2 ? judge.getRecentJudgeTiming()[2] : judge.getRecentJudgeTiming()[0];
 		}
 		return super.getNumberValue(id);
 	}
@@ -973,25 +975,25 @@ public class BMSPlayer extends MainState {
 		case OPTION_1P_PERFECT:
 			return judge.getNowJudge()[0] == 1;
 		case OPTION_1P_EARLY:
-			return judge.getNowJudge()[0] > 1 && judge.getRecentJudgeTiming() > 0;
+			return judge.getNowJudge()[0] > 1 && judge.getRecentJudgeTiming()[0] > 0;
 		case OPTION_1P_LATE:
-			return judge.getNowJudge()[0] > 1 && judge.getRecentJudgeTiming() < 0;
+			return judge.getNowJudge()[0] > 1 && judge.getRecentJudgeTiming()[0] < 0;
 		case OPTION_2P_PERFECT:
 			return judge.getNowJudge().length > 1 && judge.getNowJudge()[1] == 1;
 		case OPTION_2P_EARLY:
 			return judge.getNowJudge().length > 1 && judge.getNowJudge()[1] > 1
-					&& judge.getRecentJudgeTiming() > 0;
+					&& judge.getRecentJudgeTiming()[1] > 0;
 		case OPTION_2P_LATE:
 			return judge.getNowJudge().length > 1 && judge.getNowJudge()[1] > 1
-					&& judge.getRecentJudgeTiming() < 0;
+					&& judge.getRecentJudgeTiming()[1] < 0;
 		case OPTION_3P_PERFECT:
 			return judge.getNowJudge().length > 2 && judge.getNowJudge()[2] == 1;
 		case OPTION_3P_EARLY:
 			return judge.getNowJudge().length > 2 && judge.getNowJudge()[2] > 1
-					&& judge.getRecentJudgeTiming() > 0;
+					&& judge.getRecentJudgeTiming()[2] > 0;
 		case OPTION_3P_LATE:
 			return judge.getNowJudge().length > 2 && judge.getNowJudge()[2] > 1
-					&& judge.getRecentJudgeTiming() < 0;
+					&& judge.getRecentJudgeTiming()[2] < 0;
 		case OPTION_PERFECT_EXIST:
 			return judge.getJudgeCount(0) > 0;
 		case OPTION_GREAT_EXIST:
