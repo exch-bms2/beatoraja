@@ -1,18 +1,9 @@
 package bms.player.beatoraja;
 
-import java.util.Arrays;
 import java.util.Map;
-import java.util.logging.Logger;
-
-import bms.player.beatoraja.input.BMControllerInputProcessor.BMKeys;
-import bms.player.beatoraja.PlayConfig.MidiConfig;
 import bms.player.beatoraja.play.JudgeAlgorithm;
-
 import bms.player.beatoraja.skin.SkinType;
-import com.badlogic.gdx.Input.Keys;
-
 import static bms.player.beatoraja.Resolution.*;
-import bms.model.Mode;
 
 /**
  * 各種設定項目。config.jsonで保持される
@@ -108,23 +99,6 @@ public class Config {
 	 */
 	private int maxFramePerSecond = 240;
 	/**
-	 * ゲージの種類
-	 */
-	private int gauge = 0;
-
-	/**
-	 * ハイスピード固定。固定する場合はデュレーションが有効となり、固定しない場合はハイスピードが有効になる
-	 */
-	private int fixhispeed = FIX_HISPEED_MAINBPM;
-
-	public static final int FIX_HISPEED_OFF = 0;
-	public static final int FIX_HISPEED_STARTBPM = 1;
-	public static final int FIX_HISPEED_MAXBPM = 2;
-	public static final int FIX_HISPEED_MAINBPM = 3;
-	public static final int FIX_HISPEED_MINBPM = 4;
-
-	private int target;
-	/**
 	 * 最小入力感覚
 	 */
 	private int inputduration = 10;
@@ -137,48 +111,14 @@ public class Config {
 	 */
 	private int scrolldurationhigh = 50;
 	/**
-	 * 判定タイミング
-	 */
-	private int judgetiming = 0;
-	/**
 	 * 判定アルゴリズム
 	 */
 	private JudgeAlgorithm judgealgorithm = JudgeAlgorithm.Combo;
-
-    /**
-     * 選曲時のモードフィルター
-     */
-	private Mode mode = null;
 	
     private boolean cacheSkinImage = false;
     
     private boolean useSongInfo = true;
-	/**
-	 * アシストオプション:コンスタント
-	 */
-	private boolean constant = false;
-	/**
-	 * アシストオプション:LNアシスト
-	 */
-	private boolean legacynote = false;
-	/**
-	 * LNモード
-	 */
-	private int lnmode = 0;
-	/**
-	 * アシストオプション:地雷除去
-	 */
-	private boolean nomine = false;
-
-	/**
-	 * アシストオプション:BPMガイド
-	 */
-	private boolean bpmguide = false;
-
-	private boolean showjudgearea = false;
-
-	private boolean markprocessednote = false;
-
+    
 	private boolean showhiddennote = false;
 
 	private boolean showpastnote = false;
@@ -217,8 +157,6 @@ public class Config {
 
 	private int frameskip = 1;
 	private String vlcpath = "";
-
-	private int musicselectinput = 0;
 
 	private boolean updatesong = false;
 
@@ -520,117 +458,5 @@ public class Config {
 		this.updatesong = updatesong;
 	}
 
-	// TODO これ以降の値はPlayerConfigに移行する
-	
-	public SkinConfig[] getSkin() {
-		return skin;
-	}
-
-	public void setSkin(SkinConfig[] skin) {
-		this.skin = skin;
-	}
-
-	public int getGauge() {
-		return gauge;
-	}
-
-	public void setGauge(int gauge) {
-		this.gauge = gauge;
-	}
-
-	public int getFixhispeed() {
-		return fixhispeed;
-	}
-
-	public void setFixhispeed(int fixhispeed) {
-		this.fixhispeed = fixhispeed;
-	}
-
-	public int getJudgetiming() {
-		return judgetiming;
-	}
-
-	public void setJudgetiming(int judgetiming) {
-		this.judgetiming = judgetiming;
-	}
-
-	public void setMode(Mode m)  {
-		this.mode = m;
-	}
-	
-	public Mode getMode()  {
-		return mode;
-	}
-	
-	public boolean isConstant() {
-		return constant;
-	}
-
-	public void setConstant(boolean constant) {
-		this.constant = constant;
-	}
-
-	public boolean isBpmguide() {
-		return bpmguide;
-	}
-
-	public void setBpmguide(boolean bpmguide) {
-		this.bpmguide = bpmguide;
-	}
-	
-	public boolean isNomine() {
-		return nomine;
-	}
-
-	public void setNomine(boolean nomine) {
-		this.nomine = nomine;
-	}
-
-	public boolean isLegacynote() {
-		return legacynote;
-	}
-
-	public void setLegacynote(boolean legacynote) {
-		this.legacynote = legacynote;
-	}
-
-	public boolean isShowjudgearea() {
-		return showjudgearea;
-	}
-
-	public void setShowjudgearea(boolean showjudgearea) {
-		this.showjudgearea = showjudgearea;
-	}
-
-	public boolean isMarkprocessednote() {
-		return markprocessednote;
-	}
-
-	public void setMarkprocessednote(boolean markprocessednote) {
-		this.markprocessednote = markprocessednote;
-	}
-
-	public int getLnmode() {
-		return lnmode;
-	}
-
-	public void setLnmode(int lnmode) {
-		this.lnmode = lnmode;
-	}
-
-	public int getMusicselectinput() {
-		return musicselectinput;
-	}
-
-	public void setMusicselectinput(int musicselectinput) {
-		this.musicselectinput = musicselectinput;
-	}
-
-	public int getTarget() {
-		return target;
-	}
-
-	public void setTarget(int target) {
-		this.target = target;
-	}
+	// TODO これ以降の値はPlayerConfigに移行する	
 }

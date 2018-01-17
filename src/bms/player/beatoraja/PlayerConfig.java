@@ -128,23 +128,6 @@ public class PlayerConfig {
 	public PlayerConfig() {
 	}
 	
-	public PlayerConfig(Config c) {
-		this.gauge = c.getGauge();
-		this.fixhispeed = c.getFixhispeed();
-		this.target = c.getTarget();
-		this.judgetiming = c.getJudgetiming();
-		this.mode = c.getMode();
-		this.constant = c.isConstant();
-		this.legacynote = c.isLegacynote();
-		this.lnmode = c.getLnmode();
-		this.nomine = c.isNomine();
-		this.bpmguide = c.isBpmguide();
-		this.showjudgearea = c.isShowjudgearea();
-		this.markprocessednote = c.isMarkprocessednote();
-		this.skin = c.getSkin();
-		this.musicselectinput = c.getMusicselectinput();
-	}
-	
     public String getName() {
         return name;
     }
@@ -459,7 +442,7 @@ public class PlayerConfig {
 				Files.createDirectory(Paths.get("player"));
 			}
 			if(readAllPlayerID().length == 0 || readPlayerConfig(config.getPlayername()) == null) {
-				PlayerConfig pc = new PlayerConfig(config);
+				PlayerConfig pc = new PlayerConfig();
 				create("player1");
 				// スコアデータコピー
 				if(Files.exists(Paths.get("playerscore.db"))) {

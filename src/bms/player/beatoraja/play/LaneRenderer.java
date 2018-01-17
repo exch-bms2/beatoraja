@@ -149,18 +149,18 @@ public class LaneRenderer {
 		// model.getAllTimeLines().length);
 
 		switch (config.getFixhispeed()) {
-		case Config.FIX_HISPEED_OFF:
+		case PlayerConfig.FIX_HISPEED_OFF:
 			break;
-		case Config.FIX_HISPEED_STARTBPM:
+		case PlayerConfig.FIX_HISPEED_STARTBPM:
 			basebpm = model.getBpm();
 			break;
-		case Config.FIX_HISPEED_MINBPM:
+		case PlayerConfig.FIX_HISPEED_MINBPM:
 			basebpm = model.getMinBPM();
 			break;
-		case Config.FIX_HISPEED_MAXBPM:
+		case PlayerConfig.FIX_HISPEED_MAXBPM:
 			basebpm = model.getMaxBPM();
 			break;
-		case Config.FIX_HISPEED_MAINBPM:
+		case PlayerConfig.FIX_HISPEED_MAINBPM:
 			Map<Double, Integer> m = new HashMap<Double, Integer>();
 			for (TimeLine tl : model.getAllTimeLines()) {
 				Integer count = m.get(tl.getBPM());
@@ -180,7 +180,7 @@ public class LaneRenderer {
 		}
 
 		this.setLanecover(playconfig.getLanecover());
-		if (this.fixhispeed != Config.FIX_HISPEED_OFF) {
+		if (this.fixhispeed != PlayerConfig.FIX_HISPEED_OFF) {
 			basehispeed = hispeed;
 		}
 	}
@@ -221,7 +221,7 @@ public class LaneRenderer {
 	public void setLanecover(float lanecover) {
 		lanecover = (lanecover < 0 ? 0 : (lanecover > 1 ? 1 : lanecover));
 		this.lanecover = lanecover;
-		if (this.fixhispeed != Config.FIX_HISPEED_OFF) {
+		if (this.fixhispeed != PlayerConfig.FIX_HISPEED_OFF) {
 			hispeed = (float) ((2400f / (basebpm / 100) / gvalue) * (1 - (enableLanecover ? lanecover : 0)));
 		}
 	}
@@ -236,7 +236,7 @@ public class LaneRenderer {
 
 	public void changeHispeed(boolean b) {
 		float f = 0;
-		if (this.fixhispeed != Config.FIX_HISPEED_OFF) {
+		if (this.fixhispeed != PlayerConfig.FIX_HISPEED_OFF) {
 			f = basehispeed * 0.25f * (b ? 1 : -1);
 		} else {
 			f = 0.125f * (b ? 1 : -1);
