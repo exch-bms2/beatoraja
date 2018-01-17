@@ -447,7 +447,7 @@ public class NoteShuffleModifier extends PatternModifier {
 
 		// 元のレーンをノーツの存在で分類
 		while (!originalLane.isEmpty()) {
-			if (notes[originalLane.get(0)] != null) {
+			if (notes[originalLane.get(0)] != null && (notes[originalLane.get(0)] instanceof NormalNote || notes[originalLane.get(0)] instanceof LongNote)) {
 				noteLane.add(originalLane.get(0));
 			} else {
 				otherLane.add(originalLane.get(0));
