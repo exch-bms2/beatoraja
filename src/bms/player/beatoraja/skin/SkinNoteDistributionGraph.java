@@ -7,7 +7,6 @@ import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 import bms.player.beatoraja.song.SongData;
 
 import com.badlogic.gdx.graphics.*;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 
@@ -29,7 +28,7 @@ public class SkinNoteDistributionGraph extends SkinObject {
 	private int[][] data = new int[0][0];
 
 	private static final Color[][] JGRAPH = {
-			{ Color.valueOf("44ff44"), Color.valueOf("ff4444"), Color.valueOf("4444ff"), Color.valueOf("cccccc"),
+			{ Color.valueOf("44ff44"), Color.valueOf("228822"), Color.valueOf("ff4444"), Color.valueOf("4444ff"), Color.valueOf("222288"), Color.valueOf("cccccc"),
 					Color.valueOf("880000") },
 			{ Color.valueOf("555555"), Color.valueOf("0088ff"), Color.valueOf("00ff88"), Color.valueOf("ffff00"),
 					Color.valueOf("ff8800"), Color.valueOf("ff0000") },
@@ -138,41 +137,56 @@ public class SkinNoteDistributionGraph extends SkinObject {
 			int count = 0;
 			max = 20;
 			for (TimeLine tl : model.getAllTimeLines()) {
+				if(tl.getTime() / 1000 >= data.length) {
+					break;
+				}
 				if (tl.getTime() / 1000 != pos) {
 					if (max < count) {
 						max = Math.min((count / 10) * 10 + 10, 100);
 					}
 					pos = tl.getTime() / 1000;
-					count = 0;
+					count = type == TYPE_NORMAL ? data[tl.getTime() / 1000][1] + data[tl.getTime() / 1000][4] : 0;
 				}
 				for (int i = 0; i < model.getMode().key; i++) {
 					Note n = tl.getNote(i);
-					if (n != null && !(model.getLntype() == BMSModel.LNTYPE_LONGNOTE && n instanceof LongNote
-							&& ((LongNote) n).isEnd())) {
-						int st = n.getState();
-						int t = n.getPlayTime();
+					if (n != null) {
+						final int st = n.getState();
+						final int t = n.getPlayTime();
 						switch (type) {
 						case TYPE_NORMAL:
 							if (n instanceof NormalNote) {
-								data[tl.getTime() / 1000][model.getMode().isScratchKey(i) ? 1 : 3]++;
+								data[tl.getTime() / 1000][model.getMode().isScratchKey(i) ? 2 : 5]++;
+								count++;
 							}
 							if (n instanceof LongNote) {
-								data[tl.getTime() / 1000][model.getMode().isScratchKey(i) ? 0 : 2]++;
+								if(!((LongNote)n).isEnd()) {
+									for(int index = tl.getTime() / 1000;index <= ((LongNote)n).getPair().getTime() / 1000;index++) {
+										data[index][model.getMode().isScratchKey(i) ? 1 : 4]++;
+									}
+									count++;
+								}
+								if((model.getLntype() == BMSModel.LNTYPE_LONGNOTE && n instanceof LongNote
+										&& ((LongNote) n).isEnd())) {
+									data[tl.getTime() / 1000][model.getMode().isScratchKey(i) ? 0 : 3]++;
+									data[tl.getTime() / 1000][model.getMode().isScratchKey(i) ? 1 : 4]--;									
+								}
 							}
 							if (n instanceof MineNote) {
-								data[tl.getTime() / 1000][4]++;
+								data[tl.getTime() / 1000][6]++;
+								count++;
 							}
-							count++;
 							break;
 						case TYPE_JUDGE:
-							if (n instanceof MineNote) {
+							if (n instanceof MineNote || (model.getLntype() == BMSModel.LNTYPE_LONGNOTE && n instanceof LongNote
+									&& ((LongNote) n).isEnd())) {
 								break;
 							}
 							data[tl.getTime() / 1000][st]++;
 							count++;
 							break;
 						case TYPE_EARLYLATE:
-							if (n instanceof MineNote) {
+							if (n instanceof MineNote || (model.getLntype() == BMSModel.LNTYPE_LONGNOTE && n instanceof LongNote
+							&& ((LongNote) n).isEnd())) {
 								break;
 							}
 							if (st <= 1) {
@@ -182,8 +196,7 @@ public class SkinNoteDistributionGraph extends SkinObject {
 							}
 							count++;
 							break;
-
-						}
+						}							 
 					}
 				}
 			}

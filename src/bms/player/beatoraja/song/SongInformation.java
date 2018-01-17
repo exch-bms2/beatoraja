@@ -39,7 +39,7 @@ public class SongInformation {
 	 */
 	private String distribution;
 	
-	private int[][] distributionValues = new int[0][5];
+	private int[][] distributionValues = new int[0][7];
 
 	public SongInformation() {
 		
@@ -52,7 +52,7 @@ public class SongInformation {
 		ls = model.getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH);
 		total = model.getTotal();
 		
-		int[][] data = new int[model.getLastTime() / 1000 + 2][5];
+		int[][] data = new int[model.getLastTime() / 1000 + 2][7];
 		int pos = 0;
 		int border = (int) (model.getTotalNotes() * (1.0 - 100.0 / model.getTotal()));
 		int borderpos = 0;
@@ -62,21 +62,30 @@ public class SongInformation {
 			}
 			for (int i = 0; i < model.getMode().key; i++) {
 				Note n = tl.getNote(i);
-				if (n != null && !(model.getLntype() == BMSModel.LNTYPE_LONGNOTE && n instanceof LongNote
-						&& ((LongNote) n).isEnd())) {
-					if (n instanceof NormalNote) {
-						data[tl.getTime() / 1000][model.getMode().isScratchKey(i) ? 1 : 3]++;
+				if (n != null) {
+					if(n instanceof LongNote && !((LongNote)n).isEnd()) {
+						for(int index = tl.getTime() / 1000;index <= ((LongNote)n).getPair().getTime() / 1000;index++) {
+							data[index][model.getMode().isScratchKey(i) ? 1 : 4]++;
+						}
 					}
-					if (n instanceof LongNote) {
-						data[tl.getTime() / 1000][model.getMode().isScratchKey(i) ? 0 : 2]++;
-					}
-					if (n instanceof MineNote) {
-						data[tl.getTime() / 1000][4]++;
-					}
-					
-					border--;
-					if(border == 0) {
-						borderpos = pos;
+
+					if(!(model.getLntype() == BMSModel.LNTYPE_LONGNOTE && n instanceof LongNote
+							&& ((LongNote) n).isEnd())) {
+						if (n instanceof NormalNote) {
+							data[tl.getTime() / 1000][model.getMode().isScratchKey(i) ? 2 : 5]++;
+						}
+						if (n instanceof LongNote) {
+							data[tl.getTime() / 1000][model.getMode().isScratchKey(i) ? 0 : 3]++;
+							data[tl.getTime() / 1000][model.getMode().isScratchKey(i) ? 1 : 4]--;
+						}
+						if (n instanceof MineNote) {
+							data[tl.getTime() / 1000][6]++;
+						}
+						
+						border--;
+						if(border == 0) {
+							borderpos = pos;
+						}						
 					}
 				}
 			}
@@ -87,7 +96,7 @@ public class SongInformation {
 		for(int i = borderpos;i < data.length - d;i++) {
 			int notes = 0;
 			for(int j = 0;j < d;j++) {
-				notes += data[i + j][0] + data[i + j][1] + data[i + j][2] + data[i + j][3];
+				notes += data[i + j][0] + data[i + j][2] + data[i + j][3] + data[i + j][5];
 			}
 			density = Math.max(density, ((double)notes) / d);
 		}
@@ -100,10 +109,15 @@ public class SongInformation {
 
 	public void setDistribution(String distribution) {
 		this.distribution = distribution;
-		distributionValues = new int[distribution.length() / 10][5];
-		for(int i = 0;i < distribution.length() / 10;i++) {
-			for(int j = 0;j < 5;j++) {
-				distributionValues[i][j] = parseInt36(distribution, i * 10 + j * 2);
+		int[] index = {0,2,3,5,6};
+		if(distribution.startsWith("#")) {
+			index = new int[]{0,1,2,3,4,5,6};
+			distribution = distribution.substring(1);
+		}
+		distributionValues = new int[distribution.length() / (index.length * 2)][7];
+		for(int i = 0;i < distribution.length() / (index.length * 2);i++) {
+			for(int j = 0;j < index.length;j++) {
+				distributionValues[i][index[j]] = parseInt36(distribution, i * (index.length * 2) + j * 2);
 			}
 		}
 		
@@ -115,9 +129,10 @@ public class SongInformation {
 
 	public void setDistributionValues(int[][] values) {
 		distributionValues = values;
-		StringBuilder sb = new StringBuilder(values.length * 10);
+		StringBuilder sb = new StringBuilder(values.length * 14 + 1);
+		sb.append("#");
 		for(int i = 0;i < values.length;i++) {
-			for(int j = 0;j < 5;j++) {
+			for(int j = 0;j < 7;j++) {
 				int value = Math.min(distributionValues[i][j], 36 * 36 - 1);
 				int val1 = value / 36;
 				sb.append((char) (val1 >= 10 ? val1 - 10 + 'a' : val1 + '0'));
