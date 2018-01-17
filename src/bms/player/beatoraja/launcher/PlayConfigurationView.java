@@ -762,6 +762,7 @@ public class PlayConfigurationView implements Initializable {
 		audioTab.setDisable(true);
 		inputTab.setDisable(true);
 		resourceTab.setDisable(true);
+		skinTab.setDisable(true);
 		optionTab.setDisable(true);
 		otherTab.setDisable(true);
 		irTab.setDisable(true);

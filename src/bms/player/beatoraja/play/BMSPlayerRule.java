@@ -9,9 +9,9 @@ import bms.model.Mode;
  */
 public enum BMSPlayerRule {
 
-    BEAT_5K(GaugeProperty.FIVEKEYS, JudgeProperty.FIVEKEYS),
+    BEAT_5K(GaugeProperty.SEVENKEYS, JudgeProperty.SEVENKEYS),
     BEAT_7K(GaugeProperty.SEVENKEYS, JudgeProperty.SEVENKEYS),
-    BEAT_10K(GaugeProperty.FIVEKEYS, JudgeProperty.FIVEKEYS),
+    BEAT_10K(GaugeProperty.SEVENKEYS, JudgeProperty.SEVENKEYS),
     BEAT_14K(GaugeProperty.SEVENKEYS, JudgeProperty.SEVENKEYS),
     POPN_5K(GaugeProperty.PMS, JudgeProperty.PMS),
     POPN_9K(GaugeProperty.PMS, JudgeProperty.PMS),
