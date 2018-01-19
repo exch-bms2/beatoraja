@@ -56,6 +56,20 @@ public interface IRConnection {
 	 */
 	public IRResponse<Object> sendPlayData(BMSModel model, IRScoreData score);
 	
+	/**
+	 * 楽曲のURLを取得する
+	 * @param model 譜面データ
+	 * @return
+	 */
+	public String getSongURL(BMSModel model);
+
+	/**
+	 * プレイヤーURLを取得する
+	 * @param id ユーザーID
+	 * @return
+	 */
+	public String getPlayerURL(String id);
+	
 	public static String[] getAllAvailableIRConnectionName() {
 		Class[] irclass = getAllAvailableIRConnection();
 		String[] names = new String[irclass.length];
