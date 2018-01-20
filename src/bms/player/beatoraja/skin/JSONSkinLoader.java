@@ -22,6 +22,8 @@ import bms.player.beatoraja.result.*;
 import bms.player.beatoraja.select.MusicSelectSkin;
 import bms.player.beatoraja.select.SkinBar;
 import bms.player.beatoraja.select.SkinDistributionGraph;
+import bms.player.beatoraja.skin.SkinObject.SkinOffset;
+
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.reflect.ClassReflection;
 import com.badlogic.gdx.utils.reflect.Field;
@@ -278,6 +280,17 @@ public class JSONSkinLoader extends SkinLoader{
 								SkinNumber num = new SkinNumber(pn, mn, value.timer, value.cycle, value.digit, 0,
 										value.ref);
 								num.setAlign(value.align);
+								if(value.offset != null) {
+									SkinOffset[] offsets = new SkinOffset[value.offset.length];
+									for(int i = 0;i < offsets.length;i++) {
+										offsets[i] = new SkinOffset();
+										offsets[i].x = value.offset[i].x;
+										offsets[i].y = value.offset[i].y;
+										offsets[i].w = value.offset[i].w;
+										offsets[i].h = value.offset[i].h;
+									}
+									num.setOffsets(offsets);									
+								}
 								obj = num;
 							} else {
 								int d = images.length % 10 == 0 ? 10 : 11;
@@ -292,6 +305,17 @@ public class JSONSkinLoader extends SkinLoader{
 								SkinNumber num = new SkinNumber(nimages, value.timer, value.cycle, value.digit,
 										d > 10 ? 2 : value.padding, value.ref);
 								num.setAlign(value.align);
+								if(value.offset != null) {
+									SkinOffset[] offsets = new SkinOffset[value.offset.length];
+									for(int i = 0;i < offsets.length;i++) {
+										offsets[i] = new SkinOffset();
+										offsets[i].x = value.offset[i].x;
+										offsets[i].y = value.offset[i].y;
+										offsets[i].w = value.offset[i].w;
+										offsets[i].h = value.offset[i].h;
+									}
+									num.setOffsets(offsets);									
+								}
 								obj = num;
 							}
 							break;
@@ -550,6 +574,18 @@ public class JSONSkinLoader extends SkinLoader{
 										numbers[i] = new SkinNumber(nimages, value.timer, value.cycle, value.digit,
 												d > 10 ? 2 : 0, value.ref);
 										numbers[i].setAlign(2);
+										if(value.offset != null) {
+											SkinOffset[] offsets = new SkinOffset[value.offset.length];
+											for(int j = 0;j < offsets.length;j++) {
+												offsets[j] = new SkinOffset();
+												offsets[j].x = value.offset[j].x;
+												offsets[j].y = value.offset[j].y;
+												offsets[j].w = value.offset[j].w;
+												offsets[j].h = value.offset[j].h;
+											}
+											numbers[i].setOffsets(offsets);									
+										}
+
 										for(Animation ani : judge.numbers[i].dst) {
 											ani.x -= ani.w * value.digit / 2;
 										}
@@ -972,6 +1008,7 @@ public class JSONSkinLoader extends SkinLoader{
 		public int digit;
 		public int padding;
 		public int ref;
+		public Value[] offset;
 	}
 
 	public static class Text {
