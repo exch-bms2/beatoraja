@@ -57,7 +57,7 @@ public class JudgeManager {
 	/**
 	 * 判定差時間(ms , +は早押しで-は遅押し)
 	 */
-	private int judgefast;
+	private int[] judgefast;
 	/**
 	 * 処理中のLN
 	 */
@@ -126,6 +126,7 @@ public class JudgeManager {
 		prevtime = 0;
 		judgenow = new int[((PlaySkin) main.getSkin()).getJudgeregion()];
 		judgecombo = new int[((PlaySkin) main.getSkin()).getJudgeregion()];
+		judgefast = new int[((PlaySkin) main.getSkin()).getJudgeregion()];
 		score = new IRScoreData(model.getMode());
 		score.setNotes(model.getTotalNotes());
 		score.setSha256(model.getSHA256());
@@ -553,8 +554,6 @@ public class JudgeManager {
 		n.setPlayTime(fast);
 		score.addJudgeCount(judge, fast >= 0, 1);
 		
-		judgefast = fast;
-		
 		if (combocond[judge] && judge < 5) {
 			combo++;
 			score.setCombo(Math.max(score.getCombo(), combo));
@@ -582,11 +581,12 @@ public class JudgeManager {
 			main.getTimer()[COMBO_TIMER[lane / (lanelength / judgenow.length)]] = main.getNowTime();
 			judgenow[lane / (lanelength / judgenow.length)] = judge + 1;
 			judgecombo[lane / (lanelength / judgenow.length)] = main.getJudgeManager().getCourseCombo();
+			judgefast[lane / (lanelength / judgenow.length)] = fast;
 		}
 		main.update(lane, judge, time, fast);
 	}
 
-	public int getRecentJudgeTiming() {
+	public int[] getRecentJudgeTiming() {
 		return judgefast;
 	}
 
