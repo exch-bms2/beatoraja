@@ -105,6 +105,10 @@ public class JudgeManager {
 	private boolean[] combocond;
 	
 	private MissCondition miss;
+	/**
+     * 各判定毎のノートの判定を消失するかどうか。PG, GR, GD, BD, PR, MSの順
+     */
+    private boolean[] judgeVanish;
 
 	private int prevtime;
 
@@ -137,6 +141,7 @@ public class JudgeManager {
 		JudgeProperty rule = BMSPlayerRule.getBMSPlayerRule(model.getMode()).judge;
 		combocond = rule.combo;
 		miss = rule.miss;
+		judgeVanish = rule.judgeVanish;
 
 		keyassign = main.getLaneProperty().getKeyLaneAssign();
 		offset = main.getLaneProperty().getLaneSkinOffset();
@@ -166,8 +171,8 @@ public class JudgeManager {
 				constraint = 1;
 			}
 		}
-		njudge = rule.getNoteJudge(judgerank, constraint);
-		cnendjudge = rule.getLongNoteEndJudge(judgerank, constraint);
+		njudge = rule.getNoteJudge(judgerank, constraint, model.getMode() == Mode.POPN_9K);
+		cnendjudge = rule.getLongNoteEndJudge(judgerank, constraint, model.getMode() == Mode.POPN_9K);
 		sjudge = rule.getScratchJudge(judgerank, constraint);
 		scnendjudge = rule.getLongScratchEndJudge(judgerank, constraint);
 		judgestart = judgeend = 0;
@@ -545,7 +550,7 @@ public class JudgeManager {
 	private final int[] COMBO_TIMER = { TIMER_COMBO_1P, TIMER_COMBO_2P, TIMER_COMBO_3P };
 
 	private void update(int lane, Note n, int time, int judge, int fast) {
-		if (judge < 5) {
+		if (judgeVanish[judge]) {
 			n.setState(judge + 1);
 		}
 		if(miss == MissCondition.ONE && judge == 4 && n.getPlayTime() != 0) {

@@ -76,8 +76,13 @@ public class NoteShuffleModifier extends PatternModifier {
 				switch (type) {
 				case S_RANDOM:
 					keys = getKeys(mode, false);
-					random = keys.length > 0 ? timeBasedShuffle(keys, ln, notes, lastNoteTime, tl.getTime(), 40)
-							: keys;
+					if(mode == Mode.POPN_9K) {
+						random = keys.length > 0 ? timeBasedShuffle(keys, ln, notes, lastNoteTime, tl.getTime(), 0)
+								: keys;
+					} else {
+						random = keys.length > 0 ? timeBasedShuffle(keys, ln, notes, lastNoteTime, tl.getTime(), 40)
+								: keys;
+					}
 					break;
 				case SPIRAL:
 					keys = getKeys(mode, false);

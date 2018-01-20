@@ -155,7 +155,20 @@ public class PlayerResource {
 			generator = decoder.getBMSGenerator();
 			// JUDGERANKをbmson互換に変換
 			if (model.getJudgerank() >= 0 && model.getJudgerank() < 5) {
-				final int[] judgetable = { 40, 60, 80, 100, 120 };
+				int[] judgetable = new int[5];
+				if(model.getMode() == Mode.POPN_9K) {
+					judgetable[0] = 33;
+					judgetable[1] = 50;
+					judgetable[2] = 70;
+					judgetable[3] = 100;
+					judgetable[4] = 133;
+				} else {
+					judgetable[0] = 40;
+					judgetable[1] = 60;
+					judgetable[2] = 80;
+					judgetable[3] = 100;
+					judgetable[4] = 120;
+				}
 				model.setJudgerank(judgetable[model.getJudgerank()]);
 			} else if (model.getJudgerank() < 0) {
 				model.setJudgerank(100);
