@@ -17,10 +17,7 @@ import bms.player.beatoraja.skin.SkinType;
 
 public class CourseResult extends MainState {
 
-	private int oldclear;
-	private int oldexscore;
-	private int oldmisscount;
-	private int oldcombo;
+	private IRScoreData oldscore = new IRScoreData();
 
 	/**
 	 * 状態
@@ -79,53 +76,8 @@ public class CourseResult extends MainState {
 		// リプレイの自動保存
 		if(resource.getAutoplay() == 0){
 			for(int i=0;i<replay;i++){
-				/*
-				 * コンフィグ値:0=保存しない 1=スコア更新時 2=スコアが自己ベスト以上 3=BP更新時 4=BPが自己ベスト以下
-				 * 5=COMBO更新時 6=COMBOが自己ベスト以上 7=ランプ更新時 8=ランプが自己ベスト以上 9=何か更新した時 10=毎回
-				 */
-				switch(resource.getConfig().getAutoSaveReplay()[i]){
-				case 0:
-					break;
-				case 1:
-					if(newscore.getExscore() > oldexscore)
-						saveReplayData(i);
-					break;
-				case 2:
-					if(newscore.getExscore() >= oldexscore)
-						saveReplayData(i);
-					break;
-				case 3:
-					if(newscore.getMinbp() < oldmisscount || oldclear == NoPlay.id)
-						saveReplayData(i);
-					break;
-				case 4:
-					if(newscore.getMinbp() <= oldmisscount || oldclear == NoPlay.id)
-						saveReplayData(i);
-					break;
-				case 5:
-					if(newscore.getCombo() > oldcombo)
-						saveReplayData(i);
-					break;
-				case 6:
-					if(newscore.getCombo() >= oldcombo)
-						saveReplayData(i);
-					break;
-				case 7:
-					if(newscore.getClear() > oldclear)
-						saveReplayData(i);
-					break;
-				case 8:
-					if(newscore.getClear() >= oldclear)
-						saveReplayData(i);
-					break;
-				case 9:
-					if(newscore.getClear() > oldclear || newscore.getCombo() > oldcombo||
-						newscore.getMinbp() < oldmisscount || newscore.getExscore() > oldexscore)
-						saveReplayData(i);
-					break;
-				case 10:
-						saveReplayData(i);
-					break;
+				if(MusicResult.ReplayAutoSaveConstraint.get(resource.getConfig().getAutoSaveReplay()[i]).isQualified(oldscore ,newscore)) {
+					saveReplayData(i);
 				}
 			}
 		}
@@ -226,15 +178,11 @@ public class CourseResult extends MainState {
 		}
 		IRScoreData score = getMainController().getPlayDataAccessor().readScoreData(models,
 				config.getLnmode(), random, resource.getConstraint());
-		if (score == null) {
-			score = new IRScoreData();
+		if (score != null) {
+			oldscore = score;
 		}
-		oldclear = score.getClear();
-		oldexscore = score.getExscore();
-		oldmisscount = score.getMinbp();
-		oldcombo = score.getCombo();
 
-		getScoreDataProperty().setTargetScore(oldexscore, resource.getRivalScoreData(), resource.getBMSModel().getTotalNotes());
+		getScoreDataProperty().setTargetScore(oldscore.getExscore(), resource.getRivalScoreData(), resource.getBMSModel().getTotalNotes());
 		getScoreDataProperty().update(newscore);
 
 		getMainController().getPlayDataAccessor().writeScoreDara(newscore, models, config.getLnmode(),
@@ -349,34 +297,34 @@ public class CourseResult extends MainState {
 				}
 				return Integer.MIN_VALUE;
 			case NUMBER_TARGET_CLEAR:
-				return oldclear;
+				return oldscore.getClear();
 			case NUMBER_TARGET_SCORE:
-				return oldexscore;
+				return oldscore.getExscore();
 			case NUMBER_SCORE:
 				if (resource.getCourseScoreData() != null) {
 					return resource.getCourseScoreData().getExscore();
 				}
 				return Integer.MIN_VALUE;
 			case NUMBER_DIFF_HIGHSCORE:
-				return resource.getCourseScoreData().getExscore() - oldexscore;
+				return resource.getCourseScoreData().getExscore() - oldscore.getExscore();
 			case NUMBER_MISSCOUNT:
 				if (resource.getCourseScoreData() != null) {
 					return resource.getCourseScoreData().getMinbp();
 				}
 				return Integer.MIN_VALUE;
 			case NUMBER_TARGET_MISSCOUNT:
-				if (oldmisscount == Integer.MAX_VALUE) {
+				if (oldscore.getMinbp() == Integer.MAX_VALUE) {
 					return Integer.MIN_VALUE;
 				}
-				return oldmisscount;
+				return oldscore.getMinbp();
 			case NUMBER_DIFF_MISSCOUNT:
-				if (oldmisscount == Integer.MAX_VALUE) {
+				if (oldscore.getMinbp() == Integer.MAX_VALUE) {
 					return Integer.MIN_VALUE;
 				}
-				return resource.getCourseScoreData().getMinbp() - oldmisscount;
+				return resource.getCourseScoreData().getMinbp() - oldscore.getMinbp();
 			case NUMBER_TARGET_MAXCOMBO:
-				if (oldcombo > 0) {
-					return oldcombo;
+				if (oldscore.getCombo() > 0) {
+					return oldscore.getCombo();
 				}
 				return Integer.MIN_VALUE;
 			case NUMBER_MAXCOMBO:
@@ -385,10 +333,10 @@ public class CourseResult extends MainState {
 				}
 				return Integer.MIN_VALUE;
 			case NUMBER_DIFF_MAXCOMBO:
-				if (oldcombo == 0) {
+				if (oldscore.getCombo() == 0) {
 					return Integer.MIN_VALUE;
 				}
-				return resource.getCourseScoreData().getCombo() - oldcombo;
+				return resource.getCourseScoreData().getCombo() - oldscore.getCombo();
 			case NUMBER_TOTALNOTES:
 				int notes = 0;
 				for (BMSModel model : resource.getCourseBMSModels()) {
@@ -426,17 +374,17 @@ public class CourseResult extends MainState {
 			case OPTION_RESULT_FAIL:
 				return score.getClear() == Failed.id;
 			case OPTION_UPDATE_SCORE:
-				return score.getExscore() > oldexscore;
+				return score.getExscore() > oldscore.getExscore();
 			case OPTION_DRAW_SCORE:
-				return score.getExscore() == oldexscore;
+				return score.getExscore() == oldscore.getExscore();
 			case OPTION_UPDATE_MAXCOMBO:
-				return score.getCombo() > oldcombo;
+				return score.getCombo() > oldscore.getCombo();
 			case OPTION_DRAW_MAXCOMBO:
-				return score.getCombo() == oldcombo;
+				return score.getCombo() == oldscore.getCombo();
 			case OPTION_UPDATE_MISSCOUNT:
-				return score.getMinbp() < oldmisscount;
+				return score.getMinbp() < oldscore.getMinbp();
 			case OPTION_DRAW_MISSCOUNT:
-				return score.getMinbp() == oldmisscount;
+				return score.getMinbp() == oldscore.getMinbp();
 			case OPTION_UPDATE_SCORERANK:
 				return getScoreDataProperty().getNowRate() > getScoreDataProperty().getBestScoreRate();
 			case OPTION_DRAW_SCORERANK:
@@ -487,7 +435,7 @@ public class CourseResult extends MainState {
 				}
 				return Integer.MIN_VALUE;
 			case NUMBER_TARGET_CLEAR:
-				return oldclear;
+				return oldscore.getClear();
 		}
 		return super.getImageIndex(id);
 	}

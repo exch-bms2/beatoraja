@@ -23,10 +23,7 @@ import bms.player.beatoraja.skin.SkinType;
  */
 public class MusicResult extends MainState {
 
-	private int oldclear;
-	private int oldexscore;
-	private int oldmisscount;
-	private int oldcombo;
+	private IRScoreData oldscore = new IRScoreData();
 
 	/**
 	 * 全ノーツの平均ズレ
@@ -77,53 +74,8 @@ public class MusicResult extends MainState {
 		// リプレイの自動保存
 		if(resource.getAutoplay() == 0){
 			for(int i=0;i<replay;i++){
-				/*
-				 * コンフィグ値:0=保存しない 1=スコア更新時 2=スコアが自己ベスト以上 3=BP更新時 4=BPが自己ベスト以下
-				 * 5=COMBO更新時 6=COMBOが自己ベスト以上 7=ランプ更新時 8=ランプが自己ベスト以上 9=何か更新した時 10=毎回
-				 */
-				switch(resource.getConfig().getAutoSaveReplay()[i]){
-				case 0:
-					break;
-				case 1:
-					if(resource.getScoreData().getExscore() > oldexscore)
-						saveReplayData(i);
-					break;
-				case 2:
-					if(resource.getScoreData().getExscore() >= oldexscore)
-						saveReplayData(i);
-					break;
-				case 3:
-					if(resource.getScoreData().getMinbp() < oldmisscount || oldclear == NoPlay.id)
-						saveReplayData(i);
-					break;
-				case 4:
-					if(resource.getScoreData().getMinbp() <= oldmisscount || oldclear == NoPlay.id)
-						saveReplayData(i);
-					break;
-				case 5:
-					if(resource.getScoreData().getCombo() > oldcombo)
-						saveReplayData(i);
-					break;
-				case 6:
-					if(resource.getScoreData().getCombo() >= oldcombo)
-						saveReplayData(i);
-					break;
-				case 7:
-					if(resource.getScoreData().getClear() > oldclear)
-						saveReplayData(i);
-					break;
-				case 8:
-					if(resource.getScoreData().getClear() >= oldclear)
-						saveReplayData(i);
-					break;
-				case 9:
-					if(resource.getScoreData().getClear() > oldclear || resource.getScoreData().getCombo() > oldcombo||
-						resource.getScoreData().getMinbp() < oldmisscount || resource.getScoreData().getExscore() > oldexscore)
-						saveReplayData(i);
-					break;
-				case 10:
-						saveReplayData(i);
-					break;
+				if(ReplayAutoSaveConstraint.get(resource.getConfig().getAutoSaveReplay()[i]).isQualified(oldscore, resource.getScoreData())) {
+					saveReplayData(i);
 				}
 			}
 		}
@@ -298,17 +250,13 @@ public class MusicResult extends MainState {
 			}
 			return;
 		}
-		IRScoreData score = getMainController().getPlayDataAccessor().readScoreData(resource.getBMSModel(),
+		IRScoreData oldsc = getMainController().getPlayDataAccessor().readScoreData(resource.getBMSModel(),
 				resource.getPlayerConfig().getLnmode());
-		if (score == null) {
-			score = new IRScoreData();
+		if (oldsc != null) {
+			oldscore = oldsc;
 		}
-		oldclear = score.getClear();
-		oldexscore = score.getExscore();
-		oldmisscount = score.getMinbp();
-		oldcombo = score.getCombo();
 
-		getScoreDataProperty().setTargetScore(oldexscore, resource.getRivalScoreData(), resource.getBMSModel().getTotalNotes());
+		getScoreDataProperty().setTargetScore(oldscore.getExscore(), resource.getRivalScoreData(), resource.getBMSModel().getTotalNotes());
 		getScoreDataProperty().update(newscore);
 		next = 0;
 		for (int i = 2; i < 9; i++) {
@@ -401,8 +349,8 @@ public class MusicResult extends MainState {
 					break;
 				case PlayerConfig.IR_SEND_UPDATE_SCORE:
 					IRScoreData current = resource.getScoreData();
-					send &= (current.getExscore() > oldexscore || current.getClear() > oldclear
-							|| current.getCombo() > oldcombo || current.getMinbp() < oldmisscount);
+					send &= (current.getExscore() > oldscore.getExscore() || current.getClear() > oldscore.getClear()
+							|| current.getCombo() > oldscore.getCombo() || current.getMinbp() < oldscore.getMinbp());
 					break;
 				}
 				
@@ -410,7 +358,6 @@ public class MusicResult extends MainState {
 					Logger.getGlobal().info("IRへスコア送信中");
 					setTimer(TIMER_IR_CONNECT_BEGIN, true);
 					state = STATE_IR_PROCESSING;
-					final IRScoreData oldscore = score;
 					Thread irprocess = new Thread() {
 
 						@Override
@@ -494,10 +441,10 @@ public class MusicResult extends MainState {
 			}
 			return Integer.MIN_VALUE;
 		case NUMBER_TARGET_CLEAR:
-			return oldclear;
+			return oldscore.getClear();
 		case NUMBER_HIGHSCORE:
 		case NUMBER_HIGHSCORE2:
-			return oldexscore;
+			return oldscore.getExscore();
 		case NUMBER_TARGET_SCORE:
 		case NUMBER_TARGET_SCORE2:
 			return resource.getRivalScoreData();
@@ -512,7 +459,7 @@ public class MusicResult extends MainState {
 			return Integer.MIN_VALUE;
 		case NUMBER_DIFF_HIGHSCORE:
 		case NUMBER_DIFF_HIGHSCORE2:
-			return resource.getScoreData().getExscore() - oldexscore;
+			return resource.getScoreData().getExscore() - oldscore.getExscore();
 		case NUMBER_DIFF_NEXTRANK:
 			return next;
 		case NUMBER_MISSCOUNT:
@@ -522,18 +469,18 @@ public class MusicResult extends MainState {
 			}
 			return Integer.MIN_VALUE;
 		case NUMBER_TARGET_MISSCOUNT:
-			if (oldmisscount == Integer.MAX_VALUE) {
+			if (oldscore.getMinbp() == Integer.MAX_VALUE) {
 				return Integer.MIN_VALUE;
 			}
-			return oldmisscount;
+			return oldscore.getMinbp();
 		case NUMBER_DIFF_MISSCOUNT:
-			if (oldmisscount == Integer.MAX_VALUE) {
+			if (oldscore.getMinbp() == Integer.MAX_VALUE) {
 				return Integer.MIN_VALUE;
 			}
-			return resource.getScoreData().getMinbp() - oldmisscount;
+			return resource.getScoreData().getMinbp() - oldscore.getMinbp();
 		case NUMBER_TARGET_MAXCOMBO:
-			if (oldcombo > 0) {
-				return oldcombo;
+			if (oldscore.getCombo() > 0) {
+				return oldscore.getCombo();
 			}
 			return Integer.MIN_VALUE;
 		case NUMBER_MAXCOMBO:
@@ -543,10 +490,10 @@ public class MusicResult extends MainState {
 			}
 			return Integer.MIN_VALUE;
 		case NUMBER_DIFF_MAXCOMBO:
-			if (oldcombo == 0) {
+			if (oldscore.getCombo() == 0) {
 				return Integer.MIN_VALUE;
 			}
-			return resource.getScoreData().getCombo() - oldcombo;
+			return resource.getScoreData().getCombo() - oldscore.getCombo();
 		case NUMBER_GROOVEGAUGE:
 			return (int) resource.getGauge().get(resource.getGauge().size - 1);
 			case NUMBER_AVERAGE_DURATION:
@@ -588,17 +535,17 @@ public class MusicResult extends MainState {
 			return score.getClear() == Failed.id
 					|| (cscore != null && cscore.getClear() == Failed.id);
 		case OPTION_UPDATE_SCORE:
-			return score.getExscore() > oldexscore;
+			return score.getExscore() > oldscore.getExscore();
 			case OPTION_DRAW_SCORE:
-				return score.getExscore() == oldexscore;
+				return score.getExscore() == oldscore.getExscore();
 		case OPTION_UPDATE_MAXCOMBO:
-			return score.getCombo() > oldcombo;
+			return score.getCombo() > oldscore.getCombo();
 			case OPTION_DRAW_MAXCOMBO:
-				return score.getCombo() == oldcombo;
+				return score.getCombo() == oldscore.getCombo();
 		case OPTION_UPDATE_MISSCOUNT:
-			return score.getMinbp() < oldmisscount;
+			return score.getMinbp() < oldscore.getMinbp();
 			case OPTION_DRAW_MISSCOUNT:
-				return score.getMinbp() == oldmisscount;
+				return score.getMinbp() == oldscore.getMinbp();
 		case OPTION_UPDATE_SCORERANK:
 			return getScoreDataProperty().getNowRate() > getScoreDataProperty().getBestScoreRate();
 			case OPTION_DRAW_SCORERANK:
@@ -648,7 +595,7 @@ public class MusicResult extends MainState {
 				}
 				return Integer.MIN_VALUE;
 			case NUMBER_TARGET_CLEAR:
-				return oldclear;
+				return oldscore.getClear();
 		}
 		return super.getImageIndex(id);
 	}
@@ -670,4 +617,83 @@ public class MusicResult extends MainState {
 		}
 	}
 
+	public enum ReplayAutoSaveConstraint {
+
+		NOTHING {
+			@Override
+			public boolean isQualified(IRScoreData oldscore, IRScoreData newscore) {
+				return false;
+			}
+		},
+		SCORE_UPDATE {
+			@Override
+			public boolean isQualified(IRScoreData oldscore, IRScoreData newscore) {
+				return newscore.getExscore() > oldscore.getExscore();
+			}
+		},
+		SCORE_UPDATE_OR_EQUAL {
+			@Override
+			public boolean isQualified(IRScoreData oldscore, IRScoreData newscore) {
+				return newscore.getExscore() >= oldscore.getExscore();
+			}
+		},
+		MISSCOUNT_UPDATE {
+			@Override
+			public boolean isQualified(IRScoreData oldscore, IRScoreData newscore) {
+				return newscore.getMinbp() < oldscore.getMinbp() || oldscore.getClear() == NoPlay.id;
+			}
+		},
+		MISSCOUNT_UPDATE_OR_EQUAL {
+			@Override
+			public boolean isQualified(IRScoreData oldscore, IRScoreData newscore) {
+				return newscore.getMinbp() <= oldscore.getMinbp() || oldscore.getClear() == NoPlay.id;
+			}
+		},
+		MAXCOMBO_UPDATE {
+			@Override
+			public boolean isQualified(IRScoreData oldscore, IRScoreData newscore) {
+				return newscore.getCombo() > oldscore.getCombo();
+			}
+		},
+		MAXCOMBO_UPDATE_OR_EQUAL {
+			@Override
+			public boolean isQualified(IRScoreData oldscore, IRScoreData newscore) {
+				return newscore.getCombo() >= oldscore.getCombo();
+			}
+		},
+		CLEAR_UPDATE {
+			@Override
+			public boolean isQualified(IRScoreData oldscore, IRScoreData newscore) {
+				return newscore.getClear() > oldscore.getClear();
+			}
+		},
+		CLEAR_UPDATE_OR_EQUAL {
+			@Override
+			public boolean isQualified(IRScoreData oldscore, IRScoreData newscore) {
+				return newscore.getClear() >= oldscore.getClear();
+			}
+		},
+		ANYONE_UPDATE {
+			@Override
+			public boolean isQualified(IRScoreData oldscore, IRScoreData newscore) {
+				return newscore.getClear() > oldscore.getClear() || newscore.getCombo() > oldscore.getCombo() ||
+						newscore.getMinbp() < oldscore.getMinbp() || newscore.getExscore() > oldscore.getExscore();
+			}
+		},
+		ALWAYS {
+			@Override
+			public boolean isQualified(IRScoreData oldscore, IRScoreData newscore) {
+				return true;
+			}
+		};
+
+		public abstract boolean isQualified(IRScoreData oldscore, IRScoreData newscore);
+
+		public static ReplayAutoSaveConstraint get(int index) {
+			if(index < 0 || index >= values().length) {
+				return NOTHING;
+			}
+			return values()[index];
+		}
+	}
 }
