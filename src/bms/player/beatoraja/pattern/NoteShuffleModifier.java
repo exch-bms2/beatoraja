@@ -51,6 +51,11 @@ public class NoteShuffleModifier extends PatternModifier {
 		this.type = type;
 	}
 
+	/**
+	 * 連打回数(PMS ALLSCR用)
+	 */
+	private static int[] laneRendaCount;
+
 	@Override
 	public List<PatternModifyLog> modify(BMSModel model) {
 		List<PatternModifyLog> log = new ArrayList<PatternModifyLog>();
@@ -64,6 +69,8 @@ public class NoteShuffleModifier extends PatternModifier {
 		Arrays.fill(ln, -1);
 		Arrays.fill(lastNoteTime, -100);
 		Arrays.fill(endLnNoteTime, -1);
+		laneRendaCount = new int[lanes];
+		Arrays.fill(laneRendaCount, 0);
 		for (TimeLine tl : model.getAllTimeLines()) {
 			if (tl.existNote() || tl.existHiddenNote()) {
 				Note[] notes = new Note[lanes];
@@ -125,6 +132,12 @@ public class NoteShuffleModifier extends PatternModifier {
 
 					break;
 				case ALL_SCR:
+					if(mode == Mode.POPN_9K) {
+						keys = getKeys(mode, false);
+						random = keys.length > 0 ? rendaShuffle(keys, ln, notes, lastNoteTime, tl.getTime(), 125, 60)
+								: keys;
+						break;
+					}
 					// スクラッチレーンが無いなら何もしない
 					if (mode.scratchKey.length == 0) {
 						break;
@@ -537,6 +550,116 @@ public class NoteShuffleModifier extends PatternModifier {
 			int r = (int) (Math.random() * noAssignedLane.size());
 			result[noAssignedLane.get(r)] = otherLane.get(0);
 			noAssignedLane.remove(r);
+			otherLane.remove(0);
+		}
+
+		return result;
+	}
+
+	// duration2[ms]時間未満の縦連打を出来るだけ避けつつduration1[ms]時間未満の縦連打が出来るだけ長く発生するようにshuffleをかける
+	private static int[] rendaShuffle(int[] keys, int[] activeln,
+			Note[] notes, int[] lastNoteTime, int now, int duration1, int duration2) {
+		List<Integer> assignLane = new ArrayList<Integer>(keys.length);
+		List<Integer> originalLane = new ArrayList<Integer>(keys.length);
+		for (int key : keys) {
+			assignLane.add(key);
+			originalLane.add(key);
+		}
+		int max = 0;
+		for (int key : keys) {
+			max = Math.max(max, key);
+		}
+		int[] result = new int[max + 1];
+		for (int i = 0; i < result.length; i++) {
+			result[i] = i;
+		}
+
+		// LNがアクティブなレーンをアサインしてから除外
+		for (int lane = 0; lane < keys.length; lane++) {
+			if (activeln != null && activeln[keys[lane]] != -1) {
+				result[keys[lane]] = activeln[keys[lane]];
+				assignLane.remove((Integer) keys[lane]);
+				originalLane.remove((Integer) activeln[keys[lane]]);
+			}
+		}
+		List<Integer> noteLane, otherLane;
+		noteLane = new ArrayList<Integer>(keys.length);
+		otherLane = new ArrayList<Integer>(keys.length);
+
+		// 元のレーンをノーツの存在で分類
+		while (!originalLane.isEmpty()) {
+			if (notes[originalLane.get(0)] != null && (notes[originalLane.get(0)] instanceof NormalNote || notes[originalLane.get(0)] instanceof LongNote)) {
+				noteLane.add(originalLane.get(0));
+			} else {
+				otherLane.add(originalLane.get(0));
+			}
+			originalLane.remove(0);
+		}
+
+		// 未アサインレーンを縦連打発生かどうかで分類
+		List<Integer> rendaLane,mainRendaLane, noRendaLane;
+		rendaLane = new ArrayList<Integer>(keys.length);
+		mainRendaLane = new ArrayList<Integer>(keys.length);
+		noRendaLane = new ArrayList<Integer>(keys.length);
+		while (!assignLane.isEmpty()) {
+			if (now - lastNoteTime[assignLane.get(0)] < duration2) {
+				rendaLane.add(assignLane.get(0));
+			} else if(now - lastNoteTime[assignLane.get(0)] < duration1) {
+				mainRendaLane.add(assignLane.get(0));
+			} else {
+				noRendaLane.add(assignLane.get(0));
+			}
+			assignLane.remove(0);
+		}
+
+		// ノーツがあるレーンを縦連打が発生するレーンに長い順に配置
+		while (!(noteLane.isEmpty() || mainRendaLane.isEmpty())) {
+			int maxRenda = Integer.MIN_VALUE;
+			int r;
+			for (int i = 0; i < mainRendaLane.size(); i++) {
+				if (maxRenda < laneRendaCount[mainRendaLane.get(i)]) {
+					maxRenda = laneRendaCount[mainRendaLane.get(i)];
+				}
+			}
+			ArrayList<Integer> maxLane = new ArrayList<Integer>(mainRendaLane.size());
+			for (int i = 0; i < mainRendaLane.size(); i++) {
+				if (maxRenda == laneRendaCount[mainRendaLane.get(i)]) {
+					maxLane.add(mainRendaLane.get(i));
+				}
+			}
+			r = (int) (Math.random() * maxLane.size());
+			result[maxLane.get(r)] = noteLane.get(0);
+			laneRendaCount[maxLane.get(r)]++;
+			mainRendaLane.remove((Integer) maxLane.get(r));
+			noteLane.remove(0);
+		}
+
+		// noteLaneが空でなかったら残りのノートを縦連打にならないレーンからランダムに置いていく
+		while (!(noteLane.isEmpty() || noRendaLane.isEmpty())) {
+			int r = (int) (Math.random() * noRendaLane.size());
+			result[noRendaLane.get(r)] = noteLane.get(0);
+			laneRendaCount[noRendaLane.get(r)] = 0;
+			noRendaLane.remove(r);
+			noteLane.remove(0);
+		}
+
+		// noteLaneが空でなかったら残りのノートをランダムに置いていく
+		while (!(noteLane.isEmpty() || rendaLane.isEmpty())) {
+			int r = (int) (Math.random() * rendaLane.size());
+			result[rendaLane.get(r)] = noteLane.get(0);
+			laneRendaCount[rendaLane.get(r)]++;
+			rendaLane.remove(r);
+			noteLane.remove(0);
+		}
+
+		// 残りをランダムに置いていく
+		noRendaLane.addAll(rendaLane);
+		noRendaLane.addAll(mainRendaLane);
+		while (!otherLane.isEmpty()) {
+			int r = (int) (Math.random() * noRendaLane.size());
+			result[noRendaLane.get(r)] = otherLane.get(0);
+			if(rendaLane.indexOf(noRendaLane.get(r)) == -1) laneRendaCount[noRendaLane.get(r)] = 0;
+			noRendaLane.remove(r);
 			otherLane.remove(0);
 		}
 
