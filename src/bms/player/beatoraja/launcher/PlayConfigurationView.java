@@ -839,7 +839,7 @@ public class PlayConfigurationView implements Initializable {
 			SongDatabaseAccessor songdb = new SQLiteSongDatabaseAccessor(Paths.get("songdata.db").toString(),
 					config.getBmsroot());
 			String player = "player1";
-			ScoreDatabaseAccessor scoredb = new ScoreDatabaseAccessor("player/" + player + "/scorelog.db");
+			ScoreDatabaseAccessor scoredb = new ScoreDatabaseAccessor("player/" + player + "/score.db");
 			scoredb.createTable();
 
 			try (Connection con = DriverManager.getConnection("jdbc:sqlite:" + dir.getPath())) {

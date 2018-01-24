@@ -402,9 +402,8 @@ public class JudgeManager {
 						this.judge[player[lane]][offset[lane]] = 0;
 						
 						// 空POOR判定がないときのキー音処理
-						Note n = null;
-						boolean sound = false;
-						
+						final Note[] notes = lanemodel.getNotes();
+						Note n = notes.length > 0 ? notes[0] : null;
 						for(Note note : lanemodel.getHiddens()) {
 							if(note.getTime() >= ptime) {
 								break;
@@ -412,21 +411,19 @@ public class JudgeManager {
 							n = note;
 						}
 						
-						for(Note note : lanemodel.getNotes()) {
+						for(Note note : notes) {
+							if(note.getTime() >= ptime) {
+								break;
+							}
 							if ((n == null || n.getTime() <= note.getTime()) 
 									&& !(note instanceof LongNote && note.getState() != 0)) {
 								n = note;
 							}
-							if (n != null && note.getTime() >= ptime) {
-								main.play(n, config.getKeyvolume(), 0);
-								sound = true;
-								break;
-							}							
 						}
 						
-						if (!sound && n != null) {
+						if (n != null) {
 							main.play(n, config.getKeyvolume(), 0);
-						}
+						}							
 					}
 				}
 			} else {

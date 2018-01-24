@@ -1,14 +1,10 @@
 package bms.player.beatoraja.skin;
 
 import bms.player.beatoraja.MainState;
-import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
-
-import static bms.player.beatoraja.skin.SkinProperty.*;
 
 /**
  * スキンイメージ
@@ -50,7 +46,8 @@ public class SkinImage extends SkinObject {
 
 	public SkinImage(SkinSourceMovie image) {
 		this.image = new SkinSource[1];
-		this.image[0] = image;		
+		this.image[0] = image;
+		this.setImageType(SkinObjectRenderer.TYPE_FFMPEG);
 	}
 
 	public TextureRegion getImage(int value, long time, MainState state) {
