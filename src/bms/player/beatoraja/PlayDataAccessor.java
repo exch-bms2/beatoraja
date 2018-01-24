@@ -14,9 +14,11 @@ import bms.model.TimeLine;
 import static bms.player.beatoraja.ClearType.*;
 import static bms.player.beatoraja.CourseData.CourseDataConstraint.*;
 
+import bms.player.beatoraja.IRScoreData.SongTrophy;
 import bms.player.beatoraja.ScoreLogDatabaseAccessor.ScoreLog;
 import bms.player.beatoraja.song.SongData;
 
+import com.badlogic.gdx.utils.CharArray;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter.OutputType;
 import com.badlogic.gdx.utils.StringBuilder;
@@ -30,6 +32,7 @@ public class PlayDataAccessor {
 
 	// TODO スコアハッシュを付与するかどうかの判定(前のスコアハッシュの正当性を確認できなかった時)
 	// TODO リプレイ暗号、復号化
+	// TODO BATTLEは別ハッシュで登録したい}			
 
 	private final String hashkey;
 
@@ -200,21 +203,46 @@ public class PlayDataAccessor {
 
 		ScoreLog log = updateScore(score, newscore, hash, updateScore);
 		
-		if (model.getMode().player == 1) {
-			int history = score.getHistory();
-			for (int i = 0; i < newscore.getOption(); i++) {
-				history /= 10;
+		Set<SongTrophy> l = new HashSet<SongTrophy>();
+		for(char c : score.getTrophy() != null ? score.getTrophy().toCharArray() : new char[0]) {
+			SongTrophy trophy = SongTrophy.getTrophy(c);
+			if(trophy != null) {
+				l.add(trophy);
 			}
-			if (history % 10 < newscore.getClear() - LightAssistEasy.id) {
-				int add = newscore.getClear() - LightAssistEasy.id - (history % 10);
-				for (int i = 0; i < newscore.getOption(); i++) {
-					add *= 10;
-				}
-				score.setHistory(score.getHistory() + add);
-			}
-		} else {
-			// TODO DPのhistoryはどうする？
 		}
+		// クリアトロフィー
+		int clear = newscore.getClear();
+		if(clear >= FullCombo.id) {
+			l.add(SongTrophy.EXHARD);
+			l.add(SongTrophy.HARD);
+			l.add(SongTrophy.GROOVE);
+			l.add(SongTrophy.EASY);
+		} else if(clear >= Hard.id){
+			if(clear == ExHard.id) {
+				l.add(SongTrophy.EXHARD);
+			}
+			l.add(SongTrophy.HARD);
+		} else {
+			if(clear == Normal.id) {
+				l.add(SongTrophy.GROOVE);
+			}
+			l.add(SongTrophy.EASY);
+		}
+		// オプショントロフィー
+		// TODO FLIPの扱いは？
+		final SongTrophy[] optionTrophy = {SongTrophy.NORMAL,SongTrophy.MIRROR,SongTrophy.RANDOM, SongTrophy.R_RANDOM
+				,SongTrophy.S_RANDOM, SongTrophy.SPIRAL, SongTrophy.H_RANDOM, SongTrophy.ALL_SCR, SongTrophy.EX_RANDOM
+				,SongTrophy.EX_S_RANDOM};
+			
+		if(clear >= Easy.id) {
+			l.add(optionTrophy[Math.max(newscore.getOption() % 10, (newscore.getOption() / 10) % 10)]);
+		}
+		
+		StringBuilder sb = new StringBuilder();
+		for(SongTrophy trophy : l) {
+			sb.append(trophy.character);
+		}
+		score.setTrophy(sb.toString());
 
 		score.setPlaycount(score.getPlaycount() + 1);
 		score.setDate(Calendar.getInstance(TimeZone.getDefault()).getTimeInMillis() / 1000L);
@@ -349,7 +377,7 @@ public class PlayDataAccessor {
 					+ score.getLpr() + "," + score.getEms() + "," + score.getLms() + "," + score.getClear() + ","
 					+ score.getMinbp() + "," + score.getCombo() + "," + score.getMode() + "," + score.getClearcount()
 					+ "," + score.getPlaycount() + "," + score.getOption() + "," + score.getRandom() + ","
-					+ score.getHistory() + "," + score.getDate()).getBytes());
+					+ score.getTrophy() + "," + score.getDate()).getBytes());
 			cipher_byte = md.digest();
 			StringBuilder sb = new StringBuilder(2 * cipher_byte.length);
 			for (byte b : cipher_byte) {

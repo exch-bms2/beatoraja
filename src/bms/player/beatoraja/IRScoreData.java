@@ -69,7 +69,7 @@ public class IRScoreData {
 	/**
 	 * 各譜面オプションのクリア履歴
 	 */
-	private int history;
+	private String trophy = "";
 	/**
 	 * 更新時のRANDOM配列
 	 */
@@ -304,11 +304,11 @@ public class IRScoreData {
 	public void setMinbp(int minbp) {
 		this.minbp = minbp;
 	}
-	public int getHistory() {
-		return history;
+	public String getTrophy() {
+		return trophy;
 	}
-	public void setHistory(int history) {
-		this.history = history;
+	public void setTrophy(String trophy) {
+		this.trophy = trophy;
 	}
 	public int getOption() {
 		return option;
@@ -365,5 +365,41 @@ public class IRScoreData {
 
 	public Mode getPlaymode() {
 		return playmode;
+	}
+	
+	public static enum SongTrophy {
+		
+		EASY('g'),
+		GROOVE('G'),
+		HARD('h'),
+		EXHARD('H'),
+		NORMAL('n'),
+		MIRROR('m'),
+		RANDOM('r'),
+		R_RANDOM('o'),
+		S_RANDOM('s'),
+		H_RANDOM('p'),
+		SPIRAL('P'),
+		ALL_SCR('a'),
+		EX_RANDOM('R'),
+		EX_S_RANDOM('S'),
+		BATTLE('B'),
+		BATTLE_ASSIST('b'),		
+		;
+		
+		public final char character;
+		
+		private SongTrophy(char c) {
+			character = c;
+		}
+		
+		public static SongTrophy getTrophy(char c) {
+			for(SongTrophy trophy : values()) {
+				if(trophy.character == c) {
+					return trophy;
+				}
+			}
+			return null;
+		}
 	}
 }

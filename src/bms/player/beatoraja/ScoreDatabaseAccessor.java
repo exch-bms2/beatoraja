@@ -20,6 +20,10 @@ import org.sqlite.SQLiteConfig.SynchronousMode;
 public class ScoreDatabaseAccessor {
 
 	private final QueryRunner qr;
+	
+	private final ResultSetHandler<List<PlayerInformation>> infoHandler = new BeanListHandler<PlayerInformation>(PlayerInformation.class);
+	private final ResultSetHandler<List<IRScoreData>> scoreHandler = new BeanListHandler<IRScoreData>(IRScoreData.class);
+	private final ResultSetHandler<List<PlayerData>> playerHandler = new BeanListHandler<PlayerData>(PlayerData.class);
 
 	public ScoreDatabaseAccessor(String path) throws ClassNotFoundException {
 		Class.forName("org.sqlite.JDBC");
@@ -34,14 +38,15 @@ public class ScoreDatabaseAccessor {
 
 	public void createTable() {
 		try {
+			final MapListHandler mh = new MapListHandler();
 			String sql = "SELECT * FROM sqlite_master WHERE name = ? and type='table';";
-			// playerテーブル作成(存在しない場合)
-			if (qr.query(sql, new MapListHandler(), "info").size() == 0) {
+			// infoテーブル作成(存在しない場合)
+			if (qr.query(sql, mh, "info").size() == 0) {
 				qr.update("CREATE TABLE [info] ([id] TEXT NOT NULL,[name] TEXT NOT NULL," + "[rank] TEXT, "
 						+ "PRIMARY KEY(id));");
 			}
 			// playerテーブル作成(存在しない場合)
-			if (qr.query(sql, new MapListHandler(), "player").size() == 0) {
+			if (qr.query(sql, mh, "player").size() == 0) {
 				qr.update("CREATE TABLE [player] ([date] INTEGER,[playcount] INTEGER," + "[clear] INTEGER,"
 						+ "[epg] INTEGER," + "[lpg] INTEGER," + "[egr] INTEGER," + "[lgr] INTEGER," + "[egd] INTEGER,"
 						+ "[lgd] INTEGER," + "[ebd] INTEGER," + "[lbd] INTEGER," + "[epr] INTEGER," + "[lpr] INTEGER,"
@@ -55,15 +60,19 @@ public class ScoreDatabaseAccessor {
 						0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "");
 			}
 			// scoreテーブル作成(存在しない場合)
-			if (qr.query(sql, new MapListHandler(), "score").size() == 0) {
+			if (qr.query(sql, mh, "score").size() == 0) {
 				qr.update("CREATE TABLE [score] ([sha256] TEXT NOT NULL," + "[mode] INTEGER," + "[clear] INTEGER,"
 						+ "[epg] INTEGER," + "[lpg] INTEGER," + "[egr] INTEGER," + "[lgr] INTEGER," + "[egd] INTEGER,"
 						+ "[lgd] INTEGER," + "[ebd] INTEGER," + "[lbd] INTEGER," + "[epr] INTEGER," + "[lpr] INTEGER,"
 						+ "[ems] INTEGER," + "[lms] INTEGER," + "[notes] INTEGER," + "[combo] INTEGER,"
-						+ "[minbp] INTEGER," + "[playcount] INTEGER," + "[clearcount] INTEGER," + "[history] INTEGER,"
+						+ "[minbp] INTEGER," + "[playcount] INTEGER," + "[clearcount] INTEGER," + "[trophy] TEXT,"
 						+ "[scorehash] TEXT," + "[option] INTEGER," + "[random] INTEGER," + "[date] INTEGER,"
 						+ "[state] INTEGER," + "PRIMARY KEY(sha256, mode));");
+			}			
+			if(qr.query("SELECT * FROM sqlite_master WHERE name = 'score' AND sql LIKE '%trophy%'", new MapListHandler()).size() == 0) {
+				qr.update("ALTER TABLE score ADD COLUMN trophy [TEXT]");
 			}
+
 		} catch (SQLException e) {
 			Logger.getGlobal().severe("スコアデータベース初期化中の例外:" + e.getMessage());
 		}
@@ -71,8 +80,7 @@ public class ScoreDatabaseAccessor {
 	
 	public PlayerInformation getInformation() {
 		try {
-			ResultSetHandler<List<PlayerInformation>> rh = new BeanListHandler<PlayerInformation>(PlayerInformation.class);
-			List<PlayerInformation> info =  qr.query("SELECT * FROM info", rh);
+			List<PlayerInformation> info =  qr.query("SELECT * FROM info", infoHandler);
 			if (info.size() > 0) {
 				return info.get(0);
 			}
@@ -122,7 +130,6 @@ public class ScoreDatabaseAccessor {
 	public Map<String, IRScoreData> getScoreDatas(String[] hashes, int mode) {
 		Map<String, IRScoreData> result = new HashMap<String, IRScoreData>();
 		try {
-			ResultSetHandler<List<IRScoreData>> rh = new BeanListHandler<IRScoreData>(IRScoreData.class);
 			StringBuilder str = new StringBuilder();
 			for (String hash : hashes) {
 				if (str.length() > 0) {
@@ -132,7 +139,7 @@ public class ScoreDatabaseAccessor {
 			}
 
 			List<IRScoreData> scores = qr
-					.query("SELECT * FROM score WHERE sha256 IN (" + str.toString() + ") AND mode = " + mode, rh);
+					.query("SELECT * FROM score WHERE sha256 IN (" + str.toString() + ") AND mode = " + mode, scoreHandler);
 			for (IRScoreData score : scores) {
 				result.put(score.getSha256(), score);
 			}
@@ -145,8 +152,7 @@ public class ScoreDatabaseAccessor {
 	public List<IRScoreData> getScoreDatas(String sql) {
 		List<IRScoreData> score = null;
 		try {
-			ResultSetHandler<List<IRScoreData>> rh = new BeanListHandler<IRScoreData>(IRScoreData.class);
-			score = qr.query("SELECT * FROM score WHERE " + sql, rh);
+			score = qr.query("SELECT * FROM score WHERE " + sql, scoreHandler);
 		} catch (Exception e) {
 			Logger.getGlobal().severe("スコア取得時の例外:" + e.getMessage());
 		}
@@ -163,14 +169,14 @@ public class ScoreDatabaseAccessor {
 			con.setAutoCommit(false);
 			String sql = "INSERT OR REPLACE INTO score "
 					+ "(sha256, mode, clear, epg, lpg, egr, lgr, egd, lgd, ebd, lbd, epr, lpr, ems, lms, notes, combo, "
-					+ "minbp, playcount, clearcount, history, scorehash, option, random, date, state)"
+					+ "minbp, playcount, clearcount, trophy, scorehash, option, random, date, state)"
 					+ "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
 			for (IRScoreData score : scores) {
 				qr.update(con, sql, score.getSha256(), score.getMode(), score.getClear(), score.getEpg(),
 						score.getLpg(), score.getEgr(), score.getLgr(), score.getEgd(), score.getLgd(), score.getEbd(),
 						score.getLbd(), score.getEpr(), score.getLpr(), score.getEms(), score.getLms(),
 						score.getNotes(), score.getCombo(), score.getMinbp(), score.getPlaycount(),
-						score.getClearcount(), score.getHistory(), score.getScorehash(), score.getOption(),
+						score.getClearcount(), score.getTrophy(), score.getScorehash(), score.getOption(),
 						score.getRandom(), score.getDate(), score.getState());
 			}
 			con.commit();
@@ -215,9 +221,8 @@ public class ScoreDatabaseAccessor {
 	public PlayerData[] getPlayerDatas(int count) {
 		PlayerData[] result = null;
 		try {
-			ResultSetHandler<List<PlayerData>> rh = new BeanListHandler<PlayerData>(PlayerData.class);
 			List<PlayerData> pd = qr
-					.query("SELECT * FROM player ORDER BY date DESC" + (count > 0 ? " limit " + count : ""), rh);
+					.query("SELECT * FROM player ORDER BY date DESC" + (count > 0 ? " limit " + count : ""), playerHandler);
 			result = pd.toArray(new PlayerData[0]);
 		} catch (Exception e) {
 			Logger.getGlobal().severe("プレイヤーデータ取得時の例外:" + e.getMessage());
