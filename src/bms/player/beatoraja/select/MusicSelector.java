@@ -17,6 +17,7 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 
 import bms.model.Mode;
 import bms.player.beatoraja.*;
+import bms.player.beatoraja.IRScoreData.SongTrophy;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.ir.IRResponse;
 import bms.player.beatoraja.select.bar.*;
@@ -500,8 +501,6 @@ public class MusicSelector extends MainState {
 			return bar.getSelected().getScore() != null
 					? bar.getSelected().getScore().getPlaycount() - bar.getSelected().getScore().getClearcount()
 					: Integer.MIN_VALUE;
-		case NUMBER_SCORE:
-			return bar.getSelected().getScore() != null ? bar.getSelected().getScore().getExscore() : Integer.MIN_VALUE;
 		case NUMBER_MISSCOUNT:
 			return bar.getSelected().getScore() != null ? bar.getSelected().getScore().getMinbp() : Integer.MIN_VALUE;
 		case NUMBER_MAXCOMBO:
@@ -525,11 +524,6 @@ public class MusicSelector extends MainState {
 			return config.getMode7().getDuration();
 		case NUMBER_JUDGETIMING:
 			return config.getJudgetiming();
-		case NUMBER_SCORE_RATE:
-			return bar.getSelected().getScore() != null ? getScoreDataProperty().getRateInt() : Integer.MIN_VALUE;
-		case NUMBER_SCORE_RATE_AFTERDOT:
-			return bar.getSelected().getScore() != null ? getScoreDataProperty().getNowRateAfterDot()
-					: Integer.MIN_VALUE;
 		}
 		return super.getNumberValue(id);
 	}
@@ -596,74 +590,17 @@ public class MusicSelector extends MainState {
 			}
 			return 0;
 		case BARGRAPH_LEVEL:
-			if (bar.getSelected() instanceof SongBar && ((SongBar) bar.getSelected()).getSongData() != null) {
-				SongData sd = ((SongBar) bar.getSelected()).getSongData();
-				int maxLevel = getMaxLevel(sd.getMode());
-				if (maxLevel > 0) {
-					return (float)sd.getLevel() / maxLevel;
-				}
-			}
-			return 0;
+			return getLevelRate(-1);
 		case BARGRAPH_LEVEL_BEGINNER:
-			if (bar.getSelected() instanceof SongBar && ((SongBar) bar.getSelected()).getSongData() != null) {
-				SongData sd = ((SongBar) bar.getSelected()).getSongData();
-				if (sd.getDifficulty() != 1) {
-					return 0;
-				}
-				int maxLevel = getMaxLevel(sd.getMode());
-				if (maxLevel > 0) {
-					return (float)sd.getLevel() / maxLevel;
-				}
-			}
-			return 0;
+			return getLevelRate(1);
 		case BARGRAPH_LEVEL_NORMAL:
-			if (bar.getSelected() instanceof SongBar && ((SongBar) bar.getSelected()).getSongData() != null) {
-				SongData sd = ((SongBar) bar.getSelected()).getSongData();
-				if (sd.getDifficulty() != 2) {
-					return 0;
-				}
-				int maxLevel = getMaxLevel(sd.getMode());
-				if (maxLevel > 0) {
-					return (float)sd.getLevel() / maxLevel;
-				}
-			}
-			return 0;
+			return getLevelRate(2);
 		case BARGRAPH_LEVEL_HYPER:
-			if (bar.getSelected() instanceof SongBar && ((SongBar) bar.getSelected()).getSongData() != null) {
-				SongData sd = ((SongBar) bar.getSelected()).getSongData();
-				if (sd.getDifficulty() != 3) {
-					return 0;
-				}
-				int maxLevel = getMaxLevel(sd.getMode());
-				if (maxLevel > 0) {
-					return (float)sd.getLevel() / maxLevel;
-				}
-			}
-			return 0;
+			return getLevelRate(3);
 		case BARGRAPH_LEVEL_ANOTHER:
-			if (bar.getSelected() instanceof SongBar && ((SongBar) bar.getSelected()).getSongData() != null) {
-				SongData sd = ((SongBar) bar.getSelected()).getSongData();
-				if (sd.getDifficulty() != 4) {
-					return 0;
-				}
-				int maxLevel = getMaxLevel(sd.getMode());
-				if (maxLevel > 0) {
-					return (float)sd.getLevel() / maxLevel;
-				}
-			}
-			return 0;
+			return getLevelRate(4);
 		case BARGRAPH_LEVEL_INSANE:
-			if (bar.getSelected() instanceof SongBar && ((SongBar) bar.getSelected()).getSongData() != null) {
-				SongData sd = ((SongBar) bar.getSelected()).getSongData();
-				if (sd.getDifficulty() != 5) {
-					return 0;
-				}
-				int maxLevel = getMaxLevel(sd.getMode());
-				if (maxLevel > 0) {
-					return (float)sd.getLevel() / maxLevel;
-				}
-			}
-			return 0;
+			return getLevelRate(5);
 		case BARGRAPH_RATE_GREAT:
 			if (bar.getSelected() instanceof SongBar) {
 				IRScoreData score = bar.getSelected().getScore();
@@ -709,23 +646,32 @@ public class MusicSelector extends MainState {
 		}
 		return super.getSliderValue(id);
 	}
-
-	private int getMaxLevel(int modeId) {
-		switch (modeId) {
-		case 5:
-		case 10:
-			return 9;
-		case 7:
-		case 14:
-			return 12;
-		case 9:
-			return 50;
-		case 25:
-		case 50:
-			return 10;
-		default:
-			return 0;
+	
+	private float getLevelRate(int difficulty) {
+		if (bar.getSelected() instanceof SongBar && ((SongBar) bar.getSelected()).getSongData() != null) {
+			SongData sd = ((SongBar) bar.getSelected()).getSongData();
+			if (difficulty >= 0 && sd.getDifficulty() != difficulty) {
+				return 0;
+			}
+			int maxLevel = 0;
+			switch (sd.getMode()) {
+			case 5:
+			case 10:
+				maxLevel = 9;
+			case 7:
+			case 14:
+				maxLevel = 12;
+			case 9:
+				maxLevel =  50;
+			case 25:
+			case 50:
+				maxLevel = 10;
+			}
+			if (maxLevel > 0) {
+				return (float)sd.getLevel() / maxLevel;
+			}
 		}
+		return 0;
 	}
 
 	public void setSliderValue(int id, float value) {
@@ -797,25 +743,53 @@ public class MusicSelector extends MainState {
 			return selectedreplay == 2;
 		case OPTION_SELECT_REPLAYDATA4:
 			return selectedreplay == 3;
-			case OPTION_GRADEBAR_MIRROR:
-				return existsConstant(CourseData.CourseDataConstraint.MIRROR);
-			case OPTION_GRADEBAR_RANDOM:
-				return existsConstant(CourseData.CourseDataConstraint.RANDOM);
-			case OPTION_GRADEBAR_NOSPEED:
-				return existsConstant(CourseData.CourseDataConstraint.NO_SPEED);
-			case OPTION_GRADEBAR_NOGOOD:
-				return existsConstant(CourseData.CourseDataConstraint.NO_GOOD);
-			case OPTION_GRADEBAR_NOGREAT:
-				return existsConstant(CourseData.CourseDataConstraint.NO_GREAT);
-			case OPTION_NOT_COMPARE_RIVAL:
-				return rival == null;
-			case OPTION_COMPARE_RIVAL:
-				return rival != null;
+		case OPTION_GRADEBAR_MIRROR:
+			return existsConstraint(CourseData.CourseDataConstraint.MIRROR);
+		case OPTION_GRADEBAR_RANDOM:
+			return existsConstraint(CourseData.CourseDataConstraint.RANDOM);
+		case OPTION_GRADEBAR_NOSPEED:
+			return existsConstraint(CourseData.CourseDataConstraint.NO_SPEED);
+		case OPTION_GRADEBAR_NOGOOD:
+			return existsConstraint(CourseData.CourseDataConstraint.NO_GOOD);
+		case OPTION_GRADEBAR_NOGREAT:
+			return existsConstraint(CourseData.CourseDataConstraint.NO_GREAT);
+		case OPTION_NOT_COMPARE_RIVAL:
+			return rival == null;
+		case OPTION_COMPARE_RIVAL:
+			return rival != null;
+		case OPTION_CLEAR_EASY:
+			return existsTrophy(SongTrophy.EASY);
+		case OPTION_CLEAR_GROOVE:
+			return existsTrophy(SongTrophy.GROOVE);
+		case OPTION_CLEAR_HARD:
+			return existsTrophy(SongTrophy.HARD);
+		case OPTION_CLEAR_EXHARD:
+			return existsTrophy(SongTrophy.EXHARD);
+		case OPTION_CLEAR_NORMAL:
+			return existsTrophy(SongTrophy.NORMAL);
+		case OPTION_CLEAR_MIRROR:
+			return existsTrophy(SongTrophy.MIRROR);
+		case OPTION_CLEAR_RANDOM:
+			return existsTrophy(SongTrophy.RANDOM);
+		case OPTION_CLEAR_RRANDOM:
+			return existsTrophy(SongTrophy.R_RANDOM);
+		case OPTION_CLEAR_SRANDOM:
+			return existsTrophy(SongTrophy.S_RANDOM);
+		case OPTION_CLEAR_SPIRAL:
+			return existsTrophy(SongTrophy.SPIRAL);
+		case OPTION_CLEAR_HRANDOM:
+			return existsTrophy(SongTrophy.H_RANDOM);
+		case OPTION_CLEAR_ALLSCR:
+			return existsTrophy(SongTrophy.ALL_SCR);
+		case OPTION_CLEAR_EXRANDOM:
+			return existsTrophy(SongTrophy.EX_RANDOM);
+		case OPTION_CLEAR_EXSRANDOM:
+			return existsTrophy(SongTrophy.EX_S_RANDOM);
 		}
 		return super.getBooleanValue(id);
 	}
 
-	private boolean existsConstant(CourseData.CourseDataConstraint constraint) {
+	private boolean existsConstraint(CourseData.CourseDataConstraint constraint) {
 		if (!(bar.getSelected() instanceof GradeBar)) {
 			return false;
 		}
@@ -827,6 +801,11 @@ public class MusicSelector extends MainState {
 			}
 		}
 		return false;
+	}
+	
+	private boolean existsTrophy(SongTrophy trophy) {
+		final IRScoreData score = getScoreDataProperty().getScoreData();
+		return score != null && score.getTrophy() != null && score.getTrophy().indexOf(trophy.character) >= 0;
 	}
 
 	public int getImageIndex(int id) {

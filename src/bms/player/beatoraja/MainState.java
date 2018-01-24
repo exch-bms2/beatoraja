@@ -482,21 +482,22 @@ public abstract class MainState {
 				return score.getNowScore();
 			case NUMBER_SCORE:
 			case NUMBER_SCORE2:
-				return score.getNowEXScore();
+			case NUMBER_SCORE3:
+				return score.getScoreData() != null ? score.getNowEXScore() : Integer.MIN_VALUE;
 			case NUMBER_MAXSCORE:
 				return score.getScoreData() != null ? score.getScoreData().getNotes() : 0;
 			case NUMBER_DIFF_NEXTRANK:
 				return score.getNextRank();
 			case NUMBER_SCORE_RATE:
-				return score.getNowRateInt();
+				return score.getScoreData() != null ? score.getNowRateInt() : Integer.MIN_VALUE;
 			case NUMBER_SCORE_RATE_AFTERDOT:
-				return score.getNowRateAfterDot();
+				return score.getScoreData() != null ? score.getNowRateAfterDot() : Integer.MIN_VALUE;
 			case NUMBER_TOTAL_RATE:
 			case NUMBER_SCORE_RATE2:
-				return score.getRateInt();
+				return score.getScoreData() != null ? score.getRateInt() : Integer.MIN_VALUE;
 			case NUMBER_TOTAL_RATE_AFTERDOT:
 			case NUMBER_SCORE_RATE_AFTERDOT2:
-				return score.getRateAfterDot();
+				return score.getScoreData() != null ? score.getRateAfterDot() : Integer.MIN_VALUE;
 			case NUMBER_HIGHSCORE:
 				return score.getBestScore();
 			case NUMBER_BEST_RATE:

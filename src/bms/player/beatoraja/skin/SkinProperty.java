@@ -439,23 +439,23 @@ public class SkinProperty {
 	public static final int OPTION_RESULT_CLEAR = 90;
 	public static final int OPTION_RESULT_FAIL = 91;
 
-	public static final int OPTION_GROOVE = 118;
-	public static final int OPTION_HARD = 119;
-	public static final int OPTION_HAZARD = 120;
-	public static final int OPTION_EASY = 121;
-	public static final int OPTION_AEASY = 124;
-	public static final int OPTION_EXHARD = 125;
+	public static final int OPTION_CLEAR_GROOVE = 118;
+	public static final int OPTION_CLEAR_HARD = 119;
+	public static final int OPTION_CLEAR_HAZARD = 120;
+	public static final int OPTION_CLEAR_EASY = 121;
+	public static final int OPTION_CLEAR_AEASY = 124;
+	public static final int OPTION_CLEAR_EXHARD = 125;
 
-	public static final int OPTION_NORMAL = 126;
-	public static final int OPTION_MIRROR = 127;
-	public static final int OPTION_RANDOM = 128;
-	public static final int OPTION_SRANDOM = 129;
-	public static final int OPTION_HRANDOM = 130;
-	public static final int OPTION_ALLSCR = 131;
-	public static final int OPTION_RRANDOM = 928;
-	public static final int OPTION_SPIRAL = 929;
-	public static final int OPTION_EXRANDOM = 930;
-	public static final int OPTION_EXSRANDOM = 931;
+	public static final int OPTION_CLEAR_NORMAL = 126;
+	public static final int OPTION_CLEAR_MIRROR = 127;
+	public static final int OPTION_CLEAR_RANDOM = 128;
+	public static final int OPTION_CLEAR_SRANDOM = 129;
+	public static final int OPTION_CLEAR_HRANDOM = 130;
+	public static final int OPTION_CLEAR_ALLSCR = 131;
+	public static final int OPTION_CLEAR_RRANDOM = 1128;
+	public static final int OPTION_CLEAR_SPIRAL = 1129;
+	public static final int OPTION_CLEAR_EXRANDOM = 1130;
+	public static final int OPTION_CLEAR_EXSRANDOM = 1131;
 
 	public static final int OPTION_DIFFICULTY0 = 150;
 	public static final int OPTION_DIFFICULTY1 = 151;
@@ -688,6 +688,8 @@ public class SkinProperty {
 	public static final int BUTTON_DPOPTION = 54;
 	public static final int BUTTON_HSFIX = 55;
 	public static final int BUTTON_BGA = 72;
+	public static final int BUTTON_FAVORITTE = 90;
+	public static final int BUTTON_OPEN_IR_WEBSITE = 210;
 	public static final int BUTTON_ASSIST_EXJUDGE = 301;
 	public static final int BUTTON_ASSIST_CONSTANT = 302;
 	public static final int BUTTON_ASSIST_JUDGEAREA = 303;
