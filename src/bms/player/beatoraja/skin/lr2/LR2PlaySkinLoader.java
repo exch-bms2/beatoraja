@@ -642,7 +642,10 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 							: (Integer.parseInt(str[6]) * dsth / srch);
 					float x = Integer.parseInt(str[3]) * dstw / srcw - (groovex < 0 ? groovex * dstw / srcw : 0);
 					float y = dsth - Integer.parseInt(str[4]) * dsth / srch - height;
-					gauger.setDestination(0, x, y, width, height, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+					int[] values = parseInt(str);
+					gauger.setDestination(values[2], x, y, width, height, values[7],
+							values[8], values[9], values[10], values[11], values[12], values[13], values[14],
+							values[15], values[16], values[17], values[18], values[19], values[20], values[21]);
 				}
 			}
 		});
@@ -700,22 +703,23 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 		final int[] OPTION_LATE = { OPTION_1P_LATE, OPTION_2P_LATE, OPTION_3P_LATE };
 		final int[] VALUE_JUDGE_DURATION = { VALUE_JUDGE_1P_DURATION, VALUE_JUDGE_2P_DURATION, VALUE_JUDGE_3P_DURATION };
 		final int[] OPTION_PERFECT = { OPTION_1P_PERFECT, OPTION_2P_PERFECT, OPTION_3P_PERFECT };
+		final int[] OFFSET_JUDGE = { OFFSET_JUDGE_1P, OFFSET_JUDGE_2P, OFFSET_JUDGE_3P };
 
 		SkinImage early = new SkinImage(new TextureRegion(tex, 0, 0, 50,20));
 		early.setDestination(0, (values[3] + values[5] / 2) * dstw / srcw,
 				dsth - (values[4] - 5) * dsth / srch, 40 * dw, 16 * dh, 0, 255,
-				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1998, 0, OPTION_EARLY[side], 0);
+				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1998, 0, OPTION_EARLY[side], OFFSET_JUDGE[side]);
 		early.setDestination(500, (values[3] + values[5] / 2) * dstw / srcw,
 				dsth - (values[4] - 5) * dsth / srch, 40 * dw, 16 * dh, 0, 255,
-				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1998, 0, OPTION_EARLY[side], 0);
+				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1998, 0, OPTION_EARLY[side], OFFSET_JUDGE[side]);
 		skin.add(early);
 		SkinImage late = new SkinImage(new TextureRegion(tex, 50, 0, 50,20));
 		late.setDestination(0, (values[3] + values[5] / 2) * dstw / srcw,
 				dsth - (values[4] - 5) * dsth / srch, 40 * dw, 16 * dh, 0, 255,
-				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1998, 0, OPTION_LATE[side], 0);
+				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1998, 0, OPTION_LATE[side], OFFSET_JUDGE[side]);
 		late.setDestination(500, (values[3] + values[5] / 2) * dstw / srcw,
 				dsth - (values[4] - 5) * dsth / srch, 40 * dw, 16 * dh, 0, 255,
-				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1998, 0, OPTION_LATE[side], 0);
+				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1998, 0, OPTION_LATE[side], OFFSET_JUDGE[side]);
 		skin.add(late);
 
 		TextureRegion[][] images = TextureRegion.split(tex, 10, 20);
@@ -724,20 +728,20 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 		num.setAlign(values[12]);
 		num.setDestination(0, (values[3] + values[5] / 2) * dstw / srcw,
 				dsth - (values[4] - 5) * dsth / srch, 8 * dw, 16 * dh, 0, 255,
-				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1999, 0, OPTION_PERFECT[side], 0);
+				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1999, 0, OPTION_PERFECT[side], OFFSET_JUDGE[side]);
 		num.setDestination(500, (values[3] + values[5] / 2) * dstw / srcw,
 				dsth - (values[4] - 5) * dsth / srch, 8 * dw, 16 * dh, 0, 255,
-				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1999, 0, OPTION_PERFECT[side], 0);
+				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1999, 0, OPTION_PERFECT[side], OFFSET_JUDGE[side]);
 		skin.add(num);
 		SkinNumber num2 = new SkinNumber(new TextureRegion[][] { images[3] },
 				new TextureRegion[][] { images[4] }, 0, 0, 4, 0, VALUE_JUDGE_DURATION[side]);
 		num2.setAlign(values[12]);
 		num2.setDestination(0, (values[3] + values[5] / 2) * dstw / srcw,
 				dsth - (values[4] - 5) * dsth / srch, 8 * dw, 16 * dh, 0, 255,
-				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1999, 0, -(OPTION_PERFECT[side]), 0);
+				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1999, 0, -(OPTION_PERFECT[side]), OFFSET_JUDGE[side]);
 		num2.setDestination(500, (values[3] + values[5] / 2) * dstw / srcw,
 				dsth - (values[4] - 5) * dsth / srch, 8 * dw, 16 * dh, 0, 255,
-				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1999, 0, -(OPTION_PERFECT[side]), 0);
+				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1999, 0, -(OPTION_PERFECT[side]), OFFSET_JUDGE[side]);
 		skin.add(num2);
 	}
 
