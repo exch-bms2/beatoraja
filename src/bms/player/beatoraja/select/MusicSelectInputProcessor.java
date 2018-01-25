@@ -99,7 +99,7 @@ public class MusicSelectInputProcessor {
         
         final MusicSelectKeyProperty property = MusicSelectKeyProperty.values()[config.getMusicselectinput()];
 
-        if (input.startPressed()) {
+        if (input.startPressed() && !input.isSelectPressed()) {
             bar.resetInput();
             // show play option
             select.setPanelState(1);
@@ -180,7 +180,7 @@ public class MusicSelectInputProcessor {
                 select.play(SOUND_SCRATCH);
                 mov++;
             }
-        } else if (input.isSelectPressed()) {
+        } else if (input.isSelectPressed() && !input.startPressed()) {
             bar.resetInput();
             // show assist option
             select.setPanelState(2);
@@ -205,7 +205,7 @@ public class MusicSelectInputProcessor {
             if (property.isPressed(keystate, keytime, NOMINE, true)) {
                 config.setNomine(!config.isNomine());
             }
-        } else if (input.getNumberState()[5]) {
+        } else if (input.getNumberState()[5] || (input.startPressed() && input.isSelectPressed())) {
             bar.resetInput();
             // show detail option
             select.setPanelState(3);
