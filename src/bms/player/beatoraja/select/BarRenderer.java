@@ -412,6 +412,19 @@ public class BarRenderer {
 			if(ba.value == -1) {
 				continue;
 			}
+			// folder graph
+			if (ba.sd instanceof DirectoryBar) {
+				if (baro.getGraph() != null) {
+					baro.getGraph().draw(sprite, time, select, (DirectoryBar)ba.sd, ba.x, ba.y);
+				}
+			}
+		}
+		
+		for (int i = 0; i < barlength; i++) {
+			final BarArea ba = bararea[i];
+			if(ba.value == -1) {
+				continue;
+			}
 			// 新規追加曲はテキストを変える
 			int songstatus = 0;
 			if (ba.sd instanceof SongBar) {

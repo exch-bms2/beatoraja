@@ -34,6 +34,8 @@ public class SkinBar extends SkinObject {
      */
     private SkinImage[] label = new SkinImage[3];
 
+    private SkinDistributionGraph graph;
+
     private int position = 0;
 
     private TextureRegion[][] images;
@@ -167,4 +169,12 @@ public class SkinBar extends SkinObject {
     public void setLabel(SkinImage[] label) {
         this.label = label;
     }
+
+	public SkinDistributionGraph getGraph() {
+		return graph;
+	}
+
+	public void setGraph(SkinDistributionGraph graph) {
+		this.graph = graph;
+	}
 }

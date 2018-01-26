@@ -506,7 +506,10 @@
 			{"id":"label-mine", "dst":[
 				{"x":-60, "y":5, "w":16, "h":30}
 			]},
-		]
+		],
+		"graph": {"id":"graph-lamp", "dst":[
+				{"x":15, "y":0, "w":450, "h":8}
+			]},
 	},
 	"judgegraph": [
 		{"id":"notes-graph", "type" : 0}

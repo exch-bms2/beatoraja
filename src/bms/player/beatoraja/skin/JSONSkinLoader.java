@@ -762,8 +762,30 @@ public class JSONSkinLoader extends SkinLoader{
 									break;
 								}
 							}
-						}
+						}						
 						barobj.setBarlevel(numbers);
+
+						// graph
+						for (Graph img : sk.graph) {
+							if (sk.songlist.graph != null && sk.songlist.graph.id.equals(img.id)) {
+								if (img.type < 0) {
+									SkinDistributionGraph bargraph = null;
+									switch (img.type) {
+									case -1:
+										bargraph = new SkinDistributionGraph(0);
+										break;
+									case -2:
+										bargraph = new SkinDistributionGraph(1);
+										break;
+									}
+									
+									if(bargraph != null) {
+										setDestination(skin, bargraph, sk.songlist.graph);
+										barobj.setGraph(bargraph);
+									}
+								}
+							}
+						}
 
 						obj = barobj;
 
@@ -1118,6 +1140,7 @@ public class JSONSkinLoader extends SkinLoader{
 		public Destination[] rivallamp = new Destination[0];
 		public Destination[] trophy = new Destination[0];
 		public Destination[] label = new Destination[0];
+		public Destination graph;
 	}
 
 	public static class Destination {

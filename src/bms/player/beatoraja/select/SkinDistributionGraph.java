@@ -1,6 +1,7 @@
 package bms.player.beatoraja.select;
 
 import bms.player.beatoraja.MainState;
+import bms.player.beatoraja.select.bar.Bar;
 import bms.player.beatoraja.select.bar.DirectoryBar;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
@@ -59,9 +60,16 @@ public class SkinDistributionGraph extends SkinObject {
 
     @Override
     public void draw(SkinObjectRenderer sprite, long time, MainState state) {
+    	final Bar bar = ((MusicSelector)state).getSelectedBar();
+    	if(!(bar instanceof DirectoryBar)) {
+    		return;
+    	}
+    	draw(sprite, time, state, (DirectoryBar)bar, 0, 0);
+    }
+
+    public void draw(SkinObjectRenderer sprite, long time, MainState state, DirectoryBar current, int offsetx, int offsety) {
         final Rectangle r = getDestination(time, state);
-        if (r != null && state.getMainController().getPlayerResource().getConfig().isFolderlamp() && ((MusicSelector)state).getSelectedBar() instanceof DirectoryBar) {
-            DirectoryBar current = (DirectoryBar)((MusicSelector)state).getSelectedBar();
+        if (r != null && state.getMainController().getPlayerResource().getConfig().isFolderlamp()) {
             int[] lamps = current.getLamps();
             int[] ranks = current.getRanks();
             int count = 0;
@@ -72,13 +80,13 @@ public class SkinDistributionGraph extends SkinObject {
             if (count != 0) {
                 if(type == 0) {
                     for (int i = 10, x = 0; i >= 0; i--) {
-                        sprite.draw(lampimage[i].getImage(time,state), r.x + x * r.width / count, r.y, lamps[i] * r.width / count, r.height);
+                        sprite.draw(lampimage[i].getImage(time,state), r.x + x * r.width / count + offsetx, r.y + offsety, lamps[i] * r.width / count, r.height);
                         x += lamps[i];
                     }
                 } else {
                     for (int i = 27, x = 0; i >= 0; i--) {
                         sprite.draw(lampimage[i].getImage(time,state),
-                                r.x + x * r.width / count, r.y,
+                                r.x + x * r.width / count + offsetx, r.y + offsety,
                                 ranks[i] * r.width / count, r.height);
                         x += ranks[i];
                     }
