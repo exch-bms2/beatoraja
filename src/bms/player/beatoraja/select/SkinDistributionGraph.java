@@ -34,26 +34,46 @@ public class SkinDistributionGraph extends SkinObject {
 
 
     public SkinDistributionGraph(int type) {
-        this.type = type;
+    	this(type, createDefaultImages(type), 0, 0);
+    }
+    
+    private static TextureRegion[][] createDefaultImages(int type) {
         if(type == 0) {
             Pixmap lampp = new Pixmap(11,1, Pixmap.Format.RGBA8888);
             for(int i = 0;i < LAMP.length;i++) {
                 lampp.drawPixel(i,0, Color.valueOf(LAMP[i]).toIntBits());
             }
             Texture lampt = new Texture(lampp);
-            lampimage = new SkinSource[11];
+            TextureRegion[][] result = new TextureRegion[11][1];
             for(int i = 0;i < LAMP.length;i++) {
-                lampimage[i] = new SkinSourceImage(new TextureRegion[]{new TextureRegion(lampt,i,0,1,1)},0,0);
+            	result[i] = new TextureRegion[]{new TextureRegion(lampt,i,0,1,1)};
             }
+            return result;
         } else {
             Pixmap rankp = new Pixmap(28,1, Pixmap.Format.RGBA8888);
             for(int i = 0;i < RANK.length;i++) {
                 rankp.drawPixel(i,0, Color.valueOf(RANK[i]).toIntBits());
             }
             Texture rankt = new Texture(rankp);
-            lampimage = new SkinSource[28];
+            TextureRegion[][] result = new TextureRegion[28][1];
             for(int i = 0;i < RANK.length;i++) {
-                lampimage[i] = new SkinSourceImage(new TextureRegion[]{new TextureRegion(rankt,i,0,1,1)},0,0);
+            	result[i] = new TextureRegion[]{new TextureRegion(rankt,i,0,1,1)};
+            }
+            return result;
+        }
+    }
+
+    public SkinDistributionGraph(int type, TextureRegion[][] image, int timer, int cycle) {
+        this.type = type;
+        if(type == 0) {
+            lampimage = new SkinSource[11];
+            for(int i = 0;i < lampimage.length;i++) {
+                lampimage[i] = new SkinSourceImage(image[i],timer,cycle);
+            }
+        } else {
+            lampimage = new SkinSource[28];
+            for(int i = 0;i < lampimage.length;i++) {
+                lampimage[i] = new SkinSourceImage(image[i],timer,cycle);
             }
         }
     }
@@ -80,14 +100,12 @@ public class SkinDistributionGraph extends SkinObject {
             if (count != 0) {
                 if(type == 0) {
                     for (int i = 10, x = 0; i >= 0; i--) {
-                        sprite.draw(lampimage[i].getImage(time,state), r.x + x * r.width / count + offsetx, r.y + offsety, lamps[i] * r.width / count, r.height);
+                        sprite.draw(lampimage[i].getImage(time,state), r.x + x * r.width / count + offsetx, r.y + offsety, lamps[i] * r.width / count, r.height);                    		
                         x += lamps[i];
                     }
                 } else {
                     for (int i = 27, x = 0; i >= 0; i--) {
-                        sprite.draw(lampimage[i].getImage(time,state),
-                                r.x + x * r.width / count + offsetx, r.y + offsety,
-                                ranks[i] * r.width / count, r.height);
+                        sprite.draw(lampimage[i].getImage(time,state), r.x + x * r.width / count + offsetx, r.y + offsety, ranks[i] * r.width / count, r.height);                    		
                         x += ranks[i];
                     }
                 }

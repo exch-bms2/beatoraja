@@ -361,13 +361,26 @@ public class JSONSkinLoader extends SkinLoader{
 					for (Graph img : sk.graph) {
 						if (dst.id.equals(img.id)) {
 							if (img.type < 0) {
-								switch (img.type) {
-								case -1:
-									obj = new SkinDistributionGraph(0);
-									break;
-								case -2:
-									obj = new SkinDistributionGraph(1);
-									break;
+								Texture tex = getTexture(img.src, p);
+								TextureRegion[][] imgs = null;
+								if(tex != null) {
+									TextureRegion[] images = getSourceImage(tex, img.x, img.y, img.w, img.h,
+											img.divx, img.divy);
+									final int len = img.type == -1 ? 11 : 28;
+									imgs = new TextureRegion[len][images.length / len];
+									for(int j = 0 ;j < len;j++) {
+										for(int i = 0 ;i < imgs[j].length;i++) {
+											imgs[j][i] = images[i * len + j];
+										}						
+									}
+								}
+								
+								final int graphtype = img.type == -1 ? 0 : 1;
+								
+								if(imgs != null) {
+									obj = new SkinDistributionGraph(graphtype,  imgs, img.timer, img.cycle);
+								} else {
+									obj = new SkinDistributionGraph(graphtype);										
 								}
 							} else {
 								Texture tex = getTexture(img.src, p);
@@ -769,20 +782,31 @@ public class JSONSkinLoader extends SkinLoader{
 						for (Graph img : sk.graph) {
 							if (sk.songlist.graph != null && sk.songlist.graph.id.equals(img.id)) {
 								if (img.type < 0) {
-									SkinDistributionGraph bargraph = null;
-									switch (img.type) {
-									case -1:
-										bargraph = new SkinDistributionGraph(0);
-										break;
-									case -2:
-										bargraph = new SkinDistributionGraph(1);
-										break;
+									Texture tex = getTexture(img.src, p);
+									TextureRegion[][] imgs = null;
+									if(tex != null) {
+										TextureRegion[] images = getSourceImage(tex, img.x, img.y, img.w, img.h,
+												img.divx, img.divy);
+										final int len = img.type == -1 ? 11 : 28;
+										imgs = new TextureRegion[len][images.length / len];
+										for(int j = 0 ;j < len;j++) {
+											for(int i = 0 ;i < imgs[j].length;i++) {
+												imgs[j][i] = images[i * len + j];
+											}						
+										}
 									}
 									
-									if(bargraph != null) {
-										setDestination(skin, bargraph, sk.songlist.graph);
-										barobj.setGraph(bargraph);
+									final int graphtype = img.type == -1 ? 0 : 1;
+									
+									SkinDistributionGraph bargraph = null;
+									if(imgs != null) {
+										bargraph = new SkinDistributionGraph(graphtype,  imgs, img.timer, img.cycle);
+									} else {
+										bargraph = new SkinDistributionGraph(graphtype);										
 									}
+									
+									setDestination(skin, bargraph, sk.songlist.graph);
+									barobj.setGraph(bargraph);
 								}
 							}
 						}
@@ -840,6 +864,9 @@ public class JSONSkinLoader extends SkinLoader{
 	}
 
 	private Texture getTexture(String srcid, Path p) {
+		if(srcid == null) {
+			return null;
+		}
 		for (Source src : sk.source) {
 			if (srcid.equals(src.id)) {
 				if (!texmap.containsKey(src.id)) {

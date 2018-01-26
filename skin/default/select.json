@@ -15,7 +15,7 @@
 		{"id":5, "path":"clear.png"},
 		{"id":6, "path":"number.png"},
 		{"id":7, "path":"panel.png"},
-		{"id":8, "path":"constraint.png"},
+		{"id":8, "path":"constraint.png"}
 	],
 	"font": [
 		{"id":0, "path":"VL-Gothic-Regular.ttf"}
@@ -205,7 +205,7 @@
 		{"id":"search", "font":0, "size":24, "ref":30},
 	],
 	"graph":[
-		{"id":"graph-lamp", "type":-1},
+		{"id":"graph-lamp", "src":3, "x":0, "y":330, "w":11, "h":30, "divx":11, "divy":2, "cycle":100, "type":-1},
 		{"id":"graph-rank", "type":-2},
 
 	],

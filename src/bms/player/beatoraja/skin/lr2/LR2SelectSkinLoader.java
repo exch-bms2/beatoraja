@@ -386,6 +386,50 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 				}
 			}
 		});
+		// 拡張定義。段位のトロフィー画像を定義する。0:銅、1:銀、2:金
+		addCommandWord(new CommandWord("SRC_BAR_GRAPH") {
+
+			@Override
+			public void execute(String[] str) {
+				int[] values = parseInt(str);
+				TextureRegion[] images = getSourceImage(values);
+				if (images != null) {
+					final int len = values[1] == 0 ? 11 : 28;
+					TextureRegion[][] imgs = new TextureRegion[images.length / len][len];
+					imgs = new TextureRegion[len][images.length / len];
+					for(int j = 0 ;j < len;j++) {
+						for(int i = 0 ;i < imgs[j].length;i++) {
+							imgs[j][i] = images[i * len + j];
+						}						
+					}
+					skinbar.setGraph(new SkinDistributionGraph(values[1], imgs, values[10], values[9]));
+					// System.out.println("Nowjudge Added - " + (5 -
+					// values[1]));
+				}
+			}
+		});
+		addCommandWord(new CommandWord("DST_BAR_GRAPH") {
+			@Override
+			public void execute(String[] str) {
+				int[] values = parseInt(str);
+				if (skinbar.getGraph() != null) {
+					if (values[5] < 0) {
+						values[3] += values[5];
+						values[5] = -values[5];
+					}
+					if (values[6] < 0) {
+						values[4] += values[6];
+						values[6] = -values[6];
+					}
+					skinbar.getGraph().setDestination(values[2], values[3] * dstw / srcw,
+							-(values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
+							values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
+							values[12], values[13], values[14], values[15], values[16], values[17], values[18],
+							values[19], values[20], values[21]);
+				}
+			}
+		});
+
 		addCommandWord(new CommandWord("SRC_NOTECHART") {
 			@Override
 			public void execute(String[] str) {
