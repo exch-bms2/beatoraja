@@ -1,6 +1,7 @@
 package bms.player.beatoraja.play;
 
 import bms.model.BMSModel;
+import bms.player.beatoraja.IRScoreData;
 import bms.player.beatoraja.MainController;
 
 import java.util.*;
@@ -26,6 +27,8 @@ public abstract class TargetProperty {
             targets.add(new StaticTargetProperty("RANK AAA-", 88.8f));
             targets.add(new StaticTargetProperty("RANK AAA", 92.5f));
             targets.add(new StaticTargetProperty("RANK AAA+", 96.2f));
+            targets.add(new StaticTargetProperty("MAX", 100.0f));
+            targets.add(new NextRankTargetProperty());
             available = targets.toArray(new TargetProperty[targets.size()]);
         }
         return available;
@@ -70,5 +73,27 @@ class RivalTargetProperty extends TargetProperty{
     public int getTarget(MainController main) {
         // TODO 指定プレイヤーのスコアデータ取得
         return 0;
+    }
+}
+
+class NextRankTargetProperty extends TargetProperty{
+
+    public NextRankTargetProperty() {
+        setName("NEXT RANK");
+    }
+
+    @Override
+    public int getTarget(MainController main) {
+        IRScoreData now = main.getPlayDataAccessor().readScoreData(main.getPlayerResource().getBMSModel()
+                , main.getPlayerConfig().getLnmode());
+        final int nowscore = now != null ? now.getExscore() : 0;
+        final int max = main.getPlayerResource().getBMSModel().getTotalNotes() * 2;
+        for(int i = 15;i < 27;i++) {
+            int target = max * i / 27;
+            if(nowscore < target) {
+                return target;
+            }
+        }
+        return max;
     }
 }
