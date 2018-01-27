@@ -1021,4 +1021,8 @@ public class BMSPlayer extends MainState {
 		}
 		return super.getImageIndex(id);
 	}
+	
+	public Mode getMode() {
+		return model.getMode();
+	}
 }

@@ -2,6 +2,7 @@ package bms.player.beatoraja.play;
 
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
+import bms.model.Mode;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 
 public class ControlInputProcessor {
@@ -55,12 +56,12 @@ public class ControlInputProcessor {
 				if (autoplay == 0) {
 					// change hi speed by START + Keys
 					boolean[] key = input.getKeystate();
-					if (key[0] || key[2] || key[4] || key[6]) {
+					if (key[0] || key[2] || key[4] || key[6] || key[9] || key[11] || key[13] || key[15]) {
 						if (!hschanged) {
 							lanerender.changeHispeed(false);
 							hschanged = true;
 						}
-					} else if (key[1] || key[3] || key[5]) {
+					} else if (key[1] || key[3] || key[5] || key[10] || key[12] || key[14]) {
 						if (!hschanged) {
 							lanerender.changeHispeed(true);
 							hschanged = true;
@@ -70,10 +71,10 @@ public class ControlInputProcessor {
 					}
 
 					// move lane cover by START + Scratch
-					if (key[7] | key[8]) {
+					if (key[7] || key[8] || key[16] || key[17]) {
 						long l = System.currentTimeMillis();
 						if (l - lanecovertiming > 50) {
-							lanerender.setLanecover(lanerender.getLanecover() + (key[7] ? 0.001f : -0.001f));
+							lanerender.setLanecover(lanerender.getLanecover() + (key[7] || key[16] ? 0.001f : -0.001f));
 							lanecovertiming = l;
 						}
 					}
@@ -96,26 +97,42 @@ public class ControlInputProcessor {
 				if (autoplay == 0) {
 					boolean[] key = input.getKeystate();
 					// change duration by SELECT + Scratch
-					if (key[7] | key[8]) {
-						long l = System.currentTimeMillis();
-						if (l - lanecovertiming > 50) {
-							lanerender.setGreenValue(lanerender.getGreenValue() + (key[7] ? 1 : -1));
-							lanecovertiming = l;
-						}
-					}
-					// change duration by SELECT + Keys
-					if (key[0] || key[2] || key[4] || key[6]) {
-						if (!hschanged) {
-							lanerender.setGreenValue(lanerender.getGreenValue() -1);
-							hschanged = true;
-						}
-					} else if (key[1] || key[3] || key[5]) {
-						if (!hschanged) {
-							lanerender.setGreenValue(lanerender.getGreenValue() +1);
-							hschanged = true;
+					if(player.getMode() == Mode.POPN_9K) {
+						if (key[1] || key[3] || key[5] || key[7]) {
+							if (!hschanged) {
+								lanerender.setGreenValue(lanerender.getGreenValue() -1);
+								hschanged = true;
+							}
+						} else if (key[0] || key[2] || key[4] || key[6] || key[8]) {
+							if (!hschanged) {
+								lanerender.setGreenValue(lanerender.getGreenValue() +1);
+								hschanged = true;
+							}
+						} else {
+							hschanged = false;
 						}
 					} else {
-						hschanged = false;
+						if (key[7] || key[8] || key[16] || key[17]) {
+							long l = System.currentTimeMillis();
+							if (l - lanecovertiming > 50) {
+								lanerender.setGreenValue(lanerender.getGreenValue() + (key[7] || key[16] ? 1 : -1));
+								lanecovertiming = l;
+							}
+						}
+						// change duration by SELECT + Keys
+						if (key[1] || key[3] || key[5] || key[10] || key[12] || key[14]) {
+							if (!hschanged) {
+								lanerender.setGreenValue(lanerender.getGreenValue() -1);
+								hschanged = true;
+							}
+						} else if (key[0] || key[2] || key[4] || key[6] || key[9] || key[11] || key[13] || key[15]) {
+							if (!hschanged) {
+								lanerender.setGreenValue(lanerender.getGreenValue() +1);
+								hschanged = true;
+							}
+						} else {
+							hschanged = false;
+						}
 					}
 				}
 			}
