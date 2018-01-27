@@ -83,8 +83,8 @@ class KeyInputProccessor {
 			final long deltatime = now - prevtime;
 			for (int s = 0; s < scratch.length; s++) {
 				scratch[s] += s % 2 == 0 ? 2160 - deltatime : deltatime;
-				final int key0 = laneProperty.getScratchKeyAssign()[s][0];
-				final int key1 = laneProperty.getScratchKeyAssign()[s][1];
+				final int key0 = laneProperty.getScratchKeyAssign()[s][1];
+				final int key1 = laneProperty.getScratchKeyAssign()[s][0];
 				if (keystate[key0] || auto_presstime[key0] != Long.MIN_VALUE) {
 					scratch[s] += deltatime * 2;
 				} else if (keystate[key1] || auto_presstime[key1] != Long.MIN_VALUE) {
