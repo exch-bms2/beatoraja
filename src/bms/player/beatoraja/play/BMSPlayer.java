@@ -894,6 +894,11 @@ public class BMSPlayer extends MainState {
 				return lane;
 			}
 			return 0;
+		case BARGRAPH_MUSIC_PROGRESS:
+			if (getTimer()[TIMER_PLAY] != Long.MIN_VALUE) {
+				return (float) (getNowTime() - getTimer()[TIMER_PLAY]) / playtime;
+			}
+			return 0;
 		case BARGRAPH_LOAD_PROGRESS:
 			float value = (getMainController().getAudioProcessor().getProgress() + bga.getProgress()) / 2;
 			return value;
