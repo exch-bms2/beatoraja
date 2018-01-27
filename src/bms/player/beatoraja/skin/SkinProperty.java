@@ -368,6 +368,17 @@ public class SkinProperty {
 
 	public static final int NUMBER_FOLDER_TOTALSONGS = 300;
 
+	public static final int NUMBER_TOTALNOTE_NORMAL = 350;
+	public static final int NUMBER_TOTALNOTE_LN = 351;
+	public static final int NUMBER_TOTALNOTE_SCRATCH = 352;
+	public static final int NUMBER_TOTALNOTE_BSS = 353;
+	public static final int NUMBER_TOTALNOTE_MINE = 354;
+
+	public static final int NUMBER_DENSITY_ENDPEAK = 364;
+	public static final int NUMBER_DENSITY_ENDPEAK_AFTERDOT = 365;
+
+	public static final int NUMBER_SONGGAUGE_TOTAL = 370;
+
 	public static final int VALUE_JUDGE_1P_DURATION = 525;
 	public static final int VALUE_JUDGE_2P_DURATION = 526;
 	public static final int VALUE_JUDGE_3P_DURATION = 527;
@@ -631,6 +642,8 @@ public class SkinProperty {
 	public static final int OPTION_UPDATE_IRRANK = 334;
 	public static final int OPTION_UPDATE_SCORERANK = 335;
 	public static final int OPTION_DRAW_SCORERANK = 1335;
+	public static final int OPTION_UPDATE_TARGET = 336;
+	public static final int OPTION_DRAW_TARGET = 1336;
 
 	public static final int OPTION_NOW_AAA_1P = 340;
 	public static final int OPTION_NOW_AA_1P = 341;

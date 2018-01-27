@@ -15,6 +15,7 @@ import bms.player.beatoraja.skin.lr2.LR2SkinCSVLoader;
 import bms.player.beatoraja.skin.lr2.LR2SkinHeaderLoader;
 import bms.player.beatoraja.song.SongData;
 
+import bms.player.beatoraja.song.SongInformation;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -345,64 +346,64 @@ public abstract class MainState {
 
 	public int getNumberValue(int id) {
 		switch (id) {
-		case NUMBER_JUDGETIMING:
-			return getMainController().getPlayerResource().getPlayerConfig().getJudgetiming();
+			case NUMBER_JUDGETIMING:
+				return getMainController().getPlayerResource().getPlayerConfig().getJudgetiming();
 			case NUMBER_CURRENT_FPS:
 				return Gdx.graphics.getFramesPerSecond();
 			case NUMBER_TIME_YEAR:
 				return main.getCurrnetTime().get(Calendar.YEAR);
-		case NUMBER_TIME_MONTH:
-			return main.getCurrnetTime().get(Calendar.MONTH) + 1;
-		case NUMBER_TIME_DAY:
-			return main.getCurrnetTime().get(Calendar.DATE);
-		case NUMBER_TIME_HOUR:
-			return main.getCurrnetTime().get(Calendar.HOUR_OF_DAY);
-		case NUMBER_TIME_MINUTE:
-			return main.getCurrnetTime().get(Calendar.MINUTE);
-		case NUMBER_TIME_SECOND:
-			return main.getCurrnetTime().get(Calendar.SECOND);
+			case NUMBER_TIME_MONTH:
+				return main.getCurrnetTime().get(Calendar.MONTH) + 1;
+			case NUMBER_TIME_DAY:
+				return main.getCurrnetTime().get(Calendar.DATE);
+			case NUMBER_TIME_HOUR:
+				return main.getCurrnetTime().get(Calendar.HOUR_OF_DAY);
+			case NUMBER_TIME_MINUTE:
+				return main.getCurrnetTime().get(Calendar.MINUTE);
+			case NUMBER_TIME_SECOND:
+				return main.getCurrnetTime().get(Calendar.SECOND);
 			case NUMBER_OPERATING_TIME_HOUR:
 				return (int) (main.getPlayTime() / 3600000);
 			case NUMBER_OPERATING_TIME_MINUTE:
 				return (int) (main.getPlayTime() / 60000) % 60;
 			case NUMBER_OPERATING_TIME_SECOND:
 				return (int) (main.getPlayTime() / 1000) % 60;
-		case NUMBER_PERFECT:
-			return getJudgeCount(0, true) + getJudgeCount(0, false);
-		case NUMBER_EARLY_PERFECT:
-			return getJudgeCount(0, true);
-		case NUMBER_LATE_PERFECT:
-			return getJudgeCount(0, false);
-		case NUMBER_GREAT:
-			return getJudgeCount(1, true) + getJudgeCount(1, false);
-		case NUMBER_EARLY_GREAT:
-			return getJudgeCount(1, true);
-		case NUMBER_LATE_GREAT:
-			return getJudgeCount(1, false);
-		case NUMBER_GOOD:
-			return getJudgeCount(2, true) + getJudgeCount(2, false);
-		case NUMBER_EARLY_GOOD:
-			return getJudgeCount(2, true);
-		case NUMBER_LATE_GOOD:
-			return getJudgeCount(2, false);
-		case NUMBER_BAD:
-			return getJudgeCount(3, true) + getJudgeCount(3, false);
-		case NUMBER_EARLY_BAD:
-			return getJudgeCount(3, true);
-		case NUMBER_LATE_BAD:
-			return getJudgeCount(3, false);
-		case NUMBER_POOR:
-			return getJudgeCount(4, true) + getJudgeCount(4, false);
-		case NUMBER_EARLY_POOR:
-			return getJudgeCount(4, true);
-		case NUMBER_LATE_POOR:
-			return getJudgeCount(4, false);
-		case NUMBER_MISS:
-			return getJudgeCount(5, true) + getJudgeCount(5, false);
-		case NUMBER_EARLY_MISS:
-			return getJudgeCount(5, true);
-		case NUMBER_LATE_MISS:
-			return getJudgeCount(5, false);
+			case NUMBER_PERFECT:
+				return getJudgeCount(0, true) + getJudgeCount(0, false);
+			case NUMBER_EARLY_PERFECT:
+				return getJudgeCount(0, true);
+			case NUMBER_LATE_PERFECT:
+				return getJudgeCount(0, false);
+			case NUMBER_GREAT:
+				return getJudgeCount(1, true) + getJudgeCount(1, false);
+			case NUMBER_EARLY_GREAT:
+				return getJudgeCount(1, true);
+			case NUMBER_LATE_GREAT:
+				return getJudgeCount(1, false);
+			case NUMBER_GOOD:
+				return getJudgeCount(2, true) + getJudgeCount(2, false);
+			case NUMBER_EARLY_GOOD:
+				return getJudgeCount(2, true);
+			case NUMBER_LATE_GOOD:
+				return getJudgeCount(2, false);
+			case NUMBER_BAD:
+				return getJudgeCount(3, true) + getJudgeCount(3, false);
+			case NUMBER_EARLY_BAD:
+				return getJudgeCount(3, true);
+			case NUMBER_LATE_BAD:
+				return getJudgeCount(3, false);
+			case NUMBER_POOR:
+				return getJudgeCount(4, true) + getJudgeCount(4, false);
+			case NUMBER_EARLY_POOR:
+				return getJudgeCount(4, true);
+			case NUMBER_LATE_POOR:
+				return getJudgeCount(4, false);
+			case NUMBER_MISS:
+				return getJudgeCount(5, true) + getJudgeCount(5, false);
+			case NUMBER_EARLY_MISS:
+				return getJudgeCount(5, true);
+			case NUMBER_LATE_MISS:
+				return getJudgeCount(5, false);
 			case NUMBER_TOTALEARLY:
 				int ecount = 0;
 				for (int i = 1; i < 6; i++) {
@@ -418,21 +419,21 @@ public abstract class MainState {
 			case NUMBER_COMBOBREAK:
 				return getJudgeCount(3, true) + getJudgeCount(3, false) + getJudgeCount(4, true) + getJudgeCount(4, false);
 			case NUMBER_TOTALNOTES:
-		case NUMBER_TOTALNOTES2:
-			if (getMainController().getPlayerResource().getSongdata() != null) {
-				return getMainController().getPlayerResource().getSongdata().getNotes();
-			}
-			return Integer.MIN_VALUE;
-		case NUMBER_MINBPM:
-			if (getMainController().getPlayerResource().getSongdata() != null) {
-				return getMainController().getPlayerResource().getSongdata().getMinbpm();
-			}
-			return Integer.MIN_VALUE;
-		case NUMBER_MAXBPM:
-			if (getMainController().getPlayerResource().getSongdata() != null) {
-				return getMainController().getPlayerResource().getSongdata().getMaxbpm();
-			}
-			return Integer.MIN_VALUE;
+			case NUMBER_TOTALNOTES2:
+				if (getMainController().getPlayerResource().getSongdata() != null) {
+					return getMainController().getPlayerResource().getSongdata().getNotes();
+				}
+				return Integer.MIN_VALUE;
+			case NUMBER_MINBPM:
+				if (getMainController().getPlayerResource().getSongdata() != null) {
+					return getMainController().getPlayerResource().getSongdata().getMinbpm();
+				}
+				return Integer.MIN_VALUE;
+			case NUMBER_MAXBPM:
+				if (getMainController().getPlayerResource().getSongdata() != null) {
+					return getMainController().getPlayerResource().getSongdata().getMaxbpm();
+				}
+				return Integer.MIN_VALUE;
 			case NUMBER_HISPEED_LR2:
 				if (getMainController().getPlayerResource().getSongdata() != null) {
 					SongData song = getMainController().getPlayerResource().getSongdata();
@@ -469,15 +470,15 @@ public abstract class MainState {
 				}
 				return Integer.MIN_VALUE;
 			case NUMBER_PLAYLEVEL:
-		case NUMBER_FOLDER_BEGINNER:
-		case NUMBER_FOLDER_NORMAL:
-		case NUMBER_FOLDER_HYPER:
-		case NUMBER_FOLDER_ANOTHER:
-		case NUMBER_FOLDER_INSANE:
-			if (getMainController().getPlayerResource().getSongdata() != null) {
-				return getMainController().getPlayerResource().getSongdata().getLevel();
-			}
-			return Integer.MIN_VALUE;
+			case NUMBER_FOLDER_BEGINNER:
+			case NUMBER_FOLDER_NORMAL:
+			case NUMBER_FOLDER_HYPER:
+			case NUMBER_FOLDER_ANOTHER:
+			case NUMBER_FOLDER_INSANE:
+				if (getMainController().getPlayerResource().getSongdata() != null) {
+					return getMainController().getPlayerResource().getSongdata().getLevel();
+				}
+				return Integer.MIN_VALUE;
 			case NUMBER_POINT:
 				return score.getNowScore();
 			case NUMBER_SCORE:
@@ -522,6 +523,56 @@ public abstract class MainState {
 			case NUMBER_DIFF_EXSCORE2:
 			case NUMBER_DIFF_TARGETSCORE:
 				return score.getNowEXScore() - score.getNowRivalScore();
+
+			case NUMBER_TOTALNOTE_NORMAL: {
+				final SongData song = getMainController().getPlayerResource().getSongdata();
+				if (song != null && song.getInformation() != null) {
+					return song.getInformation().getN();
+				}
+				return Integer.MIN_VALUE;
+			}
+			case NUMBER_TOTALNOTE_LN: {
+				final SongData song = getMainController().getPlayerResource().getSongdata();
+				if (song != null && song.getInformation() != null) {
+					return song.getInformation().getLn();
+				}
+				return Integer.MIN_VALUE;
+			}
+			case NUMBER_TOTALNOTE_SCRATCH: {
+				final SongData song = getMainController().getPlayerResource().getSongdata();
+				if (song != null && song.getInformation() != null) {
+					return song.getInformation().getS();
+				}
+				return Integer.MIN_VALUE;
+			}
+			case NUMBER_TOTALNOTE_BSS: {
+				final SongData song = getMainController().getPlayerResource().getSongdata();
+				if (song != null && song.getInformation() != null) {
+					return song.getInformation().getLs();
+				}
+				return Integer.MIN_VALUE;
+			}
+			case NUMBER_DENSITY_ENDPEAK: {
+				final SongData song = getMainController().getPlayerResource().getSongdata();
+				if (song != null && song.getInformation() != null) {
+					return (int) song.getInformation().getDensity();
+				}
+				return Integer.MIN_VALUE;
+			}
+			case NUMBER_DENSITY_ENDPEAK_AFTERDOT: {
+				final SongData song = getMainController().getPlayerResource().getSongdata();
+				if (song != null && song.getInformation() != null) {
+					return ((int) (song.getInformation().getDensity() * 100)) % 100;
+				}
+				return Integer.MIN_VALUE;
+			}
+			case NUMBER_SONGGAUGE_TOTAL: {
+				final SongData song = getMainController().getPlayerResource().getSongdata();
+				if (song != null && song.getInformation() != null) {
+					return (int) song.getInformation().getTotal();
+				}
+				return Integer.MIN_VALUE;
+			}
 		}
 		return 0;
 	}

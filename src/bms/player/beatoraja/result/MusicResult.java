@@ -550,7 +550,11 @@ public class MusicResult extends MainState {
 			return getScoreDataProperty().getNowRate() > getScoreDataProperty().getBestScoreRate();
 			case OPTION_DRAW_SCORERANK:
 				return getScoreDataProperty().getNowRate() == getScoreDataProperty().getBestScoreRate();
-		case OPTION_NO_REPLAYDATA:
+			case OPTION_UPDATE_TARGET:
+				return score.getExscore() > resource.getRivalScoreData();
+			case OPTION_DRAW_TARGET:
+				return score.getExscore() == resource.getRivalScoreData();
+			case OPTION_NO_REPLAYDATA:
 			return !getMainController().getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
 					resource.getPlayerConfig().getLnmode(), 0);
 		case OPTION_NO_REPLAYDATA2:
