@@ -567,7 +567,7 @@ public class JudgeManager {
 			coursecombo = 0;
 		}
 
-		this.judge[player[lane]][offset[lane]] = judge == 0 ? 1 : judge * 2 + (fast > 0 ? 0 : 1);
+		if (judge != 4) this.judge[player[lane]][offset[lane]] = judge == 0 ? 1 : judge * 2 + (fast > 0 ? 0 : 1);
 		if (judge <= ((PlaySkin)main.getSkin()).getJudgetimer()) {
 			main.getTimer()[SkinPropertyMapper.bombTimerId(player[lane], offset[lane])] = main.getNowTime();
 		}
