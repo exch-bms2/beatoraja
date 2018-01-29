@@ -2,6 +2,8 @@ package bms.player.beatoraja.play;
 
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
+import java.util.Arrays;
+
 import bms.model.Mode;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 
