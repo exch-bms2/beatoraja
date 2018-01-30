@@ -881,7 +881,7 @@ public class BMSPlayer extends MainState {
 		switch (id) {
 		case SLIDER_MUSIC_PROGRESS:
 			if (getTimer()[TIMER_PLAY] != Long.MIN_VALUE) {
-				return (float) (getNowTime() - getTimer()[TIMER_PLAY]) / playtime;
+				return Math.min((float) (getNowTime() - getTimer()[TIMER_PLAY]) / playtime , 1);
 			}
 			return 0;
 		case SLIDER_LANECOVER:
@@ -896,7 +896,7 @@ public class BMSPlayer extends MainState {
 			return 0;
 		case BARGRAPH_MUSIC_PROGRESS:
 			if (getTimer()[TIMER_PLAY] != Long.MIN_VALUE) {
-				return (float) (getNowTime() - getTimer()[TIMER_PLAY]) / playtime;
+				return Math.min((float) (getNowTime() - getTimer()[TIMER_PLAY]) / playtime , 1);
 			}
 			return 0;
 		case BARGRAPH_LOAD_PROGRESS:
