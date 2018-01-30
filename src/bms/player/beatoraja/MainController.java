@@ -435,7 +435,7 @@ public class MainController extends ApplicationAdapter {
                 } else {
                     Gdx.graphics.setFullscreenMode(currentMode);
                 }
-                config.setFullscreen(!fullscreen);
+                config.setDisplaymode(fullscreen ? Config.DisplayMode.WINDOW : Config.DisplayMode.FULLSCREEN);
                 input.getFunctiontime()[3] = 0;
             }
 

@@ -15,10 +15,8 @@ public class Config {
 	// TODO プレイヤー毎に異なる見込みの大きい要素をPlayerConfigに移動
 
 	private String playername;
-	/**
-	 * フルスクリーン
-	 */
-	private boolean fullscreen;
+
+	private DisplayMode displaymode = DisplayMode.WINDOW;
 	/**
 	 * 垂直同期
 	 */
@@ -186,14 +184,6 @@ public class Config {
 
 	public void setPlayername(String playername) {
 		this.playername = playername;
-	}
-
-	public boolean isFullscreen() {
-		return fullscreen;
-	}
-
-	public void setFullscreen(boolean fullscreen) {
-		this.fullscreen = fullscreen;
 	}
 
 	public boolean isVsync() {
@@ -458,5 +448,15 @@ public class Config {
 		this.updatesong = updatesong;
 	}
 
-	// TODO これ以降の値はPlayerConfigに移行する	
+	public DisplayMode getDisplaymode() {
+		return displaymode;
+	}
+
+	public void setDisplaymode(DisplayMode displaymode) {
+		this.displaymode = displaymode;
+	}
+
+	public enum DisplayMode {
+		FULLSCREEN,BORDERLESS,WINDOW;
+	}
 }

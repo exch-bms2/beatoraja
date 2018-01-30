@@ -86,7 +86,18 @@ public class MainLoader extends Application {
 			cfg.height = config.getResolution().height;
 
 			// fullscreen
-			cfg.fullscreen = config.isFullscreen();
+			switch (config.getDisplaymode()) {
+				case FULLSCREEN:
+					cfg.fullscreen = true;
+					break;
+				case BORDERLESS:
+					System.setProperty("org.lwjgl.opengl.Window.undecorated", "true");
+					cfg.fullscreen = false;
+					break;
+				case WINDOW:
+					cfg.fullscreen = false;
+					break;
+			}
 			// vSync
 			cfg.vSyncEnabled = config.isVsync();
 			cfg.backgroundFPS = config.getMaxFramePerSecond();

@@ -112,7 +112,7 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private Spinner<Integer> scrolldurationhigh;
 	@FXML
-	private CheckBox fullscreen;
+	private ComboBox<Config.DisplayMode> displaymode;
 	@FXML
 	private CheckBox vsync;
 	@FXML
@@ -262,6 +262,7 @@ public class PlayConfigurationView implements Initializable {
 				return new ResolutionListCell();
 			}
 		});
+		displaymode.getItems().setAll(Config.DisplayMode.values());
 		resolution.setButtonCell(new ResolutionListCell());
 		String[] scoreOptions = new String[] { "OFF", "MIRROR", "RANDOM", "R-RANDOM", "S-RANDOM", "SPIRAL", "H-RANDOM",
 				"ALL-SCR", "RANDOM-EX", "S-RANDOM-EX" };
@@ -312,7 +313,7 @@ public class PlayConfigurationView implements Initializable {
 	 */
 	public void update(Config config) {
 		this.config = config;
-		fullscreen.setSelected(config.isFullscreen());
+		displaymode.setValue(config.getDisplaymode());
 		updateResolutions();
 		resolution.setValue(config.getResolution());
 		vsync.setSelected(config.isVsync());
@@ -370,7 +371,7 @@ public class PlayConfigurationView implements Initializable {
 	public void updateResolutions() {
 		Resolution oldValue = resolution.getValue();
 		resolution.getItems().clear();
-		if (fullscreen.isSelected()) {
+		if (displaymode.getValue() == Config.DisplayMode.FULLSCREEN) {
 			Graphics.DisplayMode[] displays = MainLoader.getAvailableDisplayMode();
 			for(Resolution r : Resolution.values()) {
 				for(Graphics.DisplayMode display : displays) {
@@ -459,7 +460,7 @@ public class PlayConfigurationView implements Initializable {
 		config.setPlayername(players.getValue());
 
 		config.setResolution(resolution.getValue());
-		config.setFullscreen(fullscreen.isSelected());
+		config.setDisplaymode(displaymode.getValue());
 		config.setVsync(vsync.isSelected());
 		config.setBga(bgaop.getValue());
 		config.setBgaExpand(bgaexpand.getValue());

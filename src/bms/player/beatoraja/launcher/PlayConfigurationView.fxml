@@ -52,7 +52,15 @@
                      <children>
                         <VBox prefHeight="200.0" prefWidth="552.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                            <children>
-                              <CheckBox fx:id="fullscreen" mnemonicParsing="false" onAction="#updateResolutions" prefHeight="25.0" prefWidth="150.0" text="%FULLSCREEN" />
+                               <HBox alignment="CENTER_LEFT" prefHeight="30.0" prefWidth="552.0">
+                                   <children>
+                                       <Label text="%DISPLAYMODE">
+                                           <HBox.margin>
+                                               <Insets right="10.0" />
+                                           </HBox.margin></Label>
+                                       <ComboBox fx:id="displaymode" prefWidth="200.0" />
+                                   </children>
+                               </HBox>
                               <HBox alignment="CENTER_LEFT" prefHeight="30.0" prefWidth="552.0">
                                  <children>
                                     <Label text="%RESOLUTION">
