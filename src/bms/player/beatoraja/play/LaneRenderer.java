@@ -491,8 +491,13 @@ public class LaneRenderer {
 		
 		//PMS見逃しPOOR描画
 		if (dstNote2 != Integer.MIN_VALUE) {
-			//遅BADから落下開始
+			//遅BADからノースピの速度で落下
 			final long badTime = Math.abs( main.getJudgeManager().getJudgeTable(false)[2][0] ) * 1000;
+			double stopTime;
+			double orgy2 = dstNote2;
+			if(orgy2 < -laneregion[0].height) orgy2 = -laneregion[0].height;
+			if(orgy2 > orgy) orgy2 = orgy;
+			final double rxhs2 = (hu - hl);
 			int nowPos = timelines.length - 1;
 			for (int i = pos; i < timelines.length; i++) {
 				final TimeLine tl = timelines[i];
@@ -501,43 +506,29 @@ public class LaneRenderer {
 					break;
 				}
 			}
-			double orgy2 = dstNote2;
-			if(orgy2 < -laneregion[0].height) orgy2 = -laneregion[0].height;
-			if(orgy2 > orgy) orgy2 = orgy;
-			final double rxhs2 = (hu - hl);
-			y = orgy;
 			for (int i = nowPos; i >= 0 && y >= orgy2; i--) {
 				final TimeLine tl = timelines[i];
-				if (tl.getMicroTime() + tl.getMicroStop() < (microtime - badTime)) {
-					if (i + 1 < timelines.length) {
-						final TimeLine nexttl = timelines[i + 1];
-						//次のタイムラインが判定ラインより下
-						if (nexttl.getMicroTime() + nexttl.getMicroStop() < (microtime - badTime)) {
-							y -= (nexttl.getSection() - tl.getSection()) * rxhs2;
-						//次のタイムラインが判定ラインより上
-						} else if (nexttl.getMicroTime() > microtime) {
-							y -= (nexttl.getSection() - tl.getSection()) * ((microtime - badTime) - tl.getMicroTime() - tl.getMicroStop())
-									/ (nexttl.getMicroTime() - tl.getMicroTime() - tl.getMicroStop()) * rxhs2;
-						//次のタイムラインが判定ラインに重なっている
-						} else {
-							long totalStop = 0;
-							for(int j = i+1 ; j < timelines.length && timelines[j].getMicroTime() <= microtime && timelines[j].getMicroTime() + timelines[j].getMicroStop() >= (microtime - badTime) ; j++) {
-								if (timelines[j].getMicroTime() <= microtime && timelines[j].getMicroTime() + timelines[j].getMicroStop() >= microtime) {
-									totalStop += microtime - timelines[j].getMicroTime();
-								} else if (timelines[j].getMicroTime() + timelines[j].getMicroStop() < microtime && timelines[j].getMicroTime() + timelines[j].getMicroStop() >= (microtime - badTime)) {
-									totalStop += timelines[j].getMicroStop();
-								}
-							}
-							y -= (nexttl.getSection() - tl.getSection()) * ((microtime - badTime) - totalStop - tl.getMicroTime() - tl.getMicroStop())
-									/ (nexttl.getMicroTime() - tl.getMicroTime() - tl.getMicroStop()) * rxhs2;
+				y = orgy;
+				if (i + 1 < timelines.length) {
+					int j;
+					for (j = i; j + 1 < timelines.length && timelines[j + 1].getMicroTime() < microtime; j++) {
+						if(timelines[j + 1].getMicroTime() > tl.getMicroTime() + tl.getMicroStop() + badTime) {
+							stopTime = Math.max(tl.getMicroTime() + tl.getMicroStop() + badTime - timelines[j].getMicroTime() - timelines[j].getMicroStop(), 0);
+							y -= (timelines[j + 1].getMicroTime() - timelines[j].getMicroTime() - timelines[j].getMicroStop() - stopTime) * rxhs2 * timelines[j].getBPM() / 240000000;
+							//4分の画面上での長さ rxhs2 / 4 [pixel] 4分の時間 60 / BPM [second] 落下速度 rxhs2 * BPM / 240 [pixel/second]
 						}
-					} else {
-						if (i > 0) {
-							final TimeLine prevtl = timelines[i - 1];
-							y -= (tl.getSection() - prevtl.getSection()) * ((microtime - badTime) - tl.getMicroTime() - tl.getMicroStop())
-									/ (tl.getMicroTime() - prevtl.getMicroTime() - prevtl.getMicroStop()) * rxhs2;
-						} else {
-							y -= tl.getSection() * ((microtime - badTime) - tl.getMicroTime() - tl.getMicroStop()) / tl.getMicroTime() * rxhs2;
+					}
+					if(timelines[j].getMicroTime() + timelines[j].getMicroStop() < microtime) {
+						if(microtime > tl.getMicroTime() + tl.getMicroStop() + badTime) {
+							stopTime = Math.max(tl.getMicroTime() + tl.getMicroStop() + badTime - timelines[j].getMicroTime() - timelines[j].getMicroStop(), 0);
+							y -= (microtime - timelines[j].getMicroTime() - timelines[j].getMicroStop() - stopTime) * rxhs2 * timelines[j].getBPM() / 240000000;
+						}
+					}
+				} else {
+					if(tl.getMicroTime() + tl.getMicroStop() < microtime) {
+						if(microtime > tl.getMicroTime() + tl.getMicroStop() + badTime) {
+							stopTime = Math.max(tl.getMicroTime() + tl.getMicroStop() + badTime - tl.getMicroTime() - tl.getMicroStop(), 0);
+							y -= (microtime - tl.getMicroTime() - tl.getMicroStop() - stopTime) * rxhs2 * tl.getBPM() / 240000000;
 						}
 					}
 				}
