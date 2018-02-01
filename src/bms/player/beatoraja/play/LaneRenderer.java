@@ -491,44 +491,58 @@ public class LaneRenderer {
 		
 		//PMS見逃しPOOR描画
 		if (dstNote2 != Integer.MIN_VALUE) {
-			//遅BADから落下開始
+			//遅BADからノースピの速度で落下
 			final long badTime = Math.abs( main.getJudgeManager().getJudgeTable(false)[2][0] ) * 1000;
+			double stopTime;
 			double orgy2 = dstNote2;
 			if(orgy2 < -laneregion[0].height) orgy2 = -laneregion[0].height;
 			if(orgy2 > orgy) orgy2 = orgy;
 			final double rxhs2 = (hu - hl);
-			y = orgy;
-			if (1 < timelines.length && timelines[1].getMicroTime() > microtime) {
-				y -= timelines[1].getSection() * ((microtime - badTime) - timelines[0].getMicroTime() - timelines[0].getMicroStop()) / (timelines[1].getMicroTime() - timelines[0].getMicroTime() - timelines[0].getMicroStop()) * rxhs2 * timelines[0].getBPM() / timelines[1].getBPM();
-			} else if(1 < timelines.length) {
-				y -= timelines[1].getSection() * ((timelines[1].getMicroTime() - badTime) - timelines[0].getMicroTime() - timelines[0].getMicroStop()) / (timelines[1].getMicroTime() - timelines[0].getMicroTime() - timelines[0].getMicroStop()) * rxhs2 * timelines[0].getBPM() / timelines[1].getBPM();
-				int posIndex;
-				for (posIndex = 1; posIndex + 1 < timelines.length && timelines[posIndex + 1].getMicroTime() <= microtime; posIndex++) {
-					y -= timelines[1].getSection() * (timelines[posIndex + 1].getMicroTime() - timelines[posIndex].getMicroTime() - timelines[posIndex].getMicroStop()) / (timelines[1].getMicroTime() - timelines[0].getMicroTime() - timelines[0].getMicroStop()) * rxhs2 * timelines[posIndex].getBPM() / timelines[1].getBPM();
+			int nowPos = timelines.length - 1;
+			for (int i = pos; i < timelines.length; i++) {
+				final TimeLine tl = timelines[i];
+				if (tl.getMicroTime() >= microtime) {
+					nowPos = i;
+					break;
 				}
-				if(posIndex + 1 < timelines.length && timelines[posIndex].getMicroTime() + timelines[posIndex].getMicroStop() < microtime && timelines[posIndex + 1].getMicroTime() > microtime) y -= timelines[1].getSection() * (microtime - timelines[posIndex].getMicroTime() - timelines[posIndex].getMicroStop()) / (timelines[1].getMicroTime() - timelines[0].getMicroTime() - timelines[0].getMicroStop()) * rxhs2 * timelines[posIndex].getBPM() / timelines[1].getBPM();
-				else if(timelines.length != 2 && posIndex + 1 == timelines.length && timelines[posIndex].getMicroTime() + timelines[posIndex].getMicroStop() < microtime) y -= timelines[1].getSection() * (microtime - timelines[posIndex].getMicroTime() - timelines[posIndex].getMicroStop()) / (timelines[1].getMicroTime() - timelines[0].getMicroTime() - timelines[0].getMicroStop()) * rxhs2 * timelines[posIndex].getBPM() / timelines[1].getBPM();
-				else if(timelines.length == 2 && posIndex + 1 == timelines.length && timelines[posIndex].getMicroTime() + timelines[posIndex].getMicroStop() < microtime) y -= timelines[1].getSection() * (microtime - timelines[posIndex].getMicroTime() - timelines[posIndex].getMicroStop()) / (timelines[1].getMicroTime() - timelines[0].getMicroTime() - timelines[0].getMicroStop()) * rxhs2 * timelines[posIndex].getBPM() / timelines[0].getBPM();
-			} else {
-				y -= timelines[0].getSection() * ((microtime - badTime) - timelines[0].getMicroTime() - timelines[0].getMicroStop()) / timelines[0].getMicroTime() * rxhs2;
 			}
-			for (int i = 0 ; i < timelines.length && timelines[i].getMicroTime() <= microtime; i++) {
-				if (i > 0) {
-					y += (timelines[i].getSection() - timelines[i - 1].getSection()) * rxhs2;
+			for (int i = nowPos; i >= 0 && y >= orgy2; i--) {
+				final TimeLine tl = timelines[i];
+				y = orgy;
+				if (i + 1 < timelines.length) {
+					int j;
+					for (j = i; j + 1 < timelines.length && timelines[j + 1].getMicroTime() < microtime; j++) {
+						if(timelines[j + 1].getMicroTime() > tl.getMicroTime() + tl.getMicroStop() + badTime) {
+							stopTime = Math.max(tl.getMicroTime() + tl.getMicroStop() + badTime - timelines[j].getMicroTime() - timelines[j].getMicroStop(), 0);
+							y -= (timelines[j + 1].getMicroTime() - timelines[j].getMicroTime() - timelines[j].getMicroStop() - stopTime) * rxhs2 * timelines[j].getBPM() / 240000000;
+							//4分の画面上での長さ rxhs2 / 4 [pixel] 4分の時間 60 / BPM [second] 落下速度 rxhs2 * BPM / 240 [pixel/second]
+						}
+					}
+					if(timelines[j].getMicroTime() + timelines[j].getMicroStop() < microtime) {
+						if(microtime > tl.getMicroTime() + tl.getMicroStop() + badTime) {
+							stopTime = Math.max(tl.getMicroTime() + tl.getMicroStop() + badTime - timelines[j].getMicroTime() - timelines[j].getMicroStop(), 0);
+							y -= (microtime - timelines[j].getMicroTime() - timelines[j].getMicroStop() - stopTime) * rxhs2 * timelines[j].getBPM() / 240000000;
+						}
+					}
+				} else {
+					if(tl.getMicroTime() + tl.getMicroStop() < microtime) {
+						if(microtime > tl.getMicroTime() + tl.getMicroStop() + badTime) {
+							stopTime = Math.max(tl.getMicroTime() + tl.getMicroStop() + badTime - tl.getMicroTime() - tl.getMicroStop(), 0);
+							y -= (microtime - tl.getMicroTime() - tl.getMicroStop() - stopTime) * rxhs2 * tl.getBPM() / 240000000;
+						}
+					}
 				}
 				// ノート描画
-				if(y >= orgy2) {
-					for (int lane = 0; lane < laneregion.length; lane++) {
-						final float scale = lanes[lane].scale;
-						final Note note = timelines[i].getNote(lane);
-						if (note != null) {
-							if (note instanceof NormalNote) {
-								// draw normal note
-								if ( ((note.getState() == 0 || note.getState() >= 4) && timelines[i].getMicroTime() <= microtime)) {
-									final TextureRegion s = noteimage[lane];
-									if(y > orgy) sprite.draw(s, laneregion[lane].x, (float) orgy, laneregion[lane].width, scale);
-									else sprite.draw(s, laneregion[lane].x, (float) y, laneregion[lane].width, scale);
-								}
+				for (int lane = 0; lane < laneregion.length; lane++) {
+					final float scale = lanes[lane].scale;
+					final Note note = tl.getNote(lane);
+					if (note != null) {
+						if (note instanceof NormalNote) {
+							// draw normal note
+							if ( ((note.getState() == 0 || note.getState() >= 4) && tl.getMicroTime() <= microtime) && y >= orgy2) {
+								final TextureRegion s = noteimage[lane];
+								if(y > orgy) sprite.draw(s, laneregion[lane].x, (float) orgy, laneregion[lane].width, scale);
+								else sprite.draw(s, laneregion[lane].x, (float) y, laneregion[lane].width, scale);
 							}
 						}
 					}
