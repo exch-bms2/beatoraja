@@ -143,6 +143,7 @@ public class FFmpegProcessor implements MovieProcessor {
 					fps = 30;
 				}
 				long start = 0;
+				long offset = grabber.getTimestamp();
 				int framecount = 0;
 				Frame frame = null;
 				boolean halt = false;
@@ -154,11 +155,15 @@ public class FFmpegProcessor implements MovieProcessor {
 							sleep(3600000);
 						} catch (InterruptedException e) {
 
-						}						
-					} else if (time >= framecount * 1000 / fps) {
-						while (time >= framecount * 1000 / fps || framecount % fpsd != 0) {
+						}
+					} else if (time >= (grabber.getTimestamp() - offset) / 1000) {
+						while (time >= (grabber.getTimestamp() - offset) / 1000 || framecount % fpsd != 0) {
 							frame = grabber.grabImage();
+							if(frame == null) {
+								break;
+							}
 							framecount++;
+//							System.out.println("time : " + grabber.getTimestamp() + " --- " + time);
 						}
 						if (frame == null) {
 							eof = true;
@@ -179,7 +184,7 @@ public class FFmpegProcessor implements MovieProcessor {
 							}
 						}
 					} else {
-						final long sleeptime = (long) (framecount * 1000 / fps - time + 1);
+						final long sleeptime = (long) ((grabber.getTimestamp() - offset) / 1000 - time + 1);
 						if (sleeptime > 0) {
 							try {
 								sleep(sleeptime);
@@ -196,9 +201,11 @@ public class FFmpegProcessor implements MovieProcessor {
 							pixmap = null;
 //							grabber.start();
 							grabber.restart();
+							grabber.grabFrame();
 							eof = false;
 							start = player != null ? player.getNowTime() - player.getTimer()[TIMER_PLAY] : (System.nanoTime() / 1000000);
-							framecount = 0;
+							offset = grabber.getTimestamp();
+							framecount = 1;
 //							System.out.println("movie restart - starttime : " + start);
 							break;
 						case LOOP:
@@ -206,9 +213,11 @@ public class FFmpegProcessor implements MovieProcessor {
 							pixmap = null;
 //							grabber.start();
 							grabber.restart();
+							grabber.grabFrame();
 							eof = false;
 							start = player != null ? player.getNowTime() - player.getTimer()[TIMER_PLAY] : (System.nanoTime() / 1000000);
-							framecount = 0;
+							offset = grabber.getTimestamp();
+							framecount = 1;
 //							System.out.println("movie restart - starttime : " + start);
 							break;
 						case STOP:
