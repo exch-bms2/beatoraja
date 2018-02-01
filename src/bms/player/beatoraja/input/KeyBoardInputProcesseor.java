@@ -28,16 +28,16 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 	/**
 	 * 数字
 	 */
-	private int[] numbers = new int[] { Keys.NUM_0, Keys.NUM_1, Keys.NUM_2, Keys.NUM_3, Keys.NUM_4, Keys.NUM_5,
+	private final int[] numbers = new int[] { Keys.NUM_0, Keys.NUM_1, Keys.NUM_2, Keys.NUM_3, Keys.NUM_4, Keys.NUM_5,
 			Keys.NUM_6, Keys.NUM_7, Keys.NUM_8, Keys.NUM_9 };
 	/**
 	 * カーソル
 	 */
-	private int[] cover = new int[] { Keys.UP, Keys.DOWN, Keys.LEFT, Keys.RIGHT };
+	private final int[] cover = new int[] { Keys.UP, Keys.DOWN, Keys.LEFT, Keys.RIGHT };
 	/**
 	 * 機能
 	 */
-	private int[] function = new int[] { Keys.F1, Keys.F2, Keys.F3, Keys.F4, Keys.F5, Keys.F6, Keys.F7, Keys.F8,
+	private final int[] function = new int[] { Keys.F1, Keys.F2, Keys.F3, Keys.F4, Keys.F5, Keys.F6, Keys.F7, Keys.F8,
 			Keys.F9, Keys.F10, Keys.F11, Keys.F12 };
 	/**
 	 * 終了キー
@@ -52,7 +52,23 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 
 	private boolean enable = true;
 
+	/**
+	 * 画面の解像度。マウスの入力イベント処理で使用
+	 */
 	private Resolution resolution;
+
+	/**
+	 * 各キーのon/off状態
+	 */
+	private boolean[] keystate = new boolean[256];
+	/**
+	 * 各キーの状態変化時間
+	 */
+	private long[] keytime = new long[256];
+	/**
+	 * キーの最少入力感覚
+	 */
+	private int duration;
 
 	public KeyBoardInputProcesseor(BMSPlayerInputProcessor bmsPlayerInputProcessor, KeyboardConfig config, Resolution resolution) {
 		super(Type.KEYBOARD);
@@ -84,10 +100,6 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 	public boolean keyUp(int keycode) {
 		return true;
 	}
-
-	private boolean[] keystate = new boolean[256];
-	private long[] keytime = new long[256];
-	private int duration;
 
 	public void clear() {
 		// Arrays.fill(keystate, false);
@@ -155,6 +167,7 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 	}
 
 	public boolean mouseMoved(int arg0, int arg1) {
+		this.bmsPlayerInputProcessor.setMouseMoved(true);
 		return false;
 	}
 
@@ -165,17 +178,17 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 
 	public boolean touchDown(int x, int y, int point, int button) {
 		this.bmsPlayerInputProcessor.mousebutton = button;
-		this.bmsPlayerInputProcessor.mousex = (int) (x * resolution.width / Gdx.graphics.getWidth());
-		this.bmsPlayerInputProcessor.mousey = (int) (resolution.height - y * resolution.height
-				/ Gdx.graphics.getHeight());
+		this.bmsPlayerInputProcessor.mousex = x * resolution.width / Gdx.graphics.getWidth();
+		this.bmsPlayerInputProcessor.mousey = resolution.height - y * resolution.height
+				/ Gdx.graphics.getHeight();
 		this.bmsPlayerInputProcessor.mousepressed = true;
 		return false;
 	}
 
 	public boolean touchDragged(int x, int y, int point) {
-		this.bmsPlayerInputProcessor.mousex = (int) (x * resolution.width / Gdx.graphics.getWidth());
-		this.bmsPlayerInputProcessor.mousey = (int) (resolution.height - y * resolution.height
-				/ Gdx.graphics.getHeight());
+		this.bmsPlayerInputProcessor.mousex = x * resolution.width / Gdx.graphics.getWidth();
+		this.bmsPlayerInputProcessor.mousey = resolution.height - y * resolution.height
+				/ Gdx.graphics.getHeight();
 		this.bmsPlayerInputProcessor.mousedragged = true;
 		return false;
 	}

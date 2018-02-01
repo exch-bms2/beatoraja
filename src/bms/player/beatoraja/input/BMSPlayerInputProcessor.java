@@ -118,6 +118,7 @@ public class BMSPlayerInputProcessor {
 	int mousebutton;
 	boolean mousepressed;
 	boolean mousedragged;
+	private boolean mouseMoved = false;
 
 	int scroll;
 
@@ -400,6 +401,14 @@ public class BMSPlayerInputProcessor {
 
 	public void setMouseDragged() {
 		mousedragged = false;
+	}
+
+	public boolean isMouseMoved() {
+		return mouseMoved;
+	}
+
+	public void setMouseMoved(boolean mouseMoved) {
+		this.mouseMoved = mouseMoved;
 	}
 
 	public int getScroll() {

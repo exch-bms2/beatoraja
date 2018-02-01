@@ -67,6 +67,7 @@ public class MainController extends ApplicationAdapter {
 	 */
 	private final long boottime = System.currentTimeMillis();
 	private final Calendar cl = Calendar.getInstance();
+	private long mouseMovedTime;
 
 	private BMSPlayer bmsplayer;
 	private MusicDecide decide;
@@ -254,12 +255,6 @@ public class MainController extends ApplicationAdapter {
 			break;
 		}
 		
-		if(state == STATE_PLAYBMS) {
-		    Mouse.setGrabbed(true);
-		} else {
-		    Mouse.setGrabbed(false);
-		}
-
 		if (newState != null && current != newState) {
 			Arrays.fill(timer, Long.MIN_VALUE);
 			if(current != null) {
@@ -421,7 +416,14 @@ public class MainController extends ApplicationAdapter {
                 current.getSkin().mouseDragged(current, input.getMouseButton(), input.getMouseX(), input.getMouseY());
             }
 
-            // FPS表示切替
+            // マウスカーソル表示判定
+            if(input.isMouseMoved()) {
+            	input.setMouseMoved(false);
+            	mouseMovedTime = time;
+			}
+			Mouse.setGrabbed(current == bmsplayer && time > mouseMovedTime + 5000);
+
+			// FPS表示切替
             if (input.getFunctionstate()[0] && input.getFunctiontime()[0] != 0) {
                 showfps = !showfps;
                 input.getFunctiontime()[0] = 0;
