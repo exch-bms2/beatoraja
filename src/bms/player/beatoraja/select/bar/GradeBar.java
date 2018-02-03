@@ -19,7 +19,7 @@ public class GradeBar extends SelectableBar {
     public GradeBar(String name, SongData[] songs, CourseData course) {
         this.songs = songs;
         this.name = name;
-        this.course = course;
+        this.course = course;        
     }
 
     public SongData[] getSongDatas() {
@@ -28,12 +28,12 @@ public class GradeBar extends SelectableBar {
 
     @Override
     public String getTitle() {
-        return (course.isClassCourse() ? "段位認定 " : "") + name;
+        return name;
     }
 
     public boolean existsAllSongs() {
         for (SongData song : songs) {
-            if (song == null) {
+            if (song == null || song.getPath() == null) {
                 return false;
             }
         }

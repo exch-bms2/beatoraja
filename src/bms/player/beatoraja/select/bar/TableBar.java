@@ -67,20 +67,18 @@ public class TableBar extends DirectoryBar {
 		SongData[] songs = selector.getSongDatabase().getSongDatas(hashset.toArray(new String[hashset.size()]));
 
 		grades = new GradeBar[courses.length];
-		List<SongData> songlist = new ArrayList<SongData>();
 		for (int i = 0;i < courses.length;i++) {
-			for (SongData hash : courses[i].getSong()) {
-				SongData song = null;
+			SongData[] songlist = new SongData[courses[i].getSong().length];
+			for (int j = 0;j < songlist.length;j++) {
+				final SongData hash = songlist[j] = courses[i].getSong()[j];
 				for(SongData sd :songs) {
 					if((hash.getMd5().length() > 0 && hash.getMd5().equals(sd.getMd5())) || (hash.getSha256().length() > 0 && hash.getSha256().equals(sd.getSha256()))) {
-						song = sd;
+						songlist[j] = sd;
 						break;
 					}
 				}
-				songlist.add(song);
 			}
-			grades[i] = new GradeBar(courses[i].getName(), songlist.toArray(new SongData[songlist.size()]), courses[i]);
-			songlist.clear();
+			grades[i] = new GradeBar(courses[i].getName(), songlist, courses[i]);
 		}
 		
 		children = new Bar[levels.length + grades.length];
