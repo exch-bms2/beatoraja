@@ -1,5 +1,7 @@
 package bms.player.beatoraja.play.bga;
 
+import static bms.player.beatoraja.skin.SkinProperty.TIMER_PLAY;
+
 import java.nio.file.*;
 import java.util.logging.Logger;
 
@@ -8,15 +10,11 @@ import bms.model.TimeLine;
 import bms.player.beatoraja.Config;
 import bms.player.beatoraja.PlayerConfig;
 import bms.player.beatoraja.ResourcePool;
-import bms.player.beatoraja.ShaderManager;
 import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.*;
-import com.badlogic.gdx.graphics.Texture.TextureFilter;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.IntMap;
@@ -59,7 +57,7 @@ public class BGAProcessor {
 
 	};
 
-	public static final String[] mov_extension = { "mpg", "mpeg", "m1v", "m2v", "avi", "wmv", "mp4" };
+	public static final String[] mov_extension = { "mpg", "mpeg", "m1v", "m2v", "m4v", "avi", "wmv", "mp4" };
 
 	/**
 	 * BGAイメージのキャッシュ枚数
@@ -209,7 +207,9 @@ public class BGAProcessor {
 		for (MovieProcessor mp : mpgmap.values()) {
 			mp.stop();				
 			if (mp instanceof FFmpegProcessor) {
-				((FFmpegProcessor) mp).setBMSPlayer(player);
+				((FFmpegProcessor) mp).setTimerObserver(() -> {
+					return (player.getNowTime() - player.getTimer()[TIMER_PLAY]) * 1000;
+				});
 			}
 		}
 		playingbgaid = -1;
@@ -249,23 +249,27 @@ public class BGAProcessor {
 			}
 
 			if (tl.getTime() > prevrendertime) {
-				if (tl.getBGA() == -2) {
+				final int bga = tl.getBGA();
+				if (bga == -2) {
 					playingbgaid = -1;
 					rbga = false;
-				} else if (tl.getBGA() >= 0) {
-					playingbgaid = tl.getBGA();
+				} else if (bga >= 0) {
+					playingbgaid = bga;
 					rbga = false;
 				}
-				if (tl.getLayer() == -2) {
+				
+				final int layer = tl.getLayer();
+				if (layer == -2) {
 					playinglayerid = -1;
 					rlayer = false;
-				} else if (tl.getLayer() >= 0) {
-					playinglayerid = tl.getLayer();
+				} else if (layer >= 0) {
+					playinglayerid = layer;
 					rlayer = false;
 				}
 
-				if (tl.getPoor() != null && tl.getPoor().length > 0) {
-					misslayer = tl.getPoor();
+				final int[] poor = tl.getPoor();
+				if (poor != null && poor.length > 0) {
+					misslayer = poor;
 				}
 			} else {
 				pos++;
