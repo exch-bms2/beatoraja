@@ -281,7 +281,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 		addCommandWord(new CommandWord("DST_NOTE2") {
 			@Override
 			public void execute(String[] str) {
-				lanerender.setDstNote2((int) (dsth - (Integer.parseInt(str[1]) + scale[0] * srch / dsth)));
+				lanerender.setDstNote2((int) (dsth - (Integer.parseInt(str[1]) * dsth / srch + scale[0])));
 			}
 		});
 
