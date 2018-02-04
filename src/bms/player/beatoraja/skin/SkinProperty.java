@@ -673,8 +673,11 @@ public class SkinProperty {
 
 	public static final int OFFSET_NOTES_1P = 30;
 	public static final int OFFSET_JUDGE_1P = 32;
+	public static final int OFFSET_JUDGEDETAIL_1P = 33;
 	public static final int OFFSET_JUDGE_2P = 32;
+	public static final int OFFSET_JUDGEDETAIL_2P = 33;
 	public static final int OFFSET_JUDGE_3P = 32;
+	public static final int OFFSET_JUDGEDETAIL_3P = 33;
 
 	// オフセットのユーザー定義は40番以降を使用して下さい
 

@@ -51,6 +51,7 @@ public class LR2SkinHeaderLoader extends LR2SkinLoader {
 
 						offsets.add(new CustomOffset("Notes offset", SkinProperty.OFFSET_NOTES_1P, false, false, false, true, false, false));
 						offsets.add(new CustomOffset("Judge offset", SkinProperty.OFFSET_JUDGE_1P, true, true, true, true, false, true));
+						offsets.add(new CustomOffset("Judge Detail offset", SkinProperty.OFFSET_JUDGEDETAIL_1P, true, true, true, true, false, true));
 				}
 			}
 		});

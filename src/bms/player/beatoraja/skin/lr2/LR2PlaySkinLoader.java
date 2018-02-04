@@ -704,22 +704,23 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 		final int[] VALUE_JUDGE_DURATION = { VALUE_JUDGE_1P_DURATION, VALUE_JUDGE_2P_DURATION, VALUE_JUDGE_3P_DURATION };
 		final int[] OPTION_PERFECT = { OPTION_1P_PERFECT, OPTION_2P_PERFECT, OPTION_3P_PERFECT };
 		final int[] OFFSET_JUDGE = { OFFSET_JUDGE_1P, OFFSET_JUDGE_2P, OFFSET_JUDGE_3P };
+		final int[] OFFSET_JUDGE_DETAIL = { OFFSET_JUDGEDETAIL_1P, OFFSET_JUDGEDETAIL_2P, OFFSET_JUDGEDETAIL_3P };
 
 		SkinImage early = new SkinImage(new TextureRegion(tex, 0, 0, 50,20));
 		early.setDestination(0, (values[3] + values[5] / 2) * dstw / srcw,
 				dsth - (values[4] - 5) * dsth / srch, 40 * dw, 16 * dh, 0, 255,
-				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1998, 0, OPTION_EARLY[side], OFFSET_JUDGE[side]);
+				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1998, 0, OPTION_EARLY[side], OFFSET_JUDGE_DETAIL[side]);
 		early.setDestination(500, (values[3] + values[5] / 2) * dstw / srcw,
 				dsth - (values[4] - 5) * dsth / srch, 40 * dw, 16 * dh, 0, 255,
-				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1998, 0, OPTION_EARLY[side], OFFSET_JUDGE[side]);
+				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1998, 0, OPTION_EARLY[side], OFFSET_JUDGE_DETAIL[side]);
 		skin.add(early);
 		SkinImage late = new SkinImage(new TextureRegion(tex, 50, 0, 50,20));
 		late.setDestination(0, (values[3] + values[5] / 2) * dstw / srcw,
 				dsth - (values[4] - 5) * dsth / srch, 40 * dw, 16 * dh, 0, 255,
-				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1998, 0, OPTION_LATE[side], OFFSET_JUDGE[side]);
+				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1998, 0, OPTION_LATE[side], OFFSET_JUDGE_DETAIL[side]);
 		late.setDestination(500, (values[3] + values[5] / 2) * dstw / srcw,
 				dsth - (values[4] - 5) * dsth / srch, 40 * dw, 16 * dh, 0, 255,
-				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1998, 0, OPTION_LATE[side], OFFSET_JUDGE[side]);
+				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1998, 0, OPTION_LATE[side], OFFSET_JUDGE_DETAIL[side]);
 		skin.add(late);
 
 		TextureRegion[][] images = TextureRegion.split(tex, 10, 20);
@@ -728,20 +729,20 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 		num.setAlign(values[12]);
 		num.setDestination(0, (values[3] + values[5] / 2) * dstw / srcw,
 				dsth - (values[4] - 5) * dsth / srch, 8 * dw, 16 * dh, 0, 255,
-				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1999, 0, OPTION_PERFECT[side], OFFSET_JUDGE[side]);
+				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1999, 0, OPTION_PERFECT[side], OFFSET_JUDGE_DETAIL[side]);
 		num.setDestination(500, (values[3] + values[5] / 2) * dstw / srcw,
 				dsth - (values[4] - 5) * dsth / srch, 8 * dw, 16 * dh, 0, 255,
-				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1999, 0, OPTION_PERFECT[side], OFFSET_JUDGE[side]);
+				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1999, 0, OPTION_PERFECT[side], OFFSET_JUDGE_DETAIL[side]);
 		skin.add(num);
 		SkinNumber num2 = new SkinNumber(new TextureRegion[][] { images[3] },
 				new TextureRegion[][] { images[4] }, 0, 0, 4, 0, VALUE_JUDGE_DURATION[side]);
 		num2.setAlign(values[12]);
 		num2.setDestination(0, (values[3] + values[5] / 2) * dstw / srcw,
 				dsth - (values[4] - 5) * dsth / srch, 8 * dw, 16 * dh, 0, 255,
-				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1999, 0, -(OPTION_PERFECT[side]), OFFSET_JUDGE[side]);
+				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1999, 0, -(OPTION_PERFECT[side]), OFFSET_JUDGE_DETAIL[side]);
 		num2.setDestination(500, (values[3] + values[5] / 2) * dstw / srcw,
 				dsth - (values[4] - 5) * dsth / srch, 8 * dw, 16 * dh, 0, 255,
-				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1999, 0, -(OPTION_PERFECT[side]), OFFSET_JUDGE[side]);
+				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1999, 0, -(OPTION_PERFECT[side]), OFFSET_JUDGE_DETAIL[side]);
 		skin.add(num2);
 	}
 
