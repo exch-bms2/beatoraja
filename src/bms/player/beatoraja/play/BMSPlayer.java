@@ -141,9 +141,13 @@ public class BMSPlayer extends MainState {
 			}
 
 			if (config.isLegacynote()) {
-				new LongNoteModifier().modify(model);
-				assist = 2;
-				score = false;
+				// LNがなければアシストなし
+				LongNoteModifier mod = new LongNoteModifier();
+				mod.modify(model);
+				if (mod.longNoteExists()) {
+					assist = 2;
+					score = false;
+				}
 			}
 			if (config.getJudgewindowrate() > 100) {
 				assist = 2;

@@ -6,6 +6,8 @@ import bms.model.*;
 
 public class LongNoteModifier extends PatternModifier {
 
+	private boolean exists = false;
+	
 	public LongNoteModifier() {
 		super(2);
 	}
@@ -21,10 +23,14 @@ public class LongNoteModifier extends PatternModifier {
 					} else {
 						tl.setNote(lane, new NormalNote(ln.getWav()));						
 					}
+					exists = true;
 				}
 			}
 		}
 		return null;
 	}
 
+	public boolean longNoteExists() {
+		return exists;
+	}
 }
