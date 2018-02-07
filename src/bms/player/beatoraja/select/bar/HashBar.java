@@ -1,6 +1,5 @@
 package bms.player.beatoraja.select.bar;
 
-import bms.player.beatoraja.IRScoreData;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.song.SongData;
 
@@ -15,11 +14,10 @@ public class HashBar extends DirectoryBar {
     private String title;
     private SongData[] elements;
     private String[] elementsHash;
-    private MusicSelector selector;
     private SongData[] songs;
 
     public HashBar(MusicSelector selector, String title, SongData[] elements) {
-        this.selector = selector;
+        super(selector);
         this.title = title;
         setElements(elements);;
     }
@@ -71,27 +69,9 @@ public class HashBar extends DirectoryBar {
     }
 
     public void updateFolderStatus() {
-        clear();
-        int[] clears = getLamps();
-        int[] ranks = getRanks();
-        songs = selector.getSongDatabase().getSongDatas(elementsHash);
-        final Map<String, IRScoreData> scores = selector.getScoreDataCache()
-                .readScoreDatas(songs, selector.getMainController().getPlayerResource().getPlayerConfig().getLnmode());
-        for (SongData song : songs) {
-            final IRScoreData score = scores.get(song.getSha256());
-            if (score != null) {
-                clears[score.getClear()]++;
-                if (score.getNotes() != 0) {
-                    ranks[(score.getExscore() * 27 / (score.getNotes() * 2))]++;
-                } else {
-                    ranks[0]++;
-                }
-            } else {
-                ranks[0]++;
-                clears[0]++;
-            }
+        if(songs == null) {
+            songs = selector.getSongDatabase().getSongDatas(elementsHash);        	
         }
-        setLamps(clears);
-        setRanks(ranks);
+        updateFolderStatus(songs);
     }
 }

@@ -1,7 +1,9 @@
 package bms.player.beatoraja.select.bar;
 
 /**
- * Created by exch on 2017/09/03.
+ * 指定のバーを子に持つバー
+ * 
+ * @author exch
  */
 public class ContainerBar extends DirectoryBar {
 
@@ -9,6 +11,7 @@ public class ContainerBar extends DirectoryBar {
     private Bar[] childbar;
 
     public ContainerBar(String title, Bar[] bar) {
+    	super(null);
         this.title = title;
         childbar = bar;
     }

@@ -1,6 +1,7 @@
 package bms.player.beatoraja.select.bar;
 
 import bms.player.beatoraja.MainController;
+import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.song.SongData;
 
 /**
@@ -10,12 +11,11 @@ import bms.player.beatoraja.song.SongData;
  */
 public class CommandBar extends DirectoryBar {
 
-    private MainController main;
     private String title;
     private String sql;
 
-    public CommandBar(MainController main, String title, String sql) {
-        this.main = main;
+    public CommandBar(MusicSelector selector, String title, String sql) {
+    	super(selector);
         this.title = title;
         this.sql = sql;
     }
@@ -27,6 +27,7 @@ public class CommandBar extends DirectoryBar {
 
     @Override
     public Bar[] getChildren() {
+    	final MainController main = selector.getMainController();
         SongData[] infos = main.getSongDatabase().getSongDatas(sql,"player/" + main.getConfig().getPlayername() + "/score.db"
         		,"player/" + main.getConfig().getPlayername() + "/scorelog.db",main.getInfoDatabase() != null ? "songinfo.db" : null);
        Bar[] l = new Bar[infos.length];
@@ -36,4 +37,9 @@ public class CommandBar extends DirectoryBar {
         return l;
     }
 
+    public void updateFolderStatus() {
+    	final MainController main = selector.getMainController();
+        updateFolderStatus(main.getSongDatabase().getSongDatas(sql,"player/" + main.getConfig().getPlayername() + "/score.db"
+        		,"player/" + main.getConfig().getPlayername() + "/scorelog.db",main.getInfoDatabase() != null ? "songinfo.db" : null));
+    }
 }

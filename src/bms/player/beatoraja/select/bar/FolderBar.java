@@ -1,17 +1,12 @@
 package bms.player.beatoraja.select.bar;
 
-import bms.player.beatoraja.IRScoreData;
 import bms.player.beatoraja.select.MusicSelector;
-import bms.player.beatoraja.song.FolderData;
-import bms.player.beatoraja.song.SongData;
-import bms.player.beatoraja.song.SongDatabaseAccessor;
-import bms.player.beatoraja.song.SongUtils;
+import bms.player.beatoraja.song.*;
 
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * ファイルシステムと連動したフォルダバー。
@@ -22,10 +17,9 @@ public class FolderBar extends DirectoryBar {
 
     private FolderData folder;
     private String crc;
-    private MusicSelector selector;
 
     public FolderBar(MusicSelector selector, FolderData folder, String crc) {
-        this.selector = selector;
+        super(selector);
         this.folder = folder;
         this.crc = crc;
     }
@@ -83,28 +77,7 @@ public class FolderBar extends DirectoryBar {
             path = path.substring(0, path.length() - 1);
         }
         final String ccrc = SongUtils.crc32(path, new String[0], new File(".").getAbsolutePath());
-        clear();
-        int[] clears = getLamps();
-        int[] ranks = getRanks();
-        final SongData[] songdatas = songdb.getSongDatas("parent", ccrc);
-        final Map<String, IRScoreData> scores = selector.getScoreDataCache().readScoreDatas(songdatas, selector.getMainController().getPlayerResource().getPlayerConfig()
-                .getLnmode());
-        for (SongData sd : songdatas) {
-            final IRScoreData score = scores.get(sd.getSha256());
-            if (score != null) {
-                clears[score.getClear()]++;
-                if (score.getNotes() != 0) {
-                    ranks[(score.getExscore() * 27 / (score.getNotes() * 2))]++;
-                } else {
-                    ranks[0]++;
-                }
-            } else {
-                ranks[0]++;
-                clears[0]++;
-            }
-        }
-        setLamps(clears);
-        setRanks(ranks);
-
+        
+        updateFolderStatus(songdb.getSongDatas("parent", ccrc));
     }
 }

@@ -7,16 +7,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by exch on 2017/09/03.
+ * 同ディレクトリに配置されている全譜面を子に持つバー
+ * 
+ * @author exch
  */
 public class SameFolderBar extends DirectoryBar {
 
-    private MusicSelector selector;
     private String crc;
     private String title;
 
     public SameFolderBar(MusicSelector selector, String title, String crc) {
-        this.selector = selector;
+        super(selector);
         this.crc = crc;
         this.title = title;
     }

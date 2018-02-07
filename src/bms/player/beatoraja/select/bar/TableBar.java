@@ -30,11 +30,10 @@ public class TableBar extends DirectoryBar {
      * レベルバー+コースバー
      */
     private Bar[] children;
-    private MusicSelector selector;
     private TableDataAccessor.TableReader tr;
 
     public TableBar(MusicSelector selector, TableData td, TableDataAccessor.TableReader tr) {
-        this.selector = selector;
+    	super(selector);
         this.tr = tr;
         setTableData(td);
     }

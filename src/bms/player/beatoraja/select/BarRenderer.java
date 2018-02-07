@@ -176,8 +176,8 @@ public class BarRenderer {
 		for(int i = 0;i < 30;i++) {
 			String s = i == 0 ? "TODAY" : i + "DAYS AGO";
 			long t = ((System.currentTimeMillis() / 86400000) - i) * 86400;
-			lampupdate.add(new CommandBar(main,  s, "scorelog.clear > scorelog.oldclear AND scorelog.date >= "  + t + " AND scorelog.date < " + (t + 86400)));
-			scoreupdate.add(new CommandBar(main,  s,  "scorelog.score > scorelog.oldscore AND scorelog.date >= "  + t + " AND scorelog.date < " + (t + 86400)));
+			lampupdate.add(new CommandBar(select,  s, "scorelog.clear > scorelog.oldclear AND scorelog.date >= "  + t + " AND scorelog.date < " + (t + 86400)));
+			scoreupdate.add(new CommandBar(select,  s,  "scorelog.score > scorelog.oldscore AND scorelog.date >= "  + t + " AND scorelog.date < " + (t + 86400)));
 		}
 		l.add(new ContainerBar("LAMP UPDATE", lampupdate.toArray(new Bar[lampupdate.size()])));
 		l.add(new ContainerBar("SCORE UPDATE", scoreupdate.toArray(new Bar[scoreupdate.size()])));
@@ -207,7 +207,7 @@ public class BarRenderer {
 			}
 			return new ContainerBar(folder.getName(), l.toArray(new Bar[l.size()]));
 		} else {
-			return new CommandBar(main, folder.getName(), folder.getSql());
+			return new CommandBar(select, folder.getName(), folder.getSql());
 		}
 	}
 	
@@ -848,11 +848,8 @@ public class BarRenderer {
 				}
 
 				if (select.getMainController().getPlayerResource().getConfig().isFolderlamp()) {
-					if (bar instanceof FolderBar) {
-						((FolderBar) bar).updateFolderStatus();
-					}
-					if (bar instanceof HashBar) {
-						((HashBar) bar).updateFolderStatus();
+					if (bar instanceof DirectoryBar) {
+						((DirectoryBar) bar).updateFolderStatus();
 					}
 				}
 				if (stop) {

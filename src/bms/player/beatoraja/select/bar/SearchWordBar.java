@@ -11,11 +11,10 @@ import bms.player.beatoraja.song.SongData;
 public class SearchWordBar extends DirectoryBar {
 
     private String text;
-    private MusicSelector selector;
     private String title;
 
     public SearchWordBar(MusicSelector selector, String text) {
-        this.selector = selector;
+        super(selector);
         this.text = text;
         title = "Search : '" + text + "'";
     }
@@ -28,6 +27,10 @@ public class SearchWordBar extends DirectoryBar {
             bar[i] = new SongBar(songs[i]);
         }
         return bar;
+    }
+
+    public void updateFolderStatus() {
+        updateFolderStatus(selector.getSongDatabase().getSongDatasByText(text));
     }
 
     @Override
