@@ -525,6 +525,7 @@ public class JSONSkinLoader extends SkinLoader{
 						sn.setLaneRegion(region, scale, skin);
 						sn.setDstNote2(sk.note.dst2);
 						((PlaySkin) skin).setLaneGroupRegion(gregion);
+						((PlaySkin) skin).setNoteExpansionRate(sk.note.expansionrate);
 						obj = sn;
 					}
 					// gauge (playskin only)
@@ -1126,6 +1127,7 @@ public class JSONSkinLoader extends SkinLoader{
 		public String[] processed = new String[0];
 		public Animation[] dst = new Animation[0];
 		public int dst2 = Integer.MIN_VALUE;
+		public int[] expansionrate = {100,100};
 		public float[] size = new float[0];
 		public Destination[] group = new Destination[0];
 		public Destination[] bpm = new Destination[0];

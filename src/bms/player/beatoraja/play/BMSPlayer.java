@@ -335,12 +335,36 @@ public class BMSPlayer extends MainState {
 
 		judge.init(model, resource);
 		LongArray sectiontimes = new LongArray();
-		for (TimeLine tl : model.getAllTimeLines()) {
-			if(tl.getSectionLine()) {
-				sectiontimes.add(tl.getMicroTime());
+		LongArray quarterNoteTimes = new LongArray();
+		TimeLine[] timelines = model.getAllTimeLines();
+		for (int i = 0; i < timelines.length; i++) {
+			if(timelines[i].getSectionLine()) {
+				sectiontimes.add(timelines[i].getMicroTime());
+				quarterNoteTimes.add(timelines[i].getMicroTime());
+				double sectionLineSection = timelines[i].getSection();
+				double nextSectionLineSection = timelines[i].getSection() - sectionLineSection;
+				boolean last = false;
+				for(int j = i + 1; j < timelines.length; j++) {
+					if(timelines[j].getSectionLine()) {
+						nextSectionLineSection = timelines[j].getSection() - sectionLineSection;
+						break;
+					} else if(j == timelines.length - 1) {
+						nextSectionLineSection = timelines[j].getSection() - sectionLineSection;
+						last = true;
+					}
+				}
+				for(double j = 0.25; j <= nextSectionLineSection; j += 0.25) {
+					if((!last && j != nextSectionLineSection) || last) {
+						int prevIndex;
+						for(prevIndex = i; timelines[prevIndex].getSection() - sectionLineSection < j; prevIndex++) {}
+						prevIndex--;
+						quarterNoteTimes.add((long) (timelines[prevIndex].getMicroTime() + timelines[prevIndex].getMicroStop() + (j+sectionLineSection-timelines[prevIndex].getSection()) * 240000000 / timelines[prevIndex].getBPM()));
+					}
+				}
 			}
 		}
 		this.sectiontimes = sectiontimes.toArray();
+		this.quarterNoteTimes = quarterNoteTimes.toArray();
 
 		bga = resource.getBGAManager();
 
@@ -384,6 +408,11 @@ public class BMSPlayer extends MainState {
 	private long rhythmtimer;
 	private long startpressedtime;
 	
+	//4分のタイミングの時間 PMSのリズムに合わせたノート拡大用
+	private long[] quarterNoteTimes;
+	private int quarterNote = 0;
+	private long nowQuarterNoteTime;
+
 	@Override
 	public void render() {
 		final PlaySkin skin = (PlaySkin) getSkin();
@@ -515,6 +544,13 @@ public class BMSPlayer extends MainState {
 				timer[TIMER_RHYTHM] = now;
 				rhythmtimer = micronow;
 			}
+			if(quarterNote < quarterNoteTimes.length && (quarterNoteTimes[quarterNote] * (100 / property.freq)) <= (micronow - timer[TIMER_PLAY] * 1000)) {
+				quarterNote++;
+				nowQuarterNoteTime = now;
+			} else if(quarterNote == quarterNoteTimes.length && ((nowQuarterNoteTime + 60000 / lanerender.getNowBPM()) * (100 / property.freq)) <= now)  {
+				nowQuarterNoteTime = now;
+			}
+
             final long ptime = now - timer[TIMER_PLAY];
 			final float g = gauge.getValue();
 			if (gaugelog.size <= ptime / 500) {
@@ -1043,5 +1079,9 @@ public class BMSPlayer extends MainState {
 	
 	public Mode getMode() {
 		return model.getMode();
+	}
+
+	public long getNowQuarterNoteTime() {
+		return nowQuarterNoteTime;
 	}
 }
