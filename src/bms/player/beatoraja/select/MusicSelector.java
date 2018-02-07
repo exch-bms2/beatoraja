@@ -33,10 +33,6 @@ import bms.player.beatoraja.song.SongDatabaseAccessor;
 public class MusicSelector extends MainState {
 
 	// TODO テキスト表示
-	// TODO 譜面情報表示(簡易/詳細表示の切り替え)
-	// TODO オプション常時表示(スキン実装で実現？)
-	// TODO ターゲットスコア選択の実装
-
 	// TODO　ミラーランダム段位のスコア表示
 
 	private int selectedreplay;
@@ -87,7 +83,7 @@ public class MusicSelector extends MainState {
 	private ScoreDataCache scorecache;
 	private ScoreDataCache rivalcache;
 
-	private Map<PlayerInformation, ScoreDataCache> rivalcaches = new HashMap();
+	private Map<PlayerInformation, ScoreDataCache> rivalcaches = new HashMap<PlayerInformation, ScoreDataCache>();
 	private PlayerInformation rival;
 
 	private int panelstate;
@@ -123,19 +119,22 @@ public class MusicSelector extends MainState {
 				IRResponse<PlayerInformation[]> response = main.getIRConnection().getRivals();
 				if(response.isSuccessed()) {
 					for(PlayerInformation rival : response.getData()) {
-						try {
-							final ScoreDatabaseAccessor scoredb = new ScoreDatabaseAccessor("rival/" + rival.getId() + ".db");
-							scoredb.createTable();
-							scoredb.setInformation(rival);
-							IRResponse<IRScoreData[]> scores = main.getIRConnection().getPlayData(rival.getId(), null);
-							if(scores.isSuccessed()) {
-								scoredb.setScoreData(scores.getData());
-							} else {
-								Logger.getGlobal().warning("IRからのスコア取得失敗 : " + scores.getMessage());
-							}
-						} catch (ClassNotFoundException e) {
-							e.printStackTrace();
-						}
+						new Thread(() -> {
+							try {
+								final ScoreDatabaseAccessor scoredb = new ScoreDatabaseAccessor("rival/" + rival.getId() + ".db");
+								scoredb.createTable();
+								scoredb.setInformation(rival);
+								IRResponse<IRScoreData[]> scores = main.getIRConnection().getPlayData(rival.getId(), null);
+								if(scores.isSuccessed()) {
+									scoredb.setScoreData(scores.getData());
+									Logger.getGlobal().info("IRからのスコア取得完了 : " + rival.getName());
+								} else {
+									Logger.getGlobal().warning("IRからのスコア取得失敗 : " + scores.getMessage());
+								}
+							} catch (ClassNotFoundException e) {
+								e.printStackTrace();
+							};
+						}).start();
 					}
 				} else {
 					Logger.getGlobal().warning("IRからのライバル取得失敗 : " + response.getMessage());
@@ -255,15 +254,11 @@ public class MusicSelector extends MainState {
 		final MainController main = getMainController();
 		final PlayerResource resource = main.getPlayerResource();
 		final Bar current = bar.getSelected();
-        if(getTimer()[TIMER_STARTINPUT] == Long.MIN_VALUE && getNowTime() > getSkin().getInput()){
-        	getTimer()[TIMER_STARTINPUT] =  getNowTime();
+        if(getNowTime() > getSkin().getInput()){
+        	setTimer(TIMER_STARTINPUT, true);
         }
 		// draw song information
-		if (current instanceof SongBar) {
-			resource.setSongdata(((SongBar) current).getSongData());
-		} else {
-			resource.setSongdata(null);
-		}
+		resource.setSongdata(current instanceof SongBar ? ((SongBar) current).getSongData() : null);
 
 		// preview music
 		if (current instanceof SongBar) {
@@ -278,13 +273,10 @@ public class MusicSelector extends MainState {
 		if (getNowTime() > getTimer()[TIMER_SONGBAR_CHANGE] + notesGraphDuration && !showNoteGraph && play < 0) {
 			if (current instanceof SongBar && ((SongBar) current).existsSong()) {
 				SongData song = main.getPlayerResource().getSongdata();
-				Thread thread = new Thread() {
-					public void run() {
-						song.setBMSModel(resource.loadBMSModel(Paths.get(((SongBar) current).getSongData().getPath()),
-								config.getLnmode()));
-					}
-				};
-				thread.start();
+				new Thread(() ->  {
+					song.setBMSModel(resource.loadBMSModel(Paths.get(((SongBar) current).getSongData().getPath()),
+							config.getLnmode()));
+				}).start();;
 			}
 			showNoteGraph = true;
 		}
