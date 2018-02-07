@@ -14,11 +14,11 @@ import bms.model.TimeLine;
 import static bms.player.beatoraja.ClearType.*;
 import static bms.player.beatoraja.CourseData.CourseDataConstraint.*;
 
+import bms.player.beatoraja.CourseData.CourseDataConstraint;
 import bms.player.beatoraja.IRScoreData.SongTrophy;
 import bms.player.beatoraja.ScoreLogDatabaseAccessor.ScoreLog;
 import bms.player.beatoraja.song.SongData;
 
-import com.badlogic.gdx.utils.CharArray;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter.OutputType;
 import com.badlogic.gdx.utils.StringBuilder;
@@ -272,17 +272,33 @@ public class PlayDataAccessor {
 		int judge = 0;
 		int gauge = 0;
 		for (CourseData.CourseDataConstraint c : constraint) {
-			if (c == NO_SPEED) {
+			switch(c) {
+			case NO_SPEED:
 				hispeed = 1;
-			}
-			if (c == NO_GOOD) {
+				break;
+			case NO_GOOD:
 				judge = 1;
-			}
-			if (c == NO_GREAT) {
+				break;
+			case NO_GREAT:
 				judge = 2;
-			}
-			if (c == GAUGE_LR2) {
+				break;
+			case GAUGE_LR2:
 				gauge = 1;
+				break;
+			case GAUGE_5KEYS:
+				gauge = 2;
+				break;
+			case GAUGE_7KEYS:
+				gauge = 3;
+				break;
+			case GAUGE_9KEYS:
+				gauge = 4;
+				break;
+			case GAUGE_24KEYS:
+				gauge = 5;
+				break;
+			default:
+				break;
 			}
 		}
 		return scoredb.getScoreData(hash, (ln ? lnmode : 0) + option * 10 + hispeed * 100 + judge * 1000 + gauge * 10000);
@@ -325,17 +341,33 @@ public class PlayDataAccessor {
 		int judge = 0;
 		int gauge = 0;
 		for (CourseData.CourseDataConstraint c : constraint) {
-			if (c == NO_SPEED) {
+			switch(c) {
+			case NO_SPEED:
 				hispeed = 1;
-			}
-			if (c == NO_GOOD) {
+				break;
+			case NO_GOOD:
 				judge = 1;
-			}
-			if (c == NO_GREAT) {
+				break;
+			case NO_GREAT:
 				judge = 2;
-			}
-			if (c == GAUGE_LR2) {
+				break;
+			case GAUGE_LR2:
 				gauge = 1;
+				break;
+			case GAUGE_5KEYS:
+				gauge = 2;
+				break;
+			case GAUGE_7KEYS:
+				gauge = 3;
+				break;
+			case GAUGE_9KEYS:
+				gauge = 4;
+				break;
+			case GAUGE_24KEYS:
+				gauge = 5;
+				break;
+			default:
+				break;
 			}
 		}
 		IRScoreData score = scoredb.getScoreData(hash, (ln ? lnmode : 0) + option * 10 + hispeed * 100 + judge * 1000 + gauge * 10000);
@@ -630,7 +662,12 @@ public class PlayDataAccessor {
 		StringBuilder sb = new StringBuilder();
 		for (CourseData.CourseDataConstraint c : constraint) {
 			if (c != CLASS && c != MIRROR && c != RANDOM) {
-				sb.append(String.format("%02d", c.id));
+				for(int i = 0;i < CourseDataConstraint.values().length;i++) {
+					if(c == CourseDataConstraint.values()[i]) {
+						sb.append(String.format("%02d", i + 1));
+						break;
+					}
+				}
 			}
 		}
 		return "player" + File.separatorChar + player + File.separatorChar + "replay" + File.separatorChar

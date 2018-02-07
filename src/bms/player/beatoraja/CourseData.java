@@ -72,23 +72,21 @@ public class CourseData {
      * @author exch
      */
     public enum CourseDataConstraint {
-        CLASS(1,"grade"),
-        MIRROR(2,"grade_mirror"),
-        RANDOM(3,"grade_random"),
-        NO_SPEED(4,"no_speed"),
-        NO_GOOD(5,"no_good"),
-        NO_GREAT(6,"no_great"),
-    	GAUGE_LR2(7,"gauge_lr2"),
-    	GAUGE_5KEYS(7,"gauge_5k"),
-    	GAUGE_7KEYS(7,"gauge_7k"),
-    	GAUGE_9KEYS(7,"gauge_9k"),
-    	GAUGE_24KEYS(7,"gauge_24k");
+        CLASS("grade"),
+        MIRROR("grade_mirror"),
+        RANDOM("grade_random"),
+        NO_SPEED("no_speed"),
+        NO_GOOD("no_good"),
+        NO_GREAT("no_great"),
+    	GAUGE_LR2("gauge_lr2"),
+    	GAUGE_5KEYS("gauge_5k"),
+    	GAUGE_7KEYS("gauge_7k"),
+    	GAUGE_9KEYS("gauge_9k"),
+    	GAUGE_24KEYS("gauge_24k");
 
-        public final int id;
         public final String name;
 
-        private CourseDataConstraint(int id, String name) {
-            this.id = id;
+        private CourseDataConstraint(String name) {
             this.name = name;
         }
     }
