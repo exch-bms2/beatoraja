@@ -78,7 +78,11 @@ public class CourseData {
         NO_SPEED(4,"no_speed"),
         NO_GOOD(5,"no_good"),
         NO_GREAT(6,"no_great"),
-    	GAUGE_LR2(7,"gauge_lr2");
+    	GAUGE_LR2(7,"gauge_lr2"),
+    	GAUGE_5KEYS(7,"gauge_5k"),
+    	GAUGE_7KEYS(7,"gauge_7k"),
+    	GAUGE_9KEYS(7,"gauge_9k"),
+    	GAUGE_24KEYS(7,"gauge_24k");
 
         public final int id;
         public final String name;
