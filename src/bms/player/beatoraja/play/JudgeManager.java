@@ -561,6 +561,7 @@ public class JudgeManager {
 	private void update(int lane, Note n, int time, int judge, int fast) {
 		if (judgeVanish[judge]) {
 			n.setState(judge + 1);
+			pastNotes++;
 		}
 		if(miss == MissCondition.ONE && judge == 4 && n.getPlayTime() != 0) {
 			return;
