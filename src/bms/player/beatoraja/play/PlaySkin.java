@@ -31,6 +31,11 @@ public class PlaySkin extends Skin {
 	 */
 	private int close;
 
+	/**
+	 * STATE_FINISHEDからフェードアウトを開始するまでのマージン(ms)
+	 */
+	private int finishMargin = 0;
+
 	private int loadstart;
 	private int loadend;
 	
@@ -75,6 +80,14 @@ public class PlaySkin extends Skin {
 
 	public void setClose(int close) {
 		this.close = close;
+	}
+
+	public int getFinishMargin() {
+		return finishMargin;
+	}
+
+	public void setFinishMargin(int finishMargin) {
+		this.finishMargin = finishMargin;
 	}
 
 	public int getPlaystart() {

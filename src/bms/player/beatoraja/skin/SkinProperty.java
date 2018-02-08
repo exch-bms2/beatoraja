@@ -133,6 +133,21 @@ public class SkinProperty {
 	public static final int TIMER_IR_CONNECT_FAIL = 174;
 
 
+	//ぽみゅキャラ用タイマー
+	//ここから
+	public static final int TIMER_PM_CHARA_1P_NEUTRAL = 900;
+	public static final int TIMER_PM_CHARA_1P_FEVER = 901;
+	public static final int TIMER_PM_CHARA_1P_GREAT = 902;
+	public static final int TIMER_PM_CHARA_1P_GOOD = 903;
+	public static final int TIMER_PM_CHARA_1P_BAD = 904;
+	public static final int TIMER_PM_CHARA_2P_NEUTRAL = 905;
+	public static final int TIMER_PM_CHARA_2P_GREAT = 906;
+	public static final int TIMER_PM_CHARA_2P_BAD = 907;
+	public static final int TIMER_MUSIC_END = 908;
+	//FEVERWIN WIN LOSEはOPTION_1P_100とOPTION_1P_BORDER_OR_MOREを用いて分岐
+	public static final int TIMER_PM_CHARA_DANCE = 909;
+	//ここまで連番でお願いします
+
 	// 拡張版TIMER
 	public static final int TIMER_BOMB_1P_KEY10 = 1010;
 	public static final int TIMER_BOMB_1P_KEY99 = 1099;
@@ -154,8 +169,6 @@ public class SkinProperty {
 	public static final int TIMER_HCN_ACTIVE_2P_KEY10 = 1910;
 	public static final int TIMER_HCN_DAMAGE_1P_KEY10 = 2010;
 	public static final int TIMER_HCN_DAMAGE_2P_KEY10 = 2110;
-	public static final int TIMER_GOOD_BOMB_1P_KEY10 = 2210;
-	public static final int TIMER_GOOD_BOMB_2P_KEY10 = 2310;
 
 	public static final int TIMER_MAX = 2999;
 
@@ -307,6 +320,8 @@ public class SkinProperty {
 	public static final int NUMBER_TOTALEARLY = 423;
 	public static final int NUMBER_TOTALLATE = 424;
 	public static final int NUMBER_COMBOBREAK = 425;
+	public static final int NUMBER_POOR_PLUS_MISS = 426;
+	public static final int NUMBER_BAD_PLUS_POOR_PLUS_MISS = 427;
 	public static final int NUMBER_TOTAL_RATE = 115;
 	public static final int NUMBER_TOTAL_RATE_AFTERDOT = 116;
 	public static final int NUMBER_TARGET_SCORE = 121;

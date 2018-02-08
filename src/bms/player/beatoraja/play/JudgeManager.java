@@ -121,6 +121,11 @@ public class JudgeManager {
 
 	private final JudgeAlgorithm algorithm;
 
+	/**
+	 * PMS キャラ用 判定
+	 */
+	private int PMcharaJudge = 0;
+
 	public JudgeManager(BMSPlayer main) {
 		this.main = main;
 		algorithm = main.getMainController().getPlayerResource().getConfig().getJudgealgorithm();
@@ -571,6 +576,7 @@ public class JudgeManager {
 		if (judge <= ((PlaySkin)main.getSkin()).getJudgetimer()) {
 			main.getTimer()[SkinPropertyMapper.bombTimerId(player[lane], offset[lane])] = main.getNowTime();
 		}
+		PMcharaJudge = judge + 1;
 
 		final int lanelength = sckeyassign.length;
 		if (judgenow.length > 0) {
@@ -688,5 +694,9 @@ public class JudgeManager {
 
 	public int[][] getJudgeTable(boolean sc) {
 		return sc ? sjudge : njudge;
+	}
+
+	public int getPMcharaJudge() {
+		return PMcharaJudge;
 	}
 }

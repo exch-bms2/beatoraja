@@ -146,6 +146,7 @@ public class JSONSkinLoader extends SkinLoader{
 				((PlaySkin) skin).setClose(sk.close);
 				((PlaySkin) skin).setPlaystart(sk.playstart);
 				((PlaySkin) skin).setJudgetimer(sk.judgetimer);
+				((PlaySkin) skin).setFinishMargin(sk.finishmargin);
 			}
 			if (type == SkinType.MUSIC_SELECT) {
 				skin = new MusicSelectSkin(src, dstr);
@@ -958,6 +959,7 @@ public class JSONSkinLoader extends SkinLoader{
 		public int close;
 		public int playstart;
 		public int judgetimer = 1;
+		public int finishmargin = 0;
 
 		public Property[] property = new Property[0];
 		public Filepath[] filepath = new Filepath[0];

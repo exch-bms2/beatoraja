@@ -232,12 +232,20 @@ public abstract class SkinObject implements Disposable {
 			if(rate == 0) {
 				r.set(dst[index].region);
 			} else {
-				final Rectangle r1 = dst[index].region;
-				final Rectangle r2 = dst[index + 1].region;
-				r.x = r1.x + (r2.x - r1.x) * rate;
-				r.y = r1.y + (r2.y - r1.y) * rate;
-				r.width = r1.width + (r2.width - r1.width) * rate;
-				r.height = r1.height + (r2.height - r1.height) * rate;
+				if(acc == 3) {
+					final Rectangle r1 = dst[index].region;
+					r.x = r1.x;
+					r.y = r1.y;
+					r.width = r1.width;
+					r.height = r1.height;
+				} else {
+					final Rectangle r1 = dst[index].region;
+					final Rectangle r2 = dst[index + 1].region;
+					r.x = r1.x + (r2.x - r1.x) * rate;
+					r.y = r1.y + (r2.y - r1.y) * rate;
+					r.width = r1.width + (r2.width - r1.width) * rate;
+					r.height = r1.height + (r2.height - r1.height) * rate;
+				}
 			}
 
 			for(SkinOffset off : this.off) {
@@ -286,13 +294,22 @@ public abstract class SkinObject implements Disposable {
 		if(rate == 0) {
 			c.set(dst[index].color);			
 		} else {
-			final Color r1 = dst[index].color;
-			final Color r2 = dst[index + 1].color;
-			c.r = r1.r + (r2.r - r1.r) * rate;
-			c.g = r1.g + (r2.g - r1.g) * rate;
-			c.b = r1.b + (r2.b - r1.b) * rate;
-			c.a = r1.a + (r2.a - r1.a) * rate;
-			return c;			
+			if(acc == 3) {
+				final Color r1 = dst[index].color;
+				c.r = r1.r;
+				c.g = r1.g;
+				c.b = r1.b;
+				c.a = r1.a;
+				return c;
+			} else {
+				final Color r1 = dst[index].color;
+				final Color r2 = dst[index + 1].color;
+				c.r = r1.r + (r2.r - r1.r) * rate;
+				c.g = r1.g + (r2.g - r1.g) * rate;
+				c.b = r1.b + (r2.b - r1.b) * rate;
+				c.a = r1.a + (r2.a - r1.a) * rate;
+				return c;
+			}
 		}
 		for(SkinOffset off :this.off) {
 			if(off != null) {
@@ -315,7 +332,7 @@ public abstract class SkinObject implements Disposable {
 			return a;
 		}
 		getRate();
-		int a = (rate == 0 ? dst[index].angle :  (int) (dst[index].angle + (dst[index + 1].angle - dst[index].angle) * rate));
+		int a = (rate == 0 || acc == 3 ? dst[index].angle :  (int) (dst[index].angle + (dst[index + 1].angle - dst[index].angle) * rate));
 		for(SkinOffset off :this.off) {
 			if(off != null) {
 				a += off.r;

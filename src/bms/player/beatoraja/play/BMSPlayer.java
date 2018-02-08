@@ -65,6 +65,10 @@ public class BMSPlayer extends MainState {
 	 * 処理済ノート数
 	 */
 	private int notes;
+	/**
+	 * PMS キャラ用 ニュートラルモーション開始時の処理済ノート数{1P,2P} (ニュートラルモーション一周時に変化がなければニュートラルモーションを継続するため)
+	 */
+	private int[] PMcharaLastnotes = {0, 0};
 
 	static final int TIME_MARGIN = 5000;
 
@@ -417,6 +421,10 @@ public class BMSPlayer extends MainState {
 				play(SOUND_READY);
 				Logger.getGlobal().info("STATE_READYに移行");
 			}
+			if(timer[TIMER_PM_CHARA_1P_NEUTRAL] == Long.MIN_VALUE || timer[TIMER_PM_CHARA_2P_NEUTRAL] == Long.MIN_VALUE){
+				timer[TIMER_PM_CHARA_1P_NEUTRAL] = now;
+				timer[TIMER_PM_CHARA_2P_NEUTRAL] = now;
+			}
 			break;
 		// practice mode
 		case STATE_PRACTICE:
@@ -424,11 +432,18 @@ public class BMSPlayer extends MainState {
 				resource.reloadBMSFile();
 				model = resource.getBMSModel();
 				lanerender.init(model);
+				keyinput.setKeyBeamStop(false);
                 timer[TIMER_PLAY] = Long.MIN_VALUE;
                 timer[TIMER_RHYTHM] = Long.MIN_VALUE;
                 timer[TIMER_FAILED] = Long.MIN_VALUE;
                 timer[TIMER_FADEOUT] = Long.MIN_VALUE;
                 timer[TIMER_ENDOFNOTE_1P] = Long.MIN_VALUE;
+
+				for(int i = TIMER_PM_CHARA_1P_NEUTRAL; i <= TIMER_MUSIC_END; i++) timer[i] = Long.MIN_VALUE;
+			}
+			if(timer[TIMER_PM_CHARA_1P_NEUTRAL] == Long.MIN_VALUE || timer[TIMER_PM_CHARA_2P_NEUTRAL] == Long.MIN_VALUE){
+				timer[TIMER_PM_CHARA_1P_NEUTRAL] = now;
+				timer[TIMER_PM_CHARA_2P_NEUTRAL] = now;
 			}
 			control.setEnableControl(false);
 			practice.processInput(input);
@@ -522,10 +537,47 @@ public class BMSPlayer extends MainState {
 			}
 			setTimer(TIMER_GAUGE_MAX_1P, g == gauge.getMaxValue());
 
+			if(timer[TIMER_PM_CHARA_1P_NEUTRAL] != Long.MIN_VALUE && now - timer[TIMER_PM_CHARA_1P_NEUTRAL] >= skin.getPMcharaTime(TIMER_PM_CHARA_1P_NEUTRAL - TIMER_PM_CHARA_1P_NEUTRAL) && (now - timer[TIMER_PM_CHARA_1P_NEUTRAL]) % skin.getPMcharaTime(TIMER_PM_CHARA_1P_NEUTRAL - TIMER_PM_CHARA_1P_NEUTRAL) < 17) {
+				if(PMcharaLastnotes[0] != notes) {
+					if(judge.getPMcharaJudge() == 1 || judge.getPMcharaJudge() == 2) {
+						if(g == gauge.getMaxValue()) timer[TIMER_PM_CHARA_1P_FEVER] = now;
+						else timer[TIMER_PM_CHARA_1P_GREAT] = now;
+					} else if(judge.getPMcharaJudge() == 3) timer[TIMER_PM_CHARA_1P_GOOD] = now;
+					else timer[TIMER_PM_CHARA_1P_BAD] = now;
+					timer[TIMER_PM_CHARA_1P_NEUTRAL] = Long.MIN_VALUE;
+				}
+			}
+			if(timer[TIMER_PM_CHARA_2P_NEUTRAL] != Long.MIN_VALUE && now - timer[TIMER_PM_CHARA_2P_NEUTRAL] >= skin.getPMcharaTime(TIMER_PM_CHARA_2P_NEUTRAL - TIMER_PM_CHARA_1P_NEUTRAL) && (now - timer[TIMER_PM_CHARA_2P_NEUTRAL]) % skin.getPMcharaTime(TIMER_PM_CHARA_2P_NEUTRAL - TIMER_PM_CHARA_1P_NEUTRAL) < 17) {
+				if(PMcharaLastnotes[1] != notes) {
+					if(judge.getPMcharaJudge() >= 1 && judge.getPMcharaJudge() <= 3) timer[TIMER_PM_CHARA_2P_BAD] = now;
+					else timer[TIMER_PM_CHARA_2P_GREAT] = now;
+					timer[TIMER_PM_CHARA_2P_NEUTRAL] = Long.MIN_VALUE;
+				} else PMcharaLastnotes[1] = notes;
+			}
+			for(int i = TIMER_PM_CHARA_1P_FEVER; i <= TIMER_PM_CHARA_2P_BAD; i++) {
+				if(i != TIMER_PM_CHARA_2P_NEUTRAL && timer[i] != Long.MIN_VALUE && now - timer[i] >= skin.getPMcharaTime(i - TIMER_PM_CHARA_1P_NEUTRAL)) {
+					if(i <= TIMER_PM_CHARA_1P_BAD) {
+						timer[TIMER_PM_CHARA_1P_NEUTRAL] = now;
+						PMcharaLastnotes[0] = notes;
+					}
+					else {
+						timer[TIMER_PM_CHARA_2P_NEUTRAL] = now;
+						PMcharaLastnotes[1] = notes;
+					}
+					timer[i] = Long.MIN_VALUE;
+				}
+			}
+			if(timer[TIMER_PM_CHARA_DANCE] == Long.MIN_VALUE) timer[TIMER_PM_CHARA_DANCE] = now;
+
             // System.out.println("playing time : " + time);
 			if (playtime < ptime) {
 				state = STATE_FINISHED;
-                timer[TIMER_FADEOUT] = now;
+				timer[TIMER_MUSIC_END] = now;
+				for(int i = TIMER_PM_CHARA_1P_NEUTRAL; i <= TIMER_PM_CHARA_2P_BAD; i++) {
+					timer[i] = Long.MIN_VALUE;
+				}
+				timer[TIMER_PM_CHARA_DANCE] = Long.MIN_VALUE;
+
 				Logger.getGlobal().info("STATE_FINISHEDに移行");
 			} else if(playtime - TIME_MARGIN < ptime && timer[TIMER_ENDOFNOTE_1P] == Long.MIN_VALUE) {
                 timer[TIMER_ENDOFNOTE_1P] = now;
@@ -583,6 +635,9 @@ public class BMSPlayer extends MainState {
 				autoThread.stop = true;
 			}
 			keyinput.stopJudge();
+			if (now - timer[TIMER_MUSIC_END] > skin.getFinishMargin() && timer[TIMER_FADEOUT] == Long.MIN_VALUE) {
+				timer[TIMER_FADEOUT] = now;
+			}
 			if (now - timer[TIMER_FADEOUT] > skin.getFadeout()) {
 				getMainController().getAudioProcessor().setGlobalPitch(1f);
 				resource.getBGAManager().stop();
@@ -721,11 +776,13 @@ public class BMSPlayer extends MainState {
 		if (getTimer()[TIMER_FAILED] != Long.MIN_VALUE || getTimer()[TIMER_FADEOUT] != Long.MIN_VALUE) {
 			return;
 		}
-		if (notes == getMainController().getPlayerResource().getSongdata().getNotes()) {
+		if (state != STATE_FINISHED && notes == getMainController().getPlayerResource().getSongdata().getNotes()) {
 			state = STATE_FINISHED;
 			getTimer()[TIMER_FADEOUT] = getNowTime();
 			Logger.getGlobal().info("STATE_FINISHEDに移行");
-		} else {
+		} else if(state == STATE_FINISHED && getTimer()[TIMER_FADEOUT] == Long.MIN_VALUE) {
+			getTimer()[TIMER_FADEOUT] = getNowTime();
+		} else if(state != STATE_FINISHED) {
 			state = STATE_FAILED;
 			getTimer()[TIMER_FAILED] = getNowTime();
 			if (getMainController().getPlayerResource().mediaLoadFinished()) {
@@ -857,13 +914,13 @@ public class BMSPlayer extends MainState {
 			return (((int) (getTimer()[TIMER_PLAY] != Long.MIN_VALUE ? getNowTime() - getTimer()[TIMER_PLAY] : 0))
 					/ 1000) % 60;
 		case NUMBER_TIMELEFT_MINUTE:
-			return (int) ((playtime
+			return (int) (Math.max((playtime
 					- (int) (getTimer()[TIMER_PLAY] != Long.MIN_VALUE ? getNowTime() - getTimer()[TIMER_PLAY] : 0)
-					+ 1000) / 60000);
+					+ 1000), 0) / 60000);
 		case NUMBER_TIMELEFT_SECOND:
-			return ((playtime
+			return (Math.max((playtime
 					- (int) (getTimer()[TIMER_PLAY] != Long.MIN_VALUE ? getNowTime() - getTimer()[TIMER_PLAY] : 0)
-					+ 1000) / 1000) % 60;
+					+ 1000), 0) / 1000) % 60;
 		case NUMBER_LOADING_PROGRESS:
 			return (int) ((getMainController().getAudioProcessor().getProgress() + bga.getProgress()) * 50);
 		case NUMBER_GROOVEGAUGE:
@@ -994,6 +1051,28 @@ public class BMSPlayer extends MainState {
 		case OPTION_LANECOVER1_CHANGING:
 			return getMainController().getInputProcessor().startPressed() ||
 					getMainController().getInputProcessor().isSelectPressed();
+		case OPTION_1P_0_9:
+			return gauge.getValue() >= 0 && gauge.getValue() < 0.1 * gauge.getMaxValue();
+		case OPTION_1P_10_19:
+			return gauge.getValue() >= 0.1 * gauge.getMaxValue() && gauge.getValue() < 0.2 * gauge.getMaxValue();
+		case OPTION_1P_20_29:
+			return gauge.getValue() >= 0.2 * gauge.getMaxValue() && gauge.getValue() < 0.3 * gauge.getMaxValue();
+		case OPTION_1P_30_39:
+			return gauge.getValue() >= 0.3 * gauge.getMaxValue() && gauge.getValue() < 0.4 * gauge.getMaxValue();
+		case OPTION_1P_40_49:
+			return gauge.getValue() >= 0.4 * gauge.getMaxValue() && gauge.getValue() < 0.5 * gauge.getMaxValue();
+		case OPTION_1P_50_59:
+			return gauge.getValue() >= 0.5 * gauge.getMaxValue() && gauge.getValue() < 0.6 * gauge.getMaxValue();
+		case OPTION_1P_60_69:
+			return gauge.getValue() >= 0.6 * gauge.getMaxValue() && gauge.getValue() < 0.7 * gauge.getMaxValue();
+		case OPTION_1P_70_79:
+			return gauge.getValue() >= 0.7 * gauge.getMaxValue() && gauge.getValue() < 0.8 * gauge.getMaxValue();
+		case OPTION_1P_80_89:
+			return gauge.getValue() >= 0.8 * gauge.getMaxValue() && gauge.getValue() < 0.9 * gauge.getMaxValue();
+		case OPTION_1P_90_99:
+			return gauge.getValue() >= 0.9 * gauge.getMaxValue() && gauge.getValue() < gauge.getMaxValue();
+		case OPTION_1P_100:
+			return gauge.getValue() == gauge.getMaxValue();
 		case OPTION_1P_BORDER_OR_MORE:
 			return gauge.getValue() >= gauge.getBorder();
 		case OPTION_1P_PERFECT:
