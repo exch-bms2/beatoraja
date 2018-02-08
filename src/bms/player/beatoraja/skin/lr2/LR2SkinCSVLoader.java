@@ -967,7 +967,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 			case GOOD:
 				if(setMotion == Integer.MIN_VALUE) setMotion = 8;
 			case BAD:
-				if(setMotion == Integer.MIN_VALUE) setMotion = 4;
+				if(setMotion == Integer.MIN_VALUE) setMotion = 10;
 			case FEVERWIN:
 				if(setMotion == Integer.MIN_VALUE) setMotion = 17;
 			case WIN:
@@ -1015,7 +1015,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 									else if(motion == 6) timer = TIMER_PM_CHARA_1P_FEVER;
 									else if(motion == 7) timer = TIMER_PM_CHARA_1P_GREAT;
 									else if(motion == 8) timer = TIMER_PM_CHARA_1P_GOOD;
-									else if(motion == 4) timer = TIMER_PM_CHARA_1P_BAD;
+									else if(motion == 10) timer = TIMER_PM_CHARA_1P_BAD;
 									else if(motion >= 15 && motion <= 17) {
 										timer = TIMER_MUSIC_END;
 										if(motion == 15) {
@@ -1028,7 +1028,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 								} else {
 									if(motion == 1) timer = TIMER_PM_CHARA_2P_NEUTRAL;
 									else if(motion == 7) timer = TIMER_PM_CHARA_2P_GREAT;
-									else if(motion == 4) timer = TIMER_PM_CHARA_2P_BAD;
+									else if(motion == 10) timer = TIMER_PM_CHARA_2P_BAD;
 									else if(motion == 15 || motion == 16) {
 										timer = TIMER_MUSIC_END;
 										if(motion == 15) op[0] = -OPTION_1P_BORDER_OR_MORE;	//WIN
