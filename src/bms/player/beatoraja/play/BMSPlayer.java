@@ -538,7 +538,7 @@ public class BMSPlayer extends MainState {
 			setTimer(TIMER_GAUGE_MAX_1P, g == gauge.getMaxValue());
 
 			if(timer[TIMER_PM_CHARA_1P_NEUTRAL] != Long.MIN_VALUE && now - timer[TIMER_PM_CHARA_1P_NEUTRAL] >= skin.getPMcharaTime(TIMER_PM_CHARA_1P_NEUTRAL - TIMER_PM_CHARA_1P_NEUTRAL) && (now - timer[TIMER_PM_CHARA_1P_NEUTRAL]) % skin.getPMcharaTime(TIMER_PM_CHARA_1P_NEUTRAL - TIMER_PM_CHARA_1P_NEUTRAL) < 17) {
-				if(PMcharaLastnotes[0] != notes) {
+				if(PMcharaLastnotes[0] != notes && judge.getPMcharaJudge() > 0) {
 					if(judge.getPMcharaJudge() == 1 || judge.getPMcharaJudge() == 2) {
 						if(g == gauge.getMaxValue()) timer[TIMER_PM_CHARA_1P_FEVER] = now;
 						else timer[TIMER_PM_CHARA_1P_GREAT] = now;
@@ -548,11 +548,11 @@ public class BMSPlayer extends MainState {
 				}
 			}
 			if(timer[TIMER_PM_CHARA_2P_NEUTRAL] != Long.MIN_VALUE && now - timer[TIMER_PM_CHARA_2P_NEUTRAL] >= skin.getPMcharaTime(TIMER_PM_CHARA_2P_NEUTRAL - TIMER_PM_CHARA_1P_NEUTRAL) && (now - timer[TIMER_PM_CHARA_2P_NEUTRAL]) % skin.getPMcharaTime(TIMER_PM_CHARA_2P_NEUTRAL - TIMER_PM_CHARA_1P_NEUTRAL) < 17) {
-				if(PMcharaLastnotes[1] != notes) {
+				if(PMcharaLastnotes[1] != notes && judge.getPMcharaJudge() > 0) {
 					if(judge.getPMcharaJudge() >= 1 && judge.getPMcharaJudge() <= 3) timer[TIMER_PM_CHARA_2P_BAD] = now;
 					else timer[TIMER_PM_CHARA_2P_GREAT] = now;
 					timer[TIMER_PM_CHARA_2P_NEUTRAL] = Long.MIN_VALUE;
-				} else PMcharaLastnotes[1] = notes;
+				}
 			}
 			for(int i = TIMER_PM_CHARA_1P_FEVER; i <= TIMER_PM_CHARA_2P_BAD; i++) {
 				if(i != TIMER_PM_CHARA_2P_NEUTRAL && timer[i] != Long.MIN_VALUE && now - timer[i] >= skin.getPMcharaTime(i - TIMER_PM_CHARA_1P_NEUTRAL)) {
