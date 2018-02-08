@@ -122,6 +122,11 @@ public class JudgeManager {
 	private final JudgeAlgorithm algorithm;
 
 	/**
+	 * 処理済ノート数
+	 */
+	private int pastNotes = 0;
+
+	/**
 	 * PMS キャラ用 判定
 	 */
 	private int PMcharaJudge = 0;
@@ -147,6 +152,8 @@ public class JudgeManager {
 		combocond = rule.combo;
 		miss = rule.miss;
 		judgeVanish = rule.judgeVanish;
+		pastNotes = 0;
+		PMcharaJudge = 0;
 
 		keyassign = main.getLaneProperty().getKeyLaneAssign();
 		offset = main.getLaneProperty().getLaneSkinOffset();
@@ -694,6 +701,10 @@ public class JudgeManager {
 
 	public int[][] getJudgeTable(boolean sc) {
 		return sc ? sjudge : njudge;
+	}
+
+	public int getPastNotes() {
+		return pastNotes;
 	}
 
 	public int getPMcharaJudge() {

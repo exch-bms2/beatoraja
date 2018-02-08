@@ -475,6 +475,8 @@ public class BMSPlayer extends MainState {
 				lanerender.init(model);
 				judge.init(model, resource);
 				notes = 0;
+				PMcharaLastnotes[0] = 0;
+				PMcharaLastnotes[1] = 0;
 				starttimeoffset = (property.starttime > 1000 ? property.starttime - 1000 : 0) * 100 / property.freq;
 				playtime = (property.endtime + 1000) * 100 / property.freq + TIME_MARGIN;
 				bga.prepare(this);
@@ -510,6 +512,7 @@ public class BMSPlayer extends MainState {
 			break;
 		// プレイ
 		case STATE_PLAY:
+			notes = this.judge.getPastNotes();
 			final long deltatime = micronow - prevtime;
 			final long deltaplay = deltatime * (100 - playspeed) / 100;
 			PracticeProperty property = practice.getPracticeProperty();
@@ -821,9 +824,7 @@ public class BMSPlayer extends MainState {
 	}
 
 	public void update(int lane, int judge, int time, int fast) {
-		if (judge < 5) {
-			notes++;
-		}
+		notes = this.judge.getPastNotes();
 
 		if (this.judge.getCombo() == 0) {
 			bga.setMisslayerTme(time);
