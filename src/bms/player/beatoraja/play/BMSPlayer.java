@@ -1119,7 +1119,11 @@ public class BMSPlayer extends MainState {
 		}
 		return super.getImageIndex(id);
 	}
-	
+
+	public boolean isNoteEnd() {
+		return notes == getMainController().getPlayerResource().getSongdata().getNotes();
+	}
+
 	public Mode getMode() {
 		return model.getMode();
 	}

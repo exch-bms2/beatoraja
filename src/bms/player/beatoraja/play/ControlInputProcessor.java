@@ -158,8 +158,7 @@ public class ControlInputProcessor {
 		}
 		long now = System.currentTimeMillis();
 		if((input.startPressed() && input.isSelectPressed() && now - exitpressedtime > 1000 )||
-				(player.getTimer()[TIMER_ENDOFNOTE_1P] != Long.MIN_VALUE &&
-				now > player.getTimer()[TIMER_ENDOFNOTE_1P] && (input.startPressed() || input.isSelectPressed()))){
+				(player.isNoteEnd() && (input.startPressed() || input.isSelectPressed()))){
 			input.startChanged(false);
 			input.setSelectPressed(false);
 			player.stopPlay();
