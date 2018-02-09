@@ -334,33 +334,40 @@ public class BMSPlayer extends MainState {
 		}
 
 		judge.init(model, resource);
+
+		final PlaySkin skin = (PlaySkin) getSkin();
+		isNoteExpansion = (skin.getNoteExpansionRate()[0] != 100 || skin.getNoteExpansionRate()[1] != 100);
 		LongArray sectiontimes = new LongArray();
 		LongArray quarterNoteTimes = new LongArray();
 		TimeLine[] timelines = model.getAllTimeLines();
 		for (int i = 0; i < timelines.length; i++) {
 			if(timelines[i].getSectionLine()) {
 				sectiontimes.add(timelines[i].getMicroTime());
-				quarterNoteTimes.add(timelines[i].getMicroTime());
-				double sectionLineSection = timelines[i].getSection();
-				double nextSectionLineSection = timelines[i].getSection() - sectionLineSection;
-				boolean last = false;
-				for(int j = i + 1; j < timelines.length; j++) {
-					if(timelines[j].getSectionLine()) {
-						nextSectionLineSection = timelines[j].getSection() - sectionLineSection;
-						break;
-					} else if(j == timelines.length - 1) {
-						nextSectionLineSection = timelines[j].getSection() - sectionLineSection;
-						last = true;
+
+				if(isNoteExpansion) {
+					quarterNoteTimes.add(timelines[i].getMicroTime());
+					double sectionLineSection = timelines[i].getSection();
+					double nextSectionLineSection = timelines[i].getSection() - sectionLineSection;
+					boolean last = false;
+					for(int j = i + 1; j < timelines.length; j++) {
+						if(timelines[j].getSectionLine()) {
+							nextSectionLineSection = timelines[j].getSection() - sectionLineSection;
+							break;
+						} else if(j == timelines.length - 1) {
+							nextSectionLineSection = timelines[j].getSection() - sectionLineSection;
+							last = true;
+						}
+					}
+					for(double j = 0.25; j <= nextSectionLineSection; j += 0.25) {
+						if((!last && j != nextSectionLineSection) || last) {
+							int prevIndex;
+							for(prevIndex = i; timelines[prevIndex].getSection() - sectionLineSection < j; prevIndex++) {}
+							prevIndex--;
+							quarterNoteTimes.add((long) (timelines[prevIndex].getMicroTime() + timelines[prevIndex].getMicroStop() + (j+sectionLineSection-timelines[prevIndex].getSection()) * 240000000 / timelines[prevIndex].getBPM()));
+						}
 					}
 				}
-				for(double j = 0.25; j <= nextSectionLineSection; j += 0.25) {
-					if((!last && j != nextSectionLineSection) || last) {
-						int prevIndex;
-						for(prevIndex = i; timelines[prevIndex].getSection() - sectionLineSection < j; prevIndex++) {}
-						prevIndex--;
-						quarterNoteTimes.add((long) (timelines[prevIndex].getMicroTime() + timelines[prevIndex].getMicroStop() + (j+sectionLineSection-timelines[prevIndex].getSection()) * 240000000 / timelines[prevIndex].getBPM()));
-					}
-				}
+
 			}
 		}
 		this.sectiontimes = sectiontimes.toArray();
@@ -411,7 +418,9 @@ public class BMSPlayer extends MainState {
 	//4分のタイミングの時間 PMSのリズムに合わせたノート拡大用
 	private long[] quarterNoteTimes;
 	private int quarterNote = 0;
-	private long nowQuarterNoteTime;
+	private long nowQuarterNoteTime = 0;
+	//ノートを拡大するかどうか
+	boolean isNoteExpansion = false;
 
 	@Override
 	public void render() {
@@ -544,12 +553,14 @@ public class BMSPlayer extends MainState {
 				timer[TIMER_RHYTHM] = now;
 				rhythmtimer = micronow;
 			}
-			if(quarterNote < quarterNoteTimes.length && (quarterNoteTimes[quarterNote] * (100 / property.freq)) <= (micronow - timer[TIMER_PLAY] * 1000)) {
-				quarterNote++;
-				nowQuarterNoteTime = now;
-			} else if(quarterNote == quarterNoteTimes.length && ((nowQuarterNoteTime + 60000 / lanerender.getNowBPM()) * (100 / property.freq)) <= now)  {
-				nowQuarterNoteTime = now;
-			}
+            if(isNoteExpansion) {
+				if(quarterNote < quarterNoteTimes.length && (quarterNoteTimes[quarterNote] * (100 / property.freq)) <= (micronow - timer[TIMER_PLAY] * 1000)) {
+					quarterNote++;
+					nowQuarterNoteTime = now;
+				} else if(quarterNote == quarterNoteTimes.length && ((nowQuarterNoteTime + 60000 / lanerender.getNowBPM()) * (100 / property.freq)) <= now)  {
+					nowQuarterNoteTime = now;
+				}
+            }
 
             final long ptime = now - timer[TIMER_PLAY];
 			final float g = gauge.getValue();

@@ -433,16 +433,18 @@ public class LaneRenderer {
 					float dsty = (float) y;
 					float dstw = laneregion[lane].width;
 					float dsth = scale;
-					if((main.getNowTime() - main.getNowQuarterNoteTime()) < noteExpansionTime) {
-						dstw *= 1 + (skin.getNoteExpansionRate()[0]/100.0f - 1) * (main.getNowTime() - main.getNowQuarterNoteTime()) / noteExpansionTime;
-						dsth *= 1 + (skin.getNoteExpansionRate()[1]/100.0f - 1) * (main.getNowTime() - main.getNowQuarterNoteTime()) / noteExpansionTime;
-						dstx -= (dstw - laneregion[lane].width) / 2;
-						dsty -= (dsth - scale) / 2;
-					} else if((main.getNowTime() - main.getNowQuarterNoteTime()) >= noteExpansionTime && (main.getNowTime() - main.getNowQuarterNoteTime()) <= (noteExpansionTime + noteContractionTime)) {
-						dstw *= 1 + (skin.getNoteExpansionRate()[0]/100.0f - 1) * (noteContractionTime - (main.getNowTime() - main.getNowQuarterNoteTime() - noteExpansionTime)) / noteContractionTime;
-						dsth *= 1 + (skin.getNoteExpansionRate()[1]/100.0f - 1) * (noteContractionTime - (main.getNowTime() - main.getNowQuarterNoteTime() - noteExpansionTime)) / noteContractionTime;
-						dstx -= (dstw - laneregion[lane].width) / 2;
-						dsty -= (dsth - scale) / 2;
+					if(skin.getNoteExpansionRate()[0] != 100 || skin.getNoteExpansionRate()[1] != 100) {
+						if((main.getNowTime() - main.getNowQuarterNoteTime()) < noteExpansionTime) {
+							dstw *= 1 + (skin.getNoteExpansionRate()[0]/100.0f - 1) * (main.getNowTime() - main.getNowQuarterNoteTime()) / noteExpansionTime;
+							dsth *= 1 + (skin.getNoteExpansionRate()[1]/100.0f - 1) * (main.getNowTime() - main.getNowQuarterNoteTime()) / noteExpansionTime;
+							dstx -= (dstw - laneregion[lane].width) / 2;
+							dsty -= (dsth - scale) / 2;
+						} else if((main.getNowTime() - main.getNowQuarterNoteTime()) >= noteExpansionTime && (main.getNowTime() - main.getNowQuarterNoteTime()) <= (noteExpansionTime + noteContractionTime)) {
+							dstw *= 1 + (skin.getNoteExpansionRate()[0]/100.0f - 1) * (noteContractionTime - (main.getNowTime() - main.getNowQuarterNoteTime() - noteExpansionTime)) / noteContractionTime;
+							dsth *= 1 + (skin.getNoteExpansionRate()[1]/100.0f - 1) * (noteContractionTime - (main.getNowTime() - main.getNowQuarterNoteTime() - noteExpansionTime)) / noteContractionTime;
+							dstx -= (dstw - laneregion[lane].width) / 2;
+							dsty -= (dsth - scale) / 2;
+						}
 					}
 					if (note instanceof NormalNote) {
 						// draw normal note
@@ -566,16 +568,18 @@ public class LaneRenderer {
 							float dsty = (float) y;
 							float dstw = laneregion[lane].width;
 							float dsth = scale;
-							if((main.getNowTime() - main.getNowQuarterNoteTime()) < noteExpansionTime) {
-								dstw *= 1 + (skin.getNoteExpansionRate()[0]/100.0f - 1) * (main.getNowTime() - main.getNowQuarterNoteTime()) / noteExpansionTime;
-								dsth *= 1 + (skin.getNoteExpansionRate()[1]/100.0f - 1) * (main.getNowTime() - main.getNowQuarterNoteTime()) / noteExpansionTime;
-								dstx -= (dstw - laneregion[lane].width) / 2;
-								dsty -= (dsth - scale) / 2;
-							} else if((main.getNowTime() - main.getNowQuarterNoteTime()) >= noteExpansionTime && (main.getNowTime() - main.getNowQuarterNoteTime()) <= (noteExpansionTime + noteContractionTime)) {
-								dstw *= 1 + (skin.getNoteExpansionRate()[0]/100.0f - 1) * (noteContractionTime - (main.getNowTime() - main.getNowQuarterNoteTime() - noteExpansionTime)) / noteContractionTime;
-								dsth *= 1 + (skin.getNoteExpansionRate()[1]/100.0f - 1) * (noteContractionTime - (main.getNowTime() - main.getNowQuarterNoteTime() - noteExpansionTime)) / noteContractionTime;
-								dstx -= (dstw - laneregion[lane].width) / 2;
-								dsty -= (dsth - scale) / 2;
+							if(skin.getNoteExpansionRate()[0] != 100 || skin.getNoteExpansionRate()[1] != 100) {
+								if((main.getNowTime() - main.getNowQuarterNoteTime()) < noteExpansionTime) {
+									dstw *= 1 + (skin.getNoteExpansionRate()[0]/100.0f - 1) * (main.getNowTime() - main.getNowQuarterNoteTime()) / noteExpansionTime;
+									dsth *= 1 + (skin.getNoteExpansionRate()[1]/100.0f - 1) * (main.getNowTime() - main.getNowQuarterNoteTime()) / noteExpansionTime;
+									dstx -= (dstw - laneregion[lane].width) / 2;
+									dsty -= (dsth - scale) / 2;
+								} else if((main.getNowTime() - main.getNowQuarterNoteTime()) >= noteExpansionTime && (main.getNowTime() - main.getNowQuarterNoteTime()) <= (noteExpansionTime + noteContractionTime)) {
+									dstw *= 1 + (skin.getNoteExpansionRate()[0]/100.0f - 1) * (noteContractionTime - (main.getNowTime() - main.getNowQuarterNoteTime() - noteExpansionTime)) / noteContractionTime;
+									dsth *= 1 + (skin.getNoteExpansionRate()[1]/100.0f - 1) * (noteContractionTime - (main.getNowTime() - main.getNowQuarterNoteTime() - noteExpansionTime)) / noteContractionTime;
+									dstx -= (dstw - laneregion[lane].width) / 2;
+									dsty -= (dsth - scale) / 2;
+								}
 							}
 							if ( ((note.getState() == 0 || note.getState() >= 4) && tl.getMicroTime() <= microtime) && y >= orgy2) {
 								final TextureRegion s = noteimage[lane];
