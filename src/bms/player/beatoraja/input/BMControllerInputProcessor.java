@@ -1,6 +1,7 @@
 package bms.player.beatoraja.input;
 
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.logging.Logger;
 
@@ -195,7 +196,9 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice implements 
 			}
 		}
 
-		float analogScratchX = axis[1];
+		// Linux : axis[0]
+		// Windows : axis[1]
+		float analogScratchX = File.separatorChar == '\\' ? axis[1] :  axis[0];
 		if (oldAnalogScratchX > 1) {
 			oldAnalogScratchX = analogScratchX;
 			activeAnalogScratch = false;
