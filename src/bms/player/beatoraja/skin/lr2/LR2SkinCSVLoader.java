@@ -1058,7 +1058,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 								}
 								//ハイフンがある時はフレーム補間を行う 60FPSの17msが基準
 								int increaseRate = 1;
-								if(hyphenFlag && frame[motion] > increaseRateThreshold) {
+								if(hyphenFlag && frame[motion] >= increaseRateThreshold) {
 									for(int i = 1; i <= frame[motion]; i++) {
 										if(frame[motion] / i < increaseRateThreshold && frame[motion] % i == 0) {
 											increaseRate = i;
