@@ -439,7 +439,7 @@ public class BMSPlayer extends MainState {
                 timer[TIMER_FADEOUT] = Long.MIN_VALUE;
                 timer[TIMER_ENDOFNOTE_1P] = Long.MIN_VALUE;
 
-				for(int i = TIMER_PM_CHARA_1P_NEUTRAL; i <= TIMER_MUSIC_END; i++) timer[i] = Long.MIN_VALUE;
+				for(int i = TIMER_PM_CHARA_1P_NEUTRAL; i <= TIMER_PM_CHARA_DANCE; i++) timer[i] = Long.MIN_VALUE;
 			}
 			if(timer[TIMER_PM_CHARA_1P_NEUTRAL] == Long.MIN_VALUE || timer[TIMER_PM_CHARA_2P_NEUTRAL] == Long.MIN_VALUE){
 				timer[TIMER_PM_CHARA_1P_NEUTRAL] = now;
