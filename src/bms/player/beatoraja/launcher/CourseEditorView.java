@@ -51,8 +51,10 @@ public class CourseEditorView implements Initializable {
 		judgeType.getItems().setAll(null, NO_GOOD, NO_GREAT);
 		gaugeType.getItems().setAll(null, GAUGE_LR2,  GAUGE_5KEYS,  GAUGE_7KEYS,  GAUGE_9KEYS,  GAUGE_24KEYS);
 		
-		courses.getSelectionModel().selectedItemProperty().addListener((observable, oldVal, newVal) -> {
-			updateCourseData();
+		courses.getSelectionModel().selectedIndexProperty().addListener((observable, oldVal, newVal) -> {
+			if(oldVal != newVal) {
+				updateCourseData();				
+			}
 		});
 		courses.setCellFactory((ListView) -> {
 			return new TextFieldListCell<CourseData>() {
@@ -62,9 +64,6 @@ public class CourseEditorView implements Initializable {
 					setText(empty ? "" : course.getName());
 				}
 			};
-		});
-		courses.setOnEditCommit((event) -> {
-			
 		});
 	}
 	
@@ -100,7 +99,9 @@ public class CourseEditorView implements Initializable {
 		if(selectedCourse == null) {
 			return;
 		}
+		final int index = courses.getItems().indexOf(selectedCourse);
 		
+		selectedCourse = new CourseData();
 		selectedCourse.setName(courseName.getText());
 		
 		List<CourseData.CourseDataConstraint> constraint = new ArrayList<CourseData.CourseDataConstraint>();
@@ -118,6 +119,8 @@ public class CourseEditorView implements Initializable {
 		}
 		selectedCourse.setConstraint(constraint.toArray(new CourseData.CourseDataConstraint[constraint.size()]));
 		selectedCourse.setSong(courseSongs.getItems().toArray(new SongData[courseSongs.getItems().size()]));
+		
+		courses.getItems().set(index, selectedCourse);
 	}
 
 	private void updateCourse(CourseData course) {

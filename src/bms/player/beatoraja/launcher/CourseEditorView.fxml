@@ -14,27 +14,16 @@
 
 <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="bms.player.beatoraja.launcher.CourseEditorView">
    <children>
-      <HBox>
-         <children>
-            <TextField fx:id="search" prefHeight="24.0" prefWidth="521.0" />
-            <Button mnemonicParsing="false" onAction="#searchSongs" text="Search" />
-         </children>
-      </HBox>
-      <AnchorPane prefHeight="100.0" prefWidth="600.0">
-         <children>
-            <fx:include fx:id="searchSongs" prefHeight="100.0" prefWidth="600.0" source="SongDataView.fxml" />
-         </children>
-      </AnchorPane>
       <HBox VBox.vgrow="ALWAYS">
          <children>
-            <ListView fx:id="courses" prefHeight="172.0" prefWidth="224.0" />
-            <VBox prefHeight="188.0" prefWidth="203.0">
+            <ListView fx:id="courses" prefHeight="276.0" prefWidth="170.0" />
+            <VBox prefHeight="276.0" prefWidth="300.0">
                <children>
                   <Button mnemonicParsing="false" onAction="#addCourseData" text="＋" />
                   <TextField fx:id="courseName" />
       <AnchorPane prefHeight="150.0" prefWidth="300.0">
          <children>
-      	      <fx:include fx:id="courseSongs" source="SongDataView.fxml"  prefHeight="150.0" prefWidth="300.0" />
+      	      <fx:include fx:id="courseSongs" prefHeight="150.0" prefWidth="300.0" source="SongDataView.fxml" />
          </children>
       </AnchorPane>
                   <GridPane>
@@ -77,6 +66,21 @@
                         <Insets top="20.0" />
                      </VBox.margin>
                   </Button>
+               </children>
+            </VBox>
+            <VBox prefHeight="400.0" prefWidth="200.0">
+               <children>
+                  <HBox>
+                     <children>
+                        <TextField fx:id="search" prefHeight="24.0" prefWidth="521.0" />
+                        <Button mnemonicParsing="false" onAction="#searchSongs" text="Search" />
+                     </children>
+                  </HBox>
+                  <AnchorPane prefHeight="350.0" prefWidth="200.0">
+                     <children>
+                        <fx:include fx:id="searchSongs" prefHeight="350.0" prefWidth="200.0" source="SongDataView.fxml" />
+                     </children>
+                  </AnchorPane>
                </children>
             </VBox>
          </children>
