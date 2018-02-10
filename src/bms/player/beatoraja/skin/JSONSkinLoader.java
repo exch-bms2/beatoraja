@@ -815,6 +815,40 @@ public class JSONSkinLoader extends SkinLoader{
 						obj = barobj;
 
 					}
+
+					//POMYU chara
+					for (PMchara chara : sk.pmchara) {
+						if (dst.id.equals(chara.id)) {
+							//type 0:プレイ 1:キャラ背景 2:名前画像 3:ハリアイ画像(上半身のみ) 4:ハリアイ画像(全体) 5:キャラアイコン 6:NEUTRAL 7:FEVER 8:GREAT 9:GOOD 10:BAD 11:FEVERWIN 12:WIN 13:LOSE 14:OJAMA 15:DANCE
+							File imagefile = getSrcIdPath(chara.src, p);
+							if(dst.dst.length > 0 && imagefile != null) {
+								int color = chara.color == 2 ? 2 : 1;
+								int side = chara.side == 2 ? 2 : 1;
+								int[] option = new int[3];
+								for(int i = 0; i < option.length; i++) {
+									if(i < dst.op.length) option[i] = dst.op[i];
+									else option[i] = 0;
+								}
+								if(chara.type == 0) {
+									skin.PMcharaLoader(usecim, imagefile, chara.type, color,
+											dst.dst[0].x, dst.dst[0].y, dst.dst[0].w, dst.dst[0].h,
+											side, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, dst.offset);
+								} else if(chara.type >= 1 && chara.type <= 5) {
+									SkinImage si = skin.PMcharaLoader(usecim, imagefile, chara.type, color,
+											Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE,
+											Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE);
+									obj = si;
+								} else if(chara.type >= 6 && chara.type <= 15) {
+									skin.PMcharaLoader(usecim, imagefile, chara.type, color,
+											dst.dst[0].x, dst.dst[0].y, dst.dst[0].w, dst.dst[0].h,
+											Integer.MIN_VALUE, dst.timer, option[0], option[1], option[2], dst.offset);
+								}
+							}
+							break;
+						}
+					}
+
+
 				}
 
 				if (obj != null) {
@@ -979,6 +1013,7 @@ public class JSONSkinLoader extends SkinLoader{
 		public BGA bga;
 		public Judge[] judge = new Judge[0];
 		public SongList songlist;
+		public PMchara[] pmchara = new PMchara[0];
 
 		public Destination[] destination;
 	}
@@ -1201,6 +1236,28 @@ public class JSONSkinLoader extends SkinLoader{
 
 		public int angle = Integer.MIN_VALUE;
 
+	}
+
+	public static class PMchara {
+		public String id;
+		public String src;
+		public int color = 1;
+		public int type = Integer.MIN_VALUE;
+		public int side = 1;
+	}
+
+	private File getSrcIdPath(String srcid, Path p) {
+		if(srcid == null) {
+			return null;
+		}
+		for (Source src : sk.source) {
+			if (srcid.equals(src.id)) {
+				if (!texmap.containsKey(src.id)) {
+					return getPath(p.getParent().toString() + "/" + src.path, filemap);
+				}
+			}
+		}
+		return null;
 	}
 
 	private void setSerializers(Json json, HashSet<Integer> enabledOptions, Path path) {
