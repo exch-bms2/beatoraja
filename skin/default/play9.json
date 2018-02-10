@@ -8,6 +8,7 @@
 	"input":500,
 	"close":1500,
 	"fadeout":1000,
+	"finishmargin":5000,
 
 	"property":[
 		{"name":"Judge Detail", "item":[
