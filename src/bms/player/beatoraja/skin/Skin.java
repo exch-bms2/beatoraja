@@ -328,7 +328,10 @@ public class Skin {
 			this.sprite = sprite;
 			shaders[TYPE_BILINEAR] = ShaderManager.getShader("bilinear");
 			shaders[TYPE_FFMPEG] = ShaderManager.getShader("ffmpeg");
-			shaders[TYPE_LAYER] = ShaderManager.getShader("layer");			
+			shaders[TYPE_LAYER] = ShaderManager.getShader("layer");
+
+			sprite.setShader(shaders[current]);
+			sprite.setColor(Color.WHITE);
 		}
 
 		public void draw(BitmapFont font, String s, float x, float y, Color c) {
