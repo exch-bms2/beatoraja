@@ -103,6 +103,16 @@ public class CourseData {
 
         private float scorerate;
 
+        public TrophyData() {
+        	
+        }
+        
+        public TrophyData(String name, float missrate, float scorerate) {
+        	this.name = name;
+        	this.missrate = missrate;
+        	this.scorerate = scorerate;
+        }
+        
         public String getName() {
             return name;
         }

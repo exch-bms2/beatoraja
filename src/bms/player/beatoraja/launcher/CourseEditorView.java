@@ -35,6 +35,18 @@ public class CourseEditorView implements Initializable {
 	@FXML
 	private ComboBox<CourseData.CourseDataConstraint> gaugeType;;
 	@FXML
+	private Spinner<Double> bronzemiss;
+	@FXML
+	private Spinner<Double> bronzescore;
+	@FXML
+	private Spinner<Double> silvermiss;
+	@FXML
+	private Spinner<Double> silverscore;
+	@FXML
+	private Spinner<Double> goldmiss;
+	@FXML
+	private Spinner<Double> goldscore;
+	@FXML
 	private TableView<SongData> courseSongs;
 
 	private String filename;
@@ -118,8 +130,13 @@ public class CourseEditorView implements Initializable {
 			constraint.add(gaugeType.getValue());
 		}
 		selectedCourse.setConstraint(constraint.toArray(new CourseData.CourseDataConstraint[constraint.size()]));
-		selectedCourse.setSong(courseSongs.getItems().toArray(new SongData[courseSongs.getItems().size()]));
+		CourseData.TrophyData[] trophy = new CourseData.TrophyData[3];
+		trophy[0] = new CourseData.TrophyData("bronzemedal", getValue(bronzemiss).floatValue(), getValue(bronzescore).floatValue());
+		trophy[1] = new CourseData.TrophyData("silvermedal", getValue(silvermiss).floatValue(), getValue(silverscore).floatValue());
+		trophy[2] = new CourseData.TrophyData("goldmedal", getValue(goldmiss).floatValue(), getValue(goldscore).floatValue());
+		selectedCourse.setTrophy(trophy);
 		
+		selectedCourse.setSong(courseSongs.getItems().toArray(new SongData[courseSongs.getItems().size()]));		
 		courses.getItems().set(index, selectedCourse);
 	}
 
@@ -150,12 +167,37 @@ public class CourseEditorView implements Initializable {
 				break;
 			}
 		}
+		for(CourseData.TrophyData trophy : course.getTrophy()) {
+			if(trophy.getName().equals("bronzemedal")) {
+				bronzemiss.getValueFactory().setValue(Double.valueOf(trophy.getMissrate()));
+				bronzescore.getValueFactory().setValue(Double.valueOf(trophy.getScorerate()));
+			}
+			if(trophy.getName().equals("silvermedal")) {
+				silvermiss.getValueFactory().setValue(Double.valueOf(trophy.getMissrate()));
+				silverscore.getValueFactory().setValue(Double.valueOf(trophy.getScorerate()));				
+			}
+			if(trophy.getName().equals("goldmedal")) {
+				goldmiss.getValueFactory().setValue(Double.valueOf(trophy.getMissrate()));
+				goldscore.getValueFactory().setValue(Double.valueOf(trophy.getScorerate()));
+			}
+		}
+		
 		courseSongs.getItems().setAll(course.getSong());
+	}
+	
+	private <T> T getValue(Spinner<T> spinner) {
+		spinner.getValueFactory()
+				.setValue(spinner.getValueFactory().getConverter().fromString(spinner.getEditor().getText()));
+		return spinner.getValue();
 	}
 
 	public void addCourseData() {
 		CourseData course = new CourseData();
 		course.setName("New Course");
+		CourseData.TrophyData[] trophy = new CourseData.TrophyData[3];
+		trophy[0] = new CourseData.TrophyData("bronzemedal", 7.5f, 55.0f);
+		trophy[1] = new CourseData.TrophyData("silvermedal", 5.0f, 70.0f);
+		trophy[2] = new CourseData.TrophyData("goldmedal", 2.5f, 85.0f);
 		courses.getItems().add(course);
 	}
 
