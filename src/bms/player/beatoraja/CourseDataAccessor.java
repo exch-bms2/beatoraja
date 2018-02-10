@@ -8,7 +8,6 @@ import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.zip.GZIPOutputStream;
 
 /**
  * コースデータへのアクセス
@@ -21,6 +20,10 @@ public class CourseDataAccessor {
 
     public CourseDataAccessor(String path) {
         coursedir = path;
+		try {
+			Files.createDirectories(Paths.get(coursedir));
+		} catch (IOException e) {
+		}
     }
     /**
      * 全てのキャッシュされた難易度表データを読み込む
@@ -29,43 +32,64 @@ public class CourseDataAccessor {
      */
     public CourseData[] readAll() {
         List<CourseData> result = new ArrayList<>();
+        for(String name : readAllNames()) {
+        	result.addAll(Arrays.asList(read(name)));
+        }
+        return result.toArray(new CourseData[result.size()]) ;
+    }
+    
+    public String[] readAllNames() {
+        List<String> result = new ArrayList<>();
         try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get(coursedir))) {
             for (Path p : paths) {
                 if (p.toString().endsWith(".json")) {
-                    boolean isList = false;
-                    try {
-                        Json json = new Json();
-                        CourseData[] courses = json.fromJson(CourseData[].class,
-                                new BufferedInputStream(Files.newInputStream(p)));
-                        result.addAll(Arrays.asList(courses));
-                        isList = true;
-                    } catch(Throwable e) {
-
-                    }
-                    if(!isList) {
-                        try {
-                            Json json = new Json();
-                            CourseData course = json.fromJson(CourseData.class,
-                                    new BufferedInputStream(Files.newInputStream(p)));
-                            result.add(course);
-                        } catch(Throwable e) {
-
-                        }
-                    }
+                	String filename = p.getFileName().toString();
+                	result.add(filename.substring(0, filename.lastIndexOf('.')));
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return result.toArray(new CourseData[result.size()]) ;
+        return result.toArray(new String[result.size()]) ;    	
     }
 
+    public CourseData[] read(String name) {
+        Path p = Paths.get(coursedir + "/" + name + ".json");
+        boolean isList = false;
+        try {
+            Json json = new Json();
+            CourseData[] courses =  json.fromJson(CourseData[].class,
+                    new BufferedInputStream(Files.newInputStream(p)));
+            List<CourseData> result = new ArrayList<CourseData>();            
+            for(CourseData course : courses) {
+            	if(course.getSong() == null || course.getSong().length == 0) {
+            		continue;
+            	}
+            	result.add(course);
+            }
+            return result.toArray(new CourseData[result.size()]);
+        } catch(Throwable e) {
+
+        }
+        if(!isList) {
+            try {
+                Json json = new Json();
+                CourseData course = json.fromJson(CourseData.class,
+                        new BufferedInputStream(Files.newInputStream(p)));
+            	if(course.getSong() != null || course.getSong().length > 0) {
+            		return new CourseData[]{course};
+            	}
+            } catch(Throwable e) {
+            }
+        }
+        return new CourseData[0] ;
+    }
     /**
      * コースデータを保存する
      *
      * @param cd コースデータ
      */
-    public void write(String name, CourseData cd) {
+    public void write(String name, CourseData[] cd) {
         try {
             Json json = new Json();
             json.setOutputType(JsonWriter.OutputType.json);

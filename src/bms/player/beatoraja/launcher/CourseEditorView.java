@@ -1,0 +1,190 @@
+package bms.player.beatoraja.launcher;
+
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ResourceBundle;
+
+import bms.player.beatoraja.CourseData;
+import bms.player.beatoraja.CourseDataAccessor;
+
+import static bms.player.beatoraja.CourseData.CourseDataConstraint.*;
+import bms.player.beatoraja.song.*;
+import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.TextFieldListCell;
+
+public class CourseEditorView implements Initializable {
+
+	@FXML
+	private TextField search;
+	@FXML
+	private TableView<SongData> searchSongs;
+
+	@FXML
+	private ListView<CourseData> courses;
+	@FXML
+	private TextField courseName;
+	@FXML
+	private ComboBox<CourseData.CourseDataConstraint> gradeType;;
+	@FXML
+	private ComboBox<CourseData.CourseDataConstraint> hispeedType;;
+	@FXML
+	private ComboBox<CourseData.CourseDataConstraint> judgeType;;
+	@FXML
+	private ComboBox<CourseData.CourseDataConstraint> gaugeType;;
+	@FXML
+	private TableView<SongData> courseSongs;
+
+	private String filename;
+	
+	private CourseData selectedCourse;
+	
+	private SongDatabaseAccessor songdb;
+	
+	private CourseDataAccessor courseAccessor = new CourseDataAccessor("course");
+	
+	public void initialize(URL arg0, ResourceBundle arg1) {
+		gradeType.getItems().setAll(null, CLASS, MIRROR, RANDOM);
+		hispeedType.getItems().setAll(null, NO_SPEED);
+		judgeType.getItems().setAll(null, NO_GOOD, NO_GREAT);
+		gaugeType.getItems().setAll(null, GAUGE_LR2,  GAUGE_5KEYS,  GAUGE_7KEYS,  GAUGE_9KEYS,  GAUGE_24KEYS);
+		
+		courses.getSelectionModel().selectedItemProperty().addListener((observable, oldVal, newVal) -> {
+			updateCourseData();
+		});
+		courses.setCellFactory((ListView) -> {
+			return new TextFieldListCell<CourseData>() {
+				@Override
+				public void updateItem(CourseData course, boolean empty) {
+					super.updateItem(course, empty);
+					setText(empty ? "" : course.getName());
+				}
+			};
+		});
+		courses.setOnEditCommit((event) -> {
+			
+		});
+	}
+	
+	protected void setSongDatabaseAccessor(SongDatabaseAccessor songdb) {
+		this.songdb = songdb;
+	}
+
+	public void searchSongs() {
+		if(songdb == null) {
+			return;
+		}
+		if(search.getText().length() > 1) {
+			searchSongs.getItems().setAll(songdb.getSongDatasByText(search.getText()));			
+		}
+	}
+
+	public void update(String name) {
+		courses.getItems().setAll(courseAccessor.read(name));
+		filename = name;
+	}
+	
+	public void commit() {
+		commitCourse();
+		courseAccessor.write(filename, courses.getItems().toArray(new CourseData[courses.getItems().size()]));
+	}
+	
+	public void updateCourseData() {
+		commitCourse();
+		updateCourse(courses.getSelectionModel().getSelectedItem());
+	}
+	
+	private void commitCourse() {
+		if(selectedCourse == null) {
+			return;
+		}
+		
+		selectedCourse.setName(courseName.getText());
+		
+		List<CourseData.CourseDataConstraint> constraint = new ArrayList<CourseData.CourseDataConstraint>();
+		if(gradeType.getValue() != null) {
+			constraint.add(gradeType.getValue());
+		}
+		if(hispeedType.getValue() != null) {
+			constraint.add(hispeedType.getValue());
+		}
+		if(judgeType.getValue() != null) {
+			constraint.add(judgeType.getValue());
+		}
+		if(gaugeType.getValue() != null) {
+			constraint.add(gaugeType.getValue());
+		}
+		selectedCourse.setConstraint(constraint.toArray(new CourseData.CourseDataConstraint[constraint.size()]));
+		selectedCourse.setSong(courseSongs.getItems().toArray(new SongData[courseSongs.getItems().size()]));
+	}
+
+	private void updateCourse(CourseData course) {
+		selectedCourse = course;
+		
+		courseName.setText(selectedCourse.getName());
+		for(CourseData.CourseDataConstraint constraint : course.getConstraint()) {
+			switch(constraint) {
+			case CLASS:
+			case MIRROR:
+			case RANDOM:
+				gradeType.setValue(constraint);
+				break;
+			case NO_GREAT:
+			case NO_GOOD:
+				judgeType.setValue(constraint);
+				break;
+			case NO_SPEED:
+				hispeedType.setValue(constraint);
+				break;
+			case GAUGE_24KEYS:
+			case GAUGE_5KEYS:
+			case GAUGE_7KEYS:
+			case GAUGE_9KEYS:
+			case GAUGE_LR2:
+				gaugeType.setValue(constraint);
+				break;
+			}
+		}
+		courseSongs.getItems().setAll(course.getSong());
+	}
+
+	public void addCourseData() {
+		CourseData course = new CourseData();
+		course.setName("New Course");
+		courses.getItems().add(course);
+	}
+
+	public void addSongData() {
+		SongData song = searchSongs.getSelectionModel().getSelectedItem();
+		if(song != null) {
+			courseSongs.getItems().add(song);
+		}
+	}
+
+	public void removeSongData() {
+		SongData song = courseSongs.getSelectionModel().getSelectedItem();
+		if(song != null) {
+			courseSongs.getItems().remove(song);
+		}
+	}
+ 
+	public void moveSongDataUp() {
+		final int index = courseSongs.getSelectionModel().getSelectedIndex();
+		if(index > 0) {
+			SongData song = courseSongs.getSelectionModel().getSelectedItem();
+			courseSongs.getItems().remove(index);
+			courseSongs.getItems().add(index - 1, song);
+		}
+	}
+
+	public void moveSongDataDown() {
+		final int index = courseSongs.getSelectionModel().getSelectedIndex();
+		if(index >= 0 && index < courseSongs.getItems().size() - 1) {
+			SongData song = courseSongs.getSelectionModel().getSelectedItem();
+			courseSongs.getItems().remove(index);
+			courseSongs.getItems().add(index + 1, song);
+		}
+	}
+}

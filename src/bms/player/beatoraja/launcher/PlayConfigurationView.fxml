@@ -647,6 +647,15 @@
                   </AnchorPane>
               </content>
             </Tab>
+            <Tab fx:id="courseTab" closable="false" text="Course">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                         <fx:include fx:id="course" source="CourseEditorView.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                     </children>
+                  </AnchorPane>
+              </content>
+            </Tab>
          </tabs>
       </TabPane>
       <HBox fx:id="controlPanel" prefHeight="38.0" prefWidth="552.0">

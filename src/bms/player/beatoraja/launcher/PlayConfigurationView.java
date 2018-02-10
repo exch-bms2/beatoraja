@@ -79,6 +79,8 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private Tab irTab;
 	@FXML
+	private Tab courseTab;
+	@FXML
 	private HBox controlPanel;
 
 	@FXML
@@ -222,6 +224,8 @@ public class PlayConfigurationView implements Initializable {
 	private VBox skin;
 	@FXML
 	private SkinConfigurationView skinController;
+	@FXML
+	private CourseEditorView courseController;
 
 	private Config config;
 	private PlayerConfig player;
@@ -365,6 +369,16 @@ public class PlayConfigurationView implements Initializable {
 			players.getSelectionModel().select(0);
 		}
 		updatePlayer();
+		
+		try {
+			Class.forName("org.sqlite.JDBC");
+			SongDatabaseAccessor songdb = new SQLiteSongDatabaseAccessor(Paths.get("songdata.db").toString(),
+					config.getBmsroot());
+			courseController.setSongDatabaseAccessor(songdb);
+			courseController.update("default");
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@FXML
@@ -510,6 +524,7 @@ public class PlayConfigurationView implements Initializable {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		courseController.commit();
 	}
 
 	public void commitPlayer() {

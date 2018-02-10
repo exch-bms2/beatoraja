@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="bms.player.beatoraja.launcher.CourseEditorView">
+   <children>
+      <HBox>
+         <children>
+            <TextField fx:id="search" prefHeight="24.0" prefWidth="521.0" />
+            <Button mnemonicParsing="false" onAction="#searchSongs" text="Search" />
+         </children>
+      </HBox>
+      <AnchorPane prefHeight="100.0" prefWidth="600.0">
+         <children>
+            <fx:include fx:id="searchSongs" prefHeight="100.0" prefWidth="600.0" source="SongDataView.fxml" />
+         </children>
+      </AnchorPane>
+      <HBox VBox.vgrow="ALWAYS">
+         <children>
+            <ListView fx:id="courses" prefHeight="172.0" prefWidth="224.0" />
+            <VBox prefHeight="188.0" prefWidth="203.0">
+               <children>
+                  <Button mnemonicParsing="false" onAction="#addCourseData" text="＋" />
+                  <TextField fx:id="courseName" />
+      <AnchorPane prefHeight="150.0" prefWidth="300.0">
+         <children>
+      	      <fx:include fx:id="courseSongs" source="SongDataView.fxml"  prefHeight="150.0" prefWidth="300.0" />
+         </children>
+      </AnchorPane>
+                  <GridPane>
+                     <columnConstraints>
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                     </columnConstraints>
+                     <rowConstraints>
+                        <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                     </rowConstraints>
+                     <children>
+                        <ComboBox fx:id="gradeType" prefWidth="150.0" />
+                        <ComboBox fx:id="hispeedType" prefWidth="150.0" GridPane.columnIndex="1" />
+                        <ComboBox fx:id="judgeType" prefWidth="150.0" GridPane.rowIndex="1" />
+                        <ComboBox fx:id="gaugeType" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                     </children>
+                  </GridPane>
+               </children>
+            </VBox>
+            <VBox prefHeight="200.0" prefWidth="33.0">
+               <children>
+                  <Button mnemonicParsing="false" onAction="#addSongData" text="＋">
+                     <VBox.margin>
+                        <Insets />
+                     </VBox.margin>
+                  </Button>
+                  <Button mnemonicParsing="false" onAction="#removeSongData" text="ー">
+                     <VBox.margin>
+                        <Insets top="20.0" />
+                     </VBox.margin>
+                  </Button>
+                  <Button mnemonicParsing="false" onAction="#moveSongDataUp" text="↑">
+                     <VBox.margin>
+                        <Insets top="20.0" />
+                     </VBox.margin>
+                  </Button>
+                  <Button mnemonicParsing="false" onAction="#moveSongDataDown" text="↓">
+                     <VBox.margin>
+                        <Insets top="20.0" />
+                     </VBox.margin>
+                  </Button>
+               </children>
+            </VBox>
+         </children>
+      </HBox>
+   </children>
+</VBox>
