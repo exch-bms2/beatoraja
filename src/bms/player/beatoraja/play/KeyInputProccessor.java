@@ -29,6 +29,9 @@ class KeyInputProccessor {
 
 	private final LaneProperty laneProperty;
 
+	//キービーム停止用
+	private boolean keyBeamStop = false;
+
 	public KeyInputProccessor(BMSPlayer player, LaneProperty laneProperty) {
 		this.player = player;
 		this.laneProperty = laneProperty;
@@ -54,13 +57,15 @@ class KeyInputProccessor {
 			final int offset = laneoffset[lane];
 			boolean pressed = false;
 			boolean scratch = false;
-			for (int key : laneProperty.getLaneKeyAssign()[lane]) {
-				if (keystate[key] || auto_presstime[key] != Long.MIN_VALUE) {
-					pressed = true;
-					if(laneProperty.getLaneScratchAssign()[lane] != -1
-							&& scratchKey[laneProperty.getLaneScratchAssign()[lane]] != key) {
-						scratch = true;
-						scratchKey[laneProperty.getLaneScratchAssign()[lane]] = key;
+			if(!keyBeamStop) {
+				for (int key : laneProperty.getLaneKeyAssign()[lane]) {
+					if (keystate[key] || auto_presstime[key] != Long.MIN_VALUE) {
+						pressed = true;
+						if(laneProperty.getLaneScratchAssign()[lane] != -1
+								&& scratchKey[laneProperty.getLaneScratchAssign()[lane]] != key) {
+							scratch = true;
+							scratchKey[laneProperty.getLaneScratchAssign()[lane]] = key;
+						}
 					}
 				}
 			}
@@ -102,9 +107,14 @@ class KeyInputProccessor {
 
 	public void stopJudge() {
 		if (judge != null) {
+			keyBeamStop = true;
 			judge.stop = true;
 			judge = null;
 		}
+	}
+
+	public void setKeyBeamStop(boolean inputStop) {
+		this.keyBeamStop = inputStop;
 	}
 
 	/**

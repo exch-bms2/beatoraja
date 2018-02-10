@@ -93,6 +93,13 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 				skin.setLoadend(Integer.parseInt(str[1]));
 			}
 		});
+		addCommandWord(new CommandWord("FINISHMARGIN") {
+			@Override
+			//STATE_FINISHEDからフェードアウトを開始するまでのマージン(ms)
+			public void execute(String[] str) {
+				skin.setFinishMargin(Integer.parseInt(str[1]));
+			}
+		});
 		addCommandWord(new CommandWord("JUDGETIMER") {
 			@Override
 			public void execute(String[] str) {
