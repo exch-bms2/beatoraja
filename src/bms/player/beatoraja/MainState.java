@@ -404,6 +404,10 @@ public abstract class MainState {
 				return getJudgeCount(5, true);
 			case NUMBER_LATE_MISS:
 				return getJudgeCount(5, false);
+			case NUMBER_POOR_PLUS_MISS:
+				return getJudgeCount(4, true) + getJudgeCount(4, false) + getJudgeCount(5, true) + getJudgeCount(5, false);
+			case NUMBER_BAD_PLUS_POOR_PLUS_MISS:
+				return getJudgeCount(3, true) + getJudgeCount(3, false) + getJudgeCount(4, true) + getJudgeCount(4, false) + getJudgeCount(5, true) + getJudgeCount(5, false);
 			case NUMBER_TOTALEARLY:
 				int ecount = 0;
 				for (int i = 1; i < 6; i++) {

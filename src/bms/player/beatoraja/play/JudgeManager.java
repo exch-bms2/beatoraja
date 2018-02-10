@@ -46,7 +46,7 @@ public class JudgeManager {
 	 */
 	private int coursemaxcombo;
 	/**
-	 * ボムの表示開始時間
+	 * 判定連動レーザーの色
 	 */
 	private int[][] judge;
 	/**
@@ -121,6 +121,16 @@ public class JudgeManager {
 
 	private final JudgeAlgorithm algorithm;
 
+	/**
+	 * 処理済ノート数
+	 */
+	private int pastNotes = 0;
+
+	/**
+	 * PMS キャラ用 判定
+	 */
+	private int PMcharaJudge = 0;
+
 	public JudgeManager(BMSPlayer main) {
 		this.main = main;
 		algorithm = main.getMainController().getPlayerResource().getConfig().getJudgealgorithm();
@@ -142,6 +152,8 @@ public class JudgeManager {
 		combocond = rule.combo;
 		miss = rule.miss;
 		judgeVanish = rule.judgeVanish;
+		pastNotes = 0;
+		PMcharaJudge = 0;
 
 		keyassign = main.getLaneProperty().getKeyLaneAssign();
 		offset = main.getLaneProperty().getLaneSkinOffset();
@@ -252,6 +264,8 @@ public class JudgeManager {
 							if ((lntype == BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
 									|| ln.getType() == LongNote.TYPE_LONGNOTE) {
 								passingcount[lane] = 0;
+								//LN時のレーザー色変更処理
+								this.judge[player[lane]][offset[lane]] = 8;
 							} else {
 								this.update(lane, ln, time, 0, 0);
 							}
@@ -379,6 +393,8 @@ public class JudgeManager {
 									|| ln.getType() == LongNote.TYPE_LONGNOTE)
 									&& j < 4) {
 								passingcount[lane] = (int) (tnote.getTime() - ptime);
+								//LN時のレーザー色変更処理
+								this.judge[player[lane]][offset[lane]] = 8;
 							} else {
 								final int dtime = (int) (tnote.getTime() - ptime);
 								this.update(lane, ln, time, j, dtime);
@@ -549,6 +565,7 @@ public class JudgeManager {
 	private void update(int lane, Note n, int time, int judge, int fast) {
 		if (judgeVanish[judge]) {
 			n.setState(judge + 1);
+			pastNotes++;
 		}
 		if(miss == MissCondition.ONE && judge == 4 && n.getPlayTime() != 0) {
 			return;
@@ -571,6 +588,7 @@ public class JudgeManager {
 		if (judge <= ((PlaySkin)main.getSkin()).getJudgetimer()) {
 			main.getTimer()[SkinPropertyMapper.bombTimerId(player[lane], offset[lane])] = main.getNowTime();
 		}
+		PMcharaJudge = judge + 1;
 
 		final int lanelength = sckeyassign.length;
 		if (judgenow.length > 0) {
@@ -688,5 +706,13 @@ public class JudgeManager {
 
 	public int[][] getJudgeTable(boolean sc) {
 		return sc ? sjudge : njudge;
+	}
+
+	public int getPastNotes() {
+		return pastNotes;
+	}
+
+	public int getPMcharaJudge() {
+		return PMcharaJudge;
 	}
 }

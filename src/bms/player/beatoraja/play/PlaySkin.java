@@ -31,6 +31,11 @@ public class PlaySkin extends Skin {
 	 */
 	private int close;
 
+	/**
+	 * STATE_FINISHEDからフェードアウトを開始するまでのマージン(ms)
+	 */
+	private int finishMargin = 0;
+
 	private int loadstart;
 	private int loadend;
 	
@@ -38,6 +43,11 @@ public class PlaySkin extends Skin {
 	 * 各レーンの判定タイマーを発動するときの判定条件。(0:PG, 1:GR, 2:GD, 3:BD)
 	 */
 	private int judgetimer = 1;
+
+	/**
+	 * PMSのリズムに合わせたノートの拡大の最大拡大率(%) w h
+	 */
+	private int[] noteExpansionRate = {100,100};
 
 	private static final int[] fixop = {OPTION_STAGEFILE, OPTION_NO_STAGEFILE, OPTION_BACKBMP, OPTION_NO_BACKBMP,
 		OPTION_AUTOPLAYON, OPTION_AUTOPLAYOFF, OPTION_BGAON, OPTION_BGAOFF,
@@ -75,6 +85,14 @@ public class PlaySkin extends Skin {
 
 	public void setClose(int close) {
 		this.close = close;
+	}
+
+	public int getFinishMargin() {
+		return finishMargin;
+	}
+
+	public void setFinishMargin(int finishMargin) {
+		this.finishMargin = finishMargin;
 	}
 
 	public int getPlaystart() {
@@ -139,6 +157,14 @@ public class PlaySkin extends Skin {
 	
 	public void setJudgetimer(int judgetimer) {
 		this.judgetimer = judgetimer;
+	}
+
+	public int[] getNoteExpansionRate() {
+		return noteExpansionRate;
+	}
+
+	public void setNoteExpansionRate(int[] rate) {
+		this.noteExpansionRate = rate;
 	}
 
 }

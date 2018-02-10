@@ -72,7 +72,7 @@ public enum JudgeAlgorithm {
 						&& ((LongNote) judgenote).isEnd())) {
 					if (note == null || note.getState() != 0 || compare(note, judgenote, ptime, judgetable)) {
 						if (!(miss == MissCondition.ONE && (judgenote.getState() != 0
-								|| (judgenote.getState() == 0 && judgenote.getPlayTime() != 0 && dtime >= judgetable[2][1])))) {
+								|| (judgenote.getState() == 0 && judgenote.getPlayTime() != 0 && (dtime > judgetable[2][1] || dtime < judgetable[2][0]))))) {
 							if (judgenote.getState() != 0) {
 								judge = (dtime >= judgetable[4][0] && dtime <= judgetable[4][1]) ? 5 : 6;
 							} else {

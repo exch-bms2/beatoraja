@@ -436,4 +436,21 @@ public class Skin {
 			this.color = color;
 		}
 	}
+
+	/**
+	 * ぽみゅキャラの各モーションの1周期の時間  0:1P_NEUTRAL 1:1P_FEVER 2:1P_GREAT 3:1P_GOOD 4:1P_BAD 5:2P_NEUTRAL 6:2P_GREAT 7:2P_BAD
+	 */
+	private int PMcharaTime[] = {1,1,1,1,1,1,1,1};
+
+	public int getPMcharaTime(int index) {
+		if(index < 0 || index >= PMcharaTime.length) return 1;
+		return PMcharaTime[index];
+	}
+
+	public void setPMcharaTime(int index, int value) {
+		if(index >= 0 && index < PMcharaTime.length && value >= 1) {
+			this.PMcharaTime[index] = value;
+		}
+	}
+
 }
