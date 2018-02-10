@@ -46,7 +46,7 @@ public class JudgeManager {
 	 */
 	private int coursemaxcombo;
 	/**
-	 * ボムの表示開始時間
+	 * 判定連動レーザーの色
 	 */
 	private int[][] judge;
 	/**
@@ -264,6 +264,8 @@ public class JudgeManager {
 							if ((lntype == BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
 									|| ln.getType() == LongNote.TYPE_LONGNOTE) {
 								passingcount[lane] = 0;
+								//LN時のレーザー色変更処理
+								this.judge[player[lane]][offset[lane]] = 8;
 							} else {
 								this.update(lane, ln, time, 0, 0);
 							}
@@ -391,6 +393,8 @@ public class JudgeManager {
 									|| ln.getType() == LongNote.TYPE_LONGNOTE)
 									&& j < 4) {
 								passingcount[lane] = (int) (tnote.getTime() - ptime);
+								//LN時のレーザー色変更処理
+								this.judge[player[lane]][offset[lane]] = 8;
 							} else {
 								final int dtime = (int) (tnote.getTime() - ptime);
 								this.update(lane, ln, time, j, dtime);
