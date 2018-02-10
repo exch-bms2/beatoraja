@@ -27,7 +27,7 @@ public enum BarSorter implements Comparator<Bar> {
 			if (!(o2 instanceof SongBar)) {
 				return -1;
 			}
-			return o1.getTitle().compareTo(o2.getTitle());
+			return o1.getTitle().toLowerCase().compareTo(o2.getTitle().toLowerCase());
 		}
 	},
 	/**
