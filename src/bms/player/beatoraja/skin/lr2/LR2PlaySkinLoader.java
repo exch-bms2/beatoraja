@@ -287,8 +287,17 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 
 		addCommandWord(new CommandWord("DST_NOTE2") {
 			@Override
+			//PMSの見逃しPOOR時のノートが落ちる演出の消失点のy座標
 			public void execute(String[] str) {
 				lanerender.setDstNote2((int) (dsth - (Integer.parseInt(str[1]) * dsth / srch + scale[0])));
+			}
+		});
+
+		addCommandWord(new CommandWord("DST_NOTE_EXPANSION_RATE") {
+			@Override
+			//PMSのリズムに合わせたノートの拡大の最大拡大率(%) 「w,h」
+			public void execute(String[] str) {
+				skin.setNoteExpansionRate(new int[]{Integer.parseInt(str[1]),Integer.parseInt(str[2])});
 			}
 		});
 

@@ -44,6 +44,11 @@ public class PlaySkin extends Skin {
 	 */
 	private int judgetimer = 1;
 
+	/**
+	 * PMSのリズムに合わせたノートの拡大の最大拡大率(%) w h
+	 */
+	private int[] noteExpansionRate = {100,100};
+
 	private static final int[] fixop = {OPTION_STAGEFILE, OPTION_NO_STAGEFILE, OPTION_BACKBMP, OPTION_NO_BACKBMP,
 		OPTION_AUTOPLAYON, OPTION_AUTOPLAYOFF, OPTION_BGAON, OPTION_BGAOFF,
 		OPTION_BGANORMAL, OPTION_BGAEXTEND, OPTION_GHOST_OFF, OPTION_GHOST_A, OPTION_GHOST_B,
@@ -152,6 +157,14 @@ public class PlaySkin extends Skin {
 	
 	public void setJudgetimer(int judgetimer) {
 		this.judgetimer = judgetimer;
+	}
+
+	public int[] getNoteExpansionRate() {
+		return noteExpansionRate;
+	}
+
+	public void setNoteExpansionRate(int[] rate) {
+		this.noteExpansionRate = rate;
 	}
 
 }
