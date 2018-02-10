@@ -11,10 +11,12 @@ import bms.player.beatoraja.Config;
 import bms.player.beatoraja.PlayerConfig;
 import bms.player.beatoraja.ResourcePool;
 import bms.player.beatoraja.play.BMSPlayer;
+import bms.player.beatoraja.play.SkinBGA;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.IntMap;
@@ -91,6 +93,7 @@ public class BGAProcessor {
 
 	private TimeLine[] timelines;
 	private int pos;
+	private TextureRegion image;
 
 	public BGAProcessor(Config config, PlayerConfig player) {
 		this.config = config;
@@ -102,6 +105,7 @@ public class BGAProcessor {
 		blanktex = new Texture(blank);
 		
 		cache = new BGImageProcessor(BGACACHE_SIZE);
+		image = new TextureRegion();
 	}
 
 	public synchronized void setModel(BMSModel model) {
@@ -234,7 +238,9 @@ public class BGAProcessor {
 		return cache != null ? cache.getTexture(id) : null;
 	}
 
-	public void drawBGA(SkinObjectRenderer sprite, Rectangle r, int time) {
+	public void drawBGA(SkinBGA dst, SkinObjectRenderer sprite, Rectangle r, int time) {
+		sprite.setColor(dst.getColor());
+		sprite.setBlend(dst.getBlend());
 		if (time < 0 || timelines == null) {
 			prevrendertime = -1;
 			sprite.draw(blanktex, r.x, r.y, r.width, r.height);
@@ -281,7 +287,7 @@ public class BGAProcessor {
 			Texture miss = getBGAData(misslayer[misslayer.length * (time - misslayertime) / getMisslayerduration], true);
 			if (miss != null) {
 				sprite.setType(SkinObjectRenderer.TYPE_LINEAR);
-				drawBGAFixRatio(sprite, r, miss);
+				drawBGAFixRatio(dst, sprite, r, miss);
 			}
 		} else {
 			// draw BGA
@@ -290,10 +296,10 @@ public class BGAProcessor {
 				final MovieProcessor mp = getMovieProcessor(playingbgaid);
 				if (mp != null) {
 					sprite.setType(SkinObjectRenderer.TYPE_FFMPEG);
-					drawBGAFixRatio(sprite, r, playingbgatex);
+					drawBGAFixRatio(dst, sprite, r, playingbgatex);
 				} else {
 					sprite.setType(SkinObjectRenderer.TYPE_LINEAR);
-					drawBGAFixRatio(sprite, r, playingbgatex);
+					drawBGAFixRatio(dst, sprite, r, playingbgatex);
 				}
 			} else {
 				sprite.draw(blanktex, r.x, r.y, r.width, r.height);
@@ -304,10 +310,10 @@ public class BGAProcessor {
 				final MovieProcessor mp = getMovieProcessor(playinglayerid);
 				if (mp != null) {
 					sprite.setType(SkinObjectRenderer.TYPE_FFMPEG);
-					drawBGAFixRatio(sprite, r, playinglayertex);
+					drawBGAFixRatio(dst, sprite, r, playinglayertex);
 				} else {
 					sprite.setType(SkinObjectRenderer.TYPE_LAYER);
-					drawBGAFixRatio(sprite, r, playinglayertex);
+					drawBGAFixRatio(dst, sprite, r, playinglayertex);
 				}
 			}
 		}
@@ -322,38 +328,11 @@ public class BGAProcessor {
 	/**
 	 * Modify the aspect ratio and draw BGA
 	 */
-	private void drawBGAFixRatio(SkinObjectRenderer sprite, Rectangle r, Texture bga){
-		switch(config.getBgaExpand()) {
-		case Config.BGAEXPAND_FULL:
-	        sprite.draw(bga, r.x, r.y, r.width, r.height);
-			break;
-		case Config.BGAEXPAND_KEEP_ASPECT_RATIO:
-			float fixx,fixy,fixheight,fixwidth;
-			float movieaspect = (float)bga.getWidth() / bga.getHeight();
-			float windowaspect = (float)r.width / r.height;
-			float scaleheight = (float)windowaspect / movieaspect;
-			float scalewidth  = (float)1.0f / scaleheight;
-	        if(1.0f > scaleheight){
-	        	fixx = r.x;
-	            fixy = r.y+ (r.height * (1.0f - scaleheight)) / 2.0f;
-	            fixheight = r.height * scaleheight;
-	            fixwidth = r.width;
-	        } else {
-	            fixx = r.x+(r.width * (1.0f - scalewidth)) / 2.0f;
-	            fixy = r.y;
-	            fixheight = r.height;
-	            fixwidth = r.width * scalewidth;
-	        }
-	        sprite.draw(bga, fixx, fixy, fixwidth, fixheight);
-			break;
-		case Config.BGAEXPAND_OFF:
-            float w = Math.min(r.width, bga.getWidth());
-            float h = Math.min(r.height, bga.getHeight());
-	       	float x = r.x + (r.width - w) / 2;
-            float y = r.y + (r.height - h) / 2;;
-	        sprite.draw(bga, x, y, w, h);
-			break;
-		}
+	private void drawBGAFixRatio(SkinBGA dst, SkinObjectRenderer sprite, Rectangle r, Texture bga){
+		image.setTexture(bga);
+		image.setRegion(0, 0, bga.getWidth(), bga.getHeight());
+		dst.getStretchedRect(r, image, image);
+		sprite.draw(image, r.x, r.y, r.width, r.height);
 	}
 
 	/**

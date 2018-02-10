@@ -109,7 +109,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 		addCommandWord(new CommandWord("SRC_BGA") {
 			@Override
 			public void execute(String[] str) {
-				bga = new SkinBGA();
+				bga = new SkinBGA(c.getBgaExpand());
 				skin.add(bga);
 			}
 		});
