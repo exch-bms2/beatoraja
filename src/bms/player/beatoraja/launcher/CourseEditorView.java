@@ -198,6 +198,7 @@ public class CourseEditorView implements Initializable {
 		trophy[0] = new CourseData.TrophyData("bronzemedal", 7.5f, 55.0f);
 		trophy[1] = new CourseData.TrophyData("silvermedal", 5.0f, 70.0f);
 		trophy[2] = new CourseData.TrophyData("goldmedal", 2.5f, 85.0f);
+		course.setTrophy(trophy);
 		courses.getItems().add(course);
 	}
 

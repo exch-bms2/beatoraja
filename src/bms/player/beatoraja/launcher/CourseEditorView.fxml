@@ -77,6 +77,7 @@
                         </Spinner>
                      </children>
                   </GridPane>
+                  <Button mnemonicParsing="false" onAction="#commit" text="Save" />
                </children>
             </VBox>
             <VBox prefHeight="200.0" prefWidth="33.0">
