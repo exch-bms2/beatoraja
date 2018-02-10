@@ -35,8 +35,6 @@ public class TableDataAccessor {
 	
 	private String tabledir = "table";
 
-	private String url;
-
 	public TableDataAccessor() {
 		
 	}
@@ -48,15 +46,13 @@ public class TableDataAccessor {
 	public void updateTableData(String[] urls) {
 		final ConcurrentLinkedDeque< Thread> tasks = new ConcurrentLinkedDeque<Thread>();
 		for (final String url : urls) {
-			Thread task = new Thread() {
-				public void run() {
-					TableReader tr = new DifficultyTableReader(url);
-					TableData td = tr.read();
-					if(td != null) {
-						write(td);
-					}
-				}
-			};
+			Thread task = new Thread(() -> {
+                TableReader tr = new DifficultyTableReader(url);
+                TableData td = tr.read();
+                if(td != null) {
+                    write(td);
+                }
+            });
 			tasks.add(task);
 			task.start();
 		}
@@ -249,8 +245,12 @@ public class TableDataAccessor {
 
 	private static SongData toSongData(BMSTableElement te, Mode defaultMode) {
 		SongData song = new SongData();
-		song.setMd5(te.getMD5());
-		song.setSha256(te.getSHA256());
+		if(te.getMD5() != null) {
+			song.setMd5(te.getMD5().toLowerCase());
+		}
+		if(te.getSHA256() != null) {
+			song.setSha256(te.getSHA256().toLowerCase());
+		}
 		song.setTitle(te.getTitle());
 		song.setArtist(te.getArtist());
 		Mode mode = te.getMode() != null ? Mode.getMode(te.getMode()) : null;
