@@ -663,14 +663,14 @@ public class MainController extends ApplicationAdapter {
 		private final TableBar accessor;
 
 		public TableUpdateThread(TableBar bar) {
-			super("updating table : " + bar.getReader().name);
+			super("updating table : " + bar.getAccessor().name);
 			accessor = bar;
 		}
 
 		public void run() {
-			TableData td = accessor.getReader().read();
+			TableData td = accessor.getAccessor().read();
 			if (td != null) {
-				new TableDataAccessor().write(td);
+				accessor.getAccessor().write(td);
 				accessor.setTableData(td);
 			}
 		}
