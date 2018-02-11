@@ -37,8 +37,8 @@
 		{"id":10, "path":"bomb.png"},
 		{"id":11, "path":"ready.png"},
 		{"id":12, "path":"lanecover.png"},
-		{"id":13, "path":"judgedetail.png"}
-		{"id":"srcPMchara1P", "path":"POMYU Chara/1P/*"}
+		{"id":13, "path":"judgedetail.png"},
+		{"id":"srcPMchara1P", "path":"POMYU Chara/1P/*"},
 		{"id":"srcPMchara2P", "path":"POMYU Chara/2P/*"}
 	],
 	"font": [
