@@ -118,13 +118,20 @@ public abstract class MainState {
 		this.starttime = System.nanoTime();
 	}
 	
-	public void updateNowTime() {
+	protected void updateNowTime() {
 		nowmicrotime = ((System.nanoTime() - starttime) / 1000);
 		nowtime = nowmicrotime / 1000;
 	}
 
 	public long getNowTime() {
 		return nowtime;
+	}
+
+	public long getNowTime(int id) {
+		if(isTimerActive(id)) {
+			return nowtime - getTimer()[id];
+		}
+		return 0;
 	}
 
 	public long getNowMicroTime() {
@@ -135,8 +142,16 @@ public abstract class MainState {
 		return main.getTimer();
 	}
 
-	public void setTimer(int id, boolean on) {
-		if(on) {
+	public long getTimer(int id) {
+		return main.getTimer()[id];
+	}
+
+	public boolean isTimerActive(int id) {
+		return main.getTimer()[id] != Long.MIN_VALUE;
+	}
+
+	public void setTimer(int id, boolean active) {
+		if(active) {
 			if(main.getTimer()[id] == Long.MIN_VALUE) {
 				main.getTimer()[id] = nowtime;
 			}

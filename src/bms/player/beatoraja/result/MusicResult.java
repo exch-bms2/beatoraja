@@ -104,8 +104,8 @@ public class MusicResult extends MainState {
 
 		final PlayerResource resource = getMainController().getPlayerResource();
 
-		if (getTimer()[TIMER_FADEOUT] != Long.MIN_VALUE) {
-			if (time > getTimer()[TIMER_FADEOUT] + getSkin().getFadeout()) {
+		if (isTimerActive(TIMER_FADEOUT)) {
+			if (getNowTime(TIMER_FADEOUT) > getSkin().getFadeout()) {
 				stop(SOUND_CLEAR);
 				stop(SOUND_FAIL);
 				stop(SOUND_CLOSE);
@@ -170,7 +170,7 @@ public class MusicResult extends MainState {
 			}
 		} else {
 			if (time > getSkin().getScene()) {
-				getTimer()[TIMER_FADEOUT] = time;
+				setTimer(TIMER_FADEOUT, true);
 				if(getSound(SOUND_CLOSE) != null) {
 					stop(SOUND_CLEAR);
 					stop(SOUND_FAIL);
@@ -186,9 +186,7 @@ public class MusicResult extends MainState {
 		final MainController main = getMainController();
 		final PlayerResource resource = getMainController().getPlayerResource();
 
-		if (getTimer()[TIMER_FADEOUT] != Long.MIN_VALUE || getTimer()[TIMER_STARTINPUT] == Long.MIN_VALUE) {
-
-		} else {
+		if (!isTimerActive(TIMER_FADEOUT) && isTimerActive(TIMER_STARTINPUT)) {
 			if (time > getSkin().getInput()) {
 				boolean[] keystate = main.getInputProcessor().getKeystate();
 				long[] keytime = main.getInputProcessor().getTime();
@@ -202,10 +200,10 @@ public class MusicResult extends MainState {
 
 				if (resource.getScoreData() == null || ok) {
 					if (((MusicResultSkin) getSkin()).getRankTime() != 0
-							&& getTimer()[TIMER_RESULT_UPDATESCORE] == Long.MIN_VALUE) {
-						getTimer()[TIMER_RESULT_UPDATESCORE] = time;
+							&& !isTimerActive(TIMER_RESULT_UPDATESCORE)) {
+						setTimer(TIMER_RESULT_UPDATESCORE, true);
 					} else if(state == STATE_OFFLINE || state == STATE_IR_FINISHED){
-						getTimer()[TIMER_FADEOUT] = time;
+						setTimer(TIMER_FADEOUT, true);
 						if(getSound(SOUND_CLOSE) != null) {
 							stop(SOUND_CLEAR);
 							stop(SOUND_FAIL);

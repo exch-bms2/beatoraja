@@ -95,15 +95,15 @@ public class CourseResult extends MainState {
 
 		final MainController main = getMainController();
 
-		if (getTimer()[TIMER_FADEOUT] != Long.MIN_VALUE) {
-			if (time > getTimer()[TIMER_FADEOUT] + getSkin().getFadeout()) {
+		if (isTimerActive(TIMER_FADEOUT)) {
+			if (getNowTime(TIMER_FADEOUT) > getSkin().getFadeout()) {
 				stop(SOUND_CLEAR);
 				stop(SOUND_FAIL);
 				stop(SOUND_CLOSE);
 				main.changeState(MainController.STATE_SELECTMUSIC);
 			}
 		} else if (time > getSkin().getScene()) {
-            getTimer()[TIMER_FADEOUT] = time;
+            setTimer(TIMER_FADEOUT, true);
 			if(getSound(SOUND_CLOSE) != null) {
 				stop(SOUND_CLEAR);
 				stop(SOUND_FAIL);
@@ -118,7 +118,7 @@ public class CourseResult extends MainState {
         final MainController main = getMainController();
         final PlayerResource resource = getMainController().getPlayerResource();
 
-        if (getTimer()[TIMER_FADEOUT] == Long.MIN_VALUE && getTimer()[TIMER_STARTINPUT] != Long.MIN_VALUE) {
+        if (!isTimerActive(TIMER_FADEOUT) && isTimerActive(TIMER_STARTINPUT)) {
             boolean[] keystate = main.getInputProcessor().getKeystate();
             long[] keytime = main.getInputProcessor().getTime();
 
@@ -131,10 +131,10 @@ public class CourseResult extends MainState {
 			}
 
 			if (resource.getScoreData() == null || ok) {
-                if (((CourseResultSkin) getSkin()).getRankTime() != 0 && getTimer()[TIMER_RESULT_UPDATESCORE] == Long.MIN_VALUE) {
-                    getTimer()[TIMER_RESULT_UPDATESCORE] = time;
+                if (((CourseResultSkin) getSkin()).getRankTime() != 0 && !isTimerActive(TIMER_RESULT_UPDATESCORE)) {
+                    setTimer(TIMER_RESULT_UPDATESCORE, true);
 				} else if (state == STATE_OFFLINE || state == STATE_IR_FINISHED){
-                    getTimer()[TIMER_FADEOUT] = time;
+                    setTimer(TIMER_FADEOUT, true);
 					if(getSound(SOUND_CLOSE) != null) {
 						stop(SOUND_CLEAR);
 						stop(SOUND_FAIL);
