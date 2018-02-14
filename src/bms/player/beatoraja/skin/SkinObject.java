@@ -493,7 +493,7 @@ public abstract class SkinObject implements Disposable {
 		case KEEP_ASPECT_RATIO_NO_EXPANDING: {
 			float scale = Math.min(1f, Math.min(scaleX, scaleY));
 			fitWidth(rectangle, image.getRegionWidth() * scale);
-			fitWidth(rectangle, image.getRegionHeight() * scale);
+			fitHeight(rectangle, image.getRegionHeight() * scale);
 			break;
 		}
 		case NO_RESIZE:
