@@ -129,17 +129,13 @@ public abstract class MainState {
 
 	public long getNowTime(int id) {
 		if(isTimerActive(id)) {
-			return nowtime - getTimer()[id];
+			return nowtime - main.getTimer()[id];
 		}
 		return 0;
 	}
 
 	public long getNowMicroTime() {
 		return nowmicrotime;
-	}
-
-	public long[] getTimer() {
-		return main.getTimer();
 	}
 
 	public long getTimer(int id) {

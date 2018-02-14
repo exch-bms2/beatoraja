@@ -465,7 +465,7 @@ public class BMSPlayer extends MainState {
 			break;
 		// practice mode
 		case STATE_PRACTICE:
-			if (getTimer()[TIMER_PLAY] != Long.MIN_VALUE) {
+			if (isTimerActive(TIMER_PLAY)) {
 				resource.reloadBMSFile();
 				model = resource.getBMSModel();
 				lanerender.init(model);
@@ -525,13 +525,13 @@ public class BMSPlayer extends MainState {
 			break;
 		// practice終了
 		case STATE_PRACTICE_FINISHED:
-			if (now - getTimer()[TIMER_FADEOUT] > skin.getFadeout()) {
+			if (getTimer(TIMER_FADEOUT) > skin.getFadeout()) {
 				getMainController().changeState(MainController.STATE_SELECTMUSIC);
 			}
 			break;
 			// GET READY
 		case STATE_READY:
-			if (now - getTimer()[TIMER_READY] > skin.getPlaystart()) {
+			if (getTimer(TIMER_READY) > skin.getPlaystart()) {
 				state = STATE_PLAY;
                 setTimer(TIMER_PLAY, now - starttimeoffset);
                 setTimer(TIMER_RHYTHM, now - starttimeoffset);
