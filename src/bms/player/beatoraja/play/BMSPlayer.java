@@ -482,12 +482,14 @@ public class BMSPlayer extends MainState {
 				setTimerOff(TIMER_PM_CHARA_2P_NEUTRAL);
 			}
 			control.setEnableControl(false);
+			control.setEnableCursor(false);
 			practice.processInput(input);
 
 			if (input.getKeystate()[0] && resource.mediaLoadFinished() && now > skin.getLoadstart() + skin.getLoadend()
 					&& now - startpressedtime > 1000) {
 				PracticeProperty property = practice.getPracticeProperty();
 				control.setEnableControl(true);
+				control.setEnableCursor(true);
 				if (property.freq != 100) {
 					model.setFrequency(property.freq / 100f);
 					if (getMainController().getConfig().getAudioFreqOption() == Config.AUDIO_PLAY_FREQ) {
