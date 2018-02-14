@@ -47,7 +47,6 @@ class KeyInputProccessor {
 
 	public void input() {
 		final long now = player.getNowTime();
-		final long[] timer = player.getTimer();
 		final boolean[] keystate = player.getMainController().getInputProcessor().getKeystate();
 		final long[] auto_presstime = player.getJudgeManager().getAutoPresstime();
 
@@ -72,14 +71,14 @@ class KeyInputProccessor {
 			final int timerOn = SkinPropertyMapper.keyOnTimerId(laneProperty.getLanePlayer()[lane], offset);
 			final int timerOff = SkinPropertyMapper.keyOffTimerId(laneProperty.getLanePlayer()[lane], offset);
 			if (pressed) {
-				if (timer[timerOn] == Long.MIN_VALUE || scratch) {
-					timer[timerOn] = now;
-					timer[timerOff] = Long.MIN_VALUE;
+				if (!player.isTimerActive(timerOn) || scratch) {
+					player.setTimer(timerOn);
+					player.setTimer(timerOff, false);
 				}
 			} else {
-				if (timer[timerOn] != Long.MIN_VALUE) {
-					timer[timerOff] = now;
-					timer[timerOn] = Long.MIN_VALUE;
+				if (player.isTimerActive(timerOn)) {
+					player.setTimer(timerOff);
+					player.setTimer(timerOn, false);
 				}
 			}
 		}
@@ -144,11 +143,10 @@ class KeyInputProccessor {
 			final BMSPlayerInputProcessor input = player.getMainController().getInputProcessor();
 			final JudgeManager judge = player.getJudgeManager();
 			final int lasttime = timelines[timelines.length - 1].getTime() + BMSPlayer.TIME_MARGIN;
-			final long[] timer = player.getTimer();
 
-			int prevtime = -1;
+			long prevtime = -1;
 			while (!stop) {
-				final int time = (int) (player.getNowTime() - timer[TIMER_PLAY]);
+				final long time = player.getNowTime(TIMER_PLAY);
 				if (time != prevtime) {
 					// リプレイデータ再生
 					if (keylog != null) {

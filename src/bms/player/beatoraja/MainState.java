@@ -150,6 +150,14 @@ public abstract class MainState {
 		return main.getTimer()[id] != Long.MIN_VALUE;
 	}
 
+	public void setTimer(int id) {
+		main.getTimer()[id] = nowtime;
+	}
+
+	public void setTimer(int id, long time) {
+		main.getTimer()[id] = time;
+	}
+
 	public void setTimer(int id, boolean active) {
 		if(active) {
 			if(main.getTimer()[id] == Long.MIN_VALUE) {

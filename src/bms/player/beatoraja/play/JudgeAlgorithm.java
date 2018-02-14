@@ -56,14 +56,13 @@ public enum JudgeAlgorithm {
 	 * @param lanemodel レーン
 	 * @param ptime 時間
 	 * @param judgetable 判定時間テーブル
-	 * @param pmsjudge PMS判定
 	 * @return 判定対象ノーツ
 	 */
-	public Note getNote(Lane lanemodel, long ptime, int[][] judgetable, int judgestart, int judgeend, MissCondition miss) {
+	public Note getNote(Lane lanemodel, long ptime, int[][] judgetable, long judgestart, long judgeend, MissCondition miss) {
 		Note note = null;
 		int judge = 0;
 		for (Note judgenote = lanemodel.getNote();judgenote != null;judgenote = lanemodel.getNote()) {
-			final int dtime = (int) (judgenote.getTime() - ptime);
+			final long dtime = judgenote.getTime() - ptime;
 			if (dtime >= judgeend) {
 				break;
 			}

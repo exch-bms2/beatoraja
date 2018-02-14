@@ -277,7 +277,7 @@ public class LaneRenderer {
 			laneregion[i] = lanes[i].getDestination(time, main);
 		}
 
-		time = (main.getTimer()[TIMER_PLAY] != Long.MIN_VALUE ? (time - main.getTimer()[TIMER_PLAY]) : 0)
+		time = (main.isTimerActive(TIMER_PLAY) ? time - main.getTimer(TIMER_PLAY) : 0)
 				+ config.getJudgetiming();
 		if (main.getState() == BMSPlayer.STATE_PRACTICE) {
 			time = main.getPracticeConfiguration().getPracticeProperty().starttime;
