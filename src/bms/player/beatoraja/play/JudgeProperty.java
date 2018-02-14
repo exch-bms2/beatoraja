@@ -79,38 +79,43 @@ public enum JudgeProperty {
         this.miss = miss;
         this.judgeVanish = judgeVanish;
     }
-    
-    public int[][] getNoteJudge(int judgerank, int constraint, boolean pms) {
-    	return create(note, judgerank, constraint, pms);
+
+    public int[][] getNoteJudge(int judgerank, int judgeWindowRate, int constraint, boolean pms) {
+    	return create(note, judgerank, judgeWindowRate, constraint, pms);
     }
-    
-    public int[][] getLongNoteEndJudge(int judgerank, int constraint, boolean pms) {
-    	return create(longnote, judgerank, constraint, pms);
+
+    public int[][] getLongNoteEndJudge(int judgerank, int judgeWindowRate, int constraint, boolean pms) {
+    	return create(longnote, judgerank, judgeWindowRate, constraint, pms);
     }
-    
-    public int[][] getScratchJudge(int judgerank, int constraint) {
-    	return create(scratch, judgerank, constraint, false);
+
+    public int[][] getScratchJudge(int judgerank, int judgeWindowRate, int constraint) {
+    	return create(scratch, judgerank, judgeWindowRate, constraint, false);
     }
-    
-    public int[][] getLongScratchEndJudge(int judgerank, int constraint) {
-    	return create(longscratch, judgerank, constraint, false);
+
+    public int[][] getLongScratchEndJudge(int judgerank, int judgeWindowRate, int constraint) {
+    	return create(longscratch, judgerank, judgeWindowRate, constraint, false);
     }
-    
-    private int[][] create(int[][] org, int judgerank, int constraint, boolean pms) {
+
+    private int[][] create(int[][] org, int judgerank, int judgeWindowRate, int constraint, boolean pms) {
 		final int[][] judge = new int[org.length][2];
 		for (int i = 0; i < judge.length; i++) {
 			for(int j = 0;j < 2;j++) {
-				if((pms && (i >= 1 && i < 3)) || (!pms && i < 3)) {
+				if((judgeWindowRate <= 100 && i < 3) || (judgeWindowRate > 100 && i < 2)) {
 					if(i > constraint) {
 						judge[i][j] = judge[i - 1][j];
 					} else {
-						judge[i][j] = org[i][j] * judgerank / 100;
-						if(Math.abs(judge[i][j]) > Math.abs(org[3][j])) {
+						//PMS時はjudgerankによらずにPG幅固定
+						judge[i][j] = org[i][j] * (pms && i == 0 ? 100 : judgerank) / 100 * judgeWindowRate / 100;
+						if(Math.abs(judge[i][j]) > Math.abs(org[3][j]) && judgeWindowRate <= 100) {
 							judge[i][j] = org[3][j];
-						}						
+						}
 					}
-				} else {
+				} else if(judgeWindowRate <= 100 || (i == 4 && j == 0)) {
 					judge[i][j] = org[i][j];
+				} else {
+					int sign = org[i][j] >= 0 ? 1 : -1;
+					int difference = Math.abs(org[i][j] * (i < 3 ? judgerank : 100) / 100) - Math.abs(org[i - 1][j] * (i - 1 < 3 ? judgerank : 100) / 100);
+					judge[i][j] = sign * (Math.abs(judge[i - 1][j]) + difference);
 				}
 			}
 		}
