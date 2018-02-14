@@ -106,9 +106,9 @@ public class JudgeManager {
 	
 	private MissCondition miss;
 	/**
-     * 各判定毎のノートの判定を消失するかどうか。PG, GR, GD, BD, PR, MSの順
-     */
-    private boolean[] judgeVanish;
+	 * 各判定毎のノートの判定を消失するかどうか。PG, GR, GD, BD, PR, MSの順
+	 */
+	private boolean[] judgeVanish;
 
 	private int prevtime;
 
@@ -174,7 +174,8 @@ public class JudgeManager {
 			auto_presstime[key] = Long.MIN_VALUE;
 		}
 
-		final int judgerank = model.getJudgerank() * resource.getPlayerConfig().getJudgewindowrate() / 100;
+		final int judgerank = model.getJudgerank();
+		final int judgeWindowRate = resource.getPlayerConfig().getJudgewindowrate();
 		int constraint = 2;
 		for (CourseData.CourseDataConstraint mode : resource.getConstraint()) {
 			if (mode == CourseData.CourseDataConstraint.NO_GREAT) {
@@ -183,10 +184,10 @@ public class JudgeManager {
 				constraint = 1;
 			}
 		}
-		njudge = rule.getNoteJudge(judgerank, constraint, model.getMode() == Mode.POPN_9K);
-		cnendjudge = rule.getLongNoteEndJudge(judgerank, constraint, model.getMode() == Mode.POPN_9K);
-		sjudge = rule.getScratchJudge(judgerank, constraint);
-		scnendjudge = rule.getLongScratchEndJudge(judgerank, constraint);
+		njudge = rule.getNoteJudge(judgerank, judgeWindowRate, constraint, model.getMode() == Mode.POPN_9K);
+		cnendjudge = rule.getLongNoteEndJudge(judgerank, judgeWindowRate, constraint, model.getMode() == Mode.POPN_9K);
+		sjudge = rule.getScratchJudge(judgerank, judgeWindowRate, constraint);
+		scnendjudge = rule.getLongScratchEndJudge(judgerank, judgeWindowRate, constraint);
 		judgestart = judgeend = 0;
 		for(int[] i : njudge) {
 			judgestart = Math.min(judgestart, i[0]);
