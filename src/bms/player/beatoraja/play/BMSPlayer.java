@@ -1034,7 +1034,7 @@ public class BMSPlayer extends MainState {
         case OFFSET_LIFT_OBSOLETE:
             if (lanerender.isEnableLift()) {
                 final PlaySkin skin = (PlaySkin) getSkin();
-                offset.y = lanerender.getLiftRegion() * (skin.getHeight() - skin.getLaneGroupRegion()[0].y);
+                offset.y = lanerender.getLiftRegion() * skin.getLaneRegion()[0].height;
             } else {
             	offset.y = 0;
             }
@@ -1045,9 +1045,9 @@ public class BMSPlayer extends MainState {
                 final PlaySkin skin = (PlaySkin) getSkin();
                 if (lanerender.isEnableLift()) {
                     offset.y =  -(1 - lanerender.getLiftRegion()) * lanerender.getLanecover()
-                            * (skin.getHeight() - skin.getLaneGroupRegion()[0].y);
+                            * skin.getLaneRegion()[0].height;
                 } else {
-                    offset.y =  -lanerender.getLanecover() * (skin.getHeight() - skin.getLaneGroupRegion()[0].y);
+                    offset.y =  -lanerender.getLanecover() * skin.getLaneRegion()[0].height;
                 }
             } else {
             	offset.y = 0;
