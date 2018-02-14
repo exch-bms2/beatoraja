@@ -20,37 +20,62 @@ public class ControlInputProcessor {
 	private long exitpressedtime;
 
 	private boolean enableControl = true;
+	private boolean enableCursor = true;
 	
 	private final int autoplay;
+
+	private Runnable processStart;
+	private Runnable processSelect;
 
 	public ControlInputProcessor(BMSPlayer player, int autoplay) {
 		this.player = player;
 		this.autoplay = autoplay;
 		hschanged = new boolean[player.getMainController().getInputProcessor().getKeystate().length];
 		Arrays.fill(hschanged, true);
+
+		switch (this.player.getMode()) {
+		case POPN_9K:
+			processStart = () -> processStart9key();
+			processSelect = () -> processSelect9key();
+			break;
+		case KEYBOARD_24K:
+		case KEYBOARD_24K_DOUBLE:
+			processStart = () -> processStart24key();
+			processSelect = () -> processSelect24key();
+			break;
+		default:
+			processStart = () -> processStart7key();
+			processSelect = () -> processSelect7key();
+		}
 	}
 	
 	public void setEnableControl(boolean b) {
 		enableControl = b;
 	}
-	
+
+	public void setEnableCursor(boolean b) {
+		enableCursor = b;
+	}
+
 	public void input() {
 		final LaneRenderer lanerender = player.getLanerender();
 		final BMSPlayerInputProcessor input = player.getMainController().getInputProcessor();
 		// 各種コントロール入力判定
 		if (enableControl) {
-			if (input.getCursorState()[0]) {
-				if (!cursorpressed) {
-					lanerender.setLanecover(lanerender.getLanecover() - 0.01f);
-					cursorpressed = true;
+			if (enableCursor) {
+				if (input.getCursorState()[0]) {
+					if (!cursorpressed) {
+						lanerender.setLanecover(lanerender.getLanecover() - 0.01f);
+						cursorpressed = true;
+					}
+				} else if (input.getCursorState()[1]) {
+					if (!cursorpressed) {
+						lanerender.setLanecover(lanerender.getLanecover() + 0.01f);
+						cursorpressed = true;
+					}
+				} else {
+					cursorpressed = false;
 				}
-			} else if (input.getCursorState()[1]) {
-				if (!cursorpressed) {
-					lanerender.setLanecover(lanerender.getLanecover() + 0.01f);
-					cursorpressed = true;
-				}
-			} else {
-				cursorpressed = false;
 			}
 			// move lane cover by mouse wheel
 			if (input.getScroll() != 0) {
@@ -58,34 +83,9 @@ public class ControlInputProcessor {
 				input.resetScroll();
 			}
 			if (input.startPressed() && !input.isSelectPressed()) {
-				if (autoplay == 0 && startpressed) {
-					// change hi speed by START + Keys
-					boolean[] key = input.getKeystate();
-					for(int i = 0; i <= 15; i++) {
-						if ((i == 0 || i == 2 || i == 4 || i == 6 || i == 9 || i == 11 || i == 13 || i == 15) && key[i]) {
-							if(!hschanged[i]) {
-								lanerender.changeHispeed(false);
-								hschanged[i] = true;
-							}
-						} else if ((i == 1 || i == 3 || i == 5 || i == 10 || i == 12 || i == 14) && key[i]) {
-							if(!hschanged[i]) {
-								lanerender.changeHispeed(true);
-								hschanged[i] = true;
-							}
-						} else {
-							hschanged[i] = false;
-						}
-					}
-
-					// move lane cover by START + Scratch
-					if (key[7] || key[8] || key[16] || key[17]) {
-						long l = System.currentTimeMillis();
-						if (l - lanecovertiming > 50) {
-							lanerender.setLanecover(lanerender.getLanecover() + (key[7] || key[16] ? 0.001f : -0.001f));
-							lanecovertiming = l;
-						}
-					}
-				} else if (autoplay == 0 && !startpressed) {
+				if ((autoplay == 0 || autoplay == 2) && startpressed) {
+					processStart.run();
+				} else if ((autoplay == 0 || autoplay == 2) && !startpressed) {
 					Arrays.fill(hschanged, true);
 				}
 				// show-hide lane cover by double-press START
@@ -103,52 +103,9 @@ public class ControlInputProcessor {
 				startpressed = false;
 			}
 			if(input.isSelectPressed() && !input.startPressed()){
-				if (autoplay == 0 && selectpressed) {
-					boolean[] key = input.getKeystate();
-					// change duration by SELECT + Keys
-					if(player.getMode() == Mode.POPN_9K) {
-						for(int i = 0; i <= 8; i++) {
-							if (i % 2 == 1 && key[i]) {
-								if(!hschanged[i]) {
-									lanerender.setGreenValue(lanerender.getGreenValue() -1);
-									hschanged[i] = true;
-								}
-							} else if (i % 2 == 0 && key[i])  {
-								if(!hschanged[i]) {
-									lanerender.setGreenValue(lanerender.getGreenValue() +1);
-									hschanged[i] = true;
-								}
-							} else {
-								hschanged[i] = false;
-							}
-						}
-					} else {
-						// change duration by SELECT + Scratch
-						if (key[7] || key[8] || key[16] || key[17]) {
-							long l = System.currentTimeMillis();
-							if (l - lanecovertiming > 50) {
-								lanerender.setGreenValue(lanerender.getGreenValue() + (key[7] || key[16] ? 1 : -1));
-								lanecovertiming = l;
-							}
-						}
-						// change duration by SELECT + Keys
-						for(int i = 0; i <= 15; i++) {
-							if ((i == 1 || i == 3 || i == 5 || i == 10 || i == 12 || i == 14) && key[i]) {
-								if(!hschanged[i]) {
-									lanerender.setGreenValue(lanerender.getGreenValue() -1);
-									hschanged[i] = true;
-								}
-							} else if ((i == 0 || i == 2 || i == 4 || i == 6 || i == 9 || i == 11 || i == 13 || i == 15) && key[i])  {
-								if(!hschanged[i]) {
-									lanerender.setGreenValue(lanerender.getGreenValue() +1);
-									hschanged[i] = true;
-								}
-							} else {
-								hschanged[i] = false;
-							}
-						}
-					}
-				} else if (autoplay == 0 && !selectpressed) {
+				if ((autoplay == 0 || autoplay == 2) && selectpressed) {
+					processSelect.run();
+				} else if ((autoplay == 0 || autoplay == 2) && !selectpressed) {
 					Arrays.fill(hschanged, true);
 				}
 				selectpressed = true;
@@ -186,4 +143,190 @@ public class ControlInputProcessor {
 		}
 	}
 
+	void processStart7key() {
+		final LaneRenderer lanerender = player.getLanerender();
+		final BMSPlayerInputProcessor input = player.getMainController().getInputProcessor();
+		boolean[] key = input.getKeystate();
+
+		// change hi speed by START + Keys
+		for(int i = 0; i <= 15; i++) {
+			if ((i == 0 || i == 2 || i == 4 || i == 6 || i == 9 || i == 11 || i == 13 || i == 15) && key[i]) {
+				if(!hschanged[i]) {
+					lanerender.changeHispeed(false);
+					hschanged[i] = true;
+				}
+			} else if ((i == 1 || i == 3 || i == 5 || i == 10 || i == 12 || i == 14) && key[i]) {
+				if(!hschanged[i]) {
+					lanerender.changeHispeed(true);
+					hschanged[i] = true;
+				}
+			} else {
+				hschanged[i] = false;
+			}
+		}
+
+		// move lane cover by START + Scratch
+		if (key[7] || key[8] || key[16] || key[17]) {
+			long l = System.currentTimeMillis();
+			if (l - lanecovertiming > 50) {
+				lanerender.setLanecover(lanerender.getLanecover() + (key[7] || key[16] ? 0.001f : -0.001f));
+				lanecovertiming = l;
+			}
+		}
+	}
+
+	void processSelect7key() {
+		final LaneRenderer lanerender = player.getLanerender();
+		final BMSPlayerInputProcessor input = player.getMainController().getInputProcessor();
+		boolean[] key = input.getKeystate();
+
+		// change duration by SELECT + Scratch
+		if (key[7] || key[8] || key[16] || key[17]) {
+			long l = System.currentTimeMillis();
+			if (l - lanecovertiming > 50) {
+				lanerender.setGreenValue(lanerender.getGreenValue() + (key[7] || key[16] ? 1 : -1));
+				lanecovertiming = l;
+			}
+		}
+
+		// change duration by SELECT + Keys
+		for(int i = 0; i <= 15; i++) {
+			if ((i == 1 || i == 3 || i == 5 || i == 10 || i == 12 || i == 14) && key[i]) {
+				if(!hschanged[i]) {
+					lanerender.setGreenValue(lanerender.getGreenValue() -1);
+					hschanged[i] = true;
+				}
+			} else if ((i == 0 || i == 2 || i == 4 || i == 6 || i == 9 || i == 11 || i == 13 || i == 15) && key[i])  {
+				if(!hschanged[i]) {
+					lanerender.setGreenValue(lanerender.getGreenValue() +1);
+					hschanged[i] = true;
+				}
+			} else {
+				hschanged[i] = false;
+			}
+		}
+	}
+
+	void processStart9key() {
+		final LaneRenderer lanerender = player.getLanerender();
+		final BMSPlayerInputProcessor input = player.getMainController().getInputProcessor();
+		boolean[] key = input.getKeystate();
+
+		// change hi speed by START + Keys(0-6)
+		for(int i = 0; i <= 6; i++) {
+			if (i % 2 == 1 && key[i]) {
+				if(!hschanged[i]) {
+					lanerender.changeHispeed(true);
+					hschanged[i] = true;
+				}
+			} else if (i % 2 == 0 && key[i])  {
+				if(!hschanged[i]) {
+					lanerender.changeHispeed(false);
+					hschanged[i] = true;
+				}
+			} else {
+				hschanged[i] = false;
+			}
+		}
+
+		// move lane cover by START + Keys(7-8)
+		if (key[7] || key[8]) {
+			long l = System.currentTimeMillis();
+			if (l - lanecovertiming > 50) {
+				lanerender.setLanecover(lanerender.getLanecover() + (key[7] || key[16] ? 0.001f : -0.001f));
+				lanecovertiming = l;
+			}
+		}
+	}
+
+	void processSelect9key() {
+		final LaneRenderer lanerender = player.getLanerender();
+		final BMSPlayerInputProcessor input = player.getMainController().getInputProcessor();
+		boolean[] key = input.getKeystate();
+
+		// change duration by SELECT + Keys
+		for(int i = 0; i <= 8; i++) {
+			if (i % 2 == 1 && key[i]) {
+				if(!hschanged[i]) {
+					lanerender.setGreenValue(lanerender.getGreenValue() -1);
+					hschanged[i] = true;
+				}
+			} else if (i % 2 == 0 && key[i])  {
+				if(!hschanged[i]) {
+					lanerender.setGreenValue(lanerender.getGreenValue() +1);
+					hschanged[i] = true;
+				}
+			} else {
+				hschanged[i] = false;
+			}
+		}
+	}
+
+	void processStart24key() {
+		final LaneRenderer lanerender = player.getLanerender();
+		final BMSPlayerInputProcessor input = player.getMainController().getInputProcessor();
+		boolean[] key = input.getKeystate();
+
+		// change duration by SELECT + Keys/Wheel
+		for(int i = 0; i < 52; i++) {
+			int j = i % 26;
+			if (key[i] && j < 24) {
+				int k = j % 12;
+				if (k <= 4 ? k % 2 == 1 : k % 2 == 0) {
+					if (!hschanged[i]) {
+						lanerender.changeHispeed(true);
+						hschanged[i] = true;
+					}
+				} else {
+					if (!hschanged[i]) {
+						lanerender.changeHispeed(false);
+						hschanged[i] = true;
+					}
+				}
+			} else if (key[i] && j >= 24) {
+				long l = System.currentTimeMillis();
+				if (l - lanecovertiming > 50) {
+					lanerender.setLanecover(lanerender.getLanecover() + (j == 25 ? 0.001f : -0.001f));
+					lanecovertiming = l;
+				}
+				hschanged[i] = false;
+			} else {
+				hschanged[i] = false;
+			}
+		}
+	}
+
+	void processSelect24key() {
+		final LaneRenderer lanerender = player.getLanerender();
+		final BMSPlayerInputProcessor input = player.getMainController().getInputProcessor();
+		boolean[] key = input.getKeystate();
+
+		// change duration by SELECT + Keys/Wheel
+		for(int i = 0; i < 52; i++) {
+			int j = i % 26;
+			if (key[i] && j < 24) {
+				int k = j % 12;
+				if (k <= 4 ? k % 2 == 1 : k % 2 == 0) {
+					if (!hschanged[i]) {
+						lanerender.setGreenValue(lanerender.getGreenValue() - 1);
+						hschanged[i] = true;
+					}
+				} else {
+					if (!hschanged[i]) {
+						lanerender.setGreenValue(lanerender.getGreenValue() + 1);
+						hschanged[i] = true;
+					}
+				}
+			} else if (key[i] && j >= 24) {
+				long l = System.currentTimeMillis();
+				if (l - lanecovertiming > 50) {
+					lanerender.setGreenValue(lanerender.getGreenValue() + (j == 24 ? 1 : -1));
+					lanecovertiming = l;
+				}
+				hschanged[i] = false;
+			} else {
+				hschanged[i] = false;
+			}
+		}
+	}
 }
