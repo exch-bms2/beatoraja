@@ -409,7 +409,6 @@ public class BMSPlayer extends MainState {
 	private int state = STATE_PRELOAD;
 
 	private long prevtime;
-	private long deltaplaymicro;
 
 	private PracticeConfiguration practice = new PracticeConfiguration();
 	private long starttimeoffset;
@@ -435,10 +434,9 @@ public class BMSPlayer extends MainState {
 
 		final long now = getNowTime();
 		final long micronow = getNowMicroTime();
-        final long[] timer = getTimer();
 
-        if(timer[TIMER_STARTINPUT] == Long.MIN_VALUE && now >skin.getInput()){
-            timer[TIMER_STARTINPUT] = now;
+        if(now > skin.getInput()){
+        	switchTimer(TIMER_STARTINPUT, true);
         }
         if(input.startPressed() || input.isSelectPressed()){
         	startpressedtime = now;
@@ -455,33 +453,33 @@ public class BMSPlayer extends MainState {
 				Logger.getGlobal().info("current free memory : " + (cmem / (1024 * 1024)) + "MB , disposed : "
 						+ ((cmem - mem) / (1024 * 1024)) + "MB");
 				state = STATE_READY;
-				timer[TIMER_READY] = now;
+				setTimerOn(TIMER_READY);
 				play(SOUND_READY);
 				Logger.getGlobal().info("STATE_READYに移行");
 			}
-			if(timer[TIMER_PM_CHARA_1P_NEUTRAL] == Long.MIN_VALUE || timer[TIMER_PM_CHARA_2P_NEUTRAL] == Long.MIN_VALUE){
-				timer[TIMER_PM_CHARA_1P_NEUTRAL] = now;
-				timer[TIMER_PM_CHARA_2P_NEUTRAL] = now;
+			if(!isTimerOn(TIMER_PM_CHARA_1P_NEUTRAL) || !isTimerOn(TIMER_PM_CHARA_2P_NEUTRAL)){
+				setTimerOff(TIMER_PM_CHARA_1P_NEUTRAL);
+				setTimerOff(TIMER_PM_CHARA_2P_NEUTRAL);
 			}
 			break;
 		// practice mode
 		case STATE_PRACTICE:
-			if (getTimer()[TIMER_PLAY] != Long.MIN_VALUE) {
+			if (isTimerOn(TIMER_PLAY)) {
 				resource.reloadBMSFile();
 				model = resource.getBMSModel();
 				lanerender.init(model);
 				keyinput.setKeyBeamStop(false);
-                timer[TIMER_PLAY] = Long.MIN_VALUE;
-                timer[TIMER_RHYTHM] = Long.MIN_VALUE;
-                timer[TIMER_FAILED] = Long.MIN_VALUE;
-                timer[TIMER_FADEOUT] = Long.MIN_VALUE;
-                timer[TIMER_ENDOFNOTE_1P] = Long.MIN_VALUE;
+                setTimerOff(TIMER_PLAY);
+                setTimerOff(TIMER_RHYTHM);
+                setTimerOff(TIMER_FAILED);
+                setTimerOff(TIMER_FADEOUT);
+                setTimerOff(TIMER_ENDOFNOTE_1P);
 
-				for(int i = TIMER_PM_CHARA_1P_NEUTRAL; i <= TIMER_PM_CHARA_DANCE; i++) timer[i] = Long.MIN_VALUE;
+				for(int i = TIMER_PM_CHARA_1P_NEUTRAL; i <= TIMER_PM_CHARA_DANCE; i++) setTimerOff(i);
 			}
-			if(timer[TIMER_PM_CHARA_1P_NEUTRAL] == Long.MIN_VALUE || timer[TIMER_PM_CHARA_2P_NEUTRAL] == Long.MIN_VALUE){
-				timer[TIMER_PM_CHARA_1P_NEUTRAL] = now;
-				timer[TIMER_PM_CHARA_2P_NEUTRAL] = now;
+			if(!isTimerOn(TIMER_PM_CHARA_1P_NEUTRAL) || !isTimerOn(TIMER_PM_CHARA_2P_NEUTRAL)){
+				setTimerOff(TIMER_PM_CHARA_1P_NEUTRAL);
+				setTimerOff(TIMER_PM_CHARA_2P_NEUTRAL);
 			}
 			control.setEnableControl(false);
 			practice.processInput(input);
@@ -519,23 +517,23 @@ public class BMSPlayer extends MainState {
 				playtime = (property.endtime + 1000) * 100 / property.freq + TIME_MARGIN;
 				bga.prepare(this);
 				state = STATE_READY;
-                timer[TIMER_READY] = now;
+                setTimerOn(TIMER_READY);
 				play(SOUND_READY);
 				Logger.getGlobal().info("STATE_READYに移行");
 			}
 			break;
 		// practice終了
 		case STATE_PRACTICE_FINISHED:
-			if (now - getTimer()[TIMER_FADEOUT] > skin.getFadeout()) {
+			if (getTimer(TIMER_FADEOUT) > skin.getFadeout()) {
 				getMainController().changeState(MainController.STATE_SELECTMUSIC);
 			}
 			break;
 			// GET READY
 		case STATE_READY:
-			if (now - getTimer()[TIMER_READY] > skin.getPlaystart()) {
+			if (getTimer(TIMER_READY) > skin.getPlaystart()) {
 				state = STATE_PLAY;
-                timer[TIMER_PLAY] = now - starttimeoffset;
-                timer[TIMER_RHYTHM] = now - starttimeoffset;
+                setMicroTimer(TIMER_PLAY, micronow - starttimeoffset * 1000);
+                setMicroTimer(TIMER_RHYTHM, micronow - starttimeoffset * 1000);
 
 				input.setStartTime(now + getStartTime() - starttimeoffset);
 				List<KeyInputLog> keylog = null;
@@ -554,25 +552,17 @@ public class BMSPlayer extends MainState {
 			final long deltatime = micronow - prevtime;
 			final long deltaplay = deltatime * (100 - playspeed) / 100;
 			PracticeProperty property = practice.getPracticeProperty();
-			deltaplaymicro += deltaplay % 1000;
-            timer[TIMER_PLAY] += deltaplay / 1000;
-            if(deltaplaymicro >= 1000) {
-                timer[TIMER_PLAY]++;;
-            	deltaplaymicro -= 1000;
-            } else if(deltaplaymicro <= -1000) {
-                timer[TIMER_PLAY]--;;
-            	deltaplaymicro += 1000;
-            }
+            setMicroTimer(TIMER_PLAY, getMicroTimer(TIMER_PLAY) + deltaplay);
             rhythmtimer += deltatime * (100 - lanerender.getNowBPM() * playspeed / 60) / 100;
-            timer[TIMER_RHYTHM] = rhythmtimer / 1000;
+            setMicroTimer(TIMER_RHYTHM, rhythmtimer);
 
-            if(sections < sectiontimes.length && (sectiontimes[sections] * (100 / property.freq)) <= (micronow - timer[TIMER_PLAY] * 1000)) {
+            if(sections < sectiontimes.length && (sectiontimes[sections] * (100 / property.freq)) <= (micronow - getTimer(TIMER_PLAY) * 1000)) {
 				sections++;;
-				timer[TIMER_RHYTHM] = now;
+				setTimerOn(TIMER_RHYTHM);
 				rhythmtimer = micronow;
 			}
             if(isNoteExpansion) {
-				if(quarterNote < quarterNoteTimes.length && (quarterNoteTimes[quarterNote] * (100 / property.freq)) <= (micronow - timer[TIMER_PLAY] * 1000)) {
+				if(quarterNote < quarterNoteTimes.length && (quarterNoteTimes[quarterNote] * (100 / property.freq)) <= (micronow - getTimer(TIMER_PLAY) * 1000)) {
 					quarterNote++;
 					nowQuarterNoteTime = now;
 				} else if(quarterNote == quarterNoteTimes.length && ((nowQuarterNoteTime + 60000 / lanerender.getNowBPM()) * (100 / property.freq)) <= now)  {
@@ -580,62 +570,62 @@ public class BMSPlayer extends MainState {
 				}
             }
 
-            final long ptime = now - timer[TIMER_PLAY];
+            final long ptime = getNowTime(TIMER_PLAY);
 			final float g = gauge.getValue();
 			if (gaugelog.size <= ptime / 500) {
 				gaugelog.add(g);
 			}
-			setTimer(TIMER_GAUGE_MAX_1P, g == gauge.getMaxValue());
+			switchTimer(TIMER_GAUGE_MAX_1P, g == gauge.getMaxValue());
 
-			if(timer[TIMER_PM_CHARA_1P_NEUTRAL] != Long.MIN_VALUE && now - timer[TIMER_PM_CHARA_1P_NEUTRAL] >= skin.getPMcharaTime(TIMER_PM_CHARA_1P_NEUTRAL - TIMER_PM_CHARA_1P_NEUTRAL) && (now - timer[TIMER_PM_CHARA_1P_NEUTRAL]) % skin.getPMcharaTime(TIMER_PM_CHARA_1P_NEUTRAL - TIMER_PM_CHARA_1P_NEUTRAL) < 17) {
+			if(isTimerOn(TIMER_PM_CHARA_1P_NEUTRAL) && getTimer(TIMER_PM_CHARA_1P_NEUTRAL) >= skin.getPMcharaTime(TIMER_PM_CHARA_1P_NEUTRAL - TIMER_PM_CHARA_1P_NEUTRAL) && getTimer(TIMER_PM_CHARA_1P_NEUTRAL) % skin.getPMcharaTime(TIMER_PM_CHARA_1P_NEUTRAL - TIMER_PM_CHARA_1P_NEUTRAL) < 17) {
 				if(PMcharaLastnotes[0] != notes && judge.getPMcharaJudge() > 0) {
 					if(judge.getPMcharaJudge() == 1 || judge.getPMcharaJudge() == 2) {
-						if(g == gauge.getMaxValue()) timer[TIMER_PM_CHARA_1P_FEVER] = now;
-						else timer[TIMER_PM_CHARA_1P_GREAT] = now;
-					} else if(judge.getPMcharaJudge() == 3) timer[TIMER_PM_CHARA_1P_GOOD] = now;
-					else timer[TIMER_PM_CHARA_1P_BAD] = now;
-					timer[TIMER_PM_CHARA_1P_NEUTRAL] = Long.MIN_VALUE;
+						if(g == gauge.getMaxValue()) setTimerOn(TIMER_PM_CHARA_1P_FEVER);
+						else setTimerOn(TIMER_PM_CHARA_1P_GREAT);
+					} else if(judge.getPMcharaJudge() == 3) setTimerOn(TIMER_PM_CHARA_1P_GOOD);
+					else setTimerOn(TIMER_PM_CHARA_1P_BAD);
+					setTimerOff(TIMER_PM_CHARA_1P_NEUTRAL);
 				}
 			}
-			if(timer[TIMER_PM_CHARA_2P_NEUTRAL] != Long.MIN_VALUE && now - timer[TIMER_PM_CHARA_2P_NEUTRAL] >= skin.getPMcharaTime(TIMER_PM_CHARA_2P_NEUTRAL - TIMER_PM_CHARA_1P_NEUTRAL) && (now - timer[TIMER_PM_CHARA_2P_NEUTRAL]) % skin.getPMcharaTime(TIMER_PM_CHARA_2P_NEUTRAL - TIMER_PM_CHARA_1P_NEUTRAL) < 17) {
+			if(isTimerOn(TIMER_PM_CHARA_2P_NEUTRAL) && getTimer(TIMER_PM_CHARA_2P_NEUTRAL) >= skin.getPMcharaTime(TIMER_PM_CHARA_2P_NEUTRAL - TIMER_PM_CHARA_1P_NEUTRAL) && getTimer(TIMER_PM_CHARA_2P_NEUTRAL) % skin.getPMcharaTime(TIMER_PM_CHARA_2P_NEUTRAL - TIMER_PM_CHARA_1P_NEUTRAL) < 17) {
 				if(PMcharaLastnotes[1] != notes && judge.getPMcharaJudge() > 0) {
-					if(judge.getPMcharaJudge() >= 1 && judge.getPMcharaJudge() <= 3) timer[TIMER_PM_CHARA_2P_BAD] = now;
-					else timer[TIMER_PM_CHARA_2P_GREAT] = now;
-					timer[TIMER_PM_CHARA_2P_NEUTRAL] = Long.MIN_VALUE;
+					if(judge.getPMcharaJudge() >= 1 && judge.getPMcharaJudge() <= 3) setTimerOn(TIMER_PM_CHARA_2P_BAD);
+					else setTimerOn(TIMER_PM_CHARA_2P_GREAT);
+					setTimerOff(TIMER_PM_CHARA_2P_NEUTRAL);
 				}
 			}
 			for(int i = TIMER_PM_CHARA_1P_FEVER; i <= TIMER_PM_CHARA_2P_BAD; i++) {
-				if(i != TIMER_PM_CHARA_2P_NEUTRAL && timer[i] != Long.MIN_VALUE && now - timer[i] >= skin.getPMcharaTime(i - TIMER_PM_CHARA_1P_NEUTRAL)) {
+				if(i != TIMER_PM_CHARA_2P_NEUTRAL && isTimerOn(i) && getTimer(i) >= skin.getPMcharaTime(i - TIMER_PM_CHARA_1P_NEUTRAL)) {
 					if(i <= TIMER_PM_CHARA_1P_BAD) {
-						timer[TIMER_PM_CHARA_1P_NEUTRAL] = now;
+						setTimerOn(TIMER_PM_CHARA_1P_NEUTRAL);
 						PMcharaLastnotes[0] = notes;
 					}
 					else {
-						timer[TIMER_PM_CHARA_2P_NEUTRAL] = now;
+						setTimerOn(TIMER_PM_CHARA_2P_NEUTRAL);
 						PMcharaLastnotes[1] = notes;
 					}
-					timer[i] = Long.MIN_VALUE;
+					setTimerOff(i);
 				}
 			}
-			if(timer[TIMER_PM_CHARA_DANCE] == Long.MIN_VALUE) timer[TIMER_PM_CHARA_DANCE] = now;
+			switchTimer(TIMER_PM_CHARA_DANCE, true);
 
             // System.out.println("playing time : " + time);
 			if (playtime < ptime) {
 				state = STATE_FINISHED;
-				timer[TIMER_MUSIC_END] = now;
+				setTimerOn(TIMER_MUSIC_END);
 				for(int i = TIMER_PM_CHARA_1P_NEUTRAL; i <= TIMER_PM_CHARA_2P_BAD; i++) {
-					timer[i] = Long.MIN_VALUE;
+					setTimerOff(i);
 				}
-				timer[TIMER_PM_CHARA_DANCE] = Long.MIN_VALUE;
+				setTimerOff(TIMER_PM_CHARA_DANCE);
 
 				Logger.getGlobal().info("STATE_FINISHEDに移行");
-			} else if(playtime - TIME_MARGIN < ptime && timer[TIMER_ENDOFNOTE_1P] == Long.MIN_VALUE) {
-                timer[TIMER_ENDOFNOTE_1P] = now;
+			} else if(playtime - TIME_MARGIN < ptime) {
+                switchTimer(TIMER_ENDOFNOTE_1P, true);
             }
 			// stage failed判定
 			if (g == 0) {
 				state = STATE_FAILED;
-                timer[TIMER_FAILED] = now;
+                setTimerOn(TIMER_FAILED);
 				if (resource.mediaLoadFinished()) {
 					getMainController().getAudioProcessor().stop((Note) null);
 				}
@@ -650,7 +640,7 @@ public class BMSPlayer extends MainState {
 			}
 			keyinput.stopJudge();
 
-			if (now - timer[TIMER_FAILED] > skin.getClose()) {
+			if (getNowTime(TIMER_FAILED) > skin.getClose()) {
 				getMainController().getAudioProcessor().setGlobalPitch(1f);
 				if (resource.mediaLoadFinished()) {
 					resource.getBGAManager().stop();
@@ -661,8 +651,8 @@ public class BMSPlayer extends MainState {
 				resource.setCombo(judge.getCourseCombo());
 				resource.setMaxcombo(judge.getCourseMaxcombo());
 				saveConfig();
-				if (timer[TIMER_PLAY] != Long.MIN_VALUE) {
-					for (long l = timer[TIMER_FAILED] - timer[TIMER_PLAY]; l < playtime + 500; l += 500) {
+				if (isTimerOn(TIMER_PLAY)) {
+					for (long l = getTimer(TIMER_FAILED) - getTimer(TIMER_PLAY); l < playtime + 500; l += 500) {
 						gaugelog.add(0f);
 					}
 				}
@@ -685,10 +675,10 @@ public class BMSPlayer extends MainState {
 				autoThread.stop = true;
 			}
 			keyinput.stopJudge();
-			if (now - timer[TIMER_MUSIC_END] > skin.getFinishMargin() && timer[TIMER_FADEOUT] == Long.MIN_VALUE) {
-				timer[TIMER_FADEOUT] = now;
+			if (getNowTime(TIMER_MUSIC_END) > skin.getFinishMargin()) {
+				switchTimer(TIMER_FADEOUT, true);
 			}
-			if (now - timer[TIMER_FADEOUT] > skin.getFadeout()) {
+			if (getNowTime(TIMER_FADEOUT) > skin.getFadeout()) {
 				getMainController().getAudioProcessor().setGlobalPitch(1f);
 				resource.getBGAManager().stop();
 				if (autoplay != 1 && autoplay != 2) {
@@ -814,27 +804,27 @@ public class BMSPlayer extends MainState {
 	public void stopPlay() {
 		if (state == STATE_PRACTICE) {
 			practice.saveProperty();
-			getTimer()[TIMER_FADEOUT] = getNowTime();
+			setTimerOn(TIMER_FADEOUT);
 			state = STATE_PRACTICE_FINISHED;
 			return;
 		}
 		if (state == STATE_PRELOAD || state == STATE_READY) {
-			getTimer()[TIMER_FADEOUT] = getNowTime();
+			setTimerOn(TIMER_FADEOUT);
 			state = STATE_PRACTICE_FINISHED;
 			return;
 		}
-		if (getTimer()[TIMER_FAILED] != Long.MIN_VALUE || getTimer()[TIMER_FADEOUT] != Long.MIN_VALUE) {
+		if (isTimerOn(TIMER_FAILED) || isTimerOn(TIMER_FADEOUT)) {
 			return;
 		}
 		if (state != STATE_FINISHED && notes == getMainController().getPlayerResource().getSongdata().getNotes()) {
 			state = STATE_FINISHED;
-			getTimer()[TIMER_FADEOUT] = getNowTime();
+			setTimerOn(TIMER_FADEOUT);
 			Logger.getGlobal().info("STATE_FINISHEDに移行");
-		} else if(state == STATE_FINISHED && getTimer()[TIMER_FADEOUT] == Long.MIN_VALUE) {
-			getTimer()[TIMER_FADEOUT] = getNowTime();
+		} else if(state == STATE_FINISHED && !isTimerOn(TIMER_FADEOUT)) {
+			setTimerOn(TIMER_FADEOUT);
 		} else if(state != STATE_FINISHED) {
 			state = STATE_FAILED;
-			getTimer()[TIMER_FAILED] = getNowTime();
+			setTimerOn(TIMER_FAILED);
 			if (getMainController().getPlayerResource().mediaLoadFinished()) {
 				getMainController().getAudioProcessor().stop((Note) null);
 			}
@@ -870,7 +860,7 @@ public class BMSPlayer extends MainState {
 		return judge;
 	}
 
-	public void update(int lane, int judge, int time, int fast) {
+	public void update(int judge, long time) {
 		notes = this.judge.getPastNotes();
 
 		if (this.judge.getCombo() == 0) {
@@ -880,16 +870,16 @@ public class BMSPlayer extends MainState {
 		// System.out.println("Now count : " + notes + " - " + totalnotes);
 
 		//フルコン判定
-		setTimer(TIMER_FULLCOMBO_1P, notes == getMainController().getPlayerResource().getSongdata().getNotes()
+		switchTimer(TIMER_FULLCOMBO_1P, notes == getMainController().getPlayerResource().getSongdata().getNotes()
 				&& notes == this.judge.getCombo());
 		
 		getScoreDataProperty().update(this.judge.getScoreData(), notes);
 
-		setTimer(TIMER_SCORE_A, getScoreDataProperty().qualifyRank(18));
-		setTimer(TIMER_SCORE_AA, getScoreDataProperty().qualifyRank(21));
-		setTimer(TIMER_SCORE_AAA, getScoreDataProperty().qualifyRank(24));
-		setTimer(TIMER_SCORE_BEST, this.judge.getScoreData().getExscore() >= getScoreDataProperty().getBestScore());
-		setTimer(TIMER_SCORE_TARGET, this.judge.getScoreData().getExscore() >= getScoreDataProperty().getRivalScore());
+		switchTimer(TIMER_SCORE_A, getScoreDataProperty().qualifyRank(18));
+		switchTimer(TIMER_SCORE_AA, getScoreDataProperty().qualifyRank(21));
+		switchTimer(TIMER_SCORE_AAA, getScoreDataProperty().qualifyRank(24));
+		switchTimer(TIMER_SCORE_BEST, this.judge.getScoreData().getExscore() >= getScoreDataProperty().getBestScore());
+		switchTimer(TIMER_SCORE_TARGET, this.judge.getScoreData().getExscore() >= getScoreDataProperty().getRivalScore());
 	}
 
 	public GrooveGauge getGauge() {
@@ -927,7 +917,7 @@ public class BMSPlayer extends MainState {
 				;
 
 			while (!stop) {
-				final long time = getNowMicroTime() - getTimer()[TIMER_PLAY] * 1000;
+				final long time = getNowMicroTime() - getTimer(TIMER_PLAY) * 1000;
 				// BGレーン再生
 				while (p < timelines.length && timelines[p].getMicroTime() <= time) {
 					for (Note n : timelines[p].getBackGroundNotes()) {
@@ -956,18 +946,18 @@ public class BMSPlayer extends MainState {
 		case NUMBER_LANECOVER1:
 			return (int) (lanerender.getLanecover() * 1000);
 		case NUMBER_PLAYTIME_MINUTE:
-			return (int) (((int) (getTimer()[TIMER_PLAY] != Long.MIN_VALUE ? getNowTime() - getTimer()[TIMER_PLAY] : 0))
+			return (int) (((int) (isTimerOn(TIMER_PLAY) ? getNowTime(TIMER_PLAY) : 0))
 					/ 60000);
 		case NUMBER_PLAYTIME_SECOND:
-			return (((int) (getTimer()[TIMER_PLAY] != Long.MIN_VALUE ? getNowTime() - getTimer()[TIMER_PLAY] : 0))
+			return (((int) (isTimerOn(TIMER_PLAY) ? getNowTime(TIMER_PLAY) : 0))
 					/ 1000) % 60;
 		case NUMBER_TIMELEFT_MINUTE:
 			return (int) (Math.max((playtime
-					- (int) (getTimer()[TIMER_PLAY] != Long.MIN_VALUE ? getNowTime() - getTimer()[TIMER_PLAY] : 0)
+					- (int) (isTimerOn(TIMER_PLAY) ? getNowTime(TIMER_PLAY) : 0)
 					+ 1000), 0) / 60000);
 		case NUMBER_TIMELEFT_SECOND:
 			return (Math.max((playtime
-					- (int) (getTimer()[TIMER_PLAY] != Long.MIN_VALUE ? getNowTime() - getTimer()[TIMER_PLAY] : 0)
+					- (int) (isTimerOn(TIMER_PLAY) ? getNowTime(TIMER_PLAY) : 0)
 					+ 1000), 0) / 1000) % 60;
 		case NUMBER_LOADING_PROGRESS:
 			return (int) ((getMainController().getAudioProcessor().getProgress() + bga.getProgress()) * 50);
@@ -991,11 +981,11 @@ public class BMSPlayer extends MainState {
 		case NUMBER_MAXCOMBO2:
 			return judge.getScoreData().getCombo();
 		case VALUE_JUDGE_1P_DURATION:
-			return judge.getRecentJudgeTiming()[0];
+			return (int) judge.getRecentJudgeTiming()[0];
 		case VALUE_JUDGE_2P_DURATION:
-			return judge.getRecentJudgeTiming().length > 1 ? judge.getRecentJudgeTiming()[1] : judge.getRecentJudgeTiming()[0];
+			return (int) (judge.getRecentJudgeTiming().length > 1 ? judge.getRecentJudgeTiming()[1] : judge.getRecentJudgeTiming()[0]);
 		case VALUE_JUDGE_3P_DURATION:
-			return judge.getRecentJudgeTiming().length > 2 ? judge.getRecentJudgeTiming()[2] : judge.getRecentJudgeTiming()[0];
+			return (int) (judge.getRecentJudgeTiming().length > 2 ? judge.getRecentJudgeTiming()[2] : judge.getRecentJudgeTiming()[0]);
 		}
 		return super.getNumberValue(id);
 	}
@@ -1004,8 +994,8 @@ public class BMSPlayer extends MainState {
 	public float getSliderValue(int id) {
 		switch (id) {
 		case SLIDER_MUSIC_PROGRESS:
-			if (getTimer()[TIMER_PLAY] != Long.MIN_VALUE) {
-				return Math.min((float) (getNowTime() - getTimer()[TIMER_PLAY]) / playtime , 1);
+			if (isTimerOn(TIMER_PLAY)) {
+				return Math.min((float) getNowTime(TIMER_PLAY) / playtime , 1);
 			}
 			return 0;
 		case SLIDER_LANECOVER:
@@ -1019,8 +1009,8 @@ public class BMSPlayer extends MainState {
 			}
 			return 0;
 		case BARGRAPH_MUSIC_PROGRESS:
-			if (getTimer()[TIMER_PLAY] != Long.MIN_VALUE) {
-				return Math.min((float) (getNowTime() - getTimer()[TIMER_PLAY]) / playtime , 1);
+			if (isTimerOn(TIMER_PLAY)) {
+				return Math.min((float) getNowTime(TIMER_PLAY) / playtime , 1);
 			}
 			return 0;
 		case BARGRAPH_LOAD_PROGRESS:

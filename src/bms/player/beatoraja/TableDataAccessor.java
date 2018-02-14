@@ -47,7 +47,7 @@ public class TableDataAccessor {
 		final ConcurrentLinkedDeque< Thread> tasks = new ConcurrentLinkedDeque<Thread>();
 		for (final String url : urls) {
 			Thread task = new Thread(() -> {
-                TableReader tr = new DifficultyTableReader(url);
+                TableAccessor tr = new DifficultyTableAccessor(url);
                 TableData td = tr.read();
                 if(td != null) {
                     write(td);
@@ -145,22 +145,23 @@ public class TableDataAccessor {
 		return td;
 	}
 
-	public static abstract class TableReader {
+	public static abstract class TableAccessor {
 
 		public final String name;
 
-		public TableReader(String name) {
+		public TableAccessor(String name) {
 			this.name = name;
 		}
 
 		public abstract TableData read();
+		public abstract void write(TableData td);
 	}
 
-	public static class DifficultyTableReader extends TableReader {
+	public static class DifficultyTableAccessor extends TableAccessor {
 
 		private String url;
 
-		public DifficultyTableReader(String url) {
+		public DifficultyTableAccessor(String url) {
 			super(url);
 			this.url = url;
 		}
@@ -240,6 +241,11 @@ public class TableDataAccessor {
 				e.printStackTrace();
 			}
 			return null;
+		}
+
+		@Override
+		public void write(TableData td) {
+			new TableDataAccessor().write(td);
 		}
 	}
 

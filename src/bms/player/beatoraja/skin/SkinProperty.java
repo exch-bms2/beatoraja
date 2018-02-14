@@ -383,6 +383,18 @@ public class SkinProperty {
 
 	public static final int NUMBER_FOLDER_TOTALSONGS = 300;
 
+	public static final int NUMBER_FOLDER_NOPLAY = 320;
+	public static final int NUMBER_FOLDER_FAILED = 321;
+	public static final int NUMBER_FOLDER_ASSIST = 322;
+	public static final int NUMBER_FOLDER_LASSIST = 323;
+	public static final int NUMBER_FOLDER_EASY = 324;
+	public static final int NUMBER_FOLDER_GROOOVE = 325;
+	public static final int NUMBER_FOLDER_HARD = 326;
+	public static final int NUMBER_FOLDER_EXHARD = 327;
+	public static final int NUMBER_FOLDER_FULLCOMBO = 328;
+	public static final int NUMBER_FOLDER_PERFECT = 329;
+	public static final int NUMBER_FOLDER_MAX = 330;
+
 	public static final int NUMBER_TOTALNOTE_NORMAL = 350;
 	public static final int NUMBER_TOTALNOTE_LN = 351;
 	public static final int NUMBER_TOTALNOTE_SCRATCH = 352;

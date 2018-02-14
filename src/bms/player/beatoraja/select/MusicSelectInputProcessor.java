@@ -9,10 +9,6 @@ import bms.player.beatoraja.song.SongData;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 
-import java.awt.*;
-import java.io.IOException;
-import java.nio.file.Paths;
-
 import static bms.player.beatoraja.select.MusicSelector.*;
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
@@ -294,9 +290,7 @@ public class MusicSelectInputProcessor {
         if (bar.getSelected() != current) {
             select.selectedBarMoved();
         }
-        if(select.getTimer()[TIMER_SONGBAR_CHANGE] == Long.MIN_VALUE) {
-            select.getTimer()[TIMER_SONGBAR_CHANGE] = nowtime;
-        }
+        select.switchTimer(TIMER_SONGBAR_CHANGE, true);
         // update folder
         if (input.getFunctionstate()[1] && input.getFunctiontime()[1] != 0) {
             input.getFunctiontime()[1] = 0;

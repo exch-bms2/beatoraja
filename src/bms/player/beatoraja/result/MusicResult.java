@@ -90,22 +90,22 @@ public class MusicResult extends MainState {
 
 	public void render() {
 		long time = getNowTime();
-		setTimer(TIMER_RESULTGRAPH_BEGIN, true);
-		setTimer(TIMER_RESULTGRAPH_END, true);
+		switchTimer(TIMER_RESULTGRAPH_BEGIN, true);
+		switchTimer(TIMER_RESULTGRAPH_END, true);
 
 		if (((MusicResultSkin) getSkin()).getRankTime() == 0) {
-			setTimer(TIMER_RESULT_UPDATESCORE, true);
+			switchTimer(TIMER_RESULT_UPDATESCORE, true);
 		}
 	    if(time > getSkin().getInput()){
-    		setTimer(TIMER_STARTINPUT, true);
+    		switchTimer(TIMER_STARTINPUT, true);
 	    }
 
 		final MainController main = getMainController();
 
 		final PlayerResource resource = getMainController().getPlayerResource();
 
-		if (getTimer()[TIMER_FADEOUT] != Long.MIN_VALUE) {
-			if (time > getTimer()[TIMER_FADEOUT] + getSkin().getFadeout()) {
+		if (isTimerOn(TIMER_FADEOUT)) {
+			if (getNowTime(TIMER_FADEOUT) > getSkin().getFadeout()) {
 				stop(SOUND_CLEAR);
 				stop(SOUND_FAIL);
 				stop(SOUND_CLOSE);
@@ -170,7 +170,7 @@ public class MusicResult extends MainState {
 			}
 		} else {
 			if (time > getSkin().getScene()) {
-				getTimer()[TIMER_FADEOUT] = time;
+				switchTimer(TIMER_FADEOUT, true);
 				if(getSound(SOUND_CLOSE) != null) {
 					stop(SOUND_CLEAR);
 					stop(SOUND_FAIL);
@@ -186,9 +186,7 @@ public class MusicResult extends MainState {
 		final MainController main = getMainController();
 		final PlayerResource resource = getMainController().getPlayerResource();
 
-		if (getTimer()[TIMER_FADEOUT] != Long.MIN_VALUE || getTimer()[TIMER_STARTINPUT] == Long.MIN_VALUE) {
-
-		} else {
+		if (!isTimerOn(TIMER_FADEOUT) && isTimerOn(TIMER_STARTINPUT)) {
 			if (time > getSkin().getInput()) {
 				boolean[] keystate = main.getInputProcessor().getKeystate();
 				long[] keytime = main.getInputProcessor().getTime();
@@ -202,10 +200,10 @@ public class MusicResult extends MainState {
 
 				if (resource.getScoreData() == null || ok) {
 					if (((MusicResultSkin) getSkin()).getRankTime() != 0
-							&& getTimer()[TIMER_RESULT_UPDATESCORE] == Long.MIN_VALUE) {
-						getTimer()[TIMER_RESULT_UPDATESCORE] = time;
+							&& !isTimerOn(TIMER_RESULT_UPDATESCORE)) {
+						switchTimer(TIMER_RESULT_UPDATESCORE, true);
 					} else if(state == STATE_OFFLINE || state == STATE_IR_FINISHED){
-						getTimer()[TIMER_FADEOUT] = time;
+						switchTimer(TIMER_FADEOUT, true);
 						if(getSound(SOUND_CLOSE) != null) {
 							stop(SOUND_CLEAR);
 							stop(SOUND_FAIL);
@@ -356,7 +354,7 @@ public class MusicResult extends MainState {
 				
 				if(send) {
 					Logger.getGlobal().info("IRへスコア送信中");
-					setTimer(TIMER_IR_CONNECT_BEGIN, true);
+					switchTimer(TIMER_IR_CONNECT_BEGIN, true);
 					state = STATE_IR_PROCESSING;
 					Thread irprocess = new Thread() {
 
@@ -379,10 +377,10 @@ public class MusicResult extends MainState {
 										}
 									}
 								}
-								setTimer(TIMER_IR_CONNECT_SUCCESS, true);
+								switchTimer(TIMER_IR_CONNECT_SUCCESS, true);
 								Logger.getGlobal().info("IRへスコア送信完了");
 							} else {
-								setTimer(TIMER_IR_CONNECT_FAIL, true);
+								switchTimer(TIMER_IR_CONNECT_FAIL, true);
 								Logger.getGlobal().warning("IRからのスコア取得失敗 : " + response.getMessage());
 							}
 

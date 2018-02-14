@@ -12,7 +12,7 @@ import com.badlogic.gdx.utils.Json;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.TableData.TableFolder;
 
-public class BMSSearchAccessor extends TableDataAccessor.TableReader {
+public class BMSSearchAccessor extends TableDataAccessor.TableAccessor {
 
 	public BMSSearchAccessor() {
 		super("BMS Search");
@@ -55,6 +55,11 @@ public class BMSSearchAccessor extends TableDataAccessor.TableReader {
 		return td;
 	}
 
+	@Override
+	public void write(TableData td) {
+		new TableDataAccessor().write(td);
+	}
+	
 	public static class BMSSearchElement {
 		
 		private String id;
@@ -124,5 +129,4 @@ public class BMSSearchAccessor extends TableDataAccessor.TableReader {
 			this.md5hash = md5hash;
 		}		
 	}
-	
 }

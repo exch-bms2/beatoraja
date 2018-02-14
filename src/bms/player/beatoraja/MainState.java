@@ -15,7 +15,6 @@ import bms.player.beatoraja.skin.lr2.LR2SkinCSVLoader;
 import bms.player.beatoraja.skin.lr2.LR2SkinHeaderLoader;
 import bms.player.beatoraja.song.SongData;
 
-import bms.player.beatoraja.song.SongInformation;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -36,7 +35,6 @@ public abstract class MainState {
 	 */
 	private long starttime;
 	
-	private long nowtime;
 	private long nowmicrotime;
 	/**
 	 * スキン
@@ -118,27 +116,60 @@ public abstract class MainState {
 		this.starttime = System.nanoTime();
 	}
 	
-	public void updateNowTime() {
+	protected void updateNowTime() {
 		nowmicrotime = ((System.nanoTime() - starttime) / 1000);
-		nowtime = nowmicrotime / 1000;
 	}
 
 	public long getNowTime() {
-		return nowtime;
+		return nowmicrotime / 1000;
+	}
+
+	public long getNowTime(int id) {
+		if(isTimerOn(id)) {
+			return (nowmicrotime - main.getTimer()[id]) / 1000;
+		}
+		return 0;
 	}
 
 	public long getNowMicroTime() {
 		return nowmicrotime;
 	}
 
-	public long[] getTimer() {
-		return main.getTimer();
+	public long getNowMicroTime(int id) {
+		if(isTimerOn(id)) {
+			return nowmicrotime - main.getTimer()[id];
+		}
+		return 0;
 	}
 
-	public void setTimer(int id, boolean on) {
+	public long getTimer(int id) {
+		return main.getTimer()[id] / 1000;
+	}
+
+	public long getMicroTimer(int id) {
+		return main.getTimer()[id];
+	}
+
+	public boolean isTimerOn(int id) {
+		return main.getTimer()[id] != Long.MIN_VALUE;
+	}
+
+	public void setTimerOn(int id) {
+		main.getTimer()[id] = nowmicrotime;
+	}
+
+	public void setTimerOff(int id) {
+		main.getTimer()[id] = Long.MIN_VALUE;
+	}
+
+	public void setMicroTimer(int id, long microtime) {
+		main.getTimer()[id] = microtime;
+	}
+
+	public void switchTimer(int id, boolean on) {
 		if(on) {
 			if(main.getTimer()[id] == Long.MIN_VALUE) {
-				main.getTimer()[id] = nowtime;
+				main.getTimer()[id] = nowmicrotime;
 			}
 		} else {
 			main.getTimer()[id] = Long.MIN_VALUE;

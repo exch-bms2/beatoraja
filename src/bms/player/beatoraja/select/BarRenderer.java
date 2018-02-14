@@ -50,7 +50,7 @@ public class BarRenderer {
 
 	private Bar[] commands;
 
-	private GradeBar[] courses = new GradeBar[0];
+	private TableBar courses;
 
 	private HashBar[] favorites = new HashBar[0];
 	/**
@@ -110,7 +110,7 @@ public class BarRenderer {
 				bmssearch = new TableBar(select, tds[i], bmssearcha);
 				table.add(bmssearch);
 			} else {
-				table.add(new TableBar(select, tds[i], new TableDataAccessor.DifficultyTableReader(tds[i].getUrl())));
+				table.add(new TableBar(select, tds[i], new TableDataAccessor.DifficultyTableAccessor(tds[i].getUrl())));
 			}
 		}
 		
@@ -118,47 +118,39 @@ public class BarRenderer {
 			IRResponse<TableData[]> response = main.getIRConnection().getTableDatas();
 			if(response.isSuccessed()) {
 				for(TableData td : response.getData()) {
-					table.add(new TableBar(select, td, new TableDataAccessor.DifficultyTableReader(td.getUrl())));				
+					table.add(new TableBar(select, td, new TableDataAccessor.DifficultyTableAccessor(td.getUrl())));				
 				}				
 			} else {
 				Logger.getGlobal().warning("IRからのテーブル取得失敗 : " + response.getMessage());
 			}
 		}
 
-		Thread bst = new Thread() {
-			public void run() {
-				TableData td = bmssearcha.read();
-				if(td != null) {
-					tdaccessor.write(td);
-				}
-			}
-		};
-		bst.start();
+		new Thread(() -> {
+			TableData td = bmssearcha.read();
+			if(td != null) {
+				tdaccessor.write(td);
+			}			
+		}).start();
 
 		this.tables = table.toArray(TableBar.class);
 		
-		CourseData[] cds = new CourseDataAccessor("course").readAll();
-		courses = new GradeBar[cds.length];
-		for (int i = 0; i < cds.length; i++) {
-			Set<String> hashset = new HashSet<String>();
-			for (SongData hash : cds[i].getSong()) {
-				hashset.add(hash.getSha256().length() > 0 ? hash.getSha256() : hash.getMd5());
+		TableDataAccessor.TableAccessor courseReader = new TableDataAccessor.TableAccessor("course") {
+			@Override
+			public TableData read() {
+				TableData td = new TableData();
+				td.setName("COURSE");
+				td.setCourse(new CourseDataAccessor("course").readAll());
+				return td;
 			}
-			SongData[] songs = select.getSongDatabase().getSongDatas(hashset.toArray(new String[hashset.size()]));
 
-			SongData[] songdatas = new SongData[cds[i].getSong().length];
-			for (int j = 0;j < songdatas.length;j++) {
-				for(SongData sd : songs) {
-					if((sd.getMd5().length() > 0 && cds[i].getSong()[j].getMd5().equals(sd.getMd5()))
-							|| (sd.getSha256().length() > 0 && cds[i].getSong()[j].getSha256().equals(sd.getSha256()))) {
-						songdatas[j] = sd;
-						break;
-					}
-				}
+			@Override
+			public void write(TableData td) {
 			}
-			this.courses[i] = new GradeBar(cds[i].getName(), songdatas, cds[i]);
-		}
-		cds = new CourseDataAccessor("favorite").readAll();
+		};
+		
+		courses = new TableBar(select, courseReader.read(), courseReader);
+		
+		CourseData[] cds = new CourseDataAccessor("favorite").readAll();
 //		if(cds.length == 0) {
 //			cds = new CourseData[1];
 //			cds[0] = new CourseData();
@@ -657,7 +649,7 @@ public class BarRenderer {
 			}
 			dir.clear();
 			l.addAll(Arrays.asList(new FolderBar(select, null, "e2977170").getChildren()));
-			l.add(new ContainerBar("COURSE", courses));
+			l.add(courses);
 			l.addAll(Arrays.asList(favorites));
 			l.addAll(Arrays.asList(tables));
 			l.addAll(Arrays.asList(commands));

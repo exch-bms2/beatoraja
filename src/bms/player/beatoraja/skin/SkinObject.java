@@ -248,11 +248,10 @@ public abstract class SkinObject implements Disposable {
 		final int timer = dsttimer;
 
 		if (timer != 0 && timer < MainController.timerCount) {
-			final long stime = state.getTimer()[timer];
-			if (stime == Long.MIN_VALUE) {
+			if (!state.isTimerOn(timer)) {
 				return null;
 			}
-			time -= stime;
+			time -= state.getTimer(timer);
 		}
 
 		final long lasttime = endtime;

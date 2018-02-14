@@ -255,7 +255,7 @@ public class MusicSelector extends MainState {
 		final PlayerResource resource = main.getPlayerResource();
 		final Bar current = bar.getSelected();
         if(getNowTime() > getSkin().getInput()){
-        	setTimer(TIMER_STARTINPUT, true);
+        	switchTimer(TIMER_STARTINPUT, true);
         }
 		// draw song information
 		resource.setSongdata(current instanceof SongBar ? ((SongBar) current).getSongData() : null);
@@ -263,14 +263,14 @@ public class MusicSelector extends MainState {
 		// preview music
 		if (current instanceof SongBar) {
 			final SongData song = main.getPlayerResource().getSongdata();
-			if (song != preview.getSongData() && getNowTime() > getTimer()[TIMER_SONGBAR_CHANGE] + previewDuration
+			if (song != preview.getSongData() && getNowTime() > getTimer(TIMER_SONGBAR_CHANGE) + previewDuration
 					&& play < 0) {
 				this.preview.start(song);
 			}
 		}
 
 		// read bms information
-		if (getNowTime() > getTimer()[TIMER_SONGBAR_CHANGE] + notesGraphDuration && !showNoteGraph && play < 0) {
+		if (getNowTime() > getTimer(TIMER_SONGBAR_CHANGE) + notesGraphDuration && !showNoteGraph && play < 0) {
 			if (current instanceof SongBar && ((SongBar) current).existsSong()) {
 				SongData song = main.getPlayerResource().getSongdata();
 				new Thread(() ->  {
@@ -444,12 +444,12 @@ public class MusicSelector extends MainState {
 	public void setPanelState(int panelstate) {
 		if (this.panelstate != panelstate) {
 			if (this.panelstate != 0) {
-				getTimer()[TIMER_PANEL1_OFF + this.panelstate - 1] = getNowTime();
-				getTimer()[TIMER_PANEL1_ON + this.panelstate - 1] = Long.MIN_VALUE;
+				setTimerOn(TIMER_PANEL1_OFF + this.panelstate - 1);
+				setTimerOff(TIMER_PANEL1_ON + this.panelstate - 1);
 			}
 			if (panelstate != 0) {
-				getTimer()[TIMER_PANEL1_ON + panelstate - 1] = getNowTime();
-				getTimer()[TIMER_PANEL1_OFF + panelstate - 1] = Long.MIN_VALUE;
+				setTimerOn(TIMER_PANEL1_ON + panelstate - 1);
+				setTimerOff(TIMER_PANEL1_OFF + panelstate - 1);
 			}
 		}
 		this.panelstate = panelstate;
@@ -897,7 +897,7 @@ public class MusicSelector extends MainState {
 		getMainController().getPlayerResource().getBMSResource().setBanner(
 				current instanceof SongBar ? ((SongBar) current).getBanner() : null);
 
-		getTimer()[TIMER_SONGBAR_CHANGE] = getNowTime();
+		setTimerOn(TIMER_SONGBAR_CHANGE);
 		if(preview.getSongData() != null && (!(bar.getSelected() instanceof SongBar) ||
 				((SongBar) bar.getSelected()).getSongData().getFolder().equals(preview.getSongData().getFolder()) == false))
 		preview.start(null);

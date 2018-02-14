@@ -77,15 +77,15 @@ public class BGAProcessor {
 	/**
 	 * ミスレイヤー表示開始時間
 	 */
-	private int misslayertime;
+	private long misslayertime;
 
-	private int getMisslayerduration;
+	private long getMisslayerduration;
 	/**
 	 * 現在のミスレイヤーシーケンス
 	 */
 	private int[] misslayer = null;
 
-	private int prevrendertime;
+	private long prevrendertime;
 
 	private BGImageProcessor cache;
 
@@ -211,9 +211,7 @@ public class BGAProcessor {
 		for (MovieProcessor mp : mpgmap.values()) {
 			mp.stop();				
 			if (mp instanceof FFmpegProcessor) {
-				((FFmpegProcessor) mp).setTimerObserver(() -> {
-					return (player.getNowTime() - player.getTimer()[TIMER_PLAY]) * 1000;
-				});
+				((FFmpegProcessor) mp).setTimerObserver(() -> player.getNowTime(TIMER_PLAY) * 1000);
 			}
 		}
 		playingbgaid = -1;
@@ -238,7 +236,7 @@ public class BGAProcessor {
 		return cache != null ? cache.getTexture(id) : null;
 	}
 
-	public void drawBGA(SkinBGA dst, SkinObjectRenderer sprite, Rectangle r, int time) {
+	public void drawBGA(SkinBGA dst, SkinObjectRenderer sprite, Rectangle r, long time) {
 		sprite.setColor(dst.getColor());
 		sprite.setBlend(dst.getBlend());
 		if (time < 0 || timelines == null) {
@@ -284,7 +282,7 @@ public class BGAProcessor {
 
 		if (misslayer != null && misslayertime != 0 && time >= misslayertime && time < misslayertime + getMisslayerduration) {
 			// draw miss layer
-			Texture miss = getBGAData(misslayer[misslayer.length * (time - misslayertime) / getMisslayerduration], true);
+			Texture miss = getBGAData(misslayer[(int) (misslayer.length * (time - misslayertime) / getMisslayerduration)], true);
 			if (miss != null) {
 				sprite.setType(SkinObjectRenderer.TYPE_LINEAR);
 				drawBGAFixRatio(dst, sprite, r, miss);
@@ -341,7 +339,7 @@ public class BGAProcessor {
 	 * @param time
 	 *            ミスレイヤー開始時間(ms)
 	 */
-	public void setMisslayerTme(int time) {
+	public void setMisslayerTme(long time) {
 		misslayertime = time;
 		getMisslayerduration = player.getMisslayerDuration();
 	}
