@@ -71,14 +71,14 @@ class KeyInputProccessor {
 			final int timerOn = SkinPropertyMapper.keyOnTimerId(laneProperty.getLanePlayer()[lane], offset);
 			final int timerOff = SkinPropertyMapper.keyOffTimerId(laneProperty.getLanePlayer()[lane], offset);
 			if (pressed) {
-				if (!player.isTimerActive(timerOn) || scratch) {
-					player.setTimer(timerOn);
-					player.setTimer(timerOff, false);
+				if (!player.isTimerOn(timerOn) || scratch) {
+					player.setTimerOn(timerOn);
+					player.setTimerOff(timerOff);
 				}
 			} else {
-				if (player.isTimerActive(timerOn)) {
-					player.setTimer(timerOff);
-					player.setTimer(timerOn, false);
+				if (player.isTimerOn(timerOn)) {
+					player.setTimerOn(timerOff);
+					player.setTimerOff(timerOn);
 				}
 			}
 		}

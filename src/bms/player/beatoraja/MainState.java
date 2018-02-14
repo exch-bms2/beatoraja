@@ -15,7 +15,6 @@ import bms.player.beatoraja.skin.lr2.LR2SkinCSVLoader;
 import bms.player.beatoraja.skin.lr2.LR2SkinHeaderLoader;
 import bms.player.beatoraja.song.SongData;
 
-import bms.player.beatoraja.song.SongInformation;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -128,7 +127,7 @@ public abstract class MainState {
 	}
 
 	public long getNowTime(int id) {
-		if(isTimerActive(id)) {
+		if(isTimerOn(id)) {
 			return nowtime - main.getTimer()[id];
 		}
 		return 0;
@@ -138,24 +137,35 @@ public abstract class MainState {
 		return nowmicrotime;
 	}
 
+	public long getNowMicroTime(int id) {
+		if(isTimerOn(id)) {
+			return nowmicrotime - main.getTimer()[id] * 1000;
+		}
+		return 0;
+	}
+
 	public long getTimer(int id) {
 		return main.getTimer()[id];
 	}
 
-	public boolean isTimerActive(int id) {
+	public boolean isTimerOn(int id) {
 		return main.getTimer()[id] != Long.MIN_VALUE;
 	}
 
-	public void setTimer(int id) {
+	public void setTimerOn(int id) {
 		main.getTimer()[id] = nowtime;
+	}
+
+	public void setTimerOff(int id) {
+		main.getTimer()[id] = Long.MIN_VALUE;
 	}
 
 	public void setTimer(int id, long time) {
 		main.getTimer()[id] = time;
 	}
 
-	public void setTimer(int id, boolean active) {
-		if(active) {
+	public void switchTimer(int id, boolean on) {
+		if(on) {
 			if(main.getTimer()[id] == Long.MIN_VALUE) {
 				main.getTimer()[id] = nowtime;
 			}

@@ -11,7 +11,6 @@ import com.badlogic.gdx.utils.FloatArray;
 import bms.model.BMSModel;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.ir.IRConnection;
-import bms.player.beatoraja.ir.IRResponse;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.skin.SkinType;
 
@@ -85,17 +84,17 @@ public class CourseResult extends MainState {
 
 	public void render() {
 		long time = getNowTime();
-		setTimer(TIMER_RESULTGRAPH_BEGIN, true);
-		setTimer(TIMER_RESULTGRAPH_END, true);
-		setTimer(TIMER_RESULT_UPDATESCORE, true);
+		switchTimer(TIMER_RESULTGRAPH_BEGIN, true);
+		switchTimer(TIMER_RESULTGRAPH_END, true);
+		switchTimer(TIMER_RESULT_UPDATESCORE, true);
 
         if(time > getSkin().getInput()){
-    		setTimer(TIMER_STARTINPUT, true);
+    		switchTimer(TIMER_STARTINPUT, true);
         }
 
 		final MainController main = getMainController();
 
-		if (isTimerActive(TIMER_FADEOUT)) {
+		if (isTimerOn(TIMER_FADEOUT)) {
 			if (getNowTime(TIMER_FADEOUT) > getSkin().getFadeout()) {
 				stop(SOUND_CLEAR);
 				stop(SOUND_FAIL);
@@ -103,7 +102,7 @@ public class CourseResult extends MainState {
 				main.changeState(MainController.STATE_SELECTMUSIC);
 			}
 		} else if (time > getSkin().getScene()) {
-            setTimer(TIMER_FADEOUT, true);
+            switchTimer(TIMER_FADEOUT, true);
 			if(getSound(SOUND_CLOSE) != null) {
 				stop(SOUND_CLEAR);
 				stop(SOUND_FAIL);
@@ -118,7 +117,7 @@ public class CourseResult extends MainState {
         final MainController main = getMainController();
         final PlayerResource resource = getMainController().getPlayerResource();
 
-        if (!isTimerActive(TIMER_FADEOUT) && isTimerActive(TIMER_STARTINPUT)) {
+        if (!isTimerOn(TIMER_FADEOUT) && isTimerOn(TIMER_STARTINPUT)) {
             boolean[] keystate = main.getInputProcessor().getKeystate();
             long[] keytime = main.getInputProcessor().getTime();
 
@@ -131,10 +130,10 @@ public class CourseResult extends MainState {
 			}
 
 			if (resource.getScoreData() == null || ok) {
-                if (((CourseResultSkin) getSkin()).getRankTime() != 0 && !isTimerActive(TIMER_RESULT_UPDATESCORE)) {
-                    setTimer(TIMER_RESULT_UPDATESCORE, true);
+                if (((CourseResultSkin) getSkin()).getRankTime() != 0 && !isTimerOn(TIMER_RESULT_UPDATESCORE)) {
+                    switchTimer(TIMER_RESULT_UPDATESCORE, true);
 				} else if (state == STATE_OFFLINE || state == STATE_IR_FINISHED){
-                    setTimer(TIMER_FADEOUT, true);
+                    switchTimer(TIMER_FADEOUT, true);
 					if(getSound(SOUND_CLOSE) != null) {
 						stop(SOUND_CLEAR);
 						stop(SOUND_FAIL);
@@ -207,14 +206,14 @@ public class CourseResult extends MainState {
 			
 			if(send) {
 				Logger.getGlobal().info("IRへスコア送信中(未実装)");
-				setTimer(TIMER_IR_CONNECT_BEGIN, true);
+				switchTimer(TIMER_IR_CONNECT_BEGIN, true);
 				state = STATE_IR_PROCESSING;
 				final IRScoreData oldscore = score;
 				Thread irprocess = new Thread() {
 
 					@Override
 					public void run() {
-						setTimer(TIMER_IR_CONNECT_SUCCESS, true);
+						switchTimer(TIMER_IR_CONNECT_SUCCESS, true);
 						Logger.getGlobal().info("IRへスコア送信完了(未実装)");
 //						ir.sendPlayData(resource.getBMSModel(), resource.getScoreData());
 //						IRResponse<IRScoreData[]> response = ir.getPlayData(null, resource.getBMSModel());
@@ -233,10 +232,10 @@ public class CourseResult extends MainState {
 //									}
 //								}
 //							}
-//							setTimer(TIMER_IR_CONNECT_SUCCESS, true);
+//							setTimerOn(TIMER_IR_CONNECT_SUCCESS, true);
 //							Logger.getGlobal().info("IRへスコア送信完了");
 //						} else {
-//							setTimer(TIMER_IR_CONNECT_FAIL, true);
+//							setTimerOn(TIMER_IR_CONNECT_FAIL, true);
 //							Logger.getGlobal().warning("IRからのスコア取得失敗 : " + response.getMessage());
 //						}
 

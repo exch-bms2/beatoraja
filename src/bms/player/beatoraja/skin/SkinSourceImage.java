@@ -53,7 +53,7 @@ public class SkinSourceImage implements SkinSource {
 		}
 
 		if (timer != 0 && timer < MainController.timerCount) {
-			if (!state.isTimerActive(timer)) {
+			if (!state.isTimerOn(timer)) {
 				return 0;
 			}
 			time -= state.getTimer(timer);

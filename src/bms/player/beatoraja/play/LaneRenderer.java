@@ -1,13 +1,9 @@
 package bms.player.beatoraja.play;
 
 import java.util.*;
-import java.util.logging.Logger;
 
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.play.SkinNote.SkinLane;
-
-import com.badlogic.gdx.utils.LongArray;
-import org.lwjgl.opengl.GL11;
 
 import bms.model.*;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
@@ -20,8 +16,6 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Rectangle;
 
 import static bms.player.beatoraja.CourseData.CourseDataConstraint.*;
@@ -277,7 +271,7 @@ public class LaneRenderer {
 			laneregion[i] = lanes[i].getDestination(time, main);
 		}
 
-		time = (main.isTimerActive(TIMER_PLAY) ? time - main.getTimer(TIMER_PLAY) : 0)
+		time = (main.isTimerOn(TIMER_PLAY) ? time - main.getTimer(TIMER_PLAY) : 0)
 				+ config.getJudgetiming();
 		if (main.getState() == BMSPlayer.STATE_PRACTICE) {
 			time = main.getPracticeConfiguration().getPracticeProperty().starttime;

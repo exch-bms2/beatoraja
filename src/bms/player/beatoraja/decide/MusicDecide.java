@@ -1,7 +1,5 @@
 package bms.player.beatoraja.decide;
 
-import java.io.File;
-
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.skin.*;
@@ -35,31 +33,29 @@ public class MusicDecide extends MainState {
 	public void render() {
 		long nowtime = getNowTime();
         if(nowtime >getSkin().getInput()){
-			setTimer(TIMER_STARTINPUT, true);
+			switchTimer(TIMER_STARTINPUT, true);
         }
-		if (isTimerActive(TIMER_FADEOUT)) {
+		if (isTimerOn(TIMER_FADEOUT)) {
 			if (getNowTime(TIMER_FADEOUT) > getSkin().getFadeout()) {
 				getMainController()
 						.changeState(cancel ? MainController.STATE_SELECTMUSIC : MainController.STATE_PLAYBMS);
 			}
 		} else {
 			if (nowtime > getSkin().getScene()) {
-				setTimer(TIMER_FADEOUT, true);
+				setTimerOn(TIMER_FADEOUT);
 			}
 		}
 	}
 
 	public void input() {
-		long nowtime = getNowTime();
-
-		if (!isTimerActive(TIMER_FADEOUT) && isTimerActive(TIMER_STARTINPUT)) {
+		if (!isTimerOn(TIMER_FADEOUT) && isTimerOn(TIMER_STARTINPUT)) {
 			BMSPlayerInputProcessor input = getMainController().getInputProcessor();
 			if (input.getKeystate()[0] || input.getKeystate()[2] || input.getKeystate()[4] || input.getKeystate()[6]) {
-				setTimer(TIMER_FADEOUT, true);
+				setTimerOn(TIMER_FADEOUT);
 			}
 			if (input.isExitPressed() || (input.startPressed() && input.isSelectPressed())) {
 				cancel = true;
-				setTimer(TIMER_FADEOUT, true);
+				setTimerOn(TIMER_FADEOUT);
 			}
 		}
 	}
