@@ -35,7 +35,6 @@ public abstract class MainState {
 	 */
 	private long starttime;
 	
-	private long nowtime;
 	private long nowmicrotime;
 	/**
 	 * スキン
@@ -119,16 +118,15 @@ public abstract class MainState {
 	
 	protected void updateNowTime() {
 		nowmicrotime = ((System.nanoTime() - starttime) / 1000);
-		nowtime = nowmicrotime / 1000;
 	}
 
 	public long getNowTime() {
-		return nowtime;
+		return nowmicrotime / 1000;
 	}
 
 	public long getNowTime(int id) {
 		if(isTimerOn(id)) {
-			return nowtime - main.getTimer()[id];
+			return (nowmicrotime - main.getTimer()[id]) / 1000;
 		}
 		return 0;
 	}
@@ -139,12 +137,16 @@ public abstract class MainState {
 
 	public long getNowMicroTime(int id) {
 		if(isTimerOn(id)) {
-			return nowmicrotime - main.getTimer()[id] * 1000;
+			return nowmicrotime - main.getTimer()[id];
 		}
 		return 0;
 	}
 
 	public long getTimer(int id) {
+		return main.getTimer()[id] / 1000;
+	}
+
+	public long getMicroTimer(int id) {
 		return main.getTimer()[id];
 	}
 
@@ -153,21 +155,21 @@ public abstract class MainState {
 	}
 
 	public void setTimerOn(int id) {
-		main.getTimer()[id] = nowtime;
+		main.getTimer()[id] = nowmicrotime;
 	}
 
 	public void setTimerOff(int id) {
 		main.getTimer()[id] = Long.MIN_VALUE;
 	}
 
-	public void setTimer(int id, long time) {
-		main.getTimer()[id] = time;
+	public void setMicroTimer(int id, long microtime) {
+		main.getTimer()[id] = microtime;
 	}
 
 	public void switchTimer(int id, boolean on) {
 		if(on) {
 			if(main.getTimer()[id] == Long.MIN_VALUE) {
-				main.getTimer()[id] = nowtime;
+				main.getTimer()[id] = nowmicrotime;
 			}
 		} else {
 			main.getTimer()[id] = Long.MIN_VALUE;

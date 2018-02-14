@@ -409,7 +409,6 @@ public class BMSPlayer extends MainState {
 	private int state = STATE_PRELOAD;
 
 	private long prevtime;
-	private long deltaplaymicro;
 
 	private PracticeConfiguration practice = new PracticeConfiguration();
 	private long starttimeoffset;
@@ -533,8 +532,8 @@ public class BMSPlayer extends MainState {
 		case STATE_READY:
 			if (getTimer(TIMER_READY) > skin.getPlaystart()) {
 				state = STATE_PLAY;
-                setTimer(TIMER_PLAY, now - starttimeoffset);
-                setTimer(TIMER_RHYTHM, now - starttimeoffset);
+                setMicroTimer(TIMER_PLAY, micronow - starttimeoffset * 1000);
+                setMicroTimer(TIMER_RHYTHM, micronow - starttimeoffset * 1000);
 
 				input.setStartTime(now + getStartTime() - starttimeoffset);
 				List<KeyInputLog> keylog = null;
@@ -553,17 +552,9 @@ public class BMSPlayer extends MainState {
 			final long deltatime = micronow - prevtime;
 			final long deltaplay = deltatime * (100 - playspeed) / 100;
 			PracticeProperty property = practice.getPracticeProperty();
-			deltaplaymicro += deltaplay % 1000;
-            setTimer(TIMER_PLAY, getTimer(TIMER_PLAY) + deltaplay / 1000);
-            if(deltaplaymicro >= 1000) {
-				setTimer(TIMER_PLAY, getTimer(TIMER_PLAY) + 1);
-            	deltaplaymicro -= 1000;
-            } else if(deltaplaymicro <= -1000) {
-				setTimer(TIMER_PLAY, getTimer(TIMER_PLAY) - 1);
-            	deltaplaymicro += 1000;
-            }
+            setMicroTimer(TIMER_PLAY, getMicroTimer(TIMER_PLAY) + deltaplay);
             rhythmtimer += deltatime * (100 - lanerender.getNowBPM() * playspeed / 60) / 100;
-            setTimer(TIMER_RHYTHM, rhythmtimer / 1000);
+            setMicroTimer(TIMER_RHYTHM, rhythmtimer);
 
             if(sections < sectiontimes.length && (sectiontimes[sections] * (100 / property.freq)) <= (micronow - getTimer(TIMER_PLAY) * 1000)) {
 				sections++;;
