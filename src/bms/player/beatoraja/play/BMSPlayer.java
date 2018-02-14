@@ -524,13 +524,13 @@ public class BMSPlayer extends MainState {
 			break;
 		// practice終了
 		case STATE_PRACTICE_FINISHED:
-			if (getTimer(TIMER_FADEOUT) > skin.getFadeout()) {
+			if (getNowTime(TIMER_FADEOUT) > skin.getFadeout()) {
 				getMainController().changeState(MainController.STATE_SELECTMUSIC);
 			}
 			break;
 			// GET READY
 		case STATE_READY:
-			if (getTimer(TIMER_READY) > skin.getPlaystart()) {
+			if (getNowTime(TIMER_READY) > skin.getPlaystart()) {
 				state = STATE_PLAY;
                 setMicroTimer(TIMER_PLAY, micronow - starttimeoffset * 1000);
                 setMicroTimer(TIMER_RHYTHM, micronow - starttimeoffset * 1000);
@@ -556,13 +556,13 @@ public class BMSPlayer extends MainState {
             rhythmtimer += deltatime * (100 - lanerender.getNowBPM() * playspeed / 60) / 100;
             setMicroTimer(TIMER_RHYTHM, rhythmtimer);
 
-            if(sections < sectiontimes.length && (sectiontimes[sections] * (100 / property.freq)) <= (micronow - getTimer(TIMER_PLAY) * 1000)) {
+            if(sections < sectiontimes.length && (sectiontimes[sections] * (100 / property.freq)) <= getNowMicroTime(TIMER_PLAY)) {
 				sections++;;
 				setTimerOn(TIMER_RHYTHM);
 				rhythmtimer = micronow;
 			}
             if(isNoteExpansion) {
-				if(quarterNote < quarterNoteTimes.length && (quarterNoteTimes[quarterNote] * (100 / property.freq)) <= (micronow - getTimer(TIMER_PLAY) * 1000)) {
+				if(quarterNote < quarterNoteTimes.length && (quarterNoteTimes[quarterNote] * (100 / property.freq)) <= getNowMicroTime(TIMER_PLAY)) {
 					quarterNote++;
 					nowQuarterNoteTime = now;
 				} else if(quarterNote == quarterNoteTimes.length && ((nowQuarterNoteTime + 60000 / lanerender.getNowBPM()) * (100 / property.freq)) <= now)  {
@@ -917,7 +917,7 @@ public class BMSPlayer extends MainState {
 				;
 
 			while (!stop) {
-				final long time = getNowMicroTime() - getTimer(TIMER_PLAY) * 1000;
+				final long time = getNowMicroTime(TIMER_PLAY);
 				// BGレーン再生
 				while (p < timelines.length && timelines[p].getMicroTime() <= time) {
 					for (Note n : timelines[p].getBackGroundNotes()) {
