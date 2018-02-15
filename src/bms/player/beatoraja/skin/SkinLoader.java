@@ -34,7 +34,7 @@ public abstract class SkinLoader {
      * @return
      */
     public static Skin load(MainState state, SkinType skinType) {
-        final PlayerResource resource = state.getMainController().getPlayerResource();
+        final PlayerResource resource = state.main.getPlayerResource();
         try {
             SkinConfig sc = resource.getPlayerConfig().getSkin()[skinType.getId()];
             if (sc.getPath().endsWith(".json")) {

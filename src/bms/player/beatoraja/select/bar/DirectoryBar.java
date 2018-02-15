@@ -86,7 +86,7 @@ public abstract class DirectoryBar extends Bar {
     protected void updateFolderStatus(SongData[] songs) {
         clear();
         final Map<String, IRScoreData> scores = selector.getScoreDataCache()
-                .readScoreDatas(songs, selector.getMainController().getPlayerResource().getPlayerConfig().getLnmode());
+                .readScoreDatas(songs, selector.main.getPlayerResource().getPlayerConfig().getLnmode());
         for (SongData song : songs) {
             final IRScoreData score = scores.get(song.getSha256());
             if (score != null) {

@@ -133,7 +133,7 @@ public class JudgeManager {
 
 	public JudgeManager(BMSPlayer main) {
 		this.main = main;
-		algorithm = main.getMainController().getPlayerResource().getConfig().getJudgealgorithm();
+		algorithm = main.main.getPlayerResource().getConfig().getJudgealgorithm();
 	}
 
 	public void init(BMSModel model, PlayerResource resource) {

@@ -47,10 +47,6 @@ public abstract class MainState {
 		this.main = main;
 	}
 	
-	public MainController getMainController() {
-		return main;
-	}
-
 	public abstract void create();
 
 	public abstract void render();

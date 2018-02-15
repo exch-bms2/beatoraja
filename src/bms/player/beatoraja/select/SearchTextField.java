@@ -99,7 +99,7 @@ public class SearchTextField extends Stage {
 			@Override
 			public boolean handle(Event e) {
 				if (e.isHandled()) {
-					selector.getMainController().getInputProcessor().getKeyBoardInputProcesseor()
+					selector.main.getInputProcessor().getKeyBoardInputProcesseor()
 							.setEnable(getKeyboardFocus() == null);
 				}
 				return false;

@@ -18,7 +18,7 @@ public enum MusicSelectCommand {
         @Override
         public void execute(MusicSelector selector) {
             int mode = 0;
-            PlayerConfig config = selector.getMainController().getPlayerConfig();
+            PlayerConfig config = selector.main.getPlayerConfig();
             for(;mode < MusicSelector.MODE.length && MusicSelector.MODE[mode] != config.getMode();mode++);
             config.setMode(MusicSelector.MODE[(mode + 1) % MusicSelector.MODE.length]);
             selector.getBarRender().updateBar();
@@ -36,7 +36,7 @@ public enum MusicSelectCommand {
     NEXT_LNMODE {
         @Override
         public void execute(MusicSelector selector) {
-            PlayerConfig config = selector.getMainController().getPlayerConfig();
+            PlayerConfig config = selector.main.getPlayerConfig();
             config.setLnmode((config.getLnmode() + 1) % 3);
             selector.getBarRender().updateBar();
             selector.play(SOUND_CHANGEOPTION);
@@ -117,7 +117,7 @@ public enum MusicSelectCommand {
     NEXT_OPTION_1P {
         @Override
         public void execute(MusicSelector selector) {
-            PlayerConfig config = selector.getMainController().getPlayerConfig();
+            PlayerConfig config = selector.main.getPlayerConfig();
             config.setRandom((config.getRandom() + 1) % 10);
             selector.play(SOUND_CHANGEOPTION);
         }
@@ -125,7 +125,7 @@ public enum MusicSelectCommand {
     NEXT_OPTION_2P {
         @Override
         public void execute(MusicSelector selector) {
-            PlayerConfig config = selector.getMainController().getPlayerConfig();
+            PlayerConfig config = selector.main.getPlayerConfig();
             config.setRandom2((config.getRandom2() + 1) % 10);
             selector.play(SOUND_CHANGEOPTION);
         }
@@ -133,7 +133,7 @@ public enum MusicSelectCommand {
     NEXT_OPTION_DP {
         @Override
         public void execute(MusicSelector selector) {
-            PlayerConfig config = selector.getMainController().getPlayerConfig();
+            PlayerConfig config = selector.main.getPlayerConfig();
             config.setDoubleoption((config.getDoubleoption() + 1) % 4);
             selector.play(SOUND_CHANGEOPTION);
         }
@@ -141,7 +141,7 @@ public enum MusicSelectCommand {
     NEXT_GAUGE_1P {
         @Override
         public void execute(MusicSelector selector) {
-            PlayerConfig config = selector.getMainController().getPlayerConfig();
+            PlayerConfig config = selector.main.getPlayerConfig();
             config.setGauge((config.getGauge() + 1) % 6);
             selector.play(SOUND_CHANGEOPTION);
         }
@@ -149,7 +149,7 @@ public enum MusicSelectCommand {
     NEXT_HSFIX {
         @Override
         public void execute(MusicSelector selector) {
-            PlayerConfig config = selector.getMainController().getPlayerConfig();
+            PlayerConfig config = selector.main.getPlayerConfig();
             config.setFixhispeed((config.getFixhispeed() + 1) % 5);
             selector.play(SOUND_CHANGEOPTION);
         }

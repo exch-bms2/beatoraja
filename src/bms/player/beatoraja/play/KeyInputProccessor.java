@@ -142,7 +142,7 @@ class KeyInputProccessor {
 			int index = 0;
 
 			long frametime = 1;
-			final BMSPlayerInputProcessor input = player.getMainController().getInputProcessor();
+			final BMSPlayerInputProcessor input = player.main.getInputProcessor();
 			final JudgeManager judge = player.getJudgeManager();
 			final int lasttime = timelines[timelines.length - 1].getTime() + BMSPlayer.TIME_MARGIN;
 

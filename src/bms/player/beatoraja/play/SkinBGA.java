@@ -21,7 +21,7 @@ public class SkinBGA extends SkinObject {
 
 	@Override
 	public void draw(SkinObjectRenderer sprite, long time, MainState state) {
-		final PlayerResource resource = state.getMainController().getPlayerResource();
+		final PlayerResource resource = state.main.getPlayerResource();
 		if (resource.getAutoplay() == 2) {
 			Rectangle r = getDestination(time, state);
 			if (r != null) {

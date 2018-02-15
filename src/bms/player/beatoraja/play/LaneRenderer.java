@@ -102,8 +102,8 @@ public class LaneRenderer {
 		generator.dispose();
 
 		this.skin = (PlaySkin) main.getSkin();
-		this.conf = main.getMainController().getPlayerResource().getConfig();
-		this.config = main.getMainController().getPlayerResource().getPlayerConfig();
+		this.conf = main.main.getPlayerResource().getConfig();
+		this.config = main.main.getPlayerResource().getPlayerConfig();
 		this.playconfig = main.getPlayConfig(this.config);
 
 		this.enableLanecover = playconfig.isEnablelanecover();
@@ -114,7 +114,7 @@ public class LaneRenderer {
 		hispeed = playconfig.getHispeed();
 		init(model);
 
-		for (CourseData.CourseDataConstraint i : main.getMainController().getPlayerResource().getConstraint()) {
+		for (CourseData.CourseDataConstraint i : main.main.getPlayerResource().getConstraint()) {
 			if (i == NO_SPEED) {
 				hispeed = 1.0f;
 				lanecover = 0;

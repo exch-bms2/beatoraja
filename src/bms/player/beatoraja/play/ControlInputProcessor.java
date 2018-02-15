@@ -30,7 +30,7 @@ public class ControlInputProcessor {
 	public ControlInputProcessor(BMSPlayer player, int autoplay) {
 		this.player = player;
 		this.autoplay = autoplay;
-		hschanged = new boolean[player.getMainController().getInputProcessor().getKeystate().length];
+		hschanged = new boolean[player.main.getInputProcessor().getKeystate().length];
 		Arrays.fill(hschanged, true);
 
 		switch (this.player.getMode()) {
@@ -59,7 +59,7 @@ public class ControlInputProcessor {
 
 	public void input() {
 		final LaneRenderer lanerender = player.getLanerender();
-		final BMSPlayerInputProcessor input = player.getMainController().getInputProcessor();
+		final BMSPlayerInputProcessor input = player.main.getInputProcessor();
 		// 各種コントロール入力判定
 		if (enableControl) {
 			if (enableCursor) {
@@ -145,7 +145,7 @@ public class ControlInputProcessor {
 
 	void processStart7key() {
 		final LaneRenderer lanerender = player.getLanerender();
-		final BMSPlayerInputProcessor input = player.getMainController().getInputProcessor();
+		final BMSPlayerInputProcessor input = player.main.getInputProcessor();
 		boolean[] key = input.getKeystate();
 
 		// change hi speed by START + Keys
@@ -177,7 +177,7 @@ public class ControlInputProcessor {
 
 	void processSelect7key() {
 		final LaneRenderer lanerender = player.getLanerender();
-		final BMSPlayerInputProcessor input = player.getMainController().getInputProcessor();
+		final BMSPlayerInputProcessor input = player.main.getInputProcessor();
 		boolean[] key = input.getKeystate();
 
 		// change duration by SELECT + Scratch
@@ -209,7 +209,7 @@ public class ControlInputProcessor {
 
 	void processStart9key() {
 		final LaneRenderer lanerender = player.getLanerender();
-		final BMSPlayerInputProcessor input = player.getMainController().getInputProcessor();
+		final BMSPlayerInputProcessor input = player.main.getInputProcessor();
 		boolean[] key = input.getKeystate();
 
 		// change hi speed by START + Keys(0-6)
@@ -241,7 +241,7 @@ public class ControlInputProcessor {
 
 	void processSelect9key() {
 		final LaneRenderer lanerender = player.getLanerender();
-		final BMSPlayerInputProcessor input = player.getMainController().getInputProcessor();
+		final BMSPlayerInputProcessor input = player.main.getInputProcessor();
 		boolean[] key = input.getKeystate();
 
 		// change duration by SELECT + Keys
@@ -264,7 +264,7 @@ public class ControlInputProcessor {
 
 	void processStart24key() {
 		final LaneRenderer lanerender = player.getLanerender();
-		final BMSPlayerInputProcessor input = player.getMainController().getInputProcessor();
+		final BMSPlayerInputProcessor input = player.main.getInputProcessor();
 		boolean[] key = input.getKeystate();
 
 		// change duration by SELECT + Keys/Wheel
@@ -298,7 +298,7 @@ public class ControlInputProcessor {
 
 	void processSelect24key() {
 		final LaneRenderer lanerender = player.getLanerender();
-		final BMSPlayerInputProcessor input = player.getMainController().getInputProcessor();
+		final BMSPlayerInputProcessor input = player.main.getInputProcessor();
 		boolean[] key = input.getKeystate();
 
 		// change duration by SELECT + Keys/Wheel

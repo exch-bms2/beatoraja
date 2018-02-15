@@ -304,7 +304,7 @@ public class MusicSelectInputProcessor {
         }
 
         if (input.isExitPressed()) {
-            select.getMainController().exit();
+            select.main.exit();
         }
     }
 }
