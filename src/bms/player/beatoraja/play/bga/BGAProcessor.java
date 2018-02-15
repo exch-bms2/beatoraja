@@ -94,6 +94,7 @@ public class BGAProcessor {
 	private TimeLine[] timelines;
 	private int pos;
 	private TextureRegion image;
+	private Rectangle tmpRect = new Rectangle();
 
 	public BGAProcessor(Config config, PlayerConfig player) {
 		this.config = config;
@@ -327,10 +328,11 @@ public class BGAProcessor {
 	 * Modify the aspect ratio and draw BGA
 	 */
 	private void drawBGAFixRatio(SkinBGA dst, SkinObjectRenderer sprite, Rectangle r, Texture bga){
+		tmpRect.set(r);
 		image.setTexture(bga);
 		image.setRegion(0, 0, bga.getWidth(), bga.getHeight());
-		dst.getStretchedRect(r, image, image);
-		sprite.draw(image, r.x, r.y, r.width, r.height);
+		dst.getStretchedRect(tmpRect, image, image);
+		sprite.draw(image, tmpRect.x, tmpRect.y, tmpRect.width, tmpRect.height);
 	}
 
 	/**
