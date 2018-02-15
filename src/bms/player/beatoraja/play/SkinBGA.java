@@ -33,7 +33,7 @@ public class SkinBGA extends SkinObject {
 					sprite,
 					getDestination(time, state),
 					s == BMSPlayer.STATE_PRELOAD || s == BMSPlayer.STATE_PRACTICE || s == BMSPlayer.STATE_READY ? -1
-							: state.getNowTime(TIMER_PLAY));
+							: state.main.getNowTime(TIMER_PLAY));
 		}
 	}
 

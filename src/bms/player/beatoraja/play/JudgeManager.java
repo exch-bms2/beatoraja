@@ -208,11 +208,12 @@ public class JudgeManager {
 	}
 
 	public void update(final long time) {
-		final BMSPlayerInputProcessor input = main.getMainController().getInputProcessor();
-		final Config config = main.getMainController().getPlayerResource().getConfig();
+		final MainController mc = main.main;
+		final BMSPlayerInputProcessor input = mc.getInputProcessor();
+		final Config config = mc.getPlayerResource().getConfig();
 		final long[] keytime = input.getTime();
 		final boolean[] keystate = input.getKeystate();
-		final long now = main.getNowTime();
+		final long now = mc.getNowTime();
 		// 通過系の判定
 		Arrays.fill(next_inclease, false);
 		
@@ -312,8 +313,8 @@ public class JudgeManager {
 
 
 			if (passing[lane] == null || passing[lane].getState() == 0) {
-				main.setTimerOff(timerActive);
-				main.setTimerOff(timerDamage);
+				mc.setTimerOff(timerActive);
+				mc.setTimerOff(timerDamage);
 				continue;
 			}
 
@@ -324,8 +325,8 @@ public class JudgeManager {
 					// System.out.println("HCN : Gauge increase");
 					passingcount[lane] -= hcnduration;
 				}
-				main.switchTimer(timerActive, true);
-				main.setTimerOff(timerDamage);
+				mc.switchTimer(timerActive, true);
+				mc.setTimerOff(timerDamage);
 			} else {
 				passingcount[lane] -= (time - prevtime);
 				if (passingcount[lane] < -hcnduration) {
@@ -333,8 +334,8 @@ public class JudgeManager {
 					// System.out.println("HCN : Gauge decrease");
 					passingcount[lane] += hcnduration;
 				}
-				main.setTimerOff(timerActive);
-				main.switchTimer(timerDamage, true);
+				mc.setTimerOff(timerActive);
+				mc.switchTimer(timerDamage, true);
 			}
 		}
 		prevtime = time;
@@ -544,7 +545,7 @@ public class JudgeManager {
 			// LN処理タイマー
 			// TODO processing値の変化のときのみ実行したい
 			// TODO HCNは別タイマーにするかも
-			main.switchTimer(SkinPropertyMapper.holdTimerId(player[lane], offset[lane]),
+			mc.switchTimer(SkinPropertyMapper.holdTimerId(player[lane], offset[lane]),
 					processing[lane] != null || (passing[lane] != null && inclease[lane]));
 		}
 	}
@@ -576,19 +577,19 @@ public class JudgeManager {
 
 		if (judge != 4) this.judge[player[lane]][offset[lane]] = judge == 0 ? 1 : judge * 2 + (fast > 0 ? 0 : 1);
 		if (judge <= ((PlaySkin)main.getSkin()).getJudgetimer()) {
-			main.setTimerOn(SkinPropertyMapper.bombTimerId(player[lane], offset[lane]));
+			main.main.setTimerOn(SkinPropertyMapper.bombTimerId(player[lane], offset[lane]));
 		}
 		PMcharaJudge = judge + 1;
 
 		final int lanelength = sckeyassign.length;
 		if (judgenow.length > 0) {
-			main.setTimerOn(JUDGE_TIMER[lane / (lanelength / judgenow.length)]);
+			main.main.setTimerOn(JUDGE_TIMER[lane / (lanelength / judgenow.length)]);
 			if(judgenow.length >= 3) {
 				for(int i = 0 ; i < COMBO_TIMER.length ; i++) {
-					if(i != lane / (lanelength / judgenow.length)) main.setTimerOff(COMBO_TIMER[i]);
+					if(i != lane / (lanelength / judgenow.length)) main.main.setTimerOff(COMBO_TIMER[i]);
 				}
 			}
-			main.setTimerOn(COMBO_TIMER[lane / (lanelength / judgenow.length)]);
+			main.main.setTimerOn(COMBO_TIMER[lane / (lanelength / judgenow.length)]);
 			judgenow[lane / (lanelength / judgenow.length)] = judge + 1;
 			judgecombo[lane / (lanelength / judgenow.length)] = main.getJudgeManager().getCourseCombo();
 			judgefast[lane / (lanelength / judgenow.length)] = fast;

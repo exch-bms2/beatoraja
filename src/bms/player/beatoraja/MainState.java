@@ -82,34 +82,6 @@ public abstract class MainState {
 		}
 	}
 
-	public long getNowTime() {
-		return main.getNowTime();
-	}
-
-	public long getNowTime(int id) {
-		return main.getNowTime(id);
-	}
-
-	public long getTimer(int id) {
-		return main.getTimer(id);
-	}
-
-	public boolean isTimerOn(int id) {
-		return main.isTimerOn(id);
-	}
-
-	public void setTimerOn(int id) {
-		main.setTimerOn(id);
-	}
-
-	public void setTimerOff(int id) {
-		main.setTimerOff(id);
-	}
-
-	public void switchTimer(int id, boolean on) {
-		main.switchTimer(id, on);
-	}
-
 	public void executeClickEvent(int id) {
 
 	}

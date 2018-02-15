@@ -271,7 +271,7 @@ public class LaneRenderer {
 			laneregion[i] = lanes[i].getDestination(time, main);
 		}
 
-		time = (main.isTimerOn(TIMER_PLAY) ? time - main.getTimer(TIMER_PLAY) : 0)
+		time = (main.main.isTimerOn(TIMER_PLAY) ? time - main.main.getTimer(TIMER_PLAY) : 0)
 				+ config.getJudgetiming();
 		if (main.getState() == BMSPlayer.STATE_PRACTICE) {
 			time = main.getPracticeConfiguration().getPracticeProperty().starttime;
@@ -402,6 +402,8 @@ public class LaneRenderer {
 		sprite.setBlend(0);
 		sprite.setType(SkinObjectRenderer.TYPE_NORMAL);
 		y = orgy;
+		final long now = main.main.getNowTime();
+		
 		for (int i = pos; i < timelines.length && y <= hu; i++) {
 			final TimeLine tl = timelines[i];
 			if (tl.getMicroTime() >= microtime) {
@@ -428,14 +430,14 @@ public class LaneRenderer {
 					float dstw = laneregion[lane].width;
 					float dsth = scale;
 					if(skin.getNoteExpansionRate()[0] != 100 || skin.getNoteExpansionRate()[1] != 100) {
-						if((main.getNowTime() - main.getNowQuarterNoteTime()) < noteExpansionTime) {
-							dstw *= 1 + (skin.getNoteExpansionRate()[0]/100.0f - 1) * (main.getNowTime() - main.getNowQuarterNoteTime()) / noteExpansionTime;
-							dsth *= 1 + (skin.getNoteExpansionRate()[1]/100.0f - 1) * (main.getNowTime() - main.getNowQuarterNoteTime()) / noteExpansionTime;
+						if((now - main.getNowQuarterNoteTime()) < noteExpansionTime) {
+							dstw *= 1 + (skin.getNoteExpansionRate()[0]/100.0f - 1) * (now - main.getNowQuarterNoteTime()) / noteExpansionTime;
+							dsth *= 1 + (skin.getNoteExpansionRate()[1]/100.0f - 1) * (now - main.getNowQuarterNoteTime()) / noteExpansionTime;
 							dstx -= (dstw - laneregion[lane].width) / 2;
 							dsty -= (dsth - scale) / 2;
-						} else if((main.getNowTime() - main.getNowQuarterNoteTime()) >= noteExpansionTime && (main.getNowTime() - main.getNowQuarterNoteTime()) <= (noteExpansionTime + noteContractionTime)) {
-							dstw *= 1 + (skin.getNoteExpansionRate()[0]/100.0f - 1) * (noteContractionTime - (main.getNowTime() - main.getNowQuarterNoteTime() - noteExpansionTime)) / noteContractionTime;
-							dsth *= 1 + (skin.getNoteExpansionRate()[1]/100.0f - 1) * (noteContractionTime - (main.getNowTime() - main.getNowQuarterNoteTime() - noteExpansionTime)) / noteContractionTime;
+						} else if((now - main.getNowQuarterNoteTime()) >= noteExpansionTime && (now - main.getNowQuarterNoteTime()) <= (noteExpansionTime + noteContractionTime)) {
+							dstw *= 1 + (skin.getNoteExpansionRate()[0]/100.0f - 1) * (noteContractionTime - (now - main.getNowQuarterNoteTime() - noteExpansionTime)) / noteContractionTime;
+							dsth *= 1 + (skin.getNoteExpansionRate()[1]/100.0f - 1) * (noteContractionTime - (now - main.getNowQuarterNoteTime() - noteExpansionTime)) / noteContractionTime;
 							dstx -= (dstw - laneregion[lane].width) / 2;
 							dsty -= (dsth - scale) / 2;
 						}
@@ -563,14 +565,14 @@ public class LaneRenderer {
 							float dstw = laneregion[lane].width;
 							float dsth = scale;
 							if(skin.getNoteExpansionRate()[0] != 100 || skin.getNoteExpansionRate()[1] != 100) {
-								if((main.getNowTime() - main.getNowQuarterNoteTime()) < noteExpansionTime) {
-									dstw *= 1 + (skin.getNoteExpansionRate()[0]/100.0f - 1) * (main.getNowTime() - main.getNowQuarterNoteTime()) / noteExpansionTime;
-									dsth *= 1 + (skin.getNoteExpansionRate()[1]/100.0f - 1) * (main.getNowTime() - main.getNowQuarterNoteTime()) / noteExpansionTime;
+								if((now - main.getNowQuarterNoteTime()) < noteExpansionTime) {
+									dstw *= 1 + (skin.getNoteExpansionRate()[0]/100.0f - 1) * (now - main.getNowQuarterNoteTime()) / noteExpansionTime;
+									dsth *= 1 + (skin.getNoteExpansionRate()[1]/100.0f - 1) * (now - main.getNowQuarterNoteTime()) / noteExpansionTime;
 									dstx -= (dstw - laneregion[lane].width) / 2;
 									dsty -= (dsth - scale) / 2;
-								} else if((main.getNowTime() - main.getNowQuarterNoteTime()) >= noteExpansionTime && (main.getNowTime() - main.getNowQuarterNoteTime()) <= (noteExpansionTime + noteContractionTime)) {
-									dstw *= 1 + (skin.getNoteExpansionRate()[0]/100.0f - 1) * (noteContractionTime - (main.getNowTime() - main.getNowQuarterNoteTime() - noteExpansionTime)) / noteContractionTime;
-									dsth *= 1 + (skin.getNoteExpansionRate()[1]/100.0f - 1) * (noteContractionTime - (main.getNowTime() - main.getNowQuarterNoteTime() - noteExpansionTime)) / noteContractionTime;
+								} else if((now - main.getNowQuarterNoteTime()) >= noteExpansionTime && (now - main.getNowQuarterNoteTime()) <= (noteExpansionTime + noteContractionTime)) {
+									dstw *= 1 + (skin.getNoteExpansionRate()[0]/100.0f - 1) * (noteContractionTime - (now - main.getNowQuarterNoteTime() - noteExpansionTime)) / noteContractionTime;
+									dsth *= 1 + (skin.getNoteExpansionRate()[1]/100.0f - 1) * (noteContractionTime - (now - main.getNowQuarterNoteTime() - noteExpansionTime)) / noteContractionTime;
 									dstx -= (dstw - laneregion[lane].width) / 2;
 									dsty -= (dsth - scale) / 2;
 								}

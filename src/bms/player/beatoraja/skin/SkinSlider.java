@@ -54,7 +54,7 @@ public class SkinSlider extends SkinObject {
 
 	protected boolean mousePressed(MainState state, int button, int x, int y) {
 		if (isChangable()) {
-			Rectangle r = getDestination(state.getNowTime(), state);
+			Rectangle r = getDestination(state.main.getNowTime(), state);
 			if (r != null) {
 				switch (getSliderAngle()) {
 				case 0:

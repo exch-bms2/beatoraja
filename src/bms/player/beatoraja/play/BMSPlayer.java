@@ -820,7 +820,7 @@ public class BMSPlayer extends MainState {
 			main.setTimerOn(TIMER_FADEOUT);
 			Logger.getGlobal().info("STATE_FINISHEDに移行");
 		} else if(state == STATE_FINISHED && !main.isTimerOn(TIMER_FADEOUT)) {
-			setTimerOn(TIMER_FADEOUT);
+			main.setTimerOn(TIMER_FADEOUT);
 		} else if(state != STATE_FINISHED) {
 			state = STATE_FAILED;
 			main.setTimerOn(TIMER_FAILED);

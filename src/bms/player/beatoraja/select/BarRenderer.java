@@ -307,7 +307,7 @@ public class BarRenderer {
 					- ((MusicSelectSkin) select.getSkin()).getCenterBar()) % currentsongs.length;
 			Bar sd = currentsongs[index];
 
-			Rectangle r = baro.getBarImages(on, i).getDestination(select.getNowTime(), select);
+			Rectangle r = baro.getBarImages(on, i).getDestination(select.main.getNowTime(), select);
 			if (r != null) {
 				if (r != null && r.x <= x && r.x + r.width >= x && r.y <= y && r.y + r.height >= y) {
 					if (button == 0) {
