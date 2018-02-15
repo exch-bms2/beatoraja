@@ -532,8 +532,8 @@ public class JSONSkinLoader extends SkinLoader{
 					}
 					// gauge (playskin only)
 					if (sk.gauge != null && dst.id.equals(sk.gauge.id)) {
-						TextureRegion[][] pgaugetex = new TextureRegion[8][];
-						for (int i = 0; i < 8; i++) {
+						TextureRegion[][] pgaugetex = new TextureRegion[sk.gauge.nodes.length][];
+						for (int i = 0; i < sk.gauge.nodes.length; i++) {
 							for (Image img : sk.image) {
 								if (sk.gauge.nodes[i].equals(img.id)) {
 									Texture tex = getTexture(img.src, p);
@@ -544,8 +544,8 @@ public class JSONSkinLoader extends SkinLoader{
 
 						}
 
-						TextureRegion[][] gaugetex = new TextureRegion[pgaugetex[0].length][8];
-						for (int i = 0; i < 8; i++) {
+						TextureRegion[][] gaugetex = new TextureRegion[pgaugetex[0].length][sk.gauge.nodes.length];
+						for (int i = 0; i < sk.gauge.nodes.length; i++) {
 							for (int j = 0; j < gaugetex.length; j++) {
 								gaugetex[j][i] = pgaugetex[i][j];
 							}

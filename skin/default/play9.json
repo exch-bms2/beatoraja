@@ -218,6 +218,10 @@
 		{"id":"gauge-e2", "src":3, "x":5, "y":17, "w":5, "h":17},
 		{"id":"gauge-e3", "src":3, "x":10, "y":17, "w":5, "h":17},
 		{"id":"gauge-e4", "src":3, "x":15, "y":17, "w":5, "h":17},
+		{"id":"gauge-n1bright", "src":3, "x":0, "y":34, "w":5, "h":17},
+		{"id":"gauge-n2bright", "src":3, "x":5, "y":34, "w":5, "h":17},
+		{"id":"gauge-e1bright", "src":3, "x":10, "y":34, "w":5, "h":17},
+		{"id":"gauge-e2bright", "src":3, "x":15, "y":34, "w":5, "h":17},
 		
 		{"id":"judgef-pg", "src":4, "x":0, "y":0, "w":180, "h":100, "divy":2, "cycle":100},
 		{"id":"judgef-pg2", "src":4, "x":0, "y":50, "w":180, "h":150, "divy":3, "cycle":100},
@@ -368,9 +372,11 @@
 	},
 	"gauge":{
 		"id":2001,
-		"nodes":["gauge-n1","gauge-n2","gauge-n3","gauge-n4","gauge-e1","gauge-e2","gauge-e3","gauge-e4"],
+		"nodes":["gauge-n1","gauge-n2","gauge-n3","gauge-n4","gauge-e1","gauge-e2","gauge-e3","gauge-e4","gauge-n1bright","gauge-n2bright","gauge-e1bright","gauge-e2bright"],
 		"parts":24,
-		"range":0
+		"range":0,
+		"type":3,
+		"cycle":1500
 	},
 	"judge":[
 	{

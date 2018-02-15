@@ -619,18 +619,46 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 					if (divy <= 0) {
 						divy = 1;
 					}
-					TextureRegion[][] gauge = new TextureRegion[(divx * divy) / 4][8];
-					final int w = values[5];
-					final int h = values[6];
-					for (int x = 0; x < divx; x++) {
-						for (int y = 0; y < divy; y++) {
-							if ((y * divx + x) / 4 < gauge.length) {
-								gauge[(y * divx + x) / 4][(y * divx + x) % 4] = new TextureRegion(
-										(Texture) imagelist.get(values[2]), values[3] + w * x / divx,
-										values[4] + h * y / divy, w / divx, h / divy);
-								gauge[(y * divx + x) / 4][(y * divx + x) % 4 + 4] = new TextureRegion(
-										(Texture) imagelist.get(values[2]), values[3] + w * x / divx,
-										values[4] + h * y / divy, w / divx, h / divy);
+					TextureRegion[][] gauge;
+					if(values[14] == 3 && divx * divy % 6 == 0) {
+						gauge = new TextureRegion[(divx * divy) / 6][12];
+						final int w = values[5];
+						final int h = values[6];
+						for (int x = 0; x < divx; x++) {
+							for (int y = 0; y < divy; y++) {
+								if ((y * divx + x) / 6 < gauge.length) {
+									if((y * divx + x) % 6 < 4) {
+										gauge[(y * divx + x) / 6][(y * divx + x) % 6] = new TextureRegion(
+												(Texture) imagelist.get(values[2]), values[3] + w * x / divx,
+												values[4] + h * y / divy, w / divx, h / divy);
+										gauge[(y * divx + x) / 6][(y * divx + x) % 6 + 4] = new TextureRegion(
+												(Texture) imagelist.get(values[2]), values[3] + w * x / divx,
+												values[4] + h * y / divy, w / divx, h / divy);
+									} else {
+										gauge[(y * divx + x) / 6][(y * divx + x) % 6 + 4] = new TextureRegion(
+												(Texture) imagelist.get(values[2]), values[3] + w * x / divx,
+												values[4] + h * y / divy, w / divx, h / divy);
+										gauge[(y * divx + x) / 6][(y * divx + x) % 6 + 6] = new TextureRegion(
+												(Texture) imagelist.get(values[2]), values[3] + w * x / divx,
+												values[4] + h * y / divy, w / divx, h / divy);
+									}
+								}
+							}
+						}
+					} else {
+						gauge = new TextureRegion[(divx * divy) / 4][8];
+						final int w = values[5];
+						final int h = values[6];
+						for (int x = 0; x < divx; x++) {
+							for (int y = 0; y < divy; y++) {
+								if ((y * divx + x) / 4 < gauge.length) {
+									gauge[(y * divx + x) / 4][(y * divx + x) % 4] = new TextureRegion(
+											(Texture) imagelist.get(values[2]), values[3] + w * x / divx,
+											values[4] + h * y / divy, w / divx, h / divy);
+									gauge[(y * divx + x) / 4][(y * divx + x) % 4 + 4] = new TextureRegion(
+											(Texture) imagelist.get(values[2]), values[3] + w * x / divx,
+											values[4] + h * y / divy, w / divx, h / divy);
+								}
 							}
 						}
 					}
