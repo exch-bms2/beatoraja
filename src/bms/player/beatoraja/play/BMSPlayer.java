@@ -964,7 +964,7 @@ public class BMSPlayer extends MainState {
 		case NUMBER_GROOVEGAUGE:
 			return (int) gauge.getValue();
 		case NUMBER_GROOVEGAUGE_AFTERDOT:
-			return  (gauge.getType() == HARD || gauge.getType() == EXHARD || gauge.getType() == HAZARD || gauge.getType() == GrooveGauge.CLASS || gauge.getType() == EXCLASS || gauge.getType() == EXHARDCLASS) 
+			return  (gauge.getType() == GrooveGauge.HARD || gauge.getType() == GrooveGauge.EXHARD || gauge.getType() == GrooveGauge.HAZARD || gauge.getType() == GrooveGauge.CLASS || gauge.getType() == GrooveGauge.EXCLASS || gauge.getType() == GrooveGauge.EXHARDCLASS)
 					&& gauge.getValue() > 0 && gauge.getValue() < 0.1 
 					? 1 : ((int) (gauge.getValue() * 10)) % 10;
 		case NUMBER_HISPEED_LR2:
