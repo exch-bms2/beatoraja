@@ -16,9 +16,9 @@ import bms.player.beatoraja.skin.lr2.LR2SkinHeaderLoader;
 import bms.player.beatoraja.song.SongData;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.utils.IntMap;
 
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
@@ -29,13 +29,8 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
  */
 public abstract class MainState {
 
-	private final MainController main;
-	/**
-	 * 状態の開始時間
-	 */
-	private long starttime;
+	public final MainController main;
 	
-	private long nowmicrotime;
 	/**
 	 * スキン
 	 */
@@ -43,24 +38,15 @@ public abstract class MainState {
 
 	private Stage stage;
 	
-	private Map<Integer, String> soundmap = new HashMap<Integer, String>();
-	private Map<Integer, Boolean> soundloop = new HashMap<Integer, Boolean>();
+	private IntMap<String> soundmap = new IntMap<String>();
+	private IntMap<Boolean> soundloop = new IntMap<Boolean>();
 
 	private ScoreDataProperty score = new ScoreDataProperty();
 
 	public MainState(MainController main) {
 		this.main = main;
-		Arrays.fill(main.getTimer(), Long.MIN_VALUE);
-		Pixmap bp = new Pixmap(1,1, Pixmap.Format.RGBA8888);
-		bp.drawPixel(0,0, Color.toIntBits(255,0,0,0));
-		black = new TextureRegion(new Texture(bp));
-		bp.dispose();
-		Pixmap hp = new Pixmap(1,1, Pixmap.Format.RGBA8888);
-		hp.drawPixel(0,0, Color.toIntBits(255,255,255,255));
-		white = new TextureRegion(new Texture(hp));
-		hp.dispose();
 	}
-
+	
 	public MainController getMainController() {
 		return main;
 	}
@@ -90,90 +76,38 @@ public abstract class MainState {
 			skin.dispose();
 			skin = null;
 		}
-		if(black != null) {
-			black.getTexture().dispose();
-			black = null;
-		}
-		if(white != null) {
-			white.getTexture().dispose();
-			white = null;
-		}
 		if(stage != null) {
 			stage.dispose();
 			stage = null;
 		}
 	}
 
-	public long getStartTime() {
-		return starttime / 1000000;
-	}
-
-	public long getStartMicroTime() {
-		return starttime / 1000;
-	}
-
-	public void setStartTime() {
-		this.starttime = System.nanoTime();
-	}
-	
-	protected void updateNowTime() {
-		nowmicrotime = ((System.nanoTime() - starttime) / 1000);
-	}
-
 	public long getNowTime() {
-		return nowmicrotime / 1000;
+		return main.getNowTime();
 	}
 
 	public long getNowTime(int id) {
-		if(isTimerOn(id)) {
-			return (nowmicrotime - main.getTimer()[id]) / 1000;
-		}
-		return 0;
-	}
-
-	public long getNowMicroTime() {
-		return nowmicrotime;
-	}
-
-	public long getNowMicroTime(int id) {
-		if(isTimerOn(id)) {
-			return nowmicrotime - main.getTimer()[id];
-		}
-		return 0;
+		return main.getNowTime(id);
 	}
 
 	public long getTimer(int id) {
-		return main.getTimer()[id] / 1000;
-	}
-
-	public long getMicroTimer(int id) {
-		return main.getTimer()[id];
+		return main.getTimer(id);
 	}
 
 	public boolean isTimerOn(int id) {
-		return main.getTimer()[id] != Long.MIN_VALUE;
+		return main.isTimerOn(id);
 	}
 
 	public void setTimerOn(int id) {
-		main.getTimer()[id] = nowmicrotime;
+		main.setTimerOn(id);
 	}
 
 	public void setTimerOff(int id) {
-		main.getTimer()[id] = Long.MIN_VALUE;
-	}
-
-	public void setMicroTimer(int id, long microtime) {
-		main.getTimer()[id] = microtime;
+		main.setTimerOff(id);
 	}
 
 	public void switchTimer(int id, boolean on) {
-		if(on) {
-			if(main.getTimer()[id] == Long.MIN_VALUE) {
-				main.getTimer()[id] = nowmicrotime;
-			}
-		} else {
-			main.getTimer()[id] = Long.MIN_VALUE;
-		}
+		main.switchTimer(id, on);
 	}
 
 	public void executeClickEvent(int id) {
@@ -185,7 +119,7 @@ public abstract class MainState {
 	}
 
 	public boolean getBooleanValue(int id) {
-		final SongData model = getMainController().getPlayerResource().getSongdata();
+		final SongData model = main.getPlayerResource().getSongdata();
 		switch (id) {
 		case OPTION_STAGEFILE:
 			return model != null && model.getStagefile().length() > 0;
@@ -256,9 +190,9 @@ public abstract class MainState {
 		case OPTION_BPMCHANGE:
 			return model != null && model.getMinbpm() < model.getMaxbpm();
 		case OPTION_OFFLINE:
-			return getMainController().getIRConnection() == null;
+			return main.getIRConnection() == null;
 			case OPTION_ONLINE:
-				return getMainController().getIRConnection() != null;
+				return main.getIRConnection() != null;
 			case OPTION_F:
 				return score.qualifyRank(0);
 			case OPTION_E:
@@ -378,7 +312,7 @@ public abstract class MainState {
 	public int getNumberValue(int id) {
 		switch (id) {
 			case NUMBER_JUDGETIMING:
-				return getMainController().getPlayerResource().getPlayerConfig().getJudgetiming();
+				return main.getPlayerResource().getPlayerConfig().getJudgetiming();
 			case NUMBER_CURRENT_FPS:
 				return Gdx.graphics.getFramesPerSecond();
 			case NUMBER_TIME_YEAR:
@@ -455,52 +389,52 @@ public abstract class MainState {
 				return getJudgeCount(3, true) + getJudgeCount(3, false) + getJudgeCount(4, true) + getJudgeCount(4, false);
 			case NUMBER_TOTALNOTES:
 			case NUMBER_TOTALNOTES2:
-				if (getMainController().getPlayerResource().getSongdata() != null) {
-					return getMainController().getPlayerResource().getSongdata().getNotes();
+				if (main.getPlayerResource().getSongdata() != null) {
+					return main.getPlayerResource().getSongdata().getNotes();
 				}
 				return Integer.MIN_VALUE;
 			case NUMBER_MINBPM:
-				if (getMainController().getPlayerResource().getSongdata() != null) {
-					return getMainController().getPlayerResource().getSongdata().getMinbpm();
+				if (main.getPlayerResource().getSongdata() != null) {
+					return main.getPlayerResource().getSongdata().getMinbpm();
 				}
 				return Integer.MIN_VALUE;
 			case NUMBER_MAXBPM:
-				if (getMainController().getPlayerResource().getSongdata() != null) {
-					return getMainController().getPlayerResource().getSongdata().getMaxbpm();
+				if (main.getPlayerResource().getSongdata() != null) {
+					return main.getPlayerResource().getSongdata().getMaxbpm();
 				}
 				return Integer.MIN_VALUE;
 			case NUMBER_HISPEED_LR2:
-				if (getMainController().getPlayerResource().getSongdata() != null) {
-					SongData song = getMainController().getPlayerResource().getSongdata();
-					PlayConfig pc = getMainController().getPlayerResource().getPlayerConfig().getPlayConfig(song.getMode());
+				if (main.getPlayerResource().getSongdata() != null) {
+					SongData song = main.getPlayerResource().getSongdata();
+					PlayConfig pc = main.getPlayerResource().getPlayerConfig().getPlayConfig(song.getMode());
 					return (int) (pc.getHispeed() * 100);
 				}
 				return Integer.MIN_VALUE;
 			case NUMBER_HISPEED:
-				if (getMainController().getPlayerResource().getSongdata() != null) {
-					SongData song = getMainController().getPlayerResource().getSongdata();
-					PlayConfig pc = getMainController().getPlayerResource().getPlayerConfig().getPlayConfig(song.getMode());
+				if (main.getPlayerResource().getSongdata() != null) {
+					SongData song = main.getPlayerResource().getSongdata();
+					PlayConfig pc = main.getPlayerResource().getPlayerConfig().getPlayConfig(song.getMode());
 					return (int) pc.getHispeed();
 				}
 				return Integer.MIN_VALUE;
 			case NUMBER_HISPEED_AFTERDOT:
-				if (getMainController().getPlayerResource().getSongdata() != null) {
-					SongData song = getMainController().getPlayerResource().getSongdata();
-					PlayConfig pc = getMainController().getPlayerResource().getPlayerConfig().getPlayConfig(song.getMode());
+				if (main.getPlayerResource().getSongdata() != null) {
+					SongData song = main.getPlayerResource().getSongdata();
+					PlayConfig pc = main.getPlayerResource().getPlayerConfig().getPlayConfig(song.getMode());
 					return (int) (pc.getHispeed() * 100) % 100;
 				}
 				return Integer.MIN_VALUE;
 			case NUMBER_DURATION:
-				if (getMainController().getPlayerResource().getSongdata() != null) {
-					SongData song = getMainController().getPlayerResource().getSongdata();
-					PlayConfig pc = getMainController().getPlayerResource().getPlayerConfig().getPlayConfig(song.getMode());
+				if (main.getPlayerResource().getSongdata() != null) {
+					SongData song = main.getPlayerResource().getSongdata();
+					PlayConfig pc = main.getPlayerResource().getPlayerConfig().getPlayConfig(song.getMode());
 					return pc.getDuration();
 				}
 				return Integer.MIN_VALUE;
 			case NUMBER_DURATION_GREEN:
-				if (getMainController().getPlayerResource().getSongdata() != null) {
-					SongData song = getMainController().getPlayerResource().getSongdata();
-					PlayConfig pc = getMainController().getPlayerResource().getPlayerConfig().getPlayConfig(song.getMode());
+				if (main.getPlayerResource().getSongdata() != null) {
+					SongData song = main.getPlayerResource().getSongdata();
+					PlayConfig pc = main.getPlayerResource().getPlayerConfig().getPlayConfig(song.getMode());
 					return pc.getDuration() * 3 / 5;
 				}
 				return Integer.MIN_VALUE;
@@ -510,8 +444,8 @@ public abstract class MainState {
 			case NUMBER_FOLDER_HYPER:
 			case NUMBER_FOLDER_ANOTHER:
 			case NUMBER_FOLDER_INSANE:
-				if (getMainController().getPlayerResource().getSongdata() != null) {
-					return getMainController().getPlayerResource().getSongdata().getLevel();
+				if (main.getPlayerResource().getSongdata() != null) {
+					return main.getPlayerResource().getSongdata().getLevel();
 				}
 				return Integer.MIN_VALUE;
 			case NUMBER_POINT:
@@ -560,49 +494,49 @@ public abstract class MainState {
 				return score.getNowEXScore() - score.getNowRivalScore();
 
 			case NUMBER_TOTALNOTE_NORMAL: {
-				final SongData song = getMainController().getPlayerResource().getSongdata();
+				final SongData song = main.getPlayerResource().getSongdata();
 				if (song != null && song.getInformation() != null) {
 					return song.getInformation().getN();
 				}
 				return Integer.MIN_VALUE;
 			}
 			case NUMBER_TOTALNOTE_LN: {
-				final SongData song = getMainController().getPlayerResource().getSongdata();
+				final SongData song = main.getPlayerResource().getSongdata();
 				if (song != null && song.getInformation() != null) {
 					return song.getInformation().getLn();
 				}
 				return Integer.MIN_VALUE;
 			}
 			case NUMBER_TOTALNOTE_SCRATCH: {
-				final SongData song = getMainController().getPlayerResource().getSongdata();
+				final SongData song = main.getPlayerResource().getSongdata();
 				if (song != null && song.getInformation() != null) {
 					return song.getInformation().getS();
 				}
 				return Integer.MIN_VALUE;
 			}
 			case NUMBER_TOTALNOTE_BSS: {
-				final SongData song = getMainController().getPlayerResource().getSongdata();
+				final SongData song = main.getPlayerResource().getSongdata();
 				if (song != null && song.getInformation() != null) {
 					return song.getInformation().getLs();
 				}
 				return Integer.MIN_VALUE;
 			}
 			case NUMBER_DENSITY_ENDPEAK: {
-				final SongData song = getMainController().getPlayerResource().getSongdata();
+				final SongData song = main.getPlayerResource().getSongdata();
 				if (song != null && song.getInformation() != null) {
 					return (int) song.getInformation().getDensity();
 				}
 				return Integer.MIN_VALUE;
 			}
 			case NUMBER_DENSITY_ENDPEAK_AFTERDOT: {
-				final SongData song = getMainController().getPlayerResource().getSongdata();
+				final SongData song = main.getPlayerResource().getSongdata();
 				if (song != null && song.getInformation() != null) {
 					return ((int) (song.getInformation().getDensity() * 100)) % 100;
 				}
 				return Integer.MIN_VALUE;
 			}
 			case NUMBER_SONGGAUGE_TOTAL: {
-				final SongData song = getMainController().getPlayerResource().getSongdata();
+				final SongData song = main.getPlayerResource().getSongdata();
 				if (song != null && song.getInformation() != null) {
 					return (int) song.getInformation().getTotal();
 				}
@@ -638,13 +572,13 @@ public abstract class MainState {
 	}
 
 	public String getTextValue(int id) {
-		if (getMainController().getPlayerResource() != null) {
-			SongData song = getMainController().getPlayerResource().getSongdata();
+		if (main.getPlayerResource() != null) {
+			SongData song = main.getPlayerResource().getSongdata();
 			switch (id) {
 				case STRING_RIVAL:
-					return TargetProperty.getAllTargetProperties()[getMainController().getPlayerResource().getPlayerConfig().getTarget()].getName();
+					return TargetProperty.getAllTargetProperties()[main.getPlayerResource().getPlayerConfig().getTarget()].getName();
 				case STRING_PLAYER:
-					return getMainController().getPlayerConfig().getName();
+					return main.getPlayerConfig().getName();
 			case STRING_TITLE:
 				return song != null ? song.getTitle() : "";
 			case STRING_SUBTITLE:
@@ -664,21 +598,18 @@ public abstract class MainState {
 		return "";
 	}
 
-	private TextureRegion black;
-	private TextureRegion white;
-
 	public TextureRegion getImage(int imageid) {
 		switch(imageid) {
 		case IMAGE_BACKBMP:
-			return getMainController().getPlayerResource().getBMSResource().getBackbmp();
+			return main.getPlayerResource().getBMSResource().getBackbmp();
 		case IMAGE_STAGEFILE:
-			return getMainController().getPlayerResource().getBMSResource().getStagefile();
+			return main.getPlayerResource().getBMSResource().getStagefile();
 			case IMAGE_BANNER:
-				return getMainController().getPlayerResource().getBMSResource().getBanner();
+				return main.getPlayerResource().getBMSResource().getBanner();
 		case IMAGE_BLACK:
-			return black;
+			return main.black;
 		case IMAGE_WHITE:
-			return white;			
+			return main.white;			
 		}
 		return null;
 	}
@@ -686,33 +617,33 @@ public abstract class MainState {
 	public int getImageIndex(int id) {
 		switch(id) {
 			case BUTTON_GAUGE_1P:
-				return getMainController().getPlayerResource().getPlayerConfig().getGauge();
+				return main.getPlayerResource().getPlayerConfig().getGauge();
 			case BUTTON_RANDOM_1P:
-				return getMainController().getPlayerResource().getPlayerConfig().getRandom();
+				return main.getPlayerResource().getPlayerConfig().getRandom();
 			case BUTTON_RANDOM_2P:
-				return getMainController().getPlayerResource().getPlayerConfig().getRandom2();
+				return main.getPlayerResource().getPlayerConfig().getRandom2();
 			case BUTTON_DPOPTION:
-				return getMainController().getPlayerResource().getPlayerConfig().getDoubleoption();
+				return main.getPlayerResource().getPlayerConfig().getDoubleoption();
 			case BUTTON_HSFIX:
-				return getMainController().getPlayerResource().getPlayerConfig().getFixhispeed();
+				return main.getPlayerResource().getPlayerConfig().getFixhispeed();
 			case BUTTON_BGA:
-				return getMainController().getPlayerResource().getConfig().getBga();
+				return main.getPlayerResource().getConfig().getBga();
 			case BUTTON_ASSIST_EXJUDGE:
-				return getMainController().getPlayerResource().getPlayerConfig().getJudgewindowrate() > 100 ? 1 : 0;
+				return main.getPlayerResource().getPlayerConfig().getJudgewindowrate() > 100 ? 1 : 0;
 			case BUTTON_ASSIST_CONSTANT:
-				return getMainController().getPlayerResource().getPlayerConfig().isConstant() ? 1 : 0;
+				return main.getPlayerResource().getPlayerConfig().isConstant() ? 1 : 0;
 			case BUTTON_ASSIST_JUDGEAREA:
-				return getMainController().getPlayerResource().getPlayerConfig().isShowjudgearea() ? 1 : 0;
+				return main.getPlayerResource().getPlayerConfig().isShowjudgearea() ? 1 : 0;
 			case BUTTON_ASSIST_LEGACY:
-				return getMainController().getPlayerResource().getPlayerConfig().isLegacynote() ? 1 : 0;
+				return main.getPlayerResource().getPlayerConfig().isLegacynote() ? 1 : 0;
 			case BUTTON_ASSIST_MARKNOTE:
-				return getMainController().getPlayerResource().getPlayerConfig().isMarkprocessednote() ? 1 : 0;
+				return main.getPlayerResource().getPlayerConfig().isMarkprocessednote() ? 1 : 0;
 			case BUTTON_ASSIST_BPMGUIDE:
-				return getMainController().getPlayerResource().getPlayerConfig().isBpmguide() ? 1 : 0;
+				return main.getPlayerResource().getPlayerConfig().isBpmguide() ? 1 : 0;
 			case BUTTON_ASSIST_NOMINE:
-				return getMainController().getPlayerResource().getPlayerConfig().isNomine() ? 1 : 0;
+				return main.getPlayerResource().getPlayerConfig().isNomine() ? 1 : 0;
 			case BUTTON_LNMODE:
-				return getMainController().getPlayerResource().getPlayerConfig().getLnmode();
+				return main.getPlayerResource().getPlayerConfig().getLnmode();
 		}
 		return Integer.MIN_VALUE;
 	}

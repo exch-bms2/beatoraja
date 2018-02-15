@@ -100,6 +100,7 @@ public class BGAProcessor {
 		blank.setColor(Color.BLACK);
 		blank.fill();
 		blanktex = new Texture(blank);
+		blank.dispose();
 		
 		cache = new BGImageProcessor(BGACACHE_SIZE);
 	}
@@ -207,7 +208,7 @@ public class BGAProcessor {
 		for (MovieProcessor mp : mpgmap.values()) {
 			mp.stop();				
 			if (mp instanceof FFmpegProcessor) {
-				((FFmpegProcessor) mp).setTimerObserver(() -> player.getNowTime(TIMER_PLAY) * 1000);
+				((FFmpegProcessor) mp).setTimerObserver(() -> player.main.getNowMicroTime(TIMER_PLAY));
 			}
 		}
 		playingbgaid = -1;

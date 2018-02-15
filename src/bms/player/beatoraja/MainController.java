@@ -5,7 +5,6 @@ import java.nio.file.*;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.ResourceBundle;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
@@ -25,7 +24,6 @@ import bms.player.beatoraja.decide.MusicDecide;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.ir.IRConnection;
 import bms.player.beatoraja.ir.IRResponse;
-import bms.player.beatoraja.launcher.SkinConfigurationView;
 import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.result.CourseResult;
 import bms.player.beatoraja.result.MusicResult;
@@ -33,10 +31,6 @@ import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.song.SQLiteSongDatabaseAccessor;
 import bms.player.beatoraja.song.SongDatabaseAccessor;
 import bms.player.beatoraja.song.SongInformationAccessor;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
-import javafx.scene.layout.VBox;
-import javafx.stage.Modality;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -58,7 +52,7 @@ import com.badlogic.gdx.utils.StringBuilder;
  */
 public class MainController extends ApplicationAdapter {
 
-	public static final String VERSION = "beatoraja 0.5.3";
+	public static final String VERSION = "beatoraja 0.5.4";
 	
 	private static final boolean debug = false;
 
@@ -83,6 +77,11 @@ public class MainController extends ApplicationAdapter {
 	private BitmapFont systemfont;
 
 	private MainState current;
+	/**
+	 * 状態の開始時間
+	 */
+	private long starttime;
+	private long nowmicrotime;
 
 	private Config config;
 	private PlayerConfig player;
@@ -122,6 +121,9 @@ public class MainController extends ApplicationAdapter {
 	private final long[] timer = new long[timerCount];
 	public static final int offsetCount = SkinProperty.OFFSET_MAX + 1;
 	private final SkinOffset[] offset = new SkinOffset[offsetCount];
+	
+	protected TextureRegion black;
+	protected TextureRegion white;
 
 	public MainController(Path f, Config config, PlayerConfig player, int auto, boolean songUpdated) {
 		this.auto = auto;
@@ -180,10 +182,6 @@ public class MainController extends ApplicationAdapter {
 		}
 
 		sound = new SystemSoundManager(config);
-	}
-
-	public long[] getTimer() {
-		return timer;
 	}
 
 	public SkinOffset getOffset(int index) {
@@ -263,7 +261,7 @@ public class MainController extends ApplicationAdapter {
 			newState.create();
 			newState.getSkin().prepare(newState);
 			current = newState;
-			current.setStartTime();
+			starttime = System.nanoTime();
 		}
 		if (current.getStage() != null) {
 			Gdx.input.setInputProcessor(new InputMultiplexer(current.getStage(), input.getKeyBoardInputProcesseor()));
@@ -339,6 +337,15 @@ public class MainController extends ApplicationAdapter {
 		if(player.getTarget() >= TargetProperty.getAllTargetProperties().length) {
 			player.setTarget(0);
 		}
+		
+		Pixmap plainPixmap = new Pixmap(2,1, Pixmap.Format.RGBA8888);
+		plainPixmap.drawPixel(0,0, Color.toIntBits(255,0,0,0));
+		plainPixmap.drawPixel(1,0, Color.toIntBits(255,255,255,255));
+		Texture plainTexture = new Texture(plainPixmap);
+		black = new TextureRegion(plainTexture,0,0,1,1);
+		white = new TextureRegion(plainTexture,1,0,1,1);
+		plainPixmap.dispose();
+
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 	}
 	
@@ -349,7 +356,7 @@ public class MainController extends ApplicationAdapter {
 	@Override
 	public void render() {
 //		input.poll();
-		current.updateNowTime();
+		nowmicrotime = ((System.nanoTime() - starttime) / 1000);
 
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
@@ -406,11 +413,12 @@ public class MainController extends ApplicationAdapter {
 		if(time > prevtime) {
 		    prevtime = time;
             current.input();
-            // move song bar position by mouse
+            // event - move pressed
             if (input.isMousePressed()) {
                 input.setMousePressed();
                 current.getSkin().mousePressed(current, input.getMouseButton(), input.getMouseX(), input.getMouseY());
             }
+            // event - move dragged
             if (input.isMouseDragged()) {
                 input.setMouseDragged();
                 current.getSkin().mouseDragged(current, input.getMouseButton(), input.getMouseX(), input.getMouseY());
@@ -563,6 +571,72 @@ public class MainController extends ApplicationAdapter {
 		cl.setTimeInMillis(System.currentTimeMillis());
 		return cl;
 	}
+	
+	public long getStartTime() {
+		return starttime / 1000000;
+	}
+
+	public long getStartMicroTime() {
+		return starttime / 1000;
+	}
+
+	public long getNowTime() {
+		return nowmicrotime / 1000;
+	}
+
+	public long getNowTime(int id) {
+		if(isTimerOn(id)) {
+			return (nowmicrotime - timer[id]) / 1000;
+		}
+		return 0;
+	}
+
+	public long getNowMicroTime() {
+		return nowmicrotime;
+	}
+
+	public long getNowMicroTime(int id) {
+		if(isTimerOn(id)) {
+			return nowmicrotime - timer[id];
+		}
+		return 0;
+	}
+
+	public long getTimer(int id) {
+		return timer[id] / 1000;
+	}
+
+	public long getMicroTimer(int id) {
+		return timer[id];
+	}
+
+	public boolean isTimerOn(int id) {
+		return timer[id] != Long.MIN_VALUE;
+	}
+
+	public void setTimerOn(int id) {
+		timer[id] = nowmicrotime;
+	}
+
+	public void setTimerOff(int id) {
+		timer[id] = Long.MIN_VALUE;
+	}
+
+	public void setMicroTimer(int id, long microtime) {
+		timer[id] = microtime;
+	}
+
+	public void switchTimer(int id, boolean on) {
+		if(on) {
+			if(timer[id] == Long.MIN_VALUE) {
+				timer[id] = nowmicrotime;
+			}
+		} else {
+			timer[id] = Long.MIN_VALUE;
+		}
+	}
+
+
 	/**
 	 * スクリーンショット処理用スレッド
 	 * 
