@@ -49,7 +49,7 @@ public class CourseResult extends MainState {
 	}
 
 	public void create() {
-		final PlayerResource resource = getMainController().getPlayerResource();
+		final PlayerResource resource = main.getPlayerResource();
 
 		setSound(SOUND_CLEAR, "course_clear.wav", SoundType.SOUND,false);
 		setSound(SOUND_FAIL, "course_fail.wav", SoundType.SOUND, false);
@@ -83,26 +83,24 @@ public class CourseResult extends MainState {
 	}
 
 	public void render() {
-		long time = getNowTime();
-		switchTimer(TIMER_RESULTGRAPH_BEGIN, true);
-		switchTimer(TIMER_RESULTGRAPH_END, true);
-		switchTimer(TIMER_RESULT_UPDATESCORE, true);
+		long time = main.getNowTime();
+		main.switchTimer(TIMER_RESULTGRAPH_BEGIN, true);
+		main.switchTimer(TIMER_RESULTGRAPH_END, true);
+		main.switchTimer(TIMER_RESULT_UPDATESCORE, true);
 
         if(time > getSkin().getInput()){
-    		switchTimer(TIMER_STARTINPUT, true);
+        	main.switchTimer(TIMER_STARTINPUT, true);
         }
 
-		final MainController main = getMainController();
-
-		if (isTimerOn(TIMER_FADEOUT)) {
-			if (getNowTime(TIMER_FADEOUT) > getSkin().getFadeout()) {
+		if (main.isTimerOn(TIMER_FADEOUT)) {
+			if (main.getNowTime(TIMER_FADEOUT) > getSkin().getFadeout()) {
 				stop(SOUND_CLEAR);
 				stop(SOUND_FAIL);
 				stop(SOUND_CLOSE);
 				main.changeState(MainController.STATE_SELECTMUSIC);
 			}
 		} else if (time > getSkin().getScene()) {
-            switchTimer(TIMER_FADEOUT, true);
+			main.switchTimer(TIMER_FADEOUT, true);
 			if(getSound(SOUND_CLOSE) != null) {
 				stop(SOUND_CLEAR);
 				stop(SOUND_FAIL);
@@ -113,11 +111,9 @@ public class CourseResult extends MainState {
 	}
 
     public void input() {
-        long time = getNowTime();
-        final MainController main = getMainController();
-        final PlayerResource resource = getMainController().getPlayerResource();
+        final PlayerResource resource = main.getPlayerResource();
 
-        if (!isTimerOn(TIMER_FADEOUT) && isTimerOn(TIMER_STARTINPUT)) {
+        if (!main.isTimerOn(TIMER_FADEOUT) && main.isTimerOn(TIMER_STARTINPUT)) {
             boolean[] keystate = main.getInputProcessor().getKeystate();
             long[] keytime = main.getInputProcessor().getTime();
 
@@ -130,10 +126,10 @@ public class CourseResult extends MainState {
 			}
 
 			if (resource.getScoreData() == null || ok) {
-                if (((CourseResultSkin) getSkin()).getRankTime() != 0 && !isTimerOn(TIMER_RESULT_UPDATESCORE)) {
-                    switchTimer(TIMER_RESULT_UPDATESCORE, true);
+                if (((CourseResultSkin) getSkin()).getRankTime() != 0 && !main.isTimerOn(TIMER_RESULT_UPDATESCORE)) {
+                	main.switchTimer(TIMER_RESULT_UPDATESCORE, true);
 				} else if (state == STATE_OFFLINE || state == STATE_IR_FINISHED){
-                    switchTimer(TIMER_FADEOUT, true);
+					main.switchTimer(TIMER_FADEOUT, true);
 					if(getSound(SOUND_CLOSE) != null) {
 						stop(SOUND_CLEAR);
 						stop(SOUND_FAIL);
@@ -154,7 +150,7 @@ public class CourseResult extends MainState {
     public void updateScoreDatabase() {
     	Arrays.fill(saveReplay, -1);
 		state = STATE_OFFLINE;
-		final PlayerResource resource = getMainController().getPlayerResource();
+		final PlayerResource resource = main.getPlayerResource();
 		final PlayerConfig config = resource.getPlayerConfig();
 		BMSModel[] models = resource.getCourseBMSModels();
 		newscore = resource.getCourseScoreData();
@@ -175,7 +171,7 @@ public class CourseResult extends MainState {
 				&& (!dp || (config.getRandom2() == 1 && config.getDoubleoption() == 1))) {
 			random = 1;
 		}
-		IRScoreData score = getMainController().getPlayDataAccessor().readScoreData(models,
+		IRScoreData score = main.getPlayDataAccessor().readScoreData(models,
 				config.getLnmode(), random, resource.getConstraint());
 		if (score != null) {
 			oldscore = score;
@@ -184,13 +180,13 @@ public class CourseResult extends MainState {
 		getScoreDataProperty().setTargetScore(oldscore.getExscore(), resource.getRivalScoreData(), resource.getBMSModel().getTotalNotes());
 		getScoreDataProperty().update(newscore);
 
-		getMainController().getPlayDataAccessor().writeScoreDara(newscore, models, config.getLnmode(),
+		main.getPlayDataAccessor().writeScoreDara(newscore, models, config.getLnmode(),
 				random, resource.getConstraint(), resource.isUpdateScore());
 
-		IRConnection ir = getMainController().getIRConnection();
+		IRConnection ir = main.getIRConnection();
 		if (ir != null) {
 			boolean send = resource.isUpdateScore();
-			switch(getMainController().getPlayerConfig().getIrsend()) {
+			switch(main.getPlayerConfig().getIrsend()) {
 			case PlayerConfig.IR_SEND_ALWAYS:
 				break;
 			case PlayerConfig.IR_SEND_COMPLETE_SONG:
@@ -206,14 +202,14 @@ public class CourseResult extends MainState {
 			
 			if(send) {
 				Logger.getGlobal().info("IRへスコア送信中(未実装)");
-				switchTimer(TIMER_IR_CONNECT_BEGIN, true);
+				main.switchTimer(TIMER_IR_CONNECT_BEGIN, true);
 				state = STATE_IR_PROCESSING;
 				final IRScoreData oldscore = score;
 				Thread irprocess = new Thread() {
 
 					@Override
 					public void run() {
-						switchTimer(TIMER_IR_CONNECT_SUCCESS, true);
+						main.switchTimer(TIMER_IR_CONNECT_SUCCESS, true);
 						Logger.getGlobal().info("IRへスコア送信完了(未実装)");
 //						ir.sendPlayData(resource.getBMSModel(), resource.getScoreData());
 //						IRResponse<IRScoreData[]> response = ir.getPlayData(null, resource.getBMSModel());
@@ -256,7 +252,7 @@ public class CourseResult extends MainState {
 	}
 
 	public int getJudgeCount(int judge, boolean fast) {
-		final PlayerResource resource = getMainController().getPlayerResource();
+		final PlayerResource resource = main.getPlayerResource();
 		IRScoreData score = resource.getCourseScoreData();
 		if (score != null) {
 			switch (judge) {
@@ -278,7 +274,7 @@ public class CourseResult extends MainState {
 	}
 
 	public String getTextValue(int id) {
-		final PlayerResource resource = getMainController().getPlayerResource();
+		final PlayerResource resource = main.getPlayerResource();
 		switch (id) {
 			case STRING_TITLE:
 			case STRING_FULLTITLE:
@@ -288,7 +284,7 @@ public class CourseResult extends MainState {
 	}
 
 	public int getNumberValue(int id) {
-		final PlayerResource resource = getMainController().getPlayerResource();
+		final PlayerResource resource = main.getPlayerResource();
 		switch (id) {
 			case NUMBER_CLEAR:
 				if (resource.getCourseScoreData() != null) {
@@ -352,12 +348,12 @@ public class CourseResult extends MainState {
 	}
 
 	private void saveReplayData(int index) {
-		final PlayerResource resource = getMainController().getPlayerResource();
+		final PlayerResource resource = main.getPlayerResource();
 		if (resource.getAutoplay() == 0 && resource.getCourseScoreData() != null) {
 			if (saveReplay[index] == -1 && resource.isUpdateScore()) {
 				// 保存されているリプレイデータがない場合は、EASY以上で自動保存
 				ReplayData[] rd = resource.getCourseReplay();
-				getMainController().getPlayDataAccessor().wrireReplayData(rd, resource.getCourseBMSModels(),
+				main.getPlayDataAccessor().wrireReplayData(rd, resource.getCourseBMSModels(),
 						resource.getPlayerConfig().getLnmode(), index, resource.getConstraint());
 				saveReplay[index] = 1;
 			}
@@ -365,7 +361,7 @@ public class CourseResult extends MainState {
 	}
 
 	public boolean getBooleanValue(int id) {
-		final PlayerResource resource = getMainController().getPlayerResource();
+		final PlayerResource resource = main.getPlayerResource();
 		final IRScoreData score = resource.getCourseScoreData();
 		switch (id) {
 			case OPTION_RESULT_CLEAR:
@@ -389,28 +385,28 @@ public class CourseResult extends MainState {
 			case OPTION_DRAW_SCORERANK:
 				return getScoreDataProperty().getNowRate() == getScoreDataProperty().getBestScoreRate();
 			case OPTION_NO_REPLAYDATA:
-				return !getMainController().getPlayDataAccessor().existsReplayData(resource.getCourseBMSModels(),
+				return !main.getPlayDataAccessor().existsReplayData(resource.getCourseBMSModels(),
 						resource.getPlayerConfig().getLnmode(), 0,resource.getConstraint());
 			case OPTION_NO_REPLAYDATA2:
-				return !getMainController().getPlayDataAccessor().existsReplayData(resource.getCourseBMSModels(),
+				return !main.getPlayDataAccessor().existsReplayData(resource.getCourseBMSModels(),
 						resource.getPlayerConfig().getLnmode(), 1,resource.getConstraint());
 			case OPTION_NO_REPLAYDATA3:
-				return !getMainController().getPlayDataAccessor().existsReplayData(resource.getCourseBMSModels(),
+				return !main.getPlayDataAccessor().existsReplayData(resource.getCourseBMSModels(),
 						resource.getPlayerConfig().getLnmode(), 2,resource.getConstraint());
 			case OPTION_NO_REPLAYDATA4:
-				return !getMainController().getPlayDataAccessor().existsReplayData(resource.getCourseBMSModels(),
+				return !main.getPlayDataAccessor().existsReplayData(resource.getCourseBMSModels(),
 						resource.getPlayerConfig().getLnmode(), 3,resource.getConstraint());
 			case OPTION_REPLAYDATA:
-				return getMainController().getPlayDataAccessor().existsReplayData(resource.getCourseBMSModels(),
+				return main.getPlayDataAccessor().existsReplayData(resource.getCourseBMSModels(),
 						resource.getPlayerConfig().getLnmode(), 0,resource.getConstraint());
 			case OPTION_REPLAYDATA2:
-				return getMainController().getPlayDataAccessor().existsReplayData(resource.getCourseBMSModels(),
+				return main.getPlayDataAccessor().existsReplayData(resource.getCourseBMSModels(),
 						resource.getPlayerConfig().getLnmode(), 1,resource.getConstraint());
 			case OPTION_REPLAYDATA3:
-				return getMainController().getPlayDataAccessor().existsReplayData(resource.getCourseBMSModels(),
+				return main.getPlayDataAccessor().existsReplayData(resource.getCourseBMSModels(),
 						resource.getPlayerConfig().getLnmode(), 2,resource.getConstraint());
 			case OPTION_REPLAYDATA4:
-				return getMainController().getPlayDataAccessor().existsReplayData(resource.getCourseBMSModels(),
+				return main.getPlayDataAccessor().existsReplayData(resource.getCourseBMSModels(),
 						resource.getPlayerConfig().getLnmode(), 3,resource.getConstraint());
 			case OPTION_REPLAYDATA_SAVED:
 				return saveReplay[0] == 1;
@@ -428,7 +424,7 @@ public class CourseResult extends MainState {
 	public int getImageIndex(int id) {
 		switch (id) {
 			case NUMBER_CLEAR:
-				final PlayerResource resource = getMainController().getPlayerResource();
+				final PlayerResource resource = main.getPlayerResource();
 				if (resource.getScoreData() != null) {
 					return resource.getScoreData().getClear();
 				}

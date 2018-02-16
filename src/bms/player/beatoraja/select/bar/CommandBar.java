@@ -27,7 +27,7 @@ public class CommandBar extends DirectoryBar {
 
     @Override
     public Bar[] getChildren() {
-    	final MainController main = selector.getMainController();
+    	final MainController main = selector.main;
         SongData[] infos = main.getSongDatabase().getSongDatas(sql,"player/" + main.getConfig().getPlayername() + "/score.db"
         		,"player/" + main.getConfig().getPlayername() + "/scorelog.db",main.getInfoDatabase() != null ? "songinfo.db" : null);
        Bar[] l = new Bar[infos.length];
@@ -38,7 +38,7 @@ public class CommandBar extends DirectoryBar {
     }
 
     public void updateFolderStatus() {
-    	final MainController main = selector.getMainController();
+    	final MainController main = selector.main;
         updateFolderStatus(main.getSongDatabase().getSongDatas(sql,"player/" + main.getConfig().getPlayername() + "/score.db"
         		,"player/" + main.getConfig().getPlayername() + "/scorelog.db",main.getInfoDatabase() != null ? "songinfo.db" : null));
     }

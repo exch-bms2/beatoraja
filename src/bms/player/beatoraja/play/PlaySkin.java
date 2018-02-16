@@ -23,6 +23,7 @@ public class PlaySkin extends Skin {
 	private SkinImage[] bpm = new SkinImage[0];
 	private SkinImage[] stop = new SkinImage[0];
 
+	private Rectangle[] laneregion;
 	private Rectangle[] lanegroupregion;
 
 	private int judgeregion;
@@ -69,6 +70,14 @@ public class PlaySkin extends Skin {
 
 	public void setLaneGroupRegion(Rectangle[] r) {
 		lanegroupregion = r;
+	}
+
+	public Rectangle[] getLaneRegion() {
+		return laneregion;
+	}
+
+	public void setLaneRegion(Rectangle[] r) {
+		laneregion = r;
 	}
 
 	public void setJudgeregion(int jr) {

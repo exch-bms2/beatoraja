@@ -266,7 +266,7 @@ public class PracticeConfiguration {
 			sprite.draw(titlefont, "OPTION-DP : " + DPRANDOM[property.doubleop], x, y - 220, cursorpos == 10 ? Color.YELLOW : Color.CYAN);
 		}
 
-		if (state.getMainController().getPlayerResource().mediaLoadFinished()) {
+		if (state.main.getPlayerResource().mediaLoadFinished()) {
 			sprite.draw(titlefont, "PRESS 1KEY TO PLAY", x, y - 254, Color.ORANGE);
 		}
 

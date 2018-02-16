@@ -100,7 +100,7 @@ public class MusicSelector extends MainState {
 
 		songdb = main.getSongDatabase();
 
-		final PlayDataAccessor pda = getMainController().getPlayDataAccessor();
+		final PlayDataAccessor pda = main.getPlayDataAccessor();
 
 		scorecache = new ScoreDataCache() {
 			@Override
@@ -208,7 +208,7 @@ public class MusicSelector extends MainState {
 	}
 
 	public void create() {
-		getMainController().getSoundManager().shuffle();
+		main.getSoundManager().shuffle();
 		setSound(SOUND_BGM, "select.wav", SoundType.BGM, true);
 		setSound(SOUND_SCRATCH, "scratch.wav", SoundType.SOUND, false);
 		setSound(SOUND_FOLDEROPEN, "f-open.wav", SoundType.SOUND,false);
@@ -216,7 +216,6 @@ public class MusicSelector extends MainState {
 		setSound(SOUND_CHANGEOPTION, "o-change.wav", SoundType.SOUND,false);
 
 		play = -1;
-		final MainController main = getMainController();
 		playerdata = main.getPlayDataAccessor().readPlayerData();
 		if (bar.getSelected() != null && bar.getSelected() instanceof SongBar) {
 			scorecache.update(((SongBar) bar.getSelected()).getSongData(), config.getLnmode());
@@ -251,11 +250,10 @@ public class MusicSelector extends MainState {
 	}
 
 	public void render() {
-		final MainController main = getMainController();
 		final PlayerResource resource = main.getPlayerResource();
 		final Bar current = bar.getSelected();
-        if(getNowTime() > getSkin().getInput()){
-        	switchTimer(TIMER_STARTINPUT, true);
+        if(main.getNowTime() > getSkin().getInput()){
+        	main.switchTimer(TIMER_STARTINPUT, true);
         }
 		// draw song information
 		resource.setSongdata(current instanceof SongBar ? ((SongBar) current).getSongData() : null);
@@ -263,14 +261,14 @@ public class MusicSelector extends MainState {
 		// preview music
 		if (current instanceof SongBar) {
 			final SongData song = main.getPlayerResource().getSongdata();
-			if (song != preview.getSongData() && getNowTime() > getTimer(TIMER_SONGBAR_CHANGE) + previewDuration
+			if (song != preview.getSongData() && main.getNowTime() > main.getTimer(TIMER_SONGBAR_CHANGE) + previewDuration
 					&& play < 0) {
 				this.preview.start(song);
 			}
 		}
 
 		// read bms information
-		if (getNowTime() > getTimer(TIMER_SONGBAR_CHANGE) + notesGraphDuration && !showNoteGraph && play < 0) {
+		if (main.getNowTime() > main.getTimer(TIMER_SONGBAR_CHANGE) + notesGraphDuration && !showNoteGraph && play < 0) {
 			if (current instanceof SongBar && ((SongBar) current).existsSong()) {
 				SongData song = main.getPlayerResource().getSongdata();
 				new Thread(() ->  {
@@ -288,7 +286,7 @@ public class MusicSelector extends MainState {
 					resource.clear();
 					if (resource.setBMSFile(Paths.get(song.getPath()), play)) {
 						preview.stop();
-						getMainController().changeState(MainController.STATE_DECIDE);
+						main.changeState(MainController.STATE_DECIDE);
 					}
 				} else {
 					if (song.getUrl() != null) {
@@ -316,18 +314,18 @@ public class MusicSelector extends MainState {
 			}
 			play = -1;
 		} else if (play == -255) {
-			getMainController().exit();
+			main.exit();
 		}
 	}
 
 	private int play = -1;
 
 	public void input() {
-		final BMSPlayerInputProcessor input = getMainController().getInputProcessor();
+		final BMSPlayerInputProcessor input = main.getInputProcessor();
 
 		if (input.getNumberState()[6]) {
 			preview.stop();
-			getMainController().changeState(MainController.STATE_CONFIG);
+			main.changeState(MainController.STATE_CONFIG);
 		}
 
 		musicinput.input();
@@ -357,7 +355,7 @@ public class MusicSelector extends MainState {
 	}
 
 	private void readCourse(int autoplay) {
-		final PlayerResource resource = getMainController().getPlayerResource();
+		final PlayerResource resource = main.getPlayerResource();
 		if (((GradeBar) bar.getSelected()).existsAllSongs()) {
 			resource.clear();
 			List<Path> files = new ArrayList<Path>();
@@ -407,7 +405,7 @@ public class MusicSelector extends MainState {
 				preview.stop();
 				resource.setCoursetitle(bar.getSelected().getTitle());
 				resource.setBMSFile(files.get(0), autoplay);
-				getMainController().changeState(MainController.STATE_DECIDE);
+				main.changeState(MainController.STATE_DECIDE);
 			} else {
 				Logger.getGlobal().info("段位の楽曲が揃っていません");
 			}
@@ -444,12 +442,12 @@ public class MusicSelector extends MainState {
 	public void setPanelState(int panelstate) {
 		if (this.panelstate != panelstate) {
 			if (this.panelstate != 0) {
-				setTimerOn(TIMER_PANEL1_OFF + this.panelstate - 1);
-				setTimerOff(TIMER_PANEL1_ON + this.panelstate - 1);
+				main.setTimerOn(TIMER_PANEL1_OFF + this.panelstate - 1);
+				main.setTimerOff(TIMER_PANEL1_ON + this.panelstate - 1);
 			}
 			if (panelstate != 0) {
-				setTimerOn(TIMER_PANEL1_ON + panelstate - 1);
-				setTimerOff(TIMER_PANEL1_OFF + panelstate - 1);
+				main.setTimerOn(TIMER_PANEL1_ON + panelstate - 1);
+				main.setTimerOff(TIMER_PANEL1_OFF + panelstate - 1);
 			}
 		}
 		this.panelstate = panelstate;
@@ -569,11 +567,11 @@ public class MusicSelector extends MainState {
 		case SLIDER_MUSICSELECT_POSITION:
 			return bar.getSelectedPosition();
 			case SLIDER_MASTER_VOLUME:
-				return getMainController().getConfig().getSystemvolume();
+				return main.getConfig().getSystemvolume();
 			case SLIDER_KEY_VOLUME:
-				return getMainController().getConfig().getKeyvolume();
+				return main.getConfig().getKeyvolume();
 			case SLIDER_BGM_VOLUME:
-				return getMainController().getConfig().getBgvolume();
+				return main.getConfig().getBgvolume();
 			case BARGRAPH_RATE_PGREAT:
 			if (bar.getSelected() instanceof SongBar) {
 				IRScoreData score = bar.getSelected().getScore();
@@ -673,13 +671,13 @@ public class MusicSelector extends MainState {
 			bar.setSelectedPosition(value);
 			return;
 			case SLIDER_MASTER_VOLUME:
-				getMainController().getConfig().setSystemvolume(value);
+				main.getConfig().setSystemvolume(value);
 				return;
 			case SLIDER_KEY_VOLUME:
-				getMainController().getConfig().setKeyvolume(value);
+				main.getConfig().setKeyvolume(value);
 				return;
 			case SLIDER_BGM_VOLUME:
-				getMainController().getConfig().setBgvolume(value);
+				main.getConfig().setBgvolume(value);
 				return;
 		}
 		super.setSliderValue(id, value);
@@ -884,9 +882,9 @@ public class MusicSelector extends MainState {
 
 	public void updateSong(Bar selected) {
 		if(selected instanceof FolderBar) {
-			getMainController().updateSong(((FolderBar) selected).getFolderData().getPath());
+			main.updateSong(((FolderBar) selected).getFolderData().getPath());
 		} else if(selected instanceof TableBar) {
-			getMainController().updateTable((TableBar) selected);
+			main.updateTable((TableBar) selected);
 		}
 	}
 
@@ -894,10 +892,10 @@ public class MusicSelector extends MainState {
 		execute(MusicSelectCommand.RESET_REPLAY);
 		// banner
 		final Bar current = bar.getSelected();
-		getMainController().getPlayerResource().getBMSResource().setBanner(
+		main.getPlayerResource().getBMSResource().setBanner(
 				current instanceof SongBar ? ((SongBar) current).getBanner() : null);
 
-		setTimerOn(TIMER_SONGBAR_CHANGE);
+		main.setTimerOn(TIMER_SONGBAR_CHANGE);
 		if(preview.getSongData() != null && (!(bar.getSelected() instanceof SongBar) ||
 				((SongBar) bar.getSelected()).getSongData().getFolder().equals(preview.getSongData().getFolder()) == false))
 		preview.start(null);

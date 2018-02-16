@@ -248,10 +248,10 @@ public abstract class SkinObject implements Disposable {
 		final int timer = dsttimer;
 
 		if (timer != 0 && timer < MainController.timerCount) {
-			if (!state.isTimerOn(timer)) {
+			if (!state.main.isTimerOn(timer)) {
 				return null;
 			}
-			time -= state.getTimer(timer);
+			time -= state.main.getTimer(timer);
 		}
 
 		final long lasttime = endtime;
@@ -544,7 +544,7 @@ public abstract class SkinObject implements Disposable {
 	
 	protected boolean mousePressed(MainState state, int button, int x, int y) {
 		if (clickevent != -1) {
-			Rectangle r = getDestination(state.getNowTime(), state);
+			Rectangle r = getDestination(state.main.getNowTime(), state);
 			// System.out.println(obj.getClickevent() + " : " + r.x +
 			// "," + r.y + "," + r.width + "," + r.height + " - " + x +
 			// "," + y);

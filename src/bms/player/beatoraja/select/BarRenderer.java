@@ -91,7 +91,7 @@ public class BarRenderer {
 	}
 
 	public BarRenderer(MusicSelector select) {
-		final MainController main = select.getMainController();
+		final MainController main = select.main;
 		this.select = select;
 		TableDataAccessor tdaccessor = new TableDataAccessor();
 
@@ -307,7 +307,7 @@ public class BarRenderer {
 					- ((MusicSelectSkin) select.getSkin()).getCenterBar()) % currentsongs.length;
 			Bar sd = currentsongs[index];
 
-			Rectangle r = baro.getBarImages(on, i).getDestination(select.getNowTime(), select);
+			Rectangle r = baro.getBarImages(on, i).getDestination(select.main.getNowTime(), select);
 			if (r != null) {
 				if (r != null && r.x <= x && r.x + r.width >= x && r.y <= y && r.y + r.height >= y) {
 					if (button == 0) {
@@ -520,12 +520,12 @@ public class BarRenderer {
 	}
 
 	public void input() {
-		BMSPlayerInputProcessor input = select.getMainController().getInputProcessor();
+		BMSPlayerInputProcessor input = select.main.getInputProcessor();
 		boolean[] keystate = input.getKeystate();
 		long[] keytime = input.getTime();
 		boolean[] cursor = input.getCursorState();
 
-        final MusicSelectKeyProperty property = MusicSelectKeyProperty.values()[select.getMainController().getPlayerResource().getPlayerConfig().getMusicselectinput()];
+        final MusicSelectKeyProperty property = MusicSelectKeyProperty.values()[select.main.getPlayerResource().getPlayerConfig().getMusicselectinput()];
 
 		// song bar scroll on mouse wheel
 		int mov = -input.getScroll();
@@ -666,7 +666,7 @@ public class BarRenderer {
 
 		List<Bar> remove = new ArrayList<Bar>();
 		for (Bar b : l) {
-			final Mode mode = select.getMainController().getPlayerResource().getPlayerConfig().getMode();
+			final Mode mode = select.main.getPlayerResource().getPlayerConfig().getMode();
 			if (mode != null && b instanceof SongBar && ((SongBar) b).getSongData().getMode() != 0 && 
 					((SongBar) b).getSongData().getMode() != mode.id) {
 				remove.add(b);
@@ -683,7 +683,7 @@ public class BarRenderer {
 			currentsongs = l.toArray(new Bar[l.size()]);
 			bartextupdate = true;
 
-			final PlayerConfig config = select.getMainController().getPlayerResource().getPlayerConfig();
+			final PlayerConfig config = select.main.getPlayerResource().getPlayerConfig();
 			for (Bar b : currentsongs) {
 				if (b instanceof SongBar) {
 					SongData sd = ((SongBar) b).getSongData();
@@ -796,9 +796,9 @@ public class BarRenderer {
 
 		@Override
 		public void run() {
-			PlayerConfig config = select.getMainController().getPlayerResource().getPlayerConfig();
-			final MainController main = select.getMainController();
-			final SongInformationAccessor info = select.getMainController().getInfoDatabase();
+			final MainController main = select.main;
+			PlayerConfig config = main.getPlayerResource().getPlayerConfig();
+			final SongInformationAccessor info = main.getInfoDatabase();
 			final ScoreDataCache rival = select.getRivalScoreDataCache();
 			for (Bar bar : bars) {
 				if (bar instanceof SongBar && ((SongBar) bar).existsSong()) {
@@ -839,7 +839,7 @@ public class BarRenderer {
 					}
 				}
 
-				if (select.getMainController().getPlayerResource().getConfig().isFolderlamp()) {
+				if (main.getPlayerResource().getConfig().isFolderlamp()) {
 					if (bar instanceof DirectoryBar) {
 						((DirectoryBar) bar).updateFolderStatus();
 					}

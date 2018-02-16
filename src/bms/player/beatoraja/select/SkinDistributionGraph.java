@@ -89,7 +89,7 @@ public class SkinDistributionGraph extends SkinObject {
 
     public void draw(SkinObjectRenderer sprite, long time, MainState state, DirectoryBar current, int offsetx, int offsety) {
         final Rectangle r = getDestination(time, state);
-        if (r != null && state.getMainController().getPlayerResource().getConfig().isFolderlamp()) {
+        if (r != null && state.main.getPlayerResource().getConfig().isFolderlamp()) {
             int[] lamps = current.getLamps();
             int[] ranks = current.getRanks();
             int count = 0;

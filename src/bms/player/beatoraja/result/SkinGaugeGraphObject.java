@@ -81,7 +81,7 @@ public class SkinGaugeGraphObject extends SkinObject {
 			}
 		}
 		if (shapetex == null) {
-			PlayerResource resource = state.getMainController().getPlayerResource();
+			PlayerResource resource = state.main.getPlayerResource();
 			Pixmap shape = new Pixmap((int) graph.width, (int) graph.height, Pixmap.Format.RGBA8888);
 			// ゲージグラフ描画
 			color = typetable[resource.getGrooveGauge().getType()];

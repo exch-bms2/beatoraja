@@ -104,7 +104,7 @@ public class KeyConfiguration extends MainState {
 	}
 
 	public void create() {
-		this.setSkin(new MusicDecideSkin(Resolution.HD, getMainController().getConfig().getResolution()));
+		this.setSkin(new MusicDecideSkin(Resolution.HD, main.getConfig().getResolution()));
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
 				Gdx.files.internal("skin/default/VL-Gothic-Regular.ttf"));
 		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
@@ -112,7 +112,7 @@ public class KeyConfiguration extends MainState {
 		titlefont = generator.generateFont(parameter);
 		shape = new ShapeRenderer();
 
-		input = getMainController().getInputProcessor();
+		input = main.getInputProcessor();
 		keyboard = input.getKeyBoardInputProcesseor();
 		controllers = input.getBMInputProcessor();
 		midiinput = input.getMidiInputProcessor();
@@ -120,7 +120,6 @@ public class KeyConfiguration extends MainState {
 	}
 
 	public void render() {
-		final MainController main = getMainController();
 		final SpriteBatch sprite = main.getSpriteBatch();
 		final float scaleX = (float) getSkin().getScaleX();
 		final float scaleY = (float) getSkin().getScaleY();
@@ -312,7 +311,7 @@ public class KeyConfiguration extends MainState {
 
 	private void setMode(int mode) {
 		this.mode = mode;
-		config = getMainController().getPlayerResource().getPlayerConfig();
+		config = main.getPlayerResource().getPlayerConfig();
 		pc = config.getPlayConfig(MODE_HINT[mode]);
 		keyboardConfig = pc.getKeyboardConfig();
 		controllerConfigs = pc.getController();

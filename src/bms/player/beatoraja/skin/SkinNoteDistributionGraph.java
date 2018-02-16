@@ -79,7 +79,7 @@ public class SkinNoteDistributionGraph extends SkinObject {
 			return;
 		}
 		
-		final SongData song = state.getMainController().getPlayerResource().getSongdata();
+		final SongData song = state.main.getPlayerResource().getSongdata();
 		final BMSModel model = song != null ? song.getBMSModel() : null;
 		if(song != current || (this.model == null && model != null)) {
 			current = song;

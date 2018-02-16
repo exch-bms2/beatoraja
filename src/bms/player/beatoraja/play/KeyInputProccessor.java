@@ -8,6 +8,7 @@ import java.util.logging.Logger;
 
 import bms.model.BMSModel;
 import bms.model.TimeLine;
+import bms.player.beatoraja.MainController;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyInputLog;
 import bms.player.beatoraja.skin.SkinPropertyMapper;
@@ -46,8 +47,9 @@ class KeyInputProccessor {
 	}
 
 	public void input() {
-		final long now = player.getNowTime();
-		final boolean[] keystate = player.getMainController().getInputProcessor().getKeystate();
+		final MainController main = player.main;
+		final long now = main.getNowTime();
+		final boolean[] keystate = main.getInputProcessor().getKeystate();
 		final long[] auto_presstime = player.getJudgeManager().getAutoPresstime();
 
 		final int[] laneoffset = laneProperty.getLaneSkinOffset();
@@ -71,14 +73,14 @@ class KeyInputProccessor {
 			final int timerOn = SkinPropertyMapper.keyOnTimerId(laneProperty.getLanePlayer()[lane], offset);
 			final int timerOff = SkinPropertyMapper.keyOffTimerId(laneProperty.getLanePlayer()[lane], offset);
 			if (pressed) {
-				if (!player.isTimerOn(timerOn) || scratch) {
-					player.setTimerOn(timerOn);
-					player.setTimerOff(timerOff);
+				if (!main.isTimerOn(timerOn) || scratch) {
+					main.setTimerOn(timerOn);
+					main.setTimerOff(timerOff);
 				}
 			} else {
-				if (player.isTimerOn(timerOn)) {
-					player.setTimerOn(timerOff);
-					player.setTimerOff(timerOn);
+				if (main.isTimerOn(timerOn)) {
+					main.setTimerOn(timerOff);
+					main.setTimerOff(timerOn);
 				}
 			}
 		}
@@ -140,13 +142,13 @@ class KeyInputProccessor {
 			int index = 0;
 
 			long frametime = 1;
-			final BMSPlayerInputProcessor input = player.getMainController().getInputProcessor();
+			final BMSPlayerInputProcessor input = player.main.getInputProcessor();
 			final JudgeManager judge = player.getJudgeManager();
 			final int lasttime = timelines[timelines.length - 1].getTime() + BMSPlayer.TIME_MARGIN;
 
 			long prevtime = -1;
 			while (!stop) {
-				final long time = player.getNowTime(TIMER_PLAY);
+				final long time = player.main.getNowTime(TIMER_PLAY);
 				if (time != prevtime) {
 					// リプレイデータ再生
 					if (keylog != null) {

@@ -33,7 +33,7 @@ public class SkinBGA extends SkinObject {
 
 	@Override
 	public void draw(SkinObjectRenderer sprite, long time, MainState state) {
-		final PlayerResource resource = state.getMainController().getPlayerResource();
+		final PlayerResource resource = state.main.getPlayerResource();
 		if (resource.getAutoplay() == 2) {
 			Rectangle r = getDestination(time, state);
 			if (r != null) {
@@ -46,7 +46,7 @@ public class SkinBGA extends SkinObject {
 					sprite,
 					getDestination(time, state),
 					s == BMSPlayer.STATE_PRELOAD || s == BMSPlayer.STATE_PRACTICE || s == BMSPlayer.STATE_READY ? -1
-							: state.getNowTime(TIMER_PLAY));
+							: state.main.getNowTime(TIMER_PLAY));
 		}
 	}
 

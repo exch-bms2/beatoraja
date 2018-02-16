@@ -59,7 +59,7 @@ public class MusicResult extends MainState {
 	}
 
 	public void create() {
-		final PlayerResource resource = getMainController().getPlayerResource();
+		final PlayerResource resource = main.getPlayerResource();
 
 		setSound(SOUND_CLEAR, "clear.wav", SoundType.SOUND,false);
 		setSound(SOUND_FAIL, "fail.wav", SoundType.SOUND,false);
@@ -89,27 +89,25 @@ public class MusicResult extends MainState {
 	}
 
 	public void render() {
-		long time = getNowTime();
-		switchTimer(TIMER_RESULTGRAPH_BEGIN, true);
-		switchTimer(TIMER_RESULTGRAPH_END, true);
+		long time = main.getNowTime();
+		main.switchTimer(TIMER_RESULTGRAPH_BEGIN, true);
+		main.switchTimer(TIMER_RESULTGRAPH_END, true);
 
 		if (((MusicResultSkin) getSkin()).getRankTime() == 0) {
-			switchTimer(TIMER_RESULT_UPDATESCORE, true);
+			main.switchTimer(TIMER_RESULT_UPDATESCORE, true);
 		}
 	    if(time > getSkin().getInput()){
-    		switchTimer(TIMER_STARTINPUT, true);
+	    	main.switchTimer(TIMER_STARTINPUT, true);
 	    }
 
-		final MainController main = getMainController();
+		final PlayerResource resource = main.getPlayerResource();
 
-		final PlayerResource resource = getMainController().getPlayerResource();
-
-		if (isTimerOn(TIMER_FADEOUT)) {
-			if (getNowTime(TIMER_FADEOUT) > getSkin().getFadeout()) {
+		if (main.isTimerOn(TIMER_FADEOUT)) {
+			if (main.getNowTime(TIMER_FADEOUT) > getSkin().getFadeout()) {
 				stop(SOUND_CLEAR);
 				stop(SOUND_FAIL);
 				stop(SOUND_CLOSE);
-				getMainController().getAudioProcessor().stop((Note) null);
+				main.getAudioProcessor().stop((Note) null);
 
 				boolean[] keystate = main.getInputProcessor().getKeystate();
 //				System.out.println(Arrays.toString(keystate));
@@ -170,7 +168,7 @@ public class MusicResult extends MainState {
 			}
 		} else {
 			if (time > getSkin().getScene()) {
-				switchTimer(TIMER_FADEOUT, true);
+				main.switchTimer(TIMER_FADEOUT, true);
 				if(getSound(SOUND_CLOSE) != null) {
 					stop(SOUND_CLEAR);
 					stop(SOUND_FAIL);
@@ -182,11 +180,10 @@ public class MusicResult extends MainState {
 	}
 
 	public void input() {
-		long time = getNowTime();
-		final MainController main = getMainController();
-		final PlayerResource resource = getMainController().getPlayerResource();
+		long time = main.getNowTime();
+		final PlayerResource resource = main.getPlayerResource();
 
-		if (!isTimerOn(TIMER_FADEOUT) && isTimerOn(TIMER_STARTINPUT)) {
+		if (!main.isTimerOn(TIMER_FADEOUT) && main.isTimerOn(TIMER_STARTINPUT)) {
 			if (time > getSkin().getInput()) {
 				boolean[] keystate = main.getInputProcessor().getKeystate();
 				long[] keytime = main.getInputProcessor().getTime();
@@ -200,10 +197,10 @@ public class MusicResult extends MainState {
 
 				if (resource.getScoreData() == null || ok) {
 					if (((MusicResultSkin) getSkin()).getRankTime() != 0
-							&& !isTimerOn(TIMER_RESULT_UPDATESCORE)) {
-						switchTimer(TIMER_RESULT_UPDATESCORE, true);
+							&& !main.isTimerOn(TIMER_RESULT_UPDATESCORE)) {
+						main.switchTimer(TIMER_RESULT_UPDATESCORE, true);
 					} else if(state == STATE_OFFLINE || state == STATE_IR_FINISHED){
-						switchTimer(TIMER_FADEOUT, true);
+						main.switchTimer(TIMER_FADEOUT, true);
 						if(getSound(SOUND_CLOSE) != null) {
 							stop(SOUND_CLEAR);
 							stop(SOUND_FAIL);
@@ -223,11 +220,11 @@ public class MusicResult extends MainState {
 	}
 
 	private void saveReplayData(int index) {
-		final PlayerResource resource = getMainController().getPlayerResource();
+		final PlayerResource resource = main.getPlayerResource();
 		if (resource.getAutoplay() == 0 && resource.getCourseBMSModels() == null && resource.getScoreData() != null) {
 			if (saveReplay[index] == -1 && resource.isUpdateScore()) {
 				ReplayData rd = resource.getReplayData();
-				getMainController().getPlayDataAccessor().wrireReplayData(rd, resource.getBMSModel(),
+				main.getPlayDataAccessor().wrireReplayData(rd, resource.getBMSModel(),
 						resource.getPlayerConfig().getLnmode(), index);
 				saveReplay[index] = 1;
 			}
@@ -238,7 +235,7 @@ public class MusicResult extends MainState {
 		Arrays.fill(saveReplay, -1);
 		state = STATE_OFFLINE;
 		irrank = irprevrank = irtotal = 0;
-		final PlayerResource resource = getMainController().getPlayerResource();
+		final PlayerResource resource = main.getPlayerResource();
 		IRScoreData newscore = resource.getScoreData();
 		if (newscore == null) {
 			if (resource.getCourseScoreData() != null) {
@@ -248,7 +245,7 @@ public class MusicResult extends MainState {
 			}
 			return;
 		}
-		IRScoreData oldsc = getMainController().getPlayDataAccessor().readScoreData(resource.getBMSModel(),
+		IRScoreData oldsc = main.getPlayDataAccessor().readScoreData(resource.getBMSModel(),
 				resource.getPlayerConfig().getLnmode());
 		if (oldsc != null) {
 			oldscore = oldsc;
@@ -332,13 +329,13 @@ public class MusicResult extends MainState {
 		}
 
 		if (resource.getAutoplay() == 0) {
-			getMainController().getPlayDataAccessor().writeScoreDara(resource.getScoreData(), resource.getBMSModel(),
+			main.getPlayDataAccessor().writeScoreDara(resource.getScoreData(), resource.getBMSModel(),
 					resource.getPlayerConfig().getLnmode(), resource.isUpdateScore());
 			// TODO スコアハッシュがあり、有効期限が切れていないものを送信する？
-			IRConnection ir = getMainController().getIRConnection();
+			IRConnection ir = main.getIRConnection();
 			if (ir != null) {
 				boolean send = resource.isUpdateScore();
-				switch(getMainController().getPlayerConfig().getIrsend()) {
+				switch(main.getPlayerConfig().getIrsend()) {
 				case PlayerConfig.IR_SEND_ALWAYS:
 					break;
 				case PlayerConfig.IR_SEND_COMPLETE_SONG:
@@ -354,7 +351,7 @@ public class MusicResult extends MainState {
 				
 				if(send) {
 					Logger.getGlobal().info("IRへスコア送信中");
-					switchTimer(TIMER_IR_CONNECT_BEGIN, true);
+					main.switchTimer(TIMER_IR_CONNECT_BEGIN, true);
 					state = STATE_IR_PROCESSING;
 					Thread irprocess = new Thread() {
 
@@ -377,10 +374,10 @@ public class MusicResult extends MainState {
 										}
 									}
 								}
-								switchTimer(TIMER_IR_CONNECT_SUCCESS, true);
+								main.switchTimer(TIMER_IR_CONNECT_SUCCESS, true);
 								Logger.getGlobal().info("IRへスコア送信完了");
 							} else {
-								switchTimer(TIMER_IR_CONNECT_FAIL, true);
+								main.switchTimer(TIMER_IR_CONNECT_FAIL, true);
 								Logger.getGlobal().warning("IRからのスコア取得失敗 : " + response.getMessage());
 							}
 
@@ -400,7 +397,7 @@ public class MusicResult extends MainState {
 	}
 
 	public int getJudgeCount(int judge, boolean fast) {
-		IRScoreData score = getMainController().getPlayerResource().getScoreData();
+		IRScoreData score = main.getPlayerResource().getScoreData();
 		if (score != null) {
 			switch (judge) {
 			case 0:
@@ -426,12 +423,12 @@ public class MusicResult extends MainState {
 	}
 
 	public int getTotalNotes() {
-		final PlayerResource resource = getMainController().getPlayerResource();
+		final PlayerResource resource = main.getPlayerResource();
 		return resource.getBMSModel().getTotalNotes();
 	}
 
 	public int getNumberValue(int id) {
-		final PlayerResource resource = getMainController().getPlayerResource();
+		final PlayerResource resource = main.getPlayerResource();
 		switch (id) {
 		case NUMBER_CLEAR:
 			if (resource.getScoreData() != null) {
@@ -518,7 +515,7 @@ public class MusicResult extends MainState {
 	}
 
 	public boolean getBooleanValue(int id) {
-		final PlayerResource resource = getMainController().getPlayerResource();
+		final PlayerResource resource = main.getPlayerResource();
 		final IRScoreData score = resource.getScoreData();
 		final IRScoreData cscore = resource.getCourseScoreData();
 		switch (id) {
@@ -553,28 +550,28 @@ public class MusicResult extends MainState {
 			case OPTION_DRAW_TARGET:
 				return score.getExscore() == resource.getRivalScoreData();
 			case OPTION_NO_REPLAYDATA:
-			return !getMainController().getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
+			return !main.getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
 					resource.getPlayerConfig().getLnmode(), 0);
 		case OPTION_NO_REPLAYDATA2:
-			return !getMainController().getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
+			return !main.getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
 					resource.getPlayerConfig().getLnmode(), 1);
 		case OPTION_NO_REPLAYDATA3:
-			return !getMainController().getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
+			return !main.getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
 					resource.getPlayerConfig().getLnmode(), 2);
 		case OPTION_NO_REPLAYDATA4:
-			return !getMainController().getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
+			return !main.getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
 					resource.getPlayerConfig().getLnmode(), 3);
 		case OPTION_REPLAYDATA:
-			return getMainController().getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
+			return main.getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
 					resource.getPlayerConfig().getLnmode(), 0);
 		case OPTION_REPLAYDATA2:
-			return getMainController().getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
+			return main.getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
 					resource.getPlayerConfig().getLnmode(), 1);
 		case OPTION_REPLAYDATA3:
-			return getMainController().getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
+			return main.getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
 					resource.getPlayerConfig().getLnmode(), 2);
 		case OPTION_REPLAYDATA4:
-			return getMainController().getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
+			return main.getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
 					resource.getPlayerConfig().getLnmode(), 3);
 		case OPTION_REPLAYDATA_SAVED:
 			return saveReplay[0] == 1;
@@ -591,7 +588,7 @@ public class MusicResult extends MainState {
 	public int getImageIndex(int id) {
 		switch (id) {
 			case NUMBER_CLEAR:
-				final PlayerResource resource = getMainController().getPlayerResource();
+				final PlayerResource resource = main.getPlayerResource();
 				if (resource.getScoreData() != null) {
 					return resource.getScoreData().getClear();
 				}

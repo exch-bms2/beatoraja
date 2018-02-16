@@ -40,12 +40,13 @@ public class MusicSelectInputProcessor {
     }
 
     public void input() {
-        final BMSPlayerInputProcessor input = select.getMainController().getInputProcessor();
-        final PlayerResource resource = select.getMainController().getPlayerResource();
+    	final MainController main = select.main;
+        final BMSPlayerInputProcessor input = main.getInputProcessor();
+        final PlayerResource resource = main.getPlayerResource();
         final PlayerConfig config = resource.getPlayerConfig();
         final BarRenderer bar = select.getBarRender();
         final Bar current = bar.getSelected();
-        final long nowtime = select.getNowTime();
+        final long nowtime = main.getNowTime();
 
         boolean[] numberstate = input.getNumberState();
         long[] numtime = input.getNumberTime();
@@ -290,7 +291,7 @@ public class MusicSelectInputProcessor {
         if (bar.getSelected() != current) {
             select.selectedBarMoved();
         }
-        select.switchTimer(TIMER_SONGBAR_CHANGE, true);
+        main.switchTimer(TIMER_SONGBAR_CHANGE, true);
         // update folder
         if (input.getFunctionstate()[1] && input.getFunctiontime()[1] != 0) {
             input.getFunctiontime()[1] = 0;
@@ -303,7 +304,7 @@ public class MusicSelectInputProcessor {
         }
 
         if (input.isExitPressed()) {
-            select.getMainController().exit();
+            select.main.exit();
         }
     }
 }

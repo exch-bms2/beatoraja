@@ -197,7 +197,7 @@ public class Skin {
 	private SkinObjectRenderer renderer;
 
 	public void drawAllObjects(SpriteBatch sprite, MainState state) {
-		final long time = state.getNowTime();
+		final long time = state.main.getNowTime();
 		if(renderer == null) {
 			renderer = new SkinObjectRenderer(sprite);
 		}

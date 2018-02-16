@@ -827,6 +827,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 			else break;
 		}
 		skin.setJudgeregion(judge_reg);
+		skin.setLaneRegion(laner);
 		skin.setLaneGroupRegion(playerr);
 
 		return skin;
