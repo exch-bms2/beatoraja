@@ -35,6 +35,7 @@ public class JSONSkinLoader extends SkinLoader{
 
 	private Resolution dstr;
 	private boolean usecim;
+	private int bgaExpand = -1;
 
 	private JsonSkin sk;
 
@@ -50,6 +51,7 @@ public class JSONSkinLoader extends SkinLoader{
 	public JSONSkinLoader(Config c) {
 		dstr = c.getResolution();
 		usecim = false;
+		bgaExpand = c.getBgaExpand();
 	}
 
 	public Skin loadSkin(Path p, SkinType type, SkinConfig.Property property) {
@@ -555,7 +557,7 @@ public class JSONSkinLoader extends SkinLoader{
 					}
 					// bga (playskin only)
 					if (sk.bga != null && dst.id.equals(sk.bga.id)) {
-						obj = new SkinBGA();
+						obj = new SkinBGA(this.bgaExpand);
 					}
 					// judge (playskin only)
 					for (Judge judge : sk.judge) {
@@ -898,6 +900,9 @@ public class JSONSkinLoader extends SkinLoader{
 		}
 
 		obj.setOffsetID(dst.offset);
+		if (dst.stretch >= 0) {
+			obj.setStretch(dst.stretch);
+		}
 	}
 
 	private Texture getTexture(String srcid, Path p) {
@@ -1218,6 +1223,7 @@ public class JSONSkinLoader extends SkinLoader{
 		public int loop;
 		public int center;
 		public int offset;
+		public int stretch = -1;
 		public int[] op = new int[0];
 		public Animation[] dst = new Animation[0];
 	}
