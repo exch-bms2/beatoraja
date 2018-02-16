@@ -424,11 +424,11 @@ public abstract class SkinObject implements Disposable {
 
 	public abstract void draw(SkinObjectRenderer sprite, long time, MainState state);
 
-	public void draw(SkinObjectRenderer sprite, TextureRegion image, float x, float y, float width, float height) {
+	protected void draw(SkinObjectRenderer sprite, TextureRegion image, float x, float y, float width, float height) {
 		draw(sprite, image, x, y, width, height, getColor(), getAngle());
 	}
 
-	public void draw(SkinObjectRenderer sprite, TextureRegion image, float x, float y, float width, float height,
+	protected void draw(SkinObjectRenderer sprite, TextureRegion image, float x, float y, float width, float height,
 			Color color, int angle) {
 		if (color == null || color.a == 0f || image == null) {
 			return;
