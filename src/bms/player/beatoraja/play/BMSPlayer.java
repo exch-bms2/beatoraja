@@ -167,9 +167,19 @@ public class BMSPlayer extends MainState {
 					score = false;
 				}
 			}
-			if (config.getDoubleoption() >= 2 && (model.getMode() == Mode.BEAT_5K || model.getMode() == Mode.BEAT_7K)) {
+			if (config.getDoubleoption() >= 2 && (model.getMode() == Mode.BEAT_5K || model.getMode() == Mode.BEAT_7K || model.getMode() == Mode.KEYBOARD_24K)) {
 				// SPでなければBATTLEは未適用
-				model.setMode(model.getMode() == Mode.BEAT_5K ? Mode.BEAT_10K : Mode.BEAT_14K);
+				switch (model.getMode()) {
+				case BEAT_5K:
+					model.setMode(Mode.BEAT_10K);
+					break;
+				case BEAT_7K:
+					model.setMode(Mode.BEAT_14K);
+					break;
+				case KEYBOARD_24K:
+					model.setMode(Mode.KEYBOARD_24K_DOUBLE);
+					break;
+				}
 				LaneShuffleModifier mod = new LaneShuffleModifier(LaneShuffleModifier.BATTLE);
 				mod.setModifyTarget(PatternModifier.SIDE_1P);
 				mod.modify(model);
