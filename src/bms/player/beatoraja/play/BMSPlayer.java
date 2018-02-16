@@ -1,6 +1,7 @@
 package bms.player.beatoraja.play;
 
 import java.util.*;
+import static bms.player.beatoraja.play.GrooveGauge.*;
 import java.util.logging.Logger;
 
 import bms.model.*;
@@ -963,7 +964,9 @@ public class BMSPlayer extends MainState {
 		case NUMBER_GROOVEGAUGE:
 			return (int) gauge.getValue();
 		case NUMBER_GROOVEGAUGE_AFTERDOT:
-			return ((int) (gauge.getValue() * 10)) % 10;
+			return  (gauge.getType() == GrooveGauge.HARD || gauge.getType() == GrooveGauge.EXHARD || gauge.getType() == GrooveGauge.HAZARD || gauge.getType() == GrooveGauge.CLASS || gauge.getType() == GrooveGauge.EXCLASS || gauge.getType() == GrooveGauge.EXHARDCLASS)
+					&& gauge.getValue() > 0 && gauge.getValue() < 0.1 
+					? 1 : ((int) (gauge.getValue() * 10)) % 10;
 		case NUMBER_HISPEED_LR2:
 			return (int) (lanerender.getHispeed() * 100);
 		case NUMBER_HISPEED:

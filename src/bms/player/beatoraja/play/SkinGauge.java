@@ -9,6 +9,7 @@ import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.graphics.Color;
 
 /**
  * ゲージオブジェクト
@@ -20,6 +21,7 @@ public class SkinGauge extends SkinObject {
 	public static final int ANIMATION_RANDOM = 0;
 	public static final int ANIMATION_INCLEASE = 1;
 	public static final int ANIMATION_DECLEASE = 2;
+	public static final int ANIMATION_FLICKERING = 3; //PMSゲージ明滅用
 	
 	/**
 	 * イメージ
@@ -72,6 +74,9 @@ public class SkinGauge extends SkinObject {
 			case ANIMATION_DECLEASE:				
 				animation = (animation + 1) % (animationRange + 1);
 				break;
+			case ANIMATION_FLICKERING:
+				animation = 0;
+				break;
 			}
 			atime = time + duration;
 		}
@@ -85,13 +90,26 @@ public class SkinGauge extends SkinObject {
 			exgauge = 4;
 		}
 
-		final int notes = (int) (value * parts / max);
+		Color orgColor = new Color(sprite.getColor());
+
+		final int notes = (type == HARD || type == EXHARD || type == HAZARD || type ==GrooveGauge.CLASS || type == EXCLASS || type == EXHARDCLASS)
+						&& value > 0 && ((int) (value * parts / max)) < 1
+						? 1 : (int) (value * parts / max);
 		for (int i = 1; i <= parts; i++) {
 			final float border = i * max / parts;
 			sprite.draw(
 					images[exgauge + (notes == i || notes - animation > i ? 0 : 2)
 							+ (border < gauge.getBorder() ? 1 : 0)],
 					gr.x + gr.width * (i - 1) / parts, gr.y, gr.width / parts, gr.height);
+
+			if(animationType == ANIMATION_FLICKERING && images.length == 12 && i == notes) {
+				float alpha = orgColor.a * ((time % duration) < duration / 2 ? (time % duration) / ((float) duration / 2 - 1) : ((duration - 1) - (time % duration)) / ((float) duration / 2 - 1));
+				sprite.setColor(new Color(orgColor.r, orgColor.g, orgColor.b, alpha));
+				sprite.draw(
+						images[8 + exgauge / 2 + (border < gauge.getBorder() ? 1 : 0)],
+						gr.x + gr.width * (i - 1) / parts, gr.y, gr.width / parts, gr.height);
+				sprite.setColor(orgColor);
+			}
 		}
 	}
 
