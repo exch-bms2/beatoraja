@@ -722,26 +722,6 @@ public class PlayConfigurationView implements Initializable {
 			audiobuffer.setDisable(false);
 			audiosim.setDisable(false);
 			break;
-		case Config.AUDIODRIVER_ASIO:
-			try {
-				List<String> drivers = AsioDriver.getDriverNames();
-				if(drivers.size() == 0) {
-					throw new RuntimeException("ドライバが見つかりません");
-				}
-				audioname.getItems().setAll(drivers);
-				if(drivers.contains(config.getAudioDriverName())) {
-					audioname.setValue(config.getAudioDriverName());
-				} else {
-					audioname.setValue(drivers.get(0));
-				}
-				audioname.setDisable(false);
-				audiobuffer.setDisable(true);
-				audiosim.setDisable(false);
-			} catch(Throwable e) {
-				Logger.getGlobal().severe("ASIOは選択できません : " + e.getMessage());
-				audio.setValue(Config.AUDIODRIVER_SOUND);
-			}
-			break;
 		case Config.AUDIODRIVER_PORTAUDIO:
 			try {
 				DeviceInfo[] devices = PortAudioDriver.getDevices();

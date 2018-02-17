@@ -44,10 +44,6 @@ public class Config {
 	 * オーディオ:PortAudio
 	 */
 	public static final int AUDIODRIVER_PORTAUDIO = 2;
-	/**
-	 * オーディオ:JASIOHost
-	 */
-	public static final int AUDIODRIVER_ASIO = 3;
 
 	private String audioDriverName = null;
 	/**
@@ -366,6 +362,9 @@ public class Config {
 	}
 
 	public int getAudioDriver() {
+		if(audioDriver != Config.AUDIODRIVER_SOUND && audioDriver != Config.AUDIODRIVER_SOUND) {
+			audioDriver = Config.AUDIODRIVER_SOUND;
+		}
 		return audioDriver;
 	}
 

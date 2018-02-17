@@ -163,14 +163,6 @@ public class MainController extends ApplicationAdapter {
 		}
 		
 		switch(config.getAudioDriver()) {
-		case Config.AUDIODRIVER_ASIO:
-			try {
-				audio = new ASIODriver(config);
-			} catch(Throwable e) {
-				e.printStackTrace();
-				config.setAudioDriver(Config.AUDIODRIVER_SOUND);
-			}
-			break;
 		case Config.AUDIODRIVER_PORTAUDIO:
 			try {
 				audio = new PortAudioDriver(config);
