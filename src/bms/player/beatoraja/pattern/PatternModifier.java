@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.List;
 
 import bms.model.*;
+import bms.player.beatoraja.PlayerConfig;
+
 import com.badlogic.gdx.utils.IntArray;
 
 /**
@@ -21,6 +23,12 @@ public abstract class PatternModifier {
 	public static final int SIDE_1P = 0;
 	public static final int SIDE_2P = 1;
 
+	static PlayerConfig playerConfig;
+	
+	static public void setPlayerConfig(PlayerConfig config) {
+		playerConfig = config;
+	}
+	
 	public PatternModifier(int assist) {
 		this.assist = assist;
 	}

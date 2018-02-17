@@ -423,6 +423,12 @@
                                        <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="25" initialValue="100" max="400" min="25" />
                                    </valueFactory>
                                </Spinner>
+                               <Label text="%H_RANDOM_THRESHOLD_BPM" GridPane.columnIndex="0" GridPane.rowIndex="6" />
+                               <Spinner fx:id="hranthresholdbpm" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="6">
+                                   <valueFactory>
+                                       <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="120" max="15000" min="0" />
+                                   </valueFactory>
+                               </Spinner>
                               <Label text="%GVALUE" GridPane.columnIndex="2" />
                   				    <Spinner fx:id="gvalue" editable="true" GridPane.columnIndex="3">
             <valueFactory>
@@ -441,21 +447,21 @@
               <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="100" max="1000" min="0" />
             </valueFactory>
           </Spinner>
-                              <CheckBox fx:id="constant" mnemonicParsing="false" text="%CONSTANT" GridPane.columnIndex="1" GridPane.rowIndex="6" />
-                              <CheckBox fx:id="bpmguide" mnemonicParsing="false" text="%BPM_GUIDE" GridPane.columnIndex="2" GridPane.rowIndex="6" />
-                              <CheckBox fx:id="legacy" mnemonicParsing="false" text="%LEGACY_NOTE" GridPane.columnIndex="3" GridPane.rowIndex="6" />
-                              <Label text="%ASSIST_OPTION" GridPane.rowIndex="6" />
+                              <CheckBox fx:id="constant" mnemonicParsing="false" text="%CONSTANT" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+                              <CheckBox fx:id="bpmguide" mnemonicParsing="false" text="%BPM_GUIDE" GridPane.columnIndex="2" GridPane.rowIndex="7" />
+                              <CheckBox fx:id="legacy" mnemonicParsing="false" text="%LEGACY_NOTE" GridPane.columnIndex="3" GridPane.rowIndex="7" />
+                              <Label text="%ASSIST_OPTION" GridPane.rowIndex="7" />
                               <Label text="%JUDGETIMING" GridPane.rowIndex="2" />
                   				    <Spinner fx:id="judgetiming" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="2">
             <valueFactory>
               <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="0" max="99" min="-99" />
             </valueFactory>
           </Spinner>
-                              <CheckBox fx:id="nomine" mnemonicParsing="false" text="%NO_MINE" GridPane.columnIndex="2" GridPane.rowIndex="7" />
+                              <CheckBox fx:id="nomine" mnemonicParsing="false" text="%NO_MINE" GridPane.columnIndex="2" GridPane.rowIndex="8" />
                               <Label text="%OPTIONS_MISC" GridPane.rowIndex="8" />
-                              <CheckBox fx:id="showhiddennote" mnemonicParsing="false" text="%SHOW_HIDDEN_NOTE" GridPane.columnIndex="2" GridPane.rowIndex="8" />
-                              <CheckBox fx:id="judgeregion" mnemonicParsing="false" text="%JUDGE_REGION" GridPane.columnIndex="1" GridPane.rowIndex="8" />
-                              <CheckBox fx:id="markprocessednote" mnemonicParsing="false" text="%MARK_PROCESSED_NOTE" GridPane.columnIndex="3" GridPane.rowIndex="8" />
+                              <CheckBox fx:id="showhiddennote" mnemonicParsing="false" text="%SHOW_HIDDEN_NOTE" GridPane.columnIndex="2" GridPane.rowIndex="9" />
+                              <CheckBox fx:id="judgeregion" mnemonicParsing="false" text="%JUDGE_REGION" GridPane.columnIndex="1" GridPane.rowIndex="9" />
+                              <CheckBox fx:id="markprocessednote" mnemonicParsing="false" text="%MARK_PROCESSED_NOTE" GridPane.columnIndex="3" GridPane.rowIndex="9" />
                            </children>
                         </GridPane>
                         <HBox prefHeight="9.0" prefWidth="720.0">
@@ -499,6 +505,23 @@
                                  </HBox.margin></Label>
                               <ComboBox fx:id="autosavereplay4" prefWidth="150.0" />
                            </children>
+                        </HBox>
+                        
+                        <HBox prefHeight="9.0" prefWidth="723.0">
+                           <children>
+                              <Label prefHeight="24.0" prefWidth="127.0" text="%SEVEN_TO_NINE_PATTERN" />
+                              <ComboBox fx:id="seventoninepattern" prefWidth="150.0" />
+                           </children>
+                           <children>
+                              <Label prefHeight="24.0" prefWidth="127.0" text="%SEVEN_TO_NINE_TYPE">
+                                 <HBox.margin>
+                                    <Insets left="10.0" />
+                                 </HBox.margin></Label>
+                              <ComboBox fx:id="seventoninetype" prefWidth="150.0" />
+                           </children>
+                           <VBox.margin>
+                              <Insets top="10.0" />
+                           </VBox.margin>
                         </HBox>
                   	</children>
                   	<padding>

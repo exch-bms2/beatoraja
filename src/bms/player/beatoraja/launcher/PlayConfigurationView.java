@@ -167,6 +167,12 @@ public class PlayConfigurationView implements Initializable {
 	private Spinner<Integer> exjudge;
 	@FXML
 	private CheckBox nomine;
+	@FXML
+	private Spinner<Integer> hranthresholdbpm;
+	@FXML
+	private ComboBox<Integer> seventoninepattern;
+	@FXML
+	private ComboBox<Integer> seventoninetype;
 
 	@FXML
 	private CheckBox judgeregion;
@@ -273,6 +279,9 @@ public class PlayConfigurationView implements Initializable {
 		initComboBox(scoreop, scoreOptions);
 		initComboBox(scoreop2, scoreOptions);
 		initComboBox(doubleop, new String[] { "OFF", "FLIP", "BATTLE", "BATTLE AS" });
+		initComboBox(seventoninepattern, new String[] { "OFF", "SC1KEY2~8", "SC1KEY3~9", "SC2KEY3~9", "SC8KEY1~7", "SC9KEY1~7", "SC9KEY2~8" });
+		String[] seventoninestring = new String[]{arg1.getString("SEVEN_TO_NINE_OFF"),arg1.getString("SEVEN_TO_NINE_NO_MASHING"),arg1.getString("SEVEN_TO_NINE_ALTERNATION")};
+		initComboBox(seventoninetype, seventoninestring);
 		initComboBox(gaugeop, new String[] { "ASSIST EASY", "EASY", "NORMAL", "HARD", "EX-HARD", "HAZARD" });
 		initComboBox(bgaop, new String[] { "ON", "AUTOPLAY ", "OFF" });
 		initComboBox(bgaexpand, new String[] { "Full", "Keep Aspect Ratio", "Off" });
@@ -438,6 +447,8 @@ public class PlayConfigurationView implements Initializable {
 		scoreop.getSelectionModel().select(player.getRandom());
 		scoreop2.getSelectionModel().select(player.getRandom2());
 		doubleop.getSelectionModel().select(player.getDoubleoption());
+		seventoninepattern.getSelectionModel().select(player.getSevenToNinePattern());
+		seventoninetype.getSelectionModel().select(player.getSevenToNineType());
 		gaugeop.getSelectionModel().select(player.getGauge());
 		lntype.getSelectionModel().select(player.getLnmode());
 
@@ -449,6 +460,7 @@ public class PlayConfigurationView implements Initializable {
 		legacy.setSelected(player.isLegacynote());
 		exjudge.getValueFactory().setValue(player.getJudgewindowrate());
 		nomine.setSelected(player.isNomine());
+		hranthresholdbpm.getValueFactory().setValue(player.getHranThresholdBPM());
 		judgeregion.setSelected(player.isShowjudgearea());
 		markprocessednote.setSelected(player.isMarkprocessednote());
 		target.setValue(player.getTarget());
@@ -539,6 +551,8 @@ public class PlayConfigurationView implements Initializable {
 		player.setRandom(scoreop.getValue());
 		player.setRandom2(scoreop2.getValue());
 		player.setDoubleoption(doubleop.getValue());
+		player.setSevenToNinePattern(seventoninepattern.getValue());
+		player.setSevenToNineType(seventoninetype.getValue());
 		player.setGauge(gaugeop.getValue());
 		player.setLnmode(lntype.getValue());
 		player.setFixhispeed(fixhispeed.getValue());
@@ -549,6 +563,7 @@ public class PlayConfigurationView implements Initializable {
 		player.setLegacynote(legacy.isSelected());
 		player.setJudgewindowrate(getValue(exjudge));
 		player.setNomine(nomine.isSelected());
+		player.setHranThresholdBPM(getValue(hranthresholdbpm));
 		player.setMarkprocessednote(markprocessednote.isSelected());
 
 		player.setShowjudgearea(judgeregion.isSelected());
