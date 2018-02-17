@@ -204,36 +204,37 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 
 	public void run() {
 		while(!stop) {
-			try {
-				synchronized (inputs) {
-					final float gpitch = getGlobalPitch();
-					for (int i = 0; i < buffer.length; i+=2) {
-						float wav_l = 0;
-						float wav_r = 0;
-						for (MixerInput input : inputs) {
-							if (input.pos != -1) {
-								wav_l += ((float) input.sample[input.pos]) * input.volume / Short.MAX_VALUE;
-								wav_r += ((float) input.sample[input.pos+1]) * input.volume / Short.MAX_VALUE;
-								input.posf += gpitch * input.pitch;
-								int inc = (int)input.posf;
-								if (inc > 0) {
-									input.pos += 2 * inc;
-									input.posf -= (float)inc;
-								}
-								if (input.pos >= input.sample.length) {
-									input.pos = input.loop ? 0 : -1;
-								}
+			final float gpitch = getGlobalPitch();
+			synchronized (inputs) {
+				for (int i = 0; i < buffer.length; i+=2) {
+					float wav_l = 0;
+					float wav_r = 0;
+					for (MixerInput input : inputs) {
+						if (input.pos != -1) {
+							wav_l += ((float) input.sample[input.pos]) * input.volume / Short.MAX_VALUE;
+							wav_r += ((float) input.sample[input.pos+1]) * input.volume / Short.MAX_VALUE;
+							input.posf += gpitch * input.pitch;
+							int inc = (int)input.posf;
+							if (inc > 0) {
+								input.pos += 2 * inc;
+								input.posf -= (float)inc;
+							}
+							if (input.pos >= input.sample.length) {
+								input.pos = input.loop ? 0 : -1;
 							}
 						}
-						buffer[i] = wav_l;
-						buffer[i+1] = wav_r;
-					}						
-				}
-				
+					}
+					buffer[i] = wav_l;
+					buffer[i+1] = wav_r;
+				}						
+			}
+			
+			try {
 				stream.write( buffer, buffer.length / 2);					
 			} catch(Throwable e) {
 				e.printStackTrace();
 			}
+			
 		}
 	}		
 
