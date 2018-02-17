@@ -362,7 +362,7 @@ public class Config {
 	}
 
 	public int getAudioDriver() {
-		if(audioDriver != Config.AUDIODRIVER_SOUND && audioDriver != Config.AUDIODRIVER_SOUND) {
+		if(audioDriver != Config.AUDIODRIVER_SOUND && audioDriver != Config.AUDIODRIVER_PORTAUDIO) {
 			audioDriver = Config.AUDIODRIVER_SOUND;
 		}
 		return audioDriver;
