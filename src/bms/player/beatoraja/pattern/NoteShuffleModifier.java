@@ -11,6 +11,7 @@ import bms.model.Mode;
 import bms.model.NormalNote;
 import bms.model.Note;
 import bms.model.TimeLine;
+import bms.player.beatoraja.PlayerConfig;
 
 /**
  * タイムライン単位でノーツを入れ替えるためのクラス．
@@ -18,7 +19,7 @@ import bms.model.TimeLine;
  * @author exch
  */
 public class NoteShuffleModifier extends PatternModifier {
-
+	private static final PlayerConfig config = playerConfig;
 	/**
 	 * タイムライン毎にノーツをランダムに入れ替える
 	 */
@@ -40,11 +41,21 @@ public class NoteShuffleModifier extends PatternModifier {
 	 */
 	public static final int S_RANDOM_EX = 4;
 
+	/**
+	 * 7to9
+	 */
+	public static final int SEVEN_TO_NINE = 100;
+
 	private int type;
 	/**
 	 * 次のTimeLine増加分(SPIRAL用)
 	 */
 	private int inc;
+
+	/**
+	 * 連打しきい値(ms)(H-RANDOM用)
+	 */
+	private int hranThreshold = 125;
 
 	public NoteShuffleModifier(int type) {
 		super(type >= ALL_SCR ? 1 : 0);
@@ -71,6 +82,8 @@ public class NoteShuffleModifier extends PatternModifier {
 		Arrays.fill(endLnNoteTime, -1);
 		laneRendaCount = new int[lanes];
 		Arrays.fill(laneRendaCount, 0);
+		if(config.getHranThresholdBPM() <= 0) hranThreshold = 0;
+		else hranThreshold = (int) (Math.ceil(15000.0f / config.getHranThresholdBPM()));
 		for (TimeLine tl : model.getAllTimeLines()) {
 			if (tl.existNote() || tl.existHiddenNote()) {
 				Note[] notes = new Note[lanes];
@@ -134,7 +147,7 @@ public class NoteShuffleModifier extends PatternModifier {
 				case ALL_SCR:
 					if(mode == Mode.POPN_9K) {
 						keys = getKeys(mode, false);
-						random = keys.length > 0 ? rendaShuffle(keys, ln, notes, lastNoteTime, tl.getTime(), 125, 60)
+						random = keys.length > 0 ? rendaShuffle(keys, ln, notes, lastNoteTime, tl.getTime(), hranThreshold, 60)
 								: keys;
 						break;
 					}
@@ -190,9 +203,9 @@ public class NoteShuffleModifier extends PatternModifier {
 						}
 						// ダブルプレー時
 						// スクラッチ側の鍵盤に優先的にアサインされるようにする
-						// 連打は出来ないように sc:40ms key:110ms
+						// 連打は出来ないように sc:40ms key:コンフィグから読み出し
 						keys = getKeys(mode, true);
-						int keyInterval = 110;
+						int keyInterval = hranThreshold;
 						boolean isRightSide = (getModifyTarget() == SIDE_2P);
 						int scLane = isRightSide ? mode.scratchKey[1] : mode.scratchKey[0];
 						ArrayList<Integer> original, assign, note, other, primary, tate;
@@ -285,20 +298,26 @@ public class NoteShuffleModifier extends PatternModifier {
 				case H_RANDOM:
 					keys = getKeys(mode, false);
 					random = keys.length > 0 ? timeBasedShuffle(keys, ln,
-							notes, lastNoteTime, tl.getTime(), 110)
+							notes, lastNoteTime, tl.getTime(), hranThreshold)
 							: keys;
 					break;
 				case S_RANDOM_EX:
 					keys = getKeys(mode, true);
 					if(mode == Mode.POPN_9K) {
 						random = keys.length > 0 ? noMurioshiShuffle(keys, ln,
-								notes, lastNoteTime, tl.getTime(), 125)
+								notes, lastNoteTime, tl.getTime(), hranThreshold)
 								: keys;
 					} else {
 						random = keys.length > 0 ? timeBasedShuffle(keys, ln,
 								notes, lastNoteTime, tl.getTime(), 40)
 								: keys;
 					}
+					break;
+				case SEVEN_TO_NINE:
+					keys = getKeys(mode, true);
+					random = keys.length > 0 ? sevenToNine(keys, ln,
+							notes, lastNoteTime, tl.getTime(), hranThreshold)
+							: keys;
 					break;
 
 				}
@@ -661,6 +680,95 @@ public class NoteShuffleModifier extends PatternModifier {
 			if(rendaLane.indexOf(noRendaLane.get(r)) == -1) laneRendaCount[noRendaLane.get(r)] = 0;
 			noRendaLane.remove(r);
 			otherLane.remove(0);
+		}
+
+		return result;
+	}
+
+	//7to9
+	private static int[] sevenToNine(int[] keys, int[] activeln, Note[] notes, int[] lastNoteTime, int now, int duration) {
+		/**
+		 * 7to9 スクラッチ鍵盤位置関係 0:OFF 1:SC1KEY2~8 2:SC1KEY3~9 3:SC2KEY3~9 4:SC8KEY1~7 5:SC9KEY1~7 6:SC9KEY2~8
+		 */
+		int keyLane = 2;
+		int scLane = 1;
+		int restLane = 0;
+		switch(config.getSevenToNinePattern()) {
+			case 1:
+				scLane = 1 - 1;
+				keyLane = 2 - 1;
+				restLane = 9 - 1;
+				break;
+			case 2:
+				scLane = 1 - 1;
+				keyLane = 3 - 1;
+				restLane = 2 - 1;
+				break;
+			case 4:
+				scLane = 8 - 1;
+				keyLane = 1 - 1;
+				restLane = 9 - 1;
+				break;
+			case 5:
+				scLane = 9 - 1;
+				keyLane = 1 - 1;
+				restLane = 8 - 1;
+				break;
+			case 6:
+				scLane = 9 - 1;
+				keyLane = 2 - 1;
+				restLane = 1 - 1;
+				break;
+			case 3:
+			default:
+				scLane = 2 - 1;
+				keyLane = 3 - 1;
+				restLane = 1 - 1;
+				break;
+		}
+
+		int[] result = new int[9];
+		for (int i = 0; i < 7; i++) {
+			result[i + keyLane] = i;
+		}
+
+		if (activeln != null && (activeln[scLane] != -1 || activeln[restLane] != -1)) {
+			if(activeln[scLane] == 7) {
+				result[scLane] = 7;
+				result[restLane] = 8;
+			} else {
+				result[scLane] = 8;
+				result[restLane] = 7;
+			}
+		} else {
+			/**
+			 * 7to9スクラッチ処理タイプ 0:そのまま 1:連打回避 2:交互
+			 */
+			switch(config.getSevenToNineType()) {
+				case 1:
+					if(now - lastNoteTime[scLane] > duration || now - lastNoteTime[scLane] >= now - lastNoteTime[restLane]) {
+						result[scLane] = 7;
+						result[restLane] = 8;
+					} else {
+						result[scLane] = 8;
+						result[restLane] = 7;
+					}
+					break;
+				case 2:
+					if(now - lastNoteTime[scLane] >= now - lastNoteTime[restLane]) {
+						result[scLane] = 7;
+						result[restLane] = 8;
+					} else {
+						result[scLane] = 8;
+						result[restLane] = 7;
+					}
+					break;
+				case 0:
+				default:
+					result[scLane] = 7;
+					result[restLane] = 8;
+					break;
+			}
 		}
 
 		return result;

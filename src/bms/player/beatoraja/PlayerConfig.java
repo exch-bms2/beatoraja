@@ -99,6 +99,21 @@ public class PlayerConfig {
 
 	private boolean markprocessednote = false;
 
+	/**
+	 * H-RANDOM連打しきい値BPM
+	 */
+	private int hranThresholdBPM = 120;
+
+	/**
+	 * 7to9 スクラッチ鍵盤位置関係 0:OFF 1:SC1KEY2~8 2:SC1KEY3~9 3:SC2KEY3~9 4:SC8KEY1~7 5:SC9KEY1~7 6:SC9KEY2~8
+	 */
+	private int sevenToNinePattern = 0;
+
+	/**
+	 * 7to9 スクラッチ処理タイプ 0:そのまま 1:連打回避 2:交互
+	 */
+	private int sevenToNineType = 0;
+
 	private SkinConfig[] skin = new SkinConfig[SkinType.getMaxSkinTypeID() + 1];
 
 	private PlayConfig mode7 = new PlayConfig(Mode.BEAT_7K);
@@ -417,6 +432,30 @@ public class PlayerConfig {
 
 	public void setJudgewindowrate(int judgewindowrate) {
 		this.judgewindowrate = judgewindowrate;
+	}
+
+	public int getHranThresholdBPM() {
+		return hranThresholdBPM;
+	}
+
+	public void setHranThresholdBPM(int hranThresholdBPM) {
+		this.hranThresholdBPM = hranThresholdBPM;
+	}
+
+	public int getSevenToNinePattern() {
+		return sevenToNinePattern;
+	}
+
+	public void setSevenToNinePattern(int sevenToNinePattern) {
+		this.sevenToNinePattern = sevenToNinePattern;
+	}
+
+	public int getSevenToNineType() {
+		return sevenToNineType;
+	}
+
+	public void setSevenToNineType(int sevenToNineType) {
+		this.sevenToNineType = sevenToNineType;
 	}
 
 	public String getId() {

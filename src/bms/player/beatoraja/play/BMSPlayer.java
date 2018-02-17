@@ -200,6 +200,7 @@ public class BMSPlayer extends MainState {
 			PatternModifier.modify(model, pattern);
 			Logger.getGlobal().info("譜面オプション : 保存された譜面変更ログから譜面再現");
 		} else if (autoplay != 2) {
+			PatternModifier.setPlayerConfig(config);
 			if(model.getMode().player == 2) {
 				if (config.getDoubleoption() == 1) {
 					LaneShuffleModifier mod = new LaneShuffleModifier(LaneShuffleModifier.FLIP);
@@ -233,6 +234,15 @@ public class BMSPlayer extends MainState {
 				score = false;
 			}
 			Logger.getGlobal().info("譜面オプション :  " + config.getRandom());
+			if (config.getSevenToNinePattern() >= 1 && model.getMode() == Mode.BEAT_7K) {
+				//7to9
+				model.setMode(Mode.POPN_9K);
+				NoteShuffleModifier mod = new NoteShuffleModifier(NoteShuffleModifier.SEVEN_TO_NINE);
+				mod.setModifyTarget(PatternModifier.SIDE_1P);
+				pattern = mod.modify(model);
+				assist = 1;
+				score = false;
+			}
 		}
 
 		Logger.getGlobal().info("ゲージ設定");
