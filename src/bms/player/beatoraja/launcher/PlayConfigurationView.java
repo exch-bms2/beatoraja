@@ -15,7 +15,6 @@ import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter.OutputType;
 import com.portaudio.DeviceInfo;
-import com.synthbot.jasiohost.AsioDriver;
 
 import bms.model.Mode;
 import bms.player.beatoraja.*;
@@ -31,11 +30,8 @@ import bms.player.beatoraja.song.SongData;
 import bms.player.beatoraja.song.SongDatabaseAccessor;
 import bms.player.beatoraja.song.SongInformationAccessor;
 import javafx.application.Platform;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
@@ -43,10 +39,7 @@ import javafx.scene.input.TransferMode;
 import javafx.scene.layout.*;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
-import javafx.stage.WindowEvent;
 import javafx.stage.FileChooser.ExtensionFilter;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
 import javafx.util.Callback;
 
 /**
@@ -246,11 +239,7 @@ public class PlayConfigurationView implements Initializable {
 	private boolean songUpdated = false;
 
 	private void initComboBox(ComboBox<Integer> combo, final String[] values) {
-		combo.setCellFactory(new Callback<ListView<Integer>, ListCell<Integer>>() {
-			public ListCell<Integer> call(ListView<Integer> param) {
-				return new OptionListCell(values);
-			}
-		});
+		combo.setCellFactory((param) -> new OptionListCell(values));
 		combo.setButtonCell(new OptionListCell(values));
 		for (int i = 0; i < values.length; i++) {
 			combo.getItems().add(i);
@@ -261,11 +250,7 @@ public class PlayConfigurationView implements Initializable {
 		lr2configuration.setHgap(25);
 		lr2configuration.setVgap(4);
 
-		resolution.setCellFactory(new Callback<ListView<Resolution>, ListCell<Resolution>>() {
-			public ListCell<Resolution> call(ListView<Resolution> param) {
-				return new ResolutionListCell();
-			}
-		});
+		resolution.setCellFactory((param) -> new ResolutionListCell());
 		displaymode.getItems().setAll(Config.DisplayMode.values());
 		resolution.setButtonCell(new ResolutionListCell());
 		String[] scoreOptions = new String[] { "OFF", "MIRROR", "RANDOM", "R-RANDOM", "S-RANDOM", "SPIRAL", "H-RANDOM",
@@ -296,8 +281,8 @@ public class PlayConfigurationView implements Initializable {
 		initComboBox(autosavereplay3, autosaves);
 		initComboBox(autosavereplay4, autosaves);
 		initComboBox(irsend, new String[] { arg1.getString("IR_SEND_ALWAYS"), arg1.getString("IR_SEND_FINISH"), arg1.getString("IR_SEND_UPDATE")});
-		initComboBox(audio, new String[] { "OpenAL (LibGDX Sound)", "OpenAL (LibGDX AudioDevice)", "PortAudio", "Java ASIO Host" });
-		audio.getItems().setAll(0, 2, 3);
+		initComboBox(audio, new String[] { "OpenAL (LibGDX Sound)", "OpenAL (LibGDX AudioDevice)", "PortAudio"});
+		audio.getItems().setAll(0, 2);
 
 		String[] audioPlaySpeedControls = new String[] { "UNPROCESSED", "FREQUENCY" };
 		initComboBox(audioFreqOption, audioPlaySpeedControls);
