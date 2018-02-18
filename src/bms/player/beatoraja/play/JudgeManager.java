@@ -559,6 +559,7 @@ public class JudgeManager {
 			pastNotes++;
 		}
 		if(miss == MissCondition.ONE && judge == 4 && n.getPlayTime() != 0) {
+			main.setPastNotes(pastNotes);
 			return;
 		}
 		n.setPlayTime(fast);
