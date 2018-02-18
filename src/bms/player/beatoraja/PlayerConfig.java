@@ -103,6 +103,11 @@ public class PlayerConfig {
 	 * H-RANDOM連打しきい値BPM
 	 */
 	private int hranThresholdBPM = 120;
+	
+	/**
+	 * 途中閉店の有無
+	 */
+	private boolean continueUntilEndOfSong = false;
 
 	/**
 	 * 7to9 スクラッチ鍵盤位置関係 0:OFF 1:SC1KEY2~8 2:SC1KEY3~9 3:SC2KEY3~9 4:SC8KEY1~7 5:SC9KEY1~7 6:SC9KEY2~8
@@ -202,6 +207,14 @@ public class PlayerConfig {
 		this.bpmguide = bpmguide;
 	}
 
+	public boolean isContinueUntilEndOfSong() {
+		return continueUntilEndOfSong;
+	}
+
+	public void setContinueUntilEndOfSong(boolean continueUntilEndOfSong) {
+		this.continueUntilEndOfSong = continueUntilEndOfSong;
+	}
+	
 	public int getLnmode() {
 		return lnmode;
 	}

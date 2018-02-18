@@ -67,6 +67,10 @@ public class BMSPlayer extends MainState {
 	 */
 	private int notes;
 	/**
+	 * 閉店フラグ
+	 */
+	private boolean isFailed = false;
+	/**
 	 * PMS キャラ用 ニュートラルモーション開始時の処理済ノート数{1P,2P} (ニュートラルモーション一周時に変化がなければニュートラルモーションを継続するため)
 	 */
 	private int[] PMcharaLastnotes = {0, 0};
@@ -450,6 +454,7 @@ public class BMSPlayer extends MainState {
 		final PlaySkin skin = (PlaySkin) getSkin();
 		final PlayerResource resource = main.getPlayerResource();
 		final BMSPlayerInputProcessor input = main.getInputProcessor();
+		final PlayerConfig config = resource.getPlayerConfig();
 
 		final long now = main.getNowTime();
 		final long micronow = main.getNowMicroTime();
@@ -532,6 +537,7 @@ public class BMSPlayer extends MainState {
 				lanerender.init(model);
 				judge.init(model, resource);
 				notes = 0;
+				isFailed = false;
 				PMcharaLastnotes[0] = 0;
 				PMcharaLastnotes[1] = 0;
 				starttimeoffset = (property.starttime > 1000 ? property.starttime - 1000 : 0) * 100 / property.freq;
@@ -569,7 +575,6 @@ public class BMSPlayer extends MainState {
 			break;
 		// プレイ
 		case STATE_PLAY:
-			notes = this.judge.getPastNotes();
 			final long deltatime = micronow - prevtime;
 			final long deltaplay = deltatime * (100 - playspeed) / 100;
 			PracticeProperty property = practice.getPracticeProperty();
@@ -592,7 +597,11 @@ public class BMSPlayer extends MainState {
             }
 
             final long ptime = main.getNowTime(TIMER_PLAY);
-			final float g = gauge.getValue();
+			float g = gauge.getValue();
+			if(isFailed) {
+				g = 0;
+				gauge.setValue(0);
+			}
 			if (gaugelog.size <= ptime / 500) {
 				gaugelog.add(g);
 			}
@@ -630,7 +639,7 @@ public class BMSPlayer extends MainState {
 			main.switchTimer(TIMER_PM_CHARA_DANCE, true);
 
             // System.out.println("playing time : " + time);
-			if (playtime < ptime) {
+			if (playtime < ptime && !isFailed) {
 				state = STATE_FINISHED;
 				main.setTimerOn(TIMER_MUSIC_END);
 				for(int i = TIMER_PM_CHARA_1P_NEUTRAL; i <= TIMER_PM_CHARA_2P_BAD; i++) {
@@ -644,13 +653,17 @@ public class BMSPlayer extends MainState {
             }
 			// stage failed判定
 			if (g == 0) {
-				state = STATE_FAILED;
-				main.setTimerOn(TIMER_FAILED);
-				if (resource.mediaLoadFinished()) {
-					main.getAudioProcessor().stop((Note) null);
+				if(config.isContinueUntilEndOfSong() && notes != main.getPlayerResource().getSongdata().getNotes() && !isFailed) {
+					isFailed = true;
+				} else if(!config.isContinueUntilEndOfSong() || (config.isContinueUntilEndOfSong() && notes == main.getPlayerResource().getSongdata().getNotes())) {
+					state = STATE_FAILED;
+					main.setTimerOn(TIMER_FAILED);
+					if (resource.mediaLoadFinished()) {
+						main.getAudioProcessor().stop((Note) null);
+					}
+					play(SOUND_PLAYSTOP);
+					Logger.getGlobal().info("STATE_FAILEDに移行");
 				}
-				play(SOUND_PLAYSTOP);
-				Logger.getGlobal().info("STATE_FAILEDに移行");
 			}
 			break;
 		// 閉店処理
@@ -1182,6 +1195,10 @@ public class BMSPlayer extends MainState {
 
 	public boolean isNoteEnd() {
 		return notes == main.getPlayerResource().getSongdata().getNotes();
+	}
+
+	public void setPastNotes(int notes) {
+		this.notes = notes;
 	}
 
 	public Mode getMode() {

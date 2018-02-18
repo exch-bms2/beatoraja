@@ -97,6 +97,8 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private GridPane lr2configuration;
 	@FXML
+	private GridPane lr2configurationassist;
+	@FXML
 	private ComboBox<Integer> fixhispeed;
 	@FXML
 	private Spinner<Integer> gvalue;
@@ -156,6 +158,8 @@ public class PlayConfigurationView implements Initializable {
 	private CheckBox bpmguide;
 	@FXML
 	private CheckBox legacy;
+	@FXML
+	private CheckBox continueuntilendofsong;
 	@FXML
 	private Spinner<Integer> exjudge;
 	@FXML
@@ -255,6 +259,8 @@ public class PlayConfigurationView implements Initializable {
 	public void initialize(URL arg0, ResourceBundle arg1) {
 		lr2configuration.setHgap(25);
 		lr2configuration.setVgap(4);
+		lr2configurationassist.setHgap(25);
+		lr2configurationassist.setVgap(4);
 
 		resolution.setCellFactory((param) -> new ResolutionListCell());
 		displaymode.getItems().setAll(Config.DisplayMode.values());
@@ -443,6 +449,7 @@ public class PlayConfigurationView implements Initializable {
 		constant.setSelected(player.isConstant());
 		bpmguide.setSelected(player.isBpmguide());
 		legacy.setSelected(player.isLegacynote());
+		continueuntilendofsong.setSelected(player.isContinueUntilEndOfSong());
 		exjudge.getValueFactory().setValue(player.getJudgewindowrate());
 		nomine.setSelected(player.isNomine());
 		hranthresholdbpm.getValueFactory().setValue(player.getHranThresholdBPM());
@@ -546,6 +553,7 @@ public class PlayConfigurationView implements Initializable {
 		player.setConstant(constant.isSelected());
 		player.setBpmguide(bpmguide.isSelected());
 		player.setLegacynote(legacy.isSelected());
+		player.setContinueUntilEndOfSong(continueuntilendofsong.isSelected());
 		player.setJudgewindowrate(getValue(exjudge));
 		player.setNomine(nomine.isSelected());
 		player.setHranThresholdBPM(getValue(hranthresholdbpm));
