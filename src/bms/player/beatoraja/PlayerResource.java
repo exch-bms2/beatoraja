@@ -42,7 +42,7 @@ public class PlayerResource {
 	private Config config;
 	private PlayerConfig pconfig;
 
-	private int auto;
+	private PlayMode mode;
 
 	private List<CourseData.CourseDataConstraint> constraint = new ArrayList();
 
@@ -118,8 +118,8 @@ public class PlayerResource {
 		constraint.clear();
 	}
 
-	public boolean setBMSFile(final Path f, int autoplay) {
-		this.auto = autoplay;
+	public boolean setBMSFile(final Path f, PlayMode mode) {
+		this.mode = mode;
 		replay = new ReplayData();
 		model = loadBMSModel(f, pconfig.getLnmode());
 		if (model == null) {
@@ -130,7 +130,7 @@ public class PlayerResource {
 			return false;
 		}
 
-		bmsresource.setBMSFile(model, f, config, autoplay);
+		bmsresource.setBMSFile(model, f, config, mode);
 		return true;
 	}
 
@@ -203,8 +203,8 @@ public class PlayerResource {
 		return model;
 	}
 
-	public int getAutoplay() {
-		return auto;
+	public PlayMode getPlayMode() {
+		return mode;
 	}
 
 	public Config getConfig() {
@@ -261,7 +261,7 @@ public class PlayerResource {
 		if (courseindex == course.length) {
 			return false;
 		} else {
-			setBMSFile(Paths.get(course[courseindex].getPath()), auto);
+			setBMSFile(Paths.get(course[courseindex].getPath()), mode);
 			return true;
 		}
 	}
@@ -382,5 +382,53 @@ public class PlayerResource {
 
 	public BMSResource getBMSResource() {
 		return bmsresource;
+	}
+	
+	public enum PlayMode {
+		PLAY,
+		PRACTICE,
+		AUTOPLAY,
+		REPLAY_1,
+		REPLAY_2,
+		REPLAY_3,
+		REPLAY_4;
+		
+		public boolean isAutoPlayMode() {
+			return this == AUTOPLAY; 
+		}
+		
+		public boolean isReplayMode() {
+			return this == REPLAY_1 || this == REPLAY_2 || this == REPLAY_3 || this == REPLAY_4; 
+		}
+		
+		public static PlayMode getReplayMode(int index) {
+			switch(index) {
+			case 0:
+				return REPLAY_1;
+			case 1:
+				return REPLAY_2;
+			case 2:
+				return REPLAY_3;
+			case 3:
+				return REPLAY_4;
+			default:
+				return null;
+			}			
+		}
+		
+		public int getReplayIndex() {
+			switch(this) {
+			case REPLAY_1:
+				return 0;
+			case REPLAY_2:
+				return 1;
+			case REPLAY_3:
+				return 2;
+			case REPLAY_4:
+				return 3;
+			default:
+				return 0;
+			}
+		}
 	}
 }

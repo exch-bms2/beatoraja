@@ -5,6 +5,7 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
 import java.util.Arrays;
 
 import bms.player.beatoraja.*;
+import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.skin.SkinPropertyMapper;
 import com.badlogic.gdx.utils.FloatArray;
 
@@ -198,7 +199,7 @@ public class JudgeManager {
 			judgeend = Math.max(judgeend, i[1]);
 		}
 
-		this.autoplay = resource.getAutoplay() == 1;
+		this.autoplay = resource.getPlayMode().isAutoPlayMode();
 		
 		FloatArray f = resource.getGauge();
 		if (f != null) {

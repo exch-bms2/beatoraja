@@ -11,6 +11,7 @@ import com.badlogic.gdx.utils.FloatArray;
 
 import bms.model.*;
 import bms.player.beatoraja.*;
+import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.ir.IRConnection;
 import bms.player.beatoraja.ir.IRResponse;
 import bms.player.beatoraja.select.MusicSelector;
@@ -72,7 +73,7 @@ public class MusicResult extends MainState {
 
 		updateScoreDatabase();
 		// リプレイの自動保存
-		if(resource.getAutoplay() == 0){
+		if(resource.getPlayMode() == PlayMode.PLAY){
 			for(int i=0;i<replay;i++){
 				if(ReplayAutoSaveConstraint.get(resource.getConfig().getAutoSaveReplay()[i]).isQualified(oldscore, resource.getScoreData())) {
 					saveReplayData(i);
@@ -150,13 +151,13 @@ public class MusicResult extends MainState {
 							break;
 						}
 					}
-					if (resource.getAutoplay() == 0 && key == ResultKeyProperty.ResultKey.REPLAY_DIFFERENT) {
+					if (resource.getPlayMode() == PlayMode.PLAY && key == ResultKeyProperty.ResultKey.REPLAY_DIFFERENT) {
 						Logger.getGlobal().info("オプションを変更せずリプレイ");
 						// オプションを変更せず同じ譜面でリプレイ
 						resource.getReplayData().pattern = null;
 						resource.reloadBMSFile();
 						main.changeState(MainController.STATE_PLAYBMS);
-					} else if (resource.getAutoplay() == 0 && key == ResultKeyProperty.ResultKey.REPLAY_SAME) {
+					} else if (resource.getPlayMode() == PlayMode.PLAY && key == ResultKeyProperty.ResultKey.REPLAY_SAME) {
 						// 同じ譜面でリプレイ
 						Logger.getGlobal().info("同じ譜面でリプレイ");
 						resource.reloadBMSFile();
@@ -221,7 +222,7 @@ public class MusicResult extends MainState {
 
 	private void saveReplayData(int index) {
 		final PlayerResource resource = main.getPlayerResource();
-		if (resource.getAutoplay() == 0 && resource.getCourseBMSModels() == null && resource.getScoreData() != null) {
+		if (resource.getPlayMode() == PlayMode.PLAY && resource.getCourseBMSModels() == null && resource.getScoreData() != null) {
 			if (saveReplay[index] == -1 && resource.isUpdateScore()) {
 				ReplayData rd = resource.getReplayData();
 				main.getPlayDataAccessor().wrireReplayData(rd, resource.getBMSModel(),
@@ -328,7 +329,7 @@ public class MusicResult extends MainState {
 			newscore = cscore;
 		}
 
-		if (resource.getAutoplay() == 0) {
+		if (resource.getPlayMode() == PlayMode.PLAY) {
 			main.getPlayDataAccessor().writeScoreDara(resource.getScoreData(), resource.getBMSModel(),
 					resource.getPlayerConfig().getLnmode(), resource.isUpdateScore());
 			// TODO スコアハッシュがあり、有効期限が切れていないものを送信する？

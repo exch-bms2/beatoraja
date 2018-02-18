@@ -18,6 +18,7 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import bms.model.Mode;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.IRScoreData.SongTrophy;
+import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.ir.IRResponse;
 import bms.player.beatoraja.select.bar.*;
@@ -93,6 +94,9 @@ public class MusicSelector extends MainState {
 	public static final int SOUND_FOLDEROPEN = 2;
 	public static final int SOUND_FOLDERCLOSE = 3;
 	public static final int SOUND_CHANGEOPTION = 4;
+
+	private PlayMode play = null;
+	private boolean exit = false;
 
 	public MusicSelector(MainController main, boolean songUpdated) {
 		super(main);
@@ -215,7 +219,7 @@ public class MusicSelector extends MainState {
 		setSound(SOUND_FOLDERCLOSE, "f-close.wav", SoundType.SOUND,false);
 		setSound(SOUND_CHANGEOPTION, "o-change.wav", SoundType.SOUND,false);
 
-		play = -1;
+		play = null;
 		playerdata = main.getPlayDataAccessor().readPlayerData();
 		if (bar.getSelected() != null && bar.getSelected() instanceof SongBar) {
 			scorecache.update(((SongBar) bar.getSelected()).getSongData(), config.getLnmode());
@@ -262,13 +266,13 @@ public class MusicSelector extends MainState {
 		if (current instanceof SongBar) {
 			final SongData song = main.getPlayerResource().getSongdata();
 			if (song != preview.getSongData() && main.getNowTime() > main.getTimer(TIMER_SONGBAR_CHANGE) + previewDuration
-					&& play < 0) {
+					&& play == null) {
 				this.preview.start(song);
 			}
 		}
 
 		// read bms information
-		if (main.getNowTime() > main.getTimer(TIMER_SONGBAR_CHANGE) + notesGraphDuration && !showNoteGraph && play < 0) {
+		if (main.getNowTime() > main.getTimer(TIMER_SONGBAR_CHANGE) + notesGraphDuration && !showNoteGraph && play == null) {
 			if (current instanceof SongBar && ((SongBar) current).existsSong()) {
 				SongData song = main.getPlayerResource().getSongdata();
 				new Thread(() ->  {
@@ -279,7 +283,7 @@ public class MusicSelector extends MainState {
 			showNoteGraph = true;
 		}
 
-		if (play >= 0) {
+		if (play != null) {
 			if (current instanceof SongBar) {
 				SongData song = ((SongBar) current).getSongData();
 				if (((SongBar) current).existsSong()) {
@@ -307,18 +311,14 @@ public class MusicSelector extends MainState {
 					}
 				}
 			} else if (current instanceof GradeBar) {
-				if (play == 2) {
-					play = 0;
+				if (play == PlayMode.PRACTICE) {
+					play = PlayMode.PLAY;
 				}
 				readCourse(play);
 			}
-			play = -1;
-		} else if (play == -255) {
-			main.exit();
+			play = null;
 		}
 	}
-
-	private int play = -1;
 
 	public void input() {
 		final BMSPlayerInputProcessor input = main.getInputProcessor();
@@ -338,7 +338,7 @@ public class MusicSelector extends MainState {
 			}
 			execute(MusicSelectCommand.RESET_REPLAY);
 		} else {
-			play = 0;
+			play = PlayMode.PLAY;
 		}
 	}
 
@@ -354,7 +354,7 @@ public class MusicSelector extends MainState {
 		command.execute(this);
 	}
 
-	private void readCourse(int autoplay) {
+	private void readCourse(PlayMode mode) {
 		final PlayerResource resource = main.getPlayerResource();
 		if (((GradeBar) bar.getSelected()).existsAllSongs()) {
 			resource.clear();
@@ -366,14 +366,14 @@ public class MusicSelector extends MainState {
 				for (CourseData.CourseDataConstraint constraint : ((GradeBar) bar.getSelected()).getConstraint()) {
 					switch (constraint) {
 					case CLASS:
-						if (autoplay < 2) {
+						if (mode == PlayMode.PLAY || mode.isAutoPlayMode()) {
 							config.setRandom(0);
 							config.setRandom2(0);
 							config.setDoubleoption(0);
 						}
 						break;
 					case MIRROR:
-						if (autoplay < 2) {
+						if (mode == PlayMode.PLAY || mode.isAutoPlayMode()) {
 							if (config.getRandom() == 1) {
 								config.setRandom2(1);
 								config.setDoubleoption(1);
@@ -385,7 +385,7 @@ public class MusicSelector extends MainState {
 						}
 						break;
 					case RANDOM:
-						if (autoplay < 2) {
+						if (mode == PlayMode.PLAY || mode.isAutoPlayMode()) {
 							if (config.getRandom() > 5) {
 								config.setRandom(0);
 							}
@@ -404,7 +404,7 @@ public class MusicSelector extends MainState {
 				}
 				preview.stop();
 				resource.setCoursetitle(bar.getSelected().getTitle());
-				resource.setBMSFile(files.get(0), autoplay);
+				resource.setBMSFile(files.get(0), mode);
 				main.changeState(MainController.STATE_DECIDE);
 			} else {
 				Logger.getGlobal().info("段位の楽曲が揃っていません");
@@ -822,25 +822,25 @@ public class MusicSelector extends MainState {
 	public void executeClickEvent(int id) {
 		switch (id) {
 		case BUTTON_PLAY:
-			play = 0;
+			play = PlayMode.PLAY;
 			break;
 		case BUTTON_AUTOPLAY:
-			play = 1;
+			play = PlayMode.AUTOPLAY;
 			break;
 		case BUTTON_PRACTICE:
-			play = 2;
+			play = PlayMode.PRACTICE;
 			break;
 		case BUTTON_REPLAY:
-			play = 3;
+			play = PlayMode.REPLAY_1;
 			break;
 		case BUTTON_REPLAY2:
-			play = 4;
+			play = PlayMode.REPLAY_2;
 			break;
 		case BUTTON_REPLAY3:
-			play = 5;
+			play = PlayMode.REPLAY_3;
 			break;
 		case BUTTON_REPLAY4:
-			play = 6;
+			play = PlayMode.REPLAY_4;
 			break;
 		case BUTTON_READTEXT:
 			execute(MusicSelectCommand.OPEN_DOCUMENT);
@@ -902,11 +902,11 @@ public class MusicSelector extends MainState {
 		showNoteGraph = false;
 	}
 
-	public void selectSong(int mode) {
-		if (mode < 3) {
+	public void selectSong(PlayMode mode) {
+		if (!mode.isReplayMode()) {
 			play = mode;
 		} else {
-			play = (selectedreplay >= 0) ? 3 + selectedreplay : 0;
+			play = (selectedreplay >= 0) ? PlayMode.getReplayMode(selectedreplay) : PlayMode.PLAY;
 		}
 	}
 }

@@ -19,6 +19,7 @@ import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter.OutputType;
 
+import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.launcher.PlayConfigurationView;
 
 /**
@@ -37,27 +38,27 @@ public class MainLoader extends Application {
 		}
 
 		Path f = null;
-		int auto = 0;
+		PlayMode auto = PlayMode.PLAY;
 		boolean config = false;
 		for (String s : args) {
 			if (s.startsWith("-")) {
 				if (s.equals("-a")) {
-					auto = 1;
+					auto = PlayMode.AUTOPLAY;
 				}
 				if (s.equals("-p")) {
-					auto = 2;
+					auto = PlayMode.PRACTICE;
 				}
 				if (s.equals("-r") || s.equals("-r1")) {
-					auto = 3;
+					auto = PlayMode.REPLAY_1;
 				}
 				if (s.equals("-r2")) {
-					auto = 4;
+					auto = PlayMode.REPLAY_2;
 				}
 				if (s.equals("-r3")) {
-					auto = 5;
+					auto = PlayMode.REPLAY_3;
 				}
 				if (s.equals("-r4")) {
-					auto = 6;
+					auto = PlayMode.REPLAY_4;
 				}
 				if (s.equals("-c")) {
 					config = true;
@@ -73,7 +74,7 @@ public class MainLoader extends Application {
 		}
 	}
 
-	public static void play(Path f, int auto, boolean forceExit, Config config, PlayerConfig player, boolean songUpdated) {
+	public static void play(Path f, PlayMode auto, boolean forceExit, Config config, PlayerConfig player, boolean songUpdated) {
 		if(config == null) {
 			config = readConfig();			
 		}

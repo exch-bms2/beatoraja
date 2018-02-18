@@ -1,6 +1,7 @@
 package bms.player.beatoraja.select;
 
 import bms.player.beatoraja.*;
+import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.play.TargetProperty;
 import bms.player.beatoraja.select.MusicSelectKeyProperty.MusicSelectKey;
@@ -242,16 +243,16 @@ public class MusicSelectInputProcessor {
                 if (property.isPressed(keystate, keytime, PLAY, true) || (cursor[3] && cursortime[3] != 0)) {
                     // play
                     cursortime[3] = 0;
-                    select.selectSong(0);
+                    select.selectSong(PlayMode.PLAY);
                 } else if (property.isPressed(keystate, keytime, PRACTICE, true)) {
                     // practice mode
-                    select.selectSong(2);
+                    select.selectSong(PlayMode.PRACTICE);
                 } else if (property.isPressed(keystate, keytime, AUTO, true)) {
                     // auto play
-                    select.selectSong(1);
+                    select.selectSong(PlayMode.AUTOPLAY);
                 } else if (property.isPressed(keystate, keytime, MusicSelectKey.REPLAY, true)) {
                     // replay
-                    select.selectSong(3);
+                    select.selectSong(PlayMode.REPLAY_1);
                 }
             } else {
                 if (property.isPressed(keystate, keytime, FOLDER_OPEN, true) || (cursor[3] && cursortime[3] != 0)) {

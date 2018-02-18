@@ -5,6 +5,7 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
 import java.util.Arrays;
 
 import bms.model.Mode;
+import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 
 public class ControlInputProcessor {
@@ -22,12 +23,12 @@ public class ControlInputProcessor {
 	private boolean enableControl = true;
 	private boolean enableCursor = true;
 	
-	private final int autoplay;
+	private final PlayMode autoplay;
 
 	private Runnable processStart;
 	private Runnable processSelect;
 
-	public ControlInputProcessor(BMSPlayer player, int autoplay) {
+	public ControlInputProcessor(BMSPlayer player, PlayMode autoplay) {
 		this.player = player;
 		this.autoplay = autoplay;
 		hschanged = new boolean[player.main.getInputProcessor().getKeystate().length];
@@ -83,9 +84,9 @@ public class ControlInputProcessor {
 				input.resetScroll();
 			}
 			if (input.startPressed() && !input.isSelectPressed()) {
-				if ((autoplay == 0 || autoplay == 2) && startpressed) {
+				if ((autoplay == PlayMode.PLAY || autoplay == PlayMode.PRACTICE) && startpressed) {
 					processStart.run();
-				} else if ((autoplay == 0 || autoplay == 2) && !startpressed) {
+				} else if ((autoplay == PlayMode.PLAY || autoplay == PlayMode.PRACTICE) && !startpressed) {
 					Arrays.fill(hschanged, true);
 				}
 				// show-hide lane cover by double-press START
@@ -103,9 +104,9 @@ public class ControlInputProcessor {
 				startpressed = false;
 			}
 			if(input.isSelectPressed() && !input.startPressed()){
-				if ((autoplay == 0 || autoplay == 2) && selectpressed) {
+				if ((autoplay == PlayMode.PLAY || autoplay == PlayMode.PRACTICE) && selectpressed) {
 					processSelect.run();
-				} else if ((autoplay == 0 || autoplay == 2) && !selectpressed) {
+				} else if ((autoplay == PlayMode.PLAY || autoplay == PlayMode.PRACTICE) && !selectpressed) {
 					Arrays.fill(hschanged, true);
 				}
 				selectpressed = true;
@@ -128,7 +129,7 @@ public class ControlInputProcessor {
 			player.stopPlay();
 		}
 		// play speed change (autoplay or replay only)
-		if (autoplay == 1 || autoplay >= 3) {
+		if (autoplay.isAutoPlayMode() || autoplay.isReplayMode()) {
 			if (input.getNumberState()[1]) {
 				player.setPlaySpeed(25);
 			} else if (input.getNumberState()[2]) {

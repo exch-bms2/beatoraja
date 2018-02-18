@@ -10,6 +10,7 @@ import com.badlogic.gdx.utils.FloatArray;
 
 import bms.model.BMSModel;
 import bms.player.beatoraja.*;
+import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.ir.IRConnection;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.skin.SkinType;
@@ -73,7 +74,7 @@ public class CourseResult extends MainState {
 		updateScoreDatabase();
 
 		// リプレイの自動保存
-		if(resource.getAutoplay() == 0){
+		if(resource.getPlayMode() == PlayMode.PLAY){
 			for(int i=0;i<replay;i++){
 				if(MusicResult.ReplayAutoSaveConstraint.get(resource.getConfig().getAutoSaveReplay()[i]).isQualified(oldscore ,newscore)) {
 					saveReplayData(i);
@@ -349,7 +350,7 @@ public class CourseResult extends MainState {
 
 	private void saveReplayData(int index) {
 		final PlayerResource resource = main.getPlayerResource();
-		if (resource.getAutoplay() == 0 && resource.getCourseScoreData() != null) {
+		if (resource.getPlayMode() == PlayMode.PLAY && resource.getCourseScoreData() != null) {
 			if (saveReplay[index] == -1 && resource.isUpdateScore()) {
 				// 保存されているリプレイデータがない場合は、EASY以上で自動保存
 				ReplayData[] rd = resource.getCourseReplay();

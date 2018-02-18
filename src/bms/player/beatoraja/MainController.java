@@ -18,6 +18,7 @@ import bms.player.beatoraja.skin.SkinProperty;
 import com.badlogic.gdx.Graphics;
 
 import bms.player.beatoraja.skin.SkinObject.SkinOffset;
+import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.audio.*;
 import bms.player.beatoraja.config.KeyConfiguration;
 import bms.player.beatoraja.decide.MusicDecide;
@@ -85,7 +86,7 @@ public class MainController extends ApplicationAdapter {
 
 	private Config config;
 	private PlayerConfig player;
-	private int auto;
+	private PlayMode auto;
 	private boolean songUpdated;
 
 	private SongDatabaseAccessor songdb;
@@ -125,7 +126,7 @@ public class MainController extends ApplicationAdapter {
 	protected TextureRegion black;
 	protected TextureRegion white;
 
-	public MainController(Path f, Config config, PlayerConfig player, int auto, boolean songUpdated) {
+	public MainController(Path f, Config config, PlayerConfig player, PlayMode auto, boolean songUpdated) {
 		this.auto = auto;
 		this.config = config;
 		this.songUpdated = songUpdated;
@@ -262,7 +263,7 @@ public class MainController extends ApplicationAdapter {
 		}
 	}
 
-	public void setAuto(int auto) {
+	public void setPlayMode(PlayMode auto) {
 		this.auto = auto;
 
 	}

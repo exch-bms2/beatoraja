@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 
 import bms.model.*;
 import bms.player.beatoraja.*;
+import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyInputLog;
 import bms.player.beatoraja.pattern.*;
@@ -41,7 +42,7 @@ public class BMSPlayer extends MainState {
 
 	private int playtime;
 
-	private int autoplay = 0;
+	private PlayMode autoplay = PlayMode.PLAY;
 	/**
 	 * BGレーン再生用スレッド
 	 */
@@ -79,21 +80,21 @@ public class BMSPlayer extends MainState {
 	public BMSPlayer(MainController main, PlayerResource resource) {
 		super(main);
 		this.model = resource.getBMSModel();
-		this.autoplay = resource.getAutoplay();
+		this.autoplay = resource.getPlayMode();
 		PlayerConfig config = resource.getPlayerConfig();
 
-		if (autoplay >= 3) {
+		if (autoplay.isReplayMode()) {
 			if (resource.getCourseBMSModels() != null) {
 				if (resource.getCourseReplay().length == 0) {
 					ReplayData[] replays = main.getPlayDataAccessor().readReplayData(resource.getCourseBMSModels(),
-							config.getLnmode(), autoplay - 3, resource.getConstraint());
+							config.getLnmode(), autoplay.getReplayIndex(), resource.getConstraint());
 					if (replays != null) {
 						for (ReplayData rd : replays) {
 							resource.addCourseReplay(rd);
 						}
 						replay = replays[0];
 					} else {
-						autoplay = 0;
+						autoplay = PlayMode.PLAY;
 					}
 				} else {
 					for (int i = 0; i < resource.getCourseBMSModels().length; i++) {
@@ -103,9 +104,9 @@ public class BMSPlayer extends MainState {
 					}
 				}
 			} else {
-				replay = main.getPlayDataAccessor().readReplayData(model, config.getLnmode(), autoplay - 3);
+				replay = main.getPlayDataAccessor().readReplayData(model, config.getLnmode(), autoplay.getReplayIndex());
 				if (replay == null) {
-					autoplay = 0;
+					autoplay = PlayMode.PLAY;
 				}
 			}
 		}
@@ -113,11 +114,11 @@ public class BMSPlayer extends MainState {
 		if(replay != null && main.getInputProcessor().getKeystate()[1]) {
 			resource.setReplayData(replay);
 			replay = null;
-			autoplay = 0;
+			autoplay = PlayMode.PLAY;
 		}
 
 		if (model.getRandom() != null && model.getRandom().length > 0) {
-			if (autoplay >= 3) {
+			if (autoplay.isReplayMode()) {
 				model = resource.getGenerator().generate(replay.rand);
 			} else if (resource.getReplayData().pattern != null) {
 				model = resource.getGenerator().generate(resource.getReplayData().rand);
@@ -125,13 +126,13 @@ public class BMSPlayer extends MainState {
 			Logger.getGlobal().info("譜面分岐 : " + Arrays.toString(model.getRandom()));
 		}
 		// 通常プレイの場合は最後のノーツ、オートプレイの場合はBG/BGAを含めた最後のノーツ
-		playtime = (autoplay == 1 ? model.getLastTime() : model.getLastNoteTime()) + TIME_MARGIN;
+		playtime = (autoplay.isAutoPlayMode() ? model.getLastTime() : model.getLastNoteTime()) + TIME_MARGIN;
 		gaugelog = new FloatArray(playtime / 500 + 2);
 
 		boolean score = true;
 
 		Logger.getGlobal().info("アシストオプション設定");
-		if (resource.getCourseBMSModels() == null && autoplay < 2) {
+		if (resource.getCourseBMSModels() == null && autoplay == PlayMode.PLAY || autoplay.isAutoPlayMode()) {
 			if (config.isBpmguide() && (model.getMinBPM() < model.getMaxBPM())) {
 				// BPM変化がなければBPMガイドなし
 				assist = 1;
@@ -199,7 +200,7 @@ public class BMSPlayer extends MainState {
 			pattern = Arrays.asList(resource.getReplayData().pattern);
 			PatternModifier.modify(model, pattern);
 			Logger.getGlobal().info("譜面オプション : 保存された譜面変更ログから譜面再現");
-		} else if (autoplay != 2) {
+		} else if (autoplay != PlayMode.PRACTICE) {
 			PatternModifier.setPlayerConfig(config);
 			if(model.getMode().player == 2) {
 				if (config.getDoubleoption() == 1) {
@@ -340,10 +341,10 @@ public class BMSPlayer extends MainState {
 		final BMSPlayerInputProcessor input = main.getInputProcessor();
 		input.setMinimumInputDutration(conf.getInputduration());
 		PlayConfig pc = getPlayConfig(config);
-		if(autoplay == 0 || autoplay == 2) {
+		if(autoplay == PlayMode.PLAY || autoplay == PlayMode.PRACTICE) {
 			input.setPlayConfig(pc);
 		}
-		if (autoplay == 1 || autoplay >= 3) {
+		if (autoplay.isAutoPlayMode() || autoplay.isReplayMode()) {
 			input.setEnable(false);
 		}
 		input.setKeyboardConfig(pc.getKeyboardConfig());
@@ -409,7 +410,7 @@ public class BMSPlayer extends MainState {
 				.getTarget(main);
 		resource.setRivalScoreData(rivalscore);
 
-		if (autoplay == 2) {
+		if (autoplay == PlayMode.PRACTICE) {
 			getScoreDataProperty().setTargetScore(0, 0, model.getTotalNotes());
 			practice.create(model);
 			state = STATE_PRACTICE;
@@ -558,7 +559,7 @@ public class BMSPlayer extends MainState {
 
 				input.setStartTime(now + main.getStartTime() - starttimeoffset);
 				List<KeyInputLog> keylog = null;
-				if (autoplay >= 3) {
+				if (autoplay.isReplayMode()) {
 					keylog = Arrays.asList(replay.keylog);
 				}
 				keyinput.startJudge(model, keylog);
@@ -665,7 +666,7 @@ public class BMSPlayer extends MainState {
 				if (resource.mediaLoadFinished()) {
 					resource.getBGAManager().stop();
 				}
-				if (autoplay != 1 && autoplay != 2) {
+				if (!autoplay.isAutoPlayMode() && autoplay != PlayMode.PRACTICE) {
 					resource.setScoreData(createScoreData());
 				}
 				resource.setCombo(judge.getCourseCombo());
@@ -680,7 +681,7 @@ public class BMSPlayer extends MainState {
 				resource.setGrooveGauge(gauge);
 				input.setEnable(true);
 				input.setStartTime(0);
-				if (autoplay == 2) {
+				if (autoplay == PlayMode.PRACTICE) {
 					state = STATE_PRACTICE;
 				} else if (resource.getScoreData() != null) {
 					main.changeState(MainController.STATE_RESULT);
@@ -701,7 +702,7 @@ public class BMSPlayer extends MainState {
 			if (main.getNowTime(TIMER_FADEOUT) > skin.getFadeout()) {
 				main.getAudioProcessor().setGlobalPitch(1f);
 				resource.getBGAManager().stop();
-				if (autoplay != 1 && autoplay != 2) {
+				if (!autoplay.isAutoPlayMode() && autoplay != PlayMode.PRACTICE) {
 					resource.setScoreData(createScoreData());
 				}
 				resource.setCombo(judge.getCourseCombo());
@@ -711,7 +712,7 @@ public class BMSPlayer extends MainState {
 				resource.setGrooveGauge(gauge);
 				input.setEnable(true);
 				input.setStartTime(0);
-				if (autoplay == 2) {
+				if (autoplay == PlayMode.PRACTICE) {
 					state = STATE_PRACTICE;
 				} else if (resource.getScoreData() != null) {
 					main.changeState(MainController.STATE_RESULT);
@@ -1089,21 +1090,21 @@ public class BMSPlayer extends MainState {
 			final int type = gauge.getType();
 			return type == 0 || type == 1 || type == 4 || type == 5 || type == 7 || type == 8;
 		case OPTION_AUTOPLAYON:
-			return autoplay == 1;
+			return autoplay == PlayMode.AUTOPLAY;
 		case OPTION_AUTOPLAYOFF:
-			return autoplay != 1;
+			return autoplay != PlayMode.AUTOPLAY;
 		case OPTION_REPLAY_OFF:
-			return autoplay == 0 || autoplay == 2;
+			return autoplay == PlayMode.PLAY || autoplay == PlayMode.PRACTICE;
 		case OPTION_REPLAY_PLAYING:
-			return autoplay >= 3;
+			return autoplay.isReplayMode();
 		case OPTION_BGAON:
 			return main.getPlayerResource().getConfig().getBga() == Config.BGA_ON
 					|| (main.getPlayerResource().getConfig().getBga() == Config.BGA_AUTO
-							&& (autoplay == 1 || autoplay >= 3));
+							&& (autoplay == PlayMode.AUTOPLAY || autoplay.isReplayMode()));
 		case OPTION_BGAOFF:
 			return main.getPlayerResource().getConfig().getBga() == Config.BGA_OFF
 					|| (main.getPlayerResource().getConfig().getBga() == Config.BGA_AUTO
-							&& (autoplay == 0 || autoplay == 2));
+							&& (autoplay == PlayMode.PLAY || autoplay == PlayMode.PRACTICE));
 		case OPTION_NOW_LOADING:
 			return state == STATE_PRELOAD;
 		case OPTION_LOADED:
