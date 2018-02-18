@@ -621,6 +621,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 					}
 					TextureRegion[][] gauge;
 					if(values[14] == 3 && divx * divy % 6 == 0) {
+						//アニメーションタイプがPMS用明滅アニメーションの場合 表赤、表緑、裏赤、裏緑、発光表赤、発光表緑の順にsrc分割
 						gauge = new TextureRegion[(divx * divy) / 6][12];
 						final int w = values[5];
 						final int h = values[6];
@@ -668,7 +669,65 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 						if(values[13] == 0) {
 							gauger = new SkinGauge(gauge, values[10], values[9], mode == Mode.POPN_9K ? 24 : 50, 0, mode == Mode.POPN_9K ? 0 : 3, 33);
 						} else {
-							gauger = new SkinGauge(gauge, values[10], values[9], values[13], values[14], values[15], values[16]);							
+							gauger = new SkinGauge(gauge, values[10], values[9], values[13], values[14], values[15], values[16]);
+						}
+
+						skin.add(gauger);
+					}
+				}
+			}
+		});
+		addCommandWord(new CommandWord("SRC_GROOVEGAUGE_EX") {
+			//JSONスキンと同形式版 表赤、表緑、裏赤、裏緑、EX表赤、EX表緑、EX裏赤、EX裏緑の順にsrc分割
+			@Override
+			public void execute(String[] str) {
+				int[] values = parseInt(str);
+				if (values[2] < imagelist.size() && imagelist.get(values[2]) != null) {
+					int playside = values[1];
+					int divx = values[7];
+					if (divx <= 0) {
+						divx = 1;
+					}
+					int divy = values[8];
+					if (divy <= 0) {
+						divy = 1;
+					}
+					TextureRegion[][] gauge;
+					if(values[14] == 3 && divx * divy % 12 == 0) {
+						//アニメーションタイプがPMS用明滅アニメーションの場合 表赤、表緑、裏赤、裏緑、EX表赤、EX表緑、EX裏赤、EX裏緑、発光表赤、発光表緑、発光EX表赤、発光EX表緑の順にsrc分割
+						gauge = new TextureRegion[(divx * divy) / 12][12];
+						final int w = values[5];
+						final int h = values[6];
+						for (int x = 0; x < divx; x++) {
+							for (int y = 0; y < divy; y++) {
+								if ((y * divx + x) / 12 < gauge.length) {
+										gauge[(y * divx + x) / 12][(y * divx + x) % 12] = new TextureRegion(
+												(Texture) imagelist.get(values[2]), values[3] + w * x / divx,
+												values[4] + h * y / divy, w / divx, h / divy);
+								}
+							}
+						}
+					} else {
+						gauge = new TextureRegion[(divx * divy) / 8][8];
+						final int w = values[5];
+						final int h = values[6];
+						for (int x = 0; x < divx; x++) {
+							for (int y = 0; y < divy; y++) {
+								if ((y * divx + x) / 8 < gauge.length) {
+									gauge[(y * divx + x) / 8][(y * divx + x) % 8] = new TextureRegion(
+											(Texture) imagelist.get(values[2]), values[3] + w * x / divx,
+											values[4] + h * y / divy, w / divx, h / divy);
+								}
+							}
+						}
+					}
+					groovex = values[11];
+					groovey = values[12];
+					if (gauger == null) {
+						if(values[13] == 0) {
+							gauger = new SkinGauge(gauge, values[10], values[9], mode == Mode.POPN_9K ? 24 : 50, 0, mode == Mode.POPN_9K ? 0 : 3, 33);
+						} else {
+							gauger = new SkinGauge(gauge, values[10], values[9], values[13], values[14], values[15], values[16]);
 						}
 						
 						skin.add(gauger);
