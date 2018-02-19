@@ -1,8 +1,11 @@
 package bms.player.beatoraja.song;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
+import bms.model.BMSDecoder;
 import bms.model.BMSModel;
 import bms.model.TimeLine;
 
@@ -63,6 +66,9 @@ public class SongData {
 	private int judge;
 	private int minbpm;
 	private int maxbpm;
+	/**
+	 * 曲の長さ(ms)
+	 */
 	private int length;
 	private int content;
 	private int notes;
@@ -76,7 +82,9 @@ public class SongData {
 	private BMSModel model;
 	private TimeLine[] timelines;
 	private SongInformation info;
-	
+
+	private String charthash;
+
 	public SongData() {
 		
 	}
@@ -128,6 +136,13 @@ public class SongData {
 		feature |= model.getRandom() != null && model.getRandom().length > 0 ? FEATURE_RANDOM : 0;
 		feature |= model.containsLongNote() ? FEATURE_LONGNOTE : 0;
 		content |= model.getBgaList().length > 0 ? CONTENT_BGA : 0;
+		
+		try {
+			MessageDigest md = MessageDigest.getInstance("SHA-256");
+			charthash = BMSDecoder.convertHexString(md.digest(model.toChartString().getBytes()));
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public BMSModel getBMSModel() {
@@ -413,5 +428,13 @@ public class SongData {
 
 	public void setAppendurl(String appendurl) {
 		this.appendurl = appendurl;
+	}
+
+	public String getCharthash() {
+		return charthash;
+	}
+
+	public void setCharthash(String charthash) {
+		this.charthash = charthash;
 	}
 }

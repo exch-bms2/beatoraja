@@ -69,7 +69,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 						+ "[preview] TEXT," + "[parent] TEXT," + "[level] INTEGER," + "[difficulty] INTEGER," + "[maxbpm] INTEGER,"
 						+ "[minbpm] INTEGER," + "[mode] INTEGER," + "[judge] INTEGER," + "[feature] INTEGER,"
 						+ "[content] INTEGER," + "[date] INTEGER," + "[favorite] INTEGER," + "[notes] INTEGER,"
-						+ "[adddate] INTEGER," + "PRIMARY KEY(sha256, path));");
+						+ "[adddate] INTEGER,"  + "[charthash] TEXT," + "PRIMARY KEY(sha256, path));");
 			}
 
 			if(qr.query("SELECT * FROM sqlite_master WHERE name = 'song' AND sql LIKE '%preview%'", new MapListHandler()).size() == 0) {
@@ -77,6 +77,9 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 			}
 			if(qr.query("SELECT * FROM sqlite_master WHERE name = 'song' AND sql LIKE '%length%'", new MapListHandler()).size() == 0) {
 				qr.update("ALTER TABLE song ADD COLUMN length [INTEGER]");
+			}
+			if(qr.query("SELECT * FROM sqlite_master WHERE name = 'song' AND sql LIKE '%charthash%'", new MapListHandler()).size() == 0) {
+				qr.update("ALTER TABLE song ADD COLUMN charthash [TEXT]");
 			}
 
 			if (qr.query("SELECT * FROM sqlite_master WHERE name = ? and type='table';", new MapListHandler(), "folder")
@@ -152,7 +155,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 			if(info != null) {
 				stmt.execute("ATTACH DATABASE '" + info + "' as infodb");
 				String s = "SELECT DISTINCT song.sha256 AS sha256, title, subtitle, genre, artist, subartist,path,folder,stagefile,banner,backbmp,parent,level,difficulty,"
-						+ "maxbpm,minbpm,song.mode AS mode, judge, feature, content, song.date AS date, favorite, song.notes AS notes, adddate, preview, length"
+						+ "maxbpm,minbpm,song.mode AS mode, judge, feature, content, song.date AS date, favorite, song.notes AS notes, adddate, preview, length, charthash"
 						+ " FROM song INNER JOIN (information LEFT OUTER JOIN (score LEFT OUTER JOIN scorelog ON score.sha256 = scorelog.sha256) ON information.sha256 = score.sha256) "
 						+ "ON song.sha256 = information.sha256 WHERE " + sql;
 				ResultSet rs = stmt.executeQuery(s);
@@ -161,7 +164,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 				stmt.execute("DETACH DATABASE infodb");
 			} else {
 				String s = "SELECT DISTINCT song.sha256 AS sha256, title, subtitle, genre, artist, subartist,path,folder,stagefile,banner,backbmp,parent,level,difficulty,"
-						+ "maxbpm,minbpm,song.mode AS mode, judge, feature, content, song.date AS date, favorite, song.notes AS notes, adddate, preview, length"
+						+ "maxbpm,minbpm,song.mode AS mode, judge, feature, content, song.date AS date, favorite, song.notes AS notes, adddate, preview, length, charthash"
 						+ " FROM song LEFT OUTER JOIN (score LEFT OUTER JOIN scorelog ON score.sha256 = scorelog.sha256) ON song.sha256 = score.sha256 WHERE " + sql;
 				ResultSet rs = stmt.executeQuery(s);
 				m = songhandler.handle(rs);
@@ -226,14 +229,14 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 								+ "(md5, sha256, title, subtitle, genre, artist, subartist, tag, path,"
 								+ "folder, stagefile, banner, backbmp, preview, parent, level, difficulty, "
 								+ "maxbpm, minbpm, length, mode, judge, feature, content, "
-								+ "date, favorite, notes, adddate)"
-								+ "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);",
+								+ "date, favorite, notes, adddate, charthash)"
+								+ "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);",
 						sd.getMd5(), sd.getSha256(), sd.getTitle(), sd.getSubtitle(), sd.getGenre(),
 						sd.getArtist(), sd.getSubartist(), sd.getTag(), sd.getPath(), sd.getFolder(),
 						sd.getStagefile(), sd.getBanner(), sd.getBackbmp(), sd.getPreview(),sd.getParent(),
 						sd.getLevel(), sd.getDifficulty(), sd.getMaxbpm(), sd.getMinbpm(), sd.getLength(),
 						sd.getMode(), sd.getJudge(), sd.getFeature(), sd.getContent(),
-						sd.getDate(), sd.getFavorite(), sd.getNotes(), sd.getAdddate());
+						sd.getDate(), sd.getFavorite(), sd.getNotes(), sd.getAdddate(), sd.getCharthash());
 			}
 			conn.commit();
 			conn.close();
@@ -526,8 +529,8 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 												+ "(md5, sha256, title, subtitle, genre, artist, subartist, tag, path,"
 												+ "folder, stagefile, banner, backbmp, preview, parent, level, difficulty, "
 												+ "maxbpm, minbpm, length, mode, judge, feature, content, "
-												+ "date, favorite, notes, adddate)"
-												+ "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);",
+												+ "date, favorite, notes, adddate, charthash)"
+												+ "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);",
 										sd.getMd5(), sd.getSha256(), sd.getTitle(), sd.getSubtitle(), sd.getGenre(),
 										sd.getArtist(), sd.getSubartist(), tag != null ? tag : "",
 										pathname, SongUtils.crc32(path.getParent().toString(), bmsroot, root.toString()),
@@ -535,7 +538,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 										SongUtils.crc32(path.getParent().getParent().toString(), bmsroot, root.toString()),
 										sd.getLevel(), sd.getDifficulty(), sd.getMaxbpm(), sd.getMinbpm(), sd.getLength(),
 										sd.getMode(), sd.getJudge(), sd.getFeature(), sd.getContent(),
-										Files.getLastModifiedTime(path).toMillis() / 1000, 0, sd.getNotes(), updatetime);
+										Files.getLastModifiedTime(path).toMillis() / 1000, 0, sd.getNotes(), updatetime, sd.getCharthash());
 								if(info != null) {
 									info.update(model);
 								}
