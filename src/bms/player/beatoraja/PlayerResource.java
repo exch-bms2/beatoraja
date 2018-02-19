@@ -96,11 +96,16 @@ public class PlayerResource {
 	 * 最大コンボ数。コースプレイ時の引継ぎに使用
 	 */
 	private int maxcombo;
+	/**
+	 * 元々のゲージオプション
+	 */
+	private int orgGaugeOption = 0;
 
 	public PlayerResource(AudioDriver audio, Config config, PlayerConfig pconfig) {
 		this.config = config;
 		this.pconfig = pconfig;
 		this.bmsresource = new BMSResource(audio, config, pconfig);
+		this.orgGaugeOption = pconfig.getGauge();
 	}
 
 	public void clear() {
@@ -382,5 +387,13 @@ public class PlayerResource {
 
 	public BMSResource getBMSResource() {
 		return bmsresource;
+	}
+
+	public int getOrgGaugeOption() {
+		return orgGaugeOption;
+	}
+
+	public void setOrgGaugeOption(int orgGaugeOption) {
+		this.orgGaugeOption = orgGaugeOption;
 	}
 }
