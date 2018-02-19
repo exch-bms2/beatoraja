@@ -28,6 +28,8 @@ public class MusicDecide extends MainState {
 		play(SOUND_DECIDE);
 
 		loadSkin(SkinType.DECIDE);
+
+		main.getPlayerResource().setOrgGaugeOption(main.getPlayerResource().getPlayerConfig().getGauge());
 	}
 
 	public void render() {

@@ -140,6 +140,7 @@ public class MusicResult extends MainState {
 						main.changeState(MainController.STATE_GRADE_RESULT);
 					}
 				} else {
+					main.getPlayerResource().getPlayerConfig().setGauge(main.getPlayerResource().getOrgGaugeOption());
 					ResultKeyProperty.ResultKey key = null;
 					for(int i = 0; i < property.getAssignLength(); i++) {
 						if(property.getAssign(i) == ResultKeyProperty.ResultKey.REPLAY_DIFFERENT && keystate[i]) {

@@ -60,7 +60,7 @@ public class BMSPlayer extends MainState {
 
 	private ReplayData replay = null;
 
-	private final FloatArray gaugelog;
+	private final FloatArray[] gaugelog;
 
 	private int playspeed = 100;
 
@@ -68,6 +68,10 @@ public class BMSPlayer extends MainState {
 	 * 処理済ノート数
 	 */
 	private int notes;
+	/**
+	 * 閉店フラグ
+	 */
+	private boolean isFailed = false;
 	/**
 	 * PMS キャラ用 ニュートラルモーション開始時の処理済ノート数{1P,2P} (ニュートラルモーション一周時に変化がなければニュートラルモーションを継続するため)
 	 */
@@ -128,7 +132,6 @@ public class BMSPlayer extends MainState {
 		}
 		// 通常プレイの場合は最後のノーツ、オートプレイの場合はBG/BGAを含めた最後のノーツ
 		playtime = (autoplay.isAutoPlayMode() ? model.getLastTime() : model.getLastNoteTime()) + TIME_MARGIN;
-		gaugelog = new FloatArray(playtime / 500 + 2);
 
 		boolean score = true;
 
@@ -288,6 +291,10 @@ public class BMSPlayer extends MainState {
 		FloatArray f = resource.getGauge();
 		if (f != null) {
 			gauge.setValue(f.get(f.size - 1));
+		}
+		gaugelog = new FloatArray[gauge.getGaugeTypeLength()];
+		for(int i = 0; i < gaugelog.length; i++) {
+			gaugelog[i] = new FloatArray(playtime / 500 + 2);
 		}
 
 		resource.setUpdateScore(score);
@@ -452,6 +459,7 @@ public class BMSPlayer extends MainState {
 		final PlaySkin skin = (PlaySkin) getSkin();
 		final PlayerResource resource = main.getPlayerResource();
 		final BMSPlayerInputProcessor input = main.getInputProcessor();
+		final PlayerConfig config = resource.getPlayerConfig();
 
 		final long now = main.getNowTime();
 		final long micronow = main.getNowMicroTime();
@@ -534,6 +542,7 @@ public class BMSPlayer extends MainState {
 				lanerender.init(model);
 				judge.init(model, resource);
 				notes = 0;
+				isFailed = false;
 				PMcharaLastnotes[0] = 0;
 				PMcharaLastnotes[1] = 0;
 				starttimeoffset = (property.starttime > 1000 ? property.starttime - 1000 : 0) * 100 / property.freq;
@@ -571,7 +580,6 @@ public class BMSPlayer extends MainState {
 			break;
 		// プレイ
 		case STATE_PLAY:
-			notes = this.judge.getPastNotes();
 			final long deltatime = micronow - prevtime;
 			final long deltaplay = deltatime * (100 - playspeed) / 100;
 			PracticeProperty property = practice.getPracticeProperty();
@@ -594,9 +602,11 @@ public class BMSPlayer extends MainState {
             }
 
             final long ptime = main.getNowTime(TIMER_PLAY);
-			final float g = gauge.getValue();
-			if (gaugelog.size <= ptime / 500) {
-				gaugelog.add(g);
+			float g = gauge.getValue();
+			for(int i = 0; i < gaugelog.length; i++) {
+				if (gaugelog[i].size <= ptime / 500) {
+					gaugelog[i].add(gauge.getValue(i));
+				}
 			}
 			main.switchTimer(TIMER_GAUGE_MAX_1P, g == gauge.getMaxValue());
 
@@ -632,7 +642,7 @@ public class BMSPlayer extends MainState {
 			main.switchTimer(TIMER_PM_CHARA_DANCE, true);
 
             // System.out.println("playing time : " + time);
-			if (playtime < ptime) {
+			if (playtime < ptime && !isFailed) {
 				state = STATE_FINISHED;
 				main.setTimerOn(TIMER_MUSIC_END);
 				for(int i = TIMER_PM_CHARA_1P_NEUTRAL; i <= TIMER_PM_CHARA_2P_BAD; i++) {
@@ -646,13 +656,22 @@ public class BMSPlayer extends MainState {
             }
 			// stage failed判定
 			if (g == 0) {
-				state = STATE_FAILED;
-				main.setTimerOn(TIMER_FAILED);
-				if (resource.mediaLoadFinished()) {
-					main.getAudioProcessor().stop((Note) null);
+				if(config.isContinueUntilEndOfSong() && notes != main.getPlayerResource().getSongdata().getNotes() && !isFailed && gauge.getType() != GrooveGauge.HAZARD) {
+					if(gauge.getType() != GrooveGauge.CLASS) {
+						gauge.downType();
+						config.setGauge(config.getGauge() > 0 ? config.getGauge() - 1 :0);
+					} else {
+						isFailed = true;
+					}
+				} else if(!config.isContinueUntilEndOfSong() || gauge.getType() == GrooveGauge.HAZARD || (config.isContinueUntilEndOfSong() && notes == main.getPlayerResource().getSongdata().getNotes())) {
+					state = STATE_FAILED;
+					main.setTimerOn(TIMER_FAILED);
+					if (resource.mediaLoadFinished()) {
+						main.getAudioProcessor().stop((Note) null);
+					}
+					play(SOUND_PLAYSTOP);
+					Logger.getGlobal().info("STATE_FAILEDに移行");
 				}
-				play(SOUND_PLAYSTOP);
-				Logger.getGlobal().info("STATE_FAILEDに移行");
 			}
 			break;
 		// 閉店処理
@@ -675,10 +694,12 @@ public class BMSPlayer extends MainState {
 				saveConfig();
 				if (main.isTimerOn(TIMER_PLAY)) {
 					for (long l = main.getTimer(TIMER_FAILED) - main.getTimer(TIMER_PLAY); l < playtime + 500; l += 500) {
-						gaugelog.add(0f);
+						for(int i = 0; i < gaugelog.length; i++) {
+							gaugelog[i].add(0f);
+						}
 					}
 				}
-				resource.setGauge(gaugelog);
+				resource.setGauge(gaugelog[gauge.getType()]);
 				resource.setGrooveGauge(gauge);
 				input.setEnable(true);
 				input.setStartTime(0);
@@ -701,6 +722,9 @@ public class BMSPlayer extends MainState {
 				main.switchTimer(TIMER_FADEOUT, true);
 			}
 			if (main.getNowTime(TIMER_FADEOUT) > skin.getFadeout()) {
+				if(config.isContinueUntilEndOfSong()) {
+					config.setGauge(config.getGauge() + gauge.changeTypeOfClear(gauge.getType()));
+				}
 				main.getAudioProcessor().setGlobalPitch(1f);
 				resource.getBGAManager().stop();
 				if (!autoplay.isAutoPlayMode() && autoplay != PlayMode.PRACTICE) {
@@ -709,7 +733,7 @@ public class BMSPlayer extends MainState {
 				resource.setCombo(judge.getCourseCombo());
 				resource.setMaxcombo(judge.getCourseMaxcombo());
 				saveConfig();
-				resource.setGauge(gaugelog);
+				resource.setGauge(gaugelog[gauge.getType()]);
 				resource.setGrooveGauge(gauge);
 				input.setEnable(true);
 				input.setStartTime(0);
@@ -840,7 +864,7 @@ public class BMSPlayer extends MainState {
 		if (main.isTimerOn(TIMER_FAILED) || main.isTimerOn(TIMER_FADEOUT)) {
 			return;
 		}
-		if (state != STATE_FINISHED && notes == main.getPlayerResource().getSongdata().getNotes()) {
+		if (state != STATE_FINISHED && notes == main.getPlayerResource().getSongdata().getNotes() && !isFailed) {
 			state = STATE_FINISHED;
 			main.setTimerOn(TIMER_FADEOUT);
 			Logger.getGlobal().info("STATE_FINISHEDに移行");
@@ -1186,6 +1210,10 @@ public class BMSPlayer extends MainState {
 
 	public boolean isNoteEnd() {
 		return notes == main.getPlayerResource().getSongdata().getNotes();
+	}
+
+	public void setPastNotes(int notes) {
+		this.notes = notes;
 	}
 
 	public Mode getMode() {

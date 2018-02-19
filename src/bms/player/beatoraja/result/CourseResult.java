@@ -354,6 +354,9 @@ public class CourseResult extends MainState {
 			if (saveReplay[index] == -1 && resource.isUpdateScore()) {
 				// 保存されているリプレイデータがない場合は、EASY以上で自動保存
 				ReplayData[] rd = resource.getCourseReplay();
+				for(int i = 0; i < rd.length - 1; i++) {
+					rd[i].gauge = rd[rd.length - 1].gauge;
+				}
 				main.getPlayDataAccessor().wrireReplayData(rd, resource.getCourseBMSModels(),
 						resource.getPlayerConfig().getLnmode(), index, resource.getConstraint());
 				saveReplay[index] = 1;
