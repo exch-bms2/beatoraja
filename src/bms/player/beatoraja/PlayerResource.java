@@ -6,9 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.FloatArray;
 
 import bms.model.Mode;
@@ -17,7 +14,6 @@ import bms.model.BMSGenerator;
 import bms.model.BMSModel;
 import bms.model.BMSONDecoder;
 import bms.player.beatoraja.audio.AudioDriver;
-import bms.player.beatoraja.input.BMSPlayerInputDevice;
 import bms.player.beatoraja.play.GrooveGauge;
 import bms.player.beatoraja.play.bga.BGAProcessor;
 import bms.player.beatoraja.song.SongData;
@@ -28,6 +24,9 @@ import bms.player.beatoraja.song.SongData;
  * @author exch
  */
 public class PlayerResource {
+	
+	// TODO 各モード毎にPlayPropertyを作成
+	
 	/**
 	 * 選曲中のBMS
 	 */
@@ -43,11 +42,12 @@ public class PlayerResource {
 	private PlayerConfig pconfig;
 
 	private PlayMode mode;
-
+	
 	private List<CourseData.CourseDataConstraint> constraint = new ArrayList();
 
 	private BMSResource bmsresource;
 
+	private PlayProperty playresource;
 	/**
 	 * スコア
 	 */
@@ -238,7 +238,7 @@ public class PlayerResource {
 	public void setRivalScoreData(int rscore) {
 		this.rscore = rscore;
 	}
-
+	
 	public boolean setCourseBMSFiles(Path[] files) {
 		List<BMSModel> models = new ArrayList();
 		for (Path f : files) {
@@ -384,17 +384,26 @@ public class PlayerResource {
 		return bmsresource;
 	}
 	
+	public PlayProperty getPlayProperty() {
+		return playresource;
+	}
+
+	public void setPlayProperty(PlayProperty playresource) {
+		this.playresource = playresource;
+	}
+
 	public enum PlayMode {
 		PLAY,
 		PRACTICE,
 		AUTOPLAY,
+		AUTOPLAY_LOOP,
 		REPLAY_1,
 		REPLAY_2,
 		REPLAY_3,
 		REPLAY_4;
 		
 		public boolean isAutoPlayMode() {
-			return this == AUTOPLAY; 
+			return this == AUTOPLAY || this == AUTOPLAY_LOOP; 
 		}
 		
 		public boolean isReplayMode() {
@@ -430,5 +439,41 @@ public class PlayerResource {
 				return 0;
 			}
 		}
+	}
+	
+	public interface PlayProperty {
+		
+	}
+
+	public static class AutoPlayProperty implements PlayProperty {
+
+		private final PlayerResource resource;
+		private final Path[] bmsPaths;
+		private final boolean loop;
+		private int index;
+
+		public AutoPlayProperty(PlayerResource resource, Path[] bmsPaths, boolean loop) {
+			this.resource = resource;
+			this.bmsPaths = bmsPaths;
+			this.loop = loop;
+		}
+		
+		public boolean next() {
+			final int orgindex = index;
+			do {
+				if(index == bmsPaths.length) {
+					if(loop) {
+						index = 0;
+					} else {
+						return false;
+					}
+				}
+				if(resource.setBMSFile(bmsPaths[index++], PlayMode.AUTOPLAY)) {
+					return true;
+				};
+			} while(orgindex != index);
+			return false;
+		}
+
 	}
 }

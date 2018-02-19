@@ -14,10 +14,12 @@ import java.util.logging.Logger;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.utils.Array;
 
 import bms.model.Mode;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.IRScoreData.SongTrophy;
+import bms.player.beatoraja.PlayerResource.AutoPlayProperty;
 import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.ir.IRResponse;
@@ -284,6 +286,7 @@ public class MusicSelector extends MainState {
 		}
 
 		if (play != null) {
+			resource.setPlayProperty(null);
 			if (current instanceof SongBar) {
 				SongData song = ((SongBar) current).getSongData();
 				if (((SongBar) current).existsSong()) {
@@ -315,6 +318,22 @@ public class MusicSelector extends MainState {
 					play = PlayMode.PLAY;
 				}
 				readCourse(play);
+			} else if (current instanceof DirectoryBar) {
+				if(play.isAutoPlayMode()) {
+					Array<Path> paths = new Array();
+					for(Bar bar : ((DirectoryBar) current).getChildren()) {
+						if(bar instanceof SongBar && ((SongBar) bar).getSongData() != null && ((SongBar) bar).getSongData().getPath() != null) {
+							paths.add(Paths.get(((SongBar) bar).getSongData().getPath()));
+						}
+					}
+					if(paths.size > 0) {
+						resource.setPlayProperty(new PlayerResource.AutoPlayProperty(resource, paths.toArray(Path.class), false));
+						if (((AutoPlayProperty) resource.getPlayProperty()).next()) {
+							preview.stop();
+							main.changeState(MainController.STATE_DECIDE);
+						}
+					}
+				}
 			}
 			play = null;
 		}

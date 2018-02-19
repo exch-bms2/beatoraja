@@ -286,6 +286,13 @@ public class MusicSelectInputProcessor {
                 cursortime[2] = 0;
                 bar.close();
             }
+            
+    		if(input.getFunctionstate()[9] && input.getFunctiontime()[9] != 0) {
+    			input.getFunctiontime()[9] = 0;
+    			if(current instanceof DirectoryBar) {
+    				select.selectSong(PlayMode.AUTOPLAY);
+    			}
+    		}
         }
 
         // song bar moved
