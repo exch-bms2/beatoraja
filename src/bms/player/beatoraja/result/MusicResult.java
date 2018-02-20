@@ -202,6 +202,11 @@ public class MusicResult extends MainState {
 					inputProcessor.setEnterPressed(false);
 				}
 
+				if (inputProcessor.isExitPressed()) {
+					ok = true;
+					inputProcessor.setExitPressed(false);
+				}
+
 				if (resource.getScoreData() == null || ok) {
 					if (((MusicResultSkin) getSkin()).getRankTime() != 0
 							&& !main.isTimerOn(TIMER_RESULT_UPDATESCORE)) {
