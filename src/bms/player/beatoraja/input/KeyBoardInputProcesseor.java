@@ -43,6 +43,8 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 	 * 終了キー
 	 */
 	private int exit = Keys.ESCAPE;
+
+	private int enter = Keys.ENTER;
 	
 	private final IntArray reserved;
 	/**
@@ -81,6 +83,7 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 		reserved.addAll(function);
 		reserved.addAll(numbers);
 		reserved.addAll(exit);
+		reserved.addAll(enter);
 	}
 
 	public void setConfig(KeyboardConfig config) {
@@ -163,6 +166,11 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 		if (exitpressed != keystate[exit]) {
 			keystate[exit] = exitpressed;
 			this.bmsPlayerInputProcessor.setExitPressed(exitpressed);
+		}
+		final boolean enterpressed = Gdx.input.isKeyPressed(enter);
+		if (enterpressed != keystate[enter]) {
+			keystate[enter] = enterpressed;
+			this.bmsPlayerInputProcessor.setEnterPressed(enterpressed);
 		}
 	}
 

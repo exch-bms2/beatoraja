@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
+import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import com.badlogic.gdx.utils.FloatArray;
 
 import bms.model.*;
@@ -184,17 +185,28 @@ public class MusicResult extends MainState {
 	public void input() {
 		long time = main.getNowTime();
 		final PlayerResource resource = main.getPlayerResource();
+		final BMSPlayerInputProcessor inputProcessor = main.getInputProcessor();
 
 		if (!main.isTimerOn(TIMER_FADEOUT) && main.isTimerOn(TIMER_STARTINPUT)) {
 			if (time > getSkin().getInput()) {
-				boolean[] keystate = main.getInputProcessor().getKeystate();
-				long[] keytime = main.getInputProcessor().getTime();
+				boolean[] keystate = inputProcessor.getKeystate();
+				long[] keytime = inputProcessor.getTime();
 				boolean ok = false;
 				for(int i = 0; i < property.getAssignLength(); i++) {
 					if(property.getAssign(i) != null && keystate[i] && keytime[i] != 0) {
 						keytime[i] = 0;
 						ok = true;
 					}
+				}
+
+				if (inputProcessor.isEnterPressed()) {
+					ok = true;
+					inputProcessor.setEnterPressed(false);
+				}
+
+				if (inputProcessor.isExitPressed()) {
+					ok = true;
+					inputProcessor.setExitPressed(false);
 				}
 
 				if (resource.getScoreData() == null || ok) {
@@ -212,7 +224,7 @@ public class MusicResult extends MainState {
 				}
 
 				for (int i = 0; i < MusicSelector.REPLAY; i++) {
-					if (main.getInputProcessor().getNumberState()[i + 1]) {
+					if (inputProcessor.getNumberState()[i + 1]) {
 						saveReplayData(i);
 						break;
 					}

@@ -232,7 +232,8 @@ public class KeyConfiguration extends MainState {
 				midiconfig.setKeyAssign(MODE_HINT[mode], true);
 			}
 
-			if (input.getKeyBoardInputProcesseor().getLastPressedKey() == Keys.ENTER) {
+			if (input.isEnterPressed()) {
+				input.setEnterPressed(false);
 				input.getKeyBoardInputProcesseor().setLastPressedKey(-1);
 				for (BMControllerInputProcessor bmc : controllers) {
 					bmc.setLastPressedButton(-1);

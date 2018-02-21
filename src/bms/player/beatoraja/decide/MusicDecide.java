@@ -51,7 +51,8 @@ public class MusicDecide extends MainState {
 	public void input() {
 		if (!main.isTimerOn(TIMER_FADEOUT) && main.isTimerOn(TIMER_STARTINPUT)) {
 			BMSPlayerInputProcessor input = main.getInputProcessor();
-			if (input.getKeystate()[0] || input.getKeystate()[2] || input.getKeystate()[4] || input.getKeystate()[6]) {
+			if (input.getKeystate()[0] || input.getKeystate()[2] || input.getKeystate()[4] || input.getKeystate()[6] || input.isEnterPressed()) {
+				input.setEnterPressed(false);
 				main.setTimerOn(TIMER_FADEOUT);
 			}
 			if (input.isExitPressed() || (input.startPressed() && input.isSelectPressed())) {

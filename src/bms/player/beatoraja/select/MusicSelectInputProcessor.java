@@ -240,8 +240,9 @@ public class MusicSelectInputProcessor {
             select.setPanelState(0);
 
             if (current instanceof SelectableBar) {
-                if (property.isPressed(keystate, keytime, PLAY, true) || (cursor[3] && cursortime[3] != 0)) {
+                if (property.isPressed(keystate, keytime, PLAY, true) || (cursor[3] && cursortime[3] != 0) || input.isEnterPressed()) {
                     // play
+                    input.setEnterPressed(false);
                     cursortime[3] = 0;
                     select.selectSong(PlayMode.PLAY);
                 } else if (property.isPressed(keystate, keytime, PRACTICE, true)) {
@@ -255,7 +256,8 @@ public class MusicSelectInputProcessor {
                     select.selectSong(PlayMode.REPLAY_1);
                 }
             } else {
-                if (property.isPressed(keystate, keytime, FOLDER_OPEN, true) || (cursor[3] && cursortime[3] != 0)) {
+                if (property.isPressed(keystate, keytime, FOLDER_OPEN, true) || (cursor[3] && cursortime[3] != 0) || input.isEnterPressed()) {
+                    input.setEnterPressed(false);
                     // open folder
                     cursortime[3] = 0;
                     if (bar.updateBar(current)) {
