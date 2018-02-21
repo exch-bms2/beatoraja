@@ -530,10 +530,12 @@ public class Skin {
 		final int CharFaceIndex = 4;
 		final int SelectCGIndex = 6;
 		//各パラメータ
-		int[][] xywh = new int[256][4];
+		int[][] xywh = new int[1296][4];
 		for(int[] i: xywh){
 			Arrays.fill(i, 0);
 		}
+		int[] charFaceUpperXywh = {0, 0, 256, 256};
+		int[] charFaceAllXywh = {320, 0, 320, 480};
 		int anime = 100;
 		int size[] = {0, 0};
 		int frame[] = new int[20];
@@ -603,11 +605,25 @@ public class Skin {
 								size[0] = PMparseInt(data.get(1));
 								size[1] = PMparseInt(data.get(2));
 							}
-						} else if(str[0].length() == 3 && PMparseInt(str[0].substring(1,3), 16) >= 0 && PMparseInt(str[0].substring(1,3), 16) < xywh.length) {
+						} else if(str[0].length() == 3 && PMparseInt(str[0].substring(1,3), 36) >= 0 && PMparseInt(str[0].substring(1,3), 36) < xywh.length) {
 							//座標定義
 							if(data.size() > xywh[0].length) {
 								for(int i = 0; i < xywh[0].length; i++) {
-									xywh[PMparseInt(str[0].substring(1,3), 16)][i] = PMparseInt(data.get(i+1));
+									xywh[PMparseInt(str[0].substring(1,3), 36)][i] = PMparseInt(data.get(i+1));
+								}
+							}
+						} else if(str[0].equalsIgnoreCase("#CharFaceUpperSize")) {
+							//ハリアイ(上半身のみ) 座標&サイズ
+							if(data.size() > charFaceUpperXywh.length) {
+								for(int i = 0; i < charFaceUpperXywh.length; i++) {
+									charFaceUpperXywh[i] = PMparseInt(data.get(i+1));
+								}
+							}
+						} else if(str[0].equalsIgnoreCase("#CharFaceAllSize")) {
+							//ハリアイ(全体) 座標&サイズ
+							if(data.size() > charFaceAllXywh.length) {
+								for(int i = 0; i < charFaceAllXywh.length; i++) {
+									charFaceAllXywh[i] = PMparseInt(data.get(i+1));
 								}
 							}
 						} else if(str[0].equalsIgnoreCase("#Loop")) {
@@ -674,7 +690,7 @@ public class Skin {
 				setBMP = setColor == 2 && CharBMP[CharFaceIndex + 1] != null ? CharBMP[CharFaceIndex + 1] : CharBMP[CharFaceIndex];
 				if(setBMP == null) break;
 				image = new TextureRegion[1];
-				image[0] = new TextureRegion(setBMP, 0, 0, 256, 256);
+				image[0] = new TextureRegion(setBMP, charFaceUpperXywh[0], charFaceUpperXywh[1], charFaceUpperXywh[2], charFaceUpperXywh[3]);
 				PMcharaPart = new SkinImage(image, 0, 0);
 				add(PMcharaPart);
 				return PMcharaPart;
@@ -682,7 +698,7 @@ public class Skin {
 				setBMP = setColor == 2 && CharBMP[CharFaceIndex + 1] != null ? CharBMP[CharFaceIndex + 1] : CharBMP[CharFaceIndex];
 				if(setBMP == null) break;
 				image = new TextureRegion[1];
-				image[0] = new TextureRegion(setBMP, 320, 0, 320, 480);
+				image[0] = new TextureRegion(setBMP, charFaceAllXywh[0], charFaceAllXywh[1], charFaceAllXywh[2], charFaceAllXywh[3]);
 				PMcharaPart = new SkinImage(image, 0, 0);
 				add(PMcharaPart);
 				return PMcharaPart;
@@ -833,7 +849,7 @@ public class Skin {
 										if(dst[1].substring(i, i+2).equals("--")) {
 											count = 0;
 											for(int j = i; j < dst[1].length() && dst[1].substring(j, j+2).equals("--"); j+=2) count++;
-											if(PMparseInt(dst[1].substring(i+count*2, i+count*2+2), 16) >= 0 && PMparseInt(dst[1].substring(i+count*2, i+count*2+2), 16) <= 255) endxywh = xywh[PMparseInt(dst[1].substring(i+count*2, i+count*2+2), 16)];
+											if(PMparseInt(dst[1].substring(i+count*2, i+count*2+2), 36) >= 0 && PMparseInt(dst[1].substring(i+count*2, i+count*2+2), 36) < xywh.length) endxywh = xywh[PMparseInt(dst[1].substring(i+count*2, i+count*2+2), 36)];
 											for(int j = i; j < dst[1].length() && dst[1].substring(j, j+2).equals("--"); j+=2) {
 												int[] value = new int[dstxywh[0].length];
 												for(int k = 0; k < dstxywh[0].length; k++) {
@@ -842,8 +858,8 @@ public class Skin {
 												System.arraycopy(value,0,dstxywh[j/2],0,value.length);
 											}
 											i += (count - 1) * 2;
-										} else if(PMparseInt(dst[1].substring(i, i+2), 16) >= 0 && PMparseInt(dst[1].substring(i, i+2), 16) <= 255) {
-											startxywh = xywh[PMparseInt(dst[1].substring(i, i+2), 16)];
+										} else if(PMparseInt(dst[1].substring(i, i+2), 36) >= 0 && PMparseInt(dst[1].substring(i, i+2), 36) < xywh.length) {
+											startxywh = xywh[PMparseInt(dst[1].substring(i, i+2), 36)];
 											System.arraycopy(startxywh,0,dstxywh[i/2],0,startxywh.length);
 										}
 									}
@@ -882,7 +898,7 @@ public class Skin {
 								if((loopFrame+increaseRate) != 0) {
 									TextureRegion[] images = new TextureRegion[(loop[motion]+1)];
 									for(int i = 0; i < (loop[motion]+1) * 2; i+=2) {
-										int index = PMparseInt(dst[0].substring(i, i+2), 16);
+										int index = PMparseInt(dst[0].substring(i, i+2), 36);
 										if(index >= 0 && index < xywh.length && xywh[index][2] > 0 && xywh[index][3] > 0) images[i/2] = new TextureRegion(setBMP, xywh[index][0], xywh[index][1], xywh[index][2], xywh[index][3]);
 										else images[i/2] = new TextureRegion(transparent, 0, 0, 1, 1);
 									}
@@ -896,7 +912,7 @@ public class Skin {
 								//ループ開始フレームから
 								TextureRegion[] images = new TextureRegion[dst[0].length() / 2 - (loop[motion]+1)];
 								for(int i = (loop[motion]+1)  * 2; i < dst[0].length(); i+=2) {
-									int index = PMparseInt(dst[0].substring(i, i+2), 16);
+									int index = PMparseInt(dst[0].substring(i, i+2), 36);
 									if(index >= 0 && index < xywh.length && xywh[index][2] > 0 && xywh[index][3] > 0) images[i/2-(loop[motion]+1)] = new TextureRegion(setBMP, xywh[index][0], xywh[index][1], xywh[index][2], xywh[index][3]);
 									else images[i/2-(loop[motion]+1)] = new TextureRegion(transparent, 0, 0, 1, 1);
 								}
@@ -918,6 +934,26 @@ public class Skin {
 		return Integer.parseInt(s.replaceAll("[^0-9-]", ""));
 	}
 	private int PMparseInt(String s, int radix) {
+		if(radix == 36) {
+			int result = 0;
+			final char c1 = s.charAt(0);
+			if (c1 >= '0' && c1 <= '9') {
+				result = (c1 - '0') * 36;
+			} else if (c1 >= 'a' && c1 <= 'z') {
+				result = ((c1 - 'a') + 10) * 36;
+			} else if (c1 >= 'A' && c1 <= 'Z') {
+				result = ((c1 - 'A') + 10) * 36;
+			}
+			final char c2 = s.charAt(1);
+			if (c2 >= '0' && c2 <= '9') {
+				result += (c2 - '0');
+			} else if (c2 >= 'a' && c2 <= 'z') {
+				result += (c2 - 'a') + 10;
+			} else if (c2 >= 'A' && c2 <= 'Z') {
+				result += (c2 - 'A') + 10;
+			}
+			return result;
+		}
 		return Integer.parseInt(s.replaceAll("[^0-9a-fA-F-]", ""), radix);
 	}
 	private List<String> PMparseStr(String[] s) {
