@@ -206,7 +206,7 @@ public class BMSPlayer extends MainState {
 			}
 			PatternModifier.modify(model, Arrays.asList(replay.pattern));
 		} else if (resource.getReplayData().pattern != null) {
-			if(replay.sevenToNinePattern > 0 && model.getMode() == Mode.BEAT_7K) {
+			if(resource.getReplayData().sevenToNinePattern > 0 && model.getMode() == Mode.BEAT_7K) {
 				model.setMode(Mode.POPN_9K);
 				BMSPlayerRule.setSevenToNine(true);
 			}
