@@ -42,4 +42,8 @@ public class ReplayData {
 	 * プレイ日時(unixtime)
 	 */
 	public long date = 0;
+	/**
+	 * 7to9配置
+	 */
+	public int sevenToNinePattern = 0;
 }
