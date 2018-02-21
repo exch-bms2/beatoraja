@@ -39,7 +39,7 @@ public class MainLoader extends Application {
 
 		Path f = null;
 		PlayMode auto = PlayMode.PLAY;
-		boolean config = false;
+		boolean config = args.length == 0;
 		for (String s : args) {
 			if (s.startsWith("-")) {
 				if (s.equals("-a")) {
