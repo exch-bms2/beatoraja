@@ -198,9 +198,18 @@ public class BMSPlayer extends MainState {
 		}
 
 		Logger.getGlobal().info("譜面オプション設定");
+		BMSPlayerRule.setSevenToNine(false);
 		if (replay != null) {
+			if(replay.sevenToNinePattern > 0 && model.getMode() == Mode.BEAT_7K) {
+				model.setMode(Mode.POPN_9K);
+				BMSPlayerRule.setSevenToNine(true);
+			}
 			PatternModifier.modify(model, Arrays.asList(replay.pattern));
 		} else if (resource.getReplayData().pattern != null) {
+			if(replay.sevenToNinePattern > 0 && model.getMode() == Mode.BEAT_7K) {
+				model.setMode(Mode.POPN_9K);
+				BMSPlayerRule.setSevenToNine(true);
+			}
 			pattern = Arrays.asList(resource.getReplayData().pattern);
 			PatternModifier.modify(model, pattern);
 			Logger.getGlobal().info("譜面オプション : 保存された譜面変更ログから譜面再現");
@@ -245,8 +254,11 @@ public class BMSPlayer extends MainState {
 				NoteShuffleModifier mod = new NoteShuffleModifier(NoteShuffleModifier.SEVEN_TO_NINE);
 				mod.setModifyTarget(PatternModifier.SIDE_1P);
 				pattern = mod.modify(model);
-				assist = 1;
-				score = false;
+				BMSPlayerRule.setSevenToNine(true);
+				if(config.getSevenToNineType() != 0) {
+					assist = 1;
+					score = false;
+				}
 			}
 		}
 
@@ -342,6 +354,21 @@ public class BMSPlayer extends MainState {
 		PlayerConfig config = resource.getPlayerConfig();
 
 		loadSkin(getSkinType());
+
+		if(BMSPlayerRule.isSevenToNine()) {
+			//7to9 ボーダーが丁度割り切れるゲージ粒数に変更
+			Skin skin = getSkin();
+			int setParts = skin.getGaugeParts();
+			for(int type = 0; type < gauge.getGaugeTypeLength(); type++) {
+				for(int i = skin.getGaugeParts(); i <= gauge.getMaxValue(type); i++) {
+					if(gauge.getBorder(type) % (gauge.getMaxValue(type) / i) == 0) {
+						setParts = Math.max(setParts, i);
+						break;
+					}
+				}
+			}
+			skin.setGaugeParts(setParts);
+		}
 
 		setSound(SOUND_READY, "playready.wav", SoundType.SOUND, false);
 		setSound(SOUND_PLAYSTOP, "playstop.wav", SoundType.SOUND, false);
@@ -843,6 +870,7 @@ public class BMSPlayer extends MainState {
 		replay.pattern = pattern.toArray(new PatternModifyLog[pattern.size()]);
 		replay.rand = model.getRandom();
 		replay.gauge = config.getGauge();
+		replay.sevenToNinePattern = config.getSevenToNinePattern();
 
 		score.setMinbp(score.getEbd() + score.getLbd() + score.getEpr() + score.getLpr() + score.getEms() + score.getLms() + resource.getSongdata().getNotes() - notes);
 		score.setDeviceType(main.getInputProcessor().getDeviceType());

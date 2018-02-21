@@ -4,6 +4,7 @@ import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.Resolution;
 import bms.player.beatoraja.ShaderManager;
 import bms.player.beatoraja.SkinConfig.Offset;
+import bms.player.beatoraja.play.SkinGauge;
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
 import com.badlogic.gdx.Gdx;
@@ -441,6 +442,23 @@ public class Skin {
 
 		public void setColor(Color color) {
 			this.color = color;
+		}
+	}
+
+	public int getGaugeParts() {
+		for(SkinObject obj: objects) {
+			if(obj instanceof SkinGauge) {
+				return ((SkinGauge)obj).getParts();
+			}
+		}
+		return 0;
+	}
+
+	public void setGaugeParts(int parts) {
+		for(SkinObject obj: objects) {
+			if(obj instanceof SkinGauge) {
+				((SkinGauge)obj).setParts(parts);
+			}
 		}
 	}
 

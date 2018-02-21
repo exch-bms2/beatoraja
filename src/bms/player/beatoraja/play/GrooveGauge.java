@@ -180,11 +180,23 @@ public class GrooveGauge {
 		return property.values[type].max;
 	}
 
+	public float getMaxValue(int type) {
+		return property.values[type].max;
+	}
+
 	public float getMinValue() {
 		return property.values[type].min;
 	}
 
+	public float getMinValue(int type) {
+		return property.values[type].min;
+	}
+
 	public float getBorder() {
+		return property.values[type].border;
+	}
+
+	public float getBorder(int type) {
 		return property.values[type].border;
 	}
 

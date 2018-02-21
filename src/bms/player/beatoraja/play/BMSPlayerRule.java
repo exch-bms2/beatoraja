@@ -24,6 +24,15 @@ public enum BMSPlayerRule {
     public final GaugeProperty gauge;
     public final JudgeProperty judge;
 
+    private static boolean isSevenToNine = false;
+
+    public static void setSevenToNine(boolean sevenToNine) {
+        BMSPlayerRule.isSevenToNine = sevenToNine;
+    }
+    public static boolean isSevenToNine() {
+        return BMSPlayerRule.isSevenToNine;
+    }
+
     private BMSPlayerRule(GaugeProperty gauge, JudgeProperty judge) {
         this.gauge = gauge;
         this.judge = judge;
@@ -32,7 +41,8 @@ public enum BMSPlayerRule {
     public static BMSPlayerRule getBMSPlayerRule(Mode mode) {
         for(BMSPlayerRule bmsrule : BMSPlayerRule.values()) {
             if(bmsrule.name().equals(mode.name())) {
-                return bmsrule;
+                if(mode == Mode.POPN_9K && isSevenToNine) return BEAT_7K;
+                else return bmsrule;
             }
         }
         return Default;
