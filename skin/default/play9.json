@@ -19,8 +19,8 @@
 	],
 	"filepath":[
 		{"name":"Laser", "path":"laser/*.png"},
-		{"name":"POMYU Chara 1P", "path":"POMYU Chara/1P/*" ,"def":"Off"},
-		{"name":"POMYU Chara 2P", "path":"POMYU Chara/2P/*" ,"def":"Off"}
+		{"name":"POMYU Chara 1P", "path":"POMYU Chara/*|1P|" ,"def":"Off"},
+		{"name":"POMYU Chara 2P", "path":"POMYU Chara/*|2P|" ,"def":"Off"}
 	],
 
 	"source": [
@@ -38,8 +38,8 @@
 		{"id":11, "path":"ready.png"},
 		{"id":12, "path":"lanecover.png"},
 		{"id":13, "path":"judgedetail.png"},
-		{"id":"srcPMchara1P", "path":"POMYU Chara/1P/*"},
-		{"id":"srcPMchara2P", "path":"POMYU Chara/2P/*"}
+		{"id":"srcPMchara1P", "path":"POMYU Chara/*|1P|"},
+		{"id":"srcPMchara2P", "path":"POMYU Chara/*|2P|"}
 	],
 	"font": [
 		{"id":0, "path":"VL-Gothic-Regular.ttf"}
