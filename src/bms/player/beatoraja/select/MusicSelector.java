@@ -19,7 +19,6 @@ import com.badlogic.gdx.utils.Array;
 import bms.model.Mode;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.IRScoreData.SongTrophy;
-import bms.player.beatoraja.PlayerResource.AutoPlayProperty;
 import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.ir.IRResponse;
@@ -286,7 +285,6 @@ public class MusicSelector extends MainState {
 		}
 
 		if (play != null) {
-			resource.setPlayProperty(null);
 			if (current instanceof SongBar) {
 				SongData song = ((SongBar) current).getSongData();
 				if (((SongBar) current).existsSong()) {
@@ -327,8 +325,9 @@ public class MusicSelector extends MainState {
 						}
 					}
 					if(paths.size > 0) {
-						resource.setPlayProperty(new PlayerResource.AutoPlayProperty(resource, paths.toArray(Path.class), false));
-						if (((AutoPlayProperty) resource.getPlayProperty()).next()) {
+						resource.clear();
+						resource.setAutoPlaySongs(paths.toArray(Path.class), false);
+						if(resource.nextSong()) {
 							preview.stop();
 							main.changeState(MainController.STATE_DECIDE);
 						}

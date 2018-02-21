@@ -25,13 +25,13 @@ import bms.player.beatoraja.song.SongData;
  */
 public class PlayerResource {
 	
-	// TODO 各モード毎にPlayPropertyを作成
-	
 	/**
 	 * 選曲中のBMS
 	 */
 	private BMSModel model;
-
+	/**
+	 * 選曲中のBMSの生成器
+	 */
 	private BMSGenerator generator;
 	/**
 	 * 選択中のBMSの情報
@@ -40,14 +40,13 @@ public class PlayerResource {
 
 	private Config config;
 	private PlayerConfig pconfig;
-
+	/**
+	 * プレイモード
+	 */
 	private PlayMode mode;
 	
-	private List<CourseData.CourseDataConstraint> constraint = new ArrayList();
-
 	private BMSResource bmsresource;
 
-	private PlayProperty playresource;
 	/**
 	 * スコア
 	 */
@@ -66,8 +65,12 @@ public class PlayerResource {
 	 */
 	private FloatArray gauge;
 
-	private List<FloatArray> coursegauge = new ArrayList<FloatArray>();
+	private ReplayData replay;
 
+	private Path[] bmsPaths;
+	private boolean loop;
+	
+	private List<CourseData.CourseDataConstraint> constraint = new ArrayList();
 	/**
 	 * コースタイトル
 	 */
@@ -80,8 +83,10 @@ public class PlayerResource {
 	 * コース何曲目
 	 */
 	private int courseindex;
-
-	private ReplayData replay;
+	/**
+	 * コースゲージ履歴
+	 */
+	private List<FloatArray> coursegauge = new ArrayList<FloatArray>();
 
 	private List<ReplayData> courseReplay = new ArrayList<ReplayData>();
 	/**
@@ -121,6 +126,7 @@ public class PlayerResource {
 		combo = 0;
 		maxcombo = 0;
 		constraint.clear();
+		bmsPaths = null;
 	}
 
 	public boolean setBMSFile(final Path f, PlayMode mode) {
@@ -136,6 +142,7 @@ public class PlayerResource {
 		}
 
 		bmsresource.setBMSFile(model, f, config, mode);
+		songdata = new SongData(model, false);
 		return true;
 	}
 
@@ -261,6 +268,31 @@ public class PlayerResource {
 		return course;
 	}
 
+	public void setAutoPlaySongs(Path[] paths, boolean loop) {
+		this.bmsPaths = paths;
+		this.loop = loop;
+	}
+	
+	public boolean nextSong() {
+		if(bmsPaths == null) {
+			return false;
+		}
+		final int orgindex = courseindex;
+		do {
+			if(courseindex == bmsPaths.length) {
+				if(loop) {
+					courseindex = 0;
+				} else {
+					return false;
+				}
+			}
+			if(setBMSFile(bmsPaths[courseindex++], PlayMode.AUTOPLAY)) {
+				return true;
+			};
+		} while(orgindex != courseindex);
+		return false;
+	}
+	
 	public boolean nextCourse() {
 		courseindex++;
 		if (courseindex == course.length) {
@@ -397,14 +429,6 @@ public class PlayerResource {
 		this.orgGaugeOption = orgGaugeOption;
 	}
 
-	public PlayProperty getPlayProperty() {
-		return playresource;
-	}
-
-	public void setPlayProperty(PlayProperty playresource) {
-		this.playresource = playresource;
-	}
-
 	public enum PlayMode {
 		PLAY,
 		PRACTICE,
@@ -452,41 +476,5 @@ public class PlayerResource {
 				return 0;
 			}
 		}
-	}
-	
-	public interface PlayProperty {
-		
-	}
-
-	public static class AutoPlayProperty implements PlayProperty {
-
-		private final PlayerResource resource;
-		private final Path[] bmsPaths;
-		private final boolean loop;
-		private int index;
-
-		public AutoPlayProperty(PlayerResource resource, Path[] bmsPaths, boolean loop) {
-			this.resource = resource;
-			this.bmsPaths = bmsPaths;
-			this.loop = loop;
-		}
-		
-		public boolean next() {
-			final int orgindex = index;
-			do {
-				if(index == bmsPaths.length) {
-					if(loop) {
-						index = 0;
-					} else {
-						return false;
-					}
-				}
-				if(resource.setBMSFile(bmsPaths[index++], PlayMode.AUTOPLAY)) {
-					return true;
-				};
-			} while(orgindex != index);
-			return false;
-		}
-
 	}
 }

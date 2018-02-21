@@ -6,7 +6,6 @@ import java.util.logging.Logger;
 
 import bms.model.*;
 import bms.player.beatoraja.*;
-import bms.player.beatoraja.PlayerResource.AutoPlayProperty;
 import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyInputLog;
@@ -774,7 +773,7 @@ public class BMSPlayer extends MainState {
 					}
 					if (resource.getCourseBMSModels() != null && resource.nextCourse()) {
 						main.changeState(MainController.STATE_PLAYBMS);
-					} else if(resource.getPlayProperty() instanceof AutoPlayProperty && ((AutoPlayProperty) resource.getPlayProperty()).next()){
+					} else if(resource.nextSong()){
 						main.changeState(MainController.STATE_DECIDE);
 					} else {
 						main.changeState(MainController.STATE_SELECTMUSIC);
