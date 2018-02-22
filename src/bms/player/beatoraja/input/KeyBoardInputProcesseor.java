@@ -45,7 +45,9 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 	private int exit = Keys.ESCAPE;
 
 	private int enter = Keys.ENTER;
-	
+
+	private int delete = Keys.FORWARD_DEL;
+
 	private final IntArray reserved;
 	/**
 	 * 最後に押されたキー
@@ -171,6 +173,11 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 		if (enterpressed != keystate[enter]) {
 			keystate[enter] = enterpressed;
 			this.bmsPlayerInputProcessor.setEnterPressed(enterpressed);
+		}
+		final boolean deletepressed = Gdx.input.isKeyPressed(delete);
+		if (deletepressed != keystate[delete]) {
+			keystate[delete] = deletepressed;
+			this.bmsPlayerInputProcessor.setDeletePressed(deletepressed);
 		}
 	}
 

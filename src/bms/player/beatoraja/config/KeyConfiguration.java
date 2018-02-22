@@ -98,6 +98,8 @@ public class KeyConfiguration extends MainState {
 	private ControllerConfig[] controllerConfigs;
 	private MidiConfig midiconfig;
 
+	private boolean deletepressed = false;
+
 	public KeyConfiguration(MainController main) {
 		super(main);
 
@@ -161,6 +163,10 @@ public class KeyConfiguration extends MainState {
 			if (keyinput && midiinput.hasLastPressedKey()) {
 				setMidiKeyAssign(midikeysa[cursorpos]);
 				keyinput = false;
+			}
+			if (input.isDeletePressed()) {
+				deletepressed = true;
+				input.setDeletePressed(false);
 			}
 		} else {
 			if (cursor[0] && cursortime[0] != 0) {
@@ -247,6 +253,12 @@ public class KeyConfiguration extends MainState {
 				main.saveConfig();
 				main.changeState(MainController.STATE_SELECTMUSIC);
 			}
+
+			if (input.isDeletePressed()) {
+				if(!deletepressed) resetKeyAssign(keysa[cursorpos], bmkeysa[cursorpos], midikeysa[cursorpos]);
+				deletepressed = true;
+				input.setDeletePressed(false);
+			} else deletepressed = false;
 		}
 
 		sprite.begin();
@@ -404,6 +416,30 @@ public class KeyConfiguration extends MainState {
 				cc.getKeyAssign()[index] = -1;
 			}
 			midiconfig.setKeyAssign(index, null);
+		}
+	}
+
+	private void resetKeyAssign(int KBIndex, int BMIndex, int MidiIndex) {
+		final int noAssign = -1;
+		if (KBIndex >= 0) keyboardConfig.getKeyAssign()[KBIndex] = noAssign;
+		if(BMIndex >= 0) {
+				for (ControllerConfig cc : controllerConfigs) {
+					cc.getKeyAssign()[BMIndex] = noAssign;
+				}
+		} else if (BMIndex == -1) {
+			for (int i = 0; i < controllerConfigs.length; i++) {
+				controllerConfigs[i].setStart(noAssign);
+			}
+		} else if (BMIndex == -2) {
+			for (int i = 0; i < controllerConfigs.length; i++) {
+				controllerConfigs[i].setSelect(noAssign);
+			}
+		}
+		if(MidiIndex >= 0) midiconfig.setKeyAssign(MidiIndex, null);
+		else if (MidiIndex == -1) {
+			midiconfig.setStart(null);
+		} else if (MidiIndex == -2) {
+			midiconfig.setSelect(null);
 		}
 	}
 
