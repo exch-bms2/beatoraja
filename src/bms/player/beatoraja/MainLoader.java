@@ -70,7 +70,7 @@ public class MainLoader extends Application {
 		if (config || !Files.exists(MainController.configpath)) {
 			launch(args);
 		} else {
-			play(f, auto, false, null, null, f != null);
+			play(f, auto, true, null, null, f != null);
 		}
 	}
 
