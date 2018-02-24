@@ -134,7 +134,7 @@ public class JudgeManager {
 
 	public JudgeManager(BMSPlayer main) {
 		this.main = main;
-		algorithm = main.main.getPlayerResource().getConfig().getJudgealgorithm();
+		algorithm = JudgeAlgorithm.valueOf(main.main.getPlayerResource().getConfig().getJudgeType());
 	}
 
 	public void init(BMSModel model, PlayerResource resource) {
@@ -378,8 +378,36 @@ public class JudgeManager {
 					final int[][] judge = sc >= 0 ? sjudge : njudge;
 					// 対象ノーツの抽出
 					lanemodel.reset();
-					final Note tnote = algorithm.getNote(lanemodel, ptime, judge, judgestart, judgeend, miss);
-					final int j = algorithm.getJudge();
+					Note tnote = null;
+					int j = 0;
+					for (Note judgenote = lanemodel.getNote();judgenote != null;judgenote = lanemodel.getNote()) {
+						final long dtime = judgenote.getTime() - ptime;
+						if (dtime >= judgeend) {
+							break;
+						}
+						if (dtime < judgestart) {
+							continue;
+						}
+						if (judgenote instanceof MineNote || (judgenote instanceof LongNote
+								&& ((LongNote) judgenote).isEnd())) {
+							continue;
+						}
+						if (tnote == null || tnote.getState() != 0 || algorithm.compare(tnote, judgenote, ptime, judge)) {
+							if (!(miss == MissCondition.ONE && (judgenote.getState() != 0
+									|| (judgenote.getState() == 0 && judgenote.getPlayTime() != 0 && (dtime > judge[2][1] || dtime < judge[2][0]))))) {
+								if (judgenote.getState() != 0) {
+									j = (dtime >= judge[4][0] && dtime <= judge[4][1]) ? 5 : 6;
+								} else {
+									for (j = 0; j < judge.length && !(dtime >= judge[j][0] && dtime <= judge[j][1]); j++) {
+									}
+									j = (j >= 4 ? j + 1 : j);
+								}
+								if(j < 6 && (j < 4 || tnote == null || Math.abs(tnote.getTime() - ptime) > Math.abs(judgenote.getTime() - ptime))) {
+									tnote = judgenote;
+								}
+							}
+						}
+					}
 
 					if (tnote != null) {
 						// TODO この時点で空POOR処理を分岐させるべきか

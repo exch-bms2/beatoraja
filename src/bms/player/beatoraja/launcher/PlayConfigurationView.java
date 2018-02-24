@@ -342,7 +342,7 @@ public class PlayConfigurationView implements Initializable {
 		audioFastForward.setValue(config.getAudioFastForward());
 		showhiddennote.setSelected(config.isShowhiddennote());
 
-		judgealgorithm.setValue(JudgeAlgorithm.getIndex(config.getJudgealgorithm()));
+		judgealgorithm.setValue(JudgeAlgorithm.getIndex(config.getJudgeType()));
 
 		autosavereplay1.getSelectionModel().select(config.getAutoSaveReplay()[0]);
 		autosavereplay2.getSelectionModel().select(config.getAutoSaveReplay()[1]);
@@ -503,7 +503,7 @@ public class PlayConfigurationView implements Initializable {
 		config.setAudioFreqOption(audioFreqOption.getValue());
 		config.setAudioFastForward(audioFastForward.getValue());
 
-		config.setJudgealgorithm(JudgeAlgorithm.values()[judgealgorithm.getValue()]);
+		config.setJudgeType(JudgeAlgorithm.values()[judgealgorithm.getValue()].name());
 		config.setAutoSaveReplay( new int[]{autosavereplay1.getValue(),autosavereplay2.getValue(),
 				autosavereplay3.getValue(),autosavereplay4.getValue()});
 

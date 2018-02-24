@@ -107,7 +107,7 @@ public class Config {
 	/**
 	 * 判定アルゴリズム
 	 */
-	private JudgeAlgorithm judgealgorithm = JudgeAlgorithm.Combo;
+	private String judgeType = JudgeAlgorithm.Combo.name();
 	
     private boolean cacheSkinImage = false;
     
@@ -246,12 +246,18 @@ public class Config {
 		this.tableURL = tableURL;
 	}
 
-	public JudgeAlgorithm getJudgealgorithm() {
-		return judgealgorithm;
+	public String getJudgeType() {
+		for(JudgeAlgorithm type : JudgeAlgorithm.values()) {
+			if(type.name().equals(judgeType)) {
+				return judgeType;
+			}
+		}
+		judgeType = JudgeAlgorithm.Combo.name();
+		return judgeType;
 	}
 
-	public void setJudgealgorithm(JudgeAlgorithm judgeAlgorithm) {
-		this.judgealgorithm = judgeAlgorithm;
+	public void setJudgeType(String judgeType) {
+		this.judgeType = judgeType;
 	}
 
 	public boolean isFolderlamp() {
