@@ -59,9 +59,12 @@ public class CourseResult extends MainState {
 		loadSkin(SkinType.COURSE_RESULT);
 
         for(int i = resource.getCourseGauge().size();i < resource.getCourseBMSModels().length;i++) {
-        	FloatArray list = new FloatArray();
-            for(int l = 0;l < (resource.getCourseBMSModels()[i].getLastNoteTime() + 500) / 500;l++) {
-                list.add(0f);
+            FloatArray[] list = new FloatArray[resource.getGrooveGauge().getGaugeTypeLength()];
+            for(int type = 0; type < list.length; type++) {
+                list[type] = new FloatArray();
+                for(int l = 0;l < (resource.getCourseBMSModels()[i].getLastNoteTime() + 500) / 500;l++) {
+                    list[type].add(0f);
+                }
             }
             resource.getCourseGauge().add(list);
         }
@@ -95,6 +98,7 @@ public class CourseResult extends MainState {
 
 		if (main.isTimerOn(TIMER_FADEOUT)) {
 			if (main.getNowTime(TIMER_FADEOUT) > getSkin().getFadeout()) {
+				main.getPlayerResource().getPlayerConfig().setGauge(main.getPlayerResource().getOrgGaugeOption());
 				stop(SOUND_CLEAR);
 				stop(SOUND_FAIL);
 				stop(SOUND_CLOSE);
@@ -354,8 +358,8 @@ public class CourseResult extends MainState {
 			if (saveReplay[index] == -1 && resource.isUpdateScore()) {
 				// 保存されているリプレイデータがない場合は、EASY以上で自動保存
 				ReplayData[] rd = resource.getCourseReplay();
-				for(int i = 0; i < rd.length - 1; i++) {
-					rd[i].gauge = rd[rd.length - 1].gauge;
+				for(int i = 0; i < rd.length; i++) {
+					rd[i].gauge = resource.getPlayerConfig().getGauge();
 				}
 				main.getPlayDataAccessor().wrireReplayData(rd, resource.getCourseBMSModels(),
 						resource.getPlayerConfig().getLnmode(), index, resource.getConstraint());

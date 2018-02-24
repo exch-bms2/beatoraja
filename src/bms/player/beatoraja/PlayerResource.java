@@ -63,7 +63,7 @@ public class PlayerResource {
 	/**
 	 * ゲージの遷移ログ
 	 */
-	private FloatArray gauge;
+	private FloatArray[] gauge;
 
 	private ReplayData replay;
 
@@ -86,7 +86,7 @@ public class PlayerResource {
 	/**
 	 * コースゲージ履歴
 	 */
-	private List<FloatArray> coursegauge = new ArrayList<FloatArray>();
+	private List<FloatArray[]> coursegauge = new ArrayList<FloatArray[]>();
 
 	private List<ReplayData> courseReplay = new ArrayList<ReplayData>();
 	/**
@@ -303,6 +303,10 @@ public class PlayerResource {
 		}
 	}
 
+	public int getCourseIndex() {
+		return courseindex;
+	}
+
 	public void reloadBMSFile() {
 		if (model != null) {
 			model = loadBMSModel(Paths.get(model.getPath()), pconfig.getLnmode());
@@ -310,11 +314,11 @@ public class PlayerResource {
 		clear();
 	}
 
-	public FloatArray getGauge() {
+	public FloatArray[] getGauge() {
 		return gauge;
 	}
 
-	public void setGauge(FloatArray gauge) {
+	public void setGauge(FloatArray[] gauge) {
 		this.gauge = gauge;
 	}
 
@@ -366,11 +370,11 @@ public class PlayerResource {
 		courseReplay.add(rd);
 	}
 
-	public List<FloatArray> getCourseGauge() {
+	public List<FloatArray[]> getCourseGauge() {
 		return coursegauge;
 	}
 
-	public void addCourseGauge(FloatArray gauge) {
+	public void addCourseGauge(FloatArray[] gauge) {
 		coursegauge.add(gauge);
 	}
 
