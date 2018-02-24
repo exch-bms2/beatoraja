@@ -752,7 +752,7 @@ public class Skin {
 							List<String> data = PMparseStr(str);
 							if(data.size() > 1) motion = PMparseInt(data.get(1));
 							for (int i = 0; i < dst.length; i++) {
-								if(data.size() > i + 2) dst[i] = data.get(i + 2).replaceAll("[^0-9a-fA-F-]", "");
+								if(data.size() > i + 2) dst[i] = data.get(i + 2).replaceAll("[^0-9a-zA-Z-]", "");
 							}
 							int timer = Integer.MIN_VALUE;
 							int op[] = {0,0,0};

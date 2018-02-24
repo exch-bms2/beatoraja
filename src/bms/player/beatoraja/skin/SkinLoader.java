@@ -72,6 +72,13 @@ public abstract class SkinLoader {
         }
         if (imagepath.contains("*")) {
             String ext = imagepath.substring(imagepath.lastIndexOf("*") + 1);
+            if(imagepath.contains("|")) {
+                if(imagepath.length() > imagepath.lastIndexOf('|') + 1) {
+                    ext = imagepath.substring(imagepath.lastIndexOf("*") + 1, imagepath.indexOf('|')) + imagepath.substring(imagepath.lastIndexOf('|') + 1);
+                } else {
+                    ext = imagepath.substring(imagepath.lastIndexOf("*") + 1, imagepath.indexOf('|'));
+                }
+            }
             File imagedir = new File(imagepath.substring(0, imagepath.lastIndexOf('/')));
             if (imagedir.exists() && imagedir.isDirectory()) {
                 List<File> l = new ArrayList<File>();

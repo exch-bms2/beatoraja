@@ -153,6 +153,13 @@ public class SkinConfigurationView implements Initializable {
 		filebox.clear();
 		for (CustomFile file : header.getCustomFiles()) {
 			String name = file.path.substring(file.path.lastIndexOf('/') + 1);
+			if(file.path.contains("|")) {
+				if(file.path.length() > file.path.lastIndexOf('|') + 1) {
+					name = file.path.substring(file.path.lastIndexOf('/') + 1, file.path.indexOf('|')) + file.path.substring(file.path.lastIndexOf('|') + 1);
+				} else {
+					name = file.path.substring(file.path.lastIndexOf('/') + 1, file.path.indexOf('|'));
+				}
+			}
 			final Path dirpath = Paths.get(file.path.substring(0, file.path.lastIndexOf('/')));
 			if (!Files.exists(dirpath)) {
 				continue;
