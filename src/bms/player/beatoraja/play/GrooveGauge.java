@@ -146,6 +146,10 @@ public class GrooveGauge {
 		return  type;
 	}
 
+	public void setType(int type) {
+		this.type = type;
+	}
+
 	public void downType() {
 		type = type > 0 ? type - 1 : 0;
 		cleartype = ClearType.getClearTypeByGauge(type);
@@ -160,8 +164,15 @@ public class GrooveGauge {
 					cleartype = ClearType.getClearTypeByGauge(this.type);
 				}
 			}
+		} else if(type >= CLASS && type <= EXHARDCLASS) {
+			for(int i = CLASS; i <= EXHARDCLASS; i++) {
+				if(value[i] >= property.values[i].border && value[i] != 0) {
+					this.type = i;
+					cleartype = ClearType.getClearTypeByGauge(this.type);
+				}
+			}
 		}
-		return (this.type - type);
+		return this.type;
 	}
 
 	public void setStopUpdate(int type, boolean stopUpdate) {

@@ -117,10 +117,10 @@ public class MusicResult extends MainState {
 				Arrays.fill(keytime, 0);
 
 				if (resource.getCourseBMSModels() != null) {
-					if (resource.getGauge().get(resource.getGauge().size - 1) <= 0) {
+					if (resource.getGauge()[resource.getGrooveGauge().getType()].get(resource.getGauge()[resource.getGrooveGauge().getType()].size - 1) <= 0) {
 						if (resource.getCourseScoreData() != null) {
 							// 未達曲のノーツをPOORとして加算
-							final List<FloatArray> coursegauge = resource.getCourseGauge();
+							final List<FloatArray[]> coursegauge = resource.getCourseGauge();
 							final int cg = resource.getCourseBMSModels().length;
 							for (int i = 0; i < cg; i++) {
 								if (coursegauge.size() <= i) {
@@ -138,6 +138,10 @@ public class MusicResult extends MainState {
 						main.changeState(MainController.STATE_PLAYBMS);
 					} else {
 						// 合格リザルト
+						if(resource.getPlayerConfig().isContinueUntilEndOfSong()) {
+							int changedGaugeType = resource.getGrooveGauge().changeTypeOfClear(resource.getGrooveGauge().getType());
+							if(resource.getPlayMode() == PlayMode.PLAY) resource.getPlayerConfig().setGauge(changedGaugeType + resource.getGrooveGauge().NORMAL - resource.getGrooveGauge().CLASS);
+						}
 						main.changeState(MainController.STATE_GRADE_RESULT);
 					}
 				} else {
@@ -323,8 +327,11 @@ public class MusicResult extends MainState {
 			cscore.setEms(cscore.getEms() + newscore.getEms());
 			cscore.setLms(cscore.getLms() + newscore.getLms());
 			cscore.setMinbp(cscore.getMinbp() + newscore.getMinbp());
-			if (resource.getGauge().get(resource.getGauge().size - 1) > 0) {
+			if (resource.getGauge()[resource.getGrooveGauge().getType()].get(resource.getGauge()[resource.getGrooveGauge().getType()].size - 1) > 0) {
+				int orgGaugeType = resource.getGrooveGauge().getType();
+				if(resource.getPlayerConfig().isContinueUntilEndOfSong() && resource.getCourseIndex() == resource.getCourseBMSModels().length - 1) resource.getGrooveGauge().changeTypeOfClear(resource.getGrooveGauge().getType());
 				cscore.setClear(resource.getGrooveGauge().getClearType().id);
+				if(resource.getPlayerConfig().isContinueUntilEndOfSong() && resource.getCourseIndex() == resource.getCourseBMSModels().length - 1) resource.getGrooveGauge().setType(orgGaugeType);
 			} else {
 				cscore.setClear(Failed.id);
 
@@ -353,7 +360,7 @@ public class MusicResult extends MainState {
 				case PlayerConfig.IR_SEND_ALWAYS:
 					break;
 				case PlayerConfig.IR_SEND_COMPLETE_SONG:
-					FloatArray gauge = resource.getGauge();
+					FloatArray gauge = resource.getGauge()[resource.getGrooveGauge().getType()];
 					send &= gauge.get(gauge.size - 1) > 0.0;
 					break;
 				case PlayerConfig.IR_SEND_UPDATE_SCORE:
@@ -504,7 +511,7 @@ public class MusicResult extends MainState {
 			}
 			return resource.getScoreData().getCombo() - oldscore.getCombo();
 		case NUMBER_GROOVEGAUGE:
-			return (int) resource.getGauge().get(resource.getGauge().size - 1);
+			return (int) resource.getGauge()[resource.getGrooveGauge().getType()].get(resource.getGauge()[resource.getGrooveGauge().getType()].size - 1);
 			case NUMBER_AVERAGE_DURATION:
 			return (int) avgduration;
 		case NUMBER_AVERAGE_DURATION_AFTERDOT:

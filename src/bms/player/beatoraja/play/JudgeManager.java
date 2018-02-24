@@ -201,7 +201,7 @@ public class JudgeManager {
 
 		this.autoplay = resource.getPlayMode().isAutoPlayMode();
 		
-		FloatArray f = resource.getGauge();
+		FloatArray[] f = resource.getGauge();
 		if (f != null) {
 			setCourseCombo(resource.getCombo());
 			setCourseMaxcombo(resource.getMaxcombo());

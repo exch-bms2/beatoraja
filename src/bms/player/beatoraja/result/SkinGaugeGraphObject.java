@@ -85,13 +85,13 @@ public class SkinGaugeGraphObject extends SkinObject {
 			Pixmap shape = new Pixmap((int) graph.width, (int) graph.height, Pixmap.Format.RGBA8888);
 			// ゲージグラフ描画
 			color = typetable[resource.getGrooveGauge().getType()];
-			gauge = resource.getGauge();
+			gauge = resource.getGauge()[resource.getGrooveGauge().getType()];
 			IntArray section = new IntArray();
 			if (state instanceof CourseResult) {
 				gauge = new FloatArray();
-				for (FloatArray l : resource.getCourseGauge()) {
-					gauge.addAll(l);
-					section.add((section.size > 0 ? section.get(section.size - 1) : 0) + l.size);
+				for (FloatArray[] l : resource.getCourseGauge()) {
+					gauge.addAll(l[resource.getGrooveGauge().getType()]);
+					section.add((section.size > 0 ? section.get(section.size - 1) : 0) + l[resource.getGrooveGauge().getType()].size);
 				}
 			}
 			shape.setColor(graphcolor[color]);
