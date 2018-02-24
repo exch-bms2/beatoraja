@@ -60,8 +60,8 @@ public class MainLoader extends Application {
 				if (s.equals("-r4")) {
 					auto = PlayMode.REPLAY_4;
 				}
-				if (s.equals("-c")) {
-					config = true;
+				if (s.equals("-s")) {
+					config = false;
 				}
 			} else {
 				f = Paths.get(s);
