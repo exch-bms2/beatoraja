@@ -299,9 +299,11 @@ public class BMSPlayer extends MainState {
 			}
 		}
 		gauge = GrooveGauge.create(model, replay != null ? replay.gauge : config.getGauge(), coursetype, gauges);
-		FloatArray f = resource.getGauge();
+		FloatArray[] f = resource.getGauge();
 		if (f != null) {
-			gauge.setValue(f.get(f.size - 1));
+			for(int i = 0; i < f.length; i++) {
+				gauge.setValue(i, f[i].get(f[i].size - 1));
+			}
 		}
 		gaugelog = new FloatArray[gauge.getGaugeTypeLength()];
 		for(int i = 0; i < gaugelog.length; i++) {
@@ -685,7 +687,7 @@ public class BMSPlayer extends MainState {
 				if(config.isContinueUntilEndOfSong() && notes != main.getPlayerResource().getSongdata().getNotes() && !isFailed && gauge.getType() != GrooveGauge.HAZARD) {
 					if(gauge.getType() != GrooveGauge.CLASS) {
 						gauge.downType();
-						config.setGauge(config.getGauge() > 0 ? config.getGauge() - 1 :0);
+						if(resource.getPlayMode() == PlayMode.PLAY) config.setGauge(config.getGauge() > 0 ? config.getGauge() - 1 :0);
 					} else {
 						isFailed = true;
 					}
@@ -725,7 +727,7 @@ public class BMSPlayer extends MainState {
 						}
 					}
 				}
-				resource.setGauge(gaugelog[gauge.getType()]);
+				resource.setGauge(gaugelog);
 				resource.setGrooveGauge(gauge);
 				input.setEnable(true);
 				input.setStartTime(0);
@@ -749,7 +751,10 @@ public class BMSPlayer extends MainState {
 			}
 			if (main.getNowTime(TIMER_FADEOUT) > skin.getFadeout()) {
 				if(config.isContinueUntilEndOfSong()) {
-					config.setGauge(config.getGauge() + gauge.changeTypeOfClear(gauge.getType()));
+					if(resource.getCourseBMSModels() == null) {
+						int changedGaugeType = gauge.changeTypeOfClear(gauge.getType());
+						if(resource.getPlayMode() == PlayMode.PLAY) config.setGauge(changedGaugeType);
+					}
 				}
 				main.getAudioProcessor().setGlobalPitch(1f);
 				resource.getBGAManager().stop();
@@ -759,7 +764,7 @@ public class BMSPlayer extends MainState {
 				resource.setCombo(judge.getCourseCombo());
 				resource.setMaxcombo(judge.getCourseMaxcombo());
 				saveConfig();
-				resource.setGauge(gaugelog[gauge.getType()]);
+				resource.setGauge(gaugelog);
 				resource.setGrooveGauge(gauge);
 				input.setEnable(true);
 				input.setStartTime(0);

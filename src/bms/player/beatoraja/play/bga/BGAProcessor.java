@@ -3,6 +3,7 @@ package bms.player.beatoraja.play.bga;
 import static bms.player.beatoraja.skin.SkinProperty.TIMER_PLAY;
 
 import java.nio.file.*;
+import java.util.Arrays;
 import java.util.logging.Logger;
 
 import bms.model.BMSModel;
@@ -59,7 +60,7 @@ public class BGAProcessor {
 
 	};
 
-	public static final String[] mov_extension = { "mpg", "mpeg", "m1v", "m2v", "m4v", "avi", "wmv", "mp4" };
+	public static final String[] mov_extension = { "mp4", "wmv", "m4v", "webm", "mpg", "mpeg", "m1v", "m2v", "avi"};
 
 	/**
 	 * BGAイメージのキャッシュ枚数
@@ -135,7 +136,23 @@ public class BGAProcessor {
 			}
 			Path f = null;
 			if (Files.exists(dpath.resolve(name))) {
+				final int index = name.lastIndexOf('.');
+				String fex = null;
+				if (index != -1) {
+					fex = name.substring(index + 1).toLowerCase();
+				}
+				if(fex != null && !(Arrays.asList(mov_extension).contains(fex))){
 				f = dpath.resolve(name);
+				}else if(fex != null){
+					name = name.substring(0, index);
+					for (String mov : mov_extension) {
+						final Path mpgfile = dpath.resolve(name + "." + mov);
+						if (Files.exists(mpgfile)) {
+							f = mpgfile;
+							break;
+						}
+					}
+				}
 			}
 			if (f == null) {
 				final int index = name.lastIndexOf('.');

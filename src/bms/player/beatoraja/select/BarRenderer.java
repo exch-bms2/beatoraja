@@ -274,6 +274,7 @@ public class BarRenderer {
 
 	public void close() {
 		if(dir.isEmpty()) {
+			select.execute(MusicSelectCommand.NEXT_SORT);
 			return;
 		}
 		

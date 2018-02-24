@@ -32,6 +32,7 @@ import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.song.SQLiteSongDatabaseAccessor;
 import bms.player.beatoraja.song.SongDatabaseAccessor;
 import bms.player.beatoraja.song.SongInformationAccessor;
+import static bms.player.beatoraja.skin.SkinProperty.*;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -80,6 +81,7 @@ public class MainController extends ApplicationAdapter {
 	private BitmapFont updatefont;
 
 	private MainState current;
+	private static MainState currentState;
 	/**
 	 * 状態の開始時間
 	 */
@@ -260,6 +262,7 @@ public class MainController extends ApplicationAdapter {
 			newState.create();
 			newState.getSkin().prepare(newState);
 			current = newState;
+			currentState = newState;
 			starttime = System.nanoTime();
 		}
 		if (current.getStage() != null) {
@@ -656,7 +659,34 @@ public class MainController extends ApplicationAdapter {
 		public ScreenShotThread(byte[] pixels) {
 			this.pixels = pixels;
 			final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
-			path = "screenshot/" + sdf.format(Calendar.getInstance().getTime()) + ".png";
+			String stateName = "";
+			if(currentState instanceof MusicSelector) {
+				stateName = "_Music_Select";
+			} else if(currentState instanceof MusicDecide) {
+				stateName = "_Decide";
+			} if(currentState instanceof BMSPlayer) {
+				stateName = "_Play_LEVEL" + currentState.getNumberValue(NUMBER_PLAYLEVEL);
+				if(currentState.getTextValue(STRING_FULLTITLE).length() > 0) stateName += " " + currentState.getTextValue(STRING_FULLTITLE);
+			} else if(currentState instanceof MusicResult || currentState instanceof CourseResult) {
+				String[] clearTypeName = {"NO PLAY", "FAILED", "ASSIST EASY CLEAR", "LIGHT ASSIST EASY CLEAR", "EASY CLEAR", "CLEAR", "HARD CLEAR", "EXHARD CLEAR", "FULL COMBO", "PERFECT", "MAX"};
+				if(currentState instanceof MusicResult) stateName += "_LEVEL" + currentState.getNumberValue(NUMBER_PLAYLEVEL)+ " ";
+				else stateName += "_";
+				if(currentState.getTextValue(STRING_FULLTITLE).length() > 0) stateName += currentState.getTextValue(STRING_FULLTITLE);
+				if(currentState.getNumberValue(NUMBER_CLEAR) >= 0 && currentState.getNumberValue(NUMBER_CLEAR) < clearTypeName.length) stateName += " " + clearTypeName[currentState.getNumberValue(NUMBER_CLEAR)];
+				if(currentState.getBooleanValue(OPTION_RESULT_AAA_1P)) stateName += " AAA";
+				else if(currentState.getBooleanValue(OPTION_RESULT_AA_1P)) stateName += " AA";
+				else if(currentState.getBooleanValue(OPTION_RESULT_A_1P)) stateName += " A";
+				else if(currentState.getBooleanValue(OPTION_RESULT_B_1P)) stateName += " B";
+				else if(currentState.getBooleanValue(OPTION_RESULT_C_1P)) stateName += " C";
+				else if(currentState.getBooleanValue(OPTION_RESULT_D_1P)) stateName += " D";
+				else if(currentState.getBooleanValue(OPTION_RESULT_E_1P)) stateName += " E";
+				else if(currentState.getBooleanValue(OPTION_RESULT_F_1P)) stateName += " F";
+			} else if(currentState instanceof KeyConfiguration) {
+				stateName = "_Config";
+			}
+			stateName = stateName.replace("\\", "￥").replace("/", "／").replace(":", "：").replace("*", "＊").replace("?", "？").replace("\"", "”").replace("<", "＜").replace(">", "＞").replace("|", "｜").replace("\t", " ");
+
+			path = "screenshot/" + sdf.format(Calendar.getInstance().getTime()) + stateName +".png";
 		}
 
 		@Override
