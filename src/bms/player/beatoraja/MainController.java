@@ -55,10 +55,10 @@ public class MainController extends ApplicationAdapter {
 
 	public static final String VERSION = "beatoraja 0.5.4";
 	
-	private static final boolean debug = false;
+	private static final boolean debug = true;
 
 	/**
-	 *
+	 * 
 	 */
 	private final long boottime = System.currentTimeMillis();
 	private final Calendar cl = Calendar.getInstance();
@@ -75,7 +75,9 @@ public class MainController extends ApplicationAdapter {
 	
 	private PlayerResource resource;
 
+	private FreeTypeFontGenerator generator;
 	private BitmapFont systemfont;
+	private BitmapFont updatefont;
 
 	private MainState current;
 	/**
@@ -155,11 +157,15 @@ public class MainController extends ApplicationAdapter {
 		playdata = new PlayDataAccessor(config.getPlayername());
 		
 		ir = IRConnection.getIRConnection(player.getIrname());
-		if(player.getUserid().length() > 0 && ir != null) {
-			IRResponse response = ir.login(player.getUserid(), player.getPassword());
-			if(!response.isSuccessed()) {
-				Logger.getGlobal().warning("IRへのログイン失敗 : " + response.getMessage());
+		if(ir != null) {
+			if(player.getUserid().length() == 0 || player.getPassword().length() == 0) {
 				ir = null;
+			} else {
+				IRResponse response = ir.login(player.getUserid(), player.getPassword());
+				if(!response.isSuccessed()) {
+					Logger.getGlobal().warning("IRへのログイン失敗 : " + response.getMessage());
+					ir = null;
+				}				
 			}
 		}
 		
@@ -301,30 +307,27 @@ public class MainController extends ApplicationAdapter {
 			changeState(STATE_SELECTMUSIC);
 		}
 
-		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/default/VL-Gothic-Regular.ttf"));
+		generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/default/VL-Gothic-Regular.ttf"));
 		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
 		parameter.size = 24;
 		systemfont = generator.generateFont(parameter);
-		generator.dispose();
 		Logger.getGlobal().info("初期化時間(ms) : " + (System.currentTimeMillis() - t));
 		
-		Thread polling = new Thread() {
-			public void run() {
-				long time = 0;
-				for (;;) {
-					final long now = System.nanoTime() / 1000000;
-					if (time != now) {
-						time = now;
-						input.poll();
-					} else {
-						try {
-							sleep(0, 500000);
-						} catch (InterruptedException e) {
-						}
+		Thread polling = new Thread(() -> {
+			long time = 0;
+			for (;;) {
+				final long now = System.nanoTime() / 1000000;
+				if (time != now) {
+					time = now;
+					input.poll();
+				} else {
+					try {
+						Thread.sleep(0, 500000);
+					} catch (InterruptedException e) {
 					}
 				}
 			}			
-		};
+		});
 		polling.start();
 
 		if(player.getTarget() >= TargetProperty.getAllTargetProperties().length) {
@@ -397,8 +400,8 @@ public class MainController extends ApplicationAdapter {
 			sprite.end();
 		} else if(updateSong != null && updateSong.isAlive()) {
 			sprite.begin();
-			systemfont.setColor(0,1,1,0.5f + (System.currentTimeMillis() % 500) / 1000.0f);
-			systemfont.draw(sprite, updateSong.message, 100, config.getResolution().height - 2);
+			updatefont.setColor(0,1,1,0.5f + (System.currentTimeMillis() % 750) / 1000.0f);
+			updatefont.draw(sprite, updateSong.message, 100, config.getResolution().height - 2);
 			sprite.end();
 		}
 
@@ -698,6 +701,14 @@ public class MainController extends ApplicationAdapter {
 
 		public UpdateThread(String message) {
 			this.message = message;
+			FreeTypeFontParameter parameter = new FreeTypeFontParameter();
+			parameter.size = 24;
+			parameter.characters += message;
+			if(updatefont != null) {
+				updatefont.dispose();
+			}
+			updatefont = generator.generateFont(parameter);
+
 		}
 	}
 
