@@ -127,6 +127,7 @@ public class BMSPlayerInputProcessor {
 
 	private boolean exitPressed;
 	private boolean enterPressed;
+	private boolean deletePressed;
 
 	boolean[] cursor = new boolean[4];
 	long[] cursortime = new long[4];
@@ -346,6 +347,14 @@ public class BMSPlayerInputProcessor {
 
 	public void setEnterPressed(boolean enterPressed) {
 		this.enterPressed = enterPressed;
+	}
+
+	public boolean isDeletePressed() {
+		return deletePressed;
+	}
+
+	public void setDeletePressed(boolean deletePressed) {
+		this.deletePressed = deletePressed;
 	}
 
 	public boolean[] getFunctionstate() {
