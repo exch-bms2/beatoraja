@@ -142,7 +142,7 @@ public class JudgeManager {
 		judgenow = new int[((PlaySkin) main.getSkin()).getJudgeregion()];
 		judgecombo = new int[((PlaySkin) main.getSkin()).getJudgeregion()];
 		judgefast = new long[((PlaySkin) main.getSkin()).getJudgeregion()];
-		score = new IRScoreData(model.getMode());
+		score = new IRScoreData(BMSPlayerRule.isSevenToNine() ? Mode.BEAT_7K : model.getMode());
 		score.setNotes(model.getTotalNotes());
 		score.setSha256(model.getSHA256());
 
@@ -185,8 +185,8 @@ public class JudgeManager {
 				constraint = 1;
 			}
 		}
-		njudge = rule.getNoteJudge(judgerank, judgeWindowRate, constraint, model.getMode() == Mode.POPN_9K);
-		cnendjudge = rule.getLongNoteEndJudge(judgerank, judgeWindowRate, constraint, model.getMode() == Mode.POPN_9K);
+		njudge = rule.getNoteJudge(judgerank, judgeWindowRate, constraint, model.getMode() == Mode.POPN_9K && !BMSPlayerRule.isSevenToNine());
+		cnendjudge = rule.getLongNoteEndJudge(judgerank, judgeWindowRate, constraint, model.getMode() == Mode.POPN_9K && !BMSPlayerRule.isSevenToNine());
 		sjudge = rule.getScratchJudge(judgerank, judgeWindowRate, constraint);
 		scnendjudge = rule.getLongScratchEndJudge(judgerank, judgeWindowRate, constraint);
 		judgestart = judgeend = 0;
