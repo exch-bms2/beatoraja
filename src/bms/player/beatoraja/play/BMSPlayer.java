@@ -803,6 +803,10 @@ public class BMSPlayer extends MainState {
 		keyinput.input();
 	}
 
+	public KeyInputProccessor getKeyinput() {
+		return keyinput;
+	}
+
 	public int getState() {
 		return state;
 	}

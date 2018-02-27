@@ -30,6 +30,9 @@ class KeyInputProccessor {
 
 	private final LaneProperty laneProperty;
 
+	//キービーム判定同期用
+	private boolean isJudgeStarted = false;
+
 	//キービーム停止用
 	private boolean keyBeamStop = false;
 
@@ -44,6 +47,7 @@ class KeyInputProccessor {
 		judge = new JudgeThread(model.getAllTimeLines(),
 				keylog != null ? keylog.toArray(new KeyInputLog[keylog.size()]) : null);
 		judge.start();
+		isJudgeStarted = true;
 	}
 
 	public void input() {
@@ -73,9 +77,11 @@ class KeyInputProccessor {
 			final int timerOn = SkinPropertyMapper.keyOnTimerId(laneProperty.getLanePlayer()[lane], offset);
 			final int timerOff = SkinPropertyMapper.keyOffTimerId(laneProperty.getLanePlayer()[lane], offset);
 			if (pressed) {
-				if (!main.isTimerOn(timerOn) || scratch) {
-					main.setTimerOn(timerOn);
-					main.setTimerOff(timerOff);
+				if(!isJudgeStarted || main.getPlayerResource().getPlayMode().isAutoPlayMode()) {
+					if (!main.isTimerOn(timerOn) || scratch) {
+						main.setTimerOn(timerOn);
+						main.setTimerOff(timerOff);
+					}
 				}
 			} else {
 				if (main.isTimerOn(timerOn)) {
@@ -102,6 +108,20 @@ class KeyInputProccessor {
 		prevtime = now;
 	}
 
+	// キービームフラグON 判定同期用
+	public void inputKeyOn(int lane) {
+		final MainController main = player.main;
+		final int offset = laneProperty.getLaneSkinOffset()[lane];
+		if(!keyBeamStop) {
+			final int timerOn = SkinPropertyMapper.keyOnTimerId(laneProperty.getLanePlayer()[lane], offset);
+			final int timerOff = SkinPropertyMapper.keyOffTimerId(laneProperty.getLanePlayer()[lane], offset);
+			if (!main.isTimerOn(timerOn) || laneProperty.getLaneScratchAssign()[lane] != -1) {
+				main.setTimerOn(timerOn);
+				main.setTimerOff(timerOff);
+			}
+		}
+	}
+
 	public int getScratchState(int i) {
 		return scratch[i] / 6;
 	}
@@ -109,6 +129,7 @@ class KeyInputProccessor {
 	public void stopJudge() {
 		if (judge != null) {
 			keyBeamStop = true;
+			isJudgeStarted = false;
 			judge.stop = true;
 			judge = null;
 		}
