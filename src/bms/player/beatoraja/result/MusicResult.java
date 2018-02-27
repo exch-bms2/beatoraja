@@ -330,7 +330,30 @@ public class MusicResult extends MainState {
 			if (resource.getGauge()[resource.getGrooveGauge().getType()].get(resource.getGauge()[resource.getGrooveGauge().getType()].size - 1) > 0) {
 				int orgGaugeType = resource.getGrooveGauge().getType();
 				if(resource.getPlayerConfig().isContinueUntilEndOfSong() && resource.getCourseIndex() == resource.getCourseBMSModels().length - 1) resource.getGrooveGauge().changeTypeOfClear(resource.getGrooveGauge().getType());
-				cscore.setClear(resource.getGrooveGauge().getClearType().id);
+				if (resource.getAssist() > 0) {
+					if(resource.getAssist() == 1 && cscore.getClear() != ClearType.AssistEasy.id) cscore.setClear(ClearType.LightAssistEasy.id);
+					else cscore.setClear(ClearType.AssistEasy.id);
+				} else if(!(cscore.getClear() == ClearType.LightAssistEasy.id || cscore.getClear() == ClearType.AssistEasy.id)) {
+					if(resource.getCourseIndex() == resource.getCourseBMSModels().length - 1) {
+						int courseTotalNotes = 0;
+						for(int i = 0; i < resource.getCourseBMSModels().length; i++) {
+							courseTotalNotes += resource.getCourseBMSModels()[i].getTotalNotes();
+						}
+						if (courseTotalNotes == resource.getMaxcombo()) {
+							if (cscore.getJudgeCount(2) == 0) {
+								if (cscore.getJudgeCount(1) == 0) {
+									cscore.setClear(ClearType.Max.id);
+								} else {
+									cscore.setClear(ClearType.Perfect.id);
+								}
+							} else {
+								cscore.setClear(ClearType.FullCombo.id);
+							}
+						} else {
+							cscore.setClear(resource.getGrooveGauge().getClearType().id);
+						}
+					}
+				}
 				if(resource.getPlayerConfig().isContinueUntilEndOfSong() && resource.getCourseIndex() == resource.getCourseBMSModels().length - 1) resource.getGrooveGauge().setType(orgGaugeType);
 			} else {
 				cscore.setClear(Failed.id);
