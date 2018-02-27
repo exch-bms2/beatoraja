@@ -20,6 +20,7 @@ import com.badlogic.gdx.utils.*;
 
 import static bms.player.beatoraja.CourseData.CourseDataConstraint.*;
 import static bms.player.beatoraja.skin.SkinProperty.*;
+import static bms.player.beatoraja.PlayerConfig.*;
 
 /**
  * BMSプレイヤー本体
@@ -75,6 +76,16 @@ public class BMSPlayer extends MainState {
 	 * PMS キャラ用 ニュートラルモーション開始時の処理済ノート数{1P,2P} (ニュートラルモーション一周時に変化がなければニュートラルモーションを継続するため)
 	 */
 	private int[] PMcharaLastnotes = {0, 0};
+	/**
+	 * リプレイHS保存用 STATE READY時に保存
+	 */
+	private int replayFixHispeed = FIX_HISPEED_MAINBPM;
+	private float replayHispeed = 1.0f;
+	private int replayDuration = 500;
+	private float replayLanecover = 0.2f;
+	private boolean replayEnablelanecover = true;
+	private float replayLift = 0.1f;
+	private boolean replayEnablelift = false;
 
 	static final int TIME_MARGIN = 5000;
 
@@ -115,8 +126,25 @@ public class BMSPlayer extends MainState {
 			}
 		}
 
+		boolean isReplayPatternPlay = false;
+		ReplayData HSReplay = null;
 		if(replay != null && main.getInputProcessor().getKeystate()[1]) {
+			//保存された譜面変更ログから譜面再現
 			resource.setReplayData(replay);
+			isReplayPatternPlay = true;
+		} else if(replay != null && main.getInputProcessor().getKeystate()[2]) {
+			//保存された譜面オプションログから譜面オプション再現
+			config.setRandom(replay.randomoption);
+			config.setRandom2(replay.randomoption2);
+			config.setDoubleoption(replay.doubleoption);
+			isReplayPatternPlay = true;
+		}
+		if(replay != null && main.getInputProcessor().getKeystate()[4]) {
+			//保存されたHSオプションログからHSオプション再現
+			HSReplay = replay;
+			isReplayPatternPlay = true;
+		}
+		if(isReplayPatternPlay) {
 			replay = null;
 			autoplay = PlayMode.PLAY;
 		}
@@ -259,6 +287,17 @@ public class BMSPlayer extends MainState {
 					score = false;
 				}
 			}
+		}
+
+		if(HSReplay != null) {
+			//保存されたHSオプションログからHSオプション再現
+			config.setFixhispeed(HSReplay.fixhispeed);
+			getPlayConfig(config).setHispeed(HSReplay.hispeed);
+			getPlayConfig(config).setDuration(HSReplay.duration);
+			getPlayConfig(config).setLanecover(HSReplay.lanecover);
+			getPlayConfig(config).setEnablelanecover(HSReplay.enablelanecover);
+			getPlayConfig(config).setLift(HSReplay.lift);
+			getPlayConfig(config).setEnablelift(HSReplay.enablelift);
 		}
 
 		Logger.getGlobal().info("ゲージ設定");
@@ -591,6 +630,7 @@ public class BMSPlayer extends MainState {
 			// GET READY
 		case STATE_READY:
 			if (main.getNowTime(TIMER_READY) > skin.getPlaystart()) {
+				saveReplayHS();
 				state = STATE_PLAY;
                 main.setMicroTimer(TIMER_PLAY, micronow - starttimeoffset * 1000);
                 main.setMicroTimer(TIMER_RHYTHM, micronow - starttimeoffset * 1000);
@@ -836,6 +876,16 @@ public class BMSPlayer extends MainState {
 		pc.setLift(lanerender.getLiftRegion());
 	}
 
+	private void saveReplayHS() {
+		replayFixHispeed = lanerender.getFixHispeed();
+		replayHispeed = lanerender.getHispeed();
+		replayDuration = lanerender.getGreenValue();
+		replayLanecover = lanerender.getLanecover();
+		replayEnablelanecover = lanerender.isEnableLanecover();
+		replayLift = lanerender.getLiftRegion();
+		replayEnablelift = lanerender.isEnableLift();
+	}
+
 	public IRScoreData createScoreData() {
 		final PlayerResource resource = main.getPlayerResource();
 		final PlayerConfig config = resource.getPlayerConfig();
@@ -879,6 +929,16 @@ public class BMSPlayer extends MainState {
 		replay.rand = model.getRandom();
 		replay.gauge = config.getGauge();
 		replay.sevenToNinePattern = config.getSevenToNinePattern();
+		replay.randomoption = config.getRandom();
+		replay.randomoption2 = config.getRandom2();
+		replay.doubleoption = config.getDoubleoption();
+		replay.fixhispeed = replayFixHispeed;
+		replay.hispeed = replayHispeed;
+		replay.duration = replayDuration;
+		replay.lanecover = replayLanecover;
+		replay.enablelanecover = replayEnablelanecover;
+		replay.lift = replayLift;
+		replay.enablelift = replayEnablelift;
 
 		score.setMinbp(score.getEbd() + score.getLbd() + score.getEpr() + score.getLpr() + score.getEms() + score.getLms() + resource.getSongdata().getNotes() - notes);
 		score.setDeviceType(main.getInputProcessor().getDeviceType());
