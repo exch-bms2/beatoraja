@@ -62,10 +62,12 @@ public class SearchTextField extends Stage {
 						if (count > 0) {
 							selector.getBarRender().addSearch(swb);
 							selector.getBarRender().updateBar(null);
+							selector.getBarRender().setSelected(swb);
 							textField.setText("");
 							textField.setMessageText(count + " song(s) found");
 							textFieldStyle.messageFontColor = Color.valueOf("00c0c0");
 						} else {
+							selector.main.getInputProcessor().setEnterPressed(false);
 							textField.setText("");
 							textField.setMessageText("no song found");
 							textFieldStyle.messageFontColor = Color.DARK_GRAY;
