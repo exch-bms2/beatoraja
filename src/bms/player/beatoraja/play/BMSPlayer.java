@@ -1044,7 +1044,13 @@ public class BMSPlayer extends MainState {
 					- (int) (main.isTimerOn(TIMER_PLAY) ? main.getNowTime(TIMER_PLAY) : 0)
 					+ 1000), 0) / 1000) % 60;
 		case NUMBER_LOADING_PROGRESS:
-			return (int) ((main.getAudioProcessor().getProgress() + bga.getProgress()) * 50);
+			float value;
+			if(main.getPlayerResource().getConfig().getBga() == Config.BGA_ON
+					|| (main.getPlayerResource().getConfig().getBga() == Config.BGA_AUTO
+							&& (autoplay == PlayMode.AUTOPLAY || autoplay.isReplayMode()))) {
+				value = (main.getAudioProcessor().getProgress() + bga.getProgress()) / 2;
+			} else value = main.getAudioProcessor().getProgress();
+			return (int) (value * 100);
 		case NUMBER_GROOVEGAUGE:
 			return (int) gauge.getValue();
 		case NUMBER_GROOVEGAUGE_AFTERDOT:
@@ -1100,7 +1106,12 @@ public class BMSPlayer extends MainState {
 			}
 			return 0;
 		case BARGRAPH_LOAD_PROGRESS:
-			float value = (main.getAudioProcessor().getProgress() + bga.getProgress()) / 2;
+			float value;
+			if(main.getPlayerResource().getConfig().getBga() == Config.BGA_ON
+					|| (main.getPlayerResource().getConfig().getBga() == Config.BGA_AUTO
+							&& (autoplay == PlayMode.AUTOPLAY || autoplay.isReplayMode()))) {
+				value = (main.getAudioProcessor().getProgress() + bga.getProgress()) / 2;
+			} else value = main.getAudioProcessor().getProgress();
 			return value;
 		}
 		return super.getSliderValue(id);
