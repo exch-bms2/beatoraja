@@ -38,8 +38,7 @@ public class MainLoader extends Application {
 		}
 
 		Path f = null;
-		PlayMode auto = PlayMode.PLAY;
-		boolean config = args.length == 0;
+		PlayMode auto = null;
 		for (String s : args) {
 			if (s.startsWith("-")) {
 				if (s.equals("-a")) {
@@ -61,16 +60,20 @@ public class MainLoader extends Application {
 					auto = PlayMode.REPLAY_4;
 				}
 				if (s.equals("-s")) {
-					config = false;
+					auto = PlayMode.PLAY;
 				}
 			} else {
 				f = Paths.get(s);
+				if(auto == null) {
+					auto = PlayMode.PLAY;
+				}
 			}
 		}
-		if (config || !Files.exists(MainController.configpath)) {
-			launch(args);
+		
+		if(Files.exists(MainController.configpath) && (f != null || auto != null)) {
+			play(f, auto, true, null, null, f != null);			
 		} else {
-			play(f, auto, true, null, null, f != null);
+			launch(args);			
 		}
 	}
 
