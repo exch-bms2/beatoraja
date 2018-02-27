@@ -364,13 +364,12 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 					if(Files.isDirectory(p)) {
 						dirs.add(p);
 					} else {
-						final String s = p.toString().toLowerCase();
+						final String s = p.getFileName().toString().toLowerCase();
 						if (!txt && s.endsWith(".txt")) {
 							txt = true;
 						}
 						if (previewpath == null) {
-							String name = p.getFileName().toString().toLowerCase();
-							if(name.startsWith("preview") && (name.endsWith(".wav") || name.endsWith(".ogg") || name.endsWith(".mp3"))) {
+							if(s.startsWith("preview") && (s.endsWith(".wav") || s.endsWith(".ogg") || s.endsWith(".mp3"))) {
 								previewpath = p.getFileName().toString();
 							}
 						}
@@ -386,29 +385,32 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 
 			final boolean containsBMS = bmsfiles.size() > 0;
 			if (containsBMS) {
-				BMSFolderThread task = new BMSFolderThread(conn, bmsfiles.toArray(new Path[bmsfiles.size()]), records,
+				BMSFolderThread task = new BMSFolderThread(conn, bmsfiles, records,
 						updateFolder, txt, updatetime, previewpath, tags, info);
 				tasks.addLast(task);
 				task.start();
 			}
 
+			final int len = folders.size();
 			for (Path f : dirs) {
 				boolean b = true;
-				for (int i = folders.size() - 1;i >= 0;i--) {
+				final String s = (f.startsWith(root) ? root.relativize(f).toString() : f.toString())
+						+ File.separatorChar;
+				for (int i = 0; i < len;i++) {
 					final FolderData record = folders.get(i);
-					final String s = (f.startsWith(root) ? root.relativize(f).toString() : f.toString())
-							+ File.separatorChar;
-					if (record.getPath().equals(s)) {
-						folders.remove(i);
+					if (record != null && record.getPath().equals(s)) {
+//						long t = System.nanoTime();
+						folders.set(i, null);
+//						System.out.println(System.nanoTime() - t);
 						if (!updateAll && record.getDate() == Files.getLastModifiedTime(f).toMillis() / 1000) {
 							b = false;
 						}
 						break;
 					}
 				}
-				
+
 				if(!containsBMS) {
-					this.processDirectory(conn, f, b);					
+					this.processDirectory(conn, f, b);
 				}
 			}
 			// folderテーブルの更新
@@ -426,17 +428,19 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 			}
 			// ディレクトリ内に存在しないフォルダレコードを削除
 			for (FolderData record : folders) {
-				// System.out.println("Song Database : folder deleted - " +
-				// record.getPath());
-				qr.update(conn, "DELETE FROM folder WHERE path LIKE ?", record.getPath() + "%");
-				qr.update(conn, "DELETE FROM song WHERE path LIKE ?", record.getPath() + "%");
+				if(record != null) {
+					// System.out.println("Song Database : folder deleted - " +
+					// record.getPath());
+					qr.update(conn, "DELETE FROM folder WHERE path LIKE ?", record.getPath() + "%");
+					qr.update(conn, "DELETE FROM song WHERE path LIKE ?", record.getPath() + "%");
+				}
 			}
 		}
 	}
 
 	class BMSFolderThread extends Thread {
 
-		private final Path[] bmsfiles;
+		private final List<Path> bmsfiles;
 		private final List<SongData> records;
 		private final boolean updateAll;
 		private final boolean txt;
@@ -447,7 +451,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 		private int count;
 		private final SongInformationAccessor info;
 
-		public BMSFolderThread(Connection conn, Path[] bmsfiles, List<SongData> records, boolean updateAll, boolean txt,
+		public BMSFolderThread(Connection conn, List<Path> bmsfiles, List<SongData> records, boolean updateAll, boolean txt,
 				long updatetime, String preview, Map<String, String> tags, SongInformationAccessor info) {
 			this.bmsfiles = bmsfiles;
 			this.records = records;
@@ -463,98 +467,115 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 		public void run() {
 			BMSDecoder bmsdecoder = null;
 			BMSONDecoder bmsondecoder = null;
-			try {
-				for (Path path : bmsfiles) {
-					boolean b = true;
-					final String pathname = (path.startsWith(root) ? root.relativize(path).toString() : path.toString());
-					for (int i = records.size() - 1;i >= 0;i--) {
-						final SongData record = records.get(i);
-						if (record.getPath().equals(pathname)) {
-							records.remove(i);
+			final int len = records.size();
+			for (Path path : bmsfiles) {
+				boolean update = true;
+				final String pathname = (path.startsWith(root) ? root.relativize(path).toString() : path.toString());
+				for (int i = 0;i < len;i++) {
+					final SongData record = records.get(i);
+					if (record != null && record.getPath().equals(pathname)) {
+						records.set(i, null);
+						try {
 							if (!updateAll && record.getDate() == Files.getLastModifiedTime(path).toMillis() / 1000) {
-								b = false;
+								update = false;
 							}
-							break;
+						} catch (IOException e) {
+							e.printStackTrace();
 						}
+						break;
 					}
-					if (b) {
-						BMSModel model = null;
-						if (pathname.toLowerCase().endsWith(".bmson")) {
-							if (bmsondecoder == null) {
-								bmsondecoder = new BMSONDecoder(BMSModel.LNTYPE_LONGNOTE);
-							}
-							model = bmsondecoder.decode(path.toFile());
-						} else {
-							if (bmsdecoder == null) {
-								bmsdecoder = new BMSDecoder(BMSModel.LNTYPE_LONGNOTE);
-							}
-							model = bmsdecoder.decode(path.toFile());
-						}
+				}
+				if (!update) {
+					continue;
+				}
+				BMSModel model = null;
+				if (pathname.toLowerCase().endsWith(".bmson")) {
+					if (bmsondecoder == null) {
+						bmsondecoder = new BMSONDecoder(BMSModel.LNTYPE_LONGNOTE);
+					}
+					model = bmsondecoder.decode(path.toFile());
+				} else {
+					if (bmsdecoder == null) {
+						bmsdecoder = new BMSDecoder(BMSModel.LNTYPE_LONGNOTE);
+					}
+					model = bmsdecoder.decode(path.toFile());
+				}
 
-						if (model != null) {
-							final SongData sd = new SongData(model, txt);
-							if (sd.getNotes() != 0 || model.getWavList().length != 0) {
-								if (sd.getDifficulty() == 0) {
-									final String fulltitle = (sd.getTitle() + sd.getSubtitle()).toLowerCase();
-									if (fulltitle.contains("beginner")) {
-										sd.setDifficulty(1);
-									} else if (fulltitle.contains("normal")) {
-										sd.setDifficulty(2);
-									} else if (fulltitle.contains("hyper")) {
-										sd.setDifficulty(3);
-									} else if (fulltitle.contains("another")) {
-										sd.setDifficulty(4);
-									} else if (fulltitle.contains("insane")) {
-										sd.setDifficulty(5);
-									} else {
-										if (sd.getNotes() < 250) {
-											sd.setDifficulty(1);
-										} else if (sd.getNotes() < 600) {
-											sd.setDifficulty(2);
-										} else if (sd.getNotes() < 1000) {
-											sd.setDifficulty(3);
-										} else if (sd.getNotes() < 2000) {
-											sd.setDifficulty(4);
-										} else {
-											sd.setDifficulty(5);
-										}
-									}
-								}
-								if((sd.getPreview() == null || sd.getPreview().length() == 0) && preview != null) {
-									sd.setPreview(preview);
-								}
-								final String tag = tags.get(sd.getMd5());
-								qr.update(conn,
-										"INSERT OR REPLACE INTO song "
-												+ "(md5, sha256, title, subtitle, genre, artist, subartist, tag, path,"
-												+ "folder, stagefile, banner, backbmp, preview, parent, level, difficulty, "
-												+ "maxbpm, minbpm, length, mode, judge, feature, content, "
-												+ "date, favorite, notes, adddate, charthash)"
-												+ "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);",
-										sd.getMd5(), sd.getSha256(), sd.getTitle(), sd.getSubtitle(), sd.getGenre(),
-										sd.getArtist(), sd.getSubartist(), tag != null ? tag : "",
-										pathname, SongUtils.crc32(path.getParent().toString(), bmsroot, root.toString()),
-										sd.getStagefile(), sd.getBanner(), sd.getBackbmp(), sd.getPreview(),
-										SongUtils.crc32(path.getParent().getParent().toString(), bmsroot, root.toString()),
-										sd.getLevel(), sd.getDifficulty(), sd.getMaxbpm(), sd.getMinbpm(), sd.getLength(),
-										sd.getMode(), sd.getJudge(), sd.getFeature(), sd.getContent(),
-										Files.getLastModifiedTime(path).toMillis() / 1000, 0, sd.getNotes(), updatetime, sd.getCharthash());
-								if(info != null) {
-									info.update(model);
-								}
-								count++;
+				if (model == null) {
+					continue;
+				}
+				final SongData sd = new SongData(model, txt);
+				if (sd.getNotes() != 0 || model.getWavList().length != 0) {
+					if (sd.getDifficulty() == 0) {
+						final String fulltitle = (sd.getTitle() + sd.getSubtitle()).toLowerCase();
+						if (fulltitle.contains("beginner")) {
+							sd.setDifficulty(1);
+						} else if (fulltitle.contains("normal")) {
+							sd.setDifficulty(2);
+						} else if (fulltitle.contains("hyper")) {
+							sd.setDifficulty(3);
+						} else if (fulltitle.contains("another")) {
+							sd.setDifficulty(4);
+						} else if (fulltitle.contains("insane")) {
+							sd.setDifficulty(5);
+						} else {
+							if (sd.getNotes() < 250) {
+								sd.setDifficulty(1);
+							} else if (sd.getNotes() < 600) {
+								sd.setDifficulty(2);
+							} else if (sd.getNotes() < 1000) {
+								sd.setDifficulty(3);
+							} else if (sd.getNotes() < 2000) {
+								sd.setDifficulty(4);
 							} else {
-								qr.update(conn, "DELETE FROM song WHERE path = ?", pathname);
+								sd.setDifficulty(5);
 							}
 						}
 					}
+					if((sd.getPreview() == null || sd.getPreview().length() == 0) && preview != null) {
+						sd.setPreview(preview);
+					}
+					final String tag = tags.get(sd.getMd5());
+					try {
+						qr.update(conn,
+								"INSERT OR REPLACE INTO song "
+										+ "(md5, sha256, title, subtitle, genre, artist, subartist, tag, path,"
+										+ "folder, stagefile, banner, backbmp, preview, parent, level, difficulty, "
+										+ "maxbpm, minbpm, length, mode, judge, feature, content, "
+										+ "date, favorite, notes, adddate, charthash)"
+										+ "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);",
+								sd.getMd5(), sd.getSha256(), sd.getTitle(), sd.getSubtitle(), sd.getGenre(),
+								sd.getArtist(), sd.getSubartist(), tag != null ? tag : "",
+								pathname, SongUtils.crc32(path.getParent().toString(), bmsroot, root.toString()),
+								sd.getStagefile(), sd.getBanner(), sd.getBackbmp(), sd.getPreview(),
+								SongUtils.crc32(path.getParent().getParent().toString(), bmsroot, root.toString()),
+								sd.getLevel(), sd.getDifficulty(), sd.getMaxbpm(), sd.getMinbpm(), sd.getLength(),
+								sd.getMode(), sd.getJudge(), sd.getFeature(), sd.getContent(),
+								Files.getLastModifiedTime(path).toMillis() / 1000, 0, sd.getNotes(), updatetime, sd.getCharthash());
+					} catch (SQLException | IOException e) {
+						e.printStackTrace();
+					}
+					if(info != null) {
+						info.update(model);
+					}
+					count++;
+				} else {
+					try {
+						qr.update(conn, "DELETE FROM song WHERE path = ?", pathname);
+					} catch (SQLException e) {
+						e.printStackTrace();
+					}
 				}
-				// ディレクトリ内のファイルに存在しないレコードを削除
-				for (SongData record : records) {
-					qr.update(conn, "DELETE FROM song WHERE path = ?", record.getPath());
+			}
+			// ディレクトリ内のファイルに存在しないレコードを削除
+			for (SongData record : records) {
+				if(record != null) {
+					try {
+						qr.update(conn, "DELETE FROM song WHERE path = ?", record.getPath());
+					} catch (SQLException e) {
+						e.printStackTrace();
+					}
 				}
-			} catch (Throwable e) {
-				e.printStackTrace();
 			}
 		}
 	}
