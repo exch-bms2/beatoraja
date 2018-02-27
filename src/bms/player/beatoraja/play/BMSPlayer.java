@@ -769,6 +769,7 @@ public class BMSPlayer extends MainState {
 				}
 				resource.setGauge(gaugelog);
 				resource.setGrooveGauge(gauge);
+				resource.setAssist(assist);
 				input.setEnable(true);
 				input.setStartTime(0);
 				if (autoplay == PlayMode.PRACTICE) {
@@ -806,6 +807,7 @@ public class BMSPlayer extends MainState {
 				saveConfig();
 				resource.setGauge(gaugelog);
 				resource.setGrooveGauge(gauge);
+				resource.setAssist(assist);
 				input.setEnable(true);
 				input.setStartTime(0);
 				if (autoplay == PlayMode.PRACTICE) {
@@ -897,7 +899,7 @@ public class BMSPlayer extends MainState {
 		ClearType clear = ClearType.Failed;
 		if (state != STATE_FAILED && gauge.isQualified()) {
 			if (assist > 0) {
-				clear = assist == 1 ? ClearType.LightAssistEasy : ClearType.AssistEasy;
+				if(resource.getCourseBMSModels() == null) clear = assist == 1 ? ClearType.LightAssistEasy : ClearType.AssistEasy;
 			} else {
 				if (notes == this.judge.getCombo()) {
 					if (judge.getJudgeCount(2) == 0) {
