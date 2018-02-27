@@ -227,6 +227,8 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 				continue;
 			}
 			String name = model.getWavList()[wavid];
+                        name = name.replaceFirst("^[\\\\\\/]+", ""); //trim leading \ at the start
+                        
 			for (Note note : waventry.getValue()) {
 				if (note.getMicroStarttime() == 0 && note.getMicroDuration() == 0) {
 					// 音切りなしのケース
