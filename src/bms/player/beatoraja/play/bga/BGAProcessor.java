@@ -40,17 +40,9 @@ public class BGAProcessor {
 
 		@Override
 		protected MovieProcessor load(String key) {
-			if (config.getMovieplayer() == Config.MOVIEPLAYER_FFMPEG) {
-				MovieProcessor mm = new FFmpegProcessor(config.getFrameskip());
-				mm.create(key);
-				return mm;
-			}
-			if (config.getMovieplayer() == Config.MOVIEPLAYER_VLC && config.getVlcpath().length() > 0) {
-				MovieProcessor mm = new VLCMovieProcessor(config.getVlcpath());
-				mm.create(key);
-				return mm;
-			}
-			return null;
+			MovieProcessor mm = new FFmpegProcessor(config.getFrameskip());
+			mm.create(key);
+			return mm;
 		}
 
 		@Override

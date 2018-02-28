@@ -145,12 +145,7 @@ public class Config {
 	public static final int BGAEXPAND_KEEP_ASPECT_RATIO = 1;
 	public static final int BGAEXPAND_OFF = 2;
 
-	private int movieplayer = MOVIEPLAYER_FFMPEG;
-	public static final int MOVIEPLAYER_FFMPEG = 0;
-	public static final int MOVIEPLAYER_VLC = 1;
-
 	private int frameskip = 1;
-	private String vlcpath = "";
 
 	private boolean updatesong = false;
 
@@ -196,14 +191,6 @@ public class Config {
 
 	public void setBga(int bga) {
 		this.bga = bga;
-	}
-
-	public String getVlcpath() {
-		return vlcpath;
-	}
-
-	public void setVlcpath(String vlcpath) {
-		this.vlcpath = vlcpath;
 	}
 
 	public int getAudioDeviceBufferSize() {
@@ -282,14 +269,6 @@ public class Config {
 
 	public void setShowhiddennote(boolean showhiddennote) {
 		this.showhiddennote = showhiddennote;
-	}
-
-	public int getMovieplayer() {
-		return movieplayer;
-	}
-
-	public void setMovieplayer(int movieplayer) {
-		this.movieplayer = movieplayer;
 	}
 
 	public int getFrameskip() {
