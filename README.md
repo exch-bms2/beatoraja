@@ -21,15 +21,20 @@ It works on Windows, Mac OS, and Linux.
 - OpenGL 3.1- (may not work under Windows 10 + Intel HD Graphics 2000/3000. See also https://github.com/LWJGL/lwjgl/issues/119)
 
 # How To Use
-> java -jar beatoraja.jar -(a|p|r1|r2|r3|r4|c) [BMS path]
+
+> java -jar beatoraja.jar -(a|p|r1|r2|r3|r4|s) [BMS path]
+
 - options
--- a : autoplay
--- p : practice
--- r1-r4 : start replay data 1-4
--- c : configuration
+  - a : autoplay
+  - p : practice
+  - r1-r4 : start replay data 1-4
+  - s : skip configuration
 
 beatoraja uses a large amount of heap memory. So it is recommended that you use options of extending heap memory : e.g. -Xms1g -Xmx4g.
+
 On JRE 32bit, maximum heap memory size is limited to 1.4G-1.6G. See http://www.oracle.com/technetwork/java/hotspotfaq-138619.html#gc_heap_32bit
+
+**Don't use this application for playing copyrighted contents.**
 
 # License
 - GNU General Public License v3
