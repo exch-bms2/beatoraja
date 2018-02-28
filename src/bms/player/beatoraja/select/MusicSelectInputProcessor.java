@@ -84,11 +84,6 @@ public class MusicSelectInputProcessor {
             numtime[3] = 0;
             select.execute(MusicSelectCommand.NEXT_LNMODE);
         }
-        if (numberstate[4] && numtime[4] != 0) {
-            // change replay
-            numtime[4] = 0;
-            select.execute(MusicSelectCommand.NEXT_REPLAY);
-        }
 
         boolean[] keystate = input.getKeystate();
         long[] keytime = input.getTime();
@@ -97,6 +92,11 @@ public class MusicSelectInputProcessor {
         
         final MusicSelectKeyProperty property = MusicSelectKeyProperty.values()[config.getMusicselectinput()];
 
+        if (numberstate[4] && numtime[4] != 0 || (!input.startPressed() && !input.isSelectPressed() && property.isPressed(keystate, keytime, NEXT_REPLAY, true))) {
+            // change replay
+            numtime[4] = 0;
+            select.execute(MusicSelectCommand.NEXT_REPLAY);
+        }
         if (input.startPressed() && !input.isSelectPressed()) {
             bar.resetInput();
             // show play option
