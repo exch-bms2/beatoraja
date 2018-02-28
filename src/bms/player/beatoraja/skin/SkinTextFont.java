@@ -10,6 +10,11 @@ import com.badlogic.gdx.math.Rectangle;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 
+/**
+ * フォントデータをソースとして持つスキン用テキスト
+ * 
+ * @author exch
+ */
 public class SkinTextFont extends SkinText {
 
     /**
@@ -20,7 +25,7 @@ public class SkinTextFont extends SkinText {
     private GlyphLayout layout;
 
     private int shadow = 0;
-
+    
     private FreeTypeFontGenerator generator;
     private FreeTypeFontGenerator.FreeTypeFontParameter parameter;
     private String preparedFonts;
@@ -44,18 +49,20 @@ public class SkinTextFont extends SkinText {
         }
         preparedFonts = parameter.characters = text;        	
         font = generator.generateFont(parameter);
+        layout = new GlyphLayout(font, "");
     }    
 
 	@Override
 	protected void prepareText(String text) {
-        if(preparedFonts == null) {
-            if(font != null) {
-                font.dispose();                	
-            }
-            parameter.characters = text;        	
-            font = generator.generateFont(parameter);
+        if(preparedFonts != null) {
+        	return;
         }
-        layout = new GlyphLayout(font, text);        	    	
+        if(font != null) {
+            font.dispose();                	
+        }
+        parameter.characters = text;        	
+        font = generator.generateFont(parameter);
+        layout = new GlyphLayout(font, "");
 	}
 	
 	@Override

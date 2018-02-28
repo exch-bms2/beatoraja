@@ -14,8 +14,8 @@ import com.badlogic.gdx.utils.IntMap;
 import java.io.UnsupportedEncodingException;
 
 /**
- * テキストオブジェクト
- *
+ * イメージデータをソースとして持つスキン用テキスト
+ * 
  * @author exch
  */
 public class SkinTextImage extends SkinText {
@@ -31,7 +31,7 @@ public class SkinTextImage extends SkinText {
 	 * 現在のテキスト長
 	 */
 	private float textwidth;
-
+	
 	public SkinTextImage(SkinTextImageSource source) {
 		this.source = source;
 	}
@@ -57,29 +57,31 @@ public class SkinTextImage extends SkinText {
 
 	@Override
 	protected void prepareText(String text) {
+		byte[] b = null;
 		try {
-			byte[] b = text.getBytes("utf-16le");
-			textwidth = 0;
-			texts.clear();
-			for (int i = 0; i < b.length;) {
-				int code = 0;
-				code |= (b[i++] & 0xff);
-				code |= (b[i++] & 0xff) << 8;
-				if (code >= 0xdc00 && code < 0xff00 && i < b.length) {
-					code |= (b[i++] & 0xff) << 16;
-					code |= (b[i++] & 0xff) << 24;
-				}
-				final TextureRegion ch = source.getImage(code);
-				if (ch != null) {
-					texts.add(ch);
-					textwidth += ch.getRegionWidth();
-				} else {
-					// System.out.println(text + " -> " + Arrays.toString(b) +
-					// "code not found : " + Integer.toHexString(code));
-				}
-			}
+			b = text.getBytes("utf-16le");
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
+			return;
+		}
+		textwidth = 0;
+		texts.clear();
+		for (int i = 0; i < b.length;) {
+			int code = 0;
+			code |= (b[i++] & 0xff);
+			code |= (b[i++] & 0xff) << 8;
+			if (code >= 0xdc00 && code < 0xff00 && i < b.length) {
+				code |= (b[i++] & 0xff) << 16;
+				code |= (b[i++] & 0xff) << 24;
+			}
+			final TextureRegion ch = source.getImage(code);
+			if (ch != null) {
+				texts.add(ch);
+				textwidth += ch.getRegionWidth();
+			} else {
+				// System.out.println(text + " -> " + Arrays.toString(b) +
+				// "code not found : " + Integer.toHexString(code));
+			}
 		}
 	}
 

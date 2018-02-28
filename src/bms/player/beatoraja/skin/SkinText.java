@@ -60,7 +60,7 @@ public abstract class SkinText extends SkinObject {
         }        	
         Rectangle r = this.getDestination(time,state);
         if(r != null) {
-            if(!value.equals(text)) {
+            if(value != text) {
                 setText(value);
             }
             draw(sprite, time, state, 0,0);
