@@ -173,6 +173,8 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 					input.id = idcount++;
 					input.channel = channel;
 					input.pos = 0;
+					input.start = pcm.getStart();
+					input.len = pcm.getLength();
 					return input.id;
 				}
 			}
@@ -211,15 +213,15 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 					float wav_r = 0;
 					for (MixerInput input : inputs) {
 						if (input.pos != -1) {
-							wav_l += ((float) input.sample[input.pos]) * input.volume / Short.MAX_VALUE;
-							wav_r += ((float) input.sample[input.pos+1]) * input.volume / Short.MAX_VALUE;
+							wav_l += ((float) input.sample[input.pos + input.start]) * input.volume / Short.MAX_VALUE;
+							wav_r += ((float) input.sample[input.pos+1 + input.start]) * input.volume / Short.MAX_VALUE;
 							input.posf += gpitch * input.pitch;
 							int inc = (int)input.posf;
 							if (inc > 0) {
 								input.pos += 2 * inc;
 								input.posf -= (float)inc;
 							}
-							if (input.pos >= input.sample.length) {
+							if (input.pos >= input.len) {
 								input.pos = input.loop ? 0 : -1;
 							}
 						}
@@ -257,6 +259,8 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 	static class MixerInput {
 		public PCM pcm;
 		public short[] sample = new short[0];
+		public int start;
+		public int len;
 		public float volume;
 		public float pitch;
 		public int pos = -1;

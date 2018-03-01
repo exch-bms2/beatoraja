@@ -40,6 +40,10 @@ public class PCM {
 	 * PCMデータ
 	 */
 	private short[] sample;
+	
+	private int start;
+	
+	private int len;
 
 	private PCM() {
 
@@ -173,6 +177,8 @@ public class PCM {
 		default:
 			throw new IOException(p.toString() + " : " + bitsPerSample + " bits per samples isn't supported");			
 		}
+		start = 0;
+		len = sample.length;
 		// System.out.println(p.toString() + " : " + (System.nanoTime() -
 		// time));
 	}
@@ -227,6 +233,14 @@ public class PCM {
 	public short[] getSample() {
 		return sample;
 	}
+	
+	public int getStart() {
+		return start;
+	}
+
+	public int getLength() {
+		return len;
+	}
 
 	/**
 	 * サンプリングレートを変更したPCMを返す
@@ -256,7 +270,8 @@ public class PCM {
 				}
 			}
 		}
-
+		pcm.start = 0;
+		pcm.len = pcm.sample.length;
 		return pcm;
 	}
 
@@ -293,6 +308,8 @@ public class PCM {
 				pcm.sample[(int) (i * channels + j)] = this.sample[(int) (i * this.channels)];
 			}
 		}
+		pcm.start = 0;
+		pcm.len = pcm.sample.length;
 		return pcm;
 	}
 
@@ -333,8 +350,9 @@ public class PCM {
 			Logger.getGlobal().info("終端の無音データ除外 - " + (orglength - length) + " samples");
 		}
 
-		pcm.sample = new short[length];
-		System.arraycopy(this.sample, start, pcm.sample, 0, length);
+		pcm.sample = this.sample;
+		pcm.start = start;
+		pcm.len = length;
 		return pcm;
 	}
 
@@ -412,119 +430,119 @@ public class PCM {
 			return length;
 		}
 	}
-}
+	
+	static class WavFileInputStream extends InputStream {
 
-class WavFileInputStream extends InputStream {
+		private int pos = 0;
+		private int mark = 0;
+		private final byte[] header;
+		private final PCM pcm;
 
-	private int pos = 0;
-	private int mark = 0;
-	private final byte[] header;
-	private final short[] sample;
+		public WavFileInputStream(PCM pcm) {
+			header = new byte[44];
 
-	public WavFileInputStream(PCM pcm) {
-		header = new byte[44];
+			final int sampleRate = pcm.getSampleRate();
+			final int channels = pcm.getChannels();
+			this.pcm = pcm;
+			final long totalDataLen = pcm.len * 2 + 36;
+			final long bitrate = sampleRate * channels * 16;
 
-		final int sampleRate = pcm.getSampleRate();
-		final int channels = pcm.getChannels();
-		sample = pcm.getSample();
-		final long totalDataLen = sample.length * 2 + 36;
-		final long bitrate = sampleRate * channels * 16;
-
-		header[0] = 'R';
-		header[1] = 'I';
-		header[2] = 'F';
-		header[3] = 'F';
-		header[4] = (byte) (totalDataLen & 0xff);
-		header[5] = (byte) ((totalDataLen >> 8) & 0xff);
-		header[6] = (byte) ((totalDataLen >> 16) & 0xff);
-		header[7] = (byte) ((totalDataLen >> 24) & 0xff);
-		header[8] = 'W';
-		header[9] = 'A';
-		header[10] = 'V';
-		header[11] = 'E';
-		header[12] = 'f';
-		header[13] = 'm';
-		header[14] = 't';
-		header[15] = ' ';
-		header[16] = 16;
-		header[17] = 0;
-		header[18] = 0;
-		header[19] = 0;
-		header[20] = 1;
-		header[21] = 0;
-		header[22] = (byte) channels;
-		header[23] = 0;
-		header[24] = (byte) (sampleRate & 0xff);
-		header[25] = (byte) ((sampleRate >> 8) & 0xff);
-		header[26] = (byte) ((sampleRate >> 16) & 0xff);
-		header[27] = (byte) ((sampleRate >> 24) & 0xff);
-		header[28] = (byte) ((bitrate / 8) & 0xff);
-		header[29] = (byte) (((bitrate / 8) >> 8) & 0xff);
-		header[30] = (byte) (((bitrate / 8) >> 16) & 0xff);
-		header[31] = (byte) (((bitrate / 8) >> 24) & 0xff);
-		header[32] = (byte) ((channels * 16) / 8);
-		header[33] = 0;
-		header[34] = 16;
-		header[35] = 0;
-		header[36] = 'd';
-		header[37] = 'a';
-		header[38] = 't';
-		header[39] = 'a';
-		header[40] = (byte) ((sample.length * 2) & 0xff);
-		header[41] = (byte) (((sample.length * 2) >> 8) & 0xff);
-		header[42] = (byte) (((sample.length * 2) >> 16) & 0xff);
-		header[43] = (byte) (((sample.length * 2) >> 24) & 0xff);
-	}
-
-	@Override
-	public int available() {
-		return 44 + sample.length * 2 - pos;
-	}
-
-	@Override
-	public synchronized void mark(int readlimit) {
-		mark = pos;
-	}
-
-	@Override
-	public synchronized void reset() {
-		pos = mark;
-	}
-
-	@Override
-	public long skip(long n) {
-		if (n < 0) {
-			return 0;
+			header[0] = 'R';
+			header[1] = 'I';
+			header[2] = 'F';
+			header[3] = 'F';
+			header[4] = (byte) (totalDataLen & 0xff);
+			header[5] = (byte) ((totalDataLen >> 8) & 0xff);
+			header[6] = (byte) ((totalDataLen >> 16) & 0xff);
+			header[7] = (byte) ((totalDataLen >> 24) & 0xff);
+			header[8] = 'W';
+			header[9] = 'A';
+			header[10] = 'V';
+			header[11] = 'E';
+			header[12] = 'f';
+			header[13] = 'm';
+			header[14] = 't';
+			header[15] = ' ';
+			header[16] = 16;
+			header[17] = 0;
+			header[18] = 0;
+			header[19] = 0;
+			header[20] = 1;
+			header[21] = 0;
+			header[22] = (byte) channels;
+			header[23] = 0;
+			header[24] = (byte) (sampleRate & 0xff);
+			header[25] = (byte) ((sampleRate >> 8) & 0xff);
+			header[26] = (byte) ((sampleRate >> 16) & 0xff);
+			header[27] = (byte) ((sampleRate >> 24) & 0xff);
+			header[28] = (byte) ((bitrate / 8) & 0xff);
+			header[29] = (byte) (((bitrate / 8) >> 8) & 0xff);
+			header[30] = (byte) (((bitrate / 8) >> 16) & 0xff);
+			header[31] = (byte) (((bitrate / 8) >> 24) & 0xff);
+			header[32] = (byte) ((channels * 16) / 8);
+			header[33] = 0;
+			header[34] = 16;
+			header[35] = 0;
+			header[36] = 'd';
+			header[37] = 'a';
+			header[38] = 't';
+			header[39] = 'a';
+			header[40] = (byte) ((pcm.len * 2) & 0xff);
+			header[41] = (byte) (((pcm.len * 2) >> 8) & 0xff);
+			header[42] = (byte) (((pcm.len * 2) >> 16) & 0xff);
+			header[43] = (byte) (((pcm.len * 2) >> 24) & 0xff);
 		}
-		if (44 + sample.length * 2 - pos < n) {
-			pos = 44 + sample.length * 2;
-			return 44 + sample.length * 2 - pos;
+
+		@Override
+		public int available() {
+			return 44 + pcm.len * 2 - pos;
 		}
-		pos += n;
-		return n;
-	}
 
-	@Override
-	public boolean markSupported() {
-		return true;
-	}
+		@Override
+		public synchronized void mark(int readlimit) {
+			mark = pos;
+		}
 
-	@Override
-	public int read() {
-		int result = -1;
-		if (pos < 44) {
-			result = 0x00ff & header[pos];
-			pos++;
-		} else if (pos < 44 + sample.length * 2) {
-			short s = sample[(pos - 44) / 2];
-			if (pos % 2 == 0) {
-				result = (s & 0x00ff);
-			} else {
-				result = ((s & 0xff00) >>> 8);
+		@Override
+		public synchronized void reset() {
+			pos = mark;
+		}
+
+		@Override
+		public long skip(long n) {
+			if (n < 0) {
+				return 0;
 			}
-			pos++;
+			if (44 + pcm.len * 2 - pos < n) {
+				pos = 44 + pcm.len * 2;
+				return 44 + pcm.len * 2 - pos;
+			}
+			pos += n;
+			return n;
 		}
-		// System.out.println("read : " + pos + " data : " + result);
-		return result;
+
+		@Override
+		public boolean markSupported() {
+			return true;
+		}
+
+		@Override
+		public int read() {
+			int result = -1;
+			if (pos < 44) {
+				result = 0x00ff & header[pos];
+				pos++;
+			} else if (pos < 44 + pcm.len * 2) {
+				short s = pcm.sample[(pos - 44) / 2 + pcm.start];
+				if (pos % 2 == 0) {
+					result = (s & 0x00ff);
+				} else {
+					result = ((s & 0xff00) >>> 8);
+				}
+				pos++;
+			}
+			// System.out.println("read : " + pos + " data : " + result);
+			return result;
+		}
 	}
 }
