@@ -22,712 +22,851 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox fx:id="root" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="bms.player.beatoraja.launcher.PlayConfigurationView">
-   <children>
-       <HBox fx:id="playerPanel" alignment="CENTER_LEFT" prefHeight="10.0" prefWidth="730.0">
-           <children>
-               <Label minWidth="100.0" text="%PLAYER_ID">
-               <HBox.margin>
-                  <Insets left="10.0" />
-               </HBox.margin></Label>
-               <ComboBox fx:id="players" onAction="#changePlayer" prefWidth="150.0" />
-            <TextField fx:id="playername" prefHeight="24.0" prefWidth="243.0">
-               <HBox.margin>
-                  <Insets left="10.0" />
-               </HBox.margin></TextField>
-            <Button mnemonicParsing="false" onAction="#addPlayer" text="+">
-               <HBox.margin>
-                  <Insets left="10.0" />
-               </HBox.margin></Button>
-           </children>
-           <VBox.margin>
-               <Insets bottom="5.0" top="5.0" />
-           </VBox.margin>
-       </HBox>
-       <TabPane prefHeight="435.0" prefWidth="740.0" VBox.vgrow="ALWAYS">
-         <tabs>
-            <Tab fx:id="videoTab" closable="false" text="%TAB_VIDEO">
-              <content>
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                     <children>
-                        <VBox prefHeight="200.0" prefWidth="552.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                           <children>
-                               <HBox alignment="CENTER_LEFT" prefHeight="30.0" prefWidth="552.0">
-                                   <children>
-                                       <Label text="%DISPLAYMODE">
-                                           <HBox.margin>
-                                               <Insets right="10.0" />
-                                           </HBox.margin></Label>
-                                       <ComboBox fx:id="displaymode" prefWidth="200.0" />
-                                   </children>
-                               </HBox>
-                              <HBox alignment="CENTER_LEFT" prefHeight="30.0" prefWidth="552.0">
-                                 <children>
-                                    <Label text="%RESOLUTION">
-                                       <HBox.margin>
-                                          <Insets right="10.0" />
-                                       </HBox.margin></Label>
-                                    <ComboBox fx:id="resolution" prefWidth="200.0" />
-                                 </children>
-                              </HBox>
-                              <HBox prefHeight="14.0" prefWidth="730.0">
-                                 <children>
-                                    <CheckBox fx:id="vsync" mnemonicParsing="false" prefHeight="29.0" prefWidth="104.0" text="%VSYNC" />
-                                    <Label prefHeight="25.0" prefWidth="50.0" text="%MAXFPS" />
-                  				    <Spinner fx:id="maxfps" editable="true" prefHeight="24.0" prefWidth="80.0">
-            <valueFactory>
-              <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="60" max="1000" min="0" />
-            </valueFactory>
-          </Spinner>
-                                 </children>
-                              </HBox>
-                              <HBox alignment="CENTER_LEFT" prefHeight="10.0" prefWidth="730.0">
-                                 <children>
-                                    <Label minWidth="100.0" prefWidth="150.0" text="%BGA" />
-                                    <ComboBox fx:id="bgaop" prefWidth="150.0" />
-                                 </children>
-                                 <VBox.margin>
-                                    <Insets top="30.0" />
-                                 </VBox.margin>
-                              </HBox>
+<VBox fx:id="root" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="bms.player.beatoraja.launcher.PlayConfigurationView" prefHeight="600.0" prefWidth="800.0">
+    <children>
+        <HBox fx:id="playerPanel" alignment="CENTER_LEFT" prefHeight="10.0" prefWidth="730.0">
+            <children>
+                <Label minWidth="100.0" text="%PLAYER_ID">
+                    <HBox.margin>
+                        <Insets left="10.0"/>
+                    </HBox.margin>
+                </Label>
+                <ComboBox fx:id="players" onAction="#changePlayer" prefWidth="150.0"/>
+                <TextField fx:id="playername" prefHeight="24.0" prefWidth="243.0">
+                    <HBox.margin>
+                        <Insets left="10.0"/>
+                    </HBox.margin>
+                </TextField>
+                <Button mnemonicParsing="false" onAction="#addPlayer" text="+">
+                    <HBox.margin>
+                        <Insets left="10.0"/>
+                    </HBox.margin>
+                </Button>
+            </children>
+            <VBox.margin>
+                <Insets bottom="5.0" top="5.0"/>
+            </VBox.margin>
+        </HBox>
+        <TabPane prefHeight="435.0" prefWidth="740.0" VBox.vgrow="ALWAYS">
+            <tabs>
+                <Tab fx:id="videoTab" closable="false" text="%TAB_VIDEO">
+                    <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                            <children>
+                                <VBox prefHeight="200.0" prefWidth="552.0" AnchorPane.bottomAnchor="0.0"
+                                      AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="0.0"
+                                      AnchorPane.topAnchor="10.0">
+                                    <children>
+                                        <HBox alignment="CENTER_LEFT" prefHeight="30.0" prefWidth="552.0">
+                                            <children>
+                                                <Label text="%DISPLAYMODE">
+                                                    <HBox.margin>
+                                                        <Insets right="10.0"/>
+                                                    </HBox.margin>
+                                                </Label>
+                                                <ComboBox fx:id="displaymode" prefWidth="200.0"/>
+                                            </children>
+                                        </HBox>
+                                        <HBox alignment="CENTER_LEFT" prefHeight="30.0" prefWidth="552.0">
+                                            <children>
+                                                <Label text="%RESOLUTION">
+                                                    <HBox.margin>
+                                                        <Insets right="10.0"/>
+                                                    </HBox.margin>
+                                                </Label>
+                                                <ComboBox fx:id="resolution" prefWidth="200.0"/>
+                                            </children>
+                                        </HBox>
+                                        <HBox prefHeight="14.0" prefWidth="730.0">
+                                            <children>
+                                                <CheckBox fx:id="vsync" mnemonicParsing="false" prefHeight="29.0"
+                                                          prefWidth="104.0" text="%VSYNC"/>
+                                                <Label prefHeight="25.0" prefWidth="50.0" text="%MAXFPS"/>
+                                                <Spinner fx:id="maxfps" editable="true" prefHeight="24.0"
+                                                         prefWidth="80.0">
+                                                    <valueFactory>
+                                                        <SpinnerValueFactory.IntegerSpinnerValueFactory
+                                                                amountToStepBy="1" initialValue="60" max="1000"
+                                                                min="0"/>
+                                                    </valueFactory>
+                                                </Spinner>
+                                            </children>
+                                        </HBox>
+                                        <HBox alignment="CENTER_LEFT" prefHeight="10.0" prefWidth="730.0">
+                                            <children>
+                                                <Label minWidth="100.0" prefWidth="150.0" text="%BGA"/>
+                                                <ComboBox fx:id="bgaop" prefWidth="150.0"/>
+                                            </children>
+                                            <VBox.margin>
+                                                <Insets top="30.0"/>
+                                            </VBox.margin>
+                                        </HBox>
 
-                               <HBox prefHeight="22.0" prefWidth="730.0">
-                                   <children>
-                                       <Label contentDisplay="CENTER" prefHeight="18.0" prefWidth="150.0" text="%MISSLAYER_DURATION" textAlignment="CENTER">
-                                           <tooltip>
-                                               <Tooltip text="Set miss layer display time (ms)" textAlignment="CENTER" />
-                                           </tooltip></Label>
-                                       <Spinner fx:id="misslayertime" editable="true" prefHeight="24.0" prefWidth="100.0">
-                                           <valueFactory>
-                                               <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="500" max="10000" min="0" />
-                                           </valueFactory>
-                                       </Spinner>
-                                   </children>
-                                 <VBox.margin>
-                                    <Insets top="5.0" />
-                                 </VBox.margin>
-                               </HBox>
-                              <HBox alignment="CENTER_LEFT" prefHeight="0.0" prefWidth="730.0">
-                                 <children>
-                                    <Label minWidth="100.0" prefWidth="150.0" text="%BGA_EXPAND" />
-                                    <ComboBox fx:id="bgaexpand" prefWidth="150.0" />
-                                 </children>
-                                 <VBox.margin>
-                                    <Insets top="5.0" />
-                                 </VBox.margin>
-                              </HBox>
-                           </children>
-                           <padding>
-                              <Insets left="10.0" />
-                           </padding>
-                        </VBox>
-                     </children>
-                  </AnchorPane>
-              </content>
-            </Tab>
-            <Tab fx:id="audioTab" closable="false" text="%TAB_AUDIO">
-              <content>
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                     <children>
-                        <VBox layoutX="119.0" layoutY="-22.0" prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                           <children>
-                              <HBox prefHeight="13.0" prefWidth="730.0">
-                                 <children>
-                                    <Label prefHeight="25.0" prefWidth="150.0" text="%Audio_Output" />
-                                    <ComboBox fx:id="audio" onAction="#updateAudioDriver" prefHeight="24.0" prefWidth="261.0" />
-                                 </children>
-                                 <VBox.margin>
-                                    <Insets bottom="10.0" top="10.0" />
-                                 </VBox.margin>
-                              </HBox>
-                              <HBox prefHeight="13.0" prefWidth="730.0">
-                                 <children>
-                                    <Label prefHeight="31.0" prefWidth="150.0" text="Audio Driver Name" />
-                                    <ComboBox fx:id="audioname" prefHeight="24.0" prefWidth="261.0" />
-                                 </children>
-                                 <VBox.margin>
-                                    <Insets bottom="10.0" top="10.0" />
-                                 </VBox.margin>
-                              </HBox>
-                              <HBox prefHeight="40.0" prefWidth="730.0">
-                                 <children>
-                                    <Label prefHeight="25.0" prefWidth="150.0" text="%AUDIO_BUF_SIZE" />
-                  				    <Spinner fx:id="audiobuffer" editable="true" prefWidth="150.0">
-            <valueFactory>
-              <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="384" max="1024" min="16" />
-            </valueFactory>
-          </Spinner>
-                                    <Label prefHeight="23.0" prefWidth="150.0" text="%AUDIO_SIM_SOURCES">
-                                       <HBox.margin>
-                                          <Insets left="10.0" />
-                                       </HBox.margin></Label>
-                  				    <Spinner fx:id="audiosim" editable="true" prefWidth="150.0">
-            <valueFactory>
-              <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="64" max="1024" min="8" />
-            </valueFactory>
-          </Spinner>
-                                 </children>
-                              </HBox>
-                                <HBox prefHeight="30.0" prefWidth="730.0">
-                                 <children>
-                                    <Label prefHeight="25.0" prefWidth="150.0" text="%SYSTEM_VOLUME" />
-                                    <Slider fx:id="systemvolume" blockIncrement="0.1" majorTickUnit="0.1" max="1.0" minorTickCount="5" prefHeight="30.0" prefWidth="200.0" value="1.0" />
-                                 </children>
-                              </HBox>
-                              <HBox prefHeight="30.0" prefWidth="730.0">
-                                 <children>
-                                    <Label prefHeight="25.0" prefWidth="150.0" text="%KEY_VOLUME" />
-                                    <Slider fx:id="keyvolume" blockIncrement="0.1" majorTickUnit="0.1" max="1.0" minorTickCount="5" prefHeight="30.0" prefWidth="200.0" value="1.0" />
-                                 </children>
-                              </HBox>
-                              <HBox prefHeight="30.0" prefWidth="730.0">
-                                 <children>
-                                    <Label prefHeight="30.0" prefWidth="150.0" text="%BG_VOLUME" />
-                                    <Slider fx:id="bgvolume" blockIncrement="0.1" majorTickUnit="0.1" max="1.0" minorTickCount="5" prefHeight="30.0" prefWidth="200.0" value="1.0" />
-                                 </children>
-                              </HBox>
-                              <HBox prefHeight="30.0" prefWidth="200.0">
-                                 <children>
-                                    <Label prefHeight="30.0" prefWidth="150.0" text="%AUDIO_FREQ_OPTION">
-                                       <HBox.margin>
-                                          <Insets right="5.0" />
-                                       </HBox.margin></Label>
-                                    <ComboBox fx:id="audioFreqOption" prefWidth="150.0" />
-                                 </children>
-                              </HBox>
-                              <HBox prefHeight="30.0" prefWidth="200.0">
-                                 <children>
-                                    <Label prefHeight="30.0" prefWidth="150.0" text="%AUDIO_FAST_FORWARD">
-                                       <HBox.margin>
-                                          <Insets right="5.0" />
-                                       </HBox.margin></Label>
-                                    <ComboBox fx:id="audioFastForward" prefWidth="150.0" />
-                                 </children>
-                              </HBox>
-                           </children>
-                           <padding>
-                              <Insets left="10.0" top="10.0" />
-                           </padding>
-                        </VBox>
-                     </children>
-                  </AnchorPane>
-              </content>
-            </Tab>
-            <Tab fx:id="inputTab" closable="false" text="%TAB_INPUT">
-              <content>
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                     <children>
-                        <VBox prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                           <children>
-                               <HBox prefHeight="37.0" prefWidth="723.0">
-                                   <children>
-                                       <Label prefHeight="24.0" prefWidth="150.0" text="%SCROLL_DURATION_LOW" />
-                                       <Spinner fx:id="scrolldurationlow" editable="true" prefWidth="150.0">
-                                           <valueFactory>
-                                               <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="300" max="1000" min="1" />
-                                           </valueFactory>
-                                       </Spinner>
-                                   </children>
-                                   <children>
-                                       <Label prefHeight="24.0" prefWidth="150.0" text="%SCROLL_DURATION_HIGH" />
-                                       <Spinner fx:id="scrolldurationhigh" editable="true" prefWidth="80.0">
-                                           <valueFactory>
-                                               <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="50" max="1000" min="1" />
-                                           </valueFactory>
-                                       </Spinner>
-                                   </children>
-                                 <opaqueInsets>
-                                    <Insets />
-                                 </opaqueInsets>
-                                 <VBox.margin>
-                                    <Insets left="10.0" />
-                                 </VBox.margin>
-                               </HBox>
-                               <HBox prefHeight="22.0" prefWidth="740.0">
-                                   <children>
-                                       <Label prefHeight="24.0" prefWidth="200.0" text="%MINIMUM_INPUT_DURATION" />
-                                       <Spinner fx:id="inputduration" editable="true" prefWidth="80.0">
-                                           <valueFactory>
-                                               <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="10" max="100" min="1" />
-                                           </valueFactory>
-                                       </Spinner>
-                                   </children>
-                                 <VBox.margin>
-                                    <Insets left="10.0" />
-                                 </VBox.margin>
-                               </HBox>
-                              <HBox prefHeight="23.0" prefWidth="740.0">
-                                 <children>
-                                    <Label prefHeight="24.0" prefWidth="68.0" text="\%MODE" />
-                                    <ComboBox fx:id="inputconfig" onAction="#updateInputConfig" prefWidth="150.0" />
-                                 </children>
-                                 <VBox.margin>
-                                    <Insets left="10.0" top="30.0" />
-                                 </VBox.margin>
-                              </HBox>
-                              <HBox prefHeight="37.0" prefWidth="723.0">
-                                 <children>
-                                    <CheckBox fx:id="jkoc_hack" mnemonicParsing="false" prefHeight="18.0" prefWidth="200.0" text="\%JKOC_HACK">
-                                       <HBox.margin>
-                                          <Insets right="20.0" />
-                                       </HBox.margin>
-                                    </CheckBox>
-                                       <CheckBox fx:id="analogScratch" contentDisplay="CENTER" prefHeight="18.0" prefWidth="250.0" text="%ANALOG_SCRATCH" textAlignment="CENTER">
-                                           <tooltip>
-                                               <Tooltip text="Use INF controller, is True." textAlignment="CENTER" />
-                                           </tooltip>
-                                       <HBox.margin>
-                                          <Insets />
-                                       </HBox.margin>
-                                       </CheckBox>
-                                 </children>
-                                 <VBox.margin>
-                                    <Insets left="10.0" top="10.0" />
-                                 </VBox.margin>
-                              </HBox>
-                           </children>
-                        </VBox>
-                     </children>
-                  </AnchorPane>
-              </content>
-            </Tab>
-            <Tab fx:id="resourceTab" closable="false" text="%Resource">
-              <content>
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                     <children>
-                        <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                           <children>
-                              <HBox prefHeight="100.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
-                                 <children>
-                                    <Label prefHeight="101.0" prefWidth="100.0" text="%BMS_Path" HBox.hgrow="ALWAYS">
-                                       <HBox.margin>
-                                          <Insets left="10.0" />
-                                       </HBox.margin></Label>
-                                    <ListView fx:id="bmsroot" onDragDropped="#songPathDragDropped" onDragOver="#onSongPathDragOver" prefHeight="100.0" prefWidth="500.0">
-                                       <HBox.margin>
-                                          <Insets top="10.0" />
-                                       </HBox.margin></ListView>
-                                    <VBox prefHeight="200.0" prefWidth="100.0">
-                                       <children>
-                                          <Button mnemonicParsing="false" onAction="#addSongPath" prefHeight="28.0" prefWidth="30.0" text="%+">
-                                             <VBox.margin>
-                                                <Insets left="10.0" top="10.0" />
-                                             </VBox.margin></Button>
-                                          <Button mnemonicParsing="false" onAction="#removeSongPath" prefHeight="28.0" prefWidth="30.0" text="%-">
-                                             <VBox.margin>
-                                                <Insets left="10.0" top="10.0" />
-                                             </VBox.margin></Button>
-                                       </children>
-                                    </VBox>
-                                 </children>
-                                 <VBox.margin>
-                                    <Insets bottom="30.0" />
-                                 </VBox.margin>
-                              </HBox>
-                              <HBox prefHeight="100.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" VBox.vgrow="ALWAYS">
-                                 <children>
-                                    <Label prefHeight="166.0" prefWidth="100.0" text="%Table_URL" HBox.hgrow="ALWAYS">
-                                       <HBox.margin>
-                                          <Insets left="10.0" />
-                                       </HBox.margin></Label>
-                                    <VBox prefHeight="100.0" prefWidth="536.0">
-                                       <children>
-                                          <HBox>
-                                             <children>
-                                                <TextField fx:id="url" prefHeight="28.0" prefWidth="500.0" />
-                                                <Button mnemonicParsing="false" onAction="#addTableURL" prefHeight="25.0" prefWidth="30.0" text="%+">
-                                                   <HBox.margin>
-                                                      <Insets left="10.0" />
-                                                   </HBox.margin></Button>
-                                             </children>
-                                          </HBox>
-                                          <HBox VBox.vgrow="ALWAYS">
-                                             <children>
-                                                <ListView fx:id="tableurl" prefHeight="167.0" prefWidth="500.0" HBox.hgrow="ALWAYS">
-                                                   <HBox.margin>
-                                                      <Insets top="5.0" />
-                                                   </HBox.margin></ListView>
-                                                <Button mnemonicParsing="false" onAction="#removeTableURL" prefHeight="28.0" prefWidth="30.0" text="%-">
-                                                   <HBox.margin>
-                                                      <Insets left="10.0" top="10.0" />
-                                                   </HBox.margin></Button>
-                                             </children>
-                                          </HBox>
-                                       </children>
-                                    </VBox>
-                                 </children>
-                              </HBox>
-                               <CheckBox fx:id="updatesong" mnemonicParsing="false" prefHeight="25.0" prefWidth="300.0" text="%UPDATE_SONG">
-                                 <VBox.margin>
-                                    <Insets left="10.0" />
-                                 </VBox.margin></CheckBox>
-                           </children>
-                        </VBox>
-                     </children>
-                  </AnchorPane>
-              </content>
-            </Tab>
-            <Tab fx:id="optionTab" closable="false" text="%Play_Option">
-               <content>
-                  <VBox prefHeight="241.0" prefWidth="723.0">
-                  	<children>
-                        <HBox prefHeight="18.0" prefWidth="703.0">
-                           <children>
-                              <Label prefHeight="24.0" prefWidth="75.0" text="%MODE" />
-                              <ComboBox fx:id="playconfig" onAction="#updatePlayConfig" prefWidth="150.0" />
-                           </children>
-                           <VBox.margin>
-                              <Insets bottom="10.0" />
-                           </VBox.margin>
-                        </HBox>
-                  		<GridPane fx:id="lr2configuration" prefHeight="154.0" prefWidth="632.0">
-                  			<columnConstraints>
-                  				<ColumnConstraints maxWidth="278.0" minWidth="0.0" prefWidth="150.0" />
-                  				<ColumnConstraints maxWidth="402.0" minWidth="0.0" prefWidth="188.0" />
-                              <ColumnConstraints maxWidth="438.0" minWidth="0.0" prefWidth="150.0" />
-                              <ColumnConstraints maxWidth="423.0" minWidth="0.0" prefWidth="200.0" />
-                  			</columnConstraints>
-                  			<rowConstraints>
-                  				<RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
-                  				<RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
-                              <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
-                              <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
-                              <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="30.0" />
-                              <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
-                              <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
-                  			</rowConstraints>
-                           <children>
-                  				<Label prefHeight="18.0" prefWidth="78.0" text="%HI-SPEED" />
-                  				    <Spinner fx:id="hispeed" editable="true" GridPane.columnIndex="1">
-            <valueFactory>
-              <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.1" initialValue="1.0" max="9.9" min="1.0" />
-            </valueFactory>
-          </Spinner>
-                              <Label text="%HISPEED_FIX" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-                  	    <ComboBox fx:id="fixhispeed" prefWidth="150.0" GridPane.columnIndex="3" GridPane.rowIndex="2" />
-                              <Label text="%NOTE_MODIFIER" GridPane.rowIndex="3" />
-                              <ComboBox fx:id="scoreop" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                              <Label layoutX="10.0" layoutY="84.0" text="%NOTE_MODIFIER2" GridPane.columnIndex="2" GridPane.rowIndex="3" />
-                              <ComboBox fx:id="scoreop2" prefWidth="150.0" GridPane.columnIndex="3" GridPane.rowIndex="3" />
-                              <Label layoutX="10.0" layoutY="84.0" text="%DOUBLE_OPTION" GridPane.rowIndex="4" />
-                              <ComboBox fx:id="doubleop" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                              <Label text="%GAUGE_TYPE" GridPane.columnIndex="2" GridPane.rowIndex="4" />
-                              <ComboBox fx:id="gaugeop" prefWidth="150.0" GridPane.columnIndex="3" GridPane.rowIndex="4" />
-                              <Label text="%LNTYPE" GridPane.rowIndex="5" />
-                              <ComboBox fx:id="lntype" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="5" />
-                               <Label text="%EXPAND_JUDGE" GridPane.columnIndex="2" GridPane.rowIndex="5" />
-                               <Spinner fx:id="exjudge" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="5">
-                                   <valueFactory>
-                                       <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="25" initialValue="100" max="400" min="25" />
-                                   </valueFactory>
-                               </Spinner>
-                               <Label text="%H_RANDOM_THRESHOLD_BPM" GridPane.columnIndex="0" GridPane.rowIndex="6" />
-                               <Spinner fx:id="hranthresholdbpm" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="6">
-                                   <valueFactory>
-                                       <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="120" max="15000" min="0" />
-                                   </valueFactory>
-                               </Spinner>
-                              <Label text="%GVALUE" GridPane.columnIndex="2" />
-                  				    <Spinner fx:id="gvalue" editable="true" GridPane.columnIndex="3">
-            <valueFactory>
-              <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="300" max="2000" min="1" />
-            </valueFactory>
-          </Spinner>
-                              <CheckBox fx:id="enableLanecover" mnemonicParsing="false" text="%ENABLE_LANECOVER" GridPane.rowIndex="1" />
-                  				    <Spinner fx:id="lanecover" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="1">
-            <valueFactory>
-              <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="100" max="1000" min="0" />
-            </valueFactory>
-          </Spinner>
-                              <CheckBox fx:id="enableLift" mnemonicParsing="false" text="%ENABLE_LIFT" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-                  				    <Spinner fx:id="lift" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="1">
-            <valueFactory>
-              <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="100" max="1000" min="0" />
-            </valueFactory>
-          </Spinner>
-                              <Label text="%JUDGETIMING" GridPane.rowIndex="2" />
-                  				    <Spinner fx:id="judgetiming" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="2">
-            <valueFactory>
-              <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="0" max="99" min="-99" />
-            </valueFactory>
-          </Spinner>
-                           </children>
-                        </GridPane>
-                        <GridPane fx:id="lr2configurationassist" prefHeight="48.0" prefWidth="632.0">
-                            <columnConstraints>
-                              <ColumnConstraints maxWidth="350.0" minWidth="0.0" prefWidth="160.0" />
-                              <ColumnConstraints maxWidth="350.0" minWidth="0.0" prefWidth="160.0" />
-                              <ColumnConstraints maxWidth="350.0" minWidth="0.0" prefWidth="160.0" />
-                              <ColumnConstraints maxWidth="350.0" minWidth="0.0" prefWidth="160.0" />
-                              <ColumnConstraints maxWidth="350.0" minWidth="0.0" prefWidth="160.0" />
-                            </columnConstraints>
-                            <rowConstraints>
-                              <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
-                              <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
-                           </rowConstraints>
-                           <children>
-                              <Label text="%ASSIST_OPTION" GridPane.rowIndex="0" />
-                              <CheckBox fx:id="constant" mnemonicParsing="false" text="%CONSTANT" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-                              <CheckBox fx:id="bpmguide" mnemonicParsing="false" text="%BPM_GUIDE" GridPane.columnIndex="2" GridPane.rowIndex="0" />
-                              <CheckBox fx:id="legacy" mnemonicParsing="false" text="%LEGACY_NOTE" GridPane.columnIndex="3" GridPane.rowIndex="0" />
-                              <CheckBox fx:id="nomine" mnemonicParsing="false" text="%NO_MINE" GridPane.columnIndex="4" GridPane.rowIndex="0" />
-                              <Label text="%OPTIONS_MISC" GridPane.rowIndex="1" />
-                              <CheckBox fx:id="showhiddennote" mnemonicParsing="false" text="%SHOW_HIDDEN_NOTE" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-                              <CheckBox fx:id="judgeregion" mnemonicParsing="false" text="%JUDGE_REGION" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                              <CheckBox fx:id="markprocessednote" mnemonicParsing="false" text="%MARK_PROCESSED_NOTE" GridPane.columnIndex="3" GridPane.rowIndex="1" />
-                              <CheckBox fx:id="continueuntilendofsong" mnemonicParsing="false" text="%CONTINUE_UNTIL_END_OF_SONG" GridPane.columnIndex="4" GridPane.rowIndex="1" />
-                           </children>
-                        </GridPane>
-                        <HBox prefHeight="9.0" prefWidth="720.0">
-                           <children>
-                              <Label prefHeight="24.0" prefWidth="135.0" text="%TARGET_SCORE" />
-                              <ComboBox fx:id="target" prefWidth="150.0" />
-                           </children>
-                           <opaqueInsets>
-                              <Insets />
-                           </opaqueInsets>
-                           <VBox.margin>
-                              <Insets top="4.0" />
-                           </VBox.margin>
-                        </HBox>
+                                        <HBox prefHeight="22.0" prefWidth="730.0">
+                                            <children>
+                                                <Label contentDisplay="CENTER" prefHeight="18.0" prefWidth="150.0"
+                                                       text="%MISSLAYER_DURATION" textAlignment="CENTER">
+                                                    <tooltip>
+                                                        <Tooltip text="Set miss layer display time (ms)"
+                                                                 textAlignment="CENTER"/>
+                                                    </tooltip>
+                                                </Label>
+                                                <Spinner fx:id="misslayertime" editable="true" prefHeight="24.0"
+                                                         prefWidth="100.0">
+                                                    <valueFactory>
+                                                        <SpinnerValueFactory.IntegerSpinnerValueFactory
+                                                                amountToStepBy="1" initialValue="500" max="10000"
+                                                                min="0"/>
+                                                    </valueFactory>
+                                                </Spinner>
+                                            </children>
+                                            <VBox.margin>
+                                                <Insets top="5.0"/>
+                                            </VBox.margin>
+                                        </HBox>
+                                        <HBox alignment="CENTER_LEFT" prefHeight="0.0" prefWidth="730.0">
+                                            <children>
+                                                <Label minWidth="100.0" prefWidth="150.0" text="%BGA_EXPAND"/>
+                                                <ComboBox fx:id="bgaexpand" prefWidth="150.0"/>
+                                            </children>
+                                            <VBox.margin>
+                                                <Insets top="5.0"/>
+                                            </VBox.margin>
+                                        </HBox>
+                                    </children>
+                                    <padding>
+                                        <Insets left="10.0"/>
+                                    </padding>
+                                </VBox>
+                            </children>
+                        </AnchorPane>
+                    </content>
+                </Tab>
+                <Tab fx:id="audioTab" closable="false" text="%TAB_AUDIO">
+                    <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                            <children>
+                                <VBox layoutX="119.0" layoutY="-22.0" prefHeight="200.0" prefWidth="100.0"
+                                      AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                                      AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                    <children>
+                                        <HBox prefHeight="13.0" prefWidth="730.0">
+                                            <children>
+                                                <Label prefHeight="25.0" prefWidth="150.0" text="%Audio_Output"/>
+                                                <ComboBox fx:id="audio" onAction="#updateAudioDriver" prefHeight="24.0"
+                                                          prefWidth="261.0"/>
+                                            </children>
+                                            <VBox.margin>
+                                                <Insets bottom="10.0" top="10.0"/>
+                                            </VBox.margin>
+                                        </HBox>
+                                        <HBox prefHeight="13.0" prefWidth="730.0">
+                                            <children>
+                                                <Label prefHeight="31.0" prefWidth="150.0" text="Audio Driver Name"/>
+                                                <ComboBox fx:id="audioname" prefHeight="24.0" prefWidth="261.0"/>
+                                            </children>
+                                            <VBox.margin>
+                                                <Insets bottom="10.0" top="10.0"/>
+                                            </VBox.margin>
+                                        </HBox>
+                                        <HBox prefHeight="40.0" prefWidth="730.0">
+                                            <children>
+                                                <Label prefHeight="25.0" prefWidth="150.0" text="%AUDIO_BUF_SIZE"/>
+                                                <Spinner fx:id="audiobuffer" editable="true" prefWidth="150.0">
+                                                    <valueFactory>
+                                                        <SpinnerValueFactory.IntegerSpinnerValueFactory
+                                                                amountToStepBy="1" initialValue="384" max="1024"
+                                                                min="16"/>
+                                                    </valueFactory>
+                                                </Spinner>
+                                                <Label prefHeight="23.0" prefWidth="150.0" text="%AUDIO_SIM_SOURCES">
+                                                    <HBox.margin>
+                                                        <Insets left="10.0"/>
+                                                    </HBox.margin>
+                                                </Label>
+                                                <Spinner fx:id="audiosim" editable="true" prefWidth="150.0">
+                                                    <valueFactory>
+                                                        <SpinnerValueFactory.IntegerSpinnerValueFactory
+                                                                amountToStepBy="1" initialValue="64" max="1024"
+                                                                min="8"/>
+                                                    </valueFactory>
+                                                </Spinner>
+                                            </children>
+                                        </HBox>
+                                        <HBox prefHeight="30.0" prefWidth="730.0">
+                                            <children>
+                                                <Label prefHeight="25.0" prefWidth="150.0" text="%SYSTEM_VOLUME"/>
+                                                <Slider fx:id="systemvolume" blockIncrement="0.1" majorTickUnit="0.1"
+                                                        max="1.0" minorTickCount="5" prefHeight="30.0" prefWidth="200.0"
+                                                        value="1.0"/>
+                                            </children>
+                                        </HBox>
+                                        <HBox prefHeight="30.0" prefWidth="730.0">
+                                            <children>
+                                                <Label prefHeight="25.0" prefWidth="150.0" text="%KEY_VOLUME"/>
+                                                <Slider fx:id="keyvolume" blockIncrement="0.1" majorTickUnit="0.1"
+                                                        max="1.0" minorTickCount="5" prefHeight="30.0" prefWidth="200.0"
+                                                        value="1.0"/>
+                                            </children>
+                                        </HBox>
+                                        <HBox prefHeight="30.0" prefWidth="730.0">
+                                            <children>
+                                                <Label prefHeight="30.0" prefWidth="150.0" text="%BG_VOLUME"/>
+                                                <Slider fx:id="bgvolume" blockIncrement="0.1" majorTickUnit="0.1"
+                                                        max="1.0" minorTickCount="5" prefHeight="30.0" prefWidth="200.0"
+                                                        value="1.0"/>
+                                            </children>
+                                        </HBox>
+                                        <HBox prefHeight="30.0" prefWidth="200.0">
+                                            <children>
+                                                <Label prefHeight="30.0" prefWidth="150.0" text="%AUDIO_FREQ_OPTION">
+                                                    <HBox.margin>
+                                                        <Insets right="5.0"/>
+                                                    </HBox.margin>
+                                                </Label>
+                                                <ComboBox fx:id="audioFreqOption" prefWidth="150.0"/>
+                                            </children>
+                                        </HBox>
+                                        <HBox prefHeight="30.0" prefWidth="200.0">
+                                            <children>
+                                                <Label prefHeight="30.0" prefWidth="150.0" text="%AUDIO_FAST_FORWARD">
+                                                    <HBox.margin>
+                                                        <Insets right="5.0"/>
+                                                    </HBox.margin>
+                                                </Label>
+                                                <ComboBox fx:id="audioFastForward" prefWidth="150.0"/>
+                                            </children>
+                                        </HBox>
+                                    </children>
+                                    <padding>
+                                        <Insets left="10.0" top="10.0"/>
+                                    </padding>
+                                </VBox>
+                            </children>
+                        </AnchorPane>
+                    </content>
+                </Tab>
+                <Tab fx:id="inputTab" closable="false" text="%TAB_INPUT">
+                    <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                            <children>
+                                <VBox prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0"
+                                      AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="0.0"
+                                      AnchorPane.topAnchor="10.0">
+                                    <children>
+                                        <HBox prefHeight="37.0" prefWidth="723.0">
+                                            <children>
+                                                <Label prefHeight="24.0" prefWidth="150.0" text="%SCROLL_DURATION_LOW"/>
+                                                <Spinner fx:id="scrolldurationlow" editable="true" prefWidth="150.0">
+                                                    <valueFactory>
+                                                        <SpinnerValueFactory.IntegerSpinnerValueFactory
+                                                                amountToStepBy="1" initialValue="300" max="1000"
+                                                                min="1"/>
+                                                    </valueFactory>
+                                                </Spinner>
+                                                <Label prefHeight="24.0" prefWidth="150.0"
+                                                       text="%SCROLL_DURATION_HIGH"/>
+                                                <Spinner fx:id="scrolldurationhigh" editable="true" prefWidth="80.0">
+                                                    <valueFactory>
+                                                        <SpinnerValueFactory.IntegerSpinnerValueFactory
+                                                                amountToStepBy="1" initialValue="50" max="1000"
+                                                                min="1"/>
+                                                    </valueFactory>
+                                                </Spinner>
+                                            </children>
+                                            <opaqueInsets>
+                                                <Insets/>
+                                            </opaqueInsets>
+                                        </HBox>
+                                        <HBox prefHeight="22.0" prefWidth="740.0">
+                                            <children>
+                                                <Label prefHeight="24.0" prefWidth="200.0"
+                                                       text="%MINIMUM_INPUT_DURATION"/>
+                                                <Spinner fx:id="inputduration" editable="true" prefWidth="80.0">
+                                                    <valueFactory>
+                                                        <SpinnerValueFactory.IntegerSpinnerValueFactory
+                                                                amountToStepBy="1" initialValue="10" max="100" min="1"/>
+                                                    </valueFactory>
+                                                </Spinner>
+                                            </children>
+                                            <VBox.margin>
+                                                <Insets left="10.0"/>
+                                            </VBox.margin>
+                                        </HBox>
+                                        <HBox prefHeight="23.0" prefWidth="740.0">
+                                            <children>
+                                                <Label prefHeight="24.0" prefWidth="68.0" text="%MODE"/>
+                                                <ComboBox fx:id="inputconfig" onAction="#updateInputConfig"
+                                                          prefWidth="150.0"/>
+                                            </children>
+                                            <VBox.margin>
+                                                <Insets left="10.0" top="30.0"/>
+                                            </VBox.margin>
+                                        </HBox>
+                                        <HBox prefHeight="37.0" prefWidth="723.0">
+                                            <children>
+                                                <CheckBox fx:id="jkoc_hack" mnemonicParsing="false" prefHeight="18.0"
+                                                          prefWidth="200.0" text="%JKOC_HACK">
+                                                    <HBox.margin>
+                                                        <Insets right="20.0"/>
+                                                    </HBox.margin>
+                                                </CheckBox>
+                                                <CheckBox fx:id="analogScratch" contentDisplay="CENTER"
+                                                          prefHeight="18.0" prefWidth="250.0" text="%ANALOG_SCRATCH"
+                                                          textAlignment="CENTER">
+                                                    <tooltip>
+                                                        <Tooltip text="Use INF controller, is True."
+                                                                 textAlignment="CENTER"/>
+                                                    </tooltip>
+                                                    <HBox.margin>
+                                                        <Insets/>
+                                                    </HBox.margin>
+                                                </CheckBox>
+                                            </children>
+                                            <VBox.margin>
+                                                <Insets left="10.0" top="10.0"/>
+                                            </VBox.margin>
+                                        </HBox>
+                                    </children>
+                                </VBox>
+                            </children>
+                        </AnchorPane>
+                    </content>
+                </Tab>
+                <Tab fx:id="resourceTab" closable="false" text="%Resource">
+                    <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                            <children>
+                                <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                                      AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                    <children>
+                                        <HBox prefHeight="100.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
+                                            <children>
+                                                <Label prefHeight="101.0" prefWidth="100.0" text="%BMS_Path"
+                                                       HBox.hgrow="ALWAYS">
+                                                    <HBox.margin>
+                                                        <Insets left="10.0"/>
+                                                    </HBox.margin>
+                                                </Label>
+                                                <ListView fx:id="bmsroot" onDragDropped="#songPathDragDropped"
+                                                          onDragOver="#onSongPathDragOver" prefHeight="100.0"
+                                                          prefWidth="500.0">
+                                                    <HBox.margin>
+                                                        <Insets top="10.0"/>
+                                                    </HBox.margin>
+                                                </ListView>
+                                                <VBox prefHeight="200.0" prefWidth="100.0">
+                                                    <children>
+                                                        <Button mnemonicParsing="false" onAction="#addSongPath"
+                                                                prefHeight="28.0" prefWidth="30.0" text="%+">
+                                                            <VBox.margin>
+                                                                <Insets left="10.0" top="10.0"/>
+                                                            </VBox.margin>
+                                                        </Button>
+                                                        <Button mnemonicParsing="false" onAction="#removeSongPath"
+                                                                prefHeight="28.0" prefWidth="30.0" text="%-">
+                                                            <VBox.margin>
+                                                                <Insets left="10.0" top="10.0"/>
+                                                            </VBox.margin>
+                                                        </Button>
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                            <VBox.margin>
+                                                <Insets bottom="30.0"/>
+                                            </VBox.margin>
+                                        </HBox>
+                                        <HBox prefHeight="100.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0"
+                                              AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                                              AnchorPane.topAnchor="0.0" VBox.vgrow="ALWAYS">
+                                            <children>
+                                                <Label prefHeight="166.0" prefWidth="100.0" text="%Table_URL"
+                                                       HBox.hgrow="ALWAYS">
+                                                    <HBox.margin>
+                                                        <Insets left="10.0"/>
+                                                    </HBox.margin>
+                                                </Label>
+                                                <VBox prefHeight="100.0" prefWidth="536.0">
+                                                    <children>
+                                                        <HBox>
+                                                            <children>
+                                                                <TextField fx:id="url" prefHeight="28.0"
+                                                                           prefWidth="500.0"/>
+                                                                <Button mnemonicParsing="false" onAction="#addTableURL"
+                                                                        prefHeight="25.0" prefWidth="30.0" text="%+">
+                                                                    <HBox.margin>
+                                                                        <Insets left="10.0"/>
+                                                                    </HBox.margin>
+                                                                </Button>
+                                                            </children>
+                                                        </HBox>
+                                                        <HBox VBox.vgrow="ALWAYS">
+                                                            <children>
+                                                                <ListView fx:id="tableurl" prefHeight="167.0"
+                                                                          prefWidth="500.0" HBox.hgrow="ALWAYS">
+                                                                    <HBox.margin>
+                                                                        <Insets top="5.0"/>
+                                                                    </HBox.margin>
+                                                                </ListView>
+                                                                <Button mnemonicParsing="false"
+                                                                        onAction="#removeTableURL" prefHeight="28.0"
+                                                                        prefWidth="30.0" text="%-">
+                                                                    <HBox.margin>
+                                                                        <Insets left="10.0" top="10.0"/>
+                                                                    </HBox.margin>
+                                                                </Button>
+                                                            </children>
+                                                        </HBox>
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                        </HBox>
+                                        <CheckBox fx:id="updatesong" mnemonicParsing="false" prefHeight="25.0"
+                                                  prefWidth="300.0" text="%UPDATE_SONG">
+                                            <VBox.margin>
+                                                <Insets left="10.0"/>
+                                            </VBox.margin>
+                                        </CheckBox>
+                                    </children>
+                                </VBox>
+                            </children>
+                        </AnchorPane>
+                    </content>
+                </Tab>
+                <Tab fx:id="optionTab" closable="false" text="%Play_Option">
+                    <content>
+                        <VBox prefHeight="241.0" prefWidth="723.0">
+                            <children>
+                                <HBox prefHeight="18.0" prefWidth="703.0">
+                                    <children>
+                                        <Label prefHeight="24.0" prefWidth="75.0" text="%MODE"/>
+                                        <ComboBox fx:id="playconfig" onAction="#updatePlayConfig" prefWidth="150.0"/>
+                                    </children>
+                                    <VBox.margin>
+                                        <Insets bottom="10.0"/>
+                                    </VBox.margin>
+                                </HBox>
+                                <GridPane fx:id="lr2configuration" prefHeight="154.0" prefWidth="632.0">
+                                    <columnConstraints>
+                                        <ColumnConstraints maxWidth="278.0" minWidth="0.0" prefWidth="150.0"/>
+                                        <ColumnConstraints maxWidth="402.0" minWidth="0.0" prefWidth="188.0"/>
+                                        <ColumnConstraints maxWidth="438.0" minWidth="0.0" prefWidth="150.0"/>
+                                        <ColumnConstraints maxWidth="423.0" minWidth="0.0" prefWidth="200.0"/>
+                                    </columnConstraints>
+                                    <rowConstraints>
+                                        <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0"/>
+                                        <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0"/>
+                                        <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0"/>
+                                        <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0"/>
+                                        <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="30.0"/>
+                                        <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0"/>
+                                        <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0"/>
+                                    </rowConstraints>
+                                    <children>
+                                        <Label prefHeight="18.0" prefWidth="78.0" text="%HI-SPEED"/>
+                                        <Spinner fx:id="hispeed" editable="true" GridPane.columnIndex="1">
+                                            <valueFactory>
+                                                <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.1"
+                                                                                               initialValue="1.0"
+                                                                                               max="9.9" min="1.0"/>
+                                            </valueFactory>
+                                        </Spinner>
+                                        <Label text="%HISPEED_FIX" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
+                                        <ComboBox fx:id="fixhispeed" prefWidth="150.0" GridPane.columnIndex="3"
+                                                  GridPane.rowIndex="2"/>
+                                        <Label text="%NOTE_MODIFIER" GridPane.rowIndex="3"/>
+                                        <ComboBox fx:id="scoreop" prefWidth="150.0" GridPane.columnIndex="1"
+                                                  GridPane.rowIndex="3"/>
+                                        <Label layoutX="10.0" layoutY="84.0" text="%NOTE_MODIFIER2"
+                                               GridPane.columnIndex="2" GridPane.rowIndex="3"/>
+                                        <ComboBox fx:id="scoreop2" prefWidth="150.0" GridPane.columnIndex="3"
+                                                  GridPane.rowIndex="3"/>
+                                        <Label layoutX="10.0" layoutY="84.0" text="%DOUBLE_OPTION"
+                                               GridPane.rowIndex="4"/>
+                                        <ComboBox fx:id="doubleop" prefWidth="150.0" GridPane.columnIndex="1"
+                                                  GridPane.rowIndex="4"/>
+                                        <Label text="%GAUGE_TYPE" GridPane.columnIndex="2" GridPane.rowIndex="4"/>
+                                        <ComboBox fx:id="gaugeop" prefWidth="150.0" GridPane.columnIndex="3"
+                                                  GridPane.rowIndex="4"/>
+                                        <Label text="%LNTYPE" GridPane.rowIndex="5"/>
+                                        <ComboBox fx:id="lntype" prefWidth="150.0" GridPane.columnIndex="1"
+                                                  GridPane.rowIndex="5"/>
+                                        <Label text="%EXPAND_JUDGE" GridPane.columnIndex="2" GridPane.rowIndex="5"/>
+                                        <Spinner fx:id="exjudge" editable="true" GridPane.columnIndex="3"
+                                                 GridPane.rowIndex="5">
+                                            <valueFactory>
+                                                <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="25"
+                                                                                                initialValue="100"
+                                                                                                max="400" min="25"/>
+                                            </valueFactory>
+                                        </Spinner>
+                                        <Label text="%H_RANDOM_THRESHOLD_BPM" GridPane.columnIndex="0"
+                                               GridPane.rowIndex="6"/>
+                                        <Spinner fx:id="hranthresholdbpm" editable="true" GridPane.columnIndex="1"
+                                                 GridPane.rowIndex="6">
+                                            <valueFactory>
+                                                <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1"
+                                                                                                initialValue="120"
+                                                                                                max="15000" min="0"/>
+                                            </valueFactory>
+                                        </Spinner>
+                                        <Label text="%GVALUE" GridPane.columnIndex="2"/>
+                                        <Spinner fx:id="gvalue" editable="true" GridPane.columnIndex="3">
+                                            <valueFactory>
+                                                <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1"
+                                                                                                initialValue="300"
+                                                                                                max="2000" min="1"/>
+                                            </valueFactory>
+                                        </Spinner>
+                                        <CheckBox fx:id="enableLanecover" mnemonicParsing="false"
+                                                  text="%ENABLE_LANECOVER" GridPane.rowIndex="1"/>
+                                        <Spinner fx:id="lanecover" editable="true" GridPane.columnIndex="1"
+                                                 GridPane.rowIndex="1">
+                                            <valueFactory>
+                                                <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1"
+                                                                                                initialValue="100"
+                                                                                                max="1000" min="0"/>
+                                            </valueFactory>
+                                        </Spinner>
+                                        <CheckBox fx:id="enableLift" mnemonicParsing="false" text="%ENABLE_LIFT"
+                                                  GridPane.columnIndex="2" GridPane.rowIndex="1"/>
+                                        <Spinner fx:id="lift" editable="true" GridPane.columnIndex="3"
+                                                 GridPane.rowIndex="1">
+                                            <valueFactory>
+                                                <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1"
+                                                                                                initialValue="100"
+                                                                                                max="1000" min="0"/>
+                                            </valueFactory>
+                                        </Spinner>
+                                        <Label text="%JUDGETIMING" GridPane.rowIndex="2"/>
+                                        <Spinner fx:id="judgetiming" editable="true" GridPane.columnIndex="1"
+                                                 GridPane.rowIndex="2">
+                                            <valueFactory>
+                                                <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1"
+                                                                                                initialValue="0"
+                                                                                                max="99" min="-99"/>
+                                            </valueFactory>
+                                        </Spinner>
+                                    </children>
+                                </GridPane>
+                                <GridPane fx:id="lr2configurationassist" prefHeight="48.0" prefWidth="632.0">
+                                    <columnConstraints>
+                                        <ColumnConstraints maxWidth="350.0" minWidth="0.0" prefWidth="160.0"/>
+                                        <ColumnConstraints maxWidth="350.0" minWidth="0.0" prefWidth="160.0"/>
+                                        <ColumnConstraints maxWidth="350.0" minWidth="0.0" prefWidth="160.0"/>
+                                        <ColumnConstraints maxWidth="350.0" minWidth="0.0" prefWidth="160.0"/>
+                                        <ColumnConstraints maxWidth="350.0" minWidth="0.0" prefWidth="160.0"/>
+                                    </columnConstraints>
+                                    <rowConstraints>
+                                        <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0"/>
+                                        <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0"/>
+                                    </rowConstraints>
+                                    <children>
+                                        <Label text="%ASSIST_OPTION" GridPane.rowIndex="0"/>
+                                        <CheckBox fx:id="constant" mnemonicParsing="false" text="%CONSTANT"
+                                                  GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                                        <CheckBox fx:id="bpmguide" mnemonicParsing="false" text="%BPM_GUIDE"
+                                                  GridPane.columnIndex="2" GridPane.rowIndex="0"/>
+                                        <CheckBox fx:id="legacy" mnemonicParsing="false" text="%LEGACY_NOTE"
+                                                  GridPane.columnIndex="3" GridPane.rowIndex="0"/>
+                                        <CheckBox fx:id="nomine" mnemonicParsing="false" text="%NO_MINE"
+                                                  GridPane.columnIndex="4" GridPane.rowIndex="0"/>
+                                        <Label text="%OPTIONS_MISC" GridPane.rowIndex="1"/>
+                                        <CheckBox fx:id="showhiddennote" mnemonicParsing="false"
+                                                  text="%SHOW_HIDDEN_NOTE" GridPane.columnIndex="2"
+                                                  GridPane.rowIndex="1"/>
+                                        <CheckBox fx:id="judgeregion" mnemonicParsing="false" text="%JUDGE_REGION"
+                                                  GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                                        <CheckBox fx:id="markprocessednote" mnemonicParsing="false"
+                                                  text="%MARK_PROCESSED_NOTE" GridPane.columnIndex="3"
+                                                  GridPane.rowIndex="1"/>
+                                        <CheckBox fx:id="continueuntilendofsong" mnemonicParsing="false"
+                                                  text="%CONTINUE_UNTIL_END_OF_SONG" GridPane.columnIndex="4"
+                                                  GridPane.rowIndex="1"/>
+                                    </children>
+                                </GridPane>
+                                <HBox prefHeight="9.0" prefWidth="720.0">
+                                    <children>
+                                        <Label prefHeight="24.0" prefWidth="135.0" text="%TARGET_SCORE"/>
+                                        <ComboBox fx:id="target" prefWidth="150.0"/>
+                                    </children>
+                                    <opaqueInsets>
+                                        <Insets/>
+                                    </opaqueInsets>
+                                    <VBox.margin>
+                                        <Insets top="4.0"/>
+                                    </VBox.margin>
+                                </HBox>
 
-                         <HBox prefHeight="24.0" prefWidth="723.0">
-                           <children>
-                              <Label prefHeight="24.0" prefWidth="127.0" text="%AUTO_SAVE_REPLAY1" />
-                              <ComboBox fx:id="autosavereplay1" prefWidth="150.0" />
-                           </children>
-                           <children>
-                              <Label prefHeight="24.0" prefWidth="127.0" text="%AUTO_SAVE_REPLAY2">
-                                 <HBox.margin>
-                                    <Insets left="10.0" />
-                                 </HBox.margin></Label>
-                              <ComboBox fx:id="autosavereplay2" prefWidth="150.0" />
-                           </children>
-                           <VBox.margin>
-                              <Insets top="4.0" />
-                           </VBox.margin>
-                        </HBox>
-                        <HBox prefHeight="24.0" prefWidth="723.0">
-                           <children>
-                              <Label prefHeight="24.0" prefWidth="127.0" text="%AUTO_SAVE_REPLAY3" />
-                              <ComboBox fx:id="autosavereplay3" prefWidth="150.0" />
-                           </children>
-                           <children>
-                              <Label prefHeight="24.0" prefWidth="127.0" text="%AUTO_SAVE_REPLAY4">
-                                 <HBox.margin>
-                                    <Insets left="10.0" />
-                                 </HBox.margin></Label>
-                              <ComboBox fx:id="autosavereplay4" prefWidth="150.0" />
-                           </children>
-                           <VBox.margin>
-                              <Insets top="4.0" />
-                           </VBox.margin>
-                        </HBox>
-                        
-                        <HBox prefHeight="24.0" prefWidth="723.0">
-                           <children>
-                              <Label prefHeight="24.0" prefWidth="127.0" text="%SEVEN_TO_NINE_PATTERN" />
-                              <ComboBox fx:id="seventoninepattern" prefWidth="150.0" />
-                           </children>
-                           <children>
-                              <Label prefHeight="24.0" prefWidth="127.0" text="%SEVEN_TO_NINE_TYPE">
-                                 <HBox.margin>
-                                    <Insets left="10.0" />
-                                 </HBox.margin></Label>
-                              <ComboBox fx:id="seventoninetype" prefWidth="150.0" />
-                           </children>
-                           <VBox.margin>
-                              <Insets top="4.0" />
-                           </VBox.margin>
-                        </HBox>
-                  	</children>
-                  	<padding>
-                  		<Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                  	</padding>
-                  </VBox>
-               </content>
-            </Tab>
-            <Tab fx:id="skinTab" closable="false" text="%Skin">
-              <content>
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                     <children>
-                        <VBox prefHeight="280.0" prefWidth="740.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                           <children>
-                              <fx:include fx:id="skin" source="SkinConfigurationView.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                              <HBox prefHeight="30.0" prefWidth="723.0">
-                                 <children>
-                                    <Label layoutX="10.0" layoutY="10.0" prefHeight="30.0" prefWidth="200.0" text="%BGM_Path(LR2)">
-                                       <HBox.margin>
-                                          <Insets left="10.0" right="10.0" top="10.0" />
-                                       </HBox.margin></Label>
-                                    <TextField fx:id="bgmpath" prefHeight="28.0" prefWidth="480.0">
-                                       <HBox.margin>
-                                          <Insets top="10.0" />
-                                       </HBox.margin></TextField>
-                                    <Button mnemonicParsing="false" onAction="#addBGMPath" prefHeight="28.0" prefWidth="29.0" text="...">
-                                       <HBox.margin>
-                                          <Insets left="10.0" top="10.0" />
-                                       </HBox.margin></Button>
-                                 </children>
-                              </HBox>
-                              <HBox prefHeight="30.0" prefWidth="723.0">
-                                 <children>
-                                    <Label layoutX="10.0" layoutY="10.0" prefHeight="30.0" prefWidth="200.0" text="%Sound_Path(LR2)">
-                                       <HBox.margin>
-                                          <Insets left="10.0" right="10.0" top="10.0" />
-                                       </HBox.margin></Label>
-                                    <TextField fx:id="soundpath" prefHeight="28.0" prefWidth="480.0">
-                                       <HBox.margin>
-                                          <Insets top="10.0" />
-                                       </HBox.margin></TextField>
-                                    <Button mnemonicParsing="false" onAction="#addSoundPath" prefHeight="28.0" prefWidth="29.0" text="...">
-                                       <HBox.margin>
-                                          <Insets left="10.0" top="10.0" />
-                                       </HBox.margin></Button>
-                                 </children>
-                                 <VBox.margin>
-                                    <Insets />
-                                 </VBox.margin>
-                              </HBox>
-                           </children>
-                           <padding>
-                              <Insets left="10.0" right="10.0" top="10.0" />
-                           </padding>
-                         </VBox>
-                     </children>
-                  </AnchorPane>
-              </content>
-            </Tab>
-            <Tab fx:id="otherTab" closable="false" text="%Other">
-              <content>
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                     <children>
-                        <VBox prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                           <children>
-                              <HBox prefHeight="37.0" prefWidth="723.0">
-                                 <children>
-                                    <Label prefHeight="18.0" prefWidth="127.0" text="%JUDGE_ALGORITHM" />
-                                    <ComboBox fx:id="judgealgorithm" prefWidth="150.0" />
-                                 </children>
-                              </HBox>
-                              <CheckBox fx:id="useSongInfo" mnemonicParsing="false" prefHeight="18.0" text="%USE_SONGINFO" />
-                              <CheckBox fx:id="folderlamp" mnemonicParsing="false" prefHeight="25.0" text="%FOLDER_LAMP" />
-                              <CheckBox fx:id="usecim" mnemonicParsing="false" prefHeight="25.0" text="%CACHE_SKIN_IMAGE" />
-                              <Button mnemonicParsing="false" onAction="#importScoreDataFromLR2" text="%IMPORT_LR2_SCORE">
-                                 <VBox.margin>
-                                    <Insets top="10.0" />
-                                 </VBox.margin>
-                              </Button>
-                           </children>
+                                <HBox prefHeight="24.0" prefWidth="723.0">
+                                    <children>
+                                        <Label prefHeight="24.0" prefWidth="127.0" text="%AUTO_SAVE_REPLAY1"/>
+                                        <ComboBox fx:id="autosavereplay1" prefWidth="150.0"/>
+                                    </children>
+                                    <children>
+                                        <Label prefHeight="24.0" prefWidth="127.0" text="%AUTO_SAVE_REPLAY2">
+                                            <HBox.margin>
+                                                <Insets left="10.0"/>
+                                            </HBox.margin>
+                                        </Label>
+                                        <ComboBox fx:id="autosavereplay2" prefWidth="150.0"/>
+                                    </children>
+                                    <VBox.margin>
+                                        <Insets top="4.0"/>
+                                    </VBox.margin>
+                                </HBox>
+                                <HBox prefHeight="24.0" prefWidth="723.0">
+                                    <children>
+                                        <Label prefHeight="24.0" prefWidth="127.0" text="%AUTO_SAVE_REPLAY3"/>
+                                        <ComboBox fx:id="autosavereplay3" prefWidth="150.0"/>
+                                    </children>
+                                    <children>
+                                        <Label prefHeight="24.0" prefWidth="127.0" text="%AUTO_SAVE_REPLAY4">
+                                            <HBox.margin>
+                                                <Insets left="10.0"/>
+                                            </HBox.margin>
+                                        </Label>
+                                        <ComboBox fx:id="autosavereplay4" prefWidth="150.0"/>
+                                    </children>
+                                    <VBox.margin>
+                                        <Insets top="4.0"/>
+                                    </VBox.margin>
+                                </HBox>
+
+                                <HBox prefHeight="24.0" prefWidth="723.0">
+                                    <children>
+                                        <Label prefHeight="24.0" prefWidth="127.0" text="%SEVEN_TO_NINE_PATTERN"/>
+                                        <ComboBox fx:id="seventoninepattern" prefWidth="150.0"/>
+                                    </children>
+                                    <children>
+                                        <Label prefHeight="24.0" prefWidth="127.0" text="%SEVEN_TO_NINE_TYPE">
+                                            <HBox.margin>
+                                                <Insets left="10.0"/>
+                                            </HBox.margin>
+                                        </Label>
+                                        <ComboBox fx:id="seventoninetype" prefWidth="150.0"/>
+                                    </children>
+                                    <VBox.margin>
+                                        <Insets top="4.0"/>
+                                    </VBox.margin>
+                                </HBox>
+                            </children>
+                            <padding>
+                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+                            </padding>
                         </VBox>
-                     </children>
-                     <padding>
-                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                     </padding>
-                  </AnchorPane>
-              </content>
-            </Tab>
-            <Tab fx:id="irTab" closable="false" text="IR">
-              <content>
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                     <children>
-                        <VBox layoutX="71.0" layoutY="6.0" prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                           <children>
-                              <HBox prefHeight="0.0" prefWidth="730.0">
-                                 <children>
-                                    <Label prefHeight="24.0" prefWidth="100.0" text="IR" />
-                                    <ComboBox fx:id="irname" prefWidth="150.0" />
-                                 </children>
-                                 <VBox.margin>
-                                    <Insets bottom="10.0" left="10.0" top="10.0" />
-                                 </VBox.margin>
-                              </HBox>
-                              <HBox prefHeight="12.0" prefWidth="730.0">
-                                 <VBox.margin>
-                                    <Insets left="10.0" top="10.0" />
-                                 </VBox.margin>
-                                 <children>
-                                    <Label prefHeight="24.0" prefWidth="100.0" text="User ID" />
-                                    <TextField fx:id="iruserid" prefHeight="24.0" prefWidth="287.0" />
-                                 </children>
-                              </HBox>
-                              <HBox prefHeight="7.0" prefWidth="740.0">
-                                 <children>
-                                    <Label prefHeight="35.0" prefWidth="100.0" text="Password">
-                                       <HBox.margin>
-                                          <Insets left="10.0" />
-                                       </HBox.margin>
-                                    </Label>
-                                    <PasswordField fx:id="irpassword" prefHeight="24.0" prefWidth="205.0">
-                                       <HBox.margin>
-                                          <Insets />
-                                       </HBox.margin>
-                                    </PasswordField>
-                                 </children>
-                                 <VBox.margin>
-                                    <Insets top="10.0" />
-                                 </VBox.margin>
-                              </HBox>
-                              <HBox prefHeight="15.0" prefWidth="740.0">
-                                 <VBox.margin>
-                                    <Insets top="30.0" />
-                                 </VBox.margin>
-                                 <children>
-                                    <Label prefHeight="35.0" prefWidth="100.0" text="%IR_SEND">
-                                       <HBox.margin>
-                                          <Insets left="10.0" />
-                                       </HBox.margin>
-                                    </Label>
-                                    <ComboBox fx:id="irsend" prefHeight="24.0" prefWidth="200.0" />
-                                 </children>
-                              </HBox>
-                           </children>
-                        </VBox>
-                     </children>
-                  </AnchorPane>
-              </content>
-            </Tab>
-            <Tab fx:id="courseTab" closable="false" text="Course">
-              <content>
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                     <children>
-                         <fx:include fx:id="course" source="CourseEditorView.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                     </children>
-                  </AnchorPane>
-              </content>
-            </Tab>
-         </tabs>
-      </TabPane>
-      <HBox fx:id="controlPanel" prefHeight="38.0" prefWidth="552.0">
-         <children>
-            <Button mnemonicParsing="false" onAction="#start" prefHeight="25.0" prefWidth="102.0" text="%START">
-               <padding>
-                  <Insets left="5.0" />
-               </padding></Button>
-            <Button mnemonicParsing="false" onAction="#loadDiffBMS" prefHeight="25.0" prefWidth="200.0" text="%UPDATE_DATABASE">
-               <HBox.margin>
-                  <Insets left="10.0" />
-               </HBox.margin>
-            </Button>
-            <Button mnemonicParsing="false" onAction="#loadTable" prefHeight="25.0" prefWidth="190.0" text="%LOAD_TABLE">
-               <HBox.margin>
-                  <Insets left="10.0" />
-               </HBox.margin>
-            </Button>
-            <Button alignment="CENTER" mnemonicParsing="false" onAction="#loadAllBMS" prefHeight="25.0" prefWidth="230.0" text="%REBUILD_DATABASE">
-               <HBox.margin>
-                  <Insets left="10.0" />
-               </HBox.margin>
-            </Button>
-            <Button mnemonicParsing="false" onAction="#exit" prefHeight="25.0" prefWidth="108.0" text="%EXIT">
-               <HBox.margin>
-                  <Insets left="10.0" />
-               </HBox.margin>
-            </Button>
-         </children>
-         <VBox.margin>
-            <Insets left="5.0" right="5.0" top="20.0" />
-         </VBox.margin>
-      </HBox>
-   </children>
+                    </content>
+                </Tab>
+                <Tab fx:id="skinTab" closable="false" text="%Skin">
+                    <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                            <children>
+                                <VBox prefHeight="280.0" prefWidth="740.0" AnchorPane.bottomAnchor="0.0"
+                                      AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                                      AnchorPane.topAnchor="0.0">
+                                    <children>
+                                        <fx:include fx:id="skin" source="SkinConfigurationView.fxml"
+                                                    AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                                                    AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
+                                        <HBox prefHeight="30.0" prefWidth="723.0">
+                                            <children>
+                                                <Label layoutX="10.0" layoutY="10.0" prefHeight="30.0" prefWidth="200.0"
+                                                       text="%BGM_Path(LR2)">
+                                                    <HBox.margin>
+                                                        <Insets left="10.0" right="10.0" top="10.0"/>
+                                                    </HBox.margin>
+                                                </Label>
+                                                <TextField fx:id="bgmpath" prefHeight="28.0" prefWidth="480.0">
+                                                    <HBox.margin>
+                                                        <Insets top="10.0"/>
+                                                    </HBox.margin>
+                                                </TextField>
+                                                <Button mnemonicParsing="false" onAction="#addBGMPath" prefHeight="28.0"
+                                                        prefWidth="29.0" text="...">
+                                                    <HBox.margin>
+                                                        <Insets left="10.0" top="10.0"/>
+                                                    </HBox.margin>
+                                                </Button>
+                                            </children>
+                                        </HBox>
+                                        <HBox prefHeight="30.0" prefWidth="723.0">
+                                            <children>
+                                                <Label layoutX="10.0" layoutY="10.0" prefHeight="30.0" prefWidth="200.0"
+                                                       text="%Sound_Path(LR2)">
+                                                    <HBox.margin>
+                                                        <Insets left="10.0" right="10.0" top="10.0"/>
+                                                    </HBox.margin>
+                                                </Label>
+                                                <TextField fx:id="soundpath" prefHeight="28.0" prefWidth="480.0">
+                                                    <HBox.margin>
+                                                        <Insets top="10.0"/>
+                                                    </HBox.margin>
+                                                </TextField>
+                                                <Button mnemonicParsing="false" onAction="#addSoundPath"
+                                                        prefHeight="28.0" prefWidth="29.0" text="...">
+                                                    <HBox.margin>
+                                                        <Insets left="10.0" top="10.0"/>
+                                                    </HBox.margin>
+                                                </Button>
+                                            </children>
+                                            <VBox.margin>
+                                                <Insets/>
+                                            </VBox.margin>
+                                        </HBox>
+                                    </children>
+                                    <padding>
+                                        <Insets left="10.0" right="10.0" top="10.0"/>
+                                    </padding>
+                                </VBox>
+                            </children>
+                        </AnchorPane>
+                    </content>
+                </Tab>
+                <Tab fx:id="otherTab" closable="false" text="%Other">
+                    <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                            <children>
+                                <VBox prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0"
+                                      AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                                      AnchorPane.topAnchor="0.0">
+                                    <children>
+                                        <HBox prefHeight="37.0" prefWidth="723.0">
+                                            <children>
+                                                <Label prefHeight="18.0" prefWidth="127.0" text="%JUDGE_ALGORITHM"/>
+                                                <ComboBox fx:id="judgealgorithm" prefWidth="150.0"/>
+                                            </children>
+                                        </HBox>
+                                        <CheckBox fx:id="useSongInfo" mnemonicParsing="false" prefHeight="18.0"
+                                                  text="%USE_SONGINFO"/>
+                                        <CheckBox fx:id="folderlamp" mnemonicParsing="false" prefHeight="25.0"
+                                                  text="%FOLDER_LAMP"/>
+                                        <CheckBox fx:id="usecim" mnemonicParsing="false" prefHeight="25.0"
+                                                  text="%CACHE_SKIN_IMAGE"/>
+                                        <Button mnemonicParsing="false" onAction="#importScoreDataFromLR2"
+                                                text="%IMPORT_LR2_SCORE">
+                                            <VBox.margin>
+                                                <Insets top="10.0"/>
+                                            </VBox.margin>
+                                        </Button>
+                                    </children>
+                                </VBox>
+                            </children>
+                            <padding>
+                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+                            </padding>
+                        </AnchorPane>
+                    </content>
+                </Tab>
+                <Tab fx:id="irTab" closable="false" text="IR">
+                    <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                            <children>
+                                <VBox layoutX="71.0" layoutY="6.0" prefHeight="200.0" prefWidth="100.0"
+                                      AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                                      AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                    <children>
+                                        <HBox prefHeight="0.0" prefWidth="730.0">
+                                            <children>
+                                                <Label prefHeight="24.0" prefWidth="100.0" text="IR"/>
+                                                <ComboBox fx:id="irname" prefWidth="150.0"/>
+                                            </children>
+                                            <VBox.margin>
+                                                <Insets bottom="10.0" left="10.0" top="10.0"/>
+                                            </VBox.margin>
+                                        </HBox>
+                                        <HBox prefHeight="12.0" prefWidth="730.0">
+                                            <VBox.margin>
+                                                <Insets left="10.0" top="10.0"/>
+                                            </VBox.margin>
+                                            <children>
+                                                <Label prefHeight="24.0" prefWidth="100.0" text="User ID"/>
+                                                <TextField fx:id="iruserid" prefHeight="24.0" prefWidth="287.0"/>
+                                            </children>
+                                        </HBox>
+                                        <HBox prefHeight="7.0" prefWidth="740.0">
+                                            <children>
+                                                <Label prefHeight="35.0" prefWidth="100.0" text="Password">
+                                                    <HBox.margin>
+                                                        <Insets left="10.0"/>
+                                                    </HBox.margin>
+                                                </Label>
+                                                <PasswordField fx:id="irpassword" prefHeight="24.0" prefWidth="205.0">
+                                                    <HBox.margin>
+                                                        <Insets/>
+                                                    </HBox.margin>
+                                                </PasswordField>
+                                            </children>
+                                            <VBox.margin>
+                                                <Insets top="10.0"/>
+                                            </VBox.margin>
+                                        </HBox>
+                                        <HBox prefHeight="15.0" prefWidth="740.0">
+                                            <VBox.margin>
+                                                <Insets top="30.0"/>
+                                            </VBox.margin>
+                                            <children>
+                                                <Label prefHeight="35.0" prefWidth="100.0" text="%IR_SEND">
+                                                    <HBox.margin>
+                                                        <Insets left="10.0"/>
+                                                    </HBox.margin>
+                                                </Label>
+                                                <ComboBox fx:id="irsend" prefHeight="24.0" prefWidth="200.0"/>
+                                            </children>
+                                        </HBox>
+                                    </children>
+                                </VBox>
+                            </children>
+                        </AnchorPane>
+                    </content>
+                </Tab>
+                <Tab fx:id="courseTab" closable="false" text="Course">
+                    <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                            <children>
+                                <fx:include fx:id="course" source="CourseEditorView.fxml" AnchorPane.bottomAnchor="0.0"
+                                            AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                                            AnchorPane.topAnchor="0.0"/>
+                            </children>
+                        </AnchorPane>
+                    </content>
+                </Tab>
+            </tabs>
+        </TabPane>
+        <HBox fx:id="controlPanel" prefHeight="38.0" prefWidth="552.0">
+            <children>
+                <Button mnemonicParsing="false" onAction="#start" prefHeight="25.0" prefWidth="102.0" text="%START">
+                    <padding>
+                        <Insets left="5.0"/>
+                    </padding>
+                </Button>
+                <Button mnemonicParsing="false" onAction="#loadDiffBMS" prefHeight="25.0" prefWidth="200.0"
+                        text="%UPDATE_DATABASE">
+                    <HBox.margin>
+                        <Insets left="10.0"/>
+                    </HBox.margin>
+                </Button>
+                <Button mnemonicParsing="false" onAction="#loadTable" prefHeight="25.0" prefWidth="190.0"
+                        text="%LOAD_TABLE">
+                    <HBox.margin>
+                        <Insets left="10.0"/>
+                    </HBox.margin>
+                </Button>
+                <Button alignment="CENTER" mnemonicParsing="false" onAction="#loadAllBMS" prefHeight="25.0"
+                        prefWidth="230.0" text="%REBUILD_DATABASE">
+                    <HBox.margin>
+                        <Insets left="10.0"/>
+                    </HBox.margin>
+                </Button>
+                <Button mnemonicParsing="false" onAction="#exit" prefHeight="25.0" prefWidth="108.0" text="%EXIT">
+                    <HBox.margin>
+                        <Insets left="10.0"/>
+                    </HBox.margin>
+                </Button>
+            </children>
+            <VBox.margin>
+                <Insets left="5.0" right="5.0" top="20.0"/>
+            </VBox.margin>
+        </HBox>
+    </children>
 </VBox>

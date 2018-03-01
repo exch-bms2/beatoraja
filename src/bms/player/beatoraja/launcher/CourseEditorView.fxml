@@ -112,9 +112,9 @@
                         <Button mnemonicParsing="false" onAction="#searchSongs" text="Search" />
                      </children>
                   </HBox>
-                  <AnchorPane prefHeight="350.0" prefWidth="200.0">
+                  <AnchorPane prefHeight="400.0" prefWidth="250.0">
                      <children>
-                        <fx:include fx:id="searchSongs" prefHeight="350.0" prefWidth="200.0" source="SongDataView.fxml" />
+                        <fx:include fx:id="searchSongs" prefHeight="400.0" prefWidth="250.0" source="SongDataView.fxml" />
                      </children>
                   </AnchorPane>
                </children>
