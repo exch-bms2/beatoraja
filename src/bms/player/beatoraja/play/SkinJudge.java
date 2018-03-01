@@ -69,7 +69,7 @@ public class SkinJudge extends SkinObject {
         }
         final Rectangle r = judge[judgenow].getDestination(time, state);
         if (r != null) {
-            int shift = 0;
+            float shift = 0;
             if (judgenow < 3) {
                 if(judgenow == 0 && count.length > 6 && count[6] != null && gauge.getValue() == gauge.getMaxValue()) {
                     count[6].draw(sprite, time, judgecombo, state, r.x, r.y);

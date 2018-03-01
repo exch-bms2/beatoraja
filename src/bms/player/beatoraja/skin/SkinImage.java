@@ -73,7 +73,7 @@ public class SkinImage extends SkinObject {
 		draw(sprite, time, state, 0,0);
 	}
 
-	public void draw(SkinObjectRenderer sprite, long time, MainState state, int offsetX, int offsetY) {
+	public void draw(SkinObjectRenderer sprite, long time, MainState state, float offsetX, float offsetY) {
 	    if(getImageID() != -1) {
             final Rectangle r = this.getDestination(time, state);
             final TextureRegion tr = state.getImage(getImageID());
@@ -107,7 +107,7 @@ public class SkinImage extends SkinObject {
         }
 	}
 
-    public void draw(SkinObjectRenderer sprite, long time, MainState state, int value, int offsetX, int offsetY) {
+    public void draw(SkinObjectRenderer sprite, long time, MainState state, int value, float offsetX, float offsetY) {
         if(getImageID() != -1) {
             final Rectangle r = this.getDestination(time, state);
             final TextureRegion tr = state.getImage(getImageID());

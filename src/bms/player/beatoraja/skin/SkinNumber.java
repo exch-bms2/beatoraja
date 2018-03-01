@@ -32,11 +32,15 @@ public class SkinNumber extends SkinObject {
 
 	private int align;
 
-	private TextureRegion[] values;
+	private int value = Integer.MIN_VALUE;
+	private int[] values;
+	private int shiftbase;
 
 	private SkinOffset[] offsets;
-
-	private int length;
+	/**
+	 * 現在の描画幅
+	 */
+	private float length;
 
 	public SkinNumber(TextureRegion[] image, int keta, int zeropadding) {
 		this(image, keta, zeropadding, -1);
@@ -80,34 +84,11 @@ public class SkinNumber extends SkinObject {
 
 	public void setKeta(int keta) {
 		this.keta = keta;
-		this.values = new TextureRegion[keta];
+		this.values = new int[keta];
 	}
 	
 	public void setOffsets(SkinOffset[] offsets) {
 		this.offsets = offsets;
-	}
-
-	public TextureRegion[] getValue(long time, int value, int zeropadding, MainState state) {
-		final SkinSource images = (value >= 0 || mimage == null) ? this.image : mimage;
-		if (images == null) {
-			return new TextureRegion[0];
-		}
-		TextureRegion[] image = images.getImages(time, state);
-		if(image == null) {
-			return new TextureRegion[0];
-		}
-
-		value = Math.abs(value);
-		for (int j = values.length - 1; j >= 0; j--) {
-			if (value > 0 || j == values.length - 1) {
-				values[j] = image[value % 10];
-			} else {
-				values[j] = (zeropadding == 2 ? image[10] : (zeropadding == 1 ? image[0] : (mimage != null
-						&& (values[j + 1] != image[11] && values[j + 1] != null) ? image[11] : null)));
-			}
-			value /= 10;
-		}
-		return values;
 	}
 
 	public void draw(SkinObjectRenderer sprite, long time, MainState state) {
@@ -126,33 +107,53 @@ public class SkinNumber extends SkinObject {
 
 	public void draw(SkinObjectRenderer sprite, long time, int value, MainState state, float offsetX, float offsetY) {
 		Rectangle r = this.getDestination(time, state);
-		length = 0;
-		if (r != null) {
-			TextureRegion[] values = getValue(time, value, zeropadding, state);
-			int shift = 0;
-			if (align == 1) {
-				for (int j = 0; j < values.length && values[j] == null; j++) {
-					shift += r.width;
+		if (r == null) {
+			length = 0;
+			return;
+		}
+		final SkinSource images = (value >= 0 || mimage == null) ? this.image : mimage;
+		if (images == null) {
+			length = 0;
+			return;
+		}
+		TextureRegion[] image = images.getImages(time, state);
+		if(image == null) {
+			length = 0;
+			return;
+		}
+
+		if(this.value != value) {
+			this.value = value;
+			shiftbase = 0;
+			value = Math.abs(value);
+			for (int j = values.length - 1; j >= 0; j--) {
+				if (value > 0 || j == values.length - 1) {
+					values[j] = value % 10;
+				} else {
+					values[j] = (zeropadding == 2 ? 10 : (zeropadding == 1 ? 0 : (mimage != null
+							&& (values[j + 1] != 11 && values[j + 1] != -1) ? 11 : -1)));
 				}
-			} else if (align == 2) {
-				for (int j = 0; j < values.length && values[j] == null; j++) {
-					shift += r.width * 0.5f;
+				if(values[j] == -1) {
+					shiftbase++;
+				} else {
 				}
+				value /= 10;
 			}
-			for (int j = 0; j < values.length; j++) {
-				if (values[j] != null) {
-					if(offsets != null && j < offsets.length) {
-						draw(sprite, values[j], r.x + r.width * j + offsetX - shift + offsets[j].x, r.y + offsetY + offsets[j].y, r.width + offsets[j].w, r.height + offsets[j].h);
-					} else {
-						draw(sprite, values[j], r.x + r.width * j + offsetX - shift, r.y + offsetY, r.width, r.height);						
-					}
-					length += r.width;
+		}
+		length = r.width * (values.length - shiftbase);
+		float shift = align == 0 ? 0 : (align == 1 ? r.width * shiftbase : r.width * 0.5f * shiftbase);
+		for (int j = 0; j < values.length; j++) {
+			if (values[j] != -1) {
+				if(offsets != null && j < offsets.length) {
+					draw(sprite, image[values[j]], r.x + r.width * j + offsetX - shift + offsets[j].x, r.y + offsetY + offsets[j].y, r.width + offsets[j].w, r.height + offsets[j].h);
+				} else {
+					draw(sprite, image[values[j]], r.x + r.width * j + offsetX - shift, r.y + offsetY, r.width, r.height);						
 				}
 			}
 		}
 	}
 	
-	public int getLength() {
+	public float getLength() {
 		return length;
 	}
 
