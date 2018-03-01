@@ -1,7 +1,7 @@
 <launch4jConfig>
   <headerType>gui</headerType>
-  <jar>beatoraja.jar</jar>
-  <outfile>beatoraja.exe</outfile>
+  <jar>build/beatoraja.jar</jar>
+  <outfile>build/beatoraja.exe</outfile>
   <errTitle>beatoraja</errTitle>
   <chdir>.</chdir>
   <!-- <icon>beatoraja.ico</icon> -->
@@ -9,10 +9,4 @@
     <minVersion>1.8.0</minVersion>
     <runtimeBits>64/32</runtimeBits>
   </jre>
-  <!-- <splash>
-    <file>splash.bmp</file>
-    <waitForWindow>true</waitForWindow>
-    <timeout>60</timeout>
-    <timeoutErr>true</timeoutErr>
-  </splash> -->
 </launch4jConfig>
