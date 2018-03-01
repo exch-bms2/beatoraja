@@ -11,7 +11,7 @@ public enum JudgeProperty {
             new int[][]{ {-30, 30}, {-60, 60}, {-110, 110}, {-160, 160}, {-160, 500}},
             new int[][]{ {-120, 120}, {-150, 150}, {-200, 200}, {-250, 250}},
             new int[][]{ {-130, 130}, {-160, 160}, {-110, 110}, {-260, 260}},
-            new boolean[]{true, true, false, false, false, false },
+            new boolean[]{true, true, true, false, false, false },
             MissCondition.ALWAYS,
             new boolean[]{true, true, true, true, true, false }
             ),
