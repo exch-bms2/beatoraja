@@ -1,6 +1,3 @@
-<?import javafx.scene.layout.VBox?>
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.CheckBox?>
@@ -9,42 +6,35 @@
 <?import javafx.scene.control.Spinner?>
 
 <?import java.lang.String?>
+
+<?import javafx.scene.layout.GridPane?>
 <?import javafx.collections.FXCollections?>
-<VBox prefHeight="199.0" prefWidth="552.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="bms.player.beatoraja.launcher.VideoConfigurationView">
-    <padding>
-        <Insets left="10.0"/>
-    </padding>
-    <HBox alignment="CENTER_LEFT" prefHeight="30.0" prefWidth="552.0">
-        <Label text="%DISPLAYMODE">
-            <HBox.margin>
-                <Insets right="10.0"/>
-            </HBox.margin>
-        </Label>
-        <ComboBox fx:id="displayMode" prefWidth="200.0"/>
-    </HBox>
-    <HBox alignment="CENTER_LEFT" prefHeight="30.0" prefWidth="552.0">
-        <Label text="%RESOLUTION">
-            <HBox.margin>
-                <Insets right="10.0"/>
-            </HBox.margin>
-        </Label>
-        <ComboBox fx:id="resolution" prefWidth="200.0"/>
-    </HBox>
-    <HBox prefHeight="14.0" prefWidth="730.0">
-        <CheckBox fx:id="vSync" mnemonicParsing="false" prefHeight="29.0" prefWidth="104.0" text="%VSYNC"/>
-        <Label prefHeight="25.0" prefWidth="50.0" text="%MAXFPS"/>
-        <Spinner fx:id="maxFps" editable="true" prefHeight="24.0" prefWidth="80.0">
+<?import java.net.URL?>
+<?import javafx.scene.control.ScrollPane?>
+<ScrollPane xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="bms.player.beatoraja.launcher.VideoConfigurationView">
+    <GridPane styleClass="optionGrid">
+        <Label text="%DISPLAY" GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.columnSpan="2" styleClass="optionHeader"/>
+
+        <Label text="%DISPLAYMODE" GridPane.rowIndex="1" GridPane.columnIndex="0" styleClass="optionLabel"/>
+        <ComboBox fx:id="displayMode" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+        <Label text="%RESOLUTION" GridPane.rowIndex="2" GridPane.columnIndex="0" styleClass="optionLabel"/>
+        <ComboBox fx:id="resolution" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+        <Label text="%VSYNC" GridPane.rowIndex="3" GridPane.columnIndex="0" styleClass="optionLabel"/>
+        <CheckBox fx:id="vSync" mnemonicParsing="false" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+        <Label text="%MAXFPS" GridPane.rowIndex="4" GridPane.columnIndex="0" styleClass="optionLabel"/>
+        <Spinner fx:id="maxFps" editable="true" GridPane.rowIndex="4" GridPane.columnIndex="1">
             <valueFactory>
                 <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="60" max="1000" min="0"/>
             </valueFactory>
         </Spinner>
-    </HBox>
-    <HBox alignment="CENTER_LEFT" prefHeight="10.0" prefWidth="730.0">
-        <VBox.margin>
-            <Insets top="30.0"/>
-        </VBox.margin>
-        <Label minWidth="100.0" prefWidth="150.0" text="%BGA"/>
-        <ComboBox fx:id="bgaOp" prefWidth="150.0">
+
+        <Label text="%BGA" GridPane.rowIndex="5" GridPane.columnIndex="0" GridPane.columnSpan="2" styleClass="optionHeader"/>
+
+        <Label text="%BGA" GridPane.rowIndex="6" GridPane.columnIndex="0" styleClass="optionLabel"/>
+        <ComboBox fx:id="bgaOp" GridPane.rowIndex="6" GridPane.columnIndex="1">
             <items>
                 <FXCollections fx:factory="observableArrayList">
                     <String fx:value="On"/>
@@ -53,29 +43,20 @@
                 </FXCollections>
             </items>
         </ComboBox>
-    </HBox>
 
-    <HBox prefHeight="22.0" prefWidth="730.0">
-        <VBox.margin>
-            <Insets top="5.0"/>
-        </VBox.margin>
-        <Label contentDisplay="CENTER" prefHeight="18.0" prefWidth="150.0" text="%MISSLAYER_DURATION" textAlignment="CENTER">
+        <Label text="%MISSLAYER_DURATION" GridPane.rowIndex="7" GridPane.columnIndex="0" styleClass="optionLabel">
             <tooltip>
                 <Tooltip text="Set miss layer display time (ms)" textAlignment="CENTER"/>
             </tooltip>
         </Label>
-        <Spinner fx:id="missLayerTime" editable="true" prefHeight="24.0" prefWidth="100.0">
+        <Spinner fx:id="missLayerTime" editable="true" GridPane.rowIndex="7" GridPane.columnIndex="1">
             <valueFactory>
                 <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="500" max="10000" min="0"/>
             </valueFactory>
         </Spinner>
-    </HBox>
-    <HBox alignment="CENTER_LEFT" prefHeight="0.0" prefWidth="730.0">
-        <VBox.margin>
-            <Insets top="5.0"/>
-        </VBox.margin>
-        <Label minWidth="100.0" prefWidth="150.0" text="%BGA_EXPAND"/>
-        <ComboBox fx:id="bgaExpand" prefWidth="150.0">
+
+        <Label text="%BGA_EXPAND" GridPane.rowIndex="8" GridPane.columnIndex="0" styleClass="optionLabel"/>
+        <ComboBox fx:id="bgaExpand" GridPane.rowIndex="8" GridPane.columnIndex="1">
             <items>
                 <FXCollections fx:factory="observableArrayList">
                     <String fx:value="Full"/>
@@ -84,5 +65,9 @@
                 </FXCollections>
             </items>
         </ComboBox>
-    </HBox>
-</VBox>
+
+        <stylesheets>
+            <URL value="@LauncherStyle.css"/>
+        </stylesheets>
+    </GridPane>
+</ScrollPane>

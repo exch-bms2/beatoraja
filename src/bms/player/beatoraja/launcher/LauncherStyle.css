@@ -1,0 +1,13 @@
+.optionGrid {
+    -fx-vgap: 10px;
+    -fx-hgap: 10px;
+    -fx-column-halignment: right;
+    -fx-padding: 25px;
+}
+.optionHeader {
+    -fx-font-size: 16px;
+    -fx-font-style: oblique;
+}
+.optionLabel {
+
+}
