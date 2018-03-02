@@ -46,68 +46,7 @@
     </HBox>
     <TabPane prefHeight="435.0" prefWidth="740.0" VBox.vgrow="ALWAYS">
         <Tab fx:id="videoTab" closable="false" text="%TAB_VIDEO">
-            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                <VBox prefHeight="200.0" prefWidth="552.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                    <padding>
-                        <Insets left="10.0"/>
-                    </padding>
-                    <HBox alignment="CENTER_LEFT" prefHeight="30.0" prefWidth="552.0">
-                        <Label text="%DISPLAYMODE">
-                            <HBox.margin>
-                                <Insets right="10.0"/>
-                            </HBox.margin>
-                        </Label>
-                        <ComboBox fx:id="displaymode" prefWidth="200.0"/>
-                    </HBox>
-                    <HBox alignment="CENTER_LEFT" prefHeight="30.0" prefWidth="552.0">
-                        <Label text="%RESOLUTION">
-                            <HBox.margin>
-                                <Insets right="10.0"/>
-                            </HBox.margin>
-                        </Label>
-                        <ComboBox fx:id="resolution" prefWidth="200.0"/>
-                    </HBox>
-                    <HBox prefHeight="14.0" prefWidth="730.0">
-                        <CheckBox fx:id="vsync" mnemonicParsing="false" prefHeight="29.0" prefWidth="104.0" text="%VSYNC"/>
-                        <Label prefHeight="25.0" prefWidth="50.0" text="%MAXFPS"/>
-                        <Spinner fx:id="maxfps" editable="true" prefHeight="24.0" prefWidth="80.0">
-                            <valueFactory>
-                                <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="60" max="1000" min="0"/>
-                            </valueFactory>
-                        </Spinner>
-                    </HBox>
-                    <HBox alignment="CENTER_LEFT" prefHeight="10.0" prefWidth="730.0">
-                        <VBox.margin>
-                            <Insets top="30.0"/>
-                        </VBox.margin>
-                        <Label minWidth="100.0" prefWidth="150.0" text="%BGA"/>
-                        <ComboBox fx:id="bgaop" prefWidth="150.0"/>
-                    </HBox>
-
-                    <HBox prefHeight="22.0" prefWidth="730.0">
-                        <VBox.margin>
-                            <Insets top="5.0"/>
-                        </VBox.margin>
-                        <Label contentDisplay="CENTER" prefHeight="18.0" prefWidth="150.0" text="%MISSLAYER_DURATION" textAlignment="CENTER">
-                            <tooltip>
-                                <Tooltip text="Set miss layer display time (ms)" textAlignment="CENTER"/>
-                            </tooltip>
-                        </Label>
-                        <Spinner fx:id="misslayertime" editable="true" prefHeight="24.0" prefWidth="100.0">
-                            <valueFactory>
-                                <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="500" max="10000" min="0"/>
-                            </valueFactory>
-                        </Spinner>
-                    </HBox>
-                    <HBox alignment="CENTER_LEFT" prefHeight="0.0" prefWidth="730.0">
-                        <VBox.margin>
-                            <Insets top="5.0"/>
-                        </VBox.margin>
-                        <Label minWidth="100.0" prefWidth="150.0" text="%BGA_EXPAND"/>
-                        <ComboBox fx:id="bgaexpand" prefWidth="150.0"/>
-                    </HBox>
-                </VBox>
-            </AnchorPane>
+            <fx:include fx:id="video" source="VideoConfigurationView.fxml"/>
         </Tab>
         <Tab fx:id="audioTab" closable="false" text="%TAB_AUDIO">
             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
