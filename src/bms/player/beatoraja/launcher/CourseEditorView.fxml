@@ -15,111 +15,93 @@
 <?import javafx.scene.layout.VBox?>
 
 <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="bms.player.beatoraja.launcher.CourseEditorView">
-   <children>
-      <HBox VBox.vgrow="ALWAYS">
-         <children>
-            <ListView fx:id="courses" prefHeight="276.0" prefWidth="170.0" />
-            <VBox prefHeight="276.0" prefWidth="300.0">
-               <children>
-                  <Button mnemonicParsing="false" onAction="#addCourseData" text="＋" />
-                  <TextField fx:id="courseName" />
-      <AnchorPane prefHeight="150.0" prefWidth="300.0">
-         <children>
-      	      <fx:include fx:id="courseSongs" prefHeight="150.0" prefWidth="300.0" source="SongDataView.fxml" />
-         </children>
-      </AnchorPane>
-                  <GridPane>
-                     <columnConstraints>
-                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                     </columnConstraints>
-                     <rowConstraints>
-                        <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                     </rowConstraints>
-                     <children>
-                        <ComboBox fx:id="gradeType" prefWidth="150.0" />
-                        <ComboBox fx:id="hispeedType" prefWidth="150.0" GridPane.columnIndex="1" />
-                        <ComboBox fx:id="judgeType" prefWidth="150.0" GridPane.rowIndex="1" />
-                        <ComboBox fx:id="gaugeType" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                  		<Spinner fx:id="bronzemiss" editable="true" GridPane.rowIndex="2">
-                           <valueFactory>
-                              <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.1" initialValue="100" max="100" min="0" />
-                           </valueFactory>
-                        </Spinner>
-                  		<Spinner fx:id="bronzescore" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="2">
-                           <valueFactory>
-                              <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.1" initialValue="100" max="100" min="0" />
-                           </valueFactory>
-                        </Spinner>
-                  		<Spinner fx:id="silvermiss" editable="true" GridPane.rowIndex="3">
-                           <valueFactory>
-                              <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.1" initialValue="100" max="100" min="0" />
-                           </valueFactory>
-                        </Spinner>
-                  		<Spinner fx:id="silverscore" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="3">
-                           <valueFactory>
-                              <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.1" initialValue="100" max="100" min="0" />
-                           </valueFactory>
-                        </Spinner>
-                  		<Spinner fx:id="goldmiss" editable="true" GridPane.rowIndex="4">
-                           <valueFactory>
-                              <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.1" initialValue="100" max="100" min="0" />
-                           </valueFactory>
-                        </Spinner>
-                  		<Spinner fx:id="goldscore" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="4">
-                           <valueFactory>
-                              <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.1" initialValue="100" max="100" min="0" />
-                           </valueFactory>
-                        </Spinner>
-                     </children>
-                  </GridPane>
-                  <Button mnemonicParsing="false" onAction="#commit" text="Save" />
-               </children>
-            </VBox>
-            <VBox prefHeight="200.0" prefWidth="33.0">
-               <children>
-                  <Button mnemonicParsing="false" onAction="#addSongData" text="＋">
-                     <VBox.margin>
-                        <Insets />
-                     </VBox.margin>
-                  </Button>
-                  <Button mnemonicParsing="false" onAction="#removeSongData" text="ー">
-                     <VBox.margin>
-                        <Insets top="20.0" />
-                     </VBox.margin>
-                  </Button>
-                  <Button mnemonicParsing="false" onAction="#moveSongDataUp" text="↑">
-                     <VBox.margin>
-                        <Insets top="20.0" />
-                     </VBox.margin>
-                  </Button>
-                  <Button mnemonicParsing="false" onAction="#moveSongDataDown" text="↓">
-                     <VBox.margin>
-                        <Insets top="20.0" />
-                     </VBox.margin>
-                  </Button>
-               </children>
-            </VBox>
-            <VBox prefHeight="400.0" prefWidth="200.0">
-               <children>
-                  <HBox>
-                     <children>
-                        <TextField fx:id="search" prefHeight="24.0" prefWidth="521.0" />
-                        <Button mnemonicParsing="false" onAction="#searchSongs" text="Search" />
-                     </children>
-                  </HBox>
-                  <AnchorPane prefHeight="350.0" prefWidth="200.0">
-                     <children>
-                        <fx:include fx:id="searchSongs" prefHeight="350.0" prefWidth="200.0" source="SongDataView.fxml" />
-                     </children>
-                  </AnchorPane>
-               </children>
-            </VBox>
-         </children>
-      </HBox>
-   </children>
+    <HBox VBox.vgrow="ALWAYS">
+        <ListView fx:id="courses" prefHeight="276.0" prefWidth="170.0"/>
+        <VBox prefHeight="276.0" prefWidth="300.0">
+            <Button mnemonicParsing="false" onAction="#addCourseData" text="＋"/>
+            <TextField fx:id="courseName"/>
+            <AnchorPane prefHeight="150.0" prefWidth="300.0">
+                <fx:include fx:id="courseSongs" prefHeight="150.0" prefWidth="300.0" source="SongDataView.fxml"/>
+            </AnchorPane>
+            <GridPane>
+                <columnConstraints>
+                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0"/>
+                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
+                </columnConstraints>
+                <rowConstraints>
+                    <RowConstraints minHeight="10.0" vgrow="SOMETIMES"/>
+                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+                </rowConstraints>
+                <ComboBox fx:id="gradeType" prefWidth="150.0"/>
+                <ComboBox fx:id="hispeedType" prefWidth="150.0" GridPane.columnIndex="1"/>
+                <ComboBox fx:id="judgeType" prefWidth="150.0" GridPane.rowIndex="1"/>
+                <ComboBox fx:id="gaugeType" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                <Spinner fx:id="bronzemiss" editable="true" GridPane.rowIndex="2">
+                    <valueFactory>
+                        <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.1" initialValue="100" max="100" min="0"/>
+                    </valueFactory>
+                </Spinner>
+                <Spinner fx:id="bronzescore" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                    <valueFactory>
+                        <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.1" initialValue="100" max="100" min="0"/>
+                    </valueFactory>
+                </Spinner>
+                <Spinner fx:id="silvermiss" editable="true" GridPane.rowIndex="3">
+                    <valueFactory>
+                        <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.1" initialValue="100" max="100" min="0"/>
+                    </valueFactory>
+                </Spinner>
+                <Spinner fx:id="silverscore" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                    <valueFactory>
+                        <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.1" initialValue="100" max="100" min="0"/>
+                    </valueFactory>
+                </Spinner>
+                <Spinner fx:id="goldmiss" editable="true" GridPane.rowIndex="4">
+                    <valueFactory>
+                        <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.1" initialValue="100" max="100" min="0"/>
+                    </valueFactory>
+                </Spinner>
+                <Spinner fx:id="goldscore" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="4">
+                    <valueFactory>
+                        <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.1" initialValue="100" max="100" min="0"/>
+                    </valueFactory>
+                </Spinner>
+            </GridPane>
+            <Button mnemonicParsing="false" onAction="#commit" text="Save"/>
+        </VBox>
+        <VBox prefHeight="200.0" prefWidth="33.0">
+            <Button mnemonicParsing="false" onAction="#addSongData" text="＋">
+                <VBox.margin>
+                    <Insets/>
+                </VBox.margin>
+            </Button>
+            <Button mnemonicParsing="false" onAction="#removeSongData" text="ー">
+                <VBox.margin>
+                    <Insets top="20.0"/>
+                </VBox.margin>
+            </Button>
+            <Button mnemonicParsing="false" onAction="#moveSongDataUp" text="↑">
+                <VBox.margin>
+                    <Insets top="20.0"/>
+                </VBox.margin>
+            </Button>
+            <Button mnemonicParsing="false" onAction="#moveSongDataDown" text="↓">
+                <VBox.margin>
+                    <Insets top="20.0"/>
+                </VBox.margin>
+            </Button>
+        </VBox>
+        <VBox prefHeight="400.0" prefWidth="200.0">
+            <HBox>
+                <TextField fx:id="search" prefHeight="24.0" prefWidth="521.0"/>
+                <Button mnemonicParsing="false" onAction="#searchSongs" text="Search"/>
+            </HBox>
+            <AnchorPane prefHeight="350.0" prefWidth="200.0">
+                <fx:include fx:id="searchSongs" prefHeight="350.0" prefWidth="200.0" source="SongDataView.fxml"/>
+            </AnchorPane>
+        </VBox>
+    </HBox>
 </VBox>
