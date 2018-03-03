@@ -49,10 +49,15 @@ public class PixmapResourcePool extends ResourcePool<String, Pixmap> {
 	/**
 	 * 指定のパスで表現されるファイルを読み込む
 	 * @param path イメージファイルのパス
-	 * @return イメージ。読めなかった場合はnullを返す
+	 * @return イメージ。読めなかった場合またはpathがファイルでない場合はnullを返す
 	 */
 	public static Pixmap loadPicture(String path) {
 		Pixmap tex = null;
+		File f = new File(path);
+		if(!f.isFile()) {
+			return tex;
+		}
+
 		try {
 			if(path.endsWith(".cim")) {
 				tex = PixmapIO.readCIM(Gdx.files.internal(path));
@@ -66,7 +71,7 @@ public class PixmapResourcePool extends ResourcePool<String, Pixmap> {
 			Logger.getGlobal().warning("BGAファイル読み込み再試行:" + path);
 			try {
 				// TODO 一部のbmsはImageIO.readで失敗する(e.g. past glow)。別の画像デコーダーが必要
-				BufferedImage bi = ImageIO.read(new File(path));
+				BufferedImage bi = ImageIO.read(f);
 //						System.out.println("width : " + bi.getWidth() + " height : " + bi.getHeight() + " type : " + bi.getType());
 				tex = new Pixmap(bi.getWidth(), bi.getHeight(), Pixmap.Format.RGBA8888);
 				for(int x = 0;x < bi.getWidth();x++) {
