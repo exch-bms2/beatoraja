@@ -83,7 +83,7 @@ public enum GaugeProperty {
         EASY_5(TOTAL ,2 ,100 ,20, 75, new float[]{1.0f, 1.0f, 0.5f, -1.5f, -4.5f, -1.0f}, new float[][]{}),
         NORMAL_5(TOTAL ,2 ,100 ,20, 75, new float[]{1.0f, 1.0f, 0.5f, -3.0f, -6.0f, -2.0f}, new float[][]{}),
         HARD_5(null ,0 ,100 ,100, 0, new float[]{0f, 0f, 0f, -5.0f, -10.0f, -5.0f}, new float[][]{}),
-        EXHARD_5(LIMIT_INCREMENT ,0 ,100 ,100, 0, new float[]{0f, 0f, 0f, -10.0f, -20.0f, -10.0f}, new float[][]{}),
+        EXHARD_5(MODIFY_DAMAGE ,0 ,100 ,100, 0, new float[]{0f, 0f, 0f, -10.0f, -20.0f, -10.0f}, new float[][]{}),
         HAZARD_5(null ,0 ,100 ,100, 0, new float[]{0f, 0f, 0f, -100.0f, -100.0f, -100.0f}, new float[][]{}),
         CLASS_5(null ,0 ,100 ,100, 0, new float[]{0f, 0f, 0f, -1.0f, -2.0f, -1.0f}, new float[][]{}),
         EXCLASS_5(null ,0 ,100 ,100, 0, new float[]{0f, 0f, 0f, -2.0f, -4.0f, -2.0f}, new float[][]{}),

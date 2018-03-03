@@ -28,7 +28,7 @@
             </HBox.margin>
         </Button>
     </HBox>
-    <ScrollPane fx:id="skinconfig" prefHeight="239.0" prefWidth="723.0" VBox.vgrow="ALWAYS">
+    <ScrollPane fx:id="skinconfig" prefHeight="400.0" prefWidth="723.0" VBox.vgrow="ALWAYS">
         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="200.0" prefWidth="200.0"/>
     </ScrollPane>
 </VBox>

@@ -177,11 +177,11 @@ public class PlayerResource {
 					judgetable[3] = 100;
 					judgetable[4] = 133;
 				} else {
-					judgetable[0] = 40;
-					judgetable[1] = 60;
-					judgetable[2] = 80;
+					judgetable[0] = 25;
+					judgetable[1] = 50;
+					judgetable[2] = 75;
 					judgetable[3] = 100;
-					judgetable[4] = 120;
+					judgetable[4] = 125;
 				}
 				model.setJudgerank(judgetable[model.getJudgerank()]);
 			} else if (model.getJudgerank() < 0) {

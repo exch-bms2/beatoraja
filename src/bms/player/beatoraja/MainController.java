@@ -56,7 +56,7 @@ public class MainController extends ApplicationAdapter {
 
 	public static final String VERSION = "beatoraja 0.5.4";
 	
-	private static final boolean debug = true;
+	private static final boolean debug = false;
 
 	/**
 	 * 
