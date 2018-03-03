@@ -112,7 +112,7 @@ public class PCM {
 			throw new IOException(p.toString() + " : can't convert to PCM");			
 		}		
 		bytes = bytes - (bytes % (channels > 1 ? bitsPerSample / 4 : bitsPerSample / 8));
-		final int orgbytes = bytes;
+//		final int orgbytes = bytes;
 		while(bytes > channels * bitsPerSample / 8) {
 			boolean zero = true;
 			for(int i = 0;i < channels * bitsPerSample / 8;i++){
@@ -124,9 +124,9 @@ public class PCM {
 				break;
 			}
 		}
-		if(bytes != orgbytes) {
-			Logger.getGlobal().info("終端の無音データ除外 - " + p.getFileName().toString() + " : " + (orgbytes - bytes) + " bytes");
-		}
+//		if(bytes != orgbytes) {
+//			Logger.getGlobal().info("終端の無音データ除外 - " + p.getFileName().toString() + " : " + (orgbytes - bytes) + " bytes");
+//		}
 		if(bytes <= channels * bitsPerSample / 8) {
 			throw new IOException(p.toString() + " : 0 samples");			
 		}
@@ -317,7 +317,7 @@ public class PCM {
 
 		final int start = (int) ((starttime * sampleRate / 1000000) * channels);
 		int length = (int) ((duration * sampleRate / 1000000) * channels);
-		final int orglength = length;
+//		final int orglength = length;
 		while(length > channels) {
 			boolean zero = true;
 			for(int i = 0;i < channels;i++){
@@ -329,9 +329,9 @@ public class PCM {
 				break;
 			}
 		}
-		if(length != orglength) {
-			Logger.getGlobal().info("終端の無音データ除外 - " + (orglength - length) + " samples");
-		}
+//		if(length != orglength) {
+//			Logger.getGlobal().info("終端の無音データ除外 - " + (orglength - length) + " samples");
+//		}
 
 		pcm.sample = new short[length];
 		System.arraycopy(this.sample, start, pcm.sample, 0, length);
