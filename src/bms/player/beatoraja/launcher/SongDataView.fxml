@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
 <?import javafx.scene.control.*?>
-
 <TableView fx:id="songlist" prefHeight="400.0" prefWidth="300.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="bms.player.beatoraja.launcher.SongDataView">
-   <columns>
-      <TableColumn fx:id="title" minWidth="200.0" prefWidth="300.0" text="TITLE" />
-      <TableColumn fx:id="artist" minWidth="100.0" prefWidth="150.0" text="ARTIST" />
-      <TableColumn fx:id="mode" minWidth="20.0" prefWidth="30.0" text="MODE" />
-      <TableColumn fx:id="notes" minWidth="40.0" prefWidth="60.0" text="NOTES" />
-   </columns>
+    <columns>
+        <TableColumn fx:id="title" minWidth="200.0" prefWidth="300.0" text="TITLE"/>
+        <TableColumn fx:id="artist" minWidth="100.0" prefWidth="150.0" text="ARTIST"/>
+        <TableColumn fx:id="mode" minWidth="20.0" prefWidth="30.0" text="MODE"/>
+        <TableColumn fx:id="notes" minWidth="40.0" prefWidth="60.0" text="NOTES"/>
+    </columns>
 </TableView>

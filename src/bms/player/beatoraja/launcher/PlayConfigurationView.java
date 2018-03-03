@@ -82,9 +82,6 @@ public class PlayConfigurationView implements Initializable {
 	private TextField playername;
 
 	@FXML
-	private ComboBox<Resolution> resolution;
-
-	@FXML
 	private ComboBox<PlayMode> inputconfig;
 	@FXML
 	private ComboBox<PlayMode> playconfig;
@@ -108,14 +105,6 @@ public class PlayConfigurationView implements Initializable {
 	private Spinner<Integer> scrolldurationlow;
 	@FXML
 	private Spinner<Integer> scrolldurationhigh;
-	@FXML
-	private ComboBox<Config.DisplayMode> displaymode;
-	@FXML
-	private CheckBox vsync;
-	@FXML
-	private ComboBox<Integer> bgaop;
-	@FXML
-	private ComboBox<Integer> bgaexpand;
 
 	@FXML
 	private ListView<String> bmsroot;
@@ -181,8 +170,6 @@ public class PlayConfigurationView implements Initializable {
 	private ComboBox<Integer> target;
 
 	@FXML
-	private Spinner<Integer> maxfps;
-	@FXML
 	private ComboBox<Integer> audio;
 	@FXML
 	private ComboBox<String> audioname;
@@ -202,8 +189,6 @@ public class PlayConfigurationView implements Initializable {
 	private ComboBox<Integer> audioFastForward;
 	@FXML
 	private ComboBox<Integer> judgealgorithm;
-	@FXML
-	private Spinner<Integer> misslayertime;
 
     @FXML
 	private ComboBox<Integer> autosavereplay1;
@@ -225,6 +210,8 @@ public class PlayConfigurationView implements Initializable {
 
 	@FXML
 	private VBox skin;
+	@FXML
+	private VideoConfigurationView videoController;
 	@FXML
 	private SkinConfigurationView skinController;
 	@FXML
@@ -262,9 +249,6 @@ public class PlayConfigurationView implements Initializable {
 		lr2configurationassist.setHgap(25);
 		lr2configurationassist.setVgap(4);
 
-		resolution.setCellFactory((param) -> new ResolutionListCell());
-		displaymode.getItems().setAll(Config.DisplayMode.values());
-		resolution.setButtonCell(new ResolutionListCell());
 		String[] scoreOptions = new String[] { "OFF", "MIRROR", "RANDOM", "R-RANDOM", "S-RANDOM", "SPIRAL", "H-RANDOM",
 				"ALL-SCR", "RANDOM-EX", "S-RANDOM-EX" };
 		initComboBox(scoreop, scoreOptions);
@@ -274,8 +258,6 @@ public class PlayConfigurationView implements Initializable {
 		String[] seventoninestring = new String[]{arg1.getString("SEVEN_TO_NINE_OFF"),arg1.getString("SEVEN_TO_NINE_NO_MASHING"),arg1.getString("SEVEN_TO_NINE_ALTERNATION")};
 		initComboBox(seventoninetype, seventoninestring);
 		initComboBox(gaugeop, new String[] { "ASSIST EASY", "EASY", "NORMAL", "HARD", "EX-HARD", "HAZARD" });
-		initComboBox(bgaop, new String[] { "ON", "AUTOPLAY ", "OFF" });
-		initComboBox(bgaexpand, new String[] { "Full", "Keep Aspect Ratio", "Off" });
 		initComboBox(fixhispeed, new String[] { "OFF", "START BPM", "MAX BPM", "MAIN BPM", "MIN BPM" });
 		playconfig.getItems().setAll(PlayMode.values());
 		inputconfig.getItems().setAll(PlayMode.values());
@@ -317,12 +299,9 @@ public class PlayConfigurationView implements Initializable {
 	 */
 	public void update(Config config) {
 		this.config = config;
-		displaymode.setValue(config.getDisplaymode());
-		updateResolutions();
-		resolution.setValue(config.getResolution());
-		vsync.setSelected(config.isVsync());
-		bgaop.setValue(config.getBga());
-		bgaexpand.setValue(config.getBgaExpand());
+
+		videoController.update(config);
+
 		systemvolume.setValue((double)config.getSystemvolume());
 		keyvolume.setValue((double)config.getKeyvolume());
 		bgvolume.setValue((double)config.getBgvolume());
@@ -335,7 +314,6 @@ public class PlayConfigurationView implements Initializable {
 		tableurl.getItems().setAll(config.getTableURL());
 
 		audio.setValue(config.getAudioDriver());
-		maxfps.getValueFactory().setValue(config.getMaxFramePerSecond());
 		audiobuffer.getValueFactory().setValue(config.getAudioDeviceBufferSize());
 		audiosim.getValueFactory().setValue(config.getAudioDeviceSimultaneousSources());
 		audioFreqOption.setValue(config.getAudioFreqOption());
@@ -381,32 +359,6 @@ public class PlayConfigurationView implements Initializable {
 		}
 	}
 
-	@FXML
-	public void updateResolutions() {
-		Resolution oldValue = resolution.getValue();
-		resolution.getItems().clear();
-		if (displaymode.getValue() == Config.DisplayMode.FULLSCREEN) {
-			Graphics.DisplayMode[] displays = MainLoader.getAvailableDisplayMode();
-			for(Resolution r : Resolution.values()) {
-				for(Graphics.DisplayMode display : displays) {
-					if(display.width == r.width && display.height == r.height) {
-						resolution.getItems().add(r);
-						break;
-					}
-				}
-			}
-		} else {
-			Graphics.DisplayMode display = MainLoader.getDesktopDisplayMode();
-			for(Resolution r : Resolution.values()) {
-				if (r.width <= display.width && r.height <= display.height) {
-					resolution.getItems().add(r);
-				}
-			}
-		}
-		resolution.setValue(resolution.getItems().contains(oldValue)
-				? oldValue : resolution.getItems().get(resolution.getItems().size() - 1));
-	}
-
 	public void changePlayer() {
 		commitPlayer();
 		updatePlayer();
@@ -435,6 +387,8 @@ public class PlayConfigurationView implements Initializable {
 		player = PlayerConfig.readPlayerConfig(players.getValue());
 		playername.setText(player.getName());
 
+		videoController.updatePlayer(player);
+
 		scoreop.getSelectionModel().select(player.getRandom());
 		scoreop2.getSelectionModel().select(player.getRandom2());
 		doubleop.getSelectionModel().select(player.getDoubleoption());
@@ -457,8 +411,6 @@ public class PlayConfigurationView implements Initializable {
 		markprocessednote.setSelected(player.isMarkprocessednote());
 		target.setValue(player.getTarget());
 
-		misslayertime.getValueFactory().setValue(player.getMisslayerDuration());
-
 		irname.setValue(player.getIrname());
 		iruserid.setText(player.getUserid());
 		irpassword.setText(player.getPassword());
@@ -475,13 +427,9 @@ public class PlayConfigurationView implements Initializable {
 	 * ダイアログの項目をconfig.xmlに反映する
 	 */
 	public void commit() {
-		config.setPlayername(players.getValue());
+	    videoController.commit(config);
 
-		config.setResolution(resolution.getValue());
-		config.setDisplaymode(displaymode.getValue());
-		config.setVsync(vsync.isSelected());
-		config.setBga(bgaop.getValue());
-		config.setBgaExpand(bgaexpand.getValue());
+		config.setPlayername(players.getValue());
 
 		config.setBgmpath(bgmpath.getText());
 		config.setSoundpath(soundpath.getText());
@@ -497,7 +445,6 @@ public class PlayConfigurationView implements Initializable {
 
 		config.setAudioDriver(audio.getValue());
 		config.setAudioDriverName(audioname.getValue());
-		config.setMaxFramePerSecond(getValue(maxfps));
 		config.setAudioDeviceBufferSize(getValue(audiobuffer));
 		config.setAudioDeviceSimultaneousSources(getValue(audiosim));
 		config.setAudioFreqOption(audioFreqOption.getValue());
@@ -540,6 +487,8 @@ public class PlayConfigurationView implements Initializable {
 			player.setName(playername.getText());			
 		}
 
+		videoController.commitPlayer(player);
+
 		player.setRandom(scoreop.getValue());
 		player.setRandom2(scoreop2.getValue());
 		player.setDoubleoption(doubleop.getValue());
@@ -561,8 +510,6 @@ public class PlayConfigurationView implements Initializable {
 
 		player.setShowjudgearea(judgeregion.isSelected());
 		player.setTarget(target.getValue());
-
-		player.setMisslayerDuration(getValue(misslayertime));
 
 		player.setIrname(irname.getValue());
 		player.setUserid(iruserid.getText());
@@ -889,17 +836,6 @@ public class PlayConfigurationView implements Initializable {
 		commit();
 		Platform.exit();
 		System.exit(0);
-	}
-
-	static class ResolutionListCell extends ListCell<Resolution> {
-
-		@Override
-		protected void updateItem(Resolution arg0, boolean arg1) {
-			super.updateItem(arg0, arg1);
-			if (arg0 != null) {
-				setText(arg0.name() + " (" + arg0.width + " x " + arg0.height + ")");
-			}
-		}
 	}
 
 	class OptionListCell extends ListCell<Integer> {
