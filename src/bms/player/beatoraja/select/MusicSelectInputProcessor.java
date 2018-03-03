@@ -106,30 +106,35 @@ public class MusicSelectInputProcessor {
             }
             if (property.isPressed(keystate, keytime, OPTION1_UP, true)) {
                 config.setRandom((config.getRandom() + 9) % 10);
+                select.play(SOUND_CHANGEOPTION);
             }
             if (property.isPressed(keystate, keytime, GAUGE_DOWN, true)) {
                 select.execute(MusicSelectCommand.NEXT_GAUGE_1P);
             }
             if (property.isPressed(keystate, keytime, GAUGE_UP, true)) {
                 config.setGauge((config.getGauge() + 5) % 6);
+                select.play(SOUND_CHANGEOPTION);
             }
             if (property.isPressed(keystate, keytime, OPTIONDP_DOWN, true)) {
                 select.execute(MusicSelectCommand.NEXT_OPTION_DP);
             }
             if (property.isPressed(keystate, keytime, OPTIONDP_UP, true)) {
                 config.setDoubleoption((config.getDoubleoption() + 2) % 3);
+                select.play(SOUND_CHANGEOPTION);
             }
             if (property.isPressed(keystate, keytime, OPTION2_DOWN, true)) {
                 select.execute(MusicSelectCommand.NEXT_OPTION_2P);
             }
             if (property.isPressed(keystate, keytime, OPTION2_UP, true)) {
                 config.setRandom2((config.getRandom2() + 9) % 10);
+                select.play(SOUND_CHANGEOPTION);
             }
             if (property.isPressed(keystate, keytime, HSFIX_DOWN, true)) {
                 select.execute(MusicSelectCommand.NEXT_HSFIX);
             }
             if (property.isPressed(keystate, keytime, HSFIX_UP, true)) {
                 config.setFixhispeed((config.getFixhispeed() + 4) % 5);
+                select.play(SOUND_CHANGEOPTION);
             }
 
             // song bar scroll on mouse wheel
@@ -184,24 +189,31 @@ public class MusicSelectInputProcessor {
             select.setPanelState(2);
             if (property.isPressed(keystate, keytime, JUDGEWINDOW_UP, true)) {
                 config.setJudgewindowrate(config.getJudgewindowrate() == 100 ? 400 : 100);
+                select.play(SOUND_CHANGEOPTION);
             }
             if (property.isPressed(keystate, keytime, CONSTANT, true)) {
                 config.setConstant(!config.isConstant());
+                select.play(SOUND_CHANGEOPTION);
             }
             if (property.isPressed(keystate, keytime, JUDGEAREA, true)) {
                 config.setShowjudgearea(!config.isShowjudgearea());
+                select.play(SOUND_CHANGEOPTION);
             }
             if (property.isPressed(keystate, keytime, LEGACYNOTE, true)) {
                 config.setLegacynote(!config.isLegacynote());
+                select.play(SOUND_CHANGEOPTION);
             }
             if (property.isPressed(keystate, keytime, MARKNOTE, true)) {
                 config.setMarkprocessednote(!config.isMarkprocessednote());
+                select.play(SOUND_CHANGEOPTION);
             }
             if (property.isPressed(keystate, keytime, BPMGUIDE, true)) {
                 config.setBpmguide(!config.isBpmguide());
+                select.play(SOUND_CHANGEOPTION);
             }
             if (property.isPressed(keystate, keytime, NOMINE, true)) {
                 config.setNomine(!config.isNomine());
+                select.play(SOUND_CHANGEOPTION);
             }
         } else if (input.getNumberState()[5] || (input.startPressed() && input.isSelectPressed())) {
             bar.resetInput();
@@ -214,25 +226,30 @@ public class MusicSelectInputProcessor {
             }
             if (property.isPressed(keystate, keytime, BGA_DOWN, true)) {
                 resource.getConfig().setBga((resource.getConfig().getBga() + 1) % 3);
+                select.play(SOUND_CHANGEOPTION);
             }
             if (property.isPressed(keystate, keytime, DURATION_DOWN, true)) {
                 if (pc != null && pc.getDuration() > 1) {
                     pc.setDuration(pc.getDuration() - 1);
+                    select.play(SOUND_CHANGEOPTION);
                 }
             }
             if (property.isPressed(keystate, keytime, JUDGETIMING_DOWN, true)) {
                 if (config.getJudgetiming() > -99) {
                     config.setJudgetiming(config.getJudgetiming() - 1);
+                    select.play(SOUND_CHANGEOPTION);
                 }
             }
             if (property.isPressed(keystate, keytime, DURATION_UP, true)) {
                 if (pc != null && pc.getDuration() < 2000) {
                     pc.setDuration(pc.getDuration() + 1);
+                    select.play(SOUND_CHANGEOPTION);
                 }
             }
             if (property.isPressed(keystate, keytime, JUDGETIMING_UP, true)) {
                 if (config.getJudgetiming() < 99) {
                     config.setJudgetiming(config.getJudgetiming() + 1);
+                    select.play(SOUND_CHANGEOPTION);
                 }
             }
         } else {
@@ -276,6 +293,7 @@ public class MusicSelectInputProcessor {
                         (bar.getDirectory().isEmpty() || !(bar.getDirectory().getLast() instanceof SameFolderBar))) {
                     SongData sd = ((SongBar) current).getSongData();
                     bar.updateBar(new SameFolderBar(select, sd.getTitle(), sd.getFolder()));
+                    select.play(SOUND_FOLDEROPEN);
                 }
             }
             if (numberstate[9] && numtime[9] != 0) {
