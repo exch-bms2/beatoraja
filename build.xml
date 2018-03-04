@@ -67,6 +67,7 @@
 			<zipfileset excludes="META-INF/*.SF" src="./lib/gdx-controllers.jar" />
 			<zipfileset excludes="META-INF/*.SF" src="./lib/gdx-backend-lwjgl.jar" />
 			<zipfileset excludes="META-INF/*.SF" src="./lib/gdx-backend-lwjgl-natives.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="./lib/twitter4j-core-4.0.4.jar" />
 		</jar>
 	</target>
 
@@ -89,6 +90,7 @@
 				<include name="natives/**" />
 				<include name="skin/default/**" />
 				<include name="skin/default/bg.jpg" />
+				<include name="beatoraja.l4j.ini" />
 			</fileset>
 		</copy>
 		<copy todir="${dir.release.linux}">
