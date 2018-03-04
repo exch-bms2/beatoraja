@@ -470,6 +470,24 @@
                             <Insets top="10.0" />
                         </VBox.margin>
                     </Button>
+               <VBox prefHeight="200.0" prefWidth="100.0">
+                  <children>
+                     <HBox prefHeight="31.0" prefWidth="780.0">
+                        <children>
+                           <Label prefHeight="35.0" prefWidth="195.0" text="%TWITTER_CONNECTION" />
+                           <Label fx:id="txtTwitterAuthenticated" prefHeight="34.0" prefWidth="88.0" text="%TWITTER_AUTHENTICATED" />
+                        </children>
+                     </HBox>
+                     <Button fx:id="twitterAuthButton" mnemonicParsing="false" onAction="#startTwitterAuth" prefHeight="25.0" prefWidth="134.0" text="%TWITTER_AUTHENTICATION" />
+                     <HBox prefHeight="100.0" prefWidth="200.0">
+                        <children>
+                           <Label prefHeight="25.0" prefWidth="31.0" text="PIN" />
+                           <TextField fx:id="txtTwitterPIN" prefHeight="25.0" prefWidth="100.0" />
+                           <Button fx:id="twitterPINButton" mnemonicParsing="false" onAction="#startPINAuth" text="%TWITTER_AUTH_VERIFY" />
+                        </children>
+                     </HBox>
+                  </children>
+               </VBox>
                 </VBox>
             </AnchorPane>
         </Tab>

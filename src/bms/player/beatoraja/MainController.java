@@ -1,7 +1,14 @@
 package bms.player.beatoraja;
 
-import java.io.*;
-import java.nio.file.*;
+import static bms.player.beatoraja.skin.SkinProperty.*;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -11,41 +18,57 @@ import java.util.stream.Stream;
 
 import org.lwjgl.input.Mouse;
 
-import bms.player.beatoraja.play.TargetProperty;
-import bms.player.beatoraja.select.bar.TableBar;
-import bms.player.beatoraja.skin.SkinLoader;
-import bms.player.beatoraja.skin.SkinProperty;
+import com.badlogic.gdx.ApplicationAdapter;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Graphics;
+import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.PixmapIO;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.BufferUtils;
+import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.JsonWriter.OutputType;
+import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.StringBuilder;
 
-import bms.player.beatoraja.skin.SkinObject.SkinOffset;
 import bms.player.beatoraja.PlayerResource.PlayMode;
-import bms.player.beatoraja.audio.*;
+import bms.player.beatoraja.audio.AudioDriver;
+import bms.player.beatoraja.audio.GdxAudioDeviceDriver;
+import bms.player.beatoraja.audio.GdxSoundDriver;
+import bms.player.beatoraja.audio.PortAudioDriver;
 import bms.player.beatoraja.config.KeyConfiguration;
 import bms.player.beatoraja.decide.MusicDecide;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.ir.IRConnection;
 import bms.player.beatoraja.ir.IRResponse;
 import bms.player.beatoraja.play.BMSPlayer;
+import bms.player.beatoraja.play.TargetProperty;
 import bms.player.beatoraja.result.CourseResult;
 import bms.player.beatoraja.result.MusicResult;
 import bms.player.beatoraja.select.MusicSelector;
+import bms.player.beatoraja.select.bar.TableBar;
+import bms.player.beatoraja.skin.SkinLoader;
+import bms.player.beatoraja.skin.SkinObject.SkinOffset;
+import bms.player.beatoraja.skin.SkinProperty;
 import bms.player.beatoraja.song.SQLiteSongDatabaseAccessor;
 import bms.player.beatoraja.song.SongDatabaseAccessor;
 import bms.player.beatoraja.song.SongInformationAccessor;
-import static bms.player.beatoraja.skin.SkinProperty.*;
-
-import com.badlogic.gdx.ApplicationAdapter;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.InputMultiplexer;
-import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.graphics.*;
-import com.badlogic.gdx.graphics.g2d.*;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
-import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.utils.*;
-import com.badlogic.gdx.utils.JsonWriter.OutputType;
-import com.badlogic.gdx.utils.StringBuilder;
+import twitter4j.Status;
+import twitter4j.StatusUpdate;
+import twitter4j.Twitter;
+import twitter4j.TwitterFactory;
+import twitter4j.UploadedMedia;
+import twitter4j.conf.ConfigurationBuilder;
 
 /**
  * アプリケーションのルートクラス
@@ -121,6 +144,8 @@ public class MainController extends ApplicationAdapter {
 	private SystemSoundManager sound;
 
 	private ScreenShotThread screenshot;
+	
+	private TwitterUploadThread twitterUpload;
 
 	public static final int timerCount = SkinProperty.TIMER_MAX + 1;
 	private final long[] timer = new long[timerCount];
@@ -401,6 +426,12 @@ public class MainController extends ApplicationAdapter {
 			systemfont.draw(sprite, "Screen shot saved : " + screenshot.path, 100,
 					config.getResolution().height - 2);
 			sprite.end();
+		} else if (twitterUpload != null && twitterUpload.savetime + 2000 > System.currentTimeMillis()) {
+			sprite.begin();
+			systemfont.setColor(Color.GOLD);
+			systemfont.draw(sprite, "Twitter Upload : " + twitterUpload.text, 100,
+					config.getResolution().height - 2);
+			sprite.end();
 		} else if(updateSong != null && updateSong.isAlive()) {
 			sprite.begin();
 			updatefont.setColor(0,1,1,0.5f + (System.currentTimeMillis() % 750) / 1000.0f);
@@ -473,7 +504,16 @@ public class MainController extends ApplicationAdapter {
                     screenshot.start();
                 }
                 input.getFunctiontime()[5] = 0;
-            }            
+            }
+            
+            if (input.getFunctionstate()[6] && input.getFunctiontime()[6] != 0) {
+                if (twitterUpload == null || twitterUpload.savetime != 0) {
+                	twitterUpload = new TwitterUploadThread(ScreenUtils.getFrameBufferPixels(0, 0, Gdx.graphics.getBackBufferWidth(),
+                            Gdx.graphics.getBackBufferHeight(), false), player);
+                	twitterUpload.start();
+                }
+                input.getFunctiontime()[6] = 0;
+            }
         }
 	}
 
@@ -634,6 +674,30 @@ public class MainController extends ApplicationAdapter {
 			timer[id] = Long.MIN_VALUE;
 		}
 	}
+	
+	public static String getClearTypeName() {
+		String[] clearTypeName = { "NO PLAY", "FAILED", "ASSIST EASY CLEAR", "LIGHT ASSIST EASY CLEAR", "EASY CLEAR",
+				"CLEAR", "HARD CLEAR", "EXHARD CLEAR", "FULL COMBO", "PERFECT", "MAX" };
+
+		if(currentState.getNumberValue(NUMBER_CLEAR) >= 0 && currentState.getNumberValue(NUMBER_CLEAR) < clearTypeName.length) {
+			return clearTypeName[currentState.getNumberValue(NUMBER_CLEAR)];
+		}
+
+		return "";
+	}
+	
+	public static String getRankTypeName() {
+		String rankTypeName = "";
+		if(currentState.getBooleanValue(OPTION_RESULT_AAA_1P)) rankTypeName += "AAA";
+		else if(currentState.getBooleanValue(OPTION_RESULT_AA_1P)) rankTypeName += "AA";
+		else if(currentState.getBooleanValue(OPTION_RESULT_A_1P)) rankTypeName += "A";
+		else if(currentState.getBooleanValue(OPTION_RESULT_B_1P)) rankTypeName += "B";
+		else if(currentState.getBooleanValue(OPTION_RESULT_C_1P)) rankTypeName += "C";
+		else if(currentState.getBooleanValue(OPTION_RESULT_D_1P)) rankTypeName += "D";
+		else if(currentState.getBooleanValue(OPTION_RESULT_E_1P)) rankTypeName += "E";
+		else if(currentState.getBooleanValue(OPTION_RESULT_F_1P)) rankTypeName += "F";
+		return rankTypeName;
+	}
 
 
 	/**
@@ -668,19 +732,11 @@ public class MainController extends ApplicationAdapter {
 				stateName = "_Play_LEVEL" + currentState.getNumberValue(NUMBER_PLAYLEVEL);
 				if(currentState.getTextValue(STRING_FULLTITLE).length() > 0) stateName += " " + currentState.getTextValue(STRING_FULLTITLE);
 			} else if(currentState instanceof MusicResult || currentState instanceof CourseResult) {
-				String[] clearTypeName = {"NO PLAY", "FAILED", "ASSIST EASY CLEAR", "LIGHT ASSIST EASY CLEAR", "EASY CLEAR", "CLEAR", "HARD CLEAR", "EXHARD CLEAR", "FULL COMBO", "PERFECT", "MAX"};
 				if(currentState instanceof MusicResult) stateName += "_LEVEL" + currentState.getNumberValue(NUMBER_PLAYLEVEL)+ " ";
 				else stateName += "_";
 				if(currentState.getTextValue(STRING_FULLTITLE).length() > 0) stateName += currentState.getTextValue(STRING_FULLTITLE);
-				if(currentState.getNumberValue(NUMBER_CLEAR) >= 0 && currentState.getNumberValue(NUMBER_CLEAR) < clearTypeName.length) stateName += " " + clearTypeName[currentState.getNumberValue(NUMBER_CLEAR)];
-				if(currentState.getBooleanValue(OPTION_RESULT_AAA_1P)) stateName += " AAA";
-				else if(currentState.getBooleanValue(OPTION_RESULT_AA_1P)) stateName += " AA";
-				else if(currentState.getBooleanValue(OPTION_RESULT_A_1P)) stateName += " A";
-				else if(currentState.getBooleanValue(OPTION_RESULT_B_1P)) stateName += " B";
-				else if(currentState.getBooleanValue(OPTION_RESULT_C_1P)) stateName += " C";
-				else if(currentState.getBooleanValue(OPTION_RESULT_D_1P)) stateName += " D";
-				else if(currentState.getBooleanValue(OPTION_RESULT_E_1P)) stateName += " E";
-				else if(currentState.getBooleanValue(OPTION_RESULT_F_1P)) stateName += " F";
+				stateName += " " + getClearTypeName();
+				stateName += " " + getRankTypeName();
 			} else if(currentState instanceof KeyConfiguration) {
 				stateName = "_Config";
 			}
@@ -702,6 +758,106 @@ public class MainController extends ApplicationAdapter {
 			pixmap.dispose();
 			Logger.getGlobal().info("スクリーンショット保存:" + path);
 			savetime = System.currentTimeMillis();
+		}
+	}
+	
+	/**
+	 * Twitter投稿用スレッド
+	 */
+	static class TwitterUploadThread extends Thread {
+
+		/**
+		 * 処理が完了した時間
+		 */
+		private long savetime;
+		
+		/**
+		 * 処理が完了した時間
+		 */
+		private String text = "";
+
+		private final PlayerConfig player;
+
+		/**
+		 * スクリーンショットのpixelデータ
+		 */
+		private final byte[] pixels;
+		
+		public TwitterUploadThread(byte[] pixels, PlayerConfig player) {
+			this.pixels = pixels;
+			this.player = player;
+			java.lang.StringBuilder builder = new java.lang.StringBuilder();
+			if(currentState instanceof MusicSelector) {
+				// empty
+			} else if(currentState instanceof MusicDecide) {
+				// empty
+			} if(currentState instanceof BMSPlayer) {
+				builder.append("LEVEL");
+				builder.append(currentState.getNumberValue(NUMBER_PLAYLEVEL));
+				if(currentState.getTextValue(STRING_FULLTITLE).length() > 0) {
+					builder.append(" ");
+					builder.append(currentState.getTextValue(STRING_FULLTITLE));
+				}
+			} else if(currentState instanceof MusicResult || currentState instanceof CourseResult) {
+				if(currentState instanceof MusicResult) {
+					builder.append("LEVEL");
+					builder.append(currentState.getNumberValue(NUMBER_PLAYLEVEL));
+					builder.append(" ");
+				}
+				if(currentState.getTextValue(STRING_FULLTITLE).length() > 0) {
+					builder.append(currentState.getTextValue(STRING_FULLTITLE));
+				}
+				builder.append(" ");
+				builder.append(getClearTypeName());
+				builder.append(" ");
+				builder.append(getRankTypeName());
+			} else if(currentState instanceof KeyConfiguration) {
+				// empty
+			}
+			text = builder.toString();
+			text = text.replace("\\", "￥").replace("/", "／").replace(":", "：").replace("*", "＊").replace("?", "？").replace("\"", "”").replace("<", "＜").replace(">", "＞").replace("|", "｜").replace("\t", " ");
+		}
+
+		@Override
+		public void run() {
+			ConfigurationBuilder cb = new ConfigurationBuilder();
+			cb.setOAuthConsumerKey("**dummyKey**")
+			  .setOAuthConsumerSecret("**dummyKey**")
+			  .setOAuthAccessToken(player.getTwitterAccessToken())
+			  .setOAuthAccessTokenSecret(player.getTwitterAccessTokenSecret());
+			TwitterFactory twitterFactory = new TwitterFactory(cb.build());
+			Twitter twitter = twitterFactory.getInstance();
+
+			Pixmap pixmap = null;
+	        try {
+				// 全ピクセルのアルファ値を255にする(=透明色を無くす)
+				for(int i = 3;i < pixels.length;i+=4) {
+					pixels[i] = (byte) 0xff;
+				}
+
+				// create png byte stream
+				pixmap = new Pixmap(Gdx.graphics.getBackBufferWidth(), Gdx.graphics.getBackBufferHeight(),
+						Pixmap.Format.RGBA8888);
+				BufferUtils.copy(pixels, 0, pixmap.getPixels(), pixels.length);
+				ByteArrayOutputStream byteArrayOutputStream=new ByteArrayOutputStream();
+				PixmapIO.PNG png = new PixmapIO.PNG((int)(pixmap.getWidth() * pixmap.getHeight() * 1.5f));
+				png.write(byteArrayOutputStream, pixmap);
+				byte[] imageBytes=byteArrayOutputStream.toByteArray();
+				ByteArrayInputStream byteArrayInputStream=new ByteArrayInputStream(imageBytes);
+
+				// Upload Media and Post
+				UploadedMedia mediastatus = twitter.uploadMedia("from beatoraja", byteArrayInputStream);
+				Logger.getGlobal().info("Twitter Media Upload:" + mediastatus.toString());
+				StatusUpdate update = new StatusUpdate(text);
+				update.setMediaIds(new long[]{mediastatus.getMediaId()});
+				Status status = twitter.updateStatus(update);
+				Logger.getGlobal().info("Twitter Post:" + status.toString());
+				savetime = System.currentTimeMillis();
+			} catch (Exception e) {
+				e.printStackTrace();
+			} finally {
+				if(pixmap != null) pixmap.dispose();
+			}
 		}
 	}
 
