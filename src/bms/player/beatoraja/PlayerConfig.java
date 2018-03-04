@@ -139,7 +139,11 @@ public class PlayerConfig {
 
 	private String password = "";
 	
-	private int irsend = 0;;
+	private int irsend = 0;
+	
+	private String twitterAccessToken;
+
+	private String twitterAccessTokenSecret;
 	
 	public static final int IR_SEND_ALWAYS = 0;
 	public static final int IR_SEND_COMPLETE_SONG = 1;
@@ -478,7 +482,23 @@ public class PlayerConfig {
 	public void setId(String id) {
 		this.id = id;
 	}
-	
+
+	public String getTwitterAccessToken() {
+		return twitterAccessToken;
+	}
+
+	public void setTwitterAccessToken(String twitterAccessToken) {
+		this.twitterAccessToken = twitterAccessToken;
+	}
+
+	public String getTwitterAccessTokenSecret() {
+		return twitterAccessTokenSecret;
+	}
+
+	public void setTwitterAccessTokenSecret(String twitterAccessTokenSecret) {
+		this.twitterAccessTokenSecret = twitterAccessTokenSecret;
+	}
+
 	public void validate() {
 		mode7.validate(9);
 		mode14.validate(18);

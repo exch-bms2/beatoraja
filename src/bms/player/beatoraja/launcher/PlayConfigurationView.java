@@ -1,24 +1,41 @@
 package bms.player.beatoraja.launcher;
 
-import java.io.*;
+import java.awt.Desktop;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URI;
 import java.net.URL;
-import java.nio.file.*;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 
-import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter.OutputType;
 import com.portaudio.DeviceInfo;
 
 import bms.model.Mode;
-import bms.player.beatoraja.*;
+import bms.player.beatoraja.Config;
+import bms.player.beatoraja.IRScoreData;
+import bms.player.beatoraja.MainLoader;
+import bms.player.beatoraja.PlayConfig;
 import bms.player.beatoraja.PlayConfig.ControllerConfig;
+import bms.player.beatoraja.PlayerConfig;
+import bms.player.beatoraja.ScoreDatabaseAccessor;
+import bms.player.beatoraja.TableDataAccessor;
 import bms.player.beatoraja.audio.PortAudioDriver;
 import bms.player.beatoraja.ir.IRConnection;
 import bms.player.beatoraja.play.JudgeAlgorithm;
@@ -32,15 +49,32 @@ import bms.player.beatoraja.song.SongInformationAccessor;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.Slider;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TextField;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
-import javafx.scene.layout.*;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
-import javafx.util.Callback;
+import twitter4j.Twitter;
+import twitter4j.TwitterException;
+import twitter4j.TwitterFactory;
+import twitter4j.auth.AccessToken;
+import twitter4j.auth.RequestToken;
+import twitter4j.conf.ConfigurationBuilder;
 
 /**
  * Beatorajaの設定ダイアログ
@@ -208,6 +242,15 @@ public class PlayConfigurationView implements Initializable {
     @FXML
     private CheckBox useSongInfo;
 
+    @FXML
+    private Button twitterAuthButton;
+    @FXML
+    private Label txtTwitterAuthenticated;
+    @FXML
+    private TextField txtTwitterPIN;
+    @FXML
+    private Button twitterPINButton;
+
 	@FXML
 	private VBox skin;
 	@FXML
@@ -234,6 +277,8 @@ public class PlayConfigurationView implements Initializable {
 	private MainLoader loader;
 
 	private boolean songUpdated = false;
+
+	private RequestToken requestToken = null;
 
 	private void initComboBox(ComboBox<Integer> combo, final String[] values) {
 		combo.setCellFactory((param) -> new OptionListCell(values));
@@ -415,6 +460,14 @@ public class PlayConfigurationView implements Initializable {
 		iruserid.setText(player.getUserid());
 		irpassword.setText(player.getPassword());
 		irsend.setValue(player.getIrsend());
+
+		if(player.getTwitterAccessToken() != null && !player.getTwitterAccessToken().isEmpty()) {
+			twitterAuthButton.setDisable(true);
+			txtTwitterPIN.setDisable(true);
+			twitterPINButton.setDisable(true);
+		} else {
+			txtTwitterAuthenticated.setVisible(false);
+		}
 
 		playconfig.setValue(PlayMode.BEAT_7K);
 		updatePlayConfig();
@@ -829,6 +882,37 @@ public class PlayConfigurationView implements Initializable {
 		} catch (ClassNotFoundException e1) {
 		}
 
+	}
+
+	@FXML
+	public void startTwitterAuth() {
+		ConfigurationBuilder cb = new ConfigurationBuilder();
+		cb.setOAuthConsumerKey("**dummyKey**")
+		  .setOAuthConsumerSecret("**dummyKey**");
+		TwitterFactory twitterFactory = new TwitterFactory(cb.build());
+		Twitter twitter = twitterFactory.getInstance();
+		try {
+			requestToken = twitter.getOAuthRequestToken();
+			Desktop desktop = Desktop.getDesktop();
+			URI uri = new URI(requestToken.getAuthorizationURL());
+			desktop.browse(uri);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	@FXML
+	public void startPINAuth() {
+		Twitter twitter = TwitterFactory.getSingleton();
+		try {
+			AccessToken accessToken = twitter.getOAuthAccessToken(requestToken, txtTwitterPIN.getText());
+			player.setTwitterAccessToken(accessToken.getToken());
+			player.setTwitterAccessTokenSecret(accessToken.getTokenSecret());
+			commit();
+			update(config);
+		} catch (TwitterException e) {
+			e.printStackTrace();
+		}
 	}
 
     @FXML
