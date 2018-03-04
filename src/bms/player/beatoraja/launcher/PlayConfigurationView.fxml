@@ -367,41 +367,41 @@
                     <VBox.margin>
                         <Insets top="4.0" />
                     </VBox.margin>
+                    <Label prefHeight="24.0" prefWidth="127.0" text="%AUTO_SAVE_REPLAY1" />
+                    <ComboBox fx:id="autosavereplay1" prefWidth="150.0" />
                     <Label prefHeight="24.0" prefWidth="127.0" text="%AUTO_SAVE_REPLAY2">
                         <HBox.margin>
                             <Insets left="10.0" />
                         </HBox.margin>
                     </Label>
                     <ComboBox fx:id="autosavereplay2" prefWidth="150.0" />
-                    <Label prefHeight="24.0" prefWidth="127.0" text="%AUTO_SAVE_REPLAY1" />
-                    <ComboBox fx:id="autosavereplay1" prefWidth="150.0" />
                 </HBox>
                 <HBox prefHeight="24.0" prefWidth="723.0">
                     <VBox.margin>
                         <Insets top="4.0" />
                     </VBox.margin>
+                    <Label prefHeight="24.0" prefWidth="127.0" text="%AUTO_SAVE_REPLAY3" />
+                    <ComboBox fx:id="autosavereplay3" prefWidth="150.0" />
                     <Label prefHeight="24.0" prefWidth="127.0" text="%AUTO_SAVE_REPLAY4">
                         <HBox.margin>
                             <Insets left="10.0" />
                         </HBox.margin>
                     </Label>
                     <ComboBox fx:id="autosavereplay4" prefWidth="150.0" />
-                    <Label prefHeight="24.0" prefWidth="127.0" text="%AUTO_SAVE_REPLAY3" />
-                    <ComboBox fx:id="autosavereplay3" prefWidth="150.0" />
                 </HBox>
 
                 <HBox prefHeight="24.0" prefWidth="723.0">
                     <VBox.margin>
                         <Insets top="4.0" />
                     </VBox.margin>
+                    <Label prefHeight="24.0" prefWidth="127.0" text="%SEVEN_TO_NINE_PATTERN" />
+                    <ComboBox fx:id="seventoninepattern" prefWidth="150.0" />
                     <Label prefHeight="24.0" prefWidth="127.0" text="%SEVEN_TO_NINE_TYPE">
                         <HBox.margin>
                             <Insets left="10.0" />
                         </HBox.margin>
                     </Label>
                     <ComboBox fx:id="seventoninetype" prefWidth="150.0" />
-                    <Label prefHeight="24.0" prefWidth="127.0" text="%SEVEN_TO_NINE_PATTERN" />
-                    <ComboBox fx:id="seventoninepattern" prefWidth="150.0" />
                 </HBox>
             </VBox>
         </Tab>
