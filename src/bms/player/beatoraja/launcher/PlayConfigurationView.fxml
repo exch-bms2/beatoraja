@@ -478,6 +478,18 @@
                            <Label fx:id="txtTwitterAuthenticated" prefHeight="34.0" prefWidth="88.0" text="%TWITTER_AUTHENTICATED" />
                         </children>
                      </HBox>
+                     <HBox prefHeight="25.0" prefWidth="350.0">
+                        <children>
+                           <Label prefHeight="18.0" prefWidth="100.0" text="%TWITTER_CONSUMER_KEY" />
+                           <TextField fx:id="txtTwitterConsumerKey" prefHeight="25.0" prefWidth="200.0" />
+                        </children>
+                     </HBox>
+                     <HBox prefHeight="25.0" prefWidth="350.0">
+                        <children>
+                           <Label prefHeight="25.0" prefWidth="100.0" text="%TWITTER_CONSUMER_SECRET" />
+                           <PasswordField fx:id="txtTwitterConsumerSecret" prefHeight="25.0" prefWidth="200.0" />
+                        </children>
+                     </HBox>
                      <Button fx:id="twitterAuthButton" mnemonicParsing="false" onAction="#startTwitterAuth" prefHeight="25.0" prefWidth="134.0" text="%TWITTER_AUTHENTICATION" />
                      <HBox prefHeight="100.0" prefWidth="200.0">
                         <children>
