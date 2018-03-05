@@ -698,6 +698,18 @@ public class SkinProperty {
 	public static final int OFFSET_LIFT = 3;
 	public static final int OFFSET_LANECOVER = 4;
 
+	public static final int OFFSET_ALL_7KEYS = 10;
+	public static final int OFFSET_ALL_5KEYS = 11;
+	public static final int OFFSET_ALL_14KEYS = 12;
+	public static final int OFFSET_ALL_10KEYS = 13;
+	public static final int OFFSET_ALL_9KEYS = 14;
+	public static final int OFFSET_ALL_7KEYS_BATTLE = 15;
+	public static final int OFFSET_ALL_5KEYS_BATTLE = 16;
+	public static final int OFFSET_ALL_9KEYS_BATTLE = 17;
+	public static final int OFFSET_ALL_24KEYS = 18;
+	public static final int OFFSET_ALL_24KEYS_DOUBLE = 19;
+	public static final int OFFSET_ALL_24KEYS_BATTLE = 20;
+
 	public static final int OFFSET_NOTES_1P = 30;
 	public static final int OFFSET_JUDGE_1P = 32;
 	public static final int OFFSET_JUDGEDETAIL_1P = 33;

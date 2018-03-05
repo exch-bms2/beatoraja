@@ -36,14 +36,29 @@ public class LR2SkinHeaderLoader extends LR2SkinLoader {
 			public void execute(String[] str) {
 				header.setSkinType(SkinType.getSkinTypeById(Integer.parseInt(str[1])));
 				header.setName(str[2]);
+				boolean isAllOffsetSet = false;
 				switch (header.getSkinType()) {
 					case PLAY_5KEYS:
+						if(!isAllOffsetSet) offsets.add(new CustomOffset("All offset(%)", SkinProperty.OFFSET_ALL_5KEYS, true, true, true, true, false, false));
+						isAllOffsetSet = true;
 					case PLAY_7KEYS:
+						if(!isAllOffsetSet) offsets.add(new CustomOffset("All offset(%)", SkinProperty.OFFSET_ALL_7KEYS, true, true, true, true, false, false));
+						isAllOffsetSet = true;
 					case PLAY_9KEYS:
+						if(!isAllOffsetSet) offsets.add(new CustomOffset("All offset(%)", SkinProperty.OFFSET_ALL_9KEYS, true, true, true, true, false, false));
+						isAllOffsetSet = true;
 					case PLAY_10KEYS:
+						if(!isAllOffsetSet) offsets.add(new CustomOffset("All offset(%)", SkinProperty.OFFSET_ALL_10KEYS, true, true, true, true, false, false));
+						isAllOffsetSet = true;
 					case PLAY_14KEYS:
+						if(!isAllOffsetSet) offsets.add(new CustomOffset("All offset(%)", SkinProperty.OFFSET_ALL_14KEYS, true, true, true, true, false, false));
+						isAllOffsetSet = true;
 					case PLAY_24KEYS:
+						if(!isAllOffsetSet) offsets.add(new CustomOffset("All offset(%)", SkinProperty.OFFSET_ALL_24KEYS, true, true, true, true, false, false));
+						isAllOffsetSet = true;
 					case PLAY_24KEYS_DOUBLE:
+						if(!isAllOffsetSet) offsets.add(new CustomOffset("All offset(%)", SkinProperty.OFFSET_ALL_24KEYS_DOUBLE, true, true, true, true, false, false));
+
 						options.add(new CustomOption("BGA Size", new int[]{30,31}, new String[]{"Normal", "Extend"}));
 						options.add(new CustomOption("Ghost", new int[]{34,35,36,37}, new String[]{"Off", "Type A", "Type B", "Type C"}));
 						options.add(new CustomOption("Score Graph", new int[]{38,39}, new String[]{"Off", "On"}));

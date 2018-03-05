@@ -22,6 +22,7 @@ import bms.player.beatoraja.result.*;
 import bms.player.beatoraja.select.MusicSelectSkin;
 import bms.player.beatoraja.select.SkinBar;
 import bms.player.beatoraja.select.SkinDistributionGraph;
+import bms.player.beatoraja.skin.SkinHeader.CustomOffset;
 import bms.player.beatoraja.skin.SkinObject.SkinOffset;
 
 import com.badlogic.gdx.utils.JsonValue;
@@ -93,11 +94,49 @@ public class JSONSkinLoader extends SkinLoader{
 					files[i] = new SkinHeader.CustomFile(pr.name, p.getParent().toString() + "/" + pr.path, pr.def);
 				}
 				header.setCustomFiles(files);
-				
-				SkinHeader.CustomOffset[] offsets = new SkinHeader.CustomOffset[sk.offset.length];
+
+				int offsetLengthAddition = 0;
+				switch (header.getSkinType()) {
+					case PLAY_5KEYS:
+					case PLAY_7KEYS:
+					case PLAY_9KEYS:
+					case PLAY_10KEYS:
+					case PLAY_14KEYS:
+					case PLAY_24KEYS:
+					case PLAY_24KEYS_DOUBLE:
+						offsetLengthAddition = 4;
+				}
+				SkinHeader.CustomOffset[] offsets = new SkinHeader.CustomOffset[sk.offset.length + offsetLengthAddition];
 				for (int i = 0; i < sk.offset.length; i++) {
 					Offset pr = sk.offset[i];
 					offsets[i] = new SkinHeader.CustomOffset(pr.name, pr.id, pr.x, pr.y, pr.w, pr.h, pr.r, pr.a);
+				}
+				boolean isAllOffsetSet = false;
+				switch (header.getSkinType()) {
+					case PLAY_5KEYS:
+						if(!isAllOffsetSet) offsets[sk.offset.length + 0] = new SkinHeader.CustomOffset("All offset(%)", SkinProperty.OFFSET_ALL_5KEYS, true, true, true, true, false, false);
+						isAllOffsetSet = true;
+					case PLAY_7KEYS:
+						if(!isAllOffsetSet) offsets[sk.offset.length + 0] = new SkinHeader.CustomOffset("All offset(%)", SkinProperty.OFFSET_ALL_7KEYS, true, true, true, true, false, false);
+						isAllOffsetSet = true;
+					case PLAY_9KEYS:
+						if(!isAllOffsetSet) offsets[sk.offset.length + 0] = new SkinHeader.CustomOffset("All offset(%)", SkinProperty.OFFSET_ALL_9KEYS, true, true, true, true, false, false);
+						isAllOffsetSet = true;
+					case PLAY_10KEYS:
+						if(!isAllOffsetSet) offsets[sk.offset.length + 0] = new SkinHeader.CustomOffset("All offset(%)", SkinProperty.OFFSET_ALL_10KEYS, true, true, true, true, false, false);
+						isAllOffsetSet = true;
+					case PLAY_14KEYS:
+						if(!isAllOffsetSet) offsets[sk.offset.length + 0] = new SkinHeader.CustomOffset("All offset(%)", SkinProperty.OFFSET_ALL_14KEYS, true, true, true, true, false, false);
+						isAllOffsetSet = true;
+					case PLAY_24KEYS:
+						if(!isAllOffsetSet) offsets[sk.offset.length + 0] = new SkinHeader.CustomOffset("All offset(%)", SkinProperty.OFFSET_ALL_24KEYS, true, true, true, true, false, false);
+						isAllOffsetSet = true;
+					case PLAY_24KEYS_DOUBLE:
+						if(!isAllOffsetSet) offsets[sk.offset.length + 0] = new SkinHeader.CustomOffset("All offset(%)", SkinProperty.OFFSET_ALL_24KEYS_DOUBLE, true, true, true, true, false, false);
+
+						offsets[sk.offset.length + 1] = new SkinHeader.CustomOffset("Notes offset", SkinProperty.OFFSET_NOTES_1P, false, false, false, true, false, false);
+						offsets[sk.offset.length + 2] = new SkinHeader.CustomOffset("Judge offset", SkinProperty.OFFSET_JUDGE_1P, true, true, true, true, false, true);
+						offsets[sk.offset.length + 3] = new SkinHeader.CustomOffset("Judge Detail offset", SkinProperty.OFFSET_JUDGEDETAIL_1P, true, true, true, true, false, true);
 				}
 				header.setCustomOffsets(offsets);
 
@@ -179,7 +218,7 @@ public class JSONSkinLoader extends SkinLoader{
 			skin.setOption(op);
 
 			Map<Integer, SkinConfig.Offset> offset = new HashMap<>();
-			for (Offset of : sk.offset) {
+			for (CustomOffset of : header.getCustomOffsets()) {
 				for(SkinConfig.Offset off : property.getOffset()) {
 					if (off.name.equals(of.name)) {
 						offset.put(of.id, off);
