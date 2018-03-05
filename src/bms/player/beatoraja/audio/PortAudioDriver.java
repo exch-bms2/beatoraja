@@ -92,6 +92,7 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 		final Path wavfile = Paths.get(name + ".wav");
 		final Path oggfile = Paths.get(name + ".ogg");
 		final Path mp3file = Paths.get(name + ".mp3");
+		final Path flacfile = Paths.get(name + ".flac");
 
 		PCM wav = null;
 		if (wav == null && Files.exists(wavfile)) {
@@ -111,6 +112,13 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 		if (wav == null && Files.exists(mp3file)) {
 			try {
 				wav = new PCM(mp3file);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		if (wav == null && Files.exists(flacfile)) {
+			try {
+				wav = new PCM(flacfile);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
