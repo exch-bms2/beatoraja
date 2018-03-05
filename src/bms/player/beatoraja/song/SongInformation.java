@@ -28,8 +28,13 @@ public class SongInformation {
 	 * ロングスクラッチノート総数
 	 */
 	private int ls;
-	
+	/**
+	 * 
+	 */
 	private double density;
+	private double peakdensity;
+	private double enddensity;
+
 	/**
 	 * TOTAL
 	 */
@@ -90,15 +95,29 @@ public class SongInformation {
 				}
 			}
 		}
-		
-		final int d = Math.min(5, data.length - borderpos - 1);
+
+		final int bd = model.getTotalNotes() / data.length / 4;
 		density = 0;
+		peakdensity = 0;
+		int count = 0;
+		for(int i = 0;i < data.length;i++) {
+			int notes = data[i][0] + data[i][1] + data[i][2] + data[i][3] + data[i][4] + data[i][5];
+			peakdensity = Math.max(peakdensity, notes);
+			if(notes >= bd) {
+				density += notes;
+				count++;
+			}
+		}
+		density /= count;
+
+		final int d = Math.min(5, data.length - borderpos - 1);
+		enddensity = 0;
 		for(int i = borderpos;i < data.length - d;i++) {
 			int notes = 0;
 			for(int j = 0;j < d;j++) {
-				notes += data[i + j][0] + data[i + j][2] + data[i + j][3] + data[i + j][5];
+				notes += data[i + j][0] + data[i + j][1] + data[i + j][2] + data[i + j][3] + data[i + j][4] + data[i + j][5];
 			}
-			density = Math.max(density, ((double)notes) / d);
+			enddensity = Math.max(enddensity, ((double)notes) / d);
 		}
 		setDistributionValues(data);
 	}
@@ -224,5 +243,21 @@ public class SongInformation {
 
 	public void setTotal(double total) {
 		this.total = total;
+	}
+
+	public double getPeakdensity() {
+		return peakdensity;
+	}
+
+	public void setPeakdensity(double peakdensity) {
+		this.peakdensity = peakdensity;
+	}
+	
+	public double getEnddensity() {
+		return enddensity;
+	}
+
+	public void setEnddensity(double enddensity) {
+		this.enddensity = enddensity;
 	}
 }
