@@ -355,7 +355,7 @@ public class BMSPlayer extends MainState {
 		resource.getSongdata().setDifficulty(difficulty);
 	}
 
-	private SkinType getSkinType() {
+	public SkinType getSkinType() {
 		for(SkinType type : SkinType.values()) {
 			if(type.getMode() == model.getMode()) {
 				return type;
