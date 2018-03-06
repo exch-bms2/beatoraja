@@ -290,6 +290,16 @@ public class MusicSelector extends MainState {
 				if (((SongBar) current).existsSong()) {
 					resource.clear();
 					if (resource.setBMSFile(Paths.get(song.getPath()), play)) {
+						final Deque<DirectoryBar> dir = this.getBarRender().getDirectory();
+						for(DirectoryBar bar: dir){
+							if(bar instanceof TableBar){
+								resource.setTablename(bar.getTitle());
+							}
+							if(bar instanceof HashBar){
+								resource.setTablelevel(bar.getTitle());
+								break;
+							}
+						}
 						preview.stop();
 						main.changeState(MainController.STATE_DECIDE);
 					}
