@@ -86,6 +86,31 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 				// e.printStackTrace();
 			}
 		}
+		final Path flacfile = Paths.get(name + ".flac");
+		if (Files.exists(flacfile)) {
+			try {
+				return Gdx.audio.newSound(new FileHandleStream("tempwav.wav") {
+					@Override
+					public InputStream read() {
+						try {
+							final PCM pcm = new PCM(flacfile);
+							return pcm.getInputStream();
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+						return null;
+					}
+
+					@Override
+					public OutputStream write(boolean overwrite) {
+						return null;
+					}
+				});
+			} catch (GdxRuntimeException e) {
+				Logger.getGlobal().warning("音源(flac)ファイル読み込み失敗。" + e.getMessage());
+//				e.printStackTrace();
+			}
+		}
 		return null;
 	}
 

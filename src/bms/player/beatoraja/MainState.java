@@ -644,7 +644,7 @@ public abstract class MainState {
 		path = p.resolve(path).toString();
 		path = path.substring(0, path.lastIndexOf('.'));
 
-		for(File f : new File[]{new File(path + ".wav"), new File(path + ".ogg"), new File(path + ".mp3")}) {
+		for(File f : new File[]{new File(path + ".wav"), new File(path + ".ogg"), new File(path + ".mp3"), new File(path + ".flac")}) {
 			if(f.exists()) {
 				String newpath = f.getPath();
 				String oldpath = soundmap.get(id);
