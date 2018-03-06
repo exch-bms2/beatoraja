@@ -57,16 +57,20 @@ public class SkinNoteDistributionGraph extends SkinObject {
 
 	private boolean isBackTexOff = false;
 	private int delay = 500;
+	private boolean isOrderReverse = false;
+	private boolean isNoGap = false;
 
 	public SkinNoteDistributionGraph() {
-		this(TYPE_NORMAL, 500, 0);
+		this(TYPE_NORMAL, 500, 0, 0, 0);
 	}
 
-	public SkinNoteDistributionGraph(int type, int delay, int backTexOff) {
+	public SkinNoteDistributionGraph(int type, int delay, int backTexOff, int orderReverse, int noGap) {
 		this.type = type;
 		graphcolor = JGRAPH[type];
 		this.isBackTexOff = backTexOff == 1 ? true : false;
 		this.delay = delay;
+		this.isOrderReverse = orderReverse == 1 ? true : false;
+		this.isNoGap = noGap == 1 ? true : false;
 
 		Pixmap bp = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
 		bp.drawPixel(0, 0, Color.toIntBits(255, 128, 255, 128));
@@ -257,31 +261,31 @@ public class SkinNoteDistributionGraph extends SkinObject {
 		shape = new Pixmap(data.length * 5, max * 5, Pixmap.Format.RGBA8888);
 		for (int i = 0; i < data.length; i++) {
 			int[] n = data[i];
-			if(type > 0 && model!= null && model.getMode() == Mode.POPN_9K) {
-				for (int j = 0, k = n[n.length - 1], index = n.length - 1; j < max && index < graphcolor.length;) {
+			if(!isOrderReverse) {
+				for (int j = 0, k = n[0], index = 0; j < max && index < graphcolor.length;) {
 					if (k > 0) {
 						k--;
 						shape.setColor(graphcolor[index]);
-						shape.fillRectangle(i * 5, j * 5, 4, 5);
+						shape.fillRectangle(i * 5, j * 5, 4, 4 + (isNoGap ? 1 : 0));
 						j++;
 					} else {
-						index--;
-						if (index < 0) {
+						index++;
+						if (index == graphcolor.length) {
 							break;
 						}
 						k = n[index];
 					}
 				}
 			} else {
-				for (int j = 0, k = n[0], index = 0; j < max && index < graphcolor.length;) {
+				for (int j = 0, k = n[n.length - 1], index = n.length - 1; j < max && index < graphcolor.length;) {
 					if (k > 0) {
 						k--;
 						shape.setColor(graphcolor[index]);
-						shape.fillRectangle(i * 5, j * 5, 4, 4);
+						shape.fillRectangle(i * 5, j * 5, 4, 4 + (isNoGap ? 1 : 0));
 						j++;
 					} else {
-						index++;
-						if (index == graphcolor.length) {
+						index--;
+						if (index < 0) {
 							break;
 						}
 						k = n[index];

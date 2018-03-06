@@ -56,11 +56,11 @@ public class LR2CourseResultSkinLoader extends LR2SkinCSVLoader<CourseResultSkin
             }
         });
         addCommandWord(new CommandWord("SRC_NOTECHART_1P") {
-        	//#SRC_NOTECHART_1P,(index),(gr),(x),(y),(w),(h),(div_x),(div_y),(cycle),(timer),field_w,field_h,(start),(end),delay,backTexOff
+        	//#SRC_NOTECHART_1P,(index),(gr),(x),(y),(w),(h),(div_x),(div_y),(cycle),(timer),field_w,field_h,(start),(end),delay,backTexOff,orderReverse,noGap
             @Override
             public void execute(String[] str) {
                 int[] values = parseInt(str);
-                noteobj = new SkinNoteDistributionGraph(values[1], values[15], values[16]);
+                noteobj = new SkinNoteDistributionGraph(values[1], values[15], values[16], values[17], values[18]);
                 gauge = new Rectangle(0, 0, values[11], values[12]);
             }
         });
