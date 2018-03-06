@@ -211,9 +211,10 @@ public class Skin {
 				obj.draw(renderer, time, state);
 			}
 		}
-		Matrix4 transform = new Matrix4();
 		SkinOffset offsetAll = getOffsetAll(state);
-		transform.set(width * offsetAll.x /100, height * offsetAll.y / 100, 0, 0, 0, 0, 0, (offsetAll.w + 100) / 100, (offsetAll.h + 100) / 100 , 1);
+		Matrix4 transform = new Matrix4();
+		if(offsetAll != null) transform.set(width * offsetAll.x /100, height * offsetAll.y / 100, 0, 0, 0, 0, 0, (offsetAll.w + 100) / 100, (offsetAll.h + 100) / 100, 1);
+		else transform.set(0, 0, 0, 0, 0, 0, 0, 1, 1, 1);
 		sprite.setTransformMatrix(transform);
 	}
 
@@ -475,36 +476,15 @@ public class Skin {
 		if(state instanceof BMSPlayer) {
 			switch(((BMSPlayer)state).getSkinType()) {
 			case PLAY_5KEYS:
-				offsetAll = state.getOffsetValue(SkinProperty.OFFSET_ALL_5KEYS);
-				break;
 			case PLAY_7KEYS:
-				offsetAll = state.getOffsetValue(SkinProperty.OFFSET_ALL_7KEYS);
-				break;
 			case PLAY_9KEYS:
-				offsetAll = state.getOffsetValue(SkinProperty.OFFSET_ALL_9KEYS);
-				break;
 			case PLAY_10KEYS:
-				offsetAll = state.getOffsetValue(SkinProperty.OFFSET_ALL_10KEYS);
-				break;
 			case PLAY_14KEYS:
-				offsetAll = state.getOffsetValue(SkinProperty.OFFSET_ALL_14KEYS);
-				break;
 			case PLAY_24KEYS:
-				offsetAll = state.getOffsetValue(SkinProperty.OFFSET_ALL_24KEYS);
-				break;
 			case PLAY_24KEYS_DOUBLE:
-				offsetAll = state.getOffsetValue(SkinProperty.OFFSET_ALL_24KEYS_DOUBLE);
+				offsetAll = state.getOffsetValue(SkinProperty.OFFSET_ALL);
 				break;
 			}
-		}
-		if(offsetAll == null) {
-			offsetAll = new SkinOffset();
-			offsetAll.x = 0;
-			offsetAll.y = 0;
-			offsetAll.w = 0;
-			offsetAll.h = 0;
-			offsetAll.r = 0;
-			offsetAll.a = 0;
 		}
 		return offsetAll;
 	}

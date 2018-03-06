@@ -111,28 +111,15 @@ public class JSONSkinLoader extends SkinLoader{
 					Offset pr = sk.offset[i];
 					offsets[i] = new SkinHeader.CustomOffset(pr.name, pr.id, pr.x, pr.y, pr.w, pr.h, pr.r, pr.a);
 				}
-				boolean isAllOffsetSet = false;
 				switch (header.getSkinType()) {
 					case PLAY_5KEYS:
-						if(!isAllOffsetSet) offsets[sk.offset.length + 0] = new SkinHeader.CustomOffset("All offset(%)", SkinProperty.OFFSET_ALL_5KEYS, true, true, true, true, false, false);
-						isAllOffsetSet = true;
 					case PLAY_7KEYS:
-						if(!isAllOffsetSet) offsets[sk.offset.length + 0] = new SkinHeader.CustomOffset("All offset(%)", SkinProperty.OFFSET_ALL_7KEYS, true, true, true, true, false, false);
-						isAllOffsetSet = true;
 					case PLAY_9KEYS:
-						if(!isAllOffsetSet) offsets[sk.offset.length + 0] = new SkinHeader.CustomOffset("All offset(%)", SkinProperty.OFFSET_ALL_9KEYS, true, true, true, true, false, false);
-						isAllOffsetSet = true;
 					case PLAY_10KEYS:
-						if(!isAllOffsetSet) offsets[sk.offset.length + 0] = new SkinHeader.CustomOffset("All offset(%)", SkinProperty.OFFSET_ALL_10KEYS, true, true, true, true, false, false);
-						isAllOffsetSet = true;
 					case PLAY_14KEYS:
-						if(!isAllOffsetSet) offsets[sk.offset.length + 0] = new SkinHeader.CustomOffset("All offset(%)", SkinProperty.OFFSET_ALL_14KEYS, true, true, true, true, false, false);
-						isAllOffsetSet = true;
 					case PLAY_24KEYS:
-						if(!isAllOffsetSet) offsets[sk.offset.length + 0] = new SkinHeader.CustomOffset("All offset(%)", SkinProperty.OFFSET_ALL_24KEYS, true, true, true, true, false, false);
-						isAllOffsetSet = true;
 					case PLAY_24KEYS_DOUBLE:
-						if(!isAllOffsetSet) offsets[sk.offset.length + 0] = new SkinHeader.CustomOffset("All offset(%)", SkinProperty.OFFSET_ALL_24KEYS_DOUBLE, true, true, true, true, false, false);
+						offsets[sk.offset.length + 0] = new SkinHeader.CustomOffset("All offset(%)", SkinProperty.OFFSET_ALL, true, true, true, true, false, false);
 
 						offsets[sk.offset.length + 1] = new SkinHeader.CustomOffset("Notes offset", SkinProperty.OFFSET_NOTES_1P, false, false, false, true, false, false);
 						offsets[sk.offset.length + 2] = new SkinHeader.CustomOffset("Judge offset", SkinProperty.OFFSET_JUDGE_1P, true, true, true, true, false, true);
