@@ -226,6 +226,8 @@ public class SkinProperty {
 	public static final int STRING_COURSE9_TITLE = 158;
 	public static final int STRING_COURSE10_TITLE = 159;
 	public static final int STRING_DIRECTORY = 1000;
+	public static final int STRING_TABLE_NAME = 1001;
+	public static final int STRING_TABLE_LEVEL = 1002;
 
 	public static final int NUMBER_HISPEED_LR2 = 10;
 	public static final int NUMBER_HISPEED = 310;
@@ -420,6 +422,8 @@ public class SkinProperty {
 	public static final int OPTION_GRADEBAR_NOGREAT = 1007;
 
 	public static final int OPTION_PLAYABLEBAR = 5;
+
+	public static final int OPTION_TABLE_SONG = 1008;
 
 	public static final int OPTION_PANEL1 = 21;
 	public static final int OPTION_PANEL2 = 22;

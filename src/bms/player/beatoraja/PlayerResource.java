@@ -13,6 +13,7 @@ import bms.model.BMSDecoder;
 import bms.model.BMSGenerator;
 import bms.model.BMSModel;
 import bms.model.BMSONDecoder;
+import bms.player.beatoraja.TableData.TableFolder;
 import bms.player.beatoraja.audio.AudioDriver;
 import bms.player.beatoraja.play.GrooveGauge;
 import bms.player.beatoraja.play.bga.BGAProcessor;
@@ -108,6 +109,12 @@ public class PlayerResource {
 
 	private int assist = 0;
 
+	/**
+	 * 現在プレイしている楽曲を含む難易度表とレベル
+	 */
+	private String tablename = "";
+	private String tablelevel = "";
+
 	public PlayerResource(AudioDriver audio, Config config, PlayerConfig pconfig) {
 		this.config = config;
 		this.pconfig = pconfig;
@@ -129,6 +136,8 @@ public class PlayerResource {
 		maxcombo = 0;
 		constraint.clear();
 		bmsPaths = null;
+		tablename = "";
+		tablelevel = "";
 	}
 
 	public boolean setBMSFile(final Path f, PlayMode mode) {
@@ -145,6 +154,10 @@ public class PlayerResource {
 
 		bmsresource.setBMSFile(model, f, config, mode);
 		songdata = new SongData(model, false);
+		if(tablename.length() == 0 ||
+				courseindex != 0){
+			setTableinfo();
+		}
 		return true;
 	}
 
@@ -441,6 +454,48 @@ public class PlayerResource {
 
 	public void setAssist(int assist) {
 		this.assist = assist;
+	}
+
+	public String getTablename() {
+		return tablename;
+	}
+
+	public void setTablename(String tablename) {
+		this.tablename = tablename;
+	}
+
+	public String getTablelevel() {
+		return tablelevel;
+	}
+
+	public void setTablelevel(String tablelevel) {
+		this.tablelevel = tablelevel;
+	}
+
+	private void setTableinfo(){
+		final String[] urls = this.getConfig().getTableURL();
+		final TableDataAccessor tdaccessor = new TableDataAccessor();
+		final TableData[] tds = tdaccessor.readAll();
+		for(String url: urls){
+			for(TableData td: tds){
+				if(td.getUrl().equals(url)){
+					final TableFolder[] tfs = td.getFolder();
+					for(TableFolder tf: tfs){
+						final SongData[] tss = tf.getSong();
+						for(SongData ts: tss){
+							if((ts.getMd5().length() != 0 && this.getSongdata().getMd5().length() != 0 &&
+									ts.getMd5().equals(this.getSongdata().getMd5()))||
+									(ts.getMd5().length() != 0 && this.getSongdata().getMd5().length() != 0 &&
+									ts.getSha256().equals(this.getSongdata().getSha256()))){
+								this.setTablename(td.getName());
+								this.setTablelevel(tf.getName());
+								return;
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 
 	public enum PlayMode {
