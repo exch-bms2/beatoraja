@@ -123,7 +123,7 @@ public class PCM {
 				
 				channels = info.getChannels();
 				sampleRate = info.getSampleRate();
-				bitsPerSample = info.getBitsPerSample​();
+				bitsPerSample = info.getBitsPerSample();
 				
 				OptimizedByteArrayOutputStream output = new OptimizedByteArrayOutputStream((int)info.getTotalSamples() * 16);
 				input.addPCMProcessor(new FlacProcessor(output));
@@ -378,7 +378,7 @@ public class PCM {
 		pcm.sample = this.sample;
 		pcm.start = start;
 		pcm.len = length;
-		return pcm;
+		return length > 0 ? pcm : null;
 	}
 
 	public InputStream getInputStream() {
