@@ -821,8 +821,8 @@ public class MainController extends ApplicationAdapter {
 		@Override
 		public void run() {
 			ConfigurationBuilder cb = new ConfigurationBuilder();
-			cb.setOAuthConsumerKey("**dummyKey**")
-			  .setOAuthConsumerSecret("**dummyKey**")
+			cb.setOAuthConsumerKey(player.getTwitterConsumerKey())
+			  .setOAuthConsumerSecret(player.getTwitterConsumerSecret())
 			  .setOAuthAccessToken(player.getTwitterAccessToken())
 			  .setOAuthAccessTokenSecret(player.getTwitterAccessTokenSecret());
 			TwitterFactory twitterFactory = new TwitterFactory(cb.build());
