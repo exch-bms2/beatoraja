@@ -49,6 +49,7 @@ public class LR2SkinHeaderLoader extends LR2SkinLoader {
 						options.add(new CustomOption("Score Graph", new int[]{38,39}, new String[]{"Off", "On"}));
 						options.add(new CustomOption("Judge Detail", new int[]{1997,1998,1999}, new String[]{"Off", "EARLY/LATE", "+-ms"}));
 
+						offsets.add(new CustomOffset("All offset(%)", SkinProperty.OFFSET_ALL, true, true, true, true, false, false));
 						offsets.add(new CustomOffset("Notes offset", SkinProperty.OFFSET_NOTES_1P, false, false, false, true, false, false));
 						offsets.add(new CustomOffset("Judge offset", SkinProperty.OFFSET_JUDGE_1P, true, true, true, true, false, true));
 						offsets.add(new CustomOffset("Judge Detail offset", SkinProperty.OFFSET_JUDGEDETAIL_1P, true, true, true, true, false, true));

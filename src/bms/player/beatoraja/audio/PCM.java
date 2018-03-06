@@ -9,7 +9,12 @@ import javazoom.jl.decoder.*;
 
 import com.badlogic.gdx.backends.lwjgl.audio.OggInputStream;
 import com.badlogic.gdx.utils.StreamUtils;
-import com.badlogic.gdx.utils.StreamUtils.OptimizedByteArrayOutputStream;;
+import com.badlogic.gdx.utils.StreamUtils.OptimizedByteArrayOutputStream;
+
+import org.jflac.FLACDecoder;
+import org.jflac.PCMProcessor;
+import org.jflac.metadata.StreamInfo;
+import org.jflac.util.ByteData;
 
 /**
  * PCM音源処理用クラス
@@ -109,6 +114,26 @@ public class PCM {
 				pcm = decodeMP3(new BufferedInputStream(Files.newInputStream(p)));
 				bytes = pcm.length;
 			} catch (Throwable ex) {
+			}
+		} else if (name.endsWith(".flac")) {
+			try {
+				FLACDecoder input = new FLACDecoder(new BufferedInputStream(Files.newInputStream(p)));
+				input.readMetadata();
+				StreamInfo info = input.getStreamInfo();
+				
+				channels = info.getChannels();
+				sampleRate = info.getSampleRate();
+				bitsPerSample = info.getBitsPerSample​();
+				
+				OptimizedByteArrayOutputStream output = new OptimizedByteArrayOutputStream((int)info.getTotalSamples() * 16);
+				input.addPCMProcessor(new FlacProcessor(output));
+				
+				input.decodeFrames();
+				
+				pcm = output.getBuffer();
+				bytes = output.size();
+			} catch (Throwable ex) {
+				ex.printStackTrace();
 			}
 		}
 

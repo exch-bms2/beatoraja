@@ -369,7 +369,10 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 							txt = true;
 						}
 						if (previewpath == null) {
-							if(s.startsWith("preview") && (s.endsWith(".wav") || s.endsWith(".ogg") || s.endsWith(".mp3"))) {
+							if(s.startsWith("preview") && (s.endsWith(".wav") ||
+															s.endsWith(".ogg") ||
+															s.endsWith(".mp3") ||
+															s.endsWith(".flac"))) {
 								previewpath = p.getFileName().toString();
 							}
 						}

@@ -74,7 +74,6 @@ import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
 import twitter4j.auth.AccessToken;
 import twitter4j.auth.RequestToken;
-import twitter4j.conf.ConfigurationBuilder;
 
 /**
  * Beatorajaの設定ダイアログ
@@ -241,6 +240,11 @@ public class PlayConfigurationView implements Initializable {
     private CheckBox usecim;
     @FXML
     private CheckBox useSongInfo;
+
+    @FXML
+	private TextField txtTwitterConsumerKey;
+    @FXML
+	private PasswordField txtTwitterConsumerSecret;
 
     @FXML
     private Button twitterAuthButton;
@@ -673,6 +677,24 @@ public class PlayConfigurationView implements Initializable {
 		tableurl.getItems().removeAll(tableurl.getSelectionModel().getSelectedItems());
 	}
     
+	public void moveTableURLUp() {
+		final int index = tableurl.getSelectionModel().getSelectedIndex();
+		if(index > 0) {
+			String table = tableurl.getSelectionModel().getSelectedItem();
+			tableurl.getItems().remove(index);
+			tableurl.getItems().add(index - 1, table);
+		}
+	}
+
+	public void moveTableURLDown() {
+		final int index = tableurl.getSelectionModel().getSelectedIndex();
+		if(index >= 0 && index < tableurl.getItems().size() - 1) {
+			String table = tableurl.getSelectionModel().getSelectedItem();
+			tableurl.getItems().remove(index);
+			tableurl.getItems().add(index + 1, table);
+		}
+	}
+
 	private PlayMode pc = null;
 
     @FXML
@@ -886,12 +908,11 @@ public class PlayConfigurationView implements Initializable {
 
 	@FXML
 	public void startTwitterAuth() {
-		ConfigurationBuilder cb = new ConfigurationBuilder();
-		cb.setOAuthConsumerKey("**dummyKey**")
-		  .setOAuthConsumerSecret("**dummyKey**");
-		TwitterFactory twitterFactory = new TwitterFactory(cb.build());
-		Twitter twitter = twitterFactory.getInstance();
+		Twitter twitter = TwitterFactory.getSingleton();
+		twitter.setOAuthConsumer(txtTwitterConsumerKey.getText(), txtTwitterConsumerSecret.getText());
 		try {
+			player.setTwitterConsumerKey(txtTwitterConsumerKey.getText());
+			player.setTwitterConsumerSecret(txtTwitterConsumerSecret.getText());
 			requestToken = twitter.getOAuthRequestToken();
 			Desktop desktop = Desktop.getDesktop();
 			URI uri = new URI(requestToken.getAuthorizationURL());

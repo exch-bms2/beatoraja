@@ -141,6 +141,10 @@ public class PlayerConfig {
 	
 	private int irsend = 0;
 	
+	private String twitterConsumerKey;
+
+	private String twitterConsumerSecret;
+
 	private String twitterAccessToken;
 
 	private String twitterAccessTokenSecret;
@@ -481,6 +485,22 @@ public class PlayerConfig {
 
 	public void setId(String id) {
 		this.id = id;
+	}
+
+	public String getTwitterConsumerKey() {
+		return twitterConsumerKey;
+	}
+
+	public void setTwitterConsumerKey(String twitterConsumerKey) {
+		this.twitterConsumerKey = twitterConsumerKey;
+	}
+
+	public String getTwitterConsumerSecret() {
+		return twitterConsumerSecret;
+	}
+
+	public void setTwitterConsumerSecret(String twitterConsumerSecret) {
+		this.twitterConsumerSecret = twitterConsumerSecret;
 	}
 
 	public String getTwitterAccessToken() {

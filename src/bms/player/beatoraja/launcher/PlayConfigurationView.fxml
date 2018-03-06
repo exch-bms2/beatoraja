@@ -230,11 +230,23 @@
                                         <Insets top="5.0" />
                                     </HBox.margin>
                                 </ListView>
+                                <VBox prefHeight="167.0" prefWidth="40.0">
                                 <Button mnemonicParsing="false" onAction="#removeTableURL" prefHeight="28.0" prefWidth="30.0" text="%-">
-                                    <HBox.margin>
+                                        <VBox.margin>
+                                            <Insets left="10.0" top="10.0" />
+                                        </VBox.margin>
+                                    </Button>
+                                    <Button mnemonicParsing="false" onAction="#moveTableURLUp" prefHeight="28.0" prefWidth="30.0" text="↑">
+                                        <VBox.margin>
+                                            <Insets left="10.0" top="10.0" />
+                                        </VBox.margin>
+                                    </Button>
+                                    <Button mnemonicParsing="false" onAction="#moveTableURLDown" prefHeight="28.0" prefWidth="30.0" text="↓">
+                                        <VBox.margin>
                                         <Insets left="10.0" top="10.0" />
-                                    </HBox.margin>
+                                        </VBox.margin>
                                 </Button>
+                                </VBox>
                             </HBox>
                         </VBox>
                     </HBox>
@@ -367,41 +379,41 @@
                     <VBox.margin>
                         <Insets top="4.0" />
                     </VBox.margin>
+                    <Label prefHeight="24.0" prefWidth="127.0" text="%AUTO_SAVE_REPLAY1" />
+                    <ComboBox fx:id="autosavereplay1" prefWidth="150.0" />
                     <Label prefHeight="24.0" prefWidth="127.0" text="%AUTO_SAVE_REPLAY2">
                         <HBox.margin>
                             <Insets left="10.0" />
                         </HBox.margin>
                     </Label>
                     <ComboBox fx:id="autosavereplay2" prefWidth="150.0" />
-                    <Label prefHeight="24.0" prefWidth="127.0" text="%AUTO_SAVE_REPLAY1" />
-                    <ComboBox fx:id="autosavereplay1" prefWidth="150.0" />
                 </HBox>
                 <HBox prefHeight="24.0" prefWidth="723.0">
                     <VBox.margin>
                         <Insets top="4.0" />
                     </VBox.margin>
+                    <Label prefHeight="24.0" prefWidth="127.0" text="%AUTO_SAVE_REPLAY3" />
+                    <ComboBox fx:id="autosavereplay3" prefWidth="150.0" />
                     <Label prefHeight="24.0" prefWidth="127.0" text="%AUTO_SAVE_REPLAY4">
                         <HBox.margin>
                             <Insets left="10.0" />
                         </HBox.margin>
                     </Label>
                     <ComboBox fx:id="autosavereplay4" prefWidth="150.0" />
-                    <Label prefHeight="24.0" prefWidth="127.0" text="%AUTO_SAVE_REPLAY3" />
-                    <ComboBox fx:id="autosavereplay3" prefWidth="150.0" />
                 </HBox>
 
                 <HBox prefHeight="24.0" prefWidth="723.0">
                     <VBox.margin>
                         <Insets top="4.0" />
                     </VBox.margin>
+                    <Label prefHeight="24.0" prefWidth="127.0" text="%SEVEN_TO_NINE_PATTERN" />
+                    <ComboBox fx:id="seventoninepattern" prefWidth="150.0" />
                     <Label prefHeight="24.0" prefWidth="127.0" text="%SEVEN_TO_NINE_TYPE">
                         <HBox.margin>
                             <Insets left="10.0" />
                         </HBox.margin>
                     </Label>
                     <ComboBox fx:id="seventoninetype" prefWidth="150.0" />
-                    <Label prefHeight="24.0" prefWidth="127.0" text="%SEVEN_TO_NINE_PATTERN" />
-                    <ComboBox fx:id="seventoninepattern" prefWidth="150.0" />
                 </HBox>
             </VBox>
         </Tab>
@@ -476,6 +488,18 @@
                         <children>
                            <Label prefHeight="35.0" prefWidth="195.0" text="%TWITTER_CONNECTION" />
                            <Label fx:id="txtTwitterAuthenticated" prefHeight="34.0" prefWidth="88.0" text="%TWITTER_AUTHENTICATED" />
+                        </children>
+                     </HBox>
+                     <HBox prefHeight="25.0" prefWidth="350.0">
+                        <children>
+                           <Label prefHeight="18.0" prefWidth="100.0" text="%TWITTER_CONSUMER_KEY" />
+                           <TextField fx:id="txtTwitterConsumerKey" prefHeight="25.0" prefWidth="200.0" />
+                        </children>
+                     </HBox>
+                     <HBox prefHeight="25.0" prefWidth="350.0">
+                        <children>
+                           <Label prefHeight="25.0" prefWidth="100.0" text="%TWITTER_CONSUMER_SECRET" />
+                           <PasswordField fx:id="txtTwitterConsumerSecret" prefHeight="25.0" prefWidth="200.0" />
                         </children>
                      </HBox>
                      <Button fx:id="twitterAuthButton" mnemonicParsing="false" onAction="#startTwitterAuth" prefHeight="25.0" prefWidth="134.0" text="%TWITTER_AUTHENTICATION" />

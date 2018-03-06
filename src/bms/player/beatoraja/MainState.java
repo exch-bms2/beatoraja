@@ -225,6 +225,8 @@ public abstract class MainState {
 				return score.qualifyBestRank(21) && !score.qualifyBestRank(24);
 			case OPTION_BEST_AAA_1P:
 				return score.qualifyBestRank(24);
+			case OPTION_TABLE_SONG:
+				return main.getPlayerResource().getTablename().length() != 0;
 		}
 		return false;
 	}
@@ -541,7 +543,8 @@ public abstract class MainState {
 
 	public String getTextValue(int id) {
 		if (main.getPlayerResource() != null) {
-			SongData song = main.getPlayerResource().getSongdata();
+			PlayerResource resource = main.getPlayerResource();
+			SongData song = resource.getSongdata();
 			switch (id) {
 				case STRING_RIVAL:
 					return TargetProperty.getAllTargetProperties()[main.getPlayerResource().getPlayerConfig().getTarget()].getName();
@@ -561,6 +564,10 @@ public abstract class MainState {
 					return song != null ? song.getFullArtist() : "";
 			case STRING_GENRE:
 				return song != null ? song.getGenre() : "";
+				case STRING_TABLE_NAME:
+					return song != null ? resource.getTablename() : "";
+				case STRING_TABLE_LEVEL:
+					return song != null ? resource.getTablelevel() : "";
 			}
 		}
 		return "";
@@ -644,7 +651,7 @@ public abstract class MainState {
 		path = p.resolve(path).toString();
 		path = path.substring(0, path.lastIndexOf('.'));
 
-		for(File f : new File[]{new File(path + ".wav"), new File(path + ".ogg"), new File(path + ".mp3")}) {
+		for(File f : new File[]{new File(path + ".wav"), new File(path + ".ogg"), new File(path + ".mp3"), new File(path + ".flac")}) {
 			if(f.exists()) {
 				String newpath = f.getPath();
 				String oldpath = soundmap.get(id);

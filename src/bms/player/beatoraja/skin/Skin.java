@@ -5,6 +5,9 @@ import bms.player.beatoraja.Resolution;
 import bms.player.beatoraja.ShaderManager;
 import bms.player.beatoraja.SkinConfig.Offset;
 import bms.player.beatoraja.play.SkinGauge;
+import bms.player.beatoraja.skin.SkinObject.SkinOffset;
+import bms.player.beatoraja.play.BMSPlayer;
+
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
 import com.badlogic.gdx.Gdx;
@@ -19,6 +22,7 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.IntArray;
 
 import java.util.*;
@@ -207,6 +211,11 @@ public class Skin {
 				obj.draw(renderer, time, state);
 			}
 		}
+		SkinOffset offsetAll = getOffsetAll(state);
+		Matrix4 transform = new Matrix4();
+		if(offsetAll != null) transform.set(width * offsetAll.x /100, height * offsetAll.y / 100, 0, 0, 0, 0, 0, (offsetAll.w + 100) / 100, (offsetAll.h + 100) / 100, 1);
+		else transform.set(0, 0, 0, 0, 0, 0, 0, 1, 1, 1);
+		sprite.setTransformMatrix(transform);
 	}
 
 	private final boolean isDraw(int[] opt, MainState state) {
@@ -460,6 +469,24 @@ public class Skin {
 				((SkinGauge)obj).setParts(parts);
 			}
 		}
+	}
+
+	public SkinOffset getOffsetAll(MainState state) {
+		SkinOffset offsetAll = null;
+		if(state instanceof BMSPlayer) {
+			switch(((BMSPlayer)state).getSkinType()) {
+			case PLAY_5KEYS:
+			case PLAY_7KEYS:
+			case PLAY_9KEYS:
+			case PLAY_10KEYS:
+			case PLAY_14KEYS:
+			case PLAY_24KEYS:
+			case PLAY_24KEYS_DOUBLE:
+				offsetAll = state.getOffsetValue(SkinProperty.OFFSET_ALL);
+				break;
+			}
+		}
+		return offsetAll;
 	}
 
 	/**
