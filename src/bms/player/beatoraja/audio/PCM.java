@@ -334,8 +334,12 @@ public class PCM {
 //		}
 
 		pcm.sample = new short[length];
-		System.arraycopy(this.sample, start, pcm.sample, 0, length);
-		return pcm;
+//		System.out.println(this.sample.length + " , " + start + ", " + pcm.sample.length + " , 0, " + length);
+		if(length > 0) {
+			System.arraycopy(this.sample, start, pcm.sample, 0, length);			
+			return pcm;
+		}
+		return null;
 	}
 
 	public InputStream getInputStream() {

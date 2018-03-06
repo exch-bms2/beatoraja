@@ -484,7 +484,7 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 					path = key.path;
 					try {
 						final PCM slicewav = wav.slice(key.start, key.duration);
-						return getKeySound(slicewav);
+						return slicewav != null ? getKeySound(slicewav) : null;
 						// System.out.println("WAV slicing - Name:"
 						// + name + " ID:" + note.getWav() +
 						// " start:" + note.getStarttime() +
