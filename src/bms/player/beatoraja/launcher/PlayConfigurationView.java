@@ -673,6 +673,24 @@ public class PlayConfigurationView implements Initializable {
 		tableurl.getItems().removeAll(tableurl.getSelectionModel().getSelectedItems());
 	}
     
+	public void moveTableURLUp() {
+		final int index = tableurl.getSelectionModel().getSelectedIndex();
+		if(index > 0) {
+			String table = tableurl.getSelectionModel().getSelectedItem();
+			tableurl.getItems().remove(index);
+			tableurl.getItems().add(index - 1, table);
+		}
+	}
+
+	public void moveTableURLDown() {
+		final int index = tableurl.getSelectionModel().getSelectedIndex();
+		if(index >= 0 && index < tableurl.getItems().size() - 1) {
+			String table = tableurl.getSelectionModel().getSelectedItem();
+			tableurl.getItems().remove(index);
+			tableurl.getItems().add(index + 1, table);
+		}
+	}
+
 	private PlayMode pc = null;
 
     @FXML

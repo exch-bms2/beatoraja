@@ -230,11 +230,23 @@
                                         <Insets top="5.0" />
                                     </HBox.margin>
                                 </ListView>
+                                <VBox prefHeight="167.0" prefWidth="40.0">
                                 <Button mnemonicParsing="false" onAction="#removeTableURL" prefHeight="28.0" prefWidth="30.0" text="%-">
-                                    <HBox.margin>
+                                        <VBox.margin>
+                                            <Insets left="10.0" top="10.0" />
+                                        </VBox.margin>
+                                    </Button>
+                                    <Button mnemonicParsing="false" onAction="#moveTableURLUp" prefHeight="28.0" prefWidth="30.0" text="↑">
+                                        <VBox.margin>
+                                            <Insets left="10.0" top="10.0" />
+                                        </VBox.margin>
+                                    </Button>
+                                    <Button mnemonicParsing="false" onAction="#moveTableURLDown" prefHeight="28.0" prefWidth="30.0" text="↓">
+                                        <VBox.margin>
                                         <Insets left="10.0" top="10.0" />
-                                    </HBox.margin>
+                                        </VBox.margin>
                                 </Button>
+                                </VBox>
                             </HBox>
                         </VBox>
                     </HBox>
