@@ -431,7 +431,7 @@ public class JSONSkinLoader extends SkinLoader{
 					}
 					for (JudgeGraph ggraph : sk.judgegraph) {
 						if (dst.id.equals(ggraph.id)) {
-							SkinNoteDistributionGraph st = new SkinNoteDistributionGraph(ggraph.type);
+							SkinNoteDistributionGraph st = new SkinNoteDistributionGraph(ggraph.type, ggraph.delay, ggraph.backTexOff, ggraph.orderReverse, ggraph.noGap);
 							obj = st;
 							break;
 						}
@@ -1176,6 +1176,10 @@ public class JSONSkinLoader extends SkinLoader{
 	public static class JudgeGraph {
 		public String id;
 		public int type;
+		public int backTexOff = 0;
+		public int delay = 500;
+		public int orderReverse = 0;
+		public int noGap = 0;
 	}
 
 	public static class NoteSet {
