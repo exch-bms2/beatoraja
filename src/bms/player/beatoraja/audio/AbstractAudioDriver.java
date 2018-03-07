@@ -137,7 +137,7 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 			try {
 				sound = new AudioElement(getKeySound(Paths.get(p)));
 				soundmap.put(p, sound.audio != null ? sound : null);
-			} catch (GdxRuntimeException e) {
+			} catch (Exception e) {
 				Logger.getGlobal().warning("音源読み込み失敗。" + e.getMessage());
 			}
 		}
