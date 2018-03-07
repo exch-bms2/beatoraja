@@ -3,6 +3,7 @@ package bms.player.beatoraja.audio;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.logging.Logger;
 
 import javazoom.jl.decoder.*;
@@ -12,9 +13,7 @@ import com.badlogic.gdx.utils.StreamUtils;
 import com.badlogic.gdx.utils.StreamUtils.OptimizedByteArrayOutputStream;
 
 import org.jflac.FLACDecoder;
-import org.jflac.PCMProcessor;
 import org.jflac.metadata.StreamInfo;
-import org.jflac.util.ByteData;
 
 /**
  * PCM音源処理用クラス
@@ -54,7 +53,54 @@ public class PCM {
 
 	}
 
-	public PCM(Path p) throws IOException {
+	public static PCM load(Path p) {
+		PCM pcm = new PCM();
+		try {
+			pcm.loadPCM(p);
+			return pcm;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	public static PCM load(String name) {
+		int index = name.lastIndexOf('.');
+		if(index >= 0) {
+			name = name.substring(0, index);			
+		}
+		final Path wavfile = Paths.get(name + ".wav");
+		if (Files.exists(wavfile)) {
+			PCM pcm = PCM.load(wavfile);
+			if(pcm != null) {
+				return pcm;
+			}
+		}
+		final Path flacfile = Paths.get(name + ".flac");
+		if (Files.exists(flacfile)) {
+			PCM pcm = PCM.load(flacfile);
+			if(pcm != null) {
+				return pcm;
+			}
+		}
+		final Path oggfile = Paths.get(name + ".ogg");
+		if (Files.exists(oggfile)) {
+			PCM pcm = PCM.load(oggfile);
+			if(pcm != null) {
+				return pcm;
+			}
+		}
+		final Path mp3file = Paths.get(name + ".mp3");
+		if (Files.exists(mp3file)) {
+			PCM pcm = PCM.load(mp3file);
+			if(pcm != null) {
+				return pcm;
+			}
+		}
+		return null;
+	}
+	
+	private void loadPCM(Path p) throws IOException {
 		// final long time = System.nanoTime();
 		byte[] pcm = null;
 		int bytes = 0;

@@ -1,6 +1,5 @@
 package bms.player.beatoraja.audio;
 
-import java.io.IOException;
 import java.nio.file.*;
 
 import com.portaudio.*;
@@ -87,42 +86,7 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 
 	@Override
 	protected PCM getKeySound(Path p) {
-		String name = p.toString();
-		name = name.substring(0, name.lastIndexOf('.'));
-		final Path wavfile = Paths.get(name + ".wav");
-		final Path oggfile = Paths.get(name + ".ogg");
-		final Path mp3file = Paths.get(name + ".mp3");
-		final Path flacfile = Paths.get(name + ".flac");
-
-		PCM wav = null;
-		if (wav == null && Files.exists(wavfile)) {
-			try {
-				wav = new PCM(wavfile);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		if (wav == null && Files.exists(oggfile)) {
-			try {
-				wav = new PCM(oggfile);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		if (wav == null && Files.exists(mp3file)) {
-			try {
-				wav = new PCM(mp3file);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		if (wav == null && Files.exists(flacfile)) {
-			try {
-				wav = new PCM(flacfile);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
+		PCM wav = PCM.load(p.toString());
 		
 		if (wav != null && wav.getSampleRate() != sampleRate) {
 			wav = wav.changeSampleRate(sampleRate);
@@ -174,7 +138,7 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 			for (MixerInput input : inputs) {
 				if (input.pos == -1) {
 					input.pcm = pcm;
-					input.sample = pcm.getSample();
+					input.sample = pcm.getSample();						
 					input.volume = volume;
 					input.pitch = pitch;
 					input.loop = loop;
@@ -222,7 +186,7 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 					for (MixerInput input : inputs) {
 						if (input.pos != -1) {
 							wav_l += ((float) input.sample[input.pos + input.start]) * input.volume / Short.MAX_VALUE;
-							wav_r += ((float) input.sample[input.pos+1 + input.start]) * input.volume / Short.MAX_VALUE;
+							wav_r += ((float) input.sample[input.pos+1 + input.start]) * input.volume / Short.MAX_VALUE;								
 							input.posf += gpitch * input.pitch;
 							int inc = (int)input.posf;
 							if (inc > 0) {
@@ -240,7 +204,7 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 			}
 			
 			try {
-				stream.write( buffer, buffer.length / 2);					
+				stream.write( buffer, buffer.length / 2);
 			} catch(Throwable e) {
 				e.printStackTrace();
 			}

@@ -46,25 +46,18 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 
 		if (Files.exists(wavfile)) {
 			try {
-				return Gdx.audio.newSound(new FileHandleStream("tempwav.wav") {
-					@Override
-					public InputStream read() {
-						try {
-							final PCM pcm = new PCM(wavfile);
-							return pcm.getInputStream();
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-						return null;
-					}
-
-					@Override
-					public OutputStream write(boolean overwrite) {
-						return null;
-					}
-				});
+				return Gdx.audio.newSound(new PCMHandleStream(wavfile));
 			} catch (GdxRuntimeException e) {
 				Logger.getGlobal().warning("音源(wav)ファイル読み込み失敗。" + e.getMessage());
+//				e.printStackTrace();
+			}
+		}
+		final Path flacfile = Paths.get(name + ".flac");
+		if (Files.exists(flacfile)) {
+			try {
+				return Gdx.audio.newSound(new PCMHandleStream(flacfile));
+			} catch (GdxRuntimeException e) {
+				Logger.getGlobal().warning("音源(flac)ファイル読み込み失敗。" + e.getMessage());
 //				e.printStackTrace();
 			}
 		}
@@ -84,31 +77,6 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 			} catch (GdxRuntimeException e) {
 				Logger.getGlobal().warning("音源(mp3)ファイル読み込み失敗。" + e.getMessage());
 				// e.printStackTrace();
-			}
-		}
-		final Path flacfile = Paths.get(name + ".flac");
-		if (Files.exists(flacfile)) {
-			try {
-				return Gdx.audio.newSound(new FileHandleStream("tempwav.wav") {
-					@Override
-					public InputStream read() {
-						try {
-							final PCM pcm = new PCM(flacfile);
-							return pcm.getInputStream();
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-						return null;
-					}
-
-					@Override
-					public OutputStream write(boolean overwrite) {
-						return null;
-					}
-				});
-			} catch (GdxRuntimeException e) {
-				Logger.getGlobal().warning("音源(flac)ファイル読み込み失敗。" + e.getMessage());
-//				e.printStackTrace();
 			}
 		}
 		return null;
@@ -231,5 +199,31 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 		public Sound sound;
 		public long id = -1;
 		public int channel = -1;
+	}
+	
+	private static class PCMHandleStream extends FileHandleStream {
+		
+		private final Path p;
+		
+		public PCMHandleStream(Path p) {
+			super("tempwav.wav");
+			this.p = p;
+		}
+		
+		@Override
+		public InputStream read() {
+			try {
+				PCM pcm = PCM.load(p);
+				return pcm.getInputStream();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			return null;
+		}
+
+		@Override
+		public OutputStream write(boolean overwrite) {
+			return null;
+		}
 	}
 }
