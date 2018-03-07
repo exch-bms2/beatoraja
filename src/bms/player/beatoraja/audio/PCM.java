@@ -27,37 +27,35 @@ public class PCM {
 	/**
 	 * チャンネル数
 	 */
-	private int channels;
+	public final int channels;
 	/**
 	 * 音源のサンプリングレート(Hz)
 	 */
-	private int sampleRate;
-	/**
-	 * PCMのタイプ
-	 */
-	private int type;
-	/**
-	 * サンプル当たりのビット数
-	 */
-	private int bitsPerSample;
+	public final int sampleRate;
 	/**
 	 * PCMデータ
 	 */
-	private short[] sample;
-	
-	private int start;
-	
-	private int len;
+	public final short[] sample;
+	/**
+	 * PCMデータ開始位置
+	 */
+	public final int start;
+	/**
+	 * PCMデータ長
+	 */	
+	public final int len;
 
-	private PCM() {
-
+	PCM(int channels, int sampleRate, int start, int len, short[] sample) {
+		this.channels = channels;
+		this.sampleRate = sampleRate;
+		this.start = start;
+		this.len = len;
+		this.sample = sample;
 	}
 
 	public static PCM load(Path p) {
-		PCM pcm = new PCM();
 		try {
-			pcm.loadPCM(p);
-			return pcm;
+			return loadPCM(p);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -100,33 +98,70 @@ public class PCM {
 		return null;
 	}
 	
-	private void loadPCM(Path p) throws IOException {
+	private static PCM loadPCM(Path p) throws IOException {
 		// final long time = System.nanoTime();
 		byte[] pcm = null;
+		int channels = 0;
+		int sampleRate = 0;
 		int bytes = 0;
-		
+		int bitsPerSample = 0;
+
 		final String name = p.toString().toLowerCase();
 		if (name.endsWith(".wav")) {
 			try (WavInputStream input = new WavInputStream(new BufferedInputStream(Files.newInputStream(p)))) {
-				switch(type) {
+				switch(input.type) {
 				case 1:
 				case 3:
+				{
 					OptimizedByteArrayOutputStream output = new OptimizedByteArrayOutputStream(input.dataRemaining);
 					StreamUtils.copyStream(input, output);
 					pcm = output.getBuffer();
 					bytes = output.size();
-					break;
+					
+					channels = input.channels;
+					sampleRate = input.sampleRate;
+					bitsPerSample = input.bitsPerSample;;
+					break;					
+				}
 				case 85:
+				{
 					try {
-						pcm = decodeMP3(new ByteArrayInputStream(
+						Bitstream bitstream = new Bitstream(new ByteArrayInputStream(
 								StreamUtils.copyStreamToByteArray(input, input.dataRemaining)));
+						ByteArrayOutputStream output = new ByteArrayOutputStream(4096);
+						MP3Decoder decoder = new MP3Decoder();
+						OutputBuffer outputBuffer = null;
+						while (true) {
+							Header header = bitstream.readFrame();
+							if (header == null)
+								break;
+							if (outputBuffer == null) {
+								channels = header.mode() == Header.SINGLE_CHANNEL ? 1 : 2;
+								outputBuffer = new OutputBuffer(channels, false);
+								decoder.setOutputBuffer(outputBuffer);
+								sampleRate = header.getSampleRate();
+							}
+							try {
+								decoder.decodeFrame(header, bitstream);
+							} catch (Exception ignored) {
+								// JLayer's decoder throws
+								// ArrayIndexOutOfBoundsException
+								// sometimes!?
+							}
+							bitstream.closeFrame();
+							output.write(outputBuffer.getBuffer(), 0, outputBuffer.reset());
+						}
+						bitstream.close();
+						pcm = output.toByteArray();
+						bitsPerSample = 16;
 						bytes = pcm.length;
 					} catch (BitstreamException e) {
 						e.printStackTrace();
 					}
-					break;
+					break;					
+				}
 				default:
-					throw new IOException(p.toString() + " unsupported WAV format ID : " + type);					
+					throw new IOException(p.toString() + " unsupported WAV format ID : " + input.type);					
 				}
 			} catch (Throwable e) {
 				Logger.getGlobal().warning("WAV処理中の例外 - file : " + p + " error : "+ e.getMessage());
@@ -157,7 +192,33 @@ public class PCM {
 			}
 		} else if (name.endsWith(".mp3")) {
 			try {
-				pcm = decodeMP3(new BufferedInputStream(Files.newInputStream(p)));
+				Bitstream bitstream = new Bitstream(new BufferedInputStream(Files.newInputStream(p)));
+				ByteArrayOutputStream output = new ByteArrayOutputStream(4096);
+				MP3Decoder decoder = new MP3Decoder();
+				OutputBuffer outputBuffer = null;
+				while (true) {
+					Header header = bitstream.readFrame();
+					if (header == null)
+						break;
+					if (outputBuffer == null) {
+						channels = header.mode() == Header.SINGLE_CHANNEL ? 1 : 2;
+						outputBuffer = new OutputBuffer(channels, false);
+						decoder.setOutputBuffer(outputBuffer);
+						sampleRate = header.getSampleRate();
+					}
+					try {
+						decoder.decodeFrame(header, bitstream);
+					} catch (Exception ignored) {
+						// JLayer's decoder throws
+						// ArrayIndexOutOfBoundsException
+						// sometimes!?
+					}
+					bitstream.closeFrame();
+					output.write(outputBuffer.getBuffer(), 0, outputBuffer.reset());
+				}
+				bitstream.close();
+				pcm = output.toByteArray();
+				bitsPerSample = 16;
 				bytes = pcm.length;
 			} catch (Throwable ex) {
 			}
@@ -210,18 +271,19 @@ public class PCM {
 //		 " - PCM generated : " + bitsPerSample + "bit " + sampleRate
 //		 + "Hz " + channels + "channel PCM type : " + type);
 
+		short[] sample = null;
 		switch(bitsPerSample) {
 		case 8:
-			this.sample = new short[bytes];
+			sample = new short[bytes];
 			for (int i = 0; i < sample.length; i++) {
-				this.sample[i] = (short) ((((short) pcm[i]) - 128) * 256);
+				sample[i] = (short) ((((short) pcm[i]) - 128) * 256);
 			}
 			break;
 		case 16:
 			// final long time = System.nanoTime();
-			this.sample = new short[bytes / 2];
+			sample = new short[bytes / 2];
 			for (int i = 0; i < sample.length; i++) {
-				this.sample[i] = (short) ((pcm[i * 2] & 0xff) | (pcm[i * 2 + 1] << 8));
+				sample[i] = (short) ((pcm[i * 2] & 0xff) | (pcm[i * 2 + 1] << 8));
 			}
 
 			// ShortBuffer shortbuf =
@@ -231,16 +293,16 @@ public class PCM {
 			// - time));
 			break;
 		case 24:
-			this.sample = new short[bytes / 3];
-			for (int i = 0; i < this.sample.length; i++) {
-				this.sample[i] = (short) ((pcm[i * 3 + 1] & 0xff) | (pcm[i * 3 + 2] << 8));
+			sample = new short[bytes / 3];
+			for (int i = 0; i < sample.length; i++) {
+				sample[i] = (short) ((pcm[i * 3 + 1] & 0xff) | (pcm[i * 3 + 2] << 8));
 			}
 			break;
 		case 32:
 			int pos = 0;
-			this.sample = new short[bytes / 4];
-			for (int i = 0; i < this.sample.length; i++) {
-				this.sample[i] = (short) (Float.intBitsToFloat((pcm[pos] & 0xff) | ((pcm[pos + 1] & 0xff) << 8)
+			sample = new short[bytes / 4];
+			for (int i = 0; i < sample.length; i++) {
+				sample[i] = (short) (Float.intBitsToFloat((pcm[pos] & 0xff) | ((pcm[pos + 1] & 0xff) << 8)
 						| ((pcm[pos + 2] & 0xff) << 16) | ((pcm[pos + 3] & 0xff) << 24)) * Short.MAX_VALUE);
 				pos += 4;
 			}
@@ -248,69 +310,10 @@ public class PCM {
 		default:
 			throw new IOException(p.toString() + " : " + bitsPerSample + " bits per samples isn't supported");			
 		}
-		start = 0;
-		len = sample.length;
+		
+		return new PCM(channels, sampleRate, 0, sample.length, sample);
 		// System.out.println(p.toString() + " : " + (System.nanoTime() -
 		// time));
-	}
-
-	private byte[] decodeMP3(InputStream is) throws BitstreamException {
-		Bitstream bitstream = new Bitstream(is);
-		ByteArrayOutputStream output = new ByteArrayOutputStream(4096);
-		MP3Decoder decoder = new MP3Decoder();
-		OutputBuffer outputBuffer = null;
-		while (true) {
-			Header header = bitstream.readFrame();
-			if (header == null)
-				break;
-			if (outputBuffer == null) {
-				channels = header.mode() == Header.SINGLE_CHANNEL ? 1 : 2;
-				outputBuffer = new OutputBuffer(channels, false);
-				decoder.setOutputBuffer(outputBuffer);
-				sampleRate = header.getSampleRate();
-				bitsPerSample = 16;
-			}
-			try {
-				decoder.decodeFrame(header, bitstream);
-			} catch (Exception ignored) {
-				// JLayer's decoder throws
-				// ArrayIndexOutOfBoundsException
-				// sometimes!?
-			}
-			bitstream.closeFrame();
-			output.write(outputBuffer.getBuffer(), 0, outputBuffer.reset());
-		}
-		bitstream.close();
-		return output.toByteArray();
-
-	}
-
-	public int getChannels() {
-		return channels;
-	}
-
-	public int getSampleRate() {
-		return sampleRate;
-	}
-
-	public int getType() {
-		return type;
-	}
-
-	public int getBitsPerSample() {
-		return bitsPerSample;
-	}
-
-	public short[] getSample() {
-		return sample;
-	}
-	
-	public int getStart() {
-		return start;
-	}
-
-	public int getLength() {
-		return len;
 	}
 
 	/**
@@ -321,29 +324,8 @@ public class PCM {
 	 * @return サンプリングレート変更後のPCM
 	 */
 	public PCM changeSampleRate(int sample) {
-		PCM pcm = new PCM();
-		pcm.channels = channels;
-		pcm.bitsPerSample = bitsPerSample;
-		pcm.sampleRate = sample;
-
-		pcm.sample = new short[(int) (((long) this.sample.length / channels) * sample / sampleRate) * channels];
-
-		for (long i = 0; i < pcm.sample.length / channels; i++) {
-			for (int j = 0; j < channels; j++) {
-				if ((i * sampleRate) % sample != 0
-						&& (int) ((i * sampleRate / sample + 1) * channels + j) < this.sample.length) {
-					pcm.sample[(int) (i * channels
-							+ j)] = (short) (this.sample[(int) ((i * sampleRate / sample) * channels + j)] / 2
-									+ this.sample[(int) ((i * sampleRate / sample + 1) * channels + j)] / 2);
-				} else {
-					pcm.sample[(int) (i * channels + j)] = this.sample[(int) ((i * sampleRate / sample) * channels
-							+ j)];
-				}
-			}
-		}
-		pcm.start = 0;
-		pcm.len = pcm.sample.length;
-		return pcm;
+		short[] samples = getSample(sample);
+		return new PCM(channels, sample, 0, samples.length, samples);
 	}
 
 	/**
@@ -354,9 +336,28 @@ public class PCM {
 	 * @return 再生速度を変更したPCM
 	 */
 	public PCM changeFrequency(float rate) {
-		PCM pcm = changeSampleRate((int) (sampleRate / rate));
-		pcm.sampleRate = sampleRate;
-		return pcm;
+		short[] samples = getSample((int) (sampleRate / rate));
+		return new PCM(channels, sampleRate, 0, samples.length, samples);
+	}
+	
+	private short[] getSample(int sample) {
+		short[] samples = new short[(int) (((long) this.sample.length / channels) * sample / sampleRate) * channels];
+
+		for (long i = 0; i < samples.length / channels; i++) {
+			for (int j = 0; j < channels; j++) {
+				if ((i * sampleRate) % sample != 0
+						&& (int) ((i * sampleRate / sample + 1) * channels + j) < this.sample.length) {
+					samples[(int) (i * channels
+							+ j)] = (short) (this.sample[(int) ((i * sampleRate / sample) * channels + j)] / 2
+									+ this.sample[(int) ((i * sampleRate / sample + 1) * channels + j)] / 2);
+				} else {
+					samples[(int) (i * channels + j)] = this.sample[(int) ((i * sampleRate / sample) * channels
+							+ j)];
+				}
+			}
+		}
+		
+		return samples;
 	}
 
 	/**
@@ -367,21 +368,14 @@ public class PCM {
 	 * @return チャンネル数を変更したPCM
 	 */
 	public PCM changeChannels(int channels) {
-		PCM pcm = new PCM();
-		pcm.channels = channels;
-		pcm.bitsPerSample = bitsPerSample;
-		pcm.sampleRate = sampleRate;
+		short[] samples = new short[this.sample.length * channels / this.channels];
 
-		pcm.sample = new short[this.sample.length * channels / this.channels];
-
-		for (long i = 0; i < pcm.sample.length / channels; i++) {
+		for (long i = 0; i < samples.length / channels; i++) {
 			for (int j = 0; j < channels; j++) {
-				pcm.sample[(int) (i * channels + j)] = this.sample[(int) (i * this.channels)];
+				samples[(int) (i * channels + j)] = this.sample[(int) (i * this.channels)];
 			}
 		}
-		pcm.start = 0;
-		pcm.len = pcm.sample.length;
-		return pcm;
+		return new PCM(channels, sampleRate, 0, samples.length, samples);
 	}
 
 	/**
@@ -394,11 +388,6 @@ public class PCM {
 	 * @return トリミングしたPCM
 	 */
 	public PCM slice(long starttime, long duration) {
-		PCM pcm = new PCM();
-		pcm.channels = channels;
-		pcm.bitsPerSample = bitsPerSample;
-		pcm.sampleRate = sampleRate;
-
 		if (duration == 0 || starttime + duration > ((long) this.sample.length) * 1000000 / (sampleRate * channels)) {
 			duration = Math.max(((long) this.sample.length) * 1000000 / (sampleRate * channels) - starttime, 0);
 		}
@@ -420,11 +409,7 @@ public class PCM {
 //		if(length != orglength) {
 //			Logger.getGlobal().info("終端の無音データ除外 - " + (orglength - length) + " samples");
 //		}
-
-		pcm.sample = this.sample;
-		pcm.start = start;
-		pcm.len = length;
-		return length > 0 ? pcm : null;
+		return length > 0 ? new PCM(channels, sampleRate, start, length, this.sample) : null;
 	}
 
 	public InputStream getInputStream() {
@@ -432,8 +417,18 @@ public class PCM {
 	}
 
 	/** @author Nathan Sweet */
-	private class WavInputStream extends FilterInputStream {
+	private static class WavInputStream extends FilterInputStream {
 		private int dataRemaining;
+		/**
+		 * PCMのタイプ
+		 */
+		private final int type;
+		private final int channels;
+		private final int sampleRate;
+		/**
+		 * 1サンプル当たりのビット数
+		 */
+		private final int bitsPerSample;		
 
 		WavInputStream(InputStream p) {
 			super(p);
@@ -512,8 +507,8 @@ public class PCM {
 		public WavFileInputStream(PCM pcm) {
 			header = new byte[44];
 
-			final int sampleRate = pcm.getSampleRate();
-			final int channels = pcm.getChannels();
+			final int sampleRate = pcm.sampleRate;
+			final int channels = pcm.channels;
 			this.pcm = pcm;
 			final long totalDataLen = pcm.len * 2 + 36;
 			final long bitrate = sampleRate * channels * 16;
