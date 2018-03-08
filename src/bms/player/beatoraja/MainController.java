@@ -793,19 +793,27 @@ public class MainController extends ApplicationAdapter {
 			} else if(currentState instanceof MusicDecide) {
 				// empty
 			} if(currentState instanceof BMSPlayer) {
-				builder.append("LEVEL");
-				builder.append(currentState.getNumberValue(NUMBER_PLAYLEVEL));
+				if(currentState.getTextValue(STRING_TABLE_NAME).length() > 0){
+					builder.append(currentState.getTextValue(STRING_TABLE_LEVEL));
+				}else{
+					builder.append("LEVEL");
+					builder.append(currentState.getNumberValue(NUMBER_PLAYLEVEL));
+				}
 				if(currentState.getTextValue(STRING_FULLTITLE).length() > 0) {
 					builder.append(" ");
 					builder.append(currentState.getTextValue(STRING_FULLTITLE));
 				}
 			} else if(currentState instanceof MusicResult || currentState instanceof CourseResult) {
 				if(currentState instanceof MusicResult) {
-					builder.append("LEVEL");
-					builder.append(currentState.getNumberValue(NUMBER_PLAYLEVEL));
-					builder.append(" ");
+					if(currentState.getTextValue(STRING_TABLE_NAME).length() > 0){
+						builder.append(currentState.getTextValue(STRING_TABLE_LEVEL));
+					}else{
+						builder.append("LEVEL");
+						builder.append(currentState.getNumberValue(NUMBER_PLAYLEVEL));
+					}
 				}
 				if(currentState.getTextValue(STRING_FULLTITLE).length() > 0) {
+					builder.append(" ");
 					builder.append(currentState.getTextValue(STRING_FULLTITLE));
 				}
 				builder.append(" ");
