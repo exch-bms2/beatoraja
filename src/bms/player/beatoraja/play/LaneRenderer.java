@@ -52,6 +52,8 @@ public class LaneRenderer {
 	private int fixhispeed;
 	private float basehispeed;
 
+	private float hispeedmargin = 0.25f;
+
 	private BMSModel model;
 	private TimeLine[] timelines;
 
@@ -183,6 +185,7 @@ public class LaneRenderer {
 		if (this.fixhispeed != PlayerConfig.FIX_HISPEED_OFF) {
 			basehispeed = hispeed;
 		}
+		this.hispeedmargin = playconfig.getHispeedMargin();
 	}
 
 	public int getFixHispeed() {
@@ -204,6 +207,14 @@ public class LaneRenderer {
 
 	public int getCurrentDuration() {
 		return currentduration;
+	}
+
+	public float getHispeedmargin() {
+		return hispeedmargin;
+	}
+
+	public void setHispeedmargin(float hispeedmargin) {
+		this.hispeedmargin = hispeedmargin;
 	}
 
 	public boolean isEnableLift() {
@@ -237,9 +248,9 @@ public class LaneRenderer {
 	public void changeHispeed(boolean b) {
 		float f = 0;
 		if (this.fixhispeed != PlayerConfig.FIX_HISPEED_OFF) {
-			f = basehispeed * 0.25f * (b ? 1 : -1);
+			f = basehispeed * hispeedmargin * (b ? 1 : -1);
 		} else {
-			f = 0.125f * (b ? 1 : -1);
+			f = hispeedmargin * (b ? 1 : -1);
 		}
 		if (hispeed + f > 0 && hispeed + f < 20) {
 			hispeed += f;

@@ -82,6 +82,7 @@ public class BMSPlayer extends MainState {
 	private int replayFixHispeed = FIX_HISPEED_MAINBPM;
 	private float replayHispeed = 1.0f;
 	private int replayDuration = 500;
+	private float replayHispeedmargin = 0.25f;
 	private float replayLanecover = 0.2f;
 	private boolean replayEnablelanecover = true;
 	private float replayLift = 0.1f;
@@ -294,6 +295,7 @@ public class BMSPlayer extends MainState {
 			config.setFixhispeed(HSReplay.fixhispeed);
 			getPlayConfig(config).setHispeed(HSReplay.hispeed);
 			getPlayConfig(config).setDuration(HSReplay.duration);
+			getPlayConfig(config).setHispeedMargin(HSReplay.hispeedmargin);
 			getPlayConfig(config).setLanecover(HSReplay.lanecover);
 			getPlayConfig(config).setEnablelanecover(HSReplay.enablelanecover);
 			getPlayConfig(config).setLift(HSReplay.lift);
@@ -882,6 +884,7 @@ public class BMSPlayer extends MainState {
 		replayFixHispeed = lanerender.getFixHispeed();
 		replayHispeed = lanerender.getHispeed();
 		replayDuration = lanerender.getGreenValue();
+		replayHispeedmargin = lanerender.getHispeedmargin();
 		replayLanecover = lanerender.getLanecover();
 		replayEnablelanecover = lanerender.isEnableLanecover();
 		replayLift = lanerender.getLiftRegion();
@@ -937,6 +940,7 @@ public class BMSPlayer extends MainState {
 		replay.fixhispeed = replayFixHispeed;
 		replay.hispeed = replayHispeed;
 		replay.duration = replayDuration;
+		replay.hispeedmargin = replayHispeedmargin;
 		replay.lanecover = replayLanecover;
 		replay.enablelanecover = replayEnablelanecover;
 		replay.lift = replayLift;

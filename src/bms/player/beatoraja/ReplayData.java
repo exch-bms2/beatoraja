@@ -68,6 +68,10 @@ public class ReplayData {
 	 */
 	public float hispeed = 1.0f;
 	/**
+	 * ハイスピード変化間隔
+	 */
+	public float hispeedmargin = 0.25f;
+	/**
 	 * デュレーション(ノーツ表示時間)
 	 */
 	public int duration = 500;

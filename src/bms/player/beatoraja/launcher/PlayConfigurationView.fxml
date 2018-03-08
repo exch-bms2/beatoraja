@@ -340,6 +340,12 @@
                             <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="0" max="99" min="-99" />
                         </valueFactory>
                     </Spinner>
+                    <Label text="%HISPEED_MARGIN" GridPane.columnIndex="2" GridPane.rowIndex="6" />
+                    <Spinner fx:id="hispeedmargin" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="6">
+                        <valueFactory>
+                            <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.01" initialValue="0.25" max="9.99" min="0.00" />
+                        </valueFactory>
+                    </Spinner>
                 </GridPane>
                 <GridPane fx:id="lr2configurationassist" prefHeight="48.0" prefWidth="632.0">
                     <columnConstraints>

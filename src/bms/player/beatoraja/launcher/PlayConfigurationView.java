@@ -133,6 +133,8 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private Spinner<Integer> gvalue;
 	@FXML
+	private Spinner<Double> hispeedmargin;
+	@FXML
 	private Spinner<Integer> inputduration;
 	@FXML
 	private Spinner<Integer> scrolldurationlow;
@@ -703,6 +705,7 @@ public class PlayConfigurationView implements Initializable {
 			PlayConfig conf = player.getPlayConfig(Mode.valueOf(pc.name()));
 			conf.setHispeed(getValue(hispeed).floatValue());
 			conf.setDuration(getValue(gvalue));
+			conf.setHispeedMargin(getValue(hispeedmargin).floatValue());
 			conf.setEnablelanecover(enableLanecover.isSelected());
 			conf.setLanecover(getValue(lanecover) / 1000f);
 			conf.setEnablelift(enableLift.isSelected());
@@ -712,6 +715,7 @@ public class PlayConfigurationView implements Initializable {
 		PlayConfig conf = player.getPlayConfig(Mode.valueOf(pc.name()));
 		hispeed.getValueFactory().setValue((double) conf.getHispeed());
 		gvalue.getValueFactory().setValue(conf.getDuration());
+		hispeedmargin.getValueFactory().setValue((double) conf.getHispeedMargin());
 		enableLanecover.setSelected(conf.isEnablelanecover());
 		lanecover.getValueFactory().setValue((int) (conf.getLanecover() * 1000));
 		enableLift.setSelected(conf.isEnablelift());
