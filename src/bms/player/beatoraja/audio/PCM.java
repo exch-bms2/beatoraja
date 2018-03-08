@@ -4,6 +4,20 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.logging.Logger;
+
+import org.jflac.FLACDecoder;
+import org.jflac.metadata.StreamInfo;
+
+import com.badlogic.gdx.backends.lwjgl.audio.OggInputStream;
+import com.badlogic.gdx.utils.StreamUtils;
+import com.badlogic.gdx.utils.StreamUtils.OptimizedByteArrayOutputStream;
+
+import javazoom.jl.decoder.Bitstream;
+import javazoom.jl.decoder.BitstreamException;
+import javazoom.jl.decoder.Header;
+import javazoom.jl.decoder.MP3Decoder;
+import javazoom.jl.decoder.OutputBuffer;
 
 /**
  * PCM音源処理用クラス
@@ -45,7 +59,14 @@ public abstract class PCM<T> {
 
 	public static PCM load(Path p) {
 		try {
-			return ShortPCM.loadPCM(p);
+			PCMLoader loader = new PCMLoader();
+			loader.loadPCM(p);
+			if(loader.bitsPerSample > 16) {
+				System.out.println("FLOAT");
+				return FloatPCM.loadPCM(loader);				
+			} else {
+				return ShortPCM.loadPCM(loader);
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -125,6 +146,264 @@ public abstract class PCM<T> {
 	 */
 	public abstract PCM<T> slice(long starttime, long duration);
 
-	public abstract InputStream getInputStream();
+	static class PCMLoader {
+		
+		byte[] pcm;
+		int channels = 0;
+		int sampleRate = 0;
+		int bytes = 0;
+		int bitsPerSample = 0;
+		
+		public PCMLoader() {
+			
+		};
+		
+		public byte[] loadPCM(Path p) throws IOException {
+			// final long time = System.nanoTime();
+			pcm = null;
 
+			final String name = p.toString().toLowerCase();
+			if (name.endsWith(".wav")) {
+				try (WavInputStream input = new WavInputStream(new BufferedInputStream(Files.newInputStream(p)))) {
+					switch(input.type) {
+					case 1:
+					case 3:
+					{
+						OptimizedByteArrayOutputStream output = new OptimizedByteArrayOutputStream(input.dataRemaining);
+						StreamUtils.copyStream(input, output);
+						pcm = output.getBuffer();
+						bytes = output.size();
+						
+						channels = input.channels;
+						sampleRate = input.sampleRate;
+						bitsPerSample = input.bitsPerSample;;
+						break;					
+					}
+					case 85:
+					{
+						try {
+							Bitstream bitstream = new Bitstream(new ByteArrayInputStream(
+									StreamUtils.copyStreamToByteArray(input, input.dataRemaining)));
+							ByteArrayOutputStream output = new ByteArrayOutputStream(4096);
+							MP3Decoder decoder = new MP3Decoder();
+							OutputBuffer outputBuffer = null;
+							while (true) {
+								Header header = bitstream.readFrame();
+								if (header == null)
+									break;
+								if (outputBuffer == null) {
+									channels = header.mode() == Header.SINGLE_CHANNEL ? 1 : 2;
+									outputBuffer = new OutputBuffer(channels, false);
+									decoder.setOutputBuffer(outputBuffer);
+									sampleRate = header.getSampleRate();
+								}
+								try {
+									decoder.decodeFrame(header, bitstream);
+								} catch (Exception ignored) {
+									// JLayer's decoder throws
+									// ArrayIndexOutOfBoundsException
+									// sometimes!?
+								}
+								bitstream.closeFrame();
+								output.write(outputBuffer.getBuffer(), 0, outputBuffer.reset());
+							}
+							bitstream.close();
+							pcm = output.toByteArray();
+							bitsPerSample = 16;
+							bytes = pcm.length;
+						} catch (BitstreamException e) {
+							e.printStackTrace();
+						}
+						break;					
+					}
+					default:
+						throw new IOException(p.toString() + " unsupported WAV format ID : " + input.type);					
+					}
+				} catch (Throwable e) {
+					Logger.getGlobal().warning("WAV処理中の例外 - file : " + p + " error : "+ e.getMessage());
+				}
+			} else if (name.endsWith(".ogg")) {
+				try (OggInputStream input = new OggInputStream(new BufferedInputStream(Files.newInputStream(p)))) {
+					// final long time = System.nanoTime();
+					// OptimizedByteArrayOutputStream output = new
+					// OptimizedByteArrayOutputStream(4096);
+					OptimizedByteArrayOutputStream output = new OptimizedByteArrayOutputStream(input.getLength() * 16);
+					byte[] buff = new byte[4096];
+					while (!input.atEnd()) {
+						int length = input.read(buff);
+						if (length == -1)
+							break;
+						output.write(buff, 0, length);
+					}
+
+					channels = input.getChannels();
+					sampleRate = input.getSampleRate();
+					bitsPerSample = 16;
+
+					pcm = output.getBuffer();
+					bytes = output.size();
+					// System.out.println(p.toString() + " : " + (System.nanoTime()
+					// - time));
+				} catch (Throwable ex) {
+				}
+			} else if (name.endsWith(".mp3")) {
+				try {
+					Bitstream bitstream = new Bitstream(new BufferedInputStream(Files.newInputStream(p)));
+					ByteArrayOutputStream output = new ByteArrayOutputStream(4096);
+					MP3Decoder decoder = new MP3Decoder();
+					OutputBuffer outputBuffer = null;
+					while (true) {
+						Header header = bitstream.readFrame();
+						if (header == null)
+							break;
+						if (outputBuffer == null) {
+							channels = header.mode() == Header.SINGLE_CHANNEL ? 1 : 2;
+							outputBuffer = new OutputBuffer(channels, false);
+							decoder.setOutputBuffer(outputBuffer);
+							sampleRate = header.getSampleRate();
+						}
+						try {
+							decoder.decodeFrame(header, bitstream);
+						} catch (Exception ignored) {
+							// JLayer's decoder throws
+							// ArrayIndexOutOfBoundsException
+							// sometimes!?
+						}
+						bitstream.closeFrame();
+						output.write(outputBuffer.getBuffer(), 0, outputBuffer.reset());
+					}
+					bitstream.close();
+					pcm = output.toByteArray();
+					bitsPerSample = 16;
+					bytes = pcm.length;
+				} catch (Throwable ex) {
+				}
+			} else if (name.endsWith(".flac")) {
+				try {
+					FLACDecoder input = new FLACDecoder(new BufferedInputStream(Files.newInputStream(p)));
+					input.readMetadata();
+					StreamInfo info = input.getStreamInfo();
+					
+					channels = info.getChannels();
+					sampleRate = info.getSampleRate();
+					bitsPerSample = info.getBitsPerSample();
+					
+					OptimizedByteArrayOutputStream output = new OptimizedByteArrayOutputStream((int)info.getTotalSamples() * 16);
+					input.addPCMProcessor(new FlacProcessor(output));
+					
+					input.decodeFrames();
+					
+					pcm = output.getBuffer();
+					bytes = output.size();
+				} catch (Throwable ex) {
+					ex.printStackTrace();
+				}
+			}
+
+			if(pcm == null) {
+				throw new IOException(p.toString() + " : can't convert to PCM");			
+			}		
+			bytes = bytes - (bytes % (channels > 1 ? bitsPerSample / 4 : bitsPerSample / 8));
+//			final int orgbytes = bytes;
+			while(bytes > channels * bitsPerSample / 8) {
+				boolean zero = true;
+				for(int i = 0;i < channels * bitsPerSample / 8;i++){
+					zero &= (pcm[bytes - i - 1] == 0x00);
+				}
+				if(zero) {
+					bytes -= channels * bitsPerSample / 8;
+				} else {
+					break;
+				}
+			}
+//			if(bytes != orgbytes) {
+//				Logger.getGlobal().info("終端の無音データ除外 - " + p.getFileName().toString() + " : " + (orgbytes - bytes) + " bytes");
+//			}
+			if(bytes <= channels * bitsPerSample / 8) {
+				throw new IOException(p.toString() + " : 0 samples");			
+			}
+			return pcm;
+		}
+	}
+	
+	/** @author Nathan Sweet */
+	private static class WavInputStream extends FilterInputStream {
+		private int dataRemaining;
+		/**
+		 * PCMのタイプ
+		 */
+		private final int type;
+		private final int channels;
+		private final int sampleRate;
+		/**
+		 * 1サンプル当たりのビット数
+		 */
+		private final int bitsPerSample;		
+
+		WavInputStream(InputStream p) {
+			super(p);
+			try {
+				if (read() != 'R' || read() != 'I' || read() != 'F' || read() != 'F')
+					throw new RuntimeException("RIFF header not found: " + p.toString());
+
+				skipFully(4);
+
+				if (read() != 'W' || read() != 'A' || read() != 'V' || read() != 'E')
+					throw new RuntimeException("Invalid wave file header: " + p.toString());
+
+				int fmtChunkLength = seekToChunk('f', 'm', 't', ' ');
+
+				type = read() & 0xff | (read() & 0xff) << 8;
+
+				channels = read() & 0xff | (read() & 0xff) << 8;
+
+				sampleRate = read() & 0xff | (read() & 0xff) << 8 | (read() & 0xff) << 16 | (read() & 0xff) << 24;
+
+				skipFully(6);
+
+				bitsPerSample = read() & 0xff | (read() & 0xff) << 8;
+
+				skipFully(fmtChunkLength - 16);
+
+				dataRemaining = seekToChunk('d', 'a', 't', 'a');
+			} catch (Throwable ex) {
+				StreamUtils.closeQuietly(this);
+				throw new RuntimeException("Error reading WAV file: " + p.toString(), ex);
+			}
+		}
+
+		private int seekToChunk(char c1, char c2, char c3, char c4) throws IOException {
+			while (true) {
+				boolean found = read() == c1;
+				found &= read() == c2;
+				found &= read() == c3;
+				found &= read() == c4;
+				int chunkLength = read() & 0xff | (read() & 0xff) << 8 | (read() & 0xff) << 16 | (read() & 0xff) << 24;
+				if (chunkLength == -1)
+					throw new IOException("Chunk not found: " + c1 + c2 + c3 + c4);
+				if (found)
+					return chunkLength;
+				skipFully(chunkLength);
+			}
+		}
+
+		private void skipFully(int count) throws IOException {
+			while (count > 0) {
+				long skipped = in.skip(count);
+				if (skipped <= 0)
+					throw new EOFException("Unable to skip.");
+				count -= skipped;
+			}
+		}
+
+		public int read(byte[] buffer) throws IOException {
+			if (dataRemaining == 0)
+				return -1;
+			int length = Math.min(super.read(buffer), dataRemaining);
+			if (length == -1)
+				return -1;
+			dataRemaining -= length;
+			return length;
+		}
+	}
 }
