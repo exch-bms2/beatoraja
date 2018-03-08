@@ -602,6 +602,7 @@ public class PlayConfigurationView implements Initializable {
 			}
 			if (unique) {
 				bmsroot.getItems().add(f.getPath());
+				loadDiffBMS();
 			}
 		}
 	}
@@ -630,6 +631,7 @@ public class PlayConfigurationView implements Initializable {
 					}
 					if (unique) {
 						bmsroot.getItems().add(f.getPath());
+						loadDiffBMS();
 					}
 				}
 			}
