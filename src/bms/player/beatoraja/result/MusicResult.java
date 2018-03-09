@@ -267,6 +267,8 @@ public class MusicResult extends MainState {
 				resource.getPlayerConfig().getLnmode());
 		if (oldsc != null) {
 			oldscore = oldsc;
+		}else{
+			oldscore = new IRScoreData();
 		}
 
 		getScoreDataProperty().setTargetScore(oldscore.getExscore(), resource.getRivalScoreData(), resource.getBMSModel().getTotalNotes());
