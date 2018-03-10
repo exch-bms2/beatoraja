@@ -96,6 +96,8 @@ public class MusicSelector extends MainState {
 
 	private PlayMode play = null;
 
+	private PixmapResourcePool banners;
+
 	public MusicSelector(MainController main, boolean songUpdated) {
 		super(main);
 		this.config = main.getPlayerResource().getPlayerConfig();
@@ -178,6 +180,7 @@ public class MusicSelector extends MainState {
 		}
 
 		bar = new BarRenderer(this);
+		banners = new PixmapResourcePool(main.getConfig().getBannerPixmapGen());
 		musicinput = new MusicSelectInputProcessor(this);
 
 		if (!songUpdated && main.getPlayerResource().getConfig().isUpdatesong()) {
@@ -299,6 +302,7 @@ public class MusicSelector extends MainState {
 						}
 						preview.stop();
 						main.changeState(MainController.STATE_DECIDE);
+						banners.disposeOld();
 					}
 				} else {
 	                execute(MusicSelectCommand.OPEN_DOWNLOAD_SITE);
@@ -322,6 +326,7 @@ public class MusicSelector extends MainState {
 						if(resource.nextSong()) {
 							preview.stop();
 							main.changeState(MainController.STATE_DECIDE);
+							banners.disposeOld();
 						}
 					}
 				}
@@ -416,6 +421,7 @@ public class MusicSelector extends MainState {
 				resource.setCoursetitle(bar.getSelected().getTitle());
 				resource.setBMSFile(files.get(0), mode);
 				main.changeState(MainController.STATE_DECIDE);
+				banners.disposeOld();
 			} else {
 				Logger.getGlobal().info("段位の楽曲が揃っていません");
 			}
@@ -435,6 +441,7 @@ public class MusicSelector extends MainState {
 	public void dispose() {
 		super.dispose();
 		bar.dispose();
+		banners.dispose();
 		if (titlefont != null) {
 			titlefont.dispose();
 			titlefont = null;
@@ -891,6 +898,10 @@ public class MusicSelector extends MainState {
 
 	public BarRenderer getBarRender() {
 		return bar;
+	}
+	
+	public PixmapResourcePool getBannerResource() {
+		return banners;
 	}
 
 	public void selectedBarMoved() {

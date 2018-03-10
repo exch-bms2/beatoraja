@@ -66,8 +66,6 @@ public class BarRenderer {
 
 	private final int SEARCHBAR_MAXCOUNT = 10;
 
-	private PixmapResourcePool banners = new PixmapResourcePool();
-
 	private int durationlow = 300;
 	private int durationhigh = 50;
 	/**
@@ -764,17 +762,6 @@ public class BarRenderer {
 //			}
 //		}
 //		cda.write("default", course);
-
-		banners.dispose();
-	}
-
-	private void setBanner(SongBar songbar) {
-		SongData song = songbar.getSongData();
-		Path bannerfile = Paths.get(song.getPath()).getParent().resolve(song.getBanner());
-		// System.out.println(bannerfile.getPath());
-		if (song.getBanner().length() > 0 && Files.exists(bannerfile)) {
-			songbar.setBanner(banners.get(bannerfile.toString()));
-		}
 	}
 
 	/**
@@ -851,7 +838,13 @@ public class BarRenderer {
 			}
 			for (Bar bar : bars) {
 				if (bar instanceof SongBar && ((SongBar) bar).existsSong()) {
-					setBanner((SongBar) bar);
+					final SongBar songbar = (SongBar) bar;
+					SongData song = songbar.getSongData();
+					Path bannerfile = Paths.get(song.getPath()).getParent().resolve(song.getBanner());
+					// System.out.println(bannerfile.getPath());
+					if (song.getBanner().length() > 0 && Files.exists(bannerfile)) {
+						songbar.setBanner(select.getBannerResource().get(bannerfile.toString()));
+					}
 				}
 				if (stop) {
 					break;
