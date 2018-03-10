@@ -180,6 +180,8 @@ public class CourseResult extends MainState {
 				config.getLnmode(), random, resource.getConstraint());
 		if (score != null) {
 			oldscore = score;
+		}else{
+			oldscore = new IRScoreData();
 		}
 
 		getScoreDataProperty().setTargetScore(oldscore.getExscore(), resource.getRivalScoreData(), resource.getBMSModel().getTotalNotes());
