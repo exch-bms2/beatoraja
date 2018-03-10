@@ -36,7 +36,16 @@ public class SkinNoteDistributionGraph extends SkinObject {
 					Color.valueOf("004488"), Color.valueOf("002244"), Color.valueOf("ff8800"), Color.valueOf("cc6600"),
 					Color.valueOf("884400"), Color.valueOf("442200") } };
 
-	private final Color[] graphcolor;
+	private static final Color[][] pmsGraphColor = {
+					{ Color.valueOf("44ff44"), Color.valueOf("228822"), Color.valueOf("ff4444"), Color.valueOf("4444ff"), Color.valueOf("222288"), Color.valueOf("cccccc"),
+							Color.valueOf("880000") },
+					{ Color.valueOf("555555"), Color.valueOf("ff5eb0"), Color.valueOf("ffbe32"), Color.valueOf("dc463c"),
+							Color.valueOf("6cc6ff"), Color.valueOf("6cc6ff") },
+					{ Color.valueOf("555555"), Color.valueOf("ff5eb0"), Color.valueOf("0088ff"), Color.valueOf("0066cc"),
+							Color.valueOf("004488"), Color.valueOf("002244"), Color.valueOf("ff8800"), Color.valueOf("cc6600"),
+							Color.valueOf("884400"), Color.valueOf("442200") } };
+
+	private Color[] graphcolor;
 
 	private int max = 20;
 
@@ -46,15 +55,22 @@ public class SkinNoteDistributionGraph extends SkinObject {
 	public static final int TYPE_JUDGE = 1;
 	public static final int TYPE_EARLYLATE = 2;
 
+	private boolean isBackTexOff = false;
 	private int delay = 500;
+	private boolean isOrderReverse = false;
+	private boolean isNoGap = false;
 
 	public SkinNoteDistributionGraph() {
-		this(TYPE_NORMAL);
+		this(TYPE_NORMAL, 500, 0, 0, 0);
 	}
 
-	public SkinNoteDistributionGraph(int type) {
+	public SkinNoteDistributionGraph(int type, int delay, int backTexOff, int orderReverse, int noGap) {
 		this.type = type;
 		graphcolor = JGRAPH[type];
+		this.isBackTexOff = backTexOff == 1 ? true : false;
+		this.delay = delay;
+		this.isOrderReverse = orderReverse == 1 ? true : false;
+		this.isNoGap = noGap == 1 ? true : false;
 
 		Pixmap bp = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
 		bp.drawPixel(0, 0, Color.toIntBits(255, 128, 255, 128));
@@ -81,6 +97,10 @@ public class SkinNoteDistributionGraph extends SkinObject {
 		
 		final SongData song = state.main.getPlayerResource().getSongdata();
 		final BMSModel model = song != null ? song.getBMSModel() : null;
+
+		if(type > 0 && model != null && model.getMode() == Mode.POPN_9K && graphcolor != pmsGraphColor[type]) {
+			graphcolor = pmsGraphColor[type];
+		}
 		if(song != current || (this.model == null && model != null)) {
 			current = song;
 			this.model = model;
@@ -93,6 +113,9 @@ public class SkinNoteDistributionGraph extends SkinObject {
 		if (shapetex == null) {
 			updateGraph(model);
 		}			
+		if(model != null && state instanceof BMSPlayer) {
+			updateGraph(model);
+		}
 
 		draw(sprite, backtex, r.x, r.y + r.height, r.width, -r.height);
 		final float render = time >= delay ? 1.0f : (float) time / delay;
@@ -212,22 +235,24 @@ public class SkinNoteDistributionGraph extends SkinObject {
 		}
 		
 		Pixmap shape = new Pixmap(data.length * 5, max * 5, Pixmap.Format.RGBA8888);
-		shape.setColor(0, 0, 0, 0.8f);
-		shape.fill();
+		if(!isBackTexOff) {
+			shape.setColor(0, 0, 0, 0.8f);
+			shape.fill();
 
-		for (int i = 10; i < max; i += 10) {
-			shape.setColor(0.007f * i, 0.007f * i, 0, 1.0f);
-			shape.fillRectangle(0, i * 5, data.length * 5, 50);
-		}
+			for (int i = 10; i < max; i += 10) {
+				shape.setColor(0.007f * i, 0.007f * i, 0, 1.0f);
+				shape.fillRectangle(0, i * 5, data.length * 5, 50);
+			}
 
-		for (int i = 0; i < data.length; i++) {
-			// x軸補助線描画
-			if (i % 60 == 0) {
-				shape.setColor(Color.valueOf("444444"));
-				shape.drawLine(i * 5, 0, i * 5, max * 5);
-			} else if (i % 10 == 0) {
-				shape.setColor(Color.valueOf("222222"));
-				shape.drawLine(i * 5, 0, i * 5, max * 5);
+			for (int i = 0; i < data.length; i++) {
+				// x軸補助線描画
+				if (i % 60 == 0) {
+					shape.setColor(Color.valueOf("444444"));
+					shape.drawLine(i * 5, 0, i * 5, max * 5);
+				} else if (i % 10 == 0) {
+					shape.setColor(Color.valueOf("222222"));
+					shape.drawLine(i * 5, 0, i * 5, max * 5);
+				}
 			}
 		}
 		backtex = new TextureRegion(new Texture(shape));
@@ -236,18 +261,35 @@ public class SkinNoteDistributionGraph extends SkinObject {
 		shape = new Pixmap(data.length * 5, max * 5, Pixmap.Format.RGBA8888);
 		for (int i = 0; i < data.length; i++) {
 			int[] n = data[i];
-			for (int j = 0, k = n[0], index = 0; j < max && index < graphcolor.length;) {
-				if (k > 0) {
-					k--;
-					shape.setColor(graphcolor[index]);
-					shape.fillRectangle(i * 5, j * 5, 4, 4);
-					j++;
-				} else {
-					index++;
-					if (index == graphcolor.length) {
-						break;
+			if(!isOrderReverse) {
+				for (int j = 0, k = n[0], index = 0; j < max && index < graphcolor.length;) {
+					if (k > 0) {
+						k--;
+						shape.setColor(graphcolor[index]);
+						shape.fillRectangle(i * 5, j * 5, 4, 4 + (isNoGap ? 1 : 0));
+						j++;
+					} else {
+						index++;
+						if (index == graphcolor.length) {
+							break;
+						}
+						k = n[index];
 					}
-					k = n[index];
+				}
+			} else {
+				for (int j = 0, k = n[n.length - 1], index = n.length - 1; j < max && index < graphcolor.length;) {
+					if (k > 0) {
+						k--;
+						shape.setColor(graphcolor[index]);
+						shape.fillRectangle(i * 5, j * 5, 4, 4 + (isNoGap ? 1 : 0));
+						j++;
+					} else {
+						index--;
+						if (index < 0) {
+							break;
+						}
+						k = n[index];
+					}
 				}
 			}
 		}

@@ -16,6 +16,7 @@ public class TableData {
 	 * 難易度表名
 	 */
 	private String name = "";
+	private String tag = "";
 	
 	private TableFolder[] folder = new TableFolder[0];
 	
@@ -53,10 +54,19 @@ public class TableData {
 		this.url = url;
 	}
 
+	public String getTag() {
+		return tag;
+	}
+
+	public void setTag(String tag) {
+		this.tag = tag;
+	}
+
 	public static class TableFolder {
 
 		private String name;
 		private SongData[] songs = new SongData[0];
+		private String level;
 
 		public String getName() {
 			return name;
@@ -72,6 +82,14 @@ public class TableData {
 
 		public void setSong(SongData[] songs) {
 			this.songs = songs;
+		}
+
+		public String getLevel() {
+			return level;
+		}
+
+		public void setLevel(String level) {
+			this.level = level;
 		}
 	}
 

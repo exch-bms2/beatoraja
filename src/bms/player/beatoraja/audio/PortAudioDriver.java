@@ -1,6 +1,5 @@
 package bms.player.beatoraja.audio;
 
-import java.io.IOException;
 import java.nio.file.*;
 
 import com.portaudio.*;
@@ -87,47 +86,12 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 
 	@Override
 	protected PCM getKeySound(Path p) {
-		String name = p.toString();
-		name = name.substring(0, name.lastIndexOf('.'));
-		final Path wavfile = Paths.get(name + ".wav");
-		final Path oggfile = Paths.get(name + ".ogg");
-		final Path mp3file = Paths.get(name + ".mp3");
-		final Path flacfile = Paths.get(name + ".flac");
-
-		PCM wav = null;
-		if (wav == null && Files.exists(wavfile)) {
-			try {
-				wav = new PCM(wavfile);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		if (wav == null && Files.exists(oggfile)) {
-			try {
-				wav = new PCM(oggfile);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		if (wav == null && Files.exists(mp3file)) {
-			try {
-				wav = new PCM(mp3file);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		if (wav == null && Files.exists(flacfile)) {
-			try {
-				wav = new PCM(flacfile);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
+		PCM wav = PCM.load(p.toString());
 		
-		if (wav != null && wav.getSampleRate() != sampleRate) {
+		if (wav != null && wav.sampleRate != sampleRate) {
 			wav = wav.changeSampleRate(sampleRate);
 		}
-		if (wav != null && wav.getChannels() != 2) {
+		if (wav != null && wav.channels != 2) {
 			wav = wav.changeChannels(2);
 		}
 
@@ -136,10 +100,10 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 
 	@Override
 	protected PCM getKeySound(PCM pcm) {
-		if (pcm.getSampleRate() != sampleRate) {
+		if (pcm.sampleRate != sampleRate) {
 			pcm = pcm.changeSampleRate(sampleRate);
 		}
-		if (pcm.getChannels() != 2) {
+		if (pcm.channels != 2) {
 			pcm = pcm.changeChannels(2);
 		}
 		return pcm;
@@ -174,15 +138,12 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 			for (MixerInput input : inputs) {
 				if (input.pos == -1) {
 					input.pcm = pcm;
-					input.sample = pcm.getSample();
 					input.volume = volume;
 					input.pitch = pitch;
 					input.loop = loop;
 					input.id = idcount++;
 					input.channel = channel;
 					input.pos = 0;
-					input.start = pcm.getStart();
-					input.len = pcm.getLength();
 					return input.id;
 				}
 			}
@@ -221,15 +182,22 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 					float wav_r = 0;
 					for (MixerInput input : inputs) {
 						if (input.pos != -1) {
-							wav_l += ((float) input.sample[input.pos + input.start]) * input.volume / Short.MAX_VALUE;
-							wav_r += ((float) input.sample[input.pos+1 + input.start]) * input.volume / Short.MAX_VALUE;
+							if(input.pcm instanceof FloatPCM) {
+								final float[] sample = (float[]) input.pcm.sample;
+								wav_l += sample[input.pos + input.pcm.start] * input.volume;
+								wav_r += sample[input.pos+1 + input.pcm.start] * input.volume;																
+							} else if(input.pcm instanceof ShortPCM) {
+								final short[] sample = (short[]) input.pcm.sample;
+								wav_l += ((float) sample[input.pos + input.pcm.start]) * input.volume / Short.MAX_VALUE;
+								wav_r += ((float) sample[input.pos+1 + input.pcm.start]) * input.volume / Short.MAX_VALUE;																
+							}
 							input.posf += gpitch * input.pitch;
 							int inc = (int)input.posf;
 							if (inc > 0) {
 								input.pos += 2 * inc;
 								input.posf -= (float)inc;
 							}
-							if (input.pos >= input.len) {
+							if (input.pos >= input.pcm.len) {
 								input.pos = input.loop ? 0 : -1;
 							}
 						}
@@ -240,7 +208,7 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 			}
 			
 			try {
-				stream.write( buffer, buffer.length / 2);					
+				stream.write( buffer, buffer.length / 2);
 			} catch(Throwable e) {
 				e.printStackTrace();
 			}
@@ -266,9 +234,6 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 
 	static class MixerInput {
 		public PCM pcm;
-		public short[] sample = new short[0];
-		public int start;
-		public int len;
 		public float volume;
 		public float pitch;
 		public int pos = -1;

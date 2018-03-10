@@ -137,7 +137,7 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 			try {
 				sound = new AudioElement(getKeySound(Paths.get(p)));
 				soundmap.put(p, sound.audio != null ? sound : null);
-			} catch (GdxRuntimeException e) {
+			} catch (Exception e) {
 				Logger.getGlobal().warning("音源読み込み失敗。" + e.getMessage());
 			}
 		}
@@ -453,31 +453,7 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 				return getKeySound(Paths.get(key.path));
 			} else {
 				if (wav == null) {
-					String name = key.path.substring(0, key.path.lastIndexOf('.'));
-					final Path wavfile = Paths.get(name + ".wav");
-					final Path oggfile = Paths.get(name + ".ogg");
-					final Path mp3file = Paths.get(name + ".mp3");
-					if (wav == null && Files.exists(wavfile)) {
-						try {
-							wav = new PCM(wavfile);
-						} catch (Throwable e) {
-							e.printStackTrace();
-						}
-					}
-					if (wav == null && Files.exists(oggfile)) {
-						try {
-							wav = new PCM(oggfile);
-						} catch (Throwable e) {
-							e.printStackTrace();
-						}
-					}
-					if (wav == null && Files.exists(mp3file)) {
-						try {
-							wav = new PCM(mp3file);
-						} catch (Throwable e) {
-							e.printStackTrace();
-						}
-					}
+					wav = PCM.load(key.path);
 				}
 
 				if (wav != null) {
