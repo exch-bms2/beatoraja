@@ -47,7 +47,6 @@ public class MusicSelectInputProcessor {
         final PlayerConfig config = resource.getPlayerConfig();
         final BarRenderer bar = select.getBarRender();
         final Bar current = bar.getSelected();
-        final long nowtime = main.getNowTime();
 
         boolean[] numberstate = input.getNumberState();
         long[] numtime = input.getNumberTime();
@@ -219,38 +218,20 @@ public class MusicSelectInputProcessor {
             bar.resetInput();
             // show detail option
             select.setPanelState(3);
-            PlayConfig pc = null;
-            if (current instanceof SongBar && ((SongBar)current).existsSong()) {
-                SongBar song = (SongBar) current;
-                pc = config.getPlayConfig(song.getSongData().getMode());
-            }
             if (property.isPressed(keystate, keytime, BGA_DOWN, true)) {
-                resource.getConfig().setBga((resource.getConfig().getBga() + 1) % 3);
-                select.play(SOUND_CHANGEOPTION);
+                select.execute(MusicSelectCommand.CHANGE_BGA_SHOW);
             }
             if (property.isPressed(keystate, keytime, DURATION_DOWN, true)) {
-                if (pc != null && pc.getDuration() > 1) {
-                    pc.setDuration(pc.getDuration() - 1);
-                    select.play(SOUND_CHANGEOPTION);
-                }
+                select.execute(MusicSelectCommand.DURATION_DOWN);
             }
             if (property.isPressed(keystate, keytime, JUDGETIMING_DOWN, true)) {
-                if (config.getJudgetiming() > -99) {
-                    config.setJudgetiming(config.getJudgetiming() - 1);
-                    select.play(SOUND_CHANGEOPTION);
-                }
+                select.execute(MusicSelectCommand.JUDGETIMING_DOWN);
             }
             if (property.isPressed(keystate, keytime, DURATION_UP, true)) {
-                if (pc != null && pc.getDuration() < 2000) {
-                    pc.setDuration(pc.getDuration() + 1);
-                    select.play(SOUND_CHANGEOPTION);
-                }
+                select.execute(MusicSelectCommand.DURATION_UP);
             }
             if (property.isPressed(keystate, keytime, JUDGETIMING_UP, true)) {
-                if (config.getJudgetiming() < 99) {
-                    config.setJudgetiming(config.getJudgetiming() + 1);
-                    select.play(SOUND_CHANGEOPTION);
-                }
+                select.execute(MusicSelectCommand.JUDGETIMING_UP);
             }
         } else {
             bar.input();
@@ -323,7 +304,7 @@ public class MusicSelectInputProcessor {
         // update folder
         if (input.getFunctionstate()[1] && input.getFunctiontime()[1] != 0) {
             input.getFunctiontime()[1] = 0;
-            select.updateSong(current);
+            select.execute(MusicSelectCommand.UPDATE_FOLDER);
         }
         // open explorer with selected song
         if (input.getFunctionstate()[2] && input.getFunctiontime()[2] != 0) {

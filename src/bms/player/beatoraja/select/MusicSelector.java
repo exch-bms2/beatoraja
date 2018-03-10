@@ -2,8 +2,6 @@ package bms.player.beatoraja.select;
 
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
-import java.awt.Desktop;
-import java.net.URI;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -97,7 +95,6 @@ public class MusicSelector extends MainState {
 	public static final int SOUND_CHANGEOPTION = 4;
 
 	private PlayMode play = null;
-	private boolean exit = false;
 
 	public MusicSelector(MainController main, boolean songUpdated) {
 		super(main);
@@ -304,22 +301,7 @@ public class MusicSelector extends MainState {
 						main.changeState(MainController.STATE_DECIDE);
 					}
 				} else {
-					if (song.getUrl() != null) {
-						try {
-							URI uri = new URI(song.getUrl());
-							Desktop.getDesktop().browse(uri);
-						} catch (Throwable e) {
-							e.printStackTrace();
-						}
-					}
-					if (song.getAppendurl() != null) {
-						try {
-							URI uri = new URI(song.getAppendurl());
-							Desktop.getDesktop().browse(uri);
-						} catch (Throwable e) {
-							e.printStackTrace();
-						}
-					}
+	                execute(MusicSelectCommand.OPEN_DOWNLOAD_SITE);
 				}
 			} else if (current instanceof GradeBar) {
 				if (play == PlayMode.PRACTICE) {
@@ -897,6 +879,9 @@ public class MusicSelector extends MainState {
 		case BUTTON_HSFIX:
 			execute(MusicSelectCommand.NEXT_HSFIX);
 			break;
+		case BUTTON_BGA:
+			execute(MusicSelectCommand.CHANGE_BGA_SHOW);
+			break;
 		}
 	}
 
@@ -906,14 +891,6 @@ public class MusicSelector extends MainState {
 
 	public BarRenderer getBarRender() {
 		return bar;
-	}
-
-	public void updateSong(Bar selected) {
-		if(selected instanceof FolderBar) {
-			main.updateSong(((FolderBar) selected).getFolderData().getPath());
-		} else if(selected instanceof TableBar) {
-			main.updateTable((TableBar) selected);
-		}
 	}
 
 	public void selectedBarMoved() {
