@@ -27,6 +27,11 @@ public class PlayConfig {
 	private int duration = 500;
 
 	/**
+	 * ハイスピード変化間隔
+	 */
+	public float hispeedmargin = 0.25f;
+
+	/**
 	 * レーンカバー表示量(0-1)
 	 */
 	private float lanecover = 0.2f;
@@ -115,6 +120,16 @@ public class PlayConfig {
 
 	public void setDuration(int duration) {
 		this.duration = duration;
+	}
+
+	public float getHispeedMargin() {
+		if(hispeedmargin < 0.0f || hispeedmargin > 10.0f)
+			hispeedmargin = 0.25f;
+		return hispeedmargin;
+	}
+
+	public void setHispeedMargin(float hispeedmargin) {
+		this.hispeedmargin = hispeedmargin;
 	}
 
 	public float getLanecover() {
