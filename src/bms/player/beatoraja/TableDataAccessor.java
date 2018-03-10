@@ -180,12 +180,14 @@ public class TableDataAccessor {
 				TableData td = new TableData();
 				td.setUrl(url);
 				td.setName(dt.getName());
+				td.setTag(dt.getTag());
 				Mode defaultMode = dt.getMode() != null ? Mode.getMode(dt.getMode()) : null;
 				String[] levels = dt.getLevelDescription();
 				List<TableData.TableFolder> tdes = new ArrayList<>(levels.length);
 				for (String lv : levels) {
 					TableData.TableFolder tde = new TableData.TableFolder();
-					tde.setName("LEVEL " + lv);
+					tde.setLevel(lv);
+					tde.setName(td.getTag() + lv);
 					List<SongData> hashes = new ArrayList<SongData>();
 					for (DifficultyTableElement dte : dt.getElements()) {
 						if (lv.equals(dte.getLevel())) {
