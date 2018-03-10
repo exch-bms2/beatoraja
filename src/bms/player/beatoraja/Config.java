@@ -150,6 +150,8 @@ public class Config {
 	private boolean updatesong = false;
 
 	private int autosavereplay[] = {0,0,0,0};
+	
+	private int skinPixmapGen = 4;
 
 	public Config() {
 		tableURL = new String[] { "http://bmsnormal2.syuriken.jp/table.html",
@@ -445,6 +447,14 @@ public class Config {
 
 	public void setDisplaymode(DisplayMode displaymode) {
 		this.displaymode = displaymode;
+	}
+
+	public int getSkinPixmapGen() {
+		return skinPixmapGen;
+	}
+
+	public void setSkinPixmapGen(int skinPixmapGen) {
+		this.skinPixmapGen = skinPixmapGen;
 	}
 
 	public enum DisplayMode {

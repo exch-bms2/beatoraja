@@ -77,9 +77,9 @@ import twitter4j.conf.ConfigurationBuilder;
  */
 public class MainController extends ApplicationAdapter {
 
-	public static final String VERSION = "beatoraja 0.5.4";
+	public static final String VERSION = "beatoraja 0.5.5";
 	
-	private static final boolean debug = false;
+	private static final boolean debug = true;
 
 	/**
 	 * 
@@ -306,6 +306,7 @@ public class MainController extends ApplicationAdapter {
 	public void create() {
 		final long t = System.currentTimeMillis();
 		sprite = new SpriteBatch();
+		SkinLoader.initPixmapResourcePool(config.getSkinPixmapGen());
 
 		generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/default/VL-Gothic-Regular.ttf"));
 		FreeTypeFontParameter parameter = new FreeTypeFontParameter();

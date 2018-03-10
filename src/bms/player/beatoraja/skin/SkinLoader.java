@@ -24,8 +24,15 @@ public abstract class SkinLoader {
     /**
      * スキンイメージのリソースプール
      */
-    private static final PixmapResourcePool resource = new PixmapResourcePool();
+    private static PixmapResourcePool resource;
 
+    public static void initPixmapResourcePool(int gen) {
+    	if(resource != null) {
+    		resource.dispose();
+    	}
+    	resource = new PixmapResourcePool(gen);
+    }
+    
     /**
      * スキンデータを読み込む
      *
@@ -39,22 +46,31 @@ public abstract class SkinLoader {
             SkinConfig sc = resource.getPlayerConfig().getSkin()[skinType.getId()];
             if (sc.getPath().endsWith(".json")) {
                 JSONSkinLoader sl = new JSONSkinLoader(resource.getConfig());
-                return sl.loadSkin(Paths.get(sc.getPath()), skinType, sc.getProperties());
+                Skin skin =  sl.loadSkin(Paths.get(sc.getPath()), skinType, sc.getProperties());
+                SkinLoader.resource.disposeOld();
+                return skin;
             } else {
                 LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
                 SkinHeader header = loader.loadSkin(Paths.get(sc.getPath()), state, sc.getProperties());
                 LR2SkinCSVLoader dloader = LR2SkinCSVLoader.getSkinLoader(skinType,  header.getResolution(), resource.getConfig());
-                return dloader.loadSkin(Paths.get(sc.getPath()).toFile(), state, header, loader.getOption(),
+                Skin skin = dloader.loadSkin(Paths.get(sc.getPath()).toFile(), state, header, loader.getOption(),
                         sc.getProperties());
+                SkinLoader.resource.disposeOld();
+                return skin;
             }
         } catch (Throwable e) {
             e.printStackTrace();
         }
         JSONSkinLoader sl = new JSONSkinLoader(resource.getConfig());
-        return sl.loadSkin(Paths.get(SkinConfig.defaultSkinPathMap.get(skinType)), skinType, new SkinConfig.Property());
+        Skin skin =  sl.loadSkin(Paths.get(SkinConfig.defaultSkinPathMap.get(skinType)), skinType, new SkinConfig.Property());
+        SkinLoader.resource.disposeOld();
+        return skin;
     }
 
     public static PixmapResourcePool getResource() {
+    	if(resource == null) {
+    		initPixmapResourcePool(1);
+    	}
         return resource;
     }
 
@@ -96,6 +112,7 @@ public abstract class SkinLoader {
     }
 
     protected static Texture getTexture(String path, boolean usecim) {
+    	final PixmapResourcePool resource = SkinLoader.getResource();
         if(resource.exists(path)) {
             return new Texture(resource.get(path));
         }
