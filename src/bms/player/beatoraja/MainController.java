@@ -72,7 +72,7 @@ import twitter4j.conf.ConfigurationBuilder;
 
 /**
  * アプリケーションのルートクラス
- * 
+ *
  * @author exch
  */
 public class MainController extends ApplicationAdapter {
@@ -82,7 +82,7 @@ public class MainController extends ApplicationAdapter {
 	private static final boolean debug = true;
 
 	/**
-	 * 
+	 *
 	 */
 	private final long boottime = System.currentTimeMillis();
 	private final Calendar cl = Calendar.getInstance();
@@ -96,7 +96,7 @@ public class MainController extends ApplicationAdapter {
 	private KeyConfiguration keyconfig;
 
 	private AudioDriver audio;
-	
+
 	private PlayerResource resource;
 
 	private FreeTypeFontGenerator generator;
@@ -120,7 +120,7 @@ public class MainController extends ApplicationAdapter {
 	private SongInformationAccessor infodb;
 
 	private IRConnection ir;
-	
+
 	private SpriteBatch sprite;
 	/**
 	 * 1曲プレイで指定したBMSファイル
@@ -144,14 +144,14 @@ public class MainController extends ApplicationAdapter {
 	private SystemSoundManager sound;
 
 	private ScreenShotThread screenshot;
-	
+
 	private TwitterUploadThread twitterUpload;
 
 	public static final int timerCount = SkinProperty.TIMER_MAX + 1;
 	private final long[] timer = new long[timerCount];
 	public static final int offsetCount = SkinProperty.OFFSET_MAX + 1;
 	private final SkinOffset[] offset = new SkinOffset[offsetCount];
-	
+
 	protected TextureRegion black;
 	protected TextureRegion white;
 
@@ -159,30 +159,30 @@ public class MainController extends ApplicationAdapter {
 		this.auto = auto;
 		this.config = config;
 		this.songUpdated = songUpdated;
-		
+
 		for(int i = 0;i < offset.length;i++) {
 			offset[i] = new SkinOffset();
 		}
-		
+
 		if(player == null) {
-			player = PlayerConfig.readPlayerConfig(config.getPlayername());			
+			player = PlayerConfig.readPlayerConfig(config.getPlayername());
 		}
 		this.player = player;
-		
+
 		this.bmsfile = f;
 
 		try {
 			Class.forName("org.sqlite.JDBC");
 			songdb = new SQLiteSongDatabaseAccessor(songdbpath.toString(), config.getBmsroot());
 			if(config.isUseSongInfo()) {
-				infodb = new SongInformationAccessor(infodbpath.toString());				
+				infodb = new SongInformationAccessor(infodbpath.toString());
 			}
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
 
 		playdata = new PlayDataAccessor(config.getPlayername());
-		
+
 		ir = IRConnection.getIRConnection(player.getIrname());
 		if(ir != null) {
 			if(player.getUserid().length() == 0 || player.getPassword().length() == 0) {
@@ -192,10 +192,10 @@ public class MainController extends ApplicationAdapter {
 				if(!response.isSuccessed()) {
 					Logger.getGlobal().warning("IRへのログイン失敗 : " + response.getMessage());
 					ir = null;
-				}				
+				}
 			}
 		}
-		
+
 		switch(config.getAudioDriver()) {
 		case Config.AUDIODRIVER_PORTAUDIO:
 			try {
@@ -278,7 +278,7 @@ public class MainController extends ApplicationAdapter {
 			newState = keyconfig;
 			break;
 		}
-		
+
 		if (newState != null && current != newState) {
 			Arrays.fill(timer, Long.MIN_VALUE);
 			if(current != null) {
@@ -331,7 +331,7 @@ public class MainController extends ApplicationAdapter {
 		keyconfig = new KeyConfiguration(this);
 		if (bmsfile != null) {
 			if(resource.setBMSFile(bmsfile, auto)) {
-				changeState(STATE_PLAYBMS);				
+				changeState(STATE_PLAYBMS);
 			} else {
 				// ダミーステートに移行してすぐexitする
 				changeState(STATE_CONFIG);
@@ -342,7 +342,7 @@ public class MainController extends ApplicationAdapter {
 		}
 
 		Logger.getGlobal().info("初期化時間(ms) : " + (System.currentTimeMillis() - t));
-		
+
 		Thread polling = new Thread(() -> {
 			long time = 0;
 			for (;;) {
@@ -356,14 +356,14 @@ public class MainController extends ApplicationAdapter {
 					} catch (InterruptedException e) {
 					}
 				}
-			}			
+			}
 		});
 		polling.start();
 
 		if(player.getTarget() >= TargetProperty.getAllTargetProperties().length) {
 			player.setTarget(0);
 		}
-		
+
 		Pixmap plainPixmap = new Pixmap(2,1, Pixmap.Format.RGBA8888);
 		plainPixmap.drawPixel(0,0, Color.toIntBits(255,0,0,0));
 		plainPixmap.drawPixel(1,0, Color.toIntBits(255,255,255,255));
@@ -374,11 +374,11 @@ public class MainController extends ApplicationAdapter {
 
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 	}
-	
+
 	private long prevtime;
 
 	private final StringBuilder message = new StringBuilder();
-	
+
 	@Override
 	public void render() {
 //		input.poll();
@@ -418,7 +418,7 @@ public class MainController extends ApplicationAdapter {
 				systemfont.draw(sprite, message.append("Max Sprite In Batch ").append(sprite.maxSpritesInBatch), 10,
 						config.getResolution().height - 98);
 			}
-			
+
 			sprite.end();
 		}
 		// show screenshot status
@@ -507,7 +507,7 @@ public class MainController extends ApplicationAdapter {
                 }
                 input.getFunctiontime()[5] = 0;
             }
-            
+
             if (input.getFunctionstate()[6] && input.getFunctiontime()[6] != 0) {
                 if (twitterUpload == null || twitterUpload.savetime != 0) {
                 	twitterUpload = new TwitterUploadThread(ScreenUtils.getFrameBufferPixels(0, 0, Gdx.graphics.getBackBufferWidth(),
@@ -612,7 +612,7 @@ public class MainController extends ApplicationAdapter {
 		cl.setTimeInMillis(System.currentTimeMillis());
 		return cl;
 	}
-	
+
 	public long getStartTime() {
 		return starttime / 1000000;
 	}
@@ -676,7 +676,7 @@ public class MainController extends ApplicationAdapter {
 			timer[id] = Long.MIN_VALUE;
 		}
 	}
-	
+
 	public static String getClearTypeName() {
 		String[] clearTypeName = { "NO PLAY", "FAILED", "ASSIST EASY CLEAR", "LIGHT ASSIST EASY CLEAR", "EASY CLEAR",
 				"CLEAR", "HARD CLEAR", "EXHARD CLEAR", "FULL COMBO", "PERFECT", "MAX" };
@@ -687,7 +687,7 @@ public class MainController extends ApplicationAdapter {
 
 		return "";
 	}
-	
+
 	public static String getRankTypeName() {
 		String rankTypeName = "";
 		if(currentState.getBooleanValue(OPTION_RESULT_AAA_1P)) rankTypeName += "AAA";
@@ -704,7 +704,7 @@ public class MainController extends ApplicationAdapter {
 
 	/**
 	 * スクリーンショット処理用スレッド
-	 * 
+	 *
 	 * @author exch
 	 */
 	static class ScreenShotThread extends Thread {
@@ -721,7 +721,7 @@ public class MainController extends ApplicationAdapter {
 		 * スクリーンショットのpixelデータ
 		 */
 		private final byte[] pixels;
-		
+
 		public ScreenShotThread(byte[] pixels) {
 			this.pixels = pixels;
 			final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
@@ -731,11 +731,22 @@ public class MainController extends ApplicationAdapter {
 			} else if(currentState instanceof MusicDecide) {
 				stateName = "_Decide";
 			} if(currentState instanceof BMSPlayer) {
-				stateName = "_Play_LEVEL" + currentState.getNumberValue(NUMBER_PLAYLEVEL);
+				if(currentState.getTextValue(STRING_TABLE_LEVEL).length() > 0){
+					stateName = "_Play_" + currentState.getTextValue(STRING_TABLE_LEVEL);
+				}else{
+					stateName = "_Play_LEVEL" + currentState.getNumberValue(NUMBER_PLAYLEVEL);
+				}
 				if(currentState.getTextValue(STRING_FULLTITLE).length() > 0) stateName += " " + currentState.getTextValue(STRING_FULLTITLE);
 			} else if(currentState instanceof MusicResult || currentState instanceof CourseResult) {
-				if(currentState instanceof MusicResult) stateName += "_LEVEL" + currentState.getNumberValue(NUMBER_PLAYLEVEL)+ " ";
-				else stateName += "_";
+				if(currentState instanceof MusicResult){
+					if(currentState.getTextValue(STRING_TABLE_LEVEL).length() > 0){
+						stateName += "_" + currentState.getTextValue(STRING_TABLE_LEVEL);
+					}else{
+						stateName += "_LEVEL" + currentState.getNumberValue(NUMBER_PLAYLEVEL);
+					}
+				}else{
+					stateName += "_";
+				}
 				if(currentState.getTextValue(STRING_FULLTITLE).length() > 0) stateName += currentState.getTextValue(STRING_FULLTITLE);
 				stateName += " " + getClearTypeName();
 				stateName += " " + getRankTypeName();
@@ -762,7 +773,7 @@ public class MainController extends ApplicationAdapter {
 			savetime = System.currentTimeMillis();
 		}
 	}
-	
+
 	/**
 	 * Twitter投稿用スレッド
 	 */
@@ -772,7 +783,7 @@ public class MainController extends ApplicationAdapter {
 		 * 処理が完了した時間
 		 */
 		private long savetime;
-		
+
 		/**
 		 * 処理が完了した時間
 		 */
@@ -784,7 +795,7 @@ public class MainController extends ApplicationAdapter {
 		 * スクリーンショットのpixelデータ
 		 */
 		private final byte[] pixels;
-		
+
 		public TwitterUploadThread(byte[] pixels, PlayerConfig player) {
 			this.pixels = pixels;
 			this.player = player;
@@ -794,19 +805,27 @@ public class MainController extends ApplicationAdapter {
 			} else if(currentState instanceof MusicDecide) {
 				// empty
 			} if(currentState instanceof BMSPlayer) {
-				builder.append("LEVEL");
-				builder.append(currentState.getNumberValue(NUMBER_PLAYLEVEL));
+				if(currentState.getTextValue(STRING_TABLE_NAME).length() > 0){
+					builder.append(currentState.getTextValue(STRING_TABLE_LEVEL));
+				}else{
+					builder.append("LEVEL");
+					builder.append(currentState.getNumberValue(NUMBER_PLAYLEVEL));
+				}
 				if(currentState.getTextValue(STRING_FULLTITLE).length() > 0) {
 					builder.append(" ");
 					builder.append(currentState.getTextValue(STRING_FULLTITLE));
 				}
 			} else if(currentState instanceof MusicResult || currentState instanceof CourseResult) {
 				if(currentState instanceof MusicResult) {
-					builder.append("LEVEL");
-					builder.append(currentState.getNumberValue(NUMBER_PLAYLEVEL));
-					builder.append(" ");
+					if(currentState.getTextValue(STRING_TABLE_NAME).length() > 0){
+						builder.append(currentState.getTextValue(STRING_TABLE_LEVEL));
+					}else{
+						builder.append("LEVEL");
+						builder.append(currentState.getNumberValue(NUMBER_PLAYLEVEL));
+					}
 				}
 				if(currentState.getTextValue(STRING_FULLTITLE).length() > 0) {
+					builder.append(" ");
 					builder.append(currentState.getTextValue(STRING_FULLTITLE));
 				}
 				builder.append(" ");
