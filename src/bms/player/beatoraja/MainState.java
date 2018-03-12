@@ -154,6 +154,11 @@ public abstract class MainState {
 			return model != null && model.getMinbpm() == model.getMaxbpm();
 		case OPTION_BPMCHANGE:
 			return model != null && model.getMinbpm() < model.getMaxbpm();
+		case OPTION_BPMSTOP:
+			if (main.getPlayerResource().getSongdata() != null) {
+				return main.getPlayerResource().getSongdata().isBpmstop();
+			}
+			return false;
 		case OPTION_OFFLINE:
 			return main.getIRConnection() == null;
 		case OPTION_ONLINE:

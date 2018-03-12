@@ -523,6 +523,7 @@ public class SkinProperty {
 	public static final int OPTION_TEXT = 175;
 	public static final int OPTION_NO_BPMCHANGE = 176;
 	public static final int OPTION_BPMCHANGE = 177;
+	public static final int OPTION_BPMSTOP = 1177;
 	public static final int OPTION_NO_RANDOMSEQUENCE = 178;
 	public static final int OPTION_RANDOMSEQUENCE = 179;
 

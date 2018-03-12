@@ -69,6 +69,7 @@ public class SongData {
 	private int minbpm;
 	private int maxbpm;
 	private int mainbpm;
+	private boolean bpmstop;
 	/**
 	 * 曲の長さ(ms)
 	 */
@@ -129,6 +130,7 @@ public class SongData {
 		judge = model.getJudgerank();
 		minbpm = (int) model.getMinBPM();
 		maxbpm = (int) model.getMaxBPM();
+		boolean existStop = false;
 		Map<Double, Integer> bpmMap = new HashMap<Double, Integer>();
 		for (TimeLine tl : model.getAllTimeLines()) {
 			Integer count = bpmMap.get(tl.getBPM());
@@ -136,6 +138,7 @@ public class SongData {
 				count = 0;
 			}
 			bpmMap.put(tl.getBPM(), count + tl.getTotalNotes());
+			if(tl.getStop() > 0) existStop = true;
 		}
 		int maxcount = 0;
 		for (double bpm : bpmMap.keySet()) {
@@ -144,6 +147,8 @@ public class SongData {
 				mainbpm = (int) bpm;
 			}
 		}
+		if(existStop) bpmstop = true;
+		else bpmstop = false;
 		length = model.getLastTime();
 		notes = model.getTotalNotes();
 
@@ -299,6 +304,14 @@ public class SongData {
 
 	public void setMainbpm(int mainbpm) {
 		this.mainbpm = mainbpm;
+	}
+
+	public boolean isBpmstop() {
+		return bpmstop;
+	}
+
+	public void setBpmstop(boolean bpmstop) {
+		this.bpmstop = bpmstop;
 	}
 
 	public String getBanner() {
