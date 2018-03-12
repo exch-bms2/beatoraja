@@ -354,6 +354,11 @@ public abstract class MainState {
 				return main.getPlayerResource().getSongdata().getMaxbpm();
 			}
 			return Integer.MIN_VALUE;
+		case NUMBER_MAINBPM:
+			if (main.getPlayerResource().getSongdata() != null) {
+				return main.getPlayerResource().getSongdata().getMainbpm();
+			}
+			return Integer.MIN_VALUE;
 		case NUMBER_HISPEED_LR2:
 			if (main.getPlayerResource().getSongdata() != null) {
 				SongData song = main.getPlayerResource().getSongdata();

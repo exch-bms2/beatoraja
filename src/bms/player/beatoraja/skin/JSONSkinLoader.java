@@ -436,6 +436,13 @@ public class JSONSkinLoader extends SkinLoader{
 							break;
 						}
 					}
+					for (BPMGraph ggraph : sk.bpmgraph) {
+						if (dst.id.equals(ggraph.id)) {
+							SkinBPMGraph st = new SkinBPMGraph(ggraph.delay, ggraph.lineWidth, ggraph.mainBPMColor, ggraph.minBPMColor, ggraph.maxBPMColor, ggraph.otherBPMColor, ggraph.stopLineColor, ggraph.transitionLineColor);
+							obj = st;
+							break;
+						}
+					}
 					// note (playskin only)
 					if(sk.note != null && dst.id.equals(sk.note.id)) {
 						SkinSource[] notes = getNoteTexture(sk.note.note, p);
@@ -1041,6 +1048,7 @@ public class JSONSkinLoader extends SkinLoader{
 		public Graph[] graph = new Graph[0];
 		public GaugeGraph[] gaugegraph = new GaugeGraph[0];
 		public JudgeGraph[] judgegraph = new JudgeGraph[0];
+		public BPMGraph[] bpmgraph = new BPMGraph[0];
 		public NoteSet note;
 		public Gauge gauge;
 		public BGA bga;
@@ -1180,6 +1188,18 @@ public class JSONSkinLoader extends SkinLoader{
 		public int delay = 500;
 		public int orderReverse = 0;
 		public int noGap = 0;
+	}
+
+	public static class BPMGraph {
+		public String id;
+		public int delay = 0;
+		public int lineWidth = 2;
+		public String mainBPMColor = "00ff00";
+		public String minBPMColor = "0000ff";
+		public String maxBPMColor = "ff0000";
+		public String otherBPMColor = "ffff00";
+		public String stopLineColor = "ff00ff";
+		public String transitionLineColor = "7f7f7f";
 	}
 
 	public static class NoteSet {

@@ -290,6 +290,7 @@ public class SkinProperty {
 	public static final int NUMBER_POOR_RATE = 89;
 	public static final int NUMBER_MAXBPM = 90;
 	public static final int NUMBER_MINBPM = 91;
+	public static final int NUMBER_MAINBPM = 92;
 	public static final int NUMBER_PLAYLEVEL = 96;
 	public static final int NUMBER_POINT = 100;
 	public static final int NUMBER_SCORE2 = 101;
