@@ -172,20 +172,18 @@ public class SkinBPMGraph extends SkinObject {
 				shape.setColor(lineColor);
 				shape.fillRectangle(x1, y2, x2 - x1 + lineWidth, lineWidth);
 			}
-			if(BPMTimeList.get(BPMTimeList.size()-1) != lastTime) {
-				//横線
-				x1 = (int) (width * BPMTimeList.get(BPMTimeList.size()-1) / lastTime);
-				y1 = (int) ((Math.log10(Math.min(Math.max((BPMList.get(BPMTimeList.size()-1) / mainBPM),minValue),maxValue)) - minValueLog) / (maxValueLog-minValueLog) * (height - lineWidth));
-				x2 = (int) width;
-				y2 = y1;
-				Color lineColor = otherLineColor;
-				if(BPMList.get(BPMList.size()-1) == mainBPM) lineColor = mainLineColor;
-				else if(BPMList.get(BPMList.size()-1) == minBPM) lineColor = minLineColor;
-				else if(BPMList.get(BPMList.size()-1) == maxBPM) lineColor = maxLineColor;
-				else if(BPMList.get(BPMList.size()-1) == 0) lineColor = stopLineColor;
-				shape.setColor(lineColor);
-				shape.fillRectangle(x1, y2, x2 - x1 + lineWidth, lineWidth);
-			}
+			//横線
+			x1 = (int) (width * BPMTimeList.get(BPMTimeList.size()-1) / lastTime);
+			y1 = (int) ((Math.log10(Math.min(Math.max((BPMList.get(BPMTimeList.size()-1) / mainBPM),minValue),maxValue)) - minValueLog) / (maxValueLog-minValueLog) * (height - lineWidth));
+			x2 = (int) width;
+			y2 = y1;
+			Color lineColor = otherLineColor;
+			if(BPMList.get(BPMList.size()-1) == mainBPM) lineColor = mainLineColor;
+			else if(BPMList.get(BPMList.size()-1) == minBPM) lineColor = minLineColor;
+			else if(BPMList.get(BPMList.size()-1) == maxBPM) lineColor = maxLineColor;
+			else if(BPMList.get(BPMList.size()-1) == 0) lineColor = stopLineColor;
+			shape.setColor(lineColor);
+			shape.fillRectangle(x1, y2, x2 - x1 + lineWidth, lineWidth);
 			if (shapetex != null) {
 				shapetex.getTexture().dispose();
 				shapetex = null;
