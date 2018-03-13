@@ -145,12 +145,13 @@ public class SkinBPMGraph extends SkinObject {
 			}
 			double minBPM = model.getMinBPM();
 			double maxBPM = model.getMaxBPM();
+			int lastTime = model.getLastTime() + 1000;
 
 			// グラフ描画
 			int x1,x2,y1,y2;
 			for (int i = 1; i < BPMList.size(); i++) {
 				//縦線
-				x1 = (int) (width * BPMTimeList.get(i) / model.getLastTime());
+				x1 = (int) (width * BPMTimeList.get(i) / lastTime);
 				y1 = (int) ((Math.log10(Math.min(Math.max((BPMList.get(i-1) / mainBPM),minValue),maxValue)) - minValueLog) / (maxValueLog-minValueLog) * (height - lineWidth));
 				x2 = x1;
 				y2 = (int) ((Math.log10(Math.min(Math.max((BPMList.get(i) / mainBPM),minValue),maxValue)) - minValueLog) / (maxValueLog-minValueLog) * (height - lineWidth));
@@ -159,9 +160,9 @@ public class SkinBPMGraph extends SkinObject {
 					shape.fillRectangle(x1, Math.min(y1, y2) + lineWidth, lineWidth, Math.abs(y2 - y1) - lineWidth);
 				}
 				//横線
-				x1 = (int) (width * BPMTimeList.get(i-1) / model.getLastTime());
+				x1 = (int) (width * BPMTimeList.get(i-1) / lastTime);
 				y1 = (int) ((Math.log10(Math.min(Math.max((BPMList.get(i-1) / mainBPM),minValue),maxValue)) - minValueLog) / (maxValueLog-minValueLog) * (height - lineWidth));
-				x2 = (int) (width * BPMTimeList.get(i) / model.getLastTime());
+				x2 = (int) (width * BPMTimeList.get(i) / lastTime);
 				y2 = y1;
 				Color lineColor = otherLineColor;
 				if(BPMList.get(i-1) == mainBPM) lineColor = mainLineColor;
@@ -171,9 +172,9 @@ public class SkinBPMGraph extends SkinObject {
 				shape.setColor(lineColor);
 				shape.fillRectangle(x1, y2, x2 - x1 + lineWidth, lineWidth);
 			}
-			if(BPMTimeList.get(BPMTimeList.size()-1) != model.getLastTime()) {
+			if(BPMTimeList.get(BPMTimeList.size()-1) != lastTime) {
 				//横線
-				x1 = (int) (width * BPMTimeList.get(BPMTimeList.size()-1) / model.getLastTime());
+				x1 = (int) (width * BPMTimeList.get(BPMTimeList.size()-1) / lastTime);
 				y1 = (int) ((Math.log10(Math.min(Math.max((BPMList.get(BPMTimeList.size()-1) / mainBPM),minValue),maxValue)) - minValueLog) / (maxValueLog-minValueLog) * (height - lineWidth));
 				x2 = (int) width;
 				y2 = y1;
