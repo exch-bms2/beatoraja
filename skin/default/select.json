@@ -141,6 +141,8 @@
 		{"id":"const-nospeed", "src":8, "x":0, "y":48, "w":200, "h":24},
 		{"id":"const-nogood", "src":8, "x":0, "y":72, "w":200, "h":24},
 		{"id":"const-nogreat", "src":8, "x":0, "y":96, "w":200, "h":24},
+		
+		{"id":"mainbpm", "src":0, "x":130, "y":550, "w":62, "h":13},
 	],
 	"imageset":[
 		{"id":"bar", "images":["bar-song","bar-folder","bar-table","bar-grade","bar-nograde","bar-command","bar-search","bar-nosong"]},
@@ -189,6 +191,8 @@
 
 		{"id":"duration", "src":6, "x":0, "y":0, "w":240, "h":24, "divx":10, "digit":4, "ref":312},
 		{"id":"judgetiming", "src":6, "x":0, "y":24, "w":288, "h":48, "divx":12, "divy":2, "digit":3, "ref":12},
+		
+		{"id":"mainbpm-num", "src":0, "x":130, "y":565, "w":99, "h":13, "divx":11, "divy":1, "digit":7, "ref":92},
 	],
 
 	"text":[
@@ -757,6 +761,22 @@
 
 		{"id":"bpmgraph", "op":[1177], "dst":[
 			{"x":80, "y":200, "w":600, "h":100}
+		]},
+
+		{"id":"mainbpm", "op":[177,-1177], "dst":[
+			{"x":17, "y":254, "w":62, "h":13}
+		]},
+
+		{"id":"mainbpm", "op":[1177], "dst":[
+			{"x":17, "y":254, "w":62, "h":13}
+		]},
+
+		{"id":"mainbpm-num", "op":[177,-1177], "dst":[
+			{"x":17, "y":233, "w":9, "h":13}
+		]},
+
+		{"id":"mainbpm-num", "op":[1177], "dst":[
+			{"x":17, "y":233, "w":9, "h":13}
 		]},
 
 		{"id":"mode", "dst":[{"x":10, "y":10, "w":108, "h":18}]},
