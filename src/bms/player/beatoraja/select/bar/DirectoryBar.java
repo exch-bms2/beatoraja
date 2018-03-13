@@ -1,8 +1,11 @@
 package bms.player.beatoraja.select.bar;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
+import bms.model.Mode;
 import bms.player.beatoraja.IRScoreData;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.song.SongData;
@@ -78,6 +81,29 @@ public abstract class DirectoryBar extends Bar {
      * @return ディレクトリ内のバー
      */
     public abstract Bar[] getChildren();
+
+    public Bar[] getChildren(Mode mode, boolean containsSameFolder) {
+        List<Bar> l = new ArrayList<Bar>();
+        for (Bar b : getChildren()) {
+            if (!(mode != null && b instanceof SongBar && ((SongBar) b).getSongData().getMode() != 0 &&
+                    ((SongBar) b).getSongData().getMode() != mode.id)) {
+                boolean addBar = true;
+                if(!containsSameFolder) {
+                    for(Bar bar : l) {
+                        if(b instanceof SongBar && bar instanceof SongBar && ((SongBar) b).getSongData().getFolder() != null &&
+                                ((SongBar) b).getSongData().getFolder().equals(((SongBar) bar).getSongData().getFolder())) {
+                            addBar = false;
+                            break;
+                        }
+                    }
+                }
+                if(addBar) {
+                    l.add(b);
+                }
+            }
+        }
+        return l.toArray(new Bar[l.size()]);
+    }
     
     public void updateFolderStatus() {
     	
