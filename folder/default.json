@@ -85,192 +85,578 @@
 	"name":"DENSITY",
 	"folder":[
 		{
-			"name": "DENSITY 〜3",
-			"sql": "density < 3"
-		},
-		{
-			"name": "DENSITY 3〜5",
-			"sql": "density >= 3 AND density < 5"
-		},
-		{
-			"name": "DENSITY 5〜7",
-			"sql": "density >= 5 AND density < 7"
-		},
-		{
-			"name": "DENSITY 7〜9",
-			"sql": "density >= 7 AND density < 9"
-		},
-		{
-			"name": "DENSITY 9〜10",
-			"sql": "density >= 9 AND density < 10"
-		},
-		{
-			"name": "DENSITY 10〜11",
-			"sql": "density >= 10 AND density < 11"
-		},
-		{
-			"name": "DENSITY 11〜12",
-			"sql": "density >= 11 AND density < 12"
-		},
-		{
-			"name": "DENSITY 12〜13",
-			"sql": "density >= 12 AND density < 13"
-		},
-		{
-			"name": "DENSITY 13〜14",
-			"sql": "density >= 13 AND density < 14"
-		},
-		{
-			"name": "DENSITY 14〜15",
-			"sql": "density >= 14 AND density < 15"
-		},
-		{
-			"name": "DENSITY 15〜16",
-			"sql": "density >= 15 AND density < 16"
-		},
-		{
-			"name": "DENSITY 16〜17",
-			"sql": "density >= 16 AND density < 17"
-		},
-		{
-			"name": "DENSITY 17〜18",
-			"sql": "density >= 17 AND density < 18"
-		},
-		{
-			"name": "DENSITY 18〜19",
-			"sql": "density >= 18 AND density < 19"
-		},
-		{
-			"name": "DENSITY 19〜20",
-			"sql": "density >= 19 AND density < 20"
-		},
-		{
-			"name": "DENSITY 20〜21",
-			"sql": "density >= 20 AND density < 21"
-		},
-		{
-			"name": "DENSITY 21〜22",
-			"sql": "density >= 21 AND density < 22"
-		},
-		{
-			"name": "DENSITY 22〜23",
-			"sql": "density >= 22 AND density < 23"
-		},
-		{
-			"name": "DENSITY 23〜24",
-			"sql": "density >= 23 AND density < 24"
-		},
-		{
-			"name": "DENSITY 24〜25",
-			"sql": "density >= 24 AND density < 25"
-		},
-		{
-			"name": "DENSITY 25〜26",
-			"sql": "density >= 25 AND density < 26"
-		},
-		{
-			"name": "DENSITY 26〜27",
-			"sql": "density >= 26 AND density < 27"
-		},
-		{
-			"name": "DENSITY 27〜28",
-			"sql": "density >= 27 AND density < 28"
-		},
-		{
-			"name": "DENSITY 28〜29",
-			"sql": "density >= 28 AND density < 29"
-		},
-		{
-			"name": "DENSITY 29〜30",
-			"sql": "density >= 29 AND density < 30"
-		},
-		
-		{
-			"name": "DENSITY 30〜31",
-			"sql": "density >= 30 AND density < 31"
-		},
-		{
-			"name": "DENSITY 31〜32",
-			"sql": "density >= 31 AND density < 32"
-		},
-		{
-			"name": "DENSITY 32〜33",
-			"sql": "density >= 32 AND density < 33"
-		},
-		{
-			"name": "DENSITY 33〜34",
-			"sql": "density >= 33 AND density < 34"
-		},
-		{
-			"name": "DENSITY 34〜35",
-			"sql": "density >= 34 AND density < 35"
-		},
-		{
-			"name": "DENSITY 35〜36",
-			"sql": "density >= 35 AND density < 36"
-		},
-		{
-			"name": "DENSITY 36〜37",
-			"sql": "density >= 36 AND density < 37"
-		},
-		{
-			"name": "DENSITY 37〜38",
-			"sql": "density >= 37 AND density < 38"
-		},
-		{
-			"name": "DENSITY 38〜39",
-			"sql": "density >= 38 AND density < 39"
-		},
-		{
-			"name": "DENSITY 39〜40",
-			"sql": "density >= 39 AND density < 40"
-		},
+			"name": "AVERAGE",
+			"folder":[
+				{
+					"name": "DENSITY 〜3",
+					"sql": "density < 3"
+				},
+				{
+					"name": "DENSITY 3〜5",
+					"sql": "density >= 3 AND density < 5"
+				},
+				{
+					"name": "DENSITY 5〜7",
+					"sql": "density >= 5 AND density < 7"
+				},
+				{
+					"name": "DENSITY 7〜9",
+					"sql": "density >= 7 AND density < 9"
+				},
+				{
+					"name": "DENSITY 9〜10",
+					"sql": "density >= 9 AND density < 10"
+				},
+				{
+					"name": "DENSITY 10〜11",
+					"sql": "density >= 10 AND density < 11"
+				},
+				{
+					"name": "DENSITY 11〜12",
+					"sql": "density >= 11 AND density < 12"
+				},
+				{
+					"name": "DENSITY 12〜13",
+					"sql": "density >= 12 AND density < 13"
+				},
+				{
+					"name": "DENSITY 13〜14",
+					"sql": "density >= 13 AND density < 14"
+				},
+				{
+					"name": "DENSITY 14〜15",
+					"sql": "density >= 14 AND density < 15"
+				},
+				{
+					"name": "DENSITY 15〜16",
+					"sql": "density >= 15 AND density < 16"
+				},
+				{
+					"name": "DENSITY 16〜17",
+					"sql": "density >= 16 AND density < 17"
+				},
+				{
+					"name": "DENSITY 17〜18",
+					"sql": "density >= 17 AND density < 18"
+				},
+				{
+					"name": "DENSITY 18〜19",
+					"sql": "density >= 18 AND density < 19"
+				},
+				{
+					"name": "DENSITY 19〜20",
+					"sql": "density >= 19 AND density < 20"
+				},
+				{
+					"name": "DENSITY 20〜21",
+					"sql": "density >= 20 AND density < 21"
+				},
+				{
+					"name": "DENSITY 21〜22",
+					"sql": "density >= 21 AND density < 22"
+				},
+				{
+					"name": "DENSITY 22〜23",
+					"sql": "density >= 22 AND density < 23"
+				},
+				{
+					"name": "DENSITY 23〜24",
+					"sql": "density >= 23 AND density < 24"
+				},
+				{
+					"name": "DENSITY 24〜25",
+					"sql": "density >= 24 AND density < 25"
+				},
+				{
+					"name": "DENSITY 25〜26",
+					"sql": "density >= 25 AND density < 26"
+				},
+				{
+					"name": "DENSITY 26〜27",
+					"sql": "density >= 26 AND density < 27"
+				},
+				{
+					"name": "DENSITY 27〜28",
+					"sql": "density >= 27 AND density < 28"
+				},
+				{
+					"name": "DENSITY 28〜29",
+					"sql": "density >= 28 AND density < 29"
+				},
+				{
+					"name": "DENSITY 29〜30",
+					"sql": "density >= 29 AND density < 30"
+				},
 
-		{
-			"name": "DENSITY 40〜41",
-			"sql": "density >= 40 AND density < 41"
+				{
+					"name": "DENSITY 30〜31",
+					"sql": "density >= 30 AND density < 31"
+				},
+				{
+					"name": "DENSITY 31〜32",
+					"sql": "density >= 31 AND density < 32"
+				},
+				{
+					"name": "DENSITY 32〜33",
+					"sql": "density >= 32 AND density < 33"
+				},
+				{
+					"name": "DENSITY 33〜34",
+					"sql": "density >= 33 AND density < 34"
+				},
+				{
+					"name": "DENSITY 34〜35",
+					"sql": "density >= 34 AND density < 35"
+				},
+				{
+					"name": "DENSITY 35〜36",
+					"sql": "density >= 35 AND density < 36"
+				},
+				{
+					"name": "DENSITY 36〜37",
+					"sql": "density >= 36 AND density < 37"
+				},
+				{
+					"name": "DENSITY 37〜38",
+					"sql": "density >= 37 AND density < 38"
+				},
+				{
+					"name": "DENSITY 38〜39",
+					"sql": "density >= 38 AND density < 39"
+				},
+				{
+					"name": "DENSITY 39〜40",
+					"sql": "density >= 39 AND density < 40"
+				},
+
+				{
+					"name": "DENSITY 40〜41",
+					"sql": "density >= 40 AND density < 41"
+				},
+				{
+					"name": "DENSITY 41〜42",
+					"sql": "density >= 41 AND density < 42"
+				},
+				{
+					"name": "DENSITY 42〜43",
+					"sql": "density >= 42 AND density < 43"
+				},
+				{
+					"name": "DENSITY 43〜44",
+					"sql": "density >= 43 AND density < 44"
+				},
+				{
+					"name": "DENSITY 44〜45",
+					"sql": "density >= 44 AND density < 45"
+				},
+				{
+					"name": "DENSITY 45〜46",
+					"sql": "density >= 45 AND density < 46"
+				},
+				{
+					"name": "DENSITY 46〜47",
+					"sql": "density >= 46 AND density < 47"
+				},
+				{
+					"name": "DENSITY 47〜48",
+					"sql": "density >= 47 AND density < 48"
+				},
+				{
+					"name": "DENSITY 48〜49",
+					"sql": "density >= 48 AND density < 49"
+				},
+				{
+					"name": "DENSITY 49〜50",
+					"sql": "density >= 49 AND density < 50"
+				},
+				{
+					"name": "DENSITY 50〜",
+					"sql": "density >= 50"
+				}
+			]
 		},
 		{
-			"name": "DENSITY 41〜42",
-			"sql": "density >= 41 AND density < 42"
+			"name": "PEAK",
+			"folder":[
+				{
+					"name": "DENSITY 〜3",
+					"sql": "peakdensity < 3"
+				},
+				{
+					"name": "DENSITY 3〜5",
+					"sql": "peakdensity >= 3 AND peakdensity < 5"
+				},
+				{
+					"name": "DENSITY 5〜7",
+					"sql": "peakdensity >= 5 AND peakdensity < 7"
+				},
+				{
+					"name": "DENSITY 7〜9",
+					"sql": "peakdensity >= 7 AND peakdensity < 9"
+				},
+				{
+					"name": "DENSITY 9〜10",
+					"sql": "peakdensity >= 9 AND peakdensity < 10"
+				},
+				{
+					"name": "DENSITY 10〜11",
+					"sql": "peakdensity >= 10 AND peakdensity < 11"
+				},
+				{
+					"name": "DENSITY 11〜12",
+					"sql": "peakdensity >= 11 AND peakdensity < 12"
+				},
+				{
+					"name": "DENSITY 12〜13",
+					"sql": "peakdensity >= 12 AND peakdensity < 13"
+				},
+				{
+					"name": "DENSITY 13〜14",
+					"sql": "peakdensity >= 13 AND peakdensity < 14"
+				},
+				{
+					"name": "DENSITY 14〜15",
+					"sql": "peakdensity >= 14 AND peakdensity < 15"
+				},
+				{
+					"name": "DENSITY 15〜16",
+					"sql": "peakdensity >= 15 AND peakdensity < 16"
+				},
+				{
+					"name": "DENSITY 16〜17",
+					"sql": "peakdensity >= 16 AND peakdensity < 17"
+				},
+				{
+					"name": "DENSITY 17〜18",
+					"sql": "peakdensity >= 17 AND peakdensity < 18"
+				},
+				{
+					"name": "DENSITY 18〜19",
+					"sql": "peakdensity >= 18 AND peakdensity < 19"
+				},
+				{
+					"name": "DENSITY 19〜20",
+					"sql": "peakdensity >= 19 AND peakdensity < 20"
+				},
+				{
+					"name": "DENSITY 20〜21",
+					"sql": "peakdensity >= 20 AND peakdensity < 21"
+				},
+				{
+					"name": "DENSITY 21〜22",
+					"sql": "peakdensity >= 21 AND peakdensity < 22"
+				},
+				{
+					"name": "DENSITY 22〜23",
+					"sql": "peakdensity >= 22 AND peakdensity < 23"
+				},
+				{
+					"name": "DENSITY 23〜24",
+					"sql": "peakdensity >= 23 AND peakdensity < 24"
+				},
+				{
+					"name": "DENSITY 24〜25",
+					"sql": "peakdensity >= 24 AND peakdensity < 25"
+				},
+				{
+					"name": "DENSITY 25〜26",
+					"sql": "peakdensity >= 25 AND peakdensity < 26"
+				},
+				{
+					"name": "DENSITY 26〜27",
+					"sql": "peakdensity >= 26 AND peakdensity < 27"
+				},
+				{
+					"name": "DENSITY 27〜28",
+					"sql": "peakdensity >= 27 AND peakdensity < 28"
+				},
+				{
+					"name": "DENSITY 28〜29",
+					"sql": "peakdensity >= 28 AND peakdensity < 29"
+				},
+				{
+					"name": "DENSITY 29〜30",
+					"sql": "peakdensity >= 29 AND peakdensity < 30"
+				},
+
+				{
+					"name": "DENSITY 30〜31",
+					"sql": "peakdensity >= 30 AND peakdensity < 31"
+				},
+				{
+					"name": "DENSITY 31〜32",
+					"sql": "peakdensity >= 31 AND peakdensity < 32"
+				},
+				{
+					"name": "DENSITY 32〜33",
+					"sql": "peakdensity >= 32 AND peakdensity < 33"
+				},
+				{
+					"name": "DENSITY 33〜34",
+					"sql": "peakdensity >= 33 AND peakdensity < 34"
+				},
+				{
+					"name": "DENSITY 34〜35",
+					"sql": "peakdensity >= 34 AND peakdensity < 35"
+				},
+				{
+					"name": "DENSITY 35〜36",
+					"sql": "peakdensity >= 35 AND peakdensity < 36"
+				},
+				{
+					"name": "DENSITY 36〜37",
+					"sql": "peakdensity >= 36 AND peakdensity < 37"
+				},
+				{
+					"name": "DENSITY 37〜38",
+					"sql": "peakdensity >= 37 AND peakdensity < 38"
+				},
+				{
+					"name": "DENSITY 38〜39",
+					"sql": "peakdensity >= 38 AND peakdensity < 39"
+				},
+				{
+					"name": "DENSITY 39〜40",
+					"sql": "peakdensity >= 39 AND peakdensity < 40"
+				},
+
+				{
+					"name": "DENSITY 40〜41",
+					"sql": "peakdensity >= 40 AND peakdensity < 41"
+				},
+				{
+					"name": "DENSITY 41〜42",
+					"sql": "peakdensity >= 41 AND peakdensity < 42"
+				},
+				{
+					"name": "DENSITY 42〜43",
+					"sql": "peakdensity >= 42 AND peakdensity < 43"
+				},
+				{
+					"name": "DENSITY 43〜44",
+					"sql": "peakdensity >= 43 AND peakdensity < 44"
+				},
+				{
+					"name": "DENSITY 44〜45",
+					"sql": "peakdensity >= 44 AND peakdensity < 45"
+				},
+				{
+					"name": "DENSITY 45〜46",
+					"sql": "peakdensity >= 45 AND peakdensity < 46"
+				},
+				{
+					"name": "DENSITY 46〜47",
+					"sql": "peakdensity >= 46 AND peakdensity < 47"
+				},
+				{
+					"name": "DENSITY 47〜48",
+					"sql": "peakdensity >= 47 AND peakdensity < 48"
+				},
+				{
+					"name": "DENSITY 48〜49",
+					"sql": "peakdensity >= 48 AND peakdensity < 49"
+				},
+				{
+					"name": "DENSITY 49〜50",
+					"sql": "peakdensity >= 49 AND peakdensity < 50"
+				},
+				{
+					"name": "DENSITY 50〜",
+					"sql": "peakdensity >= 50"
+				}
+			]
 		},
 		{
-			"name": "DENSITY 42〜43",
-			"sql": "density >= 42 AND density < 43"
-		},
-		{
-			"name": "DENSITY 43〜44",
-			"sql": "density >= 43 AND density < 44"
-		},
-		{
-			"name": "DENSITY 44〜45",
-			"sql": "density >= 44 AND density < 45"
-		},
-		{
-			"name": "DENSITY 45〜46",
-			"sql": "density >= 45 AND density < 46"
-		},
-		{
-			"name": "DENSITY 46〜47",
-			"sql": "density >= 46 AND density < 47"
-		},
-		{
-			"name": "DENSITY 47〜48",
-			"sql": "density >= 47 AND density < 48"
-		},
-		{
-			"name": "DENSITY 48〜49",
-			"sql": "density >= 48 AND density < 49"
-		},
-		{
-			"name": "DENSITY 49〜50",
-			"sql": "density >= 49 AND density < 50"
-		},
-		{
-			"name": "DENSITY 50〜",
-			"sql": "density >= 50"
+			"name": "END",
+			"folder":[
+				{
+					"name": "DENSITY 〜3",
+					"sql": "enddensity < 3"
+				},
+				{
+					"name": "DENSITY 3〜5",
+					"sql": "enddensity >= 3 AND enddensity < 5"
+				},
+				{
+					"name": "DENSITY 5〜7",
+					"sql": "enddensity >= 5 AND enddensity < 7"
+				},
+				{
+					"name": "DENSITY 7〜9",
+					"sql": "enddensity >= 7 AND enddensity < 9"
+				},
+				{
+					"name": "DENSITY 9〜10",
+					"sql": "enddensity >= 9 AND enddensity < 10"
+				},
+				{
+					"name": "DENSITY 10〜11",
+					"sql": "enddensity >= 10 AND enddensity < 11"
+				},
+				{
+					"name": "DENSITY 11〜12",
+					"sql": "enddensity >= 11 AND enddensity < 12"
+				},
+				{
+					"name": "DENSITY 12〜13",
+					"sql": "enddensity >= 12 AND enddensity < 13"
+				},
+				{
+					"name": "DENSITY 13〜14",
+					"sql": "enddensity >= 13 AND enddensity < 14"
+				},
+				{
+					"name": "DENSITY 14〜15",
+					"sql": "enddensity >= 14 AND enddensity < 15"
+				},
+				{
+					"name": "DENSITY 15〜16",
+					"sql": "enddensity >= 15 AND enddensity < 16"
+				},
+				{
+					"name": "DENSITY 16〜17",
+					"sql": "enddensity >= 16 AND enddensity < 17"
+				},
+				{
+					"name": "DENSITY 17〜18",
+					"sql": "enddensity >= 17 AND enddensity < 18"
+				},
+				{
+					"name": "DENSITY 18〜19",
+					"sql": "enddensity >= 18 AND enddensity < 19"
+				},
+				{
+					"name": "DENSITY 19〜20",
+					"sql": "enddensity >= 19 AND enddensity < 20"
+				},
+				{
+					"name": "DENSITY 20〜21",
+					"sql": "enddensity >= 20 AND enddensity < 21"
+				},
+				{
+					"name": "DENSITY 21〜22",
+					"sql": "enddensity >= 21 AND enddensity < 22"
+				},
+				{
+					"name": "DENSITY 22〜23",
+					"sql": "enddensity >= 22 AND enddensity < 23"
+				},
+				{
+					"name": "DENSITY 23〜24",
+					"sql": "enddensity >= 23 AND enddensity < 24"
+				},
+				{
+					"name": "DENSITY 24〜25",
+					"sql": "enddensity >= 24 AND enddensity < 25"
+				},
+				{
+					"name": "DENSITY 25〜26",
+					"sql": "enddensity >= 25 AND enddensity < 26"
+				},
+				{
+					"name": "DENSITY 26〜27",
+					"sql": "enddensity >= 26 AND enddensity < 27"
+				},
+				{
+					"name": "DENSITY 27〜28",
+					"sql": "enddensity >= 27 AND enddensity < 28"
+				},
+				{
+					"name": "DENSITY 28〜29",
+					"sql": "enddensity >= 28 AND enddensity < 29"
+				},
+				{
+					"name": "DENSITY 29〜30",
+					"sql": "enddensity >= 29 AND enddensity < 30"
+				},
+
+				{
+					"name": "DENSITY 30〜31",
+					"sql": "enddensity >= 30 AND enddensity < 31"
+				},
+				{
+					"name": "DENSITY 31〜32",
+					"sql": "enddensity >= 31 AND enddensity < 32"
+				},
+				{
+					"name": "DENSITY 32〜33",
+					"sql": "enddensity >= 32 AND enddensity < 33"
+				},
+				{
+					"name": "DENSITY 33〜34",
+					"sql": "enddensity >= 33 AND enddensity < 34"
+				},
+				{
+					"name": "DENSITY 34〜35",
+					"sql": "enddensity >= 34 AND enddensity < 35"
+				},
+				{
+					"name": "DENSITY 35〜36",
+					"sql": "enddensity >= 35 AND enddensity < 36"
+				},
+				{
+					"name": "DENSITY 36〜37",
+					"sql": "enddensity >= 36 AND enddensity < 37"
+				},
+				{
+					"name": "DENSITY 37〜38",
+					"sql": "enddensity >= 37 AND enddensity < 38"
+				},
+				{
+					"name": "DENSITY 38〜39",
+					"sql": "enddensity >= 38 AND enddensity < 39"
+				},
+				{
+					"name": "DENSITY 39〜40",
+					"sql": "enddensity >= 39 AND enddensity < 40"
+				},
+
+				{
+					"name": "DENSITY 40〜41",
+					"sql": "enddensity >= 40 AND enddensity < 41"
+				},
+				{
+					"name": "DENSITY 41〜42",
+					"sql": "enddensity >= 41 AND enddensity < 42"
+				},
+				{
+					"name": "DENSITY 42〜43",
+					"sql": "enddensity >= 42 AND enddensity < 43"
+				},
+				{
+					"name": "DENSITY 43〜44",
+					"sql": "enddensity >= 43 AND enddensity < 44"
+				},
+				{
+					"name": "DENSITY 44〜45",
+					"sql": "enddensity >= 44 AND enddensity < 45"
+				},
+				{
+					"name": "DENSITY 45〜46",
+					"sql": "enddensity >= 45 AND enddensity < 46"
+				},
+				{
+					"name": "DENSITY 46〜47",
+					"sql": "enddensity >= 46 AND enddensity < 47"
+				},
+				{
+					"name": "DENSITY 47〜48",
+					"sql": "enddensity >= 47 AND enddensity < 48"
+				},
+				{
+					"name": "DENSITY 48〜49",
+					"sql": "enddensity >= 48 AND enddensity < 49"
+				},
+				{
+					"name": "DENSITY 49〜50",
+					"sql": "enddensity >= 49 AND enddensity < 50"
+				},
+				{
+					"name": "DENSITY 50〜",
+					"sql": "enddensity >= 50"
+				}
+			]
 		}
-
 	]
 },
 
