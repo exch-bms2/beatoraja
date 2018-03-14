@@ -28,13 +28,8 @@ public class CommandBar extends DirectoryBar {
     @Override
     public Bar[] getChildren() {
     	final MainController main = selector.main;
-        SongData[] infos = main.getSongDatabase().getSongDatas(sql,"player/" + main.getConfig().getPlayername() + "/score.db"
-        		,"player/" + main.getConfig().getPlayername() + "/scorelog.db",main.getInfoDatabase() != null ? "songinfo.db" : null);
-       Bar[] l = new Bar[infos.length];
-       for(int i = 0;i < infos.length;i++) {
-           l[i] = new SongBar(infos[i]);    	   
-       }
-        return l;
+        return SongBar.toSongBarArray(main.getSongDatabase().getSongDatas(sql,"player/" + main.getConfig().getPlayername() + "/score.db"
+        		,"player/" + main.getConfig().getPlayername() + "/scorelog.db",main.getInfoDatabase() != null ? "songinfo.db" : null));
     }
 
     public void updateFolderStatus() {

@@ -29,15 +29,6 @@ public class SameFolderBar extends DirectoryBar {
 
     @Override
     public Bar[] getChildren() {
-        List<Bar> l = new ArrayList<Bar>();
-        SongData[] songs = selector.getSongDatabase().getSongDatas("folder", crc);
-        List<String> sha = new ArrayList<String>();
-        for (SongData song : songs) {
-            if(!sha.contains(song.getSha256())) {
-                l.add(new SongBar(song));
-                sha.add(song.getSha256());
-            }
-        }
-        return l.toArray(new Bar[0]);
+        return SongBar.toSongBarArray(selector.getSongDatabase().getSongDatas("folder", crc));
     }
 }

@@ -21,12 +21,7 @@ public class SearchWordBar extends DirectoryBar {
 
     @Override
     public Bar[] getChildren() {
-        SongData[] songs = selector.getSongDatabase().getSongDatasByText(text);
-        Bar[] bar = new Bar[songs.length];
-        for (int i = 0;i < bar.length;i++) {
-            bar[i] = new SongBar(songs[i]);
-        }
-        return bar;
+        return SongBar.toSongBarArray(selector.getSongDatabase().getSongDatasByText(text));
     }
 
     public void updateFolderStatus() {

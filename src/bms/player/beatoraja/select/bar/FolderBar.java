@@ -5,8 +5,6 @@ import bms.player.beatoraja.song.*;
 
 import java.io.File;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * ファイルシステムと連動したフォルダバー。
@@ -39,24 +37,17 @@ public class FolderBar extends DirectoryBar {
 
     @Override
     public Bar[] getChildren() {
-        final String rootpath = Paths.get(".").toAbsolutePath().toString();
         SongDatabaseAccessor songdb = selector.getSongDatabase();
         SongData[] songs = songdb.getSongDatas("parent", crc);
         if (songs.length > 0) {
-            List<Bar> l = new ArrayList<Bar>(songs.length);
-        	List<String> sha = new ArrayList<String>(songs.length);
-            for (SongData song : songs) {
-            	if(!sha.contains(song.getSha256())) {
-                    l.add(new SongBar(song));
-                    sha.add(song.getSha256());
-            	}
-            } 	
-            return l.toArray(new Bar[l.size()]);
+            return SongBar.toSongBarArray(songs);
         }
         
         FolderData[] folders = songdb.getFolderDatas("parent", crc);
         Bar[] l = new Bar[folders.length];
-        
+
+        final String rootpath = Paths.get(".").toAbsolutePath().toString();
+
         for(int i = 0;i < folders.length;i++) {
             String path = folders[i].getPath();
             if (path.endsWith(String.valueOf(File.separatorChar))) {
