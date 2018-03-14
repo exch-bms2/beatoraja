@@ -350,6 +350,28 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 				}
 			}
 		});
+		addCommandWord(new CommandWord("SRC_SLIDER_REFNUMBER") {
+			//NUMBER値参照版
+			//#SRC_SLIDER_REFNUMBER,(NULL),gr,x,y,w,h,div_x,div_y,cycle,timer,muki,range,type,disable,min_value,max_value
+			@Override
+			public void execute(String[] str) {
+				slider = null;
+				int[] values = parseInt(str);
+				TextureRegion[] images = getSourceImage(values);
+				if (images != null) {
+					slider = new SkinSlider(images, values[10], values[9], values[11],
+							(int) (values[12] * (values[11] == 1 || values[11] == 3 ? (dstw / srcw) : (dsth / srch))),
+							values[13]);
+					slider.setChangable(values[14] == 0);
+					slider.setRefNum(true);
+					slider.setMin(values[15]);
+					slider.setMax(values[16]);
+					skin.add(slider);
+					// System.out.println("Object Added - " +
+					// (part.getTiming()));
+				}
+			}
+		});
 		addCommandWord(new CommandWord("DST_SLIDER") {
 			@Override
 			public void execute(String[] str) {
@@ -380,6 +402,39 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 						bar = new SkinGraph(images, values[10], values[9]);
 						bar.setReferenceID(values[11] + 100);
 						bar.setDirection(values[12]);
+						// System.out.println("Object Added - " +
+						// (part.getTiming()));
+					}
+				}
+				if (bar != null) {
+					skin.add(bar);
+				}
+			}
+		});
+		addCommandWord(new CommandWord("SRC_BARGRAPH_REFNUMBER") {
+			//NUMBER値参照版
+			//#SRC_BARGRAPH_REFNUMBER,(NULL),gr,x,y,w,h,div_x,div_y,cycle,timer,type,muki,min_value,max_value
+			@Override
+			public void execute(String[] str) {
+				bar = null;
+				int[] values = parseInt(str);
+				int gr = values[2];
+				if (gr >= 100) {
+					bar = new SkinGraph(gr);
+					bar.setReferenceID(values[11]);
+					bar.setDirection(values[12]);
+					bar.setRefNum(true);
+					bar.setMin(values[13]);
+					bar.setMax(values[14]);
+				} else {
+					TextureRegion[] images = getSourceImage(values);
+					if (images != null) {
+						bar = new SkinGraph(images, values[10], values[9]);
+						bar.setReferenceID(values[11]);
+						bar.setDirection(values[12]);
+						bar.setRefNum(true);
+						bar.setMin(values[13]);
+						bar.setMax(values[14]);
 						// System.out.println("Object Added - " +
 						// (part.getTiming()));
 					}

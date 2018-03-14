@@ -24,6 +24,18 @@ public class SkinGraph extends SkinObject {
 	 * グラフの伸びる向き(1:下, それ以外:右)
 	 */
 	private int direction = 1;
+	/**
+	 * NUMBER値参照かどうか
+	 */
+	private boolean isRefNum = false;
+	/**
+	 * NUMBER値参照の場合の最小値
+	 */
+	private int min = 0;
+	/**
+	 * NUMBER値参照の場合の最大値
+	 */
+	private int max = 0;
 
 	private final TextureRegion current = new TextureRegion();
 
@@ -44,7 +56,18 @@ public class SkinGraph extends SkinObject {
 			Rectangle r = this.getDestination(time, state);
 			TextureRegion image = state.getImage(getImageID());
 			if (r != null && image != null) {
-				final float value = id != -1 ? state.getSliderValue(id) : 0;
+				float value = id != -1 ? state.getSliderValue(id) : 0;
+				if(id != -1 && isRefNum && max != min) {
+					if(min < max) {
+						if(state.getNumberValue(id) > max) value = 1;
+						else if(state.getNumberValue(id) < min) value = 0;
+						else value = Math.abs( ((float) state.getNumberValue(id) - min) / (max - min) );
+					} else {
+						if(state.getNumberValue(id) < max) value = 1;
+						else if(state.getNumberValue(id) > min) value = 0;
+						else value = Math.abs( ((float) state.getNumberValue(id) - min) / (max - min) );
+					}
+				}
 				if (direction == 1) {
 					current.setRegion(image, 0,
 							image.getRegionY() + image.getRegionHeight() - (int) (image.getRegionHeight() * value),
@@ -59,7 +82,18 @@ public class SkinGraph extends SkinObject {
 		} else if (source != null) {
 			Rectangle r = this.getDestination(time, state);
 			if (r != null) {
-				final float value = id != -1 ? state.getSliderValue(id) : 0;
+				float value = id != -1 ? state.getSliderValue(id) : 0;
+				if(id != -1 && isRefNum && max != min) {
+					if(min < max) {
+						if(state.getNumberValue(id) > max) value = 1;
+						else if(state.getNumberValue(id) < min) value = 0;
+						else value = Math.abs( ((float) state.getNumberValue(id) - min) / (max - min) );
+					} else {
+						if(state.getNumberValue(id) < max) value = 1;
+						else if(state.getNumberValue(id) > min) value = 0;
+						else value = Math.abs( ((float) state.getNumberValue(id) - min) / (max - min) );
+					}
+				}
 				TextureRegion image = source.getImage(time, state);
 				if (direction == 1) {
 					current.setRegion(image, 0, image.getRegionHeight() - (int) (image.getRegionHeight() * value),
@@ -94,5 +128,29 @@ public class SkinGraph extends SkinObject {
 
 	public void setDirection(int direction) {
 		this.direction = direction;
+	}
+
+	public boolean isRefNum() {
+		return isRefNum;
+	}
+
+	public void setRefNum(boolean isRefNum) {
+		this.isRefNum = isRefNum;
+	}
+
+	public int getMin() {
+		return min;
+	}
+
+	public void setMin(int min) {
+		this.min = min;
+	}
+
+	public int getMax() {
+		return max;
+	}
+
+	public void setMax(int max) {
+		this.max = max;
 	}
 }
