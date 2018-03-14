@@ -16,6 +16,7 @@ import static bms.player.beatoraja.CourseData.CourseDataConstraint.*;
 
 import bms.player.beatoraja.CourseData.CourseDataConstraint;
 import bms.player.beatoraja.IRScoreData.SongTrophy;
+import bms.player.beatoraja.ScoreDatabaseAccessor.ScoreDataCollector;
 import bms.player.beatoraja.ScoreLogDatabaseAccessor.ScoreLog;
 import bms.player.beatoraja.song.SongData;
 
@@ -152,19 +153,8 @@ public class PlayDataAccessor {
 		return scoredb.getScoreData(hash, ln ? lnmode : 0);
 	}
 
-	public Map<String, IRScoreData> readScoreDatas(SongData[] songs, int lnmode) {
-		List<String> noln = new ArrayList<String>();
-		List<String> ln = new ArrayList<String>();
-		for (SongData song : songs) {
-			if (song.hasUndefinedLongNote()) {
-				ln.add(song.getSha256());
-			} else {
-				noln.add(song.getSha256());
-			}
-		}
-		Map<String, IRScoreData> result = scoredb.getScoreDatas(noln.toArray(new String[0]), 0);
-		result.putAll(scoredb.getScoreDatas(ln.toArray(new String[0]), lnmode));
-		return result;
+	public void readScoreDatas(ScoreDataCollector collector, SongData[] songs, int lnmode) {
+		scoredb.getScoreDatas(collector, songs, lnmode);
 	}
 
 	public List<IRScoreData> readScoreDatas(String sql) {

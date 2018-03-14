@@ -18,6 +18,7 @@ import bms.model.Mode;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.IRScoreData.SongTrophy;
 import bms.player.beatoraja.PlayerResource.PlayMode;
+import bms.player.beatoraja.ScoreDatabaseAccessor.ScoreDataCollector;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.ir.IRResponse;
 import bms.player.beatoraja.select.bar.*;
@@ -113,8 +114,8 @@ public class MusicSelector extends MainState {
 			}
 
 			@Override
-			protected Map<String, IRScoreData> readScoreDatasFromSource(SongData[] songs, int lnmode) {
-				return pda.readScoreDatas(songs, lnmode);
+			protected void readScoreDatasFromSource(ScoreDataCollector collector, SongData[] songs, int lnmode) {
+				pda.readScoreDatas(collector, songs, lnmode);
 			}
 		};
 
@@ -167,19 +168,8 @@ public class MusicSelector extends MainState {
 								return scoredb.getScoreData(song.getSha256(), song.hasUndefinedLongNote() ? lnmode : 0);
 							}
 
-							protected Map<String, IRScoreData> readScoreDatasFromSource(SongData[] songs, int lnmode) {
-								List<String> noln = new ArrayList<String>();
-								List<String> ln = new ArrayList<String>();
-								for (SongData song : songs) {
-									if (song.hasUndefinedLongNote()) {
-										ln.add(song.getSha256());
-									} else {
-										noln.add(song.getSha256());
-									}
-								}
-								Map<String, IRScoreData> result = scoredb.getScoreDatas(noln.toArray(new String[0]), 0);
-								result.putAll(scoredb.getScoreDatas(ln.toArray(new String[0]), lnmode));
-								return result;
+							protected void readScoreDatasFromSource(ScoreDataCollector collector, SongData[] songs, int lnmode) {
+								scoredb.getScoreDatas(collector,songs, lnmode);
 							}
 						});
 					}

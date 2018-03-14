@@ -1,6 +1,7 @@
 package bms.player.beatoraja.select;
 
 import bms.player.beatoraja.IRScoreData;
+import bms.player.beatoraja.ScoreDatabaseAccessor.ScoreDataCollector;
 import bms.player.beatoraja.song.SongData;
 import com.badlogic.gdx.utils.ObjectMap;
 
@@ -40,33 +41,35 @@ public abstract class ScoreDataCache {
         return score;
     }
 
-    public Map<String, IRScoreData> readScoreDatas(SongData[] songs, int lnmode) {
-        Map<String, IRScoreData> result = new HashMap<String, IRScoreData>(songs.length);
+    public void readScoreDatas(ScoreDataCollector collector, SongData[] songs, int lnmode) {
         // キャッシュからの抽出
-        List<SongData> noscore = new ArrayList<SongData>();
+        List<SongData> noscore = null;
         for (SongData song : songs) {
             final int cacheindex = song.hasUndefinedLongNote() ? lnmode : 3;
 
             if (scorecache[cacheindex].containsKey(song.getSha256())) {
-                result.put(song.getSha256(), scorecache[cacheindex].get(song.getSha256()));
+                collector.collect(song, scorecache[cacheindex].get(song.getSha256()));
             } else {
+            	if(noscore == null) {
+            		noscore = new ArrayList<SongData>();
+            	}
                 noscore.add(song);
             }
         }
 
-        if(noscore.size() == 0) {
-            return result;
+        if(noscore == null) {
+            return;
         }
+        
+        final SongData[] noscores = noscore.toArray(new SongData[noscore.size()]);
 
-        // データベースから抽出し、キャッシュに登録
-        Map<String, IRScoreData> scores = readScoreDatasFromSource(noscore.toArray(new SongData[noscore.size()]), lnmode);
-        for (SongData song : noscore) {
+        final ScoreDataCollector cachecollector = (song, score) -> {
             final int cacheindex = song.hasUndefinedLongNote() ? lnmode : 3;
-            IRScoreData score = scores.get(song.getSha256());
             scorecache[cacheindex].put(song.getSha256(), score);
-            result.put(song.getSha256(), score);
-        }
-        return result;
+        	collector.collect(song, score);
+        };
+        // データベースから抽出し、キャッシュに登録
+        readScoreDatasFromSource(cachecollector, noscores, lnmode);
     }
 
     boolean existsScoreDataCache(SongData song, int lnmode) {
@@ -88,5 +91,5 @@ public abstract class ScoreDataCache {
 
     protected abstract IRScoreData readScoreDatasFromSource(SongData songs, int lnmode);
 
-    protected abstract Map<String, IRScoreData> readScoreDatasFromSource(SongData[] songs, int lnmode);
+    protected abstract void readScoreDatasFromSource(ScoreDataCollector collector, SongData[] songs, int lnmode);
 }

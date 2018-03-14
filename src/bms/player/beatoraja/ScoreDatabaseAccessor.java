@@ -10,6 +10,9 @@ import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.sqlite.SQLiteConfig;
 import org.sqlite.SQLiteDataSource;
+
+import bms.player.beatoraja.song.SongData;
+
 import org.sqlite.SQLiteConfig.SynchronousMode;
 
 /**
@@ -127,26 +130,44 @@ public class ScoreDatabaseAccessor {
 	 *            スコアを取得する楽曲のhash
 	 * @return <ハッシュ, スコアデータ>のマップ
 	 */
-	public Map<String, IRScoreData> getScoreDatas(String[] hashes, int mode) {
-		Map<String, IRScoreData> result = new HashMap<String, IRScoreData>();
+	public void getScoreDatas(ScoreDataCollector collector, SongData[] songs, int mode) {
+		StringBuilder str = new StringBuilder(songs.length * 68);
+		getScoreDatas(collector, songs, mode, str, true);
+		str.setLength(0);
+		getScoreDatas(collector, songs, 0, str, false);
+	}
+	
+	private void getScoreDatas(ScoreDataCollector collector, SongData[] songs, int mode, StringBuilder str, boolean hasln) {
 		try {
-			StringBuilder str = new StringBuilder();
-			for (String hash : hashes) {
-				if (str.length() > 0) {
-					str.append(',');
+			for (SongData song : songs) {
+				if((hasln && song.hasUndefinedLongNote()) || (!hasln && !song.hasUndefinedLongNote())) {
+					if (str.length() > 0) {
+						str.append(',');
+					}
+					str.append('\'').append(song.getSha256()).append('\'');					
 				}
-				str.append('\'').append(hash).append('\'');
 			}
 
 			List<IRScoreData> scores = qr
 					.query("SELECT * FROM score WHERE sha256 IN (" + str.toString() + ") AND mode = " + mode, scoreHandler);
-			for (IRScoreData score : scores) {
-				result.put(score.getSha256(), score);
+			for(SongData song : songs) {
+				if((hasln && song.hasUndefinedLongNote()) || (!hasln && !song.hasUndefinedLongNote())) {
+					boolean b = true;
+					for (IRScoreData score : scores) {
+						if(song.getSha256().equals(score.getSha256())) {
+							collector.collect(song, score);
+							b = false;
+							break;
+						}
+					}
+					if(b) {
+						collector.collect(song, null);					
+					}					
+				}
 			}
 		} catch (Exception e) {
 			Logger.getGlobal().severe("スコア取得時の例外:" + e.getMessage());
-		}
-		return result;
+		}		
 	}
 
 	public List<IRScoreData> getScoreDatas(String sql) {
@@ -251,5 +272,10 @@ public class ScoreDatabaseAccessor {
 		} catch (Exception e) {
 			Logger.getGlobal().severe("スコア更新時の例外:" + e.getMessage());
 		}
+	}
+	
+	public interface ScoreDataCollector {
+		
+		public void collect(SongData hash, IRScoreData score);
 	}
 }
