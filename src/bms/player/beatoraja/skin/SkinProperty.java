@@ -290,6 +290,7 @@ public class SkinProperty {
 	public static final int NUMBER_POOR_RATE = 89;
 	public static final int NUMBER_MAXBPM = 90;
 	public static final int NUMBER_MINBPM = 91;
+	public static final int NUMBER_MAINBPM = 92;
 	public static final int NUMBER_PLAYLEVEL = 96;
 	public static final int NUMBER_POINT = 100;
 	public static final int NUMBER_SCORE2 = 101;
@@ -522,6 +523,7 @@ public class SkinProperty {
 	public static final int OPTION_TEXT = 175;
 	public static final int OPTION_NO_BPMCHANGE = 176;
 	public static final int OPTION_BPMCHANGE = 177;
+	public static final int OPTION_BPMSTOP = 1177;
 	public static final int OPTION_NO_RANDOMSEQUENCE = 178;
 	public static final int OPTION_RANDOMSEQUENCE = 179;
 

@@ -3,7 +3,9 @@ package bms.player.beatoraja.song;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import bms.model.BMSDecoder;
 import bms.model.BMSModel;
@@ -66,6 +68,8 @@ public class SongData {
 	private int judge;
 	private int minbpm;
 	private int maxbpm;
+	private int mainbpm;
+	private boolean bpmstop;
 	/**
 	 * 曲の長さ(ms)
 	 */
@@ -126,6 +130,25 @@ public class SongData {
 		judge = model.getJudgerank();
 		minbpm = (int) model.getMinBPM();
 		maxbpm = (int) model.getMaxBPM();
+		boolean existStop = false;
+		Map<Double, Integer> bpmMap = new HashMap<Double, Integer>();
+		for (TimeLine tl : model.getAllTimeLines()) {
+			Integer count = bpmMap.get(tl.getBPM());
+			if (count == null) {
+				count = 0;
+			}
+			bpmMap.put(tl.getBPM(), count + tl.getTotalNotes());
+			if(tl.getStop() > 0) existStop = true;
+		}
+		int maxcount = 0;
+		for (double bpm : bpmMap.keySet()) {
+			if (bpmMap.get(bpm) > maxcount) {
+				maxcount = bpmMap.get(bpm);
+				mainbpm = (int) bpm;
+			}
+		}
+		if(existStop) bpmstop = true;
+		else bpmstop = false;
 		length = model.getLastTime();
 		notes = model.getTotalNotes();
 
@@ -273,6 +296,22 @@ public class SongData {
 
 	public void setMaxbpm(int maxbpm) {
 		this.maxbpm = maxbpm;
+	}
+
+	public int getMainbpm() {
+		return mainbpm;
+	}
+
+	public void setMainbpm(int mainbpm) {
+		this.mainbpm = mainbpm;
+	}
+
+	public boolean isBpmstop() {
+		return bpmstop;
+	}
+
+	public void setBpmstop(boolean bpmstop) {
+		this.bpmstop = bpmstop;
 	}
 
 	public String getBanner() {

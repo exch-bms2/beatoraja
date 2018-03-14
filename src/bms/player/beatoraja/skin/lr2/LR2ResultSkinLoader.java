@@ -11,6 +11,7 @@ import com.badlogic.gdx.math.Rectangle;
 
 import bms.player.beatoraja.result.MusicResultSkin;
 import bms.player.beatoraja.result.SkinGaugeGraphObject;
+import bms.player.beatoraja.skin.SkinBPMGraph;
 import bms.player.beatoraja.skin.SkinHeader;
 import bms.player.beatoraja.skin.SkinNoteDistributionGraph;
 
@@ -24,6 +25,7 @@ public class LR2ResultSkinLoader extends LR2SkinCSVLoader<MusicResultSkin> {
 	private Rectangle gauge = new Rectangle();
 	private SkinGaugeGraphObject gaugeobj;
 	private SkinNoteDistributionGraph noteobj;
+	private SkinBPMGraph bpmgraphobj;
 
 	public LR2ResultSkinLoader(final Resolution src, final Config c) {
 		super(src, c);
@@ -74,6 +76,28 @@ public class LR2ResultSkinLoader extends LR2SkinCSVLoader<MusicResultSkin> {
 				gauge.x = values[3];
 				gauge.y = src.height - values[4];
 				skin.setDestination(noteobj, values[2], gauge.x, gauge.y, gauge.width, gauge.height, values[7], values[8],
+						values[9], values[10], values[11], values[12], values[13], values[14], values[15],
+						values[16], values[17], values[18], values[19], values[20], values[21]);
+			}
+		});
+
+		addCommandWord(new CommandWord("SRC_BPMCHART") {
+			//#SRC_BPMCHART, field_w, field_h, delay, lineWidth, mainBPMColor, minBPMColor, maxBPMColor, otherBPMColor, stopLineColor, transitionLineColor
+			@Override
+			public void execute(String[] str) {
+				int[] values = parseInt(str);
+				bpmgraphobj = new SkinBPMGraph(values[3], values[4], str[5], str[6], str[7], str[8], str[9], str[10]);
+				gauge = new Rectangle(0, 0, values[1], values[2]);
+				skin.add(bpmgraphobj);
+			}
+		});
+		addCommandWord(new CommandWord("DST_BPMCHART") {
+			@Override
+			public void execute(String[] str) {
+				int[] values = parseInt(str);
+				gauge.x = values[3];
+				gauge.y = src.height - values[4];
+				skin.setDestination(bpmgraphobj, values[2], gauge.x, gauge.y, gauge.width, gauge.height, values[7], values[8],
 						values[9], values[10], values[11], values[12], values[13], values[14], values[15],
 						values[16], values[17], values[18], values[19], values[20], values[21]);
 			}
