@@ -108,6 +108,11 @@ public class MusicSelector extends MainState {
 
 		scorecache = new ScoreDataCache() {
 			@Override
+			protected IRScoreData readScoreDatasFromSource(SongData song, int lnmode) {
+				return pda.readScoreData(song.getSha256(), song.hasUndefinedLongNote(), lnmode);
+			}
+
+			@Override
 			protected Map<String, IRScoreData> readScoreDatasFromSource(SongData[] songs, int lnmode) {
 				return pda.readScoreDatas(songs, lnmode);
 			}
@@ -156,6 +161,11 @@ public class MusicSelector extends MainState {
 					PlayerInformation info = scoredb.getInformation();
 					if(info != null) {
 						rivalcaches.put(info,  new ScoreDataCache() {
+
+							@Override
+							protected IRScoreData readScoreDatasFromSource(SongData song, int lnmode) {
+								return scoredb.getScoreData(song.getSha256(), song.hasUndefinedLongNote() ? lnmode : 0);
+							}
 
 							protected Map<String, IRScoreData> readScoreDatasFromSource(SongData[] songs, int lnmode) {
 								List<String> noln = new ArrayList<String>();
@@ -371,14 +381,17 @@ public class MusicSelector extends MainState {
 
 	private void readCourse(PlayMode mode) {
 		final PlayerResource resource = main.getPlayerResource();
-		if (((GradeBar) bar.getSelected()).existsAllSongs()) {
+		final GradeBar course = (GradeBar) bar.getSelected();
+		if (course.existsAllSongs()) {
 			resource.clear();
-			List<Path> files = new ArrayList<Path>();
-			for (SongData song : ((GradeBar) bar.getSelected()).getSongDatas()) {
-				files.add(Paths.get(song.getPath()));
+			final SongData[] songs = course.getSongDatas();
+			Path[] files = new Path[songs.length];
+			int i = 0;
+			for (SongData song : songs) {
+				files[i++] = Paths.get(song.getPath());
 			}
-			if (resource.setCourseBMSFiles(files.toArray(new Path[files.size()]))) {
-				for (CourseData.CourseDataConstraint constraint : ((GradeBar) bar.getSelected()).getConstraint()) {
+			if (resource.setCourseBMSFiles(files)) {
+				for (CourseData.CourseDataConstraint constraint : course.getConstraint()) {
 					switch (constraint) {
 					case CLASS:
 						if (mode == PlayMode.PLAY || mode.isAutoPlayMode()) {
@@ -419,7 +432,7 @@ public class MusicSelector extends MainState {
 				}
 				preview.stop();
 				resource.setCoursetitle(bar.getSelected().getTitle());
-				resource.setBMSFile(files.get(0), mode);
+				resource.setBMSFile(files[0], mode);
 				main.changeState(MainController.STATE_DECIDE);
 				banners.disposeOld();
 			} else {
