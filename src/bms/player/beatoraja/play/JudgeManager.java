@@ -212,6 +212,7 @@ public class JudgeManager {
 		final MainController mc = main.main;
 		final BMSPlayerInputProcessor input = mc.getInputProcessor();
 		final Config config = mc.getPlayerResource().getConfig();
+		final PlayerConfig playerConfig = mc.getPlayerResource().getPlayerConfig();
 		final long[] keytime = input.getTime();
 		final boolean[] keystate = input.getKeystate();
 		final long now = mc.getNowTime();
@@ -257,6 +258,9 @@ public class JudgeManager {
 						auto_presstime[laneassign[lane][0]] = now;
 						main.play(note, config.getKeyvolume(), 0);
 						this.update(lane, note, time, 0, 0);
+						if(playerConfig.isGuideSE()) {
+							main.play(main.SOUND_GUIDE_SE_PG);
+						}
 					}
 					if (note instanceof LongNote) {
 						final LongNote ln = (LongNote) note;
@@ -272,6 +276,9 @@ public class JudgeManager {
 								this.update(lane, ln, time, 0, 0);
 							}
 							processing[lane] = ln.getPair();
+							if(playerConfig.isGuideSE()) {
+								main.play(main.SOUND_GUIDE_SE_PG);
+							}
 						}
 						if (ln.isEnd() && ln.getState() == 0) {
 							if ((lntype != BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
@@ -438,6 +445,11 @@ public class JudgeManager {
 							// 通常ノート処理
 							final int dtime = (int) (tnote.getTime() - ptime);
 							this.update(lane, tnote, time, j, dtime);
+						}
+						if(playerConfig.isGuideSE()) {
+							if(j == 0) main.play(main.SOUND_GUIDE_SE_PG);
+							else if(j == 1) main.play(main.SOUND_GUIDE_SE_GR);
+							else if(j == 2) main.play(main.SOUND_GUIDE_SE_GD);
 						}
 					} else {
 						// 空POOR判定がないときのレーザー色変更処理

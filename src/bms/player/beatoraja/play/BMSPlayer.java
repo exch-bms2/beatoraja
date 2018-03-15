@@ -92,6 +92,9 @@ public class BMSPlayer extends MainState {
 
 	public static final int SOUND_READY = 0;
 	public static final int SOUND_PLAYSTOP = 1;
+	public static final int SOUND_GUIDE_SE_PG = 10;
+	public static final int SOUND_GUIDE_SE_GR = 11;
+	public static final int SOUND_GUIDE_SE_GD = 12;
 
 	public BMSPlayer(MainController main, PlayerResource resource) {
 		super(main);
@@ -414,6 +417,9 @@ public class BMSPlayer extends MainState {
 
 		setSound(SOUND_READY, "playready.wav", SoundType.SOUND, false);
 		setSound(SOUND_PLAYSTOP, "playstop.wav", SoundType.SOUND, false);
+		setSound(SOUND_GUIDE_SE_PG, "guide-pg.wav", SoundType.SOUND, false);
+		setSound(SOUND_GUIDE_SE_GR, "guide-gr.wav", SoundType.SOUND, false);
+		setSound(SOUND_GUIDE_SE_GD, "guide-gd.wav", SoundType.SOUND, false);
 
 		final BMSPlayerInputProcessor input = main.getInputProcessor();
 		input.setMinimumInputDutration(conf.getInputduration());

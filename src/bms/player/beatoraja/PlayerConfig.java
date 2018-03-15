@@ -119,6 +119,11 @@ public class PlayerConfig {
 	 */
 	private int sevenToNineType = 0;
 
+	/**
+	 * Guide SE
+	 */
+	private boolean isGuideSE = false;
+
 	private SkinConfig[] skin = new SkinConfig[SkinType.getMaxSkinTypeID() + 1];
 
 	private PlayConfig mode7 = new PlayConfig(Mode.BEAT_7K);
@@ -477,6 +482,14 @@ public class PlayerConfig {
 
 	public void setSevenToNineType(int sevenToNineType) {
 		this.sevenToNineType = sevenToNineType;
+	}
+
+	public boolean isGuideSE() {
+		return isGuideSE;
+	}
+
+	public void setGuideSE(boolean isGuideSE) {
+		this.isGuideSE = isGuideSE;
 	}
 
 	public String getId() {
