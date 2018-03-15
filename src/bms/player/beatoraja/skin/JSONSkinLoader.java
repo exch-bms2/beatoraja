@@ -383,6 +383,9 @@ public class JSONSkinLoader extends SkinLoader{
 									img.timer, img.cycle, img.angle, (int) ((img.angle == 1 || img.angle == 3
 											? ((float)dstr.width / sk.w) : ((float)dstr.height / sk.h)) * img.range),
 									img.type);
+							((SkinSlider) obj).setRefNum(img.isRefNum);
+							((SkinSlider) obj).setMin(img.min);
+							((SkinSlider) obj).setMax(img.max);
 							break;
 						}
 					}
@@ -417,6 +420,9 @@ public class JSONSkinLoader extends SkinLoader{
 										img.timer, img.cycle);
 								((SkinGraph) obj).setDirection(img.angle);
 								((SkinGraph) obj).setReferenceID(img.type);
+								((SkinGraph) obj).setRefNum(img.isRefNum);
+								((SkinGraph) obj).setMin(img.min);
+								((SkinGraph) obj).setMax(img.max);
 								break;
 							}
 						}
@@ -1160,6 +1166,9 @@ public class JSONSkinLoader extends SkinLoader{
 		public int angle;
 		public int range;
 		public int type;
+		public boolean isRefNum = false;
+		public int min = 0;
+		public int max = 0;
 	}
 
 	public static class Graph {
@@ -1175,6 +1184,9 @@ public class JSONSkinLoader extends SkinLoader{
 		public int cycle;
 		public int angle = 1;
 		public int type;
+		public boolean isRefNum = false;
+		public int min = 0;
+		public int max = 0;
 	}
 
 	public static class GaugeGraph {
