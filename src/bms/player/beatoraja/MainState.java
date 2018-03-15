@@ -637,11 +637,12 @@ public abstract class MainState {
 			p = main.getSoundManager().getSoundPath();
 			break;
 		}
-		if (p == null) {
-			return;
+		if (p != null) {
+			path = p.resolve(path).toString();
+			path = path.substring(0, path.lastIndexOf('.'));
+		} else {
+			path = "defaultsound/" + path.substring(path.contains("/") || path.contains("\\") ? Math.max(path.lastIndexOf('/'),path.lastIndexOf('\\')) + 1 : 0, path.contains(".") ? path.lastIndexOf('.') : path.length());
 		}
-		path = p.resolve(path).toString();
-		path = path.substring(0, path.lastIndexOf('.'));
 
 		if(!setSoundFile(id, path, type, loop)) {
 			path = "defaultsound/" + path.substring(path.contains("/") || path.contains("\\") ? Math.max(path.lastIndexOf('/'),path.lastIndexOf('\\')) + 1 : 0, path.length());
