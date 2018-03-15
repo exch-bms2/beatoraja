@@ -291,6 +291,9 @@ public class JudgeManager {
 								this.update(lane, ln, time, 0, 0);
 								main.play(processing[lane], config.getKeyvolume(), 0);
 								processing[lane] = null;
+								if(playerConfig.isGuideSE() && sckeyassign[lane] != -1) {
+									main.play(main.SOUND_GUIDE_SE_PG);
+								}
 							}
 						}
 					}
@@ -378,6 +381,11 @@ public class JudgeManager {
 						main.play(processing[lane], config.getKeyvolume(), 0);
 						processing[lane] = null;
 						sckey[sc] = 0;
+						if(playerConfig.isGuideSE()) {
+							if(j == 0) main.play(main.SOUND_GUIDE_SE_PG);
+							else if(j == 1) main.play(main.SOUND_GUIDE_SE_GR);
+							else if(j == 2) main.play(main.SOUND_GUIDE_SE_GD);
+						}
 					} else {
 						// ここに来るのはマルチキーアサイン以外ありえないはず
 					}
