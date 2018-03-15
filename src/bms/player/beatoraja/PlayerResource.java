@@ -325,7 +325,11 @@ public class PlayerResource {
 		if (model != null) {
 			model = loadBMSModel(Paths.get(model.getPath()), pconfig.getLnmode());
 		}
+		final String name = tablename;
+		final String lev = tablelevel;
 		clear();
+		tablename = name;
+		tablelevel = lev;
 	}
 
 	public FloatArray[] getGauge() {
@@ -486,8 +490,8 @@ public class PlayerResource {
 									ts.getMd5().equals(this.getSongdata().getMd5()))||
 									(ts.getMd5().length() != 0 && this.getSongdata().getMd5().length() != 0 &&
 									ts.getSha256().equals(this.getSongdata().getSha256()))){
-								this.setTablename(td.getName());
-								this.setTablelevel(tf.getName());
+								tablename = td.getName();
+								tablelevel = tf.getName();
 								return;
 							}
 						}
@@ -495,6 +499,8 @@ public class PlayerResource {
 				}
 			}
 		}
+		tablename = "";
+		tablelevel = "";
 	}
 
 	public enum PlayMode {
