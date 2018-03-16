@@ -71,7 +71,9 @@ public class ShortPCM extends PCM<short[]> {
 	 */
 	public ShortPCM changeSampleRate(int sample) {
 		short[] samples = getSample(sample);
-		return new ShortPCM(channels, sample, 0, samples.length, samples);
+		int start = Math.min((int)((long)this.start * sample / this.sampleRate), samples.length - 1);
+		int len = Math.min((int)((long)this.len * sample / this.sampleRate), samples.length - start);
+		return new ShortPCM(channels, sample, start, len, samples);
 	}
 
 	/**
@@ -83,7 +85,9 @@ public class ShortPCM extends PCM<short[]> {
 	 */
 	public ShortPCM changeFrequency(float rate) {
 		short[] samples = getSample((int) (sampleRate / rate));
-		return new ShortPCM(channels, sampleRate, 0, samples.length, samples);
+		int start = Math.min((int)((long)this.start / rate / this.sampleRate), samples.length - 1);
+		int len = Math.min((int)((long)this.len / rate / this.sampleRate), samples.length - start);
+		return new ShortPCM(channels, sampleRate, start, len, samples);
 	}
 	
 	private short[] getSample(int sample) {
