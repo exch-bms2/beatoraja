@@ -358,6 +358,7 @@
                     <rowConstraints>
                         <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
                         <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
+                        <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
                     </rowConstraints>
                     <Label text="%ASSIST_OPTION" GridPane.rowIndex="0" />
                     <CheckBox fx:id="constant" mnemonicParsing="false" text="%CONSTANT" GridPane.columnIndex="1" GridPane.rowIndex="0" />
@@ -369,6 +370,7 @@
                     <CheckBox fx:id="judgeregion" mnemonicParsing="false" text="%JUDGE_REGION" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                     <CheckBox fx:id="markprocessednote" mnemonicParsing="false" text="%MARK_PROCESSED_NOTE" GridPane.columnIndex="3" GridPane.rowIndex="1" />
                     <CheckBox fx:id="continueuntilendofsong" mnemonicParsing="false" text="%CONTINUE_UNTIL_END_OF_SONG" GridPane.columnIndex="4" GridPane.rowIndex="1" />
+                    <CheckBox fx:id="guidese" mnemonicParsing="false" text="%GUIDE_SE" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                 </GridPane>
                 <HBox prefHeight="9.0" prefWidth="720.0">
                     <opaqueInsets>
