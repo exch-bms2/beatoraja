@@ -255,8 +255,9 @@ public class MainController extends ApplicationAdapter {
 		case STATE_SELECTMUSIC:
 			if (this.bmsfile != null) {
 				exit();
+			} else {
+				newState = selector;
 			}
-			newState = selector;
 			break;
 		case STATE_DECIDE:
 			newState = decide;
@@ -388,7 +389,9 @@ public class MainController extends ApplicationAdapter {
 
 		current.render();
 		sprite.begin();
-		current.getSkin().drawAllObjects(sprite, current);
+		if (current.getSkin() != null) {
+			current.getSkin().drawAllObjects(sprite, current);
+		}
 		sprite.end();
 
 		final Stage stage = current.getStage();
