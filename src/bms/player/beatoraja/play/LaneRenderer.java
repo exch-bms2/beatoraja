@@ -69,9 +69,20 @@ public class LaneRenderer {
 	private PlayConfig playconfig;
 
 	private int currentduration;
+	private int currentdurationLanecoverOn;
+	private int currentdurationLanecoverOff;
+	private int mainbpmdurationLanecoverOn;
+	private int mainbpmdurationLanecoverOff;
+	private int minbpmdurationLanecoverOn;
+	private int minbpmdurationLanecoverOff;
+	private int maxbpmdurationLanecoverOn;
+	private int maxbpmdurationLanecoverOff;
 
 	private double basebpm;
 	private double nowbpm;
+	private double mainbpm;
+	private double minbpm;
+	private double maxbpm;
 
 	private TextureRegion[] noteimage;
 	private TextureRegion[][] longnote;
@@ -150,6 +161,23 @@ public class LaneRenderer {
 		// (model.getAllTimeLines().length - timelines.length) + " / " +
 		// model.getAllTimeLines().length);
 
+		minbpm = model.getMinBPM();
+		maxbpm = model.getMaxBPM();
+		Map<Double, Integer> m = new HashMap<Double, Integer>();
+		for (TimeLine tl : model.getAllTimeLines()) {
+			Integer count = m.get(tl.getBPM());
+			if (count == null) {
+				count = 0;
+			}
+			m.put(tl.getBPM(), count + tl.getTotalNotes());
+		}
+		int maxcount = 0;
+		for (double bpm : m.keySet()) {
+			if (m.get(bpm) > maxcount) {
+				maxcount = m.get(bpm);
+				mainbpm = bpm;
+			}
+		}
 		switch (config.getFixhispeed()) {
 		case PlayerConfig.FIX_HISPEED_OFF:
 			break;
@@ -157,27 +185,13 @@ public class LaneRenderer {
 			basebpm = model.getBpm();
 			break;
 		case PlayerConfig.FIX_HISPEED_MINBPM:
-			basebpm = model.getMinBPM();
+			basebpm = minbpm;
 			break;
 		case PlayerConfig.FIX_HISPEED_MAXBPM:
-			basebpm = model.getMaxBPM();
+			basebpm = maxbpm;
 			break;
 		case PlayerConfig.FIX_HISPEED_MAINBPM:
-			Map<Double, Integer> m = new HashMap<Double, Integer>();
-			for (TimeLine tl : model.getAllTimeLines()) {
-				Integer count = m.get(tl.getBPM());
-				if (count == null) {
-					count = 0;
-				}
-				m.put(tl.getBPM(), count + tl.getTotalNotes());
-			}
-			int maxcount = 0;
-			for (double bpm : m.keySet()) {
-				if (m.get(bpm) > maxcount) {
-					maxcount = m.get(bpm);
-					basebpm = bpm;
-				}
-			}
+			basebpm = mainbpm;
 			break;
 		}
 
@@ -207,6 +221,38 @@ public class LaneRenderer {
 
 	public int getCurrentDuration() {
 		return currentduration;
+	}
+
+	public int getCurrentDurationLanecoverOn() {
+		return currentdurationLanecoverOn;
+	}
+
+	public int getCurrentDurationLanecoverOff() {
+		return currentdurationLanecoverOff;
+	}
+
+	public int getMainbpmdurationLanecoverOn() {
+		return mainbpmdurationLanecoverOn;
+	}
+
+	public int getMainbpmdurationLanecoverOff() {
+		return mainbpmdurationLanecoverOff;
+	}
+
+	public int getMinbpmdurationLanecoverOn() {
+		return minbpmdurationLanecoverOn;
+	}
+
+	public int getMinbpmdurationLanecoverOff() {
+		return minbpmdurationLanecoverOff;
+	}
+
+	public int getMaxbpmdurationLanecoverOn() {
+		return maxbpmdurationLanecoverOn;
+	}
+
+	public int getMaxbpmdurationLanecoverOff() {
+		return maxbpmdurationLanecoverOff;
 	}
 
 	public float getHispeedmargin() {
@@ -299,14 +345,23 @@ public class LaneRenderer {
 			nbpm = timelines[i].getBPM();
 		}
 		nowbpm = nbpm;
-		final int region = (int) (240000 / nbpm / hispeed);
+		final double region = (240000 / nbpm / hispeed);
 		// double sect = (bpm / 60) * 4 * 1000;
 		final double hu = laneregion[0].y + laneregion[0].height;
 		final double hl = enableLift ? laneregion[0].y + laneregion[0].height * lift : laneregion[0].y;
 		final double rxhs = (hu - hl) * hispeed;
 		double y = hl;
 
-		currentduration = Math.round(region * (1 - (enableLanecover ? lanecover : 0)));
+		currentduration = (int) Math.round(region * (1 - (enableLanecover ? lanecover : 0)));
+
+		currentdurationLanecoverOn = (int) Math.round( region * (1 - lanecover) );
+		currentdurationLanecoverOff = (int) Math.round( region );
+		mainbpmdurationLanecoverOn = (int) Math.round( (240000 / mainbpm / hispeed) * (1 - lanecover) );
+		mainbpmdurationLanecoverOff = (int) Math.round( 240000 / mainbpm / hispeed );
+		minbpmdurationLanecoverOn = (int) Math.round( (240000 / minbpm / hispeed) * (1 - lanecover) );
+		minbpmdurationLanecoverOff = (int) Math.round( 240000 / minbpm / hispeed );
+		maxbpmdurationLanecoverOn = (int) Math.round( (240000 / maxbpm / hispeed) * (1 - lanecover) );
+		maxbpmdurationLanecoverOff = (int) Math.round( 240000 / maxbpm / hispeed );
 
 		// 判定エリア表示
 		// TODO 実装が古いため、書き直す
