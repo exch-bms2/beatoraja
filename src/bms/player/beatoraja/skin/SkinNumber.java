@@ -127,11 +127,21 @@ public class SkinNumber extends SkinObject {
 			shiftbase = 0;
 			value = Math.abs(value);
 			for (int j = values.length - 1; j >= 0; j--) {
-				if (value > 0 || j == values.length - 1) {
-					values[j] = value % 10;
+				if(mimage != null && zeropadding > 0) {
+					if(j == 0) {
+						values[j] = 11;
+					} else if(value > 0 || j == values.length - 1) {
+						values[j] = value % 10;
+					} else {
+						values[j] = zeropadding == 2 ? 10 : 0;
+					}
 				} else {
-					values[j] = (zeropadding == 2 ? 10 : (zeropadding == 1 ? 0 : (mimage != null
-							&& (values[j + 1] != 11 && values[j + 1] != -1) ? 11 : -1)));
+					if (value > 0 || j == values.length - 1) {
+						values[j] = value % 10;
+					} else {
+						values[j] = (zeropadding == 2 ? 10 : (zeropadding == 1 ? 0 : (mimage != null
+								&& (values[j + 1] != 11 && values[j + 1] != -1) ? 11 : -1)));
+					}
 				}
 				if(values[j] == -1) {
 					shiftbase++;
