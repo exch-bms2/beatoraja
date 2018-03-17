@@ -3,10 +3,9 @@ package bms.player.beatoraja.audio;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.ShortBuffer;
 
 /**
- * 16bit short PCM
+ * 16bit short PCM (using diect buffer)
  * 
  * @author exch
  */
@@ -18,40 +17,42 @@ public class ShortDirectPCM extends PCM<ByteBuffer> {
 
 	protected static ShortDirectPCM loadPCM(PCMLoader loader) throws IOException {
 		ByteBuffer sample = null;
-		final int bytes = loader.bytes;
-		final byte[] pcm = loader.pcm;
+		final int bytes = loader.pcm.limit();
+		final ByteBuffer pcm = loader.pcm;
+		pcm.rewind();
 		
 		switch(loader.bitsPerSample) {
 		case 8:
-			sample = ByteBuffer.allocateDirect(bytes * 2);
+			sample = ByteBuffer.allocateDirect(bytes * 2).order(ByteOrder.LITTLE_ENDIAN);
 			for (int i = 0; i < bytes; i++) {
-				sample.putShort((short) ((((short) pcm[i]) - 128) * 256));
+				sample.putShort((short) ((((short) pcm.get()) - 128) * 256));
 			}
 			break;
 		case 16:
 			// final long time = System.nanoTime();
-			sample = ByteBuffer.allocateDirect(bytes).order(ByteOrder.nativeOrder()).put(pcm, 0, bytes);
+			if(pcm.isDirect()) {
+				sample = pcm;
+			} else {
+				sample = ByteBuffer.allocateDirect(bytes).order(ByteOrder.LITTLE_ENDIAN).put(pcm.array(), 0, bytes);				
+			}
 			break;
 		case 24:
-			sample = ByteBuffer.allocateDirect(bytes * 2 / 3);
+			sample = ByteBuffer.allocateDirect(bytes * 2 / 3).order(ByteOrder.LITTLE_ENDIAN);
 			for (int i = 0, len = bytes / 3; i < len; i++) {
-				sample.putShort((short) ((pcm[i * 3 + 1] & 0xff) | (pcm[i * 3 + 2] << 8)));
+				sample.putShort(pcm.getShort(i * 3 + 1));
 			}
 			break;
 		case 32:
-			int pos = 0;
-			sample = ByteBuffer.allocateDirect(bytes / 2);
+			sample = ByteBuffer.allocateDirect(bytes / 2).order(ByteOrder.LITTLE_ENDIAN);
 			for (int i = 0, len = bytes / 4; i < len; i++) {
-				sample.putShort((short) (Float.intBitsToFloat((pcm[pos] & 0xff) | ((pcm[pos + 1] & 0xff) << 8)
-						| ((pcm[pos + 2] & 0xff) << 16) | ((pcm[pos + 3] & 0xff) << 24)) * Short.MAX_VALUE));
-				pos += 4;
+				sample.putShort((short) (pcm.getFloat() * Short.MAX_VALUE));
 			}
 			break;
 		default:
 			throw new IOException(loader.bitsPerSample + " bits per samples isn't supported");			
 		}
 		
-		return new ShortDirectPCM(loader.channels, loader.sampleRate, 0, sample.capacity() / 2, sample);
+		return new ShortDirectPCM(loader.channels, loader.sampleRate, 0, bytes * 8 / (loader.bitsPerSample), sample);
 		// System.out.println(p.toString() + " : " + (System.nanoTime() -
 		// time));
 	}

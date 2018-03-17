@@ -1,6 +1,8 @@
 package bms.player.beatoraja.audio;
 
 import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -62,6 +64,8 @@ public abstract class PCM<T> {
 			if(loader.bitsPerSample > 16) {
 //				System.out.println("FLOAT");
 				return FloatPCM.loadPCM(loader);				
+			} else if(loader.bitsPerSample == 16 && loader.pcm.isDirect()) {
+				return ShortDirectPCM.loadPCM(loader);
 			} else {
 				return ShortPCM.loadPCM(loader);
 			}
@@ -146,17 +150,17 @@ public abstract class PCM<T> {
 	
 	static class PCMLoader {
 		
-		byte[] pcm;
+		ByteBuffer pcm;
 		int channels = 0;
 		int sampleRate = 0;
-		int bytes = 0;
 		int bitsPerSample = 0;
 		
 		public PCMLoader() {
 			
 		};
 		
-		public byte[] loadPCM(Path p) throws IOException {
+		public void loadPCM(Path p) throws IOException {
+			// TODO この場でsampleRateを引数に取って変換し、メモリ確保のコストを減らす
 			// final long time = System.nanoTime();
 			pcm = null;
 
@@ -167,14 +171,20 @@ public abstract class PCM<T> {
 					case 1:
 					case 3:
 					{
-						OptimizedByteArrayOutputStream output = new OptimizedByteArrayOutputStream(input.dataRemaining);
-						StreamUtils.copyStream(input, output);
-						pcm = output.getBuffer();
-						bytes = output.size();
-						
 						channels = input.channels;
 						sampleRate = input.sampleRate;
 						bitsPerSample = input.bitsPerSample;;
+						
+						if(sampleRate == 16) {
+							pcm = ByteBuffer.allocateDirect(input.dataRemaining).order(ByteOrder.LITTLE_ENDIAN);
+							StreamUtils.copyStream(input, pcm);
+						} else {
+							OptimizedByteArrayOutputStream output = new OptimizedByteArrayOutputStream(input.dataRemaining);
+							StreamUtils.copyStream(input, output);
+							pcm = ByteBuffer.wrap(output.getBuffer()).order(ByteOrder.LITTLE_ENDIAN);
+							pcm.limit(output.size());
+						}
+						
 						break;					
 					}
 					case 85:
@@ -206,9 +216,9 @@ public abstract class PCM<T> {
 								output.write(outputBuffer.getBuffer(), 0, outputBuffer.reset());
 							}
 							bitstream.close();
-							pcm = output.toByteArray();
+							byte[] bytes = output.toByteArray();
+							pcm = ByteBuffer.allocateDirect(bytes.length).order(ByteOrder.LITTLE_ENDIAN).put(bytes);
 							bitsPerSample = 16;
-							bytes = pcm.length;
 						} catch (BitstreamException e) {
 							e.printStackTrace();
 						}
@@ -233,15 +243,13 @@ public abstract class PCM<T> {
 							break;
 						output.write(buff, 0, length);
 					}
-
+					
 					channels = input.getChannels();
 					sampleRate = input.getSampleRate();
 					bitsPerSample = 16;
-
-					pcm = output.getBuffer();
-					bytes = output.size();
-					// System.out.println(p.toString() + " : " + (System.nanoTime()
-					// - time));
+					
+					pcm = ByteBuffer.allocateDirect(output.size()).put(output.getBuffer(), 0, output.size()).order(ByteOrder.LITTLE_ENDIAN);;
+//					System.out.println(name + " - length : " + input.getLength() + " ( " + input.getLength() * 16 + " ) " + " , bytes : " + bytes);
 				} catch (Throwable ex) {
 				}
 			} else if (name.endsWith(".mp3")) {
@@ -271,9 +279,9 @@ public abstract class PCM<T> {
 						output.write(outputBuffer.getBuffer(), 0, outputBuffer.reset());
 					}
 					bitstream.close();
-					pcm = output.toByteArray();
+					byte[] bytes = output.toByteArray();
+					pcm = ByteBuffer.allocateDirect(bytes.length).order(ByteOrder.LITTLE_ENDIAN).put(bytes);
 					bitsPerSample = 16;
-					bytes = pcm.length;
 				} catch (Throwable ex) {
 				}
 			} else if (name.endsWith(".flac")) {
@@ -291,8 +299,12 @@ public abstract class PCM<T> {
 					
 					input.decodeFrames();
 					
-					pcm = output.getBuffer();
-					bytes = output.size();
+					if(bitsPerSample == 16) {
+						pcm = ByteBuffer.allocateDirect(output.size()).put(output.getBuffer(), 0, output.size()).order(ByteOrder.LITTLE_ENDIAN);						
+					} else {
+						pcm = ByteBuffer.wrap(output.getBuffer()).order(ByteOrder.LITTLE_ENDIAN);
+						pcm.limit(output.size());						
+					}
 				} catch (Throwable ex) {
 					ex.printStackTrace();
 				}
@@ -300,13 +312,15 @@ public abstract class PCM<T> {
 
 			if(pcm == null) {
 				throw new IOException(p.toString() + " : can't convert to PCM");			
-			}		
-			bytes = bytes - (bytes % (channels > 1 ? bitsPerSample / 4 : bitsPerSample / 8));
+			}
+			
+			int bytes = pcm.limit();
+			bytes -= bytes % (channels > 1 ? bitsPerSample / 4 : bitsPerSample / 8);
 //			final int orgbytes = bytes;
 			while(bytes > channels * bitsPerSample / 8) {
 				boolean zero = true;
 				for(int i = 0;i < channels * bitsPerSample / 8;i++){
-					zero &= (pcm[bytes - i - 1] == 0x00);
+					zero &= (pcm.get(bytes - i - 1) == 0x00);
 				}
 				if(zero) {
 					bytes -= channels * bitsPerSample / 8;
@@ -320,7 +334,7 @@ public abstract class PCM<T> {
 			if(bytes <= channels * bitsPerSample / 8) {
 				throw new IOException(p.toString() + " : 0 samples");			
 			}
-			return pcm;
+			pcm.limit(bytes);
 		}
 	}
 	

@@ -1,6 +1,7 @@
 package bms.player.beatoraja.audio;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 /**
  * 16bit short PCM
@@ -15,42 +16,33 @@ public class ShortPCM extends PCM<short[]> {
 
 	protected static ShortPCM loadPCM(PCMLoader loader) throws IOException {
 		short[] sample = null;
-		final int bytes = loader.bytes;
-		final byte[] pcm = loader.pcm;
+		final int bytes = loader.pcm.limit();
+		final ByteBuffer pcm = loader.pcm;
+		pcm.rewind();
 		
 		switch(loader.bitsPerSample) {
 		case 8:
 			sample = new short[bytes];
 			for (int i = 0; i < sample.length; i++) {
-				sample[i] = (short) ((((short) pcm[i]) - 128) * 256);
+				sample[i] = (short) ((((short) pcm.get()) - 128) * 256);
 			}
 			break;
 		case 16:
-			// final long time = System.nanoTime();
 			sample = new short[bytes / 2];
 			for (int i = 0; i < sample.length; i++) {
-				sample[i] = (short) ((pcm[i * 2] & 0xff) | (pcm[i * 2 + 1] << 8));
+				sample[i] = pcm.getShort();
 			}
-
-			// ShortBuffer shortbuf =
-			// ByteBuffer.wrap(pcm).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer();
-			// shortbuf.get(sample);
-			// System.out.println(p.toString() + " : " + (System.nanoTime()
-			// - time));
 			break;
 		case 24:
 			sample = new short[bytes / 3];
 			for (int i = 0; i < sample.length; i++) {
-				sample[i] = (short) ((pcm[i * 3 + 1] & 0xff) | (pcm[i * 3 + 2] << 8));
+				sample[i] = pcm.getShort(i * 3 + 1);
 			}
 			break;
 		case 32:
-			int pos = 0;
 			sample = new short[bytes / 4];
 			for (int i = 0; i < sample.length; i++) {
-				sample[i] = (short) (Float.intBitsToFloat((pcm[pos] & 0xff) | ((pcm[pos + 1] & 0xff) << 8)
-						| ((pcm[pos + 2] & 0xff) << 16) | ((pcm[pos + 3] & 0xff) << 24)) * Short.MAX_VALUE);
-				pos += 4;
+				sample[i] = (short) (pcm.getFloat() * Short.MAX_VALUE);
 			}
 			break;
 		default:

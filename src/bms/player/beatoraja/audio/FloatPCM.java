@@ -1,6 +1,7 @@
 package bms.player.beatoraja.audio;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 /**
  * 32bit float PCM
@@ -15,42 +16,34 @@ public class FloatPCM extends PCM<float[]> {
 
 	protected static FloatPCM loadPCM(PCMLoader loader) throws IOException {
 		float[] sample = null;
-		final int bytes = loader.bytes;
-		final byte[] pcm = loader.pcm;
+		final int bytes = loader.pcm.limit();
+		final ByteBuffer pcm = loader.pcm;
+		pcm.rewind();
 
 		switch(loader.bitsPerSample) {
 		case 8:
 			sample = new float[bytes];
 			for (int i = 0; i < sample.length; i++) {
-				sample[i] = (pcm[i] - 128) / 128.0f;
+				sample[i] = (pcm.get() - 128) / 128.0f;
 			}
 			break;
 		case 16:
 			// final long time = System.nanoTime();
 			sample = new float[bytes / 2];
 			for (int i = 0; i < sample.length; i++) {
-				sample[i] = (float) ((pcm[i * 2] & 0xff) | (pcm[i * 2 + 1] << 8)) / Short.MAX_VALUE;
+				sample[i] = (float) (pcm.getShort()) / Short.MAX_VALUE;
 			}
-
-			// ShortBuffer shortbuf =
-			// ByteBuffer.wrap(pcm).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer();
-			// shortbuf.get(sample);
-			// System.out.println(p.toString() + " : " + (System.nanoTime()
-			// - time));
 			break;
 		case 24:
 			sample = new float[bytes / 3];
 			for (int i = 0; i < sample.length; i++) {
-				sample[i] = (float) (((pcm[i * 3] & 0xff) << 8) | ((pcm[i * 3 + 1] & 0xff) << 16) | ((pcm[i * 3 + 2] & 0xff) << 24)) / Integer.MAX_VALUE;
+				sample[i] = (float) (((pcm.get(i * 3) & 0xff) << 8) | ((pcm.get(i * 3 + 1) & 0xff) << 16) | ((pcm.get(i * 3 + 2) & 0xff) << 24)) / Integer.MAX_VALUE;
 			}
 			break;
 		case 32:
-			int pos = 0;
 			sample = new float[bytes / 4];
 			for (int i = 0; i < sample.length; i++) {
-				sample[i] = Float.intBitsToFloat((pcm[pos] & 0xff) | ((pcm[pos + 1] & 0xff) << 8)
-						| ((pcm[pos + 2] & 0xff) << 16) | ((pcm[pos + 3] & 0xff) << 24));
-				pos += 4;
+				sample[i] = pcm.getFloat();
 			}
 			break;
 		default:
