@@ -23,7 +23,7 @@ public class ShortDirectPCM extends PCM<ByteBuffer> {
 		
 		switch(loader.bitsPerSample) {
 		case 8:
-			sample = ByteBuffer.allocateDirect(bytes * 2).order(ByteOrder.LITTLE_ENDIAN);
+			sample = getDirectByteBuffer(bytes * 2).order(ByteOrder.LITTLE_ENDIAN);
 			for (int i = 0; i < bytes; i++) {
 				sample.putShort((short) ((((short) pcm.get()) - 128) * 256));
 			}
@@ -37,13 +37,13 @@ public class ShortDirectPCM extends PCM<ByteBuffer> {
 			}
 			break;
 		case 24:
-			sample = ByteBuffer.allocateDirect(bytes * 2 / 3).order(ByteOrder.LITTLE_ENDIAN);
+			sample = getDirectByteBuffer(bytes * 2 / 3).order(ByteOrder.LITTLE_ENDIAN);
 			for (int i = 0, len = bytes / 3; i < len; i++) {
 				sample.putShort(pcm.getShort(i * 3 + 1));
 			}
 			break;
 		case 32:
-			sample = ByteBuffer.allocateDirect(bytes / 2).order(ByteOrder.LITTLE_ENDIAN);
+			sample = getDirectByteBuffer(bytes / 2).order(ByteOrder.LITTLE_ENDIAN);
 			for (int i = 0, len = bytes / 4; i < len; i++) {
 				sample.putShort((short) (pcm.getFloat() * Short.MAX_VALUE));
 			}
@@ -66,8 +66,8 @@ public class ShortDirectPCM extends PCM<ByteBuffer> {
 	 */
 	public ShortDirectPCM changeSampleRate(int sample) {
 		ByteBuffer samples = getSample(sample);
-		int start = (Math.min((int)((long)this.start * sample / this.sampleRate), samples.capacity() / 2 - 1) / channels) * channels;
-		int len = (Math.min((int)((long)this.len * sample / this.sampleRate), samples.capacity() / 2 - start) / channels) * channels;
+		int start = (Math.min((int)((long)this.start * sample / this.sampleRate), samples.limit() / 2 - 1) / channels) * channels;
+		int len = (Math.min((int)((long)this.len * sample / this.sampleRate), samples.limit() / 2 - start) / channels) * channels;
 		return new ShortDirectPCM(channels, sample, start, len, samples);
 	}
 
@@ -80,19 +80,19 @@ public class ShortDirectPCM extends PCM<ByteBuffer> {
 	 */
 	public ShortDirectPCM changeFrequency(float rate) {
 		ByteBuffer samples = getSample((int) (sampleRate / rate));
-		int start = (Math.min((int)((long)this.start / rate / this.sampleRate), samples.capacity()  / 2 - 1) / channels) * channels;
-		int len = (Math.min((int)((long)this.len / rate / this.sampleRate), samples.capacity() / 2 - start) / channels) * channels;
+		int start = (Math.min((int)((long)this.start / rate / this.sampleRate), samples.limit()  / 2 - 1) / channels) * channels;
+		int len = (Math.min((int)((long)this.len / rate / this.sampleRate), samples.limit() / 2 - start) / channels) * channels;
 		return new ShortDirectPCM(channels, sampleRate, start, len, samples);
 	}
 	
 	private ByteBuffer getSample(int sample) {
-		ByteBuffer samples = ByteBuffer.allocateDirect((int) (((long) this.sample.capacity() / 2 / channels) * sample / sampleRate) * channels * 2);
+		ByteBuffer samples = getDirectByteBuffer((int) (((long) this.sample.limit() / 2 / channels) * sample / sampleRate) * channels * 2);
 
-		for (long i = 0; i < samples.capacity() / 2 / channels; i++) {
+		for (long i = 0; i < samples.limit() / 2 / channels; i++) {
 			for (int j = 0; j < channels; j++) {
 				if ((i * sampleRate) % sample != 0
-						&& (int) ((i * sampleRate / sample + 1) * channels + j) < this.sample.capacity() / 2) {
-					samples.putShort((int) (i * channels + j) * 2, (short) (this.sample.getShort((int) ((i * sampleRate / sample) * channels + j)) / 2
+						&& (int) ((i * sampleRate / sample + 1) * channels + j) < this.sample.limit() / 2) {
+					samples.putShort((int) (i * channels + j) * 2, (short) (this.sample.getShort((int) ((i * sampleRate / sample) * channels + j) * 2) / 2
 									+ this.sample.get((int) ((i * sampleRate / sample + 1) * channels + j) * 2) / 2));
 				} else {
 					samples.putShort((int) (i * channels + j) * 2, this.sample.getShort((int) ((i * sampleRate / sample) * channels
@@ -112,9 +112,9 @@ public class ShortDirectPCM extends PCM<ByteBuffer> {
 	 * @return チャンネル数を変更したPCM
 	 */
 	public ShortDirectPCM changeChannels(int channels) {
-		ByteBuffer samples = ByteBuffer.allocateDirect((this.sample.capacity() / 2) * channels / this.channels * 2);
+		ByteBuffer samples = getDirectByteBuffer((this.sample.limit() / 2) * channels / this.channels * 2);
 
-		for (long i = 0; i < samples.capacity() / 2 / channels; i++) {
+		for (long i = 0; i < samples.limit() / 2 / channels; i++) {
 			for (int j = 0; j < channels; j++) {
 				samples.putShort((int) (i * channels + j) * 2, this.sample.getShort((int) (i * this.channels) * 2));
 			}

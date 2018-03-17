@@ -12,6 +12,7 @@ import org.jflac.FLACDecoder;
 import org.jflac.metadata.StreamInfo;
 
 import com.badlogic.gdx.backends.lwjgl.audio.OggInputStream;
+import com.badlogic.gdx.utils.BufferUtils;
 import com.badlogic.gdx.utils.StreamUtils;
 import com.badlogic.gdx.utils.StreamUtils.OptimizedByteArrayOutputStream;
 
@@ -27,6 +28,8 @@ import javazoom.jl.decoder.OutputBuffer;
  * @author exch
  */
 public abstract class PCM<T> {
+
+	protected static final boolean USE_UNSAFE = false;
 
 	/**
 	 * チャンネル数
@@ -148,6 +151,13 @@ public abstract class PCM<T> {
 	 */
 	public abstract PCM<T> slice(long starttime, long duration);
 	
+	protected static ByteBuffer getDirectByteBuffer(int capacity) {
+		if(USE_UNSAFE) {
+			return BufferUtils.newUnsafeByteBuffer(capacity);				
+		}
+		return ByteBuffer.allocateDirect(capacity);
+	}
+
 	static class PCMLoader {
 		
 		ByteBuffer pcm;
@@ -176,7 +186,7 @@ public abstract class PCM<T> {
 						bitsPerSample = input.bitsPerSample;;
 						
 						if(sampleRate == 16) {
-							pcm = ByteBuffer.allocateDirect(input.dataRemaining).order(ByteOrder.LITTLE_ENDIAN);
+							pcm = getDirectByteBuffer(input.dataRemaining).order(ByteOrder.LITTLE_ENDIAN);
 							StreamUtils.copyStream(input, pcm);
 						} else {
 							OptimizedByteArrayOutputStream output = new OptimizedByteArrayOutputStream(input.dataRemaining);
@@ -217,7 +227,7 @@ public abstract class PCM<T> {
 							}
 							bitstream.close();
 							byte[] bytes = output.toByteArray();
-							pcm = ByteBuffer.allocateDirect(bytes.length).order(ByteOrder.LITTLE_ENDIAN).put(bytes);
+							pcm = getDirectByteBuffer(bytes.length).order(ByteOrder.LITTLE_ENDIAN).put(bytes);
 							bitsPerSample = 16;
 						} catch (BitstreamException e) {
 							e.printStackTrace();
@@ -248,7 +258,7 @@ public abstract class PCM<T> {
 					sampleRate = input.getSampleRate();
 					bitsPerSample = 16;
 					
-					pcm = ByteBuffer.allocateDirect(output.size()).put(output.getBuffer(), 0, output.size()).order(ByteOrder.LITTLE_ENDIAN);;
+					pcm = getDirectByteBuffer(output.size()).put(output.getBuffer(), 0, output.size()).order(ByteOrder.LITTLE_ENDIAN);;
 //					System.out.println(name + " - length : " + input.getLength() + " ( " + input.getLength() * 16 + " ) " + " , bytes : " + bytes);
 				} catch (Throwable ex) {
 				}
@@ -280,7 +290,7 @@ public abstract class PCM<T> {
 					}
 					bitstream.close();
 					byte[] bytes = output.toByteArray();
-					pcm = ByteBuffer.allocateDirect(bytes.length).order(ByteOrder.LITTLE_ENDIAN).put(bytes);
+					pcm = getDirectByteBuffer(bytes.length).order(ByteOrder.LITTLE_ENDIAN).put(bytes);
 					bitsPerSample = 16;
 				} catch (Throwable ex) {
 				}
@@ -300,7 +310,7 @@ public abstract class PCM<T> {
 					input.decodeFrames();
 					
 					if(bitsPerSample == 16) {
-						pcm = ByteBuffer.allocateDirect(output.size()).put(output.getBuffer(), 0, output.size()).order(ByteOrder.LITTLE_ENDIAN);						
+						pcm = getDirectByteBuffer(output.size()).put(output.getBuffer(), 0, output.size()).order(ByteOrder.LITTLE_ENDIAN);						
 					} else {
 						pcm = ByteBuffer.wrap(output.getBuffer()).order(ByteOrder.LITTLE_ENDIAN);
 						pcm.limit(output.size());						
@@ -336,6 +346,7 @@ public abstract class PCM<T> {
 			}
 			pcm.limit(bytes);
 		}
+		
 	}
 	
 	/** @author Nathan Sweet */
