@@ -234,6 +234,22 @@ public class SkinProperty {
 	public static final int NUMBER_HISPEED_AFTERDOT = 311;
 	public static final int NUMBER_DURATION = 312;
 	public static final int NUMBER_DURATION_GREEN = 313;
+	public static final int NUMBER_DURATION_LANECOVER_ON = 1312;
+	public static final int NUMBER_DURATION_GREEN_LANECOVER_ON = 1313;
+	public static final int NUMBER_DURATION_LANECOVER_OFF = 1314;
+	public static final int NUMBER_DURATION_GREEN_LANECOVER_OFF = 1315;
+	public static final int NUMBER_MAINBPM_DURATION_LANECOVER_ON = 1316;
+	public static final int NUMBER_MAINBPM_DURATION_GREEN_LANECOVER_ON = 1317;
+	public static final int NUMBER_MAINBPM_DURATION_LANECOVER_OFF = 1318;
+	public static final int NUMBER_MAINBPM_DURATION_GREEN_LANECOVER_OFF = 1319;
+	public static final int NUMBER_MINBPM_DURATION_LANECOVER_ON = 1320;
+	public static final int NUMBER_MINBPM_DURATION_GREEN_LANECOVER_ON = 1321;
+	public static final int NUMBER_MINBPM_DURATION_LANECOVER_OFF = 1322;
+	public static final int NUMBER_MINBPM_DURATION_GREEN_LANECOVER_OFF = 1323;
+	public static final int NUMBER_MAXBPM_DURATION_LANECOVER_ON = 1324;
+	public static final int NUMBER_MAXBPM_DURATION_GREEN_LANECOVER_ON = 1325;
+	public static final int NUMBER_MAXBPM_DURATION_LANECOVER_OFF = 1326;
+	public static final int NUMBER_MAXBPM_DURATION_GREEN_LANECOVER_OFF = 1327;
 	public static final int NUMBER_JUDGETIMING = 12;
     public static final int NUMBER_LANECOVER1 = 14;
 	public static final int NUMBER_LIFT1 = 314;
@@ -624,6 +640,7 @@ public class SkinProperty {
 	public static final int OPTION_MISS_EXIST = 2246;
 
 	public static final int OPTION_LANECOVER1_CHANGING = 270;
+	public static final int OPTION_LANECOVER1_ON = 271;
 
 	public static final int OPTION_COURSE_STAGE1 = 280;
 	public static final int OPTION_COURSE_STAGE2 = 281;
