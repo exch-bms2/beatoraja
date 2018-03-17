@@ -26,8 +26,6 @@ import javazoom.jl.decoder.OutputBuffer;
  */
 public abstract class PCM<T> {
 
-	// TODO PCM実データのダイレクトバッファ化
-
 	/**
 	 * チャンネル数
 	 */
@@ -62,7 +60,7 @@ public abstract class PCM<T> {
 			PCMLoader loader = new PCMLoader();
 			loader.loadPCM(p);
 			if(loader.bitsPerSample > 16) {
-				System.out.println("FLOAT");
+//				System.out.println("FLOAT");
 				return FloatPCM.loadPCM(loader);				
 			} else {
 				return ShortPCM.loadPCM(loader);
@@ -145,7 +143,7 @@ public abstract class PCM<T> {
 	 * @return トリミングしたPCM
 	 */
 	public abstract PCM<T> slice(long starttime, long duration);
-
+	
 	static class PCMLoader {
 		
 		byte[] pcm;

@@ -454,6 +454,7 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 			} else {
 				if (wav == null) {
 					wav = PCM.load(key.path);
+					// TODO このタイミングでsampleRate変換を行い、slice時での再変換を抑止する
 				}
 
 				if (wav != null) {

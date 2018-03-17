@@ -1,5 +1,6 @@
 package bms.player.beatoraja.audio;
 
+import java.nio.ByteBuffer;
 import java.nio.file.*;
 
 import com.portaudio.*;
@@ -186,6 +187,10 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 								final float[] sample = (float[]) input.pcm.sample;
 								wav_l += sample[input.pos + input.pcm.start] * input.volume;
 								wav_r += sample[input.pos+1 + input.pcm.start] * input.volume;																
+							} else if(input.pcm instanceof ShortDirectPCM) {
+								final ByteBuffer sample = (ByteBuffer) input.pcm.sample;
+								wav_l += ((float) sample.getShort((input.pos + input.pcm.start) * 2)) * input.volume / Short.MAX_VALUE;
+								wav_r += ((float) sample.getShort((input.pos+1 + input.pcm.start) * 2)) * input.volume / Short.MAX_VALUE;																
 							} else if(input.pcm instanceof ShortPCM) {
 								final short[] sample = (short[]) input.pcm.sample;
 								wav_l += ((float) sample[input.pos + input.pcm.start]) * input.volume / Short.MAX_VALUE;
