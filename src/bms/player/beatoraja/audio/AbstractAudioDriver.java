@@ -5,10 +5,9 @@ import bms.player.beatoraja.ResourcePool;
 
 import java.nio.file.*;
 import java.util.*;
-import java.util.Map.Entry;
 import java.util.logging.Logger;
 
-import com.badlogic.gdx.utils.GdxRuntimeException;
+import com.badlogic.gdx.utils.*;
 
 /**
  * 抽象オーディオドライバー
@@ -23,7 +22,7 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	/**
 	 * 効果音マップ
 	 */
-	private Map<String, AudioElement<T>> soundmap = new HashMap<String, AudioElement<T>>();
+	private ObjectMap<String, AudioElement<T>> soundmap = new ObjectMap<String, AudioElement<T>>();
 	/**
 	 * キー音マップ(音切りなし)
 	 */
@@ -196,9 +195,9 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 			volume = model.getVolwav() / 100f;
 		}
 
-		List<SliceWav<T>>[] slicesound = new List[wavcount];
+		Array<SliceWav<T>>[] slicesound = new Array[wavcount];
 
-		Map<Integer, List<Note>> notemap = new HashMap<Integer, List<Note>>();
+		IntMap<List<Note>> notemap = new IntMap<List<Note>>();
 		final int lanes = model.getMode().key;
 		for (TimeLine tl : model.getAllTimeLines()) {
 			for (int i = 0; i < lanes; i++) {
@@ -218,8 +217,8 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 			}
 		}
 
-		for (Entry<Integer, List<Note>> waventry : notemap.entrySet()) {
-			final int wavid = waventry.getKey();
+		for (IntMap.Entry<List<Note>> waventry : notemap) {
+			final int wavid = waventry.key;
 			if (progress >= 1) {
 				break;
 			}
@@ -227,7 +226,7 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 				continue;
 			}
 			String name = model.getWavList()[wavid];
-			for (Note note : waventry.getValue()) {
+			for (Note note : waventry.value) {
 				if (note.getMicroStarttime() == 0 && note.getMicroDuration() == 0) {
 					// 音切りなしのケース
 					Path p = dpath.resolve(name);
@@ -239,7 +238,7 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 					// 音切りありのケース
 					boolean b = true;
 					if (slicesound[note.getWav()] == null) {
-						slicesound[note.getWav()] = new ArrayList<SliceWav<T>>();
+						slicesound[note.getWav()] = new Array<SliceWav<T>>();
 					}
 					for (SliceWav<T> slice : slicesound[note.getWav()]) {
 						if (slice.starttime == note.getMicroStarttime() && slice.duration == note.getMicroDuration()) {
@@ -258,13 +257,13 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 					}
 				}
 			}
-			progress += 1f / notemap.keySet().size();
+			progress += 1f / notemap.size;
 		}
 
 		Logger.getGlobal().info("音源ファイル読み込み完了。音源数:" + wavmap.length);
 		for (int i = 0; i < wavmap.length; i++) {
 			if (slicesound[i] != null) {
-				this.slicesound[i] = slicesound[i].toArray(new SliceWav[slicesound[i].size()]);
+				this.slicesound[i] = slicesound[i].toArray(SliceWav.class);
 			} else {
 				this.slicesound[i] = new SliceWav[0];
 			}
@@ -277,7 +276,7 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 		progress = 1;
 	}
 
-	private void addNoteList(Map<Integer, List<Note>> notemap, Note n) {
+	private void addNoteList(IntMap<List<Note>> notemap, Note n) {
 		if (n.getWav() < 0) {
 			return;
 		}
@@ -454,7 +453,6 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 			} else {
 				if (wav == null) {
 					wav = PCM.load(key.path);
-					// TODO このタイミングでsampleRate変換を行い、slice時での再変換を抑止する
 				}
 
 				if (wav != null) {

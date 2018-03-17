@@ -17,8 +17,9 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 	private static DeviceInfo[] devices;
 	
 	private BlockingStream stream;
+
 	private int sampleRate;
-	
+	private int channels;
 	/**
 	 * ミキサー入力
 	 */
@@ -57,12 +58,13 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 		}
 		DeviceInfo deviceInfo = devices[ deviceId ];
 		sampleRate = (int)deviceInfo.defaultSampleRate;
+		channels = 2;
 //		System.out.println( "  deviceId    = " + deviceId );
 //		System.out.println( "  sampleRate  = " + sampleRate );
 //		System.out.println( "  device name = " + deviceInfo.name );
 
 		StreamParameters streamParameters = new StreamParameters();
-		streamParameters.channelCount = 2;
+		streamParameters.channelCount = channels;
 		streamParameters.device = deviceId;
 		int framesPerBuffer = config.getAudioDeviceBufferSize();
 		streamParameters.suggestedLatency = ((double)framesPerBuffer) / sampleRate;
@@ -71,13 +73,12 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 		int flags = 0;
 		
 		// Open a stream for output.
-		stream = PortAudio.openStream( null, streamParameters,
-				(int) sampleRate, framesPerBuffer, flags );
+		stream = PortAudio.openStream( null, streamParameters, sampleRate, framesPerBuffer, flags );
 
 		stream.start();
 
 		mixer = new Thread(this);
-		buffer = new float[framesPerBuffer * 2];
+		buffer = new float[framesPerBuffer * channels];
 		inputs = new MixerInput[config.getAudioDeviceSimultaneousSources()];
 		for (int i = 0; i < inputs.length; i++) {
 			inputs[i] = new MixerInput();
@@ -92,8 +93,8 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 		if (wav != null && wav.sampleRate != sampleRate) {
 			wav = wav.changeSampleRate(sampleRate);
 		}
-		if (wav != null && wav.channels != 2) {
-			wav = wav.changeChannels(2);
+		if (wav != null && wav.channels != channels) {
+			wav = wav.changeChannels(channels);
 		}
 
 		return wav;
@@ -104,8 +105,8 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 		if (pcm.sampleRate != sampleRate) {
 			pcm = pcm.changeSampleRate(sampleRate);
 		}
-		if (pcm.channels != 2) {
-			pcm = pcm.changeChannels(2);
+		if (pcm.channels != channels) {
+			pcm = pcm.changeChannels(channels);
 		}
 		return pcm;
 	}

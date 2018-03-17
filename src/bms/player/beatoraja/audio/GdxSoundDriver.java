@@ -196,7 +196,7 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 		}
 	}
 
-	class SoundInstance {
+	private static class SoundInstance {
 		public Sound sound;
 		public long id = -1;
 		public int channel = -1;
@@ -338,7 +338,7 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 						result = ((s & 0xff00) >>> 8);
 					}
 				} else if(pcm instanceof ShortDirectPCM) {
-					result = ((ByteBuffer)pcm.sample).get(pos - 44 + pcm.start) & 0xff;
+					result = ((ByteBuffer)pcm.sample).get(pos - 44 + pcm.start * 2) & 0xff;
 				} else if(pcm instanceof FloatPCM) {
 					s = (short) (((float[])pcm.sample)[(pos - 44) / 2 + pcm.start] * Short.MAX_VALUE);					
 					if (pos % 2 == 0) {
