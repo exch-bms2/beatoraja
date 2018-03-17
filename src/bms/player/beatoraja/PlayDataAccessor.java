@@ -397,7 +397,7 @@ public class PlayDataAccessor {
 					+ score.getLpg() + "," + score.getEgr() + "," + score.getLgr() + "," + score.getEgd() + ","
 					+ score.getLgd() + "," + score.getEbd() + "," + score.getLbd() + "," + score.getEpr() + ","
 					+ score.getLpr() + "," + score.getEms() + "," + score.getLms() + "," + score.getClear() + ","
-					+ score.getMinbp() + "," + score.getCombo() + "," + score.getMode() + "," + score.getClearcount()
+					+ score.getMinBP() + "," + score.getMaxCombo() + "," + score.getMode() + "," + score.getClearcount()
 					+ "," + score.getPlaycount() + "," + score.getOption() + "," + score.getRandom() + ","
 					+ score.getTrophy() + "," + score.getDate()).getBytes());
 			cipher_byte = md.digest();
@@ -443,21 +443,21 @@ public class PlayDataAccessor {
 			log.setSha256(hash);
 			log.setScore(newscore.getExscore());
 		}
-		log.setOldminbp(score.getMinbp());
-		log.setMinbp(score.getMinbp());
-		if (score.getMinbp() > newscore.getMinbp() && updateScore) {
-			score.setMinbp(newscore.getMinbp());
+		log.setOldminbp(score.getMinBP());
+		log.setMinbp(score.getMinBP());
+		if (score.getMinBP() > newscore.getMinBP() && updateScore) {
+			score.setMinBP(newscore.getMinBP());
 			score.setOption(newscore.getOption());
 			log.setSha256(hash);
-			log.setMinbp(newscore.getMinbp());
+			log.setMinbp(newscore.getMinBP());
 		}
-		log.setOldcombo(score.getCombo());
-		log.setCombo(score.getCombo());
-		if (score.getCombo() < newscore.getCombo() && updateScore) {
-			score.setCombo(newscore.getCombo());
+		log.setOldcombo(score.getMaxCombo());
+		log.setCombo(score.getMaxCombo());
+		if (score.getMaxCombo() < newscore.getMaxCombo() && updateScore) {
+			score.setMaxCombo(newscore.getMaxCombo());
 			score.setOption(newscore.getOption());
 			log.setSha256(hash);
-			log.setCombo(newscore.getCombo());
+			log.setCombo(newscore.getMaxCombo());
 		}
 
 		return log;

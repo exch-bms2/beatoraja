@@ -33,7 +33,9 @@
 	</target>
 
 	<target name="compile" depends="clean">
-		<javac classpathref="build.lib" srcdir="${build.src}" debug="${debug}" destdir="${build.dest}" encoding="UTF-8" />
+		<javac classpathref="build.lib" srcdir="${build.src}" debug="${debug}" destdir="${build.dest}" encoding="UTF-8">
+			<classpath location="lib/lombok.jar" />
+		</javac>
 	</target>
 
 	<target name="create_run_jar" depends="compile">

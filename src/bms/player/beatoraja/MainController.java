@@ -173,7 +173,7 @@ public class MainController extends ApplicationAdapter {
 
 		try {
 			Class.forName("org.sqlite.JDBC");
-			songdb = new SQLiteSongDatabaseAccessor(songdbpath.toString(), config.getBmsroot());
+			songdb = new SQLiteSongDatabaseAccessor(songdbpath.toString(), config.getBmsRoot());
 			if(config.isUseSongInfo()) {
 				infodb = new SongInformationAccessor(infodbpath.toString());
 			}
@@ -968,8 +968,8 @@ public class MainController extends ApplicationAdapter {
 		private Path currentSoundPath;
 
 		public SystemSoundManager(Config config) {
-			scan(Paths.get(config.getBgmpath()), bgms, "select.");
-			scan(Paths.get(config.getSoundpath()), sounds, "clear.");
+			scan(Paths.get(config.getBgmPath()), bgms, "select.");
+			scan(Paths.get(config.getSoundPath()), sounds, "clear.");
 			Logger.getGlobal().info("検出されたBGM Set : " + bgms.size + " Sound Set : " + sounds.size);
 		}
 

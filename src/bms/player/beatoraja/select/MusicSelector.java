@@ -183,7 +183,7 @@ public class MusicSelector extends MainState {
 		banners = new PixmapResourcePool(main.getConfig().getBannerPixmapGen());
 		musicinput = new MusicSelectInputProcessor(this);
 
-		if (!songUpdated && main.getPlayerResource().getConfig().isUpdatesong()) {
+		if (!songUpdated && main.getPlayerResource().getConfig().isUpdateSong()) {
 			main.updateSong(null);
 		}
 	}
@@ -512,9 +512,9 @@ public class MusicSelector extends MainState {
 					? bar.getSelected().getScore().getPlaycount() - bar.getSelected().getScore().getClearcount()
 					: Integer.MIN_VALUE;
 		case NUMBER_MISSCOUNT:
-			return bar.getSelected().getScore() != null ? bar.getSelected().getScore().getMinbp() : Integer.MIN_VALUE;
+			return bar.getSelected().getScore() != null ? bar.getSelected().getScore().getMinBP() : Integer.MIN_VALUE;
 		case NUMBER_MAXCOMBO:
-			return bar.getSelected().getScore() != null ? bar.getSelected().getScore().getCombo() : Integer.MIN_VALUE;
+			return bar.getSelected().getScore() != null ? bar.getSelected().getScore().getMaxCombo() : Integer.MIN_VALUE;
 		case NUMBER_FOLDER_TOTALSONGS:
 			if (bar.getSelected() instanceof DirectoryBar) {
 				int[] lamps = ((DirectoryBar) bar.getSelected()).getLamps();
@@ -587,11 +587,11 @@ public class MusicSelector extends MainState {
 		case SLIDER_MUSICSELECT_POSITION:
 			return bar.getSelectedPosition();
 			case SLIDER_MASTER_VOLUME:
-				return main.getConfig().getSystemvolume();
+				return main.getConfig().getSystemVolume();
 			case SLIDER_KEY_VOLUME:
-				return main.getConfig().getKeyvolume();
+				return main.getConfig().getKeyVolume();
 			case SLIDER_BGM_VOLUME:
-				return main.getConfig().getBgvolume();
+				return main.getConfig().getBgVolume();
 			case BARGRAPH_RATE_PGREAT:
 			if (bar.getSelected() instanceof SongBar) {
 				IRScoreData score = bar.getSelected().getScore();
@@ -643,7 +643,7 @@ public class MusicSelector extends MainState {
 			if (bar.getSelected() instanceof SongBar) {
 				IRScoreData score = bar.getSelected().getScore();
 				return score != null
-						? ((float) score.getCombo()) / ((SongBar) bar.getSelected()).getSongData().getNotes() : 0;
+						? ((float) score.getMaxCombo()) / ((SongBar) bar.getSelected()).getSongData().getNotes() : 0;
 			}
 			return 0;
 		case BARGRAPH_RATE_EXSCORE:
@@ -691,13 +691,13 @@ public class MusicSelector extends MainState {
 			bar.setSelectedPosition(value);
 			return;
 			case SLIDER_MASTER_VOLUME:
-				main.getConfig().setSystemvolume(value);
+				main.getConfig().setSystemVolume(value);
 				return;
 			case SLIDER_KEY_VOLUME:
-				main.getConfig().setKeyvolume(value);
+				main.getConfig().setKeyVolume(value);
 				return;
 			case SLIDER_BGM_VOLUME:
-				main.getConfig().setBgvolume(value);
+				main.getConfig().setBgVolume(value);
 				return;
 		}
 		super.setSliderValue(id, value);
@@ -814,7 +814,7 @@ public class MusicSelector extends MainState {
 	}
 	
 	private boolean existsTrophy(SongTrophy trophy) {
-		final IRScoreData score = getScoreDataProperty().getScoreData();
+		final IRScoreData score = getScoreDataProperty().getScore();
 		return score != null && score.getTrophy() != null && score.getTrophy().indexOf(trophy.character) >= 0;
 	}
 

@@ -1,12 +1,16 @@
 package bms.player.beatoraja;
 
 import bms.player.beatoraja.song.SongData;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * コースデータ
  *
  * @author exch
  */
+@Data
 public class CourseData {
     /**
      * コース名
@@ -25,36 +29,12 @@ public class CourseData {
      */
     private TrophyData[] trophy = new TrophyData[0];
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public SongData[] getSong() {
         return hash;
     }
 
     public void setSong(SongData[] hash) {
         this.hash = hash;
-    }
-
-    public CourseDataConstraint[] getConstraint() {
-        return constraint;
-    }
-
-    public void setConstraint(CourseDataConstraint[] constraint) {
-        this.constraint = constraint;
-    }
-
-    public TrophyData[] getTrophy() {
-        return trophy;
-    }
-
-    public void setTrophy(TrophyData[] trophy) {
-        this.trophy = trophy;
     }
 
     public boolean isClassCourse() {
@@ -95,6 +75,9 @@ public class CourseData {
      *
      * @author exch
      */
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class TrophyData {
 
         private String name;
@@ -103,39 +86,6 @@ public class CourseData {
 
         private float scorerate;
 
-        public TrophyData() {
-        	
-        }
-        
-        public TrophyData(String name, float missrate, float scorerate) {
-        	this.name = name;
-        	this.missrate = missrate;
-        	this.scorerate = scorerate;
-        }
-        
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public float getMissrate() {
-            return missrate;
-        }
-
-        public void setMissrate(float missrate) {
-            this.missrate = missrate;
-        }
-
-        public float getScorerate() {
-            return scorerate;
-        }
-
-        public void setScorerate(float scorerate) {
-            this.scorerate = scorerate;
-        }
     }
 
 }

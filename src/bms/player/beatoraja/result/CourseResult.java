@@ -166,7 +166,7 @@ public class CourseResult extends MainState {
 		for (BMSModel model : models) {
 			dp |= model.getMode().player == 2;
 		}
-		newscore.setCombo(resource.getMaxcombo());
+		newscore.setMaxCombo(resource.getMaxcombo());
 		int random = 0;
 		if (config.getRandom() > 0
 				|| (dp && (config.getRandom2() > 0 || config.getDoubleoption() > 0))) {
@@ -203,7 +203,7 @@ public class CourseResult extends MainState {
 			case PlayerConfig.IR_SEND_UPDATE_SCORE:
 //				IRScoreData current = resource.getScoreData();
 //				send &= (current.getExscore() > oldexscore || current.getClear() > oldclear
-//						|| current.getCombo() > oldcombo || current.getMinbp() < oldmisscount);
+//						|| current.getCombo() > oldcombo || current.getMinBP() < oldmisscount);
 				break;
 			}
 			
@@ -311,34 +311,34 @@ public class CourseResult extends MainState {
 				return resource.getCourseScoreData().getExscore() - oldscore.getExscore();
 			case NUMBER_MISSCOUNT:
 				if (resource.getCourseScoreData() != null) {
-					return resource.getCourseScoreData().getMinbp();
+					return resource.getCourseScoreData().getMinBP();
 				}
 				return Integer.MIN_VALUE;
 			case NUMBER_TARGET_MISSCOUNT:
-				if (oldscore.getMinbp() == Integer.MAX_VALUE) {
+				if (oldscore.getMinBP() == Integer.MAX_VALUE) {
 					return Integer.MIN_VALUE;
 				}
-				return oldscore.getMinbp();
+				return oldscore.getMinBP();
 			case NUMBER_DIFF_MISSCOUNT:
-				if (oldscore.getMinbp() == Integer.MAX_VALUE) {
+				if (oldscore.getMinBP() == Integer.MAX_VALUE) {
 					return Integer.MIN_VALUE;
 				}
-				return resource.getCourseScoreData().getMinbp() - oldscore.getMinbp();
+				return resource.getCourseScoreData().getMinBP() - oldscore.getMinBP();
 			case NUMBER_TARGET_MAXCOMBO:
-				if (oldscore.getCombo() > 0) {
-					return oldscore.getCombo();
+				if (oldscore.getMaxCombo() > 0) {
+					return oldscore.getMaxCombo();
 				}
 				return Integer.MIN_VALUE;
 			case NUMBER_MAXCOMBO:
 				if (resource.getCourseScoreData() != null) {
-					return resource.getCourseScoreData().getCombo();
+					return resource.getCourseScoreData().getMaxCombo();
 				}
 				return Integer.MIN_VALUE;
 			case NUMBER_DIFF_MAXCOMBO:
-				if (oldscore.getCombo() == 0) {
+				if (oldscore.getMaxCombo() == 0) {
 					return Integer.MIN_VALUE;
 				}
-				return resource.getCourseScoreData().getCombo() - oldscore.getCombo();
+				return resource.getCourseScoreData().getMaxCombo() - oldscore.getMaxCombo();
 			case NUMBER_TOTALNOTES:
 				int notes = 0;
 				for (BMSModel model : resource.getCourseBMSModels()) {
@@ -383,13 +383,13 @@ public class CourseResult extends MainState {
 			case OPTION_DRAW_SCORE:
 				return score.getExscore() == oldscore.getExscore();
 			case OPTION_UPDATE_MAXCOMBO:
-				return score.getCombo() > oldscore.getCombo();
+				return score.getMaxCombo() > oldscore.getMaxCombo();
 			case OPTION_DRAW_MAXCOMBO:
-				return score.getCombo() == oldscore.getCombo();
+				return score.getMaxCombo() == oldscore.getMaxCombo();
 			case OPTION_UPDATE_MISSCOUNT:
-				return score.getMinbp() < oldscore.getMinbp();
+				return score.getMinBP() < oldscore.getMinBP();
 			case OPTION_DRAW_MISSCOUNT:
-				return score.getMinbp() == oldscore.getMinbp();
+				return score.getMinBP() == oldscore.getMinBP();
 			case OPTION_UPDATE_SCORERANK:
 				return getScoreDataProperty().getNowRate() > getScoreDataProperty().getBestScoreRate();
 			case OPTION_DRAW_SCORERANK:

@@ -362,7 +362,7 @@ public class LaneRenderer {
 
 				if (config.isBpmguide() || showTimeline) {
 					if (tl.getBPM() != nbpm) {
-						for (SkinImage line : skin.getBPMLine()) {
+						for (SkinImage line : skin.getBpmLine()) {
 							line.draw(sprite, time, main, 0, (int) (y - hl));
 						}
 						for (Rectangle r : playerr) {
@@ -398,7 +398,7 @@ public class LaneRenderer {
 					if (note != null && ((note instanceof LongNote
 							&& (((LongNote) note).isEnd() ? (LongNote) note : ((LongNote) note).getPair())
 									.getMicroTime() >= microtime)
-							|| (conf.isShowpastnote() && note instanceof NormalNote && note.getState() == 0))) {
+							|| (conf.isShowPastNote() && note instanceof NormalNote && note.getState() == 0))) {
 						b = false;
 						break;
 					}
@@ -461,7 +461,7 @@ public class LaneRenderer {
 								? pnoteimage[lane] : noteimage[lane];
 								sprite.draw(s, dstx, dsty, dstw, dsth);
 							}
-						} else if (tl.getMicroTime() >= microtime || (conf.isShowpastnote() && note.getState() == 0)) {
+						} else if (tl.getMicroTime() >= microtime || (conf.isShowPastNote() && note.getState() == 0)) {
 							final TextureRegion s = config.isMarkprocessednote() && note.getState() != 0
 									? pnoteimage[lane] : noteimage[lane];
 							sprite.draw(s, dstx, dsty, dstw, dsth);
@@ -509,7 +509,7 @@ public class LaneRenderer {
 					}
 				}
 				// hidden note
-				if (conf.isShowhiddennote() && tl.getMicroTime() >= microtime) {
+				if (conf.isShowHiddenNote() && tl.getMicroTime() >= microtime) {
 					final Note hnote = tl.getHiddenNote(lane);
 					if (hnote != null) {
 						sprite.draw(hnoteimage[lane], laneregion[lane].x, (float) y, laneregion[lane].width, scale);

@@ -5,7 +5,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.lang.reflect.Array;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 
 import bms.player.beatoraja.Config;
@@ -172,8 +171,8 @@ public class JSONSkinLoader extends SkinLoader{
 			if (type.isPlay()) {
 				skin = new PlaySkin(src, dstr);
 				((PlaySkin) skin).setClose(sk.close);
-				((PlaySkin) skin).setPlaystart(sk.playstart);
-				((PlaySkin) skin).setJudgetimer(sk.judgetimer);
+				((PlaySkin) skin).setPlayStart(sk.playstart);
+				((PlaySkin) skin).setJudgeTimer(sk.judgetimer);
 				((PlaySkin) skin).setFinishMargin(sk.finishmargin);
 			}
 			if (type == SkinType.MUSIC_SELECT) {
@@ -516,7 +515,7 @@ public class JSONSkinLoader extends SkinLoader{
 									}
 								}
 							}
-							((PlaySkin) skin).setBPMLine(bpm);							
+							((PlaySkin) skin).setBpmLine(bpm);
 						}
 						
 						if(sk.note.stop != null) {
@@ -535,7 +534,7 @@ public class JSONSkinLoader extends SkinLoader{
 									}
 								}
 							}
-							((PlaySkin) skin).setStopLine(stop);							
+							((PlaySkin) skin).setStopLine(stop);
 						}
 
 						if(sk.note.time != null) {
@@ -554,7 +553,7 @@ public class JSONSkinLoader extends SkinLoader{
 									}
 								}
 							}
-							((PlaySkin) skin).setTimeLine(time);							
+							((PlaySkin) skin).setTimeLine(time);
 						}
 
 						SkinNote sn = new SkinNote(notes, lnss, mines);
@@ -648,9 +647,9 @@ public class JSONSkinLoader extends SkinLoader{
 							}
 							obj = new SkinJudge(images, numbers, judge.index, judge.shift);
 
-							int region = ((PlaySkin) skin).getJudgeregion();
+							int region = ((PlaySkin) skin).getJudgeRegion();
 							if (judge.index >= region) {
-								((PlaySkin) skin).setJudgeregion(judge.index + 1);
+								((PlaySkin) skin).setJudgeRegion(judge.index + 1);
 							}
 							break;
 						}

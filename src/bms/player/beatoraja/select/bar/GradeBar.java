@@ -84,7 +84,7 @@ public class GradeBar extends SelectableBar {
 
     private boolean qualified(IRScoreData score, CourseData.TrophyData trophy) {
         return score != null && score.getNotes() != 0
-                && trophy.getMissrate() >= score.getMinbp() * 100.0 / score.getNotes()
+                && trophy.getMissrate() >= score.getMinBP() * 100.0 / score.getNotes()
                 && trophy.getScorerate() <= score.getExscore() * 100.0 / (score.getNotes() * 2);
     }
 

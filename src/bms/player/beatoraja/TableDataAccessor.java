@@ -195,7 +195,7 @@ public class TableDataAccessor {
 							hashes.add(sd);
 						}
 					}
-					tde.setSong(hashes.toArray(new SongData[hashes.size()]));
+					tde.setSongs(hashes.toArray(new SongData[hashes.size()]));
 					tdes.add(tde);
 				}
 				td.setFolder(tdes.toArray(new TableData.TableFolder[tdes.size()]));

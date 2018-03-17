@@ -1,5 +1,8 @@
 package bms.player.beatoraja;
 
+import lombok.Data;
+
+@Data
 public class PlayerData {
 
 	/**
@@ -49,107 +52,4 @@ public class PlayerData {
 	 */
 	private long playtime = 0;
 	private long maxcombo = 0;
-	public long getDate() {
-		return date;
-	}
-	public void setDate(long date) {
-		this.date = date;
-	}
-	public long getPlaycount() {
-		return playcount;
-	}
-	public void setPlaycount(long playcount) {
-		this.playcount = playcount;
-	}
-	public long getClear() {
-		return clear;
-	}
-	public void setClear(long clear) {
-		this.clear = clear;
-	}
-	public long getEpg() {
-		return epg;
-	}
-	public void setEpg(long epg) {
-		this.epg = epg;
-	}
-	public long getLpg() {
-		return lpg;
-	}
-	public void setLpg(long lpg) {
-		this.lpg = lpg;
-	}
-	public long getEgr() {
-		return egr;
-	}
-	public void setEgr(long egr) {
-		this.egr = egr;
-	}
-	public long getLgr() {
-		return lgr;
-	}
-	public void setLgr(long lgr) {
-		this.lgr = lgr;
-	}
-	public long getEgd() {
-		return egd;
-	}
-	public void setEgd(long egd) {
-		this.egd = egd;
-	}
-	public long getLgd() {
-		return lgd;
-	}
-	public void setLgd(long lgd) {
-		this.lgd = lgd;
-	}
-	public long getEbd() {
-		return ebd;
-	}
-	public void setEbd(long ebd) {
-		this.ebd = ebd;
-	}
-	public long getLbd() {
-		return lbd;
-	}
-	public void setLbd(long lbd) {
-		this.lbd = lbd;
-	}
-	public long getEpr() {
-		return epr;
-	}
-	public void setEpr(long epr) {
-		this.epr = epr;
-	}
-	public long getLpr() {
-		return lpr;
-	}
-	public void setLpr(long lpr) {
-		this.lpr = lpr;
-	}
-	public long getEms() {
-		return ems;
-	}
-	public void setEms(long ems) {
-		this.ems = ems;
-	}
-	public long getLms() {
-		return lms;
-	}
-	public void setLms(long lms) {
-		this.lms = lms;
-	}
-	public long getPlaytime() {
-		return playtime;
-	}
-	public void setPlaytime(long playtime) {
-		this.playtime = playtime;
-	}
-	public long getMaxcombo() {
-		return maxcombo;
-	}
-	public void setMaxcombo(long maxcombo) {
-		this.maxcombo = maxcombo;
-	}
-
 }

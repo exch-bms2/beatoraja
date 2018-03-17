@@ -5,7 +5,6 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
 import java.util.Arrays;
 
 import bms.player.beatoraja.*;
-import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.skin.SkinPropertyMapper;
 import com.badlogic.gdx.utils.FloatArray;
 
@@ -139,9 +138,9 @@ public class JudgeManager {
 
 	public void init(BMSModel model, PlayerResource resource) {
 		prevtime = 0;
-		judgenow = new int[((PlaySkin) main.getSkin()).getJudgeregion()];
-		judgecombo = new int[((PlaySkin) main.getSkin()).getJudgeregion()];
-		judgefast = new long[((PlaySkin) main.getSkin()).getJudgeregion()];
+		judgenow = new int[((PlaySkin) main.getSkin()).getJudgeRegion()];
+		judgecombo = new int[((PlaySkin) main.getSkin()).getJudgeRegion()];
+		judgefast = new long[((PlaySkin) main.getSkin()).getJudgeRegion()];
 		score = new IRScoreData(BMSPlayerRule.isSevenToNine() ? Mode.BEAT_7K : model.getMode());
 		score.setNotes(model.getTotalNotes());
 		score.setSha256(model.getSHA256());
@@ -255,14 +254,14 @@ public class JudgeManager {
 					// ここにオートプレイ処理を入れる
 					if (note instanceof NormalNote && note.getState() == 0) {
 						auto_presstime[laneassign[lane][0]] = now;
-						main.play(note, config.getKeyvolume(), 0);
+						main.play(note, config.getKeyVolume(), 0);
 						this.update(lane, note, time, 0, 0);
 					}
 					if (note instanceof LongNote) {
 						final LongNote ln = (LongNote) note;
 						if (!ln.isEnd() && ln.getState() == 0 && processing[lane] == null) {
 							auto_presstime[laneassign[lane][0]] = now;
-							main.play(note, config.getKeyvolume(), 0);
+							main.play(note, config.getKeyVolume(), 0);
 							if ((lntype == BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
 									|| ln.getType() == LongNote.TYPE_LONGNOTE) {
 								passingcount[lane] = 0;
@@ -282,7 +281,7 @@ public class JudgeManager {
 									auto_presstime[laneassign[lane][1]] = now;
 								}
 								this.update(lane, ln, time, 0, 0);
-								main.play(processing[lane], config.getKeyvolume(), 0);
+								main.play(processing[lane], config.getKeyVolume(), 0);
 								processing[lane] = null;
 							}
 						}
@@ -368,7 +367,7 @@ public class JudgeManager {
 
 						this.update(lane, processing[lane], time, j, dtime);
 //						 System.out.println("BSS終端判定 - Time : " + ptime + " Judge : " + j + " LN : " + processing[lane].hashCode());
-						main.play(processing[lane], config.getKeyvolume(), 0);
+						main.play(processing[lane], config.getKeyVolume(), 0);
 						processing[lane] = null;
 						sckey[sc] = 0;
 					} else {
@@ -414,7 +413,7 @@ public class JudgeManager {
 						if (tnote instanceof LongNote) {
 							// ロングノート処理
 							final LongNote ln = (LongNote) tnote;
-							main.play(tnote, config.getKeyvolume(), 0);
+							main.play(tnote, config.getKeyVolume(), 0);
 							if (((lntype == BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
 									|| ln.getType() == LongNote.TYPE_LONGNOTE)
 									&& j < 4) {
@@ -434,7 +433,7 @@ public class JudgeManager {
 								}
 							}
 						} else {
-							main.play(tnote, config.getKeyvolume(), 0);
+							main.play(tnote, config.getKeyVolume(), 0);
 							// 通常ノート処理
 							final int dtime = (int) (tnote.getTime() - ptime);
 							this.update(lane, tnote, time, j, dtime);
@@ -464,7 +463,7 @@ public class JudgeManager {
 						}
 						
 						if (n != null) {
-							main.play(n, config.getKeyvolume(), 0);
+							main.play(n, config.getKeyVolume(), 0);
 						}							
 					}
 				}
@@ -496,7 +495,7 @@ public class JudgeManager {
 								main.stop(processing[lane].getPair());
 							}
 							this.update(lane, processing[lane], time, j, dtime);
-							main.play(processing[lane], config.getKeyvolume(), 0);
+							main.play(processing[lane], config.getKeyVolume(), 0);
 							processing[lane] = null;							
 						}
 					} else {
@@ -509,7 +508,7 @@ public class JudgeManager {
 							main.stop(processing[lane].getPair());
 						}
 						this.update(lane, processing[lane].getPair(), time, j, dtime);
-						main.play(processing[lane], config.getKeyvolume(), 0);
+						main.play(processing[lane], config.getKeyVolume(), 0);
 						processing[lane] = null;
 					}
 				}
@@ -533,7 +532,7 @@ public class JudgeManager {
 					}
 				}
 				this.update(lane, processing[lane].getPair(), time, j, passingcount[lane]);
-				main.play(processing[lane], config.getKeyvolume(), 0);
+				main.play(processing[lane], config.getKeyVolume(), 0);
 				processing[lane] = null;
 			}
 			// 見逃しPOOR判定
@@ -597,7 +596,7 @@ public class JudgeManager {
 		
 		if (combocond[judge] && judge < 5) {
 			combo++;
-			score.setCombo(Math.max(score.getCombo(), combo));
+			score.setMaxCombo(Math.max(score.getMaxCombo(), combo));
 			coursecombo++;
 			coursemaxcombo = coursemaxcombo > coursecombo ? coursemaxcombo : coursecombo;
 		}
@@ -607,7 +606,7 @@ public class JudgeManager {
 		}
 
 		if (judge != 4) this.judge[player[lane]][offset[lane]] = judge == 0 ? 1 : judge * 2 + (fast > 0 ? 0 : 1);
-		if (judge <= ((PlaySkin)main.getSkin()).getJudgetimer()) {
+		if (judge <= ((PlaySkin)main.getSkin()).getJudgeTimer()) {
 			main.main.setTimerOn(SkinPropertyMapper.bombTimerId(player[lane], offset[lane]));
 		}
 		PMcharaJudge = judge + 1;
