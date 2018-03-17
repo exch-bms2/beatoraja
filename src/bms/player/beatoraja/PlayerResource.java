@@ -484,7 +484,7 @@ public class PlayerResource {
 				if(td.getUrl().equals(url)){
 					final TableFolder[] tfs = td.getFolder();
 					for(TableFolder tf: tfs){
-						final SongData[] tss = tf.getSong();
+						final SongData[] tss = tf.getSongs();
 						for(SongData ts: tss){
 							if((ts.getMd5().length() != 0 && this.getSongdata().getMd5().length() != 0 &&
 									ts.getMd5().equals(this.getSongdata().getMd5()))||

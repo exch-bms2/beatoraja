@@ -1,11 +1,9 @@
 package bms.player.beatoraja.launcher;
 
 import java.awt.Desktop;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.DirectoryStream;
@@ -355,15 +353,15 @@ public class PlayConfigurationView implements Initializable {
 
 		videoController.update(config);
 
-		systemvolume.setValue((double)config.getSystemvolume());
-		keyvolume.setValue((double)config.getKeyvolume());
-		bgvolume.setValue((double)config.getBgvolume());
+		systemvolume.setValue((double)config.getSystemVolume());
+		keyvolume.setValue((double)config.getKeyVolume());
+		bgvolume.setValue((double)config.getBgVolume());
 
-		bgmpath.setText(config.getBgmpath());
-		soundpath.setText(config.getSoundpath());
+		bgmpath.setText(config.getBgmPath());
+		soundpath.setText(config.getSoundPath());
 
-		bmsroot.getItems().setAll(config.getBmsroot());
-		updatesong.setSelected(config.isUpdatesong());
+		bmsroot.getItems().setAll(config.getBmsRoot());
+		updatesong.setSelected(config.isUpdateSong());
 		tableurl.getItems().setAll(config.getTableURL());
 
 		audio.setValue(config.getAudioDriver());
@@ -371,7 +369,7 @@ public class PlayConfigurationView implements Initializable {
 		audiosim.getValueFactory().setValue(config.getAudioDeviceSimultaneousSources());
 		audioFreqOption.setValue(config.getAudioFreqOption());
 		audioFastForward.setValue(config.getAudioFastForward());
-		showhiddennote.setSelected(config.isShowhiddennote());
+		showhiddennote.setSelected(config.isShowHiddenNote());
 
 		judgealgorithm.setValue(JudgeAlgorithm.getIndex(config.getJudgeType()));
 
@@ -385,7 +383,7 @@ public class PlayConfigurationView implements Initializable {
         usecim.setSelected(config.isCacheSkinImage());
         useSongInfo.setSelected(config.isUseSongInfo());
 
-		folderlamp.setSelected(config.isFolderlamp());
+		folderlamp.setSelected(config.isFolderLamp());
 
 		inputduration.getValueFactory().setValue(config.getInputduration());
 
@@ -404,7 +402,7 @@ public class PlayConfigurationView implements Initializable {
 		try {
 			Class.forName("org.sqlite.JDBC");
 			SongDatabaseAccessor songdb = new SQLiteSongDatabaseAccessor(Paths.get("songdata.db").toString(),
-					config.getBmsroot());
+					config.getBmsRoot());
 			courseController.setSongDatabaseAccessor(songdb);
 			courseController.update("default");
 		} catch (ClassNotFoundException e) {
@@ -493,17 +491,17 @@ public class PlayConfigurationView implements Initializable {
 
 		config.setPlayername(players.getValue());
 
-		config.setBgmpath(bgmpath.getText());
-		config.setSoundpath(soundpath.getText());
-		config.setSystemvolume((float) systemvolume.getValue());
-		config.setKeyvolume((float) keyvolume.getValue());
-		config.setBgvolume((float) bgvolume.getValue());
+		config.setBgmPath(bgmpath.getText());
+		config.setSoundPath(soundpath.getText());
+		config.setSystemVolume((float) systemvolume.getValue());
+		config.setKeyVolume((float) keyvolume.getValue());
+		config.setBgVolume((float) bgvolume.getValue());
 
-		config.setBmsroot(bmsroot.getItems().toArray(new String[0]));
-		config.setUpdatesong(updatesong.isSelected());
+		config.setBmsRoot(bmsroot.getItems().toArray(new String[0]));
+		config.setUpdateSong(updatesong.isSelected());
 		config.setTableURL(tableurl.getItems().toArray(new String[0]));
 
-		config.setShowhiddennote(showhiddennote.isSelected());
+		config.setShowHiddenNote(showhiddennote.isSelected());
 
 		config.setAudioDriver(audio.getValue());
 		config.setAudioDriverName(audioname.getValue());
@@ -520,12 +518,12 @@ public class PlayConfigurationView implements Initializable {
 
         config.setCacheSkinImage(usecim.isSelected());
         config.setUseSongInfo(useSongInfo.isSelected());
-        config.setFolderlamp(folderlamp.isSelected());
+        config.setFolderLamp(folderlamp.isSelected());
 
 		config.setInputduration(getValue(inputduration));
 
-		config.setScrollDutationLow(getValue(scrolldurationlow));
-		config.setScrollDutationHigh(getValue(scrolldurationhigh));
+		config.setScrollDurationLow(getValue(scrolldurationlow));
+		config.setScrollDurationHigh(getValue(scrolldurationhigh));
 
 		commitPlayer();
 
@@ -827,7 +825,7 @@ public class PlayConfigurationView implements Initializable {
 		try {
 			Class.forName("org.sqlite.JDBC");
 			SongDatabaseAccessor songdb = new SQLiteSongDatabaseAccessor(Paths.get("songdata.db").toString(),
-					config.getBmsroot());
+					config.getBmsRoot());
 			SongInformationAccessor infodb = useSongInfo.isSelected() ?
 					new SongInformationAccessor(Paths.get("songinfo.db").toString()) : null;
 			Logger.getGlobal().info("song.db更新開始");
@@ -873,7 +871,7 @@ public class PlayConfigurationView implements Initializable {
 		try {
 			Class.forName("org.sqlite.JDBC");
 			SongDatabaseAccessor songdb = new SQLiteSongDatabaseAccessor(Paths.get("songdata.db").toString(),
-					config.getBmsroot());
+					config.getBmsRoot());
 			String player = "player1";
 			ScoreDatabaseAccessor scoredb = new ScoreDatabaseAccessor("player/" + player + "/score.db");
 			scoredb.createTable();
@@ -894,7 +892,7 @@ public class PlayConfigurationView implements Initializable {
 						sd.setEgd((int) score.get("good"));
 						sd.setEbd((int) score.get("bad"));
 						sd.setEpr((int) score.get("poor"));
-						sd.setMinbp((int) score.get("minbp"));
+						sd.setMinBP((int) score.get("minBP"));
 						sd.setClear(clears[(int) score.get("clear")]);
 						sd.setPlaycount((int) score.get("playcount"));
 						sd.setClearcount((int) score.get("clearcount"));

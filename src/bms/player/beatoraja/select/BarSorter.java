@@ -104,7 +104,7 @@ public enum BarSorter implements Comparator<Bar> {
 			if (!(o2 instanceof SongBar) || o2.getScore() == null) {
 				return -1;
 			}
-			return o1.getScore().getMinbp() - o2.getScore().getMinbp();
+			return o1.getScore().getMinBP() - o2.getScore().getMinBP();
 		}
 	}
 	;

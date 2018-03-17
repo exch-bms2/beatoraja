@@ -3,6 +3,8 @@ package bms.player.beatoraja;
 import java.util.Map;
 import bms.player.beatoraja.play.JudgeAlgorithm;
 import bms.player.beatoraja.skin.SkinType;
+import lombok.Data;
+
 import static bms.player.beatoraja.Resolution.*;
 
 /**
@@ -10,6 +12,7 @@ import static bms.player.beatoraja.Resolution.*;
  * 
  * @author exch
  */
+@Data
 public class Config {
 
 	// TODO プレイヤー毎に異なる見込みの大きい要素をPlayerConfigに移動
@@ -29,7 +32,7 @@ public class Config {
 	/**
 	 * フォルダランプの有効/無効
 	 */
-	private boolean folderlamp = true;
+	private boolean folderLamp = true;
 	/**
 	 * オーディオドライバー
 	 */
@@ -79,15 +82,15 @@ public class Config {
 	/**
 	 * システム音ボリューム
 	 */
-	private float systemvolume = 1.0f;
+	private float systemVolume = 1.0f;
 	/**
 	 * キー音のボリューム
 	 */
-	private float keyvolume = 1.0f;
+	private float keyVolume = 1.0f;
 	/**
 	 * BGノート音のボリューム
 	 */
-	private float bgvolume = 1.0f;
+	private float bgVolume = 1.0f;
 	/**
 	 * 最大FPS。垂直同期OFFの時のみ有効
 	 */
@@ -99,11 +102,11 @@ public class Config {
 	/**
 	 * 選曲バー移動速度の最初
 	 */
-	private int scrolldurationlow = 300;
+	private int scrollDurationLow = 300;
 	/**
 	 * 選曲バー移動速度の2つ目以降
 	 */
-	private int scrolldurationhigh = 50;
+	private int scrollDurationHigh = 50;
 	/**
 	 * 判定アルゴリズム
 	 */
@@ -112,20 +115,20 @@ public class Config {
     private boolean cacheSkinImage = false;
     
     private boolean useSongInfo = true;
-    
-	private boolean showhiddennote = false;
 
-	private boolean showpastnote = false;
+	private boolean showHiddenNote = false;
 
-	private String bgmpath = "";
+	private boolean showPastNote = false;
 
-	private String soundpath = "";
+	private String bgmPath = "";
+
+	private String soundPath = "";
 
 	private SkinConfig[] skin;
 	/**
 	 * BMSルートディレクトリパス
 	 */
-	private String[] bmsroot = new String[0];
+	private String[] bmsRoot = new String[0];
 	/**
 	 * 難易度表URL
 	 */
@@ -145,11 +148,11 @@ public class Config {
 	public static final int BGAEXPAND_KEEP_ASPECT_RATIO = 1;
 	public static final int BGAEXPAND_OFF = 2;
 
-	private int frameskip = 1;
+	private int frameSkip = 1;
 
-	private boolean updatesong = false;
+	private boolean updateSong = false;
 
-	private int autosavereplay[] = {0,0,0,0};
+	private int autoSaveReplay[] = {0,0,0,0};
 	
 	private int skinPixmapGen = 4;
 	private int bannerPixmapGen = 2;
@@ -179,70 +182,6 @@ public class Config {
 		}
 	}
 
-	public String getPlayername() {
-		return playername;
-	}
-
-	public void setPlayername(String playername) {
-		this.playername = playername;
-	}
-
-	public boolean isVsync() {
-		return vsync;
-	}
-
-	public void setVsync(boolean vsync) {
-		this.vsync = vsync;
-	}
-
-	public int getBga() {
-		return bga;
-	}
-
-	public void setBga(int bga) {
-		this.bga = bga;
-	}
-
-	public int getAudioDeviceBufferSize() {
-		return audioDeviceBufferSize;
-	}
-
-	public void setAudioDeviceBufferSize(int audioDeviceBufferSize) {
-		this.audioDeviceBufferSize = audioDeviceBufferSize;
-	}
-
-	public int getAudioDeviceSimultaneousSources() {
-		return audioDeviceSimultaneousSources;
-	}
-
-	public void setAudioDeviceSimultaneousSources(int audioDeviceSimultaneousSources) {
-		this.audioDeviceSimultaneousSources = audioDeviceSimultaneousSources;
-	}
-
-	public int getMaxFramePerSecond() {
-		return maxFramePerSecond;
-	}
-
-	public void setMaxFramePerSecond(int maxFramePerSecond) {
-		this.maxFramePerSecond = maxFramePerSecond;
-	}
-
-	public String[] getBmsroot() {
-		return bmsroot;
-	}
-
-	public void setBmsroot(String[] bmsroot) {
-		this.bmsroot = bmsroot;
-	}
-
-	public String[] getTableURL() {
-		return tableURL;
-	}
-
-	public void setTableURL(String[] tableURL) {
-		this.tableURL = tableURL;
-	}
-
 	public String getJudgeType() {
 		for(JudgeAlgorithm type : JudgeAlgorithm.values()) {
 			if(type.name().equals(judgeType)) {
@@ -253,107 +192,18 @@ public class Config {
 		return judgeType;
 	}
 
-	public void setJudgeType(String judgeType) {
-		this.judgeType = judgeType;
-	}
-
-	public boolean isFolderlamp() {
-		return folderlamp;
-	}
-
-	public void setFolderlamp(boolean folderlamp) {
-		this.folderlamp = folderlamp;
-	}
-
-	public Resolution getResolution() {
-		return resolution;
-	}
-
-	public void setResolution(Resolution resolution) {
-		this.resolution = resolution;
-	}
-
-	public boolean isShowhiddennote() {
-		return showhiddennote;
-	}
-
-	public void setShowhiddennote(boolean showhiddennote) {
-		this.showhiddennote = showhiddennote;
-	}
-
-	public int getFrameskip() {
-		return frameskip;
-	}
-
-	public void setFrameskip(int frameskip) {
-		this.frameskip = frameskip;
-	}
-
-	public String getBgmpath() {
-		return bgmpath;
-	}
-
-	public void setBgmpath(String bgmpath) {
-		this.bgmpath = bgmpath;
-	}
-
-	public String getSoundpath() {
-		return soundpath;
-	}
-
-	public void setSoundpath(String soundpath) {
-		this.soundpath = soundpath;
-	}
-
-	public int getInputduration() {
-		return inputduration;
-	}
-
-	public void setInputduration(int inputduration) {
-		this.inputduration = inputduration;
-	}
-
-	public int getScrollDurationLow(){
-		return scrolldurationlow;
-	}
-	public void setScrollDutationLow(int scrolldurationlow){
-		this.scrolldurationlow = scrolldurationlow;
-	}
-	public int getScrollDurationHigh(){
-		return scrolldurationhigh;
-	}
-	public void setScrollDutationHigh(int scrolldurationhigh){
-		this.scrolldurationhigh = scrolldurationhigh;
-	}
-
-	public float getKeyvolume() {
-		if(keyvolume < 0 || keyvolume > 1) {
-			keyvolume = 1;
+	public float getKeyVolume() {
+		if(keyVolume < 0 || keyVolume > 1) {
+			keyVolume = 1;
 		}
-		return keyvolume;
+		return keyVolume;
 	}
 
-	public void setKeyvolume(float keyvolume) {
-		this.keyvolume = keyvolume;
-	}
-
-	public float getBgvolume() {
-		if(bgvolume < 0 || bgvolume > 1) {
-			bgvolume = 1;
+	public float getBgVolume() {
+		if(bgVolume < 0 || bgVolume > 1) {
+			bgVolume = 1;
 		}
-		return bgvolume;
-	}
-
-	public void setBgvolume(float bgvolume) {
-		this.bgvolume = bgvolume;
-	}
-
-	public boolean isShowpastnote() {
-		return showpastnote;
-	}
-
-	public void setShowpastnote(boolean showpastnote) {
-		this.showpastnote = showpastnote;
+		return bgVolume;
 	}
 
 	public int getAudioDriver() {
@@ -363,107 +213,11 @@ public class Config {
 		return audioDriver;
 	}
 
-	public void setAudioDriver(int audioDriver) {
-		this.audioDriver = audioDriver;
-	}
-
-	public String getAudioDriverName() {
-		return audioDriverName;
-	}
-
-	public void setAudioDriverName(String audioDriverName) {
-		this.audioDriverName = audioDriverName;
-	}
-
-	public int getAudioFreqOption() {
-		return audioFreqOption;
-	}
-
-	public void setAudioFreqOption(int audioFreqOption) {
-		this.audioFreqOption = audioFreqOption;
-	}
-
-	public int getAudioFastForward() {
-		return audioFastForward;
-	}
-
-	public void setAudioFastForward(int audioFastForward) {
-		this.audioFastForward = audioFastForward;
-	}
-
-	public void setAutoSaveReplay(int autoSaveReplay[]){
-		this.autosavereplay = autoSaveReplay;
-	}
-
-	public int[] getAutoSaveReplay(){
-		return autosavereplay;
-	}
-	
-	public boolean isUseSongInfo() {
-		return useSongInfo;
-	}
-
-	public void setUseSongInfo(boolean useSongInfo) {
-		this.useSongInfo = useSongInfo;
-	}
-
-	public int getBgaExpand() {
-		return bgaExpand;
-	}
-
-	public void setBgaExpand(int bgaExpand) {
-		this.bgaExpand = bgaExpand;
-	}
-
-	public boolean isCacheSkinImage() {
-		return cacheSkinImage;
-	}
-
-	public void setCacheSkinImage(boolean cacheSkinImage) {
-		this.cacheSkinImage = cacheSkinImage;
-	}
-
-	public float getSystemvolume() {
-		if(systemvolume < 0 || systemvolume > 1) {
-			systemvolume = 1;
+	public float getSystemVolume() {
+		if(systemVolume < 0 || systemVolume > 1) {
+			systemVolume = 1;
 		}
-		return systemvolume;
-	}
-
-	public void setSystemvolume(float systemvolume) {
-		this.systemvolume = systemvolume;
-	}
-	
-	public boolean isUpdatesong() {
-		return updatesong;
-	}
-
-	public void setUpdatesong(boolean updatesong) {
-		this.updatesong = updatesong;
-	}
-
-	public DisplayMode getDisplaymode() {
-		return displaymode;
-	}
-
-	public void setDisplaymode(DisplayMode displaymode) {
-		this.displaymode = displaymode;
-	}
-
-	public int getSkinPixmapGen() {
-		return skinPixmapGen;
-	}
-
-	public void setSkinPixmapGen(int skinPixmapGen) {
-		this.skinPixmapGen = skinPixmapGen;
-	}
-
-	public int getBannerPixmapGen() {
-		return bannerPixmapGen;
-	}
-
-	public void setBannerPixmapGen(int bannerPixmapGen) {
-		this.bannerPixmapGen = bannerPixmapGen;
+		return systemVolume;
 	}
 
 	public enum DisplayMode {

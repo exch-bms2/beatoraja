@@ -2,6 +2,7 @@ package bms.player.beatoraja;
 
 import java.sql.SQLException;
 
+import lombok.Data;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.sqlite.SQLiteConfig;
@@ -33,7 +34,7 @@ public class ScoreLogDatabaseAccessor {
 			if (qr.query(sql, new MapListHandler(), "scorelog").size() == 0) {
 				qr.update("CREATE TABLE [scorelog] ([sha256] TEXT NOT NULL," + "[mode] INTEGER," + "[clear] INTEGER," + "[oldclear] INTEGER,"
 						+ "[score] INTEGER," + "[oldscore] INTEGER," + "[combo] INTEGER,"  + "[oldcombo] INTEGER," 
-						+ "[minbp] INTEGER," + "[oldminbp] INTEGER," + "[date] INTEGER);");
+						+ "[minBP] INTEGER," + "[oldminbp] INTEGER," + "[date] INTEGER);");
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -45,7 +46,7 @@ public class ScoreLogDatabaseAccessor {
 		try {
 			qr.update(
 					"INSERT INTO scorelog "
-							+ "(sha256, mode, clear, oldclear, score, oldscore, combo, oldcombo, minbp, oldminbp, date) "
+							+ "(sha256, mode, clear, oldclear, score, oldscore, combo, oldcombo, minBP, oldminbp, date) "
 							+ "VALUES(?,?,?,?,?,?,?,?,?,?,?);", log.getSha256(), log.getMode(), log.getClear(), log.getOldclear(),
 							log.getScore(), log.getOldscore(), log.getCombo(), log.getOldcombo(), log.getMinbp(), log.getOldminbp()
 							,log.getDate());
@@ -54,7 +55,8 @@ public class ScoreLogDatabaseAccessor {
 			e.printStackTrace();
 		}
 	}
-	
+
+	@Data
 	public static class ScoreLog {
 		
 		private String sha256;
@@ -68,73 +70,6 @@ public class ScoreLogDatabaseAccessor {
 		private int minbp;		
 		private int oldminbp;
 		private long date;
-		
-		public String getSha256() {
-			return sha256;
-		}
-		public void setSha256(String sha256) {
-			this.sha256 = sha256;
-		}
-		public int getMode() {
-			return mode;
-		}
-		public void setMode(int mode) {
-			this.mode = mode;
-		}
-		public int getClear() {
-			return clear;
-		}
-		public void setClear(int clear) {
-			this.clear = clear;
-		}
-		public int getOldclear() {
-			return oldclear;
-		}
-		public void setOldclear(int oldclear) {
-			this.oldclear = oldclear;
-		}
-		public int getScore() {
-			return score;
-		}
-		public void setScore(int score) {
-			this.score = score;
-		}
-		public int getOldscore() {
-			return oldscore;
-		}
-		public void setOldscore(int oldscore) {
-			this.oldscore = oldscore;
-		}
-		public int getCombo() {
-			return combo;
-		}
-		public void setCombo(int combo) {
-			this.combo = combo;
-		}
-		public int getOldcombo() {
-			return oldcombo;
-		}
-		public void setOldcombo(int oldcombo) {
-			this.oldcombo = oldcombo;
-		}
-		public int getMinbp() {
-			return minbp;
-		}
-		public void setMinbp(int minbp) {
-			this.minbp = minbp;
-		}
-		public int getOldminbp() {
-			return oldminbp;
-		}
-		public void setOldminbp(int oldminbp) {
-			this.oldminbp = oldminbp;
-		}
-		public long getDate() {
-			return date;
-		}
-		public void setDate(long date) {
-			this.date = date;
-		}
 		
 	}
 }

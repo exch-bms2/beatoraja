@@ -9,7 +9,6 @@ import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 
@@ -89,7 +88,7 @@ public class SkinDistributionGraph extends SkinObject {
 
     public void draw(SkinObjectRenderer sprite, long time, MainState state, DirectoryBar current, int offsetx, int offsety) {
         final Rectangle r = getDestination(time, state);
-        if (r != null && state.main.getPlayerResource().getConfig().isFolderlamp()) {
+        if (r != null && state.main.getPlayerResource().getConfig().isFolderLamp()) {
             int[] lamps = current.getLamps();
             int[] ranks = current.getRanks();
             int count = 0;

@@ -53,7 +53,7 @@ public class TableBar extends DirectoryBar {
     	final TableData.TableFolder[] folder = td.getFolder();
     	levels = new HashBar[folder.length];
     	for(int i = 0;i < folder.length;i++) {
-    		levels[i] = new HashBar(selector, folder[i].getName(), folder[i].getSong());
+    		levels[i] = new HashBar(selector, folder[i].getName(), folder[i].getSongs());
     	}
     	
 		final CourseData[] courses = td.getCourse();

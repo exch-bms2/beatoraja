@@ -40,7 +40,7 @@ public class BGAProcessor {
 
 		@Override
 		protected MovieProcessor load(String key) {
-			MovieProcessor mm = new FFmpegProcessor(config.getFrameskip());
+			MovieProcessor mm = new FFmpegProcessor(config.getFrameSkip());
 			mm.create(key);
 			return mm;
 		}

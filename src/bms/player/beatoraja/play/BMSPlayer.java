@@ -1,7 +1,6 @@
 package bms.player.beatoraja.play;
 
 import java.util.*;
-import static bms.player.beatoraja.play.GrooveGauge.*;
 import java.util.logging.Logger;
 
 import bms.model.*;
@@ -548,7 +547,7 @@ public class BMSPlayer extends MainState {
 		switch (state) {
 		// 楽曲ロード
 		case STATE_PRELOAD:
-			if (resource.mediaLoadFinished() && now > skin.getLoadstart() + skin.getLoadend()
+			if (resource.mediaLoadFinished() && now > skin.getLoadStart() + skin.getLoadEnd()
 					&& now - startpressedtime > 1000) {
 				bga.prepare(this);
 				final long mem = Runtime.getRuntime().freeMemory();
@@ -589,7 +588,7 @@ public class BMSPlayer extends MainState {
 			control.setEnableCursor(false);
 			practice.processInput(input);
 
-			if (input.getKeystate()[0] && resource.mediaLoadFinished() && now > skin.getLoadstart() + skin.getLoadend()
+			if (input.getKeystate()[0] && resource.mediaLoadFinished() && now > skin.getLoadStart() + skin.getLoadEnd()
 					&& now - startpressedtime > 1000) {
 				PracticeProperty property = practice.getPracticeProperty();
 				control.setEnableControl(true);
@@ -637,7 +636,7 @@ public class BMSPlayer extends MainState {
 			break;
 			// GET READY
 		case STATE_READY:
-			if (main.getNowTime(TIMER_READY) > skin.getPlaystart()) {
+			if (main.getNowTime(TIMER_READY) > skin.getPlayStart()) {
 				saveReplayHS();
 				state = STATE_PLAY;
                 main.setMicroTimer(TIMER_PLAY, micronow - starttimeoffset * 1000);
@@ -952,7 +951,7 @@ public class BMSPlayer extends MainState {
 		replay.lift = replayLift;
 		replay.enablelift = replayEnablelift;
 
-		score.setMinbp(score.getEbd() + score.getLbd() + score.getEpr() + score.getLpr() + score.getEms() + score.getLms() + resource.getSongdata().getNotes() - notes);
+		score.setMinBP(score.getEbd() + score.getLbd() + score.getEpr() + score.getLpr() + score.getEms() + score.getLms() + resource.getSongdata().getNotes() - notes);
 		score.setDeviceType(main.getInputProcessor().getDeviceType());
 		return score;
 	}
@@ -1077,7 +1076,7 @@ public class BMSPlayer extends MainState {
 				// BGレーン再生
 				while (p < timelines.length && timelines[p].getMicroTime() <= time) {
 					for (Note n : timelines[p].getBackGroundNotes()) {
-						play(n, config.getBgvolume(), 0);
+						play(n, config.getBgVolume(), 0);
 					}
 					p++;
 				}
@@ -1143,7 +1142,7 @@ public class BMSPlayer extends MainState {
 			return (int) lanerender.getNowBPM();
 		case NUMBER_MAXCOMBO:
 		case NUMBER_MAXCOMBO2:
-			return judge.getScoreData().getCombo();
+			return judge.getScoreData().getMaxCombo();
 		case VALUE_JUDGE_1P_DURATION:
 			return (int) judge.getRecentJudgeTiming()[0];
 		case VALUE_JUDGE_2P_DURATION:

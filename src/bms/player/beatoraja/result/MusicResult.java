@@ -124,7 +124,7 @@ public class MusicResult extends MainState {
 							final int cg = resource.getCourseBMSModels().length;
 							for (int i = 0; i < cg; i++) {
 								if (coursegauge.size() <= i) {
-									resource.getCourseScoreData().setMinbp(resource.getCourseScoreData().getMinbp()
+									resource.getCourseScoreData().setMinBP(resource.getCourseScoreData().getMinBP()
 											+ resource.getCourseBMSModels()[i].getTotalNotes());
 								}
 							}
@@ -258,7 +258,7 @@ public class MusicResult extends MainState {
 		if (newscore == null) {
 			if (resource.getCourseScoreData() != null) {
 				resource.getCourseScoreData()
-						.setMinbp(resource.getCourseScoreData().getMinbp() + resource.getBMSModel().getTotalNotes());
+						.setMinBP(resource.getCourseScoreData().getMinBP() + resource.getBMSModel().getTotalNotes());
 				resource.getCourseScoreData().setClear(Failed.id);
 			}
 			return;
@@ -308,7 +308,7 @@ public class MusicResult extends MainState {
 			IRScoreData cscore = resource.getCourseScoreData();
 			if (cscore == null) {
 				cscore = new IRScoreData();
-				cscore.setMinbp(0);
+				cscore.setMinBP(0);
 				int notes = 0;
 				for (BMSModel mo : resource.getCourseBMSModels()) {
 					notes += mo.getTotalNotes();
@@ -328,7 +328,7 @@ public class MusicResult extends MainState {
 			cscore.setLpr(cscore.getLpr() + newscore.getLpr());
 			cscore.setEms(cscore.getEms() + newscore.getEms());
 			cscore.setLms(cscore.getLms() + newscore.getLms());
-			cscore.setMinbp(cscore.getMinbp() + newscore.getMinbp());
+			cscore.setMinBP(cscore.getMinBP() + newscore.getMinBP());
 			if (resource.getGauge()[resource.getGrooveGauge().getType()].get(resource.getGauge()[resource.getGrooveGauge().getType()].size - 1) > 0) {
 				int orgGaugeType = resource.getGrooveGauge().getType();
 				if(resource.getPlayerConfig().isContinueUntilEndOfSong() && resource.getCourseIndex() == resource.getCourseBMSModels().length - 1) resource.getGrooveGauge().changeTypeOfClear(resource.getGrooveGauge().getType());
@@ -364,7 +364,7 @@ public class MusicResult extends MainState {
 				// 残りの曲がある場合はtotalnotesをBPに加算する
 				for (BMSModel m : resource.getCourseBMSModels()) {
 					if (b) {
-						cscore.setMinbp(cscore.getMinbp() + m.getTotalNotes());
+						cscore.setMinBP(cscore.getMinBP() + m.getTotalNotes());
 					}
 					if (m == resource.getBMSModel()) {
 						b = true;
@@ -391,7 +391,7 @@ public class MusicResult extends MainState {
 				case PlayerConfig.IR_SEND_UPDATE_SCORE:
 					IRScoreData current = resource.getScoreData();
 					send &= (current.getExscore() > oldscore.getExscore() || current.getClear() > oldscore.getClear()
-							|| current.getCombo() > oldscore.getCombo() || current.getMinbp() < oldscore.getMinbp());
+							|| current.getMaxCombo() > oldscore.getMaxCombo() || current.getMinBP() < oldscore.getMinBP());
 					break;
 				}
 				
@@ -506,35 +506,35 @@ public class MusicResult extends MainState {
 		case NUMBER_MISSCOUNT:
 		case NUMBER_MISSCOUNT2:
 			if (resource.getScoreData() != null) {
-				return resource.getScoreData().getMinbp();
+				return resource.getScoreData().getMinBP();
 			}
 			return Integer.MIN_VALUE;
 		case NUMBER_TARGET_MISSCOUNT:
-			if (oldscore.getMinbp() == Integer.MAX_VALUE) {
+			if (oldscore.getMinBP() == Integer.MAX_VALUE) {
 				return Integer.MIN_VALUE;
 			}
-			return oldscore.getMinbp();
+			return oldscore.getMinBP();
 		case NUMBER_DIFF_MISSCOUNT:
-			if (oldscore.getMinbp() == Integer.MAX_VALUE) {
+			if (oldscore.getMinBP() == Integer.MAX_VALUE) {
 				return Integer.MIN_VALUE;
 			}
-			return resource.getScoreData().getMinbp() - oldscore.getMinbp();
+			return resource.getScoreData().getMinBP() - oldscore.getMinBP();
 		case NUMBER_TARGET_MAXCOMBO:
-			if (oldscore.getCombo() > 0) {
-				return oldscore.getCombo();
+			if (oldscore.getMaxCombo() > 0) {
+				return oldscore.getMaxCombo();
 			}
 			return Integer.MIN_VALUE;
 		case NUMBER_MAXCOMBO:
 		case NUMBER_MAXCOMBO2:
 			if (resource.getScoreData() != null) {
-				return resource.getScoreData().getCombo();
+				return resource.getScoreData().getMaxCombo();
 			}
 			return Integer.MIN_VALUE;
 		case NUMBER_DIFF_MAXCOMBO:
-			if (oldscore.getCombo() == 0) {
+			if (oldscore.getMaxCombo() == 0) {
 				return Integer.MIN_VALUE;
 			}
-			return resource.getScoreData().getCombo() - oldscore.getCombo();
+			return resource.getScoreData().getMaxCombo() - oldscore.getMaxCombo();
 		case NUMBER_GROOVEGAUGE:
 			return (int) resource.getGauge()[resource.getGrooveGauge().getType()].get(resource.getGauge()[resource.getGrooveGauge().getType()].size - 1);
 			case NUMBER_AVERAGE_DURATION:
@@ -580,13 +580,13 @@ public class MusicResult extends MainState {
 			case OPTION_DRAW_SCORE:
 				return score.getExscore() == oldscore.getExscore();
 		case OPTION_UPDATE_MAXCOMBO:
-			return score.getCombo() > oldscore.getCombo();
+			return score.getMaxCombo() > oldscore.getMaxCombo();
 			case OPTION_DRAW_MAXCOMBO:
-				return score.getCombo() == oldscore.getCombo();
+				return score.getMaxCombo() == oldscore.getMaxCombo();
 		case OPTION_UPDATE_MISSCOUNT:
-			return score.getMinbp() < oldscore.getMinbp();
+			return score.getMinBP() < oldscore.getMinBP();
 			case OPTION_DRAW_MISSCOUNT:
-				return score.getMinbp() == oldscore.getMinbp();
+				return score.getMinBP() == oldscore.getMinBP();
 		case OPTION_UPDATE_SCORERANK:
 			return getScoreDataProperty().getNowRate() > getScoreDataProperty().getBestScoreRate();
 			case OPTION_DRAW_SCORERANK:
@@ -685,25 +685,25 @@ public class MusicResult extends MainState {
 		MISSCOUNT_UPDATE {
 			@Override
 			public boolean isQualified(IRScoreData oldscore, IRScoreData newscore) {
-				return newscore.getMinbp() < oldscore.getMinbp() || oldscore.getClear() == NoPlay.id;
+				return newscore.getMinBP() < oldscore.getMinBP() || oldscore.getClear() == NoPlay.id;
 			}
 		},
 		MISSCOUNT_UPDATE_OR_EQUAL {
 			@Override
 			public boolean isQualified(IRScoreData oldscore, IRScoreData newscore) {
-				return newscore.getMinbp() <= oldscore.getMinbp() || oldscore.getClear() == NoPlay.id;
+				return newscore.getMinBP() <= oldscore.getMinBP() || oldscore.getClear() == NoPlay.id;
 			}
 		},
 		MAXCOMBO_UPDATE {
 			@Override
 			public boolean isQualified(IRScoreData oldscore, IRScoreData newscore) {
-				return newscore.getCombo() > oldscore.getCombo();
+				return newscore.getMaxCombo() > oldscore.getMaxCombo();
 			}
 		},
 		MAXCOMBO_UPDATE_OR_EQUAL {
 			@Override
 			public boolean isQualified(IRScoreData oldscore, IRScoreData newscore) {
-				return newscore.getCombo() >= oldscore.getCombo();
+				return newscore.getMaxCombo() >= oldscore.getMaxCombo();
 			}
 		},
 		CLEAR_UPDATE {
@@ -721,8 +721,8 @@ public class MusicResult extends MainState {
 		ANYONE_UPDATE {
 			@Override
 			public boolean isQualified(IRScoreData oldscore, IRScoreData newscore) {
-				return newscore.getClear() > oldscore.getClear() || newscore.getCombo() > oldscore.getCombo() ||
-						newscore.getMinbp() < oldscore.getMinbp() || newscore.getExscore() > oldscore.getExscore();
+				return newscore.getClear() > oldscore.getClear() || newscore.getMaxCombo() > oldscore.getMaxCombo() ||
+						newscore.getMinBP() < oldscore.getMinBP() || newscore.getExscore() > oldscore.getExscore();
 			}
 		},
 		ALWAYS {

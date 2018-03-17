@@ -63,7 +63,7 @@ public class PreviewMusicProcessor {
         private String playing;
 
         public void run() {
-            audio.play(defaultMusic, config.getSystemvolume(), true);
+            audio.play(defaultMusic, config.getSystemVolume(), true);
             while(!stop) {
                 if(!commands.isEmpty()) {
                     String path = commands.removeFirst();
@@ -73,9 +73,9 @@ public class PreviewMusicProcessor {
                     if(!path.equals(playing)) {
                         stopPreview(true);
                         if(path != defaultMusic) {
-                            audio.play(path, config.getSystemvolume(), true);
+                            audio.play(path, config.getSystemVolume(), true);
                         } else {
-                            audio.setVolume(defaultMusic, config.getSystemvolume());
+                            audio.setVolume(defaultMusic, config.getSystemVolume());
                         }
                         playing = path;
                     }
@@ -96,7 +96,7 @@ public class PreviewMusicProcessor {
                     audio.dispose(playing);
                 } else if(pause) {
                 	for(int i = 10;i >= 0;i--) {
-                		float vol = i * 0.1f * config.getSystemvolume();
+                		float vol = i * 0.1f * config.getSystemVolume();
                         audio.setVolume(playing, vol);
                         // TODO フェードアウトはAudioDriver側で実装したい
                         try {

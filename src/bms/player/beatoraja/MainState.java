@@ -260,7 +260,7 @@ public abstract class MainState {
 	}
 
 	public int getJudgeCount(int judge, boolean fast) {
-		IRScoreData sd = score.getScoreData();
+		IRScoreData sd = score.getScore();
 		return sd != null ? sd.getJudgeCount(judge, fast) : 0;
 	}
 
@@ -414,21 +414,21 @@ public abstract class MainState {
 		case NUMBER_SCORE:
 		case NUMBER_SCORE2:
 		case NUMBER_SCORE3:
-			return score.getScoreData() != null ? score.getNowEXScore() : Integer.MIN_VALUE;
+			return score.getScore() != null ? score.getNowExScore() : Integer.MIN_VALUE;
 		case NUMBER_MAXSCORE:
-			return score.getScoreData() != null ? score.getScoreData().getNotes() : 0;
+			return score.getScore() != null ? score.getScore().getNotes() : 0;
 		case NUMBER_DIFF_NEXTRANK:
 			return score.getNextRank();
 		case NUMBER_SCORE_RATE:
-			return score.getScoreData() != null ? score.getNowRateInt() : Integer.MIN_VALUE;
+			return score.getScore() != null ? score.getNowRateInt() : Integer.MIN_VALUE;
 		case NUMBER_SCORE_RATE_AFTERDOT:
-			return score.getScoreData() != null ? score.getNowRateAfterDot() : Integer.MIN_VALUE;
+			return score.getScore() != null ? score.getNowRateAfterDot() : Integer.MIN_VALUE;
 		case NUMBER_TOTAL_RATE:
 		case NUMBER_SCORE_RATE2:
-			return score.getScoreData() != null ? score.getRateInt() : Integer.MIN_VALUE;
+			return score.getScore() != null ? score.getRateInt() : Integer.MIN_VALUE;
 		case NUMBER_TOTAL_RATE_AFTERDOT:
 		case NUMBER_SCORE_RATE_AFTERDOT2:
-			return score.getScoreData() != null ? score.getRateAfterDot() : Integer.MIN_VALUE;
+			return score.getScore() != null ? score.getRateAfterDot() : Integer.MIN_VALUE;
 		case NUMBER_HIGHSCORE:
 			return score.getBestScore();
 		case NUMBER_BEST_RATE:
@@ -448,11 +448,11 @@ public abstract class MainState {
 		case NUMBER_TARGET_SCORE_RATE_AFTERDOT2:
 			return score.getRivalRateAfterDot();
 		case NUMBER_DIFF_HIGHSCORE:
-			return score.getNowEXScore() - score.getNowBestScore();
+			return score.getNowExScore() - score.getNowBestScore();
 		case NUMBER_DIFF_EXSCORE:
 		case NUMBER_DIFF_EXSCORE2:
 		case NUMBER_DIFF_TARGETSCORE:
-			return score.getNowEXScore() - score.getNowRivalScore();
+			return score.getNowExScore() - score.getNowRivalScore();
 
 		case NUMBER_TOTALNOTE_NORMAL: {
 			final SongData song = main.getPlayerResource().getSongdata();
@@ -514,11 +514,11 @@ public abstract class MainState {
 		case BARGRAPH_SCORERATE_FINAL:
 			return score.getNowRate();
 		case BARGRAPH_BESTSCORERATE_NOW:
-			return score.getNowBestScoreRate();
+			return score.getNowBestScore();
 		case BARGRAPH_BESTSCORERATE:
 			return score.getBestScoreRate();
 		case BARGRAPH_TARGETSCORERATE_NOW:
-			return score.getNowRivalScoreRate();
+			return score.getRivalScore();
 		case BARGRAPH_TARGETSCORERATE:
 			return score.getRivalScoreRate();
 		}
@@ -677,7 +677,7 @@ public abstract class MainState {
 	public void play(int id) {
 		final String path = soundmap.get(id);
 		if (path != null) {
-			main.getAudioProcessor().play(path, main.getPlayerResource().getConfig().getSystemvolume(),
+			main.getAudioProcessor().play(path, main.getPlayerResource().getConfig().getSystemVolume(),
 					soundloop.get(id));
 		}
 	}

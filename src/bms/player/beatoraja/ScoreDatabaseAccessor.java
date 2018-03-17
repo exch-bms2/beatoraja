@@ -54,11 +54,11 @@ public class ScoreDatabaseAccessor {
 						+ "[epg] INTEGER," + "[lpg] INTEGER," + "[egr] INTEGER," + "[lgr] INTEGER," + "[egd] INTEGER,"
 						+ "[lgd] INTEGER," + "[ebd] INTEGER," + "[lbd] INTEGER," + "[epr] INTEGER," + "[lpr] INTEGER,"
 						+ "[ems] INTEGER," + "[lms] INTEGER," + "[playtime] INTEGER," + "[combo] INTEGER,"
-						+ "[maxcombo] INTEGER," + "[scorehash] TEXT," + "PRIMARY KEY(date));");
+						+ "[maxCombo] INTEGER," + "[scorehash] TEXT," + "PRIMARY KEY(date));");
 
 				qr.update(
 						"insert into player "
-								+ "(date, playcount, clear, epg, lpg, egr, lgr, egd, lgd, ebd, lbd, epr, lpr, ems, lms, playtime, combo, maxcombo, "
+								+ "(date, playcount, clear, epg, lpg, egr, lgr, egd, lgd, ebd, lbd, epr, lpr, ems, lms, playtime, combo, maxCombo, "
 								+ "scorehash) " + "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);",
 						0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "");
 			}
@@ -68,7 +68,7 @@ public class ScoreDatabaseAccessor {
 						+ "[epg] INTEGER," + "[lpg] INTEGER," + "[egr] INTEGER," + "[lgr] INTEGER," + "[egd] INTEGER,"
 						+ "[lgd] INTEGER," + "[ebd] INTEGER," + "[lbd] INTEGER," + "[epr] INTEGER," + "[lpr] INTEGER,"
 						+ "[ems] INTEGER," + "[lms] INTEGER," + "[notes] INTEGER," + "[combo] INTEGER,"
-						+ "[minbp] INTEGER," + "[playcount] INTEGER," + "[clearcount] INTEGER," + "[trophy] TEXT,"
+						+ "[minBP] INTEGER," + "[playcount] INTEGER," + "[clearcount] INTEGER," + "[trophy] TEXT,"
 						+ "[scorehash] TEXT," + "[option] INTEGER," + "[random] INTEGER," + "[date] INTEGER,"
 						+ "[state] INTEGER," + "PRIMARY KEY(sha256, mode));");
 			}			
@@ -190,13 +190,13 @@ public class ScoreDatabaseAccessor {
 			con.setAutoCommit(false);
 			String sql = "INSERT OR REPLACE INTO score "
 					+ "(sha256, mode, clear, epg, lpg, egr, lgr, egd, lgd, ebd, lbd, epr, lpr, ems, lms, notes, combo, "
-					+ "minbp, playcount, clearcount, trophy, scorehash, option, random, date, state)"
+					+ "minBP, playcount, clearcount, trophy, scorehash, option, random, date, state)"
 					+ "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
 			for (IRScoreData score : scores) {
 				qr.update(con, sql, score.getSha256(), score.getMode(), score.getClear(), score.getEpg(),
 						score.getLpg(), score.getEgr(), score.getLgr(), score.getEgd(), score.getLgd(), score.getEbd(),
 						score.getLbd(), score.getEpr(), score.getLpr(), score.getEms(), score.getLms(),
-						score.getNotes(), score.getCombo(), score.getMinbp(), score.getPlaycount(),
+						score.getNotes(), score.getMaxCombo(), score.getMinBP(), score.getPlaycount(),
 						score.getClearcount(), score.getTrophy(), score.getScorehash(), score.getOption(),
 						score.getRandom(), score.getDate(), score.getState());
 			}
@@ -263,7 +263,7 @@ public class ScoreDatabaseAccessor {
 
 			qr.update(con,
 					"INSERT OR REPLACE INTO player "
-							+ "(date, playcount, clear, epg, lpg, egr, lgr, egd, lgd, ebd, lbd, epr, lpr, ems, lms, playtime, combo, maxcombo, "
+							+ "(date, playcount, clear, epg, lpg, egr, lgr, egd, lgd, ebd, lbd, epr, lpr, ems, lms, playtime, combo, maxCombo, "
 							+ "scorehash) " + "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);",
 					unixtime, pd.getPlaycount(), pd.getClear(), pd.getEpg(), pd.getLpg(), pd.getEgr(), pd.getLgr(),
 					pd.getEgd(), pd.getLgd(), pd.getEbd(), pd.getLbd(), pd.getEpr(), pd.getLpr(), pd.getEms(),

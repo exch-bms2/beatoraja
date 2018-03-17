@@ -2,6 +2,7 @@ package bms.player.beatoraja;
 
 import bms.model.Mode;
 import bms.player.beatoraja.input.BMSPlayerInputDevice;
+import lombok.Data;
 
 /**
  * スコアデータ
@@ -9,6 +10,7 @@ import bms.player.beatoraja.input.BMSPlayerInputDevice;
  *
  * @author ununique
  */
+@Data
 public class IRScoreData {
 	/**
 	 * 譜面のハッシュ値
@@ -61,11 +63,11 @@ public class IRScoreData {
 	 */
 	private int ems = 0;
 	private int lms = 0;
-	private int maxcombo = 0;
+	private int maxCombo = 0;
 	
 	private int notes = 0;
 	
-	private int minbp = Integer.MAX_VALUE;
+	private int minBP = Integer.MAX_VALUE;
 	/**
 	 * 各譜面オプションのクリア履歴
 	 */
@@ -105,97 +107,6 @@ public class IRScoreData {
 		this.playmode = playmode;
 	}
 	
-	public long getDate() {
-		return date;
-	}
-	public void setDate(long date) {
-		this.date = date;
-	}
-	public int getPlaycount() {
-		return playcount;
-	}
-	public void setPlaycount(int playcount) {
-		this.playcount = playcount;
-	}
-	public int getClear() {
-		return clear;
-	}
-	public void setClear(int clear) {
-		this.clear = clear;
-	}
-	public int getEpg() {
-		return epg;
-	}
-	public void setEpg(int epg) {
-		this.epg = epg;
-	}
-	public int getLpg() {
-		return lpg;
-	}
-	public void setLpg(int lpg) {
-		this.lpg = lpg;
-	}
-	public int getEgr() {
-		return egr;
-	}
-	public void setEgr(int egr) {
-		this.egr = egr;
-	}
-	public int getLgr() {
-		return lgr;
-	}
-	public void setLgr(int lgr) {
-		this.lgr = lgr;
-	}
-	public int getEgd() {
-		return egd;
-	}
-	public void setEgd(int egd) {
-		this.egd = egd;
-	}
-	public int getLgd() {
-		return lgd;
-	}
-	public void setLgd(int lgd) {
-		this.lgd = lgd;
-	}
-	public int getEbd() {
-		return ebd;
-	}
-	public void setEbd(int ebd) {
-		this.ebd = ebd;
-	}
-	public int getLbd() {
-		return lbd;
-	}
-	public void setLbd(int lbd) {
-		this.lbd = lbd;
-	}
-	public int getEpr() {
-		return epr;
-	}
-	public void setEpr(int epr) {
-		this.epr = epr;
-	}
-	public int getLpr() {
-		return lpr;
-	}
-	public void setLpr(int lpr) {
-		this.lpr = lpr;
-	}
-	public int getEms() {
-		return ems;
-	}
-	public void setEms(int ems) {
-		this.ems = ems;
-	}
-	public int getLms() {
-		return lms;
-	}
-	public void setLms(int lms) {
-		this.lms = lms;
-	}
-
 	public int getJudgeCount(int judge) {
 		return getJudgeCount(judge, true) + getJudgeCount(judge, false);
 	}
@@ -274,99 +185,10 @@ public class IRScoreData {
 		}
 	}
 
-	public int getCombo() {
-		return maxcombo;
-	}
-	public void setCombo(int maxcombo) {
-		this.maxcombo = maxcombo;
-	}
-	public int getMode() {
-		return mode;
-	}
-	public void setMode(int mode) {
-		this.mode = mode;
-	}
-	public int getNotes() {
-		return notes;
-	}
-	public void setNotes(int totalnotes) {
-		this.notes = totalnotes;
-	}
-	public int getClearcount() {
-		return clearcount;
-	}
-	public void setClearcount(int clearcount) {
-		this.clearcount = clearcount;
-	}
-	public int getMinbp() {
-		return minbp;
-	}
-	public void setMinbp(int minbp) {
-		this.minbp = minbp;
-	}
-	public String getTrophy() {
-		return trophy;
-	}
-	public void setTrophy(String trophy) {
-		this.trophy = trophy;
-	}
-	public int getOption() {
-		return option;
-	}
-	public void setOption(int option) {
-		this.option = option;
-	}
-	public int getState() {
-		return state;
-	}
-	public void setState(int state) {
-		this.state = state;
-	}
-	public String getSha256() {
-		return sha256;
-	}
-	public void setSha256(String sha256) {
-		this.sha256 = sha256;
-	}
-
 	public int getExscore() {
 		return (epg + lpg) * 2 + egr + lgr;
 	}
-	public int getRandom() {
-		return random;
-	}
-	public void setRandom(int random) {
-		this.random = random;
-	}
-	public String getScorehash() {
-		return scorehash;
-	}
-	public void setScorehash(String scorehash) {
-		this.scorehash = scorehash;
-	}
-	public int getAssist() {
-		return assist;
-	}
-	public void setAssist(int assist) {
-		this.assist = assist;
-	}
-	public int getGauge() {
-		return gauge;
-	}
-	public void setGauge(int gauge) {
-		this.gauge = gauge;
-	}
-	public BMSPlayerInputDevice.Type getDeviceType() {
-		return deviceType;
-	}
-	public void setDeviceType(BMSPlayerInputDevice.Type deviceType) {
-		this.deviceType = deviceType;
-	}
 
-	public Mode getPlaymode() {
-		return playmode;
-	}
-	
 	public static enum SongTrophy {
 		
 		EASY('g'),

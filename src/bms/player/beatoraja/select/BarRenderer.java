@@ -103,12 +103,12 @@ public class BarRenderer {
 		durationlow = main.getConfig().getScrollDurationLow();
 		durationhigh = main.getConfig().getScrollDurationHigh();
 
-		for (int i = 0; i < tds.length; i++) {
-			if(tds[i].getName().equals("BMS Search")) {
-				bmssearch = new TableBar(select, tds[i], bmssearcha);
+		for (TableData td1 : tds) {
+			if (td1.getName().equals("BMS Search")) {
+				bmssearch = new TableBar(select, td1, bmssearcha);
 				table.add(bmssearch);
 			} else {
-				table.add(new TableBar(select, tds[i], new TableDataAccessor.DifficultyTableAccessor(tds[i].getUrl())));
+				table.add(new TableBar(select, td1, new TableDataAccessor.DifficultyTableAccessor(td1.getUrl())));
 			}
 		}
 		
@@ -827,7 +827,7 @@ public class BarRenderer {
 					}
 				}
 
-				if (main.getPlayerResource().getConfig().isFolderlamp()) {
+				if (main.getPlayerResource().getConfig().isFolderLamp()) {
 					if (bar instanceof DirectoryBar) {
 						((DirectoryBar) bar).updateFolderStatus();
 					}

@@ -83,19 +83,19 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 		addCommandWord(new CommandWord("PLAYSTART") {
 			@Override
 			public void execute(String[] str) {
-				skin.setPlaystart(Integer.parseInt(str[1]));
+				skin.setPlayStart(Integer.parseInt(str[1]));
 			}
 		});
 		addCommandWord(new CommandWord("LOADSTART") {
 			@Override
 			public void execute(String[] str) {
-				skin.setLoadstart(Integer.parseInt(str[1]));
+				skin.setLoadStart(Integer.parseInt(str[1]));
 			}
 		});
 		addCommandWord(new CommandWord("LOADEND") {
 			@Override
 			public void execute(String[] str) {
-				skin.setLoadend(Integer.parseInt(str[1]));
+				skin.setLoadEnd(Integer.parseInt(str[1]));
 			}
 		});
 		addCommandWord(new CommandWord("FINISHMARGIN") {
@@ -108,7 +108,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 		addCommandWord(new CommandWord("JUDGETIMER") {
 			@Override
 			public void execute(String[] str) {
-				skin.setJudgetimer(Integer.parseInt(str[1]));
+				skin.setJudgeTimer(Integer.parseInt(str[1]));
 			}
 		});
 		addCommandWord(new CommandWord("SRC_BGA") {
@@ -945,7 +945,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 			}
 			skinbpm[i] = lines[i + 2];
 		}
-		skin.setBPMLine(skinbpm);		
+		skin.setBpmLine(skinbpm);
 		
 		SkinImage[] skinstop = new SkinImage[skinline.length];
 		for(int i = 0;i < skinstop.length;i++) {
@@ -961,7 +961,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 			if(judge[i] != null) judge_reg++;
 			else break;
 		}
-		skin.setJudgeregion(judge_reg);
+		skin.setJudgeRegion(judge_reg);
 		skin.setLaneRegion(laner);
 		skin.setLaneGroupRegion(playerr);
 
