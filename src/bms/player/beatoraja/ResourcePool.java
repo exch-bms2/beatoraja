@@ -1,10 +1,8 @@
 package bms.player.beatoraja;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
+import com.badlogic.gdx.utils.ObjectMap;
 
 /**
  * リソースプール。イメージデータやオーディオデータ等の読み込みコストが大きく、
@@ -23,7 +21,7 @@ public abstract class ResourcePool<K, V> implements Disposable {
 	/**
 	 * リソース
 	 */
-	private Map<K, ResourceCacheElement<V>> image = new HashMap<K, ResourceCacheElement<V>> ();
+	private ObjectMap<K, ResourceCacheElement<V>> image = new ObjectMap<K, ResourceCacheElement<V>> ();
 
 	public ResourcePool(int maxgen) {
 		this.maxgen = maxgen;
@@ -61,18 +59,25 @@ public abstract class ResourcePool<K, V> implements Disposable {
 		return ie != null ? ie.image : null;
 	}
 
+ 	private final Array<K> removes = new Array<K>();
+
  	/**
  	 * 世代数を進め、最大世代数を経過したリソースを開放する
  	 */
 	public void disposeOld() {
-		for(Entry<K, ResourceCacheElement<V>> entry : image.entrySet().toArray(new Entry[image.size()])) {
-			ResourceCacheElement<V> ie = entry.getValue();
+		removes.clear();
+		for(ObjectMap.Entry<K, ResourceCacheElement<V>> entry : image) {
+			ResourceCacheElement<V> ie = entry.value;
 			if(ie.gen == maxgen) {
 				dispose(ie.image);
-				image.remove(entry.getKey());
+				removes.add(entry.key);
 			} else {
 				ie.gen++;
 			}
+		}
+		
+		for(K key : removes) {
+			image.remove(key);
 		}
 	}
 
@@ -81,12 +86,12 @@ public abstract class ResourcePool<K, V> implements Disposable {
 	 * @return リソースの
 	 */
 	public int size() {
-		return image.size();
+		return image.size;
 	}
 	
 	public void dispose() {
-		for(Map.Entry<K, ResourceCacheElement<V>> e : image.entrySet()) {
-			dispose(e.getValue().image);
+		for(ObjectMap.Entry<K, ResourceCacheElement<V>> entry : image) {
+			dispose(entry.value.image);
 		}
 		image.clear();
 	}
@@ -113,7 +118,7 @@ public abstract class ResourcePool<K, V> implements Disposable {
 		/**
 		 * リソース
 		 */
-		public R image;
+		public final R image;
 		/**
 		 * 世代
 		 */
