@@ -82,6 +82,7 @@ import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
 import twitter4j.auth.AccessToken;
 import twitter4j.auth.RequestToken;
+import twitter4j.conf.ConfigurationBuilder;
 
 /**
  * Beatorajaの設定ダイアログ
@@ -533,10 +534,10 @@ public class PlayConfigurationView implements Initializable {
 		irpassword.setText(player.getPassword());
 		irsend.setValue(player.getIrsend());
 
+		txtTwitterPIN.setDisable(true);
+		twitterPINButton.setDisable(true);
 		if(player.getTwitterAccessToken() != null && !player.getTwitterAccessToken().isEmpty()) {
-			twitterAuthButton.setDisable(true);
-			txtTwitterPIN.setDisable(true);
-			twitterPINButton.setDisable(true);
+			txtTwitterAuthenticated.setVisible(true);
 		} else {
 			txtTwitterAuthenticated.setVisible(false);
 		}
@@ -671,7 +672,7 @@ public class PlayConfigurationView implements Initializable {
 			}
 			if (unique) {
 				bmsroot.getItems().add(f.getPath());
-				loadDiffBMS();
+				loadBMSPath(f.getPath());
 			}
 		}
 	}
@@ -700,7 +701,7 @@ public class PlayConfigurationView implements Initializable {
 					}
 					if (unique) {
 						bmsroot.getItems().add(f.getPath());
-						loadDiffBMS();
+						loadBMSPath(f.getPath());
 					}
 				}
 			}
@@ -871,12 +872,16 @@ public class PlayConfigurationView implements Initializable {
 
     @FXML
 	public void loadAllBMS() {
-		loadBMS(true);
+		loadBMS(null, true);
 	}
 
     @FXML
 	public void loadDiffBMS() {
-		loadBMS(false);
+		loadBMS(null, false);
+	}
+
+    public void loadBMSPath(String updatepath){
+    	loadBMS(updatepath, false);
 	}
 
 	/**
@@ -885,7 +890,7 @@ public class PlayConfigurationView implements Initializable {
 	 * @param updateAll
 	 *            falseの場合は追加削除分のみを更新する
 	 */
-	public void loadBMS(boolean updateAll) {
+	public void loadBMS(String updatepath, boolean updateAll) {
 		commit();
 		try {
 			Class.forName("org.sqlite.JDBC");
@@ -894,7 +899,7 @@ public class PlayConfigurationView implements Initializable {
 			SongInformationAccessor infodb = useSongInfo.isSelected() ?
 					new SongInformationAccessor(Paths.get("songinfo.db").toString()) : null;
 			Logger.getGlobal().info("song.db更新開始");
-			songdb.updateSongDatas(null, updateAll, infodb);
+			songdb.updateSongDatas(updatepath, updateAll, infodb);
 			Logger.getGlobal().info("song.db更新完了");
 			songUpdated = true;
 		} catch (ClassNotFoundException e) {
@@ -981,15 +986,25 @@ public class PlayConfigurationView implements Initializable {
 
 	@FXML
 	public void startTwitterAuth() {
-		Twitter twitter = TwitterFactory.getSingleton();
-		twitter.setOAuthConsumer(txtTwitterConsumerKey.getText(), txtTwitterConsumerSecret.getText());
+		ConfigurationBuilder cb = new ConfigurationBuilder();
+		cb.setOAuthConsumerKey(txtTwitterConsumerKey.getText());
+		cb.setOAuthConsumerSecret(txtTwitterConsumerSecret.getText());
+		cb.setOAuthAccessToken(null);
+		cb.setOAuthAccessTokenSecret(null);
+		TwitterFactory twitterfactory = new TwitterFactory(cb.build());
+		Twitter twitter = twitterfactory.getInstance();
 		try {
-			player.setTwitterConsumerKey(txtTwitterConsumerKey.getText());
-			player.setTwitterConsumerSecret(txtTwitterConsumerSecret.getText());
 			requestToken = twitter.getOAuthRequestToken();
 			Desktop desktop = Desktop.getDesktop();
 			URI uri = new URI(requestToken.getAuthorizationURL());
 			desktop.browse(uri);
+			player.setTwitterConsumerKey(txtTwitterConsumerKey.getText());
+			player.setTwitterConsumerSecret(txtTwitterConsumerSecret.getText());
+			player.setTwitterAccessToken("");
+			player.setTwitterAccessTokenSecret("");
+			txtTwitterPIN.setDisable(false);
+			twitterPINButton.setDisable(false);
+			txtTwitterAuthenticated.setVisible(false);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -997,7 +1012,13 @@ public class PlayConfigurationView implements Initializable {
 
 	@FXML
 	public void startPINAuth() {
-		Twitter twitter = TwitterFactory.getSingleton();
+		ConfigurationBuilder cb = new ConfigurationBuilder();
+		cb.setOAuthConsumerKey(player.getTwitterConsumerKey());
+		cb.setOAuthConsumerSecret(player.getTwitterConsumerSecret());
+		cb.setOAuthAccessToken(null);
+		cb.setOAuthAccessTokenSecret(null);
+		TwitterFactory twitterfactory = new TwitterFactory(cb.build());
+		Twitter twitter = twitterfactory.getInstance();
 		try {
 			AccessToken accessToken = twitter.getOAuthAccessToken(requestToken, txtTwitterPIN.getText());
 			player.setTwitterAccessToken(accessToken.getToken());
