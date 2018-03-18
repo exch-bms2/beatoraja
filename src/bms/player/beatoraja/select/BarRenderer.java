@@ -743,11 +743,11 @@ public class BarRenderer {
 			return true;
 		}
 
-//		if (dir.size() > 0) {
-//			updateBar(dir.getLast());
-//		} else {
-//			updateBar(null);
-//		}
+		if (dir.size() > 0) {
+			updateBar(dir.getLast());
+		} else {
+			updateBar(null);
+		}
 		Logger.getGlobal().warning("楽曲がありません");
 		return false;
 	}
