@@ -142,10 +142,15 @@ public class JSONSkinLoader extends SkinLoader{
 			json.setIgnoreUnknownFields(true);
 
 			HashSet<Integer> enabledOptions = new HashSet<>();
-			if (property != null) {
-				for (SkinConfig.Option op : property.getOption()) {
-					enabledOptions.add(op.value);
+			for (SkinHeader.CustomOption customOption : header.getCustomOptions()) {
+				int op = customOption.getDefaultOption();
+				for (SkinConfig.Option option : property.getOption()) {
+					if (option.name.equals(customOption.name)) {
+						op = option.value;
+						break;
+					}
 				}
+				enabledOptions.add(op);
 			}
 			setSerializers(json, enabledOptions, p);
 
