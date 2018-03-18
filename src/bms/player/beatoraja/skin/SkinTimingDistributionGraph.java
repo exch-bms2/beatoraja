@@ -78,13 +78,13 @@ public class SkinTimingDistributionGraph extends SkinObject {
 
 		backtex = new TextureRegion(new Texture(shape));
 		shape.dispose();
-		
+
 		shape = new Pixmap(dist.length, max, Pixmap.Format.RGBA8888);
 		for (int i = 0; i < dist.length; i++) {
 			shape.setColor(Color.valueOf("dddddd"));
 			shape.fillRectangle(i, max - dist[i], 1, dist[i]);
 		}
-		
+
 		graphtex = new TextureRegion(new Texture(shape));
 		shape.dispose();
 
@@ -112,7 +112,11 @@ public class SkinTimingDistributionGraph extends SkinObject {
 
 	@Override
 	public void dispose() {
-		// TODO 自動生成されたメソッド・スタブ
+		if (graphtex != null) {
+			graphtex.getTexture().dispose();
+			backtex.getTexture().dispose();
+			graphtex = null;
+		}
 
 	}
 
