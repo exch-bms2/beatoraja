@@ -85,15 +85,15 @@ public class FloatPCM extends PCM<float[]> {
 		float[] samples = new float[(int) (((long) this.sample.length / channels) * sample / sampleRate) * channels];
 
 		for (long i = 0; i < samples.length / channels; i++) {
+			long position = i * sampleRate / sample;
+			long mod = (i * sampleRate) % sample;
 			for (int j = 0; j < channels; j++) {
-				if ((i * sampleRate) % sample != 0
-						&& (int) ((i * sampleRate / sample + 1) * channels + j) < this.sample.length) {
-					samples[(int) (i * channels
-							+ j)] = (short) (this.sample[(int) ((i * sampleRate / sample) * channels + j)] / 2
-									+ this.sample[(int) ((i * sampleRate / sample + 1) * channels + j)] / 2);
+				if (mod != 0 && (int) ((position + 1) * channels + j) < this.sample.length) {
+					float sample1 = this.sample[(int) (position * channels + j)];
+					float sample2 = this.sample[(int) ((position + 1) * channels + j)];
+					samples[(int) (i * channels + j)] = (sample1 * (sample - mod) + sample2 * mod) / sample;
 				} else {
-					samples[(int) (i * channels + j)] = this.sample[(int) ((i * sampleRate / sample) * channels
-							+ j)];
+					samples[(int) (i * channels + j)] = this.sample[(int) (position * channels + j)];
 				}
 			}
 		}

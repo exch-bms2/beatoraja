@@ -89,14 +89,15 @@ public class ShortDirectPCM extends PCM<ByteBuffer> {
 		ByteBuffer samples = getDirectByteBuffer((int) (((long) this.sample.limit() / 2 / channels) * sample / sampleRate) * channels * 2);
 
 		for (long i = 0; i < samples.limit() / 2 / channels; i++) {
+			long position = i * sampleRate / sample;
+			long mod = (i * sampleRate) % sample;
 			for (int j = 0; j < channels; j++) {
-				if ((i * sampleRate) % sample != 0
-						&& (int) ((i * sampleRate / sample + 1) * channels + j) < this.sample.limit() / 2) {
-					samples.putShort((int) (i * channels + j) * 2, (short) (this.sample.getShort((int) ((i * sampleRate / sample) * channels + j) * 2) / 2
-									+ this.sample.get((int) ((i * sampleRate / sample + 1) * channels + j) * 2) / 2));
+				if (mod != 0 && (int) ((position + 1) * channels + j) < this.sample.limit() / 2) {
+					short sample1 = this.sample.getShort((int) (position * channels + j) * 2);
+					short sample2 = this.sample.getShort((int) ((position + 1) * channels + j) * 2);
+					samples.putShort((int) (i * channels + j) * 2,  (short)(((long)sample1 * (sample - mod) + (long)sample2 * mod) / sample));
 				} else {
-					samples.putShort((int) (i * channels + j) * 2, this.sample.getShort((int) ((i * sampleRate / sample) * channels
-							+ j) * 2));
+					samples.putShort((int) (i * channels + j) * 2, this.sample.getShort((int) (position * channels+ j) * 2));
 				}
 			}
 		}
