@@ -500,8 +500,8 @@ public class MusicResult extends MainState {
 		super.dispose();
 	}
 
-	public int[] getTimingDistribution() {
-		return timingDistribution.getTimingDistribution();
+	public TimingDistribution getTimingDistribution() {
+		return timingDistribution;
 	}
 
 	public int getTotalNotes() {
@@ -835,6 +835,10 @@ public class MusicResult extends MainState {
 
 		public float getStdDev() {
 			return stdDev;
+		}
+
+		public int getArrayCenter() {
+			return arrayCenter;
 		}
 
 	}
