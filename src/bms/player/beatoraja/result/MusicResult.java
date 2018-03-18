@@ -7,12 +7,21 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
-import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import com.badlogic.gdx.utils.FloatArray;
 
-import bms.model.*;
-import bms.player.beatoraja.*;
+import bms.model.BMSModel;
+import bms.model.LongNote;
+import bms.model.Note;
+import bms.model.TimeLine;
+import bms.player.beatoraja.ClearType;
+import bms.player.beatoraja.IRScoreData;
+import bms.player.beatoraja.MainController;
+import bms.player.beatoraja.MainState;
+import bms.player.beatoraja.PlayerConfig;
+import bms.player.beatoraja.PlayerResource;
 import bms.player.beatoraja.PlayerResource.PlayMode;
+import bms.player.beatoraja.ReplayData;
+import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.ir.IRConnection;
 import bms.player.beatoraja.ir.IRResponse;
 import bms.player.beatoraja.select.MusicSelector;
@@ -33,6 +42,16 @@ public class MusicResult extends MainState {
 	private float avgduration;
 
 	/**
+	 * タイミング分布
+	 */
+	private TimingDistribution timingDistribution;
+
+	/**
+	 * タイミング分布レンジ
+	 */
+	final int distRange = 200;
+
+	/**
 	 * 状態
 	 */
 	private int state;
@@ -48,7 +67,7 @@ public class MusicResult extends MainState {
 	private int irtotal;
 
 	private int saveReplay[] = new int[4];
-	private static final int replay= 4;
+	private static final int replay = 4;
 
 	public static final int SOUND_CLEAR = 0;
 	public static final int SOUND_FAIL = 1;
@@ -58,25 +77,28 @@ public class MusicResult extends MainState {
 
 	public MusicResult(MainController main) {
 		super(main);
+
+		timingDistribution = new TimingDistribution(distRange);
 	}
 
 	public void create() {
 		final PlayerResource resource = main.getPlayerResource();
 
-		setSound(SOUND_CLEAR, "clear.wav", SoundType.SOUND,false);
-		setSound(SOUND_FAIL, "fail.wav", SoundType.SOUND,false);
-		setSound(SOUND_CLOSE, "resultclose.wav", SoundType.SOUND,false);
+		setSound(SOUND_CLEAR, "clear.wav", SoundType.SOUND, false);
+		setSound(SOUND_FAIL, "fail.wav", SoundType.SOUND, false);
+		setSound(SOUND_CLOSE, "resultclose.wav", SoundType.SOUND, false);
 
 		property = ResultKeyProperty.get(resource.getBMSModel().getMode());
-		if(property == null) {
+		if (property == null) {
 			property = ResultKeyProperty.BEAT_7K;
 		}
 
 		updateScoreDatabase();
 		// リプレイの自動保存
-		if(resource.getPlayMode() == PlayMode.PLAY){
-			for(int i=0;i<replay;i++){
-				if(ReplayAutoSaveConstraint.get(resource.getConfig().getAutoSaveReplay()[i]).isQualified(oldscore, resource.getScoreData())) {
+		if (resource.getPlayMode() == PlayMode.PLAY) {
+			for (int i = 0; i < replay; i++) {
+				if (ReplayAutoSaveConstraint.get(resource.getConfig().getAutoSaveReplay()[i]).isQualified(oldscore,
+						resource.getScoreData())) {
 					saveReplayData(i);
 				}
 			}
@@ -98,9 +120,9 @@ public class MusicResult extends MainState {
 		if (((MusicResultSkin) getSkin()).getRankTime() == 0) {
 			main.switchTimer(TIMER_RESULT_UPDATESCORE, true);
 		}
-	    if(time > getSkin().getInput()){
-	    	main.switchTimer(TIMER_STARTINPUT, true);
-	    }
+		if (time > getSkin().getInput()) {
+			main.switchTimer(TIMER_STARTINPUT, true);
+		}
 
 		final PlayerResource resource = main.getPlayerResource();
 
@@ -112,12 +134,13 @@ public class MusicResult extends MainState {
 				main.getAudioProcessor().stop((Note) null);
 
 				boolean[] keystate = main.getInputProcessor().getKeystate();
-//				System.out.println(Arrays.toString(keystate));
+				//				System.out.println(Arrays.toString(keystate));
 				long[] keytime = main.getInputProcessor().getTime();
 				Arrays.fill(keytime, 0);
 
 				if (resource.getCourseBMSModels() != null) {
-					if (resource.getGauge()[resource.getGrooveGauge().getType()].get(resource.getGauge()[resource.getGrooveGauge().getType()].size - 1) <= 0) {
+					if (resource.getGauge()[resource.getGrooveGauge().getType()]
+							.get(resource.getGauge()[resource.getGrooveGauge().getType()].size - 1) <= 0) {
 						if (resource.getCourseScoreData() != null) {
 							// 未達曲のノーツをPOORとして加算
 							final List<FloatArray[]> coursegauge = resource.getCourseGauge();
@@ -138,32 +161,37 @@ public class MusicResult extends MainState {
 						main.changeState(MainController.STATE_PLAYBMS);
 					} else {
 						// 合格リザルト
-						if(resource.getPlayerConfig().isContinueUntilEndOfSong()) {
-							int changedGaugeType = resource.getGrooveGauge().changeTypeOfClear(resource.getGrooveGauge().getType());
-							if(resource.getPlayMode() == PlayMode.PLAY) resource.getPlayerConfig().setGauge(changedGaugeType + resource.getGrooveGauge().NORMAL - resource.getGrooveGauge().CLASS);
+						if (resource.getPlayerConfig().isContinueUntilEndOfSong()) {
+							int changedGaugeType = resource.getGrooveGauge()
+									.changeTypeOfClear(resource.getGrooveGauge().getType());
+							if (resource.getPlayMode() == PlayMode.PLAY)
+								resource.getPlayerConfig().setGauge(changedGaugeType + resource.getGrooveGauge().NORMAL
+										- resource.getGrooveGauge().CLASS);
 						}
 						main.changeState(MainController.STATE_GRADE_RESULT);
 					}
 				} else {
 					main.getPlayerResource().getPlayerConfig().setGauge(main.getPlayerResource().getOrgGaugeOption());
 					ResultKeyProperty.ResultKey key = null;
-					for(int i = 0; i < property.getAssignLength(); i++) {
-						if(property.getAssign(i) == ResultKeyProperty.ResultKey.REPLAY_DIFFERENT && keystate[i]) {
+					for (int i = 0; i < property.getAssignLength(); i++) {
+						if (property.getAssign(i) == ResultKeyProperty.ResultKey.REPLAY_DIFFERENT && keystate[i]) {
 							key = ResultKeyProperty.ResultKey.REPLAY_DIFFERENT;
 							break;
 						}
-						if(property.getAssign(i) == ResultKeyProperty.ResultKey.REPLAY_SAME && keystate[i]) {
+						if (property.getAssign(i) == ResultKeyProperty.ResultKey.REPLAY_SAME && keystate[i]) {
 							key = ResultKeyProperty.ResultKey.REPLAY_SAME;
 							break;
 						}
 					}
-					if (resource.getPlayMode() == PlayMode.PLAY && key == ResultKeyProperty.ResultKey.REPLAY_DIFFERENT) {
+					if (resource.getPlayMode() == PlayMode.PLAY
+							&& key == ResultKeyProperty.ResultKey.REPLAY_DIFFERENT) {
 						Logger.getGlobal().info("オプションを変更せずリプレイ");
 						// オプションを変更せず同じ譜面でリプレイ
 						resource.getReplayData().pattern = null;
 						resource.reloadBMSFile();
 						main.changeState(MainController.STATE_PLAYBMS);
-					} else if (resource.getPlayMode() == PlayMode.PLAY && key == ResultKeyProperty.ResultKey.REPLAY_SAME) {
+					} else if (resource.getPlayMode() == PlayMode.PLAY
+							&& key == ResultKeyProperty.ResultKey.REPLAY_SAME) {
 						// 同じ譜面でリプレイ
 						Logger.getGlobal().info("同じ譜面でリプレイ");
 						resource.reloadBMSFile();
@@ -176,7 +204,7 @@ public class MusicResult extends MainState {
 		} else {
 			if (time > getSkin().getScene()) {
 				main.switchTimer(TIMER_FADEOUT, true);
-				if(getSound(SOUND_CLOSE) != null) {
+				if (getSound(SOUND_CLOSE) != null) {
 					stop(SOUND_CLEAR);
 					stop(SOUND_FAIL);
 					play(SOUND_CLOSE);
@@ -196,8 +224,8 @@ public class MusicResult extends MainState {
 				boolean[] keystate = inputProcessor.getKeystate();
 				long[] keytime = inputProcessor.getTime();
 				boolean ok = false;
-				for(int i = 0; i < property.getAssignLength(); i++) {
-					if(property.getAssign(i) != null && keystate[i] && keytime[i] != 0) {
+				for (int i = 0; i < property.getAssignLength(); i++) {
+					if (property.getAssign(i) != null && keystate[i] && keytime[i] != 0) {
 						keytime[i] = 0;
 						ok = true;
 					}
@@ -217,9 +245,9 @@ public class MusicResult extends MainState {
 					if (((MusicResultSkin) getSkin()).getRankTime() != 0
 							&& !main.isTimerOn(TIMER_RESULT_UPDATESCORE)) {
 						main.switchTimer(TIMER_RESULT_UPDATESCORE, true);
-					} else if(state == STATE_OFFLINE || state == STATE_IR_FINISHED){
+					} else if (state == STATE_OFFLINE || state == STATE_IR_FINISHED) {
 						main.switchTimer(TIMER_FADEOUT, true);
-						if(getSound(SOUND_CLOSE) != null) {
+						if (getSound(SOUND_CLOSE) != null) {
 							stop(SOUND_CLEAR);
 							stop(SOUND_FAIL);
 							play(SOUND_CLOSE);
@@ -239,7 +267,8 @@ public class MusicResult extends MainState {
 
 	private void saveReplayData(int index) {
 		final PlayerResource resource = main.getPlayerResource();
-		if (resource.getPlayMode() == PlayMode.PLAY && resource.getCourseBMSModels() == null && resource.getScoreData() != null) {
+		if (resource.getPlayMode() == PlayMode.PLAY && resource.getCourseBMSModels() == null
+				&& resource.getScoreData() != null) {
 			if (saveReplay[index] == -1 && resource.isUpdateScore()) {
 				ReplayData rd = resource.getReplayData();
 				main.getPlayDataAccessor().wrireReplayData(rd, resource.getBMSModel(),
@@ -283,6 +312,7 @@ public class MusicResult extends MainState {
 		// duration average
 		int count = 0;
 		avgduration = 0;
+		timingDistribution.init();
 		final int lanes = resource.getBMSModel().getMode().key;
 		for (TimeLine tl : resource.getBMSModel().getAllTimeLines()) {
 			for (int i = 0; i < lanes; i++) {
@@ -294,11 +324,13 @@ public class MusicResult extends MainState {
 					if (state >= 1) {
 						count++;
 						avgduration += Math.abs(time);
+						timingDistribution.add(time);
 					}
 				}
 			}
 		}
 		avgduration /= count;
+		timingDistribution.statisticValueCalcuate();
 
 		// コースモードの場合はコーススコアに加算・累積する
 		if (resource.getCourseBMSModels() != null) {
@@ -394,7 +426,7 @@ public class MusicResult extends MainState {
 							|| current.getCombo() > oldscore.getCombo() || current.getMinbp() < oldscore.getMinbp());
 					break;
 				}
-				
+
 				if(send) {
 					Logger.getGlobal().info("IRへスコア送信中");
 					main.switchTimer(TIMER_IR_CONNECT_BEGIN, true);
@@ -430,7 +462,7 @@ public class MusicResult extends MainState {
 							state = STATE_IR_FINISHED;
 						}
 					};
-					irprocess.start();					
+					irprocess.start();
 				}
 			}
 		}
@@ -466,6 +498,10 @@ public class MusicResult extends MainState {
 	@Override
 	public void dispose() {
 		super.dispose();
+	}
+
+	public int[] getTimingDistribution() {
+		return timingDistribution.getTimingDistribution();
 	}
 
 	public int getTotalNotes() {
@@ -536,23 +572,24 @@ public class MusicResult extends MainState {
 			}
 			return resource.getScoreData().getCombo() - oldscore.getCombo();
 		case NUMBER_GROOVEGAUGE:
-			return (int) resource.getGauge()[resource.getGrooveGauge().getType()].get(resource.getGauge()[resource.getGrooveGauge().getType()].size - 1);
-			case NUMBER_AVERAGE_DURATION:
+			return (int) resource.getGauge()[resource.getGrooveGauge().getType()]
+					.get(resource.getGauge()[resource.getGrooveGauge().getType()].size - 1);
+		case NUMBER_AVERAGE_DURATION:
 			return (int) avgduration;
 		case NUMBER_AVERAGE_DURATION_AFTERDOT:
 			return ((int) (avgduration * 100)) % 100;
 		case NUMBER_IR_RANK:
-			if(state != STATE_OFFLINE) {
+			if (state != STATE_OFFLINE) {
 				return irrank;
 			}
 			return Integer.MIN_VALUE;
 		case NUMBER_IR_PREVRANK:
-			if(state != STATE_OFFLINE) {
+			if (state != STATE_OFFLINE) {
 				return irprevrank;
 			}
 			return Integer.MIN_VALUE;
 		case NUMBER_IR_TOTALPLAYER:
-			if(state != STATE_OFFLINE) {
+			if (state != STATE_OFFLINE) {
 				return irtotal;
 			}
 			return Integer.MIN_VALUE;
@@ -577,25 +614,25 @@ public class MusicResult extends MainState {
 					|| (cscore != null && cscore.getClear() == Failed.id);
 		case OPTION_UPDATE_SCORE:
 			return score.getExscore() > oldscore.getExscore();
-			case OPTION_DRAW_SCORE:
-				return score.getExscore() == oldscore.getExscore();
+		case OPTION_DRAW_SCORE:
+			return score.getExscore() == oldscore.getExscore();
 		case OPTION_UPDATE_MAXCOMBO:
 			return score.getCombo() > oldscore.getCombo();
-			case OPTION_DRAW_MAXCOMBO:
-				return score.getCombo() == oldscore.getCombo();
+		case OPTION_DRAW_MAXCOMBO:
+			return score.getCombo() == oldscore.getCombo();
 		case OPTION_UPDATE_MISSCOUNT:
 			return score.getMinbp() < oldscore.getMinbp();
-			case OPTION_DRAW_MISSCOUNT:
-				return score.getMinbp() == oldscore.getMinbp();
+		case OPTION_DRAW_MISSCOUNT:
+			return score.getMinbp() == oldscore.getMinbp();
 		case OPTION_UPDATE_SCORERANK:
 			return getScoreDataProperty().getNowRate() > getScoreDataProperty().getBestScoreRate();
-			case OPTION_DRAW_SCORERANK:
-				return getScoreDataProperty().getNowRate() == getScoreDataProperty().getBestScoreRate();
-			case OPTION_UPDATE_TARGET:
-				return score.getExscore() > resource.getRivalScoreData();
-			case OPTION_DRAW_TARGET:
-				return score.getExscore() == resource.getRivalScoreData();
-			case OPTION_NO_REPLAYDATA:
+		case OPTION_DRAW_SCORERANK:
+			return getScoreDataProperty().getNowRate() == getScoreDataProperty().getBestScoreRate();
+		case OPTION_UPDATE_TARGET:
+			return score.getExscore() > resource.getRivalScoreData();
+		case OPTION_DRAW_TARGET:
+			return score.getExscore() == resource.getRivalScoreData();
+		case OPTION_NO_REPLAYDATA:
 			return !main.getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
 					resource.getPlayerConfig().getLnmode(), 0);
 		case OPTION_NO_REPLAYDATA2:
@@ -633,14 +670,14 @@ public class MusicResult extends MainState {
 
 	public int getImageIndex(int id) {
 		switch (id) {
-			case NUMBER_CLEAR:
-				final PlayerResource resource = main.getPlayerResource();
-				if (resource.getScoreData() != null) {
-					return resource.getScoreData().getClear();
-				}
-				return Integer.MIN_VALUE;
-			case NUMBER_TARGET_CLEAR:
-				return oldscore.getClear();
+		case NUMBER_CLEAR:
+			final PlayerResource resource = main.getPlayerResource();
+			if (resource.getScoreData() != null) {
+				return resource.getScoreData().getClear();
+			}
+			return Integer.MIN_VALUE;
+		case NUMBER_TARGET_CLEAR:
+			return oldscore.getClear();
 		}
 		return super.getImageIndex(id);
 	}
@@ -735,10 +772,70 @@ public class MusicResult extends MainState {
 		public abstract boolean isQualified(IRScoreData oldscore, IRScoreData newscore);
 
 		public static ReplayAutoSaveConstraint get(int index) {
-			if(index < 0 || index >= values().length) {
+			if (index < 0 || index >= values().length) {
 				return NOTHING;
 			}
 			return values()[index];
 		}
+	}
+
+	public class TimingDistribution {
+		private final int arrayCenter;
+		private int[] dist;
+		private float average;
+		private float stdDev;
+
+		public TimingDistribution(int range) {
+			this.arrayCenter = range;
+			this.dist = new int[range * 2 + 1];
+		}
+
+		public void statisticValueCalcuate() {
+			int count = 0;
+			int sum = 0;
+			float sumf = 0;
+
+			for (int i = 0; i < dist.length; i++) {
+				count += dist[i];
+				sum += dist[i] * (i - arrayCenter);
+			}
+
+			if (count == 0) {
+				return;
+			}
+
+			average = sum / count;
+
+			for (int i = 0; i < dist.length; i++) {
+				sumf += dist[i] * (i - arrayCenter - average) * (i - arrayCenter - average);
+			}
+
+			stdDev = (float) Math.sqrt(sumf / count);
+		}
+
+		public void init() {
+			Arrays.fill(dist, 0);
+			average = Float.MAX_VALUE;
+			stdDev = -1.0f;
+		}
+
+		public void add(int timing) {
+			if (-arrayCenter <= timing && timing <= arrayCenter) {
+				dist[timing + arrayCenter]++;
+			}
+		}
+
+		public int[] getTimingDistribution() {
+			return dist;
+		}
+
+		public float getAverage() {
+			return average;
+		}
+
+		public float getStdDev() {
+			return stdDev;
+		}
+
 	}
 }
