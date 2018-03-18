@@ -468,8 +468,8 @@ public class PlayConfigurationView implements Initializable {
 		irpassword.setText(player.getPassword());
 		irsend.setValue(player.getIrsend());
 
-			txtTwitterPIN.setDisable(true);
-			twitterPINButton.setDisable(true);
+		txtTwitterPIN.setDisable(true);
+		twitterPINButton.setDisable(true);
 		if(player.getTwitterAccessToken() != null && !player.getTwitterAccessToken().isEmpty()) {
 			txtTwitterAuthenticated.setVisible(true);
 		} else {
@@ -605,7 +605,7 @@ public class PlayConfigurationView implements Initializable {
 			}
 			if (unique) {
 				bmsroot.getItems().add(f.getPath());
-				loadDiffBMS();
+				loadBMSPath(f.getPath());
 			}
 		}
 	}
@@ -634,7 +634,7 @@ public class PlayConfigurationView implements Initializable {
 					}
 					if (unique) {
 						bmsroot.getItems().add(f.getPath());
-						loadDiffBMS();
+						loadBMSPath(f.getPath());
 					}
 				}
 			}
@@ -805,12 +805,16 @@ public class PlayConfigurationView implements Initializable {
 
     @FXML
 	public void loadAllBMS() {
-		loadBMS(true);
+		loadBMS(null, true);
 	}
 
     @FXML
 	public void loadDiffBMS() {
-		loadBMS(false);
+		loadBMS(null, false);
+	}
+
+    public void loadBMSPath(String updatepath){
+    	loadBMS(updatepath, false);
 	}
 
 	/**
@@ -819,7 +823,7 @@ public class PlayConfigurationView implements Initializable {
 	 * @param updateAll
 	 *            falseの場合は追加削除分のみを更新する
 	 */
-	public void loadBMS(boolean updateAll) {
+	public void loadBMS(String updatepath, boolean updateAll) {
 		commit();
 		try {
 			Class.forName("org.sqlite.JDBC");
@@ -828,7 +832,7 @@ public class PlayConfigurationView implements Initializable {
 			SongInformationAccessor infodb = useSongInfo.isSelected() ?
 					new SongInformationAccessor(Paths.get("songinfo.db").toString()) : null;
 			Logger.getGlobal().info("song.db更新開始");
-			songdb.updateSongDatas(null, updateAll, infodb);
+			songdb.updateSongDatas(updatepath, updateAll, infodb);
 			Logger.getGlobal().info("song.db更新完了");
 			songUpdated = true;
 		} catch (ClassNotFoundException e) {
