@@ -74,6 +74,7 @@ import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
 import twitter4j.auth.AccessToken;
 import twitter4j.auth.RequestToken;
+import twitter4j.conf.ConfigurationBuilder;
 
 /**
  * Beatorajaの設定ダイアログ
@@ -467,10 +468,10 @@ public class PlayConfigurationView implements Initializable {
 		irpassword.setText(player.getPassword());
 		irsend.setValue(player.getIrsend());
 
-		if(player.getTwitterAccessToken() != null && !player.getTwitterAccessToken().isEmpty()) {
-			twitterAuthButton.setDisable(true);
 			txtTwitterPIN.setDisable(true);
 			twitterPINButton.setDisable(true);
+		if(player.getTwitterAccessToken() != null && !player.getTwitterAccessToken().isEmpty()) {
+			txtTwitterAuthenticated.setVisible(true);
 		} else {
 			txtTwitterAuthenticated.setVisible(false);
 		}
@@ -914,15 +915,25 @@ public class PlayConfigurationView implements Initializable {
 
 	@FXML
 	public void startTwitterAuth() {
-		Twitter twitter = TwitterFactory.getSingleton();
-		twitter.setOAuthConsumer(txtTwitterConsumerKey.getText(), txtTwitterConsumerSecret.getText());
+		ConfigurationBuilder cb = new ConfigurationBuilder();
+		cb.setOAuthConsumerKey(txtTwitterConsumerKey.getText());
+		cb.setOAuthConsumerSecret(txtTwitterConsumerSecret.getText());
+		cb.setOAuthAccessToken(null);
+		cb.setOAuthAccessTokenSecret(null);
+		TwitterFactory twitterfactory = new TwitterFactory(cb.build());
+		Twitter twitter = twitterfactory.getInstance();
 		try {
-			player.setTwitterConsumerKey(txtTwitterConsumerKey.getText());
-			player.setTwitterConsumerSecret(txtTwitterConsumerSecret.getText());
 			requestToken = twitter.getOAuthRequestToken();
 			Desktop desktop = Desktop.getDesktop();
 			URI uri = new URI(requestToken.getAuthorizationURL());
 			desktop.browse(uri);
+			player.setTwitterConsumerKey(txtTwitterConsumerKey.getText());
+			player.setTwitterConsumerSecret(txtTwitterConsumerSecret.getText());
+			player.setTwitterAccessToken("");
+			player.setTwitterAccessTokenSecret("");
+			txtTwitterPIN.setDisable(false);
+			twitterPINButton.setDisable(false);
+			txtTwitterAuthenticated.setVisible(false);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -930,7 +941,13 @@ public class PlayConfigurationView implements Initializable {
 
 	@FXML
 	public void startPINAuth() {
-		Twitter twitter = TwitterFactory.getSingleton();
+		ConfigurationBuilder cb = new ConfigurationBuilder();
+		cb.setOAuthConsumerKey(player.getTwitterConsumerKey());
+		cb.setOAuthConsumerSecret(player.getTwitterConsumerSecret());
+		cb.setOAuthAccessToken(null);
+		cb.setOAuthAccessTokenSecret(null);
+		TwitterFactory twitterfactory = new TwitterFactory(cb.build());
+		Twitter twitter = twitterfactory.getInstance();
 		try {
 			AccessToken accessToken = twitter.getOAuthAccessToken(requestToken, txtTwitterPIN.getText());
 			player.setTwitterAccessToken(accessToken.getToken());
