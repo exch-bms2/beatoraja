@@ -596,7 +596,11 @@ public class MusicResult extends MainState {
 		case NUMBER_AVERAGE_TIMING:
 			return (int) timingDistribution.getAverage();
 		case NUMBER_AVERAGE_TIMING_AFTERDOT:
-			return (int) (timingDistribution.getAverage() * 100) % 100;
+			if (timingDistribution.getAverage() >= 0.0) {
+				return (int) (timingDistribution.getAverage() * 100) % 100;
+			} else {
+				return (int) ( -1 * ((Math.abs(timingDistribution.getAverage()) * 100) % 100));
+			}
 		case NUMBER_STDDEV_TIMING:
 			return (int) timingDistribution.getStdDev();
 		case NUMBER_STDDEV_TIMING_AFTERDOT:
@@ -813,7 +817,7 @@ public class MusicResult extends MainState {
 				return;
 			}
 
-			average = sum / count;
+			average = sum * 1.0f / count;
 
 			for (int i = 0; i < dist.length; i++) {
 				sumf += dist[i] * (i - arrayCenter - average) * (i - arrayCenter - average);

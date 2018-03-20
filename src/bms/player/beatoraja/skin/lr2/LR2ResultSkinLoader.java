@@ -105,11 +105,11 @@ public class LR2ResultSkinLoader extends LR2SkinCSVLoader<MusicResultSkin> {
 			}
 		});
 		addCommandWord(new CommandWord("SRC_TIMINGCHART_1P") {
-			//#SRC_TIMINGCHART_1P,(index),(gr),(x),(y),(w),(h),(div_x),(div_y),(cycle),(timer),field_w,field_h,(start),(end),delay,backTexOff,orderReverse,noGap
+			//#SRC_TIMINGCHART_1P,(index),(gr),(x),(y),(w),(h),(div_x),(div_y),(cycle),(timer),field_w,field_h,(start),(end),drawAverage
 			@Override
 			public void execute(String[] str) {
 				int[] values = parseInt(str);
-				timinggraphobj = new SkinTimingDistributionGraph();
+				timinggraphobj = new SkinTimingDistributionGraph(values[15]);
 				gauge = new Rectangle(0, 0, values[11], values[12]);
 				skin.add(timinggraphobj);
 			}

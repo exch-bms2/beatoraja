@@ -86,7 +86,7 @@ public class SkinTimingVisualizer extends SkinObject {
 			}
 			if (drawCenter) {
 				shape.setColor(Color.WHITE);
-				shape.drawPixel(center, 0);
+				shape.fillRectangle(center, 0, Math.min(range, 2), 1);
 			}
 
 			backtex = new TextureRegion(new Texture(shape));
@@ -113,7 +113,7 @@ public class SkinTimingVisualizer extends SkinObject {
 			if (drawDecay) {
 				shape.drawLine(x, recent.length - i, x, recent.length + i);
 			} else {
-				shape.drawLine(x, 0, x, recent.length);
+				shape.drawLine(x, 0, x, recent.length * 2);
 			}
 		}
 
