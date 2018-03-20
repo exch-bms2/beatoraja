@@ -593,7 +593,16 @@ public class MusicResult extends MainState {
 				return irtotal;
 			}
 			return Integer.MIN_VALUE;
+		case NUMBER_AVERAGE_TIMING:
+			return (int) timingDistribution.getAverage();
+		case NUMBER_AVERAGE_TIMING_AFTERDOT:
+			return (int) (timingDistribution.getAverage() * 100) % 100;
+		case NUMBER_STDDEV_TIMING:
+			return (int) timingDistribution.getStdDev();
+		case NUMBER_STDDEV_TIMING_AFTERDOT:
+			return (int) (timingDistribution.getStdDev() * 100) % 100;
 		}
+
 		return super.getNumberValue(id);
 	}
 
