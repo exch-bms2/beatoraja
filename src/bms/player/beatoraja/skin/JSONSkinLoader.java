@@ -11,6 +11,7 @@ import java.util.*;
 import bms.player.beatoraja.Config;
 import bms.player.beatoraja.Resolution;
 import bms.player.beatoraja.SkinConfig;
+import bms.player.beatoraja.config.SkinConfigurationSkin;
 import bms.player.beatoraja.play.*;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -192,6 +193,9 @@ public class JSONSkinLoader extends SkinLoader{
 			}
 			if (type == SkinType.COURSE_RESULT) {
 				skin = new CourseResultSkin(src, dstr);
+			}
+			if (type == SkinType.SKIN_SELECT) {
+				skin = new SkinConfigurationSkin(src, dstr);
 			}
 
 			Map<Integer, Boolean> op = new HashMap<>();

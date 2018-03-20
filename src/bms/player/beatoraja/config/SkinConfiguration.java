@@ -6,12 +6,15 @@ import bms.player.beatoraja.skin.SkinType;
 
 public class SkinConfiguration extends MainState {
 
+	private SkinConfigurationSkin skin;
+
 	public SkinConfiguration(MainController main) {
 		super(main);
 	}
 
 	public void create() {
 		loadSkin(SkinType.SKIN_SELECT);
+		skin = (SkinConfigurationSkin) getSkin();
 	}
 
 	public void render() {
