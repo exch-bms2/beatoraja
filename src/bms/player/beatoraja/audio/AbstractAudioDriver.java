@@ -46,8 +46,11 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	/**
 	 * 
 	 */
-	private AudioCache cache = new AudioCache();
+	private final AudioCache cache;
 
+	public AbstractAudioDriver(int maxgen) {
+		cache = new AudioCache(maxgen);
+	}
 	/**
 	 * パスで指定された効果音ファイルの音源データを取得する
 	 * 
@@ -435,8 +438,8 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 
 	class AudioCache extends ResourcePool<AudioKey, T> {
 
-		public AudioCache() {
-			super(1);
+		public AudioCache(int maxgen) {
+			super(maxgen);
 		}
 
 		private String path;

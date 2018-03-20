@@ -6,6 +6,7 @@ import java.nio.ByteBuffer;
 import java.nio.file.*;
 import java.util.logging.Logger;
 
+import bms.player.beatoraja.Config;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandleStream;
@@ -25,7 +26,8 @@ public class GdxSoundDriver extends AbstractAudioDriver<Sound> {
 	private SoundInstance[] sounds = new SoundInstance[256];
 	private int soundPos = 0;
 
-	public GdxSoundDriver() {
+	public GdxSoundDriver(Config config) {
+		super(config.getSongResourceGen());
 		for (int i = 0; i < sounds.length; i++) {
 			sounds[i] = new SoundInstance();
 		}

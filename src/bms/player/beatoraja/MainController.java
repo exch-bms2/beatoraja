@@ -317,10 +317,10 @@ public class MainController extends ApplicationAdapter {
 		input = new BMSPlayerInputProcessor(config, player);
 		switch(config.getAudioDriver()) {
 		case Config.AUDIODRIVER_SOUND:
-			audio = new GdxSoundDriver();
+			audio = new GdxSoundDriver(config);
 			break;
 		case Config.AUDIODRIVER_AUDIODEVICE:
-			audio = new GdxAudioDeviceDriver();
+			audio = new GdxAudioDeviceDriver(config);
 			break;
 		}
 

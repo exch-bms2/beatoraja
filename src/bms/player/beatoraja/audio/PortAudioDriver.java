@@ -46,7 +46,7 @@ public class PortAudioDriver extends AbstractAudioDriver<PCM> implements Runnabl
 	}
 
 	public PortAudioDriver(Config config) {
-
+		super(config.getSongResourceGen());
 		DeviceInfo[] devices = getDevices();
 		// Get the default device and setup the stream parameters.
 		int deviceId = 0;

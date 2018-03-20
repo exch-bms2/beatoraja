@@ -1,8 +1,14 @@
 package bms.player.beatoraja.audio;
 
+import bms.player.beatoraja.Config;
+
 import java.nio.file.Path;
 
 public class GdxAudioDeviceDriver extends AbstractAudioDriver {
+
+	public GdxAudioDeviceDriver(Config config) {
+		super(config.getSongResourceGen());
+	}
 
 	@Override
 	protected Object getKeySound(Path p) {

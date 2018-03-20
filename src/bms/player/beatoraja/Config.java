@@ -150,9 +150,10 @@ public class Config {
 	private boolean updatesong = false;
 
 	private int autosavereplay[] = {0,0,0,0};
-	
+
 	private int skinPixmapGen = 4;
 	private int bannerPixmapGen = 2;
+	private int songResourceGen = 1;
 
 	public Config() {
 		tableURL = new String[] { "http://bmsnormal2.syuriken.jp/table.html",
@@ -464,6 +465,14 @@ public class Config {
 
 	public void setBannerPixmapGen(int bannerPixmapGen) {
 		this.bannerPixmapGen = bannerPixmapGen;
+	}
+
+	public int getSongResourceGen() {
+		return songResourceGen;
+	}
+
+	public void setSongResourceGen(int songResourceGen) {
+		this.songResourceGen = songResourceGen;
 	}
 
 	public enum DisplayMode {
