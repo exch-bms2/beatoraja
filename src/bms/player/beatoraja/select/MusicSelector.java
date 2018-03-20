@@ -341,6 +341,9 @@ public class MusicSelector extends MainState {
 		if (input.getNumberState()[6]) {
 			preview.stop();
 			main.changeState(MainController.STATE_CONFIG);
+		} else if (input.getNumberState()[7]) {
+			preview.stop();
+			main.changeState(MainController.STATE_SKIN_SELECT);
 		}
 
 		musicinput.input();
