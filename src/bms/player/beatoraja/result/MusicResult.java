@@ -49,7 +49,7 @@ public class MusicResult extends MainState {
 	/**
 	 * タイミング分布レンジ
 	 */
-	final int distRange = 200;
+	final int distRange = 150;
 
 	/**
 	 * 状態

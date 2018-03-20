@@ -1,5 +1,7 @@
 package bms.player.beatoraja.skin;
 
+import java.util.Optional;
+
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
@@ -23,8 +25,9 @@ import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
  */
 public class SkinTimingVisualizer extends SkinObject {
 
-	private TextureRegion backtex;
-	private TextureRegion shapetex;
+	private TextureRegion backtex = null;
+	private TextureRegion shapetex = null;
+	private Pixmap shape = null;
 
 	private static final Color[] JColor = new Color[] {
 			Color.valueOf("000088"),
@@ -33,61 +36,92 @@ public class SkinTimingVisualizer extends SkinObject {
 			Color.valueOf("880000"),
 			Color.valueOf("000000") };
 
-	private final int center = 200;
-	private final int range = center * 2 + 1;
+	private static final Color CLEAR = Color.valueOf("00000000");
+
+	private final int center;
+	private final int range;
+	private final boolean drawCenter;
+	private final boolean drawDecay;
+
+	public SkinTimingVisualizer() {
+		this(401, 1, 1);
+	}
+
+	public SkinTimingVisualizer(int width, int drawCenter, int drawDecay) {
+		if (width > 0) {
+			this.center = width / 2;
+			this.range = width;
+		} else {
+			this.center = 200;
+			this.range = 401;
+		}
+		this.drawCenter = drawCenter == 1 ? true : false;
+		this.drawDecay = drawDecay == 1 ? true : false;
+	}
 
 	@Override
 	public void draw(SkinObjectRenderer sprite, long time, MainState state) {
 		if (state instanceof BMSPlayer) {
 			draw(sprite, time, (BMSPlayer) state, getDestination(time, state));
 		}
-
 	}
 
 	private void draw(SkinObjectRenderer sprite, long time, BMSPlayer state, Rectangle r) {
-		if (backtex != null) {
-			backtex.getTexture().dispose();
-		}
-		if (shapetex != null) {
-			shapetex.getTexture().dispose();
-		}
-
 		if (r == null) {
 			return;
 		}
 
 		PlayerResource resource = state.main.getPlayerResource();
-		int index = state.getJudgeManager().getRecentJudgesIndex();
-		long[] recent = state.getJudgeManager().getRecentJudges();
 		int[][] judgeArea = getJudgeArea(resource);
 
-		Pixmap shape = new Pixmap(range, 200, Pixmap.Format.RGBA8888);
-		for (int i = JColor.length - 1; i >= 0; i--) {
-			shape.setColor(JColor[i]);
-			int x = center + Math.max(-center, Math.min(judgeArea[i][0], center));
-			int width = Math.min(range - x, Math.abs(judgeArea[i][0]) + Math.abs(judgeArea[i][1]) + 1);
-			shape.fillRectangle(x, 0, width, 200);
+		if (backtex == null) {
+			shape = new Pixmap(range, 1, Pixmap.Format.RGBA8888);
+			shape.setColor(Color.BLACK);
+			shape.fill();
+			for (int i = JColor.length - 1; i >= 0; i--) {
+				shape.setColor(JColor[i]);
+				int x = center + Math.max(-center, Math.min(judgeArea[i][0], center));
+				int width = Math.min(range - x, Math.abs(judgeArea[i][0]) + Math.abs(judgeArea[i][1]) + 1);
+				shape.fillRectangle(x, 0, width, 1);
+			}
+			if (drawCenter) {
+				shape.setColor(Color.WHITE);
+				shape.drawPixel(center, 0);
+			}
+
+			backtex = new TextureRegion(new Texture(shape));
+			shape.dispose();
+			shape = null;
 		}
-		shape.setColor(Color.valueOf("FFFFFF"));
-		shape.fillRectangle(0, 100, range, 1);
-		shape.fillRectangle(center, 0, 2, 200);
 
-		backtex = new TextureRegion(new Texture(shape));
-		shape.dispose();
+		int index = state.getJudgeManager().getRecentJudgesIndex();
+		long[] recent = state.getJudgeManager().getRecentJudges();
 
-		shape = new Pixmap(range, 200, Pixmap.Format.RGBA8888);
+		if (shape == null) {
+			shape = new Pixmap(range, recent.length * 2, Pixmap.Format.RGBA8888);
+		}
+		shape.setColor(CLEAR);
+		shape.fill();
 		for (int i = 0; i < recent.length; i++) {
-			int j = index + 1;
-			if (recent[(i + j) % recent.length] == Long.MIN_VALUE) {
+			int j = i + index + 1;
+			if (recent[j % recent.length] == Long.MIN_VALUE) {
 				continue;
 			}
+
 			shape.setColor(Color.rgba8888(0.0f, 1.0f, 0, (i / (1.0f * recent.length))));
-			int x = center + Math.max(-center, Math.min((int) recent[(i + j) % recent.length], center));
-			shape.fillRectangle(x, recent.length - i, 1, i * 2);
+			int x = center + Math.max(-center, Math.min((int) recent[j % recent.length], center));
+			if (drawDecay) {
+				shape.drawLine(x, recent.length - i, x, recent.length + i);
+			} else {
+				shape.drawLine(x, 0, x, recent.length);
+			}
 		}
 
-		shapetex = new TextureRegion(new Texture(shape));
-		shape.dispose();
+		if (shapetex == null) {
+			shapetex = new TextureRegion(new Texture(shape));
+		} else {
+			shapetex.getTexture().draw(shape, 0, 0);
+		}
 
 		draw(sprite, backtex, r.x, r.y, r.width, r.height);
 		draw(sprite, shapetex, r.x, r.y, r.width, r.height);
@@ -114,11 +148,9 @@ public class SkinTimingVisualizer extends SkinObject {
 
 	@Override
 	public void dispose() {
-		if (shapetex != null) {
-			shapetex.getTexture().dispose();
-			backtex.getTexture().dispose();
-			shapetex = null;
-		}
+		Optional.ofNullable(backtex.getTexture()).ifPresent(Texture::dispose);
+		Optional.ofNullable(shapetex.getTexture()).ifPresent(Texture::dispose);
+		Optional.ofNullable(shape).ifPresent(Pixmap::dispose);
 	}
 
 }
