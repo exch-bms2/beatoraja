@@ -5,6 +5,7 @@ import bms.player.beatoraja.MainState;
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
 import bms.player.beatoraja.SkinConfig;
+import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.lr2.LR2SkinHeaderLoader;
 
@@ -30,6 +31,7 @@ public class SkinConfiguration extends MainState {
 	private SkinHeader selectedSkinHeader;
 	private List<CustomItemBase> customOptions;
 	private int customOptionOffset;
+	private int customOptionOffsetMax;
 	private Skin selectedSkin;
 
 	public SkinConfiguration(MainController main) {
@@ -52,6 +54,15 @@ public class SkinConfiguration extends MainState {
 		}
 	}
 
+	public void input() {
+		BMSPlayerInputProcessor input = main.getInputProcessor();
+		int mov = -input.getScroll();
+		input.resetScroll();
+		if (mov != 0 && customOptions != null) {
+			customOptionOffset = Math.max(0, Math.min(customOptionOffsetMax, customOptionOffset + mov));
+		}
+	}
+
 	public int getImageIndex(int id) {
 		if (SkinPropertyMapper.isSkinSelectTypeId(id)) {
 			SkinType t = SkinPropertyMapper.getSkinSelectType(id);
@@ -63,7 +74,7 @@ public class SkinConfiguration extends MainState {
 	public float getSliderValue(int id) {
 		switch (id) {
 		case SLIDER_SKINSELECT_POSITION:
-			return 0;
+			return (float)customOptionOffset / customOptionOffsetMax;
 		}
 		return super.getSliderValue(id);
 	}
@@ -99,6 +110,17 @@ public class SkinConfiguration extends MainState {
 			setNextSkin();
 			break;
 		default:
+			if (SkinPropertyMapper.isSkinCustomizeButton(id)) {
+				int index = SkinPropertyMapper.getSkinCustomizeIndex(id) + customOptionOffset;
+				if (customOptions != null && index < customOptions.size()) {
+					CustomItemBase item = customOptions.get(index);
+					if (item.getvalue() < item.getMax()) {
+						item.setValue(item.getvalue() + 1);
+					} else {
+						item.setValue(item.getMin());
+					}
+				}
+			}
 			if (SkinPropertyMapper.isSkinSelectTypeId(id)) {
 				SkinType t = SkinPropertyMapper.getSkinSelectType(id);
 				changeSkinType(t);
@@ -153,6 +175,7 @@ public class SkinConfiguration extends MainState {
 			updateCustomOptions();
 			updateCustomFiles();
 			updateCustomOffsets();
+			customOptionOffsetMax = Math.max(0, customOptions.size() - skin.getCustomPropertyCount());
 		} else {
 			selectedSkinHeader = null;
 			customOptions = null;
@@ -471,15 +494,15 @@ public class SkinConfiguration extends MainState {
 			displayValues = new ArrayList<String>();
 			int i=0;
 			for (String path : paths) {
-				if (path.equals(selection)) {
-					this.value = i;
-					this.displayValue = path;
-				}
 				int point = path.lastIndexOf('.');
 				if (point >= 0) {
 					displayValues.add(path.substring(0, point));
 				} else {
 					displayValues.add(path);
+				}
+				if (path.equals(selection)) {
+					this.value = i;
+					this.displayValue = displayValues.get(i);
 				}
 				i++;
 			}
@@ -493,10 +516,12 @@ public class SkinConfiguration extends MainState {
 	}
 
 	private class CustomOffsetItem extends CustomItemBase {
+		String offsetName;
 		int kind;
 
 		public CustomOffsetItem(String offsetName, String kindName, int kind, int min, int max, int selection) {
 			super(offsetName + " - " + kindName, min, max);
+			this.offsetName = offsetName;
 			this.kind = kind;
 			this.value = selection;
 			this.displayValue = String.valueOf(this.value);
@@ -505,7 +530,7 @@ public class SkinConfiguration extends MainState {
 		public void setValue(int i) {
 			value = i;
 			displayValue = String.valueOf(value);
-			setCustomOffset(categoryName, kind, value);
+			setCustomOffset(offsetName, kind, value);
 		}
 	}
 }
