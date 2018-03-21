@@ -761,7 +761,26 @@ public class SkinProperty {
 	public static final int BUTTON_HSFIX = 55;
 	public static final int BUTTON_BGA = 72;
 	public static final int BUTTON_FAVORITTE = 90;
+	public static final int BUTTON_SKINSELECT_7KEY = 170;
+	public static final int BUTTON_SKINSELECT_5KEY = 171;
+	public static final int BUTTON_SKINSELECT_14KEY = 172;
+	public static final int BUTTON_SKINSELECT_10KEY = 173;
+	public static final int BUTTON_SKINSELECT_9KEY = 174;
+	public static final int BUTTON_SKINSELECT_MUSIC_SELECT = 175;
+	public static final int BUTTON_SKINSELECT_DECIDE = 176;
+	public static final int BUTTON_SKINSELECT_RESULT = 177;
+	public static final int BUTTON_SKINSELECT_KEY_CONFIG = 178;
+	public static final int BUTTON_SKINSELECT_SKIN_SELECT = 179;
+	public static final int BUTTON_SKINSELECT_SOUND_SET = 180;
+	public static final int BUTTON_SKINSELECT_THEME = 181;
+	public static final int BUTTON_SKINSELECT_BATTLE7 = 182;
+	public static final int BUTTON_SKINSELECT_BATTLE5 = 183;
+	public static final int BUTTON_SKINSELECT_BATTLE9 = 184;
+	public static final int BUTTON_SKINSELECT_COURSE_RESULT = 185;
+	public static final int BUTTON_CHANGE_SKIN = 190;
 	public static final int BUTTON_OPEN_IR_WEBSITE = 210;
+	public static final int BUTTON_SKIN_CUSTOMIZE1 = 220;
+	public static final int BUTTON_SKIN_CUSTOMIZE10 = 229;
 	public static final int BUTTON_ASSIST_EXJUDGE = 301;
 	public static final int BUTTON_ASSIST_CONSTANT = 302;
 	public static final int BUTTON_ASSIST_JUDGEAREA = 303;
@@ -770,6 +789,11 @@ public class SkinProperty {
 	public static final int BUTTON_ASSIST_BPMGUIDE = 306;
 	public static final int BUTTON_ASSIST_NOMINE = 307;
 	public static final int BUTTON_LNMODE = 308;
+
+	public static final int BUTTON_SKINSELECT_24KEY = 386;
+	public static final int BUTTON_SKINSELECT_24KEY_DOUBLE = 387;
+	public static final int BUTTON_SKINSELECT_24KEY_BATTLE = 388;
+
 
 	public static final int VALUE_JUDGE_1P_SCRATCH = 500;
 	public static final int VALUE_JUDGE_1P_KEY1 = 501;

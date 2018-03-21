@@ -908,6 +908,33 @@ public class JSONSkinLoader extends SkinLoader{
 					skin.add(obj);
 				}
 			}
+
+			if (sk.skinSelect != null && skin instanceof  SkinConfigurationSkin) {
+				SkinConfigurationSkin skinSelect = (SkinConfigurationSkin) skin;
+				skinSelect.setCustomOffsetStyle(sk.skinSelect.customOffsetStyle);
+				skinSelect.setDefaultSkinType(sk.skinSelect.defaultCategory);
+				skinSelect.setSampleBMS(sk.skinSelect.customBMS);
+				if (sk.skinSelect.customPropertyCount > 0) {
+					skinSelect.setCustomPropertyCount(sk.skinSelect.customPropertyCount);
+				} else {
+					int count = 0;
+					for (Image image : sk.image) {
+						if (SkinPropertyMapper.isSkinCustomizeButton(image.act)) {
+							int index = SkinPropertyMapper.getSkinCustomizeIndex(image.act);
+							if (count <= index)
+								count = index + 1;
+						}
+					}
+					for (ImageSet imageSet : sk.imageset) {
+						if (SkinPropertyMapper.isSkinCustomizeButton(imageSet.act)) {
+							int index = SkinPropertyMapper.getSkinCustomizeIndex(imageSet.act);
+							if (count <= index)
+								count = index + 1;
+						}
+					}
+					skinSelect.setCustomPropertyCount(count);
+				}
+			}
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -1070,6 +1097,7 @@ public class JSONSkinLoader extends SkinLoader{
 		public Judge[] judge = new Judge[0];
 		public SongList songlist;
 		public PMchara[] pmchara = new PMchara[0];
+		public SkinConfigurationProperty skinSelect;
 
 		public Destination[] destination;
 	}
@@ -1326,6 +1354,13 @@ public class JSONSkinLoader extends SkinLoader{
 		public int side = 1;
 	}
 
+	public static class SkinConfigurationProperty {
+		public String[] customBMS;
+		public int defaultCategory = 0;
+		public int customPropertyCount = -1;
+		public int customOffsetStyle = 0;
+	}
+
 	private File getSrcIdPath(String srcid, Path p) {
 		if(srcid == null) {
 			return null;
@@ -1362,6 +1397,7 @@ public class JSONSkinLoader extends SkinLoader{
 				SongList.class,
 				Destination.class,
 				Animation.class,
+				SkinConfigurationProperty.class,
 		};
 		for (Class c : classes) {
 			json.setSerializer(c, new ObjectSerializer<>(enabledOptions, path));

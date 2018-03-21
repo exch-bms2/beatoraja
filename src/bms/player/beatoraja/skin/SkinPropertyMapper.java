@@ -102,4 +102,35 @@ public class SkinPropertyMapper {
 		}
 		return -1;
 	}
+
+	public static boolean isSkinSelectTypeId(int id) {
+		return (id >= BUTTON_SKINSELECT_7KEY && id <= BUTTON_SKINSELECT_COURSE_RESULT)
+				|| (id >= BUTTON_SKINSELECT_24KEY && id <= BUTTON_SKINSELECT_24KEY_BATTLE);
+	}
+
+	public static SkinType getSkinSelectType(int id) {
+		if (id >= BUTTON_SKINSELECT_7KEY && id <= BUTTON_SKINSELECT_COURSE_RESULT) {
+			return SkinType.getSkinTypeById(id - BUTTON_SKINSELECT_7KEY);
+		} else if (id >= BUTTON_SKINSELECT_24KEY && id <= BUTTON_SKINSELECT_24KEY_BATTLE) {
+			return SkinType.getSkinTypeById(id - BUTTON_SKINSELECT_24KEY + 16);
+		} else {
+			return null;
+		}
+	}
+
+	public static int skinSelectTypeId(SkinType type) {
+		if (type.getId() <= 15) {
+			return BUTTON_SKINSELECT_7KEY + type.getId();
+		} else {
+			return BUTTON_SKINSELECT_24KEY + type.getId() - 16;
+		}
+	}
+
+	public static boolean isSkinCustomizeButton(int id) {
+		return id >= BUTTON_SKIN_CUSTOMIZE1 && id < BUTTON_SKIN_CUSTOMIZE10;
+	}
+
+	public static int getSkinCustomizeIndex(int id) {
+		return id - BUTTON_SKIN_CUSTOMIZE1;
+	}
 }
