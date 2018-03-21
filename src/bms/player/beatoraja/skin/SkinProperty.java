@@ -177,6 +177,8 @@ public class SkinProperty {
 	// プレイ専用
 	public static final int SLIDER_MUSIC_PROGRESS = 6;
 
+	public static final int SLIDER_SKINSELECT_POSITION = 7;
+
 	public static final int SLIDER_MASTER_VOLUME = 17;
 	public static final int SLIDER_KEY_VOLUME = 18;
 	public static final int SLIDER_BGM_VOLUME = 19;
