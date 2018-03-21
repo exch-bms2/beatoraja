@@ -732,14 +732,19 @@ public class BMSPlayer extends MainState {
             }
 			// stage failed判定
 			if (g == 0) {
-				if(config.isContinueUntilEndOfSong() && notes != main.getPlayerResource().getSongdata().getNotes() && !isFailed && gauge.getType() != GrooveGauge.HAZARD) {
+				if(config.isContinueUntilEndOfSong()
+						&& ( gauge.getType() != GrooveGauge.CLASS || (gauge.getType() == GrooveGauge.CLASS && notes != main.getPlayerResource().getSongdata().getNotes()) )
+						&& !isFailed
+						&& gauge.getType() != GrooveGauge.HAZARD) {
 					if(gauge.getType() != GrooveGauge.CLASS) {
 						gauge.downType();
 						if(resource.getPlayMode() == PlayMode.PLAY) config.setGauge(config.getGauge() > 0 ? config.getGauge() - 1 :0);
 					} else {
 						isFailed = true;
 					}
-				} else if(!config.isContinueUntilEndOfSong() || gauge.getType() == GrooveGauge.HAZARD || (config.isContinueUntilEndOfSong() && notes == main.getPlayerResource().getSongdata().getNotes())) {
+				} else if(!config.isContinueUntilEndOfSong()
+						|| gauge.getType() == GrooveGauge.HAZARD
+						|| (config.isContinueUntilEndOfSong() && gauge.getType() == GrooveGauge.CLASS && notes == main.getPlayerResource().getSongdata().getNotes())) {
 					state = STATE_FAILED;
 					main.setTimerOn(TIMER_FAILED);
 					if (resource.mediaLoadFinished()) {
