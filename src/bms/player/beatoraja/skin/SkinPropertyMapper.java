@@ -133,4 +133,20 @@ public class SkinPropertyMapper {
 	public static int getSkinCustomizeIndex(int id) {
 		return id - BUTTON_SKIN_CUSTOMIZE1;
 	}
+
+	public static boolean isSkinCustomizeCategory(int id) {
+		return id >= STRING_SKIN_CUSTOMIZE_CATEGORY1 && id <= STRING_SKIN_CUSTOMIZE_CATEGORY10;
+	}
+
+	public static int getSkinCustomizeCategoryIndex(int id) {
+		return id - STRING_SKIN_CUSTOMIZE_CATEGORY1;
+	}
+
+	public static boolean isSkinCustomizeItem(int id) {
+		return id >= STRING_SKIN_CUSTOMIZE_ITEM1 && id <= STRING_SKIN_CUSTOMIZE_ITEM10;
+	}
+
+	public static int getSkinCustomizeItemIndex(int id) {
+		return id - STRING_SKIN_CUSTOMIZE_ITEM1;
+	}
 }

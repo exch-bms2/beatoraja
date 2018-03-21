@@ -215,6 +215,12 @@ public class SkinProperty {
 	public static final int STRING_SUBARTIST = 15;
 	public static final int STRING_FULLARTIST = 16;
 	public static final int STRING_SEARCHWORD = 30;
+	public static final int STRING_SKIN_NAME = 50;
+	public static final int STRING_SKIN_AUTHOR = 51;
+	public static final int STRING_SKIN_CUSTOMIZE_CATEGORY1 = 100;
+	public static final int STRING_SKIN_CUSTOMIZE_CATEGORY10 = 109;
+	public static final int STRING_SKIN_CUSTOMIZE_ITEM1 = 110;
+	public static final int STRING_SKIN_CUSTOMIZE_ITEM10 = 119;
 	public static final int STRING_COURSE1_TITLE = 150;
 	public static final int STRING_COURSE2_TITLE = 151;
 	public static final int STRING_COURSE3_TITLE = 152;
