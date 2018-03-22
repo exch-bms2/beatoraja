@@ -464,7 +464,7 @@ public class MainController extends ApplicationAdapter {
             	input.setMouseMoved(false);
             	mouseMovedTime = time;
 			}
-			Mouse.setGrabbed(current == bmsplayer && time > mouseMovedTime + 5000);
+			Mouse.setGrabbed(current == bmsplayer && time > mouseMovedTime + 5000 && Mouse.isInsideWindow());
 
 			// FPS表示切替
             if (input.getFunctionstate()[0] && input.getFunctiontime()[0] != 0) {
