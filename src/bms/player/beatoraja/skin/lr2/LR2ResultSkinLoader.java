@@ -4,20 +4,21 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
+import com.badlogic.gdx.math.Rectangle;
+
 import bms.player.beatoraja.Config;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.Resolution;
-import com.badlogic.gdx.math.Rectangle;
-
 import bms.player.beatoraja.result.MusicResultSkin;
 import bms.player.beatoraja.result.SkinGaugeGraphObject;
 import bms.player.beatoraja.skin.SkinBPMGraph;
 import bms.player.beatoraja.skin.SkinHeader;
 import bms.player.beatoraja.skin.SkinNoteDistributionGraph;
+import bms.player.beatoraja.skin.SkinTimingDistributionGraph;
 
 /**
  * LR2リザルトスキン読み込み用クラス
- * 
+ *
  * @author exch
  */
 public class LR2ResultSkinLoader extends LR2SkinCSVLoader<MusicResultSkin> {
@@ -26,6 +27,7 @@ public class LR2ResultSkinLoader extends LR2SkinCSVLoader<MusicResultSkin> {
 	private SkinGaugeGraphObject gaugeobj;
 	private SkinNoteDistributionGraph noteobj;
 	private SkinBPMGraph bpmgraphobj;
+	private SkinTimingDistributionGraph timinggraphobj;
 
 	public LR2ResultSkinLoader(final Resolution src, final Config c) {
 		super(src, c);
@@ -100,6 +102,29 @@ public class LR2ResultSkinLoader extends LR2SkinCSVLoader<MusicResultSkin> {
 				skin.setDestination(bpmgraphobj, values[2], gauge.x, gauge.y, gauge.width, gauge.height, values[7], values[8],
 						values[9], values[10], values[11], values[12], values[13], values[14], values[15],
 						values[16], values[17], values[18], values[19], values[20], values[21]);
+			}
+		});
+		addCommandWord(new CommandWord("SRC_TIMINGCHART_1P") {
+			//#SRC_TIMINGCHART_1P,(index),(gr),(x),(y),(w),(h),(div_x),(div_y),(cycle),(timer),field_w,field_h,(start),(end),drawAverage
+			@Override
+			public void execute(String[] str) {
+				int[] values = parseInt(str);
+				timinggraphobj = new SkinTimingDistributionGraph(values[15]);
+				gauge = new Rectangle(0, 0, values[11], values[12]);
+				skin.add(timinggraphobj);
+			}
+		});
+		addCommandWord(new CommandWord("DST_TIMINGCHART_1P") {
+
+			@Override
+			public void execute(String[] str) {
+				int[] values = parseInt(str);
+				gauge.x = values[3];
+				gauge.y = src.height - values[4];
+				skin.setDestination(timinggraphobj, values[2], gauge.x, gauge.y, gauge.width, gauge.height, values[7], values[8],
+						values[9], values[10], values[11], values[12], values[13], values[14], values[15],
+						values[16], values[17], values[18], values[19], values[20], values[21]);
+
 			}
 		});
 	}

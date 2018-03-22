@@ -1,22 +1,38 @@
 package bms.player.beatoraja.skin.lr2;
 
-import java.io.*;
-import java.util.*;
+import static bms.player.beatoraja.skin.SkinProperty.*;
 
-import bms.model.Mode;
-import bms.player.beatoraja.*;
-import bms.player.beatoraja.play.*;
-import bms.player.beatoraja.skin.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.Map;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 
-import static bms.player.beatoraja.skin.SkinProperty.*;
+import bms.model.Mode;
+import bms.player.beatoraja.Config;
+import bms.player.beatoraja.MainState;
+import bms.player.beatoraja.Resolution;
+import bms.player.beatoraja.play.PlaySkin;
+import bms.player.beatoraja.play.SkinBGA;
+import bms.player.beatoraja.play.SkinGauge;
+import bms.player.beatoraja.play.SkinJudge;
+import bms.player.beatoraja.play.SkinNote;
+import bms.player.beatoraja.skin.Skin;
+import bms.player.beatoraja.skin.SkinBPMGraph;
+import bms.player.beatoraja.skin.SkinHeader;
+import bms.player.beatoraja.skin.SkinImage;
+import bms.player.beatoraja.skin.SkinNoteDistributionGraph;
+import bms.player.beatoraja.skin.SkinNumber;
+import bms.player.beatoraja.skin.SkinSource;
+import bms.player.beatoraja.skin.SkinSourceImage;
+import bms.player.beatoraja.skin.SkinTimingVisualizer;
+import bms.player.beatoraja.skin.SkinType;
 
 /**
  * LR2プレイスキンローダー
- * 
+ *
  * @author exch
  */
 public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
@@ -28,7 +44,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 	private Rectangle[] playerr;
 
 	private Mode mode;
-	
+
 	private SkinSource[] note = new SkinSource[8];
 	private SkinSource[] lnstart = new SkinSource[8];
 	private SkinSource[] lnend = new SkinSource[8];
@@ -54,7 +70,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 	private int groovey = 0;
 
 	private SkinType type;
-	
+
 	final float srcw;
 	final float srch;
 	final float dstw;
@@ -64,6 +80,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 	private Rectangle gauge = new Rectangle();
 	private SkinNoteDistributionGraph noteobj;
 	private SkinBPMGraph bpmgraphobj;
+	private SkinTimingVisualizer timingobj;
 
 	public LR2PlaySkinLoader(final SkinType type, final Resolution src, final Config c) {
 		super(src, c);
@@ -162,7 +179,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 					if(playerr[values[1] % 2] != null) {
 						playerr[values[1] % 2] = new Rectangle(values[3] * dstw / srcw,
 								dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
-								(values[4] + values[6]) * dsth / srch);						
+								(values[4] + values[6]) * dsth / srch);
 					}
 					linevalues[values[1] % 2] = values;
 				}
@@ -421,7 +438,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 								values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
 								values[12], values[13], values[14], values[15], values[16], values[17], values[18],
 								values[19], values[20], new int[]{OFFSET_JUDGE_2P, values[21]});
-						
+
 						if (!detail) {
 							detail = true;
 							addJudgeDetail(skin, values, srcw, dstw, srch, dsth, 1);
@@ -758,7 +775,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 						} else {
 							gauger = new SkinGauge(gauge, values[10], values[9], values[13], values[14], values[15], values[16]);
 						}
-						
+
 						skin.add(gauger);
 					}
 				}
@@ -824,8 +841,29 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 						values[16], values[17], values[18], values[19], values[20], values[21]);
 			}
 		});
+		addCommandWord(new CommandWord("SRC_TIMING_1P") {
+			//#SRC_NOTECHART_1P,(index),(gr),(x),(y),(w),(h),(div_x),(div_y),(cycle),(timer),field_w,(field_h),(start),(end),drawCenter,drawDecay,(),()
+			@Override
+			public void execute(String[] str) {
+				int[] values = parseInt(str);
+				timingobj = new SkinTimingVisualizer(values[11], values[15], values[16]);
+				gauge = new Rectangle(0, 0, values[11], values[12]);
+				skin.add(timingobj);
+			}
+		});
+		addCommandWord(new CommandWord("DST_TIMING_1P") {
+			@Override
+			public void execute(String[] str) {
+				int[] values = parseInt(str);
+				gauge.x = values[3];
+				gauge.y = src.height - values[4];
+				skin.setDestination(timingobj, values[2], gauge.x, gauge.y, gauge.width, gauge.height, values[7], values[8],
+						values[9], values[10], values[11], values[12], values[13], values[14], values[15],
+						values[16], values[17], values[18], values[19], values[20], values[21]);
+			}
+		});
 	}
-	
+
 	private void setDstNowCombo(int index, String[] str, int offsetid) {
 		final SkinJudge sj = judge[index];
 		if (sj != null && sj.getJudgeCount()[Integer.parseInt(str[1]) <= 5 ? (5 - Integer.parseInt(str[1])) : Integer.parseInt(str[1])] != null) {
@@ -938,16 +976,16 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 		mine = new SkinSource[mode.key];
 		laner = new Rectangle[mode.key];
 		scale = new float[mode.key];
-		
+
 		playerr = new Rectangle[mode.player];
 		for(int i = 0;i < playerr.length;i++) {
 			playerr[i] = new Rectangle();
 		}
-		
+
 		this.loadSkin(new PlaySkin(src, dst), f, player, header, option, property);
 
 		lanerender.setLaneRegion(laner, scale, skin);
-		
+
 		SkinImage[] skinline = new SkinImage[lines[0] != null ? (lines[1] != null ? 2 : 1) : 0];
 		for(int i = 0;i < skinline.length;i++) {
 			skinline[i] = lines[i];
@@ -956,12 +994,12 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 		SkinImage[] skintime = new SkinImage[skinline.length];
 		for(int i = 0;i < skintime.length;i++) {
 			if(lines[i + 6] == null && lines[i] != null) {
-				makeDefaultLines(i + 6, 1, 64, 192, 192);				
+				makeDefaultLines(i + 6, 1, 64, 192, 192);
 			}
 			skintime[i] = lines[i + 6];
 		}
 		skin.setTimeLine(skintime);
-		
+
 		SkinImage[] skinbpm = new SkinImage[skinline.length];
 		for(int i = 0;i < skinbpm.length;i++) {
 			if(lines[i + 2] == null && lines[i] != null) {
@@ -969,8 +1007,8 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 			}
 			skinbpm[i] = lines[i + 2];
 		}
-		skin.setBPMLine(skinbpm);		
-		
+		skin.setBPMLine(skinbpm);
+
 		SkinImage[] skinstop = new SkinImage[skinline.length];
 		for(int i = 0;i < skinstop.length;i++) {
 			if(lines[i + 4] == null && lines[i] != null) {
@@ -979,7 +1017,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 			skinstop[i] = lines[i + 4];
 		}
 		skin.setStopLine(skinstop);
-		
+
 		int judge_reg = 1;
 		for(int i = 1 ; i < judge.length ; i++) {
 			if(judge[i] != null) judge_reg++;
@@ -991,7 +1029,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 
 		return skin;
 	}
-	
+
 	private void makeDefaultLines(int index, int h, int r, int g, int b) {
 		Texture tex = new Texture("skin/default/system.png");
 		int[] values = linevalues[index % 2];
@@ -1002,5 +1040,5 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 				values[5] * dstw / srcw, values[6] * dsth / srch * h, values[7], 255, r, g,
 				b, values[12], values[13], values[14], values[15], values[16],
 				values[17], values[18], values[19], values[20], values[21]);
-	}	
+	}
 }

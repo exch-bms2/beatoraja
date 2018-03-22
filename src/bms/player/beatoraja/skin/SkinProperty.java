@@ -127,7 +127,7 @@ public class SkinProperty {
 	public static final int TIMER_RESULTGRAPH_BEGIN = 150;
 	public static final int TIMER_RESULTGRAPH_END = 151;
 	public static final int TIMER_RESULT_UPDATESCORE = 152;
-	
+
 	public static final int TIMER_IR_CONNECT_BEGIN = 172;
 	public static final int TIMER_IR_CONNECT_SUCCESS = 173;
 	public static final int TIMER_IR_CONNECT_FAIL = 174;
@@ -286,6 +286,10 @@ public class SkinProperty {
 	public static final int NUMBER_TARGET_CLEAR = 371;
 	public static final int NUMBER_AVERAGE_DURATION = 372;
 	public static final int NUMBER_AVERAGE_DURATION_AFTERDOT = 373;
+	public static final int NUMBER_AVERAGE_TIMING = 374;
+	public static final int NUMBER_AVERAGE_TIMING_AFTERDOT = 375;
+	public static final int NUMBER_STDDEV_TIMING = 376;
+	public static final int NUMBER_STDDEV_TIMING_AFTERDOT = 377;
 	public static final int NUMBER_SCORE = 71;
 	public static final int NUMBER_MAXSCORE = 72;
 	public static final int NUMBER_TOTALNOTES = 74;
@@ -736,7 +740,7 @@ public class SkinProperty {
 	// 廃止予定
 	public static final int OFFSET_LIFT_OBSOLETE = 50;
 	public static final int OFFSET_LANECOVER_OBSOLETE = 51;
-	
+
 	public static final int OFFSET_MAX = 199;
 
 	public static final int BUTTON_MODE = 11;

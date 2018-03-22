@@ -4,18 +4,28 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
 
 import java.util.Arrays;
 
-import bms.player.beatoraja.*;
-import bms.player.beatoraja.PlayerResource.PlayMode;
-import bms.player.beatoraja.skin.SkinPropertyMapper;
 import com.badlogic.gdx.utils.FloatArray;
 
-import bms.model.*;
+import bms.model.BMSModel;
+import bms.model.Lane;
+import bms.model.LongNote;
+import bms.model.MineNote;
+import bms.model.Mode;
+import bms.model.NormalNote;
+import bms.model.Note;
+import bms.player.beatoraja.Config;
+import bms.player.beatoraja.CourseData;
+import bms.player.beatoraja.IRScoreData;
+import bms.player.beatoraja.MainController;
+import bms.player.beatoraja.PlayerConfig;
+import bms.player.beatoraja.PlayerResource;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.play.JudgeProperty.MissCondition;
+import bms.player.beatoraja.skin.SkinPropertyMapper;
 
 /**
  * ノーツ判定管理用クラス
- * 
+ *
  * @author exch
  */
 public class JudgeManager {
@@ -104,7 +114,7 @@ public class JudgeManager {
 	 * PMS用判定システム(空POORでコンボカット、1ノーツにつき1空POORまで)の有効/無効
 	 */
 	private boolean[] combocond;
-	
+
 	private MissCondition miss;
 	/**
 	 * 各判定毎のノートの判定を消失するかどうか。PG, GR, GD, BD, PR, MSの順
@@ -131,6 +141,15 @@ public class JudgeManager {
 	 * PMS キャラ用 判定
 	 */
 	private int PMcharaJudge = 0;
+
+	/**
+	 * 直近100ノーツの判定差時間
+	 */
+	private long[] recentJudges = new long[100];
+	/**
+	 * 判定差時間のヘッド
+	 */
+	private int recentJudgesIndex = 0;
 
 	public JudgeManager(BMSPlayer main) {
 		this.main = main;
@@ -185,27 +204,32 @@ public class JudgeManager {
 				constraint = 1;
 			}
 		}
-		njudge = rule.getNoteJudge(judgerank, judgeWindowRate, constraint, model.getMode() == Mode.POPN_9K && !BMSPlayerRule.isSevenToNine());
-		cnendjudge = rule.getLongNoteEndJudge(judgerank, judgeWindowRate, constraint, model.getMode() == Mode.POPN_9K && !BMSPlayerRule.isSevenToNine());
+		njudge = rule.getNoteJudge(judgerank, judgeWindowRate, constraint,
+				model.getMode() == Mode.POPN_9K && !BMSPlayerRule.isSevenToNine());
+		cnendjudge = rule.getLongNoteEndJudge(judgerank, judgeWindowRate, constraint,
+				model.getMode() == Mode.POPN_9K && !BMSPlayerRule.isSevenToNine());
 		sjudge = rule.getScratchJudge(judgerank, judgeWindowRate, constraint);
 		scnendjudge = rule.getLongScratchEndJudge(judgerank, judgeWindowRate, constraint);
 		judgestart = judgeend = 0;
-		for(int[] i : njudge) {
+		for (int[] i : njudge) {
 			judgestart = Math.min(judgestart, i[0]);
 			judgeend = Math.max(judgeend, i[1]);
 		}
-		for(int[] i : sjudge) {
+		for (int[] i : sjudge) {
 			judgestart = Math.min(judgestart, i[0]);
 			judgeend = Math.max(judgeend, i[1]);
 		}
 
 		this.autoplay = resource.getPlayMode().isAutoPlayMode();
-		
+
 		FloatArray[] f = resource.getGauge();
 		if (f != null) {
 			setCourseCombo(resource.getCombo());
 			setCourseMaxcombo(resource.getMaxcombo());
 		}
+
+		Arrays.fill(recentJudges, Long.MIN_VALUE);
+		this.recentJudgesIndex = 0;
 	}
 
 	public void update(final long time) {
@@ -218,7 +242,7 @@ public class JudgeManager {
 		final long now = mc.getNowTime();
 		// 通過系の判定
 		Arrays.fill(next_inclease, false);
-		
+
 		for (int lane = 0; lane < laneassign.length; lane++) {
 			final Lane lanemodel = lanes[lane];
 			lanemodel.mark((int) (prevtime + judgestart - 100));
@@ -229,8 +253,8 @@ public class JudgeManager {
 					break;
 				}
 			}
-			for(Note note = lanemodel.getNote();note != null && note.getTime() <= time;note = lanemodel.getNote()) {
-				if(note.getTime() <= prevtime) {
+			for (Note note = lanemodel.getNote(); note != null && note.getTime() <= time; note = lanemodel.getNote()) {
+				if (note.getTime() <= prevtime) {
 					continue;
 				}
 				if (note instanceof LongNote) {
@@ -258,7 +282,7 @@ public class JudgeManager {
 						auto_presstime[laneassign[lane][0]] = now;
 						main.play(note, config.getKeyvolume(), 0);
 						this.update(lane, note, time, 0, 0);
-						if(playerConfig.isGuideSE()) {
+						if (playerConfig.isGuideSE()) {
 							main.play(main.SOUND_GUIDE_SE_PG);
 						}
 					}
@@ -276,7 +300,7 @@ public class JudgeManager {
 								this.update(lane, ln, time, 0, 0);
 							}
 							processing[lane] = ln.getPair();
-							if(playerConfig.isGuideSE()) {
+							if (playerConfig.isGuideSE()) {
 								main.play(main.SOUND_GUIDE_SE_PG);
 							}
 						}
@@ -291,7 +315,7 @@ public class JudgeManager {
 								this.update(lane, ln, time, 0, 0);
 								main.play(processing[lane], config.getKeyvolume(), 0);
 								processing[lane] = null;
-								if(playerConfig.isGuideSE() && sckeyassign[lane] != -1) {
+								if (playerConfig.isGuideSE() && sckeyassign[lane] != -1) {
 									main.play(main.SOUND_GUIDE_SE_PG);
 								}
 							}
@@ -300,28 +324,32 @@ public class JudgeManager {
 				}
 			}
 			// HCNゲージ増減判定
-			if (passing[lane] != null && (pressed || (passing[lane].getPair().getState() > 0 && passing[lane].getPair().getState() <= 3) || autoplay)) {
+			if (passing[lane] != null
+					&& (pressed || (passing[lane].getPair().getState() > 0 && passing[lane].getPair().getState() <= 3)
+							|| autoplay)) {
 				next_inclease[lane] = true;
 			}
 
 			if (autoplay) {
 				for (int key : laneassign[lane]) {
-					if (auto_presstime[key] != Long.MIN_VALUE && now - auto_presstime[key] > auto_minduration && processing[lane] == null) {
+					if (auto_presstime[key] != Long.MIN_VALUE && now - auto_presstime[key] > auto_minduration
+							&& processing[lane] == null) {
 						auto_presstime[key] = Long.MIN_VALUE;
 					}
 				}
 			}
 		}
-		
+
 		final boolean[] b = inclease;
 		inclease = next_inclease;
 		next_inclease = b;
 
 		for (int lane = 0; lane < passing.length; lane++) {
 			final int offset = main.getLaneProperty().getLaneSkinOffset()[lane];
-			final int timerActive = SkinPropertyMapper.hcnActiveTimerId(main.getLaneProperty().getLanePlayer()[lane], offset);
-			final int timerDamage = SkinPropertyMapper.hcnDamageTimerId(main.getLaneProperty().getLanePlayer()[lane], offset);
-
+			final int timerActive = SkinPropertyMapper.hcnActiveTimerId(main.getLaneProperty().getLanePlayer()[lane],
+					offset);
+			final int timerDamage = SkinPropertyMapper.hcnDamageTimerId(main.getLaneProperty().getLanePlayer()[lane],
+					offset);
 
 			if (passing[lane] == null || passing[lane].getState() == 0) {
 				mc.setTimerOff(timerActive);
@@ -372,19 +400,23 @@ public class JudgeManager {
 							|| processing[lane].getType() == LongNote.TYPE_HELLCHARGENOTE) && sc >= 0
 							&& key != sckey[sc]) {
 						final int[][] judge = scnendjudge;
-						final int dtime = (int) (processing[lane].getTime() - ptime);						
+						final int dtime = (int) (processing[lane].getTime() - ptime);
 						int j = 0;
-						for (; j < judge.length && !(dtime >= judge[j][0] && dtime <= judge[j][1]); j++);
+						for (; j < judge.length && !(dtime >= judge[j][0] && dtime <= judge[j][1]); j++)
+							;
 
 						this.update(lane, processing[lane], time, j, dtime);
-//						 System.out.println("BSS終端判定 - Time : " + ptime + " Judge : " + j + " LN : " + processing[lane].hashCode());
+						//						 System.out.println("BSS終端判定 - Time : " + ptime + " Judge : " + j + " LN : " + processing[lane].hashCode());
 						main.play(processing[lane], config.getKeyvolume(), 0);
 						processing[lane] = null;
 						sckey[sc] = 0;
-						if(playerConfig.isGuideSE()) {
-							if(j == 0) main.play(main.SOUND_GUIDE_SE_PG);
-							else if(j == 1) main.play(main.SOUND_GUIDE_SE_GR);
-							else if(j == 2) main.play(main.SOUND_GUIDE_SE_GD);
+						if (playerConfig.isGuideSE()) {
+							if (j == 0)
+								main.play(main.SOUND_GUIDE_SE_PG);
+							else if (j == 1)
+								main.play(main.SOUND_GUIDE_SE_GR);
+							else if (j == 2)
+								main.play(main.SOUND_GUIDE_SE_GD);
 						}
 					} else {
 						// ここに来るのはマルチキーアサイン以外ありえないはず
@@ -395,7 +427,7 @@ public class JudgeManager {
 					lanemodel.reset();
 					Note tnote = null;
 					int j = 0;
-					for (Note judgenote = lanemodel.getNote();judgenote != null;judgenote = lanemodel.getNote()) {
+					for (Note judgenote = lanemodel.getNote(); judgenote != null; judgenote = lanemodel.getNote()) {
 						final long dtime = judgenote.getTime() - ptime;
 						if (dtime >= judgeend) {
 							break;
@@ -407,17 +439,21 @@ public class JudgeManager {
 								&& ((LongNote) judgenote).isEnd())) {
 							continue;
 						}
-						if (tnote == null || tnote.getState() != 0 || algorithm.compare(tnote, judgenote, ptime, judge)) {
+						if (tnote == null || tnote.getState() != 0
+								|| algorithm.compare(tnote, judgenote, ptime, judge)) {
 							if (!(miss == MissCondition.ONE && (judgenote.getState() != 0
-									|| (judgenote.getState() == 0 && judgenote.getPlayTime() != 0 && (dtime > judge[2][1] || dtime < judge[2][0]))))) {
+									|| (judgenote.getState() == 0 && judgenote.getPlayTime() != 0
+											&& (dtime > judge[2][1] || dtime < judge[2][0]))))) {
 								if (judgenote.getState() != 0) {
 									j = (dtime >= judge[4][0] && dtime <= judge[4][1]) ? 5 : 6;
 								} else {
-									for (j = 0; j < judge.length && !(dtime >= judge[j][0] && dtime <= judge[j][1]); j++) {
+									for (j = 0; j < judge.length
+											&& !(dtime >= judge[j][0] && dtime <= judge[j][1]); j++) {
 									}
 									j = (j >= 4 ? j + 1 : j);
 								}
-								if(j < 6 && (j < 4 || tnote == null || Math.abs(tnote.getTime() - ptime) > Math.abs(judgenote.getTime() - ptime))) {
+								if (j < 6 && (j < 4 || tnote == null
+										|| Math.abs(tnote.getTime() - ptime) > Math.abs(judgenote.getTime() - ptime))) {
 									tnote = judgenote;
 								}
 							}
@@ -444,7 +480,7 @@ public class JudgeManager {
 								processing[lane] = ln.getPair();
 								if (sc >= 0) {
 									// BSS処理開始
-//									 System.out.println("BSS開始判定 - Time : " + ptime + " Judge : " + j + " KEY : " + key + " LN : " + ln.getPair().hashCode());
+									//									 System.out.println("BSS開始判定 - Time : " + ptime + " Judge : " + j + " KEY : " + key + " LN : " + ln.getPair().hashCode());
 									sckey[sc] = key;
 								}
 							}
@@ -454,38 +490,41 @@ public class JudgeManager {
 							final int dtime = (int) (tnote.getTime() - ptime);
 							this.update(lane, tnote, time, j, dtime);
 						}
-						if(playerConfig.isGuideSE()) {
-							if(j == 0) main.play(main.SOUND_GUIDE_SE_PG);
-							else if(j == 1) main.play(main.SOUND_GUIDE_SE_GR);
-							else if(j == 2) main.play(main.SOUND_GUIDE_SE_GD);
+						if (playerConfig.isGuideSE()) {
+							if (j == 0)
+								main.play(main.SOUND_GUIDE_SE_PG);
+							else if (j == 1)
+								main.play(main.SOUND_GUIDE_SE_GR);
+							else if (j == 2)
+								main.play(main.SOUND_GUIDE_SE_GD);
 						}
 					} else {
 						// 空POOR判定がないときのレーザー色変更処理
 						this.judge[player[lane]][offset[lane]] = 0;
-						
+
 						// 空POOR判定がないときのキー音処理
 						final Note[] notes = lanemodel.getNotes();
 						Note n = notes.length > 0 ? notes[0] : null;
-						for(Note note : lanemodel.getHiddens()) {
-							if(note.getTime() >= ptime) {
+						for (Note note : lanemodel.getHiddens()) {
+							if (note.getTime() >= ptime) {
 								break;
 							}
 							n = note;
 						}
-						
-						for(Note note : notes) {
-							if(note.getTime() >= ptime) {
+
+						for (Note note : notes) {
+							if (note.getTime() >= ptime) {
 								break;
 							}
-							if ((n == null || n.getTime() <= note.getTime()) 
+							if ((n == null || n.getTime() <= note.getTime())
 									&& !(note instanceof LongNote && note.getState() != 0)) {
 								n = note;
 							}
 						}
-						
+
 						if (n != null) {
 							main.play(n, config.getKeyvolume(), 0);
-						}							
+						}
 					}
 				}
 				main.getKeyinput().inputKeyOn(lane);
@@ -495,8 +534,9 @@ public class JudgeManager {
 					final int[][] judge = sc >= 0 ? scnendjudge : cnendjudge;
 					int dtime = (int) (processing[lane].getTime() - ptime);
 					int j = 0;
-					for (; j < judge.length && !(dtime >= judge[j][0] && dtime <= judge[j][1]); j++);
-					
+					for (; j < judge.length && !(dtime >= judge[j][0] && dtime <= judge[j][1]); j++)
+						;
+
 					if ((lntype != BMSModel.LNTYPE_LONGNOTE
 							&& processing[lane].getType() == LongNote.TYPE_UNDEFINED)
 							|| processing[lane].getType() == LongNote.TYPE_CHARGENOTE
@@ -507,23 +547,24 @@ public class JudgeManager {
 							if (j != 4 || key != sckey[sc]) {
 								release = false;
 							} else {
-//								 System.out.println("BSS途中離し判定 - Time : " + ptime + " Judge : " + j + " LN : " + processing[lane]);
-								sckey[sc] = 0;								
+								//								 System.out.println("BSS途中離し判定 - Time : " + ptime + " Judge : " + j + " LN : " + processing[lane]);
+								sckey[sc] = 0;
 							}
 						}
-						if(release) {
+						if (release) {
 							if (j >= 3) {
 								main.stop(processing[lane].getPair());
 							}
 							this.update(lane, processing[lane], time, j, dtime);
 							main.play(processing[lane], config.getKeyvolume(), 0);
-							processing[lane] = null;							
+							processing[lane] = null;
 						}
 					} else {
 						// LN離し処理
 						if (Math.abs(passingcount[lane]) > Math.abs(dtime)) {
 							dtime = passingcount[lane];
-							for (; j < judge.length && !(dtime >= judge[j][0] && dtime <= judge[j][1]); j++);
+							for (; j < judge.length && !(dtime >= judge[j][0] && dtime <= judge[j][1]); j++)
+								;
 						}
 						if (j >= 3) {
 							main.stop(processing[lane].getPair());
@@ -559,7 +600,8 @@ public class JudgeManager {
 			// 見逃しPOOR判定
 			final Lane lanemodel = lanes[lane];
 			lanemodel.reset();
-			for (Note note = lanemodel.getNote(); note != null && note.getTime() < time + judge[3][0]; note = lanemodel.getNote()) {
+			for (Note note = lanemodel.getNote(); note != null
+					&& note.getTime() < time + judge[3][0]; note = lanemodel.getNote()) {
 				final long jud = note.getTime() - time;
 				if (note instanceof NormalNote && note.getState() == 0) {
 					this.update(lane, note, time, 4, jud);
@@ -608,13 +650,22 @@ public class JudgeManager {
 			n.setState(judge + 1);
 			pastNotes++;
 		}
-		if(miss == MissCondition.ONE && judge == 4 && n.getPlayTime() != 0) {
+		if (miss == MissCondition.ONE && judge == 4 && n.getPlayTime() != 0) {
 			main.setPastNotes(pastNotes);
 			return;
 		}
 		n.setPlayTime(fast);
 		score.addJudgeCount(judge, fast >= 0, 1);
-		
+
+		if (judge < 4) {
+			if (recentJudgesIndex == recentJudges.length - 1) {
+				recentJudgesIndex = 0;
+			} else {
+				recentJudgesIndex++;
+			}
+			recentJudges[recentJudgesIndex] = fast;
+		}
+
 		if (combocond[judge] && judge < 5) {
 			combo++;
 			score.setCombo(Math.max(score.getCombo(), combo));
@@ -626,8 +677,9 @@ public class JudgeManager {
 			coursecombo = 0;
 		}
 
-		if (judge != 4) this.judge[player[lane]][offset[lane]] = judge == 0 ? 1 : judge * 2 + (fast > 0 ? 0 : 1);
-		if (judge <= ((PlaySkin)main.getSkin()).getJudgetimer()) {
+		if (judge != 4)
+			this.judge[player[lane]][offset[lane]] = judge == 0 ? 1 : judge * 2 + (fast > 0 ? 0 : 1);
+		if (judge <= ((PlaySkin) main.getSkin()).getJudgetimer()) {
 			main.main.setTimerOn(SkinPropertyMapper.bombTimerId(player[lane], offset[lane]));
 		}
 		PMcharaJudge = judge + 1;
@@ -635,9 +687,10 @@ public class JudgeManager {
 		final int lanelength = sckeyassign.length;
 		if (judgenow.length > 0) {
 			main.main.setTimerOn(JUDGE_TIMER[lane / (lanelength / judgenow.length)]);
-			if(judgenow.length >= 3) {
-				for(int i = 0 ; i < COMBO_TIMER.length ; i++) {
-					if(i != lane / (lanelength / judgenow.length)) main.main.setTimerOff(COMBO_TIMER[i]);
+			if (judgenow.length >= 3) {
+				for (int i = 0; i < COMBO_TIMER.length; i++) {
+					if (i != lane / (lanelength / judgenow.length))
+						main.main.setTimerOff(COMBO_TIMER[i]);
 				}
 			}
 			main.main.setTimerOn(COMBO_TIMER[lane / (lanelength / judgenow.length)]);
@@ -646,6 +699,14 @@ public class JudgeManager {
 			judgefast[lane / (lanelength / judgenow.length)] = fast;
 		}
 		main.update(judge, time);
+	}
+
+	public long[] getRecentJudges() {
+		return recentJudges;
+	}
+
+	public int getRecentJudgesIndex() {
+		return recentJudgesIndex;
 	}
 
 	public long[] getRecentJudgeTiming() {
@@ -670,7 +731,7 @@ public class JudgeManager {
 
 	/**
 	 * 現在の1曲内のコンボ数を取得する
-	 * 
+	 *
 	 * @return 現在のコンボ数
 	 */
 	public int getCombo() {
@@ -679,7 +740,7 @@ public class JudgeManager {
 
 	/**
 	 * 現在のコース内のコンボ数を取得する
-	 * 
+	 *
 	 * @return 現在のコンボ数
 	 */
 	public int getCourseCombo() {
@@ -744,7 +805,7 @@ public class JudgeManager {
 
 	public int[] getNowCombo() {
 		return judgecombo;
-	}	
+	}
 
 	public int[][] getJudgeTable(boolean sc) {
 		return sc ? sjudge : njudge;
