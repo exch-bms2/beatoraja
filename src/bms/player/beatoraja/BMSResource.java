@@ -25,10 +25,6 @@ public class BMSResource {
 	 */
 	private BMSModel model;
 	/**
-	 * BGAオプション
-	 */
-	private int bgashow;
-	/**
 	 * BMSの音源リソース
 	 */
 	private AudioDriver audio;
@@ -66,8 +62,6 @@ public class BMSResource {
 	}
 	
 	public boolean setBMSFile(BMSModel model, final Path f, final Config config, PlayMode mode) {
-		String bmspath = this.model != null ? this.model.getPath() : null;
-
 		if(stagefile != null) {
 			stagefile.getTexture().dispose();
 			stagefile = null;
@@ -103,33 +97,14 @@ public class BMSResource {
 		while(!bgaloaders.isEmpty() && !bgaloaders.getFirst().isAlive()) {
 			bgaloaders.removeFirst();
 		}
-		if (bmspath == null || !f.toAbsolutePath().toString().equals(bmspath) || bgashow != config.getBga()
-				|| (model.getRandom() != null && model.getRandom().length > 0)) {
-			// 前回と違うbmsファイルを読み込んだ場合、BGAオプション変更時はリソースのロード
-			// 同フォルダの違うbmsファイルでも、WAV/,BMP定義が違う可能性があるのでロード
-			// RANDOM定義がある場合はリロード
-			this.bgashow = config.getBga();			
-			
-			if (config.getBga() == Config.BGA_ON || (config.getBga() == Config.BGA_AUTO && (mode == PlayMode.AUTOPLAY || mode.isReplayMode()))) {
-				BGALoaderThread bgaloader = new BGALoaderThread(model, bga);
-				bgaloaders.addLast(bgaloader);
-				bgaloader.start();					
-			}
-			AudioLoaderThread audioloader = new AudioLoaderThread(model, audio);
-			audioloaders.addLast(audioloader);
-			audioloader.start();
-		} else {
-			// windowsだけ動画を含むBGAがあれば読み直す(ffmpegがエラー終了する。今後のupdateで直れば外す)
-//			if ("\\".equals(System.getProperty("file.separator"))) {
-				Logger.getGlobal().info("WindowsのためBGA再読み込み");
-				
-				if (config.getBga() == Config.BGA_ON || (config.getBga() == Config.BGA_AUTO && (mode == PlayMode.AUTOPLAY || mode.isReplayMode()))) {
-					BGALoaderThread bgaloader = new BGALoaderThread(model, bga);
-					bgaloaders.addLast(bgaloader);
-					bgaloader.start();					
-				}
-//			}
-		}
+		// Audio, BGAともキャッシュがあるため、何があっても全リロードする
+		BGALoaderThread bgaloader = new BGALoaderThread(
+				config.getBga() == Config.BGA_ON || (config.getBga() == Config.BGA_AUTO && (mode == PlayMode.AUTOPLAY || mode.isReplayMode())) ? model : null);
+		bgaloaders.addLast(bgaloader);
+		bgaloader.start();
+		AudioLoaderThread audioloader = new AudioLoaderThread(model);
+		audioloaders.addLast(audioloader);
+		audioloader.start();
 		return true;
 	}
 	
@@ -194,14 +169,12 @@ public class BMSResource {
 		}
 	}
 
-	static class BGALoaderThread extends Thread {
+	class BGALoaderThread extends Thread {
 
 		private final BMSModel model;
-		private final BGAProcessor bga;
-		
-		public BGALoaderThread(BMSModel model, BGAProcessor bga) {
+
+		public BGALoaderThread(BMSModel model) {
 			this.model = model;
-			this.bga = bga;
 		}
 		
 		@Override
@@ -216,14 +189,12 @@ public class BMSResource {
 		}
 	}
 	
-	static class AudioLoaderThread extends Thread {
+	class AudioLoaderThread extends Thread {
 
 		private final BMSModel model;
-		private final AudioDriver audio;
-		
-		public AudioLoaderThread(BMSModel model, AudioDriver audio) {
+
+		public AudioLoaderThread(BMSModel model) {
 			this.model = model;
-			this.audio = audio;
 		}
 		
 		@Override
