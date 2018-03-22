@@ -31,25 +31,26 @@ public class BGImageProcessor {
 	 */
 	private int[] bgacacheid;
 
-	private PixmapResourcePool cache = new PixmapResourcePool() {
-		
-		protected Pixmap convert(Pixmap pixmap) {
-			int bgasize = Math.max(pixmap.getHeight(), pixmap.getWidth());
-			if ( bgasize <=256 ){
-				final int fixx = (256 - pixmap.getWidth()) / 2;
-				Pixmap fixpixmap = new Pixmap(256, 256, pixmap.getFormat());
-				fixpixmap.drawPixmap(pixmap, 0, 0, pixmap.getWidth(), pixmap.getHeight(),
-						fixx, 0, pixmap.getWidth(), pixmap.getHeight());
-				pixmap.dispose();
-				return fixpixmap;
-			}
-			return pixmap;
-		}
-	};
+	private final PixmapResourcePool cache;
 
-	public BGImageProcessor(int size) {
+	public BGImageProcessor(int size, int maxgen) {
 		bgacache = new Texture[size];
 		bgacacheid = new int[size];
+		cache = new PixmapResourcePool(maxgen) {
+
+			protected Pixmap convert(Pixmap pixmap) {
+				int bgasize = Math.max(pixmap.getHeight(), pixmap.getWidth());
+				if ( bgasize <=256 ){
+					final int fixx = (256 - pixmap.getWidth()) / 2;
+					Pixmap fixpixmap = new Pixmap(256, 256, pixmap.getFormat());
+					fixpixmap.drawPixmap(pixmap, 0, 0, pixmap.getWidth(), pixmap.getHeight(),
+							fixx, 0, pixmap.getWidth(), pixmap.getHeight());
+					pixmap.dispose();
+					return fixpixmap;
+				}
+				return pixmap;
+			}
+		};
 	}
 
 	public void put(int id, Path path) {

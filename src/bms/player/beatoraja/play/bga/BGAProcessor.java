@@ -36,28 +36,9 @@ public class BGAProcessor {
 
 	private IntMap<MovieProcessor> mpgmap = new IntMap<MovieProcessor>();
 	
-	private ResourcePool<String, MovieProcessor> mpgresource = new ResourcePool<String, MovieProcessor>(1) {
-
-		@Override
-		protected MovieProcessor load(String key) {
-			MovieProcessor mm = new FFmpegProcessor(config.getFrameskip());
-			mm.create(key);
-			return mm;
-		}
-
-		@Override
-		protected void dispose(MovieProcessor resource) {
-			resource.dispose();
-		}
-
-	};
+	private final ResourcePool<String, MovieProcessor> mpgresource;
 
 	public static final String[] mov_extension = { "mp4", "wmv", "m4v", "webm", "mpg", "mpeg", "m1v", "m2v", "avi"};
-
-	/**
-	 * BGAイメージのキャッシュ枚数
-	 */
-	private static final int BGACACHE_SIZE = 256;
 
 	/**
 	 * 再生中のBGAID
@@ -98,45 +79,74 @@ public class BGAProcessor {
 		blank.fill();
 		blanktex = new Texture(blank);
 		blank.dispose();
-		
-		cache = new BGImageProcessor(BGACACHE_SIZE);
+
+		mpgresource = new ResourcePool<String, MovieProcessor>(config.getSongResourceGen()) {
+			@Override
+			protected MovieProcessor load(String key) {
+				MovieProcessor mm = new FFmpegProcessor(config.getFrameskip());
+				mm.create(key);
+				return mm;
+			}
+
+			@Override
+			protected void dispose(MovieProcessor resource) {
+				resource.dispose();
+			}
+		};
+		cache = new BGImageProcessor(256, config.getSongResourceGen());
 		image = new TextureRegion();
 	}
 
 	public synchronized void setModel(BMSModel model) {
 		this.model = model;
-		Array<TimeLine> tls = new Array<TimeLine>();
-		for(TimeLine tl : model.getAllTimeLines()) {
-			if(tl.getBGA() != -1 || tl.getLayer() != -1 || (tl.getPoor() != null && tl.getPoor().length > 0)) {
-				tls.add(tl);
-			}
-		}
-		timelines = tls.toArray(TimeLine.class);
-
-		// BMS格納ディレクトリ
-		Path dpath = Paths.get(model.getPath()).getParent();
-
 		progress = 0;
 
 		mpgmap.clear();
-		int id = 0;
 		cache.clear();
 
-		for (String name : model.getBgaList()) {
-			if (progress == 1) {
-				break;
-			}
-			Path f = null;
-			if (Files.exists(dpath.resolve(name))) {
-				final int index = name.lastIndexOf('.');
-				String fex = null;
-				if (index != -1) {
-					fex = name.substring(index + 1).toLowerCase();
+		int id = 0;
+
+		Array<TimeLine> tls = new Array<TimeLine>();
+
+		if(model != null) {
+			for(TimeLine tl : model.getAllTimeLines()) {
+				if(tl.getBGA() != -1 || tl.getLayer() != -1 || (tl.getPoor() != null && tl.getPoor().length > 0)) {
+					tls.add(tl);
 				}
-				if(fex != null && !(Arrays.asList(mov_extension).contains(fex))){
-				f = dpath.resolve(name);
-				}else if(fex != null){
-					name = name.substring(0, index);
+			}
+
+			// BMS格納ディレクトリ
+			Path dpath = Paths.get(model.getPath()).getParent();
+
+			for (String name : model.getBgaList()) {
+				if (progress == 1) {
+					break;
+				}
+				Path f = null;
+				if (Files.exists(dpath.resolve(name))) {
+					final int index = name.lastIndexOf('.');
+					String fex = null;
+					if (index != -1) {
+						fex = name.substring(index + 1).toLowerCase();
+					}
+					if(fex != null && !(Arrays.asList(mov_extension).contains(fex))){
+						f = dpath.resolve(name);
+					}else if(fex != null){
+						name = name.substring(0, index);
+						for (String mov : mov_extension) {
+							final Path mpgfile = dpath.resolve(name + "." + mov);
+							if (Files.exists(mpgfile)) {
+								f = mpgfile;
+								break;
+							}
+						}
+					}
+				}
+				if (f == null) {
+					final int index = name.lastIndexOf('.');
+					if (index != -1) {
+						name = name.substring(0, index);
+					}
 					for (String mov : mov_extension) {
 						final Path mpgfile = dpath.resolve(name + "." + mov);
 						if (Files.exists(mpgfile)) {
@@ -144,63 +154,46 @@ public class BGAProcessor {
 							break;
 						}
 					}
-				}
-			}
-			if (f == null) {
-				final int index = name.lastIndexOf('.');
-				if (index != -1) {
-					name = name.substring(0, index);
-				}
-				for (String mov : mov_extension) {
-					final Path mpgfile = dpath.resolve(name + "." + mov);
-					if (Files.exists(mpgfile)) {
-						f = mpgfile;
-						break;
-					}
-				}
-				for (String mov : BGImageProcessor.pic_extension) {
-					final Path picfile = dpath.resolve(name + "." + mov);
-					if (Files.exists(picfile)) {
-						f = picfile;
-						break;
-					}
-				}
-			}
-
-			if (f != null) {
-				boolean isMovie = false;
-				for (String mov : mov_extension) {
-					if (f.getFileName().toString().toLowerCase().endsWith(mov)) {
-						try {
-							MovieProcessor mm = mpgresource.get(f.toString());
-							mpgmap.put(id, mm);
-							isMovie = true;
+					for (String mov : BGImageProcessor.pic_extension) {
+						final Path picfile = dpath.resolve(name + "." + mov);
+						if (Files.exists(picfile)) {
+							f = picfile;
 							break;
-						} catch (Throwable e) {
-							Logger.getGlobal().warning("BGAファイル読み込み失敗。" + e.getMessage());
-							e.printStackTrace();
-						}					
+						}
 					}
 				}
-				if(isMovie) {
-				} else {
-					cache.put(id, f);					
+
+				if (f != null) {
+					boolean isMovie = false;
+					for (String mov : mov_extension) {
+						if (f.getFileName().toString().toLowerCase().endsWith(mov)) {
+							try {
+								MovieProcessor mm = mpgresource.get(f.toString());
+								mpgmap.put(id, mm);
+								isMovie = true;
+								break;
+							} catch (Throwable e) {
+								Logger.getGlobal().warning("BGAファイル読み込み失敗。" + e.getMessage());
+								e.printStackTrace();
+							}
+						}
+					}
+					if(isMovie) {
+					} else {
+						cache.put(id, f);
+					}
 				}
+
+				progress += 1f / model.getBgaList().length;
+				id++;
 			}
-
-			progress += 1f / model.getBgaList().length;
-			id++;
 		}
-		
-		cache.disposeOld();
-		Gdx.app.postRunnable(new Runnable() {
-			@Override
-			public void run() {
-				mpgresource.disposeOld();
-			}			
-		});
+		timelines = tls.toArray(TimeLine.class);
 
-		Logger.getGlobal().info("BGAファイル読み込み完了。BGA数:" + model.getBgaList().length);
+		cache.disposeOld();
+		Gdx.app.postRunnable(() -> mpgresource.disposeOld());
+
+		Logger.getGlobal().info("BGAファイル読み込み完了。BGA数:" + id);
 		progress = 1;
 	}
 
@@ -212,9 +205,6 @@ public class BGAProcessor {
 	 * BGAの初期データをあらかじめキャッシュする
 	 */
 	public void prepare(BMSPlayer player) {
-		if (model == null) {
-			return;
-		}
 		pos = 0;
 		if(cache != null) {
 			cache.prepare(timelines);			
