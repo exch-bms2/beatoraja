@@ -663,17 +663,26 @@ public class BarRenderer {
 			l.addAll(Arrays.asList(((DirectoryBar) bar).getChildren()));
 		}
 
-		List<Bar> remove = new ArrayList<Bar>();
-		for (Bar b : l) {
-			final Mode mode = select.main.getPlayerResource().getPlayerConfig().getMode();
-			if (mode != null && b instanceof SongBar && ((SongBar) b).getSongData().getMode() != 0 && 
-					((SongBar) b).getSongData().getMode() != mode.id) {
-				remove.add(b);
-			}
-		}
-		l.removeAll(remove);
-
 		if (!l.isEmpty()) {
+			final PlayerConfig config = select.main.getPlayerResource().getPlayerConfig();
+			int modeIndex = 0;
+			for(;modeIndex < MusicSelector.MODE.length && MusicSelector.MODE[modeIndex] != config.getMode();modeIndex++);
+			for(int trialCount = 0; trialCount < MusicSelector.MODE.length; trialCount++, modeIndex++) {
+				config.setMode(MusicSelector.MODE[modeIndex % MusicSelector.MODE.length]);
+				List<Bar> remove = new ArrayList<Bar>();
+				for (Bar b : l) {
+					final Mode mode = select.main.getPlayerResource().getPlayerConfig().getMode();
+					if (mode != null && b instanceof SongBar && ((SongBar) b).getSongData().getMode() != 0 &&
+							((SongBar) b).getSongData().getMode() != mode.id) {
+						remove.add(b);
+					}
+				}
+				if(l.size() != remove.size()) {
+					l.removeAll(remove);
+					break;
+				}
+			}
+
 			if (bar != null) {
 				dir.add((DirectoryBar) bar);
 			}
@@ -682,7 +691,6 @@ public class BarRenderer {
 			currentsongs = l.toArray(new Bar[l.size()]);
 			bartextupdate = true;
 
-			final PlayerConfig config = select.main.getPlayerResource().getPlayerConfig();
 			for (Bar b : currentsongs) {
 				if (b instanceof SongBar) {
 					SongData sd = ((SongBar) b).getSongData();
