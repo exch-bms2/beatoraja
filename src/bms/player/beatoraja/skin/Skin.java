@@ -369,13 +369,14 @@ public class Skin {
 
 		public void draw(TextureRegion image, float x, float y, float w, float h) {
 			preDraw(image);
-			sprite.draw(image, (int)x, (int)y, (int)w, (int)h);
+			sprite.draw(image, (int)(x + 0.5f), (int)(y + 0.5f), (int)(w + (x + 0.5f) % 1.0f), (int)(h + (y + 0.5f) % 1.0f));
 			postDraw();
 		}
 
 		public void draw(TextureRegion image, float x, float y, float w, float h, float cx, float cy, float angle) {
 			preDraw(image);
-			sprite.draw(image, (int)x, (int)y, cx * w, cy * h, (int)w, (int)h, 1, 1, angle);
+			sprite.draw(image, (int)(x + 0.5f), (int)(y + 0.5f), cx * w, cy * h, (int)(w + (x + 0.5f) % 1.0f),
+					(int)(h + (y + 0.5f) % 1.0f), 1, 1, angle);
 			postDraw();
 		}
 
