@@ -369,13 +369,15 @@ public class Skin {
 
 		public void draw(TextureRegion image, float x, float y, float w, float h) {
 			preDraw(image);
-			sprite.draw(image, (int)x, (int)y, (int)w, (int)h);
+			// x,yが*.5の際に(Windowsのみ)TextureRegionがずれるため、暫定対処
+			sprite.draw(image,  x + 0.01f, y + 0.01f, w, h);
 			postDraw();
 		}
 
 		public void draw(TextureRegion image, float x, float y, float w, float h, float cx, float cy, float angle) {
 			preDraw(image);
-			sprite.draw(image, (int)x, (int)y, cx * w, cy * h, (int)w, (int)h, 1, 1, angle);
+			// x,yが*.5の際に(Windowsのみ)TextureRegionがずれるため、暫定対処
+			sprite.draw(image, x + 0.01f, y + 0.01f, cx * w, cy * h, w, h, 1, 1, angle);
 			postDraw();
 		}
 
