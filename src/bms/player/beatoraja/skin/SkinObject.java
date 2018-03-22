@@ -56,6 +56,14 @@ public abstract class SkinObject implements Disposable {
 	 */
 	private int clickevent = -1;
 	/**
+	 * オブジェクトクリック判定・イベント引数の種類
+	 * 0: 通常(plus only)
+	 * 1: 通常(minus only)
+	 * 2: 左右分割(左=minus,右=plus)
+	 * 3: 上下分割(下=minus,上=plus)
+	 */
+	private int clickeventType = 0;
+	/**
 	 * 描画条件となるオプション定義
 	 */
 	private int[] dstop = new int[0];
@@ -562,6 +570,14 @@ public abstract class SkinObject implements Disposable {
 
 	public void setClickevent(int clickevent) {
 		this.clickevent = clickevent;
+	}
+
+	public int getClickeventType() {
+		return clickeventType;
+	}
+
+	public void setClickeventType(int clickeventType) {
+		this.clickeventType = clickeventType;
 	}
 
 	public boolean isRelative() {

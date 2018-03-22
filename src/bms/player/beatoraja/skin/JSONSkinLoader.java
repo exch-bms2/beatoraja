@@ -262,6 +262,7 @@ public class JSONSkinLoader extends SkinLoader{
 							}
 							if (img.act > 0) {
 								obj.setClickevent(img.act);
+								obj.setClickeventType(img.click);
 							}
 
 							break;
@@ -293,6 +294,7 @@ public class JSONSkinLoader extends SkinLoader{
 							obj = si;
 							if (imgs.act > 0) {
 								obj.setClickevent(imgs.act);
+								obj.setClickeventType(imgs.click);
 							}
 							break;
 						}
@@ -1154,6 +1156,7 @@ public class JSONSkinLoader extends SkinLoader{
 		public int len;
 		public int ref;
 		public int act;
+		public int click = 0;
 	}
 
 	public static class ImageSet {
@@ -1161,6 +1164,7 @@ public class JSONSkinLoader extends SkinLoader{
 		public int ref;
 		public String[] images = new String[0];
 		public int act;
+		public int click = 0;
 	}
 
 	public static class Value {
