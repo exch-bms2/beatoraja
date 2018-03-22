@@ -8,11 +8,7 @@ import com.badlogic.gdx.graphics.Color;
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.utils.Disposable;
-
-import java.util.*;
-
-import com.badlogic.gdx.utils.IntSet;
+import com.badlogic.gdx.utils.*;
 
 /**
  * スキンオブジェクト
@@ -94,12 +90,20 @@ public abstract class SkinObject implements Disposable {
 		public final int id;
 	}
 
-	private final float[] CENTERX = { 0.5f, 0, 0.5f, 1, 0, 0.5f, 1, 0, 0.5f, 1, };
-	private final float[] CENTERY = { 0.5f, 0, 0, 0, 0.5f, 0.5f, 0.5f, 1, 1, 1 };
+	private static final float[] CENTERX = { 0.5f, 0, 0.5f, 1, 0, 0.5f, 1, 0, 0.5f, 1, };
+	private static final float[] CENTERY = { 0.5f, 0, 0, 0, 0.5f, 0.5f, 0.5f, 1, 1, 1 };
 
+	/**
+	 * 回転中心のX座標(左端:0.0 - 右端:1.0)
+	 */
 	private float centerx;
+	/**
+	 * 回転中心のY座標(下端:0.0 - 上端:1.0)
+	 */
 	private float centery;
-
+	/**
+	 * 描画先
+	 */
 	private SkinObjectDestination[] dst = new SkinObjectDestination[0];
 	
 	// 以下、高速化用
@@ -179,31 +183,27 @@ public abstract class SkinObject implements Disposable {
 			dstloop = loop;
 		}
 		if (dstop.length == 0) {
-			List<Integer> l = new ArrayList<Integer>();
+			IntSet l = new IntSet();
 			for(int i : op) {
 				if(i != 0) {
 					l.add(i);
 				}
 			}
-			op = new int[l.size()];
-			for (int i = 0; i < l.size(); i++) {
-				op[i] = l.get(i);
-			}
-			dstop = op;
+			dstop = l.iterator().toArray().toArray();
 		}
 		for (int i = 0; i < dst.length; i++) {
 			if (dst[i].time > time) {
-				List<SkinObjectDestination> l = new ArrayList<SkinObjectDestination>(Arrays.asList(dst));
-				l.add(i, obj);
-				dst = l.toArray(new SkinObjectDestination[l.size()]);
+				Array<SkinObjectDestination> l = new Array<SkinObjectDestination>(dst);
+				l.insert(i, obj);
+				dst = l.toArray(SkinObjectDestination.class);
 				starttime = dst[0].time;
 				endtime = dst[dst.length - 1].time;
 				return;
 			}
 		}
-		List<SkinObjectDestination> l = new ArrayList<SkinObjectDestination>(Arrays.asList(dst));
+		Array<SkinObjectDestination> l = new Array<SkinObjectDestination>(dst);
 		l.add(obj);
-		dst = l.toArray(new SkinObjectDestination[l.size()]);
+		dst = l.toArray(SkinObjectDestination.class);
 		starttime = dst[0].time;
 		endtime = dst[dst.length - 1].time;
 	}
@@ -597,6 +597,11 @@ public abstract class SkinObject implements Disposable {
 		}
 	}
 	
+	/**
+	 * オフセット
+	 * 
+	 * @author exch
+	 */
 	public static class SkinOffset {
 		public float x;
 		public float y;
@@ -617,6 +622,9 @@ public abstract class SkinObject implements Disposable {
 	}
 
 	public void setOffsetID(int[] offset) {
+		if(this.offset.length > 0) {
+			return;
+		}
 		IntSet a = new IntSet(offset.length);
 		for(int o : offset) {
 			if(o > 0 && o < SkinProperty.OFFSET_MAX + 1) {
