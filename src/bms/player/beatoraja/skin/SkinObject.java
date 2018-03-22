@@ -556,9 +556,31 @@ public abstract class SkinObject implements Disposable {
 			// System.out.println(obj.getClickevent() + " : " + r.x +
 			// "," + r.y + "," + r.width + "," + r.height + " - " + x +
 			// "," + y);
-			if (r != null && r.x <= x && r.x + r.width >= x && r.y <= y && r.y + r.height >= y) {
-				state.executeClickEvent(clickevent);
-				return true;
+			switch (clickeventType) {
+			case 0:
+				if (r != null && r.x <= x && r.x + r.width >= x && r.y <= y && r.y + r.height >= y) {
+					state.executeClickEvent(clickevent, 1);
+					return true;
+				}
+				break;
+			case 1:
+				if (r != null && r.x <= x && r.x + r.width >= x && r.y <= y && r.y + r.height >= y) {
+					state.executeClickEvent(clickevent, -1);
+					return true;
+				}
+				break;
+			case 2:
+				if (r != null && r.x <= x && r.x + r.width >= x && r.y <= y && r.y + r.height >= y) {
+					state.executeClickEvent(clickevent, x >= r.x + r.width/2 ? 1 : -1);
+					return true;
+				}
+				break;
+			case 3:
+				if (r != null && r.x <= x && r.x + r.width >= x && r.y <= y && r.y + r.height >= y) {
+					state.executeClickEvent(clickevent, y >= r.y + r.height/2 ? 1 : -1);
+					return true;
+				}
+				break;
 			}
 		}
 		return false;

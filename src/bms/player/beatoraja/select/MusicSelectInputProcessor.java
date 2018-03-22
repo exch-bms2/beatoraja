@@ -219,7 +219,7 @@ public class MusicSelectInputProcessor {
             // show detail option
             select.setPanelState(3);
             if (property.isPressed(keystate, keytime, BGA_DOWN, true)) {
-                select.execute(MusicSelectCommand.CHANGE_BGA_SHOW);
+                select.execute(MusicSelectCommand.NEXT_BGA_SHOW);
             }
             if (property.isPressed(keystate, keytime, DURATION_DOWN, true)) {
                 select.execute(MusicSelectCommand.DURATION_DOWN);

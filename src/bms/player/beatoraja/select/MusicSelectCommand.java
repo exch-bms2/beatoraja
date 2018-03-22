@@ -27,10 +27,29 @@ public enum MusicSelectCommand {
             selector.play(SOUND_CHANGEOPTION);
         }
     },
+    PREV_MODE {
+        @Override
+        public void execute(MusicSelector selector) {
+            int mode = 0;
+            PlayerConfig config = selector.main.getPlayerConfig();
+            for(;mode < MusicSelector.MODE.length && MusicSelector.MODE[mode] != config.getMode();mode++);
+            config.setMode(MusicSelector.MODE[(mode - 1 + MusicSelector.MODE.length) % MusicSelector.MODE.length]);
+            selector.getBarRender().updateBar();
+            selector.play(SOUND_CHANGEOPTION);
+        }
+    },
     NEXT_SORT {
         @Override
         public void execute(MusicSelector selector) {
             selector.setSort((selector.getSort() + 1) % BarSorter.values().length);
+            selector.getBarRender().updateBar();
+            selector.play(SOUND_CHANGEOPTION);
+        }
+    },
+    PREV_SORT {
+        @Override
+        public void execute(MusicSelector selector) {
+            selector.setSort((selector.getSort() - 1 + BarSorter.values().length) % BarSorter.values().length);
             selector.getBarRender().updateBar();
             selector.play(SOUND_CHANGEOPTION);
         }
@@ -40,6 +59,15 @@ public enum MusicSelectCommand {
         public void execute(MusicSelector selector) {
             PlayerConfig config = selector.main.getPlayerConfig();
             config.setLnmode((config.getLnmode() + 1) % 3);
+            selector.getBarRender().updateBar();
+            selector.play(SOUND_CHANGEOPTION);
+        }
+    },
+    PREV_LNMODE {
+        @Override
+        public void execute(MusicSelector selector) {
+            PlayerConfig config = selector.main.getPlayerConfig();
+            config.setLnmode((config.getLnmode() - 1 + 3) % 3);
             selector.getBarRender().updateBar();
             selector.play(SOUND_CHANGEOPTION);
         }
@@ -76,6 +104,23 @@ public enum MusicSelectCommand {
             }
         }
     },
+    PREV_REPLAY {
+        @Override
+        public void execute(MusicSelector selector) {
+            Bar current = selector.getBarRender().getSelected();
+            if (current != null && current instanceof SelectableBar) {
+                boolean[] replays = ((SelectableBar) current).getExistsReplayData();
+                for (int i = 1; i < replays.length; i++) {
+                    final int selectedreplay = selector.getSelectedReplay();
+                    if (replays[(selectedreplay + replays.length - i) % replays.length]) {
+                        selector.setSelectedReplay((selectedreplay + replays.length - i) % replays.length);
+                        selector.play(SOUND_CHANGEOPTION);
+                        break;
+                    }
+                }
+            }
+        }
+    },
     NEXT_RIVAL {
         @Override
         public void execute(MusicSelector selector) {
@@ -91,6 +136,20 @@ public enum MusicSelectCommand {
             }
             if(match) {
                 nowrival = null;
+            }
+            selector.setRival(nowrival);
+            selector.play(SOUND_CHANGEOPTION);
+        }
+    },
+    PREV_RIVAL {
+        @Override
+        public void execute(MusicSelector selector) {
+            PlayerInformation nowrival = null;
+            for(PlayerInformation rival : selector.getRivals()) {
+                if (rival == selector.getRival() && nowrival != null) {
+                    break;
+                }
+                nowrival = rival;
             }
             selector.setRival(nowrival);
             selector.play(SOUND_CHANGEOPTION);
@@ -116,11 +175,33 @@ public enum MusicSelectCommand {
             selector.play(SOUND_CHANGEOPTION);
         }
     },
+    PREV_TARGET {
+        @Override
+        public void execute(MusicSelector selector) {
+            PlayerInformation nowrival = null;
+            for(PlayerInformation rival : selector.getRivals()) {
+                if (rival == selector.getRival() && nowrival != null) {
+                    break;
+                }
+                nowrival = rival;
+            }
+            selector.setRival(nowrival);
+            selector.play(SOUND_CHANGEOPTION);
+        }
+    },
     NEXT_OPTION_1P {
         @Override
         public void execute(MusicSelector selector) {
             PlayerConfig config = selector.main.getPlayerConfig();
             config.setRandom((config.getRandom() + 1) % 10);
+            selector.play(SOUND_CHANGEOPTION);
+        }
+    },
+    PREV_OPTION_1P {
+        @Override
+        public void execute(MusicSelector selector) {
+            PlayerConfig config = selector.main.getPlayerConfig();
+            config.setRandom((config.getRandom() - 1 + 10) % 10);
             selector.play(SOUND_CHANGEOPTION);
         }
     },
@@ -132,11 +213,27 @@ public enum MusicSelectCommand {
             selector.play(SOUND_CHANGEOPTION);
         }
     },
+    PREV_OPTION_2P {
+        @Override
+        public void execute(MusicSelector selector) {
+            PlayerConfig config = selector.main.getPlayerConfig();
+            config.setRandom2((config.getRandom2() - 1 + 10) % 10);
+            selector.play(SOUND_CHANGEOPTION);
+        }
+    },
     NEXT_OPTION_DP {
         @Override
         public void execute(MusicSelector selector) {
             PlayerConfig config = selector.main.getPlayerConfig();
             config.setDoubleoption((config.getDoubleoption() + 1) % 4);
+            selector.play(SOUND_CHANGEOPTION);
+        }
+    },
+    PREV_OPTION_DP {
+        @Override
+        public void execute(MusicSelector selector) {
+            PlayerConfig config = selector.main.getPlayerConfig();
+            config.setDoubleoption((config.getDoubleoption() - 1 + 4) % 4);
             selector.play(SOUND_CHANGEOPTION);
         }
     },
@@ -148,11 +245,27 @@ public enum MusicSelectCommand {
             selector.play(SOUND_CHANGEOPTION);
         }
     },
+    PREV_GAUGE_1P {
+        @Override
+        public void execute(MusicSelector selector) {
+            PlayerConfig config = selector.main.getPlayerConfig();
+            config.setGauge((config.getGauge() - 1 + 6) % 6);
+            selector.play(SOUND_CHANGEOPTION);
+        }
+    },
     NEXT_HSFIX {
         @Override
         public void execute(MusicSelector selector) {
             PlayerConfig config = selector.main.getPlayerConfig();
             config.setFixhispeed((config.getFixhispeed() + 1) % 5);
+            selector.play(SOUND_CHANGEOPTION);
+        }
+    },
+    PREV_HSFIX {
+        @Override
+        public void execute(MusicSelector selector) {
+            PlayerConfig config = selector.main.getPlayerConfig();
+            config.setFixhispeed((config.getFixhispeed() - 1 + 5) % 5);
             selector.play(SOUND_CHANGEOPTION);
         }
     },
@@ -284,13 +397,20 @@ public enum MusicSelectCommand {
             }
 		}    	
     },
-    CHANGE_BGA_SHOW {
+    NEXT_BGA_SHOW {
 		@Override
 		public void execute(MusicSelector selector) {
             selector.main.getConfig().setBga((selector.main.getConfig().getBga() + 1) % 3);
             selector.play(SOUND_CHANGEOPTION);
 		}    	
-    }
+    },
+    PREV_BGA_SHOW {
+        @Override
+        public void execute(MusicSelector selector) {
+            selector.main.getConfig().setBga((selector.main.getConfig().getBga() - 1 + 3) % 3);
+            selector.play(SOUND_CHANGEOPTION);
+        }
+    },
     ;
 
     public abstract void execute(MusicSelector selector);

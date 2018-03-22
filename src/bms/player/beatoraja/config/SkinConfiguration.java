@@ -104,20 +104,32 @@ public class SkinConfiguration extends MainState {
 		return super.getTextValue(id);
 	}
 
-	public void executeClickEvent(int id) {
+	public void executeClickEvent(int id, int arg) {
 		switch (id) {
 		case BUTTON_CHANGE_SKIN:
-			setNextSkin();
+			if (arg >= 0) {
+				setNextSkin();
+			} else {
+				setPrevSkin();
+			}
 			break;
 		default:
 			if (SkinPropertyMapper.isSkinCustomizeButton(id)) {
 				int index = SkinPropertyMapper.getSkinCustomizeIndex(id) + customOptionOffset;
 				if (customOptions != null && index < customOptions.size()) {
 					CustomItemBase item = customOptions.get(index);
-					if (item.getvalue() < item.getMax()) {
-						item.setValue(item.getvalue() + 1);
+					if (arg >= 0) {
+						if (item.getvalue() < item.getMax()) {
+							item.setValue(item.getvalue() + 1);
+						} else {
+							item.setValue(item.getMin());
+						}
 					} else {
-						item.setValue(item.getMin());
+						if (item.getvalue() > item.getMin()) {
+							item.setValue(item.getvalue() - 1);
+						} else {
+							item.setValue(item.getMax());
+						}
 					}
 				}
 			}
@@ -162,7 +174,24 @@ public class SkinConfiguration extends MainState {
 			main.getPlayerConfig().getSkin()[type.getId()] = config;
 		}
 
-		int index = (selectedSkinIndex + 1) % availableSkins.size();
+		int index = selectedSkinIndex < 0 ? 0 : (selectedSkinIndex + 1) % availableSkins.size();
+		config.setPath(availableSkins.get(index).getPath().toString());
+		config.setProperties(new SkinConfig.Property());
+		selectSkin(index);
+	}
+
+	private void setPrevSkin() {
+		if (availableSkins.isEmpty()) {
+			Logger.getGlobal().warning("利用可能なスキンがありません");
+			return;
+		}
+
+		if (config == null) {
+			config = new SkinConfig();
+			main.getPlayerConfig().getSkin()[type.getId()] = config;
+		}
+
+		int index = selectedSkinIndex < 0 ? 0 : (selectedSkinIndex - 1 + availableSkins.size()) % availableSkins.size();
 		config.setPath(availableSkins.get(index).getPath().toString());
 		config.setProperties(new SkinConfig.Property());
 		selectSkin(index);
