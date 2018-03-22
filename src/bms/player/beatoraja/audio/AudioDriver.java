@@ -92,4 +92,6 @@ public interface AudioDriver extends Disposable {
 	 * @return ピッチ(0.5 - 2.0)
 	 */
 	public float getGlobalPitch();
+
+	public void disposeOld();
 }

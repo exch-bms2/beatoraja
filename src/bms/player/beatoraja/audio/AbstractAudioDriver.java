@@ -49,7 +49,7 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	private final AudioCache cache;
 
 	public AbstractAudioDriver(int maxgen) {
-		cache = new AudioCache(maxgen);
+		cache = new AudioCache(Math.max(maxgen, 1));
 	}
 	/**
 	 * パスで指定された効果音ファイルの音源データを取得する
@@ -403,6 +403,9 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 		return progress;
 	}
 
+	public void disposeOld() {
+		cache.disposeOld();
+	}
 	/**
 	 * リソースを開放する
 	 */

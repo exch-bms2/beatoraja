@@ -80,7 +80,7 @@ public class BGAProcessor {
 		blanktex = new Texture(blank);
 		blank.dispose();
 
-		mpgresource = new ResourcePool<String, MovieProcessor>(config.getSongResourceGen()) {
+		mpgresource = new ResourcePool<String, MovieProcessor>(Math.max(config.getSongResourceGen(), 1)) {
 			@Override
 			protected MovieProcessor load(String key) {
 				MovieProcessor mm = new FFmpegProcessor(config.getFrameskip());
@@ -93,7 +93,7 @@ public class BGAProcessor {
 				resource.dispose();
 			}
 		};
-		cache = new BGImageProcessor(256, config.getSongResourceGen());
+		cache = new BGImageProcessor(256, Math.max(config.getSongResourceGen(), 1));
 		image = new TextureRegion();
 	}
 
@@ -190,8 +190,7 @@ public class BGAProcessor {
 		}
 		timelines = tls.toArray(TimeLine.class);
 
-		cache.disposeOld();
-		Gdx.app.postRunnable(() -> mpgresource.disposeOld());
+		disposeOld();
 
 		Logger.getGlobal().info("BGAファイル読み込み完了。BGA数:" + id);
 		progress = 1;
@@ -201,6 +200,10 @@ public class BGAProcessor {
 		progress = 1;
 	}
 
+	public void disposeOld() {
+		cache.disposeOld();
+		Gdx.app.postRunnable(() -> mpgresource.disposeOld());
+	}
 	/**
 	 * BGAの初期データをあらかじめキャッシュする
 	 */
