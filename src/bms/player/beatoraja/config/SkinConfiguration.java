@@ -157,6 +157,11 @@ public class SkinConfiguration extends MainState {
 			return;
 		}
 
+		if (config == null) {
+			config = new SkinConfig();
+			main.getPlayerConfig().getSkin()[type.getId()] = config;
+		}
+
 		int index = (selectedSkinIndex + 1) % availableSkins.size();
 		config.setPath(availableSkins.get(index).getPath().toString());
 		config.setProperties(new SkinConfig.Property());
