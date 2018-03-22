@@ -23,7 +23,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Matrix4;
-import com.badlogic.gdx.utils.IntArray;
+import com.badlogic.gdx.utils.*;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -37,6 +37,8 @@ import org.lwjgl.opengl.GL11;
  * @author exch
  */
 public class Skin {
+	
+	// TODO ぽみゅキャラ系処理の分離
 
 	/**
 	 * 幅
@@ -58,12 +60,12 @@ public class Skin {
 	/**
 	 * 登録されているスキンオブジェクト
 	 */
-	private List<SkinObject> objects = new ArrayList<SkinObject>();
+	private Array<SkinObject> objects = new Array<SkinObject>();
 	private SkinObject[] objectarray = new SkinObject[0];
 	/**
 	 * 除外されているスキンオブジェクト
 	 */
-	private List<SkinObject> removes = new ArrayList<SkinObject>();
+	private Array<SkinObject> removes = new Array<SkinObject>();
 	/**
 	 * 入力受付開始時間(ms)
 	 */
@@ -133,11 +135,11 @@ public class Skin {
 	}
 
 	public SkinObject[] getAllSkinObjects() {
-		return objects.toArray(new SkinObject[objects.size()]);
+		return objects.toArray(SkinObject.class);
 	}
 
 	public void removeSkinObject(SkinObject obj) {
-		objects.remove(obj);
+		objects.removeValue(obj, true);
 	}
 	
 	public void prepare(MainState state) {
@@ -193,9 +195,9 @@ public class Skin {
 			}
 			
  		}
-		Logger.getGlobal().info("描画されないことが確定しているSkinObject削除 : " + removes.size() + " / " + objects.size());
-		objects.removeAll(removes);
-		objectarray = objects.toArray(new SkinObject[objects.size()]);
+		Logger.getGlobal().info("描画されないことが確定しているSkinObject削除 : " + removes.size + " / " + objects.size);
+		objects.removeAll(removes, true);
+		objectarray = objects.toArray(SkinObject.class);
 		option.clear();
 	}
 	
@@ -204,6 +206,14 @@ public class Skin {
 	public void drawAllObjects(SpriteBatch sprite, MainState state) {
 		final long time = state.main.getNowTime();
 		if(renderer == null) {
+			SkinOffset offsetAll = getOffsetAll(state);
+			Matrix4 transform = new Matrix4();
+			if(offsetAll != null) {
+				transform.set(width * offsetAll.x /100, height * offsetAll.y / 100, 0, 0, 0, 0, 0, (offsetAll.w + 100) / 100, (offsetAll.h + 100) / 100, 1);
+			} else {
+				transform.set(0, 0, 0, 0, 0, 0, 0, 1, 1, 1);
+			}
+			sprite.setTransformMatrix(transform);
 			renderer = new SkinObjectRenderer(sprite);
 		}
 		for (SkinObject obj : objectarray) {
@@ -211,11 +221,6 @@ public class Skin {
 				obj.draw(renderer, time, state);
 			}
 		}
-		SkinOffset offsetAll = getOffsetAll(state);
-		Matrix4 transform = new Matrix4();
-		if(offsetAll != null) transform.set(width * offsetAll.x /100, height * offsetAll.y / 100, 0, 0, 0, 0, 0, (offsetAll.w + 100) / 100, (offsetAll.h + 100) / 100, 1);
-		else transform.set(0, 0, 0, 0, 0, 0, 0, 1, 1, 1);
-		sprite.setTransformMatrix(transform);
 	}
 
 	private final boolean isDraw(int[] opt, MainState state) {
