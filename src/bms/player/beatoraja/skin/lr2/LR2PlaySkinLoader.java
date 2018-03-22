@@ -193,6 +193,18 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 				addNote(str, lnbodya, true);
 			}
 		});
+		addCommandWord(new CommandWord("SRC_LN_BODY_INACTIVE") {
+			@Override
+			public void execute(String[] str) {
+				addNote(str, lnbody, true);
+			}
+		});
+		addCommandWord(new CommandWord("SRC_LN_BODY_ACTIVE") {
+			@Override
+			public void execute(String[] str) {
+				addNote(str, lnbodya, true);
+			}
+		});
 		addCommandWord(new CommandWord("SRC_HCN_END") {
 			@Override
 			public void execute(String[] str) {
@@ -209,6 +221,18 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 			@Override
 			public void execute(String[] str) {
 				addNote(str, hcnbody, false);
+				addNote(str, hcnbodya, true);
+			}
+		});
+		addCommandWord(new CommandWord("SRC_HCN_BODY_INACTIVE") {
+			@Override
+			public void execute(String[] str) {
+				addNote(str, hcnbody, true);
+			}
+		});
+		addCommandWord(new CommandWord("SRC_HCN_BODY_ACTIVE") {
+			@Override
+			public void execute(String[] str) {
 				addNote(str, hcnbodya, true);
 			}
 		});

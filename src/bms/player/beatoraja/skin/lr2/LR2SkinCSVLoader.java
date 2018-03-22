@@ -228,6 +228,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 		});
 
 		addCommandWord(new CommandWord("SRC_NUMBER") {
+			//#SRC_NUMBER,(NULL),gr,x,y,w,h,div_x,div_y,cycle,timer,num,align,keta,zeropadding
 			@Override
 			public void execute(String[] str) {
 				num = null;
@@ -258,7 +259,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 								}
 							}
 
-							num = new SkinNumber(pn, mn, values[10], values[9], values[13] + 1, 0, values[11]);
+							num = new SkinNumber(pn, mn, values[10], values[9], values[13] + 1, str[14].length() > 0 ? values[14] : 2, values[11]);
 							num.setAlign(values[12]);
 						} else {
 							int d = images.length % 10 == 0 ? 10 : 11;

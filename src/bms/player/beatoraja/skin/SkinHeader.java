@@ -122,6 +122,14 @@ public class SkinHeader {
 			this.contents = contents;
 			this.def = def;
 		}
+
+		public int getDefaultOption() {
+			for (int i = 0; i < option.length; i++) {
+				if (contents[i].equals(def))
+					return option[i];
+			}
+			return option[0];
+		}
 	}
 
 	public static class CustomFile {
