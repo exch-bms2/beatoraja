@@ -75,7 +75,7 @@ public abstract class MainState {
 		}
 	}
 
-	public void executeClickEvent(int id) {
+	public void executeClickEvent(int id, int arg) {
 
 	}
 

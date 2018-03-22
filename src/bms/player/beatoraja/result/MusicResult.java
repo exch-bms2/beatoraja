@@ -695,7 +695,7 @@ public class MusicResult extends MainState {
 		return super.getImageIndex(id);
 	}
 
-	public void executeClickEvent(int id) {
+	public void executeClickEvent(int id, int arg) {
 		switch (id) {
 		case BUTTON_REPLAY:
 			saveReplayData(0);

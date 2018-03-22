@@ -11,6 +11,7 @@ import java.util.*;
 import bms.player.beatoraja.Config;
 import bms.player.beatoraja.Resolution;
 import bms.player.beatoraja.SkinConfig;
+import bms.player.beatoraja.config.SkinConfigurationSkin;
 import bms.player.beatoraja.play.*;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -193,6 +194,9 @@ public class JSONSkinLoader extends SkinLoader{
 			if (type == SkinType.COURSE_RESULT) {
 				skin = new CourseResultSkin(src, dstr);
 			}
+			if (type == SkinType.SKIN_SELECT) {
+				skin = new SkinConfigurationSkin(src, dstr);
+			}
 
 			Map<Integer, Boolean> op = new HashMap<>();
 			for (Property pr : sk.property) {
@@ -258,6 +262,7 @@ public class JSONSkinLoader extends SkinLoader{
 							}
 							if (img.act > 0) {
 								obj.setClickevent(img.act);
+								obj.setClickeventType(img.click);
 							}
 
 							break;
@@ -289,6 +294,7 @@ public class JSONSkinLoader extends SkinLoader{
 							obj = si;
 							if (imgs.act > 0) {
 								obj.setClickevent(imgs.act);
+								obj.setClickeventType(imgs.click);
 							}
 							break;
 						}
@@ -904,6 +910,33 @@ public class JSONSkinLoader extends SkinLoader{
 					skin.add(obj);
 				}
 			}
+
+			if (sk.skinSelect != null && skin instanceof  SkinConfigurationSkin) {
+				SkinConfigurationSkin skinSelect = (SkinConfigurationSkin) skin;
+				skinSelect.setCustomOffsetStyle(sk.skinSelect.customOffsetStyle);
+				skinSelect.setDefaultSkinType(sk.skinSelect.defaultCategory);
+				skinSelect.setSampleBMS(sk.skinSelect.customBMS);
+				if (sk.skinSelect.customPropertyCount > 0) {
+					skinSelect.setCustomPropertyCount(sk.skinSelect.customPropertyCount);
+				} else {
+					int count = 0;
+					for (Image image : sk.image) {
+						if (SkinPropertyMapper.isSkinCustomizeButton(image.act)) {
+							int index = SkinPropertyMapper.getSkinCustomizeIndex(image.act);
+							if (count <= index)
+								count = index + 1;
+						}
+					}
+					for (ImageSet imageSet : sk.imageset) {
+						if (SkinPropertyMapper.isSkinCustomizeButton(imageSet.act)) {
+							int index = SkinPropertyMapper.getSkinCustomizeIndex(imageSet.act);
+							if (count <= index)
+								count = index + 1;
+						}
+					}
+					skinSelect.setCustomPropertyCount(count);
+				}
+			}
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -1066,6 +1099,7 @@ public class JSONSkinLoader extends SkinLoader{
 		public Judge[] judge = new Judge[0];
 		public SongList songlist;
 		public PMchara[] pmchara = new PMchara[0];
+		public SkinConfigurationProperty skinSelect;
 
 		public Destination[] destination;
 	}
@@ -1122,6 +1156,7 @@ public class JSONSkinLoader extends SkinLoader{
 		public int len;
 		public int ref;
 		public int act;
+		public int click = 0;
 	}
 
 	public static class ImageSet {
@@ -1129,6 +1164,7 @@ public class JSONSkinLoader extends SkinLoader{
 		public int ref;
 		public String[] images = new String[0];
 		public int act;
+		public int click = 0;
 	}
 
 	public static class Value {
@@ -1322,6 +1358,13 @@ public class JSONSkinLoader extends SkinLoader{
 		public int side = 1;
 	}
 
+	public static class SkinConfigurationProperty {
+		public String[] customBMS;
+		public int defaultCategory = 0;
+		public int customPropertyCount = -1;
+		public int customOffsetStyle = 0;
+	}
+
 	private File getSrcIdPath(String srcid, Path p) {
 		if(srcid == null) {
 			return null;
@@ -1358,6 +1401,7 @@ public class JSONSkinLoader extends SkinLoader{
 				SongList.class,
 				Destination.class,
 				Animation.class,
+				SkinConfigurationProperty.class,
 		};
 		for (Class c : classes) {
 			json.setSerializer(c, new ObjectSerializer<>(enabledOptions, path));

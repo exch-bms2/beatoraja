@@ -510,6 +510,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 					button.setReferenceID(values[11]);
 					if (values[12] == 1) {
 						button.setClickevent(values[11]);
+						button.setClickeventType(values[14] > 0 ? 0 : values[14] < 0 ? 1 : 2);
 					}
 					skin.add(button);
 					// System.out.println("Object Added - " +
@@ -790,6 +791,9 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 		case COURSE_RESULT:
 			return new LR2CourseResultSkinLoader(src, c);
 		case KEY_CONFIG:
+			return null;
+		case SKIN_SELECT:
+			return null;
 		}
 		return null;
 	}

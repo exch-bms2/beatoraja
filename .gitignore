@@ -1,7 +1,7 @@
 /build/*
 /player/*
 /skin/*
-!/skin/default/*
+!/skin/default/
 /practice/*
 /screenshot/*
 /table/*
@@ -15,3 +15,4 @@ beatoraja_log.xml
 /bin/
 b.bat
 /*.dll
+*.cim

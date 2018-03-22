@@ -56,6 +56,14 @@ public abstract class SkinObject implements Disposable {
 	 */
 	private int clickevent = -1;
 	/**
+	 * オブジェクトクリック判定・イベント引数の種類
+	 * 0: 通常(plus only)
+	 * 1: 通常(minus only)
+	 * 2: 左右分割(左=minus,右=plus)
+	 * 3: 上下分割(下=minus,上=plus)
+	 */
+	private int clickeventType = 0;
+	/**
 	 * 描画条件となるオプション定義
 	 */
 	private int[] dstop = new int[0];
@@ -548,9 +556,31 @@ public abstract class SkinObject implements Disposable {
 			// System.out.println(obj.getClickevent() + " : " + r.x +
 			// "," + r.y + "," + r.width + "," + r.height + " - " + x +
 			// "," + y);
-			if (r != null && r.x <= x && r.x + r.width >= x && r.y <= y && r.y + r.height >= y) {
-				state.executeClickEvent(clickevent);
-				return true;
+			switch (clickeventType) {
+			case 0:
+				if (r != null && r.x <= x && r.x + r.width >= x && r.y <= y && r.y + r.height >= y) {
+					state.executeClickEvent(clickevent, 1);
+					return true;
+				}
+				break;
+			case 1:
+				if (r != null && r.x <= x && r.x + r.width >= x && r.y <= y && r.y + r.height >= y) {
+					state.executeClickEvent(clickevent, -1);
+					return true;
+				}
+				break;
+			case 2:
+				if (r != null && r.x <= x && r.x + r.width >= x && r.y <= y && r.y + r.height >= y) {
+					state.executeClickEvent(clickevent, x >= r.x + r.width/2 ? 1 : -1);
+					return true;
+				}
+				break;
+			case 3:
+				if (r != null && r.x <= x && r.x + r.width >= x && r.y <= y && r.y + r.height >= y) {
+					state.executeClickEvent(clickevent, y >= r.y + r.height/2 ? 1 : -1);
+					return true;
+				}
+				break;
 			}
 		}
 		return false;
@@ -562,6 +592,14 @@ public abstract class SkinObject implements Disposable {
 
 	public void setClickevent(int clickevent) {
 		this.clickevent = clickevent;
+	}
+
+	public int getClickeventType() {
+		return clickeventType;
+	}
+
+	public void setClickeventType(int clickeventType) {
+		this.clickeventType = clickeventType;
 	}
 
 	public boolean isRelative() {

@@ -341,6 +341,9 @@ public class MusicSelector extends MainState {
 		if (input.getNumberState()[6]) {
 			preview.stop();
 			main.changeState(MainController.STATE_CONFIG);
+		} else if (input.getFunctionstate()[11]) {
+			preview.stop();
+			main.changeState(MainController.STATE_SKIN_SELECT);
 		}
 
 		musicinput.input();
@@ -846,7 +849,7 @@ public class MusicSelector extends MainState {
 		return super.getImageIndex(id);
 	}
 
-	public void executeClickEvent(int id) {
+	public void executeClickEvent(int id, int arg) {
 		switch (id) {
 		case BUTTON_PLAY:
 			play = PlayMode.PLAY;
@@ -873,31 +876,31 @@ public class MusicSelector extends MainState {
 			execute(MusicSelectCommand.OPEN_DOCUMENT);
 			break;
 		case BUTTON_MODE:
-			execute(MusicSelectCommand.NEXT_MODE);
+			execute(arg >= 0 ? MusicSelectCommand.NEXT_MODE : MusicSelectCommand.PREV_MODE);
 			break;
 		case BUTTON_SORT:
-			execute(MusicSelectCommand.NEXT_SORT);
+			execute(arg >= 0 ? MusicSelectCommand.NEXT_SORT : MusicSelectCommand.PREV_SORT);
 			break;
 		case BUTTON_LNMODE:
-			execute(MusicSelectCommand.NEXT_LNMODE);
+			execute(arg >= 0 ? MusicSelectCommand.NEXT_LNMODE : MusicSelectCommand.PREV_LNMODE);
 			break;
 		case BUTTON_RANDOM_1P:
-			execute(MusicSelectCommand.NEXT_OPTION_1P);
+			execute(arg >= 0 ? MusicSelectCommand.NEXT_OPTION_1P : MusicSelectCommand.PREV_OPTION_1P);
 			break;
 		case BUTTON_RANDOM_2P:
-			execute(MusicSelectCommand.NEXT_OPTION_2P);
+			execute(arg >= 0 ? MusicSelectCommand.NEXT_OPTION_2P : MusicSelectCommand.PREV_OPTION_2P);
 			break;
 		case BUTTON_DPOPTION:
-			execute(MusicSelectCommand.NEXT_OPTION_DP);
+			execute(arg >= 0 ? MusicSelectCommand.NEXT_OPTION_DP : MusicSelectCommand.PREV_OPTION_DP);
 			break;
 		case BUTTON_GAUGE_1P:
-			execute(MusicSelectCommand.NEXT_GAUGE_1P);
+			execute(arg >= 0 ? MusicSelectCommand.NEXT_GAUGE_1P : MusicSelectCommand.PREV_GAUGE_1P);
 			break;
 		case BUTTON_HSFIX:
-			execute(MusicSelectCommand.NEXT_HSFIX);
+			execute(arg >= 0 ? MusicSelectCommand.NEXT_HSFIX : MusicSelectCommand.PREV_HSFIX);
 			break;
 		case BUTTON_BGA:
-			execute(MusicSelectCommand.CHANGE_BGA_SHOW);
+			execute(arg >= 0 ? MusicSelectCommand.NEXT_BGA_SHOW : MusicSelectCommand.PREV_BGA_SHOW);
 			break;
 		}
 	}
