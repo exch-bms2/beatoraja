@@ -256,17 +256,31 @@ public enum MusicSelectCommand {
     NEXT_HSFIX {
         @Override
         public void execute(MusicSelector selector) {
-            PlayerConfig config = selector.main.getPlayerConfig();
-            config.setFixhispeed((config.getFixhispeed() + 1) % 5);
-            selector.play(SOUND_CHANGEOPTION);
+            Bar current = selector.getBarRender().getSelected();
+            PlayConfig pc = null;
+            if (current instanceof SongBar && ((SongBar)current).existsSong()) {
+                SongBar song = (SongBar) current;
+                pc = selector.main.getPlayerConfig().getPlayConfig(song.getSongData().getMode()).getPlayconfig();
+            }
+            if (pc != null) {
+                pc.setFixhispeed((pc.getFixhispeed() + 1) % 5);
+                selector.play(SOUND_CHANGEOPTION);
+            }
         }
     },
     PREV_HSFIX {
         @Override
         public void execute(MusicSelector selector) {
-            PlayerConfig config = selector.main.getPlayerConfig();
-            config.setFixhispeed((config.getFixhispeed() - 1 + 5) % 5);
-            selector.play(SOUND_CHANGEOPTION);
+            Bar current = selector.getBarRender().getSelected();
+            PlayConfig pc = null;
+            if (current instanceof SongBar && ((SongBar)current).existsSong()) {
+                SongBar song = (SongBar) current;
+                pc = selector.main.getPlayerConfig().getPlayConfig(song.getSongData().getMode()).getPlayconfig();
+            }
+            if (pc != null) {
+                pc.setFixhispeed((pc.getFixhispeed() + 4) % 5);
+                selector.play(SOUND_CHANGEOPTION);
+            }
         }
     },
     OPEN_WITH_EXPLORER {

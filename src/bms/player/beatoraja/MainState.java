@@ -592,7 +592,12 @@ public abstract class MainState {
 		case BUTTON_DPOPTION:
 			return main.getPlayerResource().getPlayerConfig().getDoubleoption();
 		case BUTTON_HSFIX:
-			return main.getPlayerResource().getPlayerConfig().getFixhispeed();
+			if (main.getPlayerResource().getSongdata() != null) {
+				SongData song = main.getPlayerResource().getSongdata();
+				PlayConfig pc = main.getPlayerResource().getPlayerConfig().getPlayConfig(song.getMode()).getPlayconfig();
+				return pc.getFixhispeed();
+			}
+			return Integer.MIN_VALUE;
 		case BUTTON_BGA:
 			return main.getPlayerResource().getConfig().getBga();
 		case BUTTON_ASSIST_EXJUDGE:

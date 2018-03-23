@@ -132,8 +132,7 @@ public class MusicSelectInputProcessor {
                 select.execute(MusicSelectCommand.NEXT_HSFIX);
             }
             if (property.isPressed(keystate, keytime, HSFIX_UP, true)) {
-                config.setFixhispeed((config.getFixhispeed() + 4) % 5);
-                select.play(SOUND_CHANGEOPTION);
+                select.execute(MusicSelectCommand.PREV_HSFIX);
             }
 
             // song bar scroll on mouse wheel

@@ -2,7 +2,7 @@ package bms.player.beatoraja;
 
 import bms.player.beatoraja.input.KeyInputLog;
 import bms.player.beatoraja.pattern.PatternModifyLog;
-import static bms.player.beatoraja.PlayerConfig.*;
+import static bms.player.beatoraja.PlayConfig.*;
 
 /**
  * リプレイデータ。キー入力ログ、譜面変更情報、ゲージ種類を含む

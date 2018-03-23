@@ -43,17 +43,6 @@ public class PlayerConfig {
 	 */
 	private int doubleoption;
 
-	/**
-	 * ハイスピード固定。固定する場合はデュレーションが有効となり、固定しない場合はハイスピードが有効になる
-	 */
-	private int fixhispeed = FIX_HISPEED_MAINBPM;
-
-	public static final int FIX_HISPEED_OFF = 0;
-	public static final int FIX_HISPEED_STARTBPM = 1;
-	public static final int FIX_HISPEED_MAXBPM = 2;
-	public static final int FIX_HISPEED_MAINBPM = 3;
-	public static final int FIX_HISPEED_MINBPM = 4;
-
 	private int target;
 	/**
 	 * 判定タイミング
@@ -183,17 +172,6 @@ public class PlayerConfig {
 
 	public void setRandom(int random) {
 		this.random = random;
-	}
-
-	public int getFixhispeed() {
-		if(fixhispeed < 0 || fixhispeed > FIX_HISPEED_MINBPM) {
-			fixhispeed = FIX_HISPEED_OFF;
-		}
-		return fixhispeed;
-	}
-
-	public void setFixhispeed(int fixhispeed) {
-		this.fixhispeed = fixhispeed;
 	}
 
 	public int getJudgetiming() {

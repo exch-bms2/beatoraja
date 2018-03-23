@@ -28,28 +28,6 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
  */
 public class LaneRenderer {
 
-	/**
-	 * レーンカバーの量
-	 */
-	private float lanecover = 0.2f;
-	/**
-	 * レーンカバーを表示するかどうか
-	 */
-	private boolean enableLanecover = true;
-	/**
-	 * リフトの量
-	 */
-	private float lift = 0.05f;
-	/**
-	 * リフトを使用するかどうか
-	 */
-	private boolean enableLift = true;
-
-	private float hispeed = 1.0f;
-
-	private int gvalue;
-
-	private int fixhispeed;
 	private float basehispeed;
 
 	private float hispeedmargin = 0.25f;
@@ -117,21 +95,15 @@ public class LaneRenderer {
 		this.skin = (PlaySkin) main.getSkin();
 		this.conf = main.main.getPlayerResource().getConfig();
 		this.config = main.main.getPlayerResource().getPlayerConfig();
-		this.playconfig = main.getPlayConfig(this.config).getPlayconfig();
+		this.playconfig = main.getPlayConfig(this.config).getPlayconfig().clone();
 
-		this.enableLanecover = playconfig.isEnablelanecover();
-		this.enableLift = playconfig.isEnablelift();
-		this.lift = playconfig.getLift();
-		this.fixhispeed = config.getFixhispeed();
-		this.gvalue = playconfig.getDuration();
-		hispeed = playconfig.getHispeed();
 		init(model);
 
 		for (CourseData.CourseDataConstraint i : main.main.getPlayerResource().getConstraint()) {
 			if (i == NO_SPEED) {
-				hispeed = 1.0f;
-				lanecover = 0;
-				lift = 0;
+				playconfig.setHispeed(1.0f);
+				playconfig.setLanecover(0);
+				playconfig.setLift(0);
 			}
 		}
 
@@ -178,45 +150,45 @@ public class LaneRenderer {
 				mainbpm = bpm;
 			}
 		}
-		switch (config.getFixhispeed()) {
-		case PlayerConfig.FIX_HISPEED_OFF:
+		switch (playconfig.getFixhispeed()) {
+		case PlayConfig.FIX_HISPEED_OFF:
 			break;
-		case PlayerConfig.FIX_HISPEED_STARTBPM:
+		case PlayConfig.FIX_HISPEED_STARTBPM:
 			basebpm = model.getBpm();
 			break;
-		case PlayerConfig.FIX_HISPEED_MINBPM:
+		case PlayConfig.FIX_HISPEED_MINBPM:
 			basebpm = minbpm;
 			break;
-		case PlayerConfig.FIX_HISPEED_MAXBPM:
+		case PlayConfig.FIX_HISPEED_MAXBPM:
 			basebpm = maxbpm;
 			break;
-		case PlayerConfig.FIX_HISPEED_MAINBPM:
+		case PlayConfig.FIX_HISPEED_MAINBPM:
 			basebpm = mainbpm;
 			break;
 		}
 
 		this.setLanecover(playconfig.getLanecover());
-		if (this.fixhispeed != PlayerConfig.FIX_HISPEED_OFF) {
-			basehispeed = hispeed;
+		if (playconfig.getFixhispeed() != PlayConfig.FIX_HISPEED_OFF) {
+			basehispeed = playconfig.getHispeed();
 		}
 		this.hispeedmargin = playconfig.getHispeedMargin();
 	}
 
 	public int getFixHispeed() {
-		return fixhispeed;
+		return playconfig.getFixhispeed();
 	}
 
 	public float getHispeed() {
-		return hispeed;
+		return playconfig.getHispeed();
 	}
 
 	public int getGreenValue() {
-		return gvalue;
+		return playconfig.getDuration();
 	}
 
 	public void setGreenValue(int gvalue) {
-		this.gvalue = gvalue < 1 ? 1 : gvalue;
-		setLanecover(lanecover);
+		playconfig.setDuration(gvalue < 1 ? 1 : gvalue);
+		setLanecover(playconfig.getLanecover());
 	}
 
 	public int getCurrentDuration() {
@@ -264,43 +236,46 @@ public class LaneRenderer {
 	}
 
 	public boolean isEnableLift() {
-		return enableLift;
+		return playconfig.isEnablelift();
 	}
 
 	public float getLiftRegion() {
-		return lift;
+		return playconfig.getLift();
 	}
 
 	public float getLanecover() {
-		return lanecover;
+		return playconfig.getLanecover();
 	}
 	
 	public void setLanecover(float lanecover) {
-		lanecover = (lanecover < 0 ? 0 : (lanecover > 1 ? 1 : lanecover));
-		this.lanecover = lanecover;
-		if (this.fixhispeed != PlayerConfig.FIX_HISPEED_OFF) {
-			hispeed = (float) ((2400f / (basebpm / 100) / gvalue) * (1 - (enableLanecover ? lanecover : 0)));
+		playconfig.setLanecover(lanecover < 0 ? 0 : (lanecover > 1 ? 1 : lanecover));
+		if (playconfig.getFixhispeed() != PlayConfig.FIX_HISPEED_OFF) {
+			playconfig.setHispeed((float) ((2400f / (basebpm / 100) / playconfig.getDuration()) * (1 - (playconfig.isEnablelanecover() ? playconfig.getLanecover() : 0))));
 		}
 	}
 
 	public void setEnableLanecover(boolean b) {
-		enableLanecover = b;
+		playconfig.setEnablelanecover(b);
 	}
 
 	public boolean isEnableLanecover() {
-		return enableLanecover;
+		return playconfig.isEnablelanecover();
 	}
 
 	public void changeHispeed(boolean b) {
 		float f = 0;
-		if (this.fixhispeed != PlayerConfig.FIX_HISPEED_OFF) {
+		if (playconfig.getFixhispeed() != PlayConfig.FIX_HISPEED_OFF) {
 			f = basehispeed * hispeedmargin * (b ? 1 : -1);
 		} else {
 			f = hispeedmargin * (b ? 1 : -1);
 		}
-		if (hispeed + f > 0 && hispeed + f < 20) {
-			hispeed += f;
+		if (playconfig.getHispeed() + f > 0 && playconfig.getHispeed() + f < 20) {
+			playconfig.setHispeed(playconfig.getHispeed() + f);
 		}
+	}
+	
+	public PlayConfig getPlayConfig() {
+		return playconfig;
 	}
 
 	public void drawLane(SkinObjectRenderer sprite, long time, SkinLane[] lanes, int dstNote2) {
@@ -337,7 +312,7 @@ public class LaneRenderer {
 		final long microtime = time * 1000;
 		final boolean showTimeline = (main.getState() == BMSPlayer.STATE_PRACTICE);
 
-		final float hispeed = main.getState() != BMSPlayer.STATE_PRACTICE ? this.hispeed : 1.0f;
+		final float hispeed = main.getState() != BMSPlayer.STATE_PRACTICE ? playconfig.getHispeed() : 1.0f;
 		final Rectangle[] playerr = skin.getLaneGroupRegion();
 		double bpm = model.getBpm();
 		double nbpm = bpm;
@@ -348,11 +323,12 @@ public class LaneRenderer {
 		final double region = (240000 / nbpm / hispeed);
 		// double sect = (bpm / 60) * 4 * 1000;
 		final double hu = laneregion[0].y + laneregion[0].height;
-		final double hl = enableLift ? laneregion[0].y + laneregion[0].height * lift : laneregion[0].y;
+		final double hl = playconfig.isEnablelift() ? laneregion[0].y + laneregion[0].height * playconfig.getLift() : laneregion[0].y;
 		final double rxhs = (hu - hl) * hispeed;
 		double y = hl;
 
-		currentduration = (int) Math.round(region * (1 - (enableLanecover ? lanecover : 0)));
+		final float lanecover = playconfig.getLanecover();
+		currentduration = (int) Math.round(region * (1 - (playconfig.isEnablelanecover() ? lanecover : 0)));
 
 		currentdurationLanecoverOn = (int) Math.round( region * (1 - lanecover) );
 		currentdurationLanecoverOff = (int) Math.round( region );

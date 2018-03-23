@@ -5,9 +5,7 @@ package bms.player.beatoraja;
  * 
  * @author exch
  */
-public class PlayConfig {
-
-	// TODO 複数デバイスの混合キー設定(ex.鍵盤キーボード、皿を専コン等)
+public class PlayConfig implements Cloneable {
 
 	/**
 	 * ハイスピード。1.0で等速
@@ -17,6 +15,16 @@ public class PlayConfig {
 	 * デュレーション(ノーツ表示時間)
 	 */
 	private int duration = 500;
+	/**
+	 * ハイスピード固定。固定する場合はデュレーションが有効となり、固定しない場合はハイスピードが有効になる
+	 */
+	private int fixhispeed = FIX_HISPEED_MAINBPM;
+	
+	public static final int FIX_HISPEED_OFF = 0;
+	public static final int FIX_HISPEED_STARTBPM = 1;
+	public static final int FIX_HISPEED_MAXBPM = 2;
+	public static final int FIX_HISPEED_MAINBPM = 3;
+	public static final int FIX_HISPEED_MINBPM = 4;
 
 	/**
 	 * ハイスピード変化間隔
@@ -75,6 +83,17 @@ public class PlayConfig {
 		this.hispeedmargin = hispeedmargin;
 	}
 
+	public int getFixhispeed() {
+		if(fixhispeed < 0 || fixhispeed > FIX_HISPEED_MINBPM) {
+			fixhispeed = FIX_HISPEED_OFF;
+		}
+		return fixhispeed;
+	}
+
+	public void setFixhispeed(int fixhispeed) {
+		this.fixhispeed = fixhispeed;
+	}
+
 	public float getLanecover() {
 		if (lanecover < 0 || lanecover > 1) {
 			lanecover = 0;
@@ -111,5 +130,14 @@ public class PlayConfig {
 
 	public void setEnablelift(boolean enablelift) {
 		this.enablelift = enablelift;
+	}
+	
+	public PlayConfig clone() {
+		try {
+			return (PlayConfig) super.clone();
+		} catch (CloneNotSupportedException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 }

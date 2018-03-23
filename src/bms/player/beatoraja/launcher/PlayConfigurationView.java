@@ -508,7 +508,6 @@ public class PlayConfigurationView implements Initializable {
 		gaugeop.getSelectionModel().select(player.getGauge());
 		lntype.getSelectionModel().select(player.getLnmode());
 
-		fixhispeed.setValue(player.getFixhispeed());
 		judgetiming.getValueFactory().setValue(player.getJudgetiming());
 
 		constant.setSelected(player.isConstant());
@@ -616,7 +615,6 @@ public class PlayConfigurationView implements Initializable {
 		player.setGuideSE(guidese.isSelected());
 		player.setGauge(gaugeop.getValue());
 		player.setLnmode(lntype.getValue());
-		player.setFixhispeed(fixhispeed.getValue());
 		player.setJudgetiming(getValue(judgetiming));
 
 		player.setConstant(constant.isSelected());
@@ -769,6 +767,7 @@ public class PlayConfigurationView implements Initializable {
 			conf.setHispeed(getValue(hispeed).floatValue());
 			conf.setDuration(getValue(gvalue));
 			conf.setHispeedMargin(getValue(hispeedmargin).floatValue());
+			conf.setFixhispeed(fixhispeed.getValue());
 			conf.setEnablelanecover(enableLanecover.isSelected());
 			conf.setLanecover(getValue(lanecover) / 1000f);
 			conf.setEnablelift(enableLift.isSelected());
@@ -779,6 +778,7 @@ public class PlayConfigurationView implements Initializable {
 		hispeed.getValueFactory().setValue((double) conf.getHispeed());
 		gvalue.getValueFactory().setValue(conf.getDuration());
 		hispeedmargin.getValueFactory().setValue((double) conf.getHispeedMargin());
+		fixhispeed.setValue(conf.getFixhispeed());
 		enableLanecover.setSelected(conf.isEnablelanecover());
 		lanecover.getValueFactory().setValue((int) (conf.getLanecover() * 1000));
 		enableLift.setSelected(conf.isEnablelift());
