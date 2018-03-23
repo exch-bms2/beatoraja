@@ -296,13 +296,14 @@ public class BMSPlayer extends MainState {
 		if(HSReplay != null) {
 			//保存されたHSオプションログからHSオプション再現
 			config.setFixhispeed(HSReplay.fixhispeed);
-			getPlayConfig(config).setHispeed(HSReplay.hispeed);
-			getPlayConfig(config).setDuration(HSReplay.duration);
-			getPlayConfig(config).setHispeedMargin(HSReplay.hispeedmargin);
-			getPlayConfig(config).setLanecover(HSReplay.lanecover);
-			getPlayConfig(config).setEnablelanecover(HSReplay.enablelanecover);
-			getPlayConfig(config).setLift(HSReplay.lift);
-			getPlayConfig(config).setEnablelift(HSReplay.enablelift);
+			PlayConfig pc = getPlayConfig(config).getPlayconfig();
+			pc.setHispeed(HSReplay.hispeed);
+			pc.setDuration(HSReplay.duration);
+			pc.setHispeedMargin(HSReplay.hispeedmargin);
+			pc.setLanecover(HSReplay.lanecover);
+			pc.setEnablelanecover(HSReplay.enablelanecover);
+			pc.setLift(HSReplay.lift);
+			pc.setEnablelift(HSReplay.enablelift);
 		}
 
 		Logger.getGlobal().info("ゲージ設定");
@@ -369,7 +370,7 @@ public class BMSPlayer extends MainState {
 		return null;
 	}
 
-	public PlayConfig getPlayConfig(PlayerConfig config) {
+	public PlayModeConfig getPlayConfig(PlayerConfig config) {
 		switch (model.getMode()) {
 		case BEAT_7K:
 		case BEAT_5K:
@@ -423,7 +424,7 @@ public class BMSPlayer extends MainState {
 
 		final BMSPlayerInputProcessor input = main.getInputProcessor();
 		input.setMinimumInputDutration(conf.getInputduration());
-		PlayConfig pc = getPlayConfig(config);
+		PlayModeConfig pc = getPlayConfig(config);
 		if(autoplay == PlayMode.PLAY || autoplay == PlayMode.PRACTICE) {
 			input.setPlayConfig(pc);
 		}
@@ -881,7 +882,7 @@ public class BMSPlayer extends MainState {
 				return;
 			}
 		}
-		PlayConfig pc = getPlayConfig(resource.getPlayerConfig());
+		PlayConfig pc = getPlayConfig(resource.getPlayerConfig()).getPlayconfig();
 		if (lanerender.getFixHispeed() != PlayerConfig.FIX_HISPEED_OFF) {
 			pc.setDuration(lanerender.getGreenValue());
 		} else {

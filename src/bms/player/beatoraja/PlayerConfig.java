@@ -126,15 +126,15 @@ public class PlayerConfig {
 
 	private SkinConfig[] skin = new SkinConfig[SkinType.getMaxSkinTypeID() + 1];
 
-	private PlayConfig mode7 = new PlayConfig(Mode.BEAT_7K);
+	private PlayModeConfig mode7 = new PlayModeConfig(Mode.BEAT_7K);
 
-	private PlayConfig mode14 = new PlayConfig(Mode.BEAT_14K);
+	private PlayModeConfig mode14 = new PlayModeConfig(Mode.BEAT_14K);
 
-	private PlayConfig mode9 = new PlayConfig(Mode.POPN_9K);
+	private PlayModeConfig mode9 = new PlayModeConfig(Mode.POPN_9K);
 
-	private PlayConfig mode24 = new PlayConfig(Mode.KEYBOARD_24K);
+	private PlayModeConfig mode24 = new PlayModeConfig(Mode.KEYBOARD_24K);
 
-	private PlayConfig mode24double = new PlayConfig(Mode.KEYBOARD_24K_DOUBLE);
+	private PlayModeConfig mode24double = new PlayModeConfig(Mode.KEYBOARD_24K_DOUBLE);
 
 	private int musicselectinput = 0;
 
@@ -284,7 +284,7 @@ public class PlayerConfig {
 		this.markprocessednote = markprocessednote;
 	}
 
-	public PlayConfig getPlayConfig(Mode modeId) {
+	public PlayModeConfig getPlayConfig(Mode modeId) {
 		switch (modeId) {
 		case BEAT_5K:
 		case BEAT_7K:
@@ -303,7 +303,7 @@ public class PlayerConfig {
 		}
 	}
 
-	public PlayConfig getPlayConfig(int modeId) {
+	public PlayModeConfig getPlayConfig(int modeId) {
 		switch (modeId) {
 		case 7:
 		case 5:
@@ -322,51 +322,51 @@ public class PlayerConfig {
 		}
 	}
 
-	public PlayConfig getMode7() {
+	public PlayModeConfig getMode7() {
 		return mode7;
 	}
 
-	public void setMode7(PlayConfig mode7) {
+	public void setMode7(PlayModeConfig mode7) {
 		this.mode7 = mode7;
 	}
 
-	public PlayConfig getMode14() {
+	public PlayModeConfig getMode14() {
 		if(mode14 == null || mode14.getController().length < 2) {
-			mode14 = new PlayConfig(Mode.BEAT_14K);
+			mode14 = new PlayModeConfig(Mode.BEAT_14K);
 			Logger.getGlobal().warning("mode14のPlayConfigを再構成");
 		}
 		return mode14;
 	}
 
-	public void setMode14(PlayConfig mode14) {
+	public void setMode14(PlayModeConfig mode14) {
 		this.mode14 = mode14;
 	}
 
-	public PlayConfig getMode9() {
+	public PlayModeConfig getMode9() {
 		return mode9;
 	}
 
-	public void setMode9(PlayConfig mode9) {
+	public void setMode9(PlayModeConfig mode9) {
 		this.mode9 = mode9;
 	}
 
-	public PlayConfig getMode24() {
+	public PlayModeConfig getMode24() {
 		return mode24;
 	}
 
-	public void setMode24(PlayConfig mode24) {
+	public void setMode24(PlayModeConfig mode24) {
 		this.mode24 = mode24;
 	}
 
-	public PlayConfig getMode24double() {
+	public PlayModeConfig getMode24double() {
 		if(mode24double == null || mode24double.getController().length < 2) {
-			mode24double = new PlayConfig(Mode.KEYBOARD_24K_DOUBLE);
+			mode24double = new PlayModeConfig(Mode.KEYBOARD_24K_DOUBLE);
 			Logger.getGlobal().warning("mode24doubleのPlayConfigを再構成");
 		}
 		return mode24double;
 	}
 
-	public void setMode24double(PlayConfig mode24double) {
+	public void setMode24double(PlayModeConfig mode24double) {
 		this.mode24double = mode24double;
 	}
 

@@ -1,6 +1,6 @@
 package bms.player.beatoraja.input;
 
-import bms.player.beatoraja.PlayConfig.MidiConfig;
+import bms.player.beatoraja.PlayModeConfig.MidiConfig;
 
 import javax.sound.midi.*;
 import java.util.ArrayList;

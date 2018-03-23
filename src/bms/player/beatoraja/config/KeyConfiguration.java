@@ -1,5 +1,6 @@
 package bms.player.beatoraja.config;
 
+import bms.player.beatoraja.*;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
@@ -12,14 +13,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 
 import bms.model.Mode;
-import bms.player.beatoraja.MainController;
-import bms.player.beatoraja.MainState;
-import bms.player.beatoraja.PlayConfig;
-import bms.player.beatoraja.PlayConfig.ControllerConfig;
-import bms.player.beatoraja.PlayConfig.KeyboardConfig;
-import bms.player.beatoraja.PlayConfig.MidiConfig;
-import bms.player.beatoraja.PlayerConfig;
-import bms.player.beatoraja.Resolution;
+import bms.player.beatoraja.PlayModeConfig.*;
 import bms.player.beatoraja.decide.MusicDecideSkin;
 import bms.player.beatoraja.input.BMControllerInputProcessor;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
@@ -93,7 +87,7 @@ public class KeyConfiguration extends MainState {
 	private MidiInputProcessor midiinput;
 
 	private PlayerConfig config;
-	private PlayConfig pc;
+	private PlayModeConfig pc;
 	private KeyboardConfig keyboardConfig;
 	private ControllerConfig[] controllerConfigs;
 	private MidiConfig midiconfig;

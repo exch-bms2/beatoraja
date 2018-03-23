@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
+import bms.player.beatoraja.*;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 
@@ -31,15 +32,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.portaudio.DeviceInfo;
 
 import bms.model.Mode;
-import bms.player.beatoraja.Config;
-import bms.player.beatoraja.IRScoreData;
-import bms.player.beatoraja.MainController;
-import bms.player.beatoraja.MainLoader;
-import bms.player.beatoraja.PlayConfig;
-import bms.player.beatoraja.PlayConfig.ControllerConfig;
-import bms.player.beatoraja.PlayerConfig;
-import bms.player.beatoraja.ScoreDatabaseAccessor;
-import bms.player.beatoraja.TableDataAccessor;
+import bms.player.beatoraja.PlayModeConfig.ControllerConfig;
 import bms.player.beatoraja.audio.PortAudioDriver;
 import bms.player.beatoraja.ir.IRConnection;
 import bms.player.beatoraja.play.JudgeAlgorithm;
@@ -772,7 +765,7 @@ public class PlayConfigurationView implements Initializable {
     @FXML
 	public void updatePlayConfig() {
 		if (pc != null) {
-			PlayConfig conf = player.getPlayConfig(Mode.valueOf(pc.name()));
+			PlayConfig conf = player.getPlayConfig(Mode.valueOf(pc.name())).getPlayconfig();
 			conf.setHispeed(getValue(hispeed).floatValue());
 			conf.setDuration(getValue(gvalue));
 			conf.setHispeedMargin(getValue(hispeedmargin).floatValue());
@@ -782,7 +775,7 @@ public class PlayConfigurationView implements Initializable {
 			conf.setLift(getValue(lift) / 1000f);
 		}
 		pc = playconfig.getValue();
-		PlayConfig conf = player.getPlayConfig(Mode.valueOf(pc.name()));
+		PlayConfig conf = player.getPlayConfig(Mode.valueOf(pc.name())).getPlayconfig();
 		hispeed.getValueFactory().setValue((double) conf.getHispeed());
 		gvalue.getValueFactory().setValue(conf.getDuration());
 		hispeedmargin.getValueFactory().setValue((double) conf.getHispeedMargin());
@@ -797,14 +790,14 @@ public class PlayConfigurationView implements Initializable {
     @FXML
 	public void updateInputConfig() {
 		if (ic != null) {
-			PlayConfig conf = player.getPlayConfig(Mode.valueOf(ic.name()));
+			PlayModeConfig conf = player.getPlayConfig(Mode.valueOf(ic.name()));
 			for(ControllerConfig controller : conf.getController()) {
 				controller.setJKOC(jkoc_hack.isSelected());
 		        controller.setAnalogScratch(analogScratch.isSelected());
 			}
 		}
 		ic = inputconfig.getValue();
-		PlayConfig conf = player.getPlayConfig(Mode.valueOf(ic.name()));
+		PlayModeConfig conf = player.getPlayConfig(Mode.valueOf(ic.name()));
 		for(ControllerConfig controller : conf.getController()) {
 	        jkoc_hack.setSelected(controller.getJKOC());
 	        analogScratch.setSelected(controller.isAnalogScratch());

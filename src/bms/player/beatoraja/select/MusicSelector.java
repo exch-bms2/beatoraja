@@ -231,7 +231,7 @@ public class MusicSelector extends MainState {
 		preview.start(null);
 
 		final BMSPlayerInputProcessor input = main.getInputProcessor();
-		PlayConfig pc = (config.getMusicselectinput() == 0 ? config.getMode7()
+		PlayModeConfig pc = (config.getMusicselectinput() == 0 ? config.getMode7()
 				: (config.getMusicselectinput() == 1 ? config.getMode9() : config.getMode14()));
 		input.setKeyboardConfig(pc.getKeyboardConfig());
 		input.setControllerConfig(pc.getController());
@@ -531,17 +531,17 @@ public class MusicSelector extends MainState {
 		case NUMBER_DURATION:
 			if (bar.getSelected() instanceof SongBar && ((SongBar) bar.getSelected()).existsSong()) {
 				SongBar song = (SongBar) bar.getSelected();
-				PlayConfig pc = config.getPlayConfig(song.getSongData().getMode());
+				PlayConfig pc = config.getPlayConfig(song.getSongData().getMode()).getPlayconfig();
 				return pc.getDuration();
 			}
-			return config.getMode7().getDuration();
+			return config.getMode7().getPlayconfig().getDuration();
 		case NUMBER_DURATION_GREEN:
 			if (bar.getSelected() instanceof SongBar && ((SongBar) bar.getSelected()).existsSong()) {
 				SongBar song = (SongBar) bar.getSelected();
-				PlayConfig pc = config.getPlayConfig(song.getSongData().getMode());
+				PlayConfig pc = config.getPlayConfig(song.getSongData().getMode()).getPlayconfig();
 				return pc.getDuration() * 3 / 5;
 			}
-			return config.getMode7().getDuration() * 3 / 5;
+			return config.getMode7().getPlayconfig().getDuration() * 3 / 5;
 		case NUMBER_JUDGETIMING:
 			return config.getJudgetiming();
 		}

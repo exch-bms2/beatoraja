@@ -367,35 +367,35 @@ public abstract class MainState {
 		case NUMBER_HISPEED_LR2:
 			if (main.getPlayerResource().getSongdata() != null) {
 				SongData song = main.getPlayerResource().getSongdata();
-				PlayConfig pc = main.getPlayerResource().getPlayerConfig().getPlayConfig(song.getMode());
+				PlayConfig pc = main.getPlayerResource().getPlayerConfig().getPlayConfig(song.getMode()).getPlayconfig();
 				return (int) (pc.getHispeed() * 100);
 			}
 			return Integer.MIN_VALUE;
 		case NUMBER_HISPEED:
 			if (main.getPlayerResource().getSongdata() != null) {
 				SongData song = main.getPlayerResource().getSongdata();
-				PlayConfig pc = main.getPlayerResource().getPlayerConfig().getPlayConfig(song.getMode());
+				PlayConfig pc = main.getPlayerResource().getPlayerConfig().getPlayConfig(song.getMode()).getPlayconfig();
 				return (int) pc.getHispeed();
 			}
 			return Integer.MIN_VALUE;
 		case NUMBER_HISPEED_AFTERDOT:
 			if (main.getPlayerResource().getSongdata() != null) {
 				SongData song = main.getPlayerResource().getSongdata();
-				PlayConfig pc = main.getPlayerResource().getPlayerConfig().getPlayConfig(song.getMode());
+				PlayConfig pc = main.getPlayerResource().getPlayerConfig().getPlayConfig(song.getMode()).getPlayconfig();
 				return (int) (pc.getHispeed() * 100) % 100;
 			}
 			return Integer.MIN_VALUE;
 		case NUMBER_DURATION:
 			if (main.getPlayerResource().getSongdata() != null) {
 				SongData song = main.getPlayerResource().getSongdata();
-				PlayConfig pc = main.getPlayerResource().getPlayerConfig().getPlayConfig(song.getMode());
+				PlayConfig pc = main.getPlayerResource().getPlayerConfig().getPlayConfig(song.getMode()).getPlayconfig();
 				return pc.getDuration();
 			}
 			return Integer.MIN_VALUE;
 		case NUMBER_DURATION_GREEN:
 			if (main.getPlayerResource().getSongdata() != null) {
 				SongData song = main.getPlayerResource().getSongdata();
-				PlayConfig pc = main.getPlayerResource().getPlayerConfig().getPlayConfig(song.getMode());
+				PlayConfig pc = main.getPlayerResource().getPlayerConfig().getPlayConfig(song.getMode()).getPlayconfig();
 				return pc.getDuration() * 3 / 5;
 			}
 			return Integer.MIN_VALUE;

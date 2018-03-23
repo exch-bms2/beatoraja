@@ -5,7 +5,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.logging.Logger;
 
-import bms.player.beatoraja.PlayConfig.ControllerConfig;
+import bms.player.beatoraja.PlayModeConfig.ControllerConfig;
 import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.ControllerListener;
 import com.badlogic.gdx.controllers.PovDirection;

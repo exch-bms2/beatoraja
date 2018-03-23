@@ -374,7 +374,7 @@ public enum MusicSelectCommand {
             PlayConfig pc = null;
             if (current instanceof SongBar && ((SongBar)current).existsSong()) {
                 SongBar song = (SongBar) current;
-                pc = selector.main.getPlayerConfig().getPlayConfig(song.getSongData().getMode());
+                pc = selector.main.getPlayerConfig().getPlayConfig(song.getSongData().getMode()).getPlayconfig();
             }
             if (pc != null && pc.getDuration() < 2000) {
                 pc.setDuration(pc.getDuration() + 1);
@@ -389,7 +389,7 @@ public enum MusicSelectCommand {
             PlayConfig pc = null;
             if (current instanceof SongBar && ((SongBar)current).existsSong()) {
                 SongBar song = (SongBar) current;
-                pc = selector.main.getPlayerConfig().getPlayConfig(song.getSongData().getMode());
+                pc = selector.main.getPlayerConfig().getPlayConfig(song.getSongData().getMode()).getPlayconfig();
             }
             if (pc != null && pc.getDuration() > 1) {
                 pc.setDuration(pc.getDuration() - 1);

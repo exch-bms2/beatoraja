@@ -1,7 +1,6 @@
 package bms.player.beatoraja.input;
 
-import bms.player.beatoraja.Config;
-import bms.player.beatoraja.PlayConfig;
+import bms.player.beatoraja.*;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -10,11 +9,9 @@ import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
-import bms.player.beatoraja.PlayConfig.KeyboardConfig;
-import bms.player.beatoraja.PlayConfig.ControllerConfig;
-import bms.player.beatoraja.PlayConfig.MidiConfig;
-import bms.player.beatoraja.PlayerConfig;
-import bms.player.beatoraja.Resolution;
+import bms.player.beatoraja.PlayModeConfig.KeyboardConfig;
+import bms.player.beatoraja.PlayModeConfig.ControllerConfig;
+import bms.player.beatoraja.PlayModeConfig.MidiConfig;
 import bms.player.beatoraja.input.BMSPlayerInputDevice.Type;
 
 import com.badlogic.gdx.controllers.Controller;
@@ -209,7 +206,7 @@ public class BMSPlayerInputProcessor {
 		return bminput.length + 1;
 	}
 
-	public void setPlayConfig(PlayConfig playconfig) {
+	public void setPlayConfig(PlayModeConfig playconfig) {
 		// KB, コントローラー, Midiの各ボタンについて排他的処理を実施
 		int[] kbkeys = playconfig.getKeyboardConfig().getKeyAssign();
 		boolean[] exclusive = new boolean[kbkeys.length];
