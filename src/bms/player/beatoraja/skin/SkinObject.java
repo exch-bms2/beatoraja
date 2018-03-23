@@ -445,11 +445,8 @@ public abstract class SkinObject implements Disposable {
 		if (color == null || color.a == 0f || image == null) {
 			return;
 		}
-		int mouseX = state.main.getInputProcessor().getMouseX();
-		int mouseY = state.main.getInputProcessor().getMouseY();
-		if (mouseRect != null &&
-				!(x + mouseRect.x < mouseX && x + mouseRect.x + mouseRect.width > mouseX
-						&& y + height - mouseRect.y - mouseRect.height < mouseY && y + height - mouseRect.y > mouseY)) {
+		if (mouseRect != null && !mouseRect.contains(state.main.getInputProcessor().getMouseX() - x,
+				state.main.getInputProcessor().getMouseY() - y)) {
 			return;
 		}
 		tmpRect.set(x, y, width, height);

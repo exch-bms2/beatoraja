@@ -973,6 +973,9 @@ public class JSONSkinLoader extends SkinLoader{
 			}
 			skin.setDestination(obj, a.time, a.x, a.y, a.w, a.h, a.acc, a.a, a.r, a.g, a.b, dst.blend, dst.filter,
 					a.angle, dst.center, dst.loop, dst.timer, dst.op);
+			if (dst.mouseRect != null) {
+				skin.setMouseRect(obj, dst.mouseRect.x, dst.mouseRect.y, dst.mouseRect.w, dst.mouseRect.h);
+			}
 			prev = a;
 		}
 
@@ -1329,6 +1332,14 @@ public class JSONSkinLoader extends SkinLoader{
 		public int stretch = -1;
 		public int[] op = new int[0];
 		public Animation[] dst = new Animation[0];
+		public Rect mouseRect;
+	}
+
+	public static class Rect {
+		public int x;
+		public int y;
+		public int w;
+		public int h;
 	}
 
 	public static class Animation {
