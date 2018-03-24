@@ -117,10 +117,10 @@ public class SkinNoteDistributionGraph extends SkinObject {
 			updateGraph(model);
 		}
 
-		draw(sprite, backtex, r.x, r.y + r.height, r.width, -r.height);
+		draw(sprite, backtex, r.x, r.y + r.height, r.width, -r.height, state);
 		final float render = time >= delay ? 1.0f : (float) time / delay;
 		shapetex.setRegionWidth((int) (shapetex.getTexture().getWidth() * render));
-		draw(sprite, shapetex, r.x, r.y + r.height, r.width * render, -r.height);
+		draw(sprite, shapetex, r.x, r.y + r.height, r.width * render, -r.height, state);
 		// スタートカーソル描画
 		if (starttime >= 0) {
 			int dx = (int) (starttime * r.width / (data.length * 1000));

@@ -155,9 +155,9 @@ public class SkinNumber extends SkinObject {
 		for (int j = 0; j < values.length; j++) {
 			if (values[j] != -1) {
 				if(offsets != null && j < offsets.length) {
-					draw(sprite, image[values[j]], r.x + r.width * j + offsetX - shift + offsets[j].x, r.y + offsetY + offsets[j].y, r.width + offsets[j].w, r.height + offsets[j].h);
+					draw(sprite, image[values[j]], r.x + r.width * j + offsetX - shift + offsets[j].x, r.y + offsetY + offsets[j].y, r.width + offsets[j].w, r.height + offsets[j].h, state);
 				} else {
-					draw(sprite, image[values[j]], r.x + r.width * j + offsetX - shift, r.y + offsetY, r.width, r.height);						
+					draw(sprite, image[values[j]], r.x + r.width * j + offsetX - shift, r.y + offsetY, r.width, r.height, state);
 				}
 			}
 		}

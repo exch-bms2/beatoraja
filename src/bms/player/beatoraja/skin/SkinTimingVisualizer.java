@@ -123,8 +123,8 @@ public class SkinTimingVisualizer extends SkinObject {
 			shapetex.getTexture().draw(shape, 0, 0);
 		}
 
-		draw(sprite, backtex, r.x, r.y, r.width, r.height);
-		draw(sprite, shapetex, r.x, r.y, r.width, r.height);
+		draw(sprite, backtex, r.x, r.y, r.width, r.height, state);
+		draw(sprite, shapetex, r.x, r.y, r.width, r.height, state);
 	}
 
 	private int[][] getJudgeArea(PlayerResource resource) {

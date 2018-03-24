@@ -98,7 +98,7 @@ public class SkinTimingDistributionGraph extends SkinObject {
 			shape.dispose();
 		}
 
-		draw(sprite, tex, r.x, r.y, r.width, r.height);
+		draw(sprite, tex, r.x, r.y, r.width, r.height, state);
 
 	}
 
