@@ -42,13 +42,22 @@ public class LR2SkinLoader extends SkinLoader {
 						continue;
 					}
 					try {
-						int opt = Integer.parseInt(str[i]);
-						
-						if(op.containsKey(opt) && op.get(opt)) {
-							b = true;
+						int opt = Integer.parseInt(str[i].replace('!', '-').replaceAll("[^0-9-]", ""));
+						if(opt >=  0) {
+							if(op.containsKey(opt) && op.get(opt)) {
+								b = true;
+							}
+						} else {
+							if(op.containsKey(-opt) && !op.get(-opt)) {
+								b = true;
+							}
 						}
-						if (!b && state != null) {
-							b = state.getBooleanValue(opt);
+						if (!b && !op.containsKey(Math.abs(opt)) && state != null) {
+							if(opt >= 0) {
+								b = state.getBooleanValue(opt);
+							} else {
+								b = !state.getBooleanValue(-opt);
+							}
 						}
 						if (!b) {
 							ifs = false;
@@ -69,12 +78,22 @@ public class LR2SkinLoader extends SkinLoader {
 					for (int i = 1; i < str.length; i++) {
 						boolean b = false;
 						try {
-							int opt = Integer.parseInt(str[i]);
-							if(op.containsKey(opt) && op.get(opt)) {
-								b = true;
+							int opt = Integer.parseInt(str[i].replace('!', '-').replaceAll("[^0-9-]", ""));
+							if(opt >=  0) {
+								if(op.containsKey(opt) && op.get(opt)) {
+									b = true;
+								}
+							} else {
+								if(op.containsKey(-opt) && !op.get(-opt)) {
+									b = true;
+								}
 							}
-							if (!b && state != null) {
-								b = state.getBooleanValue(opt);
+							if (!b && !op.containsKey(Math.abs(opt)) && state != null) {
+								if(opt >= 0) {
+									b = state.getBooleanValue(opt);
+								} else {
+									b = !state.getBooleanValue(-opt);
+								}
 							}
 							if (!b) {
 								ifs = false;
