@@ -680,6 +680,543 @@
 			"sql":"(n + s) <= (ln + ls) * 4"
 		}
 	]
+},
+
+{
+	"name":"LEVEL",
+	"folder":[
+		{
+			"name":"7KEYS",
+			"folder":[
+				{
+					"name":"LEVEL 〜0",
+					"sql":"(level <= 0 OR level IS NULL) AND song.mode = 7"
+				},
+				{
+					"name":"LEVEL 1",
+					"sql":"level = 1 AND song.mode = 7"
+				},
+				{
+					"name":"LEVEL 2",
+					"sql":"level = 2 AND song.mode = 7"
+				},
+				{
+					"name":"LEVEL 3",
+					"sql":"level = 3 AND song.mode = 7"
+				},
+				{
+					"name":"LEVEL 4",
+					"sql":"level = 4 AND song.mode = 7"
+				},
+				{
+					"name":"LEVEL 5",
+					"sql":"level = 5 AND song.mode = 7"
+				},
+				{
+					"name":"LEVEL 6",
+					"sql":"level = 6 AND song.mode = 7"
+				},
+				{
+					"name":"LEVEL 7",
+					"sql":"level = 7 AND song.mode = 7"
+				},
+				{
+					"name":"LEVEL 8",
+					"sql":"level = 8 AND song.mode = 7"
+				},
+				{
+					"name":"LEVEL 9",
+					"sql":"level = 9 AND song.mode = 7"
+				},
+				{
+					"name":"LEVEL 10",
+					"sql":"level = 10 AND song.mode = 7"
+				},
+				{
+					"name":"LEVEL 11",
+					"sql":"level = 11 AND song.mode = 7"
+				},
+				{
+					"name":"LEVEL 12",
+					"sql":"level = 12 AND song.mode = 7"
+				},
+				{
+					"name":"LEVEL 13〜",
+					"sql":"level >= 13 AND song.mode = 7"
+				}
+			]
+		},
+		{
+			"name":"14KEYS",
+			"folder":[
+				{
+					"name":"LEVEL 〜0",
+					"sql":"(level <= 0 OR level IS NULL) AND song.mode = 14"
+				},
+				{
+					"name":"LEVEL 1",
+					"sql":"level = 1 AND song.mode = 14"
+				},
+				{
+					"name":"LEVEL 2",
+					"sql":"level = 2 AND song.mode = 14"
+				},
+				{
+					"name":"LEVEL 3",
+					"sql":"level = 3 AND song.mode = 14"
+				},
+				{
+					"name":"LEVEL 4",
+					"sql":"level = 4 AND song.mode = 14"
+				},
+				{
+					"name":"LEVEL 5",
+					"sql":"level = 5 AND song.mode = 14"
+				},
+				{
+					"name":"LEVEL 6",
+					"sql":"level = 6 AND song.mode = 14"
+				},
+				{
+					"name":"LEVEL 7",
+					"sql":"level = 7 AND song.mode = 14"
+				},
+				{
+					"name":"LEVEL 8",
+					"sql":"level = 8 AND song.mode = 14"
+				},
+				{
+					"name":"LEVEL 9",
+					"sql":"level = 9 AND song.mode = 14"
+				},
+				{
+					"name":"LEVEL 10",
+					"sql":"level = 10 AND song.mode = 14"
+				},
+				{
+					"name":"LEVEL 11",
+					"sql":"level = 11 AND song.mode = 14"
+				},
+				{
+					"name":"LEVEL 12",
+					"sql":"level = 12 AND song.mode = 14"
+				},
+				{
+					"name":"LEVEL 13〜",
+					"sql":"level >= 13 AND song.mode = 14"
+				}
+			]
+		},
+		{
+			"name":"9KEYS",
+			"folder":[
+				{
+					"name":"LEVEL 〜0",
+					"sql":"(level <= 0 OR level IS NULL) AND song.mode = 9"
+				},
+				{
+					"name":"LEVEL 1",
+					"sql":"level = 1 AND song.mode = 9"
+				},
+				{
+					"name":"LEVEL 2",
+					"sql":"level = 2 AND song.mode = 9"
+				},
+				{
+					"name":"LEVEL 3",
+					"sql":"level = 3 AND song.mode = 9"
+				},
+				{
+					"name":"LEVEL 4",
+					"sql":"level = 4 AND song.mode = 9"
+				},
+				{
+					"name":"LEVEL 5",
+					"sql":"level = 5 AND song.mode = 9"
+				},
+				{
+					"name":"LEVEL 6",
+					"sql":"level = 6 AND song.mode = 9"
+				},
+				{
+					"name":"LEVEL 7",
+					"sql":"level = 7 AND song.mode = 9"
+				},
+				{
+					"name":"LEVEL 8",
+					"sql":"level = 8 AND song.mode = 9"
+				},
+				{
+					"name":"LEVEL 9",
+					"sql":"level = 9 AND song.mode = 9"
+				},
+				{
+					"name":"LEVEL 10",
+					"sql":"level = 10 AND song.mode = 9"
+				},
+				{
+					"name":"LEVEL 11",
+					"sql":"level = 11 AND song.mode = 9"
+				},
+				{
+					"name":"LEVEL 12",
+					"sql":"level = 12 AND song.mode = 9"
+				},
+				{
+					"name":"LEVEL 13",
+					"sql":"level = 13 AND song.mode = 9"
+				},
+				{
+					"name":"LEVEL 14",
+					"sql":"level = 14 AND song.mode = 9"
+				},
+				{
+					"name":"LEVEL 15",
+					"sql":"level = 15 AND song.mode = 9"
+				},
+				{
+					"name":"LEVEL 16",
+					"sql":"level = 16 AND song.mode = 9"
+				},
+				{
+					"name":"LEVEL 17",
+					"sql":"level = 17 AND song.mode = 9"
+				},
+				{
+					"name":"LEVEL 18",
+					"sql":"level = 18 AND song.mode = 9"
+				},
+				{
+					"name":"LEVEL 19",
+					"sql":"level = 19 AND song.mode = 9"
+				},
+				{
+					"name":"LEVEL 20",
+					"sql":"level = 20 AND song.mode = 9"
+				},
+				{
+					"name":"LEVEL 21",
+					"sql":"level = 21 AND song.mode = 9"
+				},
+				{
+					"name":"LEVEL 22",
+					"sql":"level = 22 AND song.mode = 9"
+				},
+				{
+					"name":"LEVEL 23",
+					"sql":"level = 23 AND song.mode = 9"
+				},
+				{
+					"name":"LEVEL 24",
+					"sql":"level = 24 AND song.mode = 9"
+				},
+				{
+					"name":"LEVEL 25",
+					"sql":"level = 25 AND song.mode = 9"
+				},
+				{
+					"name":"LEVEL 26",
+					"sql":"level = 26 AND song.mode = 9"
+				},
+				{
+					"name":"LEVEL 27",
+					"sql":"level = 27 AND song.mode = 9"
+				},
+				{
+					"name":"LEVEL 28",
+					"sql":"level = 28 AND song.mode = 9"
+				},
+				{
+					"name":"LEVEL 29",
+					"sql":"level = 29 AND song.mode = 9"
+				},
+				{
+					"name":"LEVEL 30",
+					"sql":"level = 30 AND song.mode = 9"
+				},
+				{
+					"name":"LEVEL 31",
+					"sql":"level = 31 AND song.mode = 9"
+				},
+				{
+					"name":"LEVEL 32",
+					"sql":"level = 32 AND song.mode = 9"
+				},
+				{
+					"name":"LEVEL 33",
+					"sql":"level = 33 AND song.mode = 9"
+				},
+				{
+					"name":"LEVEL 34",
+					"sql":"level = 34 AND song.mode = 9"
+				},
+				{
+					"name":"LEVEL 35",
+					"sql":"level = 35 AND song.mode = 9"
+				},
+				{
+					"name":"LEVEL 36",
+					"sql":"level = 36 AND song.mode = 9"
+				},
+				{
+					"name":"LEVEL 37",
+					"sql":"level = 37 AND song.mode = 9"
+				},
+				{
+					"name":"LEVEL 38",
+					"sql":"level = 38 AND song.mode = 9"
+				},
+				{
+					"name":"LEVEL 39",
+					"sql":"level = 39 AND song.mode = 9"
+				},
+				{
+					"name":"LEVEL 40",
+					"sql":"level = 40 AND song.mode = 9"
+				},
+				{
+					"name":"LEVEL 41",
+					"sql":"level = 41 AND song.mode = 9"
+				},
+				{
+					"name":"LEVEL 42",
+					"sql":"level = 42 AND song.mode = 9"
+				},
+				{
+					"name":"LEVEL 43",
+					"sql":"level = 43 AND song.mode = 9"
+				},
+				{
+					"name":"LEVEL 44",
+					"sql":"level = 44 AND song.mode = 9"
+				},
+				{
+					"name":"LEVEL 45",
+					"sql":"level = 45 AND song.mode = 9"
+				},
+				{
+					"name":"LEVEL 46",
+					"sql":"level = 46 AND song.mode = 9"
+				},
+				{
+					"name":"LEVEL 47",
+					"sql":"level = 47 AND song.mode = 9"
+				},
+				{
+					"name":"LEVEL 48",
+					"sql":"level = 48 AND song.mode = 9"
+				},
+				{
+					"name":"LEVEL 49",
+					"sql":"level = 49 AND song.mode = 9"
+				},
+				{
+					"name":"LEVEL 50",
+					"sql":"level = 50 AND song.mode = 9"
+				},
+				{
+					"name":"LEVEL 51〜",
+					"sql":"level >= 51 AND song.mode = 9"
+				}
+			]
+		},
+		{
+			"name":"5KEYS",
+			"folder":[
+				{
+					"name":"LEVEL 〜0",
+					"sql":"(level <= 0 OR level IS NULL) AND song.mode = 5"
+				},
+				{
+					"name":"LEVEL 1",
+					"sql":"level = 1 AND song.mode = 5"
+				},
+				{
+					"name":"LEVEL 2",
+					"sql":"level = 2 AND song.mode = 5"
+				},
+				{
+					"name":"LEVEL 3",
+					"sql":"level = 3 AND song.mode = 5"
+				},
+				{
+					"name":"LEVEL 4",
+					"sql":"level = 4 AND song.mode = 5"
+				},
+				{
+					"name":"LEVEL 5",
+					"sql":"level = 5 AND song.mode = 5"
+				},
+				{
+					"name":"LEVEL 6",
+					"sql":"level = 6 AND song.mode = 5"
+				},
+				{
+					"name":"LEVEL 7",
+					"sql":"level = 7 AND song.mode = 5"
+				},
+				{
+					"name":"LEVEL 8",
+					"sql":"level = 8 AND song.mode = 5"
+				},
+				{
+					"name":"LEVEL 9",
+					"sql":"level = 9 AND song.mode = 5"
+				},
+				{
+					"name":"LEVEL 10",
+					"sql":"level = 10 AND song.mode = 5"
+				},
+				{
+					"name":"LEVEL 11",
+					"sql":"level = 11 AND song.mode = 5"
+				},
+				{
+					"name":"LEVEL 12",
+					"sql":"level = 12 AND song.mode = 5"
+				},
+				{
+					"name":"LEVEL 13〜",
+					"sql":"level >= 13 AND song.mode = 5"
+				}
+			]
+		},
+		{
+			"name":"10KEYS",
+			"folder":[
+				{
+					"name":"LEVEL 〜0",
+					"sql":"(level <= 0 OR level IS NULL) AND song.mode = 10"
+				},
+				{
+					"name":"LEVEL 1",
+					"sql":"level = 1 AND song.mode = 10"
+				},
+				{
+					"name":"LEVEL 2",
+					"sql":"level = 2 AND song.mode = 10"
+				},
+				{
+					"name":"LEVEL 3",
+					"sql":"level = 3 AND song.mode = 10"
+				},
+				{
+					"name":"LEVEL 4",
+					"sql":"level = 4 AND song.mode = 10"
+				},
+				{
+					"name":"LEVEL 5",
+					"sql":"level = 5 AND song.mode = 10"
+				},
+				{
+					"name":"LEVEL 6",
+					"sql":"level = 6 AND song.mode = 10"
+				},
+				{
+					"name":"LEVEL 7",
+					"sql":"level = 7 AND song.mode = 10"
+				},
+				{
+					"name":"LEVEL 8",
+					"sql":"level = 8 AND song.mode = 10"
+				},
+				{
+					"name":"LEVEL 9",
+					"sql":"level = 9 AND song.mode = 10"
+				},
+				{
+					"name":"LEVEL 10",
+					"sql":"level = 10 AND song.mode = 10"
+				},
+				{
+					"name":"LEVEL 11",
+					"sql":"level = 11 AND song.mode = 10"
+				},
+				{
+					"name":"LEVEL 12",
+					"sql":"level = 12 AND song.mode = 10"
+				},
+				{
+					"name":"LEVEL 13〜",
+					"sql":"level >= 13 AND song.mode = 10"
+				}
+			]
+		},
+		{
+			"name":"24KEYS",
+			"folder":[
+				{
+					"name":"LEVEL 〜0",
+					"sql":"(level <= 0 OR level IS NULL) AND song.mode = 25"
+				},
+				{
+					"name":"LEVEL 1",
+					"sql":"level = 1 AND song.mode = 25"
+				},
+				{
+					"name":"LEVEL 2",
+					"sql":"level = 2 AND song.mode = 25"
+				},
+				{
+					"name":"LEVEL 3",
+					"sql":"level = 3 AND song.mode = 25"
+				},
+				{
+					"name":"LEVEL 4",
+					"sql":"level = 4 AND song.mode = 25"
+				},
+				{
+					"name":"LEVEL 5",
+					"sql":"level = 5 AND song.mode = 25"
+				},
+				{
+					"name":"LEVEL 6",
+					"sql":"level = 6 AND song.mode = 25"
+				},
+				{
+					"name":"LEVEL 7〜",
+					"sql":"level >= 7 AND song.mode = 25"
+				}
+			]
+		},
+		{
+			"name":"48KEYS",
+			"folder":[
+				{
+					"name":"LEVEL 〜0",
+					"sql":"(level <= 0 OR level IS NULL) AND song.mode = 50"
+				},
+				{
+					"name":"LEVEL 1",
+					"sql":"level = 1 AND song.mode = 50"
+				},
+				{
+					"name":"LEVEL 2",
+					"sql":"level = 2 AND song.mode = 50"
+				},
+				{
+					"name":"LEVEL 3",
+					"sql":"level = 3 AND song.mode = 50"
+				},
+				{
+					"name":"LEVEL 4",
+					"sql":"level = 4 AND song.mode = 50"
+				},
+				{
+					"name":"LEVEL 5",
+					"sql":"level = 5 AND song.mode = 50"
+				},
+				{
+					"name":"LEVEL 6",
+					"sql":"level = 6 AND song.mode = 50"
+				},
+				{
+					"name":"LEVEL 7〜",
+					"sql":"level >= 7 AND song.mode = 50"
+				}
+			]
+		}
+	]
 }
 
 ]
