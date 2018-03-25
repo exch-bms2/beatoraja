@@ -188,7 +188,7 @@ public class JSONSkinLoader extends SkinLoader{
 								}
 								if (l.size() > 0) {
 									String filename = l.get((int) (Math.random() * l.size())).getName();
-									filemap.put(file.name, filename);
+									filemap.put(customFile.path, filename);
 								}
 							}
 						}
