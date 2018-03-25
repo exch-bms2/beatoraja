@@ -6,6 +6,8 @@ import java.util.*;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
+import javax.swing.JOptionPane;
+
 import com.badlogic.gdx.Graphics;
 import javafx.application.Application;
 import javafx.event.EventHandler;
@@ -29,7 +31,14 @@ import bms.player.beatoraja.launcher.PlayConfigurationView;
  */
 public class MainLoader extends Application {
 	
+	private static final boolean ALLOWS_32BIT_JAVA = false;
+	
 	public static void main(String[] args) {
+		if(!ALLOWS_32BIT_JAVA && !System.getProperty( "os.arch" ).contains( "64")) {
+			JOptionPane.showMessageDialog(null, "This Application needs 64bit-Jaja.", "Error", JOptionPane.ERROR_MESSAGE);
+			System.exit(1);
+		}
+
 		Logger logger = Logger.getGlobal();
 		try {
 			logger.addHandler(new FileHandler("beatoraja_log.xml"));
