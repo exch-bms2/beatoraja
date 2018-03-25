@@ -225,10 +225,12 @@ public class NoteShuffleModifier extends PatternModifier {
 						}
 						
 						// primaryにスクラッチレーンがあればノーツがあるレーンを配置
-						if (primary.contains(sckey.get(scratchIndex))) {
+						if (primary.contains(sckey.get(scratchIndex)) && !note.isEmpty()) {
 							random[sckey.get(scratchIndex)] = note.get(0);
 							primary.remove(sckey.get(scratchIndex));
 							note.remove(0);
+							// スクラッチレーンを順繰りに
+							scratchIndex = ++scratchIndex == sckey.size() ? 0 : scratchIndex;
 						}
 
 						// ノーツがあるレーンを縦連が発生しないレーンにランダムに配置
@@ -264,8 +266,6 @@ public class NoteShuffleModifier extends PatternModifier {
 							other.remove(0);
 						}
 						
-						// スクラッチレーンを順繰りに
-						scratchIndex = ++scratchIndex == sckey.size() ? 0 : scratchIndex;
 
 
 					} else if (mode.player == 2) {
