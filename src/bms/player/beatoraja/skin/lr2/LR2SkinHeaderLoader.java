@@ -72,6 +72,25 @@ public class LR2SkinHeaderLoader extends LR2SkinLoader {
 				options.add(new CustomOption(str[1], op, contents.toArray(new String[contents.size()])));
 			}
 		});
+		addCommandWord(new CommandWord("CUSTOMOPTION_ADDITION_SETTING") {
+			//#CUSTOMOPTION_ADDITION_SETTING, BGA Size, Ghost, Score Graph, Judge Detail
+			//0 = No Add, 1 = Add
+			@Override
+			public void execute(String[] str) {
+				CustomOption[] addition = new CustomOption[4];
+				String[] additionName = {"BGA Size", "Ghost", "Score Graph", "Judge Detail"};
+				for(CustomOption co : options) {
+					for(int i = 0; i < additionName.length; i++) {
+						if(co.name.equals(additionName[i])) addition[i] = co;
+					}
+				}
+				for(int i = 0; i < addition.length; i++) {
+					if(str[i + 1].replaceAll("[^0-9-]", "").equals("0") && addition[i] != null) {
+						options.remove(addition[i]);
+					}
+				}
+			}
+		});
 		addCommandWord(new CommandWord("CUSTOMFILE") {
 			@Override
 			public void execute(String[] str) {
