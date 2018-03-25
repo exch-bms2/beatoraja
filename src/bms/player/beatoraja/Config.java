@@ -1,10 +1,14 @@
 package bms.player.beatoraja;
 
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Arrays;
-import java.util.Map;
 import bms.player.beatoraja.play.JudgeAlgorithm;
-import bms.player.beatoraja.skin.SkinType;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.JsonWriter.OutputType;
 
 import static bms.player.beatoraja.Resolution.*;
 
@@ -504,6 +508,38 @@ public class Config {
 		}
 		if(autosavereplay.length != 4) {
 			autosavereplay = Arrays.copyOf(autosavereplay, 4);
+		}
+	}
+
+	public static Config read() {
+		Config config = null;
+		if (Files.exists(MainController.configpath)) {
+			Json json = new Json();
+			try {
+				json.setIgnoreUnknownFields(true);
+				config = json.fromJson(Config.class, new FileReader(MainController.configpath.toFile()));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		if(config == null) {
+			config = new Config();
+		}
+		config.validate();
+
+		PlayerConfig.init(config);
+
+		return config;
+	}
+	
+	public static void write(Config config) {
+		Json json = new Json();
+		json.setOutputType(OutputType.json);
+		try (FileWriter fw = new FileWriter(MainController.configpath.toFile())) {
+			fw.write(json.prettyPrint(config));
+			fw.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 

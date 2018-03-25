@@ -574,24 +574,9 @@ public class MainController extends ApplicationAdapter {
 	}
 
 	public void saveConfig(){
-		Json json = new Json();
-		json.setOutputType(OutputType.json);
-		try (FileWriter fw = new FileWriter(configpath.toFile())) {
-			fw.write(json.prettyPrint(config));
-			fw.flush();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		Logger.getGlobal().info("設定情報をconfig.jsonに保存");
-
-		Path p = Paths.get("player/" + config.getPlayername() + "/config.json");
-		try (FileWriter fw = new FileWriter(p.toFile())) {
-			fw.write(json.prettyPrint(player));
-			fw.flush();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		Logger.getGlobal().info("設定情報を" + p.toString() + "に保存");
+		Config.write(config);
+		PlayerConfig.write(player);
+		Logger.getGlobal().info("設定情報を保存");
 	}
 
 	public void exit() {

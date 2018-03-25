@@ -88,7 +88,7 @@ public class MainLoader extends Application {
 
 	public static void play(Path f, PlayMode auto, boolean forceExit, Config config, PlayerConfig player, boolean songUpdated) {
 		if(config == null) {
-			config = readConfig();			
+			config = Config.read();			
 		}
 
 		try {
@@ -175,7 +175,7 @@ public class MainLoader extends Application {
 
 	@Override
 	public void start(javafx.stage.Stage primaryStage) throws Exception {
-		Config config = readConfig();
+		Config config = Config.read();
 
 		try {
 			ResourceBundle bundle = ResourceBundle.getBundle("resources.UIResources");
@@ -200,34 +200,5 @@ public class MainLoader extends Application {
 			Logger.getGlobal().severe(e.getMessage());
 			e.printStackTrace();
 		}
-	}
-
-	private static Config readConfig() {
-		Config config = new Config();
-		if (Files.exists(MainController.configpath)) {
-			Json json = new Json();
-			try {
-				json.setIgnoreUnknownFields(true);
-				config = json.fromJson(Config.class, new FileReader(MainController.configpath.toFile()));
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		} else {
-			Json json = new Json();
-			json.setOutputType(OutputType.json);
-			try {
-				FileWriter fw = new FileWriter(MainController.configpath.toFile());
-				fw.write(json.prettyPrint(config));
-				fw.flush();
-				fw.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		config.validate();
-
-		PlayerConfig.init(config);
-
-		return config;
 	}
 }
