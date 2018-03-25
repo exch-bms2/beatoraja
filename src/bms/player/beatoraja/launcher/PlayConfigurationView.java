@@ -1047,30 +1047,6 @@ public class PlayConfigurationView implements Initializable {
 		}
 	}
 
-	static class SkinListCell extends ListCell<SkinHeader> {
-
-		@Override
-		protected void updateItem(SkinHeader arg0, boolean arg1) {
-			super.updateItem(arg0, arg1);
-			if (arg0 != null) {
-				setText(arg0.getName() + (arg0.getType() == SkinHeader.TYPE_BEATORJASKIN ? "" : " (LR2 Skin)"));
-			} else {
-				setText("");
-			}
-		}
-	}
-
-	static class SkinTypeCell extends ListCell<SkinType> {
-
-		@Override
-		protected void updateItem(SkinType arg0, boolean arg1) {
-			super.updateItem(arg0, arg1);
-			if (arg0 != null) {
-				setText(arg0.getName());
-			}
-		}
-	}
-
 	enum PlayMode {
 		BEAT_7K("5/7KEYS"),
 		BEAT_14K("10/14KEYS"),

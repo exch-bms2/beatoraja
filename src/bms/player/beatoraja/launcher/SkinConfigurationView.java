@@ -4,29 +4,18 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.*;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import bms.player.beatoraja.PlayerConfig;
 import bms.player.beatoraja.SkinConfig;
-import bms.player.beatoraja.launcher.PlayConfigurationView.SkinListCell;
-import bms.player.beatoraja.launcher.PlayConfigurationView.SkinTypeCell;
 import bms.player.beatoraja.skin.*;
-import bms.player.beatoraja.skin.SkinHeader.CustomFile;
-import bms.player.beatoraja.skin.SkinHeader.CustomOffset;
-import bms.player.beatoraja.skin.SkinHeader.CustomOption;
+import bms.player.beatoraja.skin.SkinHeader.*;
 import bms.player.beatoraja.skin.lr2.LR2SkinHeaderLoader;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.Spinner;
+import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.util.Callback;
 
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
@@ -56,18 +45,27 @@ public class SkinConfigurationView implements Initializable {
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
-		skincategory.setCellFactory(new Callback<ListView<SkinType>, ListCell<SkinType>>() {
-			public ListCell<SkinType> call(ListView<SkinType> param) { return new SkinTypeCell(); }
-		});
-		skincategory.setButtonCell(new SkinTypeCell());
-		skincategory.getItems().addAll(SkinType.values());
-
-		skinheader.setCellFactory(new Callback<ListView<SkinHeader>, ListCell<SkinHeader>>() {
-			public ListCell<SkinHeader> call(ListView<SkinHeader> param) {
-				return new SkinListCell();
+		final ListCell<SkinType> skinTypeCell = new ListCell<SkinType>() {
+			@Override
+			protected void updateItem(SkinType arg0, boolean arg1) {
+				super.updateItem(arg0, arg1);
+				setText(arg0 != null ? arg0.getName() : "");
 			}
-		});
-		skinheader.setButtonCell(new SkinListCell());
+		};
+		skincategory.setCellFactory((param) -> skinTypeCell);
+		skincategory.setButtonCell(skinTypeCell);
+		skincategory.getItems().addAll(SkinType.values());
+		
+		final ListCell<SkinHeader> skinListCell = new ListCell<SkinHeader>() {
+			@Override
+			protected void updateItem(SkinHeader arg0, boolean arg1) {
+				super.updateItem(arg0, arg1);
+				setText(arg0 != null ? arg0.getName() + (arg0.getType() == SkinHeader.TYPE_BEATORJASKIN ? "" : " (LR2 Skin)") : "");
+			}			
+		};
+		
+		skinheader.setCellFactory((param) -> skinListCell);
+		skinheader.setButtonCell(skinListCell);
 
 		List<Path> lr2skinpaths = new ArrayList<Path>();
 		scan(Paths.get("skin"), lr2skinpaths);
@@ -224,25 +222,15 @@ public class SkinConfigurationView implements Initializable {
 			label.setMinWidth(250.0);
 			hbox.getChildren().add(label);
 
-			int[] v = new int[values.length];
-			boolean[] b = new boolean[values.length];
+			final boolean[] b = {option.x, option.y, option.w, option.h, option.r, option.a};
+			SkinConfig.Offset offset = null;
 			for(SkinConfig.Offset o : property.getOffset()) {
 				if(o.name.equals(option.name)) {
-					v[0] = o.x;
-					v[1] = o.y;
-					v[2] = o.w;
-					v[3] = o.h;
-					v[4] = o.r;
-					v[5] = o.a;
-					b[0] = option.x;
-					b[1] = option.y;
-					b[2] = option.w;
-					b[3] = option.h;
-					b[4] = option.r;
-					b[5] = option.a;
+					offset = o;
 					break;
 				}
 			}
+			final int[] v = offset != null ? new int[]{offset.x, offset.y, offset.w, offset.h, offset.r, offset.a} : new int[values.length];
 
 			Spinner<Integer>[] spinner = new Spinner[values.length];
 			for(int i = 0;i < spinner.length;i++) {
@@ -263,11 +251,8 @@ public class SkinConfigurationView implements Initializable {
 	private void scan(Path p, final List<Path> paths) {
 		if (Files.isDirectory(p)) {
 			try (Stream<Path> sub = Files.list(p)) {
-				sub.forEach(new Consumer<Path>() {
-					@Override
-					public void accept(Path t) {
+				sub.forEach((t) -> {
 						scan(t, paths);
-					}
 				});
 			} catch (IOException e) {
 			}
