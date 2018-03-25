@@ -309,6 +309,10 @@ public class SkinConfiguration extends MainState {
 					}
 					setFilePath(file.name, selection);
 				}
+				if (selection == null) {
+					selection = items.get(0);
+					setFilePath(file.name, selection);
+				}
 				CustomFileItem item = new CustomFileItem(file.name, items, selection);
 				customOptions.add(item);
 			} catch (IOException e) {
