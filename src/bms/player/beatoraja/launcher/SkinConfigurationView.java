@@ -43,29 +43,32 @@ public class SkinConfigurationView implements Initializable {
 	private Map<CustomFile, ComboBox<String>> filebox = new HashMap<CustomFile, ComboBox<String>>();
 	private Map<CustomOffset, Spinner<Integer>[]> offsetbox = new HashMap<CustomOffset, Spinner<Integer>[]>();
 
+	static class SkinTypeCell extends ListCell<SkinType> {
+
+		@Override
+		protected void updateItem(SkinType arg0, boolean arg1) {
+			super.updateItem(arg0, arg1);
+			setText(arg0 != null ? arg0.getName() : "");
+		}
+	}
+
+	static class SkinListCell extends ListCell<SkinHeader> {
+
+		@Override
+		protected void updateItem(SkinHeader arg0, boolean arg1) {
+			super.updateItem(arg0, arg1);
+			setText(arg0 != null ? arg0.getName() + (arg0.getType() == SkinHeader.TYPE_BEATORJASKIN ? "" : " (LR2 Skin)") : "");
+		}
+	}
+
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
-		final ListCell<SkinType> skinTypeCell = new ListCell<SkinType>() {
-			@Override
-			protected void updateItem(SkinType arg0, boolean arg1) {
-				super.updateItem(arg0, arg1);
-				setText(arg0 != null ? arg0.getName() : "");
-			}
-		};
-		skincategory.setCellFactory((param) -> skinTypeCell);
-		skincategory.setButtonCell(skinTypeCell);
+		skincategory.setCellFactory((param) -> new SkinTypeCell());
+		skincategory.setButtonCell(new SkinTypeCell());
 		skincategory.getItems().addAll(SkinType.values());
-		
-		final ListCell<SkinHeader> skinListCell = new ListCell<SkinHeader>() {
-			@Override
-			protected void updateItem(SkinHeader arg0, boolean arg1) {
-				super.updateItem(arg0, arg1);
-				setText(arg0 != null ? arg0.getName() + (arg0.getType() == SkinHeader.TYPE_BEATORJASKIN ? "" : " (LR2 Skin)") : "");
-			}			
-		};
-		
-		skinheader.setCellFactory((param) -> skinListCell);
-		skinheader.setButtonCell(skinListCell);
+
+		skinheader.setCellFactory((param) -> new SkinListCell());
+		skinheader.setButtonCell(new SkinListCell());
 
 		List<Path> lr2skinpaths = new ArrayList<Path>();
 		scan(Paths.get("skin"), lr2skinpaths);
