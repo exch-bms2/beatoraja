@@ -654,6 +654,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 		addCommandWord(new CommandWord("SRC_GROOVEGAUGE") {
 			@Override
 			public void execute(String[] str) {
+				gauger = null;
 				int[] values = parseInt(str);
 				if (values[2] < imagelist.size() && imagelist.get(values[2]) != null) {
 					int playside = values[1];
@@ -727,6 +728,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 			//JSONスキンと同形式版 表赤、表緑、裏赤、裏緑、EX表赤、EX表緑、EX裏赤、EX裏緑の順にsrc分割
 			@Override
 			public void execute(String[] str) {
+				gauger = null;
 				int[] values = parseInt(str);
 				if (values[2] < imagelist.size() && imagelist.get(values[2]) != null) {
 					int playside = values[1];
