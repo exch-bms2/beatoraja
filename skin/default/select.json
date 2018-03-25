@@ -170,7 +170,7 @@
 		{"id":"playlevel_count", "src":6, "x":0, "y":0, "w":240, "h":24, "divx":10, "digit":3, "ref":96},
 		{"id":"score_count", "src":6, "x":0, "y":0, "w":240, "h":24, "divx":10, "digit":4, "ref":71},
 		{"id":"scorerate_count", "src":6, "x":0, "y":0, "w":240, "h":24, "divx":10, "digit":3, "ref":102},
-		{"id":"scorerate_dot_count", "src":6, "x":0, "y":0, "w":240, "h":24, "divx":10, "digit":1, "ref":103},
+		{"id":"scorerate_dot_count", "src":6, "x":0, "y":72, "w":264, "h":24, "divx":11, "digit":2, "ref":103},
 
 		{"id":"miss_count", "src":6, "x":0, "y":0, "w":240, "h":24, "divx":10, "digit":4, "ref":76},
 		{"id":"combo_count", "src":6, "x":0, "y":0, "w":240, "h":24, "divx":10, "digit":4, "ref":75},
