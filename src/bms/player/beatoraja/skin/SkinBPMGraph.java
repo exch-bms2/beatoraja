@@ -98,7 +98,7 @@ public class SkinBPMGraph extends SkinObject {
 		}
 		final float render = time >= delay ? 1.0f : (float) time / delay;
 		shapetex.setRegionWidth((int) (shapetex.getTexture().getWidth() * render));
-		draw(sprite, shapetex, graph.x, graph.y + graph.height, (int)(graph.width * render), -graph.height);
+		draw(sprite, shapetex, graph.x, graph.y + graph.height, (int)(graph.width * render), -graph.height, state);
 	}
 
 	private void updateGraph(BMSModel model) {

@@ -531,6 +531,35 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 				}
 			}
 		});
+		addCommandWord(new CommandWord("SRC_ONMOUSE") {
+			@Override
+			public void execute(String[] str) {
+				onmouse = null;
+				int gr = Integer.parseInt(str[2]);
+				if (gr < imagelist.size() && imagelist.get(gr) != null) {
+					int[] values = parseInt(str);
+					TextureRegion[] images = getSourceImage(values);
+					if (images != null) {
+						onmouse = new SkinImage(images, values[10], values[9]);
+						skin.setMouseRect(onmouse, values[12], values[6] - values[13] - values[15], values[14], values[15]);
+						skin.add(onmouse);
+					}
+				}
+			}
+		});
+		addCommandWord(new CommandWord("DST_ONMOUSE") {
+			@Override
+			public void execute(String[] str) {
+				if (onmouse != null) {
+					int[] values = parseInt(str);
+					onmouse.setDestination(values[2], values[3] * dstw / srcw,
+							dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
+							values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
+							values[12], values[13], values[14], values[15], values[16], values[17], values[18],
+							values[19], values[20], values[21]);
+				}
+			}
+		});
 		addCommandWord(new CommandWord("DST_PM_CHARA_1P") {
 			@Override
 			public void execute(String[] str) {
@@ -682,6 +711,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 
 	SkinImage part = null;
 	SkinImage button = null;
+	SkinImage onmouse = null;
 	SkinGraph bar = null;
 	SkinSlider slider = null;
 	SkinNumber num = null;
@@ -829,7 +859,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 		case KEY_CONFIG:
 			return null;
 		case SKIN_SELECT:
-			return null;
+			return new LR2SkinSelectSkinLoader(src, c);
 		}
 		return null;
 	}

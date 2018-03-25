@@ -72,7 +72,7 @@ public class SkinSlider extends SkinObject {
 			draw(sprite, image, r.x
 					+ (direction == 1 ? value * range : (direction == 3 ? -value * range : 0)), r.y
 					+ (direction == 0 ? value * range : (direction == 2 ? -value * range : 0)),
-					r.width, r.height);
+					r.width, r.height, state);
 		}
 	}
 

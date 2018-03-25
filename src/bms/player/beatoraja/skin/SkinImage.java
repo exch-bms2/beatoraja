@@ -78,7 +78,7 @@ public class SkinImage extends SkinObject {
             final Rectangle r = this.getDestination(time, state);
             final TextureRegion tr = state.getImage(getImageID());
             if (r != null && tr != null) {
-                draw(sprite, tr, r.x + offsetX, r.y + offsetY, r.width, r.height);
+                draw(sprite, tr, r.x + offsetX, r.y + offsetY, r.width, r.height, state);
             }
         } else {
             if(image == null) {
@@ -97,10 +97,10 @@ public class SkinImage extends SkinObject {
                 if(value >= 0 && value < image.length) {
                 	if(image[0] instanceof SkinSourceMovie) {
                 		setImageType(3);
-                        draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height);
+                        draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height, state);
                 		setImageType(0);
                 	} else {
-						draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height);
+						draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height, state);
                 	}
                 }
             }
@@ -112,7 +112,7 @@ public class SkinImage extends SkinObject {
             final Rectangle r = this.getDestination(time, state);
             final TextureRegion tr = state.getImage(getImageID());
             if (r != null && tr != null) {
-                draw(sprite, tr, r.x + offsetX, r.y + offsetY, r.width, r.height);
+                draw(sprite, tr, r.x + offsetX, r.y + offsetY, r.width, r.height, state);
             }
         } else {
             if(image == null) {
@@ -121,7 +121,7 @@ public class SkinImage extends SkinObject {
             final Rectangle r = this.getDestination(time, state);
             if (r != null) {
                 if(value >= 0 && value < image.length) {
-                    draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height);                    		
+                    draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height, state);
                 }
             }
         }

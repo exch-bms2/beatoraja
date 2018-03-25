@@ -72,11 +72,11 @@ public class SkinGraph extends SkinObject {
 					current.setRegion(image, 0,
 							image.getRegionY() + image.getRegionHeight() - (int) (image.getRegionHeight() * value),
 							image.getRegionWidth(), (int) (image.getRegionHeight() * value));
-					draw(sprite, current, r.x, r.y, r.width, r.height * value);
+					draw(sprite, current, r.x, r.y, r.width, r.height * value, state);
 				} else {
 					current.setRegion(image, 0, image.getRegionY(), (int) (image.getRegionWidth() * value),
 							image.getRegionHeight());
-					draw(sprite, current, r.x, r.y, r.width * value, r.height);
+					draw(sprite, current, r.x, r.y, r.width * value, r.height, state);
 				}
 			}
 		} else if (source != null) {
@@ -98,10 +98,10 @@ public class SkinGraph extends SkinObject {
 				if (direction == 1) {
 					current.setRegion(image, 0, image.getRegionHeight() - (int) (image.getRegionHeight() * value),
 							image.getRegionWidth(), (int) (image.getRegionHeight() * value));
-					draw(sprite, current, r.x, r.y, r.width, r.height * value);
+					draw(sprite, current, r.x, r.y, r.width, r.height * value, state);
 				} else {
 					current.setRegion(image, 0, 0, (int) (image.getRegionWidth() * value), image.getRegionHeight());
-					draw(sprite, current, r.x, r.y, r.width * value, r.height);
+					draw(sprite, current, r.x, r.y, r.width * value, r.height, state);
 				}
 			}
 		}

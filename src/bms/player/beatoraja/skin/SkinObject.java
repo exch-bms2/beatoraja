@@ -68,6 +68,10 @@ public abstract class SkinObject implements Disposable {
 	 */
 	private int[] dstop = new int[0];
 	/**
+	 * 描画条件のマウス範囲
+	 */
+	private Rectangle mouseRect = null;
+	/**
 	 * 画像の伸縮方法の指定
 	 */
 	private StretchType stretch = StretchType.STRETCH;
@@ -432,13 +436,17 @@ public abstract class SkinObject implements Disposable {
 
 	public abstract void draw(SkinObjectRenderer sprite, long time, MainState state);
 
-	protected void draw(SkinObjectRenderer sprite, TextureRegion image, float x, float y, float width, float height) {
-		draw(sprite, image, x, y, width, height, getColor(), getAngle());
+	protected void draw(SkinObjectRenderer sprite, TextureRegion image, float x, float y, float width, float height, MainState state) {
+		draw(sprite, image, x, y, width, height, getColor(), getAngle(), state);
 	}
 
 	protected void draw(SkinObjectRenderer sprite, TextureRegion image, float x, float y, float width, float height,
-			Color color, int angle) {
+			Color color, int angle, MainState state) {
 		if (color == null || color.a == 0f || image == null) {
+			return;
+		}
+		if (mouseRect != null && !mouseRect.contains(state.main.getInputProcessor().getMouseX() - x,
+				state.main.getInputProcessor().getMouseY() - y)) {
 			return;
 		}
 		tmpRect.set(x, y, width, height);
@@ -712,4 +720,7 @@ public abstract class SkinObject implements Disposable {
 		dstfilter = filter;
 	}
 
+	public void setMouseRect(float x2, float y2, float w2, float h2) {
+		this.mouseRect = new Rectangle(x2, y2, w2, h2);
+	}
 }

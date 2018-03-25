@@ -134,6 +134,10 @@ public class Skin {
 		return si;
 	}
 
+	public void setMouseRect(SkinObject object, float x, float y, float w, float h) {
+		object.setMouseRect(x * dw, y * dh, w * dw, h * dh);
+	}
+
 	public SkinObject[] getAllSkinObjects() {
 		return objects.toArray(SkinObject.class);
 	}

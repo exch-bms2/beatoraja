@@ -103,7 +103,7 @@ public class SkinTextImage extends SkinText {
 				// System.out.println("SkinTextImage描画:" + text.charAt(i) +
 				// " -
 				// " + (x + dx) + " " + y + " " + tw + " " + h);
-				draw(sprite, ch, x + dx + offsetX, r.y + offsetY, tw, r.height, c, 0);
+				draw(sprite, ch, x + dx + offsetX, r.y + offsetY, tw, r.height, c, 0, state);
 				dx += tw + source.getMargin() * scale;
 			}
 		}
