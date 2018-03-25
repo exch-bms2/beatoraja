@@ -224,6 +224,7 @@ public class MainLoader extends Application {
 				e.printStackTrace();
 			}
 		}
+		config.validate();
 
 		PlayerConfig.init(config);
 
