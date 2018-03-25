@@ -169,33 +169,105 @@ public class NoteShuffleModifier extends PatternModifier {
 					// Scratchレーンが複数ある場合は順繰りに配置されるように (24key対応)
 					if (mode.player == 1) {
 						// シングルプレー時
-						int[] sckey = mode.scratchKey;
-						boolean existsScratch = false;
-						boolean sclnisactive = false;
-						int lastScNoteTime = Integer.MIN_VALUE;
-						for (int sc : sckey) {
-							existsScratch = existsScratch || (notes[sc] != null);
-							sclnisactive = sclnisactive || (ln[sc] != -1);
-							lastScNoteTime = lastScNoteTime > lastNoteTime[sc] ? lastScNoteTime : lastNoteTime[sc];
+						keys = getKeys(mode, true);
+						int keyInterval = hranThreshold;
+						ArrayList<Integer> original, assign, note, other, primary, tate, sckey;
+						original = new ArrayList<Integer>(keys.length);
+						assign = new ArrayList<Integer>(keys.length);
+						note = new ArrayList<Integer>(keys.length);
+						other = new ArrayList<Integer>(keys.length);
+						primary = new ArrayList<Integer>(keys.length);
+						tate = new ArrayList<Integer>(keys.length);
+						sckey = new ArrayList<Integer>(mode.scratchKey.length);
+
+						for (int lane = 0; lane < keys.length; lane++) {
+							original.add(keys[lane]);
+							assign.add(keys[lane]);
 						}
-						// sckeyがln activeでなく、sckeyにノーツがなく、最後にスクラッチを置いてから十分時間が経っていれば
-						if (!(sclnisactive || existsScratch)
-								&& tl.getTime() - lastScNoteTime > scratchInterval) {
-							// normalnoteをリストアップしてそこからランダムに入れ替える
-							ArrayList<Integer> l = new ArrayList<Integer>(mode.key);
-							for (int i = 0; i < mode.key; i++) {
-								if (notes[i] != null && notes[i] instanceof NormalNote) {
-									l.add(i);
+						
+						for (int sc = 0; sc < mode.scratchKey.length; sc++) {
+							sckey.add(mode.scratchKey[sc]);
+						}
+
+						// LNがアクティブなレーンをアサインしてから除外
+						for (int lane = 0; lane < keys.length; lane++) {
+							if (ln[keys[lane]] != -1) {
+								random[keys[lane]] = ln[keys[lane]];
+								assign.remove((Integer) keys[lane]);
+								original.remove((Integer) ln[keys[lane]]);
+							}
+						}
+
+						// 元のレーンをノーツの存在で分類
+						while (!original.isEmpty()) {
+							if (notes[original.get(0)] != null) {
+								note.add(original.get(0));
+							} else {
+								other.add(original.get(0));
+							}
+							original.remove(0);
+						}
+						
+						// 
+
+						// 未アサインレーンを分類 1.次に配置するスクラッチレーンでない 2.縦連が発生する
+						while (!assign.isEmpty()) {
+							if ((
+									sckey.contains(assign.get(0)) && assign.get(0) != sckey.get(scratchIndex))
+									|| tl.getTime() - lastNoteTime[assign.get(0)]
+											< (sckey.contains(assign.get(0)) ? scratchInterval : keyInterval)) {
+								tate.add(assign.get(0));
+							} else {
+								primary.add(assign.get(0));
+							}
+							
+							assign.remove(0);
+						}
+						
+						// primaryにスクラッチレーンがあればノーツがあるレーンを配置
+						if (primary.contains(sckey.get(scratchIndex)) && !note.isEmpty()) {
+							random[sckey.get(scratchIndex)] = note.get(0);
+							primary.remove(sckey.get(scratchIndex));
+							note.remove(0);
+							// スクラッチレーンを順繰りに
+							scratchIndex = ++scratchIndex == sckey.size() ? 0 : scratchIndex;
+						}
+
+						// ノーツがあるレーンを縦連が発生しないレーンにランダムに配置
+						while (!(note.isEmpty() || primary.isEmpty())) {
+							int r = (int) (Math.random() * primary.size());
+							random[primary.get(r)] = note.get(0);
+							primary.remove(r);
+							note.remove(0);
+						}
+
+						// noteLaneが空でなかったら
+						// lastNoteTimeが小さいレーンから順番に置いていく
+						while (!note.isEmpty()) {
+							int min = Integer.MAX_VALUE;
+							int minLane = tate.get(0);
+							for (int i = 0; i < tate.size(); i++) {
+								if (min > lastNoteTime[tate.get(i)]) {
+									min = lastNoteTime[tate.get(i)];
+									minLane = tate.get(i);
 								}
 							}
-							if (!l.isEmpty()) {
-								int r = (int) (Math.random() * l.size());
-								random[sckey[scratchIndex]] = l.get(r);
-								random[l.get(r)] = sckey[scratchIndex];
-								scratchIndex = ++scratchIndex == sckey.length ? 0 : scratchIndex;
-							}
-
+							random[minLane] = note.get(0);
+							tate.remove((Integer) minLane);
+							note.remove(0);
 						}
+
+						primary.addAll(tate);
+						// 残りをランダムに
+						while (!other.isEmpty()) {
+							int r = (int) (Math.random() * primary.size());
+							random[primary.get(r)] = other.get(0);
+							primary.remove(r);
+							other.remove(0);
+						}
+						
+
+
 					} else if (mode.player == 2) {
 						if (mode == Mode.KEYBOARD_24K_DOUBLE) {
 							// TODO 24k-DPに対応
