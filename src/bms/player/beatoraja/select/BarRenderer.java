@@ -740,6 +740,8 @@ public class BarRenderer {
 			}
 			dirString = str.toString();
 
+			select.selectedBarMoved();
+
 			return true;
 		}
 
