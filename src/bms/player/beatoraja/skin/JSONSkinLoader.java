@@ -32,6 +32,7 @@ import com.badlogic.gdx.utils.reflect.Field;
 import com.badlogic.gdx.utils.reflect.ReflectionException;
 
 import static bms.player.beatoraja.Resolution.*;
+import static bms.player.beatoraja.skin.SkinProperty.*;
 
 public class JSONSkinLoader extends SkinLoader{
 
@@ -147,7 +148,14 @@ public class JSONSkinLoader extends SkinLoader{
 				int op = customOption.getDefaultOption();
 				for (SkinConfig.Option option : property.getOption()) {
 					if (option.name.equals(customOption.name)) {
-						op = option.value;
+						if(option.value != OPTION_RANDOM_VALUE) {
+							op = option.value;
+						} else {
+							if(customOption.option.length > 0) {
+								op = customOption.option[(int) (Math.random() * customOption.option.length)];
+								header.setRandomSelectedOptions(option.name, op);
+							}
+						}
 						break;
 					}
 				}
@@ -159,7 +167,31 @@ public class JSONSkinLoader extends SkinLoader{
 			for (SkinHeader.CustomFile customFile : header.getCustomFiles()) {
 				for(SkinConfig.FilePath file : property.getFile()) {
 					if (customFile.name.equals(file.name)) {
-						filemap.put(customFile.path, file.path);
+						if(!file.path.equals("Random")) {
+							filemap.put(customFile.path, file.path);
+						} else {
+							String ext = customFile.path.substring(customFile.path.lastIndexOf("*") + 1);
+							if(customFile.path.contains("|")) {
+								if(customFile.path.length() > customFile.path.lastIndexOf('|') + 1) {
+									ext = customFile.path.substring(customFile.path.lastIndexOf("*") + 1, customFile.path.indexOf('|')) + customFile.path.substring(customFile.path.lastIndexOf('|') + 1);
+								} else {
+									ext = customFile.path.substring(customFile.path.lastIndexOf("*") + 1, customFile.path.indexOf('|'));
+								}
+							}
+							File dir = new File(customFile.path.substring(0, customFile.path.lastIndexOf('/')));
+							if (dir.exists() && dir.isDirectory()) {
+								List<File> l = new ArrayList<File>();
+								for (File subfile : dir.listFiles()) {
+									if (subfile.getPath().toLowerCase().endsWith(ext)) {
+										l.add(subfile);
+									}
+								}
+								if (l.size() > 0) {
+									String filename = l.get((int) (Math.random() * l.size())).getName();
+									filemap.put(file.name, filename);
+								}
+							}
+						}
 					}
 				}
 			}
@@ -203,7 +235,11 @@ public class JSONSkinLoader extends SkinLoader{
 				int pop = 0;
 				for(SkinConfig.Option opt : property.getOption()) {
 					if(opt.name.equals(pr.name)) {
-						pop = opt.value;
+						if(opt.value != OPTION_RANDOM_VALUE) {
+							pop = opt.value;
+						} else {
+							if(header.getRandomSelectedOptions(opt.name) >= 0) pop = header.getRandomSelectedOptions(opt.name);
+						}
 						break;
 					}
 				}

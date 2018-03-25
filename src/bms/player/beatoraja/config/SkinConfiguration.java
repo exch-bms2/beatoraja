@@ -222,11 +222,15 @@ public class SkinConfiguration extends MainState {
 			for(SkinConfig.Option o : config.getProperties().getOption()) {
 				if (o.name.equals(option.name)) {
 					int i = o.value;
-					for (int j = 0; j < option.option.length; j++) {
-						if (option.option[j] == i) {
-							selection = j;
-							break;
+					if(i != OPTION_RANDOM_VALUE) {
+						for (int j = 0; j < option.option.length; j++) {
+							if (option.option[j] == i) {
+								selection = j;
+								break;
+							}
 						}
+					} else {
+						selection = option.option.length;
 					}
 					break;
 				}
@@ -245,7 +249,18 @@ public class SkinConfiguration extends MainState {
 				}
 				setCustomOption(option.name, option.option[selection]);
 			}
-			CustomOptionItem item = new CustomOptionItem(option.name, option.contents, option.option, selection);
+			String[] contentsAddedRandom = new String[option.contents.length + 1];
+			for(int i = 0; i < option.contents.length; i++) {
+				contentsAddedRandom[i] = option.contents[i];
+			}
+			contentsAddedRandom[option.contents.length] = "Random";
+			int[] optionAddedRandom = new int[option.option.length + 1];
+			for(int i = 0; i < option.option.length; i++) {
+				optionAddedRandom[i] = option.option[i];
+			}
+			optionAddedRandom[option.option.length] = OPTION_RANDOM_VALUE;
+
+			CustomOptionItem item = new CustomOptionItem(option.name, contentsAddedRandom, optionAddedRandom, selection);
 			customOptions.add(item);
 		}
 	}
@@ -271,6 +286,7 @@ public class SkinConfiguration extends MainState {
 				for (Path path : paths) {
 					items.add(path.getFileName().toString());
 				}
+				items.add("Random");
 				String selection = null;
 				for(SkinConfig.FilePath f : config.getProperties().getFile()) {
 					if(f.name.equals(file.name)) {

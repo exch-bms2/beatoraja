@@ -16,6 +16,7 @@ import bms.player.beatoraja.skin.SkinType;
 import bms.player.beatoraja.skin.SkinHeader.*;
 
 import static bms.player.beatoraja.Resolution.*;
+import static bms.player.beatoraja.skin.SkinProperty.*;
 
 /**
  * LR2スキンヘッダファイル(lr2skin)のローダー
@@ -126,10 +127,6 @@ public class LR2SkinHeaderLoader extends LR2SkinLoader {
 		BufferedReader br = Files.newBufferedReader(f, Charset.forName("MS932"));
 		String line = null;
 
-		for(SkinConfig.Option opt : property.getOption()) {
-			op.put(opt.value, true);
-		}
-
 		while ((line = br.readLine()) != null) {
 			try {
 				processLine(line, state);				
@@ -141,6 +138,19 @@ public class LR2SkinHeaderLoader extends LR2SkinLoader {
 		header.setCustomFiles(files.toArray(new CustomFile[files.size()]));
 		header.setCustomOffsets(offsets.toArray(new CustomOffset[offsets.size()]));
 
+		for(SkinConfig.Option opt : property.getOption()) {
+			if(opt.value != OPTION_RANDOM_VALUE) {
+				op.put(opt.value, true);
+			} else {
+				for (CustomOption option : header.getCustomOptions()) {
+					if(opt.name.equals(option.name)) {
+						int selected = option.option[(int) (Math.random() * option.option.length)];
+						op.put(selected, true);
+						header.setRandomSelectedOptions(option.name, selected);
+					}
+				}
+			}
+		}
 		for(CustomOption co : options) {
 			for(int i = 0;i < co.contents.length;i++) {
 				if(!op.containsKey(co.option[i])) {

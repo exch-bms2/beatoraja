@@ -3,6 +3,7 @@ package bms.player.beatoraja.skin;
 import bms.player.beatoraja.Resolution;
 
 import java.nio.file.Path;
+import java.util.*;
 
 /**
  * スキンのヘッダ情報
@@ -38,6 +39,10 @@ public class SkinHeader {
 	 * スキン解像度
 	 */
 	private Resolution resolution = Resolution.SD;
+	/**
+	 * ランダムで選択されたオプション名と値
+	 */
+	private Map<String, Integer> randomSelectedOptions = new HashMap<>();
 
 	public SkinType getSkinType() {
 		return mode;
@@ -164,5 +169,14 @@ public class SkinHeader {
 			this.r = r;
 			this.a = a;
 		}
+	}
+
+	public int getRandomSelectedOptions(String name) {
+		if(randomSelectedOptions.containsKey(name)) return randomSelectedOptions.get(name);
+		return -1;
+	}
+
+	public void setRandomSelectedOptions(String name, int value) {
+		randomSelectedOptions.put(name, value);
 	}
 }
