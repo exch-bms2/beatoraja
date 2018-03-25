@@ -80,6 +80,7 @@ public class PlayModeConfig {
         if(playconfig == null) {
             playconfig = new PlayConfig();
         }
+        // データ移行用
         if(duration != 500) {
             playconfig.setDuration(duration);
             duration = 500;
@@ -108,6 +109,8 @@ public class PlayModeConfig {
             playconfig.setLift(lift);
             lift = 0.1f;
         }
+        
+        playconfig.validate();
 
         if (keyboard.keys == null) {
             keyboard.keys = new int[] { Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.F, Keys.V, Keys.SHIFT_LEFT,

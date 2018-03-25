@@ -1,5 +1,7 @@
 package bms.player.beatoraja;
 
+import com.badlogic.gdx.math.MathUtils;
+
 /**
  * プレイコンフィグ。モード毎に保持するべき値についてはこちらに格納する
  * 
@@ -52,9 +54,6 @@ public class PlayConfig implements Cloneable {
 	}
 
 	public float getHispeed() {
-		if (hispeed < 0.01) {
-			hispeed = 0.01f;
-		}
 		return hispeed;
 	}
 
@@ -63,9 +62,6 @@ public class PlayConfig implements Cloneable {
 	}
 
 	public int getDuration() {
-		if (duration < 1) {
-			duration = 1;
-		}
 		return duration;
 	}
 
@@ -74,8 +70,6 @@ public class PlayConfig implements Cloneable {
 	}
 
 	public float getHispeedMargin() {
-		if(hispeedmargin < 0.0f || hispeedmargin > 10.0f)
-			hispeedmargin = 0.25f;
 		return hispeedmargin;
 	}
 
@@ -84,9 +78,6 @@ public class PlayConfig implements Cloneable {
 	}
 
 	public int getFixhispeed() {
-		if(fixhispeed < 0 || fixhispeed > FIX_HISPEED_MINBPM) {
-			fixhispeed = FIX_HISPEED_OFF;
-		}
 		return fixhispeed;
 	}
 
@@ -95,9 +86,6 @@ public class PlayConfig implements Cloneable {
 	}
 
 	public float getLanecover() {
-		if (lanecover < 0 || lanecover > 1) {
-			lanecover = 0;
-		}
 		return lanecover;
 	}
 
@@ -114,9 +102,6 @@ public class PlayConfig implements Cloneable {
 	}
 
 	public float getLift() {
-		if (lift < 0 || lift > 1) {
-			lift = 0;
-		}
 		return lift;
 	}
 
@@ -130,6 +115,15 @@ public class PlayConfig implements Cloneable {
 
 	public void setEnablelift(boolean enablelift) {
 		this.enablelift = enablelift;
+	}
+	
+	public void validate() {
+		hispeed = MathUtils.clamp(hispeed, 0.01f, 20);
+		duration = MathUtils.clamp(duration, 1, 10000);
+		hispeedmargin = MathUtils.clamp(hispeedmargin, 0f, 10f);
+		fixhispeed = MathUtils.clamp(fixhispeed, 0, FIX_HISPEED_MINBPM);
+		lanecover = MathUtils.clamp(lanecover, 0f, 1f);
+		lift = MathUtils.clamp(lift, 0f, 1f);
 	}
 	
 	public PlayConfig clone() {

@@ -69,6 +69,20 @@ public class SkinConfig {
 	public void setProperties(Property property) {
 		this.properties = property;
 	}
+	
+	public void validate() {
+		if(properties == null) {
+			properties = new Property();
+		}
+		properties.validate();
+	}
+	
+	public static SkinConfig getDefault(int id) {
+		SkinConfig skin = new SkinConfig();
+		skin.setPath(defaultSkinPathMap.get(SkinType.getSkinTypeById(id)));
+		skin.validate();
+		return skin;
+	}
 
 	public static class Property {
 		private Option[] option = new Option[0];
@@ -76,9 +90,6 @@ public class SkinConfig {
 		private Offset[] offset = new Offset[0];
 
 		public Option[] getOption() {
-			if(option == null) {
-				option = new Option[0];
-			}
 			return option;
 		}
 
@@ -87,9 +98,6 @@ public class SkinConfig {
 		}
 
 		public FilePath[] getFile() {
-			if(file == null) {
-				file = new FilePath[0];
-			}
 			return file;
 		}
 
@@ -98,14 +106,23 @@ public class SkinConfig {
 		}
 
 		public Offset[] getOffset() {
-			if(offset == null) {
-				offset = new Offset[0];
-			}
 			return offset;
 		}
 
 		public void setOffset(Offset[] offset) {
 			this.offset = offset;
+		}
+		
+		public void validate() {
+			if(option == null) {
+				option = new Option[0];
+			}
+			if(file == null) {
+				file = new FilePath[0];
+			}
+			if(offset == null) {
+				offset = new Offset[0];
+			}			
 		}
 	}
 

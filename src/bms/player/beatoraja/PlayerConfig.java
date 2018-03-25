@@ -7,9 +7,12 @@ import java.nio.file.*;
 import java.util.*;
 import java.util.logging.Logger;
 
+import bms.player.beatoraja.play.TargetProperty;
 import bms.player.beatoraja.skin.SkinType;
 
 import bms.model.Mode;
+
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter;
 
@@ -59,6 +62,10 @@ public class PlayerConfig {
 	private int misslayerDuration = 500;
 	
 	/**
+	 * LNモード
+	 */
+	private int lnmode = 0;
+	/**
 	 * アシストオプション:コンスタント
 	 */
 	private boolean constant = false;
@@ -67,10 +74,6 @@ public class PlayerConfig {
 	 */
 	private boolean legacynote = false;
 	/**
-	 * LNモード
-	 */
-	private int lnmode = 0;
-	/**
 	 * アシストオプション:判定拡大
 	 */
 	private int judgewindowrate = 100;
@@ -78,7 +81,6 @@ public class PlayerConfig {
 	 * アシストオプション:地雷除去
 	 */
 	private boolean nomine = false;
-
 	/**
 	 * アシストオプション:BPMガイド
 	 */
@@ -92,7 +94,6 @@ public class PlayerConfig {
 	 * H-RANDOM連打しきい値BPM
 	 */
 	private int hranThresholdBPM = 120;
-	
 	/**
 	 * 途中閉店の有無
 	 */
@@ -125,6 +126,9 @@ public class PlayerConfig {
 
 	private PlayModeConfig mode24double = new PlayModeConfig(Mode.KEYBOARD_24K_DOUBLE);
 
+	/**
+	 * 選曲時でのキー入力方式
+	 */
 	private int musicselectinput = 0;
 
 	private String irname = "";
@@ -135,6 +139,10 @@ public class PlayerConfig {
 	
 	private int irsend = 0;
 	
+	public static final int IR_SEND_ALWAYS = 0;
+	public static final int IR_SEND_COMPLETE_SONG = 1;
+	public static final int IR_SEND_UPDATE_SCORE = 2;
+
 	private String twitterConsumerKey;
 
 	private String twitterConsumerSecret;
@@ -143,11 +151,8 @@ public class PlayerConfig {
 
 	private String twitterAccessTokenSecret;
 	
-	public static final int IR_SEND_ALWAYS = 0;
-	public static final int IR_SEND_COMPLETE_SONG = 1;
-	public static final int IR_SEND_UPDATE_SCORE = 2;
-
 	public PlayerConfig() {
+		validate();
 	}
 	
     public String getName() {
@@ -511,11 +516,55 @@ public class PlayerConfig {
 	}
 
 	public void validate() {
+		if(skin == null) {
+			skin = new SkinConfig[SkinType.getMaxSkinTypeID() + 1];
+		}
+		if(skin.length != SkinType.getMaxSkinTypeID() + 1) {
+			skin = Arrays.copyOf(skin, SkinType.getMaxSkinTypeID() + 1);
+		}
+		for(int i = 0;i < skin.length;i++) {
+			if(skin[i] == null) {
+				skin[i] = SkinConfig.getDefault(i);
+			}
+			skin[i].validate();
+		}
+
+		if(mode7 == null) {
+			mode7 = new PlayModeConfig(Mode.BEAT_7K);
+		}
+		if(mode14 == null) {
+			mode14 = new PlayModeConfig(Mode.BEAT_14K);
+		}
+		if(mode9 == null) {
+			mode9 = new PlayModeConfig(Mode.POPN_9K);			
+		}
+		if(mode24 == null) {
+			mode24 = new PlayModeConfig(Mode.KEYBOARD_24K);
+		}
+		if(mode24double == null) {
+			mode24double = new PlayModeConfig(Mode.KEYBOARD_24K_DOUBLE);
+		}
 		mode7.validate(9);
 		mode14.validate(18);
 		mode9.validate(9);
 		mode24.validate(26);
 		mode24double.validate(52);
+		
+		gauge = MathUtils.clamp(gauge, 0, 5);
+		random = MathUtils.clamp(random, 0, 9);
+		random2 = MathUtils.clamp(random2, 0, 9);
+		doubleoption = MathUtils.clamp(doubleoption, 0, 3);
+		target = MathUtils.clamp(target, 0, TargetProperty.getAllTargetProperties().length);
+		judgetiming = MathUtils.clamp(judgetiming, -100, 100);
+		misslayerDuration = MathUtils.clamp(misslayerDuration, 0, 5000);
+		lnmode = MathUtils.clamp(lnmode, 0, 2);
+		judgewindowrate = MathUtils.clamp(judgewindowrate, 10, 400);
+		hranThresholdBPM = MathUtils.clamp(hranThresholdBPM, 1, 1000);
+		sevenToNinePattern = MathUtils.clamp(sevenToNinePattern, 0, 6);
+		sevenToNineType = MathUtils.clamp(sevenToNineType, 0, 2);
+		
+		irsend = MathUtils.clamp(irsend, 0, 2);
+
 	}
 
 	public static void init(Config config) {
