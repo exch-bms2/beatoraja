@@ -445,10 +445,12 @@ public class MainController extends ApplicationAdapter {
 					config.getResolution().height - 2);
 			sprite.end();
 		} else if(updateSong != null && updateSong.isAlive()) {
-			sprite.begin();
-			updatefont.setColor(0,1,1,0.5f + (System.currentTimeMillis() % 750) / 1000.0f);
-			updatefont.draw(sprite, updateSong.message, 100, config.getResolution().height - 2);
-			sprite.end();
+			if(currentState instanceof MusicSelector) {
+				sprite.begin();
+				updatefont.setColor(0,1,1,0.5f + (System.currentTimeMillis() % 750) / 1000.0f);
+				updatefont.draw(sprite, updateSong.message, 100, config.getResolution().height - 2);
+				sprite.end();
+			}
 		}
 
 		final long time = System.currentTimeMillis();
