@@ -761,10 +761,46 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 	public S loadSkin(File f, MainState decide, SkinHeader header, Map<Integer, Boolean> option, SkinConfig.Property property) throws IOException {
 		Map m = new HashMap();
 		for(SkinConfig.Option op : property.getOption()) {
-			m.put(op.name, op.value);
+			if(op.value != OPTION_RANDOM_VALUE) {
+				m.put(op.name, op.value);
+			} else {
+				for (CustomOption opt : header.getCustomOptions()) {
+					if(op.name.equals(opt.name)) {
+						if(header.getRandomSelectedOptions(op.name) >= 0) m.put(op.name, header.getRandomSelectedOptions(op.name));
+					}
+				}
+			}
 		}
 		for(SkinConfig.FilePath file : property.getFile()) {
-			m.put(file.name, file.path);
+			if(!file.path.equals("Random")) {
+				m.put(file.name, file.path);
+			} else {
+				for (CustomFile cf : header.getCustomFiles()) {
+					if(file.name.equals(cf.name)) {
+						String ext = cf.path.substring(cf.path.lastIndexOf("*") + 1);
+						if(cf.path.contains("|")) {
+							if(cf.path.length() > cf.path.lastIndexOf('|') + 1) {
+								ext = cf.path.substring(cf.path.lastIndexOf("*") + 1, cf.path.indexOf('|')) + cf.path.substring(cf.path.lastIndexOf('|') + 1);
+							} else {
+								ext = cf.path.substring(cf.path.lastIndexOf("*") + 1, cf.path.indexOf('|'));
+							}
+						}
+						File dir = new File(cf.path.substring(0, cf.path.lastIndexOf('/')));
+						if (dir.exists() && dir.isDirectory()) {
+							List<File> l = new ArrayList<File>();
+							for (File subfile : dir.listFiles()) {
+								if (subfile.getPath().toLowerCase().endsWith(ext)) {
+									l.add(subfile);
+								}
+							}
+							if (l.size() > 0) {
+								String filename = l.get((int) (Math.random() * l.size())).getName();
+								m.put(file.name, filename);
+							}
+						}
+					}
+				}
+			}
 		}
 		for(SkinConfig.Offset offset : property.getOffset()) {
 			m.put(offset.name, offset);

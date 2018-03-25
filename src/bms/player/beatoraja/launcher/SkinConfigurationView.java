@@ -28,6 +28,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 
+import static bms.player.beatoraja.skin.SkinProperty.*;
+
 /**
  * スキンコンフィグ
  *
@@ -119,16 +121,21 @@ public class SkinConfigurationView implements Initializable {
 			HBox hbox = new HBox();
 			ComboBox<String> combo = new ComboBox<String>();
 			combo.getItems().setAll(option.contents);
+			combo.getItems().add("Random");
 			combo.getSelectionModel().select(0);
 			int selection = -1;
 			for(SkinConfig.Option o : property.getOption()) {
 				if (o.name.equals(option.name)) {
 					int i = o.value;
-					for(int index = 0;index < option.option.length;index++) {
-						if(option.option[index] == i) {
-							selection = index;
-							break;
+					if(i != OPTION_RANDOM_VALUE) {
+						for(int index = 0;index < option.option.length;index++) {
+							if(option.option[index] == i) {
+								selection = index;
+								break;
+							}
 						}
+					} else {
+						selection = combo.getItems().size() - 1;
 					}
 					break;
 				}
@@ -171,6 +178,7 @@ public class SkinConfigurationView implements Initializable {
 				for (Path p : paths) {
 					combo.getItems().add(p.getFileName().toString());
 				}
+				combo.getItems().add("Random");
 
 				String selection = null;
 				for(SkinConfig.FilePath f : property.getFile()) {
@@ -282,7 +290,11 @@ public class SkinConfigurationView implements Initializable {
 				int index = optionbox.get(option).getSelectionModel().getSelectedIndex();
 				SkinConfig.Option o = new SkinConfig.Option();
 				o.name = option.name;
-				o.value = option.option[index];
+				if(index != optionbox.get(option).getItems().size() - 1) {
+					o.value = option.option[index];
+				} else {
+					o.value = OPTION_RANDOM_VALUE;
+				}
 				options.add(o);
 			}
 		}

@@ -441,6 +441,8 @@ public class SkinProperty {
 	public static final int VALUE_JUDGE_2P_DURATION = 526;
 	public static final int VALUE_JUDGE_3P_DURATION = 527;
 
+	public static final int OPTION_RANDOM_VALUE = -1;
+
 	public static final int OPTION_FOLDERBAR = 1;
 	public static final int OPTION_SONGBAR = 2;
 	public static final int OPTION_GRADEBAR = 3;
