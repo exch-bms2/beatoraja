@@ -747,7 +747,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 
 	protected int[] parseInt(String[] s) {
 		int[] result = new int[22];
-		for (int i = 1; i < result.length; i++) {
+		for (int i = 1; i < result.length && i < s.length; i++) {
 			try {
 				result[i] = Integer.parseInt(s[i].replace('!', '-').replaceAll(" ", ""));
 			} catch (Exception e) {
