@@ -74,7 +74,7 @@ public class MusicSelector extends MainState {
 	/**
 	 * 楽曲が選択されてからbmsを読み込むまでの時間(ms)
 	 */
-	private final int notesGraphDuration = 1000;
+	private final int notesGraphDuration = 350;
 	/**
 	 * 楽曲が選択されてからプレビュー曲を再生するまでの時間(ms)
 	 */
@@ -221,6 +221,7 @@ public class MusicSelector extends MainState {
 		setSound(SOUND_CHANGEOPTION, "o-change.wav", SoundType.SOUND,false);
 
 		play = null;
+		showNoteGraph = false;
 		playerdata = main.getPlayDataAccessor().readPlayerData();
 		if (bar.getSelected() != null && bar.getSelected() instanceof SongBar) {
 			scorecache.update(((SongBar) bar.getSelected()).getSongData(), config.getLnmode());
@@ -260,6 +261,9 @@ public class MusicSelector extends MainState {
         if(main.getNowTime() > getSkin().getInput()){
         	main.switchTimer(TIMER_STARTINPUT, true);
         }
+		if(main.getNowTime(TIMER_SONGBAR_CHANGE) < 0) {
+			main.setTimerOn(TIMER_SONGBAR_CHANGE);
+		}
 		// draw song information
 		resource.setSongdata(current instanceof SongBar ? ((SongBar) current).getSongData() : null);
 
