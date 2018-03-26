@@ -185,7 +185,9 @@ public class PlayDataAccessor {
 			score.setMode(model.containsUndefinedLongNote() ? lnmode : 0);
 		}
 		score.setSha256(hash);
-		score.setNotes(model.getTotalNotes());
+		if (updateScore) {
+			score.setNotes(model.getTotalNotes());
+		}
 
 		if (newscore.getClear() > Failed.id) {
 			score.setClearcount(score.getClearcount() + 1);
