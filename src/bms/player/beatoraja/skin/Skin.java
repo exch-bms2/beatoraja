@@ -112,6 +112,13 @@ public class Skin {
 	}
 
 	public void setDestination(SkinObject object, long time, float x, float y, float w, float h, int acc, int a,
+			int r, int g, int b, int blend, int filter, int angle, int center, int loop, int timer, int op1, int op2,
+			int op3, int[] offset) {
+		object.setDestination(time, x * dw, y * dh, w * dw, h * dh, acc, a, r, g, b, blend, filter, angle, center,
+				loop, timer, op1, op2, op3, offset);
+	}
+
+	public void setDestination(SkinObject object, long time, float x, float y, float w, float h, int acc, int a,
 			int r, int g, int b, int blend, int filter, int angle, int center, int loop, int timer, int[] op) {
 		object.setDestination(time, x * dw, y * dh, w * dw, h * dh, acc, a, r, g, b, blend, filter, angle, center,
 				loop, timer, op);

@@ -18,6 +18,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.IntArray;
 
 /**
  * LR2のスキン定義用csvファイルのローダー
@@ -222,7 +223,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 							dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
 							values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
 							values[12], values[13], values[14], values[15], values[16], values[17], values[18],
-							values[19], values[20], values[21]);
+							values[19], values[20], readOffset(str, 21));
 				}
 			}
 		});
@@ -290,7 +291,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 					num.setDestination(values[2], values[3] * dstw / srcw, dsth - (values[4] + values[6]) * dsth / srch,
 							values[5] * dstw / srcw, values[6] * dsth / srch, values[7], values[8], values[9],
 							values[10], values[11], values[12], values[13], values[14], values[15], values[16],
-							values[17], values[18], values[19], values[20], values[21]);
+							values[17], values[18], values[19], values[20], readOffset(str, 21));
 				}
 			}
 		});
@@ -323,7 +324,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 							dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
 							values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
 							values[12], values[13], values[14], values[15], values[16], values[17], values[18],
-							values[19], values[20], values[21]);
+							values[19], values[20], readOffset(str, 21));
 					if(text.isEditable() && text.getReferenceID() == SkinProperty.STRING_SEARCHWORD && skin instanceof MusicSelectSkin) {
 						Rectangle r = new Rectangle(values[3] * dstw / srcw,
 								dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
@@ -382,7 +383,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 							dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
 							values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
 							values[12], values[13], values[14], values[15], values[16], values[17], values[18],
-							values[19], values[20], values[21]);
+							values[19], values[20], readOffset(str, 21));
 				}
 			}
 		});
@@ -457,7 +458,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 					bar.setDestination(values[2], values[3] * dstw / srcw, dsth - (values[4] + values[6]) * dsth / srch,
 							values[5] * dstw / srcw, values[6] * dsth / srch, values[7], values[8], values[9],
 							values[10], values[11], values[12], values[13], values[14], values[15], values[16],
-							values[17], values[18], values[19], values[20], values[21]);
+							values[17], values[18], values[19], values[20], readOffset(str, 21));
 				}
 			}
 		});
@@ -527,7 +528,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 							dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
 							values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
 							values[12], values[13], values[14], values[15], values[16], values[17], values[18],
-							values[19], values[20], values[21]);
+							values[19], values[20], readOffset(str, 21));
 				}
 			}
 		});
@@ -556,7 +557,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 							dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
 							values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
 							values[12], values[13], values[14], values[15], values[16], values[17], values[18],
-							values[19], values[20], values[21]);
+							values[19], values[20], readOffset(str, 21));
 				}
 			}
 		});
@@ -660,7 +661,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 							dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
 							values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
 							values[12], values[13], values[14], values[15], values[16], values[17], values[18],
-							values[19], values[20], values[21]);
+							values[19], values[20], readOffset(str, 21));
 				}
 			}
 		});
@@ -746,7 +747,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 
 	protected int[] parseInt(String[] s) {
 		int[] result = new int[22];
-		for (int i = 1; i < s.length; i++) {
+		for (int i = 1; i < result.length; i++) {
 			try {
 				result[i] = Integer.parseInt(s[i].replace('!', '-').replaceAll(" ", ""));
 			} catch (Exception e) {
@@ -754,6 +755,23 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 			}
 		}
 		return result;
+	}
+
+	protected int[] readOffset(String[] str, int startIndex) {
+		return readOffset(str, startIndex, new int[0]);
+	}
+
+	protected int[] readOffset(String[] str, int startIndex, int[] offset) {
+		IntArray result = new IntArray();
+		for(int i : offset) {
+			result.add(i);
+		}
+		for (int i = startIndex; i < str.length; i++) {
+			if(str[i].length() > 0) {
+				result.add(Integer.parseInt(str[i].replaceAll("[^0-9-]", "")));
+			}
+		}
+		return result.toArray();
 	}
 
 	protected TextureRegion[] getSourceImage(int[] values) {
