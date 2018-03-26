@@ -489,7 +489,7 @@ public class Config {
 		maxFramePerSecond = MathUtils.clamp(maxFramePerSecond, 0, 10000);
 		inputduration = MathUtils.clamp(inputduration, 0, 100);
 		scrolldurationlow = MathUtils.clamp(scrolldurationlow, 2, 1000);
-		scrolldurationhigh = MathUtils.clamp(scrolldurationlow, 1, 1000);
+		scrolldurationhigh = MathUtils.clamp(scrolldurationhigh, 1, 1000);
 
 		if(JudgeAlgorithm.getIndex(judgeType) == -1) {
 			judgeType = JudgeAlgorithm.Combo.name();
