@@ -633,6 +633,8 @@ public class BMSPlayer extends MainState {
 		// practice終了
 		case STATE_PRACTICE_FINISHED:
 			if (main.getNowTime(TIMER_FADEOUT) > skin.getFadeout()) {
+				input.setEnable(true);
+				input.setStartTime(0);
 				main.changeState(MainController.STATE_SELECTMUSIC);
 			}
 			break;
