@@ -84,7 +84,7 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 				skinbar.makeBarImages(false, values[1]).setDestination(values[2], values[3] * dstw / srcw,
 						dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw, values[6] * dsth / srch,
 						values[7], values[8], values[9], values[10], values[11], values[12], values[13], values[14],
-						values[15], values[16], values[17], values[18], values[19], values[20], values[21]);
+						values[15], values[16], values[17], values[18], values[19], values[20], readOffset(str, 21));
 			}
 		});
 		addCommandWord(new CommandWord("DST_BAR_BODY_ON") {
@@ -102,7 +102,7 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 				skinbar.makeBarImages(true, values[1]).setDestination(values[2], values[3] * dstw / srcw,
 						dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw, values[6] * dsth / srch,
 						values[7], values[8], values[9], values[10], values[11], values[12], values[13], values[14],
-						values[15], values[16], values[17], values[18], values[19], values[20], values[21]);
+						values[15], values[16], values[17], values[18], values[19], values[20], readOffset(str, 21));
 			}
 		});
 		addCommandWord(new CommandWord("BAR_CENTER") {
@@ -194,7 +194,7 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 					skinbar.getBarlevel()[values[1]].setDestination(values[2], values[3] * dstw / srcw,
 							-(values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw, values[6] * dsth / srch,
 							values[7], values[8], values[9], values[10], values[11], values[12], values[13], values[14],
-							values[15], values[16], values[17], values[18], values[19], values[20], values[21]);
+							values[15], values[16], values[17], values[18], values[19], values[20], readOffset(str, 21));
 				}
 			}
 		});
@@ -231,7 +231,7 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 								-(values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
 								values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
 								values[12], values[13], values[14], values[15], values[16], values[17], values[18],
-								values[19], values[20], values[21]);
+								values[19], values[20], readOffset(str, 21));
 					} else {
 						skinbar.getLamp()[lamps[i]] = skinbar.getLamp()[lamps[0]];
 					}
@@ -270,7 +270,7 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 								-(values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
 								values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
 								values[12], values[13], values[14], values[15], values[16], values[17], values[18],
-								values[19], values[20], values[21]);
+								values[19], values[20], readOffset(str, 21));
 					} else {
 						skinbar.getPlayerLamp()[lamps[i]] = skinbar.getPlayerLamp()[lamps[0]];
 					}
@@ -309,7 +309,7 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 								-(values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
 								values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
 								values[12], values[13], values[14], values[15], values[16], values[17], values[18],
-								values[19], values[20], values[21]);
+								values[19], values[20], readOffset(str, 21));
 					} else {
 						skinbar.getRivalLamp()[lamps[i]] = skinbar.getRivalLamp()[lamps[0]];
 					}
@@ -347,7 +347,7 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 							-(values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
 							values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
 							values[12], values[13], values[14], values[15], values[16], values[17], values[18],
-							values[19], values[20], values[21]);
+							values[19], values[20], readOffset(str, 21));
 				}
 			}
 		});
@@ -383,7 +383,7 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 							-(values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
 							values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
 							values[12], values[13], values[14], values[15], values[16], values[17], values[18],
-							values[19], values[20], values[21]);
+							values[19], values[20], readOffset(str, 21));
 				}
 			}
 		});
@@ -426,7 +426,7 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 							-(values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
 							values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
 							values[12], values[13], values[14], values[15], values[16], values[17], values[18],
-							values[19], values[20], values[21]);
+							values[19], values[20], readOffset(str, 21));
 				}
 			}
 		});
@@ -449,7 +449,7 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 				gauge.y = src.height - values[4];
 				skin.setDestination(noteobj, values[2], gauge.x, gauge.y, gauge.width, gauge.height, values[7], values[8],
 						values[9], values[10], values[11], values[12], values[13], values[14], values[15],
-						values[16], values[17], values[18], values[19], values[20], values[21]);
+						values[16], values[17], values[18], values[19], values[20], readOffset(str, 21));
 			}
 		});
 
@@ -471,7 +471,7 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 				gauge.y = src.height - values[4];
 				skin.setDestination(bpmgraphobj, values[2], gauge.x, gauge.y, gauge.width, gauge.height, values[7], values[8],
 						values[9], values[10], values[11], values[12], values[13], values[14], values[15],
-						values[16], values[17], values[18], values[19], values[20], values[21]);
+						values[16], values[17], values[18], values[19], values[20], readOffset(str, 21));
 			}
 		});
 
@@ -498,7 +498,7 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 				skinbar.getText()[values[1]].setDestination(values[2], values[3] * dstw / srcw,
 						- (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw, values[6] * dsth / srch, values[7],
 						values[8], values[9], values[10], values[11], values[12], values[13], values[14], values[15],
-						values[16], values[17], values[18], values[19], values[20], values[21]);
+						values[16], values[17], values[18], values[19], values[20], readOffset(str, 21));
 			}
 		});
 		addCommandWord(new CommandWord("SRC_BAR_RANK") {
