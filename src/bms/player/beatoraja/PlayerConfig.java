@@ -114,6 +114,11 @@ public class PlayerConfig {
 	 */
 	private boolean isGuideSE = false;
 
+	/**
+	 * Window Hold
+	 */
+	private boolean isWindowHold = false;
+
 	private SkinConfig[] skin = new SkinConfig[SkinType.getMaxSkinTypeID() + 1];
 
 	private PlayModeConfig mode7 = new PlayModeConfig(Mode.BEAT_7K);
@@ -473,6 +478,14 @@ public class PlayerConfig {
 
 	public void setGuideSE(boolean isGuideSE) {
 		this.isGuideSE = isGuideSE;
+	}
+
+	public boolean isWindowHold() {
+		return isWindowHold;
+	}
+
+	public void setWindowHold(boolean isWindowHold) {
+		this.isWindowHold = isWindowHold;
 	}
 
 	public String getId() {

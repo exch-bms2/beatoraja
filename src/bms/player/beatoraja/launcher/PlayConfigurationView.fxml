@@ -373,6 +373,7 @@
                     <CheckBox fx:id="markprocessednote" mnemonicParsing="false" text="%MARK_PROCESSED_NOTE" GridPane.columnIndex="3" GridPane.rowIndex="1" />
                     <CheckBox fx:id="continueuntilendofsong" mnemonicParsing="false" text="%CONTINUE_UNTIL_END_OF_SONG" GridPane.columnIndex="4" GridPane.rowIndex="1" />
                     <CheckBox fx:id="guidese" mnemonicParsing="false" text="%GUIDE_SE" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                    <CheckBox fx:id="windowhold" mnemonicParsing="false" text="%WINDOW_HOLD" GridPane.columnIndex="2" GridPane.rowIndex="2" />
                 </GridPane>
                 <HBox prefHeight="9.0" prefWidth="720.0">
                     <opaqueInsets>
