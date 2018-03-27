@@ -767,8 +767,9 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 			result.add(i);
 		}
 		for (int i = startIndex; i < str.length; i++) {
-			if(str[i].length() > 0) {
-				result.add(Integer.parseInt(str[i].replaceAll("[^0-9-]", "")));
+			String s = str[i].replaceAll("[^0-9-]", "");
+			if(s.length() > 0) {
+				result.add(Integer.parseInt(s));
 			}
 		}
 		return result.toArray();
