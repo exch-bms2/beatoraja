@@ -283,7 +283,7 @@ public class JudgeManager {
 						main.play(note, config.getKeyvolume(), 0);
 						this.update(lane, note, time, 0, 0);
 						if (playerConfig.isGuideSE()) {
-							main.play(main.SOUND_GUIDE_SE_PG);
+							playGuideSE(0);
 						}
 					}
 					if (note instanceof LongNote) {
@@ -301,7 +301,7 @@ public class JudgeManager {
 							}
 							processing[lane] = ln.getPair();
 							if (playerConfig.isGuideSE()) {
-								main.play(main.SOUND_GUIDE_SE_PG);
+								playGuideSE(0);
 							}
 						}
 						if (ln.isEnd() && ln.getState() == 0) {
@@ -316,7 +316,7 @@ public class JudgeManager {
 								main.play(processing[lane], config.getKeyvolume(), 0);
 								processing[lane] = null;
 								if (playerConfig.isGuideSE() && sckeyassign[lane] != -1) {
-									main.play(main.SOUND_GUIDE_SE_PG);
+									playGuideSE(0);
 								}
 							}
 						}
@@ -411,12 +411,7 @@ public class JudgeManager {
 						processing[lane] = null;
 						sckey[sc] = 0;
 						if (playerConfig.isGuideSE()) {
-							if (j == 0)
-								main.play(main.SOUND_GUIDE_SE_PG);
-							else if (j == 1)
-								main.play(main.SOUND_GUIDE_SE_GR);
-							else if (j == 2)
-								main.play(main.SOUND_GUIDE_SE_GD);
+							playGuideSE(j);
 						}
 					} else {
 						// ここに来るのはマルチキーアサイン以外ありえないはず
@@ -491,12 +486,7 @@ public class JudgeManager {
 							this.update(lane, tnote, time, j, dtime);
 						}
 						if (playerConfig.isGuideSE()) {
-							if (j == 0)
-								main.play(main.SOUND_GUIDE_SE_PG);
-							else if (j == 1)
-								main.play(main.SOUND_GUIDE_SE_GR);
-							else if (j == 2)
-								main.play(main.SOUND_GUIDE_SE_GD);
+							playGuideSE(j);
 						}
 					} else {
 						// 空POOR判定がないときのレーザー色変更処理
@@ -699,6 +689,22 @@ public class JudgeManager {
 			judgefast[lane / (lanelength / judgenow.length)] = fast;
 		}
 		main.update(judge, time);
+	}
+
+	private void playGuideSE(int judge) {
+		if (judge == 0) {
+			try {
+				main.play(main.SOUND_GUIDE_SE_PG);
+			} catch (Exception e) {}
+		} else if (judge == 1) {
+			try {
+				main.play(main.SOUND_GUIDE_SE_GR);
+			} catch (Exception e) {}
+		} else if (judge == 2) {
+			try {
+				main.play(main.SOUND_GUIDE_SE_GD);
+			} catch (Exception e) {}
+		}
 	}
 
 	public long[] getRecentJudges() {
