@@ -1,28 +1,26 @@
 package bms.player.beatoraja.skin.lr2;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import bms.player.beatoraja.MainState;
-import bms.player.beatoraja.skin.SkinHeader.CustomFile;
-import bms.player.beatoraja.skin.SkinHeader.CustomOption;
 import bms.player.beatoraja.skin.SkinLoader;
 
 public class LR2SkinLoader extends SkinLoader {
 
-	private List<CommandWord> commands = new ArrayList<CommandWord>();
+	private List<Command> commands = new ArrayList<Command>();
 
 	protected Map<Integer, Boolean> op = new HashMap<Integer, Boolean>();
 
-	protected void addCommandWord(CommandWord cm) {
+	protected void addCommandWord(Command cm) {
 		commands.add(cm);
+	}
+
+	protected void addCommandWord(Command... cm) {
+		commands.addAll(Arrays.asList(cm));
 	}
 
 	boolean skip = false;
@@ -118,9 +116,9 @@ public class LR2SkinLoader extends SkinLoader {
 					op.put(index, Integer.parseInt(str[2]) >= 1);
 				}
 
-				for (CommandWord cm : commands) {
-					if (str[0].equals("#" + cm.str)) {
-						cm.execute(str);
+				for (Command cm : commands) {
+					if (str[0].equals("#" + cm.name())) {
+						cm.execute(this, str);
 					}
 				}
 			}
@@ -131,14 +129,29 @@ public class LR2SkinLoader extends SkinLoader {
 		return op;
 	}
 
-	public abstract class CommandWord {
+	public abstract class CommandWord implements Command<LR2SkinLoader> {
 
 		public final String str;
 
+		public String name() {
+			return str;
+		}
+		
 		public CommandWord(String str) {
 			this.str = str;
 		}
 
+		public void execute(LR2SkinLoader loader, String[] values) {
+			execute(values);
+		}
+
 		public abstract void execute(String[] values);
+
+	}
+	
+	public interface Command<T extends LR2SkinLoader> {
+		
+		public abstract String name();
+		public abstract void execute(T loader, String[] values);		
 	}
 }
