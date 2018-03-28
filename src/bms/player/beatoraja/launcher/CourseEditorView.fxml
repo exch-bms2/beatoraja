@@ -15,6 +15,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
+<?import bms.player.beatoraja.launcher.NumericSpinner?>
 
 <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="750.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="bms.player.beatoraja.launcher.CourseEditorView">
    <children>
@@ -117,36 +118,36 @@
                       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                     </rowConstraints>
                      <children>
-                  		<Spinner fx:id="bronzemiss" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                  		<NumericSpinner fx:id="bronzemiss" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="1">
                            <valueFactory>
                               <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.1" initialValue="100" max="100" min="0" />
                            </valueFactory>
-                        </Spinner>
-                  		<Spinner fx:id="bronzescore" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                        </NumericSpinner>
+                  		<NumericSpinner fx:id="bronzescore" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="1">
                            <valueFactory>
                               <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.1" initialValue="100" max="100" min="0" />
                            </valueFactory>
-                        </Spinner>
-                  		<Spinner fx:id="silvermiss" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                        </NumericSpinner>
+                  		<NumericSpinner fx:id="silvermiss" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="2">
                            <valueFactory>
                               <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.1" initialValue="100" max="100" min="0" />
                            </valueFactory>
-                        </Spinner>
-                  		<Spinner fx:id="silverscore" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="2">
+                        </NumericSpinner>
+                  		<NumericSpinner fx:id="silverscore" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="2">
                            <valueFactory>
                               <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.1" initialValue="100" max="100" min="0" />
                            </valueFactory>
-                        </Spinner>
-                  		<Spinner fx:id="goldmiss" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                        </NumericSpinner>
+                  		<NumericSpinner fx:id="goldmiss" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="3">
                            <valueFactory>
                               <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.1" initialValue="100" max="100" min="0" />
                            </valueFactory>
-                        </Spinner>
-                  		<Spinner fx:id="goldscore" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="3">
+                        </NumericSpinner>
+                  		<NumericSpinner fx:id="goldscore" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="3">
                            <valueFactory>
                               <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.1" initialValue="100" max="100" min="0" />
                            </valueFactory>
-                        </Spinner>
+                        </NumericSpinner>
                         <Label text="MISS RATE" GridPane.columnIndex="1" />
                         <Label text="SCORE RATE" GridPane.columnIndex="2" />
                         <Label text="BRONZE" GridPane.rowIndex="1" />
