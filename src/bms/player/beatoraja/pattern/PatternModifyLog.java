@@ -7,12 +7,6 @@ package bms.player.beatoraja.pattern;
  */
 public class PatternModifyLog {
 
-	// TODO time廃止(0.5以降)
-
-	/**
-	 * 対象のTimeLineの時間(ms)。下位互換のために残しており、廃止予定
-	 */
-	public int time = -1;
 	/**
 	 * 対象のTimeLineの小節
 	 */

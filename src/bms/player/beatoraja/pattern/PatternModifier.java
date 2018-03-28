@@ -47,7 +47,7 @@ public abstract class PatternModifier {
 		for (TimeLine tl : model.getAllTimeLines()) {
 			PatternModifyLog pm = null;
 			for (PatternModifyLog pms : log) {
-				if (pms.section == tl.getSection() || pms.time == tl.getTime()) {
+				if (pms.section == tl.getSection()) {
 					pm = pms;
 					break;
 				}
