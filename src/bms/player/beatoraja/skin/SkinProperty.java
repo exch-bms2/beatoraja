@@ -512,6 +512,18 @@ public class SkinProperty {
 	public static final int OPTION_RESULT_CLEAR = 90;
 	public static final int OPTION_RESULT_FAIL = 91;
 
+	public static final int OPTION_SELECT_BAR_NOT_PLAYED = 100;
+	public static final int OPTION_SELECT_BAR_FAILED = 101;
+	public static final int OPTION_SELECT_BAR_ASSIST_EASY_CLEARED = 1100;
+	public static final int OPTION_SELECT_BAR_LIGHT_ASSIST_EASY_CLEARED = 1101;
+	public static final int OPTION_SELECT_BAR_EASY_CLEARED = 102;
+	public static final int OPTION_SELECT_BAR_NORMAL_CLEARED = 103;
+	public static final int OPTION_SELECT_BAR_HARD_CLEARED = 104;
+	public static final int OPTION_SELECT_BAR_EXHARD_CLEARED = 1102;
+	public static final int OPTION_SELECT_BAR_FULL_COMBO_CLEARED = 105;
+	public static final int OPTION_SELECT_BAR_PERFECT_CLEARED = 1103;
+	public static final int OPTION_SELECT_BAR_MAX_CLEARED = 1104;
+
 	public static final int OPTION_CLEAR_GROOVE = 118;
 	public static final int OPTION_CLEAR_HARD = 119;
 	public static final int OPTION_CLEAR_HAZARD = 120;
