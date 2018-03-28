@@ -201,6 +201,8 @@ public class PlayConfigurationView implements Initializable {
 	private ComboBox<Integer> seventoninetype;
 	@FXML
 	private CheckBox guidese;
+	@FXML
+	private CheckBox windowhold;
 
 	@FXML
 	private CheckBox judgeregion;
@@ -505,6 +507,7 @@ public class PlayConfigurationView implements Initializable {
 		seventoninepattern.getSelectionModel().select(player.getSevenToNinePattern());
 		seventoninetype.getSelectionModel().select(player.getSevenToNineType());
 		guidese.setSelected(player.isGuideSE());
+		windowhold.setSelected(player.isWindowHold());
 		gaugeop.getSelectionModel().select(player.getGauge());
 		lntype.getSelectionModel().select(player.getLnmode());
 
@@ -613,6 +616,7 @@ public class PlayConfigurationView implements Initializable {
 		player.setSevenToNinePattern(seventoninepattern.getValue());
 		player.setSevenToNineType(seventoninetype.getValue());
 		player.setGuideSE(guidese.isSelected());
+		player.setWindowHold(windowhold.isSelected());
 		player.setGauge(gaugeop.getValue());
 		player.setLnmode(lntype.getValue());
 		player.setJudgetiming(getValue(judgetiming));

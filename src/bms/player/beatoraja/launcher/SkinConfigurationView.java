@@ -240,6 +240,7 @@ public class SkinConfigurationView implements Initializable {
 				spinner[i] = new Spinner(-9999,9999,0,1);
 				spinner[i].setPrefWidth(80);
 				spinner[i].getValueFactory().setValue(v[i]);
+				spinner[i].setEditable(true);
 				if(b[i]) {
 					hbox.getChildren().addAll(new Label(values[i]), spinner[i]);					
 				}

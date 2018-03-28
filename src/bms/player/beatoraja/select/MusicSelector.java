@@ -1,6 +1,7 @@
 package bms.player.beatoraja.select;
 
 import static bms.player.beatoraja.skin.SkinProperty.*;
+import static bms.player.beatoraja.ClearType.*;
 
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -781,6 +782,29 @@ public class MusicSelector extends MainState {
 			return rival == null;
 		case OPTION_COMPARE_RIVAL:
 			return rival != null;
+		case OPTION_SELECT_BAR_NOT_PLAYED:
+			return (current instanceof SongBar || current instanceof GradeBar)
+					&& (bar.getSelected().getScore() == null || (bar.getSelected().getScore() != null && bar.getSelected().getScore().getClear() == NoPlay.id));
+		case OPTION_SELECT_BAR_FAILED:
+			return bar.getSelected().getScore() != null && bar.getSelected().getScore().getClear() == Failed.id;
+		case OPTION_SELECT_BAR_ASSIST_EASY_CLEARED:
+			return bar.getSelected().getScore() != null && bar.getSelected().getScore().getClear() == AssistEasy.id;
+		case OPTION_SELECT_BAR_LIGHT_ASSIST_EASY_CLEARED:
+			return bar.getSelected().getScore() != null && bar.getSelected().getScore().getClear() == LightAssistEasy.id;
+		case OPTION_SELECT_BAR_EASY_CLEARED:
+			return bar.getSelected().getScore() != null && bar.getSelected().getScore().getClear() == Easy.id;
+		case OPTION_SELECT_BAR_NORMAL_CLEARED:
+			return bar.getSelected().getScore() != null && bar.getSelected().getScore().getClear() == Normal.id;
+		case OPTION_SELECT_BAR_HARD_CLEARED:
+			return bar.getSelected().getScore() != null && bar.getSelected().getScore().getClear() == Hard.id;
+		case OPTION_SELECT_BAR_EXHARD_CLEARED:
+			return bar.getSelected().getScore() != null && bar.getSelected().getScore().getClear() == ExHard.id;
+		case OPTION_SELECT_BAR_FULL_COMBO_CLEARED:
+			return bar.getSelected().getScore() != null && bar.getSelected().getScore().getClear() == FullCombo.id;
+		case OPTION_SELECT_BAR_PERFECT_CLEARED:
+			return bar.getSelected().getScore() != null && bar.getSelected().getScore().getClear() == Perfect.id;
+		case OPTION_SELECT_BAR_MAX_CLEARED:
+			return bar.getSelected().getScore() != null && bar.getSelected().getScore().getClear() == Max.id;
 		case OPTION_CLEAR_EASY:
 			return existsTrophy(SongTrophy.EASY);
 		case OPTION_CLEAR_GROOVE:

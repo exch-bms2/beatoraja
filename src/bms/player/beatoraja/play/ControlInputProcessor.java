@@ -83,7 +83,8 @@ public class ControlInputProcessor {
 				lanerender.setLanecover(lanerender.getLanecover() - input.getScroll() * 0.005f);
 				input.resetScroll();
 			}
-			if (input.startPressed() && !input.isSelectPressed()) {
+			if ((input.startPressed() && !input.isSelectPressed())
+					|| (player.main.getPlayerResource().getPlayerConfig().isWindowHold() && player.main.isTimerOn(TIMER_PLAY) && !player.isNoteEnd())) {
 				if ((autoplay == PlayMode.PLAY || autoplay == PlayMode.PRACTICE) && startpressed) {
 					processStart.run();
 				} else if ((autoplay == PlayMode.PLAY || autoplay == PlayMode.PRACTICE) && !startpressed) {
