@@ -12,6 +12,7 @@ import bms.model.BMSModel;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.ir.IRConnection;
+import bms.player.beatoraja.result.MusicResult.ReplayStatus;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.skin.SkinType;
 
@@ -34,8 +35,8 @@ public class CourseResult extends MainState {
 	private int irprevrank;
 	private int irtotal;
 
-	private int saveReplay[] = new int[4];
-	private static final int replay= 4;
+	private ReplayStatus[] saveReplay = new ReplayStatus[REPLAY_SIZE];
+	private static final int REPLAY_SIZE = 4;
 
 	public static final int SOUND_CLEAR = 0;
 	public static final int SOUND_FAIL = 1;
@@ -51,6 +52,11 @@ public class CourseResult extends MainState {
 
 	public void create() {
 		final PlayerResource resource = main.getPlayerResource();
+		
+		for(int i = 0;i < REPLAY_SIZE;i++) {
+			saveReplay[i] = main.getPlayDataAccessor().existsReplayData(resource.getCourseBMSModels(),
+					resource.getPlayerConfig().getLnmode(), i ,resource.getConstraint()) ? ReplayStatus.EXIST : ReplayStatus.NOT_EXIST ;			
+		}
 
 		setSound(SOUND_CLEAR, "course_clear.wav", SoundType.SOUND,false);
 		setSound(SOUND_FAIL, "course_fail.wav", SoundType.SOUND, false);
@@ -78,7 +84,7 @@ public class CourseResult extends MainState {
 
 		// リプレイの自動保存
 		if(resource.getPlayMode() == PlayMode.PLAY){
-			for(int i=0;i<replay;i++){
+			for(int i=0;i<REPLAY_SIZE;i++){
 				if(MusicResult.ReplayAutoSaveConstraint.get(resource.getConfig().getAutoSaveReplay()[i]).isQualified(oldscore ,newscore)) {
 					saveReplayData(i);
 				}
@@ -357,7 +363,7 @@ public class CourseResult extends MainState {
 	private void saveReplayData(int index) {
 		final PlayerResource resource = main.getPlayerResource();
 		if (resource.getPlayMode() == PlayMode.PLAY && resource.getCourseScoreData() != null) {
-			if (saveReplay[index] == -1 && resource.isUpdateScore()) {
+			if (saveReplay[index] != ReplayStatus.SAVED && resource.isUpdateScore()) {
 				// 保存されているリプレイデータがない場合は、EASY以上で自動保存
 				ReplayData[] rd = resource.getCourseReplay();
 				for(int i = 0; i < rd.length; i++) {
@@ -365,7 +371,7 @@ public class CourseResult extends MainState {
 				}
 				main.getPlayDataAccessor().wrireReplayData(rd, resource.getCourseBMSModels(),
 						resource.getPlayerConfig().getLnmode(), index, resource.getConstraint());
-				saveReplay[index] = 1;
+				saveReplay[index] = ReplayStatus.SAVED;
 			}
 		}
 	}
@@ -395,37 +401,29 @@ public class CourseResult extends MainState {
 			case OPTION_DRAW_SCORERANK:
 				return getScoreDataProperty().getNowRate() == getScoreDataProperty().getBestScoreRate();
 			case OPTION_NO_REPLAYDATA:
-				return !main.getPlayDataAccessor().existsReplayData(resource.getCourseBMSModels(),
-						resource.getPlayerConfig().getLnmode(), 0,resource.getConstraint());
+				return saveReplay[0] == ReplayStatus.NOT_EXIST;
 			case OPTION_NO_REPLAYDATA2:
-				return !main.getPlayDataAccessor().existsReplayData(resource.getCourseBMSModels(),
-						resource.getPlayerConfig().getLnmode(), 1,resource.getConstraint());
+				return saveReplay[1] == ReplayStatus.NOT_EXIST;
 			case OPTION_NO_REPLAYDATA3:
-				return !main.getPlayDataAccessor().existsReplayData(resource.getCourseBMSModels(),
-						resource.getPlayerConfig().getLnmode(), 2,resource.getConstraint());
+				return saveReplay[2] == ReplayStatus.NOT_EXIST;
 			case OPTION_NO_REPLAYDATA4:
-				return !main.getPlayDataAccessor().existsReplayData(resource.getCourseBMSModels(),
-						resource.getPlayerConfig().getLnmode(), 3,resource.getConstraint());
+				return saveReplay[3] == ReplayStatus.NOT_EXIST;
 			case OPTION_REPLAYDATA:
-				return main.getPlayDataAccessor().existsReplayData(resource.getCourseBMSModels(),
-						resource.getPlayerConfig().getLnmode(), 0,resource.getConstraint());
+				return saveReplay[0] == ReplayStatus.EXIST;
 			case OPTION_REPLAYDATA2:
-				return main.getPlayDataAccessor().existsReplayData(resource.getCourseBMSModels(),
-						resource.getPlayerConfig().getLnmode(), 1,resource.getConstraint());
+				return saveReplay[1] == ReplayStatus.EXIST;
 			case OPTION_REPLAYDATA3:
-				return main.getPlayDataAccessor().existsReplayData(resource.getCourseBMSModels(),
-						resource.getPlayerConfig().getLnmode(), 2,resource.getConstraint());
+				return saveReplay[2] == ReplayStatus.EXIST;
 			case OPTION_REPLAYDATA4:
-				return main.getPlayDataAccessor().existsReplayData(resource.getCourseBMSModels(),
-						resource.getPlayerConfig().getLnmode(), 3,resource.getConstraint());
+				return saveReplay[3] == ReplayStatus.EXIST;
 			case OPTION_REPLAYDATA_SAVED:
-				return saveReplay[0] == 1;
+				return saveReplay[0] == ReplayStatus.SAVED;
 			case OPTION_REPLAYDATA2_SAVED:
-				return saveReplay[1] == 1;
+				return saveReplay[1] == ReplayStatus.SAVED;
 			case OPTION_REPLAYDATA3_SAVED:
-				return saveReplay[2] == 1;
+				return saveReplay[2] == ReplayStatus.SAVED;
 			case OPTION_REPLAYDATA4_SAVED:
-				return saveReplay[3] == 1;
+				return saveReplay[3] == ReplayStatus.SAVED;
 		}
 		return super.getBooleanValue(id);
 

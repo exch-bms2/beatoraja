@@ -66,8 +66,8 @@ public class MusicResult extends MainState {
 	private int irprevrank;
 	private int irtotal;
 
-	private int saveReplay[] = new int[4];
-	private static final int replay = 4;
+	private ReplayStatus[] saveReplay = new ReplayStatus[REPLAY_SIZE];
+	private static final int REPLAY_SIZE = 4;
 
 	public static final int SOUND_CLEAR = 0;
 	public static final int SOUND_FAIL = 1;
@@ -83,6 +83,10 @@ public class MusicResult extends MainState {
 
 	public void create() {
 		final PlayerResource resource = main.getPlayerResource();
+		for(int i = 0;i < REPLAY_SIZE;i++) {
+			saveReplay[i] = main.getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
+					resource.getPlayerConfig().getLnmode(), i) ? ReplayStatus.EXIST : ReplayStatus.NOT_EXIST ;			
+		}
 
 		setSound(SOUND_CLEAR, "clear.wav", SoundType.SOUND, false);
 		setSound(SOUND_FAIL, "fail.wav", SoundType.SOUND, false);
@@ -96,7 +100,7 @@ public class MusicResult extends MainState {
 		updateScoreDatabase();
 		// リプレイの自動保存
 		if (resource.getPlayMode() == PlayMode.PLAY) {
-			for (int i = 0; i < replay; i++) {
+			for (int i = 0; i < REPLAY_SIZE; i++) {
 				if (ReplayAutoSaveConstraint.get(resource.getConfig().getAutoSaveReplay()[i]).isQualified(oldscore,
 						resource.getScoreData())) {
 					saveReplayData(i);
@@ -269,17 +273,16 @@ public class MusicResult extends MainState {
 		final PlayerResource resource = main.getPlayerResource();
 		if (resource.getPlayMode() == PlayMode.PLAY && resource.getCourseBMSModels() == null
 				&& resource.getScoreData() != null) {
-			if (saveReplay[index] == -1 && resource.isUpdateScore()) {
+			if (saveReplay[index] != ReplayStatus.SAVED && resource.isUpdateScore()) {
 				ReplayData rd = resource.getReplayData();
 				main.getPlayDataAccessor().wrireReplayData(rd, resource.getBMSModel(),
 						resource.getPlayerConfig().getLnmode(), index);
-				saveReplay[index] = 1;
+				saveReplay[index] = ReplayStatus.SAVED;
 			}
 		}
 	}
 
 	private void updateScoreDatabase() {
-		Arrays.fill(saveReplay, -1);
 		state = STATE_OFFLINE;
 		irrank = irprevrank = irtotal = 0;
 		final PlayerResource resource = main.getPlayerResource();
@@ -646,37 +649,29 @@ public class MusicResult extends MainState {
 		case OPTION_DRAW_TARGET:
 			return score.getExscore() == resource.getRivalScoreData();
 		case OPTION_NO_REPLAYDATA:
-			return !main.getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
-					resource.getPlayerConfig().getLnmode(), 0);
+			return saveReplay[0] == ReplayStatus.NOT_EXIST;
 		case OPTION_NO_REPLAYDATA2:
-			return !main.getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
-					resource.getPlayerConfig().getLnmode(), 1);
+			return saveReplay[1] == ReplayStatus.NOT_EXIST;
 		case OPTION_NO_REPLAYDATA3:
-			return !main.getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
-					resource.getPlayerConfig().getLnmode(), 2);
+			return saveReplay[2] == ReplayStatus.NOT_EXIST;
 		case OPTION_NO_REPLAYDATA4:
-			return !main.getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
-					resource.getPlayerConfig().getLnmode(), 3);
+			return saveReplay[3] == ReplayStatus.NOT_EXIST;
 		case OPTION_REPLAYDATA:
-			return main.getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
-					resource.getPlayerConfig().getLnmode(), 0);
+			return saveReplay[0] == ReplayStatus.EXIST;
 		case OPTION_REPLAYDATA2:
-			return main.getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
-					resource.getPlayerConfig().getLnmode(), 1);
+			return saveReplay[1] == ReplayStatus.EXIST;
 		case OPTION_REPLAYDATA3:
-			return main.getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
-					resource.getPlayerConfig().getLnmode(), 2);
+			return saveReplay[2] == ReplayStatus.EXIST;
 		case OPTION_REPLAYDATA4:
-			return main.getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
-					resource.getPlayerConfig().getLnmode(), 3);
+			return saveReplay[3] == ReplayStatus.EXIST;
 		case OPTION_REPLAYDATA_SAVED:
-			return saveReplay[0] == 1;
+			return saveReplay[0] == ReplayStatus.SAVED;
 		case OPTION_REPLAYDATA2_SAVED:
-			return saveReplay[1] == 1;
+			return saveReplay[1] == ReplayStatus.SAVED;
 		case OPTION_REPLAYDATA3_SAVED:
-			return saveReplay[2] == 1;
+			return saveReplay[2] == ReplayStatus.SAVED;
 		case OPTION_REPLAYDATA4_SAVED:
-			return saveReplay[3] == 1;
+			return saveReplay[3] == ReplayStatus.SAVED;
 		}
 		return super.getBooleanValue(id);
 	}
@@ -790,6 +785,10 @@ public class MusicResult extends MainState {
 			}
 			return values()[index];
 		}
+	}
+	
+	public enum ReplayStatus {
+		EXIST, NOT_EXIST, SAVED;
 	}
 
 	public class TimingDistribution {
