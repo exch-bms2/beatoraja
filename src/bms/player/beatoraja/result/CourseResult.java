@@ -12,35 +12,12 @@ import bms.model.BMSModel;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.ir.IRConnection;
-import bms.player.beatoraja.result.MusicResult.ReplayStatus;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.skin.SkinType;
 
-public class CourseResult extends MainState {
+public class CourseResult extends AbstractResult {
 
 	private IRScoreData oldscore = new IRScoreData();
-
-	/**
-	 * 状態
-	 */
-	private int state;
-
-	public static final int STATE_OFFLINE = 0;
-	public static final int STATE_IR_PROCESSING = 1;
-	public static final int STATE_IR_FINISHED = 2;
-
-	private int next;
-
-	private int irrank;
-	private int irprevrank;
-	private int irtotal;
-
-	private ReplayStatus[] saveReplay = new ReplayStatus[REPLAY_SIZE];
-	private static final int REPLAY_SIZE = 4;
-
-	public static final int SOUND_CLEAR = 0;
-	public static final int SOUND_FAIL = 1;
-	public static final int SOUND_CLOSE = 2;
 
 	private IRScoreData newscore;
 
@@ -400,30 +377,6 @@ public class CourseResult extends MainState {
 				return getScoreDataProperty().getNowRate() > getScoreDataProperty().getBestScoreRate();
 			case OPTION_DRAW_SCORERANK:
 				return getScoreDataProperty().getNowRate() == getScoreDataProperty().getBestScoreRate();
-			case OPTION_NO_REPLAYDATA:
-				return saveReplay[0] == ReplayStatus.NOT_EXIST;
-			case OPTION_NO_REPLAYDATA2:
-				return saveReplay[1] == ReplayStatus.NOT_EXIST;
-			case OPTION_NO_REPLAYDATA3:
-				return saveReplay[2] == ReplayStatus.NOT_EXIST;
-			case OPTION_NO_REPLAYDATA4:
-				return saveReplay[3] == ReplayStatus.NOT_EXIST;
-			case OPTION_REPLAYDATA:
-				return saveReplay[0] == ReplayStatus.EXIST;
-			case OPTION_REPLAYDATA2:
-				return saveReplay[1] == ReplayStatus.EXIST;
-			case OPTION_REPLAYDATA3:
-				return saveReplay[2] == ReplayStatus.EXIST;
-			case OPTION_REPLAYDATA4:
-				return saveReplay[3] == ReplayStatus.EXIST;
-			case OPTION_REPLAYDATA_SAVED:
-				return saveReplay[0] == ReplayStatus.SAVED;
-			case OPTION_REPLAYDATA2_SAVED:
-				return saveReplay[1] == ReplayStatus.SAVED;
-			case OPTION_REPLAYDATA3_SAVED:
-				return saveReplay[2] == ReplayStatus.SAVED;
-			case OPTION_REPLAYDATA4_SAVED:
-				return saveReplay[3] == ReplayStatus.SAVED;
 		}
 		return super.getBooleanValue(id);
 

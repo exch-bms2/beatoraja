@@ -13,14 +13,8 @@ import bms.model.BMSModel;
 import bms.model.LongNote;
 import bms.model.Note;
 import bms.model.TimeLine;
-import bms.player.beatoraja.ClearType;
-import bms.player.beatoraja.IRScoreData;
-import bms.player.beatoraja.MainController;
-import bms.player.beatoraja.MainState;
-import bms.player.beatoraja.PlayerConfig;
-import bms.player.beatoraja.PlayerResource;
+import bms.player.beatoraja.*;
 import bms.player.beatoraja.PlayerResource.PlayMode;
-import bms.player.beatoraja.ReplayData;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.ir.IRConnection;
 import bms.player.beatoraja.ir.IRResponse;
@@ -32,7 +26,7 @@ import bms.player.beatoraja.skin.SkinType;
  *
  * @author exch
  */
-public class MusicResult extends MainState {
+public class MusicResult extends AbstractResult {
 
 	private IRScoreData oldscore = new IRScoreData();
 
@@ -50,28 +44,6 @@ public class MusicResult extends MainState {
 	 * タイミング分布レンジ
 	 */
 	final int distRange = 150;
-
-	/**
-	 * 状態
-	 */
-	private int state;
-
-	public static final int STATE_OFFLINE = 0;
-	public static final int STATE_IR_PROCESSING = 1;
-	public static final int STATE_IR_FINISHED = 2;
-
-	private int next;
-
-	private int irrank;
-	private int irprevrank;
-	private int irtotal;
-
-	private ReplayStatus[] saveReplay = new ReplayStatus[REPLAY_SIZE];
-	private static final int REPLAY_SIZE = 4;
-
-	public static final int SOUND_CLEAR = 0;
-	public static final int SOUND_FAIL = 1;
-	public static final int SOUND_CLOSE = 2;
 
 	private ResultKeyProperty property;
 
@@ -648,30 +620,6 @@ public class MusicResult extends MainState {
 			return score.getExscore() > resource.getRivalScoreData();
 		case OPTION_DRAW_TARGET:
 			return score.getExscore() == resource.getRivalScoreData();
-		case OPTION_NO_REPLAYDATA:
-			return saveReplay[0] == ReplayStatus.NOT_EXIST;
-		case OPTION_NO_REPLAYDATA2:
-			return saveReplay[1] == ReplayStatus.NOT_EXIST;
-		case OPTION_NO_REPLAYDATA3:
-			return saveReplay[2] == ReplayStatus.NOT_EXIST;
-		case OPTION_NO_REPLAYDATA4:
-			return saveReplay[3] == ReplayStatus.NOT_EXIST;
-		case OPTION_REPLAYDATA:
-			return saveReplay[0] == ReplayStatus.EXIST;
-		case OPTION_REPLAYDATA2:
-			return saveReplay[1] == ReplayStatus.EXIST;
-		case OPTION_REPLAYDATA3:
-			return saveReplay[2] == ReplayStatus.EXIST;
-		case OPTION_REPLAYDATA4:
-			return saveReplay[3] == ReplayStatus.EXIST;
-		case OPTION_REPLAYDATA_SAVED:
-			return saveReplay[0] == ReplayStatus.SAVED;
-		case OPTION_REPLAYDATA2_SAVED:
-			return saveReplay[1] == ReplayStatus.SAVED;
-		case OPTION_REPLAYDATA3_SAVED:
-			return saveReplay[2] == ReplayStatus.SAVED;
-		case OPTION_REPLAYDATA4_SAVED:
-			return saveReplay[3] == ReplayStatus.SAVED;
 		}
 		return super.getBooleanValue(id);
 	}
@@ -705,90 +653,6 @@ public class MusicResult extends MainState {
 			saveReplayData(3);
 			break;
 		}
-	}
-
-	public enum ReplayAutoSaveConstraint {
-
-		NOTHING {
-			@Override
-			public boolean isQualified(IRScoreData oldscore, IRScoreData newscore) {
-				return false;
-			}
-		},
-		SCORE_UPDATE {
-			@Override
-			public boolean isQualified(IRScoreData oldscore, IRScoreData newscore) {
-				return newscore.getExscore() > oldscore.getExscore();
-			}
-		},
-		SCORE_UPDATE_OR_EQUAL {
-			@Override
-			public boolean isQualified(IRScoreData oldscore, IRScoreData newscore) {
-				return newscore.getExscore() >= oldscore.getExscore();
-			}
-		},
-		MISSCOUNT_UPDATE {
-			@Override
-			public boolean isQualified(IRScoreData oldscore, IRScoreData newscore) {
-				return newscore.getMinbp() < oldscore.getMinbp() || oldscore.getClear() == NoPlay.id;
-			}
-		},
-		MISSCOUNT_UPDATE_OR_EQUAL {
-			@Override
-			public boolean isQualified(IRScoreData oldscore, IRScoreData newscore) {
-				return newscore.getMinbp() <= oldscore.getMinbp() || oldscore.getClear() == NoPlay.id;
-			}
-		},
-		MAXCOMBO_UPDATE {
-			@Override
-			public boolean isQualified(IRScoreData oldscore, IRScoreData newscore) {
-				return newscore.getCombo() > oldscore.getCombo();
-			}
-		},
-		MAXCOMBO_UPDATE_OR_EQUAL {
-			@Override
-			public boolean isQualified(IRScoreData oldscore, IRScoreData newscore) {
-				return newscore.getCombo() >= oldscore.getCombo();
-			}
-		},
-		CLEAR_UPDATE {
-			@Override
-			public boolean isQualified(IRScoreData oldscore, IRScoreData newscore) {
-				return newscore.getClear() > oldscore.getClear();
-			}
-		},
-		CLEAR_UPDATE_OR_EQUAL {
-			@Override
-			public boolean isQualified(IRScoreData oldscore, IRScoreData newscore) {
-				return newscore.getClear() >= oldscore.getClear();
-			}
-		},
-		ANYONE_UPDATE {
-			@Override
-			public boolean isQualified(IRScoreData oldscore, IRScoreData newscore) {
-				return newscore.getClear() > oldscore.getClear() || newscore.getCombo() > oldscore.getCombo() ||
-						newscore.getMinbp() < oldscore.getMinbp() || newscore.getExscore() > oldscore.getExscore();
-			}
-		},
-		ALWAYS {
-			@Override
-			public boolean isQualified(IRScoreData oldscore, IRScoreData newscore) {
-				return true;
-			}
-		};
-
-		public abstract boolean isQualified(IRScoreData oldscore, IRScoreData newscore);
-
-		public static ReplayAutoSaveConstraint get(int index) {
-			if (index < 0 || index >= values().length) {
-				return NOTHING;
-			}
-			return values()[index];
-		}
-	}
-	
-	public enum ReplayStatus {
-		EXIST, NOT_EXIST, SAVED;
 	}
 
 	public class TimingDistribution {
