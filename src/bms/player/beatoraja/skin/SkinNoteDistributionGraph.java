@@ -17,8 +17,11 @@ import com.badlogic.gdx.math.Rectangle;
  */
 public class SkinNoteDistributionGraph extends SkinObject {
 
+	private MainState state;
+
 	private TextureRegion backtex;
 	private TextureRegion shapetex;
+	private Pixmap shape = null;
 
 	private TextureRegion startcursor;
 	private TextureRegion endcursor;
@@ -60,6 +63,13 @@ public class SkinNoteDistributionGraph extends SkinObject {
 	private boolean isOrderReverse = false;
 	private boolean isNoGap = false;
 
+	/*
+	 * 処理済みノート数 プレイ時は処理済みノート数に変化があった時だけ更新する
+	 */
+	private int pastNotes = 0;
+
+	private static final Color TRANSPARENT_COLOR = Color.valueOf("00000000");
+
 	public SkinNoteDistributionGraph() {
 		this(TYPE_NORMAL, 500, 0, 0, 0);
 	}
@@ -71,6 +81,7 @@ public class SkinNoteDistributionGraph extends SkinObject {
 		this.delay = delay;
 		this.isOrderReverse = orderReverse == 1 ? true : false;
 		this.isNoGap = noGap == 1 ? true : false;
+		pastNotes = 0;
 
 		Pixmap bp = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
 		bp.drawPixel(0, 0, Color.toIntBits(255, 128, 255, 128));
@@ -95,6 +106,10 @@ public class SkinNoteDistributionGraph extends SkinObject {
 			return;
 		}
 		
+		if(this.state != state) {
+			this.state = state;
+		}
+
 		final SongData song = state.main.getPlayerResource().getSongdata();
 		final BMSModel model = song != null ? song.getBMSModel() : null;
 
@@ -112,8 +127,11 @@ public class SkinNoteDistributionGraph extends SkinObject {
 		}
 		if (shapetex == null) {
 			updateGraph(model);
-		}			
-		if(model != null && state instanceof BMSPlayer) {
+		}
+
+		//プレイ時、判定をリアルタイムで更新する
+		if(model != null && state instanceof BMSPlayer && type > 0 && pastNotes != ((BMSPlayer)state).getPastNotes()) {
+			pastNotes = ((BMSPlayer)state).getPastNotes();
 			updateGraph(model);
 		}
 
@@ -229,12 +247,17 @@ public class SkinNoteDistributionGraph extends SkinObject {
 	}
 	
 	private void updateTexture() {
-		if (shapetex != null) {
+		if (shapetex != null && !(state instanceof BMSPlayer)) {
 			shapetex.getTexture().dispose();
 			backtex.getTexture().dispose();
 		}
-		
-		Pixmap shape = new Pixmap(data.length * 5, max * 5, Pixmap.Format.RGBA8888);
+
+		if( shape == null || (shape != null && !(state instanceof BMSPlayer)) ) {
+			shape = new Pixmap(data.length * 5, max * 5, Pixmap.Format.RGBA8888);
+		} else {
+			shape.setColor(TRANSPARENT_COLOR);
+			shape.fill();
+		}
 		if(!isBackTexOff) {
 			shape.setColor(0, 0, 0, 0.8f);
 			shape.fill();
@@ -255,10 +278,14 @@ public class SkinNoteDistributionGraph extends SkinObject {
 				}
 			}
 		}
-		backtex = new TextureRegion(new Texture(shape));
-		shape.dispose();
+		if( backtex == null || (backtex != null && !(state instanceof BMSPlayer)) ) {
+			backtex = new TextureRegion(new Texture(shape));
+		} else {
+			backtex.getTexture().draw(shape, 0, 0);
+		}
+		shape.setColor(TRANSPARENT_COLOR);
+		shape.fill();
 
-		shape = new Pixmap(data.length * 5, max * 5, Pixmap.Format.RGBA8888);
 		for (int i = 0; i < data.length; i++) {
 			int[] n = data[i];
 			if(!isOrderReverse) {
@@ -293,8 +320,11 @@ public class SkinNoteDistributionGraph extends SkinObject {
 				}
 			}
 		}
-		shapetex = new TextureRegion(new Texture(shape));
-		shape.dispose();				
+		if( shapetex == null || (shapetex != null && !(state instanceof BMSPlayer)) ) {
+			shapetex = new TextureRegion(new Texture(shape));
+		} else {
+			shapetex.getTexture().draw(shape, 0, 0);
+		}
 	}
 
 	@Override

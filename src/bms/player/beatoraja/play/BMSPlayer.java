@@ -1375,6 +1375,10 @@ public class BMSPlayer extends MainState {
 		return notes == main.getPlayerResource().getSongdata().getNotes();
 	}
 
+	public int getPastNotes() {
+		return notes;
+	}
+
 	public void setPastNotes(int notes) {
 		this.notes = notes;
 	}
