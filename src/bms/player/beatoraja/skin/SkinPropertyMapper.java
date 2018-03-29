@@ -5,6 +5,7 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.ScoreDataProperty;
 import bms.player.beatoraja.skin.SkinObject.BooleanProperty;
+import bms.player.beatoraja.skin.SkinObject.IntegerProperty;
 
 public class SkinPropertyMapper {
 
@@ -189,6 +190,43 @@ public class SkinPropertyMapper {
 			};
 		}
 		
+		return result;
+	}
+	
+	public static IntegerProperty getIntegerProperty(int optionid) {
+		IntegerProperty result = null;
+		if(optionid == NUMBER_MINBPM) {
+			result = (state) -> (state.main.getPlayerResource().getSongdata() != null ? 
+					state.main.getPlayerResource().getSongdata().getMinbpm() : Integer.MIN_VALUE);
+		}
+		if(optionid == NUMBER_MAXBPM) {
+			result = (state) -> (state.main.getPlayerResource().getSongdata() != null ? 
+					state.main.getPlayerResource().getSongdata().getMaxbpm() : Integer.MIN_VALUE);
+		}		
+		if(optionid == NUMBER_MAINBPM) {
+			result = (state) -> (state.main.getPlayerResource().getSongdata() != null ? 
+					state.main.getPlayerResource().getSongdata().getMainbpm() : Integer.MIN_VALUE);
+		}
+
+		return result;
+	}
+
+	public static IntegerProperty getImageIndexProperty(int optionid) {
+		IntegerProperty result = null;
+		
+		if(optionid == BUTTON_GAUGE_1P) {
+			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().getGauge());
+		}
+		if(optionid == BUTTON_RANDOM_1P) {
+			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().getRandom());
+		}		
+		if(optionid == BUTTON_RANDOM_2P) {
+			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().getRandom2());
+		}		
+		if(optionid == BUTTON_DPOPTION) {
+			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().getDoubleoption());
+		}		
+
 		return result;
 	}
 	

@@ -23,6 +23,8 @@ public class SkinNumber extends SkinObject {
 	private SkinSource mimage;
 
 	private int id = -1;
+	
+	private IntegerProperty ref;
 	/**
 	 * 表示桁数
 	 */
@@ -59,7 +61,7 @@ public class SkinNumber extends SkinObject {
 		this.mimage = mimage != null ? new SkinSourceImage(new TextureRegion[][]{ mimage }, 0, 0) : null;
 		this.setKeta(keta);
 		this.zeropadding = zeropadding;
-		this.id = id;
+		setId(id);
 	}
 
 	public SkinNumber(TextureRegion[][] image, TextureRegion[][] mimage, int timer, int cycle, int keta, int zeropadding, int id) {
@@ -67,7 +69,7 @@ public class SkinNumber extends SkinObject {
 		this.mimage = mimage != null ? new SkinSourceImage(mimage, timer, cycle) : null;
 		this.setKeta(keta);
 		this.zeropadding = zeropadding;
-		this.id = id;
+		setId(id);
 	}
 
 	public int getId() {
@@ -75,6 +77,7 @@ public class SkinNumber extends SkinObject {
 	}
 
 	public void setId(int id) {
+		ref = SkinPropertyMapper.getIntegerProperty(id);
 		this.id = id;
 	}
 
@@ -93,7 +96,9 @@ public class SkinNumber extends SkinObject {
 
 	public void draw(SkinObjectRenderer sprite, long time, MainState state) {
 		int value = Integer.MIN_VALUE;
-		if (id != -1) {
+		if (ref != null) {
+			value = ref.get(state);
+		} else if (id != -1) {
 			value = state.getNumberValue(id);
 		}
 		if (value != Integer.MIN_VALUE && value != Integer.MAX_VALUE) {

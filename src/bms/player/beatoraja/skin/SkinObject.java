@@ -680,6 +680,11 @@ public abstract class SkinObject implements Disposable {
 		public boolean get(MainState state);
 	}
 
+	public interface IntegerProperty {
+		
+		public int get(MainState state);
+	}
+	
 	public abstract void dispose();
 
 	public int[] getOffsetID() {
