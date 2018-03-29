@@ -67,6 +67,7 @@ public abstract class SkinObject implements Disposable {
 	 * 描画条件となるオプション定義
 	 */
 	private int[] dstop = new int[0];
+	private BooleanProperty[] dstdraw = new BooleanProperty[0];
 	/**
 	 * 描画条件のマウス範囲
 	 */
@@ -194,14 +195,8 @@ public abstract class SkinObject implements Disposable {
 		if (dstloop == 0) {
 			dstloop = loop;
 		}
-		if (dstop.length == 0) {
-			IntSet l = new IntSet();
-			for(int i : op) {
-				if(i != 0) {
-					l.add(i);
-				}
-			}
-			dstop = l.iterator().toArray().toArray();
+		if (dstop.length == 0 && dstdraw.length == 0) {
+			setDrawCondition(op);
 		}
 		for (int i = 0; i < dst.length; i++) {
 			if (dst[i].time > time) {
@@ -220,12 +215,35 @@ public abstract class SkinObject implements Disposable {
 		endtime = dst[dst.length - 1].time;
 	}
 
+	public BooleanProperty[] getDrawCondition() {
+		return dstdraw;
+	}
+
 	public int[] getOption() {
 		return dstop;
 	}
 
 	public void setOption(int[] dstop) {
 		this.dstop = dstop;
+	}
+
+	public void setDrawCondition(int[] dstop) {
+		IntSet l = new IntSet(dstop.length);
+		IntArray op = new IntArray(dstop.length);
+		Array<BooleanProperty> draw = new Array(dstop.length);
+		for(int i : dstop) {
+			if(i != 0 && !l.contains(i)) {
+				BooleanProperty dc = SkinPropertyMapper.getBooleanProperty(i);
+				if(dc != null) {
+					draw.add(dc);
+				} else {
+					op.add(i);
+				}
+				l.add(i);
+			}
+		}
+		this.dstop = op.toArray();
+		this.dstdraw = draw.toArray(BooleanProperty.class);
 	}
 
 	public Rectangle getDestination(long time) {
@@ -655,6 +673,11 @@ public abstract class SkinObject implements Disposable {
 		public float h;
 		public float r;
 		public float a;
+	}
+	
+	public interface BooleanProperty {
+		
+		public boolean get(MainState state);
 	}
 
 	public abstract void dispose();

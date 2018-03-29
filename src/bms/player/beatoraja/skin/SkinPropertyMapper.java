@@ -2,6 +2,10 @@ package bms.player.beatoraja.skin;
 
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
+import bms.player.beatoraja.MainState;
+import bms.player.beatoraja.ScoreDataProperty;
+import bms.player.beatoraja.skin.SkinObject.BooleanProperty;
+
 public class SkinPropertyMapper {
 
 	public static int bombTimerId(int player, int key) {
@@ -148,5 +152,62 @@ public class SkinPropertyMapper {
 
 	public static int getSkinCustomizeItemIndex(int id) {
 		return id - STRING_SKIN_CUSTOMIZE_ITEM1;
+	}
+	
+	public static BooleanProperty getBooleanProperty(int optionid) {
+		// TODO 各Skinに分散するるべき？
+		BooleanProperty result = null;
+		final int id = Math.abs(optionid);
+		if (id >= OPTION_BEST_AAA_1P && id <= OPTION_BEST_F_1P) {			
+			final int[] values = { 0, 6, 9, 12, 15, 18, 21, 24, 28 };
+			final int low =values[OPTION_BEST_F_1P - id];
+			final int high =values[OPTION_BEST_F_1P - id + 1];
+			result = new BooleanProperty() {				
+				@Override
+				public boolean get(MainState state) {
+					final ScoreDataProperty score = state.getScoreDataProperty();
+					return score.qualifyBestRank(low) && !score.qualifyBestRank(high);
+				}
+			};
+		}
+		if (id >= OPTION_1P_AAA && id <= OPTION_1P_F) {			
+			result = new NowRankDrawCondition(OPTION_1P_F - id);
+		}
+		if (id >= OPTION_RESULT_AAA_1P && id <= OPTION_RESULT_F_1P) {			
+			result = new NowRankDrawCondition(OPTION_RESULT_F_1P - id);
+		}
+		if (id >= OPTION_NOW_AAA_1P && id <= OPTION_NOW_F_1P) {			
+			result = new NowRankDrawCondition(OPTION_NOW_F_1P - id);
+		}
+		
+		if(result != null && optionid < 0) {
+			final BooleanProperty dc = result;
+			result = new BooleanProperty() {
+				public boolean get(MainState state) {
+					return !dc.get(state);
+				}				
+			};
+		}
+		
+		return result;
+	}
+	
+	private static class NowRankDrawCondition implements BooleanProperty {
+		
+		private final int low;
+		private final int high;
+		
+		public NowRankDrawCondition(int rank) {
+			final int[] values = { 0, 6, 9, 12, 15, 18, 21, 24, 28 };
+			low =values[rank];
+			high =values[rank + 1];
+		}
+
+		@Override
+		public boolean get(MainState state) {
+			final ScoreDataProperty score = state.getScoreDataProperty();
+			return score.qualifyNowRank(low) && (high > 27 ? true : !score.qualifyNowRank(high));
+		}
+		
 	}
 }

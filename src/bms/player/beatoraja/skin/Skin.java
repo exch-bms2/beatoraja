@@ -5,6 +5,7 @@ import bms.player.beatoraja.Resolution;
 import bms.player.beatoraja.ShaderManager;
 import bms.player.beatoraja.SkinConfig.Offset;
 import bms.player.beatoraja.play.SkinGauge;
+import bms.player.beatoraja.skin.SkinObject.BooleanProperty;
 import bms.player.beatoraja.skin.SkinObject.SkinOffset;
 import bms.player.beatoraja.play.BMSPlayer;
 
@@ -228,14 +229,19 @@ public class Skin {
 			renderer = new SkinObjectRenderer(sprite);
 		}
 		for (SkinObject obj : objectarray) {
-			if (isDraw(obj.getOption(), state)) {
+			if (isDraw(obj, state)) {
 				obj.draw(renderer, time, state);
 			}
 		}
 	}
 
-	private final boolean isDraw(int[] opt, MainState state) {
-		for (int op : opt) {
+	private final boolean isDraw(SkinObject obj, MainState state) {
+		for (BooleanProperty draw : obj.getDrawCondition()) {
+			if(!draw.get(state)) {
+				return false;
+			}
+		}
+		for (int op : obj.getOption()) {
 			if (op > 0) {
 				if (!state.getBooleanValue(op)) {
 					return false;
@@ -252,7 +258,7 @@ public class Skin {
 	public void mousePressed(MainState state, int button, int x, int y) {
 		for (int i = objectarray.length - 1; i >= 0; i--) {
 			final SkinObject obj = objectarray[i];
-			if (isDraw(obj.getOption(), state) && obj.mousePressed(state, button, x, y)) {
+			if (isDraw(obj, state) && obj.mousePressed(state, button, x, y)) {
 				break;
 			}
 		}
@@ -261,7 +267,7 @@ public class Skin {
 	public void mouseDragged(MainState state, int button, int x, int y) {
 		for (int i = objectarray.length - 1; i >= 0; i--) {
 			final SkinObject obj = objectarray[i];
-			if (obj instanceof SkinSlider && isDraw(obj.getOption(), state) && obj.mousePressed(state, button, x, y)) {
+			if (obj instanceof SkinSlider && isDraw(obj, state) && obj.mousePressed(state, button, x, y)) {
 				break;
 			}
 		}
