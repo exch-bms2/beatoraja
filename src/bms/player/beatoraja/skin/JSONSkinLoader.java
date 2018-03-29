@@ -841,8 +841,9 @@ public class JSONSkinLoader extends SkinLoader{
 								}
 							}
 						}
-						barobj.getText()[0] = text[0];
-						barobj.getText()[1] = text[1];
+						for(int i = 0; i < barobj.getText().length && i < text.length; i++) {
+							barobj.getText()[i] = text[i];
+						}
 
 						SkinNumber[] numbers = new SkinNumber[sk.songlist.level.length];
 						for (int i = 0; i < sk.songlist.level.length; i++) {

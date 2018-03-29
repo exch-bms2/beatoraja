@@ -478,6 +478,9 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 		addCommandWord(new CommandWord("SRC_BAR_TITLE") {
 			@Override
 			public void execute(String[] str) {
+				// 拡張Index 0:通常 1:新規 2:SongBar(通常) 3:SongBar(新規) 4:FolderBar(通常) 5:FolderBar(新規) 6:TableBar or HashBar
+				// 7:GradeBar(曲所持) 8:(SongBar or GradeBar)(曲未所持) 9:CommandBar or ContainerBar 10:SearchWordBar
+				// 3以降で定義されてなければ0か1が用いられる
 				int[] values = parseInt(str);
 				SkinText bartext = null;
 				if (values[2] < fontlist.size() && fontlist.get(values[2]) != null) {
