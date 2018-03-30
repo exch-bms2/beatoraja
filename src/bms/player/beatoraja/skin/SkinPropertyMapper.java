@@ -4,7 +4,10 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
 
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.ScoreDataProperty;
+import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.skin.SkinObject.BooleanProperty;
+import bms.player.beatoraja.skin.SkinObject.FloatProperty;
+import bms.player.beatoraja.skin.SkinObject.FloatWriter;
 import bms.player.beatoraja.skin.SkinObject.IntegerProperty;
 
 public class SkinPropertyMapper {
@@ -230,6 +233,50 @@ public class SkinPropertyMapper {
 		return result;
 	}
 	
+	public static FloatProperty getFloatProperty(int optionid) {
+		FloatProperty result = null;
+		if(optionid == SLIDER_MUSICSELECT_POSITION) {
+			result = (state) -> (state instanceof MusicSelector ? ((MusicSelector) state).getBarRender().getSelectedPosition() : 0);
+		}
+		if(optionid == BARGRAPH_SCORERATE) {
+			result = (state) -> (state.getScoreDataProperty().getRate());
+		}
+		if(optionid == BARGRAPH_SCORERATE_FINAL) {
+			result = (state) -> (state.getScoreDataProperty().getNowRate());
+		}		
+		if(optionid == BARGRAPH_BESTSCORERATE_NOW) {
+			result = (state) -> (state.getScoreDataProperty().getNowBestScoreRate());
+		}		
+		if(optionid == BARGRAPH_BESTSCORERATE) {
+			result = (state) -> (state.getScoreDataProperty().getBestScoreRate());
+		}		
+		if(optionid == BARGRAPH_TARGETSCORERATE_NOW) {
+			result = (state) -> (state.getScoreDataProperty().getNowRivalScoreRate());
+		}		
+		if(optionid == BARGRAPH_TARGETSCORERATE) {
+			result = (state) -> (state.getScoreDataProperty().getRivalScoreRate());
+		}		
+
+		return result;
+	}
+	
+	public static FloatWriter getFloatWriter(int optionid) {
+		FloatWriter result = null;
+		
+		if(optionid == SLIDER_MUSICSELECT_POSITION) {
+			result = (state, value) -> {
+				if(state instanceof MusicSelector) {
+					final MusicSelector select = (MusicSelector) state;
+					select.selectedBarMoved();
+					select.getBarRender().setSelectedPosition(value);
+				}
+			};
+		}
+		
+		return result;
+	}
+
+
 	private static class NowRankDrawCondition implements BooleanProperty {
 		
 		private final int low;

@@ -26,6 +26,9 @@ public class SkinSlider extends SkinObject {
 	 * slider値参照ID
 	 */
 	private int type;
+	
+	private FloatProperty ref;
+	private FloatWriter writer;
 	/**
 	 * ユーザーによる値変更を受け付けるかどうか
 	 */
@@ -47,6 +50,8 @@ public class SkinSlider extends SkinObject {
 		source = new SkinSourceImage(image, timer ,cycle);
 		this.direction = angle;
 		this.range = range;
+		ref = SkinPropertyMapper.getFloatProperty(type);
+		writer = SkinPropertyMapper.getFloatWriter(type);
 		this.type = type;
 	}
 
@@ -57,7 +62,7 @@ public class SkinSlider extends SkinObject {
 		Rectangle r = this.getDestination(time,state);
 		if (r != null) {
 			TextureRegion image = source.getImage(time, state);
-			float value = type != -1 ? state.getSliderValue(type) : 0;
+			float value = ref != null ? ref.get(state) : (type != -1 ? state.getSliderValue(type) : 0);
 			if(type != -1 && isRefNum && max != min) {
 				if(min < max) {
 					if(state.getNumberValue(type) > max) value = 1;
@@ -83,25 +88,41 @@ public class SkinSlider extends SkinObject {
 				switch (getSliderAngle()) {
 				case 0:
 					if (r.x <= x && r.x + r.width >= x && r.y <= y && r.y + range >= y) {
-						state.setSliderValue(type, (y - r.y) / range);
+						if(writer != null) {
+							writer.set(state, (y - r.y) / range);
+						} else {
+							state.setSliderValue(type, (y - r.y) / range);
+						}
 						return true;
 					}
 					break;
 				case 1:
 					if (r.x <= x && r.x + range >= x && r.y <= y && r.y + r.height >= y) {
-						state.setSliderValue(type, (x - r.x) / range);
+						if(writer != null) {
+							writer.set(state, (x - r.x) / range);
+						} else {
+							state.setSliderValue(type, (x - r.x) / range);							
+						}
 						return true;
 					}
 					break;
 				case 2:
 					if (r.x <= x && r.x + r.width >= x && r.y - range <= y && r.y >= y) {
-						state.setSliderValue(type, (r.y - y) / range);
+						if(writer != null) {
+							writer.set(state, (r.y - y) / range);
+						} else {
+							state.setSliderValue(type, (r.y - y) / range);							
+						}
 						return true;
 					}
 					break;
 				case 3:
 					if (r.x <= x && r.x + range >= x && r.y <= y && r.y + r.height >= y) {
-						state.setSliderValue(type, (r.x + range - x) / range);
+						if(writer != null) {
+							writer.set(state, (r.x + range - x) / range);
+						} else {
+							state.setSliderValue(type, (r.x + range - x) / range);							
+						}
 						return true;
 					}
 					break;

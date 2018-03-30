@@ -685,6 +685,18 @@ public abstract class SkinObject implements Disposable {
 		public int get(MainState state);
 	}
 	
+	public interface FloatProperty {
+		
+		public float get(MainState state);
+
+	}
+	
+	public interface FloatWriter {
+		
+		public void set(MainState state, float value);
+
+	}
+	
 	public abstract void dispose();
 
 	public int[] getOffsetID() {

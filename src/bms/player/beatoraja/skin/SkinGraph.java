@@ -20,6 +20,8 @@ public class SkinGraph extends SkinObject {
 	 * グラフの参照値
 	 */
 	private int id = -1;
+	
+	private FloatProperty ref;	
 	/**
 	 * グラフの伸びる向き(1:下, それ以外:右)
 	 */
@@ -56,7 +58,7 @@ public class SkinGraph extends SkinObject {
 			Rectangle r = this.getDestination(time, state);
 			TextureRegion image = state.getImage(getImageID());
 			if (r != null && image != null) {
-				float value = id != -1 ? state.getSliderValue(id) : 0;
+				float value = ref != null ? ref.get(state) : (id != -1 ? state.getSliderValue(id) : 0);
 				if(id != -1 && isRefNum && max != min) {
 					if(min < max) {
 						if(state.getNumberValue(id) > max) value = 1;
@@ -82,7 +84,7 @@ public class SkinGraph extends SkinObject {
 		} else if (source != null) {
 			Rectangle r = this.getDestination(time, state);
 			if (r != null) {
-				float value = id != -1 ? state.getSliderValue(id) : 0;
+				float value = ref != null ? ref.get(state) : (id != -1 ? state.getSliderValue(id) : 0);
 				if(id != -1 && isRefNum && max != min) {
 					if(min < max) {
 						if(state.getNumberValue(id) > max) value = 1;
@@ -115,6 +117,7 @@ public class SkinGraph extends SkinObject {
 	}
 
 	public void setReferenceID(int id) {
+		ref = SkinPropertyMapper.getFloatProperty(id);
 		this.id = id;
 	}
 
