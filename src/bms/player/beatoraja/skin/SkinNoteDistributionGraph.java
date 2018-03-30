@@ -250,6 +250,7 @@ public class SkinNoteDistributionGraph extends SkinObject {
 		if (shapetex != null && !(state instanceof BMSPlayer)) {
 			shapetex.getTexture().dispose();
 			backtex.getTexture().dispose();
+			shape.dispose();
 		}
 
 		if( shape == null || (shape != null && !(state instanceof BMSPlayer)) ) {
@@ -334,6 +335,7 @@ public class SkinNoteDistributionGraph extends SkinObject {
 			shapetex.getTexture().dispose();
 			startcursor.getTexture().dispose();
 			endcursor.getTexture().dispose();
+			shape.dispose();
 			shapetex = null;
 		}
 	}
