@@ -3,7 +3,6 @@ package bms.player.beatoraja.skin;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 
@@ -17,40 +16,42 @@ public class SkinGraph extends SkinObject {
 	 */
 	private SkinSource source;
 	/**
-	 * グラフの参照値
+	 * グラフの参照値(将来廃止予定)
 	 */
-	private int id = -1;
-	
-	private FloatProperty ref;	
+	private final int id;
+	/**
+	 * グラフ値参照先
+	 */	
+	private final FloatProperty ref;	
 	/**
 	 * グラフの伸びる向き(1:下, それ以外:右)
 	 */
 	private int direction = 1;
-	/**
-	 * NUMBER値参照かどうか
-	 */
-	private boolean isRefNum = false;
-	/**
-	 * NUMBER値参照の場合の最小値
-	 */
-	private int min = 0;
-	/**
-	 * NUMBER値参照の場合の最大値
-	 */
-	private int max = 0;
 
 	private final TextureRegion current = new TextureRegion();
 
-	public SkinGraph(int imageid) {
+	public SkinGraph(int imageid, int id) {
 		setImageID(imageid);
+		ref = SkinPropertyMapper.getFloatProperty(id);
+		this.id = id;
 	}
 
-	public SkinGraph(TextureRegion image) {
-		source = new SkinSourceImage(new TextureRegion[] { image }, 0, 0);
+	public SkinGraph(int imageid, int id, int min, int max) {
+		setImageID(imageid);
+		ref = new RateProperty(id, min, max);
+		this.id = id;
 	}
 
-	public SkinGraph(TextureRegion[] image, int timer, int cycle) {
+	public SkinGraph(TextureRegion[] image, int timer, int cycle, int id) {
 		source = new SkinSourceImage(image, timer, cycle);
+		ref = SkinPropertyMapper.getFloatProperty(id);
+		this.id = id;
+	}
+
+	public SkinGraph(TextureRegion[] image, int timer, int cycle, int id, int min, int max) {
+		source = new SkinSourceImage(image, timer, cycle);
+		ref = new RateProperty(id, min, max);
+		this.id = id;
 	}
 
 	public void draw(SkinObjectRenderer sprite, long time, MainState state) {
@@ -59,17 +60,6 @@ public class SkinGraph extends SkinObject {
 			TextureRegion image = state.getImage(getImageID());
 			if (r != null && image != null) {
 				float value = ref != null ? ref.get(state) : (id != -1 ? state.getSliderValue(id) : 0);
-				if(id != -1 && isRefNum && max != min) {
-					if(min < max) {
-						if(state.getNumberValue(id) > max) value = 1;
-						else if(state.getNumberValue(id) < min) value = 0;
-						else value = Math.abs( ((float) state.getNumberValue(id) - min) / (max - min) );
-					} else {
-						if(state.getNumberValue(id) < max) value = 1;
-						else if(state.getNumberValue(id) > min) value = 0;
-						else value = Math.abs( ((float) state.getNumberValue(id) - min) / (max - min) );
-					}
-				}
 				if (direction == 1) {
 					current.setRegion(image, 0,
 							image.getRegionY() + image.getRegionHeight() - (int) (image.getRegionHeight() * value),
@@ -85,17 +75,6 @@ public class SkinGraph extends SkinObject {
 			Rectangle r = this.getDestination(time, state);
 			if (r != null) {
 				float value = ref != null ? ref.get(state) : (id != -1 ? state.getSliderValue(id) : 0);
-				if(id != -1 && isRefNum && max != min) {
-					if(min < max) {
-						if(state.getNumberValue(id) > max) value = 1;
-						else if(state.getNumberValue(id) < min) value = 0;
-						else value = Math.abs( ((float) state.getNumberValue(id) - min) / (max - min) );
-					} else {
-						if(state.getNumberValue(id) < max) value = 1;
-						else if(state.getNumberValue(id) > min) value = 0;
-						else value = Math.abs( ((float) state.getNumberValue(id) - min) / (max - min) );
-					}
-				}
 				TextureRegion image = source.getImage(time, state);
 				if (direction == 1) {
 					current.setRegion(image, 0, image.getRegionHeight() - (int) (image.getRegionHeight() * value),
@@ -116,44 +95,11 @@ public class SkinGraph extends SkinObject {
 		}
 	}
 
-	public void setReferenceID(int id) {
-		ref = SkinPropertyMapper.getFloatProperty(id);
-		this.id = id;
-	}
-
-	public int getReferenceID() {
-		return id;
-	}
-
 	public int getDirection() {
 		return direction;
 	}
 
 	public void setDirection(int direction) {
 		this.direction = direction;
-	}
-
-	public boolean isRefNum() {
-		return isRefNum;
-	}
-
-	public void setRefNum(boolean isRefNum) {
-		this.isRefNum = isRefNum;
-	}
-
-	public int getMin() {
-		return min;
-	}
-
-	public void setMin(int min) {
-		this.min = min;
-	}
-
-	public int getMax() {
-		return max;
-	}
-
-	public void setMax(int max) {
-		this.max = max;
 	}
 }

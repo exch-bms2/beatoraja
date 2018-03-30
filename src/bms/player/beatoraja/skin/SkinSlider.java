@@ -3,7 +3,6 @@ package bms.player.beatoraja.skin;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 
@@ -23,28 +22,18 @@ public class SkinSlider extends SkinObject {
 	 */
 	private int range = 100;
 	/**
-	 * slider値参照ID
+	 * slider値参照ID(将来廃止予定)
 	 */
 	private int type;
-	
-	private FloatProperty ref;
-	private FloatWriter writer;
+	/**
+	 * slider値参照先
+	 */	
+	private final FloatProperty ref;
+	private final FloatWriter writer;
 	/**
 	 * ユーザーによる値変更を受け付けるかどうか
 	 */
 	private boolean changable;
-	/**
-	 * NUMBER値参照かどうか
-	 */
-	private boolean isRefNum = false;
-	/**
-	 * NUMBER値参照の場合の最小値
-	 */
-	private int min = 0;
-	/**
-	 * NUMBER値参照の場合の最大値
-	 */
-	private int max = 0;
 
 	public SkinSlider(TextureRegion[] image, int timer, int cycle, int angle, int range, int type) {
 		source = new SkinSourceImage(image, timer ,cycle);
@@ -52,6 +41,15 @@ public class SkinSlider extends SkinObject {
 		this.range = range;
 		ref = SkinPropertyMapper.getFloatProperty(type);
 		writer = SkinPropertyMapper.getFloatWriter(type);
+		this.type = type;
+	}
+
+	public SkinSlider(TextureRegion[] image, int timer, int cycle, int angle, int range, int type, int min, int max) {
+		source = new SkinSourceImage(image, timer ,cycle);
+		this.direction = angle;
+		this.range = range;
+		ref = new RateProperty(type, min, max);
+		writer = null;
 		this.type = type;
 	}
 
@@ -63,17 +61,6 @@ public class SkinSlider extends SkinObject {
 		if (r != null) {
 			TextureRegion image = source.getImage(time, state);
 			float value = ref != null ? ref.get(state) : (type != -1 ? state.getSliderValue(type) : 0);
-			if(type != -1 && isRefNum && max != min) {
-				if(min < max) {
-					if(state.getNumberValue(type) > max) value = 1;
-					else if(state.getNumberValue(type) < min) value = 0;
-					else value = Math.abs( ((float) state.getNumberValue(type) - min) / (max - min) );
-				} else {
-					if(state.getNumberValue(type) < max) value = 1;
-					else if(state.getNumberValue(type) > min) value = 0;
-					else value = Math.abs( ((float) state.getNumberValue(type) - min) / (max - min) );
-				}
-			}
 			draw(sprite, image, r.x
 					+ (direction == 1 ? value * range : (direction == 3 ? -value * range : 0)), r.y
 					+ (direction == 0 ? value * range : (direction == 2 ? -value * range : 0)),
@@ -82,7 +69,7 @@ public class SkinSlider extends SkinObject {
 	}
 
 	protected boolean mousePressed(MainState state, int button, int x, int y) {
-		if (isChangable() && !isRefNum) {
+		if (isChangable()) {
 			Rectangle r = getDestination(state.main.getNowTime(), state);
 			if (r != null) {
 				switch (getSliderAngle()) {
@@ -157,29 +144,5 @@ public class SkinSlider extends SkinObject {
 	
 	public int getSliderAngle() {
 		return direction;
-	}
-
-	public boolean isRefNum() {
-		return isRefNum;
-	}
-
-	public void setRefNum(boolean isRefNum) {
-		this.isRefNum = isRefNum;
-	}
-
-	public int getMin() {
-		return min;
-	}
-
-	public void setMin(int min) {
-		this.min = min;
-	}
-
-	public int getMax() {
-		return max;
-	}
-
-	public void setMax(int max) {
-		this.max = max;
 	}
 }

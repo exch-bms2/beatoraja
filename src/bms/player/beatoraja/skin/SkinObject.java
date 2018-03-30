@@ -691,6 +691,42 @@ public abstract class SkinObject implements Disposable {
 
 	}
 	
+	public static class RateProperty implements FloatProperty {
+		
+		private final IntegerProperty ref;
+		private final int type;
+		private final int min;
+		private final int max;
+		
+		public RateProperty(int type, int min, int max) {
+			this.ref = SkinPropertyMapper.getIntegerProperty(type);
+			this.type = type;
+			this.min = min;
+			this.max = max;
+		}
+		
+		public float get(MainState state) {
+			final int value = ref != null ? ref.get(state) : state.getNumberValue(type);
+			if(min < max) {
+				if(value > max) {
+					return 1;
+				} else if(value < min) {
+					return 0;
+				} else {
+					return Math.abs( ((float) value - min) / (max - min) );
+				}
+			} else {
+				if(value < max) {
+					return 1;
+				} else if(value > min) {
+					return 0;
+				} else {
+					return Math.abs( ((float) value - min) / (max - min) );
+				}
+			}
+		}
+	}
+	
 	public interface FloatWriter {
 		
 		public void set(MainState state, float value);

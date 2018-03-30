@@ -426,13 +426,17 @@ public class JSONSkinLoader extends SkinLoader{
 						if (dst.id.equals(img.id)) {
 							Texture tex = getTexture(img.src, p);
 
-							obj = new SkinSlider(getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy),
-									img.timer, img.cycle, img.angle, (int) ((img.angle == 1 || img.angle == 3
-											? ((float)dstr.width / sk.w) : ((float)dstr.height / sk.h)) * img.range),
-									img.type);
-							((SkinSlider) obj).setRefNum(img.isRefNum);
-							((SkinSlider) obj).setMin(img.min);
-							((SkinSlider) obj).setMax(img.max);
+							if(img.isRefNum) {
+								obj = new SkinSlider(getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy),
+										img.timer, img.cycle, img.angle, (int) ((img.angle == 1 || img.angle == 3
+												? ((float)dstr.width / sk.w) : ((float)dstr.height / sk.h)) * img.range),
+										img.type, img.min, img.max);								
+							} else {
+								obj = new SkinSlider(getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy),
+										img.timer, img.cycle, img.angle, (int) ((img.angle == 1 || img.angle == 3
+												? ((float)dstr.width / sk.w) : ((float)dstr.height / sk.h)) * img.range),
+										img.type);
+							}
 							break;
 						}
 					}
@@ -463,13 +467,14 @@ public class JSONSkinLoader extends SkinLoader{
 								}
 							} else {
 								Texture tex = getTexture(img.src, p);
-								obj = new SkinGraph(getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy),
-										img.timer, img.cycle);
+								if(img.isRefNum) {
+									obj = new SkinGraph(getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy),
+											img.timer, img.cycle, img.type, img.min, img.max);
+								} else {
+									obj = new SkinGraph(getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy),
+											img.timer, img.cycle, img.type);									
+								}
 								((SkinGraph) obj).setDirection(img.angle);
-								((SkinGraph) obj).setReferenceID(img.type);
-								((SkinGraph) obj).setRefNum(img.isRefNum);
-								((SkinGraph) obj).setMin(img.min);
-								((SkinGraph) obj).setMax(img.max);
 								break;
 							}
 						}
