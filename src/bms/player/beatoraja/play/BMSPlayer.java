@@ -522,7 +522,7 @@ public class BMSPlayer extends MainState {
 	private int sections = 0;
 	private long rhythmtimer;
 	private long startpressedtime;
-	
+
 	//4分のタイミングの時間 PMSのリズムに合わせたノート拡大用
 	private long[] quarterNoteTimes;
 	private int quarterNote = 0;
@@ -540,12 +540,12 @@ public class BMSPlayer extends MainState {
 		final long now = main.getNowTime();
 		final long micronow = main.getNowMicroTime();
 
-        if(now > skin.getInput()){
-        	main.switchTimer(TIMER_STARTINPUT, true);
-        }
-        if(input.startPressed() || input.isSelectPressed()){
-        	startpressedtime = now;
-        }
+		if(now > skin.getInput()){
+			main.switchTimer(TIMER_STARTINPUT, true);
+		}
+		if(input.startPressed() || input.isSelectPressed()){
+			startpressedtime = now;
+		}
 		switch (state) {
 		// 楽曲ロード
 		case STATE_PRELOAD:
@@ -643,8 +643,8 @@ public class BMSPlayer extends MainState {
 			if (main.getNowTime(TIMER_READY) > skin.getPlaystart()) {
 				saveReplayHS();
 				state = STATE_PLAY;
-                main.setMicroTimer(TIMER_PLAY, micronow - starttimeoffset * 1000);
-                main.setMicroTimer(TIMER_RHYTHM, micronow - starttimeoffset * 1000);
+				main.setMicroTimer(TIMER_PLAY, micronow - starttimeoffset * 1000);
+				main.setMicroTimer(TIMER_RHYTHM, micronow - starttimeoffset * 1000);
 
 				input.setStartTime(now + main.getStartTime() - starttimeoffset);
 				List<KeyInputLog> keylog = null;
@@ -663,24 +663,24 @@ public class BMSPlayer extends MainState {
 			final long deltaplay = deltatime * (100 - playspeed) / 100;
 			PracticeProperty property = practice.getPracticeProperty();
 			main.setMicroTimer(TIMER_PLAY, main.getMicroTimer(TIMER_PLAY) + deltaplay);
-            rhythmtimer += deltatime * (100 - lanerender.getNowBPM() * playspeed / 60) / 100;
-            main.setMicroTimer(TIMER_RHYTHM, rhythmtimer);
+			rhythmtimer += deltatime * (100 - lanerender.getNowBPM() * playspeed / 60) / 100;
+			main.setMicroTimer(TIMER_RHYTHM, rhythmtimer);
 
-            if(sections < sectiontimes.length && (sectiontimes[sections] * (100 / property.freq)) <= main.getNowMicroTime(TIMER_PLAY)) {
+			if(sections < sectiontimes.length && (sectiontimes[sections] * (100 / property.freq)) <= main.getNowMicroTime(TIMER_PLAY)) {
 				sections++;;
 				main.setTimerOn(TIMER_RHYTHM);
 				rhythmtimer = micronow;
 			}
-            if(isNoteExpansion) {
+			if(isNoteExpansion) {
 				if(quarterNote < quarterNoteTimes.length && (quarterNoteTimes[quarterNote] * (100 / property.freq)) <= main.getNowMicroTime(TIMER_PLAY)) {
 					quarterNote++;
 					nowQuarterNoteTime = now;
 				} else if(quarterNote == quarterNoteTimes.length && ((nowQuarterNoteTime + 60000 / lanerender.getNowBPM()) * (100 / property.freq)) <= now)  {
 					nowQuarterNoteTime = now;
 				}
-            }
+			}
 
-            final long ptime = main.getNowTime(TIMER_PLAY);
+			final long ptime = main.getNowTime(TIMER_PLAY);
 			float g = gauge.getValue();
 			for(int i = 0; i < gaugelog.length; i++) {
 				if (gaugelog[i].size <= ptime / 500) {
@@ -720,7 +720,7 @@ public class BMSPlayer extends MainState {
 			}
 			main.switchTimer(TIMER_PM_CHARA_DANCE, true);
 
-            // System.out.println("playing time : " + time);
+			// System.out.println("playing time : " + time);
 			if (playtime < ptime && !isFailed) {
 				state = STATE_FINISHED;
 				main.setTimerOn(TIMER_MUSIC_END);
@@ -732,7 +732,7 @@ public class BMSPlayer extends MainState {
 				Logger.getGlobal().info("STATE_FINISHEDに移行");
 			} else if(playtime - TIME_MARGIN < ptime) {
 				main.switchTimer(TIMER_ENDOFNOTE_1P, true);
-            }
+			}
 			// stage failed判定
 			if (g == 0) {
 				if(config.isContinueUntilEndOfSong()
@@ -1036,7 +1036,7 @@ public class BMSPlayer extends MainState {
 		//フルコン判定
 		main.switchTimer(TIMER_FULLCOMBO_1P, notes == main.getPlayerResource().getSongdata().getNotes()
 				&& notes == this.judge.getCombo());
-		
+
 		getScoreDataProperty().update(this.judge.getScoreData(), notes);
 
 		main.switchTimer(TIMER_SCORE_A, getScoreDataProperty().qualifyRank(18));
@@ -1135,7 +1135,7 @@ public class BMSPlayer extends MainState {
 			return (int) gauge.getValue();
 		case NUMBER_GROOVEGAUGE_AFTERDOT:
 			return  (gauge.getType() == GrooveGauge.HARD || gauge.getType() == GrooveGauge.EXHARD || gauge.getType() == GrooveGauge.HAZARD || gauge.getType() == GrooveGauge.CLASS || gauge.getType() == GrooveGauge.EXCLASS || gauge.getType() == GrooveGauge.EXHARDCLASS)
-					&& gauge.getValue() > 0 && gauge.getValue() < 0.1 
+					&& gauge.getValue() > 0 && gauge.getValue() < 0.1
 					? 1 : ((int) (gauge.getValue() * 10)) % 10;
 		case NUMBER_HISPEED_LR2:
 			return (int) (lanerender.getHispeed() * 100);
@@ -1204,7 +1204,7 @@ public class BMSPlayer extends MainState {
 			return 0;
 		case SLIDER_LANECOVER:
 		case SLIDER_LANECOVER2:
-        	final PlayConfig pc = lanerender.getPlayConfig();
+			final PlayConfig pc = lanerender.getPlayConfig();
 			if (pc.isEnablelanecover()) {
 				float lane = pc.getLanecover();
 				if (pc.isEnablelift()) {
@@ -1230,45 +1230,59 @@ public class BMSPlayer extends MainState {
 		return super.getSliderValue(id);
 	}
 
-    public SkinOffset getOffsetValue(int id) {
-    	// TODO 各クラスでoffsetを算出してこのメソッドは廃止したい
-    	SkinOffset offset = main.getOffset(id);
-        switch (id) {
+	public SkinOffset getOffsetValue(int id) {
+		// TODO 各クラスでoffsetを算出してこのメソッドは廃止したい
+		SkinOffset offset = main.getOffset(id);
+		final PlayConfig pc = lanerender.getPlayConfig();
+		switch (id) {
 		case OFFSET_SCRATCHANGLE_1P:
 			offset.r = keyinput.getScratchState(0);
 			break;
 		case OFFSET_SCRATCHANGLE_2P:
 			offset.r = keyinput.getScratchState(1);
 			break;
-        case OFFSET_LIFT:
-        case OFFSET_LIFT_OBSOLETE:
-            if (lanerender.isEnableLift()) {
-                final PlaySkin skin = (PlaySkin) getSkin();
-                offset.y = lanerender.getLiftRegion() * skin.getLaneRegion()[0].height;
-            } else {
-            	offset.y = 0;
-            }
+		case OFFSET_LIFT:
+		case OFFSET_LIFT_OBSOLETE:
+			if (lanerender.isEnableLift()) {
+				final PlaySkin skin = (PlaySkin) getSkin();
+				offset.y = lanerender.getLiftRegion() * skin.getLaneRegion()[0].height;
+			} else {
+				offset.y = 0;
+			}
 			break;
-        case OFFSET_LANECOVER:
-        case OFFSET_LANECOVER_OBSOLETE:
-        	final PlayConfig pc = lanerender.getPlayConfig();
-            if (pc.isEnablelanecover()) {
-                final PlaySkin skin = (PlaySkin) getSkin();
-                if (pc.isEnablelift()) {
-                    offset.y =  -(1 - pc.getLift()) * pc.getLanecover()
-                            * skin.getLaneRegion()[0].height;
-                } else {
-                    offset.y =  -pc.getLanecover() * skin.getLaneRegion()[0].height;
-                }
-            } else {
-            	offset.y = 0;
-            }
+		case OFFSET_LANECOVER:
+		case OFFSET_LANECOVER_OBSOLETE:
+			if (pc.isEnablelanecover()) {
+				final PlaySkin skin = (PlaySkin) getSkin();
+				if (pc.isEnablelift()) {
+					offset.y =  -(1 - pc.getLift()) * pc.getLanecover()
+							* skin.getLaneRegion()[0].height;
+				} else {
+					offset.y =  -pc.getLanecover() * skin.getLaneRegion()[0].height;
+				}
+			} else {
+				offset.y = 0;
+			}
 			break;
-        }
-        return offset;
-    }
+		case OFFSET_HIDDEN_COVER:
+			if (pc.isEnablehidden()) {
+				final PlaySkin skin = (PlaySkin) getSkin();
+				offset.a = 0;
+				if (pc.isEnablelift()) {
+					offset.y =  (1 - pc.getLift()) * pc.getHidden()
+							* skin.getLaneRegion()[0].height;
+				} else {
+					offset.y = pc.getHidden() * skin.getLaneRegion()[0].height;
+				}
+			} else {
+				offset.a = -255;
+			}
+			break;
+		}
+		return offset;
+	}
 
-    public boolean getBooleanValue(int id) {
+	public boolean getBooleanValue(int id) {
 		switch (id) {
 		case OPTION_GAUGE_GROOVE:
 			return gauge.getType() <= 2;

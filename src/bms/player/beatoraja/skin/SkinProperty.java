@@ -746,6 +746,7 @@ public class SkinProperty {
 	public static final int OFFSET_SCRATCHANGLE_2P = 2;
 	public static final int OFFSET_LIFT = 3;
 	public static final int OFFSET_LANECOVER = 4;
+	public static final int OFFSET_HIDDEN_COVER = 5;
 
 	public static final int OFFSET_ALL = 10;
 

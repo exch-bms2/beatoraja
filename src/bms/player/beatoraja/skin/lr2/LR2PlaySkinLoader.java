@@ -18,6 +18,7 @@ import bms.player.beatoraja.Resolution;
 import bms.player.beatoraja.play.PlaySkin;
 import bms.player.beatoraja.play.SkinBGA;
 import bms.player.beatoraja.play.SkinGauge;
+import bms.player.beatoraja.play.SkinHidden;
 import bms.player.beatoraja.play.SkinJudge;
 import bms.player.beatoraja.play.SkinNote;
 import bms.player.beatoraja.skin.Skin;
@@ -82,6 +83,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 	private SkinNoteDistributionGraph noteobj;
 	private SkinBPMGraph bpmgraphobj;
 	private SkinTimingVisualizer timingobj;
+	private SkinHidden hidden;
 
 	public LR2PlaySkinLoader(final SkinType type, final Resolution src, final Config c) {
 		super(src, c);
@@ -648,7 +650,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 							values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
 							values[12], values[13], values[14], values[15], values[16], values[17], values[18],
 							values[19], values[20], readOffset(str, 21, new int[]{OFFSET_LIFT}));
-                }
+				}
 			}
 		});
 
@@ -863,6 +865,45 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 				skin.setDestination(timingobj, values[2], gauge.x, gauge.y, gauge.width, gauge.height, values[7], values[8],
 						values[9], values[10], values[11], values[12], values[13], values[14], values[15],
 						values[16], values[17], values[18], values[19], values[20], readOffset(str, 21));
+			}
+		});
+
+		addCommandWord(new CommandWord("SRC_HIDDEN") {
+			//#SRC_HIDDEN, (NULL), g, x, y, w, h,div_x, div_y, cycle, timer, disapear_line, isDisapearLineLinkLift
+			@Override
+			public void execute(String[] str) {
+				hidden = null;
+				int[] values = parseInt(str);
+				TextureRegion[] images = getSourceImage(values);
+				if (images != null) {
+					hidden = new SkinHidden(images, values[10], values[9]);
+				}
+				if (hidden != null) {
+					if(str[11].length() > 0 && values[11] > 0) hidden.setDisapearLine(dsth - values[11] * dsth / srch);
+					hidden.setDisapearLineLinkLift(str[12].length() == 0 || values[12] != 0);
+					skin.add(hidden);
+				}
+			}
+		});
+		addCommandWord(new CommandWord("DST_HIDDEN") {
+			@Override
+			public void execute(String[] str) {
+				if (hidden != null) {
+					int[] values = parseInt(str);
+					if (values[5] < 0) {
+						values[3] += values[5];
+						values[5] = -values[5];
+					}
+					if (values[6] < 0) {
+						values[4] += values[6];
+						values[6] = -values[6];
+					}
+					hidden.setDestination(values[2], values[3] * dstw / srcw,
+							dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
+							values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
+							values[12], values[13], values[14], values[15], values[16], values[17], values[18],
+							values[19], values[20], readOffset(str, 21, new int[]{OFFSET_LIFT, OFFSET_HIDDEN_COVER}));
+				}
 			}
 		});
 	}
