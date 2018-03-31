@@ -37,8 +37,8 @@ public class SkinHidden extends SkinObject {
 	 */
 	private boolean isDisapearLineLinkLift = true;
 
-	private float beforeY = Float.MIN_VALUE;
-	private float beforeLift = Float.MIN_VALUE;
+	private float previousY = Float.MIN_VALUE;
+	private float previousLift = Float.MIN_VALUE;
 
 	private int timer;
 	private int cycle;
@@ -61,21 +61,21 @@ public class SkinHidden extends SkinObject {
 			this.state = state;
 			disapearLineAddedLift = disapearLine;
 		}
-		if(isDisapearLineLinkLift && disapearLine >= 0 && beforeLift != state.getOffsetValue(OFFSET_LIFT).y) {
+		if(isDisapearLineLinkLift && disapearLine >= 0 && previousLift != state.getOffsetValue(OFFSET_LIFT).y) {
 			disapearLineAddedLift = disapearLine + state.getOffsetValue(OFFSET_LIFT).y;
-			beforeLift = state.getOffsetValue(OFFSET_LIFT).y;
+			previousLift = state.getOffsetValue(OFFSET_LIFT).y;
 		}
 		Rectangle r = this.getDestination(time,state);
 		if (r != null && ((r.y + r.height > disapearLineAddedLift && disapearLine >= 0) || disapearLine < 0)) {
 			if(r.y < disapearLineAddedLift && disapearLine >= 0) {
-				if(beforeY != r.y) {
+				if(previousY != r.y) {
 					for(int i = 0; i < trimmedImages.length; i++) {
 						trimmedImages[i] = new TextureRegion(originalImages[i]);
 					}
 					for(int i = 0; i < trimmedImages.length; i++) {
 						trimmedImages[i].setRegionHeight( (int) Math.round(originalImages[i].getRegionHeight() * (r.y + r.height - disapearLineAddedLift) / r.height));
 					}
-					beforeY = r.y;
+					previousY = r.y;
 				}
 				draw(sprite, trimmedImages[getImageIndex(trimmedImages.length, time, state)], r.x, disapearLineAddedLift, r.width, r.y + r.height - disapearLineAddedLift, state);
 			} else {
