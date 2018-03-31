@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -241,6 +242,7 @@ public class TableDataAccessor {
 				return td;
 			} catch (Throwable e) {
 				e.printStackTrace();
+				Logger.getGlobal().warning("難易度表 - "+url+" の読み込み失敗。");
 			}
 			return null;
 		}

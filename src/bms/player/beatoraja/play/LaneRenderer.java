@@ -243,6 +243,10 @@ public class LaneRenderer {
 		return playconfig.getLift();
 	}
 
+	public void setLiftRegion(float liftRegion) {
+		playconfig.setLift(liftRegion < 0 ? 0 : (liftRegion > 1 ? 1 : liftRegion));
+	}
+
 	public float getLanecover() {
 		return playconfig.getLanecover();
 	}
@@ -260,6 +264,18 @@ public class LaneRenderer {
 
 	public boolean isEnableLanecover() {
 		return playconfig.isEnablelanecover();
+	}
+
+	public float getHiddenCover() {
+		return playconfig.getHidden();
+	}
+
+	public void setHiddenCover(float hiddenCover) {
+		playconfig.setHidden(hiddenCover < 0 ? 0 : (hiddenCover > 1 ? 1 : hiddenCover));
+	}
+
+	public boolean isEnableHidden() {
+		return playconfig.isEnablehidden();
 	}
 
 	public void changeHispeed(boolean b) {
