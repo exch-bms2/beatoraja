@@ -25,15 +25,20 @@ public class SkinHidden extends SkinObject {
 	private TextureRegion[] trimmedImages;
 
 	/**
-	 * 消失ラインのy座標 この座標以下の部分はトリミングする
+	 * 消失ラインのy座標(スキン設定値) この座標以下の部分はトリミングする 負の値の場合はトリミングしない
 	 */
 	private float disapearLine = -1;
+	/**
+	 * 消失ラインのy座標(計算用)
+	 */
+	private float disapearLineAddedLift = -1;
 	/**
 	 * 消失ラインのy座標とリフトを連動させるかどうか
 	 */
 	private boolean isDisapearLineLinkLift = true;
 
-	private float beforeY = Float.MIN_VALUE;
+	private float previousY = Float.MIN_VALUE;
+	private float previousLift = Float.MIN_VALUE;
 
 	private int timer;
 	private int cycle;
@@ -52,23 +57,27 @@ public class SkinHidden extends SkinObject {
 		if(originalImages == null) {
 			return;
 		}
-		if(this.state != state && isDisapearLineLinkLift && disapearLine >= 0) {
+		if(this.state != state) {
 			this.state = state;
-			disapearLine += state.getOffsetValue(OFFSET_LIFT).y;
+			disapearLineAddedLift = disapearLine;
+		}
+		if(isDisapearLineLinkLift && disapearLine >= 0 && previousLift != state.getOffsetValue(OFFSET_LIFT).y) {
+			disapearLineAddedLift = disapearLine + state.getOffsetValue(OFFSET_LIFT).y;
+			previousLift = state.getOffsetValue(OFFSET_LIFT).y;
 		}
 		Rectangle r = this.getDestination(time,state);
-		if (r != null && ((r.y + r.height > disapearLine && disapearLine >= 0) || disapearLine < 0)) {
-			if(r.y < disapearLine && disapearLine >= 0) {
-				if(beforeY != r.y) {
+		if (r != null && ((r.y + r.height > disapearLineAddedLift && disapearLine >= 0) || disapearLine < 0)) {
+			if(r.y < disapearLineAddedLift && disapearLine >= 0) {
+				if(previousY != r.y) {
 					for(int i = 0; i < trimmedImages.length; i++) {
 						trimmedImages[i] = new TextureRegion(originalImages[i]);
 					}
 					for(int i = 0; i < trimmedImages.length; i++) {
-						trimmedImages[i].setRegionHeight( (int) Math.round(originalImages[i].getRegionHeight() * (r.y + r.height - disapearLine) / r.height));
+						trimmedImages[i].setRegionHeight( (int) Math.round(originalImages[i].getRegionHeight() * (r.y + r.height - disapearLineAddedLift) / r.height));
 					}
-					beforeY = r.y;
+					previousY = r.y;
 				}
-				draw(sprite, trimmedImages[getImageIndex(trimmedImages.length, time, state)], r.x, disapearLine, r.width, r.y + r.height - disapearLine, state);
+				draw(sprite, trimmedImages[getImageIndex(trimmedImages.length, time, state)], r.x, disapearLineAddedLift, r.width, r.y + r.height - disapearLineAddedLift, state);
 			} else {
 				draw(sprite, originalImages[getImageIndex(originalImages.length, time, state)], r.x, r.y, r.width, r.height, state);
 			}
