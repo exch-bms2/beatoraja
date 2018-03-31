@@ -1363,7 +1363,7 @@ public class JSONSkinLoader extends SkinLoader{
 		public int divy = 1;
 		public int timer;
 		public int cycle;
-		public int disapearLine = Integer.MIN_VALUE;
+		public int disapearLine = -1;
 		public boolean isDisapearLineLinkLift = true;
 	}
 

@@ -879,7 +879,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 					hidden = new SkinHidden(images, values[10], values[9]);
 				}
 				if (hidden != null) {
-					if(values[11] > 0) hidden.setDisapearLine(dsth - values[11] * dsth / srch);
+					if(str[11].length() > 0 && values[11] > 0) hidden.setDisapearLine(dsth - values[11] * dsth / srch);
 					hidden.setDisapearLineLinkLift(str[12].length() == 0 || values[12] != 0);
 					skin.add(hidden);
 				}

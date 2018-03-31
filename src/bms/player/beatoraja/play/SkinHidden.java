@@ -27,7 +27,7 @@ public class SkinHidden extends SkinObject {
 	/**
 	 * 消失ラインのy座標 この座標以下の部分はトリミングする
 	 */
-	private float disapearLine = Float.MIN_VALUE;
+	private float disapearLine = -1;
 	/**
 	 * 消失ラインのy座標とリフトを連動させるかどうか
 	 */
@@ -52,13 +52,13 @@ public class SkinHidden extends SkinObject {
 		if(originalImages == null) {
 			return;
 		}
-		if(this.state != state && isDisapearLineLinkLift) {
+		if(this.state != state && isDisapearLineLinkLift && disapearLine >= 0) {
 			this.state = state;
 			disapearLine += state.getOffsetValue(OFFSET_LIFT).y;
 		}
 		Rectangle r = this.getDestination(time,state);
-		if (r != null && r.y + r.height > disapearLine) {
-			if(r.y < disapearLine) {
+		if (r != null && ((r.y + r.height > disapearLine && disapearLine >= 0) || disapearLine < 0)) {
+			if(r.y < disapearLine && disapearLine >= 0) {
 				if(beforeY != r.y) {
 					for(int i = 0; i < trimmedImages.length; i++) {
 						trimmedImages[i] = new TextureRegion(originalImages[i]);
