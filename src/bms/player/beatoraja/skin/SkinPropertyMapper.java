@@ -4,7 +4,10 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
 
 import bms.model.Mode;
 import bms.player.beatoraja.MainState;
+import bms.player.beatoraja.PlayerResource;
 import bms.player.beatoraja.ScoreDataProperty;
+import bms.player.beatoraja.play.BMSPlayer;
+import bms.player.beatoraja.play.GrooveGauge;
 import bms.player.beatoraja.result.CourseResult;
 import bms.player.beatoraja.result.MusicResult;
 import bms.player.beatoraja.select.MusicSelector;
@@ -180,6 +183,21 @@ public class SkinPropertyMapper {
 			result = new ModeDrawCondition(Mode.KEYBOARD_24K_DOUBLE);
 		}
 
+		if (id >= OPTION_1P_0_9 && id <= OPTION_1P_100) {
+			final float low =(id - OPTION_1P_0_9) * 0.1f;
+			final float high =(id - OPTION_1P_0_9 + 1) * 0.1f;
+			result = new DrawConditionProperty(DrawConditionProperty.TYPE_STATIC_ON_RESULT) {
+				@Override
+				public boolean get(MainState state) {
+					if(state instanceof BMSPlayer) {
+						final GrooveGauge gauge = ((BMSPlayer) state).getGauge();
+						return gauge.getValue() >= low * gauge.getMaxValue() && gauge.getValue() < high * gauge.getMaxValue();
+					}
+					return false;
+				}
+			};
+		}
+
 		if (id >= OPTION_AAA && id <= OPTION_F) {			
 			final int[] values = { 0, 6, 9, 12, 15, 18, 21, 24};
 			final int low =values[OPTION_F - id];
@@ -212,6 +230,15 @@ public class SkinPropertyMapper {
 		}
 		if (id >= OPTION_NOW_AAA_1P && id <= OPTION_NOW_F_1P) {			
 			result = new NowRankDrawCondition(OPTION_NOW_F_1P - id);
+		}
+		if(id >= OPTION_PERFECT_EXIST && id <= OPTION_MISS_EXIST) {
+			result = new DrawConditionProperty(DrawConditionProperty.TYPE_STATIC_ON_RESULT) {
+				private final int judge = id - OPTION_PERFECT_EXIST;
+				@Override
+				public boolean get(MainState state) {
+					return state.getJudgeCount(judge, true) + state.getJudgeCount(judge, false) > 0;
+				}
+			};
 		}
 		
 		if(result != null && optionid < 0) {
