@@ -2,7 +2,6 @@ package bms.player.beatoraja;
 
 import bms.player.beatoraja.input.KeyInputLog;
 import bms.player.beatoraja.pattern.PatternModifyLog;
-import static bms.player.beatoraja.PlayConfig.*;
 
 /**
  * リプレイデータ。キー入力ログ、譜面変更情報、ゲージ種類を含む
@@ -60,35 +59,7 @@ public class ReplayData {
 	 */
 	public int doubleoption = 0;
 	/**
-	 * ハイスピード固定。固定する場合はデュレーションが有効となり、固定しない場合はハイスピードが有効になる
+	 * プレイコンフィグ
 	 */
-	public int fixhispeed = FIX_HISPEED_MAINBPM;
-	/**
-	 * ハイスピード。1.0で等速
-	 */
-	public float hispeed = 1.0f;
-	/**
-	 * ハイスピード変化間隔
-	 */
-	public float hispeedmargin = 0.25f;
-	/**
-	 * デュレーション(ノーツ表示時間)
-	 */
-	public int duration = 500;
-	/**
-	 * レーンカバー表示量(0-1)
-	 */
-	public float lanecover = 0.2f;
-	/**
-	 * レーンカバー使用
-	 */
-	public boolean enablelanecover = true;
-	/**
-	 * リフト表示量(0-1)
-	 */
-	public float lift = 0.1f;
-	/**
-	 * リフト使用
-	 */
-	public boolean enablelift = false;
+	public PlayConfig config;
 }
