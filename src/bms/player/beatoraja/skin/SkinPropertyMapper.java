@@ -2,8 +2,11 @@ package bms.player.beatoraja.skin;
 
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
+import bms.model.Mode;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.ScoreDataProperty;
+import bms.player.beatoraja.result.CourseResult;
+import bms.player.beatoraja.result.MusicResult;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.select.bar.Bar;
 import bms.player.beatoraja.select.bar.GradeBar;
@@ -166,16 +169,39 @@ public class SkinPropertyMapper {
 		// TODO 各Skinに分散するるべき？
 		BooleanProperty result = null;
 		final int id = Math.abs(optionid);
+		if (id >= OPTION_7KEYSONG && id <= OPTION_9KEYSONG) {	
+			final Mode[] modes = {Mode.BEAT_7K, Mode.BEAT_5K, Mode.BEAT_14K, Mode.BEAT_10K, Mode.POPN_9K};
+			result = new ModeDrawCondition(modes[id - OPTION_7KEYSONG]);
+		}
+		if (id == OPTION_24KEYSONG) {
+			result = new ModeDrawCondition(Mode.KEYBOARD_24K);
+		}
+		if (id == OPTION_24KEYDPSONG) {
+			result = new ModeDrawCondition(Mode.KEYBOARD_24K_DOUBLE);
+		}
+
+		if (id >= OPTION_AAA && id <= OPTION_F) {			
+			final int[] values = { 0, 6, 9, 12, 15, 18, 21, 24};
+			final int low =values[OPTION_F - id];
+			result = new DrawConditionProperty(DrawConditionProperty.TYPE_STATIC_ON_RESULT) {
+				@Override
+				public boolean get(MainState state) {
+					return state.getScoreDataProperty().qualifyRank(low);
+				}
+			};
+		}
 		if (id >= OPTION_BEST_AAA_1P && id <= OPTION_BEST_F_1P) {			
 			final int[] values = { 0, 6, 9, 12, 15, 18, 21, 24, 28 };
 			final int low =values[OPTION_BEST_F_1P - id];
 			final int high =values[OPTION_BEST_F_1P - id + 1];
-			result = new BooleanProperty() {				
+			result = new DrawConditionProperty(DrawConditionProperty.TYPE_STATIC_ON_RESULT) {
+				
 				@Override
 				public boolean get(MainState state) {
 					final ScoreDataProperty score = state.getScoreDataProperty();
-					return score.qualifyBestRank(low) && !score.qualifyBestRank(high);
+					return score.qualifyBestRank(low) && (high > 27 ? true : !score.qualifyBestRank(high));
 				}
+
 			};
 		}
 		if (id >= OPTION_1P_AAA && id <= OPTION_1P_F) {			
@@ -191,9 +217,14 @@ public class SkinPropertyMapper {
 		if(result != null && optionid < 0) {
 			final BooleanProperty dc = result;
 			result = new BooleanProperty() {
+				@Override
+				public boolean isStatic(MainState state) {
+					return dc.isStatic(state);
+				}				
+				
 				public boolean get(MainState state) {
 					return !dc.get(state);
-				}				
+				}
 			};
 		}
 		
@@ -305,12 +336,60 @@ public class SkinPropertyMapper {
 		return result;
 	}
 
-	private static class NowRankDrawCondition implements BooleanProperty {
+	private static abstract class DrawConditionProperty implements BooleanProperty {
+		
+		public final int type;
+		
+		public static final int TYPE_NO_STATIC = 0;
+		public static final int TYPE_STATIC_WITHOUT_MUSICSELECT = 1;
+		public static final int TYPE_STATIC_ON_RESULT = 2;
+		public static final int TYPE_STATIC_ALL = 3;
+		
+		public DrawConditionProperty(int type) {
+			this.type = type;
+		}
+
+		@Override
+		public boolean isStatic(MainState state) {
+			switch(type) {
+			case TYPE_NO_STATIC:
+				return false;
+			case TYPE_STATIC_WITHOUT_MUSICSELECT:
+				return !(state instanceof MusicSelector);
+			case TYPE_STATIC_ON_RESULT:
+				return (state instanceof MusicResult) || (state instanceof CourseResult);
+			case TYPE_STATIC_ALL:
+				return true;
+			}
+			return false;
+		}
+		
+	}	
+
+	private static class ModeDrawCondition extends DrawConditionProperty {
+		
+		private final Mode mode;
+		
+		public ModeDrawCondition(Mode mode) {
+			super(TYPE_STATIC_WITHOUT_MUSICSELECT);
+			this.mode = mode;
+		}
+
+		@Override
+		public boolean get(MainState state) {
+			final SongData model = state.main.getPlayerResource().getSongdata();
+			return model != null && model.getMode() == mode.id;
+		}
+
+	}
+
+	private static class NowRankDrawCondition extends DrawConditionProperty {
 		
 		private final int low;
 		private final int high;
 		
 		public NowRankDrawCondition(int rank) {
+			super(TYPE_STATIC_ON_RESULT);
 			final int[] values = { 0, 6, 9, 12, 15, 18, 21, 24, 28 };
 			low =values[rank];
 			high =values[rank + 1];

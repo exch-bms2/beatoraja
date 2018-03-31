@@ -245,6 +245,10 @@ public abstract class SkinObject implements Disposable {
 		this.dstop = op.toArray();
 		this.dstdraw = draw.toArray(BooleanProperty.class);
 	}
+	
+	public void setDrawCondition(BooleanProperty[] dstdraw) {
+		this.dstdraw = dstdraw;
+	}
 
 	public Rectangle getDestination(long time) {
 		return this.getDestination(time, null);
@@ -676,6 +680,8 @@ public abstract class SkinObject implements Disposable {
 	}
 	
 	public interface BooleanProperty {
+		
+		public boolean isStatic(MainState state);
 		
 		public boolean get(MainState state);
 	}

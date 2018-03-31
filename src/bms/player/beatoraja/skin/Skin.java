@@ -159,6 +159,18 @@ public class Skin {
 			if(obj.getAllDestination().length == 0) {
 				removes.add(obj);
 			} else {
+				Array<BooleanProperty> bp = new Array();
+				for(BooleanProperty op : obj.getDrawCondition()) {
+					if(op.isStatic(state)) {
+						if(!op.get(state)) {
+							removes.add(obj);							
+						}
+					} else {
+						bp.add(op);
+					}
+				}
+				obj.setDrawCondition(bp.toArray(BooleanProperty.class));
+
 				IntArray l = new IntArray();
 				for(int op : obj.getOption()) {
 					if(op > 0) {
