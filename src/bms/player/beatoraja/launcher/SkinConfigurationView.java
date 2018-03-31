@@ -34,7 +34,7 @@ public class SkinConfigurationView implements Initializable {
 	private ScrollPane skinconfig;
 
 	private PlayerConfig player;
-	private int mode = -1;
+	private SkinType mode = null;
 
 	private List<SkinHeader> lr2skinheader = new ArrayList<SkinHeader>();
 
@@ -237,9 +237,9 @@ public class SkinConfigurationView implements Initializable {
 
 			Spinner<Integer>[] spinner = new Spinner[values.length];
 			for(int i = 0;i < spinner.length;i++) {
-				spinner[i] = new Spinner(-9999,9999,0,1);
+				spinner[i] = new NumericSpinner();
+				spinner[i].setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(-9999,9999,v[i],1));
 				spinner[i].setPrefWidth(80);
-				spinner[i].getValueFactory().setValue(v[i]);
 				spinner[i].setEditable(true);
 				if(b[i]) {
 					hbox.getChildren().addAll(new Label(values[i]), spinner[i]);					
@@ -343,14 +343,14 @@ public class SkinConfigurationView implements Initializable {
 			SkinConfig skin = new SkinConfig(header.getPath().toString());
 			skin.setProperties(getProperty());
 			player.getSkin()[header.getSkinType().getId()] = skin;
-		} else if (mode != -1) {
-			player.getSkin()[mode] = null;
+		} else if (mode != null) {
+			player.getSkin()[mode.getId()] = null;
 		}
 
 		skinheader.getItems().clear();
 		SkinHeader[] headers = getSkinHeader(skincategory.getValue());
 		skinheader.getItems().addAll(headers);
-		mode = skincategory.getValue().getId();
+		mode = skincategory.getValue();
 		if (player.getSkin()[skincategory.getValue().getId()] != null) {
 			SkinConfig skinconf = player.getSkin()[skincategory.getValue().getId()];
 			if (skinconf != null) {
