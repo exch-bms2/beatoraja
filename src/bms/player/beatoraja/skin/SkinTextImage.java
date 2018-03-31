@@ -31,8 +31,13 @@ public class SkinTextImage extends SkinText {
 	 * 現在のテキスト長
 	 */
 	private float textwidth;
-	
+
 	public SkinTextImage(SkinTextImageSource source) {
+		this(source, -1);
+	}
+
+	public SkinTextImage(SkinTextImageSource source, int id) {
+		super(id);
 		this.source = source;
 	}
 

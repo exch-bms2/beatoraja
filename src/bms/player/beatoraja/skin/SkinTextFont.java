@@ -30,11 +30,12 @@ public class SkinTextFont extends SkinText {
     private FreeTypeFontGenerator.FreeTypeFontParameter parameter;
     private String preparedFonts;
 
-    public SkinTextFont(String fontpath, int cycle, int size) {
-        this(fontpath, cycle, size, 0);
+    public SkinTextFont(String fontpath, int cycle, int size, int shadow) {
+        this(fontpath, cycle, size, shadow, -1);
     }
 
-    public SkinTextFont(String fontpath, int cycle, int size, int shadow) {
+    public SkinTextFont(String fontpath, int cycle, int size, int shadow, int id) {
+    	super(id);
         generator = new FreeTypeFontGenerator(Gdx.files.internal(fontpath));
         parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
         parameter.characters = "";

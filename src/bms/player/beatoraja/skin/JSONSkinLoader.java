@@ -5,7 +5,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.lang.reflect.Array;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 
 import bms.player.beatoraja.Config;
@@ -410,9 +409,8 @@ public class JSONSkinLoader extends SkinLoader{
 										((MusicSelectSkin) skin).setSearchTextRegion(r);
 									} else {
 										SkinText st = new SkinTextFont(p.getParent().resolve(font.path).toString(), 0,
-												text.size);
+												text.size, 0, text.ref);
 										st.setAlign(text.align);
-										st.setReferenceID(text.ref);
 										obj = st;
 										break;
 									}
@@ -836,7 +834,7 @@ public class JSONSkinLoader extends SkinLoader{
 									for (Font font : sk.font) {
 										if (img.font.equals(font.id)) {
 											text[i] = new SkinTextFont(p.getParent().resolve(font.path).toString(), 0,
-													img.size);
+													img.size, 0);
 											text[i].setAlign(img.align);
 											setDestination(skin, text[i], sk.songlist.text[i]);
 											break;

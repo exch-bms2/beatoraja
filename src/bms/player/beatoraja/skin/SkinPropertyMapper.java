@@ -5,10 +5,14 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.ScoreDataProperty;
 import bms.player.beatoraja.select.MusicSelector;
+import bms.player.beatoraja.select.bar.Bar;
+import bms.player.beatoraja.select.bar.GradeBar;
 import bms.player.beatoraja.skin.SkinObject.BooleanProperty;
 import bms.player.beatoraja.skin.SkinObject.FloatProperty;
 import bms.player.beatoraja.skin.SkinObject.FloatWriter;
 import bms.player.beatoraja.skin.SkinObject.IntegerProperty;
+import bms.player.beatoraja.skin.SkinObject.StringProperty;
+import bms.player.beatoraja.song.SongData;
 
 public class SkinPropertyMapper {
 
@@ -276,6 +280,30 @@ public class SkinPropertyMapper {
 		return result;
 	}
 
+	public static StringProperty getTextProperty(final int optionid) {
+		StringProperty result = null;
+		if(optionid >= STRING_COURSE1_TITLE && optionid <= STRING_COURSE10_TITLE) {
+			result = new StringProperty() {
+				private final int index = optionid - STRING_COURSE1_TITLE;
+				@Override
+				public String get(MainState state) {
+					if(state instanceof MusicSelector) {
+						final Bar bar = ((MusicSelector)state).getSelectedBar();
+						if (bar instanceof GradeBar) {
+							if (((GradeBar) bar).getSongDatas().length > index) {
+								SongData song = ((GradeBar) bar).getSongDatas()[index];
+								final String songname = song != null && song.getTitle() != null ? song.getTitle() : "----";
+								return song != null && song.getPath() != null ? songname : "(no song) " + songname;
+							}
+						}				
+					}
+					return "";
+				}
+				
+			};
+		}
+		return result;
+	}
 
 	private static class NowRankDrawCondition implements BooleanProperty {
 		
@@ -294,5 +322,5 @@ public class SkinPropertyMapper {
 			return score.qualifyNowRank(low) && (high > 27 ? true : !score.qualifyNowRank(high));
 		}
 		
-	}
+	}	
 }

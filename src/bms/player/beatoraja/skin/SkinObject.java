@@ -691,6 +691,12 @@ public abstract class SkinObject implements Disposable {
 
 	}
 	
+	public interface StringProperty {
+		
+		public String get(MainState state);
+
+	}
+	
 	public static class RateProperty implements FloatProperty {
 		
 		private final IntegerProperty ref;
