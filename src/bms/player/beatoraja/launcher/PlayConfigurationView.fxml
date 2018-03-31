@@ -158,14 +158,14 @@
                         <VBox.margin>
                             <Insets left="10.0" top="30.0" />
                         </VBox.margin>
-                        <Label prefHeight="24.0" prefWidth="68.0" text="\%MODE" />
+                        <Label prefHeight="24.0" prefWidth="68.0" text="%MODE" />
                         <ComboBox fx:id="inputconfig" onAction="#updateInputConfig" prefWidth="150.0" />
                     </HBox>
                     <HBox prefHeight="37.0" prefWidth="723.0">
                         <VBox.margin>
                             <Insets left="10.0" top="10.0" />
                         </VBox.margin>
-                        <CheckBox fx:id="jkoc_hack" mnemonicParsing="false" prefHeight="18.0" prefWidth="200.0" text="\%JKOC_HACK">
+                        <CheckBox fx:id="jkoc_hack" mnemonicParsing="false" prefHeight="18.0" prefWidth="200.0" text="%JKOC_HACK">
                             <HBox.margin>
                                 <Insets right="20.0" />
                             </HBox.margin>
@@ -288,6 +288,7 @@
                         <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="30.0" />
                         <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
                         <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
+                        <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
                     </rowConstraints>
                     <Label prefHeight="18.0" prefWidth="78.0" text="%HI-SPEED" />
                     <NumericSpinner fx:id="hispeed" editable="true" GridPane.columnIndex="1">
@@ -347,6 +348,12 @@
                     <NumericSpinner fx:id="hispeedmargin" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="6">
                         <valueFactory>
                             <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.01" initialValue="0.25" max="9.99" min="0.00" />
+                        </valueFactory>
+                    </NumericSpinner>
+                    <CheckBox fx:id="enableHidden" mnemonicParsing="false" text="%ENABLE_HIDDEN" GridPane.columnIndex="0" GridPane.rowIndex="7" />
+                    <NumericSpinner fx:id="hidden" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="7">
+                        <valueFactory>
+                            <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="100" max="1000" min="0" />
                         </valueFactory>
                     </NumericSpinner>
                 </GridPane>

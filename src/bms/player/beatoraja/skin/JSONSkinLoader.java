@@ -365,7 +365,7 @@ public class JSONSkinLoader extends SkinLoader{
 										offsets[i].w = value.offset[i].w;
 										offsets[i].h = value.offset[i].h;
 									}
-									num.setOffsets(offsets);									
+									num.setOffsets(offsets);
 								}
 								obj = num;
 							} else {
@@ -390,7 +390,7 @@ public class JSONSkinLoader extends SkinLoader{
 										offsets[i].w = value.offset[i].w;
 										offsets[i].h = value.offset[i].h;
 									}
-									num.setOffsets(offsets);									
+									num.setOffsets(offsets);
 								}
 								obj = num;
 							}
@@ -450,16 +450,16 @@ public class JSONSkinLoader extends SkinLoader{
 									for(int j = 0 ;j < len;j++) {
 										for(int i = 0 ;i < imgs[j].length;i++) {
 											imgs[j][i] = images[i * len + j];
-										}						
+										}
 									}
 								}
-								
+
 								final int graphtype = img.type == -1 ? 0 : 1;
-								
+
 								if(imgs != null) {
 									obj = new SkinDistributionGraph(graphtype,  imgs, img.timer, img.cycle);
 								} else {
-									obj = new SkinDistributionGraph(graphtype);										
+									obj = new SkinDistributionGraph(graphtype);
 								}
 							} else {
 								Texture tex = getTexture(img.src, p);
@@ -569,9 +569,9 @@ public class JSONSkinLoader extends SkinLoader{
 									}
 								}
 							}
-							((PlaySkin) skin).setBPMLine(bpm);							
+							((PlaySkin) skin).setBPMLine(bpm);
 						}
-						
+
 						if(sk.note.stop != null) {
 							SkinImage[] stop = new SkinImage[gregion.length];
 							for (int i = 0; i < gregion.length && i < sk.note.stop.length; i++) {
@@ -588,7 +588,7 @@ public class JSONSkinLoader extends SkinLoader{
 									}
 								}
 							}
-							((PlaySkin) skin).setStopLine(stop);							
+							((PlaySkin) skin).setStopLine(stop);
 						}
 
 						if(sk.note.time != null) {
@@ -607,12 +607,12 @@ public class JSONSkinLoader extends SkinLoader{
 									}
 								}
 							}
-							((PlaySkin) skin).setTimeLine(time);							
+							((PlaySkin) skin).setTimeLine(time);
 						}
 
 						SkinNote sn = new SkinNote(notes, lnss, mines);
 						sn.setLaneRegion(region, scale, skin);
-						sn.setDstNote2(sk.note.dst2);
+						sn.setDstNote2((int) Math.round(sk.note.dst2 * dy));
 						((PlaySkin) skin).setLaneRegion(region);
 						((PlaySkin) skin).setLaneGroupRegion(gregion);
 						((PlaySkin) skin).setNoteExpansionRate(sk.note.expansionrate);
@@ -640,6 +640,23 @@ public class JSONSkinLoader extends SkinLoader{
 						}
 
 						obj = new SkinGauge(gaugetex, 0, 0, sk.gauge.parts, sk.gauge.type, sk.gauge.range, sk.gauge.cycle);
+					}
+					// hidden cover (playskin only)
+					for (HiddenCover img : sk.hiddenCover) {
+						if (dst.id.equals(img.id)) {
+							Texture tex = getTexture(img.src, p);
+							obj = new SkinHidden(getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy), img.timer, img.cycle);
+							((SkinHidden) obj).setDisapearLine((float) (img.disapearLine * skin.getScaleY()));
+							((SkinHidden) obj).setDisapearLineLinkLift(img.isDisapearLineLinkLift);
+							int[] offsets = new int[dst.offsets.length + 2];
+							for(int i = 0; i < dst.offsets.length; i++) {
+								offsets[i] = dst.offsets[i];
+							}
+							offsets[dst.offsets.length] = OFFSET_LIFT;
+							offsets[dst.offsets.length + 1] = OFFSET_HIDDEN_COVER;
+							dst.offsets = offsets;
+							break;
+						}
 					}
 					// bga (playskin only)
 					if (sk.bga != null && dst.id.equals(sk.bga.id)) {
@@ -687,7 +704,7 @@ public class JSONSkinLoader extends SkinLoader{
 												offsets[j].w = value.offset[j].w;
 												offsets[j].h = value.offset[j].h;
 											}
-											numbers[i].setOffsets(offsets);									
+											numbers[i].setOffsets(offsets);
 										}
 
 										for(Animation ani : judge.numbers[i].dst) {
@@ -866,7 +883,7 @@ public class JSONSkinLoader extends SkinLoader{
 									break;
 								}
 							}
-						}						
+						}
 						barobj.setBarlevel(numbers);
 
 						// graph
@@ -883,19 +900,19 @@ public class JSONSkinLoader extends SkinLoader{
 										for(int j = 0 ;j < len;j++) {
 											for(int i = 0 ;i < imgs[j].length;i++) {
 												imgs[j][i] = images[i * len + j];
-											}						
+											}
 										}
 									}
-									
+
 									final int graphtype = img.type == -1 ? 0 : 1;
-									
+
 									SkinDistributionGraph bargraph = null;
 									if(imgs != null) {
 										bargraph = new SkinDistributionGraph(graphtype,  imgs, img.timer, img.cycle);
 									} else {
-										bargraph = new SkinDistributionGraph(graphtype);										
+										bargraph = new SkinDistributionGraph(graphtype);
 									}
-									
+
 									setDestination(skin, bargraph, sk.songlist.graph);
 									barobj.setGraph(bargraph);
 								}
@@ -1015,7 +1032,12 @@ public class JSONSkinLoader extends SkinLoader{
 			prev = a;
 		}
 
-		obj.setOffsetID(dst.offset);
+		int[] offsets = new int[dst.offsets.length + 1];
+		for(int i = 0; i < dst.offsets.length; i++) {
+			offsets[i] = dst.offsets[i];
+		}
+		offsets[dst.offsets.length] = dst.offset;
+		obj.setOffsetID(offsets);
 		if (dst.stretch >= 0) {
 			obj.setStretch(dst.stretch);
 		}
@@ -1077,7 +1099,7 @@ public class JSONSkinLoader extends SkinLoader{
 		}
 		return noteimages;
 	}
-	
+
 	protected TextureRegion[] getSourceImage(Texture image, int x, int y, int w, int h, int divx, int divy) {
 		if (w == -1) {
 			w = image.getWidth();
@@ -1099,7 +1121,7 @@ public class JSONSkinLoader extends SkinLoader{
 		}
 		return images;
 	}
-	
+
 	private Texture getTexture(String path) {
 		return getTexture(path, usecim);
 	}
@@ -1120,7 +1142,7 @@ public class JSONSkinLoader extends SkinLoader{
 
 		public Property[] property = new Property[0];
 		public Filepath[] filepath = new Filepath[0];
-		public Offset[] offset = new Offset[0];		
+		public Offset[] offset = new Offset[0];
 		public Source[] source = new Source[0];
 		public Font[] font = new Font[0];
 		public Image[] image = new Image[0];
@@ -1134,6 +1156,7 @@ public class JSONSkinLoader extends SkinLoader{
 		public BPMGraph[] bpmgraph = new BPMGraph[0];
 		public NoteSet note;
 		public Gauge gauge;
+		public HiddenCover[] hiddenCover = new HiddenCover[0];
 		public BGA bga;
 		public Judge[] judge = new Judge[0];
 		public SongList songlist;
@@ -1329,6 +1352,21 @@ public class JSONSkinLoader extends SkinLoader{
 		public int cycle = 33;;
 	}
 
+	public static class HiddenCover {
+		public String id;
+		public String src;
+		public int x;
+		public int y;
+		public int w;
+		public int h;
+		public int divx = 1;
+		public int divy = 1;
+		public int timer;
+		public int cycle;
+		public int disapearLine = Integer.MIN_VALUE;
+		public boolean isDisapearLineLinkLift = true;
+	}
+
 	public static class BGA {
 		public String id;
 	}
@@ -1365,6 +1403,7 @@ public class JSONSkinLoader extends SkinLoader{
 		public int loop;
 		public int center;
 		public int offset;
+		public int[] offsets = new int[0];
 		public int stretch = -1;
 		public int[] op = new int[0];
 		public Animation[] dst = new Animation[0];
