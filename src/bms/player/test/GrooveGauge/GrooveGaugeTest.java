@@ -46,7 +46,7 @@ public class GrooveGaugeTest extends MainLoader{
 	static BMSDecoder bmsDecoder;
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		File bmsFile = new File("C:\\Users\\rnwhd\\Desktop\\programing\\git\\beatoraja\\yassu_ff6_nakama\\yassu_ff6_nakama\\_yassu_ff6_nakama_24b.bmson");
+		File bmsFile = new File("src/yassu_ff6_nakama/yassu_ff6_nakama/_yassu_ff6_nakama_24b.bmson");
 		bmsDecoder = new BMSDecoder();
 		bmsModel = bmsDecoder.decode(bmsFile);
 	}

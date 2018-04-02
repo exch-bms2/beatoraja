@@ -61,7 +61,7 @@ import javafx.stage.Stage;
 public class SkinTest extends MainLoader{
 	Skin skin = new Skin(Resolution.HD,Resolution.HD,fixop);
 	boolean usecim=false;
-	 File imagefile = new File("C:/Users/형우/eclipse-TestCase/beatoraja/skin/default/POMYU Chara/Off/dummy.chp");
+	 File imagefile = new File("C:/Users/�삎�슦/eclipse-TestCase/beatoraja/skin/default/POMYU Chara/Off/dummy.chp");
 	int type=0, color=0,side=0,dsttimer=0;
 	int dstOp1=0,dstOp2=0,dstOp3=0,dstOffset=0;
 	float dstx=0.0f,dsty=0.0f,dsth=0.0f,dstw=0.0f;
@@ -97,7 +97,7 @@ public class SkinTest extends MainLoader{
 	@Test
 	public void typeBoundaryTest_case1(){
 		//Check if type is out of bind -> 16
-		imagefile = new File("C:/Users/형우/eclipse-TestCase/beatoraja/skin/default/POMYU Chara/Off/dummy.chp");
+		imagefile = new File("beatoraja/skin/default/POMYU Chara/Off/dummy.chp");
 		type = 16;
 		assertTrue(skin.PMcharaLoader(usecim, imagefile, type, color, dstx, dsty, dstw, dsth, side, dsttimer, dstOp1, dstOp2, dstOp3, dstOffset)==null);
 	}
@@ -105,18 +105,11 @@ public class SkinTest extends MainLoader{
 	@Test
 	public void typeBoundaryTest_case2(){
 		//Check if type is out of bind -> -1
-		imagefile = new File("C:/Users/형우/eclipse-TestCase/beatoraja/skin/default/POMYU Chara/Off/dummy.chp");
+		imagefile = new File("beatoraja/skin/default/POMYU Chara/Off/dummy.chp");
 		type = -1;
 		assertTrue(skin.PMcharaLoader(usecim, imagefile, type, color, dstx, dsty, dstw, dsth, side, dsttimer, dstOp1, dstOp2, dstOp3, dstOffset)==null);
 	}
 	
-	@Test
-	public void typeBoundaryTest_case3(){
-		//Check if type is not out of bind -> 3
-		imagefile = new File("C:/Users/형우/eclipse-TestCase/beatoraja/skin/default/POMYU Chara/Off/dummy.chp");
-		type = 3;
-		assertTrue(skin.PMcharaLoader(usecim, imagefile, type, color, dstx, dsty, dstw, dsth, side, dsttimer, dstOp1, dstOp2, dstOp3, dstOffset)==null);
-	}
 	
 	@Test
 	public void fileExistTest_case1(){
