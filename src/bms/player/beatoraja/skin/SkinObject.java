@@ -156,6 +156,20 @@ public abstract class SkinObject implements Disposable {
 
 	public void setDestination(long time, float x, float y, float w, float h, int acc, int a, int r, int g, int b,
 			int blend, int filter, int angle, int center, int loop, int timer, int[] op) {
+		setDestination(time, x, y, w, h, acc, a, r, g, b, blend, filter, angle, center, loop, timer);
+		if (dstop.length == 0 && dstdraw.length == 0) {
+			setDrawCondition(op);
+		}
+	}
+	
+	public void setDestination(long time, float x, float y, float w, float h, int acc, int a, int r, int g, int b,
+			int blend, int filter, int angle, int center, int loop, int timer, BooleanProperty draw) {
+		setDestination(time, x, y, w, h, acc, a, r, g, b, blend, filter, angle, center, loop, timer);
+		dstdraw = new BooleanProperty[] {draw};
+	}
+	
+	private void setDestination(long time, float x, float y, float w, float h, int acc, int a, int r, int g, int b,
+			int blend, int filter, int angle, int center, int loop, int timer) {
 		SkinObjectDestination obj = new SkinObjectDestination(time, new Rectangle(x, y, w, h), new Color(r / 255.0f,
 				g / 255.0f, b / 255.0f, a / 255.0f), angle, acc);
 		if (dst.length == 0) {
@@ -195,9 +209,6 @@ public abstract class SkinObject implements Disposable {
 		if (dstloop == 0) {
 			dstloop = loop;
 		}
-		if (dstop.length == 0 && dstdraw.length == 0) {
-			setDrawCondition(op);
-		}
 		for (int i = 0; i < dst.length; i++) {
 			if (dst[i].time > time) {
 				Array<SkinObjectDestination> l = new Array<SkinObjectDestination>(dst);
@@ -212,7 +223,7 @@ public abstract class SkinObject implements Disposable {
 		l.add(obj);
 		dst = l.toArray(SkinObjectDestination.class);
 		starttime = dst[0].time;
-		endtime = dst[dst.length - 1].time;
+		endtime = dst[dst.length - 1].time;		
 	}
 
 	public BooleanProperty[] getDrawCondition() {

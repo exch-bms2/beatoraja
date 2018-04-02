@@ -7,7 +7,10 @@ import java.lang.reflect.Array;
 import java.nio.file.Path;
 import java.util.*;
 
+import org.luaj.vm2.LuaValue;
+
 import bms.player.beatoraja.Config;
+import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.Resolution;
 import bms.player.beatoraja.SkinConfig;
 import bms.player.beatoraja.config.SkinConfigurationSkin;
@@ -23,7 +26,9 @@ import bms.player.beatoraja.select.MusicSelectSkin;
 import bms.player.beatoraja.select.SkinBar;
 import bms.player.beatoraja.select.SkinDistributionGraph;
 import bms.player.beatoraja.skin.SkinHeader.CustomOffset;
+import bms.player.beatoraja.skin.SkinObject.BooleanProperty;
 import bms.player.beatoraja.skin.SkinObject.SkinOffset;
+import bms.player.beatoraja.skin.lua.SkinLuaAccessor;
 
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.reflect.ClassReflection;
@@ -42,15 +47,19 @@ public class JSONSkinLoader extends SkinLoader{
 	private JsonSkin sk;
 
 	Map<String, Texture> texmap;
+	
+	private final SkinLuaAccessor lua;
 
 	Map<String, String> filemap = new HashMap();
 
 	public JSONSkinLoader() {
+		lua = null;
 		dstr = HD;
 		usecim = false;
 	}
 
-	public JSONSkinLoader(Config c) {
+	public JSONSkinLoader(MainState state, Config c) {
+		lua = new SkinLuaAccessor(state);
 		dstr = c.getResolution();
 		usecim = false;
 		bgaExpand = c.getBgaExpand();
@@ -1001,6 +1010,22 @@ public class JSONSkinLoader extends SkinLoader{
 	}
 
 	private void setDestination(Skin skin, SkinObject obj, Destination dst) {
+		BooleanProperty draw = null;
+		if(dst.draw != null) {
+			final LuaValue lv = lua.load(dst.draw);
+			draw = new BooleanProperty() {
+				@Override
+				public boolean isStatic(MainState state) {
+					return false;
+				}
+
+				@Override
+				public boolean get(MainState state) {
+					return lv.call().toboolean();
+				}				
+			};
+		}
+		
 		Animation prev = null;
 		for (Animation a : dst.dst) {
 			if (prev == null) {
@@ -1028,8 +1053,13 @@ public class JSONSkinLoader extends SkinLoader{
 				a.g = (a.g == Integer.MIN_VALUE ? prev.g : a.g);
 				a.b = (a.b == Integer.MIN_VALUE ? prev.b : a.b);
 			}
-			skin.setDestination(obj, a.time, a.x, a.y, a.w, a.h, a.acc, a.a, a.r, a.g, a.b, dst.blend, dst.filter,
-					a.angle, dst.center, dst.loop, dst.timer, dst.op);
+			if(draw != null) {
+				skin.setDestination(obj, a.time, a.x, a.y, a.w, a.h, a.acc, a.a, a.r, a.g, a.b, dst.blend, dst.filter,
+						a.angle, dst.center, dst.loop, dst.timer, draw);
+			} else {
+				skin.setDestination(obj, a.time, a.x, a.y, a.w, a.h, a.acc, a.a, a.r, a.g, a.b, dst.blend, dst.filter,
+						a.angle, dst.center, dst.loop, dst.timer, dst.op);				
+			}
 			if (dst.mouseRect != null) {
 				skin.setMouseRect(obj, dst.mouseRect.x, dst.mouseRect.y, dst.mouseRect.w, dst.mouseRect.h);
 			}
@@ -1410,6 +1440,7 @@ public class JSONSkinLoader extends SkinLoader{
 		public int[] offsets = new int[0];
 		public int stretch = -1;
 		public int[] op = new int[0];
+		public String draw;
 		public Animation[] dst = new Animation[0];
 		public Rect mouseRect;
 	}

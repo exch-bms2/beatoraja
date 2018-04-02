@@ -397,8 +397,17 @@
 	},
 
 	"destination":[
-		{"id":"background", "dst":[
+		{"id":"background", "draw":"gauge() >= 75", "dst":[
 			{"x":0, "y":0, "w":1280, "h":720}
+		]},
+		{"id":"background", "draw":"gauge() >= 50 and gauge() < 75", "dst":[
+			{"x":0, "y":0, "w":1280, "h":720, "a":192}
+		]},
+		{"id":"background", "draw":"gauge() >= 25 and gauge() < 50", "dst":[
+			{"x":0, "y":0, "w":1280, "h":720, "a":128}
+		]},
+		{"id":"background", "draw":"gauge() >= 0 and gauge() < 25", "dst":[
+			{"x":0, "y":0, "w":1280, "h":720, "a":64}
 		]},
 		{"id":1, "dst":[
 			{"x":0, "y":0, "w":1280, "h":720}
