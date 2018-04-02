@@ -1,4 +1,4 @@
-package bms.player.test;
+package bms.player.test.pattern;
 
 import static org.junit.Assert.*;
 
@@ -19,7 +19,7 @@ public class PracticeModifierTest {
 	static BMSDecoder bmsDecoder;
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		File bmsFile = new File("C:\\Users\\dhehd\\Desktop\\_laika_24.bmson");
+		File bmsFile = new File("src\\bms\\player\\test\\end_time_dpnep.bms");
 		bmsDecoder = new BMSDecoder();
 		bmsModel = bmsDecoder.decode(bmsFile);
 	}
@@ -41,11 +41,26 @@ public class PracticeModifierTest {
 	 * generating practice mode. Amount of node will be changed.
 	 * */
 	@Test
-	public void PracticeModifierTest() {
+	public void modifierTotalTest() {
 		PracticeModifier practiceModifier = new PracticeModifier(10,100);
 		double totalNum = bmsModel.getTotal();
 		practiceModifier.modify(bmsModel);
 		assertNotEquals(bmsModel.getTotal(), totalNum);
 	}
+	
+	@Test
+	public void modifierNoteTest() {
+		PracticeModifier practiceModifier = new PracticeModifier(10,100);
+		double totalNum = bmsModel.getTotalNotes();
+		practiceModifier.modify(bmsModel);
+		assertNotEquals(bmsModel.getTotalNotes(), totalNum);
+	}
 
+	@Test
+	public void modifierTest() {
+		PracticeModifier practiceModifier = new PracticeModifier(10,100);
+		double totalNum = bmsModel.getTotalNotes();
+		practiceModifier.modify(bmsModel);
+		assertNotEquals(bmsModel.getTotalNotes(), totalNum);
+	}
 }

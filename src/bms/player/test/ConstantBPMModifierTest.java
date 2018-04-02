@@ -1,4 +1,4 @@
-package bms.player.test;
+package bms.player.test.pattern;
 
 import static org.junit.Assert.*;
 
@@ -19,7 +19,7 @@ public class ConstantBPMModifierTest {
 	static BMSDecoder bmsDecoder;
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		File bmsFile = new File("C:\\Users\\dhehd\\Desktop\\_laika_24b.bmson");
+		File bmsFile = new File("src\\bms\\player\\test\\end_time_dpnep.bms");
 		bmsDecoder = new BMSDecoder();
 		bmsModel = bmsDecoder.decode(bmsFile);
 	}
@@ -46,10 +46,18 @@ public class ConstantBPMModifierTest {
 	 * ConstantBPMModifier should make stopping option disabled.
 	 * */
 	@Test
-	public void modifyTest() {
+	public void modifyStopTest() {
 		ConstantBPMModifier constantBPMModifier = new ConstantBPMModifier();
 		constantBPMModifier.modify(bmsModel);
 		assertEquals(bmsModel.getAllTimeLines()[0].getStop(), 0);
+	}
+	
+	@Test
+	public void modifyModelBPMTest() {
+		ConstantBPMModifier constantBPMModifier = new ConstantBPMModifier();
+		double beforeBPM = bmsModel.getBpm();
+		constantBPMModifier.modify(bmsModel);
+		assertEquals(beforeBPM, bmsModel.getBpm());
 	}
 
 }

@@ -1,4 +1,4 @@
-package bms.player.test;
+package bms.player.test.pattern;
 
 import static org.junit.Assert.*;
 
@@ -19,7 +19,7 @@ public class MineNoteModifierTest {
 	static BMSDecoder bmsDecoder;
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		File bmsFile = new File("C:\\Users\\dhehd\\Desktop\\_laika_24b.bmson");
+		File bmsFile = new File("src\\bms\\player\\test\\end_time_dpnep.bms");
 		bmsDecoder = new BMSDecoder();
 		bmsModel = bmsDecoder.decode(bmsFile);
 	}
@@ -35,10 +35,15 @@ public class MineNoteModifierTest {
 	@After
 	public void tearDown() throws Exception {
 	}
-
+	
+	/*
+	 * MineNote Modifier removes all mine note in the BMSModel.
+	 * */
+	
 	@Test
 	public void mineNoteModifierConstructorTest() {
 		MineNoteModifier mineNoteModifier = new MineNoteModifier();
+		assertEquals(mineNoteModifier.mineNoteExists(),bmsModel.containsMineNote());
 		assertNotNull(mineNoteModifier);
 	}
 	
@@ -46,6 +51,14 @@ public class MineNoteModifierTest {
 	public void modifyTest() {
 		MineNoteModifier mineNoteModifier = new MineNoteModifier();
 		mineNoteModifier.modify(bmsModel);
-		assertEquals(mineNoteModifier.mineNoteExists(),false);
+		assertEquals(mineNoteModifier.mineNoteExists(),bmsModel.containsMineNote());
+	}
+	
+	@Test
+	public void mineNoteEliminatedCheckTest() {
+		MineNoteModifier mineNoteModifier = new MineNoteModifier();
+		mineNoteModifier.modify(bmsModel);
+		assertEquals(bmsModel.containsMineNote(), false);
+	
 	}
 }
