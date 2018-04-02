@@ -279,5 +279,162 @@ public class LaneShuffleModifierTest {
 		}
 		return null;
 	}
-			
+	/* purpose : integer random suffle test
+	 * input type : saved integer in bmsModel we test integer is 0-6
+	 * output type : rotated saved integer
+	 */
+	@Test
+	public void makeRandomOneTest() {
+		LaneShuffleModifier laneShuffleModifier = new LaneShuffleModifier(RANDOM);
+		Note[] before = getNote(bmsModel);
+		Mode mode = bmsModel.getMode();
+		laneShuffleModifier.modify(bmsModel);
+		int[] first = laneShuffleModifier.getRandom();
+		laneShuffleModifier.modify(bmsModel);
+		int[] two = laneShuffleModifier.getRandom();
+		assertNotEquals(first,two);
+	}
+	@Test
+	public void makeRandomTwoTest() {
+		LaneShuffleModifier laneShuffleModifier = new LaneShuffleModifier(RANDOM);
+		Note[] before = getNote(bmsModel);
+		Mode mode = bmsModel.getMode();
+		laneShuffleModifier.modify(bmsModel);
+		int[] first = laneShuffleModifier.getRandom();
+		laneShuffleModifier.modify(bmsModel);
+		laneShuffleModifier.modify(bmsModel);
+		int[] two = laneShuffleModifier.getRandom();
+		assertNotEquals(first,two);
+	}
+	
+	@Test
+	public void makeRandomThreeTest() {
+		LaneShuffleModifier laneShuffleModifier = new LaneShuffleModifier(RANDOM);
+		Note[] before = getNote(bmsModel);
+		Mode mode = bmsModel.getMode();
+		laneShuffleModifier.modify(bmsModel);
+		int[] first = laneShuffleModifier.getRandom();
+		laneShuffleModifier.modify(bmsModel);
+		laneShuffleModifier.modify(bmsModel);
+		laneShuffleModifier.modify(bmsModel);
+		int[] two = laneShuffleModifier.getRandom();
+		assertNotEquals(first,two);
+	}
+	
+	@Test
+	public void makeMIRROROneTest() {
+		LaneShuffleModifier laneShuffleModifier = new LaneShuffleModifier(MIRROR);
+		Note[] before = getNote(bmsModel);
+		Mode mode = bmsModel.getMode();
+		laneShuffleModifier.modify(bmsModel);
+		int[] first = laneShuffleModifier.getRandom();
+		laneShuffleModifier.modify(bmsModel);
+		int[] two = laneShuffleModifier.getRandom();
+		assertNotEquals(first,two);
+	}
+	@Test
+	public void makeMIRRORTwoTest() {
+		LaneShuffleModifier laneShuffleModifier = new LaneShuffleModifier(MIRROR);
+		Note[] before = getNote(bmsModel);
+		Mode mode = bmsModel.getMode();
+		laneShuffleModifier.modify(bmsModel);
+		int[] first = laneShuffleModifier.getRandom();
+		laneShuffleModifier.modify(bmsModel);
+		laneShuffleModifier.modify(bmsModel);
+		int[] two = laneShuffleModifier.getRandom();
+		assertNotEquals(first,two);
+	}
+	
+	@Test
+	public void makeMIRRORThreeTest() {
+		LaneShuffleModifier laneShuffleModifier = new LaneShuffleModifier(MIRROR);
+		Note[] before = getNote(bmsModel);
+		Mode mode = bmsModel.getMode();
+		laneShuffleModifier.modify(bmsModel);
+		int[] first = laneShuffleModifier.getRandom();
+		laneShuffleModifier.modify(bmsModel);
+		laneShuffleModifier.modify(bmsModel);
+		laneShuffleModifier.modify(bmsModel);
+		int[] two = laneShuffleModifier.getRandom();
+		assertNotEquals(first,two);
+	}
+	
+	@Test
+	public void makeR_RANDOMOneTest() {
+		LaneShuffleModifier laneShuffleModifier = new LaneShuffleModifier(R_RANDOM);
+		Note[] before = getNote(bmsModel);
+		Mode mode = bmsModel.getMode();
+		laneShuffleModifier.modify(bmsModel);
+		int[] first = laneShuffleModifier.getRandom();
+		laneShuffleModifier.modify(bmsModel);
+		int[] two = laneShuffleModifier.getRandom();
+		assertNotEquals(first,two);
+	}
+	@Test
+	public void makeR_RANDOMTwoTest() {
+		LaneShuffleModifier laneShuffleModifier = new LaneShuffleModifier(R_RANDOM);
+		Note[] before = getNote(bmsModel);
+		Mode mode = bmsModel.getMode();
+		laneShuffleModifier.modify(bmsModel);
+		int[] first = laneShuffleModifier.getRandom();
+		laneShuffleModifier.modify(bmsModel);
+		laneShuffleModifier.modify(bmsModel);
+		int[] two = laneShuffleModifier.getRandom();
+		assertNotEquals(first,two);
+	}
+	
+	@Test
+	public void makeR_RANDOMThreeTest() {
+		LaneShuffleModifier laneShuffleModifier = new LaneShuffleModifier(R_RANDOM);
+		Note[] before = getNote(bmsModel);
+		Mode mode = bmsModel.getMode();
+		laneShuffleModifier.modify(bmsModel);
+		int[] first = laneShuffleModifier.getRandom();
+		laneShuffleModifier.modify(bmsModel);
+		laneShuffleModifier.modify(bmsModel);
+		laneShuffleModifier.modify(bmsModel);
+		int[] two = laneShuffleModifier.getRandom();
+		assertNotEquals(first,two);
+	}
+	
+	@Test
+	public void makeCROSSOneTest() {
+		LaneShuffleModifier laneShuffleModifier = new LaneShuffleModifier(CROSS);
+		Note[] before = getNote(bmsModel);
+		Mode mode = bmsModel.getMode();
+		laneShuffleModifier.modify(bmsModel);
+		int[] first = laneShuffleModifier.getRandom();
+		laneShuffleModifier.modify(bmsModel);
+		int[] two = laneShuffleModifier.getRandom();
+		assertNotEquals(first,two);
+	}
+	@Test
+	public void makeCROSSTwoTest() {
+		LaneShuffleModifier laneShuffleModifier = new LaneShuffleModifier(CROSS);
+		Note[] before = getNote(bmsModel);
+		Mode mode = bmsModel.getMode();
+		laneShuffleModifier.modify(bmsModel);
+		int[] first = laneShuffleModifier.getRandom();
+		laneShuffleModifier.modify(bmsModel);
+		laneShuffleModifier.modify(bmsModel);
+		int[] two = laneShuffleModifier.getRandom();
+		assertNotEquals(first,two);
+	}
+	
+	@Test
+	public void makeCROSSThreeTest() {
+		LaneShuffleModifier laneShuffleModifier = new LaneShuffleModifier(CROSS);
+		Note[] before = getNote(bmsModel);
+		Mode mode = bmsModel.getMode();
+		laneShuffleModifier.modify(bmsModel);
+		int[] first = laneShuffleModifier.getRandom();
+		laneShuffleModifier.modify(bmsModel);
+		laneShuffleModifier.modify(bmsModel);
+		laneShuffleModifier.modify(bmsModel);
+		int[] two = laneShuffleModifier.getRandom();
+		assertNotEquals(first,two);
+	}
+	
+	
+	
 }
