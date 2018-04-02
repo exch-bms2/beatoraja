@@ -183,7 +183,7 @@ public class LaneShuffleModifierTest {
 	}
 	
 	@Test
-	public void PatternModifyCreateWithMIRRORTest() {
+	public void patternModifyCreateWithMIRRORTest() {
 		PatternModifier modifier = PatternModifier.create(1, 0);
 		Note[] before = getNote(bmsModel);
 		modifier.modify(bmsModel);
@@ -191,7 +191,7 @@ public class LaneShuffleModifierTest {
 	}
 	
 	@Test
-	public void PatternModifyCreateWithRANDOMTest() {
+	public void patternModifyCreateWithRANDOMTest() {
 		PatternModifier modifier = PatternModifier.create(2, 0);
 		Note[] before = getNote(bmsModel);
 		modifier.modify(bmsModel);
@@ -199,7 +199,7 @@ public class LaneShuffleModifierTest {
 	}
 	
 	@Test
-	public void PatternModifyCreateWithRRandomTest() {
+	public void patternModifyCreateWithRRandomTest() {
 		PatternModifier modifier = PatternModifier.create(3, 0);
 		Note[] before = getNote(bmsModel);
 		modifier.modify(bmsModel);
@@ -207,7 +207,7 @@ public class LaneShuffleModifierTest {
 	}
 	
 	@Test(expected=NullPointerException.class)
-	public void PatternModifyCreateWithSRandomTest() {
+	public void patternModifyCreateWithSRandomTest() {
 		PatternModifier modifier = PatternModifier.create(4, 0);
 		Note[] before = getNote(bmsModel);
 		modifier.modify(bmsModel);
@@ -215,7 +215,7 @@ public class LaneShuffleModifierTest {
 	}
 	
 	@Test(expected=NullPointerException.class)
-	public void PatternModifyCreateWithSPIRALTest() {
+	public void patternModifyCreateWithSPIRALTest() {
 		PatternModifier modifier = PatternModifier.create(5, 0);
 		Note[] before = getNote(bmsModel);
 		modifier.modify(bmsModel);
@@ -223,7 +223,7 @@ public class LaneShuffleModifierTest {
 	}
 	
 	@Test(expected=NullPointerException.class)
-	public void PatternModifyCreateWithHRandomTest() {
+	public void patternModifyCreateWithHRandomTest() {
 		PatternModifier modifier = PatternModifier.create(6, 0);
 		Note[] before = getNote(bmsModel);
 		modifier.modify(bmsModel);
@@ -231,7 +231,7 @@ public class LaneShuffleModifierTest {
 	}
 	
 	@Test(expected=NullPointerException.class)
-	public void PatternModifyCreateWithAllScrTest() {
+	public void patternModifyCreateWithAllScrTest() {
 		PatternModifier modifier = PatternModifier.create(7, 0);
 		Note[] before = getNote(bmsModel);
 		modifier.modify(bmsModel);
@@ -239,7 +239,7 @@ public class LaneShuffleModifierTest {
 	}
 	
 	@Test
-	public void PatternModifyCreateWithRandomEXandomTest() {
+	public void patternModifyCreateWithRandomEXandomTest() {
 		PatternModifier modifier = PatternModifier.create(8, 0);
 		Note[] before = getNote(bmsModel);
 		modifier.modify(bmsModel);
@@ -247,7 +247,7 @@ public class LaneShuffleModifierTest {
 	}
 	
 	@Test(expected=NullPointerException.class)
-	public void PatternModifyCreateWithSRandomEXTest() {
+	public void patternModifyCreateWithSRandomEXTest() {
 		PatternModifier modifier = PatternModifier.create(9, 0);
 		Note[] before = getNote(bmsModel);
 		modifier.modify(bmsModel);
@@ -257,10 +257,253 @@ public class LaneShuffleModifierTest {
 	@Test
 	public void modifyMergeMirrorRandomTest() {
 		PatternModifier modifierDummy = PatternModifier.create(0, 0);
+		List<PatternModifyLog> dummyLog = modifierDummy.modify(bmsModel);
+		
 		PatternModifier modifierBef = PatternModifier.create(1, 0);
+		List<PatternModifyLog> befLog = modifierBef.modify(bmsModel);
 		PatternModifier modifierAft = PatternModifier.create(2, 0);
-		List<PatternModifyLog> log = modifierDummy.merge(modifierBef.modify(bmsModel)
-				, modifierAft.modify(bmsModel));
+		List<PatternModifyLog> aftLog = modifierBef.modify(bmsModel);
+		
+		dummyLog = modifierDummy.merge(befLog, aftLog);
+		assertNotNull(dummyLog.get(0).modify);
+		assertEquals(dummyLog.size(), befLog.size() + aftLog.size());
+	}
+	
+	
+	@Test
+	public void modifyMergeMirrorMirrorTest() {
+		PatternModifier modifierDummy = PatternModifier.create(0, 0);
+		List<PatternModifyLog> dummyLog = modifierDummy.modify(bmsModel);
+		
+		PatternModifier modifierBef = PatternModifier.create(1, 0);
+		List<PatternModifyLog> befLog = modifierBef.modify(bmsModel);
+		PatternModifier modifierAft = PatternModifier.create(1, 0);
+		List<PatternModifyLog> aftLog = modifierBef.modify(bmsModel);
+		
+		dummyLog = modifierDummy.merge(befLog, aftLog);
+		assertNotNull(dummyLog.get(0).modify);
+		assertEquals(dummyLog.size(), befLog.size() + aftLog.size());
+	}
+	
+	@Test
+	public void modifyMergeMirrorRRamdomTest() {
+		PatternModifier modifierDummy = PatternModifier.create(0, 0);
+		List<PatternModifyLog> dummyLog = modifierDummy.modify(bmsModel);
+		
+		PatternModifier modifierBef = PatternModifier.create(1, 0);
+		List<PatternModifyLog> befLog = modifierBef.modify(bmsModel);
+		PatternModifier modifierAft = PatternModifier.create(3, 0);
+		List<PatternModifyLog> aftLog = modifierBef.modify(bmsModel);
+		
+		dummyLog = modifierDummy.merge(befLog, aftLog);
+		assertNotNull(dummyLog.get(0).modify);
+		assertEquals(dummyLog.size(), befLog.size() + aftLog.size());
+	}
+	
+	@Test
+	public void modifyMergeMirrorRandomEXTest() {
+		PatternModifier modifierDummy = PatternModifier.create(0, 0);
+		List<PatternModifyLog> dummyLog = modifierDummy.modify(bmsModel);
+		
+		PatternModifier modifierBef = PatternModifier.create(1, 0);
+		List<PatternModifyLog> befLog = modifierBef.modify(bmsModel);
+		PatternModifier modifierAft = PatternModifier.create(8, 0);
+		List<PatternModifyLog> aftLog = modifierBef.modify(bmsModel);
+		
+		dummyLog = modifierDummy.merge(befLog, aftLog);
+		assertNotNull(dummyLog.get(0).modify);
+		assertEquals(dummyLog.size(), befLog.size() + aftLog.size());
+	}
+	
+	@Test
+	public void modifyMergeMirrorSRandomEXTest() {
+		PatternModifier modifierDummy = PatternModifier.create(0, 0);
+		List<PatternModifyLog> dummyLog = modifierDummy.modify(bmsModel);
+		
+		PatternModifier modifierBef = PatternModifier.create(1, 0);
+		List<PatternModifyLog> befLog = modifierBef.modify(bmsModel);
+		PatternModifier modifierAft = PatternModifier.create(9, 0);
+		List<PatternModifyLog> aftLog = modifierBef.modify(bmsModel);
+		
+		dummyLog = modifierDummy.merge(befLog, aftLog);
+		assertNotNull(dummyLog.get(0).modify);
+		assertEquals(dummyLog.size(), befLog.size() + aftLog.size());
+	}
+	
+	@Test
+	public void modifyMergeRandomRandomTest() {
+		PatternModifier modifierDummy = PatternModifier.create(0, 0);
+		List<PatternModifyLog> dummyLog = modifierDummy.modify(bmsModel);
+		
+		PatternModifier modifierBef = PatternModifier.create(2, 0);
+		List<PatternModifyLog> befLog = modifierBef.modify(bmsModel);
+		PatternModifier modifierAft = PatternModifier.create(2, 0);
+		List<PatternModifyLog> aftLog = modifierBef.modify(bmsModel);
+		
+		dummyLog = modifierDummy.merge(befLog, aftLog);
+		assertNotNull(dummyLog.get(0).modify);
+		assertEquals(dummyLog.size(), befLog.size() + aftLog.size());
+	}
+	
+	@Test
+	public void modifyMergeRandomRRandomTest() {
+		PatternModifier modifierDummy = PatternModifier.create(0, 0);
+		List<PatternModifyLog> dummyLog = modifierDummy.modify(bmsModel);
+		
+		PatternModifier modifierBef = PatternModifier.create(2, 0);
+		List<PatternModifyLog> befLog = modifierBef.modify(bmsModel);
+		PatternModifier modifierAft = PatternModifier.create(3, 0);
+		List<PatternModifyLog> aftLog = modifierBef.modify(bmsModel);
+		
+		dummyLog = modifierDummy.merge(befLog, aftLog);
+		assertNotNull(dummyLog.get(0).modify);
+		assertEquals(dummyLog.size(), befLog.size() + aftLog.size());
+	}
+	
+	@Test
+	public void modifyMergeRandomRandomEXTest() {
+		PatternModifier modifierDummy = PatternModifier.create(0, 0);
+		List<PatternModifyLog> dummyLog = modifierDummy.modify(bmsModel);
+		
+		PatternModifier modifierBef = PatternModifier.create(2, 0);
+		List<PatternModifyLog> befLog = modifierBef.modify(bmsModel);
+		PatternModifier modifierAft = PatternModifier.create(8, 0);
+		List<PatternModifyLog> aftLog = modifierBef.modify(bmsModel);
+		
+		dummyLog = modifierDummy.merge(befLog, aftLog);
+		assertNotNull(dummyLog.get(0).modify);
+		assertEquals(dummyLog.size(), befLog.size() + aftLog.size());
+	}
+	
+	@Test
+	public void modifyMergeRandomSRandomEXTest() {
+		PatternModifier modifierDummy = PatternModifier.create(0, 0);
+		List<PatternModifyLog> dummyLog = modifierDummy.modify(bmsModel);
+		
+		PatternModifier modifierBef = PatternModifier.create(2, 0);
+		List<PatternModifyLog> befLog = modifierBef.modify(bmsModel);
+		PatternModifier modifierAft = PatternModifier.create(9, 0);
+		List<PatternModifyLog> aftLog = modifierBef.modify(bmsModel);
+		
+		dummyLog = modifierDummy.merge(befLog, aftLog);
+		assertNotNull(dummyLog.get(0).modify);
+		assertEquals(dummyLog.size(), befLog.size() + aftLog.size());
+	}
+	
+	@Test
+	public void modifyMergeRRandomRRandomTest() {
+		PatternModifier modifierDummy = PatternModifier.create(0, 0);
+		List<PatternModifyLog> dummyLog = modifierDummy.modify(bmsModel);
+		
+		PatternModifier modifierBef = PatternModifier.create(3, 0);
+		List<PatternModifyLog> befLog = modifierBef.modify(bmsModel);
+		PatternModifier modifierAft = PatternModifier.create(3, 0);
+		List<PatternModifyLog> aftLog = modifierBef.modify(bmsModel);
+		
+		dummyLog = modifierDummy.merge(befLog, aftLog);
+		assertNotNull(dummyLog.get(0).modify);
+		assertEquals(dummyLog.size(), befLog.size() + aftLog.size());
+	}
+	
+	@Test
+	public void modifyMergeRRandomRandomEXTest() {
+		PatternModifier modifierDummy = PatternModifier.create(0, 0);
+		List<PatternModifyLog> dummyLog = modifierDummy.modify(bmsModel);
+		
+		PatternModifier modifierBef = PatternModifier.create(3, 0);
+		List<PatternModifyLog> befLog = modifierBef.modify(bmsModel);
+		PatternModifier modifierAft = PatternModifier.create(8, 0);
+		List<PatternModifyLog> aftLog = modifierBef.modify(bmsModel);
+		
+		dummyLog = modifierDummy.merge(befLog, aftLog);
+		assertNotNull(dummyLog.get(0).modify);
+		assertEquals(dummyLog.size(), befLog.size() + aftLog.size());
+	}
+
+	@Test
+	public void modifyMergeRRandomSRandomEXTest() {
+		PatternModifier modifierDummy = PatternModifier.create(0, 0);
+		List<PatternModifyLog> dummyLog = modifierDummy.modify(bmsModel);
+		
+		PatternModifier modifierBef = PatternModifier.create(3, 0);
+		List<PatternModifyLog> befLog = modifierBef.modify(bmsModel);
+		PatternModifier modifierAft = PatternModifier.create(9, 0);
+		List<PatternModifyLog> aftLog = modifierBef.modify(bmsModel);
+		
+		dummyLog = modifierDummy.merge(befLog, aftLog);
+		assertNotNull(dummyLog.get(0).modify);
+		assertEquals(dummyLog.size(), befLog.size() + aftLog.size());
+	}
+	
+	@Test
+	public void modifyMergeRandomEXRandomEXTest() {
+		PatternModifier modifierDummy = PatternModifier.create(0, 0);
+		List<PatternModifyLog> dummyLog = modifierDummy.modify(bmsModel);
+		
+		PatternModifier modifierBef = PatternModifier.create(8, 0);
+		List<PatternModifyLog> befLog = modifierBef.modify(bmsModel);
+		PatternModifier modifierAft = PatternModifier.create(8, 0);
+		List<PatternModifyLog> aftLog = modifierBef.modify(bmsModel);
+		
+		dummyLog = modifierDummy.merge(befLog, aftLog);
+		assertNotNull(dummyLog.get(0).modify);
+		assertEquals(dummyLog.size(), befLog.size() + aftLog.size());
+	}
+	
+	@Test
+	public void modifyMergeRandomEXSRandomEXTest() {
+		PatternModifier modifierDummy = PatternModifier.create(0, 0);
+		List<PatternModifyLog> dummyLog = modifierDummy.modify(bmsModel);
+		
+		PatternModifier modifierBef = PatternModifier.create(8, 0);
+		List<PatternModifyLog> befLog = modifierBef.modify(bmsModel);
+		PatternModifier modifierAft = PatternModifier.create(9, 0);
+		List<PatternModifyLog> aftLog = modifierBef.modify(bmsModel);
+		
+		dummyLog = modifierDummy.merge(befLog, aftLog);
+		assertNotNull(dummyLog.get(0).modify);
+		assertEquals(dummyLog.size(), befLog.size() + aftLog.size());
+	}
+	
+	@Test
+	public void mergeTripleTest() {
+		PatternModifier modifierDummy = PatternModifier.create(0, 0);
+		List<PatternModifyLog> dummyLog = modifierDummy.modify(bmsModel);
+		
+		PatternModifier modifierBef = PatternModifier.create(8, 0);
+		List<PatternModifyLog> befLog = modifierBef.modify(bmsModel);
+		PatternModifier modifierAft = PatternModifier.create(2, 0);
+		List<PatternModifyLog> aftLog = modifierBef.modify(bmsModel);
+	
+		PatternModifier modifierLast = PatternModifier.create(3, 0);
+		List<PatternModifyLog> lastLog = modifierBef.modify(bmsModel);
+		
+		dummyLog = modifierDummy.merge(lastLog, modifierDummy.merge(befLog, aftLog));
+		
+		assertNotNull(dummyLog.get(0).modify);
+		assertTrue(dummyLog.size() < (befLog.size() + aftLog.size() + lastLog.size()));
+	}
+	
+	@Test
+	public void mergeQuadTest() {
+		PatternModifier modifierDummy = PatternModifier.create(0, 0);
+		List<PatternModifyLog> dummyLog = modifierDummy.modify(bmsModel);
+		
+		PatternModifier modifierBef = PatternModifier.create(8, 0);
+		List<PatternModifyLog> befLog = modifierBef.modify(bmsModel);
+		PatternModifier modifierAft = PatternModifier.create(2, 0);
+		List<PatternModifyLog> aftLog = modifierBef.modify(bmsModel);
+	
+		PatternModifier modifierLast = PatternModifier.create(3, 0);
+		List<PatternModifyLog> lastLog = modifierBef.modify(bmsModel);
+		
+		PatternModifier modifierLastLast = PatternModifier.create(1, 0);
+		List<PatternModifyLog> lastLastLog = modifierBef.modify(bmsModel);
+		
+		dummyLog = modifierDummy.merge(lastLastLog, modifierDummy.merge(lastLog, modifierDummy.merge(befLog, aftLog)));
+		
+		assertNotNull(dummyLog.get(0).modify);
+		assertTrue(dummyLog.size() < ( lastLastLog.size() + befLog.size() + aftLog.size() + lastLog.size()));
 	}
 	
 	public Note[] getNote(BMSModel model) {

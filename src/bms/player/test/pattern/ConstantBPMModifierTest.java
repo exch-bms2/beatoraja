@@ -57,7 +57,7 @@ public class ConstantBPMModifierTest {
 		ConstantBPMModifier constantBPMModifier = new ConstantBPMModifier();
 		double beforeBPM = bmsModel.getBpm();
 		constantBPMModifier.modify(bmsModel);
-		assertEquals(beforeBPM, bmsModel.getBpm());
+		assertEquals((int)beforeBPM, (int)bmsModel.getBpm());
 	}
 
 }
