@@ -1,4 +1,4 @@
-package bms.player.test;
+package bms.player.test.pattern;
 
 import static org.junit.Assert.*;
 
