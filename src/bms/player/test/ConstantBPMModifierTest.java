@@ -46,10 +46,18 @@ public class ConstantBPMModifierTest {
 	 * ConstantBPMModifier should make stopping option disabled.
 	 * */
 	@Test
-	public void modifyTest() {
+	public void modifyStopTest() {
 		ConstantBPMModifier constantBPMModifier = new ConstantBPMModifier();
 		constantBPMModifier.modify(bmsModel);
 		assertEquals(bmsModel.getAllTimeLines()[0].getStop(), 0);
+	}
+	
+	@Test
+	public void modifyModelBPMTest() {
+		ConstantBPMModifier constantBPMModifier = new ConstantBPMModifier();
+		double beforeBPM = bmsModel.getBpm();
+		constantBPMModifier.modify(bmsModel);
+		assertEquals(beforeBPM, bmsModel.getBpm());
 	}
 
 }

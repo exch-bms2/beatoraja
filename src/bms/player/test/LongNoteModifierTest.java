@@ -17,13 +17,18 @@ import bms.player.beatoraja.PlayerConfig;
 import bms.player.beatoraja.pattern.LongNoteModifier;
 
 public class LongNoteModifierTest {
-	static BMSModel bmsModel;
+	static BMSModel bmsModel1;
+	static BMSModel bmsModel2;
+	static BMSModel bmsModel3;
+	static BMSModel bmsModel4;
 	static BMSDecoder bmsDecoder;
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		File bmsFile = new File("src\\bms\\player\\test\\end_time_dpnep.bms");
 		bmsDecoder = new BMSDecoder();
-		bmsModel = bmsDecoder.decode(bmsFile);
+		bmsModel1 = bmsDecoder.decode(bmsFile);
+	
+	
 	}
 
 
@@ -48,11 +53,19 @@ public class LongNoteModifierTest {
 	/**
 	 * After call modify, longNoteExists should return true
 	 * if the bms model has a long note.
+	 * All long notes in BMS models will be eliminated.
 	 */
 	@Test
 	public void modifyTest() {
 		LongNoteModifier longNoteModifier = new LongNoteModifier();
-		longNoteModifier.modify(bmsModel);
+		longNoteModifier.modify(bmsModel1);
+		assertEquals(longNoteModifier.longNoteExists(),bmsModel1.containsLongNote());
+	}
+	
+	@Test
+	public void checkLongNoteEliminatedTest() {
+		LongNoteModifier longNoteModifier = new LongNoteModifier();
+		longNoteModifier.modify(bmsModel1);
 		assertEquals(longNoteModifier.longNoteExists(),false);
 	}
 

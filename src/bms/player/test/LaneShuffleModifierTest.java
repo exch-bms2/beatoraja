@@ -18,6 +18,7 @@ import bms.model.Mode;
 import bms.model.Note;
 import bms.model.TimeLine;
 import bms.player.beatoraja.pattern.LaneShuffleModifier;
+import bms.player.beatoraja.pattern.PatternModifier;
 import bms.player.beatoraja.pattern.PatternModifyLog;
 
 public class LaneShuffleModifierTest {
@@ -52,6 +53,54 @@ public class LaneShuffleModifierTest {
 	}
 
 	@Test
+	public void LaneShuffleModifierConstructorWithMirrorTest() {
+		LaneShuffleModifier laneShuffleModifier = new LaneShuffleModifier(MIRROR);
+		assertNotNull(laneShuffleModifier);
+	}
+	
+	@Test
+	public void LaneShuffleModifierConstructorWithRRandomTest() {
+		LaneShuffleModifier laneShuffleModifier = new LaneShuffleModifier(R_RANDOM);
+		assertNotNull(laneShuffleModifier);
+	}
+	
+	@Test
+	public void LaneShuffleModifierConstructorWithRandomTest() {
+		LaneShuffleModifier laneShuffleModifier = new LaneShuffleModifier(RANDOM);
+		assertNotNull(laneShuffleModifier);
+	}
+	
+	@Test
+	public void LaneShuffleModifierConstructorWithCrossTest() {
+		LaneShuffleModifier laneShuffleModifier = new LaneShuffleModifier(CROSS);
+		assertNotNull(laneShuffleModifier);
+	}
+	
+	@Test
+	public void LaneShuffleModifierConstructorWithRandomEXTest() {
+		LaneShuffleModifier laneShuffleModifier = new LaneShuffleModifier(RANDOM_EX);
+		assertNotNull(laneShuffleModifier);
+	}
+	
+	@Test
+	public void LaneShuffleModifierConstructorWithFlipTest() {
+		LaneShuffleModifier laneShuffleModifier = new LaneShuffleModifier(FLIP);
+		assertNotNull(laneShuffleModifier);
+	}
+	
+	@Test
+	public void LaneShuffleModifierConstructorWithBattleTest() {
+		LaneShuffleModifier laneShuffleModifier = new LaneShuffleModifier(BATTLE);
+		assertNotNull(laneShuffleModifier);
+	}
+	
+	@Test
+	public void LaneShuffleModifierConstructorWithInvalidTest() {
+		LaneShuffleModifier laneShuffleModifier = new LaneShuffleModifier(-1);
+		assertNotNull(laneShuffleModifier);
+	}
+	
+	@Test
 	public void LaneShuffleModifierConstructorTest() {
 		LaneShuffleModifier laneShuffleModifier = new LaneShuffleModifier(MIRROR);
 		assertNotNull(laneShuffleModifier);
@@ -67,7 +116,7 @@ public class LaneShuffleModifierTest {
 
 	@Test
 	public void modifyMirrorTest() {
-		LaneShuffleModifier laneShuffleModifier = new LaneShuffleModifier(RANDOM);
+		LaneShuffleModifier laneShuffleModifier = new LaneShuffleModifier(MIRROR);
 		Note[] before = getNote(bmsModel);
 		laneShuffleModifier.modify(bmsModel);
 		assertNotEquals(before, getNote(bmsModel));
@@ -75,7 +124,7 @@ public class LaneShuffleModifierTest {
 	
 	@Test
 	public void modifyCrossTest() {
-		LaneShuffleModifier laneShuffleModifier = new LaneShuffleModifier(RANDOM);
+		LaneShuffleModifier laneShuffleModifier = new LaneShuffleModifier(CROSS);
 		Note[] before = getNote(bmsModel);
 		laneShuffleModifier.modify(bmsModel);
 		assertNotEquals(before, getNote(bmsModel));
@@ -83,7 +132,7 @@ public class LaneShuffleModifierTest {
 	
 	@Test
 	public void modifyFlipTest() {
-		LaneShuffleModifier laneShuffleModifier = new LaneShuffleModifier(RANDOM);
+		LaneShuffleModifier laneShuffleModifier = new LaneShuffleModifier(FLIP);
 		Note[] before = getNote(bmsModel);
 		laneShuffleModifier.modify(bmsModel);
 		assertNotEquals(before, getNote(bmsModel));
@@ -91,7 +140,7 @@ public class LaneShuffleModifierTest {
 	
 	@Test
 	public void modifyRRandomTest() {
-		LaneShuffleModifier laneShuffleModifier = new LaneShuffleModifier(RANDOM);
+		LaneShuffleModifier laneShuffleModifier = new LaneShuffleModifier(R_RANDOM);
 		Note[] before = getNote(bmsModel);
 		laneShuffleModifier.modify(bmsModel);
 		assertNotEquals(before, getNote(bmsModel));
@@ -99,7 +148,7 @@ public class LaneShuffleModifierTest {
 	
 	@Test
 	public void modifyRandomEXTest() {
-		LaneShuffleModifier laneShuffleModifier = new LaneShuffleModifier(RANDOM);
+		LaneShuffleModifier laneShuffleModifier = new LaneShuffleModifier(RANDOM_EX);
 		Note[] before = getNote(bmsModel);
 		laneShuffleModifier.modify(bmsModel);
 		assertNotEquals(before, getNote(bmsModel));
@@ -107,10 +156,111 @@ public class LaneShuffleModifierTest {
 	
 	@Test
 	public void modifyBattleTest() {
-		LaneShuffleModifier laneShuffleModifier = new LaneShuffleModifier(RANDOM);
+		LaneShuffleModifier laneShuffleModifier = new LaneShuffleModifier(BATTLE);
 		Note[] before = getNote(bmsModel);
 		laneShuffleModifier.modify(bmsModel);
 		assertNotEquals(before, getNote(bmsModel));
+	}
+	
+	@Test(expected=NullPointerException.class)
+	public void modifyWithInvalidTest() {
+		LaneShuffleModifier laneShuffleModifier = new LaneShuffleModifier(-1);
+		Note[] before = getNote(bmsModel);
+		laneShuffleModifier.modify(bmsModel);
+		assertNotEquals(before, getNote(bmsModel));
+	}
+	
+	
+	/* Subclass constructing with PatternModifer.create.
+	 * 
+	 * */
+	@Test
+	public void dummyModifyTest() {
+		PatternModifier modifier = PatternModifier.create(0, 0);
+		Note[] before = getNote(bmsModel);
+		modifier.modify(bmsModel);
+		assertNotEquals(before, getNote(bmsModel));
+	}
+	
+	@Test
+	public void PatternModifyCreateWithMIRRORTest() {
+		PatternModifier modifier = PatternModifier.create(1, 0);
+		Note[] before = getNote(bmsModel);
+		modifier.modify(bmsModel);
+		assertNotEquals(before, getNote(bmsModel));
+	}
+	
+	@Test
+	public void PatternModifyCreateWithRANDOMTest() {
+		PatternModifier modifier = PatternModifier.create(2, 0);
+		Note[] before = getNote(bmsModel);
+		modifier.modify(bmsModel);
+		assertNotEquals(before, getNote(bmsModel));
+	}
+	
+	@Test
+	public void PatternModifyCreateWithRRandomTest() {
+		PatternModifier modifier = PatternModifier.create(3, 0);
+		Note[] before = getNote(bmsModel);
+		modifier.modify(bmsModel);
+		assertNotEquals(before, getNote(bmsModel));
+	}
+	
+	@Test(expected=NullPointerException.class)
+	public void PatternModifyCreateWithSRandomTest() {
+		PatternModifier modifier = PatternModifier.create(4, 0);
+		Note[] before = getNote(bmsModel);
+		modifier.modify(bmsModel);
+		assertNotEquals(before, getNote(bmsModel));
+	}
+	
+	@Test(expected=NullPointerException.class)
+	public void PatternModifyCreateWithSPIRALTest() {
+		PatternModifier modifier = PatternModifier.create(5, 0);
+		Note[] before = getNote(bmsModel);
+		modifier.modify(bmsModel);
+		assertNotEquals(before, getNote(bmsModel));
+	}
+	
+	@Test(expected=NullPointerException.class)
+	public void PatternModifyCreateWithHRandomTest() {
+		PatternModifier modifier = PatternModifier.create(6, 0);
+		Note[] before = getNote(bmsModel);
+		modifier.modify(bmsModel);
+		assertNotEquals(before, getNote(bmsModel));
+	}
+	
+	@Test(expected=NullPointerException.class)
+	public void PatternModifyCreateWithAllScrTest() {
+		PatternModifier modifier = PatternModifier.create(7, 0);
+		Note[] before = getNote(bmsModel);
+		modifier.modify(bmsModel);
+		assertNotEquals(before, getNote(bmsModel));
+	}
+	
+	@Test
+	public void PatternModifyCreateWithRandomEXandomTest() {
+		PatternModifier modifier = PatternModifier.create(8, 0);
+		Note[] before = getNote(bmsModel);
+		modifier.modify(bmsModel);
+		assertNotEquals(before, getNote(bmsModel));
+	}
+	
+	@Test(expected=NullPointerException.class)
+	public void PatternModifyCreateWithSRandomEXTest() {
+		PatternModifier modifier = PatternModifier.create(9, 0);
+		Note[] before = getNote(bmsModel);
+		modifier.modify(bmsModel);
+		assertNotEquals(before, getNote(bmsModel));
+	}
+	
+	@Test
+	public void modifyMergeMirrorRandomTest() {
+		PatternModifier modifierDummy = PatternModifier.create(0, 0);
+		PatternModifier modifierBef = PatternModifier.create(1, 0);
+		PatternModifier modifierAft = PatternModifier.create(2, 0);
+		List<PatternModifyLog> log = modifierDummy.merge(modifierBef.modify(bmsModel)
+				, modifierAft.modify(bmsModel));
 	}
 	
 	public Note[] getNote(BMSModel model) {

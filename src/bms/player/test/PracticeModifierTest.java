@@ -41,11 +41,26 @@ public class PracticeModifierTest {
 	 * generating practice mode. Amount of node will be changed.
 	 * */
 	@Test
-	public void PracticeModifierTest() {
+	public void modifierTotalTest() {
 		PracticeModifier practiceModifier = new PracticeModifier(10,100);
 		double totalNum = bmsModel.getTotal();
 		practiceModifier.modify(bmsModel);
 		assertNotEquals(bmsModel.getTotal(), totalNum);
 	}
+	
+	@Test
+	public void modifierNoteTest() {
+		PracticeModifier practiceModifier = new PracticeModifier(10,100);
+		double totalNum = bmsModel.getTotalNotes();
+		practiceModifier.modify(bmsModel);
+		assertNotEquals(bmsModel.getTotalNotes(), totalNum);
+	}
 
+	@Test
+	public void modifierTest() {
+		PracticeModifier practiceModifier = new PracticeModifier(10,100);
+		double totalNum = bmsModel.getTotalNotes();
+		practiceModifier.modify(bmsModel);
+		assertNotEquals(bmsModel.getTotalNotes(), totalNum);
+	}
 }

@@ -35,10 +35,15 @@ public class MineNoteModifierTest {
 	@After
 	public void tearDown() throws Exception {
 	}
-
+	
+	/*
+	 * MineNote Modifier removes all mine note in the BMSModel.
+	 * */
+	
 	@Test
 	public void mineNoteModifierConstructorTest() {
 		MineNoteModifier mineNoteModifier = new MineNoteModifier();
+		assertEquals(mineNoteModifier.mineNoteExists(),bmsModel.containsMineNote());
 		assertNotNull(mineNoteModifier);
 	}
 	
@@ -46,6 +51,14 @@ public class MineNoteModifierTest {
 	public void modifyTest() {
 		MineNoteModifier mineNoteModifier = new MineNoteModifier();
 		mineNoteModifier.modify(bmsModel);
-		assertEquals(mineNoteModifier.mineNoteExists(),false);
+		assertEquals(mineNoteModifier.mineNoteExists(),bmsModel.containsMineNote());
+	}
+	
+	@Test
+	public void mineNoteEliminatedCheckTest() {
+		MineNoteModifier mineNoteModifier = new MineNoteModifier();
+		mineNoteModifier.modify(bmsModel);
+		assertEquals(bmsModel.containsMineNote(), false);
+	
 	}
 }

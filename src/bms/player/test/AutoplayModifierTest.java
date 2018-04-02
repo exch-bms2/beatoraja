@@ -55,13 +55,46 @@ public class AutoplayModifierTest {
 	}
 
 	@Test
+	public void AutoPlayModifierConstructWithoutLanesTest() {
+		int lanes[] = null;
+		AutoplayModifier autoplayModifier = new AutoplayModifier(lanes);
+		assertNotNull(autoplayModifier);
+	}
+	
+	@Test
+	public void AutoPlayModifierWithMassLanesTest() {
+		int lanes[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17
+				,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32};
+		AutoplayModifier autoplayModifier = new AutoplayModifier(lanes);
+		assertNotNull(autoplayModifier);
+	}
+	
+	@Test(expected=ArrayIndexOutOfBoundsException.class)
+	public void modifyWithMassLanesTest() {
+		int lanes[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17
+				,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32};
+		AutoplayModifier autoplayModifier = new AutoplayModifier(lanes);
+		Note[] before = getNote(bmsModel);
+		autoplayModifier.modify(bmsModel);
+		assertNotEquals(before, getNote(bmsModel));
+	}
+	
+	@Test(expected=ArrayIndexOutOfBoundsException.class)
+	public void modifyWithMinusLaneTest() {
+		int lanes[] = {-1,0,1,2,3};
+		AutoplayModifier autoplayModifier = new AutoplayModifier(lanes);
+		Note[] before = getNote(bmsModel);
+		autoplayModifier.modify(bmsModel);
+		assertNotEquals(before, getNote(bmsModel));
+	}
+	
+	@Test
 	public void modifyTest() {
 		int lanes[] = {0, 1};
 		AutoplayModifier autoplayModifier = new AutoplayModifier(lanes);
 		Note[] before = getNote(bmsModel);
 		autoplayModifier.modify(bmsModel);
 		assertNotEquals(before, getNote(bmsModel));
-		
 	}
 	
 	@Test
@@ -73,6 +106,52 @@ public class AutoplayModifierTest {
 		assertNotEquals(before, getNote(bmsModel));
 	}
 	
+	@Test
+	public void modifyWithMinusMargin() {
+		int lanes[] = {0, 1};
+		AutoplayModifier autoplayModifier = new AutoplayModifier(lanes,-1);
+		Note[] before = getNote(bmsModel);
+		autoplayModifier.modify(bmsModel);
+		assertNotEquals(before, getNote(bmsModel));
+	}
+	
+	@Test(expected=ArrayIndexOutOfBoundsException.class)
+	public void modifyWithMassLanesWithMarginTest() {
+		int lanes[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17
+				,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32};
+		AutoplayModifier autoplayModifier = new AutoplayModifier(lanes,1);
+		Note[] before = getNote(bmsModel);
+		autoplayModifier.modify(bmsModel);
+		assertNotEquals(before, getNote(bmsModel));
+	}
+	
+	@Test(expected=ArrayIndexOutOfBoundsException.class)
+	public void modifyWithMinusLaneWithMarginTest() {
+		int lanes[] = {-1,0,1,2,3};
+		AutoplayModifier autoplayModifier = new AutoplayModifier(lanes,1);
+		Note[] before = getNote(bmsModel);
+		autoplayModifier.modify(bmsModel);
+		assertNotEquals(before, getNote(bmsModel));
+	}
+	
+	@Test(expected=ArrayIndexOutOfBoundsException.class)
+	public void modifyWithMassLanesMinusMarginTest() {
+		int lanes[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17
+				,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32};
+		AutoplayModifier autoplayModifier = new AutoplayModifier(lanes,-2);
+		Note[] before = getNote(bmsModel);
+		autoplayModifier.modify(bmsModel);
+		assertNotEquals(before, getNote(bmsModel));
+	}
+	
+	@Test(expected=ArrayIndexOutOfBoundsException.class)
+	public void modifyWithMinusLaneMinusMarginTest() {
+		int lanes[] = {-1,0,1,2,3};
+		AutoplayModifier autoplayModifier = new AutoplayModifier(lanes,-3);
+		Note[] before = getNote(bmsModel);
+		autoplayModifier.modify(bmsModel);
+		assertNotEquals(before, getNote(bmsModel));
+	}
 	
 	public Note[] getNote(BMSModel model) {
 		List<PatternModifyLog> log = new ArrayList();
