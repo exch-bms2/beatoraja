@@ -1,4 +1,4 @@
-package bms.player.test;
+package bms.player.test.pattern;
 
 import static org.junit.Assert.*;
 
@@ -19,7 +19,7 @@ public class ConstantBPMModifierTest {
 	static BMSDecoder bmsDecoder;
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		File bmsFile = new File("C:\\Users\\dhehd\\Desktop\\_laika_24b.bmson");
+		File bmsFile = new File("src\\bms\\player\\test\\end_time_dpnep.bms");
 		bmsDecoder = new BMSDecoder();
 		bmsModel = bmsDecoder.decode(bmsFile);
 	}
