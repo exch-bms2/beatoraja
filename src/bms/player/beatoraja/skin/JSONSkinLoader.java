@@ -6,7 +6,9 @@ import java.io.FileReader;
 import java.lang.reflect.Array;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.logging.Logger;
 
+import org.luaj.vm2.LuaError;
 import org.luaj.vm2.LuaValue;
 
 import bms.player.beatoraja.Config;
@@ -1012,18 +1014,22 @@ public class JSONSkinLoader extends SkinLoader{
 	private void setDestination(Skin skin, SkinObject obj, Destination dst) {
 		BooleanProperty draw = null;
 		if(dst.draw != null) {
-			final LuaValue lv = lua.load(dst.draw);
-			draw = new BooleanProperty() {
-				@Override
-				public boolean isStatic(MainState state) {
-					return false;
-				}
+			try {
+				final LuaValue lv = lua.load(dst.draw);
+				draw = new BooleanProperty() {
+					@Override
+					public boolean isStatic(MainState state) {
+						return false;
+					}
 
-				@Override
-				public boolean get(MainState state) {
-					return lv.call().toboolean();
-				}				
-			};
+					@Override
+					public boolean get(MainState state) {
+						return lv.call().toboolean();
+					}
+				};
+			} catch (RuntimeException e) {
+				Logger.getGlobal().warning("Lua解析時の例外 : " + e.getMessage());
+			}
 		}
 		
 		Animation prev = null;
