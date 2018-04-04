@@ -23,6 +23,36 @@ public class SkinLuaAccessor {
 				return LuaDouble.valueOf(state.getScoreDataProperty().getNowRate());
 			}
         });
+		globals.set("exscore", new ZeroArgFunction() {
+			@Override
+			public LuaValue call() {
+				return LuaDouble.valueOf(state.getScoreDataProperty().getNowEXScore());
+			}
+		});
+		globals.set("rate_best", new ZeroArgFunction() {
+			@Override
+			public LuaValue call() {
+				return LuaDouble.valueOf(state.getScoreDataProperty().getNowBestScoreRate());
+			}
+		});
+		globals.set("exscore_best", new ZeroArgFunction() {
+			@Override
+			public LuaValue call() {
+				return LuaDouble.valueOf(state.getScoreDataProperty().getBestScore());
+			}
+		});
+		globals.set("rate_rival", new ZeroArgFunction() {
+			@Override
+			public LuaValue call() {
+				return LuaDouble.valueOf(state.getScoreDataProperty().getRivalScoreRate());
+			}
+		});
+		globals.set("exscore_rival", new ZeroArgFunction() {
+			@Override
+			public LuaValue call() {
+				return LuaDouble.valueOf(state.getScoreDataProperty().getRivalScore());
+			}
+		});
         globals.set("judge", new OneArgFunction() {
 			@Override
 			public LuaValue call(LuaValue value) {
@@ -39,6 +69,16 @@ public class SkinLuaAccessor {
 				return LuaInteger.ZERO;
 			}
         });
+		globals.set("gauge_type", new ZeroArgFunction() {
+			@Override
+			public LuaValue call() {
+				if(state instanceof BMSPlayer) {
+					BMSPlayer player = (BMSPlayer) state;
+					return LuaDouble.valueOf(player.getGauge().getType());
+				}
+				return LuaInteger.ZERO;
+			}
+		});
 	}
 	
 	public LuaValue load(String script) {
