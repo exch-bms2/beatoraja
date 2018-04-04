@@ -47,14 +47,6 @@ public class LaneRenderer {
 	private PlayConfig playconfig;
 
 	private int currentduration;
-	private int currentdurationLanecoverOn;
-	private int currentdurationLanecoverOff;
-	private int mainbpmdurationLanecoverOn;
-	private int mainbpmdurationLanecoverOff;
-	private int minbpmdurationLanecoverOn;
-	private int minbpmdurationLanecoverOff;
-	private int maxbpmdurationLanecoverOn;
-	private int maxbpmdurationLanecoverOff;
 
 	private double basebpm;
 	private double nowbpm;
@@ -195,38 +187,6 @@ public class LaneRenderer {
 		return currentduration;
 	}
 
-	public int getCurrentDurationLanecoverOn() {
-		return currentdurationLanecoverOn;
-	}
-
-	public int getCurrentDurationLanecoverOff() {
-		return currentdurationLanecoverOff;
-	}
-
-	public int getMainbpmdurationLanecoverOn() {
-		return mainbpmdurationLanecoverOn;
-	}
-
-	public int getMainbpmdurationLanecoverOff() {
-		return mainbpmdurationLanecoverOff;
-	}
-
-	public int getMinbpmdurationLanecoverOn() {
-		return minbpmdurationLanecoverOn;
-	}
-
-	public int getMinbpmdurationLanecoverOff() {
-		return minbpmdurationLanecoverOff;
-	}
-
-	public int getMaxbpmdurationLanecoverOn() {
-		return maxbpmdurationLanecoverOn;
-	}
-
-	public int getMaxbpmdurationLanecoverOff() {
-		return maxbpmdurationLanecoverOff;
-	}
-
 	public float getHispeedmargin() {
 		return hispeedmargin;
 	}
@@ -346,17 +306,7 @@ public class LaneRenderer {
 		final float lanecover = playconfig.getLanecover();
 		currentduration = (int) Math.round(region * (1 - (playconfig.isEnablelanecover() ? lanecover : 0)));
 
-		currentdurationLanecoverOn = (int) Math.round( region * (1 - lanecover) );
-		currentdurationLanecoverOff = (int) Math.round( region );
-		mainbpmdurationLanecoverOn = (int) Math.round( (240000 / mainbpm / hispeed) * (1 - lanecover) );
-		mainbpmdurationLanecoverOff = (int) Math.round( 240000 / mainbpm / hispeed );
-		minbpmdurationLanecoverOn = (int) Math.round( (240000 / minbpm / hispeed) * (1 - lanecover) );
-		minbpmdurationLanecoverOff = (int) Math.round( 240000 / minbpm / hispeed );
-		maxbpmdurationLanecoverOn = (int) Math.round( (240000 / maxbpm / hispeed) * (1 - lanecover) );
-		maxbpmdurationLanecoverOff = (int) Math.round( 240000 / maxbpm / hispeed );
-
 		// 判定エリア表示
-		// TODO 実装が古いため、書き直す
 		if (config.isShowjudgearea()) {
 			final Color[] color = { Color.valueOf("0000ff20"), Color.valueOf("00ff0020"), Color.valueOf("ffff0020"),
 					Color.valueOf("ff800020"), Color.valueOf("ff000020") };
@@ -648,6 +598,18 @@ public class LaneRenderer {
 	}
 
 	public double getNowBPM() {
+		return nowbpm;
+	}
+
+	public double getMinBPM() {
+		return nowbpm;
+	}
+
+	public double getMaxBPM() {
+		return nowbpm;
+	}
+
+	public double getMainBPM() {
 		return nowbpm;
 	}
 

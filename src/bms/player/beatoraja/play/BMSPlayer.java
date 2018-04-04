@@ -1039,38 +1039,6 @@ public class BMSPlayer extends MainState {
 			return lanerender.getCurrentDuration();
 		case NUMBER_DURATION_GREEN:
 			return lanerender.getCurrentDuration() * 3 / 5;
-		case NUMBER_DURATION_LANECOVER_ON:
-			return lanerender.getCurrentDurationLanecoverOn();
-		case NUMBER_DURATION_GREEN_LANECOVER_ON:
-			return lanerender.getCurrentDurationLanecoverOn() * 3 / 5;
-		case NUMBER_DURATION_LANECOVER_OFF:
-			return lanerender.getCurrentDurationLanecoverOff();
-		case NUMBER_DURATION_GREEN_LANECOVER_OFF:
-			return lanerender.getCurrentDurationLanecoverOff() * 3 / 5;
-		case NUMBER_MAINBPM_DURATION_LANECOVER_ON:
-			return lanerender.getMainbpmdurationLanecoverOn();
-		case NUMBER_MAINBPM_DURATION_GREEN_LANECOVER_ON:
-			return lanerender.getMainbpmdurationLanecoverOn() * 3 / 5;
-		case NUMBER_MAINBPM_DURATION_LANECOVER_OFF:
-			return lanerender.getMainbpmdurationLanecoverOff();
-		case NUMBER_MAINBPM_DURATION_GREEN_LANECOVER_OFF:
-			return lanerender.getMainbpmdurationLanecoverOff() * 3 / 5;
-		case NUMBER_MINBPM_DURATION_LANECOVER_ON:
-			return lanerender.getMinbpmdurationLanecoverOn();
-		case NUMBER_MINBPM_DURATION_GREEN_LANECOVER_ON:
-			return lanerender.getMinbpmdurationLanecoverOn() * 3 / 5;
-		case NUMBER_MINBPM_DURATION_LANECOVER_OFF:
-			return lanerender.getMinbpmdurationLanecoverOff();
-		case NUMBER_MINBPM_DURATION_GREEN_LANECOVER_OFF:
-			return lanerender.getMinbpmdurationLanecoverOff() * 3 / 5;
-		case NUMBER_MAXBPM_DURATION_LANECOVER_ON:
-			return lanerender.getMaxbpmdurationLanecoverOn();
-		case NUMBER_MAXBPM_DURATION_GREEN_LANECOVER_ON:
-			return lanerender.getMaxbpmdurationLanecoverOn() * 3 / 5;
-		case NUMBER_MAXBPM_DURATION_LANECOVER_OFF:
-			return lanerender.getMaxbpmdurationLanecoverOff();
-		case NUMBER_MAXBPM_DURATION_GREEN_LANECOVER_OFF:
-			return lanerender.getMaxbpmdurationLanecoverOff() * 3 / 5;
 		case NUMBER_NOWBPM:
 			return (int) lanerender.getNowBPM();
 		case NUMBER_MAXCOMBO:
