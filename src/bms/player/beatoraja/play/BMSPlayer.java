@@ -802,6 +802,7 @@ public class BMSPlayer extends MainState {
 		}
 		pc.setLanecover(lanerender.getLanecover());
 		pc.setLift(lanerender.getLiftRegion());
+		pc.setHidden(lanerender.getHiddenCover());
 	}
 
 	private void saveReplayHS() {

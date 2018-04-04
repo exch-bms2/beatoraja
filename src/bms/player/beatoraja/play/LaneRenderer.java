@@ -96,6 +96,7 @@ public class LaneRenderer {
 				playconfig.setHispeed(1.0f);
 				playconfig.setLanecover(0);
 				playconfig.setLift(0);
+				playconfig.setHidden(0);
 			}
 		}
 
