@@ -4,10 +4,9 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
 
 import bms.model.Mode;
 import bms.player.beatoraja.MainState;
-import bms.player.beatoraja.PlayerResource;
 import bms.player.beatoraja.ScoreDataProperty;
 import bms.player.beatoraja.play.BMSPlayer;
-import bms.player.beatoraja.play.GrooveGauge;
+import bms.player.beatoraja.play.GrooveGauge.Gauge;
 import bms.player.beatoraja.play.LaneRenderer;
 import bms.player.beatoraja.result.CourseResult;
 import bms.player.beatoraja.result.MusicResult;
@@ -191,8 +190,8 @@ public class SkinPropertyMapper {
 				@Override
 				public boolean get(MainState state) {
 					if(state instanceof BMSPlayer) {
-						final GrooveGauge gauge = ((BMSPlayer) state).getGauge();
-						return gauge.getValue() >= low * gauge.getMaxValue() && gauge.getValue() < high * gauge.getMaxValue();
+						final Gauge gauge = ((BMSPlayer) state).getGauge().getGauge();
+						return gauge.getValue() >= low * gauge.getProperty().max && gauge.getValue() < high * gauge.getProperty().max ;
 					}
 					return false;
 				}

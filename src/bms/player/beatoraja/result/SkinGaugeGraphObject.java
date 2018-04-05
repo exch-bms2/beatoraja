@@ -2,11 +2,10 @@ package bms.player.beatoraja.result;
 
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.PlayerResource;
-import bms.player.beatoraja.play.GrooveGauge;
+import bms.player.beatoraja.play.GrooveGauge.Gauge;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 import bms.player.beatoraja.skin.SkinObject;
 import com.badlogic.gdx.graphics.*;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.FloatArray;
@@ -76,6 +75,7 @@ public class SkinGaugeGraphObject extends SkinObject {
 				// shape.fill();
 			} else {
 				backtex.dispose();
+				backtex = null;
 				shapetex.getTexture().dispose();
 				shapetex = null;
 			}
@@ -96,13 +96,14 @@ public class SkinGaugeGraphObject extends SkinObject {
 			}
 			shape.setColor(graphcolor[color]);
 			shape.fill();
-			final GrooveGauge gg = resource.getGrooveGauge();
-			final float border = gg.getBorder();
+			final Gauge gg = resource.getGrooveGauge().getGauge();
+			final float border = gg.getProperty().border;
+			final float max = gg.getProperty().max;
 			Color borderline = this.borderline;
 			if (border > 0) {
 				shape.setColor(bordercolor);
-				shape.fillRectangle(0, (int) (graph.height * gg.getBorder() / gg.getMaxValue()), (int) (graph.width),
-						(int) (graph.height * (gg.getMaxValue() - gg.getBorder()) / gg.getMaxValue()));
+				shape.fillRectangle(0, (int) (graph.height * border / max), (int) (graph.width),
+						(int) (graph.height * (max - border) / max));
 			} else {
 				borderline = graphline[color];
 			}
@@ -121,10 +122,10 @@ public class SkinGaugeGraphObject extends SkinObject {
 				Float f2 = gauge.get(i);
 				if (f1 != null) {
 					final int x1 = (int) (graph.width * (i - 1) / gauge.size);
-					final int y1 = (int) ((f1 / gg.getMaxValue()) * (graph.height - lineWidth));
+					final int y1 = (int) ((f1 / max) * (graph.height - lineWidth));
 					final int x2 = (int) (graph.width * i / gauge.size);
-					final int y2 = (int) ((f2 / gg.getMaxValue()) * (graph.height - lineWidth));
-					final int yb = (int) ((border / gg.getMaxValue()) * (graph.height - lineWidth));
+					final int y2 = (int) ((f2 / max) * (graph.height - lineWidth));
+					final int yb = (int) ((border / max) * (graph.height - lineWidth));
 					if (f1 < border) {
 						if (f2 < border) {
 							shape.setColor(graphline[color]);
@@ -169,6 +170,10 @@ public class SkinGaugeGraphObject extends SkinObject {
 		if (shapetex != null) {
 			shapetex.getTexture().dispose();
 			shapetex = null;
+		}
+		if (backtex != null) {
+			backtex.dispose();
+			backtex = null;
 		}
 	}
 }

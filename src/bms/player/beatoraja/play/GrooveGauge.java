@@ -1,6 +1,6 @@
 package bms.player.beatoraja.play;
 
-import java.util.*;
+import com.badlogic.gdx.math.MathUtils;
 
 import bms.model.Mode;
 import bms.player.beatoraja.ClearType;
@@ -25,42 +25,15 @@ public class GrooveGauge {
 	public static final int EXHARDCLASS = 8;
 
 	private int type = -1;
-	/**
-	 * ゲージ量
-	 */
-	private float[] value;
-	/**
-	 * ゲージの仕様
-	 */
-	private GaugeProperty property;
-	/**
-	 * ゲージのクリアタイプ
-	 */
-	private ClearType cleartype;
+	
+	private Gauge[] gauges;
 
-	private float[][] gauge;
-
-	private boolean[] stopUpdate;
-
-	public GrooveGauge(BMSModel model, int type, GaugeProperty propertyset) {
+	public GrooveGauge(BMSModel model, int type, GaugeProperty property) {
 		this.type = type;
-		property = propertyset;
-		this.value = new float[property.values.length];
+		this.gauges = new Gauge[property.values.length];
 		for(int i = 0; i < property.values.length; i++) {
-			this.value[i] = property.values[i].init;
+			this.gauges[i] = new Gauge(model, property.values[i], ClearType.getClearTypeByGauge(i));
 		}
-		this.cleartype = ClearType.getClearTypeByGauge(type);
-		this.gauge = new float[property.values.length][];
-		for(int j = 0; j < property.values.length; j++) {
-			this.gauge[j] = property.values[j].value.clone();
-			if(property.values[j].type != null) {
-				for(int i = 0;i < gauge[j].length;i++) {
-					gauge[j][i] = property.values[j].type.modify(gauge[j][i], model);
-				}
-			}
-		}
-		this.stopUpdate = new boolean[property.values.length];
-		Arrays.fill(stopUpdate, false);
 	}
 
 	/**
@@ -78,68 +51,37 @@ public class GrooveGauge {
 	 * @param judge
 	 */
 	public void update(int judge, float rate) {
-		for(int i = 0; i < property.values.length; i++) {
-			float inc = this.getGaugeValue(i, judge) * rate;
-			if(inc < 0) {
-				for(float[] gut : property.values[i].guts) {
-					if(value[i] < gut[0]) {
-						inc *= gut[1];
-						break;
-					}
-				}
-			}
-			if(!stopUpdate[i]) this.setValue(i, value[i] + inc);
+		for(Gauge gauge : gauges) {
+			gauge.update(judge, rate);
 		}
 	}
 
 	public void addValue(float value) {
-		for(int type = 0; type < property.values.length; type++) {
-			this.setValue(type, getValue(type) + value);
+		for(Gauge gauge : gauges) {
+			gauge.setValue(gauge.getValue() + value);
 		}
 	}
 
-	protected float getGaugeValue(int type, int judge) {
-		return gauge[type][judge];
-	}
-
 	public float getValue() {
-		return value[type];
+		return gauges[type].getValue();
 	}
 
 	public float getValue(int type) {
-		return value[type];
+		return gauges[type].getValue();
 	}
 
 	public void setValue(float value) {
-		for(int type = 0; type < property.values.length; type++) {
-			if (value > property.values[type].max) {
-				this.value[type] = property.values[type].max;
-			} else if (value < property.values[type].min) {
-				this.value[type] = property.values[type].min;
-			} else {
-				this.value[type] = value;
-			}
-			if((this.value[type] == 0) &&(type == HARD || type == EXHARD || type == HAZARD || type == CLASS || type == EXCLASS || type == EXHARDCLASS)) {
-				stopUpdate[type] = true;
-			}
+		for(Gauge gauge : gauges) {
+			gauge.setValue(value);
 		}
 	}
 
 	public void setValue(int type, float value) {
-		if (value > property.values[type].max) {
-			this.value[type] = property.values[type].max;
-		} else if (value < property.values[type].min) {
-			this.value[type] = property.values[type].min;
-		} else {
-			this.value[type] = value;
-		}
-		if((this.value[type] == 0) &&(type == HARD || type == EXHARD || type == HAZARD || type == CLASS || type == EXCLASS || type == EXHARDCLASS)) {
-			stopUpdate[type] = true;
-		}
+		gauges[type].setValue(value);
 	}
 
 	public boolean isQualified() {
-		return value[type] >= property.values[type].border;
+		return gauges[type].isQualified();
 	}
 
 	public int getType() {
@@ -152,65 +94,42 @@ public class GrooveGauge {
 
 	public void downType() {
 		type = type > 0 ? type - 1 : 0;
-		cleartype = ClearType.getClearTypeByGauge(type);
 		return;
 	}
 
-	public int changeTypeOfClear(int type) {
+	public int changeTypeOfClear() {
 		if(type >= ASSISTEASY && type <= EXHARD) {
 			for(int i = ASSISTEASY; i <= EXHARD; i++) {
-				if(value[i] >= property.values[i].border && value[i] != 0) {
+				if(gauges[i].isQualified()) {
 					this.type = i;
-					cleartype = ClearType.getClearTypeByGauge(this.type);
 				}
 			}
 		} else if(type >= CLASS && type <= EXHARDCLASS) {
 			for(int i = CLASS; i <= EXHARDCLASS; i++) {
-				if(value[i] >= property.values[i].border && value[i] != 0) {
+				if(gauges[i].isQualified()) {
 					this.type = i;
-					cleartype = ClearType.getClearTypeByGauge(this.type);
 				}
 			}
 		}
 		return this.type;
 	}
 
-	public void setStopUpdate(int type, boolean stopUpdate) {
-		this.stopUpdate[type] = stopUpdate;
-	}
-
 	public int getGaugeTypeLength() {
-		return property.values.length;
+		return gauges.length;
 	}
 
 	public ClearType getClearType() {
-		return cleartype;
+		return gauges[type].cleartype;
 	}
 
-	public float getMaxValue() {
-		return property.values[type].max;
+	public Gauge getGauge() {
+		return gauges[type];
 	}
-
-	public float getMaxValue(int type) {
-		return property.values[type].max;
+	
+	public Gauge getGauge(int type) {
+		return gauges[type];
 	}
-
-	public float getMinValue() {
-		return property.values[type].min;
-	}
-
-	public float getMinValue(int type) {
-		return property.values[type].min;
-	}
-
-	public float getBorder() {
-		return property.values[type].border;
-	}
-
-	public float getBorder(int type) {
-		return property.values[type].border;
-	}
-
+	
 	public static GrooveGauge create(BMSModel model, int type, int grade, GaugeProperty gauge) {
 		int id = -1;
 		if (grade > 0) {
@@ -239,6 +158,77 @@ public class GrooveGauge {
 		return gauge.type;
 	}
 
+	public static class Gauge {
+		/**
+		 * ゲージの現在値
+		 */
+		private float value;
+		/**
+		 * ゲージの仕様
+		 */
+		private final GaugeElementProperty element;
+		/**
+		 * 各判定毎のゲージの増減
+		 */
+		private float[] gauge;
+		/**
+		 * ゲージのクリアタイプ
+		 */
+		private final ClearType cleartype;
+
+		public Gauge(BMSModel model, GaugeElementProperty element, ClearType cleartype) {
+			this.element = element;
+			this.value = element.init;
+			this.cleartype = cleartype;
+			this.gauge = element.value.clone();
+			if(element.type != null) {
+				for(int i = 0;i < gauge.length;i++) {
+					gauge[i] = element.type.modify(gauge[i], model);
+				}				
+			}
+		}
+		
+		public float getValue() {
+			return value;
+		}
+
+		public void setValue(float value) {
+			if(this.value > 0f) {
+				this.value = MathUtils.clamp(value, element.min, element.max);				
+			}
+		}
+		
+		/**
+		 * 判定に応じてゲージを更新する
+		 * 
+		 * @param judge
+		 */
+		public void update(int judge, float rate) {
+			float inc = gauge[judge] * rate;
+			if(inc < 0) {
+				for(float[] gut : element.guts) {
+					if(value < gut[0]) {
+						inc *= gut[1];
+						break;
+					}
+				}
+			}
+			this.setValue(value + inc);
+		}
+		
+		public GaugeElementProperty getProperty() {
+			return element;
+		}
+		
+		public boolean isQualified() {
+			return value >= element.border;
+		}
+		
+		public boolean isMax() {
+			return value == element.max;
+		}
+	}
+	
 	public enum GaugeType {
 		/**
 		 * 回復量にTOTALを使用

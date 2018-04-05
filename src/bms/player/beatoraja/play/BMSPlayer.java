@@ -9,6 +9,7 @@ import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyInputLog;
 import bms.player.beatoraja.pattern.*;
+import bms.player.beatoraja.play.GaugeProperty.GaugeElementProperty;
 import bms.player.beatoraja.play.PracticeConfiguration.PracticeProperty;
 import bms.player.beatoraja.play.bga.BGAProcessor;
 import bms.player.beatoraja.skin.*;
@@ -369,8 +370,9 @@ public class BMSPlayer extends MainState {
 			Skin skin = getSkin();
 			int setParts = skin.getGaugeParts();
 			for(int type = 0; type < gauge.getGaugeTypeLength(); type++) {
-				for(int i = skin.getGaugeParts(); i <= gauge.getMaxValue(type); i++) {
-					if(gauge.getBorder(type) % (gauge.getMaxValue(type) / i) == 0) {
+				final GaugeElementProperty element = gauge.getGauge(type).getProperty();
+				for(int i = skin.getGaugeParts(); i <= element.max; i++) {
+					if(element.border % (element.max / i) == 0) {
 						setParts = Math.max(setParts, i);
 						break;
 					}
@@ -593,12 +595,12 @@ public class BMSPlayer extends MainState {
 					gaugelog[i].add(gauge.getValue(i));
 				}
 			}
-			main.switchTimer(TIMER_GAUGE_MAX_1P, g == gauge.getMaxValue());
+			main.switchTimer(TIMER_GAUGE_MAX_1P, gauge.getGauge().isMax());
 
 			if(main.isTimerOn(TIMER_PM_CHARA_1P_NEUTRAL) && main.getNowTime(TIMER_PM_CHARA_1P_NEUTRAL) >= skin.getPMcharaTime(TIMER_PM_CHARA_1P_NEUTRAL - TIMER_PM_CHARA_1P_NEUTRAL) && main.getNowTime(TIMER_PM_CHARA_1P_NEUTRAL) % skin.getPMcharaTime(TIMER_PM_CHARA_1P_NEUTRAL - TIMER_PM_CHARA_1P_NEUTRAL) < 17) {
 				if(PMcharaLastnotes[0] != notes && judge.getPMcharaJudge() > 0) {
 					if(judge.getPMcharaJudge() == 1 || judge.getPMcharaJudge() == 2) {
-						if(g == gauge.getMaxValue()) main.setTimerOn(TIMER_PM_CHARA_1P_FEVER);
+						if(gauge.getGauge().isMax()) main.setTimerOn(TIMER_PM_CHARA_1P_FEVER);
 						else main.setTimerOn(TIMER_PM_CHARA_1P_GREAT);
 					} else if(judge.getPMcharaJudge() == 3) main.setTimerOn(TIMER_PM_CHARA_1P_GOOD);
 					else main.setTimerOn(TIMER_PM_CHARA_1P_BAD);
@@ -715,7 +717,7 @@ public class BMSPlayer extends MainState {
 			if (main.getNowTime(TIMER_FADEOUT) > skin.getFadeout()) {
 				if(config.isContinueUntilEndOfSong()) {
 					if(resource.getCourseBMSModels() == null) {
-						int changedGaugeType = gauge.changeTypeOfClear(gauge.getType());
+						int changedGaugeType = gauge.changeTypeOfClear();
 						if(resource.getPlayMode() == PlayMode.PLAY) config.setGauge(changedGaugeType);
 					}
 				}
@@ -1126,7 +1128,7 @@ public class BMSPlayer extends MainState {
 		case OPTION_LANECOVER1_ON:
 			return lanerender.getPlayConfig().isEnablelanecover();
 		case OPTION_1P_BORDER_OR_MORE:
-			return gauge.getValue() >= gauge.getBorder();
+			return gauge.getGauge().isQualified();
 		case OPTION_1P_PERFECT:
 			return judge.getNowJudge()[0] == 1;
 		case OPTION_1P_EARLY:

@@ -6,7 +6,6 @@ import static bms.player.beatoraja.play.GrooveGauge.*;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.graphics.Color;
@@ -58,7 +57,7 @@ public class SkinGauge extends SkinObject {
 	@Override
 	public void draw(SkinObjectRenderer sprite, long time, MainState state) {
 		final Rectangle gr = getDestination(time, state);
-		final GrooveGauge gauge = ((BMSPlayer) state).getGauge();
+		final Gauge gauge = ((BMSPlayer) state).getGauge().getGauge();
 		if (gauge == null || gr == null) {
 			return;
 		}
@@ -80,12 +79,12 @@ public class SkinGauge extends SkinObject {
 			}
 			atime = time + duration;
 		}
-		final float max = gauge.getMaxValue();
+		final float max = gauge.getProperty().max;
 		final float value = gauge.getValue();
 		final TextureRegion[] images = image.getImages(time, state);
 
 		int exgauge = 0;
-		final int type = gauge.getType();
+		final int type =  ((BMSPlayer) state).getGauge().getType();
 		if (type == ASSISTEASY || type == EASY || type == EXHARD || type == HAZARD || type == EXCLASS || type == EXHARDCLASS) {
 			exgauge = 4;
 		}
@@ -99,14 +98,14 @@ public class SkinGauge extends SkinObject {
 			final float border = i * max / parts;
 			sprite.draw(
 					images[exgauge + (notes == i || notes - animation > i ? 0 : 2)
-							+ (border < gauge.getBorder() ? 1 : 0)],
+							+ (border < gauge.getProperty().border ? 1 : 0)],
 					gr.x + gr.width * (i - 1) / parts, gr.y, gr.width / parts, gr.height);
 
 			if(animationType == ANIMATION_FLICKERING && images.length == 12 && i == notes) {
 				float alpha = orgColor.a * ((time % duration) < duration / 2 ? (time % duration) / ((float) duration / 2 - 1) : ((duration - 1) - (time % duration)) / ((float) duration / 2 - 1));
 				sprite.setColor(new Color(orgColor.r, orgColor.g, orgColor.b, alpha));
 				sprite.draw(
-						images[8 + exgauge / 2 + (border < gauge.getBorder() ? 1 : 0)],
+						images[8 + exgauge / 2 + (border < gauge.getProperty().border ? 1 : 0)],
 						gr.x + gr.width * (i - 1) / parts, gr.y, gr.width / parts, gr.height);
 				sprite.setColor(orgColor);
 			}

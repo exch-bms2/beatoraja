@@ -1,10 +1,10 @@
 package bms.player.beatoraja.play;
 
 import bms.player.beatoraja.MainState;
+import bms.player.beatoraja.play.GrooveGauge.Gauge;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 
-import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.math.Rectangle;
 
 /**
@@ -62,7 +62,7 @@ public class SkinJudge extends SkinObject {
     public void draw(SkinObjectRenderer sprite, long time, MainState state) {
         int judgenow = ((BMSPlayer)state).getJudgeManager().getNowJudge()[index] - 1;
         final int judgecombo = ((BMSPlayer)state).getJudgeManager().getNowCombo()[index];
-        final GrooveGauge gauge = ((BMSPlayer)state).getGauge();
+        final Gauge gauge = ((BMSPlayer)state).getGauge().getGauge();
 
         if(judgenow < 0) {
             return;
@@ -71,14 +71,14 @@ public class SkinJudge extends SkinObject {
         if (r != null) {
             float shift = 0;
             if (judgenow < 3) {
-                if(judgenow == 0 && count.length > 6 && count[6] != null && gauge.getValue() == gauge.getMaxValue()) {
+                if(judgenow == 0 && count.length > 6 && count[6] != null && gauge.isMax()) {
                     count[6].draw(sprite, time, judgecombo, state, r.x, r.y);
                 } else {
                     count[judgenow].draw(sprite, time, judgecombo, state, r.x, r.y);
                 }
             	shift = count[judgenow].getLength() / 2;
             }
-            if(judgenow == 0 && judge.length > 6 && judge[6] != null && gauge.getValue() == gauge.getMaxValue()) {    
+            if(judgenow == 0 && judge.length > 6 && judge[6] != null && gauge.isMax()) {    
                 judge[6].draw(sprite, time, state, this.shift ? -shift : 0, 0);
             } else {
                 judge[judgenow].draw(sprite, time, state, this.shift ? -shift : 0, 0);
