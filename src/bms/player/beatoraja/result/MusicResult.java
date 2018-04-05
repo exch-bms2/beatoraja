@@ -18,6 +18,7 @@ import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.ir.IRConnection;
 import bms.player.beatoraja.ir.IRResponse;
+import bms.player.beatoraja.play.GrooveGauge;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.skin.SkinType;
 
@@ -84,6 +85,8 @@ public class MusicResult extends AbstractResult {
 			resource.addCourseReplay(resource.getReplayData());
 			resource.addCourseGauge(resource.getGauge());
 		}
+		
+		gaugeType = resource.getGrooveGauge().getType();
 
 		loadSkin(SkinType.RESULT);
 	}
@@ -194,7 +197,14 @@ public class MusicResult extends AbstractResult {
 				long[] keytime = inputProcessor.getTime();
 				boolean ok = false;
 				for (int i = 0; i < property.getAssignLength(); i++) {
-					if (property.getAssign(i) != null && keystate[i] && keytime[i] != 0) {
+					if (property.getAssign(i) == ResultKeyProperty.ResultKey.CHANGE_GRAPH && keystate[i] && keytime[i] != 0) {
+						if(gaugeType >= GrooveGauge.ASSISTEASY && gaugeType <= GrooveGauge.HAZARD) {
+							gaugeType = (gaugeType + 1) % 6;
+						} else {
+							gaugeType = (gaugeType - 5) % 3 + 6;
+						}
+						keytime[i] = 0;
+					} else if (property.getAssign(i) != null && keystate[i] && keytime[i] != 0) {
 						keytime[i] = 0;
 						ok = true;
 					}
@@ -330,7 +340,6 @@ public class MusicResult extends AbstractResult {
 			cscore.setLms(cscore.getLms() + newscore.getLms());
 			cscore.setMinbp(cscore.getMinbp() + newscore.getMinbp());
 			if (resource.getGauge()[resource.getGrooveGauge().getType()].get(resource.getGauge()[resource.getGrooveGauge().getType()].size - 1) > 0) {
-				int orgGaugeType = resource.getGrooveGauge().getType();
 				if (resource.getAssist() > 0) {
 					if(resource.getAssist() == 1 && cscore.getClear() != ClearType.AssistEasy.id) cscore.setClear(ClearType.LightAssistEasy.id);
 					else cscore.setClear(ClearType.AssistEasy.id);

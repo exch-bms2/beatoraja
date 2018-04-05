@@ -34,6 +34,8 @@ public class SkinGaugeGraphObject extends SkinObject {
 	 * グラフ線の太さ
 	 */
 	private int lineWidth = 2;
+	
+	private int currentType;
 
 	public int getDelay() {
 		return delay;
@@ -68,9 +70,15 @@ public class SkinGaugeGraphObject extends SkinObject {
 		if (graph == null) {
 			return;
 		}
+		
+		final PlayerResource resource = state.main.getPlayerResource();
+		int type = resource.getGrooveGauge().getType();
+		if(state instanceof AbstractResult) {
+			type = ((AbstractResult) state).gaugeType;
+		}
 
 		if (shapetex != null) {
-			if (shapetex.getTexture().getWidth() == (int) graph.getWidth() && shapetex.getTexture().getHeight() == (int) graph.getHeight()) {
+			if (currentType == type && shapetex.getTexture().getWidth() == (int) graph.getWidth() && shapetex.getTexture().getHeight() == (int) graph.getHeight()) {
 				// shape.setColor(Color.BLACK);
 				// shape.fill();
 			} else {
@@ -81,17 +89,17 @@ public class SkinGaugeGraphObject extends SkinObject {
 			}
 		}
 		if (shapetex == null) {
-			PlayerResource resource = state.main.getPlayerResource();
+			currentType = type;
 			Pixmap shape = new Pixmap((int) graph.width, (int) graph.height, Pixmap.Format.RGBA8888);
 			// ゲージグラフ描画
-			color = typetable[resource.getGrooveGauge().getType()];
-			gauge = resource.getGauge()[resource.getGrooveGauge().getType()];
+			color = typetable[currentType];
+			gauge = resource.getGauge()[currentType];
 			IntArray section = new IntArray();
 			if (state instanceof CourseResult) {
 				gauge = new FloatArray();
 				for (FloatArray[] l : resource.getCourseGauge()) {
-					gauge.addAll(l[resource.getGrooveGauge().getType()]);
-					section.add((section.size > 0 ? section.get(section.size - 1) : 0) + l[resource.getGrooveGauge().getType()].size);
+					gauge.addAll(l[currentType]);
+					section.add((section.size > 0 ? section.get(section.size - 1) : 0) + l[currentType].size);
 				}
 			}
 			shape.setColor(graphcolor[color]);

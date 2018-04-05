@@ -41,6 +41,8 @@ public abstract class AbstractResult extends MainState {
 	public static final int SOUND_CLEAR = 0;
 	public static final int SOUND_FAIL = 1;
 	public static final int SOUND_CLOSE = 2;
+	
+	protected int gaugeType;
 
 	public AbstractResult(MainController main) {
 		super(main);

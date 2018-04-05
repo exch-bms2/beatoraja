@@ -6,14 +6,14 @@ import static bms.player.beatoraja.result.ResultKeyProperty.ResultKey.*;
 
 public enum ResultKeyProperty {
 
-    BEAT_5K(new ResultKey[]{OK, OK, OK, OK, REPLAY_DIFFERENT, OK, REPLAY_SAME, null, null}),
-    BEAT_7K(new ResultKey[]{OK, OK, OK, OK, REPLAY_DIFFERENT, OK, REPLAY_SAME, null, null}),
-    BEAT_10K(new ResultKey[]{OK, OK, OK, OK, REPLAY_DIFFERENT, OK, REPLAY_SAME, null, null, OK, OK, OK, OK, REPLAY_DIFFERENT, OK, REPLAY_SAME, null, null}),
-    BEAT_14K(new ResultKey[]{OK, OK, OK, OK, REPLAY_DIFFERENT, OK, REPLAY_SAME, null, null, OK, OK, OK, OK, REPLAY_DIFFERENT, OK, REPLAY_SAME, null, null}),
-    POPN_9K(new ResultKey[]{OK, OK, OK, OK, REPLAY_DIFFERENT, OK, REPLAY_SAME, OK, OK}),
-    KEYBOARD_24K(new ResultKey[]{OK, REPLAY_DIFFERENT, OK, REPLAY_SAME, OK, OK, OK, OK, OK, OK, OK, OK, OK, REPLAY_DIFFERENT, OK, REPLAY_SAME, OK, OK, OK, OK, OK, OK, OK, OK, null, null}),
-    KEYBOARD_24K_DOUBLE(new ResultKey[]{OK, REPLAY_DIFFERENT, OK, REPLAY_SAME, OK, OK, OK, OK, OK, OK, OK, OK, OK, REPLAY_DIFFERENT, OK, REPLAY_SAME, OK, OK, OK, OK, OK, OK, OK, OK, null, null,
-            OK, REPLAY_DIFFERENT, OK, REPLAY_SAME, OK, OK, OK, OK, OK, OK, OK, OK, OK, REPLAY_DIFFERENT, OK, REPLAY_SAME, OK, OK, OK, OK, OK, OK, OK, OK, null, null}),
+    BEAT_5K(new ResultKey[]{OK, OK, OK, OK, REPLAY_DIFFERENT, CHANGE_GRAPH, REPLAY_SAME, null, null}),
+    BEAT_7K(new ResultKey[]{OK, OK, OK, OK, REPLAY_DIFFERENT, CHANGE_GRAPH, REPLAY_SAME, null, null}),
+    BEAT_10K(new ResultKey[]{OK, OK, OK, OK, REPLAY_DIFFERENT, CHANGE_GRAPH, REPLAY_SAME, null, null, OK, OK, OK, OK, REPLAY_DIFFERENT, CHANGE_GRAPH, REPLAY_SAME, null, null}),
+    BEAT_14K(new ResultKey[]{OK, OK, OK, OK, REPLAY_DIFFERENT, CHANGE_GRAPH, REPLAY_SAME, null, null, OK, OK, OK, OK, REPLAY_DIFFERENT, CHANGE_GRAPH, REPLAY_SAME, null, null}),
+    POPN_9K(new ResultKey[]{OK, OK, OK, OK, REPLAY_DIFFERENT, CHANGE_GRAPH, REPLAY_SAME, OK, OK}),
+    KEYBOARD_24K(new ResultKey[]{OK, REPLAY_DIFFERENT, CHANGE_GRAPH, REPLAY_SAME, OK, OK, OK, OK, OK, OK, OK, OK, OK, REPLAY_DIFFERENT, CHANGE_GRAPH, REPLAY_SAME, OK, OK, OK, OK, OK, OK, OK, OK, null, null}),
+    KEYBOARD_24K_DOUBLE(new ResultKey[]{OK, REPLAY_DIFFERENT, CHANGE_GRAPH, REPLAY_SAME, OK, OK, OK, OK, OK, OK, OK, OK, OK, REPLAY_DIFFERENT, CHANGE_GRAPH, REPLAY_SAME, OK, OK, OK, OK, OK, OK, OK, OK, null, null,
+            OK, REPLAY_DIFFERENT, CHANGE_GRAPH, REPLAY_SAME, OK, OK, OK, OK, OK, OK, OK, OK, OK, REPLAY_DIFFERENT, CHANGE_GRAPH, REPLAY_SAME, OK, OK, OK, OK, OK, OK, OK, OK, null, null}),
     ;
 
     private final ResultKey[] assign;
@@ -36,7 +36,8 @@ public enum ResultKeyProperty {
     public enum ResultKey {
         OK,
         REPLAY_DIFFERENT,
-        REPLAY_SAME;
+        REPLAY_SAME,
+        CHANGE_GRAPH;
     }
 
     public static ResultKeyProperty get(Mode mode) {

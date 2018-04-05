@@ -3,7 +3,6 @@ package bms.player.beatoraja.result;
 import static bms.player.beatoraja.ClearType.*;
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
-import java.util.Arrays;
 import java.util.logging.Logger;
 
 import com.badlogic.gdx.utils.FloatArray;
@@ -67,6 +66,8 @@ public class CourseResult extends AbstractResult {
 				}
 			}
 		}
+		
+		gaugeType = resource.getGrooveGauge().getType();
 	}
 
 	public void render() {
@@ -106,8 +107,11 @@ public class CourseResult extends AbstractResult {
             long[] keytime = main.getInputProcessor().getTime();
 
 			boolean ok = false;
-			for(int i = 0; i < property.getAssignLength(); i++) {
-				if(property.getAssign(i) != null && keystate[i] && keytime[i] != 0) {
+			for (int i = 0; i < property.getAssignLength(); i++) {
+				if (property.getAssign(i) == ResultKeyProperty.ResultKey.CHANGE_GRAPH && keystate[i] && keytime[i] != 0) {
+					gaugeType = (gaugeType - 5) % 3 + 6;
+					keytime[i] = 0;
+				} else if (property.getAssign(i) != null && keystate[i] && keytime[i] != 0) {
 					keytime[i] = 0;
 					ok = true;
 				}
