@@ -68,10 +68,6 @@ public class BMSPlayer extends MainState {
 	 */
 	private int notes;
 	/**
-	 * 閉店フラグ
-	 */
-	private boolean isFailed = false;
-	/**
 	 * PMS キャラ用 ニュートラルモーション開始時の処理済ノート数{1P,2P} (ニュートラルモーション一周時に変化がなければニュートラルモーションを継続するため)
 	 */
 	private int[] PMcharaLastnotes = {0, 0};
@@ -540,7 +536,6 @@ public class BMSPlayer extends MainState {
 				lanerender.init(model);
 				judge.init(model, resource);
 				notes = 0;
-				isFailed = false;
 				PMcharaLastnotes[0] = 0;
 				PMcharaLastnotes[1] = 0;
 				starttimeoffset = (property.starttime > 1000 ? property.starttime - 1000 : 0) * 100 / property.freq;
@@ -629,7 +624,7 @@ public class BMSPlayer extends MainState {
 			main.switchTimer(TIMER_PM_CHARA_DANCE, true);
 
 			// System.out.println("playing time : " + time);
-			if (playtime < ptime && !isFailed) {
+			if (playtime < ptime) {
 				state = STATE_FINISHED;
 				main.setTimerOn(TIMER_MUSIC_END);
 				for(int i = TIMER_PM_CHARA_1P_NEUTRAL; i <= TIMER_PM_CHARA_2P_BAD; i++) {
@@ -643,26 +638,20 @@ public class BMSPlayer extends MainState {
 			}
 			// stage failed判定
 			if (g == 0) {
-				if(config.isContinueUntilEndOfSong()
-						&& ( gauge.getType() != GrooveGauge.CLASS || (gauge.getType() == GrooveGauge.CLASS && notes != main.getPlayerResource().getSongdata().getNotes()) )
-						&& !isFailed
-						&& gauge.getType() != GrooveGauge.HAZARD) {
-					if(gauge.getType() != GrooveGauge.CLASS) {
-						gauge.downType();
-						if(resource.getPlayMode() == PlayMode.PLAY) config.setGauge(config.getGauge() > 0 ? config.getGauge() - 1 :0);
-					} else {
-						isFailed = true;
+				if(config.isContinueUntilEndOfSong() && gauge.getType() != GrooveGauge.HAZARD) {
+					if(!gauge.isCourseGauge()) {
+						// ARS処理
+						gauge.setType(GrooveGauge.NORMAL);
 					}
-				} else if(!config.isContinueUntilEndOfSong()
-						|| gauge.getType() == GrooveGauge.HAZARD
-						|| (config.isContinueUntilEndOfSong() && gauge.getType() == GrooveGauge.CLASS && notes == main.getPlayerResource().getSongdata().getNotes())) {
+				} else {
+					// FAILED移行
 					state = STATE_FAILED;
 					main.setTimerOn(TIMER_FAILED);
 					if (resource.mediaLoadFinished()) {
 						main.getAudioProcessor().stop((Note) null);
 					}
 					play(SOUND_PLAYSTOP);
-					Logger.getGlobal().info("STATE_FAILEDに移行");
+					Logger.getGlobal().info("STATE_FAILEDに移行");					
 				}
 			}
 			break;
@@ -715,12 +704,6 @@ public class BMSPlayer extends MainState {
 				main.switchTimer(TIMER_FADEOUT, true);
 			}
 			if (main.getNowTime(TIMER_FADEOUT) > skin.getFadeout()) {
-				if(config.isContinueUntilEndOfSong()) {
-					if(resource.getCourseBMSModels() == null) {
-						int changedGaugeType = gauge.changeTypeOfClear();
-						if(resource.getPlayMode() == PlayMode.PLAY) config.setGauge(changedGaugeType);
-					}
-				}
 				main.getAudioProcessor().setGlobalPitch(1f);
 				resource.getBGAManager().stop();
 				if (!autoplay.isAutoPlayMode() && autoplay != PlayMode.PRACTICE) {
@@ -879,7 +862,7 @@ public class BMSPlayer extends MainState {
 		if (main.isTimerOn(TIMER_FAILED) || main.isTimerOn(TIMER_FADEOUT)) {
 			return;
 		}
-		if (state != STATE_FINISHED && notes == main.getPlayerResource().getSongdata().getNotes() && !isFailed) {
+		if (state != STATE_FINISHED && notes == main.getPlayerResource().getSongdata().getNotes()) {
 			state = STATE_FINISHED;
 			main.setTimerOn(TIMER_FADEOUT);
 			Logger.getGlobal().info("STATE_FINISHEDに移行");

@@ -137,13 +137,6 @@ public class MusicResult extends AbstractResult {
 						main.changeState(MainController.STATE_PLAYBMS);
 					} else {
 						// 合格リザルト
-						if (resource.getPlayerConfig().isContinueUntilEndOfSong()) {
-							int changedGaugeType = resource.getGrooveGauge()
-									.changeTypeOfClear();
-							if (resource.getPlayMode() == PlayMode.PLAY)
-								resource.getPlayerConfig().setGauge(changedGaugeType + resource.getGrooveGauge().NORMAL
-										- resource.getGrooveGauge().CLASS);
-						}
 						main.changeState(MainController.STATE_GRADE_RESULT);
 					}
 				} else {
@@ -338,7 +331,6 @@ public class MusicResult extends AbstractResult {
 			cscore.setMinbp(cscore.getMinbp() + newscore.getMinbp());
 			if (resource.getGauge()[resource.getGrooveGauge().getType()].get(resource.getGauge()[resource.getGrooveGauge().getType()].size - 1) > 0) {
 				int orgGaugeType = resource.getGrooveGauge().getType();
-				if(resource.getPlayerConfig().isContinueUntilEndOfSong() && resource.getCourseIndex() == resource.getCourseBMSModels().length - 1) resource.getGrooveGauge().changeTypeOfClear();
 				if (resource.getAssist() > 0) {
 					if(resource.getAssist() == 1 && cscore.getClear() != ClearType.AssistEasy.id) cscore.setClear(ClearType.LightAssistEasy.id);
 					else cscore.setClear(ClearType.AssistEasy.id);
@@ -363,7 +355,6 @@ public class MusicResult extends AbstractResult {
 						}
 					}
 				}
-				if(resource.getPlayerConfig().isContinueUntilEndOfSong() && resource.getCourseIndex() == resource.getCourseBMSModels().length - 1) resource.getGrooveGauge().setType(orgGaugeType);
 			} else {
 				cscore.setClear(Failed.id);
 

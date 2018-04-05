@@ -92,28 +92,10 @@ public class GrooveGauge {
 		this.type = type;
 	}
 
-	public void downType() {
-		type = type > 0 ? type - 1 : 0;
-		return;
+	public boolean isCourseGauge() {
+		return type >= CLASS && type <= EXHARDCLASS;
 	}
-
-	public int changeTypeOfClear() {
-		if(type >= ASSISTEASY && type <= EXHARD) {
-			for(int i = ASSISTEASY; i <= EXHARD; i++) {
-				if(gauges[i].isQualified()) {
-					this.type = i;
-				}
-			}
-		} else if(type >= CLASS && type <= EXHARDCLASS) {
-			for(int i = CLASS; i <= EXHARDCLASS; i++) {
-				if(gauges[i].isQualified()) {
-					this.type = i;
-				}
-			}
-		}
-		return this.type;
-	}
-
+	
 	public int getGaugeTypeLength() {
 		return gauges.length;
 	}

@@ -136,7 +136,6 @@ public class CourseResult extends AbstractResult {
     }
 
     public void updateScoreDatabase() {
-    	Arrays.fill(saveReplay, -1);
 		state = STATE_OFFLINE;
 		final PlayerResource resource = main.getPlayerResource();
 		final PlayerConfig config = resource.getPlayerConfig();
