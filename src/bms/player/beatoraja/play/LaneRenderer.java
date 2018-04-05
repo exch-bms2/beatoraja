@@ -7,6 +7,7 @@ import bms.player.beatoraja.play.SkinNote.SkinLane;
 
 import bms.model.*;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
+import bms.player.beatoraja.skin.SkinObject.SkinOffset;
 import bms.player.beatoraja.skin.SkinImage;
 
 import com.badlogic.gdx.Gdx;
@@ -304,8 +305,24 @@ public class LaneRenderer {
 		final double rxhs = (hu - hl) * hispeed;
 		double y = hl;
 
-		final float lanecover = playconfig.getLanecover();
-		currentduration = (int) Math.round(region * (1 - (playconfig.isEnablelanecover() ? lanecover : 0)));
+		final float lanecover = playconfig.isEnablelanecover() ? playconfig.getLanecover() : 0;
+		currentduration = (int) Math.round(region * (1 - lanecover));
+		
+		main.main.getOffset(OFFSET_LIFT).y = (float) (hl - laneregion[0].y);
+		main.main.getOffset(OFFSET_LANECOVER).y = (float) ((hl - hu) * lanecover);
+		// TODO HIDDENとLIFT混在の必要性とHIDDENの必要性
+		final SkinOffset hidden = main.main.getOffset(OFFSET_HIDDEN_COVER);
+		if (playconfig.isEnablehidden()) {
+			hidden.a = 0;
+			if (playconfig.isEnablelift()) {
+				hidden.y =  (1 - playconfig.getLift()) * playconfig.getHidden()
+						* skin.getLaneRegion()[0].height;
+			} else {
+				hidden.y = playconfig.getHidden() * skin.getLaneRegion()[0].height;
+			}
+		} else {
+			hidden.a = -255;
+		}
 
 		// 判定エリア表示
 		if (config.isShowjudgearea()) {

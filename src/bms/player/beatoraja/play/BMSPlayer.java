@@ -1091,58 +1091,6 @@ public class BMSPlayer extends MainState {
 		return super.getSliderValue(id);
 	}
 
-	public SkinOffset getOffsetValue(int id) {
-		// TODO 各クラスでoffsetを算出してこのメソッドは廃止したい
-		SkinOffset offset = main.getOffset(id);
-		final PlayConfig pc = lanerender.getPlayConfig();
-		switch (id) {
-		case OFFSET_SCRATCHANGLE_1P:
-			offset.r = keyinput.getScratchState(0);
-			break;
-		case OFFSET_SCRATCHANGLE_2P:
-			offset.r = keyinput.getScratchState(1);
-			break;
-		case OFFSET_LIFT:
-		case OFFSET_LIFT_OBSOLETE:
-			if (lanerender.isEnableLift()) {
-				final PlaySkin skin = (PlaySkin) getSkin();
-				offset.y = lanerender.getLiftRegion() * skin.getLaneRegion()[0].height;
-			} else {
-				offset.y = 0;
-			}
-			break;
-		case OFFSET_LANECOVER:
-		case OFFSET_LANECOVER_OBSOLETE:
-			if (pc.isEnablelanecover()) {
-				final PlaySkin skin = (PlaySkin) getSkin();
-				if (pc.isEnablelift()) {
-					offset.y =  -(1 - pc.getLift()) * pc.getLanecover()
-							* skin.getLaneRegion()[0].height;
-				} else {
-					offset.y =  -pc.getLanecover() * skin.getLaneRegion()[0].height;
-				}
-			} else {
-				offset.y = 0;
-			}
-			break;
-		case OFFSET_HIDDEN_COVER:
-			if (pc.isEnablehidden()) {
-				final PlaySkin skin = (PlaySkin) getSkin();
-				offset.a = 0;
-				if (pc.isEnablelift()) {
-					offset.y =  (1 - pc.getLift()) * pc.getHidden()
-							* skin.getLaneRegion()[0].height;
-				} else {
-					offset.y = pc.getHidden() * skin.getLaneRegion()[0].height;
-				}
-			} else {
-				offset.a = -255;
-			}
-			break;
-		}
-		return offset;
-	}
-
 	public boolean getBooleanValue(int id) {
 		switch (id) {
 		case OPTION_GAUGE_GROOVE:
