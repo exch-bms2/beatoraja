@@ -620,15 +620,15 @@ public class LaneRenderer {
 	}
 
 	public double getMinBPM() {
-		return nowbpm;
+		return minbpm;
 	}
 
 	public double getMaxBPM() {
-		return nowbpm;
+		return maxbpm;
 	}
 
 	public double getMainBPM() {
-		return nowbpm;
+		return mainbpm;
 	}
 
 	final private void drawLongNote(SkinObjectRenderer sprite, float x, float y, float width, float height, float scale,
