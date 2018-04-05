@@ -1028,6 +1028,13 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 
 		this.loadSkin(new PlaySkin(src, dst), f, player, header, option, property);
 
+		//白数字が0の時のレーンカバーのy座標の分だけレーンの高さを減らす
+		float laneCoverPosition = skin.getLaneCoverPosition();
+		if(laneCoverPosition > 0) {
+			for(int i = 0; i < laner.length; i++) {
+				laner[i].height = laner[i].height - (dsth - laneCoverPosition);
+			}
+		}
 		lanerender.setLaneRegion(laner, scale, skin);
 
 		SkinImage[] skinline = new SkinImage[lines[0] != null ? (lines[1] != null ? 2 : 1) : 0];

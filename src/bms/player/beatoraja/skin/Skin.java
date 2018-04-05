@@ -6,6 +6,7 @@ import bms.player.beatoraja.ShaderManager;
 import bms.player.beatoraja.SkinConfig.Offset;
 import bms.player.beatoraja.play.SkinGauge;
 import bms.player.beatoraja.skin.SkinObject.BooleanProperty;
+import bms.player.beatoraja.skin.SkinObject.SkinObjectDestination;
 import bms.player.beatoraja.skin.SkinObject.SkinOffset;
 import bms.player.beatoraja.play.BMSPlayer;
 
@@ -503,6 +504,22 @@ public class Skin {
 			}
 		}
 		return 0;
+	}
+
+	/*
+	 * 白数字が0の時のレーンカバーのy座標
+	 */
+	public float getLaneCoverPosition() {
+		for(SkinObject obj: objects) {
+			if(obj instanceof SkinSlider) {
+				SkinSlider slider = (SkinSlider) obj;
+				if(slider.getType() == SLIDER_LANECOVER) {
+					SkinObjectDestination[] dst = slider.getAllDestination();
+					return dst[dst.length - 1].region.y;
+				}
+			}
+		}
+		return -1;
 	}
 
 	public void setGaugeParts(int parts) {
