@@ -501,7 +501,7 @@
                             <Insets top="10.0" />
                         </VBox.margin>
                     </Button>
-               <VBox prefHeight="200.0" prefWidth="100.0">
+               <VBox prefHeight="200.0" prefWidth="100.0" visible="false">
                   <children>
                      <HBox prefHeight="31.0" prefWidth="780.0">
                         <children>
