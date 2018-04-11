@@ -159,7 +159,11 @@ public abstract class Randomizer {
 
 		switch (r) {
 		case ALL_SCR:
-			randomizer = new AllScratchRandomizer(SRAN_THRESHOLD, thresholdMillis, playSide);
+			if (mode == Mode.POPN_9K) {
+				randomizer = new ConvergeRandomizer(SRAN_THRESHOLD, thresholdMillis);
+			} else {
+				randomizer = new AllScratchRandomizer(SRAN_THRESHOLD, thresholdMillis, playSide);
+			}
 			break;
 		case H_RANDOM:
 			randomizer = new SRandomizer(thresholdMillis);
@@ -313,6 +317,8 @@ class SpiralRandomizer extends Randomizer {
 		this.cycle = lanes.length;
 	}
 
+	// modifiLaneから直接Mapを生成する
+	// LNアクティブの時はheadを変化させない
 	@Override
 	Map<Integer, Integer> randomize(TimeLine tl, List<Integer> changeableLane, List<Integer> assignableLane) {
 		Map<Integer, Integer> rotateMap = new HashMap<>();
@@ -434,6 +440,7 @@ class NoMurioshiRandomizer extends TimeBasedRandomizer {
 	private List<Integer> buttonConbination;
 	private boolean flag;
 
+	// 無理押しが存在しない6個押しは10パターン
 	public NoMurioshiRandomizer(int threshold) {
 		super(threshold);
 		this.buttonCombinationTable = new ArrayList<>();
@@ -480,6 +487,7 @@ class NoMurioshiRandomizer extends TimeBasedRandomizer {
 		return randomMap;
 	}
 
+	// 無理押しを考慮する(flag=true)の時、選ばれた6個押しの中から優先的に選ぶ
 	@Override
 	int selectLane(List<Integer> lane) {
 		if (flag) {
@@ -493,6 +501,7 @@ class NoMurioshiRandomizer extends TimeBasedRandomizer {
 		return (int) (lane.size() * Math.random());
 	}
 
+	// LNアクティブも含めたタイムラインのノート数
 	private int noteCount(TimeLine tl) {
 		int count = 0;
 		for (int i = 0; i < modifyLanes.length; i++) {
@@ -501,6 +510,65 @@ class NoMurioshiRandomizer extends TimeBasedRandomizer {
 			}
 		}
 		return count + getLNLane().size();
+	}
+
+}
+
+/**
+ * threshold1以上threshold2以下の間隔の連打ができるだけ長く発生するように配置する
+ * @author KEH
+ *
+ */
+class ConvergeRandomizer extends TimeBasedRandomizer {
+
+	private final int threshold2;
+	private Map<Integer, Integer> rendaCount;
+
+	public ConvergeRandomizer(int threshold1, int threshold2) {
+		super(threshold1);
+		this.threshold2 = threshold2;
+		this.rendaCount = new HashMap<>();
+	}
+
+	@Override
+	public void setModifyLanes(int[] lanes) {
+		super.setModifyLanes(lanes);
+		for (int lane : lanes) {
+			rendaCount.put(lane, 0);
+		}
+	}
+
+	@Override
+	Map<Integer, Integer> randomize(TimeLine tl, List<Integer> changeableLane, List<Integer> assignableLane) {
+		// 連打とならないレーンは連打カウントをリセットする
+		rendaCount.entrySet().stream().forEach(e -> {
+			if (tl.getTime() - lastNoteTime.get(e.getKey()) > threshold2) {
+				e.setValue(0);
+			}
+		});
+		Map<Integer, Integer> randomMap = timeBasedShuffle(tl, changeableLane, assignableLane);
+		updateNoteTime(tl, randomMap);
+		return randomMap;
+	}
+
+	// できるだけ連打が長いレーンに優先的に配置
+	@Override
+	int selectLane(List<Integer> lane) {
+		List<Integer> gya = new ArrayList<>();
+		int max = -1;
+		for (int l : lane) {
+			if (max < rendaCount.get(l)) {
+				max = rendaCount.get(l);
+			}
+		}
+		for (int l : lane) {
+			if (max == rendaCount.get(l)) {
+				gya.add(l);
+			}
+		}
+		int l = gya.get((int) (gya.size() * Math.random()));
+		rendaCount.put(l, rendaCount.get(l) + 1);
+		return lane.indexOf(l);
 	}
 
 }
