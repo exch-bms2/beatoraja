@@ -13,7 +13,6 @@ import bms.player.beatoraja.play.GaugeProperty.GaugeElementProperty;
 import bms.player.beatoraja.play.PracticeConfiguration.PracticeProperty;
 import bms.player.beatoraja.play.bga.BGAProcessor;
 import bms.player.beatoraja.skin.*;
-import bms.player.beatoraja.skin.SkinObject.SkinOffset;
 import bms.player.beatoraja.song.SongData;
 
 import com.badlogic.gdx.utils.*;
@@ -44,14 +43,12 @@ public class BMSPlayer extends MainState {
 
 	private PlayMode autoplay = PlayMode.PLAY;
 	/**
-	 * BGレーン再生用スレッド
-	 */
-	private AutoplayThread autoThread;
-	/**
 	 * キー入力用スレッド
 	 */
 	private KeyInputProccessor keyinput;
 	private ControlInputProcessor control;
+	
+	private KeySoundProcessor keysound;
 
 	private int assist = 0;
 
@@ -353,6 +350,7 @@ public class BMSPlayer extends MainState {
 	public void create() {
 		final PlayerResource resource = main.getPlayerResource();
 		laneProperty = new LaneProperty(model.getMode());
+		keysound = new KeySoundProcessor(this);
 		judge = new JudgeManager(this);
 		control = new ControlInputProcessor(this, autoplay);
 		keyinput = new KeyInputProccessor(this, laneProperty);
@@ -569,8 +567,7 @@ public class BMSPlayer extends MainState {
 					keylog = Arrays.asList(replay.keylog);
 				}
 				keyinput.startJudge(model, keylog);
-				autoThread = new AutoplayThread(starttimeoffset * 1000);
-				autoThread.start();
+				keysound.startBGPlay(model, starttimeoffset * 1000);
 				Logger.getGlobal().info("STATE_PLAYに移行");
 			}
 			break;
@@ -657,10 +654,8 @@ public class BMSPlayer extends MainState {
 			break;
 		// 閉店処理
 		case STATE_FAILED:
-			if (autoThread != null) {
-				autoThread.stop = true;
-			}
 			keyinput.stopJudge();
+			keysound.stopBGPlay();
 
 			if (main.getNowTime(TIMER_FAILED) > skin.getClose()) {
 				main.getAudioProcessor().setGlobalPitch(1f);
@@ -696,10 +691,8 @@ public class BMSPlayer extends MainState {
 			break;
 		// 完奏処理
 		case STATE_FINISHED:
-			if (autoThread != null) {
-				autoThread.stop = true;
-			}
 			keyinput.stopJudge();
+			keysound.stopBGPlay();
 			if (main.getNowTime(TIMER_MUSIC_END) > skin.getFinishMargin()) {
 				main.switchTimer(TIMER_FADEOUT, true);
 			}
@@ -886,14 +879,6 @@ public class BMSPlayer extends MainState {
 		Logger.getGlobal().info("システム描画のリソース解放");
 	}
 
-	public void play(Note note, float volume, int pitchShift) {
-		main.getAudioProcessor().play(note, volume, pitchShift);
-	}
-
-	public void stop(Note note) {
-		main.getAudioProcessor().stop(note);
-	}
-
 	public PracticeConfiguration getPracticeConfiguration() {
 		return practice;
 	}
@@ -930,61 +915,6 @@ public class BMSPlayer extends MainState {
 
 	public GrooveGauge getGauge() {
 		return gauge;
-	}
-
-	/**
-	 * BGレーン再生用スレッド
-	 *
-	 * @author exch
-	 */
-	class AutoplayThread extends Thread {
-
-		private boolean stop = false;
-
-		private final long starttime;
-
-		public AutoplayThread(long starttime) {
-			this.starttime = starttime;
-		}
-
-		@Override
-		public void run() {
-			Array<TimeLine> tls = new Array<TimeLine>();
-			for(TimeLine tl : model.getAllTimeLines()) {
-				if(tl.getBackGroundNotes().length > 0) {
-					tls.add(tl);
-				}
-			}
-			final TimeLine[] timelines = tls.toArray(TimeLine.class);
-			final long lasttime = timelines[timelines.length - 1].getMicroTime() + BMSPlayer.TIME_MARGIN * 1000;
-			final Config config = main.getPlayerResource().getConfig();
-			int p = 0;
-			for (long time = starttime; p < timelines.length && timelines[p].getMicroTime() < time; p++)
-				;
-
-			while (!stop) {
-				final long time = main.getNowMicroTime(TIMER_PLAY);
-				// BGレーン再生
-				while (p < timelines.length && timelines[p].getMicroTime() <= time) {
-					for (Note n : timelines[p].getBackGroundNotes()) {
-						play(n, config.getBgvolume(), 0);
-					}
-					p++;
-				}
-				if (p < timelines.length) {
-					try {
-						final long sleeptime = timelines[p].getMicroTime() - time;
-						if (sleeptime > 0) {
-							sleep(sleeptime / 1000);
-						}
-					} catch (InterruptedException e) {
-					}
-				}
-				if (time >= lasttime) {
-					break;
-				}
-			}
-		}
 	}
 
 	public int getNumberValue(int id) {
