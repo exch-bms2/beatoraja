@@ -1,16 +1,18 @@
 package bms.player.beatoraja;
 
+import static bms.player.beatoraja.Resolution.*;
+
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Arrays;
-import bms.player.beatoraja.play.JudgeAlgorithm;
+
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter.OutputType;
 
-import static bms.player.beatoraja.Resolution.*;
+import bms.player.beatoraja.play.JudgeAlgorithm;
 
 /**
  * 各種設定項目。config.jsonで保持される
@@ -158,6 +160,10 @@ public class Config {
 	private int skinPixmapGen = 4;
 	private int bannerPixmapGen = 2;
 	private int songResourceGen = 1;
+
+	private String ipfspath = "";
+
+
 
 	private static final String[] DEFAULT_TABLEURL = { "http://bmsnormal2.syuriken.jp/table.html",
 			"http://bmsnormal2.syuriken.jp/table_insane.html",
@@ -469,6 +475,14 @@ public class Config {
 
 	public void setSongResourceGen(int songResourceGen) {
 		this.songResourceGen = songResourceGen;
+	}
+
+	public String getIpfspath() {
+		return ipfspath;
+	}
+
+	public void setIpfspath(String ipfspath) {
+		this.ipfspath = ipfspath;
 	}
 
 	public void validate() {

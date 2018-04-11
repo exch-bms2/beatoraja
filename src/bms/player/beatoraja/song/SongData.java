@@ -59,6 +59,8 @@ public class SongData {
 	private String banner = "";
 	private String url;
 	private String appendurl;
+	private String ipfs;
+	private String appendipfs;
 	private int date;
 	private int adddate;
 	private int level;
@@ -88,6 +90,7 @@ public class SongData {
 	private SongInformation info;
 
 	private String charthash;
+	private List<String> org_md5;
 
 	public SongData() {
 		
@@ -476,4 +479,29 @@ public class SongData {
 	public void setCharthash(String charthash) {
 		this.charthash = charthash;
 	}
+
+	public String getIpfs() {
+		return ipfs;
+	}
+
+	public void setIpfs(String ipfs) {
+		this.ipfs = ipfs;
+	}
+
+	public String getAppendIpfs() {
+		return appendipfs;
+	}
+
+	public void setAppendIpfs(String appendipfs) {
+		this.appendipfs = appendipfs;
+	}
+
+	public List<String> getOrg_md5() {
+		return org_md5;
+	}
+
+	public void setOrg_md5(List<String> org_md5) {
+		this.org_md5 = org_md5;
+	}
+
 }

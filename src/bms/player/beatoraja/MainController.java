@@ -4,19 +4,19 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
-import bms.player.beatoraja.config.SkinConfiguration;
 import org.lwjgl.input.Mouse;
 
 import com.badlogic.gdx.ApplicationAdapter;
@@ -37,8 +37,6 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFont
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.BufferUtils;
-import com.badlogic.gdx.utils.Json;
-import com.badlogic.gdx.utils.JsonWriter.OutputType;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.StringBuilder;
 
@@ -48,6 +46,7 @@ import bms.player.beatoraja.audio.GdxAudioDeviceDriver;
 import bms.player.beatoraja.audio.GdxSoundDriver;
 import bms.player.beatoraja.audio.PortAudioDriver;
 import bms.player.beatoraja.config.KeyConfiguration;
+import bms.player.beatoraja.config.SkinConfiguration;
 import bms.player.beatoraja.decide.MusicDecide;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.ir.IRConnection;
@@ -62,6 +61,7 @@ import bms.player.beatoraja.skin.SkinLoader;
 import bms.player.beatoraja.skin.SkinObject.SkinOffset;
 import bms.player.beatoraja.skin.SkinProperty;
 import bms.player.beatoraja.song.SQLiteSongDatabaseAccessor;
+import bms.player.beatoraja.song.SongData;
 import bms.player.beatoraja.song.SongDatabaseAccessor;
 import bms.player.beatoraja.song.SongInformationAccessor;
 import twitter4j.Status;
@@ -149,6 +149,8 @@ public class MainController extends ApplicationAdapter {
 
 	private TwitterUploadThread twitterUpload;
 
+	private MusicDownloadProcessor download;
+
 	public static final int timerCount = SkinProperty.TIMER_MAX + 1;
 	private final long[] timer = new long[timerCount];
 	public static final int offsetCount = SkinProperty.OFFSET_MAX + 1;
@@ -172,6 +174,13 @@ public class MainController extends ApplicationAdapter {
 		this.player = player;
 
 		this.bmsfile = f;
+
+		Path ipfspath = Paths.get("ipfs").toAbsolutePath();
+		List<String> roots = new ArrayList<>(Arrays.asList(getConfig().getBmsroot()));
+		if(ipfspath.toFile().exists() && !roots.contains(ipfspath.toString())){
+			roots.add(ipfspath.toString());
+			getConfig().setBmsroot(roots.toArray(new String[roots.size()]));
+		}
 
 		try {
 			Class.forName("org.sqlite.JDBC");
@@ -381,6 +390,9 @@ public class MainController extends ApplicationAdapter {
 		plainPixmap.dispose();
 
 		Gdx.gl.glClearColor(0, 0, 0, 1);
+
+		download = new MusicDownloadProcessor(this);
+		download.start(null);
 	}
 
 	private long prevtime;
@@ -450,6 +462,10 @@ public class MainController extends ApplicationAdapter {
 				updatefont.setColor(0,1,1,0.5f + (System.currentTimeMillis() % 750) / 1000.0f);
 				updatefont.draw(sprite, updateSong.message, 100, config.getResolution().height - 2);
 				sprite.end();
+			}
+		}else if(download != null && download.isDownload()){
+			if(currentState instanceof MusicSelector) {
+				download.drawMessage();
 			}
 		}
 
@@ -528,6 +544,11 @@ public class MainController extends ApplicationAdapter {
                 }
                 input.getFunctiontime()[6] = 0;
             }
+
+            if(download.getDownloadpath() != null){
+            	this.updateSong(download.getDownloadpath());
+            	download.setDownloadpath(null);
+            }
         }
 	}
 
@@ -560,6 +581,7 @@ public class MainController extends ApplicationAdapter {
 //		input.dispose();
 		SkinLoader.getResource().dispose();
 		ShaderManager.dispose();
+		download.dispose();
 		
 		Logger.getGlobal().info("全リソース破棄完了");
 	}
@@ -676,6 +698,10 @@ public class MainController extends ApplicationAdapter {
 		} else {
 			timer[id] = Long.MIN_VALUE;
 		}
+	}
+
+	public void setDownload(SongData song){
+		download.start(song);
 	}
 
 	public static String getClearTypeName() {
