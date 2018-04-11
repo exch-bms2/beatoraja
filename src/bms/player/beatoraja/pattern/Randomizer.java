@@ -147,7 +147,7 @@ public abstract class Randomizer {
 
 	public static Randomizer create(Random r, Mode mode, int playSide) {
 		Randomizer randomizer = null;
-		int thresholdBPM = 150; //config.getHranThresholdBPM();
+		int thresholdBPM = config.getHranThresholdBPM();
 		int thresholdMillis;
 		if (thresholdBPM > 0) {
 			thresholdMillis = (int) (Math.ceil(15000.0f / thresholdBPM));

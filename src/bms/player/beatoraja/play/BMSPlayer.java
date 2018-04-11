@@ -1,18 +1,7 @@
 package bms.player.beatoraja.play;
 
-import static bms.player.beatoraja.CourseData.CourseDataConstraint.*;
-import static bms.player.beatoraja.PlayConfig.*;
-import static bms.player.beatoraja.skin.SkinProperty.*;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
-
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.FloatArray;
-import com.badlogic.gdx.utils.LongArray;
 
 import bms.model.BMSModel;
 import bms.model.Mode;
@@ -32,15 +21,7 @@ import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.ReplayData;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyInputLog;
-import bms.player.beatoraja.pattern.AutoplayModifier;
-import bms.player.beatoraja.pattern.ConstantBPMModifier;
-import bms.player.beatoraja.pattern.LaneShuffleModifier;
-import bms.player.beatoraja.pattern.LongNoteModifier;
-import bms.player.beatoraja.pattern.MineNoteModifier;
-import bms.player.beatoraja.pattern.NoteShuffleModifier;
-import bms.player.beatoraja.pattern.PatternModifier;
-import bms.player.beatoraja.pattern.PatternModifyLog;
-import bms.player.beatoraja.pattern.PracticeModifier;
+import bms.player.beatoraja.pattern.*;
 import bms.player.beatoraja.play.PracticeConfiguration.PracticeProperty;
 import bms.player.beatoraja.play.bga.BGAProcessor;
 import bms.player.beatoraja.skin.Skin;
@@ -48,6 +29,12 @@ import bms.player.beatoraja.skin.SkinObject.SkinOffset;
 import bms.player.beatoraja.skin.SkinPropertyMapper;
 import bms.player.beatoraja.skin.SkinType;
 import bms.player.beatoraja.song.SongData;
+
+import com.badlogic.gdx.utils.*;
+
+import static bms.player.beatoraja.CourseData.CourseDataConstraint.*;
+import static bms.player.beatoraja.skin.SkinProperty.*;
+import static bms.player.beatoraja.PlayConfig.*;
 
 /**
  * BMSプレイヤー本体
@@ -272,6 +259,7 @@ public class BMSPlayer extends MainState {
 			PatternModifier.modify(model, pattern);
 			Logger.getGlobal().info("譜面オプション : 保存された譜面変更ログから譜面再現");
 		} else if (autoplay != PlayMode.PRACTICE) {
+			Randomizer.setPlayerConfig(config);
 			PatternModifier.setPlayerConfig(config);
 			if(model.getMode().player == 2) {
 				if (config.getDoubleoption() == 1) {
