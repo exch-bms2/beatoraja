@@ -162,7 +162,7 @@ public class MusicDownloadProcessor {
         			}
 
         			if(download && !( pc != null &&pc.isAlive())){
-        				if(diffpath.length() != 0){
+        				if(diffpath != null && diffpath.length() != 0){
         					File f = Paths.get(diffpath).toFile();
         					if(f.exists()){
         						if(f.isDirectory()){
