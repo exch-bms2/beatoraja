@@ -79,7 +79,7 @@ import twitter4j.conf.ConfigurationBuilder;
 public class MainController extends ApplicationAdapter {
 
 	public static final String VERSION = "beatoraja 0.5.5";
-	
+
 	private static final boolean debug = true;
 
 	/**
@@ -175,13 +175,15 @@ public class MainController extends ApplicationAdapter {
 
 		this.bmsfile = f;
 
-		Path ipfspath = Paths.get("ipfs").toAbsolutePath();
-		List<String> roots = new ArrayList<>(Arrays.asList(getConfig().getBmsroot()));
-		if(ipfspath.toFile().exists() && !roots.contains(ipfspath.toString())){
-			roots.add(ipfspath.toString());
-			getConfig().setBmsroot(roots.toArray(new String[roots.size()]));
+		if(Paths.get(config.getIpfspath()).toFile().exists()){
+			Path ipfspath = Paths.get("ipfs").toAbsolutePath();
+			if(!ipfspath.toFile().exists()) ipfspath.toFile().mkdirs();
+			List<String> roots = new ArrayList<>(Arrays.asList(getConfig().getBmsroot()));
+			if(ipfspath.toFile().exists() && !roots.contains(ipfspath.toString())){
+				roots.add(ipfspath.toString());
+				getConfig().setBmsroot(roots.toArray(new String[roots.size()]));
+			}
 		}
-
 		try {
 			Class.forName("org.sqlite.JDBC");
 			songdb = new SQLiteSongDatabaseAccessor(songdbpath.toString(), config.getBmsroot());
@@ -582,7 +584,7 @@ public class MainController extends ApplicationAdapter {
 		SkinLoader.getResource().dispose();
 		ShaderManager.dispose();
 		download.dispose();
-		
+
 		Logger.getGlobal().info("全リソース破棄完了");
 	}
 
