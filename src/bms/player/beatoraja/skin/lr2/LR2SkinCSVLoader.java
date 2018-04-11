@@ -224,6 +224,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 							values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
 							values[12], values[13], values[14], values[15], values[16], values[17], values[18],
 							values[19], values[20], readOffset(str, 21));
+					part.setStretch(stretch);
 				}
 			}
 		});
@@ -651,7 +652,13 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 				}
 			}
 		});
-
+		addCommandWord(new CommandWord("STRETCH") {
+			@Override
+			public void execute(String[] str) {
+				int[] values = parseInt(str);
+				stretch = values[1];
+			}
+		});
 	}
 
 	protected void loadSkin(Skin skin, File f, MainState state) throws IOException {
@@ -707,6 +714,8 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 	SkinImage PMcharaPart = null;
 
 	List <Object> imagesetarray = new ArrayList<Object>();
+
+	int stretch = -1;
 
 	protected void loadSkin0(Skin skin, File f, MainState state, Map<Integer, Boolean> option) throws IOException {
 
