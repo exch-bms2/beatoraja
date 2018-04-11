@@ -1,26 +1,53 @@
 package bms.player.beatoraja.play;
 
-import java.util.*;
-import static bms.player.beatoraja.play.GrooveGauge.*;
+import static bms.player.beatoraja.CourseData.CourseDataConstraint.*;
+import static bms.player.beatoraja.PlayConfig.*;
+import static bms.player.beatoraja.skin.SkinProperty.*;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.List;
 import java.util.logging.Logger;
 
-import bms.model.*;
-import bms.player.beatoraja.*;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.FloatArray;
+import com.badlogic.gdx.utils.LongArray;
+
+import bms.model.BMSModel;
+import bms.model.Mode;
+import bms.model.Note;
+import bms.model.TimeLine;
+import bms.player.beatoraja.ClearType;
+import bms.player.beatoraja.Config;
+import bms.player.beatoraja.CourseData;
+import bms.player.beatoraja.IRScoreData;
+import bms.player.beatoraja.MainController;
+import bms.player.beatoraja.MainState;
+import bms.player.beatoraja.PlayConfig;
+import bms.player.beatoraja.PlayModeConfig;
+import bms.player.beatoraja.PlayerConfig;
+import bms.player.beatoraja.PlayerResource;
 import bms.player.beatoraja.PlayerResource.PlayMode;
+import bms.player.beatoraja.ReplayData;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyInputLog;
-import bms.player.beatoraja.pattern.*;
+import bms.player.beatoraja.pattern.AutoplayModifier;
+import bms.player.beatoraja.pattern.ConstantBPMModifier;
+import bms.player.beatoraja.pattern.LaneShuffleModifier;
+import bms.player.beatoraja.pattern.LongNoteModifier;
+import bms.player.beatoraja.pattern.MineNoteModifier;
+import bms.player.beatoraja.pattern.NoteShuffleModifier;
+import bms.player.beatoraja.pattern.PatternModifier;
+import bms.player.beatoraja.pattern.PatternModifyLog;
+import bms.player.beatoraja.pattern.PracticeModifier;
 import bms.player.beatoraja.play.PracticeConfiguration.PracticeProperty;
 import bms.player.beatoraja.play.bga.BGAProcessor;
-import bms.player.beatoraja.skin.*;
+import bms.player.beatoraja.skin.Skin;
 import bms.player.beatoraja.skin.SkinObject.SkinOffset;
+import bms.player.beatoraja.skin.SkinPropertyMapper;
+import bms.player.beatoraja.skin.SkinType;
 import bms.player.beatoraja.song.SongData;
-
-import com.badlogic.gdx.utils.*;
-
-import static bms.player.beatoraja.CourseData.CourseDataConstraint.*;
-import static bms.player.beatoraja.skin.SkinProperty.*;
-import static bms.player.beatoraja.PlayConfig.*;
 
 /**
  * BMSプレイヤー本体
@@ -252,7 +279,7 @@ public class BMSPlayer extends MainState {
 					pattern = PatternModifier.merge(pattern,mod.modify(model));
 				}
 				pattern = PatternModifier.merge(pattern,
-								PatternModifier.create(config.getRandom2(), PatternModifier.SIDE_2P)
+								PatternModifier.create(config.getRandom2(), PatternModifier.SIDE_2P, model.getMode())
 										.modify(model));
 				if (config.getRandom2() >= 6) {
 					assist = (assist == 0) ? 1 : assist;
@@ -272,7 +299,7 @@ public class BMSPlayer extends MainState {
 			}
 			pattern = PatternModifier.merge(pattern,
 					PatternModifier
-							.create(config.getRandom(), PatternModifier.SIDE_1P)
+							.create(config.getRandom(), PatternModifier.SIDE_1P, model.getMode())
 							.modify(model));
 			if (config.getRandom() >= 6 && !(config.getRandom() == 8 && model.getMode() == Mode.POPN_9K)) {
 				assist = (assist == 0) ? 1 : assist;
@@ -522,7 +549,7 @@ public class BMSPlayer extends MainState {
 	private int sections = 0;
 	private long rhythmtimer;
 	private long startpressedtime;
-	
+
 	//4分のタイミングの時間 PMSのリズムに合わせたノート拡大用
 	private long[] quarterNoteTimes;
 	private int quarterNote = 0;
@@ -609,9 +636,9 @@ public class BMSPlayer extends MainState {
 					if (property.doubleop == 1) {
 						new LaneShuffleModifier(LaneShuffleModifier.FLIP).modify(model);
 					}
-					PatternModifier.create(property.random2, PatternModifier.SIDE_2P).modify(model);
+					PatternModifier.create(property.random2, PatternModifier.SIDE_2P, model.getMode()).modify(model);
 				}
-				PatternModifier.create(property.random, PatternModifier.SIDE_1P).modify(model);
+				PatternModifier.create(property.random, PatternModifier.SIDE_1P, model.getMode()).modify(model);
 
 				gauge = practice.getGauge(model);
 				model.setJudgerank(property.judgerank);
@@ -1034,7 +1061,7 @@ public class BMSPlayer extends MainState {
 		//フルコン判定
 		main.switchTimer(TIMER_FULLCOMBO_1P, notes == main.getPlayerResource().getSongdata().getNotes()
 				&& notes == this.judge.getCombo());
-		
+
 		getScoreDataProperty().update(this.judge.getScoreData(), notes);
 
 		main.switchTimer(TIMER_SCORE_A, getScoreDataProperty().qualifyRank(18));
@@ -1133,7 +1160,7 @@ public class BMSPlayer extends MainState {
 			return (int) gauge.getValue();
 		case NUMBER_GROOVEGAUGE_AFTERDOT:
 			return  (gauge.getType() == GrooveGauge.HARD || gauge.getType() == GrooveGauge.EXHARD || gauge.getType() == GrooveGauge.HAZARD || gauge.getType() == GrooveGauge.CLASS || gauge.getType() == GrooveGauge.EXCLASS || gauge.getType() == GrooveGauge.EXHARDCLASS)
-					&& gauge.getValue() > 0 && gauge.getValue() < 0.1 
+					&& gauge.getValue() > 0 && gauge.getValue() < 0.1
 					? 1 : ((int) (gauge.getValue() * 10)) % 10;
 		case NUMBER_HISPEED_LR2:
 			return (int) (lanerender.getHispeed() * 100);
