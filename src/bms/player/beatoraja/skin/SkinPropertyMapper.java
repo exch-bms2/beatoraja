@@ -3,8 +3,12 @@ package bms.player.beatoraja.skin;
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
 import bms.model.Mode;
+import bms.player.beatoraja.BMSResource;
+import bms.player.beatoraja.Config;
 import bms.player.beatoraja.MainState;
+import bms.player.beatoraja.PlayConfig;
 import bms.player.beatoraja.ScoreDataProperty;
+import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.play.GrooveGauge.Gauge;
 import bms.player.beatoraja.play.LaneRenderer;
@@ -89,11 +93,6 @@ public class SkinPropertyMapper {
 	}
 
 
-	public static boolean isKeyJudgeValueId(int valueId) {
-		return (valueId >= VALUE_JUDGE_1P_SCRATCH && valueId <= VALUE_JUDGE_2P_KEY9)
-				|| (valueId >= VALUE_JUDGE_1P_KEY10 && valueId <= VALUE_JUDGE_2P_KEY99);
-	}
-
 	public static int getKeyJudgeValuePlayer(int valueId) {
 		if (valueId >= VALUE_JUDGE_1P_SCRATCH && valueId <= VALUE_JUDGE_2P_KEY9) {
 			return (valueId - VALUE_JUDGE_1P_SCRATCH) / 10;
@@ -172,6 +171,15 @@ public class SkinPropertyMapper {
 		// TODO 各Skinに分散するるべき？
 		BooleanProperty result = null;
 		final int id = Math.abs(optionid);
+		
+		if(id == OPTION_BGAOFF || id == OPTION_BGAON) {
+			result = new DrawConditionProperty(DrawConditionProperty.TYPE_STATIC_WITHOUT_MUSICSELECT) {
+				@Override
+				public boolean get(MainState state) {
+					return id == OPTION_BGAON ? state.main.getPlayerResource().getBMSResource().isBGAOn() : !state.main.getPlayerResource().getBMSResource().isBGAOn();
+				}
+			};
+		}
 		if (id >= OPTION_7KEYSONG && id <= OPTION_9KEYSONG) {	
 			final Mode[] modes = {Mode.BEAT_7K, Mode.BEAT_5K, Mode.BEAT_14K, Mode.BEAT_10K, Mode.POPN_9K};
 			result = new ModeDrawCondition(modes[id - OPTION_7KEYSONG]);
@@ -299,7 +307,15 @@ public class SkinPropertyMapper {
 				return 0;
 			};
 		}
-
+		
+		if(optionid == NUMBER_LOADING_PROGRESS) {
+			result = (state) -> {
+				final BMSResource resource = state.main.getPlayerResource().getBMSResource();
+				return (int) ((resource.isBGAOn() ? (resource.getBGAProcessor().getProgress() + resource.getAudioDriver().getProgress()) / 2 : 
+					resource.getAudioDriver().getProgress()) * 100);
+			};			
+		}
+		
 		return result;
 	}
 
@@ -318,6 +334,16 @@ public class SkinPropertyMapper {
 		if(optionid == BUTTON_DPOPTION) {
 			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().getDoubleoption());
 		}		
+
+		if((optionid >= VALUE_JUDGE_1P_SCRATCH && optionid <= VALUE_JUDGE_2P_KEY9)
+					|| (optionid >= VALUE_JUDGE_1P_KEY10 && optionid <= VALUE_JUDGE_2P_KEY99)) {
+			result = (state) -> {
+				if(state instanceof BMSPlayer) {
+					return ((BMSPlayer) state).getJudgeManager().getJudge(optionid);
+				}
+				return 0;
+			};			
+		}
 
 		return result;
 	}
@@ -344,8 +370,40 @@ public class SkinPropertyMapper {
 		}		
 		if(optionid == BARGRAPH_TARGETSCORERATE) {
 			result = (state) -> (state.getScoreDataProperty().getRivalScoreRate());
-		}		
-
+		}
+		if(optionid == BARGRAPH_LOAD_PROGRESS) {
+			result = (state) -> {
+				final BMSResource resource = state.main.getPlayerResource().getBMSResource();
+				return resource.isBGAOn() ? (resource.getBGAProcessor().getProgress() + resource.getAudioDriver().getProgress()) / 2 : 
+					resource.getAudioDriver().getProgress();
+			};			
+		}
+		if(optionid == SLIDER_MUSIC_PROGRESS || optionid == BARGRAPH_MUSIC_PROGRESS) {
+			result = (state) -> {
+				if(state instanceof BMSPlayer) {
+					if (state.main.isTimerOn(TIMER_PLAY)) {
+						return Math.min((float) state.main.getNowTime(TIMER_PLAY) / ((BMSPlayer)state).getPlaytime() , 1);
+					}					
+				}
+				return 0;
+			};			
+		}
+		if(optionid == SLIDER_LANECOVER || optionid == SLIDER_LANECOVER2) {
+			result = (state) -> {
+				if(state instanceof BMSPlayer) {
+					final PlayConfig pc = ((BMSPlayer) state).getLanerender().getPlayConfig();
+					if (pc.isEnablelanecover()) {
+						float lane = pc.getLanecover();
+						if (pc.isEnablelift()) {
+							lane = lane * (1 - pc.getLift());
+						}
+						return lane;
+					}					
+				}
+				return 0;
+			};			
+		}
+		
 		return result;
 	}
 	

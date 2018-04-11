@@ -556,7 +556,7 @@ public class BMSPlayer extends MainState {
 			// GET READY
 		case STATE_READY:
 			if (main.getNowTime(TIMER_READY) > skin.getPlaystart()) {
-				saveReplayHS();
+				replayConfig = lanerender.getPlayConfig().clone();
 				state = STATE_PLAY;
 				main.setMicroTimer(TIMER_PLAY, micronow - starttimeoffset * 1000);
 				main.setMicroTimer(TIMER_RHYTHM, micronow - starttimeoffset * 1000);
@@ -783,10 +783,6 @@ public class BMSPlayer extends MainState {
 		pc.setHidden(lanerender.getHiddenCover());
 	}
 
-	private void saveReplayHS() {
-		replayConfig = lanerender.getPlayConfig().clone();
-	}
-
 	public IRScoreData createScoreData() {
 		final PlayerResource resource = main.getPlayerResource();
 		final PlayerConfig config = resource.getPlayerConfig();
@@ -931,14 +927,6 @@ public class BMSPlayer extends MainState {
 		case NUMBER_TIMELEFT_SECOND:
 			return (Math.max((playtime - (int) (main.isTimerOn(TIMER_PLAY) ? 
 					main.getNowTime(TIMER_PLAY) : 0) + 1000), 0) / 1000) % 60;
-		case NUMBER_LOADING_PROGRESS:
-			float value;
-			if(main.getPlayerResource().getConfig().getBga() == Config.BGA_ON
-					|| (main.getPlayerResource().getConfig().getBga() == Config.BGA_AUTO
-							&& (autoplay == PlayMode.AUTOPLAY || autoplay.isReplayMode()))) {
-				value = (main.getAudioProcessor().getProgress() + bga.getProgress()) / 2;
-			} else value = main.getAudioProcessor().getProgress();
-			return (int) (value * 100);
 		case NUMBER_GROOVEGAUGE:
 			return (int) gauge.getValue();
 		case NUMBER_GROOVEGAUGE_AFTERDOT:
@@ -970,42 +958,6 @@ public class BMSPlayer extends MainState {
 		return super.getNumberValue(id);
 	}
 
-	@Override
-	public float getSliderValue(int id) {
-		switch (id) {
-		case SLIDER_MUSIC_PROGRESS:
-			if (main.isTimerOn(TIMER_PLAY)) {
-				return Math.min((float) main.getNowTime(TIMER_PLAY) / playtime , 1);
-			}
-			return 0;
-		case SLIDER_LANECOVER:
-		case SLIDER_LANECOVER2:
-			final PlayConfig pc = lanerender.getPlayConfig();
-			if (pc.isEnablelanecover()) {
-				float lane = pc.getLanecover();
-				if (pc.isEnablelift()) {
-					lane = lane * (1 - pc.getLift());
-				}
-				return lane;
-			}
-			return 0;
-		case BARGRAPH_MUSIC_PROGRESS:
-			if (main.isTimerOn(TIMER_PLAY)) {
-				return Math.min((float) main.getNowTime(TIMER_PLAY) / playtime , 1);
-			}
-			return 0;
-		case BARGRAPH_LOAD_PROGRESS:
-			float value;
-			if(main.getPlayerResource().getConfig().getBga() == Config.BGA_ON
-					|| (main.getPlayerResource().getConfig().getBga() == Config.BGA_AUTO
-							&& (autoplay == PlayMode.AUTOPLAY || autoplay.isReplayMode()))) {
-				value = (main.getAudioProcessor().getProgress() + bga.getProgress()) / 2;
-			} else value = main.getAudioProcessor().getProgress();
-			return value;
-		}
-		return super.getSliderValue(id);
-	}
-
 	public boolean getBooleanValue(int id) {
 		switch (id) {
 		case OPTION_GAUGE_GROOVE:
@@ -1023,14 +975,6 @@ public class BMSPlayer extends MainState {
 			return autoplay == PlayMode.PLAY || autoplay == PlayMode.PRACTICE;
 		case OPTION_REPLAY_PLAYING:
 			return autoplay.isReplayMode();
-		case OPTION_BGAON:
-			return main.getPlayerResource().getConfig().getBga() == Config.BGA_ON
-					|| (main.getPlayerResource().getConfig().getBga() == Config.BGA_AUTO
-							&& (autoplay == PlayMode.AUTOPLAY || autoplay.isReplayMode()));
-		case OPTION_BGAOFF:
-			return main.getPlayerResource().getConfig().getBga() == Config.BGA_OFF
-					|| (main.getPlayerResource().getConfig().getBga() == Config.BGA_AUTO
-							&& (autoplay == PlayMode.PLAY || autoplay == PlayMode.PRACTICE));
 		case OPTION_NOW_LOADING:
 			return state == STATE_PRELOAD;
 		case OPTION_LOADED:
@@ -1068,13 +1012,6 @@ public class BMSPlayer extends MainState {
 		return super.getBooleanValue(id);
 	}
 
-	public int getImageIndex(int id) {
-		if (SkinPropertyMapper.isKeyJudgeValueId(id)) {
-			return judge.getJudge(id);
-		}
-		return super.getImageIndex(id);
-	}
-
 	public boolean isNoteEnd() {
 		return notes == main.getPlayerResource().getSongdata().getNotes();
 	}
@@ -1085,6 +1022,10 @@ public class BMSPlayer extends MainState {
 
 	public void setPastNotes(int notes) {
 		this.notes = notes;
+	}
+	
+	public int getPlaytime() {
+		return playtime;
 	}
 
 	public Mode getMode() {
