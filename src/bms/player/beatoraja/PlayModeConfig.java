@@ -21,6 +21,8 @@ public class PlayModeConfig {
     public boolean enablelanecover = true;
     public float lift = 0.1f;
     public boolean enablelift = false;
+    public float hidden = 0.1f;
+    public boolean enablehidden = false;
 
     private PlayConfig playconfig = new PlayConfig();
     /**
@@ -93,6 +95,10 @@ public class PlayModeConfig {
             playconfig.setEnablelift(enablelift);
             enablelift = false;
         }
+        if(enablehidden) {
+            playconfig.setEnablehidden(enablehidden);
+            enablehidden = false;
+        }
         if(hispeed != 1.0f) {
             playconfig.setHispeed(hispeed);
             hispeed = 1.0f;
@@ -109,7 +115,11 @@ public class PlayModeConfig {
             playconfig.setLift(lift);
             lift = 0.1f;
         }
-        
+        if(hidden != 0.1f) {
+            playconfig.setHidden(hidden);
+            hidden = 0.1f;
+        }
+
         playconfig.validate();
 
         if (keyboard.keys == null) {

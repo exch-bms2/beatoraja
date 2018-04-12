@@ -23,8 +23,13 @@ public class SkinBar extends SkinObject {
      * トロフィーのSkinImage。描画位置はBarの相対座標
      */
     private SkinImage[] trophy = new SkinImage[3];
-
-    private SkinText[] text = new SkinText[2];
+    /**
+     * BarのSkinText。描画位置はBarの相対座標。
+     * Indexは0:通常 1:新規 2:SongBar(通常) 3:SongBar(新規) 4:FolderBar(通常) 5:FolderBar(新規) 6:TableBar or HashBar
+     * 7:GradeBar(曲所持) 8:(SongBar or GradeBar)(曲未所持) 9:CommandBar or ContainerBar 10:SearchWordBar
+     * 3以降で定義されてなければ0か1を用いる
+     */
+    private SkinText[] text = new SkinText[11];
     /**
      * レベルのSkinNumber。描画位置はBarの相対座標
      */

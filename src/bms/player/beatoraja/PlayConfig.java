@@ -4,7 +4,7 @@ import com.badlogic.gdx.math.MathUtils;
 
 /**
  * プレイコンフィグ。モード毎に保持するべき値についてはこちらに格納する
- * 
+ *
  * @author exch
  */
 public class PlayConfig implements Cloneable {
@@ -21,7 +21,7 @@ public class PlayConfig implements Cloneable {
 	 * ハイスピード固定。固定する場合はデュレーションが有効となり、固定しない場合はハイスピードが有効になる
 	 */
 	private int fixhispeed = FIX_HISPEED_MAINBPM;
-	
+
 	public static final int FIX_HISPEED_OFF = 0;
 	public static final int FIX_HISPEED_STARTBPM = 1;
 	public static final int FIX_HISPEED_MAXBPM = 2;
@@ -49,6 +49,14 @@ public class PlayConfig implements Cloneable {
 	 * リフト使用
 	 */
 	private boolean enablelift = false;
+	/**
+	 * HIDDEN表示量(0-1)
+	 */
+	private float hidden = 0.1f;
+	/**
+	 * HIDDEN使用
+	 */
+	private boolean enablehidden = false;
 
 	public PlayConfig() {
 	}
@@ -116,7 +124,23 @@ public class PlayConfig implements Cloneable {
 	public void setEnablelift(boolean enablelift) {
 		this.enablelift = enablelift;
 	}
-	
+
+	public float getHidden() {
+		return hidden;
+	}
+
+	public void setHidden(float hidden) {
+		this.hidden = hidden;
+	}
+
+	public boolean isEnablehidden() {
+		return enablehidden;
+	}
+
+	public void setEnablehidden(boolean enablehidden) {
+		this.enablehidden = enablehidden;
+	}
+
 	public void validate() {
 		hispeed = MathUtils.clamp(hispeed, 0.01f, 20);
 		duration = MathUtils.clamp(duration, 1, 10000);
@@ -124,8 +148,9 @@ public class PlayConfig implements Cloneable {
 		fixhispeed = MathUtils.clamp(fixhispeed, 0, FIX_HISPEED_MINBPM);
 		lanecover = MathUtils.clamp(lanecover, 0f, 1f);
 		lift = MathUtils.clamp(lift, 0f, 1f);
+		hidden = MathUtils.clamp(hidden, 0f, 1f);
 	}
-	
+
 	public PlayConfig clone() {
 		try {
 			return (PlayConfig) super.clone();

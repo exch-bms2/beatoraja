@@ -16,6 +16,7 @@ public class ControlInputProcessor {
 	private long startpressedtime;
 	private boolean startpressed = false;
 	private boolean selectpressed = false;
+	private boolean startAndSelectPressed = false;
 	private boolean cursorpressed;
 	private long lanecovertiming;
 	private long exitpressedtime;
@@ -27,6 +28,8 @@ public class ControlInputProcessor {
 
 	private Runnable processStart;
 	private Runnable processSelect;
+
+	private boolean isChangeLift = true;
 
 	public ControlInputProcessor(BMSPlayer player, PlayMode autoplay) {
 		this.player = player;
@@ -66,12 +69,12 @@ public class ControlInputProcessor {
 			if (enableCursor) {
 				if (input.getCursorState()[0]) {
 					if (!cursorpressed) {
-						lanerender.setLanecover(lanerender.getLanecover() - 0.01f);
+						setCoverValue(-0.01f);
 						cursorpressed = true;
 					}
 				} else if (input.getCursorState()[1]) {
 					if (!cursorpressed) {
-						lanerender.setLanecover(lanerender.getLanecover() + 0.01f);
+						setCoverValue(0.01f);
 						cursorpressed = true;
 					}
 				} else {
@@ -80,10 +83,11 @@ public class ControlInputProcessor {
 			}
 			// move lane cover by mouse wheel
 			if (input.getScroll() != 0) {
-				lanerender.setLanecover(lanerender.getLanecover() - input.getScroll() * 0.005f);
+				setCoverValue(- input.getScroll() * 0.005f);
 				input.resetScroll();
 			}
-			if (input.startPressed() && !input.isSelectPressed()) {
+			if ((input.startPressed() && !input.isSelectPressed())
+					|| (player.main.getPlayerResource().getPlayerConfig().isWindowHold() && player.main.isTimerOn(TIMER_PLAY) && !player.isNoteEnd())) {
 				if ((autoplay == PlayMode.PLAY || autoplay == PlayMode.PRACTICE) && startpressed) {
 					processStart.run();
 				} else if ((autoplay == PlayMode.PLAY || autoplay == PlayMode.PRACTICE) && !startpressed) {
@@ -112,6 +116,14 @@ public class ControlInputProcessor {
 				selectpressed = true;
 			} else {
 				selectpressed = false;
+			}
+			if ((input.startPressed() && input.isSelectPressed())) {
+				if(!startAndSelectPressed) {
+					isChangeLift = !isChangeLift;
+				}
+				startAndSelectPressed = true;
+			} else {
+				startAndSelectPressed = false;
 			}
 		}
 		long now = System.currentTimeMillis();
@@ -144,6 +156,24 @@ public class ControlInputProcessor {
 		}
 	}
 
+	/*
+	 * 状況に応じてレーンカバー/リフト/HIDDENの表示量を変える
+	 * レーンカバー: 「レーンカバーがオン」もしくは「リフトとHIDDENが共にオフ」
+	 * リフト: 「レーンカバーがオフ」
+	 * HIDDEN: 「レーンカバーがオフ」かつ「リフトがオフ」
+	 * 「レーンカバーがオフ」で「リフトとHIDDENが共にオン」の時は「START+SELECT短押し」で切り替え
+	 */
+	private void setCoverValue(float value) {
+		final LaneRenderer lanerender = player.getLanerender();
+		if(lanerender.isEnableLanecover() || (!lanerender.isEnableLift() && !lanerender.isEnableHidden())) {
+			lanerender.setLanecover(lanerender.getLanecover() + value);
+		} else if(lanerender.isEnableLift() && (!lanerender.isEnableHidden() || isChangeLift)) {
+			lanerender.setLiftRegion(lanerender.getLiftRegion() - value);
+		} else {
+			lanerender.setHiddenCover(lanerender.getHiddenCover() - value);
+		}
+	}
+
 	void processStart7key() {
 		final LaneRenderer lanerender = player.getLanerender();
 		final BMSPlayerInputProcessor input = player.main.getInputProcessor();
@@ -170,7 +200,7 @@ public class ControlInputProcessor {
 		if (key[7] || key[8] || key[16] || key[17]) {
 			long l = System.currentTimeMillis();
 			if (l - lanecovertiming > 50) {
-				lanerender.setLanecover(lanerender.getLanecover() + (key[7] || key[16] ? 0.001f : -0.001f));
+				setCoverValue(key[7] || key[16] ? 0.001f : -0.001f);
 				lanecovertiming = l;
 			}
 		}
@@ -234,7 +264,7 @@ public class ControlInputProcessor {
 		if (key[7] || key[8]) {
 			long l = System.currentTimeMillis();
 			if (l - lanecovertiming > 50) {
-				lanerender.setLanecover(lanerender.getLanecover() + (key[7] || key[16] ? 0.001f : -0.001f));
+				setCoverValue(key[7] || key[16] ? 0.001f : -0.001f);
 				lanecovertiming = l;
 			}
 		}
@@ -287,7 +317,7 @@ public class ControlInputProcessor {
 			} else if (key[i] && j >= 24) {
 				long l = System.currentTimeMillis();
 				if (l - lanecovertiming > 50) {
-					lanerender.setLanecover(lanerender.getLanecover() + (j == 25 ? 0.001f : -0.001f));
+					setCoverValue(j == 25 ? 0.001f : -0.001f);
 					lanecovertiming = l;
 				}
 				hschanged[i] = false;

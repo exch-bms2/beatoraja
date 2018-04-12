@@ -173,6 +173,10 @@ public class PlayConfigurationView implements Initializable {
 	private CheckBox enableLift;
 	@FXML
 	private Spinner<Integer> lift;
+	@FXML
+	private CheckBox enableHidden;
+	@FXML
+	private Spinner<Integer> hidden;
 
 	@FXML
 	private TextField bgmpath;
@@ -201,6 +205,8 @@ public class PlayConfigurationView implements Initializable {
 	private ComboBox<Integer> seventoninetype;
 	@FXML
 	private CheckBox guidese;
+	@FXML
+	private CheckBox windowhold;
 
 	@FXML
 	private CheckBox judgeregion;
@@ -320,7 +326,7 @@ public class PlayConfigurationView implements Initializable {
 		playconfig.getItems().setAll(PlayMode.values());
 		inputconfig.getItems().setAll(PlayMode.values());
 		initComboBox(lntype, new String[] { "LONG NOTE", "CHARGE NOTE", "HELL CHARGE NOTE" });
-		
+
 		TargetProperty[] targets = TargetProperty.getAllTargetProperties();
 		String[] targetString = new String[targets.length];
 		for(int i  =0;i < targets.length;i++) {
@@ -349,18 +355,18 @@ public class PlayConfigurationView implements Initializable {
 
 		newVersionCheck();
 	}
-	
+
 	@JsonIgnoreProperties(ignoreUnknown=true)
 	static class GithubLastestRelease{
 		public String name;
 		public List<Asset> assets;
-		
+
 		@JsonIgnoreProperties(ignoreUnknown=true)
 		static class Asset{
 			public String browser_download_url;
 		}
 	}
-	
+
 	private void newVersionCheck() {
 		Runnable newVersionCheckRunnable = () -> {
 			try {
@@ -371,13 +377,13 @@ public class PlayConfigurationView implements Initializable {
 				final String downloadURL = lastestData.assets.get(0).browser_download_url;
 				Platform.runLater(
 	                    () -> {
-	                    	
+
 	                    	if(MainController.VERSION.contains(name)) {
 	                    		newversion.setText("最新版を利用中です");
 	                    	} else {
 	                    		newversion.setText(String.format("最新版[%s]を利用可能です。",name));
 		                    	newversion.setOnAction(new EventHandler<ActionEvent>() {
-		                    		 
+
 		                    	    @Override
 		                    	    public void handle(ActionEvent event) {
 		                    			Desktop desktop = Desktop.getDesktop();
@@ -457,7 +463,7 @@ public class PlayConfigurationView implements Initializable {
 			players.getSelectionModel().select(0);
 		}
 		updatePlayer();
-		
+
 		try {
 			Class.forName("org.sqlite.JDBC");
 			SongDatabaseAccessor songdb = new SQLiteSongDatabaseAccessor(Paths.get("songdata.db").toString(),
@@ -473,7 +479,7 @@ public class PlayConfigurationView implements Initializable {
 		commitPlayer();
 		updatePlayer();
 	}
-	
+
 	public void addPlayer() {
 		String[] ids = PlayerConfig.readAllPlayerID();
 		for(int i = 1;i < 1000;i++) {
@@ -486,7 +492,7 @@ public class PlayConfigurationView implements Initializable {
 				}
 			}
 			if(b) {
-				PlayerConfig.create(playerid);				
+				PlayerConfig.create(playerid);
 				players.getItems().add(playerid);
 				break;
 			}
@@ -505,6 +511,7 @@ public class PlayConfigurationView implements Initializable {
 		seventoninepattern.getSelectionModel().select(player.getSevenToNinePattern());
 		seventoninetype.getSelectionModel().select(player.getSevenToNineType());
 		guidese.setSelected(player.isGuideSE());
+		windowhold.setSelected(player.isWindowHold());
 		gaugeop.getSelectionModel().select(player.getGauge());
 		lntype.getSelectionModel().select(player.getLnmode());
 
@@ -602,7 +609,7 @@ public class PlayConfigurationView implements Initializable {
 		}
 		Path p = Paths.get("player/" + player.getId() + "/config.json");
 		if(playername.getText().length() > 0) {
-			player.setName(playername.getText());			
+			player.setName(playername.getText());
 		}
 
 		videoController.commitPlayer(player);
@@ -613,6 +620,7 @@ public class PlayConfigurationView implements Initializable {
 		player.setSevenToNinePattern(seventoninepattern.getValue());
 		player.setSevenToNineType(seventoninetype.getValue());
 		player.setGuideSE(guidese.isSelected());
+		player.setWindowHold(windowhold.isSelected());
 		player.setGauge(gaugeop.getValue());
 		player.setLnmode(lntype.getValue());
 		player.setJudgetiming(getValue(judgetiming));
@@ -698,7 +706,7 @@ public class PlayConfigurationView implements Initializable {
 			}
 		}
 	}
-    
+
     @FXML
 	public void addBGMPath() {
     	String s = showDirectoryChooser("BGMのルートフォルダを選択してください");
@@ -711,10 +719,10 @@ public class PlayConfigurationView implements Initializable {
 	public void addSoundPath() {
     	String s = showDirectoryChooser("効果音のルートフォルダを選択してください");
     	if(s != null) {
-    		soundpath.setText(s);    		
+    		soundpath.setText(s);
     	}
 	}
-    
+
     private String showDirectoryChooser(String title) {
 		DirectoryChooser chooser = new DirectoryChooser();
 		chooser.setTitle(title);
@@ -739,7 +747,7 @@ public class PlayConfigurationView implements Initializable {
 	public void removeTableURL() {
 		tableurl.getItems().removeAll(tableurl.getSelectionModel().getSelectedItems());
 	}
-    
+
 	public void moveTableURLUp() {
 		final int index = tableurl.getSelectionModel().getSelectedIndex();
 		if(index > 0) {
@@ -771,7 +779,9 @@ public class PlayConfigurationView implements Initializable {
 			conf.setEnablelanecover(enableLanecover.isSelected());
 			conf.setLanecover(getValue(lanecover) / 1000f);
 			conf.setEnablelift(enableLift.isSelected());
+			conf.setEnablehidden(enableHidden.isSelected());
 			conf.setLift(getValue(lift) / 1000f);
+			conf.setHidden(getValue(hidden) / 1000f);
 		}
 		pc = playconfig.getValue();
 		PlayConfig conf = player.getPlayConfig(Mode.valueOf(pc.name())).getPlayconfig();
@@ -782,7 +792,9 @@ public class PlayConfigurationView implements Initializable {
 		enableLanecover.setSelected(conf.isEnablelanecover());
 		lanecover.getValueFactory().setValue((int) (conf.getLanecover() * 1000));
 		enableLift.setSelected(conf.isEnablelift());
+		enableHidden.setSelected(conf.isEnablehidden());
 		lift.getValueFactory().setValue((int) (conf.getLift() * 1000));
+		hidden.getValueFactory().setValue((int) (conf.getHidden() * 1000));
 	}
 
 	private PlayMode ic = null;
@@ -859,7 +871,7 @@ public class PlayConfigurationView implements Initializable {
 		otherTab.setDisable(true);
 		irTab.setDisable(true);
 		controlPanel.setDisable(true);
-		
+
 		MainLoader.play(null, bms.player.beatoraja.PlayerResource.PlayMode.PLAY, true, config, player, songUpdated);
 	}
 
@@ -1053,13 +1065,13 @@ public class PlayConfigurationView implements Initializable {
 		POPN_9K("9KEYS"),
 		KEYBOARD_24K("24KEYS"),
 		KEYBOARD_24K_DOUBLE("24KEYS DOUBLE");
-		
+
 		public final String name;
-		
+
 		private PlayMode(String name) {
 			this.name = name;
 		}
-		
+
 		public String toString() {
 			return name;
 		}

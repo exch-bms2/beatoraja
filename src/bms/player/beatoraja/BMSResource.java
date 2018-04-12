@@ -8,7 +8,6 @@ import bms.model.BMSModel;
 import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.audio.AudioDriver;
 import bms.player.beatoraja.play.bga.BGAProcessor;
-import bms.player.beatoraja.select.bar.SongBar;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -36,6 +35,8 @@ public class BMSResource {
 	 * BMSのBGAリソース
 	 */
 	private BGAProcessor bga;
+	
+	private boolean bgaon;
 	/**
 	 * BGA読み込みタスク
 	 */
@@ -108,8 +109,16 @@ public class BMSResource {
 		return true;
 	}
 	
+	public AudioDriver getAudioDriver() {
+		return audio;
+	}
+	
 	public BGAProcessor getBGAProcessor() {
 		return bga;
+	}
+	
+	public boolean isBGAOn() {
+		return bgaon;
 	}
 	
 	public boolean mediaLoadFinished() {
@@ -182,6 +191,7 @@ public class BMSResource {
 			try {
 				bga.abort();
 				bga.setModel(model);
+				bgaon = model != null;
 			} catch (Throwable e) {
 				Logger.getGlobal().severe(e.getClass().getName() + " : " + e.getMessage());
 				e.printStackTrace();

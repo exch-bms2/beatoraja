@@ -21,6 +21,7 @@ import bms.player.beatoraja.*;
 import bms.player.beatoraja.CourseData.TrophyData;
 import bms.player.beatoraja.external.BMSSearchAccessor;
 import bms.player.beatoraja.song.SongData;
+import bms.player.beatoraja.song.FolderData;
 import bms.player.beatoraja.song.SongInformationAccessor;
 
 /**
@@ -416,11 +417,29 @@ public class BarRenderer {
 			if(ba.value == -1) {
 				continue;
 			}
-			// 新規追加曲はテキストを変える
-			int songstatus = 0;
-			if (ba.sd instanceof SongBar) {
-				SongData song = ((SongBar) ba.sd).getSongData();
-				songstatus = song == null || System.currentTimeMillis() / 1000 > song.getAdddate() + 3600 * 24 ? 0 : 1;
+			// Barの種類によってテキストを変える
+			// SongBarかFolderBarの場合は新規かどうかでさらに変える
+			// songstatus最終値 =
+			// 0:通常 1:新規 2:SongBar(通常) 3:SongBar(新規) 4:FolderBar(通常) 5:FolderBar(新規) 6:TableBar or HashBar
+			// 7:GradeBar(曲所持) 8:(SongBar or GradeBar)(曲未所持) 9:CommandBar or ContainerBar 10:SearchWordBar
+			// 3以降で定義されてなければ0か1を用いる
+			int songstatus = ba.value;
+			if(songstatus >= 2) {
+				songstatus += 4;
+				//定義されてなければ0:通常を用いる
+				if(baro.getText()[songstatus] == null) songstatus = 0;
+			} else {
+				if (songstatus == 0) {
+					SongData song = ((SongBar) ba.sd).getSongData();
+					songstatus = song == null || System.currentTimeMillis() / 1000 > song.getAdddate() + 3600 * 24 ? 2 : 3;
+					//定義されてなければ0:通常か1:新規を用いる
+					if(baro.getText()[songstatus] == null) songstatus = songstatus == 3 ? 1 : 0;
+				} else {
+					FolderData data = ((FolderBar) ba.sd).getFolderData();
+					songstatus = data == null || System.currentTimeMillis() / 1000 > data.getAdddate() + 3600 * 24 ? 4 : 5;
+					//定義されてなければ0:通常か1:新規を用いる
+					if(baro.getText()[songstatus] == null) songstatus = songstatus == 5 ? 1 : 0;
+				}
 			}
 			baro.getText()[songstatus].setText(ba.sd.getTitle());
 			baro.getText()[songstatus].draw(sprite, time, select, ba.x, ba.y);

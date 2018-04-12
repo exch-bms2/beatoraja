@@ -22,6 +22,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
+<?import bms.player.beatoraja.launcher.NumericSpinner?>
 
 <VBox fx:id="root" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="bms.player.beatoraja.launcher.PlayConfigurationView">
    <Hyperlink fx:id="newversion" text="" />
@@ -72,21 +73,21 @@
                     </HBox>
                     <HBox prefHeight="40.0" prefWidth="730.0">
                         <Label prefHeight="25.0" prefWidth="150.0" text="%AUDIO_BUF_SIZE" />
-                        <Spinner fx:id="audiobuffer" editable="true" prefWidth="150.0">
+                        <NumericSpinner fx:id="audiobuffer" editable="true" prefWidth="150.0">
                             <valueFactory>
                                 <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="384" max="1024" min="16" />
                             </valueFactory>
-                        </Spinner>
+                        </NumericSpinner>
                         <Label prefHeight="23.0" prefWidth="150.0" text="%AUDIO_SIM_SOURCES">
                             <HBox.margin>
                                 <Insets left="10.0" />
                             </HBox.margin>
                         </Label>
-                        <Spinner fx:id="audiosim" editable="true" prefWidth="150.0">
+                        <NumericSpinner fx:id="audiosim" editable="true" prefWidth="150.0">
                             <valueFactory>
                                 <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="64" max="1024" min="8" />
                             </valueFactory>
-                        </Spinner>
+                        </NumericSpinner>
                     </HBox>
                     <HBox prefHeight="30.0" prefWidth="730.0">
                         <Label prefHeight="25.0" prefWidth="150.0" text="%SYSTEM_VOLUME" />
@@ -130,41 +131,41 @@
                             <Insets left="10.0" />
                         </VBox.margin>
                         <Label prefHeight="24.0" prefWidth="150.0" text="%SCROLL_DURATION_HIGH" />
-                        <Spinner fx:id="scrolldurationhigh" editable="true" prefWidth="80.0">
+                        <NumericSpinner fx:id="scrolldurationhigh" editable="true" prefWidth="80.0">
                             <valueFactory>
                                 <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="50" max="1000" min="1" />
                             </valueFactory>
-                        </Spinner>
+                        </NumericSpinner>
                         <Label prefHeight="24.0" prefWidth="150.0" text="%SCROLL_DURATION_LOW" />
-                        <Spinner fx:id="scrolldurationlow" editable="true" prefWidth="150.0">
+                        <NumericSpinner fx:id="scrolldurationlow" editable="true" prefWidth="150.0">
                             <valueFactory>
                                 <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="300" max="1000" min="1" />
                             </valueFactory>
-                        </Spinner>
+                        </NumericSpinner>
                     </HBox>
                     <HBox prefHeight="22.0" prefWidth="740.0">
                         <VBox.margin>
                             <Insets left="10.0" />
                         </VBox.margin>
                         <Label prefHeight="24.0" prefWidth="200.0" text="%MINIMUM_INPUT_DURATION" />
-                        <Spinner fx:id="inputduration" editable="true" prefWidth="80.0">
+                        <NumericSpinner fx:id="inputduration" editable="true" prefWidth="80.0">
                             <valueFactory>
                                 <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="10" max="100" min="1" />
                             </valueFactory>
-                        </Spinner>
+                        </NumericSpinner>
                     </HBox>
                     <HBox prefHeight="23.0" prefWidth="740.0">
                         <VBox.margin>
                             <Insets left="10.0" top="30.0" />
                         </VBox.margin>
-                        <Label prefHeight="24.0" prefWidth="68.0" text="\%MODE" />
+                        <Label prefHeight="24.0" prefWidth="68.0" text="%MODE" />
                         <ComboBox fx:id="inputconfig" onAction="#updateInputConfig" prefWidth="150.0" />
                     </HBox>
                     <HBox prefHeight="37.0" prefWidth="723.0">
                         <VBox.margin>
                             <Insets left="10.0" top="10.0" />
                         </VBox.margin>
-                        <CheckBox fx:id="jkoc_hack" mnemonicParsing="false" prefHeight="18.0" prefWidth="200.0" text="\%JKOC_HACK">
+                        <CheckBox fx:id="jkoc_hack" mnemonicParsing="false" prefHeight="18.0" prefWidth="200.0" text="%JKOC_HACK">
                             <HBox.margin>
                                 <Insets right="20.0" />
                             </HBox.margin>
@@ -287,13 +288,14 @@
                         <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="30.0" />
                         <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
                         <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
+                        <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
                     </rowConstraints>
                     <Label prefHeight="18.0" prefWidth="78.0" text="%HI-SPEED" />
-                    <Spinner fx:id="hispeed" editable="true" GridPane.columnIndex="1">
+                    <NumericSpinner fx:id="hispeed" editable="true" GridPane.columnIndex="1">
                         <valueFactory>
                             <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.1" initialValue="1.0" max="9.9" min="1.0" />
                         </valueFactory>
-                    </Spinner>
+                    </NumericSpinner>
                     <Label text="%HISPEED_FIX" GridPane.columnIndex="2" GridPane.rowIndex="2" />
                     <ComboBox fx:id="fixhispeed" prefWidth="150.0" GridPane.columnIndex="3" GridPane.rowIndex="2" />
                     <Label text="%NOTE_MODIFIER" GridPane.rowIndex="3" />
@@ -307,47 +309,53 @@
                     <Label text="%LNTYPE" GridPane.rowIndex="5" />
                     <ComboBox fx:id="lntype" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="5" />
                     <Label text="%EXPAND_JUDGE" GridPane.columnIndex="2" GridPane.rowIndex="5" />
-                    <Spinner fx:id="exjudge" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="5">
+                    <NumericSpinner fx:id="exjudge" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="5">
                         <valueFactory>
                             <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="25" initialValue="100" max="400" min="25" />
                         </valueFactory>
-                    </Spinner>
+                    </NumericSpinner>
                     <Label text="%H_RANDOM_THRESHOLD_BPM" GridPane.columnIndex="0" GridPane.rowIndex="6" />
-                    <Spinner fx:id="hranthresholdbpm" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="6">
+                    <NumericSpinner fx:id="hranthresholdbpm" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="6">
                         <valueFactory>
                             <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="120" max="15000" min="0" />
                         </valueFactory>
-                    </Spinner>
+                    </NumericSpinner>
                     <Label text="%GVALUE" GridPane.columnIndex="2" />
-                    <Spinner fx:id="gvalue" editable="true" GridPane.columnIndex="3">
+                    <NumericSpinner fx:id="gvalue" editable="true" GridPane.columnIndex="3">
                         <valueFactory>
                             <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="300" max="2000" min="1" />
                         </valueFactory>
-                    </Spinner>
+                    </NumericSpinner>
                     <CheckBox fx:id="enableLanecover" mnemonicParsing="false" text="%ENABLE_LANECOVER" GridPane.rowIndex="1" />
-                    <Spinner fx:id="lanecover" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                    <NumericSpinner fx:id="lanecover" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="1">
                         <valueFactory>
                             <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="100" max="1000" min="0" />
                         </valueFactory>
-                    </Spinner>
+                    </NumericSpinner>
                     <CheckBox fx:id="enableLift" mnemonicParsing="false" text="%ENABLE_LIFT" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-                    <Spinner fx:id="lift" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="1">
+                    <NumericSpinner fx:id="lift" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="1">
                         <valueFactory>
                             <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="100" max="1000" min="0" />
                         </valueFactory>
-                    </Spinner>
+                    </NumericSpinner>
                     <Label text="%JUDGETIMING" GridPane.rowIndex="2" />
-                    <Spinner fx:id="judgetiming" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                    <NumericSpinner fx:id="judgetiming" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="2">
                         <valueFactory>
                             <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="0" max="99" min="-99" />
                         </valueFactory>
-                    </Spinner>
+                    </NumericSpinner>
                     <Label text="%HISPEED_MARGIN" GridPane.columnIndex="2" GridPane.rowIndex="6" />
-                    <Spinner fx:id="hispeedmargin" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="6">
+                    <NumericSpinner fx:id="hispeedmargin" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="6">
                         <valueFactory>
                             <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.01" initialValue="0.25" max="9.99" min="0.00" />
                         </valueFactory>
-                    </Spinner>
+                    </NumericSpinner>
+                    <CheckBox fx:id="enableHidden" mnemonicParsing="false" text="%ENABLE_HIDDEN" GridPane.columnIndex="0" GridPane.rowIndex="7" />
+                    <NumericSpinner fx:id="hidden" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="7">
+                        <valueFactory>
+                            <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="100" max="1000" min="0" />
+                        </valueFactory>
+                    </NumericSpinner>
                 </GridPane>
                 <GridPane fx:id="lr2configurationassist" prefHeight="48.0" prefWidth="632.0">
                     <columnConstraints>
@@ -373,6 +381,7 @@
                     <CheckBox fx:id="markprocessednote" mnemonicParsing="false" text="%MARK_PROCESSED_NOTE" GridPane.columnIndex="3" GridPane.rowIndex="1" />
                     <CheckBox fx:id="continueuntilendofsong" mnemonicParsing="false" text="%CONTINUE_UNTIL_END_OF_SONG" GridPane.columnIndex="4" GridPane.rowIndex="1" />
                     <CheckBox fx:id="guidese" mnemonicParsing="false" text="%GUIDE_SE" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                    <CheckBox fx:id="windowhold" mnemonicParsing="false" text="%WINDOW_HOLD" GridPane.columnIndex="2" GridPane.rowIndex="2" />
                 </GridPane>
                 <HBox prefHeight="9.0" prefWidth="720.0">
                     <opaqueInsets>

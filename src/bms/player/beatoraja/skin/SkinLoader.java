@@ -45,7 +45,7 @@ public abstract class SkinLoader {
         try {
             SkinConfig sc = resource.getPlayerConfig().getSkin()[skinType.getId()];
             if (sc.getPath().endsWith(".json")) {
-                JSONSkinLoader sl = new JSONSkinLoader(resource.getConfig());
+                JSONSkinLoader sl = new JSONSkinLoader(state, resource.getConfig());
                 Skin skin =  sl.loadSkin(Paths.get(sc.getPath()), skinType, sc.getProperties());
                 SkinLoader.resource.disposeOld();
                 return skin;
@@ -61,7 +61,7 @@ public abstract class SkinLoader {
         } catch (Throwable e) {
             e.printStackTrace();
         }
-        JSONSkinLoader sl = new JSONSkinLoader(resource.getConfig());
+        JSONSkinLoader sl = new JSONSkinLoader(state, resource.getConfig());
         Skin skin =  sl.loadSkin(Paths.get(SkinConfig.defaultSkinPathMap.get(skinType)), skinType, new SkinConfig.Property());
         SkinLoader.resource.disposeOld();
         return skin;

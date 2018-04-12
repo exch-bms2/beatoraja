@@ -2,6 +2,28 @@ package bms.player.beatoraja.skin;
 
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
+import bms.model.Mode;
+import bms.player.beatoraja.BMSResource;
+import bms.player.beatoraja.Config;
+import bms.player.beatoraja.MainState;
+import bms.player.beatoraja.PlayConfig;
+import bms.player.beatoraja.ScoreDataProperty;
+import bms.player.beatoraja.PlayerResource.PlayMode;
+import bms.player.beatoraja.play.BMSPlayer;
+import bms.player.beatoraja.play.GrooveGauge.Gauge;
+import bms.player.beatoraja.play.LaneRenderer;
+import bms.player.beatoraja.result.CourseResult;
+import bms.player.beatoraja.result.MusicResult;
+import bms.player.beatoraja.select.MusicSelector;
+import bms.player.beatoraja.select.bar.Bar;
+import bms.player.beatoraja.select.bar.GradeBar;
+import bms.player.beatoraja.skin.SkinObject.BooleanProperty;
+import bms.player.beatoraja.skin.SkinObject.FloatProperty;
+import bms.player.beatoraja.skin.SkinObject.FloatWriter;
+import bms.player.beatoraja.skin.SkinObject.IntegerProperty;
+import bms.player.beatoraja.skin.SkinObject.StringProperty;
+import bms.player.beatoraja.song.SongData;
+
 public class SkinPropertyMapper {
 
 	public static int bombTimerId(int player, int key) {
@@ -70,11 +92,6 @@ public class SkinPropertyMapper {
 		return -1;
 	}
 
-
-	public static boolean isKeyJudgeValueId(int valueId) {
-		return (valueId >= VALUE_JUDGE_1P_SCRATCH && valueId <= VALUE_JUDGE_2P_KEY9)
-				|| (valueId >= VALUE_JUDGE_1P_KEY10 && valueId <= VALUE_JUDGE_2P_KEY99);
-	}
 
 	public static int getKeyJudgeValuePlayer(int valueId) {
 		if (valueId >= VALUE_JUDGE_1P_SCRATCH && valueId <= VALUE_JUDGE_2P_KEY9) {
@@ -149,4 +166,352 @@ public class SkinPropertyMapper {
 	public static int getSkinCustomizeItemIndex(int id) {
 		return id - STRING_SKIN_CUSTOMIZE_ITEM1;
 	}
+	
+	public static BooleanProperty getBooleanProperty(int optionid) {
+		// TODO 各Skinに分散するるべき？
+		BooleanProperty result = null;
+		final int id = Math.abs(optionid);
+		
+		if(id == OPTION_BGAOFF || id == OPTION_BGAON) {
+			result = new DrawConditionProperty(DrawConditionProperty.TYPE_STATIC_WITHOUT_MUSICSELECT) {
+				@Override
+				public boolean get(MainState state) {
+					return id == OPTION_BGAON ? state.main.getPlayerResource().getBMSResource().isBGAOn() : !state.main.getPlayerResource().getBMSResource().isBGAOn();
+				}
+			};
+		}
+		if (id >= OPTION_7KEYSONG && id <= OPTION_9KEYSONG) {	
+			final Mode[] modes = {Mode.BEAT_7K, Mode.BEAT_5K, Mode.BEAT_14K, Mode.BEAT_10K, Mode.POPN_9K};
+			result = new ModeDrawCondition(modes[id - OPTION_7KEYSONG]);
+		}
+		if (id == OPTION_24KEYSONG) {
+			result = new ModeDrawCondition(Mode.KEYBOARD_24K);
+		}
+		if (id == OPTION_24KEYDPSONG) {
+			result = new ModeDrawCondition(Mode.KEYBOARD_24K_DOUBLE);
+		}
+
+		if (id >= OPTION_1P_0_9 && id <= OPTION_1P_100) {
+			final float low =(id - OPTION_1P_0_9) * 0.1f;
+			final float high =(id - OPTION_1P_0_9 + 1) * 0.1f;
+			result = new DrawConditionProperty(DrawConditionProperty.TYPE_STATIC_ON_RESULT) {
+				@Override
+				public boolean get(MainState state) {
+					if(state instanceof BMSPlayer) {
+						final Gauge gauge = ((BMSPlayer) state).getGauge().getGauge();
+						return gauge.getValue() >= low * gauge.getProperty().max && gauge.getValue() < high * gauge.getProperty().max ;
+					}
+					return false;
+				}
+			};
+		}
+
+		if (id >= OPTION_AAA && id <= OPTION_F) {			
+			final int[] values = { 0, 6, 9, 12, 15, 18, 21, 24};
+			final int low =values[OPTION_F - id];
+			result = new DrawConditionProperty(DrawConditionProperty.TYPE_STATIC_ON_RESULT) {
+				@Override
+				public boolean get(MainState state) {
+					return state.getScoreDataProperty().qualifyRank(low);
+				}
+			};
+		}
+		if (id >= OPTION_BEST_AAA_1P && id <= OPTION_BEST_F_1P) {			
+			final int[] values = { 0, 6, 9, 12, 15, 18, 21, 24, 28 };
+			final int low =values[OPTION_BEST_F_1P - id];
+			final int high =values[OPTION_BEST_F_1P - id + 1];
+			result = new DrawConditionProperty(DrawConditionProperty.TYPE_STATIC_ON_RESULT) {
+				
+				@Override
+				public boolean get(MainState state) {
+					final ScoreDataProperty score = state.getScoreDataProperty();
+					return score.qualifyBestRank(low) && (high > 27 ? true : !score.qualifyBestRank(high));
+				}
+
+			};
+		}
+		if (id >= OPTION_1P_AAA && id <= OPTION_1P_F) {			
+			result = new NowRankDrawCondition(OPTION_1P_F - id);
+		}
+		if (id >= OPTION_RESULT_AAA_1P && id <= OPTION_RESULT_F_1P) {			
+			result = new NowRankDrawCondition(OPTION_RESULT_F_1P - id);
+		}
+		if (id >= OPTION_NOW_AAA_1P && id <= OPTION_NOW_F_1P) {			
+			result = new NowRankDrawCondition(OPTION_NOW_F_1P - id);
+		}
+		if(id >= OPTION_PERFECT_EXIST && id <= OPTION_MISS_EXIST) {
+			result = new DrawConditionProperty(DrawConditionProperty.TYPE_STATIC_ON_RESULT) {
+				private final int judge = id - OPTION_PERFECT_EXIST;
+				@Override
+				public boolean get(MainState state) {
+					return state.getJudgeCount(judge, true) + state.getJudgeCount(judge, false) > 0;
+				}
+			};
+		}
+		
+		if(result != null && optionid < 0) {
+			final BooleanProperty dc = result;
+			result = new BooleanProperty() {
+				@Override
+				public boolean isStatic(MainState state) {
+					return dc.isStatic(state);
+				}				
+				
+				public boolean get(MainState state) {
+					return !dc.get(state);
+				}
+			};
+		}
+		
+		return result;
+	}
+	
+	public static IntegerProperty getIntegerProperty(int optionid) {
+		IntegerProperty result = null;
+		if(optionid == NUMBER_MINBPM) {
+			result = (state) -> (state.main.getPlayerResource().getSongdata() != null ? 
+					state.main.getPlayerResource().getSongdata().getMinbpm() : Integer.MIN_VALUE);
+		}
+		if(optionid == NUMBER_MAXBPM) {
+			result = (state) -> (state.main.getPlayerResource().getSongdata() != null ? 
+					state.main.getPlayerResource().getSongdata().getMaxbpm() : Integer.MIN_VALUE);
+		}		
+		if(optionid == NUMBER_MAINBPM) {
+			result = (state) -> (state.main.getPlayerResource().getSongdata() != null ? 
+					state.main.getPlayerResource().getSongdata().getMainbpm() : Integer.MIN_VALUE);
+		}
+		if(optionid >= NUMBER_DURATION_LANECOVER_ON && optionid <= NUMBER_MAXBPM_DURATION_GREEN_LANECOVER_OFF) {
+			final boolean green = (optionid - NUMBER_DURATION_LANECOVER_ON) % 2 == 1;
+			final boolean cover = (optionid - NUMBER_DURATION_LANECOVER_ON) % 4 < 2;
+			final int mode = (optionid - NUMBER_DURATION_LANECOVER_ON) / 4;
+			result = (state) -> {
+				if(state instanceof BMSPlayer) {
+					final LaneRenderer lanerender = ((BMSPlayer) state).getLanerender();
+					double bpm = 0;
+					switch(mode) {
+					case 0:
+						bpm = lanerender.getNowBPM();
+						break;
+					case 1:
+						bpm = lanerender.getMainBPM();
+						break;
+					case 2:
+						bpm = lanerender.getMinBPM();
+						break;
+					case 3:
+						bpm = lanerender.getMaxBPM();
+						break;
+					}
+					return (int) Math.round( (240000 / bpm / lanerender.getHispeed()) * (cover ? 1 - lanerender.getLanecover() : 1) * (green ? 1 : 0.6));
+				}
+				return 0;
+			};
+		}
+		
+		if(optionid == NUMBER_LOADING_PROGRESS) {
+			result = (state) -> {
+				final BMSResource resource = state.main.getPlayerResource().getBMSResource();
+				return (int) ((resource.isBGAOn() ? (resource.getBGAProcessor().getProgress() + resource.getAudioDriver().getProgress()) / 2 : 
+					resource.getAudioDriver().getProgress()) * 100);
+			};			
+		}
+		
+		return result;
+	}
+
+	public static IntegerProperty getImageIndexProperty(int optionid) {
+		IntegerProperty result = null;
+		
+		if(optionid == BUTTON_GAUGE_1P) {
+			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().getGauge());
+		}
+		if(optionid == BUTTON_RANDOM_1P) {
+			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().getRandom());
+		}		
+		if(optionid == BUTTON_RANDOM_2P) {
+			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().getRandom2());
+		}		
+		if(optionid == BUTTON_DPOPTION) {
+			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().getDoubleoption());
+		}		
+
+		if((optionid >= VALUE_JUDGE_1P_SCRATCH && optionid <= VALUE_JUDGE_2P_KEY9)
+					|| (optionid >= VALUE_JUDGE_1P_KEY10 && optionid <= VALUE_JUDGE_2P_KEY99)) {
+			result = (state) -> {
+				if(state instanceof BMSPlayer) {
+					return ((BMSPlayer) state).getJudgeManager().getJudge(optionid);
+				}
+				return 0;
+			};			
+		}
+
+		return result;
+	}
+	
+	public static FloatProperty getFloatProperty(int optionid) {
+		FloatProperty result = null;
+		if(optionid == SLIDER_MUSICSELECT_POSITION) {
+			result = (state) -> (state instanceof MusicSelector ? ((MusicSelector) state).getBarRender().getSelectedPosition() : 0);
+		}
+		if(optionid == BARGRAPH_SCORERATE) {
+			result = (state) -> (state.getScoreDataProperty().getRate());
+		}
+		if(optionid == BARGRAPH_SCORERATE_FINAL) {
+			result = (state) -> (state.getScoreDataProperty().getNowRate());
+		}		
+		if(optionid == BARGRAPH_BESTSCORERATE_NOW) {
+			result = (state) -> (state.getScoreDataProperty().getNowBestScoreRate());
+		}		
+		if(optionid == BARGRAPH_BESTSCORERATE) {
+			result = (state) -> (state.getScoreDataProperty().getBestScoreRate());
+		}		
+		if(optionid == BARGRAPH_TARGETSCORERATE_NOW) {
+			result = (state) -> (state.getScoreDataProperty().getNowRivalScoreRate());
+		}		
+		if(optionid == BARGRAPH_TARGETSCORERATE) {
+			result = (state) -> (state.getScoreDataProperty().getRivalScoreRate());
+		}
+		if(optionid == BARGRAPH_LOAD_PROGRESS) {
+			result = (state) -> {
+				final BMSResource resource = state.main.getPlayerResource().getBMSResource();
+				return resource.isBGAOn() ? (resource.getBGAProcessor().getProgress() + resource.getAudioDriver().getProgress()) / 2 : 
+					resource.getAudioDriver().getProgress();
+			};			
+		}
+		if(optionid == SLIDER_MUSIC_PROGRESS || optionid == BARGRAPH_MUSIC_PROGRESS) {
+			result = (state) -> {
+				if(state instanceof BMSPlayer) {
+					if (state.main.isTimerOn(TIMER_PLAY)) {
+						return Math.min((float) state.main.getNowTime(TIMER_PLAY) / ((BMSPlayer)state).getPlaytime() , 1);
+					}					
+				}
+				return 0;
+			};			
+		}
+		if(optionid == SLIDER_LANECOVER || optionid == SLIDER_LANECOVER2) {
+			result = (state) -> {
+				if(state instanceof BMSPlayer) {
+					final PlayConfig pc = ((BMSPlayer) state).getLanerender().getPlayConfig();
+					if (pc.isEnablelanecover()) {
+						float lane = pc.getLanecover();
+						if (pc.isEnablelift()) {
+							lane = lane * (1 - pc.getLift());
+						}
+						return lane;
+					}					
+				}
+				return 0;
+			};			
+		}
+		
+		return result;
+	}
+	
+	public static FloatWriter getFloatWriter(int optionid) {
+		FloatWriter result = null;
+		
+		if(optionid == SLIDER_MUSICSELECT_POSITION) {
+			result = (state, value) -> {
+				if(state instanceof MusicSelector) {
+					final MusicSelector select = (MusicSelector) state;
+					select.selectedBarMoved();
+					select.getBarRender().setSelectedPosition(value);
+				}
+			};
+		}
+		
+		return result;
+	}
+
+	public static StringProperty getTextProperty(final int optionid) {
+		StringProperty result = null;
+		if(optionid >= STRING_COURSE1_TITLE && optionid <= STRING_COURSE10_TITLE) {
+			result = new StringProperty() {
+				private final int index = optionid - STRING_COURSE1_TITLE;
+				@Override
+				public String get(MainState state) {
+					if(state instanceof MusicSelector) {
+						final Bar bar = ((MusicSelector)state).getSelectedBar();
+						if (bar instanceof GradeBar) {
+							if (((GradeBar) bar).getSongDatas().length > index) {
+								SongData song = ((GradeBar) bar).getSongDatas()[index];
+								final String songname = song != null && song.getTitle() != null ? song.getTitle() : "----";
+								return song != null && song.getPath() != null ? songname : "(no song) " + songname;
+							}
+						}				
+					}
+					return "";
+				}
+				
+			};
+		}
+		return result;
+	}
+
+	private static abstract class DrawConditionProperty implements BooleanProperty {
+		
+		public final int type;
+		
+		public static final int TYPE_NO_STATIC = 0;
+		public static final int TYPE_STATIC_WITHOUT_MUSICSELECT = 1;
+		public static final int TYPE_STATIC_ON_RESULT = 2;
+		public static final int TYPE_STATIC_ALL = 3;
+		
+		public DrawConditionProperty(int type) {
+			this.type = type;
+		}
+
+		@Override
+		public boolean isStatic(MainState state) {
+			switch(type) {
+			case TYPE_NO_STATIC:
+				return false;
+			case TYPE_STATIC_WITHOUT_MUSICSELECT:
+				return !(state instanceof MusicSelector);
+			case TYPE_STATIC_ON_RESULT:
+				return (state instanceof MusicResult) || (state instanceof CourseResult);
+			case TYPE_STATIC_ALL:
+				return true;
+			}
+			return false;
+		}
+		
+	}	
+
+	private static class ModeDrawCondition extends DrawConditionProperty {
+		
+		private final Mode mode;
+		
+		public ModeDrawCondition(Mode mode) {
+			super(TYPE_STATIC_WITHOUT_MUSICSELECT);
+			this.mode = mode;
+		}
+
+		@Override
+		public boolean get(MainState state) {
+			final SongData model = state.main.getPlayerResource().getSongdata();
+			return model != null && model.getMode() == mode.id;
+		}
+
+	}
+
+	private static class NowRankDrawCondition extends DrawConditionProperty {
+		
+		private final int low;
+		private final int high;
+		
+		public NowRankDrawCondition(int rank) {
+			super(TYPE_STATIC_ON_RESULT);
+			final int[] values = { 0, 6, 9, 12, 15, 18, 21, 24, 28 };
+			low =values[rank];
+			high =values[rank + 1];
+		}
+
+		@Override
+		public boolean get(MainState state) {
+			final ScoreDataProperty score = state.getScoreDataProperty();
+			return score.qualifyNowRank(low) && (high > 27 ? true : !score.qualifyNowRank(high));
+		}
+		
+	}	
 }

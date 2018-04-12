@@ -103,6 +103,8 @@ class KeyInputProccessor {
 					scratch[s] += 2160 - deltatime * 2;
 				}
 				scratch[s] %= 2160;
+				
+				main.getOffset(OFFSET_SCRATCHANGLE_1P + s).r = scratch[s] / 6;
 			}
 		}
 		prevtime = now;
@@ -120,10 +122,6 @@ class KeyInputProccessor {
 				main.setTimerOff(timerOff);
 			}
 		}
-	}
-
-	public int getScratchState(int i) {
-		return scratch[i] / 6;
 	}
 
 	public void stopJudge() {

@@ -18,6 +18,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.IntArray;
 
 /**
  * LR2のスキン定義用csvファイルのローダー
@@ -222,7 +223,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 							dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
 							values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
 							values[12], values[13], values[14], values[15], values[16], values[17], values[18],
-							values[19], values[20], values[21]);
+							values[19], values[20], readOffset(str, 21));
 				}
 			}
 		});
@@ -290,7 +291,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 					num.setDestination(values[2], values[3] * dstw / srcw, dsth - (values[4] + values[6]) * dsth / srch,
 							values[5] * dstw / srcw, values[6] * dsth / srch, values[7], values[8], values[9],
 							values[10], values[11], values[12], values[13], values[14], values[15], values[16],
-							values[17], values[18], values[19], values[20], values[21]);
+							values[17], values[18], values[19], values[20], readOffset(str, 21));
 				}
 			}
 		});
@@ -301,11 +302,10 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 				text = null;
 				int[] values = parseInt(str);
 				if (values[2] < fontlist.size() && fontlist.get(values[2]) != null) {
-					text = new SkinTextImage(fontlist.get(values[2]));
+					text = new SkinTextImage(fontlist.get(values[2]), values[3]);
 				} else {
 					text = new SkinTextFont("skin/default/VL-Gothic-Regular.ttf", 0, 48, 2);
 				}
-				text.setReferenceID(values[3]);
 				text.setAlign(values[4]);
 				text.setEditable(values[5] != 0);
 				int panel = values[6];
@@ -323,7 +323,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 							dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
 							values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
 							values[12], values[13], values[14], values[15], values[16], values[17], values[18],
-							values[19], values[20], values[21]);
+							values[19], values[20], readOffset(str, 21));
 					if(text.isEditable() && text.getReferenceID() == SkinProperty.STRING_SEARCHWORD && skin instanceof MusicSelectSkin) {
 						Rectangle r = new Rectangle(values[3] * dstw / srcw,
 								dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
@@ -362,11 +362,8 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 				if (images != null) {
 					slider = new SkinSlider(images, values[10], values[9], values[11],
 							(int) (values[12] * (values[11] == 1 || values[11] == 3 ? (dstw / srcw) : (dsth / srch))),
-							values[13]);
+							values[13], values[15], values[16]);
 					slider.setChangable(values[14] == 0);
-					slider.setRefNum(true);
-					slider.setMin(values[15]);
-					slider.setMax(values[16]);
 					skin.add(slider);
 					// System.out.println("Object Added - " +
 					// (part.getTiming()));
@@ -382,7 +379,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 							dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
 							values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
 							values[12], values[13], values[14], values[15], values[16], values[17], values[18],
-							values[19], values[20], values[21]);
+							values[19], values[20], readOffset(str, 21));
 				}
 			}
 		});
@@ -394,14 +391,12 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 				int[] values = parseInt(str);
 				int gr = values[2];
 				if (gr >= 100) {
-					bar = new SkinGraph(gr);
-					bar.setReferenceID(values[11] + 100);
+					bar = new SkinGraph(gr, values[11] + 100);
 					bar.setDirection(values[12]);
 				} else {
 					TextureRegion[] images = getSourceImage(values);
 					if (images != null) {
-						bar = new SkinGraph(images, values[10], values[9]);
-						bar.setReferenceID(values[11] + 100);
+						bar = new SkinGraph(images, values[10], values[9],values[11] + 100);
 						bar.setDirection(values[12]);
 						// System.out.println("Object Added - " +
 						// (part.getTiming()));
@@ -421,21 +416,13 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 				int[] values = parseInt(str);
 				int gr = values[2];
 				if (gr >= 100) {
-					bar = new SkinGraph(gr);
-					bar.setReferenceID(values[11]);
+					bar = new SkinGraph(gr,values[11],values[13],values[14]);
 					bar.setDirection(values[12]);
-					bar.setRefNum(true);
-					bar.setMin(values[13]);
-					bar.setMax(values[14]);
 				} else {
 					TextureRegion[] images = getSourceImage(values);
 					if (images != null) {
-						bar = new SkinGraph(images, values[10], values[9]);
-						bar.setReferenceID(values[11]);
+						bar = new SkinGraph(images,values[10], values[9], values[11],values[13],values[14]);
 						bar.setDirection(values[12]);
-						bar.setRefNum(true);
-						bar.setMin(values[13]);
-						bar.setMax(values[14]);
 						// System.out.println("Object Added - " +
 						// (part.getTiming()));
 					}
@@ -457,7 +444,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 					bar.setDestination(values[2], values[3] * dstw / srcw, dsth - (values[4] + values[6]) * dsth / srch,
 							values[5] * dstw / srcw, values[6] * dsth / srch, values[7], values[8], values[9],
 							values[10], values[11], values[12], values[13], values[14], values[15], values[16],
-							values[17], values[18], values[19], values[20], values[21]);
+							values[17], values[18], values[19], values[20], readOffset(str, 21));
 				}
 			}
 		});
@@ -527,7 +514,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 							dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
 							values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
 							values[12], values[13], values[14], values[15], values[16], values[17], values[18],
-							values[19], values[20], values[21]);
+							values[19], values[20], readOffset(str, 21));
 				}
 			}
 		});
@@ -556,7 +543,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 							dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
 							values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
 							values[12], values[13], values[14], values[15], values[16], values[17], values[18],
-							values[19], values[20], values[21]);
+							values[19], values[20], readOffset(str, 21));
 				}
 			}
 		});
@@ -660,7 +647,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 							dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
 							values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
 							values[12], values[13], values[14], values[15], values[16], values[17], values[18],
-							values[19], values[20], values[21]);
+							values[19], values[20], readOffset(str, 21));
 				}
 			}
 		});
@@ -746,7 +733,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 
 	protected int[] parseInt(String[] s) {
 		int[] result = new int[22];
-		for (int i = 1; i < s.length; i++) {
+		for (int i = 1; i < result.length && i < s.length; i++) {
 			try {
 				result[i] = Integer.parseInt(s[i].replace('!', '-').replaceAll(" ", ""));
 			} catch (Exception e) {
@@ -754,6 +741,24 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 			}
 		}
 		return result;
+	}
+
+	protected int[] readOffset(String[] str, int startIndex) {
+		return readOffset(str, startIndex, new int[0]);
+	}
+
+	protected int[] readOffset(String[] str, int startIndex, int[] offset) {
+		IntArray result = new IntArray();
+		for(int i : offset) {
+			result.add(i);
+		}
+		for (int i = startIndex; i < str.length; i++) {
+			String s = str[i].replaceAll("[^0-9-]", "");
+			if(s.length() > 0) {
+				result.add(Integer.parseInt(s));
+			}
+		}
+		return result.toArray();
 	}
 
 	protected TextureRegion[] getSourceImage(int[] values) {

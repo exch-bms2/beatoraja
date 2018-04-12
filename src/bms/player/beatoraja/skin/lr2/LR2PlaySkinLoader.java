@@ -9,6 +9,7 @@ import java.util.Map;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.utils.IntArray;
 
 import bms.model.Mode;
 import bms.player.beatoraja.Config;
@@ -17,6 +18,7 @@ import bms.player.beatoraja.Resolution;
 import bms.player.beatoraja.play.PlaySkin;
 import bms.player.beatoraja.play.SkinBGA;
 import bms.player.beatoraja.play.SkinGauge;
+import bms.player.beatoraja.play.SkinHidden;
 import bms.player.beatoraja.play.SkinJudge;
 import bms.player.beatoraja.play.SkinNote;
 import bms.player.beatoraja.skin.Skin;
@@ -62,7 +64,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 	private SkinGauge gauger = null;
 	private SkinImage line;
 	private SkinImage[] lines = new SkinImage[8];
-	private int[][] linevalues = new int[2][];
+	private String[][] linevalues = new String[2][];
 
 	private SkinJudge[] judge = new SkinJudge[3];
 
@@ -81,6 +83,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 	private SkinNoteDistributionGraph noteobj;
 	private SkinBPMGraph bpmgraphobj;
 	private SkinTimingVisualizer timingobj;
+	private SkinHidden hidden;
 
 	public LR2PlaySkinLoader(final SkinType type, final Resolution src, final Config c) {
 		super(src, c);
@@ -142,7 +145,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 				if (bga != null) {
 					skin.setDestination(bga, 0, values[3], srch - values[4] - values[6], values[5], values[6],
 							values[7], values[8], values[9], values[10], values[11], values[12], values[13], values[14],
-							values[15], values[16], values[17], values[18], values[19], values[20], values[21]);
+							values[15], values[16], values[17], values[18], values[19], values[20], readOffset(str, 21));
 				}
 			}
 		});
@@ -175,13 +178,13 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 					lines[values[1]].setDestination(values[2], values[3] * dstw / srcw, dsth - (values[4] + values[6]) * dsth / srch,
 							values[5] * dstw / srcw, values[6] * dsth / srch, values[7], values[8], values[9],
 							values[10], values[11], values[12], values[13], values[14], values[15], values[16],
-							values[17], values[18], values[19], values[20], new int[]{OFFSET_LIFT, values[21]});
+							values[17], values[18], values[19], values[20], readOffset(str, 21, new int[]{OFFSET_LIFT}));
 					if(playerr[values[1] % 2] != null) {
 						playerr[values[1] % 2] = new Rectangle(values[3] * dstw / srcw,
 								dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
 								(values[4] + values[6]) * dsth / srch);
 					}
-					linevalues[values[1] % 2] = values;
+					linevalues[values[1] % 2] = str.clone();
 				}
 			}
 		});
@@ -325,7 +328,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 						}
 					}
 					lanerender = new SkinNote(note, lnss, mine);
-					lanerender.setOffsetID(OFFSET_NOTES_1P);
+					lanerender.setOffsetID(readOffset(str, 21, new int[]{OFFSET_NOTES_1P}));
 					skin.add(lanerender);
 				}
 			}
@@ -385,7 +388,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 								dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
 								values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
 								values[12], values[13], values[14], values[15], values[16], values[17], values[18],
-								values[19], values[20], new int[]{OFFSET_JUDGE_1P, values[21]});
+								values[19], values[20], readOffset(str, 21, new int[]{OFFSET_JUDGE_1P, OFFSET_LIFT}));
 
 						if (!detail) {
 							detail = true;
@@ -437,7 +440,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 								dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
 								values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
 								values[12], values[13], values[14], values[15], values[16], values[17], values[18],
-								values[19], values[20], new int[]{OFFSET_JUDGE_2P, values[21]});
+								values[19], values[20], readOffset(str, 21, new int[]{OFFSET_JUDGE_2P, OFFSET_LIFT}));
 
 						if (!detail) {
 							detail = true;
@@ -488,7 +491,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 								dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
 								values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
 								values[12], values[13], values[14], values[15], values[16], values[17], values[18],
-								values[19], values[20], new int[]{OFFSET_JUDGE_3P, values[21]});
+								values[19], values[20], readOffset(str, 21, new int[]{OFFSET_JUDGE_3P, OFFSET_LIFT}));
 
 						if (!detail) {
 							detail = true;
@@ -535,7 +538,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 		addCommandWord(new CommandWord("DST_NOWCOMBO_1P") {
 			@Override
 			public void execute(String[] str) {
-				setDstNowCombo(0, str, OFFSET_JUDGE_1P);
+				setDstNowCombo(0, str, readOffset(str, 21, new int[]{OFFSET_JUDGE_1P, OFFSET_LIFT}));
 			}
 		});
 
@@ -572,7 +575,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 		addCommandWord(new CommandWord("DST_NOWCOMBO_2P") {
 			@Override
 			public void execute(String[] str) {
-				setDstNowCombo(1, str, OFFSET_JUDGE_2P);
+				setDstNowCombo(1, str, readOffset(str, 21, new int[]{OFFSET_JUDGE_2P, OFFSET_LIFT}));
 			}
 		});
 
@@ -609,7 +612,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 		addCommandWord(new CommandWord("DST_NOWCOMBO_3P") {
 			@Override
 			public void execute(String[] str) {
-				setDstNowCombo(2, str, OFFSET_JUDGE_3P);
+				setDstNowCombo(2, str, readOffset(str, 21, new int[]{OFFSET_JUDGE_3P, OFFSET_LIFT}));
 			}
 		});
 
@@ -646,8 +649,8 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 							dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
 							values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
 							values[12], values[13], values[14], values[15], values[16], values[17], values[18],
-							values[19], values[20], new int[]{values[21], OFFSET_LIFT});
-                }
+							values[19], values[20], readOffset(str, 21, new int[]{OFFSET_LIFT}));
+				}
 			}
 		});
 
@@ -796,7 +799,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 					int[] values = parseInt(str);
 					gauger.setDestination(values[2], x, y, width, height, values[7],
 							values[8], values[9], values[10], values[11], values[12], values[13], values[14],
-							values[15], values[16], values[17], values[18], values[19], values[20], values[21]);
+							values[15], values[16], values[17], values[18], values[19], values[20], readOffset(str, 21));
 				}
 			}
 		});
@@ -818,7 +821,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 				gauge.y = src.height - values[4];
 				skin.setDestination(noteobj, values[2], gauge.x, gauge.y, gauge.width, gauge.height, values[7], values[8],
 						values[9], values[10], values[11], values[12], values[13], values[14], values[15],
-						values[16], values[17], values[18], values[19], values[20], values[21]);
+						values[16], values[17], values[18], values[19], values[20], readOffset(str, 21));
 			}
 		});
 
@@ -840,7 +843,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 				gauge.y = src.height - values[4];
 				skin.setDestination(bpmgraphobj, values[2], gauge.x, gauge.y, gauge.width, gauge.height, values[7], values[8],
 						values[9], values[10], values[11], values[12], values[13], values[14], values[15],
-						values[16], values[17], values[18], values[19], values[20], values[21]);
+						values[16], values[17], values[18], values[19], values[20], readOffset(str, 21));
 			}
 		});
 		addCommandWord(new CommandWord("SRC_TIMING_1P") {
@@ -861,12 +864,51 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 				gauge.y = src.height - values[4];
 				skin.setDestination(timingobj, values[2], gauge.x, gauge.y, gauge.width, gauge.height, values[7], values[8],
 						values[9], values[10], values[11], values[12], values[13], values[14], values[15],
-						values[16], values[17], values[18], values[19], values[20], values[21]);
+						values[16], values[17], values[18], values[19], values[20], readOffset(str, 21));
+			}
+		});
+
+		addCommandWord(new CommandWord("SRC_HIDDEN") {
+			//#SRC_HIDDEN, (NULL), g, x, y, w, h,div_x, div_y, cycle, timer, disapear_line, isDisapearLineLinkLift
+			@Override
+			public void execute(String[] str) {
+				hidden = null;
+				int[] values = parseInt(str);
+				TextureRegion[] images = getSourceImage(values);
+				if (images != null) {
+					hidden = new SkinHidden(images, values[10], values[9]);
+				}
+				if (hidden != null) {
+					if(str[11].length() > 0 && values[11] > 0) hidden.setDisapearLine(dsth - values[11] * dsth / srch);
+					hidden.setDisapearLineLinkLift(str[12].length() == 0 || values[12] != 0);
+					skin.add(hidden);
+				}
+			}
+		});
+		addCommandWord(new CommandWord("DST_HIDDEN") {
+			@Override
+			public void execute(String[] str) {
+				if (hidden != null) {
+					int[] values = parseInt(str);
+					if (values[5] < 0) {
+						values[3] += values[5];
+						values[5] = -values[5];
+					}
+					if (values[6] < 0) {
+						values[4] += values[6];
+						values[6] = -values[6];
+					}
+					hidden.setDestination(values[2], values[3] * dstw / srcw,
+							dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
+							values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
+							values[12], values[13], values[14], values[15], values[16], values[17], values[18],
+							values[19], values[20], readOffset(str, 21, new int[]{OFFSET_LIFT, OFFSET_HIDDEN_COVER}));
+				}
 			}
 		});
 	}
 
-	private void setDstNowCombo(int index, String[] str, int offsetid) {
+	private void setDstNowCombo(int index, String[] str, int[] offset) {
 		final SkinJudge sj = judge[index];
 		if (sj != null && sj.getJudgeCount()[Integer.parseInt(str[1]) <= 5 ? (5 - Integer.parseInt(str[1])) : Integer.parseInt(str[1])] != null) {
 			int[] values = parseInt(str);
@@ -878,7 +920,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 			sj.getJudgeCount()[values[1] <= 5  ? (5 - values[1]) : values[1]].setDestination(values[2], x * dstw / srcw,
 					-values[4] * dsth / srch, values[5] * dstw / srcw, values[6] * dsth / srch, values[7],
 					values[8], values[9], values[10], values[11], values[12], values[13], values[14],
-					values[15], values[16], values[17], values[18], values[19], values[20], new int[]{OFFSET_JUDGE_1P, values[21]});
+					values[15], values[16], values[17], values[18], values[19], values[20], offset);
 		}
 	}
 
@@ -924,18 +966,18 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 		SkinImage early = new SkinImage(new TextureRegion(tex, 0, 0, 50,20));
 		early.setDestination(0, (values[3] + values[5] / 2) * dstw / srcw,
 				dsth - (values[4] - 5) * dsth / srch, 40 * dw, 16 * dh, 0, 255,
-				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1998, 0, OPTION_EARLY[side], OFFSET_JUDGE_DETAIL[side]);
+				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1998, 0, OPTION_EARLY[side], new int[]{OFFSET_JUDGE_DETAIL[side], OFFSET_LIFT});
 		early.setDestination(500, (values[3] + values[5] / 2) * dstw / srcw,
 				dsth - (values[4] - 5) * dsth / srch, 40 * dw, 16 * dh, 0, 255,
-				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1998, 0, OPTION_EARLY[side], OFFSET_JUDGE_DETAIL[side]);
+				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1998, 0, OPTION_EARLY[side], new int[]{OFFSET_JUDGE_DETAIL[side], OFFSET_LIFT});
 		skin.add(early);
 		SkinImage late = new SkinImage(new TextureRegion(tex, 50, 0, 50,20));
 		late.setDestination(0, (values[3] + values[5] / 2) * dstw / srcw,
 				dsth - (values[4] - 5) * dsth / srch, 40 * dw, 16 * dh, 0, 255,
-				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1998, 0, OPTION_LATE[side], OFFSET_JUDGE_DETAIL[side]);
+				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1998, 0, OPTION_LATE[side], new int[]{OFFSET_JUDGE_DETAIL[side], OFFSET_LIFT});
 		late.setDestination(500, (values[3] + values[5] / 2) * dstw / srcw,
 				dsth - (values[4] - 5) * dsth / srch, 40 * dw, 16 * dh, 0, 255,
-				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1998, 0, OPTION_LATE[side], OFFSET_JUDGE_DETAIL[side]);
+				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1998, 0, OPTION_LATE[side], new int[]{OFFSET_JUDGE_DETAIL[side], OFFSET_LIFT});
 		skin.add(late);
 
 		TextureRegion[][] images = TextureRegion.split(tex, 10, 20);
@@ -944,20 +986,20 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 		num.setAlign(values[12]);
 		num.setDestination(0, (values[3] + values[5] / 2) * dstw / srcw,
 				dsth - (values[4] - 5) * dsth / srch, 8 * dw, 16 * dh, 0, 255,
-				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1999, 0, OPTION_PERFECT[side], OFFSET_JUDGE_DETAIL[side]);
+				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1999, 0, OPTION_PERFECT[side], new int[]{OFFSET_JUDGE_DETAIL[side], OFFSET_LIFT});
 		num.setDestination(500, (values[3] + values[5] / 2) * dstw / srcw,
 				dsth - (values[4] - 5) * dsth / srch, 8 * dw, 16 * dh, 0, 255,
-				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1999, 0, OPTION_PERFECT[side], OFFSET_JUDGE_DETAIL[side]);
+				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1999, 0, OPTION_PERFECT[side], new int[]{OFFSET_JUDGE_DETAIL[side], OFFSET_LIFT});
 		skin.add(num);
 		SkinNumber num2 = new SkinNumber(new TextureRegion[][] { images[3] },
 				new TextureRegion[][] { images[4] }, 0, 0, 4, 0, VALUE_JUDGE_DURATION[side]);
 		num2.setAlign(values[12]);
 		num2.setDestination(0, (values[3] + values[5] / 2) * dstw / srcw,
 				dsth - (values[4] - 5) * dsth / srch, 8 * dw, 16 * dh, 0, 255,
-				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1999, 0, -(OPTION_PERFECT[side]), OFFSET_JUDGE_DETAIL[side]);
+				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1999, 0, -(OPTION_PERFECT[side]), new int[]{OFFSET_JUDGE_DETAIL[side], OFFSET_LIFT});
 		num2.setDestination(500, (values[3] + values[5] / 2) * dstw / srcw,
 				dsth - (values[4] - 5) * dsth / srch, 8 * dw, 16 * dh, 0, 255,
-				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1999, 0, -(OPTION_PERFECT[side]), OFFSET_JUDGE_DETAIL[side]);
+				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1999, 0, -(OPTION_PERFECT[side]), new int[]{OFFSET_JUDGE_DETAIL[side], OFFSET_LIFT});
 		skin.add(num2);
 	}
 
@@ -986,6 +1028,13 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 
 		this.loadSkin(new PlaySkin(src, dst), f, player, header, option, property);
 
+		//白数字が0の時のレーンカバーのy座標の分だけレーンの高さを減らす
+		float laneCoverPosition = skin.getLaneCoverPosition();
+		if(laneCoverPosition > 0) {
+			for(int i = 0; i < laner.length; i++) {
+				laner[i].height = laner[i].height - (dsth - laneCoverPosition);
+			}
+		}
 		lanerender.setLaneRegion(laner, scale, skin);
 
 		SkinImage[] skinline = new SkinImage[lines[0] != null ? (lines[1] != null ? 2 : 1) : 0];
@@ -1034,13 +1083,12 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 
 	private void makeDefaultLines(int index, int h, int r, int g, int b) {
 		Texture tex = new Texture("skin/default/system.png");
-		int[] values = linevalues[index % 2];
+		int[] values = parseInt(linevalues[index % 2]);
 		SkinImage li = new SkinImage(new TextureRegion(tex, 0, 0, 1,1));
-		li.setOffsetID(OFFSET_LIFT);
 		lines[index] = li;
 		lines[index].setDestination(values[2], values[3] * dstw / srcw, dsth - (values[4] + values[6]) * dsth / srch,
 				values[5] * dstw / srcw, values[6] * dsth / srch * h, values[7], 255, r, g,
 				b, values[12], values[13], values[14], values[15], values[16],
-				values[17], values[18], values[19], values[20], values[21]);
+				values[17], values[18], values[19], values[20], readOffset(linevalues[index % 2], 21, new int[]{OFFSET_LIFT}));
 	}
 }

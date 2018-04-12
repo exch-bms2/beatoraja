@@ -5,7 +5,6 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.Map.Entry;
 
-import bms.model.Mode;
 import bms.player.beatoraja.SkinConfig.Offset;
 import bms.player.beatoraja.play.TargetProperty;
 import bms.player.beatoraja.skin.*;
@@ -120,20 +119,6 @@ public abstract class MainState {
 			return model != null && (model.getJudge() == 1 || (model.getJudge() >= 50 && model.getJudge() < 70));
 		case OPTION_JUDGE_VERYHARD:
 			return model != null && (model.getJudge() == 0 || (model.getJudge() >= 10 && model.getJudge() < 50));
-		case OPTION_5KEYSONG:
-			return model != null && model.getMode() == Mode.BEAT_5K.id;
-		case OPTION_7KEYSONG:
-			return model != null && model.getMode() == Mode.BEAT_7K.id;
-		case OPTION_9KEYSONG:
-			return model != null && model.getMode() == Mode.POPN_9K.id;
-		case OPTION_10KEYSONG:
-			return model != null && model.getMode() == Mode.BEAT_10K.id;
-		case OPTION_14KEYSONG:
-			return model != null && model.getMode() == Mode.BEAT_14K.id;
-		case OPTION_24KEYSONG:
-			return model != null && model.getMode() == Mode.KEYBOARD_24K.id;
-		case OPTION_24KEYDPSONG:
-			return model != null && model.getMode() == Mode.KEYBOARD_24K_DOUBLE.id;
 		case OPTION_NO_TEXT:
 			return model != null && !model.hasDocument();
 		case OPTION_TEXT:
@@ -163,70 +148,6 @@ public abstract class MainState {
 			return main.getIRConnection() == null;
 		case OPTION_ONLINE:
 			return main.getIRConnection() != null;
-		case OPTION_F:
-			return score.qualifyRank(0);
-		case OPTION_E:
-			return score.qualifyRank(6);
-		case OPTION_D:
-			return score.qualifyRank(9);
-		case OPTION_C:
-			return score.qualifyRank(12);
-		case OPTION_B:
-			return score.qualifyRank(15);
-		case OPTION_A:
-			return score.qualifyRank(18);
-		case OPTION_AA:
-			return score.qualifyRank(21);
-		case OPTION_AAA:
-			return score.qualifyRank(24);
-		case OPTION_1P_F:
-		case OPTION_RESULT_F_1P:
-		case OPTION_NOW_F_1P:
-			return score.qualifyNowRank(0) && !score.qualifyNowRank(6);
-		case OPTION_1P_E:
-		case OPTION_RESULT_E_1P:
-		case OPTION_NOW_E_1P:
-			return score.qualifyNowRank(6) && !score.qualifyNowRank(9);
-		case OPTION_RESULT_D_1P:
-		case OPTION_NOW_D_1P:
-		case OPTION_1P_D:
-			return score.qualifyNowRank(9) && !score.qualifyNowRank(12);
-		case OPTION_RESULT_C_1P:
-		case OPTION_NOW_C_1P:
-		case OPTION_1P_C:
-			return score.qualifyNowRank(12) && !score.qualifyNowRank(15);
-		case OPTION_1P_B:
-		case OPTION_RESULT_B_1P:
-		case OPTION_NOW_B_1P:
-			return score.qualifyNowRank(15) && !score.qualifyNowRank(18);
-		case OPTION_1P_A:
-		case OPTION_RESULT_A_1P:
-		case OPTION_NOW_A_1P:
-			return score.qualifyNowRank(18) && !score.qualifyNowRank(21);
-		case OPTION_1P_AA:
-		case OPTION_RESULT_AA_1P:
-		case OPTION_NOW_AA_1P:
-			return score.qualifyNowRank(21) && !score.qualifyNowRank(24);
-		case OPTION_1P_AAA:
-		case OPTION_RESULT_AAA_1P:
-		case OPTION_NOW_AAA_1P:
-			return score.qualifyNowRank(24);
-		case OPTION_BEST_F_1P:
-			return score.qualifyBestRank(0) && !score.qualifyBestRank(6);
-		case OPTION_BEST_E_1P:
-			return score.qualifyBestRank(6) && !score.qualifyBestRank(9);
-		case OPTION_BEST_D_1P:
-			return score.qualifyBestRank(9) && !score.qualifyBestRank(12);
-		case OPTION_BEST_C_1P:
-			return score.qualifyBestRank(12) && !score.qualifyBestRank(15);
-		case OPTION_BEST_B_1P:
-			return score.qualifyBestRank(15) && !score.qualifyBestRank(18);
-		case OPTION_BEST_A_1P:
-			return score.qualifyBestRank(18) && !score.qualifyBestRank(21);
-		case OPTION_BEST_AA_1P:
-			return score.qualifyBestRank(21) && !score.qualifyBestRank(24);
-		case OPTION_BEST_AAA_1P:
-			return score.qualifyBestRank(24);
 		case OPTION_TABLE_SONG:
 			return main.getPlayerResource().getTablename().length() != 0;
 		}
@@ -508,20 +429,6 @@ public abstract class MainState {
 	}
 
 	public float getSliderValue(int id) {
-		switch (id) {
-		case BARGRAPH_SCORERATE:
-			return score.getRate();
-		case BARGRAPH_SCORERATE_FINAL:
-			return score.getNowRate();
-		case BARGRAPH_BESTSCORERATE_NOW:
-			return score.getNowBestScoreRate();
-		case BARGRAPH_BESTSCORERATE:
-			return score.getBestScoreRate();
-		case BARGRAPH_TARGETSCORERATE_NOW:
-			return score.getNowRivalScoreRate();
-		case BARGRAPH_TARGETSCORERATE:
-			return score.getRivalScoreRate();
-		}
 		return 0;
 	}
 

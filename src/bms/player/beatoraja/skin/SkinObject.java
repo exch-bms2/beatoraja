@@ -67,6 +67,7 @@ public abstract class SkinObject implements Disposable {
 	 * 描画条件となるオプション定義
 	 */
 	private int[] dstop = new int[0];
+	private BooleanProperty[] dstdraw = new BooleanProperty[0];
 	/**
 	 * 描画条件のマウス範囲
 	 */
@@ -155,6 +156,20 @@ public abstract class SkinObject implements Disposable {
 
 	public void setDestination(long time, float x, float y, float w, float h, int acc, int a, int r, int g, int b,
 			int blend, int filter, int angle, int center, int loop, int timer, int[] op) {
+		setDestination(time, x, y, w, h, acc, a, r, g, b, blend, filter, angle, center, loop, timer);
+		if (dstop.length == 0 && dstdraw.length == 0) {
+			setDrawCondition(op);
+		}
+	}
+	
+	public void setDestination(long time, float x, float y, float w, float h, int acc, int a, int r, int g, int b,
+			int blend, int filter, int angle, int center, int loop, int timer, BooleanProperty draw) {
+		setDestination(time, x, y, w, h, acc, a, r, g, b, blend, filter, angle, center, loop, timer);
+		dstdraw = new BooleanProperty[] {draw};
+	}
+	
+	private void setDestination(long time, float x, float y, float w, float h, int acc, int a, int r, int g, int b,
+			int blend, int filter, int angle, int center, int loop, int timer) {
 		SkinObjectDestination obj = new SkinObjectDestination(time, new Rectangle(x, y, w, h), new Color(r / 255.0f,
 				g / 255.0f, b / 255.0f, a / 255.0f), angle, acc);
 		if (dst.length == 0) {
@@ -194,15 +209,6 @@ public abstract class SkinObject implements Disposable {
 		if (dstloop == 0) {
 			dstloop = loop;
 		}
-		if (dstop.length == 0) {
-			IntSet l = new IntSet();
-			for(int i : op) {
-				if(i != 0) {
-					l.add(i);
-				}
-			}
-			dstop = l.iterator().toArray().toArray();
-		}
 		for (int i = 0; i < dst.length; i++) {
 			if (dst[i].time > time) {
 				Array<SkinObjectDestination> l = new Array<SkinObjectDestination>(dst);
@@ -217,7 +223,11 @@ public abstract class SkinObject implements Disposable {
 		l.add(obj);
 		dst = l.toArray(SkinObjectDestination.class);
 		starttime = dst[0].time;
-		endtime = dst[dst.length - 1].time;
+		endtime = dst[dst.length - 1].time;		
+	}
+
+	public BooleanProperty[] getDrawCondition() {
+		return dstdraw;
 	}
 
 	public int[] getOption() {
@@ -226,6 +236,29 @@ public abstract class SkinObject implements Disposable {
 
 	public void setOption(int[] dstop) {
 		this.dstop = dstop;
+	}
+
+	public void setDrawCondition(int[] dstop) {
+		IntSet l = new IntSet(dstop.length);
+		IntArray op = new IntArray(dstop.length);
+		Array<BooleanProperty> draw = new Array(dstop.length);
+		for(int i : dstop) {
+			if(i != 0 && !l.contains(i)) {
+				BooleanProperty dc = SkinPropertyMapper.getBooleanProperty(i);
+				if(dc != null) {
+					draw.add(dc);
+				} else {
+					op.add(i);
+				}
+				l.add(i);
+			}
+		}
+		this.dstop = op.toArray();
+		this.dstdraw = draw.toArray(BooleanProperty.class);
+	}
+	
+	public void setDrawCondition(BooleanProperty[] dstdraw) {
+		this.dstdraw = dstdraw;
 	}
 
 	public Rectangle getDestination(long time) {
@@ -656,7 +689,73 @@ public abstract class SkinObject implements Disposable {
 		public float r;
 		public float a;
 	}
+	
+	public interface BooleanProperty {
+		
+		public boolean isStatic(MainState state);
+		
+		public boolean get(MainState state);
+	}
 
+	public interface IntegerProperty {
+		
+		public int get(MainState state);
+	}
+	
+	public interface FloatProperty {
+		
+		public float get(MainState state);
+
+	}
+	
+	public interface StringProperty {
+		
+		public String get(MainState state);
+
+	}
+	
+	public static class RateProperty implements FloatProperty {
+		
+		private final IntegerProperty ref;
+		private final int type;
+		private final int min;
+		private final int max;
+		
+		public RateProperty(int type, int min, int max) {
+			this.ref = SkinPropertyMapper.getIntegerProperty(type);
+			this.type = type;
+			this.min = min;
+			this.max = max;
+		}
+		
+		public float get(MainState state) {
+			final int value = ref != null ? ref.get(state) : state.getNumberValue(type);
+			if(min < max) {
+				if(value > max) {
+					return 1;
+				} else if(value < min) {
+					return 0;
+				} else {
+					return Math.abs( ((float) value - min) / (max - min) );
+				}
+			} else {
+				if(value < max) {
+					return 1;
+				} else if(value > min) {
+					return 0;
+				} else {
+					return Math.abs( ((float) value - min) / (max - min) );
+				}
+			}
+		}
+	}
+	
+	public interface FloatWriter {
+		
+		public void set(MainState state, float value);
+
+	}
+	
 	public abstract void dispose();
 
 	public int[] getOffsetID() {

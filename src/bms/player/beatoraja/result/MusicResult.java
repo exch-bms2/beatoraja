@@ -13,17 +13,12 @@ import bms.model.BMSModel;
 import bms.model.LongNote;
 import bms.model.Note;
 import bms.model.TimeLine;
-import bms.player.beatoraja.ClearType;
-import bms.player.beatoraja.IRScoreData;
-import bms.player.beatoraja.MainController;
-import bms.player.beatoraja.MainState;
-import bms.player.beatoraja.PlayerConfig;
-import bms.player.beatoraja.PlayerResource;
+import bms.player.beatoraja.*;
 import bms.player.beatoraja.PlayerResource.PlayMode;
-import bms.player.beatoraja.ReplayData;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.ir.IRConnection;
 import bms.player.beatoraja.ir.IRResponse;
+import bms.player.beatoraja.play.GrooveGauge;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.skin.SkinType;
 
@@ -32,7 +27,7 @@ import bms.player.beatoraja.skin.SkinType;
  *
  * @author exch
  */
-public class MusicResult extends MainState {
+public class MusicResult extends AbstractResult {
 
 	private IRScoreData oldscore = new IRScoreData();
 
@@ -51,28 +46,6 @@ public class MusicResult extends MainState {
 	 */
 	final int distRange = 150;
 
-	/**
-	 * 状態
-	 */
-	private int state;
-
-	public static final int STATE_OFFLINE = 0;
-	public static final int STATE_IR_PROCESSING = 1;
-	public static final int STATE_IR_FINISHED = 2;
-
-	private int next;
-
-	private int irrank;
-	private int irprevrank;
-	private int irtotal;
-
-	private int saveReplay[] = new int[4];
-	private static final int replay = 4;
-
-	public static final int SOUND_CLEAR = 0;
-	public static final int SOUND_FAIL = 1;
-	public static final int SOUND_CLOSE = 2;
-
 	private ResultKeyProperty property;
 
 	public MusicResult(MainController main) {
@@ -83,6 +56,10 @@ public class MusicResult extends MainState {
 
 	public void create() {
 		final PlayerResource resource = main.getPlayerResource();
+		for(int i = 0;i < REPLAY_SIZE;i++) {
+			saveReplay[i] = main.getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
+					resource.getPlayerConfig().getLnmode(), i) ? ReplayStatus.EXIST : ReplayStatus.NOT_EXIST ;			
+		}
 
 		setSound(SOUND_CLEAR, "clear.wav", SoundType.SOUND, false);
 		setSound(SOUND_FAIL, "fail.wav", SoundType.SOUND, false);
@@ -96,7 +73,7 @@ public class MusicResult extends MainState {
 		updateScoreDatabase();
 		// リプレイの自動保存
 		if (resource.getPlayMode() == PlayMode.PLAY) {
-			for (int i = 0; i < replay; i++) {
+			for (int i = 0; i < REPLAY_SIZE; i++) {
 				if (ReplayAutoSaveConstraint.get(resource.getConfig().getAutoSaveReplay()[i]).isQualified(oldscore,
 						resource.getScoreData())) {
 					saveReplayData(i);
@@ -108,6 +85,8 @@ public class MusicResult extends MainState {
 			resource.addCourseReplay(resource.getReplayData());
 			resource.addCourseGauge(resource.getGauge());
 		}
+		
+		gaugeType = resource.getGrooveGauge().getType();
 
 		loadSkin(SkinType.RESULT);
 	}
@@ -161,13 +140,6 @@ public class MusicResult extends MainState {
 						main.changeState(MainController.STATE_PLAYBMS);
 					} else {
 						// 合格リザルト
-						if (resource.getPlayerConfig().isContinueUntilEndOfSong()) {
-							int changedGaugeType = resource.getGrooveGauge()
-									.changeTypeOfClear(resource.getGrooveGauge().getType());
-							if (resource.getPlayMode() == PlayMode.PLAY)
-								resource.getPlayerConfig().setGauge(changedGaugeType + resource.getGrooveGauge().NORMAL
-										- resource.getGrooveGauge().CLASS);
-						}
 						main.changeState(MainController.STATE_GRADE_RESULT);
 					}
 				} else {
@@ -225,7 +197,14 @@ public class MusicResult extends MainState {
 				long[] keytime = inputProcessor.getTime();
 				boolean ok = false;
 				for (int i = 0; i < property.getAssignLength(); i++) {
-					if (property.getAssign(i) != null && keystate[i] && keytime[i] != 0) {
+					if (property.getAssign(i) == ResultKeyProperty.ResultKey.CHANGE_GRAPH && keystate[i] && keytime[i] != 0) {
+						if(gaugeType >= GrooveGauge.ASSISTEASY && gaugeType <= GrooveGauge.HAZARD) {
+							gaugeType = (gaugeType + 1) % 6;
+						} else {
+							gaugeType = (gaugeType - 5) % 3 + 6;
+						}
+						keytime[i] = 0;
+					} else if (property.getAssign(i) != null && keystate[i] && keytime[i] != 0) {
 						keytime[i] = 0;
 						ok = true;
 					}
@@ -269,17 +248,16 @@ public class MusicResult extends MainState {
 		final PlayerResource resource = main.getPlayerResource();
 		if (resource.getPlayMode() == PlayMode.PLAY && resource.getCourseBMSModels() == null
 				&& resource.getScoreData() != null) {
-			if (saveReplay[index] == -1 && resource.isUpdateScore()) {
+			if (saveReplay[index] != ReplayStatus.SAVED && resource.isUpdateScore()) {
 				ReplayData rd = resource.getReplayData();
 				main.getPlayDataAccessor().wrireReplayData(rd, resource.getBMSModel(),
 						resource.getPlayerConfig().getLnmode(), index);
-				saveReplay[index] = 1;
+				saveReplay[index] = ReplayStatus.SAVED;
 			}
 		}
 	}
 
 	private void updateScoreDatabase() {
-		Arrays.fill(saveReplay, -1);
 		state = STATE_OFFLINE;
 		irrank = irprevrank = irtotal = 0;
 		final PlayerResource resource = main.getPlayerResource();
@@ -362,8 +340,6 @@ public class MusicResult extends MainState {
 			cscore.setLms(cscore.getLms() + newscore.getLms());
 			cscore.setMinbp(cscore.getMinbp() + newscore.getMinbp());
 			if (resource.getGauge()[resource.getGrooveGauge().getType()].get(resource.getGauge()[resource.getGrooveGauge().getType()].size - 1) > 0) {
-				int orgGaugeType = resource.getGrooveGauge().getType();
-				if(resource.getPlayerConfig().isContinueUntilEndOfSong() && resource.getCourseIndex() == resource.getCourseBMSModels().length - 1) resource.getGrooveGauge().changeTypeOfClear(resource.getGrooveGauge().getType());
 				if (resource.getAssist() > 0) {
 					if(resource.getAssist() == 1 && cscore.getClear() != ClearType.AssistEasy.id) cscore.setClear(ClearType.LightAssistEasy.id);
 					else cscore.setClear(ClearType.AssistEasy.id);
@@ -388,7 +364,6 @@ public class MusicResult extends MainState {
 						}
 					}
 				}
-				if(resource.getPlayerConfig().isContinueUntilEndOfSong() && resource.getCourseIndex() == resource.getCourseBMSModels().length - 1) resource.getGrooveGauge().setType(orgGaugeType);
 			} else {
 				cscore.setClear(Failed.id);
 
@@ -645,38 +620,6 @@ public class MusicResult extends MainState {
 			return score.getExscore() > resource.getRivalScoreData();
 		case OPTION_DRAW_TARGET:
 			return score.getExscore() == resource.getRivalScoreData();
-		case OPTION_NO_REPLAYDATA:
-			return !main.getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
-					resource.getPlayerConfig().getLnmode(), 0);
-		case OPTION_NO_REPLAYDATA2:
-			return !main.getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
-					resource.getPlayerConfig().getLnmode(), 1);
-		case OPTION_NO_REPLAYDATA3:
-			return !main.getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
-					resource.getPlayerConfig().getLnmode(), 2);
-		case OPTION_NO_REPLAYDATA4:
-			return !main.getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
-					resource.getPlayerConfig().getLnmode(), 3);
-		case OPTION_REPLAYDATA:
-			return main.getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
-					resource.getPlayerConfig().getLnmode(), 0);
-		case OPTION_REPLAYDATA2:
-			return main.getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
-					resource.getPlayerConfig().getLnmode(), 1);
-		case OPTION_REPLAYDATA3:
-			return main.getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
-					resource.getPlayerConfig().getLnmode(), 2);
-		case OPTION_REPLAYDATA4:
-			return main.getPlayDataAccessor().existsReplayData(resource.getBMSModel(),
-					resource.getPlayerConfig().getLnmode(), 3);
-		case OPTION_REPLAYDATA_SAVED:
-			return saveReplay[0] == 1;
-		case OPTION_REPLAYDATA2_SAVED:
-			return saveReplay[1] == 1;
-		case OPTION_REPLAYDATA3_SAVED:
-			return saveReplay[2] == 1;
-		case OPTION_REPLAYDATA4_SAVED:
-			return saveReplay[3] == 1;
 		}
 		return super.getBooleanValue(id);
 	}
@@ -709,86 +652,6 @@ public class MusicResult extends MainState {
 		case BUTTON_REPLAY4:
 			saveReplayData(3);
 			break;
-		}
-	}
-
-	public enum ReplayAutoSaveConstraint {
-
-		NOTHING {
-			@Override
-			public boolean isQualified(IRScoreData oldscore, IRScoreData newscore) {
-				return false;
-			}
-		},
-		SCORE_UPDATE {
-			@Override
-			public boolean isQualified(IRScoreData oldscore, IRScoreData newscore) {
-				return newscore.getExscore() > oldscore.getExscore();
-			}
-		},
-		SCORE_UPDATE_OR_EQUAL {
-			@Override
-			public boolean isQualified(IRScoreData oldscore, IRScoreData newscore) {
-				return newscore.getExscore() >= oldscore.getExscore();
-			}
-		},
-		MISSCOUNT_UPDATE {
-			@Override
-			public boolean isQualified(IRScoreData oldscore, IRScoreData newscore) {
-				return newscore.getMinbp() < oldscore.getMinbp() || oldscore.getClear() == NoPlay.id;
-			}
-		},
-		MISSCOUNT_UPDATE_OR_EQUAL {
-			@Override
-			public boolean isQualified(IRScoreData oldscore, IRScoreData newscore) {
-				return newscore.getMinbp() <= oldscore.getMinbp() || oldscore.getClear() == NoPlay.id;
-			}
-		},
-		MAXCOMBO_UPDATE {
-			@Override
-			public boolean isQualified(IRScoreData oldscore, IRScoreData newscore) {
-				return newscore.getCombo() > oldscore.getCombo();
-			}
-		},
-		MAXCOMBO_UPDATE_OR_EQUAL {
-			@Override
-			public boolean isQualified(IRScoreData oldscore, IRScoreData newscore) {
-				return newscore.getCombo() >= oldscore.getCombo();
-			}
-		},
-		CLEAR_UPDATE {
-			@Override
-			public boolean isQualified(IRScoreData oldscore, IRScoreData newscore) {
-				return newscore.getClear() > oldscore.getClear();
-			}
-		},
-		CLEAR_UPDATE_OR_EQUAL {
-			@Override
-			public boolean isQualified(IRScoreData oldscore, IRScoreData newscore) {
-				return newscore.getClear() >= oldscore.getClear();
-			}
-		},
-		ANYONE_UPDATE {
-			@Override
-			public boolean isQualified(IRScoreData oldscore, IRScoreData newscore) {
-				return newscore.getClear() > oldscore.getClear() || newscore.getCombo() > oldscore.getCombo() ||
-						newscore.getMinbp() < oldscore.getMinbp() || newscore.getExscore() > oldscore.getExscore();
-			}
-		},
-		ALWAYS {
-			@Override
-			public boolean isQualified(IRScoreData oldscore, IRScoreData newscore) {
-				return true;
-			}
-		};
-
-		public abstract boolean isQualified(IRScoreData oldscore, IRScoreData newscore);
-
-		public static ReplayAutoSaveConstraint get(int index) {
-			if (index < 0 || index >= values().length) {
-				return NOTHING;
-			}
-			return values()[index];
 		}
 	}
 

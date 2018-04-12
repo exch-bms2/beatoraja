@@ -5,6 +5,8 @@ import bms.player.beatoraja.Resolution;
 import bms.player.beatoraja.ShaderManager;
 import bms.player.beatoraja.SkinConfig.Offset;
 import bms.player.beatoraja.play.SkinGauge;
+import bms.player.beatoraja.skin.SkinObject.BooleanProperty;
+import bms.player.beatoraja.skin.SkinObject.SkinObjectDestination;
 import bms.player.beatoraja.skin.SkinObject.SkinOffset;
 import bms.player.beatoraja.play.BMSPlayer;
 
@@ -112,9 +114,22 @@ public class Skin {
 	}
 
 	public void setDestination(SkinObject object, long time, float x, float y, float w, float h, int acc, int a,
+			int r, int g, int b, int blend, int filter, int angle, int center, int loop, int timer, int op1, int op2,
+			int op3, int[] offset) {
+		object.setDestination(time, x * dw, y * dh, w * dw, h * dh, acc, a, r, g, b, blend, filter, angle, center,
+				loop, timer, op1, op2, op3, offset);
+	}
+
+	public void setDestination(SkinObject object, long time, float x, float y, float w, float h, int acc, int a,
 			int r, int g, int b, int blend, int filter, int angle, int center, int loop, int timer, int[] op) {
 		object.setDestination(time, x * dw, y * dh, w * dw, h * dh, acc, a, r, g, b, blend, filter, angle, center,
 				loop, timer, op);
+	}
+
+	public void setDestination(SkinObject object, long time, float x, float y, float w, float h, int acc, int a,
+			int r, int g, int b, int blend, int filter, int angle, int center, int loop, int timer, BooleanProperty draw) {
+		object.setDestination(time, x * dw, y * dh, w * dw, h * dh, acc, a, r, g, b, blend, filter, angle, center,
+				loop, timer, draw);
 	}
 
 	public void addNumber(SkinNumber number, long time, float x, float y, float w, float h, int acc, int a, int r,
@@ -151,6 +166,18 @@ public class Skin {
 			if(obj.getAllDestination().length == 0) {
 				removes.add(obj);
 			} else {
+				Array<BooleanProperty> bp = new Array();
+				for(BooleanProperty op : obj.getDrawCondition()) {
+					if(op.isStatic(state)) {
+						if(!op.get(state)) {
+							removes.add(obj);							
+						}
+					} else {
+						bp.add(op);
+					}
+				}
+				obj.setDrawCondition(bp.toArray(BooleanProperty.class));
+
 				IntArray l = new IntArray();
 				for(int op : obj.getOption()) {
 					if(op > 0) {
@@ -221,14 +248,19 @@ public class Skin {
 			renderer = new SkinObjectRenderer(sprite);
 		}
 		for (SkinObject obj : objectarray) {
-			if (isDraw(obj.getOption(), state)) {
+			if (isDraw(obj, state)) {
 				obj.draw(renderer, time, state);
 			}
 		}
 	}
 
-	private final boolean isDraw(int[] opt, MainState state) {
-		for (int op : opt) {
+	private final boolean isDraw(SkinObject obj, MainState state) {
+		for (BooleanProperty draw : obj.getDrawCondition()) {
+			if(!draw.get(state)) {
+				return false;
+			}
+		}
+		for (int op : obj.getOption()) {
 			if (op > 0) {
 				if (!state.getBooleanValue(op)) {
 					return false;
@@ -245,7 +277,7 @@ public class Skin {
 	public void mousePressed(MainState state, int button, int x, int y) {
 		for (int i = objectarray.length - 1; i >= 0; i--) {
 			final SkinObject obj = objectarray[i];
-			if (isDraw(obj.getOption(), state) && obj.mousePressed(state, button, x, y)) {
+			if (isDraw(obj, state) && obj.mousePressed(state, button, x, y)) {
 				break;
 			}
 		}
@@ -254,7 +286,7 @@ public class Skin {
 	public void mouseDragged(MainState state, int button, int x, int y) {
 		for (int i = objectarray.length - 1; i >= 0; i--) {
 			final SkinObject obj = objectarray[i];
-			if (obj instanceof SkinSlider && isDraw(obj.getOption(), state) && obj.mousePressed(state, button, x, y)) {
+			if (obj instanceof SkinSlider && isDraw(obj, state) && obj.mousePressed(state, button, x, y)) {
 				break;
 			}
 		}
@@ -472,6 +504,22 @@ public class Skin {
 			}
 		}
 		return 0;
+	}
+
+	/*
+	 * 白数字が0の時のレーンカバーのy座標
+	 */
+	public float getLaneCoverPosition() {
+		for(SkinObject obj: objects) {
+			if(obj instanceof SkinSlider) {
+				SkinSlider slider = (SkinSlider) obj;
+				if(slider.getType() == SLIDER_LANECOVER) {
+					SkinObjectDestination[] dst = slider.getAllDestination();
+					return dst[dst.length - 1].region.y;
+				}
+			}
+		}
+		return -1;
 	}
 
 	public void setGaugeParts(int parts) {

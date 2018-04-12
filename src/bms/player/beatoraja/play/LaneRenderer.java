@@ -7,6 +7,7 @@ import bms.player.beatoraja.play.SkinNote.SkinLane;
 
 import bms.model.*;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
+import bms.player.beatoraja.skin.SkinObject.SkinOffset;
 import bms.player.beatoraja.skin.SkinImage;
 
 import com.badlogic.gdx.Gdx;
@@ -47,14 +48,6 @@ public class LaneRenderer {
 	private PlayConfig playconfig;
 
 	private int currentduration;
-	private int currentdurationLanecoverOn;
-	private int currentdurationLanecoverOff;
-	private int mainbpmdurationLanecoverOn;
-	private int mainbpmdurationLanecoverOff;
-	private int minbpmdurationLanecoverOn;
-	private int minbpmdurationLanecoverOff;
-	private int maxbpmdurationLanecoverOn;
-	private int maxbpmdurationLanecoverOff;
 
 	private double basebpm;
 	private double nowbpm;
@@ -95,7 +88,7 @@ public class LaneRenderer {
 		this.skin = (PlaySkin) main.getSkin();
 		this.conf = main.main.getPlayerResource().getConfig();
 		this.config = main.main.getPlayerResource().getPlayerConfig();
-		this.playconfig = main.getPlayConfig(this.config).getPlayconfig().clone();
+		this.playconfig = config.getPlayConfig(model.getMode()).getPlayconfig().clone();
 
 		init(model);
 
@@ -104,6 +97,7 @@ public class LaneRenderer {
 				playconfig.setHispeed(1.0f);
 				playconfig.setLanecover(0);
 				playconfig.setLift(0);
+				playconfig.setHidden(0);
 			}
 		}
 
@@ -195,38 +189,6 @@ public class LaneRenderer {
 		return currentduration;
 	}
 
-	public int getCurrentDurationLanecoverOn() {
-		return currentdurationLanecoverOn;
-	}
-
-	public int getCurrentDurationLanecoverOff() {
-		return currentdurationLanecoverOff;
-	}
-
-	public int getMainbpmdurationLanecoverOn() {
-		return mainbpmdurationLanecoverOn;
-	}
-
-	public int getMainbpmdurationLanecoverOff() {
-		return mainbpmdurationLanecoverOff;
-	}
-
-	public int getMinbpmdurationLanecoverOn() {
-		return minbpmdurationLanecoverOn;
-	}
-
-	public int getMinbpmdurationLanecoverOff() {
-		return minbpmdurationLanecoverOff;
-	}
-
-	public int getMaxbpmdurationLanecoverOn() {
-		return maxbpmdurationLanecoverOn;
-	}
-
-	public int getMaxbpmdurationLanecoverOff() {
-		return maxbpmdurationLanecoverOff;
-	}
-
 	public float getHispeedmargin() {
 		return hispeedmargin;
 	}
@@ -241,6 +203,10 @@ public class LaneRenderer {
 
 	public float getLiftRegion() {
 		return playconfig.getLift();
+	}
+
+	public void setLiftRegion(float liftRegion) {
+		playconfig.setLift(liftRegion < 0 ? 0 : (liftRegion > 1 ? 1 : liftRegion));
 	}
 
 	public float getLanecover() {
@@ -260,6 +226,18 @@ public class LaneRenderer {
 
 	public boolean isEnableLanecover() {
 		return playconfig.isEnablelanecover();
+	}
+
+	public float getHiddenCover() {
+		return playconfig.getHidden();
+	}
+
+	public void setHiddenCover(float hiddenCover) {
+		playconfig.setHidden(hiddenCover < 0 ? 0 : (hiddenCover > 1 ? 1 : hiddenCover));
+	}
+
+	public boolean isEnableHidden() {
+		return playconfig.isEnablehidden();
 	}
 
 	public void changeHispeed(boolean b) {
@@ -327,20 +305,26 @@ public class LaneRenderer {
 		final double rxhs = (hu - hl) * hispeed;
 		double y = hl;
 
-		final float lanecover = playconfig.getLanecover();
-		currentduration = (int) Math.round(region * (1 - (playconfig.isEnablelanecover() ? lanecover : 0)));
-
-		currentdurationLanecoverOn = (int) Math.round( region * (1 - lanecover) );
-		currentdurationLanecoverOff = (int) Math.round( region );
-		mainbpmdurationLanecoverOn = (int) Math.round( (240000 / mainbpm / hispeed) * (1 - lanecover) );
-		mainbpmdurationLanecoverOff = (int) Math.round( 240000 / mainbpm / hispeed );
-		minbpmdurationLanecoverOn = (int) Math.round( (240000 / minbpm / hispeed) * (1 - lanecover) );
-		minbpmdurationLanecoverOff = (int) Math.round( 240000 / minbpm / hispeed );
-		maxbpmdurationLanecoverOn = (int) Math.round( (240000 / maxbpm / hispeed) * (1 - lanecover) );
-		maxbpmdurationLanecoverOff = (int) Math.round( 240000 / maxbpm / hispeed );
+		final float lanecover = playconfig.isEnablelanecover() ? playconfig.getLanecover() : 0;
+		currentduration = (int) Math.round(region * (1 - lanecover));
+		
+		main.main.getOffset(OFFSET_LIFT).y = (float) (hl - laneregion[0].y);
+		main.main.getOffset(OFFSET_LANECOVER).y = (float) ((hl - hu) * lanecover);
+		// TODO HIDDENとLIFT混在の必要性とHIDDENの必要性
+		final SkinOffset hidden = main.main.getOffset(OFFSET_HIDDEN_COVER);
+		if (playconfig.isEnablehidden()) {
+			hidden.a = 0;
+			if (playconfig.isEnablelift()) {
+				hidden.y =  (1 - playconfig.getLift()) * playconfig.getHidden()
+						* skin.getLaneRegion()[0].height;
+			} else {
+				hidden.y = playconfig.getHidden() * skin.getLaneRegion()[0].height;
+			}
+		} else {
+			hidden.a = -255;
+		}
 
 		// 判定エリア表示
-		// TODO 実装が古いため、書き直す
 		if (config.isShowjudgearea()) {
 			final Color[] color = { Color.valueOf("0000ff20"), Color.valueOf("00ff0020"), Color.valueOf("ffff0020"),
 					Color.valueOf("ff800020"), Color.valueOf("ff000020") };
@@ -633,6 +617,18 @@ public class LaneRenderer {
 
 	public double getNowBPM() {
 		return nowbpm;
+	}
+
+	public double getMinBPM() {
+		return minbpm;
+	}
+
+	public double getMaxBPM() {
+		return maxbpm;
+	}
+
+	public double getMainBPM() {
+		return mainbpm;
 	}
 
 	final private void drawLongNote(SkinObjectRenderer sprite, float x, float y, float width, float height, float scale,

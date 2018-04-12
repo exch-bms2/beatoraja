@@ -533,6 +533,8 @@ public class MainController extends ApplicationAdapter {
 
 	@Override
 	public void dispose() {
+		saveConfig();
+
 		if (bmsplayer != null) {
 			bmsplayer.dispose();
 		}
@@ -558,6 +560,8 @@ public class MainController extends ApplicationAdapter {
 //		input.dispose();
 		SkinLoader.getResource().dispose();
 		ShaderManager.dispose();
+		
+		Logger.getGlobal().info("全リソース破棄完了");
 	}
 
 	@Override
@@ -582,9 +586,6 @@ public class MainController extends ApplicationAdapter {
 	}
 
 	public void exit() {
-		saveConfig();
-
-		dispose();
 		Gdx.app.exit();
 	}
 
