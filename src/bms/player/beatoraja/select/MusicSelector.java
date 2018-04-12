@@ -330,8 +330,8 @@ public class MusicSelector extends MainState {
 						main.changeState(MainController.STATE_DECIDE);
 						banners.disposeOld();
 					}
-				} else if(((SongBar)current).getSongData().getIpfs() != null){
-					main.setDownload(((SongBar)current).getSongData());
+				} else if(song.getIpfs() != null){
+					execute(MusicSelectCommand.DOWNLOAD_IPFS);
 				} else {
 	                execute(MusicSelectCommand.OPEN_DOWNLOAD_SITE);
 				}
@@ -694,7 +694,7 @@ public class MusicSelector extends MainState {
 		}
 		return super.getSliderValue(id);
 	}
-	
+
 	private float getLevelRate(int difficulty) {
 		if (bar.getSelected() instanceof SongBar && ((SongBar) bar.getSelected()).getSongData() != null) {
 			SongData sd = ((SongBar) bar.getSelected()).getSongData();
@@ -873,7 +873,7 @@ public class MusicSelector extends MainState {
 		}
 		return false;
 	}
-	
+
 	private boolean existsTrophy(SongTrophy trophy) {
 		final IRScoreData score = getScoreDataProperty().getScoreData();
 		return score != null && score.getTrophy() != null && score.getTrophy().indexOf(trophy.character) >= 0;
@@ -963,7 +963,7 @@ public class MusicSelector extends MainState {
 	public BarRenderer getBarRender() {
 		return bar;
 	}
-	
+
 	public PixmapResourcePool getBannerResource() {
 		return banners;
 	}
