@@ -3,9 +3,22 @@ package bms.player.beatoraja.play;
 import java.util.*;
 import java.util.logging.Logger;
 
-import bms.model.*;
-import bms.player.beatoraja.*;
+import bms.model.BMSModel;
+import bms.model.Mode;
+import bms.model.Note;
+import bms.model.TimeLine;
+import bms.player.beatoraja.ClearType;
+import bms.player.beatoraja.Config;
+import bms.player.beatoraja.CourseData;
+import bms.player.beatoraja.IRScoreData;
+import bms.player.beatoraja.MainController;
+import bms.player.beatoraja.MainState;
+import bms.player.beatoraja.PlayConfig;
+import bms.player.beatoraja.PlayModeConfig;
+import bms.player.beatoraja.PlayerConfig;
+import bms.player.beatoraja.PlayerResource;
 import bms.player.beatoraja.PlayerResource.PlayMode;
+import bms.player.beatoraja.ReplayData;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyInputLog;
 import bms.player.beatoraja.pattern.*;
@@ -230,6 +243,7 @@ public class BMSPlayer extends MainState {
 			PatternModifier.modify(model, pattern);
 			Logger.getGlobal().info("譜面オプション : 保存された譜面変更ログから譜面再現");
 		} else if (autoplay != PlayMode.PRACTICE) {
+			Randomizer.setPlayerConfig(config);
 			PatternModifier.setPlayerConfig(config);
 			if(model.getMode().player == 2) {
 				if (config.getDoubleoption() == 1) {
@@ -237,7 +251,7 @@ public class BMSPlayer extends MainState {
 					pattern = PatternModifier.merge(pattern,mod.modify(model));
 				}
 				pattern = PatternModifier.merge(pattern,
-								PatternModifier.create(config.getRandom2(), PatternModifier.SIDE_2P)
+								PatternModifier.create(config.getRandom2(), PatternModifier.SIDE_2P, model.getMode())
 										.modify(model));
 				if (config.getRandom2() >= 6) {
 					assist = (assist == 0) ? 1 : assist;
@@ -257,7 +271,7 @@ public class BMSPlayer extends MainState {
 			}
 			pattern = PatternModifier.merge(pattern,
 					PatternModifier
-							.create(config.getRandom(), PatternModifier.SIDE_1P)
+							.create(config.getRandom(), PatternModifier.SIDE_1P, model.getMode())
 							.modify(model));
 			if (config.getRandom() >= 6 && !(config.getRandom() == 8 && model.getMode() == Mode.POPN_9K)) {
 				assist = (assist == 0) ? 1 : assist;
@@ -495,9 +509,9 @@ public class BMSPlayer extends MainState {
 					if (property.doubleop == 1) {
 						new LaneShuffleModifier(LaneShuffleModifier.FLIP).modify(model);
 					}
-					PatternModifier.create(property.random2, PatternModifier.SIDE_2P).modify(model);
+					PatternModifier.create(property.random2, PatternModifier.SIDE_2P, model.getMode()).modify(model);
 				}
-				PatternModifier.create(property.random, PatternModifier.SIDE_1P).modify(model);
+				PatternModifier.create(property.random, PatternModifier.SIDE_1P, model.getMode()).modify(model);
 
 				gauge = practice.getGauge(model);
 				model.setJudgerank(property.judgerank);
