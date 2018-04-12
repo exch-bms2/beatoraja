@@ -10,16 +10,12 @@ import javax.swing.JOptionPane;
 
 import com.badlogic.gdx.Graphics;
 import javafx.application.Application;
-import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.VBox;
-import javafx.stage.WindowEvent;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
-import com.badlogic.gdx.utils.Json;
-import com.badlogic.gdx.utils.JsonWriter.OutputType;
 
 import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.launcher.PlayConfigurationView;
@@ -34,8 +30,9 @@ public class MainLoader extends Application {
 	private static final boolean ALLOWS_32BIT_JAVA = false;
 	
 	public static void main(String[] args) {
+		
 		if(!ALLOWS_32BIT_JAVA && !System.getProperty( "os.arch" ).contains( "64")) {
-			JOptionPane.showMessageDialog(null, "This Application needs 64bit-Jaja.", "Error", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(null, "This Application needs 64bit-Java.", "Error", JOptionPane.ERROR_MESSAGE);
 			System.exit(1);
 		}
 
@@ -116,7 +113,6 @@ public class MainLoader extends Application {
 			cfg.backgroundFPS = config.getMaxFramePerSecond();
 			cfg.foregroundFPS = config.getMaxFramePerSecond();
 			cfg.title = MainController.VERSION;
-
 			
 			cfg.audioDeviceBufferSize = config.getAudioDeviceBufferSize();
 			cfg.audioDeviceSimultaneousSources = config.getAudioDeviceSimultaneousSources();
@@ -188,11 +184,8 @@ public class MainLoader extends Application {
 			Scene scene = new Scene(stackPane, stackPane.getPrefWidth(), stackPane.getPrefHeight());
 			primaryStage.setScene(scene);
 			primaryStage.setTitle(MainController.VERSION + " configuration");
-			primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {				
-				@Override
-				public void handle(WindowEvent event) {
-					bmsinfo.exit();
-				}
+			primaryStage.setOnCloseRequest((event) -> {
+				bmsinfo.exit();
 			});
 			primaryStage.show();
 
