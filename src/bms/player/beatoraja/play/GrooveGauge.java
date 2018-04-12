@@ -1,9 +1,12 @@
 package bms.player.beatoraja.play;
 
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.utils.FloatArray;
 
 import bms.model.Mode;
 import bms.player.beatoraja.ClearType;
+import bms.player.beatoraja.CourseData;
+import bms.player.beatoraja.PlayerResource;
 import bms.player.beatoraja.play.GaugeProperty.GaugeElementProperty;
 import bms.model.BMSModel;
 
@@ -110,6 +113,43 @@ public class GrooveGauge {
 	
 	public Gauge getGauge(int type) {
 		return gauges[type];
+	}
+	
+	public static GrooveGauge create(BMSModel model, int type, PlayerResource resource) {
+		int coursetype = 0;
+		GaugeProperty gauges = null;
+		if(resource.getCourseBMSModels() != null){
+			coursetype = 1;
+			for (CourseData.CourseDataConstraint i : resource.getConstraint()) {
+				switch(i) {
+				case GAUGE_5KEYS:
+					gauges = GaugeProperty.FIVEKEYS;
+					break;
+				case GAUGE_7KEYS:
+					gauges = GaugeProperty.SEVENKEYS;
+					break;
+				case GAUGE_9KEYS:
+					gauges = GaugeProperty.PMS;
+					break;
+				case GAUGE_24KEYS:
+					gauges = GaugeProperty.KEYBOARD;
+					break;
+				case GAUGE_LR2:
+					gauges = GaugeProperty.LR2;
+					break;
+				default:
+					break;
+				}
+			}
+		}
+		GrooveGauge gauge = create(model, type, coursetype, gauges);
+		FloatArray[] f = resource.getGauge();
+		if (f != null) {
+			for(int i = 0; i < f.length; i++) {
+				gauge.setValue(i, f[i].get(f[i].size - 1));
+			}
+		}
+		return gauge;
 	}
 	
 	public static GrooveGauge create(BMSModel model, int type, int grade, GaugeProperty gauge) {

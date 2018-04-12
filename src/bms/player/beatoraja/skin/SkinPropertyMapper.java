@@ -4,13 +4,12 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
 
 import bms.model.Mode;
 import bms.player.beatoraja.BMSResource;
-import bms.player.beatoraja.Config;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.PlayConfig;
 import bms.player.beatoraja.ScoreDataProperty;
-import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.play.GrooveGauge.Gauge;
+import bms.player.beatoraja.play.JudgeManager;
 import bms.player.beatoraja.play.LaneRenderer;
 import bms.player.beatoraja.result.CourseResult;
 import bms.player.beatoraja.result.MusicResult;
@@ -172,6 +171,41 @@ public class SkinPropertyMapper {
 		BooleanProperty result = null;
 		final int id = Math.abs(optionid);
 		
+		if(id == OPTION_GAUGE_GROOVE) {
+			result = new DrawConditionProperty(DrawConditionProperty.TYPE_STATIC_ON_RESULT) {
+				@Override
+				public boolean get(MainState state) {
+					if(state instanceof BMSPlayer) {
+						return ((BMSPlayer) state).getGauge().getType() <= 2;
+					}
+					return false;
+				}
+			};			
+		}
+		if(id == OPTION_GAUGE_HARD) {
+			result = new DrawConditionProperty(DrawConditionProperty.TYPE_STATIC_ON_RESULT) {
+				@Override
+				public boolean get(MainState state) {
+					if(state instanceof BMSPlayer) {
+						return ((BMSPlayer) state).getGauge().getType() >= 3;
+					}
+					return false;
+				}
+			};			
+		}
+		if(id == OPTION_GAUGE_EX) {
+			result = new DrawConditionProperty(DrawConditionProperty.TYPE_STATIC_ON_RESULT) {
+				@Override
+				public boolean get(MainState state) {
+					if(state instanceof BMSPlayer) {
+						final int type = ((BMSPlayer) state).getGauge().getType();
+						return type == 0 || type == 1 || type == 4 || type == 5 || type == 7 || type == 8;
+					}
+					return false;
+				}
+			};			
+		}
+
 		if(id == OPTION_BGAOFF || id == OPTION_BGAON) {
 			result = new DrawConditionProperty(DrawConditionProperty.TYPE_STATIC_WITHOUT_MUSICSELECT) {
 				@Override
@@ -249,6 +283,34 @@ public class SkinPropertyMapper {
 			};
 		}
 		
+		if (id == OPTION_1P_PERFECT) {			
+			result = new NowJudgeDrawCondition(0,0);
+		}		
+		if (id == OPTION_1P_EARLY) {			
+			result = new NowJudgeDrawCondition(0,1);
+		}
+		if (id == OPTION_1P_LATE) {			
+			result = new NowJudgeDrawCondition(0,2);
+		}
+		if (id == OPTION_2P_PERFECT) {			
+			result = new NowJudgeDrawCondition(1,0);
+		}		
+		if (id == OPTION_2P_EARLY) {			
+			result = new NowJudgeDrawCondition(1,1);
+		}
+		if (id == OPTION_2P_LATE) {			
+			result = new NowJudgeDrawCondition(1,2);
+		}
+		if (id == OPTION_3P_PERFECT) {			
+			result = new NowJudgeDrawCondition(2,0);
+		}		
+		if (id == OPTION_3P_EARLY) {			
+			result = new NowJudgeDrawCondition(2,1);
+		}
+		if (id == OPTION_3P_LATE) {			
+			result = new NowJudgeDrawCondition(2,2);
+		}
+		
 		if(result != null && optionid < 0) {
 			final BooleanProperty dc = result;
 			result = new BooleanProperty() {
@@ -314,6 +376,17 @@ public class SkinPropertyMapper {
 				return (int) ((resource.isBGAOn() ? (resource.getBGAProcessor().getProgress() + resource.getAudioDriver().getProgress()) / 2 : 
 					resource.getAudioDriver().getProgress()) * 100);
 			};			
+		}
+		
+		if(optionid >= VALUE_JUDGE_1P_DURATION && optionid <= VALUE_JUDGE_3P_DURATION) {
+			final int player = optionid - VALUE_JUDGE_1P_DURATION;
+			result = (state) -> {
+				if(state instanceof BMSPlayer) {
+					final JudgeManager judge =((BMSPlayer) state).getJudgeManager();
+					return (int) (judge.getRecentJudgeTiming().length > player ? judge.getRecentJudgeTiming()[player] : judge.getRecentJudgeTiming()[0]);
+				}
+				return 0;
+			};
 		}
 		
 		return result;
@@ -477,6 +550,36 @@ public class SkinPropertyMapper {
 		}
 		
 	}	
+
+	private static class NowJudgeDrawCondition extends DrawConditionProperty {
+		
+		private final int player;
+		private final int type;
+		
+		public NowJudgeDrawCondition(int player, int type) {
+			super(TYPE_STATIC_WITHOUT_MUSICSELECT);
+			this.player = player;
+			this.type = type;
+		}
+
+		@Override
+		public boolean get(MainState state) {
+			if(state instanceof BMSPlayer) {
+				JudgeManager judge = ((BMSPlayer) state).getJudgeManager();
+				if(type == 0) {
+					return judge.getNowJudge().length > player && judge.getNowJudge()[player] == 1;
+				} else if(type == 1) {
+					return judge.getNowJudge().length > player && judge.getNowJudge()[player] > 1
+							&& judge.getRecentJudgeTiming()[player] > 0;					
+				} else {
+					return judge.getNowJudge().length > player && judge.getNowJudge()[player] > 1
+							&& judge.getRecentJudgeTiming()[player] < 0;					
+				}
+			}
+			return false;
+		}
+
+	}
 
 	private static class ModeDrawCondition extends DrawConditionProperty {
 		

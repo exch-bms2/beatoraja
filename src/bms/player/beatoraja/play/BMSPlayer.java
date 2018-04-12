@@ -294,39 +294,9 @@ public class BMSPlayer extends MainState {
 		}
 		if(replay != null && main.getInputProcessor().getKeystate()[5]) {
 		}
-		int coursetype = 0;
-		GaugeProperty gauges = null;
-		if(resource.getCourseBMSModels() != null){
-			coursetype = 1;
-			for (CourseData.CourseDataConstraint i : resource.getConstraint()) {
-				switch(i) {
-				case GAUGE_5KEYS:
-					gauges = GaugeProperty.FIVEKEYS;
-					break;
-				case GAUGE_7KEYS:
-					gauges = GaugeProperty.SEVENKEYS;
-					break;
-				case GAUGE_9KEYS:
-					gauges = GaugeProperty.PMS;
-					break;
-				case GAUGE_24KEYS:
-					gauges = GaugeProperty.KEYBOARD;
-					break;
-				case GAUGE_LR2:
-					gauges = GaugeProperty.LR2;
-					break;
-				default:
-					break;
-				}
-			}
-		}
-		gauge = GrooveGauge.create(model, replay != null ? replay.gauge : config.getGauge(), coursetype, gauges);
-		FloatArray[] f = resource.getGauge();
-		if (f != null) {
-			for(int i = 0; i < f.length; i++) {
-				gauge.setValue(i, f[i].get(f[i].size - 1));
-			}
-		}
+		// プレイゲージ、初期値設定
+		gauge = GrooveGauge.create(model, replay != null ? replay.gauge : config.getGauge(), resource);
+		// ゲージログ初期化
 		gaugelog = new FloatArray[gauge.getGaugeTypeLength()];
 		for(int i = 0; i < gaugelog.length; i++) {
 			gaugelog[i] = new FloatArray(playtime / 500 + 2);
@@ -948,25 +918,12 @@ public class BMSPlayer extends MainState {
 		case NUMBER_MAXCOMBO:
 		case NUMBER_MAXCOMBO2:
 			return judge.getScoreData().getCombo();
-		case VALUE_JUDGE_1P_DURATION:
-			return (int) judge.getRecentJudgeTiming()[0];
-		case VALUE_JUDGE_2P_DURATION:
-			return (int) (judge.getRecentJudgeTiming().length > 1 ? judge.getRecentJudgeTiming()[1] : judge.getRecentJudgeTiming()[0]);
-		case VALUE_JUDGE_3P_DURATION:
-			return (int) (judge.getRecentJudgeTiming().length > 2 ? judge.getRecentJudgeTiming()[2] : judge.getRecentJudgeTiming()[0]);
 		}
 		return super.getNumberValue(id);
 	}
 
 	public boolean getBooleanValue(int id) {
 		switch (id) {
-		case OPTION_GAUGE_GROOVE:
-			return gauge.getType() <= 2;
-		case OPTION_GAUGE_HARD:
-			return gauge.getType() >= 3;
-		case OPTION_GAUGE_EX:
-			final int type = gauge.getType();
-			return type == 0 || type == 1 || type == 4 || type == 5 || type == 7 || type == 8;
 		case OPTION_AUTOPLAYON:
 			return autoplay == PlayMode.AUTOPLAY;
 		case OPTION_AUTOPLAYOFF:
@@ -986,28 +943,6 @@ public class BMSPlayer extends MainState {
 			return lanerender.getPlayConfig().isEnablelanecover();
 		case OPTION_1P_BORDER_OR_MORE:
 			return gauge.getGauge().isQualified();
-		case OPTION_1P_PERFECT:
-			return judge.getNowJudge()[0] == 1;
-		case OPTION_1P_EARLY:
-			return judge.getNowJudge()[0] > 1 && judge.getRecentJudgeTiming()[0] > 0;
-		case OPTION_1P_LATE:
-			return judge.getNowJudge()[0] > 1 && judge.getRecentJudgeTiming()[0] < 0;
-		case OPTION_2P_PERFECT:
-			return judge.getNowJudge().length > 1 && judge.getNowJudge()[1] == 1;
-		case OPTION_2P_EARLY:
-			return judge.getNowJudge().length > 1 && judge.getNowJudge()[1] > 1
-					&& judge.getRecentJudgeTiming()[1] > 0;
-		case OPTION_2P_LATE:
-			return judge.getNowJudge().length > 1 && judge.getNowJudge()[1] > 1
-					&& judge.getRecentJudgeTiming()[1] < 0;
-		case OPTION_3P_PERFECT:
-			return judge.getNowJudge().length > 2 && judge.getNowJudge()[2] == 1;
-		case OPTION_3P_EARLY:
-			return judge.getNowJudge().length > 2 && judge.getNowJudge()[2] > 1
-					&& judge.getRecentJudgeTiming()[2] > 0;
-		case OPTION_3P_LATE:
-			return judge.getNowJudge().length > 2 && judge.getNowJudge()[2] > 1
-					&& judge.getRecentJudgeTiming()[2] < 0;
 		}
 		return super.getBooleanValue(id);
 	}
