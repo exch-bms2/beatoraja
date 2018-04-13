@@ -629,6 +629,10 @@ public class MainController extends ApplicationAdapter {
 		return sound;
 	}
 
+	public MusicDownloadProcessor getMusicDownloadProcessor(){
+		return download;
+	}
+
 	public long getPlayTime() {
 		return System.currentTimeMillis() - boottime;
 	}
@@ -700,10 +704,6 @@ public class MainController extends ApplicationAdapter {
 		} else {
 			timer[id] = Long.MIN_VALUE;
 		}
-	}
-
-	public void setDownload(SongData song){
-		download.start(song);
 	}
 
 	public static String getClearTypeName() {

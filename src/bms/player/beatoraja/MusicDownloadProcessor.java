@@ -73,6 +73,9 @@ public class MusicDownloadProcessor {
     	return daemon != null && daemon.download;
     }
 
+    public boolean isAlive(){
+    	return daemon != null && daemon.isAlive();
+    }
 
     public void drawMessage(){
 		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
@@ -87,11 +90,11 @@ public class MusicDownloadProcessor {
 		downloadfont.draw(sprite, daemon.message, 100, main.getConfig().getResolution().height - 2);
 		sprite.end();
     }
-    
+
     public String getDownloadpath() {
 		return daemon != null ? daemon.downloadpath : null;
 	}
-    
+
 	public void setDownloadpath(String downloadpath) {
 		if(daemon != null) daemon.downloadpath = downloadpath;
 	}
@@ -131,7 +134,7 @@ public class MusicDownloadProcessor {
         				song = commands.removeFirst();
         				path = song.getIpfs();
         				diffpath = song.getAppendIpfs();
-        				
+
         				if(path.toLowerCase().startsWith("/ipfs")){
         					path = path.substring(1);
         				}else{
@@ -142,7 +145,7 @@ public class MusicDownloadProcessor {
         				}else if(diffpath != null){
         					diffpath = "ipfs/" + diffpath;
         				}
-        				
+
         				List<String> orgmd5 = song.getOrg_md5();
         				if(orgmd5 != null && orgmd5.size() != 0){
         					SongData[] s = main.getSongDatabase().getSongDatas(orgmd5.toArray(new String[orgmd5.size()]));

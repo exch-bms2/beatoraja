@@ -338,7 +338,7 @@ public enum MusicSelectCommand {
             if(current instanceof SongBar) {
             	final SongData song = ((SongBar) current).getSongData();
 				if (song != null && song.getIpfs() != null) {
-					selector.main.setDownload(song);
+					selector.main.getMusicDownloadProcessor().start(song);
 				}
             }
         }
