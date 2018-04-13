@@ -36,6 +36,12 @@ public class SkinGraph extends SkinObject {
 		this.id = id;
 	}
 
+	public SkinGraph(int imageid, FloatProperty ref) {
+		setImageID(imageid);
+		this.ref = ref;
+		this.id = 0;
+	}
+
 	public SkinGraph(int imageid, int id, int min, int max) {
 		setImageID(imageid);
 		ref = new RateProperty(id, min, max);
@@ -46,6 +52,12 @@ public class SkinGraph extends SkinObject {
 		source = new SkinSourceImage(image, timer, cycle);
 		ref = SkinPropertyMapper.getFloatProperty(id);
 		this.id = id;
+	}
+
+	public SkinGraph(TextureRegion[] image, int timer, int cycle, FloatProperty ref) {
+		source = new SkinSourceImage(image, timer, cycle);
+		this.ref = ref;
+		this.id = 0;
 	}
 
 	public SkinGraph(TextureRegion[] image, int timer, int cycle, int id, int min, int max) {

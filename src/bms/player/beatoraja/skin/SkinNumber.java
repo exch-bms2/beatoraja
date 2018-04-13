@@ -44,24 +44,12 @@ public class SkinNumber extends SkinObject {
 	 */
 	private float length;
 
-	public SkinNumber(TextureRegion[] image, int keta, int zeropadding) {
-		this(image, keta, zeropadding, -1);
-	}
-
 	public SkinNumber(TextureRegion[][] image, int timer, int cycle, int keta, int zeropadding, int rid) {
 		this(image, null, timer, cycle, keta, zeropadding, rid);
 	}
 
-	public SkinNumber(TextureRegion[] image, int keta, int zeropadding, int rid) {
-		this(image, null, keta, zeropadding, rid);
-	}
-
-	public SkinNumber(TextureRegion[] image, TextureRegion[] mimage, int keta, int zeropadding, int id) {
-		this.image = new SkinSourceImage(new TextureRegion[][]{ image }, 0, 0) ;
-		this.mimage = mimage != null ? new SkinSourceImage(new TextureRegion[][]{ mimage }, 0, 0) : null;
-		this.setKeta(keta);
-		this.zeropadding = zeropadding;
-		setId(id);
+	public SkinNumber(TextureRegion[][] image, int timer, int cycle, int keta, int zeropadding, IntegerProperty ref) {
+		this(image, null, timer, cycle, keta, zeropadding, ref);
 	}
 
 	public SkinNumber(TextureRegion[][] image, TextureRegion[][] mimage, int timer, int cycle, int keta, int zeropadding, int id) {
@@ -72,13 +60,23 @@ public class SkinNumber extends SkinObject {
 		setId(id);
 	}
 
+	public SkinNumber(TextureRegion[][] image, TextureRegion[][] mimage, int timer, int cycle, int keta, int zeropadding, IntegerProperty ref) {
+		this.image = new SkinSourceImage(image, timer, cycle) ;
+		this.mimage = mimage != null ? new SkinSourceImage(mimage, timer, cycle) : null;
+		this.setKeta(keta);
+		this.zeropadding = zeropadding;
+		this.ref = ref;
+	}
+
 	public int getId() {
 		return id;
 	}
 
 	public void setId(int id) {
-		ref = SkinPropertyMapper.getIntegerProperty(id);
-		this.id = id;
+		if(ref == null) {
+			ref = SkinPropertyMapper.getIntegerProperty(id);
+			this.id = id;			
+		}
 	}
 
 	public int getKeta() {

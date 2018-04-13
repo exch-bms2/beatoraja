@@ -109,7 +109,9 @@ public class TableDataAccessor {
 						Json json = new Json();
 						TableData td = json.fromJson(TableData.class,
 								new BufferedInputStream(new GZIPInputStream(Files.newInputStream(p))));
-						result.add(td);
+						if(isValid(td)) {
+							result.add(td);
+						}
 					} catch(Throwable e) {
 						e.printStackTrace();
 					}
@@ -136,6 +138,9 @@ public class TableDataAccessor {
 						Json json = new Json();
 						td = json.fromJson(TableData.class,
 								new BufferedInputStream(new GZIPInputStream(Files.newInputStream(p))));
+						if(!isValid(td)) {
+							td = null;
+						}
 						break;
 					} catch(Throwable e) {
 
@@ -241,6 +246,9 @@ public class TableDataAccessor {
 
 					td.setCourse(gname.toArray(new CourseData[gname.size()]));
 				}
+				if(!isValid(td)) {
+					throw new RuntimeException("難易度表の値が不正です");
+				}
 				return td;
 			} catch (Throwable e) {
 				e.printStackTrace();
@@ -253,6 +261,13 @@ public class TableDataAccessor {
 		public void write(TableData td) {
 			new TableDataAccessor().write(td);
 		}
+	}
+	
+	public static boolean isValid(TableData td) {
+		if(td == null) {
+			return false;
+		}
+		return td.getName() != null && td.getCourse() != null && td.getFolder() != null && (td.getCourse().length + td.getFolder().length > 0);
 	}
 
 	private static SongData toSongData(BMSTableElement te, Mode defaultMode) {

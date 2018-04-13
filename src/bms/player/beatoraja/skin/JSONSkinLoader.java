@@ -29,6 +29,9 @@ import bms.player.beatoraja.select.SkinBar;
 import bms.player.beatoraja.select.SkinDistributionGraph;
 import bms.player.beatoraja.skin.SkinHeader.CustomOffset;
 import bms.player.beatoraja.skin.SkinObject.BooleanProperty;
+import bms.player.beatoraja.skin.SkinObject.FloatProperty;
+import bms.player.beatoraja.skin.SkinObject.FloatWriter;
+import bms.player.beatoraja.skin.SkinObject.IntegerProperty;
 import bms.player.beatoraja.skin.SkinObject.SkinOffset;
 import bms.player.beatoraja.skin.lua.SkinLuaAccessor;
 
@@ -363,8 +366,21 @@ public class JSONSkinLoader extends SkinLoader{
 										mn[j][i] = images[j * 24 + i + 12];
 									}
 								}
-								SkinNumber num = new SkinNumber(pn, mn, value.timer, value.cycle, value.digit, 0,
-										value.ref);
+								
+								IntegerProperty val = null;
+								if(value.value != null) {
+									val = lua.loadIntegerProperty(value.value);
+								}
+								
+								SkinNumber num = null;
+								if(val != null) {
+									num = new SkinNumber(pn, mn, value.timer, value.cycle, value.digit, 0,
+											val);									
+								} else {
+									num = new SkinNumber(pn, mn, value.timer, value.cycle, value.digit, 0,
+											value.ref);
+								}
+
 								num.setAlign(value.align);
 								if(value.offset != null) {
 									SkinOffset[] offsets = new SkinOffset[value.offset.length];
@@ -388,8 +404,18 @@ public class JSONSkinLoader extends SkinLoader{
 									}
 								}
 
-								SkinNumber num = new SkinNumber(nimages, value.timer, value.cycle, value.digit,
-										d > 10 ? 2 : value.padding, value.ref);
+								IntegerProperty val = null;
+								if(value.value != null) {
+									val = lua.loadIntegerProperty(value.value);
+								}
+								SkinNumber num = null;
+								if(val != null) {
+									num = new SkinNumber(nimages, value.timer, value.cycle, value.digit,
+											d > 10 ? 2 : value.padding, val);									
+								} else {
+									num = new SkinNumber(nimages, value.timer, value.cycle, value.digit,
+											d > 10 ? 2 : value.padding, value.ref);																		
+								}
 								num.setAlign(value.align);
 								if(value.offset != null) {
 									SkinOffset[] offsets = new SkinOffset[value.offset.length];
@@ -435,7 +461,21 @@ public class JSONSkinLoader extends SkinLoader{
 						if (dst.id.equals(img.id)) {
 							Texture tex = getTexture(img.src, p);
 
-							if(img.isRefNum) {
+							FloatProperty value = null;
+							if(img.value != null) {
+								value = lua.loadFloatProperty(img.value);
+							}
+							FloatWriter event = null;
+							if(img.event != null) {
+								event = lua.loadFloatWriter(img.event);
+							}
+
+							if(value != null) {
+								obj = new SkinSlider(getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy),
+										img.timer, img.cycle, img.angle, (int) ((img.angle == 1 || img.angle == 3
+												? ((float)dstr.width / sk.w) : ((float)dstr.height / sk.h)) * img.range),
+										value, event);								
+							} else if(img.isRefNum) {
 								obj = new SkinSlider(getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy),
 										img.timer, img.cycle, img.angle, (int) ((img.angle == 1 || img.angle == 3
 												? ((float)dstr.width / sk.w) : ((float)dstr.height / sk.h)) * img.range),
@@ -476,7 +516,16 @@ public class JSONSkinLoader extends SkinLoader{
 								}
 							} else {
 								Texture tex = getTexture(img.src, p);
-								if(img.isRefNum) {
+								
+								FloatProperty value = null;
+								if(img.value != null) {
+									value = lua.loadFloatProperty(img.value);
+								}
+								
+								if(value != null) {
+									obj = new SkinGraph(getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy),
+											img.timer, img.cycle, value);									
+								} else if(img.isRefNum) {
 									obj = new SkinGraph(getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy),
 											img.timer, img.cycle, img.type, img.min, img.max);
 								} else {
@@ -1014,22 +1063,7 @@ public class JSONSkinLoader extends SkinLoader{
 	private void setDestination(Skin skin, SkinObject obj, Destination dst) {
 		BooleanProperty draw = null;
 		if(dst.draw != null) {
-			try {
-				final LuaValue lv = lua.load(dst.draw);
-				draw = new BooleanProperty() {
-					@Override
-					public boolean isStatic(MainState state) {
-						return false;
-					}
-
-					@Override
-					public boolean get(MainState state) {
-						return lv.call().toboolean();
-					}
-				};
-			} catch (RuntimeException e) {
-				Logger.getGlobal().warning("Lua解析時の例外 : " + e.getMessage());
-			}
+			draw = lua.loadBooleanProperty(dst.draw);
 		}
 		
 		Animation prev = null;
@@ -1284,6 +1318,7 @@ public class JSONSkinLoader extends SkinLoader{
 		public int digit;
 		public int padding;
 		public int ref;
+		public String value;
 		public Value[] offset;
 	}
 
@@ -1309,6 +1344,8 @@ public class JSONSkinLoader extends SkinLoader{
 		public int angle;
 		public int range;
 		public int type;
+		public String value;
+		public String event;
 		public boolean isRefNum = false;
 		public int min = 0;
 		public int max = 0;
@@ -1327,6 +1364,7 @@ public class JSONSkinLoader extends SkinLoader{
 		public int cycle;
 		public int angle = 1;
 		public int type;
+		public String value;
 		public boolean isRefNum = false;
 		public int min = 0;
 		public int max = 0;

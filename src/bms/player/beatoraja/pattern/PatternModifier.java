@@ -4,10 +4,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import bms.model.*;
-import bms.player.beatoraja.PlayerConfig;
-
 import com.badlogic.gdx.utils.IntArray;
+
+import bms.model.BMSModel;
+import bms.model.LongNote;
+import bms.model.MineNote;
+import bms.model.Mode;
+import bms.model.Note;
+import bms.model.TimeLine;
+import bms.player.beatoraja.PlayerConfig;
 
 /**
  * 譜面オプションの抽象クラス
@@ -18,17 +23,21 @@ public abstract class PatternModifier {
 
 	private int assist;
 
-	private int type;
+	/**
+	 * 1P側、2P側どちらの譜面を変更するか
+	 */
+	private int modifyTargetSide;
 
 	public static final int SIDE_1P = 0;
 	public static final int SIDE_2P = 1;
 
+	// TODO H乱しきい値取得に使っている リファクタリング後削除予定
 	static PlayerConfig playerConfig;
-	
+
 	static public void setPlayerConfig(PlayerConfig config) {
 		playerConfig = config;
 	}
-	
+
 	public PatternModifier(int assist) {
 		this.assist = assist;
 	}
@@ -124,15 +133,16 @@ public abstract class PatternModifier {
 	}
 
 	public int getModifyTarget() {
-		return type;
+		return modifyTargetSide;
 	}
 
 	public void setModifyTarget(int type) {
-		this.type = type;
+		this.modifyTargetSide = type;
 	}
 
-	public static PatternModifier create(int id, int type) {
+	public static PatternModifier create(int id, int type, Mode mode) {
 		PatternModifier pm = null;
+		Random r = Random.getRandom(id);
 		switch (id) {
 		case 0:
 			pm = new DummyModifier();
@@ -147,22 +157,16 @@ public abstract class PatternModifier {
 			pm = new LaneShuffleModifier(LaneShuffleModifier.R_RANDOM);
 			break;
 		case 4:
-			pm = new NoteShuffleModifier(NoteShuffleModifier.S_RANDOM);
-			break;
 		case 5:
-			pm = new NoteShuffleModifier(NoteShuffleModifier.SPIRAL);
-			break;
 		case 6:
-			pm = new NoteShuffleModifier(NoteShuffleModifier.H_RANDOM);
+		case 9:
+			pm = new NewNoteShuffleModifier(r, mode);
 			break;
 		case 7:
-			pm = new NoteShuffleModifier(NoteShuffleModifier.ALL_SCR);
+			pm = new NewNoteShuffleModifier(r, type, mode);
 			break;
 		case 8:
 			pm = new LaneShuffleModifier(LaneShuffleModifier.RANDOM_EX);
-			break;
-		case 9:
-			pm = new NoteShuffleModifier(NoteShuffleModifier.S_RANDOM_EX);
 			break;
 		}
 
@@ -172,8 +176,16 @@ public abstract class PatternModifier {
 		return pm;
 	}
 
+	/**
+	 * 変更対象のレーン番号が格納された配列を返す
+	 * @param mode
+	 * プレイモード
+	 * @param containsScratch
+	 * スクラッチレーンを含むか
+	 * @return レーン番号の配列
+	 */
 	protected int[] getKeys(Mode mode, boolean containsScratch) {
-		int key = (getModifyTarget() == SIDE_2P)
+		int key = (modifyTargetSide == SIDE_2P)
 				? mode.key / mode.player
 				: 0;
 		if (key == mode.key) {

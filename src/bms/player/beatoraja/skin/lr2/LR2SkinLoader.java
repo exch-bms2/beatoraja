@@ -8,6 +8,8 @@ import java.util.Map;
 
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.skin.SkinLoader;
+import bms.player.beatoraja.skin.SkinObject.BooleanProperty;
+import bms.player.beatoraja.skin.SkinPropertyMapper;
 
 public class LR2SkinLoader extends SkinLoader {
 
@@ -51,10 +53,15 @@ public class LR2SkinLoader extends SkinLoader {
 							}
 						}
 						if (!b && !op.containsKey(Math.abs(opt)) && state != null) {
-							if(opt >= 0) {
-								b = state.getBooleanValue(opt);
+							BooleanProperty draw = SkinPropertyMapper.getBooleanProperty(opt);
+							if(draw != null) {
+								b = draw.get(state);								
 							} else {
-								b = !state.getBooleanValue(-opt);
+								if(opt >= 0) {
+									b = state.getBooleanValue(opt);
+								} else {
+									b = !state.getBooleanValue(-opt);
+								}								
 							}
 						}
 						if (!b) {
@@ -87,10 +94,15 @@ public class LR2SkinLoader extends SkinLoader {
 								}
 							}
 							if (!b && !op.containsKey(Math.abs(opt)) && state != null) {
-								if(opt >= 0) {
-									b = state.getBooleanValue(opt);
+								BooleanProperty draw = SkinPropertyMapper.getBooleanProperty(opt);
+								if(draw != null) {
+									b = draw.get(state);								
 								} else {
-									b = !state.getBooleanValue(-opt);
+									if(opt >= 0) {
+										b = state.getBooleanValue(opt);
+									} else {
+										b = !state.getBooleanValue(-opt);
+									}									
 								}
 							}
 							if (!b) {

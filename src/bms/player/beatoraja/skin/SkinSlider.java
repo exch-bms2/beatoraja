@@ -44,6 +44,19 @@ public class SkinSlider extends SkinObject {
 		this.type = type;
 	}
 
+	public SkinSlider(TextureRegion[] image, int timer, int cycle, int angle, int range, FloatProperty ref) {
+		this(image, timer, cycle, angle, range, ref, null);
+	}
+
+	public SkinSlider(TextureRegion[] image, int timer, int cycle, int angle, int range, FloatProperty ref, FloatWriter writer) {
+		source = new SkinSourceImage(image, timer ,cycle);
+		this.direction = angle;
+		this.range = range;
+		this.ref = ref;
+		this.writer = writer;
+		this.type = 0;
+	}
+
 	public SkinSlider(TextureRegion[] image, int timer, int cycle, int angle, int range, int type, int min, int max) {
 		source = new SkinSourceImage(image, timer ,cycle);
 		this.direction = angle;

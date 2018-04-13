@@ -750,6 +750,12 @@ public abstract class SkinObject implements Disposable {
 		}
 	}
 	
+	public interface Event {
+		
+		public void exec(MainState state);
+
+	}
+	
 	public interface FloatWriter {
 		
 		public void set(MainState state, float value);
