@@ -1,10 +1,8 @@
 package bms.player.beatoraja.select;
 
-import bms.player.beatoraja.*;
-import bms.player.beatoraja.select.bar.*;
-import bms.player.beatoraja.song.SongData;
+import static bms.player.beatoraja.select.MusicSelector.*;
 
-import java.awt.*;
+import java.awt.Desktop;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.DirectoryStream;
@@ -12,7 +10,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static bms.player.beatoraja.select.MusicSelector.SOUND_CHANGEOPTION;
+import bms.player.beatoraja.PlayConfig;
+import bms.player.beatoraja.PlayerConfig;
+import bms.player.beatoraja.PlayerInformation;
+import bms.player.beatoraja.select.bar.Bar;
+import bms.player.beatoraja.select.bar.FolderBar;
+import bms.player.beatoraja.select.bar.SelectableBar;
+import bms.player.beatoraja.select.bar.SongBar;
+import bms.player.beatoraja.select.bar.TableBar;
+import bms.player.beatoraja.song.SongData;
 
 public enum MusicSelectCommand {
 
@@ -325,6 +331,18 @@ public enum MusicSelectCommand {
             }
         }
     },
+    DOWNLOAD_IPFS {
+        @Override
+        public void execute(MusicSelector selector) {
+            Bar current = selector.getBarRender().getSelected();
+            if(current instanceof SongBar) {
+            	final SongData song = ((SongBar) current).getSongData();
+				if (song != null && song.getIpfs() != null) {
+					selector.main.getMusicDownloadProcessor().start(song);
+				}
+            }
+        }
+    },
     OPEN_DOCUMENT {
         @Override
         public void execute(MusicSelector selector) {
@@ -369,7 +387,7 @@ public enum MusicSelectCommand {
                 config.setJudgetiming(config.getJudgetiming() + 1);
                 selector.play(SOUND_CHANGEOPTION);
             }
-		}    	
+		}
     },
     JUDGETIMING_DOWN {
 		@Override
@@ -379,7 +397,7 @@ public enum MusicSelectCommand {
                 config.setJudgetiming(config.getJudgetiming() - 1);
                 selector.play(SOUND_CHANGEOPTION);
             }
-		}    	
+		}
     },
     DURATION_UP {
 		@Override
@@ -394,7 +412,7 @@ public enum MusicSelectCommand {
                 pc.setDuration(pc.getDuration() + 1);
                 selector.play(SOUND_CHANGEOPTION);
             }
-		}    	
+		}
     },
     DURATION_DOWN {
 		@Override
@@ -409,14 +427,14 @@ public enum MusicSelectCommand {
                 pc.setDuration(pc.getDuration() - 1);
                 selector.play(SOUND_CHANGEOPTION);
             }
-		}    	
+		}
     },
     NEXT_BGA_SHOW {
 		@Override
 		public void execute(MusicSelector selector) {
             selector.main.getConfig().setBga((selector.main.getConfig().getBga() + 1) % 3);
             selector.play(SOUND_CHANGEOPTION);
-		}    	
+		}
     },
     PREV_BGA_SHOW {
         @Override

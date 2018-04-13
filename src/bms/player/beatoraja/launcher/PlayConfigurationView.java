@@ -1,12 +1,9 @@
 package bms.player.beatoraja.launcher;
 
 import java.awt.Desktop;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.DirectoryStream;
@@ -21,7 +18,6 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
-import bms.player.beatoraja.*;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 
@@ -32,13 +28,20 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.portaudio.DeviceInfo;
 
 import bms.model.Mode;
+import bms.player.beatoraja.Config;
+import bms.player.beatoraja.IRScoreData;
+import bms.player.beatoraja.MainController;
+import bms.player.beatoraja.MainLoader;
+import bms.player.beatoraja.PlayConfig;
+import bms.player.beatoraja.PlayModeConfig;
 import bms.player.beatoraja.PlayModeConfig.ControllerConfig;
+import bms.player.beatoraja.PlayerConfig;
+import bms.player.beatoraja.ScoreDatabaseAccessor;
+import bms.player.beatoraja.TableDataAccessor;
 import bms.player.beatoraja.audio.PortAudioDriver;
 import bms.player.beatoraja.ir.IRConnection;
 import bms.player.beatoraja.play.JudgeAlgorithm;
 import bms.player.beatoraja.play.TargetProperty;
-import bms.player.beatoraja.skin.SkinHeader;
-import bms.player.beatoraja.skin.SkinType;
 import bms.player.beatoraja.song.SQLiteSongDatabaseAccessor;
 import bms.player.beatoraja.song.SongData;
 import bms.player.beatoraja.song.SongDatabaseAccessor;
@@ -69,7 +72,6 @@ import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
-import twitter4j.JSONObject;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
@@ -271,6 +273,9 @@ public class PlayConfigurationView implements Initializable {
     private Button twitterPINButton;
 
 	@FXML
+    private TextField ipfspath;
+
+	@FXML
 	private VBox skin;
 	@FXML
 	private VideoConfigurationView videoController;
@@ -455,6 +460,8 @@ public class PlayConfigurationView implements Initializable {
 		scrolldurationlow.getValueFactory().setValue(config.getScrollDurationLow());
 		scrolldurationhigh.getValueFactory().setValue(config.getScrollDurationHigh());
 
+		ipfspath.setText(config.getIpfspath());
+
 		updateAudioDriver();
 
 		if(players.getItems().contains(config.getPlayername())) {
@@ -590,6 +597,8 @@ public class PlayConfigurationView implements Initializable {
 		config.setScrollDutationLow(getValue(scrolldurationlow));
 		config.setScrollDutationHigh(getValue(scrolldurationhigh));
 
+		config.setIpfspath(ipfspath.getText());
+
 		commitPlayer();
 
 		Json json = new Json();
@@ -722,6 +731,21 @@ public class PlayConfigurationView implements Initializable {
     		soundpath.setText(s);
     	}
 	}
+
+    @FXML
+	public void addIpfsPath() {
+    	String s = showFileChooser("IPFSのアプリケーションを選択してください");
+    	if(s != null) {
+    		ipfspath.setText(s);
+    	}
+	}
+
+    private String showFileChooser(String title) {
+    	FileChooser chooser = new FileChooser();
+		chooser.setTitle(title);
+		File f = chooser.showOpenDialog(null);
+		return f != null ? f.getPath() : null;
+    }
 
     private String showDirectoryChooser(String title) {
 		DirectoryChooser chooser = new DirectoryChooser();

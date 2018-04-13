@@ -1,6 +1,10 @@
 package bms.player.beatoraja;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -12,19 +16,18 @@ import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import bms.player.beatoraja.song.SongData;
-import bms.table.BMSTableElement;
-import bms.table.Course;
-import bms.table.DifficultyTable;
-import bms.table.DifficultyTableElement;
-import bms.table.DifficultyTableParser;
-import bms.table.Course.Trophy;
-
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter.OutputType;
 
 import bms.model.Mode;
 import bms.player.beatoraja.CourseData.TrophyData;
+import bms.player.beatoraja.song.SongData;
+import bms.table.BMSTableElement;
+import bms.table.Course;
+import bms.table.Course.Trophy;
+import bms.table.DifficultyTable;
+import bms.table.DifficultyTableElement;
+import bms.table.DifficultyTableParser;
 
 /**
  * 難易度表データアクセス用クラス
@@ -280,10 +283,12 @@ public class TableDataAccessor {
 		Mode mode = te.getMode() != null ? Mode.getMode(te.getMode()) : null;
 		song.setMode(mode != null ? mode.id : (defaultMode != null ? defaultMode.id : 0));
 		song.setUrl(te.getURL());
-		
+		song.setIpfs(te.getIPFS());
+		song.setOrg_md5(te.getParentHash());
 		if(te instanceof DifficultyTableElement) {
 			DifficultyTableElement dte = (DifficultyTableElement) te;
 			song.setAppendurl(dte.getAppendURL());
+			song.setAppendIpfs(dte.getAppendIPFS());
 		}
 		
 		return song;
