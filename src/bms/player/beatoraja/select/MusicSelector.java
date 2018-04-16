@@ -443,10 +443,7 @@ public class MusicSelector extends MainState {
 							}
 						}
 						break;
-					case NO_SPEED:
-						case NO_GOOD:
-						case NO_GREAT:
-						case GAUGE_LR2:
+					default:
 						resource.addConstraint(constraint);
 						break;
 					}
