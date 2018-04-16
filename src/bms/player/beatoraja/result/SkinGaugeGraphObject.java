@@ -104,7 +104,7 @@ public class SkinGaugeGraphObject extends SkinObject {
 			}
 			shape.setColor(graphcolor[color]);
 			shape.fill();
-			final Gauge gg = resource.getGrooveGauge().getGauge();
+			final Gauge gg = resource.getGrooveGauge().getGauge(currentType);
 			final float border = gg.getProperty().border;
 			final float max = gg.getProperty().max;
 			Color borderline = this.borderline;
