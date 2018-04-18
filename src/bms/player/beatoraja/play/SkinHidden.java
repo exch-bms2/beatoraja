@@ -66,8 +66,11 @@ public class SkinHidden extends SkinObject {
 			previousLift = state.getOffsetValue(OFFSET_LIFT).y;
 		}
 		Rectangle r = this.getDestination(time,state);
+		//描画領域上端が消失ラインより下なら描画処理を行わない
 		if (r != null && ((r.y + r.height > disapearLineAddedLift && disapearLine >= 0) || disapearLine < 0)) {
+			//描画領域と消失ラインが重なっている場合
 			if(r.y < disapearLineAddedLift && disapearLine >= 0) {
+				//前回と位置が異なる場合は画像加工処理を行う
 				if(previousY != r.y) {
 					for(int i = 0; i < trimmedImages.length; i++) {
 						trimmedImages[i] = new TextureRegion(originalImages[i]);
@@ -78,6 +81,7 @@ public class SkinHidden extends SkinObject {
 					previousY = r.y;
 				}
 				draw(sprite, trimmedImages[getImageIndex(trimmedImages.length, time, state)], r.x, disapearLineAddedLift, r.width, r.y + r.height - disapearLineAddedLift, state);
+			//画像加工処理が必要ない場合
 			} else {
 				draw(sprite, originalImages[getImageIndex(originalImages.length, time, state)], r.x, r.y, r.width, r.height, state);
 			}
