@@ -10,7 +10,7 @@ import java.util.*;
 
 /**
  * 難易度表バー
- * 
+ *
  * @author exch
  */
 public class TableBar extends DirectoryBar {
@@ -43,6 +43,10 @@ public class TableBar extends DirectoryBar {
         return td.getName();
     }
 
+	public String getUrl() {
+		return td.getUrl();
+	}
+
     public TableDataAccessor.TableAccessor getAccessor() {
     	return tr;
     }
@@ -55,7 +59,7 @@ public class TableBar extends DirectoryBar {
     	for(int i = 0;i < folder.length;i++) {
     		levels[i] = new HashBar(selector, folder[i].getName(), folder[i].getSong());
     	}
-    	
+
 		final CourseData[] courses = td.getCourse();
 		Set<String> hashset = new HashSet<String>(courses.length * 4);
 		for (CourseData course : courses) {
@@ -79,7 +83,7 @@ public class TableBar extends DirectoryBar {
 			}
 			grades[i] = new GradeBar(courses[i].getName(), songlist, courses[i]);
 		}
-		
+
 		children = new Bar[levels.length + grades.length];
 		int index = 0;
 		for (int i = 0;i < levels.length;i++, index++) {
