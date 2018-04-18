@@ -3,20 +3,8 @@ package bms.player.beatoraja.play;
 import java.util.*;
 import java.util.logging.Logger;
 
-import bms.model.BMSModel;
-import bms.model.Mode;
-import bms.model.Note;
-import bms.model.TimeLine;
-import bms.player.beatoraja.ClearType;
-import bms.player.beatoraja.Config;
-import bms.player.beatoraja.CourseData;
-import bms.player.beatoraja.IRScoreData;
-import bms.player.beatoraja.MainController;
-import bms.player.beatoraja.MainState;
-import bms.player.beatoraja.PlayConfig;
-import bms.player.beatoraja.PlayModeConfig;
-import bms.player.beatoraja.PlayerConfig;
-import bms.player.beatoraja.PlayerResource;
+import bms.model.*;
+import bms.player.beatoraja.*;
 import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.ReplayData;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
@@ -796,7 +784,7 @@ public class BMSPlayer extends MainState {
 			}
 		}
 		score.setClear(clear.id);
-		score.setGauge(GrooveGauge.getGaugeID(gauge));
+		score.setGauge(config.isContinueUntilEndOfSong() ? -1 : gauge.getType());
 		score.setOption(config.getRandom() + (model.getMode().player == 2
 				? (config.getRandom2() * 10 + config.getDoubleoption() * 100) : 0));
 		// リプレイデータ保存。スコア保存されない場合はリプレイ保存しない

@@ -204,22 +204,20 @@ public class PlayDataAccessor {
 		}
 		// クリアトロフィー
 		int clear = newscore.getClear();
-		if(clear >= FullCombo.id) {
-			l.add(SongTrophy.EXHARD);
-			l.add(SongTrophy.HARD);
-			l.add(SongTrophy.GROOVE);
-			l.add(SongTrophy.EASY);
-		} else if(clear >= Hard.id){
-			if(clear == ExHard.id) {
-				l.add(SongTrophy.EXHARD);
+		if(newscore.getGauge() != -1) {			
+			if(clear >= Hard.id){
+				if(clear == ExHard.id) {
+					l.add(SongTrophy.EXHARD);
+				}
+				l.add(SongTrophy.HARD);
+			} else {
+				if(clear >= Normal.id) {
+					l.add(SongTrophy.GROOVE);
+				}
+				l.add(SongTrophy.EASY);
 			}
-			l.add(SongTrophy.HARD);
-		} else {
-			if(clear == Normal.id) {
-				l.add(SongTrophy.GROOVE);
-			}
-			l.add(SongTrophy.EASY);
 		}
+			
 		// オプショントロフィー
 		// TODO FLIPの扱いは？
 		final SongTrophy[] optionTrophy = {SongTrophy.NORMAL,SongTrophy.MIRROR,SongTrophy.RANDOM, SongTrophy.R_RANDOM

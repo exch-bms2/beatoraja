@@ -176,10 +176,6 @@ public class GrooveGauge {
 		return new GrooveGauge(model, id, gauge);
 	}
 
-	public static int getGaugeID(GrooveGauge gauge) {
-		return gauge.type;
-	}
-
 	public static class Gauge {
 		/**
 		 * ゲージの現在値
