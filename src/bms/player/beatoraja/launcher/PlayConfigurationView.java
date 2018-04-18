@@ -194,7 +194,7 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private CheckBox legacy;
 	@FXML
-	private CheckBox continueuntilendofsong;
+	private ComboBox<Integer> gaugeautoshift;
 	@FXML
 	private Spinner<Integer> exjudge;
 	@FXML
@@ -331,6 +331,7 @@ public class PlayConfigurationView implements Initializable {
 		playconfig.getItems().setAll(PlayMode.values());
 		inputconfig.getItems().setAll(PlayMode.values());
 		initComboBox(lntype, new String[] { "LONG NOTE", "CHARGE NOTE", "HELL CHARGE NOTE" });
+		initComboBox(gaugeautoshift, new String[] { "NONE", "CONTINUE", "SURVIVAL TO GROOVE","BEST CLEAR" });
 
 		TargetProperty[] targets = TargetProperty.getAllTargetProperties();
 		String[] targetString = new String[targets.length];
@@ -527,7 +528,7 @@ public class PlayConfigurationView implements Initializable {
 		constant.setSelected(player.isConstant());
 		bpmguide.setSelected(player.isBpmguide());
 		legacy.setSelected(player.isLegacynote());
-		continueuntilendofsong.setSelected(player.isContinueUntilEndOfSong());
+		gaugeautoshift.setValue(player.getGaugeAutoShift());
 		exjudge.getValueFactory().setValue(player.getJudgewindowrate());
 		nomine.setSelected(player.isNomine());
 		hranthresholdbpm.getValueFactory().setValue(player.getHranThresholdBPM());
@@ -637,7 +638,7 @@ public class PlayConfigurationView implements Initializable {
 		player.setConstant(constant.isSelected());
 		player.setBpmguide(bpmguide.isSelected());
 		player.setLegacynote(legacy.isSelected());
-		player.setContinueUntilEndOfSong(continueuntilendofsong.isSelected());
+		player.setGaugeAutoShift(gaugeautoshift.getValue());
 		player.setJudgewindowrate(getValue(exjudge));
 		player.setNomine(nomine.isSelected());
 		player.setHranThresholdBPM(getValue(hranthresholdbpm));

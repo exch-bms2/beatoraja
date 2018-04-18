@@ -95,9 +95,14 @@ public class PlayerConfig {
 	 */
 	private int hranThresholdBPM = 120;
 	/**
-	 * 途中閉店の有無
+	 * プレイ中のゲージ切替
 	 */
-	private boolean continueUntilEndOfSong = false;
+	private int gaugeAutoShift = GAUGEAUTOSHIFT_NONE;
+	
+	public static final int GAUGEAUTOSHIFT_NONE = 0;
+	public static final int GAUGEAUTOSHIFT_CONTINUE = 1;
+	public static final int GAUGEAUTOSHIFT_SURVIVAL_TO_GROOVE = 2;
+	public static final int GAUGEAUTOSHIFT_BESTCLEAR = 3;
 
 	/**
 	 * 7to9 スクラッチ鍵盤位置関係 0:OFF 1:SC1KEY2~8 2:SC1KEY3~9 3:SC2KEY3~9 4:SC8KEY1~7 5:SC9KEY1~7 6:SC9KEY2~8
@@ -208,12 +213,12 @@ public class PlayerConfig {
 		this.bpmguide = bpmguide;
 	}
 
-	public boolean isContinueUntilEndOfSong() {
-		return continueUntilEndOfSong;
+	public int getGaugeAutoShift() {
+		return gaugeAutoShift;
 	}
 
-	public void setContinueUntilEndOfSong(boolean continueUntilEndOfSong) {
-		this.continueUntilEndOfSong = continueUntilEndOfSong;
+	public void setGaugeAutoShift(int gaugeAutoShift) {
+		this.gaugeAutoShift = gaugeAutoShift;
 	}
 	
 	public int getLnmode() {
