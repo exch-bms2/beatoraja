@@ -160,7 +160,7 @@ public abstract class Randomizer {
 		switch (r) {
 		case ALL_SCR:
 			if (mode == Mode.POPN_9K) {
-				randomizer = new ConvergeRandomizer(SRAN_THRESHOLD, thresholdMillis);
+				randomizer = new ConvergeRandomizer(thresholdMillis / 2, thresholdMillis);
 			} else {
 				randomizer = new AllScratchRandomizer(SRAN_THRESHOLD, thresholdMillis, playSide);
 			}
@@ -172,9 +172,15 @@ public abstract class Randomizer {
 			randomizer = new SpiralRandomizer();
 			break;
 		case S_RANDOM:
+			if (mode == Mode.POPN_9K) {
+				randomizer = new SRandomizer(0);
+			} else {
+				randomizer = new SRandomizer(SRAN_THRESHOLD);
+			}
+			break;
 		case S_RANDOM_EX:
 			if (mode == Mode.POPN_9K) {
-				randomizer = new NoMurioshiRandomizer(SRAN_THRESHOLD);
+				randomizer = new NoMurioshiRandomizer(thresholdMillis);
 			} else {
 				randomizer = new SRandomizer(SRAN_THRESHOLD);
 			}
@@ -436,53 +442,79 @@ class AllScratchRandomizer extends TimeBasedRandomizer {
 
 class NoMurioshiRandomizer extends TimeBasedRandomizer {
 
-	private List<List<Integer>> buttonCombinationTable;
-	private List<Integer> buttonConbination;
+	static final List<List<Integer>> buttonCombinationTable;
+	private List<Integer> buttonCombination;
 	private boolean flag;
 
 	// 無理押しが存在しない6個押しは10パターン
-	public NoMurioshiRandomizer(int threshold) {
-		super(threshold);
-		this.buttonCombinationTable = new ArrayList<>();
+	static {
+		buttonCombinationTable = new ArrayList<>();
+		buttonCombinationTable.add(Arrays.asList(0, 1, 2, 3, 4, 5));
+		buttonCombinationTable.add(Arrays.asList(0, 1, 2, 4, 5, 6));
+		buttonCombinationTable.add(Arrays.asList(0, 1, 2, 5, 6, 7));
+		buttonCombinationTable.add(Arrays.asList(1, 2, 3, 6, 7, 8));
 		buttonCombinationTable.add(Arrays.asList(1, 2, 3, 4, 5, 6));
 		buttonCombinationTable.add(Arrays.asList(1, 2, 3, 5, 6, 7));
 		buttonCombinationTable.add(Arrays.asList(1, 2, 3, 6, 7, 8));
-		buttonCombinationTable.add(Arrays.asList(1, 2, 3, 7, 8, 9));
 		buttonCombinationTable.add(Arrays.asList(2, 3, 4, 5, 6, 7));
 		buttonCombinationTable.add(Arrays.asList(2, 3, 4, 6, 7, 8));
-		buttonCombinationTable.add(Arrays.asList(2, 3, 4, 7, 8, 9));
 		buttonCombinationTable.add(Arrays.asList(3, 4, 5, 6, 7, 8));
-		buttonCombinationTable.add(Arrays.asList(3, 4, 5, 7, 8, 9));
-		buttonCombinationTable.add(Arrays.asList(4, 5, 6, 7, 8, 9));
+	}
+
+	public NoMurioshiRandomizer(int threshold) {
+		super(threshold);
 	}
 
 	@Override
 	Map<Integer, Integer> randomize(TimeLine tl, List<Integer> changeableLane, List<Integer> assignableLane) {
 		int noteCount = noteCount(tl);
+		Map<Integer, Integer> randomMap;
 		// タイムラインのノーツ(LNアクティブを含む)が2個以下or7個以上のとき無理押しを考慮しない
 		flag = (2 < noteCount && noteCount < 7);
-		// LNアクティブを含めた同時押しの候補をフィルタ
-		List<List<Integer>> candidate;
 		if (flag) {
+			List<List<Integer>> candidate;
 			if (getLNLane().size() == 0) {
 				candidate = buttonCombinationTable;
 			} else {
+				// LNアクティブを含む同時押しパターンをフィルタ
 				candidate = buttonCombinationTable.stream()
-						.filter(l -> {
-							return l.containsAll(getLNLane());
-						})
+						.filter(l -> {return l.containsAll(getLNLane());})
 						.collect(Collectors.toList());
 			}
-			// 候補が存在しないなら無理押しを考慮しない
 			if (candidate.size() != 0) {
-				buttonConbination = candidate.get((int) (candidate.size() * Math.random()));
+				// 候補から縦連打になるレーンが含まれるものを除外する
+				List<Integer> rendaLane = lastNoteTime.keySet().stream()
+						.filter(lane -> {return tl.getTime() - lastNoteTime.get(lane) < threshold;})
+						.collect(Collectors.toList());
+				List<List<Integer>> candidate2 = candidate.stream()
+						.filter(l -> {return l.stream().noneMatch(rendaLane::contains);})
+						.collect(Collectors.toList());
+				if (candidate2.size() != 0) {
+					// 候補が残れば、buttonCombinationにアサインする
+					buttonCombination = candidate2.get((int)(candidate2.size() * Math.random()));
+				} else {
+					// 結果候補がゼロなら、初期候補からノートがあるレーンをここでアサインする
+					randomMap = new HashMap<>();
+					buttonCombination = candidate.get((int)(candidate2.size() * Math.random())).stream()
+							.filter(assignableLane::contains).collect(Collectors.toList());
+					List<Integer> e = getNoteExistLane(tl).stream()
+							.filter(changeableLane::contains).collect(Collectors.toList());
+					e.stream().forEach(lane -> {
+						int i = (int)(buttonCombination.size() * Math.random());
+						randomMap.put(lane, buttonCombination.get(i));
+						changeableLane.remove((Integer)lane);
+						assignableLane.remove(buttonCombination.remove(i));
+					});
+					flag = false;
+					randomMap.putAll(timeBasedShuffle(tl, changeableLane, assignableLane));
+					return randomMap;
+				}
 			} else {
+				// 無理押ししかありえないので通常H乱処理
 				flag = false;
 			}
 		}
-
-		Map<Integer, Integer> randomMap = timeBasedShuffle(tl, changeableLane, assignableLane);
-
+		randomMap = timeBasedShuffle(tl, changeableLane, assignableLane);
 		updateNoteTime(tl, randomMap);
 		return randomMap;
 	}
@@ -491,9 +523,7 @@ class NoMurioshiRandomizer extends TimeBasedRandomizer {
 	@Override
 	int selectLane(List<Integer> lane) {
 		if (flag) {
-			List<Integer> l = lane.stream().filter(i -> {
-				return buttonConbination.contains(i);
-			}).collect(Collectors.toList());
+			List<Integer> l = lane.stream().filter(buttonCombination::contains).collect(Collectors.toList());
 			if (l.size() != 0) {
 				return lane.indexOf(l.get((int) (l.size() * Math.random())));
 			}
@@ -510,6 +540,18 @@ class NoMurioshiRandomizer extends TimeBasedRandomizer {
 			}
 		}
 		return count + getLNLane().size();
+	}
+
+	// タイムラインにノーツが存在するレーンのリスト
+	private List<Integer> getNoteExistLane(TimeLine tl) {
+		List<Integer> l = new ArrayList<>();
+		for (int i = 0; i < modifyLanes.length; i++) {
+			// nullでない、地雷ノートでない
+			if (tl.getNote(modifyLanes[i]) != null && !(tl.getNote(modifyLanes[i]) instanceof MineNote)) {
+				l.add(modifyLanes[i]);
+			}
+		}
+		return l;
 	}
 
 }
