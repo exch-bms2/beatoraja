@@ -264,7 +264,7 @@ public class ControlInputProcessor {
 		if (key[7] || key[8]) {
 			long l = System.currentTimeMillis();
 			if (l - lanecovertiming > 50) {
-				setCoverValue(key[7] || key[16] ? 0.001f : -0.001f);
+				setCoverValue(key[7] ? -0.001f : 0.001f);
 				lanecovertiming = l;
 			}
 		}
