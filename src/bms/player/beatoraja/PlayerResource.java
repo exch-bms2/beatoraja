@@ -2,17 +2,16 @@ package bms.player.beatoraja;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Logger;
 
-import com.badlogic.gdx.utils.FloatArray;
+import com.badlogic.gdx.utils.*;
 
 import bms.model.Mode;
 import bms.model.BMSDecoder;
 import bms.model.BMSGenerator;
 import bms.model.BMSModel;
 import bms.model.BMSONDecoder;
+import bms.player.beatoraja.CourseData.CourseDataConstraint;
 import bms.player.beatoraja.TableData.TableFolder;
 import bms.player.beatoraja.audio.AudioDriver;
 import bms.player.beatoraja.play.GrooveGauge;
@@ -71,11 +70,10 @@ public class PlayerResource {
 	private Path[] bmsPaths;
 	private boolean loop;
 	
-	private List<CourseData.CourseDataConstraint> constraint = new ArrayList();
 	/**
-	 * コースタイトル
+	 * コース
 	 */
-	private String coursetitle;
+	private CourseData coursedata;
 	/**
 	 * コースのBMSモデル
 	 */
@@ -87,9 +85,9 @@ public class PlayerResource {
 	/**
 	 * コースゲージ履歴
 	 */
-	private List<FloatArray[]> coursegauge = new ArrayList<FloatArray[]>();
+	private Array<FloatArray[]> coursegauge = new Array<FloatArray[]>();
 
-	private List<ReplayData> courseReplay = new ArrayList<ReplayData>();
+	private Array<ReplayData> courseReplay = new Array<ReplayData>();
 	/**
 	 * コーススコア
 	 */
@@ -123,7 +121,6 @@ public class PlayerResource {
 	}
 
 	public void clear() {
-		coursetitle = null;
 		course = null;
 		courseindex = 0;
 		cscore = null;
@@ -134,7 +131,6 @@ public class PlayerResource {
 		coursegauge.clear();
 		combo = 0;
 		maxcombo = 0;
-		constraint.clear();
 		bmsPaths = null;
 		tablename = "";
 		tablelevel = "";
@@ -266,7 +262,7 @@ public class PlayerResource {
 	}
 	
 	public boolean setCourseBMSFiles(Path[] files) {
-		List<BMSModel> models = new ArrayList();
+		Array<BMSModel> models = new Array();
 		for (Path f : files) {
 			BMSModel model = loadBMSModel(f, pconfig.getLnmode());
 			if (model == null) {
@@ -274,7 +270,7 @@ public class PlayerResource {
 			}
 			models.add(model);
 		}
-		course = models.toArray(new BMSModel[0]);
+		course = models.toArray(BMSModel.class);
 		return true;
 	}
 
@@ -372,23 +368,31 @@ public class PlayerResource {
 		this.updateScore = b;
 	}
 
-	public String getCoursetitle() {
-		return coursetitle;
+	public CourseData getCourseData() {
+		return coursedata;
 	}
 
-	public void setCoursetitle(String coursetitle) {
-		this.coursetitle = coursetitle;
+	public void setCourseData(CourseData coursedata) {
+		this.coursedata = coursedata;
+	}
+	
+	public String getCoursetitle() {
+		return coursedata != null ? coursedata.getName() : null;
+	}
+	
+	public CourseDataConstraint[] getConstraint() {
+		return coursedata != null ? coursedata.getConstraint() : new CourseDataConstraint[0];
 	}
 
 	public ReplayData[] getCourseReplay() {
-		return courseReplay.toArray(new ReplayData[0]);
+		return courseReplay.toArray(ReplayData.class);
 	}
 
 	public void addCourseReplay(ReplayData rd) {
 		courseReplay.add(rd);
 	}
 
-	public List<FloatArray[]> getCourseGauge() {
+	public Array<FloatArray[]> getCourseGauge() {
 		return coursegauge;
 	}
 
@@ -410,14 +414,6 @@ public class PlayerResource {
 
 	public void setMaxcombo(int maxcombo) {
 		this.maxcombo = maxcombo;
-	}
-
-	public CourseData.CourseDataConstraint[] getConstraint() {
-		return constraint.toArray(new CourseData.CourseDataConstraint[constraint.size()]);
-	}
-
-	public void addConstraint(CourseData.CourseDataConstraint constraint) {
-		this.constraint.add(constraint);
 	}
 
 	public void dispose() {

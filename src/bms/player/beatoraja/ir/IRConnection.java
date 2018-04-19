@@ -9,6 +9,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 import bms.model.BMSModel;
+import bms.player.beatoraja.CourseData;
 import bms.player.beatoraja.IRScoreData;
 import bms.player.beatoraja.PlayerInformation;
 import bms.player.beatoraja.TableData;
@@ -48,6 +49,8 @@ public interface IRConnection {
 	 * @return
 	 */
 	public IRResponse<IRScoreData[]> getPlayData(String id, BMSModel model);
+	
+	public IRResponse<IRScoreData[]> getCoursePlayData(String id, CourseData course, int lnmode);
 
 	/**
 	 * スコアデータを送信する
@@ -55,6 +58,12 @@ public interface IRConnection {
 	 * @param score
 	 */
 	public IRResponse<Object> sendPlayData(BMSModel model, IRScoreData score);
+	/**
+	 * スコアデータを送信する
+	 * @param model
+	 * @param score
+	 */
+	public IRResponse<Object> sendCoursePlayData(CourseData course, int lnmode, IRScoreData score);
 	
 	/**
 	 * 楽曲のURLを取得する

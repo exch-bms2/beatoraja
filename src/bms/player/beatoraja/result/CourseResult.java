@@ -11,6 +11,7 @@ import bms.model.BMSModel;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.ir.IRConnection;
+import bms.player.beatoraja.ir.IRResponse;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.skin.SkinType;
 
@@ -40,7 +41,7 @@ public class CourseResult extends AbstractResult {
 
 		loadSkin(SkinType.COURSE_RESULT);
 
-        for(int i = resource.getCourseGauge().size();i < resource.getCourseBMSModels().length;i++) {
+        for(int i = resource.getCourseGauge().size;i < resource.getCourseBMSModels().length;i++) {
             FloatArray[] list = new FloatArray[resource.getGrooveGauge().getGaugeTypeLength()];
             for(int type = 0; type < list.length; type++) {
                 list[type] = new FloatArray();
@@ -67,7 +68,7 @@ public class CourseResult extends AbstractResult {
 			}
 		}
 		
-		gaugeType = resource.getGrooveGauge().getType();
+		gaugeType = resource.getGrooveGauge().getType();		
 	}
 
 	public void render() {
@@ -183,7 +184,7 @@ public class CourseResult extends AbstractResult {
 			case PlayerConfig.IR_SEND_ALWAYS:
 				break;
 			case PlayerConfig.IR_SEND_COMPLETE_SONG:
-//				FloatArray gauge = resource.getGauge();
+//				FloatArray gauge = resource.getG.getGauge()[resource.getGrooveGauge().getType()];
 //				send &= gauge.get(gauge.size - 1) > 0.0;
 				break;
 			case PlayerConfig.IR_SEND_UPDATE_SCORE:
@@ -203,30 +204,42 @@ public class CourseResult extends AbstractResult {
 					@Override
 					public void run() {
 						main.switchTimer(TIMER_IR_CONNECT_SUCCESS, true);
-						Logger.getGlobal().info("IRへスコア送信完了(未実装)");
-//						ir.sendPlayData(resource.getBMSModel(), resource.getScoreData());
-//						IRResponse<IRScoreData[]> response = ir.getPlayData(null, resource.getBMSModel());
-//						if(response.isSuccessed()) {
-//							IRScoreData[] scores = response.getData();
-//							irtotal = scores.length;
-//
-//							for(int i = 0;i < scores.length;i++) {
-//								if(irrank == 0 && scores[i].getExscore() <= resource.getScoreData().getExscore() ) {
-//									irrank = i + 1;
-//								}
-//								if(irprevrank == 0 && scores[i].getExscore() <= oldscore.getExscore() ) {
-//									irprevrank = i + 1;
-//									if(irrank == 0) {
-//										irrank = irprevrank;
-//									}
-//								}
-//							}
-//							setTimerOn(TIMER_IR_CONNECT_SUCCESS, true);
-//							Logger.getGlobal().info("IRへスコア送信完了");
-//						} else {
-//							setTimerOn(TIMER_IR_CONNECT_FAIL, true);
-//							Logger.getGlobal().warning("IRからのスコア取得失敗 : " + response.getMessage());
-//						}
+						Logger.getGlobal().info("IRへスコア送信");
+						int lnmode = 0;
+						for(BMSModel model : resource.getCourseBMSModels()) {
+							if(model.containsUndefinedLongNote()) {
+								lnmode = config.getLnmode();
+								break;
+							}
+						}
+						IRResponse<Object> send = ir.sendCoursePlayData(resource.getCourseData(), lnmode, resource.getCourseScoreData());
+						if(send.isSuccessed()) {
+							main.switchTimer(TIMER_IR_CONNECT_SUCCESS, true);
+							Logger.getGlobal().info("IRスコア送信完了");							
+						} else {
+							main.switchTimer(TIMER_IR_CONNECT_FAIL, true);
+							Logger.getGlobal().warning("IRスコア送信失敗 : " + send.getMessage());							
+						}
+						IRResponse<IRScoreData[]> response = ir.getCoursePlayData(null, resource.getCourseData(), lnmode);
+						if(response.isSuccessed()) {
+							IRScoreData[] scores = response.getData();
+							irtotal = scores.length;
+
+							for(int i = 0;i < scores.length;i++) {
+								if(irrank == 0 && scores[i].getExscore() <= resource.getScoreData().getExscore() ) {
+									irrank = i + 1;
+								}
+								if(irprevrank == 0 && scores[i].getExscore() <= oldscore.getExscore() ) {
+									irprevrank = i + 1;
+									if(irrank == 0) {
+										irrank = irprevrank;
+									}
+								}
+							}
+							Logger.getGlobal().warning("IRからのスコア取得成功 : " + response.getMessage());
+						} else {
+							Logger.getGlobal().warning("IRからのスコア取得失敗 : " + response.getMessage());
+						}
 
 						state = STATE_IR_FINISHED;
 					}

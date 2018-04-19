@@ -9,30 +9,29 @@ import bms.player.beatoraja.song.SongData;
  */
 public class GradeBar extends SelectableBar {
 
-    private SongData[] songs;
-    private String name;
-
     private CourseData course;
     private IRScoreData mscore;
     private IRScoreData rscore;
 
-    public GradeBar(String name, SongData[] songs, CourseData course) {
-        this.songs = songs;
-        this.name = name;
+    public GradeBar(CourseData course) {
         this.course = course;        
     }
 
+    public CourseData getCourseData() {
+        return course;
+    }
+    
     public SongData[] getSongDatas() {
-        return songs;
+    	return course.getSong();
     }
 
     @Override
     public String getTitle() {
-        return name;
+        return course.getName();
     }
 
     public boolean existsAllSongs() {
-        for (SongData song : songs) {
+        for (SongData song : course.getSong()) {
             if (song == null || song.getPath() == null) {
                 return false;
             }
@@ -54,17 +53,6 @@ public class GradeBar extends SelectableBar {
 
     public void setRandomScore(IRScoreData score) {
         this.rscore = score;
-    }
-
-    public CourseData.CourseDataConstraint[] getConstraint() {
-        if (course.getConstraint() != null) {
-            return course.getConstraint();
-        }
-        return new CourseData.CourseDataConstraint[0];
-    }
-
-    public CourseData.TrophyData[] getAllTrophy() {
-        return course.getTrophy();
     }
 
     public CourseData.TrophyData getTrophy() {

@@ -557,7 +557,7 @@ public class SkinPropertyMapper {
 		private final int type;
 		
 		public NowJudgeDrawCondition(int player, int type) {
-			super(TYPE_STATIC_WITHOUT_MUSICSELECT);
+			super(TYPE_NO_STATIC);
 			this.player = player;
 			this.type = type;
 		}

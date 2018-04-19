@@ -412,7 +412,7 @@ public class MusicSelector extends MainState {
 				files[i++] = Paths.get(song.getPath());
 			}
 			if (resource.setCourseBMSFiles(files)) {
-				for (CourseData.CourseDataConstraint constraint : course.getConstraint()) {
+				for (CourseData.CourseDataConstraint constraint : course.getCourseData().getConstraint()) {
 					switch (constraint) {
 					case CLASS:
 						if (mode == PlayMode.PLAY || mode.isAutoPlayMode()) {
@@ -444,12 +444,12 @@ public class MusicSelector extends MainState {
 						}
 						break;
 					default:
-						resource.addConstraint(constraint);
 						break;
 					}
 				}
 				preview.stop();
-				resource.setCoursetitle(bar.getSelected().getTitle());
+				course.getCourseData().setSong(resource.getCourseBMSModels());
+				resource.setCourseData(course.getCourseData());
 				resource.setBMSFile(files[0], mode);
 				main.changeState(MainController.STATE_DECIDE);
 				banners.disposeOld();
@@ -863,7 +863,7 @@ public class MusicSelector extends MainState {
 		}
 
 		GradeBar gb = (GradeBar) bar.getSelected();
-		for (CourseData.CourseDataConstraint con : gb.getConstraint()) {
+		for (CourseData.CourseDataConstraint con : gb.getCourseData().getConstraint()) {
 			if(con == constraint) {
 				return true;
 			}

@@ -1,5 +1,6 @@
 package bms.player.beatoraja;
 
+import bms.model.BMSModel;
 import bms.player.beatoraja.song.SongData;
 
 /**
@@ -40,8 +41,19 @@ public class CourseData {
     public void setSong(SongData[] hash) {
         this.hash = hash;
     }
+    
+    public void setSong(BMSModel[] models) {
+    	SongData[] hash = new SongData[models.length];
+    	for(int i = 0;i < models.length;i++) {
+    		hash[i] = new SongData(models[i], false);
+    	}
+    	this.hash = hash;
+    }
 
     public CourseDataConstraint[] getConstraint() {
+    	if(constraint == null) {
+    		constraint = new CourseDataConstraint[0];
+    	}
         return constraint;
     }
 

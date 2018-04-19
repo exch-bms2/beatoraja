@@ -163,6 +163,7 @@ public class SongData {
 		feature |= model.containsLongNote() ? FEATURE_LONGNOTE : 0;
 		content |= model.getBgaList().length > 0 ? CONTENT_BGA : 0;
 		
+		info = new SongInformation(model);
 		try {
 			MessageDigest md = MessageDigest.getInstance("SHA-256");
 			charthash = BMSDecoder.convertHexString(md.digest(model.toChartString().getBytes()));

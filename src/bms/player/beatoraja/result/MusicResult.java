@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.FloatArray;
 
 import bms.model.BMSModel;
@@ -122,10 +123,10 @@ public class MusicResult extends AbstractResult {
 							.get(resource.getGauge()[resource.getGrooveGauge().getType()].size - 1) <= 0) {
 						if (resource.getCourseScoreData() != null) {
 							// 未達曲のノーツをPOORとして加算
-							final List<FloatArray[]> coursegauge = resource.getCourseGauge();
+							final Array<FloatArray[]> coursegauge = resource.getCourseGauge();
 							final int cg = resource.getCourseBMSModels().length;
 							for (int i = 0; i < cg; i++) {
-								if (coursegauge.size() <= i) {
+								if (coursegauge.size <= i) {
 									resource.getCourseScoreData().setMinbp(resource.getCourseScoreData().getMinbp()
 											+ resource.getCourseBMSModels()[i].getTotalNotes());
 								}
@@ -324,6 +325,8 @@ public class MusicResult extends AbstractResult {
 					notes += mo.getTotalNotes();
 				}
 				cscore.setNotes(notes);
+				cscore.setDeviceType(newscore.getDeviceType());
+				cscore.setOption(newscore.getOption());
 				resource.setCourseScoreData(cscore);
 			}
 			cscore.setEpg(cscore.getEpg() + newscore.getEpg());
