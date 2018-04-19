@@ -607,8 +607,9 @@ public class BMSPlayer extends MainState {
 			}
 			// stage failed判定
 			if(config.getGaugeAutoShift() == PlayerConfig.GAUGEAUTOSHIFT_BESTCLEAR) {
-				int type = 0;
-				for(int i = 0;i < gauge.getGaugeTypeLength();i++) {
+				final int len = gauge.getType() >= GrooveGauge.CLASS ? GrooveGauge.EXHARDCLASS + 1 : GrooveGauge.HAZARD + 1;
+				int type = len > GrooveGauge.EXHARDCLASS ? GrooveGauge.CLASS : 0;
+				for(int i = type;i < len;i++) {
 					if(gauge.getGauge(i).getValue() > 0f && gauge.getGauge(i).isQualified()) {
 						type = i;
 					}
