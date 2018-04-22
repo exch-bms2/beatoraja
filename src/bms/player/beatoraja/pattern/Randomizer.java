@@ -1,18 +1,9 @@
 package bms.player.beatoraja.pattern;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
-import bms.model.LongNote;
-import bms.model.MineNote;
-import bms.model.Mode;
-import bms.model.Note;
-import bms.model.TimeLine;
+import bms.model.*;
 import bms.player.beatoraja.PlayerConfig;
 
 /**
