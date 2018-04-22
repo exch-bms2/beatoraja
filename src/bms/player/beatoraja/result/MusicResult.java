@@ -552,6 +552,11 @@ public class MusicResult extends AbstractResult {
 		case NUMBER_GROOVEGAUGE:
 			return (int) resource.getGauge()[resource.getGrooveGauge().getType()]
 					.get(resource.getGauge()[resource.getGrooveGauge().getType()].size - 1);
+		case NUMBER_GROOVEGAUGE_AFTERDOT:
+			float value = resource.getGauge()[resource.getGrooveGauge().getType()]
+					.get(resource.getGauge()[resource.getGrooveGauge().getType()].size - 1) * 10;
+			if(value > 0 && value < 1) value = 1;
+			return ((int) value) % 10;
 		case NUMBER_AVERAGE_DURATION:
 			return (int) avgduration;
 		case NUMBER_AVERAGE_DURATION_AFTERDOT:

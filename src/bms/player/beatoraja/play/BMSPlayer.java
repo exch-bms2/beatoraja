@@ -903,6 +903,10 @@ public class BMSPlayer extends MainState {
 		switch (id) {
 		case NUMBER_LANECOVER1:
 			return (int) (lanerender.getLanecover() * 1000);
+		case NUMBER_LIFT1:
+			return (int) (lanerender.getLiftRegion() * 1000);
+		case NUMBER_HIDDEN1:
+			return (int) (lanerender.getHiddenCover() * 1000);
 		case NUMBER_PLAYTIME_MINUTE:
 			return (int) (((int) (main.isTimerOn(TIMER_PLAY) ? main.getNowTime(TIMER_PLAY) : 0)) / 60000);
 		case NUMBER_PLAYTIME_SECOND:
@@ -957,6 +961,10 @@ public class BMSPlayer extends MainState {
 					main.getInputProcessor().isSelectPressed();
 		case OPTION_LANECOVER1_ON:
 			return lanerender.getPlayConfig().isEnablelanecover();
+		case OPTION_LIFT1_ON:
+			return lanerender.getPlayConfig().isEnablelift();
+		case OPTION_HIDDEN1_ON:
+			return lanerender.getPlayConfig().isEnablehidden();
 		case OPTION_1P_BORDER_OR_MORE:
 			return gauge.getGauge().isQualified();
 		}

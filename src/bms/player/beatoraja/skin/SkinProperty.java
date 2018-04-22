@@ -261,6 +261,7 @@ public class SkinProperty {
 	public static final int NUMBER_JUDGETIMING = 12;
     public static final int NUMBER_LANECOVER1 = 14;
 	public static final int NUMBER_LIFT1 = 314;
+	public static final int NUMBER_HIDDEN1 = 315;
 
 	public static final int NUMBER_TOTALPLAYTIME_HOUR = 17;
 	public static final int NUMBER_TOTALPLAYTIME_MINUTE = 18;
@@ -667,6 +668,8 @@ public class SkinProperty {
 
 	public static final int OPTION_LANECOVER1_CHANGING = 270;
 	public static final int OPTION_LANECOVER1_ON = 271;
+	public static final int OPTION_LIFT1_ON = 272;
+	public static final int OPTION_HIDDEN1_ON = 273;
 
 	public static final int OPTION_COURSE_STAGE1 = 280;
 	public static final int OPTION_COURSE_STAGE2 = 281;
