@@ -452,7 +452,7 @@ class NoMurioshiRandomizer extends TimeBasedRandomizer {
 		buttonCombinationTable.add(Arrays.asList(0, 1, 2, 3, 4, 5));
 		buttonCombinationTable.add(Arrays.asList(0, 1, 2, 4, 5, 6));
 		buttonCombinationTable.add(Arrays.asList(0, 1, 2, 5, 6, 7));
-		buttonCombinationTable.add(Arrays.asList(1, 2, 3, 6, 7, 8));
+		buttonCombinationTable.add(Arrays.asList(0, 1, 2, 6, 7, 8));
 		buttonCombinationTable.add(Arrays.asList(1, 2, 3, 4, 5, 6));
 		buttonCombinationTable.add(Arrays.asList(1, 2, 3, 5, 6, 7));
 		buttonCombinationTable.add(Arrays.asList(1, 2, 3, 6, 7, 8));
@@ -482,15 +482,20 @@ class NoMurioshiRandomizer extends TimeBasedRandomizer {
 						.collect(Collectors.toList());
 			}
 			if (candidate.size() != 0) {
-				// 候補から縦連打になるレーンが含まれるものを除外する
+				// 候補から縦連打になるレーンを除外する
 				List<Integer> rendaLane = lastNoteTime.keySet().stream()
 						.filter(lane -> {return tl.getTime() - lastNoteTime.get(lane) < threshold;})
 						.collect(Collectors.toList());
 				List<List<Integer>> candidate2 = candidate.stream()
-						.filter(l -> {return l.stream().noneMatch(rendaLane::contains);})
+						.map(lanes -> {
+							return lanes.stream()
+									.filter(lane -> {return !rendaLane.contains(lane);})
+									.collect(Collectors.toList());
+							})
+						.filter(lanes -> {return lanes.size() >= noteCount;})
 						.collect(Collectors.toList());
 				if (candidate2.size() != 0) {
-					// 候補が残れば、buttonCombinationにアサインする
+					// 候補の長さがTLのノート数以上のものが残れば、それを選ぶ
 					buttonCombination = candidate2.get((int)(candidate2.size() * Math.random()));
 				} else {
 					// 結果候補がゼロなら、初期候補からノートがあるレーンをここでアサインする
