@@ -606,9 +606,11 @@ public class BMSPlayer extends MainState {
 				main.switchTimer(TIMER_ENDOFNOTE_1P, true);
 			}
 			// stage failed判定
-			if(config.getGaugeAutoShift() == PlayerConfig.GAUGEAUTOSHIFT_BESTCLEAR) {
-				final int len = gauge.getType() >= GrooveGauge.CLASS ? GrooveGauge.EXHARDCLASS + 1 : GrooveGauge.HAZARD + 1;
-				int type = len > GrooveGauge.EXHARDCLASS ? GrooveGauge.CLASS : 0;
+			if(config.getGaugeAutoShift() == PlayerConfig.GAUGEAUTOSHIFT_BESTCLEAR || config.getGaugeAutoShift() == PlayerConfig.GAUGEAUTOSHIFT_SELECT_TO_UNDER) {
+				final int len = config.getGaugeAutoShift() == PlayerConfig.GAUGEAUTOSHIFT_BESTCLEAR
+						? (gauge.getType() >= GrooveGauge.CLASS ? GrooveGauge.EXHARDCLASS + 1 : GrooveGauge.HAZARD + 1)
+						: (gauge.isCourseGauge() ? Math.min(Math.max(config.getGauge(), GrooveGauge.NORMAL) + GrooveGauge.CLASS - GrooveGauge.NORMAL, GrooveGauge.EXHARDCLASS) + 1 : config.getGauge() + 1);
+				int type = gauge.isCourseGauge() ? GrooveGauge.CLASS : 0;
 				for(int i = type;i < len;i++) {
 					if(gauge.getGauge(i).getValue() > 0f && gauge.getGauge(i).isQualified()) {
 						type = i;

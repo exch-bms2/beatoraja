@@ -331,7 +331,7 @@ public class PlayConfigurationView implements Initializable {
 		playconfig.getItems().setAll(PlayMode.values());
 		inputconfig.getItems().setAll(PlayMode.values());
 		initComboBox(lntype, new String[] { "LONG NOTE", "CHARGE NOTE", "HELL CHARGE NOTE" });
-		initComboBox(gaugeautoshift, new String[] { "NONE", "CONTINUE", "SURVIVAL TO GROOVE","BEST CLEAR" });
+		initComboBox(gaugeautoshift, new String[] { "NONE", "CONTINUE", "SURVIVAL TO GROOVE","BEST CLEAR","SELECT TO UNDER" });
 
 		TargetProperty[] targets = TargetProperty.getAllTargetProperties();
 		String[] targetString = new String[targets.length];
