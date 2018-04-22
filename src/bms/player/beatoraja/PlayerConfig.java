@@ -3,22 +3,18 @@ package bms.player.beatoraja;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.nio.file.*;
+import java.util.*;
 import java.util.logging.Logger;
+
+import bms.player.beatoraja.play.TargetProperty;
+import bms.player.beatoraja.skin.SkinType;
+
+import bms.model.Mode;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter;
-
-import bms.model.Mode;
-import bms.player.beatoraja.play.TargetProperty;
-import bms.player.beatoraja.skin.SkinType;
 
 /**
  * プレイヤー毎の設定項目
@@ -580,6 +576,7 @@ public class PlayerConfig {
 		if(mode24double == null) {
 			mode24double = new PlayModeConfig(Mode.KEYBOARD_24K_DOUBLE);
 		}
+		mode5.validate(7);
 		mode7.validate(9);
 		mode14.validate(18);
 		mode9.validate(9);
