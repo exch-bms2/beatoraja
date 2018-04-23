@@ -15,8 +15,6 @@ public abstract class Randomizer {
 
 	protected Mode mode;
 
-	public Random random;
-
 	private static PlayerConfig config;
 
 	protected static final int SRAN_THRESHOLD = 40;
@@ -33,13 +31,6 @@ public abstract class Randomizer {
 	 * <移動後, 元>
 	 */
 	private Map<Integer, Integer> LNactive = new HashMap<>();
-
-	/**
-	 * レーンのLN終了時間を格納する。
-	 * <元, 時間>
-	 * getTimeで比較するため不要？判断したら消す。
-	 */
-	private Map<Integer, Integer> LNendtime = new HashMap<>();
 
 	/**
 	 * 変更可能な移動元レーン
@@ -87,15 +78,13 @@ public abstract class Randomizer {
 			Note hn = hnotes[x];
 			if (n instanceof LongNote) {
 				LongNote ln2 = (LongNote) n;
-				if (ln2.isEnd() && LNendtime.containsKey(x) && tl.getTime() == ln2.getTime()) {
+				if (ln2.isEnd() && LNactive.containsKey(x) && tl.getTime() == ln2.getTime()) {
 					LNactive.remove(x);
-					LNendtime.remove(x);
 					changeableLane.add(x);
 					assignableLane.add(y);
 				} else {
 					if (!ln2.isEnd()) {
 						LNactive.put(x, y);
-						LNendtime.put(x, ln2.getPair().getTime());
 						changeableLane.remove((Integer) x);
 						assignableLane.remove((Integer) y);
 					}
@@ -117,7 +106,7 @@ public abstract class Randomizer {
 		this.modifyLanes = lanes;
 	}
 
-	public void setMode(Mode m) {
+	protected void setMode(Mode m) {
 		this.mode = m;
 	}
 
@@ -133,10 +122,10 @@ public abstract class Randomizer {
 	 * 対応するランダマイザ生成
 	 */
 	public static Randomizer create(Random r, Mode mode) {
-		return create(r, mode, 0);
+		return create(r, 0, mode);
 	}
 
-	public static Randomizer create(Random r, Mode mode, int playSide) {
+	public static Randomizer create(Random r, int playSide, Mode mode) {
 		Randomizer randomizer = null;
 		int thresholdBPM = config.getHranThresholdBPM();
 		int thresholdMillis;
@@ -178,13 +167,10 @@ public abstract class Randomizer {
 			break;
 		default:
 		}
-		randomizer.setRandom(r);
+		randomizer.setMode(mode);
 		return randomizer;
 	}
 
-	private void setRandom(Random r) {
-		this.random = r;
-	}
 }
 
 /**
@@ -358,7 +344,7 @@ class AllScratchRandomizer extends TimeBasedRandomizer {
 
 	// scratchLaneの決定
 	@Override
-	public void setMode(Mode m) {
+	protected void setMode(Mode m) {
 		super.setMode(m);
 		this.isDoublePlay = m.player == 2;
 		if (isDoublePlay) {
