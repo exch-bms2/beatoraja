@@ -151,7 +151,7 @@ public abstract class Randomizer {
 		switch (r) {
 		case ALL_SCR:
 			if (mode == Mode.POPN_9K) {
-				randomizer = new ConvergeRandomizer(thresholdMillis / 2, thresholdMillis);
+				randomizer = new ConvergeRandomizer(thresholdMillis, thresholdMillis * 2);
 			} else {
 				randomizer = new AllScratchRandomizer(SRAN_THRESHOLD, thresholdMillis, playSide);
 			}
@@ -244,13 +244,16 @@ abstract class TimeBasedRandomizer extends Randomizer {
 		// nが空でなかったら
 		// lastNoteTimeが小さいレーンから順番に置いていく
 		while (!noteLane.isEmpty()) {
-			int m = inferiorLane.stream()
-					.min((l1, l2) -> {
-						return lastNoteTime.get(l1) - lastNoteTime.get(l2);
-					})
-					.get();
+			int min = inferiorLane.stream()
+					.mapToInt(lastNoteTime::get)
+					.min()
+					.getAsInt();
+			List<Integer> minLane = inferiorLane.stream()
+					.filter(l -> {return lastNoteTime.get(l) == min;})
+					.collect(Collectors.toList());
+			Integer m = minLane.get((int)(minLane.size() * Math.random()));
 			randomMap.put(noteLane.remove(0), m);
-			inferiorLane.remove((Integer) m);
+			inferiorLane.remove(m);
 		}
 
 		// 残りをランダムに置いていく
@@ -489,7 +492,7 @@ class NoMurioshiRandomizer extends TimeBasedRandomizer {
 					// 候補の長さがTLのノート数以上のものが残れば、それを選ぶ
 					buttonCombination = candidate2.get((int)(candidate2.size() * Math.random()));
 				} else {
-					// 結果候補がゼロなら、初期候補からノートがあるレーンをここでアサインする
+					// 縦連打が発生しないことより、無理押しが発生しないことを優先する
 					randomMap = new HashMap<>();
 					buttonCombination = candidate.get((int)(candidate2.size() * Math.random())).stream()
 							.filter(assignableLane::contains).collect(Collectors.toList());
@@ -529,13 +532,7 @@ class NoMurioshiRandomizer extends TimeBasedRandomizer {
 
 	// LNアクティブも含めたタイムラインのノート数
 	private int noteCount(TimeLine tl) {
-		int count = 0;
-		for (int i = 0; i < modifyLanes.length; i++) {
-			if (tl.getNote(modifyLanes[i]) != null && !(tl.getNote(modifyLanes[i]) instanceof MineNote)) {
-				count++;
-			}
-		}
-		return count + getLNLane().size();
+		return getNoteExistLane(tl).size() + getLNLane().size();
 	}
 
 	// タイムラインにノーツが存在するレーンのリスト
@@ -592,18 +589,13 @@ class ConvergeRandomizer extends TimeBasedRandomizer {
 	// できるだけ連打が長いレーンに優先的に配置
 	@Override
 	int selectLane(List<Integer> lane) {
-		List<Integer> gya = new ArrayList<>();
-		int max = -1;
-		for (int l : lane) {
-			if (max < rendaCount.get(l)) {
-				max = rendaCount.get(l);
-			}
-		}
-		for (int l : lane) {
-			if (max == rendaCount.get(l)) {
-				gya.add(l);
-			}
-		}
+		int max = lane.stream()
+				.mapToInt(rendaCount::get)
+				.max()
+				.getAsInt();
+		List<Integer> gya = lane.stream()
+				.filter(l -> {return rendaCount.get(l) == max;})
+				.collect(Collectors.toList());
 		int l = gya.get((int) (gya.size() * Math.random()));
 		rendaCount.put(l, rendaCount.get(l) + 1);
 		return lane.indexOf(l);
