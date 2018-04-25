@@ -1001,16 +1001,16 @@ public class JSONSkinLoader extends SkinLoader{
 									else option[i] = 0;
 								}
 								if(chara.type == 0) {
-									skin.PMcharaLoader(usecim, imagefile, chara.type, color,
+									new PomyuCharaLoader(skin).load(usecim, imagefile, chara.type, color,
 											dst.dst[0].x, dst.dst[0].y, dst.dst[0].w, dst.dst[0].h,
 											side, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, dst.offset);
 								} else if(chara.type >= 1 && chara.type <= 5) {
-									SkinImage si = skin.PMcharaLoader(usecim, imagefile, chara.type, color,
+									SkinImage si = new PomyuCharaLoader(skin).load(usecim, imagefile, chara.type, color,
 											Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE,
 											Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE);
 									obj = si;
 								} else if(chara.type >= 6 && chara.type <= 15) {
-									skin.PMcharaLoader(usecim, imagefile, chara.type, color,
+									new PomyuCharaLoader(skin).load(usecim, imagefile, chara.type, color,
 											dst.dst[0].x, dst.dst[0].y, dst.dst[0].w, dst.dst[0].h,
 											Integer.MIN_VALUE, dst.timer, option[0], option[1], option[2], dst.offset);
 								}

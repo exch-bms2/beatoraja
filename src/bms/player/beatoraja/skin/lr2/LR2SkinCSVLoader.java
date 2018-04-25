@@ -563,7 +563,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 					values[4] = -values[4];
 				}
 				final File imagefile = SkinLoader.getPath(str[7].replace("LR2files\\Theme", "skin").replace("\\", "/"), filemap);
-				skin.PMcharaLoader(usecim, imagefile,
+				new PomyuCharaLoader(skin).load(usecim, imagefile,
 						0, (values[5] == 1 || values[5] == 2) ? values[5] : 1,
 						values[1] * dstw / srcw, dsth - (values[2] + values[4]) * dsth / srch, values[3] * dstw / srcw, values[4] * dsth / srch,
 						1, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, values[6]);
@@ -584,7 +584,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 					values[4] = -values[4];
 				}
 				final File imagefile = SkinLoader.getPath(str[7].replace("LR2files\\Theme", "skin").replace("\\", "/"), filemap);
-				skin.PMcharaLoader(usecim, imagefile,
+				new PomyuCharaLoader(skin).load(usecim, imagefile,
 						0, (values[5] == 1 || values[5] == 2) ? values[5] : 1,
 						values[1] * dstw / srcw, dsth - (values[2] + values[4]) * dsth / srch, values[3] * dstw / srcw, values[4] * dsth / srch,
 						2, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, values[6]);
@@ -607,7 +607,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 						values[4] = -values[4];
 					}
 					final File imagefile = SkinLoader.getPath(str[12].replace("LR2files\\Theme", "skin").replace("\\", "/"), filemap);
-					skin.PMcharaLoader(usecim, imagefile,
+					new PomyuCharaLoader(skin).load(usecim, imagefile,
 							values[6] + 6, (values[5] == 1 || values[5] == 2) ? values[5] : 1,
 							values[1] * dstw / srcw, dsth - (values[2] + values[4]) * dsth / srch, values[3] * dstw / srcw, values[4] * dsth / srch,
 							Integer.MIN_VALUE, values[7], values[8], values[9], values[10], values[11]);
@@ -623,7 +623,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 				int[] values = parseInt(str);
 				if(values[2] >= 0 && values[2] <= 4) {
 					final File imagefile = SkinLoader.getPath(str[3].replace("LR2files\\Theme", "skin").replace("\\", "/"), filemap);
-					PMcharaPart = skin.PMcharaLoader(usecim, imagefile,
+					PMcharaPart = new PomyuCharaLoader(skin).load(usecim, imagefile,
 							values[2] + 1, (values[1] == 1 || values[1] == 2) ? values[1] : 1,
 							Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE,
 							Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE);
