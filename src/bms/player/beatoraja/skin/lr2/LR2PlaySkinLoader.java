@@ -859,37 +859,29 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 			//#SRC_HIDDEN, (NULL), g, x, y, w, h,div_x, div_y, cycle, timer, disapear_line, isDisapearLineLinkLift
 			@Override
 			public void execute(String[] str) {
-				hidden = null;
-				int[] values = parseInt(str);
-				TextureRegion[] images = getSourceImage(values);
-				if (images != null) {
-					hidden = new SkinHidden(images, values[10], values[9]);
-				}
-				if (hidden != null) {
-					if(str[11].length() > 0 && values[11] > 0) hidden.setDisapearLine(dsth - values[11] * dsth / srch);
-					hidden.setDisapearLineLinkLift(str[12].length() == 0 || values[12] != 0);
-					skin.add(hidden);
-				}
+				setSrcHidden(str);
 			}
 		});
 		addCommandWord(new CommandWord("DST_HIDDEN") {
 			@Override
 			public void execute(String[] str) {
 				if (hidden != null) {
-					int[] values = parseInt(str);
-					if (values[5] < 0) {
-						values[3] += values[5];
-						values[5] = -values[5];
-					}
-					if (values[6] < 0) {
-						values[4] += values[6];
-						values[6] = -values[6];
-					}
-					hidden.setDestination(values[2], values[3] * dstw / srcw,
-							dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
-							values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
-							values[12], values[13], values[14], values[15], values[16], values[17], values[18],
-							values[19], values[20], readOffset(str, 21, new int[]{OFFSET_LIFT, OFFSET_HIDDEN_COVER}));
+					setDstHidden(str, new int[]{OFFSET_LIFT, OFFSET_HIDDEN_COVER});
+				}
+			}
+		});
+		addCommandWord(new CommandWord("SRC_LIFT") {
+			//#SRC_LIFT, (NULL), g, x, y, w, h,div_x, div_y, cycle, timer, disapear_line, isDisapearLineLinkLift
+			@Override
+			public void execute(String[] str) {
+				setSrcHidden(str);
+			}
+		});
+		addCommandWord(new CommandWord("DST_LIFT") {
+			@Override
+			public void execute(String[] str) {
+				if (hidden != null) {
+					setDstHidden(str, new int[]{OFFSET_LIFT});
 				}
 			}
 		});
@@ -988,6 +980,37 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 				dsth - (values[4] - 5) * dsth / srch, 8 * dw, 16 * dh, 0, 255,
 				255, 255, 255, 0, 0, 0, 0, -1, JUDGE_TIMER[side], 1999, 0, -(OPTION_PERFECT[side]), new int[]{OFFSET_JUDGE_DETAIL[side], OFFSET_LIFT});
 		skin.add(num2);
+	}
+
+	private void setSrcHidden(String[] str) {
+		hidden = null;
+		int[] values = parseInt(str);
+		TextureRegion[] images = getSourceImage(values);
+		if (images != null) {
+			hidden = new SkinHidden(images, values[10], values[9]);
+		}
+		if (hidden != null) {
+			if(str[11].length() > 0 && values[11] > 0) hidden.setDisapearLine(dsth - values[11] * dsth / srch);
+			hidden.setDisapearLineLinkLift(str[12].length() == 0 || values[12] != 0);
+			skin.add(hidden);
+		}
+	}
+
+	private void setDstHidden(String[] str, int[] offset) {
+		int[] values = parseInt(str);
+		if (values[5] < 0) {
+			values[3] += values[5];
+			values[5] = -values[5];
+		}
+		if (values[6] < 0) {
+			values[4] += values[6];
+			values[6] = -values[6];
+		}
+		hidden.setDestination(values[2], values[3] * dstw / srcw,
+				dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
+				values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
+				values[12], values[13], values[14], values[15], values[16], values[17], values[18],
+				values[19], values[20], readOffset(str, 21, offset));
 	}
 
 	public PlaySkin loadSkin(File f, MainState player, SkinHeader header, IntIntMap option,
