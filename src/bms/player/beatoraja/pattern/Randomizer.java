@@ -1,18 +1,9 @@
 package bms.player.beatoraja.pattern;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
-import bms.model.LongNote;
-import bms.model.MineNote;
-import bms.model.Mode;
-import bms.model.Note;
-import bms.model.TimeLine;
+import bms.model.*;
 import bms.player.beatoraja.PlayerConfig;
 
 /**
@@ -23,8 +14,6 @@ import bms.player.beatoraja.PlayerConfig;
 public abstract class Randomizer {
 
 	protected Mode mode;
-
-	public Random random;
 
 	private static PlayerConfig config;
 
@@ -42,13 +31,6 @@ public abstract class Randomizer {
 	 * <移動後, 元>
 	 */
 	private Map<Integer, Integer> LNactive = new HashMap<>();
-
-	/**
-	 * レーンのLN終了時間を格納する。
-	 * <元, 時間>
-	 * getTimeで比較するため不要？判断したら消す。
-	 */
-	private Map<Integer, Integer> LNendtime = new HashMap<>();
 
 	/**
 	 * 変更可能な移動元レーン
@@ -96,15 +78,13 @@ public abstract class Randomizer {
 			Note hn = hnotes[x];
 			if (n instanceof LongNote) {
 				LongNote ln2 = (LongNote) n;
-				if (ln2.isEnd() && LNendtime.containsKey(x) && tl.getTime() == ln2.getTime()) {
+				if (ln2.isEnd() && LNactive.containsKey(x) && tl.getTime() == ln2.getTime()) {
 					LNactive.remove(x);
-					LNendtime.remove(x);
 					changeableLane.add(x);
 					assignableLane.add(y);
 				} else {
 					if (!ln2.isEnd()) {
 						LNactive.put(x, y);
-						LNendtime.put(x, ln2.getPair().getTime());
 						changeableLane.remove((Integer) x);
 						assignableLane.remove((Integer) y);
 					}
@@ -126,7 +106,7 @@ public abstract class Randomizer {
 		this.modifyLanes = lanes;
 	}
 
-	public void setMode(Mode m) {
+	protected void setMode(Mode m) {
 		this.mode = m;
 	}
 
@@ -142,10 +122,10 @@ public abstract class Randomizer {
 	 * 対応するランダマイザ生成
 	 */
 	public static Randomizer create(Random r, Mode mode) {
-		return create(r, mode, 0);
+		return create(r, 0, mode);
 	}
 
-	public static Randomizer create(Random r, Mode mode, int playSide) {
+	public static Randomizer create(Random r, int playSide, Mode mode) {
 		Randomizer randomizer = null;
 		int thresholdBPM = config.getHranThresholdBPM();
 		int thresholdMillis;
@@ -160,7 +140,7 @@ public abstract class Randomizer {
 		switch (r) {
 		case ALL_SCR:
 			if (mode == Mode.POPN_9K) {
-				randomizer = new ConvergeRandomizer(thresholdMillis / 2, thresholdMillis);
+				randomizer = new ConvergeRandomizer(thresholdMillis, thresholdMillis * 2);
 			} else {
 				randomizer = new AllScratchRandomizer(SRAN_THRESHOLD, thresholdMillis, playSide);
 			}
@@ -187,13 +167,10 @@ public abstract class Randomizer {
 			break;
 		default:
 		}
-		randomizer.setRandom(r);
+		randomizer.setMode(mode);
 		return randomizer;
 	}
 
-	private void setRandom(Random r) {
-		this.random = r;
-	}
 }
 
 /**
@@ -253,13 +230,16 @@ abstract class TimeBasedRandomizer extends Randomizer {
 		// nが空でなかったら
 		// lastNoteTimeが小さいレーンから順番に置いていく
 		while (!noteLane.isEmpty()) {
-			int m = inferiorLane.stream()
-					.min((l1, l2) -> {
-						return lastNoteTime.get(l1) - lastNoteTime.get(l2);
-					})
-					.get();
+			int min = inferiorLane.stream()
+					.mapToInt(lastNoteTime::get)
+					.min()
+					.getAsInt();
+			List<Integer> minLane = inferiorLane.stream()
+					.filter(l -> {return lastNoteTime.get(l) == min;})
+					.collect(Collectors.toList());
+			Integer m = minLane.get((int)(minLane.size() * Math.random()));
 			randomMap.put(noteLane.remove(0), m);
-			inferiorLane.remove((Integer) m);
+			inferiorLane.remove(m);
 		}
 
 		// 残りをランダムに置いていく
@@ -364,7 +344,7 @@ class AllScratchRandomizer extends TimeBasedRandomizer {
 
 	// scratchLaneの決定
 	@Override
-	public void setMode(Mode m) {
+	protected void setMode(Mode m) {
 		super.setMode(m);
 		this.isDoublePlay = m.player == 2;
 		if (isDoublePlay) {
@@ -452,7 +432,7 @@ class NoMurioshiRandomizer extends TimeBasedRandomizer {
 		buttonCombinationTable.add(Arrays.asList(0, 1, 2, 3, 4, 5));
 		buttonCombinationTable.add(Arrays.asList(0, 1, 2, 4, 5, 6));
 		buttonCombinationTable.add(Arrays.asList(0, 1, 2, 5, 6, 7));
-		buttonCombinationTable.add(Arrays.asList(1, 2, 3, 6, 7, 8));
+		buttonCombinationTable.add(Arrays.asList(0, 1, 2, 6, 7, 8));
 		buttonCombinationTable.add(Arrays.asList(1, 2, 3, 4, 5, 6));
 		buttonCombinationTable.add(Arrays.asList(1, 2, 3, 5, 6, 7));
 		buttonCombinationTable.add(Arrays.asList(1, 2, 3, 6, 7, 8));
@@ -482,18 +462,23 @@ class NoMurioshiRandomizer extends TimeBasedRandomizer {
 						.collect(Collectors.toList());
 			}
 			if (candidate.size() != 0) {
-				// 候補から縦連打になるレーンが含まれるものを除外する
+				// 候補から縦連打になるレーンを除外する
 				List<Integer> rendaLane = lastNoteTime.keySet().stream()
 						.filter(lane -> {return tl.getTime() - lastNoteTime.get(lane) < threshold;})
 						.collect(Collectors.toList());
 				List<List<Integer>> candidate2 = candidate.stream()
-						.filter(l -> {return l.stream().noneMatch(rendaLane::contains);})
+						.map(lanes -> {
+							return lanes.stream()
+									.filter(lane -> {return !rendaLane.contains(lane);})
+									.collect(Collectors.toList());
+							})
+						.filter(lanes -> {return lanes.size() >= noteCount;})
 						.collect(Collectors.toList());
 				if (candidate2.size() != 0) {
-					// 候補が残れば、buttonCombinationにアサインする
+					// 候補の長さがTLのノート数以上のものが残れば、それを選ぶ
 					buttonCombination = candidate2.get((int)(candidate2.size() * Math.random()));
 				} else {
-					// 結果候補がゼロなら、初期候補からノートがあるレーンをここでアサインする
+					// 縦連打が発生しないことより、無理押しが発生しないことを優先する
 					randomMap = new HashMap<>();
 					buttonCombination = candidate.get((int)(candidate2.size() * Math.random())).stream()
 							.filter(assignableLane::contains).collect(Collectors.toList());
@@ -533,13 +518,7 @@ class NoMurioshiRandomizer extends TimeBasedRandomizer {
 
 	// LNアクティブも含めたタイムラインのノート数
 	private int noteCount(TimeLine tl) {
-		int count = 0;
-		for (int i = 0; i < modifyLanes.length; i++) {
-			if (tl.getNote(modifyLanes[i]) != null && !(tl.getNote(modifyLanes[i]) instanceof MineNote)) {
-				count++;
-			}
-		}
-		return count + getLNLane().size();
+		return getNoteExistLane(tl).size() + getLNLane().size();
 	}
 
 	// タイムラインにノーツが存在するレーンのリスト
@@ -596,18 +575,13 @@ class ConvergeRandomizer extends TimeBasedRandomizer {
 	// できるだけ連打が長いレーンに優先的に配置
 	@Override
 	int selectLane(List<Integer> lane) {
-		List<Integer> gya = new ArrayList<>();
-		int max = -1;
-		for (int l : lane) {
-			if (max < rendaCount.get(l)) {
-				max = rendaCount.get(l);
-			}
-		}
-		for (int l : lane) {
-			if (max == rendaCount.get(l)) {
-				gya.add(l);
-			}
-		}
+		int max = lane.stream()
+				.mapToInt(rendaCount::get)
+				.max()
+				.getAsInt();
+		List<Integer> gya = lane.stream()
+				.filter(l -> {return rendaCount.get(l) == max;})
+				.collect(Collectors.toList());
 		int l = gya.get((int) (gya.size() * Math.random()));
 		rendaCount.put(l, rendaCount.get(l) + 1);
 		return lane.indexOf(l);

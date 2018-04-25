@@ -203,44 +203,48 @@ public class CourseResult extends AbstractResult {
 
 					@Override
 					public void run() {
-						Logger.getGlobal().info("IRへスコア送信");
-						int lnmode = 0;
-						for(BMSModel model : resource.getCourseBMSModels()) {
-							if(model.containsUndefinedLongNote()) {
-								lnmode = config.getLnmode();
-								break;
-							}
-						}
-						IRResponse<Object> send = ir.sendCoursePlayData(resource.getCourseData(), lnmode, resource.getCourseScoreData());
-						if(send.isSuccessed()) {
-							main.switchTimer(TIMER_IR_CONNECT_SUCCESS, true);
-							Logger.getGlobal().info("IRスコア送信完了");							
-						} else {
-							main.switchTimer(TIMER_IR_CONNECT_FAIL, true);
-							Logger.getGlobal().warning("IRスコア送信失敗 : " + send.getMessage());							
-						}
-						IRResponse<IRScoreData[]> response = ir.getCoursePlayData(null, resource.getCourseData(), lnmode);
-						if(response.isSuccessed()) {
-							IRScoreData[] scores = response.getData();
-							irtotal = scores.length;
-
-							for(int i = 0;i < scores.length;i++) {
-								if(irrank == 0 && scores[i].getExscore() <= resource.getCourseScoreData().getExscore() ) {
-									irrank = i + 1;
+						try {
+							Logger.getGlobal().info("IRへスコア送信");
+							int lnmode = 0;
+							for(BMSModel model : resource.getCourseBMSModels()) {
+								if(model.containsUndefinedLongNote()) {
+									lnmode = config.getLnmode();
+									break;
 								}
-								if(irprevrank == 0 && scores[i].getExscore() <= oldscore.getExscore() ) {
-									irprevrank = i + 1;
-									if(irrank == 0) {
-										irrank = irprevrank;
+							}
+							IRResponse<Object> send = ir.sendCoursePlayData(resource.getCourseData(), lnmode, resource.getCourseScoreData());
+							if(send.isSuccessed()) {
+								main.switchTimer(TIMER_IR_CONNECT_SUCCESS, true);
+								Logger.getGlobal().info("IRスコア送信完了");							
+							} else {
+								main.switchTimer(TIMER_IR_CONNECT_FAIL, true);
+								Logger.getGlobal().warning("IRスコア送信失敗 : " + send.getMessage());							
+							}
+							IRResponse<IRScoreData[]> response = ir.getCoursePlayData(null, resource.getCourseData(), lnmode);
+							if(response.isSuccessed()) {
+								IRScoreData[] scores = response.getData();
+								irtotal = scores.length;
+	
+								for(int i = 0;i < scores.length;i++) {
+									if(irrank == 0 && scores[i].getExscore() <= resource.getScoreData().getExscore() ) {
+										irrank = i + 1;
+									}
+									if(irprevrank == 0 && scores[i].getExscore() <= oldscore.getExscore() ) {
+										irprevrank = i + 1;
+										if(irrank == 0) {
+											irrank = irprevrank;
+										}
 									}
 								}
+								Logger.getGlobal().warning("IRからのスコア取得成功 : " + response.getMessage());
+							} else {
+								Logger.getGlobal().warning("IRからのスコア取得失敗 : " + response.getMessage());
 							}
-							Logger.getGlobal().warning("IRからのスコア取得成功 : " + response.getMessage());
-						} else {
-							Logger.getGlobal().warning("IRからのスコア取得失敗 : " + response.getMessage());
+						} catch (Exception e) {
+							Logger.getGlobal().severe(e.getMessage());
+						} finally {
+							state = STATE_IR_FINISHED;
 						}
-
-						state = STATE_IR_FINISHED;
 					}
 				};
 				irprocess.start();					

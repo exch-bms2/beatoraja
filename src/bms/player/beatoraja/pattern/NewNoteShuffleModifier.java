@@ -1,11 +1,8 @@
 package bms.player.beatoraja.pattern;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
-import bms.model.BMSModel;
-import bms.model.Mode;
-import bms.model.TimeLine;
+import bms.model.*;
 
 /**
  * タイムラインごとにノーツを入れ替えるクラス
@@ -14,26 +11,26 @@ import bms.model.TimeLine;
  */
 public class NewNoteShuffleModifier extends PatternModifier {
 
-	private Randomizer r;
+	private Randomizer randomizer;
+	private boolean isScratchLaneModify;
 
 	public NewNoteShuffleModifier(Random r, Mode mode) {
-		super(r.assist);
-		this.r = Randomizer.create(r, mode, 0);
+		this(r, 0, mode);
 	}
 
 	public NewNoteShuffleModifier(Random r, int type, Mode mode) {
 		super(r.assist);
-		this.r = Randomizer.create(r, mode);
+		this.isScratchLaneModify = r.isScratchLaneModify;
+		this.randomizer = Randomizer.create(r, type, mode);
 	}
 
 	@Override
 	public List<PatternModifyLog> modify(BMSModel model) {
 		List<PatternModifyLog> log = new ArrayList<PatternModifyLog>();
-		r.setModifyLanes(getKeys(model.getMode(), r.random.isScratchLaneModify));
-		r.setMode(model.getMode());
+		randomizer.setModifyLanes(getKeys(model.getMode(), isScratchLaneModify));
 		for(TimeLine tl : model.getAllTimeLines()) {
 			if (tl.existNote() || tl.existHiddenNote()) {
-				log.add(new PatternModifyLog(tl.getSection(), r.permutate(tl)));
+				log.add(new PatternModifyLog(tl.getSection(), randomizer.permutate(tl)));
 			}
 		}
 		return log;
