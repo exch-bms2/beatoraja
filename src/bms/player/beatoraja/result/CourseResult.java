@@ -203,7 +203,6 @@ public class CourseResult extends AbstractResult {
 
 					@Override
 					public void run() {
-						main.switchTimer(TIMER_IR_CONNECT_SUCCESS, true);
 						Logger.getGlobal().info("IRへスコア送信");
 						int lnmode = 0;
 						for(BMSModel model : resource.getCourseBMSModels()) {
@@ -226,7 +225,7 @@ public class CourseResult extends AbstractResult {
 							irtotal = scores.length;
 
 							for(int i = 0;i < scores.length;i++) {
-								if(irrank == 0 && scores[i].getExscore() <= resource.getScoreData().getExscore() ) {
+								if(irrank == 0 && scores[i].getExscore() <= resource.getCourseScoreData().getExscore() ) {
 									irrank = i + 1;
 								}
 								if(irprevrank == 0 && scores[i].getExscore() <= oldscore.getExscore() ) {
