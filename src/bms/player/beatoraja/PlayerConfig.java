@@ -18,7 +18,7 @@ import com.badlogic.gdx.utils.JsonWriter;
 
 /**
  * プレイヤー毎の設定項目
- * 
+ *
  * @author exch
  */
 public class PlayerConfig {
@@ -28,7 +28,7 @@ public class PlayerConfig {
      * プレイヤーネーム
      */
     private String name = "NO NAME";
-    
+
 	/**
 	 * ゲージの種類
 	 */
@@ -60,7 +60,7 @@ public class PlayerConfig {
 	 * 指定がない場合のミスレイヤー表示時間(ms)
 	 */
 	private int misslayerDuration = 500;
-	
+
 	/**
 	 * LNモード
 	 */
@@ -98,7 +98,7 @@ public class PlayerConfig {
 	 * プレイ中のゲージ切替
 	 */
 	private int gaugeAutoShift = GAUGEAUTOSHIFT_NONE;
-	
+
 	public static final int GAUGEAUTOSHIFT_NONE = 0;
 	public static final int GAUGEAUTOSHIFT_CONTINUE = 1;
 	public static final int GAUGEAUTOSHIFT_SURVIVAL_TO_GROOVE = 2;
@@ -126,6 +126,8 @@ public class PlayerConfig {
 
 	private SkinConfig[] skin = new SkinConfig[SkinType.getMaxSkinTypeID() + 1];
 
+	private PlayModeConfig mode5 = new PlayModeConfig(Mode.BEAT_5K);
+
 	private PlayModeConfig mode7 = new PlayModeConfig(Mode.BEAT_7K);
 
 	private PlayModeConfig mode14 = new PlayModeConfig(Mode.BEAT_14K);
@@ -146,9 +148,9 @@ public class PlayerConfig {
 	private String userid = "";
 
 	private String password = "";
-	
+
 	private int irsend = 0;
-	
+
 	public static final int IR_SEND_ALWAYS = 0;
 	public static final int IR_SEND_COMPLETE_SONG = 1;
 	public static final int IR_SEND_UPDATE_SCORE = 2;
@@ -160,11 +162,11 @@ public class PlayerConfig {
 	private String twitterAccessToken;
 
 	private String twitterAccessTokenSecret;
-	
+
 	public PlayerConfig() {
 		validate();
 	}
-	
+
     public String getName() {
         return name;
     }
@@ -172,7 +174,7 @@ public class PlayerConfig {
     public void setName(String name) {
         this.name = name;
     }
-    
+
 	public int getGauge() {
 		return gauge;
 	}
@@ -220,7 +222,7 @@ public class PlayerConfig {
 	public void setGaugeAutoShift(int gaugeAutoShift) {
 		this.gaugeAutoShift = gaugeAutoShift;
 	}
-	
+
 	public int getLnmode() {
 		return lnmode;
 	}
@@ -280,6 +282,7 @@ public class PlayerConfig {
 	public PlayModeConfig getPlayConfig(Mode modeId) {
 		switch (modeId) {
 		case BEAT_5K:
+			return getMode5();
 		case BEAT_7K:
 			return getMode7();
 		case BEAT_10K:
@@ -300,7 +303,6 @@ public class PlayerConfig {
 		switch (modeId) {
 		case 7:
 		case 5:
-			return getMode7();
 		case 14:
 		case 10:
 			return getMode14();
@@ -313,6 +315,14 @@ public class PlayerConfig {
 		default:
 			return getMode7();
 		}
+	}
+
+	public PlayModeConfig getMode5() {
+		return mode5;
+	}
+
+	public void setMode5(PlayModeConfig mode5) {
+		this.mode5 = mode5;
 	}
 
 	public PlayModeConfig getMode7() {
@@ -366,11 +376,11 @@ public class PlayerConfig {
 	public void setMode(Mode m)  {
 		this.mode = m;
 	}
-	
+
 	public Mode getMode()  {
 		return mode;
 	}
-	
+
 	public int getMusicselectinput() {
 		return musicselectinput;
 	}
@@ -547,6 +557,10 @@ public class PlayerConfig {
 			skin[i].validate();
 		}
 
+		if(mode5 == null) {
+			mode5 = new PlayModeConfig(Mode.BEAT_5K);
+		}
+
 		if(mode7 == null) {
 			mode7 = new PlayModeConfig(Mode.BEAT_7K);
 		}
@@ -554,7 +568,7 @@ public class PlayerConfig {
 			mode14 = new PlayModeConfig(Mode.BEAT_14K);
 		}
 		if(mode9 == null) {
-			mode9 = new PlayModeConfig(Mode.POPN_9K);			
+			mode9 = new PlayModeConfig(Mode.POPN_9K);
 		}
 		if(mode24 == null) {
 			mode24 = new PlayModeConfig(Mode.KEYBOARD_24K);
@@ -562,12 +576,13 @@ public class PlayerConfig {
 		if(mode24double == null) {
 			mode24double = new PlayModeConfig(Mode.KEYBOARD_24K_DOUBLE);
 		}
+		mode5.validate(7);
 		mode7.validate(9);
 		mode14.validate(18);
 		mode9.validate(9);
 		mode24.validate(26);
 		mode24double.validate(52);
-		
+
 		gauge = MathUtils.clamp(gauge, 0, 5);
 		random = MathUtils.clamp(random, 0, 9);
 		random2 = MathUtils.clamp(random2, 0, 9);
@@ -580,7 +595,7 @@ public class PlayerConfig {
 		hranThresholdBPM = MathUtils.clamp(hranThresholdBPM, 1, 1000);
 		sevenToNinePattern = MathUtils.clamp(sevenToNinePattern, 0, 6);
 		sevenToNineType = MathUtils.clamp(sevenToNineType, 0, 2);
-		
+
 		irsend = MathUtils.clamp(irsend, 0, 2);
 
 	}

@@ -1,11 +1,11 @@
 package bms.player.beatoraja;
 
-import bms.model.Mode;
-import bms.player.beatoraja.input.BMControllerInputProcessor.BMKeys;
-
 import java.util.Arrays;
 
 import com.badlogic.gdx.Input.Keys;
+
+import bms.model.Mode;
+import bms.player.beatoraja.input.BMControllerInputProcessor.BMKeys;
 
 /**
  * プレイコンフィグ。モード毎に保持するべき値についてはこちらに格納する
@@ -228,6 +228,8 @@ public class PlayModeConfig {
         public void setKeyAssign(Mode mode, boolean enable) {
             switch (mode) {
                 case BEAT_5K:
+                    keys = new int[] { Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.SHIFT_LEFT,
+                            Keys.CONTROL_LEFT };
                 case BEAT_7K:
                     keys = new int[] { Keys.Z, Keys.S, Keys.X, Keys.D, Keys.C, Keys.F, Keys.V, Keys.SHIFT_LEFT,
                             Keys.CONTROL_LEFT };
