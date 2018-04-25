@@ -5,13 +5,14 @@ import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.Resolution;
 import bms.player.beatoraja.config.SkinConfigurationSkin;
 import bms.player.beatoraja.skin.SkinHeader;
-import bms.player.beatoraja.skin.SkinImage;
 import bms.player.beatoraja.skin.SkinObject;
 import bms.player.beatoraja.skin.SkinPropertyMapper;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
+
+import com.badlogic.gdx.utils.IntIntMap;
+import com.badlogic.gdx.utils.ObjectMap;
 
 public class LR2SkinSelectSkinLoader extends LR2SkinCSVLoader<SkinConfigurationSkin> {
 
@@ -27,7 +28,7 @@ public class LR2SkinSelectSkinLoader extends LR2SkinCSVLoader<SkinConfigurationS
 	}
 
 	public SkinConfigurationSkin loadSkin(File f, MainState selector, SkinHeader header,
-	                                      Map<Integer, Boolean> option, Map property) throws IOException {
+	                                      IntIntMap option, ObjectMap property) throws IOException {
 		SkinConfigurationSkin skin = this.loadSkin(new SkinConfigurationSkin(src, dst), f, selector, header, option, property);
 		int count = 0;
 		for (SkinObject obj : skin.getAllSkinObjects()) {

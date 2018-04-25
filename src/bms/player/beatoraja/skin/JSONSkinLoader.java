@@ -8,9 +8,6 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.logging.Logger;
 
-import org.luaj.vm2.LuaError;
-import org.luaj.vm2.LuaValue;
-
 import bms.player.beatoraja.Config;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.Resolution;
@@ -20,6 +17,8 @@ import bms.player.beatoraja.play.*;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.utils.IntIntMap;
+import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.Json;
 
 import bms.player.beatoraja.decide.MusicDecideSkin;
@@ -36,6 +35,7 @@ import bms.player.beatoraja.skin.SkinObject.SkinOffset;
 import bms.player.beatoraja.skin.lua.SkinLuaAccessor;
 
 import com.badlogic.gdx.utils.JsonValue;
+import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.reflect.ClassReflection;
 import com.badlogic.gdx.utils.reflect.Field;
 import com.badlogic.gdx.utils.reflect.ReflectionException;
@@ -55,7 +55,7 @@ public class JSONSkinLoader extends SkinLoader{
 	
 	private final SkinLuaAccessor lua;
 
-	Map<String, String> filemap = new HashMap();
+	ObjectMap<String, String> filemap = new ObjectMap();
 
 	public JSONSkinLoader() {
 		lua = null;
@@ -176,7 +176,7 @@ public class JSONSkinLoader extends SkinLoader{
 			}
 			setSerializers(json, enabledOptions, p);
 
-			filemap = new HashMap<>();
+			filemap = new ObjectMap<>();
 			for (SkinHeader.CustomFile customFile : header.getCustomFiles()) {
 				for(SkinConfig.FilePath file : property.getFile()) {
 					if (customFile.name.equals(file.name)) {
@@ -243,7 +243,7 @@ public class JSONSkinLoader extends SkinLoader{
 				skin = new SkinConfigurationSkin(src, dstr);
 			}
 
-			Map<Integer, Boolean> op = new HashMap<>();
+			IntIntMap op = new IntIntMap();
 			for (Property pr : sk.property) {
 				int pop = 0;
 				for(SkinConfig.Option opt : property.getOption()) {
@@ -257,12 +257,12 @@ public class JSONSkinLoader extends SkinLoader{
 					}
 				}
 				for (int i = 0; i < pr.item.length; i++) {
-					op.put(pr.item[i].op, pr.item[i].op == pop);
+					op.put(pr.item[i].op, pr.item[i].op == pop ? 1 : 0);
 				}
 			}
 			skin.setOption(op);
 
-			Map<Integer, SkinConfig.Offset> offset = new HashMap<>();
+			IntMap<SkinConfig.Offset> offset = new IntMap<>();
 			for (CustomOffset of : header.getCustomOffsets()) {
 				for(SkinConfig.Offset off : property.getOffset()) {
 					if (off.name.equals(of.name)) {

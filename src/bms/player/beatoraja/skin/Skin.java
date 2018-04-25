@@ -78,9 +78,9 @@ public class Skin {
 	 */
 	private int fadeout;
 
-	private Map<Integer, Boolean> option = new HashMap<Integer, Boolean>();
+	private IntIntMap option = new IntIntMap();
 	
-	private Map<Integer, Offset> offset = new HashMap<Integer, Offset>();
+	private IntMap<Offset> offset = new IntMap<Offset>();
 
 	/**
 	 * 読み込み時から不変であることが確定しているop
@@ -178,11 +178,10 @@ public class Skin {
 				IntArray l = new IntArray();
 				for(int op : obj.getOption()) {
 					if(op > 0) {
-						if(option.containsKey(op)) {
-							if(!option.get(op)) {
-								removes.add(obj);						
-							}
-						} else {
+						final int value = option.get(op, -1);
+						if(value == 0) {
+							removes.add(obj);						
+						} else if(value == -1){
 							boolean fix = false;
 							for(int fop : fixopt) {
 								if(op == fop) {
@@ -198,11 +197,10 @@ public class Skin {
 							}
 						}					
 					} else {
-						if(option.containsKey(-op)) {
-							if(option.get(-op)) {
-								removes.add(obj);						
-							}
-						} else {
+						final int value = option.get(-op, -1);
+						if(value == 1) {
+							removes.add(obj);						
+						} else if(value == -1){
 							boolean fix = false;
 							for(int fop : fixopt) {
 								if(-op == fop) {
@@ -322,19 +320,19 @@ public class Skin {
 		this.scene = scene;
 	}
 
-	public Map<Integer,Boolean> getOption() {
+	public IntIntMap getOption() {
 		return option;
 	}
 
-	public void setOption(Map<Integer, Boolean> option) {
+	public void setOption(IntIntMap option) {
 		this.option = option;
 	}
 
-	public Map<Integer, Offset> getOffset() {
+	public IntMap<Offset> getOffset() {
 		return offset;
 	}
 
-	public void setOffset(Map<Integer, Offset> offset) {
+	public void setOffset(IntMap<Offset> offset) {
 		this.offset = offset;
 	}
 

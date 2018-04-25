@@ -2,7 +2,6 @@ package bms.player.beatoraja.skin.lr2;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
 
 import bms.player.beatoraja.Config;
 import bms.player.beatoraja.MainState;
@@ -12,6 +11,8 @@ import bms.player.beatoraja.skin.*;
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.utils.IntIntMap;
+import com.badlogic.gdx.utils.ObjectMap;
 
 /**
  * LR2セレクトスキンローダー
@@ -483,7 +484,7 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 				// 3以降で定義されてなければ0か1が用いられる
 				int[] values = parseInt(str);
 				SkinText bartext = null;
-				if (values[2] < fontlist.size() && fontlist.get(values[2]) != null) {
+				if (values[2] < fontlist.size && fontlist.get(values[2]) != null) {
 					bartext = new SkinTextImage(fontlist.get(values[2]));
 				} else {
 					bartext = new SkinTextFont("skin/default/VL-Gothic-Regular.ttf", 0, 48, 2);
@@ -528,7 +529,7 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 	}
 
 	public MusicSelectSkin loadSkin(File f, MainState selector, SkinHeader header,
-			Map<Integer, Boolean> option, Map property) throws IOException {
+			IntIntMap option, ObjectMap property) throws IOException {
 		return this.loadSkin(new MusicSelectSkin(src, dst), f, selector, header, option, property);
 	}
 }

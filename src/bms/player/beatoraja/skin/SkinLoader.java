@@ -1,19 +1,15 @@
 package bms.player.beatoraja.skin;
 
-import bms.player.beatoraja.MainState;
-import bms.player.beatoraja.PixmapResourcePool;
-import bms.player.beatoraja.PlayerResource;
-import bms.player.beatoraja.SkinConfig;
+import bms.player.beatoraja.*;
 import bms.player.beatoraja.skin.lr2.LR2SkinCSVLoader;
 import bms.player.beatoraja.skin.lr2.LR2SkinHeaderLoader;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.ObjectMap;
 
 import java.io.File;
 import java.nio.file.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 /**
  * スキンローダー
@@ -74,9 +70,9 @@ public abstract class SkinLoader {
         return resource;
     }
 
-    protected static File getPath(String imagepath, Map<String, String> filemap) {
+    protected static File getPath(String imagepath, ObjectMap<String, String> filemap) {
         File imagefile = new File(imagepath);
-        for (String key : filemap.keySet()) {
+        for (String key : filemap.keys()) {
             if (imagepath.startsWith(key)) {
                 String foot = imagepath.substring(key.length());
                 imagefile = new File(
@@ -97,14 +93,14 @@ public abstract class SkinLoader {
             }
             File imagedir = new File(imagepath.substring(0, imagepath.lastIndexOf('/')));
             if (imagedir.exists() && imagedir.isDirectory()) {
-                List<File> l = new ArrayList<File>();
+                Array<File> l = new Array<File>();
                 for (File subfile : imagedir.listFiles()) {
                     if (subfile.getPath().toLowerCase().endsWith(ext)) {
                         l.add(subfile);
                     }
                 }
-                if (l.size() > 0) {
-                    imagefile = l.get((int) (Math.random() * l.size()));
+                if (l.size > 0) {
+                    imagefile = l.get((int) (Math.random() * l.size));
                 }
             }
         }

@@ -1,10 +1,7 @@
 package bms.player.beatoraja.skin.lr2;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.IntIntMap;
 
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.skin.SkinLoader;
@@ -13,16 +10,16 @@ import bms.player.beatoraja.skin.SkinPropertyMapper;
 
 public class LR2SkinLoader extends SkinLoader {
 
-	private List<Command> commands = new ArrayList<Command>();
+	private Array<Command> commands = new Array<Command>();
 
-	protected Map<Integer, Boolean> op = new HashMap<Integer, Boolean>();
+	protected IntIntMap op = new IntIntMap();
 
 	protected void addCommandWord(Command cm) {
 		commands.add(cm);
 	}
 
 	protected void addCommandWord(Command... cm) {
-		commands.addAll(Arrays.asList(cm));
+		commands.addAll(cm);
 	}
 
 	boolean skip = false;
@@ -44,11 +41,11 @@ public class LR2SkinLoader extends SkinLoader {
 					try {
 						int opt = Integer.parseInt(str[i].replace('!', '-').replaceAll("[^0-9-]", ""));
 						if(opt >=  0) {
-							if(op.containsKey(opt) && op.get(opt)) {
+							if(op.get(opt, -1) == 1) {
 								b = true;
 							}
 						} else {
-							if(op.containsKey(-opt) && !op.get(-opt)) {
+							if(op.get(-opt, -1) == 0) {
 								b = true;
 							}
 						}
@@ -85,11 +82,11 @@ public class LR2SkinLoader extends SkinLoader {
 						try {
 							int opt = Integer.parseInt(str[i].replace('!', '-').replaceAll("[^0-9-]", ""));
 							if(opt >=  0) {
-								if(op.containsKey(opt) && op.get(opt)) {
+								if(op.get(opt, -1) == 1) {
 									b = true;
 								}
 							} else {
-								if(op.containsKey(-opt) && !op.get(-opt)) {
+								if(op.get(-opt, -1) == 0) {
 									b = true;
 								}
 							}
@@ -125,19 +122,24 @@ public class LR2SkinLoader extends SkinLoader {
 			if (!skip) {
 				if (str[0].equals("#SETOPTION")) {
 					int index = Integer.parseInt(str[1]);
-					op.put(index, Integer.parseInt(str[2]) >= 1);
+					op.put(index, Integer.parseInt(str[2]) >= 1 ? 1 : 0);
 				}
 
+				Command command = null;
 				for (Command cm : commands) {
-					if (str[0].equals("#" + cm.name())) {
-						cm.execute(this, str);
+					if (str[0].substring(1).equals(cm.name())) {
+						command = cm;
+						break;
 					}
+				}
+				if(command != null) {
+					command.execute(this, str);					
 				}
 			}
 		}
 	}
 
-	public Map<Integer, Boolean> getOption() {
+	public IntIntMap getOption() {
 		return op;
 	}
 

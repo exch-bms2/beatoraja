@@ -7,6 +7,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
+import com.badlogic.gdx.utils.Array;
+
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.Resolution;
 import bms.player.beatoraja.SkinConfig;
@@ -27,9 +29,9 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
 public class LR2SkinHeaderLoader extends LR2SkinLoader {
 	
 	SkinHeader header = new SkinHeader();
-	List<CustomFile> files = new ArrayList<CustomFile>();
-	List<CustomOption> options = new ArrayList<CustomOption>();
-	List<CustomOffset> offsets = new ArrayList<CustomOffset>();
+	Array<CustomFile> files = new Array<CustomFile>();
+	Array<CustomOption> options = new Array<CustomOption>();
+	Array<CustomOffset> offsets = new Array<CustomOffset>();
 
 	public LR2SkinHeaderLoader() {
 		addCommandWord(HeaderCommand.values());
@@ -61,18 +63,18 @@ public class LR2SkinHeaderLoader extends LR2SkinLoader {
 		} catch(IOException e) {
 			throw e;
 		}
-		header.setCustomOptions(options.toArray(new CustomOption[options.size()]));
-		header.setCustomFiles(files.toArray(new CustomFile[files.size()]));
-		header.setCustomOffsets(offsets.toArray(new CustomOffset[offsets.size()]));
+		header.setCustomOptions(options.toArray(CustomOption.class));
+		header.setCustomFiles(files.toArray(CustomFile.class));
+		header.setCustomOffsets(offsets.toArray(CustomOffset.class));
 
 		for(SkinConfig.Option opt : property.getOption()) {
 			if(opt.value != OPTION_RANDOM_VALUE) {
-				op.put(opt.value, true);
+				op.put(opt.value, 1);
 			} else {
 				for (CustomOption option : header.getCustomOptions()) {
 					if(opt.name.equals(option.name)) {
 						int selected = option.option[(int) (Math.random() * option.option.length)];
-						op.put(selected, true);
+						op.put(selected, 1);
 						header.setRandomSelectedOptions(option.name, selected);
 					}
 				}
@@ -81,7 +83,7 @@ public class LR2SkinHeaderLoader extends LR2SkinLoader {
 		for(CustomOption co : options) {
 			for(int i = 0;i < co.contents.length;i++) {
 				if(!op.containsKey(co.option[i])) {
-					op.put(co.option[i], false);
+					op.put(co.option[i], 0);
 				}
 			}
 		}
@@ -178,7 +180,7 @@ enum HeaderCommand implements Command<LR2SkinHeaderLoader> {
 			}
 			for(int i = 0; i < addition.length; i++) {
 				if(str[i + 1].replaceAll("[^0-9-]", "").equals("0") && addition[i] != null) {
-					loader.options.remove(addition[i]);
+					loader.options.removeValue(addition[i], true);
 				}
 			}
 		}

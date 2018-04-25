@@ -4,33 +4,19 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.utils.IntArray;
+import com.badlogic.gdx.utils.IntIntMap;
+import com.badlogic.gdx.utils.ObjectMap;
 
 import bms.model.Mode;
 import bms.player.beatoraja.Config;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.Resolution;
-import bms.player.beatoraja.play.PlaySkin;
-import bms.player.beatoraja.play.SkinBGA;
-import bms.player.beatoraja.play.SkinGauge;
-import bms.player.beatoraja.play.SkinHidden;
-import bms.player.beatoraja.play.SkinJudge;
-import bms.player.beatoraja.play.SkinNote;
-import bms.player.beatoraja.skin.Skin;
-import bms.player.beatoraja.skin.SkinBPMGraph;
-import bms.player.beatoraja.skin.SkinHeader;
-import bms.player.beatoraja.skin.SkinImage;
-import bms.player.beatoraja.skin.SkinNoteDistributionGraph;
-import bms.player.beatoraja.skin.SkinNumber;
-import bms.player.beatoraja.skin.SkinSource;
-import bms.player.beatoraja.skin.SkinSourceImage;
-import bms.player.beatoraja.skin.SkinTimingVisualizer;
-import bms.player.beatoraja.skin.SkinType;
+import bms.player.beatoraja.play.*;
+import bms.player.beatoraja.skin.*;
 
 /**
  * LR2プレイスキンローダー
@@ -660,7 +646,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 			public void execute(String[] str) {
 				gauger = null;
 				int[] values = parseInt(str);
-				if (values[2] < imagelist.size() && imagelist.get(values[2]) != null) {
+				if (values[2] < imagelist.size && imagelist.get(values[2]) != null) {
 					int playside = values[1];
 					int divx = values[7];
 					if (divx <= 0) {
@@ -734,7 +720,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 			public void execute(String[] str) {
 				gauger = null;
 				int[] values = parseInt(str);
-				if (values[2] < imagelist.size() && imagelist.get(values[2]) != null) {
+				if (values[2] < imagelist.size && imagelist.get(values[2]) != null) {
 					int playside = values[1];
 					int divx = values[7];
 					if (divx <= 0) {
@@ -1004,8 +990,8 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 		skin.add(num2);
 	}
 
-	public PlaySkin loadSkin(File f, MainState player, SkinHeader header, Map<Integer, Boolean> option,
-			Map property) throws IOException {
+	public PlaySkin loadSkin(File f, MainState player, SkinHeader header, IntIntMap option,
+			ObjectMap property) throws IOException {
 		mode = type.getMode();
 		note = new SkinSource[mode.key];
 		lnstart = new SkinSource[mode.key];

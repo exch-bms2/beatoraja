@@ -1,7 +1,6 @@
 package bms.player.beatoraja.skin.lr2;
 
 import java.io.*;
-import java.util.*;
 import java.util.logging.Logger;
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
@@ -12,13 +11,14 @@ import bms.player.beatoraja.select.MusicSelectSkin;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.SkinHeader.*;
 
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.IntArray;
+import com.badlogic.gdx.utils.IntIntMap;
+import com.badlogic.gdx.utils.IntMap;
+import com.badlogic.gdx.utils.ObjectMap;
 
 /**
  * LR2のスキン定義用csvファイルのローダー
@@ -27,8 +27,8 @@ import com.badlogic.gdx.utils.IntArray;
  */
 public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 
-	List<Object> imagelist = new ArrayList<Object>();
-	List<SkinTextImage.SkinTextImageSource> fontlist = new ArrayList<>();
+	Array<Object> imagelist = new Array<Object>();
+	Array<SkinTextImage.SkinTextImageSource> fontlist = new Array<SkinTextImage.SkinTextImageSource>();
 
 	/**
 	 * スキンの元サイズ
@@ -115,7 +115,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 					}
 				} else {
 					Logger.getGlobal()
-							.warning("IMAGE " + imagelist.size() + " : ファイルが見つかりません : " + imagefile.getPath());
+							.warning("IMAGE " + imagelist.size + " : ファイルが見つかりません : " + imagefile.getPath());
 					imagelist.add(null);
 				}
 				// System.out
@@ -140,7 +140,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 
 				} else {
 					Logger.getGlobal()
-							.warning("IMAGE " + imagelist.size() + " : ファイルが見つかりません : " + imagefile.getPath());
+							.warning("IMAGE " + imagelist.size + " : ファイルが見つかりません : " + imagefile.getPath());
 					fontlist.add(null);
 				}
 				// System.out
@@ -160,7 +160,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 					// + gr);
 				} else {
 					int[] values = parseInt(str);
-					if (values[2] < imagelist.size() && imagelist.get(values[2]) != null
+					if (values[2] < imagelist.size && imagelist.get(values[2]) != null
 							&& imagelist.get(values[2]) instanceof SkinSourceMovie) {
 						part = new SkinImage((SkinSourceMovie) imagelist.get(values[2]));
 					} else {
@@ -183,7 +183,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 			@Override
 			public void execute(String[] str) {
 				int gr = Integer.parseInt(str[2]);
-				if (gr < imagelist.size() && imagelist.get(gr) != null) {
+				if (gr < imagelist.size && imagelist.get(gr) != null) {
 					int[] values = parseInt(str);
 					imagesetarray.add(getSourceImage(values));
 				}
@@ -302,7 +302,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 			public void execute(String[] str) {
 				text = null;
 				int[] values = parseInt(str);
-				if (values[2] < fontlist.size() && fontlist.get(values[2]) != null) {
+				if (values[2] < fontlist.size && fontlist.get(values[2]) != null) {
 					text = new SkinTextImage(fontlist.get(values[2]), values[3]);
 				} else {
 					text = new SkinTextFont("skin/default/VL-Gothic-Regular.ttf", 0, 48, 2);
@@ -454,7 +454,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 			public void execute(String[] str) {
 				button = null;
 				int gr = Integer.parseInt(str[2]);
-				if (gr < imagelist.size() && imagelist.get(gr) != null) {
+				if (gr < imagelist.size && imagelist.get(gr) != null) {
 					int[] values = parseInt(str);
 					int x = values[3];
 					int y = values[4];
@@ -524,7 +524,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 			public void execute(String[] str) {
 				onmouse = null;
 				int gr = Integer.parseInt(str[2]);
-				if (gr < imagelist.size() && imagelist.get(gr) != null) {
+				if (gr < imagelist.size && imagelist.get(gr) != null) {
 					int[] values = parseInt(str);
 					TextureRegion[] images = getSourceImage(values);
 					if (images != null) {
@@ -662,23 +662,23 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 	}
 
 	protected void loadSkin(Skin skin, File f, MainState state) throws IOException {
-		this.loadSkin(skin, f, state, new HashMap<Integer, Boolean>());
+		this.loadSkin(skin, f, state, new IntIntMap());
 	}
 
-	protected void loadSkin(Skin skin, File f, MainState state, Map<Integer, Boolean> option) throws IOException {
+	protected void loadSkin(Skin skin, File f, MainState state, IntIntMap option) throws IOException {
 		this.loadSkin0(skin, f, state, option);
 	}
 
-	private Map<String, String> filemap = new HashMap();
+	private ObjectMap<String, String> filemap = new ObjectMap<String, String>();
 
-	protected S loadSkin(S skin, File f, MainState state, SkinHeader header, Map<Integer, Boolean> option,
-			Map<String, Object> property) throws IOException {
+	protected S loadSkin(S skin, File f, MainState state, SkinHeader header, IntIntMap option,
+			ObjectMap<String, Object> property) throws IOException {
 		this.skin = skin;
 		this.state = state;
-		for (String key : property.keySet()) {
+		for (String key : property.keys()) {
 			if (property.get(key) != null) {
 				if (property.get(key) instanceof Integer) {
-					op.put((Integer) property.get(key), true);
+					op.put((Integer) property.get(key), 1);
 				}
 				if (property.get(key) instanceof String) {
 					for (CustomFile file : header.getCustomFiles()) {
@@ -691,8 +691,8 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 			}
 		}
 
-		Map<Integer, SkinConfig.Offset> offset = new HashMap<>();
-		for (CustomOffset of : Arrays.asList(header.getCustomOffsets())) {
+		IntMap<SkinConfig.Offset> offset = new IntMap<>();
+		for (CustomOffset of : header.getCustomOffsets()) {
 			offset.put(of.id, (Offset) property.get(of.name));
 		}
 		skin.setOffset(offset);
@@ -713,11 +713,11 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 	String line = null;
 	SkinImage PMcharaPart = null;
 
-	List <Object> imagesetarray = new ArrayList<Object>();
+	Array<Object> imagesetarray = new Array<Object>();
 
 	int stretch = -1;
 
-	protected void loadSkin0(Skin skin, File f, MainState state, Map<Integer, Boolean> option) throws IOException {
+	protected void loadSkin0(Skin skin, File f, MainState state, IntIntMap option) throws IOException {
 
 		BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(f), "MS932"));
 
@@ -771,7 +771,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 	}
 
 	protected TextureRegion[] getSourceImage(int[] values) {
-		if (values[2] < imagelist.size() && imagelist.get(values[2]) != null
+		if (values[2] < imagelist.size && imagelist.get(values[2]) != null
 				&& imagelist.get(values[2]) instanceof Texture) {
 			return getSourceImage((Texture) imagelist.get(values[2]), values[3], values[4], values[5], values[6],
 					values[7], values[8]);
@@ -802,8 +802,8 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 		return images;
 	}
 
-	public S loadSkin(File f, MainState decide, SkinHeader header, Map<Integer, Boolean> option, SkinConfig.Property property) throws IOException {
-		Map m = new HashMap();
+	public S loadSkin(File f, MainState decide, SkinHeader header, IntIntMap option, SkinConfig.Property property) throws IOException {
+		ObjectMap m = new ObjectMap();
 		for(SkinConfig.Option op : property.getOption()) {
 			if(op.value != OPTION_RANDOM_VALUE) {
 				m.put(op.name, op.value);
@@ -831,14 +831,14 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 						}
 						File dir = new File(cf.path.substring(0, cf.path.lastIndexOf('/')));
 						if (dir.exists() && dir.isDirectory()) {
-							List<File> l = new ArrayList<File>();
+							Array<File> l = new Array<File>();
 							for (File subfile : dir.listFiles()) {
 								if (subfile.getPath().toLowerCase().endsWith(ext)) {
 									l.add(subfile);
 								}
 							}
-							if (l.size() > 0) {
-								String filename = l.get((int) (Math.random() * l.size())).getName();
+							if (l.size > 0) {
+								String filename = l.get((int) (Math.random() * l.size)).getName();
 								m.put(file.name, filename);
 							}
 						}
@@ -852,7 +852,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 		return loadSkin(f, decide, header, option, m);
 	}
 
-	public abstract S loadSkin(File f, MainState decide, SkinHeader header, Map<Integer, Boolean> option, Map property) throws IOException;
+	public abstract S loadSkin(File f, MainState decide, SkinHeader header, IntIntMap option, ObjectMap property) throws IOException;
 	
 	public static LR2SkinCSVLoader getSkinLoader(SkinType type, Resolution src, Config c) {
 		switch(type) {
