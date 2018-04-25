@@ -4,7 +4,6 @@ import static bms.player.beatoraja.ClearType.*;
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.logging.Logger;
 
 import com.badlogic.gdx.utils.Array;
@@ -436,11 +435,9 @@ public class MusicResult extends AbstractResult {
 												irrank = irprevrank;
 											}
 										}
-										main.switchTimer(TIMER_IR_CONNECT_SUCCESS, true);
-										Logger.getGlobal().info("IRへスコア送信完了");
 									}
+									Logger.getGlobal().warning("IRからのスコア取得成功 : " + response.getMessage());
 								} else {
-									main.switchTimer(TIMER_IR_CONNECT_FAIL, true);
 									Logger.getGlobal().warning("IRからのスコア取得失敗 : " + response.getMessage());
 								}
 							} catch (Exception e) {
