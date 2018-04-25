@@ -413,31 +413,35 @@ public class MusicResult extends AbstractResult {
 
 						@Override
 						public void run() {
-							ir.sendPlayData(resource.getBMSModel(), resource.getScoreData());
-							IRResponse<IRScoreData[]> response = ir.getPlayData(null, resource.getBMSModel());
-							if(response.isSuccessed()) {
-								IRScoreData[] scores = response.getData();
-								irtotal = scores.length;
-
-								for(int i = 0;i < scores.length;i++) {
-									if(irrank == 0 && scores[i].getExscore() <= resource.getScoreData().getExscore() ) {
-										irrank = i + 1;
-									}
-									if(irprevrank == 0 && scores[i].getExscore() <= oldscore.getExscore() ) {
-										irprevrank = i + 1;
-										if(irrank == 0) {
-											irrank = irprevrank;
+							try {
+								ir.sendPlayData(resource.getBMSModel(), resource.getScoreData());
+								IRResponse<IRScoreData[]> response = ir.getPlayData(null, resource.getBMSModel());
+								if(response.isSuccessed()) {
+									IRScoreData[] scores = response.getData();
+									irtotal = scores.length;
+	
+									for(int i = 0;i < scores.length;i++) {
+										if(irrank == 0 && scores[i].getExscore() <= resource.getScoreData().getExscore() ) {
+											irrank = i + 1;
+										}
+										if(irprevrank == 0 && scores[i].getExscore() <= oldscore.getExscore() ) {
+											irprevrank = i + 1;
+											if(irrank == 0) {
+												irrank = irprevrank;
+											}
 										}
 									}
+									main.switchTimer(TIMER_IR_CONNECT_SUCCESS, true);
+									Logger.getGlobal().info("IRへスコア送信完了");
+								} else {
+									main.switchTimer(TIMER_IR_CONNECT_FAIL, true);
+									Logger.getGlobal().warning("IRからのスコア取得失敗 : " + response.getMessage());
 								}
-								main.switchTimer(TIMER_IR_CONNECT_SUCCESS, true);
-								Logger.getGlobal().info("IRへスコア送信完了");
-							} else {
-								main.switchTimer(TIMER_IR_CONNECT_FAIL, true);
-								Logger.getGlobal().warning("IRからのスコア取得失敗 : " + response.getMessage());
+							} catch (Exception e) {
+								Logger.getGlobal().severe(e.getMessage());
+							} finally {
+								state = STATE_IR_FINISHED;
 							}
-
-							state = STATE_IR_FINISHED;
 						}
 					};
 					irprocess.start();
