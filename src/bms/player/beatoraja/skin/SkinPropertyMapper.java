@@ -4,9 +4,12 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
 
 import bms.model.Mode;
 import bms.player.beatoraja.BMSResource;
+import bms.player.beatoraja.CourseData;
+import bms.player.beatoraja.IRScoreData;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.PlayConfig;
 import bms.player.beatoraja.ScoreDataProperty;
+import bms.player.beatoraja.IRScoreData.SongTrophy;
 import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.play.GrooveGauge.Gauge;
 import bms.player.beatoraja.play.JudgeManager;
@@ -311,6 +314,49 @@ public class SkinPropertyMapper {
 			result = new NowJudgeDrawCondition(2,2);
 		}
 		
+		if (id == OPTION_CLEAR_EASY) {			
+			result = new TrophyDrawCondition(SongTrophy.EASY);
+		}
+		if (id == OPTION_CLEAR_GROOVE) {			
+			result = new TrophyDrawCondition(SongTrophy.GROOVE);
+		}
+		if (id == OPTION_CLEAR_HARD) {			
+			result = new TrophyDrawCondition(SongTrophy.HARD);
+		}
+		if (id == OPTION_CLEAR_EXHARD) {			
+			result = new TrophyDrawCondition(SongTrophy.EXHARD);
+		}
+		if (id == OPTION_CLEAR_NORMAL) {			
+			result = new TrophyDrawCondition(SongTrophy.NORMAL);
+		}
+		if (id == OPTION_CLEAR_MIRROR) {			
+			result = new TrophyDrawCondition(SongTrophy.MIRROR);
+		}
+		if (id == OPTION_CLEAR_RANDOM) {			
+			result = new TrophyDrawCondition(SongTrophy.RANDOM);
+		}
+		if (id == OPTION_CLEAR_RRANDOM) {			
+			result = new TrophyDrawCondition(SongTrophy.R_RANDOM);
+		}
+		if (id == OPTION_CLEAR_SRANDOM) {			
+			result = new TrophyDrawCondition(SongTrophy.S_RANDOM);
+		}
+		if (id == OPTION_CLEAR_SPIRAL) {			
+			result = new TrophyDrawCondition(SongTrophy.SPIRAL);
+		}
+		if (id == OPTION_CLEAR_HRANDOM) {			
+			result = new TrophyDrawCondition(SongTrophy.H_RANDOM);
+		}
+		if (id == OPTION_CLEAR_ALLSCR) {			
+			result = new TrophyDrawCondition(SongTrophy.ALL_SCR);
+		}
+		if (id == OPTION_CLEAR_EXRANDOM) {			
+			result = new TrophyDrawCondition(SongTrophy.EX_RANDOM);
+		}
+		if (id == OPTION_CLEAR_EXSRANDOM) {			
+			result = new TrophyDrawCondition(SongTrophy.EX_S_RANDOM);
+		}
+		
 		if(result != null && optionid < 0) {
 			final BooleanProperty dc = result;
 			result = new BooleanProperty() {
@@ -512,12 +558,17 @@ public class SkinPropertyMapper {
 								return song != null && song.getPath() != null ? songname : "(no song) " + songname;
 							}
 						}				
+					} else {
+						CourseData course = state.main.getPlayerResource().getCourseData();
+						if(course != null && course.getSong().length > index && course.getSong()[index] != null) {
+							return course.getSong()[index].getTitle();
+						}
 					}
 					return "";
 				}
-				
 			};
 		}
+		
 		return result;
 	}
 
@@ -616,5 +667,23 @@ public class SkinPropertyMapper {
 			return score.qualifyNowRank(low) && (high > 27 ? true : !score.qualifyNowRank(high));
 		}
 		
-	}	
+	}
+	
+	private static class TrophyDrawCondition extends DrawConditionProperty {
+		
+		private final SongTrophy trophy;
+		
+		public TrophyDrawCondition(SongTrophy trophy) {
+			super(TYPE_STATIC_WITHOUT_MUSICSELECT);
+			this.trophy = trophy;
+		}
+
+		@Override
+		public boolean get(MainState state) {
+			final IRScoreData score = state.getScoreDataProperty().getScoreData();
+			return score != null && score.getTrophy() != null && score.getTrophy().indexOf(trophy.character) >= 0;
+		}
+
+
+	}
 }

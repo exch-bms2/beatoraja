@@ -8,42 +8,23 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Deque;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.ObjectMap;
+import com.badlogic.gdx.utils.ObjectMap.Keys;
 
 import bms.model.Mode;
-import bms.player.beatoraja.CourseData;
-import bms.player.beatoraja.IRScoreData;
-import bms.player.beatoraja.IRScoreData.SongTrophy;
-import bms.player.beatoraja.MainController;
-import bms.player.beatoraja.MainState;
-import bms.player.beatoraja.PixmapResourcePool;
-import bms.player.beatoraja.PlayConfig;
-import bms.player.beatoraja.PlayDataAccessor;
-import bms.player.beatoraja.PlayModeConfig;
-import bms.player.beatoraja.PlayerConfig;
-import bms.player.beatoraja.PlayerData;
-import bms.player.beatoraja.PlayerInformation;
-import bms.player.beatoraja.PlayerResource;
+import bms.player.beatoraja.*;
 import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.ScoreDatabaseAccessor;
 import bms.player.beatoraja.ScoreDatabaseAccessor.ScoreDataCollector;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.ir.IRResponse;
-import bms.player.beatoraja.select.bar.Bar;
-import bms.player.beatoraja.select.bar.DirectoryBar;
-import bms.player.beatoraja.select.bar.GradeBar;
-import bms.player.beatoraja.select.bar.HashBar;
-import bms.player.beatoraja.select.bar.SelectableBar;
-import bms.player.beatoraja.select.bar.SongBar;
-import bms.player.beatoraja.select.bar.TableBar;
+import bms.player.beatoraja.select.bar.*;
 import bms.player.beatoraja.skin.SkinType;
 import bms.player.beatoraja.song.SongData;
 import bms.player.beatoraja.song.SongDatabaseAccessor;
@@ -106,7 +87,7 @@ public class MusicSelector extends MainState {
 	private ScoreDataCache scorecache;
 	private ScoreDataCache rivalcache;
 
-	private Map<PlayerInformation, ScoreDataCache> rivalcaches = new HashMap<PlayerInformation, ScoreDataCache>();
+	private ObjectMap<PlayerInformation, ScoreDataCache> rivalcaches = new ObjectMap<PlayerInformation, ScoreDataCache>();
 	private PlayerInformation rival;
 
 	private int panelstate;
@@ -222,8 +203,8 @@ public class MusicSelector extends MainState {
 		return rival;
 	}
 
-	public Set<PlayerInformation> getRivals() {
-		return rivalcaches.keySet();
+	public Keys<PlayerInformation> getRivals() {
+		return rivalcaches.keys();
 	}
 
 	public ScoreDataCache getScoreDataCache() {
@@ -342,7 +323,7 @@ public class MusicSelector extends MainState {
 				readCourse(play);
 			} else if (current instanceof DirectoryBar) {
 				if(play.isAutoPlayMode()) {
-					Array<Path> paths = new Array();
+					Array<Path> paths = new Array<Path>();
 					for(Bar bar : ((DirectoryBar) current).getChildren()) {
 						if(bar instanceof SongBar && ((SongBar) bar).getSongData() != null && ((SongBar) bar).getSongData().getPath() != null) {
 							paths.add(Paths.get(((SongBar) bar).getSongData().getPath()));
@@ -583,33 +564,10 @@ public class MusicSelector extends MainState {
 				return bar.getSelected().getTitle();
 			}
 			break;
-		case STRING_COURSE1_TITLE:
-			return getCourseTitle(0);
-		case STRING_COURSE2_TITLE:
-			return getCourseTitle(1);
-		case STRING_COURSE3_TITLE:
-			return getCourseTitle(2);
-		case STRING_COURSE4_TITLE:
-			return getCourseTitle(3);
-		case STRING_COURSE5_TITLE:
-			return getCourseTitle(4);
-		case STRING_COURSE6_TITLE:
-			return getCourseTitle(5);
 		case STRING_DIRECTORY:
 			return bar.getDirectoryString();
 		}
 		return super.getTextValue(id);
-	}
-
-	private String getCourseTitle(int index) {
-		if (bar.getSelected() instanceof GradeBar) {
-			if (((GradeBar) bar.getSelected()).getSongDatas().length > index) {
-				SongData song = ((GradeBar) bar.getSelected()).getSongDatas()[index];
-				final String songname = song != null && song.getTitle() != null ? song.getTitle() : "----";
-				return song != null && song.getPath() != null ? songname : "(no song) " + songname;
-			}
-		}
-		return "";
 	}
 
 	public SongDatabaseAccessor getSongDatabase() {
@@ -825,34 +783,6 @@ public class MusicSelector extends MainState {
 			return bar.getSelected().getScore() != null && bar.getSelected().getScore().getClear() == Perfect.id;
 		case OPTION_SELECT_BAR_MAX_CLEARED:
 			return bar.getSelected().getScore() != null && bar.getSelected().getScore().getClear() == Max.id;
-		case OPTION_CLEAR_EASY:
-			return existsTrophy(SongTrophy.EASY);
-		case OPTION_CLEAR_GROOVE:
-			return existsTrophy(SongTrophy.GROOVE);
-		case OPTION_CLEAR_HARD:
-			return existsTrophy(SongTrophy.HARD);
-		case OPTION_CLEAR_EXHARD:
-			return existsTrophy(SongTrophy.EXHARD);
-		case OPTION_CLEAR_NORMAL:
-			return existsTrophy(SongTrophy.NORMAL);
-		case OPTION_CLEAR_MIRROR:
-			return existsTrophy(SongTrophy.MIRROR);
-		case OPTION_CLEAR_RANDOM:
-			return existsTrophy(SongTrophy.RANDOM);
-		case OPTION_CLEAR_RRANDOM:
-			return existsTrophy(SongTrophy.R_RANDOM);
-		case OPTION_CLEAR_SRANDOM:
-			return existsTrophy(SongTrophy.S_RANDOM);
-		case OPTION_CLEAR_SPIRAL:
-			return existsTrophy(SongTrophy.SPIRAL);
-		case OPTION_CLEAR_HRANDOM:
-			return existsTrophy(SongTrophy.H_RANDOM);
-		case OPTION_CLEAR_ALLSCR:
-			return existsTrophy(SongTrophy.ALL_SCR);
-		case OPTION_CLEAR_EXRANDOM:
-			return existsTrophy(SongTrophy.EX_RANDOM);
-		case OPTION_CLEAR_EXSRANDOM:
-			return existsTrophy(SongTrophy.EX_S_RANDOM);
 		}
 		return super.getBooleanValue(id);
 	}
@@ -869,11 +799,6 @@ public class MusicSelector extends MainState {
 			}
 		}
 		return false;
-	}
-
-	private boolean existsTrophy(SongTrophy trophy) {
-		final IRScoreData score = getScoreDataProperty().getScoreData();
-		return score != null && score.getTrophy() != null && score.getTrophy().indexOf(trophy.character) >= 0;
 	}
 
 	public int getImageIndex(int id) {
