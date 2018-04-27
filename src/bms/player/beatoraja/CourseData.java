@@ -26,6 +26,10 @@ public class CourseData {
      */
     private TrophyData[] trophy = new TrophyData[0];
 
+    public CourseData() {
+    	
+    }
+    
     public String getName() {
         return name;
     }
@@ -77,7 +81,25 @@ public class CourseData {
         }
         return false;
     }
-
+    
+    public boolean validate() {
+    	if(hash == null || (hash = DataUtils.removeNullElements(hash)).length == 0) {
+    		return false;
+    	}
+    	
+    	if(constraint == null) {
+    		constraint = new CourseDataConstraint[0];
+    	}
+    	constraint = DataUtils.removeNullElements(constraint);
+    	
+    	if(trophy == null) {
+    		trophy = new TrophyData[0];
+    	}
+    	trophy = DataUtils.removeNullElements(trophy);
+    	
+    	return true;
+    }
+    
     /**
      * コースの制約
      *

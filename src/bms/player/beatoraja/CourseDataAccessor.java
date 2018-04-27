@@ -62,10 +62,9 @@ public class CourseDataAccessor {
                     new BufferedInputStream(Files.newInputStream(p)));
             List<CourseData> result = new ArrayList<CourseData>();            
             for(CourseData course : courses) {
-            	if(course.getSong() == null || course.getSong().length == 0) {
-            		continue;
+            	if(course.validate()) {
+                	result.add(course);
             	}
-            	result.add(course);
             }
             return result.toArray(new CourseData[result.size()]);
         } catch(Throwable e) {
@@ -76,7 +75,7 @@ public class CourseDataAccessor {
                 Json json = new Json();
                 CourseData course = json.fromJson(CourseData.class,
                         new BufferedInputStream(Files.newInputStream(p)));
-            	if(course.getSong() != null || course.getSong().length > 0) {
+            	if(course.validate()) {
             		return new CourseData[]{course};
             	}
             } catch(Throwable e) {
