@@ -58,6 +58,7 @@ public class CourseDataAccessor {
         boolean isList = false;
         try {
             Json json = new Json();
+			json.setIgnoreUnknownFields(true);
             CourseData[] courses =  json.fromJson(CourseData[].class,
                     new BufferedInputStream(Files.newInputStream(p)));
             List<CourseData> result = new ArrayList<CourseData>();            
@@ -73,6 +74,7 @@ public class CourseDataAccessor {
         if(!isList) {
             try {
                 Json json = new Json();
+				json.setIgnoreUnknownFields(true);
                 CourseData course = json.fromJson(CourseData.class,
                         new BufferedInputStream(Files.newInputStream(p)));
             	if(course.validate()) {

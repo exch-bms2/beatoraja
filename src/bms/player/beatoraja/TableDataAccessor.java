@@ -107,9 +107,10 @@ public class TableDataAccessor {
 				if (p.toString().endsWith(".bmt")) {
 					try {
 						Json json = new Json();
+						json.setIgnoreUnknownFields(true);
 						TableData td = json.fromJson(TableData.class,
 								new BufferedInputStream(new GZIPInputStream(Files.newInputStream(p))));
-						if(isValid(td)) {
+						if(td != null && td.validate()) {
 							result.add(td);
 						}
 					} catch(Throwable e) {
@@ -136,9 +137,10 @@ public class TableDataAccessor {
 				if (p.getFileName().toString().equals(name + ".bmt")) {
 					try {
 						Json json = new Json();
+						json.setIgnoreUnknownFields(true);
 						td = json.fromJson(TableData.class,
 								new BufferedInputStream(new GZIPInputStream(Files.newInputStream(p))));
-						if(!isValid(td)) {
+						if(td == null || !td.validate()) {
 							td = null;
 						}
 						break;
@@ -245,7 +247,7 @@ public class TableDataAccessor {
 
 					td.setCourse(gname.toArray(new CourseData[gname.size()]));
 				}
-				if(!isValid(td)) {
+				if(td == null || !td.validate()) {
 					throw new RuntimeException("難易度表の値が不正です");
 				}
 				return td;
@@ -262,13 +264,6 @@ public class TableDataAccessor {
 		}
 	}
 	
-	public static boolean isValid(TableData td) {
-		if(td == null) {
-			return false;
-		}
-		return td.getName() != null && td.getCourse() != null && td.getFolder() != null && (td.getCourse().length + td.getFolder().length > 0);
-	}
-
 	private static SongData toSongData(BMSTableElement te, Mode defaultMode) {
 		SongData song = new SongData();
 		if(te.getMD5() != null) {

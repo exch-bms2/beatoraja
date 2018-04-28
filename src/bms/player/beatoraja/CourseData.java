@@ -9,6 +9,9 @@ import bms.player.beatoraja.song.SongData;
  * @author exch
  */
 public class CourseData implements Validatable {
+	
+	public static final CourseData[] EMPTY = new CourseData[0];
+	
     /**
      * コース名
      */
@@ -20,11 +23,11 @@ public class CourseData implements Validatable {
     /**
      * コースの制限
      */
-    private CourseDataConstraint[] constraint = new CourseDataConstraint[0];
+    private CourseDataConstraint[] constraint = CourseDataConstraint.EMPTY;
     /**
      * トロフィー条件
      */
-    private TrophyData[] trophy = new TrophyData[0];
+    private TrophyData[] trophy = TrophyData.EMPTY;
 
     public CourseData() {
     	
@@ -84,8 +87,8 @@ public class CourseData implements Validatable {
     		return false;
     	}
     	
-    	constraint = Validatable.removeInvalidElements(constraint);
-    	trophy = Validatable.removeInvalidElements(trophy);    	
+    	constraint = constraint != null ? Validatable.removeInvalidElements(constraint) : CourseDataConstraint.EMPTY;
+    	trophy = trophy != null ? Validatable.removeInvalidElements(trophy) : TrophyData.EMPTY;    	
     	return true;
     }
     
@@ -107,6 +110,8 @@ public class CourseData implements Validatable {
     	GAUGE_9KEYS("gauge_9k"),
     	GAUGE_24KEYS("gauge_24k");
 
+    	public static final CourseDataConstraint[] EMPTY = new CourseDataConstraint[0];
+    	
         public final String name;
 
         private CourseDataConstraint(String name) {
@@ -119,6 +124,8 @@ public class CourseData implements Validatable {
      * @author exch
      */
     public static class TrophyData implements Validatable {
+    	
+    	public static final TrophyData[] EMPTY = new TrophyData[0];
 
         private String name;
 
