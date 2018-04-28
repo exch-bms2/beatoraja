@@ -769,9 +769,9 @@ public class MainController extends ApplicationAdapter {
 			} else if(currentState instanceof MusicResult || currentState instanceof CourseResult) {
 				if(currentState instanceof MusicResult){
 					if(currentState.getTextValue(STRING_TABLE_LEVEL).length() > 0){
-						stateName += "_" + currentState.getTextValue(STRING_TABLE_LEVEL);
+						stateName += "_" + currentState.getTextValue(STRING_TABLE_LEVEL) + " ";
 					}else{
-						stateName += "_LEVEL" + currentState.getNumberValue(NUMBER_PLAYLEVEL);
+						stateName += "_LEVEL" + currentState.getNumberValue(NUMBER_PLAYLEVEL) + " ";
 					}
 				}else{
 					stateName += "_";
