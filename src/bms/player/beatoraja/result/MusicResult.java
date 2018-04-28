@@ -557,11 +557,11 @@ public class MusicResult extends AbstractResult {
 			}
 			return resource.getScoreData().getCombo() - oldscore.getCombo();
 		case NUMBER_GROOVEGAUGE:
-			return (int) resource.getGauge()[resource.getGrooveGauge().getType()]
-					.get(resource.getGauge()[resource.getGrooveGauge().getType()].size - 1);
+			return (int) resource.getGauge()[gaugeType]
+					.get(resource.getGauge()[gaugeType].size - 1);
 		case NUMBER_GROOVEGAUGE_AFTERDOT:
-			float value = resource.getGauge()[resource.getGrooveGauge().getType()]
-					.get(resource.getGauge()[resource.getGrooveGauge().getType()].size - 1) * 10;
+			float value = resource.getGauge()[gaugeType]
+					.get(resource.getGauge()[gaugeType].size - 1) * 10;
 			if(value > 0 && value < 1) value = 1;
 			return ((int) value) % 10;
 		case NUMBER_AVERAGE_DURATION:

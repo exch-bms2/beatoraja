@@ -1,6 +1,8 @@
 package bms.player.beatoraja.play;
 
 import bms.player.beatoraja.MainState;
+import bms.player.beatoraja.PlayerResource;
+import bms.player.beatoraja.result.MusicResult;
 
 import static bms.player.beatoraja.play.GrooveGauge.*;
 import bms.player.beatoraja.skin.*;
@@ -46,6 +48,15 @@ public class SkinGauge extends SkinObject {
 	private int animation;
 	private long atime;
 
+	/**
+	 * リザルト用 ゲージが0から最終値まで増える演出の開始時間
+	 */
+	private int starttime = 0;
+	/**
+	 * リザルト用 ゲージが0から最終値まで増える演出の終了時間
+	 */
+	private int endtime = 1000;
+
 	public SkinGauge(TextureRegion[][] image, int timer, int cycle, int parts, int type, int range, int duration) {
 		this.image = new SkinSourceImage(image, timer, cycle);
 		this.parts = parts;
@@ -57,7 +68,12 @@ public class SkinGauge extends SkinObject {
 	@Override
 	public void draw(SkinObjectRenderer sprite, long time, MainState state) {
 		final Rectangle gr = getDestination(time, state);
-		final Gauge gauge = ((BMSPlayer) state).getGauge().getGauge();
+		GrooveGauge gauge = null;
+		if(state instanceof BMSPlayer) {
+			gauge = ((BMSPlayer) state).getGauge();
+		} else if(state instanceof MusicResult) {
+			gauge = ((MusicResult) state).main.getPlayerResource().getGrooveGauge();
+		}
 		if (gauge == null || gr == null) {
 			return;
 		}
@@ -79,12 +95,25 @@ public class SkinGauge extends SkinObject {
 			}
 			atime = time + duration;
 		}
-		final float max = gauge.getProperty().max;
-		final float value = gauge.getValue();
+
+		float value = gauge.getValue();
+		int type = gauge.getType();
+
+		if(state instanceof MusicResult) {
+			type = ((MusicResult) state).getGaugeType();
+			PlayerResource resource = ((MusicResult) state).main.getPlayerResource();
+			value = resource.getGauge()[type].get(resource.getGauge()[type].size - 1);
+			if(time < starttime) {
+				value = gauge.getGauge(type).getProperty().min;
+			} else if(time >= starttime && time <= endtime) {
+				value = Math.max(value * (time - starttime) / (endtime - starttime), gauge.getGauge(type).getProperty().min);
+			}
+		}
+		final float max = gauge.getGauge(type).getProperty().max;
+
 		final TextureRegion[] images = image.getImages(time, state);
 
 		int exgauge = 0;
-		final int type =  ((BMSPlayer) state).getGauge().getType();
 		if (type == ASSISTEASY || type == EASY || type == EXHARD || type == HAZARD || type == EXCLASS || type == EXHARDCLASS) {
 			exgauge = 4;
 		}
@@ -98,14 +127,14 @@ public class SkinGauge extends SkinObject {
 			final float border = i * max / parts;
 			sprite.draw(
 					images[exgauge + (notes == i || notes - animation > i ? 0 : 2)
-							+ (border < gauge.getProperty().border ? 1 : 0)],
+							+ (border < gauge.getGauge(type).getProperty().border ? 1 : 0)],
 					gr.x + gr.width * (i - 1) / parts, gr.y, gr.width / parts, gr.height);
 
 			if(animationType == ANIMATION_FLICKERING && images.length == 12 && i == notes) {
 				float alpha = orgColor.a * ((time % duration) < duration / 2 ? (time % duration) / ((float) duration / 2 - 1) : ((duration - 1) - (time % duration)) / ((float) duration / 2 - 1));
 				sprite.setColor(new Color(orgColor.r, orgColor.g, orgColor.b, alpha));
 				sprite.draw(
-						images[8 + exgauge / 2 + (border < gauge.getProperty().border ? 1 : 0)],
+						images[8 + exgauge / 2 + (border < gauge.getGauge(type).getProperty().border ? 1 : 0)],
 						gr.x + gr.width * (i - 1) / parts, gr.y, gr.width / parts, gr.height);
 				sprite.setColor(orgColor);
 			}
@@ -142,6 +171,14 @@ public class SkinGauge extends SkinObject {
 
 	public void setParts(int parts) {
 		this.parts = parts;
+	}
+
+	public void setStarttime(int starttime) {
+		this.starttime = starttime;
+	}
+
+	public void setEndtime(int endtime) {
+		this.endtime = endtime;
 	}
 
 	@Override

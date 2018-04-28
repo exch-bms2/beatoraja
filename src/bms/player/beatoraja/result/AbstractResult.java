@@ -162,4 +162,8 @@ public abstract class AbstractResult extends MainState {
 	public enum ReplayStatus {
 		EXIST, NOT_EXIST, SAVED;
 	}
+
+	public int getGaugeType() {
+		return gaugeType;
+	}
 }
