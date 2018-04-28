@@ -19,7 +19,7 @@ import bms.player.beatoraja.play.JudgeAlgorithm;
  * 
  * @author exch
  */
-public class Config {
+public class Config implements Validatable {
 
 	private String playername;
 
@@ -485,7 +485,7 @@ public class Config {
 		this.ipfspath = ipfspath;
 	}
 
-	public void validate() {
+	public boolean validate() {
 		if(displaymode == null) {
 			displaymode = DisplayMode.WINDOW;
 		}
@@ -508,12 +508,12 @@ public class Config {
 		if(JudgeAlgorithm.getIndex(judgeType) == -1) {
 			judgeType = JudgeAlgorithm.Combo.name();
 		}
-		if(bmsroot == null) {
-			bmsroot = new String[0];
-		}
+		bmsroot = Validatable.removeInvalidElements(bmsroot);
+		
 		if(tableURL == null) {
 			tableURL = DEFAULT_TABLEURL;
 		}
+		tableURL = Validatable.removeInvalidElements(tableURL);
 
 		bga = MathUtils.clamp(bga, 0, 2);
 		bgaExpand = MathUtils.clamp(bgaExpand, 0, 2);
@@ -523,6 +523,8 @@ public class Config {
 		if(autosavereplay.length != 4) {
 			autosavereplay = Arrays.copyOf(autosavereplay, 4);
 		}
+		
+		return true;
 	}
 
 	public static Config read() {

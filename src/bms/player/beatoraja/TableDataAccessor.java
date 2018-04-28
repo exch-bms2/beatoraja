@@ -194,7 +194,6 @@ public class TableDataAccessor {
 				List<TableData.TableFolder> tdes = new ArrayList<>(levels.length);
 				for (String lv : levels) {
 					TableData.TableFolder tde = new TableData.TableFolder();
-					tde.setLevel(lv);
 					tde.setName(td.getTag() + lv);
 					List<SongData> hashes = new ArrayList<SongData>();
 					for (DifficultyTableElement dte : dt.getElements()) {

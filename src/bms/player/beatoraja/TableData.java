@@ -7,7 +7,8 @@ import bms.player.beatoraja.song.SongData;
  *
  * @author exch
  */
-public class TableData {
+public class TableData implements Validatable {
+	
 	/**
 	 * 難易度表URL
 	 */
@@ -61,12 +62,17 @@ public class TableData {
 	public void setTag(String tag) {
 		this.tag = tag;
 	}
+	
+	public boolean validate() {
+		folder = Validatable.removeInvalidElements(folder);
+		course = Validatable.removeInvalidElements(course);
+		return folder.length + course.length > 0;
+	}
 
-	public static class TableFolder {
+	public static class TableFolder implements Validatable {
 
 		private String name;
 		private SongData[] songs = new SongData[0];
-		private String level;
 
 		public String getName() {
 			return name;
@@ -84,12 +90,10 @@ public class TableData {
 			this.songs = songs;
 		}
 
-		public String getLevel() {
-			return level;
-		}
-
-		public void setLevel(String level) {
-			this.level = level;
+		@Override
+		public boolean validate() {
+			songs = Validatable.removeInvalidElements(songs);
+			return name != null && name.length() > 0 && songs.length > 0;
 		}
 	}
 

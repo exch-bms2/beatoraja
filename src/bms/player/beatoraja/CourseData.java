@@ -8,7 +8,7 @@ import bms.player.beatoraja.song.SongData;
  *
  * @author exch
  */
-public class CourseData {
+public class CourseData implements Validatable {
     /**
      * コース名
      */
@@ -55,9 +55,6 @@ public class CourseData {
     }
 
     public CourseDataConstraint[] getConstraint() {
-    	if(constraint == null) {
-    		constraint = new CourseDataConstraint[0];
-    	}
         return constraint;
     }
 
@@ -83,20 +80,12 @@ public class CourseData {
     }
     
     public boolean validate() {
-    	if(hash == null || (hash = DataUtils.removeNullElements(hash)).length == 0) {
+    	if((hash = Validatable.removeInvalidElements(hash)).length == 0) {
     		return false;
     	}
     	
-    	if(constraint == null) {
-    		constraint = new CourseDataConstraint[0];
-    	}
-    	constraint = DataUtils.removeNullElements(constraint);
-    	
-    	if(trophy == null) {
-    		trophy = new TrophyData[0];
-    	}
-    	trophy = DataUtils.removeNullElements(trophy);
-    	
+    	constraint = Validatable.removeInvalidElements(constraint);
+    	trophy = Validatable.removeInvalidElements(trophy);    	
     	return true;
     }
     
@@ -129,7 +118,7 @@ public class CourseData {
      *
      * @author exch
      */
-    public static class TrophyData {
+    public static class TrophyData implements Validatable {
 
         private String name;
 
@@ -170,6 +159,11 @@ public class CourseData {
         public void setScorerate(float scorerate) {
             this.scorerate = scorerate;
         }
+
+		@Override
+		public boolean validate() {
+			return name != null && missrate > 0 && scorerate < 100;
+		}
     }
 
 }
