@@ -239,7 +239,7 @@ public class GrooveGauge {
 		}
 		
 		public boolean isQualified() {
-			return value >= element.border;
+			return value > 0f && value >= element.border;
 		}
 		
 		public boolean isMax() {
