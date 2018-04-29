@@ -48,7 +48,7 @@ public class SkinNoteDistributionGraph extends SkinObject {
 							Color.valueOf("004488"), Color.valueOf("002244"), Color.valueOf("ff8800"), Color.valueOf("cc6600"),
 							Color.valueOf("884400"), Color.valueOf("442200") } };
 
-	private Color[] graphcolor;
+	private Pixmap[] chips;
 
 	private int max = 20;
 
@@ -57,6 +57,8 @@ public class SkinNoteDistributionGraph extends SkinObject {
 	public static final int TYPE_NORMAL = 0;
 	public static final int TYPE_JUDGE = 1;
 	public static final int TYPE_EARLYLATE = 2;
+	
+	private static final int[] DATA_LENGTH = {7, 6, 10};
 
 	private boolean isBackTexOff = false;
 	private int delay = 500;
@@ -75,8 +77,12 @@ public class SkinNoteDistributionGraph extends SkinObject {
 	}
 
 	public SkinNoteDistributionGraph(int type, int delay, int backTexOff, int orderReverse, int noGap) {
+		this(null, type, delay, backTexOff, orderReverse, noGap);
+	}
+	
+	public SkinNoteDistributionGraph(Pixmap[] chips, int type, int delay, int backTexOff, int orderReverse, int noGap) {
+		this.chips = chips;
 		this.type = type;
-		graphcolor = JGRAPH[type];
 		this.isBackTexOff = backTexOff == 1 ? true : false;
 		this.delay = delay;
 		this.isOrderReverse = orderReverse == 1 ? true : false;
@@ -112,14 +118,22 @@ public class SkinNoteDistributionGraph extends SkinObject {
 
 		final SongData song = state.main.getPlayerResource().getSongdata();
 		final BMSModel model = song != null ? song.getBMSModel() : null;
-
-		if(type > 0 && model != null && model.getMode() == Mode.POPN_9K && graphcolor != pmsGraphColor[type]) {
-			graphcolor = pmsGraphColor[type];
+		
+		// TODO スキン定義側で分岐できないか？
+		if(chips == null) {
+			Color[] graphcolor = type > 0 && model != null && model.getMode() == Mode.POPN_9K  ? 
+					pmsGraphColor[type] : JGRAPH[type];
+			chips = new Pixmap[graphcolor.length];
+			for(int i = 0;i < graphcolor.length;i++) {
+				chips[i] = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+				chips[i].drawPixel(0, 0, Color.toIntBits(255, (int)(graphcolor[i].b * 255), (int)(graphcolor[i].g * 255), (int)(graphcolor[i].r * 255)));
+			}
 		}
+
 		if(song != current || (this.model == null && model != null)) {
 			current = song;
 			this.model = model;
-			if(song != null && song.getInformation() != null) {
+			if(type == 0 && song != null && song.getInformation() != null) {
 				updateGraph(song.getInformation().getDistributionValues());				
 			} else {
 				updateGraph(model);
@@ -171,9 +185,9 @@ public class SkinNoteDistributionGraph extends SkinObject {
 	
 	private void updateGraph(BMSModel model) {
 		if (model == null) {
-			data = new int[0][graphcolor.length];
+			data = new int[0][DATA_LENGTH[type]];
 		} else {
-			data = new int[model.getLastTime() / 1000 + 1][graphcolor.length];				
+			data = new int[model.getLastTime() / 1000 + 1][DATA_LENGTH[type]];				
 			int pos = 0;
 			int count = 0;
 			max = 20;
@@ -290,26 +304,24 @@ public class SkinNoteDistributionGraph extends SkinObject {
 		for (int i = 0; i < data.length; i++) {
 			int[] n = data[i];
 			if(!isOrderReverse) {
-				for (int j = 0, k = n[0], index = 0; j < max && index < graphcolor.length;) {
+				for (int j = 0, k = n[0], index = 0; j < max && index < n.length;) {
 					if (k > 0) {
 						k--;
-						shape.setColor(graphcolor[index]);
-						shape.fillRectangle(i * 5, j * 5, 4, 4 + (isNoGap ? 1 : 0));
+						shape.drawPixmap(chips[index], 0, 0, 1, 1, i * 5, j * 5, 4, 4 + (isNoGap ? 1 : 0));
 						j++;
 					} else {
 						index++;
-						if (index == graphcolor.length) {
+						if (index == n.length) {
 							break;
 						}
 						k = n[index];
 					}
 				}
 			} else {
-				for (int j = 0, k = n[n.length - 1], index = n.length - 1; j < max && index < graphcolor.length;) {
+				for (int j = 0, k = n[n.length - 1], index = n.length - 1; j < max && index < n.length;) {
 					if (k > 0) {
 						k--;
-						shape.setColor(graphcolor[index]);
-						shape.fillRectangle(i * 5, j * 5, 4, 4 + (isNoGap ? 1 : 0));
+						shape.drawPixmap(chips[index], 0, 0, 1, 1, i * 5, j * 5, 4, 4 + (isNoGap ? 1 : 0));
 						j++;
 					} else {
 						index--;
@@ -337,6 +349,9 @@ public class SkinNoteDistributionGraph extends SkinObject {
 			endcursor.getTexture().dispose();
 			shape.dispose();
 			shapetex = null;
+		}
+		if(chips != null) {
+			disposeAll(chips);
 		}
 	}
 
