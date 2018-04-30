@@ -9,13 +9,16 @@ import bms.model.LongNote;
 import bms.model.NormalNote;
 import bms.model.Note;
 import bms.model.TimeLine;
+import bms.player.beatoraja.Validatable;
 
 /**
  * キー入力ログ
  * 
  * @author exch
  */
-public class KeyInputLog {
+public class KeyInputLog implements Validatable {
+	
+	public static final KeyInputLog[] EMPTYARRAY = new KeyInputLog[0];
 
 	/**
 	 * キー入力時間
@@ -81,5 +84,10 @@ public class KeyInputLog {
 			}
 		}
 		return keylog;
+	}
+
+	@Override
+	public boolean validate() {
+		return time >= 0 && keycode >= 0;
 	}
 }

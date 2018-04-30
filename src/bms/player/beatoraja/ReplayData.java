@@ -8,7 +8,7 @@ import bms.player.beatoraja.pattern.PatternModifyLog;
  * 
  * @author exch
  */
-public class ReplayData {
+public class ReplayData implements Validatable {
 
 	/**
 	 * プレイヤー名
@@ -25,7 +25,7 @@ public class ReplayData {
 	/**
 	 * キー入力ログ
 	 */
-	public KeyInputLog[] keylog;
+	public KeyInputLog[] keylog = KeyInputLog.EMPTYARRAY;
 	/**
 	 * ゲージの種類
 	 */
@@ -62,4 +62,11 @@ public class ReplayData {
 	 * プレイコンフィグ
 	 */
 	public PlayConfig config;
+	
+	@Override
+	public boolean validate() {
+		keylog = keylog != null ? Validatable.removeInvalidElements(keylog) : KeyInputLog.EMPTYARRAY;
+		pattern = pattern != null ? Validatable.removeInvalidElements(pattern) : null;
+		return keylog.length > 0;
+	}
 }

@@ -508,12 +508,15 @@ public class PlayDataAccessor {
 			json.setIgnoreUnknownFields(true);
 			try {
 				String path = this.getReplayDataFilePath(model, lnmode, index);
+				ReplayData result = null;
 				if (Files.exists(Paths.get(path + ".brd"))) {
-					return json.fromJson(ReplayData.class, new BufferedInputStream(
+					result =  json.fromJson(ReplayData.class, new BufferedInputStream(
 							new GZIPInputStream(Files.newInputStream(Paths.get(path + ".brd")))));
+				} else if (Files.exists(Paths.get(path + ".json"))) {
+					result =  json.fromJson(ReplayData.class, new FileReader(path + ".json"));
 				}
-				if (Files.exists(Paths.get(path + ".json"))) {
-					return json.fromJson(ReplayData.class, new FileReader(path + ".json"));
+				if(result != null && result.validate()) {
+					return result;
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -579,13 +582,22 @@ public class PlayDataAccessor {
 			json.setIgnoreUnknownFields(true);
 			try {
 				String path = this.getReplayDataFilePath(hash, ln, lnmode, index, constraint);
+				ReplayData[] result = null;
 				if (Files.exists(Paths.get(path + ".brd"))) {
-					return json.fromJson(ReplayData[].class, new BufferedInputStream(
+					result = json.fromJson(ReplayData[].class, new BufferedInputStream(
 							new GZIPInputStream(Files.newInputStream(Paths.get(path + ".brd")))));
+				} else if (Files.exists(Paths.get(path + ".json"))) {
+					result = json.fromJson(ReplayData[].class, new FileReader(path + ".json"));
 				}
-				if (Files.exists(Paths.get(path + ".json"))) {
-					return json.fromJson(ReplayData[].class, new FileReader(path + ".json"));
+				if(result != null) {
+					for(ReplayData rd : result) {
+						if(rd == null || !rd.validate()) {
+							return null;
+						}
+					}
+					return result;
 				}
+
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
