@@ -10,13 +10,14 @@ import java.util.Map;
 import bms.model.BMSDecoder;
 import bms.model.BMSModel;
 import bms.model.TimeLine;
+import bms.player.beatoraja.Validatable;
 
 /**
  * 楽曲データ
  * 
  * @author exch
  */
-public class SongData {
+public class SongData implements Validatable {
 	
 	public static final int FEATURE_UNDEFINEDLN = 1;
 	public static final int FEATURE_MINENOTE = 2;
@@ -505,4 +506,26 @@ public class SongData {
 		this.org_md5 = org_md5;
 	}
 
+	@Override
+	public boolean validate() {
+		if(title == null || title.length() == 0) {
+			return false;
+		}
+		if((md5 == null || md5.length() == 0) && (sha256 == null || sha256.length() == 0)) {
+			return false;
+		}
+		if(subtitle == null) {
+			subtitle = "";
+		}
+		if(banner == null) {
+			banner = "";
+		}
+		if(backbmp == null) {
+			backbmp = "";
+		}
+		if(stagefile == null) {
+			stagefile = "";
+		}
+		return true;
+	}
 }

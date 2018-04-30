@@ -83,7 +83,7 @@ public class CourseData implements Validatable {
     }
     
     public boolean validate() {
-    	if((hash = Validatable.removeInvalidElements(hash)).length == 0) {
+    	if(hash == null || (hash = Validatable.removeInvalidElements(hash)).length == 0) {
     		return false;
     	}
     	

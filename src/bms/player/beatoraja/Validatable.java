@@ -1,6 +1,7 @@
 package bms.player.beatoraja;
 
 import java.lang.reflect.Array;
+import java.util.List;
 
 public interface Validatable {
 	
@@ -26,4 +27,13 @@ public interface Validatable {
     	}
     	return hash;
     }
+
+	public static <T> List<T> removeInvalidElements(List<T> hash) {
+		for(int i = hash.size() - 1;i >= 0;i--) {
+			if (hash.get(i) == null || (hash.get(i) instanceof Validatable && !((Validatable)hash.get(i)).validate())) {
+				hash.remove(i);
+			}
+		}
+		return hash;
+	}
 }

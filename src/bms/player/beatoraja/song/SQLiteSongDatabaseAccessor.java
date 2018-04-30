@@ -11,6 +11,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.logging.Logger;
 
+import bms.player.beatoraja.Validatable;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
@@ -105,8 +106,9 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 	public SongData[] getSongDatas(String key, String value) {
 		try {
 			final List<SongData> m = qr.query("SELECT * FROM song WHERE " + key + " = ?", songhandler, value);
-			return m.toArray(new SongData[m.size()]);
+			return Validatable.removeInvalidElements(m).toArray(new SongData[m.size()]);
 		} catch (Exception e) {
+			e.printStackTrace();
 			Logger.getGlobal().severe("song.db更新時の例外:" + e.getMessage());
 		}
 		return EMPTYSONG;
@@ -139,7 +141,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 			List<SongData> m = qr.query("SELECT * FROM song WHERE md5 IN (" + md5str.toString() + ") OR sha256 IN ("
 					+ sha256str.toString() + ")", songhandler);
 
-			return m.toArray(new SongData[m.size()]);
+			return Validatable.removeInvalidElements(m).toArray(new SongData[m.size()]);
 		} catch (Exception e) {
 			Logger.getGlobal().severe("song.db更新時の例外:" + e.getMessage());
 		}
@@ -170,8 +172,8 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 				m = songhandler.handle(rs);
 			}
 			stmt.execute("DETACH DATABASE scorelogdb");				
-			stmt.execute("DETACH DATABASE scoredb");				
-			return m.toArray(new SongData[m.size()]);
+			stmt.execute("DETACH DATABASE scoredb");
+			return Validatable.removeInvalidElements(m).toArray(new SongData[m.size()]);
 		} catch(Throwable e) {
 			e.printStackTrace();			
 		}
@@ -185,7 +187,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 			List<SongData> m = qr.query(
 					"SELECT * FROM song WHERE rtrim(title||' '||subtitle||' '||artist||' '||subartist||' '||genre) LIKE ?"
 							+ " GROUP BY sha256",songhandler, "%" + text.replaceAll("'", "''") + "%");
-			return m.toArray(new SongData[m.size()]);
+			return Validatable.removeInvalidElements(m).toArray(new SongData[m.size()]);
 		} catch (Exception e) {
 			Logger.getGlobal().severe("song.db更新時の例外:" + e.getMessage());
 		}
