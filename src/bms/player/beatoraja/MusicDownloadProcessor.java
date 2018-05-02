@@ -150,7 +150,6 @@ public class MusicDownloadProcessor {
         			}
         			if(!commands.isEmpty() && !download){
         				song = commands.removeFirst();
-						Logger.getGlobal().info(song.getTitle());
 
 						ipfspath = song.getIpfs();
         				diffpath = song.getAppendIpfs();
@@ -160,7 +159,6 @@ public class MusicDownloadProcessor {
         				}
 						path = "[" + song.getArtist() + "]" + song.getTitle();
 						path = "ipfs/" + path.replaceAll("[(\\\\|/|:|\\*|\\?|\"|<|>|\\|)]", "");
-						Logger.getGlobal().info(path);
 						if (diffpath != null && diffpath.toLowerCase().startsWith("/ipfs/")) {
 							diffpath = diffpath.substring(5);
         				}
@@ -178,14 +176,14 @@ public class MusicDownloadProcessor {
         					pc = pbc.start();
         					download = true;
         					message = "downloading:/"+path;
-        					Logger.getGlobal().info("ipfs client本体取得開始");
+							Logger.getGlobal().info("ipfs BMS本体取得開始");
 						} else if (!Paths.get(path).toFile().exists()) {
 							downloadtar = new DownloadTarThread();
 							downloadtar.ipfspath = ipfspath;
 							downloadtar.start();
 							download = true;
 							message = "downloading:/" + path;
-							Logger.getGlobal().info("ipfs client本体取得開始");
+							Logger.getGlobal().info("BMS本体取得開始");
         				}else{
         					Logger.getGlobal().info(path+"は既に存在します（差分取得のみ）");
 							ipfspath = "";
@@ -235,17 +233,17 @@ public class MusicDownloadProcessor {
         						diffpath = "";
         					}else{
 								if (daemonexists) {
-        						Logger.getGlobal().info(diffpath);
-								ProcessBuilder pbc = new ProcessBuilder(ipfs, "get", diffpath, "-o=ipfs/" + diffpath);
-        						pbc.inheritIO();
-        						pc = pbc.start();
+									ProcessBuilder pbc = new ProcessBuilder(ipfs, "get", diffpath,
+											"-o=ipfs/" + diffpath);
+									pbc.inheritIO();
+									pc = pbc.start();
 								} else {
 									downloadtar = new DownloadTarThread();
 									downloadtar.ipfspath = diffpath;
 									downloadtar.start();
 								}
 								message = "downloading diff:/" + diffpath;
-								Logger.getGlobal().info("ipfs client差分取得開始");
+								Logger.getGlobal().info("差分取得開始");
         					}
         				}else if(downloadpath == null){
         					Path p = Paths.get(path).toAbsolutePath();
