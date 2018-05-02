@@ -95,6 +95,7 @@ public class NoteShuffleModifier extends PatternModifier {
 					hnotes[i] = tl.getHiddenNote(i);
 				}
 				int[] keys;
+				
 				switch (type) {
 				case S_RANDOM:
 					keys = getKeys(mode, false);
@@ -491,10 +492,7 @@ public class NoteShuffleModifier extends PatternModifier {
 
 		// �깕�꺖�깂�걣�걗�굥�꺃�꺖�꺍�굮潁��ｃ걣�쇇�뵟�걮�겒�걚�꺃�꺖�꺍�겓�뀓營�
 		while (!(noteLane.isEmpty() || primaryLane.isEmpty())) {
-			int r = (int) (Math.random() * primaryLane.size());
-			result[primaryLane.get(r)] = noteLane.get(0);
-			primaryLane.remove(r);
-			noteLane.remove(0);
+			laneRemover(primaryLane, result, noteLane);
 		}
 
 		// noteLane�걣令뷩겎�겒�걢�겂�걼�굢
@@ -522,10 +520,7 @@ public class NoteShuffleModifier extends PatternModifier {
 		primaryLane.addAll(rendaLane);
 		// 餘뗣굤�굮�꺀�꺍���깲�겓營��걚�겍�걚�걦
 		while (!otherLane.isEmpty()) {
-			int r = (int) (Math.random() * primaryLane.size());
-			result[primaryLane.get(r)] = otherLane.get(0);
-			primaryLane.remove(r);
-			otherLane.remove(0);
+			laneRemover(primaryLane, result, otherLane);
 		}
 
 		return result;
@@ -640,21 +635,22 @@ public class NoteShuffleModifier extends PatternModifier {
 
 		// noteLane�걣令뷩겎�겒�걢�겂�걼�굢餘뗣굤�겗�깕�꺖�깉�굮�꺀�꺍���깲�겓營��걚�겍�걚�걦
 		while (!noteLane.isEmpty()) {
-			int r = (int) (Math.random() * noAssignedLane.size());
-			result[noAssignedLane.get(r)] = noteLane.get(0);
-			noAssignedLane.remove(r);
-			noteLane.remove(0);
+			laneRemover(noAssignedLane, result, noteLane);
 		}
 
 		// 餘뗣굤�굮�꺀�꺍���깲�겓營��걚�겍�걚�걦
 		while (!otherLane.isEmpty()) {
-			int r = (int) (Math.random() * noAssignedLane.size());
-			result[noAssignedLane.get(r)] = otherLane.get(0);
-			noAssignedLane.remove(r);
-			otherLane.remove(0);
+			laneRemover(noAssignedLane, result, otherLane);
 		}
 
 		return result;
+	}
+
+	private static void laneRemover(List<Integer> noAssignedLane, int[] result, List<Integer> Lane) {
+		int r = (int) (Math.random() * noAssignedLane.size());
+		result[noAssignedLane.get(r)] = Lane.get(0);
+		noAssignedLane.remove(r);
+		Lane.remove(0);
 	}
 
 	// duration2[ms]�셽�뼋�쑋繹��겗潁��ｆ돀�굮�눣�씎�굥�걽�걨�겳�걨�겇�겇duration1[ms]�셽�뼋�쑋繹��겗潁��ｆ돀�걣�눣�씎�굥�걽�걨�빓�걦�쇇�뵟�걲�굥�굠�걝�겓shuffle�굮�걢�걨�굥
