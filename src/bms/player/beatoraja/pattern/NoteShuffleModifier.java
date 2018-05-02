@@ -14,30 +14,30 @@ import bms.model.TimeLine;
 import bms.player.beatoraja.PlayerConfig;
 
 /**
- * タイムライン単位でノーツを入れ替えるためのクラス．
+ * �궭�궎�깲�꺀�궎�꺍�뜕鵝띲겎�깕�꺖�깂�굮�뀯�굦�쎘�걟�굥�걼�굙�겗�궚�꺀�궧竊�
  *
  * @author exch
  */
 public class NoteShuffleModifier extends PatternModifier {
 	private static final PlayerConfig config = playerConfig;
 	/**
-	 * タイムライン毎にノーツをランダムに入れ替える
+	 * �궭�궎�깲�꺀�궎�꺍驪롢겓�깕�꺖�깂�굮�꺀�꺍���깲�겓�뀯�굦�쎘�걟�굥
 	 */
 	public static final int S_RANDOM = 0;
 	/**
-	 * 初期の並べ替えをベースに、螺旋状に並べ替える
+	 * �닜�쐿�겗訝╉겧�쎘�걟�굮�깧�꺖�궧�겓�곮왉�뿃�듁�겓訝╉겧�쎘�걟�굥
 	 */
 	public static final int SPIRAL = 1;
 	/**
-	 * ノーツをスクラッチレーンに集約する
+	 * �깕�꺖�깂�굮�궧�궚�꺀�긿�긽�꺃�꺖�꺍�겓�썓榮꾠걲�굥
 	 */
 	public static final int ALL_SCR = 2;
 	/**
-	 * S-RANDOMに縦連が極力来ないように配置する
+	 * S-RANDOM�겓潁��ｃ걣璵드뒟�씎�겒�걚�굠�걝�겓�뀓營��걲�굥
 	 */
 	public static final int H_RANDOM = 3;
 	/**
-	 * スクラッチレーンを含めたS-RANDOM
+	 * �궧�궚�꺀�긿�긽�꺃�꺖�꺍�굮�맜�굙�걼S-RANDOM
 	 */
 	public static final int S_RANDOM_EX = 4;
 
@@ -48,12 +48,12 @@ public class NoteShuffleModifier extends PatternModifier {
 
 	private int type;
 	/**
-	 * 次のTimeLine増加分(SPIRAL用)
+	 * 轝▲겗TimeLine罌쀥뒥�늽(SPIRAL�뵪)
 	 */
 	private int inc;
 
 	/**
-	 * 連打しきい値(ms)(H-RANDOM用)
+	 * �ｆ돀�걮�걤�걚��(ms)(H-RANDOM�뵪)
 	 */
 	private int hranThreshold = 125;
 
@@ -63,7 +63,7 @@ public class NoteShuffleModifier extends PatternModifier {
 	}
 
 	/**
-	 * 連打回数(PMS ALLSCR用)
+	 * �ｆ돀�썮�빊(PMS ALLSCR�뵪)
 	 */
 	private static int[] laneRendaCount;
 
@@ -77,13 +77,15 @@ public class NoteShuffleModifier extends PatternModifier {
 		int[] lastNoteTime = new int[lanes];
 		int[] endLnNoteTime = new int[lanes];
 		int scratchIndex = 0;
+		
 		Arrays.fill(ln, -1);
 		Arrays.fill(lastNoteTime, -100);
 		Arrays.fill(endLnNoteTime, -1);
 		laneRendaCount = new int[lanes];
 		Arrays.fill(laneRendaCount, 0);
-		if(config.getHranThresholdBPM() <= 0) hranThreshold = 0;
-		else hranThreshold = (int) (Math.ceil(15000.0f / config.getHranThresholdBPM()));
+		
+		calculateHranThreshold();
+		
 		for (TimeLine tl : model.getAllTimeLines()) {
 			if (tl.existNote() || tl.existHiddenNote()) {
 				Note[] notes = new Note[lanes];
@@ -107,7 +109,7 @@ public class NoteShuffleModifier extends PatternModifier {
 				case SPIRAL:
 					keys = getKeys(mode, false);
 					if (random.length == 0) {
-						// 初期値の作成
+						// �닜�쐿�ㅳ겗鵝쒏닇
 						int max = 0;
 						for (int key : keys) {
 							max = Math.max(max, key);
@@ -124,7 +126,7 @@ public class NoteShuffleModifier extends PatternModifier {
 							index = (index + j) % keys.length;
 						}
 						inc = (int) (Math.random() * (keys.length - 1)) + 1;
-						Logger.getGlobal().info("SPIRAL - 開始位置:" + index + " 増分:" + inc);
+						Logger.getGlobal().info("SPIRAL - �뼀冶뗤퐤營�:" + index + " 罌쀥늽:" + inc);
 					} else {
 						boolean cln = false;
 						for (int lane = 0; lane < keys.length; lane++) {
@@ -151,7 +153,7 @@ public class NoteShuffleModifier extends PatternModifier {
 								: keys;
 						break;
 					}
-					// スクラッチレーンが無いなら何もしない
+					// �궧�궚�꺀�긿�긽�꺃�꺖�꺍�걣�꽒�걚�겒�굢鵝뺛굚�걮�겒�걚
 					if (mode.scratchKey.length == 0) {
 						break;
 					}
@@ -162,13 +164,13 @@ public class NoteShuffleModifier extends PatternModifier {
 					}
 
 					/*
-					 * 連皿しきい値
+					 * �ｇ슼�걮�걤�걚��
 					 */
 					int scratchInterval = 40;
 
-					// Scratchレーンが複数ある場合は順繰りに配置されるように (24key対応)
+					// Scratch�꺃�꺖�꺍�걣筽뉑빊�걗�굥�졃�릦�겘�젂濚겹굤�겓�뀓營��걬�굦�굥�굠�걝�겓 (24key野얍퓶)
 					if (mode.player == 1) {
-						// シングルプレー時
+						// �궥�꺍�궛�꺂�깤�꺃�꺖�셽
 						keys = getKeys(mode, true);
 						int keyInterval = hranThreshold;
 						ArrayList<Integer> original, assign, note, other, primary, tate, sckey;
@@ -189,7 +191,7 @@ public class NoteShuffleModifier extends PatternModifier {
 							sckey.add(mode.scratchKey[sc]);
 						}
 
-						// LNがアクティブなレーンをアサインしてから除外
+						// LN�걣�궋�궚�깇�궍�깣�겒�꺃�꺖�꺍�굮�궋�궢�궎�꺍�걮�겍�걢�굢�솮鸚�
 						for (int lane = 0; lane < keys.length; lane++) {
 							if (ln[keys[lane]] != -1) {
 								random[keys[lane]] = ln[keys[lane]];
@@ -198,7 +200,7 @@ public class NoteShuffleModifier extends PatternModifier {
 							}
 						}
 
-						// 元のレーンをノーツの存在で分類
+						// �뀇�겗�꺃�꺖�꺍�굮�깕�꺖�깂�겗耶섇쑉�겎�늽窈�
 						while (!original.isEmpty()) {
 							if (notes[original.get(0)] != null) {
 								note.add(original.get(0));
@@ -210,7 +212,7 @@ public class NoteShuffleModifier extends PatternModifier {
 						
 						// 
 
-						// 未アサインレーンを分類 1.次に配置するスクラッチレーンでない 2.縦連が発生する
+						// �쑋�궋�궢�궎�꺍�꺃�꺖�꺍�굮�늽窈� 1.轝▲겓�뀓營��걲�굥�궧�궚�꺀�긿�긽�꺃�꺖�꺍�겎�겒�걚 2.潁��ｃ걣�쇇�뵟�걲�굥
 						while (!assign.isEmpty()) {
 							if ((
 									sckey.contains(assign.get(0)) && assign.get(0) != sckey.get(scratchIndex))
@@ -224,16 +226,16 @@ public class NoteShuffleModifier extends PatternModifier {
 							assign.remove(0);
 						}
 						
-						// primaryにスクラッチレーンがあればノーツがあるレーンを配置
+						// primary�겓�궧�궚�꺀�긿�긽�꺃�꺖�꺍�걣�걗�굦�겙�깕�꺖�깂�걣�걗�굥�꺃�꺖�꺍�굮�뀓營�
 						if (primary.contains(sckey.get(scratchIndex)) && !note.isEmpty()) {
 							random[sckey.get(scratchIndex)] = note.get(0);
 							primary.remove(sckey.get(scratchIndex));
 							note.remove(0);
-							// スクラッチレーンを順繰りに
+							// �궧�궚�꺀�긿�긽�꺃�꺖�꺍�굮�젂濚겹굤�겓
 							scratchIndex = ++scratchIndex == sckey.size() ? 0 : scratchIndex;
 						}
 
-						// ノーツがあるレーンを縦連が発生しないレーンにランダムに配置
+						// �깕�꺖�깂�걣�걗�굥�꺃�꺖�꺍�굮潁��ｃ걣�쇇�뵟�걮�겒�걚�꺃�꺖�꺍�겓�꺀�꺍���깲�겓�뀓營�
 						while (!(note.isEmpty() || primary.isEmpty())) {
 							int r = (int) (Math.random() * primary.size());
 							random[primary.get(r)] = note.get(0);
@@ -241,8 +243,8 @@ public class NoteShuffleModifier extends PatternModifier {
 							note.remove(0);
 						}
 
-						// noteLaneが空でなかったら
-						// lastNoteTimeが小さいレーンから順番に置いていく
+						// noteLane�걣令뷩겎�겒�걢�겂�걼�굢
+						// lastNoteTime�걣弱뤵걬�걚�꺃�꺖�꺍�걢�굢�젂�빁�겓營��걚�겍�걚�걦
 						while (!note.isEmpty()) {
 							int min = Integer.MAX_VALUE;
 							int minLane = tate.get(0);
@@ -258,7 +260,7 @@ public class NoteShuffleModifier extends PatternModifier {
 						}
 
 						primary.addAll(tate);
-						// 残りをランダムに
+						// 餘뗣굤�굮�꺀�꺍���깲�겓
 						while (!other.isEmpty()) {
 							int r = (int) (Math.random() * primary.size());
 							random[primary.get(r)] = other.get(0);
@@ -270,12 +272,12 @@ public class NoteShuffleModifier extends PatternModifier {
 
 					} else if (mode.player == 2) {
 						if (mode == Mode.KEYBOARD_24K_DOUBLE) {
-							// TODO 24k-DPに対応
+							// TODO 24k-DP�겓野얍퓶
 							break;
 						}
-						// ダブルプレー時
-						// スクラッチ側の鍵盤に優先的にアサインされるようにする
-						// 連打は出来ないように sc:40ms key:コンフィグから読み出し
+						// ���깣�꺂�깤�꺃�꺖�셽
+						// �궧�궚�꺀�긿�긽�겢�겗�뜷�썶�겓�꽛�뀍�쉪�겓�궋�궢�궎�꺍�걬�굦�굥�굠�걝�겓�걲�굥
+						// �ｆ돀�겘�눣�씎�겒�걚�굠�걝�겓 sc:40ms key:�궠�꺍�깢�궍�궛�걢�굢沃��겳�눣�걮
 						keys = getKeys(mode, true);
 						int keyInterval = hranThreshold;
 						boolean isRightSide = (getModifyTarget() == SIDE_2P);
@@ -297,13 +299,13 @@ public class NoteShuffleModifier extends PatternModifier {
 							}
 						}
 
-						// scLaneを先頭に
+						// scLane�굮�뀍�젺�겓
 						if (!isRightSide) {
 							assign.remove((Integer) scLane);
 							assign.add(0, scLane);
 						}
 
-						// LNがアクティブなレーンをアサインしてから除外
+						// LN�걣�궋�궚�깇�궍�깣�겒�꺃�꺖�꺍�굮�궋�궢�궎�꺍�걮�겍�걢�굢�솮鸚�
 						for (int lane = 0; lane < keys.length; lane++) {
 							if (ln[keys[lane]] != -1) {
 								random[keys[lane]] = ln[keys[lane]];
@@ -312,7 +314,7 @@ public class NoteShuffleModifier extends PatternModifier {
 							}
 						}
 
-						// 元のレーンをノーツの存在で分類
+						// �뀇�겗�꺃�꺖�꺍�굮�깕�꺖�깂�겗耶섇쑉�겎�늽窈�
 						while (!original.isEmpty()) {
 							if (notes[original.get(0)] != null) {
 								note.add(original.get(0));
@@ -322,7 +324,7 @@ public class NoteShuffleModifier extends PatternModifier {
 							original.remove(0);
 						}
 
-						// 未アサインレーンを縦連発生かどうかで分類
+						// �쑋�궋�궢�궎�꺍�꺃�꺖�꺍�굮潁��ｇ쇇�뵟�걢�겑�걝�걢�겎�늽窈�
 						while (!assign.isEmpty()) {
 							if (tl.getTime() - lastNoteTime[assign.get(0)] < (assign.get(0) == scLane ? scratchInterval
 									: keyInterval)) {
@@ -333,15 +335,15 @@ public class NoteShuffleModifier extends PatternModifier {
 							assign.remove(0);
 						}
 
-						// ノーツがあるレーンを縦連が発生しないレーンに配置
+						// �깕�꺖�깂�걣�걗�굥�꺃�꺖�꺍�굮潁��ｃ걣�쇇�뵟�걮�겒�걚�꺃�꺖�꺍�겓�뀓營�
 						while (!(note.isEmpty() || primary.isEmpty())) {
 							random[primary.get(0)] = note.get(0);
 							primary.remove(0);
 							note.remove(0);
 						}
 
-						// noteLaneが空でなかったら
-						// lastNoteTimeが小さいレーンから順番に置いていく
+						// noteLane�걣令뷩겎�겒�걢�겂�걼�굢
+						// lastNoteTime�걣弱뤵걬�걚�꺃�꺖�꺍�걢�굢�젂�빁�겓營��걚�겍�걚�걦
 						while (!note.isEmpty()) {
 							int min = Integer.MAX_VALUE;
 							int minLane = tate.get(0);
@@ -357,7 +359,7 @@ public class NoteShuffleModifier extends PatternModifier {
 						}
 
 						primary.addAll(tate);
-						// 残りを置いていく
+						// 餘뗣굤�굮營��걚�겍�걚�걦
 						while (!other.isEmpty()) {
 							random[primary.get(0)] = other.get(0);
 							primary.remove(0);
@@ -426,7 +428,15 @@ public class NoteShuffleModifier extends PatternModifier {
 		return log;
 	}
 
-	// 直前ノーツとの時間考慮shuffle duration[ms]時間未満の縦連打が出来るだけ発生しないようにshuffleをかける
+	private void calculateHranThreshold() {
+		if(config.getHranThresholdBPM() <= 0)
+			hranThreshold = 0;
+		else
+			hranThreshold = (int) (Math.ceil(15000.0f / config.getHranThresholdBPM()));
+		
+	}
+
+	// �쎍�뎺�깕�꺖�깂�겏�겗�셽�뼋�껅뀸shuffle duration[ms]�셽�뼋�쑋繹��겗潁��ｆ돀�걣�눣�씎�굥�걽�걨�쇇�뵟�걮�겒�걚�굠�걝�겓shuffle�굮�걢�걨�굥
 	private static int[] timeBasedShuffle(int[] keys, int[] activeln,
 			Note[] notes, int[] lastNoteTime, int now, int duration) {
 		List<Integer> assignLane = new ArrayList<Integer>(keys.length);
@@ -444,7 +454,7 @@ public class NoteShuffleModifier extends PatternModifier {
 			result[i] = i;
 		}
 
-		// LNがアクティブなレーンをアサインしてから除外
+		// LN�걣�궋�궚�깇�궍�깣�겒�꺃�꺖�꺍�굮�궋�궢�궎�꺍�걮�겍�걢�굢�솮鸚�
 		for (int lane = 0; lane < keys.length; lane++) {
 			if (activeln != null && activeln[keys[lane]] != -1) {
 				result[keys[lane]] = activeln[keys[lane]];
@@ -456,7 +466,7 @@ public class NoteShuffleModifier extends PatternModifier {
 		noteLane = new ArrayList<Integer>(keys.length);
 		otherLane = new ArrayList<Integer>(keys.length);
 
-		// 元のレーンをノーツの存在で分類
+		// �뀇�겗�꺃�꺖�꺍�굮�깕�꺖�깂�겗耶섇쑉�겎�늽窈�
 		while (!originalLane.isEmpty()) {
 			if (notes[originalLane.get(0)] != null) {
 				noteLane.add(originalLane.get(0));
@@ -466,7 +476,7 @@ public class NoteShuffleModifier extends PatternModifier {
 			originalLane.remove(0);
 		}
 
-		// 未アサインレーンを縦連発生かどうかで分類
+		// �쑋�궋�궢�궎�꺍�꺃�꺖�꺍�굮潁��ｇ쇇�뵟�걢�겑�걝�걢�겎�늽窈�
 		List<Integer> rendaLane, primaryLane;
 		rendaLane = new ArrayList<Integer>(keys.length);
 		primaryLane = new ArrayList<Integer>(keys.length);
@@ -479,7 +489,7 @@ public class NoteShuffleModifier extends PatternModifier {
 			assignLane.remove(0);
 		}
 
-		// ノーツがあるレーンを縦連が発生しないレーンに配置
+		// �깕�꺖�깂�걣�걗�굥�꺃�꺖�꺍�굮潁��ｃ걣�쇇�뵟�걮�겒�걚�꺃�꺖�꺍�겓�뀓營�
 		while (!(noteLane.isEmpty() || primaryLane.isEmpty())) {
 			int r = (int) (Math.random() * primaryLane.size());
 			result[primaryLane.get(r)] = noteLane.get(0);
@@ -487,8 +497,8 @@ public class NoteShuffleModifier extends PatternModifier {
 			noteLane.remove(0);
 		}
 
-		// noteLaneが空でなかったら
-		// lastNoteTimeが小さいレーンから順番に置いていく
+		// noteLane�걣令뷩겎�겒�걢�겂�걼�굢
+		// lastNoteTime�걣弱뤵걬�걚�꺃�꺖�꺍�걢�굢�젂�빁�겓營��걚�겍�걚�걦
 		while (!noteLane.isEmpty()) {
 			int min = Integer.MAX_VALUE;
 			int r = rendaLane.get(0);
@@ -510,7 +520,7 @@ public class NoteShuffleModifier extends PatternModifier {
 		}
 
 		primaryLane.addAll(rendaLane);
-		// 残りをランダムに置いていく
+		// 餘뗣굤�굮�꺀�꺍���깲�겓營��걚�겍�걚�걦
 		while (!otherLane.isEmpty()) {
 			int r = (int) (Math.random() * primaryLane.size());
 			result[primaryLane.get(r)] = otherLane.get(0);
@@ -521,7 +531,7 @@ public class NoteShuffleModifier extends PatternModifier {
 		return result;
 	}
 	
-	// 無理押しとduration[ms]時間未満の縦連打がなるべく来ないようにshuffleをかける
+	// �꽒�릤�듉�걮�겏duration[ms]�셽�뼋�쑋繹��겗潁��ｆ돀�걣�겒�굥�겧�걦�씎�겒�걚�굠�걝�겓shuffle�굮�걢�걨�굥
 	private static int[] noMurioshiShuffle(int[] keys, int[] activeln,
 		Note[] notes, int[] lastNoteTime, int now, int duration) {
 		List<Integer> assignedLane = new ArrayList<Integer>(keys.length);
@@ -541,7 +551,7 @@ public class NoteShuffleModifier extends PatternModifier {
 			result[i] = i;
 		}
 
-		// LNがアクティブなレーンをアサインしてから除外
+		// LN�걣�궋�궚�깇�궍�깣�겒�꺃�꺖�꺍�굮�궋�궢�궎�꺍�걮�겍�걢�굢�솮鸚�
 		for (int lane = 0; lane < keys.length; lane++) {
 			if (activeln != null && activeln[keys[lane]] != -1) {
 				result[keys[lane]] = activeln[keys[lane]];
@@ -554,7 +564,7 @@ public class NoteShuffleModifier extends PatternModifier {
 		noteLane = new ArrayList<Integer>(keys.length);
 		otherLane = new ArrayList<Integer>(keys.length);
 
-		// 元のレーンをノーツの存在で分類
+		// �뀇�겗�꺃�꺖�꺍�굮�깕�꺖�깂�겗耶섇쑉�겎�늽窈�
 		while (!originalLane.isEmpty()) {
 			if (notes[originalLane.get(0)] != null && (notes[originalLane.get(0)] instanceof NormalNote || notes[originalLane.get(0)] instanceof LongNote)) {
 				noteLane.add(originalLane.get(0));
@@ -564,18 +574,18 @@ public class NoteShuffleModifier extends PatternModifier {
 			originalLane.remove(0);
 		}
 
-		//無理押しにならないようにランダムに置いていく
-		//7個押し以上では無理押ししか存在しないので除外
+		//�꽒�릤�듉�걮�겓�겒�굢�겒�걚�굠�걝�겓�꺀�꺍���깲�겓營��걚�겍�걚�걦
+		//7�뗦듉�걮餓δ툓�겎�겘�꽒�릤�듉�걮�걮�걢耶섇쑉�걮�겒�걚�겗�겎�솮鸚�
 		if(assignedLane.size() + noteLane.size() <= 6) {
-			List<Integer> kouhoLane = new ArrayList<Integer>(keys.length); //置ける候補
-			List<Integer> rendaLane = new ArrayList<Integer>(keys.length); //置くと縦連打になるレーン
+			List<Integer> kouhoLane = new ArrayList<Integer>(keys.length); //營��걨�굥�숃짒
+			List<Integer> rendaLane = new ArrayList<Integer>(keys.length); //營��걦�겏潁��ｆ돀�겓�겒�굥�꺃�꺖�꺍
 			while (!(noteLane.isEmpty() || noAssignedLane.isEmpty())) {
 				kouhoLane.clear();
 				rendaLane.clear();
 				if(assignedLane.size() <= 1) {
-					kouhoLane.addAll(noAssignedLane); //既にノートが置かれているレーンが1個以下であれば全部が候補
+					kouhoLane.addAll(noAssignedLane); //�뿢�겓�깕�꺖�깉�걣營��걢�굦�겍�걚�굥�꺃�꺖�꺍�걣1�뗤빳訝뗣겎�걗�굦�겙�뀲�깿�걣�숃짒
 				} else {
-					int[] referencePoint = new int[2]; //既にノートが置かれているレーンの中で左端のレーンと右端のレーン
+					int[] referencePoint = new int[2]; //�뿢�겓�깕�꺖�깉�걣營��걢�굦�겍�걚�굥�꺃�꺖�꺍�겗訝��겎藥�塋��겗�꺃�꺖�꺍�겏�뤂塋��겗�꺃�꺖�꺍
 					referencePoint[0] = max;
 					referencePoint[1] = 0;
 					for(int i = 0; i < assignedLane.size(); i++){
@@ -583,7 +593,7 @@ public class NoteShuffleModifier extends PatternModifier {
 						referencePoint[1] = Math.max(referencePoint[1] , assignedLane.get(i));
 					}
 					if(referencePoint[1] - referencePoint[0] <= 2) {
-						kouhoLane.addAll(noAssignedLane); //既にノートが置かれているレーンが片手で押せる範囲であれば全部が候補
+						kouhoLane.addAll(noAssignedLane); //�뿢�겓�깕�꺖�깉�걣營��걢�굦�겍�걚�굥�꺃�꺖�꺍�걣�뎴�뎸�겎�듉�걵�굥影꾢쎊�겎�걗�굦�겙�뀲�깿�걣�숃짒
 					} else if(referencePoint[1] - referencePoint[0] == 3) {
 						if(noAssignedLane.indexOf(referencePoint[0] - 2) != -1) kouhoLane.add(referencePoint[0] - 2);
 						if(noAssignedLane.indexOf(referencePoint[0] - 1) != -1) kouhoLane.add(referencePoint[0] - 1);
@@ -618,7 +628,7 @@ public class NoteShuffleModifier extends PatternModifier {
 						rendaLane.add(kouhoLane.get(i));
 					}
 				}
-				if(kouhoLane.size() > rendaLane.size()) kouhoLane.removeAll(rendaLane); //縦連打になるレーンを除外。ただし候補全部が縦連打になる場合無理押しでないことの方を優先
+				if(kouhoLane.size() > rendaLane.size()) kouhoLane.removeAll(rendaLane); //潁��ｆ돀�겓�겒�굥�꺃�꺖�꺍�굮�솮鸚뽧�귙걼�걽�걮�숃짒�뀲�깿�걣潁��ｆ돀�겓�겒�굥�졃�릦�꽒�릤�듉�걮�겎�겒�걚�걪�겏�겗�뼶�굮�꽛�뀍
 				if(kouhoLane.isEmpty()) break;
 				int r = (int) (Math.random() * kouhoLane.size());
 				result[kouhoLane.get(r)] = noteLane.get(0);
@@ -628,7 +638,7 @@ public class NoteShuffleModifier extends PatternModifier {
 			}
 		}
 
-		// noteLaneが空でなかったら残りのノートをランダムに置いていく
+		// noteLane�걣令뷩겎�겒�걢�겂�걼�굢餘뗣굤�겗�깕�꺖�깉�굮�꺀�꺍���깲�겓營��걚�겍�걚�걦
 		while (!noteLane.isEmpty()) {
 			int r = (int) (Math.random() * noAssignedLane.size());
 			result[noAssignedLane.get(r)] = noteLane.get(0);
@@ -636,7 +646,7 @@ public class NoteShuffleModifier extends PatternModifier {
 			noteLane.remove(0);
 		}
 
-		// 残りをランダムに置いていく
+		// 餘뗣굤�굮�꺀�꺍���깲�겓營��걚�겍�걚�걦
 		while (!otherLane.isEmpty()) {
 			int r = (int) (Math.random() * noAssignedLane.size());
 			result[noAssignedLane.get(r)] = otherLane.get(0);
@@ -647,7 +657,7 @@ public class NoteShuffleModifier extends PatternModifier {
 		return result;
 	}
 
-	// duration2[ms]時間未満の縦連打を出来るだけ避けつつduration1[ms]時間未満の縦連打が出来るだけ長く発生するようにshuffleをかける
+	// duration2[ms]�셽�뼋�쑋繹��겗潁��ｆ돀�굮�눣�씎�굥�걽�걨�겳�걨�겇�겇duration1[ms]�셽�뼋�쑋繹��겗潁��ｆ돀�걣�눣�씎�굥�걽�걨�빓�걦�쇇�뵟�걲�굥�굠�걝�겓shuffle�굮�걢�걨�굥
 	private static int[] rendaShuffle(int[] keys, int[] activeln,
 			Note[] notes, int[] lastNoteTime, int now, int duration1, int duration2) {
 		List<Integer> assignLane = new ArrayList<Integer>(keys.length);
@@ -665,7 +675,7 @@ public class NoteShuffleModifier extends PatternModifier {
 			result[i] = i;
 		}
 
-		// LNがアクティブなレーンをアサインしてから除外
+		// LN�걣�궋�궚�깇�궍�깣�겒�꺃�꺖�꺍�굮�궋�궢�궎�꺍�걮�겍�걢�굢�솮鸚�
 		for (int lane = 0; lane < keys.length; lane++) {
 			if (activeln != null && activeln[keys[lane]] != -1) {
 				result[keys[lane]] = activeln[keys[lane]];
@@ -677,7 +687,7 @@ public class NoteShuffleModifier extends PatternModifier {
 		noteLane = new ArrayList<Integer>(keys.length);
 		otherLane = new ArrayList<Integer>(keys.length);
 
-		// 元のレーンをノーツの存在で分類
+		// �뀇�겗�꺃�꺖�꺍�굮�깕�꺖�깂�겗耶섇쑉�겎�늽窈�
 		while (!originalLane.isEmpty()) {
 			if (notes[originalLane.get(0)] != null && (notes[originalLane.get(0)] instanceof NormalNote || notes[originalLane.get(0)] instanceof LongNote)) {
 				noteLane.add(originalLane.get(0));
@@ -687,7 +697,7 @@ public class NoteShuffleModifier extends PatternModifier {
 			originalLane.remove(0);
 		}
 
-		// 未アサインレーンを縦連打発生かどうかで分類
+		// �쑋�궋�궢�궎�꺍�꺃�꺖�꺍�굮潁��ｆ돀�쇇�뵟�걢�겑�걝�걢�겎�늽窈�
 		List<Integer> rendaLane,mainRendaLane, noRendaLane;
 		rendaLane = new ArrayList<Integer>(keys.length);
 		mainRendaLane = new ArrayList<Integer>(keys.length);
@@ -703,7 +713,7 @@ public class NoteShuffleModifier extends PatternModifier {
 			assignLane.remove(0);
 		}
 
-		// ノーツがあるレーンを縦連打が発生するレーンに長い順に配置
+		// �깕�꺖�깂�걣�걗�굥�꺃�꺖�꺍�굮潁��ｆ돀�걣�쇇�뵟�걲�굥�꺃�꺖�꺍�겓�빓�걚�젂�겓�뀓營�
 		while (!(noteLane.isEmpty() || mainRendaLane.isEmpty())) {
 			int maxRenda = Integer.MIN_VALUE;
 			int r;
@@ -725,7 +735,7 @@ public class NoteShuffleModifier extends PatternModifier {
 			noteLane.remove(0);
 		}
 
-		// noteLaneが空でなかったら残りのノートを縦連打にならないレーンからランダムに置いていく
+		// noteLane�걣令뷩겎�겒�걢�겂�걼�굢餘뗣굤�겗�깕�꺖�깉�굮潁��ｆ돀�겓�겒�굢�겒�걚�꺃�꺖�꺍�걢�굢�꺀�꺍���깲�겓營��걚�겍�걚�걦
 		while (!(noteLane.isEmpty() || noRendaLane.isEmpty())) {
 			int r = (int) (Math.random() * noRendaLane.size());
 			result[noRendaLane.get(r)] = noteLane.get(0);
@@ -734,7 +744,7 @@ public class NoteShuffleModifier extends PatternModifier {
 			noteLane.remove(0);
 		}
 
-		// noteLaneが空でなかったら残りのノートをランダムに置いていく
+		// noteLane�걣令뷩겎�겒�걢�겂�걼�굢餘뗣굤�겗�깕�꺖�깉�굮�꺀�꺍���깲�겓營��걚�겍�걚�걦
 		while (!(noteLane.isEmpty() || rendaLane.isEmpty())) {
 			int r = (int) (Math.random() * rendaLane.size());
 			result[rendaLane.get(r)] = noteLane.get(0);
@@ -743,7 +753,7 @@ public class NoteShuffleModifier extends PatternModifier {
 			noteLane.remove(0);
 		}
 
-		// 残りをランダムに置いていく
+		// 餘뗣굤�굮�꺀�꺍���깲�겓營��걚�겍�걚�걦
 		noRendaLane.addAll(rendaLane);
 		noRendaLane.addAll(mainRendaLane);
 		while (!otherLane.isEmpty()) {
@@ -760,7 +770,7 @@ public class NoteShuffleModifier extends PatternModifier {
 	//7to9
 	private static int[] sevenToNine(int[] keys, int[] activeln, Note[] notes, int[] lastNoteTime, int now, int duration) {
 		/**
-		 * 7to9 スクラッチ鍵盤位置関係 0:OFF 1:SC1KEY2~8 2:SC1KEY3~9 3:SC2KEY3~9 4:SC8KEY1~7 5:SC9KEY1~7 6:SC9KEY2~8
+		 * 7to9 �궧�궚�꺀�긿�긽�뜷�썶鵝띸쉰�뼟岳� 0:OFF 1:SC1KEY2~8 2:SC1KEY3~9 3:SC2KEY3~9 4:SC8KEY1~7 5:SC9KEY1~7 6:SC9KEY2~8
 		 */
 		int keyLane = 2;
 		int scLane = 1;
@@ -814,7 +824,7 @@ public class NoteShuffleModifier extends PatternModifier {
 			}
 		} else {
 			/**
-			 * 7to9スクラッチ処理タイプ 0:そのまま 1:連打回避 2:交互
+			 * 7to9�궧�궚�꺀�긿�긽�눇�릤�궭�궎�깤 0:�걹�겗�겲�겲 1:�ｆ돀�썮�겳 2:雅ㅴ틨
 			 */
 			switch(config.getSevenToNineType()) {
 				case 1:
