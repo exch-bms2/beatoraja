@@ -4,8 +4,10 @@ import java.io.*;
 import java.util.logging.Logger;
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
+import bms.model.Mode;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.SkinConfig.Offset;
+import bms.player.beatoraja.play.SkinGauge;
 import bms.player.beatoraja.play.bga.BGAProcessor;
 import bms.player.beatoraja.select.MusicSelectSkin;
 import bms.player.beatoraja.skin.*;
@@ -22,7 +24,7 @@ import com.badlogic.gdx.utils.ObjectMap;
 
 /**
  * LR2のスキン定義用csvファイルのローダー
- * 
+ *
  * @author exch
  */
 public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
@@ -548,6 +550,169 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 				}
 			}
 		});
+		addCommandWord(new CommandWord("SRC_GROOVEGAUGE") {
+			//SRC定義,index,gr,x,y,w,h,div_x,div_y,cycle,timer,add_x,add_y,parts,animation_type,animation_range,animation_cycle,starttime,endtime
+			//parts:粒数 animation_type:アニメーションの種類(0:RANDOM 1:INCLEASE 2:DECLEASE 3:PMS用明滅アニメーション)
+			//animation_range:アニメーションする範囲 animation_cycle:アニメーション間隔(ms)
+			//starttime, endtime:リザルト用 ゲージが0から曲終了時の値まで増える演出の開始時間・終了時間(ms)
+			@Override
+			public void execute(String[] str) {
+				gauger = null;
+				int[] values = parseInt(str);
+				if (values[2] < imagelist.size && imagelist.get(values[2]) != null) {
+					int playside = values[1];
+					int divx = values[7];
+					if (divx <= 0) {
+						divx = 1;
+					}
+					int divy = values[8];
+					if (divy <= 0) {
+						divy = 1;
+					}
+					TextureRegion[][] gauge;
+					if(values[14] == 3 && divx * divy % 6 == 0) {
+						//アニメーションタイプがPMS用明滅アニメーションの場合 表赤、表緑、裏赤、裏緑、発光表赤、発光表緑の順にsrc分割
+						gauge = new TextureRegion[(divx * divy) / 6][12];
+						final int w = values[5];
+						final int h = values[6];
+						for (int x = 0; x < divx; x++) {
+							for (int y = 0; y < divy; y++) {
+								if ((y * divx + x) / 6 < gauge.length) {
+									if((y * divx + x) % 6 < 4) {
+										gauge[(y * divx + x) / 6][(y * divx + x) % 6] = new TextureRegion(
+												(Texture) imagelist.get(values[2]), values[3] + w * x / divx,
+												values[4] + h * y / divy, w / divx, h / divy);
+										gauge[(y * divx + x) / 6][(y * divx + x) % 6 + 4] = new TextureRegion(
+												(Texture) imagelist.get(values[2]), values[3] + w * x / divx,
+												values[4] + h * y / divy, w / divx, h / divy);
+									} else {
+										gauge[(y * divx + x) / 6][(y * divx + x) % 6 + 4] = new TextureRegion(
+												(Texture) imagelist.get(values[2]), values[3] + w * x / divx,
+												values[4] + h * y / divy, w / divx, h / divy);
+										gauge[(y * divx + x) / 6][(y * divx + x) % 6 + 6] = new TextureRegion(
+												(Texture) imagelist.get(values[2]), values[3] + w * x / divx,
+												values[4] + h * y / divy, w / divx, h / divy);
+									}
+								}
+							}
+						}
+					} else {
+						gauge = new TextureRegion[(divx * divy) / 4][8];
+						final int w = values[5];
+						final int h = values[6];
+						for (int x = 0; x < divx; x++) {
+							for (int y = 0; y < divy; y++) {
+								if ((y * divx + x) / 4 < gauge.length) {
+									gauge[(y * divx + x) / 4][(y * divx + x) % 4] = new TextureRegion(
+											(Texture) imagelist.get(values[2]), values[3] + w * x / divx,
+											values[4] + h * y / divy, w / divx, h / divy);
+									gauge[(y * divx + x) / 4][(y * divx + x) % 4 + 4] = new TextureRegion(
+											(Texture) imagelist.get(values[2]), values[3] + w * x / divx,
+											values[4] + h * y / divy, w / divx, h / divy);
+								}
+							}
+						}
+					}
+					groovex = values[11];
+					groovey = values[12];
+					if (gauger == null) {
+						if(values[13] == 0) {
+							gauger = new SkinGauge(gauge, values[10], values[9], mode == Mode.POPN_9K ? 24 : 50, 0, mode == Mode.POPN_9K ? 0 : 3, 33);
+						} else {
+							gauger = new SkinGauge(gauge, values[10], values[9], values[13], values[14], values[15], values[16]);
+						}
+
+						gauger.setStarttime(values[17]);
+						gauger.setEndtime(values[18]);
+
+						skin.add(gauger);
+					}
+				}
+			}
+		});
+		addCommandWord(new CommandWord("SRC_GROOVEGAUGE_EX") {
+			//SRC定義,index,gr,x,y,w,h,div_x,div_y,cycle,timer,add_x,add_y,parts,animation_type,animation_range,animation_cycle,starttime,endtime
+			//JSONスキンと同形式版 表赤、表緑、裏赤、裏緑、EX表赤、EX表緑、EX裏赤、EX裏緑の順にsrc分割
+			//parts:粒数 animation_type:アニメーションの種類(0:RANDOM 1:INCLEASE 2:DECLEASE 3:PMS用明滅アニメーション)
+			//animation_range:アニメーションする範囲 animation_cycle:アニメーション間隔(ms)
+			//starttime, endtime:リザルト用 ゲージが0から曲終了時の値まで増える演出の開始時間・終了時間(ms
+			@Override
+			public void execute(String[] str) {
+				gauger = null;
+				int[] values = parseInt(str);
+				if (values[2] < imagelist.size && imagelist.get(values[2]) != null) {
+					int playside = values[1];
+					int divx = values[7];
+					if (divx <= 0) {
+						divx = 1;
+					}
+					int divy = values[8];
+					if (divy <= 0) {
+						divy = 1;
+					}
+					TextureRegion[][] gauge;
+					if(values[14] == 3 && divx * divy % 12 == 0) {
+						//アニメーションタイプがPMS用明滅アニメーションの場合 表赤、表緑、裏赤、裏緑、EX表赤、EX表緑、EX裏赤、EX裏緑、発光表赤、発光表緑、発光EX表赤、発光EX表緑の順にsrc分割
+						gauge = new TextureRegion[(divx * divy) / 12][12];
+						final int w = values[5];
+						final int h = values[6];
+						for (int x = 0; x < divx; x++) {
+							for (int y = 0; y < divy; y++) {
+								if ((y * divx + x) / 12 < gauge.length) {
+										gauge[(y * divx + x) / 12][(y * divx + x) % 12] = new TextureRegion(
+												(Texture) imagelist.get(values[2]), values[3] + w * x / divx,
+												values[4] + h * y / divy, w / divx, h / divy);
+								}
+							}
+						}
+					} else {
+						gauge = new TextureRegion[(divx * divy) / 8][8];
+						final int w = values[5];
+						final int h = values[6];
+						for (int x = 0; x < divx; x++) {
+							for (int y = 0; y < divy; y++) {
+								if ((y * divx + x) / 8 < gauge.length) {
+									gauge[(y * divx + x) / 8][(y * divx + x) % 8] = new TextureRegion(
+											(Texture) imagelist.get(values[2]), values[3] + w * x / divx,
+											values[4] + h * y / divy, w / divx, h / divy);
+								}
+							}
+						}
+					}
+					groovex = values[11];
+					groovey = values[12];
+					if (gauger == null) {
+						if(values[13] == 0) {
+							gauger = new SkinGauge(gauge, values[10], values[9], mode == Mode.POPN_9K ? 24 : 50, 0, mode == Mode.POPN_9K ? 0 : 3, 33);
+						} else {
+							gauger = new SkinGauge(gauge, values[10], values[9], values[13], values[14], values[15], values[16]);
+						}
+
+						gauger.setStarttime(values[17]);
+						gauger.setEndtime(values[18]);
+
+						skin.add(gauger);
+					}
+				}
+			}
+		});
+		addCommandWord(new CommandWord("DST_GROOVEGAUGE") {
+			@Override
+			public void execute(String[] str) {
+				if (gauger != null) {
+					float width = (Math.abs(groovex) >= 1) ? (groovex * 50 * dstw / srcw)
+							: (Integer.parseInt(str[5]) * dstw / srcw);
+					float height = (Math.abs(groovey) >= 1) ? (groovey * 50 * dsth / srch)
+							: (Integer.parseInt(str[6]) * dsth / srch);
+					float x = Integer.parseInt(str[3]) * dstw / srcw - (groovex < 0 ? groovex * dstw / srcw : 0);
+					float y = dsth - Integer.parseInt(str[4]) * dsth / srch - height;
+					int[] values = parseInt(str);
+					gauger.setDestination(values[2], x, y, width, height, values[7],
+							values[8], values[9], values[10], values[11], values[12], values[13], values[14],
+							values[15], values[16], values[17], values[18], values[19], values[20], readOffset(str, 21));
+				}
+			}
+		});
 		addCommandWord(new CommandWord("DST_PM_CHARA_1P") {
 			@Override
 			public void execute(String[] str) {
@@ -699,7 +864,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 
 		op.putAll(option);
 		this.loadSkin0(skin, f, state, op);
-		
+
 		return skin;
 	}
 
@@ -712,6 +877,11 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 	SkinText text = null;
 	String line = null;
 	SkinImage PMcharaPart = null;
+
+	SkinGauge gauger = null;
+	int groovex = 0;
+	int groovey = 0;
+	Mode mode;
 
 	Array<Object> imagesetarray = new Array<Object>();
 
@@ -849,11 +1019,14 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 		for(SkinConfig.Offset offset : property.getOffset()) {
 			m.put(offset.name, offset);
 		}
+
+		mode = header.getSkinType().getMode();
+
 		return loadSkin(f, decide, header, option, m);
 	}
 
 	public abstract S loadSkin(File f, MainState decide, SkinHeader header, IntIntMap option, ObjectMap property) throws IOException;
-	
+
 	public static LR2SkinCSVLoader getSkinLoader(SkinType type, Resolution src, Config c) {
 		switch(type) {
 		case MUSIC_SELECT:

@@ -47,15 +47,11 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 	private SkinSource[] mine = new SkinSource[8];
 	private Rectangle[] laner = new Rectangle[8];
 	private float[] scale = new float[8];
-	private SkinGauge gauger = null;
 	private SkinImage line;
 	private SkinImage[] lines = new SkinImage[8];
 	private String[][] linevalues = new String[2][];
 
 	private SkinJudge[] judge = new SkinJudge[3];
-
-	private int groovex = 0;
-	private int groovey = 0;
 
 	private SkinType type;
 
@@ -637,156 +633,6 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 							values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
 							values[12], values[13], values[14], values[15], values[16], values[17], values[18],
 							values[19], values[20], readOffset(str, 21, new int[]{OFFSET_LIFT}));
-				}
-			}
-		});
-
-		addCommandWord(new CommandWord("SRC_GROOVEGAUGE") {
-			@Override
-			public void execute(String[] str) {
-				gauger = null;
-				int[] values = parseInt(str);
-				if (values[2] < imagelist.size && imagelist.get(values[2]) != null) {
-					int playside = values[1];
-					int divx = values[7];
-					if (divx <= 0) {
-						divx = 1;
-					}
-					int divy = values[8];
-					if (divy <= 0) {
-						divy = 1;
-					}
-					TextureRegion[][] gauge;
-					if(values[14] == 3 && divx * divy % 6 == 0) {
-						//アニメーションタイプがPMS用明滅アニメーションの場合 表赤、表緑、裏赤、裏緑、発光表赤、発光表緑の順にsrc分割
-						gauge = new TextureRegion[(divx * divy) / 6][12];
-						final int w = values[5];
-						final int h = values[6];
-						for (int x = 0; x < divx; x++) {
-							for (int y = 0; y < divy; y++) {
-								if ((y * divx + x) / 6 < gauge.length) {
-									if((y * divx + x) % 6 < 4) {
-										gauge[(y * divx + x) / 6][(y * divx + x) % 6] = new TextureRegion(
-												(Texture) imagelist.get(values[2]), values[3] + w * x / divx,
-												values[4] + h * y / divy, w / divx, h / divy);
-										gauge[(y * divx + x) / 6][(y * divx + x) % 6 + 4] = new TextureRegion(
-												(Texture) imagelist.get(values[2]), values[3] + w * x / divx,
-												values[4] + h * y / divy, w / divx, h / divy);
-									} else {
-										gauge[(y * divx + x) / 6][(y * divx + x) % 6 + 4] = new TextureRegion(
-												(Texture) imagelist.get(values[2]), values[3] + w * x / divx,
-												values[4] + h * y / divy, w / divx, h / divy);
-										gauge[(y * divx + x) / 6][(y * divx + x) % 6 + 6] = new TextureRegion(
-												(Texture) imagelist.get(values[2]), values[3] + w * x / divx,
-												values[4] + h * y / divy, w / divx, h / divy);
-									}
-								}
-							}
-						}
-					} else {
-						gauge = new TextureRegion[(divx * divy) / 4][8];
-						final int w = values[5];
-						final int h = values[6];
-						for (int x = 0; x < divx; x++) {
-							for (int y = 0; y < divy; y++) {
-								if ((y * divx + x) / 4 < gauge.length) {
-									gauge[(y * divx + x) / 4][(y * divx + x) % 4] = new TextureRegion(
-											(Texture) imagelist.get(values[2]), values[3] + w * x / divx,
-											values[4] + h * y / divy, w / divx, h / divy);
-									gauge[(y * divx + x) / 4][(y * divx + x) % 4 + 4] = new TextureRegion(
-											(Texture) imagelist.get(values[2]), values[3] + w * x / divx,
-											values[4] + h * y / divy, w / divx, h / divy);
-								}
-							}
-						}
-					}
-					groovex = values[11];
-					groovey = values[12];
-					if (gauger == null) {
-						if(values[13] == 0) {
-							gauger = new SkinGauge(gauge, values[10], values[9], mode == Mode.POPN_9K ? 24 : 50, 0, mode == Mode.POPN_9K ? 0 : 3, 33);
-						} else {
-							gauger = new SkinGauge(gauge, values[10], values[9], values[13], values[14], values[15], values[16]);
-						}
-
-						skin.add(gauger);
-					}
-				}
-			}
-		});
-		addCommandWord(new CommandWord("SRC_GROOVEGAUGE_EX") {
-			//JSONスキンと同形式版 表赤、表緑、裏赤、裏緑、EX表赤、EX表緑、EX裏赤、EX裏緑の順にsrc分割
-			@Override
-			public void execute(String[] str) {
-				gauger = null;
-				int[] values = parseInt(str);
-				if (values[2] < imagelist.size && imagelist.get(values[2]) != null) {
-					int playside = values[1];
-					int divx = values[7];
-					if (divx <= 0) {
-						divx = 1;
-					}
-					int divy = values[8];
-					if (divy <= 0) {
-						divy = 1;
-					}
-					TextureRegion[][] gauge;
-					if(values[14] == 3 && divx * divy % 12 == 0) {
-						//アニメーションタイプがPMS用明滅アニメーションの場合 表赤、表緑、裏赤、裏緑、EX表赤、EX表緑、EX裏赤、EX裏緑、発光表赤、発光表緑、発光EX表赤、発光EX表緑の順にsrc分割
-						gauge = new TextureRegion[(divx * divy) / 12][12];
-						final int w = values[5];
-						final int h = values[6];
-						for (int x = 0; x < divx; x++) {
-							for (int y = 0; y < divy; y++) {
-								if ((y * divx + x) / 12 < gauge.length) {
-										gauge[(y * divx + x) / 12][(y * divx + x) % 12] = new TextureRegion(
-												(Texture) imagelist.get(values[2]), values[3] + w * x / divx,
-												values[4] + h * y / divy, w / divx, h / divy);
-								}
-							}
-						}
-					} else {
-						gauge = new TextureRegion[(divx * divy) / 8][8];
-						final int w = values[5];
-						final int h = values[6];
-						for (int x = 0; x < divx; x++) {
-							for (int y = 0; y < divy; y++) {
-								if ((y * divx + x) / 8 < gauge.length) {
-									gauge[(y * divx + x) / 8][(y * divx + x) % 8] = new TextureRegion(
-											(Texture) imagelist.get(values[2]), values[3] + w * x / divx,
-											values[4] + h * y / divy, w / divx, h / divy);
-								}
-							}
-						}
-					}
-					groovex = values[11];
-					groovey = values[12];
-					if (gauger == null) {
-						if(values[13] == 0) {
-							gauger = new SkinGauge(gauge, values[10], values[9], mode == Mode.POPN_9K ? 24 : 50, 0, mode == Mode.POPN_9K ? 0 : 3, 33);
-						} else {
-							gauger = new SkinGauge(gauge, values[10], values[9], values[13], values[14], values[15], values[16]);
-						}
-
-						skin.add(gauger);
-					}
-				}
-			}
-		});
-		addCommandWord(new CommandWord("DST_GROOVEGAUGE") {
-			@Override
-			public void execute(String[] str) {
-				if (gauger != null) {
-					float width = (Math.abs(groovex) >= 1) ? (groovex * 50 * dstw / srcw)
-							: (Integer.parseInt(str[5]) * dstw / srcw);
-					float height = (Math.abs(groovey) >= 1) ? (groovey * 50 * dsth / srch)
-							: (Integer.parseInt(str[6]) * dsth / srch);
-					float x = Integer.parseInt(str[3]) * dstw / srcw - (groovex < 0 ? groovex * dstw / srcw : 0);
-					float y = dsth - Integer.parseInt(str[4]) * dsth / srch - height;
-					int[] values = parseInt(str);
-					gauger.setDestination(values[2], x, y, width, height, values[7],
-							values[8], values[9], values[10], values[11], values[12], values[13], values[14],
-							values[15], values[16], values[17], values[18], values[19], values[20], readOffset(str, 21));
 				}
 			}
 		});
