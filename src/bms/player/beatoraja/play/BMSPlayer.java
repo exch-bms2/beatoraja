@@ -159,14 +159,7 @@ public class BMSPlayer extends MainState {
 			autoplay = PlayMode.PLAY;
 		}
 
-		if (model.getRandom() != null && model.getRandom().length > 0) {
-			if (autoplay.isReplayMode()) {
-				model = resource.getGenerator().generate(replay.rand);
-			} else if (resource.getReplayData().pattern != null) {
-				model = resource.getGenerator().generate(resource.getReplayData().rand);
-			}
-			Logger.getGlobal().info("鈺쒒씊�늽略� : " + Arrays.toString(model.getRandom()));
-		}
+		getnerateModel(resource);
 		// �싧만�깤�꺃�궎�겗�졃�릦�겘��孃뚣겗�깕�꺖�깂�곥궕�꺖�깉�깤�꺃�궎�겗�졃�릦�겘BG/BGA�굮�맜�굙�걼��孃뚣겗�깕�꺖�깂
 		playtime = (autoplay.isAutoPlayMode() ? model.getLastTime() : model.getLastNoteTime()) + TIME_MARGIN;
 
@@ -365,6 +358,16 @@ public class BMSPlayer extends MainState {
 		final int difficulty = resource.getSongdata() != null ? resource.getSongdata().getDifficulty() : 0;
 		resource.setSongdata(new SongData(model, false));
 		resource.getSongdata().setDifficulty(difficulty);
+	}
+	private void getnerateModel(PlayerResource resource) {
+		if (model.getRandom() != null && model.getRandom().length > 0) {
+			if (autoplay.isReplayMode()) {
+				model = resource.getGenerator().generate(replay.rand);
+			} else if (resource.getReplayData().pattern != null) {
+				model = resource.getGenerator().generate(resource.getReplayData().rand);
+			}
+			Logger.getGlobal().info("鈺쒒씊�늽略� : " + Arrays.toString(model.getRandom()));
+		}
 	}
 
 	public SkinType getSkinType() {
