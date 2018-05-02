@@ -1432,7 +1432,7 @@ public class JSONSkinLoader extends SkinLoader{
 		public int range = 3;
 		public int cycle = 33;
 		public int starttime = 0;
-		public int endtime = 1000;
+		public int endtime = 500;
 	}
 
 	public static class HiddenCover {
