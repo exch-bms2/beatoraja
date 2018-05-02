@@ -1,13 +1,26 @@
 package bms.player.beatoraja;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Deque;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.logging.Logger;
+import java.util.zip.GZIPInputStream;
+import static java.nio.file.StandardCopyOption.*;
+import org.apache.tools.tar.TarEntry;
+import org.apache.tools.tar.TarInputStream;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -30,6 +43,7 @@ public class MusicDownloadProcessor {
 	private FreeTypeFontGenerator generator;
 	BitmapFont downloadfont;
 	private SpriteBatch sprite;
+	private boolean daemonexists;
 
 	public final MainController main;
 
@@ -45,11 +59,10 @@ public class MusicDownloadProcessor {
     	if((daemon == null || !daemon.isAlive())){
     		ipfs = main.getConfig().getIpfspath();
     		if(ipfs != null && Paths.get(ipfs).toFile().exists()){
-    			daemon = new DownloadDaemonThread();
-    			daemon.start();
-    		}else{
-    			Logger.getGlobal().info("ipfsの実行ファイルが指定されていないため、ダウンロードは開始されません");
+				daemonexists = true;
     		}
+			daemon = new DownloadDaemonThread();
+			daemon.start();
     	}
     	if(song!= null){
     		commands.add(song);
@@ -105,45 +118,51 @@ public class MusicDownloadProcessor {
     	private boolean dispose;
     	private Process pd = null;
     	private Process pc = null;
+		private String ipfspath = "";
     	private String path = "";
     	private String diffpath = "";
     	private boolean download;
     	private String downloadpath;
     	private SongData song;
 		public void run() {
+			DownloadTarThread downloadtar = null;
         	dispose = false;
         	try{
-        		ProcessBuilder pbd = new ProcessBuilder(ipfs,"init");
-        		pbd.inheritIO();
-        		pd = pbd.start();
-        		pd.waitFor();
+				ProcessBuilder pbd = null;
+				if (daemonexists) {
+					pbd = new ProcessBuilder(ipfs, "init");
+					pbd.inheritIO();
+					pd = pbd.start();
+					pd.waitFor();
 
-        		pbd = new ProcessBuilder(ipfs,"repo","fsck");
-        		pbd.inheritIO();
-        		pd = pbd.start();
-        		pd.waitFor();
+					pbd = new ProcessBuilder(ipfs, "repo", "fsck");
+					pbd.inheritIO();
+					pd = pbd.start();
+					pd.waitFor();
 
-        		pbd = new ProcessBuilder(ipfs,"daemon");
-        		pbd.inheritIO();
+					pbd = new ProcessBuilder(ipfs, "daemon");
+					pbd.inheritIO();
+				}
         		while(!dispose){
-        			if(!pd.isAlive()){
+					if (daemonexists && !pd.isAlive()) {
                 		Logger.getGlobal().info("ipfs daemon開始");
         				pd = pbd.start();
         			}
         			if(!commands.isEmpty() && !download){
         				song = commands.removeFirst();
-        				path = song.getIpfs();
+						Logger.getGlobal().info(song.getTitle());
+
+						ipfspath = song.getIpfs();
         				diffpath = song.getAppendIpfs();
 
-        				if(path.toLowerCase().startsWith("/ipfs")){
-        					path = path.substring(1);
-        				}else{
-        					path = "ipfs/" + path;
+						if (ipfspath.toLowerCase().startsWith("/ipfs/")) {
+							ipfspath = path.substring(5);
         				}
-        				if(diffpath != null &&diffpath.toLowerCase().startsWith("/ipfs")){
-        					diffpath = diffpath.substring(1);
-        				}else if(diffpath != null){
-        					diffpath = "ipfs/" + diffpath;
+						path = "[" + song.getArtist() + "]" + song.getTitle();
+						path = "ipfs/" + path.replaceAll("[(\\\\|/|:|\\*|\\?|\"|<|>|\\|)]", "");
+						Logger.getGlobal().info(path);
+						if (diffpath != null && diffpath.toLowerCase().startsWith("/ipfs/")) {
+							diffpath = diffpath.substring(5);
         				}
 
         				List<String> orgmd5 = song.getOrg_md5();
@@ -153,23 +172,57 @@ public class MusicDownloadProcessor {
         						path = Paths.get(s[0].getPath()).getParent().toString();
         					}
         				}
-
-        				if(!Paths.get(path).toFile().exists()){
-        					ProcessBuilder pbc = new ProcessBuilder(ipfs,"get","/" +path,"-o="+path);
+						if (!Paths.get(path).toFile().exists() && daemonexists) {
+							ProcessBuilder pbc = new ProcessBuilder(ipfs, "get", ipfspath, "-o=" + path);
         					pbc.inheritIO();
         					pc = pbc.start();
         					download = true;
         					message = "downloading:/"+path;
         					Logger.getGlobal().info("ipfs client本体取得開始");
+						} else if (!Paths.get(path).toFile().exists()) {
+							downloadtar = new DownloadTarThread();
+							downloadtar.ipfspath = ipfspath;
+							downloadtar.start();
+							download = true;
+							message = "downloading:/" + path;
+							Logger.getGlobal().info("ipfs client本体取得開始");
         				}else{
         					Logger.getGlobal().info(path+"は既に存在します（差分取得のみ）");
+							ipfspath = "";
         					download = true;
         				}
         			}
 
-        			if(download && !( pc != null &&pc.isAlive())){
+					if (download
+							&& ((pc != null && !pc.isAlive()) || (downloadtar != null && !downloadtar.isAlive())
+									|| (pc == null && downloadtar == null))) {
+						if (!daemonexists) {
+							Path p = Paths.get("ipfs/bms.tar.gz").toAbsolutePath();
+							if (Files.exists(p)) {
+								TarInputStream tin = new TarInputStream(
+										new GZIPInputStream(new FileInputStream(p.toFile())));
+								for (TarEntry tarEnt = tin.getNextEntry(); tarEnt != null; tarEnt = tin
+										.getNextEntry()) {
+									if (tarEnt.isDirectory()) {
+										new File("ipfs/" + tarEnt.getName()).mkdir();
+									} else {
+										FileOutputStream fos = new FileOutputStream(
+												new File("ipfs/" + tarEnt.getName()));
+										tin.copyEntryContents(fos);
+										fos.close();
+									}
+								}
+								tin.close();
+
+							}
+							Files.deleteIfExists(p);
+							if (ipfspath != null && ipfspath.length() != 0) {
+								Files.move(Paths.get("ipfs/" + ipfspath), Paths.get(path), ATOMIC_MOVE);
+							}
+						}
         				if(diffpath != null && diffpath.length() != 0){
-        					File f = Paths.get(diffpath).toFile();
+							ipfspath = "";
+							File f = Paths.get("ipfs/" + diffpath).toFile();
         					if(f.exists()){
         						if(f.isDirectory()){
         							for(File fs:f.listFiles()){
@@ -181,12 +234,18 @@ public class MusicDownloadProcessor {
         						}
         						diffpath = "";
         					}else{
+								if (daemonexists) {
         						Logger.getGlobal().info(diffpath);
-        						ProcessBuilder pbc = new ProcessBuilder(ipfs,"get","/" +diffpath,"-o="+diffpath);
+								ProcessBuilder pbc = new ProcessBuilder(ipfs, "get", diffpath, "-o=ipfs/" + diffpath);
         						pbc.inheritIO();
         						pc = pbc.start();
-        						message = "downloading diff:/"+path;
-        						Logger.getGlobal().info("ipfs client差分取得開始");
+								} else {
+									downloadtar = new DownloadTarThread();
+									downloadtar.ipfspath = diffpath;
+									downloadtar.start();
+								}
+								message = "downloading diff:/" + diffpath;
+								Logger.getGlobal().info("ipfs client差分取得開始");
         					}
         				}else if(downloadpath == null){
         					Path p = Paths.get(path).toAbsolutePath();
@@ -201,12 +260,34 @@ public class MusicDownloadProcessor {
         		e.printStackTrace();
         	}
         	Logger.getGlobal().info("daemon終了");
-        	pd.destroy();
-        	if(pc != null &&pc.isAlive()){
-        		pc.destroy();
-        	}
+			if (pd != null && pd.isAlive())
+				pd.destroy();
+			if (pc != null && pc.isAlive())
+				pc.destroy();
         	dispose = false;
         	download = false;
         }
     }
+
+	class DownloadTarThread extends Thread {
+		private String ipfspath = "";
+
+		public void run() {
+			URL url = null;
+			try {
+				url = new URL(
+						"http://ipfs.io/api/v0/get?arg=" + ipfspath
+								+ "&archive=true&compress=true");
+			} catch (MalformedURLException e1) {
+				e1.printStackTrace();
+			}
+			Path dlpath = Paths.get("ipfs/bms.tar.gz");
+			try {
+				Files.copy(url.openStream(), dlpath, StandardCopyOption.REPLACE_EXISTING);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
 }

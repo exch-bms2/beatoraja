@@ -175,14 +175,13 @@ public class MainController extends ApplicationAdapter {
 
 		this.bmsfile = f;
 
-		if(Paths.get(config.getIpfspath()).toFile().exists()){
-			Path ipfspath = Paths.get("ipfs").toAbsolutePath();
-			if(!ipfspath.toFile().exists()) ipfspath.toFile().mkdirs();
-			List<String> roots = new ArrayList<>(Arrays.asList(getConfig().getBmsroot()));
-			if(ipfspath.toFile().exists() && !roots.contains(ipfspath.toString())){
-				roots.add(ipfspath.toString());
-				getConfig().setBmsroot(roots.toArray(new String[roots.size()]));
-			}
+		Path ipfspath = Paths.get("ipfs").toAbsolutePath();
+		if (!ipfspath.toFile().exists())
+			ipfspath.toFile().mkdirs();
+		List<String> roots = new ArrayList<>(Arrays.asList(getConfig().getBmsroot()));
+		if (ipfspath.toFile().exists() && !roots.contains(ipfspath.toString())) {
+			roots.add(ipfspath.toString());
+			getConfig().setBmsroot(roots.toArray(new String[roots.size()]));
 		}
 		try {
 			Class.forName("org.sqlite.JDBC");
