@@ -96,7 +96,6 @@ public class BMSPlayer extends MainState {
 	public static final int SOUND_GUIDE_SE_GR = 11;
 	public static final int SOUND_GUIDE_SE_GD = 12;
 	private void autoPlayOrReplay(MainController main, PlayerResource resource) {
-
 		PlayerConfig config = resource.getPlayerConfig();
 		if (autoplay.isReplayMode()) {
 			if (resource.getCourseBMSModels() != null) {
@@ -126,15 +125,9 @@ public class BMSPlayer extends MainState {
 			}
 		}
 	}
-	public BMSPlayer(MainController main, PlayerResource resource) {
-		super(main);
-		
-		this.model = resource.getBMSModel();
-		this.autoplay = resource.getPlayMode();
-		autoPlayOrReplay(main,resource);
-		
-
-		boolean isReplayPatternPlay = false;
+	private boolean isReplayPatternPlay(MainController main, PlayerResource resource){
+		boolean isReplayPatternPlay = true;
+		PlayerConfig config = resource.getPlayerConfig();
 		ReplayData HSReplay = null;
 		if(replay != null && main.getInputProcessor().getKeystate()[1]) {
 			//岳앭춼�걬�굦�걼鈺쒒씊鸚됪쎍�꺆�궛�걢�굢鈺쒒씊�냽�뤎
@@ -152,7 +145,16 @@ public class BMSPlayer extends MainState {
 			HSReplay = replay;
 			isReplayPatternPlay = true;
 		}
-		if(isReplayPatternPlay) {
+		return isReplayPatternPlay;
+	}
+	public BMSPlayer(MainController main, PlayerResource resource) {
+		super(main);
+		
+		this.model = resource.getBMSModel();
+		this.autoplay = resource.getPlayMode();
+		autoPlayOrReplay(main,resource);
+		
+		if(isReplayPatternPlay(main,resource)) {
 			replay = null;
 			autoplay = PlayMode.PLAY;
 		}
