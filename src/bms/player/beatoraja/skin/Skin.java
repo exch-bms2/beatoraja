@@ -32,50 +32,50 @@ import java.io.*;
 import org.lwjgl.opengl.GL11;
 
 /**
- * スキン
+ * �궧�궘�꺍
  * 
  * @author exch
  */
 public class Skin {
 	
-	// TODO ぽみゅキャラ系処理の分離
+	// TODO �겱�겳�굝�궘�깵�꺀楹삣눇�릤�겗�늽�썴
 
 	/**
-	 * 幅
+	 * 亮�
 	 */
 	private final float width;
 	/**
-	 * 高さ
+	 * 遙섅걬
 	 */
 	private final float height;
 	/**
-	 * 元データからの幅比率
+	 * �뀇�깈�꺖�궭�걢�굢�겗亮끾캈�럤
 	 */
 	private final float dw;
 	/**
-	 * 元データからの高さ比率
+	 * �뀇�깈�꺖�궭�걢�굢�겗遙섅걬驪붺럤
 	 */
 	private final float dh;
 
 	/**
-	 * 登録されているスキンオブジェクト
+	 * �쇉�뙯�걬�굦�겍�걚�굥�궧�궘�꺍�궕�깣�궦�궒�궚�깉
 	 */
 	private Array<SkinObject> objects = new Array<SkinObject>();
 	private SkinObject[] objectarray = new SkinObject[0];
 	/**
-	 * 除外されているスキンオブジェクト
+	 * �솮鸚뽧걬�굦�겍�걚�굥�궧�궘�꺍�궕�깣�궦�궒�궚�깉
 	 */
 	private Array<SkinObject> removes = new Array<SkinObject>();
 	/**
-	 * 入力受付開始時間(ms)
+	 * �뀯�뒟�룛餓섌뼀冶뗦셽�뼋(ms)
 	 */
 	private int input;
 	/**
-	 * シーンの時間(ms)
+	 * �궥�꺖�꺍�겗�셽�뼋(ms)
 	 */
 	private int scene = 3600000 * 24;
 	/**
-	 * シーン以降準備開始からシーン移行までの時間(ms)
+	 * �궥�꺖�꺍餓ι솉繹뽩굺�뼀冶뗣걢�굢�궥�꺖�꺍燁삭죱�겲�겎�겗�셽�뼋(ms)
 	 */
 	private int fadeout;
 
@@ -84,7 +84,7 @@ public class Skin {
 	private Map<Integer, Offset> offset = new HashMap<Integer, Offset>();
 
 	/**
-	 * 読み込み時から不変であることが確定しているop
+	 * 沃��겳渦쇈겳�셽�걢�굢訝띶쨯�겎�걗�굥�걪�겏�걣閻뷴츣�걮�겍�걚�굥op
 	 */
 	private int[] fixopt;
 
@@ -206,7 +206,7 @@ public class Skin {
 			}
 			
  		}
-		Logger.getGlobal().info("描画されないことが確定しているSkinObject削除 : " + removes.size + " / " + objects.size);
+		Logger.getGlobal().info("�룒�뵽�걬�굦�겒�걚�걪�겏�걣閻뷴츣�걮�겍�걚�굥SkinObject�뎷�솮 : " + removes.size + " / " + objects.size);
 		objects.removeAll(removes, true);
 		objectarray = objects.toArray(SkinObject.class);
 		option.clear();
@@ -385,14 +385,14 @@ public class Skin {
 
 		public void draw(TextureRegion image, float x, float y, float w, float h) {
 			preDraw(image);
-			// x,yが*.5の際に(Windowsのみ)TextureRegionがずれるため、暫定対処
+			// x,y�걣*.5�겗�슋�겓(Windows�겗�겳)TextureRegion�걣�걳�굦�굥�걼�굙�곫슟若싧�얍눇
 			sprite.draw(image,  x + 0.01f, y + 0.01f, w, h);
 			postDraw();
 		}
 
 		public void draw(TextureRegion image, float x, float y, float w, float h, float cx, float cy, float angle) {
 			preDraw(image);
-			// x,yが*.5の際に(Windowsのみ)TextureRegionがずれるため、暫定対処
+			// x,y�걣*.5�겗�슋�겓(Windows�겗�겳)TextureRegion�걣�걳�굦�굥�걼�굙�곫슟若싧�얍눇
 			sprite.draw(image, x + 0.01f, y + 0.01f, cx * w, cy * h, w, h, 1, 1, angle);
 			postDraw();
 		}
@@ -412,7 +412,7 @@ public class Skin {
 				sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
 				break;
 			case 3:
-				// TODO 減算描画は難しいか？
+				// TODO 歷쏁츞�룒�뵽�겘�썵�걮�걚�걢竊�
 				Gdx.gl.glBlendEquation(GL20.GL_FUNC_SUBTRACT);
 				sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
 				Gdx.gl.glBlendEquation(GL20.GL_FUNC_ADD);
@@ -508,7 +508,7 @@ public class Skin {
 	}
 
 	/**
-	 * ぽみゅキャラの各モーションの1周期の時間  0:1P_NEUTRAL 1:1P_FEVER 2:1P_GREAT 3:1P_GOOD 4:1P_BAD 5:2P_NEUTRAL 6:2P_GREAT 7:2P_BAD
+	 * �겱�겳�굝�궘�깵�꺀�겗�릢�깴�꺖�궥�깾�꺍�겗1�뫅�쐿�겗�셽�뼋  0:1P_NEUTRAL 1:1P_FEVER 2:1P_GREAT 3:1P_GOOD 4:1P_BAD 5:2P_NEUTRAL 6:2P_GREAT 7:2P_BAD
 	 */
 	private int PMcharaTime[] = {1,1,1,1,1,1,1,1};
 
@@ -523,8 +523,8 @@ public class Skin {
 		}
 	}
 
-	public SkinImage PMcharaLoader(boolean usecim, File imagefile, int type, int color, float dstx, float dsty, float dstw, float dsth, int side, int dsttimer, int dstOp1, int dstOp2, int dstOp3, int dstOffset) {
-		//type 0:プレイ 1:キャラ背景 2:名前画像 3:ハリアイ画像(上半身のみ) 4:ハリアイ画像(全体) 5:キャラアイコン 6:NEUTRAL 7:FEVER 8:GREAT 9:GOOD 10:BAD 11:FEVERWIN 12:WIN 13:LOSE 14:OJAMA 15:DANCE
+	public SkinImage PMcharaLoader(boolean usecim, File imagefile, int type, int color, float dstx, float dsty, float dstw, float dsth, int side, int dsttimer, SkinOption skinOption) {
+		//type 0:�깤�꺃�궎 1:�궘�깵�꺀�깒�솺 2:�릫�뎺�뵽�깗 3:�깗�꺁�궋�궎�뵽�깗(訝듿뜇翁ャ겗�겳) 4:�깗�꺁�궋�궎�뵽�깗(�뀲鵝�) 5:�궘�깵�꺀�궋�궎�궠�꺍 6:NEUTRAL 7:FEVER 8:GREAT 9:GOOD 10:BAD 11:FEVERWIN 12:WIN 13:LOSE 14:OJAMA 15:DANCE
 		final int PLAY = 0;
 		final int BACKGROUND = 1;
 		final int NAME = 2;
@@ -556,7 +556,7 @@ public class Skin {
 			else chpdir = new File(imagefile.getPath());
 		}
 		if(chp == null && chpdir != null) {
-			//chpファイルを探す
+			//chp�깢�궊�궎�꺂�굮�렋�걲
 			File[] filename = chpdir.listFiles();
 			for(int i = 0; i < filename.length; i++) {
 				if (filename[i].getPath().substring(filename[i].getPath().length()-4,filename[i].getPath().length()).equalsIgnoreCase(".chp")) {
@@ -567,14 +567,14 @@ public class Skin {
 		}
 		if(chp == null) return null;
 
-		//画像データ 0:#CharBMP 1:#CharBMP2P 2:#CharTex 3:#CharTex2P 4:#CharFace 5:#CharFace2P 6:#SelectCG 7:#SelectCG2P
+		//�뵽�깗�깈�꺖�궭 0:#CharBMP 1:#CharBMP2P 2:#CharTex 3:#CharTex2P 4:#CharFace 5:#CharFace2P 6:#SelectCG 7:#SelectCG2P
 		Texture[] CharBMP = new Texture[8];
 		Arrays.fill(CharBMP, null);
 		final int CharBMPIndex = 0;
 		final int CharTexIndex = 2;
 		final int CharFaceIndex = 4;
 		final int SelectCGIndex = 6;
-		//各パラメータ
+		//�릢�깙�꺀�깳�꺖�궭
 		int[][] xywh = new int[1296][4];
 		for(int[] i: xywh){
 			Arrays.fill(i, 0);
@@ -587,11 +587,11 @@ public class Skin {
 		Arrays.fill(frame, Integer.MIN_VALUE);
 		int loop[] = new int[20];
 		Arrays.fill(loop, -1);
-		//最終的な色
+		//��永귞쉪�겒�돯
 		int setColor = 1;
-		//フレーム補間の基準の時間 60FPSの17ms
+		//�깢�꺃�꺖�깲獒쒒뼋�겗�읃繹뽧겗�셽�뼋 60FPS�겗17ms
 		int increaseRateThreshold = 17;
-		//#Pattern,#Texture,#Layerのデータ
+		//#Pattern,#Texture,#Layer�겗�깈�꺖�궭
 		List<List<String>> patternData = new ArrayList<List<String>>();
 		for(int i = 0; i < 3; i++) patternData.add(new ArrayList<String>());
 
@@ -604,75 +604,75 @@ public class Skin {
 					if (str.length > 1) {
 						List<String> data = PMparseStr(str);
 						if (str[0].equalsIgnoreCase("#CharBMP")) {
-							//#Pattern, #Layer用画像
+							//#Pattern, #Layer�뵪�뵽�깗
 							if(data.size() > 1) CharBMP[CharBMPIndex] = SkinLoader.getTexture(chp.getPath().substring(0, Math.max(chp.getPath().lastIndexOf('\\'), chp.getPath().lastIndexOf('/')) + 1) + data.get(1).replace("\\", "/"), usecim);
 						} else if(str[0].equalsIgnoreCase("#CharBMP2P")) {
-							//#Pattern, #Layer用画像2P
+							//#Pattern, #Layer�뵪�뵽�깗2P
 							if(data.size() > 1) CharBMP[CharBMPIndex+1] = SkinLoader.getTexture(chp.getPath().substring(0, Math.max(chp.getPath().lastIndexOf('\\'), chp.getPath().lastIndexOf('/')) + 1) + data.get(1).replace("\\", "/"), usecim);
 						} else if(str[0].equalsIgnoreCase("#CharTex")) {
-							//#Texture用画像
+							//#Texture�뵪�뵽�깗
 							if(data.size() > 1) CharBMP[CharTexIndex] = SkinLoader.getTexture(chp.getPath().substring(0, Math.max(chp.getPath().lastIndexOf('\\'), chp.getPath().lastIndexOf('/')) + 1) + data.get(1).replace("\\", "/"), usecim);
 						} else if(str[0].equalsIgnoreCase("#CharTex2P")) {
-							//#Texture用画像2P
+							//#Texture�뵪�뵽�깗2P
 							if(data.size() > 1) CharBMP[CharTexIndex+1] = SkinLoader.getTexture(chp.getPath().substring(0, Math.max(chp.getPath().lastIndexOf('\\'), chp.getPath().lastIndexOf('/')) + 1) + data.get(1).replace("\\", "/"), usecim);
 						} else if(str[0].equalsIgnoreCase("#CharFace")) {
-							//ハリアイ
+							//�깗�꺁�궋�궎
 							if(data.size() > 1) CharBMP[CharFaceIndex] = SkinLoader.getTexture(chp.getPath().substring(0, Math.max(chp.getPath().lastIndexOf('\\'), chp.getPath().lastIndexOf('/')) + 1) + data.get(1).replace("\\", "/"), usecim);
 						} else if(str[0].equalsIgnoreCase("#CharFace2P")) {
-							//ハリアイ2P
+							//�깗�꺁�궋�궎2P
 							if(data.size() > 1) CharBMP[CharFaceIndex+1] = SkinLoader.getTexture(chp.getPath().substring(0, Math.max(chp.getPath().lastIndexOf('\\'), chp.getPath().lastIndexOf('/')) + 1) + data.get(1).replace("\\", "/"), usecim);
 						} else if(str[0].equalsIgnoreCase("#SelectCG")) {
-							//選択画面アイコン
+							//�겦�뒢�뵽�씊�궋�궎�궠�꺍
 							if(data.size() > 1) CharBMP[SelectCGIndex] = SkinLoader.getTexture(chp.getPath().substring(0, Math.max(chp.getPath().lastIndexOf('\\'), chp.getPath().lastIndexOf('/')) + 1) + data.get(1).replace("\\", "/"), usecim);
 						} else if(str[0].equalsIgnoreCase("#SelectCG2P")) {
-							//選択画面アイコン2P
+							//�겦�뒢�뵽�씊�궋�궎�궠�꺍2P
 							if(data.size() > 1) CharBMP[SelectCGIndex+1] = SkinLoader.getTexture(chp.getPath().substring(0, Math.max(chp.getPath().lastIndexOf('\\'), chp.getPath().lastIndexOf('/')) + 1) + data.get(1).replace("\\", "/"), usecim);
 						} else if(str[0].equalsIgnoreCase("#Patern") || str[0].equalsIgnoreCase("#Pattern")) {
-							//アニメーションデータ  表示優先度低  「ふぃーりんぐぽみゅ せかんど」ではスペルミスのtが一つ足りない#Paternが正式?
+							//�궋�깑�깳�꺖�궥�깾�꺍�깈�꺖�궭  烏①ㅊ�꽛�뀍佯╊퐥  �뚣겣�걙�꺖�굤�굯�걧�겱�겳�굝 �걵�걢�굯�겑�띲겎�겘�궧�깪�꺂�깱�궧�겗t�걣訝��겇擁녈굤�겒�걚#Patern�걣閭ｅ폀?
 							patternData.get(0).add(line);
 						} else if(str[0].equalsIgnoreCase("#Texture")) {
-							//アニメーションデータ  表示優先度中
+							//�궋�깑�깳�꺖�궥�깾�꺍�깈�꺖�궭  烏①ㅊ�꽛�뀍佯╊릎
 							patternData.get(1).add(line);
 						} else if(str[0].equalsIgnoreCase("#Layer")) {
-							//アニメーションデータ  表示優先度高
+							//�궋�깑�깳�꺖�궥�깾�꺍�깈�꺖�궭  烏①ㅊ�꽛�뀍佯�遙�
 							patternData.get(2).add(line);
 						} else if(str[0].equalsIgnoreCase("#Flame") || str[0].equalsIgnoreCase("#Frame")) {
-							//アニメ速度 動き毎の1枚あたりの時間(ms) 「ふぃーりんぐぽみゅ せかんど」ではスペルミスの#Flameが正式?
+							//�궋�깑�깳�잌벧 �땿�걤驪롢겗1�옔�걗�걼�굤�겗�셽�뼋(ms) �뚣겣�걙�꺖�굤�굯�걧�겱�겳�굝 �걵�걢�굯�겑�띲겎�겘�궧�깪�꺂�깱�궧�겗#Flame�걣閭ｅ폀?
 							if(data.size() > 2) {
 								if(PMparseInt(data.get(1)) >= 0 && PMparseInt(data.get(1)) < frame.length) frame[PMparseInt(data.get(1))] = PMparseInt(data.get(2));
 							}
 						} else if(str[0].equalsIgnoreCase("#Anime")) {
-							//#Frame定義の指定がない時のアニメ速度 1枚あたりの時間(ms)
+							//#Frame若싩쑴�겗�뙁若싥걣�겒�걚�셽�겗�궋�깑�깳�잌벧 1�옔�걗�걼�굤�겗�셽�뼋(ms)
 							if(data.size() > 1) anime = PMparseInt(data.get(1));
 						} else if(str[0].equalsIgnoreCase("#Size")) {
-							//#Patternや背景に用いる大きさ
+							//#Pattern�굜�깒�솺�겓�뵪�걚�굥鸚㎯걤�걬
 							if(data.size() > 2) {
 								size[0] = PMparseInt(data.get(1));
 								size[1] = PMparseInt(data.get(2));
 							}
 						} else if(str[0].length() == 3 && PMparseInt(str[0].substring(1,3), 36) >= 0 && PMparseInt(str[0].substring(1,3), 36) < xywh.length) {
-							//座標定義
+							//佯㎪쮽若싩쑴
 							if(data.size() > xywh[0].length) {
 								for(int i = 0; i < xywh[0].length; i++) {
 									xywh[PMparseInt(str[0].substring(1,3), 36)][i] = PMparseInt(data.get(i+1));
 								}
 							}
 						} else if(str[0].equalsIgnoreCase("#CharFaceUpperSize")) {
-							//ハリアイ(上半身のみ) 座標&サイズ
+							//�깗�꺁�궋�궎(訝듿뜇翁ャ겗�겳) 佯㎪쮽&�궢�궎�궨
 							if(data.size() > charFaceUpperXywh.length) {
 								for(int i = 0; i < charFaceUpperXywh.length; i++) {
 									charFaceUpperXywh[i] = PMparseInt(data.get(i+1));
 								}
 							}
 						} else if(str[0].equalsIgnoreCase("#CharFaceAllSize")) {
-							//ハリアイ(全体) 座標&サイズ
+							//�깗�꺁�궋�궎(�뀲鵝�) 佯㎪쮽&�궢�궎�궨
 							if(data.size() > charFaceAllXywh.length) {
 								for(int i = 0; i < charFaceAllXywh.length; i++) {
 									charFaceAllXywh[i] = PMparseInt(data.get(i+1));
 								}
 							}
 						} else if(str[0].equalsIgnoreCase("#Loop")) {
-							//ループ位置
+							//�꺂�꺖�깤鵝띸쉰
 							if(data.size() > 2) {
 								if(PMparseInt(data.get(1)) >= 0 && PMparseInt(data.get(1)) < loop.length) loop[PMparseInt(data.get(1))] = PMparseInt(data.get(2));
 							}
@@ -684,17 +684,17 @@ public class Skin {
 			e.printStackTrace();
 		}
 
-		//#CharBMPが無い時はreturn
+		//#CharBMP�걣�꽒�걚�셽�겘return
 		if(CharBMP[CharBMPIndex] == null) return null;
-		//#CharBMP2Pが存在し、かつ#Texture定義があるときは#CharTex2Pが存在するなら2Pカラーとする
+		//#CharBMP2P�걣耶섇쑉�걮�곥걢�겇#Texture若싩쑴�걣�걗�굥�겏�걤�겘#CharTex2P�걣耶섇쑉�걲�굥�겒�굢2P�궖�꺀�꺖�겏�걲�굥
 		if(color == 2 && CharBMP[CharBMPIndex+1] != null
 				&& (patternData.get(1).size() == 0 || (patternData.get(1).size() > 0 && CharBMP[CharTexIndex+1] != null))
 				) setColor = 2;
-		//#Texture定義があるのに#CharTexが無い時はreturn
+		//#Texture若싩쑴�걣�걗�굥�겗�겓#CharTex�걣�꽒�걚�셽�겘return
 		if(setColor == 1 && patternData.get(1).size() > 0 && CharBMP[CharTexIndex] == null) return null;
 
 
-		//透過処理 右下の1pixelが透過色 選択画面アイコンは透過しない
+		//�뤻걥�눇�릤 �뤂訝뗣겗1pixel�걣�뤻걥�돯 �겦�뒢�뵽�씊�궋�궎�궠�꺍�겘�뤻걥�걮�겒�걚
 		for(int i = 0; i < SelectCGIndex; i++) {
 			if(CharBMP[i] != null) {
 				Pixmap pixmap = new Pixmap( CharBMP[i].getWidth(), CharBMP[i].getHeight(), Format.RGBA8888 );
@@ -780,11 +780,11 @@ public class Skin {
 					if(frame[i] == Integer.MIN_VALUE) frame[i] = anime;
 					if(frame[i] < 1) frame[i] = 100;
 				}
-				//ダミー用
+				//���깱�꺖�뵪
 				Pixmap pixmap = new Pixmap( 1, 1, Format.RGBA8888 );
 				Texture transparent = new Texture( pixmap );
 				SkinImage part = null;
-				//#Pattern,#Texture,#Layerの順に描画設定を行う
+				//#Pattern,#Texture,#Layer�겗�젂�겓�룒�뵽鼇�若싥굮烏뚣걝
 				int[] setBMPIndex = {CharBMPIndex,CharTexIndex,CharBMPIndex};
 				for(int patternIndex = 0; patternIndex < 3; patternIndex++) {
 					setBMP = CharBMP[setBMPIndex[patternIndex] + setColor-1];
@@ -803,9 +803,9 @@ public class Skin {
 							int op[] = {0,0,0};
 							if(setMotion != Integer.MIN_VALUE && setMotion == motion) {
 								timer = dsttimer;
-								op[0] = dstOp1;
-								op[1] = dstOp2;
-								op[2] = dstOp3;
+								op[0] = skinOption.getDstOpt1();
+								op[1] = skinOption.getDstOpt2();
+								op[2] = skinOption.getDstOpt3();
 							} else if(setMotion == Integer.MIN_VALUE) {
 								if(side != 2) {
 									if(motion == 1) timer = TIMER_PM_CHARA_1P_NEUTRAL;
@@ -853,7 +853,7 @@ public class Skin {
 										break;
 									}
 								}
-								//ハイフンがある時はフレーム補間を行う 60FPSの17msが基準
+								//�깗�궎�깢�꺍�걣�걗�굥�셽�겘�깢�꺃�꺖�깲獒쒒뼋�굮烏뚣걝 60FPS�겗17ms�걣�읃繹�
 								int increaseRate = 1;
 								if(hyphenFlag && frame[motion] >= increaseRateThreshold) {
 									for(int i = 1; i <= frame[motion]; i++) {
@@ -876,7 +876,7 @@ public class Skin {
 										dst[i] = String.valueOf(chars);
 									}
 								}
-								//DST読み込み
+								//DST沃��겳渦쇈겳
 								double frameTime = frame[motion]/increaseRate;
 								int loopFrame = loop[motion]*increaseRate;
 								int dstxywh[][] = new int[dst[1].length() > 0 ? dst[1].length()/2 : dst[0].length()/2][4];
@@ -909,7 +909,7 @@ public class Skin {
 										}
 									}
 								}
-								//alphaとangleの読み込み
+								//alpha�겏angle�겗沃��겳渦쇈겳
 								int alphaAngle[][] = new int[dstxywh.length][2];
 								for(int i = 0; i < alphaAngle.length; i++){
 									alphaAngle[i][0] = 255;
@@ -939,7 +939,7 @@ public class Skin {
 										}
 									}
 								}
-								//ループ開始フレームまで
+								//�꺂�꺖�깤�뼀冶뗣깢�꺃�꺖�깲�겲�겎
 								if((loopFrame+increaseRate) != 0) {
 									TextureRegion[] images = new TextureRegion[(loop[motion]+1)];
 									for(int i = 0; i < (loop[motion]+1) * 2; i+=2) {
@@ -952,9 +952,9 @@ public class Skin {
 									for(int i = 0; i < (loopFrame+increaseRate); i++) {
 										part.setDestination((int)(frameTime*i),dstx+dstxywh[i][0]*dstw/size[0], dsty+dsth-(dstxywh[i][1]+dstxywh[i][3])*dsth/size[1], dstxywh[i][2]*dstw/size[0], dstxywh[i][3]*dsth/size[1],3,alphaAngle[i][0],255,255,255,1,0,alphaAngle[i][1],0,-1,timer,op[0],op[1],op[2],0);
 									}
-									part.setDestination(loopTime-1,dstx+dstxywh[(loopFrame+increaseRate)-1][0]*dstw/size[0], dsty+dsth-(dstxywh[(loopFrame+increaseRate)-1][1]+dstxywh[(loopFrame+increaseRate)-1][3])*dsth/size[1], dstxywh[(loopFrame+increaseRate)-1][2]*dstw/size[0], dstxywh[(loopFrame+increaseRate)-1][3]*dsth/size[1],3,alphaAngle[(loopFrame+increaseRate)-1][0],255,255,255,1,0,alphaAngle[(loopFrame+increaseRate)-1][1],0,-1,timer,op[0],op[1],op[2],dstOffset);
+									part.setDestination(loopTime-1,dstx+dstxywh[(loopFrame+increaseRate)-1][0]*dstw/size[0], dsty+dsth-(dstxywh[(loopFrame+increaseRate)-1][1]+dstxywh[(loopFrame+increaseRate)-1][3])*dsth/size[1], dstxywh[(loopFrame+increaseRate)-1][2]*dstw/size[0], dstxywh[(loopFrame+increaseRate)-1][3]*dsth/size[1],3,alphaAngle[(loopFrame+increaseRate)-1][0],255,255,255,1,0,alphaAngle[(loopFrame+increaseRate)-1][1],0,-1,timer,op[0],op[1],op[2],skinOption.getDstOffset());
 								}
-								//ループ開始フレームから
+								//�꺂�꺖�깤�뼀冶뗣깢�꺃�꺖�깲�걢�굢
 								TextureRegion[] images = new TextureRegion[dst[0].length() / 2 - (loop[motion]+1)];
 								for(int i = (loop[motion]+1)  * 2; i < dst[0].length(); i+=2) {
 									int index = PMparseInt(dst[0].substring(i, i+2), 36);
@@ -966,7 +966,7 @@ public class Skin {
 								for(int i = (loopFrame+increaseRate); i < dstxywh.length; i++) {
 									part.setDestination((int)(frameTime*i),dstx+dstxywh[i][0]*dstw/size[0], dsty+dsth-(dstxywh[i][1]+dstxywh[i][3])*dsth/size[1], dstxywh[i][2] * dstw / size[0], dstxywh[i][3] * dsth / size[1],3,alphaAngle[i][0],255,255,255,1,0,alphaAngle[i][1],0,loopTime,timer,op[0],op[1],op[2],0);
 								}
-								part.setDestination(cycle,dstx+dstxywh[dstxywh.length-1][0]*dstw/size[0], dsty+dsth-(dstxywh[dstxywh.length-1][1]+dstxywh[dstxywh.length-1][3])*dsth/size[1], dstxywh[dstxywh.length-1][2] * dstw / size[0], dstxywh[dstxywh.length-1][3] * dsth / size[1],3,alphaAngle[dstxywh.length-1][0],255,255,255,1,0,alphaAngle[dstxywh.length-1][1],0,loopTime,timer,op[0],op[1],op[2],dstOffset);
+								part.setDestination(cycle,dstx+dstxywh[dstxywh.length-1][0]*dstw/size[0], dsty+dsth-(dstxywh[dstxywh.length-1][1]+dstxywh[dstxywh.length-1][3])*dsth/size[1], dstxywh[dstxywh.length-1][2] * dstw / size[0], dstxywh[dstxywh.length-1][3] * dsth / size[1],3,alphaAngle[dstxywh.length-1][0],255,255,255,1,0,alphaAngle[dstxywh.length-1][1],0,loopTime,timer,op[0],op[1],op[2],skinOption.getDstOffset());
 							}
 						}
 					}

@@ -21,7 +21,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.IntArray;
 
 /**
- * LR2のスキン定義用csvファイルのローダー
+ * LR2�겗�궧�궘�꺍若싩쑴�뵪csv�깢�궊�궎�꺂�겗�꺆�꺖���꺖
  * 
  * @author exch
  */
@@ -31,11 +31,11 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 	List<SkinTextImage.SkinTextImageSource> fontlist = new ArrayList<>();
 
 	/**
-	 * スキンの元サイズ
+	 * �궧�궘�꺍�겗�뀇�궢�궎�궨
 	 */
 	public final Resolution src;
 	/**
-	 * 描画サイズ
+	 * �룒�뵽�궢�궎�궨
 	 */
 	public final Resolution dst;
 	private boolean usecim;
@@ -104,7 +104,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 								isMovie = true;
 								break;
 							} catch (Throwable e) {
-								Logger.getGlobal().warning("BGAファイル読み込み失敗。" + e.getMessage());
+								Logger.getGlobal().warning("BGA�깢�궊�궎�꺂沃��겳渦쇈겳鸚길븮��" + e.getMessage());
 								e.printStackTrace();
 							}
 						}
@@ -115,7 +115,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 					}
 				} else {
 					Logger.getGlobal()
-							.warning("IMAGE " + imagelist.size() + " : ファイルが見つかりません : " + imagefile.getPath());
+							.warning("IMAGE " + imagelist.size() + " : �깢�궊�궎�꺂�걣誤뗣겇�걢�굤�겲�걵�굯 : " + imagefile.getPath());
 					imagelist.add(null);
 				}
 				// System.out
@@ -140,7 +140,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 
 				} else {
 					Logger.getGlobal()
-							.warning("IMAGE " + imagelist.size() + " : ファイルが見つかりません : " + imagefile.getPath());
+							.warning("IMAGE " + imagelist.size() + " : �깢�궊�궎�꺂�걣誤뗣겇�걢�굤�겲�걵�굯 : " + imagefile.getPath());
 					fontlist.add(null);
 				}
 				// System.out
@@ -353,7 +353,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 			}
 		});
 		addCommandWord(new CommandWord("SRC_SLIDER_REFNUMBER") {
-			//NUMBER値参照版
+			//NUMBER�ㅵ뢿�뀱�뎵
 			//#SRC_SLIDER_REFNUMBER,(NULL),gr,x,y,w,h,div_x,div_y,cycle,timer,muki,range,type,disable,min_value,max_value
 			@Override
 			public void execute(String[] str) {
@@ -414,7 +414,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 			}
 		});
 		addCommandWord(new CommandWord("SRC_BARGRAPH_REFNUMBER") {
-			//NUMBER値参照版
+			//NUMBER�ㅵ뢿�뀱�뎵
 			//#SRC_BARGRAPH_REFNUMBER,(NULL),gr,x,y,w,h,div_x,div_y,cycle,timer,type,muki,min_value,max_value
 			@Override
 			public void execute(String[] str) {
@@ -564,7 +564,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 		addCommandWord(new CommandWord("DST_PM_CHARA_1P") {
 			@Override
 			public void execute(String[] str) {
-				//プレイ用 判定連動
+				//�깤�꺃�궎�뵪 �닩若싮�ｅ땿
 				//x,y,w,h,color,offset,folderpath
 				int[] values = parseInt(str);
 				if (values[3] < 0) {
@@ -576,16 +576,17 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 					values[4] = -values[4];
 				}
 				final File imagefile = SkinLoader.getPath(str[7].replace("LR2files\\Theme", "skin").replace("\\", "/"), filemap);
+				SkinOption skinOption = new SkinOption(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, values[6]);
 				skin.PMcharaLoader(usecim, imagefile,
 						0, (values[5] == 1 || values[5] == 2) ? values[5] : 1,
 						values[1] * dstw / srcw, dsth - (values[2] + values[4]) * dsth / srch, values[3] * dstw / srcw, values[4] * dsth / srch,
-						1, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, values[6]);
+						1, Integer.MIN_VALUE, skinOption);
 			}
 		});
 		addCommandWord(new CommandWord("DST_PM_CHARA_2P") {
 			@Override
 			public void execute(String[] str) {
-				//プレイ用 判定連動
+				//�깤�꺃�궎�뵪 �닩若싮�ｅ땿
 				//x,y,w,h,color,offset,folderpath
 				int[] values = parseInt(str);
 				if (values[3] < 0) {
@@ -597,16 +598,17 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 					values[4] = -values[4];
 				}
 				final File imagefile = SkinLoader.getPath(str[7].replace("LR2files\\Theme", "skin").replace("\\", "/"), filemap);
+				SkinOption skinOption = new SkinOption(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE,  values[6]);
 				skin.PMcharaLoader(usecim, imagefile,
 						0, (values[5] == 1 || values[5] == 2) ? values[5] : 1,
 						values[1] * dstw / srcw, dsth - (values[2] + values[4]) * dsth / srch, values[3] * dstw / srcw, values[4] * dsth / srch,
-						2, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, values[6]);
+						2, Integer.MIN_VALUE, skinOption);
 			}
 		});
 		addCommandWord(new CommandWord("DST_PM_CHARA_ANIMATION") {
 			@Override
 			public void execute(String[] str) {
-				//プレイ以外用 判定非連動
+				//�깤�꺃�궎餓ε쨼�뵪 �닩若싮씆�ｅ땿
 				//x,y,w,h,color,animationtype,timer,op1,op2,op3,offset,folderpath
 				//type 0:NEUTRAL 1:FEVER 2:GREAT 3:GOOD 4:BAD 5:FEVERWIN 6:WIN 7:LOSE 8:OJAMA 9:DANCE
 				int[] values = parseInt(str);
@@ -620,10 +622,11 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 						values[4] = -values[4];
 					}
 					final File imagefile = SkinLoader.getPath(str[12].replace("LR2files\\Theme", "skin").replace("\\", "/"), filemap);
+					SkinOption skinOption = new SkinOption(values[8], values[9], values[10], values[11]);
 					skin.PMcharaLoader(usecim, imagefile,
 							values[6] + 6, (values[5] == 1 || values[5] == 2) ? values[5] : 1,
 							values[1] * dstw / srcw, dsth - (values[2] + values[4]) * dsth / srch, values[3] * dstw / srcw, values[4] * dsth / srch,
-							Integer.MIN_VALUE, values[7], values[8], values[9], values[10], values[11]);
+							Integer.MIN_VALUE, values[7], skinOption);
 				}
 			}
 		});
@@ -631,22 +634,23 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 			@Override
 			public void execute(String[] str) {
 				//color,type,folderpath
-				//type 0:キャラ背景 1:名前画像 2:ハリアイ画像(上半身のみ) 3:ハリアイ画像(全体) 4:キャラアイコン
+				//type 0:�궘�깵�꺀�깒�솺 1:�릫�뎺�뵽�깗 2:�깗�꺁�궋�궎�뵽�깗(訝듿뜇翁ャ겗�겳) 3:�깗�꺁�궋�궎�뵽�깗(�뀲鵝�) 4:�궘�깵�꺀�궋�궎�궠�꺍
 				PMcharaPart = null;
 				int[] values = parseInt(str);
 				if(values[2] >= 0 && values[2] <= 4) {
 					final File imagefile = SkinLoader.getPath(str[3].replace("LR2files\\Theme", "skin").replace("\\", "/"), filemap);
+					SkinOption skinOption = new SkinOption(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE);
 					PMcharaPart = skin.PMcharaLoader(usecim, imagefile,
 							values[2] + 1, (values[1] == 1 || values[1] == 2) ? values[1] : 1,
 							Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE,
-							Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE);
+							Integer.MIN_VALUE, Integer.MIN_VALUE, skinOption);
 				}
 			}
 		});
 		addCommandWord(new CommandWord("DST_PM_CHARA_IMAGE") {
 			@Override
 			public void execute(String[] str) {
-				//DST_IMAGEと同様
+				//DST_IMAGE�겏�릪礪�
 				if (PMcharaPart != null) {
 					int[] values = parseInt(str);
 					if (values[5] < 0) {
@@ -781,7 +785,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 			return getSourceImage((Texture) imagelist.get(values[2]), values[3], values[4], values[5], values[6],
 					values[7], values[8]);
 		}
-		Logger.getGlobal().warning("IMAGEが定義されてないか、読み込みに失敗しています : " + line);
+		Logger.getGlobal().warning("IMAGE�걣若싩쑴�걬�굦�겍�겒�걚�걢�곮き�겳渦쇈겳�겓鸚길븮�걮�겍�걚�겲�걲 : " + line);
 		return null;
 	}
 
