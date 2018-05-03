@@ -1,5 +1,6 @@
 package bms.player.beatoraja.skin.lua;
 
+import java.nio.file.Path;
 import java.util.logging.Logger;
 
 import org.luaj.vm2.Globals;
@@ -18,7 +19,11 @@ import bms.player.beatoraja.skin.SkinObject.*;
 public class SkinLuaAccessor {
 	
 	private final Globals globals;
-	
+
+	public SkinLuaAccessor() {
+		globals = JsePlatform.standardGlobals();
+	}
+
 	public SkinLuaAccessor (MainState state) {
         globals = JsePlatform.standardGlobals();
         globals.set("rate", new ZeroArgFunction() {
@@ -204,5 +209,13 @@ public class SkinLuaAccessor {
 			Logger.getGlobal().warning("Lua解析時の例外 : " + e.getMessage());
 		}
 		return null;
+	}
+
+	public LuaValue exec(String script) {
+		return globals.load(script).call();
+	}
+
+	public LuaValue execFile(Path path) {
+		return globals.loadfile(path.toString()).call();
 	}
 }
