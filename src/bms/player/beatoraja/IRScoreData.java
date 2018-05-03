@@ -9,7 +9,7 @@ import bms.player.beatoraja.input.BMSPlayerInputDevice;
  *
  * @author ununique
  */
-public class IRScoreData {
+public class IRScoreData implements Validatable {
 	/**
 	 * 譜面のハッシュ値
 	 */
@@ -366,8 +366,17 @@ public class IRScoreData {
 	public Mode getPlaymode() {
 		return playmode;
 	}
-	
-	public static enum SongTrophy {
+
+	@Override
+	public boolean validate() {
+		return mode >= 0 && clear >= 0 && clear <= ClearType.Max.id &&
+				epg >= 0 && lpg >= 0 && egr >= 0 && lgr >= 0 && egd >= 0 && lgd >= 0 &&
+				ebd >= 0 && lbd >= 0 && epr >= 0 && lpr >= 0 && ems >= 0 && lms >= 0 &&
+				clearcount >= 0 && playcount >= clearcount && maxcombo > 0 && notes > 0 && minbp >= 0 &&
+				random >= 0 && option >= 0 && assist >= 0 && gauge >= 0;
+	}
+
+	public enum SongTrophy {
 		
 		EASY('g'),
 		GROOVE('G'),

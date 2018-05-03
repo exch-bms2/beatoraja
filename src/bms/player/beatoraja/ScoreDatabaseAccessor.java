@@ -106,8 +106,7 @@ public class ScoreDatabaseAccessor {
 		IRScoreData result = null;
 		try {
 			ResultSetHandler<List<IRScoreData>> rh = new BeanListHandler<IRScoreData>(IRScoreData.class);
-			List<IRScoreData> score;
-			score = qr.query("SELECT * FROM score WHERE sha256 = '" + hash + "' AND mode = " + mode, rh);
+			List<IRScoreData> score = Validatable.removeInvalidElements(qr.query("SELECT * FROM score WHERE sha256 = '" + hash + "' AND mode = " + mode, rh));
 			if (score.size() > 0) {
 				IRScoreData sc = null;
 				for (IRScoreData s : score) {
@@ -125,10 +124,6 @@ public class ScoreDatabaseAccessor {
 
 	/**
 	 * プレイヤースコアデータを取得する
-	 * 
-	 * @param hashes
-	 *            スコアを取得する楽曲のhash
-	 * @return <ハッシュ, スコアデータ>のマップ
 	 */
 	public void getScoreDatas(ScoreDataCollector collector, SongData[] songs, int mode) {
 		StringBuilder str = new StringBuilder(songs.length * 68);
@@ -148,8 +143,8 @@ public class ScoreDatabaseAccessor {
 				}
 			}
 
-			List<IRScoreData> scores = qr
-					.query("SELECT * FROM score WHERE sha256 IN (" + str.toString() + ") AND mode = " + mode, scoreHandler);
+			List<IRScoreData> scores = Validatable.removeInvalidElements(qr
+					.query("SELECT * FROM score WHERE sha256 IN (" + str.toString() + ") AND mode = " + mode, scoreHandler));
 			for(SongData song : songs) {
 				if((hasln && song.hasUndefinedLongNote()) || (!hasln && !song.hasUndefinedLongNote())) {
 					boolean b = true;
@@ -173,7 +168,7 @@ public class ScoreDatabaseAccessor {
 	public List<IRScoreData> getScoreDatas(String sql) {
 		List<IRScoreData> score = null;
 		try {
-			score = qr.query("SELECT * FROM score WHERE " + sql, scoreHandler);
+			score = Validatable.removeInvalidElements(qr.query("SELECT * FROM score WHERE " + sql, scoreHandler));
 		} catch (Exception e) {
 			Logger.getGlobal().severe("スコア取得時の例外:" + e.getMessage());
 		}
@@ -224,6 +219,15 @@ public class ScoreDatabaseAccessor {
 		} catch (Exception e) {
 			Logger.getGlobal().severe("スコア更新時の例外:" + e.getMessage());
 		}
+	}
+
+	public void deleteScoreData(String sha256, int mode) {
+		try {
+			qr.update("DELETE FROM score WHERE sha256 = ? and mode = ?", sha256, mode);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
 	}
 
 	/**

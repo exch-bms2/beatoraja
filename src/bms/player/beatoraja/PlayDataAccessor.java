@@ -463,15 +463,17 @@ public class PlayDataAccessor {
 		return log;
 	}
 
+	public void deleteScoreData(BMSModel model, int lnmode) {
+		scoredb.deleteScoreData(model.getSHA256(), model.containsUndefinedLongNote() ? lnmode : 0);
+	}
+
 	public boolean existsReplayData(BMSModel model, int lnmode, int index) {
 		boolean ln = model.containsUndefinedLongNote();
-		return Files.exists(Paths.get(this.getReplayDataFilePath(model.getSHA256(), ln, lnmode, index) + ".brd"))
-				|| Files.exists(Paths.get(this.getReplayDataFilePath(model.getSHA256(), ln, lnmode, index) + ".json"));
+		return Files.exists(Paths.get(this.getReplayDataFilePath(model.getSHA256(), ln, lnmode, index) + ".brd"));
 	}
 
 	public boolean existsReplayData(String hash, boolean ln, int lnmode, int index) {
-		return Files.exists(Paths.get(this.getReplayDataFilePath(hash, ln, lnmode, index) + ".brd"))
-				|| Files.exists(Paths.get(this.getReplayDataFilePath(hash, ln, lnmode, index) + ".json"));
+		return Files.exists(Paths.get(this.getReplayDataFilePath(hash, ln, lnmode, index) + ".brd"));
 	}
 
 	public boolean existsReplayData(BMSModel[] models, int lnmode, int index,
@@ -483,14 +485,12 @@ public class PlayDataAccessor {
 			hash[i] = model.getSHA256();
 			ln |= model.containsUndefinedLongNote();
 		}
-		return Files.exists(Paths.get(this.getReplayDataFilePath(hash, ln, lnmode, index, constraint) + ".brd"))
-				|| Files.exists(Paths.get(this.getReplayDataFilePath(hash, ln, lnmode, index, constraint) + ".json"));
+		return Files.exists(Paths.get(this.getReplayDataFilePath(hash, ln, lnmode, index, constraint) + ".brd"));
 	}
 
 	public boolean existsReplayData(String[] hash, boolean ln, int lnmode, int index,
 			CourseData.CourseDataConstraint[] constraint) {
-		return Files.exists(Paths.get(this.getReplayDataFilePath(hash, ln, lnmode, index, constraint) + ".brd"))
-				|| Files.exists(Paths.get(this.getReplayDataFilePath(hash, ln, lnmode, index, constraint) + ".json"));
+		return Files.exists(Paths.get(this.getReplayDataFilePath(hash, ln, lnmode, index, constraint) + ".brd"));
 	}
 
 	/**
@@ -512,8 +512,6 @@ public class PlayDataAccessor {
 				if (Files.exists(Paths.get(path + ".brd"))) {
 					result =  json.fromJson(ReplayData.class, new BufferedInputStream(
 							new GZIPInputStream(Files.newInputStream(Paths.get(path + ".brd")))));
-				} else if (Files.exists(Paths.get(path + ".json"))) {
-					result =  json.fromJson(ReplayData.class, new FileReader(path + ".json"));
 				}
 				if(result != null && result.validate()) {
 					return result;
@@ -586,8 +584,6 @@ public class PlayDataAccessor {
 				if (Files.exists(Paths.get(path + ".brd"))) {
 					result = json.fromJson(ReplayData[].class, new BufferedInputStream(
 							new GZIPInputStream(Files.newInputStream(Paths.get(path + ".brd")))));
-				} else if (Files.exists(Paths.get(path + ".json"))) {
-					result = json.fromJson(ReplayData[].class, new FileReader(path + ".json"));
 				}
 				if(result != null) {
 					for(ReplayData rd : result) {
@@ -639,10 +635,19 @@ public class PlayDataAccessor {
 			fw.write(json.prettyPrint(rd));
 			fw.flush();
 			fw.close();
-			Files.deleteIfExists(Paths.get(this.getReplayDataFilePath(hash, ln, lnmode, index, constraint) + ".json"));
 			Logger.getGlobal().info("コースリプレイを保存:" + path);
 		} catch (IOException e) {
 			e.printStackTrace();
+		}
+	}
+
+	public void deleteReplayData(BMSModel model, int lnmode, int index) {
+		if (existsReplayData(model, lnmode, index)) {
+			try {
+				Files.deleteIfExists(Paths.get(this.getReplayDataFilePath(model, lnmode, index) + ".brd"));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
