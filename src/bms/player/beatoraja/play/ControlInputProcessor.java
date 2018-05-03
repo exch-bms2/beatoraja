@@ -5,11 +5,12 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
 import java.util.Arrays;
 
 import bms.model.Mode;
+import bms.player.beatoraja.PlayConfig;
 import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 
 public class ControlInputProcessor {
-	
+
 	private final BMSPlayer player;
 
 	private boolean[] hschanged;
@@ -19,11 +20,12 @@ public class ControlInputProcessor {
 	private boolean startAndSelectPressed = false;
 	private boolean cursorpressed;
 	private long lanecovertiming;
+	private long laneCoverStartTiming = Long.MIN_VALUE;
 	private long exitpressedtime;
 
 	private boolean enableControl = true;
 	private boolean enableCursor = true;
-	
+
 	private final PlayMode autoplay;
 
 	private Runnable processStart;
@@ -31,11 +33,20 @@ public class ControlInputProcessor {
 
 	private boolean isChangeLift = true;
 
+	private float coverChangeMarginLow = 0.001f;
+	private float coverChangeMarginHigh = 0.01f;
+	private long coverSpeedSwitchDuration = 500;
+
 	public ControlInputProcessor(BMSPlayer player, PlayMode autoplay) {
 		this.player = player;
 		this.autoplay = autoplay;
 		hschanged = new boolean[player.main.getInputProcessor().getKeystate().length];
 		Arrays.fill(hschanged, true);
+
+		final PlayConfig playConfig = player.main.getPlayerResource().getPlayerConfig().getPlayConfig(player.getMode()).getPlayconfig();
+		coverChangeMarginLow = playConfig.getLanecovermarginlow();
+		coverChangeMarginHigh = playConfig.getLanecovermarginhigh();
+		coverSpeedSwitchDuration = playConfig.getLanecoverswitchduration();
 
 		switch (this.player.getMode()) {
 		case POPN_9K:
@@ -52,7 +63,7 @@ public class ControlInputProcessor {
 			processSelect = () -> processSelect7key();
 		}
 	}
-	
+
 	public void setEnableControl(boolean b) {
 		enableControl = b;
 	}
@@ -174,6 +185,19 @@ public class ControlInputProcessor {
 		}
 	}
 
+	/*
+	 * レーンカバー移動
+	 * 一定時間入力で高速移動モードに切り替え
+	 */
+	private void coverValueChange(boolean sign) {
+		long l = System.currentTimeMillis();
+		if(laneCoverStartTiming == Long.MIN_VALUE) laneCoverStartTiming = l;
+		if (l - lanecovertiming > 50) {
+			setCoverValue((sign ? 1 : -1) * (l - laneCoverStartTiming > coverSpeedSwitchDuration ? coverChangeMarginHigh : coverChangeMarginLow));
+			lanecovertiming = l;
+		}
+	}
+
 	void processStart7key() {
 		final LaneRenderer lanerender = player.getLanerender();
 		final BMSPlayerInputProcessor input = player.main.getInputProcessor();
@@ -198,11 +222,9 @@ public class ControlInputProcessor {
 
 		// move lane cover by START + Scratch
 		if (key[7] || key[8] || key[16] || key[17]) {
-			long l = System.currentTimeMillis();
-			if (l - lanecovertiming > 50) {
-				setCoverValue(key[7] || key[16] ? 0.001f : -0.001f);
-				lanecovertiming = l;
-			}
+			coverValueChange(key[7] || key[16]);
+		} else if(laneCoverStartTiming != Long.MIN_VALUE) {
+			laneCoverStartTiming = Long.MIN_VALUE;
 		}
 	}
 
@@ -262,11 +284,9 @@ public class ControlInputProcessor {
 
 		// move lane cover by START + Keys(7-8)
 		if (key[7] || key[8]) {
-			long l = System.currentTimeMillis();
-			if (l - lanecovertiming > 50) {
-				setCoverValue(key[7] ? -0.001f : 0.001f);
-				lanecovertiming = l;
-			}
+			coverValueChange(key[8]);
+		} else if(laneCoverStartTiming != Long.MIN_VALUE) {
+			laneCoverStartTiming = Long.MIN_VALUE;
 		}
 	}
 
@@ -297,8 +317,9 @@ public class ControlInputProcessor {
 		final LaneRenderer lanerender = player.getLanerender();
 		final BMSPlayerInputProcessor input = player.main.getInputProcessor();
 		boolean[] key = input.getKeystate();
+		boolean wheel = false;
 
-		// change duration by SELECT + Keys/Wheel
+		// change duration by START + Keys/Wheel
 		for(int i = 0; i < 52; i++) {
 			int j = i % 26;
 			if (key[i] && j < 24) {
@@ -315,16 +336,14 @@ public class ControlInputProcessor {
 					}
 				}
 			} else if (key[i] && j >= 24) {
-				long l = System.currentTimeMillis();
-				if (l - lanecovertiming > 50) {
-					setCoverValue(j == 25 ? 0.001f : -0.001f);
-					lanecovertiming = l;
-				}
+				coverValueChange(j == 25);
 				hschanged[i] = false;
+				wheel = true;
 			} else {
 				hschanged[i] = false;
 			}
 		}
+		if(!wheel && laneCoverStartTiming != Long.MIN_VALUE) laneCoverStartTiming = Long.MIN_VALUE;
 	}
 
 	void processSelect24key() {

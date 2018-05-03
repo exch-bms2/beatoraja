@@ -282,10 +282,10 @@
                                      </padding>
                                      <GridPane fx:id="lr2configuration" hgap="10.0" vgap="10.0">
                                          <columnConstraints>
-                                             <ColumnConstraints maxWidth="278.0" minWidth="0.0" prefWidth="150.0" />
-                                             <ColumnConstraints maxWidth="402.0" minWidth="0.0" prefWidth="188.0" />
-                                             <ColumnConstraints maxWidth="438.0" minWidth="0.0" prefWidth="150.0" />
-                                             <ColumnConstraints maxWidth="438.0" minWidth="0.0" prefWidth="150.0" />
+                                             <ColumnConstraints maxWidth="450.0" minWidth="0.0" prefWidth="200.0" />
+                                             <ColumnConstraints maxWidth="450.0" minWidth="0.0" prefWidth="200.0" />
+                                             <ColumnConstraints maxWidth="450.0" minWidth="0.0" prefWidth="200.0" />
+                                             <ColumnConstraints maxWidth="450.0" minWidth="0.0" prefWidth="200.0" />
                                        <ColumnConstraints maxWidth="423.0" minWidth="0.0" prefWidth="200.0" />
                                          </columnConstraints>
                                           <rowConstraints>
@@ -293,7 +293,8 @@
                                              <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
                                              <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
                                              <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
-                                             <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="30.0" />
+                                             <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
+                                             <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
                                              <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
                                              <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
                                              <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
@@ -304,32 +305,8 @@
                                                  <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.1" initialValue="1.0" max="9.9" min="1.0" />
                                              </valueFactory>
                                          </NumericSpinner>
-                                         <Label text="%HISPEED_FIX" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-                                         <ComboBox fx:id="fixhispeed" prefWidth="150.0" GridPane.columnIndex="4" GridPane.rowIndex="2" />
-                                         <Label text="%NOTE_MODIFIER" GridPane.rowIndex="3" />
-                                         <ComboBox fx:id="scoreop" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                                         <Label layoutX="10.0" layoutY="84.0" text="%NOTE_MODIFIER2" GridPane.columnIndex="2" GridPane.rowIndex="3" />
-                                         <ComboBox fx:id="scoreop2" prefWidth="150.0" GridPane.columnIndex="4" GridPane.rowIndex="3" />
-                                         <Label layoutX="10.0" layoutY="84.0" text="%DOUBLE_OPTION" GridPane.rowIndex="4" />
-                                         <ComboBox fx:id="doubleop" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                                         <Label text="%GAUGE_TYPE" GridPane.columnIndex="2" GridPane.rowIndex="4" />
-                                         <ComboBox fx:id="gaugeop" prefWidth="150.0" GridPane.columnIndex="4" GridPane.rowIndex="4" />
-                                         <Label text="%LNTYPE" GridPane.rowIndex="5" />
-                                         <ComboBox fx:id="lntype" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="5" />
-                                         <Label text="%EXPAND_JUDGE" GridPane.columnIndex="2" GridPane.rowIndex="5" />
-                                         <NumericSpinner fx:id="exjudge" editable="true" GridPane.columnIndex="4" GridPane.rowIndex="5">
-                                             <valueFactory>
-                                                 <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="25" initialValue="100" max="400" min="25" />
-                                             </valueFactory>
-                                         </NumericSpinner>
-                                         <Label text="%H_RANDOM_THRESHOLD_BPM" GridPane.columnIndex="0" GridPane.rowIndex="6" />
-                                         <NumericSpinner fx:id="hranthresholdbpm" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="6">
-                                             <valueFactory>
-                                                 <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="120" max="15000" min="0" />
-                                             </valueFactory>
-                                         </NumericSpinner>
                                          <Label text="%GVALUE" GridPane.columnIndex="2" />
-                                         <NumericSpinner fx:id="gvalue" editable="true" GridPane.columnIndex="4">
+                                         <NumericSpinner fx:id="gvalue" editable="true" GridPane.columnIndex="3">
                                              <valueFactory>
                                                  <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="300" max="2000" min="1" />
                                              </valueFactory>
@@ -340,28 +317,70 @@
                                                  <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="100" max="1000" min="0" />
                                              </valueFactory>
                                          </NumericSpinner>
-                                         <CheckBox fx:id="enableLift" mnemonicParsing="false" text="%ENABLE_LIFT" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-                                         <NumericSpinner fx:id="lift" editable="true" GridPane.columnIndex="4" GridPane.rowIndex="1">
+                                         <Label text="%LANECOVER_MARGIN_LOW" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                                         <NumericSpinner fx:id="lanecovermarginlow" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="1">
+                                             <valueFactory>
+                                                 <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="1" max="1000" min="0" />
+                                             </valueFactory>
+                                         </NumericSpinner>
+                                         <Label text="%LANECOVER_MARGIN_HIGH" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                                         <NumericSpinner fx:id="lanecovermarginhigh" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                             <valueFactory>
+                                                 <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="10" max="1000" min="0" />
+                                             </valueFactory>
+                                         </NumericSpinner>
+                                         <Label text="%LANECOVER_SWITCH_DURATION" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                                         <NumericSpinner fx:id="lanecoverswitchduration" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="2">
+                                             <valueFactory>
+                                                 <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="500" max="1000000" min="0" />
+                                             </valueFactory>
+                                         </NumericSpinner>
+                                         <CheckBox fx:id="enableLift" mnemonicParsing="false" text="%ENABLE_LIFT" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                                         <NumericSpinner fx:id="lift" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="3">
                                              <valueFactory>
                                                  <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="100" max="1000" min="0" />
                                              </valueFactory>
                                          </NumericSpinner>
-                                         <Label text="%JUDGETIMING" GridPane.rowIndex="2" />
-                                         <NumericSpinner fx:id="judgetiming" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                         <CheckBox fx:id="enableHidden" mnemonicParsing="false" text="%ENABLE_HIDDEN" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                                         <NumericSpinner fx:id="hidden" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="3">
+                                             <valueFactory>
+                                                 <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="100" max="1000" min="0" />
+                                             </valueFactory>
+                                         </NumericSpinner>
+                                         <Label text="%JUDGETIMING" GridPane.rowIndex="4" />
+                                         <NumericSpinner fx:id="judgetiming" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="4">
                                              <valueFactory>
                                                  <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="0" max="99" min="-99" />
                                              </valueFactory>
                                          </NumericSpinner>
-                                         <Label text="%HISPEED_MARGIN" GridPane.columnIndex="2" GridPane.rowIndex="6" />
-                                         <NumericSpinner fx:id="hispeedmargin" editable="true" GridPane.columnIndex="4" GridPane.rowIndex="6">
+                                         <Label text="%HISPEED_FIX" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+                                         <ComboBox fx:id="fixhispeed" prefWidth="150.0" GridPane.columnIndex="3" GridPane.rowIndex="4" />
+                                         <Label text="%NOTE_MODIFIER" GridPane.rowIndex="5" />
+                                         <ComboBox fx:id="scoreop" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                                         <Label layoutX="10.0" layoutY="84.0" text="%NOTE_MODIFIER2" GridPane.columnIndex="2" GridPane.rowIndex="5" />
+                                         <ComboBox fx:id="scoreop2" prefWidth="150.0" GridPane.columnIndex="3" GridPane.rowIndex="5" />
+                                         <Label layoutX="10.0" layoutY="84.0" text="%DOUBLE_OPTION" GridPane.rowIndex="6" />
+                                         <ComboBox fx:id="doubleop" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                                         <Label text="%GAUGE_TYPE" GridPane.columnIndex="2" GridPane.rowIndex="6" />
+                                         <ComboBox fx:id="gaugeop" prefWidth="150.0" GridPane.columnIndex="3" GridPane.rowIndex="6" />
+                                         <Label text="%LNTYPE" GridPane.rowIndex="7" />
+                                         <ComboBox fx:id="lntype" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+                                         <Label text="%EXPAND_JUDGE" GridPane.columnIndex="2" GridPane.rowIndex="7" />
+                                         <NumericSpinner fx:id="exjudge" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="7">
                                              <valueFactory>
-                                                 <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.01" initialValue="0.25" max="9.99" min="0.00" />
+                                                 <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="25" initialValue="100" max="400" min="25" />
                                              </valueFactory>
                                          </NumericSpinner>
-                                         <CheckBox fx:id="enableHidden" mnemonicParsing="false" text="%ENABLE_HIDDEN" GridPane.columnIndex="0" GridPane.rowIndex="7" />
-                                         <NumericSpinner fx:id="hidden" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="7">
+                                         <Label text="%H_RANDOM_THRESHOLD_BPM" GridPane.columnIndex="0" GridPane.rowIndex="8" />
+                                         <NumericSpinner fx:id="hranthresholdbpm" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="8">
                                              <valueFactory>
-                                                 <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="100" max="1000" min="0" />
+                                                 <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="120" max="15000" min="0" />
+                                             </valueFactory>
+                                         </NumericSpinner>
+                                         <Label text="%HISPEED_MARGIN" GridPane.columnIndex="2" GridPane.rowIndex="8" />
+                                         <NumericSpinner fx:id="hispeedmargin" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="8">
+                                             <valueFactory>
+                                                 <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.01" initialValue="0.25" max="9.99" min="0.00" />
                                              </valueFactory>
                                          </NumericSpinner>
                                      </GridPane>
@@ -390,59 +409,36 @@
                                          <CheckBox fx:id="guidese" mnemonicParsing="false" text="%GUIDE_SE" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                                          <CheckBox fx:id="windowhold" mnemonicParsing="false" text="%WINDOW_HOLD" GridPane.columnIndex="2" GridPane.rowIndex="2" />
                                      </GridPane>
-                                     <HBox prefHeight="9.0" prefWidth="720.0" spacing="10.0">
-                                         <opaqueInsets>
-                                             <Insets />
-                                         </opaqueInsets>
-                                         <VBox.margin>
-                                             <Insets top="4.0" />
-                                         </VBox.margin>
-                                         <Label prefHeight="24.0" prefWidth="135.0" text="%TARGET_SCORE" />
-                                         <ComboBox fx:id="target" prefWidth="150.0" />
-                                         <Label prefHeight="24.0" prefWidth="135.0" text="Gauge Auto Shift" />
-                                         <ComboBox fx:id="gaugeautoshift" prefWidth="150.0" />
-                                     </HBox>
-                     
-                                     <HBox prefHeight="24.0" prefWidth="723.0" spacing="10.0">
-                                         <VBox.margin>
-                                             <Insets top="4.0" />
-                                         </VBox.margin>
-                                         <Label prefHeight="24.0" prefWidth="127.0" text="%AUTO_SAVE_REPLAY1" />
-                                         <ComboBox fx:id="autosavereplay1" prefWidth="150.0" />
-                                         <Label prefHeight="24.0" prefWidth="127.0" text="%AUTO_SAVE_REPLAY2">
-                                             <HBox.margin>
-                                                 <Insets left="10.0" />
-                                             </HBox.margin>
-                                         </Label>
-                                         <ComboBox fx:id="autosavereplay2" prefWidth="150.0" />
-                                     </HBox>
-                                     <HBox prefHeight="24.0" prefWidth="723.0" spacing="10.0">
-                                         <VBox.margin>
-                                             <Insets top="4.0" />
-                                         </VBox.margin>
-                                         <Label prefHeight="24.0" prefWidth="127.0" text="%AUTO_SAVE_REPLAY3" />
-                                         <ComboBox fx:id="autosavereplay3" prefWidth="150.0" />
-                                         <Label prefHeight="24.0" prefWidth="127.0" text="%AUTO_SAVE_REPLAY4">
-                                             <HBox.margin>
-                                                 <Insets left="10.0" />
-                                             </HBox.margin>
-                                         </Label>
-                                         <ComboBox fx:id="autosavereplay4" prefWidth="150.0" />
-                                     </HBox>
-                     
-                                     <HBox prefHeight="24.0" prefWidth="723.0" spacing="10.0">
-                                         <VBox.margin>
-                                             <Insets top="4.0" />
-                                         </VBox.margin>
-                                         <Label prefHeight="24.0" prefWidth="127.0" text="%SEVEN_TO_NINE_PATTERN" />
-                                         <ComboBox fx:id="seventoninepattern" prefWidth="150.0" />
-                                         <Label prefHeight="24.0" prefWidth="127.0" text="%SEVEN_TO_NINE_TYPE">
-                                             <HBox.margin>
-                                                 <Insets left="10.0" />
-                                             </HBox.margin>
-                                         </Label>
-                                         <ComboBox fx:id="seventoninetype" prefWidth="150.0" />
-                                     </HBox>
+                                     <GridPane hgap="10.0" vgap="4.0">
+                                         <columnConstraints>
+                                             <ColumnConstraints maxWidth="450.0" minWidth="0.0" prefWidth="160.0" />
+                                             <ColumnConstraints maxWidth="450.0" minWidth="0.0" prefWidth="160.0" />
+                                             <ColumnConstraints maxWidth="450.0" minWidth="0.0" prefWidth="160.0" />
+                                             <ColumnConstraints maxWidth="450.0" minWidth="0.0" prefWidth="160.0" />
+                                         </columnConstraints>
+                                         <rowConstraints>
+                                             <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
+                                             <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
+                                             <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
+                                             <RowConstraints maxHeight="24.0" minHeight="24.0" prefHeight="24.0" />
+                                         </rowConstraints>
+                                         <Label text="%TARGET_SCORE" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                                         <ComboBox fx:id="target" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                                         <Label text="Gauge Auto Shift" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+                                         <ComboBox fx:id="gaugeautoshift" GridPane.columnIndex="3" GridPane.rowIndex="0" />
+                                         <Label text="%AUTO_SAVE_REPLAY1" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                                         <ComboBox fx:id="autosavereplay1" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                         <Label text="%AUTO_SAVE_REPLAY2" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                                         <ComboBox fx:id="autosavereplay2" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                                         <Label text="%AUTO_SAVE_REPLAY3" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                                         <ComboBox fx:id="autosavereplay3" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                         <Label text="%AUTO_SAVE_REPLAY4" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                                         <ComboBox fx:id="autosavereplay4" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+                                         <Label text="%SEVEN_TO_NINE_PATTERN" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                                         <ComboBox fx:id="seventoninepattern" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                                         <Label text="%SEVEN_TO_NINE_TYPE" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                                         <ComboBox fx:id="seventoninetype" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+                                     </GridPane>
                                  </VBox>
                            </content>
                         </ScrollPane>
