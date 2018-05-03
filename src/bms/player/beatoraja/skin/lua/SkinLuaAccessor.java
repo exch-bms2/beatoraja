@@ -11,6 +11,7 @@ import org.luaj.vm2.lib.jse.JsePlatform;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.skin.SkinObject.*;
+import bms.player.beatoraja.SkinConfig;
 
 public class SkinLuaAccessor {
 	
@@ -218,5 +219,39 @@ public class SkinLuaAccessor {
 	public void setDirectory(Path path) {
 		LuaTable pkg = globals.get("package").checktable();
 		pkg.set("path", pkg.get("path").tojstring() + ";" + path.toString() + "/?.lua");
+	}
+
+	public void setSkinProperty(SkinConfig.Property property) {
+		LuaTable skin_config = new LuaTable();
+
+		LuaTable file_path = new LuaTable();
+		for (SkinConfig.FilePath file : property.getFile()) {
+			file_path.set(file.name, file.path);
+		}
+		skin_config.set("file_path", file_path);
+
+		LuaTable options = new LuaTable();
+		LuaTable enabled_options = new LuaTable();
+		for (SkinConfig.Option op : property.getOption()){
+			options.set(op.name, op.value);
+			enabled_options.insert(enabled_options.length() + 1, LuaInteger.valueOf(op.value));
+		}
+		skin_config.set("option", options);
+		skin_config.set("enabled_options", enabled_options);
+
+		LuaTable offsets = new LuaTable();
+		for (SkinConfig.Offset ofs : property.getOffset()) {
+			LuaTable table = new LuaTable();
+			table.set("x", ofs.x);
+			table.set("y", ofs.y);
+			table.set("w", ofs.w);
+			table.set("h", ofs.h);
+			table.set("r", ofs.r);
+			table.set("a", ofs.a);
+			offsets.set(ofs.name, table);
+		}
+		skin_config.set("offset", offsets);
+
+		globals.set("skin_config", skin_config);
 	}
 }

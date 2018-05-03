@@ -475,7 +475,7 @@ public class SkinConfiguration extends MainState {
 			} catch (IOException e) {
 			}
 		} else if (path.getFileName().toString().toLowerCase().endsWith(".lr2skin")
-				|| path.getFileName().toString().toLowerCase().endsWith(".lua")
+				|| path.getFileName().toString().toLowerCase().endsWith(".luaskin")
 				|| path.getFileName().toString().toLowerCase().endsWith(".json")) {
 			paths.add(path);
 		}
