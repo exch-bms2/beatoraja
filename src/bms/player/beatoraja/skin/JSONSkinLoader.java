@@ -681,7 +681,7 @@ public class JSONSkinLoader extends SkinLoader{
 						((PlaySkin) skin).setNoteExpansionRate(sk.note.expansionrate);
 						obj = sn;
 					}
-					// gauge (playskin only)
+					// gauge (playskin or resultskin only)
 					if (sk.gauge != null && dst.id.equals(sk.gauge.id)) {
 						TextureRegion[][] pgaugetex = new TextureRegion[sk.gauge.nodes.length][];
 						for (int i = 0; i < sk.gauge.nodes.length; i++) {
@@ -703,6 +703,9 @@ public class JSONSkinLoader extends SkinLoader{
 						}
 
 						obj = new SkinGauge(gaugetex, 0, 0, sk.gauge.parts, sk.gauge.type, sk.gauge.range, sk.gauge.cycle);
+
+						((SkinGauge)obj).setStarttime(sk.gauge.starttime);
+						((SkinGauge)obj).setEndtime(sk.gauge.endtime);
 					}
 					// hidden cover (playskin only)
 					for (HiddenCover img : sk.hiddenCover) {
@@ -1427,7 +1430,9 @@ public class JSONSkinLoader extends SkinLoader{
 		public int parts = 50;
 		public int type;
 		public int range = 3;
-		public int cycle = 33;;
+		public int cycle = 33;
+		public int starttime = 0;
+		public int endtime = 500;
 	}
 
 	public static class HiddenCover {

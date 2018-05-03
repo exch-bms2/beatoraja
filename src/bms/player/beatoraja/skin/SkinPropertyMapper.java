@@ -14,6 +14,7 @@ import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.play.GrooveGauge.Gauge;
 import bms.player.beatoraja.play.JudgeManager;
 import bms.player.beatoraja.play.LaneRenderer;
+import bms.player.beatoraja.result.AbstractResult;
 import bms.player.beatoraja.result.CourseResult;
 import bms.player.beatoraja.result.MusicResult;
 import bms.player.beatoraja.select.MusicSelector;
@@ -175,35 +176,46 @@ public class SkinPropertyMapper {
 		final int id = Math.abs(optionid);
 		
 		if(id == OPTION_GAUGE_GROOVE) {
-			result = new DrawConditionProperty(DrawConditionProperty.TYPE_STATIC_ON_RESULT) {
+			result = new DrawConditionProperty(DrawConditionProperty.TYPE_NO_STATIC) {
 				@Override
 				public boolean get(MainState state) {
+					int type = Integer.MIN_VALUE;
 					if(state instanceof BMSPlayer) {
-						return ((BMSPlayer) state).getGauge().getType() <= 2;
+						type = ((BMSPlayer) state).getGauge().getType();
+					} else if(state instanceof AbstractResult) {
+						type = ((AbstractResult) state).getGaugeType();
 					}
+					if(type != Integer.MIN_VALUE) return type <= 2;
 					return false;
 				}
 			};			
 		}
 		if(id == OPTION_GAUGE_HARD) {
-			result = new DrawConditionProperty(DrawConditionProperty.TYPE_STATIC_ON_RESULT) {
+			result = new DrawConditionProperty(DrawConditionProperty.TYPE_NO_STATIC) {
 				@Override
 				public boolean get(MainState state) {
+					int type = Integer.MIN_VALUE;
 					if(state instanceof BMSPlayer) {
-						return ((BMSPlayer) state).getGauge().getType() >= 3;
+						type = ((BMSPlayer) state).getGauge().getType();
+					} else if(state instanceof AbstractResult) {
+						type = ((AbstractResult) state).getGaugeType();
 					}
+					if(type != Integer.MIN_VALUE) return type >= 3;
 					return false;
 				}
 			};			
 		}
 		if(id == OPTION_GAUGE_EX) {
-			result = new DrawConditionProperty(DrawConditionProperty.TYPE_STATIC_ON_RESULT) {
+			result = new DrawConditionProperty(DrawConditionProperty.TYPE_NO_STATIC) {
 				@Override
 				public boolean get(MainState state) {
+					int type = Integer.MIN_VALUE;
 					if(state instanceof BMSPlayer) {
-						final int type = ((BMSPlayer) state).getGauge().getType();
-						return type == 0 || type == 1 || type == 4 || type == 5 || type == 7 || type == 8;
+						type = ((BMSPlayer) state).getGauge().getType();
+					} else if(state instanceof AbstractResult) {
+						type = ((AbstractResult) state).getGaugeType();
 					}
+					if(type != Integer.MIN_VALUE) return type == 0 || type == 1 || type == 4 || type == 5 || type == 7 || type == 8;
 					return false;
 				}
 			};			

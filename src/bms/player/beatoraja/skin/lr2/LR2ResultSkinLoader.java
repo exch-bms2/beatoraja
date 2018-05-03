@@ -138,5 +138,4 @@ enum ResultCommand implements LR2SkinLoader.Command<LR2ResultSkinLoader> {
 	}
 
 
-
 }
