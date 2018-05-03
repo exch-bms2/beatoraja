@@ -83,10 +83,22 @@ public class CourseData implements Validatable {
     }
     
     public boolean validate() {
-    	if(hash == null || (hash = Validatable.removeInvalidElements(hash)).length == 0) {
-    		return false;
-    	}
-    	
+        if(hash == null) {
+            return false;
+        }
+        for(int i = 0;i < hash.length;i++) {
+            SongData sd = hash[i];
+            if(sd == null) {
+                return false;
+            }
+            if(sd.getTitle() == null || sd.getTitle().length() == 0) {
+                sd.setTitle("course " + (i + 1));
+            }
+            if(!sd.validate()) {
+                return false;
+            }
+        }
+
     	constraint = constraint != null ? Validatable.removeInvalidElements(constraint) : CourseDataConstraint.EMPTY;
     	trophy = trophy != null ? Validatable.removeInvalidElements(trophy) : TrophyData.EMPTY;    	
     	return true;
