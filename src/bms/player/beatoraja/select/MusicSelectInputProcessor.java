@@ -17,6 +17,7 @@ import static bms.player.beatoraja.select.MusicSelectKeyProperty.MusicSelectKey.
 
 /**
  * 選曲の入力処理用クラス
+ * Class for input processing of music selection
  *
  * @author exch
  */
@@ -24,10 +25,12 @@ public class MusicSelectInputProcessor {
 
     /**
      * バー移動中のカウンタ
+     * Counter in moving bar
      */
     private long duration;
     /**
      * バーの移動方向
+     * Direction of movement of the bar
      */
     private int angle;
 
@@ -52,6 +55,7 @@ public class MusicSelectInputProcessor {
         long[] numtime = input.getNumberTime();
         if (numberstate[0] && numtime[0] != 0) {
             // 検索用ポップアップ表示。これ必要？
+        	// Popup display for search.
             numtime[0] = 0;
             Gdx.input.getTextInput(new Input.TextInputListener() {
                 @Override
@@ -70,16 +74,19 @@ public class MusicSelectInputProcessor {
 
         if (numberstate[1] && numtime[1] != 0) {
             // KEYフィルターの切り替え
+        	// Switching KEY Filters
             numtime[1] = 0;
             select.execute(MusicSelectCommand.NEXT_MODE);
         }
         if (numberstate[2] && numtime[2] != 0) {
             // ソートの切り替え
+        	// Switching the sort
             numtime[2] = 0;
             select.execute(MusicSelectCommand.NEXT_SORT);
         }
         if (numberstate[3] && numtime[3] != 0) {
             // LNモードの切り替え
+        	// LN mode switching
             numtime[3] = 0;
             select.execute(MusicSelectCommand.NEXT_LNMODE);
         }
