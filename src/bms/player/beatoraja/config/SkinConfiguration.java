@@ -434,7 +434,7 @@ public class SkinConfiguration extends MainState {
 				if (header != null) {
 					allSkins.add(header);
 				}
-			} else if (pathString.endsWith(".lua")) {
+			} else if (pathString.endsWith(".luaskin")) {
 				LuaSkinLoader loader = new LuaSkinLoader();
 				SkinHeader header = loader.loadHeader(path);
 				if (header != null) {

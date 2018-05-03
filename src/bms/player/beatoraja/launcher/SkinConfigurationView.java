@@ -81,7 +81,7 @@ public class SkinConfigurationView implements Initializable {
 				if (header != null) {
 					lr2skinheader.add(header);
 				}
-			} else if (pathString.endsWith(".lua")) {
+			} else if (pathString.endsWith(".luaskin")) {
 				LuaSkinLoader loader = new LuaSkinLoader();
 				SkinHeader header = loader.loadHeader(path);
 				if (header != null) {
@@ -269,7 +269,7 @@ public class SkinConfigurationView implements Initializable {
 			} catch (IOException e) {
 			}
 		} else if (p.getFileName().toString().toLowerCase().endsWith(".lr2skin")
-				|| p.getFileName().toString().toLowerCase().endsWith(".lua")
+				|| p.getFileName().toString().toLowerCase().endsWith(".luaskin")
 				|| p.getFileName().toString().toLowerCase().endsWith(".json")) {
 			paths.add(p);
 		}
