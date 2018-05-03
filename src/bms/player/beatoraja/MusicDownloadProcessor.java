@@ -215,7 +215,7 @@ public class MusicDownloadProcessor {
 							}
 							Files.deleteIfExists(p);
 							if (ipfspath != null && ipfspath.length() != 0) {
-								Files.move(Paths.get("ipfs/" + ipfspath), Paths.get(path), ATOMIC_MOVE);
+								Files.move(Paths.get("ipfs/" + ipfspath), Paths.get(path), REPLACE_EXISTING);
 							}
 						}
         				if(diffpath != null && diffpath.length() != 0){
@@ -224,11 +224,12 @@ public class MusicDownloadProcessor {
         					if(f.exists()){
         						if(f.isDirectory()){
         							for(File fs:f.listFiles()){
-        								Files.move(fs.toPath(), Paths.get(path+"/"+fs.getName()));
+										Files.move(fs.toPath(), Paths.get(path + "/" + fs.getName()), REPLACE_EXISTING);
         							}
         							f.delete();
         						}else{
-        							Files.move(f.toPath(), Paths.get(path+"/"+diffpath.substring(5)+".bms"));
+									Files.move(f.toPath(), Paths.get(path + "/" + diffpath.substring(5) + ".bms"),
+											REPLACE_EXISTING);
         						}
         						diffpath = "";
         					}else{
