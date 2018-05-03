@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import bms.player.beatoraja.launcher.NumericSpinner?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
-<?import javafx.scene.control.Spinner?>
 <?import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -15,17 +15,16 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
-<?import bms.player.beatoraja.launcher.NumericSpinner?>
 
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="750.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="bms.player.beatoraja.launcher.CourseEditorView">
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="bms.player.beatoraja.launcher.CourseEditorView">
    <children>
       <HBox VBox.vgrow="ALWAYS">
          <children>
-            <VBox>
+            <VBox spacing="10.0">
                <children>
-                  <HBox>
+                  <HBox prefHeight="31.0" prefWidth="240.0">
                      <VBox.margin>
-                        <Insets bottom="10.0" />
+                        <Insets />
                      </VBox.margin>
                      <children>
                         <Label text="COURSE">
@@ -39,77 +38,89 @@
                         <Button mnemonicParsing="false" onAction="#addCourseData" text="＋" />
                      </children>
                   </HBox>
-                  <ListView fx:id="courses" prefHeight="400.0" prefWidth="140.0" />
+                  <ListView fx:id="courses" prefHeight="400.0" prefWidth="240.0" VBox.vgrow="ALWAYS" />
                   <Button mnemonicParsing="false" onAction="#commit" text="Save" />
                </children>
             </VBox>
-            <GridPane>
+            <GridPane prefHeight="670.0" prefWidth="781.0" HBox.hgrow="ALWAYS">
                <columnConstraints>
-                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                  <ColumnConstraints hgrow="NEVER" minWidth="10.0" />
                   <ColumnConstraints hgrow="SOMETIMES" maxWidth="101.0" minWidth="10.0" prefWidth="99.0" />
-                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="600.0" minWidth="10.0" prefWidth="500.0" />
+                  <ColumnConstraints hgrow="ALWAYS" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="500.0" />
                </columnConstraints>
                <rowConstraints>
-                  <RowConstraints maxHeight="115.0" minHeight="0.0" prefHeight="33.0" vgrow="SOMETIMES" />
-                  <RowConstraints maxHeight="347.0" minHeight="10.0" prefHeight="144.0" vgrow="SOMETIMES" />
-                  <RowConstraints maxHeight="347.0" minHeight="10.0" prefHeight="157.0" vgrow="SOMETIMES" />
-                  <RowConstraints maxHeight="194.0" minHeight="10.0" prefHeight="57.0" vgrow="SOMETIMES" />
-                  <RowConstraints maxHeight="110.0" minHeight="10.0" prefHeight="110.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="-Infinity" vgrow="SOMETIMES" />
+                  <RowConstraints maxHeight="1.7976931348623157E308" vgrow="ALWAYS" />
+                  <RowConstraints maxHeight="1.7976931348623157E308" vgrow="ALWAYS" />
+                  <RowConstraints minHeight="-Infinity" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="-Infinity" vgrow="SOMETIMES" />
                </rowConstraints>
                <children>
-                  <GridPane GridPane.columnIndex="2" GridPane.rowIndex="3">
+                  <GridPane hgap="5.0" vgap="5.0" GridPane.columnIndex="2" GridPane.rowIndex="3">
                      <columnConstraints>
-                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="10.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="10.0" />
                      </columnConstraints>
                      <rowConstraints>
-                        <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints vgrow="SOMETIMES" />
+                        <RowConstraints vgrow="SOMETIMES" />
                      </rowConstraints>
                      <children>
-                        <ComboBox fx:id="gradeType" prefWidth="150.0" />
-                        <ComboBox fx:id="hispeedType" prefWidth="150.0" GridPane.columnIndex="1" />
-                        <ComboBox fx:id="judgeType" prefWidth="150.0" GridPane.rowIndex="1" />
-                        <ComboBox fx:id="gaugeType" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                        <ComboBox fx:id="gradeType" prefHeight="31.0" prefWidth="300.0" GridPane.hgrow="SOMETIMES" />
+                        <ComboBox fx:id="hispeedType" prefHeight="31.0" prefWidth="300.0" GridPane.columnIndex="1" GridPane.hgrow="SOMETIMES" />
+                        <ComboBox fx:id="judgeType" prefHeight="31.0" prefWidth="300.0" GridPane.hgrow="SOMETIMES" GridPane.rowIndex="1" />
+                        <ComboBox fx:id="gaugeType" prefHeight="31.0" prefWidth="300.0" GridPane.columnIndex="1" GridPane.hgrow="SOMETIMES" GridPane.rowIndex="1" />
                      </children>
+                     <padding>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </padding>
                   </GridPane>
-                  <TextField fx:id="courseName" GridPane.columnIndex="2" />
-                  <HBox prefHeight="150.0" prefWidth="300.0" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                  <TextField fx:id="courseName" GridPane.columnIndex="2">
+                     <GridPane.margin>
+                        <Insets right="5.0" />
+                     </GridPane.margin></TextField>
+                  <HBox minHeight="60.0" spacing="5.0" GridPane.columnIndex="2" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1">
                   <children>
-      <AnchorPane>
-         <children>
-      	      <fx:include fx:id="courseSongs" prefHeight="130.0" prefWidth="450.0" source="SongDataView.fxml" />
-         </children>
-      </AnchorPane>
-                        <VBox prefHeight="150.0" prefWidth="40.0">
+                        <AnchorPane minHeight="10.0" prefHeight="300.0" HBox.hgrow="ALWAYS">
                            <children>
-                              <Button mnemonicParsing="false" onAction="#removeSongData" text="ー">
+      	      <fx:include fx:id="courseSongs" prefHeight="130.0" prefWidth="450.0" source="SongDataView.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                           </children>
+                        </AnchorPane>
+                        <VBox prefHeight="208.0" prefWidth="60.0" spacing="5.0" HBox.hgrow="NEVER">
+                           <children>
+                              <Button mnemonicParsing="false" onAction="#removeSongData" prefWidth="60.0" text="ー">
                                  <VBox.margin>
                                     <Insets />
                                  </VBox.margin>
                               </Button>
-                              <Button mnemonicParsing="false" onAction="#moveSongDataUp" text="↑">
+                              <Button mnemonicParsing="false" onAction="#moveSongDataUp" prefWidth="60.0" text="↑">
                                  <VBox.margin>
-                                    <Insets top="10.0" />
+                                    <Insets />
                                  </VBox.margin>
                               </Button>
-                              <Button mnemonicParsing="false" onAction="#moveSongDataDown" text="↓">
+                              <Button mnemonicParsing="false" onAction="#moveSongDataDown" prefWidth="60.0" text="↓">
                                  <VBox.margin>
-                                    <Insets top="10.0" />
+                                    <Insets />
                                  </VBox.margin>
                               </Button>
                            </children>
                         </VBox>
                   </children>
+                     <GridPane.margin>
+                        <Insets />
+                     </GridPane.margin>
+                     <padding>
+                        <Insets bottom="5.0" right="5.0" top="5.0" />
+                     </padding>
                   </HBox>
                   <Label text="NAME" GridPane.columnIndex="1" />
                   <Label text="SONGS" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                   <Label text="CONSTRAINT" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                  <GridPane GridPane.columnIndex="2" GridPane.rowIndex="4">
+                  <GridPane hgap="5.0" vgap="5.0" GridPane.columnIndex="2" GridPane.rowIndex="4">
                     <columnConstraints>
-                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="144.0" minWidth="10.0" prefWidth="56.0" />
-                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="250.0" minWidth="10.0" prefWidth="189.0" />
-                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="197.0" minWidth="10.0" prefWidth="187.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="10.0" />
+                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="10.0" />
+                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="10.0" />
                     </columnConstraints>
                     <rowConstraints>
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
@@ -148,34 +159,46 @@
                               <SpinnerValueFactory.DoubleSpinnerValueFactory amountToStepBy="0.1" initialValue="100" max="100" min="0" />
                            </valueFactory>
                         </NumericSpinner>
-                        <Label text="MISS RATE" GridPane.columnIndex="1" />
-                        <Label text="SCORE RATE" GridPane.columnIndex="2" />
+                        <Label text="MISS RATE" GridPane.columnIndex="1" GridPane.halignment="CENTER" />
+                        <Label text="SCORE RATE" GridPane.columnIndex="2" GridPane.halignment="CENTER" />
                         <Label text="BRONZE" GridPane.rowIndex="1" />
                         <Label text="SILVER" GridPane.rowIndex="2" />
                         <Label text="GOLD" GridPane.rowIndex="3" />
                      </children>
+                     <GridPane.margin>
+                        <Insets bottom="10.0" />
+                     </GridPane.margin>
                   </GridPane>
-                  <VBox prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="2" GridPane.rowIndex="2">
+                  <VBox minHeight="60.0" spacing="5.0" GridPane.columnIndex="2" GridPane.rowIndex="2">
                      <children>
-                        <HBox>
+                        <HBox spacing="5.0">
                            <children>
                               <Button mnemonicParsing="false" onAction="#addSongData" text="＋">
                                  <HBox.margin>
-                                    <Insets right="20.0" />
+                                    <Insets />
                                  </HBox.margin>
                               </Button>
-                              <TextField fx:id="search" prefHeight="24.0" prefWidth="342.0" />
-                              <Button mnemonicParsing="false" onAction="#searchSongs" text="Search" />
+                              <TextField fx:id="search" prefHeight="24.0" prefWidth="342.0" HBox.hgrow="ALWAYS" />
+                              <Button mnemonicParsing="false" onAction="#searchSongs" text="Search">
+                                 <HBox.margin>
+                                    <Insets />
+                                 </HBox.margin></Button>
                            </children>
                         </HBox>
-                        <AnchorPane prefHeight="150.0" prefWidth="500.0">
+                        <AnchorPane minHeight="10.0" prefHeight="300.0" VBox.vgrow="ALWAYS">
                            <children>
-                              <fx:include fx:id="searchSongs" prefHeight="130.0" prefWidth="450.0" source="SongDataView.fxml" />
+                              <fx:include fx:id="searchSongs" prefHeight="130.0" prefWidth="450.0" source="SongDataView.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                            </children>
                         </AnchorPane>
                      </children>
+                     <padding>
+                        <Insets right="5.0" />
+                     </padding>
                   </VBox>
-                  <Label text="TROPHY" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                  <Label text="TROPHY" GridPane.columnIndex="1" GridPane.rowIndex="4">
+                     <GridPane.margin>
+                        <Insets />
+                     </GridPane.margin></Label>
                   <Label text="SEARCH" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                </children>
             </GridPane>
