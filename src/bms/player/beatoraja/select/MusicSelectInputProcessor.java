@@ -51,12 +51,12 @@ public class MusicSelectInputProcessor {
         final BarRenderer bar = select.getBarRender();
         final Bar current = bar.getSelected();
 
-        boolean[] numberstate = input.getNumberState();
-        long[] numtime = input.getNumberTime();
-        if (numberstate[0] && numtime[0] != 0) {
+        boolean[] numberState = input.getNumberState();
+        long[] numberTime = input.getNumberTime();
+        if (numberState[0] && numberTime[0] != 0) {
             // 検索用ポップアップ表示。これ必要？
         	// Popup display for search.
-            numtime[0] = 0;
+            numberTime[0] = 0;
             Gdx.input.getTextInput(new Input.TextInputListener() {
                 @Override
                 public void input(String text) {
@@ -72,22 +72,22 @@ public class MusicSelectInputProcessor {
             }, "Search", "", "Search bms title");
         }
 
-        if (numberstate[1] && numtime[1] != 0) {
+        if (numberState[1] && numberTime[1] != 0) {
             // KEYフィルターの切り替え
         	// Switching KEY Filters
-            numtime[1] = 0;
+            numberTime[1] = 0;
             select.execute(MusicSelectCommand.NEXT_MODE);
         }
-        if (numberstate[2] && numtime[2] != 0) {
+        if (numberState[2] && numberTime[2] != 0) {
             // ソートの切り替え
         	// Switching the sort
-            numtime[2] = 0;
+            numberTime[2] = 0;
             select.execute(MusicSelectCommand.NEXT_SORT);
         }
-        if (numberstate[3] && numtime[3] != 0) {
+        if (numberState[3] && numberTime[3] != 0) {
             // LNモードの切り替え
         	// LN mode switching
-            numtime[3] = 0;
+            numberTime[3] = 0;
             select.execute(MusicSelectCommand.NEXT_LNMODE);
         }
 
@@ -98,9 +98,9 @@ public class MusicSelectInputProcessor {
         
         final MusicSelectKeyProperty property = MusicSelectKeyProperty.values()[config.getMusicselectinput()];
 
-        if (numberstate[4] && numtime[4] != 0 || (!input.startPressed() && !input.isSelectPressed() && property.isPressed(keystate, keytime, NEXT_REPLAY, true))) {
+        if (numberState[4] && numberTime[4] != 0 || (!input.startPressed() && !input.isSelectPressed() && property.isPressed(keystate, keytime, NEXT_REPLAY, true))) {
             // change replay
-            numtime[4] = 0;
+            numberTime[4] = 0;
             select.execute(MusicSelectCommand.NEXT_REPLAY);
         }
         if (input.startPressed() && !input.isSelectPressed()) {
@@ -270,12 +270,12 @@ public class MusicSelectInputProcessor {
                 }
             }
 
-            if (numberstate[7] && numtime[7] != 0) {
-                numtime[7] = 0;
+            if (numberState[7] && numberTime[7] != 0) {
+                numberTime[7] = 0;
                 select.execute(MusicSelectCommand.NEXT_RIVAL);
             }
-            if (numberstate[8] && numtime[8] != 0) {
-                numtime[8] = 0;
+            if (numberState[8] && numberTime[8] != 0) {
+                numberTime[8] = 0;
                 if (current instanceof SongBar && ((SongBar) current).existsSong() && 
                         (bar.getDirectory().isEmpty() || !(bar.getDirectory().getLast() instanceof SameFolderBar))) {
                     SongData sd = ((SongBar) current).getSongData();
@@ -283,8 +283,8 @@ public class MusicSelectInputProcessor {
                     select.play(SOUND_FOLDEROPEN);
                 }
             }
-            if (numberstate[9] && numtime[9] != 0) {
-                numtime[9] = 0;
+            if (numberState[9] && numberTime[9] != 0) {
+                numberTime[9] = 0;
                 select.execute(MusicSelectCommand.OPEN_DOCUMENT);
             }
             // close folder
