@@ -186,6 +186,9 @@ public class PlayConfig implements Cloneable {
 		lanecover = MathUtils.clamp(lanecover, 0f, 1f);
 		lift = MathUtils.clamp(lift, 0f, 1f);
 		hidden = MathUtils.clamp(hidden, 0f, 1f);
+		lanecovermarginlow = MathUtils.clamp(lanecovermarginlow, 0f, 1f);
+		lanecovermarginhigh = MathUtils.clamp(lanecovermarginhigh, 0f, 1f);
+		lanecoverswitchduration = MathUtils.clamp(lanecoverswitchduration, 0, 1000000);
 	}
 
 	public PlayConfig clone() {
