@@ -113,7 +113,7 @@ public class SkinGauge extends SkinObject {
 			value = gaugeTransition.get(gaugeTransition.size - 1);
 			if(time < starttime) {
 				value = gauge.getGauge(type).getProperty().min;
-			} else if(time >= starttime && time <= endtime) {
+			} else if(time >= starttime && time < endtime) {
 				value = Math.min(value, Math.max(max * (time - starttime) / (endtime - starttime), gauge.getGauge(type).getProperty().min));
 			}
 		}
