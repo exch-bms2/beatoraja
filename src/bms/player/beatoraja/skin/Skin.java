@@ -57,6 +57,21 @@ public class Skin {
 	 */
 	private final float dh;
 
+	private final int CharBMPIndex = 0;
+	private final int CharTexIndex = 2;
+	private final int CharFaceIndex = 4;
+	private final int SelectCGIndex = 6;
+	
+
+	
+	private int loop[];
+	private int[][] xywh;
+	private int anime = 100;
+	
+	private int setColor = 1;
+	private int setMotion = Integer.MIN_VALUE;
+	private int frame[];
+	private int size[] = {0, 0}; 
 	/**
 	 * �쇉�뙯�걬�굦�겍�걚�굥�궧�궘�꺍�궕�깣�궦�궒�궚�깉
 	 */
@@ -83,6 +98,7 @@ public class Skin {
 	
 	private Map<Integer, Offset> offset = new HashMap<Integer, Offset>();
 
+	private Texture[] CharBMP ;
 	/**
 	 * 沃��겳渦쇈겳�셽�걢�굢訝띶쨯�겎�걗�굥�걪�겏�걣閻뷴츣�걮�겍�걚�굥op
 	 */
@@ -568,29 +584,23 @@ public class Skin {
 		if(chp == null) return null;
 
 		//�뵽�깗�깈�꺖�궭 0:#CharBMP 1:#CharBMP2P 2:#CharTex 3:#CharTex2P 4:#CharFace 5:#CharFace2P 6:#SelectCG 7:#SelectCG2P
-		Texture[] CharBMP = new Texture[8];
+		CharBMP = new Texture[8];
 		Arrays.fill(CharBMP, null);
-		final int CharBMPIndex = 0;
-		final int CharTexIndex = 2;
-		final int CharFaceIndex = 4;
-		final int SelectCGIndex = 6;
 		//�릢�깙�꺀�깳�꺖�궭
-		int[][] xywh = new int[1296][4];
+		xywh = new int[1296][4];
 		for(int[] i: xywh){
 			Arrays.fill(i, 0);
 		}
 		int[] charFaceUpperXywh = {0, 0, 256, 256};
 		int[] charFaceAllXywh = {320, 0, 320, 480};
-		int anime = 100;
-		int size[] = {0, 0};
-		int frame[] = new int[20];
+		frame = new int[20];
 		Arrays.fill(frame, Integer.MIN_VALUE);
-		int loop[] = new int[20];
+		loop = new int[20];
 		Arrays.fill(loop, -1);
-		//��永귞쉪�겒�돯
-		int setColor = 1;
+
 		//�깢�꺃�꺖�깲獒쒒뼋�겗�읃繹뽧겗�셽�뼋 60FPS�겗17ms
-		int increaseRateThreshold = 17;
+		//��永귞쉪�겒�돯
+
 		//#Pattern,#Texture,#Layer�겗�깈�꺖�궭
 		List<List<String>> patternData = new ArrayList<List<String>>();
 		for(int i = 0; i < 3; i++) patternData.add(new ArrayList<String>());
@@ -714,7 +724,6 @@ public class Skin {
 
 		TextureRegion[] image = new TextureRegion[1];
 		Texture setBMP;
-		int setMotion = Integer.MIN_VALUE;
 		SkinImage PMcharaPart = null;
 		switch(type) {
 			case BACKGROUND:
@@ -776,204 +785,209 @@ public class Skin {
 			case DANCE:
 				if(setMotion == Integer.MIN_VALUE) setMotion = 14;
 			case PLAY:
-				for(int i = 0; i < frame.length; i++) {
-					if(frame[i] == Integer.MIN_VALUE) frame[i] = anime;
-					if(frame[i] < 1) frame[i] = 100;
-				}
-				//���깱�꺖�뵪
-				Pixmap pixmap = new Pixmap( 1, 1, Format.RGBA8888 );
-				Texture transparent = new Texture( pixmap );
-				SkinImage part = null;
-				//#Pattern,#Texture,#Layer�겗�젂�겓�룒�뵽鼇�若싥굮烏뚣걝
-				int[] setBMPIndex = {CharBMPIndex,CharTexIndex,CharBMPIndex};
-				for(int patternIndex = 0; patternIndex < 3; patternIndex++) {
-					setBMP = CharBMP[setBMPIndex[patternIndex] + setColor-1];
-					for(int patternDataIndex = 0; patternDataIndex < patternData.get(patternIndex).size(); patternDataIndex++) {
-						String[] str = patternData.get(patternIndex).get(patternDataIndex).split("\t", -1);
-						if (str.length > 1) {
-							int motion = Integer.MIN_VALUE;
-							String dst[] = new String[4];
-							Arrays.fill(dst, "");
-							List<String> data = PMparseStr(str);
-							if(data.size() > 1) motion = PMparseInt(data.get(1));
-							for (int i = 0; i < dst.length; i++) {
-								if(data.size() > i + 2) dst[i] = data.get(i + 2).replaceAll("[^0-9a-zA-Z-]", "");
-							}
-							int timer = Integer.MIN_VALUE;
-							int op[] = {0,0,0};
-							if(setMotion != Integer.MIN_VALUE && setMotion == motion) {
-								timer = dsttimer;
-								op[0] = skinOption.getDstOpt1();
-								op[1] = skinOption.getDstOpt2();
-								op[2] = skinOption.getDstOpt3();
-							} else if(setMotion == Integer.MIN_VALUE) {
-								if(side != 2) {
-									if(motion == 1) timer = TIMER_PM_CHARA_1P_NEUTRAL;
-									else if(motion == 6) timer = TIMER_PM_CHARA_1P_FEVER;
-									else if(motion == 7) timer = TIMER_PM_CHARA_1P_GREAT;
-									else if(motion == 8) timer = TIMER_PM_CHARA_1P_GOOD;
-									else if(motion == 10) timer = TIMER_PM_CHARA_1P_BAD;
-									else if(motion >= 15 && motion <= 17) {
-										timer = TIMER_MUSIC_END;
-										if(motion == 15) {
-											op[0] = OPTION_1P_BORDER_OR_MORE;	//WIN
-											op[1] = -OPTION_1P_100;
-										}
-										else if(motion == 16) op[0] = -OPTION_1P_BORDER_OR_MORE;	//LOSE
-										else if(motion == 17) op[0] = OPTION_1P_100;	//FEVERWIN
-									}
-								} else {
-									if(motion == 1) timer = TIMER_PM_CHARA_2P_NEUTRAL;
-									else if(motion == 7) timer = TIMER_PM_CHARA_2P_GREAT;
-									else if(motion == 10) timer = TIMER_PM_CHARA_2P_BAD;
-									else if(motion == 15 || motion == 16) {
-										timer = TIMER_MUSIC_END;
-										if(motion == 15) op[0] = -OPTION_1P_BORDER_OR_MORE;	//WIN
-										else if(motion == 16) op[0] = OPTION_1P_BORDER_OR_MORE;	//LOSE
-									}
-								}
-							}
-							if(timer != Integer.MIN_VALUE
-									&& (dst[0].length() > 0 && dst[0].length() % 2 == 0)
-									&& (dst[1].length() == 0 || (dst[1].length() > 0 && dst[1].length() == dst[0].length()))
-									&& (dst[2].length() == 0 || (dst[2].length() > 0 && dst[2].length() == dst[0].length()))
-									&& (dst[3].length() == 0 || (dst[3].length() > 0 && dst[3].length() == dst[0].length()))
-									) {
-								if(loop[motion] >= dst[0].length() / 2 - 1) loop[motion] = dst[0].length() / 2 - 2;
-								else if(loop[motion] < -1) loop[motion] = -1;
-								int cycle = frame[motion] * dst[0].length() / 2;
-								int loopTime = frame[motion] * (loop[motion]+1);
-								if(setMotion == Integer.MIN_VALUE && timer >= TIMER_PM_CHARA_1P_NEUTRAL && timer < TIMER_MUSIC_END) {
-									setPMcharaTime(timer - TIMER_PM_CHARA_1P_NEUTRAL, cycle);
-								}
-								boolean hyphenFlag = false;
-								for(int i = 1; i < dst.length; i++) {
-									if(dst[i].indexOf("-") != -1) {
-										hyphenFlag = true;
-										break;
-									}
-								}
-								//�깗�궎�깢�꺍�걣�걗�굥�셽�겘�깢�꺃�꺖�깲獒쒒뼋�굮烏뚣걝 60FPS�겗17ms�걣�읃繹�
-								int increaseRate = 1;
-								if(hyphenFlag && frame[motion] >= increaseRateThreshold) {
-									for(int i = 1; i <= frame[motion]; i++) {
-										if(frame[motion] / i < increaseRateThreshold && frame[motion] % i == 0) {
-											increaseRate = i;
-											break;
-										}
-									}
-									for(int i = 1; i < dst.length; i++) {
-										int charsIndex = 0;
-										char[] chars = new char[dst[i].length() * increaseRate];
-										for(int j = 0; j < dst[i].length(); j+=2) {
-											for(int k = 0; k < increaseRate; k++) {
-												chars[charsIndex] = dst[i].charAt(j);
-												charsIndex++;
-												chars[charsIndex] = dst[i].charAt(j+1);
-												charsIndex++;
-											}
-										}
-										dst[i] = String.valueOf(chars);
-									}
-								}
-								//DST沃��겳渦쇈겳
-								double frameTime = frame[motion]/increaseRate;
-								int loopFrame = loop[motion]*increaseRate;
-								int dstxywh[][] = new int[dst[1].length() > 0 ? dst[1].length()/2 : dst[0].length()/2][4];
-								for(int i = 0; i < dstxywh.length;i++){
-									dstxywh[i][0] = 0;
-									dstxywh[i][1] = 0;
-									dstxywh[i][2] = size[0];
-									dstxywh[i][3] = size[1];
-								}
-								int startxywh[] = {0,0,size[0],size[1]};
-								int endxywh[] = {0,0,size[0],size[1]};
-								int count;
-								for(int i = 0; i < dst[1].length(); i+=2) {
-									if(dst[1].length() >= i+2) {
-										if(dst[1].substring(i, i+2).equals("--")) {
-											count = 0;
-											for(int j = i; j < dst[1].length() && dst[1].substring(j, j+2).equals("--"); j+=2) count++;
-											if(PMparseInt(dst[1].substring(i+count*2, i+count*2+2), 36) >= 0 && PMparseInt(dst[1].substring(i+count*2, i+count*2+2), 36) < xywh.length) endxywh = xywh[PMparseInt(dst[1].substring(i+count*2, i+count*2+2), 36)];
-											for(int j = i; j < dst[1].length() && dst[1].substring(j, j+2).equals("--"); j+=2) {
-												int[] value = new int[dstxywh[0].length];
-												for(int k = 0; k < dstxywh[0].length; k++) {
-													value[k] = startxywh[k] + (endxywh[k] - startxywh[k]) * ((j - i) / 2 + 1) / (count + 1);
-												}
-												System.arraycopy(value,0,dstxywh[j/2],0,value.length);
-											}
-											i += (count - 1) * 2;
-										} else if(PMparseInt(dst[1].substring(i, i+2), 36) >= 0 && PMparseInt(dst[1].substring(i, i+2), 36) < xywh.length) {
-											startxywh = xywh[PMparseInt(dst[1].substring(i, i+2), 36)];
-											System.arraycopy(startxywh,0,dstxywh[i/2],0,startxywh.length);
-										}
-									}
-								}
-								//alpha�겏angle�겗沃��겳渦쇈겳
-								int alphaAngle[][] = new int[dstxywh.length][2];
-								for(int i = 0; i < alphaAngle.length; i++){
-									alphaAngle[i][0] = 255;
-									alphaAngle[i][1] = 0;
-								}
-								for(int index = 2 ; index < dst.length; index++) {
-									int startValue = 0;
-									int endValue = 0;
-									for(int i = 0; i < dst[index].length(); i+=2) {
-										if(dst[index].length() >= i+2) {
-											if(dst[index].substring(i, i+2).equals("--")) {
-												count = 0;
-												for(int j = i; j < dst[index].length() && dst[index].substring(j, j+2).equals("--"); j+=2) count++;
-												if(PMparseInt(dst[index].substring(i+count*2, i+count*2+2), 16) >= 0 && PMparseInt(dst[index].substring(i+count*2, i+count*2+2), 16) <= 255) {
-													endValue = PMparseInt(dst[index].substring(i+count*2, i+count*2+2), 16);
-													if(index == 3) endValue = Math.round(endValue * 360f / 256f);
-												}
-												for(int j = i; j < dst[index].length() && dst[index].substring(j, j+2).equals("--"); j+=2) {
-													alphaAngle[j/2][index - 2] = startValue + (endValue - startValue) * ((j - i) / 2 + 1) / (count + 1);
-												}
-												i += (count - 1) * 2;
-											} else if(PMparseInt(dst[index].substring(i, i+2), 16) >= 0 && PMparseInt(dst[index].substring(i, i+2), 16) <= 255) {
-												startValue = PMparseInt(dst[index].substring(i, i+2), 16);
-												if(index == 3) startValue = Math.round(startValue * 360f / 256f);;
-												alphaAngle[i/2][index - 2] = startValue;
-											}
-										}
-									}
-								}
-								//�꺂�꺖�깤�뼀冶뗣깢�꺃�꺖�깲�겲�겎
-								if((loopFrame+increaseRate) != 0) {
-									TextureRegion[] images = new TextureRegion[(loop[motion]+1)];
-									for(int i = 0; i < (loop[motion]+1) * 2; i+=2) {
-										int index = PMparseInt(dst[0].substring(i, i+2), 36);
-										if(index >= 0 && index < xywh.length && xywh[index][2] > 0 && xywh[index][3] > 0) images[i/2] = new TextureRegion(setBMP, xywh[index][0], xywh[index][1], xywh[index][2], xywh[index][3]);
-										else images[i/2] = new TextureRegion(transparent, 0, 0, 1, 1);
-									}
-									part = new SkinImage(images, timer, loopTime);
-									add(part);
-									for(int i = 0; i < (loopFrame+increaseRate); i++) {
-										part.setDestination((int)(frameTime*i),dstSize.getDstx()+dstxywh[i][0]*dstSize.getDstw()/size[0], dstSize.getDsty()+dstSize.getDsth()-(dstxywh[i][1]+dstxywh[i][3])*dstSize.getDsth()/size[1], dstxywh[i][2]*dstSize.getDstw()/size[0], dstxywh[i][3]*dstSize.getDsth()/size[1],3,alphaAngle[i][0],255,255,255,1,0,alphaAngle[i][1],0,-1,timer,op[0],op[1],op[2],0);
-									}
-									part.setDestination(loopTime-1,dstSize.getDstx()+dstxywh[(loopFrame+increaseRate)-1][0]*dstSize.getDstw()/size[0], dstSize.getDsty()+dstSize.getDsth()-(dstxywh[(loopFrame+increaseRate)-1][1]+dstxywh[(loopFrame+increaseRate)-1][3])*dstSize.getDsth()/size[1], dstxywh[(loopFrame+increaseRate)-1][2]*dstSize.getDstw()/size[0], dstxywh[(loopFrame+increaseRate)-1][3]*dstSize.getDsth()/size[1],3,alphaAngle[(loopFrame+increaseRate)-1][0],255,255,255,1,0,alphaAngle[(loopFrame+increaseRate)-1][1],0,-1,timer,op[0],op[1],op[2],skinOption.getDstOffset());
-								}
-								//�꺂�꺖�깤�뼀冶뗣깢�꺃�꺖�깲�걢�굢
-								TextureRegion[] images = new TextureRegion[dst[0].length() / 2 - (loop[motion]+1)];
-								for(int i = (loop[motion]+1)  * 2; i < dst[0].length(); i+=2) {
-									int index = PMparseInt(dst[0].substring(i, i+2), 36);
-									if(index >= 0 && index < xywh.length && xywh[index][2] > 0 && xywh[index][3] > 0) images[i/2-(loop[motion]+1)] = new TextureRegion(setBMP, xywh[index][0], xywh[index][1], xywh[index][2], xywh[index][3]);
-									else images[i/2-(loop[motion]+1)] = new TextureRegion(transparent, 0, 0, 1, 1);
-								}
-								part = new SkinImage(images, timer, cycle - loopTime);
-								add(part);
-								for(int i = (loopFrame+increaseRate); i < dstxywh.length; i++) {
-									part.setDestination((int)(frameTime*i),dstSize.getDstx()+dstxywh[i][0]*dstSize.getDstw()/size[0], dstSize.getDsty()+dstSize.getDsth()-(dstxywh[i][1]+dstxywh[i][3])*dstSize.getDsth()/size[1], dstxywh[i][2] * dstSize.getDstw() / size[0], dstxywh[i][3] * dstSize.getDsth() / size[1],3,alphaAngle[i][0],255,255,255,1,0,alphaAngle[i][1],0,loopTime,timer,op[0],op[1],op[2],0);
-								}
-								part.setDestination(cycle,dstSize.getDstx()+dstxywh[dstxywh.length-1][0]*dstSize.getDstw()/size[0], dstSize.getDsty()+dstSize.getDsth()-(dstxywh[dstxywh.length-1][1]+dstxywh[dstxywh.length-1][3])*dstSize.getDsth()/size[1], dstxywh[dstxywh.length-1][2] * dstSize.getDstw() / size[0], dstxywh[dstxywh.length-1][3] * dstSize.getDsth() / size[1],3,alphaAngle[dstxywh.length-1][0],255,255,255,1,0,alphaAngle[dstxywh.length-1][1],0,loopTime,timer,op[0],op[1],op[2],skinOption.getDstOffset());
-							}
-						}
-					}
-				}
+				PlayCharacter(skinOption,dsttimer,side, dstSize, patternData);
 				break;
 		}
 		return null;
+	}
+	
+	private void PlayCharacter(SkinOption skinOption, int dsttimer, int side, SkinDestinationSize dstSize,List<List<String>>  patternData) {
+		int increaseRateThreshold = 17;
+		for(int i = 0; i < frame.length; i++) {
+			if(frame[i] == Integer.MIN_VALUE) frame[i] = anime;
+			if(frame[i] < 1) frame[i] = 100;
+		}
+		//���깱�꺖�뵪
+		Pixmap pixmap = new Pixmap( 1, 1, Format.RGBA8888 );
+		Texture transparent = new Texture( pixmap );
+		SkinImage part = null;
+		//#Pattern,#Texture,#Layer�겗�젂�겓�룒�뵽鼇�若싥굮烏뚣걝
+		int[] setBMPIndex = {CharBMPIndex,CharTexIndex,CharBMPIndex};
+		for(int patternIndex = 0; patternIndex < 3; patternIndex++) {
+			Texture setBMP = CharBMP[setBMPIndex[patternIndex] + setColor-1];
+			for(int patternDataIndex = 0; patternDataIndex < patternData.get(patternIndex).size(); patternDataIndex++) {
+				String[] str = patternData.get(patternIndex).get(patternDataIndex).split("\t", -1);
+				if (str.length > 1) {
+					int motion = Integer.MIN_VALUE;
+					String dst[] = new String[4];
+					Arrays.fill(dst, "");
+					List<String> data = PMparseStr(str);
+					if(data.size() > 1) motion = PMparseInt(data.get(1));
+					for (int i = 0; i < dst.length; i++) {
+						if(data.size() > i + 2) dst[i] = data.get(i + 2).replaceAll("[^0-9a-zA-Z-]", "");
+					}
+					int timer = Integer.MIN_VALUE;
+					int op[] = {0,0,0};
+					if(setMotion != Integer.MIN_VALUE && setMotion == motion) {
+						timer = dsttimer;
+						op[0] = skinOption.getDstOpt1();
+						op[1] = skinOption.getDstOpt2();
+						op[2] = skinOption.getDstOpt3();
+					} else if(setMotion == Integer.MIN_VALUE) {
+						if(side != 2) {
+							if(motion == 1) timer = TIMER_PM_CHARA_1P_NEUTRAL;
+							else if(motion == 6) timer = TIMER_PM_CHARA_1P_FEVER;
+							else if(motion == 7) timer = TIMER_PM_CHARA_1P_GREAT;
+							else if(motion == 8) timer = TIMER_PM_CHARA_1P_GOOD;
+							else if(motion == 10) timer = TIMER_PM_CHARA_1P_BAD;
+							else if(motion >= 15 && motion <= 17) {
+								timer = TIMER_MUSIC_END;
+								if(motion == 15) {
+									op[0] = OPTION_1P_BORDER_OR_MORE;	//WIN
+									op[1] = -OPTION_1P_100;
+								}
+								else if(motion == 16) op[0] = -OPTION_1P_BORDER_OR_MORE;	//LOSE
+								else if(motion == 17) op[0] = OPTION_1P_100;	//FEVERWIN
+							}
+						} else {
+							if(motion == 1) timer = TIMER_PM_CHARA_2P_NEUTRAL;
+							else if(motion == 7) timer = TIMER_PM_CHARA_2P_GREAT;
+							else if(motion == 10) timer = TIMER_PM_CHARA_2P_BAD;
+							else if(motion == 15 || motion == 16) {
+								timer = TIMER_MUSIC_END;
+								if(motion == 15) op[0] = -OPTION_1P_BORDER_OR_MORE;	//WIN
+								else if(motion == 16) op[0] = OPTION_1P_BORDER_OR_MORE;	//LOSE
+							}
+						}
+					}
+					if(timer != Integer.MIN_VALUE
+							&& (dst[0].length() > 0 && dst[0].length() % 2 == 0)
+							&& (dst[1].length() == 0 || (dst[1].length() > 0 && dst[1].length() == dst[0].length()))
+							&& (dst[2].length() == 0 || (dst[2].length() > 0 && dst[2].length() == dst[0].length()))
+							&& (dst[3].length() == 0 || (dst[3].length() > 0 && dst[3].length() == dst[0].length()))
+							) {
+						if(loop[motion] >= dst[0].length() / 2 - 1) loop[motion] = dst[0].length() / 2 - 2;
+						else if(loop[motion] < -1) loop[motion] = -1;
+						int cycle = frame[motion] * dst[0].length() / 2;
+						int loopTime = frame[motion] * (loop[motion]+1);
+						if(setMotion == Integer.MIN_VALUE && timer >= TIMER_PM_CHARA_1P_NEUTRAL && timer < TIMER_MUSIC_END) {
+							setPMcharaTime(timer - TIMER_PM_CHARA_1P_NEUTRAL, cycle);
+						}
+						boolean hyphenFlag = false;
+						for(int i = 1; i < dst.length; i++) {
+							if(dst[i].indexOf("-") != -1) {
+								hyphenFlag = true;
+								break;
+							}
+						}
+						//�깗�궎�깢�꺍�걣�걗�굥�셽�겘�깢�꺃�꺖�깲獒쒒뼋�굮烏뚣걝 60FPS�겗17ms�걣�읃繹�
+						int increaseRate = 1;
+						if(hyphenFlag && frame[motion] >= increaseRateThreshold) {
+							for(int i = 1; i <= frame[motion]; i++) {
+								if(frame[motion] / i < increaseRateThreshold && frame[motion] % i == 0) {
+									increaseRate = i;
+									break;
+								}
+							}
+							for(int i = 1; i < dst.length; i++) {
+								int charsIndex = 0;
+								char[] chars = new char[dst[i].length() * increaseRate];
+								for(int j = 0; j < dst[i].length(); j+=2) {
+									for(int k = 0; k < increaseRate; k++) {
+										chars[charsIndex] = dst[i].charAt(j);
+										charsIndex++;
+										chars[charsIndex] = dst[i].charAt(j+1);
+										charsIndex++;
+									}
+								}
+								dst[i] = String.valueOf(chars);
+							}
+						}
+						//DST沃��겳渦쇈겳
+						double frameTime = frame[motion]/increaseRate;
+						int loopFrame = loop[motion]*increaseRate;
+						int dstxywh[][] = new int[dst[1].length() > 0 ? dst[1].length()/2 : dst[0].length()/2][4];
+						for(int i = 0; i < dstxywh.length;i++){
+							dstxywh[i][0] = 0;
+							dstxywh[i][1] = 0;
+							dstxywh[i][2] = size[0];
+							dstxywh[i][3] = size[1];
+						}
+						int startxywh[] = {0,0,size[0],size[1]};
+						int endxywh[] = {0,0,size[0],size[1]};
+						int count;
+						for(int i = 0; i < dst[1].length(); i+=2) {
+							if(dst[1].length() >= i+2) {
+								if(dst[1].substring(i, i+2).equals("--")) {
+									count = 0;
+									for(int j = i; j < dst[1].length() && dst[1].substring(j, j+2).equals("--"); j+=2) count++;
+									if(PMparseInt(dst[1].substring(i+count*2, i+count*2+2), 36) >= 0 && PMparseInt(dst[1].substring(i+count*2, i+count*2+2), 36) < xywh.length) endxywh = xywh[PMparseInt(dst[1].substring(i+count*2, i+count*2+2), 36)];
+									for(int j = i; j < dst[1].length() && dst[1].substring(j, j+2).equals("--"); j+=2) {
+										int[] value = new int[dstxywh[0].length];
+										for(int k = 0; k < dstxywh[0].length; k++) {
+											value[k] = startxywh[k] + (endxywh[k] - startxywh[k]) * ((j - i) / 2 + 1) / (count + 1);
+										}
+										System.arraycopy(value,0,dstxywh[j/2],0,value.length);
+									}
+									i += (count - 1) * 2;
+								} else if(PMparseInt(dst[1].substring(i, i+2), 36) >= 0 && PMparseInt(dst[1].substring(i, i+2), 36) < xywh.length) {
+									startxywh = xywh[PMparseInt(dst[1].substring(i, i+2), 36)];
+									System.arraycopy(startxywh,0,dstxywh[i/2],0,startxywh.length);
+								}
+							}
+						}
+						//alpha�겏angle�겗沃��겳渦쇈겳
+						int alphaAngle[][] = new int[dstxywh.length][2];
+						for(int i = 0; i < alphaAngle.length; i++){
+							alphaAngle[i][0] = 255;
+							alphaAngle[i][1] = 0;
+						}
+						for(int index = 2 ; index < dst.length; index++) {
+							int startValue = 0;
+							int endValue = 0;
+							for(int i = 0; i < dst[index].length(); i+=2) {
+								if(dst[index].length() >= i+2) {
+									if(dst[index].substring(i, i+2).equals("--")) {
+										count = 0;
+										for(int j = i; j < dst[index].length() && dst[index].substring(j, j+2).equals("--"); j+=2) count++;
+										if(PMparseInt(dst[index].substring(i+count*2, i+count*2+2), 16) >= 0 && PMparseInt(dst[index].substring(i+count*2, i+count*2+2), 16) <= 255) {
+											endValue = PMparseInt(dst[index].substring(i+count*2, i+count*2+2), 16);
+											if(index == 3) endValue = Math.round(endValue * 360f / 256f);
+										}
+										for(int j = i; j < dst[index].length() && dst[index].substring(j, j+2).equals("--"); j+=2) {
+											alphaAngle[j/2][index - 2] = startValue + (endValue - startValue) * ((j - i) / 2 + 1) / (count + 1);
+										}
+										i += (count - 1) * 2;
+									} else if(PMparseInt(dst[index].substring(i, i+2), 16) >= 0 && PMparseInt(dst[index].substring(i, i+2), 16) <= 255) {
+										startValue = PMparseInt(dst[index].substring(i, i+2), 16);
+										if(index == 3) startValue = Math.round(startValue * 360f / 256f);;
+										alphaAngle[i/2][index - 2] = startValue;
+									}
+								}
+							}
+						}
+						//�꺂�꺖�깤�뼀冶뗣깢�꺃�꺖�깲�겲�겎
+						if((loopFrame+increaseRate) != 0) {
+							TextureRegion[] images = new TextureRegion[(loop[motion]+1)];
+							for(int i = 0; i < (loop[motion]+1) * 2; i+=2) {
+								int index = PMparseInt(dst[0].substring(i, i+2), 36);
+								if(index >= 0 && index < xywh.length && xywh[index][2] > 0 && xywh[index][3] > 0) images[i/2] = new TextureRegion(setBMP, xywh[index][0], xywh[index][1], xywh[index][2], xywh[index][3]);
+								else images[i/2] = new TextureRegion(transparent, 0, 0, 1, 1);
+							}
+							part = new SkinImage(images, timer, loopTime);
+							add(part);
+							for(int i = 0; i < (loopFrame+increaseRate); i++) {
+								part.setDestination((int)(frameTime*i),dstSize.getDstx()+dstxywh[i][0]*dstSize.getDstw()/size[0], dstSize.getDsty()+dstSize.getDsth()-(dstxywh[i][1]+dstxywh[i][3])*dstSize.getDsth()/size[1], dstxywh[i][2]*dstSize.getDstw()/size[0], dstxywh[i][3]*dstSize.getDsth()/size[1],3,alphaAngle[i][0],255,255,255,1,0,alphaAngle[i][1],0,-1,timer,op[0],op[1],op[2],0);
+							}
+							part.setDestination(loopTime-1,dstSize.getDstx()+dstxywh[(loopFrame+increaseRate)-1][0]*dstSize.getDstw()/size[0], dstSize.getDsty()+dstSize.getDsth()-(dstxywh[(loopFrame+increaseRate)-1][1]+dstxywh[(loopFrame+increaseRate)-1][3])*dstSize.getDsth()/size[1], dstxywh[(loopFrame+increaseRate)-1][2]*dstSize.getDstw()/size[0], dstxywh[(loopFrame+increaseRate)-1][3]*dstSize.getDsth()/size[1],3,alphaAngle[(loopFrame+increaseRate)-1][0],255,255,255,1,0,alphaAngle[(loopFrame+increaseRate)-1][1],0,-1,timer,op[0],op[1],op[2],skinOption.getDstOffset());
+						}
+						//�꺂�꺖�깤�뼀冶뗣깢�꺃�꺖�깲�걢�굢
+						TextureRegion[] images = new TextureRegion[dst[0].length() / 2 - (loop[motion]+1)];
+						for(int i = (loop[motion]+1)  * 2; i < dst[0].length(); i+=2) {
+							int index = PMparseInt(dst[0].substring(i, i+2), 36);
+							if(index >= 0 && index < xywh.length && xywh[index][2] > 0 && xywh[index][3] > 0) images[i/2-(loop[motion]+1)] = new TextureRegion(setBMP, xywh[index][0], xywh[index][1], xywh[index][2], xywh[index][3]);
+							else images[i/2-(loop[motion]+1)] = new TextureRegion(transparent, 0, 0, 1, 1);
+						}
+						part = new SkinImage(images, timer, cycle - loopTime);
+						add(part);
+						for(int i = (loopFrame+increaseRate); i < dstxywh.length; i++) {
+							part.setDestination((int)(frameTime*i),dstSize.getDstx()+dstxywh[i][0]*dstSize.getDstw()/size[0], dstSize.getDsty()+dstSize.getDsth()-(dstxywh[i][1]+dstxywh[i][3])*dstSize.getDsth()/size[1], dstxywh[i][2] * dstSize.getDstw() / size[0], dstxywh[i][3] * dstSize.getDsth() / size[1],3,alphaAngle[i][0],255,255,255,1,0,alphaAngle[i][1],0,loopTime,timer,op[0],op[1],op[2],0);
+						}
+						part.setDestination(cycle,dstSize.getDstx()+dstxywh[dstxywh.length-1][0]*dstSize.getDstw()/size[0], dstSize.getDsty()+dstSize.getDsth()-(dstxywh[dstxywh.length-1][1]+dstxywh[dstxywh.length-1][3])*dstSize.getDsth()/size[1], dstxywh[dstxywh.length-1][2] * dstSize.getDstw() / size[0], dstxywh[dstxywh.length-1][3] * dstSize.getDsth() / size[1],3,alphaAngle[dstxywh.length-1][0],255,255,255,1,0,alphaAngle[dstxywh.length-1][1],0,loopTime,timer,op[0],op[1],op[2],skinOption.getDstOffset());
+					}
+				}
+			}
+		}
 	}
 	private int PMparseInt(String s) {
 		return Integer.parseInt(s.replaceAll("[^0-9-]", ""));
