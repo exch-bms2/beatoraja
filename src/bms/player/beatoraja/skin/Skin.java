@@ -61,7 +61,7 @@ public class Skin {
 	private final int CharTexIndex = 2;
 	private final int CharFaceIndex = 4;
 	private final int SelectCGIndex = 6;
-	
+	private final PMparseMapping parseMapping = new PMparseMapping(CharBMPIndex, CharTexIndex, CharFaceIndex, SelectCGIndex);
 
 	
 	private int loop[];
@@ -604,7 +604,6 @@ public class Skin {
 		//#Pattern,#Texture,#Layer�겗�깈�꺖�궭
 		List<List<String>> patternData = new ArrayList<List<String>>();
 		for(int i = 0; i < 3; i++) patternData.add(new ArrayList<String>());
-
 		try (BufferedReader br = new BufferedReader(
 			new InputStreamReader(new FileInputStream(chp), "MS932"));) {
 			String line;
@@ -613,31 +612,10 @@ public class Skin {
 					String[] str = line.split("\t", -1);
 					if (str.length > 1) {
 						List<String> data = PMparseStr(str);
-						if (str[0].equalsIgnoreCase("#CharBMP")) {
-							//#Pattern, #Layer�뵪�뵽�깗
-							if(data.size() > 1) CharBMP[CharBMPIndex] = SkinLoader.getTexture(chp.getPath().substring(0, Math.max(chp.getPath().lastIndexOf('\\'), chp.getPath().lastIndexOf('/')) + 1) + data.get(1).replace("\\", "/"), usecim);
-						} else if(str[0].equalsIgnoreCase("#CharBMP2P")) {
-							//#Pattern, #Layer�뵪�뵽�깗2P
-							if(data.size() > 1) CharBMP[CharBMPIndex+1] = SkinLoader.getTexture(chp.getPath().substring(0, Math.max(chp.getPath().lastIndexOf('\\'), chp.getPath().lastIndexOf('/')) + 1) + data.get(1).replace("\\", "/"), usecim);
-						} else if(str[0].equalsIgnoreCase("#CharTex")) {
-							//#Texture�뵪�뵽�깗
-							if(data.size() > 1) CharBMP[CharTexIndex] = SkinLoader.getTexture(chp.getPath().substring(0, Math.max(chp.getPath().lastIndexOf('\\'), chp.getPath().lastIndexOf('/')) + 1) + data.get(1).replace("\\", "/"), usecim);
-						} else if(str[0].equalsIgnoreCase("#CharTex2P")) {
-							//#Texture�뵪�뵽�깗2P
-							if(data.size() > 1) CharBMP[CharTexIndex+1] = SkinLoader.getTexture(chp.getPath().substring(0, Math.max(chp.getPath().lastIndexOf('\\'), chp.getPath().lastIndexOf('/')) + 1) + data.get(1).replace("\\", "/"), usecim);
-						} else if(str[0].equalsIgnoreCase("#CharFace")) {
-							//�깗�꺁�궋�궎
-							if(data.size() > 1) CharBMP[CharFaceIndex] = SkinLoader.getTexture(chp.getPath().substring(0, Math.max(chp.getPath().lastIndexOf('\\'), chp.getPath().lastIndexOf('/')) + 1) + data.get(1).replace("\\", "/"), usecim);
-						} else if(str[0].equalsIgnoreCase("#CharFace2P")) {
-							//�깗�꺁�궋�궎2P
-							if(data.size() > 1) CharBMP[CharFaceIndex+1] = SkinLoader.getTexture(chp.getPath().substring(0, Math.max(chp.getPath().lastIndexOf('\\'), chp.getPath().lastIndexOf('/')) + 1) + data.get(1).replace("\\", "/"), usecim);
-						} else if(str[0].equalsIgnoreCase("#SelectCG")) {
-							//�겦�뒢�뵽�씊�궋�궎�궠�꺍
-							if(data.size() > 1) CharBMP[SelectCGIndex] = SkinLoader.getTexture(chp.getPath().substring(0, Math.max(chp.getPath().lastIndexOf('\\'), chp.getPath().lastIndexOf('/')) + 1) + data.get(1).replace("\\", "/"), usecim);
-						} else if(str[0].equalsIgnoreCase("#SelectCG2P")) {
-							//�겦�뒢�뵽�씊�궋�궎�궠�꺍2P
-							if(data.size() > 1) CharBMP[SelectCGIndex+1] = SkinLoader.getTexture(chp.getPath().substring(0, Math.max(chp.getPath().lastIndexOf('\\'), chp.getPath().lastIndexOf('/')) + 1) + data.get(1).replace("\\", "/"), usecim);
-						} else if(str[0].equalsIgnoreCase("#Patern") || str[0].equalsIgnoreCase("#Pattern")) {
+						if(checkChar(str)) {
+							CharSkinLoader(data, str, usecim, chp);
+						}
+						else if(str[0].equalsIgnoreCase("#Patern") || str[0].equalsIgnoreCase("#Pattern")) {
 							//�궋�깑�깳�꺖�궥�깾�꺍�깈�꺖�궭  烏①ㅊ�꽛�뀍佯╊퐥  �뚣겣�걙�꺖�굤�굯�걧�겱�겳�굝 �걵�걢�굯�겑�띲겎�겘�궧�깪�꺂�깱�궧�겗t�걣訝��겇擁녈굤�겒�걚#Patern�걣閭ｅ폀?
 							patternData.get(0).add(line);
 						} else if(str[0].equalsIgnoreCase("#Texture")) {
@@ -751,7 +729,7 @@ public class Skin {
 			case FACE_ALL:
 				setBMP = setColor == 2 && CharBMP[CharFaceIndex + 1] != null ? CharBMP[CharFaceIndex + 1] : CharBMP[CharFaceIndex];
 				if(setBMP == null) break;
-				image = new TextureRegion[1];
+				image = new TextureRegion[1]; 
 				image[0] = new TextureRegion(setBMP, charFaceAllXywh[0], charFaceAllXywh[1], charFaceAllXywh[2], charFaceAllXywh[3]);
 				PMcharaPart = new SkinImage(image, 0, 0);
 				add(PMcharaPart);
@@ -1030,6 +1008,15 @@ public class Skin {
 			}
 		}
 		return list;
+	}
+	boolean checkChar(String[] str) {
+		if(parseMapping.getIndex(str[0]) == 0) {
+			return false;
+		}
+		return true;
+	}
+	void CharSkinLoader(List<String> data, String[] str, boolean usecim, File chp  ) {
+		if(data.size() > 1) CharBMP[parseMapping.getIndex(str[0])] = SkinLoader.getTexture(chp.getPath().substring(0, Math.max(chp.getPath().lastIndexOf('\\'), chp.getPath().lastIndexOf('/')) + 1) + data.get(1).replace("\\", "/"), usecim);
 	}
 
 }
