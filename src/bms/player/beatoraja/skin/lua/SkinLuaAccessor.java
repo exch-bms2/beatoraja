@@ -3,11 +3,7 @@ package bms.player.beatoraja.skin.lua;
 import java.nio.file.Path;
 import java.util.logging.Logger;
 
-import org.luaj.vm2.Globals;
-import org.luaj.vm2.LuaBoolean;
-import org.luaj.vm2.LuaDouble;
-import org.luaj.vm2.LuaInteger;
-import org.luaj.vm2.LuaValue;
+import org.luaj.vm2.*;
 import org.luaj.vm2.lib.OneArgFunction;
 import org.luaj.vm2.lib.ZeroArgFunction;
 import org.luaj.vm2.lib.jse.JsePlatform;
@@ -217,5 +213,10 @@ public class SkinLuaAccessor {
 
 	public LuaValue execFile(Path path) {
 		return globals.loadfile(path.toString()).call();
+	}
+
+	public void setDirectory(Path path) {
+		LuaTable pkg = globals.get("package").checktable();
+		pkg.set("path", pkg.get("path").tojstring() + ";" + path.toString() + "/?.lua");
 	}
 }

@@ -28,6 +28,7 @@ public class LuaSkinLoader extends JSONSkinLoader {
 	public SkinHeader loadHeader(Path p) {
 		SkinHeader header = null;
 		try {
+			lua.setDirectory(p.getParent());
 			LuaValue value = lua.execFile(p);
 			sk = fromLuaValue(JsonSkin.class, value);
 			header = loadJsonSkinHeader(sk, p);
@@ -48,6 +49,7 @@ public class LuaSkinLoader extends JSONSkinLoader {
 		SkinHeader header = loadHeader(p);
 		try {
 			initFileMap(header, property);
+			lua.setDirectory(p.getParent());
 			LuaValue value = lua.execFile(p);
 			sk = fromLuaValue(JsonSkin.class, value);
 			skin = loadJsonSkin(header, sk, type, property, p);
