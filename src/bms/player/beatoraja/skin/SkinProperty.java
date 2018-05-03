@@ -503,6 +503,7 @@ public class SkinProperty {
 	public static final int OPTION_LEVEL_ANOTHER_EXCEED = 78;
 	public static final int OPTION_LEVEL_INSANE_EXCEED = 79;
 
+	public static final int OPTION_STATE_PRACTICE = 1080;
 	public static final int OPTION_NOW_LOADING = 80;
 	public static final int OPTION_LOADED = 81;
 
