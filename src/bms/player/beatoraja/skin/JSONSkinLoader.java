@@ -921,20 +921,20 @@ public class JSONSkinLoader extends SkinLoader{
 								}
 								if(chara.type == 0) {
 									SkinOption skinOption = new SkinOption(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, dst.offset);
+									SkinDestinationSize skinSize = new SkinDestinationSize(dst.dst[0].x, dst.dst[0].y, dst.dst[0].w, dst.dst[0].h);
 									skin.PMcharaLoader(usecim, imagefile, chara.type, color,
-											dst.dst[0].x, dst.dst[0].y, dst.dst[0].w, dst.dst[0].h,
-											side, Integer.MIN_VALUE, skinOption );
+											skinSize, side, Integer.MIN_VALUE, skinOption );
 								} else if(chara.type >= 1 && chara.type <= 5) {
 									SkinOption skinOption = new SkinOption(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE,  Integer.MIN_VALUE);
+									SkinDestinationSize skinSize = new SkinDestinationSize(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE);
 									SkinImage si = skin.PMcharaLoader(usecim, imagefile, chara.type, color,
-											Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE,
-											Integer.MIN_VALUE, Integer.MIN_VALUE, skinOption );
+											skinSize,Integer.MIN_VALUE, Integer.MIN_VALUE, skinOption );
 									obj = si;
 								} else if(chara.type >= 6 && chara.type <= 15) {
 									SkinOption skinOption = new SkinOption( option[0], option[1], option[2], dst.offset);
+									SkinDestinationSize skinSize = new SkinDestinationSize(dst.dst[0].x, dst.dst[0].y, dst.dst[0].w, dst.dst[0].h);
 									skin.PMcharaLoader(usecim, imagefile, chara.type, color,
-											dst.dst[0].x, dst.dst[0].y, dst.dst[0].w, dst.dst[0].h,
-											Integer.MIN_VALUE, dst.timer, skinOption);
+											skinSize,Integer.MIN_VALUE, dst.timer, skinOption);
 								}
 							}
 							break;

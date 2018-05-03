@@ -522,8 +522,8 @@ public class Skin {
 			this.PMcharaTime[index] = value;
 		}
 	}
-
-	public SkinImage PMcharaLoader(boolean usecim, File imagefile, int type, int color, float dstx, float dsty, float dstw, float dsth, int side, int dsttimer, SkinOption skinOption) {
+	
+	public SkinImage PMcharaLoader(boolean usecim, File imagefile, int type, int color, SkinDestinationSize dstSize, int side, int dsttimer, SkinOption skinOption) {
 		//type 0:�깤�꺃�궎 1:�궘�깵�꺀�깒�솺 2:�릫�뎺�뵽�깗 3:�깗�꺁�궋�궎�뵽�깗(訝듿뜇翁ャ겗�겳) 4:�깗�꺁�궋�궎�뵽�깗(�뀲鵝�) 5:�궘�깵�꺀�궋�궎�궠�꺍 6:NEUTRAL 7:FEVER 8:GREAT 9:GOOD 10:BAD 11:FEVERWIN 12:WIN 13:LOSE 14:OJAMA 15:DANCE
 		final int PLAY = 0;
 		final int BACKGROUND = 1;
@@ -950,9 +950,9 @@ public class Skin {
 									part = new SkinImage(images, timer, loopTime);
 									add(part);
 									for(int i = 0; i < (loopFrame+increaseRate); i++) {
-										part.setDestination((int)(frameTime*i),dstx+dstxywh[i][0]*dstw/size[0], dsty+dsth-(dstxywh[i][1]+dstxywh[i][3])*dsth/size[1], dstxywh[i][2]*dstw/size[0], dstxywh[i][3]*dsth/size[1],3,alphaAngle[i][0],255,255,255,1,0,alphaAngle[i][1],0,-1,timer,op[0],op[1],op[2],0);
+										part.setDestination((int)(frameTime*i),dstSize.getDstx()+dstxywh[i][0]*dstSize.getDstw()/size[0], dstSize.getDsty()+dstSize.getDsth()-(dstxywh[i][1]+dstxywh[i][3])*dstSize.getDsth()/size[1], dstxywh[i][2]*dstSize.getDstw()/size[0], dstxywh[i][3]*dstSize.getDsth()/size[1],3,alphaAngle[i][0],255,255,255,1,0,alphaAngle[i][1],0,-1,timer,op[0],op[1],op[2],0);
 									}
-									part.setDestination(loopTime-1,dstx+dstxywh[(loopFrame+increaseRate)-1][0]*dstw/size[0], dsty+dsth-(dstxywh[(loopFrame+increaseRate)-1][1]+dstxywh[(loopFrame+increaseRate)-1][3])*dsth/size[1], dstxywh[(loopFrame+increaseRate)-1][2]*dstw/size[0], dstxywh[(loopFrame+increaseRate)-1][3]*dsth/size[1],3,alphaAngle[(loopFrame+increaseRate)-1][0],255,255,255,1,0,alphaAngle[(loopFrame+increaseRate)-1][1],0,-1,timer,op[0],op[1],op[2],skinOption.getDstOffset());
+									part.setDestination(loopTime-1,dstSize.getDstx()+dstxywh[(loopFrame+increaseRate)-1][0]*dstSize.getDstw()/size[0], dstSize.getDsty()+dstSize.getDsth()-(dstxywh[(loopFrame+increaseRate)-1][1]+dstxywh[(loopFrame+increaseRate)-1][3])*dstSize.getDsth()/size[1], dstxywh[(loopFrame+increaseRate)-1][2]*dstSize.getDstw()/size[0], dstxywh[(loopFrame+increaseRate)-1][3]*dstSize.getDsth()/size[1],3,alphaAngle[(loopFrame+increaseRate)-1][0],255,255,255,1,0,alphaAngle[(loopFrame+increaseRate)-1][1],0,-1,timer,op[0],op[1],op[2],skinOption.getDstOffset());
 								}
 								//�꺂�꺖�깤�뼀冶뗣깢�꺃�꺖�깲�걢�굢
 								TextureRegion[] images = new TextureRegion[dst[0].length() / 2 - (loop[motion]+1)];
@@ -964,9 +964,9 @@ public class Skin {
 								part = new SkinImage(images, timer, cycle - loopTime);
 								add(part);
 								for(int i = (loopFrame+increaseRate); i < dstxywh.length; i++) {
-									part.setDestination((int)(frameTime*i),dstx+dstxywh[i][0]*dstw/size[0], dsty+dsth-(dstxywh[i][1]+dstxywh[i][3])*dsth/size[1], dstxywh[i][2] * dstw / size[0], dstxywh[i][3] * dsth / size[1],3,alphaAngle[i][0],255,255,255,1,0,alphaAngle[i][1],0,loopTime,timer,op[0],op[1],op[2],0);
+									part.setDestination((int)(frameTime*i),dstSize.getDstx()+dstxywh[i][0]*dstSize.getDstw()/size[0], dstSize.getDsty()+dstSize.getDsth()-(dstxywh[i][1]+dstxywh[i][3])*dstSize.getDsth()/size[1], dstxywh[i][2] * dstSize.getDstw() / size[0], dstxywh[i][3] * dstSize.getDsth() / size[1],3,alphaAngle[i][0],255,255,255,1,0,alphaAngle[i][1],0,loopTime,timer,op[0],op[1],op[2],0);
 								}
-								part.setDestination(cycle,dstx+dstxywh[dstxywh.length-1][0]*dstw/size[0], dsty+dsth-(dstxywh[dstxywh.length-1][1]+dstxywh[dstxywh.length-1][3])*dsth/size[1], dstxywh[dstxywh.length-1][2] * dstw / size[0], dstxywh[dstxywh.length-1][3] * dsth / size[1],3,alphaAngle[dstxywh.length-1][0],255,255,255,1,0,alphaAngle[dstxywh.length-1][1],0,loopTime,timer,op[0],op[1],op[2],skinOption.getDstOffset());
+								part.setDestination(cycle,dstSize.getDstx()+dstxywh[dstxywh.length-1][0]*dstSize.getDstw()/size[0], dstSize.getDsty()+dstSize.getDsth()-(dstxywh[dstxywh.length-1][1]+dstxywh[dstxywh.length-1][3])*dstSize.getDsth()/size[1], dstxywh[dstxywh.length-1][2] * dstSize.getDstw() / size[0], dstxywh[dstxywh.length-1][3] * dstSize.getDsth() / size[1],3,alphaAngle[dstxywh.length-1][0],255,255,255,1,0,alphaAngle[dstxywh.length-1][1],0,loopTime,timer,op[0],op[1],op[2],skinOption.getDstOffset());
 							}
 						}
 					}

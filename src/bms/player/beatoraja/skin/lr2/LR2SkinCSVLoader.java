@@ -577,10 +577,10 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 				}
 				final File imagefile = SkinLoader.getPath(str[7].replace("LR2files\\Theme", "skin").replace("\\", "/"), filemap);
 				SkinOption skinOption = new SkinOption(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, values[6]);
+				SkinDestinationSize skinSize = new SkinDestinationSize((int)(values[1] * dstw / srcw), (int)(dsth -(values[2] + values[4]) * dsth / srch), (int)(values[3] * dstw / srcw), (int)(values[4] * dsth / srch));
 				skin.PMcharaLoader(usecim, imagefile,
 						0, (values[5] == 1 || values[5] == 2) ? values[5] : 1,
-						values[1] * dstw / srcw, dsth - (values[2] + values[4]) * dsth / srch, values[3] * dstw / srcw, values[4] * dsth / srch,
-						1, Integer.MIN_VALUE, skinOption);
+						skinSize, 1, Integer.MIN_VALUE, skinOption);
 			}
 		});
 		addCommandWord(new CommandWord("DST_PM_CHARA_2P") {
@@ -599,10 +599,10 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 				}
 				final File imagefile = SkinLoader.getPath(str[7].replace("LR2files\\Theme", "skin").replace("\\", "/"), filemap);
 				SkinOption skinOption = new SkinOption(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE,  values[6]);
+				SkinDestinationSize skinSize = new SkinDestinationSize((int)(values[1] * dstw / srcw), (int)(dsth -(values[2] + values[4]) * dsth / srch), (int)(values[3] * dstw / srcw), (int)(values[4] * dsth / srch));
 				skin.PMcharaLoader(usecim, imagefile,
 						0, (values[5] == 1 || values[5] == 2) ? values[5] : 1,
-						values[1] * dstw / srcw, dsth - (values[2] + values[4]) * dsth / srch, values[3] * dstw / srcw, values[4] * dsth / srch,
-						2, Integer.MIN_VALUE, skinOption);
+						skinSize, 2, Integer.MIN_VALUE, skinOption);
 			}
 		});
 		addCommandWord(new CommandWord("DST_PM_CHARA_ANIMATION") {
@@ -623,10 +623,10 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 					}
 					final File imagefile = SkinLoader.getPath(str[12].replace("LR2files\\Theme", "skin").replace("\\", "/"), filemap);
 					SkinOption skinOption = new SkinOption(values[8], values[9], values[10], values[11]);
+					SkinDestinationSize skinSize = new SkinDestinationSize((int)(values[1] * dstw / srcw), (int)(dsth -(values[2] + values[4]) * dsth / srch), (int)(values[3] * dstw / srcw), (int)(values[4] * dsth / srch));
 					skin.PMcharaLoader(usecim, imagefile,
 							values[6] + 6, (values[5] == 1 || values[5] == 2) ? values[5] : 1,
-							values[1] * dstw / srcw, dsth - (values[2] + values[4]) * dsth / srch, values[3] * dstw / srcw, values[4] * dsth / srch,
-							Integer.MIN_VALUE, values[7], skinOption);
+							skinSize, Integer.MIN_VALUE, values[7], skinOption);
 				}
 			}
 		});
@@ -640,10 +640,10 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 				if(values[2] >= 0 && values[2] <= 4) {
 					final File imagefile = SkinLoader.getPath(str[3].replace("LR2files\\Theme", "skin").replace("\\", "/"), filemap);
 					SkinOption skinOption = new SkinOption(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE);
+					SkinDestinationSize skinSize = new SkinDestinationSize(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE);
 					PMcharaPart = skin.PMcharaLoader(usecim, imagefile,
 							values[2] + 1, (values[1] == 1 || values[1] == 2) ? values[1] : 1,
-							Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE,
-							Integer.MIN_VALUE, Integer.MIN_VALUE, skinOption);
+									skinSize, Integer.MIN_VALUE, Integer.MIN_VALUE, skinOption);
 				}
 			}
 		});
