@@ -95,7 +95,6 @@ public class NoteShuffleModifier extends PatternModifier {
 					hnotes[i] = tl.getHiddenNote(i);
 				}
 				int[] keys;
-				
 				switch (type) {
 				case S_RANDOM:
 					keys = getKeys(mode, false);
@@ -429,31 +428,16 @@ public class NoteShuffleModifier extends PatternModifier {
 		return log;
 	}
 
-	private void calculateHranThreshold() {
-		if(config.getHranThresholdBPM() <= 0)
-			hranThreshold = 0;
-		else
-			hranThreshold = (int) (Math.ceil(15000.0f / config.getHranThresholdBPM()));
-		
-	}
 
 	// �쎍�뎺�깕�꺖�깂�겏�겗�셽�뼋�껅뀸shuffle duration[ms]�셽�뼋�쑋繹��겗潁��ｆ돀�걣�눣�씎�굥�걽�걨�쇇�뵟�걮�겒�걚�굠�걝�겓shuffle�굮�걢�걨�굥
 	private static int[] timeBasedShuffle(int[] keys, int[] activeln,
 			Note[] notes, int[] lastNoteTime, int now, int duration) {
 		List<Integer> assignLane = new ArrayList<Integer>(keys.length);
 		List<Integer> originalLane = new ArrayList<Integer>(keys.length);
-		for (int key : keys) {
-			assignLane.add(key);
-			originalLane.add(key);
-		}
 		int max = 0;
-		for (int key : keys) {
-			max = Math.max(max, key);
-		}
 		int[] result = new int[max + 1];
-		for (int i = 0; i < result.length; i++) {
-			result[i] = i;
-		}
+		
+		initLanes(keys, assignLane, originalLane, max, result);
 
 		// LN�걣�궋�궚�깇�궍�깣�겒�꺃�꺖�꺍�굮�궋�궢�궎�꺍�걮�겍�걢�굢�솮鸚�
 		for (int lane = 0; lane < keys.length; lane++) {
@@ -492,7 +476,10 @@ public class NoteShuffleModifier extends PatternModifier {
 
 		// �깕�꺖�깂�걣�걗�굥�꺃�꺖�꺍�굮潁��ｃ걣�쇇�뵟�걮�겒�걚�꺃�꺖�꺍�겓�뀓營�
 		while (!(noteLane.isEmpty() || primaryLane.isEmpty())) {
-			laneRemover(primaryLane, result, noteLane);
+			int r = (int) (Math.random() * primaryLane.size());
+			result[primaryLane.get(r)] = noteLane.get(0);
+			primaryLane.remove(r);
+			noteLane.remove(0);
 		}
 
 		// noteLane�걣令뷩겎�겒�걢�겂�걼�굢
@@ -518,13 +505,11 @@ public class NoteShuffleModifier extends PatternModifier {
 		}
 
 		primaryLane.addAll(rendaLane);
-		// 餘뗣굤�굮�꺀�꺍���깲�겓營��걚�겍�걚�걦
-		while (!otherLane.isEmpty()) {
-			laneRemover(primaryLane, result, otherLane);
-		}
+		laneRemover(primaryLane, result, otherLane);
 
 		return result;
 	}
+	
 	
 	// �꽒�릤�듉�걮�겏duration[ms]�셽�뼋�쑋繹��겗潁��ｆ돀�걣�겒�굥�겧�걦�씎�겒�걚�굠�걝�겓shuffle�굮�걢�걨�굥
 	private static int[] noMurioshiShuffle(int[] keys, int[] activeln,
@@ -533,18 +518,10 @@ public class NoteShuffleModifier extends PatternModifier {
 		List<Integer> noAssignedLane = new ArrayList<Integer>(keys.length);
 		List<Integer> originalLane = new ArrayList<Integer>(keys.length);
 
-		for (int key : keys) {
-			noAssignedLane.add(key);
-			originalLane.add(key);
-		}
 		int max = 0;
-		for (int key : keys) {
-			max = Math.max(max, key);
-		}
 		int[] result = new int[max + 1];
-		for (int i = 0; i < result.length; i++) {
-			result[i] = i;
-		}
+		
+		initLanes(keys, noAssignedLane, originalLane, max, result);
 
 		// LN�걣�궋�궚�깇�궍�깣�겒�꺃�꺖�꺍�굮�궋�궢�궎�꺍�걮�겍�걢�굢�솮鸚�
 		for (int lane = 0; lane < keys.length; lane++) {
@@ -633,43 +610,24 @@ public class NoteShuffleModifier extends PatternModifier {
 			}
 		}
 
-		// noteLane�걣令뷩겎�겒�걢�겂�걼�굢餘뗣굤�겗�깕�꺖�깉�굮�꺀�꺍���깲�겓營��걚�겍�걚�걦
-		while (!noteLane.isEmpty()) {
-			laneRemover(noAssignedLane, result, noteLane);
-		}
+		laneRemover(noAssignedLane, result, noteLane);
 
 		// 餘뗣굤�굮�꺀�꺍���깲�겓營��걚�겍�걚�걦
-		while (!otherLane.isEmpty()) {
-			laneRemover(noAssignedLane, result, otherLane);
-		}
+		laneRemover(noAssignedLane, result, otherLane);
 
 		return result;
 	}
 
-	private static void laneRemover(List<Integer> noAssignedLane, int[] result, List<Integer> Lane) {
-		int r = (int) (Math.random() * noAssignedLane.size());
-		result[noAssignedLane.get(r)] = Lane.get(0);
-		noAssignedLane.remove(r);
-		Lane.remove(0);
-	}
 
 	// duration2[ms]�셽�뼋�쑋繹��겗潁��ｆ돀�굮�눣�씎�굥�걽�걨�겳�걨�겇�겇duration1[ms]�셽�뼋�쑋繹��겗潁��ｆ돀�걣�눣�씎�굥�걽�걨�빓�걦�쇇�뵟�걲�굥�굠�걝�겓shuffle�굮�걢�걨�굥
 	private static int[] rendaShuffle(int[] keys, int[] activeln,
 			Note[] notes, int[] lastNoteTime, int now, int duration1, int duration2) {
 		List<Integer> assignLane = new ArrayList<Integer>(keys.length);
 		List<Integer> originalLane = new ArrayList<Integer>(keys.length);
-		for (int key : keys) {
-			assignLane.add(key);
-			originalLane.add(key);
-		}
 		int max = 0;
-		for (int key : keys) {
-			max = Math.max(max, key);
-		}
 		int[] result = new int[max + 1];
-		for (int i = 0; i < result.length; i++) {
-			result[i] = i;
-		}
+		
+		initLanes(keys, assignLane, originalLane, max, result);
 
 		// LN�걣�궋�궚�깇�궍�깣�겒�꺃�꺖�꺍�굮�궋�궢�궎�꺍�걮�겍�걢�굢�솮鸚�
 		for (int lane = 0; lane < keys.length; lane++) {
@@ -763,6 +721,7 @@ public class NoteShuffleModifier extends PatternModifier {
 		return result;
 	}
 
+	
 	//7to9
 	private static int[] sevenToNine(int[] keys, int[] activeln, Note[] notes, int[] lastNoteTime, int now, int duration) {
 		/**
@@ -852,4 +811,36 @@ public class NoteShuffleModifier extends PatternModifier {
 		return result;
 	}
 
+	
+	private static void laneRemover(List<Integer> noAssignedLane, int[] result, List<Integer> Lane) {
+		while (!Lane.isEmpty()) {
+			int r = (int) (Math.random() * noAssignedLane.size());
+			result[noAssignedLane.get(r)] = Lane.get(0);
+			noAssignedLane.remove(r);
+			Lane.remove(0);
+		}
+	}
+	
+	private static void initLanes(int[] keys, List<Integer> laneFirst, List<Integer> laneSecond, int max,
+			int[] result) {
+		for (int key : keys) {
+			laneFirst.add(key);
+			laneSecond.add(key);
+		}
+		for (int key : keys) {
+			max = Math.max(max, key);
+		}
+		for (int i = 0; i < result.length; i++) {
+			result[i] = i;
+		}
+	}
+
+	
+	private void calculateHranThreshold() {
+		if(config.getHranThresholdBPM() <= 0)
+			hranThreshold = 0;
+		else
+			hranThreshold = (int) (Math.ceil(15000.0f / config.getHranThresholdBPM()));
+	}
+	
 }
