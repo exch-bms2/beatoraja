@@ -439,14 +439,8 @@ public class NoteShuffleModifier extends PatternModifier {
 		
 		initLanes(keys, assignLane, originalLane, max, result);
 
-		// LN�걣�궋�궚�깇�궍�깣�겒�꺃�꺖�꺍�굮�궋�궢�궎�꺍�걮�겍�걢�굢�솮鸚�
-		for (int lane = 0; lane < keys.length; lane++) {
-			if (activeln != null && activeln[keys[lane]] != -1) {
-				result[keys[lane]] = activeln[keys[lane]];
-				assignLane.remove((Integer) keys[lane]);
-				originalLane.remove((Integer) activeln[keys[lane]]);
-			}
-		}
+		removeActivedLane(keys, activeln, assignLane, originalLane, result);
+		
 		List<Integer> noteLane, otherLane;
 		noteLane = new ArrayList<Integer>(keys.length);
 		otherLane = new ArrayList<Integer>(keys.length);
@@ -509,6 +503,7 @@ public class NoteShuffleModifier extends PatternModifier {
 
 		return result;
 	}
+
 	
 	
 	// �꽒�릤�듉�걮�겏duration[ms]�셽�뼋�쑋繹��겗潁��ｆ돀�걣�겒�굥�겧�걦�씎�겒�걚�굠�걝�겓shuffle�굮�걢�걨�굥
@@ -532,19 +527,12 @@ public class NoteShuffleModifier extends PatternModifier {
 				originalLane.remove((Integer) activeln[keys[lane]]);
 			}
 		}
+		
 		List<Integer> noteLane, otherLane;
 		noteLane = new ArrayList<Integer>(keys.length);
 		otherLane = new ArrayList<Integer>(keys.length);
 
-		// �뀇�겗�꺃�꺖�꺍�굮�깕�꺖�깂�겗耶섇쑉�겎�늽窈�
-		while (!originalLane.isEmpty()) {
-			if (notes[originalLane.get(0)] != null && (notes[originalLane.get(0)] instanceof NormalNote || notes[originalLane.get(0)] instanceof LongNote)) {
-				noteLane.add(originalLane.get(0));
-			} else {
-				otherLane.add(originalLane.get(0));
-			}
-			originalLane.remove(0);
-		}
+		checkOriginalLane(notes, originalLane, noteLane, otherLane);
 
 		//�꽒�릤�듉�걮�겓�겒�굢�겒�걚�굠�걝�겓�꺀�꺍���깲�겓營��걚�겍�걚�걦
 		//7�뗦듉�걮餓δ툓�겎�겘�꽒�릤�듉�걮�걮�걢耶섇쑉�걮�겒�걚�겗�겎�솮鸚�
@@ -628,28 +616,13 @@ public class NoteShuffleModifier extends PatternModifier {
 		int[] result = new int[max + 1];
 		
 		initLanes(keys, assignLane, originalLane, max, result);
-
-		// LN�걣�궋�궚�깇�궍�깣�겒�꺃�꺖�꺍�굮�궋�궢�궎�꺍�걮�겍�걢�굢�솮鸚�
-		for (int lane = 0; lane < keys.length; lane++) {
-			if (activeln != null && activeln[keys[lane]] != -1) {
-				result[keys[lane]] = activeln[keys[lane]];
-				assignLane.remove((Integer) keys[lane]);
-				originalLane.remove((Integer) activeln[keys[lane]]);
-			}
-		}
+		removeActivedLane(keys, activeln, assignLane, originalLane, result);
+		
 		List<Integer> noteLane, otherLane;
 		noteLane = new ArrayList<Integer>(keys.length);
 		otherLane = new ArrayList<Integer>(keys.length);
 
-		// �뀇�겗�꺃�꺖�꺍�굮�깕�꺖�깂�겗耶섇쑉�겎�늽窈�
-		while (!originalLane.isEmpty()) {
-			if (notes[originalLane.get(0)] != null && (notes[originalLane.get(0)] instanceof NormalNote || notes[originalLane.get(0)] instanceof LongNote)) {
-				noteLane.add(originalLane.get(0));
-			} else {
-				otherLane.add(originalLane.get(0));
-			}
-			originalLane.remove(0);
-		}
+		checkOriginalLane(notes, originalLane, noteLane, otherLane);
 
 		// �쑋�궋�궢�궎�꺍�꺃�꺖�꺍�굮潁��ｆ돀�쇇�뵟�걢�겑�걝�걢�겎�늽窈�
 		List<Integer> rendaLane,mainRendaLane, noRendaLane;
@@ -719,6 +692,19 @@ public class NoteShuffleModifier extends PatternModifier {
 		}
 
 		return result;
+	}
+
+
+	private static void checkOriginalLane(Note[] notes, List<Integer> originalLane, List<Integer> noteLane,
+			List<Integer> otherLane) {
+		while (!originalLane.isEmpty()) {
+			if (notes[originalLane.get(0)] != null && (notes[originalLane.get(0)] instanceof NormalNote || notes[originalLane.get(0)] instanceof LongNote)) {
+				noteLane.add(originalLane.get(0));
+			} else {
+				otherLane.add(originalLane.get(0));
+			}
+			originalLane.remove(0);
+		}
 	}
 
 	
@@ -843,4 +829,15 @@ public class NoteShuffleModifier extends PatternModifier {
 			hranThreshold = (int) (Math.ceil(15000.0f / config.getHranThresholdBPM()));
 	}
 	
+	
+	private static void removeActivedLane(int[] keys, int[] activeln, List<Integer> assignLane,
+			List<Integer> originalLane, int[] result) {
+		for (int lane = 0; lane < keys.length; lane++) {
+			if (activeln != null && activeln[keys[lane]] != -1) {
+				result[keys[lane]] = activeln[keys[lane]];
+				assignLane.remove((Integer) keys[lane]);
+				originalLane.remove((Integer) activeln[keys[lane]]);
+			}
+		}
+	}
 }
