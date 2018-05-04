@@ -70,7 +70,8 @@ public class PracticeConfiguration {
 		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
 		parameter.size = 18;
 		titlefont = generator.generateFont(parameter);
-		graph.setDestination(0, 0, 0, 0, 0, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, new int[0]);
+		SkinDestinationSize dstSize = new SkinDestinationSize(0,0,0,0);
+		graph.setDestination(0, dstSize , 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, new int[0]);
 	}
 
 	public void saveProperty() {
