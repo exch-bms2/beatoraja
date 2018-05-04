@@ -132,18 +132,18 @@ public class BMSPlayer extends MainState {
 
 		boolean isReplayPatternPlay = false;
 		ReplayData HSReplay = null;
-		if(replay != null && main.getInputProcessor().getKeystate()[1]) {
+		if(replay != null && main.getInputProcessor().getKeyState(1)) {
 			//保存された譜面変更ログから譜面再現
 			resource.setReplayData(replay);
 			isReplayPatternPlay = true;
-		} else if(replay != null && main.getInputProcessor().getKeystate()[2]) {
+		} else if(replay != null && main.getInputProcessor().getKeyState(2)) {
 			//保存された譜面オプションログから譜面オプション再現
 			config.setRandom(replay.randomoption);
 			config.setRandom2(replay.randomoption2);
 			config.setDoubleoption(replay.doubleoption);
 			isReplayPatternPlay = true;
 		}
-		if(replay != null && main.getInputProcessor().getKeystate()[4]) {
+		if(replay != null && main.getInputProcessor().getKeyState(4)) {
 			//保存されたHSオプションログからHSオプション再現
 			HSReplay = replay;
 			isReplayPatternPlay = true;
@@ -308,14 +308,14 @@ public class BMSPlayer extends MainState {
 
 		Logger.getGlobal().info("ゲージ設定");
 		if(replay != null) {
-			boolean[] keystate = main.getInputProcessor().getKeystate();
-			for(int count = (keystate[5] ? 1 : 0) + (keystate[3] ? 2 : 0);count > 0; count--) {
+			BMSPlayerInputProcessor input = main.getInputProcessor();
+			for(int count = (input.getNumberState(5) ? 1 : 0) + (input.getNumberState(3) ? 2 : 0);count > 0; count--) {
 				if (replay.gauge != GrooveGauge.HAZARD || replay.gauge != GrooveGauge.EXHARDCLASS) {
 					replay.gauge++;
 				}
 			}
 		}
-		if(replay != null && main.getInputProcessor().getKeystate()[5]) {
+		if(replay != null && main.getInputProcessor().getKeyState(5)) {
 		}
 		int coursetype = 0;
 		GaugeProperty gauges = null;
@@ -590,7 +590,7 @@ public class BMSPlayer extends MainState {
 			control.setEnableCursor(false);
 			practice.processInput(input);
 
-			if (input.getKeystate()[0] && resource.mediaLoadFinished() && now > skin.getLoadstart() + skin.getLoadend()
+			if (input.getKeyState(0) && resource.mediaLoadFinished() && now > skin.getLoadstart() + skin.getLoadend()
 					&& now - startpressedtime > 1000) {
 				PracticeProperty property = practice.getPracticeProperty();
 				control.setEnableControl(true);

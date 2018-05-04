@@ -183,7 +183,7 @@ public class BMSPlayerInputProcessor {
 	}
 	
 	public void resetKeyTime() {
-		for (int i = 0; i < key.length; i++)
+		for (int i = 0; i < getKeyLength(); i++)
 			key[i].resetTime();
 	}
 
@@ -196,8 +196,16 @@ public class BMSPlayerInputProcessor {
 	}
 	
 	public void resetKeyState() {
-		for (int i = 0; i < key.length; i++)
+		for (int i = 0; i < getKeyLength(); i++)
 			key[i].setState(false);
+	}
+	
+	public boolean checkIfKeyPressed(int i) {
+		return key[i].checkIfPressed();
+	}
+	
+	public int getKeyLength() {
+		return key.length;
 	}
 
 	public BMSPlayerInputDevice getLastKeyChangedDevice() {

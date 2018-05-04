@@ -11,6 +11,7 @@ import com.badlogic.gdx.utils.FloatArray;
 import bms.model.BMSModel;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.PlayerResource.PlayMode;
+import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.ir.IRConnection;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.skin.SkinType;
@@ -102,13 +103,12 @@ public class CourseResult extends AbstractResult {
         final PlayerResource resource = main.getPlayerResource();
 
         if (!main.isTimerOn(TIMER_FADEOUT) && main.isTimerOn(TIMER_STARTINPUT)) {
-            boolean[] keystate = main.getInputProcessor().getKeystate();
-            long[] keytime = main.getInputProcessor().getTime();
+            BMSPlayerInputProcessor input = main.getInputProcessor();
 
 			boolean ok = false;
 			for(int i = 0; i < property.getAssignLength(); i++) {
-				if(property.getAssign(i) != null && keystate[i] && keytime[i] != 0) {
-					keytime[i] = 0;
+				if(property.getAssign(i) != null && input.checkIfKeyPressed(i)) {
+					input.resetKeyTime(i);
 					ok = true;
 				}
 			}
