@@ -12,9 +12,9 @@ import org.junit.Test;
 
 import bms.model.BMSDecoder;
 import bms.model.BMSModel;
-import bms.player.beatoraja.pattern.ConstantBPMModifier;
+import bms.player.beatoraja.pattern.MineNoteModifier;
 
-public class ConstantBPMModifierTest {
+public class MineNoteModifierTest {
 	static BMSModel bmsModel;
 	static BMSDecoder bmsDecoder;
 	@BeforeClass
@@ -35,29 +35,30 @@ public class ConstantBPMModifierTest {
 	@After
 	public void tearDown() throws Exception {
 	}
-
-	@Test
-	public void constantBPMModifierConstructTest() {
-		ConstantBPMModifier constantBPMModifier = new ConstantBPMModifier();
-		assertNotNull(constantBPMModifier);
-	}
 	
 	/*
-	 * ConstantBPMModifier should make stopping option disabled.
+	 * MineNote Modifier removes all mine note in the BMSModel.
 	 * */
+	
 	@Test
-	public void modifyStopTest() {
-		ConstantBPMModifier constantBPMModifier = new ConstantBPMModifier();
-		constantBPMModifier.modify(bmsModel);
-		assertEquals(bmsModel.getAllTimeLines()[0].getStop(), 0);
+	public void mineNoteModifierConstructorTest() {
+		MineNoteModifier mineNoteModifier = new MineNoteModifier();
+		assertEquals(mineNoteModifier.mineNoteExists(),bmsModel.containsMineNote());
+		assertNotNull(mineNoteModifier);
 	}
 	
 	@Test
-	public void modifyModelBPMTest() {
-		ConstantBPMModifier constantBPMModifier = new ConstantBPMModifier();
-		double beforeBPM = bmsModel.getBpm();
-		constantBPMModifier.modify(bmsModel);
-		assertEquals((int)beforeBPM, (int)bmsModel.getBpm());
+	public void modifyTest() {
+		MineNoteModifier mineNoteModifier = new MineNoteModifier();
+		mineNoteModifier.modify(bmsModel);
+		assertEquals(mineNoteModifier.mineNoteExists(),bmsModel.containsMineNote());
 	}
-
+	
+	@Test
+	public void mineNoteEliminatedCheckTest() {
+		MineNoteModifier mineNoteModifier = new MineNoteModifier();
+		mineNoteModifier.modify(bmsModel);
+		assertEquals(bmsModel.containsMineNote(), false);
+	
+	}
 }

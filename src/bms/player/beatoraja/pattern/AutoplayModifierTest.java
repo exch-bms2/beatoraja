@@ -17,6 +17,7 @@ import bms.model.BMSModel;
 import bms.model.Note;
 import bms.model.TimeLine;
 import bms.player.beatoraja.pattern.AutoplayModifier;
+import bms.player.beatoraja.pattern.LaneShuffleModifier;
 import bms.player.beatoraja.pattern.PatternModifyLog;
 
 public class AutoplayModifierTest {

@@ -17,6 +17,8 @@ import bms.model.BMSModel;
 import bms.model.Mode;
 import bms.model.Note;
 import bms.model.TimeLine;
+import bms.player.beatoraja.Config;
+import bms.player.beatoraja.PlayerConfig;
 import bms.player.beatoraja.pattern.LaneShuffleModifier;
 import bms.player.beatoraja.pattern.PatternModifier;
 import bms.player.beatoraja.pattern.PatternModifyLog;
@@ -24,6 +26,8 @@ import bms.player.beatoraja.pattern.PatternModifyLog;
 public class LaneShuffleModifierTest {
 	static BMSModel bmsModel;
 	static BMSDecoder bmsDecoder;
+	static Config config;
+	static PlayerConfig playerconfig;
 	
 	public static final int MIRROR = 0;
 	public static final int R_RANDOM = 1;
@@ -35,9 +39,15 @@ public class LaneShuffleModifierTest {
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
+		config = new Config();
+        config.setPlayername("player1");
+        config.read();
+        playerconfig = new PlayerConfig();
+        playerconfig.setId("player1");
 		File bmsFile = new File("src\\bms\\player\\test\\end_time_dpnep.bms");
 		bmsDecoder = new BMSDecoder();
 		bmsModel = bmsDecoder.decode(bmsFile);
+		PatternModifier.setPlayerConfig(playerconfig);
 	}
 
 	@AfterClass
@@ -206,15 +216,17 @@ public class LaneShuffleModifierTest {
 		assertNotEquals(before, getNote(bmsModel));
 	}
 	
-	@Test(expected=NullPointerException.class)
+	@Test
 	public void patternModifyCreateWithSRandomTest() {
 		PatternModifier modifier = PatternModifier.create(4, 0);
+		playerconfig = new PlayerConfig();
+        playerconfig.setId("player1");
 		Note[] before = getNote(bmsModel);
 		modifier.modify(bmsModel);
 		assertNotEquals(before, getNote(bmsModel));
 	}
 	
-	@Test(expected=NullPointerException.class)
+	@Test
 	public void patternModifyCreateWithSPIRALTest() {
 		PatternModifier modifier = PatternModifier.create(5, 0);
 		Note[] before = getNote(bmsModel);
@@ -222,7 +234,7 @@ public class LaneShuffleModifierTest {
 		assertNotEquals(before, getNote(bmsModel));
 	}
 	
-	@Test(expected=NullPointerException.class)
+	@Test
 	public void patternModifyCreateWithHRandomTest() {
 		PatternModifier modifier = PatternModifier.create(6, 0);
 		Note[] before = getNote(bmsModel);
@@ -230,7 +242,7 @@ public class LaneShuffleModifierTest {
 		assertNotEquals(before, getNote(bmsModel));
 	}
 	
-	@Test(expected=NullPointerException.class)
+	@Test
 	public void patternModifyCreateWithAllScrTest() {
 		PatternModifier modifier = PatternModifier.create(7, 0);
 		Note[] before = getNote(bmsModel);
@@ -246,7 +258,7 @@ public class LaneShuffleModifierTest {
 		assertNotEquals(before, getNote(bmsModel));
 	}
 	
-	@Test(expected=NullPointerException.class)
+	@Test
 	public void patternModifyCreateWithSRandomEXTest() {
 		PatternModifier modifier = PatternModifier.create(9, 0);
 		Note[] before = getNote(bmsModel);
@@ -522,162 +534,5 @@ public class LaneShuffleModifierTest {
 		}
 		return null;
 	}
-	/* purpose : integer random suffle test
-	 * input type : saved integer in bmsModel we test integer is 0-6
-	 * output type : rotated saved integer
-	 */
-	@Test
-	public void makeRandomOneTest() {
-		LaneShuffleModifier laneShuffleModifier = new LaneShuffleModifier(RANDOM);
-		Note[] before = getNote(bmsModel);
-		Mode mode = bmsModel.getMode();
-		laneShuffleModifier.modify(bmsModel);
-		int[] first = laneShuffleModifier.getRandom();
-		laneShuffleModifier.modify(bmsModel);
-		int[] two = laneShuffleModifier.getRandom();
-		assertNotEquals(first,two);
-	}
-	@Test
-	public void makeRandomTwoTest() {
-		LaneShuffleModifier laneShuffleModifier = new LaneShuffleModifier(RANDOM);
-		Note[] before = getNote(bmsModel);
-		Mode mode = bmsModel.getMode();
-		laneShuffleModifier.modify(bmsModel);
-		int[] first = laneShuffleModifier.getRandom();
-		laneShuffleModifier.modify(bmsModel);
-		laneShuffleModifier.modify(bmsModel);
-		int[] two = laneShuffleModifier.getRandom();
-		assertNotEquals(first,two);
-	}
-	
-	@Test
-	public void makeRandomThreeTest() {
-		LaneShuffleModifier laneShuffleModifier = new LaneShuffleModifier(RANDOM);
-		Note[] before = getNote(bmsModel);
-		Mode mode = bmsModel.getMode();
-		laneShuffleModifier.modify(bmsModel);
-		int[] first = laneShuffleModifier.getRandom();
-		laneShuffleModifier.modify(bmsModel);
-		laneShuffleModifier.modify(bmsModel);
-		laneShuffleModifier.modify(bmsModel);
-		int[] two = laneShuffleModifier.getRandom();
-		assertNotEquals(first,two);
-	}
-	
-	@Test
-	public void makeMIRROROneTest() {
-		LaneShuffleModifier laneShuffleModifier = new LaneShuffleModifier(MIRROR);
-		Note[] before = getNote(bmsModel);
-		Mode mode = bmsModel.getMode();
-		laneShuffleModifier.modify(bmsModel);
-		int[] first = laneShuffleModifier.getRandom();
-		laneShuffleModifier.modify(bmsModel);
-		int[] two = laneShuffleModifier.getRandom();
-		assertNotEquals(first,two);
-	}
-	@Test
-	public void makeMIRRORTwoTest() {
-		LaneShuffleModifier laneShuffleModifier = new LaneShuffleModifier(MIRROR);
-		Note[] before = getNote(bmsModel);
-		Mode mode = bmsModel.getMode();
-		laneShuffleModifier.modify(bmsModel);
-		int[] first = laneShuffleModifier.getRandom();
-		laneShuffleModifier.modify(bmsModel);
-		laneShuffleModifier.modify(bmsModel);
-		int[] two = laneShuffleModifier.getRandom();
-		assertNotEquals(first,two);
-	}
-	
-	@Test
-	public void makeMIRRORThreeTest() {
-		LaneShuffleModifier laneShuffleModifier = new LaneShuffleModifier(MIRROR);
-		Note[] before = getNote(bmsModel);
-		Mode mode = bmsModel.getMode();
-		laneShuffleModifier.modify(bmsModel);
-		int[] first = laneShuffleModifier.getRandom();
-		laneShuffleModifier.modify(bmsModel);
-		laneShuffleModifier.modify(bmsModel);
-		laneShuffleModifier.modify(bmsModel);
-		int[] two = laneShuffleModifier.getRandom();
-		assertNotEquals(first,two);
-	}
-	
-	@Test
-	public void makeR_RANDOMOneTest() {
-		LaneShuffleModifier laneShuffleModifier = new LaneShuffleModifier(R_RANDOM);
-		Note[] before = getNote(bmsModel);
-		Mode mode = bmsModel.getMode();
-		laneShuffleModifier.modify(bmsModel);
-		int[] first = laneShuffleModifier.getRandom();
-		laneShuffleModifier.modify(bmsModel);
-		int[] two = laneShuffleModifier.getRandom();
-		assertNotEquals(first,two);
-	}
-	@Test
-	public void makeR_RANDOMTwoTest() {
-		LaneShuffleModifier laneShuffleModifier = new LaneShuffleModifier(R_RANDOM);
-		Note[] before = getNote(bmsModel);
-		Mode mode = bmsModel.getMode();
-		laneShuffleModifier.modify(bmsModel);
-		int[] first = laneShuffleModifier.getRandom();
-		laneShuffleModifier.modify(bmsModel);
-		laneShuffleModifier.modify(bmsModel);
-		int[] two = laneShuffleModifier.getRandom();
-		assertNotEquals(first,two);
-	}
-	
-	@Test
-	public void makeR_RANDOMThreeTest() {
-		LaneShuffleModifier laneShuffleModifier = new LaneShuffleModifier(R_RANDOM);
-		Note[] before = getNote(bmsModel);
-		Mode mode = bmsModel.getMode();
-		laneShuffleModifier.modify(bmsModel);
-		int[] first = laneShuffleModifier.getRandom();
-		laneShuffleModifier.modify(bmsModel);
-		laneShuffleModifier.modify(bmsModel);
-		laneShuffleModifier.modify(bmsModel);
-		int[] two = laneShuffleModifier.getRandom();
-		assertNotEquals(first,two);
-	}
-	
-	@Test
-	public void makeCROSSOneTest() {
-		LaneShuffleModifier laneShuffleModifier = new LaneShuffleModifier(CROSS);
-		Note[] before = getNote(bmsModel);
-		Mode mode = bmsModel.getMode();
-		laneShuffleModifier.modify(bmsModel);
-		int[] first = laneShuffleModifier.getRandom();
-		laneShuffleModifier.modify(bmsModel);
-		int[] two = laneShuffleModifier.getRandom();
-		assertNotEquals(first,two);
-	}
-	@Test
-	public void makeCROSSTwoTest() {
-		LaneShuffleModifier laneShuffleModifier = new LaneShuffleModifier(CROSS);
-		Note[] before = getNote(bmsModel);
-		Mode mode = bmsModel.getMode();
-		laneShuffleModifier.modify(bmsModel);
-		int[] first = laneShuffleModifier.getRandom();
-		laneShuffleModifier.modify(bmsModel);
-		laneShuffleModifier.modify(bmsModel);
-		int[] two = laneShuffleModifier.getRandom();
-		assertNotEquals(first,two);
-	}
-	
-	@Test
-	public void makeCROSSThreeTest() {
-		LaneShuffleModifier laneShuffleModifier = new LaneShuffleModifier(CROSS);
-		Note[] before = getNote(bmsModel);
-		Mode mode = bmsModel.getMode();
-		laneShuffleModifier.modify(bmsModel);
-		int[] first = laneShuffleModifier.getRandom();
-		laneShuffleModifier.modify(bmsModel);
-		laneShuffleModifier.modify(bmsModel);
-		laneShuffleModifier.modify(bmsModel);
-		int[] two = laneShuffleModifier.getRandom();
-		assertNotEquals(first,two);
-	}
-	
-	
-	
+			
 }
