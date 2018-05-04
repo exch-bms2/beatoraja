@@ -94,11 +94,11 @@ public class BMSPlayerInputProcessor {
 	/**
 	 * 0-9キーのON/OFF状態
 	 */
-	boolean[] numberstate = new boolean[10];
+	private boolean[] numberstate = new boolean[10];
 	/**
 	 * 0-9キーの最終更新時間
 	 */
-	long[] numtime = new long[10];
+	private long[] numtime = new long[10];
 	/**
 	 * F1-F12キーのON/OFF状態
 	 */
@@ -287,9 +287,17 @@ public class BMSPlayerInputProcessor {
 	public boolean[] getNumberState() {
 		return numberstate;
 	}
+	
+	public void setNumberState(int i, boolean isPressed) {
+		numberstate[i] = isPressed;
+	}
 
 	public long[] getNumberTime() {
 		return numtime;
+	}
+	
+	public void setNumberTime(int i, long pressTime) {
+		numtime[i] = pressTime;
 	}
 
 	public void keyChanged(BMSPlayerInputDevice device, long presstime, int i, boolean pressed) {

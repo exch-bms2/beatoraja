@@ -139,8 +139,8 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 				final boolean pressed = Gdx.input.isKeyPressed(numbers[i]);
 				if (pressed != keystate[numbers[i]]) {
 					keystate[numbers[i]] = pressed;
-					this.bmsPlayerInputProcessor.numberstate[i] = pressed;
-					this.bmsPlayerInputProcessor.numtime[i] = presstime;
+					this.bmsPlayerInputProcessor.setNumberState(i, pressed);
+					this.bmsPlayerInputProcessor.setNumberTime(i, presstime);
 				}
 			}
 
