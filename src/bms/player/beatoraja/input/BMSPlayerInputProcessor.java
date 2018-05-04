@@ -102,11 +102,11 @@ public class BMSPlayerInputProcessor {
 	/**
 	 * F1-F12キーのON/OFF状態
 	 */
-	boolean[] functionstate = new boolean[12];
+	private boolean[] functionstate = new boolean[12];
 	/**
 	 * F1-F12キーの最終更新時間
 	 */
-	long[] functiontime = new long[12];
+	private long[] functiontime = new long[12];
 
 	long starttime;
 
@@ -126,8 +126,8 @@ public class BMSPlayerInputProcessor {
 	private boolean enterPressed;
 	private boolean deletePressed;
 
-	boolean[] cursor = new boolean[4];
-	long[] cursortime = new long[4];
+	private boolean[] cursor = new boolean[4];
+	private long[] cursortime = new long[4];
 
 	private Type type = Type.KEYBOARD;
 	
@@ -287,16 +287,13 @@ public class BMSPlayerInputProcessor {
 	public boolean[] getNumberState() {
 		return numberstate;
 	}
-	
-	public void setNumberState(int i, boolean isPressed) {
-		numberstate[i] = isPressed;
-	}
 
 	public long[] getNumberTime() {
 		return numtime;
 	}
 	
-	public void setNumberTime(int i, long pressTime) {
+	public void setNumberState(int i, boolean isPressed, long pressTime) {
+		numberstate[i] = isPressed;
 		numtime[i] = pressTime;
 	}
 
@@ -337,6 +334,11 @@ public class BMSPlayerInputProcessor {
 	public void setCursorState(boolean[] cursor) {
 		this.cursor = cursor;
 	}
+	
+	public void setCursor(int i, boolean isPressed, long pressTime) {
+		this.cursor[i] = isPressed;
+		this.cursortime[i] = pressTime;
+	}
 
 	public boolean isExitPressed() {
 		return exitPressed;
@@ -376,6 +378,11 @@ public class BMSPlayerInputProcessor {
 
 	public void setFunctiontime(long[] functiontime) {
 		this.functiontime = functiontime;
+	}
+	
+	public void setFunction(int i, boolean isPressed, long functiontime) {
+		this.functionstate[i] = isPressed;
+		this.functiontime[i] = functiontime;
 	}
 
 	public boolean isSelectPressed() {
