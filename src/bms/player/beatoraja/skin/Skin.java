@@ -492,15 +492,6 @@ public class Skin {
 		}
 	}
 
-	public int getGaugeParts() {
-		for(SkinObject obj: objects) {
-			if(obj instanceof SkinGauge) {
-				return ((SkinGauge)obj).getParts();
-			}
-		}
-		return 0;
-	}
-
 	/*
 	 * 白数字が0の時のレーンカバーのy座標
 	 */
@@ -515,14 +506,6 @@ public class Skin {
 			}
 		}
 		return -1;
-	}
-
-	public void setGaugeParts(int parts) {
-		for(SkinObject obj: objects) {
-			if(obj instanceof SkinGauge) {
-				((SkinGauge)obj).setParts(parts);
-			}
-		}
 	}
 
 	public SkinOffset getOffsetAll(MainState state) {

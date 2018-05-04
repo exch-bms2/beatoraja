@@ -331,22 +331,6 @@ public class BMSPlayer extends MainState {
 
 		loadSkin(getSkinType());
 
-		if(BMSPlayerRule.isSevenToNine()) {
-			//7to9 ボーダーが丁度割り切れるゲージ粒数に変更
-			Skin skin = getSkin();
-			int setParts = skin.getGaugeParts();
-			for(int type = 0; type < gauge.getGaugeTypeLength(); type++) {
-				final GaugeElementProperty element = gauge.getGauge(type).getProperty();
-				for(int i = skin.getGaugeParts(); i <= element.max; i++) {
-					if(element.border % (element.max / i) == 0) {
-						setParts = Math.max(setParts, i);
-						break;
-					}
-				}
-			}
-			skin.setGaugeParts(setParts);
-		}
-
 		setSound(SOUND_READY, "playready.wav", SoundType.SOUND, false);
 		setSound(SOUND_PLAYSTOP, "playstop.wav", SoundType.SOUND, false);
 		setSound(SOUND_GUIDE_SE_PG, "guide-pg.wav", SoundType.SOUND, false);
