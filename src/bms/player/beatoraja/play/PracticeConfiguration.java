@@ -11,7 +11,6 @@ import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 
 import bms.player.beatoraja.skin.SkinNoteDistributionGraph;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
-import bms.player.beatoraja.skin.SkinDestinationSize;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -23,7 +22,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Json;
 
 /**
- * �깤�꺀�궚�깇�궍�궧�깴�꺖�깋�겗鼇�若싪〃鹽�/渶③썓�뵪�궚�꺀�궧
+ * プラクティスモードの設定表示/編集用クラス
  *
  * @author exch
  */
@@ -101,17 +100,15 @@ public class PracticeConfiguration {
 
 	public void processInput(BMSPlayerInputProcessor input) {
 		final int values = model.getMode().player == 2 ? 11 : 9;
-		boolean[] cursor = input.getCursorState();
-		long[] cursortime = input.getCursorTime();
-		if (cursor[0] && cursortime[0] != 0) {
-			cursortime[0] = 0;
+		if (input.checkIfCursorPressed(0)) {
+			input.resetCursorTime(0);
 			cursorpos = (cursorpos + values - 1) % values;
 		}
-		if (cursor[1] && cursortime[1] != 0) {
-			cursortime[1] = 0;
+		if (input.checkIfCursorPressed(1)) {
+			input.resetCursorTime(1);
 			cursorpos = (cursorpos + 1) % values;
 		}
-		if (cursor[2] && (presscount == 0 || presscount + 10 < System.currentTimeMillis())) {
+		if (input.getCursorState(2) && (presscount == 0 || presscount + 10 < System.currentTimeMillis())) {
 			if (presscount == 0) {
 				presscount = System.currentTimeMillis() + 500;
 			} else {
@@ -176,7 +173,7 @@ public class PracticeConfiguration {
 				property.doubleop = (property.doubleop + 1) % 2;
 				break;
 			}
-		} else if (cursor[3] && (presscount == 0 || presscount + 10 < System.currentTimeMillis())) {
+		} else if (input.getCursorState(3) && (presscount == 0 || presscount + 10 < System.currentTimeMillis())) {
 			if (presscount == 0) {
 				presscount = System.currentTimeMillis() + 500;
 			} else {
@@ -244,7 +241,7 @@ public class PracticeConfiguration {
 				break;
 
 			}
-		} else if (!(cursor[2] || cursor[3])) {
+		} else if (!(input.getCursorState(2) || input.getCursorState(3))) {
 			presscount = 0;
 		}
 	}
@@ -277,7 +274,7 @@ public class PracticeConfiguration {
 	}
 
 	/**
-	 * �깤�꺀�궚�깇�궍�궧�겗�릢葉�鼇�若싧��
+	 * プラクティスの各種設定値
 	 *
 	 * @author exch
 	 */

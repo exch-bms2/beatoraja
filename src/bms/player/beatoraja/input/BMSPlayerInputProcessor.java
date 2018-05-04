@@ -79,34 +79,13 @@ public class BMSPlayerInputProcessor {
 		devices.add(midiinput);
 	}
 
-	/**
-	 * 各キーのON/OFF状態
-	 * 全モードの入力が収まる大きさにしておく
-	 */
-	private boolean[] keystate = new boolean[256];
-	/**
-	 * 各キーの最終更新時間 TODO これを他クラスから編集させない方がいいかも
-	 */
-	private long[] time = new long[256];
+	private Key[] key = new Key[256];
 
 	private BMSPlayerInputDevice lastKeyDevice;
 	private ArrayList<BMSPlayerInputDevice> devices;
-	/**
-	 * 0-9キーのON/OFF状態
-	 */
-	boolean[] numberstate = new boolean[10];
-	/**
-	 * 0-9キーの最終更新時間
-	 */
-	long[] numtime = new long[10];
-	/**
-	 * F1-F12キーのON/OFF状態
-	 */
-	boolean[] functionstate = new boolean[12];
-	/**
-	 * F1-F12キーの最終更新時間
-	 */
-	long[] functiontime = new long[12];
+	
+	private Key[] numberKey = new Key[10];
+	private Key[] functionKey = new Key[12];
 
 	long starttime;
 
@@ -126,8 +105,7 @@ public class BMSPlayerInputProcessor {
 	private boolean enterPressed;
 	private boolean deletePressed;
 
-	boolean[] cursor = new boolean[4];
-	long[] cursortime = new long[4];
+	private Key[] cursor = new Key[4];
 
 	private Type type = Type.KEYBOARD;
 	
@@ -168,7 +146,7 @@ public class BMSPlayerInputProcessor {
 	public void setStartTime(long starttime) {
 		this.starttime = starttime;
 		if (starttime != 0) {
-			Arrays.fill(time, 0);
+			resetKeyTime();
 			keylog.clear();
 			kbinput.clear();
 			for (BMControllerInputProcessor bm : bminput) {
@@ -178,24 +156,47 @@ public class BMSPlayerInputProcessor {
 		midiinput.setStartTime(starttime);
 	}
 
+	// get set methods for key
 	public long getStartTime() {
 		return starttime;
 	}
 
-	public long[] getTime() {
-		return time;
+	public long getKeyTime(int i) {
+		return key[i].getPressTime();
 	}
 
-	public void setTime(long[] l) {
-		time = l;
+	public void setKeyTime(int i, long time) {
+		key[i].setTime(time);
+	}
+	
+	public void resetKeyTime(int i) {
+		key[i].resetTime();
+	}
+	
+	public void resetKeyTime() {
+		for (int i = 0; i < getKeyLength(); i++)
+			key[i].resetTime();
 	}
 
-	public boolean[] getKeystate() {
-		return keystate;
+	public boolean getKeyState(int i) {
+		return key[i].getIsPressed();
 	}
 
-	public void setKeystate(boolean[] b) {
-		keystate = b;
+	public void setKeyState(int i, boolean state) {
+		key[i].setState(state);
+	}
+	
+	public void resetKeyState() {
+		for (int i = 0; i < getKeyLength(); i++)
+			key[i].setState(false);
+	}
+	
+	public boolean checkIfKeyPressed(int i) {
+		return key[i].checkIfPressed();
+	}
+	
+	public int getKeyLength() {
+		return key.length;
 	}
 
 	public BMSPlayerInputDevice getLastKeyChangedDevice() {
@@ -210,10 +211,8 @@ public class BMSPlayerInputProcessor {
 		// KB, コントローラー, Midiの各ボタンについて排他的処理を実施
 		int[] kbkeys = playconfig.getKeyboardConfig().getKeyAssign();
 		boolean[] exclusive = new boolean[kbkeys.length];
-		for(int i = kbkeys.length;i < keystate.length;i++) {
-			keystate[i] = false;
-			time[i] = 0;
-		}
+		resetKeyState();
+		resetKeyTime();
 		
 		int kbcount = setPlayConfig0(kbkeys,  exclusive);
 		
@@ -276,29 +275,21 @@ public class BMSPlayerInputProcessor {
 	public void setEnable(boolean enable) {
 		this.enable = enable;
 		if(!enable) {
-			Arrays.fill(keystate, false);
-			Arrays.fill(time, 0);
+			resetKeyState();
+			resetKeyTime();
 			for (BMSPlayerInputDevice device : devices) {
 				device.clear();
 			}
 		}
-	}
-	
-	public boolean[] getNumberState() {
-		return numberstate;
-	}
-
-	public long[] getNumberTime() {
-		return numtime;
 	}
 
 	public void keyChanged(BMSPlayerInputDevice device, long presstime, int i, boolean pressed) {
 		if (!enable) {
 			return;
 		}
-		if (keystate[i] != pressed) {
-			keystate[i] = pressed;
-			time[i] = presstime;
+		if (getKeyState(i) != pressed) {
+			setKeyState(i, pressed);
+			setKeyTime(i, presstime);
 			lastKeyDevice = device;
 			if (this.getStartTime() != 0) {
 				keylog.add((int) presstime, i, pressed);
@@ -318,17 +309,36 @@ public class BMSPlayerInputProcessor {
 		return startPressed;
 	}
 
-	public boolean[] getCursorState() {
-		return cursor;
+	// methods for cursor
+	public boolean getCursorState(int i) {
+		return cursor[i].getIsPressed();
 	}
 
-	public long[] getCursorTime() {
-		return cursortime;
+	public long getCursorTime(int i) {
+		return cursor[i].getPressTime();
 	}
 
-	public void setCursorState(boolean[] cursor) {
-		this.cursor = cursor;
+	public void setCursorState(int i, boolean state) {
+		this.cursor[i].setState(state);
 	}
+	
+	public void setCursorTime(int i, long state) {
+		this.cursor[i].setTime(state);
+	}
+	
+	public void resetCursorTime(int i) {
+		this.cursor[i].resetTime();
+	}
+	
+	public void setCursor(int i, boolean state, long time) {
+		this.cursor[i].setState(state);
+		this.cursor[i].setTime(time);
+	}
+	
+	public boolean checkIfCursorPressed(int i) {
+		return cursor[i].checkIfPressed();
+	}
+	
 
 	public boolean isExitPressed() {
 		return exitPressed;
@@ -353,23 +363,60 @@ public class BMSPlayerInputProcessor {
 	public void setDeletePressed(boolean deletePressed) {
 		this.deletePressed = deletePressed;
 	}
-
-	public boolean[] getFunctionstate() {
-		return functionstate;
+	
+	// methods for numberKey
+	public boolean getNumberState(int i) {
+		return numberKey[i].getIsPressed();
 	}
 
-	public void setFunctionstate(boolean[] functionstate) {
-		this.functionstate = functionstate;
+	public long getNumberTime(int i) {
+		return numberKey[i].getPressTime();
+	}
+	
+	public void resetNumberTime(int i) {
+		numberKey[i].resetTime();
+	}
+	
+	public void setNumberState(int i, boolean state, long time) {
+		numberKey[i].setState(state);
+		numberKey[i].setTime(time);
+	}
+	
+	public boolean checkIfNumberPressed(int i) {
+		return numberKey[i].checkIfPressed();
 	}
 
-	public long[] getFunctiontime() {
-		return functiontime;
+	// methods for functionKey
+	public boolean getFunctionstate(int i) {
+		return functionKey[i].getIsPressed();
 	}
 
-	public void setFunctiontime(long[] functiontime) {
-		this.functiontime = functiontime;
+	public void setFunctionstate(int i, boolean state) {
+		functionKey[i].setState(state);
 	}
 
+	public long getFunctiontime(int i) {
+		return functionKey[i].getPressTime();
+	}
+
+	public void setFunctiontime(int i, long time) {
+		functionKey[i].setTime(time);
+	}
+	
+	public void resetFunctionTime(int i) {
+		functionKey[i].resetTime();
+	}
+	
+	public void setFunction(int i, boolean state, long time) {
+		functionKey[i].setState(state);
+		functionKey[i].setTime(time);
+	}
+
+	public boolean checkIfFunctionPressed(int i) {
+		return functionKey[i].checkIfPressed();
+	}
+	
+	
 	public boolean isSelectPressed() {
 		return selectPressed;
 	}
