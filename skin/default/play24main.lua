@@ -47,7 +47,7 @@ local function is_judge_detail_ms()
 	return skin_config.option["Judge Detail"] == 912
 end
 
-local function timer_key_on(index)
+local function timer_key_bomb(index)
 	if index <= 9 then
 		return 50 + index
 	else
@@ -60,6 +60,22 @@ local function timer_key_hold(index)
 		return 70 + index
 	else
 		return 1200 + index
+	end
+end
+
+local function timer_key_on(index)
+	if index <= 9 then
+		return 100 + index
+	else
+		return 1400 + index
+	end
+end
+
+local function timer_key_off(index)
+	if index <= 9 then
+		return 120 + index
+	else
+		return 1600 + index
 	end
 end
 
@@ -90,6 +106,26 @@ local header = {
 	filepath = filepath
 }
 
+local key_wbs = { 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0 }
+local function get_key_wbs(i)
+	local k = (i - 1) % 26
+	if k >= 24 then
+		return 2
+	end
+	return key_wbs[k % 12 + 1]
+end
+local function get_key_wbss(i)
+	local k = (i - 1) % 26
+	if k == 24 then
+		return 2
+	elseif k == 25 then
+		return 3
+	end
+	return key_wbs[k % 12 + 1]
+end
+
+local keybeam_order = { 1, 3, 5, 6, 8, 10, 12, 13, 15, 17, 18, 20, 22, 24, 2, 4, 7, 9, 11, 14, 16, 19, 21, 23, 25, 26 }
+
 local function main()
 	local skin = {}
 	for k, v in pairs(header) do
@@ -101,6 +137,12 @@ local function main()
 	if is_half_lane() then
 		geometry.lanes_x = 56
 		geometry.lanes_w = 560
+		geometry.lane_w_width = 36
+		geometry.lane_b_width = 0
+		geometry.lane_s_width = 56
+		geometry.note_w_width = 36
+		geometry.note_b_width = 36
+		geometry.note_s_width = 56
 		geometry.title_align = 0
 		geometry.judge_x = 240
 		geometry.ready_x = 161
@@ -113,6 +155,12 @@ local function main()
 	if is_hybrid_lane() then
 		geometry.lanes_x = 40
 		geometry.lanes_w = 578
+		geometry.lane_w_width = 32
+		geometry.lane_b_width = 8
+		geometry.lane_s_width = 50
+		geometry.note_w_width = 32
+		geometry.note_b_width = 30
+		geometry.note_s_width = 50
 		geometry.title_align = 0
 		geometry.judge_x = 240
 		geometry.ready_x = 154
@@ -125,6 +173,12 @@ local function main()
 	if is_separate_lane() then
 		geometry.lanes_x = 20
 		geometry.lanes_w = 950
+		geometry.lane_w_width = 40
+		geometry.lane_b_width = 32
+		geometry.lane_s_width = 70
+		geometry.note_w_width = 40
+		geometry.note_b_width = 32
+		geometry.note_s_width = 70
 		geometry.title_align = 1
 		geometry.judge_x = 375
 		geometry.ready_x = 320
@@ -133,6 +187,32 @@ local function main()
 		geometry.bga_y = 440
 		geometry.bga_w = 256
 		geometry.bga_h = 256
+	end
+	do
+		geometry.notes_x = {}
+		geometry.notes_w = {}
+		geometry.lanes_center_x = {}
+		local x = geometry.lanes_x + geometry.lane_s_width
+		local adjust_w = (geometry.note_w_width - geometry.lane_w_width) / 2
+		local adjust_b = (geometry.note_b_width - geometry.lane_b_width) / 2
+		for i = 1, 24 do
+			if get_key_wbs(i) == 0 then
+				geometry.notes_x[i] = x - adjust_w
+				geometry.notes_w[i] = geometry.note_w_width
+				x = x + geometry.lane_w_width
+			else
+				geometry.notes_x[i] = x - adjust_b
+				geometry.notes_w[i] = geometry.note_b_width
+				x = x + geometry.lane_b_width
+			end
+		end
+		geometry.notes_x[25] = geometry.lanes_x
+		geometry.notes_w[25] = geometry.lane_s_width
+		geometry.notes_x[26] = geometry.lanes_x
+		geometry.notes_w[26] = geometry.lane_s_width
+		for i = 1, 26 do
+			geometry.lanes_center_x[i] = geometry.notes_x[i] + geometry.notes_w[i] / 2
+		end
 	end
 
 	skin.source = {
@@ -258,9 +338,9 @@ local function main()
 		return {id = prefix..name, src = 10, x = 0, y = src_y, w = 1810, h = 192, divx = 10, timer = timer_func(index), cycle = 160}
 	end
 	for i = 1, 26 do
-		table.insert(skin.image, bomb_image(i, "bomb1-", 0, timer_key_on))
-		table.insert(skin.image, bomb_image(i, "bomb2-", 576, timer_key_on))
-		table.insert(skin.image, bomb_image(i, "bomb3-", 192, timer_key_on))
+		table.insert(skin.image, bomb_image(i, "bomb1-", 0, timer_key_bomb))
+		table.insert(skin.image, bomb_image(i, "bomb2-", 576, timer_key_bomb))
+		table.insert(skin.image, bomb_image(i, "bomb3-", 192, timer_key_bomb))
 		table.insert(skin.image, bomb_image(i, "hold-", 384, timer_key_hold))
 	end
 	if is_half_lane() then
@@ -276,35 +356,35 @@ local function main()
 		table.insert(skin.image, {id = "keys", src = 7, x = 0, y = 480, w = 950, h = 80})
 	end
 	skin.imageset = {}
-	local function keybeam_imageset(index)
-		local name = index
-		if index == 25 then
-			name = "su"
-		elseif index == 26 then
-			name = "sd"
+	do
+		local wbs = { "w", "b", "s" }
+		for i = 1, 26 do
+			local name = i
+			if i == 25 then
+				name = "su"
+			elseif i == 26 then
+				name = "sd"
+			end
+			local img_suffix = wbs[get_key_wbs(i) + 1]
+			table.insert(skin.imageset, {
+				id = "keybeam"..name,
+				ref = value_judge(i),
+				images = { "keybeam-"..img_suffix, "keybeam-"..img_suffix.."-pg" }
+			})
 		end
-		local wbs
-		if index == 25 or index == 26 then
-			wbs = "s"
-		elseif index % 2 == 1 then
-			wbs = "w"
-		else
-			wbs = "b"
-		end
-		return {id = "keybeam"..name, ref = value_judge(index), images = { "keybeam-"..wbs, "keybeam-"..wbs.."-pg" }}
-	end
-	local function bomb_imageset(index)
-		local name = index
-		if index == 25 then
-			name = "su"
-		elseif index == 26 then
-			name = "sd"
-		end
-		return {id = index + 109, ref = value_judge(index), images = { "bomb1-"..name, "bomb2-"..name, "bomb1-"..name, "bomb3-"..name }}
 	end
 	for i = 1, 26 do
-		table.insert(skin.imageset, keybeam_imageset(i))
-		table.insert(skin.imageset, bomb_imageset(i))
+		local name = i
+		if i == 25 then
+			name = "su"
+		elseif i == 26 then
+			name = "sd"
+		end
+		table.insert(skin.imageset, {
+			id = i + 109,
+			ref = value_judge(i),
+			images = { "bomb1-"..name, "bomb2-"..name, "bomb1-"..name, "bomb3-"..name }
+		})
 	end
 	skin.value = {
 		{id = 400, src = 5, x = 0, y = 0, w = 240, h = 24, divx = 10, digit = 4, ref = 91},
@@ -409,94 +489,13 @@ local function main()
 			}}
 		}
 	}
-	if is_half_lane() then
-		skin.note.dst = {
-			{x = 112,y = 140,w = 36,h = 580},
-			{x = 130,y = 140,w = 36,h = 580},
-			{x = 148,y = 140,w = 36,h = 580},
-			{x = 166,y = 140,w = 36,h = 580},
-			{x = 184,y = 140,w = 36,h = 580},
-			{x = 220,y = 140,w = 36,h = 580},
-			{x = 238,y = 140,w = 36,h = 580},
-			{x = 256,y = 140,w = 36,h = 580},
-			{x = 274,y = 140,w = 36,h = 580},
-			{x = 292,y = 140,w = 36,h = 580},
-			{x = 310,y = 140,w = 36,h = 580},
-			{x = 328,y = 140,w = 36,h = 580},
-			{x = 364,y = 140,w = 36,h = 580},
-			{x = 382,y = 140,w = 36,h = 580},
-			{x = 400,y = 140,w = 36,h = 580},
-			{x = 418,y = 140,w = 36,h = 580},
-			{x = 436,y = 140,w = 36,h = 580},
-			{x = 472,y = 140,w = 36,h = 580},
-			{x = 490,y = 140,w = 36,h = 580},
-			{x = 508,y = 140,w = 36,h = 580},
-			{x = 526,y = 140,w = 36,h = 580},
-			{x = 544,y = 140,w = 36,h = 580},
-			{x = 562,y = 140,w = 36,h = 580},
-			{x = 580,y = 140,w = 36,h = 580},
-			{x = 56,y = 140,w = 56,h = 580},
-			{x = 56,y = 140,w = 56,h = 580}
-		}
-	end
-	if is_hybrid_lane() then
-		skin.note.dst = {
-			{x = 90,y = 140,w = 32,h = 580},
-			{x = 111,y = 140,w = 30,h = 580},
-			{x = 130,y = 140,w = 32,h = 580},
-			{x = 151,y = 140,w = 30,h = 580},
-			{x = 170,y = 140,w = 32,h = 580},
-			{x = 202,y = 140,w = 32,h = 580},
-			{x = 223,y = 140,w = 30,h = 580},
-			{x = 242,y = 140,w = 32,h = 580},
-			{x = 263,y = 140,w = 30,h = 580},
-			{x = 282,y = 140,w = 32,h = 580},
-			{x = 303,y = 140,w = 30,h = 580},
-			{x = 322,y = 140,w = 32,h = 580},
-			{x = 354,y = 140,w = 32,h = 580},
-			{x = 375,y = 140,w = 30,h = 580},
-			{x = 394,y = 140,w = 32,h = 580},
-			{x = 415,y = 140,w = 30,h = 580},
-			{x = 434,y = 140,w = 32,h = 580},
-			{x = 466,y = 140,w = 32,h = 580},
-			{x = 487,y = 140,w = 30,h = 580},
-			{x = 506,y = 140,w = 32,h = 580},
-			{x = 527,y = 140,w = 30,h = 580},
-			{x = 546,y = 140,w = 32,h = 580},
-			{x = 567,y = 140,w = 30,h = 580},
-			{x = 586,y = 140,w = 32,h = 580},
-			{x = 40,y = 140,w = 50,h = 580},
-			{x = 40,y = 140,w = 50,h = 580}
-		}
-	end
-	if is_separate_lane() then
-		skin.note.dst = {
-			{x = 90,y = 140,w = 40,h = 580},
-			{x = 130,y = 140,w = 32,h = 580},
-			{x = 162,y = 140,w = 40,h = 580},
-			{x = 202,y = 140,w = 32,h = 580},
-			{x = 234,y = 140,w = 40,h = 580},
-			{x = 274,y = 140,w = 40,h = 580},
-			{x = 314,y = 140,w = 32,h = 580},
-			{x = 346,y = 140,w = 40,h = 580},
-			{x = 386,y = 140,w = 32,h = 580},
-			{x = 418,y = 140,w = 40,h = 580},
-			{x = 458,y = 140,w = 32,h = 580},
-			{x = 490,y = 140,w = 40,h = 580},
-			{x = 530,y = 140,w = 40,h = 580},
-			{x = 570,y = 140,w = 32,h = 580},
-			{x = 602,y = 140,w = 40,h = 580},
-			{x = 642,y = 140,w = 32,h = 580},
-			{x = 674,y = 140,w = 40,h = 580},
-			{x = 714,y = 140,w = 40,h = 580},
-			{x = 754,y = 140,w = 32,h = 580},
-			{x = 786,y = 140,w = 40,h = 580},
-			{x = 826,y = 140,w = 32,h = 580},
-			{x = 858,y = 140,w = 40,h = 580},
-			{x = 898,y = 140,w = 32,h = 580},
-			{x = 930,y = 140,w = 40,h = 580},
-			{x = 20,y = 140,w = 70,h = 580},
-			{x = 20,y = 140,w = 70,h = 580}
+	skin.note.dst = {}
+	for i = 1, 26 do
+		skin.note.dst[i] = {
+			x = geometry.notes_x[i],
+			y = 140,
+			w = geometry.notes_w[i],
+			h = 580
 		}
 	end
 	skin.gauge = {
@@ -610,266 +609,54 @@ local function main()
 			{x = geometry.lanes_x, y = 100, w = geometry.lanes_w, h = 80}
 		}}
 	}
-	if is_half_lane() then
-		append_all(skin.destination, {
-			{id = "keybeam1",timer = 101,loop = 100,offset = 50,dst = {{time = 0,x = 121,y = 140,w = 18,h = 580},{time = 100,x = 112,w = 36}}},
-			{id = "keybeam3",timer = 103,loop = 100,offset = 50,dst = {{time = 0,x = 157,y = 140,w = 18,h = 580},{time = 100,x = 148,w = 36}}},
-			{id = "keybeam5",timer = 105,loop = 100,offset = 50,dst = {{time = 0,x = 193,y = 140,w = 18,h = 580},{time = 100,x = 184,w = 36}}},
-			{id = "keybeam6",timer = 106,loop = 100,offset = 50,dst = {{time = 0,x = 229,y = 140,w = 18,h = 580},{time = 100,x = 220,w = 36}}},
-			{id = "keybeam8",timer = 108,loop = 100,offset = 50,dst = {{time = 0,x = 265,y = 140,w = 18,h = 580},{time = 100,x = 256,w = 36}}},
-			{id = "keybeam10",timer = 1410,loop = 100,offset = 50,dst = {{time = 0,x = 301,y = 140,w = 18,h = 580},{time = 100,x = 292,w = 36}}},
-			{id = "keybeam12",timer = 1412,loop = 100,offset = 50,dst = {{time = 0,x = 337,y = 140,w = 18,h = 580},{time = 100,x = 328,w = 36}}},
-			{id = "keybeam13",timer = 1413,loop = 100,offset = 50,dst = {{time = 0,x = 373,y = 140,w = 18,h = 580},{time = 100,x = 364,w = 36}}},
-			{id = "keybeam15",timer = 1415,loop = 100,offset = 50,dst = {{time = 0,x = 409,y = 140,w = 18,h = 580},{time = 100,x = 400,w = 36}}},
-			{id = "keybeam17",timer = 1417,loop = 100,offset = 50,dst = {{time = 0,x = 445,y = 140,w = 18,h = 580},{time = 100,x = 436,w = 36}}},
-			{id = "keybeam18",timer = 1418,loop = 100,offset = 50,dst = {{time = 0,x = 481,y = 140,w = 18,h = 580},{time = 100,x = 472,w = 36}}},
-			{id = "keybeam20",timer = 1420,loop = 100,offset = 50,dst = {{time = 0,x = 517,y = 140,w = 18,h = 580},{time = 100,x = 508,w = 36}}},
-			{id = "keybeam22",timer = 1422,loop = 100,offset = 50,dst = {{time = 0,x = 553,y = 140,w = 18,h = 580},{time = 100,x = 544,w = 36}}},
-			{id = "keybeam24",timer = 1424,loop = 100,offset = 50,dst = {{time = 0,x = 589,y = 140,w = 18,h = 580},{time = 100,x = 580,w = 36}}},
-			{id = "keybeam2",timer = 102,loop = 100,offset = 50,dst = {{time = 0,x = 139,y = 140,w = 18,h = 580},{time = 100,x = 130,w = 36}}},
-			{id = "keybeam4",timer = 104,loop = 100,offset = 50,dst = {{time = 0,x = 175,y = 140,w = 18,h = 580},{time = 100,x = 166,w = 36}}},
-			{id = "keybeam7",timer = 107,loop = 100,offset = 50,dst = {{time = 0,x = 247,y = 140,w = 18,h = 580},{time = 100,x = 238,w = 36}}},
-			{id = "keybeam9",timer = 109,loop = 100,offset = 50,dst = {{time = 0,x = 283,y = 140,w = 18,h = 580},{time = 100,x = 274,w = 36}}},
-			{id = "keybeam11",timer = 1411,loop = 100,offset = 50,dst = {{time = 0,x = 319,y = 140,w = 18,h = 580},{time = 100,x = 310,w = 36}}},
-			{id = "keybeam14",timer = 1414,loop = 100,offset = 50,dst = {{time = 0,x = 391,y = 140,w = 18,h = 580},{time = 100,x = 382,w = 36}}},
-			{id = "keybeam16",timer = 1416,loop = 100,offset = 50,dst = {{time = 0,x = 427,y = 140,w = 18,h = 580},{time = 100,x = 418,w = 36}}},
-			{id = "keybeam19",timer = 1419,loop = 100,offset = 50,dst = {{time = 0,x = 499,y = 140,w = 18,h = 580},{time = 100,x = 490,w = 36}}},
-			{id = "keybeam21",timer = 1421,loop = 100,offset = 50,dst = {{time = 0,x = 535,y = 140,w = 18,h = 580},{time = 100,x = 526,w = 36}}},
-			{id = "keybeam23",timer = 1423,loop = 100,offset = 50,dst = {{time = 0,x = 571,y = 140,w = 18,h = 580},{time = 100,x = 562,w = 36}}},
-			{id = "keybeamsu",timer = 1425,loop = 100,offset = 50,dst = {{time = 0,x = 70,y = 140,w = 28,h = 580},{time = 100,x = 56,w = 56}}},
-			{id = "keybeamsd",timer = 1426,loop = 100,offset = 50,dst = {{time = 0,x = 70,y = 140,w = 28,h = 580},{time = 100,x = 56,w = 56}}},
-			
-			{id = 15, offset = 50, dst = {
-				{x = 56, y = 137, w = 560, h = 6}
-			}},
-			{id = "notes"},
-			
-			{id = 110,timer = 51,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 50,y = 28,w = 180,h = 192},{time = 160}}},
-			{id = 111,timer = 52,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 68,y = 28,w = 180,h = 192},{time = 160}}},
-			{id = 112,timer = 53,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 86,y = 28,w = 180,h = 192},{time = 160}}},
-			{id = 113,timer = 54,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 104,y = 28,w = 180,h = 192},{time = 160}}},
-			{id = 114,timer = 55,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 122,y = 28,w = 180,h = 192},{time = 160}}},
-			{id = 115,timer = 56,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 158,y = 28,w = 180,h = 192},{time = 160}}},
-			{id = 116,timer = 57,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 176,y = 28,w = 180,h = 192},{time = 160}}},
-			{id = 117,timer = 58,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 194,y = 28,w = 180,h = 192},{time = 160}}},
-			{id = 118,timer = 59,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 212,y = 28,w = 180,h = 192},{time = 160}}},
-			{id = 119,timer = 1010,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 230,y = 28,w = 180,h = 192},{time = 160}}},
-			{id = 120,timer = 1011,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 248,y = 28,w = 180,h = 192},{time = 160}}},
-			{id = 121,timer = 1012,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 266,y = 28,w = 180,h = 192},{time = 160}}},
-			{id = 122,timer = 1013,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 302,y = 28,w = 180,h = 192},{time = 160}}},
-			{id = 123,timer = 1014,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 320,y = 28,w = 180,h = 192},{time = 160}}},
-			{id = 124,timer = 1015,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 338,y = 28,w = 180,h = 192},{time = 160}}},
-			{id = 125,timer = 1016,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 356,y = 28,w = 180,h = 192},{time = 160}}},
-			{id = 126,timer = 1017,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 374,y = 28,w = 180,h = 192},{time = 160}}},
-			{id = 127,timer = 1018,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 410,y = 28,w = 180,h = 192},{time = 160}}},
-			{id = 128,timer = 1019,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 428,y = 28,w = 180,h = 192},{time = 160}}},
-			{id = 129,timer = 1020,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 446,y = 28,w = 180,h = 192},{time = 160}}},
-			{id = 130,timer = 1021,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 464,y = 28,w = 180,h = 192},{time = 160}}},
-			
-			{id = "hold-1",timer = 71,blend = 2,offset = 50,dst = {{time = 0,x = 50,y = 28,w = 180,h = 192}}},
-			{id = "hold-2",timer = 72,blend = 2,offset = 50,dst = {{time = 0,x = 68,y = 28,w = 180,h = 192}}},
-			{id = "hold-3",timer = 73,blend = 2,offset = 50,dst = {{time = 0,x = 86,y = 28,w = 180,h = 192}}},
-			{id = "hold-4",timer = 74,blend = 2,offset = 50,dst = {{time = 0,x = 104,y = 28,w = 180,h = 192}}},
-			{id = "hold-5",timer = 75,blend = 2,offset = 50,dst = {{time = 0,x = 122,y = 28,w = 180,h = 192}}},
-			{id = "hold-6",timer = 76,blend = 2,offset = 50,dst = {{time = 0,x = 158,y = 28,w = 180,h = 192}}},
-			{id = "hold-7",timer = 77,blend = 2,offset = 50,dst = {{time = 0,x = 176,y = 28,w = 180,h = 192}}},
-			{id = "hold-8",timer = 78,blend = 2,offset = 50,dst = {{time = 0,x = 194,y = 28,w = 180,h = 192}}},
-			{id = "hold-9",timer = 79,blend = 2,offset = 50,dst = {{time = 0,x = 212,y = 28,w = 180,h = 192}}},
-			{id = "hold-10",timer = 1210,blend = 2,offset = 50,dst = {{time = 0,x = 230,y = 28,w = 180,h = 192}}},
-			{id = "hold-11",timer = 1211,blend = 2,offset = 50,dst = {{time = 0,x = 248,y = 28,w = 180,h = 192}}},
-			{id = "hold-12",timer = 1212,blend = 2,offset = 50,dst = {{time = 0,x = 266,y = 28,w = 180,h = 192}}},
-			{id = "hold-13",timer = 1213,blend = 2,offset = 50,dst = {{time = 0,x = 302,y = 28,w = 180,h = 192}}},
-			{id = "hold-14",timer = 1214,blend = 2,offset = 50,dst = {{time = 0,x = 320,y = 28,w = 180,h = 192}}},
-			{id = "hold-15",timer = 1215,blend = 2,offset = 50,dst = {{time = 0,x = 338,y = 28,w = 180,h = 192}}},
-			{id = "hold-16",timer = 1216,blend = 2,offset = 50,dst = {{time = 0,x = 356,y = 28,w = 180,h = 192}}},
-			{id = "hold-17",timer = 1217,blend = 2,offset = 50,dst = {{time = 0,x = 374,y = 28,w = 180,h = 192}}},
-			{id = "hold-18",timer = 1218,blend = 2,offset = 50,dst = {{time = 0,x = 410,y = 28,w = 180,h = 192}}},
-			{id = "hold-19",timer = 1219,blend = 2,offset = 50,dst = {{time = 0,x = 428,y = 28,w = 180,h = 192}}},
-			{id = "hold-20",timer = 1220,blend = 2,offset = 50,dst = {{time = 0,x = 446,y = 28,w = 180,h = 192}}},
-			{id = "hold-21",timer = 1221,blend = 2,offset = 50,dst = {{time = 0,x = 464,y = 28,w = 180,h = 192}}},
-			{id = "hold-22",timer = 1222,blend = 2,offset = 50,dst = {{time = 0,x = 482,y = 28,w = 180,h = 192}}},
-			{id = "hold-23",timer = 1223,blend = 2,offset = 50,dst = {{time = 0,x = 500,y = 28,w = 180,h = 192}}},
-			{id = "hold-24",timer = 1224,blend = 2,offset = 50,dst = {{time = 0,x = 518,y = 28,w = 180,h = 192}}},
-			{id = "hold-su",timer = 1225,blend = 2,offset = 50,dst = {{time = 0,x = 4,y = 28,w = 180,h = 192}}},
-			{id = "hold-sd",timer = 1226,blend = 2,offset = 50,dst = {{time = 0,x = 4,y = 28,w = 180,h = 192}}}
+	for _, i in ipairs(keybeam_order) do
+		name = i
+		if i == 25 then
+			name = "su"
+		elseif i == 26 then
+			name = "sd"
+		end
+		table.insert(skin.destination, {
+			id = "keybeam"..name,
+			timer = timer_key_on(i),
+			loop = 100,
+			offset = 50,
+			dst = {
+				{ time = 0, x = geometry.notes_x[i] + geometry.notes_w[i] / 4, y = 140, w = geometry.notes_w[i] / 2, h = 580 },
+				{ time = 100, x = geometry.notes_x[i], w = geometry.notes_w[i] }
+			}
 		})
 	end
-	if is_hybrid_lane() then
-		append_all(skin.destination, {
-			{id = "keybeam1",timer = 101,loop = 100,offset = 50,dst = {{time = 0,x = 98,y = 140,w = 16,h = 580},{time = 100,x = 90,w = 32}}},
-			{id = "keybeam3",timer = 103,loop = 100,offset = 50,dst = {{time = 0,x = 138,y = 140,w = 16,h = 580},{time = 100,x = 130,w = 32}}},
-			{id = "keybeam5",timer = 105,loop = 100,offset = 50,dst = {{time = 0,x = 178,y = 140,w = 16,h = 580},{time = 100,x = 170,w = 32}}},
-			{id = "keybeam6",timer = 106,loop = 100,offset = 50,dst = {{time = 0,x = 210,y = 140,w = 16,h = 580},{time = 100,x = 202,w = 32}}},
-			{id = "keybeam8",timer = 108,loop = 100,offset = 50,dst = {{time = 0,x = 250,y = 140,w = 16,h = 580},{time = 100,x = 242,w = 32}}},
-			{id = "keybeam10",timer = 1410,loop = 100,offset = 50,dst = {{time = 0,x = 290,y = 140,w = 16,h = 580},{time = 100,x = 282,w = 32}}},
-			{id = "keybeam12",timer = 1412,loop = 100,offset = 50,dst = {{time = 0,x = 330,y = 140,w = 16,h = 580},{time = 100,x = 322,w = 32}}},
-			{id = "keybeam13",timer = 1413,loop = 100,offset = 50,dst = {{time = 0,x = 362,y = 140,w = 16,h = 580},{time = 100,x = 354,w = 32}}},
-			{id = "keybeam15",timer = 1415,loop = 100,offset = 50,dst = {{time = 0,x = 402,y = 140,w = 16,h = 580},{time = 100,x = 394,w = 32}}},
-			{id = "keybeam17",timer = 1417,loop = 100,offset = 50,dst = {{time = 0,x = 442,y = 140,w = 16,h = 580},{time = 100,x = 434,w = 32}}},
-			{id = "keybeam18",timer = 1418,loop = 100,offset = 50,dst = {{time = 0,x = 474,y = 140,w = 16,h = 580},{time = 100,x = 466,w = 32}}},
-			{id = "keybeam20",timer = 1420,loop = 100,offset = 50,dst = {{time = 0,x = 514,y = 140,w = 16,h = 580},{time = 100,x = 506,w = 32}}},
-			{id = "keybeam22",timer = 1422,loop = 100,offset = 50,dst = {{time = 0,x = 554,y = 140,w = 16,h = 580},{time = 100,x = 546,w = 32}}},
-			{id = "keybeam24",timer = 1424,loop = 100,offset = 50,dst = {{time = 0,x = 594,y = 140,w = 16,h = 580},{time = 100,x = 586,w = 32}}},
-			{id = "keybeam2",timer = 102,loop = 100,offset = 50,dst = {{time = 0,x = 118,y = 140,w = 15,h = 580},{time = 100,x = 111,w = 30}}},
-			{id = "keybeam4",timer = 104,loop = 100,offset = 50,dst = {{time = 0,x = 158,y = 140,w = 15,h = 580},{time = 100,x = 151,w = 30}}},
-			{id = "keybeam7",timer = 107,loop = 100,offset = 50,dst = {{time = 0,x = 230,y = 140,w = 15,h = 580},{time = 100,x = 223,w = 30}}},
-			{id = "keybeam9",timer = 109,loop = 100,offset = 50,dst = {{time = 0,x = 270,y = 140,w = 15,h = 580},{time = 100,x = 263,w = 30}}},
-			{id = "keybeam11",timer = 1411,loop = 100,offset = 50,dst = {{time = 0,x = 310,y = 140,w = 15,h = 580},{time = 100,x = 303,w = 30}}},
-			{id = "keybeam14",timer = 1414,loop = 100,offset = 50,dst = {{time = 0,x = 382,y = 140,w = 15,h = 580},{time = 100,x = 375,w = 30}}},
-			{id = "keybeam16",timer = 1416,loop = 100,offset = 50,dst = {{time = 0,x = 422,y = 140,w = 15,h = 580},{time = 100,x = 415,w = 30}}},
-			{id = "keybeam19",timer = 1419,loop = 100,offset = 50,dst = {{time = 0,x = 494,y = 140,w = 15,h = 580},{time = 100,x = 487,w = 30}}},
-			{id = "keybeam21",timer = 1421,loop = 100,offset = 50,dst = {{time = 0,x = 534,y = 140,w = 15,h = 580},{time = 100,x = 527,w = 30}}},
-			{id = "keybeam23",timer = 1423,loop = 100,offset = 50,dst = {{time = 0,x = 574,y = 140,w = 15,h = 580},{time = 100,x = 567,w = 30}}},
-			{id = "keybeamsu",timer = 1425,loop = 100,offset = 50,dst = {{time = 0,x = 52,y = 140,w = 25,h = 580},{time = 100,x = 40,w = 50}}},
-			{id = "keybeamsd",timer = 1426,loop = 100,offset = 50,dst = {{time = 0,x = 52,y = 140,w = 25,h = 580},{time = 100,x = 40,w = 50}}},
-			
-			{id = 15, offset = 50, dst = {
-				{x = 40, y = 137, w = 578, h = 6}
-			}},
-			{id = "notes"},
-			
-			{id = 110,timer = 51,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 26,y = 28,w = 180,h = 192},{time = 160}}},
-			{id = 111,timer = 52,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 46,y = 28,w = 180,h = 192},{time = 160}}},
-			{id = 112,timer = 53,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 66,y = 28,w = 180,h = 192},{time = 160}}},
-			{id = 113,timer = 54,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 86,y = 28,w = 180,h = 192},{time = 160}}},
-			{id = 114,timer = 55,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 106,y = 28,w = 180,h = 192},{time = 160}}},
-			{id = 115,timer = 56,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 138,y = 28,w = 180,h = 192},{time = 160}}},
-			{id = 116,timer = 57,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 158,y = 28,w = 180,h = 192},{time = 160}}},
-			{id = 117,timer = 58,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 178,y = 28,w = 180,h = 192},{time = 160}}},
-			{id = 118,timer = 59,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 198,y = 28,w = 180,h = 192},{time = 160}}},
-			{id = 119,timer = 1010,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 218,y = 28,w = 180,h = 192},{time = 160}}},
-			{id = 120,timer = 1011,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 238,y = 28,w = 180,h = 192},{time = 160}}},
-			{id = 121,timer = 1012,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 258,y = 28,w = 180,h = 192},{time = 160}}},
-			{id = 122,timer = 1013,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 290,y = 28,w = 180,h = 192},{time = 160}}},
-			{id = 123,timer = 1014,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 310,y = 28,w = 180,h = 192},{time = 160}}},
-			{id = 124,timer = 1015,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 330,y = 28,w = 180,h = 192},{time = 160}}},
-			{id = 125,timer = 1016,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 350,y = 28,w = 180,h = 192},{time = 160}}},
-			{id = 126,timer = 1017,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 370,y = 28,w = 180,h = 192},{time = 160}}},
-			{id = 127,timer = 1018,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 402,y = 28,w = 180,h = 192},{time = 160}}},
-			{id = 128,timer = 1019,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 422,y = 28,w = 180,h = 192},{time = 160}}},
-			{id = 129,timer = 1020,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 442,y = 28,w = 180,h = 192},{time = 160}}},
-			{id = 130,timer = 1021,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 462,y = 28,w = 180,h = 192},{time = 160}}},
-			{id = 131,timer = 1022,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 482,y = 28,w = 180,h = 192},{time = 160}}},
-			{id = 132,timer = 1023,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 502,y = 28,w = 180,h = 192},{time = 160}}},
-			{id = 133,timer = 1024,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 522,y = 28,w = 180,h = 192},{time = 160}}},
-			{id = 134,timer = 1025,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = -15,y = 28,w = 180,h = 192},{time = 160}}},
-			{id = 135,timer = 1026,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = -15,y = 28,w = 180,h = 192},{time = 160}}},
-			
-			{id = "hold-1",timer = 71,blend = 2,offset = 50,dst = {{time = 0,x = 26,y = 28,w = 180,h = 192}}},
-			{id = "hold-2",timer = 72,blend = 2,offset = 50,dst = {{time = 0,x = 46,y = 28,w = 180,h = 192}}},
-			{id = "hold-3",timer = 73,blend = 2,offset = 50,dst = {{time = 0,x = 66,y = 28,w = 180,h = 192}}},
-			{id = "hold-4",timer = 74,blend = 2,offset = 50,dst = {{time = 0,x = 86,y = 28,w = 180,h = 192}}},
-			{id = "hold-5",timer = 75,blend = 2,offset = 50,dst = {{time = 0,x = 106,y = 28,w = 180,h = 192}}},
-			{id = "hold-6",timer = 76,blend = 2,offset = 50,dst = {{time = 0,x = 138,y = 28,w = 180,h = 192}}},
-			{id = "hold-7",timer = 77,blend = 2,offset = 50,dst = {{time = 0,x = 158,y = 28,w = 180,h = 192}}},
-			{id = "hold-8",timer = 78,blend = 2,offset = 50,dst = {{time = 0,x = 178,y = 28,w = 180,h = 192}}},
-			{id = "hold-9",timer = 79,blend = 2,offset = 50,dst = {{time = 0,x = 198,y = 28,w = 180,h = 192}}},
-			{id = "hold-10",timer = 1210,blend = 2,offset = 50,dst = {{time = 0,x = 218,y = 28,w = 180,h = 192}}},
-			{id = "hold-11",timer = 1211,blend = 2,offset = 50,dst = {{time = 0,x = 238,y = 28,w = 180,h = 192}}},
-			{id = "hold-12",timer = 1212,blend = 2,offset = 50,dst = {{time = 0,x = 258,y = 28,w = 180,h = 192}}},
-			{id = "hold-13",timer = 1213,blend = 2,offset = 50,dst = {{time = 0,x = 290,y = 28,w = 180,h = 192}}},
-			{id = "hold-14",timer = 1214,blend = 2,offset = 50,dst = {{time = 0,x = 310,y = 28,w = 180,h = 192}}},
-			{id = "hold-15",timer = 1215,blend = 2,offset = 50,dst = {{time = 0,x = 330,y = 28,w = 180,h = 192}}},
-			{id = "hold-16",timer = 1216,blend = 2,offset = 50,dst = {{time = 0,x = 350,y = 28,w = 180,h = 192}}},
-			{id = "hold-17",timer = 1217,blend = 2,offset = 50,dst = {{time = 0,x = 370,y = 28,w = 180,h = 192}}},
-			{id = "hold-18",timer = 1218,blend = 2,offset = 50,dst = {{time = 0,x = 402,y = 28,w = 180,h = 192}}},
-			{id = "hold-19",timer = 1219,blend = 2,offset = 50,dst = {{time = 0,x = 422,y = 28,w = 180,h = 192}}},
-			{id = "hold-20",timer = 1220,blend = 2,offset = 50,dst = {{time = 0,x = 442,y = 28,w = 180,h = 192}}},
-			{id = "hold-21",timer = 1221,blend = 2,offset = 50,dst = {{time = 0,x = 462,y = 28,w = 180,h = 192}}},
-			{id = "hold-22",timer = 1222,blend = 2,offset = 50,dst = {{time = 0,x = 482,y = 28,w = 180,h = 192}}},
-			{id = "hold-23",timer = 1223,blend = 2,offset = 50,dst = {{time = 0,x = 502,y = 28,w = 180,h = 192}}},
-			{id = "hold-24",timer = 1224,blend = 2,offset = 50,dst = {{time = 0,x = 522,y = 28,w = 180,h = 192}}},
-			{id = "hold-su",timer = 1225,blend = 2,offset = 50,dst = {{time = 0,x = -15,y = 28,w = 180,h = 192}}},
-			{id = "hold-sd",timer = 1226,blend = 2,offset = 50,dst = {{time = 0,x = -15,y = 28,w = 180,h = 192}}}
+	table.insert(skin.destination, {id = 15, offset = 50, dst = { {x = geometry.lanes_x, y = 137, w = geometry.lanes_w, h = 6} }})
+	table.insert(skin.destination, {id = "notes"})
+	for i = 1, 26 do
+		table.insert(skin.destination, {
+			id = 109 + i,
+			timer = timer_key_bomb(i),
+			blend = 2,
+			loop = -1,
+			offset = 50,
+			dst = {
+				{ time = 0, x = geometry.lanes_center_x[i] - 80, y = 28, w = 180, h = 192 },
+				{ time = 160 }
+			}
 		})
 	end
-	if is_separate_lane() then
-		append_all(skin.destination, {
-			{id = "keybeam1",timer = 101,loop = 100,offset = 50,dst = {{time = 0,x = 100,y = 140,w = 20,h = 580},{time = 100,x = 90,w = 40}}},
-			{id = "keybeam2",timer = 102,loop = 100,offset = 50,dst = {{time = 0,x = 138,y = 140,w = 16,h = 580},{time = 100,x = 130,w = 32}}},
-			{id = "keybeam3",timer = 103,loop = 100,offset = 50,dst = {{time = 0,x = 172,y = 140,w = 20,h = 580},{time = 100,x = 162,w = 40}}},
-			{id = "keybeam4",timer = 104,loop = 100,offset = 50,dst = {{time = 0,x = 210,y = 140,w = 16,h = 580},{time = 100,x = 202,w = 32}}},
-			{id = "keybeam5",timer = 105,loop = 100,offset = 50,dst = {{time = 0,x = 244,y = 140,w = 20,h = 580},{time = 100,x = 234,w = 40}}},
-			{id = "keybeam6",timer = 106,loop = 100,offset = 50,dst = {{time = 0,x = 284,y = 140,w = 20,h = 580},{time = 100,x = 274,w = 40}}},
-			{id = "keybeam7",timer = 107,loop = 100,offset = 50,dst = {{time = 0,x = 322,y = 140,w = 16,h = 580},{time = 100,x = 314,w = 32}}},
-			{id = "keybeam8",timer = 108,loop = 100,offset = 50,dst = {{time = 0,x = 356,y = 140,w = 20,h = 580},{time = 100,x = 346,w = 40}}},
-			{id = "keybeam9",timer = 109,loop = 100,offset = 50,dst = {{time = 0,x = 394,y = 140,w = 16,h = 580},{time = 100,x = 386,w = 32}}},
-			{id = "keybeam10",timer = 1410,loop = 100,offset = 50,dst = {{time = 0,x = 428,y = 140,w = 20,h = 580},{time = 100,x = 418,w = 40}}},
-			{id = "keybeam11",timer = 1411,loop = 100,offset = 50,dst = {{time = 0,x = 466,y = 140,w = 16,h = 580},{time = 100,x = 458,w = 32}}},
-			{id = "keybeam12",timer = 1412,loop = 100,offset = 50,dst = {{time = 0,x = 500,y = 140,w = 20,h = 580},{time = 100,x = 490,w = 40}}},
-			{id = "keybeam13",timer = 1413,loop = 100,offset = 50,dst = {{time = 0,x = 540,y = 140,w = 20,h = 580},{time = 100,x = 530,w = 40}}},
-			{id = "keybeam14",timer = 1414,loop = 100,offset = 50,dst = {{time = 0,x = 578,y = 140,w = 16,h = 580},{time = 100,x = 570,w = 32}}},
-			{id = "keybeam15",timer = 1415,loop = 100,offset = 50,dst = {{time = 0,x = 612,y = 140,w = 20,h = 580},{time = 100,x = 602,w = 40}}},
-			{id = "keybeam16",timer = 1416,loop = 100,offset = 50,dst = {{time = 0,x = 650,y = 140,w = 16,h = 580},{time = 100,x = 642,w = 32}}},
-			{id = "keybeam17",timer = 1417,loop = 100,offset = 50,dst = {{time = 0,x = 684,y = 140,w = 20,h = 580},{time = 100,x = 674,w = 40}}},
-			{id = "keybeam18",timer = 1418,loop = 100,offset = 50,dst = {{time = 0,x = 724,y = 140,w = 20,h = 580},{time = 100,x = 714,w = 40}}},
-			{id = "keybeam19",timer = 1419,loop = 100,offset = 50,dst = {{time = 0,x = 762,y = 140,w = 16,h = 580},{time = 100,x = 754,w = 32}}},
-			{id = "keybeam20",timer = 1420,loop = 100,offset = 50,dst = {{time = 0,x = 796,y = 140,w = 20,h = 580},{time = 100,x = 786,w = 40}}},
-			{id = "keybeam21",timer = 1421,loop = 100,offset = 50,dst = {{time = 0,x = 834,y = 140,w = 16,h = 580},{time = 100,x = 826,w = 32}}},
-			{id = "keybeam22",timer = 1422,loop = 100,offset = 50,dst = {{time = 0,x = 868,y = 140,w = 20,h = 580},{time = 100,x = 858,w = 40}}},
-			{id = "keybeam23",timer = 1423,loop = 100,offset = 50,dst = {{time = 0,x = 906,y = 140,w = 16,h = 580},{time = 100,x = 898,w = 32}}},
-			{id = "keybeam24",timer = 1424,loop = 100,offset = 50,dst = {{time = 0,x = 940,y = 140,w = 20,h = 580},{time = 100,x = 930,w = 40}}},
-			{id = "keybeamsu",timer = 1425,loop = 100,offset = 50,dst = {{time = 0,x = 37,y = 140,w = 35,h = 580},{time = 100,x = 20,w = 70}}},
-			{id = "keybeamsd",timer = 1426,loop = 100,offset = 50,dst = {{time = 0,x = 37,y = 140,w = 35,h = 580},{time = 100,x = 20,w = 70}}},
-			
-			{id = 15, offset = 50, dst = {
-				{x = 20, y = 137, w = 950, h = 6}
-			}},
-			{id = "notes"},
-			
-			{id = 110,timer = 51,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = -26,y = -62,w = 322,h = 344},{time = 160}}},
-			{id = 111,timer = 52,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 14,y = -62,w = 322,h = 344},{time = 160}}},
-			{id = 112,timer = 53,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 46,y = -62,w = 322,h = 344},{time = 160}}},
-			{id = 113,timer = 54,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 86,y = -62,w = 322,h = 344},{time = 160}}},
-			{id = 114,timer = 55,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 118,y = -62,w = 322,h = 344},{time = 160}}},
-			{id = 115,timer = 56,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 158,y = -62,w = 322,h = 344},{time = 160}}},
-			{id = 116,timer = 57,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 198,y = -62,w = 322,h = 344},{time = 160}}},
-			{id = 117,timer = 58,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 230,y = -62,w = 322,h = 344},{time = 160}}},
-			{id = 118,timer = 59,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 270,y = -62,w = 322,h = 344},{time = 160}}},
-			{id = 119,timer = 1010,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 302,y = -62,w = 322,h = 344},{time = 160}}},
-			{id = 120,timer = 1011,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 342,y = -62,w = 322,h = 344},{time = 160}}},
-			{id = 121,timer = 1012,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 374,y = -62,w = 322,h = 344},{time = 160}}},
-			{id = 122,timer = 1013,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 414,y = -62,w = 322,h = 344},{time = 160}}},
-			{id = 123,timer = 1014,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 454,y = -62,w = 322,h = 344},{time = 160}}},
-			{id = 124,timer = 1015,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 486,y = -62,w = 322,h = 344},{time = 160}}},
-			{id = 125,timer = 1016,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 526,y = -62,w = 322,h = 344},{time = 160}}},
-			{id = 126,timer = 1017,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 558,y = -62,w = 322,h = 344},{time = 160}}},
-			{id = 127,timer = 1018,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 598,y = -62,w = 322,h = 344},{time = 160}}},
-			{id = 128,timer = 1019,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 638,y = -62,w = 322,h = 344},{time = 160}}},
-			{id = 129,timer = 1020,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 670,y = -62,w = 322,h = 344},{time = 160}}},
-			{id = 130,timer = 1021,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 710,y = -62,w = 322,h = 344},{time = 160}}},
-			{id = 131,timer = 1022,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 742,y = -62,w = 322,h = 344},{time = 160}}},
-			{id = 132,timer = 1023,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 782,y = -62,w = 322,h = 344},{time = 160}}},
-			{id = 133,timer = 1024,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = 814,y = -62,w = 322,h = 344},{time = 160}}},
-			{id = 134,timer = 1025,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = -76,y = -62,w = 322,h = 344},{time = 160}}},
-			{id = 135,timer = 1026,loop = -1,blend = 2,offset = 50,dst = {{time = 0,x = -76,y = -62,w = 322,h = 344},{time = 160}}},
-			
-			{id = "hold-1",timer = 71,blend = 2,offset = 50,dst = {{time = 0,x = -26,y = -62,w = 322,h = 344}}},
-			{id = "hold-2",timer = 72,blend = 2,offset = 50,dst = {{time = 0,x = 14,y = -62,w = 322,h = 344}}},
-			{id = "hold-3",timer = 73,blend = 2,offset = 50,dst = {{time = 0,x = 46,y = -62,w = 322,h = 344}}},
-			{id = "hold-4",timer = 74,blend = 2,offset = 50,dst = {{time = 0,x = 86,y = -62,w = 322,h = 344}}},
-			{id = "hold-5",timer = 75,blend = 2,offset = 50,dst = {{time = 0,x = 118,y = -62,w = 322,h = 344}}},
-			{id = "hold-6",timer = 76,blend = 2,offset = 50,dst = {{time = 0,x = 158,y = -62,w = 322,h = 344}}},
-			{id = "hold-7",timer = 77,blend = 2,offset = 50,dst = {{time = 0,x = 198,y = -62,w = 322,h = 344}}},
-			{id = "hold-8",timer = 78,blend = 2,offset = 50,dst = {{time = 0,x = 230,y = -62,w = 322,h = 344}}},
-			{id = "hold-9",timer = 79,blend = 2,offset = 50,dst = {{time = 0,x = 270,y = -62,w = 322,h = 344}}},
-			{id = "hold-10",timer = 1210,blend = 2,offset = 50,dst = {{time = 0,x = 302,y = -62,w = 322,h = 344}}},
-			{id = "hold-11",timer = 1211,blend = 2,offset = 50,dst = {{time = 0,x = 342,y = -62,w = 322,h = 344}}},
-			{id = "hold-12",timer = 1212,blend = 2,offset = 50,dst = {{time = 0,x = 374,y = -62,w = 322,h = 344}}},
-			{id = "hold-13",timer = 1213,blend = 2,offset = 50,dst = {{time = 0,x = 414,y = -62,w = 322,h = 344}}},
-			{id = "hold-14",timer = 1214,blend = 2,offset = 50,dst = {{time = 0,x = 454,y = -62,w = 322,h = 344}}},
-			{id = "hold-15",timer = 1215,blend = 2,offset = 50,dst = {{time = 0,x = 486,y = -62,w = 322,h = 344}}},
-			{id = "hold-16",timer = 1216,blend = 2,offset = 50,dst = {{time = 0,x = 526,y = -62,w = 322,h = 344}}},
-			{id = "hold-17",timer = 1217,blend = 2,offset = 50,dst = {{time = 0,x = 558,y = -62,w = 322,h = 344}}},
-			{id = "hold-18",timer = 1218,blend = 2,offset = 50,dst = {{time = 0,x = 598,y = -62,w = 322,h = 344}}},
-			{id = "hold-19",timer = 1219,blend = 2,offset = 50,dst = {{time = 0,x = 638,y = -62,w = 322,h = 344}}},
-			{id = "hold-20",timer = 1220,blend = 2,offset = 50,dst = {{time = 0,x = 670,y = -62,w = 322,h = 344}}},
-			{id = "hold-21",timer = 1221,blend = 2,offset = 50,dst = {{time = 0,x = 710,y = -62,w = 322,h = 344}}},
-			{id = "hold-22",timer = 1222,blend = 2,offset = 50,dst = {{time = 0,x = 742,y = -62,w = 322,h = 344}}},
-			{id = "hold-23",timer = 1223,blend = 2,offset = 50,dst = {{time = 0,x = 782,y = -62,w = 322,h = 344}}},
-			{id = "hold-24",timer = 1224,blend = 2,offset = 50,dst = {{time = 0,x = 814,y = -62,w = 322,h = 344}}},
-			{id = "hold-su",timer = 1225,blend = 2,offset = 50,dst = {{time = 0,x = -76,y = -62,w = 322,h = 344}}},
-			{id = "hold-sd",timer = 1226,blend = 2,offset = 50,dst = {{time = 0,x = -76,y = -62,w = 322,h = 344}}}
+	for i = 1, 26 do
+		name = i
+		if i == 25 then
+			name = "su"
+		elseif i == 26 then
+			name = "sd"
+		end
+		table.insert(skin.destination, {
+			id = "hold-"..name,
+			timer = timer_key_hold(i),
+			blend = 2,
+			offset = 50,
+			dst = {
+				{ time = 0, x = geometry.lanes_center_x[i] - 80, y = 28, w = 180, h = 192 }
+			}
 		})
 	end
 	append_all(skin.destination, {
