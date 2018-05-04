@@ -376,9 +376,17 @@ public class BMSPlayerInputProcessor {
 		return numberKey[i].getPressTime();
 	}
 	
+	public void resetNumberTime(int i) {
+		numberKey[i].resetTime();
+	}
+	
 	public void setNumberState(int i, boolean state, long time) {
 		numberKey[i].setState(state);
 		numberKey[i].setTime(time);
+	}
+	
+	public boolean checkIfNumberPressed(int i) {
+		return numberKey[i].checkIfPressed();
 	}
 
 	// methods for functionKey
@@ -398,11 +406,20 @@ public class BMSPlayerInputProcessor {
 		functionKey[i].setTime(time);
 	}
 	
+	public void resetFunctionTime(int i) {
+		functionKey[i].resetTime();
+	}
+	
 	public void setFunction(int i, boolean state, long time) {
 		functionKey[i].setState(state);
 		functionKey[i].setTime(time);
 	}
 
+	public boolean checkIfFunctionPressed(int i) {
+		return functionKey[i].checkIfPressed();
+	}
+	
+	
 	public boolean isSelectPressed() {
 		return selectPressed;
 	}

@@ -573,8 +573,8 @@ public class BarRenderer {
 			mov++;
 		}
 
-		if(input.getFunctionstate()[7] && input.getFunctiontime()[7] != 0) {
-			input.getFunctiontime()[7] = 0;
+		if(input.checkIfNumberPressed(7)) {
+			input.resetNumberTime(7);
 			if(getSelected() instanceof SongBar) {
 				SongData sd = ((SongBar) getSelected()).getSongData();
 
@@ -588,8 +588,8 @@ public class BarRenderer {
 				}
 			}
 		}
-		if(input.getFunctionstate()[8] && input.getFunctiontime()[8] != 0) {
-			input.getFunctiontime()[8] = 0;
+		if(input.checkIfNumberPressed(8)) {
+			input.resetNumberTime(8);
 			if(getSelected() instanceof SongBar) {
 				SongData sd = ((SongBar) getSelected()).getSongData();
 
