@@ -236,12 +236,8 @@ public class NoteShuffleModifier extends PatternModifier {
 						}
 
 						// �깕�꺖�깂�걣�걗�굥�꺃�꺖�꺍�굮潁��ｃ걣�쇇�뵟�걮�겒�걚�꺃�꺖�꺍�겓�꺀�꺍���깲�겓�뀓營�
-						while (!(note.isEmpty() || primary.isEmpty())) {
-							int r = (int) (Math.random() * primary.size());
-							random[primary.get(r)] = note.get(0);
-							primary.remove(r);
-							note.remove(0);
-						}
+						while (!(note.isEmpty() || primary.isEmpty())) 
+							makeOtherLaneRandom(random, note, primary, -1);
 
 						// noteLane�걣令뷩겎�겒�걢�겂�걼�굢
 						// lastNoteTime�걣弱뤵걬�걚�꺃�꺖�꺍�걢�굢�젂�빁�겓營��걚�겍�걚�걦
@@ -470,12 +466,8 @@ public class NoteShuffleModifier extends PatternModifier {
 		}
 
 		// �깕�꺖�깂�걣�걗�굥�꺃�꺖�꺍�굮潁��ｃ걣�쇇�뵟�걮�겒�걚�꺃�꺖�꺍�겓�뀓營�
-		while (!(noteLane.isEmpty() || primaryLane.isEmpty())) {
-			int r = (int) (Math.random() * primaryLane.size());
-			result[primaryLane.get(r)] = noteLane.get(0);
-			primaryLane.remove(r);
-			noteLane.remove(0);
-		}
+		while (!(noteLane.isEmpty() || primaryLane.isEmpty()))
+			makeOtherLaneRandom(result, noteLane, primaryLane, -1);
 
 		// noteLane�걣令뷩겎�겒�걢�겂�걼�굢
 		// lastNoteTime�걣弱뤵걬�걚�꺃�꺖�꺍�걢�굢�젂�빁�겓營��걚�겍�걚�걦
@@ -493,10 +485,7 @@ public class NoteShuffleModifier extends PatternModifier {
 					minLane.add(rendaLane.get(i));
 				}
 			}
-			r = (int) (Math.random() * minLane.size());
-			result[minLane.get(r)] = noteLane.get(0);
-			rendaLane.remove((Integer) minLane.get(r));
-			noteLane.remove(0);
+			makeOtherLaneRandom(result, noteLane, minLane, -1);
 		}
 
 		primaryLane.addAll(rendaLane);
@@ -644,30 +633,26 @@ public class NoteShuffleModifier extends PatternModifier {
 		// �깕�꺖�깂�걣�걗�굥�꺃�꺖�꺍�굮潁��ｆ돀�걣�쇇�뵟�걲�굥�꺃�꺖�꺍�겓�빓�걚�젂�겓�뀓營�
 		while (!(noteLane.isEmpty() || mainRendaLane.isEmpty())) {
 			int maxRenda = Integer.MIN_VALUE;
-			int r;
-			for (int i = 0; i < mainRendaLane.size(); i++) {
-				if (maxRenda < laneRendaCount[mainRendaLane.get(i)]) {
+		
+			for (int i = 0; i < mainRendaLane.size(); i++) 
+				if (maxRenda < laneRendaCount[mainRendaLane.get(i)])
 					maxRenda = laneRendaCount[mainRendaLane.get(i)];
-				}
-			}
+
 			ArrayList<Integer> maxLane = new ArrayList<Integer>(mainRendaLane.size());
-			for (int i = 0; i < mainRendaLane.size(); i++) {
-				if (maxRenda == laneRendaCount[mainRendaLane.get(i)]) {
+			for (int i = 0; i < mainRendaLane.size(); i++) 
+				if (maxRenda == laneRendaCount[mainRendaLane.get(i)]) 
 					maxLane.add(mainRendaLane.get(i));
-				}
-			}
-			r = (int) (Math.random() * maxLane.size());
-			result[maxLane.get(r)] = noteLane.get(0);
-			laneRendaCount[maxLane.get(r)]++;
-			mainRendaLane.remove((Integer) maxLane.get(r));
-			noteLane.remove(0);
+
+			makeOtherLaneRandom(result, noteLane, mainRendaLane, 1);
 		}
 
 		// noteLane�걣令뷩겎�겒�걢�겂�걼�굢餘뗣굤�겗�깕�꺖�깉�굮潁��ｆ돀�겓�겒�굢�겒�걚�꺃�꺖�꺍�걢�굢�꺀�꺍���깲�겓營��걚�겍�걚�걦
-		makeOtherLaneRandom(result, noteLane, noRendaLane, 0);
+		while (!(noteLane.isEmpty() || noRendaLane.isEmpty()))
+			makeOtherLaneRandom(result, noteLane, noRendaLane, 0);
 
 		// noteLane�걣令뷩겎�겒�걢�겂�걼�굢餘뗣굤�겗�깕�꺖�깉�굮�꺀�꺍���깲�겓營��걚�겍�걚�걦
-		makeOtherLaneRandom(result, noteLane, rendaLane, 1);
+		while (!(noteLane.isEmpty() || rendaLane.isEmpty()))
+			makeOtherLaneRandom(result, noteLane, rendaLane, 1);
 
 		// 餘뗣굤�굮�꺀�꺍���깲�겓營��걚�겍�걚�걦
 		noRendaLane.addAll(rendaLane);
@@ -676,7 +661,8 @@ public class NoteShuffleModifier extends PatternModifier {
 		while (!otherLane.isEmpty()) {
 			int r = (int) (Math.random() * noRendaLane.size());
 			result[noRendaLane.get(r)] = otherLane.get(0);
-			if(rendaLane.indexOf(noRendaLane.get(r)) == -1) laneRendaCount[noRendaLane.get(r)] = 0;
+			if(rendaLane.indexOf(noRendaLane.get(r)) == -1)
+				laneRendaCount[noRendaLane.get(r)] = 0;
 			noRendaLane.remove(r);
 			otherLane.remove(0);
 		}
@@ -685,33 +671,6 @@ public class NoteShuffleModifier extends PatternModifier {
 	}
 
 
-	private static void makeOtherLaneRandom(int[] result, List<Integer> noteLane, List<Integer> toRandomLane, int lineCountBias) {
-		while (!(noteLane.isEmpty() || toRandomLane.isEmpty())) {
-			int r = (int) (Math.random() * toRandomLane.size());
-			result[toRandomLane.get(r)] = noteLane.get(0);
-			if(lineCountBias == 0)
-				laneRendaCount[toRandomLane.get(r)] = 0;
-			else if(lineCountBias == 1)
-				laneRendaCount[toRandomLane.get(r)]++;
-			toRandomLane.remove(r);
-			noteLane.remove(0);
-		}
-	}
-
-
-	private static void checkOriginalLane(Note[] notes, List<Integer> originalLane, List<Integer> noteLane,
-			List<Integer> otherLane) {
-		while (!originalLane.isEmpty()) {
-			if (notes[originalLane.get(0)] != null && (notes[originalLane.get(0)] instanceof NormalNote || notes[originalLane.get(0)] instanceof LongNote)) {
-				noteLane.add(originalLane.get(0));
-			} else {
-				otherLane.add(originalLane.get(0));
-			}
-			originalLane.remove(0);
-		}
-	}
-
-	
 	//7to9
 	private static int[] sevenToNine(int[] keys, int[] activeln, Note[] notes, int[] lastNoteTime, int now, int duration) {
 		/**
@@ -845,4 +804,31 @@ public class NoteShuffleModifier extends PatternModifier {
 			}
 		}
 	}
+	
+
+	private static void makeOtherLaneRandom(int[] result, List<Integer> noteLane, List<Integer> toRandomLane, int lineCountBias) {
+		int r = (int) (Math.random() * toRandomLane.size());
+		result[toRandomLane.get(r)] = noteLane.get(0);
+		if(lineCountBias == 0)
+			laneRendaCount[toRandomLane.get(r)] = 0;
+		else if(lineCountBias == 1)
+			laneRendaCount[toRandomLane.get(r)]++;
+		toRandomLane.remove(r);
+		noteLane.remove(0);
+
+	}
+
+	private static void checkOriginalLane(Note[] notes, List<Integer> originalLane, List<Integer> noteLane,
+			List<Integer> otherLane) {
+		while (!originalLane.isEmpty()) {
+			if (notes[originalLane.get(0)] != null && (notes[originalLane.get(0)] instanceof NormalNote || notes[originalLane.get(0)] instanceof LongNote)) {
+				noteLane.add(originalLane.get(0));
+			} else {
+				otherLane.add(originalLane.get(0));
+			}
+			originalLane.remove(0);
+		}
+	}
+
+	
 }
