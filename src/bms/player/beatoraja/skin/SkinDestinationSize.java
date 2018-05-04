@@ -12,6 +12,12 @@ public class SkinDestinationSize {
 		this.dstw= dstw;
 		this.dsth= dsth;
 	}
+	public SkinDestinationSize(float dstx, float dsty, float dstw, float dsth) {
+		this.dstx= (int)dstx;
+		this.dsty= (int)dsty;
+		this.dstw= (int)dstw;
+		this.dsth= (int)dsth;
+	}
 	public int getDstx() {
 		return dstx;
 	}

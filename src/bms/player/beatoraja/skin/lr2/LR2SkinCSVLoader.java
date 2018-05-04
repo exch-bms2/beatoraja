@@ -219,9 +219,10 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 						values[4] += values[6];
 						values[6] = -values[6];
 					}
-					part.setDestination(values[2], values[3] * dstw / srcw,
+					SkinDestinationSize dstSize = new SkinDestinationSize( values[3] * dstw / srcw,
 							dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
-							values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
+							values[6] * dsth / srch);
+					part.setDestination(values[2], dstSize, values[7], values[8], values[9], values[10], values[11],
 							values[12], values[13], values[14], values[15], values[16], values[17], values[18],
 							values[19], values[20], readOffset(str, 21));
 				}
@@ -288,8 +289,10 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 			public void execute(String[] str) {
 				if (num != null) {
 					int[] values = parseInt(str);
-					num.setDestination(values[2], values[3] * dstw / srcw, dsth - (values[4] + values[6]) * dsth / srch,
-							values[5] * dstw / srcw, values[6] * dsth / srch, values[7], values[8], values[9],
+					SkinDestinationSize dstSize = new SkinDestinationSize( values[3] * dstw / srcw,
+							dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
+							values[6] * dsth / srch);
+					num.setDestination(values[2], dstSize, values[7], values[8], values[9],
 							values[10], values[11], values[12], values[13], values[14], values[15], values[16],
 							values[17], values[18], values[19], values[20], readOffset(str, 21));
 				}
@@ -320,9 +323,10 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 			public void execute(String[] str) {
 				if (text != null) {
 					int[] values = parseInt(str);
-					text.setDestination(values[2], values[3] * dstw / srcw,
+					SkinDestinationSize dstSize = new SkinDestinationSize( values[3] * dstw / srcw,
 							dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
-							values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
+							values[6] * dsth / srch);
+					text.setDestination(values[2], dstSize, values[7], values[8], values[9], values[10], values[11],
 							values[12], values[13], values[14], values[15], values[16], values[17], values[18],
 							values[19], values[20], readOffset(str, 21));
 					if(text.isEditable() && text.getReferenceID() == SkinProperty.STRING_SEARCHWORD && skin instanceof MusicSelectSkin) {
@@ -379,9 +383,10 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 			public void execute(String[] str) {
 				if (slider != null) {
 					int[] values = parseInt(str);
-					slider.setDestination(values[2], values[3] * dstw / srcw,
+					SkinDestinationSize dstSize = new SkinDestinationSize( values[3] * dstw / srcw,
 							dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
-							values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
+							values[6] * dsth / srch);
+					slider.setDestination(values[2], dstSize, values[7], values[8], values[9], values[10], values[11],
 							values[12], values[13], values[14], values[15], values[16], values[17], values[18],
 							values[19], values[20], readOffset(str, 21));
 				}
@@ -455,8 +460,10 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 						values[4] += values[6];
 						values[6] = -values[6];
 					}
-					bar.setDestination(values[2], values[3] * dstw / srcw, dsth - (values[4] + values[6]) * dsth / srch,
-							values[5] * dstw / srcw, values[6] * dsth / srch, values[7], values[8], values[9],
+					SkinDestinationSize dstSize = new SkinDestinationSize( values[3] * dstw / srcw,
+							dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
+							values[6] * dsth / srch);
+					bar.setDestination(values[2], dstSize, values[7], values[8], values[9],
 							values[10], values[11], values[12], values[13], values[14], values[15], values[16],
 							values[17], values[18], values[19], values[20], readOffset(str, 21));
 				}
@@ -524,9 +531,10 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 			public void execute(String[] str) {
 				if (button != null) {
 					int[] values = parseInt(str);
-					button.setDestination(values[2], values[3] * dstw / srcw,
+					SkinDestinationSize dstSize = new SkinDestinationSize( values[3] * dstw / srcw,
 							dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
-							values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
+							values[6] * dsth / srch);
+					button.setDestination(values[2], dstSize, values[7], values[8], values[9], values[10], values[11],
 							values[12], values[13], values[14], values[15], values[16], values[17], values[18],
 							values[19], values[20], readOffset(str, 21));
 				}
@@ -553,9 +561,10 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 			public void execute(String[] str) {
 				if (onmouse != null) {
 					int[] values = parseInt(str);
-					onmouse.setDestination(values[2], values[3] * dstw / srcw,
+					SkinDestinationSize dstSize = new SkinDestinationSize( values[3] * dstw / srcw,
 							dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
-							values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
+							values[6] * dsth / srch);
+					onmouse.setDestination(values[2], dstSize, values[7], values[8], values[9], values[10], values[11],
 							values[12], values[13], values[14], values[15], values[16], values[17], values[18],
 							values[19], values[20], readOffset(str, 21));
 				}
@@ -661,9 +670,10 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 						values[4] += values[6];
 						values[6] = -values[6];
 					}
-					PMcharaPart.setDestination(values[2], values[3] * dstw / srcw,
+					SkinDestinationSize dstSize = new SkinDestinationSize( values[3] * dstw / srcw,
 							dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
-							values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
+							values[6] * dsth / srch);
+					PMcharaPart.setDestination(values[2], dstSize, values[7], values[8], values[9], values[10], values[11],
 							values[12], values[13], values[14], values[15], values[16], values[17], values[18],
 							values[19], values[20], readOffset(str, 21));
 				}

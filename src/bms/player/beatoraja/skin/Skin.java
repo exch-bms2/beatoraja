@@ -120,38 +120,43 @@ public class Skin {
 		objects.add(object);
 	}
 
-	public void setDestination(SkinObject object, long time, float x, float y, float w, float h, int acc, int a,
-			int r, int g, int b, int blend, int filter, int angle, int center, int loop, int timer, int op1, int op2,
+	public void setDestination(SkinObject object, long time, SkinDestinationSize destSize, int acc, int a,
+			int r, int g, int b, int blend, int filter, int angle, int center, int loop, int timer,  int op1, int op2,
 			int op3, int offset) {
-		object.setDestination(time, x * dw, y * dh, w * dw, h * dh, acc, a, r, g, b, blend, filter, angle, center,
+		destSize = new SkinDestinationSize(destSize.getDstx() * dw, destSize.getDsty() * dh, destSize.getDstw() * dw, destSize.getDsth() * dh);
+		object.setDestination(time, destSize, acc, a, r, g, b, blend, filter, angle, center,
 				loop, timer, op1, op2, op3, offset);
 	}
 
-	public void setDestination(SkinObject object, long time, float x, float y, float w, float h, int acc, int a,
+	public void setDestination(SkinObject object, long time, SkinDestinationSize destSize, int acc, int a,
 			int r, int g, int b, int blend, int filter, int angle, int center, int loop, int timer, int op1, int op2,
 			int op3, int[] offset) {
-		object.setDestination(time, x * dw, y * dh, w * dw, h * dh, acc, a, r, g, b, blend, filter, angle, center,
+		destSize = new SkinDestinationSize(destSize.getDstx() * dw, destSize.getDsty() * dh, destSize.getDstw() * dw, destSize.getDsth() * dh);
+		object.setDestination(time, destSize, acc, a, r, g, b, blend, filter, angle, center,
 				loop, timer, op1, op2, op3, offset);
 	}
 
-	public void setDestination(SkinObject object, long time, float x, float y, float w, float h, int acc, int a,
+	public void setDestination(SkinObject object, long time, SkinDestinationSize destSize, int acc, int a,
 			int r, int g, int b, int blend, int filter, int angle, int center, int loop, int timer, int[] op) {
-		object.setDestination(time, x * dw, y * dh, w * dw, h * dh, acc, a, r, g, b, blend, filter, angle, center,
+		destSize = new SkinDestinationSize(destSize.getDstx() * dw, destSize.getDsty() * dh, destSize.getDstw() * dw, destSize.getDsth() * dh);
+		object.setDestination(time, destSize, acc, a, r, g, b, blend, filter, angle, center,
 				loop, timer, op);
 	}
 
-	public void addNumber(SkinNumber number, long time, float x, float y, float w, float h, int acc, int a, int r,
+	public void addNumber(SkinNumber number, long time, SkinDestinationSize destSize, int acc, int a, int r,
 			int g, int b, int blend, int filter, int angle, int center, int loop, int timer, int op1, int op2, int op3, int offset) {
-		number.setDestination(time, x * dw, y * dh, w * dw, h * dh, acc, a, r, g, b, blend, filter, angle, center,
+		destSize = new SkinDestinationSize(destSize.getDstx() * dw, destSize.getDsty() * dh, destSize.getDstw() * dw, destSize.getDsth() * dh);
+		number.setDestination(time, destSize, acc, a, r, g, b, blend, filter, angle, center,
 				loop, timer, op1, op2, op3, offset);
 		objects.add(number);
 	}
 
-	public SkinImage addImage(TextureRegion tr, long time, float x, float y, float w, float h, int acc, int a,
+	public SkinImage addImage(TextureRegion tr, long time, SkinDestinationSize destSize, int acc, int a,
 			int r, int g, int b, int blend, int filter, int angle, int center, int loop, int timer, int op1, int op2,
 			int op3, int offset) {
 		SkinImage si = new SkinImage(tr);
-		si.setDestination(time, x * dw, y * dh, w * dw, h * dh, acc, a, r, g, b, blend, filter, angle, center, loop,
+		destSize = new SkinDestinationSize(destSize.getDstx() * dw, destSize.getDsty() * dh, destSize.getDstw() * dw, destSize.getDsth() * dh);
+		si.setDestination(time, destSize, acc, a, r, g, b, blend, filter, angle, center, loop,
 				timer, op1, op2, op3, offset);
 		objects.add(si);
 		return si;
@@ -945,9 +950,11 @@ public class Skin {
 							part = new SkinImage(images, timer, loopTime);
 							add(part);
 							for(int i = 0; i < (loopFrame+increaseRate); i++) {
-								part.setDestination((int)(frameTime*i),dstSize.getDstx()+dstxywh[i][0]*dstSize.getDstw()/size[0], dstSize.getDsty()+dstSize.getDsth()-(dstxywh[i][1]+dstxywh[i][3])*dstSize.getDsth()/size[1], dstxywh[i][2]*dstSize.getDstw()/size[0], dstxywh[i][3]*dstSize.getDsth()/size[1],3,alphaAngle[i][0],255,255,255,1,0,alphaAngle[i][1],0,-1,timer,op[0],op[1],op[2],0);
+								dstSize = new SkinDestinationSize(dstSize.getDstx()+dstxywh[i][0]*dstSize.getDstw()/size[0], dstSize.getDsty()+dstSize.getDsth()-(dstxywh[i][1]+dstxywh[i][3])*dstSize.getDsth()/size[1], dstxywh[i][2]*dstSize.getDstw()/size[0], dstxywh[i][3]*dstSize.getDsth()/size[1]);
+								part.setDestination((int)(frameTime*i),dstSize,3,alphaAngle[i][0],255,255,255,1,0,alphaAngle[i][1],0,-1,timer,op[0],op[1],op[2],0);
 							}
-							part.setDestination(loopTime-1,dstSize.getDstx()+dstxywh[(loopFrame+increaseRate)-1][0]*dstSize.getDstw()/size[0], dstSize.getDsty()+dstSize.getDsth()-(dstxywh[(loopFrame+increaseRate)-1][1]+dstxywh[(loopFrame+increaseRate)-1][3])*dstSize.getDsth()/size[1], dstxywh[(loopFrame+increaseRate)-1][2]*dstSize.getDstw()/size[0], dstxywh[(loopFrame+increaseRate)-1][3]*dstSize.getDsth()/size[1],3,alphaAngle[(loopFrame+increaseRate)-1][0],255,255,255,1,0,alphaAngle[(loopFrame+increaseRate)-1][1],0,-1,timer,op[0],op[1],op[2],skinOption.getDstOffset());
+							dstSize = new SkinDestinationSize(dstSize.getDstx()+dstxywh[(loopFrame+increaseRate)-1][0]*dstSize.getDstw()/size[0], dstSize.getDsty()+dstSize.getDsth()-(dstxywh[(loopFrame+increaseRate)-1][1]+dstxywh[(loopFrame+increaseRate)-1][3])*dstSize.getDsth()/size[1], dstxywh[(loopFrame+increaseRate)-1][2]*dstSize.getDstw()/size[0], dstxywh[(loopFrame+increaseRate)-1][3]*dstSize.getDsth()/size[1]);
+							part.setDestination(loopTime-1,dstSize ,3,alphaAngle[(loopFrame+increaseRate)-1][0],255,255,255,1,0,alphaAngle[(loopFrame+increaseRate)-1][1],0,-1,timer,op[0],op[1],op[2],skinOption.getDstOffset());
 						}
 						//�꺂�꺖�깤�뼀冶뗣깢�꺃�꺖�깲�걢�굢
 						TextureRegion[] images = new TextureRegion[dst[0].length() / 2 - (loop[motion]+1)];
@@ -959,9 +966,11 @@ public class Skin {
 						part = new SkinImage(images, timer, cycle - loopTime);
 						add(part);
 						for(int i = (loopFrame+increaseRate); i < dstxywh.length; i++) {
-							part.setDestination((int)(frameTime*i),dstSize.getDstx()+dstxywh[i][0]*dstSize.getDstw()/size[0], dstSize.getDsty()+dstSize.getDsth()-(dstxywh[i][1]+dstxywh[i][3])*dstSize.getDsth()/size[1], dstxywh[i][2] * dstSize.getDstw() / size[0], dstxywh[i][3] * dstSize.getDsth() / size[1],3,alphaAngle[i][0],255,255,255,1,0,alphaAngle[i][1],0,loopTime,timer,op[0],op[1],op[2],0);
+							dstSize = new SkinDestinationSize(dstSize.getDstx()+dstxywh[i][0]*dstSize.getDstw()/size[0], dstSize.getDsty()+dstSize.getDsth()-(dstxywh[i][1]+dstxywh[i][3])*dstSize.getDsth()/size[1], dstxywh[i][2]*dstSize.getDstw()/size[0], dstxywh[i][3]*dstSize.getDsth()/size[1]);
+							part.setDestination((int)(frameTime*i),dstSize,3,alphaAngle[i][0],255,255,255,1,0,alphaAngle[i][1],0,loopTime,timer,op[0],op[1],op[2],0);
 						}
-						part.setDestination(cycle,dstSize.getDstx()+dstxywh[dstxywh.length-1][0]*dstSize.getDstw()/size[0], dstSize.getDsty()+dstSize.getDsth()-(dstxywh[dstxywh.length-1][1]+dstxywh[dstxywh.length-1][3])*dstSize.getDsth()/size[1], dstxywh[dstxywh.length-1][2] * dstSize.getDstw() / size[0], dstxywh[dstxywh.length-1][3] * dstSize.getDsth() / size[1],3,alphaAngle[dstxywh.length-1][0],255,255,255,1,0,alphaAngle[dstxywh.length-1][1],0,loopTime,timer,op[0],op[1],op[2],skinOption.getDstOffset());
+						dstSize = new SkinDestinationSize(dstSize.getDstx()+dstxywh[(loopFrame+increaseRate)-1][0]*dstSize.getDstw()/size[0], dstSize.getDsty()+dstSize.getDsth()-(dstxywh[(loopFrame+increaseRate)-1][1]+dstxywh[(loopFrame+increaseRate)-1][3])*dstSize.getDsth()/size[1], dstxywh[(loopFrame+increaseRate)-1][2]*dstSize.getDstw()/size[0], dstxywh[(loopFrame+increaseRate)-1][3]*dstSize.getDsth()/size[1]);
+						part.setDestination(loopTime-1,dstSize ,3,alphaAngle[(loopFrame+increaseRate)-1][0],255,255,255,1,0,alphaAngle[(loopFrame+increaseRate)-1][1],0,-1,timer,op[0],op[1],op[2],skinOption.getDstOffset());
 					}
 				}
 			}

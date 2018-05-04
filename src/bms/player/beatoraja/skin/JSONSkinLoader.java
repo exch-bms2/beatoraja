@@ -1010,7 +1010,8 @@ public class JSONSkinLoader extends SkinLoader{
 				a.g = (a.g == Integer.MIN_VALUE ? prev.g : a.g);
 				a.b = (a.b == Integer.MIN_VALUE ? prev.b : a.b);
 			}
-			skin.setDestination(obj, a.time, a.x, a.y, a.w, a.h, a.acc, a.a, a.r, a.g, a.b, dst.blend, dst.filter,
+			SkinDestinationSize dstSize = new SkinDestinationSize( a.x, a.y, a.w, a.h);
+			skin.setDestination(obj, a.time,dstSize, a.acc, a.a, a.r, a.g, a.b, dst.blend, dst.filter,
 					a.angle, dst.center, dst.loop, dst.timer, dst.op);
 			if (dst.mouseRect != null) {
 				skin.setMouseRect(obj, dst.mouseRect.x, dst.mouseRect.y, dst.mouseRect.w, dst.mouseRect.h);

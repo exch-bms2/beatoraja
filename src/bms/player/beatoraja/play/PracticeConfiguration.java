@@ -11,6 +11,7 @@ import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 
 import bms.player.beatoraja.skin.SkinNoteDistributionGraph;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
+import bms.player.beatoraja.skin.SkinDestinationSize;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -22,7 +23,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Json;
 
 /**
- * プラクティスモードの設定表示/編集用クラス
+ * �깤�꺀�궚�깇�궍�궧�깴�꺖�깋�겗鼇�若싪〃鹽�/渶③썓�뵪�궚�꺀�궧
  *
  * @author exch
  */
@@ -70,7 +71,8 @@ public class PracticeConfiguration {
 		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
 		parameter.size = 18;
 		titlefont = generator.generateFont(parameter);
-		graph.setDestination(0, 0, 0, 0, 0, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, new int[0]);
+		SkinDestinationSize dstSize = new SkinDestinationSize(0,0,0,0);
+		graph.setDestination(0, dstSize , 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, new int[0]);
 	}
 
 	public void saveProperty() {
@@ -275,7 +277,7 @@ public class PracticeConfiguration {
 	}
 
 	/**
-	 * プラクティスの各種設定値
+	 * �깤�꺀�궚�깇�궍�궧�겗�릢葉�鼇�若싧��
 	 *
 	 * @author exch
 	 */
