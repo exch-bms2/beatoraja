@@ -126,8 +126,9 @@ public class BMSPlayerInputProcessor {
 	private boolean enterPressed;
 	private boolean deletePressed;
 
-	private boolean[] cursor = new boolean[4];
-	private long[] cursortime = new long[4];
+	private Key[] cursor = new Key[4];
+//	private boolean[] cursor = new boolean[4];
+//	private long[] cursortime = new long[4];
 
 	private Type type = Type.KEYBOARD;
 	
@@ -323,21 +324,22 @@ public class BMSPlayerInputProcessor {
 		return startPressed;
 	}
 
-	public boolean[] getCursorState() {
-		return cursor;
+	// methods for cursor
+	public boolean getCursorState(int i) {
+		return cursor[i].getIsPressed();
 	}
 
-	public long[] getCursorTime() {
-		return cursortime;
+	public long getCursorTime(int i) {
+		return cursor[i].getPressTime();
 	}
 
-	public void setCursorState(boolean[] cursor) {
-		this.cursor = cursor;
+	public void setCursorState( int i, boolean state) {
+		this.cursor[i].setState(state);
 	}
 	
-	public void setCursor(int i, boolean isPressed, long pressTime) {
-		this.cursor[i] = isPressed;
-		this.cursortime[i] = pressTime;
+	public void setCursor(int i, boolean state, long time) {
+		this.cursor[i].setState(state);
+		this.cursor[i].setTime(time);
 	}
 
 	public boolean isExitPressed() {
