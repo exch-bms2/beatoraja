@@ -685,13 +685,13 @@ public class NoteShuffleModifier extends PatternModifier {
 	}
 
 
-	private static void makeOtherLaneRandom(int[] result, List<Integer> noteLane, List<Integer> toRandomLane, int bias) {
+	private static void makeOtherLaneRandom(int[] result, List<Integer> noteLane, List<Integer> toRandomLane, int lineCountBias) {
 		while (!(noteLane.isEmpty() || toRandomLane.isEmpty())) {
 			int r = (int) (Math.random() * toRandomLane.size());
 			result[toRandomLane.get(r)] = noteLane.get(0);
-			if(bias == 0)
+			if(lineCountBias == 0)
 				laneRendaCount[toRandomLane.get(r)] = 0;
-			else if(bias == 1)
+			else if(lineCountBias == 1)
 				laneRendaCount[toRandomLane.get(r)]++;
 			toRandomLane.remove(r);
 			noteLane.remove(0);
