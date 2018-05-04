@@ -93,8 +93,8 @@ public class MusicSelectInputProcessor {
 
         boolean[] keystate = input.getKeystate();
         long[] keytime = input.getTime();
-        boolean[] cursor = input.getCursorState();
-        long[] cursortime = input.getCursorTime();
+//        boolean[] cursor = input.getCursorState();
+//        long[] cursortime = input.getCursorTime();
         
         final MusicSelectKeyProperty property = MusicSelectKeyProperty.values()[config.getMusicselectinput()];
 
@@ -146,7 +146,7 @@ public class MusicSelectInputProcessor {
             int mov = -input.getScroll();
             input.resetScroll();
             // song bar scroll
-            if (property.isPressed(keystate, keytime, TARGET_UP, false) || cursor[1]) {
+            if (property.isPressed(keystate, keytime, TARGET_UP, false) || input.getCursorState(1)) {
                 long l = System.currentTimeMillis();
                 if (duration == 0) {
                     mov = 1;
@@ -158,7 +158,7 @@ public class MusicSelectInputProcessor {
                     mov = 1;
                     angle = durationhigh;
                 }
-            } else if (property.isPressed(keystate, keytime, TARGET_DOWN, false) || cursor[0]) {
+            } else if (property.isPressed(keystate, keytime, TARGET_DOWN, false) || input.getCursorState(1)) {
                 long l = System.currentTimeMillis();
                 if (duration == 0) {
                     mov = -1;
@@ -244,10 +244,10 @@ public class MusicSelectInputProcessor {
             select.setPanelState(0);
 
             if (current instanceof SelectableBar) {
-                if (property.isPressed(keystate, keytime, PLAY, true) || (cursor[3] && cursortime[3] != 0) || input.isEnterPressed()) {
+                if (property.isPressed(keystate, keytime, PLAY, true) || input.checkIfCursorPressed(3) || input.isEnterPressed()) {
                     // play
                     input.setEnterPressed(false);
-                    cursortime[3] = 0;
+                    input.resetCursorTime(3);
                     select.selectSong(PlayMode.PLAY);
                 } else if (property.isPressed(keystate, keytime, PRACTICE, true)) {
                     // practice mode
@@ -260,10 +260,10 @@ public class MusicSelectInputProcessor {
                     select.selectSong(PlayMode.REPLAY_1);
                 }
             } else {
-                if (property.isPressed(keystate, keytime, FOLDER_OPEN, true) || (cursor[3] && cursortime[3] != 0) || input.isEnterPressed()) {
+                if (property.isPressed(keystate, keytime, FOLDER_OPEN, true) || input.checkIfCursorPressed(3) || input.isEnterPressed()) {
                     input.setEnterPressed(false);
                     // open folder
-                    cursortime[3] = 0;
+                    input.resetCursorTime(3);
                     if (bar.updateBar(current)) {
                         select.play(SOUND_FOLDEROPEN);
                     }
@@ -288,9 +288,9 @@ public class MusicSelectInputProcessor {
                 select.execute(MusicSelectCommand.OPEN_DOCUMENT);
             }
             // close folder
-            if (property.isPressed(keystate, keytime, FOLDER_CLOSE, true) || (cursor[2] && cursortime[2] != 0)) {
+            if (property.isPressed(keystate, keytime, FOLDER_CLOSE, true) || input.checkIfCursorPressed(2)) {
                 keytime[1] = 0;
-                cursortime[2] = 0;
+                input.resetCursorTime(2);
                 bar.close();
             }
             

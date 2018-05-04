@@ -124,11 +124,11 @@ public class KeyConfiguration extends MainState {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 		boolean[] number = input.getNumberState();
-		if (input.checkIfPressed(2)) {
+		if (input.checkIfCursorPressed(2)) {
 			input.resetCursorTime(2);
 			setMode((mode + KEYS.length - 1) % KEYS.length);
 		}
-		if (input.checkIfPressed(3)) {
+		if (input.checkIfCursorPressed(3)) {
 			input.resetCursorTime(3);
 			setMode((mode + 1) % KEYS.length);
 		}
@@ -161,11 +161,11 @@ public class KeyConfiguration extends MainState {
 				input.setDeletePressed(false);
 			}
 		} else {
-			if (input.checkIfPressed(0)) {
+			if (input.checkIfCursorPressed(0)) {
 				input.resetCursorTime(0);
 				cursorpos = (cursorpos + keys.length - 1) % keys.length;
 			}
-			if (input.checkIfPressed(1)) {
+			if (input.checkIfCursorPressed(1)) {
 				input.resetCursorTime(1);
 				cursorpos = (cursorpos + 1) % keys.length;
 			}

@@ -350,7 +350,7 @@ public class BMSPlayerInputProcessor {
 		this.cursor[i].setTime(time);
 	}
 	
-	public boolean checkIfPressed(int i) {
+	public boolean checkIfCursorPressed(int i) {
 		return cursor[i].checkIfPressed();
 	}
 	

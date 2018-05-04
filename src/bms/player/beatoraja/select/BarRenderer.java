@@ -522,7 +522,6 @@ public class BarRenderer {
 		BMSPlayerInputProcessor input = select.main.getInputProcessor();
 		boolean[] keystate = input.getKeystate();
 		long[] keytime = input.getTime();
-		boolean[] cursor = input.getCursorState();
 
         final MusicSelectKeyProperty property = MusicSelectKeyProperty.values()[select.main.getPlayerResource().getPlayerConfig().getMusicselectinput()];
 
@@ -530,7 +529,7 @@ public class BarRenderer {
 		int mov = -input.getScroll();
 		input.resetScroll();
 		// song bar scroll
-		if (property.isPressed(keystate, keytime, MusicSelectKey.UP, false) || cursor[1]) {
+		if (property.isPressed(keystate, keytime, MusicSelectKey.UP, false) || input.getCursorState(1)) {
 			long l = System.currentTimeMillis();
 			if (duration == 0) {
 				keyinput = true;
@@ -543,7 +542,7 @@ public class BarRenderer {
 				mov = 1;
 				angle = durationhigh;
 			}
-		} else if (property.isPressed(keystate, keytime, MusicSelectKey.DOWN, false) || cursor[0]) {
+		} else if (property.isPressed(keystate, keytime, MusicSelectKey.DOWN, false) || input.getCursorState(0)) {
 			long l = System.currentTimeMillis();
 			if (duration == 0) {
 				keyinput = true;

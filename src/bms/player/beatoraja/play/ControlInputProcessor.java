@@ -64,12 +64,12 @@ public class ControlInputProcessor {
 		// 各種コントロール入力判定
 		if (enableControl) {
 			if (enableCursor) {
-				if (input.getCursorState()[0]) {
+				if (input.getCursorState(0)) {
 					if (!cursorpressed) {
 						lanerender.setLanecover(lanerender.getLanecover() - 0.01f);
 						cursorpressed = true;
 					}
-				} else if (input.getCursorState()[1]) {
+				} else if (input.getCursorState(1)) {
 					if (!cursorpressed) {
 						lanerender.setLanecover(lanerender.getLanecover() + 0.01f);
 						cursorpressed = true;
