@@ -9,6 +9,11 @@ public class Key {
 		pressTime = 0;
 	}
 	
+	boolean checkIfPressed() {
+		return isPressed && pressTime != 0;
+	}
+	
+	// get, set methods
 	void setState(boolean state) {
 		isPressed = state;
 	}
@@ -19,6 +24,10 @@ public class Key {
 	
 	void setTime(long time) {
 		pressTime = time;
+	}
+	
+	void resetTime() {
+		pressTime = 0;
 	}
 	
 	long getPressTime() {

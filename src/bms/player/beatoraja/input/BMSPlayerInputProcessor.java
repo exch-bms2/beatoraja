@@ -333,14 +333,27 @@ public class BMSPlayerInputProcessor {
 		return cursor[i].getPressTime();
 	}
 
-	public void setCursorState( int i, boolean state) {
+	public void setCursorState(int i, boolean state) {
 		this.cursor[i].setState(state);
+	}
+	
+	public void setCursorTime(int i, long state) {
+		this.cursor[i].setTime(state);
+	}
+	
+	public void resetCursorTime(int i) {
+		this.cursor[i].resetTime();
 	}
 	
 	public void setCursor(int i, boolean state, long time) {
 		this.cursor[i].setState(state);
 		this.cursor[i].setTime(time);
 	}
+	
+	public boolean checkIfPressed(int i) {
+		return cursor[i].checkIfPressed();
+	}
+	
 
 	public boolean isExitPressed() {
 		return exitPressed;
