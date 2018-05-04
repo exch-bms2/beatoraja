@@ -21,7 +21,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.IntArray;
 
 /**
- * LR2�겗�궧�궘�꺍若싩쑴�뵪csv�깢�궊�궎�꺂�겗�꺆�꺖���꺖
+ * LR2占쎄쿁占쎄때占쎄텣占쎄틡畑댁떓�뫒占쎈뎁csv占쎄묄占쎄텏占쎄텕占쎄틓占쎄쿁占쎄틙占쎄틬占쏙옙占쎄틬
  * 
  * @author exch
  */
@@ -31,11 +31,11 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 	List<SkinTextImage.SkinTextImageSource> fontlist = new ArrayList<>();
 
 	/**
-	 * �궧�궘�꺍�겗�뀇�궢�궎�궨
+	 * 占쎄때占쎄텣占쎄틡占쎄쿁占쎈�뉛옙沅�占쎄텕占쎄땍
 	 */
 	public final Resolution src;
 	/**
-	 * �룒�뵽�궢�궎�궨
+	 * 占쎈짂占쎈돕占쎄땁占쎄텕占쎄땍
 	 */
 	public final Resolution dst;
 	private boolean usecim;
@@ -104,7 +104,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 								isMovie = true;
 								break;
 							} catch (Throwable e) {
-								Logger.getGlobal().warning("BGA�깢�궊�궎�꺂沃��겳渦쇈겳鸚길븮��" + e.getMessage());
+								Logger.getGlobal().warning("BGA占쎄묄占쎄텏占쎄텕占쎄틓亦껓옙占쎄껙歷��뇠寃녜툣湲몃리占쏙옙" + e.getMessage());
 								e.printStackTrace();
 							}
 						}
@@ -115,7 +115,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 					}
 				} else {
 					Logger.getGlobal()
-							.warning("IMAGE " + imagelist.size() + " : �깢�궊�궎�꺂�걣誤뗣겇�걢�굤�겲�걵�굯 : " + imagefile.getPath());
+							.warning("IMAGE " + imagelist.size() + " : 占쎄묄占쎄텏占쎄텕占쎄틓占쎄괏沃ㅻ뿣寃뉛옙嫄�占쎄덮占쎄께占쎄굘占쎄뎐 : " + imagefile.getPath());
 					imagelist.add(null);
 				}
 				// System.out
@@ -140,7 +140,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 
 				} else {
 					Logger.getGlobal()
-							.warning("IMAGE " + imagelist.size() + " : �깢�궊�궎�꺂�걣誤뗣겇�걢�굤�겲�걵�굯 : " + imagefile.getPath());
+							.warning("IMAGE " + imagelist.size() + " : 占쎄묄占쎄텏占쎄텕占쎄틓占쎄괏沃ㅻ뿣寃뉛옙嫄�占쎄덮占쎄께占쎄굘占쎄뎐 : " + imagefile.getPath());
 					fontlist.add(null);
 				}
 				// System.out
@@ -357,7 +357,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 			}
 		});
 		addCommandWord(new CommandWord("SRC_SLIDER_REFNUMBER") {
-			//NUMBER�ㅵ뢿�뀱�뎵
+			//NUMBER占썬뀿猶울옙�깍옙�렦
 			//#SRC_SLIDER_REFNUMBER,(NULL),gr,x,y,w,h,div_x,div_y,cycle,timer,muki,range,type,disable,min_value,max_value
 			@Override
 			public void execute(String[] str) {
@@ -419,7 +419,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 			}
 		});
 		addCommandWord(new CommandWord("SRC_BARGRAPH_REFNUMBER") {
-			//NUMBER�ㅵ뢿�뀱�뎵
+			//NUMBER占썬뀿猶울옙�깍옙�렦
 			//#SRC_BARGRAPH_REFNUMBER,(NULL),gr,x,y,w,h,div_x,div_y,cycle,timer,type,muki,min_value,max_value
 			@Override
 			public void execute(String[] str) {
@@ -573,7 +573,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 		addCommandWord(new CommandWord("DST_PM_CHARA_1P") {
 			@Override
 			public void execute(String[] str) {
-				//�깤�꺃�궎�뵪 �닩若싮�ｅ땿
+				//占쎄묏占쎄틕占쎄텕占쎈뎁 占쎈떓畑댁떘占쏙퐛�빣
 				//x,y,w,h,color,offset,folderpath
 				int[] values = parseInt(str);
 				if (values[3] < 0) {
@@ -587,7 +587,8 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 				final File imagefile = SkinLoader.getPath(str[7].replace("LR2files\\Theme", "skin").replace("\\", "/"), filemap);
 				SkinOption skinOption = new SkinOption(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, values[6]);
 				SkinDestinationSize skinSize = new SkinDestinationSize((int)(values[1] * dstw / srcw), (int)(dsth -(values[2] + values[4]) * dsth / srch), (int)(values[3] * dstw / srcw), (int)(values[4] * dsth / srch));
-				skin.PMcharaLoader(usecim, imagefile,
+				PMcharaLoader pmCharaLoader = new PMcharaLoader(skin);
+				pmCharaLoader.Load(usecim, imagefile,
 						0, (values[5] == 1 || values[5] == 2) ? values[5] : 1,
 						skinSize, 1, Integer.MIN_VALUE, skinOption);
 			}
@@ -595,7 +596,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 		addCommandWord(new CommandWord("DST_PM_CHARA_2P") {
 			@Override
 			public void execute(String[] str) {
-				//�깤�꺃�궎�뵪 �닩若싮�ｅ땿
+				//占쎄묏占쎄틕占쎄텕占쎈뎁 占쎈떓畑댁떘占쏙퐛�빣
 				//x,y,w,h,color,offset,folderpath
 				int[] values = parseInt(str);
 				if (values[3] < 0) {
@@ -609,7 +610,8 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 				final File imagefile = SkinLoader.getPath(str[7].replace("LR2files\\Theme", "skin").replace("\\", "/"), filemap);
 				SkinOption skinOption = new SkinOption(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE,  values[6]);
 				SkinDestinationSize skinSize = new SkinDestinationSize((int)(values[1] * dstw / srcw), (int)(dsth -(values[2] + values[4]) * dsth / srch), (int)(values[3] * dstw / srcw), (int)(values[4] * dsth / srch));
-				skin.PMcharaLoader(usecim, imagefile,
+				PMcharaLoader pmCharaLoader = new PMcharaLoader(skin);
+				pmCharaLoader.Load(usecim, imagefile,
 						0, (values[5] == 1 || values[5] == 2) ? values[5] : 1,
 						skinSize, 2, Integer.MIN_VALUE, skinOption);
 			}
@@ -617,7 +619,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 		addCommandWord(new CommandWord("DST_PM_CHARA_ANIMATION") {
 			@Override
 			public void execute(String[] str) {
-				//�깤�꺃�궎餓ε쨼�뵪 �닩若싮씆�ｅ땿
+				//占쎄묏占쎄틕占쎄텕繞벿듭㉫占쎈뎁 占쎈떓畑댁떘�봿占쏙퐛�빣
 				//x,y,w,h,color,animationtype,timer,op1,op2,op3,offset,folderpath
 				//type 0:NEUTRAL 1:FEVER 2:GREAT 3:GOOD 4:BAD 5:FEVERWIN 6:WIN 7:LOSE 8:OJAMA 9:DANCE
 				int[] values = parseInt(str);
@@ -633,7 +635,8 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 					final File imagefile = SkinLoader.getPath(str[12].replace("LR2files\\Theme", "skin").replace("\\", "/"), filemap);
 					SkinOption skinOption = new SkinOption(values[8], values[9], values[10], values[11]);
 					SkinDestinationSize skinSize = new SkinDestinationSize((int)(values[1] * dstw / srcw), (int)(dsth -(values[2] + values[4]) * dsth / srch), (int)(values[3] * dstw / srcw), (int)(values[4] * dsth / srch));
-					skin.PMcharaLoader(usecim, imagefile,
+					PMcharaLoader pmCharaLoader = new PMcharaLoader(skin);
+					pmCharaLoader.Load(usecim, imagefile,
 							values[6] + 6, (values[5] == 1 || values[5] == 2) ? values[5] : 1,
 							skinSize, Integer.MIN_VALUE, values[7], skinOption);
 				}
@@ -643,14 +646,15 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 			@Override
 			public void execute(String[] str) {
 				//color,type,folderpath
-				//type 0:�궘�깵�꺀�깒�솺 1:�릫�뎺�뵽�깗 2:�깗�꺁�궋�궎�뵽�깗(訝듿뜇翁ャ겗�겳) 3:�깗�꺁�궋�궎�뵽�깗(�뀲鵝�) 4:�궘�깵�꺀�궋�궎�궠�꺍
+				//type 0:占쎄텣占쎄뭇占쎄�占쎄퉺占쎌녂 1:占쎈┼占쎈렭占쎈돕占쎄퉿 2:占쎄퉿占쎄틒占쎄텑占쎄텕占쎈돕占쎄퉿(鼇앸벩�쐡玲곥깵寃쀯옙寃�) 3:占쎄퉿占쎄틒占쎄텑占쎄텕占쎈돕占쎄퉿(占쎈�꿴턁占�) 4:占쎄텣占쎄뭇占쎄�占쎄텑占쎄텕占쎄텭占쎄틡
 				PMcharaPart = null;
 				int[] values = parseInt(str);
 				if(values[2] >= 0 && values[2] <= 4) {
 					final File imagefile = SkinLoader.getPath(str[3].replace("LR2files\\Theme", "skin").replace("\\", "/"), filemap);
 					SkinOption skinOption = new SkinOption(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE);
 					SkinDestinationSize skinSize = new SkinDestinationSize(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE);
-					PMcharaPart = skin.PMcharaLoader(usecim, imagefile,
+					PMcharaLoader pmCharaLoader = new PMcharaLoader(skin);
+					PMcharaPart = pmCharaLoader.Load(usecim, imagefile,
 							values[2] + 1, (values[1] == 1 || values[1] == 2) ? values[1] : 1,
 									skinSize, Integer.MIN_VALUE, Integer.MIN_VALUE, skinOption);
 				}
@@ -659,7 +663,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 		addCommandWord(new CommandWord("DST_PM_CHARA_IMAGE") {
 			@Override
 			public void execute(String[] str) {
-				//DST_IMAGE�겏�릪礪�
+				//DST_IMAGE占쎄쾹占쎈┴癲낉옙
 				if (PMcharaPart != null) {
 					int[] values = parseInt(str);
 					if (values[5] < 0) {
@@ -795,7 +799,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 			return getSourceImage((Texture) imagelist.get(values[2]), values[3], values[4], values[5], values[6],
 					values[7], values[8]);
 		}
-		Logger.getGlobal().warning("IMAGE�걣若싩쑴�걬�굦�겍�겒�걚�걢�곮き�겳渦쇈겳�겓鸚길븮�걮�겍�걚�겲�걲 : " + line);
+		Logger.getGlobal().warning("IMAGE占쎄괏畑댁떓�뫒占쎄괵占쎄덱占쎄쾷占쎄쾼占쎄콢占쎄괍占쎄낟�걤占쎄껙歷��뇠寃놂옙寃볣툣湲몃리占쎄괼占쎄쾷占쎄콢占쎄께占쎄굉 : " + line);
 		return null;
 	}
 
