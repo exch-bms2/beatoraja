@@ -297,12 +297,8 @@ public class PMcharaLoader {
 						if(data.size() > i + 2) dst[i] = data.get(i + 2).replaceAll("[^0-9a-zA-Z-]", "");
 					}
 					int timer = Integer.MIN_VALUE;
-					int op[] = {0,0,0};
 					if(setMotion != Integer.MIN_VALUE && setMotion == motion) {
 						timer = dsttimer;
-						op[0] = skinOption.getDstOpt1();
-						op[1] = skinOption.getDstOpt2();
-						op[2] = skinOption.getDstOpt3();
 					} else if(setMotion == Integer.MIN_VALUE) {
 						if(side != 2) {
 							if(motion == 1) timer = TIMER_PM_CHARA_1P_NEUTRAL;
@@ -313,11 +309,11 @@ public class PMcharaLoader {
 							else if(motion >= 15 && motion <= 17) {
 								timer = TIMER_MUSIC_END;
 								if(motion == 15) {
-									op[0] = OPTION_1P_BORDER_OR_MORE;	//WIN
-									op[1] = -OPTION_1P_100;
+									skinOption.setDstOpt1(OPTION_1P_BORDER_OR_MORE);
+									skinOption.setDstOpt2( -OPTION_1P_100);
 								}
-								else if(motion == 16) op[0] = -OPTION_1P_BORDER_OR_MORE;	//LOSE
-								else if(motion == 17) op[0] = OPTION_1P_100;	//FEVERWIN
+								else if(motion == 16) skinOption.setDstOpt1(-OPTION_1P_BORDER_OR_MORE);	//LOSE
+								else if(motion == 17) skinOption.setDstOpt1(OPTION_1P_100);	//FEVERWIN
 							}
 						} else {
 							if(motion == 1) timer = TIMER_PM_CHARA_2P_NEUTRAL;
@@ -325,8 +321,8 @@ public class PMcharaLoader {
 							else if(motion == 10) timer = TIMER_PM_CHARA_2P_BAD;
 							else if(motion == 15 || motion == 16) {
 								timer = TIMER_MUSIC_END;
-								if(motion == 15) op[0] = -OPTION_1P_BORDER_OR_MORE;	//WIN
-								else if(motion == 16) op[0] = OPTION_1P_BORDER_OR_MORE;	//LOSE
+								if(motion == 15) skinOption.setDstOpt1(-OPTION_1P_BORDER_OR_MORE);	//WIN
+								else if(motion == 16) skinOption.setDstOpt1( OPTION_1P_BORDER_OR_MORE);	//LOSE
 							}
 						}
 					}
@@ -448,10 +444,10 @@ public class PMcharaLoader {
 							skin.add(part);
 							for(int i = 0; i < (loopFrame+increaseRate); i++) {
 								dstSize = new SkinDestinationSize(dstSize.getDstx()+dstPosition[i][0]*dstSize.getDstw()/size[0], dstSize.getDsty()+dstSize.getDsth()-(dstPosition[i][1]+dstPosition[i][3])*dstSize.getDsth()/size[1], dstPosition[i][2]*dstSize.getDstw()/size[0], dstPosition[i][3]*dstSize.getDsth()/size[1]);
-								part.setDestination((int)(frameTime*i),dstSize,3,alphaAngle[i][0],255,255,255,1,0,alphaAngle[i][1],0,-1,timer,op[0],op[1],op[2],0);
+								part.setDestination((int)(frameTime*i),dstSize,3,alphaAngle[i][0],255,255,255,1,0,alphaAngle[i][1],0,-1,timer,skinOption.getDstOpt1(),skinOption.getDstOpt2(),skinOption.getDstOpt3(),0);
 							}
 							dstSize = new SkinDestinationSize(dstSize.getDstx()+dstPosition[(loopFrame+increaseRate)-1][0]*dstSize.getDstw()/size[0], dstSize.getDsty()+dstSize.getDsth()-(dstPosition[(loopFrame+increaseRate)-1][1]+dstPosition[(loopFrame+increaseRate)-1][3])*dstSize.getDsth()/size[1], dstPosition[(loopFrame+increaseRate)-1][2]*dstSize.getDstw()/size[0], dstPosition[(loopFrame+increaseRate)-1][3]*dstSize.getDsth()/size[1]);
-							part.setDestination(loopTime-1,dstSize ,3,alphaAngle[(loopFrame+increaseRate)-1][0],255,255,255,1,0,alphaAngle[(loopFrame+increaseRate)-1][1],0,-1,timer,op[0],op[1],op[2],skinOption.getDstOffset());
+							part.setDestination(loopTime-1,dstSize ,3,alphaAngle[(loopFrame+increaseRate)-1][0],255,255,255,1,0,alphaAngle[(loopFrame+increaseRate)-1][1],0,-1,timer,skinOption.getDstOpt1(),skinOption.getDstOpt2(),skinOption.getDstOpt3(),skinOption.getDstOffset());
 						}
 						//占쎄틓占쎄틬占쎄묏占쎈��넼�뿣源�占쎄틕占쎄틬占쎄묾占쎄괍占쎄덩
 						TextureRegion[] images = new TextureRegion[dst[0].length() / 2 - (loop[motion]+1)];
@@ -464,10 +460,10 @@ public class PMcharaLoader {
 						skin.add(part);
 						for(int i = (loopFrame+increaseRate); i < dstPosition.length; i++) {
 							dstSize = new SkinDestinationSize(dstSize.getDstx()+dstPosition[i][0]*dstSize.getDstw()/size[0], dstSize.getDsty()+dstSize.getDsth()-(dstPosition[i][1]+dstPosition[i][3])*dstSize.getDsth()/size[1], dstPosition[i][2]*dstSize.getDstw()/size[0], dstPosition[i][3]*dstSize.getDsth()/size[1]);
-							part.setDestination((int)(frameTime*i),dstSize,3,alphaAngle[i][0],255,255,255,1,0,alphaAngle[i][1],0,loopTime,timer,op[0],op[1],op[2],0);
+							part.setDestination((int)(frameTime*i),dstSize,3,alphaAngle[i][0],255,255,255,1,0,alphaAngle[i][1],0,loopTime,timer,skinOption.getDstOpt1(),skinOption.getDstOpt2(),skinOption.getDstOpt3(),0);
 						}
 						dstSize = new SkinDestinationSize(dstSize.getDstx()+dstPosition[(loopFrame+increaseRate)-1][0]*dstSize.getDstw()/size[0], dstSize.getDsty()+dstSize.getDsth()-(dstPosition[(loopFrame+increaseRate)-1][1]+dstPosition[(loopFrame+increaseRate)-1][3])*dstSize.getDsth()/size[1], dstPosition[(loopFrame+increaseRate)-1][2]*dstSize.getDstw()/size[0], dstPosition[(loopFrame+increaseRate)-1][3]*dstSize.getDsth()/size[1]);
-						part.setDestination(loopTime-1,dstSize ,3,alphaAngle[(loopFrame+increaseRate)-1][0],255,255,255,1,0,alphaAngle[(loopFrame+increaseRate)-1][1],0,-1,timer,op[0],op[1],op[2],skinOption.getDstOffset());
+						part.setDestination(loopTime-1,dstSize ,3,alphaAngle[(loopFrame+increaseRate)-1][0],255,255,255,1,0,alphaAngle[(loopFrame+increaseRate)-1][1],0,-1,timer,skinOption.getDstOpt1(),skinOption.getDstOpt2(),skinOption.getDstOpt3(),skinOption.getDstOffset());
 					}
 				}
 			}
