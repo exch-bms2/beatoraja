@@ -127,6 +127,8 @@ end
 local keybeam_order = { 1, 3, 5, 6, 8, 10, 12, 13, 15, 17, 18, 20, 22, 24, 2, 4, 7, 9, 11, 14, 16, 19, 21, 23, 25, 26 }
 
 local function main()
+	local play_parts = require("play_parts")
+
 	local skin = {}
 	for k, v in pairs(header) do
 		skin[k] = v
@@ -403,25 +405,6 @@ local function main()
 		{id = 423, src = 5, x = 0, y = 24, w = 240, h = 24, divx = 10, digit = 5, ref = 150},
 		{id = 424, src = 5, x = 0, y = 48, w = 240, h = 24, divx = 10, digit = 5, ref = 121},
 
-		{id = 430, src = 5, x = 0, y = 0, w = 264, h = 24, divx = 11, digit = 4, ref = 110},
-		{id = 431, src = 5, x = 0, y = 24, w = 264, h = 24, divx = 11, digit = 4, ref = 410},
-		{id = 432, src = 5, x = 0, y = 48, w = 264, h = 24, divx = 11, digit = 4, ref = 411},
-		{id = 433, src = 5, x = 0, y = 0, w = 264, h = 24, divx = 11, digit = 4, ref = 111},
-		{id = 434, src = 5, x = 0, y = 24, w = 264, h = 24, divx = 11, digit = 4, ref = 412},
-		{id = 435, src = 5, x = 0, y = 48, w = 264, h = 24, divx = 11, digit = 4, ref = 413},
-		{id = 436, src = 5, x = 0, y = 0, w = 264, h = 24, divx = 11, digit = 4, ref = 112},
-		{id = 437, src = 5, x = 0, y = 24, w = 264, h = 24, divx = 11, digit = 4, ref = 414},
-		{id = 438, src = 5, x = 0, y = 48, w = 264, h = 24, divx = 11, digit = 4, ref = 415},
-		{id = 439, src = 5, x = 0, y = 0, w = 264, h = 24, divx = 11, digit = 4, ref = 113},
-		{id = 440, src = 5, x = 0, y = 24, w = 264, h = 24, divx = 11, digit = 4, ref = 416},
-		{id = 441, src = 5, x = 0, y = 48, w = 264, h = 24, divx = 11, digit = 4, ref = 417},
-		{id = 442, src = 5, x = 0, y = 0, w = 264, h = 24, divx = 11, digit = 4, ref = 114},
-		{id = 443, src = 5, x = 0, y = 24, w = 264, h = 24, divx = 11, digit = 4, ref = 418},
-		{id = 444, src = 5, x = 0, y = 48, w = 264, h = 24, divx = 11, digit = 4, ref = 419},
-		{id = 445, src = 5, x = 0, y = 0, w = 264, h = 24, divx = 11, digit = 4, ref = 420},
-		{id = 446, src = 5, x = 0, y = 24, w = 264, h = 24, divx = 11, digit = 4, ref = 421},
-		{id = 447, src = 5, x = 0, y = 48, w = 264, h = 24, divx = 11, digit = 4, ref = 422},
-
 		{id = 450, src = 0, x = 0, y = 550, w = 100, h = 15, divx = 10, digit = 3, ref = 14},
 		{id = 451, src = 0, x = 0, y = 565, w = 100, h = 15, divx = 10, digit = 4, ref = 312},
 		
@@ -435,6 +418,7 @@ local function main()
 		{id = "judgems-1pp", src = 13, x = 0, y = 20, w = 120, h = 40, divx = 12, divy = 2, digit = 4, ref = 525},
 		{id = "judgems-1pg", src = 13, x = 0, y = 60, w = 120, h = 40, divx = 12, divy = 2, digit = 4, ref = 525}
 	}
+	append_all(skin.value, play_parts.judge_count_sources("judge-count-", 5))
 	skin.text = {
 		{id = 1000, font = 0, size = 24, align = geometry.title_align, ref = 12}
 	}
@@ -738,81 +722,9 @@ local function main()
 		{id = 1051, blend = 2, timer = 143,dst = {
 			{x = 2, y = 660, w = 16, h = 20}
 		}},
-
-		{id = 431 ,op = {901,906},dst = {
-			{x = 1000, y = 140, w = 12, h = 18}
-		}},
-		{id = 432 ,op = {901,906},dst = {
-			{x = 1060, y = 140, w = 12, h = 18}
-		}},
-		{id = 434 ,op = {901,906},dst = {
-			{x = 1000, y = 122, w = 12, h = 18}
-		}},
-		{id = 435 ,op = {901,906},dst = {
-			{x = 1060, y = 122, w = 12, h = 18}
-		}},
-		{id = 437 ,op = {901,906},dst = {
-			{x = 1000, y = 104, w = 12, h = 18}
-		}},
-		{id = 438 ,op = {901,906},dst = {
-			{x = 1060, y = 104, w = 12, h = 18}
-		}},
-		{id = 440 ,op = {901,906},dst = {
-			{x = 1000, y = 86, w = 12, h = 18}
-		}},
-		{id = 441 ,op = {901,906},dst = {
-			{x = 1060, y = 86, w = 12, h = 18}
-		}},
-		{id = 443 ,op = {901,906},dst = {
-			{x = 1000, y = 68, w = 12, h = 18}
-		}},
-		{id = 444 ,op = {901,906},dst = {
-			{x = 1060, y = 68, w = 12, h = 18}
-		}},
-		{id = 446 ,op = {901,906},dst = {
-			{x = 1000, y = 50, w = 12, h = 18}
-		}},
-		{id = 447 ,op = {901,906},dst = {
-			{x = 1060, y = 50, w = 12, h = 18}
-		}},
-
-		{id = 431 ,op = {900,906},dst = {
-			{x = 1000, y = 140, w = 12, h = 18}
-		}},
-		{id = 432 ,op = {900,906},dst = {
-			{x = 1060, y = 140, w = 12, h = 18}
-		}},
-		{id = 434 ,op = {900,906},dst = {
-			{x = 1000, y = 122, w = 12, h = 18}
-		}},
-		{id = 435 ,op = {900,906},dst = {
-			{x = 1060, y = 122, w = 12, h = 18}
-		}},
-		{id = 437 ,op = {900,906},dst = {
-			{x = 1000, y = 104, w = 12, h = 18}
-		}},
-		{id = 438 ,op = {900,906},dst = {
-			{x = 1060, y = 104, w = 12, h = 18}
-		}},
-		{id = 440 ,op = {900,906},dst = {
-			{x = 1000, y = 86, w = 12, h = 18}
-		}},
-		{id = 441 ,op = {900,906},dst = {
-			{x = 1060, y = 86, w = 12, h = 18}
-		}},
-		{id = 443 ,op = {900,906},dst = {
-			{x = 1000, y = 68, w = 12, h = 18}
-		}},
-		{id = 444 ,op = {900,906},dst = {
-			{x = 1060, y = 68, w = 12, h = 18}
-		}},
-		{id = 446 ,op = {900,906},dst = {
-			{x = 1000, y = 50, w = 12, h = 18}
-		}},
-		{id = 447 ,op = {900,906},dst = {
-			{x = 1060, y = 50, w = 12, h = 18}
-		}},
-
+	})
+	append_all(skin.destination, play_parts.judge_count_destinations("judge-count-", 1000, 50, {906}, -1))
+	append_all(skin.destination, {
 		{id = 450, offset = 51, op = {270},dst = {
 			{time = 0, x = 120, y = 720, w = 10, h = 15}
 		}},
