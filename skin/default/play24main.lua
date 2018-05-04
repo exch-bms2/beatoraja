@@ -47,6 +47,30 @@ local function is_judge_detail_ms()
 	return skin_config.option["Judge Detail"] == 912
 end
 
+local function timer_key_on(index)
+	if index <= 9 then
+		return 50 + index
+	else
+		return 1000 + index
+	end
+end
+
+local function timer_key_hold(index)
+	if index <= 9 then
+		return 70 + index
+	else
+		return 1200 + index
+	end
+end
+
+local function value_judge(index)
+	if index <= 9 then
+		return 500 + index
+	else
+		return 1500 + index
+	end
+end
+
 local filepath = {
 	{name = "Theme", path = "keyboard/*.png"},
 	{name = "Laser", path = "laser/*.png"}
@@ -130,6 +154,7 @@ local function main()
 	skin.font = {
 		{id = 0, path = "VL-Gothic-Regular.ttf"}
 	}
+
 	skin.image = {
 		{id = "background", src = 1, x = 0, y = 0, w = 1280, h = 720},
 		{id = 1, src = 2, x = 0, y = 0, w = 1280, h = 720},
@@ -151,114 +176,6 @@ local function main()
 		{id = "keybeam-w-pg", src = 6, x = 145, y = 0, w = 27, h = 255},
 		{id = "keybeam-b-pg", src = 6, x = 173, y = 0, w = 20, h = 255},
 		{id = "keybeam-s-pg", src = 6, x = 97, y = 0, w = 47, h = 255},
-		
-		{id = "bomb1-1", src = 10, x = 0, y = 0, w = 1810, h = 192,divx = 10, timer = 51, cycle = 160},
-		{id = "bomb1-2", src = 10, x = 0, y = 0, w = 1810, h = 192,divx = 10, timer = 52, cycle = 160},
-		{id = "bomb1-3", src = 10, x = 0, y = 0, w = 1810, h = 192,divx = 10, timer = 53, cycle = 160},
-		{id = "bomb1-4", src = 10, x = 0, y = 0, w = 1810, h = 192,divx = 10, timer = 54, cycle = 160},
-		{id = "bomb1-5", src = 10, x = 0, y = 0, w = 1810, h = 192,divx = 10, timer = 55, cycle = 160},
-		{id = "bomb1-6", src = 10, x = 0, y = 0, w = 1810, h = 192,divx = 10, timer = 56, cycle = 160},
-		{id = "bomb1-7", src = 10, x = 0, y = 0, w = 1810, h = 192,divx = 10, timer = 57, cycle = 160},
-		{id = "bomb1-8", src = 10, x = 0, y = 0, w = 1810, h = 192,divx = 10, timer = 58, cycle = 160},
-		{id = "bomb1-9", src = 10, x = 0, y = 0, w = 1810, h = 192,divx = 10, timer = 59, cycle = 160},
-		{id = "bomb1-10", src = 10, x = 0, y = 0, w = 1810, h = 192,divx = 10, timer = 1010, cycle = 160},
-		{id = "bomb1-11", src = 10, x = 0, y = 0, w = 1810, h = 192,divx = 10, timer = 1011, cycle = 160},
-		{id = "bomb1-12", src = 10, x = 0, y = 0, w = 1810, h = 192,divx = 10, timer = 1012, cycle = 160},
-		{id = "bomb1-13", src = 10, x = 0, y = 0, w = 1810, h = 192,divx = 10, timer = 1013, cycle = 160},
-		{id = "bomb1-14", src = 10, x = 0, y = 0, w = 1810, h = 192,divx = 10, timer = 1014, cycle = 160},
-		{id = "bomb1-15", src = 10, x = 0, y = 0, w = 1810, h = 192,divx = 10, timer = 1015, cycle = 160},
-		{id = "bomb1-16", src = 10, x = 0, y = 0, w = 1810, h = 192,divx = 10, timer = 1016, cycle = 160},
-		{id = "bomb1-17", src = 10, x = 0, y = 0, w = 1810, h = 192,divx = 10, timer = 1017, cycle = 160},
-		{id = "bomb1-18", src = 10, x = 0, y = 0, w = 1810, h = 192,divx = 10, timer = 1018, cycle = 160},
-		{id = "bomb1-19", src = 10, x = 0, y = 0, w = 1810, h = 192,divx = 10, timer = 1019, cycle = 160},
-		{id = "bomb1-20", src = 10, x = 0, y = 0, w = 1810, h = 192,divx = 10, timer = 1020, cycle = 160},
-		{id = "bomb1-21", src = 10, x = 0, y = 0, w = 1810, h = 192,divx = 10, timer = 1021, cycle = 160},
-		{id = "bomb1-22", src = 10, x = 0, y = 0, w = 1810, h = 192,divx = 10, timer = 1022, cycle = 160},
-		{id = "bomb1-23", src = 10, x = 0, y = 0, w = 1810, h = 192,divx = 10, timer = 1023, cycle = 160},
-		{id = "bomb1-24", src = 10, x = 0, y = 0, w = 1810, h = 192,divx = 10, timer = 1024, cycle = 160},
-		{id = "bomb1-su", src = 10, x = 0, y = 0, w = 1810, h = 192,divx = 10, timer = 1025, cycle = 160},
-		{id = "bomb1-sd", src = 10, x = 0, y = 0, w = 1810, h = 192,divx = 10, timer = 1026, cycle = 160},
-		
-		{id = "bomb2-1", src = 10, x = 0, y = 576, w = 1810, h = 192,divx = 10, timer = 51, cycle = 160},
-		{id = "bomb2-2", src = 10, x = 0, y = 576, w = 1810, h = 192,divx = 10, timer = 52, cycle = 160},
-		{id = "bomb2-3", src = 10, x = 0, y = 576, w = 1810, h = 192,divx = 10, timer = 53, cycle = 160},
-		{id = "bomb2-4", src = 10, x = 0, y = 576, w = 1810, h = 192,divx = 10, timer = 54, cycle = 160},
-		{id = "bomb2-5", src = 10, x = 0, y = 576, w = 1810, h = 192,divx = 10, timer = 55, cycle = 160},
-		{id = "bomb2-6", src = 10, x = 0, y = 576, w = 1810, h = 192,divx = 10, timer = 56, cycle = 160},
-		{id = "bomb2-7", src = 10, x = 0, y = 576, w = 1810, h = 192,divx = 10, timer = 57, cycle = 160},
-		{id = "bomb2-8", src = 10, x = 0, y = 576, w = 1810, h = 192,divx = 10, timer = 58, cycle = 160},
-		{id = "bomb2-9", src = 10, x = 0, y = 576, w = 1810, h = 192,divx = 10, timer = 59, cycle = 160},
-		{id = "bomb2-10", src = 10, x = 0, y = 576, w = 1810, h = 192,divx = 10, timer = 1010, cycle = 160},
-		{id = "bomb2-11", src = 10, x = 0, y = 576, w = 1810, h = 192,divx = 10, timer = 1011, cycle = 160},
-		{id = "bomb2-12", src = 10, x = 0, y = 576, w = 1810, h = 192,divx = 10, timer = 1012, cycle = 160},
-		{id = "bomb2-13", src = 10, x = 0, y = 576, w = 1810, h = 192,divx = 10, timer = 1013, cycle = 160},
-		{id = "bomb2-14", src = 10, x = 0, y = 576, w = 1810, h = 192,divx = 10, timer = 1014, cycle = 160},
-		{id = "bomb2-15", src = 10, x = 0, y = 576, w = 1810, h = 192,divx = 10, timer = 1015, cycle = 160},
-		{id = "bomb2-16", src = 10, x = 0, y = 576, w = 1810, h = 192,divx = 10, timer = 1016, cycle = 160},
-		{id = "bomb2-17", src = 10, x = 0, y = 576, w = 1810, h = 192,divx = 10, timer = 1017, cycle = 160},
-		{id = "bomb2-18", src = 10, x = 0, y = 576, w = 1810, h = 192,divx = 10, timer = 1018, cycle = 160},
-		{id = "bomb2-19", src = 10, x = 0, y = 576, w = 1810, h = 192,divx = 10, timer = 1019, cycle = 160},
-		{id = "bomb2-20", src = 10, x = 0, y = 576, w = 1810, h = 192,divx = 10, timer = 1020, cycle = 160},
-		{id = "bomb2-21", src = 10, x = 0, y = 576, w = 1810, h = 192,divx = 10, timer = 1021, cycle = 160},
-		{id = "bomb2-22", src = 10, x = 0, y = 576, w = 1810, h = 192,divx = 10, timer = 1022, cycle = 160},
-		{id = "bomb2-23", src = 10, x = 0, y = 576, w = 1810, h = 192,divx = 10, timer = 1023, cycle = 160},
-		{id = "bomb2-24", src = 10, x = 0, y = 576, w = 1810, h = 192,divx = 10, timer = 1024, cycle = 160},
-		{id = "bomb2-su", src = 10, x = 0, y = 576, w = 1810, h = 192,divx = 10, timer = 1025, cycle = 160},
-		{id = "bomb2-sd", src = 10, x = 0, y = 576, w = 1810, h = 192,divx = 10, timer = 1026, cycle = 160},
-		
-		{id = "bomb3-1", src = 10, x = 0, y = 192, w = 1810, h = 192,divx = 10, timer = 51, cycle = 160},
-		{id = "bomb3-2", src = 10, x = 0, y = 192, w = 1810, h = 192,divx = 10, timer = 52, cycle = 160},
-		{id = "bomb3-3", src = 10, x = 0, y = 192, w = 1810, h = 192,divx = 10, timer = 53, cycle = 160},
-		{id = "bomb3-4", src = 10, x = 0, y = 192, w = 1810, h = 192,divx = 10, timer = 54, cycle = 160},
-		{id = "bomb3-5", src = 10, x = 0, y = 192, w = 1810, h = 192,divx = 10, timer = 55, cycle = 160},
-		{id = "bomb3-6", src = 10, x = 0, y = 192, w = 1810, h = 192,divx = 10, timer = 56, cycle = 160},
-		{id = "bomb3-7", src = 10, x = 0, y = 192, w = 1810, h = 192,divx = 10, timer = 57, cycle = 160},
-		{id = "bomb3-8", src = 10, x = 0, y = 192, w = 1810, h = 192,divx = 10, timer = 58, cycle = 160},
-		{id = "bomb3-9", src = 10, x = 0, y = 192, w = 1810, h = 192,divx = 10, timer = 59, cycle = 160},
-		{id = "bomb3-10", src = 10, x = 0, y = 192, w = 1810, h = 192,divx = 10, timer = 1010, cycle = 160},
-		{id = "bomb3-11", src = 10, x = 0, y = 192, w = 1810, h = 192,divx = 10, timer = 1011, cycle = 160},
-		{id = "bomb3-12", src = 10, x = 0, y = 192, w = 1810, h = 192,divx = 10, timer = 1012, cycle = 160},
-		{id = "bomb3-13", src = 10, x = 0, y = 192, w = 1810, h = 192,divx = 10, timer = 1013, cycle = 160},
-		{id = "bomb3-14", src = 10, x = 0, y = 192, w = 1810, h = 192,divx = 10, timer = 1014, cycle = 160},
-		{id = "bomb3-15", src = 10, x = 0, y = 192, w = 1810, h = 192,divx = 10, timer = 1015, cycle = 160},
-		{id = "bomb3-16", src = 10, x = 0, y = 192, w = 1810, h = 192,divx = 10, timer = 1016, cycle = 160},
-		{id = "bomb3-17", src = 10, x = 0, y = 192, w = 1810, h = 192,divx = 10, timer = 1017, cycle = 160},
-		{id = "bomb3-18", src = 10, x = 0, y = 192, w = 1810, h = 192,divx = 10, timer = 1018, cycle = 160},
-		{id = "bomb3-19", src = 10, x = 0, y = 192, w = 1810, h = 192,divx = 10, timer = 1019, cycle = 160},
-		{id = "bomb3-20", src = 10, x = 0, y = 192, w = 1810, h = 192,divx = 10, timer = 1020, cycle = 160},
-		{id = "bomb3-21", src = 10, x = 0, y = 192, w = 1810, h = 192,divx = 10, timer = 1021, cycle = 160},
-		{id = "bomb3-22", src = 10, x = 0, y = 192, w = 1810, h = 192,divx = 10, timer = 1022, cycle = 160},
-		{id = "bomb3-23", src = 10, x = 0, y = 192, w = 1810, h = 192,divx = 10, timer = 1023, cycle = 160},
-		{id = "bomb3-24", src = 10, x = 0, y = 192, w = 1810, h = 192,divx = 10, timer = 1024, cycle = 160},
-		{id = "bomb3-su", src = 10, x = 0, y = 192, w = 1810, h = 192,divx = 10, timer = 1025, cycle = 160},
-		{id = "bomb3-sd", src = 10, x = 0, y = 192, w = 1810, h = 192,divx = 10, timer = 1026, cycle = 160},
-		
-		{id = "hold-1", src = 10, x = 0, y = 384, w = 1810, h = 192,divx = 10, timer = 71, cycle = 160},
-		{id = "hold-2", src = 10, x = 0, y = 384, w = 1810, h = 192,divx = 10, timer = 72, cycle = 160},
-		{id = "hold-3", src = 10, x = 0, y = 384, w = 1810, h = 192,divx = 10, timer = 73, cycle = 160},
-		{id = "hold-4", src = 10, x = 0, y = 384, w = 1810, h = 192,divx = 10, timer = 74, cycle = 160},
-		{id = "hold-5", src = 10, x = 0, y = 384, w = 1810, h = 192,divx = 10, timer = 75, cycle = 160},
-		{id = "hold-6", src = 10, x = 0, y = 384, w = 1810, h = 192,divx = 10, timer = 76, cycle = 160},
-		{id = "hold-7", src = 10, x = 0, y = 384, w = 1810, h = 192,divx = 10, timer = 77, cycle = 160},
-		{id = "hold-8", src = 10, x = 0, y = 384, w = 1810, h = 192,divx = 10, timer = 78, cycle = 160},
-		{id = "hold-9", src = 10, x = 0, y = 384, w = 1810, h = 192,divx = 10, timer = 79, cycle = 160},
-		{id = "hold-10", src = 10, x = 0, y = 384, w = 1810, h = 192,divx = 10, timer = 1210, cycle = 160},
-		{id = "hold-11", src = 10, x = 0, y = 384, w = 1810, h = 192,divx = 10, timer = 1211, cycle = 160},
-		{id = "hold-12", src = 10, x = 0, y = 384, w = 1810, h = 192,divx = 10, timer = 1212, cycle = 160},
-		{id = "hold-13", src = 10, x = 0, y = 384, w = 1810, h = 192,divx = 10, timer = 1213, cycle = 160},
-		{id = "hold-14", src = 10, x = 0, y = 384, w = 1810, h = 192,divx = 10, timer = 1214, cycle = 160},
-		{id = "hold-15", src = 10, x = 0, y = 384, w = 1810, h = 192,divx = 10, timer = 1215, cycle = 160},
-		{id = "hold-16", src = 10, x = 0, y = 384, w = 1810, h = 192,divx = 10, timer = 1216, cycle = 160},
-		{id = "hold-17", src = 10, x = 0, y = 384, w = 1810, h = 192,divx = 10, timer = 1217, cycle = 160},
-		{id = "hold-18", src = 10, x = 0, y = 384, w = 1810, h = 192,divx = 10, timer = 1218, cycle = 160},
-		{id = "hold-19", src = 10, x = 0, y = 384, w = 1810, h = 192,divx = 10, timer = 1219, cycle = 160},
-		{id = "hold-20", src = 10, x = 0, y = 384, w = 1810, h = 192,divx = 10, timer = 1220, cycle = 160},
-		{id = "hold-21", src = 10, x = 0, y = 384, w = 1810, h = 192,divx = 10, timer = 1221, cycle = 160},
-		{id = "hold-22", src = 10, x = 0, y = 384, w = 1810, h = 192,divx = 10, timer = 1222, cycle = 160},
-		{id = "hold-23", src = 10, x = 0, y = 384, w = 1810, h = 192,divx = 10, timer = 1223, cycle = 160},
-		{id = "hold-24", src = 10, x = 0, y = 384, w = 1810, h = 192,divx = 10, timer = 1224, cycle = 160},
-		{id = "hold-su", src = 10, x = 0, y = 384, w = 1810, h = 192,divx = 10, timer = 1225, cycle = 160},
-		{id = "hold-sd", src = 10, x = 0, y = 384, w = 1810, h = 192,divx = 10, timer = 1226, cycle = 160},
 		
 		{id = "note-b", src = 7, x = 1207, y = 405, w = 21, h = 12},
 		{id = "note-w", src = 7, x = 1179, y = 405, w = 27, h = 12},
@@ -330,6 +247,22 @@ local function main()
 		{id = "judge-early", src = 13, x = 0, y = 0, w = 50, h = 20},
 		{id = "judge-late", src = 13, x = 50, y = 0, w = 50, h = 20}
 	}
+
+	local function bomb_image(index, prefix, src_y, timer_func)
+		local name = index
+		if index == 25 then
+			name = "su"
+		elseif index == 26 then
+			name = "sd"
+		end
+		return {id = prefix..name, src = 10, x = 0, y = src_y, w = 1810, h = 192, divx = 10, timer = timer_func(index), cycle = 160}
+	end
+	for i = 1, 26 do
+		table.insert(skin.image, bomb_image(i, "bomb1-", 0, timer_key_on))
+		table.insert(skin.image, bomb_image(i, "bomb2-", 576, timer_key_on))
+		table.insert(skin.image, bomb_image(i, "bomb3-", 192, timer_key_on))
+		table.insert(skin.image, bomb_image(i, "hold-", 384, timer_key_hold))
+	end
 	if is_half_lane() then
 		table.insert(skin.image, {id = "lane-bg", src = 7, x = 56, y = 0, w = 560, h = 80})
 		table.insert(skin.image, {id = "keys", src = 7, x = 56, y = 100, w = 560, h = 80})
@@ -342,60 +275,37 @@ local function main()
 		table.insert(skin.image, {id = "lane-bg", src = 7, x = 0, y = 400, w = 950, h = 80})
 		table.insert(skin.image, {id = "keys", src = 7, x = 0, y = 480, w = 950, h = 80})
 	end
-	skin.imageset = {
-		{id = "keybeam1", ref = 501, images = {"keybeam-w","keybeam-w-pg"}},
-		{id = "keybeam2", ref = 502, images = {"keybeam-b","keybeam-b-pg"}},
-		{id = "keybeam3", ref = 503, images = {"keybeam-w","keybeam-w-pg"}},
-		{id = "keybeam4", ref = 504, images = {"keybeam-b","keybeam-b-pg"}},
-		{id = "keybeam5", ref = 505, images = {"keybeam-w","keybeam-w-pg"}},
-		{id = "keybeam6", ref = 506, images = {"keybeam-w","keybeam-w-pg"}},
-		{id = "keybeam7", ref = 507, images = {"keybeam-b","keybeam-b-pg"}},
-		{id = "keybeam8", ref = 508, images = {"keybeam-w","keybeam-w-pg"}},
-		{id = "keybeam9", ref = 509, images = {"keybeam-b","keybeam-b-pg"}},
-		{id = "keybeam10", ref = 1510, images = {"keybeam-w","keybeam-w-pg"}},
-		{id = "keybeam11", ref = 1511, images = {"keybeam-b","keybeam-b-pg"}},
-		{id = "keybeam12", ref = 1512, images = {"keybeam-w","keybeam-w-pg"}},
-		{id = "keybeam13", ref = 1513, images = {"keybeam-w","keybeam-w-pg"}},
-		{id = "keybeam14", ref = 1514, images = {"keybeam-b","keybeam-b-pg"}},
-		{id = "keybeam15", ref = 1515, images = {"keybeam-w","keybeam-w-pg"}},
-		{id = "keybeam16", ref = 1516, images = {"keybeam-b","keybeam-b-pg"}},
-		{id = "keybeam17", ref = 1517, images = {"keybeam-w","keybeam-w-pg"}},
-		{id = "keybeam18", ref = 1518, images = {"keybeam-w","keybeam-w-pg"}},
-		{id = "keybeam19", ref = 1519, images = {"keybeam-b","keybeam-b-pg"}},
-		{id = "keybeam20", ref = 1520, images = {"keybeam-w","keybeam-w-pg"}},
-		{id = "keybeam21", ref = 1521, images = {"keybeam-b","keybeam-b-pg"}},
-		{id = "keybeam22", ref = 1522, images = {"keybeam-w","keybeam-w-pg"}},
-		{id = "keybeam23", ref = 1523, images = {"keybeam-b","keybeam-b-pg"}},
-		{id = "keybeam24", ref = 1524, images = {"keybeam-w","keybeam-w-pg"}},
-		{id = "keybeamsu", ref = 1525, images = {"keybeam-s","keybeam-s-pg"}},
-		{id = "keybeamsd", ref = 1526, images = {"keybeam-s","keybeam-s-pg"}},
-		{id = 110, ref = 501, images = {"bomb1-1","bomb2-1","bomb1-1","bomb3-1"}},
-		{id = 111, ref = 502, images = {"bomb1-2","bomb2-2","bomb1-2","bomb3-2"}},
-		{id = 112, ref = 503, images = {"bomb1-3","bomb2-3","bomb1-3","bomb3-3"}},
-		{id = 113, ref = 504, images = {"bomb1-4","bomb2-4","bomb1-4","bomb3-4"}},
-		{id = 114, ref = 505, images = {"bomb1-5","bomb2-5","bomb1-5","bomb3-5"}},
-		{id = 115, ref = 506, images = {"bomb1-6","bomb2-6","bomb1-6","bomb3-6"}},
-		{id = 116, ref = 507, images = {"bomb1-7","bomb2-7","bomb1-7","bomb3-7"}},
-		{id = 117, ref = 508, images = {"bomb1-8","bomb2-8","bomb1-8","bomb3-8"}},
-		{id = 118, ref = 509, images = {"bomb1-9","bomb2-9","bomb1-9","bomb3-9"}},
-		{id = 119, ref = 1510, images = {"bomb1-10","bomb2-10","bomb1-10","bomb3-10"}},
-		{id = 120, ref = 1511, images = {"bomb1-11","bomb2-11","bomb1-11","bomb3-11"}},
-		{id = 121, ref = 1512, images = {"bomb1-12","bomb2-12","bomb1-12","bomb3-12"}},
-		{id = 122, ref = 1513, images = {"bomb1-13","bomb2-13","bomb1-13","bomb3-13"}},
-		{id = 123, ref = 1514, images = {"bomb1-14","bomb2-14","bomb1-14","bomb3-14"}},
-		{id = 124, ref = 1515, images = {"bomb1-15","bomb2-15","bomb1-15","bomb3-15"}},
-		{id = 125, ref = 1516, images = {"bomb1-16","bomb2-16","bomb1-16","bomb3-16"}},
-		{id = 126, ref = 1517, images = {"bomb1-17","bomb2-17","bomb1-17","bomb3-17"}},
-		{id = 127, ref = 1518, images = {"bomb1-18","bomb2-18","bomb1-18","bomb3-18"}},
-		{id = 128, ref = 1519, images = {"bomb1-19","bomb2-19","bomb1-19","bomb3-19"}},
-		{id = 129, ref = 1520, images = {"bomb1-20","bomb2-20","bomb1-20","bomb3-20"}},
-		{id = 130, ref = 1521, images = {"bomb1-21","bomb2-21","bomb1-21","bomb3-21"}},
-		{id = 131, ref = 1522, images = {"bomb1-22","bomb2-22","bomb1-22","bomb3-22"}},
-		{id = 132, ref = 1523, images = {"bomb1-23","bomb2-23","bomb1-23","bomb3-23"}},
-		{id = 133, ref = 1524, images = {"bomb1-24","bomb2-24","bomb1-24","bomb3-24"}},
-		{id = 134, ref = 1525, images = {"bomb1-su","bomb2-su","bomb1-su","bomb3-su"}},
-		{id = 135, ref = 1526, images = {"bomb1-sd","bomb2-sd","bomb1-sd","bomb3-sd"}}
-	}
+	skin.imageset = {}
+	local function keybeam_imageset(index)
+		local name = index
+		if index == 25 then
+			name = "su"
+		elseif index == 26 then
+			name = "sd"
+		end
+		local wbs
+		if index == 25 or index == 26 then
+			wbs = "s"
+		elseif index % 2 == 1 then
+			wbs = "w"
+		else
+			wbs = "b"
+		end
+		return {id = "keybeam"..name, ref = value_judge(index), images = { "keybeam-"..wbs, "keybeam-"..wbs.."-pg" }}
+	end
+	local function bomb_imageset(index)
+		local name = index
+		if index == 25 then
+			name = "su"
+		elseif index == 26 then
+			name = "sd"
+		end
+		return {id = index + 109, ref = value_judge(index), images = { "bomb1-"..name, "bomb2-"..name, "bomb1-"..name, "bomb3-"..name }}
+	end
+	for i = 1, 26 do
+		table.insert(skin.imageset, keybeam_imageset(i))
+		table.insert(skin.imageset, bomb_imageset(i))
+	end
 	skin.value = {
 		{id = 400, src = 5, x = 0, y = 0, w = 240, h = 24, divx = 10, digit = 4, ref = 91},
 		{id = 401, src = 5, x = 0, y = 0, w = 240, h = 24, divx = 10, digit = 4, ref = 160},
