@@ -1,7 +1,13 @@
 package bms.player.beatoraja.input;
 
 public class Key {
+	/*
+	 * key state
+	 */
 	private boolean isPressed;
+	/*
+	 * last update time of key pression
+	 */
 	private long pressTime;
 	
 	Key() {

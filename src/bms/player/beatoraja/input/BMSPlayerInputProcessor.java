@@ -79,37 +79,22 @@ public class BMSPlayerInputProcessor {
 		devices.add(midiinput);
 	}
 
-	/**
-	 * 各キーのON/OFF状態
-	 * 全モードの入力が収まる大きさにしておく
-	 */
-	private boolean[] keystate = new boolean[256];
-	/**
-	 * 各キーの最終更新時間 TODO これを他クラスから編集させない方がいいかも
-	 */
-	private long[] time = new long[256];
+	private Key[] key = new Key[256];
+//	/**
+//	 * 各キーのON/OFF状態
+//	 * 全モードの入力が収まる大きさにしておく
+//	 */
+//	private boolean[] keystate = new boolean[256];
+//	/**
+//	 * 各キーの最終更新時間 TODO これを他クラスから編集させない方がいいかも
+//	 */
+//	private long[] time = new long[256];
 
 	private BMSPlayerInputDevice lastKeyDevice;
 	private ArrayList<BMSPlayerInputDevice> devices;
 	
 	private Key[] numberKey = new Key[10];
 	private Key[] functionKey = new Key[12];
-/*	*//**
-	 * 0-9キーのON/OFF状態
-	 *//*
-	private boolean[] numberstate = new boolean[10];
-	*//**
-	 * 0-9キーの最終更新時間
-	 *//*
-	private long[] numtime = new long[10];
-	*//**
-	 * F1-F12キーのON/OFF状態
-	 *//*
-	private boolean[] functionstate = new boolean[12];
-	*//**
-	 * F1-F12キーの最終更新時間
-	 *//*
-	private long[] functiontime = new long[12];*/
 
 	long starttime;
 
@@ -170,7 +155,7 @@ public class BMSPlayerInputProcessor {
 	public void setStartTime(long starttime) {
 		this.starttime = starttime;
 		if (starttime != 0) {
-			Arrays.fill(time, 0);
+			resetKeyTime();
 			keylog.clear();
 			kbinput.clear();
 			for (BMControllerInputProcessor bm : bminput) {
@@ -180,24 +165,39 @@ public class BMSPlayerInputProcessor {
 		midiinput.setStartTime(starttime);
 	}
 
+	// get set methods for key
 	public long getStartTime() {
 		return starttime;
 	}
 
-	public long[] getTime() {
-		return time;
+	public long getKeyTime(int i) {
+		return key[i].getPressTime();
 	}
 
-	public void setTime(long[] l) {
-		time = l;
+	public void setKeyTime(int i, long time) {
+		key[i].setTime(time);
+	}
+	
+	public void resetKeyTime(int i) {
+		key[i].resetTime();
+	}
+	
+	public void resetKeyTime() {
+		for (int i = 0; i < key.length; i++)
+			key[i].resetTime();
 	}
 
-	public boolean[] getKeystate() {
-		return keystate;
+	public boolean getKeyState(int i) {
+		return key[i].getIsPressed();
 	}
 
-	public void setKeystate(boolean[] b) {
-		keystate = b;
+	public void setKeyState(int i, boolean state) {
+		key[i].setState(state);
+	}
+	
+	public void resetKeyState() {
+		for (int i = 0; i < key.length; i++)
+			key[i].setState(false);
 	}
 
 	public BMSPlayerInputDevice getLastKeyChangedDevice() {
@@ -212,10 +212,8 @@ public class BMSPlayerInputProcessor {
 		// KB, コントローラー, Midiの各ボタンについて排他的処理を実施
 		int[] kbkeys = playconfig.getKeyboardConfig().getKeyAssign();
 		boolean[] exclusive = new boolean[kbkeys.length];
-		for(int i = kbkeys.length;i < keystate.length;i++) {
-			keystate[i] = false;
-			time[i] = 0;
-		}
+		resetKeyState();
+		resetKeyTime();
 		
 		int kbcount = setPlayConfig0(kbkeys,  exclusive);
 		
@@ -278,8 +276,8 @@ public class BMSPlayerInputProcessor {
 	public void setEnable(boolean enable) {
 		this.enable = enable;
 		if(!enable) {
-			Arrays.fill(keystate, false);
-			Arrays.fill(time, 0);
+			resetKeyState();
+			resetKeyTime();
 			for (BMSPlayerInputDevice device : devices) {
 				device.clear();
 			}
@@ -290,9 +288,9 @@ public class BMSPlayerInputProcessor {
 		if (!enable) {
 			return;
 		}
-		if (keystate[i] != pressed) {
-			keystate[i] = pressed;
-			time[i] = presstime;
+		if (getKeyState(i) != pressed) {
+			setKeyState(i, pressed);
+			setKeyTime(i, presstime);
 			lastKeyDevice = device;
 			if (this.getStartTime() != 0) {
 				keylog.add((int) presstime, i, pressed);
