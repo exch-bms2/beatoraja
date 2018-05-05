@@ -493,26 +493,8 @@ public class BMSPlayer extends MainState {
 		}
 	
 		setSounds();
-
-		final BMSPlayerInputProcessor input = main.getInputProcessor();
-		input.setMinimumInputDutration(conf.getInputduration());
-		PlayModeConfig pc = getPlayConfig(config);
-		if(autoplay == PlayMode.PLAY || autoplay == PlayMode.PRACTICE) {
-			input.setPlayConfig(pc);
-		}
-		if (autoplay.isAutoPlayMode() || autoplay.isReplayMode()) {
-			input.setEnable(false);
-		}
-		input.setKeyboardConfig(pc.getKeyboardConfig());
-		input.setControllerConfig(pc.getController());
-		input.setMidiConfig(pc.getMidiConfig());
-		lanerender = new LaneRenderer(this, model);
-		for (CourseData.CourseDataConstraint i : resource.getConstraint()) {
-			if (i == NO_SPEED) {
-				control.setEnableControl(false);
-				break;
-			}
-		} 
+		
+		setMainInputProcessor(resource, conf, config); 
 
 		judge.init(model, resource);
 
@@ -572,6 +554,27 @@ public class BMSPlayer extends MainState {
 			state = STATE_PRACTICE;
 		} else {
 			getScoreDataProperty().setTargetScore(score.getExscore(), rivalscore, model.getTotalNotes());
+		}
+	}
+	private void setMainInputProcessor(final PlayerResource resource, Config conf, PlayerConfig config) {
+		final BMSPlayerInputProcessor input = main.getInputProcessor();
+		input.setMinimumInputDutration(conf.getInputduration());
+		PlayModeConfig pc = getPlayConfig(config);
+		if(autoplay == PlayMode.PLAY || autoplay == PlayMode.PRACTICE) {
+			input.setPlayConfig(pc);
+		}
+		if (autoplay.isAutoPlayMode() || autoplay.isReplayMode()) {
+			input.setEnable(false);
+		}
+		input.setKeyboardConfig(pc.getKeyboardConfig());
+		input.setControllerConfig(pc.getController());
+		input.setMidiConfig(pc.getMidiConfig());
+		lanerender = new LaneRenderer(this, model);
+		for (CourseData.CourseDataConstraint i : resource.getConstraint()) {
+			if (i == NO_SPEED) {
+				control.setEnableControl(false);
+				break;
+			}
 		}
 	}
 	private void setSounds() {
