@@ -246,12 +246,7 @@ public class BMSPlayer extends MainState {
 		boolean retV = true;
 		PlayerConfig config = resource.getPlayerConfig();
 		if (replay != null) {
-			boolean isModePOPN_9K = replay.sevenToNinePattern > 0 && model.getMode() == Mode.BEAT_7K;
-			if(isModePOPN_9K) {
-				model.setMode(Mode.POPN_9K);
-				BMSPlayerRule.setSevenToNine(true);
-			}
-			PatternModifier.modify(model, Arrays.asList(replay.pattern));
+			modifyPatternWithReplay();
 		} 
 		else if (resource.getReplayData().pattern != null) {
 			if(resource.getReplayData().sevenToNinePattern > 0 && model.getMode() == Mode.BEAT_7K) {
@@ -311,6 +306,14 @@ public class BMSPlayer extends MainState {
 			}
 		}
 		return retV;
+	}
+	private void modifyPatternWithReplay() {
+		boolean isModePOPN_9K = replay.sevenToNinePattern > 0 && model.getMode() == Mode.BEAT_7K;
+		if(isModePOPN_9K) {
+			model.setMode(Mode.POPN_9K);
+			BMSPlayerRule.setSevenToNine(true);
+		}
+		PatternModifier.modify(model, Arrays.asList(replay.pattern));
 	}
 	private boolean isDoubleOption(PlayerResource resource) {
 		boolean retV = true;
