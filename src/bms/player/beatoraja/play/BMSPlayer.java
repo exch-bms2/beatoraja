@@ -657,22 +657,7 @@ public class BMSPlayer extends MainState {
 			break;
 			// GET READY
 		case STATE_READY:
-			if (main.getNowTime(TIMER_READY) > skin.getPlaystart()) {
-				saveReplayHS();
-				state = STATE_PLAY;
-                main.setMicroTimer(TIMER_PLAY, micronow - starttimeoffset * 1000);
-                main.setMicroTimer(TIMER_RHYTHM, micronow - starttimeoffset * 1000);
-
-				input.setStartTime(now + main.getStartTime() - starttimeoffset);
-				List<KeyInputLog> keylog = null;
-				if (autoplay.isReplayMode()) {
-					keylog = Arrays.asList(replay.keylog);
-				}
-				keyinput.startJudge(model, keylog);
-				autoThread = new AutoplayThread(starttimeoffset * 1000);
-				autoThread.start();
-				Logger.getGlobal().info("STATE_PLAY�겓燁삭죱");
-			}
+			setSTATE_READY(skin, input, now, micronow);
 			break;
 		// �깤�꺃�궎
 		case STATE_PLAY:
@@ -864,6 +849,25 @@ public class BMSPlayer extends MainState {
 		}
 
 		prevtime = micronow;
+	}
+	private void setSTATE_READY(final PlaySkin skin, final BMSPlayerInputProcessor input, final long now,
+			final long micronow) {
+		if (main.getNowTime(TIMER_READY) > skin.getPlaystart()) {
+			saveReplayHS();
+			state = STATE_PLAY;
+		    main.setMicroTimer(TIMER_PLAY, micronow - starttimeoffset * 1000);
+		    main.setMicroTimer(TIMER_RHYTHM, micronow - starttimeoffset * 1000);
+
+			input.setStartTime(now + main.getStartTime() - starttimeoffset);
+			List<KeyInputLog> keylog = null;
+			if (autoplay.isReplayMode()) {
+				keylog = Arrays.asList(replay.keylog);
+			}
+			keyinput.startJudge(model, keylog);
+			autoThread = new AutoplayThread(starttimeoffset * 1000);
+			autoThread.start();
+			Logger.getGlobal().info("STATE_PLAY�겓燁삭죱");
+		}
 	}
 	private void setSTATE_PRACTICE_FINISH(final PlaySkin skin, final BMSPlayerInputProcessor input) {
 		if (main.getNowTime(TIMER_FADEOUT) > skin.getFadeout()) {
