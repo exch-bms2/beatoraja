@@ -256,47 +256,55 @@ public class BMSPlayer extends MainState {
 			if(model.getMode().player == 2) {
 				makeLaneShufflePattern(config);
 				pattern = PatternModifier.merge(pattern,
-								PatternModifier.create(config.getRandom2(), PatternModifier.SIDE_2P)
-										.modify(model));
+								PatternModifier.create(config.getRandom2(), PatternModifier.SIDE_2P).modify(model));
 				if (config.getRandom2() >= 6) {
 					assist = (assist == 0) ? 1 : assist;
 					retV = false;
 				}
 				Logger.getGlobal().info("鈺쒒씊�궕�깤�궥�깾�꺍 :  " + config.getRandom2());
 			}
-
-			if(model.getMode().scratchKey.length == 0) {
-				if (config.getRandom() == 7 && model.getMode() != Mode.POPN_9K) {
-					config.setRandom(0);
-				} else if (config.getRandom() == 8 && model.getMode() != Mode.POPN_9K) {
-					config.setRandom(2);
-				} else if (config.getRandom() == 9 && model.getMode() != Mode.POPN_9K) {
-					config.setRandom(4);
-				}
-			}
-			pattern = PatternModifier.merge(pattern,
-					PatternModifier
-							.create(config.getRandom(), PatternModifier.SIDE_1P)
-							.modify(model));
+			
+			modifyRandom(config);
+			
+			PatternModifier temp =  PatternModifier.create(config.getRandom(), PatternModifier.SIDE_1P);
+			pattern = PatternModifier.merge(pattern,temp.modify(model));
+			
 			if (config.getRandom() >= 6 && !(config.getRandom() == 8 && model.getMode() == Mode.POPN_9K)) {
 				assist = (assist == 0) ? 1 : assist;
 				retV = false;
 			}
 			Logger.getGlobal().info("鈺쒒씊�궕�깤�궥�깾�꺍 :  " + config.getRandom());
-			if (config.getSevenToNinePattern() >= 1 && model.getMode() == Mode.BEAT_7K) {
-				//7to9
-				model.setMode(Mode.POPN_9K);
-				NoteShuffleModifier mod = new NoteShuffleModifier(NoteShuffleModifier.SEVEN_TO_NINE);
-				mod.setModifyTarget(PatternModifier.SIDE_1P);
-				pattern = mod.modify(model);
-				BMSPlayerRule.setSevenToNine(true);
-				if(config.getSevenToNineType() != 0) {
-					assist = 1;
-					retV = false;
-				}
-			}
+			
+			retV &= mode7to9(config);
 		}
 		return retV;
+	}
+	private boolean mode7to9(PlayerConfig config) {
+		boolean retV = true;
+		if (config.getSevenToNinePattern() >= 1 && model.getMode() == Mode.BEAT_7K) {
+			//7to9
+			model.setMode(Mode.POPN_9K);
+			NoteShuffleModifier mod = new NoteShuffleModifier(NoteShuffleModifier.SEVEN_TO_NINE);
+			mod.setModifyTarget(PatternModifier.SIDE_1P);
+			pattern = mod.modify(model);
+			BMSPlayerRule.setSevenToNine(true);
+			if(config.getSevenToNineType() != 0) {
+				assist = 1;
+				retV = false;
+			}			
+		}
+		return retV;
+	}
+	private void modifyRandom(PlayerConfig config) {
+		if(model.getMode().scratchKey.length == 0) {
+			if (config.getRandom() == 7 && model.getMode() != Mode.POPN_9K) {
+				config.setRandom(0);
+			} else if (config.getRandom() == 8 && model.getMode() != Mode.POPN_9K) {
+				config.setRandom(2);
+			} else if (config.getRandom() == 9 && model.getMode() != Mode.POPN_9K) {
+				config.setRandom(4);
+			}
+		}
 	}
 	private void makeLaneShufflePattern(PlayerConfig config) {
 		if (config.getDoubleoption() == 1) {
