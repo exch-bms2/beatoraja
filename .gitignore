@@ -17,3 +17,4 @@ b.bat
 /*.dll
 *.cim
 /target/
+/.gradle/

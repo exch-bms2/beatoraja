@@ -25,7 +25,7 @@ import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.launcher.PlayConfigurationView;
 
 /**
- * 起動用クラス
+ * 壅룟땿�뵪�궚�꺀�궧
  *
  * @author exch
  */
