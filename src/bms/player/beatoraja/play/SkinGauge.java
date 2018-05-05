@@ -2,6 +2,7 @@ package bms.player.beatoraja.play;
 
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.PlayerResource;
+import bms.player.beatoraja.play.GaugeProperty.GaugeElementProperty;
 import bms.player.beatoraja.result.AbstractResult;
 import bms.player.beatoraja.result.MusicResult;
 
@@ -59,6 +60,11 @@ public class SkinGauge extends SkinObject {
 	 */
 	private int endtime = 500;
 
+	/**
+	 * 7to9時にボーダーが丁度割り切れるゲージ粒数になっているかがチェック済みかどうか
+	 */
+	private boolean isCheckedSevenToNine = false;
+
 	public SkinGauge(TextureRegion[][] image, int timer, int cycle, int parts, int type, int range, int duration) {
 		this.image = new SkinSourceImage(image, timer, cycle);
 		this.parts = parts;
@@ -96,6 +102,22 @@ public class SkinGauge extends SkinObject {
 				break;
 			}
 			atime = time + duration;
+		}
+
+		if(!isCheckedSevenToNine && BMSPlayerRule.isSevenToNine()) {
+			//7to9 ボーダーが丁度割り切れるゲージ粒数に変更
+			int setParts = parts;
+			for(int type = 0; type < gauge.getGaugeTypeLength(); type++) {
+				final GaugeElementProperty element = gauge.getGauge(type).getProperty();
+				for(int i = parts; i <= element.max; i++) {
+					if(element.border % (element.max / i) == 0) {
+						setParts = Math.max(setParts, i);
+						break;
+					}
+				}
+			}
+			parts = setParts;
+			isCheckedSevenToNine = true;
 		}
 
 		float value = gauge.getValue();
