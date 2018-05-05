@@ -71,6 +71,91 @@ public class CourseResult extends AbstractResult {
 
 		gaugeType = resource.getGrooveGauge().getType();
 	}
+	
+	public void prepare() {
+		state = STATE_OFFLINE;
+		final PlayerResource resource = main.getPlayerResource();
+		final PlayerConfig config = resource.getPlayerConfig();
+
+		IRConnection ir = main.getIRConnection();
+		if (ir != null) {
+			boolean send = resource.isUpdateScore();
+			switch(main.getPlayerConfig().getIrsend()) {
+			case PlayerConfig.IR_SEND_ALWAYS:
+				break;
+			case PlayerConfig.IR_SEND_COMPLETE_SONG:
+//				FloatArray gauge = resource.getG.getGauge()[resource.getGrooveGauge().getType()];
+//				send &= gauge.get(gauge.size - 1) > 0.0;
+				break;
+			case PlayerConfig.IR_SEND_UPDATE_SCORE:
+//				IRScoreData current = resource.getScoreData();
+//				send &= (current.getExscore() > oldexscore || current.getClear() > oldclear
+//						|| current.getCombo() > oldcombo || current.getMinbp() < oldmisscount);
+				break;
+			}
+
+			if(send) {
+				Logger.getGlobal().info("IRへスコア送信中(未実装)");
+				main.switchTimer(TIMER_IR_CONNECT_BEGIN, true);
+				state = STATE_IR_PROCESSING;
+				Thread irprocess = new Thread() {
+
+					@Override
+					public void run() {
+						try {
+							Logger.getGlobal().info("IRへスコア送信");
+							int lnmode = 0;
+							for(BMSModel model : resource.getCourseBMSModels()) {
+								if(model.containsUndefinedLongNote()) {
+									lnmode = config.getLnmode();
+									break;
+								}
+							}
+							IRResponse<Object> send = ir.sendCoursePlayData(resource.getCourseData(), lnmode, resource.getCourseScoreData());
+							if(send.isSuccessed()) {
+								main.switchTimer(TIMER_IR_CONNECT_SUCCESS, true);
+								Logger.getGlobal().info("IRスコア送信完了");
+							} else {
+								main.switchTimer(TIMER_IR_CONNECT_FAIL, true);
+								Logger.getGlobal().warning("IRスコア送信失敗 : " + send.getMessage());
+							}
+							IRResponse<IRScoreData[]> response = ir.getCoursePlayData(null, resource.getCourseData(), lnmode);
+							if(response.isSuccessed()) {
+								IRScoreData[] scores = response.getData();
+								irtotal = scores.length;
+
+								for(int i = 0;i < scores.length;i++) {
+									if(irrank == 0 && scores[i].getExscore() <= resource.getScoreData().getExscore() ) {
+										irrank = i + 1;
+									}
+									if(irprevrank == 0 && scores[i].getExscore() <= oldscore.getExscore() ) {
+										irprevrank = i + 1;
+										if(irrank == 0) {
+											irrank = irprevrank;
+										}
+									}
+								}
+								Logger.getGlobal().warning("IRからのスコア取得成功 : " + response.getMessage());
+							} else {
+								Logger.getGlobal().warning("IRからのスコア取得失敗 : " + response.getMessage());
+							}
+						} catch (Exception e) {
+							Logger.getGlobal().severe(e.getMessage());
+						} finally {
+							state = STATE_IR_FINISHED;
+						}
+					}
+				};
+				irprocess.start();
+			}
+		}
+
+		if (newscore.getClear() != Failed.id) {
+			play(SOUND_CLEAR);
+		} else {
+			play(SOUND_FAIL);
+		}
+	}
 
 	public void render() {
 		long time = main.getNowTime();
@@ -153,7 +238,6 @@ public class CourseResult extends AbstractResult {
 	}
 
 	public void updateScoreDatabase() {
-		state = STATE_OFFLINE;
 		final PlayerResource resource = main.getPlayerResource();
 		final PlayerConfig config = resource.getPlayerConfig();
 		BMSModel[] models = resource.getCourseBMSModels();
@@ -189,85 +273,6 @@ public class CourseResult extends AbstractResult {
 		main.getPlayDataAccessor().writeScoreDara(newscore, models, config.getLnmode(),
 				random, resource.getConstraint(), resource.isUpdateScore());
 
-		IRConnection ir = main.getIRConnection();
-		if (ir != null) {
-			boolean send = resource.isUpdateScore();
-			switch(main.getPlayerConfig().getIrsend()) {
-			case PlayerConfig.IR_SEND_ALWAYS:
-				break;
-			case PlayerConfig.IR_SEND_COMPLETE_SONG:
-//				FloatArray gauge = resource.getG.getGauge()[resource.getGrooveGauge().getType()];
-//				send &= gauge.get(gauge.size - 1) > 0.0;
-				break;
-			case PlayerConfig.IR_SEND_UPDATE_SCORE:
-//				IRScoreData current = resource.getScoreData();
-//				send &= (current.getExscore() > oldexscore || current.getClear() > oldclear
-//						|| current.getCombo() > oldcombo || current.getMinbp() < oldmisscount);
-				break;
-			}
-
-			if(send) {
-				Logger.getGlobal().info("IRへスコア送信中(未実装)");
-				main.switchTimer(TIMER_IR_CONNECT_BEGIN, true);
-				state = STATE_IR_PROCESSING;
-				final IRScoreData oldscore = score;
-				Thread irprocess = new Thread() {
-
-					@Override
-					public void run() {
-						try {
-							Logger.getGlobal().info("IRへスコア送信");
-							int lnmode = 0;
-							for(BMSModel model : resource.getCourseBMSModels()) {
-								if(model.containsUndefinedLongNote()) {
-									lnmode = config.getLnmode();
-									break;
-								}
-							}
-							IRResponse<Object> send = ir.sendCoursePlayData(resource.getCourseData(), lnmode, resource.getCourseScoreData());
-							if(send.isSuccessed()) {
-								main.switchTimer(TIMER_IR_CONNECT_SUCCESS, true);
-								Logger.getGlobal().info("IRスコア送信完了");
-							} else {
-								main.switchTimer(TIMER_IR_CONNECT_FAIL, true);
-								Logger.getGlobal().warning("IRスコア送信失敗 : " + send.getMessage());
-							}
-							IRResponse<IRScoreData[]> response = ir.getCoursePlayData(null, resource.getCourseData(), lnmode);
-							if(response.isSuccessed()) {
-								IRScoreData[] scores = response.getData();
-								irtotal = scores.length;
-
-								for(int i = 0;i < scores.length;i++) {
-									if(irrank == 0 && scores[i].getExscore() <= resource.getScoreData().getExscore() ) {
-										irrank = i + 1;
-									}
-									if(irprevrank == 0 && scores[i].getExscore() <= oldscore.getExscore() ) {
-										irprevrank = i + 1;
-										if(irrank == 0) {
-											irrank = irprevrank;
-										}
-									}
-								}
-								Logger.getGlobal().warning("IRからのスコア取得成功 : " + response.getMessage());
-							} else {
-								Logger.getGlobal().warning("IRからのスコア取得失敗 : " + response.getMessage());
-							}
-						} catch (Exception e) {
-							Logger.getGlobal().severe(e.getMessage());
-						} finally {
-							state = STATE_IR_FINISHED;
-						}
-					}
-				};
-				irprocess.start();
-			}
-		}
-
-		if (newscore.getClear() != Failed.id) {
-			play(SOUND_CLEAR);
-		} else {
-			play(SOUND_FAIL);
-		}
 
 		Logger.getGlobal().info("スコアデータベース更新完了 ");
 	}
