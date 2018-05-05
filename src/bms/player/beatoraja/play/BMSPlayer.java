@@ -661,143 +661,11 @@ public class BMSPlayer extends MainState {
 			break;
 		// �깤�꺃�궎
 		case STATE_PLAY:
-			final long deltatime = micronow - prevtime;
-			final long deltaplay = deltatime * (100 - playspeed) / 100;
-			PracticeProperty property = practice.getPracticeProperty();
-			main.setMicroTimer(TIMER_PLAY, main.getMicroTimer(TIMER_PLAY) + deltaplay);
-            rhythmtimer += deltatime * (100 - lanerender.getNowBPM() * playspeed / 60) / 100;
-            main.setMicroTimer(TIMER_RHYTHM, rhythmtimer);
-
-            if(sections < sectiontimes.length && (sectiontimes[sections] * (100 / property.freq)) <= main.getNowMicroTime(TIMER_PLAY)) {
-				sections++;;
-				main.setTimerOn(TIMER_RHYTHM);
-				rhythmtimer = micronow;
-			}
-            if(isNoteExpansion) {
-				if(quarterNote < quarterNoteTimes.length && (quarterNoteTimes[quarterNote] * (100 / property.freq)) <= main.getNowMicroTime(TIMER_PLAY)) {
-					quarterNote++;
-					nowQuarterNoteTime = now;
-				} else if(quarterNote == quarterNoteTimes.length && ((nowQuarterNoteTime + 60000 / lanerender.getNowBPM()) * (100 / property.freq)) <= now)  {
-					nowQuarterNoteTime = now;
-				}
-            }
-
-            final long ptime = main.getNowTime(TIMER_PLAY);
-			float g = gauge.getValue();
-			for(int i = 0; i < gaugelog.length; i++) {
-				if (gaugelog[i].size <= ptime / 500) {
-					gaugelog[i].add(gauge.getValue(i));
-				}
-			}
-			main.switchTimer(TIMER_GAUGE_MAX_1P, g == gauge.getMaxValue());
-
-			if(main.isTimerOn(TIMER_PM_CHARA_1P_NEUTRAL) && main.getNowTime(TIMER_PM_CHARA_1P_NEUTRAL) >= skin.getPMcharaTime(TIMER_PM_CHARA_1P_NEUTRAL - TIMER_PM_CHARA_1P_NEUTRAL) && main.getNowTime(TIMER_PM_CHARA_1P_NEUTRAL) % skin.getPMcharaTime(TIMER_PM_CHARA_1P_NEUTRAL - TIMER_PM_CHARA_1P_NEUTRAL) < 17) {
-				if(PMcharaLastnotes[0] != notes && judge.getPMcharaJudge() > 0) {
-					if(judge.getPMcharaJudge() == 1 || judge.getPMcharaJudge() == 2) {
-						if(g == gauge.getMaxValue()) main.setTimerOn(TIMER_PM_CHARA_1P_FEVER);
-						else main.setTimerOn(TIMER_PM_CHARA_1P_GREAT);
-					} else if(judge.getPMcharaJudge() == 3) main.setTimerOn(TIMER_PM_CHARA_1P_GOOD);
-					else main.setTimerOn(TIMER_PM_CHARA_1P_BAD);
-					main.setTimerOff(TIMER_PM_CHARA_1P_NEUTRAL);
-				}
-			}
-			if(main.isTimerOn(TIMER_PM_CHARA_2P_NEUTRAL) && main.getNowTime(TIMER_PM_CHARA_2P_NEUTRAL) >= skin.getPMcharaTime(TIMER_PM_CHARA_2P_NEUTRAL - TIMER_PM_CHARA_1P_NEUTRAL) && main.getNowTime(TIMER_PM_CHARA_2P_NEUTRAL) % skin.getPMcharaTime(TIMER_PM_CHARA_2P_NEUTRAL - TIMER_PM_CHARA_1P_NEUTRAL) < 17) {
-				if(PMcharaLastnotes[1] != notes && judge.getPMcharaJudge() > 0) {
-					if(judge.getPMcharaJudge() >= 1 && judge.getPMcharaJudge() <= 3) main.setTimerOn(TIMER_PM_CHARA_2P_BAD);
-					else main.setTimerOn(TIMER_PM_CHARA_2P_GREAT);
-					main.setTimerOff(TIMER_PM_CHARA_2P_NEUTRAL);
-				}
-			}
-			for(int i = TIMER_PM_CHARA_1P_FEVER; i <= TIMER_PM_CHARA_2P_BAD; i++) {
-				if(i != TIMER_PM_CHARA_2P_NEUTRAL && main.isTimerOn(i) && main.getNowTime(i) >= skin.getPMcharaTime(i - TIMER_PM_CHARA_1P_NEUTRAL)) {
-					if(i <= TIMER_PM_CHARA_1P_BAD) {
-						main.setTimerOn(TIMER_PM_CHARA_1P_NEUTRAL);
-						PMcharaLastnotes[0] = notes;
-					} else {
-						main.setTimerOn(TIMER_PM_CHARA_2P_NEUTRAL);
-						PMcharaLastnotes[1] = notes;
-					}
-					main.setTimerOff(i);
-				}
-			}
-			main.switchTimer(TIMER_PM_CHARA_DANCE, true);
-
-            // System.out.println("playing time : " + time);
-			if (playtime < ptime && !isFailed) {
-				state = STATE_FINISHED;
-				main.setTimerOn(TIMER_MUSIC_END);
-				for(int i = TIMER_PM_CHARA_1P_NEUTRAL; i <= TIMER_PM_CHARA_2P_BAD; i++) {
-					main.setTimerOff(i);
-				}
-				main.setTimerOff(TIMER_PM_CHARA_DANCE);
-
-				Logger.getGlobal().info("STATE_FINISHED�겓燁삭죱");
-			} else if(playtime - TIME_MARGIN < ptime) {
-				main.switchTimer(TIMER_ENDOFNOTE_1P, true);
-            }
-			// stage failed�닩若�
-			if (g == 0) {
-				if(config.isContinueUntilEndOfSong()
-						&& ( gauge.getType() != GrooveGauge.CLASS || (gauge.getType() == GrooveGauge.CLASS && notes != main.getPlayerResource().getSongdata().getNotes()) )
-						&& !isFailed
-						&& gauge.getType() != GrooveGauge.HAZARD) {
-					if(gauge.getType() != GrooveGauge.CLASS) {
-						gauge.downType();
-						if(resource.getPlayMode() == PlayMode.PLAY) config.setGauge(config.getGauge() > 0 ? config.getGauge() - 1 :0);
-					} else {
-						isFailed = true;
-					}
-				} else if(!config.isContinueUntilEndOfSong()
-						|| gauge.getType() == GrooveGauge.HAZARD
-						|| (config.isContinueUntilEndOfSong() && gauge.getType() == GrooveGauge.CLASS && notes == main.getPlayerResource().getSongdata().getNotes())) {
-					state = STATE_FAILED;
-					main.setTimerOn(TIMER_FAILED);
-					if (resource.mediaLoadFinished()) {
-						main.getAudioProcessor().stop((Note) null);
-					}
-					play(SOUND_PLAYSTOP);
-					Logger.getGlobal().info("STATE_FAILED�겓燁삭죱");
-				}
-			}
+			setSTATE_PLAY(skin, resource, config, now, micronow);
 			break;
 		// �뻾佯쀥눇�릤
 		case STATE_FAILED:
-			if (autoThread != null) {
-				autoThread.stop = true;
-			}
-			keyinput.stopJudge();
-
-			if (main.getNowTime(TIMER_FAILED) > skin.getClose()) {
-				main.getAudioProcessor().setGlobalPitch(1f);
-				if (resource.mediaLoadFinished()) {
-					resource.getBGAManager().stop();
-				}
-				if (!autoplay.isAutoPlayMode() && autoplay != PlayMode.PRACTICE) {
-					resource.setScoreData(createScoreData());
-				}
-				resource.setCombo(judge.getCourseCombo());
-				resource.setMaxcombo(judge.getCourseMaxcombo());
-				saveConfig();
-				if (main.isTimerOn(TIMER_PLAY)) {
-					for (long l = main.getTimer(TIMER_FAILED) - main.getTimer(TIMER_PLAY); l < playtime + 500; l += 500) {
-						for(int i = 0; i < gaugelog.length; i++) {
-							gaugelog[i].add(0f);
-						}
-					}
-				}
-				resource.setGauge(gaugelog);
-				resource.setGrooveGauge(gauge);
-				resource.setAssist(assist);
-				input.setEnable(true);
-				input.setStartTime(0);
-				if (autoplay == PlayMode.PRACTICE) {
-					state = STATE_PRACTICE;
-				} else if (resource.getScoreData() != null) {
-					main.changeState(MainController.STATE_RESULT);
-				} else {
-					main.changeState(MainController.STATE_SELECTMUSIC);
-				}
-			}
+			setSTATE_FAILED(skin, resource, input);
 			break;
 		// 若뚦쪕�눇�릤
 		case STATE_FINISHED:
@@ -849,6 +717,146 @@ public class BMSPlayer extends MainState {
 		}
 
 		prevtime = micronow;
+	}
+	private void setSTATE_FAILED(final PlaySkin skin, final PlayerResource resource,
+			final BMSPlayerInputProcessor input) {
+		if (autoThread != null) {
+			autoThread.stop = true;
+		}
+		keyinput.stopJudge();
+
+		if (main.getNowTime(TIMER_FAILED) > skin.getClose()) {
+			main.getAudioProcessor().setGlobalPitch(1f);
+			if (resource.mediaLoadFinished()) {
+				resource.getBGAManager().stop();
+			}
+			if (!autoplay.isAutoPlayMode() && autoplay != PlayMode.PRACTICE) {
+				resource.setScoreData(createScoreData());
+			}
+			resource.setCombo(judge.getCourseCombo());
+			resource.setMaxcombo(judge.getCourseMaxcombo());
+			saveConfig();
+			if (main.isTimerOn(TIMER_PLAY)) {
+				for (long l = main.getTimer(TIMER_FAILED) - main.getTimer(TIMER_PLAY); l < playtime + 500; l += 500) {
+					for(int i = 0; i < gaugelog.length; i++) {
+						gaugelog[i].add(0f);
+					}
+				}
+			}
+			resource.setGauge(gaugelog);
+			resource.setGrooveGauge(gauge);
+			resource.setAssist(assist);
+			input.setEnable(true);
+			input.setStartTime(0);
+			if (autoplay == PlayMode.PRACTICE) {
+				state = STATE_PRACTICE;
+			} else if (resource.getScoreData() != null) {
+				main.changeState(MainController.STATE_RESULT);
+			} else {
+				main.changeState(MainController.STATE_SELECTMUSIC);
+			}
+		}
+	}
+	private void setSTATE_PLAY(final PlaySkin skin, final PlayerResource resource, final PlayerConfig config,
+			final long now, final long micronow) {
+		final long deltatime = micronow - prevtime;
+		final long deltaplay = deltatime * (100 - playspeed) / 100;
+		PracticeProperty property = practice.getPracticeProperty();
+		main.setMicroTimer(TIMER_PLAY, main.getMicroTimer(TIMER_PLAY) + deltaplay);
+		rhythmtimer += deltatime * (100 - lanerender.getNowBPM() * playspeed / 60) / 100;
+		main.setMicroTimer(TIMER_RHYTHM, rhythmtimer);
+
+		if(sections < sectiontimes.length && (sectiontimes[sections] * (100 / property.freq)) <= main.getNowMicroTime(TIMER_PLAY)) {
+			sections++;;
+			main.setTimerOn(TIMER_RHYTHM);
+			rhythmtimer = micronow;
+		}
+		if(isNoteExpansion) {
+			if(quarterNote < quarterNoteTimes.length && (quarterNoteTimes[quarterNote] * (100 / property.freq)) <= main.getNowMicroTime(TIMER_PLAY)) {
+				quarterNote++;
+				nowQuarterNoteTime = now;
+			} else if(quarterNote == quarterNoteTimes.length && ((nowQuarterNoteTime + 60000 / lanerender.getNowBPM()) * (100 / property.freq)) <= now)  {
+				nowQuarterNoteTime = now;
+			}
+		}
+
+		final long ptime = main.getNowTime(TIMER_PLAY);
+		float g = gauge.getValue();
+		for(int i = 0; i < gaugelog.length; i++) {
+			if (gaugelog[i].size <= ptime / 500) {
+				gaugelog[i].add(gauge.getValue(i));
+			}
+		}
+		main.switchTimer(TIMER_GAUGE_MAX_1P, g == gauge.getMaxValue());
+
+		if(main.isTimerOn(TIMER_PM_CHARA_1P_NEUTRAL) && main.getNowTime(TIMER_PM_CHARA_1P_NEUTRAL) >= skin.getPMcharaTime(TIMER_PM_CHARA_1P_NEUTRAL - TIMER_PM_CHARA_1P_NEUTRAL) && main.getNowTime(TIMER_PM_CHARA_1P_NEUTRAL) % skin.getPMcharaTime(TIMER_PM_CHARA_1P_NEUTRAL - TIMER_PM_CHARA_1P_NEUTRAL) < 17) {
+			if(PMcharaLastnotes[0] != notes && judge.getPMcharaJudge() > 0) {
+				if(judge.getPMcharaJudge() == 1 || judge.getPMcharaJudge() == 2) {
+					if(g == gauge.getMaxValue()) main.setTimerOn(TIMER_PM_CHARA_1P_FEVER);
+					else main.setTimerOn(TIMER_PM_CHARA_1P_GREAT);
+				} else if(judge.getPMcharaJudge() == 3) main.setTimerOn(TIMER_PM_CHARA_1P_GOOD);
+				else main.setTimerOn(TIMER_PM_CHARA_1P_BAD);
+				main.setTimerOff(TIMER_PM_CHARA_1P_NEUTRAL);
+			}
+		}
+		if(main.isTimerOn(TIMER_PM_CHARA_2P_NEUTRAL) && main.getNowTime(TIMER_PM_CHARA_2P_NEUTRAL) >= skin.getPMcharaTime(TIMER_PM_CHARA_2P_NEUTRAL - TIMER_PM_CHARA_1P_NEUTRAL) && main.getNowTime(TIMER_PM_CHARA_2P_NEUTRAL) % skin.getPMcharaTime(TIMER_PM_CHARA_2P_NEUTRAL - TIMER_PM_CHARA_1P_NEUTRAL) < 17) {
+			if(PMcharaLastnotes[1] != notes && judge.getPMcharaJudge() > 0) {
+				if(judge.getPMcharaJudge() >= 1 && judge.getPMcharaJudge() <= 3) main.setTimerOn(TIMER_PM_CHARA_2P_BAD);
+				else main.setTimerOn(TIMER_PM_CHARA_2P_GREAT);
+				main.setTimerOff(TIMER_PM_CHARA_2P_NEUTRAL);
+			}
+		}
+		for(int i = TIMER_PM_CHARA_1P_FEVER; i <= TIMER_PM_CHARA_2P_BAD; i++) {
+			if(i != TIMER_PM_CHARA_2P_NEUTRAL && main.isTimerOn(i) && main.getNowTime(i) >= skin.getPMcharaTime(i - TIMER_PM_CHARA_1P_NEUTRAL)) {
+				if(i <= TIMER_PM_CHARA_1P_BAD) {
+					main.setTimerOn(TIMER_PM_CHARA_1P_NEUTRAL);
+					PMcharaLastnotes[0] = notes;
+				} else {
+					main.setTimerOn(TIMER_PM_CHARA_2P_NEUTRAL);
+					PMcharaLastnotes[1] = notes;
+				}
+				main.setTimerOff(i);
+			}
+		}
+		main.switchTimer(TIMER_PM_CHARA_DANCE, true);
+
+		// System.out.println("playing time : " + time);
+		if (playtime < ptime && !isFailed) {
+			state = STATE_FINISHED;
+			main.setTimerOn(TIMER_MUSIC_END);
+			for(int i = TIMER_PM_CHARA_1P_NEUTRAL; i <= TIMER_PM_CHARA_2P_BAD; i++) {
+				main.setTimerOff(i);
+			}
+			main.setTimerOff(TIMER_PM_CHARA_DANCE);
+
+			Logger.getGlobal().info("STATE_FINISHED�겓燁삭죱");
+		} else if(playtime - TIME_MARGIN < ptime) {
+			main.switchTimer(TIMER_ENDOFNOTE_1P, true);
+		}
+		// stage failed�닩若�
+		if (g == 0) {
+			if(config.isContinueUntilEndOfSong()
+					&& ( gauge.getType() != GrooveGauge.CLASS || (gauge.getType() == GrooveGauge.CLASS && notes != main.getPlayerResource().getSongdata().getNotes()) )
+					&& !isFailed
+					&& gauge.getType() != GrooveGauge.HAZARD) {
+				if(gauge.getType() != GrooveGauge.CLASS) {
+					gauge.downType();
+					if(resource.getPlayMode() == PlayMode.PLAY) config.setGauge(config.getGauge() > 0 ? config.getGauge() - 1 :0);
+				} else {
+					isFailed = true;
+				}
+			} else if(!config.isContinueUntilEndOfSong()
+					|| gauge.getType() == GrooveGauge.HAZARD
+					|| (config.isContinueUntilEndOfSong() && gauge.getType() == GrooveGauge.CLASS && notes == main.getPlayerResource().getSongdata().getNotes())) {
+				state = STATE_FAILED;
+				main.setTimerOn(TIMER_FAILED);
+				if (resource.mediaLoadFinished()) {
+					main.getAudioProcessor().stop((Note) null);
+				}
+				play(SOUND_PLAYSTOP);
+				Logger.getGlobal().info("STATE_FAILED�겓燁삭죱");
+			}
+		}
 	}
 	private void setSTATE_READY(final PlaySkin skin, final BMSPlayerInputProcessor input, final long now,
 			final long micronow) {
