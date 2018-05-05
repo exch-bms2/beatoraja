@@ -88,6 +88,8 @@ public class BMSPlayer extends MainState {
 	private float replayLift = 0.1f;
 	private boolean replayEnablelift = false;
 
+	private ReplayData HSReplay;
+
 	static final int TIME_MARGIN = 5000;
 
 	public static final int SOUND_READY = 0;
@@ -128,7 +130,7 @@ public class BMSPlayer extends MainState {
 	private boolean isReplayPatternPlay(MainController main, PlayerResource resource){
 		boolean isReplayPatternPlay = true;
 		PlayerConfig config = resource.getPlayerConfig();
-		ReplayData HSReplay = null;
+		HSReplay = null;
 		if(replay != null && main.getInputProcessor().getKeystate()[1]) {
 			//岳앭춼�걬�굦�걼鈺쒒씊鸚됪쎍�꺆�궛�걢�굢鈺쒒씊�냽�뤎
 			resource.setReplayData(replay);
@@ -147,6 +149,7 @@ public class BMSPlayer extends MainState {
 		}
 		return isReplayPatternPlay;
 	}
+	
 	public BMSPlayer(MainController main, PlayerResource resource) {
 		super(main);
 		
@@ -177,15 +180,7 @@ public class BMSPlayer extends MainState {
 
 		if(HSReplay != null) {
 			//岳앭춼�걬�굦�걼HS�궕�깤�궥�깾�꺍�꺆�궛�걢�굢HS�궕�깤�궥�깾�꺍�냽�뤎
-			PlayConfig pc = getPlayConfig(config).getPlayconfig();
-			pc.setFixhispeed(HSReplay.fixhispeed);
-			pc.setHispeed(HSReplay.hispeed);
-			pc.setDuration(HSReplay.duration);
-			pc.setHispeedMargin(HSReplay.hispeedmargin);
-			pc.setLanecover(HSReplay.lanecover);
-			pc.setEnablelanecover(HSReplay.enablelanecover);
-			pc.setLift(HSReplay.lift);
-			pc.setEnablelift(HSReplay.enablelift);
+			setHSReplay(resource);
 		}
 
 		Logger.getGlobal().info("�궟�꺖�궦鼇�若�");
@@ -198,34 +193,17 @@ public class BMSPlayer extends MainState {
 			}
 		}
 		if(replay != null && main.getInputProcessor().getKeystate()[5]) {
+			//; do something
 		}
 		int coursetype = 0;
 		GaugeProperty gauges = null;
 		if(resource.getCourseBMSModels() != null){
 			coursetype = 1;
-			for (CourseData.CourseDataConstraint i : resource.getConstraint()) {
-				switch(i) {
-				case GAUGE_5KEYS:
-					gauges = GaugeProperty.FIVEKEYS;
-					break;
-				case GAUGE_7KEYS:
-					gauges = GaugeProperty.SEVENKEYS;
-					break;
-				case GAUGE_9KEYS:
-					gauges = GaugeProperty.PMS;
-					break;
-				case GAUGE_24KEYS:
-					gauges = GaugeProperty.KEYBOARD;
-					break;
-				case GAUGE_LR2:
-					gauges = GaugeProperty.LR2;
-					break;
-				default:
-					break;
-				}
-			}
+			gauges = changeGaugeType(resource, gauges);
 		}
+		PlayerConfig config = resource.getPlayerConfig();
 		gauge = GrooveGauge.create(model, replay != null ? replay.gauge : config.getGauge(), coursetype, gauges);
+		
 		FloatArray[] f = resource.getGauge();
 		if (f != null) {
 			for(int i = 0; i < f.length; i++) {
@@ -241,6 +219,42 @@ public class BMSPlayer extends MainState {
 		final int difficulty = resource.getSongdata() != null ? resource.getSongdata().getDifficulty() : 0;
 		resource.setSongdata(new SongData(model, false));
 		resource.getSongdata().setDifficulty(difficulty);
+	}
+	private GaugeProperty changeGaugeType(PlayerResource resource, GaugeProperty gauges) {
+		for (CourseData.CourseDataConstraint i : resource.getConstraint()) {
+			switch(i) {
+			case GAUGE_5KEYS:
+				gauges = GaugeProperty.FIVEKEYS;
+				break;
+			case GAUGE_7KEYS:
+				gauges = GaugeProperty.SEVENKEYS;
+				break;
+			case GAUGE_9KEYS:
+				gauges = GaugeProperty.PMS;
+				break;
+			case GAUGE_24KEYS:
+				gauges = GaugeProperty.KEYBOARD;
+				break;
+			case GAUGE_LR2:
+				gauges = GaugeProperty.LR2;
+				break;
+			default:
+				break;
+			}
+		}
+		return gauges;
+	}
+	private void setHSReplay(PlayerResource resource) {
+		PlayerConfig config = resource.getPlayerConfig();
+		PlayConfig pc = getPlayConfig(config).getPlayconfig();
+		pc.setFixhispeed(HSReplay.fixhispeed);
+		pc.setHispeed(HSReplay.hispeed);
+		pc.setDuration(HSReplay.duration);
+		pc.setHispeedMargin(HSReplay.hispeedmargin);
+		pc.setLanecover(HSReplay.lanecover);
+		pc.setEnablelanecover(HSReplay.enablelanecover);
+		pc.setLift(HSReplay.lift);
+		pc.setEnablelift(HSReplay.enablelift);
 	}
 	private boolean setPattern(PlayerResource resource) {
 		boolean retV = true;
