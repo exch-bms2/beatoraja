@@ -159,72 +159,16 @@ public class BMSPlayer extends MainState {
 			autoplay = PlayMode.PLAY;
 		}
 
-		getnerateModel(resource);
+		generateModel(resource);
 		// �싧만�깤�꺃�궎�겗�졃�릦�겘��孃뚣겗�깕�꺖�깂�곥궕�꺖�깉�깤�꺃�궎�겗�졃�릦�겘BG/BGA�굮�맜�굙�걼��孃뚣겗�깕�꺖�깂
 		playtime = (autoplay.isAutoPlayMode() ? model.getLastTime() : model.getLastNoteTime()) + TIME_MARGIN;
-
-		boolean score = true;
+		
+		boolean updateScore = true;
 
 		Logger.getGlobal().info("�궋�궥�궧�깉�궕�깤�궥�깾�꺍鼇�若�");
-		if (resource.getCourseBMSModels() == null && autoplay == PlayMode.PLAY || autoplay.isAutoPlayMode()) {
-			if (config.isBpmguide() && (model.getMinBPM() < model.getMaxBPM())) {
-				// BPM鸚됧뙑�걣�겒�걨�굦�겙BPM�궗�궎�깋�겒�걮
-				assist = 1;
-				score = false;
-			}
-
-			if (config.isConstant() && (model.getMinBPM() < model.getMaxBPM())) {
-				// BPM鸚됧뙑�걣�겒�걨�굦�겙�궠�꺍�궧�궭�꺍�깉�겒�걮
-				new ConstantBPMModifier().modify(model);
-				assist = 1;
-				score = false;
-			}
-
-			if (config.isLegacynote()) {
-				// LN�걣�겒�걨�굦�겙�궋�궥�궧�깉�겒�걮
-				LongNoteModifier mod = new LongNoteModifier();
-				mod.modify(model);
-				if (mod.longNoteExists()) {
-					assist = 2;
-					score = false;
-				}
-			}
-			if (config.getJudgewindowrate() > 100) {
-				assist = 2;
-				score = false;
-			}
-			if (config.isNomine()) {
-				// �쑑�쎐�깕�꺖�깉�걣�겒�걨�굦�겙�궋�궥�궧�깉�겒�걮
-				MineNoteModifier mod = new MineNoteModifier();
-				mod.modify(model);
-				if (mod.mineNoteExists()) {
-					assist = 2;
-					score = false;
-				}
-			}
-			if (config.getDoubleoption() >= 2 && (model.getMode() == Mode.BEAT_5K || model.getMode() == Mode.BEAT_7K || model.getMode() == Mode.KEYBOARD_24K)) {
-				// SP�겎�겒�걨�굦�겙BATTLE�겘�쑋�겑�뵪
-				switch (model.getMode()) {
-				case BEAT_5K:
-					model.setMode(Mode.BEAT_10K);
-					break;
-				case BEAT_7K:
-					model.setMode(Mode.BEAT_14K);
-					break;
-				case KEYBOARD_24K:
-					model.setMode(Mode.KEYBOARD_24K_DOUBLE);
-					break;
-				}
-				LaneShuffleModifier mod = new LaneShuffleModifier(LaneShuffleModifier.BATTLE);
-				mod.setModifyTarget(PatternModifier.SIDE_1P);
-				mod.modify(model);
-				if(config.getDoubleoption() == 3) {
-					PatternModifier as = new AutoplayModifier(model.getMode().scratchKey);
-					as.modify(model);
-				}
-				assist = 1;
-				score = false;
-			}
+		if (resource.getCourseBMSModels() == null && autoplay == PlayMode.PLAY || autoplay.isAutoPlayMode()) {			
+			updateScore = checkConfigure(resource);			
+			updateScore = isDoubleOption(resource);
 		}
 
 		Logger.getGlobal().info("鈺쒒씊�궕�깤�궥�깾�꺍鼇�若�");
@@ -255,7 +199,7 @@ public class BMSPlayer extends MainState {
 										.modify(model));
 				if (config.getRandom2() >= 6) {
 					assist = (assist == 0) ? 1 : assist;
-					score = false;
+					updateScore = false;
 				}
 				Logger.getGlobal().info("鈺쒒씊�궕�깤�궥�깾�꺍 :  " + config.getRandom2());
 			}
@@ -275,7 +219,7 @@ public class BMSPlayer extends MainState {
 							.modify(model));
 			if (config.getRandom() >= 6 && !(config.getRandom() == 8 && model.getMode() == Mode.POPN_9K)) {
 				assist = (assist == 0) ? 1 : assist;
-				score = false;
+				updateScore = false;
 			}
 			Logger.getGlobal().info("鈺쒒씊�궕�깤�궥�깾�꺍 :  " + config.getRandom());
 			if (config.getSevenToNinePattern() >= 1 && model.getMode() == Mode.BEAT_7K) {
@@ -287,7 +231,7 @@ public class BMSPlayer extends MainState {
 				BMSPlayerRule.setSevenToNine(true);
 				if(config.getSevenToNineType() != 0) {
 					assist = 1;
-					score = false;
+					updateScore = false;
 				}
 			}
 		}
@@ -354,12 +298,109 @@ public class BMSPlayer extends MainState {
 			gaugelog[i] = new FloatArray(playtime / 500 + 2);
 		}
 
-		resource.setUpdateScore(score);
+		resource.setUpdateScore(updateScore);
 		final int difficulty = resource.getSongdata() != null ? resource.getSongdata().getDifficulty() : 0;
 		resource.setSongdata(new SongData(model, false));
 		resource.getSongdata().setDifficulty(difficulty);
 	}
-	private void getnerateModel(PlayerResource resource) {
+	private boolean isDoubleOption(PlayerResource resource) {
+		boolean retV = true;
+		PlayerConfig config = resource.getPlayerConfig();
+		if (config.getDoubleoption() >= 2 && (model.getMode() == Mode.BEAT_5K || model.getMode() == Mode.BEAT_7K || model.getMode() == Mode.KEYBOARD_24K)) {
+			// SP�겎�겒�걨�굦�겙BATTLE�겘�쑋�겑�뵪
+			switch (model.getMode()) {
+			case BEAT_5K:
+				model.setMode(Mode.BEAT_10K);
+				break;
+			case BEAT_7K:
+				model.setMode(Mode.BEAT_14K);
+				break;
+			case KEYBOARD_24K:
+				model.setMode(Mode.KEYBOARD_24K_DOUBLE);
+				break;
+			default:
+				break;
+			}
+			LaneShuffleModifier mod = new LaneShuffleModifier(LaneShuffleModifier.BATTLE);
+			mod.setModifyTarget(PatternModifier.SIDE_1P);
+			mod.modify(model);
+			if(config.getDoubleoption() == 3) {
+				PatternModifier as = new AutoplayModifier(model.getMode().scratchKey);
+				as.modify(model);
+			}
+			assist = 1;
+			retV = false;
+		}
+		return retV;
+	}
+	private boolean checkConfigure(PlayerResource resource) {
+		boolean score = true;
+		score &= isBpmguide(resource);
+		score &= isConstant(resource);			
+		score &= isLegacynote(resource);
+		score &= isWindowrateOver100(resource);
+		score &= isNomine(resource);
+		return score;
+	}
+	private boolean isNomine(PlayerResource resource) {
+		boolean retV = true;
+		PlayerConfig config = resource.getPlayerConfig();
+		if (config.isNomine()) {
+			// �쑑�쎐�깕�꺖�깉�걣�겒�걨�굦�겙�궋�궥�궧�깉�겒�걮
+			MineNoteModifier mod = new MineNoteModifier();
+			mod.modify(model);
+			if (mod.mineNoteExists()) {
+				assist = 2;
+				retV = false;
+			}
+		}
+		return retV;
+	}
+	private boolean isWindowrateOver100(PlayerResource resource) {		
+		boolean retV = true;
+		PlayerConfig config = resource.getPlayerConfig();
+		if (config.getJudgewindowrate() > 100) {
+			assist = 2;
+			retV = false;
+		}
+		return retV;
+	}
+	private boolean isLegacynote(PlayerResource resource) {
+		boolean retV = true;
+		PlayerConfig config = resource.getPlayerConfig();
+		if (config.isLegacynote()) {
+			// LN�걣�겒�걨�굦�겙�궋�궥�궧�깉�겒�걮
+			LongNoteModifier mod = new LongNoteModifier();
+			mod.modify(model);
+			if (mod.longNoteExists()) {
+				assist = 2;
+				retV = false;
+			}
+		}
+		return retV;
+	}
+	private boolean isConstant(PlayerResource resource) {
+		boolean retV = true;
+		PlayerConfig config = resource.getPlayerConfig();
+		if (config.isConstant() && (model.getMinBPM() < model.getMaxBPM())) {
+			// BPM鸚됧뙑�걣�겒�걨�굦�겙�궠�꺍�궧�궭�꺍�깉�겒�걮
+			new ConstantBPMModifier().modify(model);
+			assist = 1;
+			retV = false;				
+		}
+		return retV;
+	}
+	private boolean isBpmguide(PlayerResource resource) {
+		boolean retV=true;
+		PlayerConfig config = resource.getPlayerConfig();
+		if (config.isBpmguide() && (model.getMinBPM() < model.getMaxBPM())) {
+			// BPM鸚됧뙑�걣�겒�걨�굦�겙BPM�궗�궎�깋�겒�걮
+			assist = 1;
+			retV = false;
+		}
+		return retV;
+	}
+	private void generateModel(PlayerResource resource) {
 		if (model.getRandom() != null && model.getRandom().length > 0) {
 			if (autoplay.isReplayMode()) {
 				model = resource.getGenerator().generate(replay.rand);
