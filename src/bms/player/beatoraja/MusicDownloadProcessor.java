@@ -36,6 +36,22 @@ import bms.player.beatoraja.song.SongData;
  * @author LNTakeshi
  */
 public class MusicDownloadProcessor {
+	
+	/*
+	 * 気づいたことをコメントしておきます written by exch
+	 * 
+	 * ・ipfs使用は選択制の方がいいのではと思います。プレイヤーが常時オンラインとは限らない)
+	 * 
+	 * ・OpenGL系のオブジェクトをここに入れるべきではないです。SpriteBatchを複数箇所で定義して描画すると
+	 * 　予期せぬバグの元になります。また、FontもSpriteBatchも要dispose()で放置するとメモリリークの原因になります。
+	 * 　ステータス描画に使うなら、MainControllerにMessageRendererみたいなものを用意してそこにテキスト、
+	 * 　アニメーション、色を送るだけにするとかがいいかと思います。
+	 * 
+	 * ・そもそも別コンポーネントでもいいのではと思います
+	 * 　(=beatorajaベタ付け実装ではなく、他プロジェクトが立ち上がった時に再利用できるように)
+	 * 
+	 * 
+	 */
 
 	private Deque<SongData> commands = new ConcurrentLinkedDeque<SongData>();
 	private String ipfs = "";
