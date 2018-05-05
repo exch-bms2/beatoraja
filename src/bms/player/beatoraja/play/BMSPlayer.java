@@ -669,54 +669,58 @@ public class BMSPlayer extends MainState {
 			break;
 		// 若뚦쪕�눇�릤
 		case STATE_FINISHED:
-			if (autoThread != null) {
-				autoThread.stop = true;
-			}
-			keyinput.stopJudge();
-			if (main.getNowTime(TIMER_MUSIC_END) > skin.getFinishMargin()) {
-				main.switchTimer(TIMER_FADEOUT, true);
-			}
-			if (main.getNowTime(TIMER_FADEOUT) > skin.getFadeout()) {
-				if(config.isContinueUntilEndOfSong()) {
-					if(resource.getCourseBMSModels() == null) {
-						int changedGaugeType = gauge.changeTypeOfClear(gauge.getType());
-						if(resource.getPlayMode() == PlayMode.PLAY) config.setGauge(changedGaugeType);
-					}
-				}
-				main.getAudioProcessor().setGlobalPitch(1f);
-				resource.getBGAManager().stop();
-				if (!autoplay.isAutoPlayMode() && autoplay != PlayMode.PRACTICE) {
-					resource.setScoreData(createScoreData());
-				}
-				resource.setCombo(judge.getCourseCombo());
-				resource.setMaxcombo(judge.getCourseMaxcombo());
-				saveConfig();
-				resource.setGauge(gaugelog);
-				resource.setGrooveGauge(gauge);
-				resource.setAssist(assist);
-				input.setEnable(true);
-				input.setStartTime(0);
-				if (autoplay == PlayMode.PRACTICE) {
-					state = STATE_PRACTICE;
-				} else if (resource.getScoreData() != null) {
-					main.changeState(MainController.STATE_RESULT);
-				} else {
-					if (resource.mediaLoadFinished()) {
-						main.getAudioProcessor().stop((Note) null);
-					}
-					if (resource.getCourseBMSModels() != null && resource.nextCourse()) {
-						main.changeState(MainController.STATE_PLAYBMS);
-					} else if(resource.nextSong()){
-						main.changeState(MainController.STATE_DECIDE);
-					} else {
-						main.changeState(MainController.STATE_SELECTMUSIC);
-					}
-				}
-			}
+			setSTATE_FINISHED(skin, resource, input, config);
 			break;
 		}
 
 		prevtime = micronow;
+	}
+	private void setSTATE_FINISHED(final PlaySkin skin, final PlayerResource resource,
+			final BMSPlayerInputProcessor input, final PlayerConfig config) {
+		if (autoThread != null) {
+			autoThread.stop = true;
+		}
+		keyinput.stopJudge();
+		if (main.getNowTime(TIMER_MUSIC_END) > skin.getFinishMargin()) {
+			main.switchTimer(TIMER_FADEOUT, true);
+		}
+		if (main.getNowTime(TIMER_FADEOUT) > skin.getFadeout()) {
+			if(config.isContinueUntilEndOfSong()) {
+				if(resource.getCourseBMSModels() == null) {
+					int changedGaugeType = gauge.changeTypeOfClear(gauge.getType());
+					if(resource.getPlayMode() == PlayMode.PLAY) config.setGauge(changedGaugeType);
+				}
+			}
+			main.getAudioProcessor().setGlobalPitch(1f);
+			resource.getBGAManager().stop();
+			if (!autoplay.isAutoPlayMode() && autoplay != PlayMode.PRACTICE) {
+				resource.setScoreData(createScoreData());
+			}
+			resource.setCombo(judge.getCourseCombo());
+			resource.setMaxcombo(judge.getCourseMaxcombo());
+			saveConfig();
+			resource.setGauge(gaugelog);
+			resource.setGrooveGauge(gauge);
+			resource.setAssist(assist);
+			input.setEnable(true);
+			input.setStartTime(0);
+			if (autoplay == PlayMode.PRACTICE) {
+				state = STATE_PRACTICE;
+			} else if (resource.getScoreData() != null) {
+				main.changeState(MainController.STATE_RESULT);
+			} else {
+				if (resource.mediaLoadFinished()) {
+					main.getAudioProcessor().stop((Note) null);
+				}
+				if (resource.getCourseBMSModels() != null && resource.nextCourse()) {
+					main.changeState(MainController.STATE_PLAYBMS);
+				} else if(resource.nextSong()){
+					main.changeState(MainController.STATE_DECIDE);
+				} else {
+					main.changeState(MainController.STATE_SELECTMUSIC);
+				}
+			}
+		}
 	}
 	private void setSTATE_FAILED(final PlaySkin skin, final PlayerResource resource,
 			final BMSPlayerInputProcessor input) {
