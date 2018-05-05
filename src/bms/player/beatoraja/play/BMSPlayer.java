@@ -254,10 +254,7 @@ public class BMSPlayer extends MainState {
 		else if (autoplay != PlayMode.PRACTICE) {
 			PatternModifier.setPlayerConfig(config);
 			if(model.getMode().player == 2) {
-				if (config.getDoubleoption() == 1) {
-					LaneShuffleModifier mod = new LaneShuffleModifier(LaneShuffleModifier.FLIP);
-					pattern = PatternModifier.merge(pattern,mod.modify(model));
-				}
+				makeLaneShufflePattern(config);
 				pattern = PatternModifier.merge(pattern,
 								PatternModifier.create(config.getRandom2(), PatternModifier.SIDE_2P)
 										.modify(model));
@@ -300,6 +297,12 @@ public class BMSPlayer extends MainState {
 			}
 		}
 		return retV;
+	}
+	private void makeLaneShufflePattern(PlayerConfig config) {
+		if (config.getDoubleoption() == 1) {
+			LaneShuffleModifier mod = new LaneShuffleModifier(LaneShuffleModifier.FLIP);
+			pattern = PatternModifier.merge(pattern,mod.modify(model));
+		}
 	}
 	private void modifyPatterWithReplayPattern(PlayerResource resource) {
 		if(resource.getReplayData().sevenToNinePattern > 0 && model.getMode() == Mode.BEAT_7K) {
