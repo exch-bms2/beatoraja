@@ -653,11 +653,7 @@ public class BMSPlayer extends MainState {
 			break;
 		// practice永귚틙
 		case STATE_PRACTICE_FINISHED:
-			if (main.getNowTime(TIMER_FADEOUT) > skin.getFadeout()) {
-				input.setEnable(true);
-				input.setStartTime(0);
-				main.changeState(MainController.STATE_SELECTMUSIC);
-			}
+			setSTATE_PRACTICE_FINISH(skin, input);
 			break;
 			// GET READY
 		case STATE_READY:
@@ -868,6 +864,13 @@ public class BMSPlayer extends MainState {
 		}
 
 		prevtime = micronow;
+	}
+	private void setSTATE_PRACTICE_FINISH(final PlaySkin skin, final BMSPlayerInputProcessor input) {
+		if (main.getNowTime(TIMER_FADEOUT) > skin.getFadeout()) {
+			input.setEnable(true);
+			input.setStartTime(0);
+			main.changeState(MainController.STATE_SELECTMUSIC);
+		}
 	}
 	private void setSTATE_PRACTICE(final PlaySkin skin, final PlayerResource resource,
 			final BMSPlayerInputProcessor input, final long now) {
