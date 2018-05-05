@@ -98,8 +98,17 @@ public class CourseData implements Validatable {
                 return false;
             }
         }
-
-    	constraint = constraint != null ? Validatable.removeInvalidElements(constraint) : CourseDataConstraint.EMPTY;
+        
+        if(constraint == null) {
+        	constraint = CourseDataConstraint.EMPTY;
+        }
+        CourseDataConstraint[] cdc = new CourseDataConstraint[4];
+        for(int i = 0;i < constraint.length;i++) {
+        	if(cdc[constraint[i].type] == null) {
+        		cdc[constraint[i].type] = constraint[i];
+        	}
+        }
+        constraint = Validatable.removeInvalidElements(cdc);
     	trophy = trophy != null ? Validatable.removeInvalidElements(trophy) : TrophyData.EMPTY;    	
     	return true;
     }
@@ -110,26 +119,29 @@ public class CourseData implements Validatable {
      * @author exch
      */
     public enum CourseDataConstraint {
-        CLASS("grade"),
-        MIRROR("grade_mirror"),
-        RANDOM("grade_random"),
-        NO_SPEED("no_speed"),
-        NO_GOOD("no_good"),
-        NO_GREAT("no_great"),
-    	GAUGE_LR2("gauge_lr2"),
-    	GAUGE_5KEYS("gauge_5k"),
-    	GAUGE_7KEYS("gauge_7k"),
-    	GAUGE_9KEYS("gauge_9k"),
-    	GAUGE_24KEYS("gauge_24k");
+        CLASS("grade", 0),
+        MIRROR("grade_mirror", 0),
+        RANDOM("grade_random", 0),
+        NO_SPEED("no_speed", 1),
+        NO_GOOD("no_good", 2),
+        NO_GREAT("no_great", 2),
+    	GAUGE_LR2("gauge_lr2", 3),
+    	GAUGE_5KEYS("gauge_5k", 3),
+    	GAUGE_7KEYS("gauge_7k", 3),
+    	GAUGE_9KEYS("gauge_9k", 3),
+    	GAUGE_24KEYS("gauge_24k", 3);
 
     	public static final CourseDataConstraint[] EMPTY = new CourseDataConstraint[0];
     	
         public final String name;
+        public final int type;
 
-        private CourseDataConstraint(String name) {
+        private CourseDataConstraint(String name, int type) {
             this.name = name;
+            this.type = type;
         }
     }
+    
     /**
      * コースデータのトロフィー条件
      *
