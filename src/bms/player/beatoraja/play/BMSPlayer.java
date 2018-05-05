@@ -170,71 +170,10 @@ public class BMSPlayer extends MainState {
 			updateScore = checkConfigure(resource);			
 			updateScore = isDoubleOption(resource);
 		}
-
+		
 		Logger.getGlobal().info("鈺쒒씊�궕�깤�궥�깾�꺍鼇�若�");
 		BMSPlayerRule.setSevenToNine(false);
-		if (replay != null) {
-			if(replay.sevenToNinePattern > 0 && model.getMode() == Mode.BEAT_7K) {
-				model.setMode(Mode.POPN_9K);
-				BMSPlayerRule.setSevenToNine(true);
-			}
-			PatternModifier.modify(model, Arrays.asList(replay.pattern));
-		} else if (resource.getReplayData().pattern != null) {
-			if(resource.getReplayData().sevenToNinePattern > 0 && model.getMode() == Mode.BEAT_7K) {
-				model.setMode(Mode.POPN_9K);
-				BMSPlayerRule.setSevenToNine(true);
-			}
-			pattern = Arrays.asList(resource.getReplayData().pattern);
-			PatternModifier.modify(model, pattern);
-			Logger.getGlobal().info("鈺쒒씊�궕�깤�궥�깾�꺍 : 岳앭춼�걬�굦�걼鈺쒒씊鸚됪쎍�꺆�궛�걢�굢鈺쒒씊�냽�뤎");
-		} else if (autoplay != PlayMode.PRACTICE) {
-			PatternModifier.setPlayerConfig(config);
-			if(model.getMode().player == 2) {
-				if (config.getDoubleoption() == 1) {
-					LaneShuffleModifier mod = new LaneShuffleModifier(LaneShuffleModifier.FLIP);
-					pattern = PatternModifier.merge(pattern,mod.modify(model));
-				}
-				pattern = PatternModifier.merge(pattern,
-								PatternModifier.create(config.getRandom2(), PatternModifier.SIDE_2P)
-										.modify(model));
-				if (config.getRandom2() >= 6) {
-					assist = (assist == 0) ? 1 : assist;
-					updateScore = false;
-				}
-				Logger.getGlobal().info("鈺쒒씊�궕�깤�궥�깾�꺍 :  " + config.getRandom2());
-			}
-
-			if(model.getMode().scratchKey.length == 0) {
-				if (config.getRandom() == 7 && model.getMode() != Mode.POPN_9K) {
-					config.setRandom(0);
-				} else if (config.getRandom() == 8 && model.getMode() != Mode.POPN_9K) {
-					config.setRandom(2);
-				} else if (config.getRandom() == 9 && model.getMode() != Mode.POPN_9K) {
-					config.setRandom(4);
-				}
-			}
-			pattern = PatternModifier.merge(pattern,
-					PatternModifier
-							.create(config.getRandom(), PatternModifier.SIDE_1P)
-							.modify(model));
-			if (config.getRandom() >= 6 && !(config.getRandom() == 8 && model.getMode() == Mode.POPN_9K)) {
-				assist = (assist == 0) ? 1 : assist;
-				updateScore = false;
-			}
-			Logger.getGlobal().info("鈺쒒씊�궕�깤�궥�깾�꺍 :  " + config.getRandom());
-			if (config.getSevenToNinePattern() >= 1 && model.getMode() == Mode.BEAT_7K) {
-				//7to9
-				model.setMode(Mode.POPN_9K);
-				NoteShuffleModifier mod = new NoteShuffleModifier(NoteShuffleModifier.SEVEN_TO_NINE);
-				mod.setModifyTarget(PatternModifier.SIDE_1P);
-				pattern = mod.modify(model);
-				BMSPlayerRule.setSevenToNine(true);
-				if(config.getSevenToNineType() != 0) {
-					assist = 1;
-					updateScore = false;
-				}
-			}
-		}
+		updateScore = setPattern(resource);
 
 		if(HSReplay != null) {
 			//岳앭춼�걬�굦�걼HS�궕�깤�궥�깾�꺍�꺆�궛�걢�굢HS�궕�깤�궥�깾�꺍�냽�뤎
@@ -302,6 +241,76 @@ public class BMSPlayer extends MainState {
 		final int difficulty = resource.getSongdata() != null ? resource.getSongdata().getDifficulty() : 0;
 		resource.setSongdata(new SongData(model, false));
 		resource.getSongdata().setDifficulty(difficulty);
+	}
+	private boolean setPattern(PlayerResource resource) {
+		boolean retV = true;
+		PlayerConfig config = resource.getPlayerConfig();
+		if (replay != null) {
+			boolean isModePOPN_9K = replay.sevenToNinePattern > 0 && model.getMode() == Mode.BEAT_7K;
+			if(isModePOPN_9K) {
+				model.setMode(Mode.POPN_9K);
+				BMSPlayerRule.setSevenToNine(true);
+			}
+			PatternModifier.modify(model, Arrays.asList(replay.pattern));
+		} 
+		else if (resource.getReplayData().pattern != null) {
+			if(resource.getReplayData().sevenToNinePattern > 0 && model.getMode() == Mode.BEAT_7K) {
+				model.setMode(Mode.POPN_9K);
+				BMSPlayerRule.setSevenToNine(true);
+			}
+			pattern = Arrays.asList(resource.getReplayData().pattern);
+			PatternModifier.modify(model, pattern);
+			Logger.getGlobal().info("鈺쒒씊�궕�깤�궥�깾�꺍 : 岳앭춼�걬�굦�걼鈺쒒씊鸚됪쎍�꺆�궛�걢�굢鈺쒒씊�냽�뤎");
+		} 
+		else if (autoplay != PlayMode.PRACTICE) {
+			PatternModifier.setPlayerConfig(config);
+			if(model.getMode().player == 2) {
+				if (config.getDoubleoption() == 1) {
+					LaneShuffleModifier mod = new LaneShuffleModifier(LaneShuffleModifier.FLIP);
+					pattern = PatternModifier.merge(pattern,mod.modify(model));
+				}
+				pattern = PatternModifier.merge(pattern,
+								PatternModifier.create(config.getRandom2(), PatternModifier.SIDE_2P)
+										.modify(model));
+				if (config.getRandom2() >= 6) {
+					assist = (assist == 0) ? 1 : assist;
+					retV = false;
+				}
+				Logger.getGlobal().info("鈺쒒씊�궕�깤�궥�깾�꺍 :  " + config.getRandom2());
+			}
+
+			if(model.getMode().scratchKey.length == 0) {
+				if (config.getRandom() == 7 && model.getMode() != Mode.POPN_9K) {
+					config.setRandom(0);
+				} else if (config.getRandom() == 8 && model.getMode() != Mode.POPN_9K) {
+					config.setRandom(2);
+				} else if (config.getRandom() == 9 && model.getMode() != Mode.POPN_9K) {
+					config.setRandom(4);
+				}
+			}
+			pattern = PatternModifier.merge(pattern,
+					PatternModifier
+							.create(config.getRandom(), PatternModifier.SIDE_1P)
+							.modify(model));
+			if (config.getRandom() >= 6 && !(config.getRandom() == 8 && model.getMode() == Mode.POPN_9K)) {
+				assist = (assist == 0) ? 1 : assist;
+				retV = false;
+			}
+			Logger.getGlobal().info("鈺쒒씊�궕�깤�궥�깾�꺍 :  " + config.getRandom());
+			if (config.getSevenToNinePattern() >= 1 && model.getMode() == Mode.BEAT_7K) {
+				//7to9
+				model.setMode(Mode.POPN_9K);
+				NoteShuffleModifier mod = new NoteShuffleModifier(NoteShuffleModifier.SEVEN_TO_NINE);
+				mod.setModifyTarget(PatternModifier.SIDE_1P);
+				pattern = mod.modify(model);
+				BMSPlayerRule.setSevenToNine(true);
+				if(config.getSevenToNineType() != 0) {
+					assist = 1;
+					retV = false;
+				}
+			}
+		}
+		return retV;
 	}
 	private boolean isDoubleOption(PlayerResource resource) {
 		boolean retV = true;
