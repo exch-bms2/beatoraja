@@ -172,6 +172,12 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private Spinner<Integer> lanecover;
 	@FXML
+	private Spinner<Integer> lanecovermarginlow;
+	@FXML
+	private Spinner<Integer> lanecovermarginhigh;
+	@FXML
+	private Spinner<Integer> lanecoverswitchduration;
+	@FXML
 	private CheckBox enableLift;
 	@FXML
 	private Spinner<Integer> lift;
@@ -803,6 +809,9 @@ public class PlayConfigurationView implements Initializable {
 			conf.setFixhispeed(fixhispeed.getValue());
 			conf.setEnablelanecover(enableLanecover.isSelected());
 			conf.setLanecover(getValue(lanecover) / 1000f);
+			conf.setLanecovermarginlow(getValue(lanecovermarginlow) / 1000f);
+			conf.setLanecovermarginhigh(getValue(lanecovermarginhigh) / 1000f);
+			conf.setLanecoverswitchduration(getValue(lanecoverswitchduration));
 			conf.setEnablelift(enableLift.isSelected());
 			conf.setEnablehidden(enableHidden.isSelected());
 			conf.setLift(getValue(lift) / 1000f);
@@ -816,6 +825,9 @@ public class PlayConfigurationView implements Initializable {
 		fixhispeed.setValue(conf.getFixhispeed());
 		enableLanecover.setSelected(conf.isEnablelanecover());
 		lanecover.getValueFactory().setValue((int) (conf.getLanecover() * 1000));
+		lanecovermarginlow.getValueFactory().setValue((int) (conf.getLanecovermarginlow() * 1000));
+		lanecovermarginhigh.getValueFactory().setValue((int) (conf.getLanecovermarginhigh() * 1000));
+		lanecoverswitchduration.getValueFactory().setValue(conf.getLanecoverswitchduration());
 		enableLift.setSelected(conf.isEnablelift());
 		enableHidden.setSelected(conf.isEnablehidden());
 		lift.getValueFactory().setValue((int) (conf.getLift() * 1000));

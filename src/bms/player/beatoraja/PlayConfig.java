@@ -58,6 +58,19 @@ public class PlayConfig implements Cloneable {
 	 */
 	private boolean enablehidden = false;
 
+	/**
+	 * レーンカバー変化間隔(低速)
+	 */
+	public float lanecovermarginlow = 0.001f;
+	/**
+	 * レーンカバー変化間隔(高速)
+	 */
+	public float lanecovermarginhigh = 0.01f;
+	/**
+	 * レーンカバー変化速度切り替え時間
+	 */
+	public int lanecoverswitchduration = 500;
+
 	public PlayConfig() {
 	}
 
@@ -141,6 +154,30 @@ public class PlayConfig implements Cloneable {
 		this.enablehidden = enablehidden;
 	}
 
+	public float getLanecovermarginlow() {
+		return lanecovermarginlow;
+	}
+
+	public void setLanecovermarginlow(float lanecovermarginlow) {
+		this.lanecovermarginlow = lanecovermarginlow;
+	}
+
+	public float getLanecovermarginhigh() {
+		return lanecovermarginhigh;
+	}
+
+	public void setLanecovermarginhigh(float lanecovermarginhigh) {
+		this.lanecovermarginhigh = lanecovermarginhigh;
+	}
+
+	public int getLanecoverswitchduration() {
+		return lanecoverswitchduration;
+	}
+
+	public void setLanecoverswitchduration(int lanecoverswitchduration) {
+		this.lanecoverswitchduration = lanecoverswitchduration;
+	}
+
 	public void validate() {
 		hispeed = MathUtils.clamp(hispeed, 0.01f, 20);
 		duration = MathUtils.clamp(duration, 1, 10000);
@@ -149,6 +186,9 @@ public class PlayConfig implements Cloneable {
 		lanecover = MathUtils.clamp(lanecover, 0f, 1f);
 		lift = MathUtils.clamp(lift, 0f, 1f);
 		hidden = MathUtils.clamp(hidden, 0f, 1f);
+		lanecovermarginlow = MathUtils.clamp(lanecovermarginlow, 0f, 1f);
+		lanecovermarginhigh = MathUtils.clamp(lanecovermarginhigh, 0f, 1f);
+		lanecoverswitchduration = MathUtils.clamp(lanecoverswitchduration, 0, 1000000);
 	}
 
 	public PlayConfig clone() {
