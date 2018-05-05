@@ -11,6 +11,7 @@ import bms.player.beatoraja.SkinConfig;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.SkinHeader.*;
 import bms.player.beatoraja.skin.lr2.LR2SkinHeaderLoader;
+import bms.player.beatoraja.skin.lua.LuaSkinLoader;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
@@ -73,8 +74,15 @@ public class SkinConfigurationView implements Initializable {
 		List<Path> lr2skinpaths = new ArrayList<Path>();
 		scan(Paths.get("skin"), lr2skinpaths);
 		for (Path path : lr2skinpaths) {
-			if (path.toString().toLowerCase().endsWith(".json")) {
+			String pathString = path.toString().toLowerCase();
+			if (pathString.endsWith(".json")) {
 				JSONSkinLoader loader = new JSONSkinLoader();
+				SkinHeader header = loader.loadHeader(path);
+				if (header != null) {
+					lr2skinheader.add(header);
+				}
+			} else if (pathString.endsWith(".luaskin")) {
+				LuaSkinLoader loader = new LuaSkinLoader();
 				SkinHeader header = loader.loadHeader(path);
 				if (header != null) {
 					lr2skinheader.add(header);
@@ -261,6 +269,7 @@ public class SkinConfigurationView implements Initializable {
 			} catch (IOException e) {
 			}
 		} else if (p.getFileName().toString().toLowerCase().endsWith(".lr2skin")
+				|| p.getFileName().toString().toLowerCase().endsWith(".luaskin")
 				|| p.getFileName().toString().toLowerCase().endsWith(".json")) {
 			paths.add(p);
 		}

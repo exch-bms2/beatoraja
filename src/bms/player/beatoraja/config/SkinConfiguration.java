@@ -8,6 +8,7 @@ import bms.player.beatoraja.SkinConfig;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.lr2.LR2SkinHeaderLoader;
+import bms.player.beatoraja.skin.lua.LuaSkinLoader;
 
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
@@ -426,8 +427,15 @@ public class SkinConfiguration extends MainState {
 		List<Path> skinPaths = new ArrayList<>();
 		scanSkins(Paths.get("skin"), skinPaths);
 		for (Path path : skinPaths) {
-			if (path.toString().toLowerCase().endsWith(".json")) {
+			String pathString = path.toString().toLowerCase();
+			if (pathString.endsWith(".json")) {
 				JSONSkinLoader loader = new JSONSkinLoader();
+				SkinHeader header = loader.loadHeader(path);
+				if (header != null) {
+					allSkins.add(header);
+				}
+			} else if (pathString.endsWith(".luaskin")) {
+				LuaSkinLoader loader = new LuaSkinLoader();
 				SkinHeader header = loader.loadHeader(path);
 				if (header != null) {
 					allSkins.add(header);
@@ -467,6 +475,7 @@ public class SkinConfiguration extends MainState {
 			} catch (IOException e) {
 			}
 		} else if (path.getFileName().toString().toLowerCase().endsWith(".lr2skin")
+				|| path.getFileName().toString().toLowerCase().endsWith(".luaskin")
 				|| path.getFileName().toString().toLowerCase().endsWith(".json")) {
 			paths.add(path);
 		}

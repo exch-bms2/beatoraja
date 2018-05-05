@@ -49,16 +49,22 @@ public class JSONSkinLoader extends SkinLoader{
 	private boolean usecim;
 	private int bgaExpand = -1;
 
-	private JsonSkin sk;
+	protected JsonSkin sk;
 
 	Map<String, Texture> texmap;
-	
-	private final SkinLuaAccessor lua;
 
-	ObjectMap<String, String> filemap = new ObjectMap();
+	protected final SkinLuaAccessor lua;
+
+	protected ObjectMap<String, String> filemap = new ObjectMap();
 
 	public JSONSkinLoader() {
 		lua = null;
+		dstr = HD;
+		usecim = false;
+	}
+
+	public JSONSkinLoader(SkinLuaAccessor lua) {
+		this.lua = lua;
 		dstr = HD;
 		usecim = false;
 	}
@@ -81,7 +87,16 @@ public class JSONSkinLoader extends SkinLoader{
 			json.setIgnoreUnknownFields(true);
 			setSerializers(json, null, p);
 			sk = json.fromJson(JsonSkin.class, new FileReader(p.toFile()));
+			header = loadJsonSkinHeader(sk, p);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		return header;
+	}
 
+	protected SkinHeader loadJsonSkinHeader(JsonSkin sk, Path p) {
+		SkinHeader header = null;
+		try {
 			if (sk.type != -1) {
 				header = new SkinHeader();
 				header.setSkinType(SkinType.getSkinTypeById(sk.type));
@@ -143,7 +158,7 @@ public class JSONSkinLoader extends SkinLoader{
 				header.setCustomOffsets(offsets);
 
 			}
-		} catch (FileNotFoundException e) {
+		} catch (Throwable e) {
 			e.printStackTrace();
 		}
 		return header;
@@ -156,60 +171,77 @@ public class JSONSkinLoader extends SkinLoader{
 			Json json = new Json();
 			json.setIgnoreUnknownFields(true);
 
-			HashSet<Integer> enabledOptions = new HashSet<>();
-			for (SkinHeader.CustomOption customOption : header.getCustomOptions()) {
-				int op = customOption.getDefaultOption();
-				for (SkinConfig.Option option : property.getOption()) {
-					if (option.name.equals(customOption.name)) {
-						if(option.value != OPTION_RANDOM_VALUE) {
-							op = option.value;
-						} else {
-							if(customOption.option.length > 0) {
-								op = customOption.option[(int) (Math.random() * customOption.option.length)];
-								header.setRandomSelectedOptions(option.name, op);
-							}
-						}
-						break;
-					}
-				}
-				enabledOptions.add(op);
-			}
-			setSerializers(json, enabledOptions, p);
-
-			filemap = new ObjectMap<>();
-			for (SkinHeader.CustomFile customFile : header.getCustomFiles()) {
-				for(SkinConfig.FilePath file : property.getFile()) {
-					if (customFile.name.equals(file.name)) {
-						if(!file.path.equals("Random")) {
-							filemap.put(customFile.path, file.path);
-						} else {
-							String ext = customFile.path.substring(customFile.path.lastIndexOf("*") + 1);
-							if(customFile.path.contains("|")) {
-								if(customFile.path.length() > customFile.path.lastIndexOf('|') + 1) {
-									ext = customFile.path.substring(customFile.path.lastIndexOf("*") + 1, customFile.path.indexOf('|')) + customFile.path.substring(customFile.path.lastIndexOf('|') + 1);
-								} else {
-									ext = customFile.path.substring(customFile.path.lastIndexOf("*") + 1, customFile.path.indexOf('|'));
-								}
-							}
-							File dir = new File(customFile.path.substring(0, customFile.path.lastIndexOf('/')));
-							if (dir.exists() && dir.isDirectory()) {
-								List<File> l = new ArrayList<File>();
-								for (File subfile : dir.listFiles()) {
-									if (subfile.getPath().toLowerCase().endsWith(ext)) {
-										l.add(subfile);
-									}
-								}
-								if (l.size() > 0) {
-									String filename = l.get((int) (Math.random() * l.size())).getName();
-									filemap.put(customFile.path, filename);
-								}
-							}
-						}
-					}
-				}
-			}
+			setSerializers(json, getEnabledOptions(header, property), p);
+			initFileMap(header, property);
 
 			sk = json.fromJson(JsonSkin.class, new FileReader(p.toFile()));
+			skin = loadJsonSkin(header, sk, type, property, p);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		return skin;
+	}
+
+	protected HashSet<Integer> getEnabledOptions(SkinHeader header, SkinConfig.Property property) {
+		HashSet<Integer> enabledOptions = new HashSet<>();
+		for (SkinHeader.CustomOption customOption : header.getCustomOptions()) {
+			int op = customOption.getDefaultOption();
+			for (SkinConfig.Option option : property.getOption()) {
+				if (option.name.equals(customOption.name)) {
+					if (option.value != OPTION_RANDOM_VALUE) {
+						op = option.value;
+					} else {
+						if (customOption.option.length > 0) {
+							op = customOption.option[(int) (Math.random() * customOption.option.length)];
+							header.setRandomSelectedOptions(option.name, op);
+						}
+					}
+					break;
+				}
+			}
+			enabledOptions.add(op);
+		}
+		return enabledOptions;
+	}
+
+	protected void initFileMap(SkinHeader header, SkinConfig.Property property) {
+		filemap = new ObjectMap<>();
+		for (SkinHeader.CustomFile customFile : header.getCustomFiles()) {
+			for (SkinConfig.FilePath file : property.getFile()) {
+				if (customFile.name.equals(file.name)) {
+					if (!file.path.equals("Random")) {
+						filemap.put(customFile.path, file.path);
+					} else {
+						String ext = customFile.path.substring(customFile.path.lastIndexOf("*") + 1);
+						if (customFile.path.contains("|")) {
+							if (customFile.path.length() > customFile.path.lastIndexOf('|') + 1) {
+								ext = customFile.path.substring(customFile.path.lastIndexOf("*") + 1, customFile.path.indexOf('|')) + customFile.path.substring(customFile.path.lastIndexOf('|') + 1);
+							} else {
+								ext = customFile.path.substring(customFile.path.lastIndexOf("*") + 1, customFile.path.indexOf('|'));
+							}
+						}
+						File dir = new File(customFile.path.substring(0, customFile.path.lastIndexOf('/')));
+						if (dir.exists() && dir.isDirectory()) {
+							List<File> l = new ArrayList<File>();
+							for (File subfile : dir.listFiles()) {
+								if (subfile.getPath().toLowerCase().endsWith(ext)) {
+									l.add(subfile);
+								}
+							}
+							if (l.size() > 0) {
+								String filename = l.get((int) (Math.random() * l.size())).getName();
+								filemap.put(customFile.path, filename);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	protected Skin loadJsonSkin(SkinHeader header, JsonSkin sk, SkinType type, SkinConfig.Property property, Path p){
+		Skin skin = null;
+		try {
 			Resolution src = HD;
 			for(Resolution r : Resolution.values()) {
 				if(sk.w == r.width && sk.h == r.height) {
@@ -1057,8 +1089,9 @@ public class JSONSkinLoader extends SkinLoader{
 					skinSelect.setCustomPropertyCount(count);
 				}
 			}
-		} catch (FileNotFoundException e) {
+		} catch (Throwable e) {
 			e.printStackTrace();
+			return null;
 		}
 		return skin;
 	}
