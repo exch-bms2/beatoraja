@@ -954,6 +954,8 @@ public class BMSPlayer extends MainState {
 			return autoplay == PlayMode.PLAY || autoplay == PlayMode.PRACTICE;
 		case OPTION_REPLAY_PLAYING:
 			return autoplay.isReplayMode();
+		case OPTION_STATE_PRACTICE:
+			return state == STATE_PRACTICE;
 		case OPTION_NOW_LOADING:
 			return state == STATE_PRELOAD;
 		case OPTION_LOADED:
