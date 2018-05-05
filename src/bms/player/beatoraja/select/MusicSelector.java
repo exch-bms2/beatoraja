@@ -343,10 +343,10 @@ public class MusicSelector extends MainState {
 	public void input() {
 		final BMSPlayerInputProcessor input = main.getInputProcessor();
 
-		if (input.getNumberState()[6]) {
+		if (input.getNumberState(6)) {
 			preview.stop();
 			main.changeState(MainController.STATE_CONFIG);
-		} else if (input.getFunctionstate()[11]) {
+		} else if (input.getFunctionstate(11)) {
 			preview.stop();
 			main.changeState(MainController.STATE_SKIN_SELECT);
 		}

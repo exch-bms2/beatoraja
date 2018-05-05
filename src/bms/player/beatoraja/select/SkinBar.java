@@ -7,30 +7,30 @@ import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 import com.badlogic.gdx.graphics.g2d.*;
 
 /**
- * 楽曲バー描画用スキンオブジェクト
+ * 璵썸쎊�깘�꺖�룒�뵽�뵪�궧�궘�꺍�궕�깣�궦�궒�궚�깉
  */
 public class SkinBar extends SkinObject {
 
     /**
-     * 選択時のBarのSkinImage
+     * �겦�뒢�셽�겗Bar�겗SkinImage
      */
     private SkinImage[] barimageon = new SkinImage[60];
     /**
-     * 非選択時のBarのSkinImage
+     * �씆�겦�뒢�셽�겗Bar�겗SkinImage
      */
     private SkinImage[] barimageoff = new SkinImage[60];
     /**
-     * トロフィーのSkinImage。描画位置はBarの相対座標
+     * �깉�꺆�깢�궍�꺖�겗SkinImage�귝룒�뵽鵝띸쉰�겘Bar�겗�쎑野얍벨與�
      */
     private SkinImage[] trophy = new SkinImage[3];
 
     private SkinText[] text = new SkinText[2];
     /**
-     * レベルのSkinNumber。描画位置はBarの相対座標
+     * �꺃�깧�꺂�겗SkinNumber�귝룒�뵽鵝띸쉰�겘Bar�겗�쎑野얍벨與�
      */
     private SkinNumber[] barlevel = new SkinNumber[7];
     /**
-     * 譜面ラベルのSkinImage。描画位置はBarの相対座標
+     * 鈺쒒씊�꺀�깧�꺂�겗SkinImage�귝룒�뵽鵝띸쉰�겘Bar�겗�쎑野얍벨與�
      */
     private SkinImage[] label = new SkinImage[3];
 
@@ -42,21 +42,22 @@ public class SkinBar extends SkinObject {
     private int cycle;
 
     /**
-     * ランプ画像
+     * �꺀�꺍�깤�뵽�깗
      */
     private SkinImage[] lamp = new SkinImage[11];
     /**
-     * ライバルランプ表示時のプレイヤーランプ画像
+     * �꺀�궎�깘�꺂�꺀�꺍�깤烏①ㅊ�셽�겗�깤�꺃�궎�깶�꺖�꺀�꺍�깤�뵽�깗
      */
     private SkinImage[] mylamp = new SkinImage[11];
     /**
-     * ライバルランプ表示時のライバルランプ画像
+     * �꺀�궎�깘�꺂�꺀�꺍�깤烏①ㅊ�셽�겗�꺀�궎�깘�꺂�꺀�꺍�깤�뵽�깗
      */
     private SkinImage[] rivallamp = new SkinImage[11];
 
     public SkinBar(int position) {
         this.position = position;
-        this.setDestination(0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, new int[0]);
+        SkinDestinationSize dstSize = new SkinDestinationSize(0, 0, 0, 0);
+        this.setDestination(0, dstSize, 0, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, new int[0]);
     }
 
     public SkinBar(int position, TextureRegion[][] images, int cycle) {

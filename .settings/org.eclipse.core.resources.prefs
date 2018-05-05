@@ -1,3 +1,11 @@
+<<<<<<< HEAD
 eclipse.preferences.version=1
 encoding//src/bms/player/beatoraja/MainLoader.java=UTF-8
 encoding//src/bms/player/beatoraja/pattern/NoteShuffleModifier.java=UTF-8
+=======
+eclipse.preferences.version=1
+encoding//src/bms/player/beatoraja/pattern/NoteShuffleModifier.java=UTF-8
+encoding//src/bms/player/beatoraja/play/BMSPlayer.java=UTF-8
+encoding//src/bms/player/beatoraja/play/PracticeConfiguration.java=UTF-8
+encoding//src/bms/player/beatoraja/skin/lr2/LR2SkinCSVLoader.java=UTF-8
+>>>>>>> upstream/master

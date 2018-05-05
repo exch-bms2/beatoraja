@@ -12,12 +12,13 @@ import bms.player.beatoraja.Resolution;
 import bms.player.beatoraja.result.MusicResultSkin;
 import bms.player.beatoraja.result.SkinGaugeGraphObject;
 import bms.player.beatoraja.skin.SkinBPMGraph;
+import bms.player.beatoraja.skin.SkinDestinationSize;
 import bms.player.beatoraja.skin.SkinHeader;
 import bms.player.beatoraja.skin.SkinNoteDistributionGraph;
 import bms.player.beatoraja.skin.SkinTimingDistributionGraph;
 
 /**
- * LR2リザルトスキン読み込み用クラス
+ * LR2�꺁�궣�꺂�깉�궧�궘�꺍沃��겳渦쇈겳�뵪�궚�꺀�궧
  *
  * @author exch
  */
@@ -56,7 +57,8 @@ public class LR2ResultSkinLoader extends LR2SkinCSVLoader<MusicResultSkin> {
 				int[] values = parseInt(str);
 				gauge.x = values[3];
 				gauge.y = src.height - values[4];
-				skin.setDestination(gaugeobj, values[2], gauge.x, gauge.y, gauge.width, gauge.height, values[7],
+				SkinDestinationSize dstSize = new SkinDestinationSize(gauge.x, gauge.y, gauge.width, gauge.height);
+				skin.setDestination(gaugeobj, values[2], dstSize, values[7],
 						values[8], values[9], values[10], values[11], values[12], values[13], values[14],
 						values[15], values[16], values[17], values[18], values[19], values[20], readOffset(str, 21));
 			}
@@ -77,7 +79,8 @@ public class LR2ResultSkinLoader extends LR2SkinCSVLoader<MusicResultSkin> {
 				int[] values = parseInt(str);
 				gauge.x = values[3];
 				gauge.y = src.height - values[4];
-				skin.setDestination(noteobj, values[2], gauge.x, gauge.y, gauge.width, gauge.height, values[7], values[8],
+				SkinDestinationSize dstSize = new SkinDestinationSize(gauge.x, gauge.y, gauge.width, gauge.height);
+				skin.setDestination(noteobj, values[2], dstSize, values[7], values[8],
 						values[9], values[10], values[11], values[12], values[13], values[14], values[15],
 						values[16], values[17], values[18], values[19], values[20], readOffset(str, 21));
 			}
@@ -99,7 +102,8 @@ public class LR2ResultSkinLoader extends LR2SkinCSVLoader<MusicResultSkin> {
 				int[] values = parseInt(str);
 				gauge.x = values[3];
 				gauge.y = src.height - values[4];
-				skin.setDestination(bpmgraphobj, values[2], gauge.x, gauge.y, gauge.width, gauge.height, values[7], values[8],
+				SkinDestinationSize dstSize = new SkinDestinationSize(gauge.x, gauge.y, gauge.width, gauge.height);
+				skin.setDestination(bpmgraphobj, values[2], dstSize, values[7], values[8],
 						values[9], values[10], values[11], values[12], values[13], values[14], values[15],
 						values[16], values[17], values[18], values[19], values[20], readOffset(str, 21));
 			}
@@ -121,7 +125,8 @@ public class LR2ResultSkinLoader extends LR2SkinCSVLoader<MusicResultSkin> {
 				int[] values = parseInt(str);
 				gauge.x = values[3];
 				gauge.y = src.height - values[4];
-				skin.setDestination(timinggraphobj, values[2], gauge.x, gauge.y, gauge.width, gauge.height, values[7], values[8],
+				SkinDestinationSize dstSize = new SkinDestinationSize(gauge.x, gauge.y, gauge.width, gauge.height);
+				skin.setDestination(timinggraphobj, values[2], dstSize, values[7], values[8],
 						values[9], values[10], values[11], values[12], values[13], values[14], values[15],
 						values[16], values[17], values[18], values[19], values[20], readOffset(str, 21));
 

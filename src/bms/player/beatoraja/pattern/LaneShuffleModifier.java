@@ -13,49 +13,53 @@ import bms.model.Note;
 import bms.model.TimeLine;
 
 /**
- * レーン単位でノーツを入れ替えるオプション MIRROR、RANDOM、R-RANDOMが該当する
+ * �꺃�꺖�꺍�뜕鵝띲겎�깕�꺖�깂�굮�뀯�굦�쎘�걟�굥�궕�깤�궥�깾�꺍 MIRROR�갧ANDOM�갧-RANDOM�걣屋꿨퐪�걲�굥
  *
  * @author exch
  */
 public class LaneShuffleModifier extends PatternModifier {
 
 	/**
-	 * 各レーンの移動先
+	 * �릢�꺃�꺖�꺍�겗燁삣땿�뀍
 	 */
 	private int[] random;
 	/**
-	 * ランダムのタイプ
+	 * �꺀�꺍���깲�겗�궭�궎�깤
 	 */
 	private int type;
 	/**
-	 * ミラー
+	 * �깱�꺀�꺖
 	 */
 	public static final int MIRROR = 0;
 	/**
-	 * ローテート
+	 * �꺆�꺖�깇�꺖�깉
 	 */
 	public static final int R_RANDOM = 1;
 	/**
-	 * ランダム
+	 * �꺀�꺍���깲
 	 */
 	public static final int RANDOM = 2;
 	/**
-	 * クロス
+	 * �궚�꺆�궧
 	 */
 	public static final int CROSS = 3;
 	/**
-	 * スクラッチレーンを含むランダム
+	 * �궧�궚�꺀�긿�긽�꺃�꺖�꺍�굮�맜���꺀�꺍���깲
 	 */
 	public static final int RANDOM_EX = 4;
 	/**
-	 * 1P-2Pを入れ替える
+	 * 1P-2P�굮�뀯�굦�쎘�걟�굥
 	 */
 	public static final int FLIP = 5;
 	/**
-	 * 1Pの譜面を2Pにコピーする
+	 * 1P�겗鈺쒒씊�굮2P�겓�궠�깞�꺖�걲�굥
 	 */
 	public static final int BATTLE = 6;
 
+	
+	public int[] getRandom() {
+		return random;
+	}
 	public LaneShuffleModifier(int type) {
 		super(type == RANDOM_EX ? 1 : 0);
 		this.type = type;
@@ -116,7 +120,7 @@ public class LaneShuffleModifier extends PatternModifier {
 		}
 	}
 
-	// 無理押しが来ないようにLaneShuffleをかける(ただし正規鏡を除く)。無理押しが来ない譜面が存在しない場合は正規か鏡でランダム
+	// �꽒�릤�듉�걮�걣�씎�겒�걚�굠�걝�겓LaneShuffle�굮�걢�걨�굥(�걼�걽�걮閭ｈ쫸�룪�굮�솮�걦)�귞꽒�릤�듉�걮�걣�씎�겒�걚鈺쒒씊�걣耶섇쑉�걮�겒�걚�졃�릦�겘閭ｈ쫸�걢�룪�겎�꺀�꺍���깲
 	private int[] noMurioshiLaneShuffle(BMSModel model) {
 		Mode mode = model.getMode();
 		int[] keys;
@@ -128,12 +132,12 @@ public class LaneShuffleModifier extends PatternModifier {
 		for (int key : keys) {
 			max = Math.max(max, key);
 		}
-		boolean isImpossible = false; //7個押し以上が存在するかどうか
-		List<Integer> originalPatternList = new ArrayList<Integer>(); //3個押し以上の同時押しパターンのリスト
+		boolean isImpossible = false; //7�뗦듉�걮餓δ툓�걣耶섇쑉�걲�굥�걢�겑�걝�걢
+		List<Integer> originalPatternList = new ArrayList<Integer>(); //3�뗦듉�걮餓δ툓�겗�릪�셽�듉�걮�깙�궭�꺖�꺍�겗�꺁�궧�깉
 		Arrays.fill(ln, -1);
 		Arrays.fill(endLnNoteTime, -1);
 		
-		//3個押し以上の同時押しパターンのリストを作る
+		//3�뗦듉�걮餓δ툓�겗�릪�셽�듉�걮�깙�궭�꺖�꺍�겗�꺁�궧�깉�굮鵝쒌굥
 		for (TimeLine tl : model.getAllTimeLines()) {
 			if (tl.existNote()) {
 				//LN
@@ -152,7 +156,7 @@ public class LaneShuffleModifier extends PatternModifier {
 						}
 					}
 				}
-				//通常ノート
+				//�싧만�깕�꺖�깉
 				List<Integer> noteLane = new ArrayList<Integer>(keys.length);
 				for (int i = 0; i < lanes; i++) {
 					Note n = tl.getNote(i);
@@ -160,7 +164,7 @@ public class LaneShuffleModifier extends PatternModifier {
 							noteLane.add((Integer) i);
 					}
 				}
-				//7個押し以上が一つでも存在すれば無理押しが来ない譜面は存在しない
+				//7�뗦듉�걮餓δ툓�걣訝��겇�겎�굚耶섇쑉�걲�굦�겙�꽒�릤�듉�걮�걣�씎�겒�걚鈺쒒씊�겘耶섇쑉�걮�겒�걚
 				if(noteLane.size() >= 7) {
 					isImpossible = true;
 					break;
@@ -174,9 +178,9 @@ public class LaneShuffleModifier extends PatternModifier {
 			}
 		}
 		
-		List<List<Integer>> kouhoPatternList = new ArrayList<List<Integer>>(); //無理押しが来ない譜面のリスト
+		List<List<Integer>> kouhoPatternList = new ArrayList<List<Integer>>(); //�꽒�릤�듉�걮�걣�씎�겒�걚鈺쒒씊�겗�꺁�궧�깉
 		if(!isImpossible) {
-			//重複する同時押しパターンを除去
+			//�뇥筽뉎걲�굥�릪�셽�듉�걮�깙�궭�꺖�꺍�굮�솮�렮
 			for(int i = 0 ; i < originalPatternList.size()-1 ; i++ ) {
 				for(int j = originalPatternList.size()-1 ; j > i; j-- ) {
 					if (originalPatternList.get(i).equals(originalPatternList.get(j))) {
@@ -184,7 +188,7 @@ public class LaneShuffleModifier extends PatternModifier {
 					}
 				}
 			}
-			//無理押しが来ない譜面を探す
+			//�꽒�릤�듉�걮�걣�씎�겒�걚鈺쒒씊�굮�렋�걲
 			int[] searchLane = new int[9];
 			boolean[] searchLaneFlag = new boolean[9];
 			Arrays.fill(searchLaneFlag, false);
@@ -214,7 +218,7 @@ public class LaneShuffleModifier extends PatternModifier {
 											searchLaneFlag[searchLane[7]] = true;
 											for(searchLane[8]=0;searchLane[8]<9;searchLane[8]++) {
 												if(searchLaneFlag[searchLane[8]] || (searchLane[0]==0&&searchLane[1]==1&&searchLane[2]==2&&searchLane[3]==3&&searchLane[4]==4&&searchLane[5]==5&&searchLane[6]==6&&searchLane[7]==7&&searchLane[8]==8)
-																				 || (searchLane[0]==8&&searchLane[1]==7&&searchLane[2]==6&&searchLane[3]==5&&searchLane[4]==4&&searchLane[5]==3&&searchLane[6]==2&&searchLane[7]==1&&searchLane[8]==0)) continue; //正規鏡は除外
+																				 || (searchLane[0]==8&&searchLane[1]==7&&searchLane[2]==6&&searchLane[3]==5&&searchLane[4]==4&&searchLane[5]==3&&searchLane[6]==2&&searchLane[7]==1&&searchLane[8]==0)) continue; //閭ｈ쫸�룪�겘�솮鸚�
 												boolean murioshiFlag = false;
 												for(int i=0;i<originalPatternList.size();i++) {
 													tempPattern.clear();
@@ -262,7 +266,7 @@ public class LaneShuffleModifier extends PatternModifier {
 			}
 		}
 		
-		Logger.getGlobal().info("無理押し無し譜面数 : "+(kouhoPatternList.size()));
+		Logger.getGlobal().info("�꽒�릤�듉�걮�꽒�걮鈺쒒씊�빊 : "+(kouhoPatternList.size()));
 		
 		int[] result = new int[9];
 		if(kouhoPatternList.size() > 0) {
@@ -270,7 +274,7 @@ public class LaneShuffleModifier extends PatternModifier {
 			for (int i = 0; i < 9; i++) {
 				result[(int) (kouhoPatternList.get(r)).get(i)] = i;
 			}
-		//無理押しが来ない譜面が存在しない場合は正規か鏡でランダム
+		//�꽒�릤�듉�걮�걣�씎�겒�걚鈺쒒씊�걣耶섇쑉�걮�겒�걚�졃�릦�겘閭ｈ쫸�걢�룪�겎�꺀�꺍���깲
 		} else {
 			int mirror = (int) (Math.random() * 2);
 			for (int i = 0; i < 9; i++) {

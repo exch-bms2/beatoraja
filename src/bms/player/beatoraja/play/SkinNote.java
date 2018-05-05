@@ -13,7 +13,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 
 /**
- * ノーツオブジェクト
+ * �깕�꺖�깂�궕�깣�궦�궒�궚�깉
  * 
  * @author exch
  */
@@ -27,8 +27,8 @@ public class SkinNote extends SkinObject {
 		for(int i = 0;i < lanes.length;i++) {
 			lanes[i] = new SkinLane(note[i],longnote[i], minenote[i]);
 		}
-		
-        this.setDestination(0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, new int[0]);
+		SkinDestinationSize dstSize = new SkinDestinationSize(0,0,0,0);
+        this.setDestination(0, dstSize, 0, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, new int[0]);
 	}
 
 	public void setLaneRegion(Rectangle[] region, float[] scale, Skin skin) {
@@ -43,7 +43,8 @@ public class SkinNote extends SkinObject {
 //					region[i].r += offset[4];
 				}
 			}
-			lanes[i].setDestination(0,region[i].x, region[i].y, region[i].width, region[i].height, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+			SkinDestinationSize dstSize = new SkinDestinationSize(region[i].x, region[i].y, region[i].width, region[i].height);
+			lanes[i].setDestination(0,dstSize, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 			lanes[i].scale =  scale[i];
 		}
 	}
@@ -70,26 +71,26 @@ public class SkinNote extends SkinObject {
 
 	static class SkinLane extends SkinObject {
 		/**
-		 * ノーツ画像
+		 * �깕�꺖�깂�뵽�깗
 		 */
 		SkinSource note;
 		/**
-		 * ロングノーツ画像
+		 * �꺆�꺍�궛�깕�꺖�깂�뵽�깗
 		 */
 		SkinSource[] longnote = new SkinSource[10];
 		/**
-		 * 地雷ノーツ画像
+		 * �쑑�쎐�깕�꺖�깂�뵽�깗
 		 */
 		SkinSource minenote;
 
 		float scale;
 
 		/**
-		 * 不可視ノーツ画像
+		 * 訝띶룾誤뽧깕�꺖�깂�뵽�깗
 		 */
 		SkinSource hiddennote;
 		/**
-		 * 処理済ノーツ画像
+		 * �눇�릤歷덀깕�꺖�깂�뵽�깗
 		 */
 		SkinSource processednote;
 
