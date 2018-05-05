@@ -462,6 +462,11 @@ public class MusicResult extends AbstractResult {
 			newscore = cscore;
 		}
 
+		if (resource.getPlayMode() == PlayMode.PLAY) {
+			main.getPlayDataAccessor().writeScoreDara(resource.getScoreData(), resource.getBMSModel(),
+					resource.getPlayerConfig().getLnmode(), resource.isUpdateScore());
+		}
+
 	}
 
 	public int getJudgeCount(int judge, boolean fast) {
