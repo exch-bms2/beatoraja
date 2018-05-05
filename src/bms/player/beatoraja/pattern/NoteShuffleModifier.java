@@ -95,17 +95,16 @@ public class NoteShuffleModifier extends PatternModifier {
 					hnotes[i] = tl.getHiddenNote(i);
 				}
 				int[] keys;
+				
 				switch (type) {
 				case S_RANDOM:
 					keys = getKeys(mode, false);
-					if(mode == Mode.POPN_9K) {
-						random = keys.length > 0 ? timeBasedShuffle(keys, ln, notes, lastNoteTime, tl.getTime(), 0)
-								: keys;
-					} else {
-						random = keys.length > 0 ? timeBasedShuffle(keys, ln, notes, lastNoteTime, tl.getTime(), 40)
-								: keys;
-					}
+					if(mode == Mode.POPN_9K)
+						random = keys.length > 0 ? timeBasedShuffle(keys, ln, notes, lastNoteTime, tl.getTime(), 0): keys;
+					else
+						random = keys.length > 0 ? timeBasedShuffle(keys, ln, notes, lastNoteTime, tl.getTime(), 40): keys;
 					break;
+					
 				case SPIRAL:
 					keys = getKeys(mode, false);
 					if (random.length == 0) {
@@ -257,13 +256,8 @@ public class NoteShuffleModifier extends PatternModifier {
 
 						primary.addAll(tate);
 						// 餘뗣굤�굮�꺀�꺍���깲�겓
-						while (!other.isEmpty()) {
-							int r = (int) (Math.random() * primary.size());
-							random[primary.get(r)] = other.get(0);
-							primary.remove(r);
-							other.remove(0);
-						}
-						
+						while (!other.isEmpty())
+							makeOtherLaneRandom(random, other, primary, -1);
 
 
 					} else if (mode.player == 2) {
