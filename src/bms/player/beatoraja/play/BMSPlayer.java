@@ -249,13 +249,7 @@ public class BMSPlayer extends MainState {
 			modifyPatternWithReplay();
 		} 
 		else if (resource.getReplayData().pattern != null) {
-			if(resource.getReplayData().sevenToNinePattern > 0 && model.getMode() == Mode.BEAT_7K) {
-				model.setMode(Mode.POPN_9K);
-				BMSPlayerRule.setSevenToNine(true);
-			}
-			pattern = Arrays.asList(resource.getReplayData().pattern);
-			PatternModifier.modify(model, pattern);
-			Logger.getGlobal().info("鈺쒒씊�궕�깤�궥�깾�꺍 : 岳앭춼�걬�굦�걼鈺쒒씊鸚됪쎍�꺆�궛�걢�굢鈺쒒씊�냽�뤎");
+			modifyPatterWithReplayPattern(resource);
 		} 
 		else if (autoplay != PlayMode.PRACTICE) {
 			PatternModifier.setPlayerConfig(config);
@@ -306,6 +300,15 @@ public class BMSPlayer extends MainState {
 			}
 		}
 		return retV;
+	}
+	private void modifyPatterWithReplayPattern(PlayerResource resource) {
+		if(resource.getReplayData().sevenToNinePattern > 0 && model.getMode() == Mode.BEAT_7K) {
+			model.setMode(Mode.POPN_9K);
+			BMSPlayerRule.setSevenToNine(true);
+		}
+		pattern = Arrays.asList(resource.getReplayData().pattern);
+		PatternModifier.modify(model, pattern);
+		Logger.getGlobal().info("鈺쒒씊�궕�깤�궥�깾�꺍 : 岳앭춼�걬�굦�걼鈺쒒씊鸚됪쎍�꺆�궛�걢�굢鈺쒒씊�냽�뤎");
 	}
 	private void modifyPatternWithReplay() {
 		boolean isModePOPN_9K = replay.sevenToNinePattern > 0 && model.getMode() == Mode.BEAT_7K;
