@@ -24,14 +24,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.PixmapIO;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -41,10 +35,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.StringBuilder;
 
 import bms.player.beatoraja.PlayerResource.PlayMode;
-import bms.player.beatoraja.audio.AudioDriver;
-import bms.player.beatoraja.audio.GdxAudioDeviceDriver;
-import bms.player.beatoraja.audio.GdxSoundDriver;
-import bms.player.beatoraja.audio.PortAudioDriver;
+import bms.player.beatoraja.audio.*;
 import bms.player.beatoraja.config.KeyConfiguration;
 import bms.player.beatoraja.config.SkinConfiguration;
 import bms.player.beatoraja.decide.MusicDecide;
@@ -60,10 +51,7 @@ import bms.player.beatoraja.select.bar.TableBar;
 import bms.player.beatoraja.skin.SkinLoader;
 import bms.player.beatoraja.skin.SkinObject.SkinOffset;
 import bms.player.beatoraja.skin.SkinProperty;
-import bms.player.beatoraja.song.SQLiteSongDatabaseAccessor;
-import bms.player.beatoraja.song.SongData;
-import bms.player.beatoraja.song.SongDatabaseAccessor;
-import bms.player.beatoraja.song.SongInformationAccessor;
+import bms.player.beatoraja.song.*;
 import twitter4j.Status;
 import twitter4j.StatusUpdate;
 import twitter4j.Twitter;
@@ -306,6 +294,8 @@ public class MainController extends ApplicationAdapter {
 			current = newState;
 			currentState = newState;
 			starttime = System.nanoTime();
+			nowmicrotime = ((System.nanoTime() - starttime) / 1000);
+			current.prepare();
 		}
 		if (current.getStage() != null) {
 			Gdx.input.setInputProcessor(new InputMultiplexer(current.getStage(), input.getKeyBoardInputProcesseor()));
@@ -994,9 +984,9 @@ public class MainController extends ApplicationAdapter {
 	}
 
 	public static class SystemSoundManager {
-		private Array<Path> bgms = new Array();
+		private Array<Path> bgms = new Array<Path>();
 		private Path currentBGMPath;
-		private Array<Path> sounds = new Array();
+		private Array<Path> sounds = new Array<Path>();
 		private Path currentSoundPath;
 
 		public SystemSoundManager(Config config) {

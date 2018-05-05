@@ -2,8 +2,7 @@ package bms.player.beatoraja;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.util.*;
-import java.util.Map.Entry;
+import java.util.Calendar;
 
 import bms.player.beatoraja.SkinConfig.Offset;
 import bms.player.beatoraja.play.TargetProperty;
@@ -44,6 +43,10 @@ public abstract class MainState {
 	}
 
 	public abstract void create();
+
+	public void prepare() {
+
+	}
 
 	public abstract void render();
 
