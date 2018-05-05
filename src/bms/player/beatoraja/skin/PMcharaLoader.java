@@ -35,17 +35,6 @@ public class PMcharaLoader {
 	public static final int FACE_UPPER = 3;
 	public static final int FACE_ALL = 4;
 	public static final int SELECT_CG = 5;
-	public static final int NEUTRAL = 6;
-	public static final int FEVER = 7;
-	public static final int GREAT = 8;
-	public static final int GOOD = 9;
-	public static final int BAD = 10;
-	public static final int FEVERWIN = 11;
-	public static final int WIN = 12;
-	public static final int LOSE = 13;
-	public static final int OJAMA = 14;
-	public static final int DANCE = 15;
-	
 	
 	private final int CharBMPIndex = 0;
 	private final int CharTexIndex = 2;
@@ -201,72 +190,28 @@ public class PMcharaLoader {
 				pixmap.dispose();
 			}
 		}
-
-		TextureRegion[] image = new TextureRegion[1];
-		Texture setBMP;
-		SkinImage PMcharaPart = null;
-		switch(type) {
-			case BACKGROUND:
-				setBMP = CharBMP[CharBMPIndex + setColor-1];
-				image = new TextureRegion[1];
-				image[0] = new TextureRegion(setBMP, Position[1][0], Position[1][1], Position[1][2], Position[1][3]);
-				PMcharaPart = new SkinImage(image, 0, 0);
-				skin.add(PMcharaPart);
-				return PMcharaPart;
-			case NAME:
-				setBMP = CharBMP[CharBMPIndex + setColor-1];
-				image = new TextureRegion[1];
-				image[0] = new TextureRegion(setBMP, Position[0][0], Position[0][1], Position[0][2], Position[0][3]);
-				PMcharaPart = new SkinImage(image, 0, 0);
-				skin.add(PMcharaPart);
-				return PMcharaPart;
-			case FACE_UPPER:
-				setBMP = setColor == 2 && CharBMP[CharFaceIndex + 1] != null ? CharBMP[CharFaceIndex + 1] : CharBMP[CharFaceIndex];
-				if(setBMP == null) break;
-				image = new TextureRegion[1];
-				image[0] = new TextureRegion(setBMP, charFaceUpperXywh[0], charFaceUpperXywh[1], charFaceUpperXywh[2], charFaceUpperXywh[3]);
-				PMcharaPart = new SkinImage(image, 0, 0);
-				skin.add(PMcharaPart);
-				return PMcharaPart;
-			case FACE_ALL:
-				setBMP = setColor == 2 && CharBMP[CharFaceIndex + 1] != null ? CharBMP[CharFaceIndex + 1] : CharBMP[CharFaceIndex];
-				if(setBMP == null) break;
-				image = new TextureRegion[1]; 
-				image[0] = new TextureRegion(setBMP, charFaceAllXywh[0], charFaceAllXywh[1], charFaceAllXywh[2], charFaceAllXywh[3]);
-				PMcharaPart = new SkinImage(image, 0, 0);
-				skin.add(PMcharaPart);
-				return PMcharaPart;
-			case SELECT_CG:
-				setBMP = setColor == 2 && CharBMP[SelectCGIndex + 1] != null ? CharBMP[SelectCGIndex + 1] : CharBMP[SelectCGIndex];
-				if(setBMP == null) break;
-				image = new TextureRegion[1];
-				image[0] = new TextureRegion(setBMP, 0, 0, setBMP.getWidth(), setBMP.getHeight());
-				PMcharaPart = new SkinImage(image, 0, 0);
-				skin.add(PMcharaPart);
-				return PMcharaPart;
-			case NEUTRAL:
-				if(setMotion == Integer.MIN_VALUE) setMotion = 1;
-			case FEVER:
-				if(setMotion == Integer.MIN_VALUE) setMotion = 6;
-			case GREAT:
-				if(setMotion == Integer.MIN_VALUE) setMotion = 7;
-			case GOOD:
-				if(setMotion == Integer.MIN_VALUE) setMotion = 8;
-			case BAD:
-				if(setMotion == Integer.MIN_VALUE) setMotion = 10;
-			case FEVERWIN:
-				if(setMotion == Integer.MIN_VALUE) setMotion = 17;
-			case WIN:
-				if(setMotion == Integer.MIN_VALUE) setMotion = 15;
-			case LOSE:
-				if(setMotion == Integer.MIN_VALUE) setMotion = 16;
-			case OJAMA:
-				if(setMotion == Integer.MIN_VALUE) setMotion = 3;
-			case DANCE:
-				if(setMotion == Integer.MIN_VALUE) setMotion = 14;
-			case PLAY:
-				PlayCharacter(skinOption,dsttimer,side, dstSize, patternData);
-				break;
+		CurrentType currentType = new CurrentType();
+		if(currentType.getType(type) != 0) {
+			if(setMotion == Integer.MIN_VALUE)
+				setMotion = currentType.getType(type);
+		}
+		else if(type == BACKGROUND) {
+			return new addCharaBackGround().addChara(skin, color, CharBMP, Position);
+		}
+		else if(type == NAME) {
+			return new addCharaName().addChara(skin, color, CharBMP, Position);
+		}
+		else if(type == FACE_UPPER) {
+			return new addCharaFaceUpper().addChara(skin, color, CharBMP, Position);
+		}
+		else if(type == FACE_ALL) {
+			return new addCharaFaceAll().addChara(skin, color, CharBMP, Position);
+		}
+		else if(type == SELECT_CG) {
+			return new addCharaSelectCG().addChara(skin, color, CharBMP, Position);
+		}
+		else if(type == PLAY) {
+			PlayCharacter(skinOption,dsttimer,side, dstSize, patternData);
 		}
 		return null;
 	}
