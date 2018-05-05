@@ -49,7 +49,9 @@ public class LuaSkinLoader extends JSONSkinLoader {
 		SkinHeader header = loadHeader(p);
 		try {
 			initFileMap(header, property);
-			lua.setSkinProperty(property);
+			lua.setSkinProperty(property, (String path) -> {
+				return getPath(p.getParent().toString() + "/" + path, filemap).getPath();
+			});
 			LuaValue value = lua.execFile(p);
 			sk = fromLuaValue(JsonSkin.class, value);
 			skin = loadJsonSkin(header, sk, type, property, p);

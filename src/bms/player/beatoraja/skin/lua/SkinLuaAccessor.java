@@ -1,6 +1,7 @@
 package bms.player.beatoraja.skin.lua;
 
 import java.nio.file.Path;
+import java.util.function.Function;
 import java.util.logging.Logger;
 
 import org.luaj.vm2.*;
@@ -221,7 +222,7 @@ public class SkinLuaAccessor {
 		pkg.set("path", pkg.get("path").tojstring() + ";" + path.toString() + "/?.lua");
 	}
 
-	public void setSkinProperty(SkinConfig.Property property) {
+	public void setSkinProperty(SkinConfig.Property property, Function<String, String> filePathGetter) {
 		LuaTable skin_config = new LuaTable();
 
 		LuaTable file_path = new LuaTable();
@@ -229,6 +230,12 @@ public class SkinLuaAccessor {
 			file_path.set(file.name, file.path);
 		}
 		skin_config.set("file_path", file_path);
+		skin_config.set("get_path", new OneArgFunction() {
+			@Override
+			public LuaValue call(LuaValue value) {
+				return LuaString.valueOf(filePathGetter.apply(value.tojstring()));
+			}
+		});
 
 		LuaTable options = new LuaTable();
 		LuaTable enabled_options = new LuaTable();

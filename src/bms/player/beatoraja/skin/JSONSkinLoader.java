@@ -55,7 +55,7 @@ public class JSONSkinLoader extends SkinLoader{
 
 	protected final SkinLuaAccessor lua;
 
-	ObjectMap<String, String> filemap = new ObjectMap();
+	protected ObjectMap<String, String> filemap = new ObjectMap();
 
 	public JSONSkinLoader() {
 		lua = null;
