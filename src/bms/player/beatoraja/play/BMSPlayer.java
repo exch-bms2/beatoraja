@@ -627,6 +627,8 @@ public class BMSPlayer extends MainState {
 	//�깕�꺖�깉�굮�떋鸚㎯걲�굥�걢�겑�걝�걢
 	boolean isNoteExpansion = false;
 
+	
+//rendering***********************************************************************************************************************************************************
 	@Override
 	public void render() {
 		final PlaySkin skin = (PlaySkin) getSkin();
@@ -645,37 +647,37 @@ public class BMSPlayer extends MainState {
 		switch (state) {
 		// 璵썸쎊�꺆�꺖�깋
 		case STATE_PRELOAD:
-			setSTATE_PERLOAD(skin, resource, now);
+			renderSTATE_PERLOAD(skin, resource, now);
 			break;
 		// practice mode
 		case STATE_PRACTICE:
-			setSTATE_PRACTICE(skin, resource, input, now);
+			renderSTATE_PRACTICE(skin, resource, input, now);
 			break;
 		// practice永귚틙
 		case STATE_PRACTICE_FINISHED:
-			setSTATE_PRACTICE_FINISH(skin, input);
+			renderSTATE_PRACTICE_FINISH(skin, input);
 			break;
 			// GET READY
 		case STATE_READY:
-			setSTATE_READY(skin, input, now, micronow);
+			renderSTATE_READY(skin, input, now, micronow);
 			break;
 		// �깤�꺃�궎
 		case STATE_PLAY:
-			setSTATE_PLAY(skin, resource, config, now, micronow);
+			renderSTATE_PLAY(skin, resource, config, now, micronow);
 			break;
 		// �뻾佯쀥눇�릤
 		case STATE_FAILED:
-			setSTATE_FAILED(skin, resource, input);
+			renderSTATE_FAILED(skin, resource, input);
 			break;
 		// 若뚦쪕�눇�릤
 		case STATE_FINISHED:
-			setSTATE_FINISHED(skin, resource, input, config);
+			renderSTATE_FINISHED(skin, resource, input, config);
 			break;
 		}
-
 		prevtime = micronow;
 	}
-	private void setSTATE_FINISHED(final PlaySkin skin, final PlayerResource resource,
+	
+	private void renderSTATE_FINISHED(final PlaySkin skin, final PlayerResource resource,
 			final BMSPlayerInputProcessor input, final PlayerConfig config) {
 		if (autoThread != null) {
 			autoThread.stop = true;
@@ -722,7 +724,7 @@ public class BMSPlayer extends MainState {
 			}
 		}
 	}
-	private void setSTATE_FAILED(final PlaySkin skin, final PlayerResource resource,
+	private void renderSTATE_FAILED(final PlaySkin skin, final PlayerResource resource,
 			final BMSPlayerInputProcessor input) {
 		if (autoThread != null) {
 			autoThread.stop = true;
@@ -761,7 +763,7 @@ public class BMSPlayer extends MainState {
 			}
 		}
 	}
-	private void setSTATE_PLAY(final PlaySkin skin, final PlayerResource resource, final PlayerConfig config,
+	private void renderSTATE_PLAY(final PlaySkin skin, final PlayerResource resource, final PlayerConfig config,
 			final long now, final long micronow) {
 		final long deltatime = micronow - prevtime;
 		final long deltaplay = deltatime * (100 - playspeed) / 100;
@@ -862,7 +864,7 @@ public class BMSPlayer extends MainState {
 			}
 		}
 	}
-	private void setSTATE_READY(final PlaySkin skin, final BMSPlayerInputProcessor input, final long now,
+	private void renderSTATE_READY(final PlaySkin skin, final BMSPlayerInputProcessor input, final long now,
 			final long micronow) {
 		if (main.getNowTime(TIMER_READY) > skin.getPlaystart()) {
 			saveReplayHS();
@@ -881,14 +883,14 @@ public class BMSPlayer extends MainState {
 			Logger.getGlobal().info("STATE_PLAY�겓燁삭죱");
 		}
 	}
-	private void setSTATE_PRACTICE_FINISH(final PlaySkin skin, final BMSPlayerInputProcessor input) {
+	private void renderSTATE_PRACTICE_FINISH(final PlaySkin skin, final BMSPlayerInputProcessor input) {
 		if (main.getNowTime(TIMER_FADEOUT) > skin.getFadeout()) {
 			input.setEnable(true);
 			input.setStartTime(0);
 			main.changeState(MainController.STATE_SELECTMUSIC);
 		}
 	}
-	private void setSTATE_PRACTICE(final PlaySkin skin, final PlayerResource resource,
+	private void renderSTATE_PRACTICE(final PlaySkin skin, final PlayerResource resource,
 			final BMSPlayerInputProcessor input, final long now) {
 		if (main.isTimerOn(TIMER_PLAY)) {
 			resource.reloadBMSFile();
@@ -951,7 +953,7 @@ public class BMSPlayer extends MainState {
 			Logger.getGlobal().info("STATE_READY�겓燁삭죱");
 		}
 	}
-	private void setSTATE_PERLOAD(final PlaySkin skin, final PlayerResource resource, final long now) {
+	private void renderSTATE_PERLOAD(final PlaySkin skin, final PlayerResource resource, final long now) {
 		if (resource.mediaLoadFinished() && now > skin.getLoadstart() + skin.getLoadend()
 				&& now - startpressedtime > 1000) {
 			bga.prepare(this);
@@ -970,7 +972,8 @@ public class BMSPlayer extends MainState {
 			main.setTimerOn(TIMER_PM_CHARA_2P_NEUTRAL);
 		}
 	}
-
+//rendering***********************************************************************************************************************************************************
+	
 	public void setPlaySpeed(int playspeed) {
 		this.playspeed = playspeed;
 		if (main.getConfig().getAudioFastForward() == Config.AUDIO_PLAY_FREQ) {
