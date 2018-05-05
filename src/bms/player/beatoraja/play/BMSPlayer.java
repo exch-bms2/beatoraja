@@ -491,12 +491,8 @@ public class BMSPlayer extends MainState {
 			}
 			skin.setGaugeParts(setParts);
 		}
-
-		setSound(SOUND_READY, "playready.wav", SoundType.SOUND, false);
-		setSound(SOUND_PLAYSTOP, "playstop.wav", SoundType.SOUND, false);
-		setSound(SOUND_GUIDE_SE_PG, "guide-pg.wav", SoundType.SOUND, false);
-		setSound(SOUND_GUIDE_SE_GR, "guide-gr.wav", SoundType.SOUND, false);
-		setSound(SOUND_GUIDE_SE_GD, "guide-gd.wav", SoundType.SOUND, false);
+	
+		setSounds();
 
 		final BMSPlayerInputProcessor input = main.getInputProcessor();
 		input.setMinimumInputDutration(conf.getInputduration());
@@ -577,6 +573,13 @@ public class BMSPlayer extends MainState {
 		} else {
 			getScoreDataProperty().setTargetScore(score.getExscore(), rivalscore, model.getTotalNotes());
 		}
+	}
+	private void setSounds() {
+		setSound(SOUND_READY, "playready.wav", SoundType.SOUND, false);
+		setSound(SOUND_PLAYSTOP, "playstop.wav", SoundType.SOUND, false);
+		setSound(SOUND_GUIDE_SE_PG, "guide-pg.wav", SoundType.SOUND, false);
+		setSound(SOUND_GUIDE_SE_GR, "guide-gr.wav", SoundType.SOUND, false);
+		setSound(SOUND_GUIDE_SE_GD, "guide-gd.wav", SoundType.SOUND, false);
 	}
 
 	protected static final int STATE_PRELOAD = 0;
