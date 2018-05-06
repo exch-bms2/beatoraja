@@ -41,7 +41,8 @@ public class PMcharaLoader {
 	private final int CharFaceIndex = 4;
 	private final int SelectCGIndex = 6;
 	private final PMparseMapping parseMapping = new PMparseMapping(CharBMPIndex, CharTexIndex, CharFaceIndex, SelectCGIndex);
-
+	int[] charFaceUpperXywh = {0, 0, 256, 256};
+	int[] charFaceAllXywh = {320, 0, 320, 480};
 	
 	private int loop[];
 	private int[][] Position;
@@ -52,7 +53,7 @@ public class PMcharaLoader {
 	private int frame[];
 	private int size[] = {0, 0};
 	private Texture[] CharBMP ;
-	
+	List<List<String>> patternData = new ArrayList<List<String>>();
 	
 	public PMcharaLoader(Skin skin) {
 		this.skin = skin;
@@ -87,8 +88,6 @@ public class PMcharaLoader {
 		for(int[] i: Position){
 			Arrays.fill(i, 0);
 		}
-		int[] charFaceUpperXywh = {0, 0, 256, 256};
-		int[] charFaceAllXywh = {320, 0, 320, 480};
 		frame = new int[20];
 		Arrays.fill(frame, Integer.MIN_VALUE);
 		loop = new int[20];
@@ -98,67 +97,11 @@ public class PMcharaLoader {
 		//占쏙옙麗멸퇍�돦占쎄쾼占쎈룾
 
 		//#Pattern,#Texture,#Layer占쎄쿁占쎄퉰占쎄틬占쎄땟
-		List<List<String>> patternData = new ArrayList<List<String>>();
 		for(int i = 0; i < 3; i++) patternData.add(new ArrayList<String>());
-		try (BufferedReader br = new BufferedReader(
-			new InputStreamReader(new FileInputStream(chp), "MS932"));) {
-			String line;
-			PatternDataAdd patternDataAdd = new PatternDataAdd();
-			while ((line = br.readLine()) != null) {
-				if (line.startsWith("#") ) {
-					String[] str = line.split("\t", -1);
-					if (str.length > 1) {
-						List<String> data = PMparseStr(str);
-						if(checkChar(str)) {
-							CharSkinLoader(data, str, usecim, chp);
-						} 
-						else if(patternDataAdd.getType(str[0])) {
-							patternData.get(patternDataAdd.addType(str[0])).add(line);
-						} else if(str[0].equalsIgnoreCase("#Flame") || str[0].equalsIgnoreCase("#Frame")) {
-							if(data.size() > 2) {
-								if(PMparseInt(data.get(1)) >= 0 && PMparseInt(data.get(1)) < frame.length) frame[PMparseInt(data.get(1))] = PMparseInt(data.get(2));
-							}
-						} else if(str[0].equalsIgnoreCase("#Anime")) {
-							if(data.size() > 1) anime = PMparseInt(data.get(1));
-						} else if(str[0].equalsIgnoreCase("#Size")) {
-							if(data.size() > 2) {
-								size[0] = PMparseInt(data.get(1));
-								size[1] = PMparseInt(data.get(2));
-							}
-						} else if(str[0].length() == 3 && PMparseInt(str[0].substring(1,3), 36) >= 0 && PMparseInt(str[0].substring(1,3), 36) < Position.length) {
-							//鵝��렕怡쏙Ⅴ�떓�뫒
-							if(data.size() > Position[0].length) {
-								for(int i = 0; i < Position[0].length; i++) {
-									Position[PMparseInt(str[0].substring(1,3), 36)][i] = PMparseInt(data.get(i+1));
-								}
-							}
-						} else if(str[0].equalsIgnoreCase("#CharFaceUpperSize")) {
-							//占쎄퉿占쎄틒占쎄텑占쎄텕(鼇앸벩�쐡玲곥깵寃쀯옙寃�) 鵝��렕怡�&占쎄땁占쎄텕占쎄땍
-							if(data.size() > charFaceUpperXywh.length) {
-								for(int i = 0; i < charFaceUpperXywh.length; i++) {
-									charFaceUpperXywh[i] = PMparseInt(data.get(i+1));
-								}
-							}
-						} else if(str[0].equalsIgnoreCase("#CharFaceAllSize")) {
-							//占쎄퉿占쎄틒占쎄텑占쎄텕(占쎈�꿴턁占�) 鵝��렕怡�&占쎄땁占쎄텕占쎄땍
-							if(data.size() > charFaceAllXywh.length) {
-								for(int i = 0; i < charFaceAllXywh.length; i++) {
-									charFaceAllXywh[i] = PMparseInt(data.get(i+1));
-								}
-							}
-						} else if(str[0].equalsIgnoreCase("#Loop")) {
-							//占쎄틓占쎄틬占쎄묏俑앸씤�돭
-							if(data.size() > 2) {
-								if(PMparseInt(data.get(1)) >= 0 && PMparseInt(data.get(1)) < loop.length) loop[PMparseInt(data.get(1))] = PMparseInt(data.get(2));
-							}
-						}
-					}
-				}
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
+		
+		//file Read and Setting 
+		FileReadSetting(usecim, chp);
+		
 		//#CharBMP占쎄괏占쎄퐩占쎄콢占쎌끋占쎄쿂return
 		if(CharBMP[CharBMPIndex] == null) return null;
 		//#CharBMP2P占쎄괏�띠꼪�몛占쎄괼占쎄낄嫄�占쎄쾱#Texture畑댁떓�뫒占쎄괏占쎄콟占쎄데占쎄쾹占쎄광占쎄쿂#CharTex2P占쎄괏�띠꼪�몛占쎄굉占쎄데占쎄쾼占쎄덩2P占쎄텠占쎄�占쎄틬占쎄쾹占쎄굉占쎄데
@@ -490,6 +433,67 @@ public class PMcharaLoader {
 		}
 		return chp;
 
+	}
+	
+	public void FileReadSetting(boolean usecim, File chp) {
+		try (BufferedReader br = new BufferedReader(
+				new InputStreamReader(new FileInputStream(chp), "MS932"));) {
+				String line;
+				PatternDataAdd patternDataAdd = new PatternDataAdd();
+				while ((line = br.readLine()) != null) {
+					if (line.startsWith("#") ) {
+						String[] str = line.split("\t", -1);
+						if (str.length > 1) {
+							List<String> data = PMparseStr(str);
+							if(checkChar(str)) {
+								CharSkinLoader(data, str, usecim, chp);
+							} 
+							else if(patternDataAdd.getType(str[0])) {
+								patternData.get(patternDataAdd.addType(str[0])).add(line);
+							} else if(str[0].equalsIgnoreCase("#Flame") || str[0].equalsIgnoreCase("#Frame")) {
+								if(data.size() > 2) {
+									if(PMparseInt(data.get(1)) >= 0 && PMparseInt(data.get(1)) < frame.length) frame[PMparseInt(data.get(1))] = PMparseInt(data.get(2));
+								}
+							} else if(str[0].equalsIgnoreCase("#Anime")) {
+								if(data.size() > 1) anime = PMparseInt(data.get(1));
+							} else if(str[0].equalsIgnoreCase("#Size")) {
+								if(data.size() > 2) {
+									size[0] = PMparseInt(data.get(1));
+									size[1] = PMparseInt(data.get(2));
+								}
+							} else if(str[0].length() == 3 && PMparseInt(str[0].substring(1,3), 36) >= 0 && PMparseInt(str[0].substring(1,3), 36) < Position.length) {
+								//鵝��렕怡쏙Ⅴ�떓�뫒
+								if(data.size() > Position[0].length) {
+									for(int i = 0; i < Position[0].length; i++) {
+										Position[PMparseInt(str[0].substring(1,3), 36)][i] = PMparseInt(data.get(i+1));
+									}
+								}
+							} else if(str[0].equalsIgnoreCase("#CharFaceUpperSize")) {
+								//占쎄퉿占쎄틒占쎄텑占쎄텕(鼇앸벩�쐡玲곥깵寃쀯옙寃�) 鵝��렕怡�&占쎄땁占쎄텕占쎄땍
+								if(data.size() > charFaceUpperXywh.length) {
+									for(int i = 0; i < charFaceUpperXywh.length; i++) {
+										charFaceUpperXywh[i] = PMparseInt(data.get(i+1));
+									}
+								}
+							} else if(str[0].equalsIgnoreCase("#CharFaceAllSize")) {
+								//占쎄퉿占쎄틒占쎄텑占쎄텕(占쎈�꿴턁占�) 鵝��렕怡�&占쎄땁占쎄텕占쎄땍
+								if(data.size() > charFaceAllXywh.length) {
+									for(int i = 0; i < charFaceAllXywh.length; i++) {
+										charFaceAllXywh[i] = PMparseInt(data.get(i+1));
+									}
+								}
+							} else if(str[0].equalsIgnoreCase("#Loop")) {
+								//占쎄틓占쎄틬占쎄묏俑앸씤�돭
+								if(data.size() > 2) {
+									if(PMparseInt(data.get(1)) >= 0 && PMparseInt(data.get(1)) < loop.length) loop[PMparseInt(data.get(1))] = PMparseInt(data.get(2));
+								}
+							}
+						}
+					}
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 	}
 	
 	
