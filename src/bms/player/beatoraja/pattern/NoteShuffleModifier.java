@@ -46,7 +46,7 @@ public class NoteShuffleModifier extends PatternModifier {
 	 */
 	public static final int SEVEN_TO_NINE = 100;
 
-	private int shuffleType;
+	private int modifyType;
 	/**
 	 * 轝▲겗TimeLine罌쀥뒥�늽(SPIRAL�뵪)
 	 */
@@ -59,7 +59,7 @@ public class NoteShuffleModifier extends PatternModifier {
 
 	public NoteShuffleModifier(int type) {
 		super(type >= ALL_SCR ? 1 : 0);
-		this.shuffleType = type;
+		this.modifyType = type;
 	}
 
 	/**
@@ -96,7 +96,7 @@ public class NoteShuffleModifier extends PatternModifier {
 				}
 				int[] keys;
 				
-				switch (shuffleType) {
+				switch (modifyType) {
 				case S_RANDOM:
 					keys = getKeys(mode, false);
 					if(mode == Mode.POPN_9K)
@@ -238,21 +238,7 @@ public class NoteShuffleModifier extends PatternModifier {
 						while (!(note.isEmpty() || primary.isEmpty())) 
 							makeOtherLaneRandom(random, note, primary, -1);
 
-						// noteLane�걣令뷩겎�겒�걢�겂�걼�굢
-						// lastNoteTime�걣弱뤵걬�걚�꺃�꺖�꺍�걢�굢�젂�빁�겓營��걚�겍�걚�걦
-						while (!note.isEmpty()) {
-							int min = Integer.MAX_VALUE;
-							int minLane = tate.get(0);
-							for (int i = 0; i < tate.size(); i++) {
-								if (min > lastNoteTime[tate.get(i)]) {
-									min = lastNoteTime[tate.get(i)];
-									minLane = tate.get(i);
-								}
-							}
-							random[minLane] = note.get(0);
-							tate.remove((Integer) minLane);
-							note.remove(0);
-						}
+						leaveLastNoteTime(random, lastNoteTime, note, tate);
 
 						primary.addAll(tate);
 						// 餘뗣굤�굮�꺀�꺍���깲�겓
@@ -334,19 +320,7 @@ public class NoteShuffleModifier extends PatternModifier {
 
 						// noteLane�걣令뷩겎�겒�걢�겂�걼�굢
 						// lastNoteTime�걣弱뤵걬�걚�꺃�꺖�꺍�걢�굢�젂�빁�겓營��걚�겍�걚�걦
-						while (!note.isEmpty()) {
-							int min = Integer.MAX_VALUE;
-							int minLane = tate.get(0);
-							for (int i = 0; i < tate.size(); i++) {
-								if (min > lastNoteTime[tate.get(i)]) {
-									min = lastNoteTime[tate.get(i)];
-									minLane = tate.get(i);
-								}
-							}
-							random[minLane] = note.get(0);
-							tate.remove((Integer) minLane);
-							note.remove(0);
-						}
+						leaveLastNoteTime(random, lastNoteTime, note, tate);
 
 						primary.addAll(tate);
 						// 餘뗣굤�굮營��걚�겍�걚�걦
@@ -416,6 +390,23 @@ public class NoteShuffleModifier extends PatternModifier {
 			}
 		}
 		return log;
+	}
+
+
+	private void leaveLastNoteTime(int[] random, int[] lastNoteTime, ArrayList<Integer> note, ArrayList<Integer> tate) {
+		while (!note.isEmpty()) {
+			int min = Integer.MAX_VALUE;
+			int minLane = tate.get(0);
+			for (int i = 0; i < tate.size(); i++) {
+				if (min > lastNoteTime[tate.get(i)]) {
+					min = lastNoteTime[tate.get(i)];
+					minLane = tate.get(i);
+				}
+			}
+			random[minLane] = note.get(0);
+			tate.remove((Integer) minLane);
+			note.remove(0);
+		}
 	}
 
 
