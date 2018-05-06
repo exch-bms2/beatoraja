@@ -35,7 +35,7 @@ public class PMcharaLoader {
 	public static final int FACE_UPPER = 3;
 	public static final int FACE_ALL = 4;
 	public static final int SELECT_CG = 5;
-	
+	private final int NO_VALUE = -1;
 	private final int CharBMPIndex = 0;
 	private final int CharTexIndex = 2;
 	private final int CharFaceIndex = 4;
@@ -103,6 +103,7 @@ public class PMcharaLoader {
 		try (BufferedReader br = new BufferedReader(
 			new InputStreamReader(new FileInputStream(chp), "MS932"));) {
 			String line;
+			PatternDataAdd patternDataAdd = new PatternDataAdd();
 			while ((line = br.readLine()) != null) {
 				if (line.startsWith("#") ) {
 					String[] str = line.split("\t", -1);
@@ -110,14 +111,9 @@ public class PMcharaLoader {
 						List<String> data = PMparseStr(str);
 						if(checkChar(str)) {
 							CharSkinLoader(data, str, usecim, chp);
-						}
-						else if(str[0].equalsIgnoreCase("#Patern") || str[0].equalsIgnoreCase("#Pattern")) {
-							patternData.get(0).add(line);
-						} else if(str[0].equalsIgnoreCase("#Texture")) {
-							patternData.get(1).add(line);
-						} else if(str[0].equalsIgnoreCase("#Layer")) {
-
-							patternData.get(2).add(line);
+						} 
+						else if(patternDataAdd.getType(str[0])) {
+							patternData.get(patternDataAdd.addType(str[0])).add(line);
 						} else if(str[0].equalsIgnoreCase("#Flame") || str[0].equalsIgnoreCase("#Frame")) {
 							if(data.size() > 2) {
 								if(PMparseInt(data.get(1)) >= 0 && PMparseInt(data.get(1)) < frame.length) frame[PMparseInt(data.get(1))] = PMparseInt(data.get(2));
