@@ -208,21 +208,7 @@ public class LaneShuffleModifier extends PatternModifier{
 		for (TimeLine tl : model.getAllTimeLines()) {
 			if (tl.existNote()) {
 				//LN
-				for (int i = 0; i < lanes; i++) {
-					Note n = tl.getNote(i);
-					if (n instanceof LongNote) {
-						LongNote ln2 = (LongNote) n;
-						if (ln2.isEnd() && tl.getTime() == endLnNoteTime[i]) {
-							ln[i] = -1;
-							endLnNoteTime[i] = -1;
-						} else {
-							ln[i] = i;
-							if (!ln2.isEnd()) {
-								endLnNoteTime[i] = ln2.getPair().getTime();
-							}
-						}
-					}
-				}
+				Set_LN(tl);
 				
 				List<Integer> noteLane = new ArrayList<Integer>(keys.length);
 				for (int i = 0; i < lanes; i++) {
@@ -241,6 +227,24 @@ public class LaneShuffleModifier extends PatternModifier{
 						pattern += (int) Math.pow(2, noteLane.get(i));
 					}
 					originalPatternList.add((Integer) pattern);
+				}
+			}
+		}
+	}
+	
+	private void Set_LN(TimeLine tl) {
+		for (int i = 0; i < lanes; i++) {
+			Note n = tl.getNote(i);
+			if (n instanceof LongNote) {
+				LongNote ln2 = (LongNote) n;
+				if (ln2.isEnd() && tl.getTime() == endLnNoteTime[i]) {
+					ln[i] = -1;
+					endLnNoteTime[i] = -1;
+				} else {
+					ln[i] = i;
+					if (!ln2.isEnd()) {
+						endLnNoteTime[i] = ln2.getPair().getTime();
+					}
 				}
 			}
 		}
