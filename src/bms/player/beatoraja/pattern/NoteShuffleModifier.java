@@ -46,7 +46,7 @@ public class NoteShuffleModifier extends PatternModifier {
 	 */
 	public static final int SEVEN_TO_NINE = 100;
 
-	private int type;
+	private int shuffleType;
 	/**
 	 * 轝▲겗TimeLine罌쀥뒥�늽(SPIRAL�뵪)
 	 */
@@ -59,7 +59,7 @@ public class NoteShuffleModifier extends PatternModifier {
 
 	public NoteShuffleModifier(int type) {
 		super(type >= ALL_SCR ? 1 : 0);
-		this.type = type;
+		this.shuffleType = type;
 	}
 
 	/**
@@ -96,7 +96,7 @@ public class NoteShuffleModifier extends PatternModifier {
 				}
 				int[] keys;
 				
-				switch (type) {
+				switch (shuffleType) {
 				case S_RANDOM:
 					keys = getKeys(mode, false);
 					if(mode == Mode.POPN_9K)
@@ -560,7 +560,7 @@ public class NoteShuffleModifier extends PatternModifier {
 		// �깕�꺖�깂�걣�걗�굥�꺃�꺖�꺍�굮潁��ｆ돀�걣�쇇�뵟�걲�굥�꺃�꺖�꺍�겓�빓�걚�젂�겓�뀓營�
 		while (!(noteLane.isEmpty() || mainRendaLane.isEmpty())) {
 			int maxRenda = Integer.MIN_VALUE;
-		
+
 			for (int i = 0; i < mainRendaLane.size(); i++) 
 				if (maxRenda < laneRendaCount[mainRendaLane.get(i)])
 					maxRenda = laneRendaCount[mainRendaLane.get(i)];
@@ -683,7 +683,6 @@ public class NoteShuffleModifier extends PatternModifier {
 					break;
 			}
 		}
-
 		return result;
 	}
 
