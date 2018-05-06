@@ -13,28 +13,54 @@ import bms.model.Note;
 import bms.model.TimeLine;
 
 
-public class LaneShuffleModifier extends PatternModifier {
+public class LaneShuffleModifier extends PatternModifier{
 
-	
 	private int[] random;
 	
 	private int type;
 	
+	private int[] result;
+	
+	private int[] keys;
+	
+	private int lanes;
+	private int[] ln;
+	private int[] endLnNoteTime;
+	private int max = 0;
+	private boolean isImpossible = false;
+	
+	
+	private List<Integer> originalPatternList = new ArrayList<Integer>(); 
+	private List<List<Integer>> kouhoPatternList = new ArrayList<List<Integer>>();
+	
+	
 	public static final int MIRROR = 0;
-	
+	/**
+	 * �꺆�꺖�깇�꺖�깉
+	 */
 	public static final int R_RANDOM = 1;
-	
+	/**
+	 * �꺀�꺍���깲
+	 */
 	public static final int RANDOM = 2;
-	
+	/**
+	 * �궚�꺆�궧
+	 */
 	public static final int CROSS = 3;
-	
+	/**
+	 * �궧�궚�꺀�긿�긽�꺃�꺖�꺍�굮�맜���꺀�꺍���깲
+	 */
 	public static final int RANDOM_EX = 4;
-	
+	/**
+	 * 1P-2P�굮�뀯�굦�쎘�걟�굥
+	 */
 	public static final int FLIP = 5;
-	
+	/**
+	 * 1P�겗鈺쒒씊�굮2P�겓�궠�깞�꺖�걲�굥
+	 */
 	public static final int BATTLE = 6;
 	
-	private int[] result;
+	
 
 	public LaneShuffleModifier(int type) {
 		super(type == RANDOM_EX ? 1 : 0);
@@ -43,7 +69,6 @@ public class LaneShuffleModifier extends PatternModifier {
 	
 	private void makeRandom(BMSModel model) {
 		Mode mode = model.getMode();
-		int[] keys;
 		switch (type) {
 		case MIRROR:
 			keys = getKeys(mode, false);
@@ -96,25 +121,22 @@ public class LaneShuffleModifier extends PatternModifier {
 		}
 	}
 
-
-	private int[] noMurioshiLaneShuffle(BMSModel model) {
+	public int[] noMurioshiLaneShuffle(BMSModel model) {
 		
 		//Set value to be used this method
 		Mode mode = model.getMode();
-		int[] keys;
 		keys = getKeys(mode, false);
-		int lanes = mode.key;
-		int[] ln = new int[lanes];
-		int[] endLnNoteTime = new int[lanes];
-		int max = 0;
+		lanes = mode.key;
+		ln = new int[lanes];
+		endLnNoteTime = new int[lanes];
+		
 		for (int key : keys) {
 			max = Math.max(max, key);
 		}
-		boolean isImpossible = false;
-		List<Integer> originalPatternList = new ArrayList<Integer>(); 
+		
 		Arrays.fill(ln, -1);
 		Arrays.fill(endLnNoteTime, -1);
-		List<List<Integer>> kouhoPatternList = new ArrayList<List<Integer>>();
+		
 		
 		//Initialize All value associated with LN
 		Init_Ln(model, lanes, keys, ln, endLnNoteTime, isImpossible, originalPatternList);
@@ -131,8 +153,7 @@ public class LaneShuffleModifier extends PatternModifier {
 	@Override
 	public List<PatternModifyLog> modify(BMSModel model) {
 		List<PatternModifyLog> log = new ArrayList();
-		makeRandom(model);
-		int lanes = model.getMode().key;
+		lanes = model.getMode().key;
 		TimeLine[] timelines = model.getAllTimeLines();
 		for (int index = 0; index < timelines.length; index++) {
 			final TimeLine tl = timelines[index];
@@ -265,9 +286,15 @@ public class LaneShuffleModifier extends PatternModifier {
 											if(searchLaneFlag[searchLane[7]]) continue;
 											searchLaneFlag[searchLane[7]] = true;
 											for(searchLane[8]=0;searchLane[8]<9;searchLane[8]++) {
+												
 												if(searchLaneFlag[searchLane[8]] || (searchLane[0]==0&&searchLane[1]==1&&searchLane[2]==2&&searchLane[3]==3&&searchLane[4]==4&&searchLane[5]==5&&searchLane[6]==6&&searchLane[7]==7&&searchLane[8]==8)
 																				 || (searchLane[0]==8&&searchLane[1]==7&&searchLane[2]==6&&searchLane[3]==5&&searchLane[4]==4&&searchLane[5]==3&&searchLane[6]==2&&searchLane[7]==1&&searchLane[8]==0)) continue; 
 												boolean murioshiFlag = false;
+												kouhoPatternList.add(new ArrayList<Integer>());
+												for(int i=0;i<9;i++) {
+													kouhoPatternList.get(kouhoPatternList.size()-1).add(searchLane[i]);
+												}
+												
 												for(int i=0;i<originalPatternList.size();i++) {
 													tempPattern.clear();
 													for(int j=0;j<9;j++) {
@@ -289,12 +316,7 @@ public class LaneShuffleModifier extends PatternModifier {
 														break;
 													}
 												}
-												if(!murioshiFlag) {
-													kouhoPatternList.add(new ArrayList<Integer>());
-													for(int i=0;i<9;i++) {
-														kouhoPatternList.get(kouhoPatternList.size()-1).add(searchLane[i]);
-													}
-												}
+												
 											}
 											searchLaneFlag[searchLane[7]] = false;
 										}
