@@ -32,11 +32,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.portaudio.DeviceInfo;
 
 import bms.model.Mode;
-import bms.player.beatoraja.ControllerConfig;
 import bms.player.beatoraja.audio.PortAudioDriver;
 import bms.player.beatoraja.ir.IRConnection;
 import bms.player.beatoraja.play.JudgeAlgorithm;
 import bms.player.beatoraja.play.TargetProperty;
+import bms.player.beatoraja.playmode.ControllerConfig;
 import bms.player.beatoraja.skin.SkinHeader;
 import bms.player.beatoraja.skin.SkinType;
 import bms.player.beatoraja.song.SQLiteSongDatabaseAccessor;

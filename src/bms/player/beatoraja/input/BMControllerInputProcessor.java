@@ -5,11 +5,12 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.logging.Logger;
 
-import bms.player.beatoraja.ControllerConfig;
 import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.ControllerListener;
 import com.badlogic.gdx.controllers.PovDirection;
 import com.badlogic.gdx.math.Vector3;
+
+import bms.player.beatoraja.playmode.ControllerConfig;
 
 /**
  * 弱귞뵪�궠�꺍�깉�꺆�꺖�꺀�꺖�뀯�뒟�눇�릤�뵪�궚�꺀�궧

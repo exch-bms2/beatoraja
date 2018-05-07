@@ -1,4 +1,4 @@
-package bms.player.beatoraja;
+package bms.player.beatoraja.playmode;
 
 import java.util.Arrays;
 
@@ -8,7 +8,7 @@ import bms.player.beatoraja.input.BMControllerInputProcessor.BMKeys;
 
 
 /**
- * �궠�꺍�깉�꺆�꺖�꺀�꺖鼇�若싧츣獰⑴뵪�궚�꺀�궧
+ * �궠�꺍�깉�꺆�꺖��?�꺖鼇�若싧츣獰?��뵪�궚��?�궧
  *
  * @author exch
  */
@@ -28,7 +28,7 @@ public class ControllerConfig {
     private boolean jkoc_hack = false;
 
     /**
-     * �궋�깏�꺆�궛�궧�궚�꺀�긿�긽�굮�닶�뵪�걲�굥�걢(INFINITAS�궠�꺍�깉�꺆�꺖�꺀�겗�졃�릦true)
+     * �궋�깏�꺆�궛�궧�궚��?�긿�긽�굮�닶�뵪�걲�굥�걢(INFINITAS�궠�꺍�깉�꺆�꺖��?�겗�졃�릦true)
      */
     private boolean analogScratch = false;
 

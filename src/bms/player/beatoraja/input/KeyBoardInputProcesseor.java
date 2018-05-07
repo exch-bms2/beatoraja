@@ -2,8 +2,9 @@ package bms.player.beatoraja.input;
 
 import java.util.Arrays;
 
-import bms.player.beatoraja.KeyboardConfig;
 import bms.player.beatoraja.Resolution;
+import bms.player.beatoraja.playmode.KeyboardConfig;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.utils.IntArray;

@@ -9,10 +9,9 @@ import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
-import bms.player.beatoraja.KeyboardConfig;
-import bms.player.beatoraja.ControllerConfig;
-import bms.player.beatoraja.MidiConfig;
 import bms.player.beatoraja.input.BMSPlayerInputDevice.Type;
+import bms.player.beatoraja.playmode.*;
+import bms.player.beatoraja.PlayModeConfig;
 
 import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.Controllers;

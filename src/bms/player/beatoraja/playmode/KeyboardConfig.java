@@ -1,4 +1,4 @@
-package bms.player.beatoraja;
+package bms.player.beatoraja.playmode;
 
 import java.util.Arrays;
 
@@ -8,7 +8,7 @@ import bms.model.Mode;
 
 
 /**
- * �궘�꺖�깭�꺖�깋鼇�若싧츣獰⑴뵪�궚�꺀�궧
+ * �궘�꺖�깭�꺖�깋鼇�若싧츣獰?��뵪�궚��?�궧
  *
  * @author exch
  */
