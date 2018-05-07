@@ -10,7 +10,7 @@ import bms.player.beatoraja.PlayerConfig;
 import com.badlogic.gdx.utils.IntArray;
 
 /**
- * 譜面オプションの抽象クラス
+ * 鈺쒒씊�궕�깤�궥�깾�꺍�겗�듊穩▲궚�꺀�궧
  *
  * @author exch
  */
@@ -36,12 +36,12 @@ public abstract class PatternModifier {
 	public abstract List<PatternModifyLog> modify(BMSModel model);
 
 	/**
-	 * 譜面変更ログの通りに譜面オプションをかける
+	 * 鈺쒒씊鸚됪쎍�꺆�궛�겗�싥굤�겓鈺쒒씊�궕�깤�궥�깾�꺍�굮�걢�걨�굥
 	 *
 	 * @param model
-	 *            譜面オプションをかける対象のBMSModel
+	 *            鈺쒒씊�궕�깤�궥�깾�꺍�굮�걢�걨�굥野얕괌�겗BMSModel
 	 * @param log
-	 *            譜面変更ログ
+	 *            鈺쒒씊鸚됪쎍�꺆�궛
 	 */
 	public static void modify(BMSModel model, List<PatternModifyLog> log) {
 		for (TimeLine tl : model.getAllTimeLines()) {
@@ -138,13 +138,13 @@ public abstract class PatternModifier {
 			pm = new DummyModifier();
 			break;
 		case 1:
-			pm = new LaneShuffleModifier(LaneShuffleModifier.MIRROR);
+			pm = (PatternModifier) new LaneShuffleModifier(LaneShuffleModifier.MIRROR);
 			break;
 		case 2:
-			pm = new LaneShuffleModifier(LaneShuffleModifier.RANDOM);
+			pm = (PatternModifier) new LaneShuffleModifier(LaneShuffleModifier.RANDOM);
 			break;
 		case 3:
-			pm = new LaneShuffleModifier(LaneShuffleModifier.R_RANDOM);
+			pm = (PatternModifier) new LaneShuffleModifier(LaneShuffleModifier.R_RANDOM);
 			break;
 		case 4:
 			pm = new NoteShuffleModifier(NoteShuffleModifier.S_RANDOM);
@@ -159,7 +159,7 @@ public abstract class PatternModifier {
 			pm = new NoteShuffleModifier(NoteShuffleModifier.ALL_SCR);
 			break;
 		case 8:
-			pm = new LaneShuffleModifier(LaneShuffleModifier.RANDOM_EX);
+			pm = (PatternModifier) new LaneShuffleModifier(LaneShuffleModifier.RANDOM_EX);
 			break;
 		case 9:
 			pm = new NoteShuffleModifier(NoteShuffleModifier.S_RANDOM_EX);

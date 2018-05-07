@@ -14,13 +14,13 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 
 /**
- * LR2セレクトスキンローダー
+ * LR2�궩�꺃�궚�깉�궧�궘�꺍�꺆�꺖���꺖
  *
  * @author exch
  */
 public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 
-	// TODO コピペのリファクタリング
+	// TODO �궠�깞�깪�겗�꺁�깢�궊�궚�궭�꺁�꺍�궛
 
 	private SkinBar skinbar = new SkinBar(1);
 
@@ -32,7 +32,7 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 	private SkinBPMGraph bpmgraphobj;
 
 	/**
-	 * LR2のLAMP IDとの対応
+	 * LR2�겗LAMP ID�겏�겗野얍퓶
 	 * 0:NO PLAY, 1:FAILED, 2:EASY, 3:NORMAL, 4:HARD, 5:EXH, 6:FC, 7:PERFECT, 8:MAX, 9:ASSIST, 10:L-ASSIST
 	 */
 	private final int[][] lampg = { { 0 }, { 1 }, { 4, 2, 3}, { 5 }, { 6, 7 }, {7}, { 8, 9, 10 }, {9}, {10}, {2}, {3} };
@@ -81,8 +81,9 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 					values[4] += values[6];
 					values[6] = -values[6];
 				}
-				skinbar.makeBarImages(false, values[1]).setDestination(values[2], values[3] * dstw / srcw,
-						dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw, values[6] * dsth / srch,
+				SkinDestinationSize dstSize = new SkinDestinationSize(values[3] * dstw / srcw,
+						dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw, values[6] * dsth / srch);
+				skinbar.makeBarImages(false, values[1]).setDestination(values[2], dstSize,
 						values[7], values[8], values[9], values[10], values[11], values[12], values[13], values[14],
 						values[15], values[16], values[17], values[18], values[19], values[20], readOffset(str, 21));
 			}
@@ -99,8 +100,9 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 					values[4] += values[6];
 					values[6] = -values[6];
 				}
-				skinbar.makeBarImages(true, values[1]).setDestination(values[2], values[3] * dstw / srcw,
-						dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw, values[6] * dsth / srch,
+				SkinDestinationSize dstSize = new SkinDestinationSize(values[3] * dstw / srcw,
+						dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw, values[6] * dsth / srch);
+				skinbar.makeBarImages(true, values[1]).setDestination(values[2], dstSize,
 						values[7], values[8], values[9], values[10], values[11], values[12], values[13], values[14],
 						values[15], values[16], values[17], values[18], values[19], values[20], readOffset(str, 21));
 			}
@@ -191,8 +193,9 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 			public void execute(String[] str) {
 				int[] values = parseInt(str);
 				if (skinbar.getBarlevel()[values[1]] != null) {
-					skinbar.getBarlevel()[values[1]].setDestination(values[2], values[3] * dstw / srcw,
-							-(values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw, values[6] * dsth / srch,
+					SkinDestinationSize dstSize = new SkinDestinationSize(values[3] * dstw / srcw,
+							dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw, values[6] * dsth / srch);
+					skinbar.getBarlevel()[values[1]].setDestination(values[2], dstSize,
 							values[7], values[8], values[9], values[10], values[11], values[12], values[13], values[14],
 							values[15], values[16], values[17], values[18], values[19], values[20], readOffset(str, 21));
 				}
@@ -227,9 +230,9 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 							values[4] += values[6];
 							values[6] = -values[6];
 						}
-						skinbar.getLamp()[lamps[i]].setDestination(values[2], values[3] * dstw / srcw,
-								-(values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
-								values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
+						SkinDestinationSize dstSize = new SkinDestinationSize(values[3] * dstw / srcw,
+								dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw, values[6] * dsth / srch);
+						skinbar.getLamp()[lamps[i]].setDestination(values[2], dstSize, values[7], values[8], values[9], values[10], values[11],
 								values[12], values[13], values[14], values[15], values[16], values[17], values[18],
 								values[19], values[20], readOffset(str, 21));
 					} else {
@@ -266,9 +269,10 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 							values[4] += values[6];
 							values[6] = -values[6];
 						}
-						skinbar.getPlayerLamp()[lamps[i]].setDestination(values[2], values[3] * dstw / srcw,
-								-(values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
-								values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
+						SkinDestinationSize dstSize = new SkinDestinationSize(values[3] * dstw / srcw,
+								dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw, values[6] * dsth / srch);
+						skinbar.getPlayerLamp()[lamps[i]].setDestination(values[2],dstSize
+								, values[7], values[8], values[9], values[10], values[11],
 								values[12], values[13], values[14], values[15], values[16], values[17], values[18],
 								values[19], values[20], readOffset(str, 21));
 					} else {
@@ -305,9 +309,10 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 							values[4] += values[6];
 							values[6] = -values[6];
 						}
-						skinbar.getRivalLamp()[lamps[i]].setDestination(values[2], values[3] * dstw / srcw,
-								-(values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
-								values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
+						SkinDestinationSize dstSize = new SkinDestinationSize(values[3] * dstw / srcw,
+								dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw, values[6] * dsth / srch);
+						skinbar.getRivalLamp()[lamps[i]].setDestination(values[2], dstSize
+								, values[7], values[8], values[9], values[10], values[11],
 								values[12], values[13], values[14], values[15], values[16], values[17], values[18],
 								values[19], values[20], readOffset(str, 21));
 					} else {
@@ -316,7 +321,7 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 				}
 			}
 		});
-		// 拡張定義。段位のトロフィー画像を定義する。0:銅、1:銀、2:金
+		// �떋凉드츣獰⒲�귝�듕퐤�겗�깉�꺆�깢�궍�꺖�뵽�깗�굮若싩쑴�걲�굥��0:�뒇��1:����2:�뇫
 		addCommandWord(new CommandWord("SRC_BAR_TROPHY") {
 
 			@Override
@@ -343,16 +348,17 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 						values[4] += values[6];
 						values[6] = -values[6];
 					}
-					skinbar.getTrophy()[values[1]].setDestination(values[2], values[3] * dstw / srcw,
-							-(values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
-							values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
+					SkinDestinationSize dstSize = new SkinDestinationSize(values[3] * dstw / srcw,
+							dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw, values[6] * dsth / srch);
+					skinbar.getTrophy()[values[1]].setDestination(values[2], dstSize
+							, values[7], values[8], values[9], values[10], values[11],
 							values[12], values[13], values[14], values[15], values[16], values[17], values[18],
 							values[19], values[20], readOffset(str, 21));
 				}
 			}
 		});
 
-		// 拡張定義。楽曲バーのラベルを定義する。0:LNあり, 1:ランダム分岐あり、2:地雷あり
+		// �떋凉드츣獰⒲�귝�썸쎊�깘�꺖�겗�꺀�깧�꺂�굮若싩쑴�걲�굥��0:LN�걗�굤, 1:�꺀�꺍���깲�늽略먦걗�굤��2:�쑑�쎐�걗�굤
 		addCommandWord(new CommandWord("SRC_BAR_LABEL") {
 
 			@Override
@@ -379,15 +385,16 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 						values[4] += values[6];
 						values[6] = -values[6];
 					}
-					skinbar.getLabel()[values[1]].setDestination(values[2], values[3] * dstw / srcw,
-							-(values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
-							values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
+					SkinDestinationSize dstSize = new SkinDestinationSize(values[3] * dstw / srcw,
+							dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw, values[6] * dsth / srch);
+					skinbar.getLabel()[values[1]].setDestination(values[2], dstSize
+							, values[7], values[8], values[9], values[10], values[11],
 							values[12], values[13], values[14], values[15], values[16], values[17], values[18],
 							values[19], values[20], readOffset(str, 21));
 				}
 			}
 		});
-		// 拡張定義。段位のトロフィー画像を定義する。0:銅、1:銀、2:金
+		// �떋凉드츣獰⒲�귝�듕퐤�겗�깉�꺆�깢�궍�꺖�뵽�깗�굮若싩쑴�걲�굥��0:�뒇��1:����2:�뇫
 		addCommandWord(new CommandWord("SRC_BAR_GRAPH") {
 
 			@Override
@@ -422,9 +429,10 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 						values[4] += values[6];
 						values[6] = -values[6];
 					}
-					skinbar.getGraph().setDestination(values[2], values[3] * dstw / srcw,
-							-(values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
-							values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
+					SkinDestinationSize dstSize = new SkinDestinationSize(values[3] * dstw / srcw,
+							dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw, values[6] * dsth / srch);
+					skinbar.getGraph().setDestination(values[2], dstSize
+							, values[7], values[8], values[9], values[10], values[11],
 							values[12], values[13], values[14], values[15], values[16], values[17], values[18],
 							values[19], values[20], readOffset(str, 21));
 				}
@@ -447,7 +455,8 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 				int[] values = parseInt(str);
 				gauge.x = values[3];
 				gauge.y = src.height - values[4];
-				skin.setDestination(noteobj, values[2], gauge.x, gauge.y, gauge.width, gauge.height, values[7], values[8],
+				SkinDestinationSize dstSize = new SkinDestinationSize(gauge.x, gauge.y, gauge.width, gauge.height);
+				skin.setDestination(noteobj, values[2], dstSize, values[7], values[8],
 						values[9], values[10], values[11], values[12], values[13], values[14], values[15],
 						values[16], values[17], values[18], values[19], values[20], readOffset(str, 21));
 			}
@@ -469,7 +478,8 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 				int[] values = parseInt(str);
 				gauge.x = values[3];
 				gauge.y = src.height - values[4];
-				skin.setDestination(bpmgraphobj, values[2], gauge.x, gauge.y, gauge.width, gauge.height, values[7], values[8],
+				SkinDestinationSize dstSize = new SkinDestinationSize(gauge.x, gauge.y, gauge.width, gauge.height);
+				skin.setDestination(bpmgraphobj, values[2], dstSize, values[7], values[8],
 						values[9], values[10], values[11], values[12], values[13], values[14], values[15],
 						values[16], values[17], values[18], values[19], values[20], readOffset(str, 21));
 			}
@@ -495,8 +505,9 @@ public class LR2SelectSkinLoader extends LR2SkinCSVLoader<MusicSelectSkin> {
 			@Override
 			public void execute(String[] str) {
 				int[] values = parseInt(str);
-				skinbar.getText()[values[1]].setDestination(values[2], values[3] * dstw / srcw,
-						- (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw, values[6] * dsth / srch, values[7],
+				SkinDestinationSize dstSize = new SkinDestinationSize( values[3] * dstw / srcw,
+						- (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw, values[6] * dsth / srch);
+				skinbar.getText()[values[1]].setDestination(values[2],dstSize, values[7],
 						values[8], values[9], values[10], values[11], values[12], values[13], values[14], values[15],
 						values[16], values[17], values[18], values[19], values[20], readOffset(str, 21));
 			}

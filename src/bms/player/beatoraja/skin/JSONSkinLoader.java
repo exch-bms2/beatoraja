@@ -909,7 +909,7 @@ public class JSONSkinLoader extends SkinLoader{
 					//POMYU chara
 					for (PMchara chara : sk.pmchara) {
 						if (dst.id.equals(chara.id)) {
-							//type 0:プレイ 1:キャラ背景 2:名前画像 3:ハリアイ画像(上半身のみ) 4:ハリアイ画像(全体) 5:キャラアイコン 6:NEUTRAL 7:FEVER 8:GREAT 9:GOOD 10:BAD 11:FEVERWIN 12:WIN 13:LOSE 14:OJAMA 15:DANCE
+							//type 0:�깤�꺃�궎 1:�궘�깵�꺀�깒�솺 2:�릫�뎺�뵽�깗 3:�깗�꺁�궋�궎�뵽�깗(訝듿뜇翁ャ겗�겳) 4:�깗�꺁�궋�궎�뵽�깗(�뀲鵝�) 5:�궘�깵�꺀�궋�궎�궠�꺍 6:NEUTRAL 7:FEVER 8:GREAT 9:GOOD 10:BAD 11:FEVERWIN 12:WIN 13:LOSE 14:OJAMA 15:DANCE
 							File imagefile = getSrcIdPath(chara.src, p);
 							if(dst.dst.length > 0 && imagefile != null) {
 								int color = chara.color == 2 ? 2 : 1;
@@ -920,18 +920,24 @@ public class JSONSkinLoader extends SkinLoader{
 									else option[i] = 0;
 								}
 								if(chara.type == 0) {
-									skin.PMcharaLoader(usecim, imagefile, chara.type, color,
-											dst.dst[0].x, dst.dst[0].y, dst.dst[0].w, dst.dst[0].h,
-											side, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, dst.offset);
+									SkinOption skinOption = new SkinOption(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, dst.offset);
+									SkinDestinationSize skinSize = new SkinDestinationSize(dst.dst[0].x, dst.dst[0].y, dst.dst[0].w, dst.dst[0].h);
+									PMcharaLoader pmCharaLoader = new PMcharaLoader(skin);
+									pmCharaLoader.Load(usecim, imagefile, chara.type, color,
+											skinSize, side, Integer.MIN_VALUE, skinOption );
 								} else if(chara.type >= 1 && chara.type <= 5) {
-									SkinImage si = skin.PMcharaLoader(usecim, imagefile, chara.type, color,
-											Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE,
-											Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE);
+									SkinOption skinOption = new SkinOption(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE,  Integer.MIN_VALUE);
+									SkinDestinationSize skinSize = new SkinDestinationSize(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE);
+									PMcharaLoader pmCharaLoader = new PMcharaLoader(skin);
+									SkinImage si = pmCharaLoader.Load(usecim, imagefile, chara.type, color,
+											skinSize,Integer.MIN_VALUE, Integer.MIN_VALUE, skinOption );
 									obj = si;
 								} else if(chara.type >= 6 && chara.type <= 15) {
-									skin.PMcharaLoader(usecim, imagefile, chara.type, color,
-											dst.dst[0].x, dst.dst[0].y, dst.dst[0].w, dst.dst[0].h,
-											Integer.MIN_VALUE, dst.timer, option[0], option[1], option[2], dst.offset);
+									SkinOption skinOption = new SkinOption( option[0], option[1], option[2], dst.offset);
+									SkinDestinationSize skinSize = new SkinDestinationSize(dst.dst[0].x, dst.dst[0].y, dst.dst[0].w, dst.dst[0].h);
+									PMcharaLoader pmCharaLoader = new PMcharaLoader(skin);
+									SkinImage si = pmCharaLoader.Load(usecim, imagefile, chara.type, color,
+											skinSize,Integer.MIN_VALUE, dst.timer, skinOption );
 								}
 							}
 							break;
@@ -1007,7 +1013,8 @@ public class JSONSkinLoader extends SkinLoader{
 				a.g = (a.g == Integer.MIN_VALUE ? prev.g : a.g);
 				a.b = (a.b == Integer.MIN_VALUE ? prev.b : a.b);
 			}
-			skin.setDestination(obj, a.time, a.x, a.y, a.w, a.h, a.acc, a.a, a.r, a.g, a.b, dst.blend, dst.filter,
+			SkinDestinationSize dstSize = new SkinDestinationSize( a.x, a.y, a.w, a.h);
+			skin.setDestination(obj, a.time,dstSize, a.acc, a.a, a.r, a.g, a.b, dst.blend, dst.filter,
 					a.angle, dst.center, dst.loop, dst.timer, dst.op);
 			if (dst.mouseRect != null) {
 				skin.setMouseRect(obj, dst.mouseRect.x, dst.mouseRect.y, dst.mouseRect.w, dst.mouseRect.h);
@@ -1041,7 +1048,7 @@ public class JSONSkinLoader extends SkinLoader{
 						// isMovie = true;
 						// break;
 						// } catch (Throwable e) {
-						// Logger.getGlobal().warning("BGAファイル読み込み失敗。" +
+						// Logger.getGlobal().warning("BGA�깢�궊�궎�꺂沃��겳渦쇈겳鸚길븮��" +
 						// e.getMessage());
 						// e.printStackTrace();
 						// }

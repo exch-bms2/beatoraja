@@ -34,8 +34,8 @@ public class SkinJudge extends SkinObject {
         this.count = count;
         this.index = index;
         this.shift = shift;
-        
-        this.setDestination(0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, new int[0]);
+        SkinDestinationSize dstSize = new SkinDestinationSize(0,0,0,0);
+        this.setDestination(0, dstSize, 0, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, new int[0]);
     }
 
     public void setJudge(SkinImage[] judge) {

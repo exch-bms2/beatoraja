@@ -2,15 +2,16 @@ package bms.player.beatoraja.input;
 
 import java.util.Arrays;
 
-import bms.player.beatoraja.PlayModeConfig.KeyboardConfig;
 import bms.player.beatoraja.Resolution;
+import bms.player.beatoraja.playmode.KeyboardConfig;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.utils.IntArray;
 import com.badlogic.gdx.Input.Keys;
 
 /**
- * キーボード入力処理用クラス
+ * �궘�꺖�깭�꺖�깋�뀯�뒟�눇�릤�뵪�궚�꺀�궧
  * 
  * @author exch
  */
@@ -26,21 +27,21 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 			Keys.BACKSLASH, Keys.SHIFT_RIGHT, Keys.CONTROL_RIGHT };
 	private int[] control = new int[] { Keys.Q, Keys.W };
 	/**
-	 * 数字
+	 * �빊耶�
 	 */
 	private final int[] numbers = new int[] { Keys.NUM_0, Keys.NUM_1, Keys.NUM_2, Keys.NUM_3, Keys.NUM_4, Keys.NUM_5,
 			Keys.NUM_6, Keys.NUM_7, Keys.NUM_8, Keys.NUM_9 };
 	/**
-	 * カーソル
+	 * �궖�꺖�궫�꺂
 	 */
 	private final int[] cover = new int[] { Keys.UP, Keys.DOWN, Keys.LEFT, Keys.RIGHT };
 	/**
-	 * 機能
+	 * 艅잒꺗
 	 */
 	private final int[] function = new int[] { Keys.F1, Keys.F2, Keys.F3, Keys.F4, Keys.F5, Keys.F6, Keys.F7, Keys.F8,
 			Keys.F9, Keys.F10, Keys.F11, Keys.F12 };
 	/**
-	 * 終了キー
+	 * 永귚틙�궘�꺖
 	 */
 	private int exit = Keys.ESCAPE;
 
@@ -50,27 +51,27 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 
 	private final IntArray reserved;
 	/**
-	 * 最後に押されたキー
+	 * ��孃뚣겓�듉�걬�굦�걼�궘�꺖
 	 */
 	private int lastPressedKey = -1;
 
 	private boolean enable = true;
 
 	/**
-	 * 画面の解像度。マウスの入力イベント処理で使用
+	 * �뵽�씊�겗鰲ｅ깗佯╉�귙깯�궑�궧�겗�뀯�뒟�궎�깧�꺍�깉�눇�릤�겎鵝욜뵪
 	 */
 	private Resolution resolution;
 
 	/**
-	 * 各キーのon/off状態
+	 * �릢�궘�꺖�겗on/off�듁�뀑
 	 */
 	private boolean[] keystate = new boolean[256];
 	/**
-	 * 各キーの状態変化時間
+	 * �릢�궘�꺖�겗�듁�뀑鸚됧뙑�셽�뼋
 	 */
 	private long[] keytime = new long[256];
 	/**
-	 * キーの最少入力感覚
+	 * �궘�꺖�겗��弱묈뀯�뒟�꽏誤�
 	 */
 	private int duration;
 
@@ -89,7 +90,7 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 	}
 
 	public void setConfig(KeyboardConfig config) {
-		this.keys = config.getKeyAssign().clone();
+		this.keys = config.getKeys().clone();
 		this.control = new int[] { config.getStart(), config.getSelect() };
 	}
 
@@ -130,8 +131,7 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 				final boolean pressed = Gdx.input.isKeyPressed(cover[i]);
 				if (pressed != keystate[cover[i]]) {
 					keystate[cover[i]] = pressed;
-					this.bmsPlayerInputProcessor.cursor[i] = pressed;
-					this.bmsPlayerInputProcessor.cursortime[i] = presstime;
+					this.bmsPlayerInputProcessor.setCursor(i, pressed, presstime);
 				}
 			}
 
@@ -139,8 +139,7 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 				final boolean pressed = Gdx.input.isKeyPressed(numbers[i]);
 				if (pressed != keystate[numbers[i]]) {
 					keystate[numbers[i]] = pressed;
-					this.bmsPlayerInputProcessor.numberstate[i] = pressed;
-					this.bmsPlayerInputProcessor.numtime[i] = presstime;
+					this.bmsPlayerInputProcessor.setNumberState(i, pressed, presstime);
 				}
 			}
 
@@ -148,8 +147,7 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 				final boolean pressed = Gdx.input.isKeyPressed(function[i]);
 				if (pressed != keystate[function[i]]) {
 					keystate[function[i]] = pressed;
-					this.bmsPlayerInputProcessor.functionstate[i] = pressed;
-					this.bmsPlayerInputProcessor.functiontime[i] = presstime;
+					this.bmsPlayerInputProcessor.setFunction(i, pressed, presstime);
 				}
 			}
 

@@ -132,18 +132,18 @@ public class BMSPlayer extends MainState {
 		boolean isReplayPatternPlay = true;
 		PlayerConfig config = resource.getPlayerConfig();
 		HSReplay = null;
-		if(replay != null && main.getInputProcessor().getKeystate()[1]) {
+		if(replay != null && main.getInputProcessor().getKeystate(1)) {
 			//岳앭춼�걬�굦�걼鈺쒒씊鸚됪쎍�꺆�궛�걢�굢鈺쒒씊�냽�뤎
 			resource.setReplayData(replay);
 			isReplayPatternPlay = true;
-		} else if(replay != null && main.getInputProcessor().getKeystate()[2]) {
+		} else if(replay != null && main.getInputProcessor().getKeystate(2)) {
 			//岳앭춼�걬�굦�걼鈺쒒씊�궕�깤�궥�깾�꺍�꺆�궛�걢�굢鈺쒒씊�궕�깤�궥�깾�꺍�냽�뤎
 			config.setRandom(replay.randomoption);
 			config.setRandom2(replay.randomoption2);
 			config.setDoubleoption(replay.doubleoption);
 			isReplayPatternPlay = true;
 		}
-		if(replay != null && main.getInputProcessor().getKeystate()[4]) {
+		if(replay != null && main.getInputProcessor().getKeystate(4)) {
 			//岳앭춼�걬�굦�걼HS�궕�깤�궥�깾�꺍�꺆�궛�걢�굢HS�궕�깤�궥�깾�꺍�냽�뤎
 			HSReplay = replay;
 			isReplayPatternPlay = true;
@@ -186,14 +186,14 @@ public class BMSPlayer extends MainState {
 
 		Logger.getGlobal().info("�궟�꺖�궦鼇�若�");
 		if(replay != null) {
-			boolean[] keystate = main.getInputProcessor().getKeystate();
-			for(int count = (keystate[5] ? 1 : 0) + (keystate[3] ? 2 : 0);count > 0; count--) {
+			BMSPlayerInputProcessor input = main.getInputProcessor();
+			for(int count = (input.getNumberState(5) ? 1 : 0) + (input.getNumberState(3) ? 2 : 0);count > 0; count--) {
 				if (replay.gauge != GrooveGauge.HAZARD || replay.gauge != GrooveGauge.EXHARDCLASS) {
 					replay.gauge++;
 				}
 			}
 		}
-		if(replay != null && main.getInputProcessor().getKeystate()[5]) {
+		if(replay != null && main.getInputProcessor().getKeystate(5)) {
 			;//; do something
 		}
 		int coursetype = 0;
@@ -815,9 +815,8 @@ public class BMSPlayer extends MainState {
 				gaugelog[i].add(gauge.getValue(i));
 			}
 		}
-		main.switchTimer(TIMER_GAUGE_MAX_1P, g == gauge.getMaxValue());
-
-		if(main.isTimerOn(TIMER_PM_CHARA_1P_NEUTRAL) && main.getNowTime(TIMER_PM_CHARA_1P_NEUTRAL) >= skin.getPMcharaTime(TIMER_PM_CHARA_1P_NEUTRAL - TIMER_PM_CHARA_1P_NEUTRAL) && main.getNowTime(TIMER_PM_CHARA_1P_NEUTRAL) % skin.getPMcharaTime(TIMER_PM_CHARA_1P_NEUTRAL - TIMER_PM_CHARA_1P_NEUTRAL) < 17) {
+		PMcharaLoader pmCharaLoader = new PMcharaLoader(skin);
+		if(main.isTimerOn(TIMER_PM_CHARA_1P_NEUTRAL) && main.getNowTime(TIMER_PM_CHARA_1P_NEUTRAL) >= pmCharaLoader.getPMcharaTime(TIMER_PM_CHARA_1P_NEUTRAL - TIMER_PM_CHARA_1P_NEUTRAL) && main.getNowTime(TIMER_PM_CHARA_1P_NEUTRAL) % pmCharaLoader.getPMcharaTime(TIMER_PM_CHARA_1P_NEUTRAL - TIMER_PM_CHARA_1P_NEUTRAL) < 17) {
 			if(PMcharaLastnotes[0] != notes && judge.getPMcharaJudge() > 0) {
 				if(judge.getPMcharaJudge() == 1 || judge.getPMcharaJudge() == 2) {
 					if(g == gauge.getMaxValue()) main.setTimerOn(TIMER_PM_CHARA_1P_FEVER);
@@ -827,7 +826,7 @@ public class BMSPlayer extends MainState {
 				main.setTimerOff(TIMER_PM_CHARA_1P_NEUTRAL);
 			}
 		}
-		if(main.isTimerOn(TIMER_PM_CHARA_2P_NEUTRAL) && main.getNowTime(TIMER_PM_CHARA_2P_NEUTRAL) >= skin.getPMcharaTime(TIMER_PM_CHARA_2P_NEUTRAL - TIMER_PM_CHARA_1P_NEUTRAL) && main.getNowTime(TIMER_PM_CHARA_2P_NEUTRAL) % skin.getPMcharaTime(TIMER_PM_CHARA_2P_NEUTRAL - TIMER_PM_CHARA_1P_NEUTRAL) < 17) {
+		if(main.isTimerOn(TIMER_PM_CHARA_2P_NEUTRAL) && main.getNowTime(TIMER_PM_CHARA_2P_NEUTRAL) >= pmCharaLoader.getPMcharaTime(TIMER_PM_CHARA_2P_NEUTRAL - TIMER_PM_CHARA_1P_NEUTRAL) && main.getNowTime(TIMER_PM_CHARA_2P_NEUTRAL) % pmCharaLoader.getPMcharaTime(TIMER_PM_CHARA_2P_NEUTRAL - TIMER_PM_CHARA_1P_NEUTRAL) < 17) {
 			if(PMcharaLastnotes[1] != notes && judge.getPMcharaJudge() > 0) {
 				if(judge.getPMcharaJudge() >= 1 && judge.getPMcharaJudge() <= 3) main.setTimerOn(TIMER_PM_CHARA_2P_BAD);
 				else main.setTimerOn(TIMER_PM_CHARA_2P_GREAT);
@@ -835,7 +834,7 @@ public class BMSPlayer extends MainState {
 			}
 		}
 		for(int i = TIMER_PM_CHARA_1P_FEVER; i <= TIMER_PM_CHARA_2P_BAD; i++) {
-			if(i != TIMER_PM_CHARA_2P_NEUTRAL && main.isTimerOn(i) && main.getNowTime(i) >= skin.getPMcharaTime(i - TIMER_PM_CHARA_1P_NEUTRAL)) {
+			if(i != TIMER_PM_CHARA_2P_NEUTRAL && main.isTimerOn(i) && main.getNowTime(i) >= pmCharaLoader.getPMcharaTime(i - TIMER_PM_CHARA_1P_NEUTRAL)) {
 				if(i <= TIMER_PM_CHARA_1P_BAD) {
 					main.setTimerOn(TIMER_PM_CHARA_1P_NEUTRAL);
 					PMcharaLastnotes[0] = notes;
@@ -938,7 +937,7 @@ public class BMSPlayer extends MainState {
 		control.setEnableCursor(false);
 		practice.processInput(input);
 
-		if (input.getKeystate()[0] && resource.mediaLoadFinished() && now > skin.getLoadstart() + skin.getLoadend()
+		if (input.getKeystate(0) && resource.mediaLoadFinished() && now > skin.getLoadstart() + skin.getLoadend()
 				&& now - startpressedtime > 1000) {
 			PracticeProperty property = practice.getPracticeProperty();
 			control.setEnableControl(true);
@@ -1544,3 +1543,4 @@ public class BMSPlayer extends MainState {
 		return nowQuarterNoteTime;
 	}
 }
+
