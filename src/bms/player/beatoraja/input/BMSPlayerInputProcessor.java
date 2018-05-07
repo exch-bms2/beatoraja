@@ -9,9 +9,9 @@ import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
-import bms.player.beatoraja.PlayModeConfig.KeyboardConfig;
-import bms.player.beatoraja.PlayModeConfig.ControllerConfig;
-import bms.player.beatoraja.PlayModeConfig.MidiConfig;
+import bms.player.beatoraja.KeyboardConfig;
+import bms.player.beatoraja.ControllerConfig;
+import bms.player.beatoraja.MidiConfig;
 import bms.player.beatoraja.input.BMSPlayerInputDevice.Type;
 
 import com.badlogic.gdx.controllers.Controller;
@@ -19,7 +19,7 @@ import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.utils.Array;
 
 /**
- * キーボードやコントローラからの入力を管理するクラス
+ * �궘�꺖�깭�꺖�깋�굜�궠�꺍�깉�꺆�꺖�꺀�걢�굢�겗�뀯�뒟�굮嶸←릤�걲�굥�궚�꺀�궧
  *
  * @author exch
  */
@@ -41,8 +41,8 @@ public class BMSPlayerInputProcessor {
 		// Gdx.input.setInputProcessor(kbinput);
 		List<BMControllerInputProcessor> bminput = new ArrayList<BMControllerInputProcessor>();
 		for (Controller controller : Controllers.getControllers()) {
-			Logger.getGlobal().info("コントローラーを検出 : " + controller.getName());
-			// FIXME:前回終了時のModeからコントローラ設定を復元
+			Logger.getGlobal().info("�궠�꺍�깉�꺆�꺖�꺀�꺖�굮濾쒎눣 : " + controller.getName());
+			// FIXME:�뎺�썮永귚틙�셽�겗Mode�걢�굢�궠�꺍�깉�꺆�꺖�꺀鼇�若싥굮孃⒴뀇
 			ControllerConfig controllerConfig = Stream.of(player.getMode7().getController())
 				.filter(m -> {
 				    try {
@@ -52,7 +52,7 @@ public class BMSPlayerInputProcessor {
 				    }
 				}).findFirst()
 				.orElse(new ControllerConfig());
-			// デバイス名のユニーク化
+			// �깈�깘�궎�궧�릫�겗�깺�깑�꺖�궚�뙑
 			int index = 1;
 			String name = controller.getName();
 			for(BMControllerInputProcessor bm : bminput) {
@@ -210,12 +210,12 @@ public class BMSPlayerInputProcessor {
 	public void setPlayConfig(PlayModeConfig playconfig) {
 		boolean[] exclusive = new boolean[playconfig.getKeyboardConfig().getKeyLength()];
 		
-		// KB, コントローラー, Midiの各ボタンについて排他的処理を実施
+		// KB, �궠�꺍�깉�꺆�꺖�꺀�꺖, Midi�겗�릢�깭�궭�꺍�겓�겇�걚�겍�럲餓뽫쉪�눇�릤�굮若잍뼺
 		int kbcount = countKeyboard(playconfig, exclusive);
 		int cocount = countController(playconfig, exclusive);
 		int micount = countMidi(playconfig, exclusive);
 		
-		// 各デバイスにキーコンフィグをセット
+		// �릢�깈�깘�궎�궧�겓�궘�꺖�궠�꺍�깢�궍�궛�굮�궩�긿�깉
 		// set key configuration on each device
 		kbinput.setConfig(playconfig.getKeyboardConfig());
 		for(int i = 0;i < bminput.length;i++) {
@@ -255,7 +255,7 @@ public class BMSPlayerInputProcessor {
 		int[][] cokeys = new int[playconfig.getController().length][];
 		int cocount = 0;
 		for(int i = 0;i < cokeys.length;i++) {
-			cokeys[i] = playconfig.getController()[i].getKeyAssign();
+			cokeys[i] = playconfig.getController()[i].getKeys();
 			cocount += setPlayConfig0(cokeys[i],  exclusive);
 		}
 		return cocount;

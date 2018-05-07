@@ -1,4 +1,13 @@
 eclipse.preferences.version=1
+encoding//src/bms/player/beatoraja/ControllerConfig.java=UTF-8
+encoding//src/bms/player/beatoraja/KeyboardConfig.java=UTF-8
+encoding//src/bms/player/beatoraja/PlayModeConfig.java=UTF-8
+encoding//src/bms/player/beatoraja/config/KeyConfiguration.java=UTF-8
+encoding//src/bms/player/beatoraja/input/BMControllerInputProcessor.java=UTF-8
+encoding//src/bms/player/beatoraja/input/BMSPlayerInputProcessor.java=UTF-8
+encoding//src/bms/player/beatoraja/input/KeyBoardInputProcesseor.java=UTF-8
+encoding//src/bms/player/beatoraja/input/MidiInputProcessor.java=UTF-8
+encoding//src/bms/player/beatoraja/launcher/PlayConfigurationView.java=UTF-8
 encoding//src/bms/player/beatoraja/pattern/NoteShuffleModifier.java=UTF-8
 encoding//src/bms/player/beatoraja/play/BMSPlayer.java=UTF-8
 encoding//src/bms/player/beatoraja/play/PracticeConfiguration.java=UTF-8

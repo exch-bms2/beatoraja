@@ -1,6 +1,6 @@
 package bms.player.beatoraja.input;
 
-import bms.player.beatoraja.PlayModeConfig.MidiConfig;
+import bms.player.beatoraja.MidiConfig;
 
 import javax.sound.midi.*;
 import java.util.ArrayList;
@@ -27,7 +27,7 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 	final int pitchThreshold = 8192 / 32;
 
 	// MIDI note number -> game key number
-	// NOTE: この方法だと1つのMIDIキーに複数キー割り当てが不可能
+	// NOTE: �걪�겗�뼶力뺛걽�겏1�겇�겗MIDI�궘�꺖�겓筽뉑빊�궘�꺖�돯�굤壤볝겍�걣訝띶룾�꺗
 	Consumer<Boolean>[] keyMap = new Consumer[MaxKeys];
 
 	Consumer<Boolean> pitchBendUp, pitchBendDown;

@@ -32,7 +32,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.portaudio.DeviceInfo;
 
 import bms.model.Mode;
-import bms.player.beatoraja.PlayModeConfig.ControllerConfig;
+import bms.player.beatoraja.ControllerConfig;
 import bms.player.beatoraja.audio.PortAudioDriver;
 import bms.player.beatoraja.ir.IRConnection;
 import bms.player.beatoraja.play.JudgeAlgorithm;
@@ -78,13 +78,13 @@ import twitter4j.auth.RequestToken;
 import twitter4j.conf.ConfigurationBuilder;
 
 /**
- * Beatorajaの設定ダイアログ
+ * Beatoraja�겗鼇�若싥��궎�궋�꺆�궛
  *
  * @author exch
  */
 public class PlayConfigurationView implements Initializable {
 
-	// TODO スキンプレビュー機能
+	// TODO �궧�궘�꺍�깤�꺃�깛�깷�꺖艅잒꺗
 
 	@FXML
 	private Hyperlink newversion;
@@ -124,7 +124,7 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private ComboBox<PlayMode> playconfig;
 	/**
-	 * ハイスピード
+	 * �깗�궎�궧�깞�꺖�깋
 	 */
 	@FXML
 	private Spinner<Double> hispeed;
@@ -375,9 +375,9 @@ public class PlayConfigurationView implements Initializable {
 	                    () -> {
 	                    	
 	                    	if(MainController.VERSION.contains(name)) {
-	                    		newversion.setText("最新版を利用中です");
+	                    		newversion.setText("���뼭�뎵�굮�닶�뵪訝��겎�걲");
 	                    	} else {
-	                    		newversion.setText(String.format("最新版[%s]を利用可能です。",name));
+	                    		newversion.setText(String.format("���뼭�뎵[%s]�굮�닶�뵪�룾�꺗�겎�걲��",name));
 		                    	newversion.setOnAction(new EventHandler<ActionEvent>() {
 		                    		 
 		                    	    @Override
@@ -388,14 +388,14 @@ public class PlayConfigurationView implements Initializable {
 											uri = new URI(downloadURL);
 											desktop.browse(uri);
 										} catch (Exception e) {
-											Logger.getGlobal().warning("最新版URLアクセス時例外:" + e.getMessage());
+											Logger.getGlobal().warning("���뼭�뎵URL�궋�궚�궩�궧�셽堊뗥쨼:" + e.getMessage());
 										}
 		                    	    }
 		                    	});
 	                    	}
 	                    });
 			} catch (Exception e) {
-				Logger.getGlobal().warning("最新版URL取得時例外:" + e.getMessage());
+				Logger.getGlobal().warning("���뼭�뎵URL�룚孃쀦셽堊뗥쨼:" + e.getMessage());
 			}
 		};
 
@@ -407,7 +407,7 @@ public class PlayConfigurationView implements Initializable {
 	}
 
 	/**
-	 * ダイアログの項目を更新する
+	 * ���궎�궋�꺆�궛�겗�쟿�쎅�굮�쎍�뼭�걲�굥
 	 */
 	public void update(Config config) {
 		this.config = config;
@@ -545,7 +545,7 @@ public class PlayConfigurationView implements Initializable {
 	}
 
 	/**
-	 * ダイアログの項目をconfig.xmlに反映する
+	 * ���궎�궋�꺆�궛�겗�쟿�쎅�굮config.xml�겓�룏�삝�걲�굥
 	 */
 	public void commit() {
 	    videoController.commit(config);
@@ -655,7 +655,7 @@ public class PlayConfigurationView implements Initializable {
     @FXML
 	public void addSongPath() {
 		DirectoryChooser chooser = new DirectoryChooser();
-		chooser.setTitle("楽曲のルートフォルダを選択してください");
+		chooser.setTitle("璵썸쎊�겗�꺂�꺖�깉�깢�궔�꺂���굮�겦�뒢�걮�겍�걦�걽�걬�걚");
 		File f = chooser.showDialog(null);
 		if (f != null) {
 			boolean unique = true;
@@ -705,7 +705,7 @@ public class PlayConfigurationView implements Initializable {
     
     @FXML
 	public void addBGMPath() {
-    	String s = showDirectoryChooser("BGMのルートフォルダを選択してください");
+    	String s = showDirectoryChooser("BGM�겗�꺂�꺖�깉�깢�궔�꺂���굮�겦�뒢�걮�겍�걦�걽�걬�걚");
     	if(s != null) {
         	bgmpath.setText(s);
     	}
@@ -713,7 +713,7 @@ public class PlayConfigurationView implements Initializable {
 
     @FXML
 	public void addSoundPath() {
-    	String s = showDirectoryChooser("効果音のルートフォルダを選択してください");
+    	String s = showDirectoryChooser("�듅�옖�윹�겗�꺂�꺖�깉�깢�궔�꺂���굮�겦�뒢�걮�겍�걦�걽�걬�걚");
     	if(s != null) {
     		soundpath.setText(s);    		
     	}
@@ -831,7 +831,7 @@ public class PlayConfigurationView implements Initializable {
 					drivers.add(devices[i].name);
 				}
 				if(drivers.size() == 0) {
-					throw new RuntimeException("ドライバが見つかりません");
+					throw new RuntimeException("�깋�꺀�궎�깘�걣誤뗣겇�걢�굤�겲�걵�굯");
 				}
 				audioname.getItems().setAll(drivers);
 				if(drivers.contains(config.getAudioDriverName())) {
@@ -844,7 +844,7 @@ public class PlayConfigurationView implements Initializable {
 				audiosim.setDisable(false);
 //				PortAudio.terminate();
 			} catch(Throwable e) {
-				Logger.getGlobal().severe("PortAudioは選択できません : " + e.getMessage());
+				Logger.getGlobal().severe("PortAudio�겘�겦�뒢�겎�걤�겲�걵�굯 : " + e.getMessage());
 				audio.setValue(Config.AUDIODRIVER_SOUND);
 			}
 			break;
@@ -882,10 +882,10 @@ public class PlayConfigurationView implements Initializable {
 	}
 
 	/**
-	 * BMSを読み込み、楽曲データベースを更新する
+	 * BMS�굮沃��겳渦쇈겳�곫�썸쎊�깈�꺖�궭�깧�꺖�궧�굮�쎍�뼭�걲�굥
 	 *
 	 * @param updateAll
-	 *            falseの場合は追加削除分のみを更新する
+	 *            false�겗�졃�릦�겘瓦썲뒥�뎷�솮�늽�겗�겳�굮�쎍�뼭�걲�굥
 	 */
 	public void loadBMS(String updatepath, boolean updateAll) {
 		commit();
@@ -895,9 +895,9 @@ public class PlayConfigurationView implements Initializable {
 					config.getBmsroot());
 			SongInformationAccessor infodb = useSongInfo.isSelected() ?
 					new SongInformationAccessor(Paths.get("songinfo.db").toString()) : null;
-			Logger.getGlobal().info("song.db更新開始");
+			Logger.getGlobal().info("song.db�쎍�뼭�뼀冶�");
 			songdb.updateSongDatas(updatepath, updateAll, infodb);
-			Logger.getGlobal().info("song.db更新完了");
+			Logger.getGlobal().info("song.db�쎍�뼭若뚥틙");
 			songUpdated = true;
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
@@ -928,7 +928,7 @@ public class PlayConfigurationView implements Initializable {
 	public void importScoreDataFromLR2() {
 		FileChooser chooser = new FileChooser();
 		chooser.getExtensionFilters().setAll(new ExtensionFilter("Lunatic Rave 2 Score Database File", "*.db"));
-		chooser.setTitle("LRのスコアデータベースを選択してください");
+		chooser.setTitle("LR�겗�궧�궠�궋�깈�꺖�궭�깧�꺖�궧�굮�겦�뒢�걮�겍�걦�걽�걬�걚");
 		File dir = chooser.showOpenDialog(null);
 		if (dir == null) {
 			return;
@@ -974,7 +974,7 @@ public class PlayConfigurationView implements Initializable {
 				}
 				scoredb.setScoreData(result.toArray(new IRScoreData[result.size()]));
 			} catch (Exception e) {
-				Logger.getGlobal().severe("スコア移行時の例外:" + e.getMessage());
+				Logger.getGlobal().severe("�궧�궠�궋燁삭죱�셽�겗堊뗥쨼:" + e.getMessage());
 			}
 		} catch (ClassNotFoundException e1) {
 		}
