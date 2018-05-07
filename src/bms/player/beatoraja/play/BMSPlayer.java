@@ -127,6 +127,7 @@ public class BMSPlayer extends MainState {
 			}
 		}
 	}
+	
 	private boolean isReplayPatternPlay(MainController main, PlayerResource resource){
 		boolean isReplayPatternPlay = true;
 		PlayerConfig config = resource.getPlayerConfig();
@@ -193,7 +194,7 @@ public class BMSPlayer extends MainState {
 			}
 		}
 		if(replay != null && main.getInputProcessor().getKeystate()[5]) {
-			//; do something
+			;//; do something
 		}
 		int coursetype = 0;
 		GaugeProperty gauges = null;
@@ -256,6 +257,7 @@ public class BMSPlayer extends MainState {
 		pc.setLift(HSReplay.lift);
 		pc.setEnablelift(HSReplay.enablelift);
 	}
+	
 	private boolean setPattern(PlayerResource resource) {
 		boolean retV = true;
 		PlayerConfig config = resource.getPlayerConfig();
@@ -293,6 +295,7 @@ public class BMSPlayer extends MainState {
 		}
 		return retV;
 	}
+	
 	private boolean mode7to9(PlayerConfig config) {
 		boolean retV = true;
 		if (config.getSevenToNinePattern() >= 1 && model.getMode() == Mode.BEAT_7K) {
@@ -309,6 +312,7 @@ public class BMSPlayer extends MainState {
 		}
 		return retV;
 	}
+	
 	private void modifyRandom(PlayerConfig config) {
 		if(model.getMode().scratchKey.length == 0) {
 			if (config.getRandom() == 7 && model.getMode() != Mode.POPN_9K) {
@@ -320,12 +324,14 @@ public class BMSPlayer extends MainState {
 			}
 		}
 	}
+	
 	private void makeLaneShufflePattern(PlayerConfig config) {
 		if (config.getDoubleoption() == 1) {
 			LaneShuffleModifier mod = new LaneShuffleModifier(LaneShuffleModifier.FLIP);
 			pattern = PatternModifier.merge(pattern,mod.modify(model));
 		}
 	}
+	
 	private void modifyPatterWithReplayPattern(PlayerResource resource) {
 		if(resource.getReplayData().sevenToNinePattern > 0 && model.getMode() == Mode.BEAT_7K) {
 			model.setMode(Mode.POPN_9K);
@@ -335,6 +341,7 @@ public class BMSPlayer extends MainState {
 		PatternModifier.modify(model, pattern);
 		Logger.getGlobal().info("鈺쒒씊�궕�깤�궥�깾�꺍 : 岳앭춼�걬�굦�걼鈺쒒씊鸚됪쎍�꺆�궛�걢�굢鈺쒒씊�냽�뤎");
 	}
+	
 	private void modifyPatternWithReplay() {
 		boolean isModePOPN_9K = replay.sevenToNinePattern > 0 && model.getMode() == Mode.BEAT_7K;
 		if(isModePOPN_9K) {
@@ -343,6 +350,7 @@ public class BMSPlayer extends MainState {
 		}
 		PatternModifier.modify(model, Arrays.asList(replay.pattern));
 	}
+	
 	private boolean isDoubleOption(PlayerResource resource) {
 		boolean retV = true;
 		PlayerConfig config = resource.getPlayerConfig();
@@ -373,6 +381,7 @@ public class BMSPlayer extends MainState {
 		}
 		return retV;
 	}
+	
 	private boolean checkConfigure(PlayerResource resource) {
 		boolean score = true;
 		score &= isBpmguide(resource);
@@ -382,6 +391,7 @@ public class BMSPlayer extends MainState {
 		score &= isNomine(resource);
 		return score;
 	}
+	
 	private boolean isNomine(PlayerResource resource) {
 		boolean retV = true;
 		PlayerConfig config = resource.getPlayerConfig();
@@ -396,6 +406,7 @@ public class BMSPlayer extends MainState {
 		}
 		return retV;
 	}
+	
 	private boolean isWindowrateOver100(PlayerResource resource) {		
 		boolean retV = true;
 		PlayerConfig config = resource.getPlayerConfig();
@@ -405,6 +416,7 @@ public class BMSPlayer extends MainState {
 		}
 		return retV;
 	}
+	
 	private boolean isLegacynote(PlayerResource resource) {
 		boolean retV = true;
 		PlayerConfig config = resource.getPlayerConfig();
@@ -419,6 +431,7 @@ public class BMSPlayer extends MainState {
 		}
 		return retV;
 	}
+	
 	private boolean isConstant(PlayerResource resource) {
 		boolean retV = true;
 		PlayerConfig config = resource.getPlayerConfig();
@@ -430,6 +443,7 @@ public class BMSPlayer extends MainState {
 		}
 		return retV;
 	}
+	
 	private boolean isBpmguide(PlayerResource resource) {
 		boolean retV=true;
 		PlayerConfig config = resource.getPlayerConfig();
@@ -440,6 +454,7 @@ public class BMSPlayer extends MainState {
 		}
 		return retV;
 	}
+	
 	private void generateModel(PlayerResource resource) {
 		if (model.getRandom() != null && model.getRandom().length > 0) {
 			if (autoplay.isReplayMode()) {
@@ -536,6 +551,7 @@ public class BMSPlayer extends MainState {
 			getScoreDataProperty().setTargetScore(score.getExscore(), rivalscore, model.getTotalNotes());
 		}
 	}
+	
 	private void createSectionAndNoteTime() {
 		LongArray sectiontimes = new LongArray();
 		LongArray quarterNoteTimes = new LongArray();
@@ -595,6 +611,7 @@ public class BMSPlayer extends MainState {
 			}
 		}
 	}
+	
 	private void setSounds() {
 		setSound(SOUND_READY, "playready.wav", SoundType.SOUND, false);
 		setSound(SOUND_PLAYSTOP, "playstop.wav", SoundType.SOUND, false);
@@ -727,6 +744,7 @@ public class BMSPlayer extends MainState {
 			}
 		}
 	}
+	
 	private void renderSTATE_FAILED(final PlaySkin skin, final PlayerResource resource,
 			final BMSPlayerInputProcessor input) {
 		if (autoThread != null) {
@@ -766,6 +784,7 @@ public class BMSPlayer extends MainState {
 			}
 		}
 	}
+	
 	private void renderSTATE_PLAY(final PlaySkin skin, final PlayerResource resource, final PlayerConfig config,
 			final long now, final long micronow) {
 		final long deltatime = micronow - prevtime;
@@ -867,6 +886,7 @@ public class BMSPlayer extends MainState {
 			}
 		}
 	}
+	
 	private void renderSTATE_READY(final PlaySkin skin, final BMSPlayerInputProcessor input, final long now,
 			final long micronow) {
 		if (main.getNowTime(TIMER_READY) > skin.getPlaystart()) {
@@ -886,6 +906,7 @@ public class BMSPlayer extends MainState {
 			Logger.getGlobal().info("STATE_PLAY�겓燁삭죱");
 		}
 	}
+	
 	private void renderSTATE_PRACTICE_FINISH(final PlaySkin skin, final BMSPlayerInputProcessor input) {
 		if (main.getNowTime(TIMER_FADEOUT) > skin.getFadeout()) {
 			input.setEnable(true);
@@ -893,6 +914,7 @@ public class BMSPlayer extends MainState {
 			main.changeState(MainController.STATE_SELECTMUSIC);
 		}
 	}
+	
 	private void renderSTATE_PRACTICE(final PlaySkin skin, final PlayerResource resource,
 			final BMSPlayerInputProcessor input, final long now) {
 		if (main.isTimerOn(TIMER_PLAY)) {
@@ -956,6 +978,7 @@ public class BMSPlayer extends MainState {
 			Logger.getGlobal().info("STATE_READY�겓燁삭죱");
 		}
 	}
+	
 	private void renderSTATE_PERLOAD(final PlaySkin skin, final PlayerResource resource, final long now) {
 		if (resource.mediaLoadFinished() && now > skin.getLoadstart() + skin.getLoadend()
 				&& now - startpressedtime > 1000) {
@@ -1066,6 +1089,14 @@ public class BMSPlayer extends MainState {
 		score.setOption(config.getRandom() + (model.getMode().player == 2
 				? (config.getRandom2() * 10 + config.getDoubleoption() * 100) : 0));
 		// �꺁�깤�꺃�궎�깈�꺖�궭岳앭춼�귙궧�궠�궋岳앭춼�걬�굦�겒�걚�졃�릦�겘�꺁�깤�꺃�궎岳앭춼�걮�겒�걚
+		makeReplay(config, resource);
+
+		score.setMinbp(score.getEbd() + score.getLbd() + score.getEpr() + score.getLpr() + score.getEms() + score.getLms() + resource.getSongdata().getNotes() - notes);
+		score.setDeviceType(main.getInputProcessor().getDeviceType());
+		return score;
+	}
+
+	private void makeReplay(final PlayerConfig config, final PlayerResource resource) {
 		final ReplayData replay = resource.getReplayData();
 		replay.player = main.getPlayerConfig().getName();
 		replay.sha256 = model.getSHA256();
@@ -1087,11 +1118,8 @@ public class BMSPlayer extends MainState {
 		replay.enablelanecover = replayEnablelanecover;
 		replay.lift = replayLift;
 		replay.enablelift = replayEnablelift;
-
-		score.setMinbp(score.getEbd() + score.getLbd() + score.getEpr() + score.getLpr() + score.getEms() + score.getLms() + resource.getSongdata().getNotes() - notes);
-		score.setDeviceType(main.getInputProcessor().getDeviceType());
-		return score;
 	}
+	
 
 	public void stopPlay() {
 		if (state == STATE_PRACTICE) {
