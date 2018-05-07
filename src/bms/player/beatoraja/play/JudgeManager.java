@@ -24,13 +24,13 @@ import bms.player.beatoraja.play.JudgeProperty.MissCondition;
 import bms.player.beatoraja.skin.SkinPropertyMapper;
 
 /**
- * ノーツ判定管理用クラス
+ * �깕�꺖�깂�닩若싩�←릤�뵪�궚�꺀�궧
  *
  * @author exch
  */
 public class JudgeManager {
 
-	// TODO HCN押し直しの発音はどうする？
+	// TODO HCN�듉�걮�쎍�걮�겗�쇇�윹�겘�겑�걝�걲�굥竊�
 
 	private final BMSPlayer main;
 	/**
@@ -40,45 +40,45 @@ public class JudgeManager {
 	private Lane[] lanes;
 
 	/**
-	 * 現在の判定カウント内訳
+	 * �뤎�쑉�겗�닩若싥궖�궑�꺍�깉�냵鼇�
 	 */
 	private IRScoreData score = new IRScoreData();
 
 	/**
-	 * 現在のコンボ数
+	 * �뤎�쑉�겗�궠�꺍�깭�빊
 	 */
 	private int combo;
 	/**
-	 * コース時の現在のコンボ数
+	 * �궠�꺖�궧�셽�겗�뤎�쑉�겗�궠�꺍�깭�빊
 	 */
 	private int coursecombo;
 	/**
-	 * コース時の最大コンボ数
+	 * �궠�꺖�궧�셽�겗��鸚㎯궠�꺍�깭�빊
 	 */
 	private int coursemaxcombo;
 	/**
-	 * 判定連動レーザーの色
+	 * �닩若싮�ｅ땿�꺃�꺖�궣�꺖�겗�돯
 	 */
 	private int[][] judge;
 	/**
-	 * 現在表示中の判定
+	 * �뤎�쑉烏①ㅊ訝��겗�닩若�
 	 */
 	private int[] judgenow;
 	private int[] judgecombo;
 	/**
-	 * 判定差時間(ms , +は早押しで-は遅押し)
+	 * �닩若싧량�셽�뼋(ms , +�겘�뿩�듉�걮�겎-�겘�걛�듉�걮)
 	 */
 	private long[] judgefast;
 	/**
-	 * 処理中のLN
+	 * �눇�릤訝��겗LN
 	 */
 	private LongNote[] processing;
 	/**
-	 * 通過中のHCN
+	 * �싮걥訝��겗HCN
 	 */
 	private LongNote[] passing;
 	/**
-	 * HCN増加判定
+	 * HCN罌쀥뒥�닩若�
 	 */
 	private boolean[] inclease = new boolean[8];
 	private boolean[] next_inclease = new boolean[8];
@@ -92,32 +92,32 @@ public class JudgeManager {
 	private int[] player;
 	private int[][] laneassign;
 	/**
-	 * HCNの増減間隔(ms)
+	 * HCN�겗罌쀦툤�뼋�슂(ms)
 	 */
 	private static final int hcnduration = 200;
 	/**
-	 * ノーツ判定テーブル
+	 * �깕�꺖�깂�닩若싥깇�꺖�깣�꺂
 	 */
 	private int[][] njudge;
 	private long judgestart;
 	private long judgeend;
 	/**
-	 * CN終端判定テーブル
+	 * CN永귞ク�닩若싥깇�꺖�깣�꺂
 	 */
 	private int[][] cnendjudge;
 	/**
-	 * スクラッチ判定テーブル
+	 * �궧�궚�꺀�긿�긽�닩若싥깇�꺖�깣�꺂
 	 */
 	private int[][] sjudge;
 	private int[][] scnendjudge;
 	/**
-	 * PMS用判定システム(空POORでコンボカット、1ノーツにつき1空POORまで)の有効/無効
+	 * PMS�뵪�닩若싥궥�궧�깇�깲(令튡OOR�겎�궠�꺍�깭�궖�긿�깉��1�깕�꺖�깂�겓�겇�걤1令튡OOR�겲�겎)�겗�쐣�듅/�꽒�듅
 	 */
 	private boolean[] combocond;
 
 	private MissCondition miss;
 	/**
-	 * 各判定毎のノートの判定を消失するかどうか。PG, GR, GD, BD, PR, MSの順
+	 * �릢�닩若싨칿�겗�깕�꺖�깉�겗�닩若싥굮易덂ㅁ�걲�굥�걢�겑�걝�걢�괦G, GR, GD, BD, PR, MS�겗�젂
 	 */
 	private boolean[] judgeVanish;
 
@@ -126,28 +126,28 @@ public class JudgeManager {
 	private boolean autoplay = false;
 	private long[] auto_presstime;
 	/**
-	 * オートプレイでキーを押下する最小時間(ms)
+	 * �궕�꺖�깉�깤�꺃�궎�겎�궘�꺖�굮�듉訝뗣걲�굥��弱뤸셽�뼋(ms)
 	 */
 	private final int auto_minduration = 80;
 
 	private final JudgeAlgorithm algorithm;
 
 	/**
-	 * 処理済ノート数
+	 * �눇�릤歷덀깕�꺖�깉�빊
 	 */
 	private int pastNotes = 0;
 
 	/**
-	 * PMS キャラ用 判定
+	 * PMS �궘�깵�꺀�뵪 �닩若�
 	 */
 	private int PMcharaJudge = 0;
 
 	/**
-	 * 直近100ノーツの判定差時間
+	 * �쎍瓦�100�깕�꺖�깂�겗�닩若싧량�셽�뼋
 	 */
 	private long[] recentJudges = new long[100];
 	/**
-	 * 判定差時間のヘッド
+	 * �닩若싧량�셽�뼋�겗�깦�긿�깋
 	 */
 	private int recentJudgesIndex = 0;
 
@@ -232,13 +232,16 @@ public class JudgeManager {
 		this.recentJudgesIndex = 0;
 	}
 
+	
 	public void update(final long time) {
 		final MainController mc = main.main;
 		final BMSPlayerInputProcessor input = mc.getInputProcessor();
 		final Config config = mc.getPlayerResource().getConfig();
 		final PlayerConfig playerConfig = mc.getPlayerResource().getPlayerConfig();
+		final long[] keytime = input.getTime();
+		final boolean[] keystate = input.getKeystate();
 		final long now = mc.getNowTime();
-		// 通過系の判定
+		// �싮걥楹삠겗�닩若�
 		Arrays.fill(next_inclease, false);
 
 		for (int lane = 0; lane < laneassign.length; lane++) {
@@ -246,7 +249,7 @@ public class JudgeManager {
 			lanemodel.mark((int) (prevtime + judgestart - 100));
 			boolean pressed = false;
 			for (int key : laneassign[lane]) {
-				if (input.getKeyState(key)) {
+				if (keystate[key]) {
 					pressed = true;
 					break;
 				}
@@ -256,7 +259,7 @@ public class JudgeManager {
 					continue;
 				}
 				if (note instanceof LongNote) {
-					// HCN判定
+					// HCN�닩若�
 					final LongNote lnote = (LongNote) note;
 					if ((lnote.getType() == LongNote.TYPE_UNDEFINED && lntype == BMSModel.LNTYPE_HELLCHARGENOTE)
 							|| lnote.getType() == LongNote.TYPE_HELLCHARGENOTE) {
@@ -269,13 +272,13 @@ public class JudgeManager {
 					}
 				} else if (note instanceof MineNote && pressed) {
 					final MineNote mnote = (MineNote) note;
-					// 地雷ノート判定
+					// �쑑�쎐�깕�꺖�깉�닩若�
 					main.getGauge().addValue(-mnote.getDamage());
 					System.out.println("Mine Damage : " + mnote.getWav());
 				}
 
 				if (autoplay) {
-					// ここにオートプレイ処理を入れる
+					// �걪�걪�겓�궕�꺖�깉�깤�꺃�궎�눇�릤�굮�뀯�굦�굥
 					if (note instanceof NormalNote && note.getState() == 0) {
 						auto_presstime[laneassign[lane][0]] = now;
 						main.play(note, config.getKeyvolume(), 0);
@@ -292,7 +295,7 @@ public class JudgeManager {
 							if ((lntype == BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
 									|| ln.getType() == LongNote.TYPE_LONGNOTE) {
 								passingcount[lane] = 0;
-								//LN時のレーザー色変更処理
+								//LN�셽�겗�꺃�꺖�궣�꺖�돯鸚됪쎍�눇�릤
 								this.judge[player[lane]][offset[lane]] = 8;
 							} else {
 								this.update(lane, ln, time, 0, 0);
@@ -321,7 +324,7 @@ public class JudgeManager {
 					}
 				}
 			}
-			// HCNゲージ増減判定
+			// HCN�궟�꺖�궦罌쀦툤�닩若�
 			if (passing[lane] != null
 					&& (pressed || (passing[lane].getPair().getState() > 0 && passing[lane].getPair().getState() <= 3)
 							|| autoplay)) {
@@ -382,17 +385,17 @@ public class JudgeManager {
 			if (lane == -1) {
 				continue;
 			}
-			final long ptime = input.getKeyTime(key);
+			final long ptime = keytime[key];
 			if (ptime == 0) {
 				continue;
 			}
 			final Lane lanemodel = lanes[lane];
 			lanemodel.reset();
 			final int sc = sckeyassign[lane];
-			if (input.getKeyState(key)) {
-				// キーが押されたときの処理
+			if (keystate[key]) {
+				// �궘�꺖�걣�듉�걬�굦�걼�겏�걤�겗�눇�릤
 				if (processing[lane] != null) {
-					// BSS終端処理
+					// BSS永귞ク�눇�릤
 					if (((lntype != BMSModel.LNTYPE_LONGNOTE && processing[lane].getType() == LongNote.TYPE_UNDEFINED)
 							|| processing[lane].getType() == LongNote.TYPE_CHARGENOTE
 							|| processing[lane].getType() == LongNote.TYPE_HELLCHARGENOTE) && sc >= 0
@@ -404,7 +407,7 @@ public class JudgeManager {
 							;
 
 						this.update(lane, processing[lane], time, j, dtime);
-						//						 System.out.println("BSS終端判定 - Time : " + ptime + " Judge : " + j + " LN : " + processing[lane].hashCode());
+						//						 System.out.println("BSS永귞ク�닩若� - Time : " + ptime + " Judge : " + j + " LN : " + processing[lane].hashCode());
 						main.play(processing[lane], config.getKeyvolume(), 0);
 						processing[lane] = null;
 						sckey[sc] = 0;
@@ -417,11 +420,11 @@ public class JudgeManager {
 								main.play(main.SOUND_GUIDE_SE_GD);
 						}
 					} else {
-						// ここに来るのはマルチキーアサイン以外ありえないはず
+						// �걪�걪�겓�씎�굥�겗�겘�깯�꺂�긽�궘�꺖�궋�궢�궎�꺍餓ε쨼�걗�굤�걟�겒�걚�겘�걳
 					}
 				} else {
 					final int[][] judge = sc >= 0 ? sjudge : njudge;
-					// 対象ノーツの抽出
+					// 野얕괌�깕�꺖�깂�겗�듊�눣
 					lanemodel.reset();
 					Note tnote = null;
 					int j = 0;
@@ -459,16 +462,16 @@ public class JudgeManager {
 					}
 
 					if (tnote != null) {
-						// TODO この時点で空POOR処理を分岐させるべきか
+						// TODO �걪�겗�셽�궧�겎令튡OOR�눇�릤�굮�늽略먦걬�걵�굥�겧�걤�걢
 						if (tnote instanceof LongNote) {
-							// ロングノート処理
+							// �꺆�꺍�궛�깕�꺖�깉�눇�릤
 							final LongNote ln = (LongNote) tnote;
 							main.play(tnote, config.getKeyvolume(), 0);
 							if (((lntype == BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
 									|| ln.getType() == LongNote.TYPE_LONGNOTE)
 									&& j < 4) {
 								passingcount[lane] = (int) (tnote.getTime() - ptime);
-								//LN時のレーザー色変更処理
+								//LN�셽�겗�꺃�꺖�궣�꺖�돯鸚됪쎍�눇�릤
 								this.judge[player[lane]][offset[lane]] = 8;
 							} else {
 								final int dtime = (int) (tnote.getTime() - ptime);
@@ -477,14 +480,14 @@ public class JudgeManager {
 							if (j < 4) {
 								processing[lane] = ln.getPair();
 								if (sc >= 0) {
-									// BSS処理開始
-									//									 System.out.println("BSS開始判定 - Time : " + ptime + " Judge : " + j + " KEY : " + key + " LN : " + ln.getPair().hashCode());
+									// BSS�눇�릤�뼀冶�
+									//									 System.out.println("BSS�뼀冶뗥닩若� - Time : " + ptime + " Judge : " + j + " KEY : " + key + " LN : " + ln.getPair().hashCode());
 									sckey[sc] = key;
 								}
 							}
 						} else {
 							main.play(tnote, config.getKeyvolume(), 0);
-							// 通常ノート処理
+							// �싧만�깕�꺖�깉�눇�릤
 							final int dtime = (int) (tnote.getTime() - ptime);
 							this.update(lane, tnote, time, j, dtime);
 						}
@@ -497,10 +500,10 @@ public class JudgeManager {
 								main.play(main.SOUND_GUIDE_SE_GD);
 						}
 					} else {
-						// 空POOR判定がないときのレーザー色変更処理
+						// 令튡OOR�닩若싥걣�겒�걚�겏�걤�겗�꺃�꺖�궣�꺖�돯鸚됪쎍�눇�릤
 						this.judge[player[lane]][offset[lane]] = 0;
 
-						// 空POOR判定がないときのキー音処理
+						// 令튡OOR�닩若싥걣�겒�걚�겏�걤�겗�궘�꺖�윹�눇�릤
 						final Note[] notes = lanemodel.getNotes();
 						Note n = notes.length > 0 ? notes[0] : null;
 						for (Note note : lanemodel.getHiddens()) {
@@ -527,7 +530,7 @@ public class JudgeManager {
 				}
 				main.getKeyinput().inputKeyOn(lane);
 			} else {
-				// キーが離されたときの処理
+				// �궘�꺖�걣�썴�걬�굦�걼�겏�걤�겗�눇�릤
 				if (processing[lane] != null) {
 					final int[][] judge = sc >= 0 ? scnendjudge : cnendjudge;
 					int dtime = (int) (processing[lane].getTime() - ptime);
@@ -539,13 +542,13 @@ public class JudgeManager {
 							&& processing[lane].getType() == LongNote.TYPE_UNDEFINED)
 							|| processing[lane].getType() == LongNote.TYPE_CHARGENOTE
 							|| processing[lane].getType() == LongNote.TYPE_HELLCHARGENOTE) {
-						// CN, HCN離し処理
+						// CN, HCN�썴�걮�눇�릤
 						boolean release = true;
 						if (sc >= 0) {
 							if (j != 4 || key != sckey[sc]) {
 								release = false;
 							} else {
-								//								 System.out.println("BSS途中離し判定 - Time : " + ptime + " Judge : " + j + " LN : " + processing[lane]);
+								//								 System.out.println("BSS�붶릎�썴�걮�닩若� - Time : " + ptime + " Judge : " + j + " LN : " + processing[lane]);
 								sckey[sc] = 0;
 							}
 						}
@@ -558,7 +561,7 @@ public class JudgeManager {
 							processing[lane] = null;
 						}
 					} else {
-						// LN離し処理
+						// LN�썴�걮�눇�릤
 						if (Math.abs(passingcount[lane]) > Math.abs(dtime)) {
 							dtime = passingcount[lane];
 							for (; j < judge.length && !(dtime >= judge[j][0] && dtime <= judge[j][1]); j++)
@@ -573,14 +576,14 @@ public class JudgeManager {
 					}
 				}
 			}
-			input.resetKeyTime(key);
+			keytime[key] = 0;
 		}
 
 		for (int lane = 0; lane < sckeyassign.length; lane++) {
 			final int sc = sckeyassign[lane];
 			final int[][] judge = sc >= 0 ? sjudge : njudge;
 
-			// LN終端判定
+			// LN永귞ク�닩若�
 			if (processing[lane] != null
 					&& ((lntype == BMSModel.LNTYPE_LONGNOTE && processing[lane].getType() == LongNote.TYPE_UNDEFINED)
 							|| processing[lane].getType() == LongNote.TYPE_LONGNOTE)
@@ -595,7 +598,7 @@ public class JudgeManager {
 				main.play(processing[lane], config.getKeyvolume(), 0);
 				processing[lane] = null;
 			}
-			// 見逃しPOOR判定
+			// 誤뗩�껁걮POOR�닩若�
 			final Lane lanemodel = lanes[lane];
 			lanemodel.reset();
 			for (Note note = lanemodel.getNote(); note != null
@@ -632,9 +635,9 @@ public class JudgeManager {
 					}
 				}
 			}
-			// LN処理タイマー
-			// TODO processing値の変化のときのみ実行したい
-			// TODO HCNは別タイマーにするかも
+			// LN�눇�릤�궭�궎�깯�꺖
+			// TODO processing�ㅳ겗鸚됧뙑�겗�겏�걤�겗�겳若잒죱�걮�걼�걚
+			// TODO HCN�겘�닪�궭�궎�깯�꺖�겓�걲�굥�걢�굚
 			mc.switchTimer(SkinPropertyMapper.holdTimerId(player[lane], offset[lane]),
 					processing[lane] != null || (passing[lane] != null && inclease[lane]));
 		}
@@ -728,18 +731,18 @@ public class JudgeManager {
 	}
 
 	/**
-	 * 現在の1曲内のコンボ数を取得する
+	 * �뤎�쑉�겗1�쎊�냵�겗�궠�꺍�깭�빊�굮�룚孃쀣걲�굥
 	 *
-	 * @return 現在のコンボ数
+	 * @return �뤎�쑉�겗�궠�꺍�깭�빊
 	 */
 	public int getCombo() {
 		return combo;
 	}
 
 	/**
-	 * 現在のコース内のコンボ数を取得する
+	 * �뤎�쑉�겗�궠�꺖�궧�냵�겗�궠�꺍�깭�빊�굮�룚孃쀣걲�굥
 	 *
-	 * @return 現在のコンボ数
+	 * @return �뤎�쑉�겗�궠�꺍�깭�빊
 	 */
 	public int getCourseCombo() {
 		return coursecombo;
@@ -766,24 +769,24 @@ public class JudgeManager {
 	}
 
 	/**
-	 * 指定の判定のカウント数を返す
+	 * �뙁若싥겗�닩若싥겗�궖�궑�꺍�깉�빊�굮瓦붵걲
 	 *
 	 * @param judge
 	 *            0:PG, 1:GR, 2:GD, 3:BD, 4:PR, 5:MS
-	 * @return 判定のカウント数
+	 * @return �닩若싥겗�궖�궑�꺍�깉�빊
 	 */
 	public int getJudgeCount(int judge) {
 		return score.getJudgeCount(judge);
 	}
 
 	/**
-	 * 指定の判定のカウント数を返す
+	 * �뙁若싥겗�닩若싥겗�궖�궑�꺍�깉�빊�굮瓦붵걲
 	 *
 	 * @param judge
 	 *            0:PG, 1:GR, 2:GD, 3:BD, 4:PR, 5:MS
 	 * @param fast
 	 *            true:FAST, flase:SLOW
-	 * @return 判定のカウント数
+	 * @return �닩若싥겗�궖�궑�꺍�깉�빊
 	 */
 	public int getJudgeCount(int judge, boolean fast) {
 		return score.getJudgeCount(judge, fast);

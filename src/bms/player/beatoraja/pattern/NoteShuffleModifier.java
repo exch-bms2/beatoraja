@@ -46,7 +46,7 @@ public class NoteShuffleModifier extends PatternModifier {
 	 */
 	public static final int SEVEN_TO_NINE = 100;
 
-	private int type;
+	private int modifyType;
 	/**
 	 * 轝▲겗TimeLine罌쀥뒥�늽(SPIRAL�뵪)
 	 */
@@ -59,7 +59,7 @@ public class NoteShuffleModifier extends PatternModifier {
 
 	public NoteShuffleModifier(int type) {
 		super(type >= ALL_SCR ? 1 : 0);
-		this.type = type;
+		this.modifyType = type;
 	}
 
 	/**
@@ -95,57 +95,16 @@ public class NoteShuffleModifier extends PatternModifier {
 					hnotes[i] = tl.getHiddenNote(i);
 				}
 				int[] keys;
-				switch (type) {
+				
+				switch (modifyType) {
 				case S_RANDOM:
-					keys = getKeys(mode, false);
-					if(mode == Mode.POPN_9K) {
-						random = keys.length > 0 ? timeBasedShuffle(keys, ln, notes, lastNoteTime, tl.getTime(), 0)
-								: keys;
-					} else {
-						random = keys.length > 0 ? timeBasedShuffle(keys, ln, notes, lastNoteTime, tl.getTime(), 40)
-								: keys;
-					}
+					random = modifySRANDOM(mode, ln, lastNoteTime, tl, notes);
 					break;
+					
 				case SPIRAL:
-					keys = getKeys(mode, false);
-					if (random.length == 0) {
-						// �닜�쐿�ㅳ겗鵝쒏닇
-						int max = 0;
-						for (int key : keys) {
-							max = Math.max(max, key);
-						}
-						random = new int[max + 1];
-						for (int i = 0; i < random.length; i++) {
-							random[i] = i;
-						}
-
-						int index = (int) (Math.random() * keys.length);
-						int j = (int) (Math.random() * 2) >= 1 ? 1 : keys.length - 1;
-						for (int i = 0; i < keys.length; i++) {
-							random[keys[i]] = keys[index];
-							index = (index + j) % keys.length;
-						}
-						inc = (int) (Math.random() * (keys.length - 1)) + 1;
-						Logger.getGlobal().info("SPIRAL - �뼀冶뗤퐤營�:" + index + " 罌쀥늽:" + inc);
-					} else {
-						boolean cln = false;
-						for (int lane = 0; lane < keys.length; lane++) {
-							if (ln[keys[lane]] != -1) {
-								cln = true;
-							}
-						}
-						if (!cln) {
-							int[] nrandom = Arrays.copyOf(random, random.length);
-							int index = inc;
-							for (int i = 0; i < keys.length; i++) {
-								nrandom[keys[i]] = random[keys[index]];
-								index = (index + 1) % keys.length;
-							}
-							random = nrandom;
-						}
-					}
-
+					random = modifySPIRAL(mode, random, ln);
 					break;
+					
 				case ALL_SCR:
 					if(mode == Mode.POPN_9K) {
 						keys = getKeys(mode, false);
@@ -157,7 +116,12 @@ public class NoteShuffleModifier extends PatternModifier {
 					if (mode.scratchKey.length == 0) {
 						break;
 					}
-
+					
+					if (mode.player == 2 && mode == Mode.KEYBOARD_24K_DOUBLE) {
+						// TODO 24k-DP�겓野얍퓶
+						break;
+					}
+					
 					random = new int[mode.key];
 					for (int i = 0; i < random.length; i++) {
 						random[i] = i;
@@ -168,226 +132,18 @@ public class NoteShuffleModifier extends PatternModifier {
 					 */
 					int scratchInterval = 40;
 
-					// Scratch�꺃�꺖�꺍�걣筽뉑빊�걗�굥�졃�릦�겘�젂濚겹굤�겓�뀓營��걬�굦�굥�굠�걝�겓 (24key野얍퓶)
-					if (mode.player == 1) {
-						// �궥�꺍�궛�꺂�깤�꺃�꺖�셽
-						keys = getKeys(mode, true);
-						int keyInterval = hranThreshold;
-						ArrayList<Integer> original, assign, note, other, primary, tate, sckey;
-						original = new ArrayList<Integer>(keys.length);
-						assign = new ArrayList<Integer>(keys.length);
-						note = new ArrayList<Integer>(keys.length);
-						other = new ArrayList<Integer>(keys.length);
-						primary = new ArrayList<Integer>(keys.length);
-						tate = new ArrayList<Integer>(keys.length);
-						sckey = new ArrayList<Integer>(mode.scratchKey.length);
-
-						for (int lane = 0; lane < keys.length; lane++) {
-							original.add(keys[lane]);
-							assign.add(keys[lane]);
-						}
-						
-						for (int sc = 0; sc < mode.scratchKey.length; sc++) {
-							sckey.add(mode.scratchKey[sc]);
-						}
-
-						// LN�걣�궋�궚�깇�궍�깣�겒�꺃�꺖�꺍�굮�궋�궢�궎�꺍�걮�겍�걢�굢�솮鸚�
-						for (int lane = 0; lane < keys.length; lane++) {
-							if (ln[keys[lane]] != -1) {
-								random[keys[lane]] = ln[keys[lane]];
-								assign.remove((Integer) keys[lane]);
-								original.remove((Integer) ln[keys[lane]]);
-							}
-						}
-
-						// �뀇�겗�꺃�꺖�꺍�굮�깕�꺖�깂�겗耶섇쑉�겎�늽窈�
-						while (!original.isEmpty()) {
-							if (notes[original.get(0)] != null) {
-								note.add(original.get(0));
-							} else {
-								other.add(original.get(0));
-							}
-							original.remove(0);
-						}
-						
-						// 
-
-						// �쑋�궋�궢�궎�꺍�꺃�꺖�꺍�굮�늽窈� 1.轝▲겓�뀓營��걲�굥�궧�궚�꺀�긿�긽�꺃�꺖�꺍�겎�겒�걚 2.潁��ｃ걣�쇇�뵟�걲�굥
-						while (!assign.isEmpty()) {
-							if ((
-									sckey.contains(assign.get(0)) && assign.get(0) != sckey.get(scratchIndex))
-									|| tl.getTime() - lastNoteTime[assign.get(0)]
-											< (sckey.contains(assign.get(0)) ? scratchInterval : keyInterval)) {
-								tate.add(assign.get(0));
-							} else {
-								primary.add(assign.get(0));
-							}
-							
-							assign.remove(0);
-						}
-						
-						// primary�겓�궧�궚�꺀�긿�긽�꺃�꺖�꺍�걣�걗�굦�겙�깕�꺖�깂�걣�걗�굥�꺃�꺖�꺍�굮�뀓營�
-						if (primary.contains(sckey.get(scratchIndex)) && !note.isEmpty()) {
-							random[sckey.get(scratchIndex)] = note.get(0);
-							primary.remove(sckey.get(scratchIndex));
-							note.remove(0);
-							// �궧�궚�꺀�긿�긽�꺃�꺖�꺍�굮�젂濚겹굤�겓
-							scratchIndex = ++scratchIndex == sckey.size() ? 0 : scratchIndex;
-						}
-
-						// �깕�꺖�깂�걣�걗�굥�꺃�꺖�꺍�굮潁��ｃ걣�쇇�뵟�걮�겒�걚�꺃�꺖�꺍�겓�꺀�꺍���깲�겓�뀓營�
-						while (!(note.isEmpty() || primary.isEmpty())) 
-							makeOtherLaneRandom(random, note, primary, -1);
-
-						// noteLane�걣令뷩겎�겒�걢�겂�걼�굢
-						// lastNoteTime�걣弱뤵걬�걚�꺃�꺖�꺍�걢�굢�젂�빁�겓營��걚�겍�걚�걦
-						while (!note.isEmpty()) {
-							int min = Integer.MAX_VALUE;
-							int minLane = tate.get(0);
-							for (int i = 0; i < tate.size(); i++) {
-								if (min > lastNoteTime[tate.get(i)]) {
-									min = lastNoteTime[tate.get(i)];
-									minLane = tate.get(i);
-								}
-							}
-							random[minLane] = note.get(0);
-							tate.remove((Integer) minLane);
-							note.remove(0);
-						}
-
-						primary.addAll(tate);
-						// 餘뗣굤�굮�꺀�꺍���깲�겓
-						while (!other.isEmpty()) {
-							int r = (int) (Math.random() * primary.size());
-							random[primary.get(r)] = other.get(0);
-							primary.remove(r);
-							other.remove(0);
-						}
-						
-
-
-					} else if (mode.player == 2) {
-						if (mode == Mode.KEYBOARD_24K_DOUBLE) {
-							// TODO 24k-DP�겓野얍퓶
-							break;
-						}
-						// ���깣�꺂�깤�꺃�꺖�셽
-						// �궧�궚�꺀�긿�긽�겢�겗�뜷�썶�겓�꽛�뀍�쉪�겓�궋�궢�궎�꺍�걬�굦�굥�굠�걝�겓�걲�굥
-						// �ｆ돀�겘�눣�씎�겒�걚�굠�걝�겓 sc:40ms key:�궠�꺍�깢�궍�궛�걢�굢沃��겳�눣�걮
-						keys = getKeys(mode, true);
-						int keyInterval = hranThreshold;
-						boolean isRightSide = (getModifyTarget() == SIDE_2P);
-						int scLane = isRightSide ? mode.scratchKey[1] : mode.scratchKey[0];
-						ArrayList<Integer> original, assign, note, other, primary, tate;
-						original = new ArrayList<Integer>(keys.length);
-						assign = new ArrayList<Integer>(keys.length);
-						note = new ArrayList<Integer>(keys.length);
-						other = new ArrayList<Integer>(keys.length);
-						primary = new ArrayList<Integer>(keys.length);
-						tate = new ArrayList<Integer>(keys.length);
-
-						for (int lane = 0; lane < keys.length; lane++) {
-							original.add(keys[lane]);
-							if (isRightSide) {
-								assign.add(keys[keys.length - lane - 1]);
-							} else {
-								assign.add(keys[lane]);
-							}
-						}
-
-						// scLane�굮�뀍�젺�겓
-						if (!isRightSide) {
-							assign.remove((Integer) scLane);
-							assign.add(0, scLane);
-						}
-
-						// LN�걣�궋�궚�깇�궍�깣�겒�꺃�꺖�꺍�굮�궋�궢�궎�꺍�걮�겍�걢�굢�솮鸚�
-						for (int lane = 0; lane < keys.length; lane++) {
-							if (ln[keys[lane]] != -1) {
-								random[keys[lane]] = ln[keys[lane]];
-								assign.remove((Integer) keys[lane]);
-								original.remove((Integer) ln[keys[lane]]);
-							}
-						}
-
-						// �뀇�겗�꺃�꺖�꺍�굮�깕�꺖�깂�겗耶섇쑉�겎�늽窈�
-						while (!original.isEmpty()) {
-							if (notes[original.get(0)] != null) {
-								note.add(original.get(0));
-							} else {
-								other.add(original.get(0));
-							}
-							original.remove(0);
-						}
-
-						// �쑋�궋�궢�궎�꺍�꺃�꺖�꺍�굮潁��ｇ쇇�뵟�걢�겑�걝�걢�겎�늽窈�
-						while (!assign.isEmpty()) {
-							if (tl.getTime() - lastNoteTime[assign.get(0)] < (assign.get(0) == scLane ? scratchInterval
-									: keyInterval)) {
-								tate.add(assign.get(0));
-							} else {
-								primary.add(assign.get(0));
-							}
-							assign.remove(0);
-						}
-
-						// �깕�꺖�깂�걣�걗�굥�꺃�꺖�꺍�굮潁��ｃ걣�쇇�뵟�걮�겒�걚�꺃�꺖�꺍�겓�뀓營�
-						while (!(note.isEmpty() || primary.isEmpty())) {
-							random[primary.get(0)] = note.get(0);
-							primary.remove(0);
-							note.remove(0);
-						}
-
-						// noteLane�걣令뷩겎�겒�걢�겂�걼�굢
-						// lastNoteTime�걣弱뤵걬�걚�꺃�꺖�꺍�걢�굢�젂�빁�겓營��걚�겍�걚�걦
-						while (!note.isEmpty()) {
-							int min = Integer.MAX_VALUE;
-							int minLane = tate.get(0);
-							for (int i = 0; i < tate.size(); i++) {
-								if (min > lastNoteTime[tate.get(i)]) {
-									min = lastNoteTime[tate.get(i)];
-									minLane = tate.get(i);
-								}
-							}
-							random[minLane] = note.get(0);
-							tate.remove((Integer) minLane);
-							note.remove(0);
-						}
-
-						primary.addAll(tate);
-						// 餘뗣굤�굮營��걚�겍�걚�걦
-						while (!other.isEmpty()) {
-							random[primary.get(0)] = other.get(0);
-							primary.remove(0);
-							other.remove(0);
-						}
-
-					}
+					scratchIndex = modifyALLSCR(mode, random, ln, lastNoteTime, scratchIndex, tl, notes,
+							scratchInterval);
 					break;
 
 				case H_RANDOM:
-					keys = getKeys(mode, false);
-					random = keys.length > 0 ? timeBasedShuffle(keys, ln,
-							notes, lastNoteTime, tl.getTime(), hranThreshold)
-							: keys;
+					random = modifyHRANDOM(mode, ln, lastNoteTime, tl, notes);
 					break;
 				case S_RANDOM_EX:
-					keys = getKeys(mode, true);
-					if(mode == Mode.POPN_9K) {
-						random = keys.length > 0 ? noMurioshiShuffle(keys, ln,
-								notes, lastNoteTime, tl.getTime(), hranThreshold)
-								: keys;
-					} else {
-						random = keys.length > 0 ? timeBasedShuffle(keys, ln,
-								notes, lastNoteTime, tl.getTime(), 40)
-								: keys;
-					}
+					random = modifySRANDOMEX(mode, ln, lastNoteTime, tl, notes);
 					break;
 				case SEVEN_TO_NINE:
-					keys = getKeys(mode, true);
-					random = keys.length > 0 ? sevenToNine(keys, ln,
-							notes, lastNoteTime, tl.getTime(), hranThreshold)
-							: keys;
+					random = modifySEVENTONINE(mode, ln, lastNoteTime, tl, notes);
 					break;
 
 				}
@@ -418,10 +174,243 @@ public class NoteShuffleModifier extends PatternModifier {
 					}
 					tl.setHiddenNote(i, hn);
 				}
+				
 				log.add(new PatternModifyLog(tl.getSection(), random));
 			}
 		}
 		return log;
+	}
+	
+	private int[] modifySEVENTONINE(Mode mode, int[] ln, int[] lastNoteTime, TimeLine tl, Note[] notes) {
+		int[] random;
+		int[] keys;
+		keys = getKeys(mode, true);
+		random = keys.length > 0 ? sevenToNine(keys, ln,
+				notes, lastNoteTime, tl.getTime(), hranThreshold)
+				: keys;
+		return random;
+	}
+
+
+	private int[] modifyHRANDOM(Mode mode, int[] ln, int[] lastNoteTime, TimeLine tl, Note[] notes) {
+		int[] random;
+		int[] keys;
+		keys = getKeys(mode, false);
+		random = keys.length > 0 ? timeBasedShuffle(keys, ln,
+				notes, lastNoteTime, tl.getTime(), hranThreshold)
+				: keys;
+		return random;
+	}
+
+
+	private int[] modifySRANDOMEX(Mode mode, int[] ln, int[] lastNoteTime, TimeLine tl, Note[] notes) {
+		int[] random;
+		int[] keys;
+		keys = getKeys(mode, true);
+		if(mode == Mode.POPN_9K) {
+			random = keys.length > 0 ? noMurioshiShuffle(keys, ln,
+					notes, lastNoteTime, tl.getTime(), hranThreshold)
+					: keys;
+		} else {
+			random = keys.length > 0 ? timeBasedShuffle(keys, ln,
+					notes, lastNoteTime, tl.getTime(), 40)
+					: keys;
+		}
+		return random;
+	}
+
+
+	private int modifyALLSCR(Mode mode, int[] random, int[] ln, int[] lastNoteTime, int scratchIndex, TimeLine tl,
+			Note[] notes, int scratchInterval) {
+		int[] keys;
+		// Scratch�꺃�꺖�꺍�걣筽뉑빊�걗�굥�졃�릦�겘�젂濚겹굤�겓�뀓營��걬�굦�굥�굠�걝�겓 (24key野얍퓶)
+		if (mode.player == 1) {
+			// �궥�꺍�궛�꺂�깤�꺃�꺖�셽
+			keys = getKeys(mode, true);
+			int keyInterval = hranThreshold;
+			ArrayList<Integer> original, assign, note, other, primary, tate, sckey;
+			original = new ArrayList<Integer>(keys.length);
+			assign = new ArrayList<Integer>(keys.length);
+			note = new ArrayList<Integer>(keys.length);
+			other = new ArrayList<Integer>(keys.length);
+			primary = new ArrayList<Integer>(keys.length);
+			tate = new ArrayList<Integer>(keys.length);
+			sckey = new ArrayList<Integer>(mode.scratchKey.length);
+
+			for (int lane = 0; lane < keys.length; lane++) {
+				original.add(keys[lane]);
+				assign.add(keys[lane]);
+			}
+			
+			for (int sc = 0; sc < mode.scratchKey.length; sc++) {
+				sckey.add(mode.scratchKey[sc]);
+			}
+
+			removeActivatedLane(random, ln, keys, original, assign);
+
+			// �뀇�겗�꺃�꺖�꺍�굮�깕�꺖�깂�겗耶섇쑉�겎�늽窈�
+			classifyOriginalLane(notes, original, note, other, false);
+			
+			// 
+
+			// �쑋�궋�궢�궎�꺍�꺃�꺖�꺍�굮�늽窈� 1.轝▲겓�뀓營��걲�굥�궧�궚�꺀�긿�긽�꺃�꺖�꺍�겎�겒�걚 2.潁��ｃ걣�쇇�뵟�걲�굥
+			while (!assign.isEmpty()) {
+				if ((
+						sckey.contains(assign.get(0)) && assign.get(0) != sckey.get(scratchIndex))
+						|| tl.getTime() - lastNoteTime[assign.get(0)]
+								< (sckey.contains(assign.get(0)) ? scratchInterval : keyInterval)) {
+					tate.add(assign.get(0));
+				} else {
+					primary.add(assign.get(0));
+				}
+				
+				assign.remove(0);
+			}
+			
+			// primary�겓�궧�궚�꺀�긿�긽�꺃�꺖�꺍�걣�걗�굦�겙�깕�꺖�깂�걣�걗�굥�꺃�꺖�꺍�굮�뀓營�
+			if (primary.contains(sckey.get(scratchIndex)) && !note.isEmpty()) {
+				random[sckey.get(scratchIndex)] = note.get(0);
+				primary.remove(sckey.get(scratchIndex));
+				note.remove(0);
+				// �궧�궚�꺀�긿�긽�꺃�꺖�꺍�굮�젂濚겹굤�겓
+				scratchIndex = ++scratchIndex == sckey.size() ? 0 : scratchIndex;
+			}
+
+			// �깕�꺖�깂�걣�걗�굥�꺃�꺖�꺍�굮潁��ｃ걣�쇇�뵟�걮�겒�걚�꺃�꺖�꺍�겓�꺀�꺍���깲�겓�뀓營�
+			while (!(note.isEmpty() || primary.isEmpty())) 
+				makeOtherLaneRandom(random, note, primary, -1);
+
+			// noteLane�걣令뷩겎�겒�걢�겂�걼�굢
+			// lastNoteTime�걣弱뤵걬�걚�꺃�꺖�꺍�걢�굢�젂�빁�겓營��걚�겍�걚�걦
+			leaveLastNoteTime(random, lastNoteTime, note, tate);
+
+			primary.addAll(tate);
+			// 餘뗣굤�굮�꺀�꺍���깲�겓
+			while (!other.isEmpty())
+				makeOtherLaneRandom(random, other, primary, -1);
+
+
+		} else if (mode.player == 2) {
+			// ���깣�꺂�깤�꺃�꺖�셽
+			// �궧�궚�꺀�긿�긽�겢�겗�뜷�썶�겓�꽛�뀍�쉪�겓�궋�궢�궎�꺍�걬�굦�굥�굠�걝�겓�걲�굥
+			// �ｆ돀�겘�눣�씎�겒�걚�굠�걝�겓 sc:40ms key:�궠�꺍�깢�궍�궛�걢�굢沃��겳�눣�걮
+			keys = getKeys(mode, true);
+			int keyInterval = hranThreshold;
+			boolean isRightSide = (getModifyTarget() == SIDE_2P);
+			int scLane = isRightSide ? mode.scratchKey[1] : mode.scratchKey[0];
+			ArrayList<Integer> original, assign, note, other, primary, tate;
+			original = new ArrayList<Integer>(keys.length);
+			assign = new ArrayList<Integer>(keys.length);
+			note = new ArrayList<Integer>(keys.length);
+			other = new ArrayList<Integer>(keys.length);
+			primary = new ArrayList<Integer>(keys.length);
+			tate = new ArrayList<Integer>(keys.length);
+
+			for (int lane = 0; lane < keys.length; lane++) {
+				original.add(keys[lane]);
+				if (isRightSide) {
+					assign.add(keys[keys.length - lane - 1]);
+				} else {
+					assign.add(keys[lane]);
+				}
+			}
+
+			// scLane�굮�뀍�젺�겓
+			if (!isRightSide) {
+				assign.remove((Integer) scLane);
+				assign.add(0, scLane);
+			}
+
+			// LN�걣�궋�궚�깇�궍�깣�겒�꺃�꺖�꺍�굮�궋�궢�궎�꺍�걮�겍�걢�굢�솮鸚�
+			removeActivatedLane(random, ln, keys, original, assign);
+
+			classifyOriginalLane(notes, original, note, other, false);
+
+			// �쑋�궋�궢�궎�꺍�꺃�꺖�꺍�굮潁��ｇ쇇�뵟�걢�겑�걝�걢�겎�늽窈�
+			while (!assign.isEmpty()) {
+				if (tl.getTime() - lastNoteTime[assign.get(0)] < (assign.get(0) == scLane ? scratchInterval
+						: keyInterval)) {
+					tate.add(assign.get(0));
+				} else {
+					primary.add(assign.get(0));
+				}
+				assign.remove(0);
+			}
+
+			// �깕�꺖�깂�걣�걗�굥�꺃�꺖�꺍�굮潁��ｃ걣�쇇�뵟�걮�겒�걚�꺃�꺖�꺍�겓�뀓營�
+			while (!(note.isEmpty() || primary.isEmpty())) {
+				random[primary.get(0)] = note.get(0);
+				primary.remove(0);
+				note.remove(0);
+			}
+
+			leaveLastNoteTime(random, lastNoteTime, note, tate);
+
+			primary.addAll(tate);
+			// 餘뗣굤�굮營��걚�겍�걚�걦
+			while (!other.isEmpty()) {
+				random[primary.get(0)] = other.get(0);
+				primary.remove(0);
+				other.remove(0);
+			}
+
+		}
+		return scratchIndex;
+	}
+
+
+	private int[] modifySRANDOM(Mode mode, int[] ln, int[] lastNoteTime, TimeLine tl, Note[] notes) {
+		int[] random;
+		int[] keys;
+		keys = getKeys(mode, false);
+		if(mode == Mode.POPN_9K)
+			random = keys.length > 0 ? timeBasedShuffle(keys, ln, notes, lastNoteTime, tl.getTime(), 0): keys;
+		else
+			random = keys.length > 0 ? timeBasedShuffle(keys, ln, notes, lastNoteTime, tl.getTime(), 40): keys;
+		return random;
+	}
+
+
+	private int[] modifySPIRAL(Mode mode, int[] random, int[] ln) {
+		int[] keys;
+		keys = getKeys(mode, false);
+		if (random.length == 0) {
+			// �닜�쐿�ㅳ겗鵝쒏닇
+			int max = 0;
+			for (int key : keys) {
+				max = Math.max(max, key);
+			}
+			random = new int[max + 1];
+			for (int i = 0; i < random.length; i++) {
+				random[i] = i;
+			}
+
+			int index = (int) (Math.random() * keys.length);
+			int j = (int) (Math.random() * 2) >= 1 ? 1 : keys.length - 1;
+			for (int i = 0; i < keys.length; i++) {
+				random[keys[i]] = keys[index];
+				index = (index + j) % keys.length;
+			}
+			inc = (int) (Math.random() * (keys.length - 1)) + 1;
+			Logger.getGlobal().info("SPIRAL - �뼀冶뗤퐤營�:" + index + " 罌쀥늽:" + inc);
+		} else {
+			boolean cln = false;
+			for (int lane = 0; lane < keys.length; lane++) {
+				if (ln[keys[lane]] != -1) {
+					cln = true;
+				}
+			}
+			if (!cln) {
+				int[] nrandom = Arrays.copyOf(random, random.length);
+				int index = inc;
+				for (int i = 0; i < keys.length; i++) {
+					nrandom[keys[i]] = random[keys[index]];
+					index = (index + 1) % keys.length;
+				}
+				random = nrandom;
+			}
+		}
+		return random;
 	}
 
 
@@ -435,21 +424,14 @@ public class NoteShuffleModifier extends PatternModifier {
 		
 		initLanes(keys, assignLane, originalLane, max, result);
 
-		removeActivedLane(keys, activeln, assignLane, originalLane, null, result);
+		removeActivatedLane(keys, activeln, assignLane, originalLane, null, result);
 		
 		List<Integer> noteLane, otherLane;
 		noteLane = new ArrayList<Integer>(keys.length);
 		otherLane = new ArrayList<Integer>(keys.length);
 
-		// �뀇�겗�꺃�꺖�꺍�굮�깕�꺖�깂�겗耶섇쑉�겎�늽窈�
-		while (!originalLane.isEmpty()) {
-			if (notes[originalLane.get(0)] != null) {
-				noteLane.add(originalLane.get(0));
-			} else {
-				otherLane.add(originalLane.get(0));
-			}
-			originalLane.remove(0);
-		}
+		classifyOriginalLane(notes, originalLane, noteLane, otherLane, false);
+		
 
 		// �쑋�궋�궢�궎�꺍�꺃�꺖�꺍�굮潁��ｇ쇇�뵟�걢�겑�걝�걢�겎�늽窈�
 		List<Integer> rendaLane, primaryLane;
@@ -507,13 +489,13 @@ public class NoteShuffleModifier extends PatternModifier {
 		initLanes(keys, noAssignedLane, originalLane, max, result);
 
 		// LN�걣�궋�궚�깇�궍�깣�겒�꺃�꺖�꺍�굮�궋�궢�궎�꺍�걮�겍�걢�굢�솮鸚�
-		removeActivedLane(keys, activeln, assignedLane, originalLane, noAssignedLane, result);
+		removeActivatedLane(keys, activeln, assignedLane, originalLane, noAssignedLane, result);
 		
 		List<Integer> noteLane, otherLane;
 		noteLane = new ArrayList<Integer>(keys.length);
 		otherLane = new ArrayList<Integer>(keys.length);
 
-		checkOriginalLane(notes, originalLane, noteLane, otherLane);
+		classifyOriginalLane(notes, originalLane, noteLane, otherLane, true);
 
 		//�꽒�릤�듉�걮�겓�겒�굢�겒�걚�굠�걝�겓�꺀�꺍���깲�겓營��걚�겍�걚�걦
 		//7�뗦듉�걮餓δ툓�겎�겘�꽒�릤�듉�걮�걮�걢耶섇쑉�걮�겒�걚�겗�겎�솮鸚�
@@ -539,13 +521,13 @@ public class NoteShuffleModifier extends PatternModifier {
 		int[] result = new int[max + 1];
 		
 		initLanes(keys, assignLane, originalLane, max, result);
-		removeActivedLane(keys, activeln, assignLane, originalLane, null, result);
+		removeActivatedLane(keys, activeln, assignLane, originalLane, null, result);
 		
 		List<Integer> noteLane, otherLane;
 		noteLane = new ArrayList<Integer>(keys.length);
 		otherLane = new ArrayList<Integer>(keys.length);
 
-		checkOriginalLane(notes, originalLane, noteLane, otherLane);
+		classifyOriginalLane(notes, originalLane, noteLane, otherLane, true);
 
 		// �쑋�궋�궢�궎�꺍�꺃�꺖�꺍�굮潁��ｆ돀�쇇�뵟�걢�겑�걝�걢�겎�늽窈�
 		List<Integer> rendaLane,mainRendaLane, noRendaLane;
@@ -566,7 +548,7 @@ public class NoteShuffleModifier extends PatternModifier {
 		// �깕�꺖�깂�걣�걗�굥�꺃�꺖�꺍�굮潁��ｆ돀�걣�쇇�뵟�걲�굥�꺃�꺖�꺍�겓�빓�걚�젂�겓�뀓營�
 		while (!(noteLane.isEmpty() || mainRendaLane.isEmpty())) {
 			int maxRenda = Integer.MIN_VALUE;
-		
+
 			for (int i = 0; i < mainRendaLane.size(); i++) 
 				if (maxRenda < laneRendaCount[mainRendaLane.get(i)])
 					maxRenda = laneRendaCount[mainRendaLane.get(i)];
@@ -689,7 +671,6 @@ public class NoteShuffleModifier extends PatternModifier {
 					break;
 			}
 		}
-
 		return result;
 	}
 
@@ -721,7 +702,7 @@ public class NoteShuffleModifier extends PatternModifier {
 			hranThreshold = (int) (Math.ceil(15000.0f / config.getHranThresholdBPM()));
 	}
 	
-	private static void removeActivedLane(int[] keys, int[] activeln, List<Integer> assignLane,
+	private static void removeActivatedLane(int[] keys, int[] activeln, List<Integer> assignLane,
 			List<Integer> originalLane, List<Integer> noAssignedLane, int[] result) {
 		for (int lane = 0; lane < keys.length; lane++) {
 			if (activeln != null && activeln[keys[lane]] != -1) {
@@ -734,6 +715,18 @@ public class NoteShuffleModifier extends PatternModifier {
 		}
 	}
 
+
+	private void removeActivatedLane(int[] random, int[] ln, int[] keys, ArrayList<Integer> original,
+			ArrayList<Integer> assign) {
+		for (int lane = 0; lane < keys.length; lane++) {
+			if (ln[keys[lane]] != -1) {
+				random[keys[lane]] = ln[keys[lane]];
+				assign.remove((Integer) keys[lane]);
+				original.remove((Integer) ln[keys[lane]]);
+			}
+		}
+	}
+	
 	private static void makeOtherLaneRandom(int[] result, List<Integer> noteLane, List<Integer> toRandomLane, int lineCountBias) {
 		int r = (int) (Math.random() * toRandomLane.size());
 		result[toRandomLane.get(r)] = noteLane.get(0);
@@ -746,10 +739,12 @@ public class NoteShuffleModifier extends PatternModifier {
 
 	}
 
-	private static void checkOriginalLane(Note[] notes, List<Integer> originalLane, List<Integer> noteLane,
-			List<Integer> otherLane) {
+
+	private static void classifyOriginalLane(Note[] notes, List<Integer> originalLane, List<Integer> noteLane,
+			List<Integer> otherLane, boolean noteTypeCheck) {
 		while (!originalLane.isEmpty()) {
-			if (notes[originalLane.get(0)] != null && (notes[originalLane.get(0)] instanceof NormalNote || notes[originalLane.get(0)] instanceof LongNote)) {
+			if (notes[originalLane.get(0)] != null && 
+					((!noteTypeCheck) || (notes[originalLane.get(0)] instanceof NormalNote || notes[originalLane.get(0)] instanceof LongNote))) {
 				noteLane.add(originalLane.get(0));
 			} else {
 				otherLane.add(originalLane.get(0));
@@ -758,6 +753,23 @@ public class NoteShuffleModifier extends PatternModifier {
 		}
 	}
 
+
+	private void leaveLastNoteTime(int[] random, int[] lastNoteTime, ArrayList<Integer> note, ArrayList<Integer> tate) {
+		while (!note.isEmpty()) {
+			int min = Integer.MAX_VALUE;
+			int minLane = tate.get(0);
+			for (int i = 0; i < tate.size(); i++) {
+				if (min > lastNoteTime[tate.get(i)]) {
+					min = lastNoteTime[tate.get(i)];
+					minLane = tate.get(i);
+				}
+			}
+			random[minLane] = note.get(0);
+			tate.remove((Integer) minLane);
+			note.remove(0);
+		}
+	}
+	
 	private static void preventMoreThanSevenKeys(int[] keys, int[] lastNoteTime, int now, int duration,
 			List<Integer> assignedLane, List<Integer> noAssignedLane, int max, int[] result, List<Integer> noteLane) {
 		List<Integer> kouhoLane = new ArrayList<Integer>(keys.length); //營��걨�굥�숃짒
@@ -824,4 +836,5 @@ public class NoteShuffleModifier extends PatternModifier {
 		}
 	}
 
+	
 }
