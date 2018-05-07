@@ -14,7 +14,6 @@ import bms.model.TimeLine;
 
 
 public class LaneShuffleModifier extends PatternModifier{
-	
 
 	private int[] random;
 	
@@ -30,7 +29,6 @@ public class LaneShuffleModifier extends PatternModifier{
 	private int max = 0;
 	private boolean isImpossible = false;
 	
-	private LaneShuffleModifier lan;
 	
 	private List<Integer> originalPatternList = new ArrayList<Integer>(); 
 	private List<List<Integer>> kouhoPatternList = new ArrayList<List<Integer>>();
@@ -69,7 +67,60 @@ public class LaneShuffleModifier extends PatternModifier{
 		this.type = type;
 	}
 	
-	
+	private void makeRandom(BMSModel model) {
+		Mode mode = model.getMode();
+		int[] keys;
+		switch (type) {
+		case MIRROR:
+			keys = getKeys(mode, false);
+			random = keys.length > 0 ? rotate(keys, keys.length - 1, false) : keys;
+			break;
+		case R_RANDOM:
+			keys = getKeys(mode, false);
+			random = keys.length > 0 ? rotate(keys) : keys;
+			break;
+		case RANDOM:
+			keys = getKeys(mode, false);
+			random = keys.length > 0 ? shuffle(keys) : keys;
+			break;
+		case CROSS:
+			keys = getKeys(mode, false);
+			random = new int[keys.length];
+			for (int i = 0; i < keys.length / 2 - 1; i += 2) {
+				random[i] = keys[i + 1];
+				random[i + 1] = keys[i];
+				random[keys.length - i - 1] = keys[keys.length - i - 2];
+				random[keys.length - i - 2] = keys[keys.length - i - 1];
+			}
+			break;
+		case RANDOM_EX:
+			keys = getKeys(mode, true);
+			if(mode == Mode.POPN_9K) random = keys.length > 0 ? noMurioshiLaneShuffle(model) : keys;
+			else random = keys.length > 0 ? shuffle(keys) : keys;
+			break;
+		case FLIP:
+			if (mode.player == 2) {
+				random = new int[mode.key];
+				for (int i = 0; i < random.length; i++) {
+					random[i] = (i + (mode.key / mode.player)) % mode.key;
+				}
+			} else {
+				random = new int[0];
+			}
+			break;
+		case BATTLE:
+			if (mode.player == 1) {
+				random = new int[0];
+			} else {
+				keys = getKeys(mode, true);
+				random = new int[keys.length * 2];
+				System.arraycopy(keys, 0, random, 0, keys.length);
+				System.arraycopy(keys, 0, random, keys.length, keys.length);
+			}
+			break;
+
+		}
+	}
 
 	public int[] noMurioshiLaneShuffle(BMSModel model) {
 		
@@ -102,9 +153,6 @@ public class LaneShuffleModifier extends PatternModifier{
 
 	@Override
 	public List<PatternModifyLog> modify(BMSModel model) {
-		Random rand = new Random(model, lan, type);
-		random = rand.makeRandom();
-		
 		List<PatternModifyLog> log = new ArrayList();
 		lanes = model.getMode().key;
 		TimeLine[] timelines = model.getAllTimeLines();
