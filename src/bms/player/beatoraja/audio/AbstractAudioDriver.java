@@ -138,7 +138,8 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 		if (!soundmap.containsKey(p)) {
 			try {
 				sound = new AudioElement(getKeySound(Paths.get(p)));
-				soundmap.put(p, sound.audio != null ? sound : null);
+				sound = sound.audio != null ? sound : null;
+				soundmap.put(p, sound);
 			} catch (Exception e) {
 				Logger.getGlobal().warning("音源読み込み失敗。" + e.getMessage());
 			}
