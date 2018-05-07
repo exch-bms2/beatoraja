@@ -1,13 +1,16 @@
 package bms.player.beatoraja.song;
 
 import bms.model.*;
+import bms.player.beatoraja.Validatable;
+
+import java.util.logging.Logger;
 
 /**
  * 楽曲詳細情報
  * 
  * @author exch
  */
-public class SongInformation {
+public class SongInformation implements Validatable {
 	/**
 	 * 譜面のハッシュ値
 	 */
@@ -133,10 +136,18 @@ public class SongInformation {
 			index = new int[]{0,1,2,3,4,5,6};
 			distribution = distribution.substring(1);
 		}
-		distributionValues = new int[distribution.length() / (index.length * 2)][7];
-		for(int i = 0;i < distribution.length() / (index.length * 2);i++) {
+		final int count = distribution.length() % (index.length * 2) == 0 ? distribution.length() / (index.length * 2) : 0;
+		if(count == 0) {
+			Logger.getGlobal().warning("distributionのString超が不正です");
+		}
+		distributionValues = new int[count][7];
+		for(int i = 0;i < count;i++) {
 			for(int j = 0;j < index.length;j++) {
-				distributionValues[i][index[j]] = parseInt36(distribution, i * (index.length * 2) + j * 2);
+				try {
+					distributionValues[i][index[j]] = parseInt36(distribution, i * (index.length * 2) + j * 2);
+				} catch(NumberFormatException e) {
+					Logger.getGlobal().warning("distribution解析中の例外:" + e.getMessage());
+				}
 			}
 		}
 		
@@ -259,5 +270,19 @@ public class SongInformation {
 
 	public void setEnddensity(double enddensity) {
 		this.enddensity = enddensity;
+	}
+
+	@Override
+	public boolean validate() {
+		if(sha256 == null || sha256.length() != 64) {
+			return false;
+		}
+		if(n < 0 || ln < 0 || s < 0 || ls < 0) {
+			return false;
+		}
+		if(density < 0 || peakdensity < 0 || enddensity < 0 || density > peakdensity || enddensity > peakdensity) {
+			return false;
+		}
+		return true;
 	}
 }

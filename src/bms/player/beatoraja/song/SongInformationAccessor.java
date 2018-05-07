@@ -5,6 +5,8 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.logging.Logger;
 
+import bms.player.beatoraja.IRScoreData;
+import bms.player.beatoraja.Validatable;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
@@ -69,7 +71,7 @@ public class SongInformationAccessor {
 
 	public SongInformation[] getInformations(String sql) {
 		try {
-			List<SongInformation> m = qr.query("SELECT * FROM information WHERE " + sql, songhandler);
+			List<SongInformation> m = Validatable.removeInvalidElements(qr.query("SELECT * FROM information WHERE " + sql, songhandler));
 			return m.toArray(new SongInformation[m.size()]);
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -79,7 +81,7 @@ public class SongInformationAccessor {
 
 	public SongInformation getInformation(String sha256) {
 		try {
-			List<SongInformation> m = qr.query("SELECT * FROM information WHERE sha256 = ?", songhandler, sha256);
+			List<SongInformation> m = Validatable.removeInvalidElements(qr.query("SELECT * FROM information WHERE sha256 = ?", songhandler, sha256));
 			if(m.size() > 0) {
 				return m.get(0);
 			}
@@ -87,6 +89,33 @@ public class SongInformationAccessor {
 			e.printStackTrace();
 		}
 		return null;
+	}
+
+	public void getInformation(SongData[] songs) {
+		try {
+			StringBuilder str = new StringBuilder(songs.length * 64);
+			for (SongData song : songs) {
+				if(song.getSha256() != null) {
+					if (str.length() > 0) {
+						str.append(',');
+					}
+					str.append('\'').append(song.getSha256()).append('\'');
+				}
+			}
+
+			List<SongInformation> infos = Validatable.removeInvalidElements(qr
+					.query("SELECT * FROM information WHERE sha256 IN (" + str.toString() + ")", songhandler));
+			for(SongData song : songs) {
+				for(SongInformation info : infos) {
+					if(info.getSha256().equals(song.getSha256())) {
+						song.setInformation(info);
+						break;
+					}
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void startUpdate() {
