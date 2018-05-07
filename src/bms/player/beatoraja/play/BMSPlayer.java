@@ -23,13 +23,13 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
 import static bms.player.beatoraja.PlayConfig.*;
 
 /**
- * BMSプレイヤー本体
+ * BMS�깤�꺃�궎�깶�꺖�쑍鵝�
  *
  * @author exch
  */
 public class BMSPlayer extends MainState {
 
-	// TODO GLAssistから起動すると楽曲ロード中に止まる
+	// TODO GLAssist�걢�굢壅룟땿�걲�굥�겏璵썸쎊�꺆�꺖�깋訝��겓閭㏂겲�굥
 
 	private BMSModel model;
 
@@ -45,11 +45,11 @@ public class BMSPlayer extends MainState {
 
 	private PlayMode autoplay = PlayMode.PLAY;
 	/**
-	 * BGレーン再生用スレッド
+	 * BG�꺃�꺖�꺍�냽�뵟�뵪�궧�꺃�긿�깋
 	 */
 	private AutoplayThread autoThread;
 	/**
-	 * キー入力用スレッド
+	 * �궘�꺖�뀯�뒟�뵪�궧�꺃�긿�깋
 	 */
 	private KeyInputProccessor keyinput;
 	private ControlInputProcessor control;
@@ -65,19 +65,19 @@ public class BMSPlayer extends MainState {
 	private int playspeed = 100;
 
 	/**
-	 * 処理済ノート数
+	 * �눇�릤歷덀깕�꺖�깉�빊
 	 */
 	private int notes;
 	/**
-	 * 閉店フラグ
+	 * �뻾佯쀣깢�꺀�궛
 	 */
 	private boolean isFailed = false;
 	/**
-	 * PMS キャラ用 ニュートラルモーション開始時の処理済ノート数{1P,2P} (ニュートラルモーション一周時に変化がなければニュートラルモーションを継続するため)
+	 * PMS �궘�깵�꺀�뵪 �깑�깷�꺖�깉�꺀�꺂�깴�꺖�궥�깾�꺍�뼀冶뗦셽�겗�눇�릤歷덀깕�꺖�깉�빊{1P,2P} (�깑�깷�꺖�깉�꺀�꺂�깴�꺖�궥�깾�꺍訝��뫅�셽�겓鸚됧뙑�걣�겒�걨�굦�겙�깑�깷�꺖�깉�꺀�꺂�깴�꺖�궥�깾�꺍�굮泳숂텥�걲�굥�걼�굙)
 	 */
 	private int[] PMcharaLastnotes = {0, 0};
 	/**
-	 * リプレイHS保存用 STATE READY時に保存
+	 * �꺁�깤�꺃�궎HS岳앭춼�뵪 STATE READY�셽�겓岳앭춼
 	 */
 	private int replayFixHispeed = FIX_HISPEED_MAINBPM;
 	private float replayHispeed = 1.0f;
@@ -133,18 +133,18 @@ public class BMSPlayer extends MainState {
 		boolean isReplayPatternPlay = false;
 		ReplayData HSReplay = null;
 		if(replay != null && main.getInputProcessor().getKeyState(1)) {
-			//保存された譜面変更ログから譜面再現
+			//岳앭춼�걬�굦�걼鈺쒒씊鸚됪쎍�꺆�궛�걢�굢鈺쒒씊�냽�뤎
 			resource.setReplayData(replay);
 			isReplayPatternPlay = true;
 		} else if(replay != null && main.getInputProcessor().getKeyState(2)) {
-			//保存された譜面オプションログから譜面オプション再現
+			//岳앭춼�걬�굦�걼鈺쒒씊�궕�깤�궥�깾�꺍�꺆�궛�걢�굢鈺쒒씊�궕�깤�궥�깾�꺍�냽�뤎
 			config.setRandom(replay.randomoption);
 			config.setRandom2(replay.randomoption2);
 			config.setDoubleoption(replay.doubleoption);
 			isReplayPatternPlay = true;
 		}
 		if(replay != null && main.getInputProcessor().getKeyState(4)) {
-			//保存されたHSオプションログからHSオプション再現
+			//岳앭춼�걬�굦�걼HS�궕�깤�궥�깾�꺍�꺆�궛�걢�굢HS�궕�깤�궥�깾�꺍�냽�뤎
 			HSReplay = replay;
 			isReplayPatternPlay = true;
 		}
@@ -159,30 +159,30 @@ public class BMSPlayer extends MainState {
 			} else if (resource.getReplayData().pattern != null) {
 				model = resource.getGenerator().generate(resource.getReplayData().rand);
 			}
-			Logger.getGlobal().info("譜面分岐 : " + Arrays.toString(model.getRandom()));
+			Logger.getGlobal().info("鈺쒒씊�늽略� : " + Arrays.toString(model.getRandom()));
 		}
-		// 通常プレイの場合は最後のノーツ、オートプレイの場合はBG/BGAを含めた最後のノーツ
+		// �싧만�깤�꺃�궎�겗�졃�릦�겘��孃뚣겗�깕�꺖�깂�곥궕�꺖�깉�깤�꺃�궎�겗�졃�릦�겘BG/BGA�굮�맜�굙�걼��孃뚣겗�깕�꺖�깂
 		playtime = (autoplay.isAutoPlayMode() ? model.getLastTime() : model.getLastNoteTime()) + TIME_MARGIN;
 
 		boolean score = true;
 
-		Logger.getGlobal().info("アシストオプション設定");
+		Logger.getGlobal().info("�궋�궥�궧�깉�궕�깤�궥�깾�꺍鼇�若�");
 		if (resource.getCourseBMSModels() == null && autoplay == PlayMode.PLAY || autoplay.isAutoPlayMode()) {
 			if (config.isBpmguide() && (model.getMinBPM() < model.getMaxBPM())) {
-				// BPM変化がなければBPMガイドなし
+				// BPM鸚됧뙑�걣�겒�걨�굦�겙BPM�궗�궎�깋�겒�걮
 				assist = 1;
 				score = false;
 			}
 
 			if (config.isConstant() && (model.getMinBPM() < model.getMaxBPM())) {
-				// BPM変化がなければコンスタントなし
+				// BPM鸚됧뙑�걣�겒�걨�굦�겙�궠�꺍�궧�궭�꺍�깉�겒�걮
 				new ConstantBPMModifier().modify(model);
 				assist = 1;
 				score = false;
 			}
 
 			if (config.isLegacynote()) {
-				// LNがなければアシストなし
+				// LN�걣�겒�걨�굦�겙�궋�궥�궧�깉�겒�걮
 				LongNoteModifier mod = new LongNoteModifier();
 				mod.modify(model);
 				if (mod.longNoteExists()) {
@@ -195,7 +195,7 @@ public class BMSPlayer extends MainState {
 				score = false;
 			}
 			if (config.isNomine()) {
-				// 地雷ノートがなければアシストなし
+				// �쑑�쎐�깕�꺖�깉�걣�겒�걨�굦�겙�궋�궥�궧�깉�겒�걮
 				MineNoteModifier mod = new MineNoteModifier();
 				mod.modify(model);
 				if (mod.mineNoteExists()) {
@@ -204,7 +204,7 @@ public class BMSPlayer extends MainState {
 				}
 			}
 			if (config.getDoubleoption() >= 2 && (model.getMode() == Mode.BEAT_5K || model.getMode() == Mode.BEAT_7K || model.getMode() == Mode.KEYBOARD_24K)) {
-				// SPでなければBATTLEは未適用
+				// SP�겎�겒�걨�굦�겙BATTLE�겘�쑋�겑�뵪
 				switch (model.getMode()) {
 				case BEAT_5K:
 					model.setMode(Mode.BEAT_10K);
@@ -228,7 +228,7 @@ public class BMSPlayer extends MainState {
 			}
 		}
 
-		Logger.getGlobal().info("譜面オプション設定");
+		Logger.getGlobal().info("鈺쒒씊�궕�깤�궥�깾�꺍鼇�若�");
 		BMSPlayerRule.setSevenToNine(false);
 		if (replay != null) {
 			if(replay.sevenToNinePattern > 0 && model.getMode() == Mode.BEAT_7K) {
@@ -243,7 +243,7 @@ public class BMSPlayer extends MainState {
 			}
 			pattern = Arrays.asList(resource.getReplayData().pattern);
 			PatternModifier.modify(model, pattern);
-			Logger.getGlobal().info("譜面オプション : 保存された譜面変更ログから譜面再現");
+			Logger.getGlobal().info("鈺쒒씊�궕�깤�궥�깾�꺍 : 岳앭춼�걬�굦�걼鈺쒒씊鸚됪쎍�꺆�궛�걢�굢鈺쒒씊�냽�뤎");
 		} else if (autoplay != PlayMode.PRACTICE) {
 			PatternModifier.setPlayerConfig(config);
 			if(model.getMode().player == 2) {
@@ -258,7 +258,7 @@ public class BMSPlayer extends MainState {
 					assist = (assist == 0) ? 1 : assist;
 					score = false;
 				}
-				Logger.getGlobal().info("譜面オプション :  " + config.getRandom2());
+				Logger.getGlobal().info("鈺쒒씊�궕�깤�궥�깾�꺍 :  " + config.getRandom2());
 			}
 
 			if(model.getMode().scratchKey.length == 0) {
@@ -278,7 +278,7 @@ public class BMSPlayer extends MainState {
 				assist = (assist == 0) ? 1 : assist;
 				score = false;
 			}
-			Logger.getGlobal().info("譜面オプション :  " + config.getRandom());
+			Logger.getGlobal().info("鈺쒒씊�궕�깤�궥�깾�꺍 :  " + config.getRandom());
 			if (config.getSevenToNinePattern() >= 1 && model.getMode() == Mode.BEAT_7K) {
 				//7to9
 				model.setMode(Mode.POPN_9K);
@@ -294,7 +294,7 @@ public class BMSPlayer extends MainState {
 		}
 
 		if(HSReplay != null) {
-			//保存されたHSオプションログからHSオプション再現
+			//岳앭춼�걬�굦�걼HS�궕�깤�궥�깾�꺍�꺆�궛�걢�굢HS�궕�깤�궥�깾�꺍�냽�뤎
 			PlayConfig pc = getPlayConfig(config).getPlayconfig();
 			pc.setFixhispeed(HSReplay.fixhispeed);
 			pc.setHispeed(HSReplay.hispeed);
@@ -306,7 +306,7 @@ public class BMSPlayer extends MainState {
 			pc.setEnablelift(HSReplay.enablelift);
 		}
 
-		Logger.getGlobal().info("ゲージ設定");
+		Logger.getGlobal().info("�궟�꺖�궦鼇�若�");
 		if(replay != null) {
 			BMSPlayerInputProcessor input = main.getInputProcessor();
 			for(int count = (input.getNumberState(5) ? 1 : 0) + (input.getNumberState(3) ? 2 : 0);count > 0; count--) {
@@ -402,7 +402,7 @@ public class BMSPlayer extends MainState {
 		loadSkin(getSkinType());
 
 		if(BMSPlayerRule.isSevenToNine()) {
-			//7to9 ボーダーが丁度割り切れるゲージ粒数に変更
+			//7to9 �깭�꺖���꺖�걣訝곩벧�돯�굤�늾�굦�굥�궟�꺖�궦暎믤빊�겓鸚됪쎍
 			Skin skin = getSkin();
 			int setParts = skin.getGaugeParts();
 			for(int type = 0; type < gauge.getGaugeTypeLength(); type++) {
@@ -485,7 +485,7 @@ public class BMSPlayer extends MainState {
 		bga = resource.getBGAManager();
 
 		IRScoreData score = main.getPlayDataAccessor().readScoreData(model, config.getLnmode());
-		Logger.getGlobal().info("スコアデータベースからスコア取得");
+		Logger.getGlobal().info("�궧�궠�궋�깈�꺖�궭�깧�꺖�궧�걢�굢�궧�궠�궋�룚孃�");
 		if (score == null) {
 			score = new IRScoreData();
 		}
@@ -523,11 +523,11 @@ public class BMSPlayer extends MainState {
 	private long rhythmtimer;
 	private long startpressedtime;
 	
-	//4分のタイミングの時間 PMSのリズムに合わせたノート拡大用
+	//4�늽�겗�궭�궎�깱�꺍�궛�겗�셽�뼋 PMS�겗�꺁�궨�깲�겓�릦�굩�걵�걼�깕�꺖�깉�떋鸚㎫뵪
 	private long[] quarterNoteTimes;
 	private int quarterNote = 0;
 	private long nowQuarterNoteTime = 0;
-	//ノートを拡大するかどうか
+	//�깕�꺖�깉�굮�떋鸚㎯걲�굥�걢�겑�걝�걢
 	boolean isNoteExpansion = false;
 
 	@Override
@@ -547,7 +547,7 @@ public class BMSPlayer extends MainState {
         	startpressedtime = now;
         }
 		switch (state) {
-		// 楽曲ロード
+		// 璵썸쎊�꺆�꺖�깋
 		case STATE_PRELOAD:
 			if (resource.mediaLoadFinished() && now > skin.getLoadstart() + skin.getLoadend()
 					&& now - startpressedtime > 1000) {
@@ -560,7 +560,7 @@ public class BMSPlayer extends MainState {
 				state = STATE_READY;
 				main.setTimerOn(TIMER_READY);
 				play(SOUND_READY);
-				Logger.getGlobal().info("STATE_READYに移行");
+				Logger.getGlobal().info("STATE_READY�겓燁삭죱");
 			}
 			if(!main.isTimerOn(TIMER_PM_CHARA_1P_NEUTRAL) || !main.isTimerOn(TIMER_PM_CHARA_2P_NEUTRAL)){
 				main.setTimerOn(TIMER_PM_CHARA_1P_NEUTRAL);
@@ -627,10 +627,10 @@ public class BMSPlayer extends MainState {
 				state = STATE_READY;
 				main.setTimerOn(TIMER_READY);
 				play(SOUND_READY);
-				Logger.getGlobal().info("STATE_READYに移行");
+				Logger.getGlobal().info("STATE_READY�겓燁삭죱");
 			}
 			break;
-		// practice終了
+		// practice永귚틙
 		case STATE_PRACTICE_FINISHED:
 			if (main.getNowTime(TIMER_FADEOUT) > skin.getFadeout()) {
 				input.setEnable(true);
@@ -654,10 +654,10 @@ public class BMSPlayer extends MainState {
 				keyinput.startJudge(model, keylog);
 				autoThread = new AutoplayThread(starttimeoffset * 1000);
 				autoThread.start();
-				Logger.getGlobal().info("STATE_PLAYに移行");
+				Logger.getGlobal().info("STATE_PLAY�겓燁삭죱");
 			}
 			break;
-		// プレイ
+		// �깤�꺃�궎
 		case STATE_PLAY:
 			final long deltatime = micronow - prevtime;
 			final long deltaplay = deltatime * (100 - playspeed) / 100;
@@ -688,8 +688,8 @@ public class BMSPlayer extends MainState {
 				}
 			}
 			main.switchTimer(TIMER_GAUGE_MAX_1P, g == gauge.getMaxValue());
-
-			if(main.isTimerOn(TIMER_PM_CHARA_1P_NEUTRAL) && main.getNowTime(TIMER_PM_CHARA_1P_NEUTRAL) >= skin.getPMcharaTime(TIMER_PM_CHARA_1P_NEUTRAL - TIMER_PM_CHARA_1P_NEUTRAL) && main.getNowTime(TIMER_PM_CHARA_1P_NEUTRAL) % skin.getPMcharaTime(TIMER_PM_CHARA_1P_NEUTRAL - TIMER_PM_CHARA_1P_NEUTRAL) < 17) {
+			PMcharaLoader pmCharaLoader = new PMcharaLoader(skin);
+			if(main.isTimerOn(TIMER_PM_CHARA_1P_NEUTRAL) && main.getNowTime(TIMER_PM_CHARA_1P_NEUTRAL) >= pmCharaLoader.getPMcharaTime(TIMER_PM_CHARA_1P_NEUTRAL - TIMER_PM_CHARA_1P_NEUTRAL) && main.getNowTime(TIMER_PM_CHARA_1P_NEUTRAL) % pmCharaLoader.getPMcharaTime(TIMER_PM_CHARA_1P_NEUTRAL - TIMER_PM_CHARA_1P_NEUTRAL) < 17) {
 				if(PMcharaLastnotes[0] != notes && judge.getPMcharaJudge() > 0) {
 					if(judge.getPMcharaJudge() == 1 || judge.getPMcharaJudge() == 2) {
 						if(g == gauge.getMaxValue()) main.setTimerOn(TIMER_PM_CHARA_1P_FEVER);
@@ -699,7 +699,7 @@ public class BMSPlayer extends MainState {
 					main.setTimerOff(TIMER_PM_CHARA_1P_NEUTRAL);
 				}
 			}
-			if(main.isTimerOn(TIMER_PM_CHARA_2P_NEUTRAL) && main.getNowTime(TIMER_PM_CHARA_2P_NEUTRAL) >= skin.getPMcharaTime(TIMER_PM_CHARA_2P_NEUTRAL - TIMER_PM_CHARA_1P_NEUTRAL) && main.getNowTime(TIMER_PM_CHARA_2P_NEUTRAL) % skin.getPMcharaTime(TIMER_PM_CHARA_2P_NEUTRAL - TIMER_PM_CHARA_1P_NEUTRAL) < 17) {
+			if(main.isTimerOn(TIMER_PM_CHARA_2P_NEUTRAL) && main.getNowTime(TIMER_PM_CHARA_2P_NEUTRAL) >= pmCharaLoader.getPMcharaTime(TIMER_PM_CHARA_2P_NEUTRAL - TIMER_PM_CHARA_1P_NEUTRAL) && main.getNowTime(TIMER_PM_CHARA_2P_NEUTRAL) % pmCharaLoader.getPMcharaTime(TIMER_PM_CHARA_2P_NEUTRAL - TIMER_PM_CHARA_1P_NEUTRAL) < 17) {
 				if(PMcharaLastnotes[1] != notes && judge.getPMcharaJudge() > 0) {
 					if(judge.getPMcharaJudge() >= 1 && judge.getPMcharaJudge() <= 3) main.setTimerOn(TIMER_PM_CHARA_2P_BAD);
 					else main.setTimerOn(TIMER_PM_CHARA_2P_GREAT);
@@ -707,7 +707,7 @@ public class BMSPlayer extends MainState {
 				}
 			}
 			for(int i = TIMER_PM_CHARA_1P_FEVER; i <= TIMER_PM_CHARA_2P_BAD; i++) {
-				if(i != TIMER_PM_CHARA_2P_NEUTRAL && main.isTimerOn(i) && main.getNowTime(i) >= skin.getPMcharaTime(i - TIMER_PM_CHARA_1P_NEUTRAL)) {
+				if(i != TIMER_PM_CHARA_2P_NEUTRAL && main.isTimerOn(i) && main.getNowTime(i) >= pmCharaLoader.getPMcharaTime(i - TIMER_PM_CHARA_1P_NEUTRAL)) {
 					if(i <= TIMER_PM_CHARA_1P_BAD) {
 						main.setTimerOn(TIMER_PM_CHARA_1P_NEUTRAL);
 						PMcharaLastnotes[0] = notes;
@@ -729,11 +729,11 @@ public class BMSPlayer extends MainState {
 				}
 				main.setTimerOff(TIMER_PM_CHARA_DANCE);
 
-				Logger.getGlobal().info("STATE_FINISHEDに移行");
+				Logger.getGlobal().info("STATE_FINISHED�겓燁삭죱");
 			} else if(playtime - TIME_MARGIN < ptime) {
 				main.switchTimer(TIMER_ENDOFNOTE_1P, true);
             }
-			// stage failed判定
+			// stage failed�닩若�
 			if (g == 0) {
 				if(config.isContinueUntilEndOfSong()
 						&& ( gauge.getType() != GrooveGauge.CLASS || (gauge.getType() == GrooveGauge.CLASS && notes != main.getPlayerResource().getSongdata().getNotes()) )
@@ -754,11 +754,11 @@ public class BMSPlayer extends MainState {
 						main.getAudioProcessor().stop((Note) null);
 					}
 					play(SOUND_PLAYSTOP);
-					Logger.getGlobal().info("STATE_FAILEDに移行");
+					Logger.getGlobal().info("STATE_FAILED�겓燁삭죱");
 				}
 			}
 			break;
-		// 閉店処理
+		// �뻾佯쀥눇�릤
 		case STATE_FAILED:
 			if (autoThread != null) {
 				autoThread.stop = true;
@@ -797,7 +797,7 @@ public class BMSPlayer extends MainState {
 				}
 			}
 			break;
-		// 完奏処理
+		// 若뚦쪕�눇�릤
 		case STATE_FINISHED:
 			if (autoThread != null) {
 				autoThread.stop = true;
@@ -937,7 +937,7 @@ public class BMSPlayer extends MainState {
 		score.setGauge(GrooveGauge.getGaugeID(gauge));
 		score.setOption(config.getRandom() + (model.getMode().player == 2
 				? (config.getRandom2() * 10 + config.getDoubleoption() * 100) : 0));
-		// リプレイデータ保存。スコア保存されない場合はリプレイ保存しない
+		// �꺁�깤�꺃�궎�깈�꺖�궭岳앭춼�귙궧�궠�궋岳앭춼�걬�굦�겒�걚�졃�릦�겘�꺁�깤�꺃�궎岳앭춼�걮�겒�걚
 		final ReplayData replay = resource.getReplayData();
 		replay.player = main.getPlayerConfig().getName();
 		replay.sha256 = model.getSHA256();
@@ -983,7 +983,7 @@ public class BMSPlayer extends MainState {
 		if (state != STATE_FINISHED && notes == main.getPlayerResource().getSongdata().getNotes() && !isFailed) {
 			state = STATE_FINISHED;
 			main.setTimerOn(TIMER_FADEOUT);
-			Logger.getGlobal().info("STATE_FINISHEDに移行");
+			Logger.getGlobal().info("STATE_FINISHED�겓燁삭죱");
 		} else if(state == STATE_FINISHED && !main.isTimerOn(TIMER_FADEOUT)) {
 			main.setTimerOn(TIMER_FADEOUT);
 		} else if(state != STATE_FINISHED) {
@@ -993,7 +993,7 @@ public class BMSPlayer extends MainState {
 				main.getAudioProcessor().stop((Note) null);
 			}
 			play(SOUND_PLAYSTOP);
-			Logger.getGlobal().info("STATE_FAILEDに移行");
+			Logger.getGlobal().info("STATE_FAILED�겓燁삭죱");
 		}
 	}
 
@@ -1001,7 +1001,7 @@ public class BMSPlayer extends MainState {
 	public void dispose() {
 		super.dispose();
 		lanerender.dispose();
-		Logger.getGlobal().info("システム描画のリソース解放");
+		Logger.getGlobal().info("�궥�궧�깇�깲�룒�뵽�겗�꺁�궫�꺖�궧鰲ｆ붂");
 	}
 
 	public void play(Note note, float volume, int pitchShift) {
@@ -1033,7 +1033,7 @@ public class BMSPlayer extends MainState {
 		gauge.update(judge);
 		// System.out.println("Now count : " + notes + " - " + totalnotes);
 
-		//フルコン判定
+		//�깢�꺂�궠�꺍�닩若�
 		main.switchTimer(TIMER_FULLCOMBO_1P, notes == main.getPlayerResource().getSongdata().getNotes()
 				&& notes == this.judge.getCombo());
 		
@@ -1051,7 +1051,7 @@ public class BMSPlayer extends MainState {
 	}
 
 	/**
-	 * BGレーン再生用スレッド
+	 * BG�꺃�꺖�꺍�냽�뵟�뵪�궧�꺃�긿�깋
 	 *
 	 * @author exch
 	 */
@@ -1082,7 +1082,7 @@ public class BMSPlayer extends MainState {
 
 			while (!stop) {
 				final long time = main.getNowMicroTime(TIMER_PLAY);
-				// BGレーン再生
+				// BG�꺃�꺖�꺍�냽�뵟
 				while (p < timelines.length && timelines[p].getMicroTime() <= time) {
 					for (Note n : timelines[p].getBackGroundNotes()) {
 						play(n, config.getBgvolume(), 0);
@@ -1231,7 +1231,7 @@ public class BMSPlayer extends MainState {
 	}
 
     public SkinOffset getOffsetValue(int id) {
-    	// TODO 各クラスでoffsetを算出してこのメソッドは廃止したい
+    	// TODO �릢�궚�꺀�궧�겎offset�굮嶸쀥눣�걮�겍�걪�겗�깳�궫�긿�깋�겘兩껅�㏂걮�걼�걚
     	SkinOffset offset = main.getOffset(id);
         switch (id) {
 		case OFFSET_SCRATCHANGLE_1P:
