@@ -208,33 +208,15 @@ public class BMSPlayerInputProcessor {
 	}
 
 	public void setPlayConfig(PlayModeConfig playconfig) {
+		boolean[] exclusive = new boolean[playconfig.getKeyboardConfig().getKeyLength()];
+		
 		// KB, コントローラー, Midiの各ボタンについて排他的処理を実施
-		int[] kbkeys = playconfig.getKeyboardConfig().getKeyAssign();
-		boolean[] exclusive = new boolean[kbkeys.length];
-		resetKeyState();
-		resetKeyTime();
-		
-		int kbcount = setPlayConfig0(kbkeys,  exclusive);
-		
-		int[][] cokeys = new int[playconfig.getController().length][];
-		int cocount = 0;
-		for(int i = 0;i < cokeys.length;i++) {
-			cokeys[i] = playconfig.getController()[i].getKeyAssign();
-			cocount += setPlayConfig0(cokeys[i],  exclusive);
-		}
-				
-		MidiConfig.Input[] mikeys  = playconfig.getMidiConfig().getKeys();
-		int micount = 0;
-		for(int i = 0;i < mikeys.length;i++) {
-			if(exclusive[i]) {
-				mikeys[i] = null;
-			} else {
-				exclusive[i] = true;
-				micount++;
-			}
-		}
+		int kbcount = countKeyboard(playconfig, exclusive);
+		int cocount = countController(playconfig, exclusive);
+		int micount = countMidi(playconfig, exclusive);
 		
 		// 各デバイスにキーコンフィグをセット
+		// set key configuration on each device
 		kbinput.setConfig(playconfig.getKeyboardConfig());
 		for(int i = 0;i < bminput.length;i++) {
 			for(ControllerConfig controller : playconfig.getController()) {
@@ -253,6 +235,39 @@ public class BMSPlayerInputProcessor {
 		} else {
 			type = Type.MIDI;			
 		}
+	}
+	
+	private int countMidi(PlayModeConfig playconfig, boolean[] exclusive) {
+		MidiConfig.Input[] mikeys  = playconfig.getMidiConfig().getKeys();
+		int micount = 0;
+		for(int i = 0;i < mikeys.length;i++) {
+			if(exclusive[i]) {
+				mikeys[i] = null;
+			} else {
+				exclusive[i] = true;
+				micount++;
+			}
+		}
+		return micount;
+	}
+
+	private int countController(PlayModeConfig playconfig, boolean[] exclusive) {
+		int[][] cokeys = new int[playconfig.getController().length][];
+		int cocount = 0;
+		for(int i = 0;i < cokeys.length;i++) {
+			cokeys[i] = playconfig.getController()[i].getKeyAssign();
+			cocount += setPlayConfig0(cokeys[i],  exclusive);
+		}
+		return cocount;
+	}
+
+	private int countKeyboard(PlayModeConfig playconfig, boolean[] exclusive) {
+		int[] kbkeys = playconfig.getKeyboardConfig().getKeyAssign();
+		resetKeyState();
+		resetKeyTime();
+		
+		int kbcount = setPlayConfig0(kbkeys,  exclusive);
+		return kbcount;
 	}
 	
 	public BMSPlayerInputDevice.Type getDeviceType() {
