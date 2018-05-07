@@ -238,8 +238,6 @@ public class JudgeManager {
 		final BMSPlayerInputProcessor input = mc.getInputProcessor();
 		final Config config = mc.getPlayerResource().getConfig();
 		final PlayerConfig playerConfig = mc.getPlayerResource().getPlayerConfig();
-		final long[] keytime = input.getTime();
-		final boolean[] keystate = input.getKeystate();
 		final long now = mc.getNowTime();
 		// �싮걥楹삠겗�닩若�
 		Arrays.fill(next_inclease, false);
@@ -249,7 +247,7 @@ public class JudgeManager {
 			lanemodel.mark((int) (prevtime + judgestart - 100));
 			boolean pressed = false;
 			for (int key : laneassign[lane]) {
-				if (keystate[key]) {
+				if (input.getKeyState(key)) {
 					pressed = true;
 					break;
 				}
@@ -385,14 +383,14 @@ public class JudgeManager {
 			if (lane == -1) {
 				continue;
 			}
-			final long ptime = keytime[key];
+			final long ptime = input.getKeyTime(key);
 			if (ptime == 0) {
 				continue;
 			}
 			final Lane lanemodel = lanes[lane];
 			lanemodel.reset();
 			final int sc = sckeyassign[lane];
-			if (keystate[key]) {
+			if (input.getKeyState(key)) {
 				// �궘�꺖�걣�듉�걬�굦�걼�겏�걤�겗�눇�릤
 				if (processing[lane] != null) {
 					// BSS永귞ク�눇�릤
@@ -576,7 +574,7 @@ public class JudgeManager {
 					}
 				}
 			}
-			keytime[key] = 0;
+			input.resetCursorTime(key);
 		}
 
 		for (int lane = 0; lane < sckeyassign.length; lane++) {
