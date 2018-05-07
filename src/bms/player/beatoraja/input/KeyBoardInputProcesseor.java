@@ -90,7 +90,7 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 	}
 
 	public void setConfig(KeyboardConfig config) {
-		this.keys = config.getKeyAssign().clone();
+		this.keys = config.getKeys().clone();
 		this.control = new int[] { config.getStart(), config.getSelect() };
 	}
 

@@ -5,49 +5,15 @@ import java.util.Arrays;
 import bms.model.Mode;
 
 
-public class MidiConfig {
-
-    public static class Input {
-        public enum Type {
-            NOTE, PITCH_BEND, CONTROL_CHANGE,
-        }
-
-        public Type type;
-        public int value;
-
-        public Input() {
-            this.type = Type.NOTE;
-            this.value = 0;
-        }
-
-        public Input(Input input) {
-            this.type = input.type;
-            this.value = input.value;
-        }
-
-        public Input(Type type, int value) {
-            this.type = type;
-            this.value = value;
-        }
-
-        public String toString() {
-            switch (type) {
-                case NOTE:
-                    return "NOTE " + value;
-                case PITCH_BEND:
-                    return "PITCH " + (value > 0 ? "+" : "-");
-                case CONTROL_CHANGE:
-                    return "CC " + value;
-                default:
-                    return null;
-            }
-        }
+public class MidiConfig extends Configuration<Input> {
+	public MidiConfig() {
+        this(Mode.BEAT_7K, true);
     }
 
-    private Input[] keys;
-    private Input start;
-    private Input select;
-
+    public MidiConfig(Mode mode, boolean enable) {
+        this.setKeyAssign(mode, enable);
+    }
+    
     public Input[] getKeys() {
         return keys;
     }
@@ -56,40 +22,12 @@ public class MidiConfig {
         this.keys = keys;
     }
 
-    public Input getStart() {
-        return start;
-    }
-
-    public Input getSelect() {
-        return select;
-    }
-
-    public void setStart(Input input) {
-        start = input;
-    }
-
-    public void setSelect(Input input) {
-        select = input;
-    }
-
-    public MidiConfig() {
-        this(Mode.BEAT_7K, true);
-    }
-
-    public MidiConfig(Mode mode, boolean enable) {
-        this.setKeyAssign(mode, enable);
-    }
-
     public Input getKey(int index) {
         return keys[index];
     }
     
-    public boolean isKeyAssigned() {
-    	return keys != null;
-    }
-    
-    public int getKeyLength() {
-    	return keys.length;
+    public void setKey(int index, Input input) {
+        keys[index] = input;
     }
 
     public void setKeyAssign(Mode mode, boolean enable) {
@@ -161,9 +99,5 @@ public class MidiConfig {
         if(!enable) {
             Arrays.fill(keys, null);
         }
-    }
-
-    public void setKey(int index, Input input) {
-        keys[index] = input;
     }
 }

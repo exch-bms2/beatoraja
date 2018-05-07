@@ -237,7 +237,7 @@ public class BMSPlayerInputProcessor {
 	}
 	
 	private int countMidi(PlayModeConfig playconfig, boolean[] exclusive) {
-		MidiConfig.Input[] mikeys  = playconfig.getMidiConfig().getKeys();
+		Input[] mikeys  = playconfig.getMidiConfig().getKeys();
 		int micount = 0;
 		for(int i = 0;i < mikeys.length;i++) {
 			if(exclusive[i]) {
@@ -261,7 +261,7 @@ public class BMSPlayerInputProcessor {
 	}
 
 	private int countKeyboard(PlayModeConfig playconfig, boolean[] exclusive) {
-		int[] kbkeys = playconfig.getKeyboardConfig().getKeyAssign();
+		int[] kbkeys = playconfig.getKeyboardConfig().getKeys();
 		resetKeyState();
 		resetKeyTime();
 		

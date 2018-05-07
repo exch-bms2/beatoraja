@@ -207,7 +207,7 @@ public class KeyConfiguration extends MainState {
 
 			if (input.checkIfNumberPressed(7)) {
 				input.resetNumberTime(7);
-				keyboardConfig.setKeyAssign(MODE_HINT[mode], true);
+				keyboardConfig.setKeyAssgin(MODE_HINT[mode], true);
 				for (int i = 0; i < controllerConfigs.length; i++) {
 					controllerConfigs[i].setKeyAssign(MODE_HINT[mode], i, false);
 				}
@@ -215,7 +215,7 @@ public class KeyConfiguration extends MainState {
 			}
 			if (input.checkIfNumberPressed(8)) {
 				input.resetNumberTime(8);
-				keyboardConfig.setKeyAssign(MODE_HINT[mode], false);
+				keyboardConfig.setKeyAssgin(MODE_HINT[mode], false);
 				for (int i = 0; i < controllerConfigs.length; i++) {
 					controllerConfigs[i].setKeyAssign(MODE_HINT[mode], i, true);
 				}
@@ -223,7 +223,7 @@ public class KeyConfiguration extends MainState {
 			}
 			if (input.checkIfNumberPressed(9)) {
 				input.resetNumberTime(9);
-				keyboardConfig.setKeyAssign(MODE_HINT[mode], false);
+				keyboardConfig.setKeyAssgin(MODE_HINT[mode], false);
 				for (int i = 0; i < controllerConfigs.length; i++) {
 					controllerConfigs[i].setKeyAssign(MODE_HINT[mode], i, false);
 				}
@@ -334,7 +334,7 @@ public class KeyConfiguration extends MainState {
 
 	private int getKeyboardKeyAssign(int index) {
 		if (index >= 0) {
-			return keyboardConfig.getKeyAssign()[index];
+			return keyboardConfig.getKeys()[index];
 		} else if (index == -1) {
 			return keyboardConfig.getStart();
 		} else if (index == -2) {
@@ -349,7 +349,7 @@ public class KeyConfiguration extends MainState {
 		}
 		resetKeyAssign(index);
 		if (index >= 0) {
-			keyboardConfig.getKeyAssign()[index] = keyboard.getLastPressedKey();
+			keyboardConfig.getKeys()[index] = keyboard.getLastPressedKey();
 		} else if (index == -1) {
 			keyboardConfig.setStart(keyboard.getLastPressedKey());
 		} else if (index == -2) {
@@ -390,7 +390,7 @@ public class KeyConfiguration extends MainState {
 		}
 	}
 
-	private MidiConfig.Input getMidiKeyAssign(int index) {
+	private Input getMidiKeyAssign(int index) {
 		if (index >= 0) {
 			return midiconfig.getKey(index);
 		} else if (index == -1) {
@@ -398,12 +398,12 @@ public class KeyConfiguration extends MainState {
 		} else if (index == -2) {
 			return midiconfig.getSelect();
 		}
-		return new MidiConfig.Input();
+		return new Input();
 	}
 
 	private void resetKeyAssign(int index) {
 		if (index >= 0) {
-			keyboardConfig.getKeyAssign()[index] = -1;
+			keyboardConfig.getKeys()[index] = -1;
 			for (ControllerConfig cc : controllerConfigs) {
 				cc.setKey(index, -1);
 			}
@@ -413,7 +413,7 @@ public class KeyConfiguration extends MainState {
 
 	private void resetKeyAssign(int KBIndex, int BMIndex, int MidiIndex) {
 		final int noAssign = -1;
-		if (KBIndex >= 0) keyboardConfig.getKeyAssign()[KBIndex] = noAssign;
+		if (KBIndex >= 0) keyboardConfig.getKeys()[KBIndex] = noAssign;
 		if(BMIndex >= 0) {
 				for (ControllerConfig cc : controllerConfigs) {
 					cc.setKey(BMIndex, noAssign);
@@ -453,12 +453,12 @@ public class KeyConfiguration extends MainState {
 				maxKey = key;
 			}
 		}
-		if (keyboardConfig.getKeyAssign().length <= maxKey) {
+		if (keyboardConfig.getKeys().length <= maxKey) {
 			int[] keys = new int[maxKey + 1];
-			for (int i = 0; i < keyboardConfig.getKeyAssign().length; i++) {
-				keys[i] = keyboardConfig.getKeyAssign()[i];
+			for (int i = 0; i < keyboardConfig.getKeys().length; i++) {
+				keys[i] = keyboardConfig.getKeys()[i];
 			}
-			keyboardConfig.setKeyAssign(keys);
+			keyboardConfig.setKeys(keys);
 		}
 	}
 
@@ -487,7 +487,7 @@ public class KeyConfiguration extends MainState {
 				for (int i = 0; i < controllerConfig.getKeyLength(); i++) {
 					keys[i] = controllerConfig.getKey(i);
 				}
-				controllerConfig.setKeyAssign(keys);
+				controllerConfig.setKeys(keys);
 			}
 		}
 	}
@@ -500,9 +500,9 @@ public class KeyConfiguration extends MainState {
 			}
 		}
 		if (midiconfig.getKeys().length <= maxKey) {
-			MidiConfig.Input[] keys = new MidiConfig.Input[maxKey + 1];
+			Input[] keys = new Input[maxKey + 1];
 			for (int i = 0; i < keys.length; i++) {
-				keys[i] = i < midiconfig.getKeys().length ? midiconfig.getKeys()[i] : new MidiConfig.Input();
+				keys[i] = i < midiconfig.getKeys().length ? midiconfig.getKeys()[i] : new Input();
 			}
 			midiconfig.setKeys(keys);
 		}

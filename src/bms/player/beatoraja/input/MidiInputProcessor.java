@@ -2,7 +2,7 @@ package bms.player.beatoraja.input;
 
 import javax.sound.midi.*;
 
-import bms.player.beatoraja.playmode.MidiConfig;
+import bms.player.beatoraja.playmode.*;
 
 import java.util.ArrayList;
 import java.util.function.Consumer;
@@ -22,7 +22,7 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 	int pitch = 0;
 
 	boolean lastPressedKeyAvailable = false;
-	MidiConfig.Input lastPressedKey = new MidiConfig.Input();
+	Input lastPressedKey = new Input();
 
 	// pitch value: -8192 ~ 8191
 	final int pitchThreshold = 8192 / 32;
@@ -68,7 +68,7 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 		clear();
 		clearHandlers();
 
-		MidiConfig.Input[] keys = config.getKeys();
+		Input[] keys = config.getKeys();
 		for (int i=0; i<keys.length; i++) {
 			final int key = i;
 			setHandler(keys[i], (Boolean pressed) -> {
@@ -100,7 +100,7 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 		pitchBendDown = null;
 	}
 
-	void setHandler(MidiConfig.Input input, Consumer<Boolean> handler) {
+	void setHandler(Input input, Consumer<Boolean> handler) {
 		if (input == null)
 			return;
 		switch (input.type) {
@@ -129,7 +129,7 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 
 	void noteOn(int num) {
 		lastPressedKeyAvailable = true;
-		lastPressedKey.type = MidiConfig.Input.Type.NOTE;
+		lastPressedKey.type = Input.Type.NOTE;
 		lastPressedKey.value = num;
 		if (keyMap[num] != null) {
 			keyMap[num].accept(true);
@@ -139,7 +139,7 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 	void onPitchBendUp(boolean pressed) {
 		if (pressed) {
 			lastPressedKeyAvailable = true;
-			lastPressedKey.type = MidiConfig.Input.Type.PITCH_BEND;
+			lastPressedKey.type = Input.Type.PITCH_BEND;
 			lastPressedKey.value = 1;
 		}
 		if (pitchBendUp != null) {
@@ -150,7 +150,7 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 	void onPitchBendDown(boolean pressed) {
 		if (pressed) {
 			lastPressedKeyAvailable = true;
-			lastPressedKey.type = MidiConfig.Input.Type.PITCH_BEND;
+			lastPressedKey.type = Input.Type.PITCH_BEND;
 			lastPressedKey.value = -1;
 		}
 		if (pitchBendDown != null) {
@@ -166,8 +166,8 @@ public class MidiInputProcessor extends BMSPlayerInputDevice implements AutoClos
 		return lastPressedKeyAvailable;
 	}
 
-	public MidiConfig.Input getLastPressedKey() {
-		return lastPressedKeyAvailable ? new MidiConfig.Input(lastPressedKey) : null;
+	public Input getLastPressedKey() {
+		return lastPressedKeyAvailable ? new Input(lastPressedKey) : null;
 	}
 
 	public void clearLastPressedKey() {
