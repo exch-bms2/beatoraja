@@ -160,7 +160,7 @@ public class PMcharaLoader {
 		for(int i = 0; i < frame.length; i++) {
 			if(frame[i] == Integer.MIN_VALUE) frame[i] = anime;
 			if(frame[i] < 1) frame[i] = 100;
-		}//////////
+		}//////////////
 		
 		//占쏙옙占쎄묽占쎄틬占쎈뎁
 		Pixmap pixmap = new Pixmap( 1, 1, Format.RGBA8888 );
