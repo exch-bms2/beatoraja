@@ -155,50 +155,20 @@ public class LaneShuffleModifier extends PatternModifier{
 	public List<PatternModifyLog> modify(BMSModel model) {
 		List<PatternModifyLog> log = new ArrayList();
 		lanes = model.getMode().key;
+		Note[] notes = new Note[lanes];
+		Note[] hnotes = new Note[lanes];
+		boolean[] clone = new boolean[lanes];
 		TimeLine[] timelines = model.getAllTimeLines();
+		
 		for (int index = 0; index < timelines.length; index++) {
 			final TimeLine tl = timelines[index];
 			if (tl.existNote() || tl.existHiddenNote()) {
-				Note[] notes = new Note[lanes];
-				Note[] hnotes = new Note[lanes];
-				for (int i = 0; i < lanes; i++) {
-					notes[i] = tl.getNote(i);
-					hnotes[i] = tl.getHiddenNote(i);
-				}
-				boolean[] clone = new boolean[lanes];
-				for (int i = 0; i < lanes; i++) {
-					final int mod = i < random.length ? random[i] : i;
-					if (clone[mod]) {
-						if (notes[mod] != null) {
-							if (notes[mod] instanceof LongNote && ((LongNote) notes[mod]).isEnd()) {
-								for (int j = index - 1; j >= 0; j--) {
-									if (((LongNote) notes[mod]).getPair().getSection() == timelines[j].getSection()) {
-										LongNote ln = (LongNote) timelines[j].getNote(i);
-										tl.setNote(i, ln.getPair());
-										System.out.println(ln.toString() + " : " + ln.getPair().toString() + " == "
-												+ ((LongNote) notes[mod]).getPair().toString() + " : "
-												+ notes[mod].toString());
-										break;
-									}
-								}
-							} else {
-								tl.setNote(i, (Note) notes[mod].clone());
-							}
-						} else {
-							tl.setNote(i, null);
-						}
-						if (hnotes[mod] != null) {
-							tl.setHiddenNote(i, (Note) hnotes[mod].clone());
-						} else {
-							tl.setHiddenNote(i, null);
-						}
-					} else {
-						tl.setNote(i, notes[mod]);
-						tl.setHiddenNote(i, hnotes[mod]);
-						clone[mod] = true;
-					}
-				}
-				log.add(new PatternModifyLog(tl.getSection(), random));
+				
+				//Set Note
+				Set_Note(tl, notes, hnotes);
+				
+				//Set_Log
+				Set_Log(clone, notes, hnotes, tl, index, timelines ,log );
 			}
 		}
 		return log;
@@ -360,6 +330,50 @@ public class LaneShuffleModifier extends PatternModifier{
 		}
 		
 		return result;
+	}
+	
+	private void Set_Note(TimeLine tl, Note[] notes, Note[] hnotes ) {
+		
+		for (int i = 0; i < lanes; i++) {
+			notes[i] = tl.getNote(i);
+			hnotes[i] = tl.getHiddenNote(i);
+		}
+	}
+	
+	private void Set_Log(boolean[] clone, Note[] notes, Note[] hnotes, TimeLine tl, int index, TimeLine[] timelines ,List<PatternModifyLog> log ) {
+		for (int i = 0; i < lanes; i++) {
+			final int mod = i < random.length ? random[i] : i;
+			if (clone[mod]) {
+				if (notes[mod] != null) {
+					if (notes[mod] instanceof LongNote && ((LongNote) notes[mod]).isEnd()) {
+						for (int j = index - 1; j >= 0; j--) {
+							if (((LongNote) notes[mod]).getPair().getSection() == timelines[j].getSection()) {
+								LongNote ln = (LongNote) timelines[j].getNote(i);
+								tl.setNote(i, ln.getPair());
+								System.out.println(ln.toString() + " : " + ln.getPair().toString() + " == "
+										+ ((LongNote) notes[mod]).getPair().toString() + " : "
+										+ notes[mod].toString());
+								break;
+							}
+						}
+					} else {
+						tl.setNote(i, (Note) notes[mod].clone());
+					}
+				} else {
+					tl.setNote(i, null);
+				}
+				if (hnotes[mod] != null) {
+					tl.setHiddenNote(i, (Note) hnotes[mod].clone());
+				} else {
+					tl.setHiddenNote(i, null);
+				}
+			} else {
+				tl.setNote(i, notes[mod]);
+				tl.setHiddenNote(i, hnotes[mod]);
+				clone[mod] = true;
+			}
+		}
+		log.add(new PatternModifyLog(tl.getSection(), random));
 	}
 
 }
