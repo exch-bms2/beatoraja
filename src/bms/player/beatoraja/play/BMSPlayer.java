@@ -1089,15 +1089,15 @@ public class BMSPlayer extends MainState {
 		score.setOption(config.getRandom() + (model.getMode().player == 2
 				? (config.getRandom2() * 10 + config.getDoubleoption() * 100) : 0));
 		// �꺁�깤�꺃�궎�깈�꺖�궭岳앭춼�귙궧�궠�궋岳앭춼�걬�굦�겒�걚�졃�릦�겘�꺁�깤�꺃�궎岳앭춼�걮�겒�걚
-		makeReplay(config, resource);
+		final ReplayData replay = makeReplay(config, resource);
 
 		score.setMinbp(score.getEbd() + score.getLbd() + score.getEpr() + score.getLpr() + score.getEms() + score.getLms() + resource.getSongdata().getNotes() - notes);
 		score.setDeviceType(main.getInputProcessor().getDeviceType());
 		return score;
 	}
 
-	private void makeReplay(final PlayerConfig config, final PlayerResource resource) {
-		final ReplayData replay = resource.getReplayData();
+	private ReplayData makeReplay(final PlayerConfig config, final PlayerResource resource) {
+		ReplayData replay = resource.getReplayData();
 		replay.player = main.getPlayerConfig().getName();
 		replay.sha256 = model.getSHA256();
 		replay.mode = config.getLnmode();
@@ -1118,6 +1118,7 @@ public class BMSPlayer extends MainState {
 		replay.enablelanecover = replayEnablelanecover;
 		replay.lift = replayLift;
 		replay.enablelift = replayEnablelift;
+		return replay;
 	}
 	
 
