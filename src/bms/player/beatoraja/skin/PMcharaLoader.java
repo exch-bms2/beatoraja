@@ -238,7 +238,7 @@ public class PMcharaLoader {
 						}
 						int startPosition[] = {0,0,size[0],size[1]};
 						int endPosition[] = {0,0,size[0],size[1]};
-						int count;
+						int count = 0;
 						for(int i = 0; i < dst[1].length(); i+=2) {
 							if(dst[1].length() >= i+2) {
 								if(dst[1].substring(i, i+2).equals("--")) {
@@ -261,34 +261,8 @@ public class PMcharaLoader {
 						}
 						//alpha占쎄쾹angle占쎄쿁亦껓옙占쎄껙歷��뇠寃�
 						int alphaAngle[][] = new int[dstPosition.length][2];
-						for(int i = 0; i < alphaAngle.length; i++){
-							alphaAngle[i][0] = 255;
-							alphaAngle[i][1] = 0;
-						}
-						for(int index = 2 ; index < dst.length; index++) {
-							int startValue = 0;
-							int endValue = 0;
-							for(int i = 0; i < dst[index].length(); i+=2) {
-								if(dst[index].length() >= i+2) {
-									if(dst[index].substring(i, i+2).equals("--")) {
-										count = 0;
-										for(int j = i; j < dst[index].length() && dst[index].substring(j, j+2).equals("--"); j+=2) count++;
-										if(PMparseInt(dst[index].substring(i+count*2, i+count*2+2), 16) >= 0 && PMparseInt(dst[index].substring(i+count*2, i+count*2+2), 16) <= 255) {
-											endValue = PMparseInt(dst[index].substring(i+count*2, i+count*2+2), 16);
-											if(index == 3) endValue = Math.round(endValue * 360f / 256f);
-										}
-										for(int j = i; j < dst[index].length() && dst[index].substring(j, j+2).equals("--"); j+=2) {
-											alphaAngle[j/2][index - 2] = startValue + (endValue - startValue) * ((j - i) / 2 + 1) / (count + 1);
-										}
-										i += (count - 1) * 2;
-									} else if(PMparseInt(dst[index].substring(i, i+2), 16) >= 0 && PMparseInt(dst[index].substring(i, i+2), 16) <= 255) {
-										startValue = PMparseInt(dst[index].substring(i, i+2), 16);
-										if(index == 3) startValue = Math.round(startValue * 360f / 256f);;
-										alphaAngle[i/2][index - 2] = startValue;
-									}
-								}
-							}
-						}
+						setAlphaAngle setAngle = new setAlphaAngle(alphaAngle);
+						setAngle.settingAngle(alphaAngle, count, dst, this);
 						//占쎄틓占쎄틬占쎄묏占쎈��넼�뿣源�占쎄틕占쎄틬占쎄묾占쎄께占쎄쾸
 						if((loopFrame+increaseRate) != 0) {
 							TextureRegion[] images = new TextureRegion[(loop[motion]+1)];
@@ -331,7 +305,7 @@ public class PMcharaLoader {
 	private int PMparseInt(String s) {
 		return Integer.parseInt(s.replaceAll("[^0-9-]", ""));
 	}
-	private int PMparseInt(String s, int radix) {
+	public int PMparseInt(String s, int radix) {
 		if(radix == 36) {
 			int result = 0;
 			final char c1 = s.charAt(0);
