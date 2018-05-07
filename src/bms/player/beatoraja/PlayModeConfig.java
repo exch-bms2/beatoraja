@@ -156,6 +156,10 @@ public class PlayModeConfig {
             }
         }
     }
+    
+    public int getControllerLength() {
+    	return controller.length;
+    }
 
     private void validate0(int[] keys, boolean[] exclusive) {
         for(int i = 0;i < exclusive.length;i++) {
@@ -213,6 +217,10 @@ public class PlayModeConfig {
 
         public int getSelect() {
             return select;
+        }
+        
+        public int getKeyLength() {
+        	return keys.length;
         }
 
         public void setKeyAssign(Mode mode, boolean enable) {
