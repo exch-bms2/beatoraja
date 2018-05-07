@@ -207,56 +207,33 @@ public class BMSPlayerInputProcessor {
 	}
 
 	public void setPlayConfig(PlayModeConfig playconfig) {
-		// KB, �궠�꺍�깉�꺆�꺖�꺀�꺖, Midi�겗�릢�깭�궭�꺍�겓�겇�걚�겍�럲餓뽫쉪�눇�릤�굮若잍뼺
-		int[] kbkeys = playconfig.getKeyboardConfig().getKeyAssign();
-		boolean[] exclusive = new boolean[kbkeys.length];
-		resetKeyState();
-		resetKeyTime();
-		
-		// KB, �궠�꺍�깉�꺆�꺖�꺀�꺖, Midi�겗�릢�깭�궭�꺍�겓�겇�걚�겍�럲餓뽫쉪�눇�릤�굮若잍뼺
-		int kbcount = countKeyboard(playconfig, exclusive);
-		int cocount = countController(playconfig, exclusive);
-		int micount = countMidi(playconfig, exclusive);
-
-		int[][] cokeys = new int[playconfig.getController().length][];
-		int cocount = 0;
-		for(int i = 0;i < cokeys.length;i++) {
-			cokeys[i] = playconfig.getController()[i].getKeyAssign();
-			cocount += setPlayConfig0(cokeys[i],  exclusive);
-		}
-				
-		MidiConfig.Input[] mikeys  = playconfig.getMidiConfig().getKeys();
-		int micount = 0;
-		for(int i = 0;i < mikeys.length;i++) {
-			if(exclusive[i]) {
-				mikeys[i] = null;
-			} else {
-				exclusive[i] = true;
-				micount++;
-			}
-		}
-		
-		// �릢�깈�깘�궎�궧�겓�궘�꺖�궠�꺍�깢�궍�궛�굮�궩�긿�깉
-		kbinput.setConfig(playconfig.getKeyboardConfig());
-		for(int i = 0;i < bminput.length;i++) {
-			for(ControllerConfig controller : playconfig.getController()) {
-				if(bminput[i].getName().equals(controller.getName())) {
-					bminput[i].setConfig(controller);
-					break;
-				}
-			}
-		}
-		midiinput.setConfig(playconfig.getMidiConfig());
-		
-		if(kbcount >= cocount && kbcount >= micount) {
-			type = Type.KEYBOARD;
-		} else if(cocount >= kbcount && cocount >= micount) {
-			type = Type.BM_CONTROLLER;
-		} else {
-			type = Type.MIDI;			
-		}
-	}
-	
+	      boolean[] exclusive = new boolean[playconfig.getKeyboardConfig().getKeyLength()];
+	      
+	      // KB, �궠�꺍�깉�꺆�꺖�꺀�꺖, Midi�겗�릢�깭�궭�꺍�겓�겇�걚�겍�럲餓뽫쉪�눇�릤�굮若잍뼺
+	      int kbcount = countKeyboard(playconfig, exclusive);
+	      int cocount = countController(playconfig, exclusive);
+	      int micount = countMidi(playconfig, exclusive);
+	      
+	      // �릢�깈�깘�궎�궧�겓�궘�꺖�궠�꺍�깢�궍�궛�굮�궩�긿�깉
+	      kbinput.setConfig(playconfig.getKeyboardConfig());
+	      for(int i = 0;i < bminput.length;i++) {
+	         for(ControllerConfig controller : playconfig.getController()) {
+	            if(bminput[i].getName().equals(controller.getName())) {
+	               bminput[i].setConfig(controller);
+	               break;
+	            }
+	         }
+	      }
+	      midiinput.setConfig(playconfig.getMidiConfig());
+	      
+	      if(kbcount >= cocount && kbcount >= micount) {
+	         type = Type.KEYBOARD;
+	      } else if(cocount >= kbcount && cocount >= micount) {
+	         type = Type.BM_CONTROLLER;
+	      } else {
+	         type = Type.MIDI;         
+	      }
+	   }	
 	private int countMidi(PlayModeConfig playconfig, boolean[] exclusive) {
 		Input[] mikeys  = playconfig.getMidiConfig().getKeys();
 		int micount = 0;
@@ -564,14 +541,5 @@ public class BMSPlayerInputProcessor {
 		}
 	}
 
-	public boolean[] getKeystate() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public long[] getTime() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 }
