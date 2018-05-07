@@ -127,9 +127,9 @@ public abstract class MainState {
 		case OPTION_TEXT:
 			return model != null && model.hasDocument();
 		case OPTION_NO_LN:
-			return model != null && !model.hasLongNote();
+			return model != null && !model.hasAnyLongNote();
 		case OPTION_LN:
-			return model != null && model.hasLongNote();
+			return model != null && model.hasAnyLongNote();
 		case OPTION_NO_BGA:
 			return model != null && !model.hasBGA();
 		case OPTION_BGA:

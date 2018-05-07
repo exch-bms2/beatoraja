@@ -7,9 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import bms.model.BMSDecoder;
-import bms.model.BMSModel;
-import bms.model.TimeLine;
+import bms.model.*;
 import bms.player.beatoraja.Validatable;
 
 /**
@@ -23,6 +21,9 @@ public class SongData implements Validatable {
 	public static final int FEATURE_MINENOTE = 2;
 	public static final int FEATURE_RANDOM = 4;
 	public static final int FEATURE_LONGNOTE = 8;
+	public static final int FEATURE_CHARGENOTE = 16;
+	public static final int FEATURE_HELLCHARGENOTE = 32;
+	public static final int FEATURE_STOPSEQUENCE = 64;
 
 	public static final int CONTENT_TEXT = 1;
 	public static final int CONTENT_BGA = 2;
@@ -72,7 +73,6 @@ public class SongData implements Validatable {
 	private int minbpm;
 	private int maxbpm;
 	private int mainbpm;
-	private boolean bpmstop;
 	/**
 	 * 曲の長さ(ms)
 	 */
@@ -134,15 +134,38 @@ public class SongData implements Validatable {
 		judge = model.getJudgerank();
 		minbpm = (int) model.getMinBPM();
 		maxbpm = (int) model.getMaxBPM();
-		boolean existStop = false;
+		feature = 0;
 		Map<Double, Integer> bpmMap = new HashMap<Double, Integer>();
+		final int keys = model.getMode().key;
 		for (TimeLine tl : model.getAllTimeLines()) {
 			Integer count = bpmMap.get(tl.getBPM());
 			if (count == null) {
 				count = 0;
 			}
 			bpmMap.put(tl.getBPM(), count + tl.getTotalNotes());
-			if(tl.getStop() > 0) existStop = true;
+			if(tl.getStop() > 0) feature |= FEATURE_STOPSEQUENCE;
+
+			for(int i = 0;i < keys;i++) {
+				if(tl.getNote(i) instanceof LongNote) {
+					switch(((LongNote) tl.getNote(i)).getType()) {
+						case LongNote.TYPE_UNDEFINED:
+							feature |= FEATURE_UNDEFINEDLN;
+							break;
+						case LongNote.TYPE_LONGNOTE:
+							feature |= FEATURE_LONGNOTE;
+							break;
+						case LongNote.TYPE_CHARGENOTE:
+							feature |= FEATURE_CHARGENOTE;
+							break;
+						case LongNote.TYPE_HELLCHARGENOTE:
+							feature |= FEATURE_HELLCHARGENOTE;
+							break;
+					}
+				}
+				if(tl.getNote(i) instanceof MineNote) {
+					feature |= FEATURE_MINENOTE;
+				}
+			}
 		}
 		int maxcount = 0;
 		for (double bpm : bpmMap.keySet()) {
@@ -151,15 +174,11 @@ public class SongData implements Validatable {
 				mainbpm = (int) bpm;
 			}
 		}
-		if(existStop) bpmstop = true;
-		else bpmstop = false;
 		length = model.getLastTime();
 		notes = model.getTotalNotes();
 
 		timelines = model.getAllTimeLines();
 
-		feature = model.containsUndefinedLongNote() ? FEATURE_UNDEFINEDLN : 0;
-		feature |= model.containsMineNote() ? FEATURE_MINENOTE : 0;
 		feature |= model.getRandom() != null && model.getRandom().length > 0 ? FEATURE_RANDOM : 0;
 		feature |= model.containsLongNote() ? FEATURE_LONGNOTE : 0;
 		content |= model.getBgaList().length > 0 ? CONTENT_BGA : 0;
@@ -312,11 +331,7 @@ public class SongData implements Validatable {
 	}
 
 	public boolean isBpmstop() {
-		return bpmstop;
-	}
-
-	public void setBpmstop(boolean bpmstop) {
-		this.bpmstop = bpmstop;
+		return (feature & FEATURE_STOPSEQUENCE) != 0;
 	}
 
 	public String getBanner() {
@@ -349,6 +364,10 @@ public class SongData implements Validatable {
 
 	public boolean hasLongNote() {
 		return (feature & FEATURE_LONGNOTE) != 0;
+	}
+
+	public boolean hasAnyLongNote() {
+		return (feature & (FEATURE_UNDEFINEDLN | FEATURE_LONGNOTE | FEATURE_CHARGENOTE | FEATURE_HELLCHARGENOTE)) != 0;
 	}
 
 	public String getMd5() {
