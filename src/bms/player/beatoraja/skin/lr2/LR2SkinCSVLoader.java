@@ -21,7 +21,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.IntArray;
 
 /**
- * LR2のスキン定義用csvファイルのローダー
+ * LR2占쎄쿁占쎄때占쎄텣占쎄틡畑댁떓�뫒占쎈뎁csv占쎄묄占쎄텏占쎄텕占쎄틓占쎄쿁占쎄틙占쎄틬占쏙옙占쎄틬
  * 
  * @author exch
  */
@@ -31,11 +31,11 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 	List<SkinTextImage.SkinTextImageSource> fontlist = new ArrayList<>();
 
 	/**
-	 * スキンの元サイズ
+	 * 占쎄때占쎄텣占쎄틡占쎄쿁占쎈�뉛옙沅�占쎄텕占쎄땍
 	 */
 	public final Resolution src;
 	/**
-	 * 描画サイズ
+	 * 占쎈짂占쎈돕占쎄땁占쎄텕占쎄땍
 	 */
 	public final Resolution dst;
 	private boolean usecim;
@@ -104,7 +104,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 								isMovie = true;
 								break;
 							} catch (Throwable e) {
-								Logger.getGlobal().warning("BGAファイル読み込み失敗。" + e.getMessage());
+								Logger.getGlobal().warning("BGA占쎄묄占쎄텏占쎄텕占쎄틓亦껓옙占쎄껙歷��뇠寃녜툣湲몃리占쏙옙" + e.getMessage());
 								e.printStackTrace();
 							}
 						}
@@ -115,7 +115,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 					}
 				} else {
 					Logger.getGlobal()
-							.warning("IMAGE " + imagelist.size() + " : ファイルが見つかりません : " + imagefile.getPath());
+							.warning("IMAGE " + imagelist.size() + " : 占쎄묄占쎄텏占쎄텕占쎄틓占쎄괏沃ㅻ뿣寃뉛옙嫄�占쎄덮占쎄께占쎄굘占쎄뎐 : " + imagefile.getPath());
 					imagelist.add(null);
 				}
 				// System.out
@@ -140,7 +140,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 
 				} else {
 					Logger.getGlobal()
-							.warning("IMAGE " + imagelist.size() + " : ファイルが見つかりません : " + imagefile.getPath());
+							.warning("IMAGE " + imagelist.size() + " : 占쎄묄占쎄텏占쎄텕占쎄틓占쎄괏沃ㅻ뿣寃뉛옙嫄�占쎄덮占쎄께占쎄굘占쎄뎐 : " + imagefile.getPath());
 					fontlist.add(null);
 				}
 				// System.out
@@ -219,9 +219,10 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 						values[4] += values[6];
 						values[6] = -values[6];
 					}
-					part.setDestination(values[2], values[3] * dstw / srcw,
+					SkinDestinationSize dstSize = new SkinDestinationSize( values[3] * dstw / srcw,
 							dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
-							values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
+							values[6] * dsth / srch);
+					part.setDestination(values[2], dstSize, values[7], values[8], values[9], values[10], values[11],
 							values[12], values[13], values[14], values[15], values[16], values[17], values[18],
 							values[19], values[20], readOffset(str, 21));
 				}
@@ -288,8 +289,10 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 			public void execute(String[] str) {
 				if (num != null) {
 					int[] values = parseInt(str);
-					num.setDestination(values[2], values[3] * dstw / srcw, dsth - (values[4] + values[6]) * dsth / srch,
-							values[5] * dstw / srcw, values[6] * dsth / srch, values[7], values[8], values[9],
+					SkinDestinationSize dstSize = new SkinDestinationSize( values[3] * dstw / srcw,
+							dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
+							values[6] * dsth / srch);
+					num.setDestination(values[2], dstSize, values[7], values[8], values[9],
 							values[10], values[11], values[12], values[13], values[14], values[15], values[16],
 							values[17], values[18], values[19], values[20], readOffset(str, 21));
 				}
@@ -320,9 +323,10 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 			public void execute(String[] str) {
 				if (text != null) {
 					int[] values = parseInt(str);
-					text.setDestination(values[2], values[3] * dstw / srcw,
+					SkinDestinationSize dstSize = new SkinDestinationSize( values[3] * dstw / srcw,
 							dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
-							values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
+							values[6] * dsth / srch);
+					text.setDestination(values[2], dstSize, values[7], values[8], values[9], values[10], values[11],
 							values[12], values[13], values[14], values[15], values[16], values[17], values[18],
 							values[19], values[20], readOffset(str, 21));
 					if(text.isEditable() && text.getReferenceID() == SkinProperty.STRING_SEARCHWORD && skin instanceof MusicSelectSkin) {
@@ -353,7 +357,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 			}
 		});
 		addCommandWord(new CommandWord("SRC_SLIDER_REFNUMBER") {
-			//NUMBER値参照版
+			//NUMBER占썬뀿猶울옙�깍옙�렦
 			//#SRC_SLIDER_REFNUMBER,(NULL),gr,x,y,w,h,div_x,div_y,cycle,timer,muki,range,type,disable,min_value,max_value
 			@Override
 			public void execute(String[] str) {
@@ -379,9 +383,10 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 			public void execute(String[] str) {
 				if (slider != null) {
 					int[] values = parseInt(str);
-					slider.setDestination(values[2], values[3] * dstw / srcw,
+					SkinDestinationSize dstSize = new SkinDestinationSize( values[3] * dstw / srcw,
 							dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
-							values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
+							values[6] * dsth / srch);
+					slider.setDestination(values[2], dstSize, values[7], values[8], values[9], values[10], values[11],
 							values[12], values[13], values[14], values[15], values[16], values[17], values[18],
 							values[19], values[20], readOffset(str, 21));
 				}
@@ -414,7 +419,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 			}
 		});
 		addCommandWord(new CommandWord("SRC_BARGRAPH_REFNUMBER") {
-			//NUMBER値参照版
+			//NUMBER占썬뀿猶울옙�깍옙�렦
 			//#SRC_BARGRAPH_REFNUMBER,(NULL),gr,x,y,w,h,div_x,div_y,cycle,timer,type,muki,min_value,max_value
 			@Override
 			public void execute(String[] str) {
@@ -455,8 +460,10 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 						values[4] += values[6];
 						values[6] = -values[6];
 					}
-					bar.setDestination(values[2], values[3] * dstw / srcw, dsth - (values[4] + values[6]) * dsth / srch,
-							values[5] * dstw / srcw, values[6] * dsth / srch, values[7], values[8], values[9],
+					SkinDestinationSize dstSize = new SkinDestinationSize( values[3] * dstw / srcw,
+							dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
+							values[6] * dsth / srch);
+					bar.setDestination(values[2], dstSize, values[7], values[8], values[9],
 							values[10], values[11], values[12], values[13], values[14], values[15], values[16],
 							values[17], values[18], values[19], values[20], readOffset(str, 21));
 				}
@@ -524,9 +531,10 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 			public void execute(String[] str) {
 				if (button != null) {
 					int[] values = parseInt(str);
-					button.setDestination(values[2], values[3] * dstw / srcw,
+					SkinDestinationSize dstSize = new SkinDestinationSize( values[3] * dstw / srcw,
 							dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
-							values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
+							values[6] * dsth / srch);
+					button.setDestination(values[2], dstSize, values[7], values[8], values[9], values[10], values[11],
 							values[12], values[13], values[14], values[15], values[16], values[17], values[18],
 							values[19], values[20], readOffset(str, 21));
 				}
@@ -553,9 +561,10 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 			public void execute(String[] str) {
 				if (onmouse != null) {
 					int[] values = parseInt(str);
-					onmouse.setDestination(values[2], values[3] * dstw / srcw,
+					SkinDestinationSize dstSize = new SkinDestinationSize( values[3] * dstw / srcw,
 							dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
-							values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
+							values[6] * dsth / srch);
+					onmouse.setDestination(values[2], dstSize, values[7], values[8], values[9], values[10], values[11],
 							values[12], values[13], values[14], values[15], values[16], values[17], values[18],
 							values[19], values[20], readOffset(str, 21));
 				}
@@ -564,7 +573,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 		addCommandWord(new CommandWord("DST_PM_CHARA_1P") {
 			@Override
 			public void execute(String[] str) {
-				//プレイ用 判定連動
+				//占쎄묏占쎄틕占쎄텕占쎈뎁 占쎈떓畑댁떘占쏙퐛�빣
 				//x,y,w,h,color,offset,folderpath
 				int[] values = parseInt(str);
 				if (values[3] < 0) {
@@ -576,16 +585,18 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 					values[4] = -values[4];
 				}
 				final File imagefile = SkinLoader.getPath(str[7].replace("LR2files\\Theme", "skin").replace("\\", "/"), filemap);
-				skin.PMcharaLoader(usecim, imagefile,
+				SkinOption skinOption = new SkinOption(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, values[6]);
+				SkinDestinationSize skinSize = new SkinDestinationSize((int)(values[1] * dstw / srcw), (int)(dsth -(values[2] + values[4]) * dsth / srch), (int)(values[3] * dstw / srcw), (int)(values[4] * dsth / srch));
+				PMcharaLoader pmCharaLoader = new PMcharaLoader(skin);
+				pmCharaLoader.Load(usecim, imagefile,
 						0, (values[5] == 1 || values[5] == 2) ? values[5] : 1,
-						values[1] * dstw / srcw, dsth - (values[2] + values[4]) * dsth / srch, values[3] * dstw / srcw, values[4] * dsth / srch,
-						1, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, values[6]);
+						skinSize, 1, Integer.MIN_VALUE, skinOption);
 			}
 		});
 		addCommandWord(new CommandWord("DST_PM_CHARA_2P") {
 			@Override
 			public void execute(String[] str) {
-				//プレイ用 判定連動
+				//占쎄묏占쎄틕占쎄텕占쎈뎁 占쎈떓畑댁떘占쏙퐛�빣
 				//x,y,w,h,color,offset,folderpath
 				int[] values = parseInt(str);
 				if (values[3] < 0) {
@@ -597,16 +608,18 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 					values[4] = -values[4];
 				}
 				final File imagefile = SkinLoader.getPath(str[7].replace("LR2files\\Theme", "skin").replace("\\", "/"), filemap);
-				skin.PMcharaLoader(usecim, imagefile,
+				SkinOption skinOption = new SkinOption(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE,  values[6]);
+				SkinDestinationSize skinSize = new SkinDestinationSize((int)(values[1] * dstw / srcw), (int)(dsth -(values[2] + values[4]) * dsth / srch), (int)(values[3] * dstw / srcw), (int)(values[4] * dsth / srch));
+				PMcharaLoader pmCharaLoader = new PMcharaLoader(skin);
+				pmCharaLoader.Load(usecim, imagefile,
 						0, (values[5] == 1 || values[5] == 2) ? values[5] : 1,
-						values[1] * dstw / srcw, dsth - (values[2] + values[4]) * dsth / srch, values[3] * dstw / srcw, values[4] * dsth / srch,
-						2, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, values[6]);
+						skinSize, 2, Integer.MIN_VALUE, skinOption);
 			}
 		});
 		addCommandWord(new CommandWord("DST_PM_CHARA_ANIMATION") {
 			@Override
 			public void execute(String[] str) {
-				//プレイ以外用 判定非連動
+				//占쎄묏占쎄틕占쎄텕繞벿듭㉫占쎈뎁 占쎈떓畑댁떘�봿占쏙퐛�빣
 				//x,y,w,h,color,animationtype,timer,op1,op2,op3,offset,folderpath
 				//type 0:NEUTRAL 1:FEVER 2:GREAT 3:GOOD 4:BAD 5:FEVERWIN 6:WIN 7:LOSE 8:OJAMA 9:DANCE
 				int[] values = parseInt(str);
@@ -620,10 +633,12 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 						values[4] = -values[4];
 					}
 					final File imagefile = SkinLoader.getPath(str[12].replace("LR2files\\Theme", "skin").replace("\\", "/"), filemap);
-					skin.PMcharaLoader(usecim, imagefile,
+					SkinOption skinOption = new SkinOption(values[8], values[9], values[10], values[11]);
+					SkinDestinationSize skinSize = new SkinDestinationSize((int)(values[1] * dstw / srcw), (int)(dsth -(values[2] + values[4]) * dsth / srch), (int)(values[3] * dstw / srcw), (int)(values[4] * dsth / srch));
+					PMcharaLoader pmCharaLoader = new PMcharaLoader(skin);
+					pmCharaLoader.Load(usecim, imagefile,
 							values[6] + 6, (values[5] == 1 || values[5] == 2) ? values[5] : 1,
-							values[1] * dstw / srcw, dsth - (values[2] + values[4]) * dsth / srch, values[3] * dstw / srcw, values[4] * dsth / srch,
-							Integer.MIN_VALUE, values[7], values[8], values[9], values[10], values[11]);
+							skinSize, Integer.MIN_VALUE, values[7], skinOption);
 				}
 			}
 		});
@@ -631,22 +646,24 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 			@Override
 			public void execute(String[] str) {
 				//color,type,folderpath
-				//type 0:キャラ背景 1:名前画像 2:ハリアイ画像(上半身のみ) 3:ハリアイ画像(全体) 4:キャラアイコン
+				//type 0:占쎄텣占쎄뭇占쎄�占쎄퉺占쎌녂 1:占쎈┼占쎈렭占쎈돕占쎄퉿 2:占쎄퉿占쎄틒占쎄텑占쎄텕占쎈돕占쎄퉿(鼇앸벩�쐡玲곥깵寃쀯옙寃�) 3:占쎄퉿占쎄틒占쎄텑占쎄텕占쎈돕占쎄퉿(占쎈�꿴턁占�) 4:占쎄텣占쎄뭇占쎄�占쎄텑占쎄텕占쎄텭占쎄틡
 				PMcharaPart = null;
 				int[] values = parseInt(str);
 				if(values[2] >= 0 && values[2] <= 4) {
 					final File imagefile = SkinLoader.getPath(str[3].replace("LR2files\\Theme", "skin").replace("\\", "/"), filemap);
-					PMcharaPart = skin.PMcharaLoader(usecim, imagefile,
+					SkinOption skinOption = new SkinOption(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE);
+					SkinDestinationSize skinSize = new SkinDestinationSize(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE);
+					PMcharaLoader pmCharaLoader = new PMcharaLoader(skin);
+					PMcharaPart = pmCharaLoader.Load(usecim, imagefile,
 							values[2] + 1, (values[1] == 1 || values[1] == 2) ? values[1] : 1,
-							Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE,
-							Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE);
+									skinSize, Integer.MIN_VALUE, Integer.MIN_VALUE, skinOption);
 				}
 			}
 		});
 		addCommandWord(new CommandWord("DST_PM_CHARA_IMAGE") {
 			@Override
 			public void execute(String[] str) {
-				//DST_IMAGEと同様
+				//DST_IMAGE占쎄쾹占쎈┴癲낉옙
 				if (PMcharaPart != null) {
 					int[] values = parseInt(str);
 					if (values[5] < 0) {
@@ -657,9 +674,10 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 						values[4] += values[6];
 						values[6] = -values[6];
 					}
-					PMcharaPart.setDestination(values[2], values[3] * dstw / srcw,
+					SkinDestinationSize dstSize = new SkinDestinationSize( values[3] * dstw / srcw,
 							dsth - (values[4] + values[6]) * dsth / srch, values[5] * dstw / srcw,
-							values[6] * dsth / srch, values[7], values[8], values[9], values[10], values[11],
+							values[6] * dsth / srch);
+					PMcharaPart.setDestination(values[2], dstSize, values[7], values[8], values[9], values[10], values[11],
 							values[12], values[13], values[14], values[15], values[16], values[17], values[18],
 							values[19], values[20], readOffset(str, 21));
 				}
@@ -781,7 +799,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 			return getSourceImage((Texture) imagelist.get(values[2]), values[3], values[4], values[5], values[6],
 					values[7], values[8]);
 		}
-		Logger.getGlobal().warning("IMAGEが定義されてないか、読み込みに失敗しています : " + line);
+		Logger.getGlobal().warning("IMAGE占쎄괏畑댁떓�뫒占쎄괵占쎄덱占쎄쾷占쎄쾼占쎄콢占쎄괍占쎄낟�걤占쎄껙歷��뇠寃놂옙寃볣툣湲몃리占쎄괼占쎄쾷占쎄콢占쎄께占쎄굉 : " + line);
 		return null;
 	}
 

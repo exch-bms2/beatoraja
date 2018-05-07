@@ -476,12 +476,12 @@ public class MainController extends ApplicationAdapter {
 			Mouse.setGrabbed(current == bmsplayer && time > mouseMovedTime + 5000 && Mouse.isInsideWindow());
 
 			// FPS表示切替
-            if (input.getFunctionstate()[0] && input.getFunctiontime()[0] != 0) {
+            if (input.checkIfFunctionPressed(0)) {
                 showfps = !showfps;
-                input.getFunctiontime()[0] = 0;
+                input.resetFunctionTime(0);
             }
             // fullscrees - windowed
-            if (input.getFunctionstate()[3] && input.getFunctiontime()[3] != 0) {
+            if (input.checkIfFunctionPressed(3)) {
                 boolean fullscreen = Gdx.graphics.isFullscreen();
                 Graphics.DisplayMode currentMode = Gdx.graphics.getDisplayMode();
                 if (fullscreen) {
@@ -490,7 +490,7 @@ public class MainController extends ApplicationAdapter {
                     Gdx.graphics.setFullscreenMode(currentMode);
                 }
                 config.setDisplaymode(fullscreen ? Config.DisplayMode.WINDOW : Config.DisplayMode.FULLSCREEN);
-                input.getFunctiontime()[3] = 0;
+                input.resetFunctionTime(3);
             }
 
             // if (input.getFunctionstate()[4] && input.getFunctiontime()[4] != 0) {
@@ -511,22 +511,22 @@ public class MainController extends ApplicationAdapter {
             // }
 
             // screen shot
-            if (input.getFunctionstate()[5] && input.getFunctiontime()[5] != 0) {
+            if (input.checkIfFunctionPressed(5)) {
                 if (screenshot == null || screenshot.savetime != 0) {
                     screenshot = new ScreenShotThread(ScreenUtils.getFrameBufferPixels(0, 0, Gdx.graphics.getBackBufferWidth(),
                             Gdx.graphics.getBackBufferHeight(), true));
                     screenshot.start();
                 }
-                input.getFunctiontime()[5] = 0;
+                input.resetFunctionTime(5);
             }
 
-            if (input.getFunctionstate()[6] && input.getFunctiontime()[6] != 0) {
+            if (input.checkIfFunctionPressed(6)) {
                 if (twitterUpload == null || twitterUpload.savetime != 0) {
                 	twitterUpload = new TwitterUploadThread(ScreenUtils.getFrameBufferPixels(0, 0, Gdx.graphics.getBackBufferWidth(),
                             Gdx.graphics.getBackBufferHeight(), false), player);
                 	twitterUpload.start();
                 }
-                input.getFunctiontime()[6] = 0;
+                input.resetFunctionTime(6);
             }
         }
 	}

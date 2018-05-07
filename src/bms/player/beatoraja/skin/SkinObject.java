@@ -11,14 +11,14 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.*;
 
 /**
- * スキンオブジェクト
+ * �궧�궘�꺍�궕�깣�궦�궒�궚�깉
  * 
  * @author exch
  */
 public abstract class SkinObject implements Disposable {
 
 	/**
-	 * オフセットの参照ID
+	 * �궕�깢�궩�긿�깉�겗�뢿�뀱ID
 	 */
 	private int[] offset = new int[0];
 
@@ -26,15 +26,15 @@ public abstract class SkinObject implements Disposable {
 
 	private int imageid = -1;
 	/**
-	 * 参照するタイマーID
+	 * �뢿�뀱�걲�굥�궭�궎�깯�꺖ID
 	 */
 	private int dsttimer = 0;
 	/**
-	 * ループ開始タイマー
+	 * �꺂�꺖�깤�뼀冶뗣궭�궎�깯�꺖
 	 */
 	private int dstloop = 0;
 	/**
-	 * ブレンド(2:加算, 9:反転)
+	 * �깣�꺃�꺍�깋(2:�뒥嶸�, 9:�룏邕�)
 	 */
 	private int dstblend = 0;
     /**
@@ -46,53 +46,53 @@ public abstract class SkinObject implements Disposable {
 	private int imageType;
 	
 	/**
-	 * 画像回転の中心
+	 * �뵽�깗�썮邕㏂겗訝�恙�
 	 */
 	private int dstcenter;
 
 	private int acc;
 	/**
-	 * オブジェクトクリック時に実行するイベントの参照ID
+	 * �궕�깣�궦�궒�궚�깉�궚�꺁�긿�궚�셽�겓若잒죱�걲�굥�궎�깧�꺍�깉�겗�뢿�뀱ID
 	 */
 	private int clickevent = -1;
 	/**
-	 * オブジェクトクリック判定・イベント引数の種類
-	 * 0: 通常(plus only)
-	 * 1: 通常(minus only)
-	 * 2: 左右分割(左=minus,右=plus)
-	 * 3: 上下分割(下=minus,上=plus)
+	 * �궕�깣�궦�궒�궚�깉�궚�꺁�긿�궚�닩若싥꺕�궎�깧�꺍�깉凉뺞빊�겗葉�窈�
+	 * 0: �싧만(plus only)
+	 * 1: �싧만(minus only)
+	 * 2: 藥��뤂�늽�돯(藥�=minus,�뤂=plus)
+	 * 3: 訝듾툔�늽�돯(訝�=minus,訝�=plus)
 	 */
 	private int clickeventType = 0;
 	/**
-	 * 描画条件となるオプション定義
+	 * �룒�뵽�씉餓뜰겏�겒�굥�궕�깤�궥�깾�꺍若싩쑴
 	 */
 	private int[] dstop = new int[0];
 	/**
-	 * 描画条件のマウス範囲
+	 * �룒�뵽�씉餓뜰겗�깯�궑�궧影꾢쎊
 	 */
 	private Rectangle mouseRect = null;
 	/**
-	 * 画像の伸縮方法の指定
+	 * �뵽�깗�겗鴉며리�뼶力뺛겗�뙁若�
 	 */
 	private StretchType stretch = StretchType.STRETCH;
 
 	public enum StretchType {
-		// 描画先の範囲に合わせて伸縮する
+		// �룒�뵽�뀍�겗影꾢쎊�겓�릦�굩�걵�겍鴉며리�걲�굥
 		STRETCH(0),
-		// アスペクト比を保ちつつ描画先の範囲に収まるように伸縮する
+		// �궋�궧�깪�궚�깉驪붵굮岳앫걾�겇�겇�룒�뵽�뀍�겗影꾢쎊�겓�룑�겲�굥�굠�걝�겓鴉며리�걲�굥
 		KEEP_ASPECT_RATIO_FIT_INNER(1),
-		// アスペクト比を保ちつつ描画先の範囲全体を覆うように伸縮する
+		// �궋�궧�깪�궚�깉驪붵굮岳앫걾�겇�겇�룒�뵽�뀍�겗影꾢쎊�뀲鵝볝굮誤녴걝�굠�걝�겓鴉며리�걲�굥
 		KEEP_ASPECT_RATIO_FIT_OUTER(2),
 		KEEP_ASPECT_RATIO_FIT_OUTER_TRIMMED(3),
-		// アスペクト比を保ちつつ描画先の横幅に合わせて伸縮する
+		// �궋�궧�깪�궚�깉驪붵굮岳앫걾�겇�겇�룒�뵽�뀍�겗與ゅ퉭�겓�릦�굩�걵�겍鴉며리�걲�굥
 		KEEP_ASPECT_RATIO_FIT_WIDTH(4),
 		KEEP_ASPECT_RATIO_FIT_WIDTH_TRIMMED(5),
-		// アスペクト比を保ちつつ描画先の縦幅に合わせて伸縮する
+		// �궋�궧�깪�궚�깉驪붵굮岳앫걾�겇�겇�룒�뵽�뀍�겗潁�亮끹겓�릦�굩�걵�겍鴉며리�걲�굥
 		KEEP_ASPECT_RATIO_FIT_HEIGHT(6),
 		KEEP_ASPECT_RATIO_FIT_HEIGHT_TRIMMED(7),
-		// 描画先に収まらない場合にはアスペクト比を保ちつつ縮小する
+		// �룒�뵽�뀍�겓�룑�겲�굢�겒�걚�졃�릦�겓�겘�궋�궧�깪�궚�깉驪붵굮岳앫걾�겇�겇潁�弱뤵걲�굥
 		KEEP_ASPECT_RATIO_NO_EXPANDING(8),
-		// 伸縮しない（中央に合わせる）
+		// 鴉며리�걮�겒�걚竊덁릎鸚��겓�릦�굩�걵�굥竊�
 		NO_RESIZE(9),
 		NO_RESIZE_TRIMMED(10),
 		;
@@ -106,19 +106,19 @@ public abstract class SkinObject implements Disposable {
 	private static final float[] CENTERY = { 0.5f, 0, 0, 0, 0.5f, 0.5f, 0.5f, 1, 1, 1 };
 
 	/**
-	 * 回転中心のX座標(左端:0.0 - 右端:1.0)
+	 * �썮邕㏘릎恙껁겗X佯㎪쮽(藥�塋�:0.0 - �뤂塋�:1.0)
 	 */
 	private float centerx;
 	/**
-	 * 回転中心のY座標(下端:0.0 - 上端:1.0)
+	 * �썮邕㏘릎恙껁겗Y佯㎪쮽(訝뗧ク:0.0 - 訝딁ク:1.0)
 	 */
 	private float centery;
 	/**
-	 * 描画先
+	 * �룒�뵽�뀍
 	 */
 	private SkinObjectDestination[] dst = new SkinObjectDestination[0];
 	
-	// 以下、高速化用
+	// 餓δ툔�곲쳵�잌뙑�뵪
 	private long starttime;
 	private long endtime;
 
@@ -141,21 +141,21 @@ public abstract class SkinObject implements Disposable {
 		return dst;
 	}
 
-	public void setDestination(long time, float x, float y, float w, float h, int acc, int a, int r, int g, int b,
+	public void setDestination(long time, SkinDestinationSize destSize, int acc, int a, int r, int g, int b,
 			int blend, int filter, int angle, int center, int loop, int timer, int op1, int op2, int op3, int offset) {
-		setDestination(time, x, y, w, h, acc, a, r, g, b, blend, filter, angle, center, loop, timer, new int[]{op1,op2,op3});
+		setDestination(time, destSize, acc, a, r, g, b, blend, filter, angle, center, loop, timer, new int[]{op1,op2,op3});
 		setOffsetID(offset);
 	}
 
-	public void setDestination(long time, float x, float y, float w, float h, int acc, int a, int r, int g, int b,
+	public void setDestination(long time, SkinDestinationSize destSize, int acc, int a, int r, int g, int b,
 							   int blend, int filter, int angle, int center, int loop, int timer, int op1, int op2, int op3, int[] offset) {
-		setDestination(time, x, y, w, h, acc, a, r, g, b, blend, filter, angle, center, loop, timer, new int[]{op1,op2,op3});
+		setDestination(time, destSize, acc, a, r, g, b, blend, filter, angle, center, loop, timer, new int[]{op1,op2,op3});
 		setOffsetID(offset);
 	}
 
-	public void setDestination(long time, float x, float y, float w, float h, int acc, int a, int r, int g, int b,
+	public void setDestination(long time, SkinDestinationSize destSize, int acc, int a, int r, int g, int b,
 			int blend, int filter, int angle, int center, int loop, int timer, int[] op) {
-		SkinObjectDestination obj = new SkinObjectDestination(time, new Rectangle(x, y, w, h), new Color(r / 255.0f,
+		SkinObjectDestination obj = new SkinObjectDestination(time, new Rectangle(destSize.getDstx(), destSize.getDsty(),destSize.getDstw(),destSize.getDsth()), new Color(r / 255.0f,
 				g / 255.0f, b / 255.0f, a / 255.0f), angle, acc);
 		if (dst.length == 0) {
 			fixr = obj.region;
@@ -250,11 +250,11 @@ public abstract class SkinObject implements Disposable {
 	}
 
 	/**
-	 * 指定して時間に応じた描画領域を返す
+	 * �뙁若싥걮�겍�셽�뼋�겓恙쒌걯�걼�룒�뵽�젞�윜�굮瓦붵걲
 	 * 
 	 * @param time
-	 *            時間(ms)
-	 * @return 描画領域
+	 *            �셽�뼋(ms)
+	 * @return �룒�뵽�젞�윜
 	 */
 	public Rectangle getDestination(long time, MainState state) {
 		final int timer = dsttimer;
@@ -619,7 +619,7 @@ public abstract class SkinObject implements Disposable {
 	}
 
 	/**
-	 * スキンオブジェクトの描画先を表現するクラス
+	 * �궧�궘�꺍�궕�깣�궦�궒�궚�깉�겗�룒�뵽�뀍�굮烏①뤎�걲�굥�궚�꺀�궧
 	 * 
 	 * @author exch
 	 */
@@ -627,7 +627,7 @@ public abstract class SkinObject implements Disposable {
 
 		public final long time;
 		/**
-		 * 描画領域
+		 * �룒�뵽�젞�윜
 		 */
 		public final Rectangle region;
 		public final int acc;
@@ -644,7 +644,7 @@ public abstract class SkinObject implements Disposable {
 	}
 	
 	/**
-	 * オフセット
+	 * �궕�깢�궩�긿�깉
 	 * 
 	 * @author exch
 	 */

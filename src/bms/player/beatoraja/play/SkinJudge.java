@@ -8,18 +8,18 @@ import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.math.Rectangle;
 
 /**
- * 判定オブジェクト
+ * �닩若싥궕�깣�궦�궒�궚�깉
  * 
  * @author exch
  */
 public class SkinJudge extends SkinObject {
 
 	/**
-	 * 文字イメージ
+	 * �뻼耶쀣궎�깳�꺖�궦
 	 */
     private SkinImage[] judge;
     /**
-     * 数字イメージ
+     * �빊耶쀣궎�깳�꺖�궦
      */
     private SkinNumber[] count;
     private int index;
@@ -34,8 +34,8 @@ public class SkinJudge extends SkinObject {
         this.count = count;
         this.index = index;
         this.shift = shift;
-        
-        this.setDestination(0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, new int[0]);
+        SkinDestinationSize dstSize = new SkinDestinationSize(0,0,0,0);
+        this.setDestination(0, dstSize, 0, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, new int[0]);
     }
 
     public void setJudge(SkinImage[] judge) {
