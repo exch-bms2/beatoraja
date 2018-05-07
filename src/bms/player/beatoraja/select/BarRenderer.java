@@ -816,8 +816,17 @@ public class BarRenderer {
 		public void run() {
 			final MainController main = select.main;
 			PlayerConfig config = main.getPlayerResource().getPlayerConfig();
-			final SongInformationAccessor info = main.getInfoDatabase();
 			final ScoreDataCache rival = select.getRivalScoreDataCache();
+
+			final Array<SongData> songarray = new Array<>(bars.length);
+			for (Bar bar : bars) {
+				if (bar instanceof SongBar && ((SongBar) bar).existsSong()) {
+					songarray.add(((SongBar) bar).getSongData());
+				}
+			}
+			final SongData[] songs = songarray.toArray(SongData.class);
+			// loading score
+			// TODO collectorを使用してスコアをまとめて取得
 			for (Bar bar : bars) {
 				if (bar instanceof SongBar && ((SongBar) bar).existsSong()) {
 					SongData sd = ((SongBar) bar).getSongData();
@@ -833,9 +842,6 @@ public class BarRenderer {
 								config.getLnmode(), i);
 					}
 					((SongBar) bar).setExistsReplayData(replay);
-					if(info != null) {
-						sd.setInformation(info.getInformation(sd.getSha256()));
-					}
 				}
 				if (bar instanceof GradeBar) {
 					GradeBar gb = (GradeBar) bar;
@@ -867,6 +873,12 @@ public class BarRenderer {
 					break;
 				}
 			}
+			// loading song information
+			final SongInformationAccessor info = main.getInfoDatabase();
+			if(info != null) {
+				info.getInformation(songs);
+			}
+			// loading banner
 			for (Bar bar : bars) {
 				if (bar instanceof SongBar && ((SongBar) bar).existsSong()) {
 					final SongBar songbar = (SongBar) bar;
