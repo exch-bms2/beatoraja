@@ -8,18 +8,18 @@ import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.math.Rectangle;
 
 /**
- * 判定オブジェクト
+ * �닩若싥궕�깣�궦�궒�궚�깉
  * 
  * @author exch
  */
 public class SkinJudge extends SkinObject {
 
 	/**
-	 * 文字イメージ
+	 * �뻼耶쀣궎�깳�꺖�궦
 	 */
     private SkinImage[] judge;
     /**
-     * 数字イメージ
+     * �빊耶쀣궎�깳�꺖�궦
      */
     private SkinNumber[] count;
     private int index;
@@ -57,7 +57,7 @@ public class SkinJudge extends SkinObject {
     public boolean isShift() {
     	return shift;
     }
-
+ 
     @Override
     public void draw(SkinObjectRenderer sprite, long time, MainState state) {
         int judgenow = ((BMSPlayer)state).getJudgeManager().getNowJudge()[index] - 1;

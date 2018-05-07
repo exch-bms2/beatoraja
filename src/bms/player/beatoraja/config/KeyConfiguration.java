@@ -21,13 +21,13 @@ import bms.player.beatoraja.input.KeyBoardInputProcesseor;
 import bms.player.beatoraja.input.MidiInputProcessor;
 
 /**
- * キーコンフィグ画面
+ * �궘�꺖�궠�꺍�깢�궍�궛�뵽�씊
  *
  * @author exch
  */
 public class KeyConfiguration extends MainState {
 
-	// TODO スキンベースへ移行
+	// TODO �궧�궘�꺍�깧�꺖�궧�겦燁삭죱
 
 	private BitmapFont titlefont;
 
@@ -114,7 +114,7 @@ public class KeyConfiguration extends MainState {
 		midiinput = input.getMidiInputProcessor();
 		setMode(0);
 	}
-
+ 
 	public void render() {
 		final SpriteBatch sprite = main.getSpriteBatch();
 		final float scaleX = (float) getSkin().getScaleX();
@@ -324,7 +324,7 @@ public class KeyConfiguration extends MainState {
 		controllerConfigs = pc.getController();
 		midiconfig = pc.getMidiConfig();
 
-		// 各configのキーサイズ等が足りない場合は補充する
+		// �릢config�겗�궘�꺖�궢�궎�궨嶺됥걣擁녈굤�겒�걚�졃�릦�겘獒쒎뀉�걲�굥
 		validateKeyboardLength();
 		validateControllerLength();
 		validateMidiLength();

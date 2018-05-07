@@ -61,7 +61,7 @@ public class ControlInputProcessor {
 	public void input() {
 		final LaneRenderer lanerender = player.getLanerender();
 		final BMSPlayerInputProcessor input = player.main.getInputProcessor();
-		// 各種コントロール入力判定
+		// �릢葉��궠�꺍�깉�꺆�꺖�꺂�뀯�뒟�닩若�
 		if (enableControl) {
 			if (enableCursor) {
 				if (input.getCursorState()[0]) {
@@ -149,7 +149,6 @@ public class ControlInputProcessor {
 		final LaneRenderer lanerender = player.getLanerender();
 		final BMSPlayerInputProcessor input = player.main.getInputProcessor();
 		boolean[] key = input.getKeystate();
-
 		// change hi speed by START + Keys
 		for(int i = 0; i <= 15; i++) {
 			if ((i == 0 || i == 2 || i == 4 || i == 6 || i == 9 || i == 11 || i == 13 || i == 15) && key[i]) {

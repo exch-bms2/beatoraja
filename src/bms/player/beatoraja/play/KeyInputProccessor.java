@@ -14,7 +14,7 @@ import bms.player.beatoraja.input.KeyInputLog;
 import bms.player.beatoraja.skin.SkinPropertyMapper;
 
 /**
- * キー入力処理用スレッド
+ * �궘�꺖�뀯�뒟�눇�릤�뵪�궧�꺃�긿�깋
  *
  * @author exch
  */
@@ -30,10 +30,10 @@ class KeyInputProccessor {
 
 	private final LaneProperty laneProperty;
 
-	//キービーム判定同期用
+	//�궘�꺖�깛�꺖�깲�닩若싧릪�쐿�뵪
 	private boolean isJudgeStarted = false;
 
-	//キービーム停止用
+	//�궘�꺖�깛�꺖�깲�걶閭®뵪
 	private boolean keyBeamStop = false;
 
 	public KeyInputProccessor(BMSPlayer player, LaneProperty laneProperty) {
@@ -58,7 +58,7 @@ class KeyInputProccessor {
 
 		final int[] laneoffset = laneProperty.getLaneSkinOffset();
 		for (int lane = 0; lane < laneoffset.length; lane++) {
-			// キービームフラグON/OFF
+			// �궘�꺖�깛�꺖�깲�깢�꺀�궛ON/OFF			
 			final int offset = laneoffset[lane];
 			boolean pressed = false;
 			boolean scratch = false;
@@ -108,7 +108,7 @@ class KeyInputProccessor {
 		prevtime = now;
 	}
 
-	// キービームフラグON 判定同期用
+	// �궘�꺖�깛�꺖�깲�깢�꺀�궛ON �닩若싧릪�쐿�뵪
 	public void inputKeyOn(int lane) {
 		final MainController main = player.main;
 		final int offset = laneProperty.getLaneSkinOffset()[lane];
@@ -140,16 +140,16 @@ class KeyInputProccessor {
 	}
 
 	/**
-	 * プレイログからのキー自動入力、判定処理用スレッド
+	 * �깤�꺃�궎�꺆�궛�걢�굢�겗�궘�꺖�눎�땿�뀯�뒟�곩닩若싧눇�릤�뵪�궧�꺃�긿�깋
 	 */
 	class JudgeThread extends Thread {
 
-		// TODO 判定処理スレッドはJudgeManagerに渡した方がいいかも
+		// TODO �닩若싧눇�릤�궧�꺃�긿�깋�겘JudgeManager�겓歷▲걮�걼�뼶�걣�걚�걚�걢�굚
 
 		private final TimeLine[] timelines;
 		private boolean stop = false;
 		/**
-		 * 自動入力するキー入力ログ
+		 * �눎�땿�뀯�뒟�걲�굥�궘�꺖�뀯�뒟�꺆�궛
 		 */
 		private final KeyInputLog[] keylog;
 
@@ -171,13 +171,13 @@ class KeyInputProccessor {
 			while (!stop) {
 				final long time = player.main.getNowTime(TIMER_PLAY);
 				if (time != prevtime) {
-					// リプレイデータ再生
+					// �꺁�깤�꺃�궎�깈�꺖�궭�냽�뵟
 					if (keylog != null) {
 						while (index < keylog.length && keylog[index].time <= time) {
 							final KeyInputLog key = keylog[index];
 							// if(input.getKeystate()[key.keycode] ==
 							// key.pressed) {
-							// System.out.println("押し離しが行われていません : key - " +
+							// System.out.println("�듉�걮�썴�걮�걣烏뚣굩�굦�겍�걚�겲�걵�굯 : key - " +
 							// key.keycode + " pressed - " + key.pressed +
 							// " time - " + key.time);
 							// }
@@ -212,7 +212,7 @@ class KeyInputProccessor {
 				Arrays.fill(input.getTime(), 0);
 			}
 
-			Logger.getGlobal().info("入力パフォーマンス(max ms) : " + frametime);
+			Logger.getGlobal().info("�뀯�뒟�깙�깢�궔�꺖�깯�꺍�궧(max ms) : " + frametime);
 		}
 	}
 }

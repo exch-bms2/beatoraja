@@ -22,7 +22,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Json;
 
 /**
- * プラクティスモードの設定表示/編集用クラス
+ * �깤�꺀�궚�깇�궍�궧�깴�꺖�깋�겗鼇�若싪〃鹽�/渶③썓�뵪�궚�꺀�궧
  *
  * @author exch
  */
@@ -94,7 +94,7 @@ public class PracticeConfiguration {
 	public GrooveGauge getGauge(BMSModel model) {
 		GrooveGauge gauge = GrooveGauge.create(model, property.gaugetype, property.gaugecategory);
 		gauge.setValue(property.startgauge);
-		return gauge;
+		return gauge; 
 	}
 
 	public void processInput(BMSPlayerInputProcessor input) {
@@ -275,7 +275,7 @@ public class PracticeConfiguration {
 	}
 
 	/**
-	 * プラクティスの各種設定値
+	 * �깤�꺀�궚�깇�궍�궧�겗�릢葉�鼇�若싧��
 	 *
 	 * @author exch
 	 */
