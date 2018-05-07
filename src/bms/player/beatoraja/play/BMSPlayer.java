@@ -514,6 +514,29 @@ public class BMSPlayer extends MainState {
 
 		final PlaySkin skin = (PlaySkin) getSkin();
 		isNoteExpansion = (skin.getNoteExpansionRate()[0] != 100 || skin.getNoteExpansionRate()[1] != 100);
+		createSectionAndNoteTime();
+
+		bga = resource.getBGAManager();
+
+		IRScoreData score = main.getPlayDataAccessor().readScoreData(model, config.getLnmode());
+		Logger.getGlobal().info("�궧�궠�궋�깈�꺖�궭�깧�꺖�궧�걢�굢�궧�궠�궋�룚孃�");
+		if (score == null) {
+			score = new IRScoreData();
+		}
+
+		int rivalscore = TargetProperty.getAllTargetProperties()[config.getTarget()]
+				.getTarget(main);
+		resource.setRivalScoreData(rivalscore);
+
+		if (autoplay == PlayMode.PRACTICE) {
+			getScoreDataProperty().setTargetScore(0, 0, model.getTotalNotes());
+			practice.create(model);
+			state = STATE_PRACTICE;
+		} else {
+			getScoreDataProperty().setTargetScore(score.getExscore(), rivalscore, model.getTotalNotes());
+		}
+	}
+	private void createSectionAndNoteTime() {
 		LongArray sectiontimes = new LongArray();
 		LongArray quarterNoteTimes = new LongArray();
 		TimeLine[] timelines = model.getAllTimeLines();
@@ -549,26 +572,6 @@ public class BMSPlayer extends MainState {
 		}
 		this.sectiontimes = sectiontimes.toArray();
 		this.quarterNoteTimes = quarterNoteTimes.toArray();
-
-		bga = resource.getBGAManager();
-
-		IRScoreData score = main.getPlayDataAccessor().readScoreData(model, config.getLnmode());
-		Logger.getGlobal().info("�궧�궠�궋�깈�꺖�궭�깧�꺖�궧�걢�굢�궧�궠�궋�룚孃�");
-		if (score == null) {
-			score = new IRScoreData();
-		}
-
-		int rivalscore = TargetProperty.getAllTargetProperties()[config.getTarget()]
-				.getTarget(main);
-		resource.setRivalScoreData(rivalscore);
-
-		if (autoplay == PlayMode.PRACTICE) {
-			getScoreDataProperty().setTargetScore(0, 0, model.getTotalNotes());
-			practice.create(model);
-			state = STATE_PRACTICE;
-		} else {
-			getScoreDataProperty().setTargetScore(score.getExscore(), rivalscore, model.getTotalNotes());
-		}
 	}
 	
 	private void setMainInputProcessor(final PlayerResource resource, Config conf, PlayerConfig config) {
