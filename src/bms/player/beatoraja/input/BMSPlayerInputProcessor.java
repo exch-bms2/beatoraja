@@ -9,10 +9,9 @@ import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
-import bms.player.beatoraja.PlayModeConfig.KeyboardConfig;
-import bms.player.beatoraja.PlayModeConfig.ControllerConfig;
-import bms.player.beatoraja.PlayModeConfig.MidiConfig;
 import bms.player.beatoraja.input.BMSPlayerInputDevice.Type;
+import bms.player.beatoraja.playmode.*;
+import bms.player.beatoraja.PlayModeConfig;
 
 import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.Controllers;
@@ -214,8 +213,11 @@ public class BMSPlayerInputProcessor {
 		resetKeyState();
 		resetKeyTime();
 		
-		int kbcount = setPlayConfig0(kbkeys,  exclusive);
-		
+		// KB, �궠�꺍�깉�꺆�꺖�꺀�꺖, Midi�겗�릢�깭�궭�꺍�겓�겇�걚�겍�럲餓뽫쉪�눇�릤�굮若잍뼺
+		int kbcount = countKeyboard(playconfig, exclusive);
+		int cocount = countController(playconfig, exclusive);
+		int micount = countMidi(playconfig, exclusive);
+
 		int[][] cokeys = new int[playconfig.getController().length][];
 		int cocount = 0;
 		for(int i = 0;i < cokeys.length;i++) {
@@ -253,6 +255,39 @@ public class BMSPlayerInputProcessor {
 		} else {
 			type = Type.MIDI;			
 		}
+	}
+	
+	private int countMidi(PlayModeConfig playconfig, boolean[] exclusive) {
+		Input[] mikeys  = playconfig.getMidiConfig().getKeys();
+		int micount = 0;
+		for(int i = 0;i < mikeys.length;i++) {
+			if(exclusive[i]) {
+				mikeys[i] = null;
+			} else {
+				exclusive[i] = true;
+				micount++;
+			}
+		}
+		return micount;
+	}
+
+	private int countController(PlayModeConfig playconfig, boolean[] exclusive) {
+		int[][] cokeys = new int[playconfig.getController().length][];
+		int cocount = 0;
+		for(int i = 0;i < cokeys.length;i++) {
+			cokeys[i] = playconfig.getController()[i].getKeys();
+			cocount += setPlayConfig0(cokeys[i],  exclusive);
+		}
+		return cocount;
+	}
+
+	private int countKeyboard(PlayModeConfig playconfig, boolean[] exclusive) {
+		int[] kbkeys = playconfig.getKeyboardConfig().getKeys();
+		resetKeyState();
+		resetKeyTime();
+		
+		int kbcount = setPlayConfig0(kbkeys,  exclusive);
+		return kbcount;
 	}
 	
 	public BMSPlayerInputDevice.Type getDeviceType() {

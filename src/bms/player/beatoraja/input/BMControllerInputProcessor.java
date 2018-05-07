@@ -5,14 +5,15 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.logging.Logger;
 
-import bms.player.beatoraja.PlayModeConfig.ControllerConfig;
 import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.ControllerListener;
 import com.badlogic.gdx.controllers.PovDirection;
 import com.badlogic.gdx.math.Vector3;
 
+import bms.player.beatoraja.playmode.ControllerConfig;
+
 /**
- * 専用コントローラー入力処理用クラス
+ * 弱귞뵪�궠�꺍�깉�꺆�꺖�꺀�꺖�뀯�뒟�눇�릤�뵪�궚�꺀�궧
  *
  * @author exch
  */
@@ -22,20 +23,20 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice implements 
 
 	private final Controller controller;
 	/**
-	 * デバイス名称
+	 * �깈�깘�궎�궧�릫燁�
 	 */
 	private final String name;
 	/**
-	 * ボタンキーアサイン
+	 * �깭�궭�꺍�궘�꺖�궋�궢�궎�꺍
 	 */
 	private int[] buttons = new int[] { BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8,
 			BMKeys.BUTTON_2, BMKeys.BUTTON_5, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN };
 	/**
-	 * スタートキーアサイン
+	 * �궧�궭�꺖�깉�궘�꺖�궋�궢�궎�꺍
 	 */
 	private int start = BMKeys.BUTTON_9;
 	/**
-	 * セレクトキーアサイン
+	 * �궩�꺃�궚�깉�궘�꺖�궋�궢�궎�꺍
 	 */
 	private int select = BMKeys.BUTTON_10;
 
@@ -56,7 +57,7 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice implements 
 	}
 
 	public void setConfig(ControllerConfig controllerConfig) {
-		this.buttons = controllerConfig.getKeyAssign().clone();
+		this.buttons = controllerConfig.getKeys().clone();
 		this.start = controllerConfig.getStart();
 		this.select = controllerConfig.getSelect();
 		this.jkoc = controllerConfig.getJKOC();
@@ -122,19 +123,19 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice implements 
 	}
 
 	/**
-	 * スクラッチ停止カウンタ
+	 * �궧�궚�꺀�긿�긽�걶閭㏂궖�궑�꺍�궭
 	 */
 	private long counter = 1;
 	/**
-	 * アナログスクラッチ位置(-1<->0<->1)
+	 * �궋�깏�꺆�궛�궧�궚�꺀�긿�긽鵝띸쉰(-1<->0<->1)
 	 */
 	private float oldAnalogScratchX = 10;
 	/**
-	 * アナログスクラッチ 入力フラグ
+	 * �궋�깏�꺆�궛�궧�궚�꺀�긿�긽 �뀯�뒟�깢�꺀�궛
 	 */
 	private boolean activeAnalogScratch = false;
 	/**
-	 * アナログスクラッチ 右回転フラグ
+	 * �궋�깏�꺆�궛�궧�궚�꺀�긿�긽 �뤂�썮邕㏂깢�꺀�궛
 	 */
 	private boolean rightMoveScratching = false;
 
@@ -149,10 +150,10 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice implements 
 				if (button <= BMKeys.BUTTON_16) {
 					buttonstate[button] = controller.getButton(button);
 				} else if (button == BMKeys.UP && !jkoc) {
-					// アナログ右回転をUPに割り当てる
+					// �궋�깏�꺆�궛�뤂�썮邕㏂굮UP�겓�돯�굤壤볝겍�굥
 					buttonstate[button] = scratchInput(BMKeys.UP);
 				} else if (button == BMKeys.DOWN && !jkoc) {
-					// アナログ左回転をDOWNに割り当てる
+					// �궋�깏�꺆�궛藥��썮邕㏂굮DOWN�겓�돯�굤壤볝겍�굥
 					buttonstate[button] = scratchInput(BMKeys.DOWN);
 				} else if (button == BMKeys.LEFT) {
 					buttonstate[button] = (axis[0] < -0.9) || (axis[3] < -0.9);
@@ -206,7 +207,7 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice implements 
 		}
 
 		if (oldAnalogScratchX != analogScratchX) {
-			// アナログスクラッチ位置の移動が発生した場合
+			// �궋�깏�꺆�궛�궧�궚�꺀�긿�긽鵝띸쉰�겗燁삣땿�걣�쇇�뵟�걮�걼�졃�릦
 			boolean nowRight = false;
 			if (oldAnalogScratchX < analogScratchX) {
 				nowRight = true;
@@ -221,10 +222,10 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice implements 
 			}
 
 			if (activeAnalogScratch && !(rightMoveScratching == nowRight)) {
-				// 左回転→右回転の場合(右回転→左回転は値の変更がない)
+				// 藥��썮邕™넂�뤂�썮邕㏂겗�졃�릦(�뤂�썮邕™넂藥��썮邕㏂겘�ㅳ겗鸚됪쎍�걣�겒�걚)
 				rightMoveScratching = nowRight;
 			} else if (!activeAnalogScratch) {
-				// 移動無し→回転の場合
+				// 燁삣땿�꽒�걮�넂�썮邕㏂겗�졃�릦
 				activeAnalogScratch = true;
 				rightMoveScratching = nowRight;
 			}
@@ -292,7 +293,7 @@ public class BMControllerInputProcessor extends BMSPlayerInputDevice implements 
 		public static final int MAXID = 20;
 
 		/**
-		 * 専コンのキーコードに対応したテキスト
+		 * 弱귙궠�꺍�겗�궘�꺖�궠�꺖�깋�겓野얍퓶�걮�걼�깇�궘�궧�깉
 		 */
 		private static final String[] BMCODE = { "BUTTON 1", "BUTTON 2", "BUTTON 3", "BUTTON 4", "BUTTON 5", "BUTTON 6",
 				"BUTTON 7", "BUTTON 8", "BUTTON 9", "BUTTON 10", "BUTTON 11", "BUTTON 12", "BUTTON 13", "BUTTON 14",

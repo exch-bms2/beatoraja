@@ -13,21 +13,22 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 
 import bms.model.Mode;
-import bms.player.beatoraja.PlayModeConfig.*;
 import bms.player.beatoraja.decide.MusicDecideSkin;
 import bms.player.beatoraja.input.BMControllerInputProcessor;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyBoardInputProcesseor;
 import bms.player.beatoraja.input.MidiInputProcessor;
+import bms.player.beatoraja.playmode.*;
+import bms.player.beatoraja.PlayModeConfig;
 
 /**
- * キーコンフィグ画面
+ * �궘�꺖�궠�꺍�깢�궍�궛�뵽�씊
  *
  * @author exch
  */
 public class KeyConfiguration extends MainState {
 
-	// TODO スキンベースへ移行
+	// TODO �궧�궘�꺍�깧�꺖�궧�겦燁삭죱
 
 	private BitmapFont titlefont;
 
@@ -206,7 +207,7 @@ public class KeyConfiguration extends MainState {
 
 			if (input.checkIfNumberPressed(7)) {
 				input.resetNumberTime(7);
-				keyboardConfig.setKeyAssign(MODE_HINT[mode], true);
+				keyboardConfig.setKeyAssgin(MODE_HINT[mode], true);
 				for (int i = 0; i < controllerConfigs.length; i++) {
 					controllerConfigs[i].setKeyAssign(MODE_HINT[mode], i, false);
 				}
@@ -214,7 +215,7 @@ public class KeyConfiguration extends MainState {
 			}
 			if (input.checkIfNumberPressed(8)) {
 				input.resetNumberTime(8);
-				keyboardConfig.setKeyAssign(MODE_HINT[mode], false);
+				keyboardConfig.setKeyAssgin(MODE_HINT[mode], false);
 				for (int i = 0; i < controllerConfigs.length; i++) {
 					controllerConfigs[i].setKeyAssign(MODE_HINT[mode], i, true);
 				}
@@ -222,7 +223,7 @@ public class KeyConfiguration extends MainState {
 			}
 			if (input.checkIfNumberPressed(9)) {
 				input.resetNumberTime(9);
-				keyboardConfig.setKeyAssign(MODE_HINT[mode], false);
+				keyboardConfig.setKeyAssgin(MODE_HINT[mode], false);
 				for (int i = 0; i < controllerConfigs.length; i++) {
 					controllerConfigs[i].setKeyAssign(MODE_HINT[mode], i, false);
 				}
@@ -321,7 +322,7 @@ public class KeyConfiguration extends MainState {
 		controllerConfigs = pc.getController();
 		midiconfig = pc.getMidiConfig();
 
-		// 各configのキーサイズ等が足りない場合は補充する
+		// �릢config�겗�궘�꺖�궢�궎�궨嶺됥걣擁녈굤�겒�걚�졃�릦�겘獒쒎뀉�걲�굥
 		validateKeyboardLength();
 		validateControllerLength();
 		validateMidiLength();
@@ -333,7 +334,7 @@ public class KeyConfiguration extends MainState {
 
 	private int getKeyboardKeyAssign(int index) {
 		if (index >= 0) {
-			return keyboardConfig.getKeyAssign()[index];
+			return keyboardConfig.getKeys()[index];
 		} else if (index == -1) {
 			return keyboardConfig.getStart();
 		} else if (index == -2) {
@@ -348,7 +349,7 @@ public class KeyConfiguration extends MainState {
 		}
 		resetKeyAssign(index);
 		if (index >= 0) {
-			keyboardConfig.getKeyAssign()[index] = keyboard.getLastPressedKey();
+			keyboardConfig.getKeys()[index] = keyboard.getLastPressedKey();
 		} else if (index == -1) {
 			keyboardConfig.setStart(keyboard.getLastPressedKey());
 		} else if (index == -2) {
@@ -358,7 +359,7 @@ public class KeyConfiguration extends MainState {
 
 	private int getControllerKeyAssign(int device, int index) {
 		if (index >= 0) {
-			return controllerConfigs[device].getKeyAssign()[index];
+			return controllerConfigs[device].getKey(index);
 		} else if (index == -1) {
 			return controllerConfigs[device].getStart();
 		} else if (index == -2) {
@@ -381,7 +382,7 @@ public class KeyConfiguration extends MainState {
 
 		resetKeyAssign(index);
 		if (index >= 0) {
-			controllerConfigs[cindex].getKeyAssign()[index] = bmc.getLastPressedButton();
+			controllerConfigs[cindex].setKey(index, bmc.getLastPressedButton());
 		} else if (index == -1) {
 			controllerConfigs[cindex].setStart(bmc.getLastPressedButton());
 		} else if (index == -2) {
@@ -389,33 +390,33 @@ public class KeyConfiguration extends MainState {
 		}
 	}
 
-	private MidiConfig.Input getMidiKeyAssign(int index) {
+	private Input getMidiKeyAssign(int index) {
 		if (index >= 0) {
-			return midiconfig.getKeyAssign(index);
+			return midiconfig.getKey(index);
 		} else if (index == -1) {
 			return midiconfig.getStart();
 		} else if (index == -2) {
 			return midiconfig.getSelect();
 		}
-		return new MidiConfig.Input();
+		return new Input();
 	}
 
 	private void resetKeyAssign(int index) {
 		if (index >= 0) {
-			keyboardConfig.getKeyAssign()[index] = -1;
+			keyboardConfig.getKeys()[index] = -1;
 			for (ControllerConfig cc : controllerConfigs) {
-				cc.getKeyAssign()[index] = -1;
+				cc.setKey(index, -1);
 			}
-			midiconfig.setKeyAssign(index, null);
+			midiconfig.setKey(index, null);
 		}
 	}
 
 	private void resetKeyAssign(int KBIndex, int BMIndex, int MidiIndex) {
 		final int noAssign = -1;
-		if (KBIndex >= 0) keyboardConfig.getKeyAssign()[KBIndex] = noAssign;
+		if (KBIndex >= 0) keyboardConfig.getKeys()[KBIndex] = noAssign;
 		if(BMIndex >= 0) {
 				for (ControllerConfig cc : controllerConfigs) {
-					cc.getKeyAssign()[BMIndex] = noAssign;
+					cc.setKey(BMIndex, noAssign);
 				}
 		} else if (BMIndex == -1) {
 			for (int i = 0; i < controllerConfigs.length; i++) {
@@ -426,7 +427,7 @@ public class KeyConfiguration extends MainState {
 				controllerConfigs[i].setSelect(noAssign);
 			}
 		}
-		if(MidiIndex >= 0) midiconfig.setKeyAssign(MidiIndex, null);
+		if(MidiIndex >= 0) midiconfig.setKey(MidiIndex, null);
 		else if (MidiIndex == -1) {
 			midiconfig.setStart(null);
 		} else if (MidiIndex == -2) {
@@ -437,7 +438,7 @@ public class KeyConfiguration extends MainState {
 	private void setMidiKeyAssign(int index) {
 		resetKeyAssign(index);
 		if (index >= 0) {
-			midiconfig.setKeyAssign(index, midiinput.getLastPressedKey());
+			midiconfig.setKey(index, midiinput.getLastPressedKey());
 		} else if (index == -1) {
 			midiconfig.setStart(midiinput.getLastPressedKey());
 		} else if (index == -2) {
@@ -452,12 +453,12 @@ public class KeyConfiguration extends MainState {
 				maxKey = key;
 			}
 		}
-		if (keyboardConfig.getKeyAssign().length <= maxKey) {
+		if (keyboardConfig.getKeys().length <= maxKey) {
 			int[] keys = new int[maxKey + 1];
-			for (int i = 0; i < keyboardConfig.getKeyAssign().length; i++) {
-				keys[i] = keyboardConfig.getKeyAssign()[i];
+			for (int i = 0; i < keyboardConfig.getKeys().length; i++) {
+				keys[i] = keyboardConfig.getKeys()[i];
 			}
-			keyboardConfig.setKeyAssign(keys);
+			keyboardConfig.setKeys(keys);
 		}
 	}
 
@@ -481,12 +482,12 @@ public class KeyConfiguration extends MainState {
 			controllerConfigs = configs;
 		}
 		for (ControllerConfig controllerConfig : controllerConfigs) {
-			if (controllerConfig.getKeyAssign().length <= maxKey) {
+			if (controllerConfig.getKeyLength() <= maxKey) {
 				int[] keys = new int[maxKey + 1];
-				for (int i = 0; i < controllerConfig.getKeyAssign().length; i++) {
-					keys[i] = controllerConfig.getKeyAssign()[i];
+				for (int i = 0; i < controllerConfig.getKeyLength(); i++) {
+					keys[i] = controllerConfig.getKey(i);
 				}
-				controllerConfig.setKeyAssign(keys);
+				controllerConfig.setKeys(keys);
 			}
 		}
 	}
@@ -499,9 +500,9 @@ public class KeyConfiguration extends MainState {
 			}
 		}
 		if (midiconfig.getKeys().length <= maxKey) {
-			MidiConfig.Input[] keys = new MidiConfig.Input[maxKey + 1];
+			Input[] keys = new Input[maxKey + 1];
 			for (int i = 0; i < keys.length; i++) {
-				keys[i] = i < midiconfig.getKeys().length ? midiconfig.getKeys()[i] : new MidiConfig.Input();
+				keys[i] = i < midiconfig.getKeys().length ? midiconfig.getKeys()[i] : new Input();
 			}
 			midiconfig.setKeys(keys);
 		}
