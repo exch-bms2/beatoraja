@@ -1,7 +1,7 @@
 package bms.player.beatoraja.skin;
 
-public class setAlphaAngle {
-	public setAlphaAngle(int alphaAngle[][]) {
+public class LoaderSetting {
+	public LoaderSetting(int alphaAngle[][]) {
 		for (int i = 0; i < alphaAngle.length; i++) {
 			alphaAngle[i][0] = 255;
 			alphaAngle[i][1] = 0;
