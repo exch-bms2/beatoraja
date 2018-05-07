@@ -164,7 +164,7 @@ public class PMcharaLoader {
 		//占쏙옙占쎄묽占쎄틬占쎈뎁
 		Pixmap pixmap = new Pixmap( 1, 1, Format.RGBA8888 );
 		Texture transparent = new Texture( pixmap );
-		SkinImage part = null;
+		SkinImage ImagePart = null;
 		//#Pattern,#Texture,#Layer占쎄쿁占쎌쟼占쎄쾽占쎈짂占쎈돕庸뉛옙畑댁떏援��깗�슔嫄�
 		int[] setBMPIndex = {CharBMPIndex,CharTexIndex,CharBMPIndex};
 		for(int patternIndex = 0; patternIndex < 3; patternIndex++) {
@@ -261,7 +261,7 @@ public class PMcharaLoader {
 						}
 						//alpha占쎄쾹angle占쎄쿁亦껓옙占쎄껙歷��뇠寃�
 						int alphaAngle[][] = new int[dstPosition.length][2];
-						setAlphaAngle setAngle = new setAlphaAngle(alphaAngle);
+						LoaderSetting setAngle = new LoaderSetting(alphaAngle);
 						setAngle.settingAngle(alphaAngle, count, dst, this);
 						//占쎄틓占쎄틬占쎄묏占쎈��넼�뿣源�占쎄틕占쎄틬占쎄묾占쎄께占쎄쾸
 						if((loopFrame+increaseRate) != 0) {
@@ -271,14 +271,14 @@ public class PMcharaLoader {
 								if(index >= 0 && index < Position.length && Position[index][2] > 0 && Position[index][3] > 0) images[i/2] = new TextureRegion(setBMP, Position[index][0], Position[index][1], Position[index][2], Position[index][3]);
 								else images[i/2] = new TextureRegion(transparent, 0, 0, 1, 1);
 							}
-							part = new SkinImage(images, timer, loopTime);
-							skin.add(part);
+							ImagePart = new SkinImage(images, timer, loopTime);
+							skin.add(ImagePart);
 							for(int i = 0; i < (loopFrame+increaseRate); i++) {
 								dstSize = new SkinDestinationSize(dstSize.getDstx()+dstPosition[i][0]*dstSize.getDstw()/size[0], dstSize.getDsty()+dstSize.getDsth()-(dstPosition[i][1]+dstPosition[i][3])*dstSize.getDsth()/size[1], dstPosition[i][2]*dstSize.getDstw()/size[0], dstPosition[i][3]*dstSize.getDsth()/size[1]);
-								part.setDestination((int)(frameTime*i),dstSize,3,alphaAngle[i][0],255,255,255,1,0,alphaAngle[i][1],0,-1,timer,skinOption.getDstOpt1(),skinOption.getDstOpt2(),skinOption.getDstOpt3(),0);
+								ImagePart.setDestination((int)(frameTime*i),dstSize,3,alphaAngle[i][0],255,255,255,1,0,alphaAngle[i][1],0,-1,timer,skinOption.getDstOpt1(),skinOption.getDstOpt2(),skinOption.getDstOpt3(),0);
 							}
 							dstSize = new SkinDestinationSize(dstSize.getDstx()+dstPosition[(loopFrame+increaseRate)-1][0]*dstSize.getDstw()/size[0], dstSize.getDsty()+dstSize.getDsth()-(dstPosition[(loopFrame+increaseRate)-1][1]+dstPosition[(loopFrame+increaseRate)-1][3])*dstSize.getDsth()/size[1], dstPosition[(loopFrame+increaseRate)-1][2]*dstSize.getDstw()/size[0], dstPosition[(loopFrame+increaseRate)-1][3]*dstSize.getDsth()/size[1]);
-							part.setDestination(loopTime-1,dstSize ,3,alphaAngle[(loopFrame+increaseRate)-1][0],255,255,255,1,0,alphaAngle[(loopFrame+increaseRate)-1][1],0,-1,timer,skinOption.getDstOpt1(),skinOption.getDstOpt2(),skinOption.getDstOpt3(),skinOption.getDstOffset());
+							ImagePart.setDestination(loopTime-1,dstSize ,3,alphaAngle[(loopFrame+increaseRate)-1][0],255,255,255,1,0,alphaAngle[(loopFrame+increaseRate)-1][1],0,-1,timer,skinOption.getDstOpt1(),skinOption.getDstOpt2(),skinOption.getDstOpt3(),skinOption.getDstOffset());
 						}
 						//占쎄틓占쎄틬占쎄묏占쎈��넼�뿣源�占쎄틕占쎄틬占쎄묾占쎄괍占쎄덩
 						TextureRegion[] images = new TextureRegion[dst[0].length() / 2 - (loop[motion]+1)];
@@ -287,14 +287,14 @@ public class PMcharaLoader {
 							if(index >= 0 && index < Position.length && Position[index][2] > 0 && Position[index][3] > 0) images[i/2-(loop[motion]+1)] = new TextureRegion(setBMP, Position[index][0], Position[index][1], Position[index][2], Position[index][3]);
 							else images[i/2-(loop[motion]+1)] = new TextureRegion(transparent, 0, 0, 1, 1);
 						}
-						part = new SkinImage(images, timer, cycle - loopTime);
-						skin.add(part);
+						ImagePart = new SkinImage(images, timer, cycle - loopTime);
+						skin.add(ImagePart);
 						for(int i = (loopFrame+increaseRate); i < dstPosition.length; i++) {
 							dstSize = new SkinDestinationSize(dstSize.getDstx()+dstPosition[i][0]*dstSize.getDstw()/size[0], dstSize.getDsty()+dstSize.getDsth()-(dstPosition[i][1]+dstPosition[i][3])*dstSize.getDsth()/size[1], dstPosition[i][2]*dstSize.getDstw()/size[0], dstPosition[i][3]*dstSize.getDsth()/size[1]);
-							part.setDestination((int)(frameTime*i),dstSize,3,alphaAngle[i][0],255,255,255,1,0,alphaAngle[i][1],0,loopTime,timer,skinOption.getDstOpt1(),skinOption.getDstOpt2(),skinOption.getDstOpt3(),0);
+							ImagePart.setDestination((int)(frameTime*i),dstSize,3,alphaAngle[i][0],255,255,255,1,0,alphaAngle[i][1],0,loopTime,timer,skinOption.getDstOpt1(),skinOption.getDstOpt2(),skinOption.getDstOpt3(),0);
 						}
 						dstSize = new SkinDestinationSize(dstSize.getDstx()+dstPosition[(loopFrame+increaseRate)-1][0]*dstSize.getDstw()/size[0], dstSize.getDsty()+dstSize.getDsth()-(dstPosition[(loopFrame+increaseRate)-1][1]+dstPosition[(loopFrame+increaseRate)-1][3])*dstSize.getDsth()/size[1], dstPosition[(loopFrame+increaseRate)-1][2]*dstSize.getDstw()/size[0], dstPosition[(loopFrame+increaseRate)-1][3]*dstSize.getDsth()/size[1]);
-						part.setDestination(loopTime-1,dstSize ,3,alphaAngle[(loopFrame+increaseRate)-1][0],255,255,255,1,0,alphaAngle[(loopFrame+increaseRate)-1][1],0,-1,timer,skinOption.getDstOpt1(),skinOption.getDstOpt2(),skinOption.getDstOpt3(),skinOption.getDstOffset());
+						ImagePart.setDestination(loopTime-1,dstSize ,3,alphaAngle[(loopFrame+increaseRate)-1][0],255,255,255,1,0,alphaAngle[(loopFrame+increaseRate)-1][1],0,-1,timer,skinOption.getDstOpt1(),skinOption.getDstOpt2(),skinOption.getDstOpt3(),skinOption.getDstOffset());
 					}
 				}
 			}
