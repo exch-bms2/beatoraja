@@ -75,6 +75,9 @@ public class PomyuCharaLoader {
 			final int CharTexIndex = 2;
 			final int CharFaceIndex = 4;
 			final int SelectCGIndex = 6;
+			//透過処理フラグ
+			boolean[] transparentFlag = new boolean[8];
+			Arrays.fill(transparentFlag, false);
 			//各パラメータ
 			int[][] xywh = new int[1296][4];
 			for(int[] i: xywh){
@@ -199,23 +202,27 @@ public class PomyuCharaLoader {
 			Texture setBMP;
 			int setMotion = Integer.MIN_VALUE;
 			SkinImage PMcharaPart = null;
+			int setIndex = 0;
 			switch(type) {
 				case BACKGROUND:
-					setBMP = transparentProcessing(CharBMP[CharBMPIndex + setColor-1]);
+					setIndex = CharBMPIndex + setColor-1;
+					setBMP = transparentProcessing(CharBMP[setIndex], setIndex, transparentFlag);
 					image = new TextureRegion[1];
 					image[0] = new TextureRegion(setBMP, xywh[1][0], xywh[1][1], xywh[1][2], xywh[1][3]);
 					PMcharaPart = new SkinImage(image, 0, 0);
 					skin.add(PMcharaPart);
 					return PMcharaPart;
 				case NAME:
-					setBMP = transparentProcessing(CharBMP[CharBMPIndex + setColor-1]);
+					setIndex = CharBMPIndex + setColor-1;
+					setBMP = transparentProcessing(CharBMP[setIndex], setIndex, transparentFlag);
 					image = new TextureRegion[1];
 					image[0] = new TextureRegion(setBMP, xywh[0][0], xywh[0][1], xywh[0][2], xywh[0][3]);
 					PMcharaPart = new SkinImage(image, 0, 0);
 					skin.add(PMcharaPart);
 					return PMcharaPart;
 				case FACE_UPPER:
-					setBMP = transparentProcessing(setColor == 2 && CharBMP[CharFaceIndex + 1] != null ? CharBMP[CharFaceIndex + 1] : CharBMP[CharFaceIndex]);
+					setIndex = setColor == 2 && CharBMP[CharFaceIndex + 1] != null ? CharFaceIndex + 1 : CharFaceIndex;
+					setBMP = transparentProcessing(CharBMP[setIndex], setIndex, transparentFlag);
 					if(setBMP == null) break;
 					image = new TextureRegion[1];
 					image[0] = new TextureRegion(setBMP, charFaceUpperXywh[0], charFaceUpperXywh[1], charFaceUpperXywh[2], charFaceUpperXywh[3]);
@@ -223,7 +230,8 @@ public class PomyuCharaLoader {
 					skin.add(PMcharaPart);
 					return PMcharaPart;
 				case FACE_ALL:
-					setBMP = transparentProcessing(setColor == 2 && CharBMP[CharFaceIndex + 1] != null ? CharBMP[CharFaceIndex + 1] : CharBMP[CharFaceIndex]);
+					setIndex = setColor == 2 && CharBMP[CharFaceIndex + 1] != null ? CharFaceIndex + 1 : CharFaceIndex;
+					setBMP = transparentProcessing(CharBMP[setIndex], setIndex, transparentFlag);
 					if(setBMP == null) break;
 					image = new TextureRegion[1];
 					image[0] = new TextureRegion(setBMP, charFaceAllXywh[0], charFaceAllXywh[1], charFaceAllXywh[2], charFaceAllXywh[3]);
@@ -270,10 +278,12 @@ public class PomyuCharaLoader {
 					//#Pattern,#Texture,#Layerの順に描画設定を行う
 					int[] setBMPIndex = {CharBMPIndex,CharTexIndex,CharBMPIndex};
 					for(int patternIndex = 0; patternIndex < 3; patternIndex++) {
-						setBMP = transparentProcessing(CharBMP[setBMPIndex[patternIndex] + setColor-1]);
 						for(int patternDataIndex = 0; patternDataIndex < patternData.get(patternIndex).size(); patternDataIndex++) {
 							String[] str = patternData.get(patternIndex).get(patternDataIndex).split("\t", -1);
 							if (str.length > 1) {
+								setIndex = setBMPIndex[patternIndex] + setColor-1;
+								CharBMP[setIndex] = transparentProcessing(CharBMP[setIndex], setIndex, transparentFlag);
+								setBMP = CharBMP[setIndex];
 								int motion = Integer.MIN_VALUE;
 								String dst[] = new String[4];
 								Arrays.fill(dst, "");
@@ -501,9 +511,11 @@ public class PomyuCharaLoader {
 		}
 		return list;
 	}
-	private Texture transparentProcessing(Texture tex) {
+	private Texture transparentProcessing(Texture tex, int index, boolean[] flag) {
 		//透過処理 右下の1pixelが透過色 選択画面アイコンは透過しない
-		if(tex == null) return null;
+		if(tex == null || flag[index]) {
+			return tex;
+		}
 		Pixmap pixmap = new Pixmap( tex.getWidth(), tex.getHeight(), Format.RGBA8888 );
 		int transparentColor = tex.getTextureData().consumePixmap().getPixel(tex.getWidth() - 1, tex.getHeight() - 1);
 		for(int x = 0; x < tex.getWidth(); x++) {
@@ -516,6 +528,7 @@ public class PomyuCharaLoader {
 		tex.dispose();
 		tex = new Texture( pixmap );
 		pixmap.dispose();
+		flag[index] = true;
 		return tex;
 	}
 }
