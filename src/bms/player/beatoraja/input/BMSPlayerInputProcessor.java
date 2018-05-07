@@ -207,15 +207,36 @@ public class BMSPlayerInputProcessor {
 	}
 
 	public void setPlayConfig(PlayModeConfig playconfig) {
-		boolean[] exclusive = new boolean[playconfig.getKeyboardConfig().getKeyLength()];
+		// KB, �궠�꺍�깉�꺆�꺖�꺀�꺖, Midi�겗�릢�깭�궭�꺍�겓�겇�걚�겍�럲餓뽫쉪�눇�릤�굮若잍뼺
+		int[] kbkeys = playconfig.getKeyboardConfig().getKeyAssign();
+		boolean[] exclusive = new boolean[kbkeys.length];
+		resetKeyState();
+		resetKeyTime();
 		
 		// KB, �궠�꺍�깉�꺆�꺖�꺀�꺖, Midi�겗�릢�깭�궭�꺍�겓�겇�걚�겍�럲餓뽫쉪�눇�릤�굮若잍뼺
 		int kbcount = countKeyboard(playconfig, exclusive);
 		int cocount = countController(playconfig, exclusive);
 		int micount = countMidi(playconfig, exclusive);
+
+		int[][] cokeys = new int[playconfig.getController().length][];
+		int cocount = 0;
+		for(int i = 0;i < cokeys.length;i++) {
+			cokeys[i] = playconfig.getController()[i].getKeyAssign();
+			cocount += setPlayConfig0(cokeys[i],  exclusive);
+		}
+				
+		MidiConfig.Input[] mikeys  = playconfig.getMidiConfig().getKeys();
+		int micount = 0;
+		for(int i = 0;i < mikeys.length;i++) {
+			if(exclusive[i]) {
+				mikeys[i] = null;
+			} else {
+				exclusive[i] = true;
+				micount++;
+			}
+		}
 		
 		// �릢�깈�깘�궎�궧�겓�궘�꺖�궠�꺍�깢�궍�궛�굮�궩�긿�깉
-		// set key configuration on each device
 		kbinput.setConfig(playconfig.getKeyboardConfig());
 		for(int i = 0;i < bminput.length;i++) {
 			for(ControllerConfig controller : playconfig.getController()) {
@@ -542,4 +563,15 @@ public class BMSPlayerInputProcessor {
 			return keylog.toArray(KeyInputLog.class);
 		}
 	}
+
+	public boolean[] getKeystate() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public long[] getTime() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

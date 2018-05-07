@@ -12,28 +12,6 @@ import bms.model.NormalNote;
 import bms.model.Note;
 import bms.model.TimeLine;
 
-
-public class LaneShuffleModifier extends PatternModifier{
-
-	private int[] random;
-	
-	private int type;
-	
-	private int[] result;
-	
-	private int[] keys;
-	
-	private int lanes;
-	private int[] ln;
-	private int[] endLnNoteTime;
-	private int max = 0;
-	private boolean isImpossible = false;
-	
-	
-	private List<Integer> originalPatternList = new ArrayList<Integer>(); 
-	private List<List<Integer>> kouhoPatternList = new ArrayList<List<Integer>>();
-	
-	
 	public static final int MIRROR = 0;
 	/**
 	 * �꺆�꺖�깇�꺖�깉
@@ -59,14 +37,12 @@ public class LaneShuffleModifier extends PatternModifier{
 	 * 1P�겗鈺쒒씊�굮2P�겓�궠�깞�꺖�걲�굥
 	 */
 	public static final int BATTLE = 6;
-	
-	
 
 	public LaneShuffleModifier(int type) {
 		super(type == RANDOM_EX ? 1 : 0);
 		this.type = type;
 	}
-	
+
 	private void makeRandom(BMSModel model) {
 		Mode mode = model.getMode();
 		int[] keys;
@@ -122,65 +98,6 @@ public class LaneShuffleModifier extends PatternModifier{
 		}
 	}
 
-	public int[] noMurioshiLaneShuffle(BMSModel model) {
-		
-		//Set value to be used this method
-		Mode mode = model.getMode();
-		keys = getKeys(mode, false);
-		lanes = mode.key;
-		ln = new int[lanes];
-		endLnNoteTime = new int[lanes];
-		
-		for (int key : keys) {
-			max = Math.max(max, key);
-		}
-		
-		Arrays.fill(ln, -1);
-		Arrays.fill(endLnNoteTime, -1);
-		
-		
-		//Initialize All value associated with LN
-		Init_Ln(model, lanes, keys, ln, endLnNoteTime, isImpossible, originalPatternList);
-		
-	
-		//Set Flag Value
-		Set_murioshiFlag(isImpossible ,originalPatternList,keys, kouhoPatternList);
-		
-		
-		//SetResult
-		return Set_Result(result, kouhoPatternList);
-	}
-
-	@Override
-	public List<PatternModifyLog> modify(BMSModel model) {
-		List<PatternModifyLog> log = new ArrayList();
-		lanes = model.getMode().key;
-		Note[] notes = new Note[lanes];
-		Note[] hnotes = new Note[lanes];
-		boolean[] clone = new boolean[lanes];
-		TimeLine[] timelines = model.getAllTimeLines();
-		
-		for (int index = 0; index < timelines.length; index++) {
-			final TimeLine tl = timelines[index];
-			if (tl.existNote() || tl.existHiddenNote()) {
-				
-				//Set Note
-				Set_Note(tl, notes, hnotes);
-				
-				//Set_Log
-				Set_Log(clone, notes, hnotes, tl, index, timelines ,log );
-			}
-		}
-		return log;
-	}
-	
-	private void Init_Ln(BMSModel model, int lanes, int[] keys, int[] ln, int[] endLnNoteTime,
-			boolean isImpossible, List<Integer> originalPatternList) {
-		for (TimeLine tl : model.getAllTimeLines()) {
-			if (tl.existNote()) {
-				//LN
-				Set_LN(tl);
-				
 				List<Integer> noteLane = new ArrayList<Integer>(keys.length);
 				for (int i = 0; i < lanes; i++) {
 					Note n = tl.getNote(i);
@@ -188,7 +105,7 @@ public class LaneShuffleModifier extends PatternModifier{
 							noteLane.add((Integer) i);
 					}
 				}
-				
+
 				if(noteLane.size() >= 7) {
 					isImpossible = true;
 					break;
@@ -201,30 +118,7 @@ public class LaneShuffleModifier extends PatternModifier{
 				}
 			}
 		}
-	}
-	
-	private void Set_LN(TimeLine tl) {
-		for (int i = 0; i < lanes; i++) {
-			Note n = tl.getNote(i);
-			if (n instanceof LongNote) {
-				LongNote ln2 = (LongNote) n;
-				if (ln2.isEnd() && tl.getTime() == endLnNoteTime[i]) {
-					ln[i] = -1;
-					endLnNoteTime[i] = -1;
-				} else {
-					ln[i] = i;
-					if (!ln2.isEnd()) {
-						endLnNoteTime[i] = ln2.getPair().getTime();
-					}
-				}
-			}
-		}
-	}
-	
-	private void Set_murioshiFlag(boolean isImpossible ,List<Integer> originalPatternList, int[] keys, 
-			List<List<Integer>> kouhoPatternList) {
-		if(!isImpossible) {
-			
+
 			for(int i = 0 ; i < originalPatternList.size()-1 ; i++ ) {
 				for(int j = originalPatternList.size()-1 ; j > i; j-- ) {
 					if (originalPatternList.get(i).equals(originalPatternList.get(j))) {
@@ -232,7 +126,7 @@ public class LaneShuffleModifier extends PatternModifier{
 					}
 				}
 			}
-			
+
 			int[] searchLane = new int[9];
 			boolean[] searchLaneFlag = new boolean[9];
 			Arrays.fill(searchLaneFlag, false);
@@ -261,15 +155,6 @@ public class LaneShuffleModifier extends PatternModifier{
 											if(searchLaneFlag[searchLane[7]]) continue;
 											searchLaneFlag[searchLane[7]] = true;
 											for(searchLane[8]=0;searchLane[8]<9;searchLane[8]++) {
-												
-												if(searchLaneFlag[searchLane[8]] || (searchLane[0]==0&&searchLane[1]==1&&searchLane[2]==2&&searchLane[3]==3&&searchLane[4]==4&&searchLane[5]==5&&searchLane[6]==6&&searchLane[7]==7&&searchLane[8]==8)
-																				 || (searchLane[0]==8&&searchLane[1]==7&&searchLane[2]==6&&searchLane[3]==5&&searchLane[4]==4&&searchLane[5]==3&&searchLane[6]==2&&searchLane[7]==1&&searchLane[8]==0)) continue; 
-												boolean murioshiFlag = false;
-												kouhoPatternList.add(new ArrayList<Integer>());
-												for(int i=0;i<9;i++) {
-													kouhoPatternList.get(kouhoPatternList.size()-1).add(searchLane[i]);
-												}
-												
 												for(int i=0;i<originalPatternList.size();i++) {
 													tempPattern.clear();
 													for(int j=0;j<9;j++) {
@@ -291,7 +176,7 @@ public class LaneShuffleModifier extends PatternModifier{
 														break;
 													}
 												}
-												
+
 											}
 											searchLaneFlag[searchLane[7]] = false;
 										}
@@ -311,69 +196,14 @@ public class LaneShuffleModifier extends PatternModifier{
 			}
 		}
 		
-		Logger.getGlobal().info("Murioshi Sheet Number: "+(kouhoPatternList.size()));
-	}
-	
-	private int[] Set_Result(int[] result, List<List<Integer>> kouhoPatternList) {
-		
 		if(kouhoPatternList.size() > 0) {
 			int r = (int) (Math.random() * kouhoPatternList.size());
 			for (int i = 0; i < 9; i++) {
 				result[(int) (kouhoPatternList.get(r)).get(i)] = i;
 			}
-		
 		} else {
 			int mirror = (int) (Math.random() * 2);
 			for (int i = 0; i < 9; i++) {
 				result[i] = mirror == 0 ? i : 8 - i;
 			}
 		}
-		
-		return result;
-	}
-	
-	private void Set_Note(TimeLine tl, Note[] notes, Note[] hnotes ) {
-		
-		for (int i = 0; i < lanes; i++) {
-			notes[i] = tl.getNote(i);
-			hnotes[i] = tl.getHiddenNote(i);
-		}
-	}
-	
-	private void Set_Log(boolean[] clone, Note[] notes, Note[] hnotes, TimeLine tl, int index, TimeLine[] timelines ,List<PatternModifyLog> log ) {
-		for (int i = 0; i < lanes; i++) {
-			final int mod = i < random.length ? random[i] : i;
-			if (clone[mod]) {
-				if (notes[mod] != null) {
-					if (notes[mod] instanceof LongNote && ((LongNote) notes[mod]).isEnd()) {
-						for (int j = index - 1; j >= 0; j--) {
-							if (((LongNote) notes[mod]).getPair().getSection() == timelines[j].getSection()) {
-								LongNote ln = (LongNote) timelines[j].getNote(i);
-								tl.setNote(i, ln.getPair());
-								System.out.println(ln.toString() + " : " + ln.getPair().toString() + " == "
-										+ ((LongNote) notes[mod]).getPair().toString() + " : "
-										+ notes[mod].toString());
-								break;
-							}
-						}
-					} else {
-						tl.setNote(i, (Note) notes[mod].clone());
-					}
-				} else {
-					tl.setNote(i, null);
-				}
-				if (hnotes[mod] != null) {
-					tl.setHiddenNote(i, (Note) hnotes[mod].clone());
-				} else {
-					tl.setHiddenNote(i, null);
-				}
-			} else {
-				tl.setNote(i, notes[mod]);
-				tl.setHiddenNote(i, hnotes[mod]);
-				clone[mod] = true;
-			}
-		}
-		log.add(new PatternModifyLog(tl.getSection(), random));
-	}
-
-}
