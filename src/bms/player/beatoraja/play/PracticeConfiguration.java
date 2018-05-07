@@ -96,7 +96,7 @@ public class PracticeConfiguration {
 	public GrooveGauge getGauge(BMSModel model) {
 		GrooveGauge gauge = GrooveGauge.create(model, property.gaugetype, property.gaugecategory);
 		gauge.setValue(property.startgauge);
-		return gauge;
+		return gauge; 
 	}
 
 	public void processInput(BMSPlayerInputProcessor input) {

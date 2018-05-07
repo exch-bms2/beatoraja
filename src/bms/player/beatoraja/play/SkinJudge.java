@@ -57,7 +57,7 @@ public class SkinJudge extends SkinObject {
     public boolean isShift() {
     	return shift;
     }
-
+ 
     @Override
     public void draw(SkinObjectRenderer sprite, long time, MainState state) {
         int judgenow = ((BMSPlayer)state).getJudgeManager().getNowJudge()[index] - 1;

@@ -61,7 +61,7 @@ public class ControlInputProcessor {
 	public void input() {
 		final LaneRenderer lanerender = player.getLanerender();
 		final BMSPlayerInputProcessor input = player.main.getInputProcessor();
-		// 各種コントロール入力判定
+		// 占쎈│�몛占쏙옙沅좑옙爰랃옙源됵옙爰놅옙爰뽳옙爰귨옙��占쎈뮓占쎈떓畑댐옙
 		if (enableControl) {
 			if (enableCursor) {
 				if (input.getCursorState(0)) {

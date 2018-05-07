@@ -853,6 +853,8 @@ public class PlayConfigurationView implements Initializable {
 
     @FXML
 	public void start() {
+
+		
 		commit();
 		playerPanel.setDisable(true);
 		videoTab.setDisable(true);
@@ -863,8 +865,9 @@ public class PlayConfigurationView implements Initializable {
 		otherTab.setDisable(true);
 		irTab.setDisable(true);
 		controlPanel.setDisable(true);
-		
 		MainLoader.play(null, bms.player.beatoraja.PlayerResource.PlayMode.PLAY, true, config, player, songUpdated);
+
+		
 	}
 
     @FXML

@@ -32,50 +32,50 @@ import java.io.*;
 import org.lwjgl.opengl.GL11;
 
 /**
- * �궧�궘�꺍
+ * 占쎄때占쎄텣占쎄틡
  * 
  * @author exch
  */
 public class Skin {
 	
-	// TODO �겱�겳�굝�궘�깵�꺀楹삣눇�릤�겗�늽�썴
+	// TODO 占쎄껑占쎄껙占쎄턁占쎄텣占쎄뭇占쎄�璵뱀궍�늾占쎈┐占쎄쿁占쎈듊占쎌뜶
 
 	/**
-	 * 亮�
+	 * 畑뤄옙
 	 */
 	private final float width;
 	/**
-	 * 遙섅걬
+	 * �걲�꼨嫄�
 	 */
 	private final float height;
 	/**
-	 * �뀇�깈�꺖�궭�걢�굢�겗亮끾캈�럤
+	 * 占쎈�뉛옙源덌옙爰뽳옙沅�占쎄괍占쎄덩占쎄쿁畑룸겲罹덌옙�윣
 	 */
 	private final float dw;
 	/**
-	 * �뀇�깈�꺖�궭�걢�굢�겗遙섅걬驪붺럤
+	 * 占쎈�뉛옙源덌옙爰뽳옙沅�占쎄괍占쎄덩占쎄쿁�걲�꼨嫄э쫯遺븍윣
 	 */
 	private final float dh;
 
 	/**
-	 * �쇉�뙯�걬�굦�겍�걚�굥�궧�궘�꺍�궕�깣�궦�궒�궚�깉
+	 * 占쎌뇡占쎈솺占쎄괵占쎄덱占쎄쾷占쎄콢占쎄데占쎄때占쎄텣占쎄틡占쎄텞占쎄묍占쎄땋占쎄텙占쎄텥占쎄퉱
 	 */
 	private Array<SkinObject> objects = new Array<SkinObject>();
 	private SkinObject[] objectarray = new SkinObject[0];
 	/**
-	 * �솮鸚뽧걬�굦�겍�걚�굥�궧�궘�꺍�궕�깣�궦�궒�궚�깉
+	 * 占쎌넯勇싲쉑嫄э옙援�占쎄쾷占쎄콢占쎄데占쎄때占쎄텣占쎄틡占쎄텞占쎄묍占쎄땋占쎄텙占쎄텥占쎄퉱
 	 */
 	private Array<SkinObject> removes = new Array<SkinObject>();
 	/**
-	 * �뀯�뒟�룛餓섌뼀冶뗦셽�뼋(ms)
+	 * 占쎈��占쎈뮓占쎈짏繞볦꼳堉��넼�뿦�끋占쎈펻(ms)
 	 */
 	private int input;
 	/**
-	 * �궥�꺖�꺍�겗�셽�뼋(ms)
+	 * 占쎄땅占쎄틬占쎄틡占쎄쿁占쎌끋占쎈펻(ms)
 	 */
 	private int scene = 3600000 * 24;
 	/**
-	 * �궥�꺖�꺍餓ι솉繹뽩굺�뼀冶뗣걢�굢�궥�꺖�꺍燁삭죱�겲�겎�겗�셽�뼋(ms)
+	 * 占쎄땅占쎄틬占쎄틡繞벿뱀냹濚밸쉘援븝옙堉��넼�뿣嫄�占쎄덩占쎄땅占쎄틬占쎄틡�뇖�궘二깍옙寃뀐옙寃롳옙寃쀯옙�끋占쎈펻(ms)
 	 */
 	private int fadeout;
 
@@ -84,7 +84,7 @@ public class Skin {
 	private Map<Integer, Offset> offset = new HashMap<Integer, Offset>();
 
 	/**
-	 * 沃��겳渦쇈겳�셽�걢�굢訝띶쨯�겎�걗�굥�걪�겏�걣閻뷴츣�걮�겍�걚�굥op
+	 * 亦껓옙占쎄껙歷��뇠寃놂옙�끋占쎄괍占쎄덩鼇앸씢夷�占쎄쾸占쎄콟占쎄데占쎄괭占쎄쾹占쎄괏�뼸酉댁르占쎄괼占쎄쾷占쎄콢占쎄데op
 	 */
 	private int[] fixopt;
 
@@ -96,7 +96,7 @@ public class Skin {
 		width = dst.width;
 		height = dst.height;
 		dw = ((float)dst.width) / org.width;
-		dh = ((float)dst.height) / org.height;
+		dh = ((float)dst.height) / org.height;		
 		this.fixopt = fixopt;
 	}
 
@@ -211,7 +211,7 @@ public class Skin {
 			}
 			
  		}
-		Logger.getGlobal().info("�룒�뵽�걬�굦�겒�걚�걪�겏�걣閻뷴츣�걮�겍�걚�굥SkinObject�뎷�솮 : " + removes.size + " / " + objects.size);
+		Logger.getGlobal().info("占쎈짂占쎈돕占쎄괵占쎄덱占쎄쾼占쎄콢占쎄괭占쎄쾹占쎄괏�뼸酉댁르占쎄괼占쎄쾷占쎄콢占쎄데SkinObject占쎈렩占쎌넯 : " + removes.size + " / " + objects.size);
 		objects.removeAll(removes, true);
 		objectarray = objects.toArray(SkinObject.class);
 		option.clear();
@@ -390,14 +390,14 @@ public class Skin {
 
 		public void draw(TextureRegion image, float x, float y, float w, float h) {
 			preDraw(image);
-			// x,y�걣*.5�겗�슋�겓(Windows�겗�겳)TextureRegion�걣�걳�굦�굥�걼�굙�곫슟若싧�얍눇
+			// x,y占쎄괏*.5占쎄쿁占쎌뒎占쎄쾽(Windows占쎄쿁占쎄껙)TextureRegion占쎄괏占쎄교占쎄덱占쎄데占쎄굴占쎄탽占쎄낙�뒣畑댁떑占쎌뼃�늾
 			sprite.draw(image,  x + 0.01f, y + 0.01f, w, h);
 			postDraw();
 		}
 
 		public void draw(TextureRegion image, float x, float y, float w, float h, float cx, float cy, float angle) {
 			preDraw(image);
-			// x,y�걣*.5�겗�슋�겓(Windows�겗�겳)TextureRegion�걣�걳�굦�굥�걼�굙�곫슟若싧�얍눇
+			// x,y占쎄괏*.5占쎄쿁占쎌뒎占쎄쾽(Windows占쎄쿁占쎄껙)TextureRegion占쎄괏占쎄교占쎄덱占쎄데占쎄굴占쎄탽占쎄낙�뒣畑댁떑占쎌뼃�늾
 			sprite.draw(image, x + 0.01f, y + 0.01f, cx * w, cy * h, w, h, 1, 1, angle);
 			postDraw();
 		}
@@ -417,7 +417,7 @@ public class Skin {
 				sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
 				break;
 			case 3:
-				// TODO 歷쏁츞�룒�뵽�겘�썵�걮�걚�걢竊�
+				// TODO 癲뚯뢾痢욑옙猷믭옙逾쏙옙寃섓옙�뜷占쎄괼占쎄콢占쎄괍塋딉옙
 				Gdx.gl.glBlendEquation(GL20.GL_FUNC_SUBTRACT);
 				sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
 				Gdx.gl.glBlendEquation(GL20.GL_FUNC_ADD);
@@ -511,6 +511,6 @@ public class Skin {
 		}
 		return offsetAll;
 	}
-	
+
 
 }

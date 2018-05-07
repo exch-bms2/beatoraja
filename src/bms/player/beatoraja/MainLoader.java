@@ -32,13 +32,13 @@ import bms.player.beatoraja.launcher.PlayConfigurationView;
 public class MainLoader extends Application {
 	
 	private static final boolean ALLOWS_32BIT_JAVA = false;
-	
+	public static MainController main; 
 	public static void main(String[] args) {
 		if(!ALLOWS_32BIT_JAVA && !System.getProperty( "os.arch" ).contains( "64")) {
 			JOptionPane.showMessageDialog(null, "This Application needs 64bit-Jaja.", "Error", JOptionPane.ERROR_MESSAGE);
 			System.exit(1);
 		}
-
+		
 		Logger logger = Logger.getGlobal();
 		try {
 			logger.addHandler(new FileHandler("beatoraja_log.xml"));
@@ -86,14 +86,15 @@ public class MainLoader extends Application {
 		}
 	}
 
-	public static void play(Path f, PlayMode auto, boolean forceExit, Config config, PlayerConfig player, boolean songUpdated) {
+	public static void play(Path f, PlayMode auto, boolean forceExit, Config config, PlayerConfig player, boolean songUpdated) {		
 		if(config == null) {
-			config = Config.read();			
+			config = Config.read();
 		}
 
 		try {
-			MainController main = new MainController(f, config, player, auto, songUpdated);
-
+	
+			main = new MainController(f, config, player, auto, songUpdated);
+			
 			LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
 			cfg.width = config.getResolution().width;
 			cfg.height = config.getResolution().height;
@@ -127,7 +128,6 @@ public class MainLoader extends Application {
 			// System.setProperty("org.lwjgl.opengl.Display.allowSoftwareOpenGL",
 			// "true");
 			new LwjglApplication(main, cfg);
-
 //			Lwjgl3ApplicationConfiguration cfg = new Lwjgl3ApplicationConfiguration();
 //
 //			final int w = (int) RESOLUTION[config.getResolution()].width;
@@ -176,7 +176,7 @@ public class MainLoader extends Application {
 	@Override
 	public void start(javafx.stage.Stage primaryStage) throws Exception {
 		Config config = Config.read();
-
+		
 		try {
 			ResourceBundle bundle = ResourceBundle.getBundle("resources.UIResources");
 			FXMLLoader loader = new FXMLLoader(
