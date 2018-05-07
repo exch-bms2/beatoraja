@@ -72,7 +72,7 @@ import twitter4j.UploadedMedia;
 import twitter4j.conf.ConfigurationBuilder;
 
 /**
- * アプリケーションのルートクラス
+ * �궋�깤�꺁�궞�꺖�궥�깾�꺍�겗�꺂�꺖�깉�궚�꺀�궧
  *
  * @author exch
  */
@@ -108,7 +108,7 @@ public class MainController extends ApplicationAdapter {
 	private MainState current;
 	private static MainState currentState;
 	/**
-	 * 状態の開始時間
+	 * �듁�뀑�겗�뼀冶뗦셽�뼋
 	 */
 	private long starttime;
 	private long nowmicrotime;
@@ -125,17 +125,17 @@ public class MainController extends ApplicationAdapter {
 
 	private SpriteBatch sprite;
 	/**
-	 * 1曲プレイで指定したBMSファイル
+	 * 1�쎊�깤�꺃�궎�겎�뙁若싥걮�걼BMS�깢�궊�궎�꺂
 	 */
 	private Path bmsfile;
 
 	private BMSPlayerInputProcessor input;
 	/**
-	 * FPSを描画するかどうか
+	 * FPS�굮�룒�뵽�걲�굥�걢�겑�걝�걢
 	 */
 	private boolean showfps;
 	/**
-	 * プレイデータアクセサ
+	 * �깤�꺃�궎�깈�꺖�궭�궋�궚�궩�궢
 	 */
 	private PlayDataAccessor playdata;
 
@@ -192,7 +192,7 @@ public class MainController extends ApplicationAdapter {
 			} else {
 				IRResponse response = ir.login(player.getUserid(), player.getPassword());
 				if(!response.isSuccessed()) {
-					Logger.getGlobal().warning("IRへのログイン失敗 : " + response.getMessage());
+					Logger.getGlobal().warning("IR�겦�겗�꺆�궛�궎�꺍鸚길븮 : " + response.getMessage());
 					ir = null;
 				}
 			}
@@ -341,7 +341,7 @@ public class MainController extends ApplicationAdapter {
 			if(resource.setBMSFile(bmsfile, auto)) {
 				changeState(STATE_PLAYBMS);
 			} else {
-				// ダミーステートに移行してすぐexitする
+				// ���깱�꺖�궧�깇�꺖�깉�겓燁삭죱�걮�겍�걲�걧exit�걲�굥
 				changeState(STATE_CONFIG);
 				exit();
 			}
@@ -349,7 +349,7 @@ public class MainController extends ApplicationAdapter {
 			changeState(STATE_SELECTMUSIC);
 		}
 
-		Logger.getGlobal().info("初期化時間(ms) : " + (System.currentTimeMillis() - t));
+		Logger.getGlobal().info("�닜�쐿�뙑�셽�뼋(ms) : " + (System.currentTimeMillis() - t));
 
 		Thread polling = new Thread(() -> {
 			long time = 0;
@@ -456,7 +456,7 @@ public class MainController extends ApplicationAdapter {
 		final long time = System.currentTimeMillis();
 		if(time > prevtime) {
 		    prevtime = time;
-            current.input();
+            //current.input();
             // event - move pressed
             if (input.isMousePressed()) {
                 input.setMousePressed();
@@ -468,30 +468,30 @@ public class MainController extends ApplicationAdapter {
                 current.getSkin().mouseDragged(current, input.getMouseButton(), input.getMouseX(), input.getMouseY());
             }
 
-            // マウスカーソル表示判定
+            // �깯�궑�궧�궖�꺖�궫�꺂烏①ㅊ�닩若�
             if(input.isMouseMoved()) {
             	input.setMouseMoved(false);
             	mouseMovedTime = time;
 			}
 			Mouse.setGrabbed(current == bmsplayer && time > mouseMovedTime + 5000 && Mouse.isInsideWindow());
 
-			// FPS表示切替
-            if (input.checkIfFunctionPressed(0)) {
-                showfps = !showfps;
-                input.resetFunctionTime(0);
-            }
+//			// FPS烏①ㅊ�늾�쎘
+//            if (input.checkIfFunctionPressed(0)) {
+//                showfps = !showfps;
+//                input.resetFunctionTime(0);
+//            }
             // fullscrees - windowed
-            if (input.checkIfFunctionPressed(3)) {
-                boolean fullscreen = Gdx.graphics.isFullscreen();
-                Graphics.DisplayMode currentMode = Gdx.graphics.getDisplayMode();
-                if (fullscreen) {
-                    Gdx.graphics.setWindowedMode(currentMode.width, currentMode.height);
-                } else {
-                    Gdx.graphics.setFullscreenMode(currentMode);
-                }
-                config.setDisplaymode(fullscreen ? Config.DisplayMode.WINDOW : Config.DisplayMode.FULLSCREEN);
-                input.resetFunctionTime(3);
-            }
+//            if (input.checkIfFunctionPressed(3)) {
+//                boolean fullscreen = Gdx.graphics.isFullscreen();
+//                Graphics.DisplayMode currentMode = Gdx.graphics.getDisplayMode();
+//                if (fullscreen) {
+//                    Gdx.graphics.setWindowedMode(currentMode.width, currentMode.height);
+//                } else {
+//                    Gdx.graphics.setFullscreenMode(currentMode);
+//                }
+//                config.setDisplaymode(fullscreen ? Config.DisplayMode.WINDOW : Config.DisplayMode.FULLSCREEN);
+//                input.resetFunctionTime(3);
+//            }
 
             // if (input.getFunctionstate()[4] && input.getFunctiontime()[4] != 0) {
             // int resolution = config.getResolution();
@@ -511,23 +511,23 @@ public class MainController extends ApplicationAdapter {
             // }
 
             // screen shot
-            if (input.checkIfFunctionPressed(5)) {
-                if (screenshot == null || screenshot.savetime != 0) {
-                    screenshot = new ScreenShotThread(ScreenUtils.getFrameBufferPixels(0, 0, Gdx.graphics.getBackBufferWidth(),
-                            Gdx.graphics.getBackBufferHeight(), true));
-                    screenshot.start();
-                }
-                input.resetFunctionTime(5);
-            }
-
-            if (input.checkIfFunctionPressed(6)) {
-                if (twitterUpload == null || twitterUpload.savetime != 0) {
-                	twitterUpload = new TwitterUploadThread(ScreenUtils.getFrameBufferPixels(0, 0, Gdx.graphics.getBackBufferWidth(),
-                            Gdx.graphics.getBackBufferHeight(), false), player);
-                	twitterUpload.start();
-                }
-                input.resetFunctionTime(6);
-            }
+//            if (input.checkIfFunctionPressed(5)) {
+//                if (screenshot == null || screenshot.savetime != 0) {
+//                    screenshot = new ScreenShotThread(ScreenUtils.getFrameBufferPixels(0, 0, Gdx.graphics.getBackBufferWidth(),
+//                            Gdx.graphics.getBackBufferHeight(), true));
+//                    screenshot.start();
+//                }
+//                input.resetFunctionTime(5);
+//            }
+//
+//            if (input.checkIfFunctionPressed(6)) {
+//                if (twitterUpload == null || twitterUpload.savetime != 0) {
+//                	twitterUpload = new TwitterUploadThread(ScreenUtils.getFrameBufferPixels(0, 0, Gdx.graphics.getBackBufferWidth(),
+//                            Gdx.graphics.getBackBufferHeight(), false), player);
+//                	twitterUpload.start();
+//                }
+//                input.resetFunctionTime(6);
+//            }
         }
 	}
 
@@ -578,7 +578,7 @@ public class MainController extends ApplicationAdapter {
 	public void saveConfig(){
 		Config.write(config);
 		PlayerConfig.write(player);
-		Logger.getGlobal().info("設定情報を保存");
+		Logger.getGlobal().info("鼇�若싨깄�젿�굮岳앭춼");
 	}
 
 	public void exit() {
@@ -703,22 +703,22 @@ public class MainController extends ApplicationAdapter {
 
 
 	/**
-	 * スクリーンショット処理用スレッド
+	 * �궧�궚�꺁�꺖�꺍�궥�깾�긿�깉�눇�릤�뵪�궧�꺃�긿�깋
 	 *
 	 * @author exch
 	 */
 	static class ScreenShotThread extends Thread {
 
 		/**
-		 * 処理が完了した時間
+		 * �눇�릤�걣若뚥틙�걮�걼�셽�뼋
 		 */
 		private long savetime;
 		/**
-		 * スクリーンショット保存先
+		 * �궧�궚�꺁�꺖�꺍�궥�깾�긿�깉岳앭춼�뀍
 		 */
 		private final String path;
 		/**
-		 * スクリーンショットのpixelデータ
+		 * �궧�궚�꺁�꺖�꺍�궥�깾�긿�깉�겗pixel�깈�꺖�궭
 		 */
 		private final byte[] pixels;
 
@@ -755,14 +755,14 @@ public class MainController extends ApplicationAdapter {
 			} else if(currentState instanceof SkinConfiguration) {
 				stateName = "_Skin_Select";
 			}
-			stateName = stateName.replace("\\", "￥").replace("/", "／").replace(":", "：").replace("*", "＊").replace("?", "？").replace("\"", "”").replace("<", "＜").replace(">", "＞").replace("|", "｜").replace("\t", " ");
+			stateName = stateName.replace("\\", "占�").replace("/", "竊�").replace(":", "竊�").replace("*", "竊�").replace("?", "竊�").replace("\"", "��").replace("<", "竊�").replace(">", "竊�").replace("|", "節�").replace("\t", " ");
 
 			path = "screenshot/" + sdf.format(Calendar.getInstance().getTime()) + stateName +".png";
 		}
 
 		@Override
 		public void run() {
-			// 全ピクセルのアルファ値を255にする(=透明色を無くす)
+			// �뀲�깞�궚�궩�꺂�겗�궋�꺂�깢�궊�ㅳ굮255�겓�걲�굥(=�뤸삇�돯�굮�꽒�걦�걲)
 			for(int i = 3;i < pixels.length;i+=4) {
 				pixels[i] = (byte) 0xff;
 			}
@@ -771,30 +771,30 @@ public class MainController extends ApplicationAdapter {
 			BufferUtils.copy(pixels, 0, pixmap.getPixels(), pixels.length);
 			PixmapIO.writePNG(new FileHandle(path), pixmap);
 			pixmap.dispose();
-			Logger.getGlobal().info("スクリーンショット保存:" + path);
+			Logger.getGlobal().info("�궧�궚�꺁�꺖�꺍�궥�깾�긿�깉岳앭춼:" + path);
 			savetime = System.currentTimeMillis();
 		}
 	}
 
 	/**
-	 * Twitter投稿用スレッド
+	 * Twitter�뒘葉욜뵪�궧�꺃�긿�깋
 	 */
 	static class TwitterUploadThread extends Thread {
 
 		/**
-		 * 処理が完了した時間
+		 * �눇�릤�걣若뚥틙�걮�걼�셽�뼋
 		 */
 		private long savetime;
 
 		/**
-		 * 処理が完了した時間
+		 * �눇�릤�걣若뚥틙�걮�걼�셽�뼋
 		 */
 		private String text = "";
 
 		private final PlayerConfig player;
 
 		/**
-		 * スクリーンショットのpixelデータ
+		 * �궧�궚�꺁�꺖�꺍�궥�깾�긿�깉�겗pixel�깈�꺖�궭
 		 */
 		private final byte[] pixels;
 
@@ -840,7 +840,7 @@ public class MainController extends ApplicationAdapter {
 				// empty
 			}
 			text = builder.toString();
-			text = text.replace("\\", "￥").replace("/", "／").replace(":", "：").replace("*", "＊").replace("?", "？").replace("\"", "”").replace("<", "＜").replace(">", "＞").replace("|", "｜").replace("\t", " ");
+			text = text.replace("\\", "占�").replace("/", "竊�").replace(":", "竊�").replace("*", "竊�").replace("?", "竊�").replace("\"", "��").replace("<", "竊�").replace(">", "竊�").replace("|", "節�").replace("\t", " ");
 		}
 
 		@Override
@@ -855,7 +855,7 @@ public class MainController extends ApplicationAdapter {
 
 			Pixmap pixmap = null;
 	        try {
-				// 全ピクセルのアルファ値を255にする(=透明色を無くす)
+				// �뀲�깞�궚�궩�꺂�겗�궋�꺂�깢�궊�ㅳ굮255�겓�걲�굥(=�뤸삇�돯�굮�꽒�걦�걲)
 				for(int i = 3;i < pixels.length;i+=4) {
 					pixels[i] = (byte) 0xff;
 				}
@@ -893,7 +893,7 @@ public class MainController extends ApplicationAdapter {
 			updateSong = new SongUpdateThread(path);
 			updateSong.start();
 		} else {
-			Logger.getGlobal().warning("楽曲更新中のため、更新要求は取り消されました");
+			Logger.getGlobal().warning("璵썸쎊�쎍�뼭訝��겗�걼�굙�곫쎍�뼭誤곫콆�겘�룚�굤易덀걬�굦�겲�걮�걼");
 		}
 	}
 
@@ -902,7 +902,7 @@ public class MainController extends ApplicationAdapter {
 			updateSong = new TableUpdateThread(reader);
 			updateSong.start();
 		} else {
-			Logger.getGlobal().warning("楽曲更新中のため、更新要求は取り消されました");
+			Logger.getGlobal().warning("璵썸쎊�쎍�뼭訝��겗�걼�굙�곫쎍�뼭誤곫콆�겘�룚�굤易덀걬�굦�겲�걮�걼");
 		}
 	}
 
@@ -924,7 +924,7 @@ public class MainController extends ApplicationAdapter {
 	}
 
 	/**
-	 * 楽曲データベース更新用スレッド
+	 * 璵썸쎊�깈�꺖�궭�깧�꺖�궧�쎍�뼭�뵪�궧�꺃�긿�깋
 	 *
 	 * @author exch
 	 */
@@ -943,7 +943,7 @@ public class MainController extends ApplicationAdapter {
 	}
 
 	/**
-	 * 難易度表更新用スレッド
+	 * �썵�삌佯�烏ⓩ쎍�뼭�뵪�궧�꺃�긿�깋
 	 *
 	 * @author exch
 	 */
@@ -974,7 +974,7 @@ public class MainController extends ApplicationAdapter {
 		public SystemSoundManager(Config config) {
 			scan(Paths.get(config.getBgmpath()), bgms, "select.");
 			scan(Paths.get(config.getSoundpath()), sounds, "clear.");
-			Logger.getGlobal().info("検出されたBGM Set : " + bgms.size + " Sound Set : " + sounds.size);
+			Logger.getGlobal().info("濾쒎눣�걬�굦�걼BGM Set : " + bgms.size + " Sound Set : " + sounds.size);
 		}
 
 		public void shuffle() {
