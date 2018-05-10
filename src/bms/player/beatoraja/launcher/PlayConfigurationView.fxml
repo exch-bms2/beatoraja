@@ -308,7 +308,7 @@
                                          <Label text="%GVALUE" GridPane.columnIndex="2" />
                                          <NumericSpinner fx:id="gvalue" editable="true" GridPane.columnIndex="3">
                                              <valueFactory>
-                                                 <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="300" max="2000" min="1" />
+                                                 <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" initialValue="500" max="5000" min="1" />
                                              </valueFactory>
                                          </NumericSpinner>
                                          <CheckBox fx:id="enableLanecover" mnemonicParsing="false" text="%ENABLE_LANECOVER" GridPane.rowIndex="1" />
