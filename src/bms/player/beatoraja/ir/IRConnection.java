@@ -13,6 +13,7 @@ import bms.player.beatoraja.CourseData;
 import bms.player.beatoraja.IRScoreData;
 import bms.player.beatoraja.PlayerInformation;
 import bms.player.beatoraja.TableData;
+import bms.player.beatoraja.song.SongData;
 
 /**
  * IR接続用インターフェイス
@@ -67,10 +68,17 @@ public interface IRConnection {
 	
 	/**
 	 * 楽曲のURLを取得する
-	 * @param model 譜面データ
+	 * @param song 譜面データ
 	 * @return
 	 */
-	public String getSongURL(BMSModel model);
+	public String getSongURL(SongData song);
+
+	/**
+	 * コースのURLを取得する
+	 * @param course コースデータ
+	 * @return
+	 */
+	public String getCourseURL(CourseData course);
 
 	/**
 	 * プレイヤーURLを取得する
