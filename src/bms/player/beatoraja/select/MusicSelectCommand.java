@@ -460,7 +460,7 @@ public enum MusicSelectCommand {
                 SongBar song = (SongBar) current;
                 pc = selector.main.getPlayerConfig().getPlayConfig(song.getSongData().getMode()).getPlayconfig();
             }
-            if (pc != null && pc.getDuration() < 2000) {
+            if (pc != null && pc.getDuration() < 5000) {
                 pc.setDuration(pc.getDuration() + 1);
                 selector.play(SOUND_CHANGEOPTION);
             }
@@ -480,6 +480,38 @@ public enum MusicSelectCommand {
                 selector.play(SOUND_CHANGEOPTION);
             }
 		}
+    },
+    DURATION_UP_LARGE {
+        @Override
+        public void execute(MusicSelector selector) {
+            Bar current = selector.getBarRender().getSelected();
+            PlayConfig pc = null;
+            if (current instanceof SongBar && ((SongBar)current).existsSong()) {
+                SongBar song = (SongBar) current;
+                pc = selector.main.getPlayerConfig().getPlayConfig(song.getSongData().getMode()).getPlayconfig();
+            }
+            if (pc != null && pc.getDuration() < 5000) {
+                int duration = pc.getDuration() + 10;
+                pc.setDuration(duration - duration % 10);
+                selector.play(SOUND_CHANGEOPTION);
+            }
+        }
+    },
+    DURATION_DOWN_LARGE {
+        @Override
+        public void execute(MusicSelector selector) {
+            Bar current = selector.getBarRender().getSelected();
+            PlayConfig pc = null;
+            if (current instanceof SongBar && ((SongBar)current).existsSong()) {
+                SongBar song = (SongBar) current;
+                pc = selector.main.getPlayerConfig().getPlayConfig(song.getSongData().getMode()).getPlayconfig();
+            }
+            if (pc != null && pc.getDuration() > 10) {
+                int duration = pc.getDuration() - 10;
+                pc.setDuration(duration - duration % 10);
+                selector.play(SOUND_CHANGEOPTION);
+            }
+        }
     },
     NEXT_BGA_SHOW {
 		@Override

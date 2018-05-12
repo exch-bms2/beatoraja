@@ -34,6 +34,10 @@ public class MusicSelectInputProcessor {
     private final int durationlow = 300;
     private final int durationhigh = 50;
 
+    // ノーツ表示時間変更のカウンタ
+    private long timeChangeDuration;
+    private int countChangeDuration;
+
     private final MusicSelector select;
 
     public MusicSelectInputProcessor(MusicSelector select) {
@@ -221,14 +225,32 @@ public class MusicSelectInputProcessor {
             if (property.isPressed(keystate, keytime, BGA_DOWN, true)) {
                 select.execute(MusicSelectCommand.NEXT_BGA_SHOW);
             }
-            if (property.isPressed(keystate, keytime, DURATION_DOWN, true)) {
-                select.execute(MusicSelectCommand.DURATION_DOWN);
-            }
             if (property.isPressed(keystate, keytime, JUDGETIMING_DOWN, true)) {
                 select.execute(MusicSelectCommand.JUDGETIMING_DOWN);
             }
-            if (property.isPressed(keystate, keytime, DURATION_UP, true)) {
-                select.execute(MusicSelectCommand.DURATION_UP);
+            if (property.isPressed(keystate, keytime, DURATION_DOWN, false)) {
+                long l = System.currentTimeMillis();
+                if (timeChangeDuration == 0) {
+                    timeChangeDuration = l + durationlow;
+                    select.execute(MusicSelectCommand.DURATION_DOWN);
+                } else if (l > timeChangeDuration) {
+                    countChangeDuration++;
+                    timeChangeDuration = l + durationhigh;
+                    select.execute(countChangeDuration > 50 ? MusicSelectCommand.DURATION_DOWN_LARGE : MusicSelectCommand.DURATION_DOWN);
+                }
+            } else if (property.isPressed(keystate, keytime, DURATION_UP, false)) {
+                long l = System.currentTimeMillis();
+                if (timeChangeDuration == 0) {
+                    timeChangeDuration = l + durationlow;
+                    select.execute(MusicSelectCommand.DURATION_UP);
+                } else if (l > timeChangeDuration) {
+                    countChangeDuration++;
+                    timeChangeDuration = l + durationhigh;
+                    select.execute(countChangeDuration > 50 ? MusicSelectCommand.DURATION_UP_LARGE : MusicSelectCommand.DURATION_UP);
+                }
+            } else {
+                timeChangeDuration = 0;
+                countChangeDuration = 0;
             }
             if (property.isPressed(keystate, keytime, JUDGETIMING_UP, true)) {
                 select.execute(MusicSelectCommand.JUDGETIMING_UP);
