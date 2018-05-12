@@ -294,6 +294,10 @@ public class MusicSelectInputProcessor {
     				select.selectSong(PlayMode.AUTOPLAY);
     			}
     		}
+            if(input.getFunctionstate()[10] && input.getFunctiontime()[10] != 0) {
+                input.getFunctiontime()[10] = 0;
+                select.execute(MusicSelectCommand.OPEN_RANKING_ON_IR);
+            }
         }
 
         // song bar moved

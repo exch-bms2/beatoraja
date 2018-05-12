@@ -18,12 +18,8 @@ import bms.player.beatoraja.PlayerInformation;
 import bms.player.beatoraja.TableData;
 import bms.player.beatoraja.TableDataAccessor;
 import bms.player.beatoraja.TableDataAccessor.TableAccessor;
-import bms.player.beatoraja.select.bar.Bar;
-import bms.player.beatoraja.select.bar.DirectoryBar;
-import bms.player.beatoraja.select.bar.FolderBar;
-import bms.player.beatoraja.select.bar.SelectableBar;
-import bms.player.beatoraja.select.bar.SongBar;
-import bms.player.beatoraja.select.bar.TableBar;
+import bms.player.beatoraja.ir.IRConnection;
+import bms.player.beatoraja.select.bar.*;
 import bms.player.beatoraja.song.SongData;
 
 public enum MusicSelectCommand {
@@ -334,6 +330,32 @@ public enum MusicSelectCommand {
 						e.printStackTrace();
 					}
 				}
+            }
+        }
+    },
+    OPEN_RANKING_ON_IR {
+        @Override
+        public void execute(MusicSelector selector) {
+            IRConnection ir = selector.main.getIRConnection();
+            if(ir == null) {
+                return;
+            }
+
+            Bar current = selector.getBarRender().getSelected();
+            String url = null;
+            if(current instanceof SongBar) {
+                url = ir.getSongURL(((SongBar) current).getSongData());
+            }
+            if(current instanceof GradeBar) {
+                url = ir.getCourseURL(((GradeBar) current).getCourseData());
+            }
+            if (url != null) {
+                try {
+                    URI uri = new URI(url);
+                    Desktop.getDesktop().browse(uri);
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                }
             }
         }
     },
