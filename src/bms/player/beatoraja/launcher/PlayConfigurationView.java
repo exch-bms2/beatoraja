@@ -279,6 +279,8 @@ public class PlayConfigurationView implements Initializable {
     private Button twitterPINButton;
 
 	@FXML
+	private CheckBox enableIpfs;
+	@FXML
     private TextField ipfspath;
 
 	@FXML
@@ -467,6 +469,7 @@ public class PlayConfigurationView implements Initializable {
 		scrolldurationlow.getValueFactory().setValue(config.getScrollDurationLow());
 		scrolldurationhigh.getValueFactory().setValue(config.getScrollDurationHigh());
 
+		enableIpfs.setSelected(config.isEnableIpfs());
 		ipfspath.setText(config.getIpfspath());
 
 		updateAudioDriver();
@@ -604,6 +607,7 @@ public class PlayConfigurationView implements Initializable {
 		config.setScrollDutationLow(getValue(scrolldurationlow));
 		config.setScrollDutationHigh(getValue(scrolldurationhigh));
 
+		config.setEnableIpfs(enableIpfs.isSelected());
 		config.setIpfspath(ipfspath.getText());
 
 		commitPlayer();

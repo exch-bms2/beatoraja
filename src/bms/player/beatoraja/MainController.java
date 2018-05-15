@@ -163,13 +163,15 @@ public class MainController extends ApplicationAdapter {
 
 		this.bmsfile = f;
 
-		Path ipfspath = Paths.get("ipfs").toAbsolutePath();
-		if (!ipfspath.toFile().exists())
-			ipfspath.toFile().mkdirs();
-		List<String> roots = new ArrayList<>(Arrays.asList(getConfig().getBmsroot()));
-		if (ipfspath.toFile().exists() && !roots.contains(ipfspath.toString())) {
-			roots.add(ipfspath.toString());
-			getConfig().setBmsroot(roots.toArray(new String[roots.size()]));
+		if (config.isEnableIpfs()) {
+			Path ipfspath = Paths.get("ipfs").toAbsolutePath();
+			if (!ipfspath.toFile().exists())
+				ipfspath.toFile().mkdirs();
+			List<String> roots = new ArrayList<>(Arrays.asList(getConfig().getBmsroot()));
+			if (ipfspath.toFile().exists() && !roots.contains(ipfspath.toString())) {
+				roots.add(ipfspath.toString());
+				getConfig().setBmsroot(roots.toArray(new String[roots.size()]));
+			}
 		}
 		try {
 			Class.forName("org.sqlite.JDBC");
@@ -382,8 +384,10 @@ public class MainController extends ApplicationAdapter {
 
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 
-		download = new MusicDownloadProcessor(this);
-		download.start(null);
+		if (config.isEnableIpfs()) {
+			download = new MusicDownloadProcessor(this);
+			download.start(null);
+		}
 	}
 
 	private long prevtime;
@@ -536,7 +540,7 @@ public class MainController extends ApplicationAdapter {
                 input.getFunctiontime()[6] = 0;
             }
 
-            if(download.getDownloadpath() != null){
+			if (download != null && download.getDownloadpath() != null) {
             	this.updateSong(download.getDownloadpath());
             	download.setDownloadpath(null);
             }
@@ -572,7 +576,9 @@ public class MainController extends ApplicationAdapter {
 //		input.dispose();
 		SkinLoader.getResource().dispose();
 		ShaderManager.dispose();
-		download.dispose();
+		if (download != null) {
+			download.dispose();
+		}
 
 		Logger.getGlobal().info("全リソース破棄完了");
 	}

@@ -550,6 +550,7 @@
                      </HBox>
                   </children>
                </VBox>
+                    <CheckBox fx:id="enableIpfs" mnemonicParsing="false" prefHeight="18.0" text="%ENABLE_IPFS" />
                     <HBox prefHeight="100.0" prefWidth="300.0">
                         <children>
                            <Label prefHeight="25.0" prefWidth="60.0" text="IPFS Path" />
