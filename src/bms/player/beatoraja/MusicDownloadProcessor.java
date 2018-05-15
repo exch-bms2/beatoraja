@@ -28,6 +28,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 
+import bms.player.beatoraja.MainController.UpdateThread;
 import bms.player.beatoraja.song.SongData;
 
 /**
@@ -36,40 +37,24 @@ import bms.player.beatoraja.song.SongData;
  * @author LNTakeshi
  */
 public class MusicDownloadProcessor {
-	
+
 	/*
-	 * 気づいたことをコメントしておきます written by exch
-	 * 
-	 * ・ipfs使用は選択制の方がいいのではと思います。プレイヤーが常時オンラインとは限らない)
-	 * 
-	 * ・OpenGL系のオブジェクトをここに入れるべきではないです。SpriteBatchを複数箇所で定義して描画すると
-	 * 　予期せぬバグの元になります。また、FontもSpriteBatchも要dispose()で放置するとメモリリークの原因になります。
-	 * 　ステータス描画に使うなら、MainControllerにMessageRendererみたいなものを用意してそこにテキスト、
-	 * 　アニメーション、色を送るだけにするとかがいいかと思います。
-	 * 
+	 * Todo
 	 * ・そもそも別コンポーネントでもいいのではと思います
 	 * 　(=beatorajaベタ付け実装ではなく、他プロジェクトが立ち上がった時に再利用できるように)
-	 * 
-	 * 
 	 */
 
 	private Deque<SongData> commands = new ConcurrentLinkedDeque<SongData>();
 	private String ipfs = "";
 	private DownloadDaemonThread daemon;
-	private FreeTypeFontGenerator generator;
-	BitmapFont downloadfont;
-	private SpriteBatch sprite;
 	private boolean daemonexists;
+	private String message = "";
 
 	public final MainController main;
 
-
     public MusicDownloadProcessor(MainController main) {
     	this.main = main;
-         generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/default/VL-Gothic-Regular.ttf"));
-          sprite = new SpriteBatch();
     }
-
 
     public void start(SongData song){
     	if((daemon == null || !daemon.isAlive())){
@@ -89,12 +74,10 @@ public class MusicDownloadProcessor {
     	if(daemon != null && daemon.isAlive()){
     		daemon.dispose = true;
     		try {
-    			if(daemon.pc != null)daemon.pc.waitFor();
-    			if(daemon.pd != null)daemon.pd.waitFor();
-    		} catch (InterruptedException e) {
-    			// TODO 自動生成された catch ブロック
-    			e.printStackTrace();
-    		}
+				daemon.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
     	}
     }
 
@@ -106,20 +89,6 @@ public class MusicDownloadProcessor {
     	return daemon != null && daemon.isAlive();
     }
 
-    public void drawMessage(){
-		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
-		parameter.size = 24;
-		parameter.characters += daemon.message;
-		if(downloadfont != null) {
-			downloadfont.dispose();
-		}
-		downloadfont = generator.generateFont(parameter);
-		sprite.begin();
-		downloadfont.setColor(0,1,1,0.5f + (System.currentTimeMillis() % 750) / 1000.0f);
-		downloadfont.draw(sprite, daemon.message, 100, main.getConfig().getResolution().height - 2);
-		sprite.end();
-    }
-
     public String getDownloadpath() {
 		return daemon != null ? daemon.downloadpath : null;
 	}
@@ -128,20 +97,27 @@ public class MusicDownloadProcessor {
 		if(daemon != null) daemon.downloadpath = downloadpath;
 	}
 
-    class DownloadDaemonThread extends Thread {
+    public String getMessage() {
+		return message;
+	}
 
-		private String message = "";
+	public void setMessage(String message) {
+		this.message = message;
+	}
+
+	class DownloadDaemonThread extends Thread {
+
     	private boolean dispose;
     	private Process pd = null;
-    	private Process pc = null;
 		private String ipfspath = "";
     	private String path = "";
     	private String diffpath = "";
     	private boolean download;
     	private String downloadpath;
     	private SongData song;
+
 		public void run() {
-			DownloadTarThread downloadtar = null;
+			DownloadIpfsThread downloadipfs = null;
         	dispose = false;
         	try{
 				ProcessBuilder pbd = null;
@@ -186,19 +162,10 @@ public class MusicDownloadProcessor {
         						path = Paths.get(s[0].getPath()).getParent().toString();
         					}
         				}
-						if (!Paths.get(path).toFile().exists() && daemonexists) {
-							ProcessBuilder pbc = new ProcessBuilder(ipfs, "get", ipfspath, "-o=" + path);
-        					pbc.inheritIO();
-        					pc = pbc.start();
+						if (!Paths.get(path).toFile().exists()) {
+							downloadipfs = new DownloadIpfsThread(ipfspath, path);
+							downloadipfs.start();
         					download = true;
-        					message = "downloading:/"+path;
-							Logger.getGlobal().info("ipfs BMS本体取得開始");
-						} else if (!Paths.get(path).toFile().exists()) {
-							downloadtar = new DownloadTarThread();
-							downloadtar.ipfspath = ipfspath;
-							downloadtar.start();
-							download = true;
-							message = "downloading:/" + path;
 							Logger.getGlobal().info("BMS本体取得開始");
         				}else{
         					Logger.getGlobal().info(path+"は既に存在します（差分取得のみ）");
@@ -207,33 +174,7 @@ public class MusicDownloadProcessor {
         				}
         			}
 
-					if (download
-							&& ((pc != null && !pc.isAlive()) || (downloadtar != null && !downloadtar.isAlive())
-									|| (pc == null && downloadtar == null))) {
-						if (!daemonexists) {
-							Path p = Paths.get("ipfs/bms.tar.gz").toAbsolutePath();
-							if (Files.exists(p)) {
-								TarInputStream tin = new TarInputStream(
-										new GZIPInputStream(new FileInputStream(p.toFile())));
-								for (TarEntry tarEnt = tin.getNextEntry(); tarEnt != null; tarEnt = tin
-										.getNextEntry()) {
-									if (tarEnt.isDirectory()) {
-										new File("ipfs/" + tarEnt.getName()).mkdir();
-									} else {
-										FileOutputStream fos = new FileOutputStream(
-												new File("ipfs/" + tarEnt.getName()));
-										tin.copyEntryContents(fos);
-										fos.close();
-									}
-								}
-								tin.close();
-
-							}
-							Files.deleteIfExists(p);
-							if (ipfspath != null && ipfspath.length() != 0) {
-								Files.move(Paths.get("ipfs/" + ipfspath), Paths.get(path), REPLACE_EXISTING);
-							}
-						}
+					if (download && (downloadipfs == null || !downloadipfs.isAlive())) {
         				if(diffpath != null && diffpath.length() != 0){
 							ipfspath = "";
 							File f = Paths.get("ipfs/" + diffpath).toFile();
@@ -249,17 +190,8 @@ public class MusicDownloadProcessor {
         						}
         						diffpath = "";
         					}else{
-								if (daemonexists) {
-									ProcessBuilder pbc = new ProcessBuilder(ipfs, "get", diffpath,
-											"-o=ipfs/" + diffpath);
-									pbc.inheritIO();
-									pc = pbc.start();
-								} else {
-									downloadtar = new DownloadTarThread();
-									downloadtar.ipfspath = diffpath;
-									downloadtar.start();
-								}
-								message = "downloading diff:/" + diffpath;
+								downloadipfs = new DownloadIpfsThread(diffpath, "ipfs/" + diffpath);
+								downloadipfs.start();
 								Logger.getGlobal().info("差分取得開始");
         					}
         				}else if(downloadpath == null){
@@ -277,32 +209,83 @@ public class MusicDownloadProcessor {
         	Logger.getGlobal().info("daemon終了");
 			if (pd != null && pd.isAlive())
 				pd.destroy();
-			if (pc != null && pc.isAlive())
-				pc.destroy();
+			if (downloadipfs != null && downloadipfs.isAlive()) {
+				downloadipfs.interrupt();
+			}
         	dispose = false;
         	download = false;
         }
     }
 
-	class DownloadTarThread extends Thread {
+	class DownloadIpfsThread extends Thread {
 		private String ipfspath = "";
+		private String path = "";
+
+		public DownloadIpfsThread(String ipfspath, String path) {
+			setMessage("downloading:" + path);
+			this.ipfspath = ipfspath;
+			this.path = path;
+		}
 
 		public void run() {
-			URL url = null;
-			try {
-				url = new URL(
-						"http://ipfs.io/api/v0/get?arg=" + ipfspath
-								+ "&archive=true&compress=true");
-			} catch (MalformedURLException e1) {
-				e1.printStackTrace();
-			}
-			Path dlpath = Paths.get("ipfs/bms.tar.gz");
-			try {
-				Files.copy(url.openStream(), dlpath, StandardCopyOption.REPLACE_EXISTING);
-			} catch (IOException e) {
-				e.printStackTrace();
+			if (daemonexists) {
+				ProcessBuilder pbc = new ProcessBuilder(ipfs, "get", ipfspath, "-o=" + path);
+				pbc.inheritIO();
+				Process pc = null;
+				try {
+					pc = pbc.start();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				while (pc != null && pc.isAlive()) {
+					if (daemon.dispose) {
+						pc.destroy();
+					}
+					try {
+						sleep(100);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			} else {
+				URL url = null;
+				try {
+					url = new URL(
+							"http://localhost:5001/api/v0/get?arg=" + ipfspath
+									+ "&archive=true&compress=true");
+				} catch (MalformedURLException e1) {
+					e1.printStackTrace();
+				}
+				Path dlpath = Paths.get("ipfs/bms.tar.gz");
+				try {
+					Files.copy(url.openStream(), dlpath, StandardCopyOption.REPLACE_EXISTING);
+					Path p = Paths.get("ipfs/bms.tar.gz").toAbsolutePath();
+					if (Files.exists(p)) {
+						TarInputStream tin = null;
+
+						tin = new TarInputStream(
+								new GZIPInputStream(new FileInputStream(p.toFile())));
+						for (TarEntry tarEnt = tin.getNextEntry(); tarEnt != null; tarEnt = tin
+								.getNextEntry()) {
+							if (tarEnt.isDirectory()) {
+								new File("ipfs/" + tarEnt.getName()).mkdir();
+							} else {
+								FileOutputStream fos = new FileOutputStream(
+										new File("ipfs/" + tarEnt.getName()));
+								tin.copyEntryContents(fos);
+								fos.close();
+							}
+						}
+						tin.close();
+					}
+					Files.deleteIfExists(p);
+					if (ipfspath != null && ipfspath.length() != 0) {
+						Files.move(Paths.get("ipfs/" + ipfspath), Paths.get(path), REPLACE_EXISTING);
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}
-
 }

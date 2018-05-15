@@ -459,8 +459,14 @@ public class MainController extends ApplicationAdapter {
 				sprite.end();
 			}
 		}else if(download != null && download.isDownload()){
+			if (updatefont == null) {
+				downloadIpfsMessageRenderer(download.getMessage());
+			}
 			if(currentState instanceof MusicSelector) {
-				download.drawMessage();
+				sprite.begin();
+				updatefont.setColor(0, 1, 1, 0.5f + (System.currentTimeMillis() % 750) / 1000.0f);
+				updatefont.draw(sprite, download.getMessage(), 100, config.getResolution().height - 2);
+				sprite.end();
 			}
 		}
 
@@ -930,6 +936,17 @@ public class MainController extends ApplicationAdapter {
 		}
 	}
 
+	private UpdateThread downloadIpfs;
+
+	public void downloadIpfsMessageRenderer(String message) {
+		if (downloadIpfs == null || !downloadIpfs.isAlive()) {
+			downloadIpfs = new DownloadMessageThread(message);
+			downloadIpfs.start();
+		} else {
+			Logger.getGlobal().warning("楽曲ダウンロード中です");
+		}
+	}
+
 	abstract class UpdateThread extends Thread {
 
 		private String message;
@@ -985,6 +1002,22 @@ public class MainController extends ApplicationAdapter {
 			if (td != null) {
 				accessor.getAccessor().write(td);
 				accessor.setTableData(td);
+			}
+		}
+	}
+
+	class DownloadMessageThread extends UpdateThread {
+		public DownloadMessageThread(String message) {
+			super(message);
+		}
+
+		public void run() {
+			while (download != null && download.isDownload() && download.getMessage() != null) {
+				try {
+					sleep(100);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}
