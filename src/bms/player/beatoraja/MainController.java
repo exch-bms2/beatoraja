@@ -52,6 +52,7 @@ import bms.player.beatoraja.skin.SkinLoader;
 import bms.player.beatoraja.skin.SkinObject.SkinOffset;
 import bms.player.beatoraja.skin.SkinProperty;
 import bms.player.beatoraja.song.*;
+import bms.tool.mdprocessor.MusicDownloadProcessor;
 import twitter4j.Status;
 import twitter4j.StatusUpdate;
 import twitter4j.Twitter;
@@ -385,7 +386,14 @@ public class MainController extends ApplicationAdapter {
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 
 		if (config.isEnableIpfs()) {
-			download = new MusicDownloadProcessor(this);
+			download = new MusicDownloadProcessor(config.getIpfspath(), (md5) -> {
+				SongData[] s = getSongDatabase().getSongDatas(md5);
+				String[] result = new String[s.length];
+				for(int i = 0;i < result.length;i++) {
+					result[i] = s[i].getPath();
+				}
+				return result;
+			});
 			download.start(null);
 		}
 	}

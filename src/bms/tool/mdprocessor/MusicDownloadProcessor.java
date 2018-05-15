@@ -1,14 +1,11 @@
-package bms.player.beatoraja;
+package bms.tool.mdprocessor;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
-import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -22,15 +19,6 @@ import static java.nio.file.StandardCopyOption.*;
 import org.apache.tools.tar.TarEntry;
 import org.apache.tools.tar.TarInputStream;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
-
-import bms.player.beatoraja.MainController.UpdateThread;
-import bms.player.beatoraja.song.SongData;
-
 /**
  * ipfsによる楽曲ダウンロードを行うクラス
  *
@@ -38,27 +26,21 @@ import bms.player.beatoraja.song.SongData;
  */
 public class MusicDownloadProcessor {
 
-	/*
-	 * Todo
-	 * ・そもそも別コンポーネントでもいいのではと思います
-	 * 　(=beatorajaベタ付け実装ではなく、他プロジェクトが立ち上がった時に再利用できるように)
-	 */
-
-	private Deque<SongData> commands = new ConcurrentLinkedDeque<SongData>();
+	private Deque<IpfsInformation> commands = new ConcurrentLinkedDeque<IpfsInformation>();
 	private String ipfs = "";
 	private DownloadDaemonThread daemon;
 	private boolean daemonexists;
 	private String message = "";
 
-	public final MainController main;
+	public final MusicDatabaseAccessor main;
 
-    public MusicDownloadProcessor(MainController main) {
+    public MusicDownloadProcessor(String ipfs, MusicDatabaseAccessor main) {
+    	this.ipfs = ipfs;
     	this.main = main;
     }
 
-    public void start(SongData song){
+    public void start(IpfsInformation song){
     	if((daemon == null || !daemon.isAlive())){
-    		ipfs = main.getConfig().getIpfspath();
     		if(ipfs != null && Paths.get(ipfs).toFile().exists()){
 				daemonexists = true;
     		}
@@ -114,7 +96,7 @@ public class MusicDownloadProcessor {
     	private String diffpath = "";
     	private boolean download;
     	private String downloadpath;
-    	private SongData song;
+    	private IpfsInformation song;
 
 		public void run() {
 			DownloadIpfsThread downloadipfs = null;
@@ -157,9 +139,9 @@ public class MusicDownloadProcessor {
 
         				List<String> orgmd5 = song.getOrg_md5();
         				if(orgmd5 != null && orgmd5.size() != 0){
-        					SongData[] s = main.getSongDatabase().getSongDatas(orgmd5.toArray(new String[orgmd5.size()]));
+        					String[] s = main.getMusicPaths(orgmd5.toArray(new String[orgmd5.size()]));
         					if(s.length != 0){
-        						path = Paths.get(s[0].getPath()).getParent().toString();
+        						path = Paths.get(s[0]).getParent().toString();
         					}
         				}
 						if (!Paths.get(path).toFile().exists()) {

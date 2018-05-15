@@ -9,13 +9,14 @@ import java.util.Map;
 
 import bms.model.*;
 import bms.player.beatoraja.Validatable;
+import bms.tool.mdprocessor.IpfsInformation;
 
 /**
  * 楽曲データ
  * 
  * @author exch
  */
-public class SongData implements Validatable {
+public class SongData implements Validatable, IpfsInformation {
 	
 	public static final int FEATURE_UNDEFINEDLN = 1;
 	public static final int FEATURE_MINENOTE = 2;
