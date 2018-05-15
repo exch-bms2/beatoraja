@@ -311,7 +311,8 @@ public class MusicSelector extends MainState {
 						main.changeState(MainController.STATE_DECIDE);
 						banners.disposeOld();
 					}
-				} else if(song.getIpfs() != null && main.getMusicDownloadProcessor().isAlive()){
+				} else if (song.getIpfs() != null && main.getMusicDownloadProcessor() != null
+						&& main.getMusicDownloadProcessor().isAlive()) {
 					execute(MusicSelectCommand.DOWNLOAD_IPFS);
 				} else {
 	                execute(MusicSelectCommand.OPEN_DOWNLOAD_SITE);

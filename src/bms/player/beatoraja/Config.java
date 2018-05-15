@@ -16,7 +16,7 @@ import bms.player.beatoraja.play.JudgeAlgorithm;
 
 /**
  * 各種設定項目。config.jsonで保持される
- * 
+ *
  * @author exch
  */
 public class Config implements Validatable {
@@ -46,7 +46,7 @@ public class Config implements Validatable {
 	 */
 	public static final int AUDIODRIVER_SOUND = 0;
 	public static final int AUDIODRIVER_AUDIODEVICE = 1;
-	
+
 	/**
 	 * オーディオ:PortAudio
 	 */
@@ -115,11 +115,11 @@ public class Config implements Validatable {
 	 * 判定アルゴリズム
 	 */
 	private String judgeType = JudgeAlgorithm.Combo.name();
-	
+
     private boolean cacheSkinImage = false;
-    
+
     private boolean useSongInfo = true;
-    
+
 	private boolean showhiddennote = false;
 
 	private boolean showpastnote = false;
@@ -161,6 +161,7 @@ public class Config implements Validatable {
 	private int bannerPixmapGen = 2;
 	private int songResourceGen = 1;
 
+	private boolean enableIpfs = true;
 	private String ipfspath = "";
 
 
@@ -401,7 +402,7 @@ public class Config implements Validatable {
 	public int[] getAutoSaveReplay(){
 		return autosavereplay;
 	}
-	
+
 	public boolean isUseSongInfo() {
 		return useSongInfo;
 	}
@@ -436,7 +437,7 @@ public class Config implements Validatable {
 	public void setSystemvolume(float systemvolume) {
 		this.systemvolume = systemvolume;
 	}
-	
+
 	public boolean isUpdatesong() {
 		return updatesong;
 	}
@@ -477,6 +478,14 @@ public class Config implements Validatable {
 		this.songResourceGen = songResourceGen;
 	}
 
+	public boolean isEnableIpfs() {
+		return enableIpfs;
+	}
+
+	public void setEnableIpfs(boolean enableIpfs) {
+		this.enableIpfs = enableIpfs;
+	}
+
 	public String getIpfspath() {
 		return ipfspath;
 	}
@@ -509,7 +518,7 @@ public class Config implements Validatable {
 			judgeType = JudgeAlgorithm.Combo.name();
 		}
 		bmsroot = Validatable.removeInvalidElements(bmsroot);
-		
+
 		if(tableURL == null) {
 			tableURL = DEFAULT_TABLEURL;
 		}
@@ -523,7 +532,7 @@ public class Config implements Validatable {
 		if(autosavereplay.length != 4) {
 			autosavereplay = Arrays.copyOf(autosavereplay, 4);
 		}
-		
+
 		return true;
 	}
 
@@ -547,7 +556,7 @@ public class Config implements Validatable {
 
 		return config;
 	}
-	
+
 	public static void write(Config config) {
 		Json json = new Json();
 		json.setOutputType(OutputType.json);
