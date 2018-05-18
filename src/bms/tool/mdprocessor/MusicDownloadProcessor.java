@@ -249,11 +249,14 @@ public class MusicDownloadProcessor {
 								new GZIPInputStream(new FileInputStream(p.toFile())));
 						for (TarEntry tarEnt = tin.getNextEntry(); tarEnt != null; tarEnt = tin
 								.getNextEntry()) {
+							File file = new File("ipfs/" + tarEnt.getName());
 							if (tarEnt.isDirectory()) {
-								new File("ipfs/" + tarEnt.getName()).mkdir();
+								file.mkdir();
 							} else {
-								FileOutputStream fos = new FileOutputStream(
-										new File("ipfs/" + tarEnt.getName()));
+								if (!file.getParentFile().exists()) {
+									file.getParentFile().mkdirs();
+								}
+								FileOutputStream fos = new FileOutputStream(file);
 								tin.copyEntryContents(fos);
 								fos.close();
 							}
