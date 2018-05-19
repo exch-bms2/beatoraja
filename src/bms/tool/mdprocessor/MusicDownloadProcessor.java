@@ -304,7 +304,11 @@ public class MusicDownloadProcessor {
 							e.printStackTrace();
 						}
 					}
-
+					try {
+						Files.deleteIfExists(dir);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
 				}
 
 			}
