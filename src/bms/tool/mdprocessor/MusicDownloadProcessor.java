@@ -94,6 +94,7 @@ public class MusicDownloadProcessor {
 		private String ipfspath = "";
     	private String path = "";
     	private String diffpath = "";
+		private Path orgbms;
     	private boolean download;
     	private String downloadpath;
     	private IpfsInformation song;
@@ -138,41 +139,49 @@ public class MusicDownloadProcessor {
         				}
 
         				List<String> orgmd5 = song.getOrg_md5();
+						orgbms = null;
         				if(orgmd5 != null && orgmd5.size() != 0){
-        					String[] s = main.getMusicPaths(orgmd5.toArray(new String[orgmd5.size()]));
-        					if(s.length != 0){
-        						path = Paths.get(s[0]).getParent().toString();
+							String[] s = main.getMusicPaths(orgmd5.toArray(new String[orgmd5.size()]));
+							if (s.length != 0) {
+								for (String bms : s) {
+									Path bmspath = Paths.get(bms);
+									if (bmspath.toFile().exists()) {
+										orgbms = bmspath;
+										path = bmspath.getParent().toString();
+										break;
+									}
+								}
         					}
         				}
-						if (!Paths.get(path).toFile().exists()) {
+						if (ipfspath != null && ipfspath.length() != 0 && orgbms == null) {
 							downloadipfs = new DownloadIpfsThread(ipfspath, path);
 							downloadipfs.start();
         					download = true;
 							Logger.getGlobal().info("BMS本体取得開始");
-        				}else{
+						} else if (ipfspath != null && ipfspath.length() != 0 && diffpath != null
+								&& diffpath.length() != 0) {
         					Logger.getGlobal().info(path+"は既に存在します（差分取得のみ）");
-							ipfspath = "";
         					download = true;
         				}
         			}
 
 					if (download && (downloadipfs == null || !downloadipfs.isAlive())) {
         				if(diffpath != null && diffpath.length() != 0){
-							ipfspath = "";
 							File f = Paths.get("ipfs/" + diffpath).toFile();
-        					if(f.exists()){
-        						if(f.isDirectory()){
+							if (ipfspath == null || ipfspath.length() == 0) {
+								if (f.exists() && f.isDirectory()) {
         							for(File fs:f.listFiles()){
 										Files.move(fs.toPath(), Paths.get(path + "/" + fs.getName()), REPLACE_EXISTING);
         							}
         							f.delete();
-        						}else{
-									Files.move(f.toPath(), Paths.get(path + "/" + diffpath.substring(5) + ".bms"),
+								} else if (f.exists()) {
+									Files.move(f.toPath(), Paths.get(path + "/" + diffpath + ".bms"),
 											REPLACE_EXISTING);
         						}
         						diffpath = "";
         					}else{
 								downloadipfs = new DownloadIpfsThread(diffpath, "ipfs/" + diffpath);
+								ipfspath = "";
 								downloadipfs.start();
 								Logger.getGlobal().info("差分取得開始");
         					}
@@ -180,12 +189,12 @@ public class MusicDownloadProcessor {
         					Path p = Paths.get(path).toAbsolutePath();
         					downloadpath = p.toFile().exists() ? p.toString() : null;
         					download = false;
+							ipfspath = "";
         				}
         			}
         			sleep(100);
         		}
         	} catch (Exception e) {
-        		// TODO 自動生成された catch ブロック
         		e.printStackTrace();
         	}
         	Logger.getGlobal().info("daemon終了");
@@ -233,7 +242,7 @@ public class MusicDownloadProcessor {
 				URL url = null;
 				try {
 					url = new URL(
-							"http://localhost:5001/api/v0/get?arg=" + ipfspath
+							"http://ipfs.io/api/v0/get?arg=" + ipfspath
 									+ "&archive=true&compress=true");
 				} catch (MalformedURLException e1) {
 					e1.printStackTrace();
@@ -241,14 +250,14 @@ public class MusicDownloadProcessor {
 				Path dlpath = Paths.get("ipfs/bms.tar.gz");
 				try {
 					Files.copy(url.openStream(), dlpath, StandardCopyOption.REPLACE_EXISTING);
-					Path p = Paths.get("ipfs/bms.tar.gz").toAbsolutePath();
-					if (Files.exists(p)) {
-						TarInputStream tin = null;
-
-						tin = new TarInputStream(
-								new GZIPInputStream(new FileInputStream(p.toFile())));
-						for (TarEntry tarEnt = tin.getNextEntry(); tarEnt != null; tarEnt = tin
-								.getNextEntry()) {
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				Path p = Paths.get("ipfs/bms.tar.gz").toAbsolutePath();
+				if (Files.exists(p)) {
+					try (TarInputStream tin = new TarInputStream(
+							new GZIPInputStream(new FileInputStream(p.toFile())))) {
+						for (TarEntry tarEnt = tin.getNextEntry(); tarEnt != null; tarEnt = tin.getNextEntry()) {
 							File file = new File("ipfs/" + tarEnt.getName());
 							if (tarEnt.isDirectory()) {
 								file.mkdir();
@@ -256,20 +265,48 @@ public class MusicDownloadProcessor {
 								if (!file.getParentFile().exists()) {
 									file.getParentFile().mkdirs();
 								}
-								FileOutputStream fos = new FileOutputStream(file);
-								tin.copyEntryContents(fos);
-								fos.close();
+								try (FileOutputStream fos = new FileOutputStream(file)) {
+									tin.copyEntryContents(fos);
+								} catch (IOException e) {
+									e.printStackTrace();
+								}
 							}
 						}
 						tin.close();
+					} catch (IOException e) {
+						e.printStackTrace();
 					}
+				}
+
+				try {
 					Files.deleteIfExists(p);
-					if (ipfspath != null && ipfspath.length() != 0) {
-						Files.move(Paths.get("ipfs/" + ipfspath), Paths.get(path), REPLACE_EXISTING);
-					}
-				} catch (Exception e) {
+				} catch (IOException e) {
 					e.printStackTrace();
 				}
+					Path dir = Paths.get("ipfs/" + ipfspath);
+					if (ipfspath != null && ipfspath.length() != 0 && Files.exists(dir)) {
+						if (Files.isDirectory(dir)) {
+							if (!Paths.get(path).toFile().exists())
+								Paths.get(path).toFile().mkdirs();
+							File d = dir.toFile();
+							for (File f : d.listFiles()) {
+							try {
+								Files.move(f.toPath(), Paths.get(path + "/" + f.toPath().getFileName().toString()),
+										REPLACE_EXISTING);
+							} catch (IOException e) {
+								e.printStackTrace();
+							}
+							}
+						} else if (!Paths.get(path).toFile().exists()) {
+						try {
+							Files.move(dir, Paths.get(path), REPLACE_EXISTING);
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+						}
+
+					}
+
 			}
 		}
 	}
