@@ -180,7 +180,7 @@ public class MusicDownloadProcessor {
         						}
         						diffpath = "";
         					}else{
-								downloadipfs = new DownloadIpfsThread(diffpath, "ipfs/" + diffpath);
+								downloadipfs = new DownloadIpfsThread(diffpath, "ipfs" + File.separator + diffpath);
 								ipfspath = "";
 								downloadipfs.start();
 								Logger.getGlobal().info("差分取得開始");
@@ -283,8 +283,9 @@ public class MusicDownloadProcessor {
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
-				Path dir = Paths.get("ipfs/" + ipfspath);
-				if (ipfspath != null && ipfspath.length() != 0 && Files.exists(dir)) {
+				Path dir = Paths.get("ipfs" + File.separator + ipfspath);
+				if (ipfspath != null && ipfspath.length() != 0 && !dir.toString().equals(path.toString())
+						&& Files.exists(dir)) {
 					if (Files.isDirectory(dir)) {
 						if (!Paths.get(path).toFile().exists())
 							Paths.get(path).toFile().mkdirs();
