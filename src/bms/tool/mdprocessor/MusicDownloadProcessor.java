@@ -283,29 +283,29 @@ public class MusicDownloadProcessor {
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
-					Path dir = Paths.get("ipfs/" + ipfspath);
-					if (ipfspath != null && ipfspath.length() != 0 && Files.exists(dir)) {
-						if (Files.isDirectory(dir)) {
-							if (!Paths.get(path).toFile().exists())
-								Paths.get(path).toFile().mkdirs();
-							File d = dir.toFile();
-							for (File f : d.listFiles()) {
+				Path dir = Paths.get("ipfs/" + ipfspath);
+				if (ipfspath != null && ipfspath.length() != 0 && Files.exists(dir)) {
+					if (Files.isDirectory(dir)) {
+						if (!Paths.get(path).toFile().exists())
+							Paths.get(path).toFile().mkdirs();
+						File d = dir.toFile();
+						for (File f : d.listFiles()) {
 							try {
 								Files.move(f.toPath(), Paths.get(path + "/" + f.toPath().getFileName().toString()),
 										REPLACE_EXISTING);
 							} catch (IOException e) {
 								e.printStackTrace();
 							}
-							}
-						} else if (!Paths.get(path).toFile().exists()) {
+						}
+					} else if (!Paths.get(path).toFile().exists()) {
 						try {
 							Files.move(dir, Paths.get(path), REPLACE_EXISTING);
 						} catch (IOException e) {
 							e.printStackTrace();
 						}
-						}
-
 					}
+
+				}
 
 			}
 		}
