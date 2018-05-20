@@ -558,6 +558,10 @@ public class MainController extends ApplicationAdapter {
             	this.updateSong(download.getDownloadpath());
             	download.setDownloadpath(null);
             }
+			if (updateSong != null && !updateSong.isAlive()) {
+				selector.getBarRender().updateBar();
+				updateSong = null;
+			}
         }
 	}
 
