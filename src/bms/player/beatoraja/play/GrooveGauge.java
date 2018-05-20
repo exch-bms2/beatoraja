@@ -266,8 +266,7 @@ public class GrooveGauge {
 		LIMIT_INCREMENT {
 			@Override
 			public float modify(float f, BMSModel model) {
-				// TODO EXHARD依存の計算式なので後で汎用化する
-				final float pg = (float) Math.max(Math.min(0.15f, (2.5 * model.getTotal() - 250) / model.getTotalNotes()), 0);
+				final float pg = (float) Math.max(Math.min(0.15f, (2 * model.getTotal() - 320) / model.getTotalNotes()), 0);
 				if(f > 0) {
 					f *= pg / 0.15f;
 				}
