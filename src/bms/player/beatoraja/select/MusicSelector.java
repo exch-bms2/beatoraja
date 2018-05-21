@@ -193,7 +193,7 @@ public class MusicSelector extends MainState {
 
 	public void setRival(PlayerInformation rival) {
 		this.rival = rival;
-		rivalcache = rivalcaches.get(rival);
+		rivalcache = rival != null ? rivalcaches.get(rival) : null;
 		bar.updateBar();
 
 		Logger.getGlobal().info("Rival変更:" + (rival != null ? rival.getName() : "なし"));

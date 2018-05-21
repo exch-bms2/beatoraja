@@ -3,17 +3,14 @@ package bms.player.beatoraja.select.bar;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-
 import bms.model.Mode;
-import bms.player.beatoraja.IRScoreData;
 import bms.player.beatoraja.ScoreDatabaseAccessor.ScoreDataCollector;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.song.SongData;
 
 /**
  * ディレクトリの抽象バー。
- * 
+ *
  * @author exch
  */
 public abstract class DirectoryBar extends Bar {
@@ -78,7 +75,7 @@ public abstract class DirectoryBar extends Bar {
 
 	/**
 	 * ディレクトリ内のバーを返す
-	 * 
+	 *
 	 * @return ディレクトリ内のバー
 	 */
 	public abstract Bar[] getChildren();
@@ -116,15 +113,16 @@ public abstract class DirectoryBar extends Bar {
 		final ScoreDataCollector collector = (song, score) -> {
 			if(score != null) {
 				lamps[score.getClear()]++;
-				
+
 				if (score.getNotes() != 0) {
-					ranks[(score.getExscore() * 27 / (score.getNotes() * 2))]++;
+					int rank = score.getExscore() * 27 / (score.getNotes() * 2);
+					ranks[rank < 28 ? rank : 27]++;
 				} else {
 					ranks[0]++;
 				}
 			} else {
 				lamps[0]++;
-				ranks[0]++;				
+				ranks[0]++;
 			}
 		};
 
