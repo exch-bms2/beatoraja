@@ -28,6 +28,10 @@ public class CourseData implements Validatable {
      * トロフィー条件
      */
     private TrophyData[] trophy = TrophyData.EMPTY;
+    /**
+     * 公開するかどうか
+     */
+    private boolean release = true;
 
     public CourseData() {
     	
@@ -112,7 +116,15 @@ public class CourseData implements Validatable {
     	trophy = trophy != null ? Validatable.removeInvalidElements(trophy) : TrophyData.EMPTY;    	
     	return true;
     }
-    
+
+    public boolean isRelease() {
+        return release;
+    }
+
+    public void setRelease(boolean release) {
+        this.release = release;
+    }
+
     /**
      * コースの制約
      *

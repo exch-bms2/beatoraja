@@ -16,6 +16,11 @@ import bms.player.beatoraja.ir.IRResponse;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.skin.SkinType;
 
+/**
+ * コースリザルト
+ *
+ * @author exch
+ */
 public class CourseResult extends AbstractResult {
 
 	private IRScoreData oldscore = new IRScoreData();
@@ -79,7 +84,7 @@ public class CourseResult extends AbstractResult {
 
 		IRConnection ir = main.getIRConnection();
 		if (ir != null) {
-			boolean send = resource.isUpdateScore();
+			boolean send = resource.isUpdateScore() && resource.getCourseData().isRelease();
 			switch(main.getPlayerConfig().getIrsend()) {
 			case PlayerConfig.IR_SEND_ALWAYS:
 				break;

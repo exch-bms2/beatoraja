@@ -16,6 +16,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
+<?import javafx.scene.control.CheckBox?>
 <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="bms.player.beatoraja.launcher.CourseEditorView">
    <children>
       <HBox VBox.vgrow="ALWAYS">
@@ -75,10 +76,20 @@
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                      </padding>
                   </GridPane>
-                  <TextField fx:id="courseName" GridPane.columnIndex="2">
+                  <HBox GridPane.columnIndex="2">
                      <GridPane.margin>
                         <Insets right="5.0" />
-                     </GridPane.margin></TextField>
+                     </GridPane.margin>
+                     <children>
+                        <TextField fx:id="courseName" prefWidth="400">
+                        </TextField>
+                        <CheckBox fx:id="release" text="Release">
+                           <HBox.margin>
+                              <Insets left="5.0" />
+                           </HBox.margin>
+                        </CheckBox>
+                     </children>
+                  </HBox>
                   <HBox minHeight="60.0" spacing="5.0" GridPane.columnIndex="2" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1">
                   <children>
                         <AnchorPane minHeight="10.0" prefHeight="300.0" HBox.hgrow="ALWAYS">

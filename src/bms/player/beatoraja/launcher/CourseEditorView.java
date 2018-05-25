@@ -27,6 +27,8 @@ public class CourseEditorView implements Initializable {
 	@FXML
 	private TextField courseName;
 	@FXML
+	private CheckBox release;
+	@FXML
 	private ComboBox<CourseData.CourseDataConstraint> gradeType;;
 	@FXML
 	private ComboBox<CourseData.CourseDataConstraint> hispeedType;;
@@ -115,6 +117,7 @@ public class CourseEditorView implements Initializable {
 		
 		selectedCourse = new CourseData();
 		selectedCourse.setName(courseName.getText());
+		selectedCourse.setRelease(release.isSelected());
 		
 		List<CourseData.CourseDataConstraint> constraint = new ArrayList<CourseData.CourseDataConstraint>();
 		if(gradeType.getValue() != null) {
@@ -144,6 +147,7 @@ public class CourseEditorView implements Initializable {
 		selectedCourse = course;
 		
 		courseName.setText(selectedCourse.getName());
+		release.setSelected(selectedCourse.isRelease());
 		for(CourseData.CourseDataConstraint constraint : course.getConstraint()) {
 			switch(constraint) {
 			case CLASS:
@@ -194,6 +198,7 @@ public class CourseEditorView implements Initializable {
 	public void addCourseData() {
 		CourseData course = new CourseData();
 		course.setName("New Course");
+		course.setRelease(false);
 		CourseData.TrophyData[] trophy = new CourseData.TrophyData[3];
 		trophy[0] = new CourseData.TrophyData("bronzemedal", 7.5f, 55.0f);
 		trophy[1] = new CourseData.TrophyData("silvermedal", 5.0f, 70.0f);
