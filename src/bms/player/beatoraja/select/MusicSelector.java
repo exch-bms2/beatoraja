@@ -269,6 +269,7 @@ public class MusicSelector extends MainState {
 		}
 		// draw song information
 		resource.setSongdata(current instanceof SongBar ? ((SongBar) current).getSongData() : null);
+		resource.setCourseData(current instanceof GradeBar ? ((GradeBar) current).getCourseData() : null);
 
 		// preview music
 		if (current instanceof SongBar) {
@@ -911,5 +912,27 @@ public class MusicSelector extends MainState {
 		} else {
 			play = (selectedreplay >= 0) ? PlayMode.getReplayMode(selectedreplay) : PlayMode.PLAY;
 		}
+	}
+
+	public PlayConfig getSelectedBarPlayConfig() {
+		Bar current = bar.getSelected();
+		PlayConfig pc = null;
+		if (current instanceof SongBar && ((SongBar)current).existsSong()) {
+			SongBar song = (SongBar) current;
+			pc = main.getPlayerConfig().getPlayConfig(song.getSongData().getMode()).getPlayconfig();
+		} else if(current instanceof GradeBar && ((GradeBar)current).existsAllSongs()) {
+			GradeBar grade = (GradeBar)current;
+			for(SongData song : grade.getSongDatas()) {
+				PlayConfig pc2 = main.getPlayerConfig().getPlayConfig(song.getMode()).getPlayconfig();
+				if(pc == null) {
+					pc = pc2;
+				}
+				if(pc != pc2) {
+					pc = null;
+					break;
+				}
+			}
+		}
+		return pc;
 	}
 }

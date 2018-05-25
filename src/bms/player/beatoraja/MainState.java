@@ -506,6 +506,25 @@ public abstract class MainState {
 				SongData song = main.getPlayerResource().getSongdata();
 				PlayConfig pc = main.getPlayerResource().getPlayerConfig().getPlayConfig(song.getMode()).getPlayconfig();
 				return pc.getFixhispeed();
+			} else if(main.getPlayerResource().getCourseData() != null) {
+				PlayConfig pc = null;
+				for(SongData song : main.getPlayerResource().getCourseData().getSong()) {
+					if(song.getPath() == null) {
+						pc = null;
+						break;
+					}
+					PlayConfig pc2 = main.getPlayerConfig().getPlayConfig(song.getMode()).getPlayconfig();
+					if(pc == null) {
+						pc = pc2;
+					}
+					if(pc != pc2) {
+						pc = null;
+						break;
+					}
+				}
+				if(pc != null) {
+					return pc.getFixhispeed();
+				}
 			}
 			return Integer.MIN_VALUE;
 		case BUTTON_BGA:

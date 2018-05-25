@@ -264,12 +264,7 @@ public enum MusicSelectCommand {
     NEXT_HSFIX {
         @Override
         public void execute(MusicSelector selector) {
-            Bar current = selector.getBarRender().getSelected();
-            PlayConfig pc = null;
-            if (current instanceof SongBar && ((SongBar)current).existsSong()) {
-                SongBar song = (SongBar) current;
-                pc = selector.main.getPlayerConfig().getPlayConfig(song.getSongData().getMode()).getPlayconfig();
-            }
+            PlayConfig pc = selector.getSelectedBarPlayConfig();
             if (pc != null) {
                 pc.setFixhispeed((pc.getFixhispeed() + 1) % 5);
                 selector.play(SOUND_CHANGEOPTION);
@@ -279,12 +274,7 @@ public enum MusicSelectCommand {
     PREV_HSFIX {
         @Override
         public void execute(MusicSelector selector) {
-            Bar current = selector.getBarRender().getSelected();
-            PlayConfig pc = null;
-            if (current instanceof SongBar && ((SongBar)current).existsSong()) {
-                SongBar song = (SongBar) current;
-                pc = selector.main.getPlayerConfig().getPlayConfig(song.getSongData().getMode()).getPlayconfig();
-            }
+            PlayConfig pc = selector.getSelectedBarPlayConfig();
             if (pc != null) {
                 pc.setFixhispeed((pc.getFixhispeed() + 4) % 5);
                 selector.play(SOUND_CHANGEOPTION);
@@ -454,12 +444,7 @@ public enum MusicSelectCommand {
     DURATION_UP {
 		@Override
 		public void execute(MusicSelector selector) {
-            Bar current = selector.getBarRender().getSelected();
-            PlayConfig pc = null;
-            if (current instanceof SongBar && ((SongBar)current).existsSong()) {
-                SongBar song = (SongBar) current;
-                pc = selector.main.getPlayerConfig().getPlayConfig(song.getSongData().getMode()).getPlayconfig();
-            }
+            PlayConfig pc = selector.getSelectedBarPlayConfig();
             if (pc != null && pc.getDuration() < 5000) {
                 pc.setDuration(pc.getDuration() + 1);
                 selector.play(SOUND_CHANGEOPTION);
@@ -469,12 +454,7 @@ public enum MusicSelectCommand {
     DURATION_DOWN {
 		@Override
 		public void execute(MusicSelector selector) {
-            Bar current = selector.getBarRender().getSelected();
-            PlayConfig pc = null;
-            if (current instanceof SongBar && ((SongBar)current).existsSong()) {
-                SongBar song = (SongBar) current;
-                pc = selector.main.getPlayerConfig().getPlayConfig(song.getSongData().getMode()).getPlayconfig();
-            }
+            PlayConfig pc = selector.getSelectedBarPlayConfig();
             if (pc != null && pc.getDuration() > 1) {
                 pc.setDuration(pc.getDuration() - 1);
                 selector.play(SOUND_CHANGEOPTION);
@@ -484,12 +464,7 @@ public enum MusicSelectCommand {
     DURATION_UP_LARGE {
         @Override
         public void execute(MusicSelector selector) {
-            Bar current = selector.getBarRender().getSelected();
-            PlayConfig pc = null;
-            if (current instanceof SongBar && ((SongBar)current).existsSong()) {
-                SongBar song = (SongBar) current;
-                pc = selector.main.getPlayerConfig().getPlayConfig(song.getSongData().getMode()).getPlayconfig();
-            }
+            PlayConfig pc = selector.getSelectedBarPlayConfig();
             if (pc != null && pc.getDuration() < 5000) {
                 int duration = pc.getDuration() + 10;
                 pc.setDuration(duration - duration % 10);
@@ -500,12 +475,7 @@ public enum MusicSelectCommand {
     DURATION_DOWN_LARGE {
         @Override
         public void execute(MusicSelector selector) {
-            Bar current = selector.getBarRender().getSelected();
-            PlayConfig pc = null;
-            if (current instanceof SongBar && ((SongBar)current).existsSong()) {
-                SongBar song = (SongBar) current;
-                pc = selector.main.getPlayerConfig().getPlayConfig(song.getSongData().getMode()).getPlayconfig();
-            }
+            PlayConfig pc = selector.getSelectedBarPlayConfig();
             if (pc != null && pc.getDuration() > 10) {
                 int duration = pc.getDuration() - 10;
                 pc.setDuration(duration - duration % 10);
