@@ -563,18 +563,30 @@ public class JudgeManager {
 							processing[lane] = null;
 						}
 					} else {
-						// LN離し処理
-						if (Math.abs(passingcount[lane]) > Math.abs(dtime)) {
-							dtime = passingcount[lane];
-							for (; j < judge.length && !(dtime >= judge[j][0] && dtime <= judge[j][1]); j++)
-								;
+						boolean release = true;
+						if (sc >= 0) {
+							if (key != sckey[sc]) {
+								release = false;
+							} else {
+								//								 System.out.println("BSS途中離し判定 - Time : " + ptime + " Judge : " + j + " LN : " + processing[lane]);
+								sckey[sc] = 0;
+							}
 						}
-						if (j >= 3) {
-							keysound.stop(processing[lane].getPair());
+						if (release) {
+							// LN離し処理
+							if (Math.abs(passingcount[lane]) > Math.abs(dtime)) {
+								dtime = passingcount[lane];
+								for (; j < judge.length && !(dtime >= judge[j][0] && dtime <= judge[j][1]); j++)
+									;
+							}
+							if (j >= 3) {
+								keysound.stop(processing[lane].getPair());
+							}
+							this.update(lane, processing[lane].getPair(), time, j, dtime);
+							keysound.play(processing[lane], config.getKeyvolume(), 0);
+							processing[lane] = null;
+//							System.out.println("LN途中離し判定 - Time : " + ptime + " Judge : " + j + " LN : " + processing[lane]);	
 						}
-						this.update(lane, processing[lane].getPair(), time, j, dtime);
-						keysound.play(processing[lane], config.getKeyvolume(), 0);
-						processing[lane] = null;
 					}
 				}
 			}
