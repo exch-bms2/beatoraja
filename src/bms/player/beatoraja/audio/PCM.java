@@ -341,7 +341,7 @@ public abstract class PCM<T> {
 //			if(bytes != orgbytes) {
 //				Logger.getGlobal().info("終端の無音データ除外 - " + p.getFileName().toString() + " : " + (orgbytes - bytes) + " bytes");
 //			}
-			if(bytes <= channels * bitsPerSample / 8) {
+			if(bytes < channels * bitsPerSample / 8) {
 				throw new IOException(p.toString() + " : 0 samples");			
 			}
 			pcm.limit(bytes);
