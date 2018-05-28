@@ -7,21 +7,21 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.Deque;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.logging.Logger;
-import java.util.zip.GZIPInputStream;
 import static java.nio.file.StandardCopyOption.*;
-import org.apache.tools.tar.TarEntry;
-import org.apache.tools.tar.TarInputStream;
+
+import org.apache.commons.compress.archivers.ArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
+import org.apache.commons.compress.utils.IOUtils;
 
 /**
  * ipfsによる楽曲ダウンロードを行うクラス
@@ -250,36 +250,47 @@ public class MusicDownloadProcessor {
 				e1.printStackTrace();
 			}
 
-			Path p = Paths.get("ipfs/bms.tar.gz").toAbsolutePath();
-			if (Files.exists(p)) {
-				try (TarInputStream tin = new TarInputStream(
-						new GZIPInputStream(new FileInputStream(p.toFile())))) {
-					for (TarEntry tarEnt = tin.getNextEntry(); tarEnt != null; tarEnt = tin.getNextEntry()) {
-						File file = new File("ipfs/" + tarEnt.getName());
-						if (tarEnt.isDirectory()) {
-							file.mkdir();
-						} else {
-							if (!file.getParentFile().exists()) {
-								file.getParentFile().mkdirs();
-							}
-							try (FileOutputStream fos = new FileOutputStream(file)) {
-								tin.copyEntryContents(fos);
-							} catch (IOException e) {
-								e.printStackTrace();
-							}
-						}
-					}
-					tin.close();
-				} catch (IOException e) {
-					e.printStackTrace();
+			String gz = "ipfs/bms.tar.gz";
+			String tar = "ipfs/bms.tar";
+			try (FileInputStream fis = new FileInputStream(gz);
+					GzipCompressorInputStream archive = new GzipCompressorInputStream(fis);
+					FileOutputStream fos = new FileOutputStream(tar)) {
+				int size = 0;
+				byte[] buf = new byte[1048576];
+				while ((size = archive.read(buf)) > 0) {
+					fos.write(buf, 0, size);
 				}
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
+			try (TarArchiveInputStream tin = new TarArchiveInputStream(new FileInputStream(tar))) {
+				ArchiveEntry entry = null;
+				while ((entry = tin.getNextEntry()) != null) {
+					File file = new File("ipfs/" + entry.getName());
+					if (entry.isDirectory()) {
+						file.mkdirs();
+						continue;
+					}
+					if (!file.getParentFile().exists()) {
+						file.getParentFile().mkdirs();
+					}
+					try (FileOutputStream fos = new FileOutputStream(file)) {
+						IOUtils.copy(tin, fos);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 
-			try {
-				Files.deleteIfExists(p);
+				}
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+			try {
+				Files.deleteIfExists(Paths.get(gz));
+				Files.deleteIfExists(Paths.get(tar));
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+
 			Path dir = Paths.get("ipfs" + File.separator + ipfspath);
 			if (ipfspath != null && ipfspath.length() != 0 && !dir.toString().equals(path.toString())
 					&& Files.exists(dir)) {
