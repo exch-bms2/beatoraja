@@ -1,11 +1,15 @@
 package bms.tool.mdprocessor;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -200,19 +204,52 @@ public class MusicDownloadProcessor {
 
 		public void run() {
 			URL url = null;
+			InputStream in = null;
+			OutputStream out = null;
 			try {
 				url = new URL(
 						ipfs + "api/v0/get?arg=" + ipfspath
 								+ "&archive=true&compress=true");
-			} catch (MalformedURLException e1) {
-				e1.printStackTrace();
-			}
-			Path dlpath = Paths.get("ipfs/bms.tar.gz");
-			try {
-				Files.copy(url.openStream(), dlpath, StandardCopyOption.REPLACE_EXISTING);
+				Files.deleteIfExists(Paths.get("ipfs/bms.tar.gz"));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+			try {
+				URLConnection connection = url.openConnection();
+				connection.connect();
+				in = new BufferedInputStream(url.openStream());
+				out = new FileOutputStream("ipfs/bms.tar.gz");
+			} catch (Exception e) {
+				if (url != null) {
+					Logger.getGlobal().info("URL:" + url.toString() + "に接続失敗。");
+				}
+			}
+			byte data[] = new byte[1024 * 512];
+			long total = 0;
+			int count;
+			if (in != null && out != null) {
+				try {
+					while ((count = in.read(data)) != -1) {
+						total += count;
+						setMessage("downloading:" + path + " " + total / 1024 / 1024 + "MB");
+						out.write(data, 0, count);
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			try {
+				if (out != null) {
+					out.flush();
+					out.close();
+				}
+				if (in != null) {
+					in.close();
+				}
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+
 			Path p = Paths.get("ipfs/bms.tar.gz").toAbsolutePath();
 			if (Files.exists(p)) {
 				try (TarInputStream tin = new TarInputStream(

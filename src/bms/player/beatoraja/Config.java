@@ -491,7 +491,7 @@ public class Config implements Validatable {
 	}
 
 	public void setIpfsUrl(String ipfsUrl) {
-		this.ipfsurl = ipfsurl;
+		this.ipfsurl = ipfsUrl;
 	}
 
 	public boolean validate() {
@@ -531,6 +531,9 @@ public class Config implements Validatable {
 		}
 		if(autosavereplay.length != 4) {
 			autosavereplay = Arrays.copyOf(autosavereplay, 4);
+		}
+		if (ipfsurl == null) {
+			ipfsurl = "https://gateway.ipfs.io/";
 		}
 
 		return true;
