@@ -1,25 +1,23 @@
 package bms.player.beatoraja.play;
 
+import static bms.player.beatoraja.CourseData.CourseDataConstraint.*;
+import static bms.player.beatoraja.skin.SkinProperty.*;
+
 import java.util.*;
 import java.util.logging.Logger;
+
+import com.badlogic.gdx.utils.FloatArray;
 
 import bms.model.*;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.PlayerResource.PlayMode;
-import bms.player.beatoraja.ReplayData;
-import bms.player.beatoraja.input.BMSPlayerInputProcessor;
-import bms.player.beatoraja.input.KeyInputLog;
+import bms.player.beatoraja.input.*;
 import bms.player.beatoraja.pattern.*;
-import bms.player.beatoraja.play.GaugeProperty.GaugeElementProperty;
+import bms.player.beatoraja.pattern.Random;
 import bms.player.beatoraja.play.PracticeConfiguration.PracticeProperty;
 import bms.player.beatoraja.play.bga.BGAProcessor;
-import bms.player.beatoraja.skin.*;
+import bms.player.beatoraja.skin.SkinType;
 import bms.player.beatoraja.song.SongData;
-
-import com.badlogic.gdx.utils.*;
-
-import static bms.player.beatoraja.CourseData.CourseDataConstraint.*;
-import static bms.player.beatoraja.skin.SkinProperty.*;
 
 /**
  * BMSプレイヤー本体
@@ -48,7 +46,7 @@ public class BMSPlayer extends MainState {
 	 */
 	private KeyInputProccessor keyinput;
 	private ControlInputProcessor control;
-	
+
 	private KeySoundProcessor keysound;
 
 	private int assist = 0;
@@ -248,15 +246,20 @@ public class BMSPlayer extends MainState {
 				Logger.getGlobal().info("譜面オプション :  " + config.getRandom2());
 			}
 
-			if(model.getMode().scratchKey.length == 0) {
-				if (config.getRandom() == 7 && model.getMode() != Mode.POPN_9K) {
-					config.setRandom(0);
-				} else if (config.getRandom() == 8 && model.getMode() != Mode.POPN_9K) {
-					config.setRandom(2);
-				} else if (config.getRandom() == 9 && model.getMode() != Mode.POPN_9K) {
-					config.setRandom(4);
+			// POPN_9KのSCR系RANDOMにPOPN_5Kは対応していないため、非SCR系RANDOMに変更
+			if(model.getMode() == Mode.POPN_5K) {
+				switch(Random.getRandom(config.getRandom())) {
+				case ALL_SCR: config.setRandom(Random.IDENTITY.id);
+					break;
+				case RANDOM_EX: config.setRandom(Random.RANDOM.id);
+					break;
+				case S_RANDOM_EX: config.setRandom(Random.S_RANDOM.id);
+					break;
+				default:
+					break;
 				}
 			}
+
 			pattern = PatternModifier.merge(pattern,
 					PatternModifier
 							.create(config.getRandom(), PatternModifier.SIDE_1P, model.getMode())
@@ -360,7 +363,7 @@ public class BMSPlayer extends MainState {
 		judge.init(model, resource);
 
 		final PlaySkin skin = (PlaySkin) getSkin();
-		
+
 		rhythm = new RhythmTimerProcessor(model, skin.getNoteExpansionRate()[0] != 100 || skin.getNoteExpansionRate()[1] != 100);
 
 		bga = resource.getBGAManager();
@@ -533,7 +536,7 @@ public class BMSPlayer extends MainState {
 			final long deltaplay = deltatime * (100 - playspeed) / 100;
 			PracticeProperty property = practice.getPracticeProperty();
 			main.setMicroTimer(TIMER_PLAY, main.getMicroTimer(TIMER_PLAY) + deltaplay);
-			
+
 			rhythm.update(this, deltatime, lanerender.getNowBPM(), property.freq);
 
 			final long ptime = main.getNowTime(TIMER_PLAY);
@@ -711,7 +714,7 @@ public class BMSPlayer extends MainState {
 			main.getAudioProcessor().setGlobalPitch(playspeed / 100f);
 		}
 	}
-	
+
 	public int getPlaySpeed() {
 		return playspeed;
 	}
@@ -898,10 +901,10 @@ public class BMSPlayer extends MainState {
 		case NUMBER_PLAYTIME_SECOND:
 			return (((int) (main.isTimerOn(TIMER_PLAY) ? main.getNowTime(TIMER_PLAY) : 0)) / 1000) % 60;
 		case NUMBER_TIMELEFT_MINUTE:
-			return (int) (Math.max((playtime - (int) (main.isTimerOn(TIMER_PLAY) ? 
+			return (int) (Math.max((playtime - (int) (main.isTimerOn(TIMER_PLAY) ?
 					main.getNowTime(TIMER_PLAY) : 0) + 1000), 0) / 60000);
 		case NUMBER_TIMELEFT_SECOND:
-			return (Math.max((playtime - (int) (main.isTimerOn(TIMER_PLAY) ? 
+			return (Math.max((playtime - (int) (main.isTimerOn(TIMER_PLAY) ?
 					main.getNowTime(TIMER_PLAY) : 0) + 1000), 0) / 1000) % 60;
 		case NUMBER_GROOVEGAUGE:
 			return (int) gauge.getValue();
@@ -970,7 +973,7 @@ public class BMSPlayer extends MainState {
 	public void setPastNotes(int notes) {
 		this.notes = notes;
 	}
-	
+
 	public int getPlaytime() {
 		return playtime;
 	}
