@@ -281,7 +281,7 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private CheckBox enableIpfs;
 	@FXML
-    private TextField ipfspath;
+	private TextField ipfsurl;
 
 	@FXML
 	private VBox skin;
@@ -470,7 +470,7 @@ public class PlayConfigurationView implements Initializable {
 		scrolldurationhigh.getValueFactory().setValue(config.getScrollDurationHigh());
 
 		enableIpfs.setSelected(config.isEnableIpfs());
-		ipfspath.setText(config.getIpfspath());
+		ipfsurl.setText(config.getIpfsUrl());
 
 		updateAudioDriver();
 
@@ -608,7 +608,7 @@ public class PlayConfigurationView implements Initializable {
 		config.setScrollDutationHigh(getValue(scrolldurationhigh));
 
 		config.setEnableIpfs(enableIpfs.isSelected());
-		config.setIpfspath(ipfspath.getText());
+		config.setIpfsUrl(ipfsurl.getText());
 
 		commitPlayer();
 
@@ -740,14 +740,6 @@ public class PlayConfigurationView implements Initializable {
     	String s = showDirectoryChooser("効果音のルートフォルダを選択してください");
     	if(s != null) {
     		soundpath.setText(s);
-    	}
-	}
-
-    @FXML
-	public void addIpfsPath() {
-    	String s = showFileChooser("IPFSのアプリケーションを選択してください");
-    	if(s != null) {
-    		ipfspath.setText(s);
     	}
 	}
 
