@@ -1,23 +1,27 @@
 package bms.tool.mdprocessor;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.Deque;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.logging.Logger;
-import java.util.zip.GZIPInputStream;
 import static java.nio.file.StandardCopyOption.*;
-import org.apache.tools.tar.TarEntry;
-import org.apache.tools.tar.TarInputStream;
+
+import org.apache.commons.compress.archivers.ArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
+import org.apache.commons.compress.utils.IOUtils;
 
 /**
  * ipfsによる楽曲ダウンロードを行うクラス
@@ -29,7 +33,6 @@ public class MusicDownloadProcessor {
 	private Deque<IpfsInformation> commands = new ConcurrentLinkedDeque<IpfsInformation>();
 	private String ipfs = "";
 	private DownloadDaemonThread daemon;
-	private boolean daemonexists;
 	private String message = "";
 
 	public final MusicDatabaseAccessor main;
@@ -41,8 +44,11 @@ public class MusicDownloadProcessor {
 
     public void start(IpfsInformation song){
     	if((daemon == null || !daemon.isAlive())){
-    		if(ipfs != null && Paths.get(ipfs).toFile().exists()){
-				daemonexists = true;
+			if (ipfs == null || ipfs.length() == 0) {
+				ipfs = "https://gateway.ipfs.io/";
+			}
+			if (!ipfs.endsWith("/")) {
+				ipfs = ipfs + "/";
     		}
 			daemon = new DownloadDaemonThread();
 			daemon.start();
@@ -90,7 +96,6 @@ public class MusicDownloadProcessor {
 	class DownloadDaemonThread extends Thread {
 
     	private boolean dispose;
-    	private Process pd = null;
 		private String ipfspath = "";
     	private String path = "";
     	private String diffpath = "";
@@ -103,26 +108,7 @@ public class MusicDownloadProcessor {
 			DownloadIpfsThread downloadipfs = null;
         	dispose = false;
         	try{
-				ProcessBuilder pbd = null;
-				if (daemonexists) {
-					pbd = new ProcessBuilder(ipfs, "init");
-					pbd.inheritIO();
-					pd = pbd.start();
-					pd.waitFor();
-
-					pbd = new ProcessBuilder(ipfs, "repo", "fsck");
-					pbd.inheritIO();
-					pd = pbd.start();
-					pd.waitFor();
-
-					pbd = new ProcessBuilder(ipfs, "daemon");
-					pbd.inheritIO();
-				}
         		while(!dispose){
-					if (daemonexists && !pd.isAlive()) {
-                		Logger.getGlobal().info("ipfs daemon開始");
-        				pd = pbd.start();
-        			}
         			if(!commands.isEmpty() && !download){
         				song = commands.removeFirst();
 
@@ -197,9 +183,7 @@ public class MusicDownloadProcessor {
         	} catch (Exception e) {
         		e.printStackTrace();
         	}
-        	Logger.getGlobal().info("daemon終了");
-			if (pd != null && pd.isAlive())
-				pd.destroy();
+			Logger.getGlobal().info("IPFS Thread終了");
 			if (downloadipfs != null && downloadipfs.isAlive()) {
 				downloadipfs.interrupt();
 			}
@@ -219,99 +203,121 @@ public class MusicDownloadProcessor {
 		}
 
 		public void run() {
-			if (daemonexists) {
-				ProcessBuilder pbc = new ProcessBuilder(ipfs, "get", ipfspath, "-o=" + path);
-				pbc.inheritIO();
-				Process pc = null;
-				try {
-					pc = pbc.start();
-				} catch (IOException e) {
-					e.printStackTrace();
+			URL url = null;
+			InputStream in = null;
+			OutputStream out = null;
+			try {
+				url = new URL(
+						ipfs + "api/v0/get?arg=" + ipfspath
+								+ "&archive=true&compress=true");
+				Files.deleteIfExists(Paths.get("ipfs/bms.tar.gz"));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			try {
+				URLConnection connection = url.openConnection();
+				connection.connect();
+				in = new BufferedInputStream(url.openStream());
+				out = new FileOutputStream("ipfs/bms.tar.gz");
+			} catch (Exception e) {
+				if (url != null) {
+					Logger.getGlobal().info("URL:" + url.toString() + "に接続失敗。");
 				}
-				while (pc != null && pc.isAlive()) {
-					if (daemon.dispose) {
-						pc.destroy();
+			}
+			byte data[] = new byte[1024 * 512];
+			long total = 0;
+			int count;
+			if (in != null && out != null) {
+				try {
+					while ((count = in.read(data)) != -1) {
+						total += count;
+						setMessage("downloading:" + path + " " + total / 1024 / 1024 + "MB");
+						out.write(data, 0, count);
 					}
-					try {
-						sleep(100);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
-			} else {
-				URL url = null;
-				try {
-					url = new URL(
-							"http://ipfs.io/api/v0/get?arg=" + ipfspath
-									+ "&archive=true&compress=true");
-				} catch (MalformedURLException e1) {
-					e1.printStackTrace();
-				}
-				Path dlpath = Paths.get("ipfs/bms.tar.gz");
-				try {
-					Files.copy(url.openStream(), dlpath, StandardCopyOption.REPLACE_EXISTING);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-				Path p = Paths.get("ipfs/bms.tar.gz").toAbsolutePath();
-				if (Files.exists(p)) {
-					try (TarInputStream tin = new TarInputStream(
-							new GZIPInputStream(new FileInputStream(p.toFile())))) {
-						for (TarEntry tarEnt = tin.getNextEntry(); tarEnt != null; tarEnt = tin.getNextEntry()) {
-							File file = new File("ipfs/" + tarEnt.getName());
-							if (tarEnt.isDirectory()) {
-								file.mkdir();
-							} else {
-								if (!file.getParentFile().exists()) {
-									file.getParentFile().mkdirs();
-								}
-								try (FileOutputStream fos = new FileOutputStream(file)) {
-									tin.copyEntryContents(fos);
-								} catch (IOException e) {
-									e.printStackTrace();
-								}
-							}
-						}
-						tin.close();
-					} catch (IOException e) {
+			}
+			try {
+				if (out != null) {
+					out.flush();
+					out.close();
+				}
+				if (in != null) {
+					in.close();
+				}
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+
+			String gz = "ipfs/bms.tar.gz";
+			String tar = "ipfs/bms.tar";
+			try (FileInputStream fis = new FileInputStream(gz);
+					GzipCompressorInputStream archive = new GzipCompressorInputStream(fis);
+					FileOutputStream fos = new FileOutputStream(tar)) {
+				int size = 0;
+				byte[] buf = new byte[1048576];
+				while ((size = archive.read(buf)) > 0) {
+					fos.write(buf, 0, size);
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			try (TarArchiveInputStream tin = new TarArchiveInputStream(new FileInputStream(tar))) {
+				ArchiveEntry entry = null;
+				while ((entry = tin.getNextEntry()) != null) {
+					File file = new File("ipfs/" + entry.getName());
+					if (entry.isDirectory()) {
+						file.mkdirs();
+						continue;
+					}
+					if (!file.getParentFile().exists()) {
+						file.getParentFile().mkdirs();
+					}
+					try (FileOutputStream fos = new FileOutputStream(file)) {
+						IOUtils.copy(tin, fos);
+					} catch (Exception e) {
 						e.printStackTrace();
 					}
-				}
 
-				try {
-					Files.deleteIfExists(p);
-				} catch (IOException e) {
-					e.printStackTrace();
 				}
-				Path dir = Paths.get("ipfs" + File.separator + ipfspath);
-				if (ipfspath != null && ipfspath.length() != 0 && !dir.toString().equals(path.toString())
-						&& Files.exists(dir)) {
-					if (Files.isDirectory(dir)) {
-						if (!Paths.get(path).toFile().exists())
-							Paths.get(path).toFile().mkdirs();
-						File d = dir.toFile();
-						for (File f : d.listFiles()) {
-							try {
-								Files.move(f.toPath(), Paths.get(path + "/" + f.toPath().getFileName().toString()),
-										REPLACE_EXISTING);
-							} catch (IOException e) {
-								e.printStackTrace();
-							}
-						}
-					} else if (!Paths.get(path).toFile().exists()) {
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			try {
+				Files.deleteIfExists(Paths.get(gz));
+				Files.deleteIfExists(Paths.get(tar));
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+
+			Path dir = Paths.get("ipfs" + File.separator + ipfspath);
+			if (ipfspath != null && ipfspath.length() != 0 && !dir.toString().equals(path.toString())
+					&& Files.exists(dir)) {
+				if (Files.isDirectory(dir)) {
+					if (!Paths.get(path).toFile().exists())
+						Paths.get(path).toFile().mkdirs();
+					File d = dir.toFile();
+					for (File f : d.listFiles()) {
 						try {
-							Files.move(dir, Paths.get(path), REPLACE_EXISTING);
+							Files.move(f.toPath(), Paths.get(path + "/" + f.toPath().getFileName().toString()),
+									REPLACE_EXISTING);
 						} catch (IOException e) {
 							e.printStackTrace();
 						}
 					}
+				} else if (!Paths.get(path).toFile().exists()) {
 					try {
-						Files.deleteIfExists(dir);
+						Files.move(dir, Paths.get(path), REPLACE_EXISTING);
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
 				}
-
+				try {
+					Files.deleteIfExists(dir);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}

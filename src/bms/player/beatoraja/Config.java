@@ -162,7 +162,7 @@ public class Config implements Validatable {
 	private int songResourceGen = 1;
 
 	private boolean enableIpfs = true;
-	private String ipfspath = "";
+	private String ipfsurl = "https://gateway.ipfs.io/";
 
 
 
@@ -486,12 +486,12 @@ public class Config implements Validatable {
 		this.enableIpfs = enableIpfs;
 	}
 
-	public String getIpfspath() {
-		return ipfspath;
+	public String getIpfsUrl() {
+		return ipfsurl;
 	}
 
-	public void setIpfspath(String ipfspath) {
-		this.ipfspath = ipfspath;
+	public void setIpfsUrl(String ipfsUrl) {
+		this.ipfsurl = ipfsUrl;
 	}
 
 	public boolean validate() {
@@ -531,6 +531,9 @@ public class Config implements Validatable {
 		}
 		if(autosavereplay.length != 4) {
 			autosavereplay = Arrays.copyOf(autosavereplay, 4);
+		}
+		if (ipfsurl == null) {
+			ipfsurl = "https://gateway.ipfs.io/";
 		}
 
 		return true;

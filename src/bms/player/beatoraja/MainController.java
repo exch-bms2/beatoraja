@@ -386,7 +386,7 @@ public class MainController extends ApplicationAdapter {
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 
 		if (config.isEnableIpfs()) {
-			download = new MusicDownloadProcessor(config.getIpfspath(), (md5) -> {
+			download = new MusicDownloadProcessor(config.getIpfsUrl(), (md5) -> {
 				SongData[] s = getSongDatabase().getSongDatas(md5);
 				String[] result = new String[s.length];
 				for(int i = 0;i < result.length;i++) {
