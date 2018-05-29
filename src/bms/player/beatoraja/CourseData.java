@@ -90,6 +90,9 @@ public class CourseData implements Validatable {
         if(hash == null) {
             return false;
         }
+        if(name == null || name.length() == 0) {
+        	name = "No Course Title";
+        }
         for(int i = 0;i < hash.length;i++) {
             SongData sd = hash[i];
             if(sd == null) {
