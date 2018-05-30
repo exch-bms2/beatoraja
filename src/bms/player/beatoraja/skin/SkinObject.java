@@ -11,14 +11,14 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.*;
 
 /**
- * �궧�궘�꺍�궕�깣�궦�궒�궚�깉
+ * 占쎄때占쎄텣占쎄틡占쎄텞占쎄묍占쎄땋占쎄텙占쎄텥占쎄퉱
  * 
  * @author exch
  */
 public abstract class SkinObject implements Disposable {
 
 	/**
-	 * �궕�깢�궩�긿�깉�겗�뢿�뀱ID
+	 * 占쎄텞占쎄묄占쎄땐占쎄맙占쎄퉱占쎄쿁占쎈♧占쎈�켌D
 	 */
 	private int[] offset = new int[0];
 
@@ -26,15 +26,15 @@ public abstract class SkinObject implements Disposable {
 
 	private int imageid = -1;
 	/**
-	 * �뢿�뀱�걲�굥�궭�궎�깯�꺖ID
+	 * 占쎈♧占쎈�깍옙嫄뀐옙援ο옙沅�占쎄텕占쎄묻占쎄틬ID
 	 */
 	private int dsttimer = 0;
 	/**
-	 * �꺂�꺖�깤�뼀冶뗣궭�궎�깯�꺖
+	 * 占쎄틓占쎄틬占쎄묏占쎈��넼�뿣沅�占쎄텕占쎄묻占쎄틬
 	 */
 	private int dstloop = 0;
 	/**
-	 * �깣�꺃�꺍�깋(2:�뒥嶸�, 9:�룏邕�)
+	 * 占쎄묍占쎄틕占쎄틡占쎄퉳(2:占쎈뮙蒻몌옙, 9:占쎈즽�굲占�)
 	 */
 	private int dstblend = 0;
     /**
@@ -46,53 +46,53 @@ public abstract class SkinObject implements Disposable {
 	private int imageType;
 	
 	/**
-	 * �뵽�깗�썮邕㏂겗訝�恙�
+	 * 占쎈돕占쎄퉿占쎌뜮�굲�뢿寃쀨쯁占썸걲占�
 	 */
 	private int dstcenter;
 
 	private int acc;
 	/**
-	 * �궕�깣�궦�궒�궚�깉�궚�꺁�긿�궚�셽�겓若잒죱�걲�굥�궎�깧�꺍�깉�겗�뢿�뀱ID
+	 * 占쎄텞占쎄묍占쎄땋占쎄텙占쎄텥占쎄퉱占쎄텥占쎄틒占쎄맙占쎄텥占쎌끋占쎄쾽畑댁옊二깍옙嫄뀐옙援ο옙沅롳옙源㏆옙爰랃옙源됵옙寃쀯옙猶울옙�켌D
 	 */
 	private int clickevent = -1;
 	/**
-	 * �궕�깣�궦�궒�궚�깉�궚�꺁�긿�궚�닩若싥꺕�궎�깧�꺍�깉凉뺞빊�겗葉�窈�
-	 * 0: �싧만(plus only)
-	 * 1: �싧만(minus only)
-	 * 2: 藥��뤂�늽�돯(藥�=minus,�뤂=plus)
-	 * 3: 訝듾툔�늽�돯(訝�=minus,訝�=plus)
+	 * 占쎄텞占쎄묍占쎄땋占쎄텙占쎄텥占쎄퉱占쎄텥占쎄틒占쎄맙占쎄텥占쎈떓畑댁떏爰뺧옙沅롳옙源㏆옙爰랃옙源됵Ⅹ類욌퉲占쎄쿁�몛占썹챻占�
+	 * 0: 占쎌떑留�(plus only)
+	 * 1: 占쎌떑留�(minus only)
+	 * 2: �뿥占쏙옙琉귨옙�듊占쎈룾(�뿥占�=minus,占쎈쨧=plus)
+	 * 3: 鼇앸벦�닎占쎈듊占쎈룾(鼇앾옙=minus,鼇앾옙=plus)
 	 */
 	private int clickeventType = 0;
 	/**
-	 * �룒�뵽�씉餓뜰겏�겒�굥�궕�깤�궥�깾�꺍若싩쑴
+	 * 占쎈짂占쎈돕占쎌뵃繞볥쑑寃륅옙寃믭옙援ο옙沅뺧옙源ㅿ옙沅ο옙源억옙爰랃Ⅴ�떓�뫒
 	 */
 	private int[] dstop = new int[0];
 	/**
-	 * �룒�뵽�씉餓뜰겗�깯�궑�궧影꾢쎊
+	 * 占쎈짂占쎈돕占쎌뵃繞볥쑑寃쀯옙源�占쎄텘占쎄때壤깃쐼�럧
 	 */
 	private Rectangle mouseRect = null;
 	/**
-	 * �뵽�깗�겗鴉며리�뼶力뺛겗�뙁若�
+	 * 占쎈돕占쎄퉿占쎄쿁辱됰ŉ由э옙堉띰쫲類쏄쿁占쎈셼畑댐옙
 	 */
 	private StretchType stretch = StretchType.STRETCH;
 
 	public enum StretchType {
-		// �룒�뵽�뀍�겗影꾢쎊�겓�릦�굩�걵�겍鴉며리�걲�굥
+		// 占쎈짂占쎈돕占쎈�랃옙寃쀥쉽袁��럧占쎄쾽占쎈└占쎄뎀占쎄굘占쎄쾷辱됰ŉ由э옙嫄뀐옙援�
 		STRETCH(0),
-		// �궋�궧�깪�궚�깉驪붵굮岳앫걾�겇�겇�룒�뵽�뀍�겗影꾢쎊�겓�룑�겲�굥�굠�걝�겓鴉며리�걲�굥
+		// 占쎄텑占쎄때占쎄묫占쎄텥占쎄퉱癲뉖떫援�略녹빂嫄억옙寃뉛옙寃뉛옙猷믭옙逾쏙옙�랃옙寃쀥쉽袁��럧占쎄쾽占쎈즿占쎄께占쎄데占쎄턄占쎄콨占쎄쾽辱됰ŉ由э옙嫄뀐옙援�
 		KEEP_ASPECT_RATIO_FIT_INNER(1),
-		// �궋�궧�깪�궚�깉驪붵굮岳앫걾�겇�겇�룒�뵽�뀍�겗影꾢쎊�뀲鵝볝굮誤녴걝�굠�걝�겓鴉며리�걲�굥
+		// 占쎄텑占쎄때占쎄묫占쎄텥占쎄퉱癲뉖떫援�略녹빂嫄억옙寃뉛옙寃뉛옙猷믭옙逾쏙옙�랃옙寃쀥쉽袁��럧占쎈�꿴턁蹂앷뎌沃ㅻ뀾嫄앾옙援좑옙嫄앾옙寃볣큺硫곕━占쎄굉占쎄데
 		KEEP_ASPECT_RATIO_FIT_OUTER(2),
 		KEEP_ASPECT_RATIO_FIT_OUTER_TRIMMED(3),
-		// �궋�궧�깪�궚�깉驪붵굮岳앫걾�겇�겇�룒�뵽�뀍�겗與ゅ퉭�겓�릦�굩�걵�겍鴉며리�걲�굥
+		// 占쎄텑占쎄때占쎄묫占쎄텥占쎄퉱癲뉖떫援�略녹빂嫄억옙寃뉛옙寃뉛옙猷믭옙逾쏙옙�랃옙寃쀨늾�굝�돪占쎄쾽占쎈└占쎄뎀占쎄굘占쎄쾷辱됰ŉ由э옙嫄뀐옙援�
 		KEEP_ASPECT_RATIO_FIT_WIDTH(4),
 		KEEP_ASPECT_RATIO_FIT_WIDTH_TRIMMED(5),
-		// �궋�궧�깪�궚�깉驪붵굮岳앫걾�겇�겇�룒�뵽�뀍�겗潁�亮끹겓�릦�굩�걵�겍鴉며리�걲�굥
+		// 占쎄텑占쎄때占쎄묫占쎄텥占쎄퉱癲뉖떫援�略녹빂嫄억옙寃뉛옙寃뉛옙猷믭옙逾쏙옙�랃옙寃쀦퐗占쏙Ⅷ�겧寃볩옙由�占쎄뎀占쎄굘占쎄쾷辱됰ŉ由э옙嫄뀐옙援�
 		KEEP_ASPECT_RATIO_FIT_HEIGHT(6),
 		KEEP_ASPECT_RATIO_FIT_HEIGHT_TRIMMED(7),
-		// �룒�뵽�뀍�겓�룑�겲�굢�겒�걚�졃�릦�겓�겘�궋�궧�깪�궚�깉驪붵굮岳앫걾�겇�겇潁�弱뤵걲�굥
+		// 占쎈짂占쎈돕占쎈�랃옙寃볩옙猷묕옙寃뀐옙援�占쎄쾼占쎄콢占쎌죨占쎈└占쎄쾽占쎄쿂占쎄텑占쎄때占쎄묫占쎄텥占쎄퉱癲뉖떫援�略녹빂嫄억옙寃뉛옙寃뉑퐗占썲선琉듦굉占쎄데
 		KEEP_ASPECT_RATIO_NO_EXPANDING(8),
-		// 鴉며리�걮�겒�걚竊덁릎鸚��겓�릦�굩�걵�굥竊�
+		// 辱됰ŉ由э옙嫄�占쎄쾼占쎄콢塋딅뛻由롩툣占쏙옙寃볩옙由�占쎄뎀占쎄굘占쎄데塋딉옙
 		NO_RESIZE(9),
 		NO_RESIZE_TRIMMED(10),
 		;
@@ -106,19 +106,19 @@ public abstract class SkinObject implements Disposable {
 	private static final float[] CENTERY = { 0.5f, 0, 0, 0, 0.5f, 0.5f, 0.5f, 1, 1, 1 };
 
 	/**
-	 * �썮邕㏘릎恙껁겗X佯㎪쮽(藥�塋�:0.0 - �뤂塋�:1.0)
+	 * 占쎌뜮�굲�룜由롦걲猿곴쿁X鵝��렕怡�(�뿥占썲죰占�:0.0 - 占쎈쨧櫻뗰옙:1.0)
 	 */
 	private float centerx;
 	/**
-	 * �썮邕㏘릎恙껁겗Y佯㎪쮽(訝뗧ク:0.0 - 訝딁ク:1.0)
+	 * 占쎌뜮�굲�룜由롦걲猿곴쿁Y鵝��렕怡�(鼇앸뿧�궚:0.0 - 鼇앸봺�궚:1.0)
 	 */
 	private float centery;
 	/**
-	 * �룒�뵽�뀍
+	 * 占쎈짂占쎈돕占쎈��
 	 */
 	private SkinObjectDestination[] dst = new SkinObjectDestination[0];
 	
-	// 餓δ툔�곲쳵�잌뙑�뵪
+	// 繞벿댄닎占쎄남爾듸옙�엺�솑占쎈뎁
 	private long starttime;
 	private long endtime;
 
@@ -250,11 +250,11 @@ public abstract class SkinObject implements Disposable {
 	}
 
 	/**
-	 * �뙁若싥걮�겍�셽�뼋�겓恙쒌걯�걼�룒�뵽�젞�윜�굮瓦붵걲
+	 * 占쎈셼畑댁떏嫄�占쎄쾷占쎌끋占쎈펻占쎄쾽�걲�뭽嫄�占쎄굴占쎈짂占쎈돕占쎌젦占쎌쐺占쎄뎌�벀遺듦굉
 	 * 
 	 * @param time
-	 *            �셽�뼋(ms)
-	 * @return �룒�뵽�젞�윜
+	 *            占쎌끋占쎈펻(ms)
+	 * @return 占쎈짂占쎈돕占쎌젦占쎌쐺
 	 */
 	public Rectangle getDestination(long time, MainState state) {
 		final int timer = dsttimer;
@@ -619,7 +619,7 @@ public abstract class SkinObject implements Disposable {
 	}
 
 	/**
-	 * �궧�궘�꺍�궕�깣�궦�궒�궚�깉�겗�룒�뵽�뀍�굮烏①뤎�걲�굥�궚�꺀�궧
+	 * 占쎄때占쎄텣占쎄틡占쎄텞占쎄묍占쎄땋占쎄텙占쎄텥占쎄퉱占쎄쿁占쎈짂占쎈돕占쎈�랃옙援��깗�몺琉롳옙嫄뀐옙援ο옙沅싷옙爰�占쎄때
 	 * 
 	 * @author exch
 	 */
@@ -627,7 +627,7 @@ public abstract class SkinObject implements Disposable {
 
 		public final long time;
 		/**
-		 * �룒�뵽�젞�윜
+		 * 占쎈짂占쎈돕占쎌젦占쎌쐺
 		 */
 		public final Rectangle region;
 		public final int acc;
@@ -644,7 +644,7 @@ public abstract class SkinObject implements Disposable {
 	}
 	
 	/**
-	 * �궕�깢�궩�긿�깉
+	 * 占쎄텞占쎄묄占쎄땐占쎄맙占쎄퉱
 	 * 
 	 * @author exch
 	 */

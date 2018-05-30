@@ -7,14 +7,14 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 
 /**
- * スキンイメージ
+ * �궧�궘�꺍�궎�깳�꺖�궦
  * 
  * @author exch
  */
-public class SkinImage extends SkinObject {
+public class SkinImage extends SkinObject implements SkinObserver {
 	
 	/**
-	 * イメージ
+	 * �궎�깳�꺖�궦
 	 */
 	private SkinSource[] image;
 

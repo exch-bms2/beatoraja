@@ -132,18 +132,18 @@ public class BMSPlayer extends MainState {
 		boolean isReplayPatternPlay = true;
 		PlayerConfig config = resource.getPlayerConfig();
 		HSReplay = null;
-		if(replay != null && main.getInputProcessor().getKeystate(1)) {
+		if(replay != null && main.getInputProcessor().getKeyState(1)) {
 			//岳앭춼�걬�굦�걼鈺쒒씊鸚됪쎍�꺆�궛�걢�굢鈺쒒씊�냽�뤎
 			resource.setReplayData(replay);
 			isReplayPatternPlay = true;
-		} else if(replay != null && main.getInputProcessor().getKeystate(2)) {
+		} else if(replay != null && main.getInputProcessor().getKeyState(2)) {
 			//岳앭춼�걬�굦�걼鈺쒒씊�궕�깤�궥�깾�꺍�꺆�궛�걢�굢鈺쒒씊�궕�깤�궥�깾�꺍�냽�뤎
 			config.setRandom(replay.randomoption);
 			config.setRandom2(replay.randomoption2);
 			config.setDoubleoption(replay.doubleoption);
 			isReplayPatternPlay = true;
 		}
-		if(replay != null && main.getInputProcessor().getKeystate(4)) {
+		if(replay != null && main.getInputProcessor().getKeyState(4)) {
 			//岳앭춼�걬�굦�걼HS�궕�깤�궥�깾�꺍�꺆�궛�걢�굢HS�궕�깤�궥�깾�꺍�냽�뤎
 			HSReplay = replay;
 			isReplayPatternPlay = true;
@@ -193,7 +193,7 @@ public class BMSPlayer extends MainState {
 				}
 			}
 		}
-		if(replay != null && main.getInputProcessor().getKeystate(5)) {
+		if(replay != null && main.getInputProcessor().getKeyState(5)) {
 			;//; do something
 		}
 		int coursetype = 0;
@@ -937,7 +937,7 @@ public class BMSPlayer extends MainState {
 		control.setEnableCursor(false);
 		practice.processInput(input);
 
-		if (input.getKeystate(0) && resource.mediaLoadFinished() && now > skin.getLoadstart() + skin.getLoadend()
+		if (input.getKeyState(0) && resource.mediaLoadFinished() && now > skin.getLoadstart() + skin.getLoadend()
 				&& now - startpressedtime > 1000) {
 			PracticeProperty property = practice.getPracticeProperty();
 			control.setEnableControl(true);

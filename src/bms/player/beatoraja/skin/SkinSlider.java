@@ -7,39 +7,39 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 
-public class SkinSlider extends SkinObject {
+public class SkinSlider extends SkinObject implements SkinObserver {
 
 	/**
-	 * イメージ
+	 * �궎�깳�꺖�궦
 	 */
 	private SkinSource source;
 
 	/**
-	 * slider移動方向(0:上, 1:右, 2:下, 3:左)
+	 * slider燁삣땿�뼶�릲(0:訝�, 1:�뤂, 2:訝�, 3:藥�)
 	 */
 	private int direction;
 	/**
-	 * slider移動範囲
+	 * slider燁삣땿影꾢쎊
 	 */
 	private int range = 100;
 	/**
-	 * slider値参照ID
+	 * slider�ㅵ뢿�뀱ID
 	 */
 	private int type;
 	/**
-	 * ユーザーによる値変更を受け付けるかどうか
+	 * �깺�꺖�궣�꺖�겓�굠�굥�ㅵ쨯�쎍�굮�룛�걨餓섅걨�굥�걢�겑�걝�걢
 	 */
 	private boolean changable;
 	/**
-	 * NUMBER値参照かどうか
+	 * NUMBER�ㅵ뢿�뀱�걢�겑�걝�걢
 	 */
 	private boolean isRefNum = false;
 	/**
-	 * NUMBER値参照の場合の最小値
+	 * NUMBER�ㅵ뢿�뀱�겗�졃�릦�겗��弱뤷��
 	 */
 	private int min = 0;
 	/**
-	 * NUMBER値参照の場合の最大値
+	 * NUMBER�ㅵ뢿�뀱�겗�졃�릦�겗��鸚㎩��
 	 */
 	private int max = 0;
 
