@@ -171,7 +171,7 @@ public class SkinPropertyMapper {
 	}
 	
 	public static BooleanProperty getBooleanProperty(int optionid) {
-		// TODO 各Skinに分散するるべき？
+		// TODO 各Skinに分散するべき？
 		BooleanProperty result = null;
 		final int id = Math.abs(optionid);
 		
@@ -238,6 +238,19 @@ public class SkinPropertyMapper {
 		}
 		if (id == OPTION_24KEYDPSONG) {
 			result = new ModeDrawCondition(Mode.KEYBOARD_24K_DOUBLE);
+		}
+
+		if(id >= OPTION_JUDGE_VERYHARD && id <= OPTION_JUDGE_VERYEASY) {
+			final int judgerank = id - OPTION_JUDGE_VERYHARD;
+			final int[] judges = {10,35,60,85,110,Integer.MAX_VALUE};
+			result = new DrawConditionProperty(DrawConditionProperty.TYPE_STATIC_WITHOUT_MUSICSELECT) {
+				@Override
+				public boolean get(MainState state) {
+					final SongData model = state.main.getPlayerResource().getSongdata();
+					return model != null && (model.getJudge() == judgerank
+							|| (model.getJudge() >= judges[judgerank] && model.getJudge() < judges[judgerank + 1]));
+				}
+			};
 		}
 
 		if (id >= OPTION_1P_0_9 && id <= OPTION_1P_100) {
