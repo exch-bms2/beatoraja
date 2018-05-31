@@ -138,7 +138,8 @@ public class PMcharaLoader {
 			PlayCharacter(skinOption,dsttimer,side, dstSize, patternData);
 		}
 		else {
-			SkinImage skinImage = addCharaFactory.getAddChara(skin, color, CharBMP, Position, type);
+			addCharaFactory CharaFactory = addCharaFactory.instance();
+			SkinImage skinImage = CharaFactory.getAddChara(skin, color, CharBMP, Position, type);
 			return skinImage;
 		}
 		return null;
