@@ -300,6 +300,8 @@ public class PlayConfigurationView implements Initializable {
 	@FXML
 	private ComboBox<String> irname;
 	@FXML
+	private Hyperlink irhome;
+	@FXML
 	private TextField iruserid;
 	@FXML
 	private PasswordField irpassword;
@@ -918,7 +920,23 @@ public class PlayConfigurationView implements Initializable {
 		loadBMS(null, false);
 	}
 
-    public void loadBMSPath(String updatepath){
+	@FXML
+	public void updateIRConnection() {
+    	String homeurl = IRConnection.getHomeURL(irname.getValue());
+		irhome.setText(homeurl);
+		newversion.setOnAction((event) -> {
+            Desktop desktop = Desktop.getDesktop();
+            URI uri;
+            try {
+                uri = new URI(homeurl);
+                desktop.browse(uri);
+            } catch (Exception e) {
+                Logger.getGlobal().warning("最新版URLアクセス時例外:" + e.getMessage());
+            }
+        });
+	}
+
+	public void loadBMSPath(String updatepath){
     	loadBMS(updatepath, false);
 	}
 

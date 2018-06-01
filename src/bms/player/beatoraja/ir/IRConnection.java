@@ -149,6 +149,18 @@ public interface IRConnection {
 	 * @return 対応するIRConnectionインスタンス。存在しない場合はnull
 	 */
 	public static IRConnection getIRConnection(String name) {
+		Class irclass = getIRConnectionClass(name);
+		if(irclass != null) {
+			try {
+				return (IRConnection) irclass.newInstance();
+			} catch (Throwable e) {
+				e.printStackTrace();
+			}
+		}
+		return null;
+	}
+
+	public static Class getIRConnectionClass(String name) {
 		if (name == null || name.length() == 0) {
 			return null;
 		}
@@ -156,7 +168,7 @@ public interface IRConnection {
 		for (int i = 0; i < irclass.length; i++) {
 			try {
 				if (name.equals(irclass[i].getField("NAME").get(null).toString())) {
-					return (IRConnection) irclass[i].newInstance();
+					return irclass[i];
 				}
 			} catch (Throwable e) {
 				e.printStackTrace();
@@ -229,5 +241,25 @@ public interface IRConnection {
 			e.printStackTrace();
 		}
 		return classes.toArray(new Class[classes.size()]);
+	}
+
+	/**
+	 * IRのオームURLを取得する
+	 * @param name IR名
+	 * @return IRのホームURL。存在しない場合はnull
+	 */
+	public static String getHomeURL(String name) {
+		Class irclass = getIRConnectionClass(name);
+		if(irclass != null) {
+			try {
+				Object result = irclass.getField("HOME").get(null);
+				if(result != null) {
+					return result.toString();
+				}
+			} catch (Throwable e) {
+				e.printStackTrace();
+			}
+		}
+		return null;
 	}
 }

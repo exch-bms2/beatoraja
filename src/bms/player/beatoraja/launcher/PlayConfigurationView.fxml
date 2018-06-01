@@ -568,7 +568,8 @@
                             <Insets bottom="10.0" left="10.0" top="10.0" />
                         </VBox.margin>
                         <Label prefHeight="24.0" prefWidth="100.0" text="IR" />
-                        <ComboBox fx:id="irname" prefWidth="150.0" />
+                        <ComboBox fx:id="irname" prefWidth="150.0" onAction="#updateIRConnection" />
+                        <Hyperlink fx:id="irhome" text="" />
                     </HBox>
                     <HBox prefHeight="12.0" prefWidth="730.0">
                         <VBox.margin>
