@@ -366,6 +366,7 @@ public class PlayConfigurationView implements Initializable {
 		initComboBox(audioFastForward, audioPlaySpeedControls);
 
 		irname.getItems().setAll(IRConnection.getAllAvailableIRConnectionName());
+		irname.getItems().add(null);
 
 		players.getItems().setAll(PlayerConfig.readAllPlayerID());
 
@@ -548,6 +549,7 @@ public class PlayConfigurationView implements Initializable {
 		target.setValue(player.getTarget());
 
 		irname.setValue(player.getIrname());
+		updateIRConnection();
 		iruserid.setText(player.getUserid());
 		irpassword.setText(player.getPassword());
 		irsend.setValue(player.getIrsend());
@@ -924,7 +926,7 @@ public class PlayConfigurationView implements Initializable {
 	public void updateIRConnection() {
     	String homeurl = IRConnection.getHomeURL(irname.getValue());
 		irhome.setText(homeurl);
-		newversion.setOnAction((event) -> {
+		irhome.setOnAction((event) -> {
             Desktop desktop = Desktop.getDesktop();
             URI uri;
             try {
