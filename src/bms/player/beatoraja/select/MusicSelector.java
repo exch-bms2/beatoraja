@@ -7,7 +7,10 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Deque;
+import java.util.List;
 import java.util.logging.Logger;
 
 import com.badlogic.gdx.Gdx;
@@ -299,11 +302,15 @@ public class MusicSelector extends MainState {
 					resource.clear();
 					if (resource.setBMSFile(Paths.get(song.getPath()), play)) {
 						final Deque<DirectoryBar> dir = this.getBarRender().getDirectory();
+						List<String> urls = Arrays.asList(main.getConfig().getTableURL());
+
+						boolean istablesong = false;
 						for(DirectoryBar bar: dir){
-							if(bar instanceof TableBar){
+							if (bar instanceof TableBar && urls.contains(((TableBar) bar).getUrl())) {
+								istablesong = true;
 								resource.setTablename(bar.getTitle());
 							}
-							if(bar instanceof HashBar){
+							if (bar instanceof HashBar && istablesong) {
 								resource.setTablelevel(bar.getTitle());
 								break;
 							}
