@@ -344,6 +344,9 @@ public abstract class PCM<T> {
 			if(bytes < channels * bitsPerSample / 8) {
 				throw new IOException(p.toString() + " : 0 samples");			
 			}
+			if(sampleRate == 0) {
+				throw new IOException(p.toString() + " : 0 sample rate");			
+			}
 			pcm.limit(bytes);
 		}
 		
