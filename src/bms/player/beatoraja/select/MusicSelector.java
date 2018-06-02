@@ -304,13 +304,16 @@ public class MusicSelector extends MainState {
 						final Deque<DirectoryBar> dir = this.getBarRender().getDirectory();
 						List<String> urls = Arrays.asList(main.getConfig().getTableURL());
 
-						boolean istablesong = false;
+						boolean isdtable = false;
 						for(DirectoryBar bar: dir){
-							if (bar instanceof TableBar && urls.contains(((TableBar) bar).getUrl())) {
-								istablesong = true;
-								resource.setTablename(bar.getTitle());
+							if (bar instanceof TableBar) {
+								String currenturl = ((TableBar) bar).getUrl();
+								if (currenturl != null && urls.contains(currenturl)) {
+									isdtable = true;
+									resource.setTablename(bar.getTitle());
+								}
 							}
-							if (bar instanceof HashBar && istablesong) {
+							if (bar instanceof HashBar && isdtable) {
 								resource.setTablelevel(bar.getTitle());
 								break;
 							}

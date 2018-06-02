@@ -311,7 +311,7 @@ public class MainController extends ApplicationAdapter {
 		parameter.size = 24;
 		systemfont = generator.generateFont(parameter);
 		messageRenderer = new MessageRenderer();
-		
+
 		if(ir != null) {
 			messageRenderer.addMessage(player.getIrname() + " Connection Succeed : " + player.getUserid() ,3000, Color.GREEN, 1);
 		}
@@ -439,7 +439,7 @@ public class MainController extends ApplicationAdapter {
 
 			sprite.end();
 		}
-		
+
 		// show message
 		sprite.begin();
 		messageRenderer.render(current, sprite, 100, config.getResolution().height - 2);
@@ -735,7 +735,7 @@ public class MainController extends ApplicationAdapter {
 		 * スクリーンショットのpixelデータ
 		 */
 		private final byte[] pixels;
-		
+
 		private final MessageRenderer message;
 
 		public ScreenShotThread(MessageRenderer message, byte[] pixels) {
@@ -790,7 +790,7 @@ public class MainController extends ApplicationAdapter {
 			pixmap.dispose();
 			Logger.getGlobal().info("スクリーンショット保存:" + path);
 			savetime = System.currentTimeMillis();
-			
+
 			message.addMessage("Screen shot saved : " + path, 2000, Color.GOLD, 0);
 		}
 	}
@@ -935,8 +935,6 @@ public class MainController extends ApplicationAdapter {
 		if (downloadIpfs == null || !downloadIpfs.isAlive()) {
 			downloadIpfs = new DownloadMessageThread(message);
 			downloadIpfs.start();
-		} else {
-			Logger.getGlobal().warning("楽曲ダウンロード中です");
 		}
 	}
 
@@ -1062,25 +1060,25 @@ public class MainController extends ApplicationAdapter {
 
 		}
 	}
-	
+
 	/**
 	 * メッセージ描画用クラス。
-	 * 
+	 *
 	 * @author exch
 	 */
 	public static class MessageRenderer implements Disposable  {
-		
+
 		private FreeTypeFontGenerator generator;
 		private final Array<Message> messages = new Array<Message>();
-		
+
 		public MessageRenderer() {
 			generator = new FreeTypeFontGenerator(Gdx.files.internal("skin/default/VL-Gothic-Regular.ttf"));
 		}
-		
+
 		public void render(MainState state, SpriteBatch sprite, int x, int y) {
 			for(int i = messages.size - 1, dy = 0;i >= 0;i--) {
 				final Message message = messages.get(i);
-				
+
 				if(message.time < System.currentTimeMillis()) {
 					message.dispose();
 					messages.removeIndex(i);
@@ -1090,7 +1088,7 @@ public class MainController extends ApplicationAdapter {
 				}
 			}
 		}
-		
+
 		public Message addMessage(String text, Color color, int type) {
 			return addMessage(text, 24 * 60 * 60 * 1000 , color, type);
 		}
@@ -1109,43 +1107,43 @@ public class MainController extends ApplicationAdapter {
 			generator.dispose();
 		}
 	}
-	
+
 	/**
 	 * MessageRendererで描画されるメッセージ
-	 * 
+	 *
 	 * @author exch
 	 */
 	public static class Message implements Disposable {
-		
+
 		private BitmapFont font;
 		private long time;
 		private String text;
 		private final Color color;
 		private final int type;
-		
+
 		public Message(String text, long time, Color color, int type) {
 			this.time = time + System.currentTimeMillis();
 			this.text = text;
 			this.color = color;
 			this.type = type;
 		}
-		
+
 		public void init(FreeTypeFontGenerator generator) {
 			FreeTypeFontParameter parameter = new FreeTypeFontParameter();
 			parameter.size = 24;
 			parameter.characters += text;
 			font = generator.generateFont(parameter);
-			font.setColor(color);			
+			font.setColor(color);
 		}
-		
+
 		public void setText(String text) {
 			this.text = text;
 		}
-		
+
 		public void stop() {
 			time = -1;
 		}
-		
+
 		public void draw(MainState state, SpriteBatch sprite, int x, int y) {
 			switch(type) {
 			case 0:
