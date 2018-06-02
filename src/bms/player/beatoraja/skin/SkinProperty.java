@@ -236,6 +236,7 @@ public class SkinProperty {
 	public static final int STRING_DIRECTORY = 1000;
 	public static final int STRING_TABLE_NAME = 1001;
 	public static final int STRING_TABLE_LEVEL = 1002;
+	public static final int STRING_TABLE_FULL = 1003;
 
 	public static final int NUMBER_HISPEED_LR2 = 10;
 	public static final int NUMBER_HISPEED = 310;
