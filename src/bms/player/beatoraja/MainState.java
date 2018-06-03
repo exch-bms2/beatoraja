@@ -19,7 +19,7 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
 
 /**
  * プレイヤー内の各状態の抽象クラス
- * 
+ *
  * @author exch
  */
 public abstract class MainState {
@@ -460,6 +460,8 @@ public abstract class MainState {
 				return song != null ? resource.getTablename() : "";
 			case STRING_TABLE_LEVEL:
 				return song != null ? resource.getTablelevel() : "";
+			case STRING_TABLE_FULL:
+				return song != null ? resource.getTablename() + resource.getTablelevel() : "";
 			}
 		}
 		return "";
