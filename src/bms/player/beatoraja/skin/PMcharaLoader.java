@@ -74,10 +74,26 @@ public class PMcharaLoader {
 
 	public SkinImage Load(boolean usecim, File imagefile, int type, int color, SkinDestinationSize dstSize, int side, int dsttimer, SkinOption skinOption) {
 		//type 0:占쎈쐻占쎈윞�눧琉룸쐻占쎈윞占쎈빣占쎈쐻占쎈윞占쎈�� 1:占쎈쐻占쎈윞占쎈��占쎈쐻占쎈윞�맱�뎽�쐻占쎈윞�뜝�뜴�쐻占쎈윞占쎈뤇占쎈쐻占쎈윪占쎈�� 2:占쎈쐻占쎈윥占쎈돗占쎈쐻占쎈윥占쎌졋占쎈쐻占쎈윥占쎈짍占쎈쐻占쎈윞占쎈뤍 3:占쎈쐻占쎈윞占쎈뤍占쎈쐻占쎈윞占쎈빞占쎈쐻占쎈윞占쎈�섓옙�쐻占쎈윞占쎈�욑옙�쐻占쎈윥占쎈짍占쎈쐻占쎈윞占쎈뤍(佯몃돆鍮뽬린�뫜�삕占쎈쭎�솾占썸�ⓑ븍춪�뇦猿뗰옙占쏙옙�굲�뇦猿볦삕) 4:占쎈쐻占쎈윞占쎈뤍占쎈쐻占쎈윞占쎈빞占쎈쐻占쎈윞占쎈�섓옙�쐻占쎈윞占쎈�욑옙�쐻占쎈윥占쎈짍占쎈쐻占쎈윞占쎈뤍(占쎈쐻占쎈윥�뜝�럡��占쎄샴占쎈쐻�뜝占�) 5:占쎈쐻占쎈윞占쎈��占쎈쐻占쎈윞�맱�뎽�쐻占쎈윞�뜝�뜴�쐻占쎈윞占쎈�섓옙�쐻占쎈윞占쎈�욑옙�쐻占쎈윞占쎈�뤄옙�쐻占쎈윞占쎈뼀 6:NEUTRAL 7:FEVER 8:GREAT 9:GOOD 10:BAD 11:FEVERWIN 12:WIN 13:LOSE 14:OJAMA 15:DANCE
-
+		
 		if(type < 0 || type > 15) return null;
 		File chpdir = null;
-		File chp = SkinFileLoad(chpdir, imagefile);
+		int fileState = 0;
+		boolean isPathFile = !imagefile.exists() && imagefile.getPath().substring(imagefile.getPath().length()-4,imagefile.getPath().length()).equalsIgnoreCase(".chp");
+		boolean isChpFile = imagefile.exists() && imagefile.getPath().substring(imagefile.getPath().length()-4,imagefile.getPath().length()).equalsIgnoreCase(".chp");
+		boolean isEqualsFile = imagefile.getPath().charAt(imagefile.getPath().length()-1) != '/' && imagefile.getPath().charAt(imagefile.getPath().length()-1) != '\\';
+		if(isPathFile) {
+			fileState = 1;
+		}
+		else if(isChpFile) {
+			fileState = 2;
+		}
+		else if(isEqualsFile) {
+			fileState = 3;
+		}
+		else {
+			fileState = 4;
+		}
+		File chp = SkinFileLoad(imagefile , chpdir, fileState);
 		if(chp == null) return null;
 
 		//占쎈쐻占쎈윥占쎈짍占쎈쐻占쎈윞占쎈뤍占쎈쐻占쎈윞占쎈룺占쎈쐻占쎈윞占쎈뼎占쎈쐻占쎈윞占쎈마 0:#CharBMP 1:#CharBMP2P 2:#CharTex 3:#CharTex2P 4:#CharFace 5:#CharFace2P 6:#SelectCG 7:#SelectCG2P
@@ -349,26 +365,10 @@ public class PMcharaLoader {
 		if(data.size() > 1) CharBMP[parseMapping.getIndex(str[0])] = SkinLoader.getTexture(chp.getPath().substring(0, Math.max(chp.getPath().lastIndexOf('\\'), chp.getPath().lastIndexOf('/')) + 1) + data.get(1).replace("\\", "/"), usecim);
 	}
 	
-	public File SkinFileLoad(File chpdir, File imagefile) {
+	public File SkinFileLoad(File chpdir, File imagefile, int FileState) {
 		File chp = null;
-		if(imagefile.exists() && imagefile.getPath().substring(imagefile.getPath().length()-4,imagefile.getPath().length()).equalsIgnoreCase(".chp")) {
-			chp = new File(imagefile.getPath());
-		} else if (!imagefile.exists() && imagefile.getPath().substring(imagefile.getPath().length()-4,imagefile.getPath().length()).equalsIgnoreCase(".chp")) {
-			chpdir = new File(imagefile.getPath().substring(0, Math.max(imagefile.getPath().lastIndexOf('\\'), imagefile.getPath().lastIndexOf('/')) + 1));
-		} else {
-			if(imagefile.getPath().charAt(imagefile.getPath().length()-1) != '/' && imagefile.getPath().charAt(imagefile.getPath().length()-1) != '\\') chpdir = new File(imagefile.getPath()+"/");
-			else chpdir = new File(imagefile.getPath());
-		}
-		if(chp == null && chpdir != null) {
-			//chp占쎈쐻占쎈윞�눧袁��쐻占쎈윞占쎈�뽳옙�쐻占쎈윞占쎈�욑옙�쐻占쎈윞占쎈빟占쎈쐻占쎈윞占쎈윪占쎈쐻占쎈윥占쎌젂占쎈쐻占쎈윞�뤃占�
-			File[] filename = chpdir.listFiles();
-			for(int i = 0; i < filename.length; i++) {
-				if (filename[i].getPath().substring(filename[i].getPath().length()-4,filename[i].getPath().length()).equalsIgnoreCase(".chp")) {
-					chp = new File(filename[i].getPath());
-					break;
-				}
-			}
-		}
+		chpFileFactory ChpFileFactory = chpFileFactory.instance();
+		chp = ChpFileFactory.getFile(imagefile, chpdir, FileState);
 		return chp;
 
 	}
