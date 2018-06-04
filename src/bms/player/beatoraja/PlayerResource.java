@@ -112,6 +112,7 @@ public class PlayerResource {
 	 */
 	private String tablename = "";
 	private String tablelevel = "";
+	private String tablefull;
 
 	public PlayerResource(AudioDriver audio, Config config, PlayerConfig pconfig) {
 		this.config = config;
@@ -461,6 +462,7 @@ public class PlayerResource {
 
 	public void setTablename(String tablename) {
 		this.tablename = tablename;
+		this.tablefull = null;
 	}
 
 	public String getTablelevel() {
@@ -469,6 +471,14 @@ public class PlayerResource {
 
 	public void setTablelevel(String tablelevel) {
 		this.tablelevel = tablelevel;
+		this.tablefull = null;
+	}
+
+	public String getTableFullname() {
+		if(tablefull == null) {
+			tablefull = tablelevel + tablename;
+		}
+		return tablefull;
 	}
 
 	private void setTableinfo(){
@@ -486,8 +496,8 @@ public class PlayerResource {
 									ts.getMd5().equals(this.getSongdata().getMd5()))||
 									(ts.getMd5().length() != 0 && this.getSongdata().getMd5().length() != 0 &&
 									ts.getSha256().equals(this.getSongdata().getSha256()))){
-								tablename = td.getName();
-								tablelevel = tf.getName();
+								setTablename(td.getName());
+								setTablelevel(tf.getName());
 								return;
 							}
 						}
@@ -495,8 +505,8 @@ public class PlayerResource {
 				}
 			}
 		}
-		tablename = "";
-		tablelevel = "";
+		setTablename("");
+		setTablelevel("");
 	}
 
 	public enum PlayMode {

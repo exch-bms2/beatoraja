@@ -461,7 +461,7 @@ public abstract class MainState {
 			case STRING_TABLE_LEVEL:
 				return song != null ? resource.getTablelevel() : "";
 			case STRING_TABLE_FULL:
-				return song != null ? resource.getTablename() + resource.getTablelevel() : "";
+				return song != null ? resource.getTableFullname() : "";
 			}
 		}
 		return "";
