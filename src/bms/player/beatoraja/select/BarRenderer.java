@@ -902,10 +902,14 @@ public class BarRenderer {
 				if (bar instanceof SongBar && ((SongBar) bar).existsSong()) {
 					final SongBar songbar = (SongBar) bar;
 					SongData song = songbar.getSongData();
-					Path bannerfile = Paths.get(song.getPath()).getParent().resolve(song.getBanner());
-					// System.out.println(bannerfile.getPath());
-					if (song.getBanner().length() > 0 && Files.exists(bannerfile)) {
-						songbar.setBanner(select.getBannerResource().get(bannerfile.toString()));
+					try {
+						Path bannerfile = Paths.get(song.getPath()).getParent().resolve(song.getBanner());
+						// System.out.println(bannerfile.getPath());
+						if (song.getBanner().length() > 0 && Files.exists(bannerfile)) {
+							songbar.setBanner(select.getBannerResource().get(bannerfile.toString()));
+						}
+					} catch (Exception e) {
+						Logger.getGlobal().warning("banner読み込み失敗 : " + song.getBanner());
 					}
 				}
 				if (stop) {
