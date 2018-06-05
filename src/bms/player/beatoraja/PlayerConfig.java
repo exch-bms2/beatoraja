@@ -303,7 +303,9 @@ public class PlayerConfig {
 	public PlayModeConfig getPlayConfig(int modeId) {
 		switch (modeId) {
 		case 7:
+			return getMode7();
 		case 5:
+			return getMode5();
 		case 14:
 		case 10:
 			return getMode14();
