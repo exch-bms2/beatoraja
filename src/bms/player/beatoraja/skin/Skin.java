@@ -32,50 +32,50 @@ import java.io.*;
 import org.lwjgl.opengl.GL11;
 
 /**
- * �궧�궘�꺍
+ * �뜝�럡�븣�뜝�럡�뀭�뜝�럡�떋
  * 
  * @author exch
  */
-public class Skin {
+public class Skin extends Subject{
 	
-	// TODO �겱�겳�굝�궘�깵�꺀楹삣눇�릤�겗�늽�썴
+	// TODO �뜝�럡猿묈뜝�럡猿쇿뜝�럡�꼤�뜝�럡�뀭�뜝�럡萸뉐뜝�럡占썹뮫諭�沅랃옙�듋�뜝�럥�뵍�뜝�럡荑곩뜝�럥�뱤�뜝�럩�쑗
 
 	/**
-	 * 亮�
+	 * �븨琉꾩삕
 	 */
 	private final float width;
 	/**
-	 * 遙섅걬
+	 * 占쎄굉占쎄섀椰꾬옙
 	 */
 	private final float height;
 	/**
-	 * �뀇�깈�꺖�궭�걢�굢�겗亮끾캈�럤
+	 * �뜝�럥占쎈돍�삕繹먮뜉�삕�댆戮녹삕亦낉옙�뜝�럡愿띶뜝�럡�뜦�뜝�럡荑곭븨猷멸께筌��뜉�삕占쎌쑃
 	 */
 	private final float dw;
 	/**
-	 * �뀇�깈�꺖�궭�걢�굢�겗遙섅걬驪붺럤
+	 * �뜝�럥占쎈돍�삕繹먮뜉�삕�댆戮녹삕亦낉옙�뜝�럡愿띶뜝�럡�뜦�뜝�럡荑곻옙嫄뀐옙瑗ⓨ쳞�띿ク�겫釉띿쑃
 	 */
 	private final float dh;
 
 	/**
-	 * �쇉�뙯�걬�굦�겍�걚�굥�궧�궘�꺍�궕�깣�궦�궒�궚�깉
+	 * �뜝�럩�눀�뜝�럥�녂�뜝�럡愿드뜝�럡�뜳�뜝�럡苡룟뜝�럡肄℡뜝�럡�뜲�뜝�럡�븣�뜝�럡�뀭�뜝�럡�떋�뜝�럡�뀧�뜝�럡臾띶뜝�럡�븢�뜝�럡�뀢�뜝�럡�뀯�뜝�럡�돮
 	 */
 	private Array<SkinObject> objects = new Array<SkinObject>();
 	private SkinObject[] objectarray = new SkinObject[0];
 	/**
-	 * �솮鸚뽧걬�굦�겍�걚�굥�궧�궘�꺍�궕�깣�궦�궒�궚�깉
+	 * �뜝�럩�꽢�땱�떜�뎾椰꾊띿삕�뤃占썲뜝�럡苡룟뜝�럡肄℡뜝�럡�뜲�뜝�럡�븣�뜝�럡�뀭�뜝�럡�떋�뜝�럡�뀧�뜝�럡臾띶뜝�럡�븢�뜝�럡�뀢�뜝�럡�뀯�뜝�럡�돮
 	 */
 	private Array<SkinObject> removes = new Array<SkinObject>();
 	/**
-	 * �뀯�뒟�룛餓섌뼀冶뗦셽�뼋(ms)
+	 * �뜝�럥占쏙옙�뜝�럥裕볟뜝�럥吏뤹튊蹂�瑗녑젆占쏙옙�꽱占쎈엡占쎈걢�뜝�럥�렮(ms)
 	 */
 	private int input;
 	/**
-	 * �궥�꺖�꺍�겗�셽�뼋(ms)
+	 * �뜝�럡�븙�뜝�럡�떖�뜝�럡�떋�뜝�럡荑곩뜝�럩�걢�뜝�럥�렮(ms)
 	 */
 	private int scene = 3600000 * 24;
 	/**
-	 * �궥�꺖�꺍餓ι솉繹뽩굺�뼀冶뗣걢�굢�궥�꺖�꺍燁삭죱�겲�겎�겗�셽�뼋(ms)
+	 * �뜝�럡�븙�뜝�럡�떖�뜝�럡�떋濚욌꼬諭��꺓嚥싲갭�돇�뤃釉앹삕�젆占쏙옙�꽱占쎈엔椰꾬옙�뜝�럡�뜦�뜝�럡�븙�뜝�럡�떖�뜝�럡�떋占쎈뇲占쎄텣雅뚭퉵�삕野껊�먯삕野껊〕�삕野껋���삕占쎈걢�뜝�럥�렮(ms)
 	 */
 	private int fadeout;
 
@@ -84,7 +84,7 @@ public class Skin {
 	private Map<Integer, Offset> offset = new HashMap<Integer, Offset>();
 
 	/**
-	 * 沃��겳渦쇈겳�셽�걢�굢訝띶쨯�겎�걗�굥�걪�겏�걣閻뷴츣�걮�겍�걚�굥op
+	 * 雅�猿볦삕�뜝�럡猿숋쫵占쏙옙�뇿野껊냲�삕占쎈걢�뜝�럡愿띶뜝�럡�뜦庸뉗빖�뵢鸚뤄옙�뜝�럡苡멨뜝�럡肄잌뜝�럡�뜲�뜝�럡愿��뜝�럡苡밧뜝�럡愿륅옙堉면뀎�똻瑜닷뜝�럡愿쇔뜝�럡苡룟뜝�럡肄℡뜝�럡�뜲op
 	 */
 	private int[] fixopt;
 
@@ -96,7 +96,7 @@ public class Skin {
 		width = dst.width;
 		height = dst.height;
 		dw = ((float)dst.width) / org.width;
-		dh = ((float)dst.height) / org.height;
+		dh = ((float)dst.height) / org.height;		
 		this.fixopt = fixopt;
 	}
 
@@ -211,7 +211,7 @@ public class Skin {
 			}
 			
  		}
-		Logger.getGlobal().info("�룒�뵽�걬�굦�겒�걚�걪�겏�걣閻뷴츣�걮�겍�걚�굥SkinObject�뎷�솮 : " + removes.size + " / " + objects.size);
+		Logger.getGlobal().info("�뜝�럥吏귛뜝�럥�룙�뜝�럡愿드뜝�럡�뜳�뜝�럡苡쇔뜝�럡肄℡뜝�럡愿��뜝�럡苡밧뜝�럡愿륅옙堉면뀎�똻瑜닷뜝�럡愿쇔뜝�럡苡룟뜝�럡肄℡뜝�럡�뜲SkinObject�뜝�럥�젵�뜝�럩�꽢 : " + removes.size + " / " + objects.size);
 		objects.removeAll(removes, true);
 		objectarray = objects.toArray(SkinObject.class);
 		option.clear();
@@ -232,11 +232,7 @@ public class Skin {
 			sprite.setTransformMatrix(transform);
 			renderer = new SkinObjectRenderer(sprite);
 		}
-		for (SkinObject obj : objectarray) {
-			if (isDraw(obj.getOption(), state)) {
-				obj.draw(renderer, time, state);
-			}
-		}
+		notify_(renderer,time, state);
 	}
 
 	private final boolean isDraw(int[] opt, MainState state) {
@@ -390,14 +386,14 @@ public class Skin {
 
 		public void draw(TextureRegion image, float x, float y, float w, float h) {
 			preDraw(image);
-			// x,y�걣*.5�겗�슋�겓(Windows�겗�겳)TextureRegion�걣�걳�굦�굥�걼�굙�곫슟若싧�얍눇
+			// x,y�뜝�럡愿�*.5�뜝�럡荑곩뜝�럩�뭿�뜝�럡苡�(Windows�뜝�럡荑곩뜝�럡猿�)TextureRegion�뜝�럡愿뤷뜝�럡援먨뜝�럡�뜳�뜝�럡�뜲�뜝�럡援닷뜝�럡�꺗�뜝�럡�굺占쎈뮗�븨�똻�뼇�뜝�럩堉껓옙�듋
 			sprite.draw(image,  x + 0.01f, y + 0.01f, w, h);
 			postDraw();
 		}
 
 		public void draw(TextureRegion image, float x, float y, float w, float h, float cx, float cy, float angle) {
 			preDraw(image);
-			// x,y�걣*.5�겗�슋�겓(Windows�겗�겳)TextureRegion�걣�걳�굦�굥�걼�굙�곫슟若싧�얍눇
+			// x,y�뜝�럡愿�*.5�뜝�럡荑곩뜝�럩�뭿�뜝�럡苡�(Windows�뜝�럡荑곩뜝�럡猿�)TextureRegion�뜝�럡愿뤷뜝�럡援먨뜝�럡�뜳�뜝�럡�뜲�뜝�럡援닷뜝�럡�꺗�뜝�럡�굺占쎈뮗�븨�똻�뼇�뜝�럩堉껓옙�듋
 			sprite.draw(image, x + 0.01f, y + 0.01f, cx * w, cy * h, w, h, 1, 1, angle);
 			postDraw();
 		}
@@ -417,7 +413,7 @@ public class Skin {
 				sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
 				break;
 			case 3:
-				// TODO 歷쏁츞�룒�뵽�겘�썵�걮�걚�걢竊�
+				// TODO �솾�슣猶억㎘�쉻�삕�뙴誘��삕�얠룞�삕野껋꼻�삕占쎈쑘�뜝�럡愿쇔뜝�럡肄℡뜝�럡愿띶죰�뵃�삕
 				Gdx.gl.glBlendEquation(GL20.GL_FUNC_SUBTRACT);
 				sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
 				Gdx.gl.glBlendEquation(GL20.GL_FUNC_ADD);
@@ -511,6 +507,6 @@ public class Skin {
 		}
 		return offsetAll;
 	}
-	
+
 
 }

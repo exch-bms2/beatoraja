@@ -13,14 +13,14 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 
 /**
- * BPM推移のグラフ
+ * BPM�렓燁삠겗�궛�꺀�깢
  *
  * @author exch
  */
-public class SkinBPMGraph extends SkinObject {
+public class SkinBPMGraph extends SkinObject implements SkinObserver{
 
 	/**
-	 * グラフテクスチャ
+	 * �궛�꺀�깢�깇�궚�궧�긽�깵
 	 */
 	private TextureRegion shapetex;
 	private long time;
@@ -29,20 +29,20 @@ public class SkinBPMGraph extends SkinObject {
 	private SongData current;
 
 	/**
-	 * ゲージ描画を完了するまでの時間(ms)
+	 * �궟�꺖�궦�룒�뵽�굮若뚥틙�걲�굥�겲�겎�겗�셽�뼋(ms)
 	 */
 	private int delay = 0;
 	/**
-	 * グラフ線の太さ
+	 * �궛�꺀�깢渶싥겗鸚ゃ걬
 	 */
 	private int lineWidth = 2;
 
-	private Color mainLineColor = Color.valueOf("00ff00");			//緑
-	private Color minLineColor = Color.valueOf("0000ff");			//青
-	private Color maxLineColor = Color.valueOf("ff0000");			//赤
-	private Color otherLineColor = Color.valueOf("ffff00");			//黄
-	private Color stopLineColor = Color.valueOf("ff00ff");			//紫
-	private Color transitionLineColor = Color.valueOf("7f7f7f");	//灰
+	private Color mainLineColor = Color.valueOf("00ff00");			//渶�
+	private Color minLineColor = Color.valueOf("0000ff");			//�쓵
+	private Color maxLineColor = Color.valueOf("ff0000");			//壅�
+	private Color otherLineColor = Color.valueOf("ffff00");			//容�
+	private Color stopLineColor = Color.valueOf("ff00ff");			//榮�
+	private Color transitionLineColor = Color.valueOf("7f7f7f");	//�겙
 
 	private double minValue = 1d/8;
 	private double maxValue = 8;
@@ -147,10 +147,10 @@ public class SkinBPMGraph extends SkinObject {
 			double maxBPM = model.getMaxBPM();
 			int lastTime = model.getLastTime() + 1000;
 
-			// グラフ描画
+			// �궛�꺀�깢�룒�뵽
 			int x1,x2,y1,y2;
 			for (int i = 1; i < BPMList.size(); i++) {
-				//縦線
+				//潁�渶�
 				x1 = (int) (width * BPMTimeList.get(i) / lastTime);
 				y1 = (int) ((Math.log10(Math.min(Math.max((BPMList.get(i-1) / mainBPM),minValue),maxValue)) - minValueLog) / (maxValueLog-minValueLog) * (height - lineWidth));
 				x2 = x1;
@@ -159,7 +159,7 @@ public class SkinBPMGraph extends SkinObject {
 					shape.setColor(transitionLineColor);
 					shape.fillRectangle(x1, Math.min(y1, y2) + lineWidth, lineWidth, Math.abs(y2 - y1) - lineWidth);
 				}
-				//横線
+				//與ょ퇉
 				x1 = (int) (width * BPMTimeList.get(i-1) / lastTime);
 				y1 = (int) ((Math.log10(Math.min(Math.max((BPMList.get(i-1) / mainBPM),minValue),maxValue)) - minValueLog) / (maxValueLog-minValueLog) * (height - lineWidth));
 				x2 = (int) (width * BPMTimeList.get(i) / lastTime);
@@ -172,7 +172,7 @@ public class SkinBPMGraph extends SkinObject {
 				shape.setColor(lineColor);
 				shape.fillRectangle(x1, y2, x2 - x1 + lineWidth, lineWidth);
 			}
-			//横線
+			//與ょ퇉
 			x1 = (int) (width * BPMTimeList.get(BPMTimeList.size()-1) / lastTime);
 			y1 = (int) ((Math.log10(Math.min(Math.max((BPMList.get(BPMTimeList.size()-1) / mainBPM),minValue),maxValue)) - minValueLog) / (maxValueLog-minValueLog) * (height - lineWidth));
 			x2 = (int) width;

@@ -24,13 +24,13 @@ import bms.player.beatoraja.play.JudgeProperty.MissCondition;
 import bms.player.beatoraja.skin.SkinPropertyMapper;
 
 /**
- * �깕�꺖�깂�닩若싩�←릤�뵪�궚�꺀�궧
+ * 占쎄퉽占쎄틬占쎄퉪占쎈떓畑댁떓占썩넀由ㅿ옙逾わ옙沅싷옙爰�占쎄때
  *
  * @author exch
  */
 public class JudgeManager {
 
-	// TODO HCN�듉�걮�쎍�걮�겗�쇇�윹�겘�겑�걝�걲�굥竊�
+	// TODO HCN占쎈뱣占쎄괼占쎌럪占쎄괼占쎄쿁占쎌뇞占쎌쑚占쎄쿂占쎄쾻占쎄콨占쎄굉占쎄데塋딉옙
 
 	private final BMSPlayer main;
 	/**
@@ -40,45 +40,45 @@ public class JudgeManager {
 	private Lane[] lanes;
 
 	/**
-	 * �뤎�쑉�겗�닩若싥궖�궑�꺍�깉�냵鼇�
+	 * 占쎈쨴占쎌몛占쎄쿁占쎈떓畑댁떏沅뽳옙沅묕옙爰랃옙源됵옙�꺏庸뉛옙
 	 */
 	private IRScoreData score = new IRScoreData();
 
 	/**
-	 * �뤎�쑉�겗�궠�꺍�깭�빊
+	 * 占쎈쨴占쎌몛占쎄쿁占쎄텭占쎄틡占쎄묶占쎈퉲
 	 */
 	private int combo;
 	/**
-	 * �궠�꺖�궧�셽�겗�뤎�쑉�겗�궠�꺍�깭�빊
+	 * 占쎄텭占쎄틬占쎄때占쎌끋占쎄쿁占쎈쨴占쎌몛占쎄쿁占쎄텭占쎄틡占쎄묶占쎈퉲
 	 */
 	private int coursecombo;
 	/**
-	 * �궠�꺖�궧�셽�겗��鸚㎯궠�꺍�깭�빊
+	 * 占쎄텭占쎄틬占쎄때占쎌끋占쎄쿁占쏙옙勇싥렞沅좑옙爰랃옙源�占쎈퉲
 	 */
 	private int coursemaxcombo;
 	/**
-	 * �닩若싮�ｅ땿�꺃�꺖�궣�꺖�겗�돯
+	 * 占쎈떓畑댁떘占쏙퐛�빣占쎄틕占쎄틬占쎄땃占쎄틬占쎄쿁占쎈룾
 	 */
 	private int[][] judge;
 	/**
-	 * �뤎�쑉烏①ㅊ訝��겗�닩若�
+	 * 占쎈쨴占쎌몛�깗�몺�뀏鼇앾옙占쎄쿁占쎈떓畑댐옙
 	 */
 	private int[] judgenow;
 	private int[] judgecombo;
 	/**
-	 * �닩若싧량�셽�뼋(ms , +�겘�뿩�듉�걮�겎-�겘�걛�듉�걮)
+	 * 占쎈떓畑댁떑�웾占쎌끋占쎈펻(ms , +占쎄쿂占쎈여占쎈뱣占쎄괼占쎄쾸-占쎄쿂占쎄콣占쎈뱣占쎄괼)
 	 */
 	private long[] judgefast;
 	/**
-	 * �눇�릤訝��겗LN
+	 * 占쎈늾占쎈┐鼇앾옙占쎄쿁LN
 	 */
 	private LongNote[] processing;
 	/**
-	 * �싮걥訝��겗HCN
+	 * 占쎌떘嫄θ쯁占쏙옙寃뾊CN
 	 */
 	private LongNote[] passing;
 	/**
-	 * HCN罌쀥뒥�닩若�
+	 * HCN營뚯�λ뮙占쎈떓畑댐옙
 	 */
 	private boolean[] inclease = new boolean[8];
 	private boolean[] next_inclease = new boolean[8];
@@ -92,32 +92,32 @@ public class JudgeManager {
 	private int[] player;
 	private int[][] laneassign;
 	/**
-	 * HCN�겗罌쀦툤�뼋�슂(ms)
+	 * HCN占쎄쿁營뚯���닩占쎈펻占쎌뒄(ms)
 	 */
 	private static final int hcnduration = 200;
 	/**
-	 * �깕�꺖�깂�닩若싥깇�꺖�깣�꺂
+	 * 占쎄퉽占쎄틬占쎄퉪占쎈떓畑댁떏源뉛옙爰뽳옙源ｏ옙爰�
 	 */
 	private int[][] njudge;
 	private long judgestart;
 	private long judgeend;
 	/**
-	 * CN永귞ク�닩若싥깇�꺖�깣�꺂
+	 * CN麗멸퇍�궚占쎈떓畑댁떏源뉛옙爰뽳옙源ｏ옙爰�
 	 */
 	private int[][] cnendjudge;
 	/**
-	 * �궧�궚�꺀�긿�긽�닩若싥깇�꺖�깣�꺂
+	 * 占쎄때占쎄텥占쎄�占쎄맙占쎄맒占쎈떓畑댁떏源뉛옙爰뽳옙源ｏ옙爰�
 	 */
 	private int[][] sjudge;
 	private int[][] scnendjudge;
 	/**
-	 * PMS�뵪�닩若싥궥�궧�깇�깲(令튡OOR�겎�궠�꺍�깭�궖�긿�깉��1�깕�꺖�깂�겓�겇�걤1令튡OOR�겲�겎)�겗�쐣�듅/�꽒�듅
+	 * PMS占쎈뎁占쎈떓畑댁떏沅ο옙沅㏆옙源뉛옙源�(癲⑦뒦OOR占쎄쾸占쎄텭占쎄틡占쎄묶占쎄텠占쎄맙占쎄퉱占쏙옙1占쎄퉽占쎄틬占쎄퉪占쎄쾽占쎄쾱占쎄광1癲⑦뒦OOR占쎄께占쎄쾸)占쎄쿁占쎌맋占쎈뱟/占쎄퐩占쎈뱟
 	 */
 	private boolean[] combocond;
 
 	private MissCondition miss;
 	/**
-	 * �릢�닩若싨칿�겗�깕�꺖�깉�겗�닩若싥굮易덂ㅁ�걲�굥�걢�겑�걝�걢�괦G, GR, GD, BD, PR, MS�겗�젂
+	 * 占쎈│占쎈떓畑댁떒移울옙寃쀯옙源뺧옙爰뽳옙源됵옙寃쀯옙�떓畑댁떏援��삌�뛼�뀅占쎄굉占쎄데占쎄괍占쎄쾻占쎄콨占쎄괍占쎄뇹G, GR, GD, BD, PR, MS占쎄쿁占쎌쟼
 	 */
 	private boolean[] judgeVanish;
 
@@ -126,30 +126,30 @@ public class JudgeManager {
 	private boolean autoplay = false;
 	private long[] auto_presstime;
 	/**
-	 * �궕�꺖�깉�깤�꺃�궎�겎�궘�꺖�굮�듉訝뗣걲�굥��弱뤸셽�뼋(ms)
+	 * 占쎄텞占쎄틬占쎄퉱占쎄묏占쎄틕占쎄텕占쎄쾸占쎄텣占쎄틬占쎄뎌占쎈뱣鼇앸뿣嫄뀐옙援ο옙占썲선琉몄끋占쎈펻(ms)
 	 */
 	private final int auto_minduration = 80;
 
 	private final JudgeAlgorithm algorithm;
 
 	/**
-	 * �눇�릤歷덀깕�꺖�깉�빊
+	 * 占쎈늾占쎈┐癲뚮�源뺧옙爰뽳옙源됵옙鍮�
 	 */
 	private int pastNotes = 0;
 
 	/**
-	 * PMS �궘�깵�꺀�뵪 �닩若�
+	 * PMS 占쎄텣占쎄뭇占쎄�占쎈뎁 占쎈떓畑댐옙
 	 */
 	private int PMcharaJudge = 0;
 
 	/**
-	 * �쎍瓦�100�깕�꺖�깂�겗�닩若싧량�셽�뼋
+	 * 占쎌럪�벀占�100占쎄퉽占쎄틬占쎄퉪占쎄쿁占쎈떓畑댁떑�웾占쎌끋占쎈펻
 	 */
 	private long[] recentJudges = new long[100];
 	/**
-	 * �닩若싧량�셽�뼋�겗�깦�긿�깋
+	 * 占쎈떓畑댁떑�웾占쎌끋占쎈펻占쎄쿁占쎄묘占쎄맙占쎄퉳
 	 */
-	private int recentJudgesIndex = 0;
+	private int recentJudgesIndex = 0; 
 
 	public JudgeManager(BMSPlayer main) {
 		this.main = main;
@@ -167,7 +167,7 @@ public class JudgeManager {
 
 		this.lntype = model.getLntype();
 		lanes = model.getLanes();
-
+ 
 		JudgeProperty rule = BMSPlayerRule.getBMSPlayerRule(model.getMode()).judge;
 		combocond = rule.combo;
 		miss = rule.miss;
@@ -239,9 +239,8 @@ public class JudgeManager {
 		final Config config = mc.getPlayerResource().getConfig();
 		final PlayerConfig playerConfig = mc.getPlayerResource().getPlayerConfig();
 		final long now = mc.getNowTime();
-		// �싮걥楹삠겗�닩若�
+		// 占쎌떘嫄ζⅩ�궇寃쀯옙�떓畑댐옙
 		Arrays.fill(next_inclease, false);
-
 		for (int lane = 0; lane < laneassign.length; lane++) {
 			final Lane lanemodel = lanes[lane];
 			lanemodel.mark((int) (prevtime + judgestart - 100));
@@ -252,12 +251,14 @@ public class JudgeManager {
 					break;
 				}
 			}
+			
 			for (Note note = lanemodel.getNote(); note != null && note.getTime() <= time; note = lanemodel.getNote()) {
 				if (note.getTime() <= prevtime) {
 					continue;
 				}
 				if (note instanceof LongNote) {
-					// HCN�닩若�
+					// HCN占쎈떓畑댐옙
+
 					final LongNote lnote = (LongNote) note;
 					if ((lnote.getType() == LongNote.TYPE_UNDEFINED && lntype == BMSModel.LNTYPE_HELLCHARGENOTE)
 							|| lnote.getType() == LongNote.TYPE_HELLCHARGENOTE) {
@@ -269,14 +270,14 @@ public class JudgeManager {
 						}
 					}
 				} else if (note instanceof MineNote && pressed) {
+					System.out.println("E");
 					final MineNote mnote = (MineNote) note;
-					// �쑑�쎐�깕�꺖�깉�닩若�
+					// 占쎌몣占쎌럯占쎄퉽占쎄틬占쎄퉱占쎈떓畑댐옙
 					main.getGauge().addValue(-mnote.getDamage());
 					System.out.println("Mine Damage : " + mnote.getWav());
 				}
-
 				if (autoplay) {
-					// �걪�걪�겓�궕�꺖�깉�깤�꺃�궎�눇�릤�굮�뀯�굦�굥
+					// 占쎄괭占쎄괭占쎄쾽占쎄텞占쎄틬占쎄퉱占쎄묏占쎄틕占쎄텕占쎈늾占쎈┐占쎄뎌占쎈��占쎄덱占쎄데
 					if (note instanceof NormalNote && note.getState() == 0) {
 						auto_presstime[laneassign[lane][0]] = now;
 						main.play(note, config.getKeyvolume(), 0);
@@ -293,7 +294,7 @@ public class JudgeManager {
 							if ((lntype == BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
 									|| ln.getType() == LongNote.TYPE_LONGNOTE) {
 								passingcount[lane] = 0;
-								//LN�셽�겗�꺃�꺖�궣�꺖�돯鸚됪쎍�눇�릤
+								//LN占쎌끋占쎄쿁占쎄틕占쎄틬占쎄땃占쎄틬占쎈룾勇싲맚�럪占쎈늾占쎈┐
 								this.judge[player[lane]][offset[lane]] = 8;
 							} else {
 								this.update(lane, ln, time, 0, 0);
@@ -322,7 +323,7 @@ public class JudgeManager {
 					}
 				}
 			}
-			// HCN�궟�꺖�궦罌쀦툤�닩若�
+			// HCN占쎄텫占쎄틬占쎄땋營뚯���닩占쎈떓畑댐옙
 			if (passing[lane] != null
 					&& (pressed || (passing[lane].getPair().getState() > 0 && passing[lane].getPair().getState() <= 3)
 							|| autoplay)) {
@@ -390,10 +391,11 @@ public class JudgeManager {
 			final Lane lanemodel = lanes[lane];
 			lanemodel.reset();
 			final int sc = sckeyassign[lane];
+
 			if (input.getKeyState(key)) {
-				// �궘�꺖�걣�듉�걬�굦�걼�겏�걤�겗�눇�릤
+				// 占쎄텣占쎄틬占쎄괏占쎈뱣占쎄괵占쎄덱占쎄굴占쎄쾹占쎄광占쎄쿁占쎈늾占쎈┐
 				if (processing[lane] != null) {
-					// BSS永귞ク�눇�릤
+					// BSS麗멸퇍�궚占쎈늾占쎈┐
 					if (((lntype != BMSModel.LNTYPE_LONGNOTE && processing[lane].getType() == LongNote.TYPE_UNDEFINED)
 							|| processing[lane].getType() == LongNote.TYPE_CHARGENOTE
 							|| processing[lane].getType() == LongNote.TYPE_HELLCHARGENOTE) && sc >= 0
@@ -405,7 +407,7 @@ public class JudgeManager {
 							;
 
 						this.update(lane, processing[lane], time, j, dtime);
-						//						 System.out.println("BSS永귞ク�닩若� - Time : " + ptime + " Judge : " + j + " LN : " + processing[lane].hashCode());
+						//						 System.out.println("BSS麗멸퇍�궚占쎈떓畑댐옙 - Time : " + ptime + " Judge : " + j + " LN : " + processing[lane].hashCode());
 						main.play(processing[lane], config.getKeyvolume(), 0);
 						processing[lane] = null;
 						sckey[sc] = 0;
@@ -418,11 +420,11 @@ public class JudgeManager {
 								main.play(main.SOUND_GUIDE_SE_GD);
 						}
 					} else {
-						// �걪�걪�겓�씎�굥�겗�겘�깯�꺂�긽�궘�꺖�궋�궢�궎�꺍餓ε쨼�걗�굤�걟�겒�걚�겘�걳
+						// 占쎄괭占쎄괭占쎄쾽占쎌뵊占쎄데占쎄쿁占쎄쿂占쎄묻占쎄틓占쎄맒占쎄텣占쎄틬占쎄텑占쎄땁占쎄텕占쎄틡繞벿듭㉫占쎄콟占쎄덮占쎄콫占쎄쾼占쎄콢占쎄쿂占쎄교
 					}
 				} else {
 					final int[][] judge = sc >= 0 ? sjudge : njudge;
-					// 野얕괌�깕�꺖�깂�겗�듊�눣
+					// �뇦�뼍愿뚳옙源뺧옙爰뽳옙源귨옙寃쀯옙�뱤占쎈닧
 					lanemodel.reset();
 					Note tnote = null;
 					int j = 0;
@@ -460,16 +462,16 @@ public class JudgeManager {
 					}
 
 					if (tnote != null) {
-						// TODO �걪�겗�셽�궧�겎令튡OOR�눇�릤�굮�늽略먦걬�걵�굥�겧�걤�걢
+						// TODO 占쎄괭占쎄쿁占쎌끋占쎄때占쎄쾸癲⑦뒦OOR占쎈늾占쎈┐占쎄뎌占쎈듊畑띕Ĳ嫄э옙嫄듸옙援ο옙寃㏆옙嫄ㅿ옙嫄�
 						if (tnote instanceof LongNote) {
-							// �꺆�꺍�궛�깕�꺖�깉�눇�릤
+							// 占쎄틙占쎄틡占쎄텦占쎄퉽占쎄틬占쎄퉱占쎈늾占쎈┐
 							final LongNote ln = (LongNote) tnote;
 							main.play(tnote, config.getKeyvolume(), 0);
 							if (((lntype == BMSModel.LNTYPE_LONGNOTE && ln.getType() == LongNote.TYPE_UNDEFINED)
 									|| ln.getType() == LongNote.TYPE_LONGNOTE)
 									&& j < 4) {
 								passingcount[lane] = (int) (tnote.getTime() - ptime);
-								//LN�셽�겗�꺃�꺖�궣�꺖�돯鸚됪쎍�눇�릤
+								//LN占쎌끋占쎄쿁占쎄틕占쎄틬占쎄땃占쎄틬占쎈룾勇싲맚�럪占쎈늾占쎈┐
 								this.judge[player[lane]][offset[lane]] = 8;
 							} else {
 								final int dtime = (int) (tnote.getTime() - ptime);
@@ -478,14 +480,14 @@ public class JudgeManager {
 							if (j < 4) {
 								processing[lane] = ln.getPair();
 								if (sc >= 0) {
-									// BSS�눇�릤�뼀冶�
-									//									 System.out.println("BSS�뼀冶뗥닩若� - Time : " + ptime + " Judge : " + j + " KEY : " + key + " LN : " + ln.getPair().hashCode());
+									// BSS占쎈늾占쎈┐占쎈��넼占�
+									//									 System.out.println("BSS占쎈��넼�뿥�떓畑댐옙 - Time : " + ptime + " Judge : " + j + " KEY : " + key + " LN : " + ln.getPair().hashCode());
 									sckey[sc] = key;
 								}
 							}
 						} else {
 							main.play(tnote, config.getKeyvolume(), 0);
-							// �싧만�깕�꺖�깉�눇�릤
+							// 占쎌떑留뚳옙源뺧옙爰뽳옙源됵옙�늾占쎈┐
 							final int dtime = (int) (tnote.getTime() - ptime);
 							this.update(lane, tnote, time, j, dtime);
 						}
@@ -498,10 +500,10 @@ public class JudgeManager {
 								main.play(main.SOUND_GUIDE_SE_GD);
 						}
 					} else {
-						// 令튡OOR�닩若싥걣�겒�걚�겏�걤�겗�꺃�꺖�궣�꺖�돯鸚됪쎍�눇�릤
+						// 癲⑦뒦OOR占쎈떓畑댁떏嫄ｏ옙寃믭옙嫄싷옙寃륅옙嫄ㅿ옙寃쀯옙爰껓옙爰뽳옙沅ｏ옙爰뽳옙�룾勇싲맚�럪占쎈늾占쎈┐
 						this.judge[player[lane]][offset[lane]] = 0;
 
-						// 令튡OOR�닩若싥걣�겒�걚�겏�걤�겗�궘�꺖�윹�눇�릤
+						// 癲⑦뒦OOR占쎈떓畑댁떏嫄ｏ옙寃믭옙嫄싷옙寃륅옙嫄ㅿ옙寃쀯옙沅섓옙爰뽳옙�쑚占쎈늾占쎈┐
 						final Note[] notes = lanemodel.getNotes();
 						Note n = notes.length > 0 ? notes[0] : null;
 						for (Note note : lanemodel.getHiddens()) {
@@ -528,7 +530,7 @@ public class JudgeManager {
 				}
 				main.getKeyinput().inputKeyOn(lane);
 			} else {
-				// �궘�꺖�걣�썴�걬�굦�걼�겏�걤�겗�눇�릤
+				// 占쎄텣占쎄틬占쎄괏占쎌뜶占쎄괵占쎄덱占쎄굴占쎄쾹占쎄광占쎄쿁占쎈늾占쎈┐
 				if (processing[lane] != null) {
 					final int[][] judge = sc >= 0 ? scnendjudge : cnendjudge;
 					int dtime = (int) (processing[lane].getTime() - ptime);
@@ -540,13 +542,13 @@ public class JudgeManager {
 							&& processing[lane].getType() == LongNote.TYPE_UNDEFINED)
 							|| processing[lane].getType() == LongNote.TYPE_CHARGENOTE
 							|| processing[lane].getType() == LongNote.TYPE_HELLCHARGENOTE) {
-						// CN, HCN�썴�걮�눇�릤
+						// CN, HCN占쎌뜶占쎄괼占쎈늾占쎈┐
 						boolean release = true;
 						if (sc >= 0) {
 							if (j != 4 || key != sckey[sc]) {
 								release = false;
 							} else {
-								//								 System.out.println("BSS�붶릎�썴�걮�닩若� - Time : " + ptime + " Judge : " + j + " LN : " + processing[lane]);
+								//								 System.out.println("BSS占쎈떰由롳옙�뜶占쎄괼占쎈떓畑댐옙 - Time : " + ptime + " Judge : " + j + " LN : " + processing[lane]);
 								sckey[sc] = 0;
 							}
 						}
@@ -559,7 +561,7 @@ public class JudgeManager {
 							processing[lane] = null;
 						}
 					} else {
-						// LN�썴�걮�눇�릤
+						// LN占쎌뜶占쎄괼占쎈늾占쎈┐
 						if (Math.abs(passingcount[lane]) > Math.abs(dtime)) {
 							dtime = passingcount[lane];
 							for (; j < judge.length && !(dtime >= judge[j][0] && dtime <= judge[j][1]); j++)
@@ -581,7 +583,7 @@ public class JudgeManager {
 			final int sc = sckeyassign[lane];
 			final int[][] judge = sc >= 0 ? sjudge : njudge;
 
-			// LN永귞ク�닩若�
+			// LN麗멸퇍�궚占쎈떓畑댐옙
 			if (processing[lane] != null
 					&& ((lntype == BMSModel.LNTYPE_LONGNOTE && processing[lane].getType() == LongNote.TYPE_UNDEFINED)
 							|| processing[lane].getType() == LongNote.TYPE_LONGNOTE)
@@ -596,7 +598,7 @@ public class JudgeManager {
 				main.play(processing[lane], config.getKeyvolume(), 0);
 				processing[lane] = null;
 			}
-			// 誤뗩�껁걮POOR�닩若�
+			// 沃ㅻ뿩占쎄퍊嫄췗OOR占쎈떓畑댐옙
 			final Lane lanemodel = lanes[lane];
 			lanemodel.reset();
 			for (Note note = lanemodel.getNote(); note != null
@@ -633,9 +635,9 @@ public class JudgeManager {
 					}
 				}
 			}
-			// LN�눇�릤�궭�궎�깯�꺖
-			// TODO processing�ㅳ겗鸚됧뙑�겗�겏�걤�겗�겳若잒죱�걮�걼�걚
-			// TODO HCN�겘�닪�궭�궎�깯�꺖�겓�걲�굥�걢�굚
+			// LN占쎈늾占쎈┐占쎄땟占쎄텕占쎄묻占쎄틬
+			// TODO processing占썬뀽寃쀩툣�맕�솑占쎄쿁占쎄쾹占쎄광占쎄쿁占쎄껙畑댁옊二깍옙嫄�占쎄굴占쎄콢
+			// TODO HCN占쎄쿂占쎈떔占쎄땟占쎄텕占쎄묻占쎄틬占쎄쾽占쎄굉占쎄데占쎄괍占쎄탾
 			mc.switchTimer(SkinPropertyMapper.holdTimerId(player[lane], offset[lane]),
 					processing[lane] != null || (passing[lane] != null && inclease[lane]));
 		}
@@ -729,18 +731,18 @@ public class JudgeManager {
 	}
 
 	/**
-	 * �뤎�쑉�겗1�쎊�냵�겗�궠�꺍�깭�빊�굮�룚孃쀣걲�굥
+	 * 占쎈쨴占쎌몛占쎄쿁1占쎌럧占쎈꺏占쎄쿁占쎄텭占쎄틡占쎄묶占쎈퉲占쎄뎌占쎈짎耶껋�ｊ굉占쎄데
 	 *
-	 * @return �뤎�쑉�겗�궠�꺍�깭�빊
+	 * @return 占쎈쨴占쎌몛占쎄쿁占쎄텭占쎄틡占쎄묶占쎈퉲
 	 */
 	public int getCombo() {
 		return combo;
 	}
 
 	/**
-	 * �뤎�쑉�겗�궠�꺖�궧�냵�겗�궠�꺍�깭�빊�굮�룚孃쀣걲�굥
+	 * 占쎈쨴占쎌몛占쎄쿁占쎄텭占쎄틬占쎄때占쎈꺏占쎄쿁占쎄텭占쎄틡占쎄묶占쎈퉲占쎄뎌占쎈짎耶껋�ｊ굉占쎄데
 	 *
-	 * @return �뤎�쑉�겗�궠�꺍�깭�빊
+	 * @return 占쎈쨴占쎌몛占쎄쿁占쎄텭占쎄틡占쎄묶占쎈퉲
 	 */
 	public int getCourseCombo() {
 		return coursecombo;
@@ -767,24 +769,24 @@ public class JudgeManager {
 	}
 
 	/**
-	 * �뙁若싥겗�닩若싥겗�궖�궑�꺍�깉�빊�굮瓦붵걲
+	 * 占쎈셼畑댁떏寃쀯옙�떓畑댁떏寃쀯옙沅뽳옙沅묕옙爰랃옙源됵옙鍮딉옙援��벀遺듦굉
 	 *
 	 * @param judge
 	 *            0:PG, 1:GR, 2:GD, 3:BD, 4:PR, 5:MS
-	 * @return �닩若싥겗�궖�궑�꺍�깉�빊
+	 * @return 占쎈떓畑댁떏寃쀯옙沅뽳옙沅묕옙爰랃옙源됵옙鍮�
 	 */
 	public int getJudgeCount(int judge) {
 		return score.getJudgeCount(judge);
 	}
 
 	/**
-	 * �뙁若싥겗�닩若싥겗�궖�궑�꺍�깉�빊�굮瓦붵걲
+	 * 占쎈셼畑댁떏寃쀯옙�떓畑댁떏寃쀯옙沅뽳옙沅묕옙爰랃옙源됵옙鍮딉옙援��벀遺듦굉
 	 *
 	 * @param judge
 	 *            0:PG, 1:GR, 2:GD, 3:BD, 4:PR, 5:MS
 	 * @param fast
 	 *            true:FAST, flase:SLOW
-	 * @return �닩若싥겗�궖�궑�꺍�깉�빊
+	 * @return 占쎈떓畑댁떏寃쀯옙沅뽳옙沅묕옙爰랃옙源됵옙鍮�
 	 */
 	public int getJudgeCount(int judge, boolean fast) {
 		return score.getJudgeCount(judge, fast);

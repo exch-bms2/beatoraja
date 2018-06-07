@@ -8,32 +8,32 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 
 /**
- * グラフイメージ
+ * �궛�꺀�깢�궎�깳�꺖�궦
  */
-public class SkinGraph extends SkinObject {
+public class SkinGraph extends SkinObject implements SkinObserver {
 
 	/**
-	 * イメージ
+	 * �궎�깳�꺖�궦
 	 */
 	private SkinSource source;
 	/**
-	 * グラフの参照値
+	 * �궛�꺀�깢�겗�뢿�뀱��
 	 */
 	private int id = -1;
 	/**
-	 * グラフの伸びる向き(1:下, それ以外:右)
+	 * �궛�꺀�깢�겗鴉멥겞�굥�릲�걤(1:訝�, �걹�굦餓ε쨼:�뤂)
 	 */
 	private int direction = 1;
 	/**
-	 * NUMBER値参照かどうか
+	 * NUMBER�ㅵ뢿�뀱�걢�겑�걝�걢
 	 */
 	private boolean isRefNum = false;
 	/**
-	 * NUMBER値参照の場合の最小値
+	 * NUMBER�ㅵ뢿�뀱�겗�졃�릦�겗��弱뤷��
 	 */
 	private int min = 0;
 	/**
-	 * NUMBER値参照の場合の最大値
+	 * NUMBER�ㅵ뢿�뀱�겗�졃�릦�겗��鸚㎩��
 	 */
 	private int max = 0;
 

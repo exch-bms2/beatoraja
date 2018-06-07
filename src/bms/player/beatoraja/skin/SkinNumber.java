@@ -7,24 +7,24 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 
 /**
- * 数字オブジェクト
+ * �빊耶쀣궕�깣�궦�궒�궚�깉
  * 
  * @author exch
  */
-public class SkinNumber extends SkinObject {
+public class SkinNumber extends SkinObject implements SkinObserver  {
 
 	/**
-	 * プラス値用イメージ
+	 * �깤�꺀�궧�ㅷ뵪�궎�깳�꺖�궦
 	 */
 	private SkinSource image;
 	/**
-	 * マイナス値用イメージ
+	 * �깯�궎�깏�궧�ㅷ뵪�궎�깳�꺖�궦
 	 */
 	private SkinSource mimage;
 
 	private int id = -1;
 	/**
-	 * 表示桁数
+	 * 烏①ㅊ旅곫빊
 	 */
 	private int keta;
 
@@ -38,7 +38,7 @@ public class SkinNumber extends SkinObject {
 
 	private SkinOffset[] offsets;
 	/**
-	 * 現在の描画幅
+	 * �뤎�쑉�겗�룒�뵽亮�
 	 */
 	private float length;
 

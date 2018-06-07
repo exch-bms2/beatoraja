@@ -21,7 +21,11 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.IntArray;
 
 /**
+<<<<<<< HEAD
+ * LR2�겗�궧�궘�꺍若싩쑴�뵪csv�깢�궊�궎�꺂�겗�꺆�꺖���꺖
+=======
  * LR2占쎄쿁占쎄때占쎄텣占쎄틡畑댁떓�뫒占쎈뎁csv占쎄묄占쎄텏占쎄텕占쎄틓占쎄쿁占쎄틙占쎄틬占쏙옙占쎄틬
+>>>>>>> upstream/master
  * 
  * @author exch
  */
@@ -584,6 +588,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 					values[2] += values[4];
 					values[4] = -values[4];
 				}
+				System.out.println(str[7]);
 				final File imagefile = SkinLoader.getPath(str[7].replace("LR2files\\Theme", "skin").replace("\\", "/"), filemap);
 				SkinOption skinOption = new SkinOption(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, values[6]);
 				SkinDestinationSize skinSize = new SkinDestinationSize((int)(values[1] * dstw / srcw), (int)(dsth -(values[2] + values[4]) * dsth / srch), (int)(values[3] * dstw / srcw), (int)(values[4] * dsth / srch));
@@ -597,6 +602,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 			@Override
 			public void execute(String[] str) {
 				//占쎄묏占쎄틕占쎄텕占쎈뎁 占쎈떓畑댁떘占쏙퐛�빣
+
 				//x,y,w,h,color,offset,folderpath
 				int[] values = parseInt(str);
 				if (values[3] < 0) {
@@ -650,6 +656,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 				PMcharaPart = null;
 				int[] values = parseInt(str);
 				if(values[2] >= 0 && values[2] <= 4) {
+					System.out.println(str[3]);
 					final File imagefile = SkinLoader.getPath(str[3].replace("LR2files\\Theme", "skin").replace("\\", "/"), filemap);
 					SkinOption skinOption = new SkinOption(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE);
 					SkinDestinationSize skinSize = new SkinDestinationSize(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE);

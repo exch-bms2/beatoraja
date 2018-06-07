@@ -115,7 +115,7 @@ public class KeyConfiguration extends MainState {
 		midiinput = input.getMidiInputProcessor();
 		setMode(0);
 	}
-
+ 
 	public void render() {
 		final SpriteBatch sprite = main.getSpriteBatch();
 		final float scaleX = (float) getSkin().getScaleX();

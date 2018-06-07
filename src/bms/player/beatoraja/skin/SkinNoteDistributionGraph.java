@@ -11,11 +11,11 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 
 /**
- * ノーツ分布を表示するグラフ
+ * �깕�꺖�깂�늽躍껁굮烏①ㅊ�걲�굥�궛�꺀�깢
  * 
  * @author exch
  */
-public class SkinNoteDistributionGraph extends SkinObject {
+public class SkinNoteDistributionGraph extends SkinObject implements SkinObserver  {
 
 	private TextureRegion backtex;
 	private TextureRegion shapetex;
@@ -121,12 +121,12 @@ public class SkinNoteDistributionGraph extends SkinObject {
 		final float render = time >= delay ? 1.0f : (float) time / delay;
 		shapetex.setRegionWidth((int) (shapetex.getTexture().getWidth() * render));
 		draw(sprite, shapetex, r.x, r.y + r.height, r.width * render, -r.height, state);
-		// スタートカーソル描画
+		// �궧�궭�꺖�깉�궖�꺖�궫�꺂�룒�뵽
 		if (starttime >= 0) {
 			int dx = (int) (starttime * r.width / (data.length * 1000));
 			sprite.draw(startcursor, r.x + dx, r.y, 1, r.height);
 		}
-		// エンドカーソル描画
+		// �궓�꺍�깋�궖�꺖�궫�꺂�룒�뵽
 		if (endtime >= 0) {
 			int dx = (int) (endtime * r.width / (data.length * 1000));
 			sprite.draw(endcursor, r.x + dx, r.y, 1, r.height);
@@ -245,7 +245,7 @@ public class SkinNoteDistributionGraph extends SkinObject {
 			}
 
 			for (int i = 0; i < data.length; i++) {
-				// x軸補助線描画
+				// x邕멱짒�뒰渶싨룒�뵽
 				if (i % 60 == 0) {
 					shape.setColor(Color.valueOf("444444"));
 					shape.drawLine(i * 5, 0, i * 5, max * 5);
