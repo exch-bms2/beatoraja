@@ -180,9 +180,9 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 	}
 
 	public boolean mouseMoved(int x, int y) {
-		this.bmsPlayerInputProcessor.setMouseMoved(true);
-		this.bmsPlayerInputProcessor.mousex = x * resolution.width / Gdx.graphics.getWidth();
-		this.bmsPlayerInputProcessor.mousey = resolution.height - y * resolution.height / Gdx.graphics.getHeight();
+		mouseData.setMouseMoved(true);
+		mouseData.mousex = x * resolution.width / Gdx.graphics.getWidth();
+		mouseData.mousey = resolution.height - y * resolution.height / Gdx.graphics.getHeight();
 		return false;
 	}
 
@@ -192,19 +192,19 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 	}
 
 	public boolean touchDown(int x, int y, int point, int button) {
-		this.bmsPlayerInputProcessor.mousebutton = button;
-		this.bmsPlayerInputProcessor.mousex = x * resolution.width / Gdx.graphics.getWidth();
-		this.bmsPlayerInputProcessor.mousey = resolution.height - y * resolution.height
+		mouseData.mousebutton = button;
+		mouseData.mousex = x * resolution.width / Gdx.graphics.getWidth();
+		mouseData.mousey = resolution.height - y * resolution.height
 				/ Gdx.graphics.getHeight();
-		this.bmsPlayerInputProcessor.mousepressed = true;
+		mouseData.mousepressed = true;
 		return false;
 	}
 
 	public boolean touchDragged(int x, int y, int point) {
-		this.bmsPlayerInputProcessor.mousex = x * resolution.width / Gdx.graphics.getWidth();
-		this.bmsPlayerInputProcessor.mousey = resolution.height - y * resolution.height
+		mouseData.mousex = x * resolution.width / Gdx.graphics.getWidth();
+		mouseData.mousey = resolution.height - y * resolution.height
 				/ Gdx.graphics.getHeight();
-		this.bmsPlayerInputProcessor.mousedragged = true;
+		mouseData.mousedragged = true;
 		return false;
 	}
 

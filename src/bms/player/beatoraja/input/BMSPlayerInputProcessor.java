@@ -87,13 +87,6 @@ public class BMSPlayerInputProcessor {
 
 	long starttime;
 
-	int mousex;
-	int mousey;
-	int mousebutton;
-	boolean mousepressed;
-	boolean mousedragged;
-	private boolean mouseMoved = false;
-
 	int scroll;
 
 	private boolean startPressed;
@@ -339,6 +332,7 @@ public class BMSPlayerInputProcessor {
 	
 	
 	
+	
 	public boolean isSelectPressed() {
 		return selectPressed;
 	}
@@ -357,42 +351,6 @@ public class BMSPlayerInputProcessor {
 
 	public MidiInputProcessor getMidiInputProcessor() {
 		return midiinput;
-	}
-
-	public int getMouseX() {
-		return mousex;
-	}
-
-	public int getMouseY() {
-		return mousey;
-	}
-
-	public int getMouseButton() {
-		return mousebutton;
-	}
-
-	public boolean isMousePressed() {
-		return mousepressed;
-	}
-
-	public void setMousePressed() {
-		mousepressed = false;
-	}
-
-	public boolean isMouseDragged() {
-		return mousedragged;
-	}
-
-	public void setMouseDragged() {
-		mousedragged = false;
-	}
-
-	public boolean isMouseMoved() {
-		return mouseMoved;
-	}
-
-	public void setMouseMoved(boolean mouseMoved) {
-		this.mouseMoved = mouseMoved;
 	}
 
 	public int getScroll() {

@@ -5,6 +5,7 @@ public class keyData {
 	public static Key[] numberKey = new Key[10];
 	public static Key[] functionKey = new Key[12];
 
+	
 	// methods for key
 	public static long getKeyTime(int i) {
 		return key[i].getPressTime();
@@ -44,6 +45,7 @@ public class keyData {
 		return key.length;
 	}
 
+	
 	// methods for numberKey
 	public static boolean getNumberState(int i) {
 		return numberKey[i].getIsPressed();
@@ -66,6 +68,7 @@ public class keyData {
 		return numberKey[i].checkIfPressed();
 	}
 
+	
 	// methods for functionKey
 	public static boolean getFunctionstate(int i) {
 		return functionKey[i].getIsPressed();
