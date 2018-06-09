@@ -229,7 +229,7 @@ public class MusicResult extends AbstractResult {
 				}
 
 				for (int i = 0; i < MusicSelector.REPLAY; i++) {
-					if (inputProcessor.getNumberState(i + 1)) {
+					if (keyData.getNumberState(i + 1)) {
 						saveReplayData(i);
 						break;
 					}

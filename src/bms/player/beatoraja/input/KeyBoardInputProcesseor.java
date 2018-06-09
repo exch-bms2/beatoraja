@@ -139,7 +139,7 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 				final boolean pressed = Gdx.input.isKeyPressed(numbers[i]);
 				if (pressed != keystate[numbers[i]]) {
 					keystate[numbers[i]] = pressed;
-					this.bmsPlayerInputProcessor.setNumberState(i, pressed, presstime);
+					keyData.setNumberState(i, pressed, presstime);
 				}
 			}
 
@@ -147,7 +147,7 @@ public class KeyBoardInputProcesseor extends BMSPlayerInputDevice implements Inp
 				final boolean pressed = Gdx.input.isKeyPressed(function[i]);
 				if (pressed != keystate[function[i]]) {
 					keystate[function[i]] = pressed;
-					this.bmsPlayerInputProcessor.setFunction(i, pressed, presstime);
+					keyData.setFunction(i, pressed, presstime);
 				}
 			}
 

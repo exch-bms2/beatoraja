@@ -188,7 +188,7 @@ public class BMSPlayer extends MainState {
 		Logger.getGlobal().info("�궟�꺖�궦鼇�若�");
 		if(replay != null) {
 			BMSPlayerInputProcessor input = main.getInputProcessor();
-			for(int count = (input.getNumberState(5) ? 1 : 0) + (input.getNumberState(3) ? 2 : 0);count > 0; count--) {
+			for(int count = (keyData.getNumberState(5) ? 1 : 0) + (keyData.getNumberState(3) ? 2 : 0);count > 0; count--) {
 				if (replay.gauge != GrooveGauge.HAZARD || replay.gauge != GrooveGauge.EXHARDCLASS) {
 					replay.gauge++;
 				}

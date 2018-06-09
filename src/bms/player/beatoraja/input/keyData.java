@@ -2,9 +2,10 @@ package bms.player.beatoraja.input;
 
 public class keyData {
 	public static Key[] key = new Key[256];
-	private Key[] numberKey = new Key[10];
-	private Key[] functionKey = new Key[12];
+	public static Key[] numberKey = new Key[10];
+	public static Key[] functionKey = new Key[12];
 
+	// methods for key
 	public static long getKeyTime(int i) {
 		return key[i].getPressTime();
 	}
@@ -43,5 +44,55 @@ public class keyData {
 		return key.length;
 	}
 
+	// methods for numberKey
+	public static boolean getNumberState(int i) {
+		return numberKey[i].getIsPressed();
+	}
+
+	public static long getNumberTime(int i) {
+		return numberKey[i].getPressTime();
+	}
 	
+	public static void resetNumberTime(int i) {
+		numberKey[i].resetTime();
+	}
+	
+	public static void setNumberState(int i, boolean state, long time) {
+		numberKey[i].setState(state);
+		numberKey[i].setTime(time);
+	}
+	
+	public static boolean checkIfNumberPressed(int i) {
+		return numberKey[i].checkIfPressed();
+	}
+
+	// methods for functionKey
+	public static boolean getFunctionstate(int i) {
+		return functionKey[i].getIsPressed();
+	}
+
+	public static void setFunctionstate(int i, boolean state) {
+		functionKey[i].setState(state);
+	}
+
+	public static long getFunctiontime(int i) {
+		return functionKey[i].getPressTime();
+	}
+
+	public static void setFunctiontime(int i, long time) {
+		functionKey[i].setTime(time);
+	}
+	
+	public static void resetFunctionTime(int i) {
+		functionKey[i].resetTime();
+	}
+	
+	public static void setFunction(int i, boolean state, long time) {
+		functionKey[i].setState(state);
+		functionKey[i].setTime(time);
+	}
+
+	public static boolean checkIfFunctionPressed(int i) {
+		return functionKey[i].checkIfPressed();
+	}
 }

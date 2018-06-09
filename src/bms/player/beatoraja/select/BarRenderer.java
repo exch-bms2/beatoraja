@@ -6,6 +6,7 @@ import java.util.*;
 import java.util.logging.Logger;
 
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
+import bms.player.beatoraja.input.keyData;
 import bms.player.beatoraja.ir.IRResponse;
 import bms.player.beatoraja.select.MusicSelectKeyProperty.MusicSelectKey;
 import bms.player.beatoraja.select.bar.*;
@@ -24,7 +25,7 @@ import bms.player.beatoraja.song.SongData;
 import bms.player.beatoraja.song.SongInformationAccessor;
 
 /**
- * 楽曲バー描画用クラス
+ * 璵썸쎊�깘�꺖�룒�뵽�뵪�궚�꺀�궧
  * 
  * @author exch
  */
@@ -35,16 +36,16 @@ public class BarRenderer {
 	private BarContentsLoaderThread loader;
 
 	/**
-	 * 現在のフォルダ階層
+	 * �뤎�쑉�겗�깢�궔�꺂���쉸掠�
 	 */
 	private Deque<DirectoryBar> dir = new ArrayDeque<DirectoryBar>();
 	private String dirString = "";
 	/**
-	 * 現在表示中のバー一覧
+	 * �뤎�쑉烏①ㅊ訝��겗�깘�꺖訝�誤�
 	 */
 	private Bar[] currentsongs;
 	/**
-	 * 選択中のバーのインデックス
+	 * �겦�뒢訝��겗�깘�꺖�겗�궎�꺍�깈�긿�궚�궧
 	 */
 	private int selectedindex;
 
@@ -54,11 +55,11 @@ public class BarRenderer {
 
 	private HashBar[] favorites = new HashBar[0];
 	/**
-	 * 難易度表バー一覧
+	 * �썵�삌佯�烏ⓦ깘�꺖訝�誤�
 	 */
 	private TableBar[] tables = new TableBar[0];
 	/**
-	 * 検索結果バー一覧
+	 * 濾쒐뇨永먩옖�깘�꺖訝�誤�
 	 */
 	private List<SearchWordBar> search = new ArrayList<SearchWordBar>();
 
@@ -69,11 +70,11 @@ public class BarRenderer {
 	private int durationlow = 300;
 	private int durationhigh = 50;
 	/**
-	 * バー移動中のカウンタ
+	 * �깘�꺖燁삣땿訝��겗�궖�궑�꺍�궭
 	 */
 	private long duration;
 	/**
-	 * バーの移動方向
+	 * �깘�꺖�겗燁삣땿�뼶�릲
 	 */
 	private int angle;
 	private boolean keyinput;
@@ -119,7 +120,7 @@ public class BarRenderer {
 					table.add(new TableBar(select, td, new TableDataAccessor.DifficultyTableAccessor(td.getUrl())));				
 				}				
 			} else {
-				Logger.getGlobal().warning("IRからのテーブル取得失敗 : " + response.getMessage());
+				Logger.getGlobal().warning("IR�걢�굢�겗�깇�꺖�깣�꺂�룚孃쀥ㅁ�븮 : " + response.getMessage());
 			}
 		}
 
@@ -416,7 +417,7 @@ public class BarRenderer {
 			if(ba.value == -1) {
 				continue;
 			}
-			// 新規追加曲はテキストを変える
+			// �뼭誤뤺옙�뒥�쎊�겘�깇�궘�궧�깉�굮鸚됥걟�굥
 			int songstatus = 0;
 			if (ba.sd instanceof SongBar) {
 				SongData song = ((SongBar) ba.sd).getSongData();
@@ -571,8 +572,8 @@ public class BarRenderer {
 			mov++;
 		}
 
-		if(input.checkIfNumberPressed(7)) {
-			input.resetNumberTime(7);
+		if(keyData.checkIfNumberPressed(7)) {
+			keyData.resetNumberTime(7);
 			if(getSelected() instanceof SongBar) {
 				SongData sd = ((SongBar) getSelected()).getSongData();
 
@@ -586,8 +587,8 @@ public class BarRenderer {
 				}
 			}
 		}
-		if(input.checkIfNumberPressed(8)) {
-			input.resetNumberTime(8);
+		if(keyData.checkIfNumberPressed(8)) {
+			keyData.resetNumberTime(8);
 			if(getSelected() instanceof SongBar) {
 				SongData sd = ((SongBar) getSelected()).getSongData();
 
@@ -605,7 +606,7 @@ public class BarRenderer {
 //						List<TableData.TableSongData> l = new ArrayList(Arrays.asList(favorites[0].getElements()));
 //						l.add(new TableData.TableSongData(sd.getSha256()));
 //						favorites[0].setElements(l.toArray(new TableData.TableSongData[l.size()]));
-//						Logger.getGlobal().info("favorite追加 : " + sd.getTitle());
+//						Logger.getGlobal().info("favorite瓦썲뒥 : " + sd.getTitle());
 //					}
 				}
 			}
@@ -684,7 +685,7 @@ public class BarRenderer {
 				dir.add((DirectoryBar) bar);
 			}
 
-			// 変更前と同じバーがあればカーソル位置を保持する
+			// 鸚됪쎍�뎺�겏�릪�걯�깘�꺖�걣�걗�굦�겙�궖�꺖�궫�꺂鵝띸쉰�굮岳앮똻�걲�굥
 			currentsongs = l.toArray(new Bar[l.size()]);
 			bartextupdate = true;
 
@@ -747,12 +748,12 @@ public class BarRenderer {
 		} else {
 			updateBar(null);
 		}
-		Logger.getGlobal().warning("楽曲がありません");
+		Logger.getGlobal().warning("璵썸쎊�걣�걗�굤�겲�걵�굯");
 		return false;
 	}
 
 	public void dispose() {
-		// favorite書き込み
+		// favorite�쎑�걤渦쇈겳
 //		CourseData course = new CourseData();
 //		course.setName(favorites[0].getTitle());
 //		List<String> l = new ArrayList<>();
@@ -772,16 +773,16 @@ public class BarRenderer {
 	}
 
 	/**
-	 * 選曲バー内のスコアデータ等を読み込むためのスレッド
+	 * �겦�쎊�깘�꺖�냵�겗�궧�궠�궋�깈�꺖�궭嶺됥굮沃��겳渦쇈��걼�굙�겗�궧�꺃�긿�깋
 	 */
 	class BarContentsLoaderThread extends Thread {
 
 		/**
-		 * データ読み込み対象の選曲バー
+		 * �깈�꺖�궭沃��겳渦쇈겳野얕괌�겗�겦�쎊�깘�꺖
 		 */
 		private Bar[] bars;
 		/**
-		 * 読み込み終了フラグ
+		 * 沃��겳渦쇈겳永귚틙�깢�꺀�궛
 		 */
 		private boolean stop = false;
 
@@ -860,7 +861,7 @@ public class BarRenderer {
 		}
 
 		/**
-		 * データ読み込みを中断する
+		 * �깈�꺖�궭沃��겳渦쇈겳�굮訝��뼪�걲�굥
 		 */
 		public void stopRunning() {
 			stop = true;

@@ -83,8 +83,7 @@ public class BMSPlayerInputProcessor {
 	private BMSPlayerInputDevice lastKeyDevice;
 	private ArrayList<BMSPlayerInputDevice> devices;
 	
-	private Key[] numberKey = new Key[10];
-	private Key[] functionKey = new Key[12];
+
 
 	long starttime;
 
@@ -338,57 +337,6 @@ public class BMSPlayerInputProcessor {
 		this.deletePressed = deletePressed;
 	}
 	
-	// methods for numberKey
-	public boolean getNumberState(int i) {
-		return numberKey[i].getIsPressed();
-	}
-
-	public long getNumberTime(int i) {
-		return numberKey[i].getPressTime();
-	}
-	
-	public void resetNumberTime(int i) {
-		numberKey[i].resetTime();
-	}
-	
-	public void setNumberState(int i, boolean state, long time) {
-		numberKey[i].setState(state);
-		numberKey[i].setTime(time);
-	}
-	
-	public boolean checkIfNumberPressed(int i) {
-		return numberKey[i].checkIfPressed();
-	}
-
-	// methods for functionKey
-	public boolean getFunctionstate(int i) {
-		return functionKey[i].getIsPressed();
-	}
-
-	public void setFunctionstate(int i, boolean state) {
-		functionKey[i].setState(state);
-	}
-
-	public long getFunctiontime(int i) {
-		return functionKey[i].getPressTime();
-	}
-
-	public void setFunctiontime(int i, long time) {
-		functionKey[i].setTime(time);
-	}
-	
-	public void resetFunctionTime(int i) {
-		functionKey[i].resetTime();
-	}
-	
-	public void setFunction(int i, boolean state, long time) {
-		functionKey[i].setState(state);
-		functionKey[i].setTime(time);
-	}
-
-	public boolean checkIfFunctionPressed(int i) {
-		return functionKey[i].checkIfPressed();
-	}
 	
 	
 	public boolean isSelectPressed() {

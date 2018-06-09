@@ -132,13 +132,13 @@ public class ControlInputProcessor {
 		}
 		// play speed change (autoplay or replay only)
 		if (autoplay.isAutoPlayMode() || autoplay.isReplayMode()) {
-			if (input.getNumberState(1)) {
+			if (keyData.getNumberState(1)) {
 				player.setPlaySpeed(25);
-			} else if (input.getNumberState(2)) {
+			} else if (keyData.getNumberState(2)) {
 				player.setPlaySpeed(50);
-			} else if (input.getNumberState(3)) {
+			} else if (keyData.getNumberState(3)) {
 				player.setPlaySpeed(200);
-			} else if (input.getNumberState(4)) {
+			} else if (keyData.getNumberState(4)) {
 				player.setPlaySpeed(300);
 			} else {
 				player.setPlaySpeed(100);

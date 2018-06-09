@@ -21,6 +21,7 @@ import bms.player.beatoraja.IRScoreData.SongTrophy;
 import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.ScoreDatabaseAccessor.ScoreDataCollector;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
+import bms.player.beatoraja.input.keyData;
 import bms.player.beatoraja.ir.IRResponse;
 import bms.player.beatoraja.select.bar.*;
 import bms.player.beatoraja.skin.SkinType;
@@ -28,29 +29,29 @@ import bms.player.beatoraja.song.SongData;
 import bms.player.beatoraja.song.SongDatabaseAccessor;
 
 /**
- * 選曲部分。 楽曲一覧とカーソルが指す楽曲のステータスを表示し、選択した楽曲を 曲決定部分に渡す。
+ * �겦�쎊�깿�늽�� 璵썸쎊訝�誤㎯겏�궖�꺖�궫�꺂�걣�뙁�걲璵썸쎊�겗�궧�깇�꺖�궭�궧�굮烏①ㅊ�걮�곲겦�뒢�걮�걼璵썸쎊�굮 �쎊黎뷴츣�깿�늽�겓歷▲걲��
  *
  * @author exch
  */
 public class MusicSelector extends MainState {
 
-	// TODO テキスト表示
-	// TODO　ミラーランダム段位のスコア表示
+	// TODO �깇�궘�궧�깉烏①ㅊ
+	// TODO���깱�꺀�꺖�꺀�꺍���깲餘듕퐤�겗�궧�궠�궋烏①ㅊ
 
 	private int selectedreplay;
 
 	/**
-	 * 楽曲DBアクセサ
+	 * 璵썸쎊DB�궋�궚�궩�궢
 	 */
 	private SongDatabaseAccessor songdb;
 
 	public static final Mode[] MODE = { null, Mode.BEAT_7K, Mode.BEAT_14K, Mode.POPN_9K, Mode.BEAT_5K, Mode.BEAT_10K, Mode.KEYBOARD_24K, Mode.KEYBOARD_24K_DOUBLE };
 	/**
-	 * 選択中のソート
+	 * �겦�뒢訝��겗�궫�꺖�깉
 	 */
 	private int sort;
 	/**
-	 * 保存可能な最大リプレイ数
+	 * 岳앭춼�룾�꺗�겒��鸚㎯꺁�깤�꺃�궎�빊
 	 */
 	public static final int REPLAY = 4;
 
@@ -58,14 +59,14 @@ public class MusicSelector extends MainState {
 
 	private PlayerData playerdata;
 	/**
-	 * 楽曲プレビュー処理
+	 * 璵썸쎊�깤�꺃�깛�깷�꺖�눇�릤
 	 */
 	private PreviewMusicProcessor preview;
 
 	private BitmapFont titlefont;
 
 	/**
-	 * 楽曲バー描画用
+	 * 璵썸쎊�깘�꺖�룒�뵽�뵪
 	 */
 	private BarRenderer bar;
 	private MusicSelectInputProcessor musicinput;
@@ -73,11 +74,11 @@ public class MusicSelector extends MainState {
 	private SearchTextField search;
 
 	/**
-	 * 楽曲が選択されてからbmsを読み込むまでの時間(ms)
+	 * 璵썸쎊�걣�겦�뒢�걬�굦�겍�걢�굢bms�굮沃��겳渦쇈��겲�겎�겗�셽�뼋(ms)
 	 */
 	private final int notesGraphDuration = 350;
 	/**
-	 * 楽曲が選択されてからプレビュー曲を再生するまでの時間(ms)
+	 * 璵썸쎊�걣�겦�뒢�걬�굦�겍�걢�굢�깤�꺃�깛�깷�꺖�쎊�굮�냽�뵟�걲�굥�겲�겎�겗�셽�뼋(ms)
 	 */
 	private final int previewDuration = 400;
 	private boolean showNoteGraph = false;
@@ -121,8 +122,8 @@ public class MusicSelector extends MainState {
 		};
 
 		try {
-			// ライバルスコアデータベース作成
-			// TODO 別のクラスに移動
+			// �꺀�궎�깘�꺂�궧�궠�궋�깈�꺖�궭�깧�꺖�궧鵝쒏닇
+			// TODO �닪�겗�궚�꺀�궧�겓燁삣땿
 			if(!Files.exists(Paths.get("rival"))) {
 				Files.createDirectory(Paths.get("rival"));
 			}
@@ -138,9 +139,9 @@ public class MusicSelector extends MainState {
 								IRResponse<IRScoreData[]> scores = main.getIRConnection().getPlayData(rival.getId(), null);
 								if(scores.isSuccessed()) {
 									scoredb.setScoreData(scores.getData());
-									Logger.getGlobal().info("IRからのスコア取得完了 : " + rival.getName());
+									Logger.getGlobal().info("IR�걢�굢�겗�궧�궠�궋�룚孃쀥츑雅� : " + rival.getName());
 								} else {
-									Logger.getGlobal().warning("IRからのスコア取得失敗 : " + scores.getMessage());
+									Logger.getGlobal().warning("IR�걢�굢�겗�궧�궠�궋�룚孃쀥ㅁ�븮 : " + scores.getMessage());
 								}
 							} catch (ClassNotFoundException e) {
 								e.printStackTrace();
@@ -148,14 +149,14 @@ public class MusicSelector extends MainState {
 						}).start();
 					}
 				} else {
-					Logger.getGlobal().warning("IRからのライバル取得失敗 : " + response.getMessage());
+					Logger.getGlobal().warning("IR�걢�굢�겗�꺀�궎�깘�꺂�룚孃쀥ㅁ�븮 : " + response.getMessage());
 				}
 			}
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
 
-		// ライバルキャッシュ作成
+		// �꺀�궎�깘�꺂�궘�깵�긿�궥�깷鵝쒏닇
 		try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get("rival"))) {
 			for (Path p : paths) {
 				if(p.toString().endsWith(".db")) {
@@ -194,7 +195,7 @@ public class MusicSelector extends MainState {
 		rivalcache = rivalcaches.get(rival);
 		bar.updateBar();
 
-		Logger.getGlobal().info("Rival変更:" + (rival != null ? rival.getName() : "なし"));
+		Logger.getGlobal().info("Rival鸚됪쎍:" + (rival != null ? rival.getName() : "�겒�걮"));
 	}
 
 	public PlayerInformation getRival() {
@@ -343,10 +344,10 @@ public class MusicSelector extends MainState {
 	public void input() {
 		final BMSPlayerInputProcessor input = main.getInputProcessor();
 
-		if (input.getNumberState(6)) {
+		if (keyData.getNumberState(6)) {
 			preview.stop();
 			main.changeState(MainController.STATE_CONFIG);
-		} else if (input.getFunctionstate(11)) {
+		} else if (keyData.getFunctionstate(11)) {
 			preview.stop();
 			main.changeState(MainController.STATE_SKIN_SELECT);
 		}
@@ -434,10 +435,10 @@ public class MusicSelector extends MainState {
 				main.changeState(MainController.STATE_DECIDE);
 				banners.disposeOld();
 			} else {
-				Logger.getGlobal().info("段位の楽曲が揃っていません");
+				Logger.getGlobal().info("餘듕퐤�겗璵썸쎊�걣�룂�겂�겍�걚�겲�걵�굯");
 			}
 		} else {
-			Logger.getGlobal().info("段位の楽曲が揃っていません");
+			Logger.getGlobal().info("餘듕퐤�겗璵썸쎊�걣�룂�겂�겍�걚�겲�걵�굯");
 		}
 	}
 
