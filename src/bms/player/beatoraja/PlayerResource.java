@@ -150,7 +150,11 @@ public class PlayerResource {
 		}
 
 		bmsresource.setBMSFile(model, f, config, mode);
-		songdata = new SongData(model, false);
+		if(songdata != null) {
+			songdata.setBMSModel(model);
+		} else {
+			songdata = new SongData(model, false);			
+		}
 		if(tablename.length() == 0 || courseindex != 0){
 			setTableinfo();
 		}

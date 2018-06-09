@@ -76,6 +76,7 @@ public class TableBar extends DirectoryBar {
 				final SongData hash = songlist[j];
 				for(SongData sd :songs) {
 					if((hash.getMd5().length() > 0 && hash.getMd5().equals(sd.getMd5())) || (hash.getSha256().length() > 0 && hash.getSha256().equals(sd.getSha256()))) {
+						sd.merge(hash);
 						songlist[j] = sd;
 						break;
 					}

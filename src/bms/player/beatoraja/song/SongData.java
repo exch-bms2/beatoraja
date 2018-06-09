@@ -525,6 +525,15 @@ public class SongData implements Validatable, IpfsInformation {
 	public void setOrg_md5(List<String> org_md5) {
 		this.org_md5 = org_md5;
 	}
+	
+	public void merge(SongData song) {
+		if(url == null || url.length() == 0) {
+			url = song.getUrl();
+		}
+		if(appendurl == null || appendurl.length() == 0) {
+			appendurl = song.getAppendurl();
+		}
+	}
 
 	@Override
 	public boolean validate() {

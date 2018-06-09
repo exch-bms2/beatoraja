@@ -79,7 +79,6 @@ public class SongBar extends SelectableBar {
     }
 
     protected static SongBar[] toSongBarArray(SongData[] songs, SongData[] elements) {
-        // TODO 重複部分の共通化
         // 重複除外
         int count = songs.length;
         int noexistscount = elements.length;
@@ -99,9 +98,10 @@ public class SongBar extends SelectableBar {
             }
             for(int j = 0;j < elements.length;j++) {
                 final SongData element = elements[j];
-                if(elements[j].getPath() == null && (element.getMd5().length() > 0 && element.getMd5().equals(songs[i].getMd5()))
+                if(element.getPath() == null && (element.getMd5().length() > 0 && element.getMd5().equals(songs[i].getMd5()))
                         || (element.getSha256().length() > 0 && element.getSha256().equals(songs[i].getSha256()))) {
-                    elements[j].setPath(songs[i].getPath());
+                    element.setPath(songs[i].getPath());
+                    songs[i].merge(element);
                     noexistscount--;
                     break;
                 }

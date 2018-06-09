@@ -309,7 +309,7 @@ public class BMSPlayer extends MainState {
 
 		resource.setUpdateScore(score);
 		final int difficulty = resource.getSongdata() != null ? resource.getSongdata().getDifficulty() : 0;
-		resource.setSongdata(new SongData(model, false));
+		resource.getSongdata().setBMSModel(model);
 		resource.getSongdata().setDifficulty(difficulty);
 	}
 
