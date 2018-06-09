@@ -278,6 +278,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 		private int count = 0;
 
 		private Map<String, String> tags = new HashMap<String, String>();
+		private Map<String, Integer> favorites = new HashMap<String, Integer>();
 		private boolean updateAll;
 
 		private long updatetime;
@@ -316,9 +317,14 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 						"DELETE FROM folder WHERE path NOT LIKE 'LR2files%' AND path NOT LIKE '%.lr2folder' AND "
 								+ dsql.toString());
 				qr.update(conn, "DELETE FROM song WHERE " + dsql.toString());
-				// 楽曲のタグの保持
-				for (SongData record : qr.query(conn, "SELECT md5,tag FROM song WHERE length(tag) > 0", songhandler)) {
-					tags.put(record.getMd5(), record.getTag());
+				// 楽曲のタグ,FAVORITEの保持
+				for (SongData record : qr.query(conn, "SELECT md5, tag, favorite FROM song", songhandler)) {
+					if (record.getTag().length() > 0) {
+						tags.put(record.getMd5(), record.getTag());
+					}
+					if (record.getFavorite() > 0) {
+						favorites.put(record.getMd5(), record.getFavorite());
+					}
 				}
 				for (Path f : paths) {
 					this.processDirectory(conn, f, true);
@@ -391,7 +397,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 			final boolean containsBMS = bmsfiles.size() > 0;
 			if (containsBMS) {
 				BMSFolderThread task = new BMSFolderThread(conn, bmsfiles, records,
-						updateFolder, txt, updatetime, previewpath, tags, info);
+						updateFolder, txt, updatetime, previewpath, tags, favorites, info);
 				tasks.addLast(task);
 				task.start();
 			}
@@ -453,11 +459,12 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 		private final long updatetime;
 		private final String preview;
 		private final Map<String, String> tags;
+		private final Map<String, Integer> favorites;
 		private int count;
 		private final SongInformationAccessor info;
 
 		public BMSFolderThread(Connection conn, List<Path> bmsfiles, List<SongData> records, boolean updateAll, boolean txt,
-				long updatetime, String preview, Map<String, String> tags, SongInformationAccessor info) {
+							   long updatetime, String preview, Map<String, String> tags, Map<String, Integer> favorites, SongInformationAccessor info) {
 			this.bmsfiles = bmsfiles;
 			this.records = records;
 			this.updateAll = updateAll;
@@ -466,6 +473,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 			this.updatetime = updatetime;
 			this.preview = preview;
 			this.tags = tags;
+			this.favorites = favorites;
 			this.info = info;
 		}
 
@@ -541,6 +549,7 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 						sd.setPreview(preview);
 					}
 					final String tag = tags.get(sd.getMd5());
+					final Integer favorite = favorites.get(sd.getMd5());
 					try {
 						qr.update(conn,
 								"INSERT OR REPLACE INTO song "
@@ -556,7 +565,9 @@ public class SQLiteSongDatabaseAccessor implements SongDatabaseAccessor {
 								SongUtils.crc32(path.getParent().getParent().toString(), bmsroot, root.toString()),
 								sd.getLevel(), sd.getDifficulty(), sd.getMaxbpm(), sd.getMinbpm(), sd.getLength(),
 								sd.getMode(), sd.getJudge(), sd.getFeature(), sd.getContent(),
-								Files.getLastModifiedTime(path).toMillis() / 1000, 0, sd.getNotes(), updatetime, sd.getCharthash());
+								Files.getLastModifiedTime(path).toMillis() / 1000,
+								favorite != null ? favorite.intValue() : 0, sd.getNotes(), updatetime,
+								sd.getCharthash());
 					} catch (SQLException | IOException e) {
 						e.printStackTrace();
 					}
