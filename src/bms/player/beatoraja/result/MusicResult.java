@@ -130,7 +130,7 @@ public class MusicResult extends AbstractResult {
                                 main.switchTimer(TIMER_IR_CONNECT_FAIL, true);
                                 Logger.getGlobal().warning("IRスコア送信失敗 : " + send1.getMessage());
                             }
-                            IRResponse<IRScoreData[]> response = ir.getPlayData(null, resource.getBMSModel());
+                            IRResponse<IRScoreData[]> response = ir.getPlayData(null, resource.getSongdata());
                             if(response.isSuccessed()) {
                                 IRScoreData[] scores = response.getData();
                                 irtotal = scores.length;

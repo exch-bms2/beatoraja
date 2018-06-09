@@ -68,7 +68,7 @@ public interface IRConnection {
 	 *            スコアデータを取得する譜面。ユーザーIDのスコアデータを全取得する場合はnullを入れる
 	 * @return
 	 */
-	public IRResponse<IRScoreData[]> getPlayData(String id, BMSModel model);
+	public IRResponse<IRScoreData[]> getPlayData(String id, SongData model);
 
 	public IRResponse<IRScoreData[]> getCoursePlayData(String id, CourseData course, int lnmode);
 
