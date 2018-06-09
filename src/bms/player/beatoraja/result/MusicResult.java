@@ -16,13 +16,14 @@ import bms.model.TimeLine;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
+import bms.player.beatoraja.input.keyData;
 import bms.player.beatoraja.ir.IRConnection;
 import bms.player.beatoraja.ir.IRResponse;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.skin.SkinType;
 
 /**
- * リザルト
+ * �꺁�궣�꺂�깉
  *
  * @author exch
  */
@@ -31,17 +32,17 @@ public class MusicResult extends AbstractResult {
 	private IRScoreData oldscore = new IRScoreData();
 
 	/**
-	 * 全ノーツの平均ズレ
+	 * �뀲�깕�꺖�깂�겗亮녑쓦�궨�꺃
 	 */
 	private float avgduration;
 
 	/**
-	 * タイミング分布
+	 * �궭�궎�깱�꺍�궛�늽躍�
 	 */
 	private TimingDistribution timingDistribution;
 
 	/**
-	 * タイミング分布レンジ
+	 * �궭�궎�깱�꺍�궛�늽躍껁꺃�꺍�궦
 	 */
 	final int distRange = 150;
 
@@ -70,7 +71,7 @@ public class MusicResult extends AbstractResult {
 		}
 
 		updateScoreDatabase();
-		// リプレイの自動保存
+		// �꺁�깤�꺃�궎�겗�눎�땿岳앭춼
 		if (resource.getPlayMode() == PlayMode.PLAY) {
 			for (int i = 0; i < REPLAY_SIZE; i++) {
 				if (ReplayAutoSaveConstraint.get(resource.getConfig().getAutoSaveReplay()[i]).isQualified(oldscore,
@@ -79,7 +80,7 @@ public class MusicResult extends AbstractResult {
 				}
 			}
 		}
-		// コースモードの場合はリプレイデータをストックする
+		// �궠�꺖�궧�깴�꺖�깋�겗�졃�릦�겘�꺁�깤�꺃�궎�깈�꺖�궭�굮�궧�깉�긿�궚�걲�굥
 		if (resource.getCourseBMSModels() != null) {
 			resource.addCourseReplay(resource.getReplayData());
 			resource.addCourseGauge(resource.getGauge());
@@ -110,13 +111,13 @@ public class MusicResult extends AbstractResult {
 				main.getAudioProcessor().stop((Note) null);
 
 				BMSPlayerInputProcessor input = main.getInputProcessor();
-				input.resetKeyTime();
+				keyData.resetKeyTime();
 
 				if (resource.getCourseBMSModels() != null) {
 					if (resource.getGauge()[resource.getGrooveGauge().getType()]
 							.get(resource.getGauge()[resource.getGrooveGauge().getType()].size - 1) <= 0) {
 						if (resource.getCourseScoreData() != null) {
-							// 未達曲のノーツをPOORとして加算
+							// �쑋�걫�쎊�겗�깕�꺖�깂�굮POOR�겏�걮�겍�뒥嶸�
 							final List<FloatArray[]> coursegauge = resource.getCourseGauge();
 							final int cg = resource.getCourseBMSModels().length;
 							for (int i = 0; i < cg; i++) {
@@ -125,16 +126,16 @@ public class MusicResult extends AbstractResult {
 											+ resource.getCourseBMSModels()[i].getTotalNotes());
 								}
 							}
-							// 不合格リザルト
+							// 訝띶릦�졏�꺁�궣�꺂�깉
 							main.changeState(MainController.STATE_GRADE_RESULT);
 						} else {
-							// コーススコアがない場合は選曲画面へ
+							// �궠�꺖�궧�궧�궠�궋�걣�겒�걚�졃�릦�겘�겦�쎊�뵽�씊�겦
 							main.changeState(MainController.STATE_SELECTMUSIC);
 						}
 					} else if (resource.nextCourse()) {
 						main.changeState(MainController.STATE_PLAYBMS);
 					} else {
-						// 合格リザルト
+						// �릦�졏�꺁�궣�꺂�깉
 						if (resource.getPlayerConfig().isContinueUntilEndOfSong()) {
 							int changedGaugeType = resource.getGrooveGauge()
 									.changeTypeOfClear(resource.getGrooveGauge().getType());
@@ -148,26 +149,26 @@ public class MusicResult extends AbstractResult {
 					main.getPlayerResource().getPlayerConfig().setGauge(main.getPlayerResource().getOrgGaugeOption());
 					ResultKeyProperty.ResultKey key = null;
 					for (int i = 0; i < property.getAssignLength(); i++) {
-						if (property.getAssign(i) == ResultKeyProperty.ResultKey.REPLAY_DIFFERENT && input.getKeyState(i)) {
+						if (property.getAssign(i) == ResultKeyProperty.ResultKey.REPLAY_DIFFERENT && keyData.getKeyState(i)) {
 							key = ResultKeyProperty.ResultKey.REPLAY_DIFFERENT;
 							break;
 						}
-						if (property.getAssign(i) == ResultKeyProperty.ResultKey.REPLAY_SAME && input.getKeyState(i)) {
+						if (property.getAssign(i) == ResultKeyProperty.ResultKey.REPLAY_SAME && keyData.getKeyState(i)) {
 							key = ResultKeyProperty.ResultKey.REPLAY_SAME;
 							break;
 						}
 					}
 					if (resource.getPlayMode() == PlayMode.PLAY
 							&& key == ResultKeyProperty.ResultKey.REPLAY_DIFFERENT) {
-						Logger.getGlobal().info("オプションを変更せずリプレイ");
-						// オプションを変更せず同じ譜面でリプレイ
+						Logger.getGlobal().info("�궕�깤�궥�깾�꺍�굮鸚됪쎍�걵�걳�꺁�깤�꺃�궎");
+						// �궕�깤�궥�깾�꺍�굮鸚됪쎍�걵�걳�릪�걯鈺쒒씊�겎�꺁�깤�꺃�궎
 						resource.getReplayData().pattern = null;
 						resource.reloadBMSFile();
 						main.changeState(MainController.STATE_PLAYBMS);
 					} else if (resource.getPlayMode() == PlayMode.PLAY
 							&& key == ResultKeyProperty.ResultKey.REPLAY_SAME) {
-						// 同じ譜面でリプレイ
-						Logger.getGlobal().info("同じ譜面でリプレイ");
+						// �릪�걯鈺쒒씊�겎�꺁�깤�꺃�궎
+						Logger.getGlobal().info("�릪�걯鈺쒒씊�겎�꺁�깤�꺃�궎");
 						resource.reloadBMSFile();
 						main.changeState(MainController.STATE_PLAYBMS);
 					} else {
@@ -197,8 +198,8 @@ public class MusicResult extends AbstractResult {
 			if (time > getSkin().getInput()) {
 				boolean ok = false;
 				for (int i = 0; i < property.getAssignLength(); i++) {
-					if (property.getAssign(i) != null && inputProcessor.checkIfKeyPressed(i)) {
-						inputProcessor.resetKeyTime(i);
+					if (property.getAssign(i) != null && keyData.checkIfKeyPressed(i)) {
+						keyData.resetKeyTime(i);
 						ok = true;
 					}
 				}
@@ -228,7 +229,7 @@ public class MusicResult extends AbstractResult {
 				}
 
 				for (int i = 0; i < MusicSelector.REPLAY; i++) {
-					if (inputProcessor.getNumberState(i + 1)) {
+					if (keyData.getNumberState(i + 1)) {
 						saveReplayData(i);
 						break;
 					}
@@ -303,7 +304,7 @@ public class MusicResult extends AbstractResult {
 		avgduration /= count;
 		timingDistribution.statisticValueCalcuate();
 
-		// コースモードの場合はコーススコアに加算・累積する
+		// �궠�꺖�궧�깴�꺖�깋�겗�졃�릦�겘�궠�꺖�궧�궧�궠�궋�겓�뒥嶸쀣꺕榮�令띲걲�굥
 		if (resource.getCourseBMSModels() != null) {
 			if (resource.getScoreData().getClear() == Failed.id) {
 				resource.getScoreData().setClear(NoPlay.id);
@@ -364,7 +365,7 @@ public class MusicResult extends AbstractResult {
 				cscore.setClear(Failed.id);
 
 				boolean b = false;
-				// 残りの曲がある場合はtotalnotesをBPに加算する
+				// 餘뗣굤�겗�쎊�걣�걗�굥�졃�릦�겘totalnotes�굮BP�겓�뒥嶸쀣걲�굥
 				for (BMSModel m : resource.getCourseBMSModels()) {
 					if (b) {
 						cscore.setMinbp(cscore.getMinbp() + m.getTotalNotes());
@@ -380,7 +381,7 @@ public class MusicResult extends AbstractResult {
 		if (resource.getPlayMode() == PlayMode.PLAY) {
 			main.getPlayDataAccessor().writeScoreDara(resource.getScoreData(), resource.getBMSModel(),
 					resource.getPlayerConfig().getLnmode(), resource.isUpdateScore());
-			// TODO スコアハッシュがあり、有効期限が切れていないものを送信する？
+			// TODO �궧�궠�궋�깗�긿�궥�깷�걣�걗�굤�곫쐣�듅�쐿�솏�걣�늾�굦�겍�걚�겒�걚�굚�겗�굮�곦에�걲�굥竊�
 			IRConnection ir = main.getIRConnection();
 			if (ir != null) {
 				boolean send = resource.isUpdateScore();
@@ -399,7 +400,7 @@ public class MusicResult extends AbstractResult {
 				}
 
 				if(send) {
-					Logger.getGlobal().info("IRへスコア送信中");
+					Logger.getGlobal().info("IR�겦�궧�궠�궋�곦에訝�");
 					main.switchTimer(TIMER_IR_CONNECT_BEGIN, true);
 					state = STATE_IR_PROCESSING;
 					Thread irprocess = new Thread() {
@@ -424,10 +425,10 @@ public class MusicResult extends AbstractResult {
 									}
 								}
 								main.switchTimer(TIMER_IR_CONNECT_SUCCESS, true);
-								Logger.getGlobal().info("IRへスコア送信完了");
+								Logger.getGlobal().info("IR�겦�궧�궠�궋�곦에若뚥틙");
 							} else {
 								main.switchTimer(TIMER_IR_CONNECT_FAIL, true);
-								Logger.getGlobal().warning("IRからのスコア取得失敗 : " + response.getMessage());
+								Logger.getGlobal().warning("IR�걢�굢�겗�궧�궠�궋�룚孃쀥ㅁ�븮 : " + response.getMessage());
 							}
 
 							state = STATE_IR_FINISHED;

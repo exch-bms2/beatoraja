@@ -18,6 +18,7 @@ import bms.player.beatoraja.input.BMControllerInputProcessor;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyBoardInputProcesseor;
 import bms.player.beatoraja.input.MidiInputProcessor;
+import bms.player.beatoraja.input.keyData;
 import bms.player.beatoraja.playmode.*;
 import bms.player.beatoraja.PlayModeConfig;
 
@@ -170,13 +171,13 @@ public class KeyConfiguration extends MainState {
 				cursorpos = (cursorpos + 1) % keys.length;
 			}
 
-			if (input.checkIfNumberPressed(1)) {
-				input.resetNumberTime(1);
+			if (keyData.checkIfNumberPressed(1)) {
+				keyData.resetNumberTime(1);
 				config.setMusicselectinput((config.getMusicselectinput() + 1) % 3);
 			}
 			// change contronnler device 1
-			if (input.checkIfNumberPressed(2)) {
-				input.resetNumberTime(2);
+			if (keyData.checkIfNumberPressed(2)) {
+				keyData.resetNumberTime(2);
 				if (controllers.length > 0) {
 					int index = 0;
 					for (; index < controllers.length; index++) {
@@ -190,8 +191,8 @@ public class KeyConfiguration extends MainState {
 				}
 			}
 			// change contronnler device 2
-			if (input.checkIfNumberPressed(3)) {
-				input.resetNumberTime(3);
+			if (keyData.checkIfNumberPressed(3)) {
+				keyData.resetNumberTime(3);
 				if (controllers.length > 0 && pc.getController().length > 1) {
 					int index = 0;
 					for (; index < controllers.length; index++) {
@@ -205,29 +206,29 @@ public class KeyConfiguration extends MainState {
 				}
 			}
 
-			if (input.checkIfNumberPressed(7)) {
-				input.resetNumberTime(7);
-				keyboardConfig.setKeyAssgin(MODE_HINT[mode], true);
+			if (keyData.checkIfNumberPressed(7)) {
+				keyData.resetNumberTime(7);
+				keyboardConfig.setKeyAssign(MODE_HINT[mode], -1, true);
 				for (int i = 0; i < controllerConfigs.length; i++) {
 					controllerConfigs[i].setKeyAssign(MODE_HINT[mode], i, false);
 				}
-				midiconfig.setKeyAssign(MODE_HINT[mode], false);
+				midiconfig.setKeyAssign(MODE_HINT[mode], -1, false);
 			}
-			if (input.checkIfNumberPressed(8)) {
-				input.resetNumberTime(8);
-				keyboardConfig.setKeyAssgin(MODE_HINT[mode], false);
+			if (keyData.checkIfNumberPressed(8)) {
+				keyData.resetNumberTime(8);
+				keyboardConfig.setKeyAssign(MODE_HINT[mode], -1, false);
 				for (int i = 0; i < controllerConfigs.length; i++) {
 					controllerConfigs[i].setKeyAssign(MODE_HINT[mode], i, true);
 				}
-				midiconfig.setKeyAssign(MODE_HINT[mode], false);
+				midiconfig.setKeyAssign(MODE_HINT[mode], -1, false);
 			}
-			if (input.checkIfNumberPressed(9)) {
-				input.resetNumberTime(9);
-				keyboardConfig.setKeyAssgin(MODE_HINT[mode], false);
+			if (keyData.checkIfNumberPressed(9)) {
+				keyData.resetNumberTime(9);
+				keyboardConfig.setKeyAssign(MODE_HINT[mode], -1, false);
 				for (int i = 0; i < controllerConfigs.length; i++) {
 					controllerConfigs[i].setKeyAssign(MODE_HINT[mode], i, false);
 				}
-				midiconfig.setKeyAssign(MODE_HINT[mode], true);
+				midiconfig.setKeyAssign(MODE_HINT[mode], -1, true);
 			}
 
 			if (input.isEnterPressed()) {

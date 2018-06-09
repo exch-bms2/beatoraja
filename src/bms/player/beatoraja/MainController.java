@@ -50,6 +50,7 @@ import bms.player.beatoraja.audio.PortAudioDriver;
 import bms.player.beatoraja.config.KeyConfiguration;
 import bms.player.beatoraja.decide.MusicDecide;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
+import bms.player.beatoraja.input.mouseData;
 import bms.player.beatoraja.ir.IRConnection;
 import bms.player.beatoraja.ir.IRResponse;
 import bms.player.beatoraja.play.BMSPlayer;
@@ -72,7 +73,7 @@ import twitter4j.UploadedMedia;
 import twitter4j.conf.ConfigurationBuilder;
 
 /**
- * 占쎄텑占쎄묏占쎄틒占쎄텪占쎄틬占쎄땅占쎄뭬占쎄틡占쎄쿁占쎄틓占쎄틬占쎄퉱占쎄텥占쎄�占쎄때
+ * �뜝�럡�뀘�뜝�럡臾뤷뜝�럡�땼�뜝�럡�뀴�뜝�럡�떖�뜝�럡�븙�뜝�럡萸у뜝�럡�떋�뜝�럡荑곩뜝�럡�땽�뜝�럡�떖�뜝�럡�돮�뜝�럡�뀯�뜝�럡占썲뜝�럡�븣
  *
  * @author exch
  */
@@ -108,7 +109,7 @@ public class MainController extends ApplicationAdapter {
 	private MainState current;
 	private static MainState currentState;
 	/**
-	 * 占쎈뱚占쎈�묕옙寃쀯옙堉��넼�뿦�끋占쎈펻
+	 * �뜝�럥諭싧뜝�럥占쎈쵓�삕野껋���삕�젆占쏙옙�꽱占쎈엡占쎈걢�뜝�럥�렮
 	 */
 	private long starttime;
 	private long nowmicrotime;
@@ -125,17 +126,17 @@ public class MainController extends ApplicationAdapter {
 
 	private SpriteBatch sprite;
 	/**
-	 * 1占쎌럧占쎄묏占쎄틕占쎄텕占쎄쾸占쎈셼畑댁떏嫄�占쎄굴BMS占쎄묄占쎄텏占쎄텕占쎄틓
+	 * 1�뜝�럩�윧�뜝�럡臾뤷뜝�럡�땿�뜝�럡�뀞�뜝�럡苡멨뜝�럥�끉�븨�똻�뼅椰꾬옙�뜝�럡援퀯MS�뜝�럡臾꾢뜝�럡�뀖�뜝�럡�뀞�뜝�럡�땽
 	 */
 	private Path bmsfile;
 
 	private BMSPlayerInputProcessor input;
 	/**
-	 * FPS占쎄뎌占쎈짂占쎈돕占쎄굉占쎄데占쎄괍占쎄쾻占쎄콨占쎄괍
+	 * FPS�뜝�럡�럩�뜝�럥吏귛뜝�럥�룙�뜝�럡援됧뜝�럡�뜲�뜝�럡愿띶뜝�럡苡삣뜝�럡肄ⓨ뜝�럡愿�
 	 */
 	private boolean showfps;
 	/**
-	 * 占쎄묏占쎄틕占쎄텕占쎄퉰占쎄틬占쎄땟占쎄텑占쎄텥占쎄땐占쎄땁
+	 * �뜝�럡臾뤷뜝�럡�땿�뜝�럡�뀞�뜝�럡�돭�뜝�럡�떖�뜝�럡�븶�뜝�럡�뀘�뜝�럡�뀯�뜝�럡�븧�뜝�럡�븕
 	 */
 	private PlayDataAccessor playdata;
 
@@ -192,7 +193,7 @@ public class MainController extends ApplicationAdapter {
 			} else {
 				IRResponse response = ir.login(player.getUserid(), player.getPassword());
 				if(!response.isSuccessed()) {
-					Logger.getGlobal().warning("IR占쎄꺅占쎄쿁占쎄틙占쎄텦占쎄텕占쎄틡勇싰만釉� : " + response.getMessage());
+					Logger.getGlobal().warning("IR�뜝�럡爰끻뜝�럡荑곩뜝�럡�떃�뜝�럡�뀰�뜝�럡�뀞�뜝�럡�떋�땱�떚留뚪뇡占� : " + response.getMessage());
 					ir = null;
 				}
 			}
@@ -341,7 +342,7 @@ public class MainController extends ApplicationAdapter {
 			if(resource.setBMSFile(bmsfile, auto)) {
 				changeState(STATE_PLAYBMS);
 			} else {
-				// 占쏙옙占쎄묽占쎄틬占쎄때占쎄퉯占쎄틬占쎄퉱占쎄쾽�뇖�궘二깍옙嫄�占쎄쾷占쎄굉占쎄괠exit占쎄굉占쎄데
+				// �뜝�룞�삕�뜝�럡臾썲뜝�럡�떖�뜝�럡�븣�뜝�럡�돬�뜝�럡�떖�뜝�럡�돮�뜝�럡苡쏙옙�뇲占쎄텣雅뚭퉵�삕椰꾬옙�뜝�럡苡룟뜝�럡援됧뜝�럡愿쟢xit�뜝�럡援됧뜝�럡�뜲
 				changeState(STATE_CONFIG);
 				exit();
 			}
@@ -349,7 +350,7 @@ public class MainController extends ApplicationAdapter {
 			changeState(STATE_SELECTMUSIC);
 		}
 
-		Logger.getGlobal().info("占쎈떆占쎌맾占쎈솑占쎌끋占쎈펻(ms) : " + (System.currentTimeMillis() - t));
+		Logger.getGlobal().info("�뜝�럥�뻻�뜝�럩留얍뜝�럥�넁�뜝�럩�걢�뜝�럥�렮(ms) : " + (System.currentTimeMillis() - t));
 
 		Thread polling = new Thread(() -> {
 			long time = 0;
@@ -458,24 +459,24 @@ public class MainController extends ApplicationAdapter {
 		    prevtime = time;
             //current.input();
             // event - move pressed
-            if (input.isMousePressed()) {
-                input.setMousePressed();
-                current.getSkin().mousePressed(current, input.getMouseButton(), input.getMouseX(), input.getMouseY());
+            if (mouseData.isMousePressed()) {
+            	mouseData.setMousePressed();
+                current.getSkin().mousePressed(current, mouseData.getMouseButton(), mouseData.getMouseX(), mouseData.getMouseY());
             }
             // event - move dragged
-            if (input.isMouseDragged()) {
-                input.setMouseDragged();
-                current.getSkin().mouseDragged(current, input.getMouseButton(), input.getMouseX(), input.getMouseY());
+            if (mouseData.isMouseDragged()) {
+            	mouseData.setMouseDragged();
+                current.getSkin().mouseDragged(current, mouseData.getMouseButton(), mouseData.getMouseX(), mouseData.getMouseY());
             }
 
-            // 占쎄묻占쎄텘占쎄때占쎄텠占쎄틬占쎄땜占쎄틓�깗�몺�뀏占쎈떓畑댐옙
-            if(input.isMouseMoved()) {
-            	input.setMouseMoved(false);
+            // �뜝�럡臾삣뜝�럡�뀡�뜝�럡�븣�뜝�럡�뀪�뜝�럡�떖�뜝�럡�븳�뜝�럡�땽占쎄퉿占쎈ず占쎈�뤷뜝�럥�뼋�븨�뙋�삕
+            if(mouseData.isMouseMoved()) {
+            	mouseData.setMouseMoved(false);
             	mouseMovedTime = time;
 			}
 			Mouse.setGrabbed(current == bmsplayer && time > mouseMovedTime + 5000 && Mouse.isInsideWindow());
 
-//			// FPS�깗�몺�뀏占쎈듋占쎌럹
+//			// FPS占쎄퉿占쎈ず占쎈�뤷뜝�럥�뱥�뜝�럩�읂
 //            if (input.checkIfFunctionPressed(0)) {
 //                showfps = !showfps;
 //                input.resetFunctionTime(0);
@@ -578,7 +579,7 @@ public class MainController extends ApplicationAdapter {
 	public void saveConfig(){
 		Config.write(config);
 		PlayerConfig.write(player);
-		Logger.getGlobal().info("庸뉛옙畑댁떒源꾬옙�졒占쎄뎌略녹빆異�");
+		Logger.getGlobal().info("佯몃돍�삕�븨�똻�뼊繹먭쒀�삕占쎌죸�뜝�럡�럩畑띕끃鍮녺빊占�");
 	}
 
 	public void exit() {
@@ -703,22 +704,22 @@ public class MainController extends ApplicationAdapter {
 
 
 	/**
-	 * 占쎄때占쎄텥占쎄틒占쎄틬占쎄틡占쎄땅占쎄뭬占쎄맙占쎄퉱占쎈늾占쎈┐占쎈뎁占쎄때占쎄틕占쎄맙占쎄퉳
+	 * �뜝�럡�븣�뜝�럡�뀯�뜝�럡�땼�뜝�럡�떖�뜝�럡�떋�뜝�럡�븙�뜝�럡萸у뜝�럡留쇿뜝�럡�돮�뜝�럥�듋�뜝�럥�뵍�뜝�럥�럞�뜝�럡�븣�뜝�럡�땿�뜝�럡留쇿뜝�럡�돰
 	 *
 	 * @author exch
 	 */
 	static class ScreenShotThread extends Thread {
 
 		/**
-		 * 占쎈늾占쎈┐占쎄괏畑대슖�떃占쎄괼占쎄굴占쎌끋占쎈펻
+		 * �뜝�럥�듋�뜝�럥�뵍�뜝�럡愿뤹븨���뒙占쎈뻸�뜝�럡愿쇔뜝�럡援닷뜝�럩�걢�뜝�럥�렮
 		 */
 		private long savetime;
 		/**
-		 * 占쎄때占쎄텥占쎄틒占쎄틬占쎄틡占쎄땅占쎄뭬占쎄맙占쎄퉱略녹빆異쇽옙��
+		 * �뜝�럡�븣�뜝�럡�뀯�뜝�럡�땼�뜝�럡�떖�뜝�럡�떋�뜝�럡�븙�뜝�럡萸у뜝�럡留쇿뜝�럡�돮畑띕끃鍮녺빊�눦�삕占쏙옙
 		 */
 		private final String path;
 		/**
-		 * 占쎄때占쎄텥占쎄틒占쎄틬占쎄틡占쎄땅占쎄뭬占쎄맙占쎄퉱占쎄쿁pixel占쎄퉰占쎄틬占쎄땟
+		 * �뜝�럡�븣�뜝�럡�뀯�뜝�럡�땼�뜝�럡�떖�뜝�럡�떋�뜝�럡�븙�뜝�럡萸у뜝�럡留쇿뜝�럡�돮�뜝�럡荑걈ixel�뜝�럡�돭�뜝�럡�떖�뜝�럡�븶
 		 */
 		private final byte[] pixels;
 
@@ -755,14 +756,14 @@ public class MainController extends ApplicationAdapter {
 			} else if(currentState instanceof SkinConfiguration) {
 				stateName = "_Skin_Select";
 			}
-			stateName = stateName.replace("\\", "�뜝占�").replace("/", "塋딉옙").replace(":", "塋딉옙").replace("*", "塋딉옙").replace("?", "塋딉옙").replace("\"", "占쏙옙").replace("<", "塋딉옙").replace(">", "塋딉옙").replace("|", "影�占�").replace("\t", " ");
+			stateName = stateName.replace("\\", "占쎈쐻�뜝占�").replace("/", "櫻뗫뵃�삕").replace(":", "櫻뗫뵃�삕").replace("*", "櫻뗫뵃�삕").replace("?", "櫻뗫뵃�삕").replace("\"", "�뜝�룞�삕").replace("<", "櫻뗫뵃�삕").replace(">", "櫻뗫뵃�삕").replace("|", "壤깍옙�뜝占�").replace("\t", " ");
 
 			path = "screenshot/" + sdf.format(Calendar.getInstance().getTime()) + stateName +".png";
 		}
 
 		@Override
 		public void run() {
-			// 占쎈�뀐옙源욑옙沅싷옙沅⑼옙爰귨옙寃쀯옙沅뗰옙爰귨옙源�占쎄텏占썬뀽援�255占쎄쾽占쎄굉占쎄데(=占쎈ㅈ�굟占쎈룾占쎄뎌占쎄퐩占쎄괜占쎄굉)
+			// �뜝�럥占쎈�먯삕繹먯쉻�삕亦낆떣�삕亦끸뫜�삕�댆洹⑥삕野껋���삕亦낅뿰�삕�댆洹⑥삕繹먲옙�뜝�럡�뀖�뜝�뜫�썸뤃占�255�뜝�럡苡썲뜝�럡援됧뜝�럡�뜲(=�뜝�럥�뀍占쎄턃�뜝�럥猷얍뜝�럡�럩�뜝�럡�맗�뜝�럡愿쒎뜝�럡援�)
 			for(int i = 3;i < pixels.length;i+=4) {
 				pixels[i] = (byte) 0xff;
 			}
@@ -771,30 +772,30 @@ public class MainController extends ApplicationAdapter {
 			BufferUtils.copy(pixels, 0, pixmap.getPixels(), pixels.length);
 			PixmapIO.writePNG(new FileHandle(path), pixmap);
 			pixmap.dispose();
-			Logger.getGlobal().info("占쎄때占쎄텥占쎄틒占쎄틬占쎄틡占쎄땅占쎄뭬占쎄맙占쎄퉱略녹빆異�:" + path);
+			Logger.getGlobal().info("�뜝�럡�븣�뜝�럡�뀯�뜝�럡�땼�뜝�럡�떖�뜝�럡�떋�뜝�럡�븙�뜝�럡萸у뜝�럡留쇿뜝�럡�돮畑띕끃鍮녺빊占�:" + path);
 			savetime = System.currentTimeMillis();
 		}
 	}
 
 	/**
-	 * Twitter占쎈뮊�몛�슌逾わ옙沅㏆옙爰껓옙湲울옙源�
+	 * Twitter�뜝�럥裕딉옙紐쏉옙�뒏�얇굩�삕亦끹룇�삕�댆猿볦삕疫뀁슱�삕繹먲옙
 	 */
 	static class TwitterUploadThread extends Thread {
 
 		/**
-		 * 占쎈늾占쎈┐占쎄괏畑대슖�떃占쎄괼占쎄굴占쎌끋占쎈펻
+		 * �뜝�럥�듋�뜝�럥�뵍�뜝�럡愿뤹븨���뒙占쎈뻸�뜝�럡愿쇔뜝�럡援닷뜝�럩�걢�뜝�럥�렮
 		 */
 		private long savetime;
 
 		/**
-		 * 占쎈늾占쎈┐占쎄괏畑대슖�떃占쎄괼占쎄굴占쎌끋占쎈펻
+		 * �뜝�럥�듋�뜝�럥�뵍�뜝�럡愿뤹븨���뒙占쎈뻸�뜝�럡愿쇔뜝�럡援닷뜝�럩�걢�뜝�럥�렮
 		 */
 		private String text = "";
 
 		private final PlayerConfig player;
 
 		/**
-		 * 占쎄때占쎄텥占쎄틒占쎄틬占쎄틡占쎄땅占쎄뭬占쎄맙占쎄퉱占쎄쿁pixel占쎄퉰占쎄틬占쎄땟
+		 * �뜝�럡�븣�뜝�럡�뀯�뜝�럡�땼�뜝�럡�떖�뜝�럡�떋�뜝�럡�븙�뜝�럡萸у뜝�럡留쇿뜝�럡�돮�뜝�럡荑걈ixel�뜝�럡�돭�뜝�럡�떖�뜝�럡�븶
 		 */
 		private final byte[] pixels;
 
@@ -840,7 +841,7 @@ public class MainController extends ApplicationAdapter {
 				// empty
 			}
 			text = builder.toString();
-			text = text.replace("\\", "�뜝占�").replace("/", "塋딉옙").replace(":", "塋딉옙").replace("*", "塋딉옙").replace("?", "塋딉옙").replace("\"", "占쏙옙").replace("<", "塋딉옙").replace(">", "塋딉옙").replace("|", "影�占�").replace("\t", " ");
+			text = text.replace("\\", "占쎈쐻�뜝占�").replace("/", "櫻뗫뵃�삕").replace(":", "櫻뗫뵃�삕").replace("*", "櫻뗫뵃�삕").replace("?", "櫻뗫뵃�삕").replace("\"", "�뜝�룞�삕").replace("<", "櫻뗫뵃�삕").replace(">", "櫻뗫뵃�삕").replace("|", "壤깍옙�뜝占�").replace("\t", " ");
 		}
 
 		@Override
@@ -855,7 +856,7 @@ public class MainController extends ApplicationAdapter {
 
 			Pixmap pixmap = null;
 	        try {
-				// 占쎈�뀐옙源욑옙沅싷옙沅⑼옙爰귨옙寃쀯옙沅뗰옙爰귨옙源�占쎄텏占썬뀽援�255占쎄쾽占쎄굉占쎄데(=占쎈ㅈ�굟占쎈룾占쎄뎌占쎄퐩占쎄괜占쎄굉)
+				// �뜝�럥占쎈�먯삕繹먯쉻�삕亦낆떣�삕亦끸뫜�삕�댆洹⑥삕野껋���삕亦낅뿰�삕�댆洹⑥삕繹먲옙�뜝�럡�뀖�뜝�뜫�썸뤃占�255�뜝�럡苡썲뜝�럡援됧뜝�럡�뜲(=�뜝�럥�뀍占쎄턃�뜝�럥猷얍뜝�럡�럩�뜝�럡�맗�뜝�럡愿쒎뜝�럡援�)
 				for(int i = 3;i < pixels.length;i+=4) {
 					pixels[i] = (byte) 0xff;
 				}
@@ -893,7 +894,7 @@ public class MainController extends ApplicationAdapter {
 			updateSong = new SongUpdateThread(path);
 			updateSong.start();
 		} else {
-			Logger.getGlobal().warning("�뮫�뜽�럧占쎌럪占쎈서鼇앾옙占쎄쿁占쎄굴占쎄탽占쎄낙�럪占쎈서沃ㅺ낙肄놅옙寃섓옙猷싷옙援ㅶ삌��嫄э옙援�占쎄께占쎄괼占쎄굴");
+			Logger.getGlobal().warning("占쎈�ワ옙�쑞占쎈윧�뜝�럩�윫�뜝�럥�꽌庸뉗빢�삕�뜝�럡荑곩뜝�럡援닷뜝�럡�꺗�뜝�럡�굺占쎈윫�뜝�럥�꽌亦껁끆�굺�굜�냵�삕野껋꼻�삕�뙴�떣�삕�뤃�끀�굦占쏙옙椰꾊띿삕�뤃占썲뜝�럡猿섇뜝�럡愿쇔뜝�럡援�");
 		}
 	}
 
@@ -902,7 +903,7 @@ public class MainController extends ApplicationAdapter {
 			updateSong = new TableUpdateThread(reader);
 			updateSong.start();
 		} else {
-			Logger.getGlobal().warning("�뮫�뜽�럧占쎌럪占쎈서鼇앾옙占쎄쿁占쎄굴占쎄탽占쎄낙�럪占쎈서沃ㅺ낙肄놅옙寃섓옙猷싷옙援ㅶ삌��嫄э옙援�占쎄께占쎄괼占쎄굴");
+			Logger.getGlobal().warning("占쎈�ワ옙�쑞占쎈윧�뜝�럩�윫�뜝�럥�꽌庸뉗빢�삕�뜝�럡荑곩뜝�럡援닷뜝�럡�꺗�뜝�럡�굺占쎈윫�뜝�럥�꽌亦껁끆�굺�굜�냵�삕野껋꼻�삕�뙴�떣�삕�뤃�끀�굦占쏙옙椰꾊띿삕�뤃占썲뜝�럡猿섇뜝�럡愿쇔뜝�럡援�");
 		}
 	}
 
@@ -924,7 +925,7 @@ public class MainController extends ApplicationAdapter {
 	}
 
 	/**
-	 * �뮫�뜽�럧占쎄퉰占쎄틬占쎄땟占쎄묜占쎄틬占쎄때占쎌럪占쎈서占쎈뎁占쎄때占쎄틕占쎄맙占쎄퉳
+	 * 占쎈�ワ옙�쑞占쎈윧�뜝�럡�돭�뜝�럡�떖�뜝�럡�븶�뜝�럡臾쒎뜝�럡�떖�뜝�럡�븣�뜝�럩�윫�뜝�럥�꽌�뜝�럥�럞�뜝�럡�븣�뜝�럡�땿�뜝�럡留쇿뜝�럡�돰
 	 *
 	 * @author exch
 	 */
@@ -943,7 +944,7 @@ public class MainController extends ApplicationAdapter {
 	}
 
 	/**
-	 * 占쎌뜷占쎌굦鵝�占썹깗�벃�럪占쎈서占쎈뎁占쎄때占쎄틕占쎄맙占쎄퉳
+	 * �뜝�럩�쑘�뜝�럩援�俑앾옙�뜝�뜾源쀯옙踰껓옙�윫�뜝�럥�꽌�뜝�럥�럞�뜝�럡�븣�뜝�럡�땿�뜝�럡留쇿뜝�럡�돰
 	 *
 	 * @author exch
 	 */
@@ -974,7 +975,7 @@ public class MainController extends ApplicationAdapter {
 		public SystemSoundManager(Config config) {
 			scan(Paths.get(config.getBgmpath()), bgms, "select.");
 			scan(Paths.get(config.getSoundpath()), sounds, "clear.");
-			Logger.getGlobal().info("癲꾩뭿�닧占쎄괵占쎄덱占쎄굴BGM Set : " + bgms.size + " Sound Set : " + sounds.size);
+			Logger.getGlobal().info("�솾袁⑸�울옙�떑�뜝�럡愿드뜝�럡�뜳�뜝�럡援퀯GM Set : " + bgms.size + " Sound Set : " + sounds.size);
 		}
 
 		public void shuffle() {

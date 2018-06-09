@@ -3,6 +3,7 @@ package bms.player.beatoraja.select;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
+import bms.player.beatoraja.input.keyData;
 import bms.player.beatoraja.play.TargetProperty;
 import bms.player.beatoraja.select.MusicSelectKeyProperty.MusicSelectKey;
 import bms.player.beatoraja.select.bar.*;
@@ -16,7 +17,7 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
 import static bms.player.beatoraja.select.MusicSelectKeyProperty.MusicSelectKey.*;
 
 /**
- * 選曲の入力処理用クラス
+ * �겦�쎊�겗�뀯�뒟�눇�릤�뵪�궚�꺀�궧
  * Class for input processing of music selection
  *
  * @author exch
@@ -24,12 +25,12 @@ import static bms.player.beatoraja.select.MusicSelectKeyProperty.MusicSelectKey.
 public class MusicSelectInputProcessor {
 
     /**
-     * バー移動中のカウンタ
+     * �깘�꺖燁삣땿訝��겗�궖�궑�꺍�궭
      * Counter in moving bar
      */
     private long duration;
     /**
-     * バーの移動方向
+     * �깘�꺖�겗燁삣땿�뼶�릲
      * Direction of movement of the bar
      */
     private int angle;
@@ -51,10 +52,10 @@ public class MusicSelectInputProcessor {
         final BarRenderer bar = select.getBarRender();
         final Bar current = bar.getSelected();
 
-        if (input.checkIfNumberPressed(0)) {
-            // 検索用ポップアップ表示。これ必要？
+        if (keyData.checkIfNumberPressed(0)) {
+            // 濾쒐뇨�뵪�깮�긿�깤�궋�긿�깤烏①ㅊ�귙걪�굦恙낁쫨竊�
         	// Popup display for search.
-            input.resetNumberTime(0);
+        	keyData.resetNumberTime(0);
             Gdx.input.getTextInput(new Input.TextInputListener() {
                 @Override
                 public void input(String text) {
@@ -70,30 +71,30 @@ public class MusicSelectInputProcessor {
             }, "Search", "", "Search bms title");
         }
 
-        if (input.checkIfNumberPressed(1)) {
-            // KEYフィルターの切り替え
+        if (keyData.checkIfNumberPressed(1)) {
+            // KEY�깢�궍�꺂�궭�꺖�겗�늾�굤�쎘�걟
         	// Switching KEY Filters
-        	input.resetNumberTime(1);
+        	keyData.resetNumberTime(1);
             select.execute(MusicSelectCommand.NEXT_MODE);
         }
-        if (input.checkIfNumberPressed(2)) {
-            // ソートの切り替え
+        if (keyData.checkIfNumberPressed(2)) {
+            // �궫�꺖�깉�겗�늾�굤�쎘�걟
         	// Switching the sort
-            input.resetNumberTime(2);
+        	keyData.resetNumberTime(2);
             select.execute(MusicSelectCommand.NEXT_SORT);
         }
-        if (input.checkIfNumberPressed(3)) {
-            // LNモードの切り替え
+        if (keyData.checkIfNumberPressed(3)) {
+            // LN�깴�꺖�깋�겗�늾�굤�쎘�걟
         	// LN mode switching
-            input.resetNumberTime(3);
+        	keyData.resetNumberTime(3);
             select.execute(MusicSelectCommand.NEXT_LNMODE);
         }
         
         final MusicSelectKeyProperty property = MusicSelectKeyProperty.values()[config.getMusicselectinput()];
 
-        if (input.checkIfNumberPressed(4) || (!input.startPressed() && !input.isSelectPressed() && property.isPressed(input, NEXT_REPLAY, true))) {
+        if (keyData.checkIfNumberPressed(4) || (!input.startPressed() && !input.isSelectPressed() && property.isPressed(input, NEXT_REPLAY, true))) {
             // change replay
-            input.resetNumberTime(4);
+        	keyData.resetNumberTime(4);
             select.execute(MusicSelectCommand.NEXT_REPLAY);
         }
         if (input.startPressed() && !input.isSelectPressed()) {
@@ -213,7 +214,7 @@ public class MusicSelectInputProcessor {
                 config.setNomine(!config.isNomine());
                 select.play(SOUND_CHANGEOPTION);
             }
-        } else if (input.getNumberState(5) || (input.startPressed() && input.isSelectPressed())) {
+        } else if (keyData.getNumberState(5) || (input.startPressed() && input.isSelectPressed())) {
             bar.resetInput();
             // show detail option
             select.setPanelState(3);
@@ -263,12 +264,12 @@ public class MusicSelectInputProcessor {
                 }
             }
 
-            if (input.checkIfNumberPressed(7)) {
-            	input.resetNumberTime(7);
+            if (keyData.checkIfNumberPressed(7)) {
+            	keyData.resetNumberTime(7);
                 select.execute(MusicSelectCommand.NEXT_RIVAL);
             }
-            if (input.checkIfNumberPressed(8)) {
-            	input.resetNumberTime(8);
+            if (keyData.checkIfNumberPressed(8)) {
+            	keyData.resetNumberTime(8);
                 if (current instanceof SongBar && ((SongBar) current).existsSong() && 
                         (bar.getDirectory().isEmpty() || !(bar.getDirectory().getLast() instanceof SameFolderBar))) {
                     SongData sd = ((SongBar) current).getSongData();
@@ -276,19 +277,19 @@ public class MusicSelectInputProcessor {
                     select.play(SOUND_FOLDEROPEN);
                 }
             }
-            if (input.checkIfNumberPressed(9)) {
-                input.resetNumberTime(9);
+            if (keyData.checkIfNumberPressed(9)) {
+            	keyData.resetNumberTime(9);
                 select.execute(MusicSelectCommand.OPEN_DOCUMENT);
             }
             // close folder
             if (property.isPressed(input, FOLDER_CLOSE, true) || input.checkIfCursorPressed(2)) {
-            	input.resetKeyTime(1);
+            	keyData.resetKeyTime(1);
                 input.resetCursorTime(2);
                 bar.close();
             }
             
-    		if(input.checkIfFunctionPressed(9)) {
-    			input.resetFunctionTime(9);
+    		if(keyData.checkIfFunctionPressed(9)) {
+    			keyData.resetFunctionTime(9);
     			if(current instanceof DirectoryBar) {
     				select.selectSong(PlayMode.AUTOPLAY);
     			}
@@ -301,13 +302,13 @@ public class MusicSelectInputProcessor {
         }
         main.switchTimer(TIMER_SONGBAR_CHANGE, true);
         // update folder
-        if (input.checkIfFunctionPressed(1)) {
-        	input.resetFunctionTime(1);
+        if (keyData.checkIfFunctionPressed(1)) {
+        	keyData.resetFunctionTime(1);
             select.execute(MusicSelectCommand.UPDATE_FOLDER);
         }
         // open explorer with selected song
-        if (input.checkIfFunctionPressed(2)) {
-            input.resetFunctionTime(2);
+        if (keyData.checkIfFunctionPressed(2)) {
+        	keyData.resetFunctionTime(2);
             select.execute(MusicSelectCommand.OPEN_WITH_EXPLORER);
         }
 
