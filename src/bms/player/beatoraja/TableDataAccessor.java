@@ -27,20 +27,21 @@ import bms.model.Mode;
 import bms.player.beatoraja.CourseData.TrophyData;
 
 /**
- * 難易度表データアクセス用クラス
+ * �썵�삌佯�烏ⓦ깈�꺖�궭�궋�궚�궩�궧�뵪�궚�꺀�궧
  * 
  * @author exch
  */
 public class TableDataAccessor {
+	private static TableDataAccessor instance = null;
 	
-	private String tabledir = "table";
-
-	public TableDataAccessor() {
-		
+	final private String tabledir = "table";
+	static public TableDataAccessor getInstance() {
+		if(instance == null)
+			instance = new TableDataAccessor();
+		return instance;
 	}
-
-	public TableDataAccessor(String tabledir) {
-		this.tabledir = tabledir;
+	private TableDataAccessor() {
+		
 	}
 
 	public void updateTableData(String[] urls) {
@@ -70,9 +71,9 @@ public class TableDataAccessor {
 	}
 	
 	/**
-	 * 難易度表データをキャッシュする
+	 * �썵�삌佯�烏ⓦ깈�꺖�궭�굮�궘�깵�긿�궥�깷�걲�굥
 	 * 
-	 * @param td 難易度表データ
+	 * @param td �썵�삌佯�烏ⓦ깈�꺖�궭
 	 */
 	public void write(TableData td) {
 		try {
@@ -93,9 +94,9 @@ public class TableDataAccessor {
 	}
 
 	/**
-	 * 全てのキャッシュされた難易度表データを読み込む
+	 * �뀲�겍�겗�궘�깵�긿�궥�깷�걬�굦�걼�썵�삌佯�烏ⓦ깈�꺖�궭�굮沃��겳渦쇈�
 	 * 
-	 * @return 全てのキャッシュされた難易度表データ
+	 * @return �뀲�겍�겗�궘�깵�긿�궥�깷�걬�굦�걼�썵�삌佯�烏ⓦ깈�꺖�궭
 	 */
 	public TableData[] readAll() {
 		List<TableData> result = new ArrayList<TableData>();
@@ -119,10 +120,10 @@ public class TableDataAccessor {
 	}
 
 	/**
-	 * 指定のキャッシュされた難易度表データを読み込む
+	 * �뙁若싥겗�궘�깵�긿�궥�깷�걬�굦�걼�썵�삌佯�烏ⓦ깈�꺖�궭�굮沃��겳渦쇈�
 	 * 
-	 * @param name 難易度表名
-	 * @return キャッシュされた難易度表データ。存在しない場合はnull
+	 * @param name �썵�삌佯�烏ⓨ릫
+	 * @return �궘�깵�긿�궥�깷�걬�굦�걼�썵�삌佯�烏ⓦ깈�꺖�궭�귛춼�쑉�걮�겒�걚�졃�릦�겘null
 	 */
 	public TableData read(String name) {
 		TableData td = null;
@@ -247,7 +248,7 @@ public class TableDataAccessor {
 
 		@Override
 		public void write(TableData td) {
-			new TableDataAccessor().write(td);
+			TableDataAccessor.getInstance().write(td);
 		}
 	}
 
