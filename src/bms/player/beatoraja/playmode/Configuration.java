@@ -37,6 +37,7 @@ public abstract class Configuration <T> {
     	this.select = select;
     }
     
+    // the value of player is only required for ControllerConfig
     public void setKeyAssign(Mode mode, int player, boolean enable) {
 		switch (mode) {
             case BEAT_5K:
