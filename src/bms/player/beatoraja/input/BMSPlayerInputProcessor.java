@@ -78,7 +78,7 @@ public class BMSPlayerInputProcessor {
 		devices.add(midiinput);
 	}
 
-	private Key[] key = new Key[256];
+
 
 	private BMSPlayerInputDevice lastKeyDevice;
 	private ArrayList<BMSPlayerInputDevice> devices;
@@ -145,7 +145,7 @@ public class BMSPlayerInputProcessor {
 	public void setStartTime(long starttime) {
 		this.starttime = starttime;
 		if (starttime != 0) {
-			resetKeyTime();
+			keyData.resetKeyTime();
 			keylog.clear();
 			kbinput.clear();
 			for (BMControllerInputProcessor bm : bminput) {
@@ -158,44 +158,6 @@ public class BMSPlayerInputProcessor {
 	// get set methods for key
 	public long getStartTime() {
 		return starttime;
-	}
-
-	public long getKeyTime(int i) {
-		return key[i].getPressTime();
-	}
-
-	public void setKeyTime(int i, long time) {
-		key[i].setTime(time);
-	}
-	
-	public void resetKeyTime(int i) {
-		key[i].resetTime();
-	}
-	
-	public void resetKeyTime() {
-		for (int i = 0; i < getKeyLength(); i++)
-			key[i].resetTime();
-	}
-
-	public boolean getKeyState(int i) {
-		return key[i].getIsPressed();
-	}
-
-	public void setKeyState(int i, boolean state) {
-		key[i].setState(state);
-	}
-	
-	public void resetKeyState() {
-		for (int i = 0; i < getKeyLength(); i++)
-			key[i].setState(false);
-	}
-	
-	public boolean checkIfKeyPressed(int i) {
-		return key[i].checkIfPressed();
-	}
-	
-	public int getKeyLength() {
-		return key.length;
 	}
 
 	public BMSPlayerInputDevice getLastKeyChangedDevice() {
@@ -260,8 +222,8 @@ public class BMSPlayerInputProcessor {
 
 	private int countKeyboard(PlayModeConfig playconfig, boolean[] exclusive) {
 		int[] kbkeys = playconfig.getKeyboardConfig().getKeys();
-		resetKeyState();
-		resetKeyTime();
+		keyData.resetKeyState();
+		keyData.resetKeyTime();
 		
 		int kbcount = setPlayConfig0(kbkeys,  exclusive);
 		return kbcount;
@@ -287,8 +249,8 @@ public class BMSPlayerInputProcessor {
 	public void setEnable(boolean enable) {
 		this.enable = enable;
 		if(!enable) {
-			resetKeyState();
-			resetKeyTime();
+			keyData.resetKeyState();
+			keyData.resetKeyTime();
 			for (BMSPlayerInputDevice device : devices) {
 				device.clear();
 			}
@@ -299,9 +261,9 @@ public class BMSPlayerInputProcessor {
 		if (!enable) {
 			return;
 		}
-		if (getKeyState(i) != pressed) {
-			setKeyState(i, pressed);
-			setKeyTime(i, presstime);
+		if (keyData.getKeyState(i) != pressed) {
+			keyData.setKeyState(i, pressed);
+			keyData.setKeyTime(i, presstime);
 			lastKeyDevice = device;
 			if (this.getStartTime() != 0) {
 				keylog.add((int) presstime, i, pressed);
