@@ -120,45 +120,42 @@ public class MusicResult extends AbstractResult {
 					Logger.getGlobal().info("IRへスコア送信中");
 					main.switchTimer(TIMER_IR_CONNECT_BEGIN, true);
 					state = STATE_IR_PROCESSING;
-					Thread irprocess = new Thread() {
-						@Override
-						public void run() {
-							try {
-								IRResponse<Object> send = ir.sendPlayData(resource.getBMSModel(), resource.getScoreData());
-								if(send.isSuccessed()) {
-									main.switchTimer(TIMER_IR_CONNECT_SUCCESS, true);
-									Logger.getGlobal().info("IRスコア送信完了");							
-								} else {
-									main.switchTimer(TIMER_IR_CONNECT_FAIL, true);
-									Logger.getGlobal().warning("IRスコア送信失敗 : " + send.getMessage());							
-								}
-								IRResponse<IRScoreData[]> response = ir.getPlayData(null, resource.getBMSModel());
-								if(response.isSuccessed()) {
-									IRScoreData[] scores = response.getData();
-									irtotal = scores.length;
+					Thread irprocess = new Thread(() -> {
+                        try {
+                            IRResponse<Object> send1 = ir.sendPlayData(resource.getSongdata(), resource.getScoreData());
+                            if(send1.isSuccessed()) {
+                                main.switchTimer(TIMER_IR_CONNECT_SUCCESS, true);
+                                Logger.getGlobal().info("IRスコア送信完了");
+                            } else {
+                                main.switchTimer(TIMER_IR_CONNECT_FAIL, true);
+                                Logger.getGlobal().warning("IRスコア送信失敗 : " + send1.getMessage());
+                            }
+                            IRResponse<IRScoreData[]> response = ir.getPlayData(null, resource.getBMSModel());
+                            if(response.isSuccessed()) {
+                                IRScoreData[] scores = response.getData();
+                                irtotal = scores.length;
 
-									for(int i = 0;i < scores.length;i++) {
-										if(irrank == 0 && scores[i].getExscore() <= resource.getScoreData().getExscore() ) {
-											irrank = i + 1;
-										}
-										if(irprevrank == 0 && scores[i].getExscore() <= oldscore.getExscore() ) {
-											irprevrank = i + 1;
-											if(irrank == 0) {
-												irrank = irprevrank;
-											}
-										}
-									}
-									Logger.getGlobal().warning("IRからのスコア取得成功 : " + response.getMessage());
-								} else {
-									Logger.getGlobal().warning("IRからのスコア取得失敗 : " + response.getMessage());
-								}
-							} catch (Exception e) {
-								Logger.getGlobal().severe(e.getMessage());
-							} finally {
-								state = STATE_IR_FINISHED;
-							}
-						}
-					};
+                                for(int i = 0;i < scores.length;i++) {
+                                    if(irrank == 0 && scores[i].getExscore() <= resource.getScoreData().getExscore() ) {
+                                        irrank = i + 1;
+                                    }
+                                    if(irprevrank == 0 && scores[i].getExscore() <= oldscore.getExscore() ) {
+                                        irprevrank = i + 1;
+                                        if(irrank == 0) {
+                                            irrank = irprevrank;
+                                        }
+                                    }
+                                }
+                                Logger.getGlobal().warning("IRからのスコア取得成功 : " + response.getMessage());
+                            } else {
+                                Logger.getGlobal().warning("IRからのスコア取得失敗 : " + response.getMessage());
+                            }
+                        } catch (Exception e) {
+                            Logger.getGlobal().severe(e.getMessage());
+                        } finally {
+                            state = STATE_IR_FINISHED;
+                        }
+                    });
 					irprocess.start();
 				}
 			}
@@ -680,6 +677,11 @@ public class MusicResult extends AbstractResult {
 		}
 	}
 
+	/**
+	 *
+	 *
+	 * @author KEH
+	 */
 	public class TimingDistribution {
 		private final int arrayCenter;
 		private int[] dist;

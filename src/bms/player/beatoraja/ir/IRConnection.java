@@ -81,7 +81,7 @@ public interface IRConnection {
 	 *            スコア
 	 * @return 送信結果
 	 */
-	public IRResponse<Object> sendPlayData(BMSModel model, IRScoreData score);
+	public IRResponse<Object> sendPlayData(SongData model, IRScoreData score);
 
 	/**
 	 * コーススコアデータを送信する
