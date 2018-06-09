@@ -3,6 +3,7 @@ package bms.player.beatoraja.select;
 import static bms.player.beatoraja.select.MusicSelectKeyProperty.MusicSelectKey.*;
 
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
+import bms.player.beatoraja.input.keyData;
 
 public enum MusicSelectKeyProperty {
 
@@ -59,10 +60,10 @@ public enum MusicSelectKeyProperty {
 	public boolean isPressed(BMSPlayerInputProcessor input, MusicSelectKey code, boolean resetState) {
 		for (int i = 0; i < assign.length; i++) {
 			for (MusicSelectKey index : assign[i]) {
-				if (code == index && input.getKeyState(i)) {
+				if (code == index && keyData.getKeyState(i)) {
 					if (resetState) {
-						if (input.getKeyTime(i) != 0) {
-							input.resetKeyTime(i);
+						if (keyData.getKeyTime(i) != 0) {
+							keyData.resetKeyTime(i);
 							return true;
 						}
 						return false;

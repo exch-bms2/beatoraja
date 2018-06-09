@@ -3,6 +3,7 @@ package bms.player.beatoraja.select;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
+import bms.player.beatoraja.input.keyData;
 import bms.player.beatoraja.play.TargetProperty;
 import bms.player.beatoraja.select.MusicSelectKeyProperty.MusicSelectKey;
 import bms.player.beatoraja.select.bar.*;
@@ -16,7 +17,7 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
 import static bms.player.beatoraja.select.MusicSelectKeyProperty.MusicSelectKey.*;
 
 /**
- * 選曲の入力処理用クラス
+ * �겦�쎊�겗�뀯�뒟�눇�릤�뵪�궚�꺀�궧
  * Class for input processing of music selection
  *
  * @author exch
@@ -24,12 +25,12 @@ import static bms.player.beatoraja.select.MusicSelectKeyProperty.MusicSelectKey.
 public class MusicSelectInputProcessor {
 
     /**
-     * バー移動中のカウンタ
+     * �깘�꺖燁삣땿訝��겗�궖�궑�꺍�궭
      * Counter in moving bar
      */
     private long duration;
     /**
-     * バーの移動方向
+     * �깘�꺖�겗燁삣땿�뼶�릲
      * Direction of movement of the bar
      */
     private int angle;
@@ -52,7 +53,7 @@ public class MusicSelectInputProcessor {
         final Bar current = bar.getSelected();
 
         if (input.checkIfNumberPressed(0)) {
-            // 検索用ポップアップ表示。これ必要？
+            // 濾쒐뇨�뵪�깮�긿�깤�궋�긿�깤烏①ㅊ�귙걪�굦恙낁쫨竊�
         	// Popup display for search.
             input.resetNumberTime(0);
             Gdx.input.getTextInput(new Input.TextInputListener() {
@@ -71,19 +72,19 @@ public class MusicSelectInputProcessor {
         }
 
         if (input.checkIfNumberPressed(1)) {
-            // KEYフィルターの切り替え
+            // KEY�깢�궍�꺂�궭�꺖�겗�늾�굤�쎘�걟
         	// Switching KEY Filters
         	input.resetNumberTime(1);
             select.execute(MusicSelectCommand.NEXT_MODE);
         }
         if (input.checkIfNumberPressed(2)) {
-            // ソートの切り替え
+            // �궫�꺖�깉�겗�늾�굤�쎘�걟
         	// Switching the sort
             input.resetNumberTime(2);
             select.execute(MusicSelectCommand.NEXT_SORT);
         }
         if (input.checkIfNumberPressed(3)) {
-            // LNモードの切り替え
+            // LN�깴�꺖�깋�겗�늾�굤�쎘�걟
         	// LN mode switching
             input.resetNumberTime(3);
             select.execute(MusicSelectCommand.NEXT_LNMODE);
@@ -282,7 +283,7 @@ public class MusicSelectInputProcessor {
             }
             // close folder
             if (property.isPressed(input, FOLDER_CLOSE, true) || input.checkIfCursorPressed(2)) {
-            	input.resetKeyTime(1);
+            	keyData.resetKeyTime(1);
                 input.resetCursorTime(2);
                 bar.close();
             }

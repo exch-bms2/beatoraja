@@ -11,10 +11,11 @@ import bms.model.TimeLine;
 import bms.player.beatoraja.MainController;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyInputLog;
+import bms.player.beatoraja.input.keyData;
 import bms.player.beatoraja.skin.SkinPropertyMapper;
 
 /**
- * �궘�꺖�뀯�뒟�눇�릤�뵪�궧�꺃�긿�깋
+ * 占쎄텣占쎄틬占쎈��占쎈뮓占쎈늾占쎈┐占쎈뎁占쎄때占쎄틕占쎄맙占쎄퉳
  *
  * @author exch
  */
@@ -30,10 +31,10 @@ class KeyInputProccessor {
 
 	private final LaneProperty laneProperty;
 
-	//�궘�꺖�깛�꺖�깲�닩若싧릪�쐿�뵪
+	//占쎄텣占쎄틬占쎄튆占쎄틬占쎄묾占쎈떓畑댁떑由わ옙�맾占쎈뎁
 	private boolean isJudgeStarted = false;
 
-	//�궘�꺖�깛�꺖�깲�걶閭®뵪
+	//占쎄텣占쎄틬占쎄튆占쎄틬占쎄묾占쎄굡癲녌�逾�
 	private boolean keyBeamStop = false;
 
 	public KeyInputProccessor(BMSPlayer player, LaneProperty laneProperty) {
@@ -58,13 +59,13 @@ class KeyInputProccessor {
 
 		final int[] laneoffset = laneProperty.getLaneSkinOffset();
 		for (int lane = 0; lane < laneoffset.length; lane++) {
-			// �궘�꺖�깛�꺖�깲�깢�꺀�궛ON/OFF			
+			// 占쎄텣占쎄틬占쎄튆占쎄틬占쎄묾占쎄묄占쎄�占쎄텦ON/OFF			
 			final int offset = laneoffset[lane];
 			boolean pressed = false;
 			boolean scratch = false;
 			if(!keyBeamStop) {
 				for (int key : laneProperty.getLaneKeyAssign()[lane]) {
-					if (input.getKeyState(key) || auto_presstime[key] != Long.MIN_VALUE) {
+					if (keyData.getKeyState(key) || auto_presstime[key] != Long.MIN_VALUE) {
 						pressed = true;
 						if(laneProperty.getLaneScratchAssign()[lane] != -1
 								&& scratchKey[laneProperty.getLaneScratchAssign()[lane]] != key) {
@@ -97,9 +98,9 @@ class KeyInputProccessor {
 				scratch[s] += s % 2 == 0 ? 2160 - deltatime : deltatime;
 				final int key0 = laneProperty.getScratchKeyAssign()[s][1];
 				final int key1 = laneProperty.getScratchKeyAssign()[s][0];
-				if (input.getKeyState(key0) || auto_presstime[key0] != Long.MIN_VALUE) {
+				if (keyData.getKeyState(key0) || auto_presstime[key0] != Long.MIN_VALUE) {
 					scratch[s] += deltatime * 2;
-				} else if (input.getKeyState(key1) || auto_presstime[key1] != Long.MIN_VALUE) {
+				} else if (keyData.getKeyState(key1) || auto_presstime[key1] != Long.MIN_VALUE) {
 					scratch[s] += 2160 - deltatime * 2;
 				}
 				scratch[s] %= 2160;
@@ -108,7 +109,7 @@ class KeyInputProccessor {
 		prevtime = now;
 	}
 
-	// �궘�꺖�깛�꺖�깲�깢�꺀�궛ON �닩若싧릪�쐿�뵪
+	// 占쎄텣占쎄틬占쎄튆占쎄틬占쎄묾占쎄묄占쎄�占쎄텦ON 占쎈떓畑댁떑由わ옙�맾占쎈뎁
 	public void inputKeyOn(int lane) {
 		final MainController main = player.main;
 		final int offset = laneProperty.getLaneSkinOffset()[lane];
@@ -140,16 +141,16 @@ class KeyInputProccessor {
 	}
 
 	/**
-	 * �깤�꺃�궎�꺆�궛�걢�굢�겗�궘�꺖�눎�땿�뀯�뒟�곩닩若싧눇�릤�뵪�궧�꺃�긿�깋
+	 * 占쎄묏占쎄틕占쎄텕占쎄틙占쎄텦占쎄괍占쎄덩占쎄쿁占쎄텣占쎄틬占쎈닅占쎈빣占쎈��占쎈뮓占쎄낑�떓畑댁떑�늾占쎈┐占쎈뎁占쎄때占쎄틕占쎄맙占쎄퉳
 	 */
 	class JudgeThread extends Thread {
 
-		// TODO �닩若싧눇�릤�궧�꺃�긿�깋�겘JudgeManager�겓歷▲걮�걼�뼶�걣�걚�걚�걢�굚
+		// TODO 占쎈떓畑댁떑�늾占쎈┐占쎄때占쎄틕占쎄맙占쎄퉳占쎄쿂JudgeManager占쎄쾽癲뚢뼯嫄�占쎄굴占쎈섬占쎄괏占쎄콢占쎄콢占쎄괍占쎄탾
 
 		private final TimeLine[] timelines;
 		private boolean stop = false;
 		/**
-		 * �눎�땿�뀯�뒟�걲�굥�궘�꺖�뀯�뒟�꺆�궛
+		 * 占쎈닅占쎈빣占쎈��占쎈뮓占쎄굉占쎄데占쎄텣占쎄틬占쎈��占쎈뮓占쎄틙占쎄텦
 		 */
 		private final KeyInputLog[] keylog;
 
@@ -171,18 +172,18 @@ class KeyInputProccessor {
 			while (!stop) {
 				final long time = player.main.getNowTime(TIMER_PLAY);
 				if (time != prevtime) {
-					// �꺁�깤�꺃�궎�깈�꺖�궭�냽�뵟
+					// 占쎄틒占쎄묏占쎄틕占쎄텕占쎄퉰占쎄틬占쎄땟占쎈꺗占쎈턃
 					if (keylog != null) {
 						while (index < keylog.length && keylog[index].time <= time) {
 							final KeyInputLog key = keylog[index];
 							// if(input.getKeystate()[key.keycode] ==
 							// key.pressed) {
-							// System.out.println("�듉�걮�썴�걮�걣烏뚣굩�굦�겍�걚�겲�걵�굯 : key - " +
+							// System.out.println("占쎈뱣占쎄괼占쎌뜶占쎄괼占쎄괏�깗�슔援⑼옙援�占쎄쾷占쎄콢占쎄께占쎄굘占쎄뎐 : key - " +
 							// key.keycode + " pressed - " + key.pressed +
 							// " time - " + key.time);
 							// }
-							input.setKeyState(key.keycode, key.pressed);
-							input.setKeyTime(key.keycode, key.time);
+							keyData.setKeyState(key.keycode, key.pressed);
+							keyData.setKeyTime(key.keycode, key.time);
 							index++;
 						}
 					}
@@ -208,11 +209,11 @@ class KeyInputProccessor {
 			}
 
 			if (keylog != null) {
-				input.resetKeyState();
-				input.resetKeyTime();
+				keyData.resetKeyState();
+				keyData.resetKeyTime();
 			}
 
-			Logger.getGlobal().info("�뀯�뒟�깙�깢�궔�꺖�깯�꺍�궧(max ms) : " + frametime);
+			Logger.getGlobal().info("占쎈��占쎈뮓占쎄튃占쎄묄占쎄텛占쎄틬占쎄묻占쎄틡占쎄때(max ms) : " + frametime);
 		}
 	}
 }

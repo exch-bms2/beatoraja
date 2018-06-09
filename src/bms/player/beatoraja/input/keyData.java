@@ -2,8 +2,9 @@ package bms.player.beatoraja.input;
 
 public class keyData {
 	public static Key[] key = new Key[256];
+	private Key[] numberKey = new Key[10];
+	private Key[] functionKey = new Key[12];
 
-	// get set methods for key
 	public static long getKeyTime(int i) {
 		return key[i].getPressTime();
 	}
@@ -42,4 +43,5 @@ public class keyData {
 		return key.length;
 	}
 
+	
 }
