@@ -207,27 +207,27 @@ public class KeyConfiguration extends MainState {
 
 			if (input.checkIfNumberPressed(7)) {
 				input.resetNumberTime(7);
-				keyboardConfig.setKeyAssgin(MODE_HINT[mode], true);
+				keyboardConfig.setKeyAssign(MODE_HINT[mode], -1, true);
 				for (int i = 0; i < controllerConfigs.length; i++) {
 					controllerConfigs[i].setKeyAssign(MODE_HINT[mode], i, false);
 				}
-				midiconfig.setKeyAssign(MODE_HINT[mode], false);
+				midiconfig.setKeyAssign(MODE_HINT[mode], -1, false);
 			}
 			if (input.checkIfNumberPressed(8)) {
 				input.resetNumberTime(8);
-				keyboardConfig.setKeyAssgin(MODE_HINT[mode], false);
+				keyboardConfig.setKeyAssign(MODE_HINT[mode], -1, false);
 				for (int i = 0; i < controllerConfigs.length; i++) {
 					controllerConfigs[i].setKeyAssign(MODE_HINT[mode], i, true);
 				}
-				midiconfig.setKeyAssign(MODE_HINT[mode], false);
+				midiconfig.setKeyAssign(MODE_HINT[mode], -1, false);
 			}
 			if (input.checkIfNumberPressed(9)) {
 				input.resetNumberTime(9);
-				keyboardConfig.setKeyAssgin(MODE_HINT[mode], false);
+				keyboardConfig.setKeyAssign(MODE_HINT[mode], -1, false);
 				for (int i = 0; i < controllerConfigs.length; i++) {
 					controllerConfigs[i].setKeyAssign(MODE_HINT[mode], i, false);
 				}
-				midiconfig.setKeyAssign(MODE_HINT[mode], true);
+				midiconfig.setKeyAssign(MODE_HINT[mode], -1, true);
 			}
 
 			if (input.isEnterPressed()) {

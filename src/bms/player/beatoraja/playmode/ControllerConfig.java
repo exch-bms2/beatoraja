@@ -66,64 +66,72 @@ public class ControllerConfig extends IntConfiguration {
         this.analogScratch = analogScratch;
     }
 
-    public void setKeyAssign(Mode mode, int player, boolean enable) {
-        if(player == 0) {
-            switch (mode) {
-                case BEAT_5K:
-                case BEAT_7K:
-                case POPN_5K:
-                case POPN_9K:
-                default:
-                    keys = new Integer[]{ BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8, BMKeys.BUTTON_2,
-                            BMKeys.BUTTON_5, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN };
-                    break;
-                case BEAT_10K:
-                case BEAT_14K:
-                    keys = new Integer[]{ BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8, BMKeys.BUTTON_2,
-                            BMKeys.BUTTON_5, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN, -1,-1,-1,-1,-1,-1,-1,-1,-1 };
-                    break;
-                case KEYBOARD_24K:
-                    keys = new Integer[]{ BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8, BMKeys.BUTTON_2,
-                            BMKeys.BUTTON_5, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN };
-                    keys = Arrays.copyOf(keys, 26);
-                    break;
-                case KEYBOARD_24K_DOUBLE:
-                    keys = new Integer[]{ BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8, BMKeys.BUTTON_2,
-                            BMKeys.BUTTON_5, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN };
-                    keys = Arrays.copyOf(keys, 52);
-                    break;
-            }
-        } else {
-            switch (mode) {
-                case BEAT_5K:
-                case BEAT_7K:
-                case POPN_5K:
-                case POPN_9K:
-                default:
-                    keys = new Integer[9];
-                    Arrays.fill(keys, -1);
-                    break;
-                case BEAT_10K:
-                case BEAT_14K:
-                    keys = new Integer[]{-1,-1,-1,-1,-1,-1,-1,-1,-1,BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8, BMKeys.BUTTON_2,
-                            BMKeys.BUTTON_5, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN};
-                    break;
-                case KEYBOARD_24K:
-                    keys = new Integer[]{-1,-1,-1,-1,-1,-1,-1,-1,-1,BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8, BMKeys.BUTTON_2,
-                            BMKeys.BUTTON_5, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN};
-                    keys = Arrays.copyOf(keys, 26);
-                    break;
-                case KEYBOARD_24K_DOUBLE:
-                    keys = new Integer[]{-1,-1,-1,-1,-1,-1,-1,-1,-1,BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8, BMKeys.BUTTON_2,
-                            BMKeys.BUTTON_5, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN};
-                    keys = Arrays.copyOf(keys, 52);
-                    break;
-            }
-        }
-        if(!enable) {
+    // set key assign
+	@Override
+	protected void setKey_beat_5K_7K(int player) {
+		if(player == 0) {
+			keys = new Integer[]{ BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8, BMKeys.BUTTON_2,
+                    BMKeys.BUTTON_5, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN };
+		}
+		else {
+			keys = new Integer[9];
             Arrays.fill(keys, -1);
-        }
-        start = BMKeys.BUTTON_9;
+		}
+	}
+
+	@Override
+	protected void setKey_beat_10K_14K(int player) {
+		if(player == 0) {
+		keys = new Integer[]{ BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8, BMKeys.BUTTON_2,
+                BMKeys.BUTTON_5, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN, -1,-1,-1,-1,-1,-1,-1,-1,-1 };
+		}
+		else {
+			keys = new Integer[]{-1,-1,-1,-1,-1,-1,-1,-1,-1,BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8, BMKeys.BUTTON_2,
+                    BMKeys.BUTTON_5, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN};
+		}
+	}
+
+	@Override
+	protected void setKey_popn_5K_9K(int player) {
+		setKey_beat_5K_7K(player);
+	}
+
+	@Override
+	protected void setKey_popn_24K(int player) {
+		if(player == 0) {
+			keys = new Integer[]{ BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8, BMKeys.BUTTON_2,
+                    BMKeys.BUTTON_5, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN };
+            keys = Arrays.copyOf(keys, 26);
+		}
+		else {
+			keys = new Integer[]{-1,-1,-1,-1,-1,-1,-1,-1,-1,BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8, BMKeys.BUTTON_2,
+                    BMKeys.BUTTON_5, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN};
+            keys = Arrays.copyOf(keys, 26);
+		}
+	}
+
+	@Override
+	protected void setKey_popn_24K_double(int player) {
+		if(player == 0) {
+			keys = new Integer[]{ BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8, BMKeys.BUTTON_2,
+                    BMKeys.BUTTON_5, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN };
+            keys = Arrays.copyOf(keys, 52);
+		}
+		else {
+			keys = new Integer[]{-1,-1,-1,-1,-1,-1,-1,-1,-1,BMKeys.BUTTON_4, BMKeys.BUTTON_7, BMKeys.BUTTON_3, BMKeys.BUTTON_8, BMKeys.BUTTON_2,
+                    BMKeys.BUTTON_5, BMKeys.LEFT, BMKeys.UP, BMKeys.DOWN};
+            keys = Arrays.copyOf(keys, 52);
+		}
+	}
+
+	@Override
+	protected void setKey_default(int player) {
+		setKey_beat_5K_7K(player);
+	}
+
+	@Override
+	protected void setKey_additional() {
+		start = BMKeys.BUTTON_9;
         select = BMKeys.BUTTON_10;
-    }
+	}
 }
