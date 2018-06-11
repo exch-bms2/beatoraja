@@ -534,6 +534,13 @@ public class SongData implements Validatable, IpfsInformation {
 			appendurl = song.getAppendurl();
 		}
 	}
+	
+	public void shrink() {
+		fulltitle = fullartist = null;
+		path.clear();
+		date = adddate = level = mode = feature = difficulty = judge = minbpm = maxbpm = mainbpm = notes = length = 0;
+		folder = parent = preview = "";
+	}
 
 	@Override
 	public boolean validate() {

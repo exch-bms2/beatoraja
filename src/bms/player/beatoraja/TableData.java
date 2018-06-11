@@ -63,6 +63,15 @@ public class TableData implements Validatable {
 		this.tag = tag;
 	}
 	
+	public void shrink() {
+		for(CourseData c : course) {
+			c.shrink();
+		}
+		for(TableFolder tf : folder) {
+			tf.shrink();
+		}
+	}
+
 	public boolean validate() {
 		if(name == null || name.length() == 0) {
 			return false;
@@ -93,6 +102,12 @@ public class TableData implements Validatable {
 
 		public void setSong(SongData[] songs) {
 			this.songs = songs;
+		}
+		
+		public void shrink() {
+			for(SongData song : songs) {
+				song.shrink();
+			}
 		}
 
 		@Override

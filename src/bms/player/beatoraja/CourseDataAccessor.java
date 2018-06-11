@@ -92,6 +92,9 @@ public class CourseDataAccessor {
      */
     public void write(String name, CourseData[] cd) {
         try {
+        	for(CourseData c : cd) {
+        		c.shrink();
+        	}
             Json json = new Json();
             json.setOutputType(JsonWriter.OutputType.json);
             OutputStreamWriter fw = new OutputStreamWriter(new BufferedOutputStream(

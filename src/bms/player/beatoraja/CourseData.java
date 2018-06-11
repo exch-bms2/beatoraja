@@ -86,6 +86,12 @@ public class CourseData implements Validatable {
         return false;
     }
     
+    public void shrink() {
+    	for(SongData song : hash) {
+    		song.shrink();
+    	}
+    }
+    
     public boolean validate() {
         if(hash == null) {
             return false;

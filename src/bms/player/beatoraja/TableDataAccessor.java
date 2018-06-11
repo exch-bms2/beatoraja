@@ -79,6 +79,7 @@ public class TableDataAccessor {
 	 */
 	public void write(TableData td) {
 		try {
+			td.shrink();
 			Json json = new Json();
 			json.setElementType(TableData.class, "folder", ArrayList.class);
 			json.setElementType(TableData.TableFolder.class, "songs", ArrayList.class);
