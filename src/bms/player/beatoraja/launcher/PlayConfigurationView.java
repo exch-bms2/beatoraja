@@ -376,52 +376,45 @@ public class PlayConfigurationView implements Initializable {
 	@JsonIgnoreProperties(ignoreUnknown=true)
 	static class GithubLastestRelease{
 		public String name;
-		public List<Asset> assets;
-
-		@JsonIgnoreProperties(ignoreUnknown=true)
-		static class Asset{
-			public String browser_download_url;
-		}
 	}
 
-	private void newVersionCheck() {
-		Runnable newVersionCheckRunnable = () -> {
-			try {
-				URL url = new URL("https://api.github.com/repos/exch-bms2/beatoraja/releases/latest");
-				ObjectMapper mapper = new ObjectMapper();
-				GithubLastestRelease lastestData = mapper.readValue(url, GithubLastestRelease.class);
-				final String name = lastestData.name;
-				final String downloadURL = lastestData.assets.get(0).browser_download_url;
-				Platform.runLater(
-	                    () -> {
-
-	                    	if(MainController.VERSION.contains(name)) {
-	                    		newversion.setText("最新版を利用中です");
-	                    	} else {
-	                    		newversion.setText(String.format("最新版[%s]を利用可能です。",name));
-		                    	newversion.setOnAction(new EventHandler<ActionEvent>() {
-
-		                    	    @Override
-		                    	    public void handle(ActionEvent event) {
-		                    			Desktop desktop = Desktop.getDesktop();
-		                    			URI uri;
-										try {
-											uri = new URI(downloadURL);
-											desktop.browse(uri);
-										} catch (Exception e) {
-											Logger.getGlobal().warning("最新版URLアクセス時例外:" + e.getMessage());
-										}
-		                    	    }
-		                    	});
-	                    	}
-	                    });
-			} catch (Exception e) {
-				Logger.getGlobal().warning("最新版URL取得時例外:" + e.getMessage());
-			}
-		};
-
-		new Thread(newVersionCheckRunnable).start();
-	}
+        private void newVersionCheck() {
+        	Runnable newVersionCheckRunnable = () -> {
+        	    try {
+        		URL url = new URL("https://api.github.com/repos/exch-bms2/beatoraja/releases/latest");
+        		ObjectMapper mapper = new ObjectMapper();
+        		GithubLastestRelease lastestData = mapper.readValue(url, GithubLastestRelease.class);
+        		final String name = lastestData.name;
+        		final String downloadURL = "https://mocha-repository.info/download/beatoraja" + name + ".zip";
+        		Platform.runLater(() -> {
+        
+        		    if (MainController.VERSION.contains(name)) {
+        			newversion.setText("最新版を利用中です");
+        		    } else {
+        			newversion.setText(String.format("最新版[%s]を利用可能です。", name));
+        			newversion.setOnAction(new EventHandler<ActionEvent>() {
+        
+        			    @Override
+        			    public void handle(ActionEvent event) {
+        				Desktop desktop = Desktop.getDesktop();
+        				URI uri;
+        				try {
+        				    uri = new URI(downloadURL);
+        				    desktop.browse(uri);
+        				} catch (Exception e) {
+        				    Logger.getGlobal().warning("最新版URLアクセス時例外:" + e.getMessage());
+        				}
+        			    }
+        			});
+        		    }
+        		});
+        	    } catch (Exception e) {
+        		Logger.getGlobal().warning("最新版URL取得時例外:" + e.getMessage());
+        	    }
+        	};
+        
+        	new Thread(newVersionCheckRunnable).start();
+        }
 
 	public void setBMSInformationLoader(MainLoader loader) {
 		this.loader = loader;
