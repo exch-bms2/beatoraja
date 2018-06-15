@@ -31,10 +31,10 @@ public class SkinSourceMovie implements SkinSource {
 
 	public TextureRegion getImage(long time, MainState state) {
 		if(!playing) {
-			image.play(true);
+			image.play(time, true);
 			playing = true;
 		}
-		Texture tex = image.getFrame();
+		Texture tex = image.getFrame(time);
 		if(tex != null) {
 			region.setTexture(tex);
 			region.setRegion(tex);

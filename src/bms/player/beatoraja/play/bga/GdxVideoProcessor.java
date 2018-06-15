@@ -7,22 +7,13 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 public class GdxVideoProcessor implements MovieProcessor {
 
 	@Override
-	public void create(String filepath) {
-//	    videoPlayer = VideoPlayerCreator.createVideoPlayer();//cam, mesh, GL20.GL_TRIANGLES);
-//	    videoPlayer.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-
-		// TODO 自動生成されたメソッド・スタブ
-
-	}
-
-	@Override
-	public Texture getFrame() {
+	public Texture getFrame(long time) {
 		// TODO 自動生成されたメソッド・スタブ
 		return null;
 	}
 
 	@Override
-	public void play(boolean loop) {
+	public void play(long time, boolean loop) {
 
 	}
 

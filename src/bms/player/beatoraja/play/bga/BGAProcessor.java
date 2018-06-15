@@ -83,7 +83,7 @@ public class BGAProcessor {
 		mpgresource = new ResourcePool<String, MovieProcessor>(Math.max(config.getSongResourceGen(), 1)) {
 			@Override
 			protected MovieProcessor load(String key) {
-				MovieProcessor mm = new FFmpegProcessor(config.getFrameskip());
+				FFmpegProcessor mm = new FFmpegProcessor(config.getFrameskip());
 				mm.create(key);
 				return mm;
 			}
@@ -214,9 +214,6 @@ public class BGAProcessor {
 		}
 		for (MovieProcessor mp : mpgmap.values()) {
 			mp.stop();				
-			if (mp instanceof FFmpegProcessor) {
-				((FFmpegProcessor) mp).setTimerObserver(() -> player.main.getNowMicroTime(TIMER_PLAY));
-			}
 		}
 		playingbgaid = -1;
 		playinglayerid = -1;
@@ -225,7 +222,7 @@ public class BGAProcessor {
 		prevrendertime = 0;		
 	}
 
-	private Texture getBGAData(int id, boolean cont) {
+	private Texture getBGAData(long time, int id, boolean cont) {
 		if (progress != 1 || id == -1) {
 			return null;
 		}
@@ -233,9 +230,9 @@ public class BGAProcessor {
 		MovieProcessor mp = getMovieProcessor(id);
 		if(mp != null) {
 			if (!cont) {
-				mp.play(false);
+				mp.play(time, false);
 			}
-			return mp.getFrame();			
+			return mp.getFrame(time);
 		}
 		return cache != null ? cache.getTexture(id) : null;
 	}
@@ -286,14 +283,14 @@ public class BGAProcessor {
 
 		if (misslayer != null && misslayertime != 0 && time >= misslayertime && time < misslayertime + getMisslayerduration) {
 			// draw miss layer
-			Texture miss = getBGAData(misslayer[(int) (misslayer.length * (time - misslayertime) / getMisslayerduration)], true);
+			Texture miss = getBGAData(time, misslayer[(int) (misslayer.length * (time - misslayertime) / getMisslayerduration)], true);
 			if (miss != null) {
 				sprite.setType(SkinObjectRenderer.TYPE_LINEAR);
 				drawBGAFixRatio(dst, sprite, r, miss);
 			}
 		} else {
 			// draw BGA
-			final Texture playingbgatex = getBGAData(playingbgaid, rbga);
+			final Texture playingbgatex = getBGAData(time, playingbgaid, rbga);
 			if (playingbgatex != null) {
 				final MovieProcessor mp = getMovieProcessor(playingbgaid);
 				if (mp != null) {
@@ -307,7 +304,7 @@ public class BGAProcessor {
 				sprite.draw(blanktex, r.x, r.y, r.width, r.height);
 			}
 			// draw layer
-			final Texture playinglayertex = getBGAData(playinglayerid, rlayer);
+			final Texture playinglayertex = getBGAData(time, playinglayerid, rlayer);
 			if (playinglayertex != null) {
 				final MovieProcessor mp = getMovieProcessor(playinglayerid);
 				if (mp != null) {

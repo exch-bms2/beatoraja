@@ -36,30 +36,25 @@ public class FFmpegProcessor implements MovieProcessor {
 	 */
 	private MovieSeekThread movieseek;
 
-	private TimerObserver timerObserver = () -> {
-		return System.nanoTime() / 1000;
-	};
+	private long time;
 
 	public FFmpegProcessor(int fpsd) {
 		this.fpsd = fpsd;
 	}
 
-	public void setTimerObserver(TimerObserver timerObserver) {
-		this.timerObserver = timerObserver;
-	}
-
-	@Override
 	public void create(String filepath) {
 		movieseek = new MovieSeekThread(filepath);
 		movieseek.start();
 	}
 
 	@Override
-	public Texture getFrame() {
+	public Texture getFrame(long time) {
+		this.time = time;
 		return showingtex;
 	}
 	
-	public void play(boolean loop) {
+	public void play(long time, boolean loop) {
+		this.time = time;
 		movieseek.exec(loop ? Command.LOOP : Command.PLAY);
 	}
 
@@ -147,7 +142,7 @@ public class FFmpegProcessor implements MovieProcessor {
 				boolean halt = false;
 				boolean loop = false;
 				while (!halt) {
-					final long microtime = timerObserver.getMicroTime() + offset;
+					final long microtime = time * 1000 + offset;
 					if (eof) {
 						try {
 							sleep(3600000);
@@ -237,7 +232,7 @@ public class FFmpegProcessor implements MovieProcessor {
 			grabber.restart();
 			grabber.grabFrame();
 			eof = false;
-			offset = grabber.getTimestamp() - timerObserver.getMicroTime();
+			offset = grabber.getTimestamp() - time * 1000;
 			framecount = 1;
 			// System.out.println("movie restart - starttime : " + start);
 		}
