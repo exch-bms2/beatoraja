@@ -108,11 +108,11 @@ public class SongData implements Validatable, IpfsInformation {
 			return;
 		}
 		this.model = model;
-		title = model.getTitle();
-		subtitle = model.getSubTitle();
+		setTitle(model.getTitle());
+		setSubtitle(model.getSubTitle());
 		genre = model.getGenre();
-		artist = model.getArtist();
-		subartist = model.getSubArtist();
+		setArtist(model.getArtist());
+		setSubartist(model.getSubArtist());
 		path.add(model.getPath());
 		md5 = model.getMD5();
 		sha256 = model.getSHA256();
@@ -247,15 +247,21 @@ public class SongData implements Validatable, IpfsInformation {
 	public String getTitle() {
 		return title;
 	}
+	
 	public void setTitle(String title) {
 		this.title = title;
+		fulltitle = null;
 	}
+	
 	public String getSubtitle() {
 		return subtitle;
 	}
+	
 	public void setSubtitle(String subtitle) {
 		this.subtitle = subtitle;
+		fulltitle = null;
 	}
+	
 	public String getFullTitle() {
 		if(fulltitle == null) {
 			fulltitle = subtitle.length() > 0 ? title + " " + subtitle : title;
@@ -267,13 +273,17 @@ public class SongData implements Validatable, IpfsInformation {
 	}
 	public void setArtist(String artist) {
 		this.artist = artist;
+		fullartist = null;
 	}
 	public String getSubartist() {
 		return subartist;
 	}
+	
 	public void setSubartist(String subartist) {
 		this.subartist = subartist;
+		fullartist = null;
 	}
+	
 	public String getFullArtist() {
 		if(fullartist == null) {
 			fullartist = subartist.length() > 0 ? artist + " " + subartist : artist;
