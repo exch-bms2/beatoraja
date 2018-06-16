@@ -2,20 +2,13 @@ package bms.player.beatoraja.skin;
 
 import java.util.Optional;
 
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 
-import bms.model.BMSModel;
-import bms.model.Mode;
-import bms.player.beatoraja.CourseData;
-import bms.player.beatoraja.MainState;
-import bms.player.beatoraja.PlayerResource;
-import bms.player.beatoraja.play.BMSPlayer;
-import bms.player.beatoraja.play.BMSPlayerRule;
-import bms.player.beatoraja.play.JudgeProperty;
+import bms.model.*;
+import bms.player.beatoraja.*;
+import bms.player.beatoraja.play.*;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 
 /**
@@ -29,32 +22,50 @@ public class SkinTimingVisualizer extends SkinObject {
 	private TextureRegion shapetex = null;
 	private Pixmap shape = null;
 
-	private static final Color[] JColor = new Color[] {
-			Color.valueOf("000088"),
-			Color.valueOf("008800"),
-			Color.valueOf("666600"),
-			Color.valueOf("880000"),
-			Color.valueOf("000000") };
+	// 判定色はスキン側で設定できるように
+	private Color[] JColor;
 
 	private static final Color CLEAR = Color.valueOf("00000000");
 
+	// 線の幅をスキン側で設定できるように
+	private final int lineWidth;
+	private final int width;
+	private final int judgeWidthMillis;
 	private final int center;
-	private final int range;
 	private final boolean drawCenter;
 	private final boolean drawDecay;
 
-	public SkinTimingVisualizer() {
-		this(401, 1, 1);
+	public SkinTimingVisualizer(int width) {
+		this(width, 150, 1, "00FF00FF", "000088FF", "008800FF", "666600FF", "880000FF", "000000FF", 0, 1, 1);
 	}
 
-	public SkinTimingVisualizer(int width, int drawCenter, int drawDecay) {
-		if (width > 0) {
-			this.center = width / 2;
-			this.range = width;
-		} else {
-			this.center = 200;
-			this.range = 401;
-		}
+	/**
+	 *
+	 * @param lineWidth 入力線の幅
+	 * @param width スキン描画幅(
+	 * @param judgeWidth 判定描画幅
+	 * @param Color AARRGGBB形式
+	 * @param transparent 1:POOR判定を透過する
+	 * @param drawCenter 1:判定の中央を描画する
+	 * @param drawDecay 1:線を減衰させる
+	 */
+	public SkinTimingVisualizer(int width, int judgeWidthMillis, int lineWidth,
+			String LineColor, String PGColor, String GRColor, String GDColor, String BDColor, String PRColor,
+			int transparent, int drawCenter, int drawDecay) {
+
+
+		this.lineWidth = lineWidth;
+		this.width = width;
+		this.center = judgeWidthMillis;
+		this.judgeWidthMillis = judgeWidthMillis;
+
+		JColor = new Color[] {
+				Color.valueOf(colorStringValidation(PGColor)),
+				Color.valueOf(colorStringValidation(GRColor)),
+				Color.valueOf(colorStringValidation(GDColor)),
+				Color.valueOf(colorStringValidation(BDColor)),
+				transparent == 1 ? CLEAR : Color.valueOf(PRColor)
+		};
 		this.drawCenter = drawCenter == 1 ? true : false;
 		this.drawDecay = drawDecay == 1 ? true : false;
 	}
@@ -74,19 +85,17 @@ public class SkinTimingVisualizer extends SkinObject {
 		PlayerResource resource = state.main.getPlayerResource();
 		int[][] judgeArea = getJudgeArea(resource);
 
+		// 背景テクスチャ生成
 		if (backtex == null) {
-			shape = new Pixmap(range, 1, Pixmap.Format.RGBA8888);
-			shape.setColor(Color.BLACK);
+			int pwidth = judgeWidthMillis * 2 + 1;
+			shape = new Pixmap(pwidth, 1, Pixmap.Format.RGBA8888);
+			shape.setColor(CLEAR);
 			shape.fill();
 			for (int i = JColor.length - 1; i >= 0; i--) {
 				shape.setColor(JColor[i]);
 				int x = center + Math.max(-center, Math.min(judgeArea[i][0], center));
-				int width = Math.min(range - x, Math.abs(judgeArea[i][0]) + Math.abs(judgeArea[i][1]) + 1);
-				shape.fillRectangle(x, 0, width, 1);
-			}
-			if (drawCenter) {
-				shape.setColor(Color.WHITE);
-				shape.fillRectangle(center, 0, Math.min(range, 2), 1);
+				int jwidth = Math.min(pwidth - x, Math.abs(judgeArea[i][0]) + Math.abs(judgeArea[i][1]) + 1);
+				shape.fillRectangle(x, 0, jwidth, 1);
 			}
 
 			backtex = new TextureRegion(new Texture(shape));
@@ -98,10 +107,13 @@ public class SkinTimingVisualizer extends SkinObject {
 		long[] recent = state.getJudgeManager().getRecentJudges();
 
 		if (shape == null) {
-			shape = new Pixmap(range, recent.length * 2, Pixmap.Format.RGBA8888);
+			shape = new Pixmap(width, recent.length * 2, Pixmap.Format.RGBA8888);
 		}
+		// 前景テクスチャ 透明色でフィルして初期化
 		shape.setColor(CLEAR);
 		shape.fill();
+
+
 		for (int i = 0; i < recent.length; i++) {
 			int j = i + index + 1;
 			if (recent[j % recent.length] == Long.MIN_VALUE) {
@@ -153,4 +165,8 @@ public class SkinTimingVisualizer extends SkinObject {
 		Optional.ofNullable(shape).ifPresent(Pixmap::dispose);
 	}
 
+	private String colorStringValidation(String cs) {
+		String s = cs.replaceAll("[^0-9a-fA-F]", "");
+		return s.length() == 0 ? "FF0000FF" : s.substring(0, s.length() > 8 ? 8 : s.length());
+	}
 }
