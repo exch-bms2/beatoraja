@@ -22,43 +22,39 @@ public class SkinTimingVisualizer extends SkinObject {
 	private TextureRegion shapetex = null;
 	private Pixmap shape = null;
 
-	// 判定色はスキン側で設定できるように
+	// 色はスキン側で設定できるように
 	private Color[] JColor;
+	private Color lineColor;
+	private Color centerColor;
 
 	private static final Color CLEAR = Color.valueOf("00000000");
 
 	// 線の幅をスキン側で設定できるように
 	private final int lineWidth;
 	private final int width;
-	private final int judgeWidthMillis;
 	private final int center;
-	private final boolean drawCenter;
+	private final float judgeWidthRate;
 	private final boolean drawDecay;
-
-	public SkinTimingVisualizer(int width) {
-		this(width, 150, 1, "00FF00FF", "000088FF", "008800FF", "666600FF", "880000FF", "000000FF", 0, 1, 1);
-	}
 
 	/**
 	 *
+	 * @param width スキン描画幅
+	 * @param judgeWidthMillis 判定描画幅
 	 * @param lineWidth 入力線の幅
-	 * @param width スキン描画幅(
-	 * @param judgeWidth 判定描画幅
-	 * @param Color AARRGGBB形式
+	 * @param Color RRGGBBAA形式
 	 * @param transparent 1:POOR判定を透過する
-	 * @param drawCenter 1:判定の中央を描画する
 	 * @param drawDecay 1:線を減衰させる
 	 */
 	public SkinTimingVisualizer(int width, int judgeWidthMillis, int lineWidth,
-			String LineColor, String PGColor, String GRColor, String GDColor, String BDColor, String PRColor,
-			int transparent, int drawCenter, int drawDecay) {
+			String lineColor, String centerColor, String PGColor, String GRColor, String GDColor, String BDColor, String PRColor,
+			int transparent, int drawDecay) {
 
-
-		this.lineWidth = lineWidth;
+		this.lineWidth = (lineWidth < 1 ? 1 : 10 < lineWidth ? 10 : lineWidth);
 		this.width = width;
 		this.center = judgeWidthMillis;
-		this.judgeWidthMillis = judgeWidthMillis;
-
+		this.judgeWidthRate = width / (float) (judgeWidthMillis * 2 + 1);
+		this.lineColor = Color.valueOf(colorStringValidation(lineColor));
+		this.centerColor = Color.valueOf(colorStringValidation(centerColor));
 		JColor = new Color[] {
 				Color.valueOf(colorStringValidation(PGColor)),
 				Color.valueOf(colorStringValidation(GRColor)),
@@ -66,7 +62,6 @@ public class SkinTimingVisualizer extends SkinObject {
 				Color.valueOf(colorStringValidation(BDColor)),
 				transparent == 1 ? CLEAR : Color.valueOf(PRColor)
 		};
-		this.drawCenter = drawCenter == 1 ? true : false;
 		this.drawDecay = drawDecay == 1 ? true : false;
 	}
 
@@ -87,15 +82,27 @@ public class SkinTimingVisualizer extends SkinObject {
 
 		// 背景テクスチャ生成
 		if (backtex == null) {
-			int pwidth = judgeWidthMillis * 2 + 1;
+			int pwidth = center * 2 + 1;
 			shape = new Pixmap(pwidth, 1, Pixmap.Format.RGBA8888);
-			shape.setColor(CLEAR);
-			shape.fill();
-			for (int i = JColor.length - 1; i >= 0; i--) {
+
+			int beforex1 = center;
+			int beforex2 = center + 1;
+			shape.setColor(centerColor);
+			shape.fillRectangle(center, 0, 1, 1);
+			for (int i = 0; i < JColor.length; i++) {
 				shape.setColor(JColor[i]);
-				int x = center + Math.max(-center, Math.min(judgeArea[i][0], center));
-				int jwidth = Math.min(pwidth - x, Math.abs(judgeArea[i][0]) + Math.abs(judgeArea[i][1]) + 1);
-				shape.fillRectangle(x, 0, jwidth, 1);
+				int x1 = center + Math.max(-center, Math.min(judgeArea[i][0], center));
+				int x2 = center + Math.max(-center, Math.min(judgeArea[i][1], center)) + 1;
+
+				if (beforex1 > x1) {
+				shape.fillRectangle(x1, 0, Math.abs(x1 - beforex1), 1);
+				beforex1 = x1;
+				}
+
+				if (x2 > beforex2) {
+				shape.fillRectangle(beforex2, 0, Math.abs(x2 - beforex2), 1);
+				beforex2 = x2;
+				}
 			}
 
 			backtex = new TextureRegion(new Texture(shape));
@@ -113,19 +120,18 @@ public class SkinTimingVisualizer extends SkinObject {
 		shape.setColor(CLEAR);
 		shape.fill();
 
-
 		for (int i = 0; i < recent.length; i++) {
 			int j = i + index + 1;
 			if (recent[j % recent.length] == Long.MIN_VALUE) {
 				continue;
 			}
 
-			shape.setColor(Color.rgba8888(0.0f, 1.0f, 0, (i / (1.0f * recent.length))));
-			int x = center + Math.max(-center, Math.min((int) recent[j % recent.length], center));
+			shape.setColor(Color.rgba8888(lineColor.r, lineColor.g, lineColor.b, (lineColor.a * i / (1.0f * recent.length))));
+			int x = (width - lineWidth) / 2 + (int) (Math.max(-center, Math.min((int) recent[j % recent.length], center)) * judgeWidthRate);
 			if (drawDecay) {
-				shape.drawLine(x, recent.length - i, x, recent.length + i);
+				shape.fillRectangle(x, recent.length - i, lineWidth, i * 2);
 			} else {
-				shape.drawLine(x, 0, x, recent.length * 2);
+				shape.fillRectangle(x, 0, lineWidth, recent.length * 2);
 			}
 		}
 

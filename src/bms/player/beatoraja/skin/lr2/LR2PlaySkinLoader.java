@@ -676,14 +676,13 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 			}
 		});
 		addCommandWord(new CommandWord("SRC_TIMING_1P") {
-			//#SRC_NOTECHART_1P,(index),(gr),(x),height,width,judgeWidthMillis,lineWidth,lineColor,PGColor,GRColor,GDColor,BDColor,PRColor,transparent,drawCenter,drawDecay,(),()
+			//#SRC_NOTECHART_1P,(index),(gr),(x),width,height,judgeWidthMillis,lineWidth,lineColor,centerColor,PGColor,GRColor,GDColor,BDColor,PRColor,transparent,drawDecay,(),()
 
 			@Override
 			public void execute(String[] str) {
 				int[] values = parseInt(str);
-				timingobj = new SkinTimingVisualizer(450);
-//				timingobj = new SkinTimingVisualizer(values[5], values[6], values[7], str[8], str[9], str[10], str[11], str[12], str[13], values[14], values[15], values[16]);
-				gauge = new Rectangle(0, 0, 400, 400);
+				timingobj = new SkinTimingVisualizer(values[4], values[6], values[7], str[8], str[9], str[10], str[11], str[12], str[13], str[14], values[15], values[16]);
+				gauge = new Rectangle(0, 0, values[4], values[5]);
 				skin.add(timingobj);
 			}
 		});
