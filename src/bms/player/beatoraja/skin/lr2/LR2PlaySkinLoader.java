@@ -2,19 +2,15 @@ package bms.player.beatoraja.skin.lr2;
 
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.utils.IntIntMap;
-import com.badlogic.gdx.utils.ObjectMap;
+import com.badlogic.gdx.utils.*;
 
 import bms.model.Mode;
-import bms.player.beatoraja.Config;
-import bms.player.beatoraja.MainState;
-import bms.player.beatoraja.Resolution;
+import bms.player.beatoraja.*;
 import bms.player.beatoraja.play.*;
 import bms.player.beatoraja.skin.*;
 
@@ -680,12 +676,13 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 			}
 		});
 		addCommandWord(new CommandWord("SRC_TIMING_1P") {
-			//#SRC_NOTECHART_1P,(index),(gr),(x),(y),(w),(h),(div_x),(div_y),(cycle),(timer),field_w,(field_h),(start),(end),drawCenter,drawDecay,(),()
+			//#SRC_NOTECHART_1P,(index),(gr),(x),width,height,judgeWidthMillis,lineWidth,lineColor,centerColor,PGColor,GRColor,GDColor,BDColor,PRColor,transparent,drawDecay,(),()
+
 			@Override
 			public void execute(String[] str) {
 				int[] values = parseInt(str);
-				timingobj = new SkinTimingVisualizer(values[11], values[15], values[16]);
-				gauge = new Rectangle(0, 0, values[11], values[12]);
+				timingobj = new SkinTimingVisualizer(values[4], values[6], values[7], str[8], str[9], str[10], str[11], str[12], str[13], str[14], values[15], values[16]);
+				gauge = new Rectangle(0, 0, values[4], values[5]);
 				skin.add(timingobj);
 			}
 		});
