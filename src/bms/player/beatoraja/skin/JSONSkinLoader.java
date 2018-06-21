@@ -1,47 +1,28 @@
 package bms.player.beatoraja.skin;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import static bms.player.beatoraja.Resolution.*;
+import static bms.player.beatoraja.skin.SkinProperty.*;
+
+import java.io.*;
 import java.lang.reflect.Array;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.logging.Logger;
 
-import bms.player.beatoraja.Config;
-import bms.player.beatoraja.MainState;
-import bms.player.beatoraja.Resolution;
-import bms.player.beatoraja.SkinConfig;
-import bms.player.beatoraja.config.SkinConfigurationSkin;
-import bms.player.beatoraja.play.*;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.utils.IntIntMap;
-import com.badlogic.gdx.utils.IntMap;
-import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.*;
+import com.badlogic.gdx.utils.reflect.*;
 
+import bms.player.beatoraja.*;
+import bms.player.beatoraja.config.SkinConfigurationSkin;
 import bms.player.beatoraja.decide.MusicDecideSkin;
+import bms.player.beatoraja.play.*;
 import bms.player.beatoraja.result.*;
-import bms.player.beatoraja.select.MusicSelectSkin;
-import bms.player.beatoraja.select.SkinBar;
-import bms.player.beatoraja.select.SkinDistributionGraph;
+import bms.player.beatoraja.select.*;
 import bms.player.beatoraja.skin.SkinHeader.CustomOffset;
-import bms.player.beatoraja.skin.SkinObject.BooleanProperty;
-import bms.player.beatoraja.skin.SkinObject.FloatProperty;
-import bms.player.beatoraja.skin.SkinObject.FloatWriter;
-import bms.player.beatoraja.skin.SkinObject.IntegerProperty;
-import bms.player.beatoraja.skin.SkinObject.SkinOffset;
+import bms.player.beatoraja.skin.SkinObject.*;
 import bms.player.beatoraja.skin.lua.SkinLuaAccessor;
-
-import com.badlogic.gdx.utils.JsonValue;
-import com.badlogic.gdx.utils.ObjectMap;
-import com.badlogic.gdx.utils.reflect.ClassReflection;
-import com.badlogic.gdx.utils.reflect.Field;
-import com.badlogic.gdx.utils.reflect.ReflectionException;
-
-import static bms.player.beatoraja.Resolution.*;
-import static bms.player.beatoraja.skin.SkinProperty.*;
 
 public class JSONSkinLoader extends SkinLoader{
 
@@ -398,16 +379,16 @@ public class JSONSkinLoader extends SkinLoader{
 										mn[j][i] = images[j * 24 + i + 12];
 									}
 								}
-								
+
 								IntegerProperty val = null;
 								if(value.value != null) {
 									val = lua.loadIntegerProperty(value.value);
 								}
-								
+
 								SkinNumber num = null;
 								if(val != null) {
 									num = new SkinNumber(pn, mn, value.timer, value.cycle, value.digit, 0,
-											val);									
+											val);
 								} else {
 									num = new SkinNumber(pn, mn, value.timer, value.cycle, value.digit, 0,
 											value.ref);
@@ -443,10 +424,10 @@ public class JSONSkinLoader extends SkinLoader{
 								SkinNumber num = null;
 								if(val != null) {
 									num = new SkinNumber(nimages, value.timer, value.cycle, value.digit,
-											d > 10 ? 2 : value.padding, val);									
+											d > 10 ? 2 : value.padding, val);
 								} else {
 									num = new SkinNumber(nimages, value.timer, value.cycle, value.digit,
-											d > 10 ? 2 : value.padding, value.ref);																		
+											d > 10 ? 2 : value.padding, value.ref);
 								}
 								num.setAlign(value.align);
 								if(value.offset != null) {
@@ -506,12 +487,12 @@ public class JSONSkinLoader extends SkinLoader{
 								obj = new SkinSlider(getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy),
 										img.timer, img.cycle, img.angle, (int) ((img.angle == 1 || img.angle == 3
 												? ((float)dstr.width / sk.w) : ((float)dstr.height / sk.h)) * img.range),
-										value, event);								
+										value, event);
 							} else if(img.isRefNum) {
 								obj = new SkinSlider(getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy),
 										img.timer, img.cycle, img.angle, (int) ((img.angle == 1 || img.angle == 3
 												? ((float)dstr.width / sk.w) : ((float)dstr.height / sk.h)) * img.range),
-										img.type, img.min, img.max);								
+										img.type, img.min, img.max);
 							} else {
 								obj = new SkinSlider(getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy),
 										img.timer, img.cycle, img.angle, (int) ((img.angle == 1 || img.angle == 3
@@ -548,21 +529,21 @@ public class JSONSkinLoader extends SkinLoader{
 								}
 							} else {
 								Texture tex = getTexture(img.src, p);
-								
+
 								FloatProperty value = null;
 								if(img.value != null) {
 									value = lua.loadFloatProperty(img.value);
 								}
-								
+
 								if(value != null) {
 									obj = new SkinGraph(getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy),
-											img.timer, img.cycle, value);									
+											img.timer, img.cycle, value);
 								} else if(img.isRefNum) {
 									obj = new SkinGraph(getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy),
 											img.timer, img.cycle, img.type, img.min, img.max);
 								} else {
 									obj = new SkinGraph(getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy),
-											img.timer, img.cycle, img.type);									
+											img.timer, img.cycle, img.type);
 								}
 								((SkinGraph) obj).setDirection(img.angle);
 								break;
@@ -589,6 +570,12 @@ public class JSONSkinLoader extends SkinLoader{
 							SkinBPMGraph st = new SkinBPMGraph(ggraph.delay, ggraph.lineWidth, ggraph.mainBPMColor, ggraph.minBPMColor, ggraph.maxBPMColor, ggraph.otherBPMColor, ggraph.stopLineColor, ggraph.transitionLineColor);
 							obj = st;
 							break;
+						}
+					}
+					for (TimingVisualizer tv : sk.timingvisualizer) {
+						if (dst.id.equals(tv.id)) {
+							SkinTimingVisualizer st = new SkinTimingVisualizer(tv.width, tv.judgeWidthMillis, tv.lineWidth, tv.lineColor, tv.centerColor, tv.PGColor, tv.GRColor, tv.GDColor, tv.BDColor, tv.PRColor, tv.transparent, tv.drawDecay);
+							obj = st;
 						}
 					}
 					// note (playskin only)
@@ -1101,7 +1088,7 @@ public class JSONSkinLoader extends SkinLoader{
 		if(dst.draw != null) {
 			draw = lua.loadBooleanProperty(dst.draw);
 		}
-		
+
 		Animation prev = null;
 		for (Animation a : dst.dst) {
 			if (prev == null) {
@@ -1134,7 +1121,7 @@ public class JSONSkinLoader extends SkinLoader{
 						a.angle, dst.center, dst.loop, dst.timer, draw);
 			} else {
 				skin.setDestination(obj, a.time, a.x, a.y, a.w, a.h, a.acc, a.a, a.r, a.g, a.b, dst.blend, dst.filter,
-						a.angle, dst.center, dst.loop, dst.timer, dst.op);				
+						a.angle, dst.center, dst.loop, dst.timer, dst.op);
 			}
 			if (dst.mouseRect != null) {
 				skin.setMouseRect(obj, dst.mouseRect.x, dst.mouseRect.y, dst.mouseRect.w, dst.mouseRect.h);
@@ -1264,6 +1251,7 @@ public class JSONSkinLoader extends SkinLoader{
 		public GaugeGraph[] gaugegraph = new GaugeGraph[0];
 		public JudgeGraph[] judgegraph = new JudgeGraph[0];
 		public BPMGraph[] bpmgraph = new BPMGraph[0];
+		public TimingVisualizer[] timingvisualizer = new TimingVisualizer[0];
 		public NoteSet note;
 		public Gauge gauge;
 		public HiddenCover[] hiddenCover = new HiddenCover[0];
@@ -1429,6 +1417,22 @@ public class JSONSkinLoader extends SkinLoader{
 		public String otherBPMColor = "ffff00";
 		public String stopLineColor = "ff00ff";
 		public String transitionLineColor = "7f7f7f";
+	}
+
+	public static class TimingVisualizer {
+		public String id;
+		public int width = 301;
+		public int judgeWidthMillis = 150;
+		public int lineWidth = 1;
+		public String lineColor = "00FF00FF";
+		public String centerColor = "FFFFFFFF";
+		public String PGColor = "000088FF";
+		public String GRColor = "008800FF";
+		public String GDColor = "888800FF";
+		public String BDColor = "880000FF";
+		public String PRColor = "000000FF";
+		public int transparent = 0;
+		public int drawDecay = 1;
 	}
 
 	public static class NoteSet {
@@ -1597,6 +1601,7 @@ public class JSONSkinLoader extends SkinLoader{
 				Graph.class,
 				GaugeGraph.class,
 				JudgeGraph.class,
+				TimingVisualizer.class,
 				NoteSet.class,
 				Gauge.class,
 				BGA.class,
@@ -1624,6 +1629,7 @@ public class JSONSkinLoader extends SkinLoader{
 				Graph[].class,
 				GaugeGraph[].class,
 				JudgeGraph[].class,
+				TimingVisualizer[].class,
 				Judge[].class,
 				Destination[].class,
 				Animation[].class,
