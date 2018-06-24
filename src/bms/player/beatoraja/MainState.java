@@ -100,18 +100,6 @@ public abstract class MainState {
 			return model != null && model.getBanner().length() > 0;
 		case OPTION_NO_BANNER:
 			return model != null && model.getBanner().length() == 0;
-		case OPTION_DIFFICULTY0:
-			return model != null && (model.getDifficulty() <= 0 || model.getDifficulty() > 5);
-		case OPTION_DIFFICULTY1:
-			return model != null && model.getDifficulty() == 1;
-		case OPTION_DIFFICULTY2:
-			return model != null && model.getDifficulty() == 2;
-		case OPTION_DIFFICULTY3:
-			return model != null && model.getDifficulty() == 3;
-		case OPTION_DIFFICULTY4:
-			return model != null && model.getDifficulty() == 4;
-		case OPTION_DIFFICULTY5:
-			return model != null && model.getDifficulty() == 5;
 		case OPTION_NO_TEXT:
 			return model != null && !model.hasDocument();
 		case OPTION_TEXT:
@@ -261,21 +249,6 @@ public abstract class MainState {
 		case NUMBER_TOTALNOTES2:
 			if (main.getPlayerResource().getSongdata() != null) {
 				return main.getPlayerResource().getSongdata().getNotes();
-			}
-			return Integer.MIN_VALUE;
-		case NUMBER_MINBPM:
-			if (main.getPlayerResource().getSongdata() != null) {
-				return main.getPlayerResource().getSongdata().getMinbpm();
-			}
-			return Integer.MIN_VALUE;
-		case NUMBER_MAXBPM:
-			if (main.getPlayerResource().getSongdata() != null) {
-				return main.getPlayerResource().getSongdata().getMaxbpm();
-			}
-			return Integer.MIN_VALUE;
-		case NUMBER_MAINBPM:
-			if (main.getPlayerResource().getSongdata() != null) {
-				return main.getPlayerResource().getSongdata().getMainbpm();
 			}
 			return Integer.MIN_VALUE;
 		case NUMBER_HISPEED_LR2:
@@ -485,14 +458,6 @@ public abstract class MainState {
 
 	public int getImageIndex(int id) {
 		switch (id) {
-		case BUTTON_GAUGE_1P:
-			return main.getPlayerResource().getPlayerConfig().getGauge();
-		case BUTTON_RANDOM_1P:
-			return main.getPlayerResource().getPlayerConfig().getRandom();
-		case BUTTON_RANDOM_2P:
-			return main.getPlayerResource().getPlayerConfig().getRandom2();
-		case BUTTON_DPOPTION:
-			return main.getPlayerResource().getPlayerConfig().getDoubleoption();
 		case BUTTON_HSFIX:
 			if (main.getPlayerResource().getSongdata() != null) {
 				SongData song = main.getPlayerResource().getSongdata();
@@ -519,24 +484,6 @@ public abstract class MainState {
 				}
 			}
 			return Integer.MIN_VALUE;
-		case BUTTON_BGA:
-			return main.getPlayerResource().getConfig().getBga();
-		case BUTTON_ASSIST_EXJUDGE:
-			return main.getPlayerResource().getPlayerConfig().getJudgewindowrate() > 100 ? 1 : 0;
-		case BUTTON_ASSIST_CONSTANT:
-			return main.getPlayerResource().getPlayerConfig().isConstant() ? 1 : 0;
-		case BUTTON_ASSIST_JUDGEAREA:
-			return main.getPlayerResource().getPlayerConfig().isShowjudgearea() ? 1 : 0;
-		case BUTTON_ASSIST_LEGACY:
-			return main.getPlayerResource().getPlayerConfig().isLegacynote() ? 1 : 0;
-		case BUTTON_ASSIST_MARKNOTE:
-			return main.getPlayerResource().getPlayerConfig().isMarkprocessednote() ? 1 : 0;
-		case BUTTON_ASSIST_BPMGUIDE:
-			return main.getPlayerResource().getPlayerConfig().isBpmguide() ? 1 : 0;
-		case BUTTON_ASSIST_NOMINE:
-			return main.getPlayerResource().getPlayerConfig().isNomine() ? 1 : 0;
-		case BUTTON_LNMODE:
-			return main.getPlayerResource().getPlayerConfig().getLnmode();
 		}
 		return Integer.MIN_VALUE;
 	}

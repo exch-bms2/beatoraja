@@ -253,6 +253,17 @@ public class SkinPropertyMapper {
 			};
 		}
 
+		if(id >= OPTION_DIFFICULTY0 && id <= OPTION_DIFFICULTY5) {
+			final int difficulty = id - OPTION_DIFFICULTY0;
+			result = new DrawConditionProperty(DrawConditionProperty.TYPE_STATIC_WITHOUT_MUSICSELECT) {
+				@Override
+				public boolean get(MainState state) {
+					final SongData model = state.main.getPlayerResource().getSongdata();
+					return model != null && (difficulty == 0 ? model.getDifficulty() <= 0 || model.getDifficulty() > 5 : model.getDifficulty() == difficulty);
+				}
+			};
+		}
+
 		if (id >= OPTION_1P_0_9 && id <= OPTION_1P_100) {
 			final float low =(id - OPTION_1P_0_9) * 0.1f;
 			final float high =(id - OPTION_1P_0_9 + 1) * 0.1f;
@@ -465,7 +476,7 @@ public class SkinPropertyMapper {
 
 	public static IntegerProperty getImageIndexProperty(int optionid) {
 		IntegerProperty result = null;
-		
+
 		if(optionid == BUTTON_GAUGE_1P) {
 			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().getGauge());
 		}
@@ -477,7 +488,34 @@ public class SkinPropertyMapper {
 		}		
 		if(optionid == BUTTON_DPOPTION) {
 			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().getDoubleoption());
-		}		
+		}
+		if(optionid == BUTTON_ASSIST_EXJUDGE) {
+			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().getJudgewindowrate() > 100 ? 1 : 0);
+		}
+		if(optionid == BUTTON_ASSIST_CONSTANT) {
+			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().isConstant() ? 1 : 0);
+		}
+		if(optionid == BUTTON_ASSIST_JUDGEAREA) {
+			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().isShowjudgearea() ? 1 : 0);
+		}
+		if(optionid == BUTTON_ASSIST_LEGACY) {
+			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().isLegacynote() ? 1 : 0);
+		}
+		if(optionid == BUTTON_ASSIST_MARKNOTE) {
+			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().isMarkprocessednote() ? 1 : 0);
+		}
+		if(optionid == BUTTON_ASSIST_BPMGUIDE) {
+			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().isBpmguide() ? 1 : 0);
+		}
+		if(optionid == BUTTON_ASSIST_NOMINE) {
+			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().isNomine() ? 1 : 0);
+		}
+		if(optionid == BUTTON_LNMODE) {
+			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().getLnmode());
+		}
+		if(optionid == BUTTON_BGA) {
+			result = (state) -> (state.main.getPlayerResource().getConfig().getBga());
+		}
 
 		if((optionid >= VALUE_JUDGE_1P_SCRATCH && optionid <= VALUE_JUDGE_2P_KEY9)
 					|| (optionid >= VALUE_JUDGE_1P_KEY10 && optionid <= VALUE_JUDGE_2P_KEY99)) {
