@@ -2,19 +2,13 @@ package bms.player.beatoraja.skin;
 
 import java.util.Optional;
 
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 
-import bms.model.BMSModel;
-import bms.model.Mode;
-import bms.player.beatoraja.CourseData;
-import bms.player.beatoraja.MainState;
-import bms.player.beatoraja.PlayerResource;
-import bms.player.beatoraja.play.BMSPlayerRule;
-import bms.player.beatoraja.play.JudgeProperty;
+import bms.model.*;
+import bms.player.beatoraja.*;
+import bms.player.beatoraja.play.*;
 import bms.player.beatoraja.result.MusicResult;
 import bms.player.beatoraja.result.MusicResult.TimingDistribution;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
@@ -123,7 +117,7 @@ public class SkinTimingDistributionGraph extends SkinObject {
 
 	@Override
 	public void dispose() {
-		Optional.ofNullable(tex.getTexture()).ifPresent(Texture::dispose);
+		Optional.ofNullable(tex).ifPresent(t -> t.getTexture().dispose());
 		Optional.ofNullable(shape).ifPresent(Pixmap::dispose);
 	}
 
