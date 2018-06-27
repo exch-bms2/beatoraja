@@ -578,6 +578,13 @@ public class JSONSkinLoader extends SkinLoader{
 							obj = st;
 						}
 					}
+
+					for (TimingDistributionGraph td : sk.timingdistributiongraph) {
+						if (dst.id.equals(td.id)) {
+							SkinTimingDistributionGraph st = new SkinTimingDistributionGraph(td.width, td.lineWidth, td.graphColor, td.averageColor, td.devColor, td.PGColor, td.GRColor, td.GDColor, td.BDColor, td.PRColor, td.drawAverage, td.drawDev);
+							obj = st;
+						}
+					}
 					// note (playskin only)
 					if(sk.note != null && dst.id.equals(sk.note.id)) {
 						SkinSource[] notes = getNoteTexture(sk.note.note, p);
@@ -1252,6 +1259,7 @@ public class JSONSkinLoader extends SkinLoader{
 		public JudgeGraph[] judgegraph = new JudgeGraph[0];
 		public BPMGraph[] bpmgraph = new BPMGraph[0];
 		public TimingVisualizer[] timingvisualizer = new TimingVisualizer[0];
+		public TimingDistributionGraph[] timingdistributiongraph = new TimingDistributionGraph[0];
 		public NoteSet note;
 		public Gauge gauge;
 		public HiddenCover[] hiddenCover = new HiddenCover[0];
@@ -1435,6 +1443,22 @@ public class JSONSkinLoader extends SkinLoader{
 		public int drawDecay = 1;
 	}
 
+	public static class TimingDistributionGraph {
+		public String id;
+		public int width = 301;
+		public int lineWidth = 1;
+		public String graphColor = "00FF00FF";
+		public String averageColor = "FFFFFFFF";
+		public String devColor = "FFFFFFFF";
+		public String PGColor = "000088FF";
+		public String GRColor = "008800FF";
+		public String GDColor = "888800FF";
+		public String BDColor = "880000FF";
+		public String PRColor = "000000FF";
+		public int drawAverage = 1;
+		public int drawDev = 1;
+	}
+
 	public static class NoteSet {
 		public String id;
 		public String[] note = new String[0];
@@ -1602,6 +1626,7 @@ public class JSONSkinLoader extends SkinLoader{
 				GaugeGraph.class,
 				JudgeGraph.class,
 				TimingVisualizer.class,
+				TimingDistributionGraph.class,
 				NoteSet.class,
 				Gauge.class,
 				BGA.class,
@@ -1630,6 +1655,7 @@ public class JSONSkinLoader extends SkinLoader{
 				GaugeGraph[].class,
 				JudgeGraph[].class,
 				TimingVisualizer[].class,
+				TimingDistributionGraph[].class,
 				Judge[].class,
 				Destination[].class,
 				Animation[].class,
