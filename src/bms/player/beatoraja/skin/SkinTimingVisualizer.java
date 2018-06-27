@@ -26,8 +26,6 @@ public class SkinTimingVisualizer extends SkinObject {
 	private Color lineColor;
 	private Color centerColor;
 
-	private static final Color CLEAR = Color.valueOf("00000000");
-
 	private final int lineWidth;
 	private final int width;
 	private final int center;
@@ -59,7 +57,7 @@ public class SkinTimingVisualizer extends SkinObject {
 				Color.valueOf(colorStringValidation(GRColor)),
 				Color.valueOf(colorStringValidation(GDColor)),
 				Color.valueOf(colorStringValidation(BDColor)),
-				transparent == 1 ? CLEAR : Color.valueOf(PRColor)
+				transparent == 1 ? Color.CLEAR : Color.valueOf(PRColor)
 		};
 		this.drawDecay = drawDecay == 1 ? true : false;
 	}
@@ -90,8 +88,8 @@ public class SkinTimingVisualizer extends SkinObject {
 			shape.fillRectangle(center, 0, 1, 1);
 			for (int i = 0; i < JColor.length; i++) {
 				shape.setColor(JColor[i]);
-				int x1 = center + Math.max(-center, Math.min(judgeArea[i][0], center));
-				int x2 = center + Math.max(-center, Math.min(judgeArea[i][1], center)) + 1;
+				int x1 = center + MathUtils.clamp(judgeArea[i][0], -center, center);
+				int x2 = center + MathUtils.clamp(judgeArea[i][1], -center, center) + 1;
 
 				if (beforex1 > x1) {
 					shape.fillRectangle(x1, 0, Math.abs(x1 - beforex1), 1);
@@ -116,7 +114,7 @@ public class SkinTimingVisualizer extends SkinObject {
 			shape = new Pixmap(width, recent.length * 2, Pixmap.Format.RGBA8888);
 		}
 		// 前景テクスチャ 透明色でフィルして初期化
-		shape.setColor(CLEAR);
+		shape.setColor(Color.CLEAR);
 		shape.fill();
 
 		for (int i = 0; i < recent.length; i++) {
@@ -146,7 +144,7 @@ public class SkinTimingVisualizer extends SkinObject {
 		draw(sprite, shapetex, r.x, r.y, r.width, r.height, state);
 	}
 
-	private int[][] getJudgeArea(PlayerResource resource) {
+	static int[][] getJudgeArea(PlayerResource resource) {
 		BMSModel model = resource.getBMSModel();
 		JudgeProperty rule = BMSPlayerRule.getBMSPlayerRule(model.getMode()).judge;
 
@@ -175,7 +173,7 @@ public class SkinTimingVisualizer extends SkinObject {
 	/**
 	 * @return 文字列が16進以外の情報を持つか、長さ6未満の場合 異常を示す不透明赤
 	 */
-	private String colorStringValidation(String cs) {
+	static String colorStringValidation(String cs) {
 		if (cs.replaceAll("[^0-9a-fA-F]", "").length() != cs.length() || cs.length() < 6) {
 			return "FF0000FF";
 		} else {
