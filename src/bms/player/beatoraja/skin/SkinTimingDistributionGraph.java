@@ -2,19 +2,11 @@ package bms.player.beatoraja.skin;
 
 import java.util.Optional;
 
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.*;
 
-import bms.model.BMSModel;
-import bms.model.Mode;
-import bms.player.beatoraja.CourseData;
 import bms.player.beatoraja.MainState;
-import bms.player.beatoraja.PlayerResource;
-import bms.player.beatoraja.play.BMSPlayerRule;
-import bms.player.beatoraja.play.JudgeProperty;
 import bms.player.beatoraja.result.MusicResult;
 import bms.player.beatoraja.result.MusicResult.TimingDistribution;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
@@ -29,32 +21,45 @@ public class SkinTimingDistributionGraph extends SkinObject {
 	private TextureRegion tex = null;
 	private Pixmap shape = null;
 
+	private final int gx;
+	private final int c;
 	private final boolean drawAverage;
-
+	private final boolean drawDev;
 	private int max = 10;
+	private Color[] JColor;
+	private Color graphColor;
+	private Color averageColor;
+	private Color devColor;
 
-	private static final Color[] JColor = new Color[] {
-			Color.valueOf("000088"),
-			Color.valueOf("008800"),
-			Color.valueOf("666600"),
-			Color.valueOf("880000"),
-			Color.valueOf("000000") };
 
-	public SkinTimingDistributionGraph() {
-		this(1);
-	}
 
-	public SkinTimingDistributionGraph(int drawAverage) {
-		this.drawAverage = drawAverage == 1 ? true : false;
+	public SkinTimingDistributionGraph(int width, int lineWidth,
+			String graphColor, String averageColor, String devColor, String PGColor, String GRColor, String GDColor, String BDColor,
+			String PRColor,
+			int drawAverage, int drawDev) {
+		int w = 1 < width ? width : 1;
+		int lw = MathUtils.clamp(lineWidth, 1, width);
+		this.gx = w / lw;
+		this.c = gx / 2;
+		this.graphColor = Color.valueOf(SkinTimingVisualizer.colorStringValidation(graphColor));
+		this.averageColor = Color.valueOf(SkinTimingVisualizer.colorStringValidation(averageColor));
+		this.devColor = Color.valueOf(SkinTimingVisualizer.colorStringValidation(devColor));
+		JColor = new Color[] {
+				Color.valueOf(SkinTimingVisualizer.colorStringValidation(PGColor)),
+				Color.valueOf(SkinTimingVisualizer.colorStringValidation(GRColor)),
+				Color.valueOf(SkinTimingVisualizer.colorStringValidation(GDColor)),
+				Color.valueOf(SkinTimingVisualizer.colorStringValidation(BDColor)),
+				Color.valueOf(SkinTimingVisualizer.colorStringValidation(PRColor))
+		};
+		this.drawAverage = (drawAverage == 1);
+		this.drawDev = (drawDev == 1);
 	}
 
 	@Override
 	public void draw(SkinObjectRenderer sprite, long time, MainState state) {
-
 		if (state instanceof MusicResult) {
 			draw(sprite, time, (MusicResult) state, getDestination(time, state));
 		}
-
 	}
 
 	private void draw(SkinObjectRenderer sprite, long time, MusicResult state, Rectangle r) {
@@ -67,7 +72,7 @@ public class SkinTimingDistributionGraph extends SkinObject {
 			TimingDistribution td = state.getTimingDistribution();
 			int[] dist = td.getTimingDistribution();
 			final int center = td.getArrayCenter();
-			int[][] judgeArea = getJudgeArea(state.main.getPlayerResource());
+			int[][] judgeArea = SkinTimingVisualizer.getJudgeArea(state.main.getPlayerResource());
 
 			for (int d : dist) {
 				if (max < d) {
@@ -75,24 +80,52 @@ public class SkinTimingDistributionGraph extends SkinObject {
 				}
 			}
 
-			Pixmap shape = new Pixmap(dist.length, max, Pixmap.Format.RGBA8888);
-			for (int i = JColor.length - 1; i >= 0; i--) {
+			Pixmap shape = new Pixmap(gx, max, Pixmap.Format.RGBA8888);
+			//グラフエリア描画
+			shape.setColor(JColor[0]);
+			shape.fillRectangle(c, 0, 1, max);// ジャスト
+			int beforex1 = c;
+			int beforex2 = c + 1;
+			for (int i = 0; i < JColor.length; i++) {
 				shape.setColor(JColor[i]);
-				int x = center + Math.max(-center, Math.min(judgeArea[i][0], center));
-				int width = Math.min(dist.length - x, Math.abs(judgeArea[i][0]) + Math.abs(judgeArea[i][1]) + 1);
-				shape.fillRectangle(x, 0, width, max);
+				int x1 = c + MathUtils.clamp(judgeArea[i][0], -c, c);
+				int x2 = c + MathUtils.clamp(judgeArea[i][1], -c, c) + 1;
+
+				if (beforex1 > x1) {
+					shape.fillRectangle(x1, 0, Math.abs(x1 - beforex1), max);
+					beforex1 = x1;
+				}
+
+				if (x2 > beforex2) {
+					shape.fillRectangle(beforex2, 0, Math.abs(x2 - beforex2), max);
+					beforex2 = x2;
+				}
 			}
 
-			for (int i = 0; i < dist.length; i++) {
-				shape.setColor(Color.valueOf("dddddd"));
-				shape.drawLine(i, max - dist[i], i, max);
-			}
-
+			//平均描画
 			if (drawAverage && td.getAverage() != Float.MAX_VALUE) {
 				int avg = Math.round(td.getAverage());
-				shape.setColor(Color.RED);
-				shape.drawLine(center + avg, 0, center + avg, max);
+				shape.setColor(averageColor);
+				shape.drawLine(c + avg, 0, c + avg, max);
 			}
+
+			//偏差エリア描画
+			if (drawDev && td.getStdDev() != -1.0f) {
+				int avg = Math.round(td.getAverage());
+				int dev = Math.round(td.getStdDev());
+				shape.setColor(devColor);
+				shape.drawLine(c + avg + dev, 0, c + avg + dev, max);
+				shape.drawLine(c + avg - dev, 0, c + avg - dev, max);
+			}
+
+			//グラフ描画
+			shape.setColor(graphColor);
+			for (int i = -c; i < gx - c ; i++) {
+				if (-center < i && i < center) {
+					shape.fillRectangle(c + i, max - dist[center + i], 1, dist[center + i]);
+				}
+			}
+
 
 			tex = new TextureRegion(new Texture(shape));
 			shape.dispose();
@@ -102,28 +135,9 @@ public class SkinTimingDistributionGraph extends SkinObject {
 
 	}
 
-	private int[][] getJudgeArea(PlayerResource resource) {
-		BMSModel model = resource.getBMSModel();
-		JudgeProperty rule = BMSPlayerRule.getBMSPlayerRule(model.getMode()).judge;
-
-		final int judgerank = model.getJudgerank();
-		final int judgeWindowRate = resource.getPlayerConfig().getJudgewindowrate();
-		int constraint = 2;
-		for (CourseData.CourseDataConstraint mode : resource.getConstraint()) {
-			if (mode == CourseData.CourseDataConstraint.NO_GREAT) {
-				constraint = 0;
-			} else if (mode == CourseData.CourseDataConstraint.NO_GOOD) {
-				constraint = 1;
-			}
-		}
-
-		return rule.getNoteJudge(judgerank, judgeWindowRate, constraint,
-				model.getMode() == Mode.POPN_9K && !BMSPlayerRule.isSevenToNine());
-	}
-
 	@Override
 	public void dispose() {
-		Optional.ofNullable(tex.getTexture()).ifPresent(Texture::dispose);
+		Optional.ofNullable(tex).ifPresent(t -> t.getTexture().dispose());
 		Optional.ofNullable(shape).ifPresent(Pixmap::dispose);
 	}
 
