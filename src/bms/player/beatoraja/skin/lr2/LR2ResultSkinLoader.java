@@ -1,21 +1,13 @@
 package bms.player.beatoraja.skin.lr2;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.utils.IntIntMap;
-import com.badlogic.gdx.utils.ObjectMap;
+import com.badlogic.gdx.utils.*;
 
-import bms.player.beatoraja.Config;
-import bms.player.beatoraja.MainState;
-import bms.player.beatoraja.Resolution;
-import bms.player.beatoraja.result.MusicResultSkin;
-import bms.player.beatoraja.result.SkinGaugeGraphObject;
-import bms.player.beatoraja.skin.SkinBPMGraph;
-import bms.player.beatoraja.skin.SkinHeader;
-import bms.player.beatoraja.skin.SkinNoteDistributionGraph;
-import bms.player.beatoraja.skin.SkinTimingDistributionGraph;
+import bms.player.beatoraja.*;
+import bms.player.beatoraja.result.*;
+import bms.player.beatoraja.skin.*;
 
 /**
  * LR2リザルトスキン読み込み用クラス
@@ -115,12 +107,13 @@ enum ResultCommand implements LR2SkinLoader.Command<LR2ResultSkinLoader> {
 		}
 	},
 	SRC_TIMINGCHART_1P {
-		//#SRC_TIMINGCHART_1P,(index),(gr),(x),(y),(w),(h),(div_x),(div_y),(cycle),(timer),field_w,field_h,(start),(end),drawAverage
+		//#SRC_TIMINGCHART_1P,(index),(gr),(x),width,height,lineWidth,graphColor,averageColor,devColor,PGColor,GRColor,GDColor,BDColor,PRColor,drawAverage,drawDev
+
 		@Override
 		public void execute(LR2ResultSkinLoader loader, String[] str) {
 			int[] values = loader.parseInt(str);
-			loader.timinggraphobj = new SkinTimingDistributionGraph(values[15]);
-			loader.gauge = new Rectangle(0, 0, values[11], values[12]);
+			loader.timinggraphobj = new SkinTimingDistributionGraph(values[4], values[6], str[7], str[8], str[9], str[10], str[11], str[12], str[13], str[14], values[15], values[16]);
+			loader.gauge = new Rectangle(0, 0, values[4], values[5]);
 			loader.skin.add(loader.timinggraphobj);
 		}
 	},
