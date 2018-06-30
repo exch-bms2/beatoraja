@@ -6,6 +6,7 @@ import java.util.*;
 import java.util.logging.Logger;
 
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
+import bms.player.beatoraja.input.KeyCommand;
 import bms.player.beatoraja.ir.IRResponse;
 import bms.player.beatoraja.select.MusicSelectKeyProperty.MusicSelectKey;
 import bms.player.beatoraja.select.bar.*;
@@ -613,8 +614,7 @@ public class BarRenderer {
 			mov++;
 		}
 
-		if(input.getFunctionstate()[7] && input.getFunctiontime()[7] != 0) {
-			input.getFunctiontime()[7] = 0;
+		if(input.isActivated(KeyCommand.ADD_FAVORITE_SONG)) {
 			if(getSelected() instanceof SongBar) {
 				SongData sd = ((SongBar) getSelected()).getSongData();
 
@@ -628,8 +628,7 @@ public class BarRenderer {
 				}
 			}
 		}
-		if(input.getFunctionstate()[8] && input.getFunctiontime()[8] != 0) {
-			input.getFunctiontime()[8] = 0;
+		if(input.isActivated(KeyCommand.ADD_FAVORITE_CHART)) {
 			if(getSelected() instanceof SongBar) {
 				SongData sd = ((SongBar) getSelected()).getSongData();
 

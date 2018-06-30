@@ -3,6 +3,7 @@ package bms.player.beatoraja.select;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
+import bms.player.beatoraja.input.KeyCommand;
 import bms.player.beatoraja.play.TargetProperty;
 import bms.player.beatoraja.select.MusicSelectKeyProperty.MusicSelectKey;
 import bms.player.beatoraja.select.bar.*;
@@ -310,14 +311,12 @@ public class MusicSelectInputProcessor {
                 bar.close();
             }
             
-    		if(input.getFunctionstate()[9] && input.getFunctiontime()[9] != 0) {
-    			input.getFunctiontime()[9] = 0;
+    		if(input.isActivated(KeyCommand.AUTOPLAY_FOLDER)) {
     			if(current instanceof DirectoryBar) {
     				select.selectSong(PlayMode.AUTOPLAY);
     			}
     		}
-            if(input.getFunctionstate()[10] && input.getFunctiontime()[10] != 0) {
-                input.getFunctiontime()[10] = 0;
+    		if(input.isActivated(KeyCommand.OPEN_IR)) {
                 select.execute(MusicSelectCommand.OPEN_RANKING_ON_IR);
             }
         }
@@ -328,13 +327,11 @@ public class MusicSelectInputProcessor {
         }
         main.switchTimer(TIMER_SONGBAR_CHANGE, true);
         // update folder
-        if (input.getFunctionstate()[1] && input.getFunctiontime()[1] != 0) {
-            input.getFunctiontime()[1] = 0;
+		if(input.isActivated(KeyCommand.UPDATE_FOLDER)) {
             select.execute(MusicSelectCommand.UPDATE_FOLDER);
         }
         // open explorer with selected song
-        if (input.getFunctionstate()[2] && input.getFunctiontime()[2] != 0) {
-            input.getFunctiontime()[2] = 0;
+		if(input.isActivated(KeyCommand.OPEN_EXPLORER)) {
             select.execute(MusicSelectCommand.OPEN_WITH_EXPLORER);
         }
 

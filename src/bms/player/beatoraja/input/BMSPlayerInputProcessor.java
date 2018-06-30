@@ -354,20 +354,40 @@ public class BMSPlayerInputProcessor {
 		this.deletePressed = deletePressed;
 	}
 
-	public boolean[] getFunctionstate() {
-		return functionstate;
+	public boolean isActivated(KeyCommand key) {
+		switch(key) {
+		case SHOW_FPS:
+			return isFunctionPressed(0);
+		case UPDATE_FOLDER:
+			return isFunctionPressed(1);
+		case OPEN_EXPLORER:
+			return isFunctionPressed(2);
+		case SWITCH_SCREEN_MODE:
+			return isFunctionPressed(3);
+		case SAVE_SCREENSHOT:
+			return isFunctionPressed(5);
+		case POST_TWITTER:
+			return isFunctionPressed(6);
+		case ADD_FAVORITE_SONG:
+			return isFunctionPressed(7);
+		case ADD_FAVORITE_CHART:
+			return isFunctionPressed(8);
+		case AUTOPLAY_FOLDER:
+			return isFunctionPressed(9);
+		case OPEN_IR:
+			return isFunctionPressed(10);
+		case OPEN_SKIN_CONFIGURATION:
+			return isFunctionPressed(11);
+		}
+		return false;
 	}
-
-	public void setFunctionstate(boolean[] functionstate) {
-		this.functionstate = functionstate;
-	}
-
-	public long[] getFunctiontime() {
-		return functiontime;
-	}
-
-	public void setFunctiontime(long[] functiontime) {
-		this.functiontime = functiontime;
+	
+	private boolean isFunctionPressed(int key) {
+        if (functionstate[key] && functiontime[key] != 0) {
+        	functiontime[key] = 0;
+        	return true;
+        }
+		return false;
 	}
 
 	public boolean isSelectPressed() {

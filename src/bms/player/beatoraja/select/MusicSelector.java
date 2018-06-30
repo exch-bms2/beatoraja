@@ -26,6 +26,7 @@ import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.ScoreDatabaseAccessor;
 import bms.player.beatoraja.ScoreDatabaseAccessor.ScoreDataCollector;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
+import bms.player.beatoraja.input.KeyCommand;
 import bms.player.beatoraja.ir.IRResponse;
 import bms.player.beatoraja.select.bar.*;
 import bms.player.beatoraja.skin.SkinType;
@@ -371,7 +372,7 @@ public class MusicSelector extends MainState {
 		if (input.getNumberState()[6]) {
 			preview.stop();
 			main.changeState(MainController.STATE_CONFIG);
-		} else if (input.getFunctionstate()[11]) {
+		} else if (input.isActivated(KeyCommand.OPEN_SKIN_CONFIGURATION)) {
 			preview.stop();
 			main.changeState(MainController.STATE_SKIN_SELECT);
 		}
