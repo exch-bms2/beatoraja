@@ -17,6 +17,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import org.lwjgl.Sys;
 
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
@@ -384,6 +385,39 @@ public class SkinConfigurationView implements Initializable {
 
     @FXML
 	public void updateSkin() {
-		skinconfig.setContent(create(skinheader.getValue(), null));
+		// history保存
+		if(selected != null) {
+			SkinConfig.Property property = getProperty();
+			int index = -1;
+			for(int i = 0;i < player.getSkinHistory().length;i++) {
+				if(player.getSkinHistory()[i].getPath().equals(selected.getPath().toString())) {
+					index = i;
+					break;
+				}
+			}
+
+			SkinConfig sc = new SkinConfig();
+			sc.setPath(selected.getPath().toString());
+			sc.setProperties(property);
+			if(index >= 0) {
+				player.getSkinHistory()[index] = sc;
+			} else {
+				SkinConfig[] history = Arrays.copyOf(player.getSkinHistory(), player.getSkinHistory().length + 1);
+				history[history.length - 1] = sc;
+				player.setSkinHistory(history);
+			}
+		}
+
+		// historyからconfig抽出
+		SkinConfig.Property property = null;
+		if(skinheader.getValue() != null) {
+			for(SkinConfig skinc : player.getSkinHistory()) {
+				if(skinc.getPath().equals(skinheader.getValue().getPath().toString())) {
+					property = skinc.getProperties();
+					break;
+				}
+			}
+		}
+		skinconfig.setContent(create(skinheader.getValue(), property));
 	}
 }

@@ -126,6 +126,7 @@ public class PlayerConfig {
 	private boolean isWindowHold = false;
 
 	private SkinConfig[] skin = new SkinConfig[SkinType.getMaxSkinTypeID() + 1];
+	private SkinConfig[] skinHistory;
 
 	private PlayModeConfig mode5 = new PlayModeConfig(Mode.BEAT_5K);
 
@@ -404,6 +405,14 @@ public class PlayerConfig {
 		this.skin = skin;
 	}
 
+	public SkinConfig[] getSkinHistory() {
+		return skinHistory;
+	}
+
+	public void setSkinHistory(SkinConfig[] skinHistory) {
+		this.skinHistory = skinHistory;
+	}
+
 	public String getUserid() {
 		return userid;
 	}
@@ -549,6 +558,9 @@ public class PlayerConfig {
 	public void validate() {
 		if(skin == null) {
 			skin = new SkinConfig[SkinType.getMaxSkinTypeID() + 1];
+		}
+		if(skinHistory == null) {
+			skinHistory = new SkinConfig[0];
 		}
 		if(skin.length != SkinType.getMaxSkinTypeID() + 1) {
 			skin = Arrays.copyOf(skin, SkinType.getMaxSkinTypeID() + 1);
