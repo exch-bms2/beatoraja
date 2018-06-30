@@ -133,8 +133,8 @@ public class PlayerResource {
 		combo = 0;
 		maxcombo = 0;
 		bmsPaths = null;
-		tablename = "";
-		tablelevel = "";
+		setTablename("");
+		setTablelevel("");
 	}
 
 	public boolean setBMSFile(final Path f, PlayMode mode) {
@@ -301,6 +301,7 @@ public class PlayerResource {
 					return false;
 				}
 			}
+			songdata = null;
 			if(setBMSFile(bmsPaths[courseindex++], PlayMode.AUTOPLAY)) {
 				return true;
 			};
@@ -313,6 +314,7 @@ public class PlayerResource {
 		if (courseindex == course.length) {
 			return false;
 		} else {
+			songdata = null;
 			setBMSFile(Paths.get(course[courseindex].getPath()), mode);
 			return true;
 		}
