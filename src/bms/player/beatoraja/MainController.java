@@ -312,10 +312,6 @@ public class MainController extends ApplicationAdapter {
 		systemfont = generator.generateFont(parameter);
 		messageRenderer = new MessageRenderer();
 
-		if(ir != null) {
-			messageRenderer.addMessage(player.getIrname() + " Connection Succeed : " + player.getUserid() ,3000, Color.GREEN, 1);
-		}
-
 		input = new BMSPlayerInputProcessor(config, player);
 		switch(config.getAudioDriver()) {
 		case Config.AUDIODRIVER_SOUND:
@@ -388,6 +384,10 @@ public class MainController extends ApplicationAdapter {
 				return result;
 			});
 			download.start(null);
+		}
+		
+		if(ir != null) {
+			messageRenderer.addMessage(player.getIrname() + " Connection Succeed : " + player.getUserid() ,5000, Color.GREEN, 1);
 		}
 	}
 
@@ -1145,15 +1145,9 @@ public class MainController extends ApplicationAdapter {
 		}
 
 		public void draw(MainState state, SpriteBatch sprite, int x, int y) {
-			switch(type) {
-			case 0:
-				break;
-			case 1:
-				if(state instanceof MusicSelector) {
-					font.setColor(color.r, color.g, color.b, MathUtils.sinDeg((System.currentTimeMillis() % 1440) / 4.0f) * 0.3f + 0.7f);
-					font.draw(sprite, text, x, y);
-				}
-				break;
+			if(type != 1 || state instanceof MusicSelector) {
+				font.setColor(color.r, color.g, color.b, MathUtils.sinDeg((System.currentTimeMillis() % 1440) / 4.0f) * 0.3f + 0.7f);
+				font.draw(sprite, text, x, y);
 			}
 		}
 
