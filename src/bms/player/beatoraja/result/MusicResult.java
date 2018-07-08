@@ -159,7 +159,8 @@ public class MusicResult extends AbstractResult {
 			}
 		}
 
-		if (newscore.getClear() != Failed.id) {
+		final IRScoreData cscore = resource.getCourseScoreData();
+		if (newscore.getClear() != Failed.id && (cscore == null || cscore.getClear() != Failed.id)) {
 			play(SOUND_CLEAR);
 		} else {
 			play(SOUND_FAIL);
@@ -615,11 +616,9 @@ public class MusicResult extends AbstractResult {
 		case OPTION_ENABLE_SAVE_SCORE:
 			return resource.isUpdateScore();
 		case OPTION_RESULT_CLEAR:
-			return score.getClear() != Failed.id
-					&& (cscore == null || cscore.getClear() != Failed.id);
+			return score.getClear() != Failed.id && (cscore == null || cscore.getClear() != Failed.id);
 		case OPTION_RESULT_FAIL:
-			return score.getClear() == Failed.id
-					|| (cscore != null && cscore.getClear() == Failed.id);
+			return score.getClear() == Failed.id || (cscore != null && cscore.getClear() == Failed.id);
 		case OPTION_UPDATE_SCORE:
 			return score.getExscore() > oldscore.getExscore();
 		case OPTION_DRAW_SCORE:
