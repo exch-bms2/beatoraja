@@ -82,8 +82,8 @@ public class CourseResult extends AbstractResult {
 		final PlayerResource resource = main.getPlayerResource();
 		final PlayerConfig config = resource.getPlayerConfig();
 
-		IRConnection ir = main.getIRConnection();
-		if (ir != null) {
+		final IRConnection ir = main.getIRConnection();
+		if (ir != null && resource.getPlayMode() == PlayMode.PLAY) {
 			boolean send = resource.isUpdateScore() && resource.getCourseData().isRelease();
 			switch(main.getPlayerConfig().getIrsend()) {
 			case PlayerConfig.IR_SEND_ALWAYS:
