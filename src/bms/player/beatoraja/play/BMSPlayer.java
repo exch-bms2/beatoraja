@@ -787,7 +787,7 @@ public class BMSPlayer extends MainState {
 			}
 		}
 		score.setClear(clear.id);
-		score.setGauge(config.getGaugeAutoShift() <= PlayerConfig.GAUGEAUTOSHIFT_CONTINUE ? gauge.getType() : -1);
+		score.setGauge(gauge.isTypeChanged() ? -1 : gauge.getType());
 		score.setOption(config.getRandom() + (model.getMode().player == 2
 				? (config.getRandom2() * 10 + config.getDoubleoption() * 100) : 0));
 		// リプレイデータ保存。スコア保存されない場合はリプレイ保存しない

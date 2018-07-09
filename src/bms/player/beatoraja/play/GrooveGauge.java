@@ -27,12 +27,13 @@ public class GrooveGauge {
 	public static final int EXCLASS = 7;
 	public static final int EXHARDCLASS = 8;
 
+	private final int typeorg;
 	private int type = -1;
 	
 	private Gauge[] gauges;
 
 	public GrooveGauge(BMSModel model, int type, GaugeProperty property) {
-		this.type = type;
+		this.typeorg = this.type = type;
 		this.gauges = new Gauge[property.values.length];
 		for(int i = 0; i < property.values.length; i++) {
 			this.gauges[i] = new Gauge(model, property.values[i], ClearType.getClearTypeByGauge(i));
@@ -93,6 +94,10 @@ public class GrooveGauge {
 
 	public void setType(int type) {
 		this.type = type;
+	}
+	
+	public boolean isTypeChanged() {
+		return typeorg != type;
 	}
 
 	public boolean isCourseGauge() {
