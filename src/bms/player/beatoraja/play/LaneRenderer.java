@@ -54,7 +54,7 @@ public class LaneRenderer {
 	private double mainbpm;
 	private double minbpm;
 	private double maxbpm;
-
+	
 	private TextureRegion[] noteimage;
 	private TextureRegion[][] longnote;
 	private TextureRegion[] mnoteimage;
@@ -294,11 +294,13 @@ public class LaneRenderer {
 		final Rectangle[] playerr = skin.getLaneGroupRegion();
 		double bpm = model.getBpm();
 		double nbpm = bpm;
+		double nscroll = 1.0;
 		for (int i = (pos > 5 ? pos - 5 : 0); i < timelines.length && timelines[i].getMicroTime() <= microtime; i++) {
 			nbpm = timelines[i].getBPM();
+			nscroll = timelines[i].getScroll();
 		}
 		nowbpm = nbpm;
-		final double region = (240000 / nbpm / hispeed);
+		final double region = nscroll > 0 ? (240000 / nbpm / hispeed) / nscroll : 0;
 		// double sect = (bpm / 60) * 4 * 1000;
 		final double hu = laneregion[0].y + laneregion[0].height;
 		final double hl = playconfig.isEnablelift() ? laneregion[0].y + laneregion[0].height * playconfig.getLift() : laneregion[0].y;
@@ -333,7 +335,7 @@ public class LaneRenderer {
 				for (int i = pos; i < timelines.length; i++) {
 					final TimeLine tl = timelines[i];
 					if (tl.getMicroTime() >= microtime) {
-						double rate = (tl.getSection() - (i > 0 ? timelines[i - 1].getSection() : 0)) * rxhs * 1000
+						double rate = (tl.getSection() - (i > 0 ? timelines[i - 1].getSection() : 0)) * (i > 0 ? timelines[i - 1].getScroll() : 1.0) * rxhs * 1000
 								/ (tl.getMicroTime() - (i > 0
 										? timelines[i - 1].getMicroTime() + timelines[i - 1].getMicroStop() : 0));
 						for (int j = color.length - 1; j >= 0; j--) {
@@ -355,9 +357,9 @@ public class LaneRenderer {
 				if (i > 0) {
 					final TimeLine prevtl = timelines[i - 1];
 					if (prevtl.getMicroTime() + prevtl.getMicroStop() > microtime) {
-						y += (tl.getSection() - prevtl.getSection()) * rxhs;
+						y += (tl.getSection() - prevtl.getSection()) * prevtl.getScroll() * rxhs;
 					} else {
-						y += (tl.getSection() - prevtl.getSection()) * (tl.getMicroTime() - microtime)
+						y += (tl.getSection() - prevtl.getSection()) * prevtl.getScroll() * (tl.getMicroTime() - microtime)
 								/ (tl.getMicroTime() - prevtl.getMicroTime() - prevtl.getMicroStop()) * rxhs;
 					}
 				} else {
@@ -436,9 +438,9 @@ public class LaneRenderer {
 				if (i > 0) {
 					final TimeLine prevtl = timelines[i - 1];
 					if (prevtl.getMicroTime() + prevtl.getMicroStop() > microtime) {
-						y += (tl.getSection() - prevtl.getSection()) * rxhs;
+						y += (tl.getSection() - prevtl.getSection()) * prevtl.getScroll() * rxhs;
 					} else {
-						y += (tl.getSection() - prevtl.getSection()) * (tl.getMicroTime() - microtime)
+						y += (tl.getSection() - prevtl.getSection()) * prevtl.getScroll() * (tl.getMicroTime() - microtime)
 								/ (tl.getMicroTime() - prevtl.getMicroTime() - prevtl.getMicroStop()) * rxhs;
 					}
 				} else {
@@ -498,9 +500,9 @@ public class LaneRenderer {
 								final TimeLine nowtl = timelines[j];
 								if (nowtl.getMicroTime() >= microtime) {
 									if (prevtl.getMicroTime() + prevtl.getMicroStop() > microtime) {
-										dy += (nowtl.getSection() - prevtl.getSection()) * rxhs;
+										dy += (nowtl.getSection() - prevtl.getSection()) * prevtl.getScroll() * rxhs;
 									} else {
-										dy += (nowtl.getSection() - prevtl.getSection())
+										dy += (nowtl.getSection() - prevtl.getSection()) * prevtl.getScroll()
 												* (nowtl.getMicroTime() - microtime)
 												/ (nowtl.getMicroTime() - prevtl.getMicroTime() - prevtl.getMicroStop())
 												* rxhs;
