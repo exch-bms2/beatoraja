@@ -68,8 +68,6 @@ public class MusicSelector extends MainState {
 	 */
 	private PreviewMusicProcessor preview;
 
-	private BitmapFont titlefont;
-
 	/**
 	 * 楽曲バー描画用
 	 */
@@ -257,15 +255,11 @@ public class MusicSelector extends MainState {
 
 		loadSkin(SkinType.MUSIC_SELECT);
 
-		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
-				Gdx.files.internal("skin/default/VL-Gothic-Regular.ttf"));
-		FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-		parameter.size = 24;
-		titlefont = generator.generateFont(parameter);
-		generator.dispose();
-
 		// search text field
 		if (getStage() == null && ((MusicSelectSkin) getSkin()).getSearchTextRegion() != null) {
+			if(search != null) {
+				search.dispose();
+			}
 			search = new SearchTextField(this, main.getPlayerResource().getConfig().getResolution());
 			setStage(search);
 		}
@@ -476,10 +470,6 @@ public class MusicSelector extends MainState {
 		super.dispose();
 		bar.dispose();
 		banners.dispose();
-		if (titlefont != null) {
-			titlefont.dispose();
-			titlefont = null;
-		}
 		if (search != null) {
 			search.dispose();
 			search = null;
@@ -736,30 +726,6 @@ public class MusicSelector extends MainState {
 		case OPTION_PLAYABLEBAR:
 			return (current instanceof SongBar)
 					|| ((current instanceof GradeBar) && ((GradeBar) current).existsAllSongs());
-		case OPTION_REPLAYDATA:
-			return (current instanceof SelectableBar) && ((SelectableBar) current).getExistsReplayData().length > 0
-					&& ((SelectableBar) current).getExistsReplayData()[0];
-		case OPTION_NO_REPLAYDATA:
-			return (current instanceof SelectableBar) && ((SelectableBar) current).getExistsReplayData().length > 0
-					&& !((SelectableBar) current).getExistsReplayData()[0];
-		case OPTION_REPLAYDATA2:
-			return (current instanceof SelectableBar) && ((SelectableBar) current).getExistsReplayData().length > 1
-					&& ((SelectableBar) current).getExistsReplayData()[1];
-		case OPTION_NO_REPLAYDATA2:
-			return (current instanceof SelectableBar) && ((SelectableBar) current).getExistsReplayData().length > 1
-					&& !((SelectableBar) current).getExistsReplayData()[1];
-		case OPTION_REPLAYDATA3:
-			return (current instanceof SelectableBar) && ((SelectableBar) current).getExistsReplayData().length > 2
-					&& ((SelectableBar) current).getExistsReplayData()[2];
-		case OPTION_NO_REPLAYDATA3:
-			return (current instanceof SelectableBar) && ((SelectableBar) current).getExistsReplayData().length > 2
-					&& !((SelectableBar) current).getExistsReplayData()[2];
-		case OPTION_REPLAYDATA4:
-			return (current instanceof SelectableBar) && ((SelectableBar) current).getExistsReplayData().length > 3
-					&& ((SelectableBar) current).getExistsReplayData()[3];
-		case OPTION_NO_REPLAYDATA4:
-			return (current instanceof SelectableBar) && ((SelectableBar) current).getExistsReplayData().length > 3
-					&& !((SelectableBar) current).getExistsReplayData()[3];
 		case OPTION_SELECT_REPLAYDATA:
 			return selectedreplay == 0;
 		case OPTION_SELECT_REPLAYDATA2:

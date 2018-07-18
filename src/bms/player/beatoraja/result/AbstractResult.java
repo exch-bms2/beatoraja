@@ -48,36 +48,9 @@ public abstract class AbstractResult extends MainState {
 		super(main);
 	}
 	
-	public boolean getBooleanValue(int id) {
-		switch(id) {
-		case OPTION_NO_REPLAYDATA:
-			return saveReplay[0] == ReplayStatus.NOT_EXIST;
-		case OPTION_NO_REPLAYDATA2:
-			return saveReplay[1] == ReplayStatus.NOT_EXIST;
-		case OPTION_NO_REPLAYDATA3:
-			return saveReplay[2] == ReplayStatus.NOT_EXIST;
-		case OPTION_NO_REPLAYDATA4:
-			return saveReplay[3] == ReplayStatus.NOT_EXIST;
-		case OPTION_REPLAYDATA:
-			return saveReplay[0] == ReplayStatus.EXIST;
-		case OPTION_REPLAYDATA2:
-			return saveReplay[1] == ReplayStatus.EXIST;
-		case OPTION_REPLAYDATA3:
-			return saveReplay[2] == ReplayStatus.EXIST;
-		case OPTION_REPLAYDATA4:
-			return saveReplay[3] == ReplayStatus.EXIST;
-		case OPTION_REPLAYDATA_SAVED:
-			return saveReplay[0] == ReplayStatus.SAVED;
-		case OPTION_REPLAYDATA2_SAVED:
-			return saveReplay[1] == ReplayStatus.SAVED;
-		case OPTION_REPLAYDATA3_SAVED:
-			return saveReplay[2] == ReplayStatus.SAVED;
-		case OPTION_REPLAYDATA4_SAVED:
-			return saveReplay[3] == ReplayStatus.SAVED;
-		}
-		return super.getBooleanValue(id);
+	public ReplayStatus getReplayStatus(int index) {
+		return saveReplay[index];
 	}
-
 	
 	public enum ReplayAutoSaveConstraint {
 

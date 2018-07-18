@@ -20,6 +20,7 @@ import bms.player.beatoraja.result.MusicResult;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.select.bar.Bar;
 import bms.player.beatoraja.select.bar.GradeBar;
+import bms.player.beatoraja.select.bar.SelectableBar;
 import bms.player.beatoraja.skin.SkinObject.BooleanProperty;
 import bms.player.beatoraja.skin.SkinObject.FloatProperty;
 import bms.player.beatoraja.skin.SkinObject.FloatWriter;
@@ -392,7 +393,32 @@ public class SkinPropertyMapper {
 		if (id == OPTION_CLEAR_EXSRANDOM) {			
 			result = new TrophyDrawCondition(SongTrophy.EX_S_RANDOM);
 		}
-		
+		if (id == OPTION_REPLAYDATA) {
+			result = new ReplayDrawCondition(0,0);
+		} else if (id == OPTION_REPLAYDATA2) {
+			result = new ReplayDrawCondition(1,0);
+		} else if (id == OPTION_REPLAYDATA3) {
+			result = new ReplayDrawCondition(2,0);
+		} else if (id == OPTION_REPLAYDATA4) {
+			result = new ReplayDrawCondition(3,0);
+		} else if (id == OPTION_NO_REPLAYDATA) {
+			result = new ReplayDrawCondition(0,1);
+		} else if (id == OPTION_NO_REPLAYDATA2) {
+			result = new ReplayDrawCondition(1,1);
+		} else if (id == OPTION_NO_REPLAYDATA3) {
+			result = new ReplayDrawCondition(2,1);
+		} else if (id == OPTION_NO_REPLAYDATA4) {
+			result = new ReplayDrawCondition(3,1);
+		} else if (id == OPTION_REPLAYDATA_SAVED) {
+			result = new ReplayDrawCondition(0,2);
+		} else if (id == OPTION_REPLAYDATA2_SAVED) {
+			result = new ReplayDrawCondition(1,2);
+		} else if (id == OPTION_REPLAYDATA3_SAVED) {
+			result = new ReplayDrawCondition(2,2);
+		} else if (id == OPTION_REPLAYDATA4_SAVED) {
+			result = new ReplayDrawCondition(3,2);
+		}
+
 		if(result != null && optionid < 0) {
 			final BooleanProperty dc = result;
 			result = new BooleanProperty() {
@@ -749,4 +775,32 @@ public class SkinPropertyMapper {
 
 
 	}
+
+	private static class ReplayDrawCondition extends DrawConditionProperty {
+
+		private final int index;
+		private final int type;
+
+		public ReplayDrawCondition(int index, int type) {
+			super(TYPE_NO_STATIC);
+			this.index = index;
+			this.type = type;
+		}
+
+		@Override
+		public boolean get(MainState state) {
+			if(state instanceof MusicSelector) {
+				final Bar current = ((MusicSelector) state).getSelectedBar();
+				return (current instanceof SelectableBar) && ((SelectableBar) current).getExistsReplayData().length > index
+						&& (type == 0 ? ((SelectableBar) current).getExistsReplayData()[index] : !((SelectableBar) current).getExistsReplayData()[index]);
+			} else if(state instanceof AbstractResult) {
+				return ((AbstractResult) state).getReplayStatus(index) == (type == 0 ? AbstractResult.ReplayStatus.EXIST :
+						(type == 1 ? AbstractResult.ReplayStatus.NOT_EXIST : AbstractResult.ReplayStatus.SAVED));
+			}
+			return false;
+		}
+
+
+	}
+
 }
