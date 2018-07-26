@@ -378,6 +378,8 @@ public class SkinProperty {
 	public static final int NUMBER_PLAYTIME_SECOND = 162;
 	public static final int NUMBER_TIMELEFT_MINUTE = 163;
 	public static final int NUMBER_TIMELEFT_SECOND = 164;
+	public static final int NUMBER_SONGLENGTH_MINUTE = 1163;
+	public static final int NUMBER_SONGLENGTH_SECOND = 1164;
 	public static final int NUMBER_LOADING_PROGRESS = 165;
 	public static final int NUMBER_HIGHSCORE2 = 170;
 	public static final int NUMBER_SCORE3 = 171;
