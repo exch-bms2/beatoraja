@@ -701,7 +701,9 @@ public class JSONSkinLoader extends SkinLoader{
 
 						SkinNote sn = new SkinNote(notes, lnss, mines);
 						sn.setLaneRegion(region, scale, skin);
-						sn.setDstNote2((int) Math.round(sk.note.dst2 * dy));
+						if(sk.note.dst2 != Integer.MIN_VALUE) {
+							sn.setDstNote2((int) Math.round(sk.note.dst2 * dy));							
+						}
 						((PlaySkin) skin).setLaneRegion(region);
 						((PlaySkin) skin).setLaneGroupRegion(gregion);
 						((PlaySkin) skin).setNoteExpansionRate(sk.note.expansionrate);
