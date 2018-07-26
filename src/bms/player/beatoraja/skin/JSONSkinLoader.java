@@ -1478,7 +1478,7 @@ public class JSONSkinLoader extends SkinLoader{
 		public String[] hidden = new String[0];
 		public String[] processed = new String[0];
 		public Animation[] dst = new Animation[0];
-		public int dst2 = Integer.MIN_VALUE;
+		public int dst2 = Integer.MAX_VALUE;
 		public int[] expansionrate = {100,100};
 		public float[] size = new float[0];
 		public Destination[] group = new Destination[0];
