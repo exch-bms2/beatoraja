@@ -261,6 +261,16 @@ public abstract class MainState {
 				return (main.getPlayerResource().getSongdata().getLength() / 1000) % 60;
 			}
 			return Integer.MIN_VALUE;
+		case NUMBER_SONGLENGTH_MINUTE:
+			if (main.getPlayerResource().getSongdata() != null) {
+				return (main.getPlayerResource().getSongdata().getLength() / 60000) % 60;
+			}
+			return Integer.MIN_VALUE;
+		case NUMBER_SONGLENGTH_SECOND:
+			if (main.getPlayerResource().getSongdata() != null) {
+				return (main.getPlayerResource().getSongdata().getLength() / 1000) % 60;
+			}
+			return Integer.MIN_VALUE;
 		case NUMBER_HISPEED_LR2:
 			if (main.getPlayerResource().getSongdata() != null) {
 				SongData song = main.getPlayerResource().getSongdata();
