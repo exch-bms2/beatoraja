@@ -150,7 +150,10 @@ public class CourseData implements Validatable {
     	GAUGE_5KEYS("gauge_5k", 3),
     	GAUGE_7KEYS("gauge_7k", 3),
     	GAUGE_9KEYS("gauge_9k", 3),
-    	GAUGE_24KEYS("gauge_24k", 3);
+    	GAUGE_24KEYS("gauge_24k", 3),
+        LN("ln", 4),
+        CN("cn", 4),
+        HCN("hcn", 4);
 
     	public static final CourseDataConstraint[] EMPTY = new CourseDataConstraint[0];
     	
@@ -160,6 +163,15 @@ public class CourseData implements Validatable {
         private CourseDataConstraint(String name, int type) {
             this.name = name;
             this.type = type;
+        }
+        
+        public static CourseDataConstraint getValue(String name) {
+        	for(CourseDataConstraint constraint : CourseDataConstraint.values()) {
+        		if(constraint.name.equals(name)) {
+        			return constraint;
+        		}
+        	}
+        	return null;
         }
     }
     

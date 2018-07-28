@@ -7,15 +7,11 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Deque;
 import java.util.List;
 import java.util.logging.Logger;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.ObjectMap.Keys;
@@ -40,7 +36,6 @@ import bms.player.beatoraja.song.SongDatabaseAccessor;
  */
 public class MusicSelector extends MainState {
 
-	// TODO テキスト表示
 	// TODO　ミラーランダム段位のスコア表示
 
 	private int selectedreplay;
@@ -400,59 +395,65 @@ public class MusicSelector extends MainState {
 	private void readCourse(PlayMode mode) {
 		final PlayerResource resource = main.getPlayerResource();
 		final GradeBar course = (GradeBar) bar.getSelected();
-		if (course.existsAllSongs()) {
-			resource.clear();
-			final SongData[] songs = course.getSongDatas();
-			Path[] files = new Path[songs.length];
-			int i = 0;
-			for (SongData song : songs) {
-				files[i++] = Paths.get(song.getPath());
-			}
-			if (resource.setCourseBMSFiles(files)) {
+		if (!course.existsAllSongs()) {
+			Logger.getGlobal().info("段位の楽曲が揃っていません");
+			return;
+		}
+		
+		resource.clear();
+		final SongData[] songs = course.getSongDatas();
+		Path[] files = new Path[songs.length];
+		int i = 0;
+		for (SongData song : songs) {
+			files[i++] = Paths.get(song.getPath());
+		}
+		if (resource.setCourseBMSFiles(files)) {
+			if (mode == PlayMode.PLAY || mode.isAutoPlayMode()) {
 				for (CourseData.CourseDataConstraint constraint : course.getCourseData().getConstraint()) {
 					switch (constraint) {
 					case CLASS:
-						if (mode == PlayMode.PLAY || mode.isAutoPlayMode()) {
+						config.setRandom(0);
+						config.setRandom2(0);
+						config.setDoubleoption(0);
+						break;
+					case MIRROR:
+						if (config.getRandom() == 1) {
+							config.setRandom2(1);
+							config.setDoubleoption(1);
+						} else {
 							config.setRandom(0);
 							config.setRandom2(0);
 							config.setDoubleoption(0);
 						}
 						break;
-					case MIRROR:
-						if (mode == PlayMode.PLAY || mode.isAutoPlayMode()) {
-							if (config.getRandom() == 1) {
-								config.setRandom2(1);
-								config.setDoubleoption(1);
-							} else {
-								config.setRandom(0);
-								config.setRandom2(0);
-								config.setDoubleoption(0);
-							}
+					case RANDOM:
+						if (config.getRandom() > 5) {
+							config.setRandom(0);
+						}
+						if (config.getRandom2() > 5) {
+							config.setRandom2(0);
 						}
 						break;
-					case RANDOM:
-						if (mode == PlayMode.PLAY || mode.isAutoPlayMode()) {
-							if (config.getRandom() > 5) {
-								config.setRandom(0);
-							}
-							if (config.getRandom2() > 5) {
-								config.setRandom2(0);
-							}
-						}
+					case LN:
+						config.setLnmode(0);
+						break;
+					case CN:
+						config.setLnmode(1);
+						break;
+					case HCN:
+						config.setLnmode(2);
 						break;
 					default:
 						break;
 					}
 				}
-				preview.stop();
-				course.getCourseData().setSong(resource.getCourseBMSModels());
-				resource.setCourseData(course.getCourseData());
-				resource.setBMSFile(files[0], mode);
-				main.changeState(MainController.STATE_DECIDE);
-				banners.disposeOld();
-			} else {
-				Logger.getGlobal().info("段位の楽曲が揃っていません");
 			}
+			preview.stop();
+			course.getCourseData().setSong(resource.getCourseBMSModels());
+			resource.setCourseData(course.getCourseData());
+			resource.setBMSFile(files[0], mode);
+			main.changeState(MainController.STATE_DECIDE);
+			banners.disposeOld();
 		} else {
 			Logger.getGlobal().info("段位の楽曲が揃っていません");
 		}
