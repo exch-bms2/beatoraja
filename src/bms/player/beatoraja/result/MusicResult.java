@@ -29,8 +29,6 @@ import bms.player.beatoraja.skin.SkinType;
  */
 public class MusicResult extends AbstractResult {
 
-	private IRScoreData oldscore = new IRScoreData();
-
 	/**
 	 * 全ノーツの平均ズレ
 	 */
@@ -641,20 +639,6 @@ public class MusicResult extends AbstractResult {
 			return score.getExscore() == resource.getRivalScoreData();
 		}
 		return super.getBooleanValue(id);
-	}
-
-	public int getImageIndex(int id) {
-		switch (id) {
-		case NUMBER_CLEAR:
-			final PlayerResource resource = main.getPlayerResource();
-			if (resource.getScoreData() != null) {
-				return resource.getScoreData().getClear();
-			}
-			return Integer.MIN_VALUE;
-		case NUMBER_TARGET_CLEAR:
-			return oldscore.getClear();
-		}
-		return super.getImageIndex(id);
 	}
 
 	public void executeClickEvent(int id, int arg) {

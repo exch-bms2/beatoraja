@@ -18,8 +18,6 @@ public class SkinImage extends SkinObject {
 	 */
 	private SkinSource[] image;
 
-	private int id = -1;
-	
 	private IntegerProperty ref;
 
 	public SkinImage() {
@@ -89,8 +87,6 @@ public class SkinImage extends SkinObject {
             int value = 0;
             if(ref != null) {
                 value = ref.get(state);
-            } else if(id != -1) {
-                value = state.getImageIndex(id);
             }
             if(value >= image.length) {
                 value = 0;
@@ -141,7 +137,6 @@ public class SkinImage extends SkinObject {
 	}
 
 	public void setReferenceID(int id) {
-		ref = SkinPropertyMapper.getImageIndexProperty(id);
-		this.id = id;
+		ref = IntegerPropertyFactory.getImageIndexProperty(id);
 	}
 }

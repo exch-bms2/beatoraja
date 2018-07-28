@@ -668,27 +668,6 @@ public class MusicSelector extends MainState {
 		return false;
 	}
 
-	public int getImageIndex(int id) {
-		switch(id) {
-			case BUTTON_MODE:
-				int mode = 0;
-				for (; mode < MODE.length; mode++) {
-					if (MODE[mode] == config.getMode()) {
-						break;
-					}
-				}
-				final int[] mode_lr2 = { 0, 2, 4, 5, 1, 3 };
-				return mode < mode_lr2.length ? mode_lr2[mode] : mode;
-			case BUTTON_SORT:
-				return sort;
-			case NUMBER_CLEAR:
-				return bar.getSelected().getScore() != null ? bar.getSelected().getScore().getClear() : Integer.MIN_VALUE;
-			case NUMBER_TARGET_CLEAR:
-				return bar.getSelected().getRivalScore() != null ? bar.getSelected().getRivalScore().getClear() : Integer.MIN_VALUE;
-		}
-		return super.getImageIndex(id);
-	}
-
 	public void executeClickEvent(int id, int arg) {
 		switch (id) {
 		case BUTTON_PLAY:

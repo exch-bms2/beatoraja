@@ -63,13 +63,9 @@ public class SkinConfiguration extends MainState {
 			customOptionOffset = Math.max(0, Math.min(customOptionOffsetMax, customOptionOffset + mov));
 		}
 	}
-
-	public int getImageIndex(int id) {
-		if (SkinPropertyMapper.isSkinSelectTypeId(id)) {
-			SkinType t = SkinPropertyMapper.getSkinSelectType(id);
-			return type == t ? 1 : 0;
-		}
-		return super.getImageIndex(id);
+	
+	public SkinType getSkinType() {
+		return type;
 	}
 
 	public float getSkinSelectPosition() {

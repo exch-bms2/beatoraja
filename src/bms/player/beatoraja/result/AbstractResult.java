@@ -1,18 +1,6 @@
 package bms.player.beatoraja.result;
 
 import static bms.player.beatoraja.ClearType.NoPlay;
-import static bms.player.beatoraja.skin.SkinProperty.OPTION_NO_REPLAYDATA;
-import static bms.player.beatoraja.skin.SkinProperty.OPTION_NO_REPLAYDATA2;
-import static bms.player.beatoraja.skin.SkinProperty.OPTION_NO_REPLAYDATA3;
-import static bms.player.beatoraja.skin.SkinProperty.OPTION_NO_REPLAYDATA4;
-import static bms.player.beatoraja.skin.SkinProperty.OPTION_REPLAYDATA;
-import static bms.player.beatoraja.skin.SkinProperty.OPTION_REPLAYDATA2;
-import static bms.player.beatoraja.skin.SkinProperty.OPTION_REPLAYDATA2_SAVED;
-import static bms.player.beatoraja.skin.SkinProperty.OPTION_REPLAYDATA3;
-import static bms.player.beatoraja.skin.SkinProperty.OPTION_REPLAYDATA3_SAVED;
-import static bms.player.beatoraja.skin.SkinProperty.OPTION_REPLAYDATA4;
-import static bms.player.beatoraja.skin.SkinProperty.OPTION_REPLAYDATA4_SAVED;
-import static bms.player.beatoraja.skin.SkinProperty.OPTION_REPLAYDATA_SAVED;
 
 import bms.player.beatoraja.IRScoreData;
 import bms.player.beatoraja.MainController;
@@ -43,6 +31,8 @@ public abstract class AbstractResult extends MainState {
 	public static final int SOUND_CLOSE = 2;
 	
 	protected int gaugeType;
+	
+	protected IRScoreData oldscore = new IRScoreData();
 
 	public AbstractResult(MainController main) {
 		super(main);
@@ -138,5 +128,9 @@ public abstract class AbstractResult extends MainState {
 
 	public int getGaugeType() {
 		return gaugeType;
+	}
+	
+	public IRScoreData getOldScore() {
+		return oldscore;
 	}
 }

@@ -8,9 +8,14 @@ import com.badlogic.gdx.Gdx;
 
 import bms.player.beatoraja.BMSResource;
 import bms.player.beatoraja.PlayConfig;
+import bms.player.beatoraja.PlayerResource;
+import bms.player.beatoraja.config.SkinConfiguration;
 import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.play.JudgeManager;
 import bms.player.beatoraja.play.LaneRenderer;
+import bms.player.beatoraja.result.AbstractResult;
+import bms.player.beatoraja.select.MusicSelector;
+import bms.player.beatoraja.select.bar.Bar;
 import bms.player.beatoraja.skin.SkinObject.IntegerProperty;
 import bms.player.beatoraja.song.SongData;
 
@@ -347,6 +352,146 @@ public class IntegerPropertyFactory {
 			};
 		}
 
+		return null;
+	}
+
+	public static IntegerProperty getImageIndexProperty(int optionid) {
+		IntegerProperty result = null;
+
+		if (optionid == BUTTON_GAUGE_1P) {
+			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().getGauge());
+		}
+		if (optionid == BUTTON_RANDOM_1P) {
+			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().getRandom());
+		}
+		if (optionid == BUTTON_RANDOM_2P) {
+			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().getRandom2());
+		}
+		if (optionid == BUTTON_DPOPTION) {
+			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().getDoubleoption());
+		}
+		if (optionid == BUTTON_ASSIST_EXJUDGE) {
+			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().getJudgewindowrate() > 100 ? 1 : 0);
+		}
+		if (optionid == BUTTON_ASSIST_CONSTANT) {
+			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().isConstant() ? 1 : 0);
+		}
+		if (optionid == BUTTON_ASSIST_JUDGEAREA) {
+			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().isShowjudgearea() ? 1 : 0);
+		}
+		if (optionid == BUTTON_ASSIST_LEGACY) {
+			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().isLegacynote() ? 1 : 0);
+		}
+		if (optionid == BUTTON_ASSIST_MARKNOTE) {
+			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().isMarkprocessednote() ? 1 : 0);
+		}
+		if (optionid == BUTTON_ASSIST_BPMGUIDE) {
+			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().isBpmguide() ? 1 : 0);
+		}
+		if (optionid == BUTTON_ASSIST_NOMINE) {
+			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().isNomine() ? 1 : 0);
+		}
+		if (optionid == BUTTON_LNMODE) {
+			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().getLnmode());
+		}
+		if (optionid == BUTTON_BGA) {
+			result = (state) -> (state.main.getPlayerResource().getConfig().getBga());
+		}
+
+		if ((optionid >= VALUE_JUDGE_1P_SCRATCH && optionid <= VALUE_JUDGE_2P_KEY9)
+				|| (optionid >= VALUE_JUDGE_1P_KEY10 && optionid <= VALUE_JUDGE_2P_KEY99)) {
+			result = (state) -> {
+				if (state instanceof BMSPlayer) {
+					return ((BMSPlayer) state).getJudgeManager().getJudge(optionid);
+				}
+				return 0;
+			};
+		}
+		
+		if (SkinPropertyMapper.isSkinSelectTypeId(optionid)) {
+			final SkinType t = SkinPropertyMapper.getSkinSelectType(optionid);
+			result = (state) -> ((state instanceof SkinConfiguration) ? (((SkinConfiguration)state).getSkinType() == t ? 1 : 0) : Integer.MIN_VALUE);
+		}
+
+		if (result == null) {
+			result = getImageIndexProperty0(optionid);
+		}
+
+		return result;
+	}
+
+	private static IntegerProperty getImageIndexProperty0(int optionid) {
+		switch (optionid) {
+		case BUTTON_HSFIX:
+			return (state) -> {
+				if (state.main.getPlayerResource().getSongdata() != null) {
+					SongData song = state.main.getPlayerResource().getSongdata();
+					PlayConfig pc = state.main.getPlayerResource().getPlayerConfig().getPlayConfig(song.getMode())
+							.getPlayconfig();
+					return pc.getFixhispeed();
+				} else if (state.main.getPlayerResource().getCourseData() != null) {
+					PlayConfig pc = null;
+					for (SongData song : state.main.getPlayerResource().getCourseData().getSong()) {
+						if (song.getPath() == null) {
+							pc = null;
+							break;
+						}
+						PlayConfig pc2 = state.main.getPlayerConfig().getPlayConfig(song.getMode()).getPlayconfig();
+						if (pc == null) {
+							pc = pc2;
+						}
+						if (pc != pc2) {
+							pc = null;
+							break;
+						}
+					}
+					if (pc != null) {
+						return pc.getFixhispeed();
+					}
+				}
+				return Integer.MIN_VALUE;
+			};
+		case BUTTON_MODE:
+			return (state) -> {
+				if (state instanceof MusicSelector) {
+					int mode = 0;
+					for (; mode < MusicSelector.MODE.length; mode++) {
+						if (MusicSelector.MODE[mode] == state.main.getPlayerConfig().getMode()) {
+							break;
+						}
+					}
+					final int[] mode_lr2 = { 0, 2, 4, 5, 1, 3 };
+					return mode < mode_lr2.length ? mode_lr2[mode] : mode;					
+				}
+				return Integer.MIN_VALUE;
+			};
+		case BUTTON_SORT:
+			return (state) -> ((state instanceof MusicSelector) ? ((MusicSelector)state).getSort() : Integer.MIN_VALUE);
+		case NUMBER_CLEAR:
+			return (state) -> {
+				if (state instanceof MusicSelector) {
+					final Bar selected = ((MusicSelector) state).getBarRender().getSelected();
+					return selected.getScore() != null ? selected.getScore().getClear() : Integer.MIN_VALUE;					
+				} else if(state instanceof AbstractResult) {
+					final PlayerResource resource = state.main.getPlayerResource();
+					if (resource.getScoreData() != null) {
+						return resource.getScoreData().getClear();
+					}
+					return Integer.MIN_VALUE;
+				}
+				return Integer.MIN_VALUE;
+			};
+		case NUMBER_TARGET_CLEAR:
+			return (state) -> {
+				if (state instanceof MusicSelector) {
+					final Bar selected = ((MusicSelector) state).getBarRender().getSelected();
+					return selected.getRivalScore() != null ? selected.getRivalScore().getClear() : Integer.MIN_VALUE;
+				} else if(state instanceof AbstractResult) {
+					return ((AbstractResult)state).getOldScore().getClear();
+				}
+				return Integer.MIN_VALUE;
+			};
+		}
 		return null;
 	}
 }

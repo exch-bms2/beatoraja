@@ -436,62 +436,6 @@ public class SkinPropertyMapper {
 		return result;
 	}
 	
-	public static IntegerProperty getImageIndexProperty(int optionid) {
-		IntegerProperty result = null;
-
-		if(optionid == BUTTON_GAUGE_1P) {
-			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().getGauge());
-		}
-		if(optionid == BUTTON_RANDOM_1P) {
-			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().getRandom());
-		}		
-		if(optionid == BUTTON_RANDOM_2P) {
-			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().getRandom2());
-		}		
-		if(optionid == BUTTON_DPOPTION) {
-			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().getDoubleoption());
-		}
-		if(optionid == BUTTON_ASSIST_EXJUDGE) {
-			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().getJudgewindowrate() > 100 ? 1 : 0);
-		}
-		if(optionid == BUTTON_ASSIST_CONSTANT) {
-			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().isConstant() ? 1 : 0);
-		}
-		if(optionid == BUTTON_ASSIST_JUDGEAREA) {
-			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().isShowjudgearea() ? 1 : 0);
-		}
-		if(optionid == BUTTON_ASSIST_LEGACY) {
-			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().isLegacynote() ? 1 : 0);
-		}
-		if(optionid == BUTTON_ASSIST_MARKNOTE) {
-			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().isMarkprocessednote() ? 1 : 0);
-		}
-		if(optionid == BUTTON_ASSIST_BPMGUIDE) {
-			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().isBpmguide() ? 1 : 0);
-		}
-		if(optionid == BUTTON_ASSIST_NOMINE) {
-			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().isNomine() ? 1 : 0);
-		}
-		if(optionid == BUTTON_LNMODE) {
-			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().getLnmode());
-		}
-		if(optionid == BUTTON_BGA) {
-			result = (state) -> (state.main.getPlayerResource().getConfig().getBga());
-		}
-
-		if((optionid >= VALUE_JUDGE_1P_SCRATCH && optionid <= VALUE_JUDGE_2P_KEY9)
-					|| (optionid >= VALUE_JUDGE_1P_KEY10 && optionid <= VALUE_JUDGE_2P_KEY99)) {
-			result = (state) -> {
-				if(state instanceof BMSPlayer) {
-					return ((BMSPlayer) state).getJudgeManager().getJudge(optionid);
-				}
-				return 0;
-			};			
-		}
-
-		return result;
-	}
-	
 	public static StringProperty getTextProperty(final int optionid) {
 		StringProperty result = null;
 		if(optionid >= STRING_COURSE1_TITLE && optionid <= STRING_COURSE10_TITLE) {
