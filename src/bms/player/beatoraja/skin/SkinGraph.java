@@ -16,10 +16,6 @@ public class SkinGraph extends SkinObject {
 	 */
 	private SkinSource source;
 	/**
-	 * グラフの参照値(将来廃止予定)
-	 */
-	private final int id;
-	/**
 	 * グラフ値参照先
 	 */	
 	private final FloatProperty ref;	
@@ -32,38 +28,32 @@ public class SkinGraph extends SkinObject {
 
 	public SkinGraph(int imageid, int id) {
 		setImageID(imageid);
-		ref = SkinPropertyMapper.getFloatProperty(id);
-		this.id = id;
+		ref = FloatPropertyFactory.getFloatProperty(id);
 	}
 
 	public SkinGraph(int imageid, FloatProperty ref) {
 		setImageID(imageid);
 		this.ref = ref;
-		this.id = 0;
 	}
 
 	public SkinGraph(int imageid, int id, int min, int max) {
 		setImageID(imageid);
 		ref = new RateProperty(id, min, max);
-		this.id = id;
 	}
 
 	public SkinGraph(TextureRegion[] image, int timer, int cycle, int id) {
 		source = new SkinSourceImage(image, timer, cycle);
-		ref = SkinPropertyMapper.getFloatProperty(id);
-		this.id = id;
+		ref = FloatPropertyFactory.getFloatProperty(id);
 	}
 
 	public SkinGraph(TextureRegion[] image, int timer, int cycle, FloatProperty ref) {
 		source = new SkinSourceImage(image, timer, cycle);
 		this.ref = ref;
-		this.id = 0;
 	}
 
 	public SkinGraph(TextureRegion[] image, int timer, int cycle, int id, int min, int max) {
 		source = new SkinSourceImage(image, timer, cycle);
 		ref = new RateProperty(id, min, max);
-		this.id = id;
 	}
 
 	public void draw(SkinObjectRenderer sprite, long time, MainState state) {
@@ -71,7 +61,7 @@ public class SkinGraph extends SkinObject {
 			Rectangle r = this.getDestination(time, state);
 			TextureRegion image = state.getImage(getImageID());
 			if (r != null && image != null) {
-				float value = ref != null ? ref.get(state) : (id != -1 ? state.getSliderValue(id) : 0);
+				float value = ref != null ? ref.get(state) : 0;
 				if (direction == 1) {
 					current.setRegion(image, 0,
 							image.getRegionY() + image.getRegionHeight() - (int) (image.getRegionHeight() * value),
@@ -86,7 +76,7 @@ public class SkinGraph extends SkinObject {
 		} else if (source != null) {
 			Rectangle r = this.getDestination(time, state);
 			if (r != null) {
-				float value = ref != null ? ref.get(state) : (id != -1 ? state.getSliderValue(id) : 0);
+				float value = ref != null ? ref.get(state) : 0;
 				TextureRegion image = source.getImage(time, state);
 				if (direction == 1) {
 					current.setRegion(image, 0, image.getRegionHeight() - (int) (image.getRegionHeight() * value),

@@ -7,6 +7,7 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
 import bms.model.Mode;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.SkinConfig.Offset;
+import bms.player.beatoraja.play.PlaySkin;
 import bms.player.beatoraja.play.SkinGauge;
 import bms.player.beatoraja.play.bga.BGAProcessor;
 import bms.player.beatoraja.select.MusicSelectSkin;
@@ -349,6 +350,12 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 							values[13]);
 					slider.setChangable(values[14] == 0);
 					skin.add(slider);
+					
+					// TODO 固有実装の汎用化
+					if((skin instanceof PlaySkin) && values[13] == SLIDER_LANECOVER) {
+						((PlaySkin)skin).laneCover = slider;
+					}
+
 					// System.out.println("Object Added - " +
 					// (part.getTiming()));
 				}

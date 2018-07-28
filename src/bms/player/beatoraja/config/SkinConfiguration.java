@@ -72,14 +72,10 @@ public class SkinConfiguration extends MainState {
 		return super.getImageIndex(id);
 	}
 
-	public float getSliderValue(int id) {
-		switch (id) {
-		case SLIDER_SKINSELECT_POSITION:
-			return (float)customOptionOffset / customOptionOffsetMax;
-		}
-		return super.getSliderValue(id);
+	public float getSkinSelectPosition() {
+		return (float)customOptionOffset / customOptionOffsetMax;		
 	}
-
+	
 	public String getTextValue(int id) {
 		switch (id) {
 		case STRING_SKIN_NAME:

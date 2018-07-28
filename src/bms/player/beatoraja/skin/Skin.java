@@ -492,22 +492,6 @@ public class Skin {
 		}
 	}
 
-	/*
-	 * 白数字が0の時のレーンカバーのy座標
-	 */
-	public float getLaneCoverPosition() {
-		for(SkinObject obj: objects) {
-			if(obj instanceof SkinSlider) {
-				SkinSlider slider = (SkinSlider) obj;
-				if(slider.getType() == SLIDER_LANECOVER) {
-					SkinObjectDestination[] dst = slider.getAllDestination();
-					return dst[dst.length - 1].region.y;
-				}
-			}
-		}
-		return -1;
-	}
-
 	public SkinOffset getOffsetAll(MainState state) {
 		SkinOffset offsetAll = null;
 		if(state instanceof BMSPlayer) {

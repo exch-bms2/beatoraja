@@ -168,13 +168,6 @@ public abstract class MainState {
 		return 0;
 	}
 
-	public float getSliderValue(int id) {
-		return 0;
-	}
-
-	public void setSliderValue(int id, float value) {
-	}
-
 	public SkinOffset getOffsetValue(int id) {
 		return main.getOffset(id);
 	}

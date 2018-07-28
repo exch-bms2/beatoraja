@@ -13,6 +13,7 @@ import bms.model.Mode;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.play.*;
 import bms.player.beatoraja.skin.*;
+import bms.player.beatoraja.skin.SkinObject.SkinObjectDestination;
 
 /**
  * LR2プレイスキンローダー
@@ -62,6 +63,8 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 	private SkinBPMGraph bpmgraphobj;
 	private SkinTimingVisualizer timingobj;
 	private SkinHidden hidden;
+	
+	SkinSlider laneCover;
 
 	public LR2PlaySkinLoader(final SkinType type, final Resolution src, final Config c) {
 		super(src, c);
@@ -882,7 +885,8 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 		this.loadSkin(new PlaySkin(src, dst), f, player, header, option, property);
 
 		//白数字が0の時のレーンカバーのy座標の分だけレーンの高さを減らす
-		float laneCoverPosition = skin.getLaneCoverPosition();
+		//TODO 固有実装の汎用化
+		float laneCoverPosition = getLaneCoverPosition();
 		if(laneCoverPosition > 0) {
 			for(int i = 0; i < laner.length; i++) {
 				laner[i].height = laner[i].height - (dsth - laneCoverPosition);
@@ -943,5 +947,16 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 				values[5] * dstw / srcw, values[6] * dsth / srch * h, values[7], 255, r, g,
 				b, values[12], values[13], values[14], values[15], values[16],
 				values[17], values[18], values[19], values[20], readOffset(linevalues[index % 2], 21, new int[]{OFFSET_LIFT}));
+	}
+	
+	/*
+	 * 白数字が0の時のレーンカバーのy座標
+	 */
+	public float getLaneCoverPosition() {
+		if(skin.laneCover != null) {
+			SkinObjectDestination[] dst = skin.laneCover.getAllDestination();
+			return dst[dst.length - 1].region.y;
+		}
+		return -1;
 	}
 }

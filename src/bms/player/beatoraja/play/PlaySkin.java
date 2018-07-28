@@ -60,6 +60,8 @@ public class PlaySkin extends Skin {
 		OPTION_COURSE_STAGE1,OPTION_COURSE_STAGE2,OPTION_COURSE_STAGE3,OPTION_COURSE_STAGE4,OPTION_COURSE_STAGE_FINAL,
 		OPTION_MODE_COURSE,OPTION_MODE_NONSTOP,OPTION_MODE_EXPERT,OPTION_MODE_GRADE};
 
+	public SkinSlider laneCover;
+	
 	public PlaySkin(Resolution src, Resolution dst) {
 		super(src, dst, fixop);
 	}
