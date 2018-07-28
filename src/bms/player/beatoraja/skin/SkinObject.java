@@ -724,7 +724,7 @@ public abstract class SkinObject implements Disposable {
 		private final int max;
 		
 		public RateProperty(int type, int min, int max) {
-			this.ref = SkinPropertyMapper.getIntegerProperty(type);
+			this.ref = IntegerPropertyFactory.getIntegerProperty(type);
 			this.type = type;
 			this.min = min;
 			this.max = max;

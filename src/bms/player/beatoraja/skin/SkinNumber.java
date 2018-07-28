@@ -74,7 +74,7 @@ public class SkinNumber extends SkinObject {
 
 	public void setId(int id) {
 		if(ref == null) {
-			ref = SkinPropertyMapper.getIntegerProperty(id);
+			ref = IntegerPropertyFactory.getIntegerProperty(id);
 			this.id = id;			
 		}
 	}
