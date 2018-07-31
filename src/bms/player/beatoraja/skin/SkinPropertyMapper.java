@@ -436,36 +436,6 @@ public class SkinPropertyMapper {
 		return result;
 	}
 	
-	public static StringProperty getTextProperty(final int optionid) {
-		StringProperty result = null;
-		if(optionid >= STRING_COURSE1_TITLE && optionid <= STRING_COURSE10_TITLE) {
-			result = new StringProperty() {
-				private final int index = optionid - STRING_COURSE1_TITLE;
-				@Override
-				public String get(MainState state) {
-					if(state instanceof MusicSelector) {
-						final Bar bar = ((MusicSelector)state).getSelectedBar();
-						if (bar instanceof GradeBar) {
-							if (((GradeBar) bar).getSongDatas().length > index) {
-								SongData song = ((GradeBar) bar).getSongDatas()[index];
-								final String songname = song != null && song.getTitle() != null ? song.getTitle() : "----";
-								return song != null && song.getPath() != null ? songname : "(no song) " + songname;
-							}
-						}				
-					} else {
-						CourseData course = state.main.getPlayerResource().getCourseData();
-						if(course != null && course.getSong().length > index && course.getSong()[index] != null) {
-							return course.getSong()[index].getTitle();
-						}
-					}
-					return "";
-				}
-			};
-		}
-		
-		return result;
-	}
-
 	private static abstract class DrawConditionProperty implements BooleanProperty {
 		
 		public final int type;

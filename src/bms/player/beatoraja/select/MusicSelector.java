@@ -567,22 +567,6 @@ public class MusicSelector extends MainState {
 		return super.getNumberValue(id);
 	}
 
-	public String getTextValue(int id) {
-		switch (id) {
-			case STRING_RIVAL:
-				return rival != null ? rival.getName() : "";
-		case STRING_TITLE:
-		case STRING_FULLTITLE:
-			if (bar.getSelected() instanceof DirectoryBar) {
-				return bar.getSelected().getTitle();
-			}
-			break;
-		case STRING_DIRECTORY:
-			return bar.getDirectoryString();
-		}
-		return super.getTextValue(id);
-	}
-
 	public SongDatabaseAccessor getSongDatabase() {
 		return songdb;
 	}

@@ -20,7 +20,6 @@ public abstract class SkinText extends SkinObject {
     
     public static final int[] ALIGN = {Align.left, Align.center, Align.right};
 
-    private final int id;
     private final StringProperty ref;
     
     private String text = "";
@@ -28,8 +27,7 @@ public abstract class SkinText extends SkinObject {
     private boolean editable;
     
     public SkinText(int id) {
-    	ref = SkinPropertyMapper.getTextProperty(id);
-    	this.id = id;
+    	ref = StringPropertyFactory.getStringProperty(id);
     }
 
     public int getAlign() {
@@ -57,10 +55,7 @@ public abstract class SkinText extends SkinObject {
     protected abstract void prepareText(String text);
 
     public void draw(SkinObjectRenderer sprite, long time, MainState state) {
-        if(id == -1) {
-        	return;
-        }
-       final String  value = ref != null ? ref.get(state) : state.getTextValue(id);
+       final String  value = ref != null ? ref.get(state) : null;
         if(value == null || value.length() == 0) {
             return;
         }        	
@@ -75,10 +70,6 @@ public abstract class SkinText extends SkinObject {
 
     public abstract void draw(SkinObjectRenderer sprite, long time, MainState state, int offsetX, int offsetY);
     
-	public int getReferenceID() {
-		return id;
-    }
-
     public boolean isEditable() {
         return editable;
     }

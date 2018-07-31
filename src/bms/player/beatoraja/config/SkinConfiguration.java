@@ -72,29 +72,22 @@ public class SkinConfiguration extends MainState {
 		return (float)customOptionOffset / customOptionOffsetMax;		
 	}
 	
-	public String getTextValue(int id) {
-		switch (id) {
-		case STRING_SKIN_NAME:
-			return selectedSkinHeader != null ? selectedSkinHeader.getName() : "";
-		case STRING_SKIN_AUTHOR:
-			return selectedSkinHeader != null ? "" : "";
-		default:
-			if (SkinPropertyMapper.isSkinCustomizeCategory(id)) {
-				int index = SkinPropertyMapper.getSkinCustomizeCategoryIndex(id);
-				if (customOptions != null && index + customOptionOffset < customOptions.size()) {
-					return customOptions.get(index + customOptionOffset).getCategoryName();
-				}
-				return "";
-			}
-			if (SkinPropertyMapper.isSkinCustomizeItem(id)) {
-				int index = SkinPropertyMapper.getSkinCustomizeItemIndex(id);
-				if (customOptions != null && index + customOptionOffset < customOptions.size()) {
-					return customOptions.get(index + customOptionOffset).getDisplayValue();
-				}
-				return "";
-			}
+	public String getCategoryName(int index) {
+		if (customOptions != null && index + customOptionOffset < customOptions.size()) {
+			return customOptions.get(index + customOptionOffset).getCategoryName();
 		}
-		return super.getTextValue(id);
+		return "";		
+	}
+	
+	public String getDisplayValue(int index) {
+		if (customOptions != null && index + customOptionOffset < customOptions.size()) {
+			return customOptions.get(index + customOptionOffset).getDisplayValue();
+		}
+		return "";		
+	}
+	
+	public SkinHeader getSelectedSkinHeader() {
+		return selectedSkinHeader;
 	}
 
 	public void executeClickEvent(int id, int arg) {

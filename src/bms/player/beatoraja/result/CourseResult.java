@@ -302,16 +302,6 @@ public class CourseResult extends AbstractResult {
 		return 0;
 	}
 
-	public String getTextValue(int id) {
-		final PlayerResource resource = main.getPlayerResource();
-		switch (id) {
-			case STRING_TITLE:
-			case STRING_FULLTITLE:
-				return resource.getCoursetitle();
-		}
-		return super.getTextValue(id);
-	}
-
 	public int getNumberValue(int id) {
 		final PlayerResource resource = main.getPlayerResource();
 		switch (id) {

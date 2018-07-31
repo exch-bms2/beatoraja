@@ -20,6 +20,7 @@ public class MusicSelectSkin extends Skin {
 	 */
 	private int[] clickableBar = new int[0];
 
+	public SkinText searchText;
 	private Rectangle search;
 
 	public MusicSelectSkin(Resolution src, Resolution dst) {

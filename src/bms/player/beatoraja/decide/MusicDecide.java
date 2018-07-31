@@ -66,17 +66,4 @@ public class MusicDecide extends MainState {
 	public void dispose() {
 		super.dispose();
 	}
-
-	public String getTextValue(int id) {
-		final PlayerResource resource = main.getPlayerResource();
-		if (resource.getCourseBMSModels() != null) {
-			switch (id) {
-			case STRING_TITLE:
-			case STRING_FULLTITLE:
-				return resource.getCoursetitle();
-			}
-			return "";
-		}
-		return super.getTextValue(id);
-	}
 }

@@ -172,41 +172,6 @@ public abstract class MainState {
 		return main.getOffset(id);
 	}
 
-	public String getTextValue(int id) {
-		if (main.getPlayerResource() != null) {
-			PlayerResource resource = main.getPlayerResource();
-			SongData song = resource.getSongdata();
-			switch (id) {
-			case STRING_RIVAL:
-				return TargetProperty.getAllTargetProperties()[main.getPlayerResource().getPlayerConfig().getTarget()]
-						.getName();
-			case STRING_PLAYER:
-				return main.getPlayerConfig().getName();
-			case STRING_TITLE:
-				return song != null ? song.getTitle() : "";
-			case STRING_SUBTITLE:
-				return song != null ? song.getSubtitle() : "";
-			case STRING_FULLTITLE:
-				return song != null ? song.getFullTitle() : "";
-			case STRING_ARTIST:
-				return song != null ? song.getArtist() : "";
-			case STRING_SUBARTIST:
-				return song != null ? song.getSubartist() : "";
-			case STRING_FULLARTIST:
-				return song != null ? song.getFullArtist() : "";
-			case STRING_GENRE:
-				return song != null ? song.getGenre() : "";
-			case STRING_TABLE_NAME:
-				return song != null ? resource.getTablename() : "";
-			case STRING_TABLE_LEVEL:
-				return song != null ? resource.getTablelevel() : "";
-			case STRING_TABLE_FULL:
-				return song != null ? resource.getTableFullname() : "";
-			}
-		}
-		return "";
-	}
-
 	public TextureRegion getImage(int imageid) {
 		switch (imageid) {
 		case IMAGE_BACKBMP:
