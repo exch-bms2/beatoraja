@@ -7,6 +7,7 @@ import bms.player.beatoraja.IRScoreData;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.ScoreDataProperty;
 import bms.player.beatoraja.IRScoreData.SongTrophy;
+import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.play.JudgeManager;
 import bms.player.beatoraja.play.GrooveGauge.Gauge;
@@ -455,9 +456,85 @@ public class BooleanPropertyFactory {
 					return state.main.getPlayerResource().getTablename().length() != 0;
 				}
 			};
-
+		case OPTION_AUTOPLAYON:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
+					(state) -> ((state instanceof BMSPlayer) ? ((BMSPlayer) state).getPlayMode() == PlayMode.AUTOPLAY : false));
+		case OPTION_AUTOPLAYOFF:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
+					(state) -> ((state instanceof BMSPlayer) ? ((BMSPlayer) state).getPlayMode() != PlayMode.AUTOPLAY : false));
+		case OPTION_REPLAY_OFF:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
+					(state) -> ((state instanceof BMSPlayer) ? ((BMSPlayer) state).getPlayMode() == PlayMode.PLAY || ((BMSPlayer) state).getPlayMode() == PlayMode.PRACTICE : false));
+		case OPTION_REPLAY_PLAYING:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
+					(state) -> ((state instanceof BMSPlayer) ? ((BMSPlayer) state).getPlayMode().isReplayMode() : false));
+		case OPTION_STATE_PRACTICE:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
+					(state) -> ((state instanceof BMSPlayer) ? ((BMSPlayer) state).getState() == BMSPlayer.STATE_PRACTICE : false));
+		case OPTION_NOW_LOADING:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
+					(state) -> ((state instanceof BMSPlayer) ? ((BMSPlayer) state).getState() == BMSPlayer.STATE_PRELOAD : false));
+		case OPTION_LOADED:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
+					(state) -> ((state instanceof BMSPlayer) ? ((BMSPlayer) state).getState() != BMSPlayer.STATE_PRELOAD : false));
+		case OPTION_LANECOVER1_CHANGING:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
+					(state) -> (state.main.getInputProcessor().startPressed() || state.main.getInputProcessor().isSelectPressed()));
+		case OPTION_LANECOVER1_ON:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
+					(state) -> ((state instanceof BMSPlayer) ? ((BMSPlayer) state).getLanerender().getPlayConfig().isEnablelanecover() : false));
+		case OPTION_LIFT1_ON:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
+					(state) -> ((state instanceof BMSPlayer) ? ((BMSPlayer) state).getLanerender().getPlayConfig().isEnablelift() : false));
+		case OPTION_HIDDEN1_ON:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
+					(state) -> ((state instanceof BMSPlayer) ? ((BMSPlayer) state).getLanerender().getPlayConfig().isEnablehidden() : false));
+		case OPTION_1P_BORDER_OR_MORE:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
+					(state) -> ((state instanceof BMSPlayer) ? ((BMSPlayer) state).getGauge().getGauge().isQualified() : false));
 		}
+		
 		return null;
+	}
+
+	private static class DrawProperty implements BooleanProperty {
+
+		public final int type;
+		public final BProperty bool;
+
+		public static final int TYPE_NO_STATIC = 0;
+		public static final int TYPE_STATIC_WITHOUT_MUSICSELECT = 1;
+		public static final int TYPE_STATIC_ON_RESULT = 2;
+		public static final int TYPE_STATIC_ALL = 3;
+
+		public DrawProperty(int type, BProperty bool) {
+			this.type = type;
+			this.bool = bool;
+		}
+
+		@Override
+		public boolean isStatic(MainState state) {
+			switch (type) {
+			case TYPE_NO_STATIC:
+				return false;
+			case TYPE_STATIC_WITHOUT_MUSICSELECT:
+				return !(state instanceof MusicSelector);
+			case TYPE_STATIC_ON_RESULT:
+				return (state instanceof MusicResult) || (state instanceof CourseResult);
+			case TYPE_STATIC_ALL:
+				return true;
+			}
+			return false;
+		}
+
+		@Override
+		public boolean get(MainState state) {
+			return bool.get(state);
+		}
+	}
+
+	private interface BProperty {
+		public boolean get(MainState state);
 	}
 
 	private static abstract class DrawConditionProperty implements BooleanProperty {

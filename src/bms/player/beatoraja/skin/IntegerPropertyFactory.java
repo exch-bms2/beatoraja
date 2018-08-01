@@ -11,6 +11,7 @@ import bms.player.beatoraja.PlayConfig;
 import bms.player.beatoraja.PlayerResource;
 import bms.player.beatoraja.config.SkinConfiguration;
 import bms.player.beatoraja.play.BMSPlayer;
+import bms.player.beatoraja.play.GrooveGauge;
 import bms.player.beatoraja.play.JudgeManager;
 import bms.player.beatoraja.play.LaneRenderer;
 import bms.player.beatoraja.result.AbstractResult;
@@ -246,7 +247,9 @@ public class IntegerPropertyFactory {
 					+ state.getJudgeCount(4, true) + state.getJudgeCount(4, false));
 		case NUMBER_HISPEED_LR2:
 			return (state) -> {
-				if (state.main.getPlayerResource().getSongdata() != null) {
+				if(state instanceof BMSPlayer) {
+					return (int) (((BMSPlayer)state).getLanerender().getHispeed() * 100);
+				} else if (state.main.getPlayerResource().getSongdata() != null) {
 					SongData song = state.main.getPlayerResource().getSongdata();
 					PlayConfig pc = state.main.getPlayerResource().getPlayerConfig().getPlayConfig(song.getMode())
 							.getPlayconfig();
@@ -256,7 +259,9 @@ public class IntegerPropertyFactory {
 			};
 		case NUMBER_HISPEED:
 			return (state) -> {
-				if (state.main.getPlayerResource().getSongdata() != null) {
+				if(state instanceof BMSPlayer) {
+					return (int) (((BMSPlayer)state).getLanerender().getHispeed());
+				} else if (state.main.getPlayerResource().getSongdata() != null) {
 					SongData song = state.main.getPlayerResource().getSongdata();
 					PlayConfig pc = state.main.getPlayerResource().getPlayerConfig().getPlayConfig(song.getMode())
 							.getPlayconfig();
@@ -266,7 +271,9 @@ public class IntegerPropertyFactory {
 			};
 		case NUMBER_HISPEED_AFTERDOT:
 			return (state) -> {
-				if (state.main.getPlayerResource().getSongdata() != null) {
+				if(state instanceof BMSPlayer) {
+					return (int) ((((BMSPlayer)state).getLanerender().getHispeed() * 100) % 100);
+				} else if (state.main.getPlayerResource().getSongdata() != null) {
 					SongData song = state.main.getPlayerResource().getSongdata();
 					PlayConfig pc = state.main.getPlayerResource().getPlayerConfig().getPlayConfig(song.getMode())
 							.getPlayconfig();
@@ -276,7 +283,9 @@ public class IntegerPropertyFactory {
 			};
 		case NUMBER_DURATION:
 			return (state) -> {
-				if (state.main.getPlayerResource().getSongdata() != null) {
+				if(state instanceof BMSPlayer) {
+					return ((BMSPlayer)state).getLanerender().getCurrentDuration();
+				} else if (state.main.getPlayerResource().getSongdata() != null) {
 					SongData song = state.main.getPlayerResource().getSongdata();
 					PlayConfig pc = state.main.getPlayerResource().getPlayerConfig().getPlayConfig(song.getMode())
 							.getPlayconfig();
@@ -286,7 +295,9 @@ public class IntegerPropertyFactory {
 			};
 		case NUMBER_DURATION_GREEN:
 			return (state) -> {
-				if (state.main.getPlayerResource().getSongdata() != null) {
+				if(state instanceof BMSPlayer) {
+					return ((BMSPlayer)state).getLanerender().getCurrentDuration() * 3 / 5;
+				} else if (state.main.getPlayerResource().getSongdata() != null) {
 					SongData song = state.main.getPlayerResource().getSongdata();
 					PlayConfig pc = state.main.getPlayerResource().getPlayerConfig().getPlayConfig(song.getMode())
 							.getPlayconfig();
@@ -347,6 +358,78 @@ public class IntegerPropertyFactory {
 				final SongData song = state.main.getPlayerResource().getSongdata();
 				if (song != null && song.getInformation() != null) {
 					return (int) song.getInformation().getTotal();
+				}
+				return Integer.MIN_VALUE;
+			};
+		case NUMBER_PLAYTIME_MINUTE:
+			return (state) -> ((int) (((int) (state.main.isTimerOn(TIMER_PLAY) ? state.main.getNowTime(TIMER_PLAY) : 0)) / 60000));
+		case NUMBER_PLAYTIME_SECOND:
+			return (state) -> ((((int) (state.main.isTimerOn(TIMER_PLAY) ? state.main.getNowTime(TIMER_PLAY) : 0)) / 1000) % 60);
+		case NUMBER_TIMELEFT_MINUTE:
+			return (state) -> {
+				if(state instanceof BMSPlayer) {
+					return (int) (Math.max((((BMSPlayer)state).getPlaytime() - (int) (state.main.isTimerOn(TIMER_PLAY) ? state.main.getNowTime(TIMER_PLAY) : 0) + 1000), 0) / 60000);
+				}
+				return Integer.MIN_VALUE;
+			};
+		case NUMBER_TIMELEFT_SECOND:
+			return (state) -> {
+				if(state instanceof BMSPlayer) {
+					return (Math.max((((BMSPlayer)state).getPlaytime() - (int) (state.main.isTimerOn(TIMER_PLAY) ?
+							state.main.getNowTime(TIMER_PLAY) : 0) + 1000), 0) / 1000) % 60;
+				}
+				return Integer.MIN_VALUE;
+			};
+		case NUMBER_LANECOVER1:
+			return (state) -> {
+				if(state instanceof BMSPlayer) {
+					return (int) (((BMSPlayer)state).getLanerender().getLanecover() * 1000);
+				}
+				return Integer.MIN_VALUE;
+			};
+		case NUMBER_LIFT1:
+			return (state) -> {
+				if(state instanceof BMSPlayer) {
+					return (int) (((BMSPlayer)state).getLanerender().getLiftRegion() * 1000);
+				}
+				return Integer.MIN_VALUE;
+			};
+		case NUMBER_HIDDEN1:
+			return (state) -> {
+				if(state instanceof BMSPlayer) {
+					return (int) (((BMSPlayer)state).getLanerender().getHiddenCover() * 1000);
+				}
+				return Integer.MIN_VALUE;
+			};
+		case NUMBER_GROOVEGAUGE:
+			return (state) -> {
+				if(state instanceof BMSPlayer) {
+					return (int) (((BMSPlayer)state).getGauge().getValue());
+				}
+				return Integer.MIN_VALUE;
+			};
+		case NUMBER_GROOVEGAUGE_AFTERDOT:
+			return (state) -> {
+				if(state instanceof BMSPlayer) {
+					final GrooveGauge gauge = ((BMSPlayer)state).getGauge();
+					return  (gauge.getType() == GrooveGauge.HARD || gauge.getType() == GrooveGauge.EXHARD || gauge.getType() == GrooveGauge.HAZARD || gauge.getType() == GrooveGauge.CLASS || gauge.getType() == GrooveGauge.EXCLASS || gauge.getType() == GrooveGauge.EXHARDCLASS)
+							&& gauge.getValue() > 0 && gauge.getValue() < 0.1
+							? 1 : ((int) (gauge.getValue() * 10)) % 10;
+				}
+				return Integer.MIN_VALUE;
+			};
+		case NUMBER_NOWBPM:
+			return (state) -> {
+				if(state instanceof BMSPlayer) {
+					return (int) (((BMSPlayer)state).getLanerender().getNowBPM());
+				}
+				return Integer.MIN_VALUE;
+			};
+		case NUMBER_MAXCOMBO:
+		case NUMBER_MAXCOMBO2:
+			return (state) -> {
+				if(state instanceof BMSPlayer) {
+					return ((BMSPlayer)state).getJudgeManager().getScoreData().getCombo();
 				}
 				return Integer.MIN_VALUE;
 			};

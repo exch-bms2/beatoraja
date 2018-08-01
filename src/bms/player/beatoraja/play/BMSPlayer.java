@@ -387,13 +387,13 @@ public class BMSPlayer extends MainState {
 		}
 	}
 
-	protected static final int STATE_PRELOAD = 0;
-	protected static final int STATE_PRACTICE = 1;
-	protected static final int STATE_PRACTICE_FINISHED = 2;
-	protected static final int STATE_READY = 3;
-	protected static final int STATE_PLAY = 4;
-	protected static final int STATE_FAILED = 5;
-	protected static final int STATE_FINISHED = 6;
+	public static final int STATE_PRELOAD = 0;
+	public static final int STATE_PRACTICE = 1;
+	public static final int STATE_PRACTICE_FINISHED = 2;
+	public static final int STATE_READY = 3;
+	public static final int STATE_PLAY = 4;
+	public static final int STATE_FAILED = 5;
+	public static final int STATE_FINISHED = 6;
 
 	private int state = STATE_PRELOAD;
 
@@ -888,78 +888,8 @@ public class BMSPlayer extends MainState {
 		return gauge;
 	}
 
-	public int getNumberValue(int id) {
-		switch (id) {
-		case NUMBER_LANECOVER1:
-			return (int) (lanerender.getLanecover() * 1000);
-		case NUMBER_LIFT1:
-			return (int) (lanerender.getLiftRegion() * 1000);
-		case NUMBER_HIDDEN1:
-			return (int) (lanerender.getHiddenCover() * 1000);
-		case NUMBER_PLAYTIME_MINUTE:
-			return (int) (((int) (main.isTimerOn(TIMER_PLAY) ? main.getNowTime(TIMER_PLAY) : 0)) / 60000);
-		case NUMBER_PLAYTIME_SECOND:
-			return (((int) (main.isTimerOn(TIMER_PLAY) ? main.getNowTime(TIMER_PLAY) : 0)) / 1000) % 60;
-		case NUMBER_TIMELEFT_MINUTE:
-			return (int) (Math.max((playtime - (int) (main.isTimerOn(TIMER_PLAY) ?
-					main.getNowTime(TIMER_PLAY) : 0) + 1000), 0) / 60000);
-		case NUMBER_TIMELEFT_SECOND:
-			return (Math.max((playtime - (int) (main.isTimerOn(TIMER_PLAY) ?
-					main.getNowTime(TIMER_PLAY) : 0) + 1000), 0) / 1000) % 60;
-		case NUMBER_GROOVEGAUGE:
-			return (int) gauge.getValue();
-		case NUMBER_GROOVEGAUGE_AFTERDOT:
-			return  (gauge.getType() == GrooveGauge.HARD || gauge.getType() == GrooveGauge.EXHARD || gauge.getType() == GrooveGauge.HAZARD || gauge.getType() == GrooveGauge.CLASS || gauge.getType() == GrooveGauge.EXCLASS || gauge.getType() == GrooveGauge.EXHARDCLASS)
-					&& gauge.getValue() > 0 && gauge.getValue() < 0.1
-					? 1 : ((int) (gauge.getValue() * 10)) % 10;
-		case NUMBER_HISPEED_LR2:
-			return (int) (lanerender.getHispeed() * 100);
-		case NUMBER_HISPEED:
-			return (int) lanerender.getHispeed();
-		case NUMBER_HISPEED_AFTERDOT:
-			return (int) (lanerender.getHispeed() * 100) % 100;
-		case NUMBER_DURATION:
-			return lanerender.getCurrentDuration();
-		case NUMBER_DURATION_GREEN:
-			return lanerender.getCurrentDuration() * 3 / 5;
-		case NUMBER_NOWBPM:
-			return (int) lanerender.getNowBPM();
-		case NUMBER_MAXCOMBO:
-		case NUMBER_MAXCOMBO2:
-			return judge.getScoreData().getCombo();
-		}
-		return super.getNumberValue(id);
-	}
-
-	public boolean getBooleanValue(int id) {
-		switch (id) {
-		case OPTION_AUTOPLAYON:
-			return autoplay == PlayMode.AUTOPLAY;
-		case OPTION_AUTOPLAYOFF:
-			return autoplay != PlayMode.AUTOPLAY;
-		case OPTION_REPLAY_OFF:
-			return autoplay == PlayMode.PLAY || autoplay == PlayMode.PRACTICE;
-		case OPTION_REPLAY_PLAYING:
-			return autoplay.isReplayMode();
-		case OPTION_STATE_PRACTICE:
-			return state == STATE_PRACTICE;
-		case OPTION_NOW_LOADING:
-			return state == STATE_PRELOAD;
-		case OPTION_LOADED:
-			return state != STATE_PRELOAD;
-		case OPTION_LANECOVER1_CHANGING:
-			return main.getInputProcessor().startPressed() ||
-					main.getInputProcessor().isSelectPressed();
-		case OPTION_LANECOVER1_ON:
-			return lanerender.getPlayConfig().isEnablelanecover();
-		case OPTION_LIFT1_ON:
-			return lanerender.getPlayConfig().isEnablelift();
-		case OPTION_HIDDEN1_ON:
-			return lanerender.getPlayConfig().isEnablehidden();
-		case OPTION_1P_BORDER_OR_MORE:
-			return gauge.getGauge().isQualified();
-		}
-		return super.getBooleanValue(id);
+	public PlayMode getPlayMode() {
+		return autoplay;
 	}
 
 	public boolean isNoteEnd() {
