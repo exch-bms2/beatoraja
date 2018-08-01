@@ -244,7 +244,7 @@ public abstract class SkinObject implements Disposable {
 		Array<BooleanProperty> draw = new Array(dstop.length);
 		for(int i : dstop) {
 			if(i != 0 && !l.contains(i)) {
-				BooleanProperty dc = SkinPropertyMapper.getBooleanProperty(i);
+				BooleanProperty dc = BooleanPropertyFactory.getBooleanProperty(i);
 				if(dc != null) {
 					draw.add(dc);
 				} else {

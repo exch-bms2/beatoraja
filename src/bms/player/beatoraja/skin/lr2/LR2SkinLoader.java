@@ -4,6 +4,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.IntIntMap;
 
 import bms.player.beatoraja.MainState;
+import bms.player.beatoraja.skin.BooleanPropertyFactory;
 import bms.player.beatoraja.skin.SkinLoader;
 import bms.player.beatoraja.skin.SkinObject.BooleanProperty;
 import bms.player.beatoraja.skin.SkinPropertyMapper;
@@ -50,7 +51,7 @@ public class LR2SkinLoader extends SkinLoader {
 							}
 						}
 						if (!b && !op.containsKey(Math.abs(opt)) && state != null) {
-							BooleanProperty draw = SkinPropertyMapper.getBooleanProperty(opt);
+							BooleanProperty draw = BooleanPropertyFactory.getBooleanProperty(opt);
 							if(draw != null) {
 								b = draw.get(state);								
 							} else {
@@ -91,7 +92,7 @@ public class LR2SkinLoader extends SkinLoader {
 								}
 							}
 							if (!b && !op.containsKey(Math.abs(opt)) && state != null) {
-								BooleanProperty draw = SkinPropertyMapper.getBooleanProperty(opt);
+								BooleanProperty draw = BooleanPropertyFactory.getBooleanProperty(opt);
 								if(draw != null) {
 									b = draw.get(state);								
 								} else {

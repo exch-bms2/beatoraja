@@ -84,52 +84,6 @@ public abstract class MainState {
 	}
 
 	public boolean getBooleanValue(int id) {
-		final SongData model = main.getPlayerResource().getSongdata();
-		switch (id) {
-		case OPTION_STAGEFILE:
-			return model != null && model.getStagefile().length() > 0;
-		case OPTION_NO_STAGEFILE:
-			return model != null && model.getStagefile().length() == 0;
-		case OPTION_BACKBMP:
-			return model != null && model.getBackbmp().length() > 0;
-		case OPTION_NO_BACKBMP:
-			return model != null && model.getBackbmp().length() == 0;
-		case OPTION_BANNER:
-			return model != null && model.getBanner().length() > 0;
-		case OPTION_NO_BANNER:
-			return model != null && model.getBanner().length() == 0;
-		case OPTION_NO_TEXT:
-			return model != null && !model.hasDocument();
-		case OPTION_TEXT:
-			return model != null && model.hasDocument();
-		case OPTION_NO_LN:
-			return model != null && !model.hasAnyLongNote();
-		case OPTION_LN:
-			return model != null && model.hasAnyLongNote();
-		case OPTION_NO_BGA:
-			return model != null && !model.hasBGA();
-		case OPTION_BGA:
-			return model != null && model.hasBGA();
-		case OPTION_NO_RANDOMSEQUENCE:
-			return model != null && !model.hasRandomSequence();
-		case OPTION_RANDOMSEQUENCE:
-			return model != null && model.hasRandomSequence();
-		case OPTION_NO_BPMCHANGE:
-			return model != null && model.getMinbpm() == model.getMaxbpm();
-		case OPTION_BPMCHANGE:
-			return model != null && model.getMinbpm() < model.getMaxbpm();
-		case OPTION_BPMSTOP:
-			if (main.getPlayerResource().getSongdata() != null) {
-				return main.getPlayerResource().getSongdata().isBpmstop();
-			}
-			return false;
-		case OPTION_OFFLINE:
-			return main.getIRConnection() == null;
-		case OPTION_ONLINE:
-			return main.getIRConnection() != null;
-		case OPTION_TABLE_SONG:
-			return main.getPlayerResource().getTablename().length() != 0;
-		}
 		return false;
 	}
 
