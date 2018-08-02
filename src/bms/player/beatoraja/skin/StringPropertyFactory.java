@@ -92,18 +92,14 @@ public class StringPropertyFactory {
 				if (state instanceof MusicSelector) {
 					if (((MusicSelector) state).getSelectedBar() instanceof DirectoryBar) {
 						return ((MusicSelector) state).getSelectedBar().getTitle();
-					} else {
-						final SongData song = state.main.getPlayerResource().getSongdata();
-						return song != null ? song.getFullTitle() : "";
 					}
 				} else if ((state instanceof MusicDecide || state instanceof CourseResult)) {
-					return state.main.getPlayerResource().getCoursetitle() != null
-							? state.main.getPlayerResource().getCoursetitle()
-							: "";
-				} else {
-					final SongData song = state.main.getPlayerResource().getSongdata();
-					return song != null ? song.getTitle() : "";
+					if(state.main.getPlayerResource().getCoursetitle() != null) {
+						return state.main.getPlayerResource().getCoursetitle();						
+					}
 				}
+				final SongData song = state.main.getPlayerResource().getSongdata();
+				return song != null ? song.getTitle() : "";
 			};
 		case STRING_SUBTITLE:
 			return (state) -> {
@@ -115,18 +111,14 @@ public class StringPropertyFactory {
 				if (state instanceof MusicSelector) {
 					if (((MusicSelector) state).getSelectedBar() instanceof DirectoryBar) {
 						return ((MusicSelector) state).getSelectedBar().getTitle();
-					} else {
-						final SongData song = state.main.getPlayerResource().getSongdata();
-						return song != null ? song.getFullTitle() : "";
 					}
 				} else if ((state instanceof MusicDecide || state instanceof CourseResult)) {
-					return state.main.getPlayerResource().getCoursetitle() != null
-							? state.main.getPlayerResource().getCoursetitle()
-							: "";
-				} else {
-					final SongData song = state.main.getPlayerResource().getSongdata();
-					return song != null ? song.getFullTitle() : "";
+					if(state.main.getPlayerResource().getCoursetitle() != null) {
+						return state.main.getPlayerResource().getCoursetitle();
+					}
 				}
+				final SongData song = state.main.getPlayerResource().getSongdata();
+				return song != null ? song.getFullTitle() : "";
 			};
 		case STRING_ARTIST:
 			return (state) -> {
