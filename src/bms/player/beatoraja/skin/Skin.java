@@ -186,7 +186,7 @@ public class Skin {
 							for(int fop : fixopt) {
 								if(op == fop) {
 									fix = true;
-									if(!state.getBooleanValue(op)) {
+									if(!BooleanPropertyFactory.getBooleanProperty(op).get(state)) {
 										removes.add(obj);						
 									}							
 									break;
@@ -205,7 +205,7 @@ public class Skin {
 							for(int fop : fixopt) {
 								if(-op == fop) {
 									fix = true;
-									if(state.getBooleanValue(-op)) {
+									if(BooleanPropertyFactory.getBooleanProperty(-op).get(state)) {
 										removes.add(obj);						
 									}							
 									break;
@@ -257,11 +257,11 @@ public class Skin {
 		}
 		for (int op : obj.getOption()) {
 			if (op > 0) {
-				if (!state.getBooleanValue(op)) {
+				if (!BooleanPropertyFactory.getBooleanProperty(op).get(state)) {
 					return false;
 				}
 			} else {
-				if (state.getBooleanValue(-op)) {
+				if (BooleanPropertyFactory.getBooleanProperty(-op).get(state)) {
 					return false;
 				}				
 			}

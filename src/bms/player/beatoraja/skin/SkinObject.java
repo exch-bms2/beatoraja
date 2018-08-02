@@ -731,7 +731,7 @@ public abstract class SkinObject implements Disposable {
 		}
 		
 		public float get(MainState state) {
-			final int value = ref != null ? ref.get(state) : state.getNumberValue(type);
+			final int value = ref != null ? ref.get(state) : 0;
 			if(min < max) {
 				if(value > max) {
 					return 1;

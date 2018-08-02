@@ -83,10 +83,6 @@ public abstract class MainState {
 		return score;
 	}
 
-	public boolean getBooleanValue(int id) {
-		return false;
-	}
-
 	public Skin getSkin() {
 		return skin;
 	}
@@ -116,10 +112,6 @@ public abstract class MainState {
 	public int getJudgeCount(int judge, boolean fast) {
 		IRScoreData sd = score.getScoreData();
 		return sd != null ? sd.getJudgeCount(judge, fast) : 0;
-	}
-
-	public int getNumberValue(int id) {
-		return 0;
 	}
 
 	public SkinOffset getOffsetValue(int id) {

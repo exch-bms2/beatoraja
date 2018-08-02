@@ -21,6 +21,8 @@ import bms.player.beatoraja.result.AbstractResult.TimingDistribution;
 import bms.player.beatoraja.result.CourseResult;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.select.bar.Bar;
+import bms.player.beatoraja.select.bar.DirectoryBar;
+import bms.player.beatoraja.select.bar.SongBar;
 import bms.player.beatoraja.skin.SkinObject.IntegerProperty;
 import bms.player.beatoraja.song.SongData;
 
@@ -159,6 +161,57 @@ public class IntegerPropertyFactory {
 			return (state) -> ((int) (state.main.getPlayTime() / 60000) % 60);
 		case NUMBER_OPERATING_TIME_SECOND:
 			return (state) -> ((int) (state.main.getPlayTime() / 1000) % 60);
+		case NUMBER_TOTALPLAYTIME_HOUR:
+			return (state) -> ((int) (state.main.getPlayerResource().getPlayerData().getPlaytime() / 3600));
+		case NUMBER_TOTALPLAYTIME_MINUTE:
+			return (state) -> ((int) (state.main.getPlayerResource().getPlayerData().getPlaytime() / 60) % 60);
+		case NUMBER_TOTALPLAYTIME_SECOND:
+			return (state) -> ((int) (state.main.getPlayerResource().getPlayerData().getPlaytime()) % 60);
+		case NUMBER_TOTALPLAYCOUNT:
+			return (state) -> ((int)state.main.getPlayerResource().getPlayerData().getPlaycount());
+		case NUMBER_TOTALCLEARCOUNT:
+			return (state) -> ((int)state.main.getPlayerResource().getPlayerData().getClear());
+		case NUMBER_TOTALFAILCOUNT:
+			return (state) -> ((int)state.main.getPlayerResource().getPlayerData().getPlaycount() - (int)state.main.getPlayerResource().getPlayerData().getClear());
+		case NUMBER_TOTALPERFECT:
+			return (state) -> ((int)state.main.getPlayerResource().getPlayerData().getEpg() + (int)state.main.getPlayerResource().getPlayerData().getLpg());
+		case NUMBER_TOTALGREAT:
+			return (state) -> ((int)state.main.getPlayerResource().getPlayerData().getEgr() + (int)state.main.getPlayerResource().getPlayerData().getLgr());
+		case NUMBER_TOTALGOOD:
+			return (state) -> ((int)state.main.getPlayerResource().getPlayerData().getEgd() + (int)state.main.getPlayerResource().getPlayerData().getLgd());
+		case NUMBER_TOTALBAD:
+			return (state) -> ((int)state.main.getPlayerResource().getPlayerData().getEbd() + (int)state.main.getPlayerResource().getPlayerData().getLbd());
+		case NUMBER_TOTALPOOR:
+			return (state) -> ((int)state.main.getPlayerResource().getPlayerData().getEpr() + (int)state.main.getPlayerResource().getPlayerData().getLpr());
+		case NUMBER_TOTALPLAYNOTES:
+			return (state) -> ((int)state.main.getPlayerResource().getPlayerData().getEpg() + (int)state.main.getPlayerResource().getPlayerData().getLpg() +
+					(int)state.main.getPlayerResource().getPlayerData().getEgr() + (int)state.main.getPlayerResource().getPlayerData().getLgr() +
+					(int)state.main.getPlayerResource().getPlayerData().getEgd() + (int)state.main.getPlayerResource().getPlayerData().getLgd() +
+					(int)state.main.getPlayerResource().getPlayerData().getEbd() + (int)state.main.getPlayerResource().getPlayerData().getLbd());
+		case NUMBER_PLAYCOUNT:
+			return (state) -> {
+				if (state instanceof MusicSelector) {
+					final IRScoreData score = ((MusicSelector)state).getBarRender().getSelected().getScore();
+					return score != null ? score.getPlaycount() : Integer.MIN_VALUE;
+				}
+				return Integer.MIN_VALUE;
+			};
+		case NUMBER_CLEARCOUNT:
+			return (state) -> {
+				if (state instanceof MusicSelector) {
+					final IRScoreData score = ((MusicSelector)state).getBarRender().getSelected().getScore();
+					return score != null ? score.getClearcount() : Integer.MIN_VALUE;
+				}
+				return Integer.MIN_VALUE;
+			};
+		case NUMBER_FAILCOUNT:
+			return (state) -> {
+				if (state instanceof MusicSelector) {
+					final IRScoreData score = ((MusicSelector)state).getBarRender().getSelected().getScore();
+					return score != null ? score.getPlaycount() - score.getClearcount() : Integer.MIN_VALUE;
+				}
+				return Integer.MIN_VALUE;
+			};
 		case NUMBER_MISS:
 			return (state) -> (state.getJudgeCount(5, true) + state.getJudgeCount(5, false));
 		case NUMBER_EARLY_MISS:
@@ -289,7 +342,15 @@ public class IntegerPropertyFactory {
 			};
 		case NUMBER_DURATION:
 			return (state) -> {
-				if (state instanceof BMSPlayer) {
+				if (state instanceof MusicSelector) {
+					final Bar selected = ((MusicSelector)state).getBarRender().getSelected();
+					if (selected instanceof SongBar && ((SongBar) selected).existsSong()) {
+						SongBar song = (SongBar) selected;
+						PlayConfig pc = state.main.getPlayerConfig().getPlayConfig(song.getSongData().getMode()).getPlayconfig();
+						return pc.getDuration();
+					}
+					return state.main.getPlayerConfig().getMode7().getPlayconfig().getDuration();
+				} else if (state instanceof BMSPlayer) {
 					return ((BMSPlayer) state).getLanerender().getCurrentDuration();
 				} else if (state.main.getPlayerResource().getSongdata() != null) {
 					SongData song = state.main.getPlayerResource().getSongdata();
@@ -301,7 +362,15 @@ public class IntegerPropertyFactory {
 			};
 		case NUMBER_DURATION_GREEN:
 			return (state) -> {
-				if (state instanceof BMSPlayer) {
+				if (state instanceof MusicSelector) {
+					final Bar selected = ((MusicSelector)state).getBarRender().getSelected();
+					if (selected instanceof SongBar && ((SongBar) selected).existsSong()) {
+						SongBar song = (SongBar) selected;
+						PlayConfig pc = state.main.getPlayerConfig().getPlayConfig(song.getSongData().getMode()).getPlayconfig();
+						return pc.getDuration() * 3 / 5;
+					}
+					return state.main.getPlayerConfig().getMode7().getPlayconfig().getDuration() * 3 / 5;
+				} else if (state instanceof BMSPlayer) {
 					return ((BMSPlayer) state).getLanerender().getCurrentDuration() * 3 / 5;
 				} else if (state.main.getPlayerResource().getSongdata() != null) {
 					SongData song = state.main.getPlayerResource().getSongdata();
@@ -364,6 +433,21 @@ public class IntegerPropertyFactory {
 				final SongData song = state.main.getPlayerResource().getSongdata();
 				if (song != null && song.getInformation() != null) {
 					return (int) song.getInformation().getTotal();
+				}
+				return Integer.MIN_VALUE;
+			};
+		case NUMBER_FOLDER_TOTALSONGS:
+			return (state) -> {
+				if (state instanceof MusicSelector) {
+					final Bar selected = ((MusicSelector)state).getBarRender().getSelected();
+					if (selected instanceof DirectoryBar) {
+						int[] lamps = ((DirectoryBar) selected).getLamps();
+						int count = 0;
+						for (int lamp : lamps) {
+							count += lamp;
+						}
+						return count;
+					}
 				}
 				return Integer.MIN_VALUE;
 			};
@@ -454,6 +538,10 @@ public class IntegerPropertyFactory {
 		case NUMBER_MAXCOMBO:
 		case NUMBER_MAXCOMBO2:
 			return (state) -> {
+				if (state instanceof MusicSelector) {
+					final IRScoreData score = ((MusicSelector)state).getBarRender().getSelected().getScore();
+					return score != null ? score.getCombo() : Integer.MIN_VALUE;
+				}
 				if (state instanceof BMSPlayer) {
 					return ((BMSPlayer) state).getJudgeManager().getScoreData().getCombo();
 				}
@@ -536,6 +624,10 @@ public class IntegerPropertyFactory {
 		case NUMBER_MISSCOUNT:
 		case NUMBER_MISSCOUNT2:
 			return (state) -> {
+				if (state instanceof MusicSelector) {
+					final IRScoreData score = ((MusicSelector)state).getBarRender().getSelected().getScore();
+					return score != null ? score.getMinbp() : Integer.MIN_VALUE;
+				}
 				if (state instanceof AbstractResult) {
 					final IRScoreData score = ((AbstractResult) state).getNewScore();
 					return score != null ? score.getMinbp() : Integer.MIN_VALUE;

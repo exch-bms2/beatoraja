@@ -40,6 +40,7 @@ import bms.player.beatoraja.result.CourseResult;
 import bms.player.beatoraja.result.MusicResult;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.select.bar.TableBar;
+import bms.player.beatoraja.skin.BooleanPropertyFactory;
 import bms.player.beatoraja.skin.IntegerPropertyFactory;
 import bms.player.beatoraja.skin.SkinLoader;
 import bms.player.beatoraja.skin.SkinObject.SkinOffset;
@@ -693,8 +694,9 @@ public class MainController extends ApplicationAdapter {
 		String[] clearTypeName = { "NO PLAY", "FAILED", "ASSIST EASY CLEAR", "LIGHT ASSIST EASY CLEAR", "EASY CLEAR",
 				"CLEAR", "HARD CLEAR", "EXHARD CLEAR", "FULL COMBO", "PERFECT", "MAX" };
 
-		if(currentState.getNumberValue(NUMBER_CLEAR) >= 0 && currentState.getNumberValue(NUMBER_CLEAR) < clearTypeName.length) {
-			return clearTypeName[currentState.getNumberValue(NUMBER_CLEAR)];
+		int clear = IntegerPropertyFactory.getIntegerProperty(NUMBER_CLEAR).get(currentState);
+		if(clear >= 0 && clear < clearTypeName.length) {
+			return clearTypeName[clear];
 		}
 
 		return "";
@@ -702,14 +704,14 @@ public class MainController extends ApplicationAdapter {
 
 	public static String getRankTypeName() {
 		String rankTypeName = "";
-		if(currentState.getBooleanValue(OPTION_RESULT_AAA_1P)) rankTypeName += "AAA";
-		else if(currentState.getBooleanValue(OPTION_RESULT_AA_1P)) rankTypeName += "AA";
-		else if(currentState.getBooleanValue(OPTION_RESULT_A_1P)) rankTypeName += "A";
-		else if(currentState.getBooleanValue(OPTION_RESULT_B_1P)) rankTypeName += "B";
-		else if(currentState.getBooleanValue(OPTION_RESULT_C_1P)) rankTypeName += "C";
-		else if(currentState.getBooleanValue(OPTION_RESULT_D_1P)) rankTypeName += "D";
-		else if(currentState.getBooleanValue(OPTION_RESULT_E_1P)) rankTypeName += "E";
-		else if(currentState.getBooleanValue(OPTION_RESULT_F_1P)) rankTypeName += "F";
+		if(BooleanPropertyFactory.getBooleanProperty(OPTION_RESULT_AAA_1P).get(currentState)) rankTypeName += "AAA";
+		else if(BooleanPropertyFactory.getBooleanProperty(OPTION_RESULT_AA_1P).get(currentState)) rankTypeName += "AA";
+		else if(BooleanPropertyFactory.getBooleanProperty(OPTION_RESULT_A_1P).get(currentState)) rankTypeName += "A";
+		else if(BooleanPropertyFactory.getBooleanProperty(OPTION_RESULT_B_1P).get(currentState)) rankTypeName += "B";
+		else if(BooleanPropertyFactory.getBooleanProperty(OPTION_RESULT_C_1P).get(currentState)) rankTypeName += "C";
+		else if(BooleanPropertyFactory.getBooleanProperty(OPTION_RESULT_D_1P).get(currentState)) rankTypeName += "D";
+		else if(BooleanPropertyFactory.getBooleanProperty(OPTION_RESULT_E_1P).get(currentState)) rankTypeName += "E";
+		else if(BooleanPropertyFactory.getBooleanProperty(OPTION_RESULT_F_1P).get(currentState)) rankTypeName += "F";
 		return rankTypeName;
 	}
 

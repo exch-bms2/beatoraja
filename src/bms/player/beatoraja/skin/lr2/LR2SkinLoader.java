@@ -56,9 +56,9 @@ public class LR2SkinLoader extends SkinLoader {
 								b = draw.get(state);								
 							} else {
 								if(opt >= 0) {
-									b = state.getBooleanValue(opt);
+									b = BooleanPropertyFactory.getBooleanProperty(opt).get(state);
 								} else {
-									b = !state.getBooleanValue(-opt);
+									b = !BooleanPropertyFactory.getBooleanProperty(-opt).get(state);
 								}								
 							}
 						}
@@ -97,10 +97,10 @@ public class LR2SkinLoader extends SkinLoader {
 									b = draw.get(state);								
 								} else {
 									if(opt >= 0) {
-										b = state.getBooleanValue(opt);
+										b = BooleanPropertyFactory.getBooleanProperty(opt).get(state);
 									} else {
-										b = !state.getBooleanValue(-opt);
-									}									
+										b = !BooleanPropertyFactory.getBooleanProperty(-opt).get(state);
+									}								
 								}
 							}
 							if (!b) {

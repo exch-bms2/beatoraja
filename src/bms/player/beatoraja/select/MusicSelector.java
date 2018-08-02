@@ -57,7 +57,6 @@ public class MusicSelector extends MainState {
 
 	private PlayerConfig config;
 
-	private PlayerData playerdata;
 	/**
 	 * 楽曲プレビュー処理
 	 */
@@ -231,7 +230,7 @@ public class MusicSelector extends MainState {
 
 		play = null;
 		showNoteGraph = false;
-		playerdata = main.getPlayDataAccessor().readPlayerData();
+		main.getPlayerResource().setPlayerData(main.getPlayDataAccessor().readPlayerData());
 		if (bar.getSelected() != null && bar.getSelected() instanceof SongBar) {
 			scorecache.update(((SongBar) bar.getSelected()).getSongData(), config.getLnmode());
 		}
@@ -495,150 +494,11 @@ public class MusicSelector extends MainState {
 		this.panelstate = panelstate;
 	}
 
-	public int getNumberValue(int id) {
-		switch (id) {
-		case NUMBER_TOTALPLAYTIME_HOUR:
-			return (int) playerdata.getPlaytime() / 3600;
-		case NUMBER_TOTALPLAYTIME_MINUTE:
-			return (int) (playerdata.getPlaytime() / 60) % 60;
-		case NUMBER_TOTALPLAYTIME_SECOND:
-			return (int) (playerdata.getPlaytime() % 60);
-		case NUMBER_TOTALPLAYCOUNT:
-			return (int) playerdata.getPlaycount();
-		case NUMBER_TOTALCLEARCOUNT:
-			return (int) playerdata.getClear();
-		case NUMBER_TOTALFAILCOUNT:
-			return (int) ((int) playerdata.getPlaycount() - playerdata.getClear());
-		case NUMBER_TOTALPERFECT:
-			return (int) (playerdata.getEpg() + playerdata.getLpg());
-		case NUMBER_TOTALGREAT:
-			return (int) (playerdata.getEgr() + playerdata.getLgr());
-		case NUMBER_TOTALGOOD:
-			return (int) (playerdata.getEgd() + playerdata.getLgd());
-		case NUMBER_TOTALBAD:
-			return (int) (playerdata.getEbd() + playerdata.getLbd());
-		case NUMBER_TOTALPOOR:
-			return (int) (playerdata.getEpr() + playerdata.getLpr());
-		case NUMBER_TOTALPLAYNOTES:
-			return (int) (playerdata.getEpg() + playerdata.getLpg()) + (int) (playerdata.getEgr() + playerdata.getLgr())
-					+ (int) (playerdata.getEgd() + playerdata.getLgd())
-					+ (int) (playerdata.getEbd() + playerdata.getLbd());
-		case NUMBER_PLAYCOUNT:
-			return bar.getSelected().getScore() != null ? bar.getSelected().getScore().getPlaycount()
-					: Integer.MIN_VALUE;
-		case NUMBER_CLEARCOUNT:
-			return bar.getSelected().getScore() != null ? bar.getSelected().getScore().getClearcount()
-					: Integer.MIN_VALUE;
-		case NUMBER_FAILCOUNT:
-			return bar.getSelected().getScore() != null
-					? bar.getSelected().getScore().getPlaycount() - bar.getSelected().getScore().getClearcount()
-					: Integer.MIN_VALUE;
-		case NUMBER_MISSCOUNT:
-			return bar.getSelected().getScore() != null ? bar.getSelected().getScore().getMinbp() : Integer.MIN_VALUE;
-		case NUMBER_MAXCOMBO:
-			return bar.getSelected().getScore() != null ? bar.getSelected().getScore().getCombo() : Integer.MIN_VALUE;
-		case NUMBER_FOLDER_TOTALSONGS:
-			if (bar.getSelected() instanceof DirectoryBar) {
-				int[] lamps = ((DirectoryBar) bar.getSelected()).getLamps();
-				int count = 0;
-				for (int lamp : lamps) {
-					count += lamp;
-				}
-				return count;
-			}
-			return Integer.MIN_VALUE;
-		case NUMBER_DURATION:
-			if (bar.getSelected() instanceof SongBar && ((SongBar) bar.getSelected()).existsSong()) {
-				SongBar song = (SongBar) bar.getSelected();
-				PlayConfig pc = config.getPlayConfig(song.getSongData().getMode()).getPlayconfig();
-				return pc.getDuration();
-			}
-			return config.getMode7().getPlayconfig().getDuration();
-		case NUMBER_DURATION_GREEN:
-			if (bar.getSelected() instanceof SongBar && ((SongBar) bar.getSelected()).existsSong()) {
-				SongBar song = (SongBar) bar.getSelected();
-				PlayConfig pc = config.getPlayConfig(song.getSongData().getMode()).getPlayconfig();
-				return pc.getDuration() * 3 / 5;
-			}
-			return config.getMode7().getPlayconfig().getDuration() * 3 / 5;
-		case NUMBER_JUDGETIMING:
-			return config.getJudgetiming();
-		}
-		return super.getNumberValue(id);
-	}
-
 	public SongDatabaseAccessor getSongDatabase() {
 		return songdb;
 	}
 
-	public boolean getBooleanValue(int id) {
-		final Bar current = bar.getSelected();
-		switch (id) {
-		case OPTION_PANEL1:
-			return panelstate == 1;
-		case OPTION_PANEL2:
-			return panelstate == 2;
-		case OPTION_PANEL3:
-			return panelstate == 3;
-		case OPTION_SONGBAR:
-			return current instanceof SongBar;
-		case OPTION_FOLDERBAR:
-			return current instanceof DirectoryBar;
-		case OPTION_GRADEBAR:
-			return current instanceof GradeBar;
-		case OPTION_PLAYABLEBAR:
-			return (current instanceof SongBar)
-					|| ((current instanceof GradeBar) && ((GradeBar) current).existsAllSongs());
-		case OPTION_SELECT_REPLAYDATA:
-			return selectedreplay == 0;
-		case OPTION_SELECT_REPLAYDATA2:
-			return selectedreplay == 1;
-		case OPTION_SELECT_REPLAYDATA3:
-			return selectedreplay == 2;
-		case OPTION_SELECT_REPLAYDATA4:
-			return selectedreplay == 3;
-		case OPTION_GRADEBAR_MIRROR:
-			return existsConstraint(CourseData.CourseDataConstraint.MIRROR);
-		case OPTION_GRADEBAR_RANDOM:
-			return existsConstraint(CourseData.CourseDataConstraint.RANDOM);
-		case OPTION_GRADEBAR_NOSPEED:
-			return existsConstraint(CourseData.CourseDataConstraint.NO_SPEED);
-		case OPTION_GRADEBAR_NOGOOD:
-			return existsConstraint(CourseData.CourseDataConstraint.NO_GOOD);
-		case OPTION_GRADEBAR_NOGREAT:
-			return existsConstraint(CourseData.CourseDataConstraint.NO_GREAT);
-		case OPTION_NOT_COMPARE_RIVAL:
-			return rival == null;
-		case OPTION_COMPARE_RIVAL:
-			return rival != null;
-		case OPTION_SELECT_BAR_NOT_PLAYED:
-			return (current instanceof SongBar || current instanceof GradeBar)
-					&& (bar.getSelected().getScore() == null || (bar.getSelected().getScore() != null && bar.getSelected().getScore().getClear() == NoPlay.id));
-		case OPTION_SELECT_BAR_FAILED:
-			return bar.getSelected().getScore() != null && bar.getSelected().getScore().getClear() == Failed.id;
-		case OPTION_SELECT_BAR_ASSIST_EASY_CLEARED:
-			return bar.getSelected().getScore() != null && bar.getSelected().getScore().getClear() == AssistEasy.id;
-		case OPTION_SELECT_BAR_LIGHT_ASSIST_EASY_CLEARED:
-			return bar.getSelected().getScore() != null && bar.getSelected().getScore().getClear() == LightAssistEasy.id;
-		case OPTION_SELECT_BAR_EASY_CLEARED:
-			return bar.getSelected().getScore() != null && bar.getSelected().getScore().getClear() == Easy.id;
-		case OPTION_SELECT_BAR_NORMAL_CLEARED:
-			return bar.getSelected().getScore() != null && bar.getSelected().getScore().getClear() == Normal.id;
-		case OPTION_SELECT_BAR_HARD_CLEARED:
-			return bar.getSelected().getScore() != null && bar.getSelected().getScore().getClear() == Hard.id;
-		case OPTION_SELECT_BAR_EXHARD_CLEARED:
-			return bar.getSelected().getScore() != null && bar.getSelected().getScore().getClear() == ExHard.id;
-		case OPTION_SELECT_BAR_FULL_COMBO_CLEARED:
-			return bar.getSelected().getScore() != null && bar.getSelected().getScore().getClear() == FullCombo.id;
-		case OPTION_SELECT_BAR_PERFECT_CLEARED:
-			return bar.getSelected().getScore() != null && bar.getSelected().getScore().getClear() == Perfect.id;
-		case OPTION_SELECT_BAR_MAX_CLEARED:
-			return bar.getSelected().getScore() != null && bar.getSelected().getScore().getClear() == Max.id;
-		}
-		return super.getBooleanValue(id);
-	}
-
-	private boolean existsConstraint(CourseData.CourseDataConstraint constraint) {
+	public boolean existsConstraint(CourseData.CourseDataConstraint constraint) {
 		if (!(bar.getSelected() instanceof GradeBar)) {
 			return false;
 		}

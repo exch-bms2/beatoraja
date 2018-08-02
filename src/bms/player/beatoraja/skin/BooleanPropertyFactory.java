@@ -1,9 +1,20 @@
 package bms.player.beatoraja.skin;
 
+import static bms.player.beatoraja.ClearType.AssistEasy;
+import static bms.player.beatoraja.ClearType.Easy;
+import static bms.player.beatoraja.ClearType.ExHard;
 import static bms.player.beatoraja.ClearType.Failed;
+import static bms.player.beatoraja.ClearType.FullCombo;
+import static bms.player.beatoraja.ClearType.Hard;
+import static bms.player.beatoraja.ClearType.LightAssistEasy;
+import static bms.player.beatoraja.ClearType.Max;
+import static bms.player.beatoraja.ClearType.NoPlay;
+import static bms.player.beatoraja.ClearType.Normal;
+import static bms.player.beatoraja.ClearType.Perfect;
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
 import bms.model.Mode;
+import bms.player.beatoraja.CourseData;
 import bms.player.beatoraja.IRScoreData;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.ScoreDataProperty;
@@ -17,7 +28,10 @@ import bms.player.beatoraja.result.CourseResult;
 import bms.player.beatoraja.result.MusicResult;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.select.bar.Bar;
+import bms.player.beatoraja.select.bar.DirectoryBar;
+import bms.player.beatoraja.select.bar.GradeBar;
 import bms.player.beatoraja.select.bar.SelectableBar;
+import bms.player.beatoraja.select.bar.SongBar;
 import bms.player.beatoraja.skin.SkinObject.BooleanProperty;
 import bms.player.beatoraja.song.SongData;
 
@@ -294,7 +308,10 @@ public class BooleanPropertyFactory {
 				}
 			};
 		}
-
+		
+		if(result == null) {
+			result = new DrawProperty(DrawProperty.TYPE_NO_STATIC, (state) -> (false));
+		}
 		return result;
 	}
 
@@ -457,6 +474,168 @@ public class BooleanPropertyFactory {
 					return state.main.getPlayerResource().getTablename().length() != 0;
 				}
 			};
+		case OPTION_PANEL1:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
+					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).getPanelState() == 1 : false));
+		case OPTION_PANEL2:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
+					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).getPanelState() == 2 : false));
+		case OPTION_PANEL3:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
+					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).getPanelState() == 3 : false));
+		case OPTION_SONGBAR:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
+					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).getSelectedBar() instanceof SongBar : false));
+		case OPTION_FOLDERBAR:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
+					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).getSelectedBar() instanceof DirectoryBar : false));
+		case OPTION_GRADEBAR:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
+					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).getSelectedBar() instanceof GradeBar : false));
+		case OPTION_PLAYABLEBAR:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
+					(state) -> {
+						if(state instanceof MusicSelector) {
+							Bar selected = ((MusicSelector) state).getSelectedBar();
+							return ((selected instanceof SongBar) && ((SongBar)selected).getSongData().getPath() != null) ||
+									((selected instanceof GradeBar) && ((GradeBar)selected).existsAllSongs()); 
+						}
+						return false;
+					});
+		case OPTION_SELECT_REPLAYDATA:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
+					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).getSelectedReplay() == 0 : false));
+		case OPTION_SELECT_REPLAYDATA2:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
+					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).getSelectedReplay() == 1 : false));
+		case OPTION_SELECT_REPLAYDATA3:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
+					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).getSelectedReplay() == 2 : false));
+		case OPTION_SELECT_REPLAYDATA4:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
+					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).getSelectedReplay() == 3 : false));
+		case OPTION_GRADEBAR_MIRROR:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
+					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).existsConstraint(CourseData.CourseDataConstraint.MIRROR) : false));
+		case OPTION_GRADEBAR_RANDOM:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
+					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).existsConstraint(CourseData.CourseDataConstraint.RANDOM) : false));
+		case OPTION_GRADEBAR_NOSPEED:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
+					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).existsConstraint(CourseData.CourseDataConstraint.NO_SPEED) : false));
+		case OPTION_GRADEBAR_NOGOOD:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
+					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).existsConstraint(CourseData.CourseDataConstraint.NO_GOOD) : false));
+		case OPTION_GRADEBAR_NOGREAT:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
+					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).existsConstraint(CourseData.CourseDataConstraint.NO_GREAT) : false));
+		case OPTION_NOT_COMPARE_RIVAL:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
+					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).getRival() == null : false));
+		case OPTION_COMPARE_RIVAL:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
+					(state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).getRival() != null : false));
+		case OPTION_SELECT_BAR_NOT_PLAYED:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
+					(state) -> {
+						if(state instanceof MusicSelector) {
+							Bar current = ((MusicSelector) state).getSelectedBar();
+							IRScoreData score = ((MusicSelector) state).getSelectedBar().getScore();
+							return (current instanceof SongBar || current instanceof GradeBar)
+									&& (score == null || (score != null && score.getClear() == NoPlay.id));
+						}
+						return false;
+					});
+		case OPTION_SELECT_BAR_FAILED:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
+					(state) -> {
+						if(state instanceof MusicSelector) {
+							IRScoreData score = ((MusicSelector) state).getSelectedBar().getScore();
+							return score != null ? score.getClear() == Failed.id : false; 
+						}
+						return false;
+					});
+		case OPTION_SELECT_BAR_ASSIST_EASY_CLEARED:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
+					(state) -> {
+						if(state instanceof MusicSelector) {
+							IRScoreData score = ((MusicSelector) state).getSelectedBar().getScore();
+							return score != null ? score.getClear() == AssistEasy.id : false; 
+						}
+						return false;
+					});
+		case OPTION_SELECT_BAR_LIGHT_ASSIST_EASY_CLEARED:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
+					(state) -> {
+						if(state instanceof MusicSelector) {
+							IRScoreData score = ((MusicSelector) state).getSelectedBar().getScore();
+							return score != null ? score.getClear() == LightAssistEasy.id : false; 
+						}
+						return false;
+					});
+		case OPTION_SELECT_BAR_EASY_CLEARED:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
+					(state) -> {
+						if(state instanceof MusicSelector) {
+							IRScoreData score = ((MusicSelector) state).getSelectedBar().getScore();
+							return score != null ? score.getClear() == Easy.id : false; 
+						}
+						return false;
+					});
+		case OPTION_SELECT_BAR_NORMAL_CLEARED:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
+					(state) -> {
+						if(state instanceof MusicSelector) {
+							IRScoreData score = ((MusicSelector) state).getSelectedBar().getScore();
+							return score != null ? score.getClear() == Normal.id : false; 
+						}
+						return false;
+					});
+		case OPTION_SELECT_BAR_HARD_CLEARED:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
+					(state) -> {
+						if(state instanceof MusicSelector) {
+							IRScoreData score = ((MusicSelector) state).getSelectedBar().getScore();
+							return score != null ? score.getClear() == Hard.id : false; 
+						}
+						return false;
+					});
+		case OPTION_SELECT_BAR_EXHARD_CLEARED:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
+					(state) -> {
+						if(state instanceof MusicSelector) {
+							IRScoreData score = ((MusicSelector) state).getSelectedBar().getScore();
+							return score != null ? score.getClear() == ExHard.id : false; 
+						}
+						return false;
+					});
+		case OPTION_SELECT_BAR_FULL_COMBO_CLEARED:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
+					(state) -> {
+						if(state instanceof MusicSelector) {
+							IRScoreData score = ((MusicSelector) state).getSelectedBar().getScore();
+							return score != null ? score.getClear() == FullCombo.id : false; 
+						}
+						return false;
+					});
+		case OPTION_SELECT_BAR_PERFECT_CLEARED:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
+					(state) -> {
+						if(state instanceof MusicSelector) {
+							IRScoreData score = ((MusicSelector) state).getSelectedBar().getScore();
+							return score != null ? score.getClear() == Perfect.id : false; 
+						}
+						return false;
+					});
+		case OPTION_SELECT_BAR_MAX_CLEARED:
+			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
+					(state) -> {
+						if(state instanceof MusicSelector) {
+							IRScoreData score = ((MusicSelector) state).getSelectedBar().getScore();
+							return score != null ? score.getClear() == Max.id : false; 
+						}
+						return false;
+					});
 		case OPTION_AUTOPLAYON:
 			return new DrawProperty(DrawProperty.TYPE_NO_STATIC,
 					(state) -> ((state instanceof BMSPlayer) ? ((BMSPlayer) state).getPlayMode() == PlayMode.AUTOPLAY : false));

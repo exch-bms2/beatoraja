@@ -38,6 +38,8 @@ public class PlayerResource {
 	 */
 	private SongData songdata;
 
+	private PlayerData playerdata = new PlayerData();
+
 	private Config config;
 	private PlayerConfig pconfig;
 	/**
@@ -485,6 +487,14 @@ public class PlayerResource {
 			tablefull = tablelevel + tablename;
 		}
 		return tablefull;
+	}
+
+	public PlayerData getPlayerData() {
+		return playerdata;
+	}
+
+	public void setPlayerData(PlayerData playerdata) {
+		this.playerdata = playerdata;
 	}
 
 	private void setTableinfo(){
