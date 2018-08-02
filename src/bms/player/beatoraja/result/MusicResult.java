@@ -29,27 +29,10 @@ import bms.player.beatoraja.skin.SkinType;
  */
 public class MusicResult extends AbstractResult {
 
-	/**
-	 * 全ノーツの平均ズレ
-	 */
-	private float avgduration;
-
-	/**
-	 * タイミング分布
-	 */
-	private TimingDistribution timingDistribution;
-
-	/**
-	 * タイミング分布レンジ
-	 */
-	final int distRange = 150;
-
 	private ResultKeyProperty property;
 
 	public MusicResult(MainController main) {
 		super(main);
-
-		timingDistribution = new TimingDistribution(distRange);
 	}
 
 	public void create() {
@@ -353,13 +336,6 @@ public class MusicResult extends AbstractResult {
 
 		getScoreDataProperty().setTargetScore(oldscore.getExscore(), resource.getRivalScoreData(), resource.getBMSModel().getTotalNotes());
 		getScoreDataProperty().update(newscore);
-		next = 0;
-		for (int i = 2; i < 9; i++) {
-			if (newscore.getExscore() < i * 1111 * (resource.getBMSModel().getTotalNotes() * 2) / 10000) {
-				next = newscore.getExscore() - i * 1111 * (resource.getBMSModel().getTotalNotes() * 2) / 10000;
-				break;
-			}
-		}
 		// duration average
 		int count = 0;
 		avgduration = 0;
@@ -489,156 +465,9 @@ public class MusicResult extends AbstractResult {
 		super.dispose();
 	}
 
-	public TimingDistribution getTimingDistribution() {
-		return timingDistribution;
-	}
-
 	public int getTotalNotes() {
 		final PlayerResource resource = main.getPlayerResource();
 		return resource.getBMSModel().getTotalNotes();
-	}
-
-	public int getNumberValue(int id) {
-		final PlayerResource resource = main.getPlayerResource();
-		switch (id) {
-		case NUMBER_CLEAR:
-			if (resource.getScoreData() != null) {
-				return resource.getScoreData().getClear();
-			}
-			return Integer.MIN_VALUE;
-		case NUMBER_TARGET_CLEAR:
-			return oldscore.getClear();
-		case NUMBER_HIGHSCORE:
-		case NUMBER_HIGHSCORE2:
-			return oldscore.getExscore();
-		case NUMBER_TARGET_SCORE:
-		case NUMBER_TARGET_SCORE2:
-			return resource.getRivalScoreData();
-		case NUMBER_DIFF_TARGETSCORE:
-			return resource.getScoreData().getExscore() - resource.getRivalScoreData();
-		case NUMBER_SCORE:
-		case NUMBER_SCORE2:
-		case NUMBER_SCORE3:
-			if (resource.getScoreData() != null) {
-				return resource.getScoreData().getExscore();
-			}
-			return Integer.MIN_VALUE;
-		case NUMBER_DIFF_HIGHSCORE:
-		case NUMBER_DIFF_HIGHSCORE2:
-			return resource.getScoreData().getExscore() - oldscore.getExscore();
-		case NUMBER_DIFF_NEXTRANK:
-			return next;
-		case NUMBER_MISSCOUNT:
-		case NUMBER_MISSCOUNT2:
-			if (resource.getScoreData() != null) {
-				return resource.getScoreData().getMinbp();
-			}
-			return Integer.MIN_VALUE;
-		case NUMBER_TARGET_MISSCOUNT:
-			if (oldscore.getMinbp() == Integer.MAX_VALUE) {
-				return Integer.MIN_VALUE;
-			}
-			return oldscore.getMinbp();
-		case NUMBER_DIFF_MISSCOUNT:
-			if (oldscore.getMinbp() == Integer.MAX_VALUE) {
-				return Integer.MIN_VALUE;
-			}
-			return resource.getScoreData().getMinbp() - oldscore.getMinbp();
-		case NUMBER_TARGET_MAXCOMBO:
-			if (oldscore.getCombo() > 0) {
-				return oldscore.getCombo();
-			}
-			return Integer.MIN_VALUE;
-		case NUMBER_MAXCOMBO:
-		case NUMBER_MAXCOMBO2:
-			if (resource.getScoreData() != null) {
-				return resource.getScoreData().getCombo();
-			}
-			return Integer.MIN_VALUE;
-		case NUMBER_DIFF_MAXCOMBO:
-			if (oldscore.getCombo() == 0) {
-				return Integer.MIN_VALUE;
-			}
-			return resource.getScoreData().getCombo() - oldscore.getCombo();
-		case NUMBER_GROOVEGAUGE:
-			return (int) resource.getGauge()[gaugeType]
-					.get(resource.getGauge()[gaugeType].size - 1);
-		case NUMBER_GROOVEGAUGE_AFTERDOT:
-			float value = resource.getGauge()[gaugeType]
-					.get(resource.getGauge()[gaugeType].size - 1) * 10;
-			if(value > 0 && value < 1) value = 1;
-			return ((int) value) % 10;
-		case NUMBER_AVERAGE_DURATION:
-			return (int) avgduration;
-		case NUMBER_AVERAGE_DURATION_AFTERDOT:
-			return ((int) (avgduration * 100)) % 100;
-		case NUMBER_IR_RANK:
-			if (state != STATE_OFFLINE) {
-				return irrank;
-			}
-			return Integer.MIN_VALUE;
-		case NUMBER_IR_PREVRANK:
-			if (state != STATE_OFFLINE) {
-				return irprevrank;
-			}
-			return Integer.MIN_VALUE;
-		case NUMBER_IR_TOTALPLAYER:
-			if (state != STATE_OFFLINE) {
-				return irtotal;
-			}
-			return Integer.MIN_VALUE;
-		case NUMBER_AVERAGE_TIMING:
-			return (int) timingDistribution.getAverage();
-		case NUMBER_AVERAGE_TIMING_AFTERDOT:
-			if (timingDistribution.getAverage() >= 0.0) {
-				return (int) (timingDistribution.getAverage() * 100) % 100;
-			} else {
-				return (int) ( -1 * ((Math.abs(timingDistribution.getAverage()) * 100) % 100));
-			}
-		case NUMBER_STDDEV_TIMING:
-			return (int) timingDistribution.getStdDev();
-		case NUMBER_STDDEV_TIMING_AFTERDOT:
-			return (int) (timingDistribution.getStdDev() * 100) % 100;
-		}
-
-		return super.getNumberValue(id);
-	}
-
-	public boolean getBooleanValue(int id) {
-		final PlayerResource resource = main.getPlayerResource();
-		final IRScoreData score = resource.getScoreData();
-		final IRScoreData cscore = resource.getCourseScoreData();
-		switch (id) {
-		case OPTION_DISABLE_SAVE_SCORE:
-			return !resource.isUpdateScore();
-		case OPTION_ENABLE_SAVE_SCORE:
-			return resource.isUpdateScore();
-		case OPTION_RESULT_CLEAR:
-			return score.getClear() != Failed.id && (cscore == null || cscore.getClear() != Failed.id);
-		case OPTION_RESULT_FAIL:
-			return score.getClear() == Failed.id || (cscore != null && cscore.getClear() == Failed.id);
-		case OPTION_UPDATE_SCORE:
-			return score.getExscore() > oldscore.getExscore();
-		case OPTION_DRAW_SCORE:
-			return score.getExscore() == oldscore.getExscore();
-		case OPTION_UPDATE_MAXCOMBO:
-			return score.getCombo() > oldscore.getCombo();
-		case OPTION_DRAW_MAXCOMBO:
-			return score.getCombo() == oldscore.getCombo();
-		case OPTION_UPDATE_MISSCOUNT:
-			return score.getMinbp() < oldscore.getMinbp();
-		case OPTION_DRAW_MISSCOUNT:
-			return score.getMinbp() == oldscore.getMinbp();
-		case OPTION_UPDATE_SCORERANK:
-			return getScoreDataProperty().getNowRate() > getScoreDataProperty().getBestScoreRate();
-		case OPTION_DRAW_SCORERANK:
-			return getScoreDataProperty().getNowRate() == getScoreDataProperty().getBestScoreRate();
-		case OPTION_UPDATE_TARGET:
-			return score.getExscore() > resource.getRivalScoreData();
-		case OPTION_DRAW_TARGET:
-			return score.getExscore() == resource.getRivalScoreData();
-		}
-		return super.getBooleanValue(id);
 	}
 
 	public void executeClickEvent(int id, int arg) {
@@ -657,73 +486,8 @@ public class MusicResult extends AbstractResult {
 			break;
 		}
 	}
-
-	/**
-	 *
-	 *
-	 * @author KEH
-	 */
-	public class TimingDistribution {
-		private final int arrayCenter;
-		private int[] dist;
-		private float average;
-		private float stdDev;
-
-		public TimingDistribution(int range) {
-			this.arrayCenter = range;
-			this.dist = new int[range * 2 + 1];
-		}
-
-		public void statisticValueCalcuate() {
-			int count = 0;
-			int sum = 0;
-			float sumf = 0;
-
-			for (int i = 0; i < dist.length; i++) {
-				count += dist[i];
-				sum += dist[i] * (i - arrayCenter);
-			}
-
-			if (count == 0) {
-				return;
-			}
-
-			average = sum * 1.0f / count;
-
-			for (int i = 0; i < dist.length; i++) {
-				sumf += dist[i] * (i - arrayCenter - average) * (i - arrayCenter - average);
-			}
-
-			stdDev = (float) Math.sqrt(sumf / count);
-		}
-
-		public void init() {
-			Arrays.fill(dist, 0);
-			average = Float.MAX_VALUE;
-			stdDev = -1.0f;
-		}
-
-		public void add(int timing) {
-			if (-arrayCenter <= timing && timing <= arrayCenter) {
-				dist[timing + arrayCenter]++;
-			}
-		}
-
-		public int[] getTimingDistribution() {
-			return dist;
-		}
-
-		public float getAverage() {
-			return average;
-		}
-
-		public float getStdDev() {
-			return stdDev;
-		}
-
-		public int getArrayCenter() {
-			return arrayCenter;
-		}
-
+	
+	public IRScoreData getNewScore() {
+		return main.getPlayerResource().getScoreData();
 	}
 }

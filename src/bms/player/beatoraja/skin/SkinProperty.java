@@ -439,7 +439,7 @@ public class SkinProperty {
 	public static final int NUMBER_DENSITY_ENDPEAK = 364;
 	public static final int NUMBER_DENSITY_ENDPEAK_AFTERDOT = 365;
 
-	public static final int NUMBER_SONGGAUGE_TOTAL = 370;
+	public static final int NUMBER_SONGGAUGE_TOTAL = 368;
 
 	public static final int VALUE_JUDGE_1P_DURATION = 525;
 	public static final int VALUE_JUDGE_2P_DURATION = 526;

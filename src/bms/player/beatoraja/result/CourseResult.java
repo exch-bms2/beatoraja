@@ -302,65 +302,6 @@ public class CourseResult extends AbstractResult {
 		return 0;
 	}
 
-	public int getNumberValue(int id) {
-		final PlayerResource resource = main.getPlayerResource();
-		switch (id) {
-			case NUMBER_CLEAR:
-				if (resource.getCourseScoreData() != null) {
-					return resource.getCourseScoreData().getClear();
-				}
-				return Integer.MIN_VALUE;
-			case NUMBER_TARGET_CLEAR:
-				return oldscore.getClear();
-			case NUMBER_TARGET_SCORE:
-				return oldscore.getExscore();
-			case NUMBER_SCORE:
-				if (resource.getCourseScoreData() != null) {
-					return resource.getCourseScoreData().getExscore();
-				}
-				return Integer.MIN_VALUE;
-			case NUMBER_DIFF_HIGHSCORE:
-				return resource.getCourseScoreData().getExscore() - oldscore.getExscore();
-			case NUMBER_MISSCOUNT:
-				if (resource.getCourseScoreData() != null) {
-					return resource.getCourseScoreData().getMinbp();
-				}
-				return Integer.MIN_VALUE;
-			case NUMBER_TARGET_MISSCOUNT:
-				if (oldscore.getMinbp() == Integer.MAX_VALUE) {
-					return Integer.MIN_VALUE;
-				}
-				return oldscore.getMinbp();
-			case NUMBER_DIFF_MISSCOUNT:
-				if (oldscore.getMinbp() == Integer.MAX_VALUE) {
-					return Integer.MIN_VALUE;
-				}
-				return resource.getCourseScoreData().getMinbp() - oldscore.getMinbp();
-			case NUMBER_TARGET_MAXCOMBO:
-				if (oldscore.getCombo() > 0) {
-					return oldscore.getCombo();
-				}
-				return Integer.MIN_VALUE;
-			case NUMBER_MAXCOMBO:
-				if (resource.getCourseScoreData() != null) {
-					return resource.getCourseScoreData().getCombo();
-				}
-				return Integer.MIN_VALUE;
-			case NUMBER_DIFF_MAXCOMBO:
-				if (oldscore.getCombo() == 0) {
-					return Integer.MIN_VALUE;
-				}
-				return resource.getCourseScoreData().getCombo() - oldscore.getCombo();
-			case NUMBER_TOTALNOTES:
-				int notes = 0;
-				for (BMSModel model : resource.getCourseBMSModels()) {
-					notes += model.getTotalNotes();
-				}
-				return notes;
-		}
-		return super.getNumberValue(id);
-	}
-
 	@Override
 	public void dispose() {
 		super.dispose();
@@ -382,35 +323,6 @@ public class CourseResult extends AbstractResult {
 		}
 	}
 
-	public boolean getBooleanValue(int id) {
-		final PlayerResource resource = main.getPlayerResource();
-		final IRScoreData score = resource.getCourseScoreData();
-		switch (id) {
-			case OPTION_RESULT_CLEAR:
-				return score.getClear() != Failed.id;
-			case OPTION_RESULT_FAIL:
-				return score.getClear() == Failed.id;
-			case OPTION_UPDATE_SCORE:
-				return score.getExscore() > oldscore.getExscore();
-			case OPTION_DRAW_SCORE:
-				return score.getExscore() == oldscore.getExscore();
-			case OPTION_UPDATE_MAXCOMBO:
-				return score.getCombo() > oldscore.getCombo();
-			case OPTION_DRAW_MAXCOMBO:
-				return score.getCombo() == oldscore.getCombo();
-			case OPTION_UPDATE_MISSCOUNT:
-				return score.getMinbp() < oldscore.getMinbp();
-			case OPTION_DRAW_MISSCOUNT:
-				return score.getMinbp() == oldscore.getMinbp();
-			case OPTION_UPDATE_SCORERANK:
-				return getScoreDataProperty().getNowRate() > getScoreDataProperty().getBestScoreRate();
-			case OPTION_DRAW_SCORERANK:
-				return getScoreDataProperty().getNowRate() == getScoreDataProperty().getBestScoreRate();
-		}
-		return super.getBooleanValue(id);
-
-	}
-
 	public void executeClickEvent(int id, int arg) {
 		switch (id) {
 		case BUTTON_REPLAY:
@@ -426,5 +338,9 @@ public class CourseResult extends AbstractResult {
 			saveReplayData(3);
 			break;
 		}
+	}
+	
+	public IRScoreData getNewScore() {
+		return main.getPlayerResource().getCourseScoreData();
 	}
 }

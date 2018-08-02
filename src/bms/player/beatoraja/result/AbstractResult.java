@@ -2,6 +2,8 @@ package bms.player.beatoraja.result;
 
 import static bms.player.beatoraja.ClearType.NoPlay;
 
+import java.util.Arrays;
+
 import bms.player.beatoraja.IRScoreData;
 import bms.player.beatoraja.MainController;
 import bms.player.beatoraja.MainState;
@@ -17,11 +19,22 @@ public abstract class AbstractResult extends MainState {
 	public static final int STATE_IR_PROCESSING = 1;
 	public static final int STATE_IR_FINISHED = 2;
 
-	protected int next;
-
 	protected int irrank;
 	protected int irprevrank;
 	protected int irtotal;
+	/**
+	 * 全ノーツの平均ズレ
+	 */
+	protected float avgduration;
+	/**
+	 * タイミング分布
+	 */
+	protected TimingDistribution timingDistribution;
+
+	/**
+	 * タイミング分布レンジ
+	 */
+	final int distRange = 150;
 
 	protected ReplayStatus[] saveReplay = new ReplayStatus[REPLAY_SIZE];
 	protected static final int REPLAY_SIZE = 4;
@@ -36,6 +49,7 @@ public abstract class AbstractResult extends MainState {
 
 	public AbstractResult(MainController main) {
 		super(main);
+		timingDistribution = new TimingDistribution(distRange);
 	}
 	
 	public ReplayStatus getReplayStatus(int index) {
@@ -130,7 +144,102 @@ public abstract class AbstractResult extends MainState {
 		return gaugeType;
 	}
 	
+	public int getState() {
+		return state;
+	}
+	
+	public int getIRRank() {
+		return irrank;
+	}
+	
+	public int getOldIRRank() {
+		return irprevrank;
+	}
+	
+	public int getIRTotalPlayer() {
+		return irtotal;
+	}
+	
+	public float getAverageDuration() {
+		return avgduration;
+	}
+	
+	public abstract IRScoreData getNewScore();
+	
 	public IRScoreData getOldScore() {
 		return oldscore;
+	}	
+	
+	public TimingDistribution getTimingDistribution() {
+		return timingDistribution;
+	}
+
+	/**
+	 *
+	 *
+	 * @author KEH
+	 */
+	public static class TimingDistribution {
+		private final int arrayCenter;
+		private int[] dist;
+		private float average;
+		private float stdDev;
+
+		public TimingDistribution(int range) {
+			this.arrayCenter = range;
+			this.dist = new int[range * 2 + 1];
+		}
+
+		public void statisticValueCalcuate() {
+			int count = 0;
+			int sum = 0;
+			float sumf = 0;
+
+			for (int i = 0; i < dist.length; i++) {
+				count += dist[i];
+				sum += dist[i] * (i - arrayCenter);
+			}
+
+			if (count == 0) {
+				return;
+			}
+
+			average = sum * 1.0f / count;
+
+			for (int i = 0; i < dist.length; i++) {
+				sumf += dist[i] * (i - arrayCenter - average) * (i - arrayCenter - average);
+			}
+
+			stdDev = (float) Math.sqrt(sumf / count);
+		}
+
+		public void init() {
+			Arrays.fill(dist, 0);
+			average = Float.MAX_VALUE;
+			stdDev = -1.0f;
+		}
+
+		public void add(int timing) {
+			if (-arrayCenter <= timing && timing <= arrayCenter) {
+				dist[timing + arrayCenter]++;
+			}
+		}
+
+		public int[] getTimingDistribution() {
+			return dist;
+		}
+
+		public float getAverage() {
+			return average;
+		}
+
+		public float getStdDev() {
+			return stdDev;
+		}
+
+		public int getArrayCenter() {
+			return arrayCenter;
+		}
+
 	}
 }

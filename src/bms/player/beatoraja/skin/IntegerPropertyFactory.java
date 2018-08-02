@@ -6,7 +6,9 @@ import java.util.Calendar;
 
 import com.badlogic.gdx.Gdx;
 
+import bms.model.BMSModel;
 import bms.player.beatoraja.BMSResource;
+import bms.player.beatoraja.IRScoreData;
 import bms.player.beatoraja.PlayConfig;
 import bms.player.beatoraja.PlayerResource;
 import bms.player.beatoraja.config.SkinConfiguration;
@@ -15,6 +17,8 @@ import bms.player.beatoraja.play.GrooveGauge;
 import bms.player.beatoraja.play.JudgeManager;
 import bms.player.beatoraja.play.LaneRenderer;
 import bms.player.beatoraja.result.AbstractResult;
+import bms.player.beatoraja.result.AbstractResult.TimingDistribution;
+import bms.player.beatoraja.result.CourseResult;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.select.bar.Bar;
 import bms.player.beatoraja.skin.SkinObject.IntegerProperty;
@@ -69,9 +73,18 @@ public class IntegerPropertyFactory {
 		}
 
 		if (optionid == NUMBER_TOTALNOTES || optionid == NUMBER_TOTALNOTES2) {
-			result = (state) -> (state.main.getPlayerResource().getSongdata() != null
-					? state.main.getPlayerResource().getSongdata().getNotes()
-					: Integer.MIN_VALUE);
+			result = (state) -> {
+				if(state instanceof CourseResult) {
+					int notes = 0;
+					for (BMSModel model : state.main.getPlayerResource().getCourseBMSModels()) {
+						notes += model.getTotalNotes();
+					}
+					return notes;
+				} 
+				return state.main.getPlayerResource().getSongdata() != null
+						? state.main.getPlayerResource().getSongdata().getNotes()
+						: Integer.MIN_VALUE;
+			};
 		}
 		if (optionid == NUMBER_SONGLENGTH_MINUTE) {
 			result = (state) -> (state.main.getPlayerResource().getSongdata() != null
@@ -170,12 +183,6 @@ public class IntegerPropertyFactory {
 					: Integer.MIN_VALUE);
 		case NUMBER_POINT:
 			return (state) -> (state.getScoreDataProperty().getNowScore());
-		case NUMBER_SCORE:
-		case NUMBER_SCORE2:
-		case NUMBER_SCORE3:
-			return (state) -> (state.getScoreDataProperty().getScoreData() != null
-					? state.getScoreDataProperty().getNowEXScore()
-					: Integer.MIN_VALUE);
 		case NUMBER_MAXSCORE:
 			return (state) -> (state.getScoreDataProperty().getScoreData() != null
 					? state.getScoreDataProperty().getScoreData().getNotes()
@@ -200,8 +207,6 @@ public class IntegerPropertyFactory {
 			return (state) -> (state.getScoreDataProperty().getScoreData() != null
 					? state.getScoreDataProperty().getRateAfterDot()
 					: Integer.MIN_VALUE);
-		case NUMBER_HIGHSCORE:
-			return (state) -> (state.getScoreDataProperty().getBestScore());
 		case NUMBER_BEST_RATE:
 			return (state) -> (state.getScoreDataProperty().getBestRateInt());
 		case NUMBER_BEST_RATE_AFTERDOT:
@@ -219,6 +224,7 @@ public class IntegerPropertyFactory {
 		case NUMBER_TARGET_SCORE_RATE_AFTERDOT2:
 			return (state) -> (state.getScoreDataProperty().getRivalRateAfterDot());
 		case NUMBER_DIFF_HIGHSCORE:
+		case NUMBER_DIFF_HIGHSCORE2:
 			return (state) -> (state.getScoreDataProperty().getNowEXScore()
 					- state.getScoreDataProperty().getNowBestScore());
 		case NUMBER_DIFF_EXSCORE:
@@ -247,8 +253,8 @@ public class IntegerPropertyFactory {
 					+ state.getJudgeCount(4, true) + state.getJudgeCount(4, false));
 		case NUMBER_HISPEED_LR2:
 			return (state) -> {
-				if(state instanceof BMSPlayer) {
-					return (int) (((BMSPlayer)state).getLanerender().getHispeed() * 100);
+				if (state instanceof BMSPlayer) {
+					return (int) (((BMSPlayer) state).getLanerender().getHispeed() * 100);
 				} else if (state.main.getPlayerResource().getSongdata() != null) {
 					SongData song = state.main.getPlayerResource().getSongdata();
 					PlayConfig pc = state.main.getPlayerResource().getPlayerConfig().getPlayConfig(song.getMode())
@@ -259,8 +265,8 @@ public class IntegerPropertyFactory {
 			};
 		case NUMBER_HISPEED:
 			return (state) -> {
-				if(state instanceof BMSPlayer) {
-					return (int) (((BMSPlayer)state).getLanerender().getHispeed());
+				if (state instanceof BMSPlayer) {
+					return (int) (((BMSPlayer) state).getLanerender().getHispeed());
 				} else if (state.main.getPlayerResource().getSongdata() != null) {
 					SongData song = state.main.getPlayerResource().getSongdata();
 					PlayConfig pc = state.main.getPlayerResource().getPlayerConfig().getPlayConfig(song.getMode())
@@ -271,8 +277,8 @@ public class IntegerPropertyFactory {
 			};
 		case NUMBER_HISPEED_AFTERDOT:
 			return (state) -> {
-				if(state instanceof BMSPlayer) {
-					return (int) ((((BMSPlayer)state).getLanerender().getHispeed() * 100) % 100);
+				if (state instanceof BMSPlayer) {
+					return (int) ((((BMSPlayer) state).getLanerender().getHispeed() * 100) % 100);
 				} else if (state.main.getPlayerResource().getSongdata() != null) {
 					SongData song = state.main.getPlayerResource().getSongdata();
 					PlayConfig pc = state.main.getPlayerResource().getPlayerConfig().getPlayConfig(song.getMode())
@@ -283,8 +289,8 @@ public class IntegerPropertyFactory {
 			};
 		case NUMBER_DURATION:
 			return (state) -> {
-				if(state instanceof BMSPlayer) {
-					return ((BMSPlayer)state).getLanerender().getCurrentDuration();
+				if (state instanceof BMSPlayer) {
+					return ((BMSPlayer) state).getLanerender().getCurrentDuration();
 				} else if (state.main.getPlayerResource().getSongdata() != null) {
 					SongData song = state.main.getPlayerResource().getSongdata();
 					PlayConfig pc = state.main.getPlayerResource().getPlayerConfig().getPlayConfig(song.getMode())
@@ -295,8 +301,8 @@ public class IntegerPropertyFactory {
 			};
 		case NUMBER_DURATION_GREEN:
 			return (state) -> {
-				if(state instanceof BMSPlayer) {
-					return ((BMSPlayer)state).getLanerender().getCurrentDuration() * 3 / 5;
+				if (state instanceof BMSPlayer) {
+					return ((BMSPlayer) state).getLanerender().getCurrentDuration() * 3 / 5;
 				} else if (state.main.getPlayerResource().getSongdata() != null) {
 					SongData song = state.main.getPlayerResource().getSongdata();
 					PlayConfig pc = state.main.getPlayerResource().getPlayerConfig().getPlayConfig(song.getMode())
@@ -362,74 +368,254 @@ public class IntegerPropertyFactory {
 				return Integer.MIN_VALUE;
 			};
 		case NUMBER_PLAYTIME_MINUTE:
-			return (state) -> ((int) (((int) (state.main.isTimerOn(TIMER_PLAY) ? state.main.getNowTime(TIMER_PLAY) : 0)) / 60000));
+			return (state) -> ((int) (((int) (state.main.isTimerOn(TIMER_PLAY) ? state.main.getNowTime(TIMER_PLAY) : 0))
+					/ 60000));
 		case NUMBER_PLAYTIME_SECOND:
-			return (state) -> ((((int) (state.main.isTimerOn(TIMER_PLAY) ? state.main.getNowTime(TIMER_PLAY) : 0)) / 1000) % 60);
+			return (state) -> ((((int) (state.main.isTimerOn(TIMER_PLAY) ? state.main.getNowTime(TIMER_PLAY) : 0))
+					/ 1000) % 60);
 		case NUMBER_TIMELEFT_MINUTE:
 			return (state) -> {
-				if(state instanceof BMSPlayer) {
-					return (int) (Math.max((((BMSPlayer)state).getPlaytime() - (int) (state.main.isTimerOn(TIMER_PLAY) ? state.main.getNowTime(TIMER_PLAY) : 0) + 1000), 0) / 60000);
+				if (state instanceof BMSPlayer) {
+					return (int) (Math.max((((BMSPlayer) state).getPlaytime()
+							- (int) (state.main.isTimerOn(TIMER_PLAY) ? state.main.getNowTime(TIMER_PLAY) : 0) + 1000),
+							0) / 60000);
 				}
 				return Integer.MIN_VALUE;
 			};
 		case NUMBER_TIMELEFT_SECOND:
 			return (state) -> {
-				if(state instanceof BMSPlayer) {
-					return (Math.max((((BMSPlayer)state).getPlaytime() - (int) (state.main.isTimerOn(TIMER_PLAY) ?
-							state.main.getNowTime(TIMER_PLAY) : 0) + 1000), 0) / 1000) % 60;
+				if (state instanceof BMSPlayer) {
+					return (Math.max((((BMSPlayer) state).getPlaytime()
+							- (int) (state.main.isTimerOn(TIMER_PLAY) ? state.main.getNowTime(TIMER_PLAY) : 0) + 1000),
+							0) / 1000) % 60;
 				}
 				return Integer.MIN_VALUE;
 			};
 		case NUMBER_LANECOVER1:
 			return (state) -> {
-				if(state instanceof BMSPlayer) {
-					return (int) (((BMSPlayer)state).getLanerender().getLanecover() * 1000);
+				if (state instanceof BMSPlayer) {
+					return (int) (((BMSPlayer) state).getLanerender().getLanecover() * 1000);
 				}
 				return Integer.MIN_VALUE;
 			};
 		case NUMBER_LIFT1:
 			return (state) -> {
-				if(state instanceof BMSPlayer) {
-					return (int) (((BMSPlayer)state).getLanerender().getLiftRegion() * 1000);
+				if (state instanceof BMSPlayer) {
+					return (int) (((BMSPlayer) state).getLanerender().getLiftRegion() * 1000);
 				}
 				return Integer.MIN_VALUE;
 			};
 		case NUMBER_HIDDEN1:
 			return (state) -> {
-				if(state instanceof BMSPlayer) {
-					return (int) (((BMSPlayer)state).getLanerender().getHiddenCover() * 1000);
+				if (state instanceof BMSPlayer) {
+					return (int) (((BMSPlayer) state).getLanerender().getHiddenCover() * 1000);
 				}
 				return Integer.MIN_VALUE;
 			};
 		case NUMBER_GROOVEGAUGE:
 			return (state) -> {
-				if(state instanceof BMSPlayer) {
-					return (int) (((BMSPlayer)state).getGauge().getValue());
+				if (state instanceof BMSPlayer) {
+					return (int) (((BMSPlayer) state).getGauge().getValue());
+				}
+				if (state instanceof AbstractResult) {
+					final int gaugeType = ((AbstractResult) state).getGaugeType();
+					return (int) state.main.getPlayerResource().getGauge()[gaugeType]
+							.get(state.main.getPlayerResource().getGauge()[gaugeType].size - 1);
 				}
 				return Integer.MIN_VALUE;
 			};
 		case NUMBER_GROOVEGAUGE_AFTERDOT:
 			return (state) -> {
-				if(state instanceof BMSPlayer) {
-					final GrooveGauge gauge = ((BMSPlayer)state).getGauge();
-					return  (gauge.getType() == GrooveGauge.HARD || gauge.getType() == GrooveGauge.EXHARD || gauge.getType() == GrooveGauge.HAZARD || gauge.getType() == GrooveGauge.CLASS || gauge.getType() == GrooveGauge.EXCLASS || gauge.getType() == GrooveGauge.EXHARDCLASS)
-							&& gauge.getValue() > 0 && gauge.getValue() < 0.1
-							? 1 : ((int) (gauge.getValue() * 10)) % 10;
+				if (state instanceof BMSPlayer) {
+					final GrooveGauge gauge = ((BMSPlayer) state).getGauge();
+					return (gauge.getType() == GrooveGauge.HARD || gauge.getType() == GrooveGauge.EXHARD
+							|| gauge.getType() == GrooveGauge.HAZARD || gauge.getType() == GrooveGauge.CLASS
+							|| gauge.getType() == GrooveGauge.EXCLASS || gauge.getType() == GrooveGauge.EXHARDCLASS)
+							&& gauge.getValue() > 0 && gauge.getValue() < 0.1 ? 1
+									: ((int) (gauge.getValue() * 10)) % 10;
+				}
+				if (state instanceof AbstractResult) {
+					final int gaugeType = ((AbstractResult) state).getGaugeType();
+					float value = state.main.getPlayerResource().getGauge()[gaugeType]
+							.get(state.main.getPlayerResource().getGauge()[gaugeType].size - 1) * 10;
+					if (value > 0 && value < 1)
+						value = 1;
+					return ((int) value) % 10;
 				}
 				return Integer.MIN_VALUE;
 			};
 		case NUMBER_NOWBPM:
 			return (state) -> {
-				if(state instanceof BMSPlayer) {
-					return (int) (((BMSPlayer)state).getLanerender().getNowBPM());
+				if (state instanceof BMSPlayer) {
+					return (int) (((BMSPlayer) state).getLanerender().getNowBPM());
 				}
 				return Integer.MIN_VALUE;
 			};
 		case NUMBER_MAXCOMBO:
 		case NUMBER_MAXCOMBO2:
 			return (state) -> {
-				if(state instanceof BMSPlayer) {
-					return ((BMSPlayer)state).getJudgeManager().getScoreData().getCombo();
+				if (state instanceof BMSPlayer) {
+					return ((BMSPlayer) state).getJudgeManager().getScoreData().getCombo();
+				}
+				if (state instanceof AbstractResult) {
+					final IRScoreData score = ((AbstractResult) state).getNewScore();
+					return score != null ? score.getCombo() : Integer.MIN_VALUE;
+				}
+				return Integer.MIN_VALUE;
+			};
+		case NUMBER_CLEAR:
+			return (state) -> {
+				if (state instanceof AbstractResult) {
+					final IRScoreData score = ((AbstractResult) state).getNewScore();
+					return score != null ? score.getClear() : Integer.MIN_VALUE;
+				}
+				return Integer.MIN_VALUE;
+			};
+		case NUMBER_TARGET_CLEAR:
+			return (state) -> {
+				if (state instanceof AbstractResult) {
+					return ((AbstractResult) state).getOldScore().getClear();
+				}
+				return Integer.MIN_VALUE;
+			};
+		case NUMBER_SCORE:
+		case NUMBER_SCORE2:
+		case NUMBER_SCORE3:
+			return (state) -> {
+				if (state instanceof AbstractResult) {
+					final IRScoreData score = ((AbstractResult) state).getNewScore();
+					return score != null ? score.getExscore() : Integer.MIN_VALUE;
+				}
+				return state.getScoreDataProperty().getScoreData() != null
+						? state.getScoreDataProperty().getNowEXScore()
+						: Integer.MIN_VALUE;
+			};
+		case NUMBER_HIGHSCORE:
+		case NUMBER_HIGHSCORE2:
+			return (state) -> {
+				if (state instanceof AbstractResult) {
+					return ((AbstractResult) state).getOldScore().getExscore();
+				}
+				return state.getScoreDataProperty().getBestScore();
+			};
+		case NUMBER_TARGET_MISSCOUNT:
+			return (state) -> {
+				if (state instanceof AbstractResult) {
+					final IRScoreData score = ((AbstractResult) state).getOldScore();
+					return score.getMinbp() != Integer.MAX_VALUE ? score.getMinbp() : Integer.MIN_VALUE;
+				}
+				return Integer.MIN_VALUE;
+			};
+		case NUMBER_DIFF_MISSCOUNT:
+			return (state) -> {
+				if (state instanceof AbstractResult) {
+					final IRScoreData score = ((AbstractResult) state).getOldScore();
+					return score.getMinbp() != Integer.MAX_VALUE
+							? ((AbstractResult) state).getNewScore().getMinbp() - score.getMinbp()
+							: Integer.MIN_VALUE;
+				}
+				return Integer.MIN_VALUE;
+			};
+		case NUMBER_TARGET_MAXCOMBO:
+			return (state) -> {
+				if (state instanceof AbstractResult) {
+					final IRScoreData score = ((AbstractResult) state).getOldScore();
+					return score.getCombo() > 0 ? score.getCombo() : Integer.MIN_VALUE;
+				}
+				return Integer.MIN_VALUE;
+			};
+		case NUMBER_DIFF_MAXCOMBO:
+			return (state) -> {
+				if (state instanceof AbstractResult) {
+					final IRScoreData score = ((AbstractResult) state).getOldScore();
+					return score.getCombo() > 0 ? ((AbstractResult) state).getNewScore().getCombo() - score.getCombo()
+							: Integer.MIN_VALUE;
+				}
+				return Integer.MIN_VALUE;
+			};
+		case NUMBER_MISSCOUNT:
+		case NUMBER_MISSCOUNT2:
+			return (state) -> {
+				if (state instanceof AbstractResult) {
+					final IRScoreData score = ((AbstractResult) state).getNewScore();
+					return score != null ? score.getMinbp() : Integer.MIN_VALUE;
+				}
+				return Integer.MIN_VALUE;
+			};
+		case NUMBER_IR_RANK:
+			return (state) -> {
+				if (state instanceof AbstractResult) {
+					final IRScoreData score = ((AbstractResult) state).getNewScore();
+					return ((AbstractResult) state).getState() != AbstractResult.STATE_OFFLINE
+							? ((AbstractResult) state).getIRRank()
+							: Integer.MIN_VALUE;
+				}
+				return Integer.MIN_VALUE;
+			};
+		case NUMBER_IR_PREVRANK:
+			return (state) -> {
+				if (state instanceof AbstractResult) {
+					final IRScoreData score = ((AbstractResult) state).getNewScore();
+					return ((AbstractResult) state).getState() != AbstractResult.STATE_OFFLINE
+							? ((AbstractResult) state).getOldIRRank()
+							: Integer.MIN_VALUE;
+				}
+				return Integer.MIN_VALUE;
+			};
+		case NUMBER_IR_TOTALPLAYER:
+			return (state) -> {
+				if (state instanceof AbstractResult) {
+					final IRScoreData score = ((AbstractResult) state).getNewScore();
+					return ((AbstractResult) state).getState() != AbstractResult.STATE_OFFLINE
+							? ((AbstractResult) state).getIRTotalPlayer()
+							: Integer.MIN_VALUE;
+				}
+				return Integer.MIN_VALUE;
+			};
+		case NUMBER_AVERAGE_DURATION:
+			return (state) -> {
+				if (state instanceof AbstractResult) {
+					return (int) ((AbstractResult) state).getAverageDuration();
+				}
+				return Integer.MIN_VALUE;
+			};
+		case NUMBER_AVERAGE_DURATION_AFTERDOT:
+			return (state) -> {
+				if (state instanceof AbstractResult) {
+					return (int) (((AbstractResult) state).getAverageDuration() * 100) % 100;
+				}
+				return Integer.MIN_VALUE;
+			};
+		case NUMBER_AVERAGE_TIMING:
+			return (state) -> {
+				if (state instanceof AbstractResult) {
+					return (int) ((AbstractResult) state).getTimingDistribution().getAverage();
+				}
+				return Integer.MIN_VALUE;
+			};
+		case NUMBER_AVERAGE_TIMING_AFTERDOT:
+			return (state) -> {
+				if (state instanceof AbstractResult) {
+					TimingDistribution timingDistribution = ((AbstractResult) state).getTimingDistribution();
+					if (timingDistribution.getAverage() >= 0.0) {
+						return (int) (timingDistribution.getAverage() * 100) % 100;
+					} else {
+						return (int) ( -1 * ((Math.abs(timingDistribution.getAverage()) * 100) % 100));
+					}
+				}
+				return Integer.MIN_VALUE;
+			};
+		case NUMBER_STDDEV_TIMING:
+			return (state) -> {
+				if (state instanceof AbstractResult) {
+					return (int) ((AbstractResult) state).getTimingDistribution().getStdDev();
+				}
+				return Integer.MIN_VALUE;
+			};
+		case NUMBER_STDDEV_TIMING_AFTERDOT:
+			return (state) -> {
+				if (state instanceof AbstractResult) {
+					return (int) (((AbstractResult) state).getTimingDistribution().getStdDev() * 100) % 100;
 				}
 				return Integer.MIN_VALUE;
 			};
@@ -490,10 +676,12 @@ public class IntegerPropertyFactory {
 				return 0;
 			};
 		}
-		
+
 		if (SkinPropertyMapper.isSkinSelectTypeId(optionid)) {
 			final SkinType t = SkinPropertyMapper.getSkinSelectType(optionid);
-			result = (state) -> ((state instanceof SkinConfiguration) ? (((SkinConfiguration)state).getSkinType() == t ? 1 : 0) : Integer.MIN_VALUE);
+			result = (state) -> ((state instanceof SkinConfiguration)
+					? (((SkinConfiguration) state).getSkinType() == t ? 1 : 0)
+					: Integer.MIN_VALUE);
 		}
 
 		if (result == null) {
@@ -544,18 +732,19 @@ public class IntegerPropertyFactory {
 						}
 					}
 					final int[] mode_lr2 = { 0, 2, 4, 5, 1, 3 };
-					return mode < mode_lr2.length ? mode_lr2[mode] : mode;					
+					return mode < mode_lr2.length ? mode_lr2[mode] : mode;
 				}
 				return Integer.MIN_VALUE;
 			};
 		case BUTTON_SORT:
-			return (state) -> ((state instanceof MusicSelector) ? ((MusicSelector)state).getSort() : Integer.MIN_VALUE);
+			return (state) -> ((state instanceof MusicSelector) ? ((MusicSelector) state).getSort()
+					: Integer.MIN_VALUE);
 		case NUMBER_CLEAR:
 			return (state) -> {
 				if (state instanceof MusicSelector) {
 					final Bar selected = ((MusicSelector) state).getBarRender().getSelected();
-					return selected.getScore() != null ? selected.getScore().getClear() : Integer.MIN_VALUE;					
-				} else if(state instanceof AbstractResult) {
+					return selected.getScore() != null ? selected.getScore().getClear() : Integer.MIN_VALUE;
+				} else if (state instanceof AbstractResult) {
 					final PlayerResource resource = state.main.getPlayerResource();
 					if (resource.getScoreData() != null) {
 						return resource.getScoreData().getClear();
@@ -569,8 +758,8 @@ public class IntegerPropertyFactory {
 				if (state instanceof MusicSelector) {
 					final Bar selected = ((MusicSelector) state).getBarRender().getSelected();
 					return selected.getRivalScore() != null ? selected.getRivalScore().getClear() : Integer.MIN_VALUE;
-				} else if(state instanceof AbstractResult) {
-					return ((AbstractResult)state).getOldScore().getClear();
+				} else if (state instanceof AbstractResult) {
+					return ((AbstractResult) state).getOldScore().getClear();
 				}
 				return Integer.MIN_VALUE;
 			};

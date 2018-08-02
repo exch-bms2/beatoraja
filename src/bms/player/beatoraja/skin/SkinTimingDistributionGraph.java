@@ -8,7 +8,7 @@ import com.badlogic.gdx.math.*;
 
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.result.MusicResult;
-import bms.player.beatoraja.result.MusicResult.TimingDistribution;
+import bms.player.beatoraja.result.AbstractResult.TimingDistribution;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 
 /**
