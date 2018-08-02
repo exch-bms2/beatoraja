@@ -179,41 +179,13 @@ public class Skin {
 				for(int op : obj.getOption()) {
 					if(op > 0) {
 						final int value = option.get(op, -1);
-						if(value == 0) {
+						if(value != 1) {
 							removes.add(obj);						
-						} else if(value == -1){
-							boolean fix = false;
-							for(int fop : fixopt) {
-								if(op == fop) {
-									fix = true;
-									if(!BooleanPropertyFactory.getBooleanProperty(op).get(state)) {
-										removes.add(obj);						
-									}							
-									break;
-								}
-							}
-							if(!fix) {
-								l.add(op);
-							}
-						}					
+						}				
 					} else {
 						final int value = option.get(-op, -1);
-						if(value == 1) {
+						if(value != 0) {
 							removes.add(obj);						
-						} else if(value == -1){
-							boolean fix = false;
-							for(int fop : fixopt) {
-								if(-op == fop) {
-									fix = true;
-									if(BooleanPropertyFactory.getBooleanProperty(-op).get(state)) {
-										removes.add(obj);						
-									}							
-									break;
-								}
-							}
-							if(!fix) {
-								l.add(op);
-							}
 						}
 					}				
 				}
@@ -253,17 +225,6 @@ public class Skin {
 		for (BooleanProperty draw : obj.getDrawCondition()) {
 			if(!draw.get(state)) {
 				return false;
-			}
-		}
-		for (int op : obj.getOption()) {
-			if (op > 0) {
-				if (!BooleanPropertyFactory.getBooleanProperty(op).get(state)) {
-					return false;
-				}
-			} else {
-				if (BooleanPropertyFactory.getBooleanProperty(-op).get(state)) {
-					return false;
-				}				
 			}
 		}
 		return true;

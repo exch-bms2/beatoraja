@@ -309,9 +309,6 @@ public class BooleanPropertyFactory {
 			};
 		}
 		
-		if(result == null) {
-			result = new DrawProperty(DrawProperty.TYPE_NO_STATIC, (state) -> (false));
-		}
 		return result;
 	}
 

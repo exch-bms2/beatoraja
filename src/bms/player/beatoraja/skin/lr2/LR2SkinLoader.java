@@ -54,12 +54,6 @@ public class LR2SkinLoader extends SkinLoader {
 							BooleanProperty draw = BooleanPropertyFactory.getBooleanProperty(opt);
 							if(draw != null) {
 								b = draw.get(state);								
-							} else {
-								if(opt >= 0) {
-									b = BooleanPropertyFactory.getBooleanProperty(opt).get(state);
-								} else {
-									b = !BooleanPropertyFactory.getBooleanProperty(-opt).get(state);
-								}								
 							}
 						}
 						if (!b) {
@@ -95,12 +89,6 @@ public class LR2SkinLoader extends SkinLoader {
 								BooleanProperty draw = BooleanPropertyFactory.getBooleanProperty(opt);
 								if(draw != null) {
 									b = draw.get(state);								
-								} else {
-									if(opt >= 0) {
-										b = BooleanPropertyFactory.getBooleanProperty(opt).get(state);
-									} else {
-										b = !BooleanPropertyFactory.getBooleanProperty(-opt).get(state);
-									}								
 								}
 							}
 							if (!b) {
