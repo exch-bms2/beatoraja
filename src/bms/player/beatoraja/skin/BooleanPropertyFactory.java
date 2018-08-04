@@ -292,7 +292,7 @@ public class BooleanPropertyFactory {
 		}
 
 		if (result == null) {
-			result = getBooleanProperty0(optionid);
+			result = getBooleanProperty0(id);
 		}
 
 		if (result != null && optionid < 0) {
