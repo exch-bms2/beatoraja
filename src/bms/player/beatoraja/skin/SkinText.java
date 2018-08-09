@@ -2,6 +2,8 @@ package bms.player.beatoraja.skin;
 
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
+import bms.player.beatoraja.skin.property.StringProperty;
+import bms.player.beatoraja.skin.property.StringPropertyFactory;
 
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Align;

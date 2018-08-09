@@ -3,6 +3,7 @@ package bms.player.beatoraja.skin;
 import bms.player.beatoraja.MainController;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
+import bms.player.beatoraja.skin.property.*;
 
 import com.badlogic.gdx.graphics.Color;
 
@@ -690,30 +691,6 @@ public abstract class SkinObject implements Disposable {
 		public float h;
 		public float r;
 		public float a;
-	}
-	
-	public interface BooleanProperty {
-		
-		public boolean isStatic(MainState state);
-		
-		public boolean get(MainState state);
-	}
-
-	public interface IntegerProperty {
-		
-		public int get(MainState state);
-	}
-	
-	public interface FloatProperty {
-		
-		public float get(MainState state);
-
-	}
-	
-	public interface StringProperty {
-		
-		public String get(MainState state);
-
 	}
 	
 	public static class RateProperty implements FloatProperty {

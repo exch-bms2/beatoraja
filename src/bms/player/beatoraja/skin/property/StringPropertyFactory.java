@@ -1,4 +1,4 @@
-package bms.player.beatoraja.skin;
+package bms.player.beatoraja.skin.property;
 
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
@@ -14,7 +14,7 @@ import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.select.bar.Bar;
 import bms.player.beatoraja.select.bar.DirectoryBar;
 import bms.player.beatoraja.select.bar.GradeBar;
-import bms.player.beatoraja.skin.SkinObject.StringProperty;
+import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.song.SongData;
 
 public class StringPropertyFactory {

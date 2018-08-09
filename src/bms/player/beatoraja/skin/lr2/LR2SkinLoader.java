@@ -4,12 +4,15 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.IntIntMap;
 
 import bms.player.beatoraja.MainState;
-import bms.player.beatoraja.skin.BooleanPropertyFactory;
 import bms.player.beatoraja.skin.SkinLoader;
-import bms.player.beatoraja.skin.SkinObject.BooleanProperty;
-import bms.player.beatoraja.skin.SkinPropertyMapper;
+import bms.player.beatoraja.skin.property.*;
 
-public class LR2SkinLoader extends SkinLoader {
+/**
+ * LR2スキンローダー
+ * 
+ * @author exch
+ */
+public abstract class LR2SkinLoader extends SkinLoader {
 
 	private Array<Command> commands = new Array<Command>();
 

@@ -1,4 +1,4 @@
-package bms.player.beatoraja.skin;
+package bms.player.beatoraja.skin.property;
 
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
@@ -10,7 +10,6 @@ import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.select.bar.Bar;
 import bms.player.beatoraja.select.bar.SongBar;
-import bms.player.beatoraja.skin.SkinObject.FloatProperty;
 import bms.player.beatoraja.skin.SkinObject.FloatWriter;
 import bms.player.beatoraja.song.SongData;
 

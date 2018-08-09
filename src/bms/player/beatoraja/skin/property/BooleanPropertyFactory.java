@@ -1,4 +1,4 @@
-package bms.player.beatoraja.skin;
+package bms.player.beatoraja.skin.property;
 
 import static bms.player.beatoraja.ClearType.AssistEasy;
 import static bms.player.beatoraja.ClearType.Easy;
@@ -32,7 +32,7 @@ import bms.player.beatoraja.select.bar.DirectoryBar;
 import bms.player.beatoraja.select.bar.GradeBar;
 import bms.player.beatoraja.select.bar.SelectableBar;
 import bms.player.beatoraja.select.bar.SongBar;
-import bms.player.beatoraja.skin.SkinObject.BooleanProperty;
+import bms.player.beatoraja.skin.SkinObject;
 import bms.player.beatoraja.song.SongData;
 
 public class BooleanPropertyFactory {

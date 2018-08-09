@@ -12,6 +12,7 @@ import org.luaj.vm2.lib.jse.JsePlatform;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.skin.SkinObject.*;
+import bms.player.beatoraja.skin.property.*;
 import bms.player.beatoraja.SkinConfig;
 
 public class SkinLuaAccessor {

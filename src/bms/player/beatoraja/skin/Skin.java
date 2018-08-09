@@ -4,28 +4,20 @@ import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.Resolution;
 import bms.player.beatoraja.ShaderManager;
 import bms.player.beatoraja.SkinConfig.Offset;
-import bms.player.beatoraja.play.SkinGauge;
-import bms.player.beatoraja.skin.SkinObject.BooleanProperty;
-import bms.player.beatoraja.skin.SkinObject.SkinObjectDestination;
 import bms.player.beatoraja.skin.SkinObject.SkinOffset;
+import bms.player.beatoraja.skin.property.BooleanProperty;
 import bms.player.beatoraja.play.BMSPlayer;
-
-import static bms.player.beatoraja.skin.SkinProperty.*;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.GlyphLayout;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.*;
 
-import java.util.*;
 import java.util.logging.Logger;
 
 import org.lwjgl.opengl.GL11;
@@ -37,8 +29,6 @@ import org.lwjgl.opengl.GL11;
  */
 public class Skin {
 	
-	// TODO ぽみゅキャラ系処理の分離
-
 	/**
 	 * 幅
 	 */
@@ -82,21 +72,11 @@ public class Skin {
 	
 	private IntMap<Offset> offset = new IntMap<Offset>();
 
-	/**
-	 * 読み込み時から不変であることが確定しているop
-	 */
-	private int[] fixopt;
-
 	public Skin(Resolution org, Resolution dst) {
-		this(org, dst, new int[0]);
-	}
-
-	public Skin(Resolution org, Resolution dst, int[] fixopt) {
 		width = dst.width;
 		height = dst.height;
 		dw = ((float)dst.width) / org.width;
 		dh = ((float)dst.height) / org.height;
-		this.fixopt = fixopt;
 	}
 
 	public void add(SkinObject object) {
@@ -470,6 +450,8 @@ public class Skin {
 		}
 		return offsetAll;
 	}
+
+	// TODO ぽみゅキャラ系処理の分離
 
 	/**
 	 * ぽみゅキャラの各モーションの1周期の時間  0:1P_NEUTRAL 1:1P_FEVER 2:1P_GREAT 3:1P_GOOD 4:1P_BAD 5:2P_NEUTRAL 6:2P_GREAT 7:2P_BAD
