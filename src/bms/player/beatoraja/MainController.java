@@ -1026,8 +1026,12 @@ public class MainController extends ApplicationAdapter {
 		private Path currentSoundPath;
 
 		public SystemSoundManager(Config config) {
-			scan(Paths.get(config.getBgmpath()), bgms, "select.");
-			scan(Paths.get(config.getSoundpath()), sounds, "clear.");
+			if(config.getBgmpath() != null && config.getBgmpath().length() > 0) {
+				scan(Paths.get(config.getBgmpath()), bgms, "select.");				
+			}
+			if(config.getSoundpath() != null && config.getSoundpath().length() > 0) {
+				scan(Paths.get(config.getSoundpath()), sounds, "clear.");				
+			}
 			Logger.getGlobal().info("検出されたBGM Set : " + bgms.size + " Sound Set : " + sounds.size);
 		}
 
