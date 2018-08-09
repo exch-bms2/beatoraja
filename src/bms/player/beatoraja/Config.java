@@ -21,8 +21,13 @@ import bms.player.beatoraja.play.JudgeAlgorithm;
  */
 public class Config implements Validatable {
 
+	/**
+	 * 選択中のプレイヤー名
+	 */
 	private String playername;
-
+	/**
+	 * ディスプレイモード
+	 */
 	private DisplayMode displaymode = DisplayMode.WINDOW;
 	/**
 	 * 垂直同期
@@ -46,12 +51,14 @@ public class Config implements Validatable {
 	 */
 	public static final int AUDIODRIVER_SOUND = 0;
 	public static final int AUDIODRIVER_AUDIODEVICE = 1;
-
 	/**
 	 * オーディオ:PortAudio
 	 */
 	public static final int AUDIODRIVER_PORTAUDIO = 2;
 
+	/**
+	 * オーディオドライバー名
+	 */
 	private String audioDriverName = null;
 	/**
 	 * オーディオバッファサイズ。大きすぎると音声遅延が発生し、少なすぎるとノイズが発生する
@@ -111,19 +118,38 @@ public class Config implements Validatable {
 	 * 選曲バー移動速度の2つ目以降
 	 */
 	private int scrolldurationhigh = 50;
+    private boolean cacheSkinImage = false;
+    /**
+     * 
+     */
+    private boolean useSongInfo = true;
+
 	/**
 	 * 判定アルゴリズム
 	 */
 	private String judgeType = JudgeAlgorithm.Combo.name();
-
-    private boolean cacheSkinImage = false;
-
-    private boolean useSongInfo = true;
-
+	/**
+	 * 
+	 */
 	private boolean showhiddennote = false;
 
 	private boolean showpastnote = false;
 
+	private String songpath = SONGPATH_DEFAULT;
+	public static final String SONGPATH_DEFAULT = "./songdata.db";
+	
+	private String songinfopath = SONGINFOPATH_DEFAULT;
+	public static final String SONGINFOPATH_DEFAULT = "./songinfo.db";	
+	
+	private String tablepath = TABLEPATH_DEFAULT;
+	public static final String TABLEPATH_DEFAULT = "./table";	
+	
+	private String playerpath = "./player";
+	public static final String PLAYERPATH_DEFAULT = "./player";	
+	
+	private String skinpath = "./skin";
+	public static final String SKINPATH_DEFAULT = "./skin";	
+	
 	private String bgmpath = "";
 
 	private String soundpath = "";
@@ -494,6 +520,46 @@ public class Config implements Validatable {
 		this.ipfsurl = ipfsUrl;
 	}
 
+	public String getSongpath() {
+		return songpath;
+	}
+
+	public void setSongpath(String songpath) {
+		this.songpath = songpath;
+	}
+
+	public String getSonginfopath() {
+		return songinfopath;
+	}
+
+	public void setSonginfopath(String songinfopath) {
+		this.songinfopath = songinfopath;
+	}
+
+	public String getTablepath() {
+		return tablepath;
+	}
+
+	public void setTablepath(String tablepath) {
+		this.tablepath = tablepath;
+	}
+
+	public String getPlayerpath() {
+		return playerpath;
+	}
+
+	public void setPlayerpath(String playerpath) {
+		this.playerpath = playerpath;
+	}
+
+	public String getSkinpath() {
+		return skinpath;
+	}
+
+	public void setSkinpath(String skinpath) {
+		this.skinpath = skinpath;
+	}
+
 	public boolean validate() {
 		if(displaymode == null) {
 			displaymode = DisplayMode.WINDOW;
@@ -535,7 +601,12 @@ public class Config implements Validatable {
 		if (ipfsurl == null) {
 			ipfsurl = "https://gateway.ipfs.io/";
 		}
-
+		
+		songpath = songpath != null ? songpath : SONGPATH_DEFAULT;
+		songinfopath = songinfopath != null ? songinfopath : SONGINFOPATH_DEFAULT;
+		tablepath = tablepath != null ? tablepath : TABLEPATH_DEFAULT;
+		playerpath = playerpath != null ? playerpath : PLAYERPATH_DEFAULT;
+		skinpath = skinpath != null ? skinpath : SKINPATH_DEFAULT;
 		return true;
 	}
 

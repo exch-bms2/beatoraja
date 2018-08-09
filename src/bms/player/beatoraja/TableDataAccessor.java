@@ -38,10 +38,6 @@ public class TableDataAccessor {
 	
 	private String tabledir = "table";
 
-	public TableDataAccessor() {
-		
-	}
-
 	public TableDataAccessor(String tabledir) {
 		this.tabledir = tabledir;
 	}
@@ -50,7 +46,7 @@ public class TableDataAccessor {
 		final ConcurrentLinkedDeque< Thread> tasks = new ConcurrentLinkedDeque<Thread>();
 		for (final String url : urls) {
 			Thread task = new Thread(() -> {
-                TableAccessor tr = new DifficultyTableAccessor(url);
+                TableAccessor tr = new DifficultyTableAccessor(tabledir, url);
                 TableData td = tr.read();
                 if(td != null) {
                     write(td);
@@ -170,10 +166,12 @@ public class TableDataAccessor {
 
 	public static class DifficultyTableAccessor extends TableAccessor {
 
+		private String tabledir;
 		private String url;
 
-		public DifficultyTableAccessor(String url) {
+		public DifficultyTableAccessor(String tabledir, String url) {
 			super(url);
+			this.tabledir = tabledir;
 			this.url = url;
 		}
 
@@ -261,7 +259,7 @@ public class TableDataAccessor {
 
 		@Override
 		public void write(TableData td) {
-			new TableDataAccessor().write(td);
+			new TableDataAccessor(tabledir).write(td);
 		}
 	}
 	

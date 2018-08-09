@@ -95,11 +95,11 @@ public class BarRenderer {
 	public BarRenderer(MusicSelector select) {
 		final MainController main = select.main;
 		this.select = select;
-		TableDataAccessor tdaccessor = new TableDataAccessor();
+		TableDataAccessor tdaccessor = new TableDataAccessor(main.getConfig().getTablepath());
 
 		TableData[] tds = tdaccessor.readAll();
 
-		BMSSearchAccessor bmssearcha = new BMSSearchAccessor();
+		BMSSearchAccessor bmssearcha = new BMSSearchAccessor(main.getConfig().getTablepath());
 
 		Array<TableBar> table = new Array<TableBar>();
 		TableBar bmssearch = null;
@@ -112,7 +112,7 @@ public class BarRenderer {
 				bmssearch = new TableBar(select, tds[i], bmssearcha);
 				table.add(bmssearch);
 			} else {
-				table.add(new TableBar(select, tds[i], new TableDataAccessor.DifficultyTableAccessor(tds[i].getUrl())));
+				table.add(new TableBar(select, tds[i], new TableDataAccessor.DifficultyTableAccessor(main.getConfig().getTablepath(), tds[i].getUrl())));
 			}
 		}
 		
@@ -120,7 +120,7 @@ public class BarRenderer {
 			IRResponse<TableData[]> response = main.getIRConnection().getTableDatas();
 			if(response.isSuccessed()) {
 				for(TableData td : response.getData()) {
-					table.add(new TableBar(select, td, new TableDataAccessor.DifficultyTableAccessor(td.getUrl())));				
+					table.add(new TableBar(select, td, new TableDataAccessor.DifficultyTableAccessor(main.getConfig().getTablepath(), td.getUrl())));
 				}				
 			} else {
 				Logger.getGlobal().warning("IRからのテーブル取得失敗 : " + response.getMessage());

@@ -14,8 +14,11 @@ import bms.player.beatoraja.TableData.TableFolder;
 
 public class BMSSearchAccessor extends TableDataAccessor.TableAccessor {
 
-	public BMSSearchAccessor() {
+	private String tabledir;
+	
+	public BMSSearchAccessor(String tabledir) {
 		super("BMS Search");
+		this.tabledir = tabledir;
 	}
 
 	public TableData read() {
@@ -57,7 +60,7 @@ public class BMSSearchAccessor extends TableDataAccessor.TableAccessor {
 
 	@Override
 	public void write(TableData td) {
-		new TableDataAccessor().write(td);
+		new TableDataAccessor(tabledir).write(td);
 	}
 	
 	public static class BMSSearchElement {

@@ -40,12 +40,12 @@ import bms.player.beatoraja.result.CourseResult;
 import bms.player.beatoraja.result.MusicResult;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.select.bar.TableBar;
-import bms.player.beatoraja.skin.BooleanPropertyFactory;
-import bms.player.beatoraja.skin.IntegerPropertyFactory;
 import bms.player.beatoraja.skin.SkinLoader;
 import bms.player.beatoraja.skin.SkinObject.SkinOffset;
+import bms.player.beatoraja.skin.property.BooleanPropertyFactory;
+import bms.player.beatoraja.skin.property.IntegerPropertyFactory;
+import bms.player.beatoraja.skin.property.StringPropertyFactory;
 import bms.player.beatoraja.skin.SkinProperty;
-import bms.player.beatoraja.skin.StringPropertyFactory;
 import bms.player.beatoraja.song.*;
 import bms.tool.mdprocessor.MusicDownloadProcessor;
 import twitter4j.*;
@@ -120,8 +120,6 @@ public class MainController extends ApplicationAdapter {
 	private PlayDataAccessor playdata;
 
 	static final Path configpath = Paths.get("config.json");
-	private static final Path songdbpath = Paths.get("songdata.db");
-	private static final Path infodbpath = Paths.get("songinfo.db");
 
 	private SystemSoundManager sound;
 
@@ -149,7 +147,7 @@ public class MainController extends ApplicationAdapter {
 		}
 
 		if(player == null) {
-			player = PlayerConfig.readPlayerConfig(config.getPlayername());
+			player = PlayerConfig.readPlayerConfig(config.getPlayerpath(), config.getPlayername());
 		}
 		this.player = player;
 
@@ -167,9 +165,9 @@ public class MainController extends ApplicationAdapter {
 		}
 		try {
 			Class.forName("org.sqlite.JDBC");
-			songdb = new SQLiteSongDatabaseAccessor(songdbpath.toString(), config.getBmsroot());
+			songdb = new SQLiteSongDatabaseAccessor(config.getSongpath(), config.getBmsroot());
 			if(config.isUseSongInfo()) {
-				infodb = new SongInformationAccessor(infodbpath.toString());
+				infodb = new SongInformationAccessor(config.getSonginfopath());
 			}
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
@@ -589,7 +587,7 @@ public class MainController extends ApplicationAdapter {
 
 	public void saveConfig(){
 		Config.write(config);
-		PlayerConfig.write(player);
+		PlayerConfig.write(config.getPlayerpath(), player);
 		Logger.getGlobal().info("設定情報を保存");
 	}
 

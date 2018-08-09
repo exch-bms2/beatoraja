@@ -323,6 +323,7 @@ public class PlayConfigurationView implements Initializable {
 	}
 
 	public void initialize(URL arg0, ResourceBundle arg1) {
+		final long t = System.currentTimeMillis();
 		lr2configuration.setHgap(25);
 		lr2configuration.setVgap(4);
 		lr2configurationassist.setHgap(25);
@@ -368,9 +369,10 @@ public class PlayConfigurationView implements Initializable {
 		irname.getItems().setAll(IRConnection.getAllAvailableIRConnectionName());
 		irname.getItems().add(null);
 
-		players.getItems().setAll(PlayerConfig.readAllPlayerID());
+		players.getItems().setAll(PlayerConfig.readAllPlayerID(config.getPlayerpath()));
 
 		newVersionCheck();
+		Logger.getGlobal().info("初期化時間(ms) : " + (System.currentTimeMillis() - t));
 	}
 
 	@JsonIgnoreProperties(ignoreUnknown=true)
@@ -479,13 +481,14 @@ public class PlayConfigurationView implements Initializable {
 
 		try {
 			Class.forName("org.sqlite.JDBC");
-			SongDatabaseAccessor songdb = new SQLiteSongDatabaseAccessor(Paths.get("songdata.db").toString(),
+			SongDatabaseAccessor songdb = new SQLiteSongDatabaseAccessor(config.getSongpath(),
 					config.getBmsroot());
 			courseController.setSongDatabaseAccessor(songdb);
 			courseController.update("default");
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
+		skinController.update(config);
 	}
 
 	public void changePlayer() {
@@ -494,7 +497,7 @@ public class PlayConfigurationView implements Initializable {
 	}
 
 	public void addPlayer() {
-		String[] ids = PlayerConfig.readAllPlayerID();
+		String[] ids = PlayerConfig.readAllPlayerID(config.getPlayerpath());
 		for(int i = 1;i < 1000;i++) {
 			String playerid = "player" + i;
 			boolean b = true;
@@ -505,7 +508,7 @@ public class PlayConfigurationView implements Initializable {
 				}
 			}
 			if(b) {
-				PlayerConfig.create(playerid);
+				PlayerConfig.create(config.getPlayerpath(), playerid);
 				players.getItems().add(playerid);
 				break;
 			}
@@ -513,7 +516,7 @@ public class PlayConfigurationView implements Initializable {
 	}
 
 	public void updatePlayer() {
-		player = PlayerConfig.readPlayerConfig(players.getValue());
+		player = PlayerConfig.readPlayerConfig(config.getPlayerpath(), players.getValue());
 		playername.setText(player.getName());
 
 		videoController.updatePlayer(player);
@@ -945,7 +948,7 @@ public class PlayConfigurationView implements Initializable {
 		commit();
 		try {
 			Class.forName("org.sqlite.JDBC");
-			SongDatabaseAccessor songdb = new SQLiteSongDatabaseAccessor(Paths.get("songdata.db").toString(),
+			SongDatabaseAccessor songdb = new SQLiteSongDatabaseAccessor(config.getSongpath(),
 					config.getBmsroot());
 			SongInformationAccessor infodb = useSongInfo.isSelected() ?
 					new SongInformationAccessor(Paths.get("songinfo.db").toString()) : null;
@@ -962,11 +965,11 @@ public class PlayConfigurationView implements Initializable {
 	public void loadTable() {
 		commit();
 		try {
-			Files.createDirectories(Paths.get("table"));
+			Files.createDirectories(Paths.get(config.getTablepath()));
 		} catch (IOException e) {
 		}
 
-		try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get("table"))) {
+		try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get(config.getTablepath()))) {
 			for (Path p : paths) {
 				Files.deleteIfExists(p);
 			}
@@ -974,7 +977,7 @@ public class PlayConfigurationView implements Initializable {
 
 		}
 
-		TableDataAccessor tda = new TableDataAccessor();
+		TableDataAccessor tda = new TableDataAccessor(config.getTablepath());
 		tda.updateTableData(config.getTableURL());
 	}
 
@@ -991,10 +994,10 @@ public class PlayConfigurationView implements Initializable {
 		final int[] clears = { 0, 1, 4, 5, 6, 8, 9 };
 		try {
 			Class.forName("org.sqlite.JDBC");
-			SongDatabaseAccessor songdb = new SQLiteSongDatabaseAccessor(Paths.get("songdata.db").toString(),
+			SongDatabaseAccessor songdb = new SQLiteSongDatabaseAccessor(config.getSongpath(),
 					config.getBmsroot());
 			String player = "player1";
-			ScoreDatabaseAccessor scoredb = new ScoreDatabaseAccessor("player/" + player + "/score.db");
+			ScoreDatabaseAccessor scoredb = new ScoreDatabaseAccessor(config.getPlayerpath() + "/" + player + "/score.db");
 			scoredb.createTable();
 
 			try (Connection con = DriverManager.getConnection("jdbc:sqlite:" + dir.getPath())) {

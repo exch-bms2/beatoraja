@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 
 import com.badlogic.gdx.utils.Array;
 
+import bms.player.beatoraja.Config;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.Resolution;
 import bms.player.beatoraja.SkinConfig;
@@ -32,9 +33,12 @@ public class LR2SkinHeaderLoader extends LR2SkinLoader {
 	Array<CustomFile> files = new Array<CustomFile>();
 	Array<CustomOption> options = new Array<CustomOption>();
 	Array<CustomOffset> offsets = new Array<CustomOffset>();
+	
+	final String skinpath;
 
-	public LR2SkinHeaderLoader() {
+	public LR2SkinHeaderLoader(Config c) {
 		addCommandWord(HeaderCommand.values());
+		skinpath = c.getSkinpath();
 	}
 	
 	public SkinHeader loadSkin(Path f, MainState state) throws IOException {
@@ -85,7 +89,7 @@ public class LR2SkinHeaderLoader extends LR2SkinLoader {
 		}
 
 		return header;
-	}
+	}	
 }
 
 enum HeaderCommand implements Command<LR2SkinHeaderLoader> {
@@ -142,7 +146,7 @@ enum HeaderCommand implements Command<LR2SkinHeaderLoader> {
 	CUSTOMFILE {
 		@Override
 		public void execute(LR2SkinHeaderLoader loader, String[] str) {
-			loader.files.add(new CustomFile(str[1], str[2].replace("LR2files\\Theme", "skin").replace("\\", "/"), str.length >= 4 ? str[3] : null));
+			loader.files.add(new CustomFile(str[1], str[2].replace("LR2files\\Theme", loader.skinpath).replace("\\", "/"), str.length >= 4 ? str[3] : null));
 		}
 	},
 	CUSTOMOFFSET {
@@ -186,6 +190,4 @@ enum HeaderCommand implements Command<LR2SkinHeaderLoader> {
 		public void execute(LR2SkinHeaderLoader loader, String[] str) {
 		}
 	};
-
-
 }

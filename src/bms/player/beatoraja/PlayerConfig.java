@@ -618,22 +618,22 @@ public class PlayerConfig {
 	public static void init(Config config) {
 		// TODO プレイヤーアカウント検証
 		try {
-			if(!Files.exists(Paths.get("player"))) {
-				Files.createDirectory(Paths.get("player"));
+			if(!Files.exists(Paths.get(config.getPlayerpath()))) {
+				Files.createDirectory(Paths.get(config.getPlayerpath()));
 			}
-			if(readAllPlayerID().length == 0 || readPlayerConfig(config.getPlayername()) == null) {
+			if(readAllPlayerID(config.getPlayerpath()).length == 0 || readPlayerConfig(config.getPlayerpath(), config.getPlayername()) == null) {
 				PlayerConfig pc = new PlayerConfig();
-				create("player1");
+				create(config.getPlayerpath(), "player1");
 				// スコアデータコピー
 				if(Files.exists(Paths.get("playerscore.db"))) {
-					Files.copy(Paths.get("playerscore.db"), Paths.get("player/player1/score.db"));
+					Files.copy(Paths.get("playerscore.db"), Paths.get(config.getPlayerpath() + "/player1/score.db"));
 				}
 				// リプレイデータコピー
-				Files.createDirectory(Paths.get("player/player1/replay"));
+				Files.createDirectory(Paths.get(config.getPlayerpath() + "/player1/replay"));
 				if(Files.exists(Paths.get("replay"))) {
 					try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get("replay"))) {
 						for (Path p : paths) {
-							Files.copy(p, Paths.get("player/player1/replay").resolve(p.getFileName()));
+							Files.copy(p, Paths.get(config.getPlayerpath() + "/player1/replay").resolve(p.getFileName()));
 						}
 					} catch(Throwable e) {
 						e.printStackTrace();
@@ -648,24 +648,24 @@ public class PlayerConfig {
 		}
 	}
 
-	public static void create(String playerid) {
+	public static void create(String playerpath, String playerid) {
 		try {
-			Path p = Paths.get("player/" + playerid);
+			Path p = Paths.get(playerpath + "/" + playerid);
 			if(Files.exists(p)) {
 				return;
 			}
 			Files.createDirectory(p);
 			PlayerConfig player = new PlayerConfig();
 			player.setId(playerid);
-			write(player);
+			write(playerpath, player);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
-	public static String[] readAllPlayerID() {
+	public static String[] readAllPlayerID(String playerpath) {
 		List<String> l = new ArrayList<>();
-		try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get("player"))) {
+		try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get(playerpath))) {
 			for (Path p : paths) {
 				if(Files.isDirectory(p)) {
 					l.add(p.getFileName().toString());
@@ -677,9 +677,9 @@ public class PlayerConfig {
 		return l.toArray(new String[l.size()]);
 	}
 
-	public static PlayerConfig readPlayerConfig(String playerid) {
+	public static PlayerConfig readPlayerConfig(String playerpath, String playerid) {
 		PlayerConfig player = new PlayerConfig();
-		Path p = Paths.get("player/" + playerid + "/config.json");
+		Path p = Paths.get(playerpath + "/" + playerid + "/config.json");
 		Json json = new Json();
 		try {
 			json.setIgnoreUnknownFields(true);
@@ -692,10 +692,10 @@ public class PlayerConfig {
 		return player;
 	}
 
-	public static void write(PlayerConfig player) {
+	public static void write(String playerpath, PlayerConfig player) {
 		Json json = new Json();
 		json.setOutputType(JsonWriter.OutputType.json);
-		Path p = Paths.get("player/" + player.getId() + "/config.json");
+		Path p = Paths.get(playerpath + "/" + player.getId() + "/config.json");
 		try (FileWriter fw = new FileWriter(p.toFile())) {
 			fw.write(json.prettyPrint(player));
 			fw.flush();

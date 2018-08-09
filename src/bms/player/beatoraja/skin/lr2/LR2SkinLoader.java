@@ -1,7 +1,10 @@
 package bms.player.beatoraja.skin.lr2;
 
+import java.io.File;
+
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.IntIntMap;
+import com.badlogic.gdx.utils.ObjectMap;
 
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.skin.SkinLoader;
@@ -133,6 +136,10 @@ public abstract class LR2SkinLoader extends SkinLoader {
 
 	public IntIntMap getOption() {
 		return op;
+	}
+	
+	protected static File getPath(String skinpath, String imagepath, ObjectMap<String, String> filemap) {
+		return SkinLoader.getPath(imagepath.replace("LR2files\\Theme", skinpath).replace("\\", "/"), filemap);
 	}
 
 	public abstract class CommandWord implements Command<LR2SkinLoader> {

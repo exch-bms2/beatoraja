@@ -426,7 +426,7 @@ public class SkinConfiguration extends MainState {
 					allSkins.add(header);
 				}
 			} else {
-				LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
+				LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader(main.getConfig());
 				try {
 					SkinHeader header = loader.loadSkin(path, null);
 					allSkins.add(header);

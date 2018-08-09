@@ -6,6 +6,7 @@ import java.nio.file.*;
 import java.util.*;
 import java.util.stream.Stream;
 
+import bms.player.beatoraja.Config;
 import bms.player.beatoraja.PlayerConfig;
 import bms.player.beatoraja.SkinConfig;
 import bms.player.beatoraja.skin.*;
@@ -17,7 +18,6 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import org.lwjgl.Sys;
 
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
@@ -71,50 +71,6 @@ public class SkinConfigurationView implements Initializable {
 
 		skinheader.setCellFactory((param) -> new SkinListCell());
 		skinheader.setButtonCell(new SkinListCell());
-
-		List<Path> lr2skinpaths = new ArrayList<Path>();
-		scan(Paths.get("skin"), lr2skinpaths);
-		for (Path path : lr2skinpaths) {
-			String pathString = path.toString().toLowerCase();
-			if (pathString.endsWith(".json")) {
-				JSONSkinLoader loader = new JSONSkinLoader();
-				SkinHeader header = loader.loadHeader(path);
-				if (header != null) {
-					lr2skinheader.add(header);
-				}
-			} else if (pathString.endsWith(".luaskin")) {
-				LuaSkinLoader loader = new LuaSkinLoader();
-				SkinHeader header = loader.loadHeader(path);
-				if (header != null) {
-					lr2skinheader.add(header);
-				}
-			} else {
-				LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader();
-				try {
-					SkinHeader header = loader.loadSkin(path, null);
-					// System.out.println(path.toString() + " : " +
-					// header.getName()
-					// + " - " + header.getMode());
-					lr2skinheader.add(header);
-					// 7/14key skinは5/10keyにも加える
-					if(header.getType() == SkinHeader.TYPE_LR2SKIN &&
-							(header.getSkinType() == SkinType.PLAY_7KEYS || header.getSkinType() == SkinType.PLAY_14KEYS)) {
-						header = loader.loadSkin(path, null);
-
-						if(header.getSkinType() == SkinType.PLAY_7KEYS && !header.getName().toLowerCase().contains("7key")) {
-							header.setName(header.getName() + " (7KEYS) ");
-						} else if(header.getSkinType() == SkinType.PLAY_14KEYS && !header.getName().toLowerCase().contains("14key")) {
-							header.setName(header.getName() + " (14KEYS) ");
-						}
-						header.setSkinType(header.getSkinType() == SkinType.PLAY_7KEYS ? SkinType.PLAY_5KEYS : SkinType.PLAY_10KEYS);
-						lr2skinheader.add(header);
-					}
-
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}
 	}
 
 	public VBox create(SkinHeader header, SkinConfig.Property property) {
@@ -376,6 +332,52 @@ public class SkinConfigurationView implements Initializable {
 			}
 		}
 	}
+    
+    public void update(Config config) {
+		List<Path> lr2skinpaths = new ArrayList<Path>();
+		scan(Paths.get(config.getSkinpath()), lr2skinpaths);
+		for (Path path : lr2skinpaths) {
+			String pathString = path.toString().toLowerCase();
+			if (pathString.endsWith(".json")) {
+				JSONSkinLoader loader = new JSONSkinLoader();
+				SkinHeader header = loader.loadHeader(path);
+				if (header != null) {
+					lr2skinheader.add(header);
+				}
+			} else if (pathString.endsWith(".luaskin")) {
+				LuaSkinLoader loader = new LuaSkinLoader();
+				SkinHeader header = loader.loadHeader(path);
+				if (header != null) {
+					lr2skinheader.add(header);
+				}
+			} else {
+				LR2SkinHeaderLoader loader = new LR2SkinHeaderLoader(config);
+				try {
+					SkinHeader header = loader.loadSkin(path, null);
+					// System.out.println(path.toString() + " : " +
+					// header.getName()
+					// + " - " + header.getMode());
+					lr2skinheader.add(header);
+					// 7/14key skinは5/10keyにも加える
+					if(header.getType() == SkinHeader.TYPE_LR2SKIN &&
+							(header.getSkinType() == SkinType.PLAY_7KEYS || header.getSkinType() == SkinType.PLAY_14KEYS)) {
+						header = loader.loadSkin(path, null);
+
+						if(header.getSkinType() == SkinType.PLAY_7KEYS && !header.getName().toLowerCase().contains("7key")) {
+							header.setName(header.getName() + " (7KEYS) ");
+						} else if(header.getSkinType() == SkinType.PLAY_14KEYS && !header.getName().toLowerCase().contains("14key")) {
+							header.setName(header.getName() + " (14KEYS) ");
+						}
+						header.setSkinType(header.getSkinType() == SkinType.PLAY_7KEYS ? SkinType.PLAY_5KEYS : SkinType.PLAY_10KEYS);
+						lr2skinheader.add(header);
+					}
+
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+    }
     
     public void update(PlayerConfig player) {
     	this.player = player;

@@ -499,7 +499,7 @@ public class PlayerResource {
 
 	private void setTableinfo(){
 		final String[] urls = this.getConfig().getTableURL();
-		final TableDataAccessor tdaccessor = new TableDataAccessor();
+		final TableDataAccessor tdaccessor = new TableDataAccessor(config.getTablepath());
 		final TableData[] tds = tdaccessor.readAll();
 		for(String url: urls){
 			for(TableData td: tds){
