@@ -8,8 +8,8 @@ import bms.player.beatoraja.skin.SkinHeader;
 import bms.player.beatoraja.skin.SkinObject;
 import bms.player.beatoraja.skin.SkinPropertyMapper;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 
 import com.badlogic.gdx.utils.IntIntMap;
 import com.badlogic.gdx.utils.ObjectMap;
@@ -27,7 +27,7 @@ public class LR2SkinSelectSkinLoader extends LR2SkinCSVLoader<SkinConfigurationS
 		});
 	}
 
-	public SkinConfigurationSkin loadSkin(File f, MainState selector, SkinHeader header,
+	public SkinConfigurationSkin loadSkin(Path f, MainState selector, SkinHeader header,
 	                                      IntIntMap option, ObjectMap property) throws IOException {
 		SkinConfigurationSkin skin = this.loadSkin(new SkinConfigurationSkin(src, dst), f, selector, header, option, property);
 		int count = 0;

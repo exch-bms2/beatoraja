@@ -1,7 +1,7 @@
 package bms.player.beatoraja.skin.lr2;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 
 import bms.player.beatoraja.Config;
 import bms.player.beatoraja.MainState;
@@ -31,7 +31,7 @@ public class LR2CourseResultSkinLoader extends LR2SkinCSVLoader<CourseResultSkin
         addCommandWord(CourseCommand.values());
     }
 
-    public CourseResultSkin loadSkin(File f, MainState state, SkinHeader header, IntIntMap option,
+    public CourseResultSkin loadSkin(Path f, MainState state, SkinHeader header, IntIntMap option,
                                      ObjectMap property) throws IOException {
         return this.loadSkin(new CourseResultSkin(src, dst), f, state, header, option, property);
     }

@@ -1,7 +1,12 @@
 package bms.player.beatoraja.skin.lr2;
 
 import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
+
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
 import bms.model.Mode;
@@ -837,17 +842,17 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 		});
 	}
 
-	protected void loadSkin(Skin skin, File f, MainState state) throws IOException {
+	protected void loadSkin(Skin skin, Path f, MainState state) throws IOException {
 		this.loadSkin(skin, f, state, new IntIntMap());
 	}
 
-	protected void loadSkin(Skin skin, File f, MainState state, IntIntMap option) throws IOException {
+	protected void loadSkin(Skin skin, Path f, MainState state, IntIntMap option) throws IOException {
 		this.loadSkin0(skin, f, state, option);
 	}
 
 	private ObjectMap<String, String> filemap = new ObjectMap<String, String>();
 
-	protected S loadSkin(S skin, File f, MainState state, SkinHeader header, IntIntMap option,
+	protected S loadSkin(S skin, Path f, MainState state, SkinHeader header, IntIntMap option,
 			ObjectMap<String, Object> property) throws IOException {
 		this.skin = skin;
 		this.state = state;
@@ -898,18 +903,17 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 
 	int stretch = -1;
 
-	protected void loadSkin0(Skin skin, File f, MainState state, IntIntMap option) throws IOException {
+	protected void loadSkin0(Skin skin, Path f, MainState state, IntIntMap option) throws IOException {
 
-		BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(f), "MS932"));
-
-		while ((line = br.readLine()) != null) {
-			try {
-				processLine(line, state);
-			} catch (Throwable e) {
-				e.printStackTrace();
-			}
-		}
-		br.close();
+		try (Stream<String> lines = Files.lines(f, Charset.forName("MS932"))) {
+			lines.forEach(line -> {
+				try {
+					processLine(line, state);
+				} catch (Throwable e) {
+					e.printStackTrace();
+				}
+			});
+		};
 
 		skin.setOption(option);
 
@@ -983,7 +987,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 		return images;
 	}
 
-	public S loadSkin(File f, MainState decide, SkinHeader header, IntIntMap option, SkinConfig.Property property) throws IOException {
+	public S loadSkin(Path f, MainState decide, SkinHeader header, IntIntMap option, SkinConfig.Property property) throws IOException {
 		ObjectMap m = new ObjectMap();
 		for(SkinConfig.Option op : property.getOption()) {
 			if(op.value != OPTION_RANDOM_VALUE) {
@@ -1036,7 +1040,7 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 		return loadSkin(f, decide, header, option, m);
 	}
 
-	public abstract S loadSkin(File f, MainState decide, SkinHeader header, IntIntMap option, ObjectMap property) throws IOException;
+	public abstract S loadSkin(Path f, MainState decide, SkinHeader header, IntIntMap option, ObjectMap property) throws IOException;
 
 	public static LR2SkinCSVLoader getSkinLoader(SkinType type, Resolution src, Config c) {
 		switch(type) {

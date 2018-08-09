@@ -3,6 +3,7 @@ package bms.player.beatoraja.skin.lr2;
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
 import java.io.*;
+import java.nio.file.Path;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -859,7 +860,7 @@ public class LR2PlaySkinLoader extends LR2SkinCSVLoader<PlaySkin> {
 				values[19], values[20], readOffset(str, 21, offset));
 	}
 
-	public PlaySkin loadSkin(File f, MainState player, SkinHeader header, IntIntMap option,
+	public PlaySkin loadSkin(Path f, MainState player, SkinHeader header, IntIntMap option,
 			ObjectMap property) throws IOException {
 		mode = type.getMode();
 		note = new SkinSource[mode.key];

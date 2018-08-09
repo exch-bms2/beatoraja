@@ -1,7 +1,10 @@
 package bms.player.beatoraja.skin.lr2;
 
 import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.stream.Stream;
 
 import bms.player.beatoraja.skin.SkinTextImage;
 import bms.player.beatoraja.skin.lr2.LR2SkinLoader.Command;
@@ -33,13 +36,11 @@ public class LR2FontLoader extends LR2SkinLoader {
 		this.path = p;
 
 //		long l = System.nanoTime();
-		BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(p.toFile()), "MS932"));
-		String line;
-		while ((line = br.readLine()) != null) {
-			processLine(line, null);
-		}
-		br.close();
-
+		try (Stream<String> lines = Files.lines(p, Charset.forName("MS932"))) {
+			lines.forEach(line -> {
+				processLine(line, null);				
+			});
+		};
 //		System.out.println(p.toString() + " -> " + (System.nanoTime() - l));
 
 		return textimage;

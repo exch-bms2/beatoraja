@@ -1,11 +1,11 @@
 package bms.player.beatoraja.skin.lr2;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Stream;
 
 import com.badlogic.gdx.utils.Array;
 
@@ -50,19 +50,15 @@ public class LR2SkinHeaderLoader extends LR2SkinLoader {
 
 		header.setPath(f);
 
-		try (BufferedReader br = Files.newBufferedReader(f, Charset.forName("MS932"))) {
-			String line = null;
-
-			while ((line = br.readLine()) != null) {
+		try (Stream<String> lines = Files.lines(f, Charset.forName("MS932"))) {
+			lines.forEach(line -> {
 				try {
 					processLine(line, state);				
 				} catch(Throwable e) {
 					e.printStackTrace();
 				}
-			}			
-		} catch(IOException e) {
-			throw e;
-		}
+			});
+		};
 		header.setCustomOptions(options.toArray(CustomOption.class));
 		header.setCustomFiles(files.toArray(CustomFile.class));
 		header.setCustomOffsets(offsets.toArray(CustomOffset.class));
