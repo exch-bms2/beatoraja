@@ -369,8 +369,6 @@ public class PlayConfigurationView implements Initializable {
 		irname.getItems().setAll(IRConnection.getAllAvailableIRConnectionName());
 		irname.getItems().add(null);
 
-		players.getItems().setAll(PlayerConfig.readAllPlayerID(config.getPlayerpath()));
-
 		newVersionCheck();
 		Logger.getGlobal().info("初期化時間(ms) : " + (System.currentTimeMillis() - t));
 	}
@@ -428,6 +426,7 @@ public class PlayConfigurationView implements Initializable {
 	public void update(Config config) {
 		this.config = config;
 
+		players.getItems().setAll(PlayerConfig.readAllPlayerID(config.getPlayerpath()));
 		videoController.update(config);
 
 		systemvolume.setValue((double)config.getSystemvolume());
