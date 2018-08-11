@@ -136,19 +136,19 @@ public class Config implements Validatable {
 	private boolean showpastnote = false;
 
 	private String songpath = SONGPATH_DEFAULT;
-	public static final String SONGPATH_DEFAULT = "./songdata.db";
+	public static final String SONGPATH_DEFAULT = "songdata.db";
 	
 	private String songinfopath = SONGINFOPATH_DEFAULT;
-	public static final String SONGINFOPATH_DEFAULT = "./songinfo.db";	
+	public static final String SONGINFOPATH_DEFAULT = "songinfo.db";	
 	
 	private String tablepath = TABLEPATH_DEFAULT;
-	public static final String TABLEPATH_DEFAULT = "./table";	
+	public static final String TABLEPATH_DEFAULT = "table";	
 	
-	private String playerpath = "./player";
-	public static final String PLAYERPATH_DEFAULT = "./player";	
+	private String playerpath = PLAYERPATH_DEFAULT;
+	public static final String PLAYERPATH_DEFAULT = "player";	
 	
-	private String skinpath = "./skin";
-	public static final String SKINPATH_DEFAULT = "./skin";	
+	private String skinpath = SKINPATH_DEFAULT;
+	public static final String SKINPATH_DEFAULT = "skin";	
 	
 	private String bgmpath = "";
 

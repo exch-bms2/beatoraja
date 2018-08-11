@@ -454,6 +454,7 @@ public class PlayConfigurationView implements Initializable {
 		autosavereplay3.getSelectionModel().select(config.getAutoSaveReplay()[2]);
 		autosavereplay4.getSelectionModel().select(config.getAutoSaveReplay()[3]);
 
+		skinController.update(config);
         // int b = Boolean.valueOf(config.getJKOC()).compareTo(false);
 
         usecim.setSelected(config.isCacheSkinImage());
@@ -487,7 +488,6 @@ public class PlayConfigurationView implements Initializable {
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
-		skinController.update(config);
 	}
 
 	public void changePlayer() {
