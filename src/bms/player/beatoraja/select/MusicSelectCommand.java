@@ -497,6 +497,20 @@ public enum MusicSelectCommand {
             selector.play(SOUND_CHANGEOPTION);
         }
     },
+    NEXT_GAUGEAUTOSHIFT {
+		@Override
+		public void execute(MusicSelector selector) {
+            selector.main.getPlayerConfig().setGaugeAutoShift((selector.main.getPlayerConfig().getGaugeAutoShift() + 1) % 5);
+            selector.play(SOUND_CHANGEOPTION);
+		}
+    },
+    PREV_GAUGEAUTOSHIFT {
+        @Override
+        public void execute(MusicSelector selector) {
+            selector.main.getPlayerConfig().setGaugeAutoShift((selector.main.getPlayerConfig().getGaugeAutoShift() - 1 + 5) % 5);
+            selector.play(SOUND_CHANGEOPTION);
+        }
+    },
     ;
 
     public abstract void execute(MusicSelector selector);

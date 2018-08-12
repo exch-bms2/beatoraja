@@ -82,7 +82,7 @@ public class IntegerPropertyFactory {
 						notes += model.getTotalNotes();
 					}
 					return notes;
-				} 
+				}
 				return state.main.getPlayerResource().getSongdata() != null
 						? state.main.getPlayerResource().getSongdata().getNotes()
 						: Integer.MIN_VALUE;
@@ -754,6 +754,12 @@ public class IntegerPropertyFactory {
 		}
 		if (optionid == BUTTON_LNMODE) {
 			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().getLnmode());
+		}
+		if (optionid == BUTTON_TARGET) {
+			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().getTarget());
+		}
+		if (optionid == BUTTON_GAUGEAUTOSHIFT) {
+			result = (state) -> (state.main.getPlayerResource().getPlayerConfig().getGaugeAutoShift());
 		}
 		if (optionid == BUTTON_BGA) {
 			result = (state) -> (state.main.getPlayerResource().getConfig().getBga());

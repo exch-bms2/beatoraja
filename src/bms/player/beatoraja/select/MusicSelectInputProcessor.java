@@ -93,7 +93,7 @@ public class MusicSelectInputProcessor {
         long[] keytime = input.getTime();
         boolean[] cursor = input.getCursorState();
         long[] cursortime = input.getCursorTime();
-        
+
         final MusicSelectKeyProperty property = MusicSelectKeyProperty.values()[config.getMusicselectinput()];
 
         if (numberstate[4] && numtime[4] != 0
@@ -226,6 +226,9 @@ public class MusicSelectInputProcessor {
             if (property.isPressed(keystate, keytime, BGA_DOWN, true)) {
                 select.execute(MusicSelectCommand.NEXT_BGA_SHOW);
             }
+            if (property.isPressed(keystate, keytime, GAUGEAUTOSHIFT_DOWN, true)) {
+                select.execute(MusicSelectCommand.NEXT_GAUGEAUTOSHIFT);
+            }
             if (property.isPressed(keystate, keytime, JUDGETIMING_DOWN, true)) {
                 select.execute(MusicSelectCommand.JUDGETIMING_DOWN);
             }
@@ -293,7 +296,7 @@ public class MusicSelectInputProcessor {
             }
             if (numberstate[8] && numtime[8] != 0) {
                 numtime[8] = 0;
-                if (current instanceof SongBar && ((SongBar) current).existsSong() && 
+                if (current instanceof SongBar && ((SongBar) current).existsSong() &&
                         (bar.getDirectory().isEmpty() || !(bar.getDirectory().getLast() instanceof SameFolderBar))) {
                     SongData sd = ((SongBar) current).getSongData();
                     bar.updateBar(new SameFolderBar(select, sd.getTitle(), sd.getFolder()));
@@ -310,7 +313,7 @@ public class MusicSelectInputProcessor {
                 cursortime[2] = 0;
                 bar.close();
             }
-            
+
     		if(input.isActivated(KeyCommand.AUTOPLAY_FOLDER)) {
     			if(current instanceof DirectoryBar) {
     				select.selectSong(PlayMode.AUTOPLAY);

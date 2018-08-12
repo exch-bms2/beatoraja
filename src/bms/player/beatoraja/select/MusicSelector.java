@@ -127,7 +127,7 @@ public class MusicSelector extends MainState {
 					if(!Files.exists(Paths.get("rival"))) {
 						Files.createDirectory(Paths.get("rival"));
 					}
-					
+
 					// ライバルキャッシュ作成
 					try (DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get("rival"))) {
 						for (Path p : paths) {
@@ -152,7 +152,7 @@ public class MusicSelector extends MainState {
 					} catch (Throwable e) {
 						e.printStackTrace();
 					}
-					
+
 					for(PlayerInformation rival : response.getData()) {
 						final ScoreDatabaseAccessor scoredb = new ScoreDatabaseAccessor("rival/" + config.getIrname() + rival.getId() + ".db");
 						rivalcaches.put(rival,  new ScoreDataCache() {
@@ -398,7 +398,7 @@ public class MusicSelector extends MainState {
 			Logger.getGlobal().info("段位の楽曲が揃っていません");
 			return;
 		}
-		
+
 		resource.clear();
 		final SongData[] songs = course.getSongDatas();
 		Path[] files = new Path[songs.length];
@@ -562,8 +562,14 @@ public class MusicSelector extends MainState {
 		case BUTTON_HSFIX:
 			execute(arg >= 0 ? MusicSelectCommand.NEXT_HSFIX : MusicSelectCommand.PREV_HSFIX);
 			break;
+		case BUTTON_TARGET:
+			execute(arg >= 0 ? MusicSelectCommand.NEXT_TARGET : MusicSelectCommand.PREV_TARGET);
+			break;
 		case BUTTON_BGA:
 			execute(arg >= 0 ? MusicSelectCommand.NEXT_BGA_SHOW : MusicSelectCommand.PREV_BGA_SHOW);
+			break;
+		case BUTTON_GAUGEAUTOSHIFT:
+			execute(arg >= 0 ? MusicSelectCommand.NEXT_GAUGEAUTOSHIFT : MusicSelectCommand.PREV_GAUGEAUTOSHIFT);
 			break;
 		}
 	}
