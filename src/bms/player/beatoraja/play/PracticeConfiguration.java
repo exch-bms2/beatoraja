@@ -20,6 +20,7 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.SerializationException;
 
 /**
  * プラクティスモードの設定表示/編集用クラス
@@ -53,7 +54,7 @@ public class PracticeConfiguration {
 			Json json = new Json();
 			try {
 				property = json.fromJson(PracticeProperty.class, new FileReader(p.toFile()));
-			} catch (FileNotFoundException e) {
+			} catch (FileNotFoundException | SerializationException e) {
 				e.printStackTrace();
 			}
 		}
