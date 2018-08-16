@@ -98,6 +98,8 @@ public class MusicSelector extends MainState {
 
 	private PixmapResourcePool banners;
 
+	private PixmapResourcePool stagefiles;
+
 	public MusicSelector(MainController main, boolean songUpdated) {
 		super(main);
 		this.config = main.getPlayerResource().getPlayerConfig();
@@ -189,6 +191,7 @@ public class MusicSelector extends MainState {
 
 		bar = new BarRenderer(this);
 		banners = new PixmapResourcePool(main.getConfig().getBannerPixmapGen());
+		stagefiles = new PixmapResourcePool(main.getConfig().getStagefilePixmapGen());
 		musicinput = new MusicSelectInputProcessor(this);
 
 		if (!songUpdated && main.getPlayerResource().getConfig().isUpdatesong()) {
@@ -319,6 +322,7 @@ public class MusicSelector extends MainState {
 						preview.stop();
 						main.changeState(MainController.STATE_DECIDE);
 						banners.disposeOld();
+						stagefiles.disposeOld();
 					}
 				} else if (song.getIpfs() != null && main.getMusicDownloadProcessor() != null
 						&& main.getMusicDownloadProcessor().isAlive()) {
@@ -346,6 +350,7 @@ public class MusicSelector extends MainState {
 							preview.stop();
 							main.changeState(MainController.STATE_DECIDE);
 							banners.disposeOld();
+							stagefiles.disposeOld();
 						}
 					}
 				}
@@ -453,6 +458,7 @@ public class MusicSelector extends MainState {
 			resource.setBMSFile(files[0], mode);
 			main.changeState(MainController.STATE_DECIDE);
 			banners.disposeOld();
+			stagefiles.disposeOld();
 		} else {
 			Logger.getGlobal().info("段位の楽曲が揃っていません");
 		}
@@ -470,6 +476,7 @@ public class MusicSelector extends MainState {
 		super.dispose();
 		bar.dispose();
 		banners.dispose();
+		stagefiles.dispose();
 		if (search != null) {
 			search.dispose();
 			search = null;
@@ -585,13 +592,19 @@ public class MusicSelector extends MainState {
 	public PixmapResourcePool getBannerResource() {
 		return banners;
 	}
+	public PixmapResourcePool getStagefileResource() {
+		return stagefiles;
+	}
 
 	public void selectedBarMoved() {
 		execute(MusicSelectCommand.RESET_REPLAY);
 		// banner
+		// stagefile
 		final Bar current = bar.getSelected();
 		main.getPlayerResource().getBMSResource().setBanner(
 				current instanceof SongBar ? ((SongBar) current).getBanner() : null);
+		main.getPlayerResource().getBMSResource().setStagefile(
+				current instanceof SongBar ? ((SongBar) current).getStagefile() : null);
 
 		main.setTimerOn(TIMER_SONGBAR_CHANGE);
 		if(preview.getSongData() != null && (!(bar.getSelected() instanceof SongBar) ||

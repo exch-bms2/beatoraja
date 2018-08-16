@@ -29,7 +29,7 @@ import bms.player.beatoraja.song.SongInformationAccessor;
 
 /**
  * 楽曲バー描画用クラス
- * 
+ *
  * @author exch
  */
 public class BarRenderer {
@@ -115,13 +115,13 @@ public class BarRenderer {
 				table.add(new TableBar(select, tds[i], new TableDataAccessor.DifficultyTableAccessor(main.getConfig().getTablepath(), tds[i].getUrl())));
 			}
 		}
-		
+
 		if(main.getIRConnection() != null) {
 			IRResponse<TableData[]> response = main.getIRConnection().getTableDatas();
 			if(response.isSuccessed()) {
 				for(TableData td : response.getData()) {
 					table.add(new TableBar(select, td, new TableDataAccessor.DifficultyTableAccessor(main.getConfig().getTablepath(), td.getUrl())));
-				}				
+				}
 			} else {
 				Logger.getGlobal().warning("IRからのテーブル取得失敗 : " + response.getMessage());
 			}
@@ -131,11 +131,11 @@ public class BarRenderer {
 			TableData td = bmssearcha.read();
 			if(td != null) {
 				tdaccessor.write(td);
-			}			
+			}
 		}).start();
 
 		this.tables = table.toArray(TableBar.class);
-		
+
 		TableDataAccessor.TableAccessor courseReader = new TableDataAccessor.TableAccessor("course") {
 			@Override
 			public TableData read() {
@@ -149,9 +149,9 @@ public class BarRenderer {
 			public void write(TableData td) {
 			}
 		};
-		
+
 		courses = new TableBar(select, courseReader.read(), courseReader);
-		
+
 		CourseData[] cds = new CourseDataAccessor("favorite").readAll();
 //		if(cds.length == 0) {
 //			cds = new CourseData[1];
@@ -162,9 +162,9 @@ public class BarRenderer {
 		for (int i = 0; i < cds.length; i++) {
 			favorites[i] = new HashBar(select, cds[i].getName(), cds[i].getSong());
 		}
-		
-		List<Bar> l = new ArrayList<Bar>();		
-				
+
+		List<Bar> l = new ArrayList<Bar>();
+
 		List<Bar> lampupdate = new ArrayList<Bar>();
 		List<Bar> scoreupdate = new ArrayList<Bar>();
 		for(int i = 0;i < 30;i++) {
@@ -185,14 +185,14 @@ public class BarRenderer {
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
-		
+
 		commands = l.toArray(new Bar[l.size()]);
 
 		for(int i = 0;i < barlength;i++) {
 			bararea[i] = new BarArea();
 		}
 	}
-	
+
 	private Bar createCommandBar(MainController main, CommandFolder folder) {
 		if(folder.getFolder() != null && folder.getFolder().length > 0) {
 			List<Bar> l = new ArrayList<Bar>();
@@ -204,7 +204,7 @@ public class BarRenderer {
 			return new CommandBar(select, folder.getName(), folder.getSql());
 		}
 	}
-	
+
 	public static class CommandFolder {
 
 		private String name;
@@ -279,7 +279,7 @@ public class BarRenderer {
 			select.execute(MusicSelectCommand.NEXT_SORT);
 			return;
 		}
-		
+
 		final DirectoryBar current = dir.removeLast();
 		final DirectoryBar parent = !dir.isEmpty() ? dir.getLast() : null;
 		dir.addLast(current);
@@ -414,7 +414,7 @@ public class BarRenderer {
 				}
 			}
 		}
-		
+
 		for (int i = 0; i < barlength; i++) {
 			final BarArea ba = bararea[i];
 			if(ba.value == -1) {
@@ -665,7 +665,7 @@ public class BarRenderer {
 	public Deque<DirectoryBar> getDirectory() {
 		return dir;
 	}
-	
+
 	public String getDirectoryString() {
 		return dirString;
 	}
@@ -771,7 +771,7 @@ public class BarRenderer {
 			loader.start();
 			select.getScoreDataProperty().update(currentsongs[selectedindex].getScore(),
 					currentsongs[selectedindex].getRivalScore());
-			
+
 			StringBuilder str = new StringBuilder();
 			for (Bar b : dir) {
 				str.append(b.getTitle()).append(" > ");
@@ -897,6 +897,7 @@ public class BarRenderer {
 				info.getInformation(songs);
 			}
 			// loading banner
+			// loading stagefile
 			for (Bar bar : bars) {
 				if (bar instanceof SongBar && ((SongBar) bar).existsSong()) {
 					final SongBar songbar = (SongBar) bar;
@@ -909,6 +910,15 @@ public class BarRenderer {
 						}
 					} catch (Exception e) {
 						Logger.getGlobal().warning("banner読み込み失敗 : " + song.getBanner());
+					}
+					try {
+						Path stagefilefile = Paths.get(song.getPath()).getParent().resolve(song.getStagefile());
+						// System.out.println(stagefilefile.getPath());
+						if (song.getStagefile().length() > 0 && Files.exists(stagefilefile)) {
+							songbar.setStagefile(select.getStagefileResource().get(stagefilefile.toString()));
+						}
+					} catch (Exception e) {
+						Logger.getGlobal().warning("stagefile読み込み失敗 : " + song.getStagefile());
 					}
 				}
 				if (stop) {

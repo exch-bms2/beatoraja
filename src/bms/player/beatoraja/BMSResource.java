@@ -14,11 +14,11 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 /**
  * BMSの音源、BGAリソースを管理するクラス
- * 
+ *
  * @author exch
  */
 public class BMSResource {
-	
+
  	/**
 	 * 選曲中のBMS
 	 */
@@ -35,7 +35,7 @@ public class BMSResource {
 	 * BMSのBGAリソース
 	 */
 	private BGAProcessor bga;
-	
+
 	private boolean bgaon;
 	/**
 	 * BGA読み込みタスク
@@ -50,6 +50,8 @@ public class BMSResource {
 	 */
 	private TextureRegion stagefile;
 
+	private Pixmap stagefilePix;
+
 	/**
 	 * stagefile
 	 */
@@ -61,7 +63,7 @@ public class BMSResource {
 		this.audio = audio;
 		bga = new BGAProcessor(config, player);
 	}
-	
+
 	public boolean setBMSFile(BMSModel model, final Path f, final Config config, PlayMode mode) {
 		if(stagefile != null) {
 			stagefile.getTexture().dispose();
@@ -108,19 +110,19 @@ public class BMSResource {
 		audioloader.start();
 		return true;
 	}
-	
+
 	public AudioDriver getAudioDriver() {
 		return audio;
 	}
-	
+
 	public BGAProcessor getBGAProcessor() {
 		return bga;
 	}
-	
+
 	public boolean isBGAOn() {
 		return bgaon;
 	}
-	
+
 	public boolean mediaLoadFinished() {
 		if(!audioloaders.isEmpty() && audioloaders.getLast().isAlive()) {
 			return false;
@@ -141,6 +143,22 @@ public class BMSResource {
 
 	public TextureRegion getBanner() {
 		return banner;
+	}
+
+	public void setStagefile(Pixmap pixmap) {
+		final TextureRegion oldstagefile = stagefile;
+		if (pixmap != null) {
+			if(stagefilePix != pixmap) {
+				stagefile = new TextureRegion(new Texture(pixmap));
+				stagefilePix = pixmap;
+			}
+		} else {
+			stagefile = null;
+			stagefilePix = null;
+		}
+		if (oldstagefile != stagefile && oldstagefile != null) {
+			oldstagefile.getTexture().dispose();
+		}
 	}
 
 	public void setBanner(Pixmap pixmap) {
@@ -185,7 +203,7 @@ public class BMSResource {
 		public BGALoaderThread(BMSModel model) {
 			this.model = model;
 		}
-		
+
 		@Override
 		public void run() {
 			try {
@@ -198,7 +216,7 @@ public class BMSResource {
 			}
 		}
 	}
-	
+
 	class AudioLoaderThread extends Thread {
 
 		private final BMSModel model;
@@ -206,7 +224,7 @@ public class BMSResource {
 		public AudioLoaderThread(BMSModel model) {
 			this.model = model;
 		}
-		
+
 		@Override
 		public void run() {
 			try {
@@ -216,6 +234,6 @@ public class BMSResource {
 				Logger.getGlobal().severe(e.getClass().getName() + " : " + e.getMessage());
 				e.printStackTrace();
 			}
-		}		
+		}
 	}
  }

@@ -120,7 +120,7 @@ public class Config implements Validatable {
 	private int scrolldurationhigh = 50;
     private boolean cacheSkinImage = false;
     /**
-     * 
+     *
      */
     private boolean useSongInfo = true;
 
@@ -129,7 +129,7 @@ public class Config implements Validatable {
 	 */
 	private String judgeType = JudgeAlgorithm.Combo.name();
 	/**
-	 * 
+	 *
 	 */
 	private boolean showhiddennote = false;
 
@@ -137,19 +137,19 @@ public class Config implements Validatable {
 
 	private String songpath = SONGPATH_DEFAULT;
 	public static final String SONGPATH_DEFAULT = "songdata.db";
-	
+
 	private String songinfopath = SONGINFOPATH_DEFAULT;
-	public static final String SONGINFOPATH_DEFAULT = "songinfo.db";	
-	
+	public static final String SONGINFOPATH_DEFAULT = "songinfo.db";
+
 	private String tablepath = TABLEPATH_DEFAULT;
-	public static final String TABLEPATH_DEFAULT = "table";	
-	
+	public static final String TABLEPATH_DEFAULT = "table";
+
 	private String playerpath = PLAYERPATH_DEFAULT;
-	public static final String PLAYERPATH_DEFAULT = "player";	
-	
+	public static final String PLAYERPATH_DEFAULT = "player";
+
 	private String skinpath = SKINPATH_DEFAULT;
-	public static final String SKINPATH_DEFAULT = "skin";	
-	
+	public static final String SKINPATH_DEFAULT = "skin";
+
 	private String bgmpath = "";
 
 	private String soundpath = "";
@@ -184,6 +184,7 @@ public class Config implements Validatable {
 	private int autosavereplay[] = {0,0,0,0};
 
 	private int skinPixmapGen = 4;
+	private int stagefilePixmapGen = 3;
 	private int bannerPixmapGen = 2;
 	private int songResourceGen = 1;
 
@@ -488,6 +489,14 @@ public class Config implements Validatable {
 		this.skinPixmapGen = skinPixmapGen;
 	}
 
+	public int getStagefilePixmapGen() {
+		return stagefilePixmapGen;
+	}
+
+	public void setStagefilePixmapGen(int stagefilePixmapGen) {
+		this.stagefilePixmapGen = stagefilePixmapGen;
+	}
+
 	public int getBannerPixmapGen() {
 		return bannerPixmapGen;
 	}
@@ -601,7 +610,7 @@ public class Config implements Validatable {
 		if (ipfsurl == null) {
 			ipfsurl = "https://gateway.ipfs.io/";
 		}
-		
+
 		songpath = songpath != null ? songpath : SONGPATH_DEFAULT;
 		songinfopath = songinfopath != null ? songinfopath : SONGINFOPATH_DEFAULT;
 		tablepath = tablepath != null ? tablepath : TABLEPATH_DEFAULT;
