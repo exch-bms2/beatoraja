@@ -8,7 +8,7 @@ import java.nio.file.Paths;
 
 /**
  * ファイルシステムと連動したフォルダバー。
- * 
+ *
  * @author exch
  */
 public class FolderBar extends DirectoryBar {
@@ -36,13 +36,18 @@ public class FolderBar extends DirectoryBar {
     }
 
     @Override
+    public String getArtist() {
+        return null;
+    }
+
+    @Override
     public Bar[] getChildren() {
         SongDatabaseAccessor songdb = selector.getSongDatabase();
         SongData[] songs = songdb.getSongDatas("parent", crc);
         if (songs.length > 0) {
             return SongBar.toSongBarArray(songs);
         }
-        
+
         FolderData[] folders = songdb.getFolderDatas("parent", crc);
         Bar[] l = new Bar[folders.length];
 
@@ -57,7 +62,7 @@ public class FolderBar extends DirectoryBar {
             String ccrc = SongUtils.crc32(path, new String[0], rootpath);
             l[i] = new FolderBar(selector, folders[i], ccrc);
         }
-        	
+
         return l;
     }
 
@@ -68,7 +73,7 @@ public class FolderBar extends DirectoryBar {
             path = path.substring(0, path.length() - 1);
         }
         final String ccrc = SongUtils.crc32(path, new String[0], new File(".").getAbsolutePath());
-        
+
         updateFolderStatus(songdb.getSongDatas("parent", ccrc));
     }
 }

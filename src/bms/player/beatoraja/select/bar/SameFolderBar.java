@@ -8,7 +8,7 @@ import java.util.List;
 
 /**
  * 同ディレクトリに配置されている全譜面を子に持つバー
- * 
+ *
  * @author exch
  */
 public class SameFolderBar extends DirectoryBar {
@@ -25,6 +25,11 @@ public class SameFolderBar extends DirectoryBar {
     @Override
     public String getTitle() {
         return title;
+    }
+
+    @Override
+    public String getArtist() {
+        return null;
     }
 
     @Override

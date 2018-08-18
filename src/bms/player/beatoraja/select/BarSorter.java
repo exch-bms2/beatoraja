@@ -31,6 +31,62 @@ public enum BarSorter implements Comparator<Bar> {
 		}
 	},
 	/**
+	 * アーティスト名ソート
+	 */
+	ARTIST_SORTER("ARTIST NAME") {
+		@Override
+		public int compare(Bar o1, Bar o2) {
+			if (!(o1 instanceof SongBar) && !(o2 instanceof SongBar)) {
+				return 0;
+			}
+			if (!(o1 instanceof SongBar)) {
+				return 1;
+			}
+			if (!(o2 instanceof SongBar)) {
+				return -1;
+			}
+			return o1.getArtist().toLowerCase().compareTo(o2.getArtist().toLowerCase());
+		}
+	},
+	/**
+	 * 楽曲のBPMソート
+	 */
+	BPM_SORTER("BPM") {
+		@Override
+		public int compare(Bar o1, Bar o2) {
+			if (!(o1 instanceof SongBar && ((SongBar)o1).existsSong())
+					&& !(o2 instanceof SongBar && ((SongBar)o2).existsSong())) {
+				return 0;
+			}
+			if (!(o1 instanceof SongBar && ((SongBar)o1).existsSong())) {
+				return 1;
+			}
+			if (!(o2 instanceof SongBar && ((SongBar)o2).existsSong())) {
+				return -1;
+			}
+			return ((SongBar) o1).getSongData().getMaxbpm() - ((SongBar) o2).getSongData().getMaxbpm();
+		}
+	},
+	/**
+	 * 楽曲の長さソート
+	 */
+	LENGTH_SORTER("LENGTH") {
+		@Override
+		public int compare(Bar o1, Bar o2) {
+			if (!(o1 instanceof SongBar && ((SongBar)o1).existsSong())
+					&& !(o2 instanceof SongBar && ((SongBar)o2).existsSong())) {
+				return 0;
+			}
+			if (!(o1 instanceof SongBar && ((SongBar)o1).existsSong())) {
+				return 1;
+			}
+			if (!(o2 instanceof SongBar && ((SongBar)o2).existsSong())) {
+				return -1;
+			}
+			return ((SongBar) o1).getSongData().getLength() - ((SongBar) o2).getSongData().getLength();
+		}
+	},
+	/**
 	 * レベルソート
 	 */
 	LEVEL_SORTER("LEVEL") {
