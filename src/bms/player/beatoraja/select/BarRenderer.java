@@ -118,7 +118,7 @@ public class BarRenderer {
 
 		if(main.getIRConnection() != null) {
 			IRResponse<TableData[]> response = main.getIRConnection().getTableDatas();
-			if(response.isSuccessed()) {
+			if(response.isSucceeded()) {
 				for(TableData td : response.getData()) {
 					table.add(new TableBar(select, td, new TableDataAccessor.DifficultyTableAccessor(main.getConfig().getTablepath(), td.getUrl())));
 				}

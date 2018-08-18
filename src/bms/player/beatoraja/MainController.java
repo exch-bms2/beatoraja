@@ -181,7 +181,7 @@ public class MainController extends ApplicationAdapter {
 				ir = null;
 			} else {
 				IRResponse response = ir.login(player.getUserid(), player.getPassword());
-				if(!response.isSuccessed()) {
+				if(!response.isSucceeded()) {
 					Logger.getGlobal().warning("IRへのログイン失敗 : " + response.getMessage());
 					ir = null;
 				}

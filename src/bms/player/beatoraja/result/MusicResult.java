@@ -103,7 +103,7 @@ public class MusicResult extends AbstractResult {
 				Thread irprocess = new Thread(() -> {
                     try {
                         IRResponse<Object> send1 = ir.sendPlayData(resource.getSongdata(), resource.getScoreData());
-                        if(send1.isSuccessed()) {
+                        if(send1.isSucceeded()) {
                             main.switchTimer(TIMER_IR_CONNECT_SUCCESS, true);
                             Logger.getGlobal().info("IRスコア送信完了");
                         } else {
@@ -111,7 +111,7 @@ public class MusicResult extends AbstractResult {
                             Logger.getGlobal().warning("IRスコア送信失敗 : " + send1.getMessage());
                         }
                         IRResponse<IRScoreData[]> response = ir.getPlayData(null, resource.getSongdata());
-                        if(response.isSuccessed()) {
+                        if(response.isSucceeded()) {
                             IRScoreData[] scores = response.getData();
                             irtotal = scores.length;
 
