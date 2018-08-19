@@ -2,7 +2,7 @@ package bms.player.beatoraja.select.bar;
 
 /**
  * 指定のバーを子に持つバー
- * 
+ *
  * @author exch
  */
 public class ContainerBar extends DirectoryBar {
@@ -19,6 +19,11 @@ public class ContainerBar extends DirectoryBar {
     @Override
     public String getTitle() {
         return title;
+    }
+
+    @Override
+    public String getArtist() {
+        return null;
     }
 
     @Override

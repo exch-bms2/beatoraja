@@ -26,6 +26,11 @@ public class CommandBar extends DirectoryBar {
     }
 
     @Override
+    public String getArtist() {
+        return null;
+    }
+
+    @Override
     public Bar[] getChildren() {
     	final MainController main = selector.main;
         return SongBar.toSongBarArray(main.getSongDatabase().getSongDatas(sql,"player/" + main.getConfig().getPlayername() + "/score.db"

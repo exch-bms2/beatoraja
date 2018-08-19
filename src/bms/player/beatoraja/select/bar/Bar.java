@@ -11,6 +11,7 @@ public abstract class Bar {
     private IRScoreData rscore;
 
     public abstract String getTitle();
+    public abstract String getArtist();
 
     public IRScoreData getScore() {
         return score;
@@ -28,6 +29,6 @@ public abstract class Bar {
         this.rscore = score;
     }
 
-    public abstract int getLamp(boolean isPlayer);    
+    public abstract int getLamp(boolean isPlayer);
 }
 

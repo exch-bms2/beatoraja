@@ -33,4 +33,8 @@ public class SearchWordBar extends DirectoryBar {
         return title;
     }
 
+    @Override
+    public String getArtist() {
+        return null;
+    }
 }

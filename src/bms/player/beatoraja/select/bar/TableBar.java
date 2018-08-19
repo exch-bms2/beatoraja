@@ -43,6 +43,11 @@ public class TableBar extends DirectoryBar {
         return td.getName();
     }
 
+    @Override
+    public String getArtist() {
+        return null;
+    }
+
 	public String getUrl() {
 		return td.getUrl();
 	}

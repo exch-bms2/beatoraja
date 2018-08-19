@@ -14,13 +14,13 @@ public class GradeBar extends SelectableBar {
     private IRScoreData rscore;
 
     public GradeBar(CourseData course) {
-        this.course = course;        
+        this.course = course;
     }
 
     public CourseData getCourseData() {
         return course;
     }
-    
+
     public SongData[] getSongDatas() {
     	return course.getSong();
     }
@@ -28,6 +28,11 @@ public class GradeBar extends SelectableBar {
     @Override
     public String getTitle() {
         return course.getName();
+    }
+
+    @Override
+    public String getArtist() {
+        return null;
     }
 
     public boolean existsAllSongs() {

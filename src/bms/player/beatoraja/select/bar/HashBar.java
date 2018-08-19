@@ -26,6 +26,11 @@ public class HashBar extends DirectoryBar {
         return title;
     }
 
+    @Override
+    public String getArtist() {
+        return null;
+    }
+
     public SongData[] getElements() {
         return elements;
     }
