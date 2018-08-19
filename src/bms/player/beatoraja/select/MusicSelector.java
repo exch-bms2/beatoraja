@@ -122,7 +122,7 @@ public class MusicSelector extends MainState {
 
 		if(main.getIRConnection() != null) {
 			IRResponse<PlayerInformation[]> response = main.getIRConnection().getRivals();
-			if(response.isSuccessed()) {
+			if(response.isSucceeded()) {
 				try {
 					// ライバルスコアデータベース作成
 					// TODO 別のクラスに移動
@@ -172,7 +172,7 @@ public class MusicSelector extends MainState {
 							scoredb.createTable();
 							scoredb.setInformation(rival);
 							IRResponse<IRScoreData[]> scores = main.getIRConnection().getPlayData(rival.getId(), null);
-							if(scores.isSuccessed()) {
+							if(scores.isSucceeded()) {
 								scoredb.setScoreData(scores.getData());
 								Logger.getGlobal().info("IRからのスコア取得完了 : " + rival.getName());
 							} else {

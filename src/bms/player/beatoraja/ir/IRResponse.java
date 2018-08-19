@@ -14,7 +14,7 @@ public interface IRResponse<T> {
 	 * 
 	 * @return 成功した場合はtrue
 	 */
-	public abstract boolean isSuccessed();
+	public abstract boolean isSucceeded();
 	
 	/**
 	 * IRからのメッセージを取得する

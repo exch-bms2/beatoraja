@@ -115,7 +115,7 @@ public class CourseResult extends AbstractResult {
 								}
 							}
 							IRResponse<Object> send = ir.sendCoursePlayData(resource.getCourseData(), lnmode, resource.getCourseScoreData());
-							if(send.isSuccessed()) {
+							if(send.isSucceeded()) {
 								main.switchTimer(TIMER_IR_CONNECT_SUCCESS, true);
 								Logger.getGlobal().info("IRスコア送信完了");
 							} else {
@@ -123,7 +123,7 @@ public class CourseResult extends AbstractResult {
 								Logger.getGlobal().warning("IRスコア送信失敗 : " + send.getMessage());
 							}
 							IRResponse<IRScoreData[]> response = ir.getCoursePlayData(null, resource.getCourseData(), lnmode);
-							if(response.isSuccessed()) {
+							if(response.isSucceeded()) {
 								IRScoreData[] scores = response.getData();
 								irtotal = scores.length;
 
