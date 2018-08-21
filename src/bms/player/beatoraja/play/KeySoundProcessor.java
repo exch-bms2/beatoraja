@@ -66,7 +66,8 @@ public class KeySoundProcessor {
 
 		@Override
 		public void run() {
-			final long lasttime = timelines[timelines.length - 1].getMicroTime() + BMSPlayer.TIME_MARGIN * 1000;
+			final long lasttime = timelines.length > 0 ?
+					timelines[timelines.length - 1].getMicroTime() + BMSPlayer.TIME_MARGIN * 1000 : 0;
 			final Config config = player.main.getPlayerResource().getConfig();
 			int p = 0;
 			for (long time = starttime; p < timelines.length && timelines[p].getMicroTime() < time; p++)
