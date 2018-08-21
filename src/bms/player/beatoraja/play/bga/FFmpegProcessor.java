@@ -161,7 +161,7 @@ public class FFmpegProcessor implements MovieProcessor {
 						if (frame == null) {
 							eof = true;
 							if (loop) {
-								commands.addLast(Command.PLAY);
+								commands.offerLast(Command.PLAY);
 							}
 						} else if (frame.image != null && frame.image[0] != null) {
 							try {
@@ -238,7 +238,7 @@ public class FFmpegProcessor implements MovieProcessor {
 		}
 
 		public void exec(Command com) {
-			commands.addLast(com);
+			commands.offerLast(com);
 			interrupt();
 		}
 	}
