@@ -1,5 +1,6 @@
 package bms.player.beatoraja.play;
 
+import bms.model.Mode;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.PlayerResource;
 import bms.player.beatoraja.play.GaugeProperty.GaugeElementProperty;
@@ -104,20 +105,23 @@ public class SkinGauge extends SkinObject {
 			atime = time + duration;
 		}
 
-		if(!isCheckedSevenToNine && BMSPlayerRule.isSevenToNine()) {
-			//7to9 ボーダーが丁度割り切れるゲージ粒数に変更
-			int setParts = parts;
-			for(int type = 0; type < gauge.getGaugeTypeLength(); type++) {
-				final GaugeElementProperty element = gauge.getGauge(type).getProperty();
-				for(int i = parts; i <= element.max; i++) {
-					if(element.border % (element.max / i) == 0) {
-						setParts = Math.max(setParts, i);
-						break;
+		if(!isCheckedSevenToNine) {
+			if(state.main.getPlayerResource().getOriginalMode() == Mode.BEAT_7K 
+					&& state.main.getPlayerResource().getBMSModel().getMode() == Mode.POPN_9K) {
+				//7to9 ボーダーが丁度割り切れるゲージ粒数に変更
+				int setParts = parts;
+				for(int type = 0; type < gauge.getGaugeTypeLength(); type++) {
+					final GaugeElementProperty element = gauge.getGauge(type).getProperty();
+					for(int i = parts; i <= element.max; i++) {
+						if(element.border % (element.max / i) == 0) {
+							setParts = Math.max(setParts, i);
+							break;
+						}
 					}
 				}
+				parts = setParts;
 			}
-			parts = setParts;
-			isCheckedSevenToNine = true;
+			isCheckedSevenToNine = true;			
 		}
 
 		float value = gauge.getValue();

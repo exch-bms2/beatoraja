@@ -37,6 +37,10 @@ public class PlayerResource {
 	 * 選択中のBMSの情報
 	 */
 	private SongData songdata;
+	/**
+	 * BMSModelの元々のモード
+	 */
+	private Mode orgmode;
 
 	private PlayerData playerdata = new PlayerData();
 
@@ -151,6 +155,7 @@ public class PlayerResource {
 			return false;
 		}
 
+		orgmode = model.getMode();
 		bmsresource.setBMSFile(model, f, config, mode);
 		if(songdata != null) {
 			songdata.setBMSModel(model);
@@ -183,6 +188,7 @@ public class PlayerResource {
 			}
 			generator = decoder.getBMSGenerator();
 			// JUDGERANKをbmson互換に変換
+			// TODO これはJudgePropertyに移行
 			if (model.getJudgerank() >= 0 && model.getJudgerank() < 5) {
 				int[] judgetable = new int[5];
 				if(model.getMode() == Mode.POPN_9K) {
@@ -523,6 +529,14 @@ public class PlayerResource {
 		}
 		setTablename("");
 		setTablelevel("");
+	}
+
+	public Mode getOriginalMode() {
+		return orgmode;
+	}
+
+	public void setOriginalMode(Mode orgmode) {
+		this.orgmode = orgmode;
 	}
 
 	public enum PlayMode {

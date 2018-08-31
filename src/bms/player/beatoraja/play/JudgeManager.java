@@ -160,18 +160,19 @@ public class JudgeManager {
 	}
 
 	public void init(BMSModel model, PlayerResource resource) {
+		final Mode orgmode = resource.getOriginalMode();
 		prevtime = 0;
 		judgenow = new int[((PlaySkin) main.getSkin()).getJudgeregion()];
 		judgecombo = new int[((PlaySkin) main.getSkin()).getJudgeregion()];
 		judgefast = new long[((PlaySkin) main.getSkin()).getJudgeregion()];
-		score = new IRScoreData(BMSPlayerRule.isSevenToNine() ? Mode.BEAT_7K : model.getMode());
+		score = new IRScoreData(orgmode);
 		score.setNotes(model.getTotalNotes());
 		score.setSha256(model.getSHA256());
 
 		this.lntype = model.getLntype();
 		lanes = model.getLanes();
 
-		JudgeProperty rule = BMSPlayerRule.getBMSPlayerRule(model.getMode()).judge;
+		JudgeProperty rule = BMSPlayerRule.getBMSPlayerRule(orgmode).judge;
 		combocond = rule.combo;
 		miss = rule.miss;
 		judgeVanish = rule.judgeVanish;
@@ -207,10 +208,8 @@ public class JudgeManager {
 				constraint = 1;
 			}
 		}
-		njudge = rule.getNoteJudge(judgerank, judgeWindowRate, constraint,
-				model.getMode() == Mode.POPN_9K && !BMSPlayerRule.isSevenToNine());
-		cnendjudge = rule.getLongNoteEndJudge(judgerank, judgeWindowRate, constraint,
-				model.getMode() == Mode.POPN_9K && !BMSPlayerRule.isSevenToNine());
+		njudge = rule.getNoteJudge(judgerank, judgeWindowRate, constraint);
+		cnendjudge = rule.getLongNoteEndJudge(judgerank, judgeWindowRate, constraint);
 		sjudge = rule.getScratchJudge(judgerank, judgeWindowRate, constraint);
 		scnendjudge = rule.getLongScratchEndJudge(judgerank, judgeWindowRate, constraint);
 		judgestart = judgeend = 0;

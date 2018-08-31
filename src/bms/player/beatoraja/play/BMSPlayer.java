@@ -213,17 +213,14 @@ public class BMSPlayer extends MainState {
 		}
 
 		Logger.getGlobal().info("譜面オプション設定");
-		BMSPlayerRule.setSevenToNine(false);
 		if (replay != null) {
 			if(replay.sevenToNinePattern > 0 && model.getMode() == Mode.BEAT_7K) {
 				model.setMode(Mode.POPN_9K);
-				BMSPlayerRule.setSevenToNine(true);
 			}
 			PatternModifier.modify(model, Arrays.asList(replay.pattern));
 		} else if (resource.getReplayData().pattern != null) {
 			if(resource.getReplayData().sevenToNinePattern > 0 && model.getMode() == Mode.BEAT_7K) {
 				model.setMode(Mode.POPN_9K);
-				BMSPlayerRule.setSevenToNine(true);
 			}
 			pattern = Arrays.asList(resource.getReplayData().pattern);
 			PatternModifier.modify(model, pattern);
@@ -275,7 +272,6 @@ public class BMSPlayer extends MainState {
 				NoteShuffleModifier mod = new NoteShuffleModifier(NoteShuffleModifier.SEVEN_TO_NINE);
 				mod.setModifyTarget(PatternModifier.SIDE_1P);
 				pattern = mod.modify(model);
-				BMSPlayerRule.setSevenToNine(true);
 				if(config.getSevenToNineType() != 0) {
 					assist = 1;
 					score = false;

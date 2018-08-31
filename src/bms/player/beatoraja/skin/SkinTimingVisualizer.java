@@ -146,7 +146,7 @@ public class SkinTimingVisualizer extends SkinObject {
 
 	static int[][] getJudgeArea(PlayerResource resource) {
 		BMSModel model = resource.getBMSModel();
-		JudgeProperty rule = BMSPlayerRule.getBMSPlayerRule(model.getMode()).judge;
+		JudgeProperty rule = BMSPlayerRule.getBMSPlayerRule(resource.getOriginalMode()).judge;
 
 		final int judgerank = model.getJudgerank();
 		final int judgeWindowRate = resource.getPlayerConfig().getJudgewindowrate();
@@ -159,8 +159,7 @@ public class SkinTimingVisualizer extends SkinObject {
 			}
 		}
 
-		return rule.getNoteJudge(judgerank, judgeWindowRate, constraint,
-				model.getMode() == Mode.POPN_9K && !BMSPlayerRule.isSevenToNine());
+		return rule.getNoteJudge(judgerank, judgeWindowRate, constraint);
 	}
 
 	@Override
