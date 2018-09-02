@@ -1,5 +1,7 @@
 package bms.player.beatoraja.play;
 
+import bms.model.Mode;
+
 /**
  * 判定の設定値
  *
@@ -102,13 +104,13 @@ public enum JudgeProperty {
     public int[][] getLongScratchEndJudge(int judgerank, int judgeWindowRate, int constraint) {
     	return windowrule.create(longscratch, judgerank, judgeWindowRate, constraint);
     }
-
+    
     public enum MissCondition {
     	ONE, ALWAYS
     }
     
-    private enum JudgeWindowRule {
-    	NORMAL {
+    public enum JudgeWindowRule {
+    	NORMAL (new int[]{25, 50, 75, 100, 125}){
 
 			@Override
 			public int[][] create(int[][] org, int judgerank, int judgeWindowRate, int constraint) {
@@ -116,7 +118,7 @@ public enum JudgeProperty {
 			}
     		
     	},
-    	PMS {
+    	PMS (new int[]{33, 50, 70, 100, 133}) {
 
 			@Override
 			public int[][] create(int[][] org, int judgerank, int judgeWindowRate, int constraint) {
@@ -124,6 +126,8 @@ public enum JudgeProperty {
 			}
     		
     	};
+    	
+    	public final int[] judgerank;
     	
         private static int[][] create(int[][] org, int judgerank, int judgeWindowRate, int constraint, boolean pms) {
     		final int[][] judge = new int[org.length][2];
@@ -151,8 +155,10 @@ public enum JudgeProperty {
     		return judge;
         }
         
-
-    	
+        private JudgeWindowRule(int[] judgerank) {
+        	this.judgerank = judgerank;
+        }
+        
     	public abstract int[][] create(int[][] org, int judgerank, int judgeWindowRate, int constraint);
     }
 }

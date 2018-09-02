@@ -1,5 +1,6 @@
 package bms.player.beatoraja.play;
 
+import bms.model.BMSModel;
 import bms.model.Mode;
 
 /**
@@ -37,5 +38,45 @@ public enum BMSPlayerRule {
         }
         return Default;
     }
+    
+    public static void validate(BMSModel model, boolean bmson) {
+    	BMSPlayerRule rule = getBMSPlayerRule(model.getMode());
+    	int judgerank = model.getJudgerank();
+		if (judgerank >= 0 && model.getJudgerank() < 5) {
+			model.setJudgerank(rule.judge.windowrule.judgerank[judgerank]);
+		} else if (model.getJudgerank() < 0) {
+			model.setJudgerank(100);
+		}
+		
+		if(bmson) {
+			// TOTAL未定義の場合
+			if (model.getTotal() <= 0.0) {
+				model.setTotal(100.0);
+			}			
+			model.setTotal(model.getTotal() / 100.0 * calculateDefaultTotal(model.getMode(), model.getTotalNotes()));
+		} else {
+			// TOTAL未定義の場合
+			if (model.getTotal() <= 0.0) {
+				model.setTotal(calculateDefaultTotal(model.getMode(), model.getTotalNotes()));
+			}			
+		}
+    }
+    
+	private static double calculateDefaultTotal(Mode mode, int totalnotes) {
+		switch (mode) {
+		case BEAT_7K:
+		case BEAT_5K:
+		case BEAT_14K:
+		case BEAT_10K:
+		case POPN_9K:
+		case POPN_5K:
+			return Math.max(260.0, 7.605 * totalnotes / (0.01 * totalnotes + 6.5));
+		case KEYBOARD_24K:
+		case KEYBOARD_24K_DOUBLE:
+			return Math.max(300.0, 7.605 * (totalnotes + 100) / (0.01 * totalnotes + 6.5));
+		default:
+			return Math.max(260.0, 7.605 * totalnotes / (0.01 * totalnotes + 6.5));
+		}
+	}
 }
 

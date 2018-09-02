@@ -14,6 +14,7 @@ import bms.model.BMSONDecoder;
 import bms.player.beatoraja.CourseData.CourseDataConstraint;
 import bms.player.beatoraja.TableData.TableFolder;
 import bms.player.beatoraja.audio.AudioDriver;
+import bms.player.beatoraja.play.BMSPlayerRule;
 import bms.player.beatoraja.play.GrooveGauge;
 import bms.player.beatoraja.play.bga.BGAProcessor;
 import bms.player.beatoraja.song.SongData;
@@ -170,16 +171,14 @@ public class PlayerResource {
 
 	public BMSModel loadBMSModel(Path f, int lnmode) {
 		BMSModel model;
+		boolean bmson = false;
 		if (f.toString().toLowerCase().endsWith(".bmson")) {
 			BMSONDecoder decoder = new BMSONDecoder(lnmode);
 			model = decoder.decode(f.toFile());
 			if (model == null) {
 				return null;
 			}
-			if (model.getTotal() <= 0.0) {
-				model.setTotal(100.0);
-			}
-			model.setTotal(model.getTotal() / 100.0 * calculateDefaultTotal(model.getMode(), model.getTotalNotes()));
+			bmson = true;
 		} else {
 			BMSDecoder decoder = new BMSDecoder(lnmode);
 			model = decoder.decode(f.toFile());
@@ -187,51 +186,10 @@ public class PlayerResource {
 				return null;
 			}
 			generator = decoder.getBMSGenerator();
-			// JUDGERANKをbmson互換に変換
-			// TODO これはJudgePropertyに移行
-			if (model.getJudgerank() >= 0 && model.getJudgerank() < 5) {
-				int[] judgetable = new int[5];
-				if(model.getMode() == Mode.POPN_9K) {
-					judgetable[0] = 33;
-					judgetable[1] = 50;
-					judgetable[2] = 70;
-					judgetable[3] = 100;
-					judgetable[4] = 133;
-				} else {
-					judgetable[0] = 25;
-					judgetable[1] = 50;
-					judgetable[2] = 75;
-					judgetable[3] = 100;
-					judgetable[4] = 125;
-				}
-				model.setJudgerank(judgetable[model.getJudgerank()]);
-			} else if (model.getJudgerank() < 0) {
-				model.setJudgerank(100);
-			}
-			// TOTAL未定義の場合
-			if (model.getTotal() <= 0.0) {
-				model.setTotal(calculateDefaultTotal(model.getMode(), model.getTotalNotes()));
-			}
 		}
 
+		BMSPlayerRule.validate(model, bmson);
 		return model;
-	}
-
-	double calculateDefaultTotal(Mode mode, int totalnotes) {
-		switch (mode) {
-		case BEAT_7K:
-		case BEAT_5K:
-		case BEAT_14K:
-		case BEAT_10K:
-		case POPN_9K:
-		case POPN_5K:
-			return Math.max(260.0, 7.605 * totalnotes / (0.01 * totalnotes + 6.5));
-		case KEYBOARD_24K:
-		case KEYBOARD_24K_DOUBLE:
-			return Math.max(300.0, 7.605 * (totalnotes + 100) / (0.01 * totalnotes + 6.5));
-		default:
-			return Math.max(260.0, 7.605 * totalnotes / (0.01 * totalnotes + 6.5));
-		}
 	}
 
 	public BMSModel getBMSModel() {
