@@ -22,6 +22,7 @@ public class ConstantBPMModifier extends PatternModifier {
 			tl.setSection(model.getBpm() * tl.getMicroTime() / 240000000);
 			tl.setStop(0);
 			tl.setBPM(model.getBpm());
+			tl.setScroll(1.0);
 		}
 		return null;
 	}
