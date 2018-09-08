@@ -118,9 +118,16 @@ public class Config implements Validatable {
 	 * 選曲バー移動速度の2つ目以降
 	 */
 	private int scrolldurationhigh = 50;
+	/**
+	 * プレビュー音源をループするかどうか
+	 */
+	private boolean loopPreview = true;
+	/**
+	 * スキン画像のキャッシュイメージを作成するかどうか
+	 */
     private boolean cacheSkinImage = false;
     /**
-     *
+     * songinfoデータベースを使用するかどうか
      */
     private boolean useSongInfo = true;
 
@@ -129,10 +136,12 @@ public class Config implements Validatable {
 	 */
 	private String judgeType = JudgeAlgorithm.Combo.name();
 	/**
-	 *
+	 * HIDDENノートを表示するかどうか
 	 */
 	private boolean showhiddennote = false;
-
+	/**
+	 * 通過ノートを表示するかどうか
+	 */
 	private boolean showpastnote = false;
 
 	private String songpath = SONGPATH_DEFAULT;
@@ -355,6 +364,14 @@ public class Config implements Validatable {
 	}
 	public void setScrollDutationHigh(int scrolldurationhigh){
 		this.scrolldurationhigh = scrolldurationhigh;
+	}
+
+	public boolean isLoopPreview() {
+		return loopPreview;
+	}
+
+	public void setLoopPreview(boolean loopPreview) {
+		this.loopPreview = loopPreview;
 	}
 
 	public float getKeyvolume() {

@@ -73,12 +73,17 @@ public class PreviewMusicProcessor {
                     if(!path.equals(playing)) {
                         stopPreview(true);
                         if(path != defaultMusic) {
-                            audio.play(path, config.getSystemvolume(), true);
+                            audio.play(path, config.getSystemvolume(), config.isLoopPreview());
                         } else {
                             audio.setVolume(defaultMusic, config.getSystemvolume());
                         }
                         playing = path;
                     }
+                } else if(playing != defaultMusic && !audio.isPlaying(playing)){
+                	// プレビュー演奏終了後に選曲BGMに戻す
+                    stopPreview(true);
+                    audio.setVolume(defaultMusic, config.getSystemvolume());
+                    playing = defaultMusic;
                 } else {
                     try {
                         sleep(50);

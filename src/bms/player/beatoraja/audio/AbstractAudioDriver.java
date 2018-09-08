@@ -159,7 +159,12 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 			setVolume(sound, volume);
 		}
 	}
-	
+
+	public boolean isPlaying(String p) {
+		// TODO 未実装
+		return true;
+	}
+
 	public void stop(String p) {
 		if (p == null || p.length() == 0) {
 			return;
@@ -488,6 +493,9 @@ public abstract class AbstractAudioDriver<T> implements AudioDriver {
 	
 	static class AudioElement<T> {
 		public long id;
+		/**
+		 * 音源データ
+		 */
 		public final T audio;
 		
 		public AudioElement(T audio) {

@@ -25,6 +25,14 @@ public interface AudioDriver extends Disposable {
 	public void setVolume(String path, float volume);
 	
 	/**
+	 * 指定したパスの音源がなっている場合はtrueを返す
+	 * 
+	 * @param path
+	 *            音源のファイルパス
+	 */
+	public boolean isPlaying(String path);
+	
+	/**
 	 * 指定したパスの音源がなっている場合は止める
 	 * 
 	 * @param path
