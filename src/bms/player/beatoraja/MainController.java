@@ -58,12 +58,12 @@ import twitter4j.conf.ConfigurationBuilder;
  */
 public class MainController extends ApplicationAdapter {
 
-	public static final String VERSION = "beatoraja 0.6.2";
+	public static final String VERSION = "beatoraja 0.6.3";
 
 	private static final boolean debug = false;
 
 	/**
-	 *
+	 * 起動時間
 	 */
 	private final long boottime = System.currentTimeMillis();
 	private final Calendar cl = Calendar.getInstance();
@@ -86,6 +86,7 @@ public class MainController extends ApplicationAdapter {
 	private MessageRenderer messageRenderer;
 
 	private MainState current;
+	// TODO currentStateの多重定義は好ましくないため、削除予定
 	private static MainState currentState;
 	/**
 	 * 状態の開始時間
@@ -613,6 +614,10 @@ public class MainController extends ApplicationAdapter {
 
 	public MusicDownloadProcessor getMusicDownloadProcessor(){
 		return download;
+	}
+	
+	public MessageRenderer getMessageRenderer() {
+		return messageRenderer;
 	}
 
 	public long getPlayTime() {
