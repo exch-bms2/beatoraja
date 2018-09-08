@@ -1,17 +1,13 @@
 package bms.player.beatoraja.select;
 
-import static bms.player.beatoraja.ClearType.*;
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
 import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Deque;
-import java.util.List;
+import java.nio.file.*;
+import java.util.*;
 import java.util.logging.Logger;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.ObjectMap.Keys;
@@ -323,6 +319,8 @@ public class MusicSelector extends MainState {
 						main.changeState(MainController.STATE_DECIDE);
 						banners.disposeOld();
 						stagefiles.disposeOld();
+					} else {
+						main.getMessageRenderer().addMessage("Failed to loading BMS : Song not found, or Song has error", 1200, Color.RED, 1);
 					}
 				} else if (song.getIpfs() != null && main.getMusicDownloadProcessor() != null
 						&& main.getMusicDownloadProcessor().isAlive()) {
@@ -460,6 +458,7 @@ public class MusicSelector extends MainState {
 			banners.disposeOld();
 			stagefiles.disposeOld();
 		} else {
+			main.getMessageRenderer().addMessage("Failed to loading Course : Some of songs not found", 1200, Color.RED, 1);
 			Logger.getGlobal().info("段位の楽曲が揃っていません");
 		}
 	}
