@@ -1,13 +1,11 @@
 package bms.player.beatoraja.play.bga;
 
-import static bms.player.beatoraja.skin.SkinProperty.TIMER_PLAY;
-
 import java.nio.file.*;
 import java.util.Arrays;
 import java.util.logging.Logger;
 
-import bms.model.BMSModel;
-import bms.model.TimeLine;
+import bms.model.Layer.Sequence;
+import bms.model.*;
 import bms.player.beatoraja.Config;
 import bms.player.beatoraja.PlayerConfig;
 import bms.player.beatoraja.ResourcePool;
@@ -28,6 +26,8 @@ import com.badlogic.gdx.utils.IntMap;
  * @author exch
  */
 public class BGAProcessor {
+	
+	// TODO イベントレイヤー対応(現状はミスレイヤーのみ)
 
 	private BMSModel model;
 	private Config config;
@@ -57,7 +57,7 @@ public class BGAProcessor {
 	/**
 	 * 現在のミスレイヤーシーケンス
 	 */
-	private int[] misslayer = null;
+	private Layer misslayer = null;
 
 	private long prevrendertime;
 
@@ -110,7 +110,7 @@ public class BGAProcessor {
 
 		if(model != null) {
 			for(TimeLine tl : model.getAllTimeLines()) {
-				if(tl.getBGA() != -1 || tl.getLayer() != -1 || (tl.getPoor() != null && tl.getPoor().length > 0)) {
+				if(tl.getBGA() != -1 || tl.getLayer() != -1 || tl.getEventlayer().length > 0) {
 					tls.add(tl);
 				}
 			}
@@ -272,9 +272,12 @@ public class BGAProcessor {
 					rlayer = false;
 				}
 
-				final int[] poor = tl.getPoor();
-				if (poor != null && poor.length > 0) {
-					misslayer = poor;
+				final Layer[] eventlayer = tl.getEventlayer();
+				
+				for(Layer poor : eventlayer) {
+					if (poor.event.type == Layer.EventType.MISS) {
+						misslayer = poor;
+					}					
 				}
 			} else {
 				pos++;
@@ -283,10 +286,14 @@ public class BGAProcessor {
 
 		if (misslayer != null && misslayertime != 0 && time >= misslayertime && time < misslayertime + getMisslayerduration) {
 			// draw miss layer
-			Texture miss = getBGAData(time, misslayer[(int) (misslayer.length * (time - misslayertime) / getMisslayerduration)], true);
-			if (miss != null) {
-				sprite.setType(SkinObjectRenderer.TYPE_LINEAR);
-				drawBGAFixRatio(dst, sprite, r, miss);
+			final Sequence[] seq = misslayer.sequence[0];
+			final int index = seq[(int) ((seq.length - 1) * (time - misslayertime) / getMisslayerduration)].id;
+			if(index != Integer.MIN_VALUE) {
+				Texture miss = getBGAData(time, index, true);
+				if (miss != null) {
+					sprite.setType(SkinObjectRenderer.TYPE_LINEAR);
+					drawBGAFixRatio(dst, sprite, r, miss);
+				}				
 			}
 		} else {
 			// draw BGA
