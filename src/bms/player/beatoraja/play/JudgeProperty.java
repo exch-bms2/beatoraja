@@ -114,7 +114,7 @@ public enum JudgeProperty {
 
 			@Override
 			public int[][] create(int[][] org, int judgerank, int judgeWindowRate, int constraint) {
-				return create(org, judgerank,judgeWindowRate, constraint, false);
+				return JudgeWindowRule.create(org, judgerank,judgeWindowRate, constraint, false);
 			}
     		
     	},
@@ -122,7 +122,7 @@ public enum JudgeProperty {
 
 			@Override
 			public int[][] create(int[][] org, int judgerank, int judgeWindowRate, int constraint) {
-				return create(org, judgerank,judgeWindowRate, constraint, true);
+				return JudgeWindowRule.create(org, judgerank,judgeWindowRate, constraint, true);
 			}
     		
     	};
