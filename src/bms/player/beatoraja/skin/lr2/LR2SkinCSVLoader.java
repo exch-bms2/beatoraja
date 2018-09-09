@@ -1016,7 +1016,8 @@ public abstract class LR2SkinCSVLoader<S extends Skin> extends LR2SkinLoader {
 								ext = cf.path.substring(cf.path.lastIndexOf("*") + 1, cf.path.indexOf('|'));
 							}
 						}
-						File dir = new File(cf.path.substring(0, cf.path.lastIndexOf('/')));
+						final int slashindex = cf.path.lastIndexOf('/');
+						File dir = slashindex != -1 ? new File(cf.path.substring(0, slashindex)) : new File(cf.path);
 						if (dir.exists() && dir.isDirectory()) {
 							Array<File> l = new Array<File>();
 							for (File subfile : dir.listFiles()) {

@@ -202,7 +202,8 @@ public class JSONSkinLoader extends SkinLoader{
 								ext = customFile.path.substring(customFile.path.lastIndexOf("*") + 1, customFile.path.indexOf('|'));
 							}
 						}
-						File dir = new File(customFile.path.substring(0, customFile.path.lastIndexOf('/')));
+						final int slashindex = customFile.path.lastIndexOf('/');
+						File dir = slashindex != -1 ? new File(customFile.path.substring(0, slashindex)) : new File(customFile.path);
 						if (dir.exists() && dir.isDirectory()) {
 							List<File> l = new ArrayList<File>();
 							for (File subfile : dir.listFiles()) {

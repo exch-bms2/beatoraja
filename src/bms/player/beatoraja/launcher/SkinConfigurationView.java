@@ -133,7 +133,9 @@ public class SkinConfigurationView implements Initializable {
 					name = file.path.substring(file.path.lastIndexOf('/') + 1, file.path.indexOf('|'));
 				}
 			}
-			final Path dirpath = Paths.get(file.path.substring(0, file.path.lastIndexOf('/')));
+			
+			final int slashindex = file.path.lastIndexOf('/');
+			final Path dirpath = slashindex != -1 ? Paths.get(file.path.substring(0, slashindex)) : Paths.get(file.path);
 			if (!Files.exists(dirpath)) {
 				continue;
 			}
