@@ -28,7 +28,7 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
  * @author exch
  */
 public class LaneRenderer {
-
+	
 	private float basehispeed;
 
 	private float hispeedmargin = 0.25f;
@@ -256,7 +256,7 @@ public class LaneRenderer {
 		return playconfig;
 	}
 
-	public void drawLane(SkinObjectRenderer sprite, long time, SkinLane[] lanes, int dstNote2) {
+	public void drawLane(SkinObjectRenderer sprite, long time, SkinLane[] lanes) {
 		for (int i = 0; i < lanes.length; i++) {
 			if (i >= noteimage.length) {
 				break;
@@ -302,6 +302,7 @@ public class LaneRenderer {
 		nowbpm = nbpm;
 		final double region = nscroll > 0 ? (240000 / nbpm / hispeed) / nscroll : 0;
 		// double sect = (bpm / 60) * 4 * 1000;
+		// TODO hu,hlをレーン毎に変更
 		final double hu = laneregion[0].y + laneregion[0].height;
 		final double hl = playconfig.isEnablelift() ? laneregion[0].y + laneregion[0].height * playconfig.getLift() : laneregion[0].y;
 		final double rxhs = (hu - hl) * hispeed;
@@ -350,6 +351,7 @@ public class LaneRenderer {
 			}
 		}
 
+		// draw section line
 		final double orgy = y;
 		for (int i = pos; i < timelines.length && y <= hu; i++) {
 			final TimeLine tl = timelines[i];
@@ -472,7 +474,7 @@ public class LaneRenderer {
 					}
 					if (note instanceof NormalNote) {
 						// draw normal note
-						if (dstNote2 != Integer.MIN_VALUE) {
+						if (lanes[lane].dstnote2 != Integer.MIN_VALUE) {
 							if (tl.getMicroTime() >= microtime && (note.getState() == 0 || note.getState() >= 4)) {
 								final TextureRegion s = config.isMarkprocessednote() && note.getState() != 0
 								? pnoteimage[lane] : noteimage[lane];
@@ -538,11 +540,12 @@ public class LaneRenderer {
 		// + (ltime * (hu - hl) / yy));
 		
 		//PMS見逃しPOOR描画
-		if (dstNote2 != Integer.MIN_VALUE) {
+		// TODO dstnote2をレーン毎に変更
+		if (lanes[0].dstnote2 != Integer.MIN_VALUE) {
 			//遅BADからノースピの速度で落下
 			final long badTime = Math.abs( main.getJudgeManager().getJudgeTable(false)[2][0] ) * 1000;
 			double stopTime;
-			double orgy2 = dstNote2;
+			double orgy2 = lanes[0].dstnote2;
 			if(orgy2 < -laneregion[0].height) orgy2 = -laneregion[0].height;
 			if(orgy2 > orgy) orgy2 = orgy;
 			final double rxhs2 = (hu - hl);

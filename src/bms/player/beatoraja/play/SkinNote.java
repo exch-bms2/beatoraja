@@ -8,7 +8,6 @@ import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 
@@ -20,7 +19,6 @@ import com.badlogic.gdx.math.Rectangle;
 public class SkinNote extends SkinObject {
 
 	private SkinLane[] lanes;
-	private int dstNote2 = Integer.MIN_VALUE;
 
 	public SkinNote(SkinSource[] note, SkinSource[][] longnote, SkinSource[] minenote) {
 		lanes = new SkinLane[note.length];
@@ -31,7 +29,7 @@ public class SkinNote extends SkinObject {
         this.setDestination(0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, new int[0]);
 	}
 
-	public void setLaneRegion(Rectangle[] region, float[] scale, Skin skin) {
+	public void setLaneRegion(Rectangle[] region, float[] scale, int[] dstnote2, Skin skin) {
 		for(int i = 0;i < lanes.length;i++) {
 			for(int oid : this.getOffsetID()) {
 				SkinConfig.Offset offset = skin.getOffset().get(oid);
@@ -45,18 +43,15 @@ public class SkinNote extends SkinObject {
 			}
 			lanes[i].setDestination(0,region[i].x, region[i].y, region[i].width, region[i].height, 0, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 			lanes[i].scale =  scale[i];
+			lanes[i].dstnote2 =  dstnote2[i];
 		}
-	}
-
-	public void setDstNote2(int dstNote2) {
-		this.dstNote2 = dstNote2;
 	}
 
 	@Override
 	public void draw(SkinObjectRenderer sprite, long time, MainState state) {
 		final BMSPlayer player = (BMSPlayer) state;
 		if (player.getLanerender() != null) {
-			player.getLanerender().drawLane(sprite, time, lanes, dstNote2);
+			player.getLanerender().drawLane(sprite, time, lanes);
 		}
 	}
 
@@ -83,6 +78,7 @@ public class SkinNote extends SkinObject {
 		SkinSource minenote;
 
 		float scale;
+		int dstnote2;
 
 		/**
 		 * 不可視ノーツ画像
@@ -108,6 +104,16 @@ public class SkinNote extends SkinObject {
 			pn.drawRectangle(1, 1, hn.getWidth() - 2, hn.getHeight() - 2);
 			hiddennote = new SkinSourceImage(new TextureRegion(new Texture(hn)));
 			processednote = new SkinSourceImage(new TextureRegion(new Texture(pn)));
+			hn.dispose();
+			pn.dispose();			
+		}
+
+		public SkinLane(SkinSource note, SkinSource[] longnote, SkinSource minenote, SkinSource hiddennote, SkinSource processednote) {
+			this.note = note;
+			this.longnote = longnote;
+			this.minenote = minenote;
+			this.hiddennote = hiddennote;
+			this.processednote = processednote;
 		}
 
 		@Override

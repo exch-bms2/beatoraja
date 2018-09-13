@@ -612,6 +612,8 @@ public class JSONSkinLoader extends SkinLoader{
 
 						Rectangle[] region = new Rectangle[sk.note.dst.length];
 						float[] scale = new float[region.length];
+						int[] dstnote2 = new int[region.length];
+						Arrays.fill(dstnote2,  Integer.MIN_VALUE);
 						float dx = (float)dstr.width / sk.w;
 						float dy = (float)dstr.height / sk.h;
 						for (int i = 0; i < region.length; i++) {
@@ -701,11 +703,11 @@ public class JSONSkinLoader extends SkinLoader{
 							((PlaySkin) skin).setTimeLine(time);
 						}
 
-						SkinNote sn = new SkinNote(notes, lnss, mines);
-						sn.setLaneRegion(region, scale, skin);
 						if(sk.note.dst2 != Integer.MIN_VALUE) {
-							sn.setDstNote2((int) Math.round(sk.note.dst2 * dy));							
+							Arrays.fill(dstnote2, (int) Math.round(sk.note.dst2 * dy));
 						}
+						SkinNote sn = new SkinNote(notes, lnss, mines);
+						sn.setLaneRegion(region, scale, dstnote2, skin);
 						((PlaySkin) skin).setLaneRegion(region);
 						((PlaySkin) skin).setLaneGroupRegion(gregion);
 						((PlaySkin) skin).setNoteExpansionRate(sk.note.expansionrate);
