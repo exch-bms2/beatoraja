@@ -297,7 +297,7 @@ public class Skin {
 		
 		private final SpriteBatch sprite;
 		
-		private ShaderProgram[] shaders = new ShaderProgram[5];
+		private ShaderProgram[] shaders = new ShaderProgram[6];
 		
 		private int current;
 		
@@ -310,6 +310,7 @@ public class Skin {
 		public static final int TYPE_BILINEAR = 2;
 		public static final int TYPE_FFMPEG = 3;
 		public static final int TYPE_LAYER = 4;
+		public static final int TYPE_DISTANCE_FIELD = 5;
 		
 		private Color color;
 		
@@ -320,6 +321,7 @@ public class Skin {
 			shaders[TYPE_BILINEAR] = ShaderManager.getShader("bilinear");
 			shaders[TYPE_FFMPEG] = ShaderManager.getShader("ffmpeg");
 			shaders[TYPE_LAYER] = ShaderManager.getShader("layer");
+			shaders[TYPE_DISTANCE_FIELD] = ShaderManager.getShader("distance_field");
 
 			sprite.setShader(shaders[current]);
 			sprite.setColor(Color.WHITE);
@@ -386,8 +388,8 @@ public class Skin {
 				break;
 			}
 			
-			if(type == TYPE_LINEAR || type == TYPE_FFMPEG) {
-				image.setFilter(TextureFilter.Linear, TextureFilter.Linear);				
+			if(type == TYPE_LINEAR || type == TYPE_FFMPEG || type == TYPE_DISTANCE_FIELD) {
+				image.setFilter(TextureFilter.Linear, TextureFilter.Linear);
 			}
 
 			if(color != null) {
