@@ -80,8 +80,17 @@ public class SongData implements Validatable, IpfsInformation {
 	private int length;
 	private int content;
 	private int notes;
+	/**
+	 * STAGEFILE path
+	 */
 	private String stagefile = "";
+	/**
+	 * BACKBMP path
+	 */
 	private String backbmp = "";
+	/**
+	 * PREVIEW path
+	 */
 	private String preview = "";
 
 	private String folder = "";
@@ -562,6 +571,12 @@ public class SongData implements Validatable, IpfsInformation {
 		}
 		if(subtitle == null) {
 			subtitle = "";
+		}
+		if(artist == null) {
+			artist = "";
+		}
+		if(subartist == null) {
+			subartist = "";
 		}
 		if(banner == null) {
 			banner = "";
