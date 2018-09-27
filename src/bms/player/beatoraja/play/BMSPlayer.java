@@ -17,7 +17,6 @@ import bms.player.beatoraja.pattern.Random;
 import bms.player.beatoraja.play.PracticeConfiguration.PracticeProperty;
 import bms.player.beatoraja.play.bga.BGAProcessor;
 import bms.player.beatoraja.skin.SkinType;
-import bms.player.beatoraja.song.SongData;
 
 /**
  * BMSプレイヤー本体
@@ -464,6 +463,7 @@ public class BMSPlayer extends MainState {
 			if (input.getKeystate()[0] && resource.mediaLoadFinished() && now > skin.getLoadstart() + skin.getLoadend()
 					&& now - startpressedtime > 1000) {
 				PracticeProperty property = practice.getPracticeProperty();
+				Randomizer.setPlayerConfig(config);
 				control.setEnableControl(true);
 				control.setEnableCursor(true);
 				if (property.freq != 100) {
