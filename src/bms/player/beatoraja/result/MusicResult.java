@@ -79,8 +79,8 @@ public class MusicResult extends AbstractResult {
 		final IRScoreData newscore = resource.getScoreData();
 
 		// TODO スコアハッシュがあり、有効期限が切れていないものを送信する？
-		final IRConnection ir = main.getIRConnection();
-		if (ir != null && resource.getPlayMode() == PlayMode.PLAY) {
+		final IRConnection[] ir = main.getIRConnection();
+		if (ir.length > 0 && resource.getPlayMode() == PlayMode.PLAY) {
 			boolean send = resource.isUpdateScore();
 			switch(main.getPlayerConfig().getIrsend()) {
 			case PlayerConfig.IR_SEND_ALWAYS:
@@ -102,15 +102,22 @@ public class MusicResult extends AbstractResult {
 				state = STATE_IR_PROCESSING;
 				Thread irprocess = new Thread(() -> {
                     try {
-                        IRResponse<Object> send1 = ir.sendPlayData(resource.getSongdata(), resource.getScoreData());
-                        if(send1.isSucceeded()) {
+                    	boolean succeed = true;
+                    	for(IRConnection irc : ir) {
+                            IRResponse<Object> send1 = irc.sendPlayData(resource.getSongdata(), resource.getScoreData());
+                            if(send1.isSucceeded()) {
+                                Logger.getGlobal().info("IRスコア送信完了");
+                            } else {
+                                Logger.getGlobal().warning("IRスコア送信失敗 : " + send1.getMessage());
+                            }
+                            succeed &= send1.isSucceeded();
+                    	}
+                        if(succeed) {
                             main.switchTimer(TIMER_IR_CONNECT_SUCCESS, true);
-                            Logger.getGlobal().info("IRスコア送信完了");
                         } else {
                             main.switchTimer(TIMER_IR_CONNECT_FAIL, true);
-                            Logger.getGlobal().warning("IRスコア送信失敗 : " + send1.getMessage());
                         }
-                        IRResponse<IRScoreData[]> response = ir.getPlayData(null, resource.getSongdata());
+                        IRResponse<IRScoreData[]> response = ir[0].getPlayData(null, resource.getSongdata());
                         if(response.isSucceeded()) {
                             IRScoreData[] scores = response.getData();
                             irtotal = scores.length;

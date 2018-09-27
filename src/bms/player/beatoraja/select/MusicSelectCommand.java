@@ -326,7 +326,7 @@ public enum MusicSelectCommand {
     OPEN_RANKING_ON_IR {
         @Override
         public void execute(MusicSelector selector) {
-            IRConnection ir = selector.main.getIRConnection();
+            IRConnection ir = selector.main.getIRConnection().length > 0 ? selector.main.getIRConnection()[0] : null;
             if(ir == null) {
                 return;
             }

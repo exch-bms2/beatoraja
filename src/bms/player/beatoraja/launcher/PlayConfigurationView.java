@@ -36,6 +36,7 @@ import bms.player.beatoraja.PlayConfig;
 import bms.player.beatoraja.PlayModeConfig;
 import bms.player.beatoraja.PlayModeConfig.ControllerConfig;
 import bms.player.beatoraja.PlayerConfig;
+import bms.player.beatoraja.PlayerConfig.IRConfig;
 import bms.player.beatoraja.ScoreDatabaseAccessor;
 import bms.player.beatoraja.TableDataAccessor;
 import bms.player.beatoraja.audio.PortAudioDriver;
@@ -543,11 +544,13 @@ public class PlayConfigurationView implements Initializable {
 		markprocessednote.setSelected(player.isMarkprocessednote());
 		target.setValue(player.getTarget());
 
-		irname.setValue(player.getIrname());
+		// TODO 複数IR編集への対応
+		IRConfig ir = player.getIrconfig().length > 0 ? player.getIrconfig()[0] : new IRConfig();
+		irname.setValue(ir.getIrname());
 		updateIRConnection();
-		iruserid.setText(player.getUserid());
-		irpassword.setText(player.getPassword());
-		irsend.setValue(player.getIrsend());
+		iruserid.setText(ir.getUserid());
+		irpassword.setText(ir.getPassword());
+		irsend.setValue(ir.getIrsend());			
 
 		txtTwitterPIN.setDisable(true);
 		twitterPINButton.setDisable(true);
@@ -626,7 +629,6 @@ public class PlayConfigurationView implements Initializable {
 		if(player == null) {
 			return;
 		}
-		Path p = Paths.get("player/" + player.getId() + "/config.json");
 		if(playername.getText().length() > 0) {
 			player.setName(playername.getText());
 		}
@@ -656,23 +658,23 @@ public class PlayConfigurationView implements Initializable {
 		player.setShowjudgearea(judgeregion.isSelected());
 		player.setTarget(target.getValue());
 
-		player.setIrname(irname.getValue());
-		player.setUserid(iruserid.getText());
-		player.setPassword(irpassword.getText());
-		player.setIrsend(irsend.getValue());
+		// TODO 複数IR編集への対応
+		if(player.getIrconfig().length == 0) {
+			IRConfig[] irs = new IRConfig[1];
+			irs[0] = new IRConfig();			
+			player.setIrconfig(irs);
+		}
+		IRConfig pir = player.getIrconfig()[0];
+		pir.setIrname(irname.getValue());
+		pir.setUserid(iruserid.getText());
+		pir.setPassword(irpassword.getText());
+		pir.setIrsend(irsend.getValue());
 
 		updateInputConfig();
 		updatePlayConfig();
 		skinController.update(player);
 
-		Json json = new Json();
-		json.setOutputType(OutputType.json);
-		try (FileWriter fw = new FileWriter(p.toFile())) {
-			fw.write(json.prettyPrint(player));
-			fw.flush();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		PlayerConfig.write(config.getPlayerpath(), player);
 	}
 
     @FXML

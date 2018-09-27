@@ -116,8 +116,8 @@ public class MusicSelector extends MainState {
 			}
 		};
 
-		if(main.getIRConnection() != null) {
-			IRResponse<PlayerInformation[]> response = main.getIRConnection().getRivals();
+		if(main.getIRConnection().length > 0) {
+			IRResponse<PlayerInformation[]> response = main.getIRConnection()[0].getRivals();
 			if(response.isSucceeded()) {
 				try {
 					// ライバルスコアデータベース作成
@@ -167,7 +167,7 @@ public class MusicSelector extends MainState {
 						new Thread(() -> {
 							scoredb.createTable();
 							scoredb.setInformation(rival);
-							IRResponse<IRScoreData[]> scores = main.getIRConnection().getPlayData(rival.getId(), null);
+							IRResponse<IRScoreData[]> scores = main.getIRConnection()[0].getPlayData(rival.getId(), null);
 							if(scores.isSucceeded()) {
 								scoredb.setScoreData(scores.getData());
 								Logger.getGlobal().info("IRからのスコア取得完了 : " + rival.getName());

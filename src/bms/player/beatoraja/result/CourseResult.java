@@ -80,8 +80,8 @@ public class CourseResult extends AbstractResult {
 		final PlayerResource resource = main.getPlayerResource();
 		final PlayerConfig config = resource.getPlayerConfig();
 
-		final IRConnection ir = main.getIRConnection();
-		if (ir != null && resource.getPlayMode() == PlayMode.PLAY) {
+		final IRConnection[] ir = main.getIRConnection();
+		if (ir.length > 0 && resource.getPlayMode() == PlayMode.PLAY) {
 			boolean send = resource.isUpdateScore() && resource.getCourseData().isRelease();
 			switch(main.getPlayerConfig().getIrsend()) {
 			case PlayerConfig.IR_SEND_ALWAYS:
@@ -98,7 +98,7 @@ public class CourseResult extends AbstractResult {
 			}
 
 			if(send) {
-				Logger.getGlobal().info("IRへスコア送信中(未実装)");
+				Logger.getGlobal().info("IRへスコア送信中");
 				main.switchTimer(TIMER_IR_CONNECT_BEGIN, true);
 				state = STATE_IR_PROCESSING;
 				Thread irprocess = new Thread() {
@@ -114,15 +114,24 @@ public class CourseResult extends AbstractResult {
 									break;
 								}
 							}
-							IRResponse<Object> send = ir.sendCoursePlayData(resource.getCourseData(), lnmode, resource.getCourseScoreData());
-							if(send.isSucceeded()) {
-								main.switchTimer(TIMER_IR_CONNECT_SUCCESS, true);
-								Logger.getGlobal().info("IRスコア送信完了");
-							} else {
-								main.switchTimer(TIMER_IR_CONNECT_FAIL, true);
-								Logger.getGlobal().warning("IRスコア送信失敗 : " + send.getMessage());
-							}
-							IRResponse<IRScoreData[]> response = ir.getCoursePlayData(null, resource.getCourseData(), lnmode);
+							
+	                    	boolean succeed = true;
+	                    	for(IRConnection irc : ir) {
+								IRResponse<Object> send = irc.sendCoursePlayData(resource.getCourseData(), lnmode, resource.getCourseScoreData());
+	                            if(send.isSucceeded()) {
+	                                Logger.getGlobal().info("IRスコア送信完了");
+	                            } else {
+	                                Logger.getGlobal().warning("IRスコア送信失敗 : " + send.getMessage());
+	                            }
+	                            succeed &= send.isSucceeded();
+	                    	}
+	                        if(succeed) {
+	                            main.switchTimer(TIMER_IR_CONNECT_SUCCESS, true);
+	                        } else {
+	                            main.switchTimer(TIMER_IR_CONNECT_FAIL, true);
+	                        }
+
+							IRResponse<IRScoreData[]> response = ir[0].getCoursePlayData(null, resource.getCourseData(), lnmode);
 							if(response.isSucceeded()) {
 								IRScoreData[] scores = response.getData();
 								irtotal = scores.length;

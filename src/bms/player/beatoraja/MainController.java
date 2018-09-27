@@ -102,7 +102,7 @@ public class MainController extends ApplicationAdapter {
 	private SongDatabaseAccessor songdb;
 	private SongInformationAccessor infodb;
 
-	private IRConnection ir;
+	private IRConnection[] ir;
 
 	private SpriteBatch sprite;
 	/**
@@ -176,19 +176,27 @@ public class MainController extends ApplicationAdapter {
 
 		playdata = new PlayDataAccessor(config.getPlayername());
 
-		ir = IRConnection.getIRConnection(player.getIrname());
-		if(ir != null) {
-			if(player.getUserid().length() == 0 || player.getPassword().length() == 0) {
-				ir = null;
-			} else {
-				IRResponse response = ir.login(player.getUserid(), player.getPassword());
-				if(!response.isSucceeded()) {
-					Logger.getGlobal().warning("IRへのログイン失敗 : " + response.getMessage());
+		Array<IRConnection> irarray = new Array<IRConnection>();
+		for(PlayerConfig.IRConfig irconfig : player.getIrconfig()) {
+			IRConnection ir = IRConnection.getIRConnection(irconfig.getIrname());
+			if(ir != null) {
+				if(irconfig.getUserid().length() == 0 || irconfig.getPassword().length() == 0) {
 					ir = null;
+				} else {
+					IRResponse response = ir.login(irconfig.getUserid(), irconfig.getPassword());
+					if(!response.isSucceeded()) {
+						Logger.getGlobal().warning("IRへのログイン失敗 : " + response.getMessage());
+						ir = null;
+					}
 				}
 			}
+			
+			if(ir != null) {
+				irarray.add(ir);
+			}
 		}
-
+		ir = irarray.toArray(IRConnection.class);
+		
 		switch(config.getAudioDriver()) {
 		case Config.AUDIODRIVER_PORTAUDIO:
 			try {
@@ -388,8 +396,8 @@ public class MainController extends ApplicationAdapter {
 			download.start(null);
 		}
 		
-		if(ir != null) {
-			messageRenderer.addMessage(player.getIrname() + " Connection Succeed : " + player.getUserid() ,5000, Color.GREEN, 1);
+		if(ir.length > 0) {
+			messageRenderer.addMessage(ir.length + " IR Connection Succeed" ,5000, Color.GREEN, 1);
 		}
 	}
 
@@ -604,7 +612,7 @@ public class MainController extends ApplicationAdapter {
 		return audio;
 	}
 
-	public IRConnection getIRConnection() {
+	public IRConnection[] getIRConnection() {
 		return ir;
 	}
 
