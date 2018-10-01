@@ -78,32 +78,6 @@ public abstract class SkinObject implements Disposable {
 	 */
 	private StretchType stretch = StretchType.STRETCH;
 
-	public enum StretchType {
-		// 描画先の範囲に合わせて伸縮する
-		STRETCH(0),
-		// アスペクト比を保ちつつ描画先の範囲に収まるように伸縮する
-		KEEP_ASPECT_RATIO_FIT_INNER(1),
-		// アスペクト比を保ちつつ描画先の範囲全体を覆うように伸縮する
-		KEEP_ASPECT_RATIO_FIT_OUTER(2),
-		KEEP_ASPECT_RATIO_FIT_OUTER_TRIMMED(3),
-		// アスペクト比を保ちつつ描画先の横幅に合わせて伸縮する
-		KEEP_ASPECT_RATIO_FIT_WIDTH(4),
-		KEEP_ASPECT_RATIO_FIT_WIDTH_TRIMMED(5),
-		// アスペクト比を保ちつつ描画先の縦幅に合わせて伸縮する
-		KEEP_ASPECT_RATIO_FIT_HEIGHT(6),
-		KEEP_ASPECT_RATIO_FIT_HEIGHT_TRIMMED(7),
-		// 描画先に収まらない場合にはアスペクト比を保ちつつ縮小する
-		KEEP_ASPECT_RATIO_NO_EXPANDING(8),
-		// 伸縮しない（中央に合わせる）
-		NO_RESIZE(9),
-		NO_RESIZE_TRIMMED(10),
-		;
-		StretchType(int id) {
-			this.id = id;
-		}
-		public final int id;
-	}
-
 	private static final float[] CENTERX = { 0.5f, 0, 0.5f, 1, 0, 0.5f, 1, 0, 0.5f, 1, };
 	private static final float[] CENTERY = { 0.5f, 0, 0, 0, 0.5f, 0.5f, 0.5f, 1, 1, 1 };
 
@@ -199,7 +173,7 @@ public abstract class SkinObject implements Disposable {
 			dstfilter = filter;
 		}
 		
-		if (dstcenter == 0 && center < 10) {
+		if (dstcenter == 0 && center >= 0 && center < 10) {
 			dstcenter = center;
 			centerx = CENTERX[center];
 			centery = CENTERY[center];
@@ -486,7 +460,9 @@ public abstract class SkinObject implements Disposable {
 			return;
 		}
 		tmpRect.set(x, y, width, height);
-		getStretchedRect(tmpRect, tmpImage, image);
+		if(stretch != null) {
+			stretch.stretchRect(tmpRect, tmpImage, image);
+		}
 		sprite.setColor(color);
 		sprite.setBlend(dstblend);
 		sprite.setType(dstfilter != 0 && imageType == SkinObjectRenderer.TYPE_NORMAL ? 
@@ -500,100 +476,6 @@ public abstract class SkinObject implements Disposable {
 		}
 	}
 
-	public void getStretchedRect(Rectangle rectangle, TextureRegion trimmedImage, TextureRegion image) {
-		trimmedImage.setRegion(image);
-		if (this.stretch == StretchType.STRETCH) {
-			return;
-		}
-		float scaleX = rectangle.width / image.getRegionWidth();
-		float scaleY = rectangle.height / image.getRegionHeight();
-		switch (this.stretch) {
-		case KEEP_ASPECT_RATIO_FIT_INNER:
-			if (scaleX <= scaleY) {
-				fitHeight(rectangle, image.getRegionHeight() * scaleX);
-			} else {
-				fitWidth(rectangle, image.getRegionWidth() * scaleY);
-			}
-			break;
-		case KEEP_ASPECT_RATIO_FIT_OUTER:
-			if (scaleX >= scaleY) {
-				fitHeight(rectangle, image.getRegionHeight() * scaleX);
-			} else {
-				fitWidth(rectangle, image.getRegionWidth() * scaleY);
-			}
-			break;
-		case KEEP_ASPECT_RATIO_FIT_OUTER_TRIMMED:
-			if (scaleX >= scaleY) {
-				fitHeightTrimmed(rectangle, scaleX, trimmedImage);
-			} else {
-				fitWidthTrimmed(rectangle, scaleY, trimmedImage);
-			}
-			break;
-		case KEEP_ASPECT_RATIO_FIT_WIDTH:
-			fitHeight(rectangle, image.getRegionHeight() * scaleX);
-			break;
-		case KEEP_ASPECT_RATIO_FIT_WIDTH_TRIMMED:
-			fitHeightTrimmed(rectangle, scaleX, trimmedImage);
-			break;
-		case KEEP_ASPECT_RATIO_FIT_HEIGHT:
-			fitWidth(rectangle, image.getRegionWidth() * scaleY);
-			break;
-		case KEEP_ASPECT_RATIO_FIT_HEIGHT_TRIMMED:
-			fitWidthTrimmed(rectangle, scaleY, trimmedImage);
-			break;
-		case KEEP_ASPECT_RATIO_NO_EXPANDING: {
-			float scale = Math.min(1f, Math.min(scaleX, scaleY));
-			fitWidth(rectangle, image.getRegionWidth() * scale);
-			fitHeight(rectangle, image.getRegionHeight() * scale);
-			break;
-		}
-		case NO_RESIZE:
-			fitWidth(rectangle, image.getRegionWidth());
-			fitHeight(rectangle, image.getRegionHeight());
-			break;
-		case NO_RESIZE_TRIMMED:
-			fitWidthTrimmed(rectangle, 1.0f, trimmedImage);
-			fitHeightTrimmed(rectangle, 1.0f, trimmedImage);
-			break;
-		}
-	}
-
-	private void fitWidth(Rectangle rectangle, float width) {
-		float cx = rectangle.x + rectangle.width * 0.5f;
-		rectangle.width = width;
-		rectangle.x = cx - rectangle.width * 0.5f;
-	}
-
-	private void fitHeight(Rectangle rectangle, float height) {
-		float cy = rectangle.y + rectangle.height * 0.5f;
-		rectangle.height = height;
-		rectangle.y = cy - rectangle.height * 0.5f;
-	}
-
-	private void fitWidthTrimmed(Rectangle rectangle, float scale, TextureRegion image) {
-		float width = scale * image.getRegionWidth();
-		if (rectangle.width < width) {
-			float cx = image.getRegionX() + image.getRegionWidth() * 0.5f;
-			float w = rectangle.width / scale;
-			image.setRegionX((int)(cx - w * 0.5f));
-			image.setRegionWidth((int)w);
-		} else {
-			fitWidth(rectangle, width);
-		}
-	}
-
-	private void fitHeightTrimmed(Rectangle rectangle, float scale, TextureRegion image) {
-		float height = scale * image.getRegionHeight();
-		if (rectangle.height < height) {
-			float cy = image.getRegionY() + image.getRegionHeight() * 0.5f;
-			float h = rectangle.height / scale;
-			image.setRegionY((int)(cy - h * 0.5f));
-			image.setRegionHeight((int)h);
-		} else {
-			fitHeight(rectangle, height);
-		}
-	}
-	
 	protected boolean mousePressed(MainState state, int button, int x, int y) {
 		if (clickevent != -1) {
 			Rectangle r = getDestination(state.main.getNowTime(), state);
@@ -692,17 +574,20 @@ public abstract class SkinObject implements Disposable {
 		public float r;
 		public float a;
 	}
-	
+
+	/**
+	 * IntegerPropertyからmin - max間の比率を表現するためのProperty
+	 *
+	 * @author exch
+	 */
 	public static class RateProperty implements FloatProperty {
 		
 		private final IntegerProperty ref;
-		private final int type;
 		private final int min;
 		private final int max;
 		
 		public RateProperty(int type, int min, int max) {
 			this.ref = IntegerPropertyFactory.getIntegerProperty(type);
-			this.type = type;
 			this.min = min;
 			this.max = max;
 		}
@@ -734,7 +619,12 @@ public abstract class SkinObject implements Disposable {
 		public void exec(MainState state);
 
 	}
-	
+
+	/**
+	 * floatを反映させるためのインターフェイス
+	 *
+	 * @author exch
+	 */
 	public interface FloatWriter {
 		
 		public void set(MainState state, float value);
