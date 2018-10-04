@@ -114,13 +114,15 @@ public class LaneRenderer {
 		this.model = model;
 		List<TimeLine> tls = new ArrayList<TimeLine>();
 		double cbpm = model.getBpm();
+		double cscr = 1.0;
 		for (TimeLine tl : model.getAllTimeLines()) {
-			if (cbpm != tl.getBPM() || tl.getStop() > 0 || tl.getSectionLine()) {
+			if (cbpm != tl.getBPM() || tl.getStop() > 0 || cscr != tl.getScroll() || tl.getSectionLine()) {
 				tls.add(tl);
 			} else if (tl.existNote() || tl.existHiddenNote()) {
 				tls.add(tl);
 			}
 			cbpm = tl.getBPM();
+			cscr = tl.getScroll();
 		}
 		this.timelines = tls.toArray(new TimeLine[tls.size()]);
 		// Logger.getGlobal().info("省略したTimeLine数:" +
