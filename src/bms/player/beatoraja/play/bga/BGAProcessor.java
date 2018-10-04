@@ -338,7 +338,7 @@ public class BGAProcessor {
 		tmpRect.set(r);
 		image.setTexture(bga);
 		image.setRegion(0, 0, bga.getWidth(), bga.getHeight());
-		dst.getStretchedRect(tmpRect, image, image);
+		dst.getStretch().stretchRect(tmpRect, image, image);
 		sprite.draw(image, tmpRect.x, tmpRect.y, tmpRect.width, tmpRect.height);
 	}
 

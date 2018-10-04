@@ -6,6 +6,7 @@ import bms.player.beatoraja.PlayerResource;
 import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 import bms.player.beatoraja.skin.SkinObject;
+import bms.player.beatoraja.skin.StretchType;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 

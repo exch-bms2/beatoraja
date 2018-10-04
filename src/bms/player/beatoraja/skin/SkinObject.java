@@ -255,6 +255,10 @@ public abstract class SkinObject implements Disposable {
 		this.stretch = stretch;
 	}
 
+	public StretchType getStretch() {
+		return stretch;
+	}
+
 	public int getBlend() {
 		return this.dstblend;
 	}
