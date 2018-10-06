@@ -54,10 +54,10 @@ public class SongInformation implements Validatable {
 	}
 	
 	public SongInformation(BMSModel model) {
-		n = model.getTotalNotes(BMSModel.TOTALNOTES_KEY);
-		ln = model.getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY);
-		s = model.getTotalNotes(BMSModel.TOTALNOTES_SCRATCH);
-		ls = model.getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH);
+		n = BMSModelUtils.getTotalNotes(model, BMSModelUtils.TOTALNOTES_KEY);
+		ln = BMSModelUtils.getTotalNotes(model, BMSModelUtils.TOTALNOTES_LONG_KEY);
+		s = BMSModelUtils.getTotalNotes(model, BMSModelUtils.TOTALNOTES_SCRATCH);
+		ls = BMSModelUtils.getTotalNotes(model, BMSModelUtils.TOTALNOTES_LONG_SCRATCH);
 		total = model.getTotal();
 		
 		int[][] data = new int[model.getLastTime() / 1000 + 2][7];

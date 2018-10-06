@@ -467,7 +467,7 @@ public class BMSPlayer extends MainState {
 				control.setEnableControl(true);
 				control.setEnableCursor(true);
 				if (property.freq != 100) {
-					model.setFrequency(property.freq / 100f);
+					BMSModelUtils.changeFrequency(model, property.freq / 100f);
 					if (main.getConfig().getAudioFreqOption() == Config.AUDIO_PLAY_FREQ) {
 						main.getAudioProcessor().setGlobalPitch(property.freq / 100f);
 					}

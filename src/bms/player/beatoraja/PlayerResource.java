@@ -10,6 +10,7 @@ import bms.model.Mode;
 import bms.model.BMSDecoder;
 import bms.model.BMSGenerator;
 import bms.model.BMSModel;
+import bms.model.BMSModelUtils;
 import bms.model.BMSONDecoder;
 import bms.player.beatoraja.CourseData.CourseDataConstraint;
 import bms.player.beatoraja.TableData.TableFolder;
@@ -188,6 +189,7 @@ public class PlayerResource {
 			generator = decoder.getBMSGenerator();
 		}
 
+		BMSModelUtils.setStartNoteSection(model, 1.0);
 		BMSPlayerRule.validate(model, bmson);
 		return model;
 	}

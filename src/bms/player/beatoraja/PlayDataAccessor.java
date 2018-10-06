@@ -607,8 +607,7 @@ public class PlayDataAccessor {
 		boolean ln = false;
 		for (int i = 0; i < models.length; i++) {
 			hashes[i] = models[i].getSHA256();
-			ln |= models[i].getTotalNotes(BMSModel.TOTALNOTES_LONG_KEY)
-					+ models[i].getTotalNotes(BMSModel.TOTALNOTES_LONG_SCRATCH) > 0;
+			ln |= models[i].containsUndefinedLongNote();
 		}
 		this.wrireReplayData(rd, hashes, ln, lnmode, index, constraint);
 
