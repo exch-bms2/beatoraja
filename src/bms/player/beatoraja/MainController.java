@@ -58,7 +58,7 @@ import twitter4j.conf.ConfigurationBuilder;
  */
 public class MainController extends ApplicationAdapter {
 
-	public static final String VERSION = "beatoraja 0.6.3";
+	public static final String VERSION = "beatoraja 0.6.4";
 
 	private static final boolean debug = false;
 
