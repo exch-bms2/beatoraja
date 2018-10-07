@@ -81,16 +81,38 @@ public class SkinTextFont extends SkinText {
 
                 final float x = (getAlign() == 2 ? r.x - r.width : (getAlign() == 1 ? r.x - r.width / 2 : r.x));
                 if(shadow > 0) {
-                    layout.setText(font, getText(), new Color(c.r / 2, c.g / 2, c.b / 2, c.a), r.getWidth(),ALIGN[getAlign()], false);
+                    setLayout(new Color(c.r / 2, c.g / 2, c.b / 2, c.a), r);
                     sprite.draw(font, layout, x + shadow + offsetX, r.y - shadow + offsetY + r.getHeight());
                 }
-                layout.setText(font, getText(), c, r.getWidth(),ALIGN[getAlign()], false);
-
+                setLayout(c, r);
                 sprite.draw(font, layout, x + offsetX, r.y + offsetY + r.getHeight());
             }
         }
     }
-	
+
+    private void setLayout(Color c, Rectangle r) {
+        if (isWrapping()) {
+            layout.setText(font, getText(), c, r.getWidth(), ALIGN[getAlign()], true);
+        } else {
+            switch (getOverflow()) {
+            case OVERFLOW_OVERFLOW:
+                layout.setText(font, getText(), c, r.getWidth(), ALIGN[getAlign()], false);
+                break;
+            case OVERFLOW_SHRINK:
+                layout.setText(font, getText(), c, r.getWidth(), ALIGN[getAlign()], false);
+                float actualWidth = layout.width;
+                if (actualWidth > r.getWidth()) {
+                    font.getData().setScale(font.getData().scaleX * r.getWidth() / actualWidth, font.getData().scaleY);
+                    layout.setText(font, getText(), c, r.getWidth(), ALIGN[getAlign()], false);
+                }
+                break;
+            case OVERFLOW_TRUNCATE:
+                layout.setText(font, getText(), 0, getText().length(), c, r.getWidth(), ALIGN[getAlign()], false, "");
+                break;
+            }
+        }
+    }
+
     public void dispose() {
         if(generator != null) {
         	generator.dispose();

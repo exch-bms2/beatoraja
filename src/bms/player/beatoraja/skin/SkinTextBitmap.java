@@ -57,10 +57,33 @@ public class SkinTextBitmap extends SkinText {
 			font.getData().setScale(scale);
 			final Color c = getColor();
 			final float x = (getAlign() == 2 ? r.x - r.width : (getAlign() == 1 ? r.x - r.width / 2 : r.x));
-			layout.setText(font, getText(), c, r.getWidth(),ALIGN[getAlign()], false);
+			setLayout(c, r);
 			sprite.setType(source.isDistanceField() ? SkinObjectRenderer.TYPE_DISTANCE_FIELD : SkinObjectRenderer.TYPE_BILINEAR);
 			sprite.draw(font, layout, x + offsetX, r.y + offsetY + r.getHeight());
 			font.getData().setScale(1);
+		}
+	}
+
+	private void setLayout(Color c, Rectangle r) {
+		if (isWrapping()) {
+			layout.setText(font, getText(), c, r.getWidth(), ALIGN[getAlign()], true);
+		} else {
+			switch (getOverflow()) {
+			case OVERFLOW_OVERFLOW:
+				layout.setText(font, getText(), c, r.getWidth(), ALIGN[getAlign()], false);
+				break;
+			case OVERFLOW_SHRINK:
+				layout.setText(font, getText(), c, r.getWidth(), ALIGN[getAlign()], false);
+				float actualWidth = layout.width;
+				if (actualWidth > r.getWidth()) {
+					font.getData().setScale(font.getData().scaleX * r.getWidth() / actualWidth, font.getData().scaleY);
+					layout.setText(font, getText(), c, r.getWidth(), ALIGN[getAlign()], false);
+				}
+				break;
+			case OVERFLOW_TRUNCATE:
+				layout.setText(font, getText(), 0, getText().length(), c, r.getWidth(), ALIGN[getAlign()], false, "");
+				break;
+			}
 		}
 	}
 
