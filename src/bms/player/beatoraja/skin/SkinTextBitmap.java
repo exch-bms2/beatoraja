@@ -61,7 +61,8 @@ public class SkinTextBitmap extends SkinText {
 			font.getData().setScale(scale);
 			final Color c = getColor();
 			final float x = (getAlign() == 2 ? r.x - r.width : (getAlign() == 1 ? r.x - r.width / 2 : r.x));
-			if (source.isDistanceField()) {
+			if (source.getType() == SkinTextBitmapSource.TYPE_DISTANCE_FIELD ||
+					source.getType() == SkinTextBitmapSource.TYPE_COLORED_DISTANCE_FIELD) {
 				ShaderProgram shader = ShaderManager.getShader("distance_field");
 				shader.setUniformf("u_outlineDistance", Math.max(0.1f, 0.5f - getOutlineWidth()/2f));
 				shader.setUniformf("u_outlineColor", getOutlineColor());
@@ -112,6 +113,10 @@ public class SkinTextBitmap extends SkinText {
 
 	public static class SkinTextBitmapSource implements Disposable {
 
+		public static final int TYPE_STANDARD = 0;
+		public static final int TYPE_DISTANCE_FIELD = 1;
+		public static final int TYPE_COLORED_DISTANCE_FIELD = 2;
+
 		private boolean usecim;
 		private boolean useMipMaps;
 		private Path fontPath;
@@ -119,7 +124,7 @@ public class SkinTextBitmap extends SkinText {
 		private Array<TextureRegion> regions;
 		private BitmapFont font;
 		private float originalSize;
-		private boolean distanceField;
+		private int type;
 		private float pageWidth;
 		private float pageHeight;
 
@@ -174,12 +179,12 @@ public class SkinTextBitmap extends SkinText {
 			return originalSize;
 		}
 
-		public boolean isDistanceField() {
-			return distanceField;
+		public int getType() {
+			return type;
 		}
 
-		public void setDistanceField(boolean value) {
-			distanceField = value;
+		public void setType(int type) {
+			this.type = type;
 		}
 
 		public float getPageWidth() {
