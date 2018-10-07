@@ -19,6 +19,10 @@ public abstract class SkinText extends SkinObject {
 	public static final int ALIGN_LEFT = 0;
     public static final int ALIGN_CENTER = 1;
     public static final int ALIGN_RIGHT = 2;
+
+    public static final int OVERFLOW_OVERFLOW = 0;
+    public static final int OVERFLOW_SHRINK = 1;
+    public static final int OVERFLOW_TRUNCATE = 2;
     
     public static final int[] ALIGN = {Align.left, Align.center, Align.right};
 
@@ -27,6 +31,9 @@ public abstract class SkinText extends SkinObject {
     private String text = "";
 
     private boolean editable;
+
+    private boolean wrapping;
+    private int overflow;
     
     public SkinText(int id) {
     	ref = StringPropertyFactory.getStringProperty(id);
@@ -78,5 +85,21 @@ public abstract class SkinText extends SkinObject {
 
     public void setEditable(boolean editable) {
         this.editable = editable;
+    }
+
+    public boolean isWrapping() {
+        return wrapping;
+    }
+
+    public void setWrapping(boolean value) {
+        wrapping = value;
+    }
+
+    public int getOverflow() {
+        return overflow;
+    }
+
+    public void setOverflow(int value) {
+        overflow = value;
     }
 }

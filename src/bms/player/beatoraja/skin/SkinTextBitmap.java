@@ -16,7 +16,9 @@ import com.badlogic.gdx.utils.Disposable;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 
-
+/**
+ * .fnt ファイルをソースとして持つスキン用テキスト
+ */
 public class SkinTextBitmap extends SkinText {
 
 	private SkinTextBitmapSource source;

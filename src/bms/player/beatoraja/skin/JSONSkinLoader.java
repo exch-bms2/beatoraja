@@ -1241,6 +1241,8 @@ public class JSONSkinLoader extends SkinLoader{
 					skinText = new SkinTextFont(path.toString(), 0, text.size, 0, text.ref);
 				}
 				skinText.setAlign(text.align);
+				skinText.setWrapping(text.wrapping);
+				skinText.setOverflow(text.overflow);
 				return skinText;
 			}
 		}
@@ -1378,6 +1380,8 @@ public class JSONSkinLoader extends SkinLoader{
 		public int size;
 		public int align;
 		public int ref;
+		public boolean wrapping = false;
+		public int overflow = SkinText.OVERFLOW_OVERFLOW;
 	}
 
 	public static class Slider {
