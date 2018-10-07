@@ -1238,7 +1238,7 @@ public class JSONSkinLoader extends SkinLoader{
 						source.setDistanceField(font.distanceField);
 						bitmapSourceMap.put(font.id, source);
 					}
-					skinText = new SkinTextBitmap(bitmapSourceMap.get(font.id), text.size);
+					skinText = new SkinTextBitmap(bitmapSourceMap.get(font.id), text.size * ((float)dstr.width / sk.w));
 				} else {
 					skinText = new SkinTextFont(path.toString(), 0, text.size, 0, text.ref);
 				}

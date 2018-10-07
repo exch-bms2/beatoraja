@@ -28,13 +28,13 @@ public class SkinTextBitmap extends SkinText {
 	private SkinTextBitmapSource source;
 	private BitmapFont font;
 	private GlyphLayout layout;
-	private int size;
+	private float size;
 
-	public SkinTextBitmap(SkinTextBitmapSource source, int size) {
+	public SkinTextBitmap(SkinTextBitmapSource source, float size) {
 		this(source, size, -1);
 	}
 
-	public SkinTextBitmap(SkinTextBitmapSource source, int size, int id) {
+	public SkinTextBitmap(SkinTextBitmapSource source, float size, int id) {
 		super(id);
 		this.source = source;
 		this.size = size;
