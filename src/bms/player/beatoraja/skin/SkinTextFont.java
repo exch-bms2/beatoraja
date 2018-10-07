@@ -9,6 +9,7 @@ import com.badlogic.gdx.math.Rectangle;
 
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
+import com.badlogic.gdx.math.Vector2;
 
 /**
  * フォントデータをソースとして持つスキン用テキスト
@@ -24,8 +25,6 @@ public class SkinTextFont extends SkinText {
 
     private GlyphLayout layout;
 
-    private int shadow = 0;
-    
     private FreeTypeFontGenerator generator;
     private FreeTypeFontGenerator.FreeTypeFontParameter parameter;
     private String preparedFonts;
@@ -41,7 +40,7 @@ public class SkinTextFont extends SkinText {
         parameter.characters = "";
 //        this.setCycle(cycle);
         parameter.size = size;
-        this.shadow = shadow;
+        setShadowOffset(new Vector2(shadow, shadow));
     }
 
     public void prepareFont(String text) {
@@ -80,9 +79,9 @@ public class SkinTextFont extends SkinText {
                 sprite.setType(getFilter() != 0 ? SkinObjectRenderer.TYPE_LINEAR : SkinObjectRenderer.TYPE_NORMAL);
 
                 final float x = (getAlign() == 2 ? r.x - r.width : (getAlign() == 1 ? r.x - r.width / 2 : r.x));
-                if(shadow > 0) {
+                if(!getShadowOffset().isZero()) {
                     setLayout(new Color(c.r / 2, c.g / 2, c.b / 2, c.a), r);
-                    sprite.draw(font, layout, x + shadow + offsetX, r.y - shadow + offsetY + r.getHeight());
+                    sprite.draw(font, layout, x + getShadowOffset().x + offsetX, r.y - getShadowOffset().y + offsetY + r.getHeight());
                 }
                 setLayout(c, r);
                 sprite.draw(font, layout, x + offsetX, r.y + offsetY + r.getHeight());
