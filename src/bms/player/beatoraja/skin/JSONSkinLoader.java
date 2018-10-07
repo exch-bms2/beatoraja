@@ -1238,7 +1238,7 @@ public class JSONSkinLoader extends SkinLoader{
 						source.setType(font.type);
 						bitmapSourceMap.put(font.id, source);
 					}
-					skinText = new SkinTextBitmap(bitmapSourceMap.get(font.id), text.size * ((float)dstr.width / sk.w));
+					skinText = new SkinTextBitmap(bitmapSourceMap.get(font.id), text.size * ((float)dstr.width / sk.w), text.ref);
 				} else {
 					skinText = new SkinTextFont(path.toString(), 0, text.size, 0, text.ref);
 				}
