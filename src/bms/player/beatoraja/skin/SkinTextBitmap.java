@@ -139,7 +139,7 @@ public class SkinTextBitmap extends SkinText {
 
 				regions = new Array<>(fontData.imagePaths.length);
 				for (int i = 0; i < fontData.imagePaths.length; ++i) {
-					this.regions.add(new TextureRegion(SkinLoader.getTexture(fontData.imagePaths[i], usecim)));
+					this.regions.add(new TextureRegion(SkinLoader.getTexture(fontData.imagePaths[i], usecim, useMipMaps)));
 				}
 
 				font = new BitmapFont(fontData, regions, true);
