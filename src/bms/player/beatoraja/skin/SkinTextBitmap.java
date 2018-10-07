@@ -134,14 +134,12 @@ public class SkinTextBitmap extends SkinText {
 		}
 
 		public void load() {
-			// TODO: 画像の cim 対応
 			try {
 				fontData = new BitmapFont.BitmapFontData(new FileHandle(fontPath.toFile()), false);
 
 				regions = new Array<>(fontData.imagePaths.length);
 				for (int i = 0; i < fontData.imagePaths.length; ++i) {
-					FileHandle file = new FileHandle(new File(fontData.imagePaths[i]));
-					this.regions.add(new TextureRegion(new Texture(file, useMipMaps)));
+					this.regions.add(new TextureRegion(SkinLoader.getTexture(fontData.imagePaths[i], usecim)));
 				}
 
 				font = new BitmapFont(fontData, regions, true);
