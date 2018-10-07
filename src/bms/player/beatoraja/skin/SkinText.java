@@ -46,6 +46,10 @@ public abstract class SkinText extends SkinObject {
     	ref = StringPropertyFactory.getStringProperty(id);
     }
 
+    public SkinText(StringProperty property) {
+        ref = property;
+    }
+
     public int getAlign() {
 		return align;
 	}

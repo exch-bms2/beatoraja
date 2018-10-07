@@ -177,7 +177,22 @@ public class SkinLuaAccessor {
 		}
 		return null;
 	}
-	
+
+	public StringProperty loadStringProperty(String script) {
+		try {
+			final LuaValue lv = globals.load("return " + script);
+			return new StringProperty() {
+				@Override
+				public String get(MainState state) {
+					return lv.call().tojstring();
+				}
+			};
+		} catch (RuntimeException e) {
+			Logger.getGlobal().warning("Lua解析時の例外 : " + e.getMessage());
+		}
+		return null;
+	}
+
 	public Event loadEvent(String script) {
 		try {
 			final LuaValue lv = globals.load(script);

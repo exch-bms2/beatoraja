@@ -1232,15 +1232,22 @@ public class JSONSkinLoader extends SkinLoader{
 			if (font.id.equals(text.font)) {
 				Path path = skinPath.getParent().resolve(font.path);
 				SkinText skinText;
+				StringProperty property = null;
+				if (text.value != null) {
+					property = lua.loadStringProperty(text.value);
+				}
+				if (property == null) {
+					property = StringPropertyFactory.getStringProperty(text.ref);
+				}
 				if (path.toString().toLowerCase().endsWith(".fnt")) {
 					if (!bitmapSourceMap.containsKey(font.id)) {
 						SkinTextBitmap.SkinTextBitmapSource source = new SkinTextBitmap.SkinTextBitmapSource(path, usecim);
 						source.setType(font.type);
 						bitmapSourceMap.put(font.id, source);
 					}
-					skinText = new SkinTextBitmap(bitmapSourceMap.get(font.id), text.size * ((float)dstr.width / sk.w), text.ref);
+					skinText = new SkinTextBitmap(bitmapSourceMap.get(font.id), text.size * ((float)dstr.width / sk.w), property);
 				} else {
-					skinText = new SkinTextFont(path.toString(), 0, text.size, 0, text.ref);
+					skinText = new SkinTextFont(path.toString(), 0, text.size, 0, property);
 				}
 				skinText.setAlign(text.align);
 				skinText.setWrapping(text.wrapping);
@@ -1395,6 +1402,7 @@ public class JSONSkinLoader extends SkinLoader{
 		public int size;
 		public int align;
 		public int ref;
+		public String value;
 		public boolean wrapping = false;
 		public int overflow = SkinText.OVERFLOW_OVERFLOW;
 		public String outlineColor = "ffffff00";
