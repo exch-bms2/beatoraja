@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.*;
 import com.badlogic.gdx.utils.reflect.*;
 
@@ -1244,16 +1245,23 @@ public class JSONSkinLoader extends SkinLoader{
 				skinText.setAlign(text.align);
 				skinText.setWrapping(text.wrapping);
 				skinText.setOverflow(text.overflow);
-				try {
-					skinText.setOutlineColor(Color.valueOf(text.outlineColor));
-				} catch (Exception e) {
-					skinText.setOutlineColor(Color.WHITE);
-				}
+				skinText.setOutlineColor(parseHexColor(text.outlineColor, Color.WHITE));
 				skinText.setOutlineWidth(text.outlineWidth);
+				skinText.setShadowColor(parseHexColor(text.shadowColor, Color.WHITE));
+				skinText.setShadowOffset(new Vector2(text.shadowOffsetX, text.shadowOffsetY));
+				skinText.setShadowSmoothness(text.shadowSmoothness);
 				return skinText;
 			}
 		}
 		return null;
+	}
+
+	Color parseHexColor(String hex, Color fallbackColor) {
+		try {
+			return Color.valueOf(hex);
+		} catch (Exception e) {
+			return fallbackColor;
+		}
 	}
 
 	public static class JsonSkin {
@@ -1391,6 +1399,10 @@ public class JSONSkinLoader extends SkinLoader{
 		public int overflow = SkinText.OVERFLOW_OVERFLOW;
 		public String outlineColor = "ffffff00";
 		public float outlineWidth = 0;
+		public String shadowColor = "ffffff00";
+		public float shadowOffsetX = 0;
+		public float shadowOffsetY = 0;
+		public float shadowSmoothness = 0;
 	}
 
 	public static class Slider {

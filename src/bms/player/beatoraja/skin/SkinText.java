@@ -7,6 +7,7 @@ import bms.player.beatoraja.skin.property.StringPropertyFactory;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Align;
 
 /**
@@ -37,6 +38,9 @@ public abstract class SkinText extends SkinObject {
     private int overflow;
     private Color outlineColor;
     private float outlineWidth;
+    private Color shadowColor;
+    private Vector2 shadowOffset;
+    private float shadowSmoothness;
     
     public SkinText(int id) {
     	ref = StringPropertyFactory.getStringProperty(id);
@@ -120,5 +124,29 @@ public abstract class SkinText extends SkinObject {
 
     public void setOutlineWidth(float value) {
         outlineWidth = value;
+    }
+
+    public Color getShadowColor() {
+        return shadowColor;
+    }
+
+    public void setShadowColor(Color color) {
+        shadowColor = color;
+    }
+
+    public Vector2 getShadowOffset() {
+        return shadowOffset;
+    }
+
+    public void setShadowOffset(Vector2 offset) {
+        shadowOffset = offset;
+    }
+
+    public float getShadowSmoothness() {
+        return shadowSmoothness;
+    }
+
+    public void setShadowSmoothness(float value) {
+        shadowSmoothness = value;
     }
 }

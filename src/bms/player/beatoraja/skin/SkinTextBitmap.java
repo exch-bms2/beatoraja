@@ -14,6 +14,7 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import bms.player.beatoraja.MainState;
@@ -64,6 +65,10 @@ public class SkinTextBitmap extends SkinText {
 			ShaderProgram shader = ShaderManager.getShader("distance_field");
 			shader.setUniformf("u_outlineDistance", Math.max(0.1f, 0.5f - getOutlineWidth()/2f));
 			shader.setUniformf("u_outlineColor", getOutlineColor());
+			shader.setUniformf("u_shadowColor", getShadowColor());
+			shader.setUniformf("u_shadowSmoothing", getShadowSmoothness() / 2f);
+			shader.setUniformf("u_shadowOffset",
+					new Vector2(getShadowOffset().x / source.getPageWidth(), getShadowOffset().y / source.getPageHeight()));
 			sprite.setType(source.isDistanceField() ? SkinObjectRenderer.TYPE_DISTANCE_FIELD : SkinObjectRenderer.TYPE_BILINEAR);
 			sprite.draw(font, layout, x + offsetX, r.y + offsetY + r.getHeight());
 			font.getData().setScale(1);
@@ -107,6 +112,8 @@ public class SkinTextBitmap extends SkinText {
 		private BitmapFont font;
 		private float originalSize;
 		private boolean distanceField;
+		private float pageWidth;
+		private float pageHeight;
 
 		public SkinTextBitmapSource(Path fontPath, boolean usecim) {
 			this(fontPath, usecim, true);
@@ -135,8 +142,15 @@ public class SkinTextBitmap extends SkinText {
 				try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileHandle(fontPath.toFile()).read()), 512)) {
 					String line = reader.readLine();
 					originalSize = (float) Integer.parseInt(line.substring(line.indexOf("size=") + 5).split(" ")[0]);
+					line = reader.readLine();
+					pageWidth = (float) Integer.parseInt(line.substring(line.indexOf("scaleW=") + 7).split(" ")[0]);
+					pageHeight = (float) Integer.parseInt(line.substring(line.indexOf("scaleH=") + 7).split(" ")[0]);
 				} catch (Exception e) {
 					originalSize = fontData.lineHeight;
+					if (regions.size > 0) {
+						pageWidth = (float) regions.get(0).getRegionWidth();
+						pageHeight = (float) regions.get(0).getRegionHeight();
+					}
 				}
 			} catch (Exception e) {
 				font = null;
@@ -160,6 +174,14 @@ public class SkinTextBitmap extends SkinText {
 
 		public void setDistanceField(boolean value) {
 			distanceField = value;
+		}
+
+		public float getPageWidth() {
+			return pageWidth;
+		}
+
+		public float getPageHeight() {
+			return pageHeight;
 		}
 
 		@Override
