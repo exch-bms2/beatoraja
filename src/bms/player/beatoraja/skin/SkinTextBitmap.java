@@ -61,15 +61,23 @@ public class SkinTextBitmap extends SkinText {
 			font.getData().setScale(scale);
 			final Color c = getColor();
 			final float x = (getAlign() == 2 ? r.x - r.width : (getAlign() == 1 ? r.x - r.width / 2 : r.x));
+			if (source.isDistanceField()) {
+				ShaderProgram shader = ShaderManager.getShader("distance_field");
+				shader.setUniformf("u_outlineDistance", Math.max(0.1f, 0.5f - getOutlineWidth()/2f));
+				shader.setUniformf("u_outlineColor", getOutlineColor());
+				shader.setUniformf("u_shadowColor", getShadowColor());
+				shader.setUniformf("u_shadowSmoothing", getShadowSmoothness() / 2f);
+				shader.setUniformf("u_shadowOffset",
+						new Vector2(getShadowOffset().x / source.getPageWidth(), getShadowOffset().y / source.getPageHeight()));
+				sprite.setType(SkinObjectRenderer.TYPE_DISTANCE_FIELD);
+			} else {
+				sprite.setType(SkinObjectRenderer.TYPE_BILINEAR);
+				if (!getShadowOffset().isZero()) {
+					setLayout(new Color(c.r / 2, c.g / 2, c.b / 2, c.a), r);
+					sprite.draw(font, layout, x + getShadowOffset().x + offsetX, r.y - getShadowOffset().y + offsetY + r.getHeight());
+				}
+			}
 			setLayout(c, r);
-			ShaderProgram shader = ShaderManager.getShader("distance_field");
-			shader.setUniformf("u_outlineDistance", Math.max(0.1f, 0.5f - getOutlineWidth()/2f));
-			shader.setUniformf("u_outlineColor", getOutlineColor());
-			shader.setUniformf("u_shadowColor", getShadowColor());
-			shader.setUniformf("u_shadowSmoothing", getShadowSmoothness() / 2f);
-			shader.setUniformf("u_shadowOffset",
-					new Vector2(getShadowOffset().x / source.getPageWidth(), getShadowOffset().y / source.getPageHeight()));
-			sprite.setType(source.isDistanceField() ? SkinObjectRenderer.TYPE_DISTANCE_FIELD : SkinObjectRenderer.TYPE_BILINEAR);
 			sprite.draw(font, layout, x + offsetX, r.y + offsetY + r.getHeight());
 			font.getData().setScale(1);
 		}
