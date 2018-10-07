@@ -8,6 +8,7 @@ import java.lang.reflect.Array;
 import java.nio.file.Path;
 import java.util.*;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
@@ -1243,6 +1244,12 @@ public class JSONSkinLoader extends SkinLoader{
 				skinText.setAlign(text.align);
 				skinText.setWrapping(text.wrapping);
 				skinText.setOverflow(text.overflow);
+				try {
+					skinText.setOutlineColor(Color.valueOf(text.outlineColor));
+				} catch (Exception e) {
+					skinText.setOutlineColor(Color.WHITE);
+				}
+				skinText.setOutlineWidth(text.outlineWidth);
 				return skinText;
 			}
 		}
@@ -1382,6 +1389,8 @@ public class JSONSkinLoader extends SkinLoader{
 		public int ref;
 		public boolean wrapping = false;
 		public int overflow = SkinText.OVERFLOW_OVERFLOW;
+		public String outlineColor = "ffffff00";
+		public float outlineWidth = 0;
 	}
 
 	public static class Slider {

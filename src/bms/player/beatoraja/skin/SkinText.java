@@ -5,6 +5,7 @@ import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 import bms.player.beatoraja.skin.property.StringProperty;
 import bms.player.beatoraja.skin.property.StringPropertyFactory;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Align;
 
@@ -34,6 +35,8 @@ public abstract class SkinText extends SkinObject {
 
     private boolean wrapping;
     private int overflow;
+    private Color outlineColor;
+    private float outlineWidth;
     
     public SkinText(int id) {
     	ref = StringPropertyFactory.getStringProperty(id);
@@ -101,5 +104,21 @@ public abstract class SkinText extends SkinObject {
 
     public void setOverflow(int value) {
         overflow = value;
+    }
+
+    public Color getOutlineColor() {
+        return outlineColor;
+    }
+
+    public void setOutlineColor(Color color) {
+        outlineColor = color;
+    }
+
+    public float getOutlineWidth() {
+        return outlineWidth;
+    }
+
+    public void setOutlineWidth(float value) {
+        outlineWidth = value;
     }
 }
