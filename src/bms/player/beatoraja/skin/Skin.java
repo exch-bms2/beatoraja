@@ -328,43 +328,58 @@ public class Skin {
 		}
 
 		public void draw(BitmapFont font, String s, float x, float y, Color c) {
-			preDraw(font.getRegion());
+			for (TextureRegion region : font.getRegions()) {
+				setFilter(region);
+			}
+			preDraw();
 			font.setColor(c);
 			font.draw(sprite, s, x, y);
 			postDraw();
 		}
 
 		public void draw(BitmapFont font, GlyphLayout layout, float x, float y) {
-			preDraw(font.getRegion());
+			for (TextureRegion region : font.getRegions()) {
+				setFilter(region);
+			}
+			preDraw();
 			font.draw(sprite, layout, x, y);
 			postDraw();
 		}
 
 		public void draw(Texture image, float x, float y, float w, float h) {
-			preDraw(image);
+			setFilter(image);
+			preDraw();
 			sprite.draw(image, x, y, w, h);
 			postDraw();
 		}
 
 		public void draw(TextureRegion image, float x, float y, float w, float h) {
-			preDraw(image);
+			setFilter(image);
+			preDraw();
 			// x,yが*.5の際に(Windowsのみ)TextureRegionがずれるため、暫定対処
 			sprite.draw(image,  x + 0.01f, y + 0.01f, w, h);
 			postDraw();
 		}
 
 		public void draw(TextureRegion image, float x, float y, float w, float h, float cx, float cy, float angle) {
-			preDraw(image);
+			setFilter(image);
+			preDraw();
 			// x,yが*.5の際に(Windowsのみ)TextureRegionがずれるため、暫定対処
 			sprite.draw(image, x + 0.01f, y + 0.01f, cx * w, cy * h, w, h, 1, 1, angle);
 			postDraw();
 		}
 
-		private void preDraw(TextureRegion image) {
-			preDraw(image.getTexture());
+		private void setFilter(TextureRegion image) {
+			setFilter(image.getTexture());
+		}
+
+		private void setFilter(Texture image) {
+			if(type == TYPE_LINEAR || type == TYPE_FFMPEG || type == TYPE_DISTANCE_FIELD) {
+				image.setFilter(TextureFilter.Linear, TextureFilter.Linear);
+			}
 		}
 		
-		private void preDraw(Texture image) {
+		private void preDraw() {
 			if(shaders[current] != shaders[type]) {
 				sprite.setShader(shaders[type]);
 				current = type;
@@ -386,10 +401,6 @@ public class Skin {
 			case 9:
 				sprite.setBlendFunction(GL11.GL_ONE_MINUS_DST_COLOR, GL11.GL_ZERO);
 				break;
-			}
-			
-			if(type == TYPE_LINEAR || type == TYPE_FFMPEG || type == TYPE_DISTANCE_FIELD) {
-				image.setFilter(TextureFilter.Linear, TextureFilter.Linear);
 			}
 
 			if(color != null) {
