@@ -19,7 +19,7 @@ import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 
 public class SkinTextBitmap extends SkinText {
 
-	SkinTextBitmapSource source;
+	private SkinTextBitmapSource source;
 	private BitmapFont font;
 	private GlyphLayout layout;
 	private int size;
@@ -56,7 +56,7 @@ public class SkinTextBitmap extends SkinText {
 			final Color c = getColor();
 			final float x = (getAlign() == 2 ? r.x - r.width : (getAlign() == 1 ? r.x - r.width / 2 : r.x));
 			layout.setText(font, getText(), c, r.getWidth(),ALIGN[getAlign()], false);
-			sprite.setType(SkinObjectRenderer.TYPE_DISTANCE_FIELD);
+			sprite.setType(source.isDistanceField() ? SkinObjectRenderer.TYPE_DISTANCE_FIELD : SkinObjectRenderer.TYPE_BILINEAR);
 			sprite.draw(font, layout, x + offsetX, r.y + offsetY + r.getHeight());
 			font.getData().setScale(1);
 		}
@@ -68,13 +68,14 @@ public class SkinTextBitmap extends SkinText {
 
 	public static class SkinTextBitmapSource implements Disposable {
 
-		boolean usecim;
-		boolean useMipMaps;
-		Path fontPath;
-		BitmapFont.BitmapFontData fontData;
-		Array<TextureRegion> regions;
-		BitmapFont font;
-		float originalSize;
+		private boolean usecim;
+		private boolean useMipMaps;
+		private Path fontPath;
+		private BitmapFont.BitmapFontData fontData;
+		private Array<TextureRegion> regions;
+		private BitmapFont font;
+		private float originalSize;
+		private boolean distanceField;
 
 		public SkinTextBitmapSource(Path fontPath, boolean usecim) {
 			this(fontPath, usecim, true);
@@ -120,6 +121,14 @@ public class SkinTextBitmap extends SkinText {
 
 		public float getOriginalSize() {
 			return originalSize;
+		}
+
+		public boolean isDistanceField() {
+			return distanceField;
+		}
+
+		public void setDistanceField(boolean value) {
+			distanceField = value;
 		}
 
 		@Override

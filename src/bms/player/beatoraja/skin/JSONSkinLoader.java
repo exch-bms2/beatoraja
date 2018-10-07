@@ -1232,7 +1232,9 @@ public class JSONSkinLoader extends SkinLoader{
 				SkinText skinText;
 				if (path.toString().toLowerCase().endsWith(".fnt")) {
 					if (!bitmapSourceMap.containsKey(font.id)) {
-						bitmapSourceMap.put(font.id, new SkinTextBitmap.SkinTextBitmapSource(path, usecim));
+						SkinTextBitmap.SkinTextBitmapSource source = new SkinTextBitmap.SkinTextBitmapSource(path, usecim);
+						source.setDistanceField(font.distanceField);
+						bitmapSourceMap.put(font.id, source);
 					}
 					skinText = new SkinTextBitmap(bitmapSourceMap.get(font.id), text.size);
 				} else {
@@ -1323,6 +1325,7 @@ public class JSONSkinLoader extends SkinLoader{
 	public static class Font {
 		public String id;
 		public String path;
+		public boolean distanceField;
 	}
 
 	public static class Image {
