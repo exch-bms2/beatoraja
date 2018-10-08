@@ -114,20 +114,24 @@ public abstract class SkinLoader {
     }
 
     protected static Texture getTexture(String path, boolean usecim) {
+        return getTexture(path, usecim, false);
+    }
+
+    protected static Texture getTexture(String path, boolean usecim, boolean useMipMaps) {
     	final PixmapResourcePool resource = SkinLoader.getResource();
         if(resource.exists(path)) {
-            return new Texture(resource.get(path));
+            return new Texture(resource.get(path), useMipMaps);
         }
         try {
             long modifiedtime = Files.getLastModifiedTime(Paths.get(path)).toMillis() / 1000;
             String cim = path.substring(0, path.lastIndexOf('.')) + "__" + modifiedtime + ".cim";
             if(resource.exists(cim)) {
-                return new Texture(resource.get(cim));
+                return new Texture(resource.get(cim), useMipMaps);
             }
 
             if (Files.exists(Paths.get(cim))) {
                 Pixmap pixmap = resource.get(cim);
-                return new Texture(pixmap);
+                return new Texture(pixmap, useMipMaps);
             } else if(usecim){
                 Pixmap pixmap = resource.get(path);
 
@@ -144,11 +148,11 @@ public abstract class SkinLoader {
                 }
                 PixmapIO.writeCIM(Gdx.files.local(cim), pixmap);
 
-                Texture tex = new Texture(pixmap);
+                Texture tex = new Texture(pixmap, useMipMaps);
                 return tex;
             } else {
                 Pixmap pixmap = resource.get(path);
-                return new Texture(pixmap);
+                return new Texture(pixmap, useMipMaps);
             }
         } catch (Throwable e) {
             e.printStackTrace();

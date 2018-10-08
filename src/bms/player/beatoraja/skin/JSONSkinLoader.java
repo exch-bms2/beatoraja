@@ -8,9 +8,11 @@ import java.lang.reflect.Array;
 import java.nio.file.Path;
 import java.util.*;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.*;
 import com.badlogic.gdx.utils.reflect.*;
 
@@ -34,6 +36,7 @@ public class JSONSkinLoader extends SkinLoader{
 	protected JsonSkin sk;
 
 	Map<String, Texture> texmap;
+	Map<String, SkinTextBitmap.SkinTextBitmapSource> bitmapSourceMap;
 
 	protected final SkinLuaAccessor lua;
 
@@ -233,7 +236,8 @@ public class JSONSkinLoader extends SkinLoader{
 				}
 			}
 
-			texmap = new HashMap();
+			texmap = new HashMap<>();
+			bitmapSourceMap = new HashMap<>();
 
 			if (type.isPlay()) {
 				skin = new PlaySkin(src, dstr);
@@ -451,22 +455,14 @@ public class JSONSkinLoader extends SkinLoader{
 					// text
 					for (Text text : sk.text) {
 						if (dst.id.equals(text.id)) {
-							for (Font font : sk.font) {
-								if (text.font.equals(font.id)) {
-									if (text.ref == SkinProperty.STRING_SEARCHWORD) {
-										Animation a = dst.dst[0];
-										Rectangle r = new Rectangle(a.x * ((float)dstr.width / sk.w),
-												a.y * ((float)dstr.height / sk.h), a.w * ((float)dstr.width / sk.w),
-												a.h * ((float)dstr.height / sk.h));
-										((MusicSelectSkin) skin).setSearchTextRegion(r);
-									} else {
-										SkinText st = new SkinTextFont(p.getParent().resolve(font.path).toString(), 0,
-												text.size, 0, text.ref);
-										st.setAlign(text.align);
-										obj = st;
-										break;
-									}
-								}
+							if (text.ref == SkinProperty.STRING_SEARCHWORD) {
+								Animation a = dst.dst[0];
+								Rectangle r = new Rectangle(a.x * ((float)dstr.width / sk.w),
+										a.y * ((float)dstr.height / sk.h), a.w * ((float)dstr.width / sk.w),
+										a.h * ((float)dstr.height / sk.h));
+								((MusicSelectSkin) skin).setSearchTextRegion(r);
+							} else {
+								obj = createText(text, p);
 							}
 							break;
 						}
@@ -939,25 +935,20 @@ public class JSONSkinLoader extends SkinLoader{
 						}
 						barobj.setLabel(label);
 
-						SkinText[] text = new SkinText[sk.songlist.text.length];
+						SkinText[] skinTexts = new SkinText[sk.songlist.text.length];
 						for (int i = 0; i < sk.songlist.text.length; i++) {
-							for (Text img : sk.text) {
-								if (sk.songlist.text[i].id.equals(img.id)) {
-									for (Font font : sk.font) {
-										if (img.font.equals(font.id)) {
-											text[i] = new SkinTextFont(p.getParent().resolve(font.path).toString(), 0,
-													img.size, 0);
-											text[i].setAlign(img.align);
-											setDestination(skin, text[i], sk.songlist.text[i]);
-											break;
-										}
+							for (Text text : sk.text) {
+								if (sk.songlist.text[i].id.equals(text.id)) {
+									skinTexts[i] = createText(text, p);
+									if (skinTexts[i] != null) {
+										setDestination(skin, skinTexts[i], sk.songlist.text[i]);
 									}
 									break;
 								}
 							}
 						}
-						for(int i = 0; i < barobj.getText().length && i < text.length; i++) {
-							barobj.getText()[i] = text[i];
+						for(int i = 0; i < barobj.getText().length && i < skinTexts.length; i++) {
+							barobj.getText()[i] = skinTexts[i];
 						}
 
 						SkinNumber[] numbers = new SkinNumber[sk.songlist.level.length];
@@ -1236,6 +1227,43 @@ public class JSONSkinLoader extends SkinLoader{
 		return getTexture(path, usecim);
 	}
 
+	private SkinText createText(Text text, Path skinPath) {
+		for (Font font : sk.font) {
+			if (font.id.equals(text.font)) {
+				Path path = skinPath.getParent().resolve(font.path);
+				SkinText skinText;
+				if (path.toString().toLowerCase().endsWith(".fnt")) {
+					if (!bitmapSourceMap.containsKey(font.id)) {
+						SkinTextBitmap.SkinTextBitmapSource source = new SkinTextBitmap.SkinTextBitmapSource(path, usecim);
+						source.setType(font.type);
+						bitmapSourceMap.put(font.id, source);
+					}
+					skinText = new SkinTextBitmap(bitmapSourceMap.get(font.id), text.size * ((float)dstr.width / sk.w), text.ref);
+				} else {
+					skinText = new SkinTextFont(path.toString(), 0, text.size, 0, text.ref);
+				}
+				skinText.setAlign(text.align);
+				skinText.setWrapping(text.wrapping);
+				skinText.setOverflow(text.overflow);
+				skinText.setOutlineColor(parseHexColor(text.outlineColor, Color.WHITE));
+				skinText.setOutlineWidth(text.outlineWidth);
+				skinText.setShadowColor(parseHexColor(text.shadowColor, Color.WHITE));
+				skinText.setShadowOffset(new Vector2(text.shadowOffsetX, text.shadowOffsetY));
+				skinText.setShadowSmoothness(text.shadowSmoothness);
+				return skinText;
+			}
+		}
+		return null;
+	}
+
+	Color parseHexColor(String hex, Color fallbackColor) {
+		try {
+			return Color.valueOf(hex);
+		} catch (Exception e) {
+			return fallbackColor;
+		}
+	}
+
 	public static class JsonSkin {
 
 		public int type = -1;
@@ -1314,6 +1342,7 @@ public class JSONSkinLoader extends SkinLoader{
 	public static class Font {
 		public String id;
 		public String path;
+		public int type;
 	}
 
 	public static class Image {
@@ -1366,6 +1395,14 @@ public class JSONSkinLoader extends SkinLoader{
 		public int size;
 		public int align;
 		public int ref;
+		public boolean wrapping = false;
+		public int overflow = SkinText.OVERFLOW_OVERFLOW;
+		public String outlineColor = "ffffff00";
+		public float outlineWidth = 0;
+		public String shadowColor = "ffffff00";
+		public float shadowOffsetX = 0;
+		public float shadowOffsetY = 0;
+		public float shadowSmoothness = 0;
 	}
 
 	public static class Slider {

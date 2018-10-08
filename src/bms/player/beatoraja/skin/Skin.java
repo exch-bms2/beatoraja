@@ -18,6 +18,7 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.*;
 
+import java.util.function.Consumer;
 import java.util.logging.Logger;
 
 import org.lwjgl.opengl.GL11;
@@ -297,7 +298,7 @@ public class Skin {
 		
 		private final SpriteBatch sprite;
 		
-		private ShaderProgram[] shaders = new ShaderProgram[5];
+		private ShaderProgram[] shaders = new ShaderProgram[6];
 		
 		private int current;
 		
@@ -310,6 +311,7 @@ public class Skin {
 		public static final int TYPE_BILINEAR = 2;
 		public static final int TYPE_FFMPEG = 3;
 		public static final int TYPE_LAYER = 4;
+		public static final int TYPE_DISTANCE_FIELD = 5;
 		
 		private Color color;
 		
@@ -320,54 +322,85 @@ public class Skin {
 			shaders[TYPE_BILINEAR] = ShaderManager.getShader("bilinear");
 			shaders[TYPE_FFMPEG] = ShaderManager.getShader("ffmpeg");
 			shaders[TYPE_LAYER] = ShaderManager.getShader("layer");
+			shaders[TYPE_DISTANCE_FIELD] = ShaderManager.getShader("distance_field");
 
 			sprite.setShader(shaders[current]);
 			sprite.setColor(Color.WHITE);
 		}
 
 		public void draw(BitmapFont font, String s, float x, float y, Color c) {
-			preDraw(font.getRegion());
+			for (TextureRegion region : font.getRegions()) {
+				setFilter(region);
+			}
+			preDraw();
 			font.setColor(c);
 			font.draw(sprite, s, x, y);
 			postDraw();
 		}
 
 		public void draw(BitmapFont font, GlyphLayout layout, float x, float y) {
-			preDraw(font.getRegion());
+			draw(font, layout, x, y, null);
+		}
+
+		public void draw(BitmapFont font, GlyphLayout layout, float x, float y, Consumer<ShaderProgram> shaderVariableSetter) {
+			for (TextureRegion region : font.getRegions()) {
+				setFilter(region);
+			}
+			preDraw(shaderVariableSetter);
 			font.draw(sprite, layout, x, y);
 			postDraw();
 		}
 
 		public void draw(Texture image, float x, float y, float w, float h) {
-			preDraw(image);
+			setFilter(image);
+			preDraw();
 			sprite.draw(image, x, y, w, h);
 			postDraw();
 		}
 
 		public void draw(TextureRegion image, float x, float y, float w, float h) {
-			preDraw(image);
+			setFilter(image);
+			preDraw();
 			// x,yが*.5の際に(Windowsのみ)TextureRegionがずれるため、暫定対処
 			sprite.draw(image,  x + 0.01f, y + 0.01f, w, h);
 			postDraw();
 		}
 
 		public void draw(TextureRegion image, float x, float y, float w, float h, float cx, float cy, float angle) {
-			preDraw(image);
+			setFilter(image);
+			preDraw();
 			// x,yが*.5の際に(Windowsのみ)TextureRegionがずれるため、暫定対処
 			sprite.draw(image, x + 0.01f, y + 0.01f, cx * w, cy * h, w, h, 1, 1, angle);
 			postDraw();
 		}
 
-		private void preDraw(TextureRegion image) {
-			preDraw(image.getTexture());
+		private void setFilter(TextureRegion image) {
+			setFilter(image.getTexture());
+		}
+
+		private void setFilter(Texture image) {
+			if(type == TYPE_LINEAR || type == TYPE_FFMPEG || type == TYPE_DISTANCE_FIELD) {
+				image.setFilter(TextureFilter.Linear, TextureFilter.Linear);
+			}
 		}
 		
-		private void preDraw(Texture image) {
+		private void preDraw() {
+			preDraw(null);
+		}
+		
+		private void preDraw(Consumer<ShaderProgram> shaderVariableSetter) {
 			if(shaders[current] != shaders[type]) {
 				sprite.setShader(shaders[type]);
 				current = type;
 			}
-			
+
+			if (shaders[type] != null && shaderVariableSetter != null) {
+				// シェーダの変数を変更する場合はバッチを切る
+				// （shader.begin() - end() で囲うのは正しく動作しないため不可）
+				sprite.flush();
+				shaderVariableSetter.accept(shaders[type]);
+			}
+
 			switch (blend) {
 			case 2:
 				sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
@@ -384,10 +417,6 @@ public class Skin {
 			case 9:
 				sprite.setBlendFunction(GL11.GL_ONE_MINUS_DST_COLOR, GL11.GL_ZERO);
 				break;
-			}
-			
-			if(type == TYPE_LINEAR || type == TYPE_FFMPEG) {
-				image.setFilter(TextureFilter.Linear, TextureFilter.Linear);				
 			}
 
 			if(color != null) {
