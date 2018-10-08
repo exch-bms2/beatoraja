@@ -18,6 +18,7 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.*;
 
+import java.util.function.Consumer;
 import java.util.logging.Logger;
 
 import org.lwjgl.opengl.GL11;
@@ -338,10 +339,14 @@ public class Skin {
 		}
 
 		public void draw(BitmapFont font, GlyphLayout layout, float x, float y) {
+			draw(font, layout, x, y, null);
+		}
+
+		public void draw(BitmapFont font, GlyphLayout layout, float x, float y, Consumer<ShaderProgram> shaderVariableSetter) {
 			for (TextureRegion region : font.getRegions()) {
 				setFilter(region);
 			}
-			preDraw();
+			preDraw(shaderVariableSetter);
 			font.draw(sprite, layout, x, y);
 			postDraw();
 		}
@@ -380,11 +385,22 @@ public class Skin {
 		}
 		
 		private void preDraw() {
+			preDraw(null);
+		}
+		
+		private void preDraw(Consumer<ShaderProgram> shaderVariableSetter) {
 			if(shaders[current] != shaders[type]) {
 				sprite.setShader(shaders[type]);
 				current = type;
 			}
-			
+
+			if (shaders[type] != null && shaderVariableSetter != null) {
+				// シェーダの変数を変更する場合はバッチを切る
+				// （shader.begin() - end() で囲うのは正しく動作しないため不可）
+				sprite.flush();
+				shaderVariableSetter.accept(shaders[type]);
+			}
+
 			switch (blend) {
 			case 2:
 				sprite.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
