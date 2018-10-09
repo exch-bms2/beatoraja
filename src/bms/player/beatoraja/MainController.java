@@ -30,6 +30,7 @@ import bms.player.beatoraja.audio.*;
 import bms.player.beatoraja.config.KeyConfiguration;
 import bms.player.beatoraja.config.SkinConfiguration;
 import bms.player.beatoraja.decide.MusicDecide;
+import bms.player.beatoraja.external.*;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.input.KeyCommand;
 import bms.player.beatoraja.ir.IRConnection;
@@ -42,9 +43,7 @@ import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.select.bar.TableBar;
 import bms.player.beatoraja.skin.SkinLoader;
 import bms.player.beatoraja.skin.SkinObject.SkinOffset;
-import bms.player.beatoraja.skin.property.BooleanPropertyFactory;
-import bms.player.beatoraja.skin.property.IntegerPropertyFactory;
-import bms.player.beatoraja.skin.property.StringPropertyFactory;
+import bms.player.beatoraja.skin.property.*;
 import bms.player.beatoraja.skin.SkinProperty;
 import bms.player.beatoraja.song.*;
 import bms.tool.mdprocessor.MusicDownloadProcessor;
@@ -124,9 +123,7 @@ public class MainController extends ApplicationAdapter {
 
 	private SystemSoundManager sound;
 
-	private ScreenShotThread screenshot;
-
-	private TwitterUploadThread twitterUpload;
+	private Thread screenshot;
 
 	private MusicDownloadProcessor download;
 
@@ -517,18 +514,30 @@ public class MainController extends ApplicationAdapter {
 
             // screen shot
             if (input.isActivated(KeyCommand.SAVE_SCREENSHOT)) {
-                if (screenshot == null || screenshot.savetime != 0) {
-                    screenshot = new ScreenShotThread(messageRenderer, ScreenUtils.getFrameBufferPixels(0, 0, Gdx.graphics.getBackBufferWidth(),
-                            Gdx.graphics.getBackBufferHeight(), true));
+                if (screenshot == null || !screenshot.isAlive()) {
+            		final byte[] pixels = ScreenUtils.getFrameBufferPixels(0, 0, Gdx.graphics.getBackBufferWidth(),Gdx.graphics.getBackBufferHeight(), true);
+                    screenshot = new Thread(() -> {
+                		// 全ピクセルのアルファ値を255にする(=透明色を無くす)
+                		for(int i = 3;i < pixels.length;i+=4) {
+                			pixels[i] = (byte) 0xff;
+                		}
+                    	new ScreenShotFileExporter().send(current, pixels);
+                    });
                     screenshot.start();
                 }
             }
 
             if (input.isActivated(KeyCommand.POST_TWITTER)) {
-                if (twitterUpload == null || twitterUpload.savetime != 0) {
-                	twitterUpload = new TwitterUploadThread(messageRenderer, ScreenUtils.getFrameBufferPixels(0, 0, Gdx.graphics.getBackBufferWidth(),
-                            Gdx.graphics.getBackBufferHeight(), false), player);
-                	twitterUpload.start();
+                if (screenshot == null || !screenshot.isAlive()) {
+            		final byte[] pixels = ScreenUtils.getFrameBufferPixels(0, 0, Gdx.graphics.getBackBufferWidth(),Gdx.graphics.getBackBufferHeight(), false);
+                    screenshot = new Thread(() -> {
+                		// 全ピクセルのアルファ値を255にする(=透明色を無くす)
+                		for(int i = 3;i < pixels.length;i+=4) {
+                			pixels[i] = (byte) 0xff;
+                		}
+                    	new ScreenShotTwitterExporter(player).send(current, pixels);
+                    });
+                    screenshot.start();
                 }
             }
 
@@ -724,209 +733,6 @@ public class MainController extends ApplicationAdapter {
 		else if(BooleanPropertyFactory.getBooleanProperty(OPTION_RESULT_E_1P).get(currentState)) rankTypeName += "E";
 		else if(BooleanPropertyFactory.getBooleanProperty(OPTION_RESULT_F_1P).get(currentState)) rankTypeName += "F";
 		return rankTypeName;
-	}
-
-
-	/**
-	 * スクリーンショット処理用スレッド
-	 *
-	 * @author exch
-	 */
-	static class ScreenShotThread extends Thread {
-
-		/**
-		 * 処理が完了した時間
-		 */
-		private long savetime;
-		/**
-		 * スクリーンショット保存先
-		 */
-		private final String path;
-		/**
-		 * スクリーンショットのpixelデータ
-		 */
-		private final byte[] pixels;
-
-		private final MessageRenderer message;
-
-		public ScreenShotThread(MessageRenderer message, byte[] pixels) {
-			this.message = message;
-			this.pixels = pixels;
-			final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
-			String stateName = "";
-			if(currentState instanceof MusicSelector) {
-				stateName = "_Music_Select";
-			} else if(currentState instanceof MusicDecide) {
-				stateName = "_Decide";
-			} if(currentState instanceof BMSPlayer) {
-				final String tablelevel = StringPropertyFactory.getStringProperty(STRING_TABLE_LEVEL).get(currentState);
-				if(tablelevel.length() > 0){
-					stateName = "_Play_" + tablelevel;
-				}else{
-					stateName = "_Play_LEVEL" + IntegerPropertyFactory.getIntegerProperty(NUMBER_PLAYLEVEL).get(currentState);
-				}
-				final String fulltitle = StringPropertyFactory.getStringProperty(STRING_FULLTITLE).get(currentState);
-				if(fulltitle.length() > 0) {
-					stateName += " " + fulltitle;
-				}
-			} else if(currentState instanceof MusicResult || currentState instanceof CourseResult) {
-				if(currentState instanceof MusicResult){
-					final String tablelevel = StringPropertyFactory.getStringProperty(STRING_TABLE_LEVEL).get(currentState);
-					if(tablelevel.length() > 0){
-						stateName += "_" + tablelevel + " ";
-					}else{
-						stateName += "_LEVEL" + IntegerPropertyFactory.getIntegerProperty(NUMBER_PLAYLEVEL).get(currentState) + " ";
-					}
-				}else{
-					stateName += "_";
-				}
-				final String fulltitle = StringPropertyFactory.getStringProperty(STRING_FULLTITLE).get(currentState);
-				if(fulltitle.length() > 0) stateName += fulltitle;
-				stateName += " " + getClearTypeName();
-				stateName += " " + getRankTypeName();
-			} else if(currentState instanceof KeyConfiguration) {
-				stateName = "_Config";
-			} else if(currentState instanceof SkinConfiguration) {
-				stateName = "_Skin_Select";
-			}
-			stateName = stateName.replace("\\", "￥").replace("/", "／").replace(":", "：").replace("*", "＊").replace("?", "？").replace("\"", "”").replace("<", "＜").replace(">", "＞").replace("|", "｜").replace("\t", " ");
-
-			path = "screenshot/" + sdf.format(Calendar.getInstance().getTime()) + stateName +".png";
-		}
-
-		@Override
-		public void run() {
-			// 全ピクセルのアルファ値を255にする(=透明色を無くす)
-			for(int i = 3;i < pixels.length;i+=4) {
-				pixels[i] = (byte) 0xff;
-			}
-			Pixmap pixmap = new Pixmap(Gdx.graphics.getBackBufferWidth(), Gdx.graphics.getBackBufferHeight(),
-					Pixmap.Format.RGBA8888);
-			BufferUtils.copy(pixels, 0, pixmap.getPixels(), pixels.length);
-			PixmapIO.writePNG(new FileHandle(path), pixmap);
-			pixmap.dispose();
-			Logger.getGlobal().info("スクリーンショット保存:" + path);
-			savetime = System.currentTimeMillis();
-
-			message.addMessage("Screen shot saved : " + path, 2000, Color.GOLD, 0);
-		}
-	}
-
-	/**
-	 * Twitter投稿用スレッド
-	 */
-	static class TwitterUploadThread extends Thread {
-
-		/**
-		 * 処理が完了した時間
-		 */
-		private long savetime;
-
-		/**
-		 * 処理が完了した時間
-		 */
-		private String text = "";
-
-		private final PlayerConfig player;
-
-		/**
-		 * スクリーンショットのpixelデータ
-		 */
-		private final byte[] pixels;
-
-		private final MessageRenderer message;
-
-		public TwitterUploadThread(MessageRenderer message, byte[] pixels, PlayerConfig player) {
-			this.message = message;
-			this.pixels = pixels;
-			this.player = player;
-			java.lang.StringBuilder builder = new java.lang.StringBuilder();
-			if(currentState instanceof MusicSelector) {
-				// empty
-			} else if(currentState instanceof MusicDecide) {
-				// empty
-			} if(currentState instanceof BMSPlayer) {
-				final String tablename = StringPropertyFactory.getStringProperty(STRING_TABLE_NAME).get(currentState);
-				final String tablelevel = StringPropertyFactory.getStringProperty(STRING_TABLE_LEVEL).get(currentState);
-
-				if(tablename.length() > 0){
-					builder.append(tablelevel);
-				}else{
-					builder.append("LEVEL").append(IntegerPropertyFactory.getIntegerProperty(NUMBER_PLAYLEVEL).get(currentState));
-				}
-				final String fulltitle = StringPropertyFactory.getStringProperty(STRING_FULLTITLE).get(currentState);
-				if(fulltitle.length() > 0) {
-					builder.append(" ").append(fulltitle);
-				}
-			} else if(currentState instanceof MusicResult || currentState instanceof CourseResult) {
-				if(currentState instanceof MusicResult) {
-					final String tablename = StringPropertyFactory.getStringProperty(STRING_TABLE_NAME).get(currentState);
-					final String tablelevel = StringPropertyFactory.getStringProperty(STRING_TABLE_LEVEL).get(currentState);
-					if(tablename.length() > 0){
-						builder.append(tablelevel);
-					}else{
-						builder.append("LEVEL").append(IntegerPropertyFactory.getIntegerProperty(NUMBER_PLAYLEVEL).get(currentState));
-					}
-				}
-				final String fulltitle = StringPropertyFactory.getStringProperty(STRING_FULLTITLE).get(currentState);
-				if(fulltitle.length() > 0) {
-					builder.append(" ").append(fulltitle);
-				}
-				builder.append(" ");
-				builder.append(getClearTypeName());
-				builder.append(" ");
-				builder.append(getRankTypeName());
-			} else if(currentState instanceof KeyConfiguration) {
-				// empty
-			} else if(currentState instanceof SkinConfiguration) {
-				// empty
-			}
-			text = builder.toString();
-			text = text.replace("\\", "￥").replace("/", "／").replace(":", "：").replace("*", "＊").replace("?", "？").replace("\"", "”").replace("<", "＜").replace(">", "＞").replace("|", "｜").replace("\t", " ");
-		}
-
-		@Override
-		public void run() {
-			ConfigurationBuilder cb = new ConfigurationBuilder();
-			cb.setOAuthConsumerKey(player.getTwitterConsumerKey())
-			  .setOAuthConsumerSecret(player.getTwitterConsumerSecret())
-			  .setOAuthAccessToken(player.getTwitterAccessToken())
-			  .setOAuthAccessTokenSecret(player.getTwitterAccessTokenSecret());
-			TwitterFactory twitterFactory = new TwitterFactory(cb.build());
-			Twitter twitter = twitterFactory.getInstance();
-
-			Pixmap pixmap = null;
-	        try {
-				// 全ピクセルのアルファ値を255にする(=透明色を無くす)
-				for(int i = 3;i < pixels.length;i+=4) {
-					pixels[i] = (byte) 0xff;
-				}
-
-				// create png byte stream
-				pixmap = new Pixmap(Gdx.graphics.getBackBufferWidth(), Gdx.graphics.getBackBufferHeight(),
-						Pixmap.Format.RGBA8888);
-				BufferUtils.copy(pixels, 0, pixmap.getPixels(), pixels.length);
-				ByteArrayOutputStream byteArrayOutputStream=new ByteArrayOutputStream();
-				PixmapIO.PNG png = new PixmapIO.PNG((int)(pixmap.getWidth() * pixmap.getHeight() * 1.5f));
-				png.write(byteArrayOutputStream, pixmap);
-				byte[] imageBytes=byteArrayOutputStream.toByteArray();
-				ByteArrayInputStream byteArrayInputStream=new ByteArrayInputStream(imageBytes);
-
-				// Upload Media and Post
-				UploadedMedia mediastatus = twitter.uploadMedia("from beatoraja", byteArrayInputStream);
-				Logger.getGlobal().info("Twitter Media Upload:" + mediastatus.toString());
-				StatusUpdate update = new StatusUpdate(text);
-				update.setMediaIds(new long[]{mediastatus.getMediaId()});
-				Status status = twitter.updateStatus(update);
-				Logger.getGlobal().info("Twitter Post:" + status.toString());
-				savetime = System.currentTimeMillis();
-				message.addMessage( "Twitter Upload : " + text, 2000, Color.YELLOW, 0);
-			} catch (Exception e) {
-				e.printStackTrace();
-			} finally {
-				if(pixmap != null) pixmap.dispose();
-			}
-		}
 	}
 
 	private UpdateThread updateSong;
