@@ -1,12 +1,11 @@
 package bms.player.beatoraja.select.bar;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import bms.model.Mode;
 import bms.player.beatoraja.ScoreDatabaseAccessor.ScoreDataCollector;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.song.SongData;
+import com.badlogic.gdx.utils.Array;
 
 /**
  * ディレクトリの抽象バー。
@@ -81,7 +80,7 @@ public abstract class DirectoryBar extends Bar {
 	public abstract Bar[] getChildren();
 
 	public Bar[] getChildren(Mode mode, boolean containsSameFolder) {
-		List<Bar> l = new ArrayList<Bar>();
+		Array<Bar> l = new Array<Bar>();
 		for (Bar b : getChildren()) {
 			if (!(mode != null && b instanceof SongBar && ((SongBar) b).getSongData().getMode() != 0
 					&& ((SongBar) b).getSongData().getMode() != mode.id)) {
@@ -101,7 +100,7 @@ public abstract class DirectoryBar extends Bar {
 				}
 			}
 		}
-		return l.toArray(new Bar[l.size()]);
+		return l.toArray(Bar.class);
 	}
 
 	public void updateFolderStatus() {
@@ -110,7 +109,12 @@ public abstract class DirectoryBar extends Bar {
 
 	protected void updateFolderStatus(SongData[] songs) {
 		clear();
+		final Mode mode = selector.main.getPlayerConfig().getMode();
 		final ScoreDataCollector collector = (song, score) -> {
+			if(song.getPath() == null || (mode != null && song.getMode() != 0 && song.getMode() != mode.id)) {
+				return;
+			}
+
 			if(score != null) {
 				lamps[score.getClear()]++;
 
@@ -126,7 +130,6 @@ public abstract class DirectoryBar extends Bar {
 			}
 		};
 
-		selector.getScoreDataCache().readScoreDatas(collector, songs,
-				selector.main.getPlayerResource().getPlayerConfig().getLnmode());
+		selector.getScoreDataCache().readScoreDatas(collector, songs, selector.main.getPlayerConfig().getLnmode());
 	}
 }
