@@ -101,7 +101,7 @@ public class MainController extends ApplicationAdapter {
 	private SongDatabaseAccessor songdb;
 	private SongInformationAccessor infodb;
 
-	private IRConnection[] ir;
+	private IRStatus[] ir;
 
 	private SpriteBatch sprite;
 	/**
@@ -173,7 +173,7 @@ public class MainController extends ApplicationAdapter {
 
 		playdata = new PlayDataAccessor(config.getPlayername());
 
-		Array<IRConnection> irarray = new Array<IRConnection>();
+		Array<IRStatus> irarray = new Array<IRStatus>();
 		for(PlayerConfig.IRConfig irconfig : player.getIrconfig()) {
 			IRConnection ir = IRConnection.getIRConnection(irconfig.getIrname());
 			if(ir != null) {
@@ -189,10 +189,10 @@ public class MainController extends ApplicationAdapter {
 			}
 			
 			if(ir != null) {
-				irarray.add(ir);
+				irarray.add(new IRStatus(irconfig.getIrname(), irconfig.getIrsend(), ir));
 			}
 		}
-		ir = irarray.toArray(IRConnection.class);
+		ir = irarray.toArray(IRStatus.class);
 		
 		switch(config.getAudioDriver()) {
 		case Config.AUDIODRIVER_PORTAUDIO:
@@ -621,7 +621,7 @@ public class MainController extends ApplicationAdapter {
 		return audio;
 	}
 
-	public IRConnection[] getIRConnection() {
+	public IRStatus[] getIRStatus() {
 		return ir;
 	}
 
@@ -981,6 +981,19 @@ public class MainController extends ApplicationAdapter {
 		@Override
 		public void dispose() {
 			font.dispose();
+		}
+	}
+	
+	public static class IRStatus {
+		
+		public final String name;
+		public final int send;
+		public final IRConnection connection;
+		
+		public IRStatus(String name, int send, IRConnection connection) {
+			this.name = name;
+			this.send = send;
+			this.connection = connection;
 		}
 	}
 }

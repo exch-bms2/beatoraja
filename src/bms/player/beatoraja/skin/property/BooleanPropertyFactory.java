@@ -454,14 +454,14 @@ public class BooleanPropertyFactory {
 			return new DrawConditionProperty(DrawConditionProperty.TYPE_STATIC_ALL) {
 				@Override
 				public boolean get(MainState state) {
-					return state.main.getIRConnection() == null;
+					return state.main.getIRStatus().length == 0;
 				}
 			};
 		case OPTION_ONLINE:
 			return new DrawConditionProperty(DrawConditionProperty.TYPE_STATIC_ALL) {
 				@Override
 				public boolean get(MainState state) {
-					return state.main.getIRConnection() != null;
+					return state.main.getIRStatus().length > 0;
 				}
 			};
 		case OPTION_TABLE_SONG:

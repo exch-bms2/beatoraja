@@ -14,6 +14,7 @@ import bms.model.LongNote;
 import bms.model.Note;
 import bms.model.TimeLine;
 import bms.player.beatoraja.*;
+import bms.player.beatoraja.MainController.IRStatus;
 import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.ir.IRConnection;
@@ -79,7 +80,7 @@ public class MusicResult extends AbstractResult {
 		final IRScoreData newscore = resource.getScoreData();
 
 		// TODO スコアハッシュがあり、有効期限が切れていないものを送信する？
-		final IRConnection[] ir = main.getIRConnection();
+		final IRStatus[] ir = main.getIRStatus();
 		if (ir.length > 0 && resource.getPlayMode() == PlayMode.PLAY) {
 			boolean send = resource.isUpdateScore();
 			switch(main.getPlayerConfig().getIrsend()) {
@@ -103,8 +104,8 @@ public class MusicResult extends AbstractResult {
 				Thread irprocess = new Thread(() -> {
                     try {
                     	boolean succeed = true;
-                    	for(IRConnection irc : ir) {
-                            IRResponse<Object> send1 = irc.sendPlayData(resource.getSongdata(), resource.getScoreData());
+                    	for(IRStatus irc : ir) {
+                            IRResponse<Object> send1 = irc.connection.sendPlayData(resource.getSongdata(), resource.getScoreData());
                             if(send1.isSucceeded()) {
                                 Logger.getGlobal().info("IRスコア送信完了");
                             } else {
@@ -117,7 +118,7 @@ public class MusicResult extends AbstractResult {
                         } else {
                             main.switchTimer(TIMER_IR_CONNECT_FAIL, true);
                         }
-                        IRResponse<IRScoreData[]> response = ir[0].getPlayData(null, resource.getSongdata());
+                        IRResponse<IRScoreData[]> response = ir[0].connection.getPlayData(null, resource.getSongdata());
                         if(response.isSucceeded()) {
                             IRScoreData[] scores = response.getData();
                             irtotal = scores.length;

@@ -9,6 +9,7 @@ import com.badlogic.gdx.utils.FloatArray;
 
 import bms.model.BMSModel;
 import bms.player.beatoraja.*;
+import bms.player.beatoraja.MainController.IRStatus;
 import bms.player.beatoraja.PlayerResource.PlayMode;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.ir.IRConnection;
@@ -80,7 +81,7 @@ public class CourseResult extends AbstractResult {
 		final PlayerResource resource = main.getPlayerResource();
 		final PlayerConfig config = resource.getPlayerConfig();
 
-		final IRConnection[] ir = main.getIRConnection();
+		final IRStatus[] ir = main.getIRStatus();
 		if (ir.length > 0 && resource.getPlayMode() == PlayMode.PLAY) {
 			boolean send = resource.isUpdateScore() && resource.getCourseData().isRelease();
 			switch(main.getPlayerConfig().getIrsend()) {
@@ -116,8 +117,8 @@ public class CourseResult extends AbstractResult {
 							}
 							
 	                    	boolean succeed = true;
-	                    	for(IRConnection irc : ir) {
-								IRResponse<Object> send = irc.sendCoursePlayData(resource.getCourseData(), lnmode, resource.getCourseScoreData());
+	                    	for(IRStatus irc : ir) {
+								IRResponse<Object> send = irc.connection.sendCoursePlayData(resource.getCourseData(), lnmode, resource.getCourseScoreData());
 	                            if(send.isSucceeded()) {
 	                                Logger.getGlobal().info("IRスコア送信完了");
 	                            } else {
@@ -131,7 +132,7 @@ public class CourseResult extends AbstractResult {
 	                            main.switchTimer(TIMER_IR_CONNECT_FAIL, true);
 	                        }
 
-							IRResponse<IRScoreData[]> response = ir[0].getCoursePlayData(null, resource.getCourseData(), lnmode);
+							IRResponse<IRScoreData[]> response = ir[0].connection.getCoursePlayData(null, resource.getCourseData(), lnmode);
 							if(response.isSucceeded()) {
 								IRScoreData[] scores = response.getData();
 								irtotal = scores.length;
