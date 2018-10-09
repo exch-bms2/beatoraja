@@ -9,18 +9,15 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Deque;
 import java.util.logging.Logger;
 
 import bms.player.beatoraja.PlayConfig;
 import bms.player.beatoraja.PlayerConfig;
 import bms.player.beatoraja.PlayerInformation;
-import bms.player.beatoraja.TableData;
-import bms.player.beatoraja.TableDataAccessor;
-import bms.player.beatoraja.TableDataAccessor.TableAccessor;
 import bms.player.beatoraja.ir.IRConnection;
 import bms.player.beatoraja.select.bar.*;
 import bms.player.beatoraja.song.SongData;
+import com.badlogic.gdx.utils.Queue;
 
 public enum MusicSelectCommand {
 
@@ -352,7 +349,7 @@ public enum MusicSelectCommand {
     DOWNLOAD_IPFS {
         @Override
         public void execute(MusicSelector selector) {
-			Deque<DirectoryBar> dir = selector.getBarRender().getDirectory();
+			Queue<DirectoryBar> dir = selector.getBarRender().getDirectory();
 			String[] acceptdomain = {"lnt.softether.net","www.ribbit.xyz","rattoto10.jounin.jp","flowermaster.web.fc2.com",
 					"stellawingroad.web.fc2.com","pmsdifficulty.xxxxxxxx.jp","walkure.net","stellabms.xyz","dpbmsdelta.web.fc2.com",
 					"cgi.geocities.jp/asahi3jpn","nekokan.dyndns.info"};

@@ -297,7 +297,7 @@ public class MusicSelectInputProcessor {
             if (numberstate[8] && numtime[8] != 0) {
                 numtime[8] = 0;
                 if (current instanceof SongBar && ((SongBar) current).existsSong() &&
-                        (bar.getDirectory().isEmpty() || !(bar.getDirectory().getLast() instanceof SameFolderBar))) {
+                        (bar.getDirectory().size == 0 || !(bar.getDirectory().last() instanceof SameFolderBar))) {
                     SongData sd = ((SongBar) current).getSongData();
                     bar.updateBar(new SameFolderBar(select, sd.getTitle(), sd.getFolder()));
                     select.play(SOUND_FOLDEROPEN);

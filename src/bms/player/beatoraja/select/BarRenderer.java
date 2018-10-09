@@ -2,7 +2,6 @@ package bms.player.beatoraja.select;
 
 import java.io.BufferedInputStream;
 import java.nio.file.*;
-import java.util.*;
 import java.util.logging.Logger;
 
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
@@ -13,19 +12,16 @@ import bms.player.beatoraja.select.bar.*;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.*;
 
 import bms.model.Mode;
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.CourseData.CourseDataConstraint;
 import bms.player.beatoraja.CourseData.TrophyData;
 import bms.player.beatoraja.external.BMSSearchAccessor;
-import bms.player.beatoraja.song.SongData;
-import bms.player.beatoraja.song.FolderData;
-import bms.player.beatoraja.song.SongInformationAccessor;
+import bms.player.beatoraja.song.*;
+import com.badlogic.gdx.utils.StringBuilder;
 
 /**
  * 楽曲バー描画用クラス
@@ -41,7 +37,7 @@ public class BarRenderer {
 	/**
 	 * 現在のフォルダ階層
 	 */
-	private Deque<DirectoryBar> dir = new ArrayDeque<DirectoryBar>();
+	private Queue<DirectoryBar> dir = new Queue<DirectoryBar>();
 	private String dirString = "";
 	/**
 	 * 現在表示中のバー一覧
@@ -64,7 +60,7 @@ public class BarRenderer {
 	/**
 	 * 検索結果バー一覧
 	 */
-	private List<SearchWordBar> search = new ArrayList<SearchWordBar>();
+	private Array<SearchWordBar> search = new Array<SearchWordBar>();
 
 	private final String[] TROPHY = { "goldmedal", "silvermedal", "bronzemedal" };
 
@@ -163,18 +159,18 @@ public class BarRenderer {
 			favorites[i] = new HashBar(select, cds[i].getName(), cds[i].getSong());
 		}
 
-		List<Bar> l = new ArrayList<Bar>();
+		Array<Bar> l = new Array<Bar>();
 
-		List<Bar> lampupdate = new ArrayList<Bar>();
-		List<Bar> scoreupdate = new ArrayList<Bar>();
+		Array<Bar> lampupdate = new Array<Bar>();
+		Array<Bar> scoreupdate = new Array<Bar>();
 		for(int i = 0;i < 30;i++) {
 			String s = i == 0 ? "TODAY" : i + "DAYS AGO";
 			long t = ((System.currentTimeMillis() / 86400000) - i) * 86400;
 			lampupdate.add(new CommandBar(select,  s, "scorelog.clear > scorelog.oldclear AND scorelog.date >= "  + t + " AND scorelog.date < " + (t + 86400)));
 			scoreupdate.add(new CommandBar(select,  s,  "scorelog.score > scorelog.oldscore AND scorelog.date >= "  + t + " AND scorelog.date < " + (t + 86400)));
 		}
-		l.add(new ContainerBar("LAMP UPDATE", lampupdate.toArray(new Bar[lampupdate.size()])));
-		l.add(new ContainerBar("SCORE UPDATE", scoreupdate.toArray(new Bar[scoreupdate.size()])));
+		l.add(new ContainerBar("LAMP UPDATE", lampupdate.toArray(Bar.class)));
+		l.add(new ContainerBar("SCORE UPDATE", scoreupdate.toArray(Bar.class)));
 		try {
 			Json json = new Json();
 			CommandFolder[] cf = json.fromJson(CommandFolder[].class,
@@ -186,7 +182,7 @@ public class BarRenderer {
 			e.printStackTrace();
 		}
 
-		commands = l.toArray(new Bar[l.size()]);
+		commands = l.toArray(Bar.class);
 
 		for(int i = 0;i < barlength;i++) {
 			bararea[i] = new BarArea();
@@ -195,11 +191,11 @@ public class BarRenderer {
 
 	private Bar createCommandBar(MainController main, CommandFolder folder) {
 		if(folder.getFolder() != null && folder.getFolder().length > 0) {
-			List<Bar> l = new ArrayList<Bar>();
+			Array<Bar> l = new Array<Bar>();
 			for(CommandFolder child : folder.getFolder()) {
 				l.add(createCommandBar(main, child));
 			}
-			return new ContainerBar(folder.getName(), l.toArray(new Bar[l.size()]));
+			return new ContainerBar(folder.getName(), l.toArray(Bar.class));
 		} else {
 			return new CommandBar(select, folder.getName(), folder.getSql());
 		}
@@ -275,13 +271,13 @@ public class BarRenderer {
 	}
 
 	public void close() {
-		if(dir.isEmpty()) {
+		if(dir.size == 0) {
 			select.execute(MusicSelectCommand.NEXT_SORT);
 			return;
 		}
 
 		final DirectoryBar current = dir.removeLast();
-		final DirectoryBar parent = !dir.isEmpty() ? dir.getLast() : null;
+		final DirectoryBar parent = dir.size > 0 ? dir.last() : null;
 		dir.addLast(current);
 		updateBar(parent);
 		select.play(MusicSelector.SOUND_FOLDERCLOSE);
@@ -290,12 +286,12 @@ public class BarRenderer {
 	public void addSearch(SearchWordBar bar) {
 		for (SearchWordBar s : search) {
 			if (s.getTitle().equals(bar.getTitle())) {
-				search.remove(s);
+				search.removeValue(s, true);
 				break;
 			}
 		}
-		if (search.size() >= SEARCHBAR_MAXCOUNT) {
-			search.remove(0);
+		if (search.size >= SEARCHBAR_MAXCOUNT) {
+			search.removeIndex(0);
 		}
 		search.add(bar);
 	}
@@ -332,7 +328,7 @@ public class BarRenderer {
 
 		if (bartextupdate) {
 			bartextupdate = false;
-			Set<Character> charset = new HashSet<Character>();
+			ObjectSet<Character> charset = new ObjectSet<Character>();
 
 			for (Bar song : currentsongs) {
 				for (char c : song.getTitle().toCharArray()) {
@@ -340,7 +336,7 @@ public class BarRenderer {
 				}
 			}
 
-			char[] chars = new char[charset.size()];
+			char[] chars = new char[charset.size];
 			int i = 0;
 			for (char c : charset) {
 				chars[i++] = c;
@@ -662,7 +658,7 @@ public class BarRenderer {
 
 	private boolean bartextupdate = false;
 
-	public Deque<DirectoryBar> getDirectory() {
+	public Queue<DirectoryBar> getDirectory() {
 		return dir;
 	}
 
@@ -671,43 +667,43 @@ public class BarRenderer {
 	}
 
 	public boolean updateBar() {
-		if (dir.size() > 0) {
-			return updateBar(dir.getLast());
+		if (dir.size > 0) {
+			return updateBar(dir.last());
 		}
 		return updateBar(null);
 	}
 
 	public boolean updateBar(Bar bar) {
 		Bar prevbar = currentsongs != null ? currentsongs[selectedindex] : null;
-		List<Bar> l = new ArrayList<Bar>();
+		Array<Bar> l = new Array<Bar>();
 		if (bar == null) {
-			if (!dir.isEmpty()) {
-				prevbar = dir.getFirst();
+			if (dir.size > 0) {
+				prevbar = dir.first();
 			}
 			dir.clear();
-			l.addAll(Arrays.asList(new FolderBar(select, null, "e2977170").getChildren()));
+			l.addAll(new FolderBar(select, null, "e2977170").getChildren());
 			l.add(courses);
-			l.addAll(Arrays.asList(favorites));
-			l.addAll(Arrays.asList(tables));
-			l.addAll(Arrays.asList(commands));
+			l.addAll(favorites);
+			l.addAll(tables);
+			l.addAll(commands);
 			l.addAll(search);
 		} else if (bar instanceof DirectoryBar) {
-			if(dir.contains(bar)) {
-				while(dir.getLast() != bar) {
-					prevbar = dir.pollLast();
+			if(dir.indexOf((DirectoryBar) bar, true) != -1) {
+				while(dir.last() != bar) {
+					prevbar = dir.removeLast();
 				}
-				dir.pollLast();
+				dir.removeLast();
 			}
-			l.addAll(Arrays.asList(((DirectoryBar) bar).getChildren()));
+			l.addAll(((DirectoryBar) bar).getChildren());
 		}
 
-		if (!l.isEmpty()) {
+		if (l.size > 0) {
 			final PlayerConfig config = select.main.getPlayerResource().getPlayerConfig();
 			int modeIndex = 0;
 			for(;modeIndex < MusicSelector.MODE.length && MusicSelector.MODE[modeIndex] != config.getMode();modeIndex++);
 			for(int trialCount = 0; trialCount < MusicSelector.MODE.length; trialCount++, modeIndex++) {
 				config.setMode(MusicSelector.MODE[modeIndex % MusicSelector.MODE.length]);
-				List<Bar> remove = new ArrayList<Bar>();
+				Array<Bar> remove = new Array<Bar>();
 				for (Bar b : l) {
 					final Mode mode = select.main.getPlayerResource().getPlayerConfig().getMode();
 					if (mode != null && b instanceof SongBar && ((SongBar) b).getSongData().getMode() != 0 &&
@@ -715,18 +711,18 @@ public class BarRenderer {
 						remove.add(b);
 					}
 				}
-				if(l.size() != remove.size()) {
-					l.removeAll(remove);
+				if(l.size != remove.size) {
+					l.removeAll(remove, true);
 					break;
 				}
 			}
 
 			if (bar != null) {
-				dir.add((DirectoryBar) bar);
+				dir.addLast((DirectoryBar) bar);
 			}
 
 			// 変更前と同じバーがあればカーソル位置を保持する
-			currentsongs = l.toArray(new Bar[l.size()]);
+			currentsongs = l.toArray(Bar.class);
 			bartextupdate = true;
 
 			for (Bar b : currentsongs) {
@@ -738,7 +734,7 @@ public class BarRenderer {
 				}
 			}
 
-			Arrays.sort(currentsongs, BarSorter.values()[select.getSort()]);
+			Sort.instance().sort(currentsongs, BarSorter.values()[select.getSort()]);
 
 			selectedindex = 0;
 
@@ -783,8 +779,8 @@ public class BarRenderer {
 			return true;
 		}
 
-		if (dir.size() > 0) {
-			updateBar(dir.getLast());
+		if (dir.size > 0) {
+			updateBar(dir.last());
 		} else {
 			updateBar(null);
 		}
