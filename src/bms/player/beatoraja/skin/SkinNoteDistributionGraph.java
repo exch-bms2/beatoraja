@@ -6,6 +6,8 @@ import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 import bms.player.beatoraja.song.SongData;
 
+import java.util.Arrays;
+
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
@@ -146,7 +148,9 @@ public class SkinNoteDistributionGraph extends SkinObject {
 		//プレイ時、判定をリアルタイムで更新する
 		if(model != null && state instanceof BMSPlayer && type > 0 && pastNotes != ((BMSPlayer)state).getPastNotes()) {
 			pastNotes = ((BMSPlayer)state).getPastNotes();
-			updateGraph(model);
+			// TODO さらなる高速化のアイデア-BMSPlayerから更新したノーツの時間だけを渡し。指定時間のデータ/イメージのみ更新する
+			updateData(model);
+			updateTexture();
 		}
 
 		draw(sprite, backtex, r.x, r.y + r.height, r.width, -r.height, state);
@@ -187,77 +191,89 @@ public class SkinNoteDistributionGraph extends SkinObject {
 		if (model == null) {
 			data = new int[0][DATA_LENGTH[type]];
 		} else {
-			data = new int[model.getLastTime() / 1000 + 1][DATA_LENGTH[type]];				
-			int pos = 0;
-			int count = 0;
-			max = 20;
-			for (TimeLine tl : model.getAllTimeLines()) {
-				if(tl.getTime() / 1000 >= data.length) {
-					break;
-				}
-				if (tl.getTime() / 1000 != pos) {
-					if (max < count) {
-						max = Math.min((count / 10) * 10 + 10, 100);
-					}
-					pos = tl.getTime() / 1000;
-					count = type == TYPE_NORMAL ? data[tl.getTime() / 1000][1] + data[tl.getTime() / 1000][4] : 0;
-				}
-				for (int i = 0; i < model.getMode().key; i++) {
-					Note n = tl.getNote(i);
-					if (n != null) {
-						final int st = n.getState();
-						final int t = n.getPlayTime();
-						switch (type) {
-						case TYPE_NORMAL:
-							if (n instanceof NormalNote) {
-								data[tl.getTime() / 1000][model.getMode().isScratchKey(i) ? 2 : 5]++;
-								count++;
-							}
-							if (n instanceof LongNote) {
-								if(!((LongNote)n).isEnd()) {
-									for(int index = tl.getTime() / 1000;index <= ((LongNote)n).getPair().getTime() / 1000;index++) {
-										data[index][model.getMode().isScratchKey(i) ? 1 : 4]++;
-									}
-									count++;
-								}
-								if((model.getLntype() == BMSModel.LNTYPE_LONGNOTE && n instanceof LongNote
-										&& ((LongNote) n).isEnd())) {
-									data[tl.getTime() / 1000][model.getMode().isScratchKey(i) ? 0 : 3]++;
-									data[tl.getTime() / 1000][model.getMode().isScratchKey(i) ? 1 : 4]--;									
-								}
-							}
-							if (n instanceof MineNote) {
-								data[tl.getTime() / 1000][6]++;
-								count++;
-							}
-							break;
-						case TYPE_JUDGE:
-							if (n instanceof MineNote || (model.getLntype() == BMSModel.LNTYPE_LONGNOTE && n instanceof LongNote
-									&& ((LongNote) n).isEnd())) {
-								break;
-							}
-							data[tl.getTime() / 1000][st]++;
-							count++;
-							break;
-						case TYPE_EARLYLATE:
-							if (n instanceof MineNote || (model.getLntype() == BMSModel.LNTYPE_LONGNOTE && n instanceof LongNote
-							&& ((LongNote) n).isEnd())) {
-								break;
-							}
-							if (st <= 1) {
-								data[tl.getTime() / 1000][st]++;
-							} else {
-								data[tl.getTime() / 1000][t >= 0 ? st : st + 4]++;
-							}
-							count++;
-							break;
-						}							 
-					}
-				}
-			}
+			data = new int[model.getLastTime() / 1000 + 1][DATA_LENGTH[type]];
+			
+			updateData(model);
 		}
 		
 		updateTexture();
+	}
+	
+	private void updateData(BMSModel model) {
+		int pos = -1;
+		int count = 0;
+		max = 20;
+		for(int[] d : data) {
+			Arrays.fill(d, 0);
+		}
+
+		final Mode mode = model.getMode();
+		for (TimeLine tl : model.getAllTimeLines()) {
+			final int index = tl.getTime() / 1000;
+			if(index >= data.length) {
+				break;
+			}
+			if (index != pos) {
+				if (max < count) {
+					max = Math.min((count / 10) * 10 + 10, 100);
+				}
+				pos = index;
+				count = type == TYPE_NORMAL ? data[index][1] + data[index][4] : 0;
+			}
+			for (int i = 0; i < mode.key; i++) {
+				Note n = tl.getNote(i);
+				if (n != null) {
+					final int st = n.getState();
+					final int t = n.getPlayTime();
+					switch (type) {
+					case TYPE_NORMAL:
+						if (n instanceof NormalNote) {
+							data[index][mode.isScratchKey(i) ? 2 : 5]++;
+							count++;
+						}
+						if (n instanceof LongNote) {
+							if(!((LongNote)n).isEnd()) {
+								for(int lnindex = index;lnindex <= ((LongNote)n).getPair().getTime() / 1000;lnindex++) {
+									data[lnindex][mode.isScratchKey(i) ? 1 : 4]++;
+								}
+								count++;
+							}
+							if((model.getLntype() == BMSModel.LNTYPE_LONGNOTE && n instanceof LongNote
+									&& ((LongNote) n).isEnd())) {
+								data[index][mode.isScratchKey(i) ? 0 : 3]++;
+								data[index][mode.isScratchKey(i) ? 1 : 4]--;									
+							}
+						}
+						if (n instanceof MineNote) {
+							data[index][6]++;
+							count++;
+						}
+						break;
+					case TYPE_JUDGE:
+						if (n instanceof MineNote || (model.getLntype() == BMSModel.LNTYPE_LONGNOTE && n instanceof LongNote
+								&& ((LongNote) n).isEnd())) {
+							break;
+						}
+						data[index][st]++;
+						count++;
+						break;
+					case TYPE_EARLYLATE:
+						if (n instanceof MineNote || (model.getLntype() == BMSModel.LNTYPE_LONGNOTE && n instanceof LongNote
+						&& ((LongNote) n).isEnd())) {
+							break;
+						}
+						if (st <= 1) {
+							data[index][st]++;
+						} else {
+							data[index][t >= 0 ? st : st + 4]++;
+						}
+						count++;
+						break;
+					}							 
+				}
+			}
+		}
+
 	}
 	
 	private void updateTexture() {
