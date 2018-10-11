@@ -6,6 +6,8 @@ import java.io.InputStreamReader;
 import java.nio.file.Path;
 
 import bms.player.beatoraja.ShaderManager;
+import bms.player.beatoraja.skin.property.StringProperty;
+import bms.player.beatoraja.skin.property.StringPropertyFactory;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
@@ -31,11 +33,11 @@ public class SkinTextBitmap extends SkinText {
 	private float size;
 
 	public SkinTextBitmap(SkinTextBitmapSource source, float size) {
-		this(source, size, -1);
+		this(source, size, StringPropertyFactory.getStringProperty(-1));
 	}
 
-	public SkinTextBitmap(SkinTextBitmapSource source, float size, int id) {
-		super(id);
+	public SkinTextBitmap(SkinTextBitmapSource source, float size, StringProperty property) {
+		super(property);
 		this.source = source;
 		this.size = size;
 		this.layout =new GlyphLayout();

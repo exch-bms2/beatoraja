@@ -1,5 +1,7 @@
 package bms.player.beatoraja.skin;
 
+import bms.player.beatoraja.skin.property.StringProperty;
+import bms.player.beatoraja.skin.property.StringPropertyFactory;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -30,11 +32,11 @@ public class SkinTextFont extends SkinText {
     private String preparedFonts;
 
     public SkinTextFont(String fontpath, int cycle, int size, int shadow) {
-        this(fontpath, cycle, size, shadow, -1);
+        this(fontpath, cycle, size, shadow, StringPropertyFactory.getStringProperty(-1));
     }
 
-    public SkinTextFont(String fontpath, int cycle, int size, int shadow, int id) {
-    	super(id);
+    public SkinTextFont(String fontpath, int cycle, int size, int shadow, StringProperty property) {
+    	super(property);
         generator = new FreeTypeFontGenerator(Gdx.files.internal(fontpath));
         parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
         parameter.characters = "";
