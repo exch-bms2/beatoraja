@@ -67,7 +67,7 @@ public class SkinLuaAccessor {
 				return LuaDouble.valueOf(state.main.getConfig().getSystemvolume());
 			}
 		});
-		globals.set("volume_sys", new OneArgFunction() {
+		globals.set("set_volume_sys", new OneArgFunction() {
 			@Override
 			public LuaValue call(LuaValue value) {
 				state.main.getConfig().setSystemvolume(value.tofloat());
@@ -80,7 +80,7 @@ public class SkinLuaAccessor {
 				return LuaDouble.valueOf(state.main.getConfig().getKeyvolume());
 			}
 		});
-		globals.set("volume_key", new OneArgFunction() {
+		globals.set("set_volume_key", new OneArgFunction() {
 			@Override
 			public LuaValue call(LuaValue value) {
 				state.main.getConfig().setKeyvolume(value.tofloat());
@@ -93,7 +93,7 @@ public class SkinLuaAccessor {
 				return LuaDouble.valueOf(state.main.getConfig().getBgvolume());
 			}
 		});
-		globals.set("volume_bg", new OneArgFunction() {
+		globals.set("set_volume_bg", new OneArgFunction() {
 			@Override
 			public LuaValue call(LuaValue value) {
 				state.main.getConfig().setBgvolume(value.tofloat());
