@@ -139,7 +139,12 @@ public class SkinLuaAccessor {
 
 				@Override
 				public boolean get(MainState state) {
-					return lv.call().toboolean();
+					try {
+						return lv.call().toboolean();
+					} catch (RuntimeException e) {
+						Logger.getGlobal().warning("Lua実行時の例外 : " + e.getMessage());
+						return false;
+					}
 				}
 			};
 		} catch (RuntimeException e) {
@@ -154,9 +159,14 @@ public class SkinLuaAccessor {
 			return new IntegerProperty() {
 				@Override
 				public int get(MainState state) {
-					return lv.call().toint();
+					try{
+						return lv.call().toint();
+					} catch (RuntimeException e) {
+						Logger.getGlobal().warning("Lua実行時の例外 : " + e.getMessage());
+						return 0;
+					}
 				}
-			};			
+			};
 		} catch (RuntimeException e) {
 			Logger.getGlobal().warning("Lua解析時の例外 : " + e.getMessage());
 		}
@@ -169,9 +179,14 @@ public class SkinLuaAccessor {
 			return new FloatProperty() {
 				@Override
 				public float get(MainState state) {
-					return lv.call().tofloat();
+					try{
+						return lv.call().tofloat();
+					} catch (RuntimeException e) {
+						Logger.getGlobal().warning("Lua実行時の例外 : " + e.getMessage());
+						return 0f;
+					}
 				}
-			};			
+			};
 		} catch (RuntimeException e) {
 			Logger.getGlobal().warning("Lua解析時の例外 : " + e.getMessage());
 		}
@@ -184,7 +199,12 @@ public class SkinLuaAccessor {
 			return new StringProperty() {
 				@Override
 				public String get(MainState state) {
-					return lv.call().tojstring();
+					try {
+						return lv.call().tojstring();
+					} catch (RuntimeException e) {
+						Logger.getGlobal().warning("Lua実行時の例外：" + e.getMessage());
+						return "";
+					}
 				}
 			};
 		} catch (RuntimeException e) {
@@ -199,9 +219,13 @@ public class SkinLuaAccessor {
 			return new Event() {
 				@Override
 				public void exec(MainState state) {
-					lv.call();
+					try{
+						lv.call();
+					} catch (RuntimeException e) {
+						Logger.getGlobal().warning("Lua実行時の例外：" + e.getMessage());
+					}
 				}
-			};			
+			};
 		} catch (RuntimeException e) {
 			Logger.getGlobal().warning("Lua解析時の例外 : " + e.getMessage());
 		}
@@ -215,10 +239,14 @@ public class SkinLuaAccessor {
 
 				@Override
 				public void set(MainState state, float value) {
-					lv.call(LuaDouble.valueOf(value));
+					try{
+						lv.call(LuaDouble.valueOf(value));
+					} catch (RuntimeException e) {
+						Logger.getGlobal().warning("Lua実行時の例外：" + e.getMessage());
+					}
 				}
 				
-			};			
+			};
 		} catch (RuntimeException e) {
 			Logger.getGlobal().warning("Lua解析時の例外 : " + e.getMessage());
 		}
