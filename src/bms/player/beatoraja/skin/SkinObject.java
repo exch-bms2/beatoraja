@@ -27,9 +27,9 @@ public abstract class SkinObject implements Disposable {
 
 	private int imageid = -1;
 	/**
-	 * 参照するタイマーID
+	 * 参照するタイマー定義
 	 */
-	private int dsttimer = 0;
+	private TimerProperty dsttimer;
 	/**
 	 * ループ開始タイマー
 	 */
@@ -118,19 +118,49 @@ public abstract class SkinObject implements Disposable {
 	}
 
 	public void setDestination(long time, float x, float y, float w, float h, int acc, int a, int r, int g, int b,
-			int blend, int filter, int angle, int center, int loop, int timer, int op1, int op2, int op3, int offset) {
+	                           int blend, int filter, int angle, int center, int loop, int timer, int op1, int op2, int op3, int offset) {
+		setDestination(time, x, y, w, h, acc, a, r, g, b, blend, filter, angle, center, loop,
+				timer > 0 ? TimerPropertyFactory.getTimerProperty(timer) : null, new int[]{op1,op2,op3});
+		setOffsetID(offset);
+	}
+
+	public void setDestination(long time, float x, float y, float w, float h, int acc, int a, int r, int g, int b,
+	                           int blend, int filter, int angle, int center, int loop, int timer, int op1, int op2, int op3, int[] offset) {
+		setDestination(time, x, y, w, h, acc, a, r, g, b, blend, filter, angle, center, loop,
+				timer > 0 ? TimerPropertyFactory.getTimerProperty(timer) : null, new int[]{op1,op2,op3});
+		setOffsetID(offset);
+	}
+
+	public void setDestination(long time, float x, float y, float w, float h, int acc, int a, int r, int g, int b,
+	                           int blend, int filter, int angle, int center, int loop, int timer, int[] op) {
+		setDestination(time, x, y, w, h, acc, a, r, g, b, blend, filter, angle, center, loop,
+				timer > 0 ? TimerPropertyFactory.getTimerProperty(timer) : null);
+		if (dstop.length == 0 && dstdraw.length == 0) {
+			setDrawCondition(op);
+		}
+	}
+
+	public void setDestination(long time, float x, float y, float w, float h, int acc, int a, int r, int g, int b,
+	                           int blend, int filter, int angle, int center, int loop, int timer, BooleanProperty draw) {
+		setDestination(time, x, y, w, h, acc, a, r, g, b, blend, filter, angle, center, loop,
+				timer > 0 ? TimerPropertyFactory.getTimerProperty(timer) : null);
+		dstdraw = new BooleanProperty[] {draw};
+	}
+
+	public void setDestination(long time, float x, float y, float w, float h, int acc, int a, int r, int g, int b,
+			int blend, int filter, int angle, int center, int loop, TimerProperty timer, int op1, int op2, int op3, int offset) {
 		setDestination(time, x, y, w, h, acc, a, r, g, b, blend, filter, angle, center, loop, timer, new int[]{op1,op2,op3});
 		setOffsetID(offset);
 	}
 
 	public void setDestination(long time, float x, float y, float w, float h, int acc, int a, int r, int g, int b,
-							   int blend, int filter, int angle, int center, int loop, int timer, int op1, int op2, int op3, int[] offset) {
+							   int blend, int filter, int angle, int center, int loop, TimerProperty timer, int op1, int op2, int op3, int[] offset) {
 		setDestination(time, x, y, w, h, acc, a, r, g, b, blend, filter, angle, center, loop, timer, new int[]{op1,op2,op3});
 		setOffsetID(offset);
 	}
 
 	public void setDestination(long time, float x, float y, float w, float h, int acc, int a, int r, int g, int b,
-			int blend, int filter, int angle, int center, int loop, int timer, int[] op) {
+			int blend, int filter, int angle, int center, int loop, TimerProperty timer, int[] op) {
 		setDestination(time, x, y, w, h, acc, a, r, g, b, blend, filter, angle, center, loop, timer);
 		if (dstop.length == 0 && dstdraw.length == 0) {
 			setDrawCondition(op);
@@ -138,13 +168,13 @@ public abstract class SkinObject implements Disposable {
 	}
 	
 	public void setDestination(long time, float x, float y, float w, float h, int acc, int a, int r, int g, int b,
-			int blend, int filter, int angle, int center, int loop, int timer, BooleanProperty draw) {
+			int blend, int filter, int angle, int center, int loop, TimerProperty timer, BooleanProperty draw) {
 		setDestination(time, x, y, w, h, acc, a, r, g, b, blend, filter, angle, center, loop, timer);
 		dstdraw = new BooleanProperty[] {draw};
 	}
 	
 	private void setDestination(long time, float x, float y, float w, float h, int acc, int a, int r, int g, int b,
-			int blend, int filter, int angle, int center, int loop, int timer) {
+			int blend, int filter, int angle, int center, int loop, TimerProperty timer) {
 		SkinObjectDestination obj = new SkinObjectDestination(time, new Rectangle(x, y, w, h), new Color(r / 255.0f,
 				g / 255.0f, b / 255.0f, a / 255.0f), angle, acc);
 		if (dst.length == 0) {
@@ -178,7 +208,7 @@ public abstract class SkinObject implements Disposable {
 			centerx = CENTERX[center];
 			centery = CENTERY[center];
 		}
-		if (dsttimer == 0) {
+		if (dsttimer == null) {
 			dsttimer = timer;
 		}
 		if (dstloop == 0) {
@@ -271,13 +301,13 @@ public abstract class SkinObject implements Disposable {
 	 * @return 描画領域
 	 */
 	public Rectangle getDestination(long time, MainState state) {
-		final int timer = dsttimer;
+		final TimerProperty timer = dsttimer;
 
-		if (timer != 0 && timer < MainController.timerCount) {
-			if (!state.main.isTimerOn(timer)) {
+		if (timer != null) {
+			if (timer.isOff(state)) {
 				return null;
 			}
-			time -= state.main.getTimer(timer);
+			time -= timer.get(state);
 		}
 
 		final long lasttime = endtime;
@@ -669,7 +699,7 @@ public abstract class SkinObject implements Disposable {
 		this.imageid = imageid;
 	}
 
-	public int getDestinationTimer() {
+	public TimerProperty getDestinationTimer() {
 		return dsttimer;
 	}
 	

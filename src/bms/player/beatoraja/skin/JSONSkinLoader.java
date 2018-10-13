@@ -1066,6 +1066,10 @@ public class JSONSkinLoader extends SkinLoader{
 	}
 
 	private void setDestination(Skin skin, SkinObject obj, Destination dst) {
+		TimerProperty timer = dst.timerFunction;
+		if (timer == null && dst.timer > 0) {
+			timer = TimerPropertyFactory.getTimerProperty(dst.timer);
+		}
 		Animation prev = null;
 		for (Animation a : dst.dst) {
 			if (prev == null) {
@@ -1095,10 +1099,10 @@ public class JSONSkinLoader extends SkinLoader{
 			}
 			if(dst.draw != null) {
 				skin.setDestination(obj, a.time, a.x, a.y, a.w, a.h, a.acc, a.a, a.r, a.g, a.b, dst.blend, dst.filter,
-						a.angle, dst.center, dst.loop, dst.timer, dst.draw);
+						a.angle, dst.center, dst.loop, timer, dst.draw);
 			} else {
 				skin.setDestination(obj, a.time, a.x, a.y, a.w, a.h, a.acc, a.a, a.r, a.g, a.b, dst.blend, dst.filter,
-						a.angle, dst.center, dst.loop, dst.timer, dst.op);
+						a.angle, dst.center, dst.loop, timer, dst.op);
 			}
 			if (dst.mouseRect != null) {
 				skin.setMouseRect(obj, dst.mouseRect.x, dst.mouseRect.y, dst.mouseRect.w, dst.mouseRect.h);
@@ -1572,6 +1576,7 @@ public class JSONSkinLoader extends SkinLoader{
 		public int stretch = -1;
 		public int[] op = new int[0];
 		public BooleanProperty draw;
+		public TimerProperty timerFunction;
 		public Animation[] dst = new Animation[0];
 		public Rect mouseRect;
 	}
