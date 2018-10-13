@@ -7,6 +7,7 @@ import java.io.*;
 import java.lang.reflect.Array;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.function.Function;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
@@ -386,15 +387,10 @@ public class JSONSkinLoader extends SkinLoader{
 									}
 								}
 
-								IntegerProperty val = null;
-								if(value.value != null) {
-									val = lua.loadIntegerProperty(value.value);
-								}
-
 								SkinNumber num = null;
-								if(val != null) {
+								if(value.value != null) {
 									num = new SkinNumber(pn, mn, value.timer, value.cycle, value.digit, 0,
-											val);
+											value.value);
 								} else {
 									num = new SkinNumber(pn, mn, value.timer, value.cycle, value.digit, 0,
 											value.ref);
@@ -423,14 +419,10 @@ public class JSONSkinLoader extends SkinLoader{
 									}
 								}
 
-								IntegerProperty val = null;
-								if(value.value != null) {
-									val = lua.loadIntegerProperty(value.value);
-								}
 								SkinNumber num = null;
-								if(val != null) {
+								if(value.value != null) {
 									num = new SkinNumber(nimages, value.timer, value.cycle, value.digit,
-											d > 10 ? 2 : value.padding, val);
+											d > 10 ? 2 : value.padding, value.value);
 								} else {
 									num = new SkinNumber(nimages, value.timer, value.cycle, value.digit,
 											d > 10 ? 2 : value.padding, value.ref);
@@ -472,20 +464,11 @@ public class JSONSkinLoader extends SkinLoader{
 						if (dst.id.equals(img.id)) {
 							Texture tex = getTexture(img.src, p);
 
-							FloatProperty value = null;
 							if(img.value != null) {
-								value = lua.loadFloatProperty(img.value);
-							}
-							FloatWriter event = null;
-							if(img.event != null) {
-								event = lua.loadFloatWriter(img.event);
-							}
-
-							if(value != null) {
 								obj = new SkinSlider(getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy),
 										img.timer, img.cycle, img.angle, (int) ((img.angle == 1 || img.angle == 3
 												? ((float)dstr.width / sk.w) : ((float)dstr.height / sk.h)) * img.range),
-										value, event);
+										img.value, img.event);
 							} else if(img.isRefNum) {
 								obj = new SkinSlider(getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy),
 										img.timer, img.cycle, img.angle, (int) ((img.angle == 1 || img.angle == 3
@@ -530,7 +513,7 @@ public class JSONSkinLoader extends SkinLoader{
 
 								FloatProperty value = null;
 								if(img.value != null) {
-									value = lua.loadFloatProperty(img.value);
+									value = img.value;
 								}
 
 								if(value != null) {
@@ -1088,11 +1071,6 @@ public class JSONSkinLoader extends SkinLoader{
 	}
 
 	private void setDestination(Skin skin, SkinObject obj, Destination dst) {
-		BooleanProperty draw = null;
-		if(dst.draw != null) {
-			draw = lua.loadBooleanProperty(dst.draw);
-		}
-
 		Animation prev = null;
 		for (Animation a : dst.dst) {
 			if (prev == null) {
@@ -1120,9 +1098,9 @@ public class JSONSkinLoader extends SkinLoader{
 				a.g = (a.g == Integer.MIN_VALUE ? prev.g : a.g);
 				a.b = (a.b == Integer.MIN_VALUE ? prev.b : a.b);
 			}
-			if(draw != null) {
+			if(dst.draw != null) {
 				skin.setDestination(obj, a.time, a.x, a.y, a.w, a.h, a.acc, a.a, a.r, a.g, a.b, dst.blend, dst.filter,
-						a.angle, dst.center, dst.loop, dst.timer, draw);
+						a.angle, dst.center, dst.loop, dst.timer, dst.draw);
 			} else {
 				skin.setDestination(obj, a.time, a.x, a.y, a.w, a.h, a.acc, a.a, a.r, a.g, a.b, dst.blend, dst.filter,
 						a.angle, dst.center, dst.loop, dst.timer, dst.op);
@@ -1232,10 +1210,7 @@ public class JSONSkinLoader extends SkinLoader{
 			if (font.id.equals(text.font)) {
 				Path path = skinPath.getParent().resolve(font.path);
 				SkinText skinText;
-				StringProperty property = null;
-				if (text.value != null) {
-					property = lua.loadStringProperty(text.value);
-				}
+				StringProperty property = text.value;
 				if (property == null) {
 					property = StringPropertyFactory.getStringProperty(text.ref);
 				}
@@ -1392,7 +1367,7 @@ public class JSONSkinLoader extends SkinLoader{
 		public int digit;
 		public int padding;
 		public int ref;
-		public String value;
+		public IntegerProperty value;
 		public Value[] offset;
 	}
 
@@ -1402,7 +1377,7 @@ public class JSONSkinLoader extends SkinLoader{
 		public int size;
 		public int align;
 		public int ref;
-		public String value;
+		public StringProperty value;
 		public boolean wrapping = false;
 		public int overflow = SkinText.OVERFLOW_OVERFLOW;
 		public String outlineColor = "ffffff00";
@@ -1427,8 +1402,8 @@ public class JSONSkinLoader extends SkinLoader{
 		public int angle;
 		public int range;
 		public int type;
-		public String value;
-		public String event;
+		public FloatProperty value;
+		public FloatWriter event;
 		public boolean isRefNum = false;
 		public int min = 0;
 		public int max = 0;
@@ -1447,7 +1422,7 @@ public class JSONSkinLoader extends SkinLoader{
 		public int cycle;
 		public int angle = 1;
 		public int type;
-		public String value;
+		public FloatProperty value;
 		public boolean isRefNum = false;
 		public int min = 0;
 		public int max = 0;
@@ -1601,7 +1576,7 @@ public class JSONSkinLoader extends SkinLoader{
 		public int[] offsets = new int[0];
 		public int stretch = -1;
 		public int[] op = new int[0];
-		public String draw;
+		public BooleanProperty draw;
 		public Animation[] dst = new Animation[0];
 		public Rect mouseRect;
 	}
@@ -1714,6 +1689,13 @@ public class JSONSkinLoader extends SkinLoader{
 		for (Class c : array_classes) {
 			json.setSerializer(c, new ArraySerializer<>(enabledOptions, path));
 		}
+
+		json.setSerializer(BooleanProperty.class, new LuaScriptSerializer<>(s -> lua.loadBooleanProperty(s)));
+		json.setSerializer(IntegerProperty.class, new LuaScriptSerializer<>(s -> lua.loadIntegerProperty(s)));
+		json.setSerializer(FloatProperty.class, new LuaScriptSerializer<>(s -> lua.loadFloatProperty(s)));
+		json.setSerializer(StringProperty.class, new LuaScriptSerializer<>(s -> lua.loadStringProperty(s)));
+		json.setSerializer(FloatWriter.class, new LuaScriptSerializer<>(s -> lua.loadFloatWriter(s)));
+		json.setSerializer(Event.class, new LuaScriptSerializer<>(s -> lua.loadEvent(s)));
 	}
 
 	private abstract class Serializer<T> extends Json.ReadOnlySerializer<T> {
@@ -1893,6 +1875,18 @@ public class JSONSkinLoader extends SkinLoader{
 				} catch (FileNotFoundException e) {
 				}
 			}
+		}
+	}
+
+	private class LuaScriptSerializer<T> extends Json.ReadOnlySerializer<T> {
+		Function<String, T> luaPropertyLoader;
+
+		LuaScriptSerializer(Function<String, T> loader) {
+			luaPropertyLoader = loader;
+		}
+
+		public T read(Json json, JsonValue jsonValue, Class cls) {
+			return luaPropertyLoader.apply(jsonValue.asString());
 		}
 	}
 }

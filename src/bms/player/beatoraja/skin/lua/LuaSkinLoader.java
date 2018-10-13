@@ -4,9 +4,11 @@ import bms.player.beatoraja.Config;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.SkinConfig;
 import bms.player.beatoraja.skin.*;
+import bms.player.beatoraja.skin.property.*;
 import com.badlogic.gdx.utils.reflect.ClassReflection;
 import com.badlogic.gdx.utils.reflect.Field;
 import com.badlogic.gdx.utils.reflect.ReflectionException;
+import org.luaj.vm2.LuaFunction;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
 
@@ -61,28 +63,53 @@ public class LuaSkinLoader extends JSONSkinLoader {
 		return skin;
 	}
 
+	@SuppressWarnings("unchecked")
 	<T> T fromLuaValue(Class<T> cls, LuaValue lv) {
 		if (cls.isArray()) {
 			Class componentClass = cls.getComponentType();
 			if (lv.istable()) {
-				LuaTable table = (LuaTable)lv;
+				LuaTable table = (LuaTable) lv;
 				LuaValue[] keys = table.keys();
 				Object array = Array.newInstance(componentClass, keys.length);
-				for (int i=0; i<keys.length; i++) {
+				for (int i = 0; i < keys.length; i++) {
 					Array.set(array, i, fromLuaValue(componentClass, table.get(keys[i])));
 				}
-				return (T)array;
+				return (T) array;
 			} else {
-				return (T)Array.newInstance(componentClass, 0);
+				return (T) Array.newInstance(componentClass, 0);
 			}
 		} else if (cls == boolean.class || cls == Boolean.class) {
-			return (T)(Boolean)lv.toboolean();
+			return (T) (Boolean) lv.toboolean();
 		} else if (cls == int.class || cls == Integer.class) {
-			return (T)(Integer)lv.toint();
+			return (T) (Integer) lv.toint();
 		} else if (cls == float.class || cls == Float.class) {
-			return (T)(Float)lv.tofloat();
+			return (T) (Float) lv.tofloat();
 		} else if (cls == String.class) {
-			return (T)lv.tojstring();
+			return (T) lv.tojstring();
+		} else if (cls == BooleanProperty.class) {
+			return (T) (lv.isfunction()
+					? lua.loadBooleanProperty((LuaFunction)lv)
+					: lua.loadBooleanProperty(lv.tojstring()));
+		} else if (cls == IntegerProperty.class) {
+			return (T) (lv.isfunction()
+					? lua.loadIntegerProperty((LuaFunction)lv)
+					: lua.loadIntegerProperty(lv.tojstring()));
+		} else if (cls == FloatProperty.class) {
+			return (T) (lv.isfunction()
+					? lua.loadFloatProperty((LuaFunction)lv)
+					: lua.loadFloatProperty(lv.tojstring()));
+		} else if (cls == StringProperty.class) {
+			return (T) (lv.isfunction()
+					? lua.loadStringProperty((LuaFunction)lv)
+					: lua.loadStringProperty(lv.tojstring()));
+		} else if (cls == SkinObject.FloatWriter.class) {
+			return (T) (lv.isfunction()
+					? lua.loadFloatWriter((LuaFunction)lv)
+					: lua.loadFloatWriter(lv.tojstring()));
+		} else if (cls == SkinObject.Event.class) {
+			return (T) (lv.isfunction()
+					? lua.loadEvent((LuaFunction)lv)
+					: lua.loadEvent(lv.tojstring()));
 		} else {
 			try {
 				T instance = (T) ClassReflection.newInstance(cls);
