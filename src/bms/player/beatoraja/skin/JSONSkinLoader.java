@@ -511,14 +511,9 @@ public class JSONSkinLoader extends SkinLoader{
 							} else {
 								Texture tex = getTexture(img.src, p);
 
-								FloatProperty value = null;
 								if(img.value != null) {
-									value = img.value;
-								}
-
-								if(value != null) {
 									obj = new SkinGraph(getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy),
-											img.timer, img.cycle, value);
+											img.timer, img.cycle, img.value);
 								} else if(img.isRefNum) {
 									obj = new SkinGraph(getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy),
 											img.timer, img.cycle, img.type, img.min, img.max);
