@@ -102,6 +102,10 @@ public class LuaSkinLoader extends JSONSkinLoader {
 			return (T) (lv.isfunction()
 					? lua.loadStringProperty((LuaFunction)lv)
 					: lua.loadStringProperty(lv.tojstring()));
+		} else if (cls == TimerProperty.class) {
+			return (T) (lv.isfunction()
+					? lua.loadTimerProperty((LuaFunction)lv)
+					: lua.loadTimerProperty(lv.tojstring()));
 		} else if (cls == SkinObject.FloatWriter.class) {
 			return (T) (lv.isfunction()
 					? lua.loadFloatWriter((LuaFunction)lv)

@@ -1689,6 +1689,7 @@ public class JSONSkinLoader extends SkinLoader{
 		json.setSerializer(IntegerProperty.class, new LuaScriptSerializer<>(s -> lua.loadIntegerProperty(s)));
 		json.setSerializer(FloatProperty.class, new LuaScriptSerializer<>(s -> lua.loadFloatProperty(s)));
 		json.setSerializer(StringProperty.class, new LuaScriptSerializer<>(s -> lua.loadStringProperty(s)));
+		json.setSerializer(TimerProperty.class, new LuaScriptSerializer<>(s -> lua.loadTimerProperty(s)));
 		json.setSerializer(FloatWriter.class, new LuaScriptSerializer<>(s -> lua.loadFloatWriter(s)));
 		json.setSerializer(Event.class, new LuaScriptSerializer<>(s -> lua.loadEvent(s)));
 	}
