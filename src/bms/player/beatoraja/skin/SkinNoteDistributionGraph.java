@@ -25,7 +25,17 @@ public class SkinNoteDistributionGraph extends SkinObject {
 	private TextureRegion shapetex;
 	private Pixmap shape = null;
 
+	/**
+	 * 開始位置のカーソル(プラクティス)
+	 */
 	private TextureRegion startcursor;
+	/**
+	 * 現在位置のカーソル(プレイ中)
+	 */
+	private TextureRegion nowcursor;
+	/**
+	 * 終了位置のカーソル(プラクティス)
+	 */
 	private TextureRegion endcursor;
 
 	private BMSModel model;
@@ -99,6 +109,10 @@ public class SkinNoteDistributionGraph extends SkinObject {
 		bp.drawPixel(0, 0, Color.toIntBits(255, 128, 128, 255));
 		endcursor = new TextureRegion(new Texture(bp));
 		bp.dispose();
+		bp = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+		bp.drawPixel(0, 0, Color.toIntBits(255, 255, 255, 255));
+		nowcursor = new TextureRegion(new Texture(bp));
+		bp.dispose();
 
 	}
 
@@ -166,6 +180,11 @@ public class SkinNoteDistributionGraph extends SkinObject {
 		if (endtime >= 0) {
 			int dx = (int) (endtime * r.width / (data.length * 1000));
 			sprite.draw(endcursor, r.x + dx, r.y, 1, r.height);
+		}
+		// 現在カーソル描画
+		if (state instanceof BMSPlayer && state.main.isTimerOn(SkinProperty.TIMER_PLAY)) {
+			int dx = (int) (state.main.getNowTime(SkinProperty.TIMER_PLAY) * r.width / (data.length * 1000));
+			sprite.draw(nowcursor, r.x + dx, r.y, 1, r.height);
 		}
 
 	}
@@ -363,6 +382,7 @@ public class SkinNoteDistributionGraph extends SkinObject {
 			shapetex.getTexture().dispose();
 			startcursor.getTexture().dispose();
 			endcursor.getTexture().dispose();
+			nowcursor.getTexture().dispose();
 			shape.dispose();
 			shapetex = null;
 		}
