@@ -7,6 +7,7 @@ import java.io.*;
 import java.lang.reflect.Array;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import com.badlogic.gdx.graphics.Color;
@@ -1685,14 +1686,13 @@ public class JSONSkinLoader extends SkinLoader{
 			json.setSerializer(c, new ArraySerializer<>(enabledOptions, path));
 		}
 
-		// method reference (lua::load*Property) is not possible because lua may be null
-		json.setSerializer(BooleanProperty.class, new LuaScriptSerializer<>(s -> lua.loadBooleanProperty(s), BooleanPropertyFactory::getBooleanProperty));
-		json.setSerializer(IntegerProperty.class, new LuaScriptSerializer<>(s -> lua.loadIntegerProperty(s), IntegerPropertyFactory::getIntegerProperty));
-		json.setSerializer(FloatProperty.class, new LuaScriptSerializer<>(s -> lua.loadFloatProperty(s), FloatPropertyFactory::getFloatProperty));
-		json.setSerializer(StringProperty.class, new LuaScriptSerializer<>(s -> lua.loadStringProperty(s), StringPropertyFactory::getStringProperty));
-		json.setSerializer(TimerProperty.class, new LuaScriptSerializer<>(s -> lua.loadTimerProperty(s), TimerPropertyFactory::getTimerProperty));
-		json.setSerializer(FloatWriter.class, new LuaScriptSerializer<>(s -> lua.loadFloatWriter(s), FloatPropertyFactory::getFloatWriter));
-		json.setSerializer(Event.class, new LuaScriptSerializer<>(s -> lua.loadEvent(s), null));
+		json.setSerializer(BooleanProperty.class, new LuaScriptSerializer<>(SkinLuaAccessor::loadBooleanProperty, BooleanPropertyFactory::getBooleanProperty));
+		json.setSerializer(IntegerProperty.class, new LuaScriptSerializer<>(SkinLuaAccessor::loadIntegerProperty, IntegerPropertyFactory::getIntegerProperty));
+		json.setSerializer(FloatProperty.class, new LuaScriptSerializer<>(SkinLuaAccessor::loadFloatProperty, FloatPropertyFactory::getFloatProperty));
+		json.setSerializer(StringProperty.class, new LuaScriptSerializer<>(SkinLuaAccessor::loadStringProperty, StringPropertyFactory::getStringProperty));
+		json.setSerializer(TimerProperty.class, new LuaScriptSerializer<>(SkinLuaAccessor::loadTimerProperty, TimerPropertyFactory::getTimerProperty));
+		json.setSerializer(FloatWriter.class, new LuaScriptSerializer<>(SkinLuaAccessor::loadFloatWriter, FloatPropertyFactory::getFloatWriter));
+		json.setSerializer(Event.class, new LuaScriptSerializer<>(SkinLuaAccessor::loadEvent, null));
 	}
 
 	private abstract class Serializer<T> extends Json.ReadOnlySerializer<T> {
@@ -1876,17 +1876,17 @@ public class JSONSkinLoader extends SkinLoader{
 	}
 
 	private class LuaScriptSerializer<T> extends Json.ReadOnlySerializer<T> {
-		Function<String, T> luaPropertyLoader;
+		BiFunction<SkinLuaAccessor, String, T> luaPropertyLoader;
 		Function<Integer, T> idPropertyLoader;
 
-		LuaScriptSerializer(Function<String, T> loader, Function<Integer, T> byId) {
+		LuaScriptSerializer(BiFunction<SkinLuaAccessor, String, T> loader, Function<Integer, T> byId) {
 			luaPropertyLoader = loader;
 			idPropertyLoader = byId;
 		}
 
 		public T read(Json json, JsonValue jsonValue, Class cls) {
 			if (jsonValue.isString() && luaPropertyLoader != null) {
-				return luaPropertyLoader.apply(jsonValue.asString());
+				return luaPropertyLoader.apply(lua, jsonValue.asString());
 			} else if (jsonValue.isNumber() && idPropertyLoader != null) {
 				return idPropertyLoader.apply(jsonValue.asInt());
 			} else {
