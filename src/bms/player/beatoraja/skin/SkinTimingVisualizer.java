@@ -31,6 +31,9 @@ public class SkinTimingVisualizer extends SkinObject {
 	private final int center;
 	private final float judgeWidthRate;
 	private final boolean drawDecay;
+	
+	private BMSModel model;
+	private int[][] judgeArea;
 
 	/**
 	 *
@@ -74,8 +77,11 @@ public class SkinTimingVisualizer extends SkinObject {
 			return;
 		}
 
-		PlayerResource resource = state.main.getPlayerResource();
-		int[][] judgeArea = getJudgeArea(resource);
+		final PlayerResource resource = state.main.getPlayerResource();
+		if(resource.getBMSModel() != model) {
+			model = resource.getBMSModel();
+			judgeArea = getJudgeArea(resource);			
+		}
 
 		// 背景テクスチャ生成
 		if (backtex == null) {
