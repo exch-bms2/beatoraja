@@ -5,6 +5,7 @@ import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 import bms.player.beatoraja.skin.property.IntegerProperty;
 import bms.player.beatoraja.skin.property.IntegerPropertyFactory;
 
+import bms.player.beatoraja.skin.property.TimerProperty;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 
@@ -37,11 +38,19 @@ public class SkinImage extends SkinObject {
 	public SkinImage(TextureRegion[] image, int timer, int cycle) {
 		setImage(image, timer, cycle);
 	}
-		
+
 	public SkinImage(TextureRegion[][] image, int timer, int cycle) {
 		setImage(image, timer, cycle);
 	}
-		
+
+	public SkinImage(TextureRegion[] image, TimerProperty timer, int cycle) {
+		setImage(image, timer, cycle);
+	}
+
+	public SkinImage(TextureRegion[][] image, TimerProperty timer, int cycle) {
+		setImage(image, timer, cycle);
+	}
+
 	public TextureRegion getImage(long time, MainState state) {
 		return getImage(0 ,time, state);
 	}
@@ -58,7 +67,7 @@ public class SkinImage extends SkinObject {
 		}
 		return image[value].getImage(time, state);
 	}
-	
+
 	public void setImage(TextureRegion[] image, int timer, int cycle) {
 		this.image = new SkinSource[1];
 		this.image[0] = new SkinSourceImage(image, timer, cycle);
@@ -69,6 +78,18 @@ public class SkinImage extends SkinObject {
 		for(int i = 0;i < image.length;i++) {
 			this.image[i] = new SkinSourceImage(image[i], timer, cycle);
 		}		
+	}
+
+	public void setImage(TextureRegion[] image, TimerProperty timer, int cycle) {
+		this.image = new SkinSource[1];
+		this.image[0] = new SkinSourceImage(image, timer, cycle);
+	}
+
+	public void setImage(TextureRegion[][] image, TimerProperty timer, int cycle) {
+		this.image = new SkinSource[image.length];
+		for(int i = 0;i < image.length;i++) {
+			this.image[i] = new SkinSourceImage(image[i], timer, cycle);
+		}
 	}
 
 	public void draw(SkinObjectRenderer sprite, long time, MainState state) {

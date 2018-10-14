@@ -5,6 +5,7 @@ import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 import bms.player.beatoraja.skin.property.FloatProperty;
 import bms.player.beatoraja.skin.property.FloatPropertyFactory;
 
+import bms.player.beatoraja.skin.property.TimerProperty;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 
@@ -54,6 +55,30 @@ public class SkinSlider extends SkinObject {
 	}
 
 	public SkinSlider(TextureRegion[] image, int timer, int cycle, int angle, int range, int type, int min, int max) {
+		source = new SkinSourceImage(image, timer ,cycle);
+		this.direction = angle;
+		this.range = range;
+		ref = new RateProperty(type, min, max);
+		writer = null;
+	}
+
+	public SkinSlider(TextureRegion[] image, TimerProperty timer, int cycle, int angle, int range, int type) {
+		source = new SkinSourceImage(image, timer ,cycle);
+		this.direction = angle;
+		this.range = range;
+		ref = FloatPropertyFactory.getFloatProperty(type);
+		writer = FloatPropertyFactory.getFloatWriter(type);
+	}
+
+	public SkinSlider(TextureRegion[] image, TimerProperty timer, int cycle, int angle, int range, FloatProperty ref, FloatWriter writer) {
+		source = new SkinSourceImage(image, timer ,cycle);
+		this.direction = angle;
+		this.range = range;
+		this.ref = ref;
+		this.writer = writer;
+	}
+
+	public SkinSlider(TextureRegion[] image, TimerProperty timer, int cycle, int angle, int range, int type, int min, int max) {
 		source = new SkinSourceImage(image, timer ,cycle);
 		this.direction = angle;
 		this.range = range;

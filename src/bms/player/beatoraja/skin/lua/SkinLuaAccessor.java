@@ -25,6 +25,31 @@ public class SkinLuaAccessor {
 
 	public SkinLuaAccessor (MainState state) {
         globals = JsePlatform.standardGlobals();
+		globals.set("timer", new OneArgFunction() {
+			@Override
+			public LuaValue call(LuaValue value) {
+				return LuaNumber.valueOf(state.main.getMicroTimer(value.toint()));
+			}
+		});
+		globals.set("timer_off_value", Long.MIN_VALUE);
+		globals.set("is_timer_on", new OneArgFunction() {
+			@Override
+			public LuaValue call(LuaValue value) {
+				return LuaNumber.valueOf(state.main.isTimerOn(value.toint()));
+			}
+		});
+		globals.set("now_timer", new OneArgFunction() {
+			@Override
+			public LuaValue call(LuaValue value) {
+				return LuaNumber.valueOf(state.main.getNowMicroTime(value.toint()));
+			}
+		});
+		globals.set("time", new ZeroArgFunction() {
+			@Override
+			public LuaValue call() {
+				return LuaNumber.valueOf(state.main.getNowMicroTime());
+			}
+		});
         globals.set("rate", new ZeroArgFunction() {
 			@Override
 			public LuaValue call() {
@@ -224,6 +249,53 @@ public class SkinLuaAccessor {
 				} catch (RuntimeException e) {
 					Logger.getGlobal().warning("Lua実行時の例外：" + e.getMessage());
 					return "";
+				}
+			}
+		};
+	}
+
+	/**
+	 * Creates a timer property from Lua code.
+	 * If {@code script} returns a function, the returned function is regarded as a timer function
+	 * which will be called every frame or more frequently.
+	 * Otherwise, {@code script} itself is regarded as a timer function.
+	 * <p>NOTE: The former case is useful to synthesize a stateful custom timer in a JSON skin.</p>
+	 * <p>NOTE: A timer function returns (i) start time in microseconds if on, or (ii) Long.MIN_VALUE if off.</p>
+	 * @param script Lua script producing a function (producing a number) or a number
+	 * @return new timer property
+	 */
+	public TimerProperty loadTimerProperty(String script) {
+		try {
+			final LuaValue lv = globals.load("return " + script);
+			final LuaValue trialCallResult = lv.call();
+			if (trialCallResult.isfunction()) {
+				// タイマー関数を返す場合
+				return loadTimerProperty(trialCallResult.checkfunction());
+			} else {
+				// 数値を返す場合
+				return loadTimerProperty(lv.checkfunction());
+			}
+		} catch (RuntimeException e) {
+			Logger.getGlobal().warning("Lua解析時の例外 : " + e.getMessage());
+		}
+		return null;
+	}
+
+	/**
+	 * Creates a timer property from Lua function.
+	 * The given function is always regarded as a timer function which will be called every frame.
+	 * @param timerFunction Lua function producing a number
+	 * @return new timer property
+	 */
+	public TimerProperty loadTimerProperty(LuaFunction timerFunction) {
+		return new TimerProperty() {
+			@Override
+			public long getMicro(MainState state) {
+				try {
+					return timerFunction.call().tolong();
+				} catch (RuntimeException e) {
+					Logger.getGlobal().warning("Lua実行時の例外：" + e.getMessage());
+					return Long.MIN_VALUE;
 				}
 			}
 		};

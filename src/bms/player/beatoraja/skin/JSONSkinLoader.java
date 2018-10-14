@@ -340,14 +340,14 @@ public class JSONSkinLoader extends SkinLoader{
 					for (ImageSet imgs : sk.imageset) {
 						if (dst.id.equals(imgs.id)) {
 							TextureRegion[][] tr = new TextureRegion[imgs.images.length][];
-							int timer = -1;
+							TimerProperty timer = null;
 							int cycle = -1;
 							for (int i = 0; i < imgs.images.length; i++) {
 								for (Image img : sk.image) {
 									if (img.id.equals(imgs.images[i])) {
 										Texture tex = getTexture(img.src, p);
 										tr[i] = getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy);
-										if (timer == -1) {
+										if (timer == null) {
 											timer = img.timer;
 										}
 										if (cycle == -1) {
@@ -808,7 +808,7 @@ public class JSONSkinLoader extends SkinLoader{
 							for (ImageSet imgs : sk.imageset) {
 								if (sk.songlist.liston[i].id.equals(imgs.id)) {
 									TextureRegion[][] tr = new TextureRegion[imgs.images.length][];
-									int timer = -1;
+									TimerProperty timer = null;
 									int cycle = -1;
 									for (int j = 0; j < imgs.images.length; j++) {
 										for (Image img : sk.image) {
@@ -816,7 +816,7 @@ public class JSONSkinLoader extends SkinLoader{
 												Texture tex = getTexture(img.src, p);
 												tr[j] = getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx,
 														img.divy);
-												if (timer == -1) {
+												if (timer == null) {
 													timer = img.timer;
 												}
 												if (cycle == -1) {
@@ -1331,7 +1331,7 @@ public class JSONSkinLoader extends SkinLoader{
 		public int h;
 		public int divx = 1;
 		public int divy = 1;
-		public int timer;
+		public TimerProperty timer;
 		public int cycle;
 		public int len;
 		public int ref;
@@ -1356,7 +1356,7 @@ public class JSONSkinLoader extends SkinLoader{
 		public int h;
 		public int divx = 1;
 		public int divy = 1;
-		public int timer;
+		public TimerProperty timer;
 		public int cycle;
 		public int align;
 		public int digit;
@@ -1392,7 +1392,7 @@ public class JSONSkinLoader extends SkinLoader{
 		public int h;
 		public int divx = 1;
 		public int divy = 1;
-		public int timer;
+		public TimerProperty timer;
 		public int cycle;
 		public int angle;
 		public int range;
@@ -1413,7 +1413,7 @@ public class JSONSkinLoader extends SkinLoader{
 		public int h;
 		public int divx = 1;
 		public int divy = 1;
-		public int timer;
+		public TimerProperty timer;
 		public int cycle;
 		public int angle = 1;
 		public int type;
@@ -1526,7 +1526,7 @@ public class JSONSkinLoader extends SkinLoader{
 		public int h;
 		public int divx = 1;
 		public int divy = 1;
-		public int timer;
+		public TimerProperty timer;
 		public int cycle;
 		public int disapearLine = -1;
 		public boolean isDisapearLineLinkLift = true;
@@ -1564,7 +1564,7 @@ public class JSONSkinLoader extends SkinLoader{
 		public String id;
 		public int blend;
 		public int filter;
-		public int timer;
+		public TimerProperty timer;
 		public int loop;
 		public int center;
 		public int offset;
@@ -1685,12 +1685,14 @@ public class JSONSkinLoader extends SkinLoader{
 			json.setSerializer(c, new ArraySerializer<>(enabledOptions, path));
 		}
 
-		json.setSerializer(BooleanProperty.class, new LuaScriptSerializer<>(s -> lua.loadBooleanProperty(s)));
-		json.setSerializer(IntegerProperty.class, new LuaScriptSerializer<>(s -> lua.loadIntegerProperty(s)));
-		json.setSerializer(FloatProperty.class, new LuaScriptSerializer<>(s -> lua.loadFloatProperty(s)));
-		json.setSerializer(StringProperty.class, new LuaScriptSerializer<>(s -> lua.loadStringProperty(s)));
-		json.setSerializer(FloatWriter.class, new LuaScriptSerializer<>(s -> lua.loadFloatWriter(s)));
-		json.setSerializer(Event.class, new LuaScriptSerializer<>(s -> lua.loadEvent(s)));
+		// method reference (lua::load*Property) is not possible because lua may be null
+		json.setSerializer(BooleanProperty.class, new LuaScriptSerializer<>(s -> lua.loadBooleanProperty(s), BooleanPropertyFactory::getBooleanProperty));
+		json.setSerializer(IntegerProperty.class, new LuaScriptSerializer<>(s -> lua.loadIntegerProperty(s), IntegerPropertyFactory::getIntegerProperty));
+		json.setSerializer(FloatProperty.class, new LuaScriptSerializer<>(s -> lua.loadFloatProperty(s), FloatPropertyFactory::getFloatProperty));
+		json.setSerializer(StringProperty.class, new LuaScriptSerializer<>(s -> lua.loadStringProperty(s), StringPropertyFactory::getStringProperty));
+		json.setSerializer(TimerProperty.class, new LuaScriptSerializer<>(s -> lua.loadTimerProperty(s), TimerPropertyFactory::getTimerProperty));
+		json.setSerializer(FloatWriter.class, new LuaScriptSerializer<>(s -> lua.loadFloatWriter(s), FloatPropertyFactory::getFloatWriter));
+		json.setSerializer(Event.class, new LuaScriptSerializer<>(s -> lua.loadEvent(s), null));
 	}
 
 	private abstract class Serializer<T> extends Json.ReadOnlySerializer<T> {
@@ -1875,13 +1877,21 @@ public class JSONSkinLoader extends SkinLoader{
 
 	private class LuaScriptSerializer<T> extends Json.ReadOnlySerializer<T> {
 		Function<String, T> luaPropertyLoader;
+		Function<Integer, T> idPropertyLoader;
 
-		LuaScriptSerializer(Function<String, T> loader) {
+		LuaScriptSerializer(Function<String, T> loader, Function<Integer, T> byId) {
 			luaPropertyLoader = loader;
+			idPropertyLoader = byId;
 		}
 
 		public T read(Json json, JsonValue jsonValue, Class cls) {
-			return luaPropertyLoader.apply(jsonValue.asString());
+			if (jsonValue.isString() && luaPropertyLoader != null) {
+				return luaPropertyLoader.apply(jsonValue.asString());
+			} else if (jsonValue.isNumber() && idPropertyLoader != null) {
+				return idPropertyLoader.apply(jsonValue.asInt());
+			} else {
+				return null;
+			}
 		}
 	}
 }
