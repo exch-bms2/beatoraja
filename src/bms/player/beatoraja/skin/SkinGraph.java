@@ -5,6 +5,7 @@ import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 import bms.player.beatoraja.skin.property.FloatProperty;
 import bms.player.beatoraja.skin.property.FloatPropertyFactory;
 
+import bms.player.beatoraja.skin.property.TimerProperty;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 
@@ -54,6 +55,21 @@ public class SkinGraph extends SkinObject {
 	}
 
 	public SkinGraph(TextureRegion[] image, int timer, int cycle, int id, int min, int max) {
+		source = new SkinSourceImage(image, timer, cycle);
+		ref = new RateProperty(id, min, max);
+	}
+
+	public SkinGraph(TextureRegion[] image, TimerProperty timer, int cycle, int id) {
+		source = new SkinSourceImage(image, timer, cycle);
+		ref = FloatPropertyFactory.getFloatProperty(id);
+	}
+
+	public SkinGraph(TextureRegion[] image, TimerProperty timer, int cycle, FloatProperty ref) {
+		source = new SkinSourceImage(image, timer, cycle);
+		this.ref = ref;
+	}
+
+	public SkinGraph(TextureRegion[] image, TimerProperty timer, int cycle, int id, int min, int max) {
 		source = new SkinSourceImage(image, timer, cycle);
 		ref = new RateProperty(id, min, max);
 	}

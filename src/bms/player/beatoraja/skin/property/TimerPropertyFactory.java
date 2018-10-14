@@ -33,6 +33,11 @@ public class TimerPropertyFactory {
 			public boolean isOff(MainState state) {
 				return !state.main.isTimerOn(timerId);
 			}
+
+			@Override
+			public int getTimerId() {
+				return timerId;
+			}
 		};
 	}
 }

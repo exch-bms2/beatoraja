@@ -21,4 +21,12 @@ public interface TimerProperty {
 	default boolean isOff(MainState state) {
 		return getMicro(state) == Long.MIN_VALUE;
 	}
+
+	/**
+	 * タイマーIDに依存した処理のためのバックドア
+	 * @return タイマーID (スクリプトによるタイマー定義の場合は {@code Integer.MIN_VALUE})
+	 */
+	default int getTimerId() {
+		return Integer.MIN_VALUE;
+	}
 }

@@ -340,14 +340,14 @@ public class JSONSkinLoader extends SkinLoader{
 					for (ImageSet imgs : sk.imageset) {
 						if (dst.id.equals(imgs.id)) {
 							TextureRegion[][] tr = new TextureRegion[imgs.images.length][];
-							int timer = -1;
+							TimerProperty timer = null;
 							int cycle = -1;
 							for (int i = 0; i < imgs.images.length; i++) {
 								for (Image img : sk.image) {
 									if (img.id.equals(imgs.images[i])) {
 										Texture tex = getTexture(img.src, p);
 										tr[i] = getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy);
-										if (timer == -1) {
+										if (timer == null) {
 											timer = img.timer;
 										}
 										if (cycle == -1) {
@@ -808,7 +808,7 @@ public class JSONSkinLoader extends SkinLoader{
 							for (ImageSet imgs : sk.imageset) {
 								if (sk.songlist.liston[i].id.equals(imgs.id)) {
 									TextureRegion[][] tr = new TextureRegion[imgs.images.length][];
-									int timer = -1;
+									TimerProperty timer = null;
 									int cycle = -1;
 									for (int j = 0; j < imgs.images.length; j++) {
 										for (Image img : sk.image) {
@@ -816,7 +816,7 @@ public class JSONSkinLoader extends SkinLoader{
 												Texture tex = getTexture(img.src, p);
 												tr[j] = getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx,
 														img.divy);
-												if (timer == -1) {
+												if (timer == null) {
 													timer = img.timer;
 												}
 												if (cycle == -1) {
@@ -1066,10 +1066,6 @@ public class JSONSkinLoader extends SkinLoader{
 	}
 
 	private void setDestination(Skin skin, SkinObject obj, Destination dst) {
-		TimerProperty timer = dst.timerFunction;
-		if (timer == null && dst.timer > 0) {
-			timer = TimerPropertyFactory.getTimerProperty(dst.timer);
-		}
 		Animation prev = null;
 		for (Animation a : dst.dst) {
 			if (prev == null) {
@@ -1099,10 +1095,10 @@ public class JSONSkinLoader extends SkinLoader{
 			}
 			if(dst.draw != null) {
 				skin.setDestination(obj, a.time, a.x, a.y, a.w, a.h, a.acc, a.a, a.r, a.g, a.b, dst.blend, dst.filter,
-						a.angle, dst.center, dst.loop, timer, dst.draw);
+						a.angle, dst.center, dst.loop, dst.timer, dst.draw);
 			} else {
 				skin.setDestination(obj, a.time, a.x, a.y, a.w, a.h, a.acc, a.a, a.r, a.g, a.b, dst.blend, dst.filter,
-						a.angle, dst.center, dst.loop, timer, dst.op);
+						a.angle, dst.center, dst.loop, dst.timer, dst.op);
 			}
 			if (dst.mouseRect != null) {
 				skin.setMouseRect(obj, dst.mouseRect.x, dst.mouseRect.y, dst.mouseRect.w, dst.mouseRect.h);
@@ -1335,7 +1331,7 @@ public class JSONSkinLoader extends SkinLoader{
 		public int h;
 		public int divx = 1;
 		public int divy = 1;
-		public int timer;
+		public TimerProperty timer;
 		public int cycle;
 		public int len;
 		public int ref;
@@ -1360,7 +1356,7 @@ public class JSONSkinLoader extends SkinLoader{
 		public int h;
 		public int divx = 1;
 		public int divy = 1;
-		public int timer;
+		public TimerProperty timer;
 		public int cycle;
 		public int align;
 		public int digit;
@@ -1396,7 +1392,7 @@ public class JSONSkinLoader extends SkinLoader{
 		public int h;
 		public int divx = 1;
 		public int divy = 1;
-		public int timer;
+		public TimerProperty timer;
 		public int cycle;
 		public int angle;
 		public int range;
@@ -1417,7 +1413,7 @@ public class JSONSkinLoader extends SkinLoader{
 		public int h;
 		public int divx = 1;
 		public int divy = 1;
-		public int timer;
+		public TimerProperty timer;
 		public int cycle;
 		public int angle = 1;
 		public int type;
@@ -1530,7 +1526,7 @@ public class JSONSkinLoader extends SkinLoader{
 		public int h;
 		public int divx = 1;
 		public int divy = 1;
-		public int timer;
+		public TimerProperty timer;
 		public int cycle;
 		public int disapearLine = -1;
 		public boolean isDisapearLineLinkLift = true;
@@ -1568,7 +1564,7 @@ public class JSONSkinLoader extends SkinLoader{
 		public String id;
 		public int blend;
 		public int filter;
-		public int timer;
+		public TimerProperty timer;
 		public int loop;
 		public int center;
 		public int offset;
@@ -1576,7 +1572,6 @@ public class JSONSkinLoader extends SkinLoader{
 		public int stretch = -1;
 		public int[] op = new int[0];
 		public BooleanProperty draw;
-		public TimerProperty timerFunction;
 		public Animation[] dst = new Animation[0];
 		public Rect mouseRect;
 	}

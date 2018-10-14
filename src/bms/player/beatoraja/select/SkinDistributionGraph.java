@@ -6,6 +6,7 @@ import bms.player.beatoraja.select.bar.DirectoryBar;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 
+import bms.player.beatoraja.skin.property.TimerProperty;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
@@ -64,6 +65,21 @@ public class SkinDistributionGraph extends SkinObject {
     }
 
     public SkinDistributionGraph(int type, TextureRegion[][] image, int timer, int cycle) {
+        this.type = type;
+        if(type == 0) {
+            lampimage = new SkinSource[11];
+            for(int i = 0;i < lampimage.length;i++) {
+                lampimage[i] = new SkinSourceImage(image[i],timer,cycle);
+            }
+        } else {
+            lampimage = new SkinSource[28];
+            for(int i = 0;i < lampimage.length;i++) {
+                lampimage[i] = new SkinSourceImage(image[i],timer,cycle);
+            }
+        }
+    }
+
+    public SkinDistributionGraph(int type, TextureRegion[][] image, TimerProperty timer, int cycle) {
         this.type = type;
         if(type == 0) {
             lampimage = new SkinSource[11];

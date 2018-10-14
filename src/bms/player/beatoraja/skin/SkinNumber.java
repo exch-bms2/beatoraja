@@ -5,6 +5,7 @@ import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 import bms.player.beatoraja.skin.property.IntegerProperty;
 import bms.player.beatoraja.skin.property.IntegerPropertyFactory;
 
+import bms.player.beatoraja.skin.property.TimerProperty;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 
@@ -52,6 +53,14 @@ public class SkinNumber extends SkinObject {
 		this(image, null, timer, cycle, keta, zeropadding, ref);
 	}
 
+	public SkinNumber(TextureRegion[][] image, TimerProperty timer, int cycle, int keta, int zeropadding, int rid) {
+		this(image, null, timer, cycle, keta, zeropadding, rid);
+	}
+
+	public SkinNumber(TextureRegion[][] image, TimerProperty timer, int cycle, int keta, int zeropadding, IntegerProperty ref) {
+		this(image, null, timer, cycle, keta, zeropadding, ref);
+	}
+
 	public SkinNumber(TextureRegion[][] image, TextureRegion[][] mimage, int timer, int cycle, int keta, int zeropadding, int id) {
 		this.image = new SkinSourceImage(image, timer, cycle) ;
 		this.mimage = mimage != null ? new SkinSourceImage(mimage, timer, cycle) : null;
@@ -61,6 +70,22 @@ public class SkinNumber extends SkinObject {
 	}
 
 	public SkinNumber(TextureRegion[][] image, TextureRegion[][] mimage, int timer, int cycle, int keta, int zeropadding, IntegerProperty ref) {
+		this.image = new SkinSourceImage(image, timer, cycle) ;
+		this.mimage = mimage != null ? new SkinSourceImage(mimage, timer, cycle) : null;
+		this.setKeta(keta);
+		this.zeropadding = zeropadding;
+		this.ref = ref;
+	}
+
+	public SkinNumber(TextureRegion[][] image, TextureRegion[][] mimage, TimerProperty timer, int cycle, int keta, int zeropadding, int id) {
+		this.image = new SkinSourceImage(image, timer, cycle) ;
+		this.mimage = mimage != null ? new SkinSourceImage(mimage, timer, cycle) : null;
+		this.setKeta(keta);
+		this.zeropadding = zeropadding;
+		ref = IntegerPropertyFactory.getIntegerProperty(id);
+	}
+
+	public SkinNumber(TextureRegion[][] image, TextureRegion[][] mimage, TimerProperty timer, int cycle, int keta, int zeropadding, IntegerProperty ref) {
 		this.image = new SkinSourceImage(image, timer, cycle) ;
 		this.mimage = mimage != null ? new SkinSourceImage(mimage, timer, cycle) : null;
 		this.setKeta(keta);

@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import bms.player.beatoraja.skin.property.TimerProperty;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -38,6 +39,10 @@ public class PomyuCharaLoader {
 
 	public PomyuCharaLoader(Skin skin) {
 		this.skin = skin;
+	}
+
+	public SkinImage load(boolean usecim, File imagefile, int type, int color, float dstx, float dsty, float dstw, float dsth, int side, TimerProperty dsttimer, int dstOp1, int dstOp2, int dstOp3, int dstOffset) {
+		return load(usecim, imagefile, type, color, dstx, dsty, dstw, dsth, side, dsttimer.getTimerId(), dstOp1, dstOp2, dstOp3, dstOffset);
 	}
 
 	public SkinImage load(boolean usecim, File imagefile, int type, int color, float dstx, float dsty, float dstw, float dsth, int side, int dsttimer, int dstOp1, int dstOp2, int dstOp3, int dstOffset) {

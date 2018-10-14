@@ -1,6 +1,8 @@
 package bms.player.beatoraja.skin;
 
 import bms.player.beatoraja.MainController;
+import bms.player.beatoraja.skin.property.TimerProperty;
+import bms.player.beatoraja.skin.property.TimerPropertyFactory;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 import bms.player.beatoraja.MainState;
@@ -12,7 +14,8 @@ public class SkinSourceImage implements SkinSource {
 	 */
 	private TextureRegion[][] image;
 
-	private final int timer;
+	private final TimerProperty timer;
+
 	private final int cycle;
 
 	public SkinSourceImage(TextureRegion image) {
@@ -24,6 +27,16 @@ public class SkinSourceImage implements SkinSource {
 	}
 
 	public SkinSourceImage(TextureRegion[][] image, int timer, int cycle) {
+		this.image = image;
+		this.timer = timer > 0 ? TimerPropertyFactory.getTimerProperty(timer) : null;
+		this.cycle = cycle;
+	}
+
+	public SkinSourceImage(TextureRegion[] image, TimerProperty timer, int cycle) {
+		this(new TextureRegion[][] { image }, timer, cycle);
+	}
+
+	public SkinSourceImage(TextureRegion[][] image, TimerProperty timer, int cycle) {
 		this.image = image;
 		this.timer = timer;
 		this.cycle = cycle;
@@ -52,11 +65,11 @@ public class SkinSourceImage implements SkinSource {
 			return 0;
 		}
 
-		if (timer != 0 && timer < MainController.timerCount) {
-			if (!state.main.isTimerOn(timer)) {
+		if (timer != null) {
+			if (timer.isOff(state)) {
 				return 0;
 			}
-			time -= state.main.getTimer(timer);
+			time -= timer.get(state);
 		}
 		if (time < 0) {
 			return 0;

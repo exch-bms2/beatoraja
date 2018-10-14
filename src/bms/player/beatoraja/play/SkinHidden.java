@@ -7,6 +7,8 @@ import bms.player.beatoraja.skin.SkinObject;
 import bms.player.beatoraja.skin.SkinSource;
 import bms.player.beatoraja.skin.SkinSourceImage;
 
+import bms.player.beatoraja.skin.property.TimerProperty;
+import bms.player.beatoraja.skin.property.TimerPropertyFactory;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -40,10 +42,20 @@ public class SkinHidden extends SkinObject {
 	private float previousY = Float.MIN_VALUE;
 	private float previousLift = Float.MIN_VALUE;
 
-	private int timer;
+	private TimerProperty timer;
 	private int cycle;
 
 	public SkinHidden(TextureRegion[] image, int timer, int cycle) {
+		this.timer = timer > 0 ? TimerPropertyFactory.getTimerProperty(timer) : null;
+		this.cycle = cycle;
+		originalImages = image;
+		trimmedImages = new TextureRegion[originalImages.length];
+		for(int i = 0; i < trimmedImages.length; i++) {
+			trimmedImages[i] = new TextureRegion(originalImages[i]);
+		}
+	}
+
+	public SkinHidden(TextureRegion[] image, TimerProperty timer, int cycle) {
 		this.timer = timer;
 		this.cycle = cycle;
 		originalImages = image;
@@ -108,11 +120,11 @@ public class SkinHidden extends SkinObject {
 			return 0;
 		}
 
-		if (timer != 0 && timer < MainController.timerCount) {
-			if (!state.main.isTimerOn(timer)) {
+		if (timer != null) {
+			if (timer.isOff(state)) {
 				return 0;
 			}
-			time -= state.main.getTimer(timer);
+			time -= timer.get(state);
 		}
 		if (time < 0) {
 			return 0;
