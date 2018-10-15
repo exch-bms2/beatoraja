@@ -516,7 +516,7 @@ public class MusicSelector extends MainState {
 		return false;
 	}
 
-	public void executeClickEvent(int id, int arg) {
+	public void executeEvent(int id, int arg1, int arg2) {
 		switch (id) {
 		case BUTTON_PLAY:
 			play = PlayMode.PLAY;
@@ -543,37 +543,37 @@ public class MusicSelector extends MainState {
 			execute(MusicSelectCommand.OPEN_DOCUMENT);
 			break;
 		case BUTTON_MODE:
-			execute(arg >= 0 ? MusicSelectCommand.NEXT_MODE : MusicSelectCommand.PREV_MODE);
+			execute(arg1 >= 0 ? MusicSelectCommand.NEXT_MODE : MusicSelectCommand.PREV_MODE);
 			break;
 		case BUTTON_SORT:
-			execute(arg >= 0 ? MusicSelectCommand.NEXT_SORT : MusicSelectCommand.PREV_SORT);
+			execute(arg1 >= 0 ? MusicSelectCommand.NEXT_SORT : MusicSelectCommand.PREV_SORT);
 			break;
 		case BUTTON_LNMODE:
-			execute(arg >= 0 ? MusicSelectCommand.NEXT_LNMODE : MusicSelectCommand.PREV_LNMODE);
+			execute(arg1 >= 0 ? MusicSelectCommand.NEXT_LNMODE : MusicSelectCommand.PREV_LNMODE);
 			break;
 		case BUTTON_RANDOM_1P:
-			execute(arg >= 0 ? MusicSelectCommand.NEXT_OPTION_1P : MusicSelectCommand.PREV_OPTION_1P);
+			execute(arg1 >= 0 ? MusicSelectCommand.NEXT_OPTION_1P : MusicSelectCommand.PREV_OPTION_1P);
 			break;
 		case BUTTON_RANDOM_2P:
-			execute(arg >= 0 ? MusicSelectCommand.NEXT_OPTION_2P : MusicSelectCommand.PREV_OPTION_2P);
+			execute(arg1 >= 0 ? MusicSelectCommand.NEXT_OPTION_2P : MusicSelectCommand.PREV_OPTION_2P);
 			break;
 		case BUTTON_DPOPTION:
-			execute(arg >= 0 ? MusicSelectCommand.NEXT_OPTION_DP : MusicSelectCommand.PREV_OPTION_DP);
+			execute(arg1 >= 0 ? MusicSelectCommand.NEXT_OPTION_DP : MusicSelectCommand.PREV_OPTION_DP);
 			break;
 		case BUTTON_GAUGE_1P:
-			execute(arg >= 0 ? MusicSelectCommand.NEXT_GAUGE_1P : MusicSelectCommand.PREV_GAUGE_1P);
+			execute(arg1 >= 0 ? MusicSelectCommand.NEXT_GAUGE_1P : MusicSelectCommand.PREV_GAUGE_1P);
 			break;
 		case BUTTON_HSFIX:
-			execute(arg >= 0 ? MusicSelectCommand.NEXT_HSFIX : MusicSelectCommand.PREV_HSFIX);
+			execute(arg1 >= 0 ? MusicSelectCommand.NEXT_HSFIX : MusicSelectCommand.PREV_HSFIX);
 			break;
 		case BUTTON_TARGET:
-			execute(arg >= 0 ? MusicSelectCommand.NEXT_TARGET : MusicSelectCommand.PREV_TARGET);
+			execute(arg1 >= 0 ? MusicSelectCommand.NEXT_TARGET : MusicSelectCommand.PREV_TARGET);
 			break;
 		case BUTTON_BGA:
-			execute(arg >= 0 ? MusicSelectCommand.NEXT_BGA_SHOW : MusicSelectCommand.PREV_BGA_SHOW);
+			execute(arg1 >= 0 ? MusicSelectCommand.NEXT_BGA_SHOW : MusicSelectCommand.PREV_BGA_SHOW);
 			break;
 		case BUTTON_GAUGEAUTOSHIFT:
-			execute(arg >= 0 ? MusicSelectCommand.NEXT_GAUGEAUTOSHIFT : MusicSelectCommand.PREV_GAUGEAUTOSHIFT);
+			execute(arg1 >= 0 ? MusicSelectCommand.NEXT_GAUGEAUTOSHIFT : MusicSelectCommand.PREV_GAUGEAUTOSHIFT);
 			break;
 		}
 	}

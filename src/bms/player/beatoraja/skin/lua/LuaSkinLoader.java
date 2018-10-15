@@ -4,6 +4,7 @@ import bms.player.beatoraja.Config;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.SkinConfig;
 import bms.player.beatoraja.skin.*;
+import bms.player.beatoraja.skin.event.*;
 import bms.player.beatoraja.skin.property.*;
 import com.badlogic.gdx.utils.reflect.ClassReflection;
 import com.badlogic.gdx.utils.reflect.Field;
@@ -84,10 +85,10 @@ public class LuaSkinLoader extends JSONSkinLoader {
 					serializeLuaScript(lv, lua::loadStringProperty, lua::loadStringProperty, StringPropertyFactory::getStringProperty));
 			put(TimerProperty.class, lv ->
 					serializeLuaScript(lv, lua::loadTimerProperty, lua::loadTimerProperty, TimerPropertyFactory::getTimerProperty));
-			put(SkinObject.FloatWriter.class, lv ->
+			put(FloatWriter.class, lv ->
 					serializeLuaScript(lv, lua::loadFloatWriter, lua::loadFloatWriter, FloatPropertyFactory::getFloatWriter));
-			put(SkinObject.Event.class, lv ->
-					serializeLuaScript(lv, lua::loadEvent, lua::loadEvent, null));
+			put(Event.class, lv ->
+					serializeLuaScript(lv, lua::loadEvent, lua::loadEvent, EventFactory::getEvent));
 		}
 	};
 

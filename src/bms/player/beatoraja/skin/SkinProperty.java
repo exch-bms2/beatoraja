@@ -826,6 +826,10 @@ public class SkinProperty {
 	public static final int BUTTON_SKINSELECT_24KEY_DOUBLE = 387;
 	public static final int BUTTON_SKINSELECT_24KEY_BATTLE = 388;
 
+	// ユーザー定義イベント用
+	public static final int BUTTON_CUSTOM_BEGIN = 1000;
+	public static final int BUTTON_CUSTOM_END = 9999;
+
 
 	public static final int VALUE_JUDGE_1P_SCRATCH = 500;
 	public static final int VALUE_JUDGE_1P_KEY1 = 501;

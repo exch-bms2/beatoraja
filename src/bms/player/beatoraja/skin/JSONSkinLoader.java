@@ -27,6 +27,7 @@ import bms.player.beatoraja.select.*;
 import bms.player.beatoraja.skin.SkinHeader.CustomOffset;
 import bms.player.beatoraja.skin.SkinObject.*;
 import bms.player.beatoraja.skin.lua.SkinLuaAccessor;
+import bms.player.beatoraja.skin.event.*;
 import bms.player.beatoraja.skin.property.*;
 
 public class JSONSkinLoader extends SkinLoader{
@@ -330,7 +331,7 @@ public class JSONSkinLoader extends SkinLoader{
 								obj = new SkinImage(getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy),
 										img.timer, img.cycle);
 							}
-							if (img.act > 0) {
+							if (img.act != null) {
 								obj.setClickevent(img.act);
 								obj.setClickeventType(img.click);
 							}
@@ -362,7 +363,7 @@ public class JSONSkinLoader extends SkinLoader{
 							SkinImage si = new SkinImage(tr, timer, cycle);
 							si.setReferenceID(imgs.ref);
 							obj = si;
-							if (imgs.act > 0) {
+							if (imgs.act != null) {
 								obj.setClickevent(imgs.act);
 								obj.setClickeventType(imgs.click);
 							}
@@ -1043,15 +1044,15 @@ public class JSONSkinLoader extends SkinLoader{
 				} else {
 					int count = 0;
 					for (Image image : sk.image) {
-						if (SkinPropertyMapper.isSkinCustomizeButton(image.act)) {
-							int index = SkinPropertyMapper.getSkinCustomizeIndex(image.act);
+						if (SkinPropertyMapper.isSkinCustomizeButton(image.act.getEventId())) {
+							int index = SkinPropertyMapper.getSkinCustomizeIndex(image.act.getEventId());
 							if (count <= index)
 								count = index + 1;
 						}
 					}
 					for (ImageSet imageSet : sk.imageset) {
-						if (SkinPropertyMapper.isSkinCustomizeButton(imageSet.act)) {
-							int index = SkinPropertyMapper.getSkinCustomizeIndex(imageSet.act);
+						if (SkinPropertyMapper.isSkinCustomizeButton(imageSet.act.getEventId())) {
+							int index = SkinPropertyMapper.getSkinCustomizeIndex(imageSet.act.getEventId());
 							if (count <= index)
 								count = index + 1;
 						}
@@ -1336,7 +1337,7 @@ public class JSONSkinLoader extends SkinLoader{
 		public int cycle;
 		public int len;
 		public int ref;
-		public int act;
+		public Event act;
 		public int click = 0;
 	}
 
@@ -1344,7 +1345,7 @@ public class JSONSkinLoader extends SkinLoader{
 		public String id;
 		public int ref;
 		public String[] images = new String[0];
-		public int act;
+		public Event act;
 		public int click = 0;
 	}
 
@@ -1618,6 +1619,12 @@ public class JSONSkinLoader extends SkinLoader{
 		public int customOffsetStyle = 0;
 	}
 
+	public static class CustomEvent {
+		public Event action;
+		public BooleanProperty condition;
+		public int minInterval;
+	}
+
 	private File getSrcIdPath(String srcid, Path p) {
 		if(srcid == null) {
 			return null;
@@ -1692,7 +1699,7 @@ public class JSONSkinLoader extends SkinLoader{
 		json.setSerializer(StringProperty.class, new LuaScriptSerializer<>(SkinLuaAccessor::loadStringProperty, StringPropertyFactory::getStringProperty));
 		json.setSerializer(TimerProperty.class, new LuaScriptSerializer<>(SkinLuaAccessor::loadTimerProperty, TimerPropertyFactory::getTimerProperty));
 		json.setSerializer(FloatWriter.class, new LuaScriptSerializer<>(SkinLuaAccessor::loadFloatWriter, FloatPropertyFactory::getFloatWriter));
-		json.setSerializer(Event.class, new LuaScriptSerializer<>(SkinLuaAccessor::loadEvent, null));
+		json.setSerializer(Event.class, new LuaScriptSerializer<>(SkinLuaAccessor::loadEvent, EventFactory::getEvent));
 	}
 
 	private abstract class Serializer<T> extends Json.ReadOnlySerializer<T> {

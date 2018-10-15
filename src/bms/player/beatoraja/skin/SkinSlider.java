@@ -2,6 +2,7 @@ package bms.player.beatoraja.skin;
 
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
+import bms.player.beatoraja.skin.event.FloatWriter;
 import bms.player.beatoraja.skin.property.FloatProperty;
 import bms.player.beatoraja.skin.property.FloatPropertyFactory;
 

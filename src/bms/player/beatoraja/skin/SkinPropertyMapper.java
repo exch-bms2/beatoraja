@@ -144,4 +144,15 @@ public class SkinPropertyMapper {
 	public static int getSkinCustomizeItemIndex(int id) {
 		return id - STRING_SKIN_CUSTOMIZE_ITEM1;
 	}
+
+	public static boolean isCustomEventId(int id) {
+		return id >= BUTTON_CUSTOM_BEGIN && id <= BUTTON_CUSTOM_END;
+	}
+
+	public static boolean isEventRunnableBySkin(int id) {
+		if (isCustomEventId(id))
+			return true;
+		// スキンから実行できては困るイベントがあればここでフィルタリングする
+		return true;
+	}
 }

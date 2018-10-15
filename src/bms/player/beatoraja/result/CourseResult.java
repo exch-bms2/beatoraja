@@ -333,7 +333,7 @@ public class CourseResult extends AbstractResult {
 		}
 	}
 
-	public void executeClickEvent(int id, int arg) {
+	public void executeEvent(int id, int arg1, int arg2) {
 		switch (id) {
 		case BUTTON_REPLAY:
 			saveReplayData(0);

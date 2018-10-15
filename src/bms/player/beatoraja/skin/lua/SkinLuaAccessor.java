@@ -4,14 +4,14 @@ import java.nio.file.Path;
 import java.util.function.Function;
 import java.util.logging.Logger;
 
+import bms.player.beatoraja.skin.SkinPropertyMapper;
 import org.luaj.vm2.*;
-import org.luaj.vm2.lib.OneArgFunction;
-import org.luaj.vm2.lib.ZeroArgFunction;
+import org.luaj.vm2.lib.*;
 import org.luaj.vm2.lib.jse.JsePlatform;
 
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.play.BMSPlayer;
-import bms.player.beatoraja.skin.SkinObject.*;
+import bms.player.beatoraja.skin.event.*;
 import bms.player.beatoraja.skin.property.*;
 import bms.player.beatoraja.SkinConfig;
 
@@ -149,6 +149,29 @@ public class SkinLuaAccessor {
 					return LuaDouble.valueOf(player.getGauge().getType());
 				}
 				return LuaInteger.ZERO;
+			}
+		});
+		globals.set("event_exec", new VarArgFunction() {
+			@Override
+			public LuaValue call(LuaValue luaValue) {
+				state.executeEvent(getId(luaValue));
+				return LuaValue.NIL;
+			}
+			@Override
+			public LuaValue call(LuaValue luaValue, LuaValue arg1) {
+				state.executeEvent(getId(luaValue), arg1.toint());
+				return LuaValue.NIL;
+			}
+			@Override
+			public LuaValue call(LuaValue luaValue, LuaValue arg1, LuaValue arg2) {
+				state.executeEvent(getId(luaValue), arg1.toint(), arg2.toint());
+				return LuaValue.NIL;
+			}
+			private int getId(LuaValue luaValue) {
+				int id = luaValue.toint();
+				if (!SkinPropertyMapper.isEventRunnableBySkin(id))
+					throw new IllegalArgumentException("指定されたイベントはスキンから実行できません");
+				return id;
 			}
 		});
 	}
@@ -312,16 +335,34 @@ public class SkinLuaAccessor {
 	}
 
 	public Event loadEvent(LuaFunction function) {
-		return new Event() {
-			@Override
-			public void exec(MainState state) {
+		switch (function.narg()) {
+		case 0:
+			return EventFactory.createZeroArgEvent(state -> {
 				try{
 					function.call();
 				} catch (RuntimeException e) {
-					Logger.getGlobal().warning("Lua実行時の例外：" + e.getMessage());
+					Logger.getGlobal().warning("Lua実行時の例外 : " + e.getMessage());
 				}
-			}
-		};
+			});
+		case 1:
+			return EventFactory.createOneArgEvent((state, arg1) -> {
+				try{
+					function.call(LuaNumber.valueOf(arg1));
+				} catch (RuntimeException e) {
+					Logger.getGlobal().warning("Lua実行時の例外 : " + e.getMessage());
+				}
+			});
+		case 2:
+			return EventFactory.createTwoArgEvent((state, arg1, arg2) -> {
+				try{
+					function.call(LuaNumber.valueOf(arg1), LuaNumber.valueOf(arg2));
+				} catch (RuntimeException e) {
+					Logger.getGlobal().warning("Lua実行時の例外 : " + e.getMessage());
+				}
+			});
+		default:
+			return null;
+		}
 	}
 
 	public FloatWriter loadFloatWriter(String script) {

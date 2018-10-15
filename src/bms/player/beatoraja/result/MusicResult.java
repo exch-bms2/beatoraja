@@ -478,7 +478,7 @@ public class MusicResult extends AbstractResult {
 		return resource.getBMSModel().getTotalNotes();
 	}
 
-	public void executeClickEvent(int id, int arg) {
+	public void executeEvent(int id, int arg1, int arg2) {
 		switch (id) {
 		case BUTTON_REPLAY:
 			saveReplayData(0);
