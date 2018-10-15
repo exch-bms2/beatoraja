@@ -118,10 +118,11 @@ public class SkinConfiguration extends MainState {
 						}
 					}
 				}
-			}
-			if (SkinPropertyMapper.isSkinSelectTypeId(id)) {
+			} else if (SkinPropertyMapper.isSkinSelectTypeId(id)) {
 				SkinType t = SkinPropertyMapper.getSkinSelectType(id);
 				changeSkinType(t);
+			} else {
+				super.executeEvent(id, arg1, arg2);
 			}
 		}
 	}

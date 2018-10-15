@@ -492,6 +492,8 @@ public class MusicResult extends AbstractResult {
 		case BUTTON_REPLAY4:
 			saveReplayData(3);
 			break;
+		default:
+			super.executeEvent(id, arg1, arg2);
 		}
 	}
 	

@@ -575,6 +575,8 @@ public class MusicSelector extends MainState {
 		case BUTTON_GAUGEAUTOSHIFT:
 			execute(arg1 >= 0 ? MusicSelectCommand.NEXT_GAUGEAUTOSHIFT : MusicSelectCommand.PREV_GAUGEAUTOSHIFT);
 			break;
+		default:
+			super.executeEvent(id, arg1, arg2);
 		}
 	}
 

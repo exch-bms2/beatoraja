@@ -75,6 +75,8 @@ public class Skin {
 	
 	private IntMap<Offset> offset = new IntMap<Offset>();
 
+	private final IntMap<CustomEvent> customEvents = new IntMap<CustomEvent>();
+
 	public Skin(Resolution org, Resolution dst) {
 		width = dst.width;
 		height = dst.height;
@@ -494,4 +496,19 @@ public class Skin {
 	}
 
 
+	public void addCustomEvent(CustomEvent event) {
+		customEvents.put(event.getId(), event);
+	}
+
+	public void executeCustomEvent(MainState state, int id, int arg1, int arg2) {
+		if (customEvents.containsKey(id)) {
+			customEvents.get(id).execute(state, arg1, arg2);
+		}
+	}
+
+	public void updateCustomObjects(MainState state) {
+		for (IntMap.Entry<CustomEvent> event : customEvents) {
+			event.value.update(state);
+		}
+	}
 }

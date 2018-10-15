@@ -1060,6 +1060,12 @@ public class JSONSkinLoader extends SkinLoader{
 					skinSelect.setCustomPropertyCount(count);
 				}
 			}
+
+			if (sk.customEvents != null) {
+				for (CustomEvent event : sk.customEvents) {
+					skin.addCustomEvent(new bms.player.beatoraja.skin.CustomEvent(event.id, event.action, event.condition, event.minInterval));
+				}
+			}
 		} catch (Throwable e) {
 			e.printStackTrace();
 			return null;
@@ -1281,6 +1287,7 @@ public class JSONSkinLoader extends SkinLoader{
 		public SongList songlist;
 		public PMchara[] pmchara = new PMchara[0];
 		public SkinConfigurationProperty skinSelect;
+		public CustomEvent[] customEvents = new CustomEvent[0];
 
 		public Destination[] destination;
 	}
@@ -1620,6 +1627,7 @@ public class JSONSkinLoader extends SkinLoader{
 	}
 
 	public static class CustomEvent {
+		public int id;
 		public Event action;
 		public BooleanProperty condition;
 		public int minInterval;
@@ -1664,6 +1672,7 @@ public class JSONSkinLoader extends SkinLoader{
 				Destination.class,
 				Animation.class,
 				SkinConfigurationProperty.class,
+				CustomEvent.class,
 		};
 		for (Class c : classes) {
 			json.setSerializer(c, new ObjectSerializer<>(enabledOptions, path));
@@ -1688,6 +1697,7 @@ public class JSONSkinLoader extends SkinLoader{
 				Judge[].class,
 				Destination[].class,
 				Animation[].class,
+				CustomEvent[].class,
 		};
 		for (Class c : array_classes) {
 			json.setSerializer(c, new ArraySerializer<>(enabledOptions, path));

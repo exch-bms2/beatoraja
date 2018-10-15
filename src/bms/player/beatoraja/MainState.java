@@ -84,7 +84,9 @@ public abstract class MainState {
 	}
 
 	public void executeEvent(int id, int arg1, int arg2) {
-
+		if (SkinPropertyMapper.isCustomEventId(id)) {
+			skin.executeCustomEvent(this, id, arg1, arg2);
+		}
 	}
 
 	public ScoreDataProperty getScoreDataProperty() {

@@ -146,7 +146,7 @@ public class SkinPropertyMapper {
 	}
 
 	public static boolean isCustomEventId(int id) {
-		return id >= BUTTON_CUSTOM_BEGIN && id <= BUTTON_CUSTOM_END;
+		return id >= EVENT_CUSTOM_BEGIN && id <= EVENT_CUSTOM_END;
 	}
 
 	public static boolean isEventRunnableBySkin(int id) {

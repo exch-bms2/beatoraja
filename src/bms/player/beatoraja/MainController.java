@@ -412,6 +412,7 @@ public class MainController extends ApplicationAdapter {
 		current.render();
 		sprite.begin();
 		if (current.getSkin() != null) {
+			current.getSkin().updateCustomObjects(current);
 			current.getSkin().drawAllObjects(sprite, current);
 		}
 		sprite.end();
