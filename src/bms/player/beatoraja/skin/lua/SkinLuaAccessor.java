@@ -52,7 +52,10 @@ public class SkinLuaAccessor {
 		globals.set("set_timer", new TwoArgFunction() {
 			@Override
 			public LuaValue call(LuaValue timerId, LuaValue timerValue) {
-				state.main.setMicroTimer(timerId.toint(), timerValue.tolong());
+				int id = timerId.toint();
+				if (!SkinPropertyMapper.isTimerWritableBySkin(id))
+					throw new IllegalArgumentException("指定されたタイマーはスキンから変更できません");
+				state.main.setMicroTimer(id, timerValue.tolong());
 				return LuaBoolean.TRUE;
 			}
 		});
