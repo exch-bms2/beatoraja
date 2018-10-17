@@ -4,7 +4,6 @@ import bms.player.beatoraja.Config;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.SkinConfig;
 import bms.player.beatoraja.skin.*;
-import bms.player.beatoraja.skin.event.*;
 import bms.player.beatoraja.skin.property.*;
 import com.badlogic.gdx.utils.reflect.ClassReflection;
 import com.badlogic.gdx.utils.reflect.Field;

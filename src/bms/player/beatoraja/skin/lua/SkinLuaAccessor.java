@@ -11,7 +11,6 @@ import org.luaj.vm2.lib.jse.JsePlatform;
 
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.play.BMSPlayer;
-import bms.player.beatoraja.skin.event.*;
 import bms.player.beatoraja.skin.property.*;
 import bms.player.beatoraja.SkinConfig;
 

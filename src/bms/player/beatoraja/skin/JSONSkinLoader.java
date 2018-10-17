@@ -27,7 +27,6 @@ import bms.player.beatoraja.select.*;
 import bms.player.beatoraja.skin.SkinHeader.CustomOffset;
 import bms.player.beatoraja.skin.SkinObject.*;
 import bms.player.beatoraja.skin.lua.SkinLuaAccessor;
-import bms.player.beatoraja.skin.event.*;
 import bms.player.beatoraja.skin.property.*;
 
 public class JSONSkinLoader extends SkinLoader{

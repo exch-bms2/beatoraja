@@ -1,7 +1,7 @@
 package bms.player.beatoraja.skin;
 
 import bms.player.beatoraja.MainState;
-import bms.player.beatoraja.skin.event.Event;
+import bms.player.beatoraja.skin.property.Event;
 import bms.player.beatoraja.skin.property.BooleanProperty;
 
 public class CustomEvent {

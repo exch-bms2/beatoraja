@@ -10,7 +10,6 @@ import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.select.MusicSelector;
 import bms.player.beatoraja.select.bar.Bar;
 import bms.player.beatoraja.select.bar.SongBar;
-import bms.player.beatoraja.skin.event.FloatWriter;
 import bms.player.beatoraja.song.SongData;
 
 public class FloatPropertyFactory {

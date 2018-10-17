@@ -1,4 +1,4 @@
-package bms.player.beatoraja.skin.event;
+package bms.player.beatoraja.skin.property;
 
 import bms.player.beatoraja.MainState;
 
