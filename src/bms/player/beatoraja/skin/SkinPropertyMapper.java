@@ -155,4 +155,13 @@ public class SkinPropertyMapper {
 		// スキンから実行できては困るイベントがあればここでフィルタリングする
 		return true;
 	}
+
+	public static boolean isCustomTimerId(int id) {
+		return id >= TIMER_CUSTOM_BEGIN && id <= TIMER_CUSTOM_END;
+	}
+
+	public static boolean isTimerWritableBySkin(int id) {
+		// スキンからはカスタムタイマーのみ書き込み可能とする(組み込みタイマーはゲームプレイに影響するため)
+		return isCustomTimerId(id);
+	}
 }

@@ -49,12 +49,19 @@ public class SkinLuaAccessor {
 				return LuaNumber.valueOf(state.main.getNowMicroTime());
 			}
 		});
-        globals.set("rate", new ZeroArgFunction() {
+		globals.set("set_timer", new TwoArgFunction() {
+			@Override
+			public LuaValue call(LuaValue timerId, LuaValue timerValue) {
+				state.main.setMicroTimer(timerId.toint(), timerValue.tolong());
+				return LuaBoolean.TRUE;
+			}
+		});
+		globals.set("rate", new ZeroArgFunction() {
 			@Override
 			public LuaValue call() {
 				return LuaDouble.valueOf(state.getScoreDataProperty().getNowRate());
 			}
-        });
+		});
 		globals.set("exscore", new ZeroArgFunction() {
 			@Override
 			public LuaValue call() {
@@ -154,17 +161,17 @@ public class SkinLuaAccessor {
 			@Override
 			public LuaValue call(LuaValue luaValue) {
 				state.executeEvent(getId(luaValue));
-				return LuaValue.NIL;
+				return LuaBoolean.TRUE;
 			}
 			@Override
 			public LuaValue call(LuaValue luaValue, LuaValue arg1) {
 				state.executeEvent(getId(luaValue), arg1.toint());
-				return LuaValue.NIL;
+				return LuaBoolean.TRUE;
 			}
 			@Override
 			public LuaValue call(LuaValue luaValue, LuaValue arg1, LuaValue arg2) {
 				state.executeEvent(getId(luaValue), arg1.toint(), arg2.toint());
-				return LuaValue.NIL;
+				return LuaBoolean.TRUE;
 			}
 			private int getId(LuaValue luaValue) {
 				int id = luaValue.toint();

@@ -1065,6 +1065,12 @@ public class JSONSkinLoader extends SkinLoader{
 					skin.addCustomEvent(new bms.player.beatoraja.skin.CustomEvent(event.id, event.action, event.condition, event.minInterval));
 				}
 			}
+
+			if (sk.customTimers != null) {
+				for (CustomTimer timer : sk.customTimers) {
+					skin.addCustomTimer(new bms.player.beatoraja.skin.CustomTimer(timer.id, timer.timer));
+				}
+			}
 		} catch (Throwable e) {
 			e.printStackTrace();
 			return null;
@@ -1287,6 +1293,7 @@ public class JSONSkinLoader extends SkinLoader{
 		public PMchara[] pmchara = new PMchara[0];
 		public SkinConfigurationProperty skinSelect;
 		public CustomEvent[] customEvents = new CustomEvent[0];
+		public CustomTimer[] customTimers = new CustomTimer[0];
 
 		public Destination[] destination;
 	}
@@ -1632,6 +1639,11 @@ public class JSONSkinLoader extends SkinLoader{
 		public int minInterval;
 	}
 
+	public static class CustomTimer {
+		public int id;
+		public TimerProperty timer;
+	}
+
 	private File getSrcIdPath(String srcid, Path p) {
 		if(srcid == null) {
 			return null;
@@ -1672,6 +1684,7 @@ public class JSONSkinLoader extends SkinLoader{
 				Animation.class,
 				SkinConfigurationProperty.class,
 				CustomEvent.class,
+				CustomTimer.class,
 		};
 		for (Class c : classes) {
 			json.setSerializer(c, new ObjectSerializer<>(enabledOptions, path));
@@ -1697,6 +1710,7 @@ public class JSONSkinLoader extends SkinLoader{
 				Destination[].class,
 				Animation[].class,
 				CustomEvent[].class,
+				CustomTimer[].class,
 		};
 		for (Class c : array_classes) {
 			json.setSerializer(c, new ArraySerializer<>(enabledOptions, path));
