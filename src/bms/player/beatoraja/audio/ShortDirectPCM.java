@@ -33,7 +33,7 @@ public class ShortDirectPCM extends PCM<ByteBuffer> {
 			if(pcm.isDirect()) {
 				sample = pcm;
 			} else {
-				sample = ByteBuffer.allocateDirect(bytes).order(ByteOrder.LITTLE_ENDIAN).put(pcm.array(), 0, bytes);				
+				sample = getDirectByteBuffer(bytes).order(ByteOrder.LITTLE_ENDIAN).put(pcm.array(), 0, bytes);				
 			}
 			break;
 		case 24:
