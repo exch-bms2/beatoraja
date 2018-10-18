@@ -28,7 +28,8 @@ public class SkinImage extends SkinObject {
 	}
 
 	public SkinImage(int imageid) {
-		setImageID(imageid);
+		this.image = new SkinSource[1];
+		this.image[0] = new SkinSourceReference(imageid);
 	}
 
 	public SkinImage(TextureRegion image) {
@@ -62,9 +63,6 @@ public class SkinImage extends SkinObject {
 	}
 
 	public TextureRegion getImage(int value, long time, MainState state) {
-		if(getImageID() != -1) {
-			return state.getImage(getImageID());
-		}
 		return image[value].getImage(time, state);
 	}
 
@@ -97,54 +95,44 @@ public class SkinImage extends SkinObject {
 	}
 
 	public void draw(SkinObjectRenderer sprite, long time, MainState state, float offsetX, float offsetY) {
-	    if(getImageID() != -1) {
-            final Rectangle r = this.getDestination(time, state);
-            final TextureRegion tr = state.getImage(getImageID());
-            if (r != null && tr != null) {
-                draw(sprite, tr, r.x + offsetX, r.y + offsetY, r.width, r.height, state);
-            }
-        } else {
-            if(image == null) {
-                return;
-            }
-            int value = 0;
-            if(ref != null) {
-                value = ref.get(state);
-            }
-            if(value >= image.length) {
-                value = 0;
-            }
+        if(image == null) {
+            return;
+        }
+        int value = 0;
+        if(ref != null) {
+            value = ref.get(state);
+        }
+        if(value >= image.length) {
+            value = 0;
+        }
 
-            final Rectangle r = this.getDestination(time, state);
-            if (r != null) {
-                if(value >= 0 && value < image.length) {
+        final Rectangle r = this.getDestination(time, state);
+        if (r != null) {
+            if(value >= 0 && value < image.length) {
+                final TextureRegion tr = getImage(value, time, state);
+                if(tr != null) {
                 	if(image[0] instanceof SkinSourceMovie) {
                 		setImageType(3);
-                        draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height, state);
+                        draw(sprite, tr, r.x + offsetX, r.y + offsetY, r.width, r.height, state);
                 		setImageType(0);
                 	} else {
-						draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height, state);
-                	}
+						draw(sprite, tr, r.x + offsetX, r.y + offsetY, r.width, r.height, state);
+                	}                    	
                 }
             }
         }
 	}
 
     public void draw(SkinObjectRenderer sprite, long time, MainState state, int value, float offsetX, float offsetY) {
-        if(getImageID() != -1) {
-            final Rectangle r = this.getDestination(time, state);
-            final TextureRegion tr = state.getImage(getImageID());
-            if (r != null && tr != null) {
-                draw(sprite, tr, r.x + offsetX, r.y + offsetY, r.width, r.height, state);
-            }
-        } else {
-            if(image == null) {
-                return;
-            }
-            final Rectangle r = this.getDestination(time, state);
-            if (r != null) {
-                if(value >= 0 && value < image.length) {
-                    draw(sprite, getImage(value, time, state), r.x + offsetX, r.y + offsetY, r.width, r.height, state);
+        if(image == null) {
+            return;
+        }
+        final Rectangle r = this.getDestination(time, state);
+        if (r != null) {
+            if(value >= 0 && value < image.length) {
+                final TextureRegion tr = getImage(value, time, state);
+                if(tr != null) {
+                    draw(sprite, tr, r.x + offsetX, r.y + offsetY, r.width, r.height, state);                	
                 }
             }
         }

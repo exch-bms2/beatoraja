@@ -30,17 +30,17 @@ public class SkinGraph extends SkinObject {
 	private final TextureRegion current = new TextureRegion();
 
 	public SkinGraph(int imageid, int id) {
-		setImageID(imageid);
+		source = new SkinSourceReference(imageid);
 		ref = FloatPropertyFactory.getFloatProperty(id);
 	}
 
 	public SkinGraph(int imageid, FloatProperty ref) {
-		setImageID(imageid);
+		source = new SkinSourceReference(imageid);
 		this.ref = ref;
 	}
 
 	public SkinGraph(int imageid, int id, int min, int max) {
-		setImageID(imageid);
+		source = new SkinSourceReference(imageid);
 		ref = new RateProperty(id, min, max);
 	}
 
@@ -75,34 +75,20 @@ public class SkinGraph extends SkinObject {
 	}
 
 	public void draw(SkinObjectRenderer sprite, long time, MainState state) {
-		if (getImageID() != -1) {
-			Rectangle r = this.getDestination(time, state);
-			TextureRegion image = state.getImage(getImageID());
-			if (r != null && image != null) {
-				float value = ref != null ? ref.get(state) : 0;
-				if (direction == 1) {
-					current.setRegion(image, 0,
-							image.getRegionY() + image.getRegionHeight() - (int) (image.getRegionHeight() * value),
-							image.getRegionWidth(), (int) (image.getRegionHeight() * value));
-					draw(sprite, current, r.x, r.y, r.width, r.height * value, state);
-				} else {
-					current.setRegion(image, 0, image.getRegionY(), (int) (image.getRegionWidth() * value),
-							image.getRegionHeight());
-					draw(sprite, current, r.x, r.y, r.width * value, r.height, state);
-				}
-			}
-		} else if (source != null) {
+		if (source != null) {
 			Rectangle r = this.getDestination(time, state);
 			if (r != null) {
 				float value = ref != null ? ref.get(state) : 0;
-				TextureRegion image = source.getImage(time, state);
-				if (direction == 1) {
-					current.setRegion(image, 0, image.getRegionHeight() - (int) (image.getRegionHeight() * value),
-							image.getRegionWidth(), (int) (image.getRegionHeight() * value));
-					draw(sprite, current, r.x, r.y, r.width, r.height * value, state);
-				} else {
-					current.setRegion(image, 0, 0, (int) (image.getRegionWidth() * value), image.getRegionHeight());
-					draw(sprite, current, r.x, r.y, r.width * value, r.height, state);
+				final TextureRegion image = source.getImage(time, state);
+				if(image != null) {
+					if (direction == 1) {
+						current.setRegion(image, 0, image.getRegionHeight() - (int) (image.getRegionHeight() * value),
+								image.getRegionWidth(), (int) (image.getRegionHeight() * value));
+						draw(sprite, current, r.x, r.y, r.width, r.height * value, state);
+					} else {
+						current.setRegion(image, 0, 0, (int) (image.getRegionWidth() * value), image.getRegionHeight());
+						draw(sprite, current, r.x, r.y, r.width * value, r.height, state);
+					}					
 				}
 			}
 		}

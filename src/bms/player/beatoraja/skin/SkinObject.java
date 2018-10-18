@@ -25,7 +25,6 @@ public abstract class SkinObject implements Disposable {
 
 	private boolean relative;
 
-	private int imageid = -1;
 	/**
 	 * 参照するタイマー定義
 	 */
@@ -689,14 +688,6 @@ public abstract class SkinObject implements Disposable {
 			this.offset = a.iterator().toArray().toArray();
 			this.off = new SkinOffset[this.offset.length];
 		}
-	}
-
-	public int getImageID() {
-		return imageid;
-	}
-
-	public void setImageID(int imageid) {
-		this.imageid = imageid;
 	}
 
 	public TimerProperty getDestinationTimer() {
