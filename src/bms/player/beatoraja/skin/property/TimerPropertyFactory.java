@@ -5,7 +5,7 @@ import bms.player.beatoraja.MainState;
 
 public class TimerPropertyFactory {
 	public static TimerProperty getTimerProperty(int timerId) {
-		if (timerId < 0 || timerId >= MainController.timerCount)
+		if (timerId < 0)
 			return null;
 
 		return new TimerProperty() {

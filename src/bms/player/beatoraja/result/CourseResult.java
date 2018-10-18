@@ -327,7 +327,7 @@ public class CourseResult extends AbstractResult {
 		}
 	}
 
-	public void executeClickEvent(int id, int arg) {
+	public void executeEvent(int id, int arg1, int arg2) {
 		switch (id) {
 		case BUTTON_REPLAY:
 			saveReplayData(0);
@@ -341,6 +341,8 @@ public class CourseResult extends AbstractResult {
 		case BUTTON_REPLAY4:
 			saveReplayData(3);
 			break;
+		default:
+			super.executeEvent(id, arg1, arg2);
 		}
 	}
 	

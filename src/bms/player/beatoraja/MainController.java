@@ -9,6 +9,7 @@ import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
+import bms.player.beatoraja.skin.SkinPropertyMapper;
 import org.lwjgl.input.Mouse;
 
 import com.badlogic.gdx.ApplicationAdapter;
@@ -412,6 +413,7 @@ public class MainController extends ApplicationAdapter {
 		current.render();
 		sprite.begin();
 		if (current.getSkin() != null) {
+			current.getSkin().updateCustomObjects(current);
 			current.getSkin().drawAllObjects(sprite, current);
 		}
 		sprite.end();
@@ -660,7 +662,7 @@ public class MainController extends ApplicationAdapter {
 
 	public long getNowTime(int id) {
 		if(isTimerOn(id)) {
-			return (nowmicrotime - timer[id]) / 1000;
+			return (nowmicrotime - getMicroTimer(id)) / 1000;
 		}
 		return 0;
 	}
@@ -671,42 +673,50 @@ public class MainController extends ApplicationAdapter {
 
 	public long getNowMicroTime(int id) {
 		if(isTimerOn(id)) {
-			return nowmicrotime - timer[id];
+			return nowmicrotime - getMicroTimer(id);
 		}
 		return 0;
 	}
 
 	public long getTimer(int id) {
-		return timer[id] / 1000;
+		return getMicroTimer(id) / 1000;
 	}
 
 	public long getMicroTimer(int id) {
-		return timer[id];
+		if (id >= 0 && id < timerCount) {
+			return timer[id];
+		} else {
+			return current.getSkin().getMicroCustomTimer(id);
+		}
 	}
 
 	public boolean isTimerOn(int id) {
-		return timer[id] != Long.MIN_VALUE;
+		return getMicroTimer(id) != Long.MIN_VALUE;
 	}
 
 	public void setTimerOn(int id) {
-		timer[id] = nowmicrotime;
+		setMicroTimer(id, nowmicrotime);
 	}
 
 	public void setTimerOff(int id) {
-		timer[id] = Long.MIN_VALUE;
+		setMicroTimer(id, Long.MIN_VALUE);
 	}
 
 	public void setMicroTimer(int id, long microtime) {
-		timer[id] = microtime;
+		if (id >= 0 && id < timerCount) {
+			timer[id] = microtime;
+		} else {
+			current.getSkin().setMicroCustomTimer(id, microtime);
+		}
 	}
 
 	public void switchTimer(int id, boolean on) {
 		if(on) {
-			if(timer[id] == Long.MIN_VALUE) {
-				timer[id] = nowmicrotime;
+			if(getMicroTimer(id) == Long.MIN_VALUE) {
+				setMicroTimer(id, nowmicrotime);
 			}
 		} else {
-			timer[id] = Long.MIN_VALUE;
+			setMicroTimer(id, Long.MIN_VALUE);
 		}
 	}
 

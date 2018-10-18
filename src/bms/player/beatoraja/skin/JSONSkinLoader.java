@@ -7,6 +7,7 @@ import java.io.*;
 import java.lang.reflect.Array;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import com.badlogic.gdx.graphics.Color;
@@ -329,7 +330,7 @@ public class JSONSkinLoader extends SkinLoader{
 								obj = new SkinImage(getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy),
 										img.timer, img.cycle);
 							}
-							if (img.act > 0) {
+							if (img.act != null) {
 								obj.setClickevent(img.act);
 								obj.setClickeventType(img.click);
 							}
@@ -361,7 +362,7 @@ public class JSONSkinLoader extends SkinLoader{
 							SkinImage si = new SkinImage(tr, timer, cycle);
 							si.setReferenceID(imgs.ref);
 							obj = si;
-							if (imgs.act > 0) {
+							if (imgs.act != null) {
 								obj.setClickevent(imgs.act);
 								obj.setClickeventType(imgs.click);
 							}
@@ -1042,20 +1043,32 @@ public class JSONSkinLoader extends SkinLoader{
 				} else {
 					int count = 0;
 					for (Image image : sk.image) {
-						if (SkinPropertyMapper.isSkinCustomizeButton(image.act)) {
-							int index = SkinPropertyMapper.getSkinCustomizeIndex(image.act);
+						if (SkinPropertyMapper.isSkinCustomizeButton(image.act.getEventId())) {
+							int index = SkinPropertyMapper.getSkinCustomizeIndex(image.act.getEventId());
 							if (count <= index)
 								count = index + 1;
 						}
 					}
 					for (ImageSet imageSet : sk.imageset) {
-						if (SkinPropertyMapper.isSkinCustomizeButton(imageSet.act)) {
-							int index = SkinPropertyMapper.getSkinCustomizeIndex(imageSet.act);
+						if (SkinPropertyMapper.isSkinCustomizeButton(imageSet.act.getEventId())) {
+							int index = SkinPropertyMapper.getSkinCustomizeIndex(imageSet.act.getEventId());
 							if (count <= index)
 								count = index + 1;
 						}
 					}
 					skinSelect.setCustomPropertyCount(count);
+				}
+			}
+
+			if (sk.customEvents != null) {
+				for (CustomEvent event : sk.customEvents) {
+					skin.addCustomEvent(new bms.player.beatoraja.skin.CustomEvent(event.id, event.action, event.condition, event.minInterval));
+				}
+			}
+
+			if (sk.customTimers != null) {
+				for (CustomTimer timer : sk.customTimers) {
+					skin.addCustomTimer(new bms.player.beatoraja.skin.CustomTimer(timer.id, timer.timer));
 				}
 			}
 		} catch (Throwable e) {
@@ -1279,6 +1292,8 @@ public class JSONSkinLoader extends SkinLoader{
 		public SongList songlist;
 		public PMchara[] pmchara = new PMchara[0];
 		public SkinConfigurationProperty skinSelect;
+		public CustomEvent[] customEvents = new CustomEvent[0];
+		public CustomTimer[] customTimers = new CustomTimer[0];
 
 		public Destination[] destination;
 	}
@@ -1335,7 +1350,7 @@ public class JSONSkinLoader extends SkinLoader{
 		public int cycle;
 		public int len;
 		public int ref;
-		public int act;
+		public Event act;
 		public int click = 0;
 	}
 
@@ -1343,7 +1358,7 @@ public class JSONSkinLoader extends SkinLoader{
 		public String id;
 		public int ref;
 		public String[] images = new String[0];
-		public int act;
+		public Event act;
 		public int click = 0;
 	}
 
@@ -1617,6 +1632,18 @@ public class JSONSkinLoader extends SkinLoader{
 		public int customOffsetStyle = 0;
 	}
 
+	public static class CustomEvent {
+		public int id;
+		public Event action;
+		public BooleanProperty condition;
+		public int minInterval;
+	}
+
+	public static class CustomTimer {
+		public int id;
+		public TimerProperty timer;
+	}
+
 	private File getSrcIdPath(String srcid, Path p) {
 		if(srcid == null) {
 			return null;
@@ -1656,6 +1683,8 @@ public class JSONSkinLoader extends SkinLoader{
 				Destination.class,
 				Animation.class,
 				SkinConfigurationProperty.class,
+				CustomEvent.class,
+				CustomTimer.class,
 		};
 		for (Class c : classes) {
 			json.setSerializer(c, new ObjectSerializer<>(enabledOptions, path));
@@ -1680,19 +1709,20 @@ public class JSONSkinLoader extends SkinLoader{
 				Judge[].class,
 				Destination[].class,
 				Animation[].class,
+				CustomEvent[].class,
+				CustomTimer[].class,
 		};
 		for (Class c : array_classes) {
 			json.setSerializer(c, new ArraySerializer<>(enabledOptions, path));
 		}
 
-		// method reference (lua::load*Property) is not possible because lua may be null
-		json.setSerializer(BooleanProperty.class, new LuaScriptSerializer<>(s -> lua.loadBooleanProperty(s), BooleanPropertyFactory::getBooleanProperty));
-		json.setSerializer(IntegerProperty.class, new LuaScriptSerializer<>(s -> lua.loadIntegerProperty(s), IntegerPropertyFactory::getIntegerProperty));
-		json.setSerializer(FloatProperty.class, new LuaScriptSerializer<>(s -> lua.loadFloatProperty(s), FloatPropertyFactory::getFloatProperty));
-		json.setSerializer(StringProperty.class, new LuaScriptSerializer<>(s -> lua.loadStringProperty(s), StringPropertyFactory::getStringProperty));
-		json.setSerializer(TimerProperty.class, new LuaScriptSerializer<>(s -> lua.loadTimerProperty(s), TimerPropertyFactory::getTimerProperty));
-		json.setSerializer(FloatWriter.class, new LuaScriptSerializer<>(s -> lua.loadFloatWriter(s), FloatPropertyFactory::getFloatWriter));
-		json.setSerializer(Event.class, new LuaScriptSerializer<>(s -> lua.loadEvent(s), null));
+		json.setSerializer(BooleanProperty.class, new LuaScriptSerializer<>(SkinLuaAccessor::loadBooleanProperty, BooleanPropertyFactory::getBooleanProperty));
+		json.setSerializer(IntegerProperty.class, new LuaScriptSerializer<>(SkinLuaAccessor::loadIntegerProperty, IntegerPropertyFactory::getIntegerProperty));
+		json.setSerializer(FloatProperty.class, new LuaScriptSerializer<>(SkinLuaAccessor::loadFloatProperty, FloatPropertyFactory::getFloatProperty));
+		json.setSerializer(StringProperty.class, new LuaScriptSerializer<>(SkinLuaAccessor::loadStringProperty, StringPropertyFactory::getStringProperty));
+		json.setSerializer(TimerProperty.class, new LuaScriptSerializer<>(SkinLuaAccessor::loadTimerProperty, TimerPropertyFactory::getTimerProperty));
+		json.setSerializer(FloatWriter.class, new LuaScriptSerializer<>(SkinLuaAccessor::loadFloatWriter, FloatPropertyFactory::getFloatWriter));
+		json.setSerializer(Event.class, new LuaScriptSerializer<>(SkinLuaAccessor::loadEvent, EventFactory::getEvent));
 	}
 
 	private abstract class Serializer<T> extends Json.ReadOnlySerializer<T> {
@@ -1876,17 +1906,17 @@ public class JSONSkinLoader extends SkinLoader{
 	}
 
 	private class LuaScriptSerializer<T> extends Json.ReadOnlySerializer<T> {
-		Function<String, T> luaPropertyLoader;
+		BiFunction<SkinLuaAccessor, String, T> luaPropertyLoader;
 		Function<Integer, T> idPropertyLoader;
 
-		LuaScriptSerializer(Function<String, T> loader, Function<Integer, T> byId) {
+		LuaScriptSerializer(BiFunction<SkinLuaAccessor, String, T> loader, Function<Integer, T> byId) {
 			luaPropertyLoader = loader;
 			idPropertyLoader = byId;
 		}
 
 		public T read(Json json, JsonValue jsonValue, Class cls) {
 			if (jsonValue.isString() && luaPropertyLoader != null) {
-				return luaPropertyLoader.apply(jsonValue.asString());
+				return luaPropertyLoader.apply(lua, jsonValue.asString());
 			} else if (jsonValue.isNumber() && idPropertyLoader != null) {
 				return idPropertyLoader.apply(jsonValue.asInt());
 			} else {

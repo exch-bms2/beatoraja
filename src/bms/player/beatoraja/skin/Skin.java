@@ -75,6 +75,9 @@ public class Skin {
 	
 	private IntMap<Offset> offset = new IntMap<Offset>();
 
+	private final IntMap<CustomEvent> customEvents = new IntMap<CustomEvent>();
+	private final IntMap<CustomTimer> customTimers = new IntMap<CustomTimer>();
+
 	public Skin(Resolution org, Resolution dst) {
 		width = dst.width;
 		height = dst.height;
@@ -494,4 +497,63 @@ public class Skin {
 	}
 
 
+	public void addCustomEvent(CustomEvent event) {
+		customEvents.put(event.getId(), event);
+	}
+
+	public void executeCustomEvent(MainState state, int id, int arg1, int arg2) {
+		if (customEvents.containsKey(id)) {
+			customEvents.get(id).execute(state, arg1, arg2);
+		}
+	}
+
+	public void addCustomTimer(CustomTimer timer) {
+		customTimers.put(timer.getId(), timer);
+	}
+
+	/**
+	 * カスタムタイマーの値を設定する。
+	 * 能動的・受動的にかかわらず、取得の度にタイマーの値を再計算しないため、
+	 * 同一フレームでの値は一意であることが保証される。
+	 * @param id カスタムタイマーID
+	 * @return タイマーの値 (micro sec)
+	 */
+	public long getMicroCustomTimer(int id) {
+		if (customTimers.containsKey(id)) {
+			return customTimers.get(id).getMicroTimer();
+		} else {
+			return Long.MIN_VALUE;
+		}
+	}
+
+	/**
+	 * (受動的な)カスタムタイマーの値を設定する。
+	 * タイマーが存在しない場合は追加する。
+	 * @param id カスタムタイマーID
+	 * @param time タイマーの値 (micro sec)
+	 */
+	public void setMicroCustomTimer(int id, long time) {
+		if (customTimers.containsKey(id)) {
+			customTimers.get(id).setMicroTimer(time);
+		} else {
+			CustomTimer timer = new CustomTimer(id, null);
+			timer.setMicroTimer(time);
+			customTimers.put(id, timer);
+		}
+	}
+
+	/**
+	 * ユーザー定義のオブジェクトを1フレームに1回ずつ更新する。
+	 * 更新順: タイマー -> イベント
+	 * それぞれ ID が小さい順
+	 * @param state MainState
+	 */
+	public void updateCustomObjects(MainState state) {
+		for (IntMap.Entry<CustomTimer> timer : customTimers) {
+			timer.value.update(state);
+		}
+		for (IntMap.Entry<CustomEvent> event : customEvents) {
+			event.value.update(state);
+		}
+	}
 }

@@ -1,6 +1,5 @@
 package bms.player.beatoraja.skin;
 
-import bms.player.beatoraja.MainController;
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.skin.Skin.SkinObjectRenderer;
 import bms.player.beatoraja.skin.property.*;
@@ -52,9 +51,9 @@ public abstract class SkinObject implements Disposable {
 
 	private int acc;
 	/**
-	 * オブジェクトクリック時に実行するイベントの参照ID
+	 * オブジェクトクリック時に実行するイベント
 	 */
-	private int clickevent = -1;
+	private Event clickevent = null;
 	/**
 	 * オブジェクトクリック判定・イベント引数の種類
 	 * 0: 通常(plus only)
@@ -510,33 +509,33 @@ public abstract class SkinObject implements Disposable {
 	}
 
 	protected boolean mousePressed(MainState state, int button, int x, int y) {
-		if (clickevent != -1) {
+		if (clickevent != null) {
 			Rectangle r = getDestination(state.main.getNowTime(), state);
-			// System.out.println(obj.getClickevent() + " : " + r.x +
+			// System.out.println(obj.getClickeventId() + " : " + r.x +
 			// "," + r.y + "," + r.width + "," + r.height + " - " + x +
 			// "," + y);
 			switch (clickeventType) {
 			case 0:
 				if (r != null && r.x <= x && r.x + r.width >= x && r.y <= y && r.y + r.height >= y) {
-					state.executeClickEvent(clickevent, 1);
+					clickevent.exec(state, 1);
 					return true;
 				}
 				break;
 			case 1:
 				if (r != null && r.x <= x && r.x + r.width >= x && r.y <= y && r.y + r.height >= y) {
-					state.executeClickEvent(clickevent, -1);
+					clickevent.exec(state, -1);
 					return true;
 				}
 				break;
 			case 2:
 				if (r != null && r.x <= x && r.x + r.width >= x && r.y <= y && r.y + r.height >= y) {
-					state.executeClickEvent(clickevent, x >= r.x + r.width/2 ? 1 : -1);
+					clickevent.exec(state, x >= r.x + r.width/2 ? 1 : -1);
 					return true;
 				}
 				break;
 			case 3:
 				if (r != null && r.x <= x && r.x + r.width >= x && r.y <= y && r.y + r.height >= y) {
-					state.executeClickEvent(clickevent, y >= r.y + r.height/2 ? 1 : -1);
+					clickevent.exec(state, y >= r.y + r.height/2 ? 1 : -1);
 					return true;
 				}
 				break;
@@ -545,11 +544,19 @@ public abstract class SkinObject implements Disposable {
 		return false;
 	}
 
-	public int getClickevent() {
+	public int getClickeventId() {
+		return clickevent.getEventId();
+	}
+
+	public Event getClickevent() {
 		return clickevent;
 	}
 
 	public void setClickevent(int clickevent) {
+		this.clickevent = EventFactory.getEvent(clickevent);
+	}
+
+	public void setClickevent(Event clickevent) {
 		this.clickevent = clickevent;
 	}
 
@@ -646,24 +653,7 @@ public abstract class SkinObject implements Disposable {
 			}
 		}
 	}
-	
-	public interface Event {
-		
-		public void exec(MainState state);
 
-	}
-
-	/**
-	 * floatを反映させるためのインターフェイス
-	 *
-	 * @author exch
-	 */
-	public interface FloatWriter {
-		
-		public void set(MainState state, float value);
-
-	}
-	
 	public abstract void dispose();
 
 	public int[] getOffsetID() {

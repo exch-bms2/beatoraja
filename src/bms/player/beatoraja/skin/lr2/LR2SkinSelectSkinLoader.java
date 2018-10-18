@@ -32,8 +32,8 @@ public class LR2SkinSelectSkinLoader extends LR2SkinCSVLoader<SkinConfigurationS
 		SkinConfigurationSkin skin = this.loadSkin(new SkinConfigurationSkin(src, dst), f, selector, header, option, property);
 		int count = 0;
 		for (SkinObject obj : skin.getAllSkinObjects()) {
-			if (SkinPropertyMapper.isSkinCustomizeButton(obj.getClickevent())) {
-				int index = SkinPropertyMapper.getSkinCustomizeIndex(obj.getClickevent());
+			if (SkinPropertyMapper.isSkinCustomizeButton(obj.getClickeventId())) {
+				int index = SkinPropertyMapper.getSkinCustomizeIndex(obj.getClickeventId());
 				if (count <= index)
 					count = index + 1;
 			}

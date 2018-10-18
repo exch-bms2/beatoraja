@@ -75,8 +75,18 @@ public abstract class MainState {
 		}
 	}
 
-	public void executeClickEvent(int id, int arg) {
+	public void executeEvent(int id) {
+		executeEvent(id, 0, 0);
+	}
 
+	public void executeEvent(int id, int arg) {
+		executeEvent(id, arg, 0);
+	}
+
+	public void executeEvent(int id, int arg1, int arg2) {
+		if (SkinPropertyMapper.isCustomEventId(id)) {
+			skin.executeCustomEvent(this, id, arg1, arg2);
+		}
 	}
 
 	public ScoreDataProperty getScoreDataProperty() {

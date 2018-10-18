@@ -172,6 +172,10 @@ public class SkinProperty {
 
 	public static final int TIMER_MAX = 2999;
 
+	// カスタムタイマーの状態は組み込みタイマーと別領域に記憶する
+	public static final int TIMER_CUSTOM_BEGIN = 10000;
+	public static final int TIMER_CUSTOM_END = 19999;
+
 	// 選曲専用
 	public static final int SLIDER_MUSICSELECT_POSITION = 1;
 	// プレイ専用
@@ -825,6 +829,10 @@ public class SkinProperty {
 	public static final int BUTTON_SKINSELECT_24KEY = 386;
 	public static final int BUTTON_SKINSELECT_24KEY_DOUBLE = 387;
 	public static final int BUTTON_SKINSELECT_24KEY_BATTLE = 388;
+
+	// ユーザー定義イベント用
+	public static final int EVENT_CUSTOM_BEGIN = 1000;
+	public static final int EVENT_CUSTOM_END = 1999;
 
 
 	public static final int VALUE_JUDGE_1P_SCRATCH = 500;

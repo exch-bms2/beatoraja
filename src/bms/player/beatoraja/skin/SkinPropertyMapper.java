@@ -144,4 +144,24 @@ public class SkinPropertyMapper {
 	public static int getSkinCustomizeItemIndex(int id) {
 		return id - STRING_SKIN_CUSTOMIZE_ITEM1;
 	}
+
+	public static boolean isCustomEventId(int id) {
+		return id >= EVENT_CUSTOM_BEGIN && id <= EVENT_CUSTOM_END;
+	}
+
+	public static boolean isEventRunnableBySkin(int id) {
+		if (isCustomEventId(id))
+			return true;
+		// スキンから実行できては困るイベントがあればここでフィルタリングする
+		return true;
+	}
+
+	public static boolean isCustomTimerId(int id) {
+		return id >= TIMER_CUSTOM_BEGIN && id <= TIMER_CUSTOM_END;
+	}
+
+	public static boolean isTimerWritableBySkin(int id) {
+		// スキンからはカスタムタイマーのみ書き込み可能とする(組み込みタイマーはゲームプレイに影響するため)
+		return isCustomTimerId(id);
+	}
 }
