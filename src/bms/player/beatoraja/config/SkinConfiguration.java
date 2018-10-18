@@ -135,7 +135,7 @@ public class SkinConfiguration extends MainState {
 				availableSkins.add(header);
 			}
 		}
-		if (this.config != null) {
+		if (config != null && this.config.getPath() != null && !config.getPath().isEmpty()) {
 			int index = -1;
 			for (int i = 0; i < availableSkins.size(); i++) {
 				SkinHeader header = availableSkins.get(i);
