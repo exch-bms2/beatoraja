@@ -7,7 +7,6 @@ import java.io.*;
 import java.nio.file.Path;
 import java.util.*;
 
-import bms.player.beatoraja.skin.*;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -21,6 +20,7 @@ import bms.player.beatoraja.decide.MusicDecideSkin;
 import bms.player.beatoraja.play.*;
 import bms.player.beatoraja.result.*;
 import bms.player.beatoraja.select.*;
+import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.SkinHeader.CustomOffset;
 import bms.player.beatoraja.skin.SkinObject.*;
 import bms.player.beatoraja.skin.lua.SkinLuaAccessor;
@@ -1063,13 +1063,13 @@ public class JSONSkinLoader extends SkinLoader {
 
 			if (sk.customEvents != null) {
 				for (JsonSkin.CustomEvent event : sk.customEvents) {
-					skin.addCustomEvent(new bms.player.beatoraja.skin.CustomEvent(event.id, event.action, event.condition, event.minInterval));
+					skin.addCustomEvent(new CustomEvent(event.id, event.action, event.condition, event.minInterval));
 				}
 			}
 
 			if (sk.customTimers != null) {
 				for (JsonSkin.CustomTimer timer : sk.customTimers) {
-					skin.addCustomTimer(new bms.player.beatoraja.skin.CustomTimer(timer.id, timer.timer));
+					skin.addCustomTimer(new CustomTimer(timer.id, timer.timer));
 				}
 			}
 		} catch (Throwable e) {
