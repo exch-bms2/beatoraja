@@ -4,13 +4,11 @@ import java.nio.file.Path;
 import java.util.function.Function;
 import java.util.logging.Logger;
 
-import bms.player.beatoraja.skin.SkinPropertyMapper;
 import org.luaj.vm2.*;
 import org.luaj.vm2.lib.*;
 import org.luaj.vm2.lib.jse.JsePlatform;
 
 import bms.player.beatoraja.MainState;
-import bms.player.beatoraja.play.BMSPlayer;
 import bms.player.beatoraja.skin.property.*;
 import bms.player.beatoraja.SkinConfig;
 
@@ -18,171 +16,20 @@ public class SkinLuaAccessor {
 	
 	private final Globals globals;
 
-	public SkinLuaAccessor() {
-		globals = JsePlatform.standardGlobals();
-	}
+	// 各機能のエクスポート先を globals にするかどうか
+	private final boolean isGlobal;
 
-	public SkinLuaAccessor (MainState state) {
-        globals = JsePlatform.standardGlobals();
-		globals.set("timer", new OneArgFunction() {
-			@Override
-			public LuaValue call(LuaValue value) {
-				return LuaNumber.valueOf(state.main.getMicroTimer(value.toint()));
-			}
-		});
-		globals.set("timer_off_value", Long.MIN_VALUE);
-		globals.set("is_timer_on", new OneArgFunction() {
-			@Override
-			public LuaValue call(LuaValue value) {
-				return LuaNumber.valueOf(state.main.isTimerOn(value.toint()));
-			}
-		});
-		globals.set("now_timer", new OneArgFunction() {
-			@Override
-			public LuaValue call(LuaValue value) {
-				return LuaNumber.valueOf(state.main.getNowMicroTime(value.toint()));
-			}
-		});
-		globals.set("time", new ZeroArgFunction() {
-			@Override
-			public LuaValue call() {
-				return LuaNumber.valueOf(state.main.getNowMicroTime());
-			}
-		});
-		globals.set("set_timer", new TwoArgFunction() {
-			@Override
-			public LuaValue call(LuaValue timerId, LuaValue timerValue) {
-				int id = timerId.toint();
-				if (!SkinPropertyMapper.isTimerWritableBySkin(id))
-					throw new IllegalArgumentException("指定されたタイマーはスキンから変更できません");
-				state.main.setMicroTimer(id, timerValue.tolong());
-				return LuaBoolean.TRUE;
-			}
-		});
-		globals.set("rate", new ZeroArgFunction() {
-			@Override
-			public LuaValue call() {
-				return LuaDouble.valueOf(state.getScoreDataProperty().getNowRate());
-			}
-		});
-		globals.set("exscore", new ZeroArgFunction() {
-			@Override
-			public LuaValue call() {
-				return LuaDouble.valueOf(state.getScoreDataProperty().getNowEXScore());
-			}
-		});
-		globals.set("rate_best", new ZeroArgFunction() {
-			@Override
-			public LuaValue call() {
-				return LuaDouble.valueOf(state.getScoreDataProperty().getNowBestScoreRate());
-			}
-		});
-		globals.set("exscore_best", new ZeroArgFunction() {
-			@Override
-			public LuaValue call() {
-				return LuaDouble.valueOf(state.getScoreDataProperty().getBestScore());
-			}
-		});
-		globals.set("rate_rival", new ZeroArgFunction() {
-			@Override
-			public LuaValue call() {
-				return LuaDouble.valueOf(state.getScoreDataProperty().getRivalScoreRate());
-			}
-		});
-		globals.set("exscore_rival", new ZeroArgFunction() {
-			@Override
-			public LuaValue call() {
-				return LuaDouble.valueOf(state.getScoreDataProperty().getRivalScore());
-			}
-		});
-		globals.set("volume_sys", new ZeroArgFunction() {
-			@Override
-			public LuaValue call() {
-				return LuaDouble.valueOf(state.main.getConfig().getSystemvolume());
-			}
-		});
-		globals.set("set_volume_sys", new OneArgFunction() {
-			@Override
-			public LuaValue call(LuaValue value) {
-				state.main.getConfig().setSystemvolume(value.tofloat());
-				return LuaBoolean.TRUE;
-			}
-		});
-		globals.set("volume_key", new ZeroArgFunction() {
-			@Override
-			public LuaValue call() {
-				return LuaDouble.valueOf(state.main.getConfig().getKeyvolume());
-			}
-		});
-		globals.set("set_volume_key", new OneArgFunction() {
-			@Override
-			public LuaValue call(LuaValue value) {
-				state.main.getConfig().setKeyvolume(value.tofloat());
-				return LuaBoolean.TRUE;
-			}
-		});
-		globals.set("volume_bg", new ZeroArgFunction() {
-			@Override
-			public LuaValue call() {
-				return LuaDouble.valueOf(state.main.getConfig().getBgvolume());
-			}
-		});
-		globals.set("set_volume_bg", new OneArgFunction() {
-			@Override
-			public LuaValue call(LuaValue value) {
-				state.main.getConfig().setBgvolume(value.tofloat());
-				return LuaBoolean.TRUE;
-			}
-		});
-        globals.set("judge", new OneArgFunction() {
-			@Override
-			public LuaValue call(LuaValue value) {
-				return LuaInteger.valueOf(state.getJudgeCount(value.toint(), true) + state.getJudgeCount(value.toint(), false));
-			}
-        });
-        globals.set("gauge", new ZeroArgFunction() {
-			@Override
-			public LuaValue call() {
-				if(state instanceof BMSPlayer) {
-					BMSPlayer player = (BMSPlayer) state;
-					return LuaDouble.valueOf(player.getGauge().getValue());
-				}
-				return LuaInteger.ZERO;
-			}
-        });
-		globals.set("gauge_type", new ZeroArgFunction() {
-			@Override
-			public LuaValue call() {
-				if(state instanceof BMSPlayer) {
-					BMSPlayer player = (BMSPlayer) state;
-					return LuaDouble.valueOf(player.getGauge().getType());
-				}
-				return LuaInteger.ZERO;
-			}
-		});
-		globals.set("event_exec", new VarArgFunction() {
-			@Override
-			public LuaValue call(LuaValue luaValue) {
-				state.executeEvent(getId(luaValue));
-				return LuaBoolean.TRUE;
-			}
-			@Override
-			public LuaValue call(LuaValue luaValue, LuaValue arg1) {
-				state.executeEvent(getId(luaValue), arg1.toint());
-				return LuaBoolean.TRUE;
-			}
-			@Override
-			public LuaValue call(LuaValue luaValue, LuaValue arg1, LuaValue arg2) {
-				state.executeEvent(getId(luaValue), arg1.toint(), arg2.toint());
-				return LuaBoolean.TRUE;
-			}
-			private int getId(LuaValue luaValue) {
-				int id = luaValue.toint();
-				if (!SkinPropertyMapper.isEventRunnableBySkin(id))
-					throw new IllegalArgumentException("指定されたイベントはスキンから実行できません");
-				return id;
-			}
-		});
+	// isGlobal == false のとき、エクスポートするモジュール名
+	private static final String MAIN_STATE = "main_state";
+
+	public SkinLuaAccessor(boolean isGlobal) {
+		globals = JsePlatform.standardGlobals();
+		this.isGlobal = isGlobal;
+
+		if (!isGlobal) {
+			// ヘッダ読み込み時に require("main_state") だけでエラーになると面倒なので、空のテーブルを入れておく
+			globals.package_.setIsLoaded(MAIN_STATE, new LuaTable());
+		}
 	}
 
 	public BooleanProperty loadBooleanProperty(String script) {
@@ -410,15 +257,44 @@ public class SkinLuaAccessor {
 		pkg.set("path", pkg.get("path").tojstring() + ";" + path.toString() + "/?.lua");
 	}
 
-	public void setSkinProperty(SkinConfig.Property property, Function<String, String> filePathGetter) {
-		LuaTable skin_config = new LuaTable();
+	/**
+	 * MainState にアクセスするための機能をエクスポートする。
+	 * isGlobal == true のとき、グローバル変数としてそのまま追加
+	 * それ以外のとき、モジュール "main_state" にエクスポート
+	 * (Lua からは main_state = require("main_state") などとすることで利用可能)
+	 * @param state MainState
+	 */
+	public void exportMainStateAccessor(MainState state) {
+		MainStateAccessor accessor = new MainStateAccessor(state);
+		if (isGlobal) {
+			accessor.export(globals);
+		} else {
+			LuaTable mainStateTable = new LuaTable();
+			accessor.export(mainStateTable);
+			globals.package_.setIsLoaded(MAIN_STATE, mainStateTable);
+		}
+	}
 
+	/**
+	 * スキン設定をエクスポートする。
+	 * isGlobal にかかわらず、グローバル変数 skin_config にデータがセットされた状態にする。
+	 * Lua スキンは skin_config が nil のときヘッダのみ読み込めるようにする。
+	 * @param property Property (スキン設定データ)
+	 * @param filePathGetter スキン設定を元にファイルパスを解決する関数
+	 */
+	public void exportSkinProperty(SkinConfig.Property property, Function<String, String> filePathGetter) {
+		LuaTable table = new LuaTable();
+		exportSkinPropertyToTable(property, filePathGetter, table);
+		globals.set("skin_config", table);
+	}
+
+	private void exportSkinPropertyToTable(SkinConfig.Property property, Function<String, String> filePathGetter, LuaTable table) {
 		LuaTable file_path = new LuaTable();
 		for (SkinConfig.FilePath file : property.getFile()) {
 			file_path.set(file.name, file.path);
 		}
-		skin_config.set("file_path", file_path);
-		skin_config.set("get_path", new OneArgFunction() {
+		table.set("file_path", file_path);
+		table.set("get_path", new OneArgFunction() {
 			@Override
 			public LuaValue call(LuaValue value) {
 				return LuaString.valueOf(filePathGetter.apply(value.tojstring()));
@@ -431,22 +307,20 @@ public class SkinLuaAccessor {
 			options.set(op.name, op.value);
 			enabled_options.insert(enabled_options.length() + 1, LuaInteger.valueOf(op.value));
 		}
-		skin_config.set("option", options);
-		skin_config.set("enabled_options", enabled_options);
+		table.set("option", options);
+		table.set("enabled_options", enabled_options);
 
 		LuaTable offsets = new LuaTable();
 		for (SkinConfig.Offset ofs : property.getOffset()) {
-			LuaTable table = new LuaTable();
-			table.set("x", ofs.x);
-			table.set("y", ofs.y);
-			table.set("w", ofs.w);
-			table.set("h", ofs.h);
-			table.set("r", ofs.r);
-			table.set("a", ofs.a);
-			offsets.set(ofs.name, table);
+			LuaTable offsetTable = new LuaTable();
+			offsetTable.set("x", ofs.x);
+			offsetTable.set("y", ofs.y);
+			offsetTable.set("w", ofs.w);
+			offsetTable.set("h", ofs.h);
+			offsetTable.set("r", ofs.r);
+			offsetTable.set("a", ofs.a);
+			offsets.set(ofs.name, offsetTable);
 		}
-		skin_config.set("offset", offsets);
-
-		globals.set("skin_config", skin_config);
+		table.set("offset", offsets);
 	}
 }
