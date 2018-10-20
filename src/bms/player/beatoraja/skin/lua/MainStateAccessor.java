@@ -2,10 +2,15 @@ package bms.player.beatoraja.skin.lua;
 
 import bms.player.beatoraja.MainState;
 import bms.player.beatoraja.play.BMSPlayer;
+import bms.player.beatoraja.skin.SkinObject;
 import bms.player.beatoraja.skin.SkinPropertyMapper;
+import bms.player.beatoraja.skin.property.*;
 import org.luaj.vm2.*;
 import org.luaj.vm2.lib.*;
 
+/**
+ * 実行時にスキンからMainStateの数値などにアクセスできる関数を提供する
+ */
 public class MainStateAccessor {
 
 	private final MainState state;
@@ -15,41 +20,21 @@ public class MainStateAccessor {
 	}
 
 	public void export(LuaTable table) {
-		table.set("timer", new OneArgFunction() {
-			@Override
-			public LuaValue call(LuaValue value) {
-				return LuaNumber.valueOf(state.main.getMicroTimer(value.toint()));
-			}
-		});
-		table.set("timer_off_value", Long.MIN_VALUE);
-		table.set("is_timer_on", new OneArgFunction() {
-			@Override
-			public LuaValue call(LuaValue value) {
-				return LuaNumber.valueOf(state.main.isTimerOn(value.toint()));
-			}
-		});
-		table.set("now_timer", new OneArgFunction() {
-			@Override
-			public LuaValue call(LuaValue value) {
-				return LuaNumber.valueOf(state.main.getNowMicroTime(value.toint()));
-			}
-		});
-		table.set("time", new ZeroArgFunction() {
-			@Override
-			public LuaValue call() {
-				return LuaNumber.valueOf(state.main.getNowMicroTime());
-			}
-		});
-		table.set("set_timer", new TwoArgFunction() {
-			@Override
-			public LuaValue call(LuaValue timerId, LuaValue timerValue) {
-				int id = timerId.toint();
-				if (!SkinPropertyMapper.isTimerWritableBySkin(id))
-					throw new IllegalArgumentException("指定されたタイマーはスキンから変更できません");
-				state.main.setMicroTimer(id, timerValue.tolong());
-				return LuaBoolean.TRUE;
-			}
-		});
+		// 汎用関数(ID指定での取得・設定など)
+		table.set("option", this.new option());
+		table.set("number", this.new number());
+		table.set("float_number", this.new float_number());
+		table.set("text", this.new text());
+		table.set("offset", this.new offset());
+		table.set("timer", this.new timer());
+		table.set("timer_off_value", MainStateAccessor.timer_off_value);
+		table.set("is_timer_on", this.new is_timer_on());
+		table.set("now_timer", this.new now_timer());
+		table.set("time", this.new time());
+		table.set("set_timer", this.new set_timer());
+		table.set("event_exec", this.new event_exec());
+
+		// 具体的な数値の取得・設定など
 		table.set("rate", new ZeroArgFunction() {
 			@Override
 			public LuaValue call() {
@@ -134,7 +119,7 @@ public class MainStateAccessor {
 		table.set("gauge", new ZeroArgFunction() {
 			@Override
 			public LuaValue call() {
-				if(state instanceof BMSPlayer) {
+				if (state instanceof BMSPlayer) {
 					BMSPlayer player = (BMSPlayer) state;
 					return LuaDouble.valueOf(player.getGauge().getValue());
 				}
@@ -144,35 +129,173 @@ public class MainStateAccessor {
 		table.set("gauge_type", new ZeroArgFunction() {
 			@Override
 			public LuaValue call() {
-				if(state instanceof BMSPlayer) {
+				if (state instanceof BMSPlayer) {
 					BMSPlayer player = (BMSPlayer) state;
 					return LuaDouble.valueOf(player.getGauge().getType());
 				}
 				return LuaInteger.ZERO;
 			}
 		});
-		table.set("event_exec", new VarArgFunction() {
-			@Override
-			public LuaValue call(LuaValue luaValue) {
-				state.executeEvent(getId(luaValue));
-				return LuaBoolean.TRUE;
-			}
-			@Override
-			public LuaValue call(LuaValue luaValue, LuaValue arg1) {
-				state.executeEvent(getId(luaValue), arg1.toint());
-				return LuaBoolean.TRUE;
-			}
-			@Override
-			public LuaValue call(LuaValue luaValue, LuaValue arg1, LuaValue arg2) {
-				state.executeEvent(getId(luaValue), arg1.toint(), arg2.toint());
-				return LuaBoolean.TRUE;
-			}
-			private int getId(LuaValue luaValue) {
-				int id = luaValue.toint();
-				if (!SkinPropertyMapper.isEventRunnableBySkin(id))
-					throw new IllegalArgumentException("指定されたイベントはスキンから実行できません");
-				return id;
-			}
-		});
+	}
+
+	/**
+	 * ID指定で真理値(OPTION_*)を取得する関数
+	 * NOTE: 呼び出しの度にBooleanPropertyを生成しており効率が悪いため非推奨
+	 */
+	private class option extends OneArgFunction {
+		@Override
+		public LuaValue call(LuaValue luaValue) {
+			BooleanProperty prop = BooleanPropertyFactory.getBooleanProperty(luaValue.toint());
+			return LuaBoolean.valueOf(prop.get(state));
+		}
+	}
+
+	/**
+	 * ID指定で整数値(NUMBER_*)を取得する関数
+	 * NOTE: 呼び出しの度にIntegerPropertyを生成しており効率が悪いため非推奨
+	 */
+	private class number extends OneArgFunction {
+		@Override
+		public LuaValue call(LuaValue luaValue) {
+			IntegerProperty prop = IntegerPropertyFactory.getIntegerProperty(luaValue.toint());
+			return LuaNumber.valueOf(prop.get(state));
+		}
+	}
+
+	/**
+	 * ID指定で小数値(SLIDER_* | BARGRAPH_*)を取得する関数
+	 * NOTE: 呼び出しの度にFloatPropertyを生成しており効率が悪いため非推奨
+	 */
+	private class float_number extends OneArgFunction {
+		@Override
+		public LuaValue call(LuaValue luaValue) {
+			FloatProperty prop = FloatPropertyFactory.getFloatProperty(luaValue.toint());
+			return LuaDouble.valueOf(prop.get(state));
+		}
+	}
+
+	/**
+	 * ID指定で文字列(STRING_*)を取得する関数
+	 * NOTE: 呼び出しの度にStringPropertyを生成しており効率が悪いため非推奨
+	 */
+	private class text extends OneArgFunction {
+		@Override
+		public LuaValue call(LuaValue luaValue) {
+			StringProperty prop = StringPropertyFactory.getStringProperty(luaValue.toint());
+			return LuaString.valueOf(prop.get(state));
+		}
+	}
+
+	/**
+	 * ID指定でオフセット(OFFSET_*)を取得する関数
+	 */
+	private class offset extends OneArgFunction {
+		@Override
+		public LuaValue call(LuaValue value) {
+			SkinObject.SkinOffset offset = state.getOffsetValue(value.toint());
+			LuaTable offsetTable = new LuaTable();
+			offsetTable.set("x", offset.x);
+			offsetTable.set("y", offset.y);
+			offsetTable.set("w", offset.w);
+			offsetTable.set("h", offset.h);
+			offsetTable.set("r", offset.r);
+			offsetTable.set("a", offset.a);
+			return offsetTable;
+		}
+	}
+
+	/**
+	 * ID指定でタイマー(TIMER_* またはカスタムタイマー)の値を取得する関数
+	 * return: ONになった時刻 (micro sec) | timer_off_value (OFFのとき)
+	 */
+	private class timer extends OneArgFunction {
+		@Override
+		public LuaValue call(LuaValue value) {
+			return LuaNumber.valueOf(state.main.getMicroTimer(value.toint()));
+		}
+	}
+
+	/**
+	 * タイマーがOFFの状態を表す定数
+	 */
+	private static final Long timer_off_value = Long.MIN_VALUE;
+
+	/**
+	 * ID指定でタイマーがONかどうかを取得する関数
+	 */
+	private class is_timer_on extends OneArgFunction {
+		@Override
+		public LuaValue call(LuaValue value) {
+			return LuaNumber.valueOf(state.main.isTimerOn(value.toint()));
+		}
+	}
+
+	/**
+	 * ID指定でタイマーの経過時間を取得する関数
+	 * return: ONになってからの経過時間 (micro sec) | 0 (OFFのとき)
+	 */
+	private class now_timer extends OneArgFunction {
+		@Override
+		public LuaValue call(LuaValue value) {
+			return LuaNumber.valueOf(state.main.getNowMicroTime(value.toint()));
+		}
+	}
+
+	/**
+	 * 現在時刻を取得する関数
+	 * return: 時刻 (micro sec)
+	 */
+	private class time extends ZeroArgFunction {
+		@Override
+		public LuaValue call() {
+			return LuaNumber.valueOf(state.main.getNowMicroTime());
+		}
+	}
+
+	/**
+	 * ID指定でタイマーの値を設定する関数
+	 * ゲームプレイに影響するタイマーは設定不可
+	 * param timerValue: ONになった時刻 (micro sec) | timer_off_value (OFFにする場合)
+	 */
+	private class set_timer extends TwoArgFunction {
+		@Override
+		public LuaValue call(LuaValue timerId, LuaValue timerValue) {
+			int id = timerId.toint();
+			if (!SkinPropertyMapper.isTimerWritableBySkin(id))
+				throw new IllegalArgumentException("指定されたタイマーはスキンから変更できません");
+			state.main.setMicroTimer(id, timerValue.tolong());
+			return LuaBoolean.TRUE;
+		}
+	}
+
+	/**
+	 * ID指定でイベント(BUTTON_* またはカスタムイベント)を実行する関数
+	 * ゲームプレイに影響するイベントは実行不可
+	 */
+	private class event_exec extends VarArgFunction {
+		@Override
+		public LuaValue call(LuaValue luaValue) {
+			state.executeEvent(getId(luaValue));
+			return LuaBoolean.TRUE;
+		}
+
+		@Override
+		public LuaValue call(LuaValue luaValue, LuaValue arg1) {
+			state.executeEvent(getId(luaValue), arg1.toint());
+			return LuaBoolean.TRUE;
+		}
+
+		@Override
+		public LuaValue call(LuaValue luaValue, LuaValue arg1, LuaValue arg2) {
+			state.executeEvent(getId(luaValue), arg1.toint(), arg2.toint());
+			return LuaBoolean.TRUE;
+		}
+
+		private int getId(LuaValue luaValue) {
+			int id = luaValue.toint();
+			if (!SkinPropertyMapper.isEventRunnableBySkin(id))
+				throw new IllegalArgumentException("指定されたイベントはスキンから実行できません");
+			return id;
+		}
 	}
 }

@@ -43,6 +43,9 @@ public class JSONSkinLoader extends SkinLoader {
 
 	protected JsonSkinSerializer serializer;
 
+	/**
+	 * ヘッダの読み込みに使われるコンストラクタ
+	 */
 	public JSONSkinLoader() {
 		this(null);
 	}
@@ -53,6 +56,11 @@ public class JSONSkinLoader extends SkinLoader {
 		usecim = false;
 	}
 
+	/**
+	 * スキン本体の読み込みに使われるコンストラクタ
+	 * @param state
+	 * @param c
+	 */
 	public JSONSkinLoader(MainState state, Config c) {
 		this(state, c, new SkinLuaAccessor(true));
 	}
