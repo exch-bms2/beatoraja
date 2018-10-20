@@ -71,6 +71,7 @@ public class JSONSkinLoader extends SkinLoader {
 		usecim = false;
 		bgaExpand = c.getBgaExpand();
 		lua.exportMainStateAccessor(state);
+		lua.exportUtilities(state);
 	}
 
 	public Skin loadSkin(Path p, SkinType type, SkinConfig.Property property) {

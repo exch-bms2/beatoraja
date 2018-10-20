@@ -21,6 +21,8 @@ public class SkinLuaAccessor {
 
 	// isGlobal == false のとき、エクスポートするモジュール名
 	private static final String MAIN_STATE = "main_state";
+	private static final String TIMER_UTIL = "timer_util";
+	private static final String EVENT_UTIL = "event_util";
 
 	public SkinLuaAccessor(boolean isGlobal) {
 		globals = JsePlatform.standardGlobals();
@@ -29,6 +31,8 @@ public class SkinLuaAccessor {
 		if (!isGlobal) {
 			// ヘッダ読み込み時に require("main_state") だけでエラーになると面倒なので、空のテーブルを入れておく
 			globals.package_.setIsLoaded(MAIN_STATE, new LuaTable());
+			globals.package_.setIsLoaded(TIMER_UTIL, new LuaTable());
+			globals.package_.setIsLoaded(EVENT_UTIL, new LuaTable());
 		}
 	}
 
@@ -272,6 +276,27 @@ public class SkinLuaAccessor {
 			LuaTable mainStateTable = new LuaTable();
 			accessor.export(mainStateTable);
 			globals.package_.setIsLoaded(MAIN_STATE, mainStateTable);
+		}
+	}
+
+	/**
+	 * その他のユーティリティーをエクスポートする。
+	 * ロードがそれほど重くなく、JSONスキンから使う可能性もあることが前提
+	 * @param state MainState
+	 */
+	public void exportUtilities(MainState state) {
+		TimerUtility timerUtil = new TimerUtility(state);
+		EventUtility eventUtil = new EventUtility(state);
+		if (isGlobal) {
+			timerUtil.export(globals);
+			eventUtil.export(globals);
+		} else {
+			LuaTable timerUtilTable = new LuaTable();
+			timerUtil.export(timerUtilTable);
+			globals.package_.setIsLoaded(TIMER_UTIL, timerUtilTable);
+			LuaTable eventUtilTable = new LuaTable();
+			eventUtil.export(eventUtilTable);
+			globals.package_.setIsLoaded(EVENT_UTIL, eventUtilTable);
 		}
 	}
 

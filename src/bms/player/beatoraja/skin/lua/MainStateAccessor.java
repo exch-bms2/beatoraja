@@ -28,8 +28,6 @@ public class MainStateAccessor {
 		table.set("offset", this.new offset());
 		table.set("timer", this.new timer());
 		table.set("timer_off_value", MainStateAccessor.timer_off_value);
-		table.set("is_timer_on", this.new is_timer_on());
-		table.set("now_timer", this.new now_timer());
 		table.set("time", this.new time());
 		table.set("set_timer", this.new set_timer());
 		table.set("event_exec", this.new event_exec());
@@ -219,27 +217,6 @@ public class MainStateAccessor {
 	 * タイマーがOFFの状態を表す定数
 	 */
 	private static final Long timer_off_value = Long.MIN_VALUE;
-
-	/**
-	 * ID指定でタイマーがONかどうかを取得する関数
-	 */
-	private class is_timer_on extends OneArgFunction {
-		@Override
-		public LuaValue call(LuaValue value) {
-			return LuaNumber.valueOf(state.main.isTimerOn(value.toint()));
-		}
-	}
-
-	/**
-	 * ID指定でタイマーの経過時間を取得する関数
-	 * return: ONになってからの経過時間 (micro sec) | 0 (OFFのとき)
-	 */
-	private class now_timer extends OneArgFunction {
-		@Override
-		public LuaValue call(LuaValue value) {
-			return LuaNumber.valueOf(state.main.getNowMicroTime(value.toint()));
-		}
-	}
 
 	/**
 	 * 現在時刻を取得する関数
