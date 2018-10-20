@@ -172,7 +172,7 @@ public class MainController extends ApplicationAdapter {
 			e.printStackTrace();
 		}
 
-		playdata = new PlayDataAccessor(config.getPlayername());
+		playdata = new PlayDataAccessor(config);
 
 		Array<IRStatus> irarray = new Array<IRStatus>();
 		for(PlayerConfig.IRConfig irconfig : player.getIrconfig()) {
