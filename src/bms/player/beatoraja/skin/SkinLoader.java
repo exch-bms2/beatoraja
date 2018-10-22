@@ -1,6 +1,7 @@
 package bms.player.beatoraja.skin;
 
 import bms.player.beatoraja.*;
+import bms.player.beatoraja.skin.json.JSONSkinLoader;
 import bms.player.beatoraja.skin.lr2.LR2SkinCSVLoader;
 import bms.player.beatoraja.skin.lr2.LR2SkinHeaderLoader;
 import bms.player.beatoraja.skin.lua.LuaSkinLoader;

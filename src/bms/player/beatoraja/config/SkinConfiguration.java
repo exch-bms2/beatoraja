@@ -7,6 +7,7 @@ import static bms.player.beatoraja.skin.SkinProperty.*;
 import bms.player.beatoraja.SkinConfig;
 import bms.player.beatoraja.input.BMSPlayerInputProcessor;
 import bms.player.beatoraja.skin.*;
+import bms.player.beatoraja.skin.json.JSONSkinLoader;
 import bms.player.beatoraja.skin.lr2.LR2SkinHeaderLoader;
 import bms.player.beatoraja.skin.lua.LuaSkinLoader;
 

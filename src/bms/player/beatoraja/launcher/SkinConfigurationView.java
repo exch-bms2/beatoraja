@@ -11,6 +11,7 @@ import bms.player.beatoraja.PlayerConfig;
 import bms.player.beatoraja.SkinConfig;
 import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.SkinHeader.*;
+import bms.player.beatoraja.skin.json.JSONSkinLoader;
 import bms.player.beatoraja.skin.lr2.LR2SkinHeaderLoader;
 import bms.player.beatoraja.skin.lua.LuaSkinLoader;
 import javafx.fxml.FXML;

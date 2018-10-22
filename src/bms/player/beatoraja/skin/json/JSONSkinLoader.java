@@ -1,14 +1,11 @@
-package bms.player.beatoraja.skin;
+package bms.player.beatoraja.skin.json;
 
 import static bms.player.beatoraja.Resolution.*;
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
 import java.io.*;
-import java.lang.reflect.Array;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
@@ -16,7 +13,6 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.*;
-import com.badlogic.gdx.utils.reflect.*;
 
 import bms.player.beatoraja.*;
 import bms.player.beatoraja.config.SkinConfigurationSkin;
@@ -24,18 +20,19 @@ import bms.player.beatoraja.decide.MusicDecideSkin;
 import bms.player.beatoraja.play.*;
 import bms.player.beatoraja.result.*;
 import bms.player.beatoraja.select.*;
+import bms.player.beatoraja.skin.*;
 import bms.player.beatoraja.skin.SkinHeader.CustomOffset;
 import bms.player.beatoraja.skin.SkinObject.*;
 import bms.player.beatoraja.skin.lua.SkinLuaAccessor;
 import bms.player.beatoraja.skin.property.*;
 
-public class JSONSkinLoader extends SkinLoader{
+public class JSONSkinLoader extends SkinLoader {
 
 	private Resolution dstr;
 	private boolean usecim;
 	private int bgaExpand = -1;
 
-	protected JsonSkin sk;
+	protected JsonSkin.Skin sk;
 
 	Map<String, Texture> texmap;
 	Map<String, SkinTextBitmap.SkinTextBitmapSource> bitmapSourceMap;
@@ -43,6 +40,8 @@ public class JSONSkinLoader extends SkinLoader{
 	protected final SkinLuaAccessor lua;
 
 	protected ObjectMap<String, String> filemap = new ObjectMap();
+
+	protected JsonSkinSerializer serializer;
 
 	public JSONSkinLoader() {
 		lua = null;
@@ -68,12 +67,13 @@ public class JSONSkinLoader extends SkinLoader{
 	}
 
 	public SkinHeader loadHeader(Path p) {
+		serializer = new JsonSkinSerializer(lua, path -> getPath(path, filemap));
 		SkinHeader header = null;
 		try {
 			Json json = new Json();
 			json.setIgnoreUnknownFields(true);
-			setSerializers(json, null, p);
-			sk = json.fromJson(JsonSkin.class, new FileReader(p.toFile()));
+			serializer.setSerializers(json, null, p);
+			sk = json.fromJson(JsonSkin.Skin.class, new FileReader(p.toFile()));
 			header = loadJsonSkinHeader(sk, p);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -81,7 +81,7 @@ public class JSONSkinLoader extends SkinLoader{
 		return header;
 	}
 
-	protected SkinHeader loadJsonSkinHeader(JsonSkin sk, Path p) {
+	protected SkinHeader loadJsonSkinHeader(JsonSkin.Skin sk, Path p) {
 		SkinHeader header = null;
 		try {
 			if (sk.type != -1) {
@@ -93,7 +93,7 @@ public class JSONSkinLoader extends SkinLoader{
 
 				SkinHeader.CustomOption[] options = new SkinHeader.CustomOption[sk.property.length];
 				for (int i = 0; i < sk.property.length; i++) {
-					Property pr = sk.property[i];
+					JsonSkin.Property pr = sk.property[i];
 
 					int[] op = new int[pr.item.length];
 					String[] name = new String[pr.item.length];
@@ -107,7 +107,7 @@ public class JSONSkinLoader extends SkinLoader{
 
 				SkinHeader.CustomFile[] files = new SkinHeader.CustomFile[sk.filepath.length];
 				for (int i = 0; i < sk.filepath.length; i++) {
-					Filepath pr = sk.filepath[i];
+					JsonSkin.Filepath pr = sk.filepath[i];
 					files[i] = new SkinHeader.CustomFile(pr.name, p.getParent().toString() + "/" + pr.path, pr.def);
 				}
 				header.setCustomFiles(files);
@@ -125,7 +125,7 @@ public class JSONSkinLoader extends SkinLoader{
 				}
 				SkinHeader.CustomOffset[] offsets = new SkinHeader.CustomOffset[sk.offset.length + offsetLengthAddition];
 				for (int i = 0; i < sk.offset.length; i++) {
-					Offset pr = sk.offset[i];
+					JsonSkin.Offset pr = sk.offset[i];
 					offsets[i] = new SkinHeader.CustomOffset(pr.name, pr.id, pr.x, pr.y, pr.w, pr.h, pr.r, pr.a);
 				}
 				switch (header.getSkinType()) {
@@ -152,16 +152,17 @@ public class JSONSkinLoader extends SkinLoader{
 	}
 
 	public Skin load(Path p, SkinType type, SkinConfig.Property property) {
+		serializer = new JsonSkinSerializer(lua, path -> getPath(path, filemap));
 		Skin skin = null;
 		SkinHeader header = loadHeader(p);
 		try {
 			Json json = new Json();
 			json.setIgnoreUnknownFields(true);
 
-			setSerializers(json, getEnabledOptions(header, property), p);
+			serializer.setSerializers(json, getEnabledOptions(header, property), p);
 			initFileMap(header, property);
 
-			sk = json.fromJson(JsonSkin.class, new FileReader(p.toFile()));
+			sk = json.fromJson(JsonSkin.Skin.class, new FileReader(p.toFile()));
 			skin = loadJsonSkin(header, sk, type, property, p);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -227,7 +228,7 @@ public class JSONSkinLoader extends SkinLoader{
 		}
 	}
 
-	protected Skin loadJsonSkin(SkinHeader header, JsonSkin sk, SkinType type, SkinConfig.Property property, Path p){
+	protected Skin loadJsonSkin(SkinHeader header, JsonSkin.Skin sk, SkinType type, SkinConfig.Property property, Path p){
 		Skin skin = null;
 		try {
 			Resolution src = HD;
@@ -265,7 +266,7 @@ public class JSONSkinLoader extends SkinLoader{
 			}
 
 			IntIntMap op = new IntIntMap();
-			for (Property pr : sk.property) {
+			for (JsonSkin.Property pr : sk.property) {
 				int pop = 0;
 				for(SkinConfig.Option opt : property.getOption()) {
 					if(opt.name.equals(pr.name)) {
@@ -298,7 +299,7 @@ public class JSONSkinLoader extends SkinLoader{
 			skin.setInput(sk.input);
 			skin.setScene(sk.scene);
 
-			for (Destination dst : sk.destination) {
+			for (JsonSkin.Destination dst : sk.destination) {
 				SkinObject obj = null;
 				try {
 					int id = Integer.parseInt(dst.id);
@@ -309,7 +310,7 @@ public class JSONSkinLoader extends SkinLoader{
 
 				}
 				if (obj == null) {
-					for (Image img : sk.image) {
+					for (JsonSkin.Image img : sk.image) {
 						if (dst.id.equals(img.id)) {
 							Texture tex = getTexture(img.src, p);
 
@@ -338,13 +339,13 @@ public class JSONSkinLoader extends SkinLoader{
 							break;
 						}
 					}
-					for (ImageSet imgs : sk.imageset) {
+					for (JsonSkin.ImageSet imgs : sk.imageset) {
 						if (dst.id.equals(imgs.id)) {
 							TextureRegion[][] tr = new TextureRegion[imgs.images.length][];
 							TimerProperty timer = null;
 							int cycle = -1;
 							for (int i = 0; i < imgs.images.length; i++) {
-								for (Image img : sk.image) {
+								for (JsonSkin.Image img : sk.image) {
 									if (img.id.equals(imgs.images[i])) {
 										Texture tex = getTexture(img.src, p);
 										tr[i] = getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy);
@@ -369,7 +370,7 @@ public class JSONSkinLoader extends SkinLoader{
 							break;
 						}
 					}
-					for (Value value : sk.value) {
+					for (JsonSkin.Value value : sk.value) {
 						if (dst.id.equals(value.id)) {
 							Texture tex = getTexture(value.src, p);
 							TextureRegion[] images = getSourceImage(tex, value.x, value.y, value.w, value.h, value.divx,
@@ -446,10 +447,10 @@ public class JSONSkinLoader extends SkinLoader{
 						}
 					}
 					// text
-					for (Text text : sk.text) {
+					for (JsonSkin.Text text : sk.text) {
 						if (dst.id.equals(text.id)) {
 							if (text.ref == SkinProperty.STRING_SEARCHWORD) {
-								Animation a = dst.dst[0];
+								JsonSkin.Animation a = dst.dst[0];
 								Rectangle r = new Rectangle(a.x * ((float)dstr.width / sk.w),
 										a.y * ((float)dstr.height / sk.h), a.w * ((float)dstr.width / sk.w),
 										a.h * ((float)dstr.height / sk.h));
@@ -461,7 +462,7 @@ public class JSONSkinLoader extends SkinLoader{
 						}
 					}
 					// slider
-					for (Slider img : sk.slider) {
+					for (JsonSkin.Slider img : sk.slider) {
 						if (dst.id.equals(img.id)) {
 							Texture tex = getTexture(img.src, p);
 
@@ -485,7 +486,7 @@ public class JSONSkinLoader extends SkinLoader{
 						}
 					}
 					// graph
-					for (Graph img : sk.graph) {
+					for (JsonSkin.Graph img : sk.graph) {
 						if (dst.id.equals(img.id)) {
 							if (img.type < 0) {
 								Texture tex = getTexture(img.src, p);
@@ -528,35 +529,35 @@ public class JSONSkinLoader extends SkinLoader{
 						}
 					}
 
-					for (GaugeGraph ggraph : sk.gaugegraph) {
+					for (JsonSkin.GaugeGraph ggraph : sk.gaugegraph) {
 						if (dst.id.equals(ggraph.id)) {
 							SkinGaugeGraphObject st = new SkinGaugeGraphObject();
 							obj = st;
 							break;
 						}
 					}
-					for (JudgeGraph ggraph : sk.judgegraph) {
+					for (JsonSkin.JudgeGraph ggraph : sk.judgegraph) {
 						if (dst.id.equals(ggraph.id)) {
 							SkinNoteDistributionGraph st = new SkinNoteDistributionGraph(ggraph.type, ggraph.delay, ggraph.backTexOff, ggraph.orderReverse, ggraph.noGap);
 							obj = st;
 							break;
 						}
 					}
-					for (BPMGraph ggraph : sk.bpmgraph) {
+					for (JsonSkin.BPMGraph ggraph : sk.bpmgraph) {
 						if (dst.id.equals(ggraph.id)) {
 							SkinBPMGraph st = new SkinBPMGraph(ggraph.delay, ggraph.lineWidth, ggraph.mainBPMColor, ggraph.minBPMColor, ggraph.maxBPMColor, ggraph.otherBPMColor, ggraph.stopLineColor, ggraph.transitionLineColor);
 							obj = st;
 							break;
 						}
 					}
-					for (TimingVisualizer tv : sk.timingvisualizer) {
+					for (JsonSkin.TimingVisualizer tv : sk.timingvisualizer) {
 						if (dst.id.equals(tv.id)) {
 							SkinTimingVisualizer st = new SkinTimingVisualizer(tv.width, tv.judgeWidthMillis, tv.lineWidth, tv.lineColor, tv.centerColor, tv.PGColor, tv.GRColor, tv.GDColor, tv.BDColor, tv.PRColor, tv.transparent, tv.drawDecay);
 							obj = st;
 						}
 					}
 
-					for (TimingDistributionGraph td : sk.timingdistributiongraph) {
+					for (JsonSkin.TimingDistributionGraph td : sk.timingdistributiongraph) {
 						if (dst.id.equals(td.id)) {
 							SkinTimingDistributionGraph st = new SkinTimingDistributionGraph(td.width, td.lineWidth, td.graphColor, td.averageColor, td.devColor, td.PGColor, td.GRColor, td.GDColor, td.BDColor, td.PRColor, td.drawAverage, td.drawDev);
 							obj = st;
@@ -592,7 +593,7 @@ public class JSONSkinLoader extends SkinLoader{
 						float dx = (float)dstr.width / sk.w;
 						float dy = (float)dstr.height / sk.h;
 						for (int i = 0; i < region.length; i++) {
-							Animation dest = sk.note.dst[i];
+							JsonSkin.Animation dest = sk.note.dst[i];
 							region[i] = new Rectangle(dest.x * dx, dest.y * dy, dest.w * dx, dest.h * dy);
 							if(i < sk.note.size.length) {
 								scale[i] = sk.note.size[i] * dy;
@@ -603,11 +604,11 @@ public class JSONSkinLoader extends SkinLoader{
 						Rectangle[] gregion = new Rectangle[sk.note.group.length];
 						SkinImage[] lines = new SkinImage[gregion.length];
 						for (int i = 0; i < gregion.length; i++) {
-							Destination dest = sk.note.group[i];
+							JsonSkin.Destination dest = sk.note.group[i];
 							gregion[i] = new Rectangle(dest.dst[0].x * dx, dest.dst[0].y * dy, dest.dst[0].w * dx,
 									dest.dst[0].h * dy);
 
-							for (Image img : sk.image) {
+							for (JsonSkin.Image img : sk.image) {
 								if (dest.id.equals(img.id)) {
 									Texture tex = getTexture(img.src, p);
 									lines[i] = new SkinImage(
@@ -624,9 +625,9 @@ public class JSONSkinLoader extends SkinLoader{
 						if(sk.note.bpm != null) {
 							SkinImage[] bpm = new SkinImage[gregion.length];
 							for (int i = 0; i < gregion.length && i < sk.note.bpm.length; i++) {
-								Destination dest = sk.note.bpm[i];
+								JsonSkin.Destination dest = sk.note.bpm[i];
 
-								for (Image img : sk.image) {
+								for (JsonSkin.Image img : sk.image) {
 									if (dest.id.equals(img.id)) {
 										Texture tex = getTexture(img.src, p);
 										bpm[i] = new SkinImage(
@@ -643,9 +644,9 @@ public class JSONSkinLoader extends SkinLoader{
 						if(sk.note.stop != null) {
 							SkinImage[] stop = new SkinImage[gregion.length];
 							for (int i = 0; i < gregion.length && i < sk.note.stop.length; i++) {
-								Destination dest = sk.note.stop[i];
+								JsonSkin.Destination dest = sk.note.stop[i];
 
-								for (Image img : sk.image) {
+								for (JsonSkin.Image img : sk.image) {
 									if (dest.id.equals(img.id)) {
 										Texture tex = getTexture(img.src, p);
 										stop[i] = new SkinImage(
@@ -662,9 +663,9 @@ public class JSONSkinLoader extends SkinLoader{
 						if(sk.note.time != null) {
 							SkinImage[] time = new SkinImage[gregion.length];
 							for (int i = 0; i < gregion.length && i < sk.note.time.length; i++) {
-								Destination dest = sk.note.time[i];
+								JsonSkin.Destination dest = sk.note.time[i];
 
-								for (Image img : sk.image) {
+								for (JsonSkin.Image img : sk.image) {
 									if (dest.id.equals(img.id)) {
 										Texture tex = getTexture(img.src, p);
 										time[i] = new SkinImage(
@@ -692,7 +693,7 @@ public class JSONSkinLoader extends SkinLoader{
 					if (sk.gauge != null && dst.id.equals(sk.gauge.id)) {
 						TextureRegion[][] pgaugetex = new TextureRegion[sk.gauge.nodes.length][];
 						for (int i = 0; i < sk.gauge.nodes.length; i++) {
-							for (Image img : sk.image) {
+							for (JsonSkin.Image img : sk.image) {
 								if (sk.gauge.nodes[i].equals(img.id)) {
 									Texture tex = getTexture(img.src, p);
 									pgaugetex[i] = getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy);
@@ -715,7 +716,7 @@ public class JSONSkinLoader extends SkinLoader{
 						((SkinGauge)obj).setEndtime(sk.gauge.endtime);
 					}
 					// hidden cover (playskin only)
-					for (HiddenCover img : sk.hiddenCover) {
+					for (JsonSkin.HiddenCover img : sk.hiddenCover) {
 						if (dst.id.equals(img.id)) {
 							Texture tex = getTexture(img.src, p);
 							obj = new SkinHidden(getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx, img.divy), img.timer, img.cycle);
@@ -736,12 +737,12 @@ public class JSONSkinLoader extends SkinLoader{
 						obj = new SkinBGA(this.bgaExpand);
 					}
 					// judge (playskin only)
-					for (Judge judge : sk.judge) {
+					for (JsonSkin.Judge judge : sk.judge) {
 						if (dst.id.equals(judge.id)) {
 							SkinImage[] images = new SkinImage[judge.images.length];
 							SkinNumber[] numbers = new SkinNumber[judge.images.length];
 							for (int i = 0; i < judge.images.length; i++) {
-								for (Image img : sk.image) {
+								for (JsonSkin.Image img : sk.image) {
 									if (judge.images[i].id.equals(img.id)) {
 										Texture tex = getTexture(img.src, p);
 										images[i] = new SkinImage(
@@ -752,7 +753,7 @@ public class JSONSkinLoader extends SkinLoader{
 									}
 								}
 
-								for (Value value : sk.value) {
+								for (JsonSkin.Value value : sk.value) {
 									if (judge.numbers[i].id.equals(value.id)) {
 										Texture tex = getTexture(value.src, p);
 										TextureRegion[] numimages = getSourceImage(tex, value.x, value.y, value.w,
@@ -780,7 +781,7 @@ public class JSONSkinLoader extends SkinLoader{
 											numbers[i].setOffsets(offsets);
 										}
 
-										for(Animation ani : judge.numbers[i].dst) {
+										for(JsonSkin.Animation ani : judge.numbers[i].dst) {
 											ani.x -= ani.w * value.digit / 2;
 										}
 										setDestination(skin, numbers[i], judge.numbers[i]);
@@ -806,13 +807,13 @@ public class JSONSkinLoader extends SkinLoader{
 						SkinImage[] offimage = new SkinImage[sk.songlist.listoff.length];
 
 						for (int i = 0; i < sk.songlist.liston.length; i++) {
-							for (ImageSet imgs : sk.imageset) {
+							for (JsonSkin.ImageSet imgs : sk.imageset) {
 								if (sk.songlist.liston[i].id.equals(imgs.id)) {
 									TextureRegion[][] tr = new TextureRegion[imgs.images.length][];
 									TimerProperty timer = null;
 									int cycle = -1;
 									for (int j = 0; j < imgs.images.length; j++) {
-										for (Image img : sk.image) {
+										for (JsonSkin.Image img : sk.image) {
 											if (img.id.equals(imgs.images[j])) {
 												Texture tex = getTexture(img.src, p);
 												tr[j] = getSourceImage(tex, img.x, img.y, img.w, img.h, img.divx,
@@ -843,7 +844,7 @@ public class JSONSkinLoader extends SkinLoader{
 
 						SkinImage[] lamp = new SkinImage[sk.songlist.lamp.length];
 						for (int i = 0; i < sk.songlist.lamp.length; i++) {
-							for (Image img : sk.image) {
+							for (JsonSkin.Image img : sk.image) {
 								if (sk.songlist.lamp[i].id.equals(img.id)) {
 									Texture tex = getTexture(img.src, p);
 									lamp[i] = new SkinImage(
@@ -857,7 +858,7 @@ public class JSONSkinLoader extends SkinLoader{
 						barobj.setLamp(lamp);
 						SkinImage[] playerlamp = new SkinImage[sk.songlist.playerlamp.length];
 						for (int i = 0; i < sk.songlist.playerlamp.length; i++) {
-							for (Image img : sk.image) {
+							for (JsonSkin.Image img : sk.image) {
 								if (sk.songlist.playerlamp[i].id.equals(img.id)) {
 									Texture tex = getTexture(img.src, p);
 									playerlamp[i] = new SkinImage(
@@ -871,7 +872,7 @@ public class JSONSkinLoader extends SkinLoader{
 						barobj.setPlayerLamp(playerlamp);
 						SkinImage[] rivallamp = new SkinImage[sk.songlist.rivallamp.length];
 						for (int i = 0; i < sk.songlist.rivallamp.length; i++) {
-							for (Image img : sk.image) {
+							for (JsonSkin.Image img : sk.image) {
 								if (sk.songlist.rivallamp[i].id.equals(img.id)) {
 									Texture tex = getTexture(img.src, p);
 									rivallamp[i] = new SkinImage(
@@ -886,7 +887,7 @@ public class JSONSkinLoader extends SkinLoader{
 
 						SkinImage[] trophy = new SkinImage[sk.songlist.trophy.length];
 						for (int i = 0; i < sk.songlist.trophy.length; i++) {
-							for (Image img : sk.image) {
+							for (JsonSkin.Image img : sk.image) {
 								if (sk.songlist.trophy[i].id.equals(img.id)) {
 									Texture tex = getTexture(img.src, p);
 									trophy[i] = new SkinImage(
@@ -901,7 +902,7 @@ public class JSONSkinLoader extends SkinLoader{
 
 						SkinImage[] label = new SkinImage[sk.songlist.label.length];
 						for (int i = 0; i < sk.songlist.label.length; i++) {
-							for (Image img : sk.image) {
+							for (JsonSkin.Image img : sk.image) {
 								if (sk.songlist.label[i].id.equals(img.id)) {
 									Texture tex = getTexture(img.src, p);
 									label[i] = new SkinImage(
@@ -916,7 +917,7 @@ public class JSONSkinLoader extends SkinLoader{
 
 						SkinText[] skinTexts = new SkinText[sk.songlist.text.length];
 						for (int i = 0; i < sk.songlist.text.length; i++) {
-							for (Text text : sk.text) {
+							for (JsonSkin.Text text : sk.text) {
 								if (sk.songlist.text[i].id.equals(text.id)) {
 									skinTexts[i] = createText(text, p);
 									if (skinTexts[i] != null) {
@@ -932,7 +933,7 @@ public class JSONSkinLoader extends SkinLoader{
 
 						SkinNumber[] numbers = new SkinNumber[sk.songlist.level.length];
 						for (int i = 0; i < sk.songlist.level.length; i++) {
-							for (Value value : sk.value) {
+							for (JsonSkin.Value value : sk.value) {
 								if (sk.songlist.level[i].id.equals(value.id)) {
 									Texture tex = getTexture(value.src, p);
 									TextureRegion[] numimages = getSourceImage(tex, value.x, value.y, value.w, value.h,
@@ -956,7 +957,7 @@ public class JSONSkinLoader extends SkinLoader{
 						barobj.setBarlevel(numbers);
 
 						// graph
-						for (Graph img : sk.graph) {
+						for (JsonSkin.Graph img : sk.graph) {
 							if (sk.songlist.graph != null && sk.songlist.graph.id.equals(img.id)) {
 								if (img.type < 0) {
 									Texture tex = getTexture(img.src, p);
@@ -993,7 +994,7 @@ public class JSONSkinLoader extends SkinLoader{
 					}
 
 					//POMYU chara
-					for (PMchara chara : sk.pmchara) {
+					for (JsonSkin.PMchara chara : sk.pmchara) {
 						if (dst.id.equals(chara.id)) {
 							//type 0:プレイ 1:キャラ背景 2:名前画像 3:ハリアイ画像(上半身のみ) 4:ハリアイ画像(全体) 5:キャラアイコン 6:NEUTRAL 7:FEVER 8:GREAT 9:GOOD 10:BAD 11:FEVERWIN 12:WIN 13:LOSE 14:OJAMA 15:DANCE
 							File imagefile = getSrcIdPath(chara.src, p);
@@ -1042,14 +1043,14 @@ public class JSONSkinLoader extends SkinLoader{
 					skinSelect.setCustomPropertyCount(sk.skinSelect.customPropertyCount);
 				} else {
 					int count = 0;
-					for (Image image : sk.image) {
+					for (JsonSkin.Image image : sk.image) {
 						if (SkinPropertyMapper.isSkinCustomizeButton(image.act.getEventId())) {
 							int index = SkinPropertyMapper.getSkinCustomizeIndex(image.act.getEventId());
 							if (count <= index)
 								count = index + 1;
 						}
 					}
-					for (ImageSet imageSet : sk.imageset) {
+					for (JsonSkin.ImageSet imageSet : sk.imageset) {
 						if (SkinPropertyMapper.isSkinCustomizeButton(imageSet.act.getEventId())) {
 							int index = SkinPropertyMapper.getSkinCustomizeIndex(imageSet.act.getEventId());
 							if (count <= index)
@@ -1061,14 +1062,14 @@ public class JSONSkinLoader extends SkinLoader{
 			}
 
 			if (sk.customEvents != null) {
-				for (CustomEvent event : sk.customEvents) {
-					skin.addCustomEvent(new bms.player.beatoraja.skin.CustomEvent(event.id, event.action, event.condition, event.minInterval));
+				for (JsonSkin.CustomEvent event : sk.customEvents) {
+					skin.addCustomEvent(new CustomEvent(event.id, event.action, event.condition, event.minInterval));
 				}
 			}
 
 			if (sk.customTimers != null) {
-				for (CustomTimer timer : sk.customTimers) {
-					skin.addCustomTimer(new bms.player.beatoraja.skin.CustomTimer(timer.id, timer.timer));
+				for (JsonSkin.CustomTimer timer : sk.customTimers) {
+					skin.addCustomTimer(new CustomTimer(timer.id, timer.timer));
 				}
 			}
 		} catch (Throwable e) {
@@ -1078,9 +1079,9 @@ public class JSONSkinLoader extends SkinLoader{
 		return skin;
 	}
 
-	private void setDestination(Skin skin, SkinObject obj, Destination dst) {
-		Animation prev = null;
-		for (Animation a : dst.dst) {
+	private void setDestination(Skin skin, SkinObject obj, JsonSkin.Destination dst) {
+		JsonSkin.Animation prev = null;
+		for (JsonSkin.Animation a : dst.dst) {
 			if (prev == null) {
 				a.time = (a.time == Integer.MIN_VALUE ? 0 : a.time);
 				a.x = (a.x == Integer.MIN_VALUE ? 0 : a.x);
@@ -1134,7 +1135,7 @@ public class JSONSkinLoader extends SkinLoader{
 		if(srcid == null) {
 			return null;
 		}
-		for (Source src : sk.source) {
+		for (JsonSkin.Source src : sk.source) {
 			if (srcid.equals(src.id)) {
 				if (!texmap.containsKey(src.id)) {
 					final File imagefile = getPath(p.getParent().toString() + "/" + src.path, filemap);
@@ -1173,9 +1174,9 @@ public class JSONSkinLoader extends SkinLoader{
 	private SkinSource[] getNoteTexture(String[] images, Path p) {
 		SkinSource[] noteimages = new SkinSource[images.length];
 		for(int i = 0;i < images.length;i++) {
-			for (Image img : sk.image) {
+			for (JsonSkin.Image img : sk.image) {
 				if (images[i].equals(img.id)) {
-					Image note = img;
+					JsonSkin.Image note = img;
 					Texture tex = getTexture(note.src, p);
 					noteimages[i] = new SkinSourceImage(getSourceImage(tex,  note.x, note.y, note.w,
 							note.h, note.divx, note.divy), note.timer, note.cycle);
@@ -1213,8 +1214,8 @@ public class JSONSkinLoader extends SkinLoader{
 		return getTexture(path, usecim);
 	}
 
-	private SkinText createText(Text text, Path skinPath) {
-		for (Font font : sk.font) {
+	private SkinText createText(JsonSkin.Text text, Path skinPath) {
+		for (JsonSkin.Font font : sk.font) {
 			if (font.id.equals(text.font)) {
 				Path path = skinPath.getParent().resolve(font.path);
 				SkinText skinText;
@@ -1246,7 +1247,7 @@ public class JSONSkinLoader extends SkinLoader{
 		return null;
 	}
 
-	Color parseHexColor(String hex, Color fallbackColor) {
+	private Color parseHexColor(String hex, Color fallbackColor) {
 		try {
 			return Color.valueOf(hex);
 		} catch (Exception e) {
@@ -1254,401 +1255,11 @@ public class JSONSkinLoader extends SkinLoader{
 		}
 	}
 
-	public static class JsonSkin {
-
-		public int type = -1;
-		public String name;
-		public int w = 1280;
-		public int h = 720;
-		public int fadeout;
-		public int input;
-		public int scene;
-		public int close;
-		public int playstart;
-		public int judgetimer = 1;
-		public int finishmargin = 0;
-
-		public Property[] property = new Property[0];
-		public Filepath[] filepath = new Filepath[0];
-		public Offset[] offset = new Offset[0];
-		public Source[] source = new Source[0];
-		public Font[] font = new Font[0];
-		public Image[] image = new Image[0];
-		public ImageSet[] imageset = new ImageSet[0];
-		public Value[] value = new Value[0];
-		public Text[] text = new Text[0];
-		public Slider[] slider = new Slider[0];
-		public Graph[] graph = new Graph[0];
-		public GaugeGraph[] gaugegraph = new GaugeGraph[0];
-		public JudgeGraph[] judgegraph = new JudgeGraph[0];
-		public BPMGraph[] bpmgraph = new BPMGraph[0];
-		public TimingVisualizer[] timingvisualizer = new TimingVisualizer[0];
-		public TimingDistributionGraph[] timingdistributiongraph = new TimingDistributionGraph[0];
-		public NoteSet note;
-		public Gauge gauge;
-		public HiddenCover[] hiddenCover = new HiddenCover[0];
-		public BGA bga;
-		public Judge[] judge = new Judge[0];
-		public SongList songlist;
-		public PMchara[] pmchara = new PMchara[0];
-		public SkinConfigurationProperty skinSelect;
-		public CustomEvent[] customEvents = new CustomEvent[0];
-		public CustomTimer[] customTimers = new CustomTimer[0];
-
-		public Destination[] destination;
-	}
-
-	public static class Property {
-		public String name;
-		public PropertyItem[] item = new PropertyItem[0];
-		public String def;
-	}
-
-	public static class PropertyItem {
-		public String name;
-		public int op;
-	}
-
-	public static class Filepath {
-		public String name;
-		public String path;
-		public String def;
-	}
-
-	public static class Offset {
-		public String name;
-		public int id;
-		public boolean x;
-		public boolean y;
-		public boolean w;
-		public boolean h;
-		public boolean r;
-		public boolean a;
-	}
-
-	public static class Source {
-		public String id;
-		public String path;
-	}
-
-	public static class Font {
-		public String id;
-		public String path;
-		public int type;
-	}
-
-	public static class Image {
-		public String id;
-		public String src;
-		public int x;
-		public int y;
-		public int w;
-		public int h;
-		public int divx = 1;
-		public int divy = 1;
-		public TimerProperty timer;
-		public int cycle;
-		public int len;
-		public int ref;
-		public Event act;
-		public int click = 0;
-	}
-
-	public static class ImageSet {
-		public String id;
-		public int ref;
-		public String[] images = new String[0];
-		public Event act;
-		public int click = 0;
-	}
-
-	public static class Value {
-		public String id;
-		public String src;
-		public int x;
-		public int y;
-		public int w;
-		public int h;
-		public int divx = 1;
-		public int divy = 1;
-		public TimerProperty timer;
-		public int cycle;
-		public int align;
-		public int digit;
-		public int padding;
-		public int ref;
-		public IntegerProperty value;
-		public Value[] offset;
-	}
-
-	public static class Text {
-		public String id;
-		public String font;
-		public int size;
-		public int align;
-		public int ref;
-		public StringProperty value;
-		public boolean wrapping = false;
-		public int overflow = SkinText.OVERFLOW_OVERFLOW;
-		public String outlineColor = "ffffff00";
-		public float outlineWidth = 0;
-		public String shadowColor = "ffffff00";
-		public float shadowOffsetX = 0;
-		public float shadowOffsetY = 0;
-		public float shadowSmoothness = 0;
-	}
-
-	public static class Slider {
-		public String id;
-		public String src;
-		public int x;
-		public int y;
-		public int w;
-		public int h;
-		public int divx = 1;
-		public int divy = 1;
-		public TimerProperty timer;
-		public int cycle;
-		public int angle;
-		public int range;
-		public int type;
-		public FloatProperty value;
-		public FloatWriter event;
-		public boolean isRefNum = false;
-		public int min = 0;
-		public int max = 0;
-	}
-
-	public static class Graph {
-		public String id;
-		public String src;
-		public int x;
-		public int y;
-		public int w;
-		public int h;
-		public int divx = 1;
-		public int divy = 1;
-		public TimerProperty timer;
-		public int cycle;
-		public int angle = 1;
-		public int type;
-		public FloatProperty value;
-		public boolean isRefNum = false;
-		public int min = 0;
-		public int max = 0;
-	}
-
-	public static class GaugeGraph {
-		public String id;
-	}
-
-	public static class JudgeGraph {
-		public String id;
-		public int type;
-		public int backTexOff = 0;
-		public int delay = 500;
-		public int orderReverse = 0;
-		public int noGap = 0;
-	}
-
-	public static class BPMGraph {
-		public String id;
-		public int delay = 0;
-		public int lineWidth = 2;
-		public String mainBPMColor = "00ff00";
-		public String minBPMColor = "0000ff";
-		public String maxBPMColor = "ff0000";
-		public String otherBPMColor = "ffff00";
-		public String stopLineColor = "ff00ff";
-		public String transitionLineColor = "7f7f7f";
-	}
-
-	public static class TimingVisualizer {
-		public String id;
-		public int width = 301;
-		public int judgeWidthMillis = 150;
-		public int lineWidth = 1;
-		public String lineColor = "00FF00FF";
-		public String centerColor = "FFFFFFFF";
-		public String PGColor = "000088FF";
-		public String GRColor = "008800FF";
-		public String GDColor = "888800FF";
-		public String BDColor = "880000FF";
-		public String PRColor = "000000FF";
-		public int transparent = 0;
-		public int drawDecay = 1;
-	}
-
-	public static class TimingDistributionGraph {
-		public String id;
-		public int width = 301;
-		public int lineWidth = 1;
-		public String graphColor = "00FF00FF";
-		public String averageColor = "FFFFFFFF";
-		public String devColor = "FFFFFFFF";
-		public String PGColor = "000088FF";
-		public String GRColor = "008800FF";
-		public String GDColor = "888800FF";
-		public String BDColor = "880000FF";
-		public String PRColor = "000000FF";
-		public int drawAverage = 1;
-		public int drawDev = 1;
-	}
-
-	public static class NoteSet {
-		public String id;
-		public String[] note = new String[0];
-		public String[] lnstart = new String[0];
-		public String[] lnend = new String[0];
-		public String[] lnbody = new String[0];
-		public String[] lnactive = new String[0];
-		public String[] hcnstart = new String[0];
-		public String[] hcnend = new String[0];
-		public String[] hcnbody = new String[0];
-		public String[] hcnactive = new String[0];
-		public String[] hcndamage = new String[0];
-		public String[] hcnreactive = new String[0];
-		public String[] mine = new String[0];
-		public String[] hidden = new String[0];
-		public String[] processed = new String[0];
-		public Animation[] dst = new Animation[0];
-		public int dst2 = Integer.MIN_VALUE;
-		public int[] expansionrate = {100,100};
-		public float[] size = new float[0];
-		public Destination[] group = new Destination[0];
-		public Destination[] bpm = new Destination[0];
-		public Destination[] stop = new Destination[0];
-		public Destination[] time = new Destination[0];
-	}
-
-	public static class Gauge {
-		public String id;
-		public String[] nodes;
-		public int parts = 50;
-		public int type;
-		public int range = 3;
-		public int cycle = 33;
-		public int starttime = 0;
-		public int endtime = 500;
-	}
-
-	public static class HiddenCover {
-		public String id;
-		public String src;
-		public int x;
-		public int y;
-		public int w;
-		public int h;
-		public int divx = 1;
-		public int divy = 1;
-		public TimerProperty timer;
-		public int cycle;
-		public int disapearLine = -1;
-		public boolean isDisapearLineLinkLift = true;
-	}
-
-	public static class BGA {
-		public String id;
-	}
-
-	public static class Judge {
-		public String id;
-		public int index;
-		public Destination[] images = new Destination[0];
-		public Destination[] numbers = new Destination[0];
-		public boolean shift;
-	}
-
-	public static class SongList {
-		public String id;
-		public int center;
-		public int[] clickable = new int[0];
-		public Destination[] listoff = new Destination[0];
-		public Destination[] liston = new Destination[0];
-		public Destination[] text = new Destination[0];
-		public Destination[] level = new Destination[0];
-		public Destination[] lamp = new Destination[0];
-		public Destination[] playerlamp = new Destination[0];
-		public Destination[] rivallamp = new Destination[0];
-		public Destination[] trophy = new Destination[0];
-		public Destination[] label = new Destination[0];
-		public Destination graph;
-	}
-
-	public static class Destination {
-		public String id;
-		public int blend;
-		public int filter;
-		public TimerProperty timer;
-		public int loop;
-		public int center;
-		public int offset;
-		public int[] offsets = new int[0];
-		public int stretch = -1;
-		public int[] op = new int[0];
-		public BooleanProperty draw;
-		public Animation[] dst = new Animation[0];
-		public Rect mouseRect;
-	}
-
-	public static class Rect {
-		public int x;
-		public int y;
-		public int w;
-		public int h;
-	}
-
-	public static class Animation {
-		public int time = Integer.MIN_VALUE;
-
-		public int x = Integer.MIN_VALUE;
-		public int y = Integer.MIN_VALUE;
-		public int w = Integer.MIN_VALUE;
-		public int h = Integer.MIN_VALUE;
-
-		public int acc = Integer.MIN_VALUE;
-
-		public int a = Integer.MIN_VALUE;
-		public int r = Integer.MIN_VALUE;
-		public int g = Integer.MIN_VALUE;
-		public int b = Integer.MIN_VALUE;
-
-		public int angle = Integer.MIN_VALUE;
-
-	}
-
-	public static class PMchara {
-		public String id;
-		public String src;
-		public int color = 1;
-		public int type = Integer.MIN_VALUE;
-		public int side = 1;
-	}
-
-	public static class SkinConfigurationProperty {
-		public String[] customBMS;
-		public int defaultCategory = 0;
-		public int customPropertyCount = -1;
-		public int customOffsetStyle = 0;
-	}
-
-	public static class CustomEvent {
-		public int id;
-		public Event action;
-		public BooleanProperty condition;
-		public int minInterval;
-	}
-
-	public static class CustomTimer {
-		public int id;
-		public TimerProperty timer;
-	}
-
 	private File getSrcIdPath(String srcid, Path p) {
 		if(srcid == null) {
 			return null;
 		}
-		for (Source src : sk.source) {
+		for (JsonSkin.Source src : sk.source) {
 			if (srcid.equals(src.id)) {
 				if (!texmap.containsKey(src.id)) {
 					return getPath(p.getParent().toString() + "/" + src.path, filemap);
@@ -1656,272 +1267,5 @@ public class JSONSkinLoader extends SkinLoader{
 			}
 		}
 		return null;
-	}
-
-	private void setSerializers(Json json, HashSet<Integer> enabledOptions, Path path) {
-		Class[] classes = {
-				Property.class,
-				Filepath.class,
-				Offset.class,
-				Source.class,
-				Font.class,
-				Image.class,
-				ImageSet.class,
-				Value.class,
-				Text.class,
-				Slider.class,
-				Graph.class,
-				GaugeGraph.class,
-				JudgeGraph.class,
-				TimingVisualizer.class,
-				TimingDistributionGraph.class,
-				NoteSet.class,
-				Gauge.class,
-				BGA.class,
-				Judge.class,
-				SongList.class,
-				Destination.class,
-				Animation.class,
-				SkinConfigurationProperty.class,
-				CustomEvent.class,
-				CustomTimer.class,
-		};
-		for (Class c : classes) {
-			json.setSerializer(c, new ObjectSerializer<>(enabledOptions, path));
-		}
-
-		Class[] array_classes = {
-				Property[].class,
-				Filepath[].class,
-				Offset[].class,
-				Source[].class,
-				Font[].class,
-				Image[].class,
-				ImageSet[].class,
-				Value[].class,
-				Text[].class,
-				Slider[].class,
-				Graph[].class,
-				GaugeGraph[].class,
-				JudgeGraph[].class,
-				TimingVisualizer[].class,
-				TimingDistributionGraph[].class,
-				Judge[].class,
-				Destination[].class,
-				Animation[].class,
-				CustomEvent[].class,
-				CustomTimer[].class,
-		};
-		for (Class c : array_classes) {
-			json.setSerializer(c, new ArraySerializer<>(enabledOptions, path));
-		}
-
-		json.setSerializer(BooleanProperty.class, new LuaScriptSerializer<>(SkinLuaAccessor::loadBooleanProperty, BooleanPropertyFactory::getBooleanProperty));
-		json.setSerializer(IntegerProperty.class, new LuaScriptSerializer<>(SkinLuaAccessor::loadIntegerProperty, IntegerPropertyFactory::getIntegerProperty));
-		json.setSerializer(FloatProperty.class, new LuaScriptSerializer<>(SkinLuaAccessor::loadFloatProperty, FloatPropertyFactory::getFloatProperty));
-		json.setSerializer(StringProperty.class, new LuaScriptSerializer<>(SkinLuaAccessor::loadStringProperty, StringPropertyFactory::getStringProperty));
-		json.setSerializer(TimerProperty.class, new LuaScriptSerializer<>(SkinLuaAccessor::loadTimerProperty, TimerPropertyFactory::getTimerProperty));
-		json.setSerializer(FloatWriter.class, new LuaScriptSerializer<>(SkinLuaAccessor::loadFloatWriter, FloatPropertyFactory::getFloatWriter));
-		json.setSerializer(Event.class, new LuaScriptSerializer<>(SkinLuaAccessor::loadEvent, EventFactory::getEvent));
-	}
-
-	private abstract class Serializer<T> extends Json.ReadOnlySerializer<T> {
-
-		HashSet<Integer> options;
-		Path path;
-
-		public Serializer(HashSet<Integer> op, Path path) {
-			this.options = op != null ? op : new HashSet<>();
-			this.path = path;
-		}
-
-		// test "if" as follows:
-		// 901 -> 901 enabled
-		// [901, 911] -> 901 enabled && 911 enabled
-		// [[901, 902], 911] -> (901 || 902) && 911
-		// -901 -> 901 disabled
-		protected boolean testOption(JsonValue ops) {
-			if (ops == null) {
-				return true;
-			} else if (ops.isNumber()) {
-				return testNumber(ops.asInt());
-			} else if (ops.isArray()) {
-				boolean enabled = true;
-				for (int j = 0; j < ops.size; j++) {
-					JsonValue ops2 = ops.get(j);
-					if (ops2.isNumber()) {
-						enabled = testNumber(ops2.asInt());
-					} else if (ops2.isArray()) {
-						boolean enabled_sub = false;
-						for (int k = 0; k < ops2.size; k++) {
-							JsonValue ops3 = ops2.get(k);
-							if (ops3.isNumber() && testNumber(ops3.asInt())) {
-								enabled_sub = true;
-								break;
-							}
-						}
-						enabled = enabled_sub;
-					} else {
-						enabled = false;
-					}
-					if (!enabled)
-						break;
-				}
-				return enabled;
-			} else {
-				return false;
-			}
-		}
-
-		private boolean testNumber(int op) {
-			return op >= 0 ? options.contains(op) : !options.contains(-op);
-		}
-	}
-
-	private class ObjectSerializer<T> extends Serializer<T> {
-
-		public ObjectSerializer(HashSet<Integer> op, Path path) {
-			super(op, path);
-		}
-
-		public T read(Json json, JsonValue jsonValue, Class cls) {
-			if (jsonValue.isArray()) {
-				// conditional branch
-				// take first clause satisfying its conditions
-				JsonValue val = null;
-				for (int i = 0; i < jsonValue.size; i++) {
-					JsonValue branch = jsonValue.get(i);
-					if (testOption(branch.get("if"))) {
-						val = branch.get("value");
-						break;
-					}
-				}
-				return (T)json.readValue(cls, val);
-			} else if (jsonValue.isObject() && jsonValue.has("include")) {
-				Json subJson = new Json();
-				subJson.setIgnoreUnknownFields(true);
-				File file = getPath(path.getParent().toString() + "/" + jsonValue.get("include").asString(), filemap);
-				if (file.exists()) {
-					setSerializers(subJson, this.options, file.toPath());
-					try {
-						return (T)subJson.fromJson(cls, new FileReader(file));
-					} catch (FileNotFoundException e) {
-					}
-				}
-				return null;
-			} else {
-				// literal
-				T instance = null;
-				try {
-					instance = (T)ClassReflection.newInstance(cls);
-				} catch (ReflectionException e) {
-					e.printStackTrace();
-					return null;
-				}
-				try {
-					Field[] fields = ClassReflection.getFields(cls);
-					for (JsonValue child = jsonValue.child; child != null; child = child.next) {
-						for (Field field : fields) {
-							if (field.getName().equals(child.name)) {
-								field.set(instance, json.readValue(field.getType(), child));
-								break;
-							}
-						}
-					}
-				} catch (ReflectionException e) {
-				} catch (NullPointerException e) {
-				}
-				return instance;
-			}
-		}
-	}
-
-	private class ArraySerializer<T> extends Serializer<T[]> {
-
-		public ArraySerializer(HashSet<Integer> op, Path path) {
-			super(op, path);
-		}
-
-		public T[] read(Json json, JsonValue jsonValue, Class cls) {
-			Class componentClass = cls.getComponentType();
-			ArrayList<T> items = new ArrayList<T>();
-			try {
-				if (jsonValue.isArray()) {
-					for (int i = 0; i < jsonValue.size; i++) {
-						JsonValue item = jsonValue.get(i);
-						if (item.isObject() && item.has("if") && (item.has("value") || item.has("values"))) {
-							// conditional item(s)
-							// add item(s) to array if conditions are satisfied
-							JsonValue value = item.get("value");
-							JsonValue values = item.get("values");
-							if (testOption(item.get("if"))) {
-								if (value != null) {
-									T obj = (T) json.readValue(componentClass, value);
-									items.add(obj);
-								}
-								if (values != null) {
-									T[] objs = (T[]) json.readValue(cls, values);
-									Collections.addAll(items, objs);
-								}
-							}
-						} else if (item.isObject() && item.has("include")) {
-							// array include (inside)
-							includeArray(json, item, cls, items);
-						} else {
-							// single item
-							T obj = (T)json.readValue(componentClass, item);
-							items.add(obj);
-						}
-					}
-				} else if (jsonValue.isObject() && jsonValue.has("include")) {
-					// array include (outside)
-					includeArray(json, jsonValue, cls, items);
-				} else if (jsonValue.isObject()) {
-					// regard as a single item
-					T obj = (T)json.readValue(componentClass, jsonValue);
-					items.add(obj);
-				}
-			} catch (NullPointerException e) {
-			}
-			Object array = Array.newInstance(componentClass, items.size());
-			for (int i=0; i<items.size(); i++) {
-				Array.set(array, i, items.get(i));
-			}
-			return (T[])array;
-		}
-
-		private void includeArray(Json json, JsonValue jsonValue, Class cls, ArrayList<T> items) {
-			Json subJson = new Json();
-			subJson.setIgnoreUnknownFields(true);
-			File file = getPath(path.getParent().toString() + "/" + jsonValue.get("include").asString(), filemap);
-			if (file.exists()) {
-				setSerializers(subJson, this.options, file.toPath());
-				try {
-					T[] array = (T[])subJson.fromJson(cls, new FileReader(file));
-					Collections.addAll(items, array);
-				} catch (FileNotFoundException e) {
-				}
-			}
-		}
-	}
-
-	private class LuaScriptSerializer<T> extends Json.ReadOnlySerializer<T> {
-		BiFunction<SkinLuaAccessor, String, T> luaPropertyLoader;
-		Function<Integer, T> idPropertyLoader;
-
-		LuaScriptSerializer(BiFunction<SkinLuaAccessor, String, T> loader, Function<Integer, T> byId) {
-			luaPropertyLoader = loader;
-			idPropertyLoader = byId;
-		}
-
-		public T read(Json json, JsonValue jsonValue, Class cls) {
-			if (jsonValue.isString() && luaPropertyLoader != null) {
-				return luaPropertyLoader.apply(lua, jsonValue.asString());
-			} else if (jsonValue.isNumber() && idPropertyLoader != null) {
-				return idPropertyLoader.apply(jsonValue.asInt());
-			} else {
-				return null;
-			}
-		}
 	}
 }
