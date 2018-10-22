@@ -50,16 +50,19 @@ public class PlayDataAccessor {
 	 */
 	private ScoreLogDatabaseAccessor scorelogdb;
 
+	private String playerpath;
+
 	private static final String[] replay = { "", "C", "H" };
 
-	public PlayDataAccessor(String player) {
-		this.player = player;
+	public PlayDataAccessor(Config config) {
+		this.player = config.getPlayername();
+		this.playerpath = config.getPlayerpath();
 
 		try {
 			Class.forName("org.sqlite.JDBC");
-			scoredb = new ScoreDatabaseAccessor("player/" + player + "/score.db");
+			scoredb = new ScoreDatabaseAccessor(playerpath + File.separatorChar + player + "/score.db");
 			scoredb.createTable();
-			scorelogdb = new ScoreLogDatabaseAccessor("player/" + player + "/scorelog.db");
+			scorelogdb = new ScoreLogDatabaseAccessor(playerpath + File.separatorChar + player + "/scorelog.db");
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -655,7 +658,7 @@ public class PlayDataAccessor {
 	}
 
 	private String getReplayDataFilePath(String hash, boolean ln, int lnmode, int index) {
-		return "player" + File.separatorChar + player + File.separatorChar + "replay" + File.separatorChar
+		return playerpath + File.separatorChar + player + File.separatorChar + "replay" + File.separatorChar
 				+ (ln ? replay[lnmode] : "") + hash + (index > 0 ? "_" + index : "");
 	}
 
@@ -676,7 +679,7 @@ public class PlayDataAccessor {
 				}
 			}
 		}
-		return "player" + File.separatorChar + player + File.separatorChar + "replay" + File.separatorChar
+		return playerpath + File.separatorChar + player + File.separatorChar + "replay" + File.separatorChar
 				+ (ln ? replay[lnmode] : "") + hash + (sb.length() > 0 ? "_" + sb.toString() : "")
 				+ (index > 0 ? "_" + index : "");
 	}
