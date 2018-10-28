@@ -147,6 +147,10 @@ public class SkinImage extends SkinObject {
 		}
 	}
 
+	public void setReference(IntegerProperty property) {
+		ref = property;
+	}
+
 	public void setReferenceID(int id) {
 		ref = IntegerPropertyFactory.getImageIndexProperty(id);
 	}

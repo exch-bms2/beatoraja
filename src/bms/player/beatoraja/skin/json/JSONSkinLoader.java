@@ -361,7 +361,11 @@ public class JSONSkinLoader extends SkinLoader {
 							}
 
 							SkinImage si = new SkinImage(tr, timer, cycle);
-							si.setReferenceID(imgs.ref);
+							if (imgs.value != null) {
+								si.setReference(imgs.value);
+							} else {
+								si.setReferenceID(imgs.ref);
+							}
 							obj = si;
 							if (imgs.act != null) {
 								obj.setClickevent(imgs.act);
