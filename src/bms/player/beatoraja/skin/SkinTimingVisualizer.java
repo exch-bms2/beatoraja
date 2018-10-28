@@ -35,12 +35,12 @@ public class SkinTimingVisualizer extends SkinObject {
 	private BMSModel model;
 	private int[][] judgeArea;
 
+	private int currentindex = -1;
 	/**
 	 *
 	 * @param width スキン描画幅
 	 * @param judgeWidthMillis 判定描画幅
 	 * @param lineWidth 入力線の幅
-	 * @param Color RRGGBBAA or RRGGBB 形式
 	 * @param transparent 1:POOR判定を透過する
 	 * @param drawDecay 1:線を減衰させる
 	 */
@@ -119,24 +119,28 @@ public class SkinTimingVisualizer extends SkinObject {
 		if (shape == null) {
 			shape = new Pixmap(width, recent.length * 2, Pixmap.Format.RGBA8888);
 		}
-		// 前景テクスチャ 透明色でフィルして初期化
-		shape.setColor(Color.CLEAR);
-		shape.fill();
 
-		for (int i = 0; i < recent.length; i++) {
-			int j = i + index + 1;
-			if (recent[j % recent.length] == Long.MIN_VALUE) {
-				continue;
-			}
+		if(currentindex != index) {
+			currentindex = index;
+			// 前景テクスチャ 透明色でフィルして初期化
+			shape.setColor(Color.CLEAR);
+			shape.fill();
 
-			shape.setColor(
-					Color.rgba8888(lineColor.r, lineColor.g, lineColor.b, (lineColor.a * i / (1.0f * recent.length))));
-			int x = (width - lineWidth) / 2
-					+ (int) (MathUtils.clamp(recent[j % recent.length], -center, center) * judgeWidthRate);
-			if (drawDecay) {
-				shape.fillRectangle(x, recent.length - i, lineWidth, i * 2);
-			} else {
-				shape.fillRectangle(x, 0, lineWidth, recent.length * 2);
+			for (int i = 0; i < recent.length; i++) {
+				int j = i + index + 1;
+				if (recent[j % recent.length] == Long.MIN_VALUE) {
+					continue;
+				}
+
+				shape.setColor(
+						Color.rgba8888(lineColor.r, lineColor.g, lineColor.b, (lineColor.a * i / (1.0f * recent.length))));
+				int x = (width - lineWidth) / 2
+						+ (int) (MathUtils.clamp(recent[j % recent.length], -center, center) * judgeWidthRate);
+				if (drawDecay) {
+					shape.fillRectangle(x, recent.length - i, lineWidth, i * 2);
+				} else {
+					shape.fillRectangle(x, 0, lineWidth, recent.length * 2);
+				}
 			}
 		}
 
