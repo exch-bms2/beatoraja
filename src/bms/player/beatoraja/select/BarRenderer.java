@@ -538,7 +538,7 @@ public class BarRenderer {
 
 			if(ln >= 0) {
 				// TODO LNラベル描画分岐
-				final int[] lnindex = {0,0,0};
+				final int[] lnindex = {0,3,4};
 				if (baro.getLabel()[lnindex[ln]] != null) {
 					baro.getLabel()[lnindex[ln]].draw(sprite, time, select, ba.x, ba.y);
 				}

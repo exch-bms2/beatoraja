@@ -37,7 +37,7 @@ public class SkinBar extends SkinObject {
     /**
      * 譜面ラベルのSkinImage。描画位置はBarの相対座標
      */
-    private SkinImage[] label = new SkinImage[3];
+    private SkinImage[] label = new SkinImage[5];
 
     private SkinDistributionGraph graph;
 
