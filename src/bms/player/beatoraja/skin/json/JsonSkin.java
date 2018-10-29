@@ -107,6 +107,7 @@ public class JsonSkin {
 	public static class ImageSet {
 		public String id;
 		public int ref;
+		public IntegerProperty value;
 		public String[] images = new String[0];
 		public Event act;
 		public int click = 0;
