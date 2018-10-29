@@ -23,11 +23,11 @@ import java.util.function.Function;
 public class LuaSkinLoader extends JSONSkinLoader {
 
 	public LuaSkinLoader() {
-		super(new SkinLuaAccessor());
+		super(new SkinLuaAccessor(false));
 	}
 
 	public LuaSkinLoader(MainState state, Config c) {
-		super(state, c);
+		super(state, c, new SkinLuaAccessor(false));
 	}
 
 	@Override
@@ -55,7 +55,7 @@ public class LuaSkinLoader extends JSONSkinLoader {
 		SkinHeader header = loadHeader(p);
 		try {
 			initFileMap(header, property);
-			lua.setSkinProperty(property, (String path) -> {
+			lua.exportSkinProperty(property, (String path) -> {
 				return getPath(p.getParent().toString() + "/" + path, filemap).getPath();
 			});
 			LuaValue value = lua.execFile(p);

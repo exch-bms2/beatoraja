@@ -43,10 +43,11 @@ public class JSONSkinLoader extends SkinLoader {
 
 	protected JsonSkinSerializer serializer;
 
+	/**
+	 * ヘッダの読み込みに使われるコンストラクタ
+	 */
 	public JSONSkinLoader() {
-		lua = null;
-		dstr = HD;
-		usecim = false;
+		this(null);
 	}
 
 	public JSONSkinLoader(SkinLuaAccessor lua) {
@@ -55,11 +56,22 @@ public class JSONSkinLoader extends SkinLoader {
 		usecim = false;
 	}
 
+	/**
+	 * スキン本体の読み込みに使われるコンストラクタ
+	 * @param state
+	 * @param c
+	 */
 	public JSONSkinLoader(MainState state, Config c) {
-		lua = new SkinLuaAccessor(state);
+		this(state, c, new SkinLuaAccessor(true));
+	}
+
+	public JSONSkinLoader(MainState state, Config c, SkinLuaAccessor lua) {
+		this.lua = lua;
 		dstr = c.getResolution();
 		usecim = false;
 		bgaExpand = c.getBgaExpand();
+		lua.exportMainStateAccessor(state);
+		lua.exportUtilities(state);
 	}
 
 	public Skin loadSkin(Path p, SkinType type, SkinConfig.Property property) {
@@ -161,6 +173,9 @@ public class JSONSkinLoader extends SkinLoader {
 
 			serializer.setSerializers(json, getEnabledOptions(header, property), p);
 			initFileMap(header, property);
+			lua.exportSkinProperty(property, (String path) -> {
+				return getPath(p.getParent().toString() + "/" + path, filemap).getPath();
+			});
 
 			sk = json.fromJson(JsonSkin.Skin.class, new FileReader(p.toFile()));
 			skin = loadJsonSkin(header, sk, type, property, p);
