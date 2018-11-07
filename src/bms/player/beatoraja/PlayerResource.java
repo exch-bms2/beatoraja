@@ -31,6 +31,8 @@ public class PlayerResource {
 	 * 選曲中のBMS
 	 */
 	private BMSModel model;
+	
+	private long marginTime;
 	/**
 	 * 選曲中のBMSの生成器
 	 */
@@ -190,13 +192,17 @@ public class PlayerResource {
 			generator = decoder.getBMSGenerator();
 		}
 
-		BMSModelUtils.setStartNoteSection(model, 1000);
+		marginTime = BMSModelUtils.setStartNoteSection(model, 1000);
 		BMSPlayerRule.validate(model, bmson);
 		return model;
 	}
 
 	public BMSModel getBMSModel() {
 		return model;
+	}
+	
+	public long getMarginTime() {
+		return marginTime;
 	}
 
 	public PlayMode getPlayMode() {

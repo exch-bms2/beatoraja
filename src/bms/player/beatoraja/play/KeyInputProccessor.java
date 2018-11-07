@@ -3,7 +3,6 @@ package bms.player.beatoraja.play;
 import static bms.player.beatoraja.skin.SkinProperty.*;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.logging.Logger;
 
 import bms.model.BMSModel;
@@ -43,9 +42,8 @@ class KeyInputProccessor {
 		this.scratchKey = new int[laneProperty.getScratchKeyAssign().length];
 	}
 
-	public void startJudge(BMSModel model, List<KeyInputLog> keylog) {
-		judge = new JudgeThread(model.getAllTimeLines(),
-				keylog != null ? keylog.toArray(new KeyInputLog[keylog.size()]) : null);
+	public void startJudge(BMSModel model, KeyInputLog[] keylog) {
+		judge = new JudgeThread(model.getAllTimeLines(), keylog);
 		judge.start();
 		isJudgeStarted = true;
 	}

@@ -139,8 +139,14 @@ public class BMSPlayer extends MainState {
 		if (model.getRandom() != null && model.getRandom().length > 0) {
 			if (autoplay.isReplayMode()) {
 				model = resource.getGenerator().generate(replay.rand);
+				// 暫定処置
+				BMSModelUtils.setStartNoteSection(model, 1000);
+				BMSPlayerRule.validate(model, false);
 			} else if (resource.getReplayData().pattern != null) {
 				model = resource.getGenerator().generate(resource.getReplayData().rand);
+				// 暫定処置
+				BMSModelUtils.setStartNoteSection(model, 1000);
+				BMSPlayerRule.validate(model, false);
 			}
 			Logger.getGlobal().info("譜面分岐 : " + Arrays.toString(model.getRandom()));
 		}
@@ -517,11 +523,12 @@ public class BMSPlayer extends MainState {
 				main.setMicroTimer(TIMER_RHYTHM, micronow - starttimeoffset * 1000);
 
 				input.setStartTime(now + main.getStartTime() - starttimeoffset);
-				List<KeyInputLog> keylog = null;
 				if (autoplay.isReplayMode()) {
-					keylog = Arrays.asList(replay.keylog);
+					for(KeyInputLog keyinput : replay.keylog) {
+						keyinput.time += resource.getMarginTime();
+					}
 				}
-				keyinput.startJudge(model, keylog);
+				keyinput.startJudge(model, replay != null ? replay.keylog : null);
 				keysound.startBGPlay(model, starttimeoffset * 1000);
 				Logger.getGlobal().info("STATE_PLAYに移行");
 			}
@@ -793,6 +800,9 @@ public class BMSPlayer extends MainState {
 		replay.mode = config.getLnmode();
 		replay.date = Calendar.getInstance().getTimeInMillis() / 1000;
 		replay.keylog = main.getInputProcessor().getKeyInputLog();
+		for(KeyInputLog keyinput : replay.keylog) {
+			keyinput.time -= resource.getMarginTime();
+		}
 		replay.pattern = pattern.toArray(new PatternModifyLog[pattern.size()]);
 		replay.rand = model.getRandom();
 		replay.gauge = config.getGauge();
