@@ -537,11 +537,14 @@ public class BarRenderer {
 			}
 
 			if(ln >= 0) {
-				// TODO LNラベル描画分岐
+				// LNラベル描画分岐
 				final int[] lnindex = {0,3,4};
 				if (baro.getLabel()[lnindex[ln]] != null) {
 					baro.getLabel()[lnindex[ln]].draw(sprite, time, select, ba.x, ba.y);
+				} else if (baro.getLabel()[0] != null) {
+					baro.getLabel()[0].draw(sprite, time, select, ba.x, ba.y);
 				}
+
 			}
 			// MINE
 			if ((flag & SongData.FEATURE_MINENOTE) != 0 && baro.getLabel()[2] != null) {
