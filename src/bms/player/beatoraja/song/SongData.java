@@ -1,5 +1,8 @@
 package bms.player.beatoraja.song;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -361,6 +364,13 @@ public class SongData implements Validatable, IpfsInformation {
 	public void setBanner(String banner) {
 		this.banner = banner;
 	}
+
+	public boolean isBannerExists(){
+		if(this.getBanner() != null && this.getBanner().length() > 0) {
+			return Files.exists(Paths.get(this.getPath()).getParent().resolve(this.getBanner()));
+		}
+		return false;
+	}
 	
 	public boolean hasDocument() {
 		return (content & 1) != 0;
@@ -449,12 +459,26 @@ public class SongData implements Validatable, IpfsInformation {
 		this.stagefile = stagefile;
 	}
 
+	public boolean isStagefileExists(){
+		if(this.getStagefile() != null && this.getStagefile().length() > 0) {
+			return Files.exists(Paths.get(this.getPath()).getParent().resolve(this.getStagefile()));
+		}
+		return false;
+	}
+
 	public String getBackbmp() {
 		return backbmp;
 	}
 
 	public void setBackbmp(String backbmp) {
 		this.backbmp = backbmp;
+	}
+
+	public boolean isBackbmpExists(){
+		if(this.getBackbmp() != null && this.getBackbmp().length() > 0) {
+			return Files.exists(Paths.get(this.getPath()).getParent().resolve(this.getBackbmp()));
+		}
+		return false;
 	}
 
 	public String getPreview() {

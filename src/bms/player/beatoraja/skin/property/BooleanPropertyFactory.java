@@ -319,7 +319,7 @@ public class BooleanPropertyFactory {
 				@Override
 				public boolean get(MainState state) {
 					final SongData model = state.main.getPlayerResource().getSongdata();
-					return model != null && model.getStagefile().length() > 0;
+					return model != null && model.isStagefileExists();
 				}
 			};
 		case OPTION_NO_STAGEFILE:
@@ -327,7 +327,7 @@ public class BooleanPropertyFactory {
 				@Override
 				public boolean get(MainState state) {
 					final SongData model = state.main.getPlayerResource().getSongdata();
-					return model != null && model.getStagefile().length() == 0;
+					return model != null && !model.isStagefileExists();
 				}
 			};
 		case OPTION_BACKBMP:
@@ -335,7 +335,7 @@ public class BooleanPropertyFactory {
 				@Override
 				public boolean get(MainState state) {
 					final SongData model = state.main.getPlayerResource().getSongdata();
-					return model != null && model.getBackbmp().length() > 0;
+					return model != null && model.isBackbmpExists();
 				}
 			};
 		case OPTION_NO_BACKBMP:
@@ -343,7 +343,7 @@ public class BooleanPropertyFactory {
 				@Override
 				public boolean get(MainState state) {
 					final SongData model = state.main.getPlayerResource().getSongdata();
-					return model != null && model.getBackbmp().length() == 0;
+					return model != null && !model.isBackbmpExists();
 				}
 			};
 		case OPTION_BANNER:
@@ -351,7 +351,7 @@ public class BooleanPropertyFactory {
 				@Override
 				public boolean get(MainState state) {
 					final SongData model = state.main.getPlayerResource().getSongdata();
-					return model != null && model.getBanner().length() > 0;
+					return model != null && model.isBannerExists();
 				}
 			};
 		case OPTION_NO_BANNER:
@@ -359,7 +359,7 @@ public class BooleanPropertyFactory {
 				@Override
 				public boolean get(MainState state) {
 					final SongData model = state.main.getPlayerResource().getSongdata();
-					return model != null && model.getBanner().length() == 0;
+					return model != null && !model.isBannerExists();
 				}
 			};
 		case OPTION_NO_TEXT:
